@@ -8,6 +8,12 @@ Software:
 
 - ReverseKit: [https://github.com/zer0condition/ReverseKit](https://github.com/zer0condition/ReverseKit)
 
+## Windows kernel debugging
+
+{{#ref}}
+windows-kernel-debugging-kernelflirt.md
+{{#endref}}
+
 ## Wasm decompiler / Wat compiler
 
 Online:
@@ -25,6 +31,12 @@ Software:
 
 {{#ref}}
 nodejs-v8-cached-bytecode.md
+{{#endref}}
+
+## Virtualized payloads and custom VMs
+
+{{#ref}}
+../../windows-hardening/virtualized-payload-execution.md
 {{#endref}}
 
 ## .NET decompiler
@@ -263,6 +275,49 @@ If you simplify this kind of expression with generic algebra tooling you can eas
    - **Mixed**: products and bitwise logic are interleaved, often with repeated subexpressions
 3. **Verify every candidate rewrite** with random testing or an SMT proof. If the equivalence cannot be proven, keep the original expression instead of guessing.
 
+### Bypass flattened control flow with a narrow execution slice
+
+Recovering the complete control-flow graph is often unnecessary. With control-flow flattening, opaque predicates, large dispatchers, or MBA-heavy code, follow references from encrypted blobs and output buffers to the smallest routine that transforms them. Then reproduce only that data-flow slice, or execute it independently; the dispatcher is not part of the required solution if the relevant state can be initialized directly.<sup>[[7]](#references)</sup>
+
+A practical workflow is:<sup>[[7]](#references)</sup>
+
+1. Inventory executable and data sections, relocations, and cross-references. Dump candidate tables from `.rodata` while preserving their byte order and element width.
+2. Identify the last routine that writes the plaintext or output buffer. Record its inputs, referenced tables, imported calls, and required global state.
+3. Lift only those operations into a fixed-width Python model. If the slice still depends on too much state, invoke the routine under Unicorn, QEMU, or a debugger and hook irrelevant imports instead of emulating the whole program.
+4. Validate that the extractor actually derives its output from the supplied binary: remove silent fallbacks, search it for embedded answers, and run it against unseen builds with changed strings, keys, identifiers, layouts, and obfuscation seeds.
+
+Useful first-pass commands are:<sup>[[7]](#references)</sup>
+
+```bash
+readelf -SW target
+objdump -s -j .rodata target > rodata.txt
+objdump -d target | rg 'adrp|add|ldr|str'
+```
+
+#### Detect MBA expressions that are disguised constants
+
+An apparently input-dependent byte expression may cancel its input completely. After extracting its tables, evaluate the expression over the complete 8-bit domain; a singleton output set proves that byte is constant without recovering the surrounding state machine.<sup>[[7]](#references)</sup>
+
+```python
+def mba(a, b, c, d, e, x):
+    return ((((a | (~x & 0xff)) & c) +
+             ((x | b) & d)) ^ e) & 0xff
+
+decoded = bytearray()
+for row in zip(A, B, C, D, E):
+    outputs = {mba(*row, x) for x in range(256)}
+    if len(outputs) != 1:
+        raise ValueError("expression depends on x")
+    decoded.append(outputs.pop())
+print(decoded)
+```
+
+Keep the final mask because the original addition has byte-width wraparound. For a wider domain, ask an SMT solver whether `f(x1) != f(x2)` is satisfiable for two same-width symbolic inputs: `unsat` proves invariance, while `sat` provides a counterexample and means the input cannot be discarded.<sup>[[7]](#references)</sup>
+
+#### Recognize environment-bound decoding
+
+Anti-analysis checks need not branch or crash. A decoder can mix a sensor result into a key bit, an opaque-predicate constant, or flattened-dispatcher state, continue normally, and produce plausible but false plaintext in an emulator. Therefore, patching only visible failure branches is insufficient; trace data dependencies from environment probes into decoder state, compare the same slice on the authentic device and emulator, and test how forcing each sensor result changes the final buffer.<sup>[[7]](#references)</sup>
+
 ### CoBRA
 
 [**CoBRA**](https://github.com/trailofbits/CoBRA) is a practical MBA simplifier for malware analysis and protected-binary reversing. It classifies the expression and routes it through specialized pipelines instead of applying one generic rewrite pass to everything.<sup>[[2]](#references)</sup>
@@ -394,11 +449,43 @@ If you press a button in the graphical application, the debugger can stop in the
 
 ## Golang
 
-If you have to reverse a Golang binary I would suggest you to use the IDA plugin [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+For ordinary Go binaries, [IDAGolangHelper](https://github.com/sibears/IDAGolangHelper) can recover runtime structures and improve function names in IDA. Load its Python plugin with **Alt+F7**.
 
-Press **Alt+F7** in IDA to load a Python plugin, then select the plugin file.
+### Recover metadata without the symbol table
 
-This will resolve the names of the functions.
+A stripped Go executable still needs runtime metadata to map program counters to functions. [GoReSym](https://github.com/mandiant/GoReSym) locates and parses structures such as `pclntab` and `moduledata` using code derived from the Go runtime. This can recover function boundaries, names, source paths, types and build details without relying on the conventional symbol table.<sup>[[9]](#references)[[13]](#references)</sup>
+
+```bash
+GoReSym.exe -t -d -p /path/to/sample.exe > goresym.json
+```
+
+An obfuscator can leave those structures usable while replacing the recovered names. Garble, for example, hashes identifiers and package paths and removes build, module and debug information.<sup>[[12]](#references)</sup> The obfuscated package token must remain consistent across functions from that package. Group functions by the repeated token, infer one package from its callees, strings and APIs, then propagate that package label to the entire group.<sup>[[13]](#references)</sup>
+
+### Recover Garble names with GoResolver
+
+[GoResolver](https://github.com/volexity/GoResolver) combines runtime-symbol extraction with clean-reference generation and control-flow-graph (CFG) matching. Use this sequence:<sup>[[10]](#references)[[13]](#references)</sup>
+
+1. **Identify the compiler version.** Try `BuildInfo` and embedded version strings first. If the obfuscator removed them, compare portions of the bundled Go runtime with versioned reference runtimes. In Volexity's tests, about `2%` of the runtime was enough to distinguish major Go versions. Treat this as an empirical optimization, not a universal threshold.<sup>[[13]](#references)</sup>
+2. **Build matching references.** Generate clean binaries for the identified Go version, target architecture and likely libraries. Matching the toolchain reduces compiler-generated CFG differences.<sup>[[10]](#references)[[13]](#references)</sup>
+3. **Compare functions.** GoGrapher matches function CFGs and emits normalized scores from `0.0` to `1.0`. Its basic-block matching is based on a weighted comparison of similar instructions. High-confidence matches map randomized functions to the clean implementation. Weaker matches can still identify a package or module.<sup>[[8]](#references)[[11]](#references)[[13]](#references)</sup>
+4. **Validate and import.** Confirm proposed names with call relationships, constants, strings and side effects, then import the JSON report with the GoResolver plugin for IDA or Ghidra.<sup>[[10]](#references)[[13]](#references)</sup>
+
+Install the toolchain and run the combined extractor and graph matcher:<sup>[[10]](#references)</sup>
+
+```bash
+python3 -m venv goresolver-env
+source goresolver-env/bin/activate
+pip install goresolver
+
+# Automatic Go-version detection and reference selection
+goresolver resolve -o report.json /path/to/sample.exe
+
+# Override the version/libraries and confidence threshold when known
+goresolver resolve -v go1.23.4 -l os/exec net/http \
+  -t 0.9 -o report.json /path/to/sample.exe
+```
+
+The default significant-match threshold is `0.9`. The `--extract` and `--graph` switches can isolate either stage, while the default runs both because the recovered runtime metadata and CFG evidence complement each other.<sup>[[10]](#references)</sup> CFG scores are heuristic: inlining, build flags, architecture and library-version differences can change graph shape, so preserve unresolved functions instead of forcing low-confidence names.<sup>[[13]](#references)</sup>
 
 ## Compiled Python
 
@@ -542,5 +629,12 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 - [4] [pentestpartners/reverse-engineering - rust-strings](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
 - [5] [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
 - [6] [Nostalgia - GBA reversing tutorial (archived)](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/)
+- [7] [Defeating AI-Assisted Reverse Engineering, or at Least Trying To](http://blog.quarkslab.com/defeating-ai-assisted-reverse-engineering-or-at-least-trying-to.html)
+- [8] [An Approach to Comparing Control Flow Graphs Based on Basic Block Matching](https://www.ijcse.com/docs/INDJCSE20-11-03-237.pdf)
+- [9] [Mandiant GoReSym](https://github.com/mandiant/GoReSym)
+- [10] [Volexity GoResolver](https://github.com/volexity/GoResolver)
+- [11] [Volexity GoGrapher](https://github.com/volexity/GoGrapher)
+- [12] [Garble obfuscation mechanism](https://github.com/burrowers/garble#mechanism)
+- [13] [GoResolver: Using Control-Flow Graph Similarity to Automatically Deobfuscate Golang Binaries](https://volexity.com/blog/2025/04/01/goresolver-using-control-flow-graph-similarity-to-deobfuscate-golang-binaries-automatically)
 
 {{#include ../../banners/hacktricks-training.md}}

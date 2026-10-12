@@ -125,7 +125,7 @@ cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 Typical host/network artifacts when using PsExec-like techniques:
 - Security 4624 (Logon Type 3) and 4672 (Special Privileges) on target for the admin account used.
 - Security 5140/5145 File Share and File Share Detailed events showing ADMIN$ access and create/write of service binaries (e.g., PSEXESVC.exe or random 8-char .exe).
-- Security 7045 Service Install on target: service names like PSEXESVC, RemComSvc, or custom (-r / -service-name).
+- **System** 7045 from Service Control Manager for service installation on the target: names like PSEXESVC, RemComSvc, or custom (`-r` / `-service-name`). This proves a service was installed, not that its image ran. Correlate its timestamp and image path with process events or a matching service-image prefetch entry when available.<sup>[[4]](#references)</sup>
 - Sysmon 1 (Process Create) for services.exe or the service image, 3 (Network Connect), 11 (File Create) in C:\Windows\, 17/18 (Pipe Created/Connected) for pipes such as \\.\pipe\psexesvc, \\.\pipe\remcom_*, or randomized equivalents.
 - Registry artifact for Sysinternals EULA: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 on the operator host (if not suppressed).
 
@@ -164,5 +164,6 @@ Hunting ideas
 - [1] [PsExec - Sysinternals | Microsoft Learn](https://learn.microsoft.com/sysinternals/downloads/psexec)
 - [2] [SMB security hardening in Windows Server 2025 & Windows 11](https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591)
 - [3] [Using Credentials to Own Windows Boxes - Part 2 (PSExec and Services)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+- [4] [Microsoft – Troubleshoot unexpected reboots using system event logs](https://learn.microsoft.com/en-us/troubleshoot/windows-server/performance/troubleshoot-unexpected-reboots-system-event-logs)
 
 {{#include ../../banners/hacktricks-training.md}}

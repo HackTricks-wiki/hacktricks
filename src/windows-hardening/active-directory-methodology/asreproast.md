@@ -75,9 +75,11 @@ bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 remove u
 
 ### Detection and hardening
 
-A successful roast produces a **4768** event on the DC with `Status=0x0` and `PreAuthType=0`. Do not require RC4 in the detection: `TicketEncryptionType=0x17` is a useful weak-encryption signal, but an attacker can request AES (event-log values `0x11`/`0x12`). On Windows Server 2016 and later with the January 14, 2025 (or newer) cumulative update, version 2 of event 4768 also exposes `ClientAdvertizedEncryptionTypes`, the account/DC supported etypes and available keys.<sup>[[5]](#references)</sup>
+A successful **AS-REP request without preauthentication** produces a **4768** event on the DC with `Status=0x0` and `PreAuthType=0`; this records a request, not proof that anyone cracked the response or compromised the account. Do not require RC4 in the detection: `TicketEncryptionType=0x17` is a useful weak-encryption signal, but an attacker can request AES (event-log values `0x11`/`0x12`). On Windows Server 2016 and later with the January 14, 2025 (or newer) cumulative update, version 2 of event 4768 also exposes `ClientAdvertizedEncryptionTypes`, the account/DC supported etypes and available keys.<sup>[[5]](#references)</sup>
 
 A practical hunt flags a client advertising only RC4 while the account has AES keys, then correlates bursts from one source IP across several no-preauth users. Baseline legitimate exceptions rather than alerting on every `PreAuthType=0` event.
+
+For attribution, normalize the `IpAddress` field (which can contain `::ffff:`-mapped IPv4) and compare its time window with 4769 service-ticket or 5140 share-access events. Those events may name accounts active from the same address, but a no-preauth AS-REP request requires no authenticated account. Shared hosts, NAT, proxies, and multiple sessions mean matching an IP does **not** identify the person or account that sent the AS-REQ. Treat the related accounts as investigation leads and corroborate with endpoint or network evidence.<sup>[[5]](#references)[[7]](#references)[[8]](#references)</sup>
 
 The durable fix is to clear **Do not require Kerberos preauthentication** on every user that does not strictly need it and rotate exposed account passwords. If an exception cannot be removed, use a long randomly generated password and minimal privileges. Disabling RC4 raises cracking cost but does not remove roastability because AES AS-REP responses remain offline-crackable.<sup>[[2]](#references)[[5]](#references)</sup>
 
@@ -116,4 +118,6 @@ ASRepCatcher relay -dc $DC_IP -t 192.168.1.0/24 -outfile hashes.asreproast -form
 - [4] [0xdf – HTB Bruno (AS-REP roast → ZipSlip → DLL hijack)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 - [5] [Microsoft – Event 4768: A Kerberos authentication ticket was requested](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4768)
 - [6] [Yaxxine7 – ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher)
+- [7] [Microsoft – Security event 4769](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4769)
+- [8] [Microsoft – Security event 5140](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5140)
 {{#include ../../banners/hacktricks-training.md}}

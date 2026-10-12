@@ -443,7 +443,7 @@ Execution in only the attacker's conversation may initially look like self-XSS. 
 4. The frontend renders the stored response under the victim's origin, converting attacker-only XSS into cross-user stored XSS.
 5. If the session JWT is in a non-`HttpOnly` cookie, the script reads it through `document.cookie`, exfiltrates it, and the attacker replays the token with the victim's privileges.
 
-This chain joins an AI-specific source with ordinary web sinks. Validate the final parser/sanitizer behavior using [XSS in Markdown](../pentesting-web/xss-cross-site-scripting/xss-in-markdown.md), inspect [cookie attributes](../pentesting-web/hacking-with-cookies/README.md), and treat [CSP](../pentesting-web/content-security-policy-csp-bypass/README.md) only as defense in depth—not as a replacement for output sanitization.<sup>[[23]](#references)</sup>
+This chain joins an AI-specific source with ordinary web sinks. Validate the final parser/sanitizer behavior using [XSS in Markdown](../pentesting-web/xss-cross-site-scripting/xss-in-markdown.md), inspect [cookie attributes](../pentesting-web/hacking-with-cookies/index.html), and treat [CSP](../pentesting-web/content-security-policy-csp-bypass/README.md) only as defense in depth—not as a replacement for output sanitization.<sup>[[23]](#references)</sup>
 
 ### Testing and hardening checklist
 
@@ -773,6 +773,10 @@ Detection idea:
 
 A defensive LLM can be blinded if the attacker wraps the real payload with **non-executable text specifically chosen to trigger a safety refusal**. The malware still runs, but the scanner may stop at the refusal and never analyze the executable parts.
 
+Malware can also embed indirect prompt injection in data that an LLM-assisted triage pipeline extracts from the sample. A 2025 Windows proof of concept used one direct instruction, although the tested models ignored it.<sup>[[24]](#references)</sup> A later variant used a Markdown-fenced cascade of 38 fabricated `system` messages and copied `{{DATA}}` delimiters to resemble the triage harness. Its fake token-expiry, out-of-memory, disk-exhaustion, operation-failure, injection-warning, and static-analysis messages were intended to make the model abort, truncate, or refuse analysis.<sup>[[25]](#references)</sup>
+
+Treat embedded strings and output as untrusted evidence, not as pipeline state. Only independently observed orchestrator telemetry should establish tool failure or resource exhaustion; role labels, copied delimiters, and failure claims inside a sample must remain data.<sup>[[25]](#references)</sup>
+
 Operationally, treat these outcomes as **suspicious and inconclusive**, not as a clean pass:
 - Model refusal
 - Policy error
@@ -867,5 +871,7 @@ This means **timing alone** can be enough to leak secrets through an ordinary ch
 - [21] [Fooling Around with Encrypted Reasoning Blobs](https://blog.cryptographyengineering.com/2026/05/29/fooling-around-with-encrypted-reasoning-blobs/)
 - [22] [SpecterOps – Tokenization Confusion](https://specterops.io/blog/2025/06/03/tokenization-confusion/)
 - [23] [From Prompt to Pwned: Chaining LLM and Web Vulnerabilities to Administrator Takeover](https://blog.quarkslab.com/from-prompt-to-pwned-chaining-llm-and-web-bugs-to-admin.html)
+- [24] [Check Point Research – AI Evasion: Prompt Injection](https://research.checkpoint.com/2025/ai-evasion-prompt-injection/)
+- [25] [SentinelLABS – macOS.Gaslight: Rust Backdoor Turns Prompt Injection on the Analyst, Not the Sandbox](https://www.sentinelone.com/labs/macos-gaslight-rust-backdoor-turns-prompt-injection-on-the-analyst-not-the-sandbox/)
 
 {{#include ../banners/hacktricks-training.md}}
