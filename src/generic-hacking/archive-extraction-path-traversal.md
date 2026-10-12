@@ -4,154 +4,183 @@
 
 ## 概要
 
-多くの archive format（ZIP、RAR、TAR、7-ZIP など）では、各エントリに独自の **internal path** を持たせることができます。展開 utility がそのパスを無条件に受け入れると、`..` を含む細工されたファイル名や **absolute path**（例: `C:\Windows\System32\`）によって、ユーザーが指定した directory の外側にファイルが書き込まれます。
-この種類の vulnerability は、一般に *Zip-Slip* または **archive extraction path traversal** と呼ばれています。<sup>[[6]](#references)</sup>
+多くのアーカイブ形式（ZIP、RAR、TAR、7-ZIP など）では、各エントリに独自の**内部パス**を含めることができます。展開ユーティリティがそのパスを無条件に尊重すると、`..` や**絶対パス**（例: `C:\Windows\System32\`）を含む細工されたファイル名が、ユーザーが指定したディレクトリの外に書き込まれます。  
+この種の脆弱性は、*Zip-Slip* または **archive extraction path traversal** として広く知られています。<sup>[[6]](#references)</sup>
 
-影響は任意ファイルの上書きから、Windows の *Startup* folder のような **auto-run** location に payload を配置して、直接 **remote code execution (RCE)** を達成することまで及びます。
+影響は任意のファイルの上書きから、Windows の *Startup* フォルダーなどの**自動実行**される場所にペイロードを配置して、直接 **remote code execution (RCE)** を達成することまで多岐にわたります。
 
-## Root Cause
+## 根本原因
 
-1. Attacker は、1 つ以上の file header に以下を含む archive を作成します。
-* Relative traversal sequences（`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`）
-* Absolute paths（`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`）
-* または、target dir の外側を指す細工された **symlinks**（*nix* の ZIP/TAR で一般的）。
-2. Victim は、embedded path を信頼する（または symlinks を追従する）vulnerable tool を使って archive を展開します。この tool は、path を sanitise したり、指定された directory 配下への展開を強制したりしません。
-3. ファイルは attacker が制御する location に書き込まれ、次回 system または user がその path を trigger した際に実行または load されます。
+1. 攻撃者が、1 つ以上のファイルヘッダーに次のいずれかを含むアーカイブを作成します。
+   * 相対パスによるトラバーサルシーケンス（`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`）
+   * 絶対パス（`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`）
+   * または、対象ディレクトリの外を指すように細工された**シンボリックリンク**（*nix* の ZIP/TAR でよく見られる）。
+2. 被害者が、パスをサニタイズしたり、指定ディレクトリ配下への展開を強制したりせず、埋め込まれたパスを信頼する（またはシンボリックリンクをたどる）脆弱なツールでアーカイブを展開します。
+3. ファイルが攻撃者の制御する場所に書き込まれ、次回、システムまたはユーザーがそのパスを利用した際に実行または読み込まれます。
 
-### .NET `Path.Combine` + `ZipArchive` traversal
+### .NET `Path.Combine` + `ZipArchive` によるトラバーサル
 
-一般的な .NET anti-pattern は、意図した destination と **user-controlled** な `ZipArchiveEntry.FullName` を結合し、path normalisation を行わずに展開することです。<sup>[[4]](#references)[[8]](#references)</sup>
+よくある .NET のアンチパターンは、意図した保存先と**ユーザー制御可能な** `ZipArchiveEntry.FullName` を結合し、パスを正規化せずに展開することです。<sup>[[4]](#references)[[8]](#references)</sup>
+
 ```csharp
 using (var zip = ZipFile.OpenRead(zipPath))
 {
-foreach (var entry in zip.Entries)
-{
-var dest = Path.Combine(@"C:\samples\queue\", entry.FullName); // drops base if FullName is absolute
-entry.ExtractToFile(dest);
-}
+    foreach (var entry in zip.Entries)
+    {
+        var dest = Path.Combine(@"C:\samples\queue\", entry.FullName); // drops base if FullName is absolute
+        entry.ExtractToFile(dest);
+    }
 }
 ```
-- `entry.FullName` が `..\\` で始まる場合は traversal が発生します。**absolute path** の場合、左側のコンポーネント全体が破棄され、extraction identity として **arbitrary file write** が可能になります。
-- scheduled scanner に監視されている sibling `app` directory に書き込む Proof-of-concept archive:
+
+- `entry.FullName` が `..\\` で始まる場合、上位ディレクトリへ移動します。**絶対パス**の場合は左側のコンポーネントが完全に破棄され、展開先を基準とした **arbitrary file write** が可能になります。
+- 定期スキャナーが監視する隣接する `app` ディレクトリに書き込むための proof-of-concept archive:
+
 ```python
 import zipfile
 with zipfile.ZipFile("slip.zip", "w") as z:
-z.writestr("../app/0xdf.txt", "ABCD")
+    z.writestr("../app/0xdf.txt", "ABCD")
 ```
-監視対象の inbox にその ZIP を投入すると、`C:\samples\app\0xdf.txt` が生成され、`C:\samples\queue\` の外部への traversal が可能であること、さらに後続のプリミティブ（例: DLL hijack）が可能になることが証明されます。
 
-## Advanced Archive-Breakout Primitives
+監視対象の inbox にこの ZIP を置くと、`C:\samples\app\0xdf.txt` が作成され、`C:\samples\queue\` の外への traversal が実証されます。また、後続の攻撃手法（DLL hijack など）が可能になります。
 
-展開は、独立したファイル名チェックの集合ではなく、filesystem に対する一連の変更として扱ってください。解析時には安全なエントリでも、先行するメンバーが link を作成または置換した後には安全でなくなる可能性があります。同じ問題は、extractor がディレクトリを安全なものとして cache し、その後で種類が変更された場合にも発生します。<sup>[[11]](#references)</sup>
+### ユーザー制御可能な展開先ディレクトリ
+
+アーカイブ内のメンバー名だけでなく、**extractor に渡されるディレクトリ**もテストしてください。アプリケーションは、そのディレクトリをタイトル、プロジェクト名、その他のリクエストフィールドから生成する場合があります。`../../../../app/module` のような値を指定すると、extractor がメンバーを処理する前に、展開先をアップロード領域の外に移動できます。この場合、`api.py` という安全なベース名だけを含むアーカイブでも、アプリケーションコードを上書きできます。<sup>[[14]](#references)[[15]](#references)</sup>
+
+```python
+# Vulnerable pattern: the ZIP entries themselves need no ../ components.
+extract_root = os.path.join(site_root, "public", "files", user_title)
+archive.extractall(extract_root)
+```
+
+これは classic Zip-Slip とは別の containment boundary です。解決後の展開ルートと、各メンバーの解決後のパスの両方を検証してください。ルートのチェックには、文字列のプレフィックスではなくパスの各要素を使用できます。<sup>[[14]](#references)</sup>
+
+```python
+base = Path(site_root, "public", "files").resolve()
+dest = (base / user_title).resolve()
+if not dest.is_relative_to(base):
+    raise ValueError("extraction root escapes its base")
+```
+
+安全なテストでは、有効なアーカイブにcanary fileを1つ含め、展開先ディレクトリを選択する可能性のある各フィールドにpath traversalシーケンスを配置します。意図したディレクトリと、使い捨ての外部パスの両方を監視してください。展開先からインポート済みモジュールに到達できる場合、そのモジュールを上書きすると、workerの再読み込み時にcode executionにつながる可能性があります。再読み込み中のHTTP 500や接続リセットは、書き込みが失敗した証拠にはなりません。<sup>[[14]](#references)[[15]](#references)</sup> より広範な[file upload methodology](../pentesting-web/file-upload/)も参照してください。
+
+## 高度なArchive-Breakoutプリミティブ
+
+展開処理は、独立したファイル名チェックではなく、一連のファイルシステム変更として捉えてください。パース時点では安全なエントリでも、先行するメンバーがリンクを作成または置換すると危険になることがあります。同様の問題は、展開ツールがディレクトリを安全と判断してキャッシュした後、その種類が変更される場合にも発生します。<sup>[[11]](#references)</sup>
 
 ### Link pivots and entry collisions
 
-* **Symlink write-through**: `pivot -> /tmp` を作成し、通常のメンバーを `pivot/PWNED.txt` として展開します。extractor が 1 つ目のメンバーに従って 2 つ目を materialize する場合、2 つ目の名前に `..` がなくても書き込みが外部へ抜け出します。
-* **Directory-cache/TOCTOU collision**: ディレクトリ `d/sub/` を出力し、`d/sub` を `/tmp` への symlink に置き換えた後、`d/sub/PWNED.txt` を出力します。これは、ディレクトリを一度だけ検証または cache し、最終的な書き込み前に再検証しない extractor を対象とします。
-* **Hardlink read/overwrite**: TAR と RAR は hardlink を表現できます。既存の host ファイルへの hardlink によって、後続の component が展開された名前を提供する場合、その内容が露出する可能性があります。一方、衝突する通常のエントリは、link された inode を上書きできます。これは、同一 filesystem の制約と OS の hardlink 権限ルールによって制限されます。
-* **Pre-existing or cross-archive pivot**: 空でない destination に対して再試行します。各 archive が stateless な header-name check を通過していても、ある archive が link を配置し、後続の extraction がその link 経由で書き込める場合があります。<sup>[[11]](#references)</sup>
+* **Symlink write-through**: `pivot -> /tmp`を作成し、その後、通常のメンバーを`pivot/PWNED.txt`として展開します。展開ツールが2つ目のメンバーを書き込む際に最初のメンバーをたどる場合、2つ目の名前に`..`がなくても書き込み先が逸脱します。
+* **Directory-cache/TOCTOU collision**: ディレクトリ`d/sub/`を作成し、`d/sub`を`/tmp`へのsymlinkに置き換えてから、`d/sub/PWNED.txt`を出力します。これは、ディレクトリを一度だけ検証またはキャッシュし、最終的な書き込み前に再確認しない展開ツールを狙います。
+* **Hardlink read/overwrite**: TARとRARではhardlinkを表現できます。既存のホストファイルへのhardlinkは、後続の処理で展開先の名前が提供されると、その内容を露出させる可能性があります。一方、名前が衝突する通常のエントリは、リンク先のinodeを上書きする可能性があります。これは、同一ファイルシステムであること、およびOSのhardlink権限ルールによって制限されます。
+* **Pre-existing or cross-archive pivot**: 空ではない展開先で再試行します。各アーカイブがステートレスなヘッダー名チェックを通過しても、あるアーカイブでリンクを仕込み、後続の展開でそのリンクを通じて書き込める場合があります。<sup>[[11]](#references)</sup>
 
-### Filesystem-equivalence collisions
+### ファイルシステムの同一視による衝突
 
-受け入れ先となる filesystem のセマンティクスを使用して名前を比較します。役立つ差分ケースには、case-insensitive filesystem における `LINK` と `link`、NFC と NFD の Unicode 表記、`ﬁle` と `file` のような互換性上同値の名前、directory から symlink へ path を変更する duplicate member、Windows でのみ separator として解釈される backslash などがあります。また、NTFS では ADS を含む名前もテストします。これらのケースによって、validator には 2 つの path が見えても、filesystem は 1 つとして解決する可能性があります。<sup>[[5]](#references)[[11]](#references)</sup>
+ファイル名は、展開先のファイルシステムのセマンティクスに従って比較してください。有用な差分テストケースには、大文字小文字を区別しないファイルシステムにおける`LINK`と`link`、NFCとNFDのUnicode表記、`ﬁle`と`file`のような互換等価名、パスをディレクトリからsymlinkに変える重複メンバー、Windowsでのみ区切り文字として解釈されるバックスラッシュがあります。NTFSではADSを含む名前もテストしてください。こうしたケースでは、validatorには2つのパスに見えても、ファイルシステムでは1つに解決されることがあります。<sup>[[5]](#references)[[11]](#references)</sup>
 
-したがって、コンパクトな corpus では、**directory → symlink → child**、**symlink → colliding regular file**、**hardlink → colliding regular file**、`/` と `\` の混在、absolute/rooted name、`.tar.gz` のような compressed wrapper の順序付き組み合わせをテストすべきです。これは disposable VM/container 内でのみ実行し、destination と想定外の canary path の両方を監視してください。<sup>[[11]](#references)</sup>
+そのため、コンパクトなテストコーパスでは、**directory → symlink → child**、**symlink → colliding regular file**、**hardlink → colliding regular file**、`/`と`\`の混在、絶対パスまたはrooted name、`.tar.gz`のような圧縮ラッパーを組み合わせた順序付きテストを実施します。使い捨てのVM/container内だけで実行し、展開先と、意図した外部canary pathの両方を監視してください。<sup>[[11]](#references)</sup>
 
-ZIP 固有の構造上の曖昧性により、pre-scan と実際の extractor が異なる entry name や tree を観測する可能性があります。1 つの ZIP library の出力だけを信頼するのではなく、[Local-header vs central-directory parser confusion](../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md#local-header-vs-central-directory-parser-confusion) を参照してください。
+ZIP固有の構造的な曖昧さにより、事前スキャンと実際の展開ツールとで、認識されるエントリ名やツリーが異なる場合があります。1つのZIPライブラリの出力だけを信用せず、[Local-header vs central-directory parser confusion](../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md#local-header-vs-central-directory-parser-confusion)を参照してください。
 
-## Real-World Example – WinRAR ≤ 7.12 (CVE-2025-8088)
+## 実例 – WinRAR ≤ 7.12 (CVE-2025-8088)
 
-Windows 用の WinRAR と、その Windows RAR/UnRAR components は、extraction 中の filename の検証に失敗していました。この flaw は NTFS alternate data streams (ADS) を利用して、選択された extraction path を bypass し、意図しない場所にファイルを書き込みました。<sup>[[5]](#references)</sup>
-次のような entry を含む悪意のある RAR archive:
+Windows版WinRARおよびWindows用RAR/UnRARコンポーネントは、展開時のファイル名を検証できていませんでした。この脆弱性はNTFS alternate data streams (ADS)を利用して指定された展開先パスを迂回し、意図しない場所にファイルを書き込みました。<sup>[[5]](#references)</sup>
+次のようなエントリを含む悪意のあるRARアーカイブ:
+
 ```text
 ..\..\..\Users\victim\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\payload.lnk
 ```
-最終的に選択した出力ディレクトリの**外側**、かつユーザーの*Startup*フォルダ内に配置されることになります。ESETは、そこに悪意のあるLNKファイルが展開され、ユーザーログオン時に実行されることで、persistenceとRCEへの経路が提供されることを確認しました。<sup>[[5]](#references)</sup>
 
-### PoC Archiveの作成（Linux/Mac）
+選択した出力ディレクトリの**外側**にあり、ユーザーの *Startup* フォルダー内に展開されることになります。ESETは、悪意のあるLNKファイルがそこに展開され、ユーザーのログオン時に実行されることで、永続化とRCEへの足がかりを得る事例を確認しました。<sup>[[5]](#references)</sup>
 
-CVE-2025-8088はADS名にtraversal pathを使用するため、専用のgeneratorでRARを作成し、その後、脆弱なWinRAR buildを用いた隔離されたlab内でのみ展開をテストしてください。<sup>[[5]](#references)</sup>
+### PoCアーカイブの作成（Linux/Mac）
 
-### 実環境で確認されたExploit
+CVE-2025-8088ではADS名にパストラバーサルのパスが使われるため、専用のgeneratorを使ってRARを作成し、脆弱なWinRARビルドを使って隔離されたラボ内でのみ展開テストを行ってください。<sup>[[5]](#references)</sup>
 
-ESETは、RomCom（Storm-0978/UNC2596）が、CVE-2025-8088を悪用するRAR archiveを添付し、customized backdoorを配布してransomware operationsを促進するspear-phishing campaignを実施していたと報告しました。<sup>[[5]](#references)</sup>
+### 実環境で確認された悪用
+
+ESETは、CVE-2025-8088を悪用するRARアーカイブを添付し、カスタマイズされたバックドアを展開してランサムウェア活動を支援する、RomCom（Storm-0978/UNC2596）によるスピアフィッシングキャンペーンを報告しました。<sup>[[5]](#references)</sup>
 
 ## 新しい事例（2024–2026）
 
-### 7-Zip ZIP symlink traversal → RCE（CVE-2025-11001 / ZDI-25-949）
-* **Bug**: ZIP entryの**symbolic link**が展開時にdereferenceされるため、攻撃者はdestination directoryから脱出し、任意のpathをoverwriteできます。ユーザー操作はarchiveの*opening/extracting*だけです。<sup>[[1]](#references)</sup>
-* **Affected**: **25.00**より前の7-Zip build。symbolic-link processingのflawは**25.00**（2025年7月）以降で修正されています。<sup>[[1]](#references)[[10]](#references)</sup>
-* **Impact path**: `Start Menu/Programs/Startup`またはservice-run locationをoverwrite → 次回のlogonまたはservice restart時にcodeが実行される。
-* **Quick symlink-handling fixture (Linux)**:
-```bash
-mkdir -p /tmp/archive-slip-test /tmp/archive-slip-outside
-ln -s /tmp/archive-slip-outside /tmp/archive-slip-test/evil
-cd /tmp/archive-slip-test
-zip -y exploit.zip evil   # -y preserves symlinks
-7z x exploit.zip -o/tmp/archive-slip-target
-```
-このarchiveには、extraction directoryの外側を指すsymlink entryが含まれています。使い捨てのtargetを使用し、extractorがそれをfollowしないことを確認してください。write-through testには、symlink配下のregular-file entryも必要です。
+### 7-ZipのZIPシンボリックリンクトラバーサル → RCE（CVE-2025-11001 / ZDI-25-949）
+* **バグ**: **シンボリックリンク**であるZIPエントリが展開時に参照先へたどられ、攻撃者が展開先ディレクトリから抜け出して任意のパスを上書きできました。ユーザーが行う操作は、アーカイブを*開く／展開する*だけです。<sup>[[1]](#references)</sup>
+* **影響を受けるバージョン**: **25.00**より前の7-Zipビルド。このシンボリックリンク処理の脆弱性は**25.00**（2025年7月）以降で修正されました。<sup>[[1]](#references)[[10]](#references)</sup>
+* **影響する経路**: `Start Menu/Programs/Startup`やサービスによって実行される場所を上書き → 次回ログオン時またはサービス再起動時にコードが実行されます。
+* **シンボリックリンク処理の簡易テスト用fixture（Linux）**:
+  ```bash
+  mkdir -p /tmp/archive-slip-test /tmp/archive-slip-outside
+  ln -s /tmp/archive-slip-outside /tmp/archive-slip-test/evil
+  cd /tmp/archive-slip-test
+  zip -y exploit.zip evil   # -y preserves symlinks
+  7z x exploit.zip -o/tmp/archive-slip-target
+  ```
+  このアーカイブには、展開先ディレクトリの外を指す symlink エントリが含まれています。使い捨てのターゲットを用意し、展開ツールがそのリンクをたどらないことを確認してください。write-through テストには、symlink の下に通常ファイルのエントリも必要です。
 
-### Go mholt/archiver `Unarchive()` symlink collision（CVE-2025-3445）
-* **Bug**: `archiver.Unarchive()`はZIP symlinkをextractした後、後続のregular memberが同じnameを持つ場合にそれをdereferenceできます。これにより、一見in-rootに見えるwriteがout-of-root writeに変わります。<sup>[[2]](#references)</sup>
-* **Affected**: `github.com/mholt/archiver` ≤ 3.5.1（現在はdeprecatedのproject）。<sup>[[2]](#references)</sup>
-* **Fix**: `mholt/archives` ≥ 0.1.0へswitchするか、linkをrejectし、destinationをopenする直前に毎回再resolveします。<sup>[[2]](#references)</sup>
-* **Minimal collision generator**（その後、`archiver.Unarchive("exploit.zip", "/tmp/safe")`をcall）:<sup>[[2]](#references)</sup>
-```python
-import zipfile
+### Go mholt/archiver `Unarchive()` symlink collision (CVE-2025-3445)
+* **バグ**: `archiver.Unarchive()` は ZIP の symlink を展開した後、後続の通常メンバーの名前が同じ場合にそのリンクをたどり、一見ルート内への書き込みに見える操作をルート外への書き込みに変える可能性があります。<sup>[[2]](#references)</sup>
+* **影響を受けるバージョン**: `github.com/mholt/archiver` ≤ 3.5.1（プロジェクトは現在非推奨）。<sup>[[2]](#references)</sup>
+* **修正**: `mholt/archives` ≥ 0.1.0 に切り替えるか、リンクを拒否し、各書き込み先を開く直前に再解決してください。<sup>[[2]](#references)</sup>
+* **最小衝突ジェネレーター**（続けて `archiver.Unarchive("exploit.zip", "/tmp/safe")` を呼び出す）:<sup>[[2]](#references)</sup>
+  ```python
+  import zipfile
 
-with zipfile.ZipFile("exploit.zip", "w") as z:
-link = zipfile.ZipInfo("./x")
-link.create_system = 3
-link.external_attr = 0o120777 << 16
-z.writestr(link, "../../../tmp/PWNED")
-z.writestr("./x", b"owned\n")
-```
+  with zipfile.ZipFile("exploit.zip", "w") as z:
+      link = zipfile.ZipInfo("./x")
+      link.create_system = 3
+      link.external_attr = 0o120777 << 16
+      z.writestr(link, "../../../tmp/PWNED")
+      z.writestr("./x", b"owned\n")
+  ```
 
-### CPython filtered TAR extraction bypass（CVE-2026-11940）
+### CPython のフィルター付き TAR 展開の bypass (CVE-2026-11940)
 
-`tarfile.extractall(filter="data")`や`filter="tar"`でさえ、link-order bypassの影響を受けたことがあります。このケースでは、より深いpathにarchiveされたsymlinkをhardlinkが参照していました。fallback extractionは、その深いlocationにあるrelative symlinkをvalidationしましたが、同じrelative targetをhardlinkのより浅いlocationに再作成したため、targetが脱出しました。これは有用なgeneral testです。validationとmaterialisationで、base directoryまたは最終member typeの扱いが一致しないようにします。<sup>[[12]](#references)</sup>
+`tarfile.extractall(filter="data")` と `filter="tar"` にも、リンク順序による bypass が存在していました。このケースでは、hardlink が、より深いパスにアーカイブされた symlink を参照していました。フォールバック展開では、その深い場所を基準に相対 symlink が検証されましたが、hardlink の浅い場所に再作成されたため、同じ相対ターゲットがそこから外部へ抜け出しました。これは汎用的なテストとして有用です。検証時と実体化時で、基準ディレクトリまたは最終的なメンバーの種類に食い違いが生じるようにします。<sup>[[12]](#references)</sup>
 
-### Node `tar` symlink chainを介したhardlink target escape（GHSA-83g3-92jg-28cx）
+### symlink チェーンを経由した Node `tar` の hardlink ターゲットの逸脱 (GHSA-83g3-92jg-28cx)
 
-Node.js `tar` packageの`tar.extract()`は、lexicallyは内部に含まれているように見えるものの、2つの先行するsymlinkを介してextraction rootの外側にresolveされるhardlinkを受け入れていました。このattackはdefault extraction optionsで機能します。destination-parent checkはhardlinkのin-root nameを対象としていましたが、hardlink targetはcontainmentのためのcomplete chainをresolveせずにfilesystemへ渡されていました。`tar` ≤ 7.5.7がaffectedで、7.5.8でissueがpatchされています。<sup>[[13]](#references)</sup>
+Node.js の `tar` パッケージの `tar.extract()` は、字句上は展開先の範囲内に見えるものの、先に処理された2つの symlink を経由すると展開ルートの外に解決される hardlink を受け入れていました。この攻撃はデフォルトの展開オプションで成立します。展開先の親ディレクトリのチェックでは hardlink のルート内の名前は確認されていましたが、hardlink のターゲットは、チェーン全体を解決して範囲内かを確認せずにファイルシステムへ渡されていました。影響を受けるのは `tar` ≤ 7.5.7 で、この問題は 7.5.8 で修正されています。<sup>[[13]](#references)</sup>
 
-重要なtest fixtureは、これらのliteral nameではなく、member間の**ordered relationship**です。<sup>[[13]](#references)</sup>
+重要なテストフィクスチャは、以下の文字列そのものではなく、メンバー間の**順序関係**です。<sup>[[13]](#references)</sup>
+
 ```text
 a/b/c/up     -> ../..                          (symlink)
 a/b/escape   -> c/up/../..                     (symlink)
 exfil        => a/b/escape/<path-from-parent>  (hardlink)
 ```
-抽出に成功すると、`exfil` は出力ツリー内に目に見える形で残りますが、選択した外部ファイルと inode を共有します。そのため、これを読み取るとそのファイルが leak し、書き込むと元のファイルが変更されます。この bypass は、最終 pathname のみを確認すること、絶対 prefix を除去すること、または hardlink header 内の `..` をブロックすることだけでは不十分な理由を示しています。以前に抽出されたすべての filesystem state を適用した後で link target を検証してください。<sup>[[13]](#references)</sup>
+
+抽出に成功すると、`exfil` は出力ツリー内に見える状態で残りますが、選択した外部ファイルと inode を共有します。これを読み取るとそのファイルが leak し、書き込むと元のファイルが変更されます。この bypass は、最終的な pathname のみを検証する、絶対パスのプレフィックスを除去する、または hardlink header 内の `..` をブロックするだけでは不十分であることを示しています。リンク先は、それ以前に抽出されたすべての filesystem state を適用した後に検証してください。<sup>[[13]](#references)</sup>
 
 ## 検出のヒント
 
-* **Static inspection** – member name と link target の両方を一覧表示します。`../`、`..\\`、absolute/rooted path、symlink、hardlink、special file、重複した name、type change、case/Unicode-equivalent collision を検出対象にします。exploit が前の member に依存する可能性があるため、レビュー中は entry order を保持してください。<sup>[[11]](#references)</sup>
+* **静的検査** – member 名とリンク先の両方を列挙します。`../`、`..\\`、絶対パス／rooted path、symlink、hardlink、特殊ファイル、重複名、型の変更、case／Unicode 上同等な名前の衝突を検出します。exploit が先行する member に依存する場合があるため、レビュー中はエントリの順序を維持してください。<sup>[[11]](#references)</sup>
 
-```bash
-bsdtar -tvf suspect.tar       # ordered TAR members, types and link targets
-7z l -slt suspect.7z          # technical metadata, one field per line
-zipinfo -v suspect.zip        # ZIP central-directory metadata and offsets
-```
+  ```bash
+  bsdtar -tvf suspect.tar       # ordered TAR members, types and link targets
+  7z l -slt suspect.7z          # technical metadata, one field per line
+  zipinfo -v suspect.zip        # ZIP central-directory metadata and offsets
+  ```
 
-* **Canonicalisation** – 解決後の parent と最終 basename が、解決後の destination 配下に残ることを確認します（raw string prefix ではなく path component を比較します）。先行する各 member の後に再確認してください。`realpath(join(dest, name))` を一度だけ確認する方法は、link replacement に対して脆弱であり、まだ作成されていない leaf では失敗する可能性があります。<sup>[[3]](#references)[[11]](#references)</sup>
-* **Sandbox extraction** – path/symlink check 機能を備えた extractor（例: bsdtar のデフォルトの secure check または 7-Zip ≥ 25.00）を使用し、新しく作成した使い捨て directory に decompress してから、結果の tree に外部を指す link がないことを確認します。Isolation により、すでに発生した escape が host path に到達できないようにする必要があります。<sup>[[1]](#references)[[9]](#references)</sup>
-* **Downstream reads matter** – 抽出自体が外部ファイルを作成しなかった場合でも、残存した symlink または hardlink は、previewer、CDN、file browser、package pipeline が後から抽出された name を開く、または提供するときに arbitrary-file-read primitive となる可能性があります。<sup>[[11]](#references)</sup>
-* **Endpoint monitoring** – WinRAR/7-Zip などで archive が開かれた直後に、`Startup`/`Run`/`cron` location に新しい executable が書き込まれた場合は alert を発生させます。
+* **正規化** – 解決済みの親パスと最終 basename の組み合わせが、解決済みの展開先の配下にあることを確認します（生の文字列 prefix ではなく、パスの各要素を比較します）。先行する各メンバーの処理後に再確認してください。一度だけ `realpath(join(dest, name))` を検査する方法は、リンクの置き換えに対して脆弱であり、まだ作成されていない leaf では失敗する可能性があります。<sup>[[3]](#references)[[11]](#references)</sup>
+* **Sandbox での展開** – パスや symlink を検査する extractor（例: bsdtar のデフォルトの安全な検査、または 7-Zip ≥ 25.00）を使い、新しく作成した使い捨てディレクトリに展開してから、生成された tree に外部を指すリンクがないことを確認します。すでに発生した脱出がホストのパスに到達しないよう、隔離する必要があります。<sup>[[1]](#references)[[9]](#references)</sup>
+* **後続の読み込みも重要** – 残存した symlink や hardlink は、展開時に外部ファイルが作成されていなくても、後で previewer、CDN、file browser、package pipeline などが展開された名前を開いたり配信したりすることで、任意ファイル読み取りの primitive になり得ます。<sup>[[11]](#references)</sup>
+* **エンドポイントの監視** – WinRAR/7-Zip などで archive を開いた直後に、`Startup`/`Run`/`cron` の場所へ新しい実行ファイルが書き込まれた場合にアラートを出します。
 
-## Mitigation & Hardening
+## 緩和策と堅牢化
 
-1. **Extractor を update する** – WinRAR 7.13+、7-Zip 25.00+、Node `tar` 7.5.8+ には、引用されている path/symlink/link-target issue に対する fix が含まれています。<sup>[[1]](#references)[[5]](#references)[[13]](#references)</sup>
-2. 可能な場合は、「**Do not extract paths**」/「**Ignore paths**」を使用して archive を extract します。untrusted input については、application が明示的に必要としない限り、symbolic link、hardlink、device、FIFO を reject してください。<sup>[[9]](#references)[[11]](#references)</sup>
-3. **新しい空の directory** に extract します。untrusted member を、attacker が replace 可能な path を含む tree に merge しないでください。また、以前の archive によって作成された directory を再利用しないでください。<sup>[[11]](#references)</sup>
-4. Unix では privilege を drop し、destination を **chroot/mount namespace** 内に isolate します。Windows では **AppContainer** または sandbox を使用します。post-extraction scan だけでは不十分です。scan より前に escaped write が発生するためです。<sup>[[11]](#references)</sup>
-5. Custom code では、target OS の separator/case/Unicode rule を適用し、member と link target の両方を検証します。link を follow せずに destination を resolve して open し、containment check と、その後の create/replace operation を分離しないでください。validator は write path とまったく同じ base および link-emulation semantics を使用する必要があります。<sup>[[11]](#references)[[12]](#references)</sup>
+1. **Extractor を更新する** – WinRAR 7.13+、7-Zip 25.00+、Node `tar` 7.5.8+ には、引用されている path/symlink/link-target の問題に対する修正が含まれています。<sup>[[1]](#references)[[5]](#references)[[13]](#references)</sup>
+2. 可能な場合は、「**パスを展開しない**」/「**パスを無視する**」を指定して archive を展開します。信頼できない入力では、アプリケーションが明示的に必要としない限り、symbolic link、hardlink、device、FIFO を拒否します。<sup>[[9]](#references)[[11]](#references)</sup>
+3. **新しい空のディレクトリ**に展開します。攻撃者が置き換え可能なパスを含む tree に、信頼できないメンバーをマージしないでください。また、以前の archive が作成したディレクトリを再利用しないでください。<sup>[[11]](#references)</sup>
+4. Unix では権限を落とし、展開先を **chroot/mount namespace** 内に隔離します。Windows では **AppContainer** または sandbox を使用します。展開後のスキャンだけでは不十分です。脱出による書き込みはスキャンより前に発生するためです。<sup>[[11]](#references)</sup>
+5. 独自コードでは、対象 OS の separator/case/Unicode の規則を適用し、メンバーとリンク先の両方を検証します。リンクをたどらずに展開先を解決して開き、包含チェックと後続の作成・置換処理を分離しないでください。validator は、書き込み処理とまったく同じ base およびリンクのエミュレーション規則を使用する必要があります。<sup>[[11]](#references)[[12]](#references)</sup>
 
-## その他の影響を受けた / 過去の事例
+## その他の影響事例 / 過去の事例
 
-* 2018 – 多数の Java/Go/JS library に影響した、Snyk による大規模な *Zip-Slip* advisory。<sup>[[6]](#references)</sup>
-* 2025 – HashiCorp `go-slug`（CVE-2025-0377）における slug 内の TAR extraction traversal（v0.16.3 で fix）。<sup>[[7]](#references)</sup>
-* header string は検証するものの、link target と各 write に使用される最終 filesystem path を検証しない、あらゆる custom extraction logic。<sup>[[11]](#references)[[12]](#references)</sup>
+* 2018 – Snyk による大規模な *Zip-Slip* アドバイザリ。多数の Java/Go/JS ライブラリに影響。<sup>[[6]](#references)</sup>
+* 2025 – HashiCorp `go-slug`（CVE-2025-0377）の slug における TAR 展開 traversal（v0.16.3 で修正）。<sup>[[7]](#references)</sup>
+* header 文字列だけを検証し、リンク先や書き込みごとに使用される最終的な filesystem path を検証しない、あらゆる独自の展開処理。<sup>[[11]](#references)[[12]](#references)</sup>
 
 
 
@@ -159,17 +188,19 @@ zipinfo -v suspect.zip        # ZIP central-directory metadata and offsets
 
 ## References
 
-- [1] [Trend Micro ZDI-25-949 – 7-Zip symlink ZIP traversal (CVE-2025-11001)](https://www.zerodayinitiative.com/advisories/ZDI-25-949/)
-- [2] [JFrog Research – mholt/archiver Zip-Slip (CVE-2025-3445)](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
-- [3] [Meziantou – .NET で Zip Slip を防止する](https://www.meziantou.net/prevent-zip-slip-in-dotnet.htm)
-- [4] [0xdf – HTB Bruno ZipSlip → DLL hijack chain](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
-- [5] [ESET Research – 今すぐ WinRAR tools を update: RomCom などが zero-day vulnerability を悪用（CVE-2025-8088）](https://www.welivesecurity.com/en/eset-research/update-winrar-tools-now-romcom-and-others-exploiting-zero-day-vulnerability/)
-- [6] [Snyk – Critical な arbitrary file overwrite vulnerability の public disclosure: Zip Slip](https://snyk.io/blog/zip-slip-vulnerability/)
-- [7] [HashiCorp – HCSEC-2025-01: go-slug は Zip Slip attack に対して vulnerable（CVE-2025-0377）](https://discuss.hashicorp.com/t/hcsec-2025-01-hashicorp-go-slug-vulnerable-to-zip-slip-attack/72719)
+- [1] [Trend Micro ZDI-25-949 – 7-Zip の symlink による ZIP traversal（CVE-2025-11001）](https://www.zerodayinitiative.com/advisories/ZDI-25-949/)
+- [2] [JFrog Research – mholt/archiver の Zip-Slip（CVE-2025-3445）](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
+- [3] [Meziantou – .NET で Zip Slip を防ぐ](https://www.meziantou.net/prevent-zip-slip-in-dotnet.htm)
+- [4] [0xdf – HTB Bruno の ZipSlip → DLL hijack chain](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
+- [5] [ESET Research – 今すぐ WinRAR tools を更新: RomCom などが zero-day vulnerability（CVE-2025-8088）を悪用](https://www.welivesecurity.com/en/eset-research/update-winrar-tools-now-romcom-and-others-exploiting-zero-day-vulnerability/)
+- [6] [Snyk – 重大な任意ファイル上書き脆弱性 Zip Slip の公開](https://snyk.io/blog/zip-slip-vulnerability/)
+- [7] [HashiCorp – HCSEC-2025-01: go-slug が Zip Slip Attack に対して脆弱（CVE-2025-0377）](https://discuss.hashicorp.com/t/hcsec-2025-01-hashicorp-go-slug-vulnerable-to-zip-slip-attack/72719)
 - [8] [Microsoft Learn – Path.Combine Method](https://learn.microsoft.com/en-us/dotnet/api/system.io.path.combine?view=net-7.0)
-- [9] [libarchive – bsdtar secure extraction flags](https://github.com/libarchive/libarchive/blob/master/tar/bsdtar.c)
+- [9] [libarchive – bsdtar の安全な展開フラグ](https://github.com/libarchive/libarchive/blob/master/tar/bsdtar.c)
 - [10] [NHS England Digital – 7-Zip の CVE-2025-11001 に対する Proof-of-Concept Exploit が報告される](https://digital.nhs.uk/cyber-alerts/2025/cc-4719)
-- [11] [Joshua Rogers – zip-slip、tar-slip、symlink、hardlink、collision などを使った hacking の楽しみ](https://joshua.hu/tarslip-zipslip-symlink-hardlink-generator)
-- [12] [Python Security Announce – CVE-2026-11940 tarfile extraction filter bypass](https://mail.python.org/archives/list/security-announce@python.org/thread/LD6QIISNQFQYOIEPJNEUIPV7S3V76FZH/)
-- [13] [GitHub Security Advisory – symlink chain を介した node-tar hardlink target escape](https://github.com/isaacs/node-tar/security/advisories/GHSA-83g3-92jg-28cx)
+- [11] [Joshua Rogers – zip-slip、tar-slip、symlink、hardlink、collision などを使った hacking の実験](https://joshua.hu/tarslip-zipslip-symlink-hardlink-generator)
+- [12] [Python Security Announce – CVE-2026-11940 tarfile の展開 filter bypass](https://mail.python.org/archives/list/security-announce@python.org/thread/LD6QIISNQFQYOIEPJNEUIPV7S3V76FZH/)
+- [13] [GitHub Security Advisory – symlink chain を介した node-tar の hardlink target escape](https://github.com/isaacs/node-tar/security/advisories/GHSA-83g3-92jg-28cx)
+- [14] [Rhino Security Labs CVE PoC – ユーザー制御の SCORM 展開 root](https://raw.githubusercontent.com/RhinoSecurityLabs/CVEs/master/CVE-2026-39405/README.md)
+- [15] [Rhino Security Labs – Frappe LMS の複数の脆弱性による Remote Code Execution](https://rhinosecuritylabs.com/research/multiple-vulnerabilities-in-frappe-lms-leading-to-remote-code-execution/)
 {{#include ../banners/hacktricks-training.md}}
