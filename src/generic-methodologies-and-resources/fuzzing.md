@@ -48,17 +48,17 @@ afl-fuzz -i in -o out -c ./target.cmplog -- ./target.afl @@
 
 ## Fuzzing File APIs That Hide a Filename Language
 
-A parameter named `filename`, `path`, or `URL` may be an interpreter entry point rather than a literal file lookup. For example, CFITSIO Extended Filename Syntax (EFS) evaluates bracketed selectors, row/pixel expressions, calculated columns, histograms, and transformations before returning the opened object; some forms also create temporary copies. During attack-surface mapping, classify each open/import API as **literal-path** or **interpreted-path**, then fuzz the production entry point that applications actually call.<sup>[[15]](#references)[[17]](#references)</sup>
+A parameter named `filename`, `path`, or `URL` may be an interpreter entry point rather than a literal file lookup. For example, CFITSIO Extended Filename Syntax (EFS) evaluates bracketed selectors, row/pixel expressions, calculated columns, histograms, and transformations before returning the opened object; some forms also create temporary copies. During attack-surface mapping, classify each open/import API as **literal-path** or **interpreted-path**, then fuzz the production entry point that applications actually call.<sup>[[17]](#references)[[19]](#references)</sup>
 
-For the resulting SSRF, file-copy, and protocol-handler primitives—and safer literal-path APIs—see [Filename mini-languages as SSRF/file primitives](../pentesting-web/ssrf-server-side-request-forgery/README.md#filename-mini-languages-as-ssrffile-primitives-cfitsio-efs).<sup>[[15]](#references)</sup>
+For the resulting SSRF, file-copy, and protocol-handler primitives—and safer literal-path APIs—see [Filename mini-languages as SSRF/file primitives](../pentesting-web/ssrf-server-side-request-forgery/index.html#filename-mini-languages-as-ssrffile-primitives-cfitsio-efs).<sup>[[17]](#references)</sup>
 
 ### Keep the backing object separate from the fuzzed program
 
-When the grammar lives in a filename suffix, mutating only the referenced file bytes misses the parser. A small harness can instead read one testcase as a string and pass it to the interpreted open API; the CFITSIO campaign reached most EFS parsers and evaluators by calling `fits_open_file()` in read-only mode. Keep valid backing files available separately so mutations can focus on the selector/expression language rather than continually breaking the base path.<sup>[[17]](#references)</sup>
+When the grammar lives in a filename suffix, mutating only the referenced file bytes misses the parser. A small harness can instead read one testcase as a string and pass it to the interpreted open API; the CFITSIO campaign reached most EFS parsers and evaluators by calling `fits_open_file()` in read-only mode. Keep valid backing files available separately so mutations can focus on the selector/expression language rather than continually breaking the base path.<sup>[[19]](#references)</sup>
 
-Use seeds that each reach a different grammar family, then derive a compact dictionary from both the specification and lexer/parser source. If coverage plateaus while inputs repeatedly fail in the same syntax-error path, preserve valid prefixes and add delimiters, operators, keywords, function names, and representative field names instead of only increasing random-mutation time.<sup>[[17]](#references)</sup>
+Use seeds that each reach a different grammar family, then derive a compact dictionary from both the specification and lexer/parser source. If coverage plateaus while inputs repeatedly fail in the same syntax-error path, preserve valid prefixes and add delimiters, operators, keywords, function names, and representative field names instead of only increasing random-mutation time.<sup>[[19]](#references)</sup>
 
-Run the harness with the grammar dictionary, for example:<sup>[[3]](#references)[[17]](#references)</sup>
+Run the harness with the grammar dictionary, for example:<sup>[[3]](#references)[[19]](#references)</sup>
 
 ```bash
 afl-fuzz -i filename-seeds -o out -x filename-language.dict -- ./filename-harness @@
@@ -66,7 +66,7 @@ afl-fuzz -i filename-seeds -o out -x filename-language.dict -- ./filename-harnes
 
 ### Contain "read-only" harness side effects
 
-A read-only library flag does not guarantee a side-effect-free testcase: the filename language may rewrite the input, create output files, or materialize temporary objects. The CFITSIO campaign initially destroyed seed files and left unexpected files across the filesystem, so cleanup and isolation were required.<sup>[[17]](#references)</sup>
+A read-only library flag does not guarantee a side-effect-free testcase: the filename language may rewrite the input, create output files, or materialize temporary objects. The CFITSIO campaign initially destroyed seed files and left unexpected files across the filesystem, so cleanup and isolation were required.<sup>[[19]](#references)</sup>
 
 - Give every worker a disposable working directory and private temporary directory.
 - Expose copies of canonical backing files; never let the target mutate the only corpus copy.
@@ -75,7 +75,7 @@ A read-only library flag does not guarantee a side-effect-free testcase: the fil
 
 ### Crash-to-patch-to-fuzz loop
 
-Cluster crashes before repair so thousands of artifacts do not become thousands of patch tasks. In the CFITSIO assessment, AFLTriage reduced the initial crash set to a few root causes; the resulting advisory shows distinct failures including incorrect destination-size checks, stale pointers after `realloc()`, arithmetic faults, and unsafe parser cleanup paths.<sup>[[16]](#references)[[17]](#references)</sup>
+Cluster crashes before repair so thousands of artifacts do not become thousands of patch tasks. In the CFITSIO assessment, AFLTriage reduced the initial crash set to a few root causes; the resulting advisory shows distinct failures including incorrect destination-size checks, stale pointers after `realloc()`, arithmetic faults, and unsafe parser cleanup paths.<sup>[[18]](#references)[[19]](#references)</sup>
 
 1. Minimize a representative input for each cluster and reproduce it under AddressSanitizer.
 2. Record the exact failing access, source location, allocation/free history, and parser state that made the invariant false.
@@ -84,7 +84,7 @@ Cluster crashes before repair so thousands of artifacts do not become thousands 
 5. Run functional tests with real files, then resume from the accumulated queue (or re-import that queue if the engine requires a fresh output directory after the binary changes).
 6. Repeat: removing the first shallow crash often lets existing seeds progress into a deeper parser state.
 
-An LLM can accelerate step 2 and draft step 3 when it receives the crashing input, sanitizer report, harness, and relevant source, but its patch remains untrusted. The sanitizer replay and regression gates—not the model's explanation—decide whether the repair is accepted.<sup>[[17]](#references)</sup>
+An LLM can accelerate step 2 and draft step 3 when it receives the crashing input, sanitizer report, harness, and relevant source, but its patch remains untrusted. The sanitizer replay and regression gates—not the model's explanation—decide whether the repair is accepted.<sup>[[19]](#references)</sup>
 
 ## Richer Feedback When Edge Coverage Collapses Different Paths
 
@@ -136,6 +136,47 @@ A more effective pattern is to treat the **sequence itself as the seed** and use
 - If the protocol exposes meaningful response codes, use them as a **cheap state oracle** to prioritize sequences that progress deeper.
 
 This is the same reason authenticated bugs, hidden transitions, or “only-after-handshake” parser bugs are often missed by vanilla file-style fuzzing: the fuzzer must preserve **order, state, and dependencies**, not just structure.<sup>[[4]](#references)</sup>
+
+### Android Binder: multi-client driver fuzzing
+
+High edge coverage can still miss IPC-driver bugs because coverage does not describe **object ownership, reference counts, pending messages, cleanup order, or thread interleavings**. The [Android Binder IPC internals](../binary-exploitation/linux-kernel-exploitation/android-binder-ipc-internals-kernel-vulnerability-research.md) page covers the driver object model; this example focuses on the fuzzer harness. Android Binder is a useful model: reaching both the allocation and free paths is not enough if the fuzzer cannot make multiple processes operate on the same kernel object in the required order.<sup>[[15]](#references)</sup>
+
+#### Model the protocol, not isolated `ioctl` buffers
+
+Represent a test case as an ordered grammar of **client identity + operation + structured arguments**. The Binder LKL fuzzer uses protobuf and `libprotobuf-mutator`, with one persistent context-manager client and two ordinary clients. A semantic harness then preserves the relationships which blind byte mutation would destroy.<sup>[[15]](#references)</sup>
+
+- Cache values returned by earlier operations. For example, `BC_FREE_BUFFER` must reuse a transaction-buffer pointer returned by a previous `ioctl`.
+- Generate valid default replies so synchronous transactions can finish and later operations remain reachable.
+- Reject impossible transitions such as self-transactions or multiple pending transactions to the same target.
+- Keep singleton bootstrap state outside the per-input reset. Binder permits only one `BINDER_SET_CONTEXT_MGR` registration per boot, so repeatedly destroying and recreating that client would make later inputs invalid.
+
+A useful lifetime-race template is to make one client transfer an object, start thread or process cleanup, and concurrently make the receiving client release the transaction buffer. In the CVE-2020-0423 example, a `BINDER_TYPE_WEAK_BINDER` transfer followed by `BINDER_THREAD_EXIT` racing with `BC_FREE_BUFFER` could free an embedded `binder_work` while the exiting thread's cleanup path still used it.<sup>[[15]](#references)</sup>
+
+#### Reintroduce controlled interleavings in a userspace kernel
+
+[Linux Kernel Library (LKL)](https://github.com/lkl/linux) links the real kernel code into a userspace harness and exposes its syscall interface through `lkl_syscall`. This makes protobuf state, coverage, and KASAN easy to coordinate in one process. LKL normally runs a syscall without another kernel thread interrupting it, however. For race campaigns, insert `schedule()` points around selected lock/unlock and lifetime boundaries, then let the harness randomly choose the next client at each yield. Keep these points targeted because each one multiplies the scheduling search space. The randomized scheduler described by the researchers is **not** part of the upstream Binder fuzzer.<sup>[[15]](#references)</sup>
+
+#### Build and replay serialized regression seeds
+
+The upstream harness pins a compatible `libprotobuf-mutator`, enables LKL fuzzing instrumentation and KASAN with `LKL_FUZZING=1`, and enables `CONFIG_MMU` for Binder with `MMU=1`.<sup>[[16]](#references)</sup>
+
+```bash
+PROTOBUF_MUTATOR_DIR=/tmp/libprotobuf-mutator \
+  tools/lkl/scripts/libprotobuf-mutator-build.sh
+
+make -C tools/lkl LKL_FUZZING=1 MMU=1 \
+  PROTOBUF_MUTATOR_DIR=/tmp/libprotobuf-mutator \
+  clean-conf fuzzers -j"$(nproc)"
+```
+
+After checking out a deliberately vulnerable revision or applying the rollback patches documented upstream, a serialized seed can reproduce the whole multi-client state transition without reconstructing it in an ad-hoc C proof of concept:<sup>[[16]](#references)</sup>
+
+```bash
+tools/lkl/fuzzers/binder/binder-fuzzer \
+  tools/lkl/fuzzers/binder/seeds/CVE-2023-20938
+```
+
+Treat the resulting KASAN use-after-free as confirmation that the seed reached the vulnerable lifetime path. It does **not** demonstrate the later primitives required for kernel code execution or privilege escalation.<sup>[[16]](#references)</sup>
 
 ## Single-Machine Diversity Trick (Jackalope-Style)
 
@@ -396,7 +437,9 @@ Run the command from the **same package** and with the **same `-fuzz` target** s
 - [12] [Fuzz Introspector](https://google.github.io/oss-fuzz/advanced-topics/fuzz-introspector/)
 - [13] [AFL++ LLVM instrumentation: path and caller coverage](https://github.com/AFLplusplus/AFLplusplus/blob/stable/instrumentation/README.llvm.md)
 - [14] [Predictive Context-sensitive Fuzzing](https://www.ndss-symposium.org/ndss-paper/predictive-context-sensitive-fuzzing/)
-- [15] [CFITSIO Extended Filename Syntax](https://heasarc.gsfc.nasa.gov/docs/software/fitsio/filters.html)
-- [16] [Doyensec Advisory: CFITSIO Q4 2025](https://www.doyensec.com/resources/Doyensec_Advisory_CFITSIO_Q42025.pdf)
-- [17] [Fuzzing CFITSIO Extended Filename Syntax: 16 Memory-Safety Vulnerabilities and Codex-Assisted Triage](https://blog.doyensec.com/2026/04/20/cfitsio-fuzzing.html)
+- [15] [Android Offensive Security Blog - Binder Fuzzing](https://androidoffsec.withgoogle.com/posts/binder-fuzzing/)
+- [16] [LKL Android Binder fuzzer - build and regression-seed documentation](https://github.com/lkl/linux/blob/master/tools/lkl/fuzzers/binder/README.md)
+- [17] [CFITSIO Extended Filename Syntax](https://heasarc.gsfc.nasa.gov/docs/software/fitsio/filters.html)
+- [18] [Doyensec Advisory: CFITSIO Q4 2025](https://www.doyensec.com/resources/Doyensec_Advisory_CFITSIO_Q42025.pdf)
+- [19] [Fuzzing CFITSIO Extended Filename Syntax: 16 Memory-Safety Vulnerabilities and Codex-Assisted Triage](https://blog.doyensec.com/2026/04/20/cfitsio-fuzzing.html)
 {{#include ../banners/hacktricks-training.md}}
