@@ -30,7 +30,7 @@ jobs:
       - name: Dispatch the assigned PR agents
         uses: actions/github-script@v8
         with:
-          github-token: ${{ secrets.PAT_TOKEN }}
+          github-token: ${{ secrets.FEED_DISPATCH_TOKEN }}
           script: |
             const source = context.repo;
             const feed = {owner: 'HackTricks-wiki', repo: 'HackTricks-Feed'};
