@@ -4,28 +4,28 @@
 
 ## Mutational Grammar Fuzzing: Coverage vs. Semantik
 
-Beim **mutational grammar fuzzing** werden Inputs mutiert, bleiben dabei aber **grammatikkonform**. Im coverage-guided-Modus werden nur Samples als Corpus-Seeds gespeichert, die **neue Coverage** auslösen. Bei **Sprach-Targets** (Parsern, Interpretern, Engines) können so Bugs übersehen werden, die **semantische Datenflussketten** erfordern, bei denen die Ausgabe eines Konstrukts zur Eingabe eines anderen wird.<sup>[[1]](#references)</sup>
+Beim **mutational grammar fuzzing** werden Inputs mutiert, während sie **grammatikkonform** bleiben. Im coverage-guided-Modus werden nur Samples, die **neue Coverage** auslösen, als Corpus-Seeds gespeichert. Bei **Sprachzielen** (Parsern, Interpretern, Engines) kann dadurch die Entdeckung von Bugs ausbleiben, die **semantische/Datenfluss-Ketten** erfordern, bei denen die Ausgabe eines Konstrukts zur Eingabe eines anderen wird.<sup>[[1]](#references)</sup>
 
-**Fehlermodus:** Der Fuzzer findet Seeds, die einzeln `document()` und `generate-id()` (oder ähnliche Primitives) ausführen, **erhält aber nicht den verketteten Datenfluss**. Dadurch wird das Sample, das dem Bug näherkommt, verworfen, weil es keine zusätzliche Coverage liefert. Bei **3 oder mehr abhängigen Schritten** wird zufällige Rekombination aufwendig, und das Coverage-Feedback leitet die Suche nicht.<sup>[[1]](#references)</sup>
+**Fehlermodus:** Der Fuzzer findet Seeds, die jeweils einzeln `document()` und `generate-id()` (oder ähnliche Primitives) ausführen, **erhält aber nicht den verketteten Datenfluss**. Dadurch wird das Sample, das dem Bug näherkommt, verworfen, weil es keine zusätzliche Coverage liefert. Bei **3 oder mehr abhängigen Schritten** wird zufällige Rekombination kostspielig, und das Coverage-Feedback leitet die Suche nicht an.<sup>[[1]](#references)</sup>
 
-**Folgerung:** Ziehe bei Grammatiken mit vielen Abhängigkeiten in Betracht, **mutationale und generative Phasen zu kombinieren** oder die Generierung auf Muster mit **verketteten Funktionen** auszurichten (nicht nur auf Coverage).<sup>[[1]](#references)</sup>
+**Folgerung:** Bei grammatikbasierten Zielen mit vielen Abhängigkeiten solltest du **mutationale und generative Phasen kombinieren** oder die Generierung auf Muster mit **function chaining** ausrichten (nicht nur auf Coverage).<sup>[[1]](#references)</sup>
 
-## Fallstricke bei der Corpus-Vielfalt
+## Fallstricke bei der Corpus-Diversität
 
-Coverage-guided-Mutation ist **greedy**: Ein Sample mit neuer Coverage wird sofort gespeichert und behält dabei oft große, unveränderte Bereiche. Mit der Zeit entstehen im Corpus **Beinahe-Duplikate** mit geringer struktureller Vielfalt. Aggressive Minimierung kann nützlichen Kontext entfernen. Ein praktischer Kompromiss ist daher eine **grammatikbewusste Minimierung**, die **bei einer Mindestanzahl von Tokens stoppt** (Rauschen reduzieren, aber genug umgebende Struktur erhalten, damit sich das Sample gut mutieren lässt).<sup>[[1]](#references)</sup>
+Coverage-gesteuerte Mutation ist **greedy**: Ein Sample mit neuer Coverage wird sofort gespeichert und enthält oft große, unveränderte Bereiche. Mit der Zeit entstehen im Corpus **nahezu identische Duplikate** mit geringer struktureller Vielfalt. Aggressive Minimierung kann nützlichen Kontext entfernen. Ein praktikabler Kompromiss ist daher eine **grammatikbewusste Minimierung**, die **bei einer Mindestanzahl von Tokens stoppt** (Rauschen reduzieren und zugleich genügend umgebende Struktur erhalten, damit Mutationen weiterhin sinnvoll sind).<sup>[[1]](#references)</sup>
 
-Eine praktische Corpus-Regel für mutational fuzzing lautet: **Bevorzuge eine kleine Menge strukturell unterschiedlicher Seeds mit maximaler Coverage** gegenüber einem großen Haufen von Beinahe-Duplikaten. In der Praxis bedeutet das üblicherweise Folgendes.<sup>[[1]](#references)[[3]](#references)</sup>
+Eine praktische Corpus-Regel beim mutational fuzzing lautet: **Eine kleine Menge strukturell unterschiedlicher Seeds, die die Coverage maximieren, ist einem großen Haufen nahezu identischer Duplikate vorzuziehen.** In der Praxis bedeutet das meist Folgendes.<sup>[[1]](#references)[[3]](#references)</sup>
 
-- Beginne mit **realen Samples** (öffentlichen Corpora, Crawling, aufgezeichnetem Traffic, Dateisammlungen aus dem Ökosystem des Targets).
-- Verdichte sie durch **coveragebasierte Corpus-Minimierung**, statt jedes gültige Sample zu behalten.
-- Halte Seeds **klein genug**, damit Mutationen sinnvolle Felder treffen, anstatt die meiste Zeit mit irrelevanten Bytes zu verbringen.
-- Führe nach größeren Änderungen am Harness oder an der Instrumentierung die Corpus-Minimierung erneut aus, denn das „beste“ Corpus ändert sich, wenn sich die Erreichbarkeit ändert.
+- Beginne mit **realen Samples** (öffentlichen Corpora, Daten aus Crawling, aufgezeichnetem Traffic und Dateisammlungen aus dem Ökosystem des Ziels).
+- Reduziere sie mit **Coverage-basierter Corpus-Minimierung**, statt jedes gültige Sample zu behalten.
+- Halte Seeds **klein genug**, damit Mutationen sinnvolle Felder treffen, anstatt die meisten Zyklen mit irrelevanten Bytes zu verbringen.
+- Führe die Corpus-Minimierung nach größeren Änderungen am Harness oder an der Instrumentierung erneut aus, da sich der „beste“ Corpus ändert, wenn sich die Erreichbarkeit ändert.
 
-## Vergleichsorientierte Mutation für Magic Values
+## Comparison-Aware Mutation für Magic Values
 
-Ein häufiger Grund dafür, dass Fuzzer an ihre Grenzen stoßen, ist nicht die Syntax, sondern **strikte Vergleiche**: Magic Bytes, Längenprüfungen, Enum-Strings, Prüfsummen oder Parser-Dispatch-Werte, die durch `memcmp`, Switch-Tabellen oder verkettete Vergleiche geschützt sind. Bei reiner Zufallsmutation werden Zyklen damit verschwendet, diese Werte Byte für Byte zu erraten.
+Ein häufiger Grund, warum Fuzzer an ihre Grenzen stoßen, sind nicht Syntaxprobleme, sondern **strikte Vergleiche**: Magic Bytes, Längenprüfungen, Enum-Strings, Checksummen oder Parser-Dispatch-Werte, die durch `memcmp`, Switch-Tabellen oder eine Reihe verketteter Vergleiche geschützt sind. Reine Zufallsmutation verschwendet Zyklen damit, diese Werte Byte für Byte zu erraten.
 
-Verwende für solche Targets **Comparison Tracing** (zum Beispiel AFL++-Workflows mit `CMPLOG` oder im Redqueen-Stil), damit der Fuzzer Operanden fehlgeschlagener Vergleiche beobachten und Mutationen auf Werte ausrichten kann, die diese Vergleiche bestehen.<sup>[[3]](#references)</sup>
+Verwende für diese Ziele **Comparison Tracing** (zum Beispiel Workflows im Stil von AFL++ `CMPLOG` / Redqueen), damit der Fuzzer Operanden fehlgeschlagener Vergleiche beobachten und Mutationen auf Werte ausrichten kann, die diese Vergleiche bestehen.<sup>[[3]](#references)</sup>
 
 ```bash
 ./configure --cc=afl-clang-fast
@@ -42,15 +42,15 @@ afl-fuzz -i in -o out -c ./target.cmplog -- ./target.afl @@
 
 **Praktische Hinweise:**
 
-- Das ist besonders nützlich, wenn das Ziel tiefere Logik hinter **Dateisignaturen**, **Protokollverben**, **Typ-Tags** oder **versionsabhängigen Feature-Bits** verbirgt.
+- Das ist besonders nützlich, wenn das Ziel tiefer liegende Logik hinter **Dateisignaturen**, **Protokollverben**, **Typ-Tags** oder **versionsabhängigen Feature-Bits** verbirgt.
 - Kombiniere es mit **Wörterbüchern**, die aus echten Beispielen, Protokollspezifikationen oder Debug-Logs extrahiert wurden. Ein kleines Wörterbuch mit Grammatik-Tokens, Chunk-Namen, Verben und Trennzeichen ist oft wertvoller als eine riesige generische Wortliste.
-- Wenn das Ziel viele aufeinanderfolgende Prüfungen durchführt, löse zuerst die frühesten „Magic“-Vergleiche und minimiere anschließend den resultierenden Corpus erneut, damit spätere Phasen mit bereits gültigen Präfixen beginnen.
+- Wenn das Ziel viele aufeinanderfolgende Prüfungen durchführt, löse zuerst die frühesten „Magic“-Vergleiche und minimiere anschließend den resultierenden Korpus erneut, damit spätere Phasen mit bereits gültigen Präfixen beginnen.
 
 ## Aussagekräftigeres Feedback, wenn Edge-Coverage verschiedene Pfade zusammenfasst
 
-Normale Edge-Coverage kann zwei Ausführungen nicht unterscheiden, die denselben Helper über verschiedene Aufrufer durchlaufen oder innerhalb einer Funktion unterschiedliche Kombinationen von Verzweigungen nehmen. Das ist bei gemeinsam genutzten Decodern, Protokoll-Dispatchern und Interpreter-Helpern relevant, bei denen der **Pfad** zu einer Edge den aktuellen Zustand bestimmt. Jeden Aufrufkontext naiv zu erfassen, ist ebenfalls gefährlich: Die Coverage-Map und die Queue können explodieren. Die Forschung zu kontextsensitivem Fuzzing empfiehlt daher, nur vielversprechende Kontexte genauer zu erfassen, statt den gesamten Call-Graph als kontextsensitiv zu behandeln.<sup>[[14]](#references)</sup>
+Normale Edge-Coverage kann nicht zwischen zwei Ausführungen unterscheiden, die denselben Helper über verschiedene Aufrufer durchlaufen oder innerhalb einer Funktion unterschiedliche Branch-Kombinationen nehmen. Das ist bei gemeinsam genutzten Decodern, Protokoll-Dispatchern und Interpreter-Helpern wichtig, bei denen die **Route** zu einer Edge den aktiven Zustand bestimmt. Jeden Aufrufkontext naiv zu erfassen, ist ebenfalls riskant: Die Coverage-Map und die Queue können riesig werden. Die Forschung zu kontextsensitive Fuzzing empfiehlt daher, nur vielversprechende Kontexte gezielt zu verfeinern, statt den gesamten Call-Graph kontextsensitiv zu behandeln.<sup>[[14]](#references)</sup>
 
-Aktuelle AFL++-Builds bieten zusätzlich zur normalen Edge-Coverage eine **Ball-Larus-Pfadabdeckung pro Funktion**. Sie weist jedem azyklischen Pfad durch eine Funktion ein Feature zu; Schleifen-Back-Edges werden entfernt, sodass dieses Feedback Kombinationen von Verzweigungen unterscheidet, **nicht aber die Anzahl der Schleifendurchläufe**. Beginne mit dem lockeren Level `1` und beschränke strengere Modi anschließend auf verdächtigen Parser- oder Zustandsmaschinen-Code, da die Anzahl der Pfade exponentiell wachsen kann.<sup>[[13]](#references)</sup>
+Neuere AFL++-Builds bieten zusätzlich zur normalen Edge-Coverage **Ball-Larus-Pfad-Coverage pro Funktion**. Dabei wird jedem azyklischen Pfad durch eine Funktion ein Feature zugewiesen; Loop-Back-Edges werden entfernt, sodass dieses Feedback Branch-Kombinationen unterscheidet, **nicht aber die Anzahl der Schleifendurchläufe**. Beginne mit der lockeren Stufe `1` und beschränke strengere Modi anschließend auf verdächtigen Parser-/Zustandsautomaten-Code, da die Anzahl der Pfade exponentiell wachsen kann.<sup>[[13]](#references)</sup>
 
 ```bash
 make clean
@@ -62,7 +62,7 @@ make -j"$(nproc)"
 afl-fuzz -i in -o out -- ./target @@
 ```
 
-Bei einem Helper, der von vielen sicherheitsrelevanten Stellen aufgerufen wird, kann der LTO-Modus jeden Funktionspfad mit seiner unmittelbaren Aufrufstelle kombinieren:<sup>[[13]](#references)</sup>
+Für einen Helper, der von vielen sicherheitsrelevanten Stellen aufgerufen wird, kann der LTO-Modus jeden Funktionspfad mit seiner unmittelbaren Aufrufstelle kombinieren:<sup>[[13]](#references)</sup>
 
 ```bash
 make clean
@@ -75,50 +75,50 @@ make -j"$(nproc)"
 afl-fuzz -i in -o out -- ./target @@
 ```
 
-**Kampagnenhinweise:** Setze umfangreicheres Feedback sparsam ein und überwache seine Kosten für Coverage-Map und Queue.<sup>[[13]](#references)[[14]](#references)</sup>
+**Hinweise zur Kampagne:** Setze umfangreicheres Feedback zurückhaltend ein und überwache dessen Kosten für Coverage-Map und Queue.<sup>[[13]](#references)[[14]](#references)</sup>
 
-- Führe parallel eine gewöhnliche Edge-Coverage-Instanz aus. Umfangreicheres Feedback ist nur dann sinnvoll, wenn die zusätzlichen Kosten für Queue und Map die Anzahl der Ausführungen pro Sekunde nicht zu stark verringern.
-- Verwende `AFL_LLVM_ALLOWLIST`, um die Path-/Caller-Instrumentierung einzuschränken, wenn große, template-lastige Bibliotheken oder generischer Utility-Code die Map dominieren.
-- Funktionen mit übermäßig vielen azyklischen Pfaden können von AFL++ übersprungen werden. Warnungen während der Kompilierung sind ein Hinweis darauf, dass das Ziel eine Allowlist oder einen weniger strengen Level benötigt.
-- Caller- und Path-Coverage unterstützt nur eine Caller-Tiefe. Kombiniere es nicht mit tieferen Context-Stacks.
-- Path-IDs können sich zwischen LLVM-Hauptversionen ändern. Verwende für eine Kampagne dieselbe Toolchain und synchronisiere PATH-basierte Corpora nicht so, als wären ihre Feature-IDs über Builds hinweg stabil.
+- Führe parallel eine gewöhnliche Edge-Coverage-Instanz aus; umfangreicheres Feedback ist nur dann nützlich, wenn die zusätzlichen Kosten für Queue und Map die Anzahl der Ausführungen pro Sekunde nicht zu stark verringern.
+- Verwende `AFL_LLVM_ALLOWLIST`, um die Instrumentierung von Pfaden und Aufrufern einzuschränken, wenn große, vorlagenlastige Bibliotheken oder generischer Utility-Code die Map dominieren.
+- Funktionen mit übermäßig vielen azyklischen Pfaden können von AFL++ übersprungen werden; Warnungen während der Kompilierung sind ein Hinweis darauf, dass das Ziel Allowlisting oder eine weniger strenge Stufe benötigt.
+- Caller + Path Coverage unterstützt nur eine Caller-Tiefe. Kombiniere es nicht mit tieferen Context Stacks.
+- Pfad-IDs können sich zwischen größeren LLVM-Versionen ändern. Verwende während einer Kampagne eine feste Toolchain und synchronisiere PATH-basierte Corpora nicht so, als wären ihre Feature-IDs über verschiedene Builds hinweg stabil.
 - Dieses Feedback ergänzt `CMPLOG`: Comparison Tracing ermittelt, **welcher Wert eine Guard-Bedingung erfüllt**, während Path-/Caller-Feedback festhält, **welcher Pfad und welche Zweigkombination dorthin geführt haben**.
 
 ## Stateful Fuzzing: Sequenzen sind Seeds
 
-Bei **Protokollen**, **authentifizierten Workflows** und **mehrstufigen Parsern** ist oft nicht ein einzelner Blob, sondern eine **Nachrichtensequenz** die interessante Einheit. Das gesamte Transkript in eine Datei zu schreiben und blind zu mutieren, ist meist ineffizient, weil der Fuzzer jeden Schritt gleichermaßen mutiert, obwohl nur die spätere Nachricht den fragilen Zustand erreicht.<sup>[[4]](#references)</sup>
+Bei **Protokollen**, **authentifizierten Workflows** und **mehrstufigen Parsern** ist die interessante Einheit oft nicht ein einzelner Blob, sondern eine **Nachrichtensequenz**. Das gesamte Transkript in eine Datei zu schreiben und blind zu mutieren, ist in der Regel ineffizient, weil der Fuzzer jeden Schritt gleichermaßen mutiert, selbst wenn nur die spätere Nachricht den fragilen Zustand erreicht.<sup>[[4]](#references)</sup>
 
 Effektiver ist es, die **Sequenz selbst als Seed** zu behandeln und **beobachtbaren Zustand** (Antwortcodes, Protokollzustände, Parserphasen, zurückgegebene Objekttypen) als zusätzliches Feedback zu verwenden.<sup>[[4]](#references)</sup>
 
-- Behalte **gültige Präfixnachrichten** bei und konzentriere Mutationen auf die Nachricht, die den **Zustandsübergang auslöst**.
-- Zwischenspeichere IDs und serverseitig erzeugte Werte aus vorherigen Antworten, wenn der nächste Schritt davon abhängt.
-- Bevorzuge Mutationen und Splicing einzelner Nachrichten, statt das gesamte serialisierte Transkript als undurchsichtigen Blob zu mutieren.
-- Wenn das Protokoll aussagekräftige Antwortcodes liefert, verwende sie als **günstigen Zustandsorakel**, um Sequenzen zu priorisieren, die weiter vorankommen.
+- Lasse **gültige Präfixnachrichten** unverändert und konzentriere Mutationen auf die Nachricht, die den **Zustandsübergang auslöst**.
+- Speichere Kennungen und vom Server generierte Werte aus vorherigen Antworten zwischen, wenn der nächste Schritt davon abhängt.
+- Bevorzuge Mutationen und Splicing pro Nachricht gegenüber der Mutation des gesamten serialisierten Transkripts als undurchsichtigem Blob.
+- Wenn das Protokoll aussagekräftige Antwortcodes bereitstellt, verwende sie als **kostengünstigen Zustandsorakel**, um Sequenzen zu priorisieren, die weiter vorankommen.
 
-Aus demselben Grund werden authentifizierte Bugs, verborgene Übergänge oder Parser-Bugs, die „erst nach dem Handshake“ auftreten, oft beim herkömmlichen dateibasierten Fuzzing übersehen: Der Fuzzer muss **Reihenfolge, Zustand und Abhängigkeiten** bewahren, nicht nur die Struktur.<sup>[[4]](#references)</sup>
+Aus demselben Grund werden authentifizierte Bugs, verborgene Zustandsübergänge oder Parser-Bugs, die „erst nach dem Handshake“ auftreten, beim gewöhnlichen dateibasierten Fuzzing oft übersehen: Der Fuzzer muss **Reihenfolge, Zustand und Abhängigkeiten** bewahren, nicht nur die Struktur.<sup>[[4]](#references)</sup>
 
 ### Android Binder: Fuzzing mit mehreren Clients
 
-Eine hohe Edge-Coverage kann IPC-Treiber-Bugs trotzdem übersehen, denn Coverage beschreibt nicht **Objektbesitz, Referenzzähler, ausstehende Nachrichten, Bereinigungsreihenfolge oder Thread-Interleavings**. Die Seite [Android Binder IPC internals](../binary-exploitation/linux-kernel-exploitation/android-binder-ipc-internals-kernel-vulnerability-research.md) behandelt das Treibermodell; dieses Beispiel konzentriert sich auf den Fuzzer-Harness. Android Binder ist ein nützliches Modell: Es reicht nicht, sowohl den Allokations- als auch den Freigabepfad zu erreichen, wenn der Fuzzer nicht mehrere Prozesse in der erforderlichen Reihenfolge auf dasselbe Kernelobjekt zugreifen lassen kann.<sup>[[15]](#references)</sup>
+Eine hohe Edge-Coverage kann IPC-Treiber-Bugs trotzdem übersehen, da Coverage **Objektbesitz, Referenzzähler, ausstehende Nachrichten, Bereinigungsreihenfolge oder Thread-Interleavings** nicht abbildet. Die Seite [Android Binder IPC internals](../binary-exploitation/linux-kernel-exploitation/android-binder-ipc-internals-kernel-vulnerability-research.md) behandelt das Treiber-Objektmodell; dieses Beispiel konzentriert sich auf das Fuzzer-Harness. Android Binder ist ein nützliches Modell: Es reicht nicht aus, sowohl die Allokations- als auch die Freigabepfade zu erreichen, wenn der Fuzzer nicht mehrere Prozesse in der erforderlichen Reihenfolge auf dasselbe Kernel-Objekt zugreifen lassen kann.<sup>[[15]](#references)</sup>
 
 #### Das Protokoll modellieren, nicht isolierte `ioctl`-Puffer
 
-Stelle einen Testfall als geordnete Grammatik aus **Client-Identität + Operation + strukturierten Argumenten** dar. Der Binder-LKL-Fuzzer verwendet protobuf und `libprotobuf-mutator`, mit einem persistenten Context-Manager-Client und zwei gewöhnlichen Clients. Ein semantischer Harness bewahrt dann die Beziehungen, die durch blinde Byte-Mutationen zerstört würden.<sup>[[15]](#references)</sup>
+Stelle einen Testfall als geordnete Grammatik aus **Client-Identität + Operation + strukturierten Argumenten** dar. Der Binder-LKL-Fuzzer verwendet protobuf und `libprotobuf-mutator`, mit einem persistenten Context-Manager-Client und zwei gewöhnlichen Clients. Ein semantisches Harness bewahrt dann die Beziehungen, die durch blinde Byte-Mutationen zerstört würden.<sup>[[15]](#references)</sup>
 
-- Zwischenspeichere Werte, die von früheren Operationen zurückgegeben wurden. Beispielsweise muss `BC_FREE_BUFFER` einen Transaktionspufferzeiger wiederverwenden, der von einem vorherigen `ioctl` zurückgegeben wurde.
+- Speichere Werte aus früheren Operationen zwischen. Beispielsweise muss `BC_FREE_BUFFER` einen Transaktionspufferzeiger wiederverwenden, der von einem vorherigen `ioctl` zurückgegeben wurde.
 - Erzeuge gültige Standardantworten, damit synchrone Transaktionen abgeschlossen werden können und spätere Operationen erreichbar bleiben.
-- Verwirf unmögliche Übergänge, etwa Transaktionen an sich selbst oder mehrere ausstehende Transaktionen an dasselbe Ziel.
-- Belasse den einmaligen Bootstrap-Zustand außerhalb des Zurücksetzens pro Eingabe. Binder erlaubt pro Boot nur eine Registrierung mit `BINDER_SET_CONTEXT_MGR`; würde dieser Client wiederholt zerstört und neu erstellt, wären spätere Eingaben ungültig.
+- Verwirf unmögliche Übergänge wie Self-Transaktionen oder mehrere ausstehende Transaktionen an dasselbe Ziel.
+- Halte den einmaligen Bootstrap-Zustand außerhalb des Resets pro Eingabe. Binder erlaubt pro Boot nur eine `BINDER_SET_CONTEXT_MGR`-Registrierung; würde dieser Client wiederholt zerstört und neu erstellt, wären spätere Eingaben ungültig.
 
-Ein nützliches Muster für Lifetime-Races besteht darin, einen Client ein Objekt übertragen zu lassen, die Bereinigung eines Threads oder Prozesses zu starten und gleichzeitig den empfangenden Client den Transaktionspuffer freigeben zu lassen. Im Beispiel CVE-2020-0423 konnte eine Übertragung mit `BINDER_TYPE_WEAK_BINDER`, gefolgt von einem `BINDER_THREAD_EXIT`, das mit `BC_FREE_BUFFER` konkurrierte, ein eingebettetes `binder_work` freigeben, während der Bereinigungspfad des beendenden Threads es noch verwendete.<sup>[[15]](#references)</sup>
+Ein nützliches Template für Lifetime-Races besteht darin, einen Client ein Objekt übertragen zu lassen, die Bereinigung eines Threads oder Prozesses zu starten und den empfangenden Client gleichzeitig den Transaktionspuffer freigeben zu lassen. Im Beispiel zu CVE-2020-0423 konnte eine Übertragung von `BINDER_TYPE_WEAK_BINDER`, gefolgt von `BINDER_THREAD_EXIT`, die mit `BC_FREE_BUFFER` konkurrierte, ein eingebettetes `binder_work` freigeben, während der Bereinigungspfad des beendenden Threads es noch verwendete.<sup>[[15]](#references)</sup>
 
 #### Kontrollierte Interleavings in einem Userspace-Kernel wieder einführen
 
-Die [Linux Kernel Library (LKL)](https://github.com/lkl/linux) bindet den echten Kernel-Code in einen Userspace-Harness ein und stellt dessen syscall-Schnittstelle über `lkl_syscall` bereit. So lassen sich protobuf-Zustand, Coverage und KASAN einfach in einem Prozess koordinieren. Normalerweise führt LKL einen syscall jedoch aus, ohne dass ihn ein anderer Kernel-Thread unterbricht. Füge für Race-Kampagnen `schedule()`-Punkte an ausgewählten Grenzen von Sperren und deren Freigabe sowie an Lifetime-Grenzen ein; der Harness kann dann bei jeder Übergabe zufällig den nächsten Client auswählen. Setze diese Punkte gezielt ein, da jeder zusätzliche Punkt den Scheduling-Suchraum vervielfacht. Der von den Forschern beschriebene randomisierte Scheduler ist **nicht** Teil des Binder-Fuzzers im Upstream.<sup>[[15]](#references)</sup>
+[Linux Kernel Library (LKL)](https://github.com/lkl/linux) bindet den echten Kernel-Code in ein Userspace-Harness ein und stellt dessen Syscall-Schnittstelle über `lkl_syscall` bereit. Dadurch lassen sich protobuf-Zustand, Coverage und KASAN leicht in einem Prozess koordinieren. Normalerweise führt LKL einen Syscall jedoch aus, ohne dass ein anderer Kernel-Thread ihn unterbricht. Füge für Race-Kampagnen `schedule()`-Punkte an ausgewählten Grenzen von Sperren und Lebenszyklen ein und lasse das Harness bei jeder Übergabe zufällig den nächsten Client wählen. Setze diese Punkte gezielt ein, da jeder davon den Suchraum für die Planung vervielfacht. Der von den Forschenden beschriebene randomisierte Scheduler ist **nicht** Teil des upstream Binder-Fuzzers.<sup>[[15]](#references)</sup>
 
 #### Serialisierte Regression-Seeds erstellen und erneut ausführen
 
-Der Upstream-Harness pinnt eine kompatible Version von `libprotobuf-mutator`, aktiviert mit `LKL_FUZZING=1` die LKL-Fuzzing-Instrumentierung und KASAN und aktiviert mit `MMU=1` `CONFIG_MMU` für Binder.<sup>[[16]](#references)</sup>
+Das upstream Harness pinnt eine kompatible Version von `libprotobuf-mutator`, aktiviert LKL-Fuzzing-Instrumentierung und KASAN mit `LKL_FUZZING=1` und aktiviert `CONFIG_MMU` für Binder mit `MMU=1`.<sup>[[16]](#references)</sup>
 
 ```bash
 PROTOBUF_MUTATOR_DIR=/tmp/libprotobuf-mutator \
@@ -129,18 +129,18 @@ make -C tools/lkl LKL_FUZZING=1 MMU=1 \
   clean-conf fuzzers -j"$(nproc)"
 ```
 
-Nachdem man eine absichtlich verwundbare Revision ausgecheckt oder die upstream dokumentierten Rollback-Patches angewendet hat, kann ein serialisierter Seed den gesamten Multi-Client-Zustandsübergang reproduzieren, ohne ihn in einem ad-hoc C-Proof-of-Concept nachzubilden:<sup>[[16]](#references)</sup>
+Nachdem eine absichtlich verwundbare Revision ausgecheckt oder die upstream dokumentierten Rollback-Patches angewendet wurden, kann ein serialisierter Seed den gesamten Zustandsübergang mehrerer Clients reproduzieren, ohne ihn in einem Ad-hoc-C-Proof-of-Concept rekonstruieren zu müssen:<sup>[[16]](#references)</sup>
 
 ```bash
 tools/lkl/fuzzers/binder/binder-fuzzer \
   tools/lkl/fuzzers/binder/seeds/CVE-2023-20938
 ```
 
-Behandle den resultierenden KASAN-use-after-free als Bestätigung dafür, dass der Seed den anfälligen Lifetime-Pfad erreicht hat. Er belegt **nicht** die später erforderlichen Primitives für die Ausführung von Kernel-Code oder eine Privilegieneskalation.<sup>[[16]](#references)</sup>
+Betrachten Sie den resultierenden KASAN use-after-free als Bestätigung dafür, dass der Seed den anfälligen Lifetime-Pfad erreicht hat. Er belegt **nicht** die später erforderlichen Primitives für die Ausführung von Kernel-Code oder eine Privilegieneskalation.<sup>[[16]](#references)</sup>
 
-## Diversitätstrick auf einer einzelnen Maschine (Jackalope-Stil)
+## Diversitätstrick auf einem einzelnen Rechner (Jackalope-Style)
 
-Eine praktische Möglichkeit, **generative Neuheit** mit **wiederverwendeter Coverage** zu kombinieren, besteht darin, kurzlebige Worker auf einem persistenten Server neu zu starten. Jeder Worker beginnt mit einem leeren Corpus, synchronisiert nach `T` Sekunden, arbeitet weitere `T` Sekunden mit dem kombinierten Corpus, synchronisiert erneut und wird dann beendet. So entstehen **in jeder Generation neue Strukturen**, während die angesammelte Coverage weiterhin genutzt wird.<sup>[[1]](#references)[[2]](#references)</sup>
+Eine praktische Möglichkeit, **generative Neuartigkeit** mit der **Wiederverwendung von Coverage** zu verbinden, besteht darin, **kurzlebige Worker** gegen einen persistenten Server neu zu starten. Jeder Worker startet mit einem leeren Corpus, synchronisiert nach `T` Sekunden, läuft weitere `T` Sekunden mit dem kombinierten Corpus, synchronisiert erneut und wird dann beendet. So entstehen **in jeder Generation neue Strukturen**, während die angesammelte Coverage weiterhin genutzt wird.<sup>[[1]](#references)[[2]](#references)</sup>
 
 **Server:**
 
@@ -148,7 +148,7 @@ Eine praktische Möglichkeit, **generative Neuheit** mit **wiederverwendeter Cov
 /path/to/fuzzer -start_server 127.0.0.1:8337 -out serverout
 ```
 
-**Sequentielle Worker (Beispielschleife):**
+**Sequenzielle Worker (Beispielschleife):**
 
 <details>
 <summary>Neustartschleife für Jackalope-Worker</summary>
@@ -184,85 +184,142 @@ while True:
 
 **Hinweise:**
 
-- `-in empty` erzwingt bei jeder Generation einen **neuen Korpus**.
-- `-server_update_interval T` approximiert eine **verzögerte Synchronisierung** (zuerst Novelty, später Wiederverwendung).
-- Im Grammar-Fuzzing-Modus wird die **initiale Server-Synchronisierung standardmäßig übersprungen** (kein `-skip_initial_server_sync` erforderlich).
-- Das optimale `T` ist **vom Target abhängig**; am besten funktioniert es in der Regel, wenn du umstellst, nachdem der Worker den größten Teil der „einfachen“ Coverage gefunden hat.
+- `-in empty` erzwingt bei jeder Generierung einen **frischen Corpus**.
+- `-server_update_interval T` bildet eine **verzögerte Synchronisierung** nach (zuerst neue Eingaben, später Wiederverwendung).
+- Im Grammar-Fuzzing-Modus wird die **anfängliche Serversynchronisierung standardmäßig übersprungen** (`-skip_initial_server_sync` ist nicht erforderlich).
+- Das optimale `T` hängt vom **Ziel** ab. Am besten funktioniert es in der Regel, wenn man umschaltet, nachdem der Worker den Großteil der „einfachen“ Coverage gefunden hat.
 
-## Snapshot Fuzzing für Targets, die sich nur schwer mit einem Harness versehen lassen
+## Snapshot-Fuzzing für schwer zu instrumentierende Ziele
 
-Wenn der zu testende Code erst **nach hohen Setup-Kosten erreichbar wird** (Starten einer VM, Abschließen eines Logins, Empfangen eines Pakets, Parsen eines Containers, Initialisieren eines Dienstes), ist **Snapshot Fuzzing** eine nützliche Alternative: Erfasse den Zustand des bereiten Prozesses oder der VM, speise jeden Testfall in den Eingabepfad des Targets ein, führe ihn bis zu einem Crash/Timeout aus und stelle den Snapshot wieder her. Dadurch müssen Initialisierung und Protokollpräfixe nicht wiederholt werden. Diese Methode eignet sich für **Netzwerkdienste**, **Firmware**, **Angriffsflächen nach der Authentifizierung** und **Binary-only-Targets**.<sup>[[9]](#references)[[10]](#references)</sup>
+Wenn der Code, den Sie testen möchten, erst **nach einem umfangreichen Setup** erreichbar ist (Start einer VM, Abschluss eines Logins, Empfang eines Pakets, Parsen eines Containers, Initialisierung eines Dienstes), ist **Snapshot-Fuzzing** eine nützliche Alternative: Erfassen Sie den bereitstehenden Prozess- oder VM-Zustand, speisen Sie jeden Testfall in den Eingabepfad des Ziels ein, führen Sie die Ausführung bis zu einem Crash oder Timeout fort und stellen Sie den Snapshot wieder her. So muss die Initialisierung oder das Protokollpräfix nicht wiederholt werden. Das ist nützlich für **Netzwerkdienste**, **Firmware**, **Angriffsflächen nach der Authentifizierung** und **Binärdatei-Ziele**.<sup>[[9]](#references)[[10]](#references)</sup>
 
-1. Führe das Target aus, bis der interessante Zustand erreicht ist.
-2. Erstelle an diesem Punkt einen Snapshot von **Speicher + Registern**.
-3. Schreibe für jeden Testfall die mutierte Eingabe direkt in den relevanten Guest-/Prozesspuffer.
-4. Führe den Code bis zu einem Crash/Timeout/Reset aus.
-5. Stelle den Snapshot wieder her; bei VM-Targets stelle nur die **dirty pages** wieder her, sofern unterstützt, und wiederhole den Vorgang.
+1. Führen Sie das Ziel aus, bis der gewünschte Zustand erreicht ist.
+2. Erstellen Sie an diesem Punkt einen Snapshot von **Speicher + Registern**.
+3. Schreiben Sie bei jedem Testfall die veränderte Eingabe direkt in den relevanten Guest-/Prozesspuffer.
+4. Führen Sie die Ausführung bis zu einem Crash, Timeout oder Reset fort.
+5. Stellen Sie den Snapshot wieder her. Bei VM-Zielen sollten Sie, sofern unterstützt, nur die **dirty pages** wiederherstellen und den Vorgang anschließend wiederholen.
 
-Platziere den Snapshot möglichst nahe am ersten aufwendigen Parse-/Dispatch-Schritt, etwa nach einem `recv`/`read` oder dem Deserialisieren eines Pakets, und halte den vom Target verwendeten Eingabepuffer fest. Dies entspricht dem Prinzip der adaptiven Platzierung: Der Snapshot wird tiefer in die Eingabeverarbeitung verschoben, um wiederholte Arbeit zu vermeiden.<sup>[[11]](#references)</sup>
+Platzieren Sie den Snapshot so nah wie praktikabel am ersten aufwendigen Parse- oder Dispatch-Schritt, etwa nach einem `recv`/`read` oder einem Punkt der Paketdeserialisierung, und halten Sie fest, welchen Eingabepuffer das Ziel verwendet. Dies folgt dem Prinzip der adaptiven Platzierung: Der Snapshot wird tiefer in die Eingabeverarbeitung verschoben, um wiederholte Arbeit zu vermeiden.<sup>[[11]](#references)</sup>
 
-## Harness-Introspektion: Flache Fuzzer frühzeitig erkennen
+## Erkundung von Linux-Kernel-Races mit MAccConc
 
-Wenn eine Kampagne ins Stocken gerät, liegt das Problem oft nicht am Mutator, sondern am **Harness**. Nutze **Reachability-/Coverage-Introspektion**, um Funktionen zu finden, die statisch von deinem Fuzz-Target aus erreichbar sind, aber dynamisch selten oder nie abgedeckt werden. Solche Funktionen deuten in der Regel auf eines von drei Problemen hin.<sup>[[12]](#references)</sup>
+[MAccConc](https://github.com/googleprojectzero/MAccConc) macht zeitkritische Linux-Kernel-Races zu reproduzierbaren Speicherzugriffsabläufen. Das Tool kann Ausführungen mit zwei Kontexten nach dem **A-B-A**-Muster automatisch aufzählen oder Analysten mithilfe einer Terminal-UI/GUI Reihenfolgebedingungen festlegen lassen. Es handelt sich um experimentelle Forschungswerkzeuge und nicht um einen vollständigen Concurrency-Fuzzer: Derzeit sind LLVM 23+ und der gepatchte Kernel des Projekts erforderlich, die Kommandozeilenwerkzeuge unterstützen zwei Test-Threads, und die vorgeschlagene Fuzzing-Schicht im Userspace ist nicht implementiert.<sup>[[17]](#references)[[18]](#references)</sup>
+
+### Kommunikationspunkte zwischen Kontexten erfassen
+
+Erstellen Sie den instrumentierten Kernel mit KASAN-Outline-Callbacks und der gepatchten KCOV-Unterstützung für Speicheraufzeichnungen. Die Projekt-README empfiehlt außerdem, die Optimierung für Sibling Calls zu deaktivieren, damit die Call Stacks weiterhin verwendbar sind.<sup>[[17]](#references)[[18]](#references)</sup>
+
+```text
+CONFIG_KASAN=y
+CONFIG_KASAN_OUTLINE=y
+CONFIG_KCOV=y
+CONFIG_KCOV_EXT_RECORDS=y
+CONFIG_KCOV_MEMORY=y
+CONFIG_KALLSYMS_ALL=y
+CONFIG_DEBUG_INFO_DWARF5=y
+CONFIG_PREEMPT=y
+CONFIG_RANDOMIZE_BASE=n
+```
+
+```bash
+export KCFLAGS="-fno-optimize-sibling-calls -mllvm -sanitizer-coverage-prune-blocks=false"
+```
+
+Der KASAN-Outline-Modus (`asan-instrumentation-with-call-threshold=0`) wandelt instrumentierte Zugriffe in Helper-Aufrufe um. Die MAccConc-Kernel-Patches deaktivieren `asan-opt-same-temp`, damit aufeinanderfolgende Zugriffe nicht zusammengeführt werden. Deaktiviere auch die Optimierung `asan-opt-globals`, wenn Datenrennen auf globalen Variablen sichtbar sein müssen. KCOV überträgt die resultierenden Einträge an den Userspace. Vergleiche Zugriffe aus verschiedenen Ausführungskontexten und behalte Paare bei, deren Bytebereiche sich überschneiden und bei denen mindestens eine Seite schreibt. Behandle `kfree()` als Schreibzugriff, damit auch Änderungen der Objektlebensdauer als Kandidaten erfasst werden.<sup>[[17]](#references)</sup>
+
+Für Arbeit, die den initiierenden Task verlässt, etwa Paketverarbeitung oder RCU-Callbacks, muss das Subsystem ein KCOV-Remote-Coverage-Handle weitergeben. Upstream-Remote-KCOV ist opt-in und steht nicht automatisch für beliebige Hintergrundarbeit zur Verfügung. Eine fehlende Weitergabe kann daher dazu führen, dass eine tatsächliche Interaktion unsichtbar bleibt.<sup>[[17]](#references)[[19]](#references)</sup>
+
+### Dieselbe dynamische Speicherzugriffsoperation bei jedem Durchlauf identifizieren
+
+Wiederhole den Test nicht anhand einer konkreten Heap-Adresse, die sich nach jeder Allokation ändern kann, oder nur anhand einer Instruktionsadresse, die innerhalb von Helfern wie `memcpy()` und `spin_lock()` mehrdeutig ist. MAccConc verwendet einen **um Aufrufzähler erweiterten Stacktrace**: Jeder Frame identifiziert einen Callee sowie dessen Aufrufzähler innerhalb des Callers, und das letzte Element identifiziert die Instruktion, die auf den Speicher zugreift. SanitizerCoverage-Eintritts- und -Austrittsdatensätze für Funktionen ermöglichen es dem Userspace, diesen dynamischen Bezeichner zu rekonstruieren, der trotz Adressänderungen und unabhängigem Kontrollflussrauschen stabil bleibt.<sup>[[17]](#references)</sup>
+
+### Kandidatenpaare in erzwungene Ablaufpläne umwandeln
+
+Der gepatchte `KCOV_SET_DI`-Ioctl verknüpft einen um Aufrufzähler erweiterten Zugriffsbezeichner mit einer Aktion für ein gemeinsames Flag.<sup>[[17]](#references)</sup>
+
+| Aktion | Semantik |
+| --- | --- |
+| `DI_STACK_WAKE_PRE` | Setzt Flag *N* unmittelbar vor dem ausgewählten Zugriff. |
+| `DI_STACK_WAIT` | Wartet vor dem ausgewählten Zugriff in einer Schleife, bis Flag *N* gesetzt ist oder das konfigurierte Zeitlimit abläuft. |
+| `DI_STACK_WAKE_POST` | Setzt Flag *N* unmittelbar nach dem ausgewählten Zugriff. |
+
+Für eine partielle **A-passiert-vor-B-Bedingung** verknüpfe `DI_STACK_WAKE_POST` mit A und `DI_STACK_WAIT` mit B, jeweils mit demselben Flag. Für einen vollständig festgelegten Ablaufplan mit zwei Kontexten blockiere B zunächst. A weckt dann B auf und wartet am ersten Übergabepunkt; beim nächsten Übergabepunkt führt B die umgekehrte Aktion aus. Das entspricht einem deterministischen Kontextwechsel und wird vom automatischen A-B-A-Explorer verwendet.<sup>[[17]](#references)</sup>
+
+Eine minimale Testkampagne besteht darin, den Testfall mit vier Hooks (`test_setup`, zwei Thread-Funktionen und `test_end`) als Shared Library zu kompilieren, einen unbeschränkten Trace zu erfassen und anschließend A-B-A-Kandidaten aufzuzählen oder manuelle Bedingungen um verdächtige Zugriffe herum hinzuzufügen.<sup>[[18]](#references)</sup>
+
+```bash
+cc -shared -fPIC -o testcase.so testcase.c
+./kcov-autorace ./testcase.so
+# or interactively:
+./kcov-terminal ./testcase.so
+```
+
+Interpretiere Timeouts getrennt von erfolgreichen Umordnungen: Eine angeforderte Reihenfolge ist möglicherweise unmöglich, weil eine Sperre oder eine Abhängigkeit bei Initialisierung/Veröffentlichung verhindert, dass der zweite Kontext seinen Injection Point erreicht. Behalte auch KASANs blinde Flecken im Blick: Direkte Stack-Zugriffe werden normalerweise nicht abgefangen, sofern sie nicht möglicherweise außerhalb der Grenzen liegen; Globals werden bei der Standardoptimierung ausgelassen, und aktuelle Compiler können ASAN- und TSAN-Hooks nicht gleichzeitig ausgeben. Außerdem verliert der Prototyp den KCOV-Puffer, wenn ein Gast in Panik gerät. Bewahre daher eine unabhängige Crash-Konsole/einen unabhängigen Oracle.<sup>[[17]](#references)</sup>
+
+Für zukünftiges Concurrency-guided Fuzzing solltest du pro Input oder Syscall Zusammenfassungen der Speicherzugriffe aufzeichnen, Operationen paaren, die Cross-Context-Kommunikationspunkte bilden würden, und anschließend nur diese Kombinationen untersuchen. VM-Snapshots stabilisieren den globalen Zustand und die Adressen; ohne Snapshots können Metadaten der Allokationsstelle Objekte über mehrere Runs hinweg abstrahieren. Dies ist eine vorgeschlagene Erweiterung, keine Funktion der aktuellen MAccConc-Userspace-Tools.<sup>[[17]](#references)</sup>
+
+## Harness-Introspektion: Flache Fuzzer früh erkennen
+
+Wenn eine Kampagne ins Stocken gerät, liegt das Problem oft nicht am Mutator, sondern am **Harness**. Nutze **Reachability-/Coverage-Introspektion**, um Funktionen zu finden, die statisch von deinem Fuzz-Target aus erreichbar sind, aber dynamisch selten oder nie abgedeckt werden. Solche Funktionen weisen normalerweise auf eines von drei Problemen hin.<sup>[[12]](#references)</sup>
 
 - Der Harness steigt zu spät oder zu früh in das Target ein.
-- Im Seed-Korpus fehlt eine ganze Feature-Familie.
-- Das Target benötigt tatsächlich einen **zweiten Harness** statt eines überladenen „Alles-erledigen“-Harness.
+- Im Seed-Corpus fehlt eine ganze Feature-Familie.
+- Das Target benötigt tatsächlich einen **zweiten Harness** statt eines übergroßen „Alles-erledigen“-Harnesses.
 
-Wenn du Workflows im Stil von OSS-Fuzz / ClusterFuzz verwendest, kann Fuzz Introspector die statische Erreichbarkeit mit der Laufzeit-Coverage vergleichen und Berichte aus einem zeitlich begrenzten Lauf oder einem öffentlichen Korpus erstellen.<sup>[[12]](#references)</sup>
+Wenn du Workflows im Stil von OSS-Fuzz / ClusterFuzz verwendest, kann Fuzz Introspector die statische Erreichbarkeit mit der Laufzeit-Coverage vergleichen und Berichte aus einem zeitlich begrenzten Run oder einem öffentlichen Corpus erstellen.<sup>[[12]](#references)</sup>
 
 ```bash
 python3 infra/helper.py introspector libdwarf --seconds=30
 python3 infra/helper.py introspector libdwarf --public-corpora
 ```
 
-Nutzen Sie den Bericht, um zu entscheiden, ob Sie einen neuen Harness für einen ungetesteten Parser-Pfad hinzufügen, den Korpus für ein bestimmtes Feature erweitern oder einen monolithischen Harness in kleinere Einstiegspunkte aufteilen.
+Verwende den Bericht, um zu entscheiden, ob du einen neuen Harness für einen nicht getesteten Parserpfad hinzufügen, das Corpus für ein bestimmtes Feature erweitern oder einen monolithischen Harness in kleinere Einstiegspunkte aufteilen solltest.
 
-## Graph-First-Auswahl von Fuzzing-Zielen und Triage von Mutationen
+## Graph-first Auswahl von Fuzz-Zielen und Mutationstriage
 
-Wenn Ihnen bereits **Static-Analysis-Befunde**, **Mutation-Testing-Überlebende** und **Coverage-Berichte** vorliegen, sollten Sie diese nicht als voneinander unabhängige Listen triagieren. Erstellen Sie zunächst einen **Aufrufgraphen**, annotieren Sie die Knoten mit **zyklomatischer Komplexität**, **Erreichbarkeit von Entry Points/untrusted input** und externen Befunden und untersuchen Sie anschließend den Graphen.<sup>[[5]](#references)[[6]](#references)</sup>
+Wenn dir bereits **Ergebnisse der statischen Analyse**, **überlebende Mutationen** und **Coverage-Berichte** vorliegen, solltest du sie nicht als unabhängige Listen triagieren. Erstelle zuerst einen **Call Graph**, ergänze die Knoten um **zyklomatische Komplexität**, **Erreichbarkeit über Einstiegspunkte oder nicht vertrauenswürdige Eingaben** sowie externe Findings und stelle anschließend Fragen zum Graphen.<sup>[[5]](#references)[[6]](#references)</sup>
 
-- Welche Funktionen mit hoher Komplexität sind von untrusted input aus erreichbar?
-- Welche Mutation-Testing-Überlebenden liegen auf Pfaden von Parsern/Handlern zu sicherheitskritischem Code?
-- Welche Funktionen sind architektonische Engpässe mit ungewöhnlich großem **Blast Radius**?
+- Welche Funktionen mit hoher Komplexität sind über nicht vertrauenswürdige Eingaben erreichbar?
+- Welche überlebenden Mutationen liegen auf Pfaden von Parsern oder Handlern zu sicherheitskritischem Code?
+- Welche Funktionen sind architektonische Engpässe mit ungewöhnlich großer **Blast Radius**?
 
-Damit lassen sich meist bessere Fuzzing-Ziele finden als allein mit „geringster Coverage“. Ein Parser/Decoder mit **hoher Komplexität** und bestätigter **externer Erreichbarkeit** ist ein aussichtsreicherer Kandidat für einen Harness als ein isolierter interner Helper mit geringer Coverage, aber ohne angreifergesteuerten Pfad.
+So findest du in der Regel bessere Fuzz-Ziele als allein anhand der „niedrigsten Coverage“. Ein Parser/Decoder mit **hoher Komplexität** und bestätigter **externer Erreichbarkeit** eignet sich besser als ein isolierter interner Helper mit geringer Coverage, aber ohne vom Angreifer kontrollierbaren Pfad.
 
 ### Praktischer Triage-Workflow
 
-1. Erstellen Sie aus der Codebasis einen **Code-Graphen** und extrahieren Sie Komplexitäts-/Branch-Metriken pro Funktion.
-2. Erfassen Sie **Entry Points**, die angreifergesteuerte Eingaben annehmen: Request-Handler, Decoder, Importer, Protokollparser, CLI-/Datei-Reader.
-3. Führen Sie **Pfadabfragen** von diesen Entry Points zu Kandidatenfunktionen aus, um erreichbare Angriffsfläche von totem/nur internem Code abzugrenzen.
-4. Priorisieren Sie Knoten, die Folgendes vereinen:
+1. Erstelle aus der Codebasis einen **Code-Graphen** und ermittle für jede Funktion Metriken zu Komplexität und Verzweigungen.
+2. Liste **Einstiegspunkte** auf, die vom Angreifer kontrollierte Eingaben annehmen: Request-Handler, Decoder, Importer, Protokoll-Parser, CLI-/Datei-Reader.
+3. Führe **Pfadabfragen** von diesen Einstiegspunkten zu potenziellen Funktionen aus, um erreichbare Angriffsfläche von totem oder ausschließlich internem Code zu trennen.
+4. Priorisiere Knoten, die Folgendes vereinen:
    - hohe **zyklomatische Komplexität**
-   - bestätigte **Erreichbarkeit von untrusted input**
-   - großer **Blast Radius** oder viele abhängige Funktionen
-   - bestätigende Hinweise wie **SARIF**-Befunde, Audit-Notizen oder Mutation-Testing-Überlebende
-5. Schreiben Sie zuerst fokussierte Harnesses für die Kandidaten mit der höchsten Bewertung, insbesondere für **Parser/Codecs** wie Hex-/Base64-/IP-/Message-Decoder.
+   - bestätigte **Erreichbarkeit über nicht vertrauenswürdige Eingaben**
+   - große **Blast Radius** oder viele abhängige Funktionen
+   - bestätigende Hinweise wie **SARIF**-Findings, Audit-Notizen oder überlebende Mutationen
+5. Schreibe zuerst gezielte Harnesses für die am besten bewerteten Knoten, insbesondere für **Parser/Codecs** wie Hex-, Base64-, IP- und Message-Decoder.
 
-### Mutation-Testing-Überlebende: äquivalent oder relevant
+### Überlebende Mutationen: äquivalent oder relevant
 
-Mutation Testing erzeugt oft eine verrauschte Liste von Überlebenden. Bevor Sie jeden Überlebenden als Sicherheitslücke behandeln, prüfen Sie mithilfe des Graphen:
+Mutation Testing liefert oft eine verrauschte Liste überlebender Mutationen. Bevor du jede einzelne als Sicherheitslücke behandelst, nutze den Graphen und frage:
 
-- Ist die mutierte Funktion von einem angreifergesteuerten Entry Point aus erreichbar?
+- Ist die mutierte Funktion über einen vom Angreifer kontrollierten Einstiegspunkt erreichbar?
 - Sind alle Aufrufpfade durch stärkere Invarianten eingeschränkt als durch die mutierte Prüfung?
-- Befindet sich der Knoten in totem Code, reiner Formatierungslogik oder in einem wirkungsstarken Arithmetik-/Parser-Pfad?
+- Befindet sich der Knoten in totem Code, rein formatierungsbezogener Logik oder einem wirkungsstarken arithmetischen bzw. Parserpfad?
 
-Überlebende, die unerreichbar oder strukturell eingeschränkt bleiben, sind oft **äquivalente Mutanten**. Überlebende, die **erreichbar** bleiben und **Grenzfälle**, **Overflow-/Carry-Pfade** oder **sicherheitskritische Arithmetik/Parsing** betreffen, sollten priorisiert werden für:
+Überlebende Mutationen, die unerreichbar oder strukturell eingeschränkt bleiben, sind oft **äquivalente Mutanten**. Mutationen, die **erreichbar** bleiben und **Grenzfälle**, **Overflow-/Carry-Pfade** oder **sicherheitskritische Arithmetik bzw. Parsing** betreffen, solltest du in Folgendes aufnehmen:
 
 - neue Fuzz-Harnesses
-- direkte Property-/Invariant-Tests
-- gezielte Edge-Case-Vektoren
+- direkte Property-/Invarianten-Tests
+- gezielte Edge-Case-Testvektoren
 
-### Externe Befunde dem Graphen zuordnen
+### Externe Findings auf den Graphen abbilden
 
-Wenn Ihre SAST-Pipeline **SARIF** exportiert, ordnen Sie die Befunde den Graph-Knoten anhand von **Datei + Zeilenbereich** zu und verwenden Sie den Graphen, um die Auswirkungen nachzuverfolgen.<sup>[[6]](#references)</sup>
+Wenn deine SAST-Pipeline **SARIF** exportiert, ordne Findings anhand von **Datei und Zeilenbereich** den Graphknoten zu und nutze den Graphen, um die Auswirkungen zu erweitern.<sup>[[6]](#references)</sup>
 
-- Berechnen Sie den **Blast Radius** der markierten Funktion.
-- Prüfen Sie, ob der Befund auf einem Pfad von einem Entry Point liegt.
-- Gruppieren Sie nahe beieinanderliegende Befunde, die auf denselben Engpass hinauslaufen.
+- Ermittle die **Blast Radius** der betroffenen Funktion.
+- Prüfe, ob das Finding auf einem Pfad von einem Einstiegspunkt liegt.
+- Gruppiere nahe beieinanderliegende Findings, die auf denselben Engpass hinauslaufen.
 
-Das hilft bei der Entscheidung, ob Sie Fuzzing-Zeit in eine bestimmte Funktion investieren sollten: Ein Knoten, der **erreichbar** und **komplex** ist und bereits **SAST-Treffer** aufweist, ist oft ein besseres Ziel als ein lediglich komplexer Knoten ohne Angreiferpfad.
+Das ist hilfreich, wenn du entscheiden willst, ob du Zeit in das Fuzzing einer bestimmten Funktion investieren solltest: Ein Knoten, der **erreichbar** und **komplex** ist und bereits **SAST-Treffer** aufweist, ist oft ein besseres Ziel als ein lediglich komplexer Knoten ohne Angreiferpfad.
 
 Beispiel-Workflow mit Trailmark.<sup>[[6]](#references)</sup>
 
@@ -280,37 +337,37 @@ engine.complexity_hotspots(10)
 engine.paths_between("handle_request", "parse_ipv6")
 ```
 
-Die entscheidende Methodik liegt in der Schnittmenge: **Komplexität x Angriffsfläche x Auswirkung**. Nutze das Diagramm, um Fuzzing-Ziele mit dem höchsten erwarteten Sicherheitswert auszuwählen, und ermittle anhand überlebender Mutationen, welche Grenzen und Invarianten dein Harness gezielt belasten muss.<sup>[[5]](#references)</sup>
+Die wichtige Methodik ist die Schnittmenge: **Komplexität x Angriffsfläche x Auswirkung**. Nutze das Diagramm, um Fuzzing-Ziele mit dem höchsten erwarteten Sicherheitswert auszuwählen, und verwende überlebende Mutationen, um zu bestimmen, welche Grenzen und Invarianten dein Harness gezielt prüfen muss.<sup>[[5]](#references)</sup>
 
-## Go-Fuzzing mit gosentry: Stärkere Engine, typisierte Eingaben und Differentialprüfungen
+## Go-Fuzzing mit gosentry: Leistungsstärkere Engine, typisierte Eingaben und Differentialprüfungen
 
-Wenn ein Go-Ziel bereits über ein natives `testing.F`-Harness verfügt, ist es ein praktikabler Upgrade-Pfad, dasselbe Harness mit [gosentry](https://github.com/trailofbits/gosentry) auszuführen – einer geforkten Go-Toolchain, die `go test -fuzz` beibehält, aber das Backend durch **LibAFL** ersetzt.<sup>[[7]](#references)[[8]](#references)</sup>
+Wenn ein Go-Ziel bereits über ein natives `testing.F`-Harness verfügt, ist es ein praktikabler Upgrade-Pfad, dasselbe Harness mit [gosentry](https://github.com/trailofbits/gosentry) auszuführen: einer geforkten Go-Toolchain, die `go test -fuzz` beibehält, aber das Backend durch **LibAFL** ersetzt.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```bash
 ./bin/go test -fuzz=FuzzHarness --focus-on-new-code=false --catch-races=true --catch-leaks=true
 ```
 
-This ist nützlich, wenn der native Go-Fuzzer bei **schwierigen Vergleichen**, **typisierten Eingaben** oder **parserlastigen Formaten** ins Stocken gerät. Die Methodik bleibt gleich:
+Dies ist nützlich, wenn der native Go-Fuzzer bei **schwierigen Vergleichen**, **typisierten Eingaben** oder **parserlastigen Formaten** ins Stocken gerät. Die Methodik bleibt dieselbe:
 
 - Verwende weiterhin `f.Add(...)` für Seeds und `f.Fuzz(...)` für den Callback.
 - Verwende denselben Harness, führe ihn aber mit gosentrys `go`-Binary statt mit der Standard-Toolchain aus.
-- Behandle die resultierende Kampagne wie einen normalen Coverage-guided-Run, aber mit LibAFL-Scheduling und -Mutation sowie besseren ergänzenden Detektoren.
+- Behandle die resultierende Kampagne wie einen normalen coverage-guided Run, jedoch mit LibAFL-Scheduling und -Mutation sowie besseren umgebenden Detektoren.
 
-### Stille Fehler in Fuzzing-Befunde umwandeln
+### Stille Fehler in Fuzzing-Funde umwandeln
 
-Ein wiederkehrendes Problem bei Go-Assessments ist, dass gefährliches Verhalten standardmäßig oft **keinen** Crash verursacht. Mit gosentry kannst du mehrere Arten von „schlechten, aber stillen“ Zuständen in Befunde umwandeln.<sup>[[7]](#references)[[8]](#references)</sup>
+Ein wiederkehrendes Problem bei Go-Assessments ist, dass gefährliches Verhalten standardmäßig oft **keinen** Absturz verursacht. Mit gosentry kannst du mehrere Arten von „schlechten, aber stillen“ Zuständen zu Funden machen.<sup>[[7]](#references)[[8]](#references)</sup>
 
-- `--panic-on=pkg.Func,...`, damit ausgewählte Logging-/Fehlerpfade wie Crashes behandelt werden (nützlich für `log.Fatal`-artige Codepfade, die andernfalls nur loggen und fortfahren).
-- `--catch-races=true`, um neu entdeckte Queue-Einträge mit dem Go Race Detector erneut auszuführen.
+- `--panic-on=pkg.Func,...`, damit ausgewählte Logging-/Fehlerpfade sich wie Abstürze verhalten (nützlich für `log.Fatal`-artige Codepfade, die andernfalls nur protokollieren und fortfahren).
+- `--catch-races=true`, um neu entdeckte Queue-Einträge mit dem Go-Race-Detector erneut auszuführen.
 - `--catch-leaks=true`, um neue Queue-Einträge mit `goleak` erneut auszuführen und bei Goroutine-Leaks abzubrechen.
-- LibAFL-Hang-Behandlung, damit **Endlosschleifen / sehr langsame Eingaben** als Fuzzing-Befunde erhalten bleiben, statt als Timeouts zu verschwinden.
-- Integrierte Prüfungen auf arithmetischen Überlauf standardmäßig sowie optionale Truncation-Prüfungen durch go-panikint-artige Instrumentierung.
+- LibAFL-Hang-Behandlung, damit **Endlosschleifen / sehr langsame Eingaben** als Fuzzing-Funde erhalten bleiben, anstatt als Timeouts zu verschwinden.
+- Standardmäßig integrierte Prüfungen auf arithmetischen Overflow sowie optionale Truncation-Prüfungen durch go-panikint-artige Instrumentierung.
 
-Das ist besonders wertvoll für Ziele, bei denen die Sicherheitsauswirkung ein **panicloser Parserfehler**, ein **Concurrency-Bug** oder ein **ausschließlich DoS-relevanter Hang** statt einer Speicherbeschädigung ist.
+Das ist besonders wertvoll bei Zielen, bei denen die Sicherheitsauswirkung eher ein **Parserfehler ohne Panic**, ein **Nebenläufigkeitsfehler** oder ein **DoS-Hänger** als eine Speicherbeschädigung ist.
 
 ### Struct-aware Fuzzing für typisierte Go-APIs
 
-Beim nativen Go-Fuzzing werden hauptsächlich Skalare wie `[]byte`, `string` und Zahlen erwartet. Wenn der getestete Code typisierte Objekte verarbeitet, kann gosentry **zusammengesetzte Werte** direkt fuzzing-testen (Structs, Slices, Arrays, Pointer) und gleichzeitig die darunterliegenden Bytes mutieren.<sup>[[7]](#references)[[8]](#references)</sup>
+Natives Go-Fuzzing erwartet hauptsächlich Skalare wie `[]byte`, `string` und Zahlen. Wenn der getestete Code typisierte Objekte verarbeitet, kann gosentry **zusammengesetzte Werte** direkt fuzzing-basiert testen (Structs, Slices, Arrays, Pointer) und dabei weiterhin die zugrunde liegenden Bytes mutieren.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```go
 type Input struct {
@@ -327,26 +384,26 @@ func FuzzStructInput(f *testing.F) {
 }
 ```
 
-Wenn du ein Fake-Wire-Format nur fürs Fuzzing erstellst, kann das Logikfehler hinter Parsing-Code verbergen, der nur im Harness vorkommt. Für Differential- oder grammatikbasierte Kampagnen sollte die Harness-Eingabe ein einzelnes `[]byte` oder `string` sein. Geparst wird stattdessen im Callback.
+Wenn du beim Fuzzing ein gefälschtes Wire-Format verwendest, würde dies Logikfehler hinter Parsing-Code verbergen, der nur im Harness vorhanden ist. Bei Differential- oder grammatikbasierten Kampagnen sollte die Harness-Eingabe ein einzelnes `[]byte` oder `string` sein; parse sie stattdessen innerhalb des Callbacks.
 
 ### Grammatikbasiertes Fuzzing für Parser und Protokolleingaben
 
-Für Parser, Formate und Eingabesprachen kann gosentry **Nautilus-Grammatik-Fuzzing** auf Basis von LibAFL ausführen. Die Grammatik ist ein JSON-Array mit Produktionsregeln, und das Harness sollte üblicherweise ein einzelnes Argument vom Typ `[]byte` oder `string` entgegennehmen.<sup>[[7]](#references)[[8]](#references)</sup>
+Für Parser, Formate und Eingabesprachen kann gosentry **Nautilus-Grammatik-Fuzzing** auf LibAFL ausführen. Die Grammatik ist ein JSON-Array mit Produktionsregeln, und das Harness sollte in der Regel ein einzelnes Argument vom Typ `[]byte` oder `string` annehmen.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```bash
 ./bin/go test -fuzz=FuzzGrammarJSON --use-grammar --grammar=./testdata/JSON.json --focus-on-new-code=false
 ```
 
-Methodik-Hinweise:
+Methodik-Notizen:
 
-- Verwende den Grammatikmodus, wenn Byte-Mutationen auf niedriger Ebene meist schon bei frühen Syntaxprüfungen scheitern.
-- Beschränke die Grammatik auf die **sicherheitsrelevante Teilmenge** der Sprache/des Protokolls, statt die gesamte Spezifikation abzubilden.
-- Verwende große Grenzwerte in Terminals/Nichtterminals, um Integer-, Längen- und Zustandsmaschinen-Grenzfälle zu belasten.
-- Der Grammatikmodus hält Eingaben grammatikgültig, aber das Ziel erhält weiterhin **Bytes/Strings**. Parsing und semantische Prüfungen bleiben also Teil des instrumentierten Codes.
+- Verwende den Grammar-Modus, wenn Byte-Level-Mutationen größtenteils bereits an frühen Syntaxprüfungen scheitern.
+- Halte die Grammatik auf die **sicherheitsrelevante Teilmenge** der Sprache/des Protokolls beschränkt, statt die vollständige Spezifikation abzubilden.
+- Verwende große Grenzwerte in Terminals/Nichtterminals, um Integer-, Längen- und Zustandsmaschinen-Grenzfälle zu testen.
+- Der Grammar-Modus hält Eingaben grammatikalisch gültig, aber das Ziel erhält weiterhin **Bytes/Strings**; Parsing und semantische Prüfungen bleiben daher im instrumentierten Code.
 
-### Differential Fuzzing: Implementierungen statt nur Abstürze vergleichen
+### Differential Fuzzing: Implementierungen vergleichen, nicht nur Abstürze
 
-Ein bewährtes Muster für Go-Ökosysteme ist **grammatikbasiertes Differential Fuzzing**: Erzeuge gültige strukturierte Eingaben und übergib sie an zwei Parser, Clients oder Zustandsübergangs-Engines.<sup>[[7]](#references)[[8]](#references)</sup>
+Ein wirkungsvolles Muster für Go-Ökosysteme ist **grammar-based differential fuzzing**: gültige, strukturierte Eingaben generieren und sie an zwei Parser, Clients oder Zustandsübergangs-Engines übergeben.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```go
 f.Fuzz(func(t *testing.T, data []byte) {
@@ -360,43 +417,50 @@ f.Fuzz(func(t *testing.T, data []byte) {
 })
 ```
 
-Behandle Folgendes als Befunde:
+Betrachte Folgendes als Befunde:
 
-- eine Implementierung gerät in einen Panic, während die andere die Eingabe sauber zurückweist
+- Eine Implementierung löst eine Panic aus, während die andere die Eingabe sauber zurückweist
 - Abweichungen bei akzeptierten/zurückgewiesenen Eingaben
-- unterschiedliche Parse-Bäume oder dekodierte Objekte
-- abweichende Zustandsübergänge, Nonces, Salden oder State Roots
+- Unterschiedliche Parse-Bäume oder dekodierte Objekte
+- Abweichende Zustandsübergänge, Nonces, Kontostände oder State Roots
 
-So lassen sich **Konsensabweichungen**, **Parser-Mehrdeutigkeit** und **Abweichungen zwischen Spezifikation und Implementierung** auf praktische Weise finden, die beim reinen Crash-Fuzzing oft unentdeckt bleiben.
+So lassen sich **Konsensabweichungen**, **Parser-Mehrdeutigkeiten** und **Abweichungen zwischen Spezifikation und Implementierung** auf praktische Weise finden, die beim reinen Crash-Fuzzing oft unentdeckt bleiben.
 
-### Das Campaign-Corpus für Coverage-Berichte wiederverwenden
+{{#ref}}
+proof-assistant-formal-verification-security.md
+{{#endref}}
 
-Spiele nach einer Campaign das gespeicherte Queue-Corpus erneut ab, um einen Go-Coverage-Bericht zu erstellen, ohne manuell ein separates Corpus zu exportieren.<sup>[[7]](#references)[[8]](#references)</sup>
+### Das Kampagnen-Corpus für die Coverage-Berichterstellung wiederverwenden
+
+Spiele nach einer Kampagne das gespeicherte Queue-Corpus erneut ab, um einen Go-Coverage-Bericht zu erstellen, ohne manuell ein separates Corpus exportieren zu müssen.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```bash
 ./bin/go test -fuzz=FuzzHarness --generate-coverage .
 ```
 
-Führe den Befehl im **selben Paket** und mit demselben `-fuzz`-Ziel aus, damit gosentry den richtigen Zustand der gecachten Kampagne auflöst.
+Führe den Befehl im **selben Package** und mit demselben **`-fuzz`-Ziel** aus, damit gosentry den richtigen gecachten Campaign-Status auflöst.
 
 
 
 ## References
 
-- [1] [Mutational Grammar-Fuzzing](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
+- [1] [Mutational grammar fuzzing](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
 - [2] [Jackalope](https://github.com/googleprojectzero/Jackalope)
-- [3] [AFL++-Fuzzing im Detail](https://aflplus.plus/docs/fuzzing_in_depth/)
-- [4] [AFLNet fünf Jahre später: Coverage-gesteuertes Protokoll-Fuzzing](https://arxiv.org/abs/2412.20324)
-- [5] [Trailmark verwandelt Code in Graphen](https://blog.trailofbits.com/2026/04/23/trailmark-turns-code-into-graphs/)
+- [3] [AFL++ Fuzzing im Detail](https://aflplus.plus/docs/fuzzing_in_depth/)
+- [4] [AFLNet fünf Jahre später: Coverage-gesteuertes Protocol Fuzzing](https://arxiv.org/abs/2412.20324)
+- [5] [Trailmark wandelt Code in Graphen um](https://blog.trailofbits.com/2026/04/23/trailmark-turns-code-into-graphs/)
 - [6] [trailofbits/trailmark](https://github.com/trailofbits/trailmark)
 - [7] [Go-Fuzzing fehlte die Hälfte des Toolkits. Wir haben die Toolchain geforkt, um das zu beheben.](https://blog.trailofbits.com/2026/05/12/go-fuzzing-was-missing-half-the-toolkit.-we-forked-the-toolchain-to-fix-it./)
 - [8] [trailofbits/gosentry](https://github.com/trailofbits/gosentry)
 - [9] [SNPSFuzzer: Ein schneller Greybox-Fuzzer für zustandsbehaftete Netzwerkprotokolle mit Snapshots](https://arxiv.org/abs/2202.03643)
-- [10] [Keine Grammatik, kein Problem: Linux-Kernel-Fuzzing ohne Systemaufrufbeschreibungen](https://seclab.bu.edu/papers/FuzzNG-ndss2023.pdf)
+- [10] [Keine Grammatik, kein Problem: Fuzzing des Linux-Kernels ohne Systemaufrufbeschreibungen](https://seclab.bu.edu/papers/FuzzNG-ndss2023.pdf)
 - [11] [Snappy: Effizientes Fuzzing mit adaptiven und veränderbaren Snapshots](https://project-theseus.nl/publication/2022/snappy/)
 - [12] [Fuzz Introspector](https://google.github.io/oss-fuzz/advanced-topics/fuzz-introspector/)
-- [13] [AFL++-LLVM-Instrumentierung: Pfad- und Aufrufer-Coverage](https://github.com/AFLplusplus/AFLplusplus/blob/stable/instrumentation/README.llvm.md)
+- [13] [AFL++ LLVM-Instrumentierung: Pfad- und Caller-Coverage](https://github.com/AFLplusplus/AFLplusplus/blob/stable/instrumentation/README.llvm.md)
 - [14] [Prädiktives kontextsensitive Fuzzing](https://www.ndss-symposium.org/ndss-paper/predictive-context-sensitive-fuzzing/)
-- [15] [Android Offensive Security Blog – Binder-Fuzzing](https://androidoffsec.withgoogle.com/posts/binder-fuzzing/)
-- [16] [LKL-Android-Binder-Fuzzer – Dokumentation zu Build und Regression-Seeds](https://github.com/lkl/linux/blob/master/tools/lkl/fuzzers/binder/README.md)
+- [15] [Android Offensive Security Blog – Binder Fuzzing](https://androidoffsec.withgoogle.com/posts/binder-fuzzing/)
+- [16] [LKL Android Binder-Fuzzer – Dokumentation zum Build und zu Regression-Seeds](https://github.com/lkl/linux/blob/master/tools/lkl/fuzzers/binder/README.md)
+- [17] [MAccConc: Untersuchung von Race Conditions im Linux-Kernel mit kontrollierten Speicherzugriffsverschachtelungen](https://projectzero.google/2026/09/maccconc-race-condition.html)
+- [18] [googleprojectzero/MAccConc](https://github.com/googleprojectzero/MAccConc)
+- [19] [KCOV: Code-Coverage für Fuzzing](https://docs.kernel.org/dev-tools/kcov.html)
 {{#include ../banners/hacktricks-training.md}}
