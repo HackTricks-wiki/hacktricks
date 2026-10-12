@@ -19,7 +19,7 @@ on:
     - cron: "7,22,37,52 * * * *"
 
 concurrency:
-  group: auto-merge-approved-prs-${{ github.event_name == 'issue_comment' && github.event.issue.number || inputs.pr || 'queue' }}
+  group: auto-merge-approved-prs
   cancel-in-progress: false
 
 permissions:

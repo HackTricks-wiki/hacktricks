@@ -11,6 +11,7 @@ from pathlib import Path
 
 AUTHORIZED_USER = "carlospolop"
 WORKFLOW_NAME = "Auto Merge Approved PRs"
+TRANSLATOR_WAITING_STATUSES = ("queued", "waiting", "pending", "requested")
 
 
 def is_merge_comment(comment):
@@ -61,6 +62,23 @@ def api_items(endpoint):
     return [item for page in pages for item in page]
 
 
+def translator_has_capacity(repo):
+    """Allow one merge only while no translation is queued for replacement."""
+    counts = {}
+    for status in ("in_progress", *TRANSLATOR_WAITING_STATUSES):
+        result = gh_json(["api", f"repos/{repo}/actions/workflows/translate_all.yml/runs?status={status}&per_page=1"])
+        count = result.get("total_count") if isinstance(result, dict) else None
+        if type(count) is not int or count < 0:
+            raise RuntimeError(f"Cannot verify translator {status} count")
+        counts[status] = count
+    running = counts["in_progress"]
+    waiting = sum(counts[status] for status in TRANSLATOR_WAITING_STATUSES)
+    if waiting or running > 1:
+        print(f"Translator capacity unavailable: {running} running, {waiting} waiting; retry after translation completes.", flush=True)
+        return False
+    return True
+
+
 def approved_by_title(pr):
     return (
         pr.get("user", {}).get("login") == AUTHORIZED_USER
@@ -93,7 +111,7 @@ def merge_pr(repo, number, head_sha):
     return True
 
 
-def merge_approved(repo, max_merges=20, target_number=None):
+def merge_approved(repo, max_merges=1, target_number=None):
     prs = ([gh_json(["api", f"repos/{repo}/pulls/{target_number}"])] if target_number else
            api_items(f"repos/{repo}/pulls?state=open&sort=created&direction=asc&per_page=100"))
     merged = 0
@@ -119,6 +137,8 @@ def merge_approved(repo, max_merges=20, target_number=None):
             continue
         if details["mergeable"] == "UNKNOWN":
             print(f"GitHub has not calculated PR #{number}'s mergeability; checking with the server-side merge operation.", flush=True)
+        if not translator_has_capacity(repo):
+            break
         if merge_pr(repo, number, details["headRefOid"]):
             merged += 1
     print(f"Merged {merged} approved PR(s).", flush=True)
@@ -132,7 +152,9 @@ def main():
         return 0
     repo = os.environ["GITHUB_REPOSITORY"]
     event_name = os.environ["GITHUB_EVENT_NAME"]
-    target_number = event["issue"]["number"] if event_name == "issue_comment" else None
+    # A pending comment run can be replaced by a later one in the global merger
+    # concurrency group. Scan all approvals so that neither comment is lost.
+    target_number = None
     if event_name == "workflow_dispatch":
         target_number = int(event.get("inputs", {}).get("pr") or 0) or None
     merge_approved(repo, target_number=target_number)

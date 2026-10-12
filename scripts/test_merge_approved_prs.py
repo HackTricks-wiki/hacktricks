@@ -53,6 +53,27 @@ class ApprovalTests(unittest.TestCase):
 
 
 class WorkflowActivityTests(unittest.TestCase):
+    def test_translator_capacity_allows_one_running_and_no_waiting(self):
+        def response(arguments):
+            status = arguments[1].split("status=")[1].split("&")[0]
+            return {"total_count": 1 if status == "in_progress" else 0}
+        with patch.object(merger, "gh_json", side_effect=response):
+            self.assertTrue(merger.translator_has_capacity("owner/book"))
+
+    def test_translator_capacity_blocks_any_queued_run_or_two_running(self):
+        for blocked_status in ("queued", "waiting", "pending", "requested", "two_running"):
+            def response(arguments):
+                status = arguments[1].split("status=")[1].split("&")[0]
+                count = 2 if status == "in_progress" and blocked_status == "two_running" else int(status == blocked_status)
+                return {"total_count": count}
+            with self.subTest(status=blocked_status), patch.object(merger, "gh_json", side_effect=response), contextlib.redirect_stdout(io.StringIO()):
+                self.assertFalse(merger.translator_has_capacity("owner/book"))
+
+    def test_translator_capacity_fails_closed_on_bad_api_response(self):
+        with patch.object(merger, "gh_json", return_value={"workflow_runs": []}):
+            with self.assertRaisesRegex(RuntimeError, "Cannot verify translator"):
+                merger.translator_has_capacity("owner/book")
+
     def test_failed_reads_and_invalid_json_are_not_treated_as_idle(self):
         failed = SimpleNamespace(returncode=1, stderr="API unavailable", stdout="")
         with patch.object(merger.subprocess, "run", return_value=failed), patch.object(merger.time, "sleep"), contextlib.redirect_stdout(io.StringIO()):
@@ -65,7 +86,7 @@ class WorkflowActivityTests(unittest.TestCase):
 
 
 class MergeFlowTests(unittest.TestCase):
-    def run_flow(self, prs, *, snapshots=None, comments=None, target_number=None, max_merges=20):
+    def run_flow(self, prs, *, snapshots=None, comments=None, target_number=None, max_merges=1, capacity=True):
         def items(endpoint):
             if "/pulls?" in endpoint:
                 return prs
@@ -80,6 +101,7 @@ class MergeFlowTests(unittest.TestCase):
             patch.object(merger, "api_items", side_effect=items),
             patch.object(merger, "gh_json", return_value=next((item for item in prs if item["number"] == target_number), None)),
             patch.object(merger, "merge_details", side_effect=snapshot),
+            patch.object(merger, "translator_has_capacity", return_value=capacity),
             patch.object(merger, "merge_pr", return_value=True) as merge,
         ):
             count = merger.merge_approved("owner/book", max_merges=max_merges, target_number=target_number)
@@ -94,6 +116,11 @@ class MergeFlowTests(unittest.TestCase):
         count, merge = self.run_flow([pr(1), pr(2), pr(3)], max_merges=2)
         self.assertEqual(count, 2)
         self.assertEqual([c.args[1] for c in merge.call_args_list], [1, 2])
+
+    def test_busy_translator_prevents_merge(self):
+        count, merge = self.run_flow([pr(1)], capacity=False)
+        self.assertEqual(count, 0)
+        merge.assert_not_called()
 
     def test_closed_draft_and_conflicting_prs_are_skipped(self):
         snapshots = {n: details(n) for n in (1, 2, 3)}
