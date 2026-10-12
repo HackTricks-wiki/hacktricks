@@ -5,9 +5,10 @@
 ## Bus Pirate
 
 > [!CAUTION]
-> Przed podłączeniem Bus Pirate sprawdź napięcie docelowe, pinout, układ pull-up oraz wspólną masę. Nie włączaj zasilaczy Bus Pirate na aktywnej magistrali zasilanej przez urządzenie docelowe wyłącznie w celu jej sniffowania; dwa zasilacze mogą wejść ze sobą w konflikt i uszkodzić sprzęt. Poniższy zapis sesji jest przykładem specyficznym dla urządzenia — Bus Pirate v3/community-firmware — a nie uniwersalną instrukcją okablowania.<sup>[[1]](#references)[[2]](#references)</sup>
+> Przed podłączeniem Bus Pirate sprawdź napięcie docelowe, rozkład pinów, sposób podłączenia rezystorów podciągających oraz wspólną masę. Nie włączaj zasilaczy Bus Pirate na aktywnej magistrali zasilanej przez urządzenie docelowe wyłącznie po to, by ją podsłuchiwać — dwa zasilacze mogą ze sobą konkurować i uszkodzić sprzęt. Poniższy zapis jest przykładem dotyczącym konkretnego urządzenia — Bus Pirate v3 z firmware społeczności — a nie uniwersalną instrukcją podłączenia.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Aby sprawdzić, czy Bus Pirate działa, podłącz +5V do VPU, a 3.3V do ADC, uzyskaj dostęp do Bus Pirate (na przykład za pomocą Tera Term) i użyj polecenia `~`:
+Aby sprawdzić, czy Bus Pirate działa, podłącz +5V do VPU, a 3.3V do ADC, połącz się z Bus Pirate (na przykład za pomocą Tera Term) i użyj polecenia `~`:
+
 ```bash
 # Use command
 HiZ>~
@@ -46,18 +47,20 @@ Any key to exit
 #Press space
 Found 0 errors.
 ```
-Jak widać w poprzednim wierszu poleceń, znaleziono 0 błędów. Warto o tym wiedzieć, aby upewnić się, że urządzenie działa po jego zakupie lub po flashowaniu firmware'u.
+
+Jak widać w poprzednim wierszu poleceń, wykryto 0 błędów. To bardzo przydatna informacja, dzięki której można sprawdzić, czy urządzenie działa po zakupie lub wgraniu firmware’u.
 
 Aby połączyć się z Bus Pirate, możesz skorzystać z dokumentacji:
 
-![Użyj polecenia - naciśnij spację: Aby połączyć się z Bus Pirate, możesz skorzystać z dokumentacji](<../../images/image (484).png>)
+![Użyj polecenia — naciśnij spację: Aby połączyć się z Bus Pirate, możesz skorzystać z dokumentacji](<../../images/image (484).png>)
 
-W tym przypadku celem jest pamięć EEPROM I²C z rodziny 24C256. Potwierdź dokładny suffix i datasheet, ponieważ obsługiwane napięcie zasilania różni się w zależności od układu.<sup>[[3]](#references)</sup>
+W tym przypadku celem jest pamięć EEPROM I²C z rodziny 24C256. Sprawdź dokładne oznaczenie wariantu i jego kartę katalogową, ponieważ obsługiwane napięcie zasilania różni się w zależności od części.<sup>[[3]](#references)</sup>
 
-![Użyj polecenia - naciśnij spację: W tym przypadku połączę się z pamięcią EPROM: ATMEL901 24C256 PU27](<../../images/image (964).png>)
+![Użyj polecenia — naciśnij spację: W tym przypadku podłączę pamięć EPROM: ATMEL901 24C256 PU27](<../../images/image (964).png>)
 
-Do komunikacji z Bus Pirate użyłem Tera Term połączonego z portem COM Bus Pirate, z ustawieniem Setup --> Serial Port --> Speed na 115200.\
-W poniższej komunikacji znajdziesz informacje, jak przygotować Bus Pirate do komunikacji przez I2C oraz jak zapisywać i odczytywać dane z pamięci (komentarze są oznaczane znakiem "#"; nie oczekuj tej części w komunikacji):
+Do komunikacji z Bus Pirate użyłem Tera Term, połączonego z portem COM Bus Pirate. W menu Setup --> Serial Port ustawiłem prędkość 115200.\
+Poniższa komunikacja pokazuje, jak przygotować Bus Pirate do komunikacji przez I2C oraz jak zapisywać i odczytywać dane z pamięci (komentarze są oznaczane znakiem „#” — nie oczekuj, że będą widoczne w komunikacji):
+
 ```bash
 # Check communication with buspirate
 i
@@ -94,16 +97,16 @@ x. exit(without change)
 # Select I2C
 (1)>4
 I2C mode:
-1. Software
-2. Hardware
+ 1. Software
+ 2. Hardware
 
 # Select Software mode
 (1)>1
 Set speed:
-1. ~5kHz
-2. ~50kHz
-3. ~100kHz
-4. ~240kHz
+ 1. ~5kHz
+ 2. ~50kHz
+ 3. ~100kHz
+ 4. ~240kHz
 
 # Select communication speed
 (1)> 2
@@ -118,9 +121,9 @@ Clutch engaged!!!
 
 # Get macros
 I2C>(0)
-0.Macro menu
-1.7bit address search
-2.I2C sniffer
+ 0.Macro menu
+ 1.7bit address search
+ 2.I2C sniffer
 
 #Get addresses of slaves connected
 I2C>(1)
@@ -156,11 +159,13 @@ WRITE: 0xA1 ACK
 READ: 0x42  ACK 0x42  ACK 0x42  ACK 0x20  ACK 0x48  ACK 0x69  ACK 0x20  ACK 0x44  ACK 0x72  ACK 0x65  ACK 0x67  ACK 0x21  ACK 0x20  ACK 0x41  ACK 0x41  ACK 0x41  ACK 0x00  ACK 0xFF  ACK 0xFF  ACK 0xFF
 NACK
 ```
+
 ### Sniffer
 
-W tym scenariuszu będziemy sniffować komunikację I2C między arduino a poprzednią pamięcią EPROM. Wystarczy komunikować się z obydwoma urządzeniami, a następnie podłączyć bus pirate do pinów SCL, SDA i GND:
+W tym scenariuszu będziemy nasłuchiwać komunikacji I2C między Arduino a poprzednim układem EPROM. Wystarczy nawiązać komunikację między oboma urządzeniami, a następnie podłączyć Bus Pirate do pinów SCL, SDA i GND:
 
-![Odczyt 20B z wcześniej skonfigurowanego adresu 0x69 - Sniffer: W tym scenariuszu będziemy sniffować komunikację I2C między arduino a poprzednią pamięcią EPROM. Wystarczy...](<../../images/image (166).png>)
+![Odczyt 20B z wcześniej skonfigurowanego adresu 0x69 - Sniffer: W tym scenariuszu będziemy nasłuchiwać komunikacji I2C między Arduino a poprzednim układem EPROM. Wystarczy...](<../../images/image (166).png>)
+
 ```bash
 I2C>m
 1. HiZ
@@ -178,15 +183,15 @@ x. exit(without change)
 
 (1)>4
 I2C mode:
-1. Software
-2. Hardware
+ 1. Software
+ 2. Hardware
 
 (1)>1
 Set speed:
-1. ~5kHz
-2. ~50kHz
-3. ~100kHz
-4. ~240kHz
+ 1. ~5kHz
+ 2. ~50kHz
+ 3. ~100kHz
+ 4. ~240kHz
 
 (1)>1
 Clutch disengaged!!!
@@ -206,9 +211,51 @@ Sniffer
 Any key to exit
 [0xA0+0x00+0x69+0x41+0x41+0x41+0x20+0x48+0x69+0x20+0x44+0x72+0x65+0x67+0x21+0x20+0x41+0x41+0x41+0x00+]
 ```
+
+## Rekonstrukcja protokołu I2C metodą black-box
+
+### Identyfikacja magistrali na podstawie aktywnych pinów
+
+Jeśli urządzenie peryferyjne nie ma opisu pinów ani dokumentacji, zacznij od pasywnego monitorowania za pomocą analizatora logicznego o wysokiej impedancji, gdy oryginalny host jest uruchomiony. Po połączeniu wspólnej masy i upewnieniu się, że poziom logiczny jest bezpieczny, sklasyfikuj stałe sygnały jako prawdopodobne linie zasilania, masy lub sygnały z podciąganiem, a następnie porównaj aktywne linie z typowymi magistralami: UART używa asynchronicznych linii TX/RX o niezależnych kierunkach; konwencjonalne SPI zwykle udostępnia zegar, wybór układu i osobne linie danych dla obu kierunków; I2C ma regularny sygnał zegarowy oraz jedną dwukierunkową linię danych. Dekoder I2C powinien ujawnić 7-bitowe adresy urządzeń docelowych, kierunek odczytu/zapisu, sygnały ACK/NACK i powtarzające się payloady.<sup>[[2]](#references)[[4]](#references)</sup>
+
+Zarejestruj kilka prawidłowych wymian i zachowaj zarówno zdekodowane bajty, jak i surowe dane o taktowaniu. Powtarzające się ramki przydadzą się jako testy z oczekiwanym wynikiem dla późniejszych serializatorów, a różnice między żądaniami mogą ujawnić prawdopodobne pola opcode, indeksu, offsetu, długości, numeru sekwencji lub sumy kontrolnej.<sup>[[4]](#references)</sup>
+
+### Odtworzenie ramkowania na podstawie firmware hosta
+
+Jeśli firmware urządzenia peryferyjnego jest niedostępny, wyodrębnij firmware **hosta** i znajdź komponent, który otwiera urządzenie I2C. Wyszukaj nazwy urządzenia peryferyjnego, `/dev/i2c-`, funkcje tworzące polecenia, parsery odpowiedzi, procedury resetowania/inicjalizacji oraz funkcje sum kontrolnych. Dla każdej funkcji tworzącej ramkę zapisz dokładne offsety pól, stałe, akceptowane rozmiary argumentów, długość payloadu, zakres danych objętych sumą kontrolną, kolejność bajtów sumy kontrolnej oraz długość zwracanej ramki, zamiast wnioskować o formacie na podstawie nazw funkcji.<sup>[[4]](#references)</sup>
+
+Sama nazwa funkcji sumy kontrolnej `crc16_ccitt` nie wystarcza, by wybrać wariant. Ustal kierunek przesunięcia, bajt indeksu tablicy, wielomian reprezentowany przez tablicę, rejestr początkowy, odbicie bitów na wejściu/wyjściu, końcowe XOR/negację oraz kolejność bajtów serializatora na łączu. Na przykład tablica dla młodszego bajtu z przesunięciem w prawo, oparta na odwróconym wielomianie `0x8408`, inicjalizacja wartością `0xFFFF` i negacja na końcu wskazują na **CRC-16/X-25 (IBM-SDLC)**. Poprawna suma kontrolna jest często niezbędna, aby przypadki testowe przeszły walidację integralności i dotarły do parsera poleceń.<sup>[[4]](#references)</sup>
+
+Po odtworzeniu formatu wyszukaj charakterystyczne nazwy symboli i stałe w publicznie dostępnym kodzie. W przypadku MJA1 niezależnie odnaleziony wrapper SDK potwierdził identyfikatory poleceń, walidację argumentów, definicje odpowiedzi i lustrzaną implementację CRC; traktuj taki kod źródłowy jako potwierdzenie, a nie zamiennik weryfikacji dokładnego pliku binarnego i kolejności bajtów przesyłanych przez łącze.<sup>[[4]](#references)[[5]](#references)</sup>
+
+### Wysyłanie ramek z hosta Linux z uprawnieniami root
+
+Zhakowany host z wbudowanym systemem Linux może komunikować się z urządzeniem peryferyjnym bez dodawania kolejnego kontrolera magistrali. Otwórz odpowiedni adapter, wybierz 7-bitowy adres za pomocą `I2C_SLAVE` i wyślij ramkę utworzoną przez dedykowany serializator; zachowaj tryb surowych ramek do mutacji i fuzzingu.<sup>[[4]](#references)</sup>
+
+```c
+int fd = open("/dev/i2c-0", O_RDWR);
+if (fd < 0 || ioctl(fd, I2C_SLAVE, target_addr) < 0)
+    err(1, "I2C setup");
+if (write(fd, cmd, cmd_len) != cmd_len)
+    err(1, "I2C write");
+ssize_t n = read(fd, resp, resp_size);
+if (n < 0)
+    err(1, "I2C read");
+```
+
+Kompiluj skrośnie przy użyciu toolchaina zgodnego z docelowym CPU i libc, a następnie porównaj ślady analizatora z klienta testowego z legalnym ruchem. Granice transakcji, kolejność zapisów i odczytów, opóźnienia oraz stan urządzenia peryferyjnego mogą mieć znaczenie, nawet gdy widoczne bajty są identyczne.<sup>[[4]](#references)</sup>
+
+### Enumeracja opcode’ów na podstawie odpowiedzi
+
+Gdy znana jest najkrótsza prawidłowa ramka i suma kontrolna, enumeruj pełną szerokość opcode’u, używając jawnej odpowiedzi protokołu **unsupported-command** jako negatywnego punktu odniesienia. Inny wynik — taki jak nieprawidłowe argumenty, nieprawidłowy stan lub nieudokumentowany status — sugeruje, że dekodowanie dotarło do zaimplementowanego lub częściowo zaimplementowanego handlera. **Nie** dowodzi to podatności na exploit; nadaj temu przypadkowi wyższy priorytet podczas fuzzingu ustrukturyzowanych długości, argumentów, stanów i sekwencji poleceń.<sup>[[4]](#references)</sup>
+
+Jeśli test zawiesi urządzenie peryferyjne, zautomatyzuj wykonywanie jednego odizolowanego przypadku na każdy rozruch, korzystając z zewnętrznego kontrolera: połącz się przez SSH, wykonaj przypadek, zapisz surowe żądanie i odpowiedź oraz czasy, uruchom ponownie urządzenie lub odłącz i ponownie podłącz zasilanie, poczekaj na przywrócenie prawidłowego działania testów stanu, a następnie kontynuuj. Późniejsze przeniesienie komponentu do stanowiska testowego sterowanego przez mikrokontroler może zapewnić deterministyczne resetowanie, bezpośrednie sterowanie zasilaniem i szybszy fuzzing.<sup>[[4]](#references)</sup>
+
 ## References
 
 - [1] [Dokumentacja Bus Pirate — I²C](https://docs.buspirate.com/docs/devices/i2c-eeprom/)
-- [2] [NXP — specyfikacja magistrali I²C i podręcznik użytkownika](https://www.nxp.com/docs/en/user-guide/UM10204.pdf)
-- [3] [Microchip — karta katalogowa szeregowej pamięci EEPROM I²C AT24C256C](https://ww1.microchip.com/downloads/en/DeviceDoc/AT24C256C-I2C-Compatible-Two-Wire-Serial-EEPROM-256-Kbit-32,768-x-8-20005915A.pdf)
+- [2] [NXP — specyfikacja magistrali I²C i instrukcja obsługi](https://www.nxp.com/docs/en/user-guide/UM10204.pdf)
+- [3] [Microchip — karta katalogowa szeregowej pamięci EEPROM AT24C256C z interfejsem I²C](https://ww1.microchip.com/downloads/en/DeviceDoc/AT24C256C-I2C-Compatible-Two-Wire-Serial-EEPROM-256-Kbit-32,768-x-8-20005915A.pdf)
+- [4] [Quarkslab — sondowanie czarnej skrzynki: analiza bezpieczeństwa bezpiecznego układu MJA1 firmy Xiaomi](https://blog.quarkslab.com/black-box-probing-a-security-analysis-of-xiaomis-mja1-secure-chip.html)
+- [5] [Wrapper kryptograficzny MJA1 w Mijia BLE SDK](https://github.com/iomonad/handshow-firmware/tree/master/components/vendor/common/mijia_ble/libs/cryptography/mja1)
 {{#include ../../banners/hacktricks-training.md}}
