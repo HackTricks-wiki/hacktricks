@@ -42,6 +42,7 @@ class ApprovalTests(unittest.TestCase):
         }))
         self.assertTrue(merger.should_handle_event("pull_request_target", {}))
         self.assertTrue(merger.should_handle_event("workflow_dispatch", {}))
+        self.assertTrue(merger.should_handle_event("schedule", {}))
         self.assertFalse(merger.should_handle_event("push", {}))
 
     def test_research_title_exception_is_limited_to_the_authorized_author(self):
@@ -66,7 +67,7 @@ class WorkflowActivityTests(unittest.TestCase):
         pages = [{"workflow_runs": [{"workflow_id": 7, "status": "queued"}]}]
         with patch.object(merger, "api_pages", return_value=pages) as request:
             self.assertFalse(merger.other_workflows_active("owner/book", 7))
-        self.assertEqual(request.call_count, len(merger.ACTIVE_STATUSES))
+        self.assertEqual(request.call_count, 2 * len(merger.ACTIVE_STATUSES))
 
     def test_each_active_status_blocks_merging(self):
         for status in merger.ACTIVE_STATUSES:
@@ -75,6 +76,28 @@ class WorkflowActivityTests(unittest.TestCase):
                 return [{"workflow_runs": runs}]
             with self.subTest(status=status), patch.object(merger, "api_pages", side_effect=pages), contextlib.redirect_stdout(io.StringIO()):
                 self.assertTrue(merger.other_workflows_active("owner/book", 7))
+
+    def test_running_feed_maintenance_keeps_the_base_stable_without_disabling(self):
+        def pages(endpoint):
+            if "HackTricks-Feed" in endpoint and "status=in_progress&" in endpoint:
+                return [{"workflow_runs": [{"name": "Saturday HackTricks conflict repair", "path": ".github/workflows/book-conflict-fix.yml", "status": "in_progress"}]}]
+            return [{"workflow_runs": []}]
+        with patch.object(merger, "api_pages", side_effect=pages), contextlib.redirect_stdout(io.StringIO()):
+            self.assertTrue(merger.other_workflows_active("owner/book", 7))
+
+    def test_custom_review_run_name_still_keeps_the_book_base_stable(self):
+        def pages(endpoint):
+            runs = [{"name": "Review owner/book PR queues", "path": ".github/workflows/book-pr-review.yml", "status": "in_progress"}] if "HackTricks-Feed" in endpoint and "status=in_progress&" in endpoint else []
+            return [{"workflow_runs": runs}]
+        with patch.object(merger, "api_pages", side_effect=pages), contextlib.redirect_stdout(io.StringIO()):
+            self.assertTrue(merger.other_workflows_active("owner/book", 7))
+
+    def test_unrelated_feed_jobs_do_not_stop_merging(self):
+        def pages(endpoint):
+            runs = [{"name": "Daily updater", "status": "in_progress"}] if "HackTricks-Feed" in endpoint else []
+            return [{"workflow_runs": runs}]
+        with patch.object(merger, "api_pages", side_effect=pages):
+            self.assertFalse(merger.other_workflows_active("owner/book", 7))
 
     def test_failed_reads_and_invalid_json_are_not_treated_as_idle(self):
         failed = SimpleNamespace(returncode=1, stderr="API unavailable", stdout="")
@@ -153,6 +176,11 @@ class MergeFlowTests(unittest.TestCase):
         count, merge = self.run_flow([pr(1)], comments={1: comments})
         self.assertEqual(count, 1)
         merge.assert_called_once()
+
+    def test_approval_queue_is_requested_oldest_first_on_every_page(self):
+        with patch.object(merger, "other_workflows_active", return_value=False), patch.object(merger, "api_items", return_value=[]) as request, contextlib.redirect_stdout(io.StringIO()):
+            merger.merge_approved("owner/book", 7)
+        self.assertIn("sort=created&direction=asc", request.call_args.args[0])
 
     def test_unknown_mergeability_is_rechecked(self):
         unknown = details(1)

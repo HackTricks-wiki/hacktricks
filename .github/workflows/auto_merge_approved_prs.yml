@@ -9,6 +9,9 @@ on:
   pull_request_target:
     types: [opened, edited, synchronize, reopened, ready_for_review]
   workflow_dispatch:
+  # Recover the approval queue even if a completion trigger is missed.
+  schedule:
+    - cron: "7,22,37,52 * * * *"
 
 concurrency:
   group: auto-merge-approved-prs
