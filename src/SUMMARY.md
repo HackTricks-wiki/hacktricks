@@ -10,6 +10,7 @@
 
 - [Pentesting Methodology](generic-methodologies-and-resources/pentesting-methodology.md)
 - [Fuzzing Methodology](generic-methodologies-and-resources/fuzzing.md)
+- [Proof Assistant and Formal Verification Security](generic-methodologies-and-resources/proof-assistant-formal-verification-security.md)
 - [External Recon Methodology](generic-methodologies-and-resources/external-recon-methodology/README.md)
   - [Database Leaks](generic-methodologies-and-resources/external-recon-methodology/database-leaks.md)
   - [Wide Source Code Search](generic-methodologies-and-resources/external-recon-methodology/wide-source-code-search.md)
@@ -455,7 +456,7 @@
   - [Privileged Groups](windows-hardening/active-directory-methodology/privileged-groups-and-token-privileges.md)
   - [RDP Sessions Abuse](windows-hardening/active-directory-methodology/rdp-sessions-abuse.md)
   - [Resource-based Constrained Delegation](windows-hardening/active-directory-methodology/resource-based-constrained-delegation.md)
-  - [Sccm Management Point Relay Sql Policy Secrets](windows-hardening/active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md)
+  - [SCCM / MECM Abuse](windows-hardening/active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md)
   - [Security Descriptors](windows-hardening/active-directory-methodology/security-descriptors.md)
   - [SID-History Injection](windows-hardening/active-directory-methodology/sid-history-injection.md)
   - [Silver Ticket](windows-hardening/active-directory-methodology/silver-ticket.md)
