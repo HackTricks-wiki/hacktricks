@@ -2,17 +2,18 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## संदर्भ
+## Context
 
-Linux में किसी program को run करने के लिए उसका file के रूप में मौजूद होना आवश्यक है, और file system hierarchy के माध्यम से किसी तरह accessible होना चाहिए (यह बस इसी तरह `execve()` काम करता है)। यह file disk या ram (tmpfs, memfd) में हो सकती है, लेकिन आपको एक filepath की आवश्यकता होती है। इससे Linux system पर क्या run किया जा रहा है, इसे control करना बहुत आसान हो जाता है; threats और attacker's tools का पता लगाना आसान होता है, या उन्हें अपनी कोई भी चीज़ execute करने से पूरी तरह रोकना आसान होता है (_जैसे_ unprivileged users को कहीं भी executable files रखने की अनुमति न देना)।
+Linux आम तौर पर डिस्क या memory में संग्रहीत executable files से programs चलाता है। यह किसी executable की पहचान pathname या file descriptor से कर सकता है, इसलिए सामान्य filesystem pathname हमेशा आवश्यक नहीं होता।<sup>[[2]](#references)</sup>
 
-लेकिन यह technique इन सबको बदलने के लिए है। यदि आप मनचाहे process को start नहीं कर सकते... **तो पहले से मौजूद process को hijack कर लें**।
+DDexec / EverythingExec एक **पहले से चल रही process** की memory का उपयोग करता है। [Linux Fileless Execution](../../../post-exploitation/linux-fileless-execution.md) पेज anonymous-file execution और उससे जुड़ी detection तथा forensic collection को कवर करता है; [Memory Bypasses overview](index.html#memory-bypasses) में MemExec और Memdlopen के links भी हैं।<sup>[[1]](#references)</sup>
 
-यह technique आपको **read-only, noexec, file-name whitelisting, hash whitelisting जैसी common protection techniques को bypass** करने की अनुमति देती है।<sup>[[1]](#references)</sup>
+यह technique आपको **read-only, noexec, file-name whitelisting, hash whitelisting जैसी आम protection techniques को bypass** करने देती है।<sup>[[1]](#references)</sup>
 
 ## Dependencies
 
-Final script को काम करने के लिए निम्नलिखित tools पर निर्भरता होती है; जिस system पर आप attack कर रहे हैं, उसमें इनका accessible होना आवश्यक है (by default ये सभी आपको हर जगह मिल जाएंगे):
+अंतिम script को काम करने के लिए नीचे दिए गए tools की ज़रूरत होती है। ये उस system पर उपलब्ध होने चाहिए जिस पर आप attack कर रहे हैं (डिफ़ॉल्ट रूप से, ये सभी आपको हर जगह मिल जाएंगे):
+
 ```
 dd
 bash | zsh | ash (busybox)
@@ -26,61 +27,69 @@ wc
 tr
 base64
 ```
-## The technique
 
-यदि आप किसी process की memory को मनमाने ढंग से modify कर सकते हैं, तो आप उस पर नियंत्रण प्राप्त कर सकते हैं। इसका उपयोग पहले से मौजूद process को hijack करके उसे किसी अन्य program से replace करने के लिए किया जा सकता है। हम इसे या तो `ptrace()` syscall का उपयोग करके प्राप्त कर सकते हैं (जिसके लिए आपके पास syscalls execute करने की क्षमता या system पर gdb उपलब्ध होना आवश्यक है), या अधिक रोचक रूप से, `/proc/$pid/mem` में लिखकर।<sup>[[1]](#references)</sup>
+## यह तकनीक
 
-फ़ाइल `/proc/$pid/mem` किसी process के पूरे address space का one-to-one mapping होती है (_e. g._ x86-64 में `0x0000000000000000` से `0x7ffffffffffff000` तक)। इसका अर्थ है कि इस फ़ाइल से offset `x` पर पढ़ना या लिखना, virtual address `x` पर मौजूद contents को पढ़ने या modify करने के समान है।
+अगर आप किसी process की memory को मनमाने ढंग से modify कर सकते हैं, तो आप उस पर नियंत्रण कर सकते हैं। इसका उपयोग पहले से चल रहे process को hijack करके उसकी जगह कोई दूसरा program चलाने के लिए किया जा सकता है। हम यह `ptrace()` syscall का उपयोग करके (जिसके लिए आपके पास syscalls execute करने की क्षमता या system पर gdb उपलब्ध होना ज़रूरी है) या, अधिक दिलचस्प तरीके से, `/proc/$pid/mem` में लिखकर कर सकते हैं।<sup>[[1]](#references)</sup>
 
-अब, हमारे सामने चार basic समस्याएँ हैं:
+फ़ाइल `/proc/$pid/mem` किसी process के पूरे address space की one-to-one mapping होती है (_जैसे_, x86-64 में `0x0000000000000000` से `0x7ffffffffffff000` तक)। इसका मतलब है कि इस फ़ाइल में offset `x` से पढ़ना या उसमें लिखना, virtual address `x` पर मौजूद सामग्री को पढ़ने या modify करने के समान है।
 
-- सामान्यतः केवल root और फ़ाइल का program owner ही इसे modify कर सकते हैं।
+अब, हमें चार बुनियादी समस्याओं का सामना करना पड़ता है:
+
+- आम तौर पर, केवल root और फ़ाइल का owner program ही इसे modify कर सकते हैं।
 - ASLR।
-- यदि हम program के address space में mapped न किए गए address को पढ़ने या लिखने का प्रयास करते हैं, तो हमें I/O error मिलेगा।
+- अगर हम किसी ऐसे address को पढ़ने या लिखने की कोशिश करते हैं जो program के address space में mapped नहीं है, तो हमें I/O error मिलेगा।
 
-इन समस्याओं के solutions हैं, जो पूर्ण नहीं होने के बावजूद उपयोगी हैं:
+इन समस्याओं के समाधान हैं। वे भले ही पूरी तरह सही न हों, लेकिन कारगर हैं:
 
-- अधिकांश shell interpreters ऐसे file descriptors बनाने की अनुमति देते हैं, जो child processes को inherit हो जाते हैं। हम write permissions के साथ shell की `mem` फ़ाइल की ओर संकेत करने वाला fd बना सकते हैं... इसलिए उस fd का उपयोग करने वाले child processes shell की memory को modify कर सकेंगे।
-- ASLR कोई समस्या भी नहीं है; process के address space के बारे में जानकारी प्राप्त करने के लिए हम shell की `maps` फ़ाइल या procfs की किसी अन्य फ़ाइल को देख सकते हैं।
-- इसलिए हमें फ़ाइल पर `lseek()` करना होगा। Shell से यह नहीं किया जा सकता, जब तक कि प्रसिद्ध `dd` का उपयोग न किया जाए।
+- ज़्यादातर shell interpreters ऐसे file descriptors बनाने देते हैं जो child processes को inherit होते हैं। हम write permissions के साथ shell की `mem` फ़ाइल की ओर इंगित करने वाला fd बना सकते हैं... ताकि उस fd का उपयोग करने वाले child processes shell की memory modify कर सकें।
+- ASLR कोई समस्या नहीं है; process के address space की जानकारी पाने के लिए हम shell की `maps` फ़ाइल या procfs की किसी अन्य फ़ाइल को देख सकते हैं।
+- इसलिए हमें फ़ाइल में `lseek()` करना होगा। Shell से यह `dd` के बिना नहीं किया जा सकता, जो इस काम के लिए कुख्यात है।
 
-### In more detail
+### विस्तार से
 
-Steps अपेक्षाकृत आसान हैं और उन्हें समझने के लिए किसी विशेष expertise की आवश्यकता नहीं है:<sup>[[1]](#references)</sup>
+ये चरण काफ़ी आसान हैं और इन्हें समझने के लिए किसी खास विशेषज्ञता की ज़रूरत नहीं है:<sup>[[1]](#references)</sup>
 
-- उस binary और loader को parse करें जिसे हम run करना चाहते हैं, ताकि पता चल सके कि उन्हें किन mappings की आवश्यकता है। फिर ऐसा "shell"code तैयार करें जो व्यापक रूप से वे सभी steps execute करे, जो kernel `execve()` के प्रत्येक call पर करता है:
-- उक्त mappings बनाएँ।
-- Binaries को उनमें read करें।
-- Permissions set up करें।
-- अंत में program के arguments के साथ stack initialize करें और auxiliary vector रखें (जिसकी loader को आवश्यकता होती है)।
-- Loader में jump करें और बाकी काम उसे करने दें (program के लिए आवश्यक libraries load करना)।
-- `syscall` फ़ाइल से वह address प्राप्त करें, जिस पर process अपने द्वारा execute किए जा रहे syscall के बाद return करेगा।
-- उस स्थान को overwrite करें, जो executable होगा, अपने shellcode से (`mem` के माध्यम से हम unwritable pages को modify कर सकते हैं)।
-- जिस program को हम run करना चाहते हैं, उसे process के stdin में pass करें (जिसे उक्त "shell"code द्वारा `read()` किया जाएगा)।
-- इस बिंदु पर हमारे program के लिए आवश्यक libraries load करना और उसमें jump करना loader का काम है।
+- जिस binary को हम चलाना चाहते हैं और loader को parse करके पता लगाएँ कि उन्हें किन mappings की ज़रूरत है। फिर ऐसा "shell"code तैयार करें जो मोटे तौर पर वही चरण पूरे करेगा जो kernel हर `execve()` call पर करता है:
+  - उक्त mappings बनाएँ।
+  - Binaries को उनमें पढ़ें।
+  - Permissions सेट करें।
+  - अंत में, program के arguments के साथ stack initialize करें और auxiliary vector रखें (जिसकी loader को ज़रूरत होती है)।
+  - Loader में jump करें और उसे बाकी काम करने दें (program के लिए ज़रूरी libraries load करना)।
+- `syscall` फ़ाइल से वह address प्राप्त करें जहाँ syscall पूरा होने के बाद process लौटेगा।
+- उस जगह को, जो executable होगी, हमारे shellcode से overwrite करें (`mem` के ज़रिए हम unwritable pages modify कर सकते हैं)।
+- जिस program को हम चलाना चाहते हैं, उसे process के stdin में भेजें (उक्त "shell"code उसे `read()` करेगा)।
+- इस बिंदु पर, हमारे program के लिए ज़रूरी libraries load करना और उसमें jump करना loader का काम है।
 
-**Check out the tool in** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec)।<sup>[[1]](#references)</sup>
+**इस tool को देखें:** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec).<sup>[[1]](#references)</sup>
 
 ## EverythingExec
 
-`dd` के कई alternatives हैं, जिनमें से एक `tail` है। वर्तमान में `mem` फ़ाइल के माध्यम से `lseek()` करने के लिए default program के रूप में `tail` का उपयोग किया जाता है (और `dd` का उपयोग करने का यही एकमात्र उद्देश्य था)। ऐसे alternatives हैं:<sup>[[1]](#references)</sup>
+`dd` के कई विकल्प हैं। उनमें से एक `tail` है, जो फ़िलहाल `mem` फ़ाइल में `lseek()` करने के लिए इस्तेमाल किया जाने वाला default program है (`dd` का उपयोग करने का एकमात्र उद्देश्य यही था)। ये विकल्प हैं:<sup>[[1]](#references)</sup>
+
 ```bash
 tail
 hexdump
 cmp
 xxd
 ```
-वेरिएबल `SEEKER` सेट करके आप उपयोग किए जाने वाले `seeker` को बदल सकते हैं, _उदा._:
+
+`SEEKER` variable सेट करके, आप इस्तेमाल किए जाने वाले seeker को बदल सकते हैं, _जैसे_:
+
 ```bash
 SEEKER=cmp bash ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
-यदि आपको script में implement न किया गया कोई अन्य valid seeker मिलता है, तो भी आप `SEEKER_ARGS` variable सेट करके उसका उपयोग कर सकते हैं:
+
+यदि आपको कोई अन्य मान्य seeker मिलता है जो script में लागू नहीं है, तो भी आप `SEEKER_ARGS` variable सेट करके उसका उपयोग कर सकते हैं:
+
 ```bash
 SEEKER=xxd SEEKER_ARGS='-s $offset' zsh ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
-इसे block करें, EDRs।
+
+इसे ब्लॉक करो, EDRs.
 
 ## References
 
-- [1] [DDexec: Linux पर binaries को filelessly और stealthily चलाने की एक technique](https://github.com/arget13/DDexec)
+- [1] [DDexec: Linux पर binaries को बिना फ़ाइल के और चोरी-छिपे चलाने की तकनीक](https://github.com/arget13/DDexec)
+- [2] [execveat(2) — Linux मैनुअल पेज](https://manpages.debian.org/trixie/manpages-dev/execveat.2.en.html)
 {{#include ../../../../banners/hacktricks-training.md}}
