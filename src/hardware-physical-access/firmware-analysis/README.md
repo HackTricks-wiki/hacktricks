@@ -180,7 +180,7 @@ Prefer a disposable VM when the original init logic or an LVM stack must see the
 
 #### Recover the boot-time block map
 
-Extract the kernel's initramfs and reverse its `/init` plus any storage libraries. In [Reversing Tools & Basic Methods](../../reversing/reversing-tools-basic-methods/README.md), follow string references for `/proc/cmdline`, `/dev/mapper/`, `dmsetup`, `BLKGETSIZE64`, and partition paths; then trace the code that selects the active A/B slot and builds the table. Useful radare2 starting points are `r2 -A init`, `afl`, `pdf @ main`, and `pdf @ fcn.xxxxx`.<sup>[[9]](#references)</sup>
+Extract the kernel's initramfs and reverse its `/init` plus any storage libraries. In [Reversing Tools & Basic Methods](../../reversing/reversing-tools-basic-methods/), follow string references for `/proc/cmdline`, `/dev/mapper/`, `dmsetup`, `BLKGETSIZE64`, and partition paths; then trace the code that selects the active A/B slot and builds the table. Useful radare2 starting points are `r2 -A init`, `afl`, `pdf @ main`, and `pdf @ fcn.xxxxx`.<sup>[[9]](#references)</sup>
 
 The linear target maps consecutive ranges of a virtual device onto ranges of one or more backing devices. A recovered two-segment table commonly has this shape (all positions and lengths are 512-byte sectors):<sup>[[9]](#references)[[10]](#references)</sup>
 
@@ -383,6 +383,50 @@ For ARM binaries, the process is similar, with the `qemu-arm` emulator being uti
 ### Full System Emulation
 
 Tools like [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), and others, facilitate full firmware emulation, automating the process and aiding in dynamic analysis.
+
+### Reconstructing split and verified root filesystems for emulation
+
+If a SquashFS superblock is readable but inode, directory, or fragment-table offsets are impossible, do not immediately patch `unsquashfs`. Reverse the early boot binary and reproduce the block-device graph it creates: embedded systems may expose a nominal root partition but construct the real filesystem with a `dm-linear` mapping that appends sectors borrowed from another partition. Superblock-only checks can succeed even when every later metadata block is displaced.<sup>[[11]](#references)</sup>
+
+Preserve the firmware's arithmetic exactly. In particular, identify whether lengths are bytes, 512-byte sectors, or 4 KiB pages; reproduce shifts and truncation in their original order; and account for bank-dependent tail regions in A/B layouts. For example, `(partition_bytes >> 12) << 3` first truncates to a 4 KiB boundary and only then expresses the result in 512-byte sectors; replacing it with `partition_bytes // 512` can move the appended extent by a few kilobytes and corrupt all downstream SquashFS tables.<sup>[[11]](#references)</sup>
+
+A useful validation workflow is:<sup>[[11]](#references)</sup>
+
+1. Recover each `dm-linear` segment's source device, start sector, and length from the verifier/init binary.
+2. Concatenate or map the extents without changing their alignment semantics.
+3. If extraction still fails, search only a small window around the predicted boundary and require several consecutive valid metadata structures, rather than accepting a plausible superblock alone.
+4. Run an unmodified `unsquashfs` against the reconstructed image; successful traversal of all directories and fragments is stronger evidence than `unsquashfs -stat`.
+
+#### Analyst-controlled dm-verity replacement
+
+When the analyst controls the QEMU kernel, initramfs, and virtual disks, a modified root can be booted by replacing the vendor's verification PID 1 with a small statically linked init. This is a **lab boot-chain substitution**, not a break of dm-verity, its RSA signature, Secure Boot, or a TPM-sealed key.<sup>[[11]](#references)</sup>
+
+The replacement init should mirror the operational parts of the original boot path: mount `devtmpfs`, call `setsid()`, connect `/dev/console` to file descriptors 0–2, mount `/proc` and `/sys`, wait for the supplied block device, mount the edited root read-only, detach the old-root pseudo-filesystems, move the new mount onto `/`, `chroot`, and `execve()` the firmware's original `/sbin/init`. Detaching `/dev`, `/proc`, and `/sys` **before** `MS_MOVE` avoids accidentally detaching mount points belonging to the new root.<sup>[[11]](#references)</sup>
+
+Keep mutable device state separate from the modified immutable root. A qcow2 overlay can preserve the original disk's LVM state while a second read-only virtio disk supplies the edited SquashFS:<sup>[[11]](#references)</sup>
+
+```bash
+qemu-img create -f qcow2 -F raw -b emmc.raw overlay.qcow2
+qemu-system-x86_64 ... -kernel bzImage -initrd custom-initramfs.cpio.gz \
+  -drive if=none,id=emmc,format=qcow2,file=overlay.qcow2 \
+  -device sdhci-pci -device sd-card,drive=emmc \
+  -drive if=virtio,format=raw,readonly=on,file=rootfs-edited.squashfs
+```
+
+#### Offline image-state debugging
+
+Inspect persistent state outside the guest when slow boots, destructive startup scripts, or unreliable console logging obscure the failure. Never attach an overlay that a running VM is using; expose it with `qemu-nbd`, constrain LVM discovery to the intended NBD partition, and deactivate the volume group before disconnecting it.<sup>[[11]](#references)</sup>
+
+```bash
+sudo modprobe nbd max_part=16
+sudo qemu-nbd --connect=/dev/nbd0 overlay.qcow2
+sudo vgscan --config 'devices { filter = ["a|/dev/nbd0p4|", "r|.*|"] }'
+# inspect/fsck/mount the discovered logical volumes
+sudo vgchange -an VG_NAME
+sudo qemu-nbd --disconnect /dev/nbd0
+```
+
+For repeatable fault isolation, write timestamped marker files to a stable writable volume and verify them offline; `/dev/kmsg`, FIFOs, and transient consoles can produce false negatives through rate limiting or early process death. Also compare exact interfaces across layers before changing unrelated code: `uname -r` versus `/lib/modules/`, on-disk ext4 features versus kernel configuration, and the Mesa `libGL` generation versus DRI driver ABI and PCI-derived driver names. A component can exist and even `dlopen()` successfully while remaining unusable because its consumer expects a different ABI.<sup>[[11]](#references)</sup>
 
 ## Dynamic Analysis in Practice
 
@@ -637,5 +681,6 @@ This turns "encrypted firmware" into a more general problem: **recover the appli
 - [8] [Make it Blink: Over-the-Air Exploitation of the Philips Hue Bridge](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
 - [9] [ROOT Tesla OS on QEMU Part 1: Unpacking](https://cn0xroot.wordpress.com/2026/09/19/root-tesla-os-on-qemu-part-1-unpacking)
 - [10] [Linux kernel documentation - dm-linear](https://docs.kernel.org/admin-guide/device-mapper/linear.html)
+- [11] [ROOT Tesla OS on QEMU Part 2: Debugging and Fixing](https://cn0xroot.wordpress.com/2026/09/20/root_tesla_os_on_qemu_part_2_debugging_fixing)
 
 {{#include ../../banners/hacktricks-training.md}}
