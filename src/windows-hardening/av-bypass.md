@@ -604,6 +604,10 @@ As described in [**this blog post**](https://trustedsec.com/blog/abusing-chrome-
 
 ## Advanced Evasion
 
+{{#ref}}
+virtualized-payload-execution.md
+{{#endref}}
+
 Evasion is a very complicated topic, sometimes you have to take into account many different sources of telemetry in just one system, so it's pretty much impossible to stay completely undetected in mature environments.
 
 Every environment you go against will have their own strengths and weaknesses.
@@ -1386,6 +1390,31 @@ Good hunting opportunities mentioned by the authors:
 - P3 is a **cross-process transfer trick**, not a full execution primitive by itself: the copied parameter still needs an execute-permission change and an execution redirection method.
 - `RtlCreateProcessReflection` / Dirty Vanity was considered by the authors but rejected because it internally reaches suspicious primitives such as `NtWriteVirtualMemory` and `NtCreateThreadEx`.
 
+## Console STDIN pipe injection
+
+An interactive console child can also be used as the **payload-transfer primitive**. The injector redirects the child's standard input to a pipe and sends a marker followed by shellcode. After the console program reads the data into its own private memory, the injector finds that buffer, makes it executable and redirects a child thread to it. This avoids `VirtualAllocEx` and `WriteProcessMemory`, but it is still process injection rather than a general EDR bypass.<sup>[[41]](#references)</sup>
+
+Despite the "named-pipe" description, the reference implementation calls `CreatePipe`, which creates an **anonymous pipe**. Windows implements anonymous pipes with uniquely named pipe objects internally, but the PoC neither selects a `\\.\pipe\<name>` path nor calls `CreateNamedPipe`. It creates inheritable handles with a default security descriptor, places the read handle in `STARTUPINFO.hStdInput`, sets `STARTF_USESTDHANDLES`, and launches a new child with handle inheritance enabled. Therefore, this PoC launches the supplied console executable; it does not attach its pipe to an existing process.<sup>[[41]](#references)[[42]](#references)[[43]](#references)</sup>
+
+### Reference workflow
+
+The implementation uses the following chain:<sup>[[41]](#references)</sup>
+
+1. Create anonymous pipe pairs for the child's `STDIN` and `STDOUT`. Clear inheritance on the two parent-side handles and close the child-side duplicates in the parent after process creation.
+2. Launch an interactive executable such as `netsh.exe` or `nslookup.exe` with `CREATE_NEW_CONSOLE`. The child inherits the redirected standard handles.
+3. Send the complete binary `rawData` array with `WriteFile` through the parent-side `STDIN` handle. The console program consumes the bytes and leaves a copy in one of its private committed regions.
+4. Walk the child's address space with `VirtualQueryEx`, read candidate `MEM_PRIVATE` regions with `ReadProcessMemory`, and search for the marker at the beginning of `rawData`.
+5. Change the discovered buffer to `PAGE_EXECUTE_READWRITE` with `VirtualProtectEx`.
+6. Identify the main thread, suspend it, set `RIP` to `found_address + 0x19` with `NtSetContextThread`, and resume it.
+
+```powershell
+InjectSetConsole.exe C:\Windows\System32\netsh.exe
+```
+
+The supplied implementation is x64-specific: it modifies `CONTEXT.Rip`, and its embedded payload is x64 shellcode. `rawData` begins with a 25-byte marker, so executable bytes start at hexadecimal offset `0x19`. When replacing the payload, preserve that layout or update the marker, search vector, array size and execution offset together. The source comments also list `0x0A`, `0x0D` and `0x1A` as bad characters. This workflow does not alter the child's token or privileges.<sup>[[41]](#references)</sup>
+
+For small native helpers and payload compilation patterns, see [Windows C Payloads](windows-local-privilege-escalation/windows-c-payloads.md).
+
 ## SantaStealer Tradecraft for Fileless Evasion and Credential Theft
 
 SantaStealer (aka BluelineStealer) illustrates how modern info-stealers blend AV bypass, anti-analysis and credential access in a single workflow.<sup>[[24]](#references)</sup>
@@ -1466,5 +1495,8 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [38] [MDSec Function Peekaboo companion code](https://github.com/mdsecactivebreach/functionpeekaboo)
 - [39] [MDSec - Function Peekaboo: Crafting Self-Masking Functions Using LLVM](https://mdsec.co.uk/2025/10/function-peekaboo-crafting-self-masking-functions-using-llvm/)
 - [40] [Microsoft Learn - VirtualProtect](https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualprotect)
+- [41] [TwoSevenOneT - InjectSetConsole source](https://github.com/TwoSevenOneT/InjectSetConsole)
+- [42] [Microsoft Learn - CreatePipe function](https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-createpipe)
+- [43] [Microsoft Learn - Creating a Child Process with Redirected Input and Output](https://learn.microsoft.com/en-us/windows/win32/procthread/creating-a-child-process-with-redirected-input-and-output)
 
 {{#include ../banners/hacktricks-training.md}}
