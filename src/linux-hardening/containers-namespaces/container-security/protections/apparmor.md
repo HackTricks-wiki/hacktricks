@@ -208,7 +208,7 @@ The impact depends on what exactly is mounted and whether the alternate path als
 
 ### Full Example: Shebang Bypass
 
-AppArmor policy sometimes targets an interpreter path in a way that does not fully account for script execution through shebang handling. A historical example involved using a script whose first line points at a confined interpreter:<sup>[[3]](#references)</sup>
+AppArmor may attach a profile to the executed script path rather than the interpreter named by its shebang. Conversely, invoking the interpreter directly can select the interpreter's profile. An [AppArmor maintainer describes this distinction](https://bugs.launchpad.net/apparmor/+bug/1911431). A historical example involved a script whose first line points at a confined interpreter:
 
 ```bash
 cat <<'EOF' > /tmp/test.pl
@@ -221,7 +221,7 @@ chmod +x /tmp/test.pl
 /tmp/test.pl
 ```
 
-This kind of example is important as a reminder that profile intent and actual execution semantics can diverge. When reviewing AppArmor in container environments, interpreter chains and alternate execution paths deserve special attention.
+The example is only a candidate where the interpreter's file capability can become effective and the script's actual exec attachment permits the operation. Check the loaded policy and process label, the capability bounding set, `no_new_privs`, and the mount's `nosuid` state; a profile file name or `cap_setuid+ep` listing alone does not prove a usable transition. Interpreter chains and alternate execution paths deserve separate review.
 
 ## Checks
 
@@ -261,6 +261,5 @@ For AppArmor, the most important variable is often the **host**, not only the ru
 
 - [1] [Kubernetes security context: AppArmor profile fields and node-support behavior](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
 - [2] [Ubuntu 24.04 `apparmor.d(5)` manpage: exec transitions, `change_profile`, `userns`, and profile flags](https://manpages.ubuntu.com/manpages/noble/en/man5/apparmor.d.5.html)
-- [3] [HTB: Nunchucks - AppArmor shebang bypass with a Perl script](https://0xdf.gitlab.io/2021/11/02/htb-nunchucks.html)
 
 {{#include ../../../../banners/hacktricks-training.md}}
