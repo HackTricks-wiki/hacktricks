@@ -47,6 +47,8 @@ If a scripting runtime can access the relevant Linux interface, it can create an
 
 The project currently documents Python, Perl, and Ruby targets; PHP or Node need a different runtime-specific technique or extension, so the absence of this generator for a language does not mean that in-memory execution is impossible.<sup>[[6]](#references)[[12]](#references)</sup>
 
+See [Linux Fileless Execution](../../../post-exploitation/linux-fileless-execution.md) for the broader coverage of anonymous-file execution, related staging patterns, and detection and forensic collection.
+
 > [!WARNING]
 > A regular executable written to **`/dev/shm`** remains subject to that mount's **`noexec`** setting; merely opening it through an ordinary file descriptor does not change the mount policy.<sup>[[5]](#references)</sup>
 >
