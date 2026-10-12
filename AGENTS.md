@@ -30,7 +30,8 @@ The search index source policy is important and cost-sensitive:
   serving the large index from `hacktricks.wiki` in production is expensive.
 - On localhost, `.local`/`.internal` hosts, loopback, RFC1918, carrier-grade NAT, link-local, or
   private IPv6 addresses, load only the same-origin mdBook output so local/container deployments
-  remain self-contained.
+  remain self-contained. For a non-English page, try the language-prefixed local path first (for
+  example `/es/searchindex.js`) and use the root English index only as a fallback.
 
 For this repo, the expected local fallback is:
 
@@ -67,6 +68,8 @@ fallback when refreshing an expired entry fails.
 Common local checks:
 
 - `node --check theme/ht_searcher.js`
+- `node --test scripts/test_search.js` (matching, ranking, UI, source policy, and cache regressions)
+- `HT_SEARCH_CORPUS=1 node --test scripts/test_search.js` (also checks both generated books when present)
 - `mdbook build`
 
 If `mdbook build` fails, check:

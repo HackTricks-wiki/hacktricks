@@ -3,7 +3,7 @@
   "use strict";
 
   const clear = el => { while (el.firstChild) el.removeChild(el.firstChild); };
-  const workerCode = `
+  const workerCode = String.raw`
     self.window = self;
     self.search = self.search || {};
     const abs = p => location.origin + p;
@@ -15,8 +15,6 @@
     const MAX = 30;
     const CACHE_NAME = 'ht-search-indices-v2';
     const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
-    const PRIMARY_OPTIONS = {bool:'AND', expand:true};
-    const SUPPLEMENTAL_OPTIONS = {bool:'OR', expand:true};
 
     function xorDecryptInPlace(encryptedData, key){
       const keyBytes = new TextEncoder().encode(key);
@@ -119,21 +117,26 @@
         (octets[0] === 192 && octets[1] === 168);
     }
 
-    function loadLocal(local){
-      if(!local) return null;
-      try {
-        importScripts(abs(local));
-        console.log('Loaded private-network search index:', local);
-        return takeLegacyIndex();
-      } catch(e){
-        console.error('local', local, 'failed ->', e);
-        return null;
-      }
+    function localCandidates(local, lang){
+      if(!local) return [];
+      const safeLang = /^[a-z]{2,3}$/.test(lang) ? lang : 'en';
+      return safeLang === 'en' ? [local] : ['/' + safeLang + local, local];
     }
 
-    async function loadWithPolicy(remotes, local, privateHost){
+    function loadLocal(locals){
+      for(const local of locals){
+        try {
+          importScripts(abs(local));
+          console.log('Loaded private-network search index:', local);
+          return takeLegacyIndex();
+        } catch(e){ console.warn('local', local, 'failed ->', e); }
+      }
+      return null;
+    }
+
+    async function loadWithPolicy(remotes, locals, privateHost){
       /* Private deployments stay self-contained; public deployments never use costly origin indexes. */
-      if(privateHost) return loadLocal(local);
+      if(privateHost) return loadLocal(locals);
       for(const source of remotes){
         try {
           const data = await loadRemote(source);
@@ -164,127 +167,57 @@
       return low;
     }
 
-    function fieldConfiguration(options, name){
-      const defaultBool = options.bool || 'OR';
-      const defaultExpand = options.expand || false;
-      if(!options.fields) return {bool:defaultBool, expand:defaultExpand, boost:1};
-      if(!Object.prototype.hasOwnProperty.call(options.fields, name)) return null;
-      const configured = options.fields[name];
-      return {
-        bool:configured.bool || defaultBool,
-        expand:configured.expand === undefined ? defaultExpand : configured.expand,
-        boost:configured.boost === undefined ? 1 : configured.boost
-      };
-    }
-
-    function searchCompact(index, query, options){
-      const tokens = index.pipeline.run(elasticlunr.tokenizer(query));
-      if(!tokens.length) return [];
-      const combined = new Map();
-
-      for(const field of index.fields){
-        const config = fieldConfiguration(options, field.name);
-        if(!config || config.boost === 0) continue;
-        let fieldScores = null;
-        const exactMatches = new Map();
-
-        for(const token of tokens){
-          const tokenScores = new Map();
-          const first = lowerBound(field.terms, token);
-          let last = first;
-          if(config.expand){
-            while(last < field.terms.length && field.terms[last].startsWith(token)) last++;
-          } else if(first < field.terms.length && field.terms[first] === token){
-            last = first + 1;
-          }
-
-          for(let termIndex = first; termIndex < last; termIndex++){
-            const term = field.terms[termIndex];
-            const exact = term === token;
-            const begin = field.postingOffsets[termIndex];
-            const end = field.postingOffsets[termIndex + 1];
-            const idf = 1 + Math.log(index.documentCount / ((end - begin) + 1));
-            const penalty = exact ? 1 : .15 * (1 - (term.length - token.length) / term.length);
-
-            for(let posting = begin; posting < end; posting++){
-              const ref = field.postingDocs[posting];
-              if(fieldScores !== null && config.bool === 'AND' && !fieldScores.has(ref)) continue;
-              if(exact) exactMatches.set(ref, (exactMatches.get(ref) || 0) + 1);
-              const length = field.fieldLengths[ref];
-              const lengthNorm = length ? 1 / Math.sqrt(length) : 1;
-              const score = field.postingTermFrequencies[posting] * idf * lengthNorm * penalty;
-              tokenScores.set(ref, (tokenScores.get(ref) || 0) + score);
-            }
-          }
-
-          if(fieldScores === null){
-            fieldScores = tokenScores;
-          } else if(config.bool === 'AND'){
-            const intersection = new Map();
-            for(const [ref, score] of tokenScores){
-              if(fieldScores.has(ref)) intersection.set(ref, fieldScores.get(ref) + score);
-            }
-            fieldScores = intersection;
-          } else {
-            for(const [ref, score] of tokenScores) fieldScores.set(ref, (fieldScores.get(ref) || 0) + score);
-          }
-        }
-
-        if(!fieldScores) continue;
-        for(const [ref, unnormalised] of fieldScores){
-          const matches = exactMatches.get(ref);
-          const score = (matches ? unnormalised * matches / tokens.length : unnormalised) * config.boost;
-          combined.set(ref, (combined.get(ref) || 0) + score);
-        }
-      }
-
-      return Array.from(combined, entry => ({ref:entry[0], score:entry[1]}))
-        .sort((a, b) => (b.score - a.score) || (a.ref - b.ref));
-    }
-
     function buildCompact(data, cloud){
       const documents = data.documents;
-      const urls = data.doc_urls;
-      const compact = {
-        pipeline:elasticlunr.Pipeline.load(data.pipeline),
-        documentCount:documents.length,
-        fields:data.fields.map(field => {
-          const hydrated = {
-            name:field.name,
-            terms:field.terms,
-            postingOffsets:decodeTypedArray(field.posting_offsets, Uint32Array),
-            postingDocs:decodeTypedArray(field.posting_docs, Uint32Array),
-            postingTermFrequencies:decodeTypedArray(field.posting_term_frequencies, Float64Array),
-            fieldLengths:decodeTypedArray(field.field_lengths, Uint32Array)
-          };
-          delete field.posting_offsets;
-          delete field.posting_docs;
-          delete field.posting_term_frequencies;
-          delete field.field_lengths;
-          return hydrated;
-        })
+      const field = data.fields.find(field => field.name === 'body');
+      const offsets = decodeTypedArray(field.posting_offsets, Uint32Array);
+      const refs = decodeTypedArray(field.posting_docs, Uint32Array);
+      const frequencies = decodeTypedArray(field.posting_term_frequencies, Float64Array);
+      const lengths = decodeTypedArray(field.field_lengths, Uint32Array);
+      const body = {
+        terms:field.terms,
+        documentFrequency:term => offsets[term + 1] - offsets[term],
+        visit:(term, callback) => {
+          for(let i = offsets[term]; i < offsets[term + 1]; i++) callback(refs[i], frequencies[i], lengths[refs[i]]);
+        }
       };
-      return {
+      return prepareIndex({
         cloud:cloud,
         base:cloud ? 'https://cloud.hacktricks.wiki/' : '',
-        urls:urls,
-        search:(query, options) => searchCompact(compact, query, options),
+        urls:data.doc_urls,
         getDoc:ref => {
           const doc = documents[ref];
           return doc ? {title:doc[0], body:doc[1], breadcrumbs:doc[2]} : null;
         }
-      };
+      }, body);
     }
 
     function buildLegacy(data, cloud){
-      const index = elasticlunr.Index.load(data.json);
-      return {
+      const index = data.json;
+      const entries = [], stack = [['', index.index.body.root]];
+      while(stack.length){
+        const [term, node] = stack.pop();
+        if(node.df > 0) entries.push([term, node.docs]);
+        for(const key of Object.keys(node)){
+          if(key !== 'df' && key !== 'docs') stack.push([term + key, node[key]]);
+        }
+      }
+      entries.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
+      const body = {
+        terms:entries.map(entry => entry[0]),
+        documentFrequency:term => Object.keys(entries[term][1]).length,
+        visit:(term, callback) => {
+          for(const [ref, posting] of Object.entries(entries[term][1])){
+            callback(Number(ref), posting.tf, index.documentStore.docInfo[ref].body || 0);
+          }
+        }
+      };
+      return prepareIndex({
         cloud:cloud,
         base:cloud ? 'https://cloud.hacktricks.wiki/' : '',
         urls:data.urls,
-        search:(query, options) => index.search(query, options),
-        getDoc:ref => index.documentStore.getDoc(ref)
-      };
+        getDoc:ref => index.documentStore.docs[ref]
+      }, body);
     }
 
     function buildIndex(data, cloud){
@@ -302,42 +235,327 @@
 
     let built = [];
 
-    function topCandidates(query, options, excluded, limit){
-      const all = [];
-      for(let sourceIndex = 0; sourceIndex < built.length; sourceIndex++){
-        const source = built[sourceIndex];
-        const results = source.search(query, options);
-        if(!results.length) continue;
-        const maximum = results[0].score || 1;
-        let accepted = 0;
-        for(const result of results){
-          const key = sourceIndex + ':' + result.ref;
-          if(excluded && excluded.has(key)) continue;
-          all.push({sourceIndex:sourceIndex, ref:result.ref, norm:result.score / maximum, key:key});
-          if(++accepted === MAX) break;
+    // Keep technical punctuation and Unicode letters; metadata also exposes camel-case parts.
+    const fold = text => String(text || '').normalize('NFKD').replace(/\p{M}/gu, '').toLowerCase();
+    const words = text => fold(text).match(/[\p{L}\p{N}]+(?:\+\+|#)?/gu) || [];
+    const stem = token => /^[a-z]+$/.test(token) ? elasticlunr.stemmer(token) : token;
+    const STOP_WORDS = new Set(('a an and are as at be by for from how i in is it of on or the to was what where with ' +
+      'can could do does find me please show this about').split(' '));
+    const ALIASES = Object.assign(Object.create(null), {
+      privesc:['privilege escalation'], privs:['privileges'],
+      sqli:['sql injection'], xss:['cross site scripting'],
+      ssrf:['server side request forgery'], rce:['remote code execution'],
+      lfi:['local file inclusion'], rfi:['remote file inclusion'],
+      ssti:['server side template injection'], idor:['insecure direct object reference'],
+      ad:['active directory'], k8s:['kubernetes'],
+      'privilege escalation':['privesc'], 'sql injection':['sqli'],
+      'cross site scripting':['xss'], 'server side request forgery':['ssrf'],
+      'remote code execution':['rce'], 'active directory':['ad'], kubernetes:['k8s']
+    });
+    const TOKEN_ALIASES = new Map(Object.entries(ALIASES).filter(([token]) => !token.includes(' '))
+      .map(([token, phrases]) => [token, phrases.flatMap(words)]));
+    const TITLE_NOISE = new Set('basic basics information pentesting pentest overview introduction'.split(' '));
+
+    function queryGroups(query, keepStopWords = false){
+      const tokens = words(query.slice(0, 512)).filter(token => keepStopWords || !STOP_WORDS.has(token));
+      const groups = [], seen = new Set();
+      for(let i = 0; i < tokens.length && groups.length < 24; i++){
+        let phrase = tokens[i];
+        // Recognize full names before individual words so acronym-only pages remain searchable.
+        for(let size = Math.min(5, tokens.length - i); size > 1; size--){
+          const candidate = tokens.slice(i, i + size).join(' ');
+          if(ALIASES[candidate]){ phrase = candidate; i += size - 1; break; }
+        }
+        const alternatives = [phrase, ...(ALIASES[phrase] || [])].map(words);
+        const numbered = phrase.match(/^([a-z]{3,})(\d+)$/);
+        if(numbered) alternatives.push([numbered[1], numbered[2]]);
+        const canonical = alternatives.reduce((a, b) => a.join(' ').length >= b.join(' ').length ? a : b);
+        const key = canonical.map(stem).join(' ');
+        if(seen.has(key)) continue;
+        seen.add(key);
+        groups.push({tokens:words(phrase), alternatives:alternatives, canonical:canonical});
+      }
+      return groups;
+    }
+
+    function addLookup(lookup, token, value){
+      if(!lookup.has(token)) lookup.set(token, []);
+      lookup.get(token).push(value);
+    }
+
+    function prepareIndex(source, bodyField){
+      const lookup = new Map();
+      // Reuse existing body postings instead of tokenizing every large document on each query.
+      for(let i = 0; i < bodyField.terms.length; i++){
+        for(const token of new Set(words(bodyField.terms[i]))){
+          addLookup(lookup, token, {field:bodyField, term:i});
         }
       }
-      all.sort((a, b) => b.norm - a.norm);
-      return all.slice(0, limit);
+      const metadata = new Map();
+      source.metadata = [];
+      source.pages = new Map();
+      for(let ref = 0; ref < source.urls.length; ref++){
+        const doc = source.getDoc(ref);
+        if(!doc) continue;
+        const title = words(doc.title).join(' ');
+        const breadcrumbs = words(doc.breadcrumbs).join(' ');
+        const crumbs = String(doc.breadcrumbs || '').split('»');
+        const parent = crumbs.length > 1 ? words(crumbs[crumbs.length - 2]).join(' ') : breadcrumbs;
+        const topic = String(doc.title || '').split(/\s+\/\s+|\(|\|/)[0];
+        source.metadata[ref] = {title:title, breadcrumbs:breadcrumbs, primary:parent === title,
+          topic:queryGroups(topic, true).flatMap(group => group.canonical).filter(token => !TITLE_NOISE.has(token))};
+        let path = source.urls[ref] || '';
+        const page = path.split('#')[0];
+        if(!source.pages.has(page)) source.pages.set(page, []);
+        source.pages.get(page).push(ref);
+        try { path = decodeURIComponent(path); } catch {}
+        for(const [text, weight] of [[doc.title, 12], [doc.breadcrumbs, 4], [path, 2]]){
+          const separated = String(text || '').replace(/([a-z])([A-Z])/g, '$1 $2')
+            .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2');
+          for(const [value, tokenWeight] of [[text, weight], [separated, weight * .75]]){
+            const tokens = new Set(words(value).flatMap(token => [token, stem(token)]));
+            for(const token of tokens){
+              if(!metadata.has(token)) metadata.set(token, new Map());
+              const refs = metadata.get(token);
+              refs.set(ref, Math.max(refs.get(ref) || 0, tokenWeight));
+            }
+            for(const token of words(value)){
+              const numbered = token.match(/^([a-z]{3,})(\d+)$/);
+              const alternatives = [...(TOKEN_ALIASES.get(token) || []), ...(numbered ? numbered.slice(1) : [])];
+              for(const related of new Set(alternatives.flatMap(token => [token, stem(token)]))){
+                if(!metadata.has(related)) metadata.set(related, new Map());
+                const refs = metadata.get(related);
+                refs.set(ref, Math.max(refs.get(ref) || 0, tokenWeight * .85));
+              }
+            }
+          }
+        }
+      }
+      for(const [token, refs] of metadata) addLookup(lookup, token, {refs:refs});
+      source.lookup = lookup;
+      source.vocabulary = Array.from(lookup.keys()).sort();
+      source.termCache = new Map();
+      source.literalCache = new Map();
+      return source;
+    }
+
+    // Bounded Damerau-Levenshtein distance includes adjacent swapped letters.
+    function editDistance(a, b, limit){
+      if(Math.abs(a.length - b.length) > limit) return limit + 1;
+      let previousPrevious = null;
+      let previous = Array.from({length:b.length + 1}, (_, i) => i);
+      for(let i = 1; i <= a.length; i++){
+        const row = [i];
+        let minimum = i;
+        for(let j = 1; j <= b.length; j++){
+          row[j] = Math.min(row[j - 1] + 1, previous[j] + 1, previous[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+          if(previousPrevious && i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]){
+            row[j] = Math.min(row[j], previousPrevious[j - 2] + 1);
+          }
+          minimum = Math.min(minimum, row[j]);
+        }
+        if(minimum > limit) return limit + 1;
+        previousPrevious = previous;
+        previous = row;
+      }
+      return previous[b.length];
+    }
+
+    function termMatches(source, token){
+      if(source.termCache.has(token)) return source.termCache.get(token);
+      const matches = new Map(), root = stem(token);
+      if(source.lookup.has(token)) matches.set(token, 1);
+      if(root !== token && source.lookup.has(root)) matches.set(root, .98);
+      // Short acronyms and numbers require exact matches to avoid huge, irrelevant expansions.
+      if(token.length >= 3 && !/\d|[+#]/.test(token)){
+        let start = lowerBound(source.vocabulary, token), count = 0;
+        while(start < source.vocabulary.length && source.vocabulary[start].startsWith(token) && count < 48){
+          const candidate = source.vocabulary[start++];
+          if(candidate !== token){ matches.set(candidate, .78 + .12 * token.length / candidate.length); count++; }
+        }
+      }
+      if((token.length >= 4 || (token.length === 3 && !matches.size)) && token.length <= 40 &&
+         !/\d|[+#]/.test(token) && !ALIASES[token]){
+        const limit = token.length >= 8 ? 2 : 1;
+        const candidates = [];
+        for(const candidate of source.vocabulary){
+          if(matches.has(candidate) || Math.abs(candidate.length - root.length) > limit || /\d|[+#]/.test(candidate)) continue;
+          // A different first letter already costs an edit unless it was transposed.
+          if(candidate[0] !== root[0] && candidate[1] !== root[0] && candidate[0] !== root[1]) continue;
+          const distance = editDistance(root, candidate, limit);
+          if(distance <= limit) candidates.push({token:candidate, distance:distance});
+        }
+        candidates.sort((a, b) => a.distance - b.distance || a.token.localeCompare(b.token));
+        for(const candidate of candidates.slice(0, 12)) matches.set(candidate.token, candidate.distance === 1 ? .65 : .48);
+      }
+      if(source.termCache.size >= 128) source.termCache.delete(source.termCache.keys().next().value);
+      source.termCache.set(token, matches);
+      return matches;
+    }
+
+    function tokenScores(source, token){
+      const scores = new Map();
+      const record = (ref, score, quality, title, term) => {
+        const current = scores.get(ref);
+        if(!current) scores.set(ref, {score:score, quality:quality, title:title, terms:new Set([term])});
+        else {
+          current.score = Math.max(current.score, score);
+          current.quality = Math.max(current.quality, quality);
+          current.title = Math.max(current.title, title);
+          if(current.terms.size < 48) current.terms.add(term);
+        }
+      };
+      for(const [term, quality] of termMatches(source, token)){
+        for(const entry of source.lookup.get(term)){
+          if(entry.refs){
+            for(const [ref, weight] of entry.refs) record(ref, weight * quality, quality, weight >= 9 ? quality * weight / 12 : 0, term);
+          } else {
+            const field = entry.field;
+            const frequency = field.documentFrequency(entry.term);
+            const idf = Math.min(4, 1 + Math.log(1 + source.urls.length / (frequency + 1)));
+            field.visit(entry.term, (ref, tf, length) => {
+              const score = quality * idf * (1 + Math.min(1, Math.log1p(tf))) / (1 + .2 * Math.log1p(length));
+              record(ref, score, quality, 0, term);
+            });
+          }
+        }
+      }
+      // The legacy English trimmer reduces both C++ and C# to "c". Verify these symbols
+      // against stored text instead of treating different language names as interchangeable.
+      if(/[+#]/.test(token)){
+        if(!source.literalCache.has(token)){
+          const escaped = token.replace(/[.*+?^{}$()|[\]\\]/g, '\\$&');
+          const pattern = new RegExp('(^|[^\\p{L}\\p{N}])' + escaped + '(?=$|[^\\p{L}\\p{N}+#])', 'iu');
+          const refs = [];
+          for(let ref = 0; ref < source.urls.length; ref++){
+            if(pattern.test(source.getDoc(ref).body || '')) refs.push(ref);
+          }
+          if(source.literalCache.size >= 16) source.literalCache.delete(source.literalCache.keys().next().value);
+          source.literalCache.set(token, refs);
+        }
+        for(const ref of source.literalCache.get(token)) record(ref, 2, 1, 0, token);
+      }
+      return scores;
+    }
+
+    function sourceCandidates(source, sourceIndex, groups){
+      const candidates = new Map(), tokens = new Map();
+      const getScores = token => {
+        if(!tokens.has(token)) tokens.set(token, tokenScores(source, token));
+        return tokens.get(token);
+      };
+      const required = groups.filter(group => group.tokens.some(token => /\d|[+#]/.test(token))).length;
+      for(const group of groups){
+        const groupScores = new Map();
+        group.alternatives.forEach((alternative, alternativeIndex) => {
+          const parts = alternative.map(getScores);
+          if(!parts.length) return;
+          const smallest = parts.reduce((a, b) => a.size < b.size ? a : b);
+          for(const ref of smallest.keys()){
+            if(!parts.every(part => part.has(ref))) continue;
+            const hits = parts.map(part => part.get(ref));
+            const penalty = alternativeIndex ? .85 : 1;
+            const hit = {
+              score:hits.reduce((sum, value) => sum + value.score, 0) / parts.length * penalty,
+              quality:Math.min(...hits.map(value => value.quality)) * penalty,
+              title:Math.min(...hits.map(value => value.title)) * penalty,
+              terms:hits.flatMap(value => Array.from(value.terms))
+            };
+            if(!groupScores.has(ref) || hit.score > groupScores.get(ref).score) groupScores.set(ref, hit);
+          }
+        });
+        for(const [ref, hit] of groupScores){
+          if(!candidates.has(ref)) candidates.set(ref, {sourceIndex:sourceIndex, ref:ref, coverage:0, required:0, score:0, title:0, terms:new Set()});
+          const candidate = candidates.get(ref);
+          candidate.coverage++;
+          if(group.tokens.some(token => /\d|[+#]/.test(token))) candidate.required++;
+          candidate.score += hit.score;
+          candidate.title += hit.title;
+          for(const term of hit.terms) if(candidate.terms.size < 48) candidate.terms.add(term);
+        }
+      }
+      const phrase = groups.flatMap(group => group.tokens).join(' ');
+      const canonical = groups.flatMap(group => group.canonical).map(stem).join(' ');
+      const equivalentTitles = new Set([phrase]);
+      if(groups.length === 1){
+        for(const alternative of groups[0].alternatives){
+          const expanded = alternative.join(' ');
+          equivalentTitles.add(expanded);
+          equivalentTitles.add(phrase + ' ' + expanded);
+          equivalentTitles.add(expanded + ' ' + phrase);
+        }
+      }
+      const selected = [];
+      for(const candidate of candidates.values()){
+        if(candidate.coverage < Math.ceil(groups.length * .6) || candidate.required < required) continue;
+        const metadata = source.metadata[candidate.ref];
+        if(equivalentTitles.has(metadata.title)) candidate.score += 80;
+        else if((' ' + metadata.title + ' ').includes(' ' + phrase + ' ')) candidate.score += 40;
+        if((' ' + metadata.breadcrumbs + ' ').includes(' ' + phrase + ' ')) candidate.score += 10;
+        candidate.score += 20 * candidate.title / groups.length;
+        candidate.score += 20 * candidate.title / Math.max(1, metadata.topic.length);
+        // mdBook stores subsections separately: prefer the page introducing a topic over an aside.
+        if(metadata.primary && candidate.title >= groups.length * .8) candidate.score += 50;
+        if(metadata.primary && candidate.title >= groups.length * .8 && /(?:^|\/)index\.html(?:#|$)/.test(source.urls[candidate.ref])) candidate.score += 8;
+        const topic = metadata.topic.filter(token => /\d/.test(canonical) || !/^\d+$/.test(token)).map(stem).join(' ');
+        if(metadata.primary && topic === canonical) candidate.score += 60;
+        selected.push(candidate);
+      }
+      return selected;
     }
 
     function runSearch(query){
-      const selected = topCandidates(query, PRIMARY_OPTIONS, null, MAX);
-      if(selected.length < MAX && query.trim().split(/\\s+/).length > 1){
-        const excluded = new Set(selected.map(item => item.key));
-        selected.push(...topCandidates(query, SUPPLEMENTAL_OPTIONS, excluded, MAX - selected.length));
+      const groups = queryGroups(query);
+      if(!groups.length) return [];
+      const candidates = built.flatMap((source, index) => sourceCandidates(source, index, groups));
+      const compare = (a, b) => b.coverage - a.coverage || b.score - a.score || a.sourceIndex - b.sourceIndex || a.ref - b.ref;
+      candidates.sort(compare);
+      // Only inspect a bounded shortlist for phrase proximity in body text.
+      for(const candidate of candidates.slice(0, 200)){
+        const phrase = groups.flatMap(group => group.tokens).join(' ');
+        if(phrase.includes(' ') && (' ' + words(previewBody(built[candidate.sourceIndex], candidate.ref)).join(' ') + ' ').includes(' ' + phrase + ' ')) candidate.score += 8;
       }
-      return selected.map(item => {
-        const source = built[item.sourceIndex];
-        const doc = source.getDoc(item.ref);
-        return doc && {
-          title:doc.title,
-          body:doc.body,
-          breadcrumbs:doc.breadcrumbs,
-          url:source.base + source.urls[item.ref],
-          cloud:source.cloud
-        };
-      }).filter(Boolean);
+      candidates.sort(compare);
+      const selected = [], seen = new Set(), pages = new Map();
+      // Exhaust the complete-match tier before considering relaxed results.
+      for(let coverage = groups.length; coverage >= Math.ceil(groups.length * .6); coverage--){
+        const deferred = [];
+        for(const candidate of candidates){
+          if(candidate.coverage !== coverage) continue;
+          const source = built[candidate.sourceIndex];
+          const url = source.base + source.urls[candidate.ref];
+          if(seen.has(url)) continue;
+          seen.add(url);
+          const page = url.split('#')[0], count = pages.get(page) || 0;
+          if(count >= 2){ deferred.push(candidate); continue; }
+          selected.push(candidate);
+          pages.set(page, count + 1);
+          if(selected.length === MAX) break;
+        }
+        selected.push(...deferred.slice(0, MAX - selected.length));
+        if(selected.length === MAX) break;
+      }
+      return selected.slice(0, MAX).map(candidate => {
+        const source = built[candidate.sourceIndex], doc = source.getDoc(candidate.ref);
+        return {title:doc.title, body:previewBody(source, candidate.ref), breadcrumbs:doc.breadcrumbs,
+          url:source.base + source.urls[candidate.ref], cloud:source.cloud, terms:Array.from(candidate.terms)};
+      });
+    }
+
+    function cleanBody(body){
+      return String(body || '').replace(/(?:Tip )?Learn & practice AWS Hacking: HackTricks Training[\s\S]*?Share hacking tricks by submitting PRs to the HackTricks and HackTricks Cloud github repos\.\s*/g, '').trim();
+    }
+
+    function previewBody(source, ref){
+      const body = cleanBody(source.getDoc(ref).body);
+      if(body.length >= 40 || !source.metadata[ref].primary) return body;
+      const page = source.urls[ref].split('#')[0];
+      for(const sibling of source.pages.get(page) || []){
+        if(sibling <= ref) continue;
+        const doc = source.getDoc(sibling), preview = cleanBody(doc.body);
+        if(preview.length >= 40 && !/^references?$/i.test(doc.title)) return preview;
+      }
+      return body;
     }
 
     self.onmessage = async ({data}) => {
@@ -353,9 +571,9 @@
             language => 'searchindex-cloud-v2-' + language + '.json.gz',
             language => 'searchindex-cloud-' + language + '.js.gz', lang);
 
-          const main = await loadWithPolicy(mainSources, '/searchindex.js', privateHost);
+          const main = await loadWithPolicy(mainSources, localCandidates('/searchindex.js', lang), privateHost);
           if(main) built.push(buildIndex(main, false));
-          const cloud = await loadWithPolicy(cloudSources, null, privateHost);
+          const cloud = await loadWithPolicy(cloudSources, localCandidates(null, lang), privateHost);
           if(cloud) built.push(buildIndex(cloud, true));
           if(!built.length){ postMessage({ready:false, error:'no-index'}); return; }
           postMessage({ready:true});
@@ -415,25 +633,36 @@
   const URL_MARK='highlight';
   function metric(c,t){return c?`${c} search result${c>1?'s':''} for '${t}':`:`No search results for '${t}'.`;}
 
-  function makeTeaser(body,terms){
-    const stem=w=>elasticlunr.stemmer(w.toLowerCase());
-    const T=terms.map(stem),W_S=40,W_F=8,W_N=2,WIN=30;
-    const W=[],sents=body.toLowerCase().split('. ');
-    let i=0,v=W_F,found=false;
-    sents.forEach(s=>{v=W_F; s.split(' ').forEach(w=>{if(w){if(T.some(t=>stem(w).startsWith(t))){v=W_S;found=true;} W.push([w,v,i]);v=W_N;}i+=w.length+1;});i++;});
-    if(!W.length) return body;
-    const win=Math.min(W.length,WIN);
-    const sums=[W.slice(0,win).reduce((a,[,wt])=>a+wt,0)];
-    for(let k=1;k<=W.length-win;k++) sums[k]=sums[k-1]-W[k-1][1]+W[k+win-1][1];
-    let best=0;
-    if(found){let bestScore=sums[0];for(let k=1;k<sums.length;k++){if(sums[k]>=bestScore){bestScore=sums[k];best=k;}}}
-    const out=[];i=W[best][2];
-    for(let k=best;k<best+win;k++){const [w,wt,pos]=W[k];if(i<pos){out.push(body.substring(i,pos));i=pos;}if(wt===W_S)out.push('<em>');out.push(body.substr(pos,w.length));if(wt===W_S)out.push('</em>');i=pos+w.length;}
-    return out.join('');
+  function makeTeaser(body, terms){
+    const fold = text => text.normalize('NFKD').replace(/\p{M}/gu, '').toLowerCase();
+    const normalize = token => /^[a-z]+$/.test(token) ? elasticlunr.stemmer(token) : token;
+    const wanted = new Set(terms.flatMap(term => [fold(term), normalize(fold(term))]));
+    const tokens = Array.from(String(body || '').matchAll(/\S+/gu), match => {
+      const parts = fold(match[0]).match(/[\p{L}\p{N}]+(?:\+\+|#)?/gu) || [];
+      const hit = parts.some(part => wanted.has(part) || wanted.has(normalize(part)));
+      return {text:match[0], start:match.index, end:match.index + match[0].length, hit:hit};
+    });
+    if(!tokens.length) return '';
+    const size = Math.min(30, tokens.length);
+    let best = 0, score = 0, maximum = -1;
+    for(let i = 0; i < tokens.length; i++){
+      score += tokens[i].hit ? 1 : 0;
+      if(i >= size) score -= tokens[i - size].hit ? 1 : 0;
+      if(i >= size - 1 && score > maximum){ maximum = score; best = i - size + 1; }
+    }
+    const selected = tokens.slice(best, best + size);
+    let out = best ? '… ' : '', position = selected[0].start;
+    for(const token of selected){
+      out += escapeHTML(body.slice(position, token.start));
+      const text = escapeHTML(token.text);
+      out += token.hit ? '<em>' + text + '</em>' : text;
+      position = token.end;
+    }
+    return out + (best + size < tokens.length ? ' …' : '');
   }
 
   function format(d,terms){
-    const teaser=makeTeaser(escapeHTML(d.body),terms);
+    const teaser=makeTeaser(d.body || '', d.terms || terms);
     teaserCount++;
     const enc=encodeURIComponent(terms.join(' ')).replace(/'/g,'%27');
     const parts=d.url.split('#');if(parts.length===1)parts.push('');
@@ -441,7 +670,7 @@
     const href=`${abs?'':path_to_root}${parts[0]}?${URL_MARK}=${enc}#${parts[1]}`;
     const style=d.cloud?' style="color:#1e88e5"':'';
     const source=d.cloud?' [Cloud]':' [Book]';
-    return `<a href="${href}" aria-details="teaser_${teaserCount}"${style}>${d.breadcrumbs}${source}<span class="teaser" id="teaser_${teaserCount}" aria-label="Search Result Teaser">${teaser}</span></a>`;
+    return `<a href="${escapeHTML(href)}" aria-details="teaser_${teaserCount}"${style}>${escapeHTML(d.breadcrumbs || d.title || '')}${source}<span class="teaser" id="teaser_${teaserCount}" aria-label="Search Result Teaser">${teaser}</span></a>`;
   }
 
   function render(docs,query){
