@@ -75,6 +75,16 @@ These distros are **executed inside the RAM** memory. The only way to detect the
 
 [https://github.com/Claudio-C/awesome-data-sanitization](https://github.com/Claudio-C/awesome-data-sanitization)
 
+### Delayed Windows self-deletion
+
+A running Windows image may be locked while its process is active. A process can hand deletion to a child `cmd.exe`, use `choice` as a timer, and exit before the shell reaches `del`. The delay lets the original process release its image handle; quoting the full path is necessary when it contains spaces.<sup>[[6]](#references)[[7]](#references)[[8]](#references)</sup>
+
+```cmd
+cmd.exe /C choice /C Y /N /D Y /T 6 ^>nul ^& Del /F /Q "<full-path-of-current-executable>"
+```
+
+When this string is supplied directly as the argument to `cmd.exe` rather than typed from another interactive `cmd` prompt, use `&` instead of `^&` and `>nul` instead of `^>nul`. This removes the directory entry; it is **not secure erasure** and does not remove execution, task, filesystem-journal, or other forensic traces. Hunt for short-lived `cmd.exe` children whose command line combines `choice /T`, `Del`, and the parent's image path.<sup>[[6]](#references)[[7]](#references)[[8]](#references)</sup>
+
 ## Windows Configuration
 
 It's possible to disable several windows logging methods to make the forensics investigation much harder.
@@ -308,5 +318,8 @@ Defenders should correlate these artifacts with external exposure and service pa
 - [3] [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
 - [4] [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
 - [5] [Hiding Your .NET - ETW (Adam Chester / XPN)](https://blog.xpnsec.com/hiding-your-dotnet-etw/)
+- [6] [FortiGuard Labs – Uncovering a SectopRAT Variant Embedded in Legitimate Software](https://www.fortinet.com/blog/threat-research/uncovering-a-sectoprat-variant-embedded-in-legitimate-software)
+- [7] [Microsoft Learn – choice command](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/choice)
+- [8] [Microsoft Learn – del command](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/del)
 
 {{#include ../../banners/hacktricks-training.md}}
