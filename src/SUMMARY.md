@@ -1086,6 +1086,7 @@
 
 # 🤖 AI
 - [AI Security](AI/README.md)
+  - [LLM-Assisted Password Candidate Generation](AI/AI-Assisted-Password-Guessing.md)
   - [Ai Assisted Fuzzing And Vulnerability Discovery](AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md)
   - [Web Black-Box AI Pentester Bots](AI/Web-Black-Box-AI-Pentester-Bots.md)
   - [AI Agent Security Methodology](AI/AI-Agent-Security-Methodology.md)

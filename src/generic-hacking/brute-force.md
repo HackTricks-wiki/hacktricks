@@ -935,6 +935,37 @@ hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
 hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```
 
+#### Target-trained Hashcat passes with hate_crack
+
+[hate_crack](https://github.com/trustedsec/hate_crack) orchestrates local Hashcat passes after you have a hash file and know its Hashcat mode. Hashcat itself must be installed separately. Clone with submodules, run `make`, then start an interactive session; the example mode `1000` is NTLM, not a universal default. Existing clones need `git submodule update --init --recursive` before using the PCFG and PRINCE-LING options.<sup>[[13]](#references)[[14]](#references)</sup>
+
+```bash
+git clone --recurse-submodules https://github.com/trustedsec/hate_crack.git
+cd hate_crack
+make
+hate_crack hashes.txt 1000
+```
+
+**Learn a grammar from recovered plaintexts.** Run an initial dictionary/rule pass, then train `pcfg_cracker` on target-relevant plaintexts. Set `pcfgRuleset` in `config.json` to the trained ruleset and choose PCFG (menu `20`) to stream likely structures into Hashcat, or PRINCE-LING (`21`) to build a grammar-guided PRINCE base list. Bound the two generators with `pcfgMaxCandidates` and `pcfgPrinceLingMaxCandidates`; hate_crack does not train the grammar for you. PCFG learns the probability of structures such as baseword plus digits and symbols, unlike the fixed grammar in the [combinator example](#grammar-driven-combinator-attacks-encrypted-office-example).<sup>[[10]](#references)[[13]](#references)[[14]](#references)</sup>
+
+```bash
+cd pcfg_cracker
+python3 trainer.py -t ../target-plaintexts.txt -r TARGET
+cd ..
+# Set pcfgRuleset to TARGET in config.json, then select 20 or 21.
+hate_crack hashes.txt 1000
+```
+
+**Mine rules backwards from known passwords.** Spoonman (menu `22`) takes a plaintext corpus, including the current session's nonempty `.out` file, and derives lowercase letter basewords plus Hashcat rules that reconstruct the observed passwords. It ranks rules by the number of corpus passwords they reproduce. Start with the top-50%-coverage tier and expand only if the added keyspace is justified; combine derived basewords with other relevant wordlists when the missing stem, rather than the mutation, limits coverage. Hashcat accepts at most 31 functions per rule and its position alphabet addresses only indices `0`–`35`; Spoonman uses a literal baseword and no-op rule when a password cannot be encoded. Very large corpora can hit its bounded-memory counter cap, so read the reported coverage rather than assuming full reconstruction. See [Hashcat rule behavior](#explain-and-profile-rule-files) before reusing the output independently.<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup>
+
+**Choose a generator for the evidence available.** OMEN (`13`) trains a character-transition model from a password list and enumerates candidates in probability order, capped by `omenMaxCandidates`. Markov brute force (`15`) can instead build a `.hcstat2` table from the current `.out` cracks or a selected list and test an incremental length range. When target intelligence is prose rather than passwords, N-gram (`16`) feeds a corpus, including gzip input, to `ngramX.bin`; its default group size is three. These are alternatives, not three copies of the same candidate list.<sup>[[11]](#references)[[13]](#references)[[14]](#references)</sup>
+
+**Expand only small, plausible pools.** Permutation (`17`) reorders every character in each input word, so even one eight-character word yields `8!` orderings. Combipow (`19`) emits nonempty subset combinations from a short passphrase word pool; `-s` inserts spaces and the tool rejects more than 63 input lines. Random Rules (`18`) is a later pass after deterministic rule files, while Combinator (`6`) can join multiple wordlists with separators via `--sepFill`. For ordinary two-list concatenation, use the [native Hashcat combinator](#hashcat-attacks) already shown above.<sup>[[13]](#references)[[14]](#references)</sup>
+
+**Budget feedback attacks.** Fingerprint (`5`) iteratively expands newly cracked passwords at increasing fragment lengths, rather than re-expanding the entire corpus each round; its combination keyspace threshold skips an oversized `-a 1` pass. Hybrid (`7`) tries cheaper `?s?d` decorations before broader `?a` prepend/append masks, with `hcatHybridMaxRuntime` bounding the run. This matters because the cost of a hybrid pass is wordlist size multiplied by mask space, so a broad mask against a large list can dwarf the initial passes.<sup>[[13]](#references)[[14]](#references)</sup>
+
+For model-generated candidates from recovered passwords, see [local LLM password guessing](../AI/AI-Assisted-Password-Guessing.md). The ordinary [mask](#hashcat-attacks) and [rule](#explain-and-profile-rule-files) sections remain the reference for direct Hashcat usage.
+
 #### Hashcat modes
 
 ```bash
@@ -980,5 +1011,10 @@ Cracking Common Application Hashes
 - [7] [Hashcat debug-file implementation](https://github.com/hashcat/hashcat/blob/master/src/debugfile.c)
 - [8] [Hashcat command-line help](https://github.com/hashcat/hashcat/blob/master/docs/hashcat-help.md)
 - [9] [HashcatRosetta: Reading the Rosetta Stone of Password Cracking](https://trustedsec.com/blog/hashcatrosetta-reading-the-rosetta-stone-of-password-cracking)
+- [10] [PCFG Cracker repository and usage](https://github.com/lakiw/pcfg_cracker)
+- [11] [OMEN repository and user guide](https://github.com/RUB-SysSec/OMEN)
+- [12] [Spoonman original issue and rule derivation design](https://github.com/trustedsec/hate_crack/issues/169)
+- [13] [hate_crack repository and attack documentation](https://github.com/trustedsec/hate_crack)
+- [14] [What's New in hate_crack Since 2.0](https://trustedsec.com/blog/whats-new-in-hate-crack-since-2-0)
 
 {{#include ../banners/hacktricks-training.md}}
