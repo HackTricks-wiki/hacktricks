@@ -63,6 +63,18 @@ With a comprehensive add-in model and an API that extends the tool to suit your 
 [ILSpy plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): You can have it in any OS (you can install it directly from VSCode, no need to download the git. Click on **Extensions** and **search ILSpy**).\
 If you need to **decompile**, **modify** and **recompile** again you can use [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) or an actively maintained fork of it, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Right Click -> Modify Method** to change something inside a function).
 
+### Execution-free managed inspection with REA
+
+**REA** can inspect PE/CLI metadata and CIL without loading the assembly. Start with the artifact identity, then inspect members and declared native boundaries; this is useful when reviewing suspicious calls before using a decompiler or running the program.<sup>[[16]](#references)[[17]](#references)</sup>
+
+```bash
+rea inspect-managed-artifact /absolute/path/Assembly.dll --json
+rea inspect-managed-members /absolute/path/Assembly.dll --json
+rea inspect-managed-native-boundaries /absolute/path/Assembly.dll --json
+```
+
+For version diffing, `compare_managed_members` uses raw CIL/signature identity and decoded-instruction fingerprints rather than treating metadata tokens as stable across builds. A P/Invoke declaration is not proof that native code ran; `verify_managed_native_boundaries` needs matching native export or function Evidence to check that boundary. Keep the artifact digest, MVID and unresolved mappings with the result.<sup>[[17]](#references)</sup>
+
 ### DNSpy Logging
 
 In order to make **DNSpy log some information in a file**, you could use this snippet:
@@ -182,6 +194,24 @@ cheat-engine.md
 [**PiNCE**](https://github.com/korcankaraokcu/PINCE) is a front-end/reverse engineering tool for the GNU Project Debugger (GDB), focused on games. However, it can be used for any reverse-engineering related stuff
 
 [**Decompiler Explorer**](https://dogbolt.org/) is a web front-end to a number of decompilers. This web service lets you compare the output of different decompilers on small executables.
+
+## Evidence-backed native investigation with REA
+
+**REA** exposes Hopper, Ghidra and IDA analysis through CLI and MCP. Install Node.js/npm and configure an existing native provider first; check `rea providers --json` and select a provider explicitly when more than one supports the target. Use an observed function name or address from the inventory in place of `0x1000` below.<sup>[[16]](#references)[[18]](#references)</sup>
+
+```bash
+npm install --global rea-agents
+rea providers --json
+rea inspect /absolute/path/to/program --provider ghidra --json
+rea search /absolute/path/to/program "search" --provider ghidra --json
+rea trace /absolute/path/to/program "search" --provider ghidra --json
+rea xrefs /absolute/path/to/program 0x1000 --provider ghidra --json
+rea function /absolute/path/to/program 0x1000 --provider ghidra --json
+```
+
+Start from a feature string or symbol, follow references and callers, then inspect the selected function dossier and pseudocode with `rea decompile`. REA binds a session to the selected provider rather than silently replacing it after a failure. For repeatable queries, `--snapshot PATH` reuses only matching artifact bytes, provider, settings, operation and parameters; a snapshot is a local cache, not a saved provider database. Preserve the returned Evidence and explicit unknowns instead of treating inferred paths or decompiler text as original source.<sup>[[16]](#references)[[18]](#references)</sup>
+
+For JavaScript/Electron entry points leading into native add-ons, see [Electron Desktop Apps](../../network-services-pentesting/pentesting-web/electron-desktop-apps/#static-asar-to-native-boundary-tracing-with-rea).
 
 ## ARM & MIPS
 
@@ -667,5 +697,8 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 - [13] [GoResolver: Using Control-Flow Graph Similarity to Automatically Deobfuscate Golang Binaries](https://volexity.com/blog/2025/04/01/goresolver-using-control-flow-graph-similarity-to-deobfuscate-golang-binaries-automatically)
 - [14] [Volexity GoStringExtractor repository](https://github.com/volexity/GoStringExtractor)
 - [15] [Go Get 'Em: Updates to Volexity Golang Tooling](https://www.volexity.com/blog/2025/08/11/go-get-em-updates-to-volexity-golang-tooling/)
+- [16] [REA: Reverse Engineer Anything](https://github.com/morluto/rea)
+- [17] [REA managed-code analysis](https://github.com/morluto/rea/blob/main/docs/managed-code-analysis.md)
+- [18] [REA CLI and Evidence guide](https://github.com/morluto/rea/blob/main/docs/cli.md)
 
 {{#include ../../banners/hacktricks-training.md}}
