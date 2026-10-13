@@ -53,51 +53,47 @@ class ApprovalTests(unittest.TestCase):
 
 
 class WorkflowActivityTests(unittest.TestCase):
-    def test_a_busy_workflow_on_a_later_page_is_detected(self):
-        pages = [
-            {"workflow_runs": [{"workflow_id": 7, "status": "in_progress"}] * 100},
-            {"workflow_runs": [{"workflow_id": 8, "status": "in_progress", "name": "Build"}]},
-        ]
-        with patch.object(merger, "gh_json", return_value=pages) as request, contextlib.redirect_stdout(io.StringIO()):
-            self.assertTrue(merger.other_workflows_active("owner/book", 7))
-        self.assertIn("--paginate", request.call_args.args[0])
-        self.assertIn("--slurp", request.call_args.args[0])
+    def test_translator_capacity_allows_one_running_and_no_waiting(self):
+        def response(arguments):
+            if "/jobs?" in arguments[1]:
+                return {"total_count": 1, "jobs": [{"status": "in_progress"}]}
+            status = arguments[1].split("status=")[1].split("&")[0]
+            return {"total_count": 1, "workflow_runs": [{"id": 42}]} if status == "in_progress" else {"total_count": 0}
+        with patch.object(merger, "gh_json", side_effect=response):
+            self.assertTrue(merger.translator_has_capacity("owner/book"))
 
-    def test_pending_merger_instances_do_not_block_the_merger(self):
-        pages = [{"workflow_runs": [{"workflow_id": 7, "status": "queued"}]}]
-        with patch.object(merger, "api_pages", return_value=pages) as request:
-            self.assertFalse(merger.other_workflows_active("owner/book", 7))
-        self.assertEqual(request.call_count, 2 * len(merger.ACTIVE_STATUSES))
+    def test_translator_capacity_blocks_queued_language_job(self):
+        def response(arguments):
+            if "/jobs?" in arguments[1]:
+                return {"total_count": 2, "jobs": [{"status": "in_progress"}, {"status": "queued"}]}
+            status = arguments[1].split("status=")[1].split("&")[0]
+            return {"total_count": 1, "workflow_runs": [{"id": 42}]} if status == "in_progress" else {"total_count": 0}
+        with patch.object(merger, "gh_json", side_effect=response), contextlib.redirect_stdout(io.StringIO()):
+            self.assertFalse(merger.translator_has_capacity("owner/book"))
 
-    def test_each_active_status_blocks_merging(self):
-        for status in merger.ACTIVE_STATUSES:
-            def pages(endpoint):
-                runs = [{"workflow_id": 8, "status": status, "name": "Other"}] if f"status={status}&" in endpoint else []
-                return [{"workflow_runs": runs}]
-            with self.subTest(status=status), patch.object(merger, "api_pages", side_effect=pages), contextlib.redirect_stdout(io.StringIO()):
-                self.assertTrue(merger.other_workflows_active("owner/book", 7))
+    def test_translator_capacity_fails_closed_if_language_jobs_are_missing(self):
+        def response(arguments):
+            if "/jobs?" in arguments[1]:
+                return {"total_count": 2, "jobs": [{"status": "in_progress"}]}
+            status = arguments[1].split("status=")[1].split("&")[0]
+            return {"total_count": 1, "workflow_runs": [{"id": 42}]} if status == "in_progress" else {"total_count": 0}
+        with patch.object(merger, "gh_json", side_effect=response):
+            with self.assertRaisesRegex(RuntimeError, "Cannot verify all active translator jobs"):
+                merger.translator_has_capacity("owner/book")
 
-    def test_running_feed_maintenance_keeps_the_base_stable_without_disabling(self):
-        def pages(endpoint):
-            if "HackTricks-Feed" in endpoint and "status=in_progress&" in endpoint:
-                return [{"workflow_runs": [{"name": "Saturday HackTricks conflict repair", "path": ".github/workflows/book-conflict-fix.yml", "status": "in_progress"}]}]
-            return [{"workflow_runs": []}]
-        with patch.object(merger, "api_pages", side_effect=pages), contextlib.redirect_stdout(io.StringIO()):
-            self.assertTrue(merger.other_workflows_active("owner/book", 7))
+    def test_translator_capacity_blocks_any_queued_run_or_two_running(self):
+        for blocked_status in ("queued", "waiting", "pending", "requested", "two_running"):
+            def response(arguments):
+                status = arguments[1].split("status=")[1].split("&")[0]
+                count = 2 if status == "in_progress" and blocked_status == "two_running" else int(status == blocked_status)
+                return {"total_count": count, "workflow_runs": [{"id": 42}]} if count == 1 and status == "in_progress" else {"total_count": count}
+            with self.subTest(status=blocked_status), patch.object(merger, "gh_json", side_effect=response), contextlib.redirect_stdout(io.StringIO()):
+                self.assertFalse(merger.translator_has_capacity("owner/book"))
 
-    def test_custom_review_run_name_still_keeps_the_book_base_stable(self):
-        def pages(endpoint):
-            runs = [{"name": "Review owner/book PR queues", "path": ".github/workflows/book-pr-review.yml", "status": "in_progress"}] if "HackTricks-Feed" in endpoint and "status=in_progress&" in endpoint else []
-            return [{"workflow_runs": runs}]
-        with patch.object(merger, "api_pages", side_effect=pages), contextlib.redirect_stdout(io.StringIO()):
-            self.assertTrue(merger.other_workflows_active("owner/book", 7))
-
-    def test_unrelated_feed_jobs_do_not_stop_merging(self):
-        def pages(endpoint):
-            runs = [{"name": "Daily updater", "status": "in_progress"}] if "HackTricks-Feed" in endpoint else []
-            return [{"workflow_runs": runs}]
-        with patch.object(merger, "api_pages", side_effect=pages):
-            self.assertFalse(merger.other_workflows_active("owner/book", 7))
+    def test_translator_capacity_fails_closed_on_bad_api_response(self):
+        with patch.object(merger, "gh_json", return_value={"workflow_runs": []}):
+            with self.assertRaisesRegex(RuntimeError, "Cannot verify translator"):
+                merger.translator_has_capacity("owner/book")
 
     def test_failed_reads_and_invalid_json_are_not_treated_as_idle(self):
         failed = SimpleNamespace(returncode=1, stderr="API unavailable", stdout="")
@@ -111,7 +107,7 @@ class WorkflowActivityTests(unittest.TestCase):
 
 
 class MergeFlowTests(unittest.TestCase):
-    def run_flow(self, prs, *, activity=(False, False, False), snapshots=None, comments=None):
+    def run_flow(self, prs, *, snapshots=None, comments=None, target_number=None, max_merges=1, capacity=True):
         def items(endpoint):
             if "/pulls?" in endpoint:
                 return prs
@@ -123,51 +119,53 @@ class MergeFlowTests(unittest.TestCase):
 
         with (
             contextlib.redirect_stdout(io.StringIO()),
-            patch.object(merger, "other_workflows_active", side_effect=activity),
             patch.object(merger, "api_items", side_effect=items),
+            patch.object(merger, "gh_json", return_value=next((item for item in prs if item["number"] == target_number), None)),
             patch.object(merger, "merge_details", side_effect=snapshot),
+            patch.object(merger, "translator_has_capacity", return_value=capacity),
             patch.object(merger, "merge_pr", return_value=True) as merge,
         ):
-            count = merger.merge_approved("owner/book", 7)
+            count = merger.merge_approved("owner/book", max_merges=max_merges, target_number=target_number)
         return count, merge
 
-    def test_an_initially_busy_repository_does_not_merge(self):
-        count, merge = self.run_flow([pr(1)], activity=(True,))
-        self.assertEqual(count, 0)
-        merge.assert_not_called()
-
-    def test_a_workflow_starting_during_approval_collection_blocks_the_merge(self):
-        count, merge = self.run_flow([pr(1)], activity=(False, True))
-        self.assertEqual(count, 0)
-        merge.assert_not_called()
-
-    def test_a_build_queued_by_the_first_merge_stops_the_batch(self):
-        count, merge = self.run_flow([pr(1), pr(2)], activity=(False, False, True))
+    def test_comment_event_handles_its_pr_without_scanning_the_queue(self):
+        count, merge = self.run_flow([pr(1), pr(2)], target_number=2)
         self.assertEqual(count, 1)
-        merge.assert_called_once_with("owner/book", 1, "head-1")
+        merge.assert_called_once_with("owner/book", 2, "head-2")
 
-    def test_no_more_than_two_prs_are_merged_per_batch(self):
-        count, merge = self.run_flow([pr(1), pr(2), pr(3)])
+    def test_batch_limit_is_respected(self):
+        count, merge = self.run_flow([pr(1), pr(2), pr(3)], max_merges=2)
         self.assertEqual(count, 2)
         self.assertEqual([c.args[1] for c in merge.call_args_list], [1, 2])
+
+    def test_busy_translator_prevents_merge(self):
+        count, merge = self.run_flow([pr(1)], capacity=False)
+        self.assertEqual(count, 0)
+        merge.assert_not_called()
 
     def test_closed_draft_and_conflicting_prs_are_skipped(self):
         snapshots = {n: details(n) for n in (1, 2, 3)}
         snapshots[1]["state"] = "CLOSED"
         snapshots[2]["isDraft"] = True
         snapshots[3]["mergeable"] = "CONFLICTING"
-        count, merge = self.run_flow([pr(1), pr(2), pr(3)], activity=(False,), snapshots=snapshots)
+        count, merge = self.run_flow([pr(1), pr(2), pr(3)], snapshots=snapshots)
         self.assertEqual(count, 0)
         merge.assert_not_called()
+
+    def test_unknown_mergeability_uses_server_side_merge_guard(self):
+        unknown = details(1)
+        unknown["mergeable"] = "UNKNOWN"
+        count, merge = self.run_flow([pr(1)], snapshots={1: unknown})
+        self.assertEqual(count, 1)
+        merge.assert_called_once_with("owner/book", 1, "head-1")
 
     def test_comment_verification_failure_never_merges(self):
         with (
             contextlib.redirect_stdout(io.StringIO()),
-            patch.object(merger, "other_workflows_active", return_value=False),
             patch.object(merger, "api_items", side_effect=[[pr(1)], RuntimeError("API unavailable")]),
             patch.object(merger, "merge_pr") as merge,
         ):
-            self.assertEqual(merger.merge_approved("owner/book", 7), 0)
+            self.assertEqual(merger.merge_approved("owner/book"), 0)
         merge.assert_not_called()
 
     def test_paginated_comments_can_authorize_a_pr(self):
@@ -178,8 +176,8 @@ class MergeFlowTests(unittest.TestCase):
         merge.assert_called_once()
 
     def test_approval_queue_is_requested_oldest_first_on_every_page(self):
-        with patch.object(merger, "other_workflows_active", return_value=False), patch.object(merger, "api_items", return_value=[]) as request, contextlib.redirect_stdout(io.StringIO()):
-            merger.merge_approved("owner/book", 7)
+        with patch.object(merger, "api_items", return_value=[]) as request, contextlib.redirect_stdout(io.StringIO()):
+            merger.merge_approved("owner/book")
         self.assertIn("sort=created&direction=asc", request.call_args.args[0])
 
     def test_unknown_mergeability_is_rechecked(self):
