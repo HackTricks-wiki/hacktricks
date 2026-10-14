@@ -8,6 +8,12 @@ Software:
 
 - ReverseKit: [https://github.com/zer0condition/ReverseKit](https://github.com/zer0condition/ReverseKit)
 
+## WinDbg user-mode automation
+
+{{#ref}}
+windbg-automation.md
+{{#endref}}
+
 ## Windows kernel debugging
 
 {{#ref}}
