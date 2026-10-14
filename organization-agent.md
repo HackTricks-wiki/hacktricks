@@ -7,16 +7,20 @@
 - Main HackTricks owns general host/security techniques; HackTricks Cloud owns provider, service, and IAM-specific pivots. Cross-book links should use canonical public URLs.
 - A removed Markdown chapter needs a whole-page mdBook redirect in `book.toml`; update current local links, but do not preserve historical URL fragments.
 
-## Canonical locations and boundaries (this draft, contingent on merge)
+## Canonical locations and boundaries (verified in this clone; proposed until merged)
 
 - Windows remote service execution through SCM/SCMR—PsExec, WinExec/ScExec, SMBExec, and SCMExec—belongs in `src/windows-hardening/lateral-movement/psexec-and-winexec.md`. The SharpMove SCM example has its own `#scmexec-with-sharpmove` heading. These variants share remote service creation/start and local service rights; whether `ADMIN$` is needed depends on staging/output, so keep that distinction in the chapter. The former `scmexec.md` route redirects here.
 - `src/network-services-pentesting/pentesting-smb/README.md` keeps SMB discovery and a short context link to the service-execution chapter, not a second PsExec/SMBExec procedure. `src/windows-hardening/ntlm/README.md` links directly to the Impacket PsExec examples for Pass-the-Hash.
 - Keep Task Scheduler (`atexec.md`), DCOM (`dcomexec.md`), WMI (`wmiexec.md`), WinRM (`winrm.md`), and RDP (`rdpexec.md`) separate: their execution interfaces and prerequisites differ from SCM service creation. `lateral-movement/README.md` is a curated route map, not a duplicate technique chapter.
 - Azure/Entra-to-AD pivots remain in Cloud's `pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/`; a cloud use of PsExec does not transfer general Windows SCM ownership there.
 
+- POSIX CPU timer expiry/deletion TOCTOU, its IRQ/task-work distinction, ptrace/reaping reproducer, PoC reliability variants, and Chronomaly chain have one home at `src/binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md`. Linux Hardening's `kernel-lpe-cves/README.md` is an enumeration entry point linking straight to the root-cause section; the duplicate Linux-Hardening article is removed with a whole-page redirect. Keep kernel memory-corruption research under Binary Exploitation, while host assessment/checklists stay in Linux Hardening. Revisit the boundary only if a genuinely separate host-assessment task develops.
+
 ## Researcher lookup terms
 
 - For a remote Windows host where service-creation rights, SMB/RPC, or an already staged executable are available, look under **Lateral Movement → Remote Service Execution**; search terms include SCM, SCMR, SCMExec, PsExec, SMBExec, WinExec, ScExec, `sc.exe`, and SharpMove.
+
+- For POSIX CPU-timer races, search **Binary Exploitation → Linux kernel exploitation** for CVE-2025-38352, `CONFIG_POSIX_CPU_TIMERS_TASK_WORK`, IRQ expiry, `timer_delete`, ptrace/waitpid, UAF, and Chronomaly. Linux host operators should enter through **Linux Hardening → Kernel/LPE/CVE material**.
 
 ## Revisit only with evidence
 
