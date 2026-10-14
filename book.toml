@@ -31,6 +31,9 @@ default-theme = "hacktricks-light"
 hash-files = false
 
 [output.html.redirect]
+"/todo/industrial-control-systems-hacking/index.html" = "../../industrial-control-systems/index.html"
+"/todo/industrial-control-systems-hacking/modbus.html" = "../../network-services-pentesting/pentesting-modbus.html"
+"/todo/android-forensics.html" = "../generic-methodologies-and-resources/basic-forensic-methodology/android-forensics.html"
 "/todo/hardware-hacking/index.html" = "../../hardware-physical-access/hardware-hacking/index.html"
 "/todo/hardware-hacking/fault_injection_attacks.html" = "../../hardware-physical-access/hardware-hacking/fault_injection_attacks.html"
 "/todo/hardware-hacking/i2c.html" = "../../hardware-physical-access/hardware-hacking/i2c.html"
