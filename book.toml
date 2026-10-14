@@ -31,6 +31,8 @@ default-theme = "hacktricks-light"
 hash-files = false
 
 [output.html.redirect]
+"/todo/interesting-http.html" = "../pentesting-web/referer-header-and-referrer-policy.html"
+"/todo/stealing-sensitive-information-disclosure-from-a-web.html" = "../pentesting-web/sensitive-information-exfiltration.html"
 "/todo/industrial-control-systems-hacking/index.html" = "../../industrial-control-systems/index.html"
 "/todo/industrial-control-systems-hacking/modbus.html" = "../../network-services-pentesting/pentesting-modbus.html"
 "/todo/android-forensics.html" = "../generic-methodologies-and-resources/basic-forensic-methodology/android-forensics.html"
