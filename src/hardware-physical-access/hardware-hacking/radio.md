@@ -2,65 +2,67 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+Kwa kazi mahususi za itifaki baada ya kutambua ishara, tazama [majaribio ya RFID/NFC, sub-GHz, infrared, BLE, na LoRaWAN](../radio-hacking/README.md).
+
 ## SigDigger
 
-[**SigDigger**](https://github.com/BatchDrake/SigDigger) ni kichanganuzi cha mawimbi ya dijitali cha bure kwa GNU/Linux na macOS, kilichoundwa ili kutoa taarifa kutoka kwa mawimbi ya redio yasiyojulikana. Kinaunga mkono vifaa vya SDR kupitia SoapySDR na hutoa zana za demodulation na uchanganuzi wa wakati halisi kwa FSK, PSK, ASK, video ya analogi, mawimbi ya burst na chaneli za sauti za analogi.<sup>[[1]](#references)</sup>
+[**SigDigger**](https://github.com/BatchDrake/SigDigger) ni kichanganuzi huria cha ishara za kidijitali kwa GNU/Linux na macOS, kilichoundwa kutoa taarifa kutoka kwa ishara za redio zisizojulikana. Kinaunga mkono vifaa vya SDR kupitia SoapySDR na hutoa zana za demodulation na uchanganuzi wa wakati halisi kwa FSK, PSK, ASK, video ya analogi, ishara za mipasuko, na chaneli za sauti za analogi.<sup>[[1]](#references)</sup>
 
 ### Mipangilio ya Msingi
 
-Baada ya kusakinisha, kuna mambo machache unayoweza kufikiria kusanidi.\
-Katika mipangilio (kitufe cha kichupo cha pili), chagua **kifaa cha SDR** au faili ya ingizo, frequency ya kusikiliza na sample rate. Rate ya hadi 2.56 Msps inaweza kufaa ikiwa kifaa mwenyeji kinaiunga mkono.
+Baada ya kusakinisha, kuna mambo kadhaa unayoweza kufikiria kusanidi.\
+Katika mipangilio (kitufe cha kichupo cha pili), chagua **kifaa cha SDR** au faili ya ingizo, masafa ya kurekebisha, na kiwango cha sampuli. Kiwango cha hadi 2.56 Msps kinaweza kufaa ikiwa mfumo mwenyeji unakiunga mkono.
 
-![Mipangilio ya SigDigger inayoonyesha kifaa cha SDR, faili ya ingizo, frequency na chaguo za sample rate](<../../images/image (245).png>)
+![Mipangilio ya SigDigger inayoonyesha kifaa cha SDR, faili ya ingizo, masafa na chaguo za kiwango cha sampuli](<../../images/image (245).png>)
 
-Katika tabia ya GUI, inashauriwa kuwezesha mambo machache ikiwa PC yako inayaunga mkono:
+Katika tabia ya GUI, inapendekezwa kuwasha baadhi ya vitu ikiwa PC yako inaviunga mkono:
 
-![SigDigger - Mipangilio ya Msingi: Katika tabia ya GUI, inashauriwa kuwezesha mambo machache ikiwa PC yako inayaunga mkono](<../../images/image (472).png>)
+![SigDigger - Mipangilio ya Msingi: Katika tabia ya GUI, inapendekezwa kuwasha baadhi ya vitu ikiwa PC yako inaviunga mkono](<../../images/image (472).png>)
 
 > [!TIP]
-> Ukigundua kuwa PC yako hairekodi data, jaribu kuzima OpenGL na kupunguza sample rate.
+> Ukigundua kuwa PC yako hainasa vitu, jaribu kuzima OpenGL na kupunguza kiwango cha sampuli.
 
 ### Matumizi
 
-- Ili **kunasa sehemu ya muda wa mawimbi na kuichanganua**, shikilia kitufe cha "Push to capture" kwa muda unaohitaji.
+- Ili **kunasa ishara kwa muda na kuichanganua**, shikilia kitufe cha "Push to capture" kwa muda unaohitaji.
 
-![Mipangilio ya Msingi - Matumizi: Ili kunasa sehemu ya muda wa mawimbi na kuichanganua, shikilia kitufe cha "Push to capture" kwa muda unaohitaji](<../../images/image (960).png>)
+![Mipangilio ya Msingi - Matumizi: Ili kunasa ishara kwa muda na kuichanganua, shikilia kitufe cha "Push to capture" kwa muda unaohitaji](<../../images/image (960).png>)
 
-- **Tuner** ya SigDigger husaidia **kunasa mawimbi bora** (lakini pia inaweza kuyaharibu). Ni bora kuanza na 0 na kuendelea **kuongeza thamani yake hadi** kelele inayoletwa iwe **kubwa zaidi** kuliko **uboreshaji wa mawimbi** unaohitaji.
+- **Tuner** ya SigDigger husaidia **kunasa ishara bora zaidi** (lakini inaweza pia kuzidhoofisha). Ni vyema kuanza na 0 na kuendelea **kuiongeza hadi** kelele **inayoletwa** iwe **kubwa zaidi** kuliko **uboreshaji wa ishara** unaohitaji).
 
-![Kidhibiti cha tuner cha SigDigger kimewekwa ili kuboresha mawimbi ya redio yaliyonaswa](<../../images/image (1099).png>)
+![Kidhibiti cha tuner cha SigDigger kimewekwa ili kuboresha ishara ya redio iliyonaswa](<../../images/image (1099).png>)
 
 ### Kusawazisha na chaneli ya redio
 
-Ukitumia [**SigDigger** ](https://github.com/BatchDrake/SigDigger), sawazisha na chaneli unayotaka kusikiliza, sanidi chaguo la "Baseband audio preview", sanidi bandwidth ili kupata taarifa zote zinazotumwa, kisha weka Tuner kwenye kiwango kabla kelele haijaanza kuongezeka sana:<sup>[[1]](#references)</sup>
+Kwa kutumia [**SigDigger** ](https://github.com/BatchDrake/SigDigger), sawazisha na chaneli unayotaka kusikiliza, sanidi chaguo la "Baseband audio preview", weka kipimo data ili kupata taarifa zote zinazotumwa kisha weka Tuner kwenye kiwango kilicho kabla ya kelele kuanza kuongezeka sana:<sup>[[1]](#references)</sup>
 
-![Chaneli ya redio iliyosawazishwa kwenye SigDigger, ikiwa na baseband audio preview na bandwidth iliyosanidiwa](<../../images/image (585).png>)
+![Chaneli ya redio iliyosawazishwa kwenye SigDigger ikiwa na Baseband audio preview na kipimo data vilivyosaniwa](<../../images/image (585).png>)
 
 ## Mbinu za kuvutia
 
-- Kifaa kinapotuma burst za taarifa, kwa kawaida **sehemu ya kwanza huwa preamble**, kwa hiyo **usijali** ikiwa **hupati taarifa** humo **au kuna makosa**.
-- Katika fremu za taarifa, kwa kawaida unapaswa **kupata fremu tofauti zilizopangiliwa vizuri zilingane**:
+- Kifaa kinapotuma mipasuko ya taarifa, kwa kawaida **sehemu ya kwanza huwa preamble**, kwa hiyo **usijali** ikiwa **hupati taarifa** humo **au ikiwa kuna hitilafu**.
+- Katika fremu za taarifa, kwa kawaida unapaswa **kupata fremu tofauti zilizopangiliwa vizuri baina yake**:
 
-![Kusawazisha na chaneli ya redio - Mbinu za kuvutia: Katika fremu za taarifa, kwa kawaida unapaswa kupata fremu tofauti zilizopangiliwa vizuri zilingane](<../../images/image (1076).png>)
+![Kusawazisha na chaneli ya redio - Mbinu za kuvutia: Katika fremu za taarifa, kwa kawaida unapaswa kupata fremu tofauti zilizopangiliwa vizuri baina yake](<../../images/image (1076).png>)
 
-![Kusawazisha na chaneli ya redio - Mbinu za kuvutia: Katika fremu za taarifa, kwa kawaida unapaswa kupata fremu tofauti zilizopangiliwa vizuri zilingane](<../../images/image (597).png>)
+![Kusawazisha na chaneli ya redio - Mbinu za kuvutia: Katika fremu za taarifa, kwa kawaida unapaswa kupata fremu tofauti zilizopangiliwa vizuri baina yake](<../../images/image (597).png>)
 
-- **Baada ya kurejesha mabadiliko ya viwango, huenda ukahitaji kuyadekodi.** Kwa Manchester encoding, mwelekeo mmoja wa mabadiliko unawakilisha `0` na mwelekeo ulio kinyume unawakilisha `1`; polarity halisi hutegemea kanuni inayotumika.
-- Preamble inaweza kuwa na mfululizo wa viwango vilivyosampuliwa vilivyo sawa hata kama payload inatumia Manchester encoding, kwa hiyo tambua mpaka wa fremu kabla ya kuidikodi.
+- **Baada ya kurejesha mabadiliko ya viwango, huenda ukahitaji kuyadecodi.** Kwa encoding ya Manchester, mwelekeo mmoja wa mpito huwakilisha `0` na mwelekeo ulio kinyume huwakilisha `1`; polarity halisi hutegemea kanuni inayotumika.
+- Preamble inaweza kuwa na mfululizo wa kiwango kilekile kilichosampuliwa hata kama payload inatumia encoding ya Manchester, kwa hiyo tambua mpaka wa fremu kabla ya ku-decode.
 
 ### Kutambua aina ya modulation kwa kutumia IQ
 
-Kuna njia 3 za kuhifadhi taarifa katika mawimbi: kubadilisha **amplitude**, **frequency** au **phase**.\
-Unapochunguza mawimbi, kuna njia tofauti za kujaribu kubaini kinachotumika kuhifadhi taarifa (angalia njia zaidi hapa chini), lakini njia nzuri ni kuangalia grafu ya IQ.
+Kuna njia 3 za kuhifadhi taarifa katika ishara: kubadilisha **amplitude**, **frequency** au **phase**.\
+Unapochunguza ishara, kuna njia tofauti za kujaribu kubaini kinachotumiwa kuhifadhi taarifa (tazama njia zaidi hapa chini), lakini njia nzuri ni kuangalia grafu ya IQ.
 
-![Grafu ya IQ ya SigDigger inayotumika kutambua kama mawimbi yanatumia amplitude, frequency au phase modulation](<../../images/image (788).png>)
+![Grafu ya IQ ya SigDigger inayotumiwa kutambua kama ishara inatumia amplitude, frequency au phase modulation](<../../images/image (788).png>)
 
-- **Kutambua AM**: Ikiwa grafu ya IQ inaonyesha, kwa mfano, **duara 2** (huenda moja liko kwenye 0 na jingine kwenye amplitude tofauti), huenda hii ni mawimbi ya AM. Hii ni kwa sababu kwenye grafu ya IQ umbali kati ya 0 na duara ni amplitude ya mawimbi, hivyo ni rahisi kuona amplitude tofauti zinazotumika.
-- **Kutambua PM**: Kama ilivyo kwenye picha iliyotangulia, ukiona miduara midogo isiyohusiana, huenda inatumika phase modulation. Hii ni kwa sababu kwenye grafu ya IQ, pembe kati ya nukta na 0,0 ndiyo phase ya mawimbi, kwa hiyo ina maana kuwa phase 4 tofauti zinatumika.
-  - Kumbuka kuwa ikiwa taarifa imefichwa kwenye ukweli kwamba phase inabadilishwa, badala ya kuwa kwenye phase yenyewe, hutaona phase tofauti zikitofautiana kwa uwazi.
+- **Kutambua AM**: Ikiwa, kwa mfano, grafu ya IQ inaonyesha **duara 2** (huenda moja liko kwenye 0 na jingine kwenye amplitude tofauti), hii inaweza kumaanisha kuwa ni ishara ya AM. Hii ni kwa sababu katika grafu ya IQ, umbali kati ya 0 na duara ni amplitude ya ishara, hivyo ni rahisi kuona amplitudes tofauti zinazotumika.
+- **Kutambua PM**: Kama ilivyo kwenye picha iliyotangulia, ukiona miduara midogo isiyohusiana, huenda ikamaanisha kuwa phase modulation inatumika. Hii ni kwa sababu katika grafu ya IQ, pembe kati ya nukta na 0,0 ni phase ya ishara, hivyo ina maana kuwa phases 4 tofauti zinatumika.
+  - Kumbuka kwamba ikiwa taarifa imefichwa katika mabadiliko ya phase badala ya phase yenyewe, hutaona phases tofauti zikitofautiana waziwazi.
 - **Kutambua FM**: IQ haina sehemu ya kutambua frequencies (umbali kutoka katikati ni amplitude na pembe ni phase).\
-  Kwa hiyo, ili kutambua FM, kwenye grafu hii unapaswa **kuona duara tu kwa kiasi kikubwa**.\
-  Zaidi ya hayo, frequency offset hubadilisha kasi ya mzunguko kuzunguka duara la IQ. Kwa hiyo, kwenye SigDigger, mabadiliko ya kasi au mwelekeo wa mzunguko yanaweza kuonyesha FM.
+  Kwa hiyo, ili kutambua FM, kimsingi unapaswa **kuona duara pekee** kwenye grafu hii.\
+  Zaidi ya hayo, frequency offset hubadilisha kasi ya mzunguko kuzunguka duara la IQ. Kwa hiyo, katika SigDigger, mabadiliko ya kasi au mwelekeo wa mzunguko yanaweza kuashiria FM.
 
 ## Mfano wa AM
 
@@ -70,76 +72,76 @@ sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw
 
 ### Kutambua AM
 
-#### Kuchunguza envelope
+#### Kukagua envelope
 
-Unapokagua data ya AM kwa [**SigDigger**](https://github.com/BatchDrake/SigDigger), **envelope** ya mawimbi inaweza kuonyesha viwango tofauti vya amplitude. Mawimbi ya mfano hutuma taarifa kama mipigo iliyomoduliwa kwa amplitude; mpigo mmoja unaonekana hivi:<sup>[[1]](#references)</sup>
+Unapokagua data ya AM kwa kutumia [**SigDigger**](https://github.com/BatchDrake/SigDigger), **envelope** ya ishara inaweza kuonyesha viwango tofauti vya amplitude. Ishara ya mfano hutuma taarifa kama mipigo yenye amplitude modulation; mpigo mmoja unaonekana hivi:<sup>[[1]](#references)</sup>
 
-![Envelope ya mawimbi ya AM kwenye SigDigger yenye viwango vya amplitude vya mipigo vilivyo wazi](<../../images/image (590).png>)
+![Envelope ya ishara ya AM katika SigDigger yenye viwango vya wazi vya amplitude ya mipigo](<../../images/image (590).png>)
 
 Na hivi ndivyo sehemu ya symbol inavyoonekana pamoja na waveform:
 
-![Kutambua AM - Kuchunguza envelope: Hivi ndivyo sehemu ya symbol inavyoonekana pamoja na waveform](<../../images/image (734).png>)
+![Kutambua AM - Kukagua envelope: Na hivi ndivyo sehemu ya symbol inavyoonekana pamoja na waveform](<../../images/image (734).png>)
 
-#### Kuchunguza Histogram
+#### Kukagua Histogram
 
-Unaweza **kuchagua mawimbi yote** yenye taarifa, kuchagua hali ya **Amplitude** na **Selection**, kisha kubofya **Histogram**. Unaweza kuona kuwa kuna viwango 2 vilivyo wazi pekee.
+Unaweza **kuchagua ishara yote** ilipo taarifa, kuchagua hali ya **Amplitude** na **Selection**, kisha kubofya **Histogram.** Unaweza kuona kuwa viwango 2 vilivyo wazi pekee ndivyo vinapatikana.
 
-![Histogram ya amplitude ya SigDigger inayoonyesha viwango viwili vilivyo wazi kwa mawimbi ya AM yaliyochaguliwa](<../../images/image (264).png>)
+![Histogram ya amplitude ya SigDigger inayoonyesha viwango viwili vilivyo wazi kwa ishara ya AM iliyochaguliwa](<../../images/image (264).png>)
 
-Kwa mfano, ukichagua Frequency badala ya Amplitude katika mawimbi haya ya AM, utapata frequency 1 tu (haiwezekani taarifa iliyomoduliwa kwenye frequency itumie frequency 1 tu).
+Kwa mfano, ukichagua Frequency badala ya Amplitude katika ishara hii ya AM, utapata frequency 1 tu (haiwezekani taarifa iliyomodulishwa kwenye frequency kutumia frequency 1 tu).
 
-![Histogram ya frequency ya SigDigger kwa mawimbi ya AM inayoonyesha frequency moja](<../../images/image (732).png>)
+![Histogram ya frequency ya SigDigger kwa ishara ya AM inayoonyesha frequency moja](<../../images/image (732).png>)
 
-Ukipata frequencies nyingi, huenda haya si mawimbi ya FM; huenda frequency ya mawimbi ilibadilika tu kwa sababu ya chaneli.
+Ukipata frequencies nyingi, huenda hii isiwe FM; pengine frequency ya ishara ilibadilika tu kutokana na chaneli.
 
 #### Kwa kutumia IQ
 
-Katika mfano huu unaweza kuona kuna **duara kubwa**, lakini pia **nukta nyingi katikati**.
+Katika mfano huu unaweza kuona **duara kubwa**, lakini pia **nukta nyingi katikati**.
 
-![Kuchunguza Histogram - Kwa kutumia IQ: Katika mfano huu unaweza kuona kuwa kuna duara kubwa, lakini pia nukta nyingi katikati](<../../images/image (222).png>)
+![Kukagua Histogram - Kwa kutumia IQ: Katika mfano huu unaweza kuona duara kubwa, lakini pia nukta nyingi katikati](<../../images/image (222).png>)
 
 ### Kupata Symbol Rate
 
-#### Kwa kutumia symbol moja
+#### Kwa symbol moja
 
-Chagua kipindi kifupi zaidi chenye symbol moja kwa uwazi na uangalie **Selection freq**. Katika mfano huu ni 1.013 kHz, takribani 1 kHz.
+Chagua kipindi kidogo zaidi ambacho kina symbol moja kwa uwazi, kisha uangalie **Selection freq**. Katika mfano huu ni 1.013 kHz, takriban 1 kHz.
 
-![Kupata Symbol Rate - Kwa kutumia symbol moja: Chagua kipande kifupi zaidi chenye symbol moja unachoweza kupata (ili uhakikishe ni moja tu) na uangalie "Selection freq". Katika mfano huu ni 1.013 kHz (yaani 1 kHz).](<../../images/image (78).png>)
+![Kupata Symbol Rate - Kwa symbol moja: Chagua kipindi kidogo zaidi unachoweza kupata (ili kuhakikisha kina symbol moja tu) kisha uangalie "Selection freq". Katika mfano huu ni 1.013 kHz (yaani 1 kHz).](<../../images/image (78).png>)
 
-#### Kwa kutumia kundi la symbols
+#### Kwa kundi la symbols
 
-Unaweza pia kubainisha idadi ya symbols utakazochagua, na SigDigger itakokotoa frequency ya symbol 1 (huenda symbols nyingi zaidi zikatoa matokeo bora). Katika mfano huu nilichagua symbols 10 na "Selection freq" ni 1.004 kHz:
+Unaweza pia kuonyesha idadi ya symbols utakazochagua na SigDigger itakokotoa frequency ya symbol 1 (huenda kadiri unavyochagua symbols nyingi ndivyo matokeo yanavyokuwa bora). Katika hali hii nilichagua symbols 10 na "Selection freq" ni 1.004 Khz:
 
-![Hesabu ya symbol rate kwenye SigDigger kwa kutumia kundi teule la symbols kumi](<../../images/image (1008).png>)
+![Hesabu ya symbol-rate ya SigDigger kwa kutumia kundi lililochaguliwa la symbols kumi](<../../images/image (1008).png>)
 
 ### Kupata Bits
 
-Baada ya kutambua AM na kukadiria **symbol rate**, chagua eneo la mawimbi, sanidi amplitude sampling na viwango vya uamuzi, chagua **Gardner clock recovery**, kisha ubonyeze **Sample**:
+Baada ya kutambua AM na kukadiria **symbol rate**, chagua eneo la ishara, sanidi amplitude sampling na viwango vya uamuzi, chagua **Gardner clock recovery**, kisha ubonyeze **Sample**:
 
-![Paneli ya Get Bits ya SigDigger ikiwa imesanidiwa kwa AM sampling, symbol rate na Gardner clock recovery](<../../images/image (965).png>)
+![Paneli ya SigDigger ya Kupata Bits ikiwa imesanidiwa kwa AM sampling, symbol rate na Gardner clock recovery](<../../images/image (965).png>)
 
-- **Sync to selection intervals** humaanisha kuwa ikiwa awali ulichagua vipindi ili kupata symbol rate, symbol rate hiyo itatumika.
-- **Manual** humaanisha kuwa symbol rate iliyoonyeshwa ndiyo itatumika.
-- Katika **Fixed interval selection**, unaonyesha idadi ya vipindi vitakavyochaguliwa na kisha symbol rate huhesabiwa kutokana navyo.
-- **Gardner clock recovery** ni chaguo-msingi linalofaa, lakini bado linahitaji symbol rate ya takribani.
+- **Sync to selection intervals** inamaanisha kuwa ikiwa awali ulichagua vipindi ili kupata symbol rate, symbol rate hiyo itatumika.
+- **Manual** inamaanisha kuwa symbol rate iliyoonyeshwa ndiyo itakayotumika.
+- Katika **Fixed interval selection** unaonyesha idadi ya vipindi vitakavyochaguliwa na mfumo huhesabu symbol rate kutokana navyo.
+- **Gardner clock recovery** ni chaguo-msingi linalofaa, lakini bado linahitaji makadirio ya symbol rate.
 
-Ukibonyeza Sample, hiki ndicho kinachoonekana:
+Ukibonyeza sample, hiki ndicho kinachoonekana:
 
-![Kwa kutumia kundi la symbols - Kupata Bits: Hiki ndicho kinachoonekana unapobonyeza Sample](<../../images/image (644).png>)
+![Kwa kundi la symbols - Kupata Bits: Ukibonyeza sample, hiki ndicho kinachoonekana](<../../images/image (644).png>)
 
-Sasa, ili SigDigger itambue **eneo la viwango** vinavyobeba taarifa, bofya **kiwango cha chini** na uendelee kushikilia huku ukisogeza hadi kwenye kiwango cha juu zaidi:
+Sasa, ili SigDigger itambue **eneo la kiwango** linalobeba taarifa, unahitaji kubofya **kiwango cha chini** na kuendelea kushikilia hadi **kiwango cha juu zaidi**:
 
-![Uteuzi wa eneo la viwango kwenye SigDigger kutoka kiwango cha chini cha amplitude hadi kiwango cha juu](<../../images/image (439).png>)
+![Uteuzi wa masafa ya viwango katika SigDigger kutoka kiwango cha chini cha amplitude hadi kiwango cha juu](<../../images/image (439).png>)
 
-Kama kungekuwa na, kwa mfano, **viwango 4 tofauti vya amplitude**, ungelazimika kuweka **Bits per symbol kuwa 2** na kuchagua kutoka kiwango cha chini zaidi hadi cha juu zaidi.
+Kwa mfano, kama kungekuwa na **viwango 4 tofauti vya amplitude**, ungehitaji kusanidi **Bits per symbol kuwa 2** na kuchagua kutoka kiwango cha chini zaidi hadi cha juu zaidi.
 
-Hatimaye, **ukikuza** kwa kutumia **Zoom** na **kubadilisha Row size**, unaweza kuona bits (na unaweza kuchagua zote na kunakili ili kupata bits zote):
+Hatimaye, kwa **kuongeza** **Zoom** na **kubadilisha Row size**, unaweza kuona bits (na unaweza kuchagua zote na kunakili ili kupata bits zote):
 
-![Kwa kutumia kundi la symbols - Kupata Bits: Hatimaye, ukikuza kwa kutumia Zoom na kubadilisha Row size, unaweza kuona bits (na unaweza kuchagua zote na kunakili ili kupata bits zote)](<../../images/image (276).png>)
+![Kwa kundi la symbols - Kupata Bits: Hatimaye, kwa kuongeza Zoom na kubadilisha Row size, unaweza kuona bits (na unaweza kuchagua zote na kunakili ili kupata bits zote)](<../../images/image (276).png>)
 
-Ikiwa mawimbi yana zaidi ya bit 1 kwa symbol (kwa mfano 2), SigDigger **haiwezi kujua ni symbol ipi** ni 00, 01, 10 au 11, kwa hiyo itatumia **viwango tofauti vya kijivu** kuwakilisha kila moja (na ukinakili bits, itatumia **namba kutoka 0 hadi 3**, ambazo utahitaji kuzishughulikia).
+Ikiwa ishara ina zaidi ya bit 1 kwa kila symbol (kwa mfano 2), SigDigger **haiwezi kujua ni symbol ipi** ni 00, 01, 10 au 11, kwa hiyo itatumia **vivuli tofauti vya kijivu** kuwakilisha kila moja (na ukinakili bits, itatumia **namba kuanzia 0 hadi 3**, ambazo utahitaji kuzichakata).
 
-Kwa line encoding kama **Manchester**, geuza kila jozi halali ya mabadiliko (`01` au `10`) kuwa data bit kulingana na kanuni inayotumiwa na itifaki.
+Kwa line encoding kama **Manchester**, badilisha kila jozi halali ya mipito (`01` au `10`) kuwa data bit kulingana na kanuni inayotumiwa na itifaki.
 
 ## Mfano wa FM
 
@@ -149,57 +151,57 @@ sigdigger_20220308_170858Z_2560000_433500000_float32_iq.raw
 
 ### Kutambua FM
 
-#### Kuchunguza frequencies na waveform
+#### Kukagua frequencies na waveform
 
-Mfano wa mawimbi yanayotuma taarifa iliyomoduliwa kwa FM:
+Mfano wa ishara inayotuma taarifa zilizomodulishwa kwa FM:
 
-![Kutambua FM - Kuchunguza frequencies na waveform: Mfano wa mawimbi yanayotuma taarifa iliyomoduliwa kwa FM](<../../images/image (725).png>)
+![Kutambua FM - Kukagua frequencies na waveform: Mfano wa ishara inayotuma taarifa zilizomodulishwa kwa FM](<../../images/image (725).png>)
 
-Spectrum inaonyesha wazi **frequencies mbili**, ingawa huenda ikawa vigumu kuzitofautisha kwenye waveform ya time-domain:
+Spectrum inaonyesha wazi **frequencies mbili**, ingawa huenda ikawa vigumu kuzitofautisha katika waveform ya time-domain:
 
-![Waveform ya FM ya SigDigger ambapo ni vigumu kutofautisha frequencies hizo mbili moja kwa moja](<../../images/image (717).png>)
+![Waveform ya FM katika SigDigger ambapo frequencies mbili ni vigumu kuzitofautisha moja kwa moja](<../../images/image (717).png>)
 
-Hii hutokea kwa sababu capture imewekwa katikati ya frequencies zote mbili, kwa hiyo frequency offsets zake zinakaribia kuwa kinyume:
+Hii hutokea kwa sababu capture iko katikati ya frequencies zote mbili, hivyo frequency offsets zake zinakaribiana na kuwa kinyume:
 
-![Capture ya FM ya SigDigger inayoonyesha frequencies hizo mbili zikiwa na thamani zinazokaribia kuwa kinyume](<../../images/image (942).png>)
+![Capture ya FM ya SigDigger inayoonyesha frequencies mbili zikiwa takriban kinyume cha kila moja](<../../images/image (942).png>)
 
-Ikiwa frequency iliyosawazishwa **iko karibu zaidi na frequency moja kuliko nyingine**, unaweza kuona kwa urahisi frequencies 2 tofauti:
+Ikiwa frequency iliyosawazishwa iko **karibu zaidi na frequency moja kuliko nyingine**, unaweza kuona kwa urahisi frequencies 2 tofauti:
 
-![Kutambua FM - Kuchunguza frequencies na waveform: Ikiwa frequency iliyosawazishwa iko karibu zaidi na frequency moja kuliko nyingine, unaweza kuona kwa urahisi frequencies 2 tofauti](<../../images/image (422).png>)
+![Kutambua FM - Kukagua frequencies na waveform: Ikiwa frequency iliyosawazishwa iko karibu zaidi na frequency moja kuliko nyingine, unaweza kuona kwa urahisi frequencies 2 tofauti](<../../images/image (422).png>)
 
-![Kutambua FM - Kuchunguza frequencies na waveform: Ikiwa frequency iliyosawazishwa iko karibu zaidi na frequency moja kuliko nyingine, unaweza kuona kwa urahisi frequencies 2 tofauti](<../../images/image (488).png>)
+![Kutambua FM - Kukagua frequencies na waveform: Ikiwa frequency iliyosawazishwa iko karibu zaidi na frequency moja kuliko nyingine, unaweza kuona kwa urahisi frequencies 2 tofauti](<../../images/image (488).png>)
 
-#### Kuchunguza histogram
+#### Kukagua histogram
 
-Ukichunguza histogram ya frequency ya mawimbi yenye taarifa, unaweza kuona kwa urahisi mawimbi 2 tofauti:
+Ukikagua histogram ya frequency ya ishara yenye taarifa, unaweza kuona kwa urahisi ishara 2 tofauti:
 
-![Kuchunguza frequencies na waveform - Kuchunguza histogram: Ukichunguza histogram ya frequency ya mawimbi yenye taarifa, unaweza kuona kwa urahisi mawimbi 2 tofauti](<../../images/image (871).png>)
+![Kukagua frequencies na waveform - Kukagua histogram: Ukikagua histogram ya frequency ya ishara yenye taarifa, unaweza kuona kwa urahisi ishara 2 tofauti](<../../images/image (871).png>)
 
-Katika hali hii, ukichunguza **Amplitude histogram**, utapata **amplitude moja tu**, kwa hiyo **hayawezi kuwa mawimbi ya AM** (ukipata amplitudes nyingi, huenda ni kwa sababu mawimbi yalipoteza nguvu yalipopitia kwenye chaneli):
+Katika hali hii, ukiangalia **Amplitude histogram** utapata **amplitude moja tu**, kwa hiyo **haiwezi kuwa AM** (ukipata amplitudes nyingi, huenda ni kwa sababu ishara imepoteza nguvu ilipopitia chaneli):
 
-![Amplitude histogram ya SigDigger kwa mawimbi ya FM inayoonyesha kiwango kimoja cha amplitude](<../../images/image (817).png>)
+![Histogram ya amplitude ya SigDigger kwa ishara ya FM inayoonyesha kiwango kimoja cha amplitude](<../../images/image (817).png>)
 
-Na hii ndiyo histogram ya phase (inayoonyesha wazi kuwa mawimbi hayajamoduliwa kwa phase):
+Na hii ndiyo histogram ya phase (inayoonyesha wazi kuwa ishara haijamodulishwa kwa phase):
 
-![Kuchunguza frequencies na waveform - Kuchunguza histogram: Hii ndiyo histogram ya phase (inayoonyesha wazi kuwa mawimbi hayajamoduliwa kwa phase)](<../../images/image (996).png>)
+![Kukagua frequencies na waveform - Kukagua histogram: Hii ndiyo histogram ya phase (inayoonyesha wazi kuwa ishara haijamodulishwa kwa phase)](<../../images/image (996).png>)
 
 #### Kwa kutumia IQ
 
 IQ haina sehemu ya kutambua frequencies (umbali kutoka katikati ni amplitude na pembe ni phase).\
-Kwa hiyo, ili kutambua FM, kwenye grafu hii unapaswa **kuona duara tu kwa kiasi kikubwa**.\
-Zaidi ya hayo, frequency offset hubadilisha kasi ya mzunguko kuzunguka duara la IQ. Kwa hiyo, kwenye SigDigger, mabadiliko ya kasi au mwelekeo wa mzunguko yanaweza kuonyesha FM:
+Kwa hiyo, ili kutambua FM, kimsingi unapaswa **kuona duara pekee** kwenye grafu hii.\
+Zaidi ya hayo, frequency offset hubadilisha kasi ya mzunguko kuzunguka duara la IQ. Kwa hiyo, katika SigDigger, mabadiliko ya kasi au mwelekeo wa mzunguko yanaweza kuashiria FM:
 
-![Grafu ya IQ ya SigDigger ambapo FM huonekana kama mabadiliko ya kasi ya mzunguko kuzunguka duara](<../../images/image (81).png>)
+![Grafu ya IQ ya SigDigger ambapo FM inaonekana kama mabadiliko ya kasi ya mzunguko kuzunguka duara](<../../images/image (81).png>)
 
 ### Kupata Symbol Rate
 
-Unaweza kutumia **mbinu ileile iliyotumika kwenye mfano wa AM** kupata symbol rate baada ya kupata frequencies zinazobeba symbols.
+Unaweza kutumia **mbinu ileile iliyotumiwa katika mfano wa AM** kupata symbol rate baada ya kupata frequencies zinazobeba symbols.
 
 ### Kupata Bits
 
-Unaweza kutumia **mbinu ileile iliyotumika kwenye mfano wa AM** kupata bits baada ya **kubaini kuwa mawimbi yamemoduliwa kwa frequency** na kupata **symbol rate**.
+Unaweza kutumia **mbinu ileile iliyotumiwa katika mfano wa AM** kupata bits baada ya **kubaini kuwa ishara imemodulishwa kwa frequency** na kupata **symbol rate**.
 
 ## References
 
-- [1] [SigDigger - Kichanganuzi cha mawimbi ya dijitali cha bure kwa GNU/Linux na macOS](https://github.com/BatchDrake/SigDigger)
+- [1] [SigDigger - Kichanganuzi huria cha ishara za kidijitali kwa GNU/Linux na macOS](https://github.com/BatchDrake/SigDigger)
 {{#include ../../banners/hacktricks-training.md}}
