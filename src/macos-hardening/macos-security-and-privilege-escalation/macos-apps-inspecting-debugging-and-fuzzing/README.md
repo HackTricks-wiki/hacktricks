@@ -1,4 +1,4 @@
-# macOS Apps - 調査、デバッグ、Fuzzing
+# macOSアプリ - 検査、デバッグ、ファジング
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -24,12 +24,12 @@ objdump --disassemble-symbols=_hello --x86-asm-syntax=intel toolsdemo #Disassemb
 nm -m ./tccd # List of symbols
 ```
 
-### Disarm (old jtool2)
+### Disarm（旧 jtool2）
 
 [**disarmはこちらからダウンロードできます**](https://newosxbook.com/tools/disarm.html)。
 
 > [!TIP]
-> **`disarm`**は、圧縮されたIM4Pファイル（`kernelcache`など）にも対応しており、必要な部分だけを抽出したり、抽出せずにその部分を解析したりできます。
+> **`disarm`**は圧縮されたIM4Pファイル（`kernelcache`など）にも対応しており、必要な部分だけを抽出したり、抽出せずに必要な部分を解析したりできます。
 
 ```bash
 export JCOLOR=1
@@ -49,7 +49,7 @@ disarm -e "code signature" /bin/ps # Extract code signature of a binary
 ### Codesign / ldid
 
 > [!TIP]
-> **`Codesign`** は **macOS** で、**`ldid`** は **iOS** で利用できます。
+> **`Codesign`** は **macOS** で使用でき、**`ldid`** は **iOS** で使用できます。
 
 ```bash
 # Get signer
@@ -80,12 +80,12 @@ ldid -S/tmp/entl.xml <binary>
 
 ### SuspiciousPackage
 
-[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) は、**.pkg** ファイル（インストーラー）を検査し、インストール前に中身を確認するのに便利なツールです。\
-これらのインストーラーには `preinstall` と `postinstall` の bash スクリプトが含まれており、マルウェアの作成者は通常、これらを悪用してマルウェアを**persist**させます。
+[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) は、**.pkg** ファイル（インストーラー）を調査し、インストール前にその内容を確認するのに便利なツールです。\
+これらのインストーラーには `preinstall` と `postinstall` の bash スクリプトが含まれており、マルウェア作者は通常、**マルウェアをpersist**させるためにこれらを悪用します。
 
 ### hdiutil
 
-このツールは Apple のディスクイメージ（`.dmg`）ファイルを**マウント**し、何かを実行する前に検査できるようにします。
+このツールは Apple のディスクイメージ（`.dmg`）ファイルを**マウント**し、何かを実行する前に内容を確認できるようにします。
 
 ```bash
 hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
@@ -96,36 +96,36 @@ hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 ### Packed binaries
 
 - エントロピーが高いか確認する
-- 文字列を確認する（理解できる文字列がほとんどない場合は、packedされている）
-- macOS用のUPX packerは `__XHDR` というセクションを生成する
+- strings を確認する（理解できる文字列がほとんどない場合は、packed されている）
+- macOS 用 UPX packer は `__XHDR` という section を生成する
 
 ## Static Objective-C analysis
 
 ### Metadata
 
 > [!CAUTION]
-> Objective-Cで書かれたプログラムは、[Mach-O binaries](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)に**コンパイル**された後も、クラス宣言を**保持**します。クラス宣言には、次の名前と型が**含まれます**。
+> Objective-C で書かれたプログラムは、[Mach-O binaries](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md) に**コンパイル**されても、クラス宣言が**保持される**点に注意してください。こうしたクラス宣言には、以下の名前と型が**含まれます**。
 
 - 定義されたインターフェース
 - インターフェースのメソッド
 - インターフェースのインスタンス変数
 - 定義されたプロトコル
 
-バイナリのリバースをより難しくするために、これらの名前が難読化されている場合があることに注意してください。
+これらの名前は、バイナリのリバースを難しくするために難読化されている場合がある点に注意してください。
 
 ### Function calling
 
-Objective-Cを使用するバイナリで関数が呼び出されると、コンパイル済みコードはその関数を直接呼び出す代わりに、**`objc_msgSend`**を呼び出します。これが最終的な関数を呼び出します。
+Objective-C を使用するバイナリで関数が呼び出される場合、コンパイルされたコードはその関数を直接呼び出すのではなく、**`objc_msgSend`** を呼び出します。これが最終的に関数を呼び出します。
 
-![Metadata - Function calling: Objective-Cを使用するバイナリで関数が呼び出されると、コンパイル済みコードはその関数を直接呼び出す代わりに、objc msgSend を呼び出します。これが...](<../../../images/image (305).png>)
+![Metadata - Function calling: Objective-C を使用するバイナリで関数が呼び出される場合、コンパイルされたコードはその関数を直接呼び出すのではなく、objc msgSend を呼び出します。これが...](<../../../images/image (305).png>)
 
 この関数が受け取るパラメーターは次のとおりです。
 
-- 第1パラメーター（**self**）は「**メッセージを受け取るクラスのインスタンスを指すポインター**」です。簡単に言えば、メソッドが呼び出される対象のオブジェクトです。クラスメソッドの場合、これはクラスオブジェクト全体のインスタンスになります。一方、インスタンスメソッドの場合、selfはオブジェクトとしてインスタンス化されたクラスのインスタンスを指します。
-- 第2パラメーター（**op**）は「メッセージを処理するメソッドのセレクター」です。簡単に言えば、これは単に**メソッド名**です。
-- 残りのパラメーターは、メソッド（op）が必要とする**値**です。
+- 最初のパラメーター（**self**）は「メッセージを受け取る**クラスのインスタンスを指すポインター**」です。簡単に言えば、メソッドが呼び出される対象のオブジェクトです。クラスメソッドの場合、クラスオブジェクト全体のインスタンスを指します。一方、インスタンスメソッドの場合、インスタンス化されたクラスオブジェクトを指します。
+- 2 番目のパラメーター（**op**）は「メッセージを処理するメソッドのセレクター」です。簡単に言えば、これは単に**メソッド名**です。
+- 残りのパラメーターは、メソッド（op）で必要とされる**値**です。
 
-**ARM64で`lldb`を使ってこの情報を簡単に取得する**方法については、こちらのページを参照してください。
+このページでは、**ARM64 で `lldb` を使ってこの情報を簡単に取得する方法**を確認できます。
 
 
 {{#ref}}
@@ -138,17 +138,17 @@ x64:
 | ----------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
 | **1st argument**  | **rdi**                                                         | **self: メソッドが呼び出される対象のオブジェクト** |
 | **2nd argument**  | **rsi**                                                         | **op: メソッド名**                             |
-| **3rd argument**  | **rdx**                                                         | **メソッドの第1引数**                         |
-| **4th argument**  | **rcx**                                                         | **メソッドの第2引数**                         |
-| **5th argument**  | **r8**                                                          | **メソッドの第3引数**                         |
-| **6th argument**  | **r9**                                                          | **メソッドの第4引数**                         |
-| **7th+ argument** | <p><strong>rsp+</strong><br><strong>(on the stack)</strong></p> | **メソッドの第5引数以降**                        |
+| **3rd argument**  | **rdx**                                                         | **メソッドの第 1 引数**                         |
+| **4th argument**  | **rcx**                                                         | **メソッドの第 2 引数**                         |
+| **5th argument**  | **r8**                                                          | **メソッドの第 3 引数**                         |
+| **6th argument**  | **r9**                                                          | **メソッドの第 4 引数**                         |
+| **7th+ argument** | <p><strong>rsp+</strong><br><strong>(on the stack)</strong></p> | **メソッドの第 5 引数以降**                        |
 
-### Dump ObjectiveC metadata
+### ObjectiveC metadata のダンプ
 
 ### Dynadump
 
-[**Dynadump**](https://github.com/DerekSelander/dynadump)は、Objective-Cバイナリをclass-dumpするツールです。GitHubの説明ではdylibが対象とされていますが、実行ファイルにも使用できます。
+[**Dynadump**](https://github.com/DerekSelander/dynadump) は、Objective-C binaries を class-dump するツールです。GitHub では dylibs が対象とされていますが、実行ファイルでも動作します。
 
 ```bash
 ./dynadump dump /path/to/bin
@@ -166,13 +166,13 @@ objdump --macho --objc-meta-data /path/to/bin
 
 #### class-dump
 
-[**class-dump**](https://github.com/nygard/class-dump/) は、Objective-C形式のコード内にあるクラス、カテゴリ、プロトコルの宣言を生成する元祖のツールです。
+[**class-dump**](https://github.com/nygard/class-dump/) は、Objective-C形式のコードでクラス、カテゴリ、プロトコルの宣言を生成する元祖ツールです。
 
-古く、メンテナンスもされていないため、正常に動作しない可能性があります。
+古く、メンテナンスされていないため、正しく動作しない可能性があります。
 
 #### ICDump
 
-[**iCDump**](https://github.com/romainthomas/iCDump) は、最新のクロスプラットフォーム対応Objective-C class dumpです。既存のツールと比べて、iCDumpはAppleエコシステムに依存せずに実行でき、Python bindingsを公開しています。
+[**iCDump**](https://github.com/romainthomas/iCDump) は、最新のクロスプラットフォーム対応Objective-C class dumpです。既存のツールと比べて、iCDumpはAppleエコシステムに依存せずに実行でき、Pythonバインディングも提供します。
 
 ```python
 import icdump
@@ -181,11 +181,11 @@ metadata = icdump.objc.parse("/path/to/bin")
 print(metadata.to_decl())
 ```
 
-## Static Swift の分析
+## 静的Swift解析
 
-Swift バイナリでは、Objective-C との互換性があるため、[class-dump](https://github.com/nygard/class-dump/) を使って宣言を抽出できる場合がありますが、常にできるとは限りません。
+SwiftバイナリはObjective-Cとの互換性があるため、[class-dump](https://github.com/nygard/class-dump/)を使って宣言を抽出できる場合がありますが、常にできるとは限りません。
 
-**`jtool -l`** または **`otool -l`** のコマンドラインを使うと、**`__swift5`** というプレフィックスで始まる複数のセクションを見つけられます。
+**`jtool -l`**または**`otool -l`**のコマンドラインを使うと、**`__swift5`**プレフィックスで始まる複数のセクションを見つけられます。
 
 ```bash
 jtool2 -l /Applications/Stocks.app/Contents/MacOS/Stocks
@@ -199,9 +199,9 @@ LC 01: LC_SEGMENT_64              Mem: 0x100000000-0x100028000    __TEXT
     [...]
 ```
 
-これらのセクションに保存されている[**情報については、このブログ記事**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html)で詳しく説明されています。<sup>[[5]](#references)</sup>
+[**これらのセクションに保存されている情報については、このブログ記事**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html)で詳しく確認できます。<sup>[[5]](#references)</sup>
 
-さらに、**Swiftバイナリにはsymbolsが含まれている場合があります**（たとえば、ライブラリは関数を呼び出せるようにsymbolsを保存する必要があります）。**symbolsには通常、関数名や属性に関する情報が含まれていますが、表記が読みにくいため**、非常に役立ちます。また、元の名前を取得できる「**demanglers**」もあります。
+さらに、**Swiftバイナリにはsymbolsが含まれている場合があります**（たとえば、ライブラリは関数を呼び出せるようにsymbolsを保存する必要があります）。**symbolsには通常、関数名や属性に関する情報が読みにくい形式で含まれている**ため、非常に役立ちます。また、元の名前を取得できる「**demanglers**」もあります。
 
 ```bash
 # Ghidra plugin
@@ -211,77 +211,79 @@ https://github.com/ghidraninja/ghidra_scripts/blob/master/swift_demangler.py
 swift demangle
 ```
 
-## 動的解析
+## Dynamic Analysis
 
 > [!WARNING]
-> バイナリをデバッグするには、**SIPを無効にする**（`csrutil disable` または `csrutil enable --without debug`）か、バイナリを一時フォルダにコピーして `codesign --remove-signature <binary-path>` で**署名を削除**するか、バイナリのデバッグを許可する必要があります（[このスクリプト](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b)を使用できます）。
+> **デバッグの既定手順として SIP を無効にしないでください。** `com.apple.security.get-task-allow` が設定された開発ビルドは、SIP を有効にしたままデバッグできます。LLDB を試す前に、`codesign -d --entitlements :- /path/to/binary` で対象を確認してください。デバッガの entitlement だけでは、SIP で保護された対象にアクセスできません。<sup>[[15]](#references)</sup>
+>
+> hardened runtime を使用する配布アプリでは通常 `get-task-allow` が省略され、アタッチがブロックされます。可能であれば開発者から提供された debug build を使用してください。使い捨てのコピーに再署名すると、テスト対象の動作が変わる可能性があります。保護された対象のために SIP を無効にする必要がある場合は、普段使用しているマシンではなく、専用のテストマシンまたは VM を使用してください。<sup>[[16]](#references)</sup>
 
 > [!WARNING]
-> macOSで（`cloudconfigurationd` などの）**システムバイナリに計装を行う**には、**SIPを無効にする必要があります**（署名を削除するだけでは機能しません）。
+> macOS で `cloudconfigurationd` などの **system binaries に instrument を適用する**には、**SIP を無効にする必要があります**（署名を削除するだけでは機能しません）。
 
-### API
+### APIs
 
-macOSには、プロセスに関する情報を取得できる便利なAPIがいくつかあります。
+macOS には、プロセスに関する情報を取得できる興味深い API がいくつかあります。
 
-- `proc_info`: 各プロセスに関する多くの情報を提供する主要なAPIです。他のプロセスの情報を取得するにはroot権限が必要ですが、特別なentitlementやmach portは必要ありません。
-- `libsysmon.dylib`: XPC関数を通じてプロセス情報を提供しますが、呼び出し側には `com.apple.sysmond.client` entitlementが必要です。
+- `proc_info`: 各プロセスの多くの情報を取得できる主要な API です。他のプロセスの情報を取得するには root 権限が必要ですが、特別な entitlements や mach ports は必要ありません。
+- `libsysmon.dylib`: XPC functions を通じてプロセス情報を公開しますが、呼び出し側には `com.apple.sysmond.client` entitlement が必要です。
 
 ### Stackshot & microstackshots
 
-**Stackshot**は、実行中のすべてのスレッドのコールスタックを含む、プロセスの状態を取得する手法です。特定の時点におけるデバッグ、パフォーマンス分析、システムの動作の理解に特に役立ちます。iOSとmacOSでは、**`sample`**や**`spindump`**などのツールや方法を使ってstackshotを取得できます。
+**Stackshotting** は、実行中のすべてのスレッドの call stacks を含む、プロセスの状態を取得する手法です。デバッグ、パフォーマンス分析、特定時点におけるシステムの動作の把握に特に役立ちます。iOS と macOS では、**`sample`** や **`spindump`** などのツールを使って、複数の方法で stackshotting を実行できます。
 
 ### Sysdiagnose
 
-このツール（`/usr/bini/ysdiagnose`）は基本的に、`ps`や`zprint`など、数十種類のコマンドを実行してコンピュータから大量の情報を収集します。
+このツール（`/usr/bini/ysdiagnose`）は基本的に、`ps` や `zprint` など、さまざまなコマンドを多数実行して、コンピューターから多くの情報を収集します。
 
-**root**として実行する必要があり、デーモン `/usr/libexec/sysdiagnosed` には `com.apple.system-task-ports` や `get-task-allow` など、非常に興味深いentitlementがあります。
+**root** として実行する必要があります。また、デーモン `/usr/libexec/sysdiagnosed` には、`com.apple.system-task-ports` や `get-task-allow` など、非常に興味深い entitlements があります。
 
-plistは `/System/Library/LaunchDaemons/com.apple.sysdiagnose.plist` にあり、3つのMachServicesが宣言されています。
+その plist は `/System/Library/LaunchDaemons/com.apple.sysdiagnose.plist` にあり、次の 3 つの MachServices が宣言されています。
 
 - `com.apple.sysdiagnose.CacheDelete`: /var/rmp 内の古いアーカイブを削除します
-- `com.apple.sysdiagnose.kernel.ipc`: 特殊ポート23（kernel）
-- `com.apple.sysdiagnose.service.xpc`: `Libsysdiagnose` Obj-Cクラスを介したユーザーモードインターフェース。dict内の3つの引数（`compress`、`display`、`run`）を渡せます
+- `com.apple.sysdiagnose.kernel.ipc`: 特別な port 23（kernel）
+- `com.apple.sysdiagnose.service.xpc`: `Libsysdiagnose` Obj-C class を介した user mode interface。dict 内で 3 つの引数（`compress`、`display`、`run`）を渡せます
 
-### 統合ログ
+### Unified Logs
 
-macOSは、アプリケーションの動作を分析する際に役立つ詳細なログを生成します。
+macOS は、アプリケーションの動作を分析する際に役立つ詳細なログを生成します。
 
-一部のログフィールドには、ユーザーやデバイスを特定できる情報を隠すために `<private>` というタグが含まれています。古い手順では、これらのフィールドを表示するために証明書をインストールする方法が説明されている場合があります。現在のデバッグ手順では、代わりに `Enable-Private-Data` を含む、明示的にスコープを限定した構成プロファイル、またはアプリケーション単位の `OSLogPreferences` を使用します。動作はサブシステムやmacOSのリリースによって異なる場合があります。古い証明書やプロファイルに関する説明は参考資料に残されています。 <sup>[[8]](#references)</sup><sup>[[9]](#references)</sup>
+一部のログフィールドには `<private>` タグが含まれ、ユーザーやデバイスを特定できる情報が隠されています。古い手順では、これらのフィールドを表示するために証明書をインストールする方法が説明されていることがあります。現在のデバッグガイダンスでは、代わりに対象を明示した構成プロファイルの `Enable-Private-Data`、またはアプリケーションごとの `OSLogPreferences` を使用します。動作はサブシステムや macOS のリリースによって異なる場合があります。古い証明書／プロファイルに関する説明は references に残されています。<sup>[[8]](#references)</sup><sup>[[9]](#references)</sup>
 
 ### Hopper
 
 #### 左パネル
 
-Hopperの左パネルでは、バイナリのシンボル（**Labels**）、プロシージャと関数の一覧（**Proc**）、文字列（**Str**）を確認できます。ここに表示されるのはすべての文字列ではなく、Mac-Oファイルの複数の部分（_cstringや`objc_methname`など）で定義されたものです。
+Hopper の左パネルでは、バイナリのシンボル（**Labels**）、プロシージャと関数の一覧（**Proc**）、文字列（**Str**）を確認できます。ここに表示されるのはすべての文字列ではなく、Mac-O ファイル内の複数の領域（`_cstring` や `objc_methname` など）で定義された文字列です。
 
 #### 中央パネル
 
-中央パネルでは**逆アセンブルされたコード**を確認できます。それぞれのアイコンをクリックすると、**raw**形式、**graph**形式、**decompiled**形式、**binary**形式で逆アセンブル結果を表示できます。
+中央パネルでは、**逆アセンブルされたコード**を確認できます。また、該当するアイコンをクリックすると、**raw** な逆アセンブル、**graph**、**decompiled**、**binary** として表示できます。
 
 <figure><img src="../../../images/image (343).png" alt=""><figcaption></figcaption></figure>
 
-コードオブジェクトを右クリックすると、そのオブジェクトへの参照やそのオブジェクトからの参照を確認したり、名前を変更したりできます（decompiled pseudocodeでは機能しません）。
+コードオブジェクトを右クリックすると、そのオブジェクトへの参照や、そこからの参照を確認したり、名前を変更したりできます（decompiled pseudocode では機能しません）。
 
 <figure><img src="../../../images/image (1117).png" alt=""><figcaption></figcaption></figure>
 
-また、**中央下部ではPythonコマンドを入力できます**。
+さらに、**中央下部では Python コマンドを記述できます**。
 
 #### 右パネル
 
-右パネルでは、現在の状態に至った経緯を確認できる**ナビゲーション履歴**、この関数を呼び出すすべての**関数**と、この関数が呼び出すすべての関数を確認できる**コールグラフ**、**ローカル変数**の情報などを確認できます。
+右パネルでは、現在の状態に至った経緯を確認できる **navigation history**、この関数を呼び出すすべての **functions** と、この関数が呼び出すすべての functions を確認できる **call graph**、および **local variables** の情報などを確認できます。
 
 ### dtrace
 
-ユーザーがアプリケーションに**非常に低いレベル**でアクセスし、**プログラムをトレース**したり、実行フローを変更したりできるようにします。Dtraceは、**kernel内のさまざまな場所に配置されたprobe**を使用します。たとえば、システムコールの開始時や終了時などに配置されています。
+ユーザーがアプリケーションに**非常に低いレベル**でアクセスできるようにし、**プログラムを trace** したり、実行フローを変更したりする方法を提供します。Dtrace は **probes** を使用します。probes は **kernel 全体に配置**されており、system calls の開始地点や終了地点などにあります。
 
-DTraceは**`dtrace_probe_create`**関数を使って、各システムコールのprobeを作成します。これらのprobeは、**各システムコールのentry pointとexit point**で発火します。DTraceとのやり取りには `/dev/dtrace` を使用しますが、これはrootユーザーのみが利用できます。<sup>[[1]](#references)</sup>
+DTrace は **`dtrace_probe_create`** 関数を使用して、各 system call の probe を作成します。これらの probe は、各 system call の **entry point と exit point** で発火します。DTrace とのやり取りには `/dev/dtrace` を使用しますが、これは root user のみが利用できます。<sup>[[1]](#references)</sup>
 
 > [!TIP]
-> SIP保護を完全に無効にせずにDtraceを有効にするには、リカバリモードで次のコマンドを実行します: `csrutil enable --without dtrace`
+> SIP 保護を完全に無効にせずに Dtrace を有効にするには、recovery mode で次を実行します: `csrutil enable --without dtrace`
 >
-> 自分で**コンパイルした**バイナリに対して、**`dtrace`**や**`dtruss`**を実行することもできます。
+> 自分でコンパイルしたバイナリに対して **`dtrace`** または **`dtruss`** を実行することもできます。
 
-dtraceで利用可能なprobeは、次のコマンドで取得できます:
+利用可能な dtrace probes は、次のコマンドで取得できます:
 
 ```bash
 dtrace -l | head
@@ -293,15 +295,15 @@ dtrace -l | head
    44    profile                                                     profile-199
 ```
 
-プローブ名は4つの部分（provider、module、function、name）で構成されます（`fbt:mach_kernel:ptrace:entry`）。名前の一部を指定しない場合、Dtraceはその部分にワイルドカードを適用します。
+プローブ名は provider、module、function、name の4つの部分で構成されます（`fbt:mach_kernel:ptrace:entry`）。名前の一部を指定しない場合、DTrace はその部分にワイルドカードを適用します。
 
-DTraceでプローブを有効化し、プローブが発火したときに実行するアクションを指定するには、D languageを使用します。
+DTrace がプローブを有効化し、プローブが発火したときに実行するアクションを指定するには、D 言語を使用します。
 
-詳しい説明とその他の例は、[https://illumos.org/books/dtrace/chp-intro.html](https://illumos.org/books/dtrace/chp-intro.html)を参照してください。
+詳しい説明と追加の例は、[https://illumos.org/books/dtrace/chp-intro.html](https://illumos.org/books/dtrace/chp-intro.html) にあります。
 
 #### 例
 
-`man -k dtrace`を実行すると、**利用可能なDTraceスクリプト**の一覧が表示されます。例：`sudo dtruss -n binary`
+`man -k dtrace` を実行すると、**利用可能な DTrace スクリプト**を一覧表示できます。例：`sudo dtruss -n binary`
 
 - インライン
 
@@ -310,7 +312,7 @@ DTraceでプローブを有効化し、プローブが発火したときに実�
 sudo dtrace -n 'syscall:::entry {@[execname] = count()}'
 ```
 
-- スクリプト
+- script
 
 ```bash
 syscall:::entry
@@ -359,11 +361,11 @@ dtruss -c -p 1000 #get syscalls of PID 1000
 
 ### kdebug
 
-これはカーネルのトレース機能です。文書化されたコードは **`/usr/share/misc/trace.codes`** にあります。
+カーネルトレース機能です。文書化されたコードは **`/usr/share/misc/trace.codes`** にあります。
 
 `latency`、`sc_usage`、`fs_usage`、`trace` などのツールは、内部でこれを使用します。
 
-`kdebug` とやり取りするには、`kern.kdebug` 名前空間の `sysctl` を使用します。使用する MIB は `sys/sysctl.h` にあり、関数は `bsd/kern/kdebug.c` に実装されています。
+`kdebug` とやり取りするには、`kern.kdebug` 名前空間で `sysctl` を使用します。使用する MIB は `sys/sysctl.h` に記載されており、関数は `bsd/kern/kdebug.c` に実装されています。
 
 カスタムクライアントで kdebug とやり取りする場合、通常は次の手順を実行します。
 
@@ -373,15 +375,15 @@ dtruss -c -p 1000 #get syscalls of PID 1000
 - KERN_KDPINDEX でトレースから自身のクライアントを取得する
 - KERN_KDENABLE でトレースを有効にする
 - KERN_KDREADTR を呼び出してバッファを読み取る
-- 各スレッドをプロセスに対応付けるには、KERN_KDTHRMAP を呼び出す
+- 各スレッドとそのプロセスを対応付けるには、KERN_KDTHRMAP を呼び出す
 
 この情報を取得するには、Apple のツール **`trace`** またはカスタムツール [kDebugView (kdv)](https://newosxbook.com/tools/kdv.html)** を使用できます。
 
-**Kdebug は一度に1つのクライアントのみ利用できます。** そのため、k-debug を利用するツールは同時に1つだけ実行できます。
+**Kdebug は一度に 1 つのクライアントしか利用できない点に注意してください。** そのため、k-debug を使用するツールは同時に 1 つしか実行できません。
 
 ### ktrace
 
-`ktrace_*` API は `libktrace.dylib` にあり、Kdebug の API をラップしています。そのため、クライアントは `ktrace_session_create` と `ktrace_events_[single/class]` を呼び出して特定のコードにコールバックを設定し、その後 `ktrace_start` でトレースを開始できます。
+`ktrace_*` API は `libktrace.dylib` に由来し、Kdebug の API をラップしています。そのため、クライアントは `ktrace_session_create` と `ktrace_events_[single/class]` を呼び出して特定のコードにコールバックを設定し、`ktrace_start` で開始できます。
 
 **SIP が有効な状態でも**使用できます。
 
@@ -395,38 +397,38 @@ ktrace trace -s -S -t c -c ls | grep "ls("
 
 ### kperf
 
-これは kernel level profiling に使用され、`Kdebug` callouts を使って構築されています。
+kernel level profiling に使用され、`Kdebug` callout を使って構築されています。
 
-基本的には、グローバル変数 `kernel_debug_active` が確認され、有効な場合は、呼び出し元の kernel frame の `Kdebug` code と address を使って `kperf_kdebug_handler` が呼び出されます。`Kdebug` code が選択されたものと一致すると、bitmap として設定された「actions」が適用されます（選択肢は `osfmk/kperf/action.h` を確認してください）。
+基本的に、グローバル変数 `kernel_debug_active` がチェックされ、有効な場合は、呼び出し元の kernel frame の `Kdebug` code とアドレスを指定して `kperf_kdebug_handler` が呼び出されます。`Kdebug` code が選択されたものと一致すると、bitmap として設定された「actions」が適用されます（オプションについては `osfmk/kperf/action.h` を確認してください）。
 
-Kperf には sysctl MIB table もあります（root として実行）：`sysctl kperf`。これらの code は `osfmk/kperf/kperfbsd.c` にあります。
+Kperf には sysctl MIB テーブルもあります（root として実行）：`sysctl kperf`。これらの code は `osfmk/kperf/kperfbsd.c` にあります。
 
-さらに、Kperf の機能の一部は、マシンの performance counters に関する情報を提供する `kpc` にあります。
+さらに、Kperf の機能の一部は `kpc` にあり、マシンのパフォーマンスカウンターに関する情報を提供します。
 
 ### ProcessMonitor
 
-[**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor) は、プロセスが実行しているプロセス関連のアクション（たとえば、プロセスが新たに作成しているプロセスの監視）を確認するのに非常に便利なツールです。
+[**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor) は、プロセスが実行しているプロセス関連のアクション（たとえば、プロセスが新たに作成しているプロセス）の確認に非常に便利なツールです。
 
 ### SpriteTree
 
 [**SpriteTree**](https://themittenmac.com/tools/) は、プロセス間の関係を表示するツールです。\
-**`sudo eslogger fork exec rename create > cap.json`** のようなコマンドで Mac を監視する必要があります（このコマンドを実行するターミナルには FDA が必要です）。その後、このツールで json を読み込み、すべての関係を表示できます。
+**`sudo eslogger fork exec rename create > cap.json`** のようなコマンドで Mac の監視を開始します（このコマンドを実行するターミナルには FDA が必要です）。その後、json をこのツールに読み込むと、すべての関係を表示できます：
 
 <figure><img src="../../../images/image (1182).png" alt="" width="375"><figcaption></figcaption></figure>
 
 ### FileMonitor
 
-[**FileMonitor**](https://objective-see.com/products/utilities.html#FileMonitor) は、作成、変更、削除などのファイルイベントを監視します。
+[**FileMonitor**](https://objective-see.com/products/utilities.html#FileMonitor) は、ファイルの作成、変更、削除などのイベントを監視します。
 
 ### Crescendo
 
-[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo) は、Windows ユーザーには Microsoft Sysinternal の _Procmon_ として知られているかもしれない、同様の外観と操作感を備えた GUI ツールです。このツールでは、さまざまな種類のイベントの記録を開始・停止できます。また、ファイル、プロセス、ネットワークなどのカテゴリでイベントをフィルタリングでき、記録したイベントを json 形式で保存する機能もあります。
+[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo) は、Windows ユーザーには Microsoft Sysinternal の _Procmon_ としておなじみの外観と操作感を備えた GUI ツールです。このツールでは、さまざまな種類のイベントの記録を開始・停止でき、ファイル、プロセス、ネットワークなどのカテゴリでイベントをフィルタリングできます。また、記録したイベントを json 形式で保存できます。
 
 ### Apple Instruments
 
-[**Apple Instruments**](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CellularBestPractices/Appendix/Appendix.html) は Xcode の Developer tools の一部で、アプリケーションのパフォーマンス監視、メモリ leak の特定、ファイルシステムのアクティビティ追跡に使用されます。
+[**Apple Instruments**](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CellularBestPractices/Appendix/Appendix.html) は Xcode の Developer tools の一部で、アプリケーションのパフォーマンス監視、memory leak の特定、filesystem のアクティビティ追跡に使用されます。
 
-![Crescendo - Apple Instruments: Apple Instruments は Xcode の Developer tools の一部で、アプリケーションのパフォーマンス監視、メモリ leak の特定、ファイルシステムのアクティビティ追跡に使用されます](<../../../images/image (1138).png>)
+![Crescendo - Apple Instruments: Apple Instruments は Xcode の Developer tools の一部で、アプリケーションのパフォーマンス監視、memory leak の特定、filesystem のアクティビティ追跡に使用されます](<../../../images/image (1138).png>)
 
 ### fs_usage
 
@@ -439,16 +441,57 @@ fs_usage -w -f network curl #This tracks network actions
 
 ### TaskExplorer
 
-[**Taskexplorer**](https://objective-see.com/products/taskexplorer.html) は、バイナリが使用している**ライブラリ**、使用中の**ファイル**、**ネットワーク**接続を確認するのに便利です。\
-また、バイナリのプロセスを**virustotal**と照合し、バイナリに関する情報を表示します。
+[**Taskexplorer**](https://objective-see.com/products/taskexplorer.html) は、バイナリが使用している **libraries**、使用中の **files**、および **network** 接続を確認するのに役立ちます。\
+また、バイナリのプロセスを **virustotal** と照合し、バイナリに関する情報を表示します。
 
 ## PT_DENY_ATTACH <a href="#page-title" id="page-title"></a>
 
-[**このブログ記事**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html)では、SIPが無効でもデバッグを阻止するために**`PT_DENY_ATTACH`**を使用する**実行中のデーモンをデバッグする**方法の例を紹介しています。<sup>[[6]](#references)</sup>
+[**このブログ記事**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html)では、SIP が無効になっていてもデバッグを阻止するために **`PT_DENY_ATTACH`** を使用している **実行中のデーモンをデバッグする**例を確認できます。<sup>[[6]](#references)</sup>
+
+`PT_DENY_ATTACH` は、値 **31** (`0x1f`) の Darwin 固有の `ptrace(2)` リクエストです。他の引数は無視されます。プロセスは fork せずにこれを直接呼び出し、後続の親プロセスによるトレースを拒否できます。<sup>[[10]](#references)[[12]](#references)</sup>
+
+```c
+#include <sys/ptrace.h>
+
+if (ptrace(PT_DENY_ATTACH, 0, 0, 0) == -1) {
+    /* A debugger may already be present. */
+}
+```
+
+### XNU の状態と呼び出し順序
+
+結果は、どの `ptrace` request が最初に XNU に到達するかによって異なります:<sup>[[11]](#references)[[12]](#references)</sup>
+
+- **LLDB が先に attach する:** `debugserver` は `PT_ATTACHEXC` を使用します。XNU はこれを `PT_ATTACH` に変換し、`KAUTH_PROCESS_CANTRACE` による認可を実行して、対象プロセスに `P_LTRACED` を設定します。その後の `PT_DENY_ATTACH` はこのフラグを検知し、`W_EXITCODE(ENOTSUP, 0)` で対象プロセスを終了させます。通常、LLDB ではステータス **45** (`0x2d`) と表示されます。
+- **対象プロセスが先に拒否する:** XNU は `P_LNOATTACH` を設定します。後続の attach はプロセストレース認可によって拒否されます。attach のエラーパスは `P_LNOATTACH` を検知し、attach を試みたプロセスに `SIGSEGV` を送信するため、LLDB では `debugserver` との接続が失われたように見える場合があります。
+
+これらの経路を見分けるには、起動または attach の前に `debugserver` のログを有効にし、その `ptrace` request を確認します:<sup>[[12]](#references)</sup>
+
+```bash
+export LLDB_DEBUGSERVER_LOG_FILE=./debugserver.log
+lldb ./target                 # or: lldb -p <pid>
+grep ptrace ./debugserver.log
+```
+
+### ARM64 の静的な識別とバイパス
+
+難読化されていない ARM64 Mach-O では、インポートされた `_ptrace` のスタブを見つけ、呼び出し箇所を調べます。最初の整数引数は `w0` で渡されるため、この命令列からアンチデバッグ要求を直接確認できます。このインポートがないからといって、確実に使われていないとは限りません。コードが `ptrace` を動的に解決することもあるためです。インポートされた `_sysctl` もアンチデバッグチェックを示す場合がありますが、これも動的に解決される可能性があります。<sup>[[7]](#references)[[10]](#references)[[12]](#references)</sup>
+
+```armasm
+movz    w0, #0x1f            ; PT_DENY_ATTACH
+bl      imp___stubs__ptrace
+```
+
+実演したサンプルでは、即値を `0x1f` から `0x0` にパッチすると、要求が `PT_TRACE_ME` に変わり、プログラムは LLDB の下で続行できます。これは**サンプル固有のバイパス**であり、一般的な no-op ではありません。要求を変更するか、呼び出しをスキップするか、成功を返すよう強制するかを決める前に、呼び出し元の戻り値チェックと制御フローを確認してください。<sup>[[10]](#references)[[12]](#references)</sup>
+
+```armasm
+movz    w0, #0x0             ; PT_TRACE_ME
+bl      imp___stubs__ptrace
+```
 
 ### lldb
 
-**lldb**は、**macOS**のバイナリ**デバッグ**における事実上の標準ツールです。
+**lldb**は、**macOS**バイナリの**デバッグ**における**事実上のツール**です。
 
 ```bash
 lldb ./malware.bin
@@ -457,7 +500,7 @@ lldb -n malware.bin
 lldb -n malware.bin --waitfor
 ```
 
-lldbでIntel形式を設定するには、ホームフォルダーに次の行を含む **`.lldbinit`** というファイルを作成します:
+ホームフォルダに次の行を記述した **`.lldbinit`** というファイルを作成すると、lldbの使用時にintel flavourを設定できます：
 
 ```bash
 settings set target.x86-disassembly-flavor intel
@@ -469,24 +512,24 @@ settings set target.x86-disassembly-flavor intel
 <table data-header-hidden>
 <thead><tr><th width="225"></th><th></th></tr></thead>
 <tbody>
-<tr><td><strong>(lldb) コマンド</strong></td><td><strong>説明</strong></td></tr>
+<tr><td><strong>(lldb) Command</strong></td><td><strong>説明</strong></td></tr>
 <tr><td><strong>run (r)</strong></td><td>実行を開始します。ブレークポイントに到達するか、プロセスが終了するまで実行が続きます。</td></tr>
-<tr><td><strong>process launch --stop-at-entry</strong></td><td>実行を開始し、エントリポイントで停止します。</td></tr>
+<tr><td><strong>process launch --stop-at-entry</strong></td><td>実行を開始し、エントリーポイントで停止します。</td></tr>
 <tr><td><strong>continue (c)</strong></td><td>デバッグ中のプロセスの実行を再開します。</td></tr>
-<tr><td><strong>nexti (n / ni)</strong></td><td>次の命令を実行します。このコマンドは関数呼び出しをステップオーバーします。</td></tr>
-<tr><td><strong>stepi (s / si)</strong></td><td>次の命令を実行します。<code>nexti</code> コマンドとは異なり、このコマンドは関数呼び出しの中にステップインします。</td></tr>
-<tr><td><strong>finish (f)</strong></td><td>現在の関数（フレーム）の残りの命令を実行し、戻り値を返して停止します。</td></tr>
-<tr><td><strong>control + c</strong></td><td>実行を一時停止します。プロセスが実行（<code>r</code>）または再開（<code>c</code>）されている場合、その時点で実行中の場所で停止します。</td></tr>
+<tr><td><strong>nexti (n / ni)</strong></td><td>次の命令を実行します。このコマンドは関数呼び出しをスキップします。</td></tr>
+<tr><td><strong>stepi (s / si)</strong></td><td>次の命令を実行します。<code>nexti</code> コマンドとは異なり、関数呼び出しの中に進みます。</td></tr>
+<tr><td><strong>finish (f)</strong></td><td>現在の関数（フレーム）の残りの命令を実行し、戻って停止します。</td></tr>
+<tr><td><strong>control + c</strong></td><td>実行を一時停止します。プロセスの実行（<code>r</code>）または再開（<code>c</code>）後に入力すると、現在実行中の位置で停止します。</td></tr>
 <tr><td><strong>breakpoint (b)</strong></td><td>
 <p><code>b main</code> # main という名前の関数</p>
 <p><code>b &lt;binname&gt;`main</code> # バイナリの main 関数</p>
 <p><code>b set -n main --shlib &lt;lib_name&gt;</code> # 指定したバイナリの main 関数</p>
 <p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> # 任意の NSFileManager メソッド</p>
 <p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p>
-<p><code>break set -r . -s libobjc.A.dylib</code> # そのライブラリのすべての関数でブレーク</p>
+<p><code>break set -r . -s libobjc.A.dylib</code> # このライブラリのすべての関数で停止</p>
 <p><code>b -a 0x0000000100004bd9</code></p>
 <p><code>br l</code> # ブレークポイント一覧</p>
-<p><code>br e/dis &lt;num&gt;</code> # ブレークポイントの有効化／無効化</p>
+<p><code>br e/dis &lt;num&gt;</code> # ブレークポイントを有効化／無効化</p>
 <p><code>breakpoint delete &lt;num&gt;</code></p>
 </td></tr>
 <tr><td><strong>help</strong></td><td>
@@ -509,30 +552,30 @@ settings set target.x86-disassembly-flavor intel
 <p><code>dnsChanger = {</code></p>
 <p><code>"affiliate" = "";</code></p>
 <p><code>"blacklist_dns" = ();</code></p>
-<p>Apple の Objective-C API やメソッドの多くはオブジェクトを返すため、「print object」(<code>po</code>) コマンドで表示します。<code>po</code> で有用な出力が得られない場合は、<code>x/b</code> を使用してください。</p>
+<p>Apple の Objective-C API やメソッドの多くはオブジェクトを返すため、「print object」(<code>po</code>) コマンドで表示します。<code>po</code> で意味のある出力が得られない場合は、<code>x/b</code> を使用してください。</p>
 </td></tr>
 <tr><td><strong>memory</strong></td><td>
 <code>memory read 0x000....</code><br>
 <code>memory read $x0+0xf2a</code><br>
-<code>memory write 0x100600000 -s 4 0x41414141</code> # そのアドレスに AAAA を書き込みます<br>
-<code>memory write -f s $rip+0x11f+7 "AAAA"</code> # そのアドレスに AAAA を書き込みます
+<code>memory write 0x100600000 -s 4 0x41414141</code> # そのアドレスに AAAA を書き込む<br>
+<code>memory write -f s $rip+0x11f+7 "AAAA"</code> # そのアドレスに AAAA を書き込む
 </td></tr>
 <tr><td><strong>disassembly</strong></td><td>
 <p><code>dis</code> # 現在の関数を逆アセンブル</p>
 <p><code>dis -n &lt;funcname&gt;</code> # 関数を逆アセンブル</p>
 <p><code>dis -n &lt;funcname&gt; -b &lt;basename&gt;</code> # 関数を逆アセンブル<br>
 <code>dis -c 6</code> # 6 行を逆アセンブル<br>
-<code>dis -c 0x100003764 -e 0x100003768</code> # あるアドレスから別のアドレスまで逆アセンブル<br>
+<code>dis -c 0x100003764 -e 0x100003768</code> # 指定したアドレス間を逆アセンブル<br>
 <code>dis -p -c 4</code> # 現在のアドレスから逆アセンブルを開始</p>
 </td></tr>
-<tr><td><strong>parray</strong></td><td><code>parray 3 (char **)$x1</code> # <code>x1</code> レジスター内の 3 要素の配列を調べます</td></tr>
+<tr><td><strong>parray</strong></td><td><code>parray 3 (char **)$x1</code> # <code>x1</code> レジスター内の 3 要素の配列を調べる</td></tr>
 <tr><td><strong>image dump sections</strong></td><td>現在のプロセスメモリのマップを表示します。</td></tr>
-<tr><td><strong>image dump symtab &lt;library&gt;</strong></td><td><code>image dump symtab CoreNLP</code> # CoreNLP のすべてのシンボルのアドレスを取得します</td></tr>
+<tr><td><strong>image dump symtab &lt;library&gt;</strong></td><td><code>image dump symtab CoreNLP</code> # CoreNLP のすべてのシンボルのアドレスを取得</td></tr>
 </tbody>
 </table>
 
 > [!TIP]
-> **`objc_sendMsg`** 関数の呼び出し時、**rsi** レジスターには、ヌル終端の「C」文字列として**メソッド名**が格納されます。lldb で名前を表示するには、次のようにします。
+> **`objc_sendMsg`** 関数の呼び出し時、**rsi** レジスターには、ヌル終端（「C」）文字列として**メソッド名**が格納されます。lldb で名前を表示するには、次のようにします。
 >
 > `(lldb) x/s $rsi: 0x1000f1576: "startMiningWithPort:password:coreCount:slowMemory:currency:"`
 >
@@ -541,27 +584,28 @@ settings set target.x86-disassembly-flavor intel
 >
 > `(lldb) reg read $rsi: rsi = 0x00000001000f1576 "startMiningWithPort:password:coreCount:slowMemory:currency:"`
 
-### 動的解析対策
+### 動的解析の回避
 
-#### VM 検出
+#### VM 検知
 
-- **`sysctl hw.model`** コマンドは通常、物理ハードウェアでは Mac のモデル識別子を返し、VM では異なる値を返すことがあります。<sup>[[3]](#references)</sup>
-- 一部のマルウェアは、**`hw.logicalcpu`** と **`hw.physicalcpu`** の値を操作して、VM かどうかを検出しようとします。<sup>[[4]](#references)</sup>
-- 一部のマルウェアは、MAC アドレス（00:50:56）を基に、そのマシンが **VMware** 上で動作しているかどうかも**検出**できます。
-- 次のような簡単なコードで、**プロセスがデバッグされているかどうか**を確認することもできます。
+- **`sysctl hw.model`** コマンドは、通常、物理ハードウェアでは Mac のモデル識別子を返しますが、VM では異なる値を返す場合があります。<sup>[[3]](#references)</sup>
+- マルウェアによっては、**`hw.logicalcpu`** と **`hw.physicalcpu`** の値を操作して、VM かどうかを検知しようとします。<sup>[[4]](#references)</sup>
+- MAC アドレス（00:50:56）を基に、マシンが **VMware** 上で動作しているかを**検知**するマルウェアもあります。
+- 次のような簡単なコードで、**プロセスがデバッグ中かどうか**を確認することもできます。
   - `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //process being debugged }`
-- **`PT_DENY_ATTACH`** フラグを指定して **`ptrace`** システムコールを呼び出すこともできます。これはデバッガーによるアタッチとトレースを**防ぎます**。
-  - **`sysctl`** 関数または **`ptrace`** 関数が**インポート**されているか確認できます（ただし、マルウェアは動的にインポートする場合があります）
-  - この writeup「[アンチデバッグ手法の回避：macOS ptrace の亜種](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)」で述べられているように、<sup>[[7]](#references)</sup>\
+- **`PT_DENY_ATTACH`** フラグを指定して **`ptrace`** システムコールを呼び出すこともできます。順序に依存する XNU の動作、`debugserver` のログ、ARM64 のパッチ適用手順については、[PT_DENY_ATTACH section](#page-title) を確認してください。<sup>[[7]](#references)[[12]](#references)</sup>
+
+- **`PT_DENY_ATTACH`** フラグを指定して **`ptrace`** システムコールを呼び出すこともできます。これにより、デバ**ッ**ガーがアタッチしてトレースするのを**防止**します。
+  - **`sysctl`** 関数または **`ptrace`** 関数が**インポート**されているかを確認できます（ただし、マルウェアが動的にインポートする可能性があります）。
+  - 次の解説記事「[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)」にあるように：<sup>[[7]](#references)</sup>\
     「_Process # exited with **status = 45 (0x0000002d)** というメッセージは、デバッグ対象が **PT_DENY_ATTACH** を使用していることを示す典型的な兆候です_」
+#### `fork()` によるプロセスの引き継ぎ
 
-#### `fork()` によるプロセス引き継ぎ
+プロセスは、起動直後に `fork()` を呼び出して親プロセスを終了させ（`fork()` は正の子 PID を返す）、保護対象の処理を子プロセス内でのみ続行することで（`fork()` は `0` を返す）、元の PID にアタッチしたままのデバッガーを回避できます。`dlsym(RTLD_DEFAULT, "fork")` で `fork` を解決すると、直接の `_fork` 呼び出し箇所もなくなりますが、これは解析を妨げるだけです。シンボル名の文字列と動的解決のデータフローは、Mach-O バイナリ内に残ります。<sup>[[13]](#references)[[14]](#references)</sup>
 
-プロセスは、起動直後に `fork()` を呼び出し、親プロセスを終了（`fork()` は正の子 PID を返します）させ、子プロセス内でのみ保護された処理を続行（`fork()` は `0` を返します）することで、元の PID にアタッチしたままのデバッガーを回避できます。`dlsym(RTLD_DEFAULT, "fork")` で `fork` を解決すると、直接の `_fork` 呼び出し箇所もなくなりますが、これは解析を困難にするだけです。シンボル名の文字列と動的解決のデータフローは、Mach-O バイナリ内に依然として見えています。<sup>[[10]](#references)[[11]](#references)</sup>
+arm64 では、固定アドレスではなくデータフローを追って、このパターンを検出します。`dlsym` の最初の 2 つの引数は `x0` と `x1` で渡され、`RTLD_DEFAULT` は `-2`（たとえば `movn x0, #1`）として現れることがあります。また、`adrp`/`add` の組み合わせで `"fork"` 文字列のアドレスを構築するのが一般的です。`dlsym` のスタブへの `bl` の後、返されたポインターを `x0` からヌルチェックと格納箇所を経由して、後続の間接 `blr` まで追跡します。次に、`w0` 内の `fork()` の結果を追います。0 なら子プロセスの処理に進み、正の値または `-1` なら親プロセス／エラー処理に進みます。<sup>[[13]](#references)[[14]](#references)</sup>
 
-arm64 では、固定アドレスではなくデータフローを追跡してこのパターンを検出します。`dlsym` の最初の 2 つの引数は `x0` と `x1` で渡され、`RTLD_DEFAULT` は `-2`（たとえば `movn x0, #1`）として現れることがあります。また、`adrp`/`add` の組み合わせで `"fork"` 文字列のアドレスを構築するのが一般的です。`dlsym` スタブへの `bl` の後、返されたポインターを `x0` からヌルチェックと格納処理を経て、後続の間接 `blr` まで追跡します。続いて `fork()` の結果を `w0` で追います。値がゼロなら子プロセス側の処理へ進み、正の値と `-1` なら親プロセス／エラー側の処理へ進みます。<sup>[[10]](#references)[[11]](#references)</sup>
-
-静的な回避方法は、間接呼び出しを抑止し、既存の結果チェックが子プロセス側へ進むようにすることです。たとえば、コンパイラーが以下に示す命令列を生成している場合、`blr` と結果の格納を `nop` にパッチし、合成したゼロの結果を設定して、比較／分岐ロジックはそのまま残します。これにより、子プロセスを作成せずに、元の PID のままアプリケーションが続行します。命令レジスターと分岐先は、解析対象のビルドに合わせて調整する必要があります。<sup>[[10]](#references)[[11]](#references)</sup>
+静的な回避方法としては、間接呼び出しを抑止し、既存の結果チェックが子プロセス側の処理に進むようにします。たとえば、コンパイラーが以下の命令列を生成している場合、`blr` と結果の格納を `nop` にパッチし、合成したゼロの結果を設定して、比較／分岐ロジックはそのまま残します。これにより、子プロセスを作成せずに、元の PID のままアプリケーションの実行が続きます。命令レジスターと分岐先は、解析対象のビルドに合わせて調整する必要があります。<sup>[[13]](#references)[[14]](#references)</sup>
 
 ```armasm
 ldr  x8, [sp, #0x10]
@@ -575,23 +619,23 @@ tbnz w8, #0, child_continuation
 
 ## コアダンプ
 
-コアダンプは次の場合に作成されます。
+コアダンプは、次の場合に作成されます。
 
-- `kern.coredump` sysctl が 1 に設定されている（デフォルト）
-- プロセスが suid/sgid ではない、または `kern.sugid_coredump` が 1 に設定されている（デフォルトは 0）
-- `AS_CORE` 制限が操作を許可している。`ulimit -c 0` を実行するとコアダンプの作成を抑止でき、`ulimit -c unlimited` で再び有効にできます。
+- `kern.coredump` sysctl が 1 に設定されている場合（デフォルト）
+- プロセスが suid/sgid ではない場合、または `kern.sugid_coredump` が 1 の場合（デフォルトは 0）
+- `AS_CORE` の上限で操作が許可されている場合。`ulimit -c 0` を呼び出してコアダンプの作成を抑制し、`ulimit -c unlimited` で再度有効にできます。
 
-このような場合、コアダンプは `kern.corefile` sysctl の設定に従って生成され、通常は `/cores/core/.%P` に保存されます。
+この場合、コアダンプは `kern.corefile` sysctl の設定に従って生成され、通常は `/cores/core/.%P` に保存されます。
 
 ## Fuzzing
 
 ### [ReportCrash](https://ss64.com/osx/reportcrash.html)
 
-ReportCrash は、**クラッシュしたプロセスを解析し、クラッシュレポートをディスクに保存**します。クラッシュレポートには、クラッシュの原因を**開発者が診断するのに役立つ**情報が含まれています。\
-**ユーザーごとの launchd コンテキストで実行されている**アプリケーションやその他のプロセスの場合、ReportCrash は LaunchAgent として実行され、ユーザーの `~/Library/Logs/DiagnosticReports/` にクラッシュレポートを保存します。\
-デーモン、**システムの launchd コンテキストで実行されている**その他のプロセス、およびその他の特権プロセスの場合、ReportCrash は LaunchDaemon として実行され、システムの `/Library/Logs/DiagnosticReports` にクラッシュレポートを保存します。
+ReportCrash は**クラッシュしたプロセスを解析し、クラッシュレポートをディスクに保存します**。クラッシュレポートには、開発者がクラッシュの原因を**診断するのに役立つ**情報が含まれています。\
+**per-user の launchd コンテキストで実行されている**アプリケーションやその他のプロセスの場合、ReportCrash は LaunchAgent として実行され、ユーザーの `~/Library/Logs/DiagnosticReports/` にクラッシュレポートを保存します。\
+デーモン、**system の launchd コンテキストで実行されている**その他のプロセス、およびその他の特権プロセスの場合、ReportCrash は LaunchDaemon として実行され、システムの `/Library/Logs/DiagnosticReports` にクラッシュレポートを保存します。
 
-クラッシュレポートが**Apple に送信される**ことが心配な場合は、無効にできます。無効にしない場合、クラッシュレポートは**サーバーのクラッシュ原因を特定する**のに役立ちます。
+クラッシュレポートが**Apple に送信される**ことを懸念している場合は、無効にできます。そうでなければ、クラッシュレポートは**サーバーがクラッシュした原因を特定する**のに役立ちます。
 
 ```bash
 #To disable crash reporting:
@@ -605,15 +649,15 @@ sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.
 
 ### スリープ
 
-macOSでfuzzingを行う際は、Macがスリープしないようにします。
+macOSでfuzzingを行う間、Macがスリープしないようにします。
 
 - systemsetup -setsleep Never
 - pmset、システム設定
 - [KeepingYouAwake](https://github.com/newmarcel/KeepingYouAwake)
 
-#### SSHの切断
+#### SSH接続の切断
 
-SSH接続経由でfuzzingを行う場合は、セッションが切断されないようにすることが重要です。そのため、次のようにsshd_configファイルを変更します。
+SSH接続経由でfuzzingを行う場合、セッションが切断されないようにすることが重要です。そのため、次のようにsshd_configファイルを変更します。
 
 - TCPKeepAlive Yes
 - ClientAliveInterval 0
@@ -626,7 +670,7 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 
 ### 内部ハンドラー
 
-**次のページを確認して**、**指定した scheme または protocol の処理を担当するアプリ**を特定する方法を確認してください。
+**次のページを確認してください**。指定した scheme または protocol の**処理を担当するアプリ**を特定する方法がわかります。
 
 
 {{#ref}}
@@ -654,17 +698,27 @@ cat procs.txt
 lldb -o "target create `which some-binary`" -o "settings set target.env-vars DYLD_INSERT_LIBRARIES=/usr/lib/libgmalloc.dylib" -o "run arg1 arg2" -o "bt" -o "reg read" -o "dis -s \$pc-32 -c 24 -m -F intel" -o "quit"
 ```
 
-### ファザー
+### Stateful Mach IPC fuzzing
+
+特権デーモンが公開する Mach サービスは、非特権クライアントまたは sandbox 内のクライアントが send right を取得できる場合、有用な fuzzing 対象になります。デーモンの `MachServices` launchd エントリを起点に、[MIG analysis workflow](../macos-proces-abuse/macos-ipc-inter-process-communication/macos-mig-mach-interface-generator.md) を使って message ID と handler の対応を調べます。バイト列を変更する前に、通常のクライアントがサービスを利用している間に MIG server routine でブレークし、有効な request message を seed input として保存します。必要な header field、message size、descriptor layout を維持し、dispatch で即座に失敗せず handler に到達するように mutation します。<sup>[[17]](#references)</sup>
+
+多くの handler は先行する呼び出しに依存します。harness でサービスの状態を初期化し、各 fuzz input を **operation と引数のシーケンス** として処理します。setup request（open や create など）を送信し、返された identifier を保持して、後続の request で使用します。こうすることで、coverage feedback によって未初期化オブジェクトのチェックに繰り返し引っかかるのではなく、状態遷移を探索できます。<sup>[[17]](#references)</sup>
+
+closed-source の対象では、MIG dispatch routine を呼び出す in-process harness に Jackalope/TinyInst で instrument を適用できます。[CoreAudioFuzz harness](https://github.com/googleprojectzero/p0tools/tree/master/CoreAudioFuzz) は具体的な実装例ですが、他のサービスにそのまま使える harness ではありません。<sup>[[17]](#references)[[18]](#references)[[19]](#references)</sup>
+
+**すべての crash を実際の IPC 経路で検証してください。** direct-dispatch harness は Mach message に対する kernel の検証を省略するため、特に無効な out-of-line (OOL) memory や port descriptor を渡した場合、誤検出を生じる可能性があります。harness 内で有効な OOL backing memory を割り当てたうえで、元のサービスアクセス権を持つクライアントから `mach_msg` 経由で縮小した testcase を再生し、デーモンが引き続き crash することを確認します。<sup>[[17]](#references)</sup>
+
+### Fuzzers
 
 #### [AFL++](https://github.com/AFLplusplus/AFLplusplus)
 
-CLI toolsで動作します
+CLI ツールで動作します。
 
 #### [Litefuzz](https://github.com/sec-tools/litefuzz)
 
-多くのmacOS GUI toolsで「**そのまま動作**」します。一部のアプリケーションには、固有のファイル名、特定の拡張子、またはSandbox container（`~/Library/Containers/com.apple.Safari/Data`）からファイルを読み込むなど、追加の要件があります。
+多くの macOS GUI ツールで「**そのまま動作**」します。アプリケーションによっては、一意のファイル名、特定の拡張子、または sandbox container (`~/Library/Containers/com.apple.Safari/Data`) からファイルを読み込むことなど、追加の要件があります。
 
-例をいくつか紹介します。
+例：
 
 ```bash
 # iBooks
@@ -690,24 +744,34 @@ litefuzz -lk -c "smbutil view smb://localhost:4455" -a tcp://localhost:4455 -i i
 litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash screensharingd -p -n 100000
 ```
 
-### macOS Fuzzing に関するその他の情報
+### macOS Fuzzingに関する追加情報
 
 - [https://www.youtube.com/watch?v=T5xfL9tEg44](https://www.youtube.com/watch?v=T5xfL9tEg44) <sup>[[2]](#references)</sup>
 - [https://github.com/bnagy/slides/blob/master/OSXScale.pdf](https://github.com/bnagy/slides/blob/master/OSXScale.pdf)
 - [https://github.com/bnagy/francis/tree/master/exploitaben](https://github.com/bnagy/francis/tree/master/exploitaben)
 - [https://github.com/ant4g0nist/crashwrangler](https://github.com/ant4g0nist/crashwrangler)
 
+
+
 ## References
 
-- [1] [OS X インシデントレスポンス: スクリプティングと分析](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
-- [2] [Jeremy Brown - Fuzz の夏: MacOS - DEF CON 29 AppSec Village](https://www.youtube.com/watch?v=T5xfL9tEg44)
-- [3] [Mac Malware の技法、第I巻: 分析](https://taomm.org/)
-- [4] [No Starch Press - Mac Malware の技法: 悪意のあるソフトウェアを分析するためのガイド](https://nostarch.com/art-mac-malware)
-- [5] [knight.sc - このブログ記事のセクションに保存された情報](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html)
-- [6] [knight.sc - Pt Deny Attach を使用する Apple バイナリのデバッグ](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html)
-- [7] [alexomara.com - Anti-Debug テクニックの回避: macOS ptrace のバリエーション](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants)
-- [8] [Apple Developer Forums - Xcode の構造化ログと `Enable-Private-Data`](https://developer.apple.com/forums/thread/738648)
-- [9] [Super User - macOS unified log で private data を表示する](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log)
-- [10] [tony-go/antidebug-examples - fork の例](https://github.com/tony-go/antidebug-examples/tree/main/fork)
-- [11] [Reverse Society - dlsym と fork を使用する Anti-debugging テクニック](https://blog.reversesociety.co/blog/2024/anti-debugging-detection-with-fork)
+- [1] [OS X インシデント対応: スクリプティングと分析](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
+- [2] [Jeremy Brown - Summer of Fuzz: MacOS - DEF CON 29 AppSec Village](https://www.youtube.com/watch?v=T5xfL9tEg44)
+- [3] [The Art of Mac Malware, Volume I: Analysis](https://taomm.org/)
+- [4] [No Starch Press - The Art of Mac Malware: 悪意のあるソフトウェアを分析するためのガイド](https://nostarch.com/art-mac-malware)
+- [5] [knight.sc - このブログ記事のこれらのセクションに保存された情報](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html)
+- [6] [knight.sc - Pt Deny Attachを使用するAppleバイナリのデバッグ](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html)
+- [7] [alexomara.com - Anti-Debug Techniquesの回避: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants)
+- [8] [Apple Developer Forums - Xcodeの構造化ログと`Enable-Private-Data`](https://developer.apple.com/forums/thread/738648)
+- [9] [Super User - macOS unified logでprivate dataを表示する](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log)
+- [10] [Apple XNU `ptrace.h`のリクエスト定義](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/ptrace.h)
+- [11] [Apple XNU `mach_process.c`の`ptrace`実装](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/mach_process.c)
+- [12] [Reverse Society - ptrace internals: デバッガのアタッチを防ぐ仕組み](https://blog.reversesociety.co/blog/2024/anti-debugging-using-ptrace)
+- [13] [tony-go/antidebug-examples - forkの例](https://github.com/tony-go/antidebug-examples/tree/main/fork)
+- [14] [Reverse Society - dlsymとforkを使用するAnti-debugging technique](https://blog.reversesociety.co/blog/2024/anti-debugging-detection-with-fork)
+- [15] [Apple - デバッグツールのentitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.debugger)
+- [16] [Apple Developer Forums - hardened third-party appのデバッグ](https://developer.apple.com/forums/thread/776503)
+- [17] [Project Zero - Breaking the Sound Barrier Part I: Mach Messagesを使ったCoreAudioのFuzzing](https://projectzero.google/2025/05/breaking-sound-barrier-part-i-fuzzing.html)
+- [18] [Project Zero - CoreAudioFuzz harness](https://github.com/googleprojectzero/p0tools/tree/master/CoreAudioFuzz)
+- [19] [Project Zero - Jackalope fuzzer](https://github.com/googleprojectzero/Jackalope)
 {{#include ../../../banners/hacktricks-training.md}}
