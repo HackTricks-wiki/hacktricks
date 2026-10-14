@@ -313,7 +313,9 @@ Defenders should correlate these artifacts with external exposure and service pa
 
 ## Static embedded-shell execution
 
-A script wrapper with an embedded interpreter and command implementations can run supported shell operations inside one executable instead of launching `/bin/sh` and separate utility processes. HimitsuShell builds such a static musl binary. Its built-in commands reduce shell-process and child-`execve` visibility; unsupported commands can fall back to the host shell. This does **not** hide the wrapper process or its system calls from kernel tracing, despite the project's broad invisibility claim.<sup>[[9]](#references)</sup>
+A script wrapper with an embedded interpreter and command implementations can run supported shell operations inside one executable instead of launching `/bin/sh` and separate utility processes. HimitsuShell builds such a static musl binary. Unlike [SHc wrappers](../../linux-hardening/processes-crontab-systemd-dbus/cron-and-systemd-timers.md), its built-in commands do not need to start the host shell or a separate utility process. Unsupported commands can fall back to the system shell.<sup>[[9]](#references)</sup>
+
+This reduces shell-process and child-`execve` visibility.<sup>[[9]](#references)</sup> The wrapper process and its system calls remain observable through kernel tracepoints, so the project's claim of invisibility even to kernel tracing should not be taken literally.<sup>[[9]](#references)[[11]](#references)</sup>
 
 For the documented x86_64 build, keep the input named `launcher.sh` and copy it into the container before compiling. The output is `safeLauncher`:<sup>[[9]](#references)</sup>
 
@@ -330,7 +332,11 @@ The public `compile.sh` encrypts the script with AES-256-CTR, encrypts the expir
 
 The default LLVM passes are `-sobf` and `-sub`. Edit `/var/work/compile.sh` before building to enable documented alternatives such as control-flow flattening (`fla`) or bogus control flow (`bcf`).<sup>[[9]](#references)[[10]](#references)</sup>
 
-Test script compatibility before relying on this wrapper: the project targets POSIX shell syntax, warns that Bash/Zsh scripts may fail, and says commands outside its built-in set invoke the system shell. For analysis of flattened control flow, see [bypassing flattened control flow with a narrow execution slice](../../reversing/reversing-tools-basic-methods/#bypass-flattened-control-flow-with-a-narrow-execution-slice).<sup>[[9]](#references)</sup>
+Test script compatibility before relying on this wrapper: the project targets POSIX shell syntax, warns that Bash/Zsh scripts may fail, and says commands outside its built-in set invoke the system shell.<sup>[[9]](#references)</sup>
+
+For analysis of flattened control flow, see [bypassing flattened control flow with a narrow execution slice](../../reversing/reversing-tools-basic-methods/#bypass-flattened-control-flow-with-a-narrow-execution-slice).
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## References
 
@@ -344,5 +350,4 @@ Test script compatibility before relying on this wrapper: the project targets PO
 - [8] [Microsoft Learn – del command](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/del)
 - [9] [HimitsuShell README](https://github.com/HimitsuShell/HimitsuShell)
 - [10] [HimitsuShell build script](https://github.com/HimitsuShell/HimitsuShell/blob/main/inside_container/compile.sh)
-
-{{#include ../../banners/hacktricks-training.md}}
+- [11] [Linux kernel event histograms and syscall tracing](https://docs.kernel.org/trace/histogram.html)
