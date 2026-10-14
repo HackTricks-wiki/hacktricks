@@ -1,8 +1,8 @@
-# Grundlegende forensische Methodik
+# Grundlegende Forensik-Methodik
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Erstellen und Einbinden eines Abbilds
+## Erstellen und Einbinden eines Images
 
 
 {{#ref}}
@@ -11,23 +11,23 @@
 
 ## Malware-Analyse
 
-Dies **ist nicht unbedingt der erste Schritt, den man nach Erhalt des Abbilds durchführen muss**. Du kannst diese Malware-Analysetechniken jedoch unabhängig davon einsetzen, ob du eine Datei, ein Dateisystem-Abbild, ein Speicherabbild, einen pcap usw. hast. Daher ist es sinnvoll, **diese Maßnahmen im Hinterkopf zu behalten**:
+Dies ist **nicht unbedingt der erste Schritt, den du durchführen musst, sobald du das Image hast**. Du kannst diese Malware-Analysetechniken aber unabhängig davon anwenden, ob du eine Datei, ein Dateisystem-Image, ein Speicher-Image, einen pcap usw. hast. Es ist daher gut, **diese Maßnahmen im Hinterkopf zu behalten**:
 
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Untersuchen eines Abbilds
+## Untersuchen eines Images
 
-Wenn du ein **forensisches Abbild** eines Geräts erhältst, kannst du damit beginnen, die verwendeten **Partitionen und das Dateisystem zu analysieren** und potenziell **interessante Dateien wiederherzustellen** (auch gelöschte). Wie das funktioniert, erfährst du hier:
+Wenn du ein **forensisches Image** eines Geräts erhältst, kannst du mit der **Analyse der Partitionen und des verwendeten Dateisystems** sowie der **Wiederherstellung** potenziell **interessanter Dateien** beginnen (auch gelöschter Dateien). Hier erfährst du, wie:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Abhängig von den verwendeten Betriebssystemen und sogar der Plattform sollten nach unterschiedlichen interessanten Artefakten gesucht werden:
+Je nach verwendetem Betriebssystem und sogar Plattform sollten nach unterschiedlichen interessanten Artefakten gesucht werden:
 
 
 {{#ref}}
@@ -49,31 +49,33 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
-## Tiefgehende Untersuchung bestimmter Dateitypen und Software
+Informationen zu einem gesperrten Android-Gerät, Möglichkeiten zur Datenerfassung und zur Speicherabbildung findest du unter [Android forensics](android-forensics.md).
 
-Wenn du eine sehr **verdächtige** **Datei** hast, können je nach **Dateityp und der Software**, die sie erstellt hat, verschiedene **Tricks** nützlich sein.\
-Lies die folgende Seite, um einige interessante Tricks kennenzulernen:
+## Eingehende Untersuchung bestimmter Dateitypen und Software
+
+Wenn du eine sehr **verdächtige** **Datei** hast, können je nach **Dateityp und der Software**, mit der sie erstellt wurde, verschiedene **Tricks** nützlich sein.\
+Auf der folgenden Seite findest du einige interessante Tricks:
 
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-Ich möchte besonders auf folgende Seite hinweisen:
+Besonders hervorheben möchte ich die folgende Seite:
 
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Untersuchung eines Speicherabbilds
+## Untersuchung von Speicherabbildern
 
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Untersuchung eines Pcaps
+## Untersuchung von Pcaps
 
 
 {{#ref}}
