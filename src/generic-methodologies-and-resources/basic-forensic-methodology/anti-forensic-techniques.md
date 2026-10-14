@@ -311,6 +311,27 @@ Attackers frequently pair self‑patching with durable access paths:<sup>[[3]](#
 
 Defenders should correlate these artifacts with external exposure and service patching events to uncover anti‑forensic self‑remediation used to hide initial exploitation.
 
+## Static embedded-shell execution
+
+A script wrapper with an embedded interpreter and command implementations can run supported shell operations inside one executable instead of launching `/bin/sh` and separate utility processes. HimitsuShell builds such a static musl binary. Its built-in commands reduce shell-process and child-`execve` visibility; unsupported commands can fall back to the host shell. This does **not** hide the wrapper process or its system calls from kernel tracing, despite the project's broad invisibility claim.<sup>[[9]](#references)</sup>
+
+For the documented x86_64 build, keep the input named `launcher.sh` and copy it into the container before compiling. The output is `safeLauncher`:<sup>[[9]](#references)</sup>
+
+```bash
+curl -LO https://github.com/HimitsuShell/Himitsu/releases/download/v2.1.0/himitsu_core_x86_64_linux_musl.tar.gz
+docker load -i himitsu_core_x86_64_linux_musl.tar.gz
+docker run --name himitsu_core -d -it himitsu_core
+docker cp launcher.sh himitsu_core:/var/work/
+docker exec himitsu_core /var/work/compile.sh
+docker cp himitsu_core:/var/work/safeLauncher .
+```
+
+The public `compile.sh` encrypts the script with AES-256-CTR, encrypts the expiration value and intermediate keys/IVs with AES-256-CBC, converts the encrypted files into C arrays with `xxd -i`, and links them with `lib.bc` using `-static -s`. The final encryption key and IV are also embedded, so this is resistance to casual static extraction, not a secret that can never be recovered.<sup>[[10]](#references)</sup>
+
+The default LLVM passes are `-sobf` and `-sub`. Edit `/var/work/compile.sh` before building to enable documented alternatives such as control-flow flattening (`fla`) or bogus control flow (`bcf`).<sup>[[9]](#references)[[10]](#references)</sup>
+
+Test script compatibility before relying on this wrapper: the project targets POSIX shell syntax, warns that Bash/Zsh scripts may fail, and says commands outside its built-in set invoke the system shell. For analysis of flattened control flow, see [bypassing flattened control flow with a narrow execution slice](../../reversing/reversing-tools-basic-methods/#bypass-flattened-control-flow-with-a-narrow-execution-slice).<sup>[[9]](#references)</sup>
+
 ## References
 
 - [1] [Sophos X-Ops – AuKill: A Weaponized Vulnerable Driver for Disabling EDR (March 2023)](https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr)
@@ -321,5 +342,7 @@ Defenders should correlate these artifacts with external exposure and service pa
 - [6] [FortiGuard Labs – Uncovering a SectopRAT Variant Embedded in Legitimate Software](https://www.fortinet.com/blog/threat-research/uncovering-a-sectoprat-variant-embedded-in-legitimate-software)
 - [7] [Microsoft Learn – choice command](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/choice)
 - [8] [Microsoft Learn – del command](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/del)
+- [9] [HimitsuShell README](https://github.com/HimitsuShell/HimitsuShell)
+- [10] [HimitsuShell build script](https://github.com/HimitsuShell/HimitsuShell/blob/main/inside_container/compile.sh)
 
 {{#include ../../banners/hacktricks-training.md}}
