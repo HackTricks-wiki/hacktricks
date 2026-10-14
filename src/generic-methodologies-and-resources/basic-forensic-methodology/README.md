@@ -1,4 +1,4 @@
-# Podstawowa metodologia kryminalistyczna
+# Podstawowa metodyka informatyki śledczej
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -11,23 +11,23 @@
 
 ## Analiza malware
 
-**Nie musi to być pierwszy krok po uzyskaniu obrazu**. Możesz jednak korzystać z tych technik analizy malware niezależnie od tego, czy masz plik, obraz systemu plików, obraz pamięci, pcap... dlatego warto **mieć te działania na uwadze**:
+**Nie musi to być pierwszy krok po uzyskaniu obrazu**. Możesz jednak stosować te techniki analizy malware niezależnie, jeśli masz plik, obraz systemu plików, obraz pamięci, pcap... Warto więc **mieć te działania na uwadze**:
 
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Inspekcja obrazu
+## Analiza obrazu
 
-Jeśli otrzymasz **obraz kryminalistyczny** urządzenia, możesz rozpocząć **analizowanie partycji i używanego systemu plików** oraz **odzyskiwanie** potencjalnie **interesujących plików** (również usuniętych). Dowiedz się, jak to zrobić:
+Jeśli otrzymasz **obraz kryminalistyczny** urządzenia, możesz zacząć **analizować partycje i użyty system plików**, a także **odzyskiwać** potencjalnie **interesujące pliki** (również usunięte). Dowiedz się, jak to zrobić:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-W zależności od używanych systemów operacyjnych, a nawet platform, należy szukać różnych interesujących artefaktów:
+W zależności od używanego systemu operacyjnego, a nawet platformy, warto szukać różnych interesujących artefaktów:
 
 
 {{#ref}}
@@ -49,47 +49,49 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
-## Szczegółowa inspekcja określonych typów plików i Software
+Informacje o zablokowanym urządzeniu Android, metodach pozyskiwania danych i tworzeniu obrazu pamięci znajdziesz w sekcji [Android forensics](android-forensics.md).
 
-Jeśli masz **bardzo podejrzany** **plik**, to **w zależności od typu pliku i Software**, który go utworzył, przydatne mogą być różne **triki**.\
-Przeczytaj następującą stronę, aby poznać kilka interesujących trików:
+## Szczegółowa analiza określonych typów plików i oprogramowania
+
+Jeśli masz **podejrzany plik**, w zależności od **jego typu i oprogramowania**, które go utworzyło, przydatnych może być kilka **sztuczek**.\
+Na poniższej stronie znajdziesz kilka ciekawych sztuczek:
 
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-Chcę szczególnie wyróżnić stronę:
+Chcę szczególnie zwrócić uwagę na stronę:
 
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Inspekcja zrzutu pamięci
+## Analiza zrzutu pamięci
 
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Inspekcja Pcap
+## Analiza pcap
 
 
 {{#ref}}
 pcap-inspection/
 {{#endref}}
 
-## **Techniki antykryminalistyczne**
+## **Techniki antyforensyczne**
 
-Pamiętaj o możliwości zastosowania technik antykryminalistycznych:
+Pamiętaj o możliwości zastosowania technik antyforensycznych:
 
 
 {{#ref}}
 anti-forensic-techniques.md
 {{#endref}}
 
-## Threat Hunting
+## Hunting zagrożeń
 
 
 {{#ref}}
