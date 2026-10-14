@@ -2,19 +2,20 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Windows підтримує кілька механізмів, які можна використовувати для виконання команд у віддалених системах. На наведених нижче сторінках описано поширені техніки латерального переміщення та необхідні для них передумови:
+Windows підтримує кілька механізмів для виконання команд у віддалених системах. На наступних сторінках описано поширені техніки латерального переміщення та необхідні для них умови:
 
-- [**PsExec**](psexec-and-winexec.md)
+- [**PsExec / SCM service execution**](psexec-and-winexec.md#how-do-they-work)
 - [**SmbExec**](psexec-and-winexec.md#impacket-smbexecpy-smbexec)
 - [**WmiExec**](wmiexec.md)
 - [**AtExec / SchtasksExec**](atexec.md)
 - [**WinRM**](winrm.md)
 - [**DCOM Exec**](dcomexec.md)
 - [**RDPexec**](rdpexec.md)
-- [**SCMexec**](scmexec.md)
-- **Pass the cookie** (cloud)<sup>[[1]](#references)</sup>
-- **Pass the PRT** (cloud)<sup>[[2]](#references)</sup>
-- **Pass the Microsoft Entra ID certificate** (cloud)<sup>[[3]](#references)</sup>
+- [**SCMExec with SharpMove**](psexec-and-winexec.md#scmexec-with-sharpmove)
+- [**SCCM / MECM client execution**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
+- **Pass the cookie** (хмара)<sup>[[1]](#references)</sup>
+- **Pass the PRT** (хмара)<sup>[[2]](#references)</sup>
+- **Pass the Microsoft Entra ID certificate** (хмара)<sup>[[3]](#references)</sup>
 
 ## References
 
