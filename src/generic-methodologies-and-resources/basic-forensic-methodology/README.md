@@ -2,32 +2,32 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Kreiranje i montiranje image-a
+## Kreiranje i montiranje slike
 
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## Analiza malware-a
+## Analiza malvera
 
-Ovo **nije nužno prvi korak koji treba preduzeti nakon što dobijete image**. Međutim, ove tehnike analize malware-a možete koristiti nezavisno ako imate fajl, image sistema datoteka, memory image, pcap... zato je dobro **imati ove radnje na umu**:
+Ovo **nije nužno prvi korak koji treba preduzeti nakon što dobijete sliku**. Ove tehnike analize malvera možete koristiti i nezavisno, ako imate datoteku, sliku sistema datoteka, sliku memorije, pcap... zato je dobro **imati ove postupke na umu**:
 
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Pregled image-a
+## Pregled slike
 
-ako vam je dat **forenzički image** uređaja, možete početi sa **analizom particija i sistema datoteka** koji se koristi, kao i **oporavkom** potencijalno **zanimljivih fajlova** (čak i obrisanih). Saznajte kako:
+ako dobijete **forenzičku sliku** uređaja, možete početi da **analizirate particije i sistem datoteka** koji se koriste i da **oporavljate** potencijalno **zanimljive datoteke** (čak i obrisane). Saznajte kako na stranici:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-U zavisnosti od korišćenih OS-ova, pa čak i platforme, treba pretražiti različite zanimljive artefakte:
+U zavisnosti od korišćenog OS-a, pa čak i platforme, treba tražiti različite zanimljive artefakte:
 
 
 {{#ref}}
@@ -49,9 +49,11 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
-## Detaljan pregled određenih tipova fajlova i Software-a
+Za zaključan Android uređaj, načine pribavljanja podataka i kreiranje slike memorije pogledajte [Android forensics](android-forensics.md).
 
-Ako imate veoma **sumnjiv** **fajl**, onda, **u zavisnosti od tipa fajla i Software-a** koji ga je kreirao, različiti **trikovi** mogu biti korisni.\
+## Detaljan pregled određenih tipova datoteka i softvera
+
+Ako imate veoma **sumnjivu** **datoteku**, u zavisnosti od **tipa datoteke i softvera** kojim je napravljena, može biti korisno nekoliko **trikova**.\
 Pročitajte sledeću stranicu da biste saznali neke zanimljive trikove:
 
 
@@ -59,14 +61,14 @@ Pročitajte sledeću stranicu da biste saznali neke zanimljive trikove:
 specific-software-file-type-tricks/
 {{#endref}}
 
-Želim posebno da pomenem stranicu:
+Želim posebno da istaknem stranicu:
 
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Pregled memory dump-a
+## Pregled dump-a memorije
 
 
 {{#ref}}
@@ -80,16 +82,16 @@ memory-dump-analysis/
 pcap-inspection/
 {{#endref}}
 
-## **Anti-Forensic Techniques**
+## **Anti-forenzičke tehnike**
 
-Imajte na umu moguću upotrebu anti-forensic techniques:
+Imajte na umu da su možda korišćene anti-forenzičke tehnike:
 
 
 {{#ref}}
 anti-forensic-techniques.md
 {{#endref}}
 
-## Threat Hunting
+## Lov na pretnje
 
 
 {{#ref}}
