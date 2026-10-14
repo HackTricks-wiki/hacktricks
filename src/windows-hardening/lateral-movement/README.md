@@ -1,17 +1,18 @@
-# Lateral Movement
+# 횡적 이동
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Windows는 원격 시스템에서 명령을 실행하는 데 사용할 수 있는 여러 메커니즘을 지원합니다. 다음 페이지에서는 일반적인 lateral-movement 기법과 해당 기법의 사전 요구 사항을 설명합니다:
+Windows는 원격 시스템에서 명령을 실행하는 데 사용할 수 있는 여러 메커니즘을 지원합니다. 다음 페이지에서는 일반적인 횡적 이동 기법과 사전 요구 사항을 설명합니다.
 
-- [**PsExec**](psexec-and-winexec.md)
+- [**PsExec / SCM service execution**](psexec-and-winexec.md#how-do-they-work)
 - [**SmbExec**](psexec-and-winexec.md#impacket-smbexecpy-smbexec)
 - [**WmiExec**](wmiexec.md)
 - [**AtExec / SchtasksExec**](atexec.md)
 - [**WinRM**](winrm.md)
 - [**DCOM Exec**](dcomexec.md)
 - [**RDPexec**](rdpexec.md)
-- [**SCMexec**](scmexec.md)
+- [**SCMExec with SharpMove**](psexec-and-winexec.md#scmexec-with-sharpmove)
+- [**SCCM / MECM client execution**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
 - **Pass the cookie** (cloud)<sup>[[1]](#references)</sup>
 - **Pass the PRT** (cloud)<sup>[[2]](#references)</sup>
 - **Pass the Microsoft Entra ID certificate** (cloud)<sup>[[3]](#references)</sup>
