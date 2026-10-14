@@ -771,6 +771,8 @@
 # 🕸️ Pentesting Web
 
 - [Web Vulnerabilities Methodology](pentesting-web/web-vulnerabilities-methodology.md)
+- [Sensitive Information Exfiltration from a Web Page](pentesting-web/sensitive-information-exfiltration.md)
+- [Referer Header and Referrer Policy Leakage](pentesting-web/referer-header-and-referrer-policy.md)
 - [Burp Suite: Intruder and Session Testing](pentesting-web/burp-suite.md)
 - [Reflecting Techniques - PoCs and Polygloths CheatSheet](pentesting-web/pocs-and-polygloths-cheatsheet/README.md)
   - [Web Vulns List](pentesting-web/pocs-and-polygloths-cheatsheet/web-vulns-list.md)
@@ -982,6 +984,8 @@
   - [Android Mediatek Secure Boot Bl2 Ext Bypass El3](hardware-physical-access/firmware-analysis/android-mediatek-secure-boot-bl2_ext-bypass-el3.md)
   - [Bootloader testing](hardware-physical-access/firmware-analysis/bootloader-testing.md)
   - [Firmware Integrity](hardware-physical-access/firmware-analysis/firmware-integrity.md)
+  - [MediaTek XFlash Carbonara DA2 Hash Bypass](hardware-physical-access/firmware-analysis/mediatek-xflash-carbonara-da2-hash-bypass.md)
+  - [Synology PAT/SPK Encrypted Archive Decryption](hardware-physical-access/firmware-analysis/synology-encrypted-archive-decryption.md)
 
 # 🎯 Binary Exploitation
 
@@ -1012,8 +1016,6 @@
   - [Ret2vDSO](binary-exploitation/rop-return-oriented-programing/ret2vdso.md)
   - [SROP - Sigreturn-Oriented Programming](binary-exploitation/rop-return-oriented-programing/srop-sigreturn-oriented-programming/README.md)
     - [SROP - arm64](binary-exploitation/rop-return-oriented-programing/srop-sigreturn-oriented-programming/srop-arm64.md)
-  - [Mediatek Xflash Carbonara Da2 Hash Bypass](hardware-physical-access/firmware-analysis/mediatek-xflash-carbonara-da2-hash-bypass.md)
-  - [Synology Encrypted Archive Decryption](hardware-physical-access/firmware-analysis/synology-encrypted-archive-decryption.md)
   - [Windows SEH Overflow](binary-exploitation/stack-overflow/windows-seh-overflow.md)
 - [Array Indexing](binary-exploitation/array-indexing.md)
 - [Chrome Exploiting](binary-exploitation/chrome-exploiting.md)
@@ -1177,13 +1179,10 @@
 
 # ✍️ TODO
 
-- [Interesting Http](todo/interesting-http.md)
 - [Rust Basics](todo/rust-basics.md)
 - [More Tools](todo/more-tools.md)
 - [Other Web Tricks](todo/other-web-tricks.md)
-- [Interesting HTTP$$external:todo/interesting-http.md$$]()
 - [Online Platforms with API](todo/online-platforms-with-api.md)
-- [Stealing Sensitive Information Disclosure from a Web](todo/stealing-sensitive-information-disclosure-from-a-web.md)
 - [Post Exploitation](todo/post-exploitation.md)
 - [Investment Terms](todo/investment-terms.md)
 - [Cookies Policy](todo/cookies-policy.md)
