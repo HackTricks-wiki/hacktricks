@@ -174,6 +174,7 @@
 <!-- PR navigation heading: Linux - Hardening 🐧 (🐧 Linux Hardening) -->
 
 - [Linux - Hardening Overview](linux-hardening/README.md) <!-- Original navigation label: [🐧 Linux Hardening]() -->
+<!-- Default-branch legacy-label annotation: Linux - Basics (formerly “Linux Basics”) <!-- Original navigation label: <!-- Legacy PR-side empty SUMMARY labels, now mapped to the canonical linked entries below: -->
 - [Linux - Basics (formerly “Linux Basics”)](linux-hardening/linux-basics/README.md) <!-- Original navigation label: [Linux Basics]() -->
 <!-- Linux - Basics (formerly “Linux Basics”) <!-- Original navigation label: <!-- Legacy PR-side empty SUMMARY labels, now mapped to the canonical linked entries below: [Linux Basics]() -->
   - [Linux - Privilege Escalation](linux-hardening/linux-basics/linux-privilege-escalation/README.md)
@@ -741,6 +742,7 @@
 - [6379 - Pentesting Redis](network-services-pentesting/6379-pentesting-redis.md)
 - [8009 - Pentesting Apache JServ Protocol (AJP)](network-services-pentesting/8009-pentesting-apache-jserv-protocol-ajp.md)
 - [8086 - Pentesting InfluxDB](network-services-pentesting/8086-pentesting-influxdb.md)
+<!-- PR-side navigation-label provenance: 8000, 8089 - Pentesting Splunk / 8089 - Pentesting Splunkd / 8000, 8089 - Pentesting Splunk (formerly “8089 - Pentesting Splunkd”) <!-- Original navigation label: [8089 - Pentesting Splunkd]() -->
 - [8000, 8089 - Pentesting Splunk (8089 - Pentesting Splunkd) / 8000, 8089 - Pentesting Splunk (formerly “8089 - Pentesting Splunkd”)](network-services-pentesting/8089-splunkd.md) <!-- Original navigation label: [8089 - Pentesting Splunkd]() -->
 - [8333,18333,38333,18444 - Pentesting Bitcoin](network-services-pentesting/8333-18333-38333-18444-pentesting-bitcoin.md)
 - [9000 - Pentesting FastCGI](network-services-pentesting/9000-pentesting-fastcgi.md)
@@ -1054,6 +1056,7 @@
 - [Linux USB Audio Descriptor OOB Reads to KASLR Leaks](binary-exploitation/linux-kernel-exploitation/usb-audio-descriptor-oob-kaslr-leak.md)
 - [Futex PI UAF to Pipe Physical R/W and Workqueue Execution](binary-exploitation/linux-kernel-exploitation/futex-pi-uaf-pipe-buffer-workqueue-usermodehelper.md)
 - [Ksmbd Streams Xattr Oob Write Cve 2025 37947](binary-exploitation/linux-kernel-exploitation/ksmbd-streams_xattr-oob-write-cve-2025-37947.md)
+- [nftables Catchall Rollback UAF](binary-exploitation/linux-kernel-exploitation/nftables-catchall-rollback-uaf.md)
 - [net/sched action-IDR UAF exploitation (CVE-2026-53264)](binary-exploitation/linux-kernel-exploitation/net-sched-action-idr-uaf-cve-2026-53264.md)
 - [Pixel Bigwave Bigo Job Timeout Uaf Kernel Write](binary-exploitation/linux-kernel-exploitation/pixel-bigwave-bigo-job-timeout-uaf-kernel-write.md)
 - [Linux kernel exploitation - toctou](binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md)
