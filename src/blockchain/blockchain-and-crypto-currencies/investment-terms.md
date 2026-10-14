@@ -1,6 +1,6 @@
 # Investment Terms
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Spot
 
@@ -70,4 +70,4 @@ An option buyer receives a right, not an obligation, to exercise under the contr
 - [3] [CFTC - Understand the risks of virtual-currency trading](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/understand_risks_of_virtual_currency.html)
 - [4] [CFTC Glossary - Option, premium, and exercise](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/CFTCGlossary/index.htm)
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

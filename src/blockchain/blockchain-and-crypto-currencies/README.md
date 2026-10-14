@@ -11,6 +11,8 @@
 - **DeFi** stands for Decentralized Finance, offering financial services without central authorities.
 - **DEX** and **DAOs** refer to Decentralized Exchange Platforms and Decentralized Autonomous Organizations, respectively.
 
+For spot orders, futures, leverage, and options terminology used in crypto markets, see [Investment Terms](investment-terms.md).
+
 ## Consensus Mechanisms
 
 Consensus mechanisms ensure secure and agreed transaction validations on the blockchain:

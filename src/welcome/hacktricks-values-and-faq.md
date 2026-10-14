@@ -2,6 +2,8 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
+For the websites' use of cookies, see the [Cookies Policy](cookies-policy.md).
+
 ## HackTricks Values
 
 > [!TIP]
