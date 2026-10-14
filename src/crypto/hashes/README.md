@@ -44,6 +44,61 @@ Length-extension attacks apply to vulnerable prefix constructions such as `HASH(
 
 [Everything you need to know about hash length extension attacks](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)<sup>[[1]](#references)</sup>
 
+## Ambiguous tuple hashing and MACs
+
+### Boundary-confusion attack
+
+Incremental hash APIs do not authenticate call boundaries. `update(A); update(B)` hashes the same byte string as `update(A + B)`. Therefore, hashing or MACing raw concatenation does not authenticate a tuple. If adjacent fields have variable lengths, an attacker can repartition the bytes into a different tuple without finding a collision in the underlying hash:<sup>[[8]](#references)[[9]](#references)</sup>
+
+```python
+import hashlib
+
+def raw_hash(parts):
+    h = hashlib.sha256()
+    for part in parts:
+        h.update(part)
+    return h.digest()
+
+assert raw_hash([b"alice", b"admin"]) == raw_hash([b"aliceadmin", b""])
+```
+
+This becomes exploitable when the verifier believes the digest binds field meanings, but attacker-controlled input can reach a different parser or protocol step that assigns other boundaries. Commitments may gain alternate openings and Fiat-Shamir transcripts may be interpreted as different statements. HMAC prevents [hash length extension](#hash-length-extension-attack), but `HMAC(K, A || B)` still has this tuple-encoding ambiguity because both tuples produce the same message bytes.<sup>[[8]](#references)[[9]](#references)</sup>
+
+Use this audit workflow to test whether an ambiguous tuple encoding crosses a security boundary.<sup>[[8]](#references)[[9]](#references)</sup>
+
+1. Find `HASH(A || B)`, `HMAC(K, A || B)`, and consecutive `update()`/`Write()` calls over two or more fields.
+2. Mark every attacker-controlled or variable-length field. Try moving bytes across each boundary while keeping the complete concatenation unchanged. Include empty fields.
+3. Check delimiter schemes for delimiter bytes that inputs can contain, escaping disagreements, and designs that length-encode only some fields.
+4. Trace how every consumer parses the authenticated bytes. A candidate is meaningful only if an alternate partition changes a security decision, proof statement, record, transaction, or commitment opening. Fixed-width fields or a canonical, injective serialization prevent this specific attack.
+5. Check whether the same encoded digest is accepted in another protocol version, message type, round, or application. Bind these contexts explicitly rather than relying on callers to keep them separate.
+
+### SequenceHash and SequenceMAC
+
+SequenceHash is a hash-agnostic construction for sequences of byte strings. Each `add()` operation is atomic: it appends the value and a fixed 16-byte, little-endian length suffix to the inner hash. Empty values remain distinct objects. An outer hash prevents exposure of a length-extendable inner state, while an optional customization string provides domain separation. Do not replace `add()` with the underlying hash API's ordinary writes.<sup>[[8]](#references)[[9]](#references)</sup>
+
+```python
+import sequencehash
+
+h = sequencehash.SequenceHash.new("sha256")
+h.add(b"alice")
+h.add(b"admin")
+digest = h.result_with_customizer(b"example:v1:user-record")
+```
+
+Choose the customizer as part of the protocol definition, including enough information to distinguish the application, protocol version, message type, and round. SequenceHash still requires all parties to agree on field order, byte encoding, and canonical serialization, and it cannot protect an omitted field. Ports should be checked against the C2SP intermediate and final test vectors.<sup>[[8]](#references)[[11]](#references)</sup>
+
+For authentication, SequenceMAC provides the same atomic encoding and customization interface. It requires a key of at least 32 bytes. Unlike HMAC key preprocessing, its headers commit to the exact key length: a long raw key is not equivalent to its prehash, and appending zero bytes changes the key. This distinction matters when components accept different key representations or length metadata.<sup>[[8]](#references)[[9]](#references)</sup>
+
+```python
+key = b"\x00" * 32
+mac = sequencehash.SequenceMAC.new(key, digestmod="sha256")
+mac.add(header_bytes)
+mac.add(body_bytes)
+tag = mac.result_with_customizer(b"example:v1:request-mac")
+```
+
+The Python API and equivalent Go and Rust implementations are available as references, but protocol implementations should follow the live C2SP specification rather than recreating the encoding from this summary.<sup>[[8]](#references)[[10]](#references)</sup>
+
 ## Password hashing and cracking
 
 ### First questions<sup>[[4]](#references)</sup>
@@ -83,5 +138,7 @@ Using a recovered secret against a different account also requires evidence that
 - [5] [Hashcat example hashes](https://hashcat.net/wiki/doku.php?id=example_hashes)
 - [6] [John the Ripper command-line options](https://www.openwall.com/john/doc/OPTIONS.shtml)
 - [7] [PyPI: `hashpumpy` Python bindings for HashPump](https://pypi.org/project/hashpumpy/)
-
-{{#include ../../banners/hacktricks-training.md}}
+- [8] [C2SP - SequenceHash and SequenceMAC specification](https://c2sp.org/sequencehash)
+- [9] [Trail of Bits - SequenceHash: multihashing for the rest of us](https://blog.trailofbits.com/2026/10/02/sequencehash-multihashing-for-the-rest-of-us/)
+- [10] [Trail of Bits - SequenceHash Python implementation](https://github.com/trailofbits/sequencehash-py)
+- [11] [C2SP CCTV - SequenceHash test vectors](https://github.com/C2SP/CCTV/tree/main/sequencehash)
