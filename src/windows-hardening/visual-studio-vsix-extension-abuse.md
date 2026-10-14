@@ -1,21 +1,21 @@
-# Zloupotreba Visual Studio VSIX ekstenzija
+# Zloupotreba VSIX ekstenzija za Visual Studio
 
 {{#include ../banners/hacktricks-training.md}}
 
-Visual Studio ekstenzija može da pretvori uobičajene aktivnosti u editoru u izvršavanje koda pod identitetom prijavljenog korisnika. Zlonamerni VSIX, izdavač koji se predstavlja kao drugi ili kompromitovano ažuriranje ekstenzije mogu da dopru do korisnika uobičajenim kanalima za instalaciju. Instalacija uz administratorski upit je putanja instalacije uz pristanak, a ne automatska eskalacija privilegija.<sup>[[1]](#references)</sup>
+Ekstenzija za Visual Studio može da pretvori uobičajenu aktivnost u editoru u izvršavanje koda pod identitetom prijavljenog korisnika. Zlonamerni VSIX, izdavač koji se predstavlja kao drugi ili kompromitovano ažuriranje ekstenzije mogu doći do korisnika uobičajenim kanalima za instalaciju. Instalacija koja zahteva administratorski upit predstavlja instalaciju uz pristanak, a ne automatsko podizanje privilegija.<sup>[[1]](#references)</sup>
 
 ## Model izvršavanja
 
-Klasične VSSDK ekstenzije obično se izvršavaju unutar `devenv.exe`. Noviji model `VisualStudio.Extensibility` prvenstveno pokreće moderne .NET ekstenzije van procesa: Visual Studio posreduje u pozivima ka namenskom procesu `Microsoft.ServiceHub.Host.Extensibility`, čime se izoluје stabilnost IDE-a, ali se **ne** postavlja sandbox koji bi ograničio ekstenziju u odnosu na Windows dozvole korisnika. Tačno ime izvršne datoteke može da sadrži sufiks arhitekture, kao što je `ServiceHub.Host.Extensibility.arm64.exe`.<sup>[[1]](#references)[[2]](#references)</sup>
+Klasične VSSDK ekstenzije obično se izvršavaju unutar procesa `devenv.exe`. Noviji model `VisualStudio.Extensibility` uglavnom pokreće moderne .NET ekstenzije van procesa: Visual Studio posreduje u pozivima ka namenskom procesu `Microsoft.ServiceHub.Host.Extensibility`, čime se izoluje stabilnost IDE-a, ali se ekstenzija **ne** ograničava sandboxom u odnosu na Windows dozvole korisnika. Tačan naziv izvršne datoteke može da sadrži sufiks za arhitekturu, kao što je `ServiceHub.Host.Extensibility.arm64.exe`.<sup>[[1]](#references)[[2]](#references)</sup>
 
-### Aktiviranje pri uobičajenim aktivnostima u editoru
+### Aktiviranje uobičajenom aktivnošću u editoru
 
-Umesto da nudi samo upadljivu komandu u meniju, ekstenzija može da implementira `ITextViewOpenClosedListener`. Njen povratni poziv `TextViewOpenedAsync` poziva se za dokumente koji ispunjavaju uslove, dok `TextViewExtensionConfiguration.AppliesTo` može da ograniči aktivaciju na uobičajeni tip, kao što je JSON. Pravi formatter ili linter i dalje može da obavlja najavljeni posao, dok se druga radnja izvršava kao sporedni efekat otvaranja datoteke.<sup>[[1]](#references)[[3]](#references)</sup>
+Umesto da izlaže samo upadljivu komandu u meniju, ekstenzija može da implementira `ITextViewOpenClosedListener`. Njen povratni poziv `TextViewOpenedAsync` poziva se za dokumente koji ispunjavaju uslove, dok `TextViewExtensionConfiguration.AppliesTo` može da ograniči aktiviranje na uobičajen tip, kao što je JSON. Pravi formatter ili linter i dalje može da obavlja oglašenu funkciju dok se druga radnja izvršava kao sporedni efekat otvaranja datoteke.<sup>[[1]](#references)[[3]](#references)</sup>
 
-Sledeći pojednostavljeni obrazac prikazuje važne tačke izvršavanja; radi jasnoće izostavlja legitimni formatter i obradu grešaka.<sup>[[1]](#references)[[3]](#references)</sup>
+Sledeći pojednostavljeni obrazac prikazuje važne tačke izvršavanja; radi jasnoće, izostavlja legitimni formatter i obradu grešaka.<sup>[[1]](#references)[[3]](#references)</sup>
 
 <details>
-<summary>Učitavač upravljanih sklopova u memoriji aktiviran događajem</summary>
+<summary>Učitavač upravljanih sklopova u memoriji, pokrenut događajem</summary>
 
 ```csharp
 [VisualStudioContribution]
@@ -46,25 +46,25 @@ internal class JsonListener : ExtensionPart, ITextViewOpenClosedListener
 
 </details>
 
-Ovaj lanac preuzima Base64 tekst, dekodira ga u assembly bajtove, učitava ga iz `MemoryStream`-a preko sakupljivog `AssemblyLoadContext`-a, poziva reflektovani `EntryPoint` bez parametara ili sa `string[]`, čeka asinhrone ulazne tačke i oslobađa kontekst. Druga faza se ne zapisuje na disk, iako VSIX i primarni DLL ekstenzije ostaju artefakti na disku. Base64 ne pruža autentičnost ni poverljivost; korišćenje HTTP-a takođe omogućava napadaču koji presreće saobraćaj da zameni odgovor.<sup>[[1]](#references)</sup>
+Ovaj lanac preuzima Base64 tekst, dekodira ga u bajtove assembly-ja, učitava ga iz `MemoryStream` objekta pomoću uklonjivog `AssemblyLoadContext` konteksta, poziva reflektovani `EntryPoint` bez parametara ili sa `string[]` nizom, čeka asinhrone ulazne tačke i uklanja kontekst. Druga faza se ne zapisuje na disk, iako VSIX i primarna DLL datoteka proširenja ostaju artefakti na disku. Base64 ne pruža autentičnost ni poverljivost; korišćenje HTTP-a takođe omogućava napadaču na putanji da zameni odgovor.<sup>[[1]](#references)</sup>
 
-Operativne varijacije obuhvataju potiskivanje svih izuzetaka kako bi oglašena funkcionalnost nastavila da radi kada priprema ne uspe, ili korišćenje `ITextViewChangedListener` okidača nakon izmena. Kod se izvršava u host procesu ekstenzije i može da koristi upravljane API-je, P/Invoke, datoteke, pristupne podatke i podređene procese dostupne tom korisniku.<sup>[[1]](#references)</sup>
+Operativne varijacije uključuju potiskivanje svih izuzetaka kako bi oglašena funkcija nastavila da radi u slučaju neuspešnog postavljanja ili korišćenje `ITextViewChangedListener` za pokretanje nakon izmena. Kod se izvršava u hostu proširenja i može da koristi upravljane API-je, P/Invoke, datoteke, akreditive i podređene procese koji su dostupni tom korisniku.<sup>[[1]](#references)</sup>
 
-Za srodnu površinu za izvršavanje specifičnu za editor, zasnovanu na automatskom učitavanju nativnih dodataka, pogledajte:
+Za povezanu površinu za izvršavanje specifičnu za uređivač, zasnovanu na automatskom učitavanju izvornog dodatka, pogledajte:
 
 {{#ref}}
 windows-local-privilege-escalation/notepad-plus-plus-plugin-autoload-persistence.md
 {{#endref}}
 
-### Zloupotreba poverenja u Marketplace i kanale isporuke
+### Zloupotreba poverenja u Marketplace i kanale distribucije
 
-VSIX može stići kao direktno deljena ili phishing datoteka, sa web Marketplace-a ili kroz ugrađeni Marketplace pregledač u Visual Studio-u. Registracija izdavača, koja uglavnom proverava jedinstvenost i listu rezervisanih reči, može da omogući identitete izdavača koji vizuelno podsećaju na legitimne; kompromitovanje već pouzdanog izdavača ili ekstenzije još je efikasnije jer nasleđuje postojeću bazu instaliranih korisnika. Instaliranje sa Marketplace-a pokreće Visual Studio Installer i privremeno smešta preuzeti VSIX u `%LOCALAPPDATA%\Temp`; `payload.vsix` se takođe legitimno koristi, pa samo ime datoteke nije pokazatelj.<sup>[[1]](#references)</sup>
+VSIX može stići kao direktno deljena ili phishing datoteka, sa veb Marketplace-a ili putem ugrađenog Marketplace pregledača u Visual Studio-u. Registracija izdavača, koja uglavnom obezbeđuje jedinstvenost i listu rezervisanih reči, može da omogući identitete izdavača koji vizuelno podsećaju na druge; kompromitovanje već pouzdanog izdavača ili proširenja još je efikasnije jer nasleđuje postojeću bazu instaliranih korisnika. Instalacija sa Marketplace-a pokreće Visual Studio Installer i privremeno smešta preuzeti VSIX u `%LOCALAPPDATA%\Temp`; `payload.vsix` se takođe legitimno koristi, pa samo ime datoteke nije pokazatelj.<sup>[[1]](#references)</sup>
 
-MDSec nije identifikovao Visual Studio URL protokol koji direktno instalira ekstenziju. Operateru je i dalje potrebno da korisnik instalira ili označi VSIX kao pouzdan, ili mora da kompromituje postojeći kanal distribucije ekstenzije. Paket `AllUsers` instalira se u fasciklu instalacije Visual Studio-a i može da zatraži povišene privilegije, ali to je uobičajeno ponašanje instalacionog programa uz pristanak korisnika, a ne automatski način za dobijanje administratorskih privilegija ili SYSTEM pristupa.<sup>[[1]](#references)[[4]](#references)</sup>
+MDSec nije identifikovao URL protokol za Visual Studio koji direktno instalira proširenje. Operateru je i dalje potrebno da korisnik instalira ili odobri poverenje VSIX-u, ili mora da kompromituje postojeći kanal distribucije proširenja. Paket `AllUsers` instalira se u fasciklu za instalaciju Visual Studio-a i može zatražiti povišene privilegije, ali to je uobičajeno ponašanje instalatora uz pristanak korisnika, a ne automatski način za dobijanje administratorskih privilegija ili SYSTEM pristupa.<sup>[[1]](#references)[[4]](#references)</sup>
 
-### Statička revizija velikih razmera
+### Statička analiza velikog broja paketa
 
-VSIX paketi su obično ZIP kontejneri, pa bezbedan proces pregleda Marketplace-a može da izlista pakete, raspakuje ih **bez učitavanja koda ekstenzije**, obradi manifeste, identifikuje izvršne površine i dekompajlira upravljane assembly-je pomoću `ilspycmd`. Dajte prednost assembly-jima koje poseduje ekstenzija, nakon što isključite uobičajene objedinjene zavisnosti, a zatim povežite nizove koji se odnose na skladišta pristupnih podataka sa grupama ponašanja kao što su čitanje datoteka uz slanje preko mreže, kodiranje uz slanje, preuzimanje uz izvršavanje, pristup Credential Manager-u uz mrežni pristup ili snimak ekrana uz slanje.<sup>[[1]](#references)[[5]](#references)</sup>
+VSIX paketi su obično ZIP kontejneri, pa bezbedan proces za pregled Marketplace paketa može da ih nabroji, raspakuje **bez učitavanja koda proširenja**, analizira manifeste, identifikuje površine za izvršavanje i dekompajlira upravljane assembly-je pomoću `ilspycmd`. Dajte prednost assembly-jima koje poseduje proširenje, nakon što isključite uobičajene priložene zavisnosti, a zatim povežite nizove koji se odnose na skladišta akreditiva sa grupama ponašanja kao što su čitanje datoteke i slanje preko mreže, kodiranje i slanje, preuzimanje i izvršavanje, upravljač akreditivima i mrežni pristup ili snimak ekrana i slanje.<sup>[[1]](#references)[[5]](#references)</sup>
 
 ```bash
 unzip -q sample.vsix -d sample-vsix
@@ -73,13 +73,16 @@ ilspycmd -p -o decompiled sample-vsix/path/to/extension.dll
 rg -n -i 'Login Data|logins\.json|key4\.db|wallet\.dat|\.aws[/\\]credentials|LoadFromStream|EntryPoint|cmd\.exe' decompiled
 ```
 
-Takođe popišite native DLL-ove, MSBuild targets, skripte, T4 templates i instalacione payload-e, umesto da pretpostavite da se sve površine za izvršavanje sastoje od managed code-a. Uporedite sumnjivo ponašanje sa svrhom navedenom u manifestu; telemetrija i legitimni programi za ažuriranje mogu ličiti na exfiltration ili staging. Pregled koji se oslanja samo na statičku analizu propušta upakovani, zamagljeni, dinamički razrešeni i neaktivni kod, a pregled samo najnovije verzije propušta zlonamerna starija izdanja.<sup>[[1]](#references)</sup>
+Takođe popišite nativne DLL-ove, MSBuild targets, skripte, T4 templates i sadržaj instalacionih paketa, umesto da pretpostavite da se svaka površina za izvršavanje sastoji od managed code-a. Uporedite sumnjivo ponašanje sa namenom navedenom u manifestu; telemetrija i legitimni programi za ažuriranje mogu ličiti na eksfiltraciju ili pripremu sadržaja. Pregled samo statičke analize propušta upakovani, obfuskovani, dinamički razrešeni i neaktivni kod, a pregled samo najnovije verzije propušta zlonamerna starija izdanja.<sup>[[1]](#references)</sup>
+
+Zaseban napad pri učitavanju projekta može da izvrši zlonamerni [MSBuild `GetFrameworkPaths` target](visual-studio-project-msbuild-execution.md) bez instaliranja VSIX-a.<sup>[[6]](#references)</sup>
 
 ## References
 
-- [1] [MDSec - Ponovni pregled Visual Studio ekstenzija](https://www.mdsec.co.uk/2026/05/visual-studio-extensions-revisited/)
+- [1] [MDSec - Ponovni osvrt na Visual Studio ekstenzije](https://www.mdsec.co.uk/2026/05/visual-studio-extensions-revisited/)
 - [2] [Microsoft Learn - O VisualStudio.Extensibility](https://learn.microsoft.com/en-us/visualstudio/extensibility/visualstudio.extensibility/visualstudio-extensibility?view=visualstudio)
 - [3] [Microsoft Learn - ITextViewOpenClosedListener.TextViewOpenedAsync](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.extensibility.editor.itextviewopenclosedlistener.textviewopenedasync?view=vs-extensibility)
-- [4] [Microsoft Learn - Anatomija VSIX paketa](https://learn.microsoft.com/en-us/visualstudio/extensibility/anatomy-of-a-vsix-package?view=visualstudio)
+- [4] [Microsoft Learn - Struktura VSIX paketa](https://learn.microsoft.com/en-us/visualstudio/extensibility/anatomy-of-a-vsix-package?view=visualstudio)
 - [5] [ILSpy - .NET alat ilspycmd](https://github.com/icsharpcode/ILSpy/blob/master/ICSharpCode.ILSpyCmd/README.md)
+- [6] [Unit 42 - Kampanja Blinder Tunnel cilja infrastrukturu u Iraku](https://unit42.paloaltonetworks.com/blinder-tunnel-targets-critical-infrastructure/)
 {{#include ../banners/hacktricks-training.md}}

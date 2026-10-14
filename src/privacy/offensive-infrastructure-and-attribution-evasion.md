@@ -2,267 +2,280 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Operater retko dobija značajnu anonimnost korišćenjem samo jednog proxy-ja. Stvarne kampanje grade **graf razdvajanja**: operater pristupa access node-u, traversal nodes skrivaju taj node od izlaza, redirectors štite stvarni C2, a jednokratna imena upućuju na javnu ivicu.
+Operater retko stiče značajnu anonimnost pomoću jednog proxy-ja. Stvarne kampanje grade **graf razdvajanja**: operater pristupa pristupnom čvoru, prolazni čvorovi skrivaju taj čvor od izlaznog čvora, redirectori štite pravi C2, a jednokratna imena upućuju na javnu ivicu.
 
-Koristite [Katalog tehnika anonimnog pristupa Internetu](anonymous-internet-access-techniques.md) za standardizovani pregled prednosti/mana, implementacije i detekcije svakog puta. Ova stranica detaljnije obrađuje kompoziciju adversarijalne infrastrukture.
+Koristite [Katalog tehnika za anonimni pristup internetu](anonymous-internet-access-techniques.md) za standardizovan pregled prednosti, nedostataka, primene i detekcije svake putanje. Ova stranica detaljnije obrađuje sastavljanje adversarijalne infrastrukture.
+
 ```text
 operator -> access relay -> traversal mesh -> exit/redirector -> target
-|                 |                |
-account/provider   relay operator   target telemetry
+                |                 |                |
+          account/provider   relay operator   target telemetry
 ```
-Poslednja adresa koju meta vidi stoga predstavlja dokaz o putanji, a ne dokaz o tome ko je upravljao tastaturom. MITRE glavne komponente mapira na Acquire Infrastructure (T1583), Compromise Infrastructure (T1584), Proxy (T1090), Dynamic Resolution (T1568) i Web Service (T1102).<sup>[[1]](#references)</sup>
+
+Poslednja adresa koju vidi cilj zato je dokaz o putanji, a ne dokaz o tome ko je upravljao tastaturom. MITRE mapira glavne komponente na Acquire Infrastructure (T1583), Compromise Infrastructure (T1584), Proxy (T1090), Dynamic Resolution (T1568) i Web Service (T1102).<sup>[[1]](#references)</sup>
 
 ## Klase infrastrukture
 
-| Klasa | Zašto je actor koristi | Trajna izloženost | Najbolji pivot za defendera |
+| Klasa | Zašto je akter koristi | Dugotrajna izloženost | Najbolja tačka za pivotiranje za odbranu |
 |---|---|---|---|
-| Iznajmljeni VPS/cloud | Brz, predvidiv, rutabilan i lak za ponovnu izgradnju | tenant, billing, console, source-login i istorija image-a | account/control-plane događaji i ponovljeni server fingerprint |
-| Commercial VPN/Tor | Veliki deljeni izlazni skup; nema administracije servera | vidljivost provider-a/guard-a i end-to-end timing | ponašanje odredišta, endpoint dokazi i korelacija flow-a |
-| Residential/mobile proxy | Consumer ASN i geografska uverljivost | evidencije brokera/korisnika; proxyware ili ponašanje zaraženog hosta | impossible travel, proxy protokoli i promena adrese po sesiji |
-| Compromised server/router/IoT | Pozajmljuje reputaciju žrtve i jurisdikciju | implant, management flow i ponovljeni upstream controller | telemetry uređaja i ORB topologija, a ne jedna exit IP adresa |
-| CDN/redirector | Razdvaja javni edge od back-end C2 | TLS/HTTP gramatika, certificate, routing i cloud-account artifacts | korelacija edge-to-origin i klasterizacija request-shape-a |
-| Legitimate web service | Uklapa se u dozvoljeni GitHub/cloud/social saobraćaj | API token, tenant/object identifiers i neuobičajena process lineage | endpoint proces plus service/API semantika |
-| Physical/cellular/satellite path | Menja prividno fizičko poreklo | RF, carrier, subscriber, device i location zapisi | kombinovani radio/fizički i network dokazi |
+| Iznajmljeni VPS/cloud | Brz, predvidiv, rutabilan, lako ga je ponovo izgraditi | zakupac, naplata, konzola, istorija prijava sa izvora i image-a | događaji na nalogu/kontrolnoj ravni i ponavljajući otisak servera |
+| Komercijalni VPN/Tor | Veliki skup zajedničkih izlaznih tačaka; nema administracije servera | vidljivost pružaoca/usluge i korelacija vremena od početka do kraja | ponašanje odredišta, dokazi sa krajnjih tačaka i korelacija tokova |
+| Residential/mobile proxy | Potrošački ASN i geografska uverljivost | evidencija posrednika/korisnika; ponašanje proxyware-a ili zaraženog uređaja | nemoguće putovanje, proxy protokoli i promena adresa po sesiji |
+| Kompromitovani server/ruter/IoT | Pozajmljuje reputaciju žrtve i njenu jurisdikciju | implant, upravljački tok i ponavljajući uzvodni kontroler | telemetrija uređaja i ORB topologija, a ne jedna izlazna IP adresa |
+| CDN/redirector | Razdvaja javni edge od pozadinskog C2 | TLS/HTTP gramatika, sertifikat, rutiranje i artefakti cloud naloga | korelacija edge-a i origin-a i grupisanje po obliku zahteva |
+| Legitimni web servis | Uklapa se u dozvoljeni GitHub/cloud/saobraćaj društvenih mreža | API token, identifikatori zakupca/objekta i neuobičajeno poreklo procesa | proces na krajnjoj tački i semantika servisa/API-ja |
+| Fizička/mobilna/satelitska putanja | Menja prividno fizičko poreklo | RF, operater, pretplatnik, uređaj i podaci o lokaciji | kombinovani radio/fizički i mrežni dokazi |
 
-## Mreže operativnih relay box-eva
+## Mreže operativnih relay box uređaja
 
-**ORB network** je upravljana proxy flota koja se koristi kao posredna usluga. Mandiant ih deli na provisioned networks iznajmljenih servera, non-provisioned networks kompromitovanih router-a/IoT uređaja i hibride. Zrela topologija ima četiri logičke uloge:<sup>[[2]](#references)</sup>
+**ORB mreža** je upravljan proxy skup koji se koristi kao posredni servis. Mandiant ih deli na obezbeđene mreže iznajmljenih servera, mreže bez obezbeđivanja koje čine kompromitovani ruteri/IoT uređaji i hibridne mreže. Zrela topologija ima četiri logičke uloge:<sup>[[2]](#references)</sup>
 
-1. **Administration server (ACOS):** održava inventar, credentials, health i routing policy.
-2. **Access/relay node:** autentifikuje korisnike ili operatore; predstavlja stabilnu ulaznu tačku u promenljivu mesh mrežu.
-3. **Traversal nodes:** jedan ili više iznajmljenih ili kompromitovanih sistema prosleđuju opaque connections.
-4. **Exit/staging node:** predstavlja konačnu source adresu izviđanju, exploitation-u ili C2 metama.
+1. **Administracioni server (ACOS):** održava inventar, akreditive, stanje i pravila rutiranja.
+2. **Pristupni/relay čvor:** autentifikuje korisnike ili operatere; to je stabilna ulazna tačka u promenljivu mrežu.
+3. **Traversal čvorovi:** jedan ili više iznajmljenih ili kompromitovanih sistema prosleđuju neprozirne veze.
+4. **Izlazni/staging čvor:** predstavlja konačnu izvornu adresu sistemima za izviđanje, eksploataciju ili C2.
 
-Mesh može birati exit-e prema zemlji, ASN-u, latenciji ili dostupnosti i menjati nezdrave node-ove. Više threat grupa može iznajmljivati istu mrežu. Mandiant je uočio da IPv4 adresa ostane povezana sa nekim ORB-ovima svega 31 dan; zato preporučuje da se **mreža tretira kao entitet koji se razvija nalik actor-u**, umesto da se blokira zastarela lista IP adresa.<sup>[[2]](#references)</sup>
+Mreža može da bira izlazne čvorove prema državi, ASN-u, latenciji или dostupnosti i da menja neispravne čvorove. Više pretnji može iznajmljivati istu mrežu. Mandiant je primetio da je IPv4 adresa u nekim ORB mrežama ostajala povezana sa njima svega 31 dan; zato preporučuje da se **mreža posmatra kao entitet nalik akteru koji se razvija**, umesto da se blokira zastarela lista IP adresa.<sup>[[2]](#references)</sup>
 
-### Šta ovo omogućava — i šta odaje
+### Šta ovo omogućava — i šta leak-uje
 
-- Meta vidi exit koji može biti geografski blizu i naizgled residential.
-- Exit vidi metu i prethodni hop, ali ne nužno operatora.
-- Access service vidi customer-a i zahtev za rutom. Nezavisno upravljani mesh može držati customer-a odvojeno od exit-a, ali time stvara moćan zapis o counterpart-yju.
-- Ponovljeni portovi, redosled handshake-a, server banner-i, certificate-i, uptime window-i i controller odnosi mogu otkriti flotu čak i kada se IP adrese rotiraju.
-- Kompromitovanom router-u često nedostaje endpoint telemetry, ali njegov ISP i dalje poseduje subscriber i flow podatke; zaplena otkriva implant/configuration artifacts.
+- Cilj vidi izlaznu tačku koja može biti geografski blizu i naizgled rezidencijalna.
+- Izlazna tačka vidi cilj i prethodni hop, ali ne nužno i operatera.
+- Pristupni servis vidi korisnika i zahtev za rutom. Mreža kojom se nezavisno upravlja može da razdvoji korisnika od izlaznih tačaka, ali time nastaje moćan trag kod druge strane.
+- Ponavljajući portovi, redosled rukovanja, baneri servera, sertifikati, vremenski intervali aktivnosti i veze među kontrolerima mogu da otkriju skup čvorova čak i dok se IP adrese menjaju.
+- Kompromitovanom ruteru često nedostaje telemetrija krajnje tačke, ali njegov ISP i dalje ima podatke o pretplatniku i tokovima; zaplena otkriva artefakte implanta/konfiguracije.
 
 {% hint style="info" %}
-Za autorizovanu vežbu reprodukujte topologiju pomoću VM-ova ili router-a u vlasništvu organizacije i sačuvajte attribution map controller-a. Nemojte angažovati open proxy-je ili uređaje trećih strana. [Lab guide](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain) kreira istu hop strukturu vidljivu defenderu bez viktimizacije posrednika.
+Za odobrenu vežbu, reprodukujte topologiju pomoću VM-ova ili rutera u vlasništvu organizacije i sačuvajte mapu atribucije kontrolera. Nemojte koristiti otvorene proxy-je niti uređaje trećih strana. [Vodič za laboratoriju](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain) pravi istu strukturu hop-ova vidljivu braniocima, a da se pritom ne ugrožava posrednik.
 {% endhint %}
 
-## Residential i mobile proxy mreže
+## Rezidencijalne i mobilne proxy mreže
 
-Residential proxy servisi dodeljuju sesije adresama consumer broadband-a; mobile proxy-ji izlaze kroz carrier NAT pool-ove. Supply može poticati od izričito uključenih appliance-a, SDK/proxyware-a ugrađenog u consumer aplikacije, reseller-a ili malware-a. Ova porekla nisu ekvivalentna: nedostatak informisanog pristanka pretvara privacy service u compromised infrastructure.
+Rezidencijalni proxy servisi dodeljuju sesijama adrese potrošačkih širokopojasnih veza; mobilni proxy-ji izlaze preko NAT skupova operatera. Izvori mogu biti izričito uključeni uređaji, SDK/proxyware ugrađen u potrošačke aplikacije, preprodavci ili malware. Ovi izvori nisu istovetni: bez informisanog pristanka, servis za privatnost postaje kompromitovana infrastruktura.
 
-Načini rotacije utiču na detection:
+Načini rotacije utiču na detekciju:
 
-- **per-request rotation** proizvodi brze diskontinuitete IP adrese i ASN-a/geografije, dok identitet na višem sloju ostaje stabilan;
-- **sticky sessions** zadržavaju exit nekoliko minuta ili sati, nalik uobičajenom subscriber-u;
-- **backconnect gateways** customer-u izlažu jednu broker endpoint adresu, a exit-e biraju interno;
-- **mobile pools** postavljaju veliki broj stvarnih subscriber-a iza malog broja carrier NAT adresa, zbog čega je IP block skup.
+- **rotacija po zahtevu** dovodi do brzih diskontinuiteta IP adrese i ASN-a/geografije, dok identitet na višim slojevima ostaje stabilan;
+- **lepljive sesije** zadržavaju izlaznu tačku nekoliko minuta ili sati, pa liče na uobičajenog pretplatnika;
+- **backconnect pristupnici** korisniku izlažu jednu brokersku krajnju tačku, a interno biraju izlazne tačke;
+- **mobilni skupovi** stavljaju mnogo stvarnih pretplatnika iza malog broja carrier NAT adresa, zbog čega je blokiranje IP adrese skupo.
 
-Defenderi treba da korelišu IP adresu sa authenticated session-om, TLS/client fingerprint-om, HTTP ordering-om, device cookie-jem i ponašanjem. Navodno lokalni residential login praćen drugom zemljom, dok sve karakteristike višeg sloja ostaju identične, predstavlja jači signal od same reputacije. Nasuprot tome, deljenje adresa i mobile handoff stvaraju legitimnu churn pojavu, zato residential/proxy klasifikaciju nikada ne treba tretirati kao konačnu odluku.
+Branioci treba da povezuju IP adresu sa autentifikovanom sesijom, TLS/klijentskim otiskom, redosledom HTTP zahteva, kolačićem uređaja i ponašanjem. Navodna lokalna rezidencijalna prijava praćena prijavom iz druge države, uz nepromenjene karakteristike na višim slojevima, predstavlja jači pokazatelj od same reputacije. Nasuprot tome, deljenje adresa i promena mobilne mreže dovode do legitimnih promena, zato klasifikaciju rezidencijalnog/proxy saobraćaja nikada ne tretirajte kao konačnu procenu.
 
-### Proxyware control planes i preklapanje reseller-a
+### Kontrolne ravni proxyware-a i preklapanje preprodavaca
 
-Residential pool ne treba modelovati kao ravnu listu exit-a. Analiza IPIDEA ecosystem-a otkrila je ponovljivi **two-tier control plane**: ugrađeni SDK najpre šalje device/enrollment metadata Tier One domenu i dobija scheduling, kao i Tier Two `connect`/`proxy` IP:port parove. Node periodično proverava Tier Two connect port radi encoded task-a, otvara drugu konekciju ka uparenom proxy port-u i prosleđuje dostavljene bajtove ka traženom odredištu. Nominalno različiti SDK-ovi i proxy brendovi imali su zasebne discovery domene, ali su se spajali na deljenu Tier Two infrastrukturu i preklapajuće exit pool-ove kroz zajedničko vlasništvo i reseller odnose.<sup>[[13]](#references)</sup>
+Nemojte modelovati rezidencijalni skup kao ravnu listu izlaznih tačaka. Analiza IPIDEA ekosistema otkrila je ponovo upotrebljivu **dvoslojnu kontrolnu ravan**: ugrađeni SDK najpre šalje metapodatke o uređaju/upisu domenu Tier One, a zatim prima parove IP:port za raspoređivanje i Tier Two `connect`/`proxy`. Čvor periodično proverava connect port Tier Two radi kodiranog zadatka, otvara drugu vezu ka uparenom proxy portu i prosleđuje zadate bajtove do traženog odredišta. SDK-ovi i proxy brendovi koji su nominalno bili različiti imali su zasebne domene za otkrivanje, ali su se spajali na zajedničku Tier Two infrastrukturu i preklapajuće izlazne skupove kroz zajedničko vlasništvo i odnose sa preprodavcima.<sup>[[13]](#references)</sup>
+
 ```text
 enrolled node -> Tier One domain        -> Tier Two IP:port pairs
 enrolled node -> Tier Two connect port  -> destination + connection ID
 enrolled node -> Tier Two proxy port   <-> customer bytes -> destination
 ```
-Ovo proizvodi trajnije pivot tačke za hunting od residential IP bloka:<sup>[[13]](#references)</sup>
 
-- neočekivani utility, VPN, game ili embedded-device proces šalje stabilni ID uređaja/customer key i prima promenljivu listu servera;
-- endpoint ispituje direktan IP na neuobičajenom portu, a zatim se odmah povezuje na drugi port na istoj adresi, pre otvaranja socket-a ka novoj destinaciji;
-- nekoliko prividnih brendova deli Tier Two adrese, gramatiku protokola, SDK kod ili preklapanje exit node-ova;
-- različite aplikacije koje kontaktiraju različite Tier One domene primaju adrese iz istog Tier Two pool-a.
+Ovo daje trajnije pivot tačke za threat hunting od bloka rezidencijalnih IP adresa:<sup>[[13]](#references)</sup>
 
-Ovo preklapanje takođe ograničava atribuciju: to što se IP adresa vidi u reklamiranom pool-u jednog vendora ne dokazuje koji reseller, customer ili threat actor ju je koristio u relevantnom trenutku. Sačuvajte vremenske oznake protoka, lineage procesa, tela Tier One odgovora i identifikatore Tier Two task-ova.<sup>[[13]](#references)</sup> U autorizovanoj vežbi ovu hijerarhiju emulirajte samo pomoću endpoint-a u vlasništvu organizacije; nikada ne uključujte consumer uređaje ili third-party proxyware.
+- neočekivani proces neke pomoćne aplikacije, VPN-a, igre ili ugrađenog uređaja šalje stabilni ID uređaja/korisnički ključ i prima promenljivu listu servera;
+- krajnja tačka proverava direktnu IP adresu na neuobičajenom portu, a zatim se neposredno pre otvaranja socket-a ka novom odredištu povezuje na drugi port iste adrese;
+- nekoliko prividno različitih brendova deli Tier Two adrese, gramatiku protokola, SDK kod ili preklapanje izlaznih čvorova;
+- različite aplikacije koje kontaktiraju različite Tier One domene dobijaju adrese iz istog Tier Two skupa.
 
-## Lanci multi-hop proxyja
+Ovo preklapanje ujedno ograničava atribuciju: uočavanje IP adrese u oglašenom skupu nekog dobavljača ne utvrđuje koji ju je preprodavac, korisnik ili akter pretnje koristio u relevantnom trenutku. Sačuvajte vremenske oznake tokova, poreklo procesa, tela odgovora Tier One sistema i identifikatore zadataka Tier Two sistema.<sup>[[13]](#references)</sup> U ovlašćenoj vežbi, oponašajte ovu hijerarhiju samo pomoću krajnjih tačaka u vlasništvu organizacije; nikada ne registrujte uređaje potrošača ili proxyware trećih strana.
 
-MITRE razlikuje external proxies od **multi-hop proxies (T1090.003)**. Važno svojstvo nije broj hopova, već razdvajanje znanja i administracije.<sup>[[3]](#references)</sup>
+## Lanci višeskokovnih proxy-ja
+
+MITRE pravi razliku između eksternih proxy-ja i **višeskokovnih proxy-ja (T1090.003)**. Ključno svojstvo nije broj skokova, već razdvajanje znanja i administracije.<sup>[[3]](#references)</sup>
+
 ```text
 operator --encrypted--> entry A --encrypted/relayed--> exit B --> target
-sees source                         sees destination
+              sees source                         sees destination
 ```
-Ako jedna strana upravlja sistemima A i B, zajednički logovi ili vremensko usklađivanje saobraćaja mogu rekonstruisati circuit. Dodavanje uzastopnih komercijalnih VPN-ova sa iste endpoint/account tačke može povećati latenciju, a da pritom ostanu zajednički identitet, podaci o plaćanju i vremenski obrasci. Tor smanjuje ovaj problem nezavisno odabranim relay-ima i deljenim dizajnom client-a, ali interaktivna mreža sa niskom latencijom ne može garantovati otpornost na posmatrača koji meri oba kraja.
 
-Česti propusti su DNS ili IPv6 bypass, aplikacije koje otvaraju sopstvene socket-e, management saobraćaj koji direktno dolazi do relay-a, sinhronizovana aktivnost, ponovo korišćeni SSH ključevi i prijavljivanje na identifikujuće account-e. Ispravna verifikacija je failure test: zaustavite svaki relay redom i pokažite da workload ne može da pređe na clear putanju.
+Ako jedna strana upravlja A i B, zajednički logovi ili vremenski obrasci protoka mogu otkriti putanju veze. Dodavanje uzastopnih komercijalnih VPN-ova sa iste krajnje tačke/naloga može povećati kašnjenje, a da pritom ostavi tragove zajedničkog identiteta, plaćanja i vremenskih obrazaca. Tor umanjuje ovaj problem nezavisno odabranim relay čvorovima i zajedničkim dizajnom klijenta, ali mreža sa malim kašnjenjem za interaktivnu upotrebu ne može da garantuje otpornost na posmatrača koji meri oba kraja veze.
 
-### Kolaps tunela i curenje prema upstream-u
+Česti propusti su zaobilaženje preko DNS-a ili IPv6, aplikacije koje otvaraju sopstvene sokete, upravljački saobraćaj koji direktno stiže do relay čvorova, sinhronizovana aktivnost, ponovo korišćeni SSH ključevi i prijavljivanje na naloge koji otkrivaju identitet. Ispravna provera je test otkaza: zaustavite svaki relay redom i pokažite da radno opterećenje ne može da pređe na nezaštićenu putanju.
 
-Relay arhitektura je često najlakše atribuirati kada zakaže. Unit 42 je dokumentovao multi-tier espionage putanju koja je koristila VPS-ove okrenute ka victim-u, relay VPS-ove, residential proxy-je, Tor i druge proxy servise; kada je tunnel izostavljen ili kolabirao, skrivena upstream infrastruktura direktno se povezivala sa relay i sistemima okrenutim ka victim-u. Ista istraga je takođe koristila X.509 certificate nakratko izložen na upstream infrastrukturi kao pivot između tier-ova.<sup>[[14]](#references)</sup>
+### Otkazivanje tunela i curenje ka uzvodnoj infrastrukturi
 
-Držite **data plane** (`victim <-> exit`) odvojenim od **control plane-a** (`operator/upstream -> relay administration`). Zadržite ingress i authentication logove na svakom tier-u kojim upravljate, istoriju certificate-a i kratke neuspešne konekcije — ne samo uspešne C2 sesije. Source koji se pojavljuje samo tokom ispada relay-a ili direktno administrira više sistema okrenutih ka victim-u jači je kandidat za upstream nego običan exit, ali njegov ASN/geolokacija i dalje predstavljaju hipotezu, a ne dokaz identiteta operatora.
+Arhitektura relay čvorova često se najlakše pripisuje kada otkaže. Unit 42 je dokumentovao špijunsku putanju sa više nivoa koja je koristila VPS-ove okrenute ka žrtvama, relay VPS-ove, rezidencijalne proksije, Tor i druge proksi usluge; kada bi tunel izostao ili se prekinuo, skrivena uzvodna infrastruktura povezivala se direktno sa relay sistemima i sistemima okrenutim ka žrtvama. Ista istraga je koristila i X.509 sertifikat koji je nakratko bio izložen na uzvodnoj infrastrukturi kao pivot između nivoa.<sup>[[14]](#references)</sup>
 
-Authorized lab treba da natera workload da fail closed. Za workload izolovan u Linux network namespace-u, prva ruta mora koristiti tunnel; nakon njegovog uklanjanja, i request i route lookup moraju da zakažu, umesto da izaberu fizički uplink:
+Držite **data plane** (`victim <-> exit`) odvojenim od **control plane**-a (`operator/upstream -> relay administration`). Zadržite ulazne logove i logove autentifikacije na svakom nivou kojim upravljate, istoriju sertifikata i kratke neuspele veze — ne samo uspešne C2 sesije. Izvor koji se pojavljuje samo tokom prekida relay čvorova ili direktno administrira više čvorova okrenutih ka žrtvama jači je kandidat za uzvodni čvor od uobičajenog exit čvora, ali njegov ASN/geolokacija i dalje su hipoteza, a ne dokaz identiteta operatera.
+
+Ovlašćeno laboratorijsko okruženje treba da zaustavi radno opterećenje u slučaju otkaza. Za radno opterećenje izolovano u Linux mrežnom imenskom prostoru, prva ruta mora da koristi tunel; nakon njegovog uklanjanja, i zahtev i provera rute moraju da otkažu, a ne da izaberu fizički uplink:
+
 ```bash
 ip netns exec workload ip route get "$OWNED_TEST_IP"  # expect: dev wg0
 ip -n workload link set wg0 down
 ip netns exec workload curl --fail --connect-timeout 3 \
---resolve "$OWNED_TEST_HOST:443:$OWNED_TEST_IP" "https://$OWNED_TEST_HOST/health"
+  --resolve "$OWNED_TEST_HOST:443:$OWNED_TEST_IP" "https://$OWNED_TEST_HOST/health"
 ip netns exec workload ip route get "$OWNED_TEST_IP"  # expect: unreachable
 ```
-Ponovite test za DNS i IPv6, kao i na svakoj granici relay-a. Ako bilo koja proba uspe, zabeležite stvarnu adresu interfejsa/izvornu adresu pre popravljanja policy routing-a ili firewall-a; to opažanje predstavlja attribution leak koji bi istražitelj video.
+
+Ponovite test za DNS i IPv6, kao i na svakoj granici relay-a. Ako neka proba uspe, zabeležite stvarni interfejs/izvornu adresu pre nego što popravite policy routing ili firewall; to zapažanje predstavlja attribution leak koji bi istražitelj video.
 
 ## Slojevi redirector-a i oblikovanje saobraćaja
 
-Javni **redirector** prihvata saobraćaj koji odgovara gramatici specifičnoj za operaciju i prosleđuje ga zaštićenom team server-u. Sve ostalo može biti odbijeno ili mu se može poslužiti bezazlen sadržaj.
+Javni **redirector** prihvata saobraćaj koji odgovara gramatici specifičnoj za operaciju i prosleđuje ga zaštićenom timskom serveru. Sve ostalo može da odbije ili da posluži bezazlen sadržaj.
+
 ```text
 implant/browser -> CDN or redirector -> relay -> team server
-|
-request policy
-host + path + method + header + time
+                       |
+                 request policy
+           host + path + method + header + time
 ```
-Više nivoa ograničava izloženost: gašenje javnog domena ne mora otkriti team server. CDN-ovi dodaju anycast kapacitet i ugledan spoljašnji domen, ali CDN nalog i edge logovi postaju tačke atribucije. TLS fingerprints, istorije sertifikata, karakteristične putanje/redosled headera, veličine odgovora, ponašanje pri redirekciji i origin allowlists mogu grupisati navodno nepovezane frontove.
 
-Radi detekcije, zabeležite polja reverse-proxy-ja pre normalizacije, uporedite SNI/Host/authority, pregledajte retke kombinacije headera, grupišite tela odgovora i TLS fingerprints, i pretražite cloud/CDN audit logove radi preklapanja konfiguracije. Za autorizovane red team operacije izbegavajte kopiranje stvarnog brenda ili postavljanje prikupljanja kredencijala iza nepovezane treće strane.
+Više nivoa ograničava izloženost: kompromitovanje javnog domena ne mora da otkrije timski server. CDN-ovi pružaju anycast kapacitet i reputabilan spoljašnji domen, ali CDN nalog i edge logovi postaju tačke atribucije. TLS otisci, istorija sertifikata, prepoznatljive putanje/redosled zaglavlja, veličine odgovora, ponašanje pri preusmeravanju i liste dozvoljenih origin servera mogu da povežu naizgled nepovezane frontove.
 
-## Domain fronting i domainless fronting
+Za detekciju, zabeležite polja reverse proxy-ja pre normalizacije, uporedite SNI/Host/authority, pregledajte retke kombinacije zaglavlja, grupišite tela odgovora i TLS otiske i pretražite cloud/CDN audit logove radi preklapanja konfiguracija. Ovlašćeni red team-ovi treba da izbegavaju kopiranje stvarnog brenda ili postavljanje prikupljanja akreditiva iza nepovezane treće strane.
 
-Kod klasičnog **domain fronting (T1090.004)**, TLS veza oglašava dozvoljeni front domen u SNI-ju, dok šifrovani HTTP `Host` ili HTTP/2 `:authority` zahtevaju drugi back-end domen. Saradnički CDN usmerava saobraćaj na osnovu unutrašnje vrednosti. Mrežni posmatrač bez TLS dešifrovanja vidi front; CDN vidi obe vrednosti i origin. Kod domainless varijanti, SNI može biti prazan, dok drugo polje za rutiranje bira odredište.<sup>[[4]](#references)</sup>
+## Domain fronting i fronting bez domena
 
-Ovo nije magično oponašanje: funkcioniše samo kada posrednik namerno ili slučajno dozvoljava nepodudaranje i zna kako da usmeri unutrašnje ime. Veliki provajderi su ograničili fronting između naloga. Encrypted ClientHello (ECH) menja ono što on-path posmatrač može da vidi, ali ne uklanja CDN, endpoint ili application zapise.
+Kod klasičnog **domain fronting (T1090.004)**, TLS veza u SNI oglašava dozvoljeni front domen, dok šifrovani HTTP `Host` ili HTTP/2 `:authority` traži drugi back-end domen. Saradnički CDN usmerava saobraćaj prema unutrašnjoj vrednosti. Mrežni posmatrač bez TLS dekripcije vidi front; CDN vidi obe vrednosti i origin. Kod varijanti bez domena, SNI može biti prazan, dok drugo polje za usmeravanje bira odredište.<sup>[[4]](#references)</sup>
+
+Ovo nije magično lažno predstavljanje: funkcioniše samo ako posrednik namerno ili slučajno dozvoljava nepoklapanje i zna kako da usmeri unutrašnje ime. Veliki provajderi su ograničili fronting između naloga. Encrypted ClientHello (ECH) menja ono što posmatrač na putanji može da vidi, ali ne briše CDN, krajnju tačku ni aplikacione zapise.
 
 Tačke detekcije obuhvataju:
 
-- ancestry endpoint procesa i odredište koje se ne očekuje za tu aplikaciju;
-- nepodudaranje SNI-ja i HTTP authority-ja tamo gde je TLS inspection zakonit i dostupan;
-- CDN logove koji pokazuju da jedan tenant/front usmerava saobraćaj ka drugom authority/origin-u;
-- neuobičajene dugotrajne ili periodične sesije ka servisu koji je obično interaktivan;
-- stabilne veličine i ritam šifrovanog toka kroz promenljive front domene.
+- poreklo procesa na krajnjoj tački i odredište koje se ne očekuje za tu aplikaciju;
+- nepoklapanje između SNI i HTTP authority tamo gde je TLS inspekcija zakonita i dostupna;
+- CDN logove koji pokazuju da jedan tenant/front usmerava saobraćaj ka drugom authority/origin;
+- neuobičajene dugotrajne ili periodične sesije sa servisom koji se inače koristi interaktivno;
+- stabilne veličine i ritam šifrovanih tokova uprkos promeni front domena.
 
-Bezbedna laboratorija simulira nepodudaranje rutiranja na reverse proxy-ju u vlasništvu organizacije; ne zloupotrebljava javni CDN.
+Bezbedna laboratorijska vežba simulira nepoklapanje usmeravanja na reverse proxy-ju koji ste vlasništvom, a ne zloupotrebljava javni CDN.
 
-## Dynamic resolution: DDNS, DGA i fast flux
+## Dinamičko razrešavanje: DDNS, DGA i fast flux
 
-Dynamic resolution odvaja logički servis od fiksne infrastrukture:
+Dinamičko razrešavanje odvaja logičku uslugu od fiksne infrastrukture:
 
-- **DDNS:** autentifikovani klijent ažurira stabilno ime nakon promene svoje adrese.
-- **DGA:** endpoint i kontroler izvode kandidate za imena domena na osnovu vremenskog/ključnog seed-a; operator registruje mali podskup.
-- **Fast flux:** ime vraća skup brzo promenljivih adresa kompromitovanih/proxy sistema, često sa niskim TTL vrednostima.
-- **Double flux:** rotiraju se i adrese servisa i adrese authoritative name servera, čime se skriva i kontrolni sloj.
+- **DDNS:** autentifikovani klijent ažurira stabilno ime kada se njegova adresa promeni.
+- **DGA:** krajnja tačka i kontroler izvode kandidate za imena domena iz semena vremena/ključa; operater registruje mali broj njih.
+- **Fast flux:** ime vraća skup brzo promenljivih kompromitovanih/proxy adresa, često sa niskim TTL-ovima.
+- **Double flux:** rotiraju se i adrese usluga i adrese autoritativnih name servera, čime se skriva i kontrolni sloj.
 
-Fast flux je obrazac distribucije opterećenja koji se koristi adversarno, a ne samo „mnogo DNS odgovora“. Jači dokazi kombinuju nizak TTL, veliki broj jedinstvenih adresa, široku ASN/geografsku disperziju, kratak životni vek čvorova, ponovljeno application ponašanje i sumnjivu istoriju registracije. CDN-ovi legitimno dele nekoliko tih svojstava. MITRE preporučuje korelisanje DNS ponašanja sa procesom i naknadnim konekcijama.<sup>[[5]](#references)</sup>
+Fast flux je obrazac distribucije opterećenja koji se koristi u napadačke svrhe, a ne samo „mnogo DNS odgovora“. Jači dokazi kombinuju nizak TTL, veliki broj jedinstvenih adresa, široku disperziju ASN-ova/geografskih lokacija, kratak vek čvorova, ponavljano ponašanje aplikacije i sumnjivu istoriju registracije. CDN-ovi legitimno dele nekoliko ovih svojstava. MITRE preporučuje povezivanje DNS ponašanja sa procesom i kasnijim vezama.<sup>[[5]](#references)</sup>
 
-DGA se može detektovati pomoću leksičke entropije, obrazaca suglasnika/cifara, naleta NXDOMAIN odgovora, sinhronizovanih domena prvi put viđenih i konteksta procesa. Wordlist DGA i generativni modeli zaobilaze jednostavna pravila entropije, zbog čega su vremensko grupisanje na nivou flote i lineage endpointa važniji.
+DGA se može detektovati preko leksičke entropije, obrazaca suglasnika/cifara, naleta NXDOMAIN odgovora, sinhronizovanih domena viđenih prvi put i konteksta procesa. DGA-i zasnovani na listama reči i generativni modeli zaobilaze jednostavna pravila entropije, zbog čega su vremensko grupisanje na nivou celog sistema i poreklo krajnje tačke važniji.
 
 ## Kompromitovani domeni i domain shadowing
 
-Akter može oteti registrar/DNS nalog, preuzeti dangling subdomain ili dodati zapise ispod inače uglednog domena. **Domain shadowing** čuva legitimni apex, dok veliki broj subdomena pod kontrolom napadača usmerava saobraćaj ka promenljivim delivery ili C2 hostovima. Time se pozajmljuju starost i reputacija i može se izbeći blokiranje celog domena.<sup>[[6]](#references)</sup>
+Napadač može da otme nalog registrara/DNS-a, preuzme viseći poddomen ili doda zapise ispod domena koji je inače reputabilan. **Domain shadowing** zadržava legitimni apex domen, dok veliki broj poddomena pod kontrolom napadača upućuje na promenljive hostove za isporuku ili C2. Tako se pozajmljuju starost i reputacija domena, a može se izbeći blokiranje celog domena.<sup>[[6]](#references)</sup>
 
-Braniocima su potrebni audit logovi registrar-a i authoritative DNS-a, MFA, registry/registrar locks, upozorenja za nove delegacije/API tokene/name servere, monitoring certificate transparency-ja i inventar cloud resursa na koje DNS upućuje. Rezoluciju i istoriju sertifikata subdomena istražite nezavisno od reputacije apex-a.
+Braniocima su potrebni audit logovi registrara i autoritativnog DNS-a, MFA, registry/registrar lock-ovi, upozorenja za nove delegacije/API tokene/name servere, nadzor Certificate Transparency-ja i inventar cloud resursa na koje upućuje DNS. Rezoluciju i istoriju sertifikata poddomena istražujte nezavisno od reputacije apex domena.
 
-## Web servisi i dead-drop resolveri
+## Web usluge i dead-drop resolver-i
 
-**dead-drop resolver (T1102.001)** čuva kodirani pokazivač ka trenutnom C2-u unutar legitimne objave, profila, dokumenta, repository-ja, cloud objekta ili blockchain polja. Malware preuzima javni objekat, dekodira domen/IP i kontaktira sledeću fazu. Bidirectional varijante razmenjuju komande ili fajlove kroz service API-je.<sup>[[7]](#references)</sup>
+**Dead-drop resolver (T1102.001)** čuva kodirani pokazivač ka trenutnom C2-u unutar legitimne objave, profila, dokumenta, repozitorijuma, cloud objekta ili blockchain polja. Malware preuzima javni objekat, dekodira domen/IP adresu i povezuje se sa sledećom fazom. Dvosmerne varijante razmenjuju komande ili datoteke preko API-ja usluge.<sup>[[7]](#references)</sup>
 
-Ovo obezbeđuje otpornost i skriva back-end C2 od statičke analize binarnog fajla. Takođe stvara stabilne identifikatore objekta, tenant-a, repository-ja, API-ja i obrazaca pristupa. Branioci treba da povežu:
+Jedna GitHub-specifična varijanta resolver-a koristi Issues Search API samo kada autentifikovani kanal repozitorijuma ne uspe. Klijent traži issues koji odgovaraju trenutnom datumu, repozitorijumu i tipu issue-a, prati URL komentara svakog issue-a i izdvaja šifrat između oznaka `<!--` i `-->`. Nakon dekripcije po hostu, izvedene iz datuma, polja kao što su `Owner`, `LicRepo` i `LicToken` zamenjuju primarnog vlasnika repozitorijuma, putanju i token. To omogućava operateru da rotira akreditive i krajnje tačke bez zamene klijenta; komentar issue-a služi kao resolver, dok datoteke repozitorijuma ostaju kanal za zadatke.<sup>[[15]](#references)</sup>
 
-1. proces koji je kontaktirao servis;
+Ovo pruža otpornost i skriva back-end C2 od statičke analize binarne datoteke. Takođe stvara stabilne identifikatore objekta, tenant-a, repozitorijuma, API-ja i obrazaca pristupa. Branioci treba da povežu:
+
+1. proces koji je kontaktirao uslugu;
 2. tačnu API putanju/objekat i hash odgovora;
 3. aktivnost dekodiranja ili obrade stringova;
-4. novu outbound konekciju ubrzo nakon toga; i
-5. identično ponašanje na drugim sistemima u floti.
+4. novu odlaznu vezu ubrzo nakon toga; i
+5. isto ponašanje na drugim mestima u sistemu.
 
-Blokiranje celog GitHub-a, cloud storage-a ili društvenih mreža retko je izvodljivo. Egress policy koja razume servise i korelacija na nivou procesa efikasniji su od blokiranja zasnovanog samo na domenima.
+Blokiranje celog GitHub-a, cloud skladišta ili društvenih medija retko je izvodljivo. Politika izlaznog saobraćaja zasnovana na uslugama i korelacija na nivou procesa efikasnije su od blokiranja samo po domenu.
 
-## Personae, nalozi i compartment-i nabavke
+## Personae, nalozi i nabavka kroz odvojene segmente
 
-Anonymity infrastrukture pada kada persona, recovery email, telefon, plaćanje, browser ili admin IP poveže compartment-e. Operacije povezane sa državama negovale su društvene profile, email identitete i cloud naloge dugo pre njihove upotrebe; ATT&CK to beleži kao Establish Accounts (T1585), uključujući social, email i cloud sub-techniques.<sup>[[8]](#references)</sup>
+Anonimnost infrastrukture ne uspeva kada persona, rezervni email, telefon, plaćanje, pregledač ili administratorska IP adresa povezuje odvojene segmente. Operacije povezane sa državama unapred su razvijale društvene profile, email identitete i cloud naloge; ATT&CK to beleži kao Establish Accounts (T1585), uključujući podtehnike za društvene mreže, email i cloud.<sup>[[8]](#references)</sup>
 
 Branilac ili istražitelj gradi graf na osnovu:
 
-- vremena kreiranja i prve prijave, locale-a, vremenske zone i radnog rasporeda;
-- recovery polja, MFA uređaja, identitetskih dokumenata i instrumenata plaćanja;
-- browser/TLS fingerprints i istorije izvornih mreža;
+- vremena kreiranja i prve prijave, lokaliteta, vremenske zone i radnog rasporeda;
+- polja za oporavak naloga, MFA uređaja, identifikacionih dokumenata i načina plaćanja;
+- otisaka pregledača/TLS-a i istorije izvornih mreža;
 - ponovne upotrebe avatara, porekla slika, stila pisanja i rasta društvenog grafa;
-- zajedničkog domain registranta, name servera, sertifikata, analytics ID-ja ili repository commit-a;
-- radnji u management plane-u koje zaobilaze javnu relay arhitekturu.
+- zajedničkog registranta domena, name servera, sertifikata, analytics ID-ja ili commita u repozitorijumu;
+- radnji na kontrolnoj ravni koje zaobilaze arhitekturu javnog releja.
 
-Za autorizovani red team, sintetičke persone treba dokumentovati kod kontrolora vežbe, koristiti recovery/payment kanale u vlasništvu organizacije, izbegavati oponašanje stvarnih nepovezanih osoba i imati planirano povlačenje. SOC može ostati slep; operacija ne sme postati bez odgovornosti.
+Za ovlašćeni red team, sintetičke persone treba dokumentovati kod kontrolora vežbe, koristiti recovery/payment kanale u vlasništvu organizacije, izbegavati lažno predstavljanje stvarnih, nepovezanih osoba i imati planirano povlačenje. SOC može ostati neobavešten, ali operacija ne sme postati neodgovorna.
 
-## Novi složeni obrasci za threat-model
+## Obrasci u nastajanju koje treba modelovati kao pretnje
 
-Sledeće su **defender-driven compositions**, a ne tvrdnje da je imenovani akter primenio svaki tačno navedeni dizajn. Oni kombinuju već uočene primitive i korisne su purple-team hipoteze.
+Sledeće su **kombinacije osmišljene iz perspektive odbrane**, a ne tvrdnje da je imenovani akter primenio svaki tačno ovakav dizajn. Kombinuju već uočene primitive i korisne su kao hipoteze za purple team vežbe.
 
-### Asimetrično jednosmerno tasking
+### Asimetrično jednosmerno zadavanje zadataka
 
-Komande pristižu kroz javni, broadcast ili append-only izvor, dok rezultati napuštaju sistem kroz nepovezani kanal sa zakašnjenjem. Primeri primitive obuhvataju web-service one-way communication i dead drop-ove. Razdvajanje sprečava da jedan tok izgleda dvosmerno i otežava jednostavnu korelaciju zahteva i odgovora.<sup>[[9]](#references)</sup>
+Komande stižu preko javnog, broadcast ili append-only izvora, dok rezultati odlaze drugim kanalom nakon odlaganja. Primeri primitiva obuhvataju jednosmernu komunikaciju preko web usluga i dead drop-ove. Razdvajanje sprečava da jedan tok deluje dvosmerno i otežava jednostavnu korelaciju zahtev/odgovor.<sup>[[9]](#references)</sup>
 
-**Detekcija:** sačuvajte čitanja na nivou objekta, a zatim korelišite promene stanja procesa i kasnije outbound prenose kroz širi vremenski prozor. Tražite redak proces koji čita isti javni objekat čak i kada ne sledi neposredan odgovor.
+**Detekcija:** sačuvajte čitanja na nivou objekta, a zatim povežite promene stanja procesa sa kasnijim odlaznim prenosima u širem vremenskom prozoru. Tražite redak proces koji čita isti javni objekat, čak i kada nema neposrednog odgovora.
 
-### Promocija kanala kroz više faza
+### Promovisanje kanala kroz više faza
 
-Tiha prva faza vrši inventarizaciju i samo odabrane sisteme promoviše na nepovezani kanal druge faze. Drugi endpoint, protokol i proces možda nemaju zajedničku infrastrukturu sa prvim. Time se ograničava izloženost sposobne infrastrukture i eksplicitno se modeluje kao ATT&CK T1104.<sup>[[10]](#references)</sup>
+Tiha prva faza obavlja inventarizaciju i promoviše samo odabrane sisteme na nepovezani kanal druge faze. Druga krajnja tačka, protokol i proces možda nemaju zajedničku infrastrukturu sa prvom fazom. Time se ograničava izloženost sposobnije infrastrukture, a obrazac je izričito modelovan kao ATT&CK T1104.<sup>[[10]](#references)</sup>
 
-**Detekcija:** povežite `first network process -> downloaded/configured state -> new process or injection -> unrelated destination`; ne zatvarajte incident nakon blokiranja prvog domena.
+**Detekcija:** povežite `prvi mrežni proces -> preuzeto/konfigurisano stanje -> novi proces ili ubacivanje koda -> nepovezano odredište`; ne zatvarajte incident nakon blokiranja prvog domena.
 
-### Relay translation između protokola
+### Prevođenje releja između protokola
 
-Različiti hop-ovi prevode HTTPS, QUIC, WebSocket, DNS, SSH ili message-queue API umesto da transparentno prosleđuju pakete. Prevođenje uklanja jedinstveni end-to-end fingerprint protokola, ali stvara gateway-e sa karakterističnim vremenom, baferovanjem i semantičkom konverzijom. Protocol tunneling (T1572) može se kombinovati sa proxy-jima i service impersonation-om.<sup>[[11]](#references)</sup>
+Različiti hop-ovi prevode HTTPS, QUIC, WebSocket, DNS, SSH ili API message-queue-a umesto da transparentno prosleđuju pakete. Prevođenje uklanja jedinstven end-to-end otisak protokola, ali stvara gateway-e sa prepoznatljivim vremenom, baferovanjem i semantičkom konverzijom. Tunneling protokola (T1572) može se kombinovati sa proxy-jima i lažnim predstavljanjem usluga.<sup>[[11]](#references)</sup>
 
-**Detekcija:** tražite gateway hostove koji primaju jedan protokol i pokreću drugi uz tesno povezano ponašanje u bajtovima i vremenu; uporedite nameru endpointa sa protokolom koji se stvarno prenosi.
+**Detekcija:** tražite gateway hostove koji primaju jedan protokol, a uspostavljaju drugi, uz tesno povezano ponašanje u obimu podataka/vremenu; uporedite namenu krajnje tačke sa protokolom koji se zaista prenosi.
 
-### Pasivna aktivacija na edge uređajima
+### Pasivno aktiviranje na edge uređajima
 
-Umesto beaconing-a, implant prati saobraćaj koji već stiže do router/VPN-a i aktivira se samo na magic value, obrazac izvornog porta ili autentifikovani token. Uobičajeni saobraćaj nastavlja ka stvarnom servisu. ATT&CK ovo naziva Traffic Signaling (T1205), uz dokumentovane primere mrežnih uređaja i APT operacija.<sup>[[12]](#references)</sup>
+Umesto slanja beacon-a, implant prati saobraćaj koji već stiže do rutera/VPN-a i aktivira se samo na posebnu vrednost, obrazac izvornog porta ili autentifikovani token. Uobičajeni saobraćaj nastavlja ka stvarnoj usluzi. ATT&CK ovo naziva Traffic Signaling (T1205), uz dokumentovane primere mrežnih uređaja i APT-a.<sup>[[12]](#references)</sup>
 
-**Detekcija:** integritet firmware-a/fajlova, raw packet capture tokom autorizovanog hanta, neočekivani socket filteri i diferencijalno ponašanje servisa. Odsustvo periodičnog beacon-a ne dokazuje da je edge uređaj čist.
+**Detekcija:** integritet firmware-a/datoteka, snimanje sirovih paketa tokom ovlašćene istrage, neočekivani socket filteri i razlike u ponašanju usluge. Odsustvo periodičnog beacon-a ne dokazuje da je edge uređaj čist.
 
-### Serverless i rotacija ephemeral origina
+### Rotacija serverless i ephemeral origin-a
 
-Front zadržava stabilan logički identitet, dok kratkotrajne funkcije/kontejneri obrađuju pojedinačne faze u više regiona/naloga. Ovo smanjuje životni vek na disku i broj fiksnih origin IP adresa, ali kreiranje u control plane-u, image/layer, role, secret, request ID i billing telemetrija postaju trajni graf.
+Front zadržava stabilan logički identitet, dok kratkotrajne funkcije/kontejneri obrađuju pojedinačne faze u nekoliko regiona/naloga. Time se skraćuje životni vek podataka na disku i izbegavaju fiksne origin IP adrese, ali kreiranje na kontrolnoj ravni, image/layer, uloga, tajna, request ID i telemetrija naplate postaju trajni elementi grafa.
 
-**Detekcija:** zadržite cloud audit i invocation logove izvan workload-a; grupišite deployment template-e, role, environment ključeve i odnose front-to-origin.
+**Detekcija:** čuvajte cloud audit i invocation logove izvan workload-a; grupišite deployment šablone, uloge, ključeve okruženja i odnose front-origin.
 
-### Raznovrsnost privacy sloja
+### Raznolikost slojeva privatnosti
 
-Operacija može namerno izbegavati jedan homogeni lanac: na primer, jedan kanal koristi iznajmljeni relay, tasking koristi javni objekat, exit dolazi sa cellular link-a u vlasništvu laboratorije, a administracija koristi zasebnu mrežu organizacije. Ovo smanjuje vrednost kompromitovanja jednog provajdera, ali povećava rizik od korelacije vremena između slojeva i operativnih grešaka.
+Operacija može namerno da izbegne jedan ujednačen lanac: na primer, jedan kanal koristi iznajmljeni relej, zadaci koriste javni objekat, izlaz koristi vlasničku mobilnu vezu iz laboratorije, a administracija zasebnu mrežu organizacije. Ovo smanjuje vrednost kompromitovanja jednog provajdera, ali povećava rizik korelacije vremena između slojeva i operativnih grešaka.
 
-**Detekcija:** izgradite vremenske linije kampanje kroz identity, DNS, SaaS, network i cloud senzore. Tražite sinhronizovane promene stanja umesto identičnih indikatora.
+**Detekcija:** pravite vremenske linije kampanje preko senzora identiteta, DNS-a, SaaS-a, mreže i cloud-a. Tražite sinhronizovane promene stanja umesto istih indikatora.
 
-### Decentralizovani dead drop-ovi ili dead drop-ovi u transparency logovima
+### Decentralizovani dead drop-ovi ili dead drop-ovi u transparency log-u
 
-Akter može postaviti mali šifrovani pokazivač u bilo koji trajni javni append-only sistem, content-addressed store ili transparency-like feed. Javni objekat je otporan, ali njegov tačni indeks/content hash i ponašanje klijenta pri polling-u postaju stabilni identifikatori.
+Napadač može da postavi mali šifrovani pokazivač u bilo koji trajan, javni append-only sistem, content-addressed skladište ili feed nalik transparency log-u. Javni objekat je otporan, ali njegov tačan indeks/hash sadržaja i ponašanje klijenta pri polling-u postaju stabilni identifikatori.
 
-**Detekcija:** beležite pune API/objekt identifikatore i hash-eve odgovora; upozoravajte na nestandardne procese koji polling-uju immutable objekte, nakon čega slede dekodiranje ili nove konekcije.
+**Detekcija:** beležite pune API/objekt identifikatore i hash-eve odgovora; postavljajte upozorenja za nestandardne procese koji proveravaju nepromenljive objekte, a zatim ih dekodiraju ili uspostavljaju nove veze.
 
-### Odložene store-and-forward operacije
+### Odložene operacije store-and-forward
 
-Interaktivni C2 stvara jaku vremensku korelaciju. Store-and-forward dizajn grupiše šifrovane poslove i vraća rezultate minutima ili satima kasnije kroz drugi queue ili fizički prenos. Time se žrtvuje odzivnost radi slabije end-to-end vremenske korelacije.
+Interaktivni C2 stvara snažnu vremensku korelaciju. Dizajn store-and-forward grupiše šifrovane zadatke i vraća rezultate minutima ili satima kasnije preko drugog reda ili fizičkog prenosa. Time se žrtvuje odzivnost radi slabije end-to-end vremenske korelacije.
 
-**Detekcija:** produžite vremenske prozore korelacije, modelujte periodični pristup queue-u i pregledajte staging na endpointu. Grupisanje premešta signal sa vremenskog ponašanja paketa na zakazano ponašanje procesa/fajla; ne uklanja ga.
+**Detekcija:** produžite vremenske prozore korelacije, modelujte periodični pristup redovima i pregledajte staging na krajnjim tačkama. Grupisanje premešta signal sa vremena prenosa paketa na zakazano ponašanje procesa/datoteka; ne uklanja ga.
 
-## Pregled dizajna: razmišljajte u terminima posmatrača
+## Pregled dizajna: razmišljajte iz perspektive posmatrača
 
-Za svaku putanju popunite ovu tabelu pre deployment-a i nakon prikupljanja:
+Za svaku putanju popunite ovu tabelu pre raspoređivanja i nakon prikupljanja podataka:
 
-| Sloj | Vidi izvor? | Vidi odredište? | Vidi sadržaj? | Stabilni identifikatori | Vlasnik zadržavanja/legalni vlasnik |
+| Sloj | Vidi izvor? | Vidi odredište? | Vidi sadržaj? | Stabilni identifikatori | Vlasnik zadržavanja podataka/pravnih obaveza |
 |---|---:|---:|---:|---|---|
-| lokalna mreža/carrier | | | | | |
-| entry/access servis | | | | | |
-| traversal operator(i) | | | | | |
-| exit/redirector/CDN | | | | | |
-| authoritative DNS/registrar | | | | | |
-| target | | | | | |
-| account/payment provajder | | | | | |
+| lokalna mreža/operater | | | | | |
+| ulazna/pristupna usluga | | | | | |
+| operater(i) za prosleđivanje | | | | | |
+| izlazni relej/redirector/CDN | | | | | |
+| autoritativni DNS/registrar | | | | | |
+| cilj | | | | | |
+| provajder naloga/plaćanja | | | | | |
 
-Ako jedan uobičajeni provajder može da popuni svaku kolonu, arhitektura obezbeđuje prikrivanje od targeta, ali ne i robusno razdvajanje. Ako nijedan interni kontrolor ne može da poveže aktivnost sa angažmanom, arhitektura nije pogodna za profesionalni red teaming.
+Ako jedan uobičajeni provajder može da popuni svaku kolonu, arhitektura pruža prikrivanje od cilja, ali ne i pouzdano razdvajanje. Ako nijedan interni kontrolor ne može da poveže aktivnost sa angažmanom, arhitektura nije pogodna za profesionalni red teaming.
 
 ## References
 
 - [1] [MITRE ATT&CK — Nabavka infrastrukture (T1583), kompromitovanje infrastrukture (T1584) i proxy (T1090)](https://attack.mitre.org/techniques/T1584/)
-- [2] [Google Cloud/Mandiant — China-nexus špijunski akteri koriste ORB mreže](https://cloud.google.com/blog/topics/threat-intelligence/china-nexus-espionage-orb-networks)
-- [3] [MITRE ATT&CK — Multi-hop Proxy (T1090.003)](https://attack.mitre.org/techniques/T1090/003/)
-- [4] [MITRE ATT&CK — Domain Fronting (T1090.004)](https://attack.mitre.org/techniques/T1090/004/)
+- [2] [Google Cloud/Mandiant — Špijunski akteri povezani s Kinom koriste ORB mreže](https://cloud.google.com/blog/topics/threat-intelligence/china-nexus-espionage-orb-networks)
+- [3] [MITRE ATT&CK — Višehopni proxy (T1090.003)](https://attack.mitre.org/techniques/T1090/003/)
+- [4] [MITRE ATT&CK — Domain fronting (T1090.004)](https://attack.mitre.org/techniques/T1090/004/)
 - [5] [MITRE ATT&CK — Fast Flux DNS (T1568.001)](https://attack.mitre.org/techniques/T1568/001/)
 - [6] [MITRE ATT&CK — Kompromitovanje infrastrukture: domeni (T1584.001)](https://attack.mitre.org/techniques/T1584/001/)
-- [7] [MITRE ATT&CK — Web Service: Dead Drop Resolver (T1102.001)](https://attack.mitre.org/techniques/T1102/001/)
-- [8] [MITRE ATT&CK — Establish Accounts (T1585)](https://attack.mitre.org/techniques/T1585/)
-- [9] [MITRE ATT&CK — Web Service: One-Way Communication (T1102.003)](https://attack.mitre.org/techniques/T1102/003/)
-- [10] [MITRE ATT&CK — Multi-Stage Channels (T1104)](https://attack.mitre.org/techniques/T1104/)
-- [11] [MITRE ATT&CK — Protocol Tunneling (T1572)](https://attack.mitre.org/techniques/T1572/)
-- [12] [MITRE ATT&CK — Traffic Signaling (T1205)](https://attack.mitre.org/techniques/T1205/)
-- [13] [Google Threat Intelligence Group — Ometanje najveće svetske residential proxy mreže](https://cloud.google.com/blog/topics/threat-intelligence/disrupting-largest-residential-proxy-network)
-- [14] [Unit 42 — Shadow Campaigns: Otkrivanje globalne špijunaže](https://unit42.paloaltonetworks.com/shadow-campaigns-uncovering-global-espionage/)
+- [7] [MITRE ATT&CK — Web usluga: dead-drop resolver (T1102.001)](https://attack.mitre.org/techniques/T1102/001/)
+- [8] [MITRE ATT&CK — Kreiranje naloga (T1585)](https://attack.mitre.org/techniques/T1585/)
+- [9] [MITRE ATT&CK — Web usluga: jednosmerna komunikacija (T1102.003)](https://attack.mitre.org/techniques/T1102/003/)
+- [10] [MITRE ATT&CK — Višefazni kanali (T1104)](https://attack.mitre.org/techniques/T1104/)
+- [11] [MITRE ATT&CK — Tunneling protokola (T1572)](https://attack.mitre.org/techniques/T1572/)
+- [12] [MITRE ATT&CK — Signalizacija saobraćajem (T1205)](https://attack.mitre.org/techniques/T1205/)
+- [13] [Google Threat Intelligence Group — Prekid rada najveće svetske mreže rezidencijalnih proxy-ja](https://cloud.google.com/blog/topics/threat-intelligence/disrupting-largest-residential-proxy-network)
+- [14] [Unit 42 — Kampanje senki: otkrivanje globalne špijunaže](https://unit42.paloaltonetworks.com/shadow-campaigns-uncovering-global-espionage/)
+- [15] [Unit 42 - Blinder Tunnel kampanja cilja iračku infrastrukturu](https://unit42.paloaltonetworks.com/blinder-tunnel-targets-critical-infrastructure/)
 {{#include ../banners/hacktricks-training.md}}
