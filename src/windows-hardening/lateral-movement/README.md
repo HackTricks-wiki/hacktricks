@@ -1,17 +1,18 @@
-# Movimento laterale
+# Lateral Movement
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Windows supporta diversi meccanismi che possono essere utilizzati per eseguire comandi su sistemi remoti. Le pagine seguenti illustrano le tecniche comuni di movimento laterale e i relativi prerequisiti:
+Windows supporta diversi meccanismi che possono essere usati per eseguire comandi su sistemi remoti. Le pagine seguenti illustrano le tecniche comuni di movimento laterale e i relativi prerequisiti:
 
-- [**PsExec**](psexec-and-winexec.md)
+- [**PsExec / esecuzione del servizio SCM**](psexec-and-winexec.md#how-do-they-work)
 - [**SmbExec**](psexec-and-winexec.md#impacket-smbexecpy-smbexec)
 - [**WmiExec**](wmiexec.md)
 - [**AtExec / SchtasksExec**](atexec.md)
 - [**WinRM**](winrm.md)
 - [**DCOM Exec**](dcomexec.md)
 - [**RDPexec**](rdpexec.md)
-- [**SCMexec**](scmexec.md)
+- [**SCMExec con SharpMove**](psexec-and-winexec.md#scmexec-with-sharpmove)
+- [**Esecuzione del client SCCM / MECM**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
 - **Pass the cookie** (cloud)<sup>[[1]](#references)</sup>
 - **Pass the PRT** (cloud)<sup>[[2]](#references)</sup>
 - **Pass the Microsoft Entra ID certificate** (cloud)<sup>[[3]](#references)</sup>
