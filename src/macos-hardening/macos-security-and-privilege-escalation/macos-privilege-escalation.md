@@ -242,6 +242,12 @@ printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /t
 
 The stolen password can then be reused to **clear Gatekeeper quarantine with `xattr -c`**, copy LaunchDaemons or other privileged files, and run additional stages non-interactively.<sup>[[1]](#references)</sup>
 
+#### Validating captured passwords through PAM
+
+A native-looking secure-text prompt can collect a candidate account password and validate it in-process through PAM instead of spawning `dscl`, `security`, or `osascript`. The caller starts a PAM transaction with `pam_start`, supplies the candidate through a conversation callback, calls `pam_authenticate`, and closes the transaction with `pam_end`. A failed check can return to the password field; a successful check confirms the password without starting a separate verification process. PAM authentication alone does **not** elevate the caller or authorize privileged operations.<sup>[[9]](#references)[[10]](#references)</sup>
+
+If the login and Keychain passwords match, the captured password may also be usable for operations that require the current Keychain password; see [Keychain ACL and partition-list constraints](../macos-red-teaming/macos-keychain.md).<sup>[[10]](#references)</sup>
+
 ## Newer macOS-specific vectors (2023–2026)
 
 ### Deprecated `AuthorizationExecuteWithPrivileges` still usable
@@ -402,6 +408,8 @@ macos-files-folders-and-binaries/macos-sensitive-locations.md
 
 
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## References
 
 - [1] [Pentest Partners - 2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
@@ -412,4 +420,5 @@ macos-files-folders-and-binaries/macos-sensitive-locations.md
 - [6] [Trellix Advanced Research Center - A New Privilege Escalation Bug Class on macOS and iOS (CVE-2023-23530/23531)](https://www.trellix.com/en-sg/blogs/research/trellix-advanced-research-center-discovers-a-new-privilege-escalation-bug-class-on-macos-and-ios/)
 - [7] [LaunchDaemon Hijacking: privilege escalation and persistence via insecure folder permissions](https://bradleyjkemp.dev/post/launchdaemon-hijacking/)
 - [8] [macOS LPE via the .localized directory](https://theevilbit.github.io/posts/localized/)
-{{#include ../../banners/hacktricks-training.md}}
+- [9] [Jamf Threat Labs - PamStealer: macOS malware posing as clipboard manager app](https://www.jamf.com/blog/pamstealer-macos-infostealer-applescript-rust/)
+- [10] [Kaspersky Securelist - MacSync under the microscope](https://securelist.com/macsync-new-version/121383/)

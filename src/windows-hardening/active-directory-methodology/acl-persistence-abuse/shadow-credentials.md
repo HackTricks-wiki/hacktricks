@@ -57,11 +57,15 @@ python3 pywhisker.py -d "domain.local" -u "user1" -p "complexpassword" --target 
 
 ShadowSpray enumerates domain objects over which the operator has rights such as `GenericWrite`/`GenericAll`, attempts to add key credentials broadly, and includes cleanup/recursive modes. Broad spraying is disruptive and conspicuous; use explicit targets and retain each added DeviceID for precise removal.<sup>[[3]](#references)</sup>
 
+ADWS can carry the key-credential write when direct LDAP is filtered. See the [SOAPy ADWS workflow](../adws-enumeration.md#shadow-credentials-over-adws).<sup>[[5]](#references)</sup>
+
+
+
 ## References
 
 - [1] [Shadow Credentials: Abusing Key Trust Account Mapping for Account Takeover](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)
 - [2] [Whisker - Tool for taking over AD accounts by manipulating msDS-KeyCredentialLink](https://github.com/eladshamir/Whisker)
 - [3] [ShadowSpray - Tool to spray Shadow Credentials across a domain](https://github.com/Dec0ne/ShadowSpray/)
 - [4] [pywhisker - Python version of the Shadow Credentials tool](https://github.com/ShutdownRepo/pywhisker)
-
+- [5] [SOAPy Wiki – Post-Exploitation](https://github.com/logangoins/SOAPy/wiki/Post%E2%80%90Exploitation)
 {{#include ../../../banners/hacktricks-training.md}}

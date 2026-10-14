@@ -75,6 +75,8 @@ rg -n -i 'Login Data|logins\.json|key4\.db|wallet\.dat|\.aws[/\\]credentials|Loa
 
 Also inventory native DLLs, MSBuild targets, scripts, T4 templates, and installer payloads rather than assuming every execution surface is managed code. Compare suspicious behavior with the manifest's claimed purpose; telemetry and legitimate updaters can resemble exfiltration or staging. Static-only review misses packed, obfuscated, dynamically resolved, and dormant code, and reviewing only the latest version misses malicious historical releases.<sup>[[1]](#references)</sup>
 
+A separate project-load attack can execute a malicious [MSBuild `GetFrameworkPaths` target](visual-studio-project-msbuild-execution.md) without installing a VSIX.<sup>[[6]](#references)</sup>
+
 ## References
 
 - [1] [MDSec - Visual Studio Extensions Revisited](https://www.mdsec.co.uk/2026/05/visual-studio-extensions-revisited/)
@@ -82,5 +84,6 @@ Also inventory native DLLs, MSBuild targets, scripts, T4 templates, and installe
 - [3] [Microsoft Learn - ITextViewOpenClosedListener.TextViewOpenedAsync](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.extensibility.editor.itextviewopenclosedlistener.textviewopenedasync?view=vs-extensibility)
 - [4] [Microsoft Learn - Anatomy of a VSIX package](https://learn.microsoft.com/en-us/visualstudio/extensibility/anatomy-of-a-vsix-package?view=visualstudio)
 - [5] [ILSpy - ilspycmd .NET tool](https://github.com/icsharpcode/ILSpy/blob/master/ICSharpCode.ILSpyCmd/README.md)
+- [6] [Unit 42 - Blinder Tunnel Campaign Targets Iraqi Infrastructure](https://unit42.paloaltonetworks.com/blinder-tunnel-targets-critical-infrastructure/)
 
 {{#include ../banners/hacktricks-training.md}}

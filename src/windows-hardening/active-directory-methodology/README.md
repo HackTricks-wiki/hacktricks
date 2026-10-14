@@ -1015,7 +1015,7 @@ ldap get-acl "CN=Tier0,OU=Admins,DC=corp,DC=local"
 ### sidHistory injection, OU relocation, and attack surface shaping
 
 - `add-sidhistory` injects privileged SIDs into a controlled principal’s SID history (see [SID-History Injection](sid-history-injection.md)), providing stealthy access inheritance fully over LDAP/LDAPS.
-- `move-object` changes the DN/OU of computers or users, letting an attacker drag assets into OUs where delegated rights already exist before abusing `set-password`, `add-groupmember`, or `add-spn`.
+- `move-object` changes the DN/OU of computers or users, letting an attacker bring assets under delegated rights before using `set-password`, `add-groupmember`, or `add-spn`. See [OU relocation and inherited rights](acl-persistence-abuse/#moving-an-object-into-inherited-ou-permissions) for move permissions and inheritance checks.
 - Tightly scoped removal commands (`remove-attribute`, `remove-delegation`, `remove-rbcd`, `remove-uac`, `remove-groupmember`, etc.) allow rapid rollback after the operator harvests credentials or persistence, minimizing telemetry.
 
 ## AD -> Azure & Azure -> AD
@@ -1104,5 +1104,3 @@ If you want to detect common AD tradecraft, **do not rely only on operator-contr
 - [18] [NetExec pre2k module source](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/pre2k.py)
 - [19] [Microsoft ADSchema - msDS-GroupMSAMembership attribute](https://learn.microsoft.com/en-us/windows/win32/adschema/a-msds-groupmsamembership)
 - [20] [0xdf - HTB Pirate](https://0xdf.gitlab.io/2026/09/05/htb-pirate.html)
-
-{{#include ../../banners/hacktricks-training.md}}

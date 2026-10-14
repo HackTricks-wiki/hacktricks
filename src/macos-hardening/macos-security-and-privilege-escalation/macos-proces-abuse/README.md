@@ -243,6 +243,12 @@ Non-interactive Bash reads **`BASH_ENV`**; interactive POSIX shells read **`ENV`
 macos-bash-applications-injection.md
 {{#endref}}
 
+### Shell stdin command smuggling
+
+Starting `/bin/zsh -s` makes the shell read a program from standard input. Therefore, a downloader that copies an untrusted structured document into the child's stdin without parsing it first has turned the whole document into shell source. One observed loader fed a public iCalendar file through an anonymous pipe line by line. Calendar metadata failed as commands, but zsh continued until it reached executable lines placed after `DESCRIPTION:`. Those lines downloaded and launched the next application bundle. The carrier's expected content type and trusted hosting did not make this safe; the dangerous boundary was passing its bytes to an interpreter.<sup>[[5]](#references)</sup>
+
+Related stages are covered in [Mach-O overlays](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md), [Gatekeeper and quarantine](../macos-security-protections/macos-gatekeeper.md), and [macOS auto-start locations](../../macos-auto-start-locations.md).
+
 ### PHP Injection
 
 **`PHPRC`** or **`PHP_INI_SCAN_DIR`** can load controlled PHP configuration whose **`auto_prepend_file`** executes before the target script.
@@ -355,11 +361,12 @@ In [**this blog post**](https://knight.sc/reverse%20engineering/2019/04/15/detec
 
 Note that to call that function you need to be **the same uid** as the one running the process or **root** (and it returns info about the process, not a way to inject code).
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## References
 
 - [1] [Shield — open source macOS process-injection detection (GitHub)](https://github.com/theevilbit/Shield)
 - [2] [Apple Developer — EndpointSecurity framework](https://developer.apple.com/documentation/endpointsecurity)
 - [3] [Metnew - Why Electron apps can't store your secrets confidentially: --inspect option](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
 - [4] [Scott Knight - Detecting task modifications](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html)
-
-{{#include ../../../banners/hacktricks-training.md}}
+- [5] [Kaspersky Securelist - A new version of the MacSync macOS stealer targets crypto enthusiasts and developers](https://securelist.com/macsync-new-version/121383/)

