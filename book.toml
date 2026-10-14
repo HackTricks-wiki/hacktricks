@@ -31,6 +31,9 @@ default-theme = "hacktricks-light"
 hash-files = false
 
 [output.html.redirect]
+"/todo/rust-basics.html" = "../generic-methodologies-and-resources/rust-basics.html"
+"/todo/investment-terms.html" = "../blockchain/blockchain-and-crypto-currencies/investment-terms.html"
+"/todo/cookies-policy.html" = "../welcome/cookies-policy.html"
 "/todo/interesting-http.html" = "../pentesting-web/referer-header-and-referrer-policy.html"
 "/todo/stealing-sensitive-information-disclosure-from-a-web.html" = "../pentesting-web/sensitive-information-exfiltration.html"
 "/todo/industrial-control-systems-hacking/index.html" = "../../industrial-control-systems/index.html"
