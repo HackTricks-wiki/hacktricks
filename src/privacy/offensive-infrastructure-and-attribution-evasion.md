@@ -1,268 +1,281 @@
-# Υποδομή Offensive και Αποφυγή Attribution
+# Επιθετική Υποδομή και Αποφυγή Απόδοσης Ευθύνης
 
 {{#include ../banners/hacktricks-training.md}}
 
-Ένας operator σπάνια επιτυγχάνει ουσιαστική ανωνυμία μέσω ενός και μόνο proxy. Οι πραγματικές εκστρατείες δημιουργούν ένα **separation graph**: ο operator φτάνει σε έναν access node, οι traversal nodes αποκρύπτουν αυτόν τον node από το exit, οι redirectors προστατεύουν το πραγματικό C2 και τα disposable names δείχνουν στο public edge.
+Ένας operator σπάνια εξασφαλίζει ουσιαστική ανωνυμία μέσω ενός μόνο proxy. Οι πραγματικές καμπάνιες δημιουργούν ένα **γράφημα διαχωρισμού**: ο operator φτάνει σε έναν κόμβο πρόσβασης, οι κόμβοι διέλευσης αποκρύπτουν αυτόν τον κόμβο από την έξοδο, οι redirectors προστατεύουν το πραγματικό C2 και ονόματα μίας χρήσης οδηγούν στο δημόσιο edge.
 
-Χρησιμοποίησε το [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md) για μια τυποποιημένη άποψη των πλεονεκτημάτων/μειονεκτημάτων, της ανάπτυξης και του detection κάθε διαδρομής. Αυτή η σελίδα εμβαθύνει στη σύνθεση adversarial υποδομής.
+Χρησιμοποιήστε τον [Κατάλογο Τεχνικών Ανώνυμης Πρόσβασης στο Διαδίκτυο](anonymous-internet-access-techniques.md) για μια τυποποιημένη επισκόπηση των πλεονεκτημάτων/μειονεκτημάτων/ανάπτυξης/ανίχνευσης κάθε διαδρομής. Αυτή η σελίδα εμβαθύνει στη σύνθεση επιθετικής υποδομής.
+
 ```text
 operator -> access relay -> traversal mesh -> exit/redirector -> target
-|                 |                |
-account/provider   relay operator   target telemetry
+                |                 |                |
+          account/provider   relay operator   target telemetry
 ```
-Η τελευταία διεύθυνση που βλέπει ένας στόχος αποτελεί επομένως ένδειξη μιας διαδρομής και όχι απόδειξη του ποιος έλεγχε το πληκτρολόγιο. Το MITRE αντιστοιχίζει τα κύρια στοιχεία στα Acquire Infrastructure (T1583), Compromise Infrastructure (T1584), Proxy (T1090), Dynamic Resolution (T1568) και Web Service (T1102).<sup>[[1]](#references)</sup>
+
+Η τελευταία διεύθυνση που είδε ένας στόχος αποτελεί επομένως ένδειξη της διαδρομής, όχι απόδειξη του ποιος χειριζόταν το πληκτρολόγιο. Το MITRE αντιστοιχίζει τα κύρια στοιχεία στις κατηγορίες Acquire Infrastructure (T1583), Compromise Infrastructure (T1584), Proxy (T1090), Dynamic Resolution (T1568) και Web Service (T1102).<sup>[[1]](#references)</sup>
 
 ## Κατηγορίες υποδομής
 
-| Κατηγορία | Γιατί τη χρησιμοποιεί ένας actor | Διαρκής έκθεση | Καλύτερο pivot για τον defender |
+| Κατηγορία | Γιατί τη χρησιμοποιεί ένας παράγοντας | Διαρκής έκθεση | Καλύτερο σημείο διερεύνησης για τον αμυνόμενο |
 |---|---|---|---|
-| Rented VPS/cloud | Γρήγορο, προβλέψιμο, δρομολογήσιμο και εύκολο στην αναδημιουργία | tenant, billing, console, source-login και ιστορικό image | events του account/control-plane και επαναλαμβανόμενο server fingerprint |
-| Commercial VPN/Tor | Μεγάλο κοινόχρηστο σύνολο egress· χωρίς διαχείριση server | ορατότητα provider/guard και end-to-end timing | συμπεριφορά προορισμού, endpoint evidence και flow correlation |
-| Residential/mobile proxy | Consumer ASN και γεωγραφική αληθοφάνεια | αρχεία broker/customer· συμπεριφορά proxyware ή infected host | impossible travel, πρωτόκολλα proxy και αλλαγή διευθύνσεων ανά session |
-| Compromised server/router/IoT | Δανείζεται τη φήμη και τη δικαιοδοσία του θύματος | implant, management flow και επαναλαμβανόμενος upstream controller | telemetry της συσκευής και ORB topology, όχι μία exit IP |
-| CDN/redirector | Διαχωρίζει το public edge από το back-end C2 | TLS/HTTP grammar, certificate, routing και artifacts του cloud account | edge-to-origin correlation και clustering βάσει request shape |
-| Legitimate web service | Ενσωματώνεται σε επιτρεπόμενη GitHub/cloud/social traffic | API token, tenant/object identifiers και ασυνήθιστη process lineage | endpoint process μαζί με τα semantics του service/API |
-| Physical/cellular/satellite path | Αλλάζει τη φαινομενική φυσική προέλευση | RF, carrier, subscriber, device και location records | συνδυασμός radio/physical και network evidence |
+| Ενοικιαζόμενο VPS/cloud | Γρήγορο, προβλέψιμο, προσβάσιμο μέσω δρομολόγησης, εύκολο να αναδημιουργηθεί | ιστορικό tenant, χρέωσης, κονσόλας, συνδέσεων προέλευσης και image | συμβάντα λογαριασμού/control plane και επαναλαμβανόμενο fingerprint διακομιστή |
+| Commercial VPN/Tor | Μεγάλο κοινόχρηστο σύνολο εξόδου· χωρίς διαχείριση διακομιστή | ορατότητα παρόχου/φύλακα και χρονισμός από άκρο σε άκρο | συμπεριφορά προορισμού, στοιχεία endpoint και συσχέτιση ροών |
+| Residential/mobile proxy | ASN καταναλωτών και εύλογη γεωγραφική τοποθεσία | αρχεία broker/πελάτη· συμπεριφορά proxyware ή μολυσμένου host | αδύνατες μετακινήσεις, πρωτόκολλα proxy και αλλαγές διευθύνσεων ανά συνεδρία |
+| Παραβιασμένος διακομιστής/router/IoT | Δανείζεται τη φήμη και τη δικαιοδοσία του θύματος | implant, ροή διαχείρισης και επαναλαμβανόμενος upstream controller | τηλεμετρία συσκευής και τοπολογία ORB, όχι μία διεύθυνση εξόδου |
+| CDN/redirector | Διαχωρίζει το δημόσιο edge από το back-end C2 | γραμματική TLS/HTTP, πιστοποιητικό, δρομολόγηση και τεκμήρια λογαριασμού cloud | συσχέτιση edge με origin και ομαδοποίηση βάσει σχήματος αιτημάτων |
+| Νόμιμη υπηρεσία web | Ενσωματώνεται σε επιτρεπόμενη κίνηση GitHub/cloud/social | API token, αναγνωριστικά tenant/object και ασυνήθιστη αλυσίδα προέλευσης διεργασιών | διεργασία endpoint και σημασιολογία υπηρεσίας/API |
+| Φυσική/κυψελωτή/δορυφορική διαδρομή | Αλλάζει τη φαινομενική φυσική προέλευση | αρχεία RF, παρόχου, συνδρομητή, συσκευής και τοποθεσίας | συνδυασμός ραδιοφωνικών/φυσικών και δικτυακών στοιχείων |
 
-## Δίκτυα operational relay box
+## Δίκτυα επιχειρησιακών κόμβων relay
 
-Ένα **ORB network** είναι ένας managed proxy fleet που χρησιμοποιείται ως ενδιάμεση υπηρεσία. Η Mandiant τα διαχωρίζει σε provisioned networks από leased servers, non-provisioned networks από compromised routers/IoT και hybrids. Μια ώριμη topology έχει τέσσερις λογικούς ρόλους:<sup>[[2]](#references)</sup>
+Ένα **δίκτυο ORB** είναι ένας διαχειριζόμενος στόλος proxy που χρησιμοποιείται ως ενδιάμεση υπηρεσία. Η Mandiant τα διακρίνει σε δίκτυα με προρυθμισμένους ενοικιαζόμενους διακομιστές, δίκτυα χωρίς προρύθμιση που αποτελούνται από παραβιασμένους router/IoT και υβριδικά δίκτυα. Μια ώριμη τοπολογία έχει τέσσερις λογικούς ρόλους:<sup>[[2]](#references)</sup>
 
-1. **Administration server (ACOS):** διατηρεί inventory, credentials, health και routing policy.
-2. **Access/relay node:** αυθεντικοποιεί customers ή operators· αποτελεί το σταθερό entry σε ένα μεταβαλλόμενο mesh.
-3. **Traversal nodes:** ένα ή περισσότερα leased ή compromised systems προωθούν opaque connections.
-4. **Exit/staging node:** παρουσιάζει την τελική source address σε reconnaissance, exploitation ή C2 targets.
+1. **Διακομιστής διαχείρισης (ACOS):** διατηρεί το απόθεμα, τα διαπιστευτήρια, την κατάσταση και την πολιτική δρομολόγησης.
+2. **Κόμβος πρόσβασης/relay:** πιστοποιεί πελάτες ή χειριστές· αποτελεί τη σταθερή είσοδο σε ένα μεταβαλλόμενο mesh.
+3. **Κόμβοι διέλευσης:** ένα ή περισσότερα ενοικιαζόμενα ή παραβιασμένα συστήματα μεταδίδουν αδιαφανείς συνδέσεις.
+4. **Κόμβος εξόδου/σταδιοποίησης:** εμφανίζει την τελική διεύθυνση προέλευσης σε στόχους αναγνώρισης, εκμετάλλευσης ή C2.
 
-Το mesh μπορεί να επιλέγει exits με βάση τη χώρα, το ASN, το latency ή τη διαθεσιμότητα και να αντικαθιστά unhealthy nodes. Πολλαπλές threat groups μπορεί να νοικιάζουν το ίδιο network. Η Mandiant παρατήρησε ότι μια IPv4 address παρέμενε συνδεδεμένη με ορισμένα ORBs για μόλις 31 ημέρες· επομένως συνιστά να αντιμετωπίζεται το **network ως μια εξελισσόμενη οντότητα που μοιάζει με actor**, αντί να γίνεται block μιας παρωχημένης λίστας IPs.<sup>[[2]](#references)</sup>
+Το mesh μπορεί να επιλέγει εξόδους με βάση τη χώρα, το ASN, την καθυστέρηση ή τη διαθεσιμότητα και να αντικαθιστά μη υγιείς κόμβους. Πολλαπλές ομάδες απειλών μπορεί να νοικιάζουν το ίδιο δίκτυο. Η Mandiant παρατήρησε ότι μια διεύθυνση IPv4 παρέμεινε συνδεδεμένη με ορισμένα ORB για μόλις 31 ημέρες· γι’ αυτό συνιστά να αντιμετωπίζεται το **δίκτυο ως εξελισσόμενη οντότητα που μοιάζει με παράγοντα**, αντί να αποκλείεται μια παρωχημένη λίστα IP.<sup>[[2]](#references)</sup>
 
-### Τι προσφέρει—and τι leaks
+### Τι προσφέρει αυτό — και τι διαρρέει
 
-- Ο στόχος βλέπει ένα exit που μπορεί να βρίσκεται γεωγραφικά κοντά και να φαίνεται residential.
-- Το exit βλέπει τον στόχο και το προηγούμενο hop, όχι απαραίτητα τον operator.
-- Η access service βλέπει τον customer και το route request. Ένα ανεξάρτητα διαχειριζόμενο mesh μπορεί να διατηρεί τον customer διαχωρισμένο από τα exits, αλλά δημιουργεί ένα ισχυρό counterparty record.
-- Επαναλαμβανόμενα ports, handshake order, server banners, certificates, uptime windows και controller relationships μπορούν να αποκαλύψουν το fleet ακόμη και όταν οι IPs αλλάζουν.
-- Ένας compromised router συχνά δεν διαθέτει endpoint telemetry, όμως ο ISP του εξακολουθεί να έχει subscriber και flow data· μια κατάσχεση αποκαλύπτει artifacts του implant/configuration.
+- Ο στόχος βλέπει μια έξοδο που μπορεί να βρίσκεται γεωγραφικά κοντά και να φαίνεται οικιακή.
+- Η έξοδος βλέπει τον στόχο και τον προηγούμενο κόμβο, όχι απαραίτητα τον χειριστή.
+- Η υπηρεσία πρόσβασης βλέπει τον πελάτη και το αίτημα διαδρομής. Ένα ανεξάρτητα διαχειριζόμενο mesh μπορεί να κρατά τον πελάτη χωριστά από τις εξόδους, αλλά δημιουργεί ένα ισχυρό αρχείο για τον αντισυμβαλλόμενο.
+- Επαναλαμβανόμενες θύρες, σειρά handshake, server banner, πιστοποιητικά, χρονικά διαστήματα λειτουργίας και σχέσεις με controller μπορούν να αποκαλύψουν τον στόλο, ακόμη κι όταν οι IP αλλάζουν.
+- Ένας παραβιασμένος router συχνά δεν παρέχει τηλεμετρία endpoint, αλλά ο ISP του εξακολουθεί να έχει δεδομένα συνδρομητών και ροών· μια κατάσχεση αποκαλύπτει τεκμήρια implant/configuration.
 
 {% hint style="info" %}
-Για ένα authorized exercise, αναπαράγετε την topology με VMs ή routers που ανήκουν στον οργανισμό και διατηρήστε το attribution map του controller. Μην στρατολογείτε open proxies ή συσκευές τρίτων. Ο [οδηγός του lab](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain) δημιουργεί την ίδια hop structure που είναι ορατή στον defender χωρίς να θυματοποιεί έναν intermediary.
+Για μια εξουσιοδοτημένη άσκηση, αναπαραγάγετε την τοπολογία με VM ή router που ανήκουν στον οργανισμό και διατηρήστε τον χάρτη απόδοσης του controller. Μην επιστρατεύετε ανοιχτούς proxy ή συσκευές τρίτων. Ο [οδηγός εργαστηρίου](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain) δημιουργεί την ίδια δομή ενδιάμεσων κόμβων, ορατή στους αμυνόμενους, χωρίς να θυματοποιεί κάποιον ενδιάμεσο.
 {% endhint %}
 
-## Residential και mobile proxy networks
+## Residential και mobile δίκτυα proxy
 
-Οι residential proxy services αντιστοιχίζουν sessions σε consumer broadband addresses· τα mobile proxies κάνουν egress μέσω carrier NAT pools. Η προμήθεια μπορεί να προέρχεται από συσκευές που έχουν εγγραφεί ρητά, SDK/proxyware ενσωματωμένα σε consumer applications, resellers ή malware. Αυτές οι προελεύσεις δεν είναι ισοδύναμες: η έλλειψη informed consent μετατρέπει μια privacy service σε compromised infrastructure.
+Οι υπηρεσίες residential proxy αντιστοιχίζουν συνεδρίες σε διευθύνσεις οικιακών ευρυζωνικών συνδέσεων· τα mobile proxy πραγματοποιούν έξοδο μέσω δεξαμενών NAT παρόχων. Η παροχή μπορεί να προέρχεται από συσκευές που έχουν εγγραφεί ρητά, SDK/proxyware ενσωματωμένο σε εφαρμογές καταναλωτών, μεταπωλητές ή malware. Αυτές οι προελεύσεις δεν είναι ισοδύναμες: χωρίς ενημερωμένη συναίνεση, μια υπηρεσία ιδιωτικότητας μετατρέπεται σε παραβιασμένη υποδομή.
 
-Οι τρόποι rotation επηρεάζουν το detection:
+Οι τρόποι εναλλαγής επηρεάζουν τον εντοπισμό:
 
-- **per-request rotation** δημιουργεί γρήγορες ασυνέχειες σε IP, ASN και γεωγραφία, ενώ η ταυτότητα στα υψηλότερα layers παραμένει σταθερή·
-- **sticky sessions** διατηρούν ένα exit για λεπτά ή ώρες, μοιάζοντας με ordinary subscriber·
-- **backconnect gateways** εκθέτουν ένα broker endpoint στον customer και επιλέγουν εσωτερικά τα exits·
-- **mobile pools** τοποθετούν πολλούς πραγματικούς subscribers πίσω από ένα μικρό σύνολο carrier NAT addresses, καθιστώντας ένα IP block δαπανηρό.
+- Η **εναλλαγή ανά αίτημα** προκαλεί γρήγορες ασυνέχειες IP και ASN/γεωγραφίας, ενώ η ταυτότητα στα ανώτερα επίπεδα παραμένει σταθερή.
+- Οι **κολλώδεις συνεδρίες** διατηρούν μια έξοδο για λεπτά ή ώρες, μοιάζοντας με συνηθισμένο συνδρομητή.
+- Οι **πύλες backconnect** εκθέτουν στον πελάτη ένα μόνο endpoint broker και επιλέγουν τις εξόδους εσωτερικά.
+- Οι **mobile pools** τοποθετούν πολλούς πραγματικούς συνδρομητές πίσω από ένα μικρό σύνολο διευθύνσεων NAT παρόχων, καθιστώντας δαπανηρό τον αποκλεισμό μιας IP.
 
-Οι defenders θα πρέπει να συσχετίζουν την IP με το authenticated session, το TLS/client fingerprint, το HTTP ordering, το device cookie και τη συμπεριφορά. Ένα υποτιθέμενα local residential login που ακολουθείται από άλλη χώρα, ενώ όλα τα χαρακτηριστικά στα υψηλότερα layers παραμένουν πανομοιότυπα, αποτελεί ισχυρότερη ένδειξη από το reputation μόνο του. Αντίστροφα, το address sharing και το mobile handoff δημιουργούν legitimate churn, επομένως μην αντιμετωπίζετε ποτέ την ταξινόμηση residential/proxy ως verdict.
+Οι αμυνόμενοι πρέπει να συσχετίζουν την IP με την πιστοποιημένη συνεδρία, το TLS/client fingerprint, τη σειρά HTTP, το cookie συσκευής και τη συμπεριφορά. Μια υποτιθέμενα τοπική οικιακή σύνδεση που ακολουθείται από σύνδεση από άλλη χώρα, ενώ όλα τα χαρακτηριστικά ανώτερων επιπέδων παραμένουν ίδια, αποτελεί ισχυρότερη ένδειξη από τη φήμη της IP και μόνο. Αντίθετα, η κοινή χρήση διευθύνσεων και η μεταγωγή μεταξύ κεραιών κινητής τηλεφωνίας προκαλούν νόμιμες αλλαγές, γι’ αυτό μην αντιμετωπίζετε ποτέ την ταξινόμηση residential/proxy ως οριστικό συμπέρασμα.
 
-### Proxyware control planes και reseller overlap
+### Control planes proxyware και επικάλυψη μεταπωλητών
 
-Μην μοντελοποιείτε ένα residential pool ως επίπεδη λίστα exits. Η ανάλυση του IPIDEA ecosystem αποκάλυψε ένα επαναχρησιμοποιήσιμο **two-tier control plane**: ένα embedded SDK αναφέρει αρχικά device/enrollment metadata σε ένα Tier One domain και λαμβάνει scheduling καθώς και ζεύγη Tier Two `connect`/`proxy` IP:port. Ο node κάνει περιοδικά poll στο Tier Two connect port για ένα encoded task, ανοίγει δεύτερη connection στο αντίστοιχο proxy port και προωθεί τα παρεχόμενα bytes στον ζητούμενο προορισμό. SDKs και proxy brands που ονομαστικά διέφεραν είχαν ξεχωριστά discovery domains, αλλά συνέκλιναν σε κοινόχρηστο Tier Two infrastructure και επικαλυπτόμενα exit pools μέσω κοινής ιδιοκτησίας και reseller relationships.<sup>[[13]](#references)</sup>
+Μην μοντελοποιείτε μια residential pool ως επίπεδη λίστα εξόδων. Η ανάλυση του οικοσυστήματος IPIDEA αποκάλυψε ένα επαναχρησιμοποιήσιμο **control plane δύο επιπέδων**: ένα ενσωματωμένο SDK πρώτα αναφέρει μεταδεδομένα συσκευής/εγγραφής σε έναν τομέα Tier One και λαμβάνει ζεύγη IP:port για προγραμματισμό και `connect`/`proxy` Tier Two. Ο κόμβος ελέγχει περιοδικά τη θύρα connect Tier Two για μια κωδικοποιημένη εργασία, ανοίγει δεύτερη σύνδεση στη συζευγμένη θύρα proxy και μεταδίδει τα παρεχόμενα byte στον ζητούμενο προορισμό. SDK και επωνυμίες proxy που φαινομενικά διέφεραν είχαν ξεχωριστούς τομείς εντοπισμού, αλλά κατέληγαν σε κοινόχρηστη υποδομή Tier Two και επικαλυπτόμενες δεξαμενές εξόδου μέσω κοινής ιδιοκτησίας και σχέσεων μεταπωλητών.<sup>[[13]](#references)</sup>
+
 ```text
 enrolled node -> Tier One domain        -> Tier Two IP:port pairs
 enrolled node -> Tier Two connect port  -> destination + connection ID
 enrolled node -> Tier Two proxy port   <-> customer bytes -> destination
 ```
-Αυτό παράγει πιο ανθεκτικά hunting pivots από ένα residential IP block:<sup>[[13]](#references)</sup>
 
-- μια απρόσμενη διεργασία utility, VPN, game ή embedded-device στέλνει ένα σταθερό device ID/customer key και λαμβάνει μια μεταβαλλόμενη λίστα server·
-- το endpoint κάνει polling σε ένα direct IP σε ασυνήθιστη θύρα και, αμέσως πριν ανοίξει ένα νέο destination socket, συνδέεται σε άλλη θύρα στην ίδια διεύθυνση·
-- πολλές φαινομενικά διαφορετικές μάρκες μοιράζονται Tier Two διευθύνσεις, protocol grammar, κώδικα SDK ή επικάλυψη exit-node·
-- διαφορετικές εφαρμογές που επικοινωνούν με διαφορετικά Tier One domains λαμβάνουν διευθύνσεις από το ίδιο Tier Two pool.
+Αυτό παράγει πιο ανθεκτικά hunting pivots από έναν αποκλεισμό residential IP:<sup>[[13]](#references)</sup>
 
-Η επικάλυψη περιορίζει επίσης την απόδοση: το να εντοπιστεί μια IP στο advertised pool ενός vendor δεν αποδεικνύει ποιος reseller, customer ή threat actor τη χρησιμοποίησε κατά τον σχετικό χρόνο. Διατηρήστε timestamps των flows, process lineage, τα σώματα των αποκρίσεων Tier One και τα Tier Two task identifiers.<sup>[[13]](#references)</sup> Σε ένα authorized exercise, προσομοιώστε αυτή την ιεραρχία μόνο με endpoints που ανήκουν στον οργανισμό· μην εγγράφετε ποτέ consumer devices ή third-party proxyware.
+- μια μη αναμενόμενη διεργασία utility, VPN, παιχνιδιού ή ενσωματωμένης συσκευής στέλνει ένα σταθερό device ID/customer key και λαμβάνει μια μεταβαλλόμενη λίστα διακομιστών·
+- το endpoint κάνει polling σε μια άμεση IP σε ασυνήθιστη θύρα και, αμέσως πριν ανοίξει socket προς νέο προορισμό, συνδέεται σε άλλη θύρα της ίδιας διεύθυνσης·
+- πολλές φαινομενικά διαφορετικές μάρκες μοιράζονται διευθύνσεις Tier Two, γραμματική πρωτοκόλλου, κώδικα SDK ή επικάλυψη exit-node·
+- διαφορετικές εφαρμογές που επικοινωνούν με διαφορετικά domains Tier One λαμβάνουν διευθύνσεις από το ίδιο pool Tier Two.
 
-## Multi-hop proxy chains
+Η επικάλυψη περιορίζει επίσης την απόδοση ευθύνης: το ότι βλέπουμε μια IP στο διαφημιζόμενο pool ενός παρόχου δεν αποδεικνύει ποιος reseller, πελάτης ή threat actor τη χρησιμοποίησε τη σχετική χρονική στιγμή. Διατηρήστε τις χρονικές σημάνσεις ροής, την ιεραρχία διεργασιών, τα σώματα αποκρίσεων Tier One και τα αναγνωριστικά εργασιών Tier Two.<sup>[[13]](#references)</sup> Σε μια εξουσιοδοτημένη άσκηση, προσομοιώστε αυτή την ιεραρχία μόνο με endpoints που ανήκουν στον οργανισμό· μην εγγράφετε ποτέ συσκευές καταναλωτών ή proxyware τρίτων.
 
-Το MITRE διακρίνει τα external proxies από τα **multi-hop proxies (T1090.003)**. Η σημαντική ιδιότητα δεν είναι ο αριθμός των hops, αλλά ο διαχωρισμός της γνώσης και της διαχείρισης.<sup>[[3]](#references)</sup>
+## Αλυσίδες multi-hop proxy
+
+Το MITRE διακρίνει τους εξωτερικούς proxy από τους **multi-hop proxy (T1090.003)**. Το σημαντικό χαρακτηριστικό δεν είναι ο αριθμός των hops, αλλά ο διαχωρισμός της γνώσης και της διαχείρισης.<sup>[[3]](#references)</sup>
+
 ```text
 operator --encrypted--> entry A --encrypted/relayed--> exit B --> target
-sees source                         sees destination
+              sees source                         sees destination
 ```
-Εάν ένα μέρος χειρίζεται τα A και B, τα κοινόχρηστα logs ή ο χρονισμός της ροής μπορούν να ανακατασκευάσουν το circuit. Η προσθήκη διαδοχικών commercial VPNs από το ίδιο endpoint/account μπορεί να αυξήσει το latency, αφήνοντας παράλληλα κοινά στοιχεία ταυτότητας, πληρωμών και χρονισμού. Το Tor μειώνει αυτό το πρόβλημα με independently selected relays και shared client design, όμως ένα low-latency interactive network δεν μπορεί να εγγυηθεί αντίσταση απέναντι σε observer που μετρά και τα δύο άκρα.
 
-Συνηθισμένες αστοχίες είναι το DNS ή IPv6 bypass, οι εφαρμογές που ανοίγουν τα δικά τους sockets, η απευθείας προσέγγιση των relays από management traffic, η συγχρονισμένη δραστηριότητα, η επαναχρησιμοποίηση SSH keys και η σύνδεση σε identifying accounts. Η σωστή επαλήθευση είναι ένα failure test: σταματήστε κάθε relay διαδοχικά και δείξτε ότι το workload δεν μπορεί να κάνει fallback σε clear path.
+Αν ένα μέρος λειτουργεί τα A και B, τα κοινόχρηστα logs ή ο χρονισμός της κίνησης μπορούν να ανασυνθέσουν το κύκλωμα. Η προσθήκη διαδοχικών εμπορικών VPN από το ίδιο endpoint/account μπορεί να αυξήσει την καθυστέρηση, αφήνοντας όμως κοινά στοιχεία ταυτότητας, πληρωμής και χρονισμού. Το Tor μειώνει αυτό το πρόβλημα με ανεξάρτητα επιλεγμένα relays και κοινό σχεδιασμό client, αλλά ένα διαδραστικό δίκτυο χαμηλής καθυστέρησης δεν μπορεί να εγγυηθεί προστασία από παρατηρητή που μετρά και τα δύο άκρα.
+
+Συνηθισμένες αστοχίες είναι η παράκαμψη DNS ή IPv6, οι εφαρμογές που ανοίγουν δικά τους sockets, η απευθείας πρόσβαση της κίνησης διαχείρισης στα relays, η συγχρονισμένη δραστηριότητα, η επαναχρησιμοποίηση κλειδιών SSH και η σύνδεση σε λογαριασμούς που αποκαλύπτουν την ταυτότητα. Η σωστή επαλήθευση είναι μια δοκιμή αστοχίας: διακόψτε κάθε relay διαδοχικά και δείξτε ότι το workload δεν μπορεί να καταφύγει σε μη κρυπτογραφημένη διαδρομή.
 
 ### Κατάρρευση tunnel και upstream leakage
 
-Μια relay architecture είναι συχνά πιο attributable όταν αποτυγχάνει. Το Unit 42 τεκμηρίωσε ένα multi-tier espionage path που χρησιμοποιούσε victim-facing VPSs, relay VPSs, residential proxies, Tor και άλλες proxy services· όταν ένα tunnel παραλειπόταν ή κατέρρεε, κρυφή upstream infrastructure συνδεόταν απευθείας με relay και victim-facing systems. Η ίδια έρευνα χρησιμοποίησε επίσης ένα X.509 certificate, το οποίο εκτέθηκε για σύντομο χρονικό διάστημα σε upstream infrastructure, ως cross-tier pivot.<sup>[[14]](#references)</sup>
+Μια αρχιτεκτονική relay συχνά αποδίδεται ευκολότερα όταν αστοχεί. Η Unit 42 τεκμηρίωσε μια κατασκοπευτική διαδρομή πολλαπλών επιπέδων που χρησιμοποιούσε VPS στραμμένα προς τα θύματα, relay VPS, οικιακά proxies, Tor και άλλες υπηρεσίες proxy· όταν παραλειπόταν ή κατέρρεε ένα tunnel, κρυφή upstream υποδομή συνδεόταν απευθείας με συστήματα relay και με συστήματα στραμμένα προς τα θύματα. Η ίδια έρευνα χρησιμοποίησε επίσης ένα πιστοποιητικό X.509 που εκτέθηκε για λίγο σε upstream υποδομή ως σύνδεσμο μεταξύ επιπέδων.<sup>[[14]](#references)</sup>
 
-Διατηρήστε το **data plane** (`victim <-> exit`) ξεχωριστά από το **control plane** (`operator/upstream -> relay administration`). Διατηρήστε ingress και authentication logs σε κάθε owned tier, certificate histories και σύντομες failed connections—όχι μόνο επιτυχημένα C2 sessions. Μια source που εμφανίζεται μόνο κατά τη διάρκεια relay outages ή διαχειρίζεται απευθείας πολλαπλά victim-facing nodes αποτελεί ισχυρότερο upstream candidate από ένα συνηθισμένο exit, όμως το ASN/geolocation της παραμένει hypothesis και όχι απόδειξη της ταυτότητας ενός operator.
+Διατηρήστε το **data plane** (`victim <-> exit`) χωριστά από το **control plane** (`operator/upstream -> relay administration`). Διατηρήστε logs εισερχόμενων συνδέσεων και ελέγχου ταυτότητας σε κάθε επίπεδο που σας ανήκει, ιστορικά πιστοποιητικών και σύντομες αποτυχημένες συνδέσεις — όχι μόνο επιτυχημένες συνεδρίες C2. Μια πηγή που εμφανίζεται μόνο κατά τις διακοπές των relay ή διαχειρίζεται απευθείας πολλαπλούς κόμβους που είναι στραμμένοι προς τα θύματα αποτελεί ισχυρότερη υποψήφια upstream πηγή από ένα συνηθισμένο exit, αλλά το ASN/η γεωγραφική θέση της παραμένει υπόθεση, όχι απόδειξη της ταυτότητας του operator.
 
-Ένα authorized lab πρέπει να κάνει το workload fail closed. Για ένα workload απομονωμένο σε Linux network namespace, η πρώτη route πρέπει να χρησιμοποιεί το tunnel· μετά την αφαίρεσή του, τόσο το request όσο και το route lookup πρέπει να αποτυγχάνουν αντί να επιλέγουν το physical uplink:
+Ένα εξουσιοδοτημένο lab θα πρέπει να κάνει το workload να αποτυγχάνει με ασφάλεια (fail closed). Για ένα workload απομονωμένο σε Linux network namespace, η πρώτη διαδρομή πρέπει να χρησιμοποιεί το tunnel· αφού το αφαιρέσετε, τόσο το αίτημα όσο και η αναζήτηση διαδρομής πρέπει να αποτύχουν, αντί να επιλέξουν τη φυσική uplink:
+
 ```bash
 ip netns exec workload ip route get "$OWNED_TEST_IP"  # expect: dev wg0
 ip -n workload link set wg0 down
 ip netns exec workload curl --fail --connect-timeout 3 \
---resolve "$OWNED_TEST_HOST:443:$OWNED_TEST_IP" "https://$OWNED_TEST_HOST/health"
+  --resolve "$OWNED_TEST_HOST:443:$OWNED_TEST_IP" "https://$OWNED_TEST_HOST/health"
 ip netns exec workload ip route get "$OWNED_TEST_IP"  # expect: unreachable
 ```
-Επανάλαβε τη δοκιμή για DNS και IPv6, καθώς και σε κάθε όριο relay. Αν οποιοδήποτε probe πετύχει, κατέγραψε την πραγματική διεύθυνση interface/source πριν διορθώσεις το policy routing ή το firewall· αυτή η παρατήρηση είναι το attribution leak που θα έβλεπε ένας investigator.
 
-## Redirector tiers και traffic shaping
+Επαναλάβετε τη δοκιμή για DNS και IPv6, καθώς και σε κάθε όριο relay. Αν κάποια δοκιμή πετύχει, καταγράψτε την πραγματική διεπαφή/διεύθυνση προέλευσης πριν διορθώσετε το policy routing ή το firewall· αυτή η παρατήρηση είναι το attribution leak που θα έβλεπε ένας ερευνητής.
 
-Ένας δημόσιος **redirector** δέχεται traffic που ταιριάζει με μια operation-specific grammar και το προωθεί σε έναν προστατευμένο team server. Οτιδήποτε άλλο μπορεί να απορρίπτεται ή να εξυπηρετεί innocuous περιεχόμενο.
+## Επίπεδα redirector και διαμόρφωση κίνησης
+
+Ένας δημόσιος **redirector** δέχεται κίνηση που συμμορφώνεται με γραμματική ειδική για την επιχείρηση και την προωθεί σε έναν προστατευμένο team server. Οτιδήποτε άλλο μπορεί να απορρίπτεται ή να εξυπηρετείται με αβλαβές περιεχόμενο.
+
 ```text
 implant/browser -> CDN or redirector -> relay -> team server
-|
-request policy
-host + path + method + header + time
+                       |
+                 request policy
+           host + path + method + header + time
 ```
-Πολλαπλά επίπεδα περιορίζουν την έκθεση: η απώλεια ενός public domain δεν χρειάζεται να εκθέσει τον team server. Τα CDN προσθέτουν anycast capacity και ένα αξιόπιστο outer domain, αλλά το CDN account και τα edge logs γίνονται σημεία attribution. Τα TLS fingerprints, τα certificate histories, τα distinctive paths/header order, τα response sizes, η redirect behavior και τα origin allowlists μπορούν να ομαδοποιήσουν fronts που υποτίθεται ότι είναι άσχετα.
 
-Για detection, καταγράψτε τα reverse-proxy fields πριν από το normalization, συγκρίνετε SNI/Host/authority, εξετάστε σπάνιους συνδυασμούς headers, ομαδοποιήστε response bodies και TLS fingerprints και αναζητήστε στα cloud/CDN audit logs επικαλύψεις configuration. Για authorized red teams, αποφύγετε την αντιγραφή πραγματικού brand ή την τοποθέτηση credential collection πίσω από άσχετο third party.
+Πολλαπλά επίπεδα περιορίζουν την έκθεση: η καύση ενός δημόσιου domain δεν χρειάζεται να εκθέσει τον team server. Τα CDN προσθέτουν anycast χωρητικότητα και ένα αξιόπιστο εξωτερικό domain, αλλά ο λογαριασμός CDN και τα edge logs γίνονται σημεία απόδοσης. Τα TLS fingerprints, το ιστορικό πιστοποιητικών, τα χαρακτηριστικά paths/η σειρά των headers, τα μεγέθη των αποκρίσεων, η συμπεριφορά ανακατεύθυνσης και οι λίστες επιτρεπόμενων origin μπορούν να συσχετίσουν fronts που θεωρούνται άσχετα μεταξύ τους.
 
-## Domain fronting και domainless fronting
+Για τον εντοπισμό, καταγράψτε τα πεδία reverse-proxy πριν από την κανονικοποίηση, συγκρίνετε SNI/Host/authority, εξετάστε σπάνιους συνδυασμούς headers, ομαδοποιήστε τα response bodies και τα TLS fingerprints και αναζητήστε επικαλύψεις διαμόρφωσης στα audit logs του cloud/CDN. Σε εξουσιοδοτημένα red teams, αποφύγετε την αντιγραφή πραγματικού brand ή τη συλλογή διαπιστευτηρίων μέσω άσχετου τρίτου μέρους.
 
-Με το κλασικό **domain fronting (T1090.004)**, η TLS connection διαφημίζει ένα επιτρεπόμενο front domain στο SNI, ενώ το κρυπτογραφημένο HTTP `Host` ή HTTP/2 `:authority` ζητά διαφορετικό back-end domain. Ένα cooperating CDN κάνει routing με βάση την εσωτερική τιμή. Ένας network observer χωρίς TLS decryption βλέπει το front· το CDN βλέπει και τις δύο τιμές, καθώς και το origin. Στις domainless παραλλαγές, το SNI μπορεί να είναι κενό, ενώ ένα άλλο routing field επιλέγει τον προορισμό.<sup>[[4]](#references)</sup>
+## Domain fronting and domainless fronting
 
-Αυτό δεν είναι μαγική impersonation: λειτουργεί μόνο όταν ο intermediary επιτρέπει σκόπιμα ή κατά λάθος την ασυμφωνία και γνωρίζει πώς να κάνει routing στο εσωτερικό όνομα. Οι major providers έχουν περιορίσει το cross-account fronting. Το Encrypted ClientHello (ECH) αλλάζει όσα μπορεί να δει ένας on-path observer, αλλά δεν διαγράφει τα CDN, endpoint ή application records.
+Στο κλασικό **domain fronting (T1090.004)**, η σύνδεση TLS δηλώνει ένα επιτρεπόμενο front domain στο SNI, ενώ το κρυπτογραφημένο HTTP `Host` ή το HTTP/2 `:authority` ζητά ένα διαφορετικό back-end domain. Ένα συνεργαζόμενο CDN δρομολογεί με βάση την εσωτερική τιμή. Ένας παρατηρητής δικτύου χωρίς αποκρυπτογράφηση TLS βλέπει το front· το CDN βλέπει και τις δύο τιμές και το origin. Σε παραλλαγές domainless, το SNI μπορεί να είναι κενό, ενώ κάποιο άλλο πεδίο δρομολόγησης επιλέγει τον προορισμό.<sup>[[4]](#references)</sup>
 
-Τα detection points περιλαμβάνουν:
+Δεν πρόκειται για μαγική πλαστοπροσωπία: λειτουργεί μόνο όταν ο ενδιάμεσος επιτρέπει, σκόπιμα ή κατά λάθος, την ασυμφωνία και γνωρίζει πώς να δρομολογήσει το εσωτερικό όνομα. Μεγάλοι πάροχοι έχουν περιορίσει το fronting μεταξύ διαφορετικών λογαριασμών. Το Encrypted ClientHello (ECH) αλλάζει όσα μπορεί να δει ένας παρατηρητής στη διαδρομή, αλλά δεν διαγράφει τα αρχεία του CDN, του endpoint ή της εφαρμογής.
 
-- endpoint process ancestry και destination που δεν αναμένονται για τη συγκεκριμένη application·
-- ασυμφωνία μεταξύ SNI και HTTP authority, όπου το TLS inspection είναι νόμιμο και διαθέσιμο·
-- CDN logs που δείχνουν ένα tenant/front να κάνει routing προς άλλο authority/origin·
-- ασυνήθιστες long-lived ή περιοδικές sessions προς μια κανονικά interactive service·
-- σταθερά encrypted flow sizes και cadence μεταξύ front domains που αλλάζουν.
+Τα σημεία εντοπισμού περιλαμβάνουν:
 
-Το ασφαλές lab προσομοιώνει το routing mismatch σε owned reverse proxy· δεν κάνει abuse ενός public CDN.
+- την ιεραρχία διεργασιών του endpoint και έναν προορισμό που δεν αναμένεται για τη συγκεκριμένη εφαρμογή·
+- ασυμφωνία μεταξύ SNI και HTTP authority, όπου ο έλεγχος TLS είναι νόμιμος και διαθέσιμος·
+- logs του CDN που δείχνουν έναν tenant/front να δρομολογεί σε άλλο authority/origin·
+- ασυνήθιστες συνεδρίες μεγάλης διάρκειας ή περιοδικές συνδέσεις σε υπηρεσία που συνήθως είναι διαδραστική·
+- σταθερά μεγέθη και ρυθμό κρυπτογραφημένων ροών σε διαφορετικά front domains.
 
-## Dynamic resolution: DDNS, DGA και fast flux
+Το ασφαλές εργαστήριο προσομοιώνει την ασυμφωνία δρομολόγησης σε reverse proxy που σας ανήκει· δεν καταχράται δημόσιο CDN.
 
-Το dynamic resolution αποσυνδέει μια logical service από fixed infrastructure:
+## Δυναμική επίλυση: DDNS, DGA και fast flux
 
-- **DDNS:** ένας authenticated client ενημερώνει ένα stable name μετά την αλλαγή της address του.
-- **DGA:** τόσο το endpoint όσο και το controller παράγουν candidate domain names από ένα time/key seed· ο operator κάνει register μόνο ένα μικρό subset.
-- **Fast flux:** ένα name επιστρέφει ένα σύνολο από rapidly changing compromised/proxy addresses, συχνά με low TTLs.
-- **Double flux:** περιστρέφονται τόσο οι service addresses όσο και οι authoritative name-server addresses, αποκρύπτοντας και το control layer.
+Η δυναμική επίλυση αποσυνδέει μια λογική υπηρεσία από σταθερή υποδομή:
 
-Το fast flux είναι ένα load-distribution pattern που χρησιμοποιείται adversarially, όχι απλώς «πολλές DNS answers». Ισχυρότερα στοιχεία συνδυάζουν low TTL, μεγάλο αριθμό unique addresses, ευρεία διασπορά ASN/geography, σύντομο node lifetime, επαναλαμβανόμενη application behavior και ύποπτο registration history. Τα CDN μοιράζονται νόμιμα αρκετές από αυτές τις ιδιότητες. Το MITRE συνιστά τη συσχέτιση της DNS behavior με το process και τις subsequent connections.<sup>[[5]](#references)</sup>
+- **DDNS:** ένας πιστοποιημένος client ενημερώνει ένα σταθερό όνομα όταν αλλάζει η διεύθυνσή του.
+- **DGA:** τόσο το endpoint όσο και ο controller παράγουν υποψήφια domain names από ένα seed χρόνου/κλειδιού· ο operator καταχωρίζει ένα μικρό υποσύνολο.
+- **Fast flux:** ένα όνομα επιστρέφει ένα σύνολο διευθύνσεων από παραβιασμένα συστήματα/proxy που αλλάζει γρήγορα, συχνά με χαμηλά TTL.
+- **Double flux:** περιστρέφονται τόσο οι διευθύνσεις υπηρεσιών όσο και οι διευθύνσεις των authoritative name servers, αποκρύπτοντας και το επίπεδο ελέγχου.
 
-Ένα DGA μπορεί να ανιχνευθεί μέσω lexical entropy, consonant/digit patterns, bursts από NXDOMAIN, synchronized first-seen domains και process context. Τα wordlist DGAs και τα generative models παρακάμπτουν απλούς entropy rules, καθιστώντας σημαντικότερο το fleet-wide temporal clustering και το endpoint lineage.
+Το fast flux είναι μοτίβο κατανομής φορτίου που χρησιμοποιείται από αντιπάλους, όχι απλώς «πολλές απαντήσεις DNS». Ισχυρότερες ενδείξεις συνδυάζουν χαμηλό TTL, μεγάλο αριθμό μοναδικών διευθύνσεων, ευρεία διασπορά ASN/γεωγραφίας, σύντομη διάρκεια ζωής κόμβων, επαναλαμβανόμενη συμπεριφορά εφαρμογών και ύποπτο ιστορικό καταχώρισης. Τα CDN εμφανίζουν νόμιμα αρκετές από αυτές τις ιδιότητες. Η MITRE συνιστά τη συσχέτιση της συμπεριφοράς DNS με τη διεργασία και τις επακόλουθες συνδέσεις.<sup>[[5]](#references)</sup>
 
-## Compromised domains και domain shadowing
+Ένα DGA μπορεί να εντοπιστεί μέσω λεξικής εντροπίας, μοτίβων συμφώνων/ψηφίων, εξάρσεων NXDOMAIN, συγχρονισμένων domains που εμφανίζονται για πρώτη φορά και του πλαισίου της διεργασίας. Τα DGA που βασίζονται σε wordlists και τα παραγωγικά μοντέλα παρακάμπτουν απλούς κανόνες εντροπίας, καθιστώντας σημαντικότερη την ευρείας κλίμακας χρονική ομαδοποίηση και τη γενεαλογία των endpoints.
 
-Ένας actor μπορεί να κάνει hijack σε registrar/DNS account, να αναλάβει ένα dangling subdomain ή να προσθέσει records κάτω από ένα κατά τα άλλα reputable domain. Το **domain shadowing** διατηρεί το νόμιμο apex, ενώ μεγάλοι αριθμοί attacker-controlled subdomains δείχνουν σε μεταβαλλόμενα delivery ή C2 hosts. Δανείζεται age και reputation και μπορεί να παρακάμψει το domain-wide blocking.<sup>[[6]](#references)</sup>
+## Παραβιασμένα domains και domain shadowing
 
-Οι defenders χρειάζονται registrar και authoritative-DNS audit logs, MFA, registry/registrar locks, alerts για νέα delegations/API tokens/name servers, certificate-transparency monitoring και inventory των cloud resources που αναφέρονται από το DNS. Ερευνήστε το resolution και το certificate history ενός subdomain ανεξάρτητα από το reputation του apex.
+Ένας παράγοντας μπορεί να παραβιάσει έναν λογαριασμό registrar/DNS, να καταλάβει ένα dangling subdomain ή να προσθέσει records κάτω από ένα κατά τα άλλα αξιόπιστο domain. Το **domain shadowing** διατηρεί το νόμιμο apex, ενώ μεγάλος αριθμός subdomains που ελέγχονται από τον επιτιθέμενο δείχνει σε μεταβαλλόμενους hosts διανομής ή C2. Αξιοποιεί την ηλικία και τη φήμη του domain και μπορεί να παρακάμψει τον αποκλεισμό ολόκληρου του domain.<sup>[[6]](#references)</sup>
+
+Οι αμυνόμενοι χρειάζονται audit logs του registrar και του authoritative DNS, MFA, κλειδώματα registry/registrar, ειδοποιήσεις για νέες αναθέσεις, API tokens και name servers, παρακολούθηση certificate transparency και απογραφή των πόρων cloud στους οποίους παραπέμπει το DNS. Εξετάστε ανεξάρτητα την επίλυση και το ιστορικό πιστοποιητικών ενός subdomain, χωρίς να βασίζεστε στη φήμη του apex.
 
 ## Web services και dead-drop resolvers
 
-Ένας **dead-drop resolver (T1102.001)** αποθηκεύει έναν encoded pointer προς το τρέχον C2 μέσα σε ένα legitimate post, profile, document, repository, cloud object ή blockchain field. Το malware κάνει fetch το public object, αποκωδικοποιεί ένα domain/IP και επικοινωνεί με το επόμενο stage. Bidirectional variants ανταλλάσσουν commands ή files μέσω service APIs.<sup>[[7]](#references)</sup>
+Ένας **dead-drop resolver (T1102.001)** αποθηκεύει έναν κωδικοποιημένο δείκτη προς το τρέχον C2 μέσα σε νόμιμη ανάρτηση, προφίλ, έγγραφο, repository, αντικείμενο cloud ή πεδίο blockchain. Το malware ανακτά το δημόσιο αντικείμενο, αποκωδικοποιεί ένα domain/IP και επικοινωνεί με το επόμενο στάδιο. Οι αμφίδρομες παραλλαγές ανταλλάσσουν εντολές ή αρχεία μέσω των API υπηρεσιών.<sup>[[7]](#references)</sup>
 
-Αυτό παρέχει resilience και αποκρύπτει το back-end C2 από static binary analysis. Δημιουργεί επίσης stable object, tenant, repository, API και access-pattern identifiers. Οι defenders πρέπει να συσχετίζουν:
+Μια παραλλαγή resolver ειδική για το GitHub χρησιμοποιεί το Issues Search API μόνο όταν αποτυγχάνει ένα πιστοποιημένο κανάλι repository. Ο client αναζητά issues που ταιριάζουν με την τρέχουσα ημερομηνία, το repository και τον τύπο issue, ακολουθεί το URL σχολίων κάθε issue και εξάγει ciphertext ανάμεσα στους δείκτες `<!--` και `-->`. Μετά την αποκρυπτογράφηση ανά host, βάσει ημερομηνίας, πεδία όπως τα `Owner`, `LicRepo` και `LicToken` αντικαθιστούν τον κύριο owner, το path και το token του repository. Έτσι ο operator μπορεί να περιστρέφει διαπιστευτήρια και endpoints χωρίς να αντικαταστήσει τον client· το σχόλιο του issue λειτουργεί ως resolver, ενώ τα αρχεία του repository παραμένουν το κανάλι tasking.<sup>[[15]](#references)</sup>
 
-1. το process που επικοινώνησε με τη service·
-2. το ακριβές API path/object και το response hash·
-3. τη decoding ή string-processing activity·
-4. τη νέα outbound connection λίγο αργότερα· και
-5. την ίδια behavior αλλού στο fleet.
+Αυτό προσφέρει ανθεκτικότητα και αποκρύπτει το back-end C2 από τη στατική ανάλυση binary. Δημιουργεί επίσης σταθερά αναγνωριστικά αντικειμένων, tenant, repository, API και μοτίβων πρόσβασης. Οι αμυνόμενοι πρέπει να συσχετίζουν:
 
-Το blocking όλων των GitHub, cloud storage ή social media σπάνια είναι βιώσιμο. Το service-aware egress policy και το process-level correlation αποδίδουν καλύτερα από το domain-only blocking.
+1. τη διεργασία που επικοινώνησε με την υπηρεσία·
+2. το ακριβές API path/αντικείμενο και το hash της απόκρισης·
+3. τη δραστηριότητα αποκωδικοποίησης ή επεξεργασίας συμβολοσειρών·
+4. τη νέα εξερχόμενη σύνδεση λίγο αργότερα· και
+5. την ίδια συμπεριφορά σε άλλα σημεία του στόλου συστημάτων.
 
-## Personas, accounts και procurement compartments
+Ο αποκλεισμός όλου του GitHub, του cloud storage ή των social media είναι σπάνια εφικτός. Οι πολιτικές εξερχόμενης κίνησης με επίγνωση των υπηρεσιών και η συσχέτιση σε επίπεδο διεργασίας υπερτερούν του αποκλεισμού μόνο βάσει domain.
 
-Η υποδομή anonymity αποτυγχάνει όταν ένα persona, recovery email, phone, payment, browser ή admin IP συνδέει compartments. State-linked operations έχουν καλλιεργήσει social profiles, email identities και cloud accounts πολύ πριν από τη χρήση τους· το ATT&CK το καταγράφει ως Establish Accounts (T1585), συμπεριλαμβανομένων social, email και cloud sub-techniques.<sup>[[8]](#references)</sup>
+## Personas, λογαριασμοί και διαχωρισμός προμηθειών
 
-Ένας defender ή investigator δημιουργεί ένα graph από:
+Η ανωνυμία της υποδομής αποτυγχάνει όταν μια persona, ένα email ανάκτησης, ένα τηλέφωνο, μια πληρωμή, ένα browser ή μια IP διαχειριστή συνδέει μεταξύ τους διαχωρισμένα τμήματα. Επιχειρήσεις που συνδέονται με κράτη έχουν αναπτύξει κοινωνικά προφίλ, email identities και λογαριασμούς cloud πολύ πριν τους χρησιμοποιήσουν· το ATT&CK το καταγράφει ως Establish Accounts (T1585), συμπεριλαμβανομένων των social, email και cloud sub-techniques.<sup>[[8]](#references)</sup>
 
-- creation και first-login time, locale, time zone και working schedule·
-- recovery fields, MFA devices, identity documents και payment instruments·
-- browser/TLS fingerprints και source-network history·
-- avatar reuse, image provenance, writing style και social-graph growth·
-- shared domain registrant, name server, certificate, analytics ID ή repository commit·
-- management-plane actions που παρακάμπτουν την architecture του public relay.
+Ένας αμυνόμενος ή ερευνητής δημιουργεί γράφο από:
 
-Για ένα authorized red team, τα synthetic personas πρέπει να τεκμηριώνονται προς τον exercise controller, να χρησιμοποιούν organization-owned recovery/payment channels, να αποφεύγουν την impersonation πραγματικών μη εμπλεκόμενων ατόμων και να έχουν προγραμματισμένο retirement. Το SOC μπορεί να παραμείνει blind· η operation δεν πρέπει να γίνει unaccountable.
+- την ώρα δημιουργίας και πρώτης σύνδεσης, την τοπική ρύθμιση, τη ζώνη ώρας και το πρόγραμμα εργασίας·
+- πεδία ανάκτησης, συσκευές MFA, έγγραφα ταυτότητας και μέσα πληρωμής·
+- fingerprints browser/TLS και ιστορικό δικτύου προέλευσης·
+- επαναχρησιμοποίηση avatar, προέλευση εικόνας, ύφος γραφής και ανάπτυξη κοινωνικού γράφου·
+- κοινό registrant domain, name server, πιστοποιητικό, analytics ID ή commit repository·
+- ενέργειες του management plane που παρακάμπτουν την αρχιτεκτονική δημόσιου relay.
 
-## Emerging compound patterns προς threat-model
+Για ένα εξουσιοδοτημένο red team, οι συνθετικές personas πρέπει να τεκμηριώνονται προς τον ελεγκτή της άσκησης, να χρησιμοποιούν κανάλια ανάκτησης/πληρωμής που ανήκουν στον οργανισμό, να αποφεύγουν την πλαστοπροσωπία πραγματικών, μη εμπλεκόμενων ανθρώπων και να έχουν προγραμματισμένη απόσυρση. Το SOC μπορεί να παραμένει στο σκοτάδι· η επιχείρηση δεν πρέπει να μείνει χωρίς λογοδοσία.
 
-Τα παρακάτω είναι **defender-driven compositions**, όχι ισχυρισμοί ότι κάποιος named actor έχει αναπτύξει κάθε ακριβή design. Συνδυάζουν primitives που έχουν ήδη παρατηρηθεί και είναι χρήσιμα ως purple-team hypotheses.
+## Αναδυόμενα σύνθετα μοτίβα προς μοντελοποίηση απειλών
 
-### Asymmetric one-way tasking
+Τα παρακάτω είναι **συνδυασμοί με επίκεντρο τον αμυνόμενο**, όχι ισχυρισμοί ότι κάποιος κατονομαζόμενος παράγοντας έχει αναπτύξει καθένα από αυτά τα ακριβή σχέδια. Συνδυάζουν ήδη παρατηρημένα primitives και είναι χρήσιμες υποθέσεις για purple team.
 
-Τα commands φτάνουν μέσω μιας public, broadcast ή append-only source, ενώ τα results εξέρχονται μέσω ενός unrelated channel μετά από καθυστέρηση. Παραδείγματα του primitive περιλαμβάνουν web-service one-way communication και dead drops. Ο διαχωρισμός εμποδίζει ένα single flow να φαίνεται bidirectional και δυσκολεύει το απλό request/response correlation.<sup>[[9]](#references)</sup>
+### Ασύμμετρο tasking μονής κατεύθυνσης
 
-**Detection:** διατηρήστε object-level reads και στη συνέχεια συσχετίστε process state changes και μεταγενέστερα outbound transfers σε μεγαλύτερο χρονικό παράθυρο. Αναζητήστε ένα σπάνιο process που διαβάζει το ίδιο public object, ακόμη και όταν δεν ακολουθεί άμεση reply.
+Οι εντολές φτάνουν μέσω δημόσιας, broadcast ή append-only πηγής, ενώ τα αποτελέσματα αποστέλλονται μέσω άσχετου καναλιού μετά από καθυστέρηση. Παραδείγματα του primitive περιλαμβάνουν την επικοινωνία μονής κατεύθυνσης μέσω web service και τα dead drops. Ο διαχωρισμός εμποδίζει μία ροή να φαίνεται αμφίδρομη και δυσκολεύει την απλή συσχέτιση αιτήματος/απόκρισης.<sup>[[9]](#references)</sup>
 
-### Multi-stage channel promotion
+**Εντοπισμός:** διατηρήστε τα reads σε επίπεδο αντικειμένου και έπειτα συσχετίστε τις αλλαγές κατάστασης διεργασιών με μεταγενέστερες εξερχόμενες μεταφορές σε ευρύτερο χρονικό παράθυρο. Αναζητήστε σπάνια διεργασία που διαβάζει το ίδιο δημόσιο αντικείμενο, ακόμη κι όταν δεν ακολουθεί άμεση απάντηση.
 
-Ένα ήσυχο first stage πραγματοποιεί inventory και προωθεί μόνο επιλεγμένα systems σε ένα unrelated second-stage channel. Το δεύτερο endpoint, protocol και process μπορεί να μη μοιράζεται καμία infrastructure με το πρώτο. Αυτό περιορίζει την έκθεση capable infrastructure και μοντελοποιείται ρητά ως ATT&CK T1104.<sup>[[10]](#references)</sup>
+### Προαγωγή σε κανάλι πολλαπλών σταδίων
 
-**Detection:** συσχετίστε `first network process -> downloaded/configured state -> new process or injection -> unrelated destination`· μην κλείνετε το incident μετά το blocking του πρώτου domain.
+Ένα διακριτικό πρώτο στάδιο κάνει απογραφή και προάγει μόνο επιλεγμένα συστήματα σε ένα άσχετο κανάλι δεύτερου σταδίου. Το δεύτερο endpoint, το πρωτόκολλο και η διεργασία μπορεί να μη μοιράζονται καμία υποδομή με το πρώτο. Αυτό περιορίζει την έκθεση της ικανότερης υποδομής και μοντελοποιείται ρητά ως ATT&CK T1104.<sup>[[10]](#references)</sup>
 
-### Cross-protocol relay translation
+**Εντοπισμός:** συσχετίστε `first network process -> downloaded/configured state -> new process or injection -> unrelated destination`· μην κλείνετε το περιστατικό αφού αποκλείσετε το πρώτο domain.
 
-Διαφορετικά hops μεταφράζουν HTTPS, QUIC, WebSocket, DNS, SSH ή ένα message-queue API, αντί να προωθούν διαφανώς packets. Η μετάφραση αφαιρεί ένα single end-to-end protocol fingerprint, αλλά δημιουργεί gateways με distinctive timing, buffering και semantic conversion. Το protocol tunneling (T1572) μπορεί να συνδυαστεί με proxies και service impersonation.<sup>[[11]](#references)</sup>
+### Μετάφραση relay μεταξύ πρωτοκόλλων
 
-**Detection:** αναζητήστε gateway hosts που λαμβάνουν ένα protocol και ξεκινούν ένα άλλο, με tightly coupled byte/time behavior· συγκρίνετε το endpoint intent με το protocol που πραγματικά μεταφέρεται.
+Διαφορετικά hops μεταφράζουν HTTPS, QUIC, WebSocket, DNS, SSH ή ένα API ουράς μηνυμάτων, αντί να προωθούν διαφανώς πακέτα. Η μετάφραση καταργεί ένα ενιαίο end-to-end fingerprint πρωτοκόλλου, αλλά δημιουργεί gateways με χαρακτηριστικό χρονισμό, buffering και σημασιολογική μετατροπή. Το Protocol tunneling (T1572) μπορεί να συνδυαστεί με proxies και προσποίηση υπηρεσιών.<sup>[[11]](#references)</sup>
 
-### Passive activation on edge devices
+**Εντοπισμός:** αναζητήστε hosts gateway που λαμβάνουν ένα πρωτόκολλο και ξεκινούν άλλο, με στενά συσχετισμένη συμπεριφορά ως προς τον όγκο δεδομένων και τον χρόνο· συγκρίνετε τον σκοπό του endpoint με το πρωτόκολλο που μεταφέρεται στην πράξη.
 
-Αντί να κάνει beaconing, ένα implant παρακολουθεί traffic που ήδη φτάνει σε router/VPN και ενεργοποιείται μόνο από μια magic value, source-port pattern ή authenticated token. Η κανονική traffic συνεχίζει προς την πραγματική service. Το ATT&CK το ονομάζει Traffic Signaling (T1205), με documented network-device και APT examples.<sup>[[12]](#references)</sup>
+### Παθητική ενεργοποίηση σε edge devices
 
-**Detection:** firmware/file integrity, raw packet capture κατά τη διάρκεια authorized hunt, unexpected socket filters και differential service behavior. Η απουσία periodic beacon δεν αποδεικνύει ότι ένα edge device είναι clean.
+Αντί να στέλνει beacon, ένα implant παρακολουθεί την κίνηση που ήδη φτάνει σε router/VPN και ενεργοποιείται μόνο με μια μαγική τιμή, μοτίβο source-port ή πιστοποιημένο token. Η κανονική κίνηση συνεχίζει προς την πραγματική υπηρεσία. Το ATT&CK το ονομάζει Traffic Signaling (T1205), με τεκμηριωμένα παραδείγματα από συσκευές δικτύου και APT.<sup>[[12]](#references)</sup>
 
-### Serverless και ephemeral origin rotation
+**Εντοπισμός:** ακεραιότητα firmware/αρχείων, raw packet capture κατά τη διάρκεια εξουσιοδοτημένης διερεύνησης, απρόσμενα socket filters και διαφοροποιημένη συμπεριφορά υπηρεσίας. Η απουσία περιοδικού beacon δεν αποδεικνύει ότι μια edge device είναι καθαρή.
 
-Ένα front διατηρεί stable logical identity, ενώ short-lived functions/containers χειρίζονται μεμονωμένα stages σε αρκετές regions/accounts. Αυτό μειώνει το disk lifetime και τα fixed origin IPs, αλλά τα control-plane creation, image/layer, role, secret, request ID και billing telemetry γίνονται το durable graph.
+### Περιστροφή serverless και ephemeral origin
 
-**Detection:** διατηρήστε τα cloud audit και invocation logs εκτός του workload· ομαδοποιήστε deployment templates, roles, environment keys και front-to-origin relationships.
+Ένα front διατηρεί σταθερή λογική ταυτότητα, ενώ βραχύβιες functions/containers διαχειρίζονται μεμονωμένα στάδια σε διάφορες περιοχές/λογαριασμούς. Αυτό μειώνει τη διάρκεια ζωής των δεδομένων στον δίσκο και εξαλείφει σταθερές IP origin, αλλά τα telemetry του control plane για τη δημιουργία, την image/layer, τον ρόλο, το secret, το request ID και τη χρέωση αποτελούν το μόνιμο γράφημα.
 
-### Privacy-layer diversity
+**Εντοπισμός:** διατηρήστε τα audit και invocation logs του cloud εκτός του workload· ομαδοποιήστε templates ανάπτυξης, ρόλους, environment keys και σχέσεις front-to-origin.
 
-Μια operation μπορεί σκόπιμα να αποφεύγει ένα homogeneous chain: για παράδειγμα, ένα channel χρησιμοποιεί leased relay, το tasking χρησιμοποιεί public object, ένα exit προέρχεται από owned lab cellular link και η administration χρησιμοποιεί ξεχωριστό organization network. Αυτό μειώνει την αξία του compromising ενός provider, αλλά αυξάνει το cross-layer timing και το operational-error risk.
+### Ποικιλομορφία επιπέδων απορρήτου
 
-**Detection:** δημιουργήστε campaign timelines σε identity, DNS, SaaS, network και cloud sensors. Αναζητήστε synchronized state transitions αντί για identical indicators.
+Μια επιχείρηση μπορεί να αποφεύγει σκόπιμα μια ομοιογενή αλυσίδα: για παράδειγμα, ένα κανάλι χρησιμοποιεί μισθωμένο relay, το tasking χρησιμοποιεί δημόσιο αντικείμενο, η έξοδος προέρχεται από ιδιόκτητη εργαστηριακή σύνδεση κινητής τηλεφωνίας και η διαχείριση χρησιμοποιεί ξεχωριστό δίκτυο οργανισμού. Αυτό μειώνει την αξία της παραβίασης ενός παρόχου, αλλά αυξάνει τον κίνδυνο συσχέτισης χρονισμού μεταξύ επιπέδων και επιχειρησιακών λαθών.
 
-### Decentralized ή transparency-log dead drops
+**Εντοπισμός:** δημιουργήστε χρονολόγια εκστρατειών σε αισθητήρες ταυτότητας, DNS, SaaS, δικτύου και cloud. Αναζητήστε συγχρονισμένες μεταβάσεις κατάστασης, όχι πανομοιότυπους δείκτες.
 
-Ένας actor μπορεί να τοποθετήσει έναν μικρό encrypted pointer σε οποιοδήποτε durable public append-only system, content-addressed store ή transparency-like feed. Το public object είναι resilient, αλλά το ακριβές index/content hash και το client polling behavior γίνονται stable identifiers.
+### Αποκεντρωμένα dead drops ή dead drops σε transparency log
 
-**Detection:** καταγράψτε πλήρη API/object identifiers και response hashes· δημιουργήστε alerts για nonstandard processes που κάνουν polling immutable objects και ακολουθούνται από decoding ή νέες connections.
+Ένας παράγοντας μπορεί να τοποθετήσει έναν μικρό κρυπτογραφημένο δείκτη σε οποιοδήποτε ανθεκτικό δημόσιο append-only σύστημα, content-addressed store ή feed τύπου transparency. Το δημόσιο αντικείμενο είναι ανθεκτικό, αλλά το ακριβές index/hash περιεχομένου και η συμπεριφορά polling του client γίνονται σταθερά αναγνωριστικά.
 
-### Delayed store-and-forward operations
+**Εντοπισμός:** καταγράψτε πλήρη αναγνωριστικά API/αντικειμένων και hashes αποκρίσεων· ειδοποιήστε για μη τυπικές διεργασίες που κάνουν polling σε αμετάβλητα αντικείμενα και ακολουθούνται από αποκωδικοποίηση ή νέες συνδέσεις.
 
-Το interactive C2 δημιουργεί ισχυρό timing correlation. Ένα store-and-forward design κάνει batching σε encrypted jobs και επιστρέφει results λεπτά ή ώρες αργότερα μέσω διαφορετικού queue ή physical transfer. Θυσιάζει responsiveness για ασθενέστερο end-to-end timing.
+### Καθυστερημένες λειτουργίες store-and-forward
 
-**Detection:** διευρύνετε τα correlation windows, μοντελοποιήστε το periodic queue access και εξετάστε το endpoint staging. Το batching μετακινεί το signal από το packet timing στη scheduled process/file behavior· δεν το εξαφανίζει.
+Το διαδραστικό C2 δημιουργεί ισχυρή χρονική συσχέτιση. Ένας σχεδιασμός store-and-forward συγκεντρώνει κρυπτογραφημένες εργασίες και επιστρέφει αποτελέσματα λεπτά ή ώρες αργότερα μέσω διαφορετικής ουράς ή φυσικής μεταφοράς. Θυσιάζει την αμεσότητα για ασθενέστερη end-to-end χρονική συσχέτιση.
 
-## Design review: σκεφτείτε με βάση τους observers
+**Εντοπισμός:** διευρύνετε τα χρονικά παράθυρα συσχέτισης, μοντελοποιήστε την περιοδική πρόσβαση σε ουρές και εξετάστε το staging στα endpoints. Η ομαδοποίηση μεταφέρει το σήμα από τον χρονισμό των πακέτων στη συμπεριφορά προγραμματισμένων διεργασιών/αρχείων· δεν το εξαφανίζει.
 
-Για κάθε path, συμπληρώστε αυτόν τον πίνακα πριν από το deployment και μετά τη συλλογή:
+## Ανασκόπηση σχεδιασμού: σκεφτείτε με βάση τους παρατηρητές
 
-| Layer | Βλέπει το source; | Βλέπει το destination; | Βλέπει το content; | Stable identifiers | Retention/legal owner |
+Για κάθε διαδρομή, συμπληρώστε αυτόν τον πίνακα πριν από την ανάπτυξη και μετά τη συλλογή δεδομένων:
+
+| Επίπεδο | Βλέπει την πηγή; | Βλέπει τον προορισμό; | Βλέπει το περιεχόμενο; | Σταθερά αναγνωριστικά | Διατήρηση/νομικός υπεύθυνος |
 |---|---:|---:|---:|---|---|
-| local network/carrier | | | | | |
-| entry/access service | | | | | |
-| traversal operator(s) | | | | | |
-| exit/redirector/CDN | | | | | |
+| τοπικό δίκτυο/πάροχος | | | | | |
+| υπηρεσία εισόδου/πρόσβασης | | | | | |
+| operator(s) διέλευσης | | | | | |
+| έξοδος/redirector/CDN | | | | | |
 | authoritative DNS/registrar | | | | | |
-| target | | | | | |
-| account/payment provider | | | | | |
+| στόχος | | | | | |
+| πάροχος λογαριασμού/πληρωμών | | | | | |
 
-Αν ένας ordinary provider μπορεί να συμπληρώσει κάθε στήλη, η architecture παρέχει concealment από το target, αλλά όχι robust separation. Αν κανένας internal controller δεν μπορεί να αντιστοιχίσει τη δραστηριότητα σε ένα engagement, είναι ακατάλληλη για professional red teaming.
+Αν ένας συνηθισμένος πάροχος μπορεί να συμπληρώσει κάθε στήλη, η αρχιτεκτονική παρέχει απόκρυψη από τον στόχο, αλλά όχι ισχυρό διαχωρισμό. Αν κανένας εσωτερικός ελεγκτής δεν μπορεί να αντιστοιχίσει τη δραστηριότητα με μια αποστολή, η αρχιτεκτονική είναι ακατάλληλη για επαγγελματικό red teaming.
 
 ## References
 
-- [1] [MITRE ATT&CK — Απόκτηση Infrastructure (T1583), Compromise Infrastructure (T1584) και Proxy (T1090)](https://attack.mitre.org/techniques/T1584/)
-- [2] [Google Cloud/Mandiant — Actors espionage με nexus την Κίνα χρησιμοποιούν ORB networks](https://cloud.google.com/blog/topics/threat-intelligence/china-nexus-espionage-orb-networks)
+- [1] [MITRE ATT&CK — Απόκτηση υποδομής (T1583), παραβίαση υποδομής (T1584) και Proxy (T1090)](https://attack.mitre.org/techniques/T1584/)
+- [2] [Google Cloud/Mandiant — Κατασκοπευτικοί παράγοντες με δεσμούς με την Κίνα χρησιμοποιούν δίκτυα ORB](https://cloud.google.com/blog/topics/threat-intelligence/china-nexus-espionage-orb-networks)
 - [3] [MITRE ATT&CK — Multi-hop Proxy (T1090.003)](https://attack.mitre.org/techniques/T1090/003/)
 - [4] [MITRE ATT&CK — Domain Fronting (T1090.004)](https://attack.mitre.org/techniques/T1090/004/)
 - [5] [MITRE ATT&CK — Fast Flux DNS (T1568.001)](https://attack.mitre.org/techniques/T1568/001/)
-- [6] [MITRE ATT&CK — Compromise Infrastructure: Domains (T1584.001)](https://attack.mitre.org/techniques/T1584/001/)
+- [6] [MITRE ATT&CK — Παραβίαση υποδομής: Domains (T1584.001)](https://attack.mitre.org/techniques/T1584/001/)
 - [7] [MITRE ATT&CK — Web Service: Dead Drop Resolver (T1102.001)](https://attack.mitre.org/techniques/T1102/001/)
 - [8] [MITRE ATT&CK — Establish Accounts (T1585)](https://attack.mitre.org/techniques/T1585/)
-- [9] [MITRE ATT&CK — Web Service: One-Way Communication (T1102.003)](https://attack.mitre.org/techniques/T1102/003/)
-- [10] [MITRE ATT&CK — Multi-Stage Channels (T1104)](https://attack.mitre.org/techniques/T1104/)
+- [9] [MITRE ATT&CK — Web Service: Επικοινωνία μονής κατεύθυνσης (T1102.003)](https://attack.mitre.org/techniques/T1102/003/)
+- [10] [MITRE ATT&CK — Κανάλια πολλαπλών σταδίων (T1104)](https://attack.mitre.org/techniques/T1104/)
 - [11] [MITRE ATT&CK — Protocol Tunneling (T1572)](https://attack.mitre.org/techniques/T1572/)
 - [12] [MITRE ATT&CK — Traffic Signaling (T1205)](https://attack.mitre.org/techniques/T1205/)
-- [13] [Google Threat Intelligence Group — Disrupting the World's Largest Residential Proxy Network](https://cloud.google.com/blog/topics/threat-intelligence/disrupting-largest-residential-proxy-network)
-- [14] [Unit 42 — The Shadow Campaigns: Uncovering Global Espionage](https://unit42.paloaltonetworks.com/shadow-campaigns-uncovering-global-espionage/)
+- [13] [Google Threat Intelligence Group — Διακοπή λειτουργίας του μεγαλύτερου δικτύου residential proxy στον κόσμο](https://cloud.google.com/blog/topics/threat-intelligence/disrupting-largest-residential-proxy-network)
+- [14] [Unit 42 — Οι εκστρατείες Shadow: αποκάλυψη παγκόσμιας κατασκοπείας](https://unit42.paloaltonetworks.com/shadow-campaigns-uncovering-global-espionage/)
+- [15] [Unit 42 - Η εκστρατεία Blinder Tunnel στοχεύει υποδομές του Ιράκ](https://unit42.paloaltonetworks.com/blinder-tunnel-targets-critical-infrastructure/)
 {{#include ../banners/hacktricks-training.md}}
