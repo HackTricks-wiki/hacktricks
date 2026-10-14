@@ -1,8 +1,8 @@
-# Online Platforms with API
+# Reconnaissance and Threat-Intelligence APIs
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
-These services support reconnaissance, reputation, breach, or enrichment workflows. Their APIs, quotas, pricing, and permitted uses change frequently; confirm the current vendor documentation and engagement authorization before sending customer identifiers or sensitive data.
+These services support reconnaissance, reputation, breach, or enrichment workflows. Their APIs, quotas, pricing, and permitted uses change frequently; confirm the current vendor documentation and engagement authorization before sending customer identifiers or sensitive data. For the asset-discovery sequence, see the [External Recon Methodology](README.md).
 
 ## [Project Honey Pot](https://www.projecthoneypot.org/) <sup>[[1]](#references)</sup>
 
@@ -156,4 +156,4 @@ IP geolocation and OSINT-oriented enrichment with selected data points. Check cu
 - [30] [Netcraft](https://www.netcraft.com/)
 - [31] [NMMapper Subdomain Finder](https://www.nmmapper.com/sys/tools/subdomainfinder/)
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

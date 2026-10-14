@@ -267,6 +267,8 @@ dnsrecon -a -d tesla.com
 
 ### **OSINT**
 
+For APIs and platforms covering infrastructure, reputation, breach records, and enrichment beyond subdomain discovery, see the [Reconnaissance and Threat-Intelligence APIs catalog](reconnaissance-and-threat-intelligence-apis.md).
+
 The fastest way to obtain a lot of subdomains is search in external sources. The most used **tools** are the following ones (for better results configure the API keys):
 
 

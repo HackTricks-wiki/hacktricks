@@ -4,6 +4,8 @@
 
 ## Data Breach Search Engines
 
+For API access and service-specific caveats when searching breach or reputation data, see the [Reconnaissance and Threat-Intelligence APIs catalog](reconnaissance-and-threat-intelligence-apis.md).
+
 - [GreyNoise Visualizer](https://viz.greynoise.io/) - Look up IPs and CIDRs, and query scanner activity by tags, CVEs, and metadata.<sup>[[1]](#references)</sup>
 - [DeHashed](https://www.dehashed.com/) - Search exposed data by usernames, email addresses, IP addresses, and other selectors; monitoring and an API are also available.<sup>[[2]](#references)</sup>
 - [Have I Been Pwned?](https://haveibeenpwned.com/) - Check whether an email address appears in known data breaches or paste records; notifications and an API are also available.<sup>[[3]](#references)</sup>
