@@ -31,6 +31,7 @@ default-theme = "hacktricks-light"
 hash-files = false
 
 [output.html.redirect]
+"/windows-hardening/lateral-movement/scmexec.html" = "psexec-and-winexec.html"
 "/linux-hardening/post-exploitation/linux-post-exploitation/index.html" = "/linux-hardening/post-exploitation/index.html"
 "/linux-hardening/post-exploitation/linux-post-exploitation/trojanized-system-daemons-and-reverse-proxies.html" = "/linux-hardening/post-exploitation/trojanized-system-daemons-and-reverse-proxies.html"
 

@@ -1,20 +1,21 @@
-# Lateral Movement
+# 横向移动
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Windows 支持多种机制，可用于在远程系统上执行命令。以下页面介绍了常见的 lateral-movement 技术及其前置条件：
+Windows 支持多种可用于在远程系统上执行命令的机制。以下页面介绍了常见的横向移动技术及其前提条件：
 
-- [**PsExec**](psexec-and-winexec.md)
+- [**PsExec / SCM service execution**](psexec-and-winexec.md#how-do-they-work)
 - [**SmbExec**](psexec-and-winexec.md#impacket-smbexecpy-smbexec)
 - [**WmiExec**](wmiexec.md)
 - [**AtExec / SchtasksExec**](atexec.md)
 - [**WinRM**](winrm.md)
 - [**DCOM Exec**](dcomexec.md)
 - [**RDPexec**](rdpexec.md)
-- [**SCMexec**](scmexec.md)
-- **Pass the cookie**（cloud）<sup>[[1]](#references)</sup>
-- **Pass the PRT**（cloud）<sup>[[2]](#references)</sup>
-- **Pass the Microsoft Entra ID certificate**（cloud）<sup>[[3]](#references)</sup>
+- [**SCMExec with SharpMove**](psexec-and-winexec.md#scmexec-with-sharpmove)
+- [**SCCM / MECM client execution**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
+- **Pass the cookie**（云端）<sup>[[1]](#references)</sup>
+- **Pass the PRT**（云端）<sup>[[2]](#references)</sup>
+- **Pass the Microsoft Entra ID certificate**（云端）<sup>[[3]](#references)</sup>
 
 ## References
 
