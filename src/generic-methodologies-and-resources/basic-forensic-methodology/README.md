@@ -1,8 +1,8 @@
-# Mbinu ya Msingi ya Forensics
+# Mbinu za Msingi za Uchunguzi wa Kidijitali
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Kuunda na Ku-mount Image
+## Kuunda na Kupachika Image
 
 
 {{#ref}}
@@ -11,23 +11,23 @@
 
 ## Uchambuzi wa Malware
 
-Hii **si lazima iwe hatua ya kwanza ya kutekeleza baada ya kupata image**. Lakini unaweza kutumia mbinu hizi za uchambuzi wa malware kwa kujitegemea ikiwa una faili, image ya file-system, memory image, pcap... hivyo ni vizuri **kuzingatia vitendo hivi**:
+Hili **si lazima liwe hatua ya kwanza ya kufanya baada ya kupata image**. Lakini unaweza kutumia mbinu hizi za uchambuzi wa malware kivyake ikiwa una faili, image ya file-system, image ya memory, pcap... kwa hiyo ni vyema **kukumbuka hatua hizi**:
 
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Kuchunguza Image
+## Kukagua Image
 
-ukipewa **forensic image** ya kifaa unaweza kuanza **kuchambua partitions, file-system** iliyotumika na **kurejesha** **faili zinazoweza kuwa za kuvutia** (hata zilizofutwa). Jifunze jinsi ya kufanya hivyo katika:
+Ikiwa umepewa **forensic image** ya kifaa, unaweza kuanza **kuchanganua partitions na file-system** iliyotumika, na **kurejesha** faili zinazoweza kuwa **za kuvutia** (hata zilizofutwa). Jifunze jinsi ya kufanya hivyo hapa:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Kulingana na OS zilizotumika na hata platform, artifacts tofauti za kuvutia zinapaswa kutafutwa:
+Kulingana na OS zilizotumika na hata platform, unapaswa kutafuta artifacts tofauti zinazoweza kuvutia:
 
 
 {{#ref}}
@@ -49,9 +49,11 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
+Kwa kifaa cha Android kilichofungwa, njia za kupata data na kutengeneza memory image, angalia [uchunguzi wa Android](android-forensics.md).
+
 ## Ukaguzi wa Kina wa Aina Mahususi za Faili na Software
 
-Ikiwa una **faili** yenye **shaka nyingi**, basi **kulingana na aina ya faili na software** iliyoiunda, **mbinu** kadhaa zinaweza kuwa muhimu.\
+Ikiwa una **faili** yenye **mashaka makubwa**, basi **kulingana na aina ya faili na software** iliyoiunda, **mbinu** kadhaa zinaweza kusaidia.\
 Soma ukurasa ufuatao ili ujifunze mbinu kadhaa za kuvutia:
 
 
@@ -59,7 +61,7 @@ Soma ukurasa ufuatao ili ujifunze mbinu kadhaa za kuvutia:
 specific-software-file-type-tricks/
 {{#endref}}
 
-Ninataka kutaja kwa namna ya pekee ukurasa:
+Ningependa kutaja ukurasa huu hasa:
 
 
 {{#ref}}
@@ -80,9 +82,9 @@ memory-dump-analysis/
 pcap-inspection/
 {{#endref}}
 
-## **Mbinu za Anti-Forensics**
+## **Mbinu za Anti-Forensic**
 
-Kumbuka uwezekano wa matumizi ya mbinu za anti-forensics:
+Kumbuka uwezekano wa matumizi ya mbinu za anti-forensic:
 
 
 {{#ref}}
