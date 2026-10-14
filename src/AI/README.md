@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Temel Machine Learning Algoritmaları
+## Ana Makine Öğrenimi Algoritmaları
 
-AI hakkında bilgi edinmeye başlamak için en iyi yol, temel machine learning algoritmalarının nasıl çalıştığını anlamaktır. Bu, AI'ın nasıl çalıştığını, nasıl kullanılacağını ve ona nasıl saldırılacağını anlamanıza yardımcı olur:
+AI hakkında bilgi edinmeye başlamak için en iyi yol, temel makine öğrenimi algoritmalarının nasıl çalıştığını anlamaktır. Bu, AI'ın nasıl çalıştığını, nasıl kullanılacağını ve ona nasıl saldırılacağını anlamanıza yardımcı olur:
 
 
 {{#ref}}
@@ -28,31 +28,35 @@ AI hakkında bilgi edinmeye başlamak için en iyi yol, temel machine learning a
 
 ### LLM Mimarisi
 
-Aşağıdaki sayfada, transformers kullanarak temel bir LLM oluşturmak için gereken her bileşenin temellerini bulabilirsiniz:
+Aşağıdaki sayfada, transformers kullanarak temel bir LLM oluşturmak için her bileşenin temellerini bulabilirsiniz:
 
 
 {{#ref}}
 AI-llm-architecture/README.md
 {{#endref}}
 
+## Model araçları ve platformları
+
+Modelleri çalıştırmak, fine-tuning yapmak, sunmak veya denemek için [AI model araçları ve platformları kılavuzunu](AI-Model-Tools-and-Platforms.md) kullanın.
+
 ## AI Güvenliği
 
-### AI Agent Güvenliği Metodolojisi
+### AI Agent Güvenlik Metodolojisi
 
 {{#ref}}
 AI-Agent-Security-Methodology.md
 {{#endref}}
 
-### AI Risk Framework'leri
+### AI Risk Çerçeveleri
 
-AI sistemi risklerini değerlendirmek için yararlı iki başlangıç framework'ü, OWASP Machine Learning Security Top 10 ve Google'ın Secure AI Framework'üdür (SAIF). Bunlar, AI risk framework'lerinin kapsamlı bir listesi olmaktan ziyade birbirini tamamlar.<sup>[[1]](#references)[[2]](#references)</sup>
+AI sistemi riskini değerlendirmek için kullanılabilecek iki faydalı başlangıç çerçevesi, OWASP Machine Learning Security Top 10 ve Google Secure AI Framework (SAIF)'tir. Bunlar, AI risk çerçevelerinin kapsamlı bir listesi olmaktan ziyade birbirini tamamlar.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Mekanistik Yorumlanabilirlik Rehberliğinde Adversarial Saldırılar
+### Mekanistik Yorumlanabilirlik Kılavuzluğunda Adversarial Saldırılar
 
 {{#ref}}
 AI-Mechanistic-Interpretability-Adversarial-Attacks.md
@@ -60,7 +64,7 @@ AI-Mechanistic-Interpretability-Adversarial-Attacks.md
 
 ### AI Prompt Güvenliği
 
-LLM'ler son yıllarda AI kullanımını büyük ölçüde artırdı; ancak kusursuz değiller ve adversarial prompt'larla kandırılabilirler. Bu, AI'ı güvenli biçimde nasıl kullanacağınızı ve ona nasıl saldıracağınızı anlamak için çok önemli bir konudur:
+LLM'ler son yıllarda AI kullanımının hızla yaygınlaşmasını sağladı; ancak kusursuz değiller ve adversarial promptlarla kandırılabilirler. Bu, AI'ı güvenli şekilde nasıl kullanacağınızı ve ona nasıl saldıracağınızı anlamak için çok önemli bir konudur:
 
 
 {{#ref}}
@@ -69,16 +73,16 @@ AI-Prompts.md
 
 ### AI Modellerinde RCE
 
-Geliştiricilerin ve şirketlerin internetten indirdikleri modelleri çalıştırması oldukça yaygındır. Ancak yalnızca bir modeli yüklemek bile sistemde rastgele kod çalıştırmak için yeterli olabilir. Bu, AI'ı güvenli biçimde nasıl kullanacağınızı ve ona nasıl saldıracağınızı anlamak için çok önemli bir konudur:
+Geliştiricilerin ve şirketlerin İnternet'ten indirdikleri modelleri çalıştırması oldukça yaygındır; ancak yalnızca bir modeli yüklemek bile sistemde rastgele kod çalıştırmak için yeterli olabilir. Bu, AI'ı güvenli şekilde nasıl kullanacağınızı ve ona nasıl saldıracağınızı anlamak için çok önemli bir konudur:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### AI Destekli KYC Bypass
+### AI Destekli KYC Atlama
 
-Generative video; sanal kamera enjeksiyonu ve kamera API manipülasyonuyla birleştirilerek zayıf KYC, yaş doğrulama ve biyometrik canlılık kontrolleri atlatılabilir:
+Üretken video; zayıf KYC, yaş doğrulama ve biyometrik canlılık denetimi süreçlerini atlatmak için sanal kamera enjeksiyonu ve kamera API manipülasyonuyla birleştirilebilir:
 
 
 {{#ref}}
@@ -87,23 +91,23 @@ KYC-Bypass-Using-AI.md
 
 ### AI Model Context Protocol
 
-MCP (Model Context Protocol), AI uygulamalarını araçlara ve veri kaynaklarına bağlamaya yönelik açık bir protokoldür. MCP sunucuları veri ve eylemlere erişim sağlayabildiğinden, değerlendirmelerde yetkilendirme, onay, araç girdisi doğrulaması ve güven sınırlarının incelenmesi ele alınmalıdır.<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol), AI uygulamalarını araçlara ve veri kaynaklarına bağlamak için kullanılan açık bir protokoldür. MCP sunucuları veri ve eylemlere erişim sağlayabildiğinden, güvenlik değerlendirmeleri yetkilendirme, rıza, araç girdisi doğrulaması ve güven sınırlarının incelenmesini kapsamalıdır.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### AI Destekli Fuzzing ve Otomatik Zafiyet Keşfi
+### AI Destekli Fuzzing ve Otomatik Güvenlik Açığı Keşfi
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### AI Destekli Reverse Engineering
+### AI Destekli Tersine Mühendislik
 
-[Partial lifting, invariant MBA detection, environment-bound decoding, and automated-extractor validation](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[Partial lifting, invariant MBA tespiti, ortama bağlı kod çözme ve otomatik çıkarıcı doğrulaması](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
 ### Web Black-Box AI Pentester Botları
 
@@ -116,7 +120,7 @@ Web-Black-Box-AI-Pentester-Bots.md
 
 ## References
 
-- [1] [OWASP Machine Learning Security İlk 10](https://owasp.org/www-project-machine-learning-security-top-10/)
-- [2] [Google — Güvenli AI Framework'ü (SAIF)](https://saif.google/)
+- [1] [OWASP Makine Öğrenimi Güvenliği İlk 10](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [2] [Google — Güvenli AI Çerçevesi (SAIF)](https://saif.google/)
 - [3] [Model Context Protocol — Giriş](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}
