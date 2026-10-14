@@ -217,6 +217,12 @@ swift demangle
 > **Do not disable SIP as a default debugging step.** Development builds with `com.apple.security.get-task-allow` can be debugged with SIP enabled. Check the target with `codesign -d --entitlements :- /path/to/binary` before trying LLDB. A debugger entitlement alone does not grant access to SIP-protected targets.<sup>[[15]](#references)</sup>
 >
 > A distributed app with the hardened runtime usually omits `get-task-allow` and blocks attachment. Use a developer-supplied debug build if possible; re-signing a disposable copy can change the behavior under test. If a protected target requires SIP to be disabled, use a dedicated test machine or VM rather than a machine you rely on.<sup>[[16]](#references)</sup>
+>
+> Earlier guidance for a protected target in an isolated test environment listed these alternatives:
+>
+> Note that in order to debug binaries, SIP needs to be disabled (`csrutil disable` or `csrutil enable --without debug`) or to copy the binaries to a temporary folder and remove the signature with `codesign --remove-signature <binary-path>` or allow the debugging of the binary (you can use [this script](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b))
+>
+> This is not a general SIP requirement: prefer a debug build, and note that copying or changing a signature may alter the behavior under test.
 
 > [!WARNING]
 > Note that in order to **instrument system binaries**, (such as `cloudconfigurationd`) on macOS, **SIP must be disabled** (just removing the signature won't work).
@@ -590,12 +596,12 @@ settings set target.x86-disassembly-flavor intel
 
 - The command **`sysctl hw.model`** normally returns a Mac model identifier on physical hardware and may return a different value in a VM.<sup>[[3]](#references)</sup>
 - Playing with the values of **`hw.logicalcpu`** and **`hw.physicalcpu`** some malwares try to detect if it's a VM.<sup>[[4]](#references)</sup>
+- A loader may also query `kern.hv_vmm_present` and `machdep.cpu.brand_string` through `sysctl` when checking for a VM before unpacking its next stage. These checks complement, rather than replace, the debugger-attachment check described below.<sup>[[20]](#references)</sup>
 - Some malwares can also **detect** if the machine is **VMware** based on the MAC address (00:50:56).
 - It's also possible to find **if a process is being debugged** with a simple code such us:
   - `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //process being debugged }`
+- It can also invoke the `ptrace` system call with the `PT_DENY_ATTACH` flag. This prevents a debugger from attaching and tracing. Check the [PT_DENY_ATTACH section](#page-title) for its order-dependent XNU behavior, `debugserver` logging and ARM64 patching workflow.<sup>[[7]](#references)[[12]](#references)</sup>
 - It can also invoke the **`ptrace`** system call with the **`PT_DENY_ATTACH`** flag. Check the [PT_DENY_ATTACH section](#page-title) for its order-dependent XNU behavior, `debugserver` logging and ARM64 patching workflow.<sup>[[7]](#references)[[12]](#references)</sup>
-
-- It can also invoke the **`ptrace`** system call with the **`PT_DENY_ATTACH`** flag. This **prevents** a deb**u**gger from attaching and tracing.
   - You can check if the **`sysctl`** or **`ptrace`** function is being **imported** (but the malware could import it dynamically)
   - As noted in this writeup, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :<sup>[[7]](#references)</sup>\
     “_The message Process # exited with **status = 45 (0x0000002d)** is usually a tell-tale sign that the debug target is using **PT_DENY_ATTACH**_”
@@ -751,8 +757,6 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 - [https://github.com/bnagy/francis/tree/master/exploitaben](https://github.com/bnagy/francis/tree/master/exploitaben)
 - [https://github.com/ant4g0nist/crashwrangler](https://github.com/ant4g0nist/crashwrangler)
 
-
-
 ## References
 
 - [1] [OS X Incident Response: Scripting and Analysis](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
@@ -774,4 +778,6 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 - [17] [Project Zero - Breaking the Sound Barrier Part I: Fuzzing CoreAudio with Mach Messages](https://projectzero.google/2025/05/breaking-sound-barrier-part-i-fuzzing.html)
 - [18] [Project Zero - CoreAudioFuzz harness](https://github.com/googleprojectzero/p0tools/tree/master/CoreAudioFuzz)
 - [19] [Project Zero - Jackalope fuzzer](https://github.com/googleprojectzero/Jackalope)
+- [20] [Kaspersky Securelist - A new version of the MacSync macOS stealer targets crypto enthusiasts and developers](https://securelist.com/macsync-new-version/121383/)
+
 {{#include ../../../banners/hacktricks-training.md}}
