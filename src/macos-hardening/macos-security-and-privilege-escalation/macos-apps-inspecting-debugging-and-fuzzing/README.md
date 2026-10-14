@@ -214,7 +214,9 @@ swift demangle
 ## Dynamic Analysis
 
 > [!WARNING]
-> Note that in order to debug binaries, **SIP needs to be disabled** (`csrutil disable` or `csrutil enable --without debug`) or to copy the binaries to a temporary folder and **remove the signature** with `codesign --remove-signature <binary-path>` or allow the debugging of the binary (you can use [this script](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b))
+> **Do not disable SIP as a default debugging step.** Development builds with `com.apple.security.get-task-allow` can be debugged with SIP enabled. Check the target with `codesign -d --entitlements :- /path/to/binary` before trying LLDB. A debugger entitlement alone does not grant access to SIP-protected targets.<sup>[[15]](#references)</sup>
+>
+> A distributed app with the hardened runtime usually omits `get-task-allow` and blocks attachment. Use a developer-supplied debug build if possible; re-signing a disposable copy can change the behavior under test. If a protected target requires SIP to be disabled, use a dedicated test machine or VM rather than a machine you rely on.<sup>[[16]](#references)</sup>
 
 > [!WARNING]
 > Note that in order to **instrument system binaries**, (such as `cloudconfigurationd`) on macOS, **SIP must be disabled** (just removing the signature won't work).
@@ -696,6 +698,16 @@ Or use `netstat` or `lsof`
 lldb -o "target create `which some-binary`" -o "settings set target.env-vars DYLD_INSERT_LIBRARIES=/usr/lib/libgmalloc.dylib" -o "run arg1 arg2" -o "bt" -o "reg read" -o "dis -s \$pc-32 -c 24 -m -F intel" -o "quit"
 ```
 
+### Stateful Mach IPC fuzzing
+
+Mach services exposed by privileged daemons are useful fuzz targets when an unprivileged or sandboxed client can obtain a send right. Start from the daemon's `MachServices` launchd entry and use the [MIG analysis workflow](../macos-proces-abuse/macos-ipc-inter-process-communication/macos-mig-mach-interface-generator.md) to map message IDs to handlers. Before mutating bytes, break on the MIG server routine while a normal client exercises the service, and save valid request messages as seed inputs. Preserve required header fields, message sizes and descriptor layout so mutations reach the handler rather than failing immediately in dispatch.<sup>[[17]](#references)</sup>
+
+Many handlers depend on prior calls. Have the harness initialize the service state, then consume each fuzz input as a sequence of **operations plus arguments**: send setup requests (such as open or create), retain returned identifiers, and use them in later requests. This lets coverage feedback explore state transitions instead of repeatedly hitting an uninitialized-object check.<sup>[[17]](#references)</sup>
+
+For a closed-source target, an in-process harness that calls the MIG dispatch routine can be instrumented with Jackalope/TinyInst. The [CoreAudioFuzz harness](https://github.com/googleprojectzero/p0tools/tree/master/CoreAudioFuzz) is a concrete implementation, not a drop-in harness for other services.<sup>[[17]](#references)[[18]](#references)[[19]](#references)</sup>
+
+**Validate every crash through the real IPC path.** A direct-dispatch harness skips kernel validation of Mach messages and can produce false positives, especially when it supplies invalid out-of-line (OOL) memory or port descriptors. Allocate valid OOL backing memory in the harness, then replay the reduced testcase through `mach_msg` from a client with the original service access and verify that the daemon still crashes.<sup>[[17]](#references)</sup>
+
 ### Fuzzers
 
 #### [AFL++](https://github.com/AFLplusplus/AFLplusplus)
@@ -739,6 +751,8 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 - [https://github.com/bnagy/francis/tree/master/exploitaben](https://github.com/bnagy/francis/tree/master/exploitaben)
 - [https://github.com/ant4g0nist/crashwrangler](https://github.com/ant4g0nist/crashwrangler)
 
+
+
 ## References
 
 - [1] [OS X Incident Response: Scripting and Analysis](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
@@ -755,5 +769,9 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 - [12] [Reverse Society - ptrace internals: How it prevents debugger attachment](https://blog.reversesociety.co/blog/2024/anti-debugging-using-ptrace)
 - [13] [tony-go/antidebug-examples - fork examples](https://github.com/tony-go/antidebug-examples/tree/main/fork)
 - [14] [Reverse Society - Anti-debugging technique using dlsym and fork](https://blog.reversesociety.co/blog/2024/anti-debugging-detection-with-fork)
-
+- [15] [Apple - Debugging tool entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.debugger)
+- [16] [Apple Developer Forums - Debugging a hardened third-party app](https://developer.apple.com/forums/thread/776503)
+- [17] [Project Zero - Breaking the Sound Barrier Part I: Fuzzing CoreAudio with Mach Messages](https://projectzero.google/2025/05/breaking-sound-barrier-part-i-fuzzing.html)
+- [18] [Project Zero - CoreAudioFuzz harness](https://github.com/googleprojectzero/p0tools/tree/master/CoreAudioFuzz)
+- [19] [Project Zero - Jackalope fuzzer](https://github.com/googleprojectzero/Jackalope)
 {{#include ../../../banners/hacktricks-training.md}}
