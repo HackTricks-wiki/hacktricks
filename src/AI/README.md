@@ -1,10 +1,10 @@
-# AI u sajber-bezbednosti
+# AI у сајбер безбедности
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Glavni algoritmi mašinskog učenja
+## Главни алгоритми машинског учења
 
-Najbolji početak za učenje o AI-ju jeste da razumete kako funkcionišu glavni algoritmi mašinskog učenja. To će vam pomoći da razumete kako AI funkcioniše, kako da ga koristite i kako da ga napadnete:
+Најбоље је да започнете учење о AI-ју тако што ћете разумети како функционишу главни алгоритми машинског учења. То ће вам помоћи да разумете како AI функционише, како да га користите и како да га нападнете:
 
 
 {{#ref}}
@@ -26,59 +26,63 @@ Najbolji početak za učenje o AI-ju jeste da razumete kako funkcionišu glavni 
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### Arhitektura LLM-ova
+### Архитектура LLM-ова
 
-Na sledećoj stranici pronaći ćete osnove svake komponente potrebne za izradu osnovnog LLM-a pomoću transformera:
+На следећој страници пронаћи ћете основе сваке компоненте потребне за изградњу основног LLM-а помоћу transformers:
 
 
 {{#ref}}
 AI-llm-architecture/README.md
 {{#endref}}
 
-## Bezbednost AI-ja
+## Алати и платформе за моделе
 
-### Metodologija za bezbednost AI agenata
+За покретање, fine-tuning, сервирање или испробавање модела користите [водич за алате и платформе за AI моделе](AI-Model-Tools-and-Platforms.md).
+
+## Безбедност AI-ја
+
+### Методологија за безбедност AI агената
 
 {{#ref}}
 AI-Agent-Security-Methodology.md
 {{#endref}}
 
-### Okviri za rizike AI-ja
+### Оквири за процену ризика AI-ја
 
-Dva korisna početna okvira za procenu rizika AI sistema jesu OWASP Machine Learning Security Top 10 i Google Secure AI Framework (SAIF). Oni se međusobno dopunjuju i ne predstavljaju iscrpan spisak okvira za rizike AI-ja.<sup>[[1]](#references)[[2]](#references)</sup>
+Два корисна почетна оквира за процену ризика AI система су OWASP Machine Learning Security Top 10 и Google Secure AI Framework (SAIF). Они се међусобно допуњују и не представљају исцрпан списак оквира за процену ризика AI-ја.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Adversarijalni napadi vođeni mehanističkom interpretabilnošću
+### Адверзаријални напади вођени механистичком интерпретабилношћу
 
 {{#ref}}
 AI-Mechanistic-Interpretability-Adversarial-Attacks.md
 {{#endref}}
 
-### Bezbednost AI prompts
+### Безбедност AI промптова
 
-LLM-ovi su poslednjih godina doveli do naglog porasta upotrebe AI-ja, ali nisu savršeni i mogu se prevariti adversarijalnim prompts. Ovo je veoma važna tema za razumevanje bezbednog korišćenja AI-ja i načina na koje se može napasti:
+LLM-ови су последњих година довели до наглог пораста употребе AI-ја, али нису савршени и могу се преварити адверзаријалним промптовима. Ово је веома важна тема за разумевање безбедног коришћења AI-ја и начина на који се он може напасти:
 
 
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
 
-### RCE u AI modelima
+### RCE у AI моделима
 
-Programeri i kompanije često pokreću modele preuzete sa Interneta, ali samo učitavanje modela može biti dovoljno za izvršavanje proizvoljnog koda na sistemu. Ovo je veoma važna tema za razumevanje bezbednog korišćenja AI-ja i načina na koje se može napasti:
+Веома је уобичајено да програмери и компаније покрећу моделе преузете са интернета, међутим, само учитавање модела може бити довољно за извршавање произвољног кода на систему. Ово је веома важна тема за разумевање безбедног коришћења AI-ја и начина на који се он може напасти:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### Zaobilaženje KYC-ja uz pomoć AI-ja
+### Заобилажење KYC-а уз помоћ AI-ја
 
-Generisani video može da se kombinuje sa ubacivanjem virtuelne kamere i manipulacijom API-ja kamere kako bi se zaobišli slabi KYC, provera starosti i postupci provere biometrijske živosti:
+Генерисани видео се може комбиновати са убацивањем виртуелне камере и манипулацијом camera API-јем ради заобилажења слабих KYC, провера старости и биометријских поступака за проверу присуства живе особе:
 
 
 {{#ref}}
@@ -87,27 +91,27 @@ KYC-Bypass-Using-AI.md
 
 ### AI Model Context Protocol
 
-MCP (Model Context Protocol) je otvoreni protokol za povezivanje AI aplikacija sa alatima i izvorima podataka. Pošto MCP serveri mogu da izlažu podatke i radnje, procene moraju da obuhvate autorizaciju, saglasnost, validaciju ulaza u alate i proveru granica poverenja.<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol) је отворени протокол за повезивање AI апликација са алатима и изворима података. Пошто MCP сервери могу да излажу податке и радње, процене морају да обухвате ауторизацију, сагласност, проверу улаза алата и преглед граница поверења.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### Fuzzing uz pomoć AI-ja i automatizovano otkrivanje ranjivosti
+### Fuzzing уз помоћ AI-ја и аутоматизовано откривање рањивости
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### Reverzno inženjerstvo uz pomoć AI-ja
+### Обрнути инжењеринг уз помоћ AI-ја
 
-[Delimično podizanje nivoa koda, otkrivanje invarijanti MBA, dekodiranje vezano za okruženje i validacija automatizovanih ekstraktora](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[Делимично подизање нивоа кода, откривање инваријантног MBA-а, декодирање везано за окружење и валидација аутоматизованих екстрактора](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
-### Web black-box AI pentester botovi
+### Web black-box AI pentester ботови
 
-Agenti zasnovani na LLM-ovima mogu da automatizuju dugotrajne black-box web pentesting postupke kada imaju podršku za observabilnost, orkestraciju, rukovanje autentifikovanim sesijama i adversarijalnu validaciju:
+Агенти засновани на LLM-овима могу да аутоматизују дуготрајне black-box web pentesting токове рада када им се обезбеде опсервабилност, оркестрација, руковање аутентификованим сесијама и адверзаријална валидација:
 
 
 {{#ref}}
@@ -116,7 +120,7 @@ Web-Black-Box-AI-Pentester-Bots.md
 
 ## References
 
-- [1] [OWASP Top 10 za bezbednost mašinskog učenja](https://owasp.org/www-project-machine-learning-security-top-10/)
-- [2] [Google — Okvir za bezbedan AI (SAIF)](https://saif.google/)
-- [3] [Model Context Protocol — Uvod](https://modelcontextprotocol.io/docs/getting-started/intro)
+- [1] [OWASP топ 10 безбедности машинског учења](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [2] [Google — Оквир за безбедан AI (SAIF)](https://saif.google/)
+- [3] [Model Context Protocol — Увод](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}
