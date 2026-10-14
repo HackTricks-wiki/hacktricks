@@ -2,47 +2,47 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Taarifa za Msingi kuhusu Michakato
+## Maelezo ya Msingi kuhusu Michakato
 
-Mchakato ni nakala ya executable inayotekelezwa, lakini michakato haiendeshi code; threads ndizo zinazoendesha. Kwa hiyo, **processes ni kontena tu za threads zinazoendeshwa**, zinazotoa memory, descriptors, ports, permissions...
+Mchakato ni mfano wa programu inayotekelezwa, hata hivyo michakato haiendeshi msimbo; nyuzi ndizo zinazofanya hivyo. Kwa hiyo **michakato ni vyombo tu vya kuendeshea nyuzi** vinavyotoa kumbukumbu, vifafanuzi, milango, ruhusa...
 
-Kijadi, michakato ilianzishwa ndani ya michakato mingine (isipokuwa PID 1) kwa kuita **`fork`**, ambayo ingeunda nakala kamili ya mchakato wa sasa; kisha **child process** kwa kawaida ingeita **`execve`** kupakia executable mpya na kuiendesha. Baadaye, **`vfork`** ilianzishwa ili kuharakisha mchakato huu bila kunakili memory.\
-Kisha **`posix_spawn`** ilianzishwa, ikiunganisha **`vfork`** na **`execve`** katika mwito mmoja na kukubali flags:
+Kwa kawaida, michakato ilianzishwa ndani ya michakato mingine (isipokuwa PID 1) kwa kuita **`fork`**, ambayo ingeunda nakala kamili ya mchakato wa sasa, kisha **mchakato mtoto** kwa kawaida ungeita **`execve`** kupakia programu mpya na kuiendesha. Baadaye, **`vfork`** ilianzishwa ili kuharakisha mchakato huu bila kunakili kumbukumbu.\
+Kisha **`posix_spawn`** ilianzishwa, ikiunganisha **`vfork`** na **`execve`** katika mwito mmoja na kukubali bendera hizi:
 
-- `POSIX_SPAWN_RESETIDS`: Weka upya effective ids ziwe real ids
-- `POSIX_SPAWN_SETPGROUP`: Weka ushirika wa process group
+- `POSIX_SPAWN_RESETIDS`: Rudisha vitambulisho vinavyotumika kwenye vitambulisho halisi
+- `POSIX_SPAWN_SETPGROUP`: Weka uhusiano wa kikundi cha michakato
 - `POSUX_SPAWN_SETSIGDEF`: Weka tabia chaguomsingi ya signal
-- `POSIX_SPAWN_SETSIGMASK`: Weka signal mask
-- `POSIX_SPAWN_SETEXEC`: Tekeleza ndani ya mchakato huohuo (kama `execve` yenye options zaidi)
-- `POSIX_SPAWN_START_SUSPENDED`: Anzisha ikiwa imesimamishwa
-- `_POSIX_SPAWN_DISABLE_ASLR`: Anzisha bila ASLR
+- `POSIX_SPAWN_SETSIGMASK`: Weka kinyago cha signal
+- `POSIX_SPAWN_SETEXEC`: Tekeleza katika mchakato huohuo (kama `execve` yenye chaguo zaidi)
+- `POSIX_SPAWN_START_SUSPENDED`: Anza ikiwa imesimamishwa
+- `_POSIX_SPAWN_DISABLE_ASLR`: Anza bila ASLR
 - `_POSIX_SPAWN_NANO_ALLOCATOR:` Tumia Nano allocator ya libmalloc
-- `_POSIX_SPAWN_ALLOW_DATA_EXEC:` Ruhusu `rwx` kwenye data segments
-- `POSIX_SPAWN_CLOEXEC_DEFAULT`: Funga file descriptions zote kwenye exec(2) kwa chaguomsingi
-- `_POSIX_SPAWN_HIGH_BITS_ASLR:` Fanya high bits za ASLR slide ziwe za nasibu
+- `_POSIX_SPAWN_ALLOW_DATA_EXEC:` Ruhusu `rwx` kwenye sehemu za data
+- `POSIX_SPAWN_CLOEXEC_DEFAULT`: Funga maelezo yote ya faili kwenye exec(2) kwa chaguomsingi
+- `_POSIX_SPAWN_HIGH_BITS_ASLR:` Changanya biti za juu za mtelezo wa ASLR bila mpangilio
 
-Zaidi ya hayo, `posix_spawn` hukubali mipangilio ya **`posix_spawnattr`** inayodhibiti vipengele vya mchakato unaozalishwa na maingizo ya **`posix_spawn_file_actions`** yanayobadilisha file descriptors.
+Zaidi ya hayo, `posix_spawn` hukubali mipangilio ya **`posix_spawnattr`** inayodhibiti vipengele vya mchakato ulioanzishwa, na maingizo ya **`posix_spawn_file_actions`** yanayorekebisha vifafanuzi vya faili.
 
-Mchakato unapokufa, hutuma **return code kwa parent process** (ikiwa parent imekufa, parent mpya huwa PID 1) kupitia signal `SIGCHLD`. Parent huhitaji kupata thamani hii kwa kuita `wait4()` au `waitid()`. Hadi hilo litokee, child hubaki katika hali ya zombie, ambapo bado huorodheshwa lakini haitumii resources.
+Mchakato unapokufa, hutuma **msimbo wa kurejesha kwa mchakato mzazi** (mzazi akifa, mzazi mpya huwa PID 1) kupitia signal `SIGCHLD`. Mzazi huhitaji kupata thamani hii kwa kuita `wait4()` au `waitid()`; hadi hilo litokee, mtoto hubaki katika hali ya zombie, ambapo bado huorodheshwa lakini hautumii rasilimali.
 
 ### PIDs
 
-PIDs, yaani process identifiers, hutambulisha mchakato wa kipekee. Katika XNU, **PIDs** zina **bits 64**, huongezeka kwa mfululizo na **hazizunguki kamwe** (ili kuzuia matumizi mabaya).
+PIDs, yaani vitambulisho vya michakato, hutambulisha mchakato wa kipekee. Katika XNU, **PIDs** zina **biti 64**, huongezeka kwa mfuatano na **hazizunguki kamwe** (ili kuzuia matumizi mabaya).
 
-### Process Groups, Sessions na Coalitions
+### Vikundi vya Michakato, Sessions na Coalitions
 
-**Michakato** inaweza kuwekwa katika **groups** ili kurahisisha usimamizi wake. Kwa mfano, commands katika shell script zitakuwa katika process group moja, hivyo inawezekana **kuzitumia signal pamoja**, kwa mfano kwa kutumia kill.\
-Pia inawezekana **kuweka michakato katika sessions**. Mchakato unapoanzisha session (`setsid(2)`), michakato yake ya watoto huwekwa ndani ya session hiyo, isipokuwa ianzishe session yake yenyewe.
+**Michakato** inaweza kuwekwa katika **vikundi** ili kurahisisha kuidhibiti. Kwa mfano, amri zilizo kwenye shell script zitakuwa katika kikundi kimoja cha michakato, hivyo inawezekana **kuzitumia signal pamoja**, kwa mfano kwa kutumia kill.\
+Pia inawezekana **kuweka michakato katika sessions**. Mchakato unapoanzisha session (`setsid(2)`), michakato yake watoto huwekwa ndani ya session hiyo, isipokuwa ianzishe session yake yenyewe.
 
-Coalition ni njia nyingine ya kuweka michakato katika groups katika Darwin. Mchakato unapojiunga na coalition, unaweza kufikia shared pool resources, kushiriki ledger au kukabiliwa na Jetsam. Coalitions zina roles tofauti: Leader, XPC service, Extension.
+Coalition ni njia nyingine ya kupanga michakato katika Darwin. Mchakato unapojiunga na coalition, unaweza kufikia rasilimali za pamoja, kushiriki ledger au kukabiliwa na Jetsam. Coalitions zina majukumu tofauti: Kiongozi, huduma ya XPC, Extension.
 
-### Credentials na Personae
+### Vitambulisho na Personae
 
-Kila mchakato huwa na **credentials** **zinazotambulisha privileges zake** katika mfumo. Kila mchakato huwa na `uid` moja ya msingi na `gid` moja ya msingi (ingawa unaweza kuwa mwanachama wa groups kadhaa).\
-Pia inawezekana kubadilisha user na group id ikiwa binary ina bit ya `setuid/setgid`.\
-Kuna functions kadhaa za **kuweka uids/gids mpya**.
+Kila mchakato huwa na **vitambulisho** vinavyo **bainisha ruhusa zake** katika mfumo. Kila mchakato huwa na `uid` moja ya msingi na `gid` moja ya msingi (ingawa unaweza kuwa mwanachama wa vikundi kadhaa).\
+Pia inawezekana kubadilisha kitambulisho cha mtumiaji na kikundi ikiwa faili ya binary ina biti ya `setuid/setgid`.\
+Kuna vitendaji kadhaa vya **kuweka uids/gids mpya**.
 
-Syscall **`persona`** hutoa seti **mbadala** ya **credentials**. Kupitisha persona kunamaanisha kuchukua uid, gid na group memberships zake **kwa pamoja**. Katika [**source code**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) inawezekana kupata struct:
+Syscall **`persona`** hutoa seti **mbadala** ya **vitambulisho**. Kuchukua persona kunamaanisha kutumia uid, gid na uanachama wa vikundi vyake **kwa wakati mmoja**. Katika [**msimbo wa chanzo**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) inawezekana kupata struct:
 
 ```c
 struct kpersona_info { uint32_t persona_info_version;
@@ -60,41 +60,41 @@ struct kpersona_info { uint32_t persona_info_version;
 
 ## Taarifa za Msingi kuhusu Threads
 
-1. **POSIX Threads (pthreads):** macOS inatumia POSIX threads (`pthreads`), ambazo ni sehemu ya API ya kawaida ya threading kwa C/C++. Utekelezaji wa pthreads katika macOS unapatikana kwenye `/usr/lib/system/libsystem_pthread.dylib`, inayotokana na mradi wa `libpthread` unaopatikana hadharani. Maktaba hii hutoa vitendaji vinavyohitajika kuunda na kudhibiti threads.
-2. **Kuunda Threads:** Kazi ya `pthread_create()` hutumika kuunda threads mpya. Ndani yake, kazi hii huita `bsdthread_create()`, ambayo ni system call ya kiwango cha chini inayohusu kernel ya XNU (kernel ambayo macOS imejengwa juu yake). System call hii hupokea bendera mbalimbali zinazotokana na `pthread_attr` (sifa), zinazobainisha tabia ya thread, ikijumuisha sera za scheduling na ukubwa wa stack.
-   - **Ukubwa Chaguo-msingi wa Stack:** Ukubwa chaguo-msingi wa stack kwa threads mpya ni 512 KB, unaotosha kwa shughuli za kawaida lakini unaweza kurekebishwa kupitia sifa za thread ikiwa nafasi zaidi au kidogo inahitajika.
-3. **Uanzishaji wa Thread:** Kazi ya `__pthread_init()` ni muhimu wakati wa usanidi wa thread. Hutumia hoja ya `env[]` kuchanganua environment variables zinazoweza kuwa na maelezo kuhusu eneo na ukubwa wa stack.
+1. **POSIX Threads (pthreads):** macOS inasaidia POSIX threads (`pthreads`), ambazo ni sehemu ya API sanifu ya threading kwa C/C++. Utekelezaji wa pthreads katika macOS unapatikana kwenye `/usr/lib/system/libsystem_pthread.dylib`, ambayo inatokana na mradi wa `libpthread` unaopatikana hadharani. Maktaba hii hutoa vitendaji vinavyohitajika kuunda na kusimamia threads.
+2. **Kuunda Threads:** Kazi ya `pthread_create()` hutumika kuunda threads mpya. Kwa ndani, kazi hii huita `bsdthread_create()`, ambayo ni system call ya kiwango cha chini inayohusu kernel ya XNU (kernel ambayo macOS imejengwa juu yake). System call hii hupokea flags mbalimbali zinazotokana na `pthread_attr` (sifa) zinazoainisha tabia ya thread, ikijumuisha sera za upangaji ratiba na ukubwa wa stack.
+   - **Ukubwa Chaguomsingi wa Stack:** Ukubwa chaguomsingi wa stack kwa threads mpya ni KB 512, ambao unatosha kwa shughuli za kawaida lakini unaweza kurekebishwa kupitia sifa za thread ikiwa nafasi zaidi au kidogo inahitajika.
+3. **Uanzishaji wa Thread:** Kazi ya `__pthread_init()` ni muhimu wakati wa kusanidi thread; hutumia hoja ya `env[]` kuchanganua environment variables zinazoweza kujumuisha maelezo kuhusu mahali stack ilipo na ukubwa wake.
 
-#### Kusitishwa kwa Thread katika macOS
+#### Kusitisha Thread katika macOS
 
-1. **Kutoka kwa Threads:** Kwa kawaida, threads husitishwa kwa kuita `pthread_exit()`. Kazi hii huruhusu thread kutoka kwa usafi, kufanya usafishaji unaohitajika na kuruhusu thread kutuma thamani ya kurejesha kwa threads zinazojiunga nayo.
-2. **Usafishaji wa Thread:** `pthread_exit()` inapoitwa, kazi ya `pthread_terminate()` hutekelezwa na kushughulikia uondoaji wa miundo yote inayohusishwa na thread. Huondoa Mach thread ports (Mach ni mfumo mdogo wa mawasiliano katika kernel ya XNU) na kuita `bsdthread_terminate`, ambayo ni syscall inayoondoa miundo ya kiwango cha kernel inayohusishwa na thread.
+1. **Kumaliza Threads:** Kwa kawaida, threads husitishwa kwa kuita `pthread_exit()`. Kazi hii huruhusu thread kutoka kwa usafi, ikifanya usafishaji unaohitajika na kuiruhusu thread kutuma thamani ya kurudisha kwa threads zozote zinazojiunga nayo.
+2. **Usafishaji wa Thread:** `pthread_exit()` inapoitwa, kazi ya `pthread_terminate()` huanzishwa; kazi hii hushughulikia kuondoa miundo yote inayohusishwa na thread. Hutoa Mach thread ports (Mach ni mfumo mdogo wa mawasiliano katika kernel ya XNU) na kuita `bsdthread_terminate`, syscall inayoondoa miundo ya kiwango cha kernel inayohusishwa na thread.
 
 #### Mbinu za Usawazishaji
 
-Ili kudhibiti ufikiaji wa rasilimali zinazoshirikiwa na kuepuka race conditions, macOS hutoa primitives kadhaa za usawazishaji. Hizi ni muhimu katika mazingira ya multi-threading ili kuhakikisha uadilifu wa data na uthabiti wa mfumo:
+Ili kusimamia ufikiaji wa rasilimali zinazoshirikiwa na kuepuka race conditions, macOS hutoa primitives kadhaa za usawazishaji. Hizi ni muhimu katika mazingira ya multi-threading ili kuhakikisha uadilifu wa data na uthabiti wa mfumo:
 
 1. **Mutexes:**
-   - **Regular Mutex (Signature: 0x4D555458):** Mutex ya kawaida yenye ukubwa wa kumbukumbu wa baiti 60 (baiti 56 za mutex na baiti 4 za signature).
-   - **Fast Mutex (Signature: 0x4d55545A):** Inafanana na mutex ya kawaida lakini imeboreshwa kwa shughuli za kasi zaidi; pia ina ukubwa wa baiti 60.
+   - **Regular Mutex (Sahihi: 0x4D555458):** Mutex ya kawaida yenye ukubwa wa kumbukumbu wa baiti 60 (baiti 56 za mutex na baiti 4 za sahihi).
+   - **Fast Mutex (Sahihi: 0x4d55545A):** Inafanana na mutex ya kawaida lakini imeboreshwa kwa shughuli za haraka zaidi; pia ina ukubwa wa baiti 60.
 2. **Condition Variables:**
-   - Hutumika kusubiri hali fulani zitokee, na ina ukubwa wa baiti 44 (baiti 40 pamoja na signature ya baiti 4).
-   - **Condition Variable Attributes (Signature: 0x434e4441):** Sifa za usanidi wa condition variables, zenye ukubwa wa baiti 12.
-3. **Once Variable (Signature: 0x4f4e4345):**
+   - Hutumika kusubiri hali fulani zitokee; zina ukubwa wa baiti 44 (baiti 40 pamoja na baiti 4 za sahihi).
+   - **Condition Variable Attributes (Sahihi: 0x434e4441):** Sifa za usanidi wa condition variables, zenye ukubwa wa baiti 12.
+3. **Once Variable (Sahihi: 0x4f4e4345):**
    - Huhakikisha kwamba kipande cha msimbo wa uanzishaji kinatekelezwa mara moja tu. Kina ukubwa wa baiti 12.
 4. **Read-Write Locks:**
-   - Huruhusu readers wengi au writer mmoja kwa wakati mmoja, na kuwezesha ufikiaji bora wa data inayoshirikiwa.
-   - **Read Write Lock (Signature: 0x52574c4b):** Ina ukubwa wa baiti 196.
-   - **Read Write Lock Attributes (Signature: 0x52574c41):** Sifa za read-write locks, zenye ukubwa wa baiti 20.
+   - Huwezesha wasomaji wengi au mwandishi mmoja kutumia kwa wakati mmoja, na kurahisisha ufikiaji bora wa data inayoshirikiwa.
+   - **Read Write Lock (Sahihi: 0x52574c4b):** Ina ukubwa wa baiti 196.
+   - **Read Write Lock Attributes (Sahihi: 0x52574c41):** Sifa za read-write locks, zenye ukubwa wa baiti 20.
 
 > [!TIP]
-> Baiti 4 za mwisho za objects hizo hutumika kugundua overflows.
+> Baiti 4 za mwisho za vitu hivyo hutumika kugundua overflow.
 
 ### Thread Local Variables (TLV)
 
-**Thread Local Variables (TLV)** katika muktadha wa faili za Mach-O (muundo wa executables katika macOS) hutumika kutangaza variables ambazo ni mahususi kwa **kila thread** katika programu ya multi-threaded. Hii huhakikisha kwamba kila thread ina nakala yake tofauti ya variable, na hivyo kutoa njia ya kuepuka migongano na kudumisha uadilifu wa data bila kuhitaji mbinu za wazi za usawazishaji kama mutexes.
+**Thread Local Variables (TLV)** katika muktadha wa faili za Mach-O (umbizo la executable katika macOS) hutumika kutangaza vigezo maalum kwa **kila thread** katika programu ya multi-threaded. Hii huhakikisha kwamba kila thread ina nakala yake tofauti ya kigezo, na hivyo kutoa njia ya kuepuka migongano na kudumisha uadilifu wa data bila kuhitaji mbinu za wazi za usawazishaji kama mutexes.
 
-Katika C na lugha zinazohusiana, unaweza kutangaza variable ya thread-local kwa kutumia keyword **`__thread`**. Hivi ndivyo inavyofanya kazi katika mfano wako:
+Katika C na lugha zinazohusiana, unaweza kutangaza kigezo cha thread-local kwa kutumia neno kuu **`__thread`**. Hivi ndivyo linavyofanya kazi katika mfano wako:
 
 ```c
 cCopy code__thread int tlv_var;
@@ -104,52 +104,52 @@ void main (int argc, char **argv){
 }
 ```
 
-Kipande hiki kinafafanua `tlv_var` kama kigezo cha thread-local. Kila thread inayoendesha msimbo huu itakuwa na `tlv_var` yake, na mabadiliko yanayofanywa na thread moja kwenye `tlv_var` hayataathiri `tlv_var` ya thread nyingine.
+Kipande hiki kinafafanua `tlv_var` kama kigeu cha thread-local. Kila thread inayoendesha msimbo huu itakuwa na `tlv_var` yake, na mabadiliko yanayofanywa na thread moja kwenye `tlv_var` hayataathiri `tlv_var` ya thread nyingine.
 
-Katika binary ya Mach-O, data inayohusiana na vigezo vya thread-local hupangwa katika sehemu maalum:
+Katika binary ya Mach-O, data inayohusiana na thread-local variables hupangwa katika sehemu maalum:
 
-- **`__DATA.__thread_vars`**: Sehemu hii ina metadata kuhusu vigezo vya thread-local, kama vile aina zake na hali ya uanzishaji.
-- **`__DATA.__thread_bss`**: Sehemu hii hutumika kwa vigezo vya thread-local ambavyo havijawekewa thamani ya awali waziwazi. Ni eneo la kumbukumbu lililotengwa kwa data inayoanzishwa kwa sifuri.
+- **`__DATA.__thread_vars`**: Sehemu hii ina metadata kuhusu thread-local variables, kama vile aina zake na hali ya uanzishaji.
+- **`__DATA.__thread_bss`**: Sehemu hii hutumika kwa thread-local variables ambazo hazijaanzishwa waziwazi. Ni eneo la kumbukumbu lililotengwa kwa data inayoanzishwa kwa thamani sifuri.
 
-Mach-O pia hutoa API maalum inayoitwa **`tlv_atexit`** ya kudhibiti vigezo vya thread-local wakati thread inapotoka. API hii hukuruhusu **kusajili destructors**—vitendaji maalum vinavyosafisha data ya thread-local thread inapokoma.
+Mach-O pia hutoa API maalum inayoitwa **`tlv_atexit`** ili kudhibiti thread-local variables thread inapotoka. API hii hukuwezesha **kusajili destructors**—functions maalum zinazofuta data ya thread-local thread inapokoma.
 
 ### Vipaumbele vya Thread
 
-Kuelewa vipaumbele vya thread kunahusisha kuchunguza jinsi mfumo wa uendeshaji unavyoamua thread zitakazoendeshwa na wakati zitakapoendeshwa. Uamuzi huu huathiriwa na kiwango cha kipaumbele kilichowekwa kwa kila thread. Katika macOS na mifumo inayofanana na Unix, hili hushughulikiwa kwa kutumia dhana kama `nice`, `renice`, na madarasa ya Quality of Service (QoS).
+Kuelewa vipaumbele vya thread kunahusisha kuchunguza jinsi mfumo wa uendeshaji unavyoamua ni thread zipi za kuendesha na wakati gani. Uamuzi huu huathiriwa na kiwango cha kipaumbele kilichowekwa kwa kila thread. Katika macOS na mifumo inayofanana na Unix, hili hushughulikiwa kwa kutumia dhana kama `nice`, `renice`, na madarasa ya Quality of Service (QoS).
 
 #### Nice na Renice
 
 1. **Nice:**
-   - Thamani ya `nice` ya process ni nambari inayoathiri kipaumbele chake. Kila process ina thamani ya nice kuanzia -20 (kipaumbele cha juu zaidi) hadi 19 (kipaumbele cha chini zaidi). Thamani chaguomsingi ya nice wakati process inapoundwa kwa kawaida ni 0.
-   - Thamani ndogo ya nice (iliyo karibu zaidi na -20) hufanya process iwe na “ubinafsi” zaidi, na kuipa muda zaidi wa CPU ikilinganishwa na process nyingine zenye thamani kubwa zaidi za nice.
+   - Thamani ya `nice` ya process ni nambari inayoathiri kipaumbele chake. Kila process ina thamani ya nice kuanzia -20 (kipaumbele cha juu zaidi) hadi 19 (kipaumbele cha chini zaidi). Thamani chaguomsingi ya nice wakati process inapoanzishwa kwa kawaida ni 0.
+   - Thamani ndogo ya nice (iliyo karibu zaidi na -20) huifanya process iwe "ya kujitanguliza" zaidi, na kuipa muda mwingi zaidi wa CPU ikilinganishwa na process nyingine zenye thamani kubwa zaidi za nice.
 2. **Renice:**
-   - `renice` ni amri inayotumika kubadilisha thamani ya nice ya process ambayo tayari inaendeshwa. Inaweza kutumiwa kurekebisha kipaumbele cha process kwa nguvu, kuongeza au kupunguza mgao wa muda wake wa CPU kulingana na thamani mpya za nice.
+   - `renice` ni amri inayotumika kubadilisha thamani ya nice ya process ambayo tayari inaendeshwa. Inaweza kutumika kurekebisha kipaumbele cha process wakati inaendelea, kwa kuongeza au kupunguza mgao wake wa muda wa CPU kulingana na thamani mpya za nice.
    - Kwa mfano, ikiwa process inahitaji rasilimali zaidi za CPU kwa muda, unaweza kupunguza thamani yake ya nice kwa kutumia `renice`.
 
 #### Madarasa ya Quality of Service (QoS)
 
-Madarasa ya QoS ni mbinu ya kisasa zaidi ya kushughulikia vipaumbele vya thread, hasa katika mifumo kama macOS inayotumia **Grand Central Dispatch (GCD)**. Madarasa ya QoS huwawezesha wasanidi **kuainisha** kazi katika viwango tofauti kulingana na umuhimu au uharaka wake. macOS hudhibiti uwekaji wa vipaumbele vya thread kiotomatiki kulingana na madarasa haya ya QoS:
+Madarasa ya QoS ni mbinu ya kisasa zaidi ya kushughulikia vipaumbele vya thread, hasa katika mifumo kama macOS inayotumia **Grand Central Dispatch (GCD)**. Madarasa ya QoS huwawezesha developers **kuainisha** kazi katika viwango tofauti kulingana na umuhimu au uharaka wake. macOS hudhibiti uwekaji wa vipaumbele vya thread kiotomatiki kulingana na madarasa haya ya QoS:
 
 1. **User Interactive:**
-   - Darasa hili ni la kazi zinazoingiliana na mtumiaji kwa sasa au zinazohitaji matokeo ya haraka ili kutoa utumiaji mzuri. Kazi hizi hupewa kipaumbele cha juu zaidi ili kiolesura kiendelee kuitikia (kwa mfano, uhuishaji au ushughulikiaji wa matukio).
+   - Darasa hili ni la kazi zinazoingiliana na mtumiaji kwa wakati huo au zinazohitaji matokeo ya haraka ili kutoa uzoefu mzuri kwa mtumiaji. Kazi hizi hupewa kipaumbele cha juu zaidi ili kiolesura kiendelee kuitikia (kwa mfano, animations au ushughulikiaji wa matukio).
 2. **User Initiated:**
-   - Kazi zinazoanzishwa na mtumiaji ambaye anatarajia matokeo ya haraka, kama vile kufungua hati au kubofya kitufe kinachohitaji ukokotoaji. Hizi zina kipaumbele cha juu, lakini ziko chini ya User Interactive.
+   - Kazi anazoanzisha mtumiaji na kutarajia matokeo ya haraka, kama vile kufungua document au kubofya kitufe kinachohitaji hesabu. Kazi hizi zina kipaumbele cha juu, lakini ziko chini ya User Interactive.
 3. **Utility:**
-   - Kazi hizi huchukua muda mrefu na kwa kawaida huonyesha kiashiria cha maendeleo (kwa mfano, kupakua faili au kuingiza data). Zina kipaumbele cha chini kuliko kazi zilizoanzishwa na mtumiaji, na hazihitaji kukamilika mara moja.
+   - Kazi hizi huchukua muda mrefu na kwa kawaida huonyesha kiashirio cha maendeleo (kwa mfano, kupakua faili au kuingiza data). Kipaumbele chake ni cha chini kuliko cha kazi zilizoanzishwa na mtumiaji, na hazihitaji kukamilika mara moja.
 4. **Background:**
-   - Darasa hili ni la kazi zinazoendeshwa chinichini na hazionekani kwa mtumiaji. Kazi hizi zinaweza kuwa kama uorodheshaji, usawazishaji au nakala rudufu. Zina kipaumbele cha chini zaidi na athari ndogo zaidi kwa utendaji wa mfumo.
+   - Darasa hili ni la kazi zinazoendeshwa chinichini na hazionekani kwa mtumiaji. Kazi hizi zinaweza kuwa kuorodhesha, kusawazisha data, au kuhifadhi nakala. Zina kipaumbele cha chini zaidi na athari ndogo kwa utendaji wa mfumo.
 
-Kwa kutumia madarasa ya QoS, wasanidi hawahitaji kudhibiti nambari kamili za kipaumbele; badala yake, huzingatia aina ya kazi, na mfumo huboresha rasilimali za CPU ipasavyo.
+Kwa kutumia madarasa ya QoS, developers hawahitaji kudhibiti nambari halisi za kipaumbele; badala yake, huzingatia aina ya kazi, na mfumo huboresha rasilimali za CPU ipasavyo.
 
-Zaidi ya hayo, kuna **sera za upangaji wa thread** tofauti zinazowezesha kubainisha seti ya vigezo vya upangaji ambavyo scheduler itazingatia. Hili linaweza kufanywa kwa kutumia `thread_policy_[set/get]`. Linaweza kuwa na manufaa katika mashambulizi ya race condition.
+Zaidi ya hayo, kuna **sera tofauti za upangaji wa thread** zinazobainisha seti ya vigezo vya upangaji ambavyo scheduler itazingatia. Hili linaweza kufanywa kwa kutumia `thread_policy_[set/get]`. Hili linaweza kuwa na manufaa katika mashambulizi ya race condition.
 
 ## Matumizi Mabaya ya Process za macOS
 
-macOS hutoa mifumo mingi ya **process kuingiliana, kuwasiliana na kushiriki data**. Ingawa mifumo hii ni muhimu kwa utendaji wa kawaida wa mfumo, washambuliaji wanaweza kuitumia vibaya kwa injection, utekelezaji wa msimbo au ufikiaji wa data.
+macOS hutoa mbinu nyingi za **process kuingiliana, kuwasiliana na kushiriki data**. Ingawa mbinu hizi ni muhimu kwa uendeshaji wa kawaida wa mfumo, washambuliaji wanaweza kuzitumia vibaya kwa injection, utekelezaji wa code, au ufikiaji wa data.
 
 ### Library Injection
 
-Library Injection ni mbinu ambapo mshambuliaji **hulazimisha process kupakia library hasidi**. Baada ya kudungwa, library huendeshwa katika muktadha wa process lengwa, na kumpa mshambuliaji ruhusa na ufikiaji sawa na wa process hiyo.
+Library Injection ni mbinu ambapo mshambuliaji **hulazimisha process kupakia library hasidi**. Ikishaingizwa, library huendeshwa katika muktadha wa process lengwa, na kumpa mshambuliaji ruhusa na ufikiaji sawa na wa process hiyo.
 
 
 {{#ref}}
@@ -158,7 +158,7 @@ macos-library-injection/
 
 ### Function Hooking
 
-Function Hooking inahusisha **kunasa miito ya function** au ujumbe ndani ya msimbo wa programu. Kwa kuweka hook kwenye function, mshambuliaji anaweza **kubadilisha tabia** ya process, kuchunguza data nyeti, au hata kudhibiti mtiririko wa utekelezaji.
+Function Hooking huhusisha **kunasa miito ya functions** au ujumbe ndani ya code ya software. Kwa kuweka hooks kwenye functions, mshambuliaji anaweza **kubadilisha tabia** ya process, kuchunguza data nyeti, au hata kudhibiti mtiririko wa utekelezaji.
 
 
 {{#ref}}
@@ -167,7 +167,7 @@ macos-function-hooking.md
 
 ### ARM64/ARM64e Call-Stack Spoofing
 
-Ukurasa huu unaeleza metadata ya ARM64 unwind, vikwazo vya PAC vya arm64e, na minyororo ya synthetic call.
+Ukurasa huu unahusu metadata ya ARM64 unwind, masharti ya PAC ya arm64e, na call chains za kubuni.
 
 {{#ref}}
 arm64-arm64e-call-stack-spoofing.md
@@ -175,7 +175,7 @@ arm64-arm64e-call-stack-spoofing.md
 
 ### Inter Process Communication
 
-Inter Process Communication (IPC) hurejelea mbinu mbalimbali ambazo process tofauti hutumia **kushiriki na kubadilishana data**. Ingawa IPC ni msingi wa programu nyingi halali, inaweza pia kutumiwa vibaya ili kuvunja utengano wa process, kuvuja taarifa nyeti au kutekeleza vitendo visivyoidhinishwa.
+Inter Process Communication (IPC) inarejelea mbinu tofauti ambazo process tofauti hutumia **kushiriki na kubadilishana data**. Ingawa IPC ni msingi wa programu nyingi halali, inaweza pia kutumiwa vibaya kuvuruga utengano wa process, kuvuja kwa taarifa nyeti, au kutekeleza vitendo visivyoidhinishwa.
 
 
 {{#ref}}
@@ -184,7 +184,7 @@ macos-ipc-inter-process-communication/
 
 ### Electron Applications Injection
 
-Programu za Electron zinazoendeshwa zikiwa na vigezo maalum vya env zinaweza kuwa katika hatari ya process injection:
+Programu za Electron zinazoendeshwa zikiwa na env variables maalum zinaweza kuwa hatarini kwa process injection:
 
 
 {{#ref}}
@@ -193,7 +193,7 @@ macos-electron-applications-injection.md
 
 ### Chromium Injection
 
-Inawezekana kutumia flags `--load-extension` na `--use-fake-ui-for-media-stream` kutekeleza **shambulizi la man in the browser**, linalowezesha kuiba mibofyo ya vitufe, trafiki na cookies, kudunga scripts kwenye kurasa...:
+Inawezekana kutumia flags `--load-extension` na `--use-fake-ui-for-media-stream` kutekeleza **man in the browser attack**, inayowezesha kuiba vitufe vilivyobonyezwa, traffic, cookies, kuingiza scripts kwenye kurasa...
 
 
 {{#ref}}
@@ -202,7 +202,7 @@ macos-chromium-injection.md
 
 ### Dirty NIB
 
-Faili za NIB **hufafanua vipengele vya kiolesura cha mtumiaji (UI)** na mwingiliano wake ndani ya programu. Hata hivyo, zinaweza **kutekeleza amri zozote**, na **Gatekeeper haizuii** programu iliyokwishaendeshwa kuendeshwa tena ikiwa **faili ya NIB imebadilishwa**. Kwa hiyo, zinaweza kutumiwa kufanya programu zozote zitekeleze amri zozote:
+Faili za NIB **hufafanua vipengele vya user interface (UI)** na mwingiliano wake ndani ya programu. Hata hivyo, zinaweza **kutekeleza amri zozote**, na **Gatekeeper haizuii** programu ambayo tayari imetekelezwa kuendeshwa tena ikiwa **faili ya NIB imebadilishwa**. Kwa hiyo, zinaweza kutumiwa kufanya programu zozote kutekeleza amri zozote:
 
 
 {{#ref}}
@@ -211,7 +211,7 @@ macos-dirty-nib.md
 
 ### Java Applications Injection
 
-Inawezekana kudunga chaguo za JVM kupitia **`_JAVA_OPTIONS`**, **`JAVA_TOOL_OPTIONS`**, au **`JDK_JAVA_OPTIONS`**, na kupakia Java agent au native agent kabla ya programu kuanza.
+Inawezekana kuingiza chaguo za JVM kupitia **`_JAVA_OPTIONS`**, **`JAVA_TOOL_OPTIONS`**, au **`JDK_JAVA_OPTIONS`** na kupakia Java agent au native agent kabla programu haijaanza.
 
 
 {{#ref}}
@@ -220,7 +220,7 @@ macos-java-apps-injection.md
 
 ### Node.js Injection
 
-**`NODE_OPTIONS`** hupakia mapema JavaScript ya mshambuliaji kupitia `--require` (faili) au `--import data:text/javascript,…` (bila faili, Node ≥ 20.6); **`NODE_REPL_EXTERNAL_MODULE`** hupakia module kwenye REPL shirikishi, na **`ELECTRON_RUN_AS_NODE`** huwasha tena yote haya kwenye binary za Electron.
+**`NODE_OPTIONS`** hupakia JavaScript ya mshambuliaji mapema kupitia `--require` (file) au `--import data:text/javascript,…` (bila file, Node ≥ 20.6); **`NODE_REPL_EXTERNAL_MODULE`** hupakia module kwenye REPL shirikishi, na **`ELECTRON_RUN_AS_NODE`** huwasha tena yote haya kwenye Electron binaries.
 
 {{#ref}}
 macos-nodejs-applications-injection.md
@@ -228,7 +228,7 @@ macos-nodejs-applications-injection.md
 
 ### .Net Applications Injection
 
-Inawezekana kudunga msimbo kwenye programu za .NET kupitia **`DOTNET_STARTUP_HOOKS`** kabla ya `Main`, au kutumia vibaya utendaji wa debugging wa .NET wakati masharti yake ya awali yametimizwa.
+Inawezekana kuingiza code kwenye programu za .NET kupitia **`DOTNET_STARTUP_HOOKS`** kabla ya `Main`, au kwa kutumia vibaya utendaji wa debugging wa .NET wakati masharti yake ya awali yametimizwa.
 
 
 {{#ref}}
@@ -237,15 +237,21 @@ macos-.net-applications-injection.md
 
 ### Shell Injection
 
-Bash isiyo shirikishi husoma **`BASH_ENV`**; shell shirikishi za POSIX husoma **`ENV`**; zsh husoma **`$ZDOTDIR/.zshenv`**; na fish husoma usanidi ulio chini ya **`XDG_CONFIG_HOME`** au **`XDG_DATA_DIRS`**. Kila moja inaweza kutekeleza faili ya uanzishaji inayodhibitiwa kabla ya amri iliyokusudiwa. Bash pia hutekeleza command substitution iliyowekwa kwenye **`PS4`** kila xtrace inapowashwa (kwa mfano, kupitia **`SHELLOPTS=xtrace`** iliyorithiwa):
+Bash isiyo shirikishi husoma **`BASH_ENV`**; POSIX shells shirikishi husoma **`ENV`**; zsh husoma **`$ZDOTDIR/.zshenv`**; na fish husoma mipangilio iliyo chini ya **`XDG_CONFIG_HOME`** au **`XDG_DATA_DIRS`**. Kila moja inaweza kutekeleza faili ya startup inayodhibitiwa kabla ya amri iliyokusudiwa. Bash pia huendesha command substitution iliyowekwa kwenye **`PS4`** kila xtrace inapowashwa (kwa mfano, kupitia **`SHELLOPTS=xtrace`** iliyorithiwa):
 
 {{#ref}}
 macos-bash-applications-injection.md
 {{#endref}}
 
+### Shell stdin command smuggling
+
+Kuanzisha `/bin/zsh -s` husababisha shell kusoma program kutoka standard input. Kwa hiyo, downloader inayohamisha document iliyopangwa lakini isiyoaminika hadi stdin ya child bila kuichanganua kwanza, hugeuza document nzima kuwa chanzo cha shell. Loader moja iliyozingatiwa ilipitisha faili ya umma ya iCalendar kupitia anonymous pipe, mstari baada ya mstari. Metadata ya kalenda ilishindwa kutumika kama amri, lakini zsh iliendelea hadi ilipofikia mistari inayoweza kutekelezwa iliyowekwa baada ya `DESCRIPTION:`. Mistari hiyo ilipakua na kuanzisha application bundle iliyofuata. Aina ya maudhui iliyotarajiwa na hosting inayoaminika ya carrier havikufanya hili kuwa salama; mpaka hatari ulikuwa kupitisha bytes zake kwa interpreter.<sup>[[5]](#references)</sup>
+
+Hatua zinazohusiana zimeelezwa katika [Mach-O overlays](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md), [Gatekeeper and quarantine](../macos-security-protections/macos-gatekeeper.md), na [macOS auto-start locations](../../macos-auto-start-locations.md).
+
 ### PHP Injection
 
-**`PHPRC`** au **`PHP_INI_SCAN_DIR`** inaweza kupakia usanidi wa PHP unaodhibitiwa, ambao **`auto_prepend_file`** yake hutekelezwa kabla ya script lengwa.
+**`PHPRC`** au **`PHP_INI_SCAN_DIR`** zinaweza kupakia mipangilio ya PHP inayodhibitiwa, ambayo **`auto_prepend_file`** yake hutekelezwa kabla ya target script.
 
 {{#ref}}
 macos-php-applications-injection.md
@@ -253,7 +259,7 @@ macos-php-applications-injection.md
 
 ### Lua Injection
 
-Lua interpreter ya kujitegemea hutekeleza msimbo au `@file` kutoka **`LUA_INIT`** (au toleo lake mahususi) kabla ya kuchakata script lengwa.
+Lua interpreter inayojitegemea hutekeleza code au `@file` kutoka **`LUA_INIT`** (au toleo lake maalum) kabla ya kushughulikia target script.
 
 {{#ref}}
 macos-lua-applications-injection.md
@@ -261,7 +267,7 @@ macos-lua-applications-injection.md
 
 ### R Injection
 
-**`R_PROFILE_USER`** na **`R_PROFILE`** huelekeza kwenye profile za uanzishaji zenye msimbo wa R. **`R_DEFAULT_PACKAGES`** / **`R_SCRIPT_DEFAULT_PACKAGES`** pamoja na njia ya library ya R vinaweza badala yake kupakia kiotomatiki package iliyosakinishwa.
+**`R_PROFILE_USER`** na **`R_PROFILE`** huelekeza upya startup profiles zenye R code. **`R_DEFAULT_PACKAGES`** / **`R_SCRIPT_DEFAULT_PACKAGES`** pamoja na njia ya R library vinaweza kutumika badala yake kupakia kiotomatiki package iliyosakinishwa.
 
 {{#ref}}
 macos-r-applications-injection.md
@@ -269,7 +275,7 @@ macos-r-applications-injection.md
 
 ### Julia Injection
 
-**`JULIA_DEPOT_PATH`** huelekeza kwenye depot ambayo `config/startup.jl` yake hutekelezwa kiotomatiki.
+**`JULIA_DEPOT_PATH`** huelekeza upya depot ambayo `config/startup.jl` yake hutekelezwa kiotomatiki.
 
 {{#ref}}
 macos-julia-applications-injection.md
@@ -277,7 +283,7 @@ macos-julia-applications-injection.md
 
 ### Erlang and Elixir Injection
 
-**`ERL_AFLAGS`**, **`ERL_FLAGS`**, au **`ERL_ZFLAGS`** zinaweza kudunga expression ya Erlang VM **`-eval`** bila kuhitaji faili ya payload; workloads za Elixir kwa kawaida huanzisha VM hiyo hiyo.
+**`ERL_AFLAGS`**, **`ERL_FLAGS`**, au **`ERL_ZFLAGS`** zinaweza kuingiza expression ya Erlang VM **`-eval`** bila kuhitaji payload file; workloads za Elixir kwa kawaida huanzisha VM hiyo hiyo.
 
 {{#ref}}
 macos-erlang-elixir-applications-injection.md
@@ -285,7 +291,7 @@ macos-erlang-elixir-applications-injection.md
 
 ### GNU Octave Injection
 
-**`OCTAVE_SITE_INITFILE`** na **`OCTAVE_VERSION_INITFILE`** huelekeza upya scripts za uanzishaji za Octave.
+**`OCTAVE_SITE_INITFILE`** na **`OCTAVE_VERSION_INITFILE`** huelekeza upya startup scripts za Octave.
 
 {{#ref}}
 macos-octave-applications-injection.md
@@ -293,7 +299,7 @@ macos-octave-applications-injection.md
 
 ### PowerShell Injection
 
-`pwsh` ni programu ya .NET ya mifumo mingi, kwa hiyo vigezo kadhaa vya mazingira huwezesha utekelezaji kabla ya amri: **`XDG_CONFIG_HOME`** huelekeza upya scripts za profile zinazoendeshwa wakati wa uanzishaji, **`PSModulePath`** huteka upakiaji wa module kiotomatiki (faili ya `.psm1` iliyopandikizwa huendeshwa wakati wa import na inaweza kufunika cmdlets zilizojengewa ndani), na vigezo vya .NET **`CORECLR_PROFILER`**/**`COR_PROFILER`** na **`DOTNET_STARTUP_HOOKS`** hupakia msimbo wa mshambuliaji kwenye process kabla ya `Main`.
+`pwsh` ni programu ya .NET inayotumika kwenye majukwaa mbalimbali, kwa hiyo environment variables kadhaa zinaweza kusababisha utekelezaji kabla ya amri: **`XDG_CONFIG_HOME`** huelekeza upya profile scripts zinazoendeshwa wakati wa startup, **`PSModulePath`** huteka u-pakiaji otomatiki wa module (`.psm1` iliyowekwa huendeshwa wakati wa import na inaweza kufunika cmdlets zilizojengewa ndani), na variables za .NET **`CORECLR_PROFILER`**/**`COR_PROFILER`** na **`DOTNET_STARTUP_HOOKS`** hupakia code ya mshambuliaji kwenye process kabla ya `Main`.
 
 {{#ref}}
 macos-powershell-applications-injection.md
@@ -301,7 +307,7 @@ macos-powershell-applications-injection.md
 
 ### Perl Injection
 
-Angalia chaguo mbalimbali za kufanya script ya Perl itekeleze msimbo wowote kupitia:
+Angalia njia tofauti za kufanya Perl script itekeleze code yoyote katika:
 
 
 {{#ref}}
@@ -310,7 +316,7 @@ macos-perl-applications-injection.md
 
 ### Ruby Injection
 
-Pia inawezekana kutumia vibaya vigezo vya mazingira vya ruby (**`RUBYOPT`**, **`RUBYLIB`**) ili kufanya scripts zozote zitekeleze msimbo wowote:
+Pia inawezekana kutumia vibaya env variables za ruby (**`RUBYOPT`**, **`RUBYLIB`**) ili kufanya scripts zozote zitekeleze code yoyote:
 
 
 {{#ref}}
@@ -319,9 +325,9 @@ macos-ruby-applications-injection.md
 
 ### Python Injection
 
-Mnyororo wa standard library wa **`PYTHONWARNINGS`** na **`BROWSER`** unaweza kutekeleza amri wakati wa kuchanganua warning-filter. Njia mbadala inayotumia faili huweka `sitecustomize.py` kwenye **`PYTHONPATH`**, ili uanzishaji wa kawaida wa `site` ui-import kabla ya script lengwa. **`PYTHONBREAKPOINT`** huendesha callable/module iliyochaguliwa msimbo unapofikia `breakpoint()`. Vigezo vinavyotumika katika hali shirikishi pekee, kama **`PYTHONSTARTUP`**, vina wigo mdogo wa matumizi.
+Mlolongo wa standard library wa **`PYTHONWARNINGS`** na **`BROWSER`** unaweza kutekeleza amri wakati warning-filter inachanganuliwa. Njia mbadala inayotumia file huweka `sitecustomize.py` kwenye **`PYTHONPATH`** ili uanzishaji wa kawaida wa `site` uiingize kabla ya target script. **`PYTHONBREAKPOINT`** huendesha callable/module iliyochaguliwa code inapofika kwenye `breakpoint()`. Variables zinazotumika katika mazingira shirikishi pekee, kama **`PYTHONSTARTUP`**, zina matumizi finyu zaidi.
 
-Kumbuka kuwa executable zilizokusanywa kwa **`pyinstaller`** hazitatumia vigezo hivi vya mazingira hata kama zinaendeshwa kwa kutumia Python iliyopachikwa.
+Kumbuka kuwa executables zilizokompailiwa kwa **`pyinstaller`** hazitatumia environment variables hizi hata kama zinaendeshwa kwa kutumia embedded python.
 
 {{#ref}}
 macos-python-applications-injection.md
@@ -329,36 +335,38 @@ macos-python-applications-injection.md
 
 ### Vim/Neovim Injection
 
-**`VIMINIT`** (na mbadala wake `EXINIT`) hutekelezwa kama amri za Ex wakati wa uanzishaji wa kawaida, kwa hiyo `:!cmd` / `:call system(...)` husababisha utekelezaji wa msimbo mwathiriwa anapofungua Vim/Neovim akiwa na mazingira yaliyodhibitiwa:
+**`VIMINIT`** (na fallback yake ya `EXINIT`) hutekelezwa kama Ex commands wakati wa startup ya kawaida, kwa hiyo `:!cmd` / `:call system(...)` husababisha code execution mwathiriwa anapofungua Vim/Neovim katika mazingira yanayodhibitiwa:
 
 {{#ref}}
 macos-vim-applications-injection.md
 {{#endref}}
 
-Kando na hilo, Homebrew kwa kawaida husakinisha Python chini ya `/opt/homebrew`, ambapo wanachama wa kundi la `admin` la ndani wanaweza kuweza kubadilisha launcher. Huu ni utekaji wa binary inayoweza kuandikwa, si injection kupitia vigezo vya mazingira; hakiki umiliki na ACL kabla ya kuuchukulia kuwa unaweza kutumiwa vibaya.
+Kando na hili, Homebrew mara nyingi husakinisha Python chini ya `/opt/homebrew`, ambako wanachama wa kundi la ndani la `admin` wanaweza kuweza kubadilisha launcher. Huku ni kuteka binary inayoweza kuandikwa, si injection kupitia environment variable; hakiki umiliki na ACLs kabla ya kudhani kuwa kuna uwezekano wa kutumiwa vibaya.
 
 
-## Detection
+## Utambuzi
 
 ### Shield
 
-[**Shield**](https://github.com/theevilbit/Shield) ni programu huria inayotegemea **EndpointSecurity**, inayotambua na kuzuia process injection. Ni rejeleo zuri la ishara zinazoweza kuonekana kupitia Endpoint Security, kwani hutoa tahadhari kuhusu:<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
+[**Shield**](https://github.com/theevilbit/Shield) ni programu huria inayotumia **EndpointSecurity** kutambua na kuzuia process injection. Ni rejeleo zuri la ishara zinazoweza kuonekana kupitia Endpoint Security, kwa kuwa hutoa tahadhari kuhusu:<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
-- **Vigezo vya mazingira vya injection** wakati wa process exec: `DYLD_INSERT_LIBRARIES`, `CFNETWORK_LIBRARY_PATH`, `RAWCAMERA_BUNDLE_PATH` na `ELECTRON_RUN_AS_NODE`.
-- Miito ya **`task_for_pid`** — process moja ikiomba task port ya nyingine, jambo ambalo ni sharti la kuidunga.
-- **Hoja za Electron debugging** — `--inspect`, `--inspect-brk` na `--remote-debugging-port`, ambazo huanzisha programu ya Electron katika hali ya debug na kuruhusu mtu yeyote kujiunganisha na kutekeleza msimbo ndani yake.<sup>[[3]](#references)</sup>
-- **Uundaji wa symlink/hardlink kati ya viwango tofauti vya ruhusa** — mbinu ya kawaida ya “tengeneza link kama mtumiaji wa kawaida, ielekeze kwenye eneo lenye ruhusa za juu.” Kumbuka kuwa **symlink zinaweza kutambuliwa na kutoa tahadhari, lakini haziwezi kuzuiwa**: EndpointSecurity haionyeshi lengwa la link kabla ya kuundwa.
+- **Injection environment variables** wakati wa process exec: `DYLD_INSERT_LIBRARIES`, `CFNETWORK_LIBRARY_PATH`, `RAWCAMERA_BUNDLE_PATH` na `ELECTRON_RUN_AS_NODE`.
+- Miito ya **`task_for_pid`** — process moja ikiomba task port ya nyingine, ambayo ni sharti la awali la kuingiza code ndani yake.
+- **Electron debugging arguments** — `--inspect`, `--inspect-brk` na `--remote-debugging-port`, ambazo huanzisha programu ya Electron katika hali ya debug na kumruhusu yeyote kuunganishwa nayo na kuendesha code ndani yake.<sup>[[3]](#references)</sup>
+- **Uundaji wa symlink/hardlink kati ya viwango tofauti vya ruhusa** — mbinu ya kawaida ya "weka link kama mtumiaji wa kawaida, kisha ielekeze kwenye eneo lenye ruhusa za juu". Kumbuka kuwa **symlinks zinaweza kutoa tahadhari lakini haziwezi kuzuiwa**: EndpointSecurity haiwezi kuona mahali link inapoelekeza kabla ya kuundwa.
 
 ### Miito inayofanywa na process nyingine
 
-Katika [**chapisho hili la blogu**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) unaweza kupata maelezo ya jinsi function **`task_name_for_pid`** inavyoweza kutumiwa kupata taarifa kuhusu **process nyingine zinazodunga msimbo kwenye process**, kisha kupata taarifa kuhusu process hiyo nyingine.<sup>[[4]](#references)</sup>
+Katika [**chapisho hili la blogu**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) unaweza kujifunza jinsi ya kutumia function **`task_name_for_pid`** kupata taarifa kuhusu **process nyingine zinazoingiza code kwenye process**, kisha kupata taarifa kuhusu process hiyo nyingine.<sup>[[4]](#references)</sup>
 
-Kumbuka kuwa ili kuita function hiyo, lazima uwe na **uid sawa** na ile ya process inayoendesha au uwe **root** (na hurejesha taarifa kuhusu process, si njia ya kudunga msimbo).
+Kumbuka kuwa ili kuita function hiyo, unahitaji kuwa na **uid sawa** na ile inayoendesha process au kuwa **root** (na hurejesha taarifa kuhusu process, si njia ya kuingiza code).
+
+{{#include ../../../banners/hacktricks-training.md}}
 
 ## References
 
-- [1] [Shield — utambuzi huria wa macOS process-injection (GitHub)](https://github.com/theevilbit/Shield)
+- [1] [Shield — ugunduzi huria wa macOS process-injection (GitHub)](https://github.com/theevilbit/Shield)
 - [2] [Apple Developer — mfumo wa EndpointSecurity](https://developer.apple.com/documentation/endpointsecurity)
 - [3] [Metnew - Kwa nini programu za Electron haziwezi kuhifadhi siri zako kwa usiri: chaguo la --inspect](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
-- [4] [Scott Knight - Kutambua mabadiliko ya task](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html)
-{{#include ../../../banners/hacktricks-training.md}}
+- [4] [Scott Knight - Kutambua marekebisho ya task](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html)
+- [5] [Kaspersky Securelist - Toleo jipya la MacSync macOS stealer linalenga wapenda crypto na developers](https://securelist.com/macsync-new-version/121383/)
