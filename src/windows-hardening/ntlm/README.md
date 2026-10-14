@@ -204,7 +204,7 @@ This launches a process under the current local user, while LSASS associates the
 ### Pass-the-Hash from linux
 
 You can obtain code execution in Windows machines using Pass-the-Hash from Linux.\
-[**See practical Pass-the-Hash execution examples.**](../lateral-movement/psexec-and-winexec.md#pass-the-hash)
+[**See practical Pass-the-Hash execution examples with Impacket PsExec.**](../lateral-movement/psexec-and-winexec.md#impacket-psexecpy-psexec-like)
 
 ### Impacket Windows compiled tools
 
