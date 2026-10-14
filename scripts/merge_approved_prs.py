@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Merge up to two approved PRs when other repository workflows are idle."""
+"""Merge verified, approved PRs as soon as their approvals arrive."""
 
 import json
 import os
@@ -11,7 +11,7 @@ from pathlib import Path
 
 AUTHORIZED_USER = "carlospolop"
 WORKFLOW_NAME = "Auto Merge Approved PRs"
-ACTIVE_STATUSES = ("in_progress", "queued", "waiting", "pending", "requested")
+TRANSLATOR_WAITING_STATUSES = ("queued", "waiting", "pending", "requested")
 
 
 def is_merge_comment(comment):
@@ -62,26 +62,35 @@ def api_items(endpoint):
     return [item for page in pages for item in page]
 
 
-def other_workflows_active(repo, merger_workflow_id):
-    # Exclude every merger instance, including the pending concurrency run.
-    for status in ACTIVE_STATUSES:
-        pages = api_pages(f"repos/{repo}/actions/runs?status={status}&per_page=100")
-        for page in pages:
-            for run in page["workflow_runs"]:
-                if run["workflow_id"] != merger_workflow_id and run["status"] != "completed":
-                    label = run.get("name") or run.get("id")
-                    print(f"Other workflow is {run['status']}: {label}", flush=True)
-                    return True
-    for status in ACTIVE_STATUSES:
-        pages = api_pages(
-            f"repos/HackTricks-wiki/HackTricks-Feed/actions/runs?status={status}&per_page=100"
-        )
-        for page in pages:
-            for run in page["workflow_runs"]:
-                if run.get("path") in (".github/workflows/book-conflict-fix.yml", ".github/workflows/book-pr-review.yml"):
-                    print(f"Book maintenance is {run['status']}: {run['name']}", flush=True)
-                    return True
-    return False
+def translator_has_capacity(repo):
+    """Allow one merge only while no translation is queued for replacement."""
+    counts = {}
+    active_run = None
+    for status in ("in_progress", *TRANSLATOR_WAITING_STATUSES):
+        result = gh_json(["api", f"repos/{repo}/actions/workflows/translate_all.yml/runs?status={status}&per_page=1"])
+        count = result.get("total_count") if isinstance(result, dict) else None
+        if type(count) is not int or count < 0:
+            raise RuntimeError(f"Cannot verify translator {status} count")
+        counts[status] = count
+        if status == "in_progress" and count == 1:
+            runs = result.get("workflow_runs")
+            if not isinstance(runs, list) or len(runs) != 1 or type(runs[0].get("id")) is not int:
+                raise RuntimeError("Cannot verify active translator run")
+            active_run = runs[0]["id"]
+    running = counts["in_progress"]
+    waiting = sum(counts[status] for status in TRANSLATOR_WAITING_STATUSES)
+    if waiting or running > 1:
+        print(f"Translator capacity unavailable: {running} running, {waiting} waiting; retry after translation completes.", flush=True)
+        return False
+    if active_run is not None:
+        jobs = gh_json(["api", f"repos/{repo}/actions/runs/{active_run}/jobs?per_page=100"])
+        listed = jobs.get("jobs") if isinstance(jobs, dict) else None
+        if not isinstance(listed, list) or jobs.get("total_count") != len(listed):
+            raise RuntimeError("Cannot verify all active translator jobs")
+        if any(job.get("status") not in ("in_progress", "completed") for job in listed):
+            print("Translator has queued language jobs; retry after translation completes.", flush=True)
+            return False
+    return True
 
 
 def approved_by_title(pr):
@@ -92,15 +101,15 @@ def approved_by_title(pr):
 
 
 def merge_details(repo, number):
-    for attempt in range(11):
+    for attempt in range(3):
         details = gh_json([
             "pr", "view", str(number), "--repo", repo,
             "--json", "state,isDraft,mergeable,headRefOid",
         ])
         if details["state"] != "OPEN" or details["isDraft"] or details["mergeable"] != "UNKNOWN":
             return details
-        if attempt < 10:
-            time.sleep(2)
+        if attempt < 2:
+            time.sleep(1)
     return details
 
 
@@ -116,11 +125,9 @@ def merge_pr(repo, number, head_sha):
     return True
 
 
-def merge_approved(repo, merger_workflow_id, max_merges=2):
-    if other_workflows_active(repo, merger_workflow_id):
-        print("Repository is busy; retrying on the next workflow completion.")
-        return 0
-    prs = api_items(f"repos/{repo}/pulls?state=open&sort=created&direction=asc&per_page=100")
+def merge_approved(repo, max_merges=1, target_number=None):
+    prs = ([gh_json(["api", f"repos/{repo}/pulls/{target_number}"])] if target_number else
+           api_items(f"repos/{repo}/pulls?state=open&sort=created&direction=asc&per_page=100"))
     merged = 0
     for pr in prs:
         if merged >= max_merges:
@@ -139,12 +146,12 @@ def merge_approved(repo, merger_workflow_id, max_merges=2):
             continue
         if details["state"] != "OPEN" or details["isDraft"]:
             continue
-        if details["mergeable"] != "MERGEABLE":
+        if details["mergeable"] == "CONFLICTING":
             print(f"Skipping PR #{number}: {details['mergeable']}", flush=True)
             continue
-        # A preceding merge may have queued a build while approvals were read.
-        if other_workflows_active(repo, merger_workflow_id):
-            print("Another workflow started; stopping this merge batch.")
+        if details["mergeable"] == "UNKNOWN":
+            print(f"GitHub has not calculated PR #{number}'s mergeability; checking with the server-side merge operation.", flush=True)
+        if not translator_has_capacity(repo):
             break
         if merge_pr(repo, number, details["headRefOid"]):
             merged += 1
@@ -158,9 +165,13 @@ def main():
         print("Event does not request an approval check.")
         return 0
     repo = os.environ["GITHUB_REPOSITORY"]
-    run_id = os.environ["GITHUB_RUN_ID"]
-    current_run = gh_json(["api", f"repos/{repo}/actions/runs/{run_id}"])
-    merge_approved(repo, current_run["workflow_id"])
+    event_name = os.environ["GITHUB_EVENT_NAME"]
+    # A pending comment run can be replaced by a later one in the global merger
+    # concurrency group. Scan all approvals so that neither comment is lost.
+    target_number = None
+    if event_name == "workflow_dispatch":
+        target_number = int(event.get("inputs", {}).get("pr") or 0) or None
+    merge_approved(repo, target_number=target_number)
     return 0
 
 

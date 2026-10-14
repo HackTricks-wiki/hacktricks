@@ -100,6 +100,51 @@ Moreover, you can use these tools to extract **files embedded inside the firmwar
 
 Or [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) to inspect the file.
 
+### Differential flash analysis and recoverable XOR secret stores
+
+When a firmware setting has no documented storage format, first take several matching flash reads, change **exactly one** setting, dump the complete chip again, and compare offsets. Repeating the experiment with controlled values distinguishes the setting from counters and write metadata; changes at new offsets rather than in place indicate an append-only or log-structured store. Keep deleted/tombstoned entries because their payload bytes may remain recoverable.<sup>[[12]](#references)[[13]](#references)</sup>
+
+```bash
+sha256sum baseline-1.bin baseline-2.bin baseline-3.bin
+cmp -l baseline-1.bin changed.bin
+```
+
+After locating the region, extract the firmware modules with tools such as `binwalk` and reverse the writer/validator in Ghidra. Confirm field boundaries, padding, key indexing, and key derivation in code instead of inferring the scheme only from ciphertext patterns.<sup>[[12]](#references)</sup>
+
+#### Recover keys from encrypted zero padding
+
+As described in [XOR-based encryption](../../crypto/symmetric/#xor-based-encryption), known plaintext reveals keystream bytes at the same offsets. A fixed-size field is especially exposed when its zero padding spans every index of a repeating XOR key: the encrypted padding reveals those key bytes directly because `0x00 XOR key_byte = key_byte`. If every key index is covered, reconstruct the key from the ciphertext tail and decrypt the populated bytes.<sup>[[12]](#references)</sup>
+
+Dell's vulnerable DVAR BIOS-password format is a concrete example: byte `0` of a 32-byte field is plaintext, while bytes `1..31` use a repeating 20-byte key.<sup>[[12]](#references)</sup>
+
+```text
+stored[0] = password[0]
+stored[i] = password[i] XOR key[(i - 1) mod 20]  # i = 1..31
+```
+
+For a password length `L`, positions `L..31` were zero before XOR. When `L <= 12`, those positions cover every key index, so the complete key and password are recovered without brute force:<sup>[[12]](#references)</sup>
+
+```text
+key[(i - 1) mod 20] = stored[i]                  # padding positions
+password[i] = stored[i] XOR key[(i - 1) mod 20] # populated positions
+```
+
+#### Lift keys from historical records
+
+Do not analyze each record independently. The DVAR key is derived approximately as `modified_md5(device_seed || variable_GUID || password[0])`: the device seed and GUID are fixed, and the only password-dependent input is the clear first byte. This gives at most 256 keys per device and makes records beginning with the same byte share a key. Group active and deleted records by that byte; a short historical record can leak the full key through padding and decrypt a current longer record whose own padding is insufficient. Password rotation can therefore increase exposure when old ciphertext is tombstoned rather than erased.<sup>[[12]](#references)</sup>
+
+The [`dellpwn`](https://github.com/R3n5k1/dellpwn) tool locates DVAR, validates candidate records, recovers passwords, and can display raw stored/key bytes. Build it from a checkout and scan a verified flash image as follows:<sup>[[13]](#references)</sup>
+
+```bash
+cargo install --path .
+dellpwn scan dump.bin --raw
+dellpwn scan dump.bin --partial  # include uncertain recoveries
+```
+
+For custom parsers, reject false positives with record structure, printable-character constraints, zero-padding checks, key entropy, and consistency where the key wraps. If repeated dumps show sparse per-write bit flips, enumerate the observed masks and rank corrections with these constraints, but report ambiguous characters instead of presenting heuristic output as exact recovery.<sup>[[12]](#references)</sup>
+
+Password verifiers should store a salted, iterated one-way hash rather than reversible ciphertext, and log-structured stores should securely remove superseded secret material.<sup>[[12]](#references)</sup>
+
 ### Getting the Filesystem
 
 With the previous commented tools like `binwalk -ev <bin>` you should have been able to **extract the filesystem**.\
@@ -682,5 +727,7 @@ This turns "encrypted firmware" into a more general problem: **recover the appli
 - [9] [ROOT Tesla OS on QEMU Part 1: Unpacking](https://cn0xroot.wordpress.com/2026/09/19/root-tesla-os-on-qemu-part-1-unpacking)
 - [10] [Linux kernel documentation - dm-linear](https://docs.kernel.org/admin-guide/device-mapper/linear.html)
 - [11] [ROOT Tesla OS on QEMU Part 2: Debugging and Fixing](https://cn0xroot.wordpress.com/2026/09/20/root_tesla_os_on_qemu_part_2_debugging_fixing)
+- [12] [Dell BIOS Passwords: Weak XOR Encryption Allows Recovery from SPI Flash (CVE-2026-40639)](https://mdsec.co.uk/2026/07/dell-bios-passwords-weak-xor-encryption-allows-recovery-from-spi-flash-cve-2026-40639)
+- [13] [R3n5k1/dellpwn - Dell BIOS password recovery tooling](https://github.com/R3n5k1/dellpwn)
 
 {{#include ../../banners/hacktricks-training.md}}
