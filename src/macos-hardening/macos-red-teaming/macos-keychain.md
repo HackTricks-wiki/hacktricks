@@ -4,59 +4,60 @@
 
 ## मुख्य Keychains
 
-- **User Keychain** (`~/Library/Keychains/login.keychain-db`), जिसका उपयोग **user-specific credentials** जैसे application passwords, internet passwords, user-generated certificates, network passwords और user-generated public/private keys को store करने के लिए किया जाता है।
-- **System Keychain** (`/Library/Keychains/System.keychain`), जो **system-wide credentials** जैसे WiFi passwords, system root certificates, system private keys और system application passwords को store करता है।<sup>[[1]](#references)</sup>
-- `/System/Library/Keychains/*` में certificates जैसे अन्य components को भी find करना संभव है।
-- **iOS** में केवल एक **Keychain** होता है, जो `/private/var/Keychains/` में स्थित होता है। इस folder में `TrustStore`, certificate authorities (`caissuercache`) और OSCP entries (`ocspache`) के databases भी होते हैं।
-- Apps को उनके application identifier के आधार पर keychain में केवल उनके private area तक restricted किया जाएगा।
+- **User Keychain** (`~/Library/Keychains/login.keychain-db`), जिसका उपयोग **user-specific credentials** जैसे application passwords, internet passwords, user-generated certificates, network passwords और user-generated public/private keys को स्टोर करने के लिए किया जाता है।
+- **System Keychain** (`/Library/Keychains/System.keychain`), जिसमें **system-wide credentials** जैसे WiFi passwords, system root certificates, system private keys और system application passwords स्टोर होते हैं।<sup>[[1]](#references)</sup>
+  - `/System/Library/Keychains/*` में certificates जैसे अन्य components भी मिल सकते हैं।
+- **iOS** में `/private/var/Keychains/` में स्थित केवल एक **Keychain** होता है। इस folder में `TrustStore`, certificate authorities (`caissuercache`) और OSCP entries (`ocspache`) के databases भी होते हैं।
+  - Apps को keychain में केवल उनके application identifier के आधार पर उनके private area तक सीमित रखा जाता है।
 
-### Password Keychain Access
+### Password Keychain तक पहुंच
 
-इन files में inherent protection नहीं होती और इन्हें **downloaded** किया जा सकता है, लेकिन ये encrypted होती हैं और **user's plaintext password** की आवश्यकता होती है ताकि इन्हें **decrypted** किया जा सके। [**Chainbreaker**](https://github.com/n0fate/chainbreaker) जैसे tool का उपयोग decryption के लिए किया जा सकता है।<sup>[[1]](#references)</sup>
+इन files में अपने-आप कोई protection नहीं होती और इन्हें **download** किया जा सकता है, लेकिन ये encrypted होती हैं और इन्हें decrypt करने के लिए **user का plaintext password** चाहिए। Decryption के लिए [**Chainbreaker**](https://github.com/n0fate/chainbreaker) जैसे tool का उपयोग किया जा सकता है।<sup>[[1]](#references)</sup>
 
-## Keychain Entries Protections
+## Keychain Entries की सुरक्षा
 
 ### ACLs
 
-Keychain में प्रत्येक entry **Access Control Lists (ACLs)** द्वारा governed होती है, जो यह निर्धारित करती हैं कि keychain entry पर कौन विभिन्न actions perform कर सकता है, जिनमें शामिल हैं:<sup>[[1]](#references)</sup>
+Keychain में प्रत्येक entry को **Access Control Lists (ACLs)** नियंत्रित करती हैं। ये तय करती हैं कि कौन keychain entry पर कौन-सी actions कर सकता है, जिनमें शामिल हैं:<sup>[[1]](#references)[[2]](#references)</sup>
 
-- **ACLAuthorizationExportClear**: Holder को secret का clear text प्राप्त करने की अनुमति देता है।
-- **ACLAuthorizationExportWrapped**: Holder को किसी अन्य provided password से encrypted clear text प्राप्त करने की अनुमति देता है।
-- **ACLAuthorizationAny**: Holder को कोई भी action perform करने की अनुमति देता है।
+- **`kSecACLAuthorizationExportClear`**: Holder को secret का clear text प्राप्त करने की अनुमति देता है।
+- **`kSecACLAuthorizationExportWrapped`**: Holder को secret का clear text, दिए गए किसी अन्य password से encrypted करके प्राप्त करने की अनुमति देता है।
+- **`kSecACLAuthorizationAny`**: Holder को कोई भी action करने की अनुमति देता है।
 
-ACLs के साथ trusted applications की एक **list** भी होती है, जो बिना prompting के ये actions perform कर सकती हैं। यह हो सकती है:<sup>[[1]](#references)</sup>
+ACLs के साथ **trusted applications की list** भी होती है, जो बिना prompt दिए ये actions कर सकती हैं। यह list हो सकती है:<sup>[[1]](#references)</sup>
 
-- **N`il`** (किसी authorization की आवश्यकता नहीं, **everyone is trusted**)
-- एक **empty** list (**nobody** is trusted)
-- Specific **applications** की **List**।
+- **N`il`** (किसी authorization की आवश्यकता नहीं, **हर कोई trusted है**)
+- एक **खाली** list (**कोई भी** trusted नहीं है)
+- विशिष्ट **applications** की **list**।
 
-Entry में **`ACLAuthorizationPartitionID`,** key भी हो सकती है, जिसका उपयोग **teamid, apple,** और **cdhash** की पहचान करने के लिए किया जाता है।<sup>[[1]](#references)</sup>
+Entry में **`kSecACLAuthorizationPartitionID`** key भी हो सकती है, जिसका उपयोग **teamid, apple** और **cdhash** की पहचान के लिए किया जाता है।<sup>[[1]](#references)[[2]](#references)</sup>
 
-- यदि **teamid** specified है, तो **entry** value को **prompt** के बिना **access** करने के लिए application का **same teamid** होना आवश्यक है।
-- यदि **apple** specified है, तो app का **signed** by **Apple** होना आवश्यक है।
-- यदि **cdhash** indicated है, तो **app** में specific **cdhash** होना आवश्यक है।
+- यदि **teamid** निर्दिष्ट है, तो **entry** value को **बिना** **prompt** के **access** करने के लिए application का **teamid समान** होना चाहिए।
+- यदि **apple** निर्दिष्ट है, तो app को **Apple द्वारा signed** होना चाहिए।
+- यदि **cdhash** दिया गया है, तो **app** में वही विशिष्ट **cdhash** होना चाहिए।
 
-### Creating a Keychain Entry
+### Keychain Entry बनाना
 
-जब **`Keychain Access.app`** का उपयोग करके एक **new** **entry** create की जाती है, तो निम्नलिखित rules लागू होते हैं:<sup>[[1]](#references)</sup>
+**`Keychain Access.app`** का उपयोग करके **नई** **entry** बनाए जाने पर, ये नियम लागू होते हैं:<sup>[[1]](#references)</sup>
 
 - सभी apps encrypt कर सकते हैं।
-- **No apps** export/decrypt नहीं कर सकते (user को prompt किए बिना)।
+- **कोई भी app** (user को prompt दिए बिना) export/decrypt नहीं कर सकता।
 - सभी apps integrity check देख सकते हैं।
-- कोई भी app ACLs change नहीं कर सकता।
-- **partitionID** को **`apple`** पर set किया जाता है।
+- कोई भी app ACLs नहीं बदल सकता।
+- **partitionID** को **`apple`** पर सेट किया जाता है।
 
-जब कोई **application keychain में entry create करती है**, तो rules थोड़े अलग होते हैं:<sup>[[1]](#references)</sup>
+जब कोई **application keychain में entry बनाती है**, तो नियम थोड़े अलग होते हैं:<sup>[[1]](#references)</sup>
 
 - सभी apps encrypt कर सकते हैं।
-- केवल **creating application** (या कोई अन्य explicitly added apps) ही export/decrypt कर सकती हैं (user को prompt किए बिना)।
-- सभी apps integrity check देख सकती हैं।
-- कोई भी app ACLs change नहीं कर सकती।
-- **partitionID** को **`teamid:[teamID here]`** पर set किया जाता है।
+- केवल **entry बनाने वाला application** (या स्पष्ट रूप से जोड़े गए अन्य apps) (user को prompt दिए बिना) export/decrypt कर सकते हैं।
+- सभी apps integrity check देख सकते हैं।
+- कोई भी app ACLs नहीं बदल सकता।
+- **partitionID** को **`teamid:[teamID here]`** पर सेट किया जाता है।
 
-## Accessing the Keychain
+## Keychain तक पहुंच
 
 ### `security`
+
 ```bash
 # List keychains
 security list-keychains
@@ -68,64 +69,74 @@ security dump-keychain -a -d
 security find-generic-password -a "Slack" -g
 
 # Change the specified entry's PartitionID value
-security set-generic-password-partition-list -s "test service" -a "test account" -S
+security set-generic-password-partition-list \
+  -s "test service" -a "test account" \
+  -S 'apple-tool:,apple:,teamid:TEAMID' \
+  -k 'KEYCHAIN_PASSWORD' ~/Library/Keychains/login.keychain-db
 
 # Dump specifically the user keychain
 security dump-keychain ~/Library/Keychains/login.keychain-db
 ```
+
+`-S` आइटम की partition list सेट करता है, जबकि `-k` यह बदलाव करने के लिए ज़रूरी मौजूदा Keychain password देता है; password लेने वाला flag deprecated है।<sup>[[4]](#references)</sup> सफल update से यह साबित नहीं होता कि बाद में read करते समय कोई prompt नहीं आएगा: एक देखे गए, disabled prototype ने `Security.framework` के ज़रिए आइटम query करने पर भी confirmation prompt दिखाया। मेल खाता partition ID, ऊपर बताए गए ACL और trusted-application checks का सिर्फ़ एक हिस्सा है, इसलिए वास्तविक read path की पुष्टि करें।<sup>[[3]](#references)</sup>
+
 ### APIs
 
 > [!TIP]
-> **prompt उत्पन्न न करने वाले** secrets की **keychain enumeration और dumping** tool [**LockSmith**](https://github.com/its-a-feature/LockSmith) से की जा सकती है।
+> secrets की **keychain enumeration और dumping**, जिससे **prompt नहीं आएगा**, टूल [**LockSmith**](https://github.com/its-a-feature/LockSmith) से की जा सकती है।
 >
-> अन्य API endpoints [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html) source code में मिल सकते हैं।
+> अन्य API endpoints, [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html) source code में मिल सकते हैं।
 
-**Security Framework** का उपयोग करके प्रत्येक keychain entry को list करें और उसके बारे में **info** प्राप्त करें। आप Apple के open source cli tool [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html) को भी देख सकते हैं। कुछ API examples:<sup>[[1]](#references)</sup>
+हर keychain entry की **info** सूचीबद्ध करने और पाने के लिए **Security Framework** का उपयोग करें; या Apple के open source cli tool [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** को भी देख सकते हैं। API के कुछ उदाहरण:<sup>[[1]](#references)</sup>
 
-- API **`SecItemCopyMatching`** प्रत्येक entry की info देती है और इसका उपयोग करते समय कुछ attributes set किए जा सकते हैं:
-- **`kSecReturnData`**: यदि true है, तो यह data को decrypt करने का प्रयास करेगा (संभावित pop-ups से बचने के लिए false set करें)
-- **`kSecReturnRef`**: keychain item का reference भी प्राप्त करें (यदि बाद में पता चले कि pop-up के बिना decrypt कर सकते हैं, तो इसे true set करें)
-- **`kSecReturnAttributes`**: entries के बारे में metadata प्राप्त करें
-- **`kSecMatchLimit`**: कितने results return करने हैं
-- **`kSecClass`**: keychain entry किस प्रकार की है
+- API **`SecItemCopyMatching`** हर entry की info देता है और इसका उपयोग करते समय आप कुछ attributes सेट कर सकते हैं:
+  - **`kSecReturnData`**: यदि true हो, तो यह data decrypt करने की कोशिश करेगा (संभावित pop-ups से बचने के लिए इसे false सेट करें)
+  - **`kSecReturnRef`**: keychain item का reference भी पाएँ (यदि बाद में पता चले कि pop-up के बिना decrypt किया जा सकता है, तो इसे true सेट करें)
+  - **`kSecReturnAttributes`**: entries का metadata पाएँ
+  - **`kSecMatchLimit`**: लौटाए जाने वाले results की संख्या
+  - **`kSecClass`**: keychain entry का प्रकार
 
-प्रत्येक entry के **ACLs** प्राप्त करें:<sup>[[1]](#references)</sup>
+हर entry के **ACLs** पाएँ:<sup>[[1]](#references)</sup>
 
-- API **`SecAccessCopyACLList`** से आप **keychain item का ACL** प्राप्त कर सकते हैं। यह ACLs की एक list return करती है (जैसे `ACLAuthorizationExportClear` और पहले बताए गए अन्य ACLs), जिसमें प्रत्येक entry के पास होता है:
-- Description
-- **Trusted Application List**। यह हो सकता है:
-- एक app: /Applications/Slack.app
-- एक binary: /usr/libexec/airportd
-- एक group: group://AirPort
+- API **`SecAccessCopyACLList`** से आप **keychain item का ACL** पा सकते हैं। यह ACLs की एक सूची लौटाता है (जैसे `kSecACLAuthorizationExportClear` और पहले बताए गए अन्य ACLs), जिसमें हर entry में शामिल हैं:<sup>[[1]](#references)[[2]](#references)</sup>
+  - Description
+  - **Trusted Application List**। इसमें ये शामिल हो सकते हैं:
+    - कोई app: /Applications/Slack.app
+    - कोई binary: /usr/libexec/airportd
+    - कोई group: group://AirPort
 
 Data export करें:<sup>[[1]](#references)</sup>
 
-- API **`SecKeychainItemCopyContent`** plaintext प्राप्त करती है
-- API **`SecItemExport`** keys और certificates को export करती है, लेकिन content को encrypted रूप में export करने के लिए passwords set करने पड़ सकते हैं
+- API **`SecKeychainItemCopyContent`** plaintext प्राप्त करता है
+- API **`SecItemExport`** keys और certificates export करता है, लेकिन content को encrypted रूप में export करने के लिए password सेट करना पड़ सकता है
 
-और ये **बिना prompt के secret export करने में सक्षम होने** की **requirements** हैं:<sup>[[1]](#references)</sup>
+और ये वे **requirements** हैं जिनसे **prompt के बिना secret export** किया जा सकता है:<sup>[[1]](#references)</sup>
 
-- यदि **1+ trusted** apps listed हैं:
-- उपयुक्त **authorizations** चाहिए (**`Nil`**, या secret info तक access की authorization में allowed apps की list का **part** होना चाहिए)
-- code signature का **PartitionID** से match करना आवश्यक है
-- code signature का किसी एक **trusted app** से match करना आवश्यक है (या सही KeychainAccessGroup का member होना चाहिए)
-- यदि **all applications trusted** हैं:
-- उपयुक्त **authorizations** चाहिए
-- code signature का **PartitionID** से match करना आवश्यक है
-- यदि **no PartitionID** है, तो इसकी आवश्यकता नहीं है
+- यदि **1+ trusted** apps सूचीबद्ध हों:
+  - उपयुक्त **authorizations** चाहिए (**`Nil`**, या secret info तक पहुँचने की authorization में allowed apps की सूची का **हिस्सा** होना)
+  - code signature का **PartitionID** से मेल खाना चाहिए
+  - code signature का किसी **trusted app** से मेल खाना चाहिए (या सही KeychainAccessGroup का सदस्य होना चाहिए)
+- यदि **सभी applications trusted** हों:
+  - उपयुक्त **authorizations** चाहिए
+  - code signature का **PartitionID** से मेल खाना चाहिए
+    - यदि **PartitionID नहीं है**, तो इसकी ज़रूरत नहीं
 
 > [!CAUTION]
-> इसलिए, यदि **1 application listed** है, तो आपको उस application में **code inject करना होगा**।
+> इसलिए, यदि **1 application सूचीबद्ध है**, तो आपको **उस application में code inject करना होगा**।
 >
-> यदि **partitionID** में **apple** indicated है, तो आप **`osascript`** से इसे access कर सकते हैं। इसलिए वे सभी applications को trust करने वाली चीजें जिनके partitionID में apple है, access की जा सकती हैं। इसके लिए **`Python`** का भी उपयोग किया जा सकता है।
+> यदि **partitionID** में **apple** दर्शाया गया है, तो आप इसे **`osascript`** से access कर सकते हैं; यानी वे सभी applications जो partitionID में apple होने पर भरोसा करती हैं। इसके लिए **`Python`** का भी उपयोग किया जा सकता है।
 
-### Two additional attributes
+### दो अतिरिक्त attributes
 
-- **Invisible**: यह एक boolean flag है जो entry को **UI** Keychain app से **hide** करता है<sup>[[1]](#references)</sup>
-- **General**: इसका उपयोग **metadata** store करने के लिए होता है (इसलिए यह **ENCRYPTED नहीं है**)<sup>[[1]](#references)</sup>
-- Microsoft sensitive endpoint तक access करने के लिए सभी refresh tokens को plain text में store कर रहा था।<sup>[[1]](#references)</sup>
+- **Invisible**: यह entry को **UI** Keychain app से **छिपाने** के लिए boolean flag है<sup>[[1]](#references)</sup>
+- **General**: इसका उपयोग **metadata** स्टोर करने के लिए होता है (इसलिए यह ENCRYPTED नहीं है)<sup>[[1]](#references)</sup>
+  - Microsoft संवेदनशील endpoint तक पहुँचने के लिए सभी refresh tokens को plaintext में स्टोर कर रहा था।<sup>[[1]](#references)</sup>
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## References
 
-- [1] [#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas](https://www.youtube.com/watch?v=jKE1ZW33JpY)
-{{#include ../../banners/hacktricks-training.md}}
+- [1] [#OBTS v5.0: "macOS Keychain को Lock Picking करना" - Cody Thomas](https://www.youtube.com/watch?v=jKE1ZW33JpY)
+- [2] [Apple Developer — kSecACLAuthorizationExportClear](https://developer.apple.com/documentation/security/ksecaclauthorizationexportclear)
+- [3] [Kaspersky Securelist - MacSync macOS stealer का नया संस्करण crypto enthusiasts और developers को निशाना बनाता है](https://securelist.com/macsync-new-version/121383/)
+- [4] [Apple security(1) man page mirror](https://keith.github.io/xcode-man-pages/security.1.html)
