@@ -6,7 +6,7 @@ WinDbg and WinDbgX can run debugger commands at startup, on exceptions, and when
 
 ## Start at a useful exception
 
-`-c` runs commands at the initial debugger break. Append `;g` to resume after setup. For an unattended WinDbg Classic run, `-logo` writes the command window to a log, `-Q` avoids the workspace-save prompt, and `-G` exits when the target ends. WinDbgX also accepts `-c`; its configured Startup commands run afterward.<sup>[[1]](#references)</sup>
+`-c` runs commands at the initial debugger break. Append `;g` to resume after setup. For an unattended WinDbg Classic run, `-logo` writes the command window to a log, `-Q` disables automatic workspace saving, and `-G` ignores the final breakpoint so the session ends when the target exits. WinDbgX also accepts `-c`; its configured Startup commands run afterward.<sup>[[1]](#references)[[7]](#references)</sup>
 
 ```text
 windbg.exe -c "sxd av;g" -logo C:\logs\triage.txt C:\path\target.exe
@@ -77,9 +77,11 @@ r $t0 = 0
 
 Aliases created with `as name value` are textual substitutions, not typed variables. `al` lists them, `ad name` deletes one, and `${name}` forces an unambiguous expansion. Avoid names such as `bp`, `x`, or `r` because an alias can shadow a built-in command. MASM expressions suit pointer arithmetic such as `poi(@$t0)`; `@@c++(...)` can access typed fields when symbols are present, avoiding hard-coded structure offsets.<sup>[[1]](#references)</sup>
 
-Put longer command sequences in a command file. `$$><filename` joins lines into a single command stream and suppresses unwanted alias expansion, but multiline control structures can still be fragile; keep each `.if` or `.for` statement on one line. The same file can be invoked from `-c` at startup.<sup>[[1]](#references)</sup>
+Put longer command sequences in a command file. `$$><filename` joins lines into a single command block and permits a following semicolon-delimited debugger command. Multiline control structures can still be fragile; keep each `.if` or `.for` statement on one line. The same file can be invoked from `-c` at startup.<sup>[[1]](#references)[[8]](#references)</sup>
 
 For logic that is awkward in command language, PyKD exposes typed structures, registers, memory, and debugger output to Python. For example, `pykd.typedVar("ntdll!_PEB", pykd.getCurrentProcess())` accesses PEB fields, `pykd.loadBytes(address, size)` reads memory, and `pykd.dbgCommand("lm")` returns debugger output for parsing. Prefer bounded `loadChars`/`loadWChars` over unbounded string reads for possibly unterminated data. PyKD's `disasm(address).asm(instruction)` **writes assembled bytes at that address**, so preserve and restore the original memory if using it to obtain opcodes in a live process.<sup>[[1]](#references)</sup>
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## References
 
@@ -89,5 +91,5 @@ For logic that is awkward in command language, PyKD exposes typed structures, re
 - [4] [Microsoft: bd (Breakpoint Disable)](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/bd--breakpoint-disable-)
 - [5] [Microsoft: bp, bu, bm (Set Breakpoint)](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/bp--bu--bm--set-breakpoint-)
 - [6] [Corelan trigscan source](https://github.com/corelan/blogposts/blob/main/debugging/scripts/frida/corelan_trigscan.py)
-
-{{#include ../../banners/hacktricks-training.md}}
+- [7] [Microsoft: WinDbg Command-Line Options](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/windbg-command-line-options)
+- [8] [Microsoft: Run Script File](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/-----------------------a---run-script-file-)

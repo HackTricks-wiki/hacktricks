@@ -1111,7 +1111,7 @@
   - [Z3 - Satisfiability Modulo Theories (SMT)](reversing/reversing-tools-basic-methods/satisfiability-modulo-theories-smt-z3.md)
   - [Cheat Engine](reversing/reversing-tools-basic-methods/cheat-engine.md)
   - [Blobrunner](reversing/reversing-tools-basic-methods/blobrunner.md)
-  - [Windbg Automation](reversing/reversing-tools-basic-methods/windbg-automation.md)
+  - [WinDbg Automation](reversing/reversing-tools-basic-methods/windbg-automation.md)
   - [Windows Kernel Debugging with KernelFlirt](reversing/reversing-tools-basic-methods/windows-kernel-debugging-kernelflirt.md)
 - [Common API used in Malware](reversing/common-api-used-in-malware.md)
 - [Word Macros](reversing/word-macros.md)
