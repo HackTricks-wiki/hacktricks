@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Principales algoritmos de machine learning
+## Principales algoritmos de Machine Learning
 
-El mejor punto de partida para aprender sobre IA es entender cómo funcionan los principales algoritmos de machine learning. Esto te ayudará a comprender cómo funciona la IA, cómo usarla y cómo atacarla:
+El mejor punto de partida para aprender sobre IA es entender cómo funcionan los principales algoritmos de Machine Learning. Esto te ayudará a entender cómo funciona la IA, cómo usarla y cómo atacarla:
 
 
 {{#ref}}
@@ -26,41 +26,45 @@ El mejor punto de partida para aprender sobre IA es entender cómo funcionan los
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### Arquitectura de los LLMs
+### Arquitectura de los LLM
 
-En la siguiente página encontrarás los conceptos básicos de cada componente necesario para crear un LLM básico usando transformers:
+En la siguiente página encontrarás los conceptos básicos de cada componente necesario para crear un LLM básico con transformers:
 
 
 {{#ref}}
 AI-llm-architecture/README.md
 {{#endref}}
 
+## Herramientas y plataformas de modelos
+
+Para ejecutar, ajustar, servir o probar modelos, consulta la [guía de herramientas y plataformas de modelos de IA](AI-Model-Tools-and-Platforms.md).
+
 ## Seguridad de la IA
 
-### Metodología de seguridad de agentes de IA
+### Metodología de seguridad para agentes de IA
 
 {{#ref}}
 AI-Agent-Security-Methodology.md
 {{#endref}}
 
-### Marcos de riesgo de IA
+### Marcos de riesgo de la IA
 
-Dos marcos útiles para empezar a evaluar los riesgos de los sistemas de IA son OWASP Machine Learning Security Top 10 y Secure AI Framework (SAIF) de Google. Son complementarios y no constituyen una lista exhaustiva de marcos de riesgo de IA.<sup>[[1]](#references)[[2]](#references)</sup>
+Dos marcos útiles para comenzar a evaluar los riesgos de los sistemas de IA son OWASP Machine Learning Security Top 10 y Secure AI Framework (SAIF) de Google. Son complementarios y no constituyen una lista exhaustiva de marcos de riesgo de IA.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Ataques adversariales guiados por interpretabilidad mecanicista
+### Ataques adversariales guiados por la interpretabilidad mecanicista
 
 {{#ref}}
 AI-Mechanistic-Interpretability-Adversarial-Attacks.md
 {{#endref}}
 
-### Seguridad de los prompts de IA
+### Seguridad de prompts de IA
 
-El uso de la IA se ha disparado en los últimos años gracias a los LLMs, pero no son perfectos y pueden ser engañados mediante prompts adversariales. Este es un tema muy importante para entender cómo usar la IA de forma segura y cómo atacarla:
+El uso de la IA se ha disparado en los últimos años gracias a los LLM, pero no son perfectos y pueden ser engañados mediante prompts adversariales. Este es un tema muy importante para entender cómo usar la IA de forma segura y cómo atacarla:
 
 
 {{#ref}}
@@ -69,7 +73,7 @@ AI-Prompts.md
 
 ### RCE en modelos de IA
 
-Es muy común que desarrolladores y empresas ejecuten modelos descargados de Internet; sin embargo, con solo cargar un modelo podría bastar para ejecutar código arbitrario en el sistema. Este es un tema muy importante para entender cómo usar la IA de forma segura y cómo atacarla:
+Es muy común que los desarrolladores y las empresas ejecuten modelos descargados de Internet. Sin embargo, cargar un modelo podría bastar para ejecutar código arbitrario en el sistema. Este es un tema muy importante para entender cómo usar la IA de forma segura y cómo atacarla:
 
 
 {{#ref}}
@@ -78,7 +82,7 @@ AI-Models-RCE.md
 
 ### Evasión de KYC asistida por IA
 
-El video generativo puede combinarse con la inyección de cámaras virtuales y la manipulación de la API de la cámara para evadir flujos de trabajo débiles de KYC, verificación de edad y comprobación biométrica de presencia:
+El video generativo puede combinarse con la inyección de cámaras virtuales y la manipulación de las API de cámara para evadir flujos débiles de KYC, verificación de edad y comprobación biométrica de vida:
 
 
 {{#ref}}
@@ -94,7 +98,7 @@ MCP (Model Context Protocol) es un protocolo abierto para conectar aplicaciones 
 AI-MCP-Servers.md
 {{#endref}}
 
-### Fuzzing asistido por IA y descubrimiento automatizado de vulnerabilidades
+### Fuzzing asistido por IA y detección automatizada de vulnerabilidades
 
 
 {{#ref}}
@@ -103,11 +107,11 @@ AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 
 ### Ingeniería inversa asistida por IA
 
-[Elevación parcial, detección de invariantes MBA, decodificación vinculada al entorno y validación automatizada de extractores](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[Elevación parcial a código, detección de invariantes MBA, decodificación vinculada al entorno y validación de extractores automatizados](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
-### Bots de pentesting web black-box con IA
+### Bots de pentesting web de caja negra con IA
 
-Los agentes basados en LLMs pueden automatizar flujos de trabajo prolongados de pentesting web black-box si cuentan con observabilidad, orquestación, gestión de sesiones autenticadas y validación adversarial:
+Los agentes basados en LLM pueden automatizar flujos de trabajo prolongados de pentesting web de caja negra cuando cuentan con observabilidad, orquestación, gestión de sesiones autenticadas y validación adversarial:
 
 
 {{#ref}}
@@ -116,7 +120,7 @@ Web-Black-Box-AI-Pentester-Bots.md
 
 ## References
 
-- [1] [OWASP Top 10 de seguridad de machine learning](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [1] [OWASP: Los 10 principales riesgos de seguridad de Machine Learning](https://owasp.org/www-project-machine-learning-security-top-10/)
 - [2] [Google — Marco de IA segura (SAIF)](https://saif.google/)
 - [3] [Model Context Protocol — Introducción](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}
