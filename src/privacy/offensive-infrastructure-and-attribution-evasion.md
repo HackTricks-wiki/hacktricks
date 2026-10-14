@@ -176,6 +176,8 @@ This provides resilience and hides back-end C2 from static binary analysis. It a
 
 Blocking all GitHub, cloud storage or social media is rarely viable. Service-aware egress policy and process-level correlation outperform domain-only blocking.
 
+One GitHub-specific resolver variation uses the Issues Search API only when an authenticated repository channel fails. The client searches for issues matching the current date, repository and issue type, follows each issue's comments URL, and extracts ciphertext between `<!--` and `-->` markers. After per-host, date-derived decryption, fields such as `Owner`, `LicRepo` and `LicToken` replace the primary repository owner, path and token. This lets the operator rotate credentials and endpoints without replacing the client; the issue comment is a resolver, while the repository files remain the tasking channel.<sup>[[15]](#references)</sup>
+
 ## Personas, accounts and procurement compartments
 
 Infrastructure anonymity fails when a persona, recovery email, phone, payment, browser or admin IP bridges compartments. State-linked operations have cultivated social profiles, email identities and cloud accounts long before use; ATT&CK records this as Establish Accounts (T1585), including social, email and cloud sub-techniques.<sup>[[8]](#references)</sup>
@@ -275,4 +277,6 @@ If one ordinary provider can fill every column, the architecture provides concea
 - [12] [MITRE ATT&CK — Traffic Signaling (T1205)](https://attack.mitre.org/techniques/T1205/)
 - [13] [Google Threat Intelligence Group — Disrupting the World's Largest Residential Proxy Network](https://cloud.google.com/blog/topics/threat-intelligence/disrupting-largest-residential-proxy-network)
 - [14] [Unit 42 — The Shadow Campaigns: Uncovering Global Espionage](https://unit42.paloaltonetworks.com/shadow-campaigns-uncovering-global-espionage/)
+- [15] [Unit 42 - Blinder Tunnel Campaign Targets Iraqi Infrastructure](https://unit42.paloaltonetworks.com/blinder-tunnel-targets-critical-infrastructure/)
+
 {{#include ../banners/hacktricks-training.md}}

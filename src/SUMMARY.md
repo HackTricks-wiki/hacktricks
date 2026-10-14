@@ -379,6 +379,7 @@
 - [Authentication Credentials Uac And Efs](windows-hardening/authentication-credentials-uac-and-efs.md)
 - [Checklist - Local Windows Privilege Escalation](windows-hardening/checklist-windows-privilege-escalation.md)
 - [Visual Studio VSIX Extension Abuse](windows-hardening/visual-studio-vsix-extension-abuse.md)
+- [Visual Studio Project Design-Time MSBuild Execution](windows-hardening/visual-studio-project-msbuild-execution.md)
 - [Windows Local Privilege Escalation](windows-hardening/windows-local-privilege-escalation/README.md)
   - [Abusing Auto Updaters And Ipc](windows-hardening/windows-local-privilege-escalation/abusing-auto-updaters-and-ipc.md)
   - [Arbitrary Kernel Rw Token Theft](windows-hardening/windows-local-privilege-escalation/arbitrary-kernel-rw-token-theft.md)
