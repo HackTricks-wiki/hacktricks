@@ -166,6 +166,8 @@ Defenders need registrar and authoritative-DNS audit logs, MFA, registry/registr
 
 A **dead-drop resolver (T1102.001)** stores an encoded pointer to current C2 inside a legitimate post, profile, document, repository, cloud object or blockchain field. Malware fetches the public object, decodes a domain/IP and contacts the next stage. Bidirectional variants exchange commands or files through service APIs.<sup>[[7]](#references)</sup>
 
+One GitHub-specific resolver variation uses the Issues Search API only when an authenticated repository channel fails. The client searches for issues matching the current date, repository and issue type, follows each issue's comments URL, and extracts ciphertext between `<!--` and `-->` markers. After per-host, date-derived decryption, fields such as `Owner`, `LicRepo` and `LicToken` replace the primary repository owner, path and token. This lets the operator rotate credentials and endpoints without replacing the client; the issue comment is a resolver, while the repository files remain the tasking channel.<sup>[[15]](#references)</sup>
+
 This provides resilience and hides back-end C2 from static binary analysis. It also creates stable object, tenant, repository, API and access-pattern identifiers. Defenders should join:
 
 1. the process that contacted the service;
@@ -175,8 +177,6 @@ This provides resilience and hides back-end C2 from static binary analysis. It a
 5. identical behavior elsewhere in the fleet.
 
 Blocking all GitHub, cloud storage or social media is rarely viable. Service-aware egress policy and process-level correlation outperform domain-only blocking.
-
-One GitHub-specific resolver variation uses the Issues Search API only when an authenticated repository channel fails. The client searches for issues matching the current date, repository and issue type, follows each issue's comments URL, and extracts ciphertext between `<!--` and `-->` markers. After per-host, date-derived decryption, fields such as `Owner`, `LicRepo` and `LicToken` replace the primary repository owner, path and token. This lets the operator rotate credentials and endpoints without replacing the client; the issue comment is a resolver, while the repository files remain the tasking channel.<sup>[[15]](#references)</sup>
 
 ## Personas, accounts and procurement compartments
 

@@ -422,7 +422,6 @@ C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
 
 A malicious C# project can also run an [MSBuild design-time target when opened in Visual Studio](../../windows-hardening/visual-studio-project-msbuild-execution.md), before anyone explicitly invokes `MSBuild.exe` or builds the project.<sup>[[28]](#references)</sup>
 
-
 ## **CSC**
 
 Compile C# code in the victim machine.<sup>[[17]](#references)[[18]](#references)</sup>
