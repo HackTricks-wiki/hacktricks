@@ -2,32 +2,32 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Skep en Monteer van 'n Beeld
+## Skep en Monteer ’n Beeld
 
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## Malware-analise
+## Malware-ontleding
 
-Dit **is nie noodwendig die eerste stap om uit te voer sodra jy die beeld het nie**. Maar jy kan hierdie malware-analise-tegnieke onafhanklik gebruik indien jy 'n lêer, 'n lêerstelselbeeld, geheuebeeld, pcap... het, dus is dit goed om **hierdie aksies in gedagte te hou**:
+Dit is **nie noodwendig die eerste stap wat jy moet uitvoer nadat jy die beeld gekry het nie**. Maar jy kan hierdie malware-ontledingstegnieke onafhanklik gebruik as jy ’n lêer, ’n lêerstelselbeeld, ’n geheuebeeld, ’n pcap... het, dus is dit goed om **hierdie stappe in gedagte te hou**:
 
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Inspeksie van 'n Beeld
+## Ondersoek ’n Beeld
 
-indien jy 'n **forensiese beeld** van 'n toestel ontvang, kan jy begin om die gebruikte **partisies en lêerstelsel** te **analiseer** en potensieel **interessante lêers** te **herwin** (selfs geskrapte lêers). Leer hoe by:
+As jy ’n **forensiese beeld** van ’n toestel kry, kan jy begin om die gebruikte **partisies en lêerstelsel te ontleed** en moontlik **interessante lêers te herwin** (selfs geskrapte lêers). Leer hoe op:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Afhangende van die gebruikte OS'e en selfs platform, moet daar na verskillende interessante artefakte gesoek word:
+Afhangend van die gebruikte OS'e en selfs platform, moet daar na verskillende interessante artefakte gesoek word:
 
 
 {{#ref}}
@@ -49,31 +49,33 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
-## Diep inspeksie van spesifieke lêertipes en Software
+Sien [Android-forensika](android-forensics.md) vir ’n geslote Android-toestel, verkrygingsroetes en geheuebeelding.
 
-Indien jy 'n baie **verdagte** **lêer** het, kan verskeie **tricks**, **afhangende van die lêertipe en die software** wat dit geskep het, nuttig wees.\
-Lees die volgende bladsy om van die interessante tricks te leer:
+## Diep Ondersoek van Spesifieke Lêertipes en Sagteware
+
+As jy ’n baie **verdagte** **lêer** het, kan verskeie **truuks** nuttig wees, **afhangend van die lêertipe en die sagteware** wat dit geskep het.\
+Lees die volgende bladsy om van die interessante truuks te leer:
 
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-Ek wil spesiale vermelding maak van die bladsy:
+Ek wil spesiale melding maak van die bladsy:
 
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Inspeksie van 'n Memory Dump
+## Ondersoek van Geheuestortings
 
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Pcap-inspeksie
+## Pcap-ondersoek
 
 
 {{#ref}}
@@ -89,7 +91,7 @@ Hou die moontlike gebruik van anti-forensiese tegnieke in gedagte:
 anti-forensic-techniques.md
 {{#endref}}
 
-## Threat Hunting
+## Bedreigingsjag
 
 
 {{#ref}}
