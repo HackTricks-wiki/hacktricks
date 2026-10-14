@@ -1,10 +1,10 @@
-# KI in kuberveiligheid
+# AI in Kuberveiligheid
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Hoofmasjienleer-algoritmes
 
-Die beste beginpunt om oor KI te leer, is om te verstaan hoe die belangrikste masjienleer-algoritmes werk. Dit sal jou help om te verstaan hoe KI werk, hoe om dit te gebruik en hoe om dit aan te val:
+Die beste beginpunt om oor AI te leer, is om te verstaan hoe die belangrikste masjienleer-algoritmes werk. Dit sal jou help verstaan hoe AI werk, hoe om dit te gebruik en hoe om dit aan te val:
 
 
 {{#ref}}
@@ -28,55 +28,59 @@ Die beste beginpunt om oor KI te leer, is om te verstaan hoe die belangrikste ma
 
 ### LLM-argitektuur
 
-Op die volgende bladsy vind jy die grondbeginsels van elke komponent waarmee jy ’n basiese LLM met behulp van transformers kan bou:
+Op die volgende bladsy vind jy die basiese beginsels van elke komponent wat nodig is om ’n basiese LLM met transformers te bou:
 
 
 {{#ref}}
 AI-llm-architecture/README.md
 {{#endref}}
 
-## KI-sekuriteit
+## Modelnutsmiddels en -platforms
 
-### Metodologie vir KI-agent-sekuriteit
+Gebruik die [gids vir AI-modelnutsmiddels en -platforms](AI-Model-Tools-and-Platforms.md) om modelle te laat loop, fyn in te stel, te bedien of uit te probeer.
+
+## AI-sekuriteit
+
+### Metodologie vir AI-agentsekuriteit
 
 {{#ref}}
 AI-Agent-Security-Methodology.md
 {{#endref}}
 
-### KI-risikoraamwerke
+### AI-risikoraamwerke
 
-Twee nuttige raamwerke om KI-stelselrisiko te beoordeel, is die OWASP Top 10 vir Masjienleer-sekuriteit en Google se Veilige KI-raamwerk (SAIF). Hulle vul mekaar aan, maar vorm nie ’n volledige lys van KI-risikoraamwerke nie.<sup>[[1]](#references)[[2]](#references)</sup>
+Twee nuttige beginraamwerke om AI-stelselrisiko te bepaal, is die OWASP Machine Learning Security Top 10 en Google se Secure AI Framework (SAIF). Hulle vul mekaar aan, maar vorm nie ’n volledige lys van AI-risikoraamwerke nie.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Meganistiese interpreteerbaarheid-geleide adversariële aanvalle
+### Meganiese-interpreteerbaarheid-geleide teenstrydige aanvalle
 
 {{#ref}}
 AI-Mechanistic-Interpretability-Adversarial-Attacks.md
 {{#endref}}
 
-### Sekuriteit van KI-aanwysings
+### AI-promptsekuriteit
 
-LLM’s het die gebruik van KI die afgelope jare laat ontplof, maar hulle is nie perfek nie en kan deur adversariële aanwysings mislei word. Dit is ’n baie belangrike onderwerp om te verstaan hoe om KI veilig te gebruik en hoe om dit aan te val:
+LLM’s het die gebruik van AI die afgelope paar jaar laat ontplof, maar hulle is nie perfek nie en kan deur teenstrydige prompts mislei word. Dit is ’n baie belangrike onderwerp om te verstaan hoe om AI veilig te gebruik en hoe om dit aan te val:
 
 
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
 
-### RCE in KI-modelle
+### RCE in AI-modelle
 
-Dit is baie algemeen dat ontwikkelaars en maatskappye modelle laat loop wat van die internet afgelaai is. Die blote laai van ’n model kan egter genoeg wees om arbitrêre kode op die stelsel uit te voer. Dit is ’n baie belangrike onderwerp om te verstaan hoe om KI veilig te gebruik en hoe om dit aan te val:
+Dit is baie algemeen dat ontwikkelaars en maatskappye modelle laat loop wat van die internet afgelaai is. Om ’n model bloot te laai, kan egter genoeg wees om arbitrêre kode op die stelsel uit te voer. Dit is ’n baie belangrike onderwerp om te verstaan hoe om AI veilig te gebruik en hoe om dit aan te val:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### KI-gesteunde KYC-omseiling
+### KYC-omseiling met AI-ondersteuning
 
 Generatiewe video kan met virtuele-kamera-inspuiting en manipulasie van kamera-API’s gekombineer word om swak KYC-, ouderdomsverifikasie- en biometriese lewendigheidskontroles te omseil:
 
@@ -87,27 +91,27 @@ KYC-Bypass-Using-AI.md
 
 ### AI Model Context Protocol
 
-MCP (Model Context Protocol) is ’n oop protokol om KI-toepassings aan nutsmiddels en databronne te koppel. Omdat MCP-bedieners data en aksies kan blootstel, moet assesserings magtiging, toestemming, validering van nutsmiddelinvoer en ’n hersiening van vertrouensgrense insluit.<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol) is ’n oop protokol om AI-toepassings aan nutsmiddels en databronne te koppel. Omdat MCP-bedieners data en aksies beskikbaar kan stel, moet assesserings magtiging, toestemming, validering van nutsmiddelinsette en hersiening van vertrouensgrense insluit.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### KI-gesteunde fuzzing en outomatiese kwesbaarheidsontdekking
+### Fuzzing en outomatiese kwesbaarheidsontdekking met AI-ondersteuning
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### KI-gesteunde reverse engineering
+### Omgekeerde ingenieurswese met AI-ondersteuning
 
-[Partiële lifting, opsporing van invariantes in MBA, omgewingsgebonde dekodering en validering van outomatiese ekstrakteurs](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[Partiële lifting, opsporing van invariansie-MBA, omgewingsgebonde dekodering en validering van outomatiese onttrekkers](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
-### Black-box KI-pentesterbots vir webtoepassings
+### Web-black-box-AI-pentesterbots
 
-LLM-aangedrewe agente kan langdurige black-box-webpentesting-werkvloeie outomatiseer wanneer hulle ondersteun word deur waarneembaarheid, orkestrasie, hantering van geverifieerde sessies en adversariële validering:
+LLM-aangedrewe agente kan langdurige black-box-web-pentesting-werkvloeie outomatiseer wanneer hulle ondersteun word deur waarneembaarheid, orkestrering, geverifieerde sessiehantering en teenstrydige validering:
 
 
 {{#ref}}
@@ -116,7 +120,7 @@ Web-Black-Box-AI-Pentester-Bots.md
 
 ## References
 
-- [1] [OWASP Top 10 vir Masjienleer-sekuriteit](https://owasp.org/www-project-machine-learning-security-top-10/)
-- [2] [Google — Veilige KI-raamwerk (SAIF)](https://saif.google/)
+- [1] [OWASP Masjienleer-sekuriteit Top 10](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [2] [Google — Veilige AI-raamwerk (SAIF)](https://saif.google/)
 - [3] [Model Context Protocol — Inleiding](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}
