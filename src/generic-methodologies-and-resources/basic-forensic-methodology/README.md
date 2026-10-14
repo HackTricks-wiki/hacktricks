@@ -1,8 +1,8 @@
-# Basic Forensic Methodology
+# बुनियादी फॉरेंसिक कार्यप्रणाली
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Image बनाना और Mount करना
+## इमेज बनाना और माउंट करना
 
 
 {{#ref}}
@@ -11,23 +11,23 @@
 
 ## Malware Analysis
 
-Image प्राप्त होने के बाद यह **पहला आवश्यक कदम नहीं है**। लेकिन यदि आपके पास कोई file, file-system image, memory image, pcap... हो, तो आप इन malware analysis techniques का स्वतंत्र रूप से उपयोग कर सकते हैं, इसलिए **इन actions को ध्यान में रखना अच्छा है**:
+**इमेज मिलने के बाद यह ज़रूरी नहीं कि सबसे पहला कदम यही हो।** लेकिन अगर आपके पास कोई फ़ाइल, file-system image, memory image, pcap... हो, तो आप इन malware analysis techniques का स्वतंत्र रूप से इस्तेमाल कर सकते हैं। इसलिए **इन कार्रवाइयों को ध्यान में रखना अच्छा है**:
 
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Image का निरीक्षण
+## इमेज की जाँच करना
 
-यदि आपको किसी device की **forensic image** दी गई है, तो आप उपयोग किए गए **partitions, file-system** का **analysis** शुरू कर सकते हैं और संभावित रूप से **interesting files** (deleted files सहित) **recover** कर सकते हैं। तरीका यहां जानें:
+अगर आपको किसी डिवाइस की **forensic image** दी गई है, तो आप इस्तेमाल किए गए **partitions और file-system का विश्लेषण** करना शुरू कर सकते हैं और संभावित रूप से **दिलचस्प फ़ाइलें** (यहाँ तक कि हटाई गई फ़ाइलें भी) **रिकवर** कर सकते हैं। इसका तरीका यहाँ जानें:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-उपयोग किए गए OSs और platform के आधार पर अलग-अलग interesting artifacts की खोज की जानी चाहिए:
+इस्तेमाल किए गए OS और platform के आधार पर, अलग-अलग दिलचस्प artifacts खोजने चाहिए:
 
 
 {{#ref}}
@@ -49,31 +49,33 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
-## Specific file-types और Software का गहन निरीक्षण
+लॉक किए गए Android डिवाइस, acquisition paths और memory imaging के लिए, [Android forensics](android-forensics.md) देखें।
 
-यदि आपके पास कोई बहुत **suspicious** **file** है, तो उसे बनाने वाले **file-type और software** के आधार पर कई **tricks** उपयोगी हो सकती हैं।\
-कुछ interesting tricks सीखने के लिए निम्नलिखित page पढ़ें:
+## विशिष्ट file-types और Software की गहराई से जाँच
+
+अगर आपके पास कोई बहुत **संदिग्ध** **फ़ाइल** है, तो उसे बनाने वाले **file-type और software के आधार पर**, कई **तरकीबें** काम आ सकती हैं।\
+कुछ दिलचस्प तरकीबें जानने के लिए यह पेज पढ़ें:
 
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-मैं page का विशेष उल्लेख करना चाहता हूं:
+मैं इस पेज का खास ज़िक्र करना चाहता हूँ:
 
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Memory Dump का निरीक्षण
+## Memory Dump की जाँच
 
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Pcap का निरीक्षण
+## Pcap की जाँच
 
 
 {{#ref}}
@@ -82,7 +84,7 @@ pcap-inspection/
 
 ## **Anti-Forensic Techniques**
 
-Anti-forensic techniques के संभावित उपयोग को ध्यान में रखें:
+Anti-forensic techniques के संभावित इस्तेमाल को ध्यान में रखें:
 
 
 {{#ref}}
