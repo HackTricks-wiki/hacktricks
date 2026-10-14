@@ -197,7 +197,7 @@ cheat-engine.md
 
 ## Evidence-backed native investigation with REA
 
-**REA** exposes Hopper, Ghidra and IDA analysis through CLI and MCP. Install Node.js/npm and configure an existing native provider first; check `rea providers --json` and select a provider explicitly when more than one supports the target. Use an observed function name or address from the inventory in place of `0x1000` below.<sup>[[16]](#references)[[18]](#references)</sup>
+**REA** exposes Hopper, Ghidra and IDA analysis through CLI and MCP. It requires Node.js 22.x (at least 22.19), 24.x (at least 24.11), or 26+, plus npm. Configure an existing native provider first; check `rea providers --json` and select a provider explicitly when more than one supports the target. Use an observed function name or address from the inventory in place of `0x1000` below.<sup>[[16]](#references)[[18]](#references)</sup>
 
 ```bash
 npm install --global rea-agents
