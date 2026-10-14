@@ -4,6 +4,7 @@
 
 - [HackTricks](README.md)
 - [HackTricks Values & FAQ](welcome/hacktricks-values-and-faq.md)
+- [Cookies Policy](welcome/cookies-policy.md)
 - [About the author](welcome/about-the-author.md)
 
 # 🤩 Generic Methodologies & Resources
@@ -107,6 +108,7 @@
     - [ZIPs tricks](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md)
   - [Windows Artifacts](generic-methodologies-and-resources/basic-forensic-methodology/windows-forensics/README.md)
     - [Interesting Windows Registry Keys](generic-methodologies-and-resources/basic-forensic-methodology/windows-forensics/interesting-windows-registry-keys.md)
+- [Rust Basics](generic-methodologies-and-resources/rust-basics.md)
 - [Python Sandbox Escape & Pyscript](generic-methodologies-and-resources/python/README.md)
   - [Bypass Python sandboxes](generic-methodologies-and-resources/python/bypass-python-sandboxes/README.md)
     - [Js2py Sandbox Escape Cve 2024 28397](generic-methodologies-and-resources/python/bypass-python-sandboxes/js2py-sandbox-escape-cve-2024-28397.md)
@@ -123,6 +125,7 @@
 - [Side Channel Attacks On Messaging Protocols](generic-methodologies-and-resources/side-channel-attacks-on-messaging-protocols.md)
 - [Threat Modeling](generic-methodologies-and-resources/threat-modeling.md)
 - [Blockchain & Crypto](blockchain/blockchain-and-crypto-currencies/README.md)
+  - [Investment Terms](blockchain/blockchain-and-crypto-currencies/investment-terms.md)
   - [Defi/AMM Hook Precision](blockchain/blockchain-and-crypto-currencies/defi-amm-hook-precision.md)
   - [Defi Amm Virtual Balance Cache Exploitation](blockchain/blockchain-and-crypto-currencies/defi-amm-virtual-balance-cache-exploitation.md)
   - [Mutation Testing With Slither](blockchain/smart-contract-security/mutation-testing-with-slither.md)
@@ -1179,10 +1182,7 @@
 
 # ✍️ TODO
 
-- [Rust Basics](todo/rust-basics.md)
 - [More Tools](todo/more-tools.md)
 - [Other Web Tricks](todo/other-web-tricks.md)
 - [Online Platforms with API](todo/online-platforms-with-api.md)
 - [Post Exploitation](todo/post-exploitation.md)
-- [Investment Terms](todo/investment-terms.md)
-- [Cookies Policy](todo/cookies-policy.md)
