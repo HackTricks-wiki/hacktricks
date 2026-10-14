@@ -10,6 +10,7 @@
 
 - [Pentesting Methodology](generic-methodologies-and-resources/pentesting-methodology.md)
 - [Fuzzing Methodology](generic-methodologies-and-resources/fuzzing.md)
+- [Proof Assistant and Formal Verification Security](generic-methodologies-and-resources/proof-assistant-formal-verification-security.md)
 - [External Recon Methodology](generic-methodologies-and-resources/external-recon-methodology/README.md)
   - [Database Leaks](generic-methodologies-and-resources/external-recon-methodology/database-leaks.md)
   - [Wide Source Code Search](generic-methodologies-and-resources/external-recon-methodology/wide-source-code-search.md)
@@ -31,8 +32,7 @@
 - [Wi-Fi Pentesting Methodology](generic-methodologies-and-resources/pentesting-wifi/README.md)
   - [Wi-Fi Fundamentals](generic-methodologies-and-resources/pentesting-wifi/wifi-fundamentals.md)
     - [Hardware, Drivers and Linux](generic-methodologies-and-resources/pentesting-wifi/wifi-hardware-drivers-and-linux.md)
-      - [Enable Nexmon Monitor And Injection On Android]()
-      - [Nexmon Monitor and Injection on Android](generic-methodologies-and-resources/pentesting-wifi/enable-nexmon-monitor-and-injection-on-android.md)
+      - [Nexmon Monitor and Injection on Android (formerly “Enable Nexmon Monitor And Injection On Android”)](generic-methodologies-and-resources/pentesting-wifi/enable-nexmon-monitor-and-injection-on-android.md) <!-- Original navigation label: [Enable Nexmon Monitor And Injection On Android]() -->
     - [Reconnaissance and Wardriving](generic-methodologies-and-resources/pentesting-wifi/wifi-reconnaissance-and-wardriving.md)
       - [Wi-Fi Reconnaissance Setups](generic-methodologies-and-resources/pentesting-wifi/wifi-reconnaissance-setups.md)
     - [Wi-Fi Tools Reference](generic-methodologies-and-resources/pentesting-wifi/wifi-tools-reference.md)
@@ -53,8 +53,7 @@
   - [Wi-Fi Mesh and EasyMesh](generic-methodologies-and-resources/pentesting-wifi/wifi-mesh-and-easymesh.md)
   - [Modern Wi-Fi: Roaming, 6 GHz and MLO](generic-methodologies-and-resources/pentesting-wifi/modern-wifi-roaming-6ghz-and-mlo.md)
   - [Evil Twin, Rogue AP and Client Association Attacks](generic-methodologies-and-resources/pentesting-wifi/evil-twin-rogue-ap-and-client-association-attacks.md)
-    - [Evil Twin EAP-TLS]()
-    - [Enterprise EAP Evil Twin (including EAP-TLS)](generic-methodologies-and-resources/pentesting-wifi/evil-twin-eap-tls.md)
+    - [Enterprise EAP Evil Twin (including EAP-TLS) / Evil Twin EAP-TLS](generic-methodologies-and-resources/pentesting-wifi/evil-twin-eap-tls.md) <!-- Original navigation label: [Evil Twin EAP-TLS]() -->
   - [Wi-Fi DoS and Management-Frame Attacks](generic-methodologies-and-resources/pentesting-wifi/wifi-dos-and-management-frame-attacks.md)
   - [Post-Association and Client-Isolation Attacks](generic-methodologies-and-resources/pentesting-wifi/wifi-post-association-and-client-isolation-attacks.md)
   - [FragAttacks and Fragile Frames](generic-methodologies-and-resources/pentesting-wifi/fragattacks.md)
@@ -171,12 +170,11 @@
 - [Search Exploits](generic-hacking/search-exploits.md)
 - [Tunneling and Port Forwarding](generic-hacking/tunneling-and-port-forwarding.md)
 
-# Linux - Hardening 🐧
+# 🐧 Linux Hardening / Linux - Hardening 🐧
 
-- [🐧 Linux Hardening]()
-- [Linux - Hardening Overview](linux-hardening/README.md)
-- [Linux Basics]()
-- [Linux - Basics](linux-hardening/linux-basics/README.md)
+- [Linux - Hardening Overview](linux-hardening/README.md) <!-- Original navigation label: [🐧 Linux Hardening]() -->
+- [Linux - Basics (formerly “Linux Basics”)](linux-hardening/linux-basics/README.md) <!-- Original navigation label: <!-- Legacy PR-side empty SUMMARY labels, now mapped to the canonical linked entries below:
+[Linux Basics]() -->
   - [Linux - Privilege Escalation](linux-hardening/linux-basics/linux-privilege-escalation/README.md)
   - [Linux - Shell Startup, Aliases, and History](linux-hardening/linux-basics/shell-startup-aliases-and-history.md)
   - [Linux - Useful Commands](linux-hardening/linux-basics/useful-linux-commands.md)
@@ -184,8 +182,7 @@
   - [Linux - Bypass Restrictions](linux-hardening/linux-basics/bypass-linux-restrictions/README.md)
     - [Linux - Bypass FS protections: read-only / no-exec / Distroless](linux-hardening/linux-basics/bypass-linux-restrictions/bypass-fs-protections-read-only-no-exec-distroless/README.md)
       - [Linux - DDexec / EverythingExec](linux-hardening/linux-basics/bypass-linux-restrictions/bypass-fs-protections-read-only-no-exec-distroless/ddexec.md)
-- [Main System Information]()
-- [Linux - Main System Information](linux-hardening/main-system-information/README.md)
+- [Linux - Main System Information (formerly “Main System Information”)](linux-hardening/main-system-information/README.md) <!-- Original navigation label: [Main System Information]() -->
   - [Linux - Kernel Vulnerability Assessment](linux-hardening/main-system-information/kernel-vulnerability-assessment.md)
   - [Linux - Kernel Modules and modprobe Abuse](linux-hardening/main-system-information/kernel-modules-and-modprobe.md)
   - [Linux - Sudo Command Abuse](linux-hardening/main-system-information/sudo-command-abuse.md)
@@ -194,24 +191,20 @@
   - [Linux - Filesystem, Inodes and Recovery](linux-hardening/main-system-information/filesystem-inodes-and-recovery.md)
   - [Linux - Privilege Escalation Checklist](linux-hardening/main-system-information/linux-privilege-escalation-checklist.md)
   - [Linux - Escaping from Jails](linux-hardening/main-system-information/escaping-from-limited-bash.md)
-  - [Kernel/LPE/CVE material]()
-  - [Linux - Kernel/LPE/CVE Material](linux-hardening/main-system-information/kernel-lpe-cves/README.md)
+  - [Linux - Kernel/LPE/CVE Material (formerly “Kernel/LPE/CVE material”)](linux-hardening/main-system-information/kernel-lpe-cves/README.md) <!-- Original navigation label: [Kernel/LPE/CVE material]() -->
     - [Linux - Vmware Tools Service Discovery Untrusted Search Path Cve 2025 41244](linux-hardening/main-system-information/kernel-lpe-cves/vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md)
     - [Linux - Copy Fail Af Alg Splice Page Cache Overwrite Cve 2026 31431](linux-hardening/main-system-information/kernel-lpe-cves/copy-fail-af_alg-splice-page-cache-overwrite-cve-2026-31431.md)
     - [Open vSwitch Forwarded SKB Marker Stripping to ESP Page Cache Writes](linux-hardening/main-system-information/kernel-lpe-cves/open-vswitch-forwarded-skb-marker-stripping-esp-page-cache-write.md)
     - [Linux - Posix Cpu Timers Toctou Cve 2025 38352](linux-hardening/main-system-information/kernel-lpe-cves/posix-cpu-timers-toctou-cve-2025-38352.md)
-    - [Linux Ptrace Exit Race Pidfd Getfd Fd Theft]()
-    - [Linux - Ptrace Exit Race Pidfd Getfd Fd Theft](linux-hardening/main-system-information/kernel-lpe-cves/linux-ptrace-exit-race-pidfd_getfd-fd-theft.md)
-- [User Information]()
-- [Linux - User Information](linux-hardening/user-information/README.md)
+    - [Linux - Ptrace Exit Race Pidfd Getfd Fd Theft (formerly “Linux Ptrace Exit Race Pidfd Getfd Fd Theft”)](linux-hardening/main-system-information/kernel-lpe-cves/linux-ptrace-exit-race-pidfd_getfd-fd-theft.md) <!-- Original navigation label: [Linux Ptrace Exit Race Pidfd Getfd Fd Theft]() -->
+- [Linux - User Information (formerly “User Information”)](linux-hardening/user-information/README.md) <!-- Original navigation label: [User Information]() -->
   - [Linux - Users, Sessions, and Credential Artifacts](linux-hardening/user-information/user-and-session-triage.md)
   - [Linux - euid, ruid, suid](linux-hardening/user-information/euid-ruid-suid.md)
   - [Linux - Interesting Groups for Privilege Escalation](linux-hardening/user-information/interesting-groups-linux-pe/README.md)
     - [Linux - lxd/lxc Group - Privilege escalation](linux-hardening/user-information/interesting-groups-linux-pe/lxd-privilege-escalation.md)
   - [Linux - SSH Forward Agent exploitation](linux-hardening/user-information/ssh-forward-agent-exploitation.md)
   - [Linux - Active Directory](linux-hardening/user-information/linux-active-directory.md)
-- [Interesting Files & Permissions]()
-- [Linux - Interesting Files & Permissions](linux-hardening/interesting-files-permissions/README.md)
+- [Linux - Interesting Files & Permissions (formerly “Interesting Files & Permissions”)](linux-hardening/interesting-files-permissions/README.md) <!-- Original navigation label: [Interesting Files & Permissions]() -->
   - [Linux - SUID, SGID, ACLs, and Sensitive Files](linux-hardening/interesting-files-permissions/suid-sgid-and-acl-triage.md)
   - [Linux - Arbitrary File Write to Root](linux-hardening/interesting-files-permissions/write-to-root.md)
   - [Linux - Capabilities](linux-hardening/interesting-files-permissions/linux-capabilities.md)
@@ -220,14 +213,12 @@
   - [Linux - NFS no_root_squash/no_all_squash misconfiguration PE](linux-hardening/interesting-files-permissions/nfs-no_root_squash-misconfiguration-pe.md)
   - [Linux - Wildcards Spare tricks](linux-hardening/interesting-files-permissions/wildcards-spare-tricks.md)
   - [Linux - SELinux](linux-hardening/interesting-files-permissions/selinux.md)
-- [Network Information]()
-- [Linux - Network Information](linux-hardening/network-information/README.md)
+- [Linux - Network Information (formerly “Network Information”)](linux-hardening/network-information/README.md) <!-- Original navigation label: [Network Information]() -->
   - [Linux - Traffic Capture, Firewall, and Egress Triage](linux-hardening/network-information/traffic-capture-and-firewall-egress.md)
   - [Linux - Local Network and Socket Triage](linux-hardening/network-information/local-network-and-socket-triage.md)
   - [Linux - Socket Command Injection](linux-hardening/network-information/socket-command-injection.md)
   - [Linux - Cisco - vmanage](linux-hardening/network-information/cisco-vmanage.md)
-- [Software Information]()
-- [Linux - Software Information](linux-hardening/software-information/README.md)
+- [Linux - Software Information (formerly “Software Information”)](linux-hardening/software-information/README.md) <!-- Original navigation label: [Software Information]() -->
   - [Linux - Local Web and Authentication Services](linux-hardening/software-information/local-web-and-auth-services.md)
   - [Linux - Databases and Secret Material](linux-hardening/software-information/databases-and-secret-material.md)
   - [Linux - PAM - Pluggable Authentication Modules](linux-hardening/software-information/pam-pluggable-authentication-modules.md)
@@ -236,14 +227,12 @@
   - [Linux - Splunk LPE and Persistence](linux-hardening/software-information/splunk-lpe-and-persistence.md)
   - [Linux - Node inspector/CEF debug abuse](linux-hardening/software-information/electron-cef-chromium-debugger-abuse.md)
   - [Linux - Android Rooting Frameworks Manager Auth Bypass Syscall Hook](linux-hardening/software-information/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md)
-- [Processes, Crontab, Systemd, D-Bus]()
-- [Linux - Processes, Crontab, Systemd, D-Bus](linux-hardening/processes-crontab-systemd-dbus/README.md)
+- [Linux - Processes, Crontab, Systemd, D-Bus (formerly “Processes, Crontab, Systemd, D-Bus”)](linux-hardening/processes-crontab-systemd-dbus/README.md) <!-- Original navigation label: [Processes, Crontab, Systemd, D-Bus]() -->
   - [Linux - Process Enumeration and Service Paths](linux-hardening/processes-crontab-systemd-dbus/process-enumeration-and-service-paths.md)
   - [Linux - Cron Jobs and Systemd Timers](linux-hardening/processes-crontab-systemd-dbus/cron-and-systemd-timers.md)
   - [Linux - D-Bus Enumeration & Command Injection Privilege Escalation](linux-hardening/processes-crontab-systemd-dbus/d-bus-enumeration-and-command-injection-privilege-escalation.md)
   - [Linux - Payloads to execute](linux-hardening/processes-crontab-systemd-dbus/payloads-to-execute.md)
-- [Containers, Namespaces]()
-- [Linux - Containers, Namespaces](linux-hardening/containers-namespaces/README.md)
+- [Linux - Containers, Namespaces (formerly “Containers, Namespaces”)](linux-hardening/containers-namespaces/README.md) <!-- Original navigation label: [Containers, Namespaces]() -->
   - [Linux - Containerd (ctr) Privilege Escalation](linux-hardening/containers-namespaces/containerd-ctr-privilege-escalation.md)
   - [Linux - RunC Privilege Escalation](linux-hardening/containers-namespaces/runc-privilege-escalation.md)
   - [Linux - Container Security](linux-hardening/containers-namespaces/container-security/README.md)
@@ -273,13 +262,10 @@
         - [Linux - Time Namespace](linux-hardening/containers-namespaces/container-security/protections/namespaces/time-namespace.md)
         - [Linux - User Namespace](linux-hardening/containers-namespaces/container-security/protections/namespaces/user-namespace.md)
         - [Linux - UTS Namespace](linux-hardening/containers-namespaces/container-security/protections/namespaces/uts-namespace.md)
-- [Post-Exploitation]()
-  - [Linux Post-Exploitation]()
-    - [Trojanized System Daemons and Reverse Proxies]()
-- [Linux - Post-Exploitation](linux-hardening/post-exploitation/README.md)
+- [Linux - Post-Exploitation (formerly “Post-Exploitation”)](linux-hardening/post-exploitation/README.md) <!-- Original navigation label: [Post-Exploitation](); [Linux Post-Exploitation]() -->
   - [Linux - Cloud Instance Metadata](linux-hardening/post-exploitation/cloud-instance-metadata.md)
   - [Linux Fileless Execution](linux-hardening/post-exploitation/linux-fileless-execution.md)
-  - [Linux - Trojanized System Daemons and Reverse Proxies](linux-hardening/post-exploitation/trojanized-system-daemons-and-reverse-proxies.md)
+  - [Linux - Trojanized System Daemons and Reverse Proxies](linux-hardening/post-exploitation/trojanized-system-daemons-and-reverse-proxies.md) <!-- Original navigation label: [Trojanized System Daemons and Reverse Proxies]() -->
 
 # 🍏 MacOS Hardening
 
@@ -314,6 +300,7 @@
     - [macOS Shell Applications Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-bash-applications-injection.md)
     - [macOS Electron Applications Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-electron-applications-injection.md)
     - [macOS Function Hooking](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-function-hooking.md)
+    - [ARM64/ARM64e Call-Stack Spoofing](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/arm64-arm64e-call-stack-spoofing.md)
     - [macOS IPC - Inter Process Communication](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-ipc-inter-process-communication/README.md)
       - [macOS MIG - Mach Interface Generator](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-ipc-inter-process-communication/macos-mig-mach-interface-generator.md)
       - [macOS XPC](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/README.md)
@@ -379,6 +366,7 @@
 
 - [Authentication Credentials Uac And Efs](windows-hardening/authentication-credentials-uac-and-efs.md)
 - [Checklist - Local Windows Privilege Escalation](windows-hardening/checklist-windows-privilege-escalation.md)
+- [Visual Studio VSIX Extension Abuse](windows-hardening/visual-studio-vsix-extension-abuse.md)
 - [Windows Local Privilege Escalation](windows-hardening/windows-local-privilege-escalation/README.md)
   - [Abusing Auto Updaters And Ipc](windows-hardening/windows-local-privilege-escalation/abusing-auto-updaters-and-ipc.md)
   - [Arbitrary Kernel Rw Token Theft](windows-hardening/windows-local-privilege-escalation/arbitrary-kernel-rw-token-theft.md)
@@ -456,7 +444,7 @@
   - [Privileged Groups](windows-hardening/active-directory-methodology/privileged-groups-and-token-privileges.md)
   - [RDP Sessions Abuse](windows-hardening/active-directory-methodology/rdp-sessions-abuse.md)
   - [Resource-based Constrained Delegation](windows-hardening/active-directory-methodology/resource-based-constrained-delegation.md)
-  - [Sccm Management Point Relay Sql Policy Secrets](windows-hardening/active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md)
+  - [SCCM / MECM Abuse (Sccm Management Point Relay Sql Policy Secrets)](windows-hardening/active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md)
   - [Security Descriptors](windows-hardening/active-directory-methodology/security-descriptors.md)
   - [SID-History Injection](windows-hardening/active-directory-methodology/sid-history-injection.md)
   - [Silver Ticket](windows-hardening/active-directory-methodology/silver-ticket.md)
@@ -499,6 +487,7 @@
   - [Android Anti Instrumentation And Ssl Pinning Bypass](mobile-pentesting/android-app-pentesting/android-anti-instrumentation-and-ssl-pinning-bypass.md)
   - [Android Application Level Virtualization](mobile-pentesting/android-app-pentesting/android-application-level-virtualization.md)
   - [Android Applications Basics](mobile-pentesting/android-app-pentesting/android-applications-basics.md)
+  - [Android SELinux Policy Analysis](mobile-pentesting/android-app-pentesting/android-selinux-policy-analysis.md)
   - [Android Enterprise Work Profile Bypass](mobile-pentesting/android-app-pentesting/android-enterprise-work-profile-bypass.md)
   - [Android Hce Nfc Emv Relay Attacks](mobile-pentesting/android-app-pentesting/android-hce-nfc-emv-relay-attacks.md)
   - [Android Physical Attacks](mobile-pentesting/android-app-pentesting/android-physical-attacks.md)
@@ -536,6 +525,7 @@
   - [Smali - Decompiling, Modifying, Compiling](mobile-pentesting/android-app-pentesting/smali-changes.md)
   - [Spoofing your location in Play Store](mobile-pentesting/android-app-pentesting/spoofing-your-location-in-play-store.md)
   - [Tapjacking](mobile-pentesting/android-app-pentesting/tapjacking.md)
+  - [Telegram Mini App Privacy Analysis](mobile-pentesting/android-app-pentesting/telegram-mini-app-privacy-analysis.md)
   - [Webview Attacks](mobile-pentesting/android-app-pentesting/webview-attacks.md)
 - [iOS Pentesting Checklist](mobile-pentesting/ios-pentesting-checklist.md)
 - [iOS Pentesting](mobile-pentesting/ios-pentesting/README.md)
@@ -589,6 +579,7 @@
 - [80,443 - Pentesting Web Methodology](network-services-pentesting/pentesting-web/README.md)
   - [403 & 401 Bypasses](network-services-pentesting/pentesting-web/403-and-401-bypasses.md)
   - [AEM - Adobe Experience Cloud](network-services-pentesting/pentesting-web/aem-adobe-experience-cloud.md)
+  - [Adobe ColdFusion](network-services-pentesting/pentesting-web/adobe-coldfusion.md)
   - [Angular](network-services-pentesting/pentesting-web/angular.md)
   - [Apache Tapestry](network-services-pentesting/pentesting-web/apache-tapestry.md)
   - [Apache](network-services-pentesting/pentesting-web/apache.md)
@@ -729,6 +720,7 @@
 - [3632 - Pentesting distcc](network-services-pentesting/3632-pentesting-distcc.md)
 - [3690 - Pentesting Subversion (svn server)](network-services-pentesting/3690-pentesting-subversion-svn-server.md)
 - [3702/UDP - Pentesting WS-Discovery](network-services-pentesting/3702-udp-pentesting-ws-discovery.md)
+- [4000,10080 - Pentesting TiDB](network-services-pentesting/4000-10080-pentesting-tidb.md)
 - [4369 - Pentesting Erlang Port Mapper Daemon (epmd)](network-services-pentesting/4369-pentesting-erlang-port-mapper-daemon-epmd.md)
 - [4786 - Cisco Smart Install](network-services-pentesting/4786-cisco-smart-install.md)
 - [4840 - OPC Unified Architecture](network-services-pentesting/4840-pentesting-opc-ua.md)
@@ -747,8 +739,7 @@
 - [6379 - Pentesting Redis](network-services-pentesting/6379-pentesting-redis.md)
 - [8009 - Pentesting Apache JServ Protocol (AJP)](network-services-pentesting/8009-pentesting-apache-jserv-protocol-ajp.md)
 - [8086 - Pentesting InfluxDB](network-services-pentesting/8086-pentesting-influxdb.md)
-- [8089 - Pentesting Splunkd]()
-- [8000, 8089 - Pentesting Splunk](network-services-pentesting/8089-splunkd.md)
+- [8000, 8089 - Pentesting Splunk (formerly “8089 - Pentesting Splunkd”)](network-services-pentesting/8089-splunkd.md) <!-- Original navigation label: [8089 - Pentesting Splunkd]() -->
 - [8333,18333,38333,18444 - Pentesting Bitcoin](network-services-pentesting/8333-18333-38333-18444-pentesting-bitcoin.md)
 - [9000 - Pentesting FastCGI](network-services-pentesting/9000-pentesting-fastcgi.md)
 - [9001 - Pentesting HSQLDB](network-services-pentesting/9001-pentesting-hsqldb.md)
@@ -1053,8 +1044,10 @@
 - [Adreno A7xx Sds Rb Priv Bypass Gpu Smmu Kernel Rw](binary-exploitation/linux-kernel-exploitation/adreno-a7xx-sds-rb-priv-bypass-gpu-smmu-kernel-rw.md)
 - [Android Kernel SELinux Bypass After Arbitrary R/W](binary-exploitation/linux-kernel-exploitation/android-kernel-selinux-bypass.md)
 - [Af Unix Msg Oob Uaf Skb Primitives](binary-exploitation/linux-kernel-exploitation/af-unix-msg-oob-uaf-skb-primitives.md)
+- [AF_ALG concurrent-writer scatterlist underflow](binary-exploitation/linux-kernel-exploitation/af-alg-concurrent-writer-scatterlist-oob.md)
 - [Android Binder IPC Internals and Kernel Vulnerability Research](binary-exploitation/linux-kernel-exploitation/android-binder-ipc-internals-kernel-vulnerability-research.md)
 - [Arm64 Static Linear Map Kaslr Bypass](binary-exploitation/linux-kernel-exploitation/arm64-static-linear-map-kaslr-bypass.md)
+- [Linux USB Audio Descriptor OOB Reads to KASLR Leaks](binary-exploitation/linux-kernel-exploitation/usb-audio-descriptor-oob-kaslr-leak.md)
 - [Futex PI UAF to Pipe Physical R/W and Workqueue Execution](binary-exploitation/linux-kernel-exploitation/futex-pi-uaf-pipe-buffer-workqueue-usermodehelper.md)
 - [Ksmbd Streams Xattr Oob Write Cve 2025 37947](binary-exploitation/linux-kernel-exploitation/ksmbd-streams_xattr-oob-write-cve-2025-37947.md)
 - [net/sched action-IDR UAF exploitation (CVE-2026-53264)](binary-exploitation/linux-kernel-exploitation/net-sched-action-idr-uaf-cve-2026-53264.md)
@@ -1085,8 +1078,8 @@
   - [Ai Assisted Fuzzing And Vulnerability Discovery](AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md)
   - [Web Black-Box AI Pentester Bots](AI/Web-Black-Box-AI-Pentester-Bots.md)
   - [AI Agent Security Methodology](AI/AI-Agent-Security-Methodology.md)
-  - [AI Security Methodology]()
-  - [AI Deep Learning](AI/AI-Deep-Learning.md)
+  - [AI Deep Learning / AI Security Methodology](AI/AI-Deep-Learning.md) <!-- Original navigation label: [AI Security Methodology]() -->
+  - [Mechanistic-Interpretability-Guided Adversarial Attacks](AI/AI-Mechanistic-Interpretability-Adversarial-Attacks.md)
   - [Burp MCP: LLM-assisted traffic review](AI/AI-Burp-MCP.md)
   - [AI MCP Security](AI/AI-MCP-Servers.md)
   - [AI Model Data Preparation](AI/AI-Model-Data-Preparation-and-Evaluation.md)

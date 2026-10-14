@@ -8,6 +8,8 @@ on:
       - '.gitignore'
       - Dockerfile
       - '.github/**'
+      - 'scripts/merge_approved_prs.py'
+      - 'scripts/test_merge_approved_prs.py'
   workflow_dispatch:
     inputs:
       translation_base_sha:
