@@ -2,61 +2,62 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Belangrikste Keychains
+## Hoof-Keychains
 
-- Die **User Keychain** (`~/Library/Keychains/login.keychain-db`), wat gebruik word om **gebruiker-spesifieke credentials** soos application passwords, internet passwords, user-generated certificates, network passwords en user-generated public/private keys te stoor.
-- Die **System Keychain** (`/Library/Keychains/System.keychain`), wat **stelselwye credentials** soos WiFi passwords, system root certificates, system private keys en system application passwords stoor.<sup>[[1]](#references)</sup>
-- Dit is moontlik om ander komponente, soos certificates, in `/System/Library/Keychains/*` te vind.
-- In **iOS** is daar slegs een **Keychain**, geleë in `/private/var/Keychains/`. Hierdie vouer bevat ook databases vir die `TrustStore`, certificate authorities (`caissuercache`) en OSCP entries (`ocspache`).
-- Apps sal in die keychain beperk word tot slegs hul private area, gebaseer op hul application identifier.
+- Die **User Keychain** (`~/Library/Keychains/login.keychain-db`), wat gebruik word om **gebruikerspesifieke geloofsbriewe** soos toepassingwagwoorde, internetwagwoorde, gebruikergegenereerde sertifikate, netwerkwagwoorde en gebruikergegenereerde publieke/private sleutels te stoor.
+- Die **System Keychain** (`/Library/Keychains/System.keychain`), wat **stelselwye geloofsbriewe** soos WiFi-wagwoorde, stelselwortelsertifikate, stelselprivate sleutels en stelseltoepassingwagwoorde stoor.<sup>[[1]](#references)</sup>
+  - Dit is moontlik om ander komponente, soos sertifikate, in `/System/Library/Keychains/*` te vind.
+- In **iOS** is daar net een **Keychain**, geleë in `/private/var/Keychains/`. Hierdie vouer bevat ook databasisse vir die `TrustStore`, sertifikaatowerhede (`caissuercache`) en OSCP-inskrywings (`ocspache`).
+  - Toepassings word in die keychain beperk tot slegs hul private area, gebaseer op hul toepassing-identifiseerder.
 
-### Password Keychain Access
+### Wagwoordtoegang tot Keychain
 
-Hierdie files het geen inherente protection nie en kan dus **download** word, maar hulle is encrypted en vereis die **user's plaintext password om decrypted te word**. 'n Tool soos [**Chainbreaker**](https://github.com/n0fate/chainbreaker) kan vir decryption gebruik word.<sup>[[1]](#references)</sup>
+Hierdie lêers het geen ingeboude beskerming nie en kan **afgelaai word**, maar hulle is geënkripteer en vereis die **gebruiker se wagwoord in gewone teks om gedekripteer te word**. ’n Hulpmiddel soos [**Chainbreaker**](https://github.com/n0fate/chainbreaker) kan vir dekripsie gebruik word.<sup>[[1]](#references)</sup>
 
-## Keychain Entries Protections
+## Beskerming van Keychain-inskrywings
 
 ### ACLs
 
-Elke entry in die keychain word deur **Access Control Lists (ACLs)** beheer, wat bepaal wie verskeie actions op die keychain entry kan uitvoer, insluitend:<sup>[[1]](#references)</sup>
+Elke inskrywing in die keychain word deur **Access Control Lists (ACLs)** beheer, wat bepaal wie verskeie handelinge op die keychain-inskrywing kan uitvoer, insluitend:<sup>[[1]](#references)[[2]](#references)</sup>
 
-- **ACLAuthorizationExportClear**: Laat die holder toe om die clear text van die secret te verkry.
-- **ACLAuthorizationExportWrapped**: Laat die holder toe om die clear text encrypted met 'n ander verskafde password te verkry.
-- **ACLAuthorizationAny**: Laat die holder toe om enige action uit te voer.
+- **`kSecACLAuthorizationExportClear`**: Laat die houer toe om die geheim in gewone teks te verkry.
+- **`kSecACLAuthorizationExportWrapped`**: Laat die houer toe om die geheim in gewone teks te verkry, geënkripteer met ’n ander verskafde wagwoord.
+- **`kSecACLAuthorizationAny`**: Laat die houer toe om enige handeling uit te voer.
 
-Die ACLs word verder vergesel van 'n **list of trusted applications** wat hierdie actions sonder prompting kan uitvoer. Dit kan wees:<sup>[[1]](#references)</sup>
+Die ACLs word verder vergesel van ’n **lys vertroude toepassings** wat hierdie handelinge sonder ’n versoek kan uitvoer. Dit kan wees:<sup>[[1]](#references)</sup>
 
-- **N`il`** (geen authorization required nie, **everyone is trusted**)
-- 'n **empty** list (**nobody** is trusted)
-- 'n **List** van spesifieke **applications**.
+- **N`il`** (geen magtiging nodig nie, **almal word vertrou**)
+- ’n **Leë** lys (**niemand** word vertrou nie)
+- ’n **Lys** van spesifieke **toepassings**.
 
-Die entry kan ook die key **`ACLAuthorizationPartitionID`,** bevat, wat gebruik word om die **teamid, apple,** en **cdhash** te identifiseer.<sup>[[1]](#references)</sup>
+Die inskrywing kan ook die sleutel **`kSecACLAuthorizationPartitionID`** bevat, wat gebruik word om die **teamid, apple** en **cdhash** te identifiseer.<sup>[[1]](#references)[[2]](#references)</sup>
 
-- Indien die **teamid** gespesifiseer is, moet die application dieselfde **teamid** hê om toegang tot die **entry** value te verkry **sonder** 'n **prompt**.
-- Indien die **apple** gespesifiseer is, moet die app deur **Apple** **signed** wees.
-- Indien die **cdhash** aangedui word, moet die **app** die spesifieke **cdhash** hê.
+- As die **teamid** gespesifiseer word, moet die toepassing dieselfde **teamid** hê om toegang tot die inskrywingswaarde **sonder** ’n **versoek** te kry.
+- As **apple** gespesifiseer word, moet die toepassing deur **Apple** **onderteken** wees.
+- As die **cdhash** aangedui word, moet die **toepassing** die spesifieke **cdhash** hê.
 
-### Creating a Keychain Entry
+### Skep van ’n Keychain-inskrywing
 
-Wanneer 'n **new** **entry** met **`Keychain Access.app`** geskep word, geld die volgende rules:<sup>[[1]](#references)</sup>
+Wanneer ’n **nuwe** **inskrywing** met **`Keychain Access.app`** geskep word, geld die volgende reëls:<sup>[[1]](#references)</sup>
 
-- Alle apps kan encrypt.
-- **Geen apps** kan export/decrypt nie (sonder om die user te prompt).
-- Alle apps kan die integrity check sien.
-- Geen apps kan ACLs verander nie.
+- Alle toepassings kan enkripteer.
+- **Geen toepassings** kan uitvoer/dekripteer nie (sonder om die gebruiker te vra).
+- Alle toepassings kan die integriteitskontrole sien.
+- Geen toepassings kan ACLs verander nie.
 - Die **partitionID** word op **`apple`** gestel.
 
-Wanneer 'n **application 'n entry in die keychain skep**, verskil die rules effens:<sup>[[1]](#references)</sup>
+Wanneer ’n **toepassing ’n inskrywing in die keychain skep**, is die reëls effens anders:<sup>[[1]](#references)</sup>
 
-- Alle apps kan encrypt.
-- Slegs die **creating application** (of enige ander apps wat eksplisiet bygevoeg is) kan export/decrypt (sonder om die user te prompt).
-- Alle apps kan die integrity check sien.
-- Geen apps kan die ACLs verander nie.
+- Alle toepassings kan enkripteer.
+- Slegs die **toepassing wat die inskrywing geskep het** (of enige ander toepassings wat uitdruklik bygevoeg is) kan uitvoer/dekripteer (sonder om die gebruiker te vra).
+- Alle toepassings kan die integriteitskontrole sien.
+- Geen toepassings kan die ACLs verander nie.
 - Die **partitionID** word op **`teamid:[teamID here]`** gestel.
 
-## Accessing the Keychain
+## Toegang tot die Keychain
 
 ### `security`
+
 ```bash
 # List keychains
 security list-keychains
@@ -68,64 +69,74 @@ security dump-keychain -a -d
 security find-generic-password -a "Slack" -g
 
 # Change the specified entry's PartitionID value
-security set-generic-password-partition-list -s "test service" -a "test account" -S
+security set-generic-password-partition-list \
+  -s "test service" -a "test account" \
+  -S 'apple-tool:,apple:,teamid:TEAMID' \
+  -k 'KEYCHAIN_PASSWORD' ~/Library/Keychains/login.keychain-db
 
 # Dump specifically the user keychain
 security dump-keychain ~/Library/Keychains/login.keychain-db
 ```
+
+`-S` stel die item se partition list in, terwyl `-k` die huidige Keychain-wagwoord verskaf wat nodig is om daardie verandering aan te bring; die vlag wat ’n wagwoord vereis, is afgekeur.<sup>[[4]](#references)</sup> ’n Suksesvolle opdatering bewys nie dat ’n latere leesaksie stil sal verloop nie: een waargenome, gedeaktiveerde prototipe het steeds ’n bevestigingsversoek geaktiveer toe dit die item deur `Security.framework` navraag gedoen het. ’n Ooreenstemmende partition ID is slegs een deel van die ACL- en vertroude-toepassing-kontroles wat hierbo beskryf word, so verifieer die werklike leespad.<sup>[[3]](#references)</sup>
+
 ### APIs
 
 > [!TIP]
-> Die **keychain enumeration and dumping** van geheime wat **nie 'n prompt genereer nie**, kan met die tool [**LockSmith**](https://github.com/its-a-feature/LockSmith) gedoen word.
+> Die **enumerasie en dump van keychain**-geheime wat **nie ’n versoek sal genereer nie**, kan met die instrument [**LockSmith**](https://github.com/its-a-feature/LockSmith) gedoen word
 >
-> Ander API-endpoints kan in die bronkode van [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html) gevind word.
+> Ander API-eindpunte kan in die bronkode [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html) gevind word.
 
-Lys en kry **inligting** oor elke keychain-inskrywing met die **Security Framework**, of jy kan ook Apple se open source CLI-tool [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html) nagaan. Enkele API-voorbeelde:<sup>[[1]](#references)</sup>
+Lys en kry **inligting** oor elke keychain-inskrywing met die **Security Framework**, of jy kan ook Apple se oopbron CLI-instrument [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** nagaan. Enkele API-voorbeelde:<sup>[[1]](#references)</sup>
 
-- Die API **`SecItemCopyMatching`** gee inligting oor elke inskrywing, en daar is sommige attribute wat jy kan stel wanneer jy dit gebruik:
-- **`kSecReturnData`**: As dit waar is, sal dit probeer om die data te dekripteer (stel dit op vals om potensiële opspringvensters te vermy)
-- **`kSecReturnRef`**: Kry ook 'n verwysing na die keychain-item (stel dit op waar indien jy later sien dat jy dit sonder 'n opspringvenster kan dekripteer)
-- **`kSecReturnAttributes`**: Kry metadata oor inskrywings
-- **`kSecMatchLimit`**: Hoeveel resultate om terug te stuur
-- **`kSecClass`**: Watter soort keychain-inskrywing
+- Die API **`SecItemCopyMatching`** gee inligting oor elke inskrywing, en daar is ’n paar attribute wat jy kan stel wanneer jy dit gebruik:
+  - **`kSecReturnData`**: Indien waar, sal dit probeer om die data te dekripteer (stel dit op false om moontlike opspringvensters te vermy)
+  - **`kSecReturnRef`**: Kry ook ’n verwysing na die keychain-item (stel dit op true indien jy later sien dat jy sonder ’n opspringvenster kan dekripteer)
+  - **`kSecReturnAttributes`**: Kry metadata oor inskrywings
+  - **`kSecMatchLimit`**: Hoeveel resultate om terug te gee
+  - **`kSecClass`**: Watter soort keychain-inskrywing
 
-Kry **ACLs** van elke inskrywing:<sup>[[1]](#references)</sup>
+Kry die **ACLs** van elke inskrywing:<sup>[[1]](#references)</sup>
 
-- Met die API **`SecAccessCopyACLList`** kan jy die **ACL vir die keychain-item** kry. Dit gee 'n lys van ACLs terug (soos `ACLAuthorizationExportClear` en die ander wat voorheen genoem is), waar elke inskrywing het:
-- Beskrywing
-- **Trusted Application List**. Dit kan wees:
-- 'n App: /Applications/Slack.app
-- 'n Binary: /usr/libexec/airportd
-- 'n Groep: group://AirPort
+- Met die API **`SecAccessCopyACLList`** kan jy die **ACL vir die keychain-item** kry. Dit gee ’n lys ACLs terug (soos `kSecACLAuthorizationExportClear` en die ander wat vroeër genoem is), waar elke inskrywing die volgende bevat:<sup>[[1]](#references)[[2]](#references)</sup>
+  - Beskrywing
+  - **Lys van vertroude toepassings**. Dit kan wees:
+    - ’n Toepassing: /Applications/Slack.app
+    - ’n Binêre lêer: /usr/libexec/airportd
+    - ’n Groep: group://AirPort
 
-Export die data:<sup>[[1]](#references)</sup>
+Voer die data uit:<sup>[[1]](#references)</sup>
 
 - Die API **`SecKeychainItemCopyContent`** kry die plaintext
-- Die API **`SecItemExport`** export die sleutels en sertifikate, maar jy sal moontlik wagwoorde moet stel om die inhoud geënkripteer te export
+- Die API **`SecItemExport`** voer die sleutels en sertifikate uit, maar jy sal moontlik wagwoorde moet stel om die inhoud geënkripteer uit te voer
 
-En dit is die **vereistes** om 'n **geheim sonder 'n prompt te kan export**:<sup>[[1]](#references)</sup>
+En dit is die **vereistes** om ’n geheim **sonder ’n versoek uit te voer**:<sup>[[1]](#references)</sup>
 
-- Indien **1+ trusted** apps gelys is:
-- Benodig die toepaslike **authorizations** (**`Nil`**, of wees **deel** van die toegelate lys van apps in die authorization om toegang tot die geheiminligting te kry)
-- Benodig 'n code signature wat met **PartitionID** ooreenstem
-- Benodig 'n code signature wat met dié van een **trusted app** ooreenstem (of wees 'n lid van die korrekte KeychainAccessGroup)
-- Indien **alle toepassings trusted** is:
-- Benodig die toepaslike **authorizations**
-- Benodig 'n code signature wat met **PartitionID** ooreenstem
-- Indien **geen PartitionID** is nie, is dit nie nodig nie
+- Indien **1+ vertroude** toepassings gelys is:
+  - Benodig die toepaslike **magtigings** (**`Nil`**, of wees **deel** van die toegelate lys toepassings in die magtiging om toegang tot die geheime inligting te kry)
+  - Die kodesignatuur moet met **PartitionID** ooreenstem
+  - Die kodesignatuur moet met dié van een **vertroude toepassing** ooreenstem (of jy moet lid wees van die korrekte KeychainAccessGroup)
+- Indien **alle toepassings vertrou word**:
+  - Benodig die toepaslike **magtigings**
+  - Die kodesignatuur moet met **PartitionID** ooreenstem
+    - Indien daar **geen PartitionID** is nie, is dit nie nodig nie
 
 > [!CAUTION]
-> Daarom, indien daar **1 toepassing gelys** is, moet jy **code in daardie toepassing inject**.
+> Daarom moet jy **kode in daardie toepassing inspuit** indien **1 toepassing gelys** is.
 >
-> Indien **apple** in die **partitionID** aangedui word, kan jy toegang daartoe kry met **`osascript`**; dus enigiets wat alle toepassings vertrou met apple in die partitionID. **`Python`** kan ook hiervoor gebruik word.
+> Indien **apple** in die **partitionID** aangedui word, kan jy toegang daartoe kry met **`osascript`** vir enigiets wat alle toepassings vertrou met apple in die partitionID. **`Python`** kan ook hiervoor gebruik word.
 
-### Twee addisionele attributes
+### Twee bykomende attributes
 
-- **Invisible**: Dit is 'n boolean-vlag om die inskrywing vir die **UI** Keychain-app te **versteek**<sup>[[1]](#references)</sup>
-- **General**: Dit word gebruik om **metadata** te stoor (dit is dus NIE GEËNKRIPTEER nie)<sup>[[1]](#references)</sup>
-- Microsoft het al die refresh tokens om toegang tot sensitiewe endpoint te kry, in gewone teks gestoor.<sup>[[1]](#references)</sup>
+- **Invisible**: Dit is ’n Booleaanse vlag om die inskrywing in die Keychain-toepassing se **UI** te **versteek**<sup>[[1]](#references)</sup>
+- **General**: Dit is vir die stoor van **metadata** (dus is dit NIE GEKRIPTEER NIE)<sup>[[1]](#references)</sup>
+  - Microsoft het al die refresh tokens om toegang tot sensitiewe eindpunte te kry, in gewone teks gestoor.<sup>[[1]](#references)</sup>
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## References
 
-- [1] [#OBTS v5.0: "Lock Picking van die macOS Keychain" - Cody Thomas](https://www.youtube.com/watch?v=jKE1ZW33JpY)
-{{#include ../../banners/hacktricks-training.md}}
+- [1] [#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas](https://www.youtube.com/watch?v=jKE1ZW33JpY)
+- [2] [Apple Developer — kSecACLAuthorizationExportClear](https://developer.apple.com/documentation/security/ksecaclauthorizationexportclear)
+- [3] [Kaspersky Securelist - A new version of the MacSync macOS stealer targets crypto enthusiasts and developers](https://securelist.com/macsync-new-version/121383/)
+- [4] [Apple security(1) man page mirror](https://keith.github.io/xcode-man-pages/security.1.html)
