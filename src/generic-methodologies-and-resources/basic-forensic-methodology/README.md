@@ -1,8 +1,8 @@
-# Metodologia Básica de Perícia
+# Metodologia Básica de Forense
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Criando e Montando uma Imagem
+## Criar e Montar uma Imagem
 
 
 {{#ref}}
@@ -11,23 +11,23 @@
 
 ## Análise de Malware
 
-Isso **não é necessariamente o primeiro passo a ser executado depois que você obtém a imagem**. Mas você pode usar estas técnicas de análise de malware de forma independente se tiver um arquivo, uma imagem de sistema de arquivos, uma imagem de memória, um pcap... portanto, é importante **manter estas ações em mente**:
+Isso **não é necessariamente a primeira etapa a ser realizada depois que você obtém a imagem**. Mas você pode usar estas técnicas de análise de malware de forma independente se tiver um arquivo, uma imagem de sistema de arquivos, uma imagem de memória, um pcap... então é bom **ter estas ações em mente**:
 
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Inspecionando uma Imagem
+## Inspecionar uma Imagem
 
-se você receber uma **imagem forense** de um dispositivo, poderá começar **analisando as partições e o sistema de arquivos** utilizado e **recuperando** **arquivos potencialmente interessantes** (até mesmo os excluídos). Saiba como em:
+se você receber uma **imagem forense** de um dispositivo, poderá começar **analisando as partições e o sistema de arquivos** utilizado e **recuperando** arquivos potencialmente **interessantes** (inclusive os excluídos). Saiba como em:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Dependendo dos sistemas operacionais utilizados e até mesmo da plataforma, diferentes artefatos interessantes devem ser procurados:
+Dependendo dos sistemas operacionais e até mesmo da plataforma utilizados, devem ser procurados diferentes artefatos interessantes:
 
 
 {{#ref}}
@@ -49,9 +49,11 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
-## Inspeção aprofundada de tipos de arquivo e Software específicos
+Para um dispositivo Android bloqueado, métodos de aquisição e criação de imagens de memória, consulte [forense Android](android-forensics.md).
 
-Se você tiver um **arquivo** muito **suspeito**, então, **dependendo do tipo de arquivo e do software** que o criou, vários **truques** podem ser úteis.\
+## Inspeção aprofundada de tipos de arquivo e softwares específicos
+
+Se você tiver um **arquivo** muito **suspeito**, dependendo do **tipo de arquivo e do software** que o criou, vários **truques** podem ser úteis.\
 Leia a página a seguir para conhecer alguns truques interessantes:
 
 
@@ -59,37 +61,37 @@ Leia a página a seguir para conhecer alguns truques interessantes:
 specific-software-file-type-tricks/
 {{#endref}}
 
-Quero fazer uma menção especial à página:
+Quero dar destaque especial à página:
 
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Inspeção de Dump de Memória
+## Inspeção de Dumps de Memória
 
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Inspeção de Pcap
+## Inspeção de Pcaps
 
 
 {{#ref}}
 pcap-inspection/
 {{#endref}}
 
-## **Técnicas Anti-Forenses**
+## **Técnicas Antiforenses**
 
-Tenha em mente o possível uso de técnicas anti-forenses:
+Tenha em mente a possibilidade de uso de técnicas antiforenses:
 
 
 {{#ref}}
 anti-forensic-techniques.md
 {{#endref}}
 
-## Threat Hunting
+## Caça a Ameaças
 
 
 {{#ref}}
