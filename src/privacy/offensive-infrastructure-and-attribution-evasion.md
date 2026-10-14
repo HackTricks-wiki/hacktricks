@@ -1,268 +1,281 @@
-# Infrastruktuur vir offensiewe bedrywighede en ontwyking van toeskrywing
+# Aanstootlike infrastruktuur en ontduiking van toeskrywing
 
 {{#include ../banners/hacktricks-training.md}}
 
-’n Operateur verkry selde betekenisvolle anonimiteit uit ’n enkele proxy. Werklike veldtogte bou ’n **skeidingsgrafiek**: die operateur bereik ’n toegangsnodus, traversa- nodusse verberg daardie nodus van die uitgang, redirectors beskerm die werklike C2, en weggooibare name wys na die openbare rand.
+’n Operateur verkry selde betekenisvolle anonimiteit met net een proxy. Werklike veldtogte bou ’n **skeidingsgrafiek**: die operateur bereik ’n toegangsnodus, deurgangsnodusse verberg daardie nodus vir die uitgang, redirectors beskerm die werklike C2, en weggooibare name wys na die publieke rand.
 
-Gebruik die [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md) vir ’n gestandaardiseerde oorsig van die voordele/nadele, ontplooiing en opsporing van elke pad. Hierdie bladsy gaan dieper in op die samestelling van adversariële infrastruktuur.
+Gebruik die [Tegniekkatalogus vir anonieme internettoegang](anonymous-internet-access-techniques.md) vir ’n gestandaardiseerde oorsig van die voordele, nadele, ontplooiing en opsporing van elke roete. Hierdie bladsy delf dieper in die samestelling van infrastruktuur vir teenstanders.
+
 ```text
 operator -> access relay -> traversal mesh -> exit/redirector -> target
-|                 |                |
-account/provider   relay operator   target telemetry
+                |                 |                |
+          account/provider   relay operator   target telemetry
 ```
-Die laaste adres wat deur ’n teiken gesien word, is dus bewys van ’n pad, nie bewys van wie die sleutelbord beheer het nie. MITRE koppel die hoofkomponente aan Acquire Infrastructure (T1583), Compromise Infrastructure (T1584), Proxy (T1090), Dynamic Resolution (T1568) en Web Service (T1102).<sup>[[1]](#references)</sup>
+
+Die laaste adres wat ’n teiken sien, is dus bewys van ’n roete, nie bewys van wie die sleutelbord beheer het nie. MITRE karteer die hoofkomponente as Acquire Infrastructure (T1583), Compromise Infrastructure (T1584), Proxy (T1090), Dynamic Resolution (T1568) en Web Service (T1102).<sup>[[1]](#references)</sup>
 
 ## Infrastruktuurklasse
 
-| Klas | Waarom ’n akteur dit gebruik | Duursame blootstelling | Verdediger se beste spilpunt |
+| Klas | Waarom ’n akteur dit gebruik | Volgehoue blootstelling | Verdediger se beste ondersoekingspunt |
 |---|---|---|---|
-| Gehuurde VPS/cloud | Vinnig, voorspelbaar, roeteerbaar en maklik om te herbou | huurder-, fakturering-, konsole-, source-login- en image-geskiedenis | rekening-/beheerlaaggebeurtenisse en herhaalde server fingerprint |
-| Commercial VPN/Tor | Groot gedeelde uitgangsstel; geen serveradministrasie nie | verskaffer-/guard-sigbaarheid en end-tot-end-tydsberekening | bestemminggedrag, endpoint-bewyse en flow-korrelasie |
-| Residential/mobile proxy | Verbruikers-ASN en geografiese geloofwaardigheid | makelaar-/kliënterekords; proxyware- of infected-host-gedrag | onmoontlike reis, proxy-protokolle en adreswisseling per sessie |
-| Compromised server/router/IoT | Leen die slagoffer se reputasie en jurisdiksie | implant, bestuursvloei en herhaalde stroomop-controller | toesteltelemetrie en ORB-topologie, nie een exit-IP nie |
-| CDN/redirector | Skei openbare edge van back-end C2 | TLS/HTTP-grammatika, sertifikaat-, roeterings- en cloud-account-artefakte | edge-na-oorsprong-korrelasie en groepering volgens request-vorm |
-| Legitimate web service | Meng in met toegelate GitHub/cloud/social-verkeer | API-token, tenant-/object-identifiseerders en ongewone prosesafkoms | endpoint-proses plus diens-/API-semantiek |
-| Fisiese/sellulêre/satellietpad | Verander die oënskynlike fisiese oorsprong | RF-, draer-, intekenaar-, toestel- en liggingrekords | radio/fisiese en netwerkbewyse gekombineer |
+| Gehuurde VPS/cloud | Vinnig, voorspelbaar, roeteerbaar, maklik om te herbou | huurder, fakturering, konsole, bronaanmelding en beeldgeskiedenis | rekening-/beheerlaaggebeure en herhaalde bedienervingerafdrukke |
+| Kommersiële VPN/Tor | Groot gedeelde egress-stel; geen bedieneradministrasie nie | verskaffer-/sigbaarheidsbeheer en end-tot-end-tydsberekening | bestemminggedrag, eindpuntbewyse en verkeersvloeikorrelasie |
+| Residensiële/mobiele proxy | Verbruikers-ASN en geografiese geloofwaardigheid | makelaar-/kliëntrekords; proxyware- of besmettegasheergedrag | onmoontlike reise, prox protokolle en adresverandering per sessie |
+| Gekompromitteerde bediener/roeteerder/IoT | Leen slagofferreputasie en jurisdiksie | implantaat, bestuursverkeer en herhaalde stroomop-beheerder | toesteltelemetrie en ORB-topologie, nie ’n enkele exit-IP nie |
+| CDN/redirector | Skei die openbare edge van die back-end C2 | TLS/HTTP-grammatika, sertifikaat-, roeterings- en cloud-rekeningartefakte | edge-na-origin-korrelasie en groepering volgens versoekvorm |
+| Legitieme webdiens | Meng in met toegelate GitHub/cloud/sosiale verkeer | API-token, huurder-/objekidentifiseerders en ongewone prosesafstamming | eindpuntproses plus diens-/API-semantiek |
+| Fisiese-/sellulêre-/satellietroete | Verander die skynbare fisiese oorsprong | RF-, diensverskaffer-, intekenaar-, toestel- en liggingrekords | radio-/fisiese en netwerkbewyse saam |
 
-## Operational relay box-netwerke
+## Operasionele aflosnodusnetwerke
 
-’n **ORB-netwerk** is ’n bestuurde proxy-vloot wat as ’n intermediêre diens gebruik word. Mandiant verdeel hulle in geprovisioneerde netwerke van gehuurde servers, nie-geprovisioneerde netwerke van compromised routers/IoT, en hibriede. ’n Volwasse topologie het vier logiese rolle:<sup>[[2]](#references)</sup>
+’n **ORB-netwerk** is ’n bestuurde proxy-vloot wat as ’n tussengangerdiens gebruik word. Mandiant verdeel hulle in voorsiene netwerke van gehuurde bedieners, nie-voorsiene netwerke van gekompromitteerde roeteerders/IoT, en hibriede netwerke. ’n Volwasse topologie het vier logiese rolle:<sup>[[2]](#references)</sup>
 
-1. **Administration server (ACOS):** hou inventaris, credentials, gesondheid en roeteringsbeleid by.
-2. **Access/relay node:** verifieer kliënte of operateurs; dit is die stabiele ingang na ’n veranderende mesh.
-3. **Traversal nodes:** een of meer gehuurde of compromised stelsels relay ondeursigtige verbindings.
-4. **Exit/staging node:** bied die finale source address aan reconnaissance-, exploitation- of C2-teikens.
+1. **Administrasiebediener (ACOS):** hou die inventaris, aanmeldbesonderhede, gesondheid en roeteringsbeleid by.
+2. **Toegangs-/aflosnodus:** staaf kliënte of operateurs; dit is die stabiele ingang na ’n veranderende mesh.
+3. **Deurvoernodusse:** een of meer gehuurde of gekompromitteerde stelsels stuur ondeursigtige verbindings aan.
+4. **Exit-/staging-nodus:** bied die finale bronadres aan teikens vir verkenning, uitbuiting of C2.
 
-Die mesh kan exits volgens land, ASN, latency of beskikbaarheid kies en ongesonde nodes roteer. Verskeie threat groups kan dieselfde netwerk huur. Mandiant het waargeneem dat ’n IPv4-adres vir so min as 31 dae met sommige ORBs geassosieer gebly het; daarom beveel dit aan dat die **netwerk as ’n ontwikkelende akteur-agtige entiteit** behandel word, eerder as om ’n verouderde lys IP’s te blokkeer.<sup>[[2]](#references)</sup>
+Die mesh kan exits volgens land, ASN, latensie of beskikbaarheid kies en ongesonde nodusse roteer. Verskeie bedreigingsgroepe kan dieselfde netwerk huur. Mandiant het waargeneem dat ’n IPv4-adres vir sommige ORB’s vir so min as 31 dae geassosieer gebly het; daarom beveel dit aan dat die **netwerk as ’n ontwikkelende entiteit soortgelyk aan ’n akteur** beskou word, eerder as om ’n verouderde lys IP’s te blokkeer.<sup>[[2]](#references)</sup>
 
-### Wat dit bied—en wat dit leak
+### Wat dit oplewer—and wat dit uitlek
 
-- Die teiken sien ’n exit wat geografies naby en oënskynlik residential kan wees.
+- Die teiken sien ’n exit wat geografies naby en oënskynlik residensieel kan wees.
 - Die exit sien die teiken en die voorafgaande hop, maar nie noodwendig die operateur nie.
-- Die access service sien die kliënt en die roeteversoek. ’n Onafhanklik bestuurde mesh kan die kliënt van die exits geskei hou, maar dit skep ’n kragtige counterparty-rekord.
-- Herhaalde poorte, handshake-volgorde, server banners, sertifikate, uptime-vensters en controller-verhoudings kan die vloot blootlê, selfs terwyl IP’s roteer.
-- ’n Compromised router het dikwels nie endpoint-telemetrie nie, maar sy ISP het steeds intekenaar- en flow-data; ’n beslaglegging ontbloot implant-/konfigurasie-artefakte.
+- Die toegangsdiens sien die kliënt en die roeteversoek. ’n Onafhanklik bestuurde mesh kan die kliënt van die exits geskei hou, maar dit skep ’n kragtige teenpartyrekord.
+- Herhaalde poorte, handdrukvolgorde, bedienerbaniere, sertifikate, beskikbaarheidstydperke en beheerderverhoudings kan die vloot blootlê selfs terwyl IP’s roteer.
+- ’n Gekompromitteerde roeteerder het dikwels nie eindpunttelemetrie nie, maar sy ISP het steeds intekenaar- en verkeersvloeidata; ’n beslaglegging stel implantaat-/konfigurasieartefakte bloot.
 
 {% hint style="info" %}
-Vir ’n gemagtigde oefening, reproduseer die topologie met organisasie-besitte VMs of routers en hou die controller se attribution map by. Moenie open proxies of derdeparty-toestelle werf nie. Die [lab guide](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain) skep dieselfde verdediger-sigbare hop-struktuur sonder om ’n intermediêr te viktimiseer.
+Vir ’n gemagtigde oefening, boots die topologie na met VM’s of roeteerders wat deur die organisasie besit word, en hou die beheerder se toeskrywingskaart by. Moenie oop proxys of derdepartytoestelle werf nie. Die [labgids](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain) skep dieselfde hop-struktuur wat vir verdedigers sigbaar is, sonder om ’n tussenganger te viktimiseer.
 {% endhint %}
 
-## Residential en mobile proxy-netwerke
+## Residensiële en mobiele proxynetwerke
 
-Residential proxy-dienste ken sessies aan verbruikers-breëbandadresse toe; mobile proxies gaan deur draer-NAT-poele uit. Aanbod kan afkomstig wees van uitdruklik ingeskrewe toestelle, SDK/proxyware wat in verbruikerstoepassings gebundel is, herverkopers of malware. Hierdie oorspronge is nie gelykwaardig nie: ’n gebrek aan ingeligte toestemming verander ’n privaatheidsdiens in compromised infrastructure.
+Residensiële proxy-dienste wys sessies aan verbruikersbreëbandadresse toe; mobiele proxys stuur egress deur draer-NAT-poele. Die aanbod kan kom van toestelle wat uitdruklik ingeskryf is, SDK’s/proxyware wat in verbruikerstoepassings gebundel is, herverkopers of malware. Hierdie oorspronge is nie gelykwaardig nie: sonder ingeligte toestemming verander ’n privaatheidsdiens in gekompromitteerde infrastruktuur.
 
-Rotasiemodusse beïnvloed opsporing:
+Rotasiemetodes beïnvloed opsporing:
 
-- **per-request rotation** veroorsaak vinnige IP- en ASN/geografie-diskontinuïteite terwyl identiteit op hoër lae stabiel bly;
-- **sticky sessions** hou ’n exit vir minute of ure, wat soos ’n gewone intekenaar lyk;
-- **backconnect gateways** stel een broker endpoint aan die kliënt bloot en kies exits intern;
-- **mobile pools** plaas baie egte intekenare agter ’n klein stel draer-NAT-adresse, wat ’n IP-blokkering duur maak.
+- **rotasie per versoek** veroorsaak vinnige IP- en ASN-/geografiese diskontinuïteite terwyl die identiteit op hoër lae stabiel bly;
+- **taai sessies** behou ’n exit vir minute of ure, wat soos ’n gewone intekenaar lyk;
+- **backconnect-gateways** wys een makelaarseindpunt aan die kliënt en kies exits intern;
+- **mobiele poele** plaas baie werklike intekenare agter ’n klein stel draer-NAT-adresse, wat ’n IP-blokkering duur maak.
 
-Verdedigers behoort die IP met authenticated session, TLS/client fingerprint, HTTP-ordering, device cookie en gedrag te korreleer. ’n Vermeende plaaslike residential-login wat deur ’n ander land gevolg word terwyl alle hoërlaagkenmerke identies bly, is sterker as reputasie alleen. Omgekeerd veroorsaak adresdeling en mobile handoff wettige churn; moet residential/proxy-klassifikasie dus nooit as ’n uitspraak behandel word nie.
+Verdedigers behoort die IP met die geverifieerde sessie, TLS-/kliëntvingerafdruk, HTTP-volgorde, toestelkoekie en gedrag te korreleer. ’n Aanmelding wat na bewering plaaslik en residensieel is, gevolg deur een uit ’n ander land terwyl al die hoërlaagkenmerke identies bly, is sterker bewys as reputasie alleen. Omgekeerd veroorsaak adresdeling en mobiele oorskakeling legitieme veranderinge, moet dus nooit residensiële-/proxyklassifikasie as ’n uitspraak beskou nie.
 
-### Proxyware-beheerlae en herverkoper-oorvleueling
+### Proxyware-beheerlae en oorvleueling tussen herverkopers
 
-Moenie ’n residential pool as ’n plat lys exits modelleer nie. Ontleding van die IPIDEA-ekosisteem het ’n herbruikbare **twee-laag-beheerlaag** blootgelê: ’n ingebedde SDK rapporteer eers toestel-/enrollment-metadata aan ’n Tier One-domain en ontvang scheduling plus Tier Two `connect`/`proxy` IP:port-pare. Die node poll die Tier Two connect-port periodiek vir ’n geënkodeerde taak, open ’n tweede verbinding met die gepaarde proxy-port en relay die verskafde bytes na die aangevraagde bestemming. SDK’s en proxy-handelsmerke wat nominaal verskillend was, het afsonderlike discovery-domains gehad, maar het op gedeelde Tier Two-infrastruktuur en oorvleuelende exit-poele saamgeloop deur gemeenskaplike eienaarskap- en herverkoperverhoudings.<sup>[[13]](#references)</sup>
+Moenie ’n residensiële poel as ’n plat lys exits modelleer nie. Ontleding van die IPIDEA-ekosisteem het ’n herbruikbare **tweevlak-beheerlaag** blootgelê: ’n ingebedde SDK rapporteer eers toestel-/inskrywingsmetadata aan ’n Tier One-domein en ontvang skedulering plus Tier Two `connect`/`proxy` IP:poort-pare. Die nodus peil gereeld die Tier Two connect-poort vir ’n geënkodeerde taak, open ’n tweede verbinding met die gepaarde proxy-poort en stuur die verskafde grepe aan na die aangevraagde bestemming. SDK’s en proxyhandelsmerke wat nominaal verskillend was, het afsonderlike ontdekkingsdomeine gehad, maar het deur gemeenskaplike eienaarskap en herverkoperverhoudings op gedeelde Tier Two-infrastruktuur en oorvleuelende exit-poele saamgekom.<sup>[[13]](#references)</sup>
+
 ```text
 enrolled node -> Tier One domain        -> Tier Two IP:port pairs
 enrolled node -> Tier Two connect port  -> destination + connection ID
 enrolled node -> Tier Two proxy port   <-> customer bytes -> destination
 ```
-Dit lewer meer duursame hunting-pivots as 'n residential IP-blok:<sup>[[13]](#references)</sup>
 
-- 'n onverwagte utility-, VPN-, game- of embedded-device-proses stuur 'n stabiele device ID/customer key en ontvang 'n veranderende serverlys;
-- die endpoint poll 'n direkte IP op 'n ongewone poort en verbind dan onmiddellik met 'n ander poort op dieselfde adres voordat dit 'n nuwe destination socket open;
-- verskeie oënskynlike brands deel Tier Two-adresse, protocol grammar, SDK-code of exit-node-overlap;
-- afsonderlike applications wat met verskillende Tier One-domains kontak maak, ontvang adresse uit dieselfde Tier Two-pool.
+Dit lewer duursamer hunting-pivots as ’n residential IP block:<sup>[[13]](#references)</sup>
 
-Die overlap beperk ook attribution: om 'n IP in een vendor se geadverteerde pool te sien, bewys nie watter reseller, customer of threat actor dit op die relevante tydstip gebruik het nie. Bewaar flow timestamps, process lineage, Tier One-response bodies en Tier Two-task identifiers.<sup>[[13]](#references)</sup> Emuleer hierdie hiërargie in 'n gemagtigde oefening slegs met endpoints wat deur die organisasie besit word; moet nooit consumer devices of third-party proxyware enroll nie.
+- ’n Onverwagte nutsprogram-, VPN-, speletjie- of ingebedde toestelproses stuur ’n stabiele toestel-ID/kliëntsleutel en ontvang ’n veranderende bedienerlys;
+- die endpoint poll ’n direkte IP op ’n ongewone poort en koppel dan aan ’n ander poort op dieselfde adres, net voordat dit ’n nuwe bestemmingsocket oopmaak;
+- verskeie oënskynlike handelsmerke deel Tier Two-adresse, protokolgrammatika, SDK-kode of oorvleuelende exit nodes;
+- afsonderlike toepassings wat verskillende Tier One-domeine kontak, ontvang adresse uit dieselfde Tier Two-poel.
 
-## Multi-hop proxy chains
+Die oorvleueling beperk ook attribusie: om ’n IP in een verskaffer se geadverteerde poel te sien, bewys nie watter herverkoper, kliënt of bedreigingsakteur dit op die betrokke tydstip gebruik het nie. Bewaar vloei-tydstempels, prosesafkoms, Tier One-antwoordliggame en Tier Two-taakidentifiseerders.<sup>[[13]](#references)</sup> Emuleer hierdie hiërargie in ’n gemagtigde oefening slegs met endpoints wat die organisasie besit; moet nooit verbruikerstoestelle of proxyware van derde partye inskryf nie.
 
-MITRE onderskei external proxies van **multi-hop proxies (T1090.003)**. Die belangrike eienskap is nie die aantal hops nie, maar die skeiding van kennis en administration.<sup>[[3]](#references)</sup>
+## Multi-hop proxy-kettings
+
+MITRE onderskei eksterne proxies van **multi-hop proxies (T1090.003)**. Die belangrike eienskap is nie die aantal hops nie, maar die skeiding van kennis en administrasie.<sup>[[3]](#references)</sup>
+
 ```text
 operator --encrypted--> entry A --encrypted/relayed--> exit B --> target
-sees source                         sees destination
+              sees source                         sees destination
 ```
-As een party A en B bedryf, kan gedeelde logs of die tydsberekening van traffic die circuit rekonstrueer. Deur opeenvolgende kommersiële VPNs vanaf dieselfde endpoint/account by te voeg, kan latency verhoog word terwyl algemene identiteits-, betalings- en tydsberekeningbewyse behoue bly. Tor verminder hierdie probleem met onafhanklik geselekteerde relays en ’n gedeelde client-ontwerp, maar ’n interactive network met lae latency kan nie weerstand belowe teen ’n observer wat albei kante meet nie.
 
-Algemene mislukkings is DNS- of IPv6-bypass, applications wat hul eie sockets open, management traffic wat relays direk bereik, gesinchroniseerde aktiwiteit, hergebruikte SSH keys, en om by identifiserende accounts aan te meld. Die korrekte verifikasie is ’n failure test: stop elke relay om die beurt en toon dat die workload nie na ’n clear path kan terugval nie.
+As een party A en B bedryf, kan gedeelde logs of vloeitydsberekening die circuit rekonstrueer. Deur opeenvolgende kommersiële VPN’s vanaf dieselfde endpoint/rekening by te voeg, kan latensie toeneem terwyl gemeenskaplike identiteits-, betalings- en tydsberekeningsbewyse steeds bestaan. Tor verminder hierdie probleem met onafhanklik gekose relays en ’n gedeelde kliëntontwerp, maar ’n interaktiewe netwerk met lae latensie kan nie weerstand waarborg teen ’n waarnemer wat albei kante meet nie.
 
-### Ineenstorting van die tonnel en upstream leak
+Algemene foute sluit in DNS- of IPv6-omseiling, toepassings wat hul eie sockets oopmaak, bestuursverkeer wat relays direk bereik, gesinchroniseerde aktiwiteit, hergebruikte SSH-sleutels en aanmelding by identifiserende rekeninge. Die korrekte verifikasie is ’n faaltoets: stop elke relay om die beurt en toon aan dat die werklading nie na ’n ongeënkripteerde roete kan terugval nie.
 
-’n Relay-argitektuur is dikwels die maklikste om toe te skryf wanneer dit misluk. Unit 42 het ’n multi-tier-espionage path gedokumenteer wat victim-facing VPSs, relay VPSs, residential proxies, Tor en ander proxy services gebruik het; wanneer ’n tunnel weggelaat of ineengestort het, het verborge upstream infrastructure direk met relay- en victim-facing systems verbind. Dieselfde ondersoek het ook ’n X.509 certificate gebruik wat kortliks op upstream infrastructure blootgestel was, as ’n cross-tier pivot.<sup>[[14]](#references)</sup>
+### Tunnel-ineenstorting en upstream leakage
 
-Hou die **data plane** (`victim <-> exit`) apart van die **control plane** (`operator/upstream -> relay administration`). Behou ingress- en authentication logs by elke tier wat jy besit, certificate histories en kort mislukte connections—nie slegs suksesvolle C2 sessions nie. ’n Source wat slegs tydens relay outages verskyn of wat verskeie victim-facing nodes direk administreer, is ’n sterker upstream-kandidaat as ’n gewone exit, maar sy ASN/geolocation is steeds ’n hipotese, nie bewys van ’n operator se identiteit nie.
+’n Relay-argitektuur is dikwels die maklikste om toe te skryf wanneer dit faal. Unit 42 het ’n spioenasieroete met verskeie lae gedokumenteer, wat VPS’e aan die slagofferkant, relay-VPS’e, residensiële proxys, Tor en ander proxy-dienste gebruik het; toe ’n tunnel weggelaat of ineengestort het, het verborge upstream-infrastruktuur direk met relay- en slagofferkantstelsels verbind. Dieselfde ondersoek het ook ’n X.509-sertifikaat wat kortliks op upstream-infrastruktuur blootgelê is, as ’n cross-tier-pivot gebruik.<sup>[[14]](#references)</sup>
 
-’n Gemagtigde lab behoort die workload fail closed te laat. Vir ’n workload wat in ’n Linux network namespace geïsoleer is, moet die eerste route die tunnel gebruik; nadat dit verwyder is, moet sowel die request as die route lookup misluk eerder as om die physical uplink te kies:
+Hou die **data plane** (`victim <-> exit`) apart van die **control plane** (`operator/upstream -> relay administration`). Bewaar inkomende verbindings- en verifikasielogs by elke besitte laag, sertifikaatgeskiedenis en kort mislukte verbindings—nie net suksesvolle C2-sessies nie. ’n Bron wat slegs tydens relay-onderbrekings verskyn of verskeie slagofferkantnodusse direk administreer, is ’n sterker upstream-kandidaat as ’n gewone exit, maar sy ASN/geoligging bly ’n hipotese, nie bewys nie.
+
+’n Gemagtigde laboratorium behoort die werklading te laat misluk indien dit nie veilig kan voortgaan nie. Vir ’n werklading wat in ’n Linux-netwerknaamruimte geïsoleer is, moet die eerste roete die tunnel gebruik; nadat dit verwyder is, moet beide die versoek en roete-opsoek misluk eerder as om die fisiese uplink te kies:
+
 ```bash
 ip netns exec workload ip route get "$OWNED_TEST_IP"  # expect: dev wg0
 ip -n workload link set wg0 down
 ip netns exec workload curl --fail --connect-timeout 3 \
---resolve "$OWNED_TEST_HOST:443:$OWNED_TEST_IP" "https://$OWNED_TEST_HOST/health"
+  --resolve "$OWNED_TEST_HOST:443:$OWNED_TEST_IP" "https://$OWNED_TEST_HOST/health"
 ip netns exec workload ip route get "$OWNED_TEST_IP"  # expect: unreachable
 ```
-Herhaal die toets vir DNS en IPv6 en by elke relay-grens. As enige probe slaag, teken die werklike koppelvlak-/bronadres aan voordat jy policy routing of die firewall herstel; daardie waarneming is die attribution leak wat ’n ondersoeker sou sien.
 
-## Redirector-vlakke en traffic shaping
+Herhaal die toets vir DNS en IPv6, en by elke relay-grens. As enige probe slaag, teken die werklike koppelvlak-/bronadres aan voordat jy policy routing of die firewall herstel; daardie waarneming is die attribution leak wat ’n ondersoeker sou sien.
 
-’n Publieke **redirector** aanvaar verkeer wat by ’n operasie-spesifieke grammar pas en stuur dit aan na ’n beskermde team server. Alles anders kan verwerp word of van onskadelike inhoud voorsien word.
+## Redirector-lae en verkeersvorming
+
+’n Openbare **redirector** aanvaar verkeer wat by ’n operasie-spesifieke grammatika pas en stuur dit aan na ’n beskermde team server. Alles anders kan geweier word of onskuldige inhoud bedien word.
+
 ```text
 implant/browser -> CDN or redirector -> relay -> team server
-|
-request policy
-host + path + method + header + time
+                       |
+                 request policy
+           host + path + method + header + time
 ```
-Veelvuldige lae beperk blootstelling: die verbranding van 'n publieke domein hoef nie die span se server bloot te stel nie. CDN's voeg anycast-kapasiteit en 'n gerespekteerde buitenste domein by, maar die CDN-rekening en edge-logboeke word attributiepunte. TLS-fingerprints, sertifikaatgeskiedenisse, kenmerkende paths/header-volgorde, response-groottes, redirect-gedrag en origin-allowlists kan sogenaamd onverwante fronts groepeer.
 
-Vir opsporing, teken reverse-proxy-velde aan voordat normalisering plaasvind, vergelyk SNI/Host/authority, ondersoek seldsame header-kombinasies, groepeer response-liggame en TLS-fingerprints, en soek in cloud/CDN-ouditslogboeke vir konfigurasie-oorvleueling. Vir gemagtigde red teams, vermy die nabootsing van 'n werklike handelsmerk of die plasing van credential-insameling agter 'n onverwante derde party.
+Veelvuldige lae beperk blootstelling: om ’n publieke domein te verbrand, hoef nie die spanbediener bloot te stel nie. CDN’s voeg anycast-kapasiteit en ’n gerespekteerde buitenste domein by, maar die CDN-rekening en randlogboeke word attribusiepunte. TLS-fingerafdrukke, sertifikaatgeskiedenisse, kenmerkende paaie/volgorde van opskrifte, reaksiegroottes, herleidingsgedrag en oorsprong-toegelatelyste kan sogenaamd onverwante voorkante saamgroepeer.
 
-## Domain fronting en domainless fronting
+Vir opsporing, teken omgekeerde-instaanbedienervelde aan voordat dit genormaliseer word, vergelyk SNI/Host/authority, ondersoek seldsame kombinasies van opskrifte, groepeer reaksieliggame en TLS-fingerafdrukke, en soek in wolk-/CDN-ouditlogboeke na konfigurasie-oorvleueling. Vir gemagtigde rooi spanne, moenie ’n regte handelsmerk naboots of geloofsbriewersameling agter ’n onverwante derde party plaas nie.
 
-Met klassieke **domain fronting (T1090.004)** adverteer die TLS-verbinding 'n toegelate front-domein in SNI, terwyl die geënkripteerde HTTP `Host` of HTTP/2 `:authority` 'n ander back-end-domein versoek. 'n Samewerkende CDN roeteer op grond van die innerlike waarde. 'n Netwerkwaarnemer sonder TLS-dekripsie sien die front; die CDN sien albei waardes en die origin. In domainless-variante kan SNI leeg wees terwyl 'n ander routing-veld die bestemming kies.<sup>[[4]](#references)</sup>
+## Domain fronting and domainless fronting
 
-Dit is nie magiese impersonasie nie: dit werk slegs wanneer die intermediary die verskil opsetlik of per ongeluk toelaat en weet hoe om die innerlike naam te roeteer. Groot providers het cross-account fronting beperk. Encrypted ClientHello (ECH) verander wat 'n on-path-waarnemer kan sien, maar verwyder nie CDN-, endpoint- of application-rekords nie.
+Met klassieke **domain fronting (T1090.004)** kondig die TLS-verbinding ’n toegelate voordomein in SNI aan, terwyl die geënkripteerde HTTP `Host` of HTTP/2 `:authority` ’n ander agterkantdomein versoek. ’n Samewerkende CDN roeteer op grond van die innerlike waarde. ’n Netwerkwaarnemer sonder TLS-dekripsie sien die voorkant; die CDN sien albei waardes en die oorsprong. In domainless-variante kan SNI leeg wees, terwyl ’n ander roeteererveld die bestemming kies.<sup>[[4]](#references)</sup>
+
+Dit is nie magiese nabootsing nie: dit werk slegs wanneer die tussenganger doelbewus of per ongeluk die verskil toelaat en weet hoe om die innerlike naam te roeteer. Groot verskaffers het kruisrekening-fronting beperk. Encrypted ClientHello (ECH) verander wat ’n waarnemer op die netwerkpad kan sien, maar verwyder nie CDN-, eindpunt- of toepassingsrekords nie.
 
 Opsporingspunte sluit in:
 
-- endpoint-prosesafkoms en 'n bestemming wat nie vir daardie toepassing verwag word nie;
-- SNI teenoor HTTP-authority-wanpassing waar TLS-inspeksie wettig en beskikbaar is;
-- CDN-logboeke wat wys dat een tenant/front na 'n ander authority/origin roeteer;
-- ongewone langdurige of periodieke sessies na 'n diens wat normaalweg interaktief is;
-- stabiele geënkripteerde flow-groottes en kadens oor veranderende front-domeine.
+- eindpunt-prosesafstamming en ’n bestemming wat nie vir daardie toepassing verwag word nie;
+- SNI teenoor HTTP authority-wanpassing waar TLS-inspeksie wettig en beskikbaar is;
+- CDN-logboeke wat wys dat een huurder/voorkant na ’n ander authority/oorsprong roeteer;
+- buitengewoon langlewende of periodieke sessies na ’n diens wat gewoonlik interaktief is;
+- stabiele groottes en ritme van geënkripteerde vloei oor veranderende voordomeine.
 
-Die veilige lab simuleer die routing-wanpassing op 'n reverse proxy wat besit word; dit misbruik nie 'n publieke CDN nie.
+Die veilige laboratorium simuleer die roeteerwanpassing op ’n eie omgekeerde instaanbediener; dit misbruik nie ’n publieke CDN nie.
 
-## Dynamic resolution: DDNS, DGA en fast flux
+## Dynamic resolution: DDNS, DGA and fast flux
 
-Dynamic resolution ontkoppel 'n logiese diens van vaste infrastruktuur:
+Dinamiese resolusie ontkoppel ’n logiese diens van vaste infrastruktuur:
 
-- **DDNS:** 'n geauthentiseerde client werk 'n stabiele naam op nadat sy adres verander.
-- **DGA:** beide endpoint en controller lei kandidaat-domeinname uit 'n tyd/sleutel-seed af; die operator registreer 'n klein subset.
-- **Fast flux:** 'n naam gee 'n vinnig veranderende stel gekompromitteerde/proxy-adresse terug, dikwels met lae TTL's.
-- **Double flux:** beide diensadresse en gesaghebbende name-server-adresse roteer, wat die control layer ook verberg.
+- **DDNS:** ’n geverifieerde kliënt werk ’n stabiele naam by nadat sy adres verander.
+- **DGA:** beide die eindpunt en kontroleerder lei kandidaatdomeinname van ’n tyd-/sleutelsaad af; die operateur registreer ’n klein deel daarvan.
+- **Fast flux:** ’n naam lewer ’n vinnig veranderende stel gekompromitteerde/instaanbedieneradresse op, dikwels met lae TTL’s.
+- **Double flux:** beide diensadresse en gesaghebbende naambedieneradresse roteer, wat ook die beheerlaag versteek.
 
-Fast flux is 'n load-distribution-patroon wat adversarial gebruik word, nie bloot “baie DNS-antwoorde” nie. Sterker bewyse kombineer lae TTL, 'n hoë aantal unieke adresse, wye ASN/geografie-verspreiding, kort node-leeftyd, herhaalde application-gedrag en verdagte registrasiegeskiedenis. CDN's deel wettiglik verskeie van hierdie eienskappe. MITRE beveel aan dat DNS-gedrag met die proses en daaropvolgende verbindings gekorreleer word.<sup>[[5]](#references)</sup>
+Fast flux is ’n lasverspreidingspatroon wat teenstanders gebruik, nie bloot “baie DNS-antwoorde” nie. Sterker bewyse kombineer lae TTL, ’n hoë aantal unieke adresse, wye verspreiding oor ASN’e/geografieë, kort nodusleeftyd, herhaalde toepassingsgedrag en verdagte registrasiegeskiedenis. CDN’s deel wettiglik verskeie van hierdie eienskappe. MITRE beveel aan dat DNS-gedrag met die proses en daaropvolgende verbindings gekorreleer word.<sup>[[5]](#references)</sup>
 
-'n DGA kan opgespoor word deur leksikale entropie, konsonant/syfer-patrone, NXDOMAIN-uitbarstings, gesinchroniseerde eerste-gesiene domeine en proses-konteks. Wordlist-DGA's en generatiewe modelle omseil eenvoudige entropie-reëls, wat vlootwye temporale groepering en endpoint-afkoms belangriker maak.
+’n DGA kan opgespoor word deur leksikale entropie, konsonant-/syferpatrone, NXDOMAIN-uitbarstings, gesinchroniseerde domeine wat die eerste keer gesien word, en proses-konteks. Woordlys-DGA’s en generatiewe modelle omseil eenvoudige entropiereëls, wat vlootwye tydelike groepering en eindpunt-afstamming belangriker maak.
 
-## Gekompromitteerde domeine en domain shadowing
+## Compromised domains and domain shadowing
 
-'n Actor kan 'n registrar/DNS-rekening kaap, 'n dangling subdomain oorneem, of rekords onder 'n andersins gerespekteerde domein byvoeg. **Domain shadowing** behou die legitieme apex terwyl groot getalle aanvallerbeheerde subdomeine na veranderende delivery- of C2-hosts wys. Dit leen ouderdom en reputasie en kan domeinwye blokkering ontduik.<sup>[[6]](#references)</sup>
+’n Akteur kan ’n registrateur-/DNS-rekening kaap, ’n verlate subdomein oorneem, of rekords onder ’n andersins gerespekteerde domein byvoeg. **Domain shadowing** behou die wettige apex terwyl groot getalle aanvaller-beheerde subdomeine na veranderende aflewerings- of C2-gashere wys. Dit leen ouderdom en reputasie en kan domeinwye blokkering ontduik.<sup>[[6]](#references)</sup>
 
-Defenders benodig registrar- en authoritative-DNS-ouditslogboeke, MFA, registry/registrar locks, waarskuwings vir nuwe delegations/API-tokens/name servers, certificate-transparency-monitering en 'n inventaris van cloud-resources waarna DNS verwys. Ondersoek 'n subdomein se resolution en sertifikaatgeskiedenis onafhanklik van die apex se reputasie.
+Verdedigers benodig ouditlogboeke van registrateurs en gesaghebbende DNS, MFA, slotte by registers/registrateurs, waarskuwings vir nuwe delegerings/API-tokens/naambedieners, monitering van sertifikaatdeursigtigheid, en ’n inventaris van wolkbronne waarna DNS verwys. Ondersoek ’n subdomein se resolusie- en sertifikaatgeskiedenis onafhanklik van die apex se reputasie.
 
-## Web services en dead-drop resolvers
+## Web services and dead-drop resolvers
 
-'n **dead-drop resolver (T1102.001)** stoor 'n geënkodeerde pointer na huidige C2 binne 'n legitieme plasing, profiel, dokument, repository, cloud object of blockchain-veld. Malware haal die publieke objek op, dekodeer 'n domein/IP en kontak die volgende stage. Bidirectional-variante ruil commands of files deur diens-API's uit.<sup>[[7]](#references)</sup>
+’n **dead-drop resolver (T1102.001)** stoor ’n geënkodeerde wyser na huidige C2 in ’n wettige plasing, profiel, dokument, bewaarplek, wolkobjek of blokkettingveld. Wanware haal die publieke objek op, dekodeer ’n domein/IP en kontak die volgende stadium. Tweerigtingvariante ruil opdragte of lêers deur diens-API’s uit.<sup>[[7]](#references)</sup>
 
-Dit bied veerkragtigheid en verberg back-end C2 vir statiese binary analysis. Dit skep ook stabiele object-, tenant-, repository-, API- en access-pattern-identifiseerders. Defenders behoort die volgende saam te voeg:
+Een GitHub-spesifieke resolver-variasie gebruik die Issues Search API slegs wanneer ’n geverifieerde bewaarplekkanaal faal. Die kliënt soek na issues wat by die huidige datum, bewaarplek en issuetipe pas, volg elke issue se kommentaar-URL, en onttrek syferteks tussen `<!--` en `-->`-merkers. Ná dekripsie per gasheer, afgelei van die datum, vervang velde soos `Owner`, `LicRepo` en `LicToken` die primêre bewaarplekeienaar, pad en token. Só kan die operateur geloofsbriewe en eindpunte roteer sonder om die kliënt te vervang; die issue-kommentaar is ’n resolver, terwyl die bewaarpleklêers die taakskeduleringskanaal bly.<sup>[[15]](#references)</sup>
+
+Dit bied veerkragtigheid en versteek C2 aan die agterkant vir statiese binêre ontleding. Dit skep ook stabiele identifiseerders vir objekte, huurders, bewaarplekke, API’s en toegangspatrone. Verdedigers behoort die volgende te koppel:
 
 1. die proses wat die diens gekontak het;
-2. presiese API-path/object en response-hash;
-3. decoding- of string-processing-aktiwiteit;
-4. die nuwe outbound-verbinding kort daarna; en
+2. die presiese API-pad/objek en reaksiehash;
+3. dekoderings- of stringverwerkingsaktiwiteit;
+4. die nuwe uitgaande verbinding kort daarna; en
 5. identiese gedrag elders in die vloot.
 
-Om alle GitHub, cloud storage of social media te blokkeer, is selde lewensvatbaar. Service-aware egress-beleid en prosesvlak-korrelasie presteer beter as domein-alleen-blokkering.
+Om alle GitHub, wolkberging of sosiale media te blokkeer, is selde haalbaar. Uitgaande beleid wat diensbewus is en korrelasie op prosesvlak vaar beter as blokkering op grond van domeine alleen.
 
-## Personas, accounts en procurement-compartments
+## Personas, accounts and procurement compartments
 
-Infrastructure-anonimiteit faal wanneer 'n persona, recovery-email, telefoon, betaling, browser of admin-IP kompartemente oorbrug. State-linked operations het social profiles, email identities en cloud accounts lank voor gebruik gekweek; ATT&CK teken dit aan as Establish Accounts (T1585), insluitend social-, email- en cloud-subtegnieke.<sup>[[8]](#references)</sup>
+Infrastruktuuranonimiteit faal wanneer ’n persona, herstel-e-posadres, telefoonnommer, betaling, blaaier of admin-IP kompartemente oorbrug. Staatsgekoppelde operasies het sosiale profiele, e-posidentiteite en wolkrekeninge lank voor gebruik opgebou; ATT&CK teken dit aan as Establish Accounts (T1585), insluitend sosiale, e-pos- en wolk-subtegnieke.<sup>[[8]](#references)</sup>
 
-'n Defender of ondersoeker bou 'n grafiek uit:
+’n Verdediger of ondersoeker bou ’n grafiek op grond van:
 
-- skeppings- en eerste-login-tyd, locale, tydsone en werkskedule;
-- recovery-velde, MFA-toestelle, identiteitsdokumente en betaalinstrumente;
-- browser/TLS-fingerprints en bronnetwerkgeskiedenis;
-- avatar-hergebruik, beeldprovenance, skryfstyl en sosiale-grafiek-groei;
-- gedeelde domeinregistrant, name server, sertifikaat, analytics-ID of repository-commit;
-- management-plane-aksies wat die publieke relay-argitektuur omseil.
+- skeppingstyd en eerste aanmelding, streek, tydsone en werkskedule;
+- herstelvelde, MFA-toestelle, identiteitsdokumente en betaalmiddele;
+- blaaier-/TLS-fingerafdrukke en geskiedenis van bronnetwerke;
+- hergebruik van avatars, beeldherkoms, skryfstyl en groei van die sosiale grafiek;
+- gedeelde domeinregistrant, naambediener, sertifikaat, analise-ID of bewaarplekbystand;
+- bestuursvlak-aksies wat die publieke aflosargitektuur omseil.
 
-Vir 'n gemagtigde red team behoort synthetic personas aan die exercise controller gedokumenteer te word, organisasie-besitte recovery/payment-kanale te gebruik, die impersonasie van werklike onverwante mense te vermy en 'n beplande retirement te hê. Die SOC mag blind bly; die operasie mag nie onaccountable word nie.
+Vir ’n gemagtigde rooi span behoort sintetiese personas aan die oefeningbeheerder gedokumenteer te word, organisasie-besitte herstel-/betaalkanale te gebruik, nabootsing van regte en onverwante mense te vermy, en ’n beplande aftrede te hê. Die SOC mag steeds onbewus wees; die operasie mag nie onopspoorbaar raak nie.
 
-## Opkomende saamgestelde patrone om te threat-model
+## Emerging compound patterns to threat-model
 
-Die volgende is **defender-driven compositions**, nie bewerings dat 'n genoemde actor elke presiese ontwerp ontplooi het nie. Hulle kombineer reeds waargenome primitives en is nuttige purple-team-hipoteses.
+Die volgende is **verdedigergedrewe samestellings**, nie bewerings dat ’n genoemde akteur elke presiese ontwerp ontplooi het nie. Hulle kombineer reeds waargenome boustene en is nuttige hipoteses vir perspan-oefeninge.
 
 ### Asymmetric one-way tasking
 
-Commands arriveer deur 'n publieke, broadcast- of append-only-bron terwyl resultate deur 'n onverwante kanaal na 'n vertraging uitgaan. Voorbeelde van die primitive sluit web-service one-way communication en dead drops in. Skeiding voorkom dat 'n enkele flow bidirectional lyk en frustreer eenvoudige request/response-korrelasie.<sup>[[9]](#references)</sup>
+Opdragte kom deur ’n publieke, uitsaai- of slegs-byvoegbare bron aan, terwyl resultate ná ’n vertraging deur ’n onverwante kanaal vertrek. Voorbeelde van die bousteen sluit in eenrigtingkommunikasie deur webdienste en dead drops. Skeiding keer dat ’n enkele vloei tweerigting lyk en bemoeilik eenvoudige versoek-/reaksiekorrelasie.<sup>[[9]](#references)</sup>
 
-**Opsporing:** behou object-level reads, en korreleer dan prosesstatusveranderinge en latere outbound-transfers oor 'n wyer venster. Soek na 'n seldsame proses wat dieselfde publieke objek lees, selfs wanneer geen onmiddellike reply volg nie.
+**Opsporing:** bewaar lesings op objekvlak, en korreleer dan prosesstatusveranderinge en latere uitgaande oordragte oor ’n langer tydvenster. Soek na ’n seldsame proses wat dieselfde publieke objek lees, selfs wanneer geen onmiddellike antwoord volg nie.
 
 ### Multi-stage channel promotion
 
-'n Stil eerste stage doen inventory en bevorder slegs geselekteerde stelsels na 'n onverwante tweede-stage-kanaal. Die tweede endpoint, protokol en proses mag geen infrastruktuur met die eerste deel nie. Dit beperk blootstelling van bekwame infrastruktuur en word uitdruklik as ATT&CK T1104 gemodelleer.<sup>[[10]](#references)</sup>
+’n Stil eerste stadium doen inventarisopname en bevorder slegs geselekteerde stelsels na ’n onverwante tweede-stadiumkanaal. Die tweede eindpunt, protokol en proses deel dalk geen infrastruktuur met die eerste nie. Dit beperk blootstelling van bekwame infrastruktuur en word uitdruklik as ATT&CK T1104 gemodelleer.<sup>[[10]](#references)</sup>
 
-**Opsporing:** voeg `first network process -> downloaded/configured state -> new process or injection -> unrelated destination` saam; moenie die insident afsluit nadat die eerste domein geblokkeer is nie.
+**Opsporing:** koppel `eerste netwerkproses -> afgelaaide/gekonfigureerde status -> nuwe proses of inspuiting -> onverwante bestemming`; moenie die voorval afsluit nadat die eerste domein geblokkeer is nie.
 
 ### Cross-protocol relay translation
 
-Verskillende hops vertaal HTTPS, QUIC, WebSocket, DNS, SSH of 'n message-queue API eerder as om packets deursigtig aan te stuur. Vertaling verwyder 'n enkele end-to-end-protokol-fingerprint, maar skep gateways met kenmerkende timing, buffering en semantiese omskakeling. Protocol tunneling (T1572) kan met proxies en service impersonation gekombineer word.<sup>[[11]](#references)</sup>
+Verskillende spronge vertaal HTTPS, QUIC, WebSocket, DNS, SSH of ’n boodskapry-API, eerder as om pakkies deursigtig aan te stuur. Vertaling verwyder ’n enkele end-tot-end-protokolfingerafdruk, maar skep poorte met kenmerkende tydsberekening, buffering en semantiese omskakeling. Protokoltrekking (T1572) kan met instaanbedieners en diensnabootsing gekombineer word.<sup>[[11]](#references)</sup>
 
-**Opsporing:** soek gateway-hosts wat een protokol ontvang en 'n ander begin, met sterk gekoppelde byte/tyd-gedrag; vergelyk endpoint-intensie met die protokol wat werklik gedra word.
+**Opsporing:** soek na poortgashere wat een protokol ontvang en ’n ander begin met nou gekoppelde greep-/tydgedrag; vergelyk eindpuntbedoeling met die protokol wat werklik vervoer word.
 
 ### Passive activation on edge devices
 
-In plaas van beaconing monitor 'n implant verkeer wat reeds 'n router/VPN bereik en aktiveer dit slegs op 'n magic value, source-port-patroon of geauthentiseerde token. Normale verkeer gaan voort na die werklike diens. ATT&CK noem dit Traffic Signaling (T1205), met gedokumenteerde network-device- en APT-voorbeelde.<sup>[[12]](#references)</sup>
+In plaas van beaconing monitor ’n implantaat verkeer wat reeds ’n roeteerder/VPN bereik en aktiveer dit slegs op ’n magiese waarde, bronpoortpatroon of geverifieerde token. Normale verkeer gaan voort na die werklike diens. ATT&CK noem dit Traffic Signaling (T1205), met gedokumenteerde voorbeelde van netwerktoestelle en APT’s.<sup>[[12]](#references)</sup>
 
-**Opsporing:** firmware/file-integriteit, raw packet capture tydens 'n gemagtigde hunt, onverwagte socket filters en differensiële diensgedrag. Die afwesigheid van 'n periodieke beacon bewys nie dat 'n edge device skoon is nie.
+**Opsporing:** fermware-/lêerintegriteit, rou pakkievaslegging tydens ’n gemagtigde ondersoek, onverwagte sokfilters en verskille in diensgedrag. Die afwesigheid van ’n periodieke beacon bewys nie dat ’n randtoestel skoon is nie.
 
-### Serverless en ephemeral origin rotation
+### Serverless and ephemeral origin rotation
 
-'n Front behou 'n stabiele logiese identiteit terwyl kortlewende functions/containers individuele stages in verskeie regions/accounts hanteer. Dit verminder disk-leeftyd en vaste origin-IP's, maar control-plane-skepping, image/layer, role, secret, request ID en billing-telemetrie word die duursame grafiek.
+’n Voorkant behou ’n stabiele logiese identiteit terwyl kortstondige funksies/houers individuele stadiums in verskeie streke/rekeninge hanteer. Dit verminder skyfleeftyd en vaste oorsprong-IP’s, maar beheervlak-skepping, beeld/lae, rol, geheim, versoek-ID en faktureringsdata word die blywende grafiek.
 
-**Opsporing:** behou cloud audit- en invocation-logboeke buite die workload; groepeer deployment templates, roles, environment keys en front-to-origin-verhoudings.
+**Opsporing:** behou wolkoudit- en aanroeplogboeke buite die werklas; groepeer ontplooiingsjablone, rolle, omgewingsleutels en voorkant-tot-oorsprong-verhoudings.
 
 ### Privacy-layer diversity
 
-'n Operasie kan doelbewus een homogene ketting vermy: byvoorbeeld, een kanaal gebruik 'n gehuurde relay, tasking gebruik 'n publieke objek, 'n exit kom van 'n besitte lab-cellular-link, en administration gebruik 'n aparte organisasienetwerk. Dit verminder die waarde daarvan om een provider te kompromitteer, maar verhoog cross-layer-timing- en operasionele-fouterisiko.
+’n Operasie kan doelbewus eenvormige ketting vermy: byvoorbeeld, een kanaal gebruik ’n gehuurde aflos, taakskedulering gebruik ’n publieke objek, ’n uitgang kom van ’n besitte laboratoriumsellulêre skakel, en administrasie gebruik ’n afsonderlike organisasienetwerk. Dit verminder die waarde daarvan om een verskaffer te kompromitteer, maar verhoog die risiko van tydsberekening- en operasionele foute oor lae heen.
 
-**Opsporing:** bou campaign timelines oor identity-, DNS-, SaaS-, network- en cloud-sensors. Soek na gesinchroniseerde statusoorgange eerder as identiese indicators.
+**Opsporing:** bou veldtogtydlyne oor identiteits-, DNS-, SaaS-, netwerk- en wolksensors heen. Soek na gesinchroniseerde statusoorgange eerder as identiese aanwysers.
 
-### Decentralized of transparency-log dead drops
+### Decentralized or transparency-log dead drops
 
-'n Actor kan 'n klein geënkripteerde pointer in enige duursame publieke append-only-stelsel, content-addressed store of transparency-like feed plaas. Die publieke objek is veerkragtig, maar sy presiese index/content-hash en die client se polling-gedrag word stabiele identifiseerders.
+’n Akteur kan ’n klein geënkripteerde wyser in enige duursame publieke stelsel wat slegs byvoeg, inhoudadresseerbare berging of deursigtigheidsagtige voer plaas. Die publieke objek is veerkragtig, maar sy presiese indeks/inhoudhash en die kliënt se peilgedrag word stabiele identifiseerders.
 
-**Opsporing:** teken volledige API/object-identifiseerders en response-hashes aan; waarsku oor nie-standaardprosesse wat immutable objects poll, gevolg deur decoding of nuwe verbindings.
+**Opsporing:** teken volledige API-/objekidentifiseerders en reaksiehashes aan; waarsku oor nie-standaardprosesse wat onveranderlike objekte peil, gevolg deur dekodering of nuwe verbindings.
 
 ### Delayed store-and-forward operations
 
-Interactive C2 skep sterk timing-korrelasie. 'n Store-and-forward-ontwerp bondel geënkripteerde jobs en stuur resultate minute of ure later deur 'n ander queue of fisiese oordrag terug. Dit offer responsiwiteit op vir swakker end-to-end-timing.
+Interaktiewe C2 skep sterk tydskorrelasie. ’n Store-and-forward-ontwerp bondel geënkripteerde take en stuur resultate minute of ure later deur ’n ander ry of fisiese oordrag terug. Dit verruil responsiwiteit vir swakker end-tot-end-tydskorrelasie.
 
-**Opsporing:** verleng korrelasievensters, modelleer periodieke queue access en ondersoek endpoint staging. Batching verskuif die sein van packet timing na geskeduleerde proses/file-gedrag; dit verwyder dit nie.
+**Opsporing:** verleng korrelasievensters, modelleer periodieke rytoegang en ondersoek eindpunt-stasering. Bondeling verskuif die sein van pakkietydsberekening na geskeduleerde proses-/lêergedrag; dit wis dit nie uit nie.
 
-## Ontwerphersiening: dink in waarnemers
+## Design review: think in observers
 
-Vir elke path, vul hierdie tabel voor deployment en ná collection in:
+Vul hierdie tabel vir elke roete in, voor ontplooiing en ná versameling:
 
-| Laag | Sien bron? | Sien bestemming? | Sien inhoud? | Stabiele identifiseerders | Retensie/regseienaar |
+| Laag | Sien bron? | Sien bestemming? | Sien inhoud? | Stabiele identifiseerders | Bewaring/wetlike eienaar |
 |---|---:|---:|---:|---|---|
-| local network/carrier | | | | | |
-| entry/access service | | | | | |
-| traversal operator(s) | | | | | |
-| exit/redirector/CDN | | | | | |
-| authoritative DNS/registrar | | | | | |
-| target | | | | | |
-| account/payment provider | | | | | |
+| plaaslike netwerk/draer | | | | | |
+| toegangsdiens | | | | | |
+| deurvoeroperateur(s) | | | | | |
+| uitgang/herleier/CDN | | | | | |
+| gesaghebbende DNS/registrateur | | | | | |
+| teiken | | | | | |
+| rekening-/betalingsverskaffer | | | | | |
 
-As een gewone provider elke kolom kan invul, bied die argitektuur verberging teenoor die target, maar nie robuuste skeiding nie. As geen interne controller aktiwiteit na 'n engagement kan terugkarteer nie, is dit ongeskik vir professionele red teaming.
+As een gewone verskaffer elke kolom kan invul, bied die argitektuur verberging teenoor die teiken, maar nie robuuste skeiding nie. As geen interne beheerder aktiwiteit aan ’n opdrag kan koppel nie, is dit ongeskik vir professionele rooi spanne.
 
 ## References
 
-- [1] [MITRE ATT&CK — Verkry infrastruktuur (T1583), kompromitteer infrastruktuur (T1584) en Proxy (T1090)](https://attack.mitre.org/techniques/T1584/)
-- [2] [Google Cloud/Mandiant — China-nexus-spioenasie-actors gebruik ORB-netwerke](https://cloud.google.com/blog/topics/threat-intelligence/china-nexus-espionage-orb-networks)
+- [1] [MITRE ATT&CK — Verkryging van infrastruktuur (T1583), kompromittering van infrastruktuur (T1584), en instaanbediener (T1090)](https://attack.mitre.org/techniques/T1584/)
+- [2] [Google Cloud/Mandiant — China-gekoppelde spioenasie-akteurs gebruik ORB-netwerke](https://cloud.google.com/blog/topics/threat-intelligence/china-nexus-espionage-orb-networks)
 - [3] [MITRE ATT&CK — Multi-hop Proxy (T1090.003)](https://attack.mitre.org/techniques/T1090/003/)
 - [4] [MITRE ATT&CK — Domain Fronting (T1090.004)](https://attack.mitre.org/techniques/T1090/004/)
 - [5] [MITRE ATT&CK — Fast Flux DNS (T1568.001)](https://attack.mitre.org/techniques/T1568/001/)
-- [6] [MITRE ATT&CK — Kompromitteer infrastruktuur: domeine (T1584.001)](https://attack.mitre.org/techniques/T1584/001/)
+- [6] [MITRE ATT&CK — Kompromittering van infrastruktuur: domeine (T1584.001)](https://attack.mitre.org/techniques/T1584/001/)
 - [7] [MITRE ATT&CK — Web Service: Dead Drop Resolver (T1102.001)](https://attack.mitre.org/techniques/T1102/001/)
-- [8] [MITRE ATT&CK — Establish Accounts (T1585)](https://attack.mitre.org/techniques/T1585/)
+- [8] [MITRE ATT&CK — Rekeninge opstel (T1585)](https://attack.mitre.org/techniques/T1585/)
 - [9] [MITRE ATT&CK — Web Service: One-Way Communication (T1102.003)](https://attack.mitre.org/techniques/T1102/003/)
 - [10] [MITRE ATT&CK — Multi-Stage Channels (T1104)](https://attack.mitre.org/techniques/T1104/)
-- [11] [MITRE ATT&CK — Protocol Tunneling (T1572)](https://attack.mitre.org/techniques/T1572/)
+- [11] [MITRE ATT&CK — Protokoltrekking (T1572)](https://attack.mitre.org/techniques/T1572/)
 - [12] [MITRE ATT&CK — Traffic Signaling (T1205)](https://attack.mitre.org/techniques/T1205/)
-- [13] [Google Threat Intelligence Group — Ontwrigting van die wêreld se grootste residential proxy-netwerk](https://cloud.google.com/blog/topics/threat-intelligence/disrupting-largest-residential-proxy-network)
-- [14] [Unit 42 — Die Shadow Campaigns: Ontbloting van globale spioenasie](https://unit42.paloaltonetworks.com/shadow-campaigns-uncovering-global-espionage/)
+- [13] [Google Threat Intelligence Group — Ontwrigting van die wêreld se grootste residensiële instaanbedienernetwerk](https://cloud.google.com/blog/topics/threat-intelligence/disrupting-largest-residential-proxy-network)
+- [14] [Unit 42 — Die Shadow-veldtogte: Blootlegging van wêreldwye spioenasie](https://unit42.paloaltonetworks.com/shadow-campaigns-uncovering-global-espionage/)
+- [15] [Unit 42 - Blinder Tunnel-veldtog teiken Irakse infrastruktuur](https://unit42.paloaltonetworks.com/blinder-tunnel-targets-critical-infrastructure/)
 {{#include ../banners/hacktricks-training.md}}
