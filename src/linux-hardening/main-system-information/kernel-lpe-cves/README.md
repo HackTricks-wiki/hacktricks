@@ -16,6 +16,7 @@ For Dirty Pipe (CVE-2022-0847), the [original research](https://dirtypipe.cm4all
 The Binary Exploitation section goes deeper into exploit primitives, memory layout, and mitigation bypasses for these Linux kernel targets:
 
 - [AF_UNIX out-of-band SKB use-after-free](../../../binary-exploitation/linux-kernel-exploitation/af-unix-msg-oob-uaf-skb-primitives.md): a socket bug developed into kernel read and write primitives.
+- [AF_ALG concurrent-writer scatterlist underflow](../../../binary-exploitation/linux-kernel-exploitation/af-alg-concurrent-writer-scatterlist-oob.md): a skcipher writer race developed into a kernel write.
 - [Futex PI use-after-free](../../../binary-exploitation/linux-kernel-exploitation/futex-pi-uaf-pipe-buffer-workqueue-usermodehelper.md): a pointer-write primitive extended through pipe buffers and workqueues.
 - [ksmbd streams out-of-bounds write, CVE-2025-37947](../../../binary-exploitation/linux-kernel-exploitation/ksmbd-streams_xattr-oob-write-cve-2025-37947.md): kernel heap exploitation and mitigation bypasses.
 - [POSIX CPU timers TOCTOU, CVE-2025-38352](../../../binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md): the binary exploitation treatment of the timer race also summarized above.
