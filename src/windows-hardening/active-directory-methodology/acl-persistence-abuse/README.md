@@ -80,11 +80,11 @@ Holding these privileges on a computer object or a user account allows for:
 
 ## Moving an object into inherited OU permissions
 
-A path can combine **move rights over an account** with **write rights inherited from a destination OU**, even when neither principal can initially modify the account's sensitive attributes. Verify the source object's move permissions and `CreateChild` on the destination, move the object, then re-check its effective DACL. For example, PowerView's `Set-DomainObjectDN -Identity <user> -DestinationDN 'OU=<destination>,DC=<domain>,DC=<tld>'` moves the user; a controlled group with inherited `GenericWrite` on that OU can then add a [shadow credential](shadow-credentials.md). The move does not create the inherited right by itself.<sup>[[18]](#references)</sup>
+A path can combine **move rights over an account** with **write rights inherited from a destination OU**, even when neither principal can initially modify the account's sensitive attributes. Verify the source object's move permissions and `CreateChild` on the destination, move the object, then re-check its effective DACL. For example, powerview.py's `Set-DomainObjectDN -Identity <user> -DestinationDN 'OU=<destination>,DC=<domain>,DC=<tld>'` moves the user; a controlled group with inherited `GenericWrite` on that OU can then add a [shadow credential](shadow-credentials.md). The move does not create the inherited right by itself.<sup>[[18]](#references)</sup>
 
 If you have `GenericAll` on an OU but no suitable inherited ACE, `bloodyAD --host <dc> -d <domain> -k add genericAll 'OU=<destination>,DC=<domain>,DC=<tld>' <controlled-user>` can add one for its descendants. Test the target account separately: **AdminSDHolder-protected accounts have inheritance disabled**, so an OU ACE may affect ordinary users while failing on a protected user. See [AdminSDHolder and SDProp](../privileged-groups-and-token-privileges.md#adminsdholder-group).<sup>[[18]](#references)</sup>
 
-A separate abuse path exists when a privileged scheduled cleanup script chooses OUs based on attacker-influenced ACEs, then runs `Set-ADObject -Clear adminCount` **and** `$acl.SetAccessRuleProtection($False, $False)` on their descendants. Granting the script's trigger group the required OU right and invoking the task can restore inheritance on a previously protected account, allowing the OU ACE to apply. Confirm the exact script, trigger permission, and resulting DACL; clearing `adminCount` alone does not re-enable inheritance, and SDProp can re-protect accounts that remain in protected groups.<sup>[[18]](#references)</sup>
+A separate abuse path exists when a privileged scheduled cleanup script chooses OUs based on attacker-influenced ACEs, then runs `Set-ADObject -Clear adminCount` **and** `$acl.SetAccessRuleProtection($False, $False)` on their descendants. If you can modify the OU DACL, grant the group inspected by the script the required `ExtendedRight` or `GenericAll` ACE; separately verify that you can invoke the task. The privileged task can then restore inheritance on a previously protected account, allowing the OU ACE to apply. Confirm the exact script, trigger permission, and resulting DACL; clearing `adminCount` alone does not re-enable inheritance, and SDProp can re-protect accounts that remain in protected groups.<sup>[[18]](#references)</sup>
 
 ## **WriteProperty on Group**
 
@@ -467,5 +467,3 @@ Notes:
 - [16] [Synacktiv GPOddity](https://github.com/synacktiv/GPOddity)
 - [17] [Synacktiv OUned](https://github.com/synacktiv/OUned)
 - [18] [HTB: Hercules — OU movement and inherited ACL abuse](https://0xdf.gitlab.io/2026/09/21/htb-hercules.html)
-
-{{#include ../../../banners/hacktricks-training.md}}
