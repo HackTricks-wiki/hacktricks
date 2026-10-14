@@ -47,6 +47,27 @@ hash-files = false
 "/linux-hardening/post-exploitation/linux-post-exploitation/index.html" = "/linux-hardening/post-exploitation/index.html"
 "/linux-hardening/post-exploitation/linux-post-exploitation/trojanized-system-daemons-and-reverse-proxies.html" = "/linux-hardening/post-exploitation/trojanized-system-daemons-and-reverse-proxies.html"
 
+"/todo/radio-hacking/index.html" = "../../hardware-physical-access/radio-hacking/index.html"
+"/todo/radio-hacking/fissure-the-rf-framework.html" = "../../hardware-physical-access/radio-hacking/fissure-the-rf-framework.html"
+"/todo/radio-hacking/flipper-zero/index.html" = "../../../hardware-physical-access/radio-hacking/flipper-zero/index.html"
+"/todo/radio-hacking/flipper-zero/fz-125khz-rfid.html" = "../../../hardware-physical-access/radio-hacking/flipper-zero/fz-125khz-rfid.html"
+"/todo/radio-hacking/flipper-zero/fz-ibutton.html" = "../../../hardware-physical-access/radio-hacking/flipper-zero/fz-ibutton.html"
+"/todo/radio-hacking/flipper-zero/fz-infrared.html" = "../../../hardware-physical-access/radio-hacking/flipper-zero/fz-infrared.html"
+"/todo/radio-hacking/flipper-zero/fz-nfc.html" = "../../../hardware-physical-access/radio-hacking/flipper-zero/fz-nfc.html"
+"/todo/radio-hacking/flipper-zero/fz-sub-ghz.html" = "../../../hardware-physical-access/radio-hacking/flipper-zero/fz-sub-ghz.html"
+"/todo/radio-hacking/ibutton.html" = "../../hardware-physical-access/radio-hacking/ibutton.html"
+"/todo/radio-hacking/infrared.html" = "../../hardware-physical-access/radio-hacking/infrared.html"
+"/todo/radio-hacking/low-power-wide-area-network.html" = "../../hardware-physical-access/radio-hacking/low-power-wide-area-network.html"
+"/todo/radio-hacking/maxiprox-mobile-cloner.html" = "../../hardware-physical-access/radio-hacking/maxiprox-mobile-cloner.html"
+"/todo/radio-hacking/pentesting-ble-bluetooth-low-energy.html" = "../../hardware-physical-access/radio-hacking/pentesting-ble-bluetooth-low-energy.html"
+"/todo/radio-hacking/pentesting-rfid.html" = "../../hardware-physical-access/radio-hacking/pentesting-rfid.html"
+"/todo/radio-hacking/proxmark-3.html" = "../../hardware-physical-access/radio-hacking/proxmark-3.html"
+"/todo/radio-hacking/sub-ghz-rf.html" = "../../hardware-physical-access/radio-hacking/sub-ghz-rf.html"
+
+"/todo/test-llms.html" = "../AI/AI-Model-Tools-and-Platforms.html"
+
+"/todo/burp-suite.html" = "../pentesting-web/burp-suite.html"
+
 [output.html.fold]
 enable = true # whether or not to enable section folding
 level = 0     # the depth to start folding
