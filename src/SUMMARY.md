@@ -197,7 +197,6 @@
     - [Linux - Vmware Tools Service Discovery Untrusted Search Path Cve 2025 41244](linux-hardening/main-system-information/kernel-lpe-cves/vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md)
     - [Linux - Copy Fail Af Alg Splice Page Cache Overwrite Cve 2026 31431](linux-hardening/main-system-information/kernel-lpe-cves/copy-fail-af_alg-splice-page-cache-overwrite-cve-2026-31431.md)
     - [Open vSwitch Forwarded SKB Marker Stripping to ESP Page Cache Writes](linux-hardening/main-system-information/kernel-lpe-cves/open-vswitch-forwarded-skb-marker-stripping-esp-page-cache-write.md)
-    - [Linux - Posix Cpu Timers Toctou Cve 2025 38352](linux-hardening/main-system-information/kernel-lpe-cves/posix-cpu-timers-toctou-cve-2025-38352.md)
     - [Linux - Ptrace Exit Race Pidfd Getfd Fd Theft (Linux Ptrace Exit Race Pidfd Getfd Fd Theft) / Linux - Ptrace Exit Race Pidfd Getfd Fd Theft (formerly “Linux Ptrace Exit Race Pidfd Getfd Fd Theft”)](linux-hardening/main-system-information/kernel-lpe-cves/linux-ptrace-exit-race-pidfd_getfd-fd-theft.md) <!-- Original navigation label: [Linux Ptrace Exit Race Pidfd Getfd Fd Theft]() --> <!-- PR-side label provenance: Linux - Ptrace Exit Race Pidfd Getfd Fd Theft (formerly “Linux Ptrace Exit Race Pidfd Getfd Fd Theft”) / Linux Ptrace Exit Race Pidfd Getfd Fd Theft / Linux - Ptrace Exit Race Pidfd Getfd Fd Theft <!-- Preserved base navigation text: Linux - Ptrace Exit Race Pidfd Getfd Fd Theft (formerly “Linux Ptrace Exit Race Pidfd Getfd Fd Theft”) <!-- Original navigation label: [Linux Ptrace Exit Race Pidfd Getfd Fd Theft]() -->
 - [Linux - User Information (formerly “User Information”)](linux-hardening/user-information/README.md) <!-- Original navigation label: [User Information]() -->
   - [Linux - Users, Sessions, and Credential Artifacts](linux-hardening/user-information/user-and-session-triage.md)
@@ -1059,7 +1058,7 @@
 - [nftables Catchall Rollback UAF](binary-exploitation/linux-kernel-exploitation/nftables-catchall-rollback-uaf.md)
 - [net/sched action-IDR UAF exploitation (CVE-2026-53264)](binary-exploitation/linux-kernel-exploitation/net-sched-action-idr-uaf-cve-2026-53264.md)
 - [Pixel Bigwave Bigo Job Timeout Uaf Kernel Write](binary-exploitation/linux-kernel-exploitation/pixel-bigwave-bigo-job-timeout-uaf-kernel-write.md)
-- [Linux kernel exploitation - toctou](binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md)
+- [POSIX CPU timers TOCTOU race and exploitation (CVE-2025-38352)](binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md)
 - [Qualcomm KGSL VBO bind race to physical-page UAF](binary-exploitation/linux-kernel-exploitation/qualcomm-kgsl-vbo-bind-race-physical-uaf.md)
 - [PS5 compromission](binary-exploitation/freebsd-ptrace-rfi-vm_map-prot_exec-bypass-ps5.md)
 - [Vmware Workstation Pvscsi Lfh Escape](binary-exploitation/vmware-workstation-pvscsi-lfh-escape.md)
