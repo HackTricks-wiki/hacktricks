@@ -1,17 +1,18 @@
-# Ruch boczny
+# Ruch lateralny
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Windows obsługuje kilka mechanizmów, których można używać do wykonywania poleceń na zdalnych systemach. Poniższe strony wyjaśniają typowe techniki lateral-movement oraz ich wymagania wstępne:
+Windows obsługuje kilka mechanizmów, których można użyć do wykonywania poleceń w systemach zdalnych. Na poniższych stronach omówiono popularne techniki ruchu lateralnego i ich wymagania wstępne:
 
-- [**PsExec**](psexec-and-winexec.md)
+- [**PsExec / SCM service execution**](psexec-and-winexec.md#how-do-they-work)
 - [**SmbExec**](psexec-and-winexec.md#impacket-smbexecpy-smbexec)
 - [**WmiExec**](wmiexec.md)
 - [**AtExec / SchtasksExec**](atexec.md)
 - [**WinRM**](winrm.md)
 - [**DCOM Exec**](dcomexec.md)
 - [**RDPexec**](rdpexec.md)
-- [**SCMexec**](scmexec.md)
+- [**SCMExec with SharpMove**](psexec-and-winexec.md#scmexec-with-sharpmove)
+- [**SCCM / MECM client execution**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
 - **Pass the cookie** (cloud)<sup>[[1]](#references)</sup>
 - **Pass the PRT** (cloud)<sup>[[2]](#references)</sup>
 - **Pass the Microsoft Entra ID certificate** (cloud)<sup>[[3]](#references)</sup>
