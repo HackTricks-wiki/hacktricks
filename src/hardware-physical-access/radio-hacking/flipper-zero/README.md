@@ -6,14 +6,14 @@ Flipper Zero est un multitool matériel portable qui prend en charge les fonctio
 
 - **Recevoir, capturer et rejouer les signaux radio pris en charge :** [**Sub-GHz**](fz-sub-ghz.md)
 - **Lire, capturer et émuler les cartes NFC prises en charge :** [**NFC**](fz-nfc.md)
-- **Lire, capturer et émuler les tags 125 kHz pris en charge :** [**RFID 125 kHz**](fz-125khz-rfid.md)
+- **Lire, capturer et émuler les tags 125 kHz pris en charge :** [**125 kHz RFID**](fz-125khz-rfid.md)
 - **Lire, capturer et transmettre les signaux infrarouges :** [**Infrarouge**](fz-infrared.md)
 - **Lire, capturer et émuler les iButtons pris en charge :** [**iButton**](../ibutton.md)
 - **Agir comme un appareil BadUSB**
 - **Agir comme une clé de sécurité U2F**
 - **Exécuter des applications et des jeux tels que Snake**
 
-Pour découvrir les firmware, applications, bases de données et autres ressources maintenus par la communauté, consultez la collection Awesome Flipper Zero.<sup>[[2]](#references)</sup>
+Pour découvrir les firmwares, applications, bases de données et autres ressources maintenus par la communauté, consultez la collection Awesome Flipper Zero.<sup>[[2]](#references)</sup>
 
 ## References
 
