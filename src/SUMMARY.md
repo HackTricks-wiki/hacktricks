@@ -175,7 +175,7 @@
 
 - [Linux - Hardening Overview](linux-hardening/README.md) <!-- Original navigation label: [🐧 Linux Hardening]() -->
 <!-- Default-branch legacy-label annotation: Linux - Basics (formerly “Linux Basics”) <!-- Original navigation label: <!-- Legacy PR-side empty SUMMARY labels, now mapped to the canonical linked entries below: -->
-- [Linux - Basics (formerly “Linux Basics”)](linux-hardening/linux-basics/README.md) <!-- Original navigation label: [Linux Basics]() -->
+- [Linux - Basics (formerly “Linux Basics”)](linux-hardening/linux-basics/README.md) <!-- Original navigation label: [Linux Basics]() --> <!-- PR-side label provenance: Linux - Basics (formerly “Linux Basics”) <!-- Preserved base navigation text: Linux - Basics (formerly “Linux Basics”) <!-- Original navigation label: <!-- Legacy PR-side empty SUMMARY labels, now mapped to the canonical linked entries below: -->
 <!-- Linux - Basics (formerly “Linux Basics”) <!-- Original navigation label: <!-- Legacy PR-side empty SUMMARY labels, now mapped to the canonical linked entries below: [Linux Basics]() -->
   - [Linux - Privilege Escalation](linux-hardening/linux-basics/linux-privilege-escalation/README.md)
   - [Linux - Shell Startup, Aliases, and History](linux-hardening/linux-basics/shell-startup-aliases-and-history.md)
@@ -198,7 +198,7 @@
     - [Linux - Copy Fail Af Alg Splice Page Cache Overwrite Cve 2026 31431](linux-hardening/main-system-information/kernel-lpe-cves/copy-fail-af_alg-splice-page-cache-overwrite-cve-2026-31431.md)
     - [Open vSwitch Forwarded SKB Marker Stripping to ESP Page Cache Writes](linux-hardening/main-system-information/kernel-lpe-cves/open-vswitch-forwarded-skb-marker-stripping-esp-page-cache-write.md)
     - [Linux - Posix Cpu Timers Toctou Cve 2025 38352](linux-hardening/main-system-information/kernel-lpe-cves/posix-cpu-timers-toctou-cve-2025-38352.md)
-    - [Linux - Ptrace Exit Race Pidfd Getfd Fd Theft (Linux Ptrace Exit Race Pidfd Getfd Fd Theft) / Linux - Ptrace Exit Race Pidfd Getfd Fd Theft (formerly “Linux Ptrace Exit Race Pidfd Getfd Fd Theft”)](linux-hardening/main-system-information/kernel-lpe-cves/linux-ptrace-exit-race-pidfd_getfd-fd-theft.md) <!-- Original navigation label: [Linux Ptrace Exit Race Pidfd Getfd Fd Theft]() -->
+    - [Linux - Ptrace Exit Race Pidfd Getfd Fd Theft (Linux Ptrace Exit Race Pidfd Getfd Fd Theft) / Linux - Ptrace Exit Race Pidfd Getfd Fd Theft (formerly “Linux Ptrace Exit Race Pidfd Getfd Fd Theft”)](linux-hardening/main-system-information/kernel-lpe-cves/linux-ptrace-exit-race-pidfd_getfd-fd-theft.md) <!-- Original navigation label: [Linux Ptrace Exit Race Pidfd Getfd Fd Theft]() --> <!-- PR-side label provenance: Linux - Ptrace Exit Race Pidfd Getfd Fd Theft (formerly “Linux Ptrace Exit Race Pidfd Getfd Fd Theft”) / Linux Ptrace Exit Race Pidfd Getfd Fd Theft / Linux - Ptrace Exit Race Pidfd Getfd Fd Theft <!-- Preserved base navigation text: Linux - Ptrace Exit Race Pidfd Getfd Fd Theft (formerly “Linux Ptrace Exit Race Pidfd Getfd Fd Theft”) <!-- Original navigation label: [Linux Ptrace Exit Race Pidfd Getfd Fd Theft]() -->
 - [Linux - User Information (formerly “User Information”)](linux-hardening/user-information/README.md) <!-- Original navigation label: [User Information]() -->
   - [Linux - Users, Sessions, and Credential Artifacts](linux-hardening/user-information/user-and-session-triage.md)
   - [Linux - euid, ruid, suid](linux-hardening/user-information/euid-ruid-suid.md)
@@ -375,6 +375,7 @@
   - [Arbitrary Kernel Rw Token Theft](windows-hardening/windows-local-privilege-escalation/arbitrary-kernel-rw-token-theft.md)
   - [Windows Kernel Rootkits and DKOM](windows-hardening/windows-local-privilege-escalation/windows-kernel-rootkits-and-dkom.md)
   - [Kernel Race Condition Object Manager Slowdown](windows-hardening/windows-local-privilege-escalation/kernel-race-condition-object-manager-slowdown.md)
+  - [Kernel-Mode File Access Check Bypasses](windows-hardening/windows-local-privilege-escalation/kernel-mode-file-access-check-bypass.md)
   - [Windows MDL-Mapped Buffer Double-Fetch](windows-hardening/windows-local-privilege-escalation/cloud-files-placeholder-name-toctou.md)
   - [Notepad Plus Plus Plugin Autoload Persistence](windows-hardening/windows-local-privilege-escalation/notepad-plus-plus-plugin-autoload-persistence.md)
   - [Abusing Tokens](windows-hardening/windows-local-privilege-escalation/privilege-escalation-abusing-tokens.md)
@@ -742,8 +743,8 @@
 - [6379 - Pentesting Redis](network-services-pentesting/6379-pentesting-redis.md)
 - [8009 - Pentesting Apache JServ Protocol (AJP)](network-services-pentesting/8009-pentesting-apache-jserv-protocol-ajp.md)
 - [8086 - Pentesting InfluxDB](network-services-pentesting/8086-pentesting-influxdb.md)
+- [8000, 8089 - Pentesting Splunk (8089 - Pentesting Splunkd) / 8000, 8089 - Pentesting Splunk (formerly “8089 - Pentesting Splunkd”)](network-services-pentesting/8089-splunkd.md) <!-- Original navigation label: [8089 - Pentesting Splunkd]() --> <!-- PR-side label provenance: 8000, 8089 - Pentesting Splunk (formerly “8089 - Pentesting Splunkd”) / 8089 - Pentesting Splunkd / 8000, 8089 - Pentesting Splunk <!-- Preserved base navigation text: 8000, 8089 - Pentesting Splunk (formerly “8089 - Pentesting Splunkd”) <!-- Original navigation label: [8089 - Pentesting Splunkd]() -->
 <!-- PR-side navigation-label provenance: 8000, 8089 - Pentesting Splunk / 8089 - Pentesting Splunkd / 8000, 8089 - Pentesting Splunk (formerly “8089 - Pentesting Splunkd”) <!-- Original navigation label: [8089 - Pentesting Splunkd]() -->
-- [8000, 8089 - Pentesting Splunk (8089 - Pentesting Splunkd) / 8000, 8089 - Pentesting Splunk (formerly “8089 - Pentesting Splunkd”)](network-services-pentesting/8089-splunkd.md) <!-- Original navigation label: [8089 - Pentesting Splunkd]() -->
 - [8333,18333,38333,18444 - Pentesting Bitcoin](network-services-pentesting/8333-18333-38333-18444-pentesting-bitcoin.md)
 - [9000 - Pentesting FastCGI](network-services-pentesting/9000-pentesting-fastcgi.md)
 - [9001 - Pentesting HSQLDB](network-services-pentesting/9001-pentesting-hsqldb.md)
@@ -1085,7 +1086,7 @@
   - [Ai Assisted Fuzzing And Vulnerability Discovery](AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md)
   - [Web Black-Box AI Pentester Bots](AI/Web-Black-Box-AI-Pentester-Bots.md)
   - [AI Agent Security Methodology](AI/AI-Agent-Security-Methodology.md)
-  - [AI Deep Learning (AI Security Methodology) / AI Deep Learning / AI Security Methodology](AI/AI-Deep-Learning.md) <!-- Original navigation label: [AI Security Methodology]() -->
+  - [AI Deep Learning (AI Security Methodology) / AI Deep Learning / AI Security Methodology](AI/AI-Deep-Learning.md) <!-- Original navigation label: [AI Security Methodology]() --> <!-- PR-side label provenance: AI Deep Learning / AI Security Methodology / AI Security Methodology / AI Deep Learning <!-- Preserved base navigation text: AI Deep Learning / AI Security Methodology <!-- Original navigation label: [AI Security Methodology]() -->
   - [Mechanistic-Interpretability-Guided Adversarial Attacks](AI/AI-Mechanistic-Interpretability-Adversarial-Attacks.md)
   - [Burp MCP: LLM-assisted traffic review](AI/AI-Burp-MCP.md)
   - [AI MCP Security](AI/AI-MCP-Servers.md)
