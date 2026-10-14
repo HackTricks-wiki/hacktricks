@@ -1,268 +1,281 @@
-# Offensive Infrastructure ve Attribution Evasion
+# Saldırgan Altyapısı ve Atıfın Gizlenmesi
 
 {{#include ../banners/hacktricks-training.md}}
 
-Bir operator, tek bir proxy üzerinden nadiren anlamlı bir anonymity elde eder. Gerçek campaign'ler bir **separation graph** oluşturur: operator bir access node'a ulaşır, traversal node'ları bu node'u exit node'dan gizler, redirector'lar gerçek C2'yi korur ve disposable name'ler public edge'i işaret eder.
+Bir operatör, tek bir proxy kullanarak nadiren anlamlı bir anonimlik elde eder. Gerçek kampanyalar bir **ayrıştırma grafiği** oluşturur: operatör bir erişim düğümüne ulaşır, geçiş düğümleri bu düğümü çıkış noktasından gizler, redirector'lar gerçek C2'yi korur ve tek kullanımlık adlar herkese açık uç noktaya yönelir.
 
-Her path'in normalize edilmiş avantajlar/dezavantajlar/deployment/detection görünümü için [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md) sayfasını kullanın. Bu sayfa adversarial infrastructure composition konusunu daha derinlemesine ele alır.
+Her yolun standartlaştırılmış artı/eksi, dağıtım ve tespit görünümü için [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md) sayfasını kullanın. Bu sayfada, düşmanca altyapı bileşimi daha ayrıntılı inceleniyor.
+
 ```text
 operator -> access relay -> traversal mesh -> exit/redirector -> target
-|                 |                |
-account/provider   relay operator   target telemetry
+                |                 |                |
+          account/provider   relay operator   target telemetry
 ```
-Hedefin gördüğü son adres bu nedenle bir yolun kanıtıdır; klavyeyi kimin kontrol ettiğinin kanıtı değildir. MITRE, başlıca bileşenleri Acquire Infrastructure (T1583), Compromise Infrastructure (T1584), Proxy (T1090), Dynamic Resolution (T1568) ve Web Service (T1102) ile eşleştirir.<sup>[[1]](#references)</sup>
 
-## Infrastructure sınıfları
+Hedefin gördüğü son adres, bu nedenle bir yolun kanıtıdır; klavyeyi kimin kontrol ettiğinin kanıtı değildir. MITRE, başlıca bileşenleri Acquire Infrastructure (T1583), Compromise Infrastructure (T1584), Proxy (T1090), Dynamic Resolution (T1568) ve Web Service (T1102) olarak eşleştirir.<sup>[[1]](#references)</sup>
 
-| Sınıf | Bir actor bunu neden kullanır | Kalıcı maruziyet | Defender'ın en iyi pivot'u |
+## Altyapı sınıfları
+
+| Sınıf | Bir aktör neden kullanır | Kalıcı olarak açığa çıkanlar | Savunmacının en iyi pivot noktası |
 |---|---|---|---|
-| Kiralanmış VPS/cloud | Hızlı, öngörülebilir, yönlendirilebilir ve yeniden oluşturulması kolay | tenant, faturalandırma, console, source-login ve image geçmişi | account/control-plane event'leri ve tekrarlanan server fingerprint |
-| Commercial VPN/Tor | Büyük paylaşımlı egress kümesi; server administration gerektirmez | provider/guard görünürlüğü ve uçtan uca zamanlama | destination davranışı, endpoint kanıtı ve flow correlation |
-| Residential/mobile proxy | Consumer ASN ve coğrafi açıdan makul görünüm | broker/customer kayıtları; proxyware veya infected-host davranışı | impossible travel, proxy protokolleri ve session bazında address churn |
-| Compromised server/router/IoT | Victim reputation'ını ve jurisdiction'ı ödünç alır | implant, management flow ve tekrarlanan upstream controller | tek bir exit IP yerine device telemetry ve ORB topology |
-| CDN/redirector | Public edge'i back-end C2'den ayırır | TLS/HTTP grammar, certificate, routing ve cloud-account artifact'ları | edge-to-origin correlation ve request-shape clustering |
-| Legitimate web service | İzin verilen GitHub/cloud/social trafiğine karışır | API token, tenant/object identifier'ları ve alışılmadık process lineage | endpoint process'i ile service/API semantics |
-| Physical/cellular/satellite path | Görünen fiziksel origin'i değiştirir | RF, carrier, subscriber, device ve location kayıtları | radio/physical ve network kanıtlarının birleştirilmesi |
+| Kiralık VPS/bulut | Hızlı, öngörülebilir, yönlendirilebilir ve yeniden kurması kolay | Kiracı, faturalandırma, konsol, kaynak oturum açma ve imaj geçmişi | Hesap/kontrol düzlemi olayları ve tekrarlanan sunucu parmak izi |
+| Ticari VPN/Tor | Büyük paylaşımlı çıkış kümesi; sunucu yönetimi yok | Sağlayıcı/görünürlük ve uçtan uca zamanlama | Hedef davranışı, uç nokta kanıtı ve akış korelasyonu |
+| Konut/mobil proxy | Tüketici ASN'si ve coğrafi açıdan makul görünüm | Aracı/müşteri kayıtları; proxyware veya bulaşmış ana makine davranışı | Olanaksız seyahat, proxy protokolleri ve oturum bazında adres değişimi |
+| Ele geçirilmiş sunucu/yönlendirici/IoT | Kurbanın itibarını ve yargı alanını ödünç alır | Implant, yönetim akışı ve tekrarlanan üst akış denetleyicisi | Tek bir çıkış IP'si değil, cihaz telemetrisi ve ORB topolojisi |
+| CDN/yönlendirici | Genel uç noktayı arka uç C2'den ayırır | TLS/HTTP dilbilgisi, sertifika, yönlendirme ve cloud hesabı izleri | Uç nokta-kaynak korelasyonu ve istek biçimi kümelenmesi |
+| Meşru web hizmeti | İzin verilen GitHub/cloud/sosyal trafik içinde gizlenir | API token'ı, kiracı/nesne tanımlayıcıları ve olağandışı süreç kökeni | Uç nokta süreci ile hizmet/API semantiği |
+| Fiziksel/hücresel/uydu yolu | Görünürdeki fiziksel kaynağı değiştirir | RF, operatör, abone, cihaz ve konum kayıtları | Radyo/fiziksel ve ağ kanıtlarının birlikte değerlendirilmesi |
 
-## Operational relay box ağları
+## Operasyonel relay box ağları
 
-Bir **ORB network**, intermediate service olarak kullanılan yönetilen bir proxy filosudur. Mandiant bunları leased server'lardan oluşan provisioned network'ler, compromised router/IoT cihazlarından oluşan non-provisioned network'ler ve hybrid'ler olarak ayırır. Olgun bir topology'de dört logical role bulunur:<sup>[[2]](#references)</sup>
+Bir **ORB ağı**, ara hizmet olarak kullanılan, yönetilen bir proxy filosudur. Mandiant bunları kiralanmış sunuculardan oluşan sağlanmış ağlar, ele geçirilmiş yönlendirici/IoT cihazlarından oluşan sağlanmamış ağlar ve hibritler olarak sınıflandırır. Olgun bir topolojide dört mantıksal rol bulunur:<sup>[[2]](#references)</sup>
 
-1. **Administration server (ACOS):** Inventory, credential'ları, health durumunu ve routing policy'yi yönetir.
-2. **Access/relay node:** Customer'ları veya operator'ları authenticate eder; değişken bir mesh'e yönelik stable entry noktasıdır.
-3. **Traversal nodes:** Bir veya daha fazla leased veya compromised system, opaque connection'ları relay eder.
-4. **Exit/staging node:** Reconnaissance, exploitation veya C2 target'larına son source address'i sunar.
+1. **Yönetim sunucusu (ACOS):** Envanteri, kimlik bilgilerini, sağlık durumunu ve yönlendirme politikasını yönetir.
+2. **Erişim/relay düğümü:** Müşterilerin veya operatörlerin kimliğini doğrular; değişen bir mesh'e giden kararlı giriş noktasıdır.
+3. **Geçiş düğümleri:** Kiralanmış veya ele geçirilmiş bir ya da daha fazla sistem, şeffaf olmayan bağlantıları aktarır.
+4. **Çıkış/evreleme düğümü:** Keşif, exploit veya C2 hedeflerine son kaynak adresini sunar.
 
-Mesh, exit'leri country, ASN, latency veya availability'ye göre seçebilir ve sağlıksız node'ları rotate edebilir. Birden fazla threat group aynı network'ü kiralayabilir. Mandiant, bir IPv4 address'in bazı ORB'lerle ilişkili kalmasının 31 gün kadar kısa olabildiğini gözlemlemiştir; bu nedenle stale bir IP listesini blocklamak yerine **network'ün gelişen, actor benzeri bir entity olarak ele alınmasını** önerir.<sup>[[2]](#references)</sup>
+Mesh; ülkeye, ASN'ye, gecikmeye veya kullanılabilirliğe göre çıkış seçebilir ve sağlıksız düğümleri değiştirebilir. Birden fazla tehdit grubu aynı ağı kiralayabilir. Mandiant, bazı ORB'lerle ilişkili bir IPv4 adresinin 31 gün kadar kısa bir süre boyunca etkin kaldığını gözlemlemiştir; bu nedenle eski bir IP listesini engellemek yerine **ağı, zaman içinde değişen ve aktöre benzeyen bir varlık olarak** ele almayı önerir.<sup>[[2]](#references)</sup>
 
-### Bunun sağladıkları—and bunun sızdırdığı şeyler
+### Bunun sağladıkları—ve sızdırdıkları
 
-- Target, coğrafi olarak yakın ve görünüşte residential olabilecek bir exit görür.
-- Exit, target'ı ve kendisinden önceki hop'u görür; operator'ı mutlaka görmez.
-- Access service, customer'ı ve route request'i görür. Bağımsız olarak yönetilen bir mesh, customer'ı exit'lerden ayrı tutabilir; ancak güçlü bir karşı taraf kaydı oluşturur.
-- Tekrarlanan port'lar, handshake sırası, server banner'ları, certificate'lar, uptime window'ları ve controller ilişkileri, IP'ler rotate edilirken bile filoyu açığa çıkarabilir.
-- Compromised router çoğunlukla endpoint telemetry'den yoksundur; ancak ISP'sinde subscriber ve flow verileri bulunur; el koyma implant/configuration artifact'larını açığa çıkarır.
+- Hedef, coğrafi olarak yakında ve görünüşte konut bağlantısı olan bir çıkış görür.
+- Çıkış, hedefi ve önceki atlamayı görür; operatörü görmeyebilir.
+- Erişim hizmeti müşteriyi ve rota isteğini görür. Bağımsız yönetilen bir mesh, müşteriyi çıkışlardan ayrı tutabilir; ancak güçlü bir karşı taraf kaydı oluşturur.
+- IP'ler değişse bile tekrarlanan portlar, handshake sıralaması, sunucu banner'ları, sertifikalar, çalışma süreleri ve denetleyici ilişkileri filoyu açığa çıkarabilir.
+- Ele geçirilmiş bir yönlendiricide genellikle uç nokta telemetrisi bulunmaz; ancak ISS'sinde abone ve akış verileri bulunur. Cihaza el konulması implant/yapılandırma izlerini açığa çıkarır.
 
 {% hint style="info" %}
-Yetkili bir exercise için topology'yi kuruluşa ait VM'ler veya router'larla yeniden oluşturun ve controller'ın attribution map'ini koruyun. Open proxy'leri veya üçüncü taraf cihazları devreye sokmayın. [Lab guide](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain), bir intermediary'yi victim durumuna düşürmeden defender'ın görebildiği aynı hop structure'ı oluşturur.
+Yetkili bir alıştırma için topolojiyi kuruluşa ait VM'ler veya yönlendiricilerle yeniden oluşturun ve denetleyicinin attribution eşlemesini saklayın. Açık proxy'leri veya üçüncü taraf cihazları ağa dahil etmeyin. [Lab kılavuzu](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain), bir aracıya zarar vermeden savunmacının görebileceği aynı atlama yapısını oluşturur.
 {% endhint %}
 
-## Residential ve mobile proxy network'leri
+## Konut ve mobil proxy ağları
 
-Residential proxy service'leri session'ları consumer broadband address'lerine atar; mobile proxy'ler carrier NAT pool'ları üzerinden egress yapar. Supply; açıkça kaydettirilmiş appliance'lerden, consumer application'lara bundled edilmiş SDK/proxyware'den, reseller'lardan veya malware'den gelebilir. Bu origin'ler eşdeğer değildir: informed consent'in olmaması, bir privacy service'ini compromised infrastructure'a dönüştürür.
+Konut proxy hizmetleri oturumları tüketici geniş bant adreslerine atar; mobil proxy'ler operatör NAT havuzlarından çıkış yapar. Kaynaklar, açıkça kaydolmuş cihazlardan, tüketici uygulamalarıyla birlikte sunulan SDK/proxyware'den, yeniden satıcılardan veya zararlı yazılımlardan gelebilir. Bu kaynaklar birbirine eşdeğer değildir: bilgilendirilmiş rıza olmaması, bir gizlilik hizmetini ele geçirilmiş altyapıya dönüştürür.
 
-Rotation mode'ları detection'ı etkiler:
+Rotasyon modları tespiti etkiler:
 
-- **per-request rotation**, higher-layer identity sabit kalırken hızlı IP ve ASN/geography discontinuity'leri oluşturur;
-- **sticky sessions**, bir exit'i dakikalar veya saatler boyunca koruyarak ordinary subscriber'a benzer;
-- **backconnect gateway'ler**, customer'a tek bir broker endpoint'i sunar ve exit'leri dahili olarak seçer;
-- **mobile pool'lar**, çok sayıda genuine subscriber'ı az sayıdaki carrier NAT address'inin arkasına yerleştirir; bu da bir IP block'unu maliyetli hale getirir.
+- **istek başına rotasyon**, üst katman kimliği sabit kalırken IP ve ASN/coğrafi konumda hızlı kesintiler oluşturur;
+- **yapışkan oturumlar**, çıkışı dakikalarca veya saatlerce sabit tutarak sıradan bir aboneye benzer;
+- **backconnect gateway'leri**, müşteriye tek bir aracı uç noktası gösterir ve çıkışları kendi içinde seçer;
+- **mobil havuzlar**, çok sayıda gerçek aboneyi az sayıda operatör NAT adresinin arkasında toplar; bu da IP engellemesini maliyetli hâle getirir.
 
-Defender'lar IP'yi authenticated session, TLS/client fingerprint, HTTP ordering, device cookie ve behavior ile correlate etmelidir. Sözde local bir residential login'in ardından, tüm higher-layer feature'lar aynı kalırken başka bir country'den login gelmesi, tek başına reputation'dan daha güçlü bir göstergedir. Buna karşılık address sharing ve mobile handoff meşru churn oluşturabilir; bu nedenle residential/proxy classification'ı asla kesin hüküm olarak değerlendirmeyin.
+Savunmacılar IP'yi kimliği doğrulanmış oturum, TLS/istemci parmak izi, HTTP sıralaması, cihaz çerezi ve davranışla ilişkilendirmelidir. Tüm üst katman özellikleri aynı kalırken başka bir ülkeden yapılan ve yerel olduğu varsayılan bir konut oturum açma işlemi, tek başına itibar verisinden daha güçlü bir göstergedir. Öte yandan adres paylaşımı ve mobil geçiş meşru değişimlere yol açar; bu nedenle konut/proxy sınıflandırmasını asla kesin hüküm olarak değerlendirmeyin.
 
-### Proxyware control plane'leri ve reseller çakışması
+### Proxyware kontrol düzlemleri ve yeniden satıcıların kesişimi
 
-Bir residential pool'u düz bir exit listesi olarak modellemeyin. IPIDEA ecosystem'inin analizi, yeniden kullanılabilir bir **two-tier control plane** ortaya çıkardı: embedded SDK önce device/enrollment metadata'sını bir Tier One domain'e bildirir ve scheduling ile Tier Two `connect`/`proxy` IP:port çiftlerini alır. Node, encoded bir task için Tier Two connect port'unu periyodik olarak poll eder, eşleştirilmiş proxy port'una ikinci bir connection açar ve sağlanan byte'ları istenen destination'a relay eder. Görünüşte farklı SDK'lar ve proxy brand'leri ayrı discovery domain'lerine sahipti; ancak ortak ownership ve reseller ilişkileri üzerinden paylaşılan Tier Two infrastructure'ında ve çakışan exit pool'larında birleşiyorlardı.<sup>[[13]](#references)</sup>
+Konut havuzunu düz bir çıkış listesi olarak modellemeyin. IPIDEA ekosisteminin analizi, yeniden kullanılabilir **iki katmanlı bir kontrol düzlemini** ortaya çıkardı: gömülü bir SDK önce cihaz/kayıt meta verilerini Tier One alan adına bildirir ve zamanlama bilgisiyle Tier Two `connect`/`proxy` IP:port çiftlerini alır. Düğüm, kodlanmış bir görevi almak için düzenli aralıklarla Tier Two connect portunu yoklar; eşleştirilmiş proxy portuna ikinci bir bağlantı açar ve sağlanan baytları istenen hedefe aktarır. Görünüşte farklı SDK'lar ve proxy markaları ayrı keşif alan adlarına sahipti; ancak ortak sahiplik ve yeniden satıcı ilişkileri nedeniyle paylaşılan Tier Two altyapısında ve kesişen çıkış havuzlarında birleşiyordu.<sup>[[13]](#references)</sup>
+
 ```text
 enrolled node -> Tier One domain        -> Tier Two IP:port pairs
 enrolled node -> Tier Two connect port  -> destination + connection ID
 enrolled node -> Tier Two proxy port   <-> customer bytes -> destination
 ```
-Bu, bir residential IP bloğundan daha kalıcı hunting pivot'leri sağlar:<sup>[[13]](#references)</sup>
 
-- beklenmeyen bir utility, VPN, game veya embedded-device process'i sabit bir device ID/customer key gönderir ve değişen bir server list alır;
-- endpoint, alışılmadık bir port üzerindeki doğrudan bir IP'yi poll eder, ardından yeni bir destination socket açmadan hemen önce aynı adres üzerindeki başka bir porta bağlanır;
-- görünüşte farklı markalar Tier Two adreslerini, protocol grammar'larını, SDK code'unu veya exit-node örtüşmesini paylaşır;
-- farklı Tier One domain'lerine bağlanan farklı uygulamalar, aynı Tier Two pool'undan adresler alır.
+Bu, bir residential IP bloğundan daha kalıcı hunting pivot'ları sağlar:<sup>[[13]](#references)</sup>
 
-Bu örtüşme attribution'ı da sınırlar: Bir vendor'ın advertised pool'unda bir IP görülmesi, ilgili zamanda hangi reseller'ın, customer'ın veya threat actor'ın bunu kullandığını kanıtlamaz. Flow timestamp'lerini, process lineage'ını, Tier One response body'lerini ve Tier Two task identifier'larını koruyun.<sup>[[13]](#references)</sup> Yetkili bir exercise kapsamında bu hierarchy'yi yalnızca kuruluşa ait endpoint'lerle emulate edin; consumer device'larını veya üçüncü taraf proxyware'i asla enroll etmeyin.
+- beklenmedik bir utility, VPN, game veya embedded-device process'i sabit bir device ID/customer key gönderir ve değişen bir server listesi alır;
+- endpoint, alışılmadık bir port üzerindeki doğrudan IP'yi sorgular, ardından yeni bir destination socket açmadan hemen önce aynı adresteki başka bir porta bağlanır;
+- görünüşte farklı markalar, Tier Two adreslerini, protocol grammar'ı, SDK kodunu veya exit-node örtüşmesini paylaşır;
+- farklı Tier One domain'leriyle iletişim kuran ayrı uygulamalar, aynı Tier Two havuzundan adresler alır.
+
+Bu örtüşme attribution'ı da sınırlar: Bir IP'nin bir vendor'ın ilan ettiği havuzda görülmesi, ilgili zamanda hangi reseller'ın, customer'sının veya threat actor'ın bu IP'yi kullandığını kanıtlamaz. Flow timestamp'lerini, process lineage'ı, Tier One response body'lerini ve Tier Two task identifier'larını koruyun.<sup>[[13]](#references)</sup> Yetkili bir çalışmada bu hiyerarşiyi yalnızca kuruluşun sahip olduğu endpoint'lerle taklit edin; consumer device'ları veya üçüncü taraf proxyware'i asla kaydetmeyin.
 
 ## Multi-hop proxy zincirleri
 
-MITRE, external proxy'leri **multi-hop proxies (T1090.003)**'ten ayırır. Önemli olan hop sayısı değil, knowledge ve administration'ın ayrılmasıdır.<sup>[[3]](#references)</sup>
+MITRE, external proxy'leri **multi-hop proxy'lerden (T1090.003)** ayırır. Önemli olan hop sayısı değil, bilgi ve yönetimin birbirinden ayrılmasıdır.<sup>[[3]](#references)</sup>
+
 ```text
 operator --encrypted--> entry A --encrypted/relayed--> exit B --> target
-sees source                         sees destination
+              sees source                         sees destination
 ```
-Taraflardan biri A ve B'yi işletiyorsa paylaşılan loglar veya akış zamanlaması circuit'ü yeniden oluşturabilir. Aynı endpoint/account üzerinden ardışık ticari VPN'ler eklemek, ortak kimlik, ödeme ve zamanlama kanıtlarını korurken gecikme ekleyebilir. Tor, bağımsız olarak seçilen relay'ler ve ortak bir client tasarımıyla bu sorunu azaltır; ancak düşük gecikmeli etkileşimli bir network, her iki ucu da ölçen bir gözlemciye karşı dayanıklılık garantisi veremez.
 
-Yaygın hatalar arasında DNS veya IPv6 bypass, uygulamaların kendi socket'lerini açması, management trafiğinin relay'lere doğrudan ulaşması, senkronize etkinlik, yeniden kullanılan SSH key'leri ve kimliği belirleyici account'lara giriş yapılması bulunur. Doğru verification bir failure test'idir: her relay'i sırayla durdurun ve workload'un clear path'e geri dönemediğini gösterin.
+Bir taraf hem A'yı hem B'yi işletiyorsa, ortak loglar veya akış zamanlaması devreyi yeniden kurmaya yardımcı olabilir. Aynı uç nokta/hesaptan art arda ticari VPN'ler kullanmak, ortak kimlik, ödeme ve zamanlama kanıtlarını ortadan kaldırmadan gecikmeyi artırabilir. Tor, bağımsız seçilen relay'ler ve ortak bir istemci tasarımıyla bu sorunu azaltır; ancak düşük gecikmeli etkileşimli bir ağ, her iki ucu da ölçen bir gözlemciye karşı direnç vad edemez.
 
-### Tunnel çökmesi ve upstream sızıntısı
+Yaygın hatalar arasında DNS veya IPv6 bypass'ı, uygulamaların kendi socket'lerini açması, yönetim trafiğinin relay'lere doğrudan ulaşması, eşzamanlı etkinlik, yeniden kullanılan SSH anahtarları ve kimliği açığa çıkaran hesaplarda oturum açılması yer alır. Doğru doğrulama yöntemi bir arıza testidir: her relay'i sırayla durdurun ve workload'un açık bir yola geri dönemediğini gösterin.
 
-Bir relay architecture çoğu zaman en fazla attribution'a, başarısız olduğunda olanak tanır. Unit 42; victim-facing VPS'ler, relay VPS'leri, residential proxy'ler, Tor ve diğer proxy servislerini kullanan çok katmanlı bir espionage path'i belgeledi. Bir tunnel atlandığında veya çöktüğünde, gizli upstream infrastructure relay ve victim-facing sistemlere doğrudan bağlandı. Aynı investigation, upstream infrastructure üzerinde kısa süreliğine açığa çıkan bir X.509 certificate'ı da tier'lar arası pivot olarak kullandı.<sup>[[14]](#references)</sup>
+### Tünel çökmesi ve upstream leakage
 
-**Data plane**'i (`victim <-> exit`), **control plane**'den (`operator/upstream -> relay administration`) ayrı tutun. Her owned tier'da ingress ve authentication log'larını, certificate geçmişlerini ve kısa süreli başarısız bağlantıları—yalnızca başarılı C2 session'larını değil—saklayın. Yalnızca relay kesintileri sırasında görünen veya birden fazla victim-facing node'u doğrudan yöneten bir source, sıradan bir exit'ten daha güçlü bir upstream adayıdır; ancak ASN/geolocation hâlâ bir hipotezdir, operator kimliğinin kanıtı değildir.
+Bir relay mimarisi, çoğu zaman arızalandığında en kolay şekilde ilişkilendirilebilir. Unit 42, kurbanlara dönük VPS'ler, relay VPS'leri, residential proxy'ler, Tor ve diğer proxy hizmetlerini kullanan çok katmanlı bir casusluk yolu belgeledi; bir tünel atlandığında veya çöktüğünde, gizli upstream altyapısı relay ve kurbanlara dönük sistemlere doğrudan bağlandı. Aynı soruşturmada, upstream altyapısında kısa süreliğine açığa çıkan bir X.509 sertifikası da katmanlar arasında pivot yapmak için kullanıldı.<sup>[[14]](#references)</sup>
 
-Yetkili bir lab, workload'un fail closed olmasını sağlamalıdır. Linux network namespace içinde izole edilmiş bir workload için ilk route tunnel'ı kullanmalıdır; tunnel kaldırıldıktan sonra hem request hem de route lookup, physical uplink'i seçmek yerine başarısız olmalıdır:
+**Data plane**'i (`victim <-> exit`), **control plane**'den (`operator/upstream -> relay administration`) ayrı tutun. Yalnızca başarılı C2 oturumlarını değil, sahip olduğunuz her katmandaki ingress ve kimlik doğrulama loglarını, sertifika geçmişlerini ve kısa süreli başarısız bağlantıları da saklayın. Yalnızca relay kesintileri sırasında görünen veya kurbanlara dönük birden çok node'u doğrudan yöneten bir kaynak, sıradan bir exit'ten daha güçlü bir upstream adayıdır; ancak ASN/jeolokasyon hâlâ bir hipotezdir, operatör kimliğinin kanıtı değil.
+
+Yetkili bir lab'de workload, bağlantı kesildiğinde kapalı kalacak şekilde yapılandırılmalıdır. Bir Linux network namespace'i içinde yalıtılmış workload için ilk route tüneli kullanmalıdır; tünel kaldırıldıktan sonra hem istek hem de route lookup başarısız olmalı, fiziksel uplink seçilmemelidir:
+
 ```bash
 ip netns exec workload ip route get "$OWNED_TEST_IP"  # expect: dev wg0
 ip -n workload link set wg0 down
 ip netns exec workload curl --fail --connect-timeout 3 \
---resolve "$OWNED_TEST_HOST:443:$OWNED_TEST_IP" "https://$OWNED_TEST_HOST/health"
+  --resolve "$OWNED_TEST_HOST:443:$OWNED_TEST_IP" "https://$OWNED_TEST_HOST/health"
 ip netns exec workload ip route get "$OWNED_TEST_IP"  # expect: unreachable
 ```
-DNS ve IPv6 için testi ve her relay sınırında tekrarlayın. Herhangi bir probe başarılı olursa, policy routing veya firewall'ı düzeltmeden önce gerçek interface/source address'i kaydedin; bu gözlem, bir investigator'ın göreceği attribution leak'tir.
 
-## Redirector tiers and traffic shaping
+DNS ve IPv6 için testi, ayrıca her relay sınırında tekrarlayın. Herhangi bir probe başarılı olursa, policy routing'i veya firewall'ı düzeltmeden önce gerçek interface/source address'i kaydedin; bu gözlem, bir araştırmacının göreceği attribution leak'tir.
 
-Public bir **redirector**, operation-specific grammar ile eşleşen trafiği kabul eder ve korumalı bir team server'a iletir. Diğer her şey reddedilebilir veya zararsız içerik sunulabilir.
+## Redirector katmanları ve trafik şekillendirme
+
+Herkese açık bir **redirector**, operasyona özgü bir grammar ile eşleşen trafiği kabul eder ve korumalı bir team server'a iletir. Diğer her şey reddedilebilir veya zararsız içerik sunularak karşılanabilir.
+
 ```text
 implant/browser -> CDN or redirector -> relay -> team server
-|
-request policy
-host + path + method + header + time
+                       |
+                 request policy
+           host + path + method + header + time
 ```
-Birden fazla katman maruziyeti sınırlar: herkese açık bir domain'i yakmak, team server'ı açığa çıkarmak zorunda değildir. CDN'ler anycast kapasitesi ve itibarlı bir dış domain ekler; ancak CDN hesabı ve edge log'ları attribution noktalarına dönüşür. TLS fingerprint'leri, certificate geçmişleri, ayırt edici path'ler/header sırası, response boyutları, redirect davranışı ve origin allowlist'leri, görünüşte ilgisiz front'ları aynı kümede toplayabilir.
 
-Detection için reverse-proxy alanlarını normalization'dan önce kaydedin, SNI/Host/authority değerlerini karşılaştırın, nadir header kombinasyonlarını inceleyin, response body'leri ve TLS fingerprint'lerini kümelendirin ve configuration örtüşmesi için cloud/CDN audit log'larını arayın. Authorized red team'ler gerçek bir brand'i kopyalamaktan veya credential collection'ı ilgisiz bir üçüncü tarafın arkasına yerleştirmekten kaçınmalıdır.
+Birden fazla katman maruziyeti sınırlar: herkese açık bir domainin ortaya çıkması, team server'ın da açığa çıkmasını gerektirmez. CDN'ler anycast kapasitesi ve itibarlı bir dış domain sağlar; ancak CDN hesabı ve edge logları attribution noktalarına dönüşür. TLS fingerprints, sertifika geçmişleri, ayırt edici path/header sıraları, yanıt boyutları, redirect davranışı ve origin allowlist'leri, sözde ilgisiz ön uçları aynı kümeye dahil edebilir.
 
-## Domain fronting and domainless fronting
+Tespit için normalleştirme öncesinde reverse-proxy alanlarını kaydedin; SNI/Host/authority değerlerini karşılaştırın; nadir header bileşimlerini inceleyin; yanıt gövdelerini ve TLS fingerprints'leri kümelendirin; yapılandırma örtüşmelerini bulmak için cloud/CDN audit loglarını arayın. Yetkili red team'ler gerçek bir markayı taklit etmekten veya kimlik bilgisi toplamayı ilgisiz bir üçüncü tarafın arkasına yerleştirmekten kaçınmalıdır.
 
-Klasik **domain fronting (T1090.004)** ile TLS bağlantısı SNI'da izin verilen bir front domain'i duyururken, şifrelenmiş HTTP `Host` veya HTTP/2 `:authority`, farklı bir back-end domain'i ister. İşbirliği yapan bir CDN, routing işlemini içteki değere göre gerçekleştirir. TLS decryption yapmayan bir network observer front'u görür; CDN ise her iki değeri ve origin'i görür. Domainless varyantlarda SNI boş olabilir; başka bir routing alanı destination'ı seçer.<sup>[[4]](#references)</sup>
+## Domain fronting ve domainsiz fronting
 
-Bu sihirli bir impersonation değildir: yalnızca intermediary uyuşmazlığa kasıtlı olarak veya yanlışlıkla izin verdiğinde ve içteki adı nasıl route edeceğini bildiğinde çalışır. Major provider'lar cross-account fronting'i kısıtlamıştır. Encrypted ClientHello (ECH), on-path observer'ın görebileceklerini değiştirir; ancak CDN, endpoint veya application kayıtlarını ortadan kaldırmaz.
+Klasik **domain fronting (T1090.004)** yönteminde TLS bağlantısı SNI alanında izin verilen bir front domain'i bildirirken, şifrelenmiş HTTP `Host` veya HTTP/2 `:authority` alanı farklı bir back-end domain'i ister. İş birliği yapan bir CDN, iç değere göre yönlendirme yapar. TLS çözümlemesi yapmayan bir ağ gözlemcisi front domain'i görür; CDN ise her iki değeri ve origin'i görür. Domainsiz varyantlarda SNI boş olabilir; hedefi başka bir yönlendirme alanı seçer.<sup>[[4]](#references)</sup>
 
-Detection noktaları şunları içerir:
+Bu, sihirli bir taklit yöntemi değildir: yalnızca aracı, uyumsuzluğa kasıtlı ya da kazara izin veriyorsa ve iç adı nasıl yönlendireceğini biliyorsa çalışır. Büyük sağlayıcılar hesaplar arası fronting'i kısıtladı. Encrypted ClientHello (ECH), yol üzerindeki bir gözlemcinin görebileceklerini değiştirir; ancak CDN, endpoint veya uygulama kayıtlarını silmez.
 
-- endpoint process ancestry ve bu application için beklenmeyen destination;
-- TLS inspection'ın hukuka uygun ve mevcut olduğu durumlarda SNI ile HTTP authority arasındaki uyuşmazlık;
-- bir tenant/front'ın başka bir authority/origin'e routing yaptığını gösteren CDN log'ları;
-- normalde interactive olan bir service'e yönelik olağandışı uzun süreli veya periyodik session'lar;
-- değişen front domain'leri boyunca sabit şifrelenmiş flow boyutları ve cadence.
+Tespit noktaları şunlardır:
 
-Güvenli lab, routing uyuşmazlığını sahip olunan bir reverse proxy üzerinde simüle eder; public CDN'i kötüye kullanmaz.
+- endpoint sürecinin ataları ve o uygulama için beklenmeyen hedef;
+- TLS incelemesinin yasal ve mümkün olduğu durumlarda SNI ile HTTP authority uyuşmazlığı;
+- bir tenant/front'un başka bir authority/origin'e yönlendirme yaptığını gösteren CDN logları;
+- normalde etkileşimli olan bir hizmete kurulan olağandışı, uzun süreli veya periyodik oturumlar;
+- değişen front domain'ler üzerinden sabit kalan şifreli akış boyutları ve aralıkları.
 
-## Dynamic resolution: DDNS, DGA and fast flux
+Güvenli laboratuvar çalışmasında yönlendirme uyuşmazlığı, kuruma ait bir reverse proxy üzerinde simüle edilir; herkese açık bir CDN kötüye kullanılmaz.
 
-Dynamic resolution, logical service'i sabit infrastructure'dan ayırır:
+## Dinamik çözümleme: DDNS, DGA ve fast flux
 
-- **DDNS:** authenticated client, address değiştiğinde stable name'i günceller.
-- **DGA:** hem endpoint hem de controller, bir time/key seed'den candidate domain'ler türetir; operator bunların küçük bir alt kümesini register eder.
-- **Fast flux:** bir name, çoğunlukla düşük TTL'lerle, hızla değişen bir dizi compromised/proxy address döndürür.
-- **Double flux:** hem service address'leri hem de authoritative name-server address'leri rotate edilir; böylece control layer da gizlenir.
+Dinamik çözümleme, mantıksal bir hizmeti sabit altyapıdan ayırır:
 
-Fast flux, adversarial olarak kullanılan bir load-distribution pattern'idir; yalnızca “çok sayıda DNS cevabı” değildir. Daha güçlü kanıt; düşük TTL, yüksek unique-address sayısı, geniş ASN/coğrafya dağılımı, kısa node lifetime, tekrarlanan application davranışı ve şüpheli registration history'nin bir arada değerlendirilmesiyle elde edilir. CDN'ler bu özelliklerin birkaçını meşru şekilde paylaşır. MITRE, DNS davranışının process ve sonraki connection'larla correlation edilmesini önerir.<sup>[[5]](#references)</sup>
+- **DDNS:** Kimliği doğrulanmış bir istemci, adresi değiştikten sonra sabit bir adı günceller.
+- **DGA:** Hem endpoint hem de controller, zaman/anahtar seed'inden olası domain adları türetir; operatör bunların küçük bir kısmını kaydeder.
+- **Fast flux:** Bir ad, genellikle düşük TTL'lerle, hızla değişen ele geçirilmiş/proxy adresleri kümesi döndürür.
+- **Double flux:** Hem hizmet adresleri hem de yetkili name server adresleri dönüşümlü olarak değişir; böylece kontrol katmanı da gizlenir.
 
-Bir DGA; lexical entropy, consonant/digit pattern'leri, NXDOMAIN burst'leri, synchronized first-seen domain'ler ve process context kullanılarak tespit edilebilir. Wordlist DGA'ları ve generative model'ler basit entropy kurallarını aşar; bu nedenle fleet-wide temporal clustering ve endpoint lineage daha önemli hale gelir.
+Fast flux, yalnızca “çok sayıda DNS yanıtı” anlamına gelmez; düşmanca amaçlarla kullanılan bir yük dağıtım modelidir. Daha güçlü kanıtlar; düşük TTL, çok sayıda benzersiz adres, geniş ASN/coğrafi dağılım, kısa düğüm ömrü, tekrarlanan uygulama davranışı ve şüpheli kayıt geçmişinin bir araya gelmesiyle oluşur. CDN'ler de meşru olarak bu özelliklerin birkaçını taşır. MITRE, DNS davranışının süreç ve sonraki bağlantılarla ilişkilendirilmesini önerir.<sup>[[5]](#references)</sup>
 
-## Compromised domains and domain shadowing
+DGA, sözcüksel entropi, ünsüz/rakam örüntüleri, NXDOMAIN patlamaları, eş zamanlı ilk görülen domain'ler ve süreç bağlamı üzerinden tespit edilebilir. Wordlist DGA'ları ve üretici modeller basit entropi kurallarını aşabildiği için filo genelinde zamansal kümelendirme ve endpoint soy ağacı daha da önem kazanır.
 
-Bir actor, registrar/DNS hesabını hijack edebilir, dangling subdomain'i ele geçirebilir veya başka açıdan itibarlı bir domain'in altına record'lar ekleyebilir. **Domain shadowing**, legitimate apex'i korurken çok sayıda attacker-controlled subdomain'in değişen delivery veya C2 host'larına işaret etmesini sağlar. Domain'in yaşı ve reputation'ından yararlanır ve domain-wide blocking'den kaçabilir.<sup>[[6]](#references)</sup>
+## Ele geçirilmiş domain'ler ve domain shadowing
 
-Defender'ların registrar ve authoritative-DNS audit log'larına, MFA'ya, registry/registrar lock'larına, yeni delegation/API token/name server'lar için alert'lere, certificate-transparency monitoring'e ve DNS tarafından referans verilen cloud resource envanterine ihtiyacı vardır. Bir subdomain'in resolution ve certificate history'sini apex reputation'ından bağımsız olarak inceleyin.
+Bir aktör registrar/DNS hesabını ele geçirebilir, sahipsiz kalmış bir subdomain'i devralabilir veya başka açılardan itibarlı bir domain'in altına kayıt ekleyebilir. **Domain shadowing**, meşru apex'i korurken saldırganın kontrolündeki çok sayıda subdomain'in değişen dağıtım veya C2 sunucularına yönelmesini sağlar. Domain'in yaşı ve itibarı kullanılır; domain genelinde engellemeden kaçınılabilir.<sup>[[6]](#references)</sup>
 
-## Web services and dead-drop resolvers
+Savunucular registrar ve yetkili DNS audit loglarını, MFA'yı, registry/registrar kilitlerini, yeni delegation/API token/name server için uyarıları, certificate transparency izlemeyi ve DNS kayıtlarında adı geçen cloud kaynaklarının envanterini kullanmalıdır. Bir subdomain'in çözümlemesini ve sertifika geçmişini apex'in itibarından bağımsız olarak inceleyin.
 
-Bir **dead-drop resolver (T1102.001)**, current C2'ye yönelik encoded pointer'ı legitimate bir post, profile, document, repository, cloud object veya blockchain field içinde saklar. Malware public object'i alır, bir domain/IP'yi decode eder ve sonraki stage'e bağlanır. Bidirectional varyantlar, service API'leri üzerinden command veya file alışverişi yapar.<sup>[[7]](#references)</sup>
+## Web hizmetleri ve dead-drop resolver'lar
 
-Bu yöntem dayanıklılık sağlar ve back-end C2'yi static binary analysis'ten gizler. Ayrıca stable object, tenant, repository, API ve access-pattern identifier'ları oluşturur. Defender'lar aşağıdakileri ilişkilendirmelidir:
+Bir **dead-drop resolver (T1102.001)**, güncel C2'ye işaret eden kodlanmış bir adresi meşru bir gönderi, profil, belge, repository, cloud nesnesi veya blockchain alanında saklar. Malware, herkese açık nesneyi alır, bir domain/IP çözer ve sonraki aşamayla iletişim kurar. Çift yönlü varyantlar, hizmet API'leri üzerinden komut veya dosya alışverişi yapar.<sup>[[7]](#references)</sup>
 
-1. service'e bağlanan process'i;
-2. exact API path/object ve response hash'i;
-3. decoding veya string-processing activity'yi;
-4. kısa süre sonra gerçekleşen yeni outbound connection'ı; ve
-5. fleet'in başka yerlerindeki identical behavior'ı.
+GitHub'a özgü bir resolver varyantı, yalnızca kimliği doğrulanmış bir repository kanalı başarısız olduğunda Issues Search API'yi kullanır. İstemci geçerli tarih, repository ve issue türüyle eşleşen issue'ları arar, her issue'nun yorumlar URL'sini izler ve `<!--` ile `-->` işaretleri arasındaki şifreli metni çıkarır. Host başına yapılan tarih tabanlı şifre çözmenin ardından `Owner`, `LicRepo` ve `LicToken` gibi alanlar birincil repository sahibinin, path'in ve token'ın yerini alır. Bu, operatörün istemciyi değiştirmeden kimlik bilgilerini ve endpoint'leri döndürmesini sağlar; issue yorumu resolver, repository dosyaları ise tasking kanalı olarak kalır.<sup>[[15]](#references)</sup>
 
-Tüm GitHub, cloud storage veya social media'yı block etmek genellikle uygulanabilir değildir. Service-aware egress policy ve process-level correlation, domain-only blocking'den daha iyi sonuç verir.
+Bu yöntem dayanıklılık sağlar ve statik binary analizinden back-end C2'yi gizler. Aynı zamanda sabit nesne, tenant, repository, API ve erişim örüntüsü tanımlayıcıları oluşturur. Savunucular şu verileri ilişkilendirmelidir:
 
-## Personas, accounts and procurement compartments
+1. hizmetle iletişim kuran süreç;
+2. tam API path/nesnesi ve yanıt hash'i;
+3. çözümleme veya string işleme etkinliği;
+4. kısa süre sonra kurulan yeni outbound bağlantı; ve
+5. filonun başka yerlerindeki aynı davranışlar.
 
-Infrastructure anonymity, bir persona, recovery email, phone, payment, browser veya admin IP'si compartment'lar arasında köprü kurduğunda başarısız olur. State-linked operation'lar, kullanımdan çok önce social profile'lar, email identity'leri ve cloud account'lar oluşturmuştur; ATT&CK bunu social, email ve cloud sub-technique'lerini içeren Establish Accounts (T1585) olarak kaydeder.<sup>[[8]](#references)</sup>
+Tüm GitHub'ı, cloud storage'ı veya sosyal medyayı engellemek nadiren uygulanabilir. Hizmet farkındalıklı egress policy ve süreç düzeyinde korelasyon, yalnızca domain engellemeden daha etkilidir.
 
-Bir defender veya investigator şu kaynaklardan bir graph oluşturur:
+## Persona'lar, hesaplar ve tedarik bölmeleri
 
-- creation ve first-login zamanı, locale, time zone ve çalışma schedule'ı;
-- recovery field'ları, MFA device'ları, identity document'ları ve payment instrument'ları;
-- browser/TLS fingerprint'leri ve source-network history;
-- avatar reuse, image provenance, writing style ve social-graph growth;
-- paylaşılan domain registrant, name server, certificate, analytics ID veya repository commit'i;
-- public relay architecture'ı bypass eden management-plane action'ları.
+Persona, kurtarma e-postası, telefon, ödeme yöntemi, browser veya admin IP'si bölmeler arasında bağlantı kurarsa altyapı anonimliğini yitirir. Devlet bağlantılı operasyonlar, kullanımdan çok önce sosyal profiller, e-posta kimlikleri ve cloud hesapları oluşturmuştur; ATT&CK bunu, sosyal, e-posta ve cloud alt tekniklerini içeren Establish Accounts (T1585) olarak kaydeder.<sup>[[8]](#references)</sup>
 
-Authorized red team için synthetic persona'lar exercise controller'a belgelenmeli, organization-owned recovery/payment channel'ları kullanılmalı, gerçek ve ilgisiz kişilerin impersonation'ından kaçınılmalı ve planlı bir retirement süreci bulunmalıdır. SOC blind kalabilir; ancak operation unaccountable hale gelmemelidir.
+Bir savunucu veya araştırmacı şu verilerden bir grafik oluşturur:
 
-## Emerging compound patterns to threat-model
+- oluşturulma ve ilk giriş zamanı, yerel ayar, saat dilimi ve çalışma düzeni;
+- kurtarma alanları, MFA cihazları, kimlik belgeleri ve ödeme araçları;
+- browser/TLS fingerprints ve kaynak ağ geçmişi;
+- avatarların yeniden kullanımı, görsel kaynağı, yazım tarzı ve sosyal ağın büyümesi;
+- ortak domain kayıt sahibi, name server, sertifika, analytics ID veya repository commit'i;
+- herkese açık relay mimarisini atlayan yönetim düzlemi eylemleri.
 
-Aşağıdakiler, **defender-driven composition**'lardır; named bir actor'ın her exact design'ı deploy ettiğine dair iddia değildir. Zaten gözlemlenmiş primitive'leri birleştirir ve purple-team hypothesis'leri olarak kullanışlıdır.
+Yetkili bir red team çalışmasında sentetik persona'lar tatbikat denetleyicisine belgelenmeli, kuruma ait kurtarma/ödeme kanallarını kullanmalı, ilgisiz gerçek kişileri taklit etmekten kaçınmalı ve planlı bir emeklilik sürecine sahip olmalıdır. SOC çalışmadan habersiz kalabilir; ancak operasyon hesap veremez hâle gelmemelidir.
 
-### Asymmetric one-way tasking
+## Tehdit modellemesi için ortaya çıkan bileşik örüntüler
 
-Command'lar public, broadcast veya append-only bir source üzerinden gelirken result'lar gecikme sonrasında ilgisiz bir channel'dan çıkar. Primitive örnekleri arasında web-service one-way communication ve dead drop'lar bulunur. Ayrıştırma, tek bir flow'un bidirectional görünmesini engeller ve basit request/response correlation'ı zorlaştırır.<sup>[[9]](#references)</sup>
+Aşağıdakiler, **savunucu odaklı bileşimlerdir**; adı geçen bir aktörün bu tasarımların her birini aynen uyguladığı iddiası değildir. Gözlemlenmiş ilkeleri bir araya getirir ve purple-team hipotezleri olarak kullanılabilir.
 
-**Detection:** object-level read'leri koruyun; ardından process state change'lerini ve daha sonraki outbound transfer'ları daha geniş bir zaman aralığında correlate edin. Immediate reply gelmese bile aynı public object'i okuyan nadir bir process arayın.
+### Asimetrik tek yönlü tasking
 
-### Multi-stage channel promotion
+Komutlar herkese açık, yayın tabanlı veya yalnızca eklemeye izin veren bir kaynaktan gelirken sonuçlar gecikmenin ardından ilgisiz bir kanaldan çıkar. Bu ilkenin örnekleri arasında web hizmeti üzerinden tek yönlü iletişim ve dead drop'lar bulunur. Ayrım, tek bir akışın çift yönlü görünmesini engeller ve basit istek/yanıt korelasyonunu zorlaştırır.<sup>[[9]](#references)</sup>
 
-Sessiz bir first stage inventory gerçekleştirir ve yalnızca seçilen system'leri ilgisiz bir second-stage channel'a promote eder. Second endpoint, protocol ve process, first stage ile hiçbir infrastructure paylaşmayabilir. Bu, capable infrastructure'ın maruziyetini sınırlar ve ATT&CK'te açıkça T1104 olarak modellenir.<sup>[[10]](#references)</sup>
+**Tespit:** Nesne düzeyindeki okumaları koruyun; ardından süreç durumu değişikliklerini ve sonraki outbound aktarımları daha geniş bir zaman aralığında ilişkilendirin. Hemen yanıt gelmese bile aynı herkese açık nesneyi okuyan nadir süreçleri araştırın.
 
-**Detection:** `first network process -> downloaded/configured state -> new process or injection -> unrelated destination` zincirini birleştirin; ilk domain'i block ettikten sonra incident'ı kapatmayın.
+### Çok aşamalı kanal yükseltme
 
-### Cross-protocol relay translation
+Sessiz bir ilk aşama envanter çıkarır ve yalnızca seçilen sistemleri ilgisiz bir ikinci aşama kanalına yükseltir. İkinci endpoint, protokol ve süreç ilk aşamayla hiçbir altyapıyı paylaşmayabilir. Bu, yetenekli altyapının maruziyetini sınırlar ve ATT&CK T1104'te açıkça modellenmiştir.<sup>[[10]](#references)</sup>
 
-Farklı hop'lar packet'leri transparently forward etmek yerine HTTPS, QUIC, WebSocket, DNS, SSH veya message-queue API'lerini translate eder. Translation, tek bir end-to-end protocol fingerprint'ini ortadan kaldırır; ancak distinctive timing, buffering ve semantic conversion özelliklerine sahip gateway'ler oluşturur. Protocol tunneling (T1572), proxy'ler ve service impersonation ile birleştirilebilir.<sup>[[11]](#references)</sup>
+**Tespit:** `first network process -> downloaded/configured state -> new process or injection -> unrelated destination` zincirini ilişkilendirin; ilk domain'i engelledikten sonra olayı kapatmayın.
 
-**Detection:** bir protocol alan ve başka bir protocol başlatan, tightly coupled byte/time behavior gösteren gateway host'larını arayın; endpoint intent'i gerçekten taşınan protocol ile karşılaştırın.
+### Protokoller arası relay çevirisi
 
-### Passive activation on edge devices
+Farklı noktalar, paketleri şeffaf biçimde iletmek yerine HTTPS, QUIC, WebSocket, DNS, SSH veya bir message-queue API'sini birbirine dönüştürür. Çeviri, uçtan uca tek bir protokol fingerprint'ini ortadan kaldırır; ancak kendine özgü zamanlama, buffering ve anlamsal dönüşüm izleri bırakan gateway'ler oluşturur. Protocol tunneling (T1572), proxy'ler ve hizmet taklidiyle birleştirilebilir.<sup>[[11]](#references)</sup>
 
-Bir implant beacon göndermek yerine router/VPN'e zaten ulaşan traffic'i izler ve yalnızca magic value, source-port pattern veya authenticated token gördüğünde activate olur. Normal traffic gerçek service'e devam eder. ATT&CK bunu Traffic Signaling (T1205) olarak adlandırır ve network-device ile APT örneklerini belgeler.<sup>[[12]](#references)</sup>
+**Tespit:** Bir protokolü alıp diğeriyle bağlantı kuran ve bayt/zaman davranışları sıkı biçimde ilişkili gateway host'larını arayın; endpoint'in amacını gerçekten taşınan protokolle karşılaştırın.
 
-**Detection:** firmware/file integrity, authorized hunt sırasında raw packet capture, beklenmeyen socket filter'ları ve differential service behavior. Periodic beacon bulunmaması, bir edge device'ın temiz olduğunu kanıtlamaz.
+### Edge cihazlarında pasif etkinleştirme
 
-### Serverless and ephemeral origin rotation
+Beacon göndermek yerine bir implant, router/VPN'e zaten ulaşan trafiği izler ve yalnızca sihirli bir değer, kaynak portu örüntüsü veya kimliği doğrulanmış token gördüğünde etkinleşir. Normal trafik gerçek hizmete ulaşmaya devam eder. ATT&CK bu yöntemi Traffic Signaling (T1205) olarak adlandırır ve belgelenmiş ağ cihazı ile APT örnekleri içerir.<sup>[[12]](#references)</sup>
 
-Bir front stable logical identity'yi korurken short-lived function/container'lar farklı region/account'larda tek tek stage'leri işler. Bu, disk lifetime'ını ve sabit origin IP'lerini azaltır; ancak control-plane creation, image/layer, role, secret, request ID ve billing telemetry kalıcı graph haline gelir.
+**Tespit:** Firmware/dosya bütünlüğünü, yetkili av sırasında ham paket yakalamayı, beklenmeyen socket filter'ları ve hizmet davranışındaki farklılıkları inceleyin. Periyodik bir beacon'ın olmaması, edge cihazının temiz olduğunu kanıtlamaz.
 
-**Detection:** cloud audit ve invocation log'larını workload dışında saklayın; deployment template'lerini, role'ları, environment key'lerini ve front-to-origin relationship'lerini cluster'layın.
+### Serverless ve geçici origin rotasyonu
 
-### Privacy-layer diversity
+Bir front, sabit bir mantıksal kimliği korurken kısa ömürlü function/container'lar birkaç region/account'ta tek tek aşamaları işler. Bu, disk üzerinde kalma süresini ve sabit origin IP'lerini azaltır; ancak control-plane oluşturma kayıtları, image/layer, role, secret, request ID ve faturalama telemetrisi kalıcı bir grafik oluşturur.
 
-Bir operation kasıtlı olarak tek bir homogeneous chain'den kaçınabilir: örneğin bir channel leased relay kullanır, tasking public object üzerinden yapılır, exit owned lab cellular link'ten gelir ve administration ayrı bir organization network'ü kullanır. Bu, tek bir provider'ın compromise edilmesinin değerini azaltır; ancak cross-layer timing ve operational-error riskini artırır.
+**Tespit:** Cloud audit ve invocation loglarını workload dışında saklayın; deployment template'lerini, role'leri, environment key'lerini ve front-origin ilişkilerini kümelendirin.
 
-**Detection:** identity, DNS, SaaS, network ve cloud sensor'ları boyunca campaign timeline'ları oluşturun. Identical indicator'lar yerine synchronized state transition'ları arayın.
+### Gizlilik katmanı çeşitliliği
 
-### Decentralized or transparency-log dead drops
+Bir operasyon, örneğin bir kanal için kiralık relay, tasking için herkese açık bir nesne, çıkış noktası olarak kuruma ait bir laboratuvar cellular bağlantısı ve yönetim için ayrı bir kurum ağı kullanarak tek tip bir zincirden bilerek kaçınabilir. Bu, tek bir sağlayıcının ele geçirilmesinin değerini azaltır; ancak katmanlar arası zamanlama ve operasyonel hata riskini artırır.
 
-Bir actor, küçük bir encrypted pointer'ı herhangi bir durable public append-only system'e, content-addressed store'a veya transparency-like feed'e yerleştirebilir. Public object dayanıklıdır; ancak exact index/content hash ve client polling behavior stable identifier'lara dönüşür.
+**Tespit:** Kimlik, DNS, SaaS, ağ ve cloud sensörlerinden kampanya zaman çizelgeleri oluşturun. Aynı göstergeleri değil, eş zamanlı durum geçişlerini arayın.
 
-**Detection:** full API/object identifier'larını ve response hash'lerini kaydedin; immutable object'leri poll eden nonstandard process'lerin ardından decoding veya yeni connection'lar gelmesi durumunda alert üretin.
+### Merkeziyetsiz veya transparency log tabanlı dead drop'lar
 
-### Delayed store-and-forward operations
+Bir aktör, kalıcı ve herkese açık herhangi bir append-only sisteme, content-addressed depoya veya transparency benzeri akışa küçük bir şifreli işaretçi yerleştirebilir. Herkese açık nesne dayanıklıdır; ancak tam index/content hash'i ve istemcinin polling davranışı sabit tanımlayıcılara dönüşür.
 
-Interactive C2 güçlü timing correlation oluşturur. Store-and-forward design, encrypted job'ları batch'ler ve result'ları dakikalar veya saatler sonra farklı bir queue ya da physical transfer üzerinden döndürür. Daha zayıf end-to-end timing karşılığında responsiveness'tan vazgeçer.
+**Tespit:** Tam API/nesne tanımlayıcılarını ve yanıt hash'lerini kaydedin; değişmez nesneleri yoklayan, ardından çözümleme veya yeni bağlantılar kuran standart dışı süreçler için uyarı oluşturun.
 
-**Detection:** correlation window'larını uzatın, periodic queue access'i modelleyin ve endpoint staging'i inceleyin. Batching, signal'i packet timing'den scheduled process/file behavior'a taşır; onu ortadan kaldırmaz.
+### Gecikmeli store-and-forward operasyonları
 
-## Design review: think in observers
+Etkileşimli C2, güçlü zamanlama korelasyonu oluşturur. Store-and-forward tasarımı şifreli işleri toplu hâle getirir ve sonuçları dakikalar ya da saatler sonra farklı bir queue veya fiziksel aktarım üzerinden döndürür. Daha zayıf uçtan uca zamanlama korelasyonu karşılığında yanıt hızı düşer.
 
-Her path için deployment öncesinde ve collection sonrasında aşağıdaki tabloyu doldurun:
+**Tespit:** Korelasyon aralıklarını genişletin, periyodik queue erişimini modelleyin ve endpoint'te hazırlanan verileri inceleyin. Toplu işleme, sinyali paket zamanlamasından zamanlanmış süreç/dosya davranışına taşır; ortadan kaldırmaz.
 
-| Katman | Source'u görür mü? | Destination'ı görür mü? | Content'i görür mü? | Stable identifier'lar | Retention/legal owner |
+## Tasarım incelemesi: gözlemcileri düşünün
+
+Her yol için dağıtımdan önce ve veri toplandıktan sonra bu tabloyu doldurun:
+
+| Katman | Kaynağı görür mü? | Hedefi görür mü? | İçeriği görür mü? | Sabit tanımlayıcılar | Saklama/yasal sorumlu |
 |---|---:|---:|---:|---|---|
-| local network/carrier | | | | | |
-| entry/access service | | | | | |
-| traversal operator(s) | | | | | |
-| exit/redirector/CDN | | | | | |
-| authoritative DNS/registrar | | | | | |
-| target | | | | | |
-| account/payment provider | | | | | |
+| yerel ağ/carrier | | | | | |
+| giriş/erişim hizmeti | | | | | |
+| geçiş operatör(ler)i | | | | | |
+| çıkış/redirector/CDN | | | | | |
+| yetkili DNS/registrar | | | | | |
+| hedef | | | | | |
+| hesap/ödeme sağlayıcısı | | | | | |
 
-Tek bir ordinary provider her sütunu doldurabiliyorsa architecture, target'tan concealment sağlar ancak sağlam separation sağlamaz. Hiçbir internal controller activity'yi bir engagement'a geri map edemiyorsa bu architecture professional red teaming için uygun değildir.
+Tek bir sıradan sağlayıcı tüm sütunları doldurabiliyorsa mimari, hedeften gizlenme sağlar ama sağlam bir ayrım sağlamaz. Hiçbir kurum içi denetleyici etkinliği bir tatbikata bağlayamıyorsa bu mimari profesyonel red team çalışmaları için uygun değildir.
 
 ## References
 
-- [1] [MITRE ATT&CK — Infrastructure Edinme (T1583), Infrastructure Compromise (T1584) ve Proxy (T1090)](https://attack.mitre.org/techniques/T1584/)
-- [2] [Google Cloud/Mandiant — China-nexus espionage actor'ları ORB network'lerini kullanıyor](https://cloud.google.com/blog/topics/threat-intelligence/china-nexus-espionage-orb-networks)
-- [3] [MITRE ATT&CK — Multi-hop Proxy (T1090.003)](https://attack.mitre.org/techniques/T1090/003/)
+- [1] [MITRE ATT&CK — Altyapı edinme (T1583), Altyapıyı ele geçirme (T1584) ve Proxy (T1090)](https://attack.mitre.org/techniques/T1584/)
+- [2] [Google Cloud/Mandiant — Çin bağlantılı casusluk aktörleri ORB ağlarını kullanıyor](https://cloud.google.com/blog/topics/threat-intelligence/china-nexus-espionage-orb-networks)
+- [3] [MITRE ATT&CK — Çok atlamalı Proxy (T1090.003)](https://attack.mitre.org/techniques/T1090/003/)
 - [4] [MITRE ATT&CK — Domain Fronting (T1090.004)](https://attack.mitre.org/techniques/T1090/004/)
 - [5] [MITRE ATT&CK — Fast Flux DNS (T1568.001)](https://attack.mitre.org/techniques/T1568/001/)
-- [6] [MITRE ATT&CK — Infrastructure Compromise: Domains (T1584.001)](https://attack.mitre.org/techniques/T1584/001/)
-- [7] [MITRE ATT&CK — Web Service: Dead Drop Resolver (T1102.001)](https://attack.mitre.org/techniques/T1102/001/)
-- [8] [MITRE ATT&CK — Account Establishment (T1585)](https://attack.mitre.org/techniques/T1585/)
-- [9] [MITRE ATT&CK — Web Service: One-Way Communication (T1102.003)](https://attack.mitre.org/techniques/T1102/003/)
-- [10] [MITRE ATT&CK — Multi-Stage Channels (T1104)](https://attack.mitre.org/techniques/T1104/)
+- [6] [MITRE ATT&CK — Altyapıyı ele geçirme: Domain'ler (T1584.001)](https://attack.mitre.org/techniques/T1584/001/)
+- [7] [MITRE ATT&CK — Web Hizmeti: Dead Drop Resolver (T1102.001)](https://attack.mitre.org/techniques/T1102/001/)
+- [8] [MITRE ATT&CK — Hesap oluşturma (T1585)](https://attack.mitre.org/techniques/T1585/)
+- [9] [MITRE ATT&CK — Web Hizmeti: Tek yönlü iletişim (T1102.003)](https://attack.mitre.org/techniques/T1102/003/)
+- [10] [MITRE ATT&CK — Çok aşamalı kanallar (T1104)](https://attack.mitre.org/techniques/T1104/)
 - [11] [MITRE ATT&CK — Protocol Tunneling (T1572)](https://attack.mitre.org/techniques/T1572/)
-- [12] [MITRE ATT&CK — Traffic Signaling (T1205)](https://attack.mitre.org/techniques/T1205/)
-- [13] [Google Threat Intelligence Group — Dünyanın En Büyük Residential Proxy Network'ünü Disrupt Etmek](https://cloud.google.com/blog/topics/threat-intelligence/disrupting-largest-residential-proxy-network)
-- [14] [Unit 42 — The Shadow Campaigns: Global Espionage'ı Ortaya Çıkarmak](https://unit42.paloaltonetworks.com/shadow-campaigns-uncovering-global-espionage/)
+- [12] [MITRE ATT&CK — Trafik sinyalleme (T1205)](https://attack.mitre.org/techniques/T1205/)
+- [13] [Google Threat Intelligence Group — Dünyanın en büyük residential proxy ağını etkisiz hâle getirme](https://cloud.google.com/blog/topics/threat-intelligence/disrupting-largest-residential-proxy-network)
+- [14] [Unit 42 — Gölge kampanyalar: Küresel casusluğun ortaya çıkarılması](https://unit42.paloaltonetworks.com/shadow-campaigns-uncovering-global-espionage/)
+- [15] [Unit 42 - Blinder Tunnel kampanyası Irak altyapısını hedef alıyor](https://unit42.paloaltonetworks.com/blinder-tunnel-targets-critical-infrastructure/)
 {{#include ../banners/hacktricks-training.md}}
