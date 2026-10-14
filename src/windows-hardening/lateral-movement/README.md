@@ -2,16 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Windows prend en charge plusieurs mécanismes pouvant être utilisés pour exécuter des commandes sur des systèmes distants. Les pages suivantes expliquent les techniques courantes de mouvement latéral et leurs prérequis :
+Windows prend en charge plusieurs mécanismes permettant d’exécuter des commandes sur des systèmes distants. Les pages suivantes présentent des techniques courantes de mouvement latéral et leurs prérequis :
 
-- [**PsExec**](psexec-and-winexec.md)
+- [**PsExec / SCM service execution**](psexec-and-winexec.md#how-do-they-work)
 - [**SmbExec**](psexec-and-winexec.md#impacket-smbexecpy-smbexec)
 - [**WmiExec**](wmiexec.md)
 - [**AtExec / SchtasksExec**](atexec.md)
 - [**WinRM**](winrm.md)
 - [**DCOM Exec**](dcomexec.md)
 - [**RDPexec**](rdpexec.md)
-- [**SCMexec**](scmexec.md)
+- [**SCMExec with SharpMove**](psexec-and-winexec.md#scmexec-with-sharpmove)
+- [**SCCM / MECM client execution**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
 - **Pass the cookie** (cloud)<sup>[[1]](#references)</sup>
 - **Pass the PRT** (cloud)<sup>[[2]](#references)</sup>
 - **Pass the Microsoft Entra ID certificate** (cloud)<sup>[[3]](#references)</sup>
