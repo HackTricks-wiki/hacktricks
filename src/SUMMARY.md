@@ -13,6 +13,7 @@
 - [Fuzzing Methodology](generic-methodologies-and-resources/fuzzing.md)
 - [Proof Assistant and Formal Verification Security](generic-methodologies-and-resources/proof-assistant-formal-verification-security.md)
 - [External Recon Methodology](generic-methodologies-and-resources/external-recon-methodology/README.md)
+  - [Reconnaissance and Threat-Intelligence APIs](generic-methodologies-and-resources/external-recon-methodology/reconnaissance-and-threat-intelligence-apis.md)
   - [Database Leaks](generic-methodologies-and-resources/external-recon-methodology/database-leaks.md)
   - [Wide Source Code Search](generic-methodologies-and-resources/external-recon-methodology/wide-source-code-search.md)
   - [Github Dorks & Leaks](generic-methodologies-and-resources/external-recon-methodology/github-leaked-secrets.md)
@@ -1185,5 +1186,4 @@
 
 - [More Tools](todo/more-tools.md)
 - [Other Web Tricks](todo/other-web-tricks.md)
-- [Online Platforms with API](todo/online-platforms-with-api.md)
 - [Post Exploitation](todo/post-exploitation.md)
