@@ -35,6 +35,10 @@ In the following page you will find the basics of each component to build a basi
 AI-llm-architecture/README.md
 {{#endref}}
 
+## Model tools and platforms
+
+For running, fine-tuning, serving, or trying models, use the [AI model tools and platforms guide](AI-Model-Tools-and-Platforms.md).
+
 ## AI Security
 
 ### AI Agent Security Methodology

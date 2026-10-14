@@ -49,7 +49,7 @@ In the firmware documented by the original article, NFC card types B, F, and V c
 
 ## Actions
 
-For an intro about NFC [**read this page**](../pentesting-rfid.md#high-frequency-rfid-tags-13.56-mhz).
+For an intro about NFC [**read this page**](../pentesting-rfid.md#high-frequency-rfid-tags-1356-mhz-1).
 
 ### Read
 

@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-For a device with physical access, start with the interface exposed by its board or signals: [UART serial consoles](uart.md), [JTAG/SWD debug access](jtag.md), [I²C](i2c.md) and [SPI flash](spi.md) buses. [Side-channel analysis](side_channel_analysis.md) and [fault injection](fault_injection_attacks.md) address different measurement and glitching tasks; [radio signal analysis](radio.md) covers an over-the-air entry point. Check the target's electrical levels and the limitations in the relevant chapter before attaching tools.
+For a device with physical access, start with the interface exposed by its board or signals: [UART serial consoles](uart.md), [JTAG/SWD debug access](jtag.md), [I²C](i2c.md) and [SPI flash](spi.md) buses. [Side-channel analysis](side_channel_analysis.md) and [fault injection](fault_injection_attacks.md) address different measurement and glitching tasks; [radio signal analysis](radio.md) covers an over-the-air entry point. For target-specific RFID/NFC, sub-GHz, infrared, BLE, LoRaWAN, and iButton procedures, use [Radio Hacking and Proximity Interfaces](../radio-hacking/README.md). Check the target's electrical levels and the limitations in the relevant chapter before attaching tools.
 
 ## JTAG
 

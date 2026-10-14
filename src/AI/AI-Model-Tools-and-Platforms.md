@@ -1,4 +1,4 @@
-# Test LLMs
+# AI Model Tools and Platforms
 
 {{#include ../banners/hacktricks-training.md}}
 

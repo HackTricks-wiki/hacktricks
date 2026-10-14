@@ -2,6 +2,8 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+For protocol-specific work after signal identification, see [RFID/NFC, sub-GHz, infrared, BLE, and LoRaWAN testing](../radio-hacking/README.md).
+
 ## SigDigger
 
 [**SigDigger**](https://github.com/BatchDrake/SigDigger) is a free digital-signal analyzer for GNU/Linux and macOS designed to extract information from unknown radio signals. It supports SDR devices through SoapySDR and provides real-time demodulation and analysis tools for FSK, PSK, ASK, analog video, bursty signals, and analog voice channels.<sup>[[1]](#references)</sup>
