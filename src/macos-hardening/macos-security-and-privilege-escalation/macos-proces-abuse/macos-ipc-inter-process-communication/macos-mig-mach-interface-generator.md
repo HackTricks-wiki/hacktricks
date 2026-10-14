@@ -2,30 +2,31 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Maelezo ya Msingi
+## Taarifa za Msingi
 
-MIG iliundwa ili **kurahisisha mchakato wa kuunda** code ya Mach IPC. Kimsingi, **hutengeneza code inayohitajika** ili server na client ziwasiliane kwa kutumia definition iliyotolewa. Hata kama code iliyotengenezwa si nzuri, developer atahitaji tu kui-import, na code yake itakuwa rahisi zaidi kuliko awali.<sup>[[1]](#references)</sup>
+MIG iliundwa ili **kurahisisha uundaji wa msimbo wa Mach IPC**. Kimsingi **hutengeneza msimbo unaohitajika** ili server na client ziwasiliane kulingana na ufafanuzi fulani. Hata kama msimbo unaozalishwa si mzuri, msanidi atahitaji tu kuuleta kwenye programu yake, na msimbo wake utakuwa rahisi zaidi kuliko hapo awali.<sup>[[1]](#references)</sup>
 
-Definition hubainishwa katika Interface Definition Language (IDL) kwa kutumia extension ya `.defs`.
+Ufafanuzi hubainishwa katika Interface Definition Language (IDL) kwa kutumia kiendelezi cha `.defs`.
 
-Definitions hizi zina sections 5:
+Ufafanuzi huu una sehemu 5:
 
-- **Subsystem declaration**: Keyword subsystem hutumika kuonyesha **jina** na **id**. Pia inawezekana kuiweka kama **`KernelServer`** ikiwa server inapaswa kuendeshwa kwenye kernel.<sup>[[4]](#references)</sup>
-- **Inclusions and imports**: MIG hutumia C-prepocessor, hivyo inaweza kutumia imports. Zaidi ya hayo, inawezekana kutumia `uimport` na `simport` kwa code inayotengenezwa ya user au server.
-- **Type declarations**: Inawezekana kufafanua data types, ingawa kwa kawaida ita-import `mach_types.defs` na `std_types.defs`. Kwa custom ones, baadhi ya syntax zinaweza kutumika:
-- \[i`n/out]tran`: Function inayohitaji kutafsiriwa kutoka kwenye message inayoingia au kwenda kwenye message inayotoka
-- `c[user/server]type`: Mapping kwenda kwenye C type nyingine.
-- `destructor`: Huita function hii wakati type inapoachiliwa.
-- **Operations**: Hizi ni definitions za RPC methods. Kuna types 5 tofauti:
-- `routine`: Inatarajia reply
-- `simpleroutine`: Haitarajii reply
-- `procedure`: Inatarajia reply
-- `simpleprocedure`: Haitarajii reply
-- `function`: Inatarajia reply
+- **Tamko la subsystem**: Neno kuu subsystem hutumiwa kubainisha **jina** na **id**. Pia inawezekana kuiweka alama ya **`KernelServer`** ikiwa server inapaswa kufanya kazi ndani ya kernel.<sup>[[4]](#references)</sup>
+- **Ujumuishaji na uingizaji**: MIG hutumia C-prepocessor, kwa hivyo inaweza kutumia imports. Zaidi ya hayo, inawezekana kutumia `uimport` na `simport` kwa msimbo unaozalishwa wa user au server.
+- **Matamko ya aina**: Inawezekana kufafanua aina za data, ingawa kwa kawaida huleta `mach_types.defs` na `std_types.defs`. Kwa aina maalum, sintaksia fulani inaweza kutumika:
+  - \[i`n/out]tran`: Kazi inayohitaji kutafsiriwa kutoka kwa ujumbe unaoingia au kwa ujumbe unaotoka
+  - `c[user/server]type`: Ulinganishaji na aina nyingine ya C.
+  - `destructor`: Ita kazi hii aina inapoachiliwa.
+- **Operesheni**: Hizi ni fafanuzi za mbinu za RPC. Kuna aina 5 tofauti:
+  - `routine`: Hutarajia jibu
+  - `simpleroutine`: Hatarajii jibu
+  - `procedure`: Hutarajia jibu
+  - `simpleprocedure`: Hatarajii jibu
+  - `function`: Hutarajia jibu
 
 ### Mfano
 
-Unda definition file, katika hali hii ikiwa na function rahisi sana:
+Unda faili ya ufafanuzi, katika mfano huu ikiwa na function rahisi sana:
+
 ```cpp:myipc.defs
 subsystem myipc 500; // Arbitrary name and id
 
@@ -36,125 +37,137 @@ serverprefix SERVERPREF;    // Prefix for created functions in the server
 #include <mach/std_types.defs>
 
 simpleroutine Subtract(
-server_port :  mach_port_t;
-n1          :  uint32_t;
-n2          :  uint32_t);
+    server_port :  mach_port_t;
+    n1          :  uint32_t;
+    n2          :  uint32_t);
 ```
-Kumbuka kwamba **argument ya kwanza ni port ya kufunga** na MIG **itashughulikia kiotomatiki reply port** (isipokuwa ukiita `mig_get_reply_port()` katika client code). Zaidi ya hayo, **ID za operations** zitakuwa **za mfuatano** kuanzia subsystem ID iliyoonyeshwa (hivyo ikiwa operation imepitwa na wakati, inafutwa na `skip` hutumiwa ili kuendelea kutumia ID yake).
+
+Kumbuka kwamba **argument ya kwanza ni port ya kufungia (bind)** na MIG **itashughulikia reply port kiotomatiki** (isipokuwa uitie `mig_get_reply_port()` kwenye client code). Zaidi ya hayo, **ID za operations** zitakuwa **za mfululizo**, kuanzia na subsystem ID iliyoonyeshwa (kwa hivyo operation ikiondolewa kwa kuwa imepitwa na wakati, inafutwa na `skip` hutumika ili ID yake iendelee kutumika).
 
 Sasa tumia MIG kutengeneza server na client code zitakazoweza kuwasiliana ili kuita function ya Subtract:
+
 ```bash
 mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 ```
-Faili kadhaa mpya zitatengenezwa katika directory ya sasa.
+
+Faili kadhaa mpya zitaundwa kwenye saraka ya sasa.
 
 > [!TIP]
 > Unaweza kupata mfano changamano zaidi kwenye mfumo wako kwa kutumia: `mdfind mach_port.defs`\
-> Na unaweza kuikompile kutoka folder ileile iliyo na faili kwa kutumia: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`<sup>[[2]](#references)</sup>
+> Na unaweza kuikompaili kutoka kwenye folda ileile ilipo faili kwa kutumia: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`<sup>[[2]](#references)</sup>
 
-Katika faili **`myipcServer.c`** na **`myipcServer.h`** unaweza kupata declaration na definition ya struct **`SERVERPREFmyipc_subsystem`**, ambayo kimsingi hufafanua function ya kuita kulingana na message ID iliyopokelewa (tulionyesha nambari ya kuanzia kuwa 500):
+Kwenye faili **`myipcServer.c`** na **`myipcServer.h`** unaweza kupata tamko na ufafanuzi wa struct **`SERVERPREFmyipc_subsystem`**, ambayo kimsingi hufafanua kazi ya kuita kulingana na ID ya ujumbe uliopokelewa (tulionyesha nambari ya kuanzia ya 500):
 
 {{#tabs}}
 {{#tab name="myipcServer.c"}}
+
 ```c
 /* Description of this subsystem, for use in direct RPC */
 const struct SERVERPREFmyipc_subsystem SERVERPREFmyipc_subsystem = {
-myipc_server_routine,
-500, // start ID
-501, // end ID
-(mach_msg_size_t)sizeof(union __ReplyUnion__SERVERPREFmyipc_subsystem),
-(vm_address_t)0,
-{
-{ (mig_impl_routine_t) 0,
-// Function to call
-(mig_stub_routine_t) _XSubtract, 3, 0, (routine_arg_descriptor_t)0, (mach_msg_size_t)sizeof(__Reply__Subtract_t)},
-}
+	myipc_server_routine,
+	500, // start ID
+	501, // end ID
+	(mach_msg_size_t)sizeof(union __ReplyUnion__SERVERPREFmyipc_subsystem),
+	(vm_address_t)0,
+	{
+          { (mig_impl_routine_t) 0,
+          // Function to call
+          (mig_stub_routine_t) _XSubtract, 3, 0, (routine_arg_descriptor_t)0, (mach_msg_size_t)sizeof(__Reply__Subtract_t)},
+	}
 };
 ```
+
 {{#endtab}}
 
 {{#tab name="myipcServer.h"}}
+
 ```c
 /* Description of this subsystem, for use in direct RPC */
 extern const struct SERVERPREFmyipc_subsystem {
-mig_server_routine_t	server;	/* Server routine */
-mach_msg_id_t	start;	/* Min routine number */
-mach_msg_id_t	end;	/* Max routine number + 1 */
-unsigned int	maxsize;	/* Max msg size */
-vm_address_t	reserved;	/* Reserved */
-struct routine_descriptor	/* Array of routine descriptors */
-routine[1];
+	mig_server_routine_t	server;	/* Server routine */
+	mach_msg_id_t	start;	/* Min routine number */
+	mach_msg_id_t	end;	/* Max routine number + 1 */
+	unsigned int	maxsize;	/* Max msg size */
+	vm_address_t	reserved;	/* Reserved */
+	struct routine_descriptor	/* Array of routine descriptors */
+		routine[1];
 } SERVERPREFmyipc_subsystem;
 ```
+
 {{#endtab}}
 {{#endtabs}}
 
-Kulingana na struct ya awali, function **`myipc_server_routine`** itapata **message ID** na kurejesha function sahihi ya kuita:
+Kulingana na struct iliyotangulia, function **`myipc_server_routine`** itapata **message ID** na kurudisha function sahihi ya kuitisha:
+
 ```c
 mig_external mig_routine_t myipc_server_routine
-(mach_msg_header_t *InHeadP)
+	(mach_msg_header_t *InHeadP)
 {
-int msgh_id;
+	int msgh_id;
 
-msgh_id = InHeadP->msgh_id - 500;
+	msgh_id = InHeadP->msgh_id - 500;
 
-if ((msgh_id > 0) || (msgh_id < 0))
-return 0;
+	if ((msgh_id > 0) || (msgh_id < 0))
+		return 0;
 
-return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
+	return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-Katika mfano huu tumefafanua function 1 pekee katika definitions, lakini kama tungefafanua functions zaidi, zingekuwa ndani ya array ya **`SERVERPREFmyipc_subsystem`**, na ya kwanza ingepewa ID **500**, ya pili ID **501**...
 
-Ikiwa function ilitarajiwa kutuma **reply**, function `mig_internal kern_return_t __MIG_check__Reply__<name>` pia ingekuwepo.
+Katika mfano huu tumefafanua chaguo za kukokotoa 1 pekee kwenye definitions, lakini kama tungekuwa tumefafanua chaguo za kukokotoa zaidi, zingekuwa ndani ya array ya **`SERVERPREFmyipc_subsystem`**, na la kwanza lingepewa ID **500**, la pili ID **501**...
 
-Kwa kweli, inawezekana kutambua uhusiano huu katika struct **`subsystem_to_name_map_myipc`** kutoka **`myipcServer.h`** (**`subsystem*to_name_map*\***`** katika files nyingine):
+Ikiwa chaguo la kukokotoa lilitarajiwa kutuma **reply**, chaguo la kukokotoa `mig_internal kern_return_t __MIG_check__Reply__<name>` pia lingekuwepo.
+
+Kwa kweli, inawezekana kutambua uhusiano huu katika struct **`subsystem_to_name_map_myipc`** kutoka **`myipcServer.h`** (**`subsystem*to_name_map*\***` katika faili nyingine):
+
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
-{ "Subtract", 500 }
+    { "Subtract", 500 }
 #endif
 ```
-Hatimaye, function nyingine muhimu ya kufanya server ifanye kazi itakuwa **`myipc_server`**, ambayo ndiyo itakayo **ita function** inayohusiana na id iliyopokelewa:<sup>[[3]](#references)</sup>
+
+Hatimaye, kipengele kingine muhimu kinachofanya server ifanye kazi ni **`myipc_server`**, ambacho ndicho kitakachofanya **call function** inayohusiana na id iliyopokewa:<sup>[[3]](#references)</sup>
 
 <pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
-(mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
+	(mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
 {
-/*
-* typedef struct {
-* 	mach_msg_header_t Head;
-* 	NDR_record_t NDR;
-* 	kern_return_t RetCode;
-* } mig_reply_error_t;
-*/
+	/*
+	 * typedef struct {
+	 * 	mach_msg_header_t Head;
+	 * 	NDR_record_t NDR;
+	 * 	kern_return_t RetCode;
+	 * } mig_reply_error_t;
+	 */
 
-mig_routine_t routine;
+	mig_routine_t routine;
 
-OutHeadP->msgh_bits = MACH_MSGH_BITS(MACH_MSGH_BITS_REPLY(InHeadP->msgh_bits), 0);
-OutHeadP->msgh_remote_port = InHeadP->msgh_reply_port;
-/* Minimal size: routine() will update it if different */
-OutHeadP->msgh_size = (mach_msg_size_t)sizeof(mig_reply_error_t);
-OutHeadP->msgh_local_port = MACH_PORT_NULL;
-OutHeadP->msgh_id = InHeadP->msgh_id + 100;
-OutHeadP->msgh_reserved = 0;
+	OutHeadP->msgh_bits = MACH_MSGH_BITS(MACH_MSGH_BITS_REPLY(InHeadP->msgh_bits), 0);
+	OutHeadP->msgh_remote_port = InHeadP->msgh_reply_port;
+	/* Minimal size: routine() will update it if different */
+	OutHeadP->msgh_size = (mach_msg_size_t)sizeof(mig_reply_error_t);
+	OutHeadP->msgh_local_port = MACH_PORT_NULL;
+	OutHeadP->msgh_id = InHeadP->msgh_id + 100;
+	OutHeadP->msgh_reserved = 0;
 
-if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id < 500) ||
+	if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id < 500) ||
 <strong>	    ((routine = SERVERPREFmyipc_subsystem.routine[InHeadP->msgh_id - 500].stub_routine) == 0)) {
 </strong>		((mig_reply_error_t *)OutHeadP)->NDR = NDR_record;
-((mig_reply_error_t *)OutHeadP)->RetCode = MIG_BAD_ID;
-return FALSE;
-}
+		((mig_reply_error_t *)OutHeadP)->RetCode = MIG_BAD_ID;
+		return FALSE;
+	}
 <strong>	(*routine) (InHeadP, OutHeadP);
 </strong>	return TRUE;
 }
 </code></pre>
 
-Angalia mistari iliyoangaziwa hapo awali inayofikia function ya kuitwa kwa kutumia ID.
+Angalia mistari iliyoangaziwa hapo juu inayofikia kipengele kinachopaswa kuitwa kulingana na ID.
 
-Ifuatayo ni code ya kuunda **server** na **client** rahisi, ambapo client anaweza kuita functions za Subtract kutoka kwa server:
+Ifuatayo ni msimbo wa kuunda **server** na **client** rahisi, ambapo client inaweza kuita functions za Subtract kutoka kwa server:
 
 {{#tabs}}
 {{#tab name="myipc_server.c"}}
+
 ```c
 // gcc myipc_server.c myipcServer.c -o myipc_server
 
@@ -165,29 +178,31 @@ Ifuatayo ni code ya kuunda **server** na **client** rahisi, ambapo client anawez
 
 kern_return_t SERVERPREFSubtract(mach_port_t server_port, uint32_t n1, uint32_t n2)
 {
-printf("Received: %d - %d = %d\n", n1, n2, n1 - n2);
-return KERN_SUCCESS;
+    printf("Received: %d - %d = %d\n", n1, n2, n1 - n2);
+    return KERN_SUCCESS;
 }
 
 int main() {
 
-mach_port_t port;
-kern_return_t kr;
+    mach_port_t port;
+    kern_return_t kr;
 
-// Register the mach service
-kr = bootstrap_check_in(bootstrap_port, "xyz.hacktricks.mig", &port);
-if (kr != KERN_SUCCESS) {
-printf("bootstrap_check_in() failed with code 0x%x\n", kr);
-return 1;
-}
+    // Register the mach service
+    kr = bootstrap_check_in(bootstrap_port, "xyz.hacktricks.mig", &port);
+    if (kr != KERN_SUCCESS) {
+        printf("bootstrap_check_in() failed with code 0x%x\n", kr);
+        return 1;
+    }
 
-// myipc_server is the function that handles incoming messages (check previous exlpanation)
-mach_msg_server(myipc_server, sizeof(union __RequestUnion__SERVERPREFmyipc_subsystem), port, MACH_MSG_TIMEOUT_NONE);
+    // myipc_server is the function that handles incoming messages (check previous exlpanation)
+    mach_msg_server(myipc_server, sizeof(union __RequestUnion__SERVERPREFmyipc_subsystem), port, MACH_MSG_TIMEOUT_NONE);
 }
 ```
+
 {{#endtab}}
 
 {{#tab name="myipc_client.c"}}
+
 ```c
 // gcc myipc_client.c myipcUser.c -o myipc_client
 
@@ -201,163 +216,168 @@ mach_msg_server(myipc_server, sizeof(union __RequestUnion__SERVERPREFmyipc_subsy
 
 int main() {
 
-// Lookup the receiver port using the bootstrap server.
-mach_port_t port;
-kern_return_t kr = bootstrap_look_up(bootstrap_port, "xyz.hacktricks.mig", &port);
-if (kr != KERN_SUCCESS) {
-printf("bootstrap_look_up() failed with code 0x%x\n", kr);
-return 1;
-}
-printf("Port right name %d\n", port);
-USERPREFSubtract(port, 40, 2);
+    // Lookup the receiver port using the bootstrap server.
+    mach_port_t port;
+    kern_return_t kr = bootstrap_look_up(bootstrap_port, "xyz.hacktricks.mig", &port);
+    if (kr != KERN_SUCCESS) {
+        printf("bootstrap_look_up() failed with code 0x%x\n", kr);
+        return 1;
+    }
+    printf("Port right name %d\n", port);
+    USERPREFSubtract(port, 40, 2);
 }
 ```
+
 {{#endtab}}
 {{#endtabs}}
 
 ### The NDR_record
 
-NDR_record inatumwa na `libsystem_kernel.dylib`, na ni struct inayowezesha MIG **kubadilisha data ili isiwe tegemezi kwa mfumo** unaotumika, kwa kuwa MIG ilibuniwa kutumiwa kati ya mifumo tofauti (na si kwenye mashine moja pekee).
+NDR_record inasafirishwa na `libsystem_kernel.dylib`, na ni struct inayowezesha MIG **kubadilisha data ili isitegemee mfumo** inayotumika, kwa kuwa MIG ilikusudiwa kutumiwa kati ya mifumo tofauti (na si kwenye mashine moja tu).
 
-Hili ni muhimu kwa sababu ikiwa `_NDR_record` inapatikana kwenye binary kama dependency (`jtool2 -S <binary> | grep NDR` au `nm`), inamaanisha kuwa binary hiyo ni MIG client au Server.
+Hili linavutia kwa sababu `_NDR_record` ikipatikana kwenye binary kama dependency (`jtool2 -S <binary> | grep NDR` au `nm`), inamaanisha kuwa binary hiyo ni MIG client au Server.
 
-Zaidi ya hayo, **MIG servers** huwa na dispatch table katika `__DATA.__const` (au katika `__CONST.__constdata` kwenye macOS kernel na `__DATA_CONST.__const` kwenye kernels nyingine za \*OS). Hii inaweza kudumpiwa kwa kutumia **`jtool2`**.
+Zaidi ya hayo, **MIG servers** zina jedwali la dispatch katika `__DATA.__const` (au katika `__CONST.__constdata` kwenye kernel ya macOS na `__DATA_CONST.__const` kwenye kernel za \*OS nyingine). Hili linaweza kutupwa kwa kutumia **`jtool2`**.
 
-Na **MIG clients** zitatumia `__NDR_record` kutuma pamoja na `__mach_msg` kwa servers.
+Na **MIG clients** zitatumia `__NDR_record` kutuma ujumbe kwa seva kupitia `__mach_msg`.
 
-## Binary Analysis
+## Uchambuzi wa Binary
 
 ### jtool
 
-Kwa kuwa binaries nyingi sasa zinatumia MIG kufichua mach ports, ni muhimu kujua jinsi ya **kutambua kuwa MIG ilitumika** na **functions ambazo MIG hutekeleza** kwa kila message ID.
+Kwa kuwa binary nyingi sasa hutumia MIG kufichua mach ports, ni muhimu kujua **jinsi ya kutambua kama MIG ilitumika** na **functions zinazotekelezwa na MIG** kwa kila message ID.
 
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) inaweza kuchanganua taarifa za MIG kutoka kwenye Mach-O binary, ikionyesha message ID na kutambua function ya kutekelezwa:
+[**jtool2 / disarm**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#disarm-old-jtool2) inaweza kuchanganua maelezo ya MIG kutoka kwenye Mach-O binary, ikionyesha message ID na kutambua function ya kutekelezwa:
+
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-Zaidi ya hayo, functions za MIG ni wrappers zinazozunguka function halisi inayoitwa. Kwa hiyo, kwa kupata disassembly na kutafuta `BL`, unaweza kuweza kupata function halisi inayoitwa:
+
+Aidha, functions za MIG ni wrappers zinazozunguka function halisi inayoitwa. Kwa hiyo, kwa kupata disassembly na kutafuta `BL`, unaweza kuipata function halisi inayoitwa:
+
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
+
 ### Assembly
 
-Hapo awali ilitajwa kuwa function itakayoshughulikia **kuita function sahihi kulingana na message ID iliyopokelewa** ilikuwa `myipc_server`. Hata hivyo, kwa kawaida hutakuwa na symbols za binary (majina ya functions), kwa hiyo ni muhimu **kuangalia inavyoonekana baada ya decompilation**, kwa kuwa mara zote itafanana sana (code ya function hii haitegemei functions zilizo exposed):
+Imetajwa awali kuwa kazi inayoshughulikia **kuita kazi sahihi kulingana na ID ya ujumbe uliopokelewa** ni `myipc_server`. Hata hivyo, kwa kawaida hutakuwa na alama za binary (majina ya kazi), kwa hiyo ni muhimu **kuangalia inavyoonekana baada ya decompilation**, kwa kuwa itafanana sana kila mara (msimbo wa kazi hii hautegemei kazi zinazofichuliwa):
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
-var_10 = arg0;
-var_18 = arg1;
-// Initial instructions to find the proper function ponters
-*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f;
-*(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
-*(int32_t *)(var_18 + 0x4) = 0x24;
-*(int32_t *)(var_18 + 0xc) = 0x0;
-*(int32_t *)(var_18 + 0x14) = *(int32_t *)(var_10 + 0x14) + 0x64;
-*(int32_t *)(var_18 + 0x10) = 0x0;
-if (*(int32_t *)(var_10 + 0x14) <= 0x1f4 && *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
-rax = *(int32_t *)(var_10 + 0x14);
-// Call to sign_extend_64 that can help to identifyf this function
-// This stores in rax the pointer to the call that needs to be called
-// Check the used of the address 0x100004040 (functions addresses array)
-// 0x1f4 = 500 (the starting ID)
+    var_10 = arg0;
+    var_18 = arg1;
+    // Initial instructions to find the proper function ponters
+    *(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f;
+    *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
+    *(int32_t *)(var_18 + 0x4) = 0x24;
+    *(int32_t *)(var_18 + 0xc) = 0x0;
+    *(int32_t *)(var_18 + 0x14) = *(int32_t *)(var_10 + 0x14) + 0x64;
+    *(int32_t *)(var_18 + 0x10) = 0x0;
+    if (*(int32_t *)(var_10 + 0x14) <= 0x1f4 && *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
+            rax = *(int32_t *)(var_10 + 0x14);
+            // Call to sign_extend_64 that can help to identifyf this function
+            // This stores in rax the pointer to the call that needs to be called
+            // Check the used of the address 0x100004040 (functions addresses array)
+            // 0x1f4 = 500 (the starting ID)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
-// If - else, the if returns false, while the else call the correct function and returns true
+            // If - else, the if returns false, while the else call the correct function and returns true
 <strong>            if (rax == 0x0) {
 </strong>                    *(var_18 + 0x18) = **_NDR_record;
-*(int32_t *)(var_18 + 0x20) = 0xfffffffffffffed1;
-var_4 = 0x0;
-}
-else {
-// Calculated address that calls the proper function with 2 arguments
+                    *(int32_t *)(var_18 + 0x20) = 0xfffffffffffffed1;
+                    var_4 = 0x0;
+            }
+            else {
+                    // Calculated address that calls the proper function with 2 arguments
 <strong>                    (var_20)(var_10, var_18);
 </strong>                    var_4 = 0x1;
-}
-}
-else {
-*(var_18 + 0x18) = **_NDR_record;
-*(int32_t *)(var_18 + 0x20) = 0xfffffffffffffed1;
-var_4 = 0x0;
-}
-rax = var_4;
-return rax;
+            }
+    }
+    else {
+            *(var_18 + 0x18) = **_NDR_record;
+            *(int32_t *)(var_18 + 0x20) = 0xfffffffffffffed1;
+            var_4 = 0x0;
+    }
+    rax = var_4;
+    return rax;
 }
 </code></pre>
 
 {{#endtab}}
 
 {{#tab name="myipc_server decompiled 2"}}
-Hii ni function ileile iliyofanyiwa decompilation katika version tofauti ya Hopper free:
+Hii ni kazi ileile baada ya decompilation katika toleo tofauti la bure la Hopper:
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
-r31 = r31 - 0x40;
-saved_fp = r29;
-stack[-8] = r30;
-var_10 = arg0;
-var_18 = arg1;
-// Initial instructions to find the proper function ponters
-*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f | 0x0;
-*(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
-*(int32_t *)(var_18 + 0x4) = 0x24;
-*(int32_t *)(var_18 + 0xc) = 0x0;
-*(int32_t *)(var_18 + 0x14) = *(int32_t *)(var_10 + 0x14) + 0x64;
-*(int32_t *)(var_18 + 0x10) = 0x0;
-r8 = *(int32_t *)(var_10 + 0x14);
-r8 = r8 - 0x1f4;
-if (r8 > 0x0) {
-if (CPU_FLAGS & G) {
-r8 = 0x1;
-}
-}
-if ((r8 & 0x1) == 0x0) {
-r8 = *(int32_t *)(var_10 + 0x14);
-r8 = r8 - 0x1f4;
-if (r8 < 0x0) {
-if (CPU_FLAGS & L) {
-r8 = 0x1;
-}
-}
-if ((r8 & 0x1) == 0x0) {
-r8 = *(int32_t *)(var_10 + 0x14);
-// 0x1f4 = 500 (the starting ID)
+    r31 = r31 - 0x40;
+    saved_fp = r29;
+    stack[-8] = r30;
+    var_10 = arg0;
+    var_18 = arg1;
+    // Initial instructions to find the proper function ponters
+    *(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f | 0x0;
+    *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
+    *(int32_t *)(var_18 + 0x4) = 0x24;
+    *(int32_t *)(var_18 + 0xc) = 0x0;
+    *(int32_t *)(var_18 + 0x14) = *(int32_t *)(var_10 + 0x14) + 0x64;
+    *(int32_t *)(var_18 + 0x10) = 0x0;
+    r8 = *(int32_t *)(var_10 + 0x14);
+    r8 = r8 - 0x1f4;
+    if (r8 > 0x0) {
+            if (CPU_FLAGS & G) {
+                    r8 = 0x1;
+            }
+    }
+    if ((r8 & 0x1) == 0x0) {
+            r8 = *(int32_t *)(var_10 + 0x14);
+            r8 = r8 - 0x1f4;
+            if (r8 < 0x0) {
+                    if (CPU_FLAGS & L) {
+                            r8 = 0x1;
+                    }
+            }
+            if ((r8 & 0x1) == 0x0) {
+                    r8 = *(int32_t *)(var_10 + 0x14);
+                    // 0x1f4 = 500 (the starting ID)
 <strong>                    r8 = r8 - 0x1f4;
 </strong>                    asm { smaddl     x8, w8, w9, x10 };
-r8 = *(r8 + 0x8);
-var_20 = r8;
-r8 = r8 - 0x0;
-if (r8 != 0x0) {
-if (CPU_FLAGS & NE) {
-r8 = 0x1;
-}
-}
-// Same if else as in the previous version
-// Check the used of the address 0x100004040 (functions addresses array)
+                    r8 = *(r8 + 0x8);
+                    var_20 = r8;
+                    r8 = r8 - 0x0;
+                    if (r8 != 0x0) {
+                            if (CPU_FLAGS & NE) {
+                                    r8 = 0x1;
+                            }
+                    }
+                    // Same if else as in the previous version
+                    // Check the used of the address 0x100004040 (functions addresses array)
 <strong>                    if ((r8 & 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
 </strong>                            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;
-var_4 = 0x0;
-}
-else {
-// Call to the calculated address where the function should be
+                            var_4 = 0x0;
+                    }
+                    else {
+                            // Call to the calculated address where the function should be
 <strong>                            (var_20)(var_10, var_18);
 </strong>                            var_4 = 0x1;
-}
-}
-else {
-*(var_18 + 0x18) = **0x100004000;
-*(int32_t *)(var_18 + 0x20) = 0xfffffed1;
-var_4 = 0x0;
-}
-}
-else {
-*(var_18 + 0x18) = **0x100004000;
-*(int32_t *)(var_18 + 0x20) = 0xfffffed1;
-var_4 = 0x0;
-}
-r0 = var_4;
-return r0;
+                    }
+            }
+            else {
+                    *(var_18 + 0x18) = **0x100004000;
+                    *(int32_t *)(var_18 + 0x20) = 0xfffffed1;
+                    var_4 = 0x0;
+            }
+    }
+    else {
+            *(var_18 + 0x18) = **0x100004000;
+            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;
+            var_4 = 0x0;
+    }
+    r0 = var_4;
+    return r0;
 }
 
 </code></pre>
@@ -365,22 +385,26 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-Kwa kweli, ukienda kwenye function **`0x100004000`**, utapata array ya structs za **`routine_descriptor`**. Kipengele cha kwanza cha struct ni **address** ambako **function** imetekelezwa, na **struct ina ukubwa wa 0x28 bytes**. Kwa hiyo, kila baada ya 0x28 bytes (kuanzia byte 0), unaweza kuchukua bytes 8, ambazo zitakuwa **address ya function** itakayoitwa:
+Kwa kweli, ukienda kwenye kazi ya **`0x100004000`**, utapata array ya struct za **`routine_descriptor`**. Kipengele cha kwanza cha struct ni **anwani** ya mahali ambapo **kazi** imetekelezwa, na **struct ina ukubwa wa baiti 0x28**. Kwa hiyo, kila baada ya baiti 0x28 (kuanzia baiti 0), unaweza kupata baiti 8 ambazo zitakuwa **anwani ya kazi** itakayopigiwa simu:
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 
 <figure><img src="../../../../images/image (36).png" alt=""><figcaption></figcaption></figure>
 
-Data hii inaweza kutolewa [**kwa kutumia Hopper script hii**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py).
+Data hii inaweza kutolewa [**kwa kutumia script hii ya Hopper**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py).
 
-### Debug
+Kwa mtiririko wa kazi unaozalisha na kufuzz mfululizo wa ujumbe wa MIG wenye hali, angalia [Stateful Mach IPC fuzzing](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#stateful-mach-ipc-fuzzing).
 
-Code inayozalishwa na MIG pia huita `kernel_debug` ili kutengeneza logs kuhusu operations wakati wa kuingia na kutoka. Inawezekana kuzichunguza kwa kutumia **`trace`** au **`kdv`**: `kdv all | grep MIG`
+### Utatuzi
+
+Msimbo unaozalishwa na MIG pia huita `kernel_debug` ili kuunda logi kuhusu shughuli wakati wa kuingia na kutoka. Unaweza kuzikagua kwa kutumia **`trace`** au **`kdv`**: `kdv all | grep MIG`
+
+
 
 ## References
 
-- [1] [bootstrap_cmds — `migcom.tproj` (compiler ya MIG yenyewe)](https://github.com/apple-oss-distributions/bootstrap_cmds/tree/main/migcom.tproj)
-- [2] [XNU — `osfmk/mach/mach_port.defs` (mfano wa definition ya MIG subsystem)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
-- [3] [XNU — `osfmk/mach/message.h` (mpangilio wa Mach message header)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
-- [4] [XNU — `osfmk/mach/task.defs` (definition ya task subsystem ya MIG)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
+- [1] [bootstrap_cmds — `migcom.tproj` (compiler yenyewe ya MIG)](https://github.com/apple-oss-distributions/bootstrap_cmds/tree/main/migcom.tproj)
+- [2] [XNU — `osfmk/mach/mach_port.defs` (mfano wa ufafanuzi wa subsystem ya MIG)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
+- [3] [XNU — `osfmk/mach/message.h` (mpangilio wa kichwa cha ujumbe wa Mach)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
+- [4] [XNU — `osfmk/mach/task.defs` (ufafanuzi wa subsystem ya MIG ya task)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
 {{#include ../../../../banners/hacktricks-training.md}}
