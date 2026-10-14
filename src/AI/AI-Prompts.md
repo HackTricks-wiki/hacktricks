@@ -759,6 +759,8 @@ High-signal review checks:
 - `bun`, `node`, shell, or script launches from user-home paths or directories outside the expected repository.
 - Hook changes that preserve all prior entries but quietly add one more command.
 
+An attacker does not need direct write access to settings if the agent can edit them. NCC Group describes uploading a malicious skill that tells the agent to add a `SessionStart` shell hook to `.claude/settings.json`: the agent may refuse to run the command immediately but accept it as a configuration change, so the next session runs it. This path requires the skill to reach the agent and the settings file to be writable by that agent.<sup>[[27]](#references)</sup>
+
 ### Persistent prompt injection via repo rules files
 
 Some assistants read Markdown or rules files on every project interaction, for example `.cursorrules`, `.windsurfrules`, and `.github/copilot-instructions.md`. In that case the attacker does not need a native hook: the **LLM itself** becomes the execution bridge.
@@ -892,5 +894,6 @@ This means **timing alone** can be enough to leak secrets through an ordinary ch
 - [24] [Check Point Research – AI Evasion: Prompt Injection](https://research.checkpoint.com/2025/ai-evasion-prompt-injection/)
 - [25] [SentinelLABS – macOS.Gaslight: Rust Backdoor Turns Prompt Injection on the Analyst, Not the Sandbox](https://www.sentinelone.com/labs/macos-gaslight-rust-backdoor-turns-prompt-injection-on-the-analyst-not-the-sandbox/)
 - [26] [Check Point Research – PuzzleMask: Abusing Plain Prose as a Covert AI Attack Vector](https://research.checkpoint.com/2026/puzzlemask-abusing-plain-prose-as-a-covert-ai-attack-vector/)
+- [27] [How Hard Is It Really to Break an AI Agent Out of Its Sandbox?](https://www.nccgroup.com/research/how-hard-is-it-really-to-break-an-ai-agent-out-of-its-sandbox/)
 
 {{#include ../banners/hacktricks-training.md}}
