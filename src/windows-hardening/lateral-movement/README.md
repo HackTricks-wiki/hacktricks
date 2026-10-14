@@ -1,17 +1,18 @@
-# ラテラルムーブメント
+# 横展開
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Windows は、リモートシステム上でコマンドを実行するために使用できる複数のメカニズムをサポートしています。以下のページでは、一般的なラテラルムーブメントの手法と、その前提条件について説明します。
+Windowsは、リモートシステム上でコマンドを実行するために利用できる複数のメカニズムをサポートしています。以下のページでは、一般的な横展開の手法とその前提条件について説明します。
 
-- [**PsExec**](psexec-and-winexec.md)
+- [**PsExec / SCM service execution**](psexec-and-winexec.md#how-do-they-work)
 - [**SmbExec**](psexec-and-winexec.md#impacket-smbexecpy-smbexec)
 - [**WmiExec**](wmiexec.md)
 - [**AtExec / SchtasksExec**](atexec.md)
 - [**WinRM**](winrm.md)
 - [**DCOM Exec**](dcomexec.md)
 - [**RDPexec**](rdpexec.md)
-- [**SCMexec**](scmexec.md)
+- [**SCMExec with SharpMove**](psexec-and-winexec.md#scmexec-with-sharpmove)
+- [**SCCM / MECM client execution**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
 - **Pass the cookie** (cloud)<sup>[[1]](#references)</sup>
 - **Pass the PRT** (cloud)<sup>[[2]](#references)</sup>
 - **Pass the Microsoft Entra ID certificate** (cloud)<sup>[[3]](#references)</sup>
