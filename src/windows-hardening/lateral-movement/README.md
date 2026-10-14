@@ -2,16 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Τα Windows υποστηρίζουν αρκετούς μηχανισμούς που μπορούν να χρησιμοποιηθούν για την εκτέλεση εντολών σε απομακρυσμένα συστήματα. Οι παρακάτω σελίδες εξηγούν κοινές τεχνικές lateral-movement και τα προαπαιτούμενά τους:
+Τα Windows υποστηρίζουν διάφορους μηχανισμούς που μπορούν να χρησιμοποιηθούν για την εκτέλεση εντολών σε απομακρυσμένα συστήματα. Οι παρακάτω σελίδες εξηγούν συνήθεις τεχνικές lateral movement και τις προϋποθέσεις τους:
 
-- [**PsExec**](psexec-and-winexec.md)
+- [**PsExec / SCM service execution**](psexec-and-winexec.md#how-do-they-work)
 - [**SmbExec**](psexec-and-winexec.md#impacket-smbexecpy-smbexec)
 - [**WmiExec**](wmiexec.md)
 - [**AtExec / SchtasksExec**](atexec.md)
 - [**WinRM**](winrm.md)
 - [**DCOM Exec**](dcomexec.md)
 - [**RDPexec**](rdpexec.md)
-- [**SCMexec**](scmexec.md)
+- [**SCMExec with SharpMove**](psexec-and-winexec.md#scmexec-with-sharpmove)
+- [**SCCM / MECM client execution**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
 - **Pass the cookie** (cloud)<sup>[[1]](#references)</sup>
 - **Pass the PRT** (cloud)<sup>[[2]](#references)</sup>
 - **Pass the Microsoft Entra ID certificate** (cloud)<sup>[[3]](#references)</sup>
