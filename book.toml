@@ -31,6 +31,7 @@ default-theme = "hacktricks-light"
 hash-files = false
 
 [output.html.redirect]
+"/todo/online-platforms-with-api.html" = "../generic-methodologies-and-resources/external-recon-methodology/reconnaissance-and-threat-intelligence-apis.html"
 "/todo/rust-basics.html" = "../generic-methodologies-and-resources/rust-basics.html"
 "/todo/investment-terms.html" = "../blockchain/blockchain-and-crypto-currencies/investment-terms.html"
 "/todo/cookies-policy.html" = "../welcome/cookies-policy.html"
