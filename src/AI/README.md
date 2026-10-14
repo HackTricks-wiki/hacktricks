@@ -35,6 +35,10 @@ Na página a seguir, você encontrará os conceitos básicos de cada componente 
 AI-llm-architecture/README.md
 {{#endref}}
 
+## Ferramentas e plataformas de modelos
+
+Para executar, fazer fine-tuning, servir ou testar modelos, use o [guia de ferramentas e plataformas de modelos de IA](AI-Model-Tools-and-Platforms.md).
+
 ## Segurança de IA
 
 ### Metodologia de segurança de agentes de IA
@@ -60,7 +64,7 @@ AI-Mechanistic-Interpretability-Adversarial-Attacks.md
 
 ### Segurança de prompts de IA
 
-O uso de IA cresceu bastante nos últimos anos com o surgimento dos LLMs, mas eles não são perfeitos e podem ser enganados por prompts adversariais. Este é um tópico muito importante para entender como usar a IA com segurança e como atacá-la:
+O uso de IA disparou nos últimos anos graças aos LLMs, mas eles não são perfeitos e podem ser enganados por prompts adversariais. Este é um tema muito importante para entender como usar IA com segurança e como atacá-la:
 
 
 {{#ref}}
@@ -69,16 +73,16 @@ AI-Prompts.md
 
 ### RCE em modelos de IA
 
-É muito comum desenvolvedores e empresas executarem modelos baixados da Internet. No entanto, apenas carregar um modelo pode ser suficiente para executar código arbitrário no sistema. Este é um tópico muito importante para entender como usar a IA com segurança e como atacá-la:
+É muito comum que desenvolvedores e empresas executem modelos baixados da Internet; no entanto, apenas carregar um modelo pode ser suficiente para executar código arbitrário no sistema. Este é um tema muito importante para entender como usar IA com segurança e como atacá-la:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### Bypass de KYC assistido por IA
+### Bypass de KYC com auxílio de IA
 
-Vídeos generativos podem ser combinados com injeção de câmera virtual e manipulação da API da câmera para contornar fluxos fracos de KYC, verificação de idade e prova de vida biométrica:
+Vídeos generativos podem ser combinados com injeção de câmera virtual e manipulação da API da câmera para contornar fluxos de KYC, verificação de idade e prova de vida biométrica pouco robustos:
 
 
 {{#ref}}
@@ -87,27 +91,27 @@ KYC-Bypass-Using-AI.md
 
 ### Model Context Protocol de IA
 
-MCP (Model Context Protocol) é um protocolo aberto para conectar aplicações de IA a ferramentas e fontes de dados. Como os servidores MCP podem expor dados e ações, as avaliações devem incluir autorização, consentimento, validação de entradas das ferramentas e análise dos limites de confiança.<sup>[[3]](#references)</sup>
+O MCP (Model Context Protocol) é um protocolo aberto para conectar aplicações de IA a ferramentas e fontes de dados. Como os servidores MCP podem expor dados e ações, as avaliações devem incluir autorização, consentimento, validação de entradas das ferramentas e análise dos limites de confiança.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### Fuzzing e descoberta automatizada de vulnerabilidades assistidos por IA
+### Fuzzing e descoberta automatizada de vulnerabilidades com auxílio de IA
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### Engenharia reversa assistida por IA
+### Engenharia reversa com auxílio de IA
 
-[Elevação parcial, detecção de MBA invariantes, decodificação vinculada ao ambiente e validação de extratores automatizados](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[Elevação parcial, detecção de invariantes MBA, decodificação vinculada ao ambiente e validação de extratores automatizados](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
-### Bots de Pentester de IA para Web Black-Box
+### Bots de pentest web black-box com IA
 
-Agentes baseados em LLM podem automatizar fluxos de trabalho de pentesting web black-box de longa duração quando contam com observabilidade, orquestração, gerenciamento de sessões autenticadas e validação adversarial:
+Agentes com tecnologia de LLM podem automatizar fluxos de pentest web black-box de longa duração quando contam com observabilidade, orquestração, gerenciamento de sessões autenticadas e validação adversarial:
 
 
 {{#ref}}
@@ -117,6 +121,6 @@ Web-Black-Box-AI-Pentester-Bots.md
 ## References
 
 - [1] [OWASP Top 10 de segurança de Machine Learning](https://owasp.org/www-project-machine-learning-security-top-10/)
-- [2] [Google — Secure AI Framework (SAIF)](https://saif.google/)
+- [2] [Google — Framework de IA segura (SAIF)](https://saif.google/)
 - [3] [Model Context Protocol — Introdução](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}
