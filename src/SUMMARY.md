@@ -771,6 +771,8 @@
 # 🕸️ Pentesting Web
 
 - [Web Vulnerabilities Methodology](pentesting-web/web-vulnerabilities-methodology.md)
+- [Sensitive Information Exfiltration from a Web Page](pentesting-web/sensitive-information-exfiltration.md)
+- [Referer Header and Referrer Policy Leakage](pentesting-web/referer-header-and-referrer-policy.md)
 - [Burp Suite: Intruder and Session Testing](pentesting-web/burp-suite.md)
 - [Reflecting Techniques - PoCs and Polygloths CheatSheet](pentesting-web/pocs-and-polygloths-cheatsheet/README.md)
   - [Web Vulns List](pentesting-web/pocs-and-polygloths-cheatsheet/web-vulns-list.md)
@@ -1177,12 +1179,10 @@
 
 # ✍️ TODO
 
-- [Interesting Http](todo/interesting-http.md)
 - [Rust Basics](todo/rust-basics.md)
 - [More Tools](todo/more-tools.md)
 - [Other Web Tricks](todo/other-web-tricks.md)
 - [Online Platforms with API](todo/online-platforms-with-api.md)
-- [Stealing Sensitive Information Disclosure from a Web](todo/stealing-sensitive-information-disclosure-from-a-web.md)
 - [Post Exploitation](todo/post-exploitation.md)
 - [Investment Terms](todo/investment-terms.md)
 - [Cookies Policy](todo/cookies-policy.md)
