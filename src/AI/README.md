@@ -94,12 +94,6 @@ MCP (Model Context Protocol) is an open protocol for connecting AI applications 
 AI-MCP-Servers.md
 {{#endref}}
 
-### LLM-Assisted Password Candidate Generation
-
-{{#ref}}
-AI-Assisted-Password-Guessing.md
-{{#endref}}
-
 ### AI-Assisted Fuzzing & Automated Vulnerability Discovery
 
 
