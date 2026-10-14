@@ -2,6 +2,8 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
+For board-level interface discovery, serial consoles, flash access, side channels, and glitching, use [Hardware Hacking](hardware-hacking/README.md) and its interface-specific chapters. This page covers attacks that require physical access to the system as a whole.
+
 ## BIOS Password Recovery and System Security
 
 Legacy PC firmware settings may be reset by disconnecting the CMOS battery or using a documented clear-CMOS jumper. The necessary power-off time is board-specific, and modern UEFI passwords or keys may live in nonvolatile flash, an embedded controller, or a security device and therefore survive a battery removal. Consult the board/service manual before shorting pins; this procedure can also invalidate TPM measurements and trigger disk-encryption recovery.

@@ -2,6 +2,8 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+For a device with physical access, start with the interface exposed by its board or signals: [UART serial consoles](uart.md), [JTAG/SWD debug access](jtag.md), [I²C](i2c.md) and [SPI flash](spi.md) buses. [Side-channel analysis](side_channel_analysis.md) and [fault injection](fault_injection_attacks.md) address different measurement and glitching tasks; [radio signal analysis](radio.md) covers an over-the-air entry point. Check the target's electrical levels and the limitations in the relevant chapter before attaching tools.
+
 ## JTAG
 
 JTAG (IEEE 1149.1) supports boundary-scan testing through cells placed around a device's I/O pins. Many processors also expose vendor-specific debug functions through the same Test Access Port (TAP); boundary scan and CPU debugging are related uses of JTAG, not synonyms.<sup>[[1]](#references)</sup>

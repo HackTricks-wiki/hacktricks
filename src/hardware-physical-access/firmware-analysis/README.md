@@ -10,6 +10,8 @@
 
 ### Related resources
 
+For acquisition from exposed hardware interfaces, see [UART console-assisted firmware dumping](../hardware-hacking/uart.md#dumping-firmware-with-uart-console) and [SPI flash dumping](../hardware-hacking/spi.md#dumping-firmware-from-eeproms).
+
 {{#ref}}
 uefi-ifr-nvram-security-setting-patching.md
 {{#endref}}
