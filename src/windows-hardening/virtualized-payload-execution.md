@@ -4,6 +4,26 @@
 
 Payload virtualization compiles offensive logic to a guest instruction set and executes it with a native interpreter. Unlike a packer, which must eventually expose the original native instructions in memory, a virtualized payload can keep the protected logic as bytecode for its entire lifetime. This removes that specific unpacking window, but it does **not** hide host-visible behavior such as syscalls, network activity, or the VM-to-native call boundary.<sup>[[2]](#references)[[3]](#references)</sup>
 
+## WebAssembly re-hosting for static-analysis evasion
+
+Instead of editing a heavily signatured Go tool, it can be compiled as a `wasip1` guest and embedded in a separate native loader. The guest is built against a patched GOROOT in which unsupported operations such as `net.Dial`, `net.Listen`, `os/exec` and `os.Pipe` delegate through `//go:wasmimport`; a Wazero host module then implements sockets, process operations, Win32 calls and macOS framework calls. This keeps the original project's Go API usage intact while moving most of its logic into an encrypted WASM module that static PE tooling may not understand.<sup>[[4]](#references)</sup>
+
+### Bridging linear memory to native APIs
+
+A guest pointer is a 32-bit offset into WASM linear memory, not a host virtual address. Before a native call, the bridge can translate an argument only when it is marked as a local pointer and falls in the range `0x10000 <= value < wasmMemorySize`, producing `wasmMemoryBase + value`. The lower bound avoids rewriting small handles, flags and `nil`; per-API masks generated from `win32metadata` distinguish real pointers from handles, sizes and remote-process addresses, with overrides for inaccurate or ambiguous metadata.<sup>[[4]](#references)</sup>
+
+Native APIs may also return host pointers through guest output buffers. A mirror table can assign such objects guest-memory representations and retain a reverse mapping to the original host address. COM requires mirroring both the interface and its vtable: data pointers can be followed and mirrored, whereas executable pointers in `MEM_IMAGE` regions must remain opaque tokens because WASM cannot execute native instructions. This model does not directly support host-to-guest callback APIs such as `EnumWindows` or `SetWindowsHookEx`.<sup>[[4]](#references)</sup>
+
+### Per-build WASM VM polymorphism
+
+The runtime and payload can be transformed together on every build: shuffle the opcode-to-handler table, rewrite every guest opcode to the new mapping, randomize section identifiers, replace the standard `\0asm` magic with a build-specific marker and change runtime cache magic. Identical source then yields bytewise-different modules, and ordinary WASM tooling cannot parse the payload until the analyst recovers the custom mapping and framing from the host loader.<sup>[[4]](#references)</sup>
+
+For reverse engineering, start with the native host rather than carving only on `\0asm`: identify the compiled marker, module-decryption path, opcode dispatch table and `env` host-function registrations, then reconstruct a standard module or instrument the import boundary. The bridge remains a useful behavioral choke point because calls for networking, process creation, registry access, dynamic loading and generic Win32 dispatch cross it even when the embedded bytecode changes between builds.<sup>[[4]](#references)</sup>
+
+### Camouflaging the outer Go executable
+
+Changing the guest alone still leaves a recognizable loader. The demonstrated outer-binary transformations splice dense symbol profiles harvested from legitimate Go projects into `gopclntab`, rotate a small plausible set of DLL imports, and vary PE `VERSIONINFO` plus Authenticode identity strings. These transformations target static and machine-learning features of the container; they do not remove the runtime behavior exposed by the host shims.<sup>[[4]](#references)</sup>
+
 ## Execution model
 
 A compact virtualized loader can split execution into the following layers.<sup>[[3]](#references)</sup>
@@ -76,5 +96,6 @@ Virtualization imposes interpretation overhead, increases toolchain and ABI comp
 - [1] [RISC-Y Business: Building a RISC-V Virtual Machine for Payload Obfuscation](https://secret.club/2023/12/24/riscy-business.html)
 - [2] [Fox-IT: Red Teaming in the Age of EDR — Evasion Through Malware Virtualisation](https://blog.fox-it.com/2024/09/25/red-teaming-in-the-age-of-edr-evasion-of-endpoint-detection-through-malware-virtualisation/)
 - [3] [Praetorian: Centurion — Bring Your Own Execution Environment](https://praetorian.com/blog/virtualized-loader-centurion/)
+- [4] [Praetorian - Enter the WasmForge: Compiling Sliver into WebAssembly](https://praetorian.com/blog/wasmforge-sliver-webassembly)
 
 {{#include ../banners/hacktricks-training.md}}
