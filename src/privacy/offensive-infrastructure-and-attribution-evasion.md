@@ -2,267 +2,280 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Operator rzadko uzyskuje znaczącą anonimowość dzięki pojedynczemu proxy. Prawdziwe kampanie budują **graf separacji**: operator dociera do węzła dostępowego, węzły tranzytowe ukrywają ten węzeł przed węzłem wyjściowym, redirectory chronią rzeczywisty C2, a jednorazowe nazwy wskazują na publiczną krawędź.
+Operator rzadko uzyskuje znaczącą anonimowość dzięki pojedynczemu proxy. W prawdziwych kampaniach buduje się **graf separacji**: operator łączy się z węzłem dostępowym, węzły tranzytowe ukrywają go przed węzłem wyjściowym, redirectory chronią właściwe C2, a tymczasowe nazwy wskazują na publiczny punkt brzegowy.
 
-Użyj [Katalogu technik anonimowego dostępu do Internetu](anonymous-internet-access-techniques.md), aby uzyskać ujednolicony widok zalet i wad, wdrażania oraz wykrywania każdej ścieżki. Ta strona zawiera bardziej szczegółowe informacje na temat komponowania infrastruktury przeciwnika.
+Skorzystaj z [katalogu technik anonimowego dostępu do Internetu](anonymous-internet-access-techniques.md), aby zapoznać się ze znormalizowanym zestawieniem zalet i wad, wdrażania oraz wykrywania każdej ścieżki. Ta strona dokładniej omawia komponowanie infrastruktury w warunkach działań przeciwnika.
+
 ```text
 operator -> access relay -> traversal mesh -> exit/redirector -> target
-|                 |                |
-account/provider   relay operator   target telemetry
+                |                 |                |
+          account/provider   relay operator   target telemetry
 ```
-Ostatni adres widziany przez cel jest zatem dowodem istnienia ścieżki, a nie dowodem na to, kto kontrolował klawiaturę. MITRE mapuje główne komponenty do Acquire Infrastructure (T1583), Compromise Infrastructure (T1584), Proxy (T1090), Dynamic Resolution (T1568) oraz Web Service (T1102).<sup>[[1]](#references)</sup>
+
+Ostatni adres widziany przez cel jest więc dowodem na przebytą ścieżkę, a nie dowodem na to, kto kontrolował klawiaturę. MITRE mapuje główne komponenty na Acquire Infrastructure (T1583), Compromise Infrastructure (T1584), Proxy (T1090), Dynamic Resolution (T1568) i Web Service (T1102).<sup>[[1]](#references)</sup>
 
 ## Klasy infrastruktury
 
-| Klasa | Dlaczego actor jej używa | Trwała ekspozycja | Najlepszy punkt pivotu dla obrońcy |
+| Klasa | Dlaczego aktor z niej korzysta | Trwała ekspozycja | Najlepszy punkt zaczepienia dla obrońcy |
 |---|---|---|---|
-| Rented VPS/cloud | Szybkie, przewidywalne, routowalne i łatwe do odbudowy | tenant, billing, konsola, logowanie źródłowe i historia obrazów | zdarzenia konta/control plane oraz powtarzający się fingerprint serwera |
-| Commercial VPN/Tor | Duży współdzielony zestaw wyjściowy; brak administracji serwerem | widoczność providera/guarda oraz timing end-to-end | zachowanie celu, dowody na endpointach i korelacja przepływów |
-| Residential/mobile proxy | ASN konsumencki i wiarygodność geograficzna | dane brokera/klienta; zachowanie proxyware lub zainfekowanego hosta | impossible travel, protokoły proxy i zmienność adresów w ramach sesji |
-| Compromised server/router/IoT | Pożycza reputację i jurysdykcję ofiary | implant, przepływ zarządzania i powtarzający się upstream controller | telemetria urządzenia i topologia ORB, a nie pojedynczy exit IP |
-| CDN/redirector | Oddziela publiczny edge od back-end C2 | gramatyka TLS/HTTP, certyfikat, routing i artefakty konta cloud | korelacja edge-to-origin i klastrowanie kształtu żądań |
-| Legitimate web service | Wtapia się w dozwolony ruch GitHub/cloud/social | API token, identyfikatory tenant/object i nietypowe pochodzenie procesu | proces na endpoint oraz semantyka usługi/API |
-| Physical/cellular/satellite path | Zmienia pozorne źródło fizyczne | dane RF, operatora, abonenta, urządzenia i lokalizacji | połączone dowody radiowe/fizyczne i sieciowe |
+| Wynajęty VPS/cloud | Szybki, przewidywalny, routowalny, łatwy do odtworzenia | dzierżawca, rozliczenia, konsola, historia logowań źródłowych i obrazów | zdarzenia konta/płaszczyzny sterowania oraz powtarzający się fingerprint serwera |
+| Komercyjny VPN/Tor | Duży współdzielony zestaw wyjściowy; brak konieczności administrowania serwerem | widoczność dostawcy/strażnika i korelacja czasowa end-to-end | zachowanie celu, dowody z endpointu i korelacja przepływów |
+| Residential/mobile proxy | ASN konsumencki i wiarygodność geograficzna | dane brokera/klienta; zachowanie proxyware lub zainfekowanego hosta | niemożliwe podróże, protokoły proxy i zmiany adresu w ramach sesji |
+| Zhakowany serwer/router/IoT | Wykorzystuje reputację i jurysdykcję ofiary | implant, przepływ zarządzania i powtarzający się kontroler upstream | telemetria urządzenia i topologia ORB, a nie pojedynczy wyjściowy adres IP |
+| CDN/redirector | Oddziela publiczną krawędź od back-endowego C2 | gramatyka TLS/HTTP, certyfikat, routing i artefakty konta cloud | korelacja krawędzi z originem i grupowanie kształtu żądań |
+| Legalna usługa internetowa | Wtapia się w dozwolony ruch GitHub/cloud/social | token API, identyfikatory dzierżawcy/obiektu i nietypowe pochodzenie procesu | proces na endpoincie oraz semantyka usługi/API |
+| Trasa fizyczna/komórkowa/satelitarna | Zmienia pozorne fizyczne źródło | dane RF, operatora, abonenta, urządzenia i lokalizacji | łączne dowody radiowe/fizyczne i sieciowe |
 
-## Sieci operacyjnych relay boxów
+## Sieci przekaźników operacyjnych
 
-**Sieć ORB** to zarządzana flota proxy używana jako usługa pośrednia. Mandiant dzieli je na sieci provisioned, złożone z dzierżawionych serwerów, sieci non-provisioned, złożone ze zcompromitowanych routerów/urządzeń IoT, oraz hybrydy. Dojrzała topologia ma cztery logiczne role:<sup>[[2]](#references)</sup>
+**Sieć ORB** to zarządzana flota proxy używana jako usługa pośrednicząca. Mandiant dzieli je na sieci provisioned, złożone z wynajętych serwerów, sieci non-provisioned, złożone ze zhakowanych routerów/urządzeń IoT, oraz hybrydy. Dojrzała topologia ma cztery logiczne role:<sup>[[2]](#references)</sup>
 
-1. **Administration server (ACOS):** utrzymuje inwentarz, dane uwierzytelniające, stan oraz politykę routingu.
-2. **Access/relay node:** uwierzytelnia klientów lub operatorów; jest stabilnym wejściem do zmiennej siatki.
-3. **Traversal nodes:** jeden lub więcej dzierżawionych albo zcompromitowanych systemów przekazuje nieprzejrzyste połączenia.
-4. **Exit/staging node:** prezentuje końcowy adres źródłowy podczas rekonesansu, exploitation lub wobec celów C2.
+1. **Serwer administracyjny (ACOS):** utrzymuje inwentarz, dane uwierzytelniające, stan i politykę routingu.
+2. **Węzeł dostępu/przekaźnikowy:** uwierzytelnia klientów lub operatorów; jest stabilnym punktem wejścia do zmieniającej się siatki.
+3. **Węzły tranzytowe:** jeden lub więcej wynajętych albo zhakowanych systemów przekazuje niejawne połączenia.
+4. **Węzeł wyjściowy/stagingowy:** przedstawia końcowy adres źródłowy celom rozpoznania, eksploatacji lub C2.
 
-Mesh może wybierać exity według kraju, ASN, opóźnienia lub dostępności oraz wymieniać niesprawne węzły. Wiele threat groups może wynajmować tę samą sieć. Mandiant zaobserwował, że adres IPv4 pozostawał powiązany z niektórymi ORB zaledwie przez 31 dni; dlatego zaleca traktowanie **sieci jako zmieniającej się encji przypominającej actora**, zamiast blokowania nieaktualnej listy adresów IP.<sup>[[2]](#references)</sup>
+Siatka może wybierać węzły wyjściowe według kraju, ASN, opóźnienia lub dostępności oraz wymieniać węzły działające nieprawidłowo. Te same sieci mogą być wynajmowane przez wiele grup zagrożeń. Mandiant zaobserwował, że niektóre adresy IPv4 pozostawały powiązane z ORB zaledwie przez 31 dni; dlatego zaleca traktować **sieć jako zmieniający się podmiot przypominający aktora**, zamiast blokować nieaktualną listę adresów IP.<sup>[[2]](#references)</sup>
 
-### Co to zapewnia — i co ujawnia
+### Co to zapewnia — i co wycieka
 
-- Cel widzi exit, który może znajdować się geograficznie blisko i wyglądać na residential.
-- Exit widzi cel oraz poprzedni hop, ale niekoniecznie operatora.
-- Usługa access widzi klienta i żądanie trasy. Niezależnie zarządzany mesh może oddzielać klienta od exitów, ale tworzy potężny rekord kontrahenta.
-- Powtarzające się porty, kolejność handshake, bannery serwerów, certyfikaty, okna dostępności oraz relacje z controllerem mogą ujawnić flotę nawet podczas rotacji adresów IP.
-- Zcompromitowany router często nie ma telemetrii endpointu, ale jego ISP nadal posiada dane abonenta i przepływów; przejęcie urządzenia ujawnia artefakty implantu/konfiguracji.
+- Cel widzi węzeł wyjściowy, który może znajdować się w pobliżu geograficznym i pozornie należeć do sieci domowej.
+- Węzeł wyjściowy widzi cel i poprzedni przeskok, ale niekoniecznie operatora.
+- Usługa dostępu widzi klienta i żądanie trasy. Niezależnie zarządzana siatka może oddzielać klienta od węzłów wyjściowych, ale tworzy cenne zapisy po stronie kontrahenta.
+- Powtarzające się porty, kolejność uzgadniania połączenia, banery serwera, certyfikaty, okna dostępności i relacje z kontrolerami mogą ujawnić flotę nawet przy rotacji adresów IP.
+- Zhakowanemu routerowi często brakuje telemetrii endpointu, ale jego ISP nadal ma dane abonenta i przepływów; przejęcie urządzenia ujawnia artefakty implantu/konfiguracji.
 
 {% hint style="info" %}
-W ramach autoryzowanego ćwiczenia odtwórz topologię przy użyciu należących do organizacji VM lub routerów i zachowaj mapę attribution controllera. Nie rekrutuj open proxies ani urządzeń stron trzecich. [Przewodnik laboratorium](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain) tworzy taką samą widoczną dla obrońcy strukturę hopów bez krzywdzenia pośrednika.
+W ramach autoryzowanego ćwiczenia odtwórz topologię na maszynach wirtualnych lub routerach należących do organizacji i zachowaj mapę atrybucji kontrolera. Nie wykorzystuj otwartych proxy ani urządzeń stron trzecich. [Przewodnik laboratoryjny](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain) tworzy tę samą strukturę przeskoków widoczną dla obrońcy, nie narażając pośrednika.
 {% endhint %}
 
-## Residential i mobile proxy networks
+## Sieci residential i mobile proxy
 
-Usługi residential proxy przypisują sesje do adresów konsumenckich łączy szerokopasmowych; mobile proxies wychodzą przez pule carrier NAT. Źródłem mogą być jawnie zapisane urządzenia, SDK/proxyware dołączone do aplikacji konsumenckich, resellerzy lub malware. Te źródła nie są równoważne: brak świadomej zgody zmienia usługę privacy w compromised infrastructure.
+Usługi residential proxy przypisują sesje do adresów konsumenckich łączy szerokopasmowych; mobile proxy wychodzą przez pule NAT operatorów. Źródłem mogą być jawnie zarejestrowane urządzenia, SDK/proxyware dołączone do aplikacji konsumenckich, resellerzy lub malware. Te źródła nie są równoważne: brak świadomej zgody zmienia usługę ochrony prywatności w zhakowaną infrastrukturę.
 
-Tryby rotacji wpływają na detekcję:
+Tryby rotacji wpływają na wykrywanie:
 
-- **per-request rotation** powoduje szybkie nieciągłości IP oraz ASN/geografii, podczas gdy tożsamość na wyższych warstwach pozostaje stabilna;
-- **sticky sessions** utrzymują exit przez minuty lub godziny, przypominając zwykłego abonenta;
-- **backconnect gateways** udostępniają klientowi jeden endpoint brokera i wewnętrznie wybierają exity;
-- **mobile pools** umieszczają wielu autentycznych abonentów za niewielkim zestawem adresów carrier NAT, przez co blokada IP może być kosztowna.
+- **rotacja przy każdym żądaniu** powoduje szybkie zmiany IP oraz ASN/lokalizacji geograficznej, podczas gdy tożsamość w wyższych warstwach pozostaje stabilna;
+- **sesje sticky** utrzymują węzeł wyjściowy przez minuty lub godziny, przypominając zwykłego abonenta;
+- **bramy backconnect** udostępniają klientowi jeden punkt końcowy brokera, który wewnętrznie wybiera węzły wyjściowe;
+- **pule mobile** umieszczają wielu rzeczywistych abonentów za niewielką liczbą adresów NAT operatora, przez co blokada IP jest kosztowna.
 
-Obrońcy powinni korelować IP z uwierzytelnioną sesją, fingerprintem TLS/client, kolejnością HTTP, cookie urządzenia i zachowaniem. Pozornie lokalne logowanie residential, po którym następuje logowanie z innego kraju, przy identycznych wszystkich cechach wyższych warstw, stanowi silniejszy sygnał niż sama reputacja. Z drugiej strony współdzielenie adresów i przełączanie między stacjami mobile powodują uzasadnioną zmienność, dlatego nigdy nie traktuj klasyfikacji residential/proxy jako werdyktu.
+Obrońcy powinni korelować adres IP z uwierzytelnioną sesją, fingerprintem TLS/klienta, kolejnością HTTP, cookie urządzenia i zachowaniem. Logowanie z rzekomo lokalnej sieci residential, po którym następuje logowanie z innego kraju przy identycznych cechach wyższych warstw, jest mocniejszym dowodem niż sama reputacja. Z drugiej strony współdzielenie adresów i przełączanie się między stacjami komórkowymi powodują uzasadnione zmiany, dlatego nigdy nie należy traktować klasyfikacji residential/proxy jako werdyktu.
 
-### Proxyware control planes i nakładanie się resellerów
+### Płaszczyzny sterowania proxyware i nakładanie się resellerów
 
-Nie modeluj puli residential jako płaskiej listy exitów. Analiza ekosystemu IPIDEA ujawniła możliwy do ponownego wykorzystania **dwupoziomowy control plane**: embedded SDK najpierw raportuje metadane urządzenia/rejestracji do domeny Tier One, a następnie otrzymuje harmonogram oraz pary adresów IP:port Tier Two `connect`/`proxy`. Węzeł okresowo odpytuje port Tier Two connect o zakodowane zadanie, otwiera drugie połączenie z odpowiadającym mu portem proxy i przekazuje dostarczone bajty do żądanego celu. Pozornie różne SDK i marki proxy miały oddzielne domeny discovery, ale zbiegały się w ramach wspólnej infrastruktury Tier Two oraz nakładających się pul exitów poprzez wspólną własność i relacje resellerów.<sup>[[13]](#references)</sup>
+Nie modeluj puli residential jako płaskiej listy węzłów wyjściowych. Analiza ekosystemu IPIDEA ujawniła możliwą do ponownego wykorzystania **dwupoziomową płaszczyznę sterowania**: osadzone SDK najpierw zgłasza metadane urządzenia/rejestracji do domeny Tier One i otrzymuje pary IP:port Tier Two `connect`/`proxy` wraz z informacjami o harmonogramie. Węzeł okresowo odpytuje port connect Tier Two o zakodowane zadanie, otwiera drugie połączenie z przypisanym portem proxy i przekazuje dostarczone bajty do żądanego celu. SDK i marki proxy, nominalnie różne, korzystały z osobnych domen wykrywania, ale zbiegały się we wspólnej infrastrukturze Tier Two i nakładających się pulach węzłów wyjściowych dzięki wspólnym właścicielom i relacjom resellerów.<sup>[[13]](#references)</sup>
+
 ```text
 enrolled node -> Tier One domain        -> Tier Two IP:port pairs
 enrolled node -> Tier Two connect port  -> destination + connection ID
 enrolled node -> Tier Two proxy port   <-> customer bytes -> destination
 ```
-Daje to trwalsze punkty zaczepienia do huntingu niż blok adresów residential IP:<sup>[[13]](#references)</sup>
 
-- nieoczekiwany proces narzędzia, VPN, gry lub urządzenia wbudowanego wysyła stały identyfikator urządzenia/klucza klienta i otrzymuje zmieniającą się listę serwerów;
-- endpoint odpytuje bezpośredni adres IP na nietypowym porcie, a następnie natychmiast łączy się z innym portem pod tym samym adresem, zanim otworzy socket do nowego celu;
-- kilka pozornie różnych marek współdzieli adresy Tier Two, składnię protokołu, kod SDK lub nakładanie się exit nodes;
-- odrębne aplikacje kontaktujące się z różnymi domenami Tier One otrzymują adresy z tej samej puli Tier Two.
+Daje to trwalsze punkty zaczepienia do huntingu niż blok adresów IP rezydencyjnych:<sup>[[13]](#references)</sup>
 
-To nakładanie się również ogranicza atrybucję: zobaczenie adresu IP w reklamowanej puli jednego dostawcy nie dowodzi, który reseller, klient lub threat actor używał go w danym czasie. Zachowaj timestampy przepływów, pochodzenie procesów, treści odpowiedzi Tier One oraz identyfikatory zadań Tier Two.<sup>[[13]](#references)</sup> W ramach autoryzowanego ćwiczenia emuluj tę hierarchię wyłącznie przy użyciu endpointów należących do organizacji; nigdy nie rejestruj urządzeń konsumenckich ani proxyware stron trzecich.
+- nieoczekiwany proces narzędzia użytkowego, VPN, gry lub urządzenia wbudowanego wysyła stabilny identyfikator urządzenia/klucza klienta i otrzymuje zmienną listę serwerów;
+- endpoint odpytuje bezpośredni adres IP na nietypowym porcie, a następnie łączy się z innym portem pod tym samym adresem tuż przed otwarciem gniazda do nowego miejsca docelowego;
+- kilka pozornie odrębnych marek korzysta z tych samych adresów Tier Two, gramatyki protokołu, kodu SDK lub nakładających się węzłów wyjściowych;
+- różne aplikacje kontaktujące się z różnymi domenami Tier One otrzymują adresy z tej samej puli Tier Two.
 
-## Łańcuchy multi-hop proxies
+To nakładanie się ogranicza również możliwości atrybucji: obecność adresu IP w reklamowanej puli jednego dostawcy nie dowodzi, który reseller, klient lub aktor zagrożeń używał go w danym czasie. Zachowaj znaczniki czasu przepływów, pochodzenie procesów, treści odpowiedzi Tier One i identyfikatory zadań Tier Two.<sup>[[13]](#references)</sup> W autoryzowanym ćwiczeniu emuluj tę hierarchię wyłącznie przy użyciu endpointów należących do organizacji; nigdy nie rejestruj urządzeń konsumenckich ani proxyware stron trzecich.
 
-MITRE rozróżnia external proxies od **multi-hop proxies (T1090.003)**. Istotną właściwością nie jest liczba hopów, lecz rozdzielenie wiedzy i administracji.<sup>[[3]](#references)</sup>
+## Łańcuchy proxy multi-hop
+
+MITRE odróżnia proxy zewnętrzne od **multi-hop proxies (T1090.003)**. Kluczową cechą nie jest liczba przeskoków, lecz rozdzielenie wiedzy i administracji.<sup>[[3]](#references)</sup>
+
 ```text
 operator --encrypted--> entry A --encrypted/relayed--> exit B --> target
-sees source                         sees destination
+              sees source                         sees destination
 ```
-Jeśli jedna strona obsługuje A i B, współdzielone logi lub analiza czasu przepływu mogą umożliwić odtworzenie obwodu. Dodanie kolejnych komercyjnych VPN-ów z tego samego endpointu/konta może zwiększyć opóźnienie, jednocześnie pozostawiając wspólne dane tożsamości, płatności i synchronizacji czasowej. Tor ogranicza ten problem dzięki niezależnie wybieranym relayom i wspólnej konstrukcji klienta, ale interaktywna sieć o małych opóźnieniach nie może zagwarantować odporności na obserwatora mierzącego oba końce.
 
-Typowe awarie obejmują wyciek przez DNS lub IPv6, aplikacje otwierające własne sockety, ruch zarządzający docierający bezpośrednio do relayów, zsynchronizowaną aktywność, ponownie użyte klucze SSH oraz logowanie do kont umożliwiających identyfikację. Prawidłowa weryfikacja to test awarii: zatrzymuj każdy relay po kolei i potwierdź, że workload nie może przełączyć się na jawną ścieżkę.
+Jeśli jedna strona obsługuje A i B, wspólne logi lub analiza czasu przepływu mogą pozwolić odtworzyć obwód. Dodanie kolejnych komercyjnych VPN-ów z tego samego endpointu/konta może zwiększyć opóźnienie, ale nie usuwa wspólnych danych o tożsamości, płatności i czasie. Tor ogranicza ten problem dzięki niezależnie wybieranym relayom i wspólnej konstrukcji klienta, ale sieć interaktywna o niskim opóźnieniu nie może zagwarantować odporności na obserwatora mierzącego oba końce.
 
-### Załamanie tunelu i wyciek upstream
+Do częstych błędów należą obejście DNS lub IPv6, aplikacje otwierające własne sockety, ruch zarządzający docierający bezpośrednio do relayów, zsynchronizowana aktywność, ponowne użycie kluczy SSH i logowanie się na konta pozwalające ustalić tożsamość. Prawidłowa weryfikacja polega na teście awarii: zatrzymaj po kolei każdy relay i sprawdź, czy workload nie może przełączyć się na połączenie bez szyfrowania.
 
-Architektura relayów jest często najbardziej podatna na identyfikację właśnie w momencie awarii. Unit 42 udokumentowało wielopoziomową ścieżkę szpiegowską wykorzystującą VPS-y skierowane do ofiar, VPS-y relayów, residential proxies, Tor i inne usługi proxy; gdy tunel został pominięty lub uległ załamaniu, ukryta infrastruktura upstream łączyła się bezpośrednio z systemami relayów i systemami skierowanymi do ofiar. W ramach tego samego dochodzenia wykorzystano również certyfikat X.509, który na krótko ujawniono w infrastrukturze upstream, jako punkt przejścia między poziomami.<sup>[[14]](#references)</sup>
+### Awaria tunelu i upstream leakage
 
-Utrzymuj oddzielnie **data plane** (`victim <-> exit`) i **control plane** (`operator/upstream -> relay administration`). Zachowuj logi wejściowe i uwierzytelniania na każdym kontrolowanym poziomie, historię certyfikatów oraz krótkie nieudane połączenia — nie tylko udane sesje C2. Źródło pojawiające się wyłącznie podczas awarii relayów lub bezpośrednio administrujące wieloma węzłami skierowanymi do ofiar jest silniejszym kandydatem na upstream niż zwykły exit, ale jego ASN/geolokalizacja nadal stanowi hipotezę, a nie dowód tożsamości operatora.
+Architektura relayów często najbardziej ułatwia przypisanie aktywności, gdy ulega awarii. Unit 42 opisało wielopoziomową ścieżkę szpiegowską wykorzystującą VPS-y skierowane do ofiar, VPS-y relay, residential proxy, Tor i inne usługi proxy; gdy pominięto tunel lub doszło do jego awarii, ukryta infrastruktura upstream łączyła się bezpośrednio z systemami relay i systemami skierowanymi do ofiar. W ramach tego samego śledztwa wykorzystano też certyfikat X.509, który przez krótki czas był ujawniony w infrastrukturze upstream, jako punkt odniesienia łączący różne poziomy.<sup>[[14]](#references)</sup>
 
-Autoryzowane laboratorium powinno sprawić, aby workload kończył działanie bezpiecznie w razie awarii. W przypadku workloadu odizolowanego w linuxowym network namespace pierwsza trasa musi korzystać z tunelu; po jego usunięciu zarówno żądanie, jak i wyszukiwanie trasy muszą zakończyć się niepowodzeniem, zamiast wybrać fizyczne łącze uplink:
+Oddziel **data plane** (`victim <-> exit`) od **control plane** (`operator/upstream -> relay administration`). Zachowuj logi ruchu przychodzącego i uwierzytelniania na każdym posiadanym poziomie, historię certyfikatów oraz krótkie, nieudane połączenia — nie tylko udane sesje C2. Źródło, które pojawia się wyłącznie podczas awarii relayów lub bezpośrednio administruje wieloma węzłami skierowanymi do ofiar, jest bardziej prawdopodobnym kandydatem na upstream niż zwykły exit, ale jego ASN/geolokalizacja to nadal hipoteza, a nie dowód tożsamości operatora.
+
+Autoryzowane laboratorium powinno skonfigurować workload tak, by działał zgodnie z zasadą fail closed. W przypadku workloadu odizolowanego w network namespace systemu Linux pierwsza trasa musi prowadzić przez tunel; po jego usunięciu zarówno żądanie, jak i wyszukiwanie trasy muszą zakończyć się niepowodzeniem, zamiast korzystać z fizycznego łącza:
+
 ```bash
 ip netns exec workload ip route get "$OWNED_TEST_IP"  # expect: dev wg0
 ip -n workload link set wg0 down
 ip netns exec workload curl --fail --connect-timeout 3 \
---resolve "$OWNED_TEST_HOST:443:$OWNED_TEST_IP" "https://$OWNED_TEST_HOST/health"
+  --resolve "$OWNED_TEST_HOST:443:$OWNED_TEST_IP" "https://$OWNED_TEST_HOST/health"
 ip netns exec workload ip route get "$OWNED_TEST_IP"  # expect: unreachable
 ```
-Powtórz test dla DNS i IPv6 oraz na każdej granicy między relayami. Jeśli którakolwiek sonda zakończy się powodzeniem, zapisz rzeczywisty interfejs/adres źródłowy przed naprawą routingu zasad lub firewalla; ta obserwacja stanowi wyciek atrybucji, który zobaczyłby analityk.
+
+Powtórz test dla DNS i IPv6 oraz na każdej granicy między przekaźnikami. Jeśli którakolwiek sonda zakończy się powodzeniem, zapisz rzeczywisty interfejs/adres źródłowy przed naprawieniem routingu opartego na zasadach lub firewalla; ta obserwacja to attribution leak, który zobaczyłby śledczy.
 
 ## Warstwy redirectorów i kształtowanie ruchu
 
-Publiczny **redirector** akceptuje ruch zgodny z gramatyką właściwą dla danej operacji i przekazuje go do chronionego serwera zespołu. Całą resztę można odrzucić lub obsłużyć nieszkodliwą treścią.
+Publiczny **redirector** akceptuje ruch zgodny z gramatyką specyficzną dla danej operacji i przekazuje go do chronionego serwera zespołu. Całą resztę można odrzucić lub odpowiedzieć na nią nieszkodliwą treścią.
+
 ```text
 implant/browser -> CDN or redirector -> relay -> team server
-|
-request policy
-host + path + method + header + time
+                       |
+                 request policy
+           host + path + method + header + time
 ```
-Wiele warstw ogranicza ekspozycję: spalenie public domain nie musi ujawniać team servera. CDN-y zapewniają przepustowość anycast i wiarygodną domenę zewnętrzną, ale konto CDN oraz logi edge stają się punktami atrybucji. Odciski TLS, historia certyfikatów, charakterystyczne ścieżki/kolejność nagłówków, rozmiary odpowiedzi, sposób przekierowań oraz allowlisty originów mogą grupować pozornie niezależne fronty.
 
-Na potrzeby detekcji rejestruj pola reverse proxy przed normalizacją, porównuj SNI/Host/authority, analizuj rzadkie kombinacje nagłówków, grupuj treści odpowiedzi i odciski TLS oraz przeszukuj logi audytowe cloud/CDN pod kątem nakładania się konfiguracji. W przypadku autoryzowanych red teams unikaj kopiowania prawdziwej marki lub umieszczania zbierania poświadczeń za niezwiązanym z operacją podmiotem trzecim.
+Wiele warstw ogranicza ekspozycję: spalenie domeny publicznej nie musi ujawnić serwera zespołu. CDN-y zapewniają pojemność anycast i wiarygodną domenę zewnętrzną, ale konto CDN i logi edge stają się punktami umożliwiającymi atrybucję. Fingerprinty TLS, historia certyfikatów, charakterystyczne ścieżki/kolejność nagłówków, rozmiary odpowiedzi, zachowanie przekierowań i listy dozwolonych originów mogą łączyć pozornie niezwiązane fronty.
 
-## Domain fronting and domainless fronting
+Na potrzeby detekcji zapisuj pola reverse proxy przed normalizacją, porównuj SNI/Host/authority, sprawdzaj rzadkie kombinacje nagłówków, grupuj treści odpowiedzi i fingerprinty TLS oraz przeszukuj logi audytowe chmury/CDN pod kątem nakładających się konfiguracji. W ramach autoryzowanych red teamów nie kopiuj prawdziwej marki ani nie umieszczaj mechanizmu zbierania poświadczeń za pośrednictwem niezwiązanego podmiotu trzeciego.
 
-W klasycznym **domain fronting (T1090.004)** połączenie TLS reklamuje dozwoloną domenę frontową w SNI, podczas gdy zaszyfrowane żądanie HTTP `Host` lub HTTP/2 `:authority` wskazuje inną domenę back-endu. Współpracujący CDN routuje na podstawie wewnętrznej wartości. Obserwator sieci bez deszyfrowania TLS widzi front; CDN widzi obie wartości oraz origin. W wariantach domainless SNI może być puste, podczas gdy inne pole routingu wybiera miejsce docelowe.<sup>[[4]](#references)</sup>
+## Domain fronting i domainless fronting
 
-Nie jest to magiczne podszywanie się: działa tylko wtedy, gdy pośrednik celowo lub przypadkowo zezwala na niezgodność i wie, jak routować wewnętrzną nazwę. Najwięksi dostawcy ograniczyli cross-account fronting. Encrypted ClientHello (ECH) zmienia to, co może zobaczyć obserwator na ścieżce, ale nie usuwa zapisów CDN, endpointu ani aplikacji.
+W klasycznym **domain fronting (T1090.004)** połączenie TLS reklamuje dozwoloną domenę frontową w SNI, podczas gdy zaszyfrowany nagłówek HTTP `Host` lub `:authority` w HTTP/2 żąda innej domeny back-endu. Współpracujący CDN kieruje ruch na podstawie wartości wewnętrznej. Obserwator sieciowy bez deszyfrowania TLS widzi front; CDN widzi obie wartości i origin. W wariantach domainless SNI może być pusty, a miejsce docelowe wybiera inne pole routingu.<sup>[[4]](#references)</sup>
+
+To nie jest magiczne podszywanie się pod kogoś: działa tylko wtedy, gdy pośrednik celowo lub przypadkowo dopuszcza tę niezgodność i wie, jak kierować ruch na podstawie wewnętrznej nazwy. Główni dostawcy ograniczyli fronting między kontami. Encrypted ClientHello (ECH) zmienia to, co może zobaczyć obserwator na trasie, ale nie usuwa zapisów CDN, endpointu ani aplikacji.
 
 Punkty detekcji obejmują:
 
-- pochodzenie procesu endpointu i miejsce docelowe nieoczekiwane dla danej aplikacji;
+- pochodzenie procesu na endpoincie i miejsce docelowe nieoczekiwane dla tej aplikacji;
 - niezgodność SNI i HTTP authority, gdy inspekcja TLS jest zgodna z prawem i dostępna;
-- logi CDN pokazujące routing jednego tenanta/frontu do innego authority/origin;
-- nietypowe, długo utrzymywane lub okresowe sesje do usługi zwykle używanej interaktywnie;
-- stabilne rozmiary i rytm zaszyfrowanego przepływu przy zmieniających się domenach frontowych.
+- logi CDN wskazujące, że jeden tenant/front kieruje ruch do innego authority/originu;
+- nietypowe, długo utrzymywane lub okresowe sesje do usługi, która zwykle jest używana interaktywnie;
+- stabilne rozmiary i rytm zaszyfrowanych przepływów mimo zmieniających się domen frontowych.
 
-Bezpieczne laboratorium symuluje niezgodność routingu na należącym do zespołu reverse proxy; nie wykorzystuje publicznego CDN.
+Bezpieczne laboratorium symuluje niezgodność routingu na własnym reverse proxy; nie nadużywa publicznego CDN-a.
 
-## Dynamic resolution: DDNS, DGA and fast flux
+## Dynamiczne rozwiązywanie nazw: DDNS, DGA i fast flux
 
-Dynamic resolution oddziela logiczną usługę od stałej infrastruktury:
+Dynamiczne rozwiązywanie nazw oddziela logiczną usługę od stałej infrastruktury:
 
 - **DDNS:** uwierzytelniony klient aktualizuje stabilną nazwę po zmianie adresu.
-- **DGA:** endpoint i kontroler wyprowadzają kandydackie nazwy domen na podstawie ziarna czasu/klucza; operator rejestruje tylko niewielki podzbiór.
-- **Fast flux:** nazwa zwraca szybko zmieniający się zestaw przejętych adresów/proxy, często z krótkimi TTL.
-- **Double flux:** rotują zarówno adresy usług, jak i adresy autorytatywnych name serverów, ukrywając również warstwę sterowania.
+- **DGA:** endpoint i kontroler wyznaczają potencjalne nazwy domen na podstawie ziarna czasu/klucza; operator rejestruje niewielką ich część.
+- **Fast flux:** nazwa zwraca szybko zmieniający się zestaw przejętych adresów/proxy, często z niskimi wartościami TTL.
+- **Double flux:** rotują zarówno adresy usług, jak i adresy autorytatywnych serwerów nazw, co ukrywa również warstwę sterowania.
 
-Fast flux to wzorzec dystrybucji obciążenia wykorzystywany przeciwnikowo, a nie po prostu „wiele odpowiedzi DNS”. Silniejsze dowody łączą krótki TTL, dużą liczbę unikalnych adresów, szerokie rozproszenie ASN/geograficzne, krótki czas życia węzłów, powtarzalne zachowanie aplikacji i podejrzaną historię rejestracji. CDN-y legalnie wykazują kilka z tych właściwości. MITRE zaleca korelowanie zachowania DNS z procesem i późniejszymi połączeniami.<sup>[[5]](#references)</sup>
+Fast flux to wzorzec dystrybucji obciążenia wykorzystywany przez przeciwników, a nie po prostu „wiele odpowiedzi DNS”. Mocniejsze dowody łączą niski TTL, dużą liczbę unikalnych adresów, szerokie rozproszenie ASN/geograficzne, krótki czas życia węzłów, powtarzalne zachowanie aplikacji i podejrzaną historię rejestracji. CDN-y legalnie wykazują kilka z tych cech. MITRE zaleca korelowanie zachowania DNS z procesem i późniejszymi połączeniami.<sup>[[5]](#references)</sup>
 
-DGA można wykrywać na podstawie entropii leksykalnej, wzorców spółgłosek/cyfr, serii NXDOMAIN, zsynchronizowanych domen zaobserwowanych po raz pierwszy oraz kontekstu procesu. Wordlist DGA i modele generatywne pokonują proste reguły entropii, przez co ważniejsze stają się czasowe grupowanie w całej flocie i lineage endpointów.
+DGA można wykrywać na podstawie entropii leksykalnej, wzorców spółgłosek/cyfr, serii NXDOMAIN, zsynchronizowanych domen widzianych po raz pierwszy oraz kontekstu procesu. DGA oparte na listach słów i modele generatywne omijają proste reguły entropii, przez co ważniejsze stają się klastrowanie czasowe w całej flocie i powiązania z endpointami.
 
-## Compromised domains and domain shadowing
+## Przejęte domeny i domain shadowing
 
-Aktor może przejąć konto registrar/DNS, przejąć osieroconą subdomenę lub dodać rekordy pod skądinąd wiarygodną domeną. **Domain shadowing** zachowuje legalny apex, podczas gdy duża liczba subdomen kontrolowanych przez atakującego wskazuje na zmieniające się hosty delivery lub C2. Wykorzystuje wiek i reputację domeny oraz może omijać blokowanie obejmujące całą domenę.<sup>[[6]](#references)</sup>
+Podmiot może przejąć konto rejestratora/DNS, przejąć osieroconą subdomenę lub dodać rekordy w obrębie skądinąd wiarygodnej domeny. **Domain shadowing** zachowuje legalną domenę apex, a jednocześnie pozwala kierować dużą liczbę subdomen kontrolowanych przez atakującego do zmieniających się hostów dostarczających payload lub obsługujących C2. Wykorzystuje wiek i reputację domeny i może omijać blokowanie obejmujące całą domenę.<sup>[[6]](#references)</sup>
 
-Obrońcy potrzebują logów audytowych registrar i autorytatywnego DNS, MFA, blokad registry/registrar, alertów dotyczących nowych delegacji/tokenów API/name serverów, monitorowania certificate transparency oraz inwentaryzacji zasobów cloud wskazywanych przez DNS. Rozdzielnie badaj resolution i historię certyfikatów subdomeny, niezależnie od reputacji apexu.
+Obrońcy potrzebują logów audytowych rejestratora i autorytatywnego DNS, MFA, blokad rejestru/rejestratora, alertów o nowych delegacjach/tokenach API/serwerach nazw, monitorowania Certificate Transparency oraz inwentaryzacji zasobów chmurowych wskazanych przez DNS. Historię rozwiązywania nazw i certyfikatów subdomeny sprawdzaj niezależnie od reputacji domeny apex.
 
-## Web services and dead-drop resolvers
+## Usługi webowe i dead-drop resolvers
 
-**Dead-drop resolver (T1102.001)** przechowuje zakodowany wskaźnik do bieżącego C2 wewnątrz legalnego posta, profilu, dokumentu, repozytorium, obiektu cloud lub pola blockchain. Malware pobiera publiczny obiekt, dekoduje domenę/IP i kontaktuje się z kolejnym etapem. Warianty dwukierunkowe wymieniają polecenia lub pliki za pośrednictwem API usług.<sup>[[7]](#references)</sup>
+**Dead-drop resolver (T1102.001)** przechowuje zakodowany wskaźnik do aktualnego C2 w legalnym poście, profilu, dokumencie, repozytorium, obiekcie chmurowym lub polu blockchaina. Malware pobiera publiczny obiekt, dekoduje domenę/IP i łączy się z kolejnym etapem. Warianty dwukierunkowe wymieniają polecenia lub pliki za pośrednictwem API usług.<sup>[[7]](#references)</sup>
 
-Zapewnia to odporność i ukrywa back-end C2 przed statyczną analizą binarną. Tworzy jednak również stabilne identyfikatory obiektów, tenantów, repozytoriów, API i wzorców dostępu. Obrońcy powinni połączyć:
+Jeden wariant resolvera specyficzny dla GitHub korzysta z Issues Search API wyłącznie wtedy, gdy uwierzytelniony kanał repozytorium zawiedzie. Klient wyszukuje issues pasujące do bieżącej daty, repozytorium i typu issue, przechodzi do adresu URL komentarzy każdego issue i wyodrębnia szyfrogram znajdujący się między znacznikami `<!--` i `-->`. Po deszyfrowaniu zależnym od hosta i daty pola takie jak `Owner`, `LicRepo` i `LicToken` zastępują głównego właściciela repozytorium, ścieżkę i token. Pozwala to operatorowi rotować poświadczenia i endpointy bez wymiany klienta; komentarz issue pełni rolę resolvera, a pliki repozytorium pozostają kanałem taskingu.<sup>[[15]](#references)</sup>
 
-1. proces, który skontaktował się z usługą;
-2. dokładną ścieżkę API/obiekt oraz hash odpowiedzi;
-3. aktywność dekodowania lub przetwarzania stringów;
+Zapewnia to odporność i ukrywa back-end C2 przed statyczną analizą binarną. Tworzy też stabilne identyfikatory obiektów, tenantów, repozytoriów, API i wzorców dostępu. Obrońcy powinni łączyć:
+
+1. proces, który nawiązał połączenie z usługą;
+2. dokładną ścieżkę API/obiekt i hash odpowiedzi;
+3. aktywność dekodowania lub przetwarzania ciągów znaków;
 4. nowe połączenie wychodzące krótko potem; oraz
 5. identyczne zachowanie w innych miejscach floty.
 
-Blokowanie całego GitHub, cloud storage lub social media rzadko jest wykonalne. Polityka egress uwzględniająca usługi i korelacja na poziomie procesu przewyższają blokowanie wyłącznie domen.
+Blokowanie całego GitHub, cloud storage lub social media rzadko jest wykonalne. Polityka egress uwzględniająca usługi i korelacja na poziomie procesu są skuteczniejsze niż blokowanie wyłącznie domen.
 
-## Personas, accounts and procurement compartments
+## Persony, konta i przedziały zakupowe
 
-Anonimowość infrastruktury zawodzi, gdy persona, recovery email, telefon, płatność, przeglądarka lub admin IP łączy różne segmenty. Operacje powiązane z państwami rozwijały profile społecznościowe, tożsamości email i konta cloud długo przed ich użyciem; ATT&CK rejestruje to jako Establish Accounts (T1585), w tym podtechniki social, email i cloud.<sup>[[8]](#references)</sup>
+Anonimowość infrastruktury zawodzi, gdy persona, adres e-mail do odzyskiwania konta, telefon, płatność, przeglądarka lub IP administratora łączy różne przedziały. Operacje powiązane z państwami od dawna przed użyciem tworzą profile społecznościowe, tożsamości e-mail i konta chmurowe; ATT&CK odnotowuje to jako Establish Accounts (T1585), w tym podtechniki dotyczące mediów społecznościowych, poczty e-mail i chmury.<sup>[[8]](#references)</sup>
 
 Obrońca lub śledczy buduje graf na podstawie:
 
-- czasu utworzenia i pierwszego logowania, lokalizacji, strefy czasowej oraz harmonogramu pracy;
-- pól odzyskiwania, urządzeń MFA, dokumentów tożsamości i instrumentów płatniczych;
-- odcisków przeglądarki/TLS i historii sieci źródłowej;
-- ponownego użycia awatara, pochodzenia obrazu, stylu pisania i rozwoju grafu społecznego;
-- wspólnego registranta domeny, name servera, certyfikatu, analytics ID lub commita w repozytorium;
-- działań na płaszczyźnie zarządzania, które omijają publiczną architekturę relay.
+- czasu utworzenia i pierwszego logowania, ustawień regionalnych, strefy czasowej i harmonogramu pracy;
+- pól odzyskiwania konta, urządzeń MFA, dokumentów tożsamości i instrumentów płatniczych;
+- fingerprintów przeglądarki/TLS i historii sieci źródłowej;
+- ponownego użycia awatarów, pochodzenia obrazów, stylu pisania i rozwoju grafu społecznościowego;
+- wspólnego rejestrującego domenę, serwera nazw, certyfikatu, identyfikatora analytics lub commitu repozytorium;
+- działań w płaszczyźnie zarządzania omijających architekturę publicznych przekaźników.
 
-W przypadku autoryzowanego red teamu syntetyczne persony powinny być udokumentowane u kontrolera ćwiczenia, korzystać z należących do organizacji kanałów odzyskiwania/płatności, unikać podszywania się pod prawdziwe, niezaangażowane osoby i mieć zaplanowane wycofanie. SOC może pozostać nieświadomy; operacja nie może stać się pozbawiona odpowiedzialności.
+W autoryzowanym red teamie syntetyczne persony należy udokumentować u kontrolera ćwiczenia, korzystać z kanałów odzyskiwania kont i płatności należących do organizacji, unikać podszywania się pod prawdziwe, niezwiązane z ćwiczeniem osoby i zaplanować wycofanie person. SOC może pozostać nieświadomy; operacja nie może jednak stać się pozbawiona odpowiedzialności.
 
-## Emerging compound patterns to threat-model
+## Nowe złożone wzorce do modelowania zagrożeń
 
-Poniższe przykłady to **kompozycje tworzone z perspektywy obrońcy**, a nie twierdzenia, że nazwany aktor wdrożył każdy dokładnie taki projekt. Łączą już zaobserwowane prymitywy i są użytecznymi hipotezami dla purple teamów.
+Poniższe przykłady to **kompozycje tworzone z perspektywy obrońcy**, a nie twierdzenia, że konkretny nazwany podmiot wdrożył każdy z tych dokładnych projektów. Łączą już zaobserwowane prymitywy i mogą służyć jako hipotezy do ćwiczeń purple-team.
 
-### Asymmetric one-way tasking
+### Asymetryczny, jednokierunkowy tasking
 
-Polecenia przychodzą przez publiczne, broadcastowe lub append-only źródło, podczas gdy wyniki opuszczają system innym kanałem z opóźnieniem. Przykłady prymitywów obejmują one-way communication przez web service i dead drops. Rozdzielenie uniemożliwia, by pojedynczy przepływ wyglądał na dwukierunkowy, i utrudnia prostą korelację request/response.<sup>[[9]](#references)</sup>
+Polecenia docierają przez publiczne, rozgłoszeniowe lub append-only źródło, a wyniki są wysyłane z opóźnieniem innym kanałem. Przykłady prymitywów obejmują jednokierunkową komunikację przez web service i dead dropy. Rozdzielenie kanałów sprawia, że pojedynczy przepływ nie wygląda na dwukierunkowy i utrudnia prostą korelację żądanie/odpowiedź.<sup>[[9]](#references)</sup>
 
-**Detection:** zachowuj odczyty na poziomie obiektów, a następnie koreluj zmiany stanu procesu i późniejsze transfery wychodzące w szerszym przedziale czasowym. Szukaj rzadkiego procesu odczytującego ten sam publiczny obiekt, nawet gdy nie następuje natychmiastowa odpowiedź.
+**Detekcja:** zachowuj zapisy odczytów obiektów, a następnie koreluj zmiany stanu procesu i późniejsze transfery wychodzące w szerszym oknie czasowym. Szukaj rzadkiego procesu odczytującego ten sam publiczny obiekt, nawet jeśli nie następuje natychmiastowa odpowiedź.
 
-### Multi-stage channel promotion
+### Awans do kanału wieloetapowego
 
-Cichy pierwszy etap wykonuje inwentaryzację i promuje tylko wybrane systemy do niezwiązanego kanału drugiego etapu. Drugi endpoint, protokół i proces mogą nie dzielić infrastruktury z pierwszym. Ogranicza to ekspozycję infrastruktury o większych możliwościach i jest jawnie modelowane jako ATT&CK T1104.<sup>[[10]](#references)</sup>
+Cichy pierwszy etap przeprowadza inwentaryzację i przenosi wybrane systemy do niezwiązanego kanału drugiego etapu. Drugi endpoint, protokół i proces mogą nie mieć wspólnej infrastruktury z pierwszym etapem. Ogranicza to ekspozycję zaawansowanej infrastruktury i jest jawnie ujęte w ATT&CK T1104.<sup>[[10]](#references)</sup>
 
-**Detection:** połącz `first network process -> downloaded/configured state -> new process or injection -> unrelated destination`; nie zamykaj incydentu po zablokowaniu pierwszej domeny.
+**Detekcja:** łącz `pierwszy proces sieciowy -> pobrany/skonfigurowany stan -> nowy proces lub injection -> niezwiązane miejsce docelowe`; nie zamykaj incydentu po zablokowaniu pierwszej domeny.
 
-### Cross-protocol relay translation
+### Tłumaczenie przekaźników między protokołami
 
-Różne hop-y tłumaczą HTTPS, QUIC, WebSocket, DNS, SSH lub API message-queue, zamiast transparentnie przekazywać pakiety. Tłumaczenie usuwa pojedynczy, end-to-endowy odcisk protokołu, ale tworzy gatewaye o charakterystycznym taktowaniu, buforowaniu i konwersji semantycznej. Protocol tunneling (T1572) można łączyć z proxy i service impersonation.<sup>[[11]](#references)</sup>
+Różne przeskoki tłumaczą HTTPS, QUIC, WebSocket, DNS, SSH lub API kolejki wiadomości, zamiast transparentnie przekazywać pakiety. Tłumaczenie eliminuje pojedynczy fingerprint protokołu end-to-end, ale tworzy bramy o charakterystycznym taktowaniu, buforowaniu i konwersji semantycznej. Protocol tunneling (T1572) można łączyć z proxy i podszywaniem się pod usługi.<sup>[[11]](#references)</sup>
 
-**Detection:** szukaj hostów gateway, które odbierają jeden protokół i inicjują inny, przy ściśle powiązanym zachowaniu bajtowym/czasowym; porównuj intencję endpointu z faktycznie przenoszonym protokołem.
+**Detekcja:** szukaj hostów-bram, które odbierają jeden protokół i inicjują inny, wykazując ściśle powiązane zachowanie pod względem bajtów/czasu; porównuj zamierzone działanie endpointu z faktycznie przenoszonym protokołem.
 
-### Passive activation on edge devices
+### Pasywna aktywacja na urządzeniach brzegowych
 
-Zamiast beaconowania implant monitoruje ruch docierający już do routera/VPN i aktywuje się tylko po magic value, wzorcu portu źródłowego lub uwierzytelnionym tokenie. Normalny ruch nadal trafia do prawdziwej usługi. ATT&CK nazywa to Traffic Signaling (T1205), z udokumentowanymi przykładami dotyczącymi urządzeń sieciowych i APT.<sup>[[12]](#references)</sup>
+Zamiast wysyłać beacon, implant monitoruje ruch docierający już do routera/VPN i aktywuje się wyłącznie po otrzymaniu magicznej wartości, wzorca portu źródłowego lub uwierzytelnionego tokena. Zwykły ruch nadal trafia do prawdziwej usługi. ATT&CK nazywa to Traffic Signaling (T1205) i opisuje udokumentowane przykłady dotyczące urządzeń sieciowych oraz APT.<sup>[[12]](#references)</sup>
 
-**Detection:** integralność firmware/plików, raw packet capture podczas autoryzowanego huntu, nieoczekiwane filtry socketów i różnice w zachowaniu usługi. Brak okresowego beaconu nie dowodzi, że urządzenie edge jest czyste.
+**Detekcja:** integralność firmware/plików, przechwytywanie surowych pakietów podczas autoryzowanego huntowania, nieoczekiwane filtry gniazd i różnice w zachowaniu usługi. Brak okresowego beaconu nie dowodzi, że urządzenie brzegowe jest czyste.
 
-### Serverless and ephemeral origin rotation
+### Serverless i rotacja efemerycznych originów
 
-Front utrzymuje stabilną tożsamość logiczną, podczas gdy krótkotrwałe funkcje/kontenery obsługują poszczególne etapy w kilku regionach/kontach. Ogranicza to czas życia na dysku i stałe IP originów, ale utworzenie na płaszczyźnie sterowania, obraz/warstwa, rola, sekret, request ID i telemetria billingowa stają się trwałym grafem.
+Front zachowuje stabilną tożsamość logiczną, a krótkotrwałe funkcje/kontenery obsługują poszczególne etapy w kilku regionach/kontach. Ogranicza to czas życia danych na dysku i obecność stałych adresów IP originów, ale telemetria dotycząca tworzenia w płaszczyźnie sterowania, obrazu/warstwy, roli, sekretu, identyfikatora żądania i rozliczeń staje się trwałym grafem.
 
-**Detection:** zachowuj logi audytowe cloud i logi invocation poza workloadem; grupuj template deploymentu, role, klucze środowiskowe oraz relacje front-to-origin.
+**Detekcja:** przechowuj logi audytowe chmury i wywołań poza obciążeniem; grupuj szablony wdrożeń, role, klucze środowiskowe i relacje front-origin.
 
-### Privacy-layer diversity
+### Różnorodność warstw prywatności
 
-Operacja może celowo unikać jednorodnego łańcucha: na przykład jeden kanał korzysta z dzierżawionego relay, tasking używa publicznego obiektu, exit pochodzi z należącego do zespołu laboratoryjnego łącza cellular, a administracja wykorzystuje oddzielną sieć organizacji. Zmniejsza to wartość przejęcia jednego dostawcy, ale zwiększa ryzyko korelacji czasowej między warstwami i błędów operacyjnych.
+Operacja może celowo unikać jednorodnego łańcucha: przykładowo jeden kanał korzysta z dzierżawionego przekaźnika, tasking z publicznego obiektu, wyjście z należącego do organizacji laboratoryjnego łącza komórkowego, a administracja z oddzielnej sieci organizacji. Ogranicza to wartość przejęcia jednego dostawcy, ale zwiększa ryzyko korelacji czasowej między warstwami i błędów operacyjnych.
 
-**Detection:** buduj osie czasu kampanii obejmujące sensory identity, DNS, SaaS, sieciowe i cloud. Szukaj zsynchronizowanych zmian stanu, a nie identycznych wskaźników.
+**Detekcja:** twórz osie czasu kampanii na podstawie sensorów tożsamości, DNS, SaaS, sieci i chmury. Szukaj zsynchronizowanych zmian stanu, a nie identycznych wskaźników.
 
-### Decentralized or transparency-log dead drops
+### Zdecentralizowane dead dropy lub dead dropy w logach transparentności
 
-Aktor może umieścić mały zaszyfrowany wskaźnik w dowolnym trwałym publicznym systemie append-only, magazynie content-addressed lub feedzie podobnym do transparency log. Publiczny obiekt jest odporny, ale jego dokładny indeks/hash treści oraz zachowanie klienta polegające na odpytywaniu stają się stabilnymi identyfikatorami.
+Podmiot może umieścić niewielki zaszyfrowany wskaźnik w dowolnym trwałym, publicznym systemie append-only, magazynie adresowanym zawartością lub strumieniu podobnym do logu transparentności. Publiczny obiekt jest odporny, ale jego dokładny indeks/hash zawartości i zachowanie klienta odpytującego ten obiekt stają się stabilnymi identyfikatorami.
 
-**Detection:** rejestruj pełne identyfikatory API/obiektów i hashe odpowiedzi; alarmuj na niestandardowe procesy odpytujące niezmienne obiekty, po których następuje dekodowanie lub nowe połączenia.
+**Detekcja:** zapisuj pełne identyfikatory API/obiektów i hashe odpowiedzi; generuj alerty, gdy niestandardowe procesy odpytują niezmienne obiekty, a następnie wykonują dekodowanie lub nawiązują nowe połączenia.
 
-### Delayed store-and-forward operations
+### Operacje z opóźnionym przekazywaniem danych
 
-Interaktywny C2 tworzy silną korelację czasową. Projekt store-and-forward grupuje zaszyfrowane zadania i zwraca wyniki po minutach lub godzinach przez inną kolejkę albo transfer fizyczny. Poświęca responsywność na rzecz słabszej korelacji czasowej end-to-end.
+Interaktywny C2 tworzy silną korelację czasową. Projekt store-and-forward grupuje zaszyfrowane zadania i zwraca wyniki po minutach lub godzinach przez inną kolejkę lub transfer fizyczny. W zamian za słabszą korelację czasową end-to-end ogranicza responsywność.
 
-**Detection:** wydłużaj okna korelacji, modeluj okresowy dostęp do kolejek i analizuj staging na endpointach. Grupowanie przenosi sygnał z taktowania pakietów do zaplanowanego zachowania procesów/plików; nie usuwa go.
+**Detekcja:** wydłużaj okna korelacji, modeluj okresowy dostęp do kolejek i analizuj staging na endpointach. Grupowanie przesuwa sygnał z taktowania pakietów na zaplanowane zachowanie procesów/plików; nie usuwa go.
 
-## Design review: think in observers
+## Przegląd projektu: myśl kategoriami obserwatorów
 
 Dla każdej ścieżki wypełnij tę tabelę przed wdrożeniem i po zebraniu danych:
 
-| Warstwa | Widzi źródło? | Widzi cel? | Widzi treść? | Stabilne identyfikatory | Właściciel retencji/prawny |
+| Warstwa | Widzi źródło? | Widzi miejsce docelowe? | Widzi treść? | Stabilne identyfikatory | Retencja/właściciel prawny |
 |---|---:|---:|---:|---|---|
-| sieć lokalna/carrier | | | | | |
-| usługa wejścia/dostępu | | | | | |
-| operator(y) traversal | | | | | |
-| exit/redirector/CDN | | | | | |
-| autorytatywny DNS/registrar | | | | | |
+| sieć lokalna/operator | | | | | |
+| usługa wejściowa/dostępowa | | | | | |
+| operatorzy tranzytowi | | | | | |
+| wyjście/redirector/CDN | | | | | |
+| autorytatywny DNS/rejestrator | | | | | |
 | cel | | | | | |
 | dostawca konta/płatności | | | | | |
 
-Jeśli jeden zwykły dostawca może wypełnić każdą kolumnę, architektura zapewnia ukrycie przed celem, ale nie zapewnia solidnego rozdzielenia. Jeśli żaden wewnętrzny kontroler nie może powiązać aktywności z konkretnym engagementem, architektura nie nadaje się do profesjonalnego red teamingu.
+Jeśli jeden zwykły dostawca może wypełnić każdą kolumnę, architektura zapewnia ukrycie przed celem, ale nie solidne rozdzielenie. Jeśli żaden wewnętrzny kontroler nie może powiązać aktywności z ćwiczeniem, architektura nie nadaje się do profesjonalnego red teamingu.
 
 ## References
 
-- [1] [MITRE ATT&CK — Pozyskiwanie infrastruktury (T1583), Compromise Infrastructure (T1584) i Proxy (T1090)](https://attack.mitre.org/techniques/T1584/)
-- [2] [Google Cloud/Mandiant — Aktorzy szpiegowscy powiązani z Chinami wykorzystują sieci ORB](https://cloud.google.com/blog/topics/threat-intelligence/china-nexus-espionage-orb-networks)
+- [1] [MITRE ATT&CK — Pozyskiwanie infrastruktury (T1583), kompromitowanie infrastruktury (T1584) i Proxy (T1090)](https://attack.mitre.org/techniques/T1584/)
+- [2] [Google Cloud/Mandiant — Chińscy aktorzy szpiegowscy wykorzystują sieci ORB](https://cloud.google.com/blog/topics/threat-intelligence/china-nexus-espionage-orb-networks)
 - [3] [MITRE ATT&CK — Multi-hop Proxy (T1090.003)](https://attack.mitre.org/techniques/T1090/003/)
 - [4] [MITRE ATT&CK — Domain Fronting (T1090.004)](https://attack.mitre.org/techniques/T1090/004/)
 - [5] [MITRE ATT&CK — Fast Flux DNS (T1568.001)](https://attack.mitre.org/techniques/T1568/001/)
-- [6] [MITRE ATT&CK — Compromise Infrastructure: Domains (T1584.001)](https://attack.mitre.org/techniques/T1584/001/)
+- [6] [MITRE ATT&CK — Kompromitowanie infrastruktury: domeny (T1584.001)](https://attack.mitre.org/techniques/T1584/001/)
 - [7] [MITRE ATT&CK — Web Service: Dead Drop Resolver (T1102.001)](https://attack.mitre.org/techniques/T1102/001/)
-- [8] [MITRE ATT&CK — Establish Accounts (T1585)](https://attack.mitre.org/techniques/T1585/)
-- [9] [MITRE ATT&CK — Web Service: One-Way Communication (T1102.003)](https://attack.mitre.org/techniques/T1102/003/)
-- [10] [MITRE ATT&CK — Multi-Stage Channels (T1104)](https://attack.mitre.org/techniques/T1104/)
-- [11] [MITRE ATT&CK — Protocol Tunneling (T1572)](https://attack.mitre.org/techniques/T1572/)
-- [12] [MITRE ATT&CK — Traffic Signaling (T1205)](https://attack.mitre.org/techniques/T1205/)
-- [13] [Google Threat Intelligence Group — Zakłócenie działania największej na świecie sieci residential proxy](https://cloud.google.com/blog/topics/threat-intelligence/disrupting-largest-residential-proxy-network)
-- [14] [Unit 42 — Kampanie Shadow: ujawnianie globalnego szpiegostwa](https://unit42.paloaltonetworks.com/shadow-campaigns-uncovering-global-espionage/)
+- [8] [MITRE ATT&CK — Zakładanie kont (T1585)](https://attack.mitre.org/techniques/T1585/)
+- [9] [MITRE ATT&CK — Web Service: komunikacja jednokierunkowa (T1102.003)](https://attack.mitre.org/techniques/T1102/003/)
+- [10] [MITRE ATT&CK — Kanały wieloetapowe (T1104)](https://attack.mitre.org/techniques/T1104/)
+- [11] [MITRE ATT&CK — Tunelowanie protokołów (T1572)](https://attack.mitre.org/techniques/T1572/)
+- [12] [MITRE ATT&CK — Sygnalizowanie ruchu (T1205)](https://attack.mitre.org/techniques/T1205/)
+- [13] [Google Threat Intelligence Group — Zakłócenie działania największej na świecie sieci proxy rezydenckich](https://cloud.google.com/blog/topics/threat-intelligence/disrupting-largest-residential-proxy-network)
+- [14] [Unit 42 — Kampanie Shadow: odkrywanie globalnego szpiegostwa](https://unit42.paloaltonetworks.com/shadow-campaigns-uncovering-global-espionage/)
+- [15] [Unit 42 - Kampania Blinder Tunnel wymierzona w iracką infrastrukturę](https://unit42.paloaltonetworks.com/blinder-tunnel-targets-critical-infrastructure/)
 {{#include ../banners/hacktricks-training.md}}
