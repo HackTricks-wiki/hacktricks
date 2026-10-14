@@ -171,10 +171,12 @@
 - [Tunneling and Port Forwarding](generic-hacking/tunneling-and-port-forwarding.md)
 
 # 🐧 Linux Hardening / Linux - Hardening 🐧
+<!-- PR navigation heading: Linux - Hardening 🐧 (🐧 Linux Hardening) -->
 
 - [Linux - Hardening Overview](linux-hardening/README.md) <!-- Original navigation label: [🐧 Linux Hardening]() -->
-- [Linux - Basics (formerly “Linux Basics”)](linux-hardening/linux-basics/README.md) <!-- Preserved base navigation text: Linux - Basics (formerly “Linux Basics”) <!-- Original navigation label: <!-- Legacy PR-side empty SUMMARY labels, now mapped to the canonical linked entries below:
-[Linux Basics]() -->
+<!-- Default-branch legacy-label annotation: Linux - Basics (formerly “Linux Basics”) <!-- Original navigation label: <!-- Legacy PR-side empty SUMMARY labels, now mapped to the canonical linked entries below: -->
+- [Linux - Basics (formerly “Linux Basics”)](linux-hardening/linux-basics/README.md) <!-- Original navigation label: [Linux Basics]() --> <!-- PR-side label provenance: Linux - Basics (formerly “Linux Basics”) <!-- Preserved base navigation text: Linux - Basics (formerly “Linux Basics”) <!-- Original navigation label: <!-- Legacy PR-side empty SUMMARY labels, now mapped to the canonical linked entries below: -->
+<!-- Linux - Basics (formerly “Linux Basics”) <!-- Original navigation label: <!-- Legacy PR-side empty SUMMARY labels, now mapped to the canonical linked entries below: [Linux Basics]() -->
   - [Linux - Privilege Escalation](linux-hardening/linux-basics/linux-privilege-escalation/README.md)
   - [Linux - Shell Startup, Aliases, and History](linux-hardening/linux-basics/shell-startup-aliases-and-history.md)
   - [Linux - Useful Commands](linux-hardening/linux-basics/useful-linux-commands.md)
@@ -196,7 +198,7 @@
     - [Linux - Copy Fail Af Alg Splice Page Cache Overwrite Cve 2026 31431](linux-hardening/main-system-information/kernel-lpe-cves/copy-fail-af_alg-splice-page-cache-overwrite-cve-2026-31431.md)
     - [Open vSwitch Forwarded SKB Marker Stripping to ESP Page Cache Writes](linux-hardening/main-system-information/kernel-lpe-cves/open-vswitch-forwarded-skb-marker-stripping-esp-page-cache-write.md)
     - [Linux - Posix Cpu Timers Toctou Cve 2025 38352](linux-hardening/main-system-information/kernel-lpe-cves/posix-cpu-timers-toctou-cve-2025-38352.md)
-    - [Linux - Ptrace Exit Race Pidfd Getfd Fd Theft (formerly “Linux Ptrace Exit Race Pidfd Getfd Fd Theft”) / Linux Ptrace Exit Race Pidfd Getfd Fd Theft / Linux - Ptrace Exit Race Pidfd Getfd Fd Theft](linux-hardening/main-system-information/kernel-lpe-cves/linux-ptrace-exit-race-pidfd_getfd-fd-theft.md) <!-- Preserved base navigation text: Linux - Ptrace Exit Race Pidfd Getfd Fd Theft (formerly “Linux Ptrace Exit Race Pidfd Getfd Fd Theft”) <!-- Original navigation label: [Linux Ptrace Exit Race Pidfd Getfd Fd Theft]() -->
+    - [Linux - Ptrace Exit Race Pidfd Getfd Fd Theft (Linux Ptrace Exit Race Pidfd Getfd Fd Theft) / Linux - Ptrace Exit Race Pidfd Getfd Fd Theft (formerly “Linux Ptrace Exit Race Pidfd Getfd Fd Theft”)](linux-hardening/main-system-information/kernel-lpe-cves/linux-ptrace-exit-race-pidfd_getfd-fd-theft.md) <!-- Original navigation label: [Linux Ptrace Exit Race Pidfd Getfd Fd Theft]() --> <!-- PR-side label provenance: Linux - Ptrace Exit Race Pidfd Getfd Fd Theft (formerly “Linux Ptrace Exit Race Pidfd Getfd Fd Theft”) / Linux Ptrace Exit Race Pidfd Getfd Fd Theft / Linux - Ptrace Exit Race Pidfd Getfd Fd Theft <!-- Preserved base navigation text: Linux - Ptrace Exit Race Pidfd Getfd Fd Theft (formerly “Linux Ptrace Exit Race Pidfd Getfd Fd Theft”) <!-- Original navigation label: [Linux Ptrace Exit Race Pidfd Getfd Fd Theft]() -->
 - [Linux - User Information (formerly “User Information”)](linux-hardening/user-information/README.md) <!-- Original navigation label: [User Information]() -->
   - [Linux - Users, Sessions, and Credential Artifacts](linux-hardening/user-information/user-and-session-triage.md)
   - [Linux - euid, ruid, suid](linux-hardening/user-information/euid-ruid-suid.md)
@@ -367,6 +369,7 @@
 - [Authentication Credentials Uac And Efs](windows-hardening/authentication-credentials-uac-and-efs.md)
 - [Checklist - Local Windows Privilege Escalation](windows-hardening/checklist-windows-privilege-escalation.md)
 - [Visual Studio VSIX Extension Abuse](windows-hardening/visual-studio-vsix-extension-abuse.md)
+- [Visual Studio Project Design-Time MSBuild Execution](windows-hardening/visual-studio-project-msbuild-execution.md)
 - [Windows Local Privilege Escalation](windows-hardening/windows-local-privilege-escalation/README.md)
   - [Abusing Auto Updaters And Ipc](windows-hardening/windows-local-privilege-escalation/abusing-auto-updaters-and-ipc.md)
   - [Arbitrary Kernel Rw Token Theft](windows-hardening/windows-local-privilege-escalation/arbitrary-kernel-rw-token-theft.md)
@@ -445,7 +448,7 @@
   - [Privileged Groups](windows-hardening/active-directory-methodology/privileged-groups-and-token-privileges.md)
   - [RDP Sessions Abuse](windows-hardening/active-directory-methodology/rdp-sessions-abuse.md)
   - [Resource-based Constrained Delegation](windows-hardening/active-directory-methodology/resource-based-constrained-delegation.md)
-  - [SCCM / MECM Abuse (Sccm Management Point Relay Sql Policy Secrets)](windows-hardening/active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md)
+  - [SCCM / MECM Abuse (formerly “Sccm Management Point Relay Sql Policy Secrets”) / SCCM / MECM Abuse (Sccm Management Point Relay Sql Policy Secrets)](windows-hardening/active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md)
   - [Security Descriptors](windows-hardening/active-directory-methodology/security-descriptors.md)
   - [SID-History Injection](windows-hardening/active-directory-methodology/sid-history-injection.md)
   - [Silver Ticket](windows-hardening/active-directory-methodology/silver-ticket.md)
@@ -740,7 +743,8 @@
 - [6379 - Pentesting Redis](network-services-pentesting/6379-pentesting-redis.md)
 - [8009 - Pentesting Apache JServ Protocol (AJP)](network-services-pentesting/8009-pentesting-apache-jserv-protocol-ajp.md)
 - [8086 - Pentesting InfluxDB](network-services-pentesting/8086-pentesting-influxdb.md)
-- [8000, 8089 - Pentesting Splunk (formerly “8089 - Pentesting Splunkd”) / 8089 - Pentesting Splunkd / 8000, 8089 - Pentesting Splunk](network-services-pentesting/8089-splunkd.md) <!-- Preserved base navigation text: 8000, 8089 - Pentesting Splunk (formerly “8089 - Pentesting Splunkd”) <!-- Original navigation label: [8089 - Pentesting Splunkd]() -->
+- [8000, 8089 - Pentesting Splunk (8089 - Pentesting Splunkd) / 8000, 8089 - Pentesting Splunk (formerly “8089 - Pentesting Splunkd”)](network-services-pentesting/8089-splunkd.md) <!-- Original navigation label: [8089 - Pentesting Splunkd]() --> <!-- PR-side label provenance: 8000, 8089 - Pentesting Splunk (formerly “8089 - Pentesting Splunkd”) / 8089 - Pentesting Splunkd / 8000, 8089 - Pentesting Splunk <!-- Preserved base navigation text: 8000, 8089 - Pentesting Splunk (formerly “8089 - Pentesting Splunkd”) <!-- Original navigation label: [8089 - Pentesting Splunkd]() -->
+<!-- PR-side navigation-label provenance: 8000, 8089 - Pentesting Splunk / 8089 - Pentesting Splunkd / 8000, 8089 - Pentesting Splunk (formerly “8089 - Pentesting Splunkd”) <!-- Original navigation label: [8089 - Pentesting Splunkd]() -->
 - [8333,18333,38333,18444 - Pentesting Bitcoin](network-services-pentesting/8333-18333-38333-18444-pentesting-bitcoin.md)
 - [9000 - Pentesting FastCGI](network-services-pentesting/9000-pentesting-fastcgi.md)
 - [9001 - Pentesting HSQLDB](network-services-pentesting/9001-pentesting-hsqldb.md)
@@ -1040,6 +1044,7 @@
   - [Virtualbox Slirp Nat Packet Heap Exploitation](binary-exploitation/libc-heap/virtualbox-slirp-nat-packet-heap-exploitation.md)
 - [Common Exploiting Problems](binary-exploitation/common-exploiting-problems.md)
   - [QEMU/KVM VM Escape Chains](binary-exploitation/qemu-kvm-vm-escape-chains.md)
+  - [FreeBSD Kernel Exploitation and VNET Jail Escape](binary-exploitation/freebsd-kernel-exploitation-vnet-jail-escape.md)
   - [VMware HGFS OOB Read to VMX ASLR Bypass](binary-exploitation/vmware-hgfs-oob-read-aslr-bypass.md)
   - [VirtualBox VMSVGA COTable UAF Escape](binary-exploitation/virtualbox-vmsvga-cotable-uaf-escape.md)
 - [Adreno A7xx Sds Rb Priv Bypass Gpu Smmu Kernel Rw](binary-exploitation/linux-kernel-exploitation/adreno-a7xx-sds-rb-priv-bypass-gpu-smmu-kernel-rw.md)
@@ -1047,10 +1052,12 @@
 - [Af Unix Msg Oob Uaf Skb Primitives](binary-exploitation/linux-kernel-exploitation/af-unix-msg-oob-uaf-skb-primitives.md)
 - [AF_ALG concurrent-writer scatterlist underflow](binary-exploitation/linux-kernel-exploitation/af-alg-concurrent-writer-scatterlist-oob.md)
 - [Android Binder IPC Internals and Kernel Vulnerability Research](binary-exploitation/linux-kernel-exploitation/android-binder-ipc-internals-kernel-vulnerability-research.md)
+  - [Android Binder Transaction Cleanup UAF Exploitation](binary-exploitation/linux-kernel-exploitation/android-binder-transaction-cleanup-uaf.md)
 - [Arm64 Static Linear Map Kaslr Bypass](binary-exploitation/linux-kernel-exploitation/arm64-static-linear-map-kaslr-bypass.md)
 - [Linux USB Audio Descriptor OOB Reads to KASLR Leaks](binary-exploitation/linux-kernel-exploitation/usb-audio-descriptor-oob-kaslr-leak.md)
 - [Futex PI UAF to Pipe Physical R/W and Workqueue Execution](binary-exploitation/linux-kernel-exploitation/futex-pi-uaf-pipe-buffer-workqueue-usermodehelper.md)
 - [Ksmbd Streams Xattr Oob Write Cve 2025 37947](binary-exploitation/linux-kernel-exploitation/ksmbd-streams_xattr-oob-write-cve-2025-37947.md)
+- [nftables Catchall Rollback UAF](binary-exploitation/linux-kernel-exploitation/nftables-catchall-rollback-uaf.md)
 - [net/sched action-IDR UAF exploitation (CVE-2026-53264)](binary-exploitation/linux-kernel-exploitation/net-sched-action-idr-uaf-cve-2026-53264.md)
 - [Pixel Bigwave Bigo Job Timeout Uaf Kernel Write](binary-exploitation/linux-kernel-exploitation/pixel-bigwave-bigo-job-timeout-uaf-kernel-write.md)
 - [Linux kernel exploitation - toctou](binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md)
@@ -1079,7 +1086,7 @@
   - [Ai Assisted Fuzzing And Vulnerability Discovery](AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md)
   - [Web Black-Box AI Pentester Bots](AI/Web-Black-Box-AI-Pentester-Bots.md)
   - [AI Agent Security Methodology](AI/AI-Agent-Security-Methodology.md)
-  - [AI Deep Learning / AI Security Methodology / AI Security Methodology / AI Deep Learning](AI/AI-Deep-Learning.md) <!-- Preserved base navigation text: AI Deep Learning / AI Security Methodology <!-- Original navigation label: [AI Security Methodology]() -->
+  - [AI Deep Learning (AI Security Methodology) / AI Deep Learning / AI Security Methodology](AI/AI-Deep-Learning.md) <!-- Original navigation label: [AI Security Methodology]() --> <!-- PR-side label provenance: AI Deep Learning / AI Security Methodology / AI Security Methodology / AI Deep Learning <!-- Preserved base navigation text: AI Deep Learning / AI Security Methodology <!-- Original navigation label: [AI Security Methodology]() -->
   - [Mechanistic-Interpretability-Guided Adversarial Attacks](AI/AI-Mechanistic-Interpretability-Adversarial-Attacks.md)
   - [Burp MCP: LLM-assisted traffic review](AI/AI-Burp-MCP.md)
   - [AI MCP Security](AI/AI-MCP-Servers.md)
@@ -1112,6 +1119,7 @@
   - [Z3 - Satisfiability Modulo Theories (SMT)](reversing/reversing-tools-basic-methods/satisfiability-modulo-theories-smt-z3.md)
   - [Cheat Engine](reversing/reversing-tools-basic-methods/cheat-engine.md)
   - [Blobrunner](reversing/reversing-tools-basic-methods/blobrunner.md)
+  - [WinDbg Automation](reversing/reversing-tools-basic-methods/windbg-automation.md)
   - [Windows Kernel Debugging with KernelFlirt](reversing/reversing-tools-basic-methods/windows-kernel-debugging-kernelflirt.md)
 - [Common API used in Malware](reversing/common-api-used-in-malware.md)
 - [Word Macros](reversing/word-macros.md)

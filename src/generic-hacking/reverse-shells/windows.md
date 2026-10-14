@@ -420,6 +420,8 @@ C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
 
 **Not detected**
 
+A malicious C# project can also run an [MSBuild design-time target when opened in Visual Studio](../../windows-hardening/visual-studio-project-msbuild-execution.md), before anyone explicitly invokes `MSBuild.exe` or builds the project.<sup>[[28]](#references)</sup>
+
 ## **CSC**
 
 Compile C# code in the victim machine.<sup>[[17]](#references)[[18]](#references)</sup>
@@ -582,5 +584,6 @@ WinPWN](https://github.com/SecureThisShit/WinPwn) PS console with some offensive
 - [25] [WinPwn](https://github.com/SecureThisShit/WinPwn)
 - [26] [Empire Wiki](https://bc-security.gitbook.io/empire-wiki/)
 - [27] [multi_generate_agent | Empire Wiki](https://bc-security.gitbook.io/empire-wiki/stagers/multi_generate_agent)
+- [28] [Unit 42 - Blinder Tunnel Campaign Targets Iraqi Infrastructure](https://unit42.paloaltonetworks.com/blinder-tunnel-targets-critical-infrastructure/)
 
 {{#include ../../banners/hacktricks-training.md}}
