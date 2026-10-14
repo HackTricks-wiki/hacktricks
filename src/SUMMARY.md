@@ -77,6 +77,7 @@
   - [Docker Forensics](generic-methodologies-and-resources/basic-forensic-methodology/docker-forensics.md)
   - [Image Acquisition & Mount](generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md)
   - [Ios Backup Forensics](generic-methodologies-and-resources/basic-forensic-methodology/ios-backup-forensics.md)
+  - [Android Forensics](generic-methodologies-and-resources/basic-forensic-methodology/android-forensics.md)
   - [Linux Forensics](generic-methodologies-and-resources/basic-forensic-methodology/linux-forensics.md)
   - [Malware Analysis](generic-methodologies-and-resources/basic-forensic-methodology/malware-analysis.md)
   - [Android Malware Post-Exploitation](generic-methodologies-and-resources/basic-forensic-methodology/android-malware-post-exploitation.md)
@@ -763,6 +764,10 @@
 - [50030,50060,50070,50075,50090 - Pentesting Hadoop](network-services-pentesting/50030-50060-50070-50075-50090-pentesting-hadoop.md)
 - [55555 - Pentesting SolarWinds Access Rights Manager gRPC](network-services-pentesting/55555-pentesting-solarwinds-arm.md)
 
+# 🏭 Industrial Control Systems / OT
+
+- [OT/ICS Assessment and Safety](industrial-control-systems/README.md)
+
 # 🕸️ Pentesting Web
 
 - [Web Vulnerabilities Methodology](pentesting-web/web-vulnerabilities-methodology.md)
@@ -1157,8 +1162,6 @@
 - [Interesting Http](todo/interesting-http.md)
 - [Rust Basics](todo/rust-basics.md)
 - [More Tools](todo/more-tools.md)
-- [Industrial Control Systems Hacking](todo/industrial-control-systems-hacking/README.md)
-  - [Modbus Protocol](todo/industrial-control-systems-hacking/modbus.md)
 - [Radio Hacking](todo/radio-hacking/README.md)
   - [Maxiprox Mobile Cloner](todo/radio-hacking/maxiprox-mobile-cloner.md)
   - [Pentesting RFID](todo/radio-hacking/pentesting-rfid.md)
@@ -1179,7 +1182,6 @@
 - [Burp Suite](todo/burp-suite.md)
 - [Other Web Tricks](todo/other-web-tricks.md)
 - [Interesting HTTP$$external:todo/interesting-http.md$$]()
-- [Android Forensics](todo/android-forensics.md)
 - [Online Platforms with API](todo/online-platforms-with-api.md)
 - [Stealing Sensitive Information Disclosure from a Web](todo/stealing-sensitive-information-disclosure-from-a-web.md)
 - [Post Exploitation](todo/post-exploitation.md)
