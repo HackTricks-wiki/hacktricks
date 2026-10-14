@@ -4,7 +4,7 @@
 
 ## 主要机器学习算法
 
-学习 AI 的最佳起点是了解主要机器学习算法的工作原理。这有助于你了解 AI 的工作方式、如何使用 AI，以及如何攻击 AI：
+学习 AI 的最佳起点是了解主要机器学习算法的工作原理。这有助于你理解 AI 的工作方式、如何使用 AI，以及如何攻击 AI：
 
 
 {{#ref}}
@@ -28,12 +28,16 @@
 
 ### LLM 架构
 
-在以下页面中，你将了解使用 transformers 构建基础 LLM 所需的各个组件的基础知识：
+以下页面介绍了使用 transformers 构建基础 LLM 所需的各个组件的基础知识：
 
 
 {{#ref}}
 AI-llm-architecture/README.md
 {{#endref}}
+
+## 模型工具和平台
+
+如需运行、微调、提供服务或试用模型，请参阅 [AI 模型工具和平台指南](AI-Model-Tools-and-Platforms.md)。
 
 ## AI 安全
 
@@ -45,7 +49,7 @@ AI-Agent-Security-Methodology.md
 
 ### AI 风险框架
 
-OWASP Machine Learning Security Top 10 和 Google 的 Secure AI Framework (SAIF) 是评估 AI 系统风险的两个实用入门框架。它们相辅相成，但并非全面涵盖所有 AI 风险框架。<sup>[[1]](#references)[[2]](#references)</sup>
+评估 AI 系统风险时，OWASP Machine Learning Security Top 10 和 Google 的 Secure AI Framework (SAIF) 是两个实用的入门框架。它们相辅相成，但并未涵盖所有 AI 风险框架。<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
@@ -58,9 +62,9 @@ AI-Risk-Frameworks.md
 AI-Mechanistic-Interpretability-Adversarial-Attacks.md
 {{#endref}}
 
-### AI Prompt 安全
+### AI 提示词安全
 
-过去几年中，LLM 的出现让 AI 的应用激增，但它们并不完美，可能会被对抗性 prompt 欺骗。了解这个重要主题，有助于安全地使用 AI 并对其发起攻击：
+近年来，LLM 的出现极大推动了 AI 的应用，但它们并不完美，可能会被对抗性提示词欺骗。理解这一主题对于安全使用 AI 和攻击 AI 都非常重要：
 
 
 {{#ref}}
@@ -69,7 +73,7 @@ AI-Prompts.md
 
 ### AI 模型 RCE
 
-开发者和公司从互联网下载模型并运行的情况十分常见，但仅仅加载模型就可能足以在系统上执行任意代码。了解这个重要主题，有助于安全地使用 AI 并对其发起攻击：
+开发者和公司经常运行从 Internet 下载的模型，但仅仅加载模型就可能足以在系统上执行任意代码。理解这一主题对于安全使用 AI 和攻击 AI 都非常重要：
 
 
 {{#ref}}
@@ -78,36 +82,36 @@ AI-Models-RCE.md
 
 ### 借助 AI 绕过 KYC
 
-生成式视频可与虚拟摄像头注入和摄像头 API 操纵结合使用，以绕过安全性较弱的 KYC、年龄验证和生物特征活体检测流程：
+生成式视频可以与虚拟摄像头注入和摄像头 API 操纵结合使用，以绕过安全性较弱的 KYC、年龄验证和生物识别活体检测流程：
 
 
 {{#ref}}
 KYC-Bypass-Using-AI.md
 {{#endref}}
 
-### AI Model Context Protocol
+### AI 模型上下文协议
 
-MCP (Model Context Protocol) 是一种开放协议，用于将 AI 应用连接到工具和数据源。由于 MCP server 可以暴露数据和操作，安全评估必须涵盖授权、同意、工具输入验证以及信任边界审查。<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol) 是一种用于将 AI 应用连接到工具和数据源的开放协议。由于 MCP 服务器可能会开放数据和操作权限，评估时必须审查授权、同意、工具输入验证和信任边界。<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### 借助 AI 进行 Fuzzing 和自动化漏洞发现
+### AI 辅助 Fuzzing 与自动化漏洞发现
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### 借助 AI 进行逆向工程
+### AI 辅助逆向工程
 
-[部分提升、invariant MBA 检测、环境绑定解码和自动化提取器验证](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[部分提升、invariant MBA 检测、环境绑定解码和自动提取器验证](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
 ### Web 黑盒 AI Pentester Bot
 
-在具备可观测性、编排能力、经过身份验证的会话处理和对抗性验证的支持下，由 LLM 驱动的 agent 可以自动执行耗时较长的黑盒 Web pentesting 工作流：
+由 LLM 驱动的 Agent 可以自动执行长时间运行的 Web 黑盒 pentesting 工作流，前提是具备可观测性、编排能力、经过身份验证的会话处理能力和对抗性验证：
 
 
 {{#ref}}
