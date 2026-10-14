@@ -4,11 +4,16 @@ on:
   issue_comment:
     types: [created, edited]
   workflow_run:
-    workflows: ["*", "!Auto Merge Approved PRs"]
+    workflows: ["Translate All", "Build Master"]
     types: [completed]
   pull_request_target:
     types: [opened, edited, synchronize, reopened, ready_for_review]
   workflow_dispatch:
+    inputs:
+      pr:
+        description: Optional PR number for a targeted merge check
+        type: number
+        default: 0
   # Recover the approval queue even if a completion trigger is missed.
   schedule:
     - cron: "7,22,37,52 * * * *"
@@ -39,7 +44,7 @@ jobs:
           persist-credentials: false
           fetch-depth: 1
 
-      - name: Merge approved PRs when other workflows are idle
+      - name: Merge verified approved PRs promptly
         run: python3 scripts/merge_approved_prs.py
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}

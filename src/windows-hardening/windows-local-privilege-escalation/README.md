@@ -270,6 +270,22 @@ This is a different trust-boundary failure from intercepting an HTTP WSUS connec
 
 For the separate attack path that relays WSUS client authentication from HTTP/8530 to LDAP, SMB, or AD CS, see [Abusing WSUS HTTP for NTLM relay](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#abusing-wsus-http-8530-for-ntlm-relay-to-ldapsmbad-cs-esc8).
 
+#### Confirm the external-database relay and procedure rights
+
+In deployments where WSUS uses an external SQL Server, first check whether the WSUS server account can authenticate to the database and whether NTLM relay reaches that listener. The server's SQL role may expose update-publishing procedures even when direct table writes are denied; a failed `UPDATE` against `SUSDB` does not establish that publishing is blocked. Inspect the effective identity, role membership, and procedure permissions in an authorized SQL session before attempting a custom update.<sup>[[38]](#references)</sup>
+
+```sql
+USE SUSDB;
+SELECT ORIGINAL_LOGIN() AS LoginName, USER_NAME() AS DatabaseUser;
+SELECT IS_ROLEMEMBER('webService') AS IsWebServiceRoleMember;
+SELECT * FROM sys.fn_my_permissions('dbo.spImportUpdate', 'OBJECT');
+SELECT * FROM sys.fn_my_permissions('dbo.spSaveXmlFragment', 'OBJECT');
+SELECT * FROM sys.fn_my_permissions('dbo.spSetBatchURL', 'OBJECT');
+SELECT * FROM sys.fn_my_permissions('dbo.spDeployUpdate', 'OBJECT');
+```
+
+The live procedure definitions and the installed `SoftwareDistributionPackage.xsd` are useful when reconstructing valid update metadata. A bundle parent and payload child each need `UpdateIdentity` (fragment type `1`), `LocalizedProperties` (`4`), and `ExtendedProperties` (`2`); capture the local revision ID returned by each `spImportUpdate` call and keep the bundle relationship, digests, size, content URL, and revision consistent. This is a stateful publishing workflow, so a single successful stored-procedure call is not proof of client-side execution.<sup>[[38]](#references)</sup>
+
 #### Build, target and approve the update
 
 The custom-update workflow uses legitimate WSUS procedures as a restricted publishing API. The important state transitions are:<sup>[[38]](#references)</sup>
@@ -2141,6 +2157,44 @@ An application may create a predictable upload subdirectory, write a caller-supp
 
 Check the exact path construction and timing in the upload handler, the user's effective delete/create rights on the subdirectory, the destination's effective ACLs, whether the writer follows reparse points, and whether the web server executes files in that destination. Confirm the writer's and web server's process identities separately. Passive inventory can show directory ACLs and reparse metadata, but it cannot establish the handler's behavior or a future junction swap. If execution lands in a service account, inspect the **actual process token** before considering any separate token-privilege path.
 
+## WNF-triggered privileged scheduled-task cleanup
+
+A scheduled task that denies manual execution may still expose an unprivileged trigger. When auditing a privileged task, export its XML and inspect **all** triggers as well as its task DACL, principal and action. In particular, a `WnfStateChangeTrigger` names a Windows Notification Facility (WNF) state; if that securable state permits the current user to publish an update, the user can indirectly start the task under its configured identity despite `<AllowStartOnDemand>false</AllowStartOnDemand>`.<sup>[[43]](#references)</sup>
+
+For example, the Recall `\Microsoft\Windows\WindowsAI\Recall\PolicyConfiguration` task ran as SYSTEM, accepted updates to WNF state `7508BCA32C079E41` from a standard user, and then inspected `%LOCALAPPDATA%\CoreAIPlatform.00\UKP\{GUID}` even when Recall was disabled.<sup>[[43]](#references)</sup>
+
+```powershell
+schtasks /query /tn "<TASK>" /xml > task.xml
+Select-String -Path .\task.xml -Pattern 'WnfStateChangeTrigger|StateName|UserId|ClassId|AllowStartOnDemand'
+```
+
+To test reachability, resolve `ZwUpdateWnfStateData` from `ntdll.dll`, submit an empty update for the eight-byte state name, and correlate the return status with the task's last-run data or Procmon activity. The following reduced probe uses the byte sequence from the Recall task example; substitute the bytes exported for the task being tested.<sup>[[43]](#references)</sup>
+
+```c
+#include <windows.h>
+#include <winternl.h>
+typedef NTSTATUS (WINAPI *UpdateWnf)(PVOID,PVOID,ULONG,PVOID,PVOID,PVOID,ULONG);
+int main(void) {
+    unsigned char stateName[8] = {0x75,0x08,0xBC,0xA3,0x2C,0x07,0x9e,0x41};
+    HMODULE ntdll = LoadLibraryW(L"ntdll.dll");
+    UpdateWnf update = (UpdateWnf)GetProcAddress(ntdll, "ZwUpdateWnfStateData");
+    if (!update) return 1;
+    return update(stateName, NULL, 0, NULL, NULL, NULL, 0) < 0;
+}
+```
+
+### Turning recursive cleanup into privileged deletion
+
+The useful primitive is not the trigger alone, but a privileged cleanup routine that accepts an attacker-controlled directory. Trace the operation from enumeration to the final mutation: profile/session discovery, wildcard-selected children, `SHCreateItemFromParsingName`, and `IFileOperation::DeleteItem` are strong indicators that a previously checked pathname will later be traversed recursively. If descendants are not opened relative to trusted directory handles and validated before deletion, an attacker can change resolution between enumeration and use.<sup>[[43]](#references)</sup>
+
+Pair the WNF trigger with the [oplock, junction and Object Manager symlink substitution](#from-folder-contents-delete-to-system-eop) described below: the oplock pauses the cleaner after it selects the legitimate child, while the writable ancestor is replaced so the resumed privileged delete resolves through `\RPC Control` to the protected target. In the Recall chain this yielded the SYSTEM deletion of `C:\Config.Msi` required by the documented MSI rollback technique.<sup>[[31]](#references)[[43]](#references)</sup>
+
+### Nested descendants bypass shallow reparse-point fixes
+
+Validating only the attacker-controlled root and its immediate child does not secure a recursive pathname-based delete. Keep those checked objects legitimate and move the junction/oplock substitution into an additional child below them; `IFileOperation::DeleteItem` eventually reaches the unvalidated descendant and follows its new target. CVE-2026-20941 was produced by exactly this class of incomplete fix after the first Recall patch validated `UKP` and the GUID-shaped directory but retained the old recursive deletion operation.<sup>[[43]](#references)</sup>
+
+The safe pattern is to open **every descendant** relative to an already trusted directory handle, obtain and verify the final resolved path/object, and apply the deletion disposition to that verified handle. Do not validate a prefix and then return to recursive path-based deletion. During patch review, also inspect structures at the real call site: in this case runtime inspection of `OBJECT_ATTRIBUTES` at `NtCreateFile` showed a non-null `RootDirectory` and a relative `{GUID}\\secure_file.lock` name, disproving misleading decompiler output that suggested a second `FILE_DELETE_ON_CLOSE` primitive.<sup>[[43]](#references)</sup>
+
 ## From Arbitrary Folder Delete/Move/Rename to SYSTEM EoP
 
 The technique described [**in this blog post**](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks) with a exploit code [**available here**](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs).<sup>[[31]](#references)[[32]](#references)</sup>
@@ -2508,5 +2562,6 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 - [40] [bagelByt3s – NotWSUSPicious](https://github.com/bagelByt3s/NotWSUSPicious)
 - [41] [Exodus Intelligence - Microsoft Windows Installer Folder Delete Privilege Escalation](https://blog.exodusintel.com/2026/07/06/microsoft-windows-installer-folder-delete-privilege-escalation/)
 - [42] [Microsoft Security Response Center - CVE-2025-27727](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-27727)
+- [43] [MDSec - Total Recall: Retracing Your Steps Back to NT AUTHORITY\SYSTEM](https://www.mdsec.co.uk/2026/02/total-recall-retracing-your-steps-back-to-nt-authoritysystem/)
 
 {{#include ../../banners/hacktricks-training.md}}
