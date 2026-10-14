@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Flipper Zero ist ein tragbares Hardware-Multitool, das die folgenden Funktionen unterstützt:<sup>[[1]](#references)</sup>
+Flipper Zero ist ein portables Hardware-Multitool mit folgenden Funktionen:<sup>[[1]](#references)</sup>
 
-- **Unterstützte Funksignale empfangen, aufzeichnen und wiedergeben:** [**Sub-GHz**](fz-sub-ghz.md)
+- **Unterstützte Funksignale empfangen, aufzeichnen und erneut übertragen:** [**Sub-GHz**](fz-sub-ghz.md)
 - **Unterstützte NFC-Karten lesen, aufzeichnen und emulieren:** [**NFC**](fz-nfc.md)
 - **Unterstützte 125-kHz-Tags lesen, aufzeichnen und emulieren:** [**125 kHz RFID**](fz-125khz-rfid.md)
 - **Infrarotsignale lesen, aufzeichnen und übertragen:** [**Infrarot**](fz-infrared.md)
@@ -13,7 +13,7 @@ Flipper Zero ist ein tragbares Hardware-Multitool, das die folgenden Funktionen 
 - **Als U2F-Sicherheitsschlüssel fungieren**
 - **Anwendungen und Spiele wie Snake ausführen**
 
-Für von der Community gepflegte Firmware, Anwendungen, Datenbanken und andere Ressourcen siehe die Awesome-Flipper-Zero-Sammlung.<sup>[[2]](#references)</sup>
+Community-gepflegte Firmware, Anwendungen, Datenbanken und weitere Ressourcen finden Sie in der Awesome-Flipper-Zero-Sammlung.<sup>[[2]](#references)</sup>
 
 ## References
 
