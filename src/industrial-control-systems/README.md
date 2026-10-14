@@ -1,6 +1,6 @@
 # Industrial Control Systems Hacking
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 ## About This Section
 
@@ -20,8 +20,14 @@ Prefer passive discovery and existing engineering documentation where possible. 
 
 The same architectural knowledge supports defensive activities such as asset inventory, network segmentation, monitoring, incident response, and risk-based vulnerability management.<sup>[[1]](#references)</sup>
 
+## Protocol entry points
+
+- [Modbus testing](../network-services-pentesting/pentesting-modbus.md) covers Modbus TCP, serial variants, function codes, and register access.
+- [OPC UA testing](../network-services-pentesting/4840-pentesting-opc-ua.md) covers the industrial data-exchange service.
+- [BACnet testing](../network-services-pentesting/47808-udp-bacnet.md) covers building-automation control networks.
+
 ## References
 
 - [1] [NIST SP 800-82 Rev. 3 - Guide to Operational Technology (OT) Security](https://csrc.nist.gov/pubs/sp/800/82/r3/final)
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}

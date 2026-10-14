@@ -18,6 +18,9 @@
 
 - Board-level hardware interface work belongs under `src/hardware-physical-access/hardware-hacking/`, not TODO. Its hub retains JTAG/SWD fundamentals and links directly to JTAG, UART, I²C, SPI, side-channel, fault-injection, and radio-signal chapters. `physical-attacks.md` remains the system-level physical-access chapter; `firmware-analysis/` remains the firmware interpretation chapter, with links to acquisition via UART and SPI. Former `todo/hardware-hacking/` whole-page routes redirect to the same-named chapters here. The broader `todo/radio-hacking/` family has not moved yet.
 
+- OT/ICS process-safety and assessment planning is at `src/industrial-control-systems/README.md`, with direct routes to Modbus, OPC UA, and BACnet. Modbus application/serial/TCP models and the offensive protocol workflow share the canonical `src/network-services-pentesting/pentesting-modbus.md`; the two old TODO routes redirect respectively to the OT overview and this Modbus chapter. Keep process-level safety context distinct from protocol-specific commands. The Cloud book has no corresponding substantive Modbus/OT chapter in this clone.
+- Android device acquisition, locked-device options, physical/ADB imaging, and LiME memory capture are at `src/generic-methodologies-and-resources/basic-forensic-methodology/android-forensics.md`, not TODO or Android app pentesting. The app chapter links to it when evidence acquisition is the task; malware post-exploitation is a different forensic task and stays separate.
+
 ## Researcher lookup terms
 
 - For a remote Windows host where service-creation rights, SMB/RPC, or an already staged executable are available, look under **Lateral Movement → Remote Service Execution**; search terms include SCM, SCMR, SCMExec, PsExec, SMBExec, WinExec, ScExec, `sc.exe`, and SharpMove.
@@ -25,6 +28,8 @@
 - For POSIX CPU-timer races, search **Binary Exploitation → Linux kernel exploitation** for CVE-2025-38352, `CONFIG_POSIX_CPU_TIMERS_TASK_WORK`, IRQ expiry, `timer_delete`, ptrace/waitpid, UAF, and Chronomaly. Linux host operators should enter through **Linux Hardening → Kernel/LPE/CVE material**.
 
 - For a board with exposed pads, a debug header, serial console, memory chip, measurable leakage, or glitchable signals, enter **Hardware/Physical Access → Hardware Hacking**. Search JTAG/SWD, UART, I²C, SPI, Bus Pirate, flashrom, side-channel analysis, fault injection, and SigDigger.
+
+- For OT assets, search **Industrial Control Systems / OT** for process constraints and **Network Services → Modbus, OPC UA, BACnet** for protocol-specific assessment. For a locked Android device or acquired image, search **Basic Forensic Methodology → Android Forensics**; use **Mobile Pentesting → Android Applications** for app testing, not acquisition.
 
 ## Revisit only with evidence
 

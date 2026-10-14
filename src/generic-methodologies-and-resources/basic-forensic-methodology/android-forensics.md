@@ -1,6 +1,6 @@
 # Android Forensics
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Locked Device
 
@@ -13,7 +13,7 @@ Prefer acquisition methods that preserve the device's state and document every a
 
 ## Data acquisition
 
-On older devices, a legacy [ADB backup](../mobile-pentesting/android-app-pentesting/adb-commands.md#backup) may produce a `.backup` file that Android Backup Extractor can unpack:<sup>[[6]](#references)</sup>
+On older devices, a legacy [ADB backup](../../mobile-pentesting/android-app-pentesting/adb-commands.md#legacy-adb-backup) may produce a `.backup` file that Android Backup Extractor can unpack:<sup>[[6]](#references)</sup>
 
 ```bash
 java -jar abe.jar unpack file.backup file.tar
@@ -72,4 +72,4 @@ LiME can instead write to device storage with `path=/sdcard/ram.lime`, but that 
 - [5] [504ensicsLabs - Linux Memory Extractor (LiME)](https://github.com/504ensicsLabs/LiME)
 - [6] [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/)
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

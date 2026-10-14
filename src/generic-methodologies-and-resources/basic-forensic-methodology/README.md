@@ -49,6 +49,8 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
+For a locked Android device, acquisition paths, and memory imaging, see [Android forensics](android-forensics.md).
+
 ## Deep inspection of specific file-types and Software
 
 If you have very **suspicious** **file**, then **depending on the file-type and software** that created it several **tricks** may be useful.\
