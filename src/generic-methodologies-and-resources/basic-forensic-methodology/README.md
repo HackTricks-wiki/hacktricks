@@ -11,23 +11,23 @@
 
 ## Malware Analizi
 
-**İmajı aldıktan** sonra gerçekleştirilecek ilk adımın bu olması **gerekmez**. Ancak bir dosyanız, dosya sistemi imajınız, bellek imajınız, pcap'iniz varsa bu malware analizi tekniklerini bağımsız olarak kullanabilirsiniz. Bu nedenle **bu işlemleri aklınızda bulundurmanız** faydalıdır:
+**İmajı aldıktan sonra yapılacak ilk adımın bu olması şart değil.** Ancak elinizde bir dosya, dosya sistemi imajı, bellek imajı, pcap... varsa bu malware analiz tekniklerini bağımsız olarak kullanabilirsiniz; bu nedenle **bu işlemleri aklınızda bulundurmanız faydalı olacaktır**:
 
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## İmaj İnceleme
+## İmajı İnceleme
 
-Bir cihazın **adli imajı** size verildiyse, **bölümleri ve kullanılan dosya sistemini analiz etmeye** ve potansiyel olarak **ilginç dosyaları** (silinmiş olanlar dahil) **kurtarmaya** başlayabilirsiniz. Nasıl yapılacağını burada öğrenin:
+Bir cihazın **adli bilişim imajı** size verildiyse, kullanılan **bölümleri ve dosya sistemini analiz etmeye** ve potansiyel olarak **ilginç dosyaları** (silinenler dahil) **kurtarmaya** başlayabilirsiniz. Nasıl yapılacağını öğrenmek için:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Kullanılan işletim sistemlerine ve hatta platforma bağlı olarak farklı ilginç artifact'ler aranmalıdır:
+Kullanılan işletim sistemlerine ve hatta platforma bağlı olarak, aranması gereken farklı ilginç artefaktlar olabilir:
 
 
 {{#ref}}
@@ -49,9 +49,11 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
-## Belirli Dosya Türleri ve Yazılımların Derinlemesine İncelenmesi
+Kilitli bir Android cihaz, edinim yolları ve bellek imajı alma hakkında bilgi için [Android adli bilişimi](android-forensics.md) sayfasına bakın.
 
-Elinizde çok **şüpheli** bir **dosya** varsa, onu oluşturan **dosya türüne ve yazılıma bağlı olarak** çeşitli **hileler** faydalı olabilir.\
+## Belirli Dosya Türlerinin ve Yazılımların Derinlemesine İncelenmesi
+
+Elinizde çok **şüpheli** bir **dosya** varsa, dosya türüne ve dosyayı oluşturan yazılıma bağlı olarak çeşitli **hileler** faydalı olabilir.\
 Bazı ilginç hileleri öğrenmek için aşağıdaki sayfayı okuyun:
 
 
@@ -59,37 +61,37 @@ Bazı ilginç hileleri öğrenmek için aşağıdaki sayfayı okuyun:
 specific-software-file-type-tricks/
 {{#endref}}
 
-Şu sayfaya özellikle değinmek istiyorum:
+Şu sayfayı özellikle belirtmek istiyorum:
 
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Bellek Dökümü İncelemesi
+## Bellek Dökümünü İnceleme
 
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Pcap İncelemesi
+## Pcap İnceleme
 
 
 {{#ref}}
 pcap-inspection/
 {{#endref}}
 
-## **Anti-Forensic Teknikler**
+## **Adli Bilişimden Kaçınma Teknikleri**
 
-Anti-forensic tekniklerin olası kullanımını aklınızda bulundurun:
+Adli bilişimden kaçınma tekniklerinin olası kullanımını göz önünde bulundurun:
 
 
 {{#ref}}
 anti-forensic-techniques.md
 {{#endref}}
 
-## Threat Hunting
+## Tehdit Avcılığı
 
 
 {{#ref}}
