@@ -300,6 +300,8 @@ SSPI selects an appropriate authentication protocol for two communicating machin
 
 #### The negotiation could offer several methods or only one.
 
+<a id="uac"></a>
+
 ## UAC - User Account Control
 
 [User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) is a feature that enables a **consent prompt for elevated activities**.
