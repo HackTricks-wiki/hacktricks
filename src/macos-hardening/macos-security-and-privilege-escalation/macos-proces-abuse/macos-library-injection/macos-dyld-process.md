@@ -4,72 +4,79 @@
 
 ## Основна інформація
 
-Справжньою **точкою входу** Mach-o binary є dynamic linker, визначений у `LC_LOAD_DYLINKER`; зазвичай це `/usr/lib/dyld`.<sup>[[3]](#references)</sup>
+Справжня **точка входу** бінарного файлу Mach-O — це динамічний компонувальник, визначений у `LC_LOAD_DYLINKER`; зазвичай це `/usr/lib/dyld`.<sup>[[3]](#references)</sup>
 
-Цей linker має знайти всі libraries executable-файлу, відобразити їх у пам'ять і зв'язати всі non-lazy libraries. Лише після цього процесу буде виконано entry-point binary.
+Цей компонувальник має знайти всі бібліотеки виконуваного файлу, відобразити їх у пам’яті та зв’язати всі нет ліниві бібліотеки. Лише після цього процесу буде виконано точку входу бінарного файлу.
 
-Звісно, **`dyld`** не має залежностей (він використовує syscalls і фрагменти libSystem).
+Звісно, **`dyld`** не має залежностей (він використовує системні виклики та фрагменти libSystem).
 
 > [!CAUTION]
-> Якщо цей linker містить вразливість, оскільки він виконується до запуску будь-якого binary (навіть із високими привілеями), це може дозволити **підвищити привілеї**.
+> Якщо в цьому компонувальнику є вразливість, оскільки він виконується до запуску будь-якого бінарного файлу (навіть із високими привілеями), можна буде **підвищити привілеї**.
 
-### Процес виконання
+### Послідовність роботи
 
-Dyld буде завантажено через **`dyldboostrap::start`**, який також завантажить такі елементи, як **stack canary**. Це відбувається тому, що ця функція отримує у своєму векторі аргументів **`apple`** це та інші **чутливі** **значення**.<sup>[[1]](#references)</sup>
+Dyld завантажується через **`dyldboostrap::start`**, яка також завантажує такі речі, як **stack canary**. Це відбувається тому, що ця функція отримує у своєму векторі аргументів **`apple`** це та інші **чутливі** **значення**.<sup>[[1]](#references)</sup>
 
-**`dyls::_main()`** є entry point dyld, і його першим завданням є запуск `configureProcessRestrictions()`, яка зазвичай обмежує змінні середовища **`DYLD_*`**, описані в:<sup>[[2]](#references)</sup>
+**`dyls::_main()`** — це точка входу dyld; перше, що вона робить, — запускає `configureProcessRestrictions()`, яка зазвичай обмежує змінні середовища **`DYLD_*`**, описані тут:<sup>[[2]](#references)</sup>
 
 
 {{#ref}}
 ./
 {{#endref}}
 
-Потім він відображає shared cache dyld, який попередньо зв'язує всі важливі системні libraries, після чого відображає libraries, від яких залежить binary, і продовжує рекурсивно, доки не буде завантажено всі необхідні libraries. Отже:
+Потім вона відображає спільний кеш dyld, який попередньо компонуватиме всі важливі системні бібліотеки, після чого відображає бібліотеки, від яких залежить бінарний файл, і рекурсивно продовжує це робити, доки не завантажить усі необхідні бібліотеки. Отже:
 
-1. він починає завантажувати inserted libraries через `DYLD_INSERT_LIBRARIES` (якщо дозволено)
-2. Потім libraries зі shared cache
-3. Потім imported libraries
-1. Потім продовжує рекурсивно імпортувати libraries
+1. спочатку завантажуються вставлені бібліотеки за допомогою `DYLD_INSERT_LIBRARIES` (якщо це дозволено)
+2. Потім бібліотеки зі спільного кешу
+3. Потім імпортовані бібліотеки
+   1. Далі рекурсивно імпортуються бібліотеки
 
-Після завантаження всіх libraries запускаються їхні **initialisers**. Вони кодуються за допомогою **`__attribute__((constructor))`**, визначеного в `LC_ROUTINES[_64]` (тепер deprecated), або через pointer у section, позначеній `S_MOD_INIT_FUNC_POINTERS` (зазвичай: **`__DATA.__MOD_INIT_FUNC`**).
+Коли всі бібліотеки завантажено, запускаються їхні **ініціалізатори**. Вони оголошуються за допомогою **`__attribute__((constructor))`** у `LC_ROUTINES[_64]` (зараз застарілий спосіб) або вказівником у секції з прапорцем `S_MOD_INIT_FUNC_POINTERS` (зазвичай: **`__DATA.__MOD_INIT_FUNC`**).
 
-Terminators кодуються за допомогою **`__attribute__((destructor))`** і розташовані в section, позначеній `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**).
+Деструктори оголошуються за допомогою **`__attribute__((destructor))`** і розташовані в секції з прапорцем `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**).
 
-### Stubs
+Див. також: [Reflective Mach-O Loading](../reflective-mach-o-loading.md).
 
-Усі binaries у macOS динамічно зв'язані. Тому вони містять sections зі stubs, які допомагають binary переходити до правильного коду на різних машинах і в різних контекстах. Саме dyld під час виконання binary відповідає за розв'язання цих адрес (принаймні non-lazy).
+### Заглушки
 
-Деякі stub sections у binary:
+Усі бінарні файли в macOS мають динамічне компонування. Тому вони містять секції із заглушками, які допомагають бінарному файлу переходити до правильного коду на різних машинах і в різних контекстах. Під час запуску бінарного файлу dyld має визначити ці адреси (принаймні для не лінивих символів).
 
-- **`__TEXT.__[auth_]stubs`**: Pointers із sections `__DATA`
-- **`__TEXT.__stub_helper`**: Невеликий код, який викликає dynamic linking з інформацією про функцію, яку потрібно викликати
-- **`__DATA.__[auth_]got`**: Global Offset Table (адреси imported functions, після розв'язання bound під час завантаження, оскільки позначені прапорцем `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__nl_symbol_ptr`**: Non-lazy symbol pointers (bound під час завантаження, оскільки позначені прапорцем `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__la_symbol_ptr`**: Lazy symbols pointers (bound під час першого доступу)
+Деякі секції із заглушками в бінарному файлі:
+
+- **`__TEXT.__[auth_]stubs`**: вказівники із секцій `__DATA`
+- **`__TEXT.__stub_helper`**: невеликий фрагмент коду, що викликає динамічне компонування та містить інформацію про функцію, яку потрібно викликати
+- **`__DATA.__[auth_]got`**: Global Offset Table (адреси імпортованих функцій, які визначаються під час завантаження, оскільки секція позначена прапорцем `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__nl_symbol_ptr`**: вказівники на не ліниві символи (визначаються під час завантаження, оскільки секція позначена прапорцем `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__la_symbol_ptr`**: вказівники на ліниві символи (визначаються під час першого звернення)
 
 > [!WARNING]
-> Зверніть увагу, що pointers із префіксом "auth\_" використовують один in-process encryption key для їх захисту (PAC). Крім того, можна використовувати інструкцію arm64 `BLRA[A/B]`, щоб перевірити pointer перед переходом за ним. А `RETA\[A/B]` можна використовувати замість RET address.\
-> Фактично код у **`__TEXT.__auth_stubs`** використовує **`braa`** замість **`bl`**, щоб викликати потрібну функцію та автентифікувати pointer.
+> Зверніть увагу, що для вказівників із префіксом «auth_» використовується один внутрішньопроцесний ключ шифрування для їх захисту (PAC). Крім того, можна скористатися інструкцією arm64 `BLRA[A/B]`, щоб перевірити вказівник перед переходом за ним. Також замість адреси RET можна використовувати RETA\[A/B].\
+> Фактично код у **`__TEXT.__auth_stubs`** використовує **`braa`** замість **`bl`**, щоб викликати запитану функцію та автентифікувати вказівник.
 >
-> Також зверніть увагу, що поточні версії dyld завантажують **усе як non-lazy**.
+> Також зверніть увагу, що поточні версії dyld завантажують **усе як не ліниве**.
 
-### Пошук lazy symbols
+### Пошук лінивих символів
+
 ```c
 //gcc load.c -o load
 #include <stdio.h>
 int main (int argc, char **argv, char **envp, char **apple)
 {
-printf("Hi\n");
+    printf("Hi\n");
 }
 ```
-Цікава частина дизасемблювання:
+
+Цікавий фрагмент дизасемблювання:
+
 ```armasm
 ; objdump -d ./load
 100003f7c: 90000000    	adrp	x0, 0x100003000 <_main+0x1c>
 100003f80: 913e9000    	add	x0, x0, #4004
 100003f84: 94000005    	bl	0x100003f98 <_printf+0x100003f98>
 ```
-Можна побачити, що перехід для виклику printf спрямовується до **`__TEXT.__stubs`**:
+
+Можна побачити, що перехід до виклику printf веде до **`__TEXT.__stubs`**:
+
 ```bash
 objdump --section-headers ./load
 
@@ -77,13 +84,15 @@ objdump --section-headers ./load
 
 Sections:
 Idx Name          Size     VMA              Type
-0 __text        00000038 0000000100003f60 TEXT
-1 __stubs       0000000c 0000000100003f98 TEXT
-2 __cstring     00000004 0000000100003fa4 DATA
-3 __unwind_info 00000058 0000000100003fa8 DATA
-4 __got         00000008 0000000100004000 DATA
+  0 __text        00000038 0000000100003f60 TEXT
+  1 __stubs       0000000c 0000000100003f98 TEXT
+  2 __cstring     00000004 0000000100003fa4 DATA
+  3 __unwind_info 00000058 0000000100003fa8 DATA
+  4 __got         00000008 0000000100004000 DATA
 ```
-У дизасемблюванні секції **`__stubs`**:
+
+Під час дизасемблювання секції **`__stubs`**:
+
 ```bash
 objdump -d --section=__stubs ./load
 
@@ -96,31 +105,35 @@ Disassembly of section __TEXT,__stubs:
 100003f9c: f9400210    	ldr	x16, [x16]
 100003fa0: d61f0200    	br	x16
 ```
-ви можете бачити, що ми **переходимо за адресою GOT**, яка в цьому випадку визначається non-lazy і міститиме адресу функції printf.
 
-В інших ситуаціях замість безпосереднього переходу до GOT може виконуватися перехід до **`__DATA.__la_symbol_ptr`**, що завантажить значення, яке представляє функцію, яку система намагається завантажити, а потім перейде до **`__TEXT.__stub_helper`**, який переходить до **`__DATA.__nl_symbol_ptr`**, що містить адресу **`dyld_stub_binder`**. Ця функція отримує як параметри номер функції та адресу.\
-Ця остання функція, знайшовши адресу шуканої функції, записує її у відповідне місце в **`__TEXT.__stub_helper`**, щоб у майбутньому не виконувати пошук повторно.
+you can see that we are **переходимо за адресою GOT**, яка в цьому випадку розв’язується non-lazy і міститиме адресу функції printf.
+
+В інших випадках замість прямого переходу до GOT можливий перехід до **`__DATA.__la_symbol_ptr`**, який завантажить значення, що представляє функцію, яку потрібно завантажити, а потім перехід до **`__TEXT.__stub_helper`**, звідки відбувається перехід до **`__DATA.__nl_symbol_ptr`**, що містить адресу **`dyld_stub_binder`**. Ця функція отримує як параметри номер функції та адресу.\
+Ця остання функція, знайшовши адресу шуканої функції, записує її у відповідне місце в **`__TEXT.__stub_helper`**, щоб уникнути пошуку в майбутньому.
 
 > [!TIP]
-> Однак зверніть увагу, що поточні версії dyld завантажують усе як non-lazy.
+> Однак зауважте, що поточні версії dyld завантажують усе як non-lazy.
 
-#### Dyld opcodes
+#### Опкоди Dyld
 
-Нарешті, **`dyld_stub_binder`** має знайти вказану функцію та записати її за належною адресою, щоб більше не шукати її повторно. Для цього вона використовує opcodes (скінченний автомат) усередині dyld.
+Зрештою, **`dyld_stub_binder`** має знайти вказану функцію та записати її за відповідною адресою, щоб більше не шукати її. Для цього вона використовує опкоди (скінченний автомат) у dyld.
 
-## apple\[] argument vector
+## Вектор аргументів apple\[]
 
 У macOS головна функція фактично отримує 4 аргументи замість 3. Четвертий називається apple, і кожен його елемент має формат `key=value`. Наприклад:
+
 ```c
 // gcc apple.c -o apple
 #include <stdio.h>
 int main (int argc, char **argv, char **envp, char **apple)
 {
-for (int i=0; apple[i]; i++)
-printf("%d: %s\n", i, apple[i])
+    for (int i=0; apple[i]; i++)
+        printf("%d: %s\n", i, apple[i])
 }
 ```
+
 Результат:
+
 ```
 0: executable_path=./a
 1:
@@ -135,10 +148,11 @@ printf("%d: %s\n", i, apple[i])
 10: arm64e_abi=os
 11: th_port=
 ```
-> [!TIP]
-> До моменту, коли ці значення досягають main function, конфіденційну інформацію з них уже видалено, інакше це був би data leak.
 
-можна побачити всі ці цікаві значення під час debugging перед входом у main за допомогою:
+> [!TIP]
+> На момент досягнення main function ці значення вже очищені від конфіденційної інформації, інакше це був би data leak.
+
+Можна побачити всі ці цікаві значення під час налагодження, перш ніж перейти до main:
 
 <pre><code>lldb ./apple
 
@@ -149,7 +163,7 @@ printf("%d: %s\n", i, apple[i])
 
 <strong>(lldb) mem read $sp
 </strong>0x16fdff510: 00 00 00 00 01 00 00 00 01 00 00 00 00 00 00 00  ................
-0x16fdff520: d8 f6 df 6f 01 00 00 00 00 00 00 00 00 00 00  ...o............
+0x16fdff520: d8 f6 df 6f 01 00 00 00 00 00 00 00 00 00 00 00  ...o............
 
 <strong>(lldb) x/55s 0x016fdff6d8
 </strong>[...]
@@ -181,17 +195,18 @@ printf("%d: %s\n", i, apple[i])
 
 ## dyld_all_image_infos
 
-Це структура, експортована dyld, з інформацією про стан dyld, яку можна знайти у [**source code**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html). Вона містить такі дані, як версія, вказівник на масив dyld_image_info, вказівник на dyld_image_notifier, інформацію про те, чи від’єднаний proc від shared cache, чи був викликаний initializer libSystem, вказівник на власний Mach header dyld, вказівник на рядок версії dyld тощо...<sup>[[4]](#references)</sup>
+Це структура, яку експортує dyld і яка містить інформацію про його стан. Її можна знайти у [**вихідному коді**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html). Вона містить, зокрема, версію, вказівник на масив dyld_image_info, на dyld_image_notifier, інформацію про те, чи від’єднаний proc від shared cache, чи викликано ініціалізатор libSystem, вказівник на власний Mach header dyld, вказівник на рядок версії dyld...<sup>[[4]](#references)</sup>
 
-## dyld env variables
+## Змінні середовища dyld
 
-### debug dyld
+### налагодження dyld
 
-Цікаві env variables, які допомагають зрозуміти, що робить dyld:
+Цікаві змінні середовища, які допомагають зрозуміти, що робить dyld:
 
 - **DYLD_PRINT_LIBRARIES**
 
-Перевіряє кожну завантажену library:
+Перевірити кожну завантажену бібліотеку:
+
 ```
 DYLD_PRINT_LIBRARIES=1 ./apple
 dyld[19948]: <9F848759-9AB8-3BD2-96A1-C069DC1FFD43> /private/tmp/a
@@ -207,9 +222,11 @@ dyld[19948]: <F7CE9486-FFF5-3CB8-B26F-75811EF4283A> /usr/lib/system/libkeymgr.dy
 dyld[19948]: <1A7038EC-EE49-35AE-8A3C-C311083795FB> /usr/lib/system/libmacho.dylib
 [...]
 ```
+
 - **DYLD_PRINT_SEGMENTS**
 
 Перевірте, як завантажується кожна бібліотека:
+
 ```
 DYLD_PRINT_SEGMENTS=1 ./apple
 dyld[21147]: re-using existing shared cache (/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e):
@@ -244,54 +261,61 @@ dyld[21147]:   __AUTH_CONST (rw.) 0x0001DDE014D0->0x0001DDE015A8
 dyld[21147]:     __LINKEDIT (r..) 0x000239574000->0x000270BE4000
 [...]
 ```
+
 - **DYLD_PRINT_INITIALIZERS**
 
-Виводить повідомлення під час запуску кожного ініціалізатора бібліотеки:
+Виводить повідомлення, коли запускається ініціалізатор кожної бібліотеки:
+
 ```
 DYLD_PRINT_INITIALIZERS=1 ./apple
 dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 [...]
 ```
-### Інші
 
-- `DYLD_BIND_AT_LAUNCH`: Lazy bindings вирішуються разом із non-lazy bindings
-- `DYLD_DISABLE_PREFETCH`: Вимкнути попереднє отримання вмісту \_\_DATA і \_\_LINKEDIT
-- `DYLD_FORCE_FLAT_NAMESPACE`: Однорівневі bindings
-- `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Шляхи resolution
-- `DYLD_INSERT_LIBRARIES`: Завантажити конкретну library
-- `DYLD_PRINT_TO_FILE`: Записувати debug-інформацію dyld у файл
+### Інше
+
+- `DYLD_BIND_AT_LAUNCH`: Lazy bindings розв’язуються разом із non-lazy bindings
+- `DYLD_DISABLE_PREFETCH`: Вимкнути попереднє завантаження вмісту \_\_DATA і \_\_LINKEDIT
+- `DYLD_FORCE_FLAT_NAMESPACE`: Прив’язки з однорівневим простором імен
+- `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Шляхи пошуку
+- `DYLD_INSERT_LIBRARIES`: Завантажити певну бібліотеку
+- `DYLD_PRINT_TO_FILE`: Записувати налагоджувальну інформацію dyld у файл
 - `DYLD_PRINT_APIS`: Виводити виклики API libdyld
-- `DYLD_PRINT_APIS_APP`: Виводити виклики API libdyld, виконані main
-- `DYLD_PRINT_BINDINGS`: Виводити symbols під час binding
-- `DYLD_WEAK_BINDINGS`: Виводити лише weak symbols під час binding
-- `DYLD_PRINT_CODE_SIGNATURES`: Виводити операції реєстрації code signature
-- `DYLD_PRINT_DOFS`: Виводити секції D-Trace object format під час завантаження
-- `DYLD_PRINT_ENV`: Виводити env, який бачить dyld
-- `DYLD_PRINT_INTERPOSTING`: Виводити операції interposing
-- `DYLD_PRINT_LIBRARIES`: Виводити завантажені libraries
+- `DYLD_PRINT_APIS_APP`: Виводити виклики API libdyld, здійснені основним процесом
+- `DYLD_PRINT_BINDINGS`: Виводити символи під час прив’язування
+- `DYLD_WEAK_BINDINGS`: Виводити лише слабкі символи під час прив’язування
+- `DYLD_PRINT_CODE_SIGNATURES`: Виводити операції реєстрації підписів коду
+- `DYLD_PRINT_DOFS`: Виводити секції формату об’єктів D-Trace під час завантаження
+- `DYLD_PRINT_ENV`: Виводити змінні середовища, які бачить dyld
+- `DYLD_PRINT_INTERPOSTING`: Виводити операції interposting
+- `DYLD_PRINT_LIBRARIES`: Виводити завантажені бібліотеки
 - `DYLD_PRINT_OPTS`: Виводити параметри завантаження
-- `DYLD_REBASING`: Виводити операції rebasing symbols
-- `DYLD_RPATHS`: Виводити розгортання `@rpath`
-- `DYLD_PRINT_SEGMENTS`: Виводити mappings сегментів Mach-O
-- `DYLD_PRINT_STATISTICS`: Виводити статистику часу
-- `DYLD_PRINT_STATISTICS_DETAILS`: Виводити детальну статистику часу
+- `DYLD_REBASING`: Виводити операції переміщення символів
+- `DYLD_RPATHS`: Виводити підстановки @rpath
+- `DYLD_PRINT_SEGMENTS`: Виводити зіставлення сегментів Mach-O
+- `DYLD_PRINT_STATISTICS`: Виводити статистику часу виконання
+- `DYLD_PRINT_STATISTICS_DETAILS`: Виводити докладну статистику часу виконання
 - `DYLD_PRINT_WARNINGS`: Виводити попередження
-- `DYLD_SHARED_CACHE_DIR`: Шлях для використання shared library cache
-- `DYLD_SHARED_REGION`: `"use"`, `"private"`, `"avoid"`
+- `DYLD_SHARED_CACHE_DIR`: Шлях до кешу спільних бібліотек
+- `DYLD_SHARED_REGION`: «use», «private», «avoid»
 - `DYLD_USE_CLOSURES`: Увімкнути closures
 
-Більше параметрів можна знайти за допомогою чогось на кшталт:
+Більше таких параметрів можна знайти, наприклад, за допомогою:
+
 ```bash
 strings /usr/lib/dyld | grep "^DYLD_" | sort -u
 ```
-Або завантаживши проєкт dyld з [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) і виконавши всередині папки:
+
+Або завантаживши проєкт dyld з [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) і виконавши команду в цій папці:
+
 ```bash
 find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 ```
+
 ## References
 
 - [1] [dyld — `dyld/dyldMain.cpp` (шлях запуску процесу)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/dyldMain.cpp)
 - [2] [dyld — `dyld/DyldProcessConfig.cpp` (конфігурація процесу/безпеки)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/DyldProcessConfig.cpp)
-- [3] [XNU — `bsd/kern/kern_exec.c` (сторона ядра `execve`, завантаження dyld)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_exec.c)
+- [3] [XNU — `bsd/kern/kern_exec.c` (сторона ядра для `execve`, завантаження dyld)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_exec.c)
 - [4] [dyld — `include/mach-o/dyld_images.h` (структура `dyld_all_image_infos`)](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html)
 {{#include ../../../../banners/hacktricks-training.md}}
