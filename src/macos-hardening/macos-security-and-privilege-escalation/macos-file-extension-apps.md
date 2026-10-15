@@ -1,12 +1,12 @@
-# Vishikizo vya programu vya viendelezi vya faili na taratibu za URL katika macOS
+# Vidhibiti vya programu vya viendelezi vya faili na URL scheme kwenye macOS
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Hifadhidata ya LaunchServices
 
-Hii ni hifadhidata ya programu zote zilizosakinishwa katika macOS, ambayo inaweza kuulizwa ili kupata taarifa kuhusu kila programu iliyosakinishwa, kama vile **taratibu za URL**, **aina za hati**, **UTI**, na vishikizo chaguomsingi.
+Hii ni hifadhidata ya programu zote zilizosakinishwa kwenye macOS. Inaweza kuulizwa ili kupata maelezo kuhusu kila programu iliyosakinishwa, kama vile **URL schemes**, **aina za hati**, **UTIs**, na vidhibiti chaguomsingi.
 
-Inawezekana kutupa maudhui ya hifadhidata hii kwa:
+Inawezekana kutoa data kutoka kwenye hifadhidata hii kwa:
 
 ```
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump
@@ -14,22 +14,22 @@ Inawezekana kutupa maudhui ya hifadhidata hii kwa:
 
 Au kutumia zana [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-**`/usr/libexec/lsd`** ndiyo kiini cha database. Inatoa **huduma kadhaa za XPC** kama `.lsd.installation`, `.lsd.open`, `.lsd.openurl`, na nyinginezo. Lakini pia **inahitaji applications ziwe na entitlements fulani** ili ziweze kutumia utendaji wa XPC unaotolewa, kama `.launchservices.changedefaulthandler` au `.launchservices.changeurlschemehandler` ili kubadilisha apps chaguomsingi za aina za MIME au schemes za URL, na nyinginezo.
+**`/usr/libexec/lsd`** ndiyo kiini cha hifadhidata. Inatoa **huduma kadhaa za XPC** kama `.lsd.installation`, `.lsd.open`, `.lsd.openurl`, na nyinginezo. Lakini pia **inahitaji baadhi ya entitlements** ili programu ziweze kutumia utendakazi wa XPC unaotolewa, kama `.launchservices.changedefaulthandler` au `.launchservices.changeurlschemehandler` za kubadilisha programu chaguomsingi za aina za MIME au URL schemes, na nyinginezo.
 
-**`/System/Library/CoreServices/launchservicesd`** hutangaza huduma `com.apple.coreservices.launchservicesd`, ambayo inaweza kuulizwa ili kupata maelezo kuhusu applications zinazoendeshwa. Inaweza kuulizwa kwa kutumia zana ya mfumo **`/usr/bin/lsappinfo`** au [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
+**`/System/Library/CoreServices/launchservicesd`** hudai huduma ya `com.apple.coreservices.launchservicesd` na inaweza kuulizwa ili kupata taarifa kuhusu programu zinazoendeshwa. Inaweza kuulizwa kwa kutumia zana ya mfumo **`/usr/bin/lsappinfo`** au [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-Kwa mtazamo wa operator, kumbuka kwamba kwa kawaida kuna **mitazamo miwili yenye manufaa**:
+Kwa mtazamo wa operator, kumbuka kwamba kwa kawaida kuna **mitazamo miwili muhimu**:
 
-- **Database ya usajili** inayosimamiwa na LaunchServices / `lsd` (inayotumia faili za `.csstore`).
-- **Mipangilio chaguomsingi inayotumika kwa kila mtumiaji** iliyohifadhiwa kwenye `~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist`, ndani ya array ya `LSHandlers`.
+- **Hifadhidata ya usajili** inayosimamiwa na LaunchServices / `lsd` (na kuhifadhiwa katika faili za `.csstore`).
+- **Mipangilio chaguomsingi inayotumika kwa kila mtumiaji** iliyohifadhiwa katika `~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist` ndani ya safu ya `LSHandlers`.
 
-Tofauti hii ni muhimu: application inaweza kuwa **imesajiliwa** kuwa inaweza kushughulikia aina au scheme fulani, lakini **chaguomsingi la sasa** bado linaweza kuwa bundle ID nyingine.
+Tofauti hii ni muhimu: programu inaweza **kusajiliwa** kuwa inaweza kushughulikia aina au scheme fulani, lakini **chaguomsingi la sasa** bado linaweza kuwa bundle ID nyingine.
 
-Katika matoleo ya hivi karibuni ya macOS, ugunduzi wa usajili hauishii kwenye `/Applications`: apps zilizo kwenye folda nyingine zinazoonekana kwa Spotlight na zinazoweza kufikiwa, pamoja na volumes zilizowekwa au kushirikiwa, zinaweza kuingia kwenye registry. Kwa hiyo, wakati wa triage hifadhi maelezo ya `path` na volume kutoka `lsregister -dump`, na usidhani kuwa kusajili app nje ya mfumo kutadumu wakati bundle hiyo bado inaweza kugunduliwa.<sup>[[4]](#references)</sup>
+Katika matoleo ya hivi karibuni ya macOS, ugunduzi wa usajili hauishii kwenye `/Applications`: programu katika folda nyingine zinazoonekana kwenye Spotlight na zinazoweza kufikiwa, pamoja na volumes zilizowekwa au za pamoja, zinaweza kuongezwa kwenye registry. Kwa hivyo, wakati wa uchunguzi, hifadhi taarifa za `path` na volume kutoka `lsregister -dump`, na usidhani kuwa kuondoa usajili wa programu kutadumu wakati bundle bado inaweza kugunduliwa.<sup>[[4]](#references)</sup>
 
-## Vishughulikiaji vya apps vya File Extension na URL scheme
+## Vishughulikiaji vya programu vya viendelezi vya faili na URL scheme
 
-Mstari ufuatao unaweza kusaidia kupata applications zinazoweza kufungua faili kulingana na extension:
+Mstari ufuatao unaweza kusaidia kupata programu zinazoweza kufungua faili kulingana na kiendelezi:
 
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump | grep -E "path:|bindings:|name:"
@@ -78,7 +78,7 @@ grep -A3 CFBundleTypeExtensions Info.plist  | grep string
 				<string>svg</string>
 ```
 
-## Kuhesabu washughulikiaji wanaotumika
+## Kuorodhesha handlers zinazotumika
 
 Faili muhimu zaidi kwa **mipangilio chaguomsingi ya mtumiaji wa sasa** kwa kawaida ni:
 
@@ -86,7 +86,7 @@ Faili muhimu zaidi kwa **mipangilio chaguomsingi ya mtumiaji wa sasa** kwa kawai
 ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist
 ```
 
-Ili kudump **URL scheme** handlers kutoka kwayo:
+Ili kufanya dump ya **URL scheme** handlers kutoka humo:
 
 ```bash
 plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist |
@@ -94,7 +94,7 @@ plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServi
       {scheme: .LSHandlerURLScheme, handler: (.LSHandlerRoleAll // .LSHandlerRoleViewer // .LSHandlerRoleEditor)}'
 ```
 
-Ili kufanya dump ya handlers za **content-type / UTI**:
+Ili kutoa handlers za **content-type / UTI**:
 
 ```bash
 plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist |
@@ -108,7 +108,7 @@ Ili kubaini mti wa UTI wa faili ya sampuli:
 mdls -name kMDItemContentType -name kMDItemContentTypeTree ./sample.pdf
 ```
 
-Ikiwa unataka CLI iliyo rahisi kutumia zaidi kuuliza au kubadilisha mipangilio chaguomsingi:
+Ikiwa unataka CLI iliyo rahisi kutumia zaidi kuuliza kuhusu au kubadilisha mipangilio chaguomsingi:
 
 ```bash
 # Classic tool
@@ -126,15 +126,15 @@ dutix apps show Safari
 
 ### Ubatilishaji wa `Open With` kwa kila faili
 
-Uamuzi wa handler pia una safu **maalum kwa faili**. Kabla ya kutumia UTI ya faili na chaguomsingi la jumla la mtumiaji, LaunchServices hukagua sifa iliyopanuliwa ya `com.apple.LaunchServices.OpenWith`. Finder huiunda chaguo la **Always Open With** linapochaguliwa kwa faili moja; thamani yake ni binary property list yenye njia ya programu, kitambulishi cha bundle, na kichaguzi cha toleo.<sup>[[3]](#references)</sup>
+Utatuzi wa handler pia una safu **maalum kwa faili**. Kabla ya kutumia UTI ya faili na chaguo-msingi la jumla la mtumiaji, LaunchServices hukagua sifa iliyopanuliwa ya `com.apple.LaunchServices.OpenWith`. Finder huitengeneza unapochagua **Always Open With** kwa faili moja; thamani yake ni orodha ya sifa ya binary iliyo na njia ya programu, kitambulisho cha bundle na kiteuzi cha toleo.<sup>[[3]](#references)</sup>
 
-Ikague na uifafanue bila kutegemea kiendelezi cha jina la faili:
+Ikague na kuisimbua bila kuamini kiendelezi cha jina la faili:
 
 ```bash
 xattr -px com.apple.LaunchServices.OpenWith ./suspicious.doc | xxd -r -p | plutil -p -
 ```
 
-Hii ni muhimu wakati chambo kimoja kinafunguka kwa programu isiyotarajiwa, ingawa `duti`, `dutix`, au `LSHandlers` inaonyesha chaguomsingi ya jumla isiyo na madhara. Kwa maabara inayodhibitiwa, thamani halisi isiyo wazi inaweza kunakiliwa kutoka kwenye faili iliyosanidiwa kupitia Finder; kuifuta hurejesha utatuzi wa kawaida unaotegemea aina:
+Hii ni muhimu wakati chambo kimoja kinafungua programu isiyotarajiwa, ingawa `duti`, `dutix`, au `LSHandlers` zinaonyesha chaguo-msingi salama la jumla. Kwa maabara inayodhibitiwa, thamani halisi isiyoeleweka inaweza kunakiliwa kutoka kwenye faili iliyosanidiwa kupitia Finder; kuifuta hurejesha utatuzi wa kawaida kulingana na aina:
 
 ```bash
 # Clone an existing per-file association
@@ -145,54 +145,79 @@ xattr -wx com.apple.LaunchServices.OpenWith "$value" ./test.doc
 xattr -d com.apple.LaunchServices.OpenWith ./test.doc
 ```
 
-## Vifunguo vya Info.plist vinavyovutia
+## Vifunguo Muhimu vya Info.plist
 
-Wakati wa kufanya uchunguzi wa awali wa application bundle, vifunguo hivi ni muhimu zaidi:
+Unapochunguza kifurushi cha programu, vifunguo hivi ni muhimu zaidi:
 
-- **`CFBundleDocumentTypes`**: makundi ya nyaraka ambayo bundle inadai inaweza kufungua.
-- **`LSItemContentTypes`**: njia **ya kisasa/inayopendekezwa** ya kuunganisha aina za nyaraka na UTIs.
-- **`LSHandlerRank`**: mpangilio unaotumiwa na LaunchServices (`Owner`, `Default`, `Alternate`, `None`).
-- **`CFBundleURLTypes`** / **`CFBundleURLSchemes`**: mifumo maalum ya URI inayotekelezwa na app.
-- **`UTExportedTypeDeclarations`**: UTIs ambazo app **inamiliki**.
-- **`UTImportedTypeDeclarations`**: UTIs ambazo app haimiliki lakini inataka mfumo uzitambue.
+- **`CFBundleDocumentTypes`**: makundi ya hati ambayo kifurushi kinadai kinaweza kufungua.
+- **`LSItemContentTypes`**: njia **ya kisasa / inayopendelewa** ya kuunganisha aina za hati na UTIs.
+- **`LSHandlerRank`**: kiwango kinachotumiwa na LaunchServices (`Owner`, `Default`, `Alternate`, `None`).
+- **`CFBundleURLTypes`** / **`CFBundleURLSchemes`**: custom URI schemes zinazotekelezwa na programu.
+- **`UTExportedTypeDeclarations`**: UTIs ambazo programu **inamiliki**.
+- **`UTImportedTypeDeclarations`**: UTIs ambazo programu haimiliki lakini inataka mfumo uzitambue.
 
-Amri muhimu ya kufanya uchunguzi wa haraka ni:
+Amri muhimu ya uchunguzi wa haraka ni:
 
 ```bash
 plutil -p /Applications/Target.app/Contents/Info.plist | \
   rg 'CFBundleDocumentTypes|CFBundleURLTypes|LSItemContentTypes|LSHandlerRank|UTExportedTypeDeclarations|UTImportedTypeDeclarations'
 ```
 
-Maelezo ya offensive
+Jambo dogo lakini muhimu: ikiwa **`LSItemContentTypes`** ipo, key za zamani kama **`CFBundleTypeExtensions`**, **`CFBundleTypeMIMETypes`**, na **`CFBundleTypeOSTypes`** kimsingi ni data za uoanifu wa legacy. Katika utatuzi halisi wa handler, anza kwa kuangalia njia ya UTI.
 
-Programu hazihitaji kuendeshwa ili zivutie. Bundle ya `.app` iliyowekwa au kunakiliwa inaweza **kuchanganuliwa kiotomatiki na `lsd` mara tu inapoandikwa kwenye diski**, na aina za hati / URL schemes ilizotangaza zinaweza kusajiliwa bila mtumiaji kuwahi kuzindua bundle hiyo.
+## Maelezo ya upande wa mashambulizi
 
-Hii ni muhimu kwa **utafiti wa persistence / hijacking** na pia kwa **minyororo ya initial-access**:
+Programu hazihitaji kuendeshwa ili madai yake ya kuwa handler yawe ya kuvutia, lakini **kuandika `.app` bundle pekee hakuhakikishi usajili wa mara moja**. Finder inaweza kusajili programu inapoigundua, ikiwemo mtumiaji anapovinjari folda yake; usajili unaweza pia kutokea wakati wa kuwasha au kuingia, au kupitia mwito wa usajili ulio wazi. Angalia `lsregister -dump` kabla ya kujaribu dai hilo. Usajili pekee hauzindui programu wala kuifanya iwe default inayotumika.<sup>[[5]](#references)</sup> Kwa masharti ya awali ya persistence, angalia [URL Scheme & File-Type Handlers](../macos-auto-start-locations.md#url-scheme--file-type-handlers-launchservices).
 
-- Programu hasidi inaweza kudai **extension adimu** au **UTI maalum** na kusubiri mwathiriwa afungue faili ya chambo.
-- Programu hasidi inaweza kusajili **URL scheme maalum** inayoweza kufikiwa kutoka kwa browser, programu ya Electron, hati ya office, chat client, au programu nyingine saidizi.<sup>[[1]](#references)</sup>
-- Ili kutenganisha utatuzi wa kawaida wa default na kujaribu handler fulani, ita scheme kupitia LaunchServices kwa `open 'targetscheme://host/path?value=test'`, kisha elekeza kwa bundle maalum iliyosajiliwa kwa `open -b com.vendor.Target 'targetscheme://host/path?value=test'`. Hii ni muhimu kwa kukagua jinsi programu inayopokea inavyothibitisha na kufungua vipengele vya URL vinavyodhibitiwa na mshambuliaji.<sup>[[1]](#references)</sup>
-- Ukihariri app bundle baada ya kuijenga, unaweza kulazimisha LaunchServices ichanganue upya kwa:
+Hili linafaa kwa **utafiti wa persistence / hijacking** na kwa **minyororo ya initial-access**:
+
+- Programu hasidi inaweza kudai **extension isiyotumika sana** au **custom UTI**, kisha kusubiri mwathiriwa afungue faili ya chambo.
+- Programu hasidi inaweza kusajili **custom URL scheme** inayoweza kufikiwa kupitia browser, programu ya Electron, hati ya office, chat client au programu nyingine ya helper.<sup>[[1]](#references)</sup>
+- Ili kutenganisha utatuzi wa kawaida wa default na kujaribu handler fulani, tumia LaunchServices kuita scheme kwa `open 'targetscheme://host/path?value=test'`, kisha lenga bundle maalum iliyosajiliwa kwa `open -b com.vendor.Target 'targetscheme://host/path?value=test'`. Hii ni muhimu kwa kukagua jinsi programu inayopokea inavyothibitisha na decode vipengele vya URL vinavyodhibitiwa na mshambuliaji.<sup>[[1]](#references)</sup>
+- Ukihariri app bundle baada ya kuijenga, unaweza kulazimisha LaunchServices kuichanganua upya kwa:
 
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -f /tmp/Evil.app
 ```
 
-Unapojaribu bundles zinazotia shaka, zingatia hasa:
+Unapojaribu bundles zinazotiliwa shaka, zingatia hasa:
 
-- **`LSHandlerRank=Owner`** kwa aina zisizo za kawaida.
-- **Array za `CFBundleDocumentTypes`** pana zinazodai kushughulikia viendelezi vingi.
-- **Apps saidizi / wrapper** ambazo tabia yake pekee ya kuvutia hupatikana kupitia document au URI handler.
-- **Faili zinazofanana na njia za mkato** (`.webloc`, `.inetloc`, `.fileloc`) ambazo huishia kuelekezwa kupitia LaunchServices. Kwa hila za aina ya `.fileloc` na mambo yanayohusiana na Gatekeeper, angalia [ukurasa huu mwingine](macos-security-protections/macos-fs-tricks/README.md).<sup>[[2]](#references)</sup>
+- **`LSHandlerRank=Owner`** kwenye aina zisizo za kawaida.
+- Arrays pana za **`CFBundleDocumentTypes`** zinazodai kushughulikia viendelezi vingi.
+- Apps za helper / wrapper ambazo tabia yake pekee ya kuvutia hujitokeza kupitia handler ya document au URI.
+- Faili zinazofanana na njia za mkato (`.webloc`, `.inetloc`, `.fileloc`) ambazo hatimaye hutuma ombi kwa LaunchServices. Kwa mbinu za aina ya `.fileloc` na mambo yanayohusiana na Gatekeeper, angalia [ukurasa huu mwingine](macos-security-protections/macos-fs-tricks/README.md).<sup>[[2]](#references)</sup>
 
-Ikiwa lengo lako ni code-execution ya kimyakimya kwa kuvinjari tu folda au kuchagua faili, angalia pia ukurasa maalumu kuhusu [Quick Look generators](macos-proces-abuse/macos-quicklook-generators.md), kwa kuwa hiyo ni sehemu tofauti lakini inayohusiana kwa karibu ya kushughulikia faili.
+### URL parameters zinazopitishwa kwenye options za vipengele vya baadaye
+
+Uthibitisho wa kivinjari wa kufungua external protocol huruhusu tu handler kufunguliwa; hauaminishi URL parameters. Fuatilia URL parser ya app inayopokea hadi kwenye library yoyote, media engine, helper process au option ya kuandika faili. Tafuta prefix ya query key inayogeuza sehemu za URL kuwa majina ya options za vipengele vya baadaye. Jaribu vitenganishi vya kawaida na vilivyosimbwa kwa asilimia, ukitumia marker isiyo na madhara kwenye akaunti ya majaribio.<sup>[[6]](#references)</sup>
+
+Thibitisha **option ya mwisho inayokubaliwa na kipengele cha baadaye**, si uchanganuzi wa awali wa app pekee. Handler moja iliruhusu query keys zenye prefix kufikia amri za ingizo za mpv; hata hivyo, kuzuia option hiyo bado kuliacha njia ya kuandika faili. Jaribu aina ya options zinazoweza kufikiwa, si key moja tu inayojulikana kuwa hatari.<sup>[[7]](#references)</sup>
+
+### Handler ya `applescript://` iliyojengewa ndani
+
+Handler ya URL ya `applescript://com.apple.scripteditor` hukubali `action=new` na parameter ya `script` iliyosimbwa kwa URL. Kwa hiyo, kiungo cha kivinjari kinaweza kufungua Script Editor ikiwa na AppleScript inayodhibitiwa na mshambulizi tayari ndani ya editor, bila kuhitaji hatua ya kubandika kutoka Terminal. **Hii haisababishi utekelezaji wa moja kwa moja**: kivinjari kinaweza kuuliza kama kifungue Script Editor, na mtumiaji lazima aendeshe script.<sup>[[8]](#references)</sup>
+
+Matoleo ya hivi karibuni ya macOS yanaweza kuonyesha onyo la script-document, huku XProtect ikichanganua AppleScript wakati wa utekelezaji.<sup>[[8]](#references)[[9]](#references)</sup>
+
+Tumia jaribio lisilo na madhara la ndani ili kuangalia handler na maulizo kwenye toleo la macOS linalotathminiwa; linapaswa kujaza tu editor hadi **Run** ibofywe.<sup>[[8]](#references)</sup>
+
+```bash
+open 'applescript://com.apple.scripteditor?action=new&script=display%20dialog%20%22handler%20probe%22'
+```
+
+Ikiwa lengo lako ni kutekeleza code bila hatua ya mtumiaji, kwa kuvinjari tu folda au kuchagua faili, angalia pia ukurasa maalum wa [Quick Look generators](macos-proces-abuse/macos-quicklook-generators.md), kwa kuwa huo ni uso tofauti lakini unaohusiana kwa karibu wa kushughulikia faili.
 
 
 
 ## References
 
-- [1] [Objective-See - Udukuzi wa mbali wa Mac kupitia custom URL schemes](https://objective-see.org/blog/blog_0x38.html)
-- [2] [Jamf Threat Labs - Kupita Gate: Uchunguzi wa karibu wa dosari za Gatekeeper kwenye macOS](https://www.jamf.com/blog/gatekeeper-flaws-on-macos/)
-- [3] [The Eclectic Light Company - Jinsi macOS hufungua faili kwenye app sahihi](https://eclecticlight.co/2024/04/10/how-macos-opens-a-file-in-the-correct-app/)
-- [4] [The Eclectic Light Company - Kudhibiti LaunchServices katika macOS Sequoia](https://eclecticlight.co/2025/03/27/controlling-launchservices-in-macos-sequoia/)
+- [1] [Objective-See - Kutumia custom URL schemes kufanya remote exploitation ya Mac](https://objective-see.org/blog/blog_0x38.html)
+- [2] [Jamf Threat Labs - Kupita Gate: Uchunguzi wa karibu wa kasoro za Gatekeeper kwenye macOS](https://www.jamf.com/blog/gatekeeper-flaws-on-macos/)
+- [3] [The Eclectic Light Company - Jinsi macOS inavyofungua faili kwenye app sahihi](https://eclecticlight.co/2024/04/10/how-macos-opens-a-file-in-the-correct-app/)
+- [4] [The Eclectic Light Company - Kudhibiti LaunchServices kwenye macOS Sequoia](https://eclecticlight.co/2025/03/27/controlling-launchservices-in-macos-sequoia/)
+- [5] [Apple - Dhana za Launch Services](https://developer.apple.com/library/archive/documentation/Carbon/Conceptual/LaunchServicesConcepts/LSCConcepts/LSCConcepts.html)
+- [6] [stackpointer - Utafiti wa utekelezaji wa amri kupitia URL scheme ya IINA](https://binary.stackpointer.re/iina-142-url-scheme-command-execution)
+- [7] [IINA - Ushughulikiaji usio salama wa chaguo za mpv kwenye URL scheme yake](https://github.com/iina/iina/security/advisories/GHSA-w5xh-98j7-jp5q)
+- [8] [Jamf Threat Labs - Mbinu ya ClickFix hutumia Script Editor badala ya Terminal](https://www.jamf.com/blog/clickfix-macos-script-editor-atomic-stealer/)
+- [9] [Apple - Ulinzi wa Terminal na script](https://support.apple.com/en-ie/guide/security/sece3b202c4b/web)
 {{#include ../../banners/hacktricks-training.md}}
