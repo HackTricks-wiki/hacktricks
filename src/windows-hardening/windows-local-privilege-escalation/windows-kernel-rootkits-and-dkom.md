@@ -2,82 +2,101 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## スコープ
+## 範囲
 
-侵害後の implant は、署名済み kernel driver を service としてロードし、`IRP_MJ_DEVICE_CONTROL` を介して user-mode の control plane を公開できます。Driver signing は Windows がイメージを受け入れることを示すだけであり、IOCTL の認可、メモリ操作、callbacks、hooks が安全であることを保証するものではありません。ある rootkit の解析では、通常動作中に3つの handlers を使用していましたが、追加の post-exploitation primitives を数十個公開していました。そのため、reverse engineering では malware trace で観測された requests だけでなく、dispatcher 全体を対象にする必要があります。<sup>[[1]](#references)</sup>
+侵害後のimplantは、署名済みkernel driverをserviceとしてロードし、`IRP_MJ_DEVICE_CONTROL`を通じてuser-modeの制御プレーンを公開することがあります。Driver signingによって保証されるのは、Windowsがイメージを受け入れることだけです。IOCTLの認可、メモリ操作、callback、hookが安全になるわけではありません。解析したあるrootkitは通常動作中に3つのhandlerを使用していましたが、post-exploitation用の追加プリミティブを数十個公開していました。そのため、reverse engineeringではmalware traceで確認されたrequestだけでなく、dispatcher全体を調べる必要があります。<sup>[[1]](#references)</sup>
 
-## Signed-driver と IOCTL のトリアージ
+## 署名済みdriverとIOCTLのトリアージ
 
-`DriverEntry` から開始し、device objects と DOS symbolic links を記録し、`MajorFunction[IRP_MJ_DEVICE_CONTROL]` routine を特定して、handler に到達するすべての比較処理と table エントリをマッピングします。user mode が開く names と、driver が実際に作成する names を照合します。ある観測された chain では `\\.\msagent` を開いていましたが、その driver は `\Device\ToolTool` と `\DosDevices\ToolTool` を作成していました。この不一致から、別の sample/configuration、欠落した setup logic、または解析上の不整合を特定できる場合があります。<sup>[[1]](#references)</sup>
+`DriverEntry`から調査を始め、device objectとDOS symbolic linkを記録し、`MajorFunction[IRP_MJ_DEVICE_CONTROL]`のroutineを特定して、handlerにつながる比較処理やtable entryをすべてマッピングします。user modeが開く名前と、driverが実際に作成する名前を照合してください。ある事例では、開かれたのは`\\.\msagent`でしたが、driverが作成したのは`\Device\ToolTool`と`\DosDevices\ToolTool`でした。この不一致は、別のsample/configuration、setup logicの欠落、または解析の不整合を示している可能性があります。<sup>[[1]](#references)</sup>
 
-各 control code の input structure を再構築する前に、その control code を decode します。<sup>[[1]](#references)</sup>
+input structureを再構築する前に、各control codeをデコードしてください。<sup>[[1]](#references)</sup>
+
 ```python
 def decode_ioctl(code):
-return {
-"device_type": code >> 16,
-"access": (code >> 14) & 3,
-"function": (code >> 2) & 0xfff,
-"method": code & 3,
-}
+    return {
+        "device_type": code >> 16,
+        "access": (code >> 14) & 3,
+        "function": (code >> 2) & 0xfff,
+        "method": code & 3,
+    }
 
 for code in (0x2220F0, 0x222120, 0x2221E0):
-print(hex(code), decode_ioctl(code))
+    print(hex(code), decode_ioctl(code))
 ```
-これら3つのコードは、それぞれ `FILE_DEVICE_UNKNOWN`、`FILE_ANY_ACCESS`、`METHOD_BUFFERED` としてデコードされます。これは、権限のない caller がそれらに到達できることを**証明するものではありません**。デバイス DACL、create/open dispatch、リクエストごとの caller チェック、想定されるバッファ長、埋め込みポインタ、PID のライフタイム処理、さらに handler が caller から提供された PID や flag を信頼しているかどうかも確認してください。<sup>[[1]](#references)</sup>
 
-implant が一部のコマンドだけを使用する場合、残りの handler を dead code として片付けるのではなく、primitive ごとに分類してください。ある単一の multifunction driver では、次のすべてのクラスが公開されていました。<sup>[[1]](#references)</sup>
+これら3つのコードは、それぞれ `FILE_DEVICE_UNKNOWN`、`FILE_ANY_ACCESS`、`METHOD_BUFFERED` としてデコードされます。ただし、これだけでは権限のない呼び出し元がアクセスできる証拠にはなりません。デバイスの DACL、create/open のディスパッチ、リクエストごとの呼び出し元チェック、想定されるバッファ長、埋め込みポインター、PID のライフタイム処理、ハンドラーが呼び出し元の指定した PID やフラグを信頼するかどうかも確認してください。<sup>[[1]](#references)</sup>
 
-- **Control/configuration:** rootkit の状態を切り替える、保護対象の path、process、C2 address を追加、削除、照会、またはクリアする。
-- **Process manipulation:** PID を終了する、image を unmap する、`NtCreateThreadEx` で inject する、process または user module を hide/restore する、PPL protection を削除する。
-- **Kernel manipulation:** loaded driver の link を解除する、notification callback を列挙、無効化、復元する、別の driver を手動で map する、任意の kernel address に write する。
-- **Object manipulation:** file を削除または decrypt し、registry value を作成または変更する。
+implant が一部のコマンドしか使用しない場合でも、残りのハンドラーを死んだコードとして片付けず、プリミティブごとに分類してください。単一の多機能ドライバーが、以下のすべてのクラスを公開した事例があります。<sup>[[1]](#references)</sup>
 
-## Trusted-process exemptions
+- **制御/設定:** rootkit の状態を切り替える。保護対象のパス、プロセス、C2 アドレスを追加、削除、照会、またはクリアする。
+- **プロセス操作:** PID を終了する、イメージをアンマップする、`NtCreateThreadEx` でインジェクトする、プロセスまたはユーザーモジュールを隠す/復元する、PPL 保護を解除する。
+- **カーネル操作:** ロード済みドライバーのリンクを解除する、通知コールバックを列挙/無効化/復元する、別のドライバーを手動マップする、任意のカーネルアドレスに書き込む。
+- **オブジェクト操作:** ファイルを削除/復号する、レジストリ値を作成または変更する。
 
-有用な設計パターンとして、PID と **trusted** flag を登録する IOCTL があります。同じ trust lookup が file、registry、process、thread filter から参照されます。untrusted tool には filter 済みの列挙結果、縮小された handle 権限、または `STATUS_ACCESS_DENIED` が返される一方、implant は自身の hidden object を更新できます。これを authorization boundary として扱い、entry がどのように認証、同期され、process の終了または PID の再利用後に削除されるかを確認してください。<sup>[[1]](#references)</sup>
+## 脆弱な署名済みドライバーを介した手動カーネルマッピング
 
-rootkit は `REG_MULTI_SZ` value に policy を永続化し、file、directory、registry-key、registry-value、ignored-image、protected-image、hidden-image の list を AVL tree にコンパイルできます。分析時には、これらの共有 tree のすべての reader と writer を追跡してください。これにより、function name が削除されていても、registry configuration、IOCTL、callback、filtering logic の関連性を把握できます。<sup>[[1]](#references)</sup>
+カーネルメモリの読み書き機能を備えた署名済みドライバーは、Windows に通常のドライバーとしてロードさせずに、未署名のドライバーイメージをロードするローダーとして利用できます。<sup>[[2]](#references)[[7]](#references)</sup> LocalStranger の例は既存の `\\.\WinNotify` デバイスを開きますが、そのソースからは、任意のホストで権限のないユーザーがドライバーをインストール、起動、またはオープンできるとは確認できません。<sup>[[2]](#references)[[3]](#references)</sup> mapper はイメージのパスを受け取り、ロード済みカーネルのベースアドレスを照会し、デバイスの仮想メモリ読み書き用 IOCTL を使用します。<sup>[[4]](#references)[[9]](#references)[[10]](#references)</sup>
 
-## DKOM process and module hiding
+この読み書きアクセスをカーネル呼び出しに利用するため、mapper は `MmGetVirtualForPhysical` 内の PTE ベース即値を読み取り、`NtAddAtom` を含むページングエントリーをたどります。<sup>[[5]](#references)[[7]](#references)</sup> PTE の計算式は `PteBase + ((VA >> 9) & 0x7FFFFFFFF8)` です。コードは large-page PDE も確認します。<sup>[[5]](#references)[[7]](#references)</sup> 対象エントリーを一時的に書き込み可能にし、syscall エントリーを目的のカーネル関数へのジャンプに置き換えてから、ユーザーモードの `NtAddAtom` stub を呼び出し、最後に元のバイト列とページエントリーを復元します。<sup>[[6]](#references)</sup>
+
+mapper はこの呼び出し経路を使って `ExAllocatePool` を呼び出し、PE セクション、インポート、再配置情報をイメージにマップして、割り当て領域に書き込み、エントリポイントを呼び出します。<sup>[[7]](#references)[[8]](#references)</sup> この実装が受け付けるのは x64 の再配置可能な PE イメージのみです。また、PTE ベースの読み取りは固定された `MmGetVirtualForPhysical + 34` のレイアウトを前提としています。<sup>[[5]](#references)[[8]](#references)</sup> これはビルドに依存する手法として扱い、独立した KASLR バイパスや、HVCI または PatchGuard がこのマッピングを許可する証拠とは見なさないでください。<sup>[[5]](#references)[[8]](#references)</sup> カーネル R/W をデータのみの用途に使う方法については、[SYSTEM token theft](arbitrary-kernel-rw-token-theft.md) を参照してください。
+
+## 信頼済みプロセスの例外
+
+有用な設計パターンは、PID と **trusted** フラグを登録する IOCTL です。同じ信頼性の照会が、ファイル、レジストリ、プロセス、スレッドの各フィルターで使われます。信頼されていないツールには、フィルター済みの列挙結果、制限されたハンドル権限、または `STATUS_ACCESS_DENIED` を返す一方で、implant は自身の隠しオブジェクトを更新できます。これを認可境界として扱い、エントリーの認証、同期、およびプロセス終了後や PID 再利用時の削除方法を確認してください。<sup>[[1]](#references)</sup>
+
+rootkit はポリシーを `REG_MULTI_SZ` 値に保存し、ファイル、ディレクトリ、レジストリキー、レジストリ値、無視対象イメージ、保護対象イメージ、隠しイメージのリストを AVL tree にコンパイルできます。分析時は、これらの共有ツリーを読み書きするすべての箇所を追跡してください。関数名が削除されていても、レジストリ設定、IOCTL、コールバック、フィルタリングロジックのつながりを特定できます。<sup>[[1]](#references)</sup>
+
+## DKOM によるプロセスとモジュールの隠蔽
 
 ### `EPROCESS.ActiveProcessLinks`
 
-`ActiveProcessLinks` の offset は Windows build ごとに異なります。version-tolerant な rootkit は既知の候補をテストし、その後 `EPROCESS` を scan して、neighbor が候補を指し返す自己整合的な `LIST_ENTRY` を探します。検出した offset を保持し、process を hide する際には neighbor の `Flink`/`Blink` を再接続し、後で entry を relink できるよう状態を保存します。process は実行を継続しますが、active-process list を走査する enumerator からは消えます。<sup>[[1]](#references)</sup>
+`ActiveProcessLinks` のオフセットは Windows のビルドによって異なります。バージョンに依存しない rootkit は、既知の候補をテストし、隣接エントリーが候補自身を指し返す、一貫性のある `LIST_ENTRY` を `EPROCESS` 内でスキャンできます。検出したオフセットを保持し、隣接エントリーの `Flink`/`Blink` をつなぎ直してプロセスを隠し、後でエントリーを再リンクできるよう状態を保存します。プロセスは実行を続けますが、アクティブプロセスリストをたどる列挙ツールからは見えなくなります。<sup>[[1]](#references)</sup>
 
-これは終了処理ではなく **DKOM** です。検出では、list ベースの結果を、pool/object scan、thread ownership、handle table、scheduler artifact、kernel memory inspection などの独立した証拠と比較してください。scan では表示される一方で canonical list には存在しない process は、どちらか一方の view だけよりも有意な結果です。<sup>[[1]](#references)</sup>
+これは **DKOM** であり、プロセスの終了ではありません。検出では、リストベースの結果を、pool/object スキャン、スレッドの所有関係、ハンドルテーブル、スケジューラーの痕跡、カーネルメモリの調査など、独立した証拠と比較してください。スキャンでは見つかる一方で正規リストには存在しないプロセスは、どちらか一方の結果だけを見るよりも重要な兆候です。<sup>[[1]](#references)</sup>
 
 ### `PsLoadedModuleList`
 
-同等の module-hiding primitive は、`PsLoadedModuleList` 内で対象 entry を探し、隣接する `Flink`/`Blink` pointer を patch します。driver は map されたまま実行可能ですが、list ベースの module query からは除外されます。loader list を、実行可能な kernel mapping、pool tag、device/driver object、service key、callback address、一覧に存在しない image 内を指す dispatch pointer と比較してください。<sup>[[1]](#references)</sup>
+同様のモジュール隠蔽プリミティブは、`PsLoadedModuleList` 内で対象エントリーを見つけ、隣接する `Flink`/`Blink` ポインターを書き換えます。ドライバーはマップされたまま実行可能ですが、リストに基づくモジュール照会では表示されません。ローダーリストを、実行可能なカーネルマッピング、pool tag、デバイス/ドライバーオブジェクト、サービスキー、コールバックアドレス、リストに含まれないイメージを指すディスパッチポインターと比較してください。<sup>[[1]](#references)</sup>
 
-## Callback-based protection and cloaking
+## コールバックベースの保護と隠蔽
 
-rootkit は、documented callback framework を DKOM や hook と組み合わせることができます。<sup>[[1]](#references)</sup>
+rootkit は、文書化されたコールバックフレームワークを DKOM やフックと組み合わせることができます。<sup>[[1]](#references)</sup>
 
-- `ObRegisterCallbacks` の pre-operation handler は、`PsProcessType` と `PsThreadType` に対して、untrusted caller が保護対象を open した際に、termination、VM access、duplication、thread manipulation に使用される権限を削除します。callback の altitude を記録し、各 callback address を所有 module に解決してください。
-- `PsSetCreateProcessNotifyRoutineEx` と `PsSetLoadImageNotifyRoutine` は、process と image の出現に応じて protected/ignored/hidden process state を維持します。registration 前から存在していた object については、1回限りの process walk で backfill できます。
-- filesystem minifilter は、設定された path への access を拒否します。通常とは異なる実装では、`Instances` key を作成し、動的に altitude を選択し、`FltRegisterFilter` が collision を報告した場合に increment/retry することがあります。
-- `CmRegisterCallbackEx` routine は、保護された name を enumeration から隠し、direct open、rename、set、delete operation を拒否できます。ただし、登録済みの trusted process は除外します。
+- `ObRegisterCallbacks` の pre-operation ハンドラーは、`PsProcessType` と `PsThreadType` に対して、信頼されていない呼び出し元が保護対象を開く際に、終了、VM アクセス、複製、スレッド操作に使われる権限を取り除きます。コールバックの altitude を記録し、各コールバックアドレスの所有モジュールを特定してください。
+- `PsSetCreateProcessNotifyRoutineEx` と `PsSetLoadImageNotifyRoutine` は、プロセスやイメージの出現に応じて、保護/無視/隠蔽の状態を管理します。登録前から存在していたオブジェクトは、一度だけのプロセス走査で補完できます。
+- ファイルシステムの minifilter は、設定されたパスへのアクセスを拒否します。通常と異なる実装では `Instances` キーを作成し、altitude を動的に選んで、`FltRegisterFilter` が競合を報告した場合に値を増やして再試行することがあります。
+- `CmRegisterCallbackEx` ルーチンは、保護対象の名前を列挙結果から隠し、直接のオープン、名前変更、設定、削除操作を拒否しながら、登録済みの信頼済みプロセスを例外扱いできます。
 
-`ObRegisterCallbacks` registration、registry-callback altitude、`fltmc filters` output、service `Instances` key、callback address を相関分析してください。通常の tool が filter されている場合は、offline memory image または別の trusted acquisition layer からこれらの構造体を調査してください。<sup>[[1]](#references)</sup>
+`ObRegisterCallbacks` の登録、レジストリコールバックの altitude、`fltmc filters` の出力、サービスの `Instances` キー、コールバックアドレスを相関させてください。通常のツールがフィルターされている場合は、オフラインのメモリイメージ、または別の信頼できる取得レイヤーからこれらの構造体を調査してください。<sup>[[1]](#references)</sup>
 
-## Nsiproxy result filtering
+## Nsiproxy の結果フィルタリング
 
-Network concealment は `\Driver\Nsiproxy` を対象にできます。`ObReferenceObjectByName` で driver object を取得し、handler pointer を保存して wrapper に置き換え、user mode に届く前に IOCTL で管理された C2 list と一致する返却済み IPv4 record を削除します。filter された NSI data を使用する application では、traffic が実際には存在していても connection が表示されなくなることがあります。<sup>[[1]](#references)</sup>
+ネットワークの隠蔽では、`\Driver\Nsiproxy` を対象にできます。`ObReferenceObjectByName` でドライバーオブジェクトを取得し、ハンドラーポインターを保存して、ラッパーに置き換えます。ユーザーモードに返す前に、IOCTL で管理される C2 リストに一致する IPv4 レコードを取り除きます。フィルターされた NSI データを使用するアプリケーションでは、通信が継続しているにもかかわらず、接続が表示されなくなることがあります。<sup>[[1]](#references)</sup>
 
-host の connection view を packet capture、WFP/ETW telemetry、kernel-memory network object と比較してください。また、`Nsiproxy` の dispatch/handler pointer を調査し、それぞれが想定される signed module 内に解決されることを確認してください。一覧に存在しない mapping 内を指す pointer は、network filtering と `PsLoadedModuleList` DKOM を関連付ける手掛かりになります。<sup>[[1]](#references)</sup>
+ホスト上の接続表示を、パケットキャプチャ、WFP/ETW テレメトリー、カーネルメモリ内のネットワークオブジェクトと比較してください。また、`Nsiproxy` のディスパッチ/ハンドラーポインターを調査し、それぞれが想定された署名済みモジュール内を指していることを確認してください。リストにないマッピングを指すポインターがあれば、ネットワークフィルタリングと `PsLoadedModuleList` の DKOM を結び付けられる可能性があります。<sup>[[1]](#references)</sup>
 
-## Investigation checklist
+## 調査チェックリスト
 
-最も強い signal は、1つの filename や hash ではなく、layer 間の不一致です。次の情報を相関させてください。<sup>[[1]](#references)</sup>
+最も強い兆候は、単一のファイル名やハッシュではなく、レイヤー間の不一致です。以下を相関させてください。<sup>[[1]](#references)</sup>
 
-1. Kernel-service creation と、certificate の年代、publisher、または path がインストール済み product と一致しない signed driver。
-2. Device creation、DOS link、IOCTL traffic。user-mode と kernel の device name が一致しないケースも含みます。
-3. PID registration request の後に、他の process から同じ object を open、enumerate、modify、または delete できないこと。
-4. Object/registry/process/image callback、minifilter instance、hook の address が、通常の enumeration で確認できる driver に属していないこと。
-5. list ベースと scan ベースによる process、module、callback、network inventory の差異。
+1. カーネルサービスの作成と、証明書の経過年数、発行元、またはパスがインストール済み製品と一致しない署名済みドライバー。
+2. デバイスの作成、DOS リンク、IOCTL トラフィック。ユーザーモードとカーネルのデバイス名の不一致も含みます。
+3. PID 登録リクエストの後、他のプロセスが同じオブジェクトを開く、列挙する、変更する、または削除しようとして失敗すること。
+4. オブジェクト/レジストリ/プロセス/イメージのコールバック、minifilter インスタンス、および通常の列挙で見つかるドライバーに属さないアドレスを持つフック。
+5. リストベースとスキャンベースによる、プロセス、モジュール、コールバック、ネットワークの各インベントリの差異。
 
 ## References
 
-- [1] [Kaspersky Securelist - 署名付き Windows Kernel Rootkit により CoolClient を強化する HoneyMyte](https://securelist.com/honeymyte-coolclient-driver-rootkit/121028)
+- [1] [Kaspersky Securelist - HoneyMyte、署名済み Windows カーネル rootkit で CoolClient を強化](https://securelist.com/honeymyte-coolclient-driver-rootkit/121028)
+- [2] [LocalStranger README](https://github.com/nbs32k/LocalStranger/blob/master/README.md)
+- [3] [LocalStranger ドライバーの初期化](https://github.com/nbs32k/LocalStranger/blob/master/lsapi/init.c)
+- [4] [LocalStranger mapper のコマンドライン](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/main.cpp)
+- [5] [LocalStranger のカーネルエクスポートと PTE ベースの解決](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/core/utils.cpp)
+- [6] [LocalStranger のカーネル呼び出しトランポリン](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/mapper/mapper.h)
+- [7] [LocalStranger mapper の割り当てとエントリ呼び出し](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/mapper/mapper.cpp)
+- [8] [LocalStranger の PE マッピング](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/mapper/pe.cpp)
+- [9] [LocalStranger のカーネルと syscall コンテキスト](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/core/context.cpp)
+- [10] [LocalStranger の仮想メモリ IOCTL ラッパー](https://github.com/nbs32k/LocalStranger/blob/master/lsapi/virtual.c)
 {{#include ../../banners/hacktricks-training.md}}
