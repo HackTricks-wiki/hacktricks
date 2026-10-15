@@ -34,6 +34,14 @@ When the implant uses only a subset of commands, group the remaining handlers by
 - **Kernel manipulation:** unlink a loaded driver, enumerate/disable/restore notification callbacks, manually map another driver, and write to an arbitrary kernel address.
 - **Object manipulation:** delete/decrypt files and create or modify registry values.
 
+## Manual kernel mapping through a vulnerable signed driver
+
+A signed driver with kernel-memory read/write operations can provide a loader for an unsigned driver image without asking Windows to load that image as a normal driver.<sup>[[2]](#references)[[7]](#references)</sup> The LocalStranger example opens an existing `\\.\WinNotify` device; its source does not show that an unprivileged user can install, start, or open the driver on an arbitrary host.<sup>[[2]](#references)[[3]](#references)</sup> The mapper takes an image path, queries the loaded kernel's base, and uses the device's virtual-memory read/write IOCTLs.<sup>[[4]](#references)[[9]](#references)[[10]](#references)</sup>
+
+To turn that read/write access into a kernel call, the mapper reads a PTE-base immediate from `MmGetVirtualForPhysical` and walks the paging entries covering `NtAddAtom`.<sup>[[5]](#references)[[7]](#references)</sup> Its PTE calculation is `PteBase + ((VA >> 9) & 0x7FFFFFFFF8)`; the code also checks for a large-page PDE.<sup>[[5]](#references)[[7]](#references)</sup> It temporarily makes the covering entry writable, replaces the syscall entry with a jump to the desired kernel function, invokes the user-mode `NtAddAtom` stub, then restores both the original bytes and page entry.<sup>[[6]](#references)</sup>
+
+The mapper uses that call path for `ExAllocatePool`, maps PE sections, imports and relocations into the image, writes it to the allocation, and calls its entry point.<sup>[[7]](#references)[[8]](#references)</sup> This implementation accepts only x64, relocatable PE images; its PTE-base read also assumes a fixed `MmGetVirtualForPhysical + 34` layout.<sup>[[5]](#references)[[8]](#references)</sup> Treat it as build-dependent, not an independent KASLR bypass or proof that HVCI or PatchGuard permits the mapping.<sup>[[5]](#references)[[8]](#references)</sup> For a data-only use of kernel R/W, see [SYSTEM token theft](arbitrary-kernel-rw-token-theft.md).
+
 ## Trusted-process exemptions
 
 A useful design pattern is an IOCTL that registers a PID plus a **trusted** flag. The same trust lookup is then consulted by file, registry, process, and thread filters: untrusted tools receive filtered enumeration results, reduced handle rights, or `STATUS_ACCESS_DENIED`, while the implant can still update its own hidden objects. Treat this as an authorization boundary and verify how entries are authenticated, synchronized, and removed after process exit or PID reuse.<sup>[[1]](#references)</sup>
@@ -82,5 +90,14 @@ The strongest signal is disagreement between layers, not one filename or hash. C
 ## References
 
 - [1] [Kaspersky Securelist - HoneyMyte Enhances CoolClient with a Signed Windows Kernel Rootkit](https://securelist.com/honeymyte-coolclient-driver-rootkit/121028)
+- [2] [LocalStranger README](https://github.com/nbs32k/LocalStranger/blob/master/README.md)
+- [3] [LocalStranger driver initialization](https://github.com/nbs32k/LocalStranger/blob/master/lsapi/init.c)
+- [4] [LocalStranger mapper command line](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/main.cpp)
+- [5] [LocalStranger kernel export and PTE-base resolution](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/core/utils.cpp)
+- [6] [LocalStranger kernel-call trampoline](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/mapper/mapper.h)
+- [7] [LocalStranger mapper allocation and entry call](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/mapper/mapper.cpp)
+- [8] [LocalStranger PE mapping](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/mapper/pe.cpp)
+- [9] [LocalStranger kernel and syscall context](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/core/context.cpp)
+- [10] [LocalStranger virtual-memory IOCTL wrappers](https://github.com/nbs32k/LocalStranger/blob/master/lsapi/virtual.c)
 
 {{#include ../../banners/hacktricks-training.md}}
