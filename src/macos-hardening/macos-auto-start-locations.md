@@ -1569,6 +1569,8 @@ Finally, **build and copy your new `.mdimporter`** to one of the three previous 
 > [!TIP]
 > Even though the importer sandbox is very restrictive, `mdworker` indexes files with **privileged read access**. A malicious `.mdimporter` can therefore read the *content* of files inside TCC-protected locations (Downloads, Pictures, Desktop, …) and exfiltrate harvested metadata without any TCC prompt — the **"Sploitlight" TCC bypass (CVE-2025-31199)**, patched in macOS Sequoia 15.4.<sup>[[55]](#references)</sup>
 
+For the distinct macOS 26 technique of carrying protected bytes in **Darwin notification names** rather than system logs, see [Spotlight importer leakage via Darwin notification names](macos-security-and-privilege-escalation/macos-security-protections/macos-tcc/macos-tcc-bypasses/#spotlight-importer-leakage-via-darwin-notification-names).<sup>[[57]](#references)</sup>
+
 ### ~~Preference Pane~~
 
 > [!CAUTION]
@@ -2703,5 +2705,6 @@ Read-only observation on macOS 26: `/Library/DirectoryServices/PlugIns` and `/us
 - [54] [CoreMediaIO DAL minimal example (johnboiles)](https://github.com/johnboiles/coremediaio-dal-minimal-example)
 - [55] [Sploitlight: Analyzing a Spotlight-based macOS TCC vulnerability (Microsoft)](https://www.microsoft.com/en-us/security/blog/2025/07/28/sploitlight-analyzing-a-spotlight-based-macos-tcc-vulnerability/)
 - [56] [Python `site` module documentation (.pth / usercustomize / sitecustomize)](https://docs.python.org/3/library/site.html)
+- [57] [From Spotlight to Apple Intelligence — Abusing an 0day to steal the data that fuels macOS AI](https://objective-see.org/blog/blog_0x81.html)
 
 {{#include ../banners/hacktricks-training.md}}
