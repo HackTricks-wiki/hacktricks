@@ -6,7 +6,7 @@
 - Prefer headings in an existing coherent chapter when variants share mechanism and reader task; keep separate chapters when transport, prerequisite, or task changes. Page size alone does not justify a split or merge.
 - Main HackTricks owns general security techniques; HackTricks Cloud owns provider/service/IAM-specific pivots. Use verified public URLs for cross-book links.
 - A removed Markdown chapter needs a whole-page mdBook redirect in `book.toml`. Update current local links; historical fragments are out of scope. Preserve unique content before deleting a source.
-- Recheck these paths and pending PR overlap before relying on this guide. This is a guide to the current target clone and draft organization, not a claim that this dry-run proposal has merged.
+- Recheck paths and pending PR overlap before relying on this guide; it describes this target clone, not merged status.
 
 ## Canonical locations and boundaries in the current target clone
 
@@ -22,8 +22,9 @@
 - Blockchain's existing chapters are under top-level Blockchain & Smart Contract Security with `blockchain-and-crypto-currencies/README.md` as entry point. Bitcoin P2P enumeration stays in Network Services, DApp frontend/backend testing in Web, operational cryptocurrency privacy in Privacy.
 - VM escape entry point `src/binary-exploitation/vm-escape-and-hypervisor-exploitation.md` maps guest network/display/storage/shared-folder surfaces to QEMU/KVM, VirtualBox, and VMware cases; substantive chapters retain their paths. Slirp's custom-allocator mechanism stays under `libc-heap/`, but its SUMMARY entry belongs with guest-to-host cases.
 - General Web API testing (SOAP/REST/GraphQL discovery, CXF XOP and tRPC cases, tools) is at `src/pentesting-web/web-api-pentesting.md`; the 80/443 service overview links directly to it. Cloud retains provider-specific API control-plane semantics.
-- General HTTP 401/403 authorization-bypass methods and path/header variants are at `src/pentesting-web/403-and-401-bypasses.md`; the HTTP-header reference (routing/source, caching, conditional/range, security headers, request encoding, header-name casing) is at `src/pentesting-web/special-http-headers.md`. These belong to Web's reusable mechanism/checklist, not the Network Services web-technology family. `network-services-pentesting/pentesting-web/README.md` remains the 80/443 discovery and product/stack entry point, linking directly to both. Old whole-page routes redirect. Do not merge the two: the first is an authorization-bypass task; the second is a broader header reference.
+- General 401/403 bypasses live at `src/pentesting-web/403-and-401-bypasses.md`; broader request/response header behavior lives at `src/pentesting-web/special-http-headers.md`. Keep separate: authorization bypass is one task, header behavior is a reference. The Network Services 80/443 overview links to both while retaining service/product discovery; old routes redirect.
 - PHP multipart temporary-upload LFI races, including the PHP 7.0/7.2 segmentation-fault cleanup-interruption variant, are at `src/pentesting-web/file-inclusion/lfi2rce-via-temp-file-uploads.md#segmentation-fault-variant-on-php-70-and-72`. The variant shares the temporary-file prerequisite and reader task, so it is a heading rather than a thin sibling. Keep phpinfo path disclosure, session upload-progress files, and filter-only payload generation separate because their primitives differ.
+- Chosen-input MD5 suffix and `0e` numeric-zero searches are headings at `src/crypto/hashes/README.md#chosen-input-md5-hash-searches`, not Python sandbox topics. PHP type-juggling behavior and version caveats stay in `network-services-pentesting/pentesting-web/php-tricks-esp/README.md#loose-comparisons-and-type-juggling`; both entry points link directly to the relevant explanation.
 
 ## Researcher entry points
 
