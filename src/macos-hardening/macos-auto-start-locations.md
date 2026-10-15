@@ -1,16 +1,16 @@
-# Démarrage automatique macOS
+# Démarrage automatique de macOS
 
 {{#include ../banners/hacktricks-training.md}}
 
-Cette section s'appuie largement sur la série d'articles de blog [**Beyond the good ol' LaunchAgents**](https://theevilbit.github.io/beyond/). Son objectif est d'identifier les emplacements où l'écriture d'un fichier peut entraîner une exécution de code ultérieure, l'événement qui déclenche l'exécution et les autorisations requises. La présence d'un emplacement ne prouve pas que le mécanisme est activé. Les vérifications locales indiquées ci-dessous ont été effectuées sur macOS 26.5.2 (5 octobre 2026) ; elles ne permettent pas d'établir le comportement de toutes les versions de macOS.
+Cette section s’appuie largement sur la série d’articles [**Au-delà des bons vieux LaunchAgents**](https://theevilbit.github.io/beyond/). Son objectif est d’identifier les emplacements où l’écriture d’un fichier peut entraîner une exécution de code ultérieure, l’événement qui déclenche cette exécution et les autorisations requises. La présence d’un emplacement ne prouve pas que le mécanisme est activé. Les vérifications locales indiquées ci-dessous ont été effectuées sous macOS 26.5.2 (5 octobre 2026) ; elles ne permettent pas d’établir le comportement sur toutes les versions de macOS.
 
 > [!NOTE]
-> « Déclenché par une écriture » ne signifie pas toujours « exécuté immédiatement après l'écriture ». Certains emplacements ne sont lus qu'à la connexion, au démarrage d'une application spécifique ou lorsque l'utilisateur effectue une action. Un payload modifiable dans une tâche déjà configurée ne donne pas non plus le droit d'enregistrer une nouvelle tâche. Faites des essais dans un compte de test ou une VM avant de vous fier à une technique.
+> « Déclenché par une écriture » ne signifie pas toujours « s’exécute immédiatement après l’écriture ». Certains emplacements ne sont lus qu’à la connexion, au lancement d’une application précise ou lorsque l’utilisateur effectue une action. La présence d’un payload modifiable dans une tâche déjà configurée ne signifie pas non plus qu’on a l’autorisation d’enregistrer une nouvelle tâche. Faites des essais dans un compte ou une VM jetable avant de vous fier à une technique.
 
 ## Contournement du sandbox
 
 > [!TIP]
-> Vous trouverez ici des emplacements de démarrage utiles pour le **contournement du sandbox**, qui vous permettent d'exécuter quelque chose simplement en **l'écrivant dans un fichier** puis en **attendant** une **action** très **courante**, un **délai** déterminé ou une **action que vous pouvez généralement effectuer** depuis un sandbox sans avoir besoin des permissions root.
+> Vous trouverez ici des emplacements de démarrage utiles pour le **contournement du sandbox**, qui permettent simplement d’exécuter quelque chose en **l’écrivant dans un fichier** puis en **attendant** une action très **courante**, un **certain laps de temps** ou une **action que vous pouvez généralement effectuer** depuis un sandbox sans avoir besoin des permissions root.
 
 ### Launchd
 
@@ -20,37 +20,37 @@ Cette section s'appuie largement sur la série d'articles de blog [**Beyond the 
 #### Emplacements
 
 - **`/Library/LaunchAgents`**
-  - **Déclencheur** : Connexion de l'utilisateur (ou enregistrement explicite)
-  - Autorisations root requises
+  - **Déclencheur** : Connexion de l’utilisateur (ou enregistrement explicite)
+  - Permissions root requises
 - **`/Library/LaunchDaemons`**
   - **Déclencheur** : Démarrage du système (ou enregistrement explicite)
-  - Autorisations root requises
+  - Permissions root requises
 - **`/System/Library/LaunchAgents`**
-  - **Déclencheur** : Connexion de l'utilisateur ; emplacement système Apple protégé
+  - **Déclencheur** : Connexion de l’utilisateur ; emplacement système Apple protégé
 - **`/System/Library/LaunchDaemons`**
   - **Déclencheur** : Démarrage du système ; emplacement système Apple protégé
 - **`~/Library/LaunchAgents`**
   - **Déclencheur** : Nouvelle connexion
 
-Il n'existe pas d'emplacement `~/Library/LaunchDaemons` analysé par `launchd`. Les tâches par utilisateur se trouvent dans `~/Library/LaunchAgents` ; le répertoire des daemons système est `/Library/LaunchDaemons`. Le [guide de démarrage launchd d'Apple](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html) décrit les emplacements analysés.
+Il n’existe pas d’emplacement `~/Library/LaunchDaemons` analysé par `launchd`. Les tâches propres à un utilisateur doivent se trouver dans `~/Library/LaunchAgents` ; le répertoire des daemons système est `/Library/LaunchDaemons`. [Le guide de démarrage de launchd d’Apple](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html) documente les emplacements analysés.
 
 > [!TIP]
-> Fait intéressant, **`launchd`** intègre une liste de propriétés dans une section Mach-o `__Text.__config` qui contient d'autres services bien connus que launchd doit démarrer. De plus, ces services peuvent contenir les clés `RequireSuccess`, `RequireRun` et `RebootOnSuccess`, qui indiquent qu'ils doivent être exécutés et se terminer correctement.
+> Fait intéressant, **`launchd`** contient une liste de propriétés intégrée dans la section Mach-O `__Text.__config`, qui comprend d’autres services connus que launchd doit démarrer. De plus, ces services peuvent contenir les clés `RequireSuccess`, `RequireRun` et `RebootOnSuccess`, qui indiquent qu’ils doivent être exécutés et se terminer avec succès.
 >
-> Bien sûr, elle ne peut pas être modifiée en raison de la signature de code.
+> Bien sûr, cette liste ne peut pas être modifiée en raison de la signature du code.
 
 #### Description et exploitation
 
-**`launchd`** est le **premier** **processus** exécuté par le noyau OX S au démarrage et le dernier à se terminer à l'arrêt. Il doit toujours avoir le **PID 1**. Ce processus **lit et exécute** les configurations indiquées dans les fichiers **plist** **ASEP** situés dans :
+**`launchd`** est le **premier** **processus** exécuté par le noyau OX S au démarrage et le dernier à se terminer à l’arrêt. Il doit toujours avoir le **PID 1**. Ce processus va **lire et exécuter** les configurations indiquées dans les **plist** **ASEP** situées dans :
 
-- `/Library/LaunchAgents` : agents par utilisateur installés par l'administrateur
-- `/Library/LaunchDaemons` : daemons système installés par l'administrateur
-- `/System/Library/LaunchAgents` : agents par utilisateur fournis par Apple.
-- `/System/Library/LaunchDaemons` : daemons système fournis par Apple.
+- `/Library/LaunchAgents` : Agents par utilisateur installés par l’administrateur
+- `/Library/LaunchDaemons` : Daemons système installés par l’administrateur
+- `/System/Library/LaunchAgents` : Agents par utilisateur fournis par Apple.
+- `/System/Library/LaunchDaemons` : Daemons système fournis par Apple.
 
-Lorsqu'un utilisateur se connecte, `launchd` charge les fichiers plist situés dans le `~/Library/LaunchAgents` de cet utilisateur, avec les permissions de celui-ci. Les tâches sont lancées selon leurs clés ; le simple chargement d'un fichier plist n'implique pas l'exécution immédiate d'un processus.
+Lorsqu’un utilisateur se connecte, `launchd` charge les plist de son répertoire `~/Library/LaunchAgents` avec les permissions de cet utilisateur. Les tâches démarrent selon leurs clés ; le simple chargement d’une plist n’entraîne pas nécessairement l’exécution immédiate d’un processus.
 
-La **principale différence entre les agents et les daemons est que les agents sont chargés lorsque l'utilisateur se connecte, tandis que les daemons sont chargés au démarrage du système** (car certains services, comme ssh, doivent être exécutés avant qu'un utilisateur accède au système). Les agents peuvent également utiliser l'interface graphique, tandis que les daemons doivent s'exécuter en arrière-plan.
+La **principale différence entre les agents et les daemons est que les agents sont chargés lorsque l’utilisateur se connecte, tandis que les daemons sont chargés au démarrage du système** (car certains services, comme ssh, doivent être exécutés avant que tout utilisateur accède au système). Les agents peuvent également utiliser l’interface graphique, tandis que les daemons doivent s’exécuter en arrière-plan.
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -77,13 +77,13 @@ La **principale différence entre les agents et les daemons est que les agents s
 </plist>
 ```
 
-Chaque élément de `ProgramArguments` est un argument distinct ; `launchd` n’interprète pas une chaîne unique comme une commande shell. L’exemple corrigé ci-dessus peut faire l’objet d’une vérification syntaxique sans être chargé, à l’aide de `plutil -lint /path/to/example.plist`. Consultez l’entrée locale `man launchd.plist` pour `ProgramArguments`, `RunAtLoad` et `KeepAlive`.
+Chaque élément de `ProgramArguments` constitue un argument distinct ; `launchd` n’interprète pas une chaîne unique comme une commande shell. L’exemple corrigé ci-dessus peut faire l’objet d’une vérification syntaxique sans être chargé, à l’aide de `plutil -lint /path/to/example.plist`. Consultez l’entrée locale `man launchd.plist` pour `ProgramArguments`, `RunAtLoad` et `KeepAlive`.
 
 #### Déclencheurs d’événements de fichiers dans les jobs existants
 
-Un agent ou daemon **déjà chargé** peut utiliser `WatchPaths` pour démarrer lorsqu’un chemin nommé change. `QueueDirectories` démarre un job tant qu’un répertoire n’est pas vide ; `StartOnMount` le démarre lors du montage d’un volume. [Le guide launchd d’Apple](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html#//apple_ref/doc/uid/10000172i-CH2-SW9) contient des exemples d’utilisation de `WatchPaths` et `QueueDirectories`. Une écriture dans un fichier surveillé déclenche le **job déjà configuré** ; elle ne permet une exécution de code arbitraire que si l’auteur de l’écriture peut également contrôler l’exécutable, le script ou les données interprétées par le job. Écrire simplement un nouveau plist hors d’un emplacement analysé ou enregistré ne le charge pas.
+Un agent ou un démon **déjà chargé** peut utiliser `WatchPaths` pour démarrer lorsqu’un chemin nommé change. `QueueDirectories` démarre un job tant qu’un répertoire n’est pas vide ; `StartOnMount` démarre au montage d’un volume. Le [guide launchd d’Apple](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html#//apple_ref/doc/uid/10000172i-CH2-SW9) contient des exemples de `WatchPaths` et de `QueueDirectories`. Une écriture dans un fichier surveillé déclenche le **job déjà configuré** ; elle ne permet l’exécution de code arbitraire que si l’auteur de l’écriture peut aussi contrôler l’exécutable, le script ou les données interprétées par le job. Écrire simplement un nouveau plist en dehors d’un emplacement analysé ou enregistré ne le charge pas.
 
-Cette PoC auto-nettoyante enregistre un **agent utilisateur temporaire** au nom unique, ne modifie que son propre fichier surveillé, puis supprime l’agent. Elle a été exécutée avec succès sur macOS 26.5.2 sans déconnexion ni redémarrage :
+Cette PoC à nettoyage automatique enregistre un **agent utilisateur temporaire** au nom unique, ne modifie que son propre fichier surveillé, puis supprime l’agent. Elle a été exécutée avec succès sous macOS 26.5.2 sans déconnexion ni redémarrage :
 
 ```python
 import os, pathlib, plistlib, subprocess, tempfile, time, uuid
@@ -113,27 +113,27 @@ with tempfile.TemporaryDirectory(prefix="ht-watch-") as root:
         subprocess.run(["launchctl", "bootout", f"{target}/{label}"], check=True)
 ```
 
-L’exécution locale a affiché `watch fired: True`, et `bootout` a réussi. `launchctl bootstrap` est utilisé ici uniquement dans le PoC isolé ; ce n’est **pas** nécessaire pour une tâche déjà chargée. Pour évaluer une tâche existante en toute sécurité, lisez son plist et le chemin résolu de `ProgramArguments`, puis vérifiez si l’exécutable ou le fichier interprété concerné est accessible en écriture, sans le modifier.
+L’exécution locale a affiché `watch fired: True`, et `bootout` a réussi. `launchctl bootstrap` est utilisé ici uniquement dans le PoC isolé ; il n’est **pas** nécessaire pour un job déjà chargé. Pour évaluer un job existant en toute sécurité, lisez son plist et le chemin résolu de `ProgramArguments`, puis vérifiez si l’exécutable ou le fichier interprété concerné est accessible en écriture, sans le modifier.
 
-Dans certains cas, un **agent doit être exécuté avant que l’utilisateur se connecte** ; on les appelle **PreLoginAgents**. Par exemple, cela permet de fournir une technologie d’assistance lors de la connexion. Ils peuvent également se trouver dans `/Library/LaunchAgents` (voir [**ici**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents) pour un exemple).
+Dans certains cas, un **agent doit être exécuté avant la connexion de l’utilisateur** ; on les appelle **PreLoginAgents**. Cela peut, par exemple, être utile pour fournir une technologie d’assistance à la connexion. On peut aussi les trouver dans `/Library/LaunchAgents` (voir [**ici**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents) un exemple).
 
 > [!TIP]
-> Les nouveaux fichiers de configuration Daemon ou Agent seront **chargés après le prochain redémarrage ou avec** `launchctl load <target.plist>`. Il est **également possible de charger des fichiers .plist sans cette extension** avec `launchctl -F <file>` (cependant, ces fichiers plist ne seront pas chargés automatiquement après le redémarrage).\
-> Il est également possible de **décharger** avec `launchctl unload <target.plist>` (le processus indiqué sera terminé),
+> Les nouveaux fichiers de configuration de Daemons ou d’Agents seront **chargés au prochain redémarrage ou à l’aide de** `launchctl load <target.plist>`. Il est **également possible de charger des fichiers .plist sans cette extension** avec `launchctl -F <file>` (ces fichiers plist ne seront toutefois pas chargés automatiquement après le redémarrage).\
+> Il est également possible de les **décharger** avec `launchctl unload <target.plist>` (le processus qu’ils désignent sera terminé),
 >
-> Pour **vous assurer** que **rien** (comme une surcharge) **n’empêche** un **Agent** ou un **Daemon** **de** **s’exécuter**, exécutez : `sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.smdb.plist`
+> Pour **vous assurer** que **rien** (comme un remplacement) **n’empêche** un **Agent** ou un **Daemon** **de** **s’exécuter**, lancez : `sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.smdb.plist`
 
-Lister tous les agents et daemons chargés par l’utilisateur actuel :
+Listez tous les agents et daemons chargés par l’utilisateur actuel :
 
 ```bash
 launchctl list
 ```
 
-#### Exemple de chaîne de LaunchDaemon malveillante (réutilisation de mot de passe)
+#### Exemple de chaîne malveillante de LaunchDaemon (réutilisation de mot de passe)
 
-Un infostealer macOS récent a réutilisé un **mot de passe sudo capturé** pour déposer un agent utilisateur et un LaunchDaemon root :<sup>[[1]](#references)</sup>
+Un infostealer macOS récent a réutilisé un **mot de passe sudo capturé** pour déposer un user agent et un LaunchDaemon root :<sup>[[1]](#references)</sup>
 
-- Écrire la boucle de l’agent dans `~/.agent` et le rendre exécutable.
+- Écrire la boucle de l’agent dans `~/.agent` et la rendre exécutable.
 - Générer un plist dans `/tmp/starter` pointant vers cet agent.
 - Réutiliser le mot de passe volé avec `sudo -S` pour le copier dans `/Library/LaunchDaemons/com.finder.helper.plist`, définir `root:wheel` et le charger avec `launchctl load`.
 - Démarrer l’agent silencieusement avec `nohup ~/.agent >/dev/null 2>&1 &` pour détacher la sortie.
@@ -145,74 +145,74 @@ printf '%s\n' "$pw" | sudo -S launchctl load /Library/LaunchDaemons/com.finder.h
 nohup "$HOME/.agent" >/dev/null 2>&1 &
 ```
 > [!WARNING]
-> Un plist de daemon placé dans `/Library/LaunchDaemons` n’est pas sécurisé pour autant si son propriétaire est un utilisateur. `launchd` exige une propriété et des permissions appropriées pour les jobs système et peut rejeter un plist non sécurisé. Un daemon appartenant à root s’exécute normalement en tant que root, sauf si sa configuration sélectionne un autre compte. Vérifiez `UserName`, `GroupName`, la propriété et les diagnostics de `launchctl` ; ne déduisez pas l’identité d’exécution du seul nom du propriétaire du plist.
+> Un plist de daemon placé dans `/Library/LaunchDaemons` n'est pas sécurisé simplement parce qu'il appartient à un utilisateur. `launchd` exige une propriété et des permissions appropriées pour les tâches système et peut rejeter un plist non sécurisé. Un daemon appartenant à root s'exécute normalement en tant que root, sauf si sa configuration sélectionne un autre compte. Vérifiez `UserName`, `GroupName`, la propriété du fichier et les diagnostics de `launchctl` ; ne déduisez pas l'identité d'exécution du seul nom du propriétaire du plist.
 
-#### Plus d’informations sur launchd
+#### Plus d'informations sur launchd
 
-**`launchd`** est le **premier** processus en mode utilisateur démarré par le **kernel**. Son démarrage doit **réussir** et il **ne peut ni se terminer ni planter**. Il est même **protégé** contre certains **signaux d’arrêt**.
+**`launchd`** est le **premier** processus en mode utilisateur démarré depuis le **kernel**. Le démarrage du processus doit **réussir** et il **ne peut ni se terminer ni planter**. Il est même **protégé** contre certains **signaux d'arrêt**.
 
-L’une des premières choses que `launchd` fait est de **démarrer** tous les **daemons**, par exemple :
+L'une des premières choses que `launchd` ferait serait de **démarrer** tous les **daemons**, comme :
 
-- **Daemons de minuterie**, déclenchés à une heure donnée :
-  - `com.apple.atrun.plist` lance `/usr/libexec/atrun` avec `StartInterval = 30` secondes dans macOS 26.5.2 ; son état d’activation effectif peut différer de la clé `Disabled` du plist, car launchd conserve les dérogations séparément.
-  - `com.vix.cron.plist` lance `/usr/sbin/cron` lorsque `/usr/lib/cron/tabs` contient des jobs. `com.apple.systemstats.daily` est un service planifié distinct, et non le daemon cron.
-- **Daemons réseau**, par exemple :
+- **Daemons de minuterie** exécutés selon une échéance :
+  - `com.apple.atrun.plist` invoque `/usr/libexec/atrun` avec `StartInterval = 30` secondes sous macOS 26.5.2 ; son état effectif d'activation peut différer de la clé `Disabled` du plist, car launchd conserve les overrides séparément.
+  - `com.vix.cron.plist` invoque `/usr/sbin/cron` lorsque `/usr/lib/cron/tabs` contient des tâches. `com.apple.systemstats.daily` est un service planifié distinct, et non le daemon cron.
+- **Daemons réseau**, comme :
   - `org.cups.cups-lpd` : écoute en TCP (`SockType: stream`) avec `SockServiceName: printer`
-    - SockServiceName doit être un port ou un service défini dans `/etc/services`
+    - SockServiceName doit être un port ou un service de `/etc/services`
   - `com.apple.xscertd.plist` : écoute sur le port TCP 1640
-- **Daemons de chemin**, lancés lorsque le chemin spécifié est modifié :
+- **Daemons de chemin**, exécutés lorsqu'un chemin spécifié change :
   - `com.apple.postfix.master` : surveille le chemin `/etc/postfix/aliases`
 - **Daemons de notifications IOKit** :
   - `com.apple.xartstorageremoted` : `"com.apple.iokit.matching" => { "com.apple.device-attach" => { "IOMatchLaunchStream" => 1 ...`
 - **Port Mach :**
-  - `com.apple.xscertd-helper.plist` : l’entrée `MachServices` indique le nom `com.apple.xscertd.helper`
+  - `com.apple.xscertd-helper.plist` : l'entrée `MachServices` indique le nom `com.apple.xscertd.helper`
 - **UserEventAgent :**
-  - Il est différent du précédent. Il fait en sorte que launchd lance des apps en réponse à des événements spécifiques. Cependant, dans ce cas, le binaire principal concerné n’est pas `launchd`, mais `/usr/libexec/UserEventAgent`. Il charge des plugins depuis le dossier restreint par SIP /System/Library/UserEventPlugins/, où chaque plugin indique son initialiseur dans la clé `XPCEventModuleInitializer` ou, pour les anciens plugins, dans le dictionnaire `CFPluginFactories` sous la clé `FB86416D-6164-2070-726F-70735C216EC0` de son `Info.plist`.
+  - Celui-ci diffère du précédent. Il fait en sorte que launchd lance des applications en réponse à des événements spécifiques. Toutefois, dans ce cas, le binaire principal concerné n'est pas `launchd`, mais `/usr/libexec/UserEventAgent`. Il charge des plugins depuis le dossier restreint par SIP /System/Library/UserEventPlugins/, où chaque plugin indique son initialiseur dans la clé `XPCEventModuleInitializer` ou, dans le cas des anciens plugins, dans le dictionnaire `CFPluginFactories`, sous la clé `FB86416D-6164-2070-726F-70735C216EC0` de son `Info.plist`.
 
-### fichiers de démarrage du shell
+### Fichiers de démarrage du shell
 
-Writeup : [https://theevilbit.github.io/beyond/beyond_0001/](https://theevilbit.github.io/beyond/beyond_0001/)<sup>[[2]](#references)</sup>\
-Writeup (xterm) : [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.github.io/beyond/beyond_0018/)<sup>[[3]](#references)</sup>
+Write-up : [https://theevilbit.github.io/beyond/beyond_0001/](https://theevilbit.github.io/beyond/beyond_0001/)<sup>[[2]](#references)</sup>\
+Write-up (xterm) : [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.github.io/beyond/beyond_0018/)<sup>[[3]](#references)</sup>
 
-- Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
-- Contournement de TCC : [✅](https://emojipedia.org/check-mark-button)
-  - Mais vous devez trouver une app disposant d’un contournement de TCC qui exécute un shell chargeant ces fichiers
+- Utile pour le bypass du sandbox : [✅](https://emojipedia.org/check-mark-button)
+- TCC Bypass : [✅](https://emojipedia.org/check-mark-button)
+  - Mais vous devez trouver une application avec un TCC bypass qui exécute un shell chargeant ces fichiers
 
 #### Emplacements
 
 - **`~/.zshenv`** (ou une version compilée plus récente **`~/.zshenv.zwc`**)
   - **Déclencheur** : toute invocation ordinaire de zsh, y compris `zsh -c` non interactif ; `zsh -f` ignore les fichiers de démarrage utilisateur.
 - **`~/.zshrc`**
-  - **Déclencheur** : démarrage d’un zsh interactif.
+  - **Déclencheur** : démarrage d'un zsh interactif.
 - **`~/.zprofile`, `~/.zlogin`**
-  - **Déclencheur** : démarrage d’un zsh de connexion ; ces fichiers sont lus respectivement avant et après `.zshrc`.
+  - **Déclencheur** : démarrage d'un zsh de connexion ; ils sont lus respectivement avant et après `.zshrc`.
 - **`/etc/zshenv`, `/etc/zprofile`, `/etc/zshrc`, `/etc/zlogin`**
-  - **Déclencheur** : ouvrir un terminal avec zsh
+  - **Déclencheur** : ouverture d'un terminal avec zsh
   - Droits root requis
 - **`~/.zlogout`**
-  - **Déclencheur** : fin normale d’un zsh de connexion, et non de chaque terminal ou shell.
+  - **Déclencheur** : un zsh de connexion se termine normalement, et non chaque fermeture de terminal ou de shell.
 - **`/etc/zlogout`**
-  - **Déclencheur** : fermer un terminal avec zsh
+  - **Déclencheur** : fermeture d'un terminal avec zsh
   - Droits root requis
-- Éventuellement d’autres fichiers dans : **`man zsh`**
+- Potentiellement d'autres éléments dans : **`man zsh`**
 - **`~/.bashrc`**
-  - **Déclencheur** : démarrer Bash interactif **sans connexion**. Un Bash de connexion interactif ne le lit que si un fichier de connexion le source explicitement.
+  - **Déclencheur** : démarrage d'un Bash interactif **sans connexion**. Un Bash interactif de connexion ne le lit que si un fichier de connexion le source explicitement.
 - **`~/.bash_profile`, `~/.bash_login`, `~/.profile`**
-  - **Déclencheur** : démarrer Bash de connexion ; le premier fichier lisible dans cet ordre est exécuté. `~/.profile` est ignoré si l’un des fichiers précédents existe.
+  - **Déclencheur** : démarrage d'un Bash de connexion ; le premier fichier lisible de cette liste est exécuté. `~/.profile` est ignoré si l'un des fichiers précédents existe.
 - **`/etc/profile`**
-  - **Déclencheur** : démarrer Bash de connexion ; sa modification nécessite les droits root.
-- **`~/.tcshrc`** ou, s’il est absent, **`~/.cshrc`**
-  - **Déclencheur** : démarrer `tcsh`, y compris avec `tcsh -c` non interactif sur ce Mac. L’utilisateur doit réellement invoquer `tcsh` ; ce n’est pas le shell par défaut de macOS.
+  - **Déclencheur** : démarrage d'un Bash de connexion ; sa modification nécessite les droits root.
+- **`~/.tcshrc`** ou, s'il n'existe pas, **`~/.cshrc`**
+  - **Déclencheur** : démarrage de `tcsh`, y compris un `tcsh -c` non interactif sur ce Mac. L'utilisateur doit réellement invoquer `tcsh` ; ce n'est pas le shell par défaut de macOS.
 - **`~/.login`**
-  - **Déclencheur** : démarrer un `tcsh` de connexion, après son fichier rc.
+  - **Déclencheur** : démarrage d'un `tcsh` de connexion, après son fichier rc.
 - `~/.xinitrc`, `~/.xserverrc`, `/opt/X11/etc/X11/xinit/xinitrc.d/`
-  - **Déclencheur** : censés se déclencher avec xterm, mais celui-ci **n’est pas installé** et, même après son installation, l’erreur suivante apparaît : xterm : `DISPLAY is not set`<sup>[[3]](#references)</sup>
+  - **Déclencheur** : censés être déclenchés avec xterm, mais celui-ci **n'est pas installé** et, même après son installation, cette erreur apparaît : xterm : `DISPLAY is not set`<sup>[[3]](#references)</sup>
 
 #### Description et exploitation
 
-Lors du lancement d’un environnement shell tel que `zsh` ou `bash`, **certains fichiers de démarrage sont exécutés**. macOS utilise actuellement `/bin/zsh` comme shell par défaut. Le fait que Terminal ou SSH lance un shell de connexion ou interactif dépend de leur configuration ; ne partez pas du principe que tous les fichiers ci-dessus sont exécutés à chaque session. `bash` et `sh` sont également présents dans macOS, mais doivent être invoqués explicitement pour être utilisés.<sup>[[2]](#references)</sup> La [référence des fichiers de démarrage de zsh](https://zsh.sourceforge.io/Doc/Release/Files.html) précise l’ordre, le remplacement par `ZDOTDIR` et la règle `.zwc`.
+Lors du lancement d'un environnement shell tel que `zsh` ou `bash`, **certains fichiers de démarrage sont exécutés**. macOS utilise actuellement `/bin/zsh` comme shell par défaut. Le fait que Terminal ou SSH démarre un shell de connexion ou interactif dépend de leur configuration ; ne supposez pas que chaque fichier ci-dessus est exécuté dans chaque session. Bien que `bash` et `sh` soient également présents dans macOS, ils doivent être invoqués explicitement pour être utilisés.<sup>[[2]](#references)</sup> La [référence des fichiers de démarrage de zsh](https://zsh.sourceforge.io/Doc/Release/Files.html) précise l'ordre, la redéfinition avec `ZDOTDIR` et la règle `.zwc`.
 
-L’expérience en lecture seule suivante a utilisé un `ZDOTDIR` temporaire sur macOS 26.5.2. Elle montre quels fichiers utilisateur ont été lus ; aucun véritable fichier de démarrage du shell n’a été modifié :
+L'expérience en lecture seule suivante a utilisé un `ZDOTDIR` jetable sous macOS 26.5.2. Elle montre quels fichiers utilisateur ont été lus ; aucun fichier de démarrage shell réel n'a été modifié :
 
 ```bash
 lab=$(mktemp -d)
@@ -227,16 +227,16 @@ done
 rm -r "$lab"
 ```
 
-L’ordre observé était `-c` : `zshenv` ; `-ic` : `zshenv zshrc` ; `-lc` : `zshenv zprofile zlogin` ; `-lic` : `zshenv zprofile zshrc zlogin zlogout`. `ZDOTDIR` doit déjà pointer vers le répertoire alternatif ; il ne suffit pas de créer des fichiers dans un répertoire arbitraire.
+L’ordre observé était `-c` : `zshenv` ; `-ic` : `zshenv zshrc` ; `-lc` : `zshenv zprofile zlogin` ; `-lic` : `zshenv zprofile zshrc zlogin zlogout`. `ZDOTDIR` doit déjà pointer vers le répertoire alternatif ; il ne suffit pas de créer des fichiers dans un répertoire quelconque.
 
-La [référence de démarrage de Bash](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html) distingue les shells de connexion des shells interactifs. Sur la machine de test macOS 26.5.2, un `HOME` isolé contenant les quatre fichiers de démarrage utilisateur a produit les résultats suivants : `bash -c` → aucun ; `bash -ic` → `.bashrc` ; `bash -lc` et `bash -lic` → `.bash_profile` uniquement. Après suppression de `.bash_profile`, Bash de connexion a lu `.bash_login`, puis `.profile` après la suppression de ce dernier. `BASH_ENV` peut indiquer à Bash non interactif un fichier à lire, mais cette variable d’environnement doit déjà être définie dans le processus appelant. Une commande `exit` explicite dans un Bash de connexion peut également charger `~/.bash_logout`.
+La [référence de démarrage de Bash](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html) distingue les shells de connexion des shells interactifs. Sur la machine de test macOS 26.5.2, un `HOME` isolé contenant les quatre fichiers de démarrage utilisateur a produit les résultats suivants : `bash -c` → aucun ; `bash -ic` → `.bashrc` ; `bash -lc` et `bash -lic` → `.bash_profile` uniquement. Après suppression de `.bash_profile`, Bash de connexion a lu `.bash_login`, puis `.profile` après suppression de ce dernier. `BASH_ENV` peut indiquer à Bash non interactif un fichier à charger, mais cette variable d’environnement doit déjà être définie dans le processus appelant. Un `exit` explicite dans un Bash de connexion peut également charger `~/.bash_logout`.
 
-Le manuel local `tcsh(1)` documente son propre ordre de démarrage. Avec un `HOME` temporaire, `/bin/tcsh -c :` a lu `.tcshrc`, ou `.cshrc` en l’absence de `.tcshrc`. Une session `tcsh` de connexion temporaire a lu `.tcshrc` et `.login`. Ces vérifications ont créé et supprimé uniquement des fichiers temporaires.
+Le manuel local `tcsh(1)` décrit son ordre de démarrage spécifique. Avec un `HOME` temporaire, `/bin/tcsh -c :` a lu `.tcshrc`, ou `.cshrc` si `.tcshrc` était absent. Un `tcsh` de connexion temporaire a lu `.tcshrc` et `.login`. Ces vérifications ont créé et supprimé uniquement des fichiers temporaires.
 
 ### Applications rouvertes
 
 > [!CAUTION]
-> La configuration de l’exploitation indiquée, suivie d’une déconnexion puis d’une reconnexion, ou même d’un redémarrage, n’a pas lancé l’app lors des tests. Il se peut que l’app doive être en cours d’exécution au moment où ces actions sont effectuées.
+> Lors des tests, la configuration de l’exploitation indiquée, puis la déconnexion et la reconnexion, voire le redémarrage, n’ont pas entraîné l’exécution de l’application. Il se peut que l’application doive être en cours d’exécution lors de ces opérations.
 
 **Writeup** : [https://theevilbit.github.io/beyond/beyond_0021/](https://theevilbit.github.io/beyond/beyond_0021/)<sup>[[4]](#references)</sup>
 
@@ -254,7 +254,7 @@ Toutes les applications à rouvrir se trouvent dans le plist `~/Library/Preferen
 
 Pour que les applications rouvertes lancent la vôtre, il vous suffit de **l’ajouter à la liste**.
 
-L’UUID peut être trouvé en listant ce répertoire ou avec `ioreg -rd1 -c IOPlatformExpertDevice | awk -F'"' '/IOPlatformUUID/{print $4}'`
+Vous pouvez trouver l’UUID en listant ce répertoire ou avec `ioreg -rd1 -c IOPlatformExpertDevice | awk -F'"' '/IOPlatformUUID/{print $4}'`
 
 Pour vérifier quelles applications seront rouvertes, vous pouvez exécuter :
 
@@ -282,12 +282,12 @@ Writeup : [https://theevilbit.github.io/beyond/beyond_0020/](https://theevilbit.
 
 - Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
 - Contournement de TCC : [✅](https://emojipedia.org/check-mark-button)
-  - Terminal avait l’autorisation FDA de l’utilisateur qui l’utilisait
+  - L’utilisation de Terminal permet de bénéficier des permissions FDA de l’utilisateur
 
 #### Emplacement
 
 - **`~/Library/Preferences/com.apple.Terminal.plist`**
-  - **Déclencheur** : ouvrir une nouvelle fenêtre ou un nouvel onglet Terminal avec le profil dont les réglages du shell contiennent la commande de démarrage
+  - **Déclencheur** : ouvrir une nouvelle fenêtre ou un nouvel onglet Terminal avec un profil dont les réglages Shell contiennent la commande de démarrage
 
 #### Description et exploitation
 
@@ -315,9 +315,9 @@ Cette configuration apparaît dans le fichier **`~/Library/Preferences/com.apple
 [...]
 ```
 
-Si le profil concerné contient une commande de démarrage et que Terminal lit cette préférence, une nouvelle session utilisant ce profil peut l’exécuter. [Le guide actuel de Terminal d’Apple](https://support.apple.com/guide/terminal/trmlshll/mac) documente la commande **Shell → Démarrage** propre à chaque profil. Ouvrir Terminal sans démarrer de nouvelle session avec ce profil ne suffit pas. Les modifications de préférences ci-dessous n’ont **pas** été effectuées sur le Mac de recherche.
+Si le profil concerné contient une commande de démarrage et que Terminal lit cette préférence, une nouvelle session utilisant ce profil peut l’exécuter. [Le guide actuel de Terminal d’Apple](https://support.apple.com/guide/terminal/trmlshll/mac) documente la commande **Shell → Startup** propre à chaque profil. Il ne suffit pas d’ouvrir Terminal sans démarrer une nouvelle session avec ce profil. Les modifications de préférences ci-dessous n’ont **pas** été effectuées sur le Mac de recherche.
 
-Vous pouvez l’ajouter depuis la CLI avec :
+Vous pouvez l’ajouter depuis la ligne de commande avec :
 
 ```bash
 # Add
@@ -328,11 +328,11 @@ Vous pouvez l’ajouter depuis la CLI avec :
 /usr/libexec/PlistBuddy -c "Set :\"Window Settings\":\"Basic\":\"CommandString\" ''" $HOME/Library/Preferences/com.apple.Terminal.plist
 ```
 
-### Scripts Terminal / autres extensions de fichiers
+### Scripts Terminal / autres extensions de fichier
 
 - Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
 - Contournement de TCC : [✅](https://emojipedia.org/check-mark-button)
-  - Terminal a besoin des permissions FDA de l’utilisateur pour l’utiliser
+  - Terminal permet d’utiliser les permissions FDA de l’utilisateur
 
 #### Emplacement
 
@@ -341,7 +341,7 @@ Vous pouvez l’ajouter depuis la CLI avec :
 
 #### Description et exploitation
 
-Si un utilisateur ouvre un fichier de paramètres **`.terminal`**, Terminal peut créer une session à partir de son profil ; les fichiers exécutables **`.command`** et **`.tool`** peuvent également s’ouvrir dans Terminal. Il s’agit d’un déclencheur explicite à l’ouverture d’un fichier, et non d’une exécution déclenchée par la simple ouverture de Terminal. Tout accès TCC hérité dépend des autorisations réellement accordées à Terminal et de l’opération tentée. L’exemple historique ci-dessous n’a pas été exécuté sur le Mac de recherche.
+Si un utilisateur ouvre un fichier de configuration **`.terminal`**, Terminal peut créer une session à partir de son profil ; les fichiers exécutables **`.command`** et **`.tool`** peuvent également s’ouvrir dans Terminal. Il s’agit d’un déclencheur explicite à l’ouverture d’un fichier, et non d’une exécution résultant du simple fait d’ouvrir Terminal. Tout accès TCC hérité dépend des autorisations réelles accordées à Terminal et de l’opération tentée. L’exemple historique ci-dessous n’a pas été exécuté sur le Mac de recherche.
 
 Essayez avec :
 
@@ -376,7 +376,7 @@ rm -f /tmp/test.terminal /tmp/ht-terminal-file-marker
 Vous pouvez également utiliser les extensions **`.command`**, **`.tool`**, avec du contenu de scripts shell classiques ; elles seront également ouvertes par Terminal.
 
 > [!CAUTION]
-> Si Terminal dispose de l’accès complet au disque, il pourra effectuer cette action (notez que la commande exécutée sera visible dans une fenêtre Terminal).
+> Si Terminal dispose de l’**Accès complet au disque**, il pourra effectuer cette action (notez que la commande exécutée sera visible dans une fenêtre de Terminal).
 
 ### Plugins audio
 
@@ -384,8 +384,8 @@ Writeup : [https://theevilbit.github.io/beyond/beyond_0013/](https://theevilbit.
 Writeup : [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)<sup>[[7]](#references)</sup>
 
 - Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
-- Contournement de TCC : [🟠](https://emojipedia.org/large-orange-circle)
-  - Vous pourriez obtenir des autorisations TCC supplémentaires
+- TCC bypass : [🟠](https://emojipedia.org/large-orange-circle)
+  - Vous pourriez obtenir des accès TCC supplémentaires
 
 #### Emplacement
 
@@ -398,14 +398,14 @@ Writeup : [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https:/
 - **`~/Library/Audio/Plug-ins/Components`**
   - **Déclencheur** : Un hôte audio détecte et instancie l’Audio Unit installé
 - **`/System/Library/Components`**
-  - Emplacement protégé par le système et réservé aux composants fournis par Apple
+  - Emplacement fourni par Apple et protégé par le système
   - **Déclencheur** : Un hôte audio instancie un composant système correspondant
 
 #### Description
 
-Selon les writeups précédents, il est possible de **compiler certains plugins audio** et de les faire charger.<sup>[[6]](#references)[[7]](#references)</sup>
+Selon les writeups précédents, il est possible de **compiler certains plug-ins audio** et de les faire charger.<sup>[[6]](#references)[[7]](#references)</sup>
 
-Les plug-ins de périphérique HAL et les Audio Units empruntent des chemins de chargement distincts. Le [guide d’hébergement des Audio Units d’Apple](https://developer.apple.com/library/archive/documentation/MusicAudio/Conceptual/CoreAudioOverview/ARoadmaptoCommonTasks/ARoadmaptoCommonTasks.html) indique qu’un hôte doit trouver et instancier un composant ; le copier dans un répertoire analysé ou redémarrer `coreaudiod` ne prouve pas, à lui seul, qu’il a été exécuté. Les plug-ins AUv2 s’exécutent dans le processus de l’hôte, tandis que les [directives actuelles d’Apple sur les Audio Units](https://developer.apple.com/documentation/audiotoolbox/incorporating-audio-effects-and-instruments) indiquent que, par défaut, AUv3 s’exécute dans un processus distinct sur macOS. Les contrôles de signature, de sandbox et de validation des bibliothèques dépendent de l’hôte. Aucun plugin audio n’a été installé ni exécuté sur le Mac de recherche.
+Les plug-ins de périphérique HAL et les Audio Units empruntent des chemins de chargement distincts. [Le guide d’Apple sur l’hébergement des Audio Units](https://developer.apple.com/library/archive/documentation/MusicAudio/Conceptual/CoreAudioOverview/ARoadmaptoCommonTasks/ARoadmaptoCommonTasks.html) indique qu’un hôte doit trouver et instancier un composant ; le copier dans un répertoire analysé ou redémarrer `coreaudiod` ne prouve pas à lui seul qu’il est exécuté. Les plug-ins AUv2 s’exécutent dans le processus de l’hôte, tandis que [les recommandations actuelles d’Apple sur les Audio Units](https://developer.apple.com/documentation/audiotoolbox/incorporating-audio-effects-and-instruments) indiquent que, par défaut, AUv3 s’exécute dans un processus distinct sous macOS. Les contrôles de signature, de sandbox et de validation des bibliothèques dépendent de l’hôte. Aucun plug-in audio n’a été installé ni exécuté sur le Mac de recherche.
 
 ### Pilotes CoreMIDI (MIDIServer)
 
@@ -413,21 +413,21 @@ Writeup : [https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing
 
 - Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
   - Votre code s’exécute dans le processus `MIDIServer`, et non dans le sandbox de votre application
-- Contournement de TCC : [🔴](https://emojipedia.org/large-red-circle)
+- TCC bypass : [🔴](https://emojipedia.org/large-red-circle)
   - `MIDIServer` s’exécute avec son propre profil de sandbox `seatbelt`
 
 #### Emplacement
 
 - **`~/Library/Audio/MIDI Drivers/*.plugin`**
-  - Droits root non requis (accessible en écriture par l’utilisateur)
-  - **Déclencheur** : `MIDIServer` (re)démarre. Il est lancé à la demande, la première fois qu’un processus utilise CoreMIDI (ouverture de *Configuration audio et MIDI*, GarageBand, d’un DAW ou d’une page utilisant WebMIDI)
+  - Aucun droit root requis (accessible en écriture par l’utilisateur)
+  - **Déclencheur** : `MIDIServer` (re)démarre. Il est lancé à la demande, la première fois qu’un processus utilise CoreMIDI (en ouvrant *Configuration audio et MIDI*, GarageBand, une DAW ou une page utilisant WebMIDI)
 - **`/Library/Audio/MIDI Drivers/*.plugin`**
   - Droits root requis
   - **Déclencheur** : identique à ci-dessus
 
 #### Description et exploitation
 
-Le `MIDIServer` d’Apple (`/System/Library/Frameworks/CoreMIDI.framework/MIDIServer`) charge les bundles de **pilotes** MIDI depuis les répertoires `Audio/MIDI Drivers`. Le binaire est signé par Apple, mais dispose de l’entitlement `com.apple.security.cs.disable-library-validation`, ce qui lui permet de charger un bundle **non signé ou signé ad hoc par une autre équipe** et d’exécuter du code dans un processus distinct appartenant à Apple, **sans droits root**.<sup>[[53]](#references)</sup>
+Le `MIDIServer` d’Apple (`/System/Library/Frameworks/CoreMIDI.framework/MIDIServer`) charge les bundles de **pilotes** MIDI depuis les répertoires `Audio/MIDI Drivers`. Le binaire est signé par Apple, mais est livré avec l’entitlement `com.apple.security.cs.disable-library-validation` ; il chargera donc un bundle **non signé ou signé ad hoc par une autre équipe**, ce qui permet l’exécution de code au sein d’un processus distinct appartenant à Apple **sans droits root**.<sup>[[53]](#references)</sup>
 
 Vérifié sur macOS 26 (en lecture seule) :
 
@@ -438,20 +438,20 @@ codesign -d --entitlements :- /System/Library/Frameworks/CoreMIDI.framework/MIDI
   | grep disable-library-validation              # -> com.apple.security.cs.disable-library-validation
 ```
 
-Un pilote est un bundle standard qui exporte une factory `MIDIDriverInterface` ; placer le payload dans la factory/le constructeur le fait s’exécuter dès que `MIDIServer` énumère les pilotes. Compilez-le, déposez-le sous `~/Library/Audio/MIDI Drivers/Evil.plugin`, puis déclenchez son chargement sans vous déconnecter ni redémarrer :
+Un pilote est un bundle standard qui exporte une fabrique `MIDIDriverInterface` ; placer le payload dans la fabrique/le constructeur le fait s’exécuter dès que `MIDIServer` énumère les pilotes. Compilez-le, déposez-le sous `~/Library/Audio/MIDI Drivers/Evil.plugin`, puis déclenchez son chargement sans vous déconnecter ni redémarrer :
 
 ```bash
 # starts MIDIServer, which scans the driver directories
 open -a "Audio MIDI Setup"
 ```
 
-### QuickLook Plugins
+### Plugins QuickLook
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0012/](https://theevilbit.github.io/beyond/beyond_0012/)<sup>[[8]](#references)</sup>
+Compte rendu : [https://theevilbit.github.io/beyond/beyond_0012/](https://theevilbit.github.io/beyond/beyond_0012/)<sup>[[8]](#references)</sup>
 
 - Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
 - Contournement de TCC : [🟠](https://emojipedia.org/large-orange-circle)
-  - Vous pourriez obtenir des autorisations TCC supplémentaires
+  - Vous pourriez obtenir des accès TCC supplémentaires
 
 #### Emplacement
 
@@ -467,14 +467,14 @@ Les plugins QuickLook peuvent être exécutés lorsque vous **déclenchez l’ap
 
 Vous pouvez compiler votre propre plugin QuickLook, le placer dans l’un des emplacements précédents pour le charger, puis sélectionner un fichier pris en charge et appuyer sur la barre d’espace pour le déclencher.
 
-Ces chemins correspondent aux anciens bundles `.qlgenerator` ; [le guide d’architecture Quick Look d’Apple](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Articles/QLArchitecture.html) décrit l’ordre de recherche et les types de fichiers correspondants. Les **app extensions** Quick Look actuelles sont intégrées à une app et suivent des règles d’enregistrement et d’exécution différentes. La présence d’un générateur ne prouve ni qu’il sera sélectionné pour le type de fichier ni que son code s’exécutera dans Finder même. Le chemin des anciens générateurs a été vérifié à partir de la documentation et de la présence des répertoires ; aucun générateur n’a été installé ni chargé sur le Mac utilisé pour la recherche.
+Ces chemins désignent les bundles `.qlgenerator` historiques ; [le guide d’architecture Quick Look d’Apple](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Articles/QLArchitecture.html) documente l’ordre de recherche et les types de fichiers correspondants. Les **app extensions** Quick Look actuelles sont intégrées à une app et obéissent à des règles différentes d’enregistrement et d’exécution. La présence d’un générateur ne prouve pas qu’il sera choisi pour le type de fichier ni que son code s’exécutera dans Finder lui-même. Le chemin des générateurs historiques a été vérifié à partir de la documentation et de la présence des répertoires ; aucun générateur n’a été installé ni chargé sur le Mac de recherche.
 
 ### ~~Login/Logout Hooks~~
 
 > [!CAUTION]
-> Cela n’a pas fonctionné pour moi, ni avec le LoginHook de l’utilisateur ni avec le LogoutHook de root.
+> Cela n’a pas fonctionné pour moi, ni avec le LoginHook de l’utilisateur ni avec le LogoutHook root
 
-**Writeup** : [https://theevilbit.github.io/beyond/beyond_0022/](https://theevilbit.github.io/beyond/beyond_0022/)<sup>[[9]](#references)</sup>
+**Compte rendu** : [https://theevilbit.github.io/beyond/beyond_0022/](https://theevilbit.github.io/beyond/beyond_0022/)<sup>[[9]](#references)</sup>
 
 - Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
 - Contournement de TCC : [🔴](https://emojipedia.org/large-red-circle)
@@ -482,7 +482,7 @@ Ces chemins correspondent aux anciens bundles `.qlgenerator` ; [le guide d’arc
 #### Emplacement
 
 - Vous devez pouvoir exécuter quelque chose comme `defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh`
-  - `Lo`cated dans `~/Library/Preferences/com.apple.loginwindow.plist`
+  - Situé dans `~/Library/Preferences/com.apple.loginwindow.plist`
 
 Ils sont obsolètes, mais peuvent servir à exécuter des commandes lorsqu’un utilisateur se connecte.<sup>[[9]](#references)</sup>
 
@@ -517,44 +517,44 @@ defaults delete com.apple.loginwindow LoginHook
 defaults delete com.apple.loginwindow LogoutHook
 ```
 
-La valeur de l’utilisateur root est stockée dans **`/private/var/root/Library/Preferences/com.apple.loginwindow.plist`**
+L’entrée de l’utilisateur root est stockée dans **`/private/var/root/Library/Preferences/com.apple.loginwindow.plist`**
 
 ## Conditional Sandbox Bypass
 
 > [!TIP]
-> Vous trouverez ici des emplacements de démarrage utiles pour le **sandbox bypass**, qui permettent d’exécuter simplement quelque chose en **l’écrivant dans un fichier** et en **comptant sur des conditions peu courantes**, comme la présence de **programmes spécifiques**, des actions ou des environnements d’« utilisateurs inhabituels ».
+> Vous trouverez ici des emplacements de démarrage utiles pour le **sandbox bypass**, qui permettent d’exécuter simplement quelque chose en **l’écrivant dans un fichier** et en **comptant sur des conditions peu courantes**, comme la présence de **programmes spécifiques**, des actions ou des environnements liés à des **utilisateurs « peu courants »**.
 
 ### Cron
 
 **Writeup** : [https://theevilbit.github.io/beyond/beyond_0004/](https://theevilbit.github.io/beyond/beyond_0004/)<sup>[[10]](#references)</sup>
 
-- Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
+- Utile pour le sandbox bypass : [✅](https://emojipedia.org/check-mark-button)
   - Cependant, vous devez pouvoir exécuter le binaire `crontab`
   - Ou être root
-- Contournement de TCC : [🔴](https://emojipedia.org/large-red-circle)
+- TCC bypass : [🔴](https://emojipedia.org/large-red-circle)
 
 #### Emplacement
 
 - **`/usr/lib/cron/tabs/`**
   - Un accès root est requis pour écrire directement. Aucun accès root n’est nécessaire si vous pouvez exécuter `crontab <file>`
-  - **Déclencheur** : La planification de la crontab installée. `at` et `periodic` sont des mécanismes distincts présentés ci-dessous.
+  - **Déclencheur** : La planification dans la crontab installée. `at` et `periodic` sont des mécanismes distincts présentés ci-dessous.
 
 #### Description et exploitation
 
-Listez les tâches cron de l’**utilisateur actuel** avec :
+Lister les tâches cron de l’**utilisateur actuel** avec :
 
 ```bash
 crontab -l
 ```
 
-Le plist launchd du cron daemon système contient une entrée `QueueDirectories` pour `/usr/lib/cron/tabs` ; c’est là que sont stockées les crontabs des utilisateurs installées. L’inspection des crontabs des autres utilisateurs nécessite les privilèges root :
+Le plist launchd du daemon cron du système contient une entrée `QueueDirectories` pour `/usr/lib/cron/tabs` ; c'est là que sont conservés les crontabs des utilisateurs installés. L'inspection des crontabs des autres utilisateurs nécessite les privilèges root :
 
 ```bash
 plutil -p /System/Library/LaunchDaemons/com.vix.cron.plist
 ls -ld /usr/lib/cron/tabs
 ```
 
-Dans un compte jetable, une entrée cron ne contenant qu’un marqueur peut être installée avec `crontab`, puis supprimée après observation. L’exécution de `crontab <file>` **remplace l’intégralité de la crontab existante du compte** ; si le compte n’est pas jetable, sauvegardez-la et restaurez-la ensuite :<sup>[[10]](#references)</sup>
+Dans un compte jetable, une entrée cron utilisateur contenant uniquement un marqueur peut être installée avec `crontab`, puis supprimée après observation. L’exécution de `crontab <file>` **remplace l’intégralité du crontab existant du compte** : sauvegardez-le et restaurez-le si le compte n’est pas jetable :<sup>[[10]](#references)</sup>
 
 ```bash
 lab=$(mktemp -d)
@@ -577,20 +577,20 @@ Compte rendu : [https://theevilbit.github.io/beyond/beyond_0002/](https://theevi
 
 - Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
 - Contournement de TCC : [✅](https://emojipedia.org/check-mark-button)
-  - iTerm2 disposait auparavant d’autorisations TCC
+  - iTerm2 avait auparavant des permissions TCC accordées
 
 #### Emplacements
 
 - **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch`**
-  - **Déclencheur** : démarrer iTerm2 avec un script Python API compatible dans ce dossier
+  - **Déclencheur** : Démarrer iTerm2 avec un script d’API Python compatible dans ce dossier
 - **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`**
-  - **Déclencheur** : démarrer iTerm2 ; le hook de démarrage AppleScript est documenté séparément
+  - **Déclencheur** : Démarrer iTerm2 ; le hook de démarrage AppleScript est documenté séparément
 - **`~/Library/Preferences/com.googlecode.iterm2.plist`**
-  - **Déclencheur** : créer une session avec le profil dont la commande ou le texte initial lance le payload
+  - **Déclencheur** : Créer une session avec le profil dont la commande ou le texte initial invoque le payload
 
 #### Description et exploitation
 
-Le [guide actuel de l’API Python d’iTerm2](https://iterm2.com/python-api/tutorial/running.html#auto-run-scripts) documente les scripts **Python** exécutés automatiquement dans `~/Library/Application Support/iTerm2/Scripts/AutoLaunch`. Il ne confirme pas qu’un fichier exécutable `.sh` quelconque placé dans ce dossier soit lancé. Dans un compte jetable, enregistrez ce script sous `~/Library/Application Support/iTerm2/Scripts/AutoLaunch/ht-marker.py` :
+Le [guide actuel de l’API Python d’iTerm2](https://iterm2.com/python-api/tutorial/running.html#auto-run-scripts) documente les scripts **Python** exécutés automatiquement dans `~/Library/Application Support/iTerm2/Scripts/AutoLaunch`. Il ne confirme pas qu’un fichier `.sh` exécutable quelconque placé dans ce dossier soit exécuté. Pour un compte jetable, enregistrez ce fichier sous `~/Library/Application Support/iTerm2/Scripts/AutoLaunch/ht-marker.py` :
 
 ```python
 import iterm2
@@ -602,17 +602,17 @@ async def main(connection):
 iterm2.run_until_complete(main)
 ```
 
-Le [guide AppleScript actuel d’iTerm2](https://iterm2.com/documentation-scripting.html) documente séparément `~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`, avec une solution de repli héritée vers `~/Library/Application Support/iTerm/Scripts/AutoLaunch.scpt` lorsque le dossier moderne n’existe pas. Voici un AppleScript ne contenant qu’un marqueur :
+Le [guide AppleScript actuel d’iTerm2](https://iterm2.com/documentation-scripting.html) documente séparément `~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`, avec un chemin de repli historique `~/Library/Application Support/iTerm/Scripts/AutoLaunch.scpt` lorsque le dossier moderne n’existe pas. Voici un AppleScript ne contenant qu’un marqueur :
 
 ```applescript
 do shell script "touch /tmp/iterm2-autolaunchscpt"
 ```
 
-Ces exemples de scripts ont été vérifiés par rapport à la documentation d’iTerm2, mais n’ont pas été exécutés dans la session de bureau active. Après les tests dans un compte jetable, supprimez le script de test et `/tmp/ht-iterm-autolaunch-marker` ou `/tmp/iterm2-autolaunchscpt`, selon le cas.
+Ces exemples de scripts ont été vérifiés à l'aide de la documentation d'iTerm2, mais n'ont pas été exécutés dans la session de bureau active. Après les avoir testés dans un compte jetable, supprimez le script de test et `/tmp/ht-iterm-autolaunch-marker` ou `/tmp/iterm2-autolaunchscpt`, respectivement.
 
-Les préférences d’iTerm2 situées dans **`~/Library/Preferences/com.googlecode.iterm2.plist`** peuvent définir une commande de profil ou un texte initial. Ce dernier est saisi dans une session ; son exécution dépend de son interprétation par un shell. La [documentation d’iTerm2 sur les profils](https://iterm2.com/documentation-preferences-profiles-general.html) décrit la commande exécutée à la création d’une nouvelle session avec ce profil.
+Les préférences d'iTerm2 situées dans **`~/Library/Preferences/com.googlecode.iterm2.plist`** peuvent définir une commande de profil ou un texte initial. Ce dernier est saisi dans une session ; son exécution dépend de son interprétation par un shell. [La documentation des profils d'iTerm2](https://iterm2.com/documentation-preferences-profiles-general.html) décrit la commande exécutée lors de la création d'une nouvelle session avec ce profil.
 
-Ce paramètre peut être configuré dans les réglages d’iTerm2 :
+Ce paramètre peut être configuré dans les réglages d'iTerm2 :
 
 <figure><img src="../images/image (37).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -628,25 +628,25 @@ plutil -p com.googlecode.iterm2.plist
       "Initial Text" => "touch /tmp/iterm-start-command"
 ```
 
-Pour une évaluation sûre, inspectez le profil choisi dans les réglages d’iTerm2 ou lisez une copie de son fichier de préférences. Modifier `Initial Text` dans un profil actif affecterait les sessions d’un utilisateur ; aucune préférence n’a donc été modifiée sur le Mac de recherche.
+Pour une évaluation sans risque, inspectez le profil choisi dans les réglages d’iTerm2 ou lisez une copie de son fichier de préférences. Modifier `Initial Text` dans un profil actif affecterait les sessions d’un utilisateur ; aucune préférence n’a donc été modifiée sur le Mac de recherche.
 
 ### xbar
 
 Writeup : [https://theevilbit.github.io/beyond/beyond_0007/](https://theevilbit.github.io/beyond/beyond_0007/)<sup>[[12]](#references)</sup>
 
-- Utile pour bypass sandbox : [✅](https://emojipedia.org/check-mark-button)
+- Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
   - Mais xbar doit être installé
-- TCC bypass : [✅](https://emojipedia.org/check-mark-button)
-  - Le programme demande des autorisations d’accessibilité
+- Contournement de TCC : [✅](https://emojipedia.org/check-mark-button)
+  - Il demande les autorisations d’accessibilité
 
 #### Emplacement
 
 - **`~/Library/Application\ Support/xbar/plugins/`**
-  - **Déclencheur** : au lancement de xbar
+  - **Déclencheur** : Au lancement de xbar
 
 #### Description
 
-Si le programme populaire [**xbar**](https://github.com/matryer/xbar) est installé, il est possible d’écrire un script shell dans **`~/Library/Application\ Support/xbar/plugins/`**, qui sera exécuté au lancement de xbar :<sup>[[12]](#references)</sup>
+Si le programme populaire [**xbar**](https://github.com/matryer/xbar) est installé, il est possible d’écrire un shell script dans **`~/Library/Application\ Support/xbar/plugins/`** qui sera exécuté au démarrage de xbar :<sup>[[12]](#references)</sup>
 
 ```bash
 cat > "$HOME/Library/Application Support/xbar/plugins/a.sh" << EOF
@@ -658,23 +658,23 @@ chmod +x "$HOME/Library/Application Support/xbar/plugins/a.sh"
 
 ### Hammerspoon
 
-**Compte rendu** : [https://theevilbit.github.io/beyond/beyond_0008/](https://theevilbit.github.io/beyond/beyond_0008/)<sup>[[13]](#references)</sup>
+**Writeup**: [https://theevilbit.github.io/beyond/beyond_0008/](https://theevilbit.github.io/beyond/beyond_0008/)<sup>[[13]](#references)</sup>
 
-- Utile pour bypasser le sandbox : [✅](https://emojipedia.org/check-mark-button)
-  - Hammerspoon doit toutefois être installé
-- TCC bypass : [✅](https://emojipedia.org/check-mark-button)
-  - L’application demande des autorisations d’accessibilité
+- Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
+  - Mais Hammerspoon doit être installé
+- Contournement de TCC : [✅](https://emojipedia.org/check-mark-button)
+  - Il demande des autorisations d’accessibilité
 
 #### Emplacement
 
 - **`~/.hammerspoon/init.lua`**
-  - **Déclenchement** : lorsque Hammerspoon est exécuté
+  - **Déclenchement** : Dès que Hammerspoon est exécuté
 
 #### Description
 
-[**Hammerspoon**](https://github.com/Hammerspoon/hammerspoon) est une plateforme d’automatisation pour **macOS** qui utilise le **langage de script LUA**. Elle prend notamment en charge l’intégration de code AppleScript complet et l’exécution de scripts shell, ce qui étend considérablement ses capacités de script.<sup>[[13]](#references)</sup>
+[**Hammerspoon**](https://github.com/Hammerspoon/hammerspoon) sert de plateforme d’automatisation pour **macOS**, utilisant le **langage de script LUA**. Il prend notamment en charge l’intégration de code AppleScript complet et l’exécution de scripts shell, ce qui enrichit considérablement ses capacités de script.<sup>[[13]](#references)</sup>
 
-L’application recherche un fichier unique, `~/.hammerspoon/init.lua`, et exécute le script au démarrage.
+L’application recherche un seul fichier, `~/.hammerspoon/init.lua`, et le script est exécuté au démarrage.
 
 ```bash
 mkdir -p "$HOME/.hammerspoon"
@@ -692,9 +692,9 @@ EOF
 
 #### Emplacement
 
-- Un fichier de script **déjà référencé** par un preset BetterTouchTool activé, ou la configuration de ce preset dans `~/Library/Application Support/BetterTouchTool/`. Le chemin exact du script dépend de la configuration du preset.
+- Un fichier de script **déjà référencé** par un préréglage BetterTouchTool activé, ou la configuration de ce préréglage sous `~/Library/Application Support/BetterTouchTool/`. Le chemin précis du script dépend de la configuration du préréglage.
 
-[La référence des actions BetterTouchTool](https://docs.folivora.ai/docs/actions/action-definitions/) documente les actions de script shell et de commande en arrière-plan. L’événement clavier, souris, tactile, widget ou autre configuré doit se produire lorsque le preset concerné est actif ; [son guide des déclencheurs](https://docs.folivora.ai/docs/configuration/new-trigger/) montre cette association. Un fichier quelconque dans le répertoire de support de l’application ne constitue pas un déclencheur. Une action déjà configurée qui charge un script externe modifiable constitue une cible écriture-vers-exécution plus précise. Le code s’exécute avec le compte de l’utilisateur de BetterTouchTool, sous réserve des autorisations macOS effectivement accordées. BetterTouchTool était absent de `/Applications` sur le Mac de recherche ; aucun preset n’a donc été modifié ni exécuté localement.
+[La référence des actions de BetterTouchTool](https://docs.folivora.ai/docs/actions/action-definitions/) décrit les actions de script shell et de commande en arrière-plan. L’événement clavier, souris, tactile, widget ou autre configuré doit se produire lorsque le préréglage concerné est actif ; [son guide des déclencheurs](https://docs.folivora.ai/docs/configuration/new-trigger/) montre cette association. Un fichier quelconque dans le répertoire de prise en charge de l’application ne constitue pas un déclencheur. Une action déjà configurée qui charge un script externe modifiable constitue une cible d’écriture-vers-exécution plus précise. Le code s’exécute avec le compte utilisateur de BetterTouchTool, sous réserve des autorisations macOS effectivement accordées. BetterTouchTool était absent de `/Applications` sur le Mac de recherche ; aucun préréglage n’y a donc été modifié ni exécuté.
 
 ### Alfred
 
@@ -705,16 +705,16 @@ EOF
 
 #### Emplacement
 
-- Un script ou fichier **déjà référencé** par un workflow Alfred installé, ou ce workflow dans le répertoire `Alfred.alfredpreferences` configuré par l’utilisateur. Le répertoire des préférences peut être synchronisé et son chemin n’est pas universellement fixe.
+- Un script ou fichier **déjà référencé** par un workflow Alfred installé, ou ce workflow dans le répertoire `Alfred.alfredpreferences` configuré par l’utilisateur. Le répertoire des préférences peut être synchronisé et ne correspond pas à un chemin universel fixe.
 
-[Le guide des workflows Alfred](https://www.alfredapp.com/help/workflows/) décrit le prérequis Powerpack et l’installation via son interface. Le hotkey, le mot-clé ou un autre déclencheur configuré d’un workflow installé doit se déclencher ; [l’exemple de hotkey d’Alfred](https://www.alfredapp.com/help/workflows/triggers/hotkey/creating-a-hotkey-workflow/) montre une action de script. [La référence de l’environnement Alfred](https://www.alfredapp.com/help/workflows/script-environment-variables/) expose le chemin des préférences sélectionné sous `alfred_preferences`. Déposer un fichier de workflow non enregistré dans un répertoire quelconque ne prouve pas qu’il sera installé ou exécuté. Le code s’exécute avec le compte Alfred connecté, selon les autorisations macOS effectivement accordées. Alfred était absent de `/Applications` sur le Mac de recherche ; cette possibilité a donc été évaluée uniquement à partir de la documentation.
+[Le guide des workflows d’Alfred](https://www.alfredapp.com/help/workflows/) décrit la condition préalable Powerpack et l’installation via son interface. Un déclencheur configuré — raccourci clavier, mot-clé ou autre — d’un workflow installé doit se déclencher ; [l’exemple de raccourci clavier d’Alfred](https://www.alfredapp.com/help/workflows/triggers/hotkey/creating-a-hotkey-workflow/) présente une action de script. [La référence de l’environnement d’Alfred](https://www.alfredapp.com/help/workflows/script-environment-variables/) expose le chemin des préférences sélectionné sous la variable `alfred_preferences`. Déposer un fichier de workflow non enregistré dans un répertoire quelconque ne prouve pas qu’il sera installé ou exécuté. Le code s’exécute avec le compte Alfred de l’utilisateur connecté et ses autorisations macOS effectives. Alfred était absent de `/Applications` sur le Mac de recherche ; cette piste a donc été évaluée uniquement à partir de la documentation.
 
 ### Commandes de script Raycast et actualisation des extensions
 
-- **Cible d’écriture :** Un script exécutable dans un répertoire **déjà ajouté** sous Raycast Settings → Script Commands. Raycast n’analyse pas un répertoire nouvellement créé au hasard. [Le guide Script Commands de Raycast](https://manual.raycast.com/script-commands) décrit l’enregistrement d’un répertoire.
-- **Déclencheur et identité :** Un utilisateur lance la commande indexée, un hotkey configuré ou un fallback la lance, ou Raycast actualise un script `inline` selon son `@raycast.refreshTime` configuré. Le script s’exécute via son interpréteur avec le compte Raycast connecté. La [référence des métadonnées en amont](https://github.com/raycast/script-commands#metadata) limite l’actualisation automatique aux commandes inline, et [le manifeste des extensions Raycast](https://github.com/raycast/extensions/blob/main/docs/information/manifest.md) prend séparément en charge un `interval` pour les commandes d’extension installées `no-view` ou `menu-bar`. Ajouter simplement une commande de script normale ne la programme pas.
+- **Cible d’écriture :** Un script exécutable dans un répertoire **déjà ajouté** sous Raycast Settings → Script Commands. Raycast ne parcourt pas un répertoire nouvellement créé quelconque. [Le guide des commandes de script de Raycast](https://manual.raycast.com/script-commands) décrit l’enregistrement d’un répertoire.
+- **Déclencheur et identité :** Un utilisateur lance la commande indexée, un raccourci clavier ou un fallback configuré la lance, ou Raycast actualise un script `inline` selon son `@raycast.refreshTime` configuré. Le script s’exécute avec le compte Raycast de l’utilisateur connecté via son interpréteur. [La référence des métadonnées en amont](https://github.com/raycast/script-commands#metadata) limite l’actualisation automatique aux commandes inline, et [le manifeste des extensions Raycast](https://github.com/raycast/extensions/blob/main/docs/information/manifest.md) prend séparément en charge un `interval` pour les commandes d’extension installées `no-view` ou `menu-bar`. Le simple ajout d’une commande de script standard ne la planifie pas.
 
-Pour un compte jetable avec un répertoire de scripts enregistré, voici un script inline qui écrit uniquement un marqueur :
+Pour un compte jetable disposant d’un répertoire de scripts enregistré, voici un script inline qui ne fait qu’écrire un marqueur :
 
 ```bash
 #!/bin/bash
@@ -726,13 +726,13 @@ Pour un compte jetable avec un répertoire de scripts enregistré, voici un scri
 echo ready
 ```
 
-Enregistrez-le dans le répertoire enregistré, rendez-le exécutable et laissez Raycast l’actualiser. Supprimez ensuite ce fichier ainsi que `/tmp/ht-raycast-refresh-marker`. Raycast n’a pas été trouvé sous son nom habituel dans `/Applications` sur le Mac de recherche ; cette procédure est donc documentée, mais n’a pas été exécutée localement. L’Accessibilité, l’Automatisation et les autorisations d’accès aux fichiers restent soumises aux invites d’autorisation de macOS.
+Enregistrez-le dans le répertoire enregistré, rendez-le exécutable et laissez Raycast l’actualiser. Supprimez ensuite ce fichier ainsi que `/tmp/ht-raycast-refresh-marker`. Raycast n’a pas été trouvé sous son nom habituel dans `/Applications` sur le Mac de recherche ; cette procédure est donc documentée, mais n’a pas été exécutée localement. Les autorisations d’accessibilité, d’automatisation et d’accès aux fichiers restent soumises aux demandes d’autorisation de macOS.
 
-### Tâches automatiques d’espace de travail de Visual Studio Code
+### Tâches automatiques d’espace de travail dans Visual Studio Code
 
-- **Destination d’écriture :** `.vscode/tasks.json` dans un espace de travail que l’utilisateur ouvrira.
-- **Déclencheur :** ouverture de cet espace de travail dans VS Code, mais uniquement si le dossier est approuvé **et** que les tâches automatiques ont été autorisées. Un espace de travail non approuvé n’exécute jamais de tâches automatiques ; par défaut, une confirmation est demandée à l’utilisateur avant la première exécution automatique. [La documentation des tâches VS Code](https://code.visualstudio.com/docs/debugtest/tasks#_run-behavior) et [la documentation sur la confiance des espaces de travail](https://code.visualstudio.com/docs/editing/workspaces/workspace-trust) décrivent ces deux conditions.
-- **Identité d’exécution :** le compte de l’utilisateur VS Code, par le biais du processus de tâche configuré. Il s’agit d’une exécution propre à l’application, et non d’une persistance à la connexion.
+- **Cible d’écriture :** `.vscode/tasks.json` dans un espace de travail que l’utilisateur ouvrira.
+- **Déclencheur :** Ouverture de cet espace de travail dans VS Code, mais uniquement si le dossier est approuvé **et** que les tâches automatiques ont été autorisées. Un espace de travail non approuvé n’exécute jamais de tâches automatiques ; par défaut, VS Code demande l’autorisation de l’utilisateur avant la première exécution automatique. La [documentation sur les tâches de VS Code](https://code.visualstudio.com/docs/debugtest/tasks#_run-behavior) et la [documentation sur la confiance des espaces de travail](https://code.visualstudio.com/docs/editing/workspaces/workspace-trust) décrivent ces deux conditions.
+- **Identité d’exécution :** Le compte de l’utilisateur de VS Code, via le processus de tâche configuré. Il s’agit d’une exécution propre à l’application, et non d’une persistance à la connexion.
 
 Dans un **nouvel espace de travail jetable**, placez cette tâche qui ne fait que créer un marqueur dans `.vscode/tasks.json` :
 
@@ -754,13 +754,13 @@ Dans un **nouvel espace de travail jetable**, placez cette tâche qui ne fait qu
 
 Après avoir ouvert l’espace de travail approuvé et autorisé les tâches automatiques, vérifiez la présence de `.autostart-task-ran`. Supprimez l’entrée de tâche et le marqueur pour nettoyer. **Cela a été vérifié à partir de la documentation de Microsoft et du bundle installé de VS Code 1.139.1 ; cela n’a pas été exécuté dans la session de bureau active.**
 
-### Hôtes de messagerie native Chrome
+### Hôtes de messagerie native de Chrome
 
-- **Cible d’écriture :** `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/<host-name>.json` pour l’utilisateur actuel, ou `/Library/Google/Chrome/NativeMessagingHosts/<host-name>.json` pour tous les utilisateurs (écriture administrateur requise). Chromium et Chrome for Testing utilisent des répertoires différents ; consultez [le tableau des chemins actuel de Chrome](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging#native-messaging-host-location).
-- **Déclenchement :** Une extension Chrome installée disposant de l’autorisation `nativeMessaging` appelle `chrome.runtime.connectNative()` ou `chrome.runtime.sendNativeMessage()` en utilisant le nom d’hôte exact du manifeste. Chrome démarre alors le programme hôte. Ouvrir Chrome seul n’exécute pas un nouvel hôte natif arbitraire ; créer un manifeste sans extension appelante ne fait rien. [Le guide de messagerie native de Chrome](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging) décrit cette négociation.
-- **Identité d’exécution :** Le compte de l’utilisateur Chrome. Le manifeste doit indiquer un chemin absolu vers le programme exécutable et autoriser explicitement l’origine de l’extension appelante.
+- **Cible d’écriture :** `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/<host-name>.json` pour l’utilisateur actuel, ou `/Library/Google/Chrome/NativeMessagingHosts/<host-name>.json` pour tous les utilisateurs (écriture par un administrateur requise). Chromium et Chrome for Testing utilisent des répertoires différents ; consultez le [tableau actuel des chemins de Chrome](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging#native-messaging-host-location).
+- **Déclencheur :** Une extension Chrome installée disposant de la permission `nativeMessaging` appelle `chrome.runtime.connectNative()` ou `chrome.runtime.sendNativeMessage()` en utilisant le nom d’hôte exact indiqué dans le manifeste. Chrome démarre alors l’exécutable hôte. Ouvrir Chrome seul n’exécute pas un nouvel hôte natif arbitraire ; créer un manifeste sans extension appelante ne fait rien. Le [guide de messagerie native de Chrome](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging) décrit cette négociation.
+- **Identité d’exécution :** Le compte de l’utilisateur Chrome. Le manifeste doit indiquer un chemin absolu vers l’exécutable et autoriser explicitement l’origine de l’extension appelante.
 
-Dans un compte de navigateur jetable avec une extension de test, la paire de fichiers suivante illustre le lien entre écriture et exécution. Le nom de fichier du manifeste doit correspondre à son champ `name`, et `TEST_EXTENSION_ID` doit être remplacé par l’ID réel de cette extension :
+Dans un compte de navigateur jetable avec une extension de test, la paire de fichiers suivante illustre le lien entre écriture et exécution. Le nom de fichier du manifeste doit correspondre à son `name`, et `TEST_EXTENSION_ID` doit être remplacé par l’ID réel de cette extension :
 
 ```json
 {
@@ -772,7 +772,7 @@ Dans un compte de navigateur jetable avec une extension de test, la paire de fic
 }
 ```
 
-Enregistrez ce JSON sous `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/org.hacktricks.marker.json`. L’exécutable qui se contente de créer un marqueur, indiqué dans le champ `path` du manifeste, peut contenir :
+Enregistrez ce JSON sous `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/org.hacktricks.marker.json`. L’exécutable qui sert uniquement à déposer un marqueur, indiqué par le `path` du manifeste, peut contenir :
 
 ```sh
 #!/bin/sh
@@ -780,15 +780,15 @@ Enregistrez ce JSON sous `~/Library/Application Support/Google/Chrome/NativeMess
 exit 0
 ```
 
-Après que l’extension de test a appelé `chrome.runtime.sendNativeMessage('org.hacktricks.marker', {ping: 1})` depuis son service worker ou sa page d’extension, le marqueur prouve que l’hôte a démarré. Cet hôte minimal ne met pas en œuvre le protocole de réponse de Chrome avec préfixe de longueur ; l’extension peut donc signaler une erreur de messagerie après l’écriture du marqueur. Supprimez le manifeste de test, l’hôte et le marqueur pour nettoyer. Sous macOS 26.5.2, l’application Chrome et les deux répertoires de manifestes étaient présents ; **le profil Chrome actif n’a pas été modifié ni utilisé**.
+Après que l’extension de test a appelé `chrome.runtime.sendNativeMessage('org.hacktricks.marker', {ping: 1})` depuis son service worker ou sa page d’extension, le marqueur prouve que l’hôte a démarré. Cet hôte minimal n’implémente pas le protocole de réponse de Chrome avec préfixe de longueur ; l’extension peut donc signaler une erreur de messagerie après l’écriture du marqueur. Supprimez le manifeste de test, l’hôte et le marqueur pour nettoyer. Sous macOS 26.5.2, l’application Chrome et les deux répertoires de manifestes étaient présents ; **le profil Chrome actif n’a pas été modifié ni utilisé**.
 
-### Commandes d’événements clavier Karabiner-Elements
+### Commandes d’événement de touche Karabiner-Elements
 
-- **Cible d’écriture :** `~/.config/karabiner/karabiner.json` dans un compte où Karabiner-Elements est installé et en cours d’exécution. [Le guide de Karabiner sur l’emplacement des fichiers](https://karabiner-elements.pqrs.org/docs/json/location/) indique que l’application surveille ce fichier et le recharge après une écriture. Les fichiers JSON dans `assets/complex_modifications` ne sont que des préréglages importables ; le simple fait d’y écrire un fichier n’active pas de règle.
-- **Déclencheur :** L’événement de touche configuré après l’activation de la règle. La [référence de `to.shell_command`](https://karabiner-elements.pqrs.org/docs/json/complex-modifications-manipulator-definition/to/shell-command/) décrit l’exécution de commandes. Cela n’exécute pas du code à l’ouverture de session ni à chaque écriture de fichier.
+- **Cible d’écriture :** `~/.config/karabiner/karabiner.json` dans un compte où Karabiner-Elements est installé et en cours d’exécution. [Le guide de Karabiner sur l’emplacement du fichier](https://karabiner-elements.pqrs.org/docs/json/location/) indique que l’application surveille ce fichier et le recharge après une écriture. Les fichiers JSON dans `assets/complex_modifications` ne sont que des préréglages importables ; le simple fait d’en écrire un à cet emplacement n’active pas de règle.
+- **Déclencheur :** L’événement de touche configuré, une fois la règle activée. La [référence de `to.shell_command`](https://karabiner-elements.pqrs.org/docs/json/complex-modifications-manipulator-definition/to/shell-command/) décrit l’exécution de commandes. Il ne s’agit pas d’une exécution de code à la connexion ni à chaque écriture de fichier.
 - **Identité d’exécution :** L’utilisateur connecté qui exécute le processus utilisateur de Karabiner. Les autorisations qui lui sont accordées et tout accès TCC dépendent de l’application et de sa version.
 
-Pour un compte de test jetable, ajoutez cet objet de règle au tableau `complex_modifications.rules` du profil sélectionné dans `karabiner.json`, en conservant le reste de ce profil. Appuyez sur F18 pour créer un marqueur inoffensif, puis supprimez cette règle et le marqueur. Choisir F18 évite de remplacer une touche de frappe ordinaire :
+Dans un compte de test jetable, ajoutez cet objet de règle au tableau `complex_modifications.rules` du profil sélectionné dans `karabiner.json`, en conservant le reste du profil. Appuyez sur F18 pour créer un marqueur inoffensif, puis supprimez cette règle et le marqueur. Le choix de F18 évite de remplacer une touche de frappe ordinaire :
 
 ```json
 {
@@ -805,15 +805,15 @@ Pour un compte de test jetable, ajoutez cet objet de règle au tableau `complex_
 }
 ```
 
-Karabiner-Elements n’était pas installé dans `/Applications` sur la machine de test macOS 26.5.2 ; il s’agit donc d’un PoC étayé par la documentation, et non d’un résultat d’exécution local.
+Karabiner-Elements n’était pas installé dans `/Applications` sur la machine de test macOS 26.5.2. Il s’agit donc d’un PoC fondé sur la documentation, et non d’un résultat d’exécution locale.
 
-### Hooks Git dans un dépôt local
+### Git hooks dans un dépôt local
 
-- **Cible d’écriture :** Un hook exécutable tel que `<repo>/.git/hooks/post-checkout`. Si `core.hooksPath` a déjà été défini, utilisez plutôt le répertoire configuré. Un hook ajouté au dépôt comme fichier source suivi ordinaire n’est pas automatiquement installé dans un clone.
-- **Déclencheur :** L’opération Git correspondante. Par exemple, `post-checkout` s’exécute après `git checkout` ou `git switch`, et peut aussi s’exécuter après la création d’un clone ou d’un worktree. [La référence des hooks Git](https://git-scm.com/docs/githooks) répertorie les événements et l’obligation de définir le bit exécutable ; [`core.hooksPath`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-corehooksPath) modifie le répertoire de recherche.
-- **Identité d’exécution :** Le compte qui exécute Git. Le hook ne peut s’exécuter que si le répertoire des hooks effectif du dépôt est accessible en écriture par l’acteur et si l’utilisateur effectue ensuite l’opération Git correspondante.
+- **Cible d’écriture :** Un hook exécutable tel que `<repo>/.git/hooks/post-checkout`. Si `core.hooksPath` a déjà été défini, utilisez plutôt le répertoire configuré. Un hook ajouté comme fichier source suivi ordinaire n’est pas automatiquement installé dans un clone.
+- **Déclencheur :** L’opération Git correspondante. Par exemple, `post-checkout` s’exécute après `git checkout` ou `git switch`, et peut aussi s’exécuter après un clone ou la création d’un worktree. [La référence des hooks de Git](https://git-scm.com/docs/githooks) répertorie les événements et l’exigence du bit exécutable ; [`core.hooksPath`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-corehooksPath) modifie le répertoire de recherche.
+- **Identité d’exécution :** Le compte qui exécute Git. Le hook ne peut s’exécuter que si le répertoire des hooks effectif du dépôt est accessible en écriture par l’acteur et que l’utilisateur effectue ensuite l’opération Git correspondante.
 
-Ce PoC limité à un marqueur crée un dépôt entièrement jetable, installe un hook et change de branche. Il a été exécuté avec succès avec Apple Git 2.50.1 sur macOS 26.5.2 :
+Ce PoC qui ne crée qu’un marqueur crée un dépôt entièrement jetable, installe un hook et change de branche. Il a été exécuté avec succès avec Apple Git 2.50.1 sur macOS 26.5.2 :
 
 ```bash
 lab=$(mktemp -d)
@@ -832,10 +832,10 @@ rm -r "$lab"
 
 ### Scripts de cycle de vie npm dans un projet
 
-- **Cible d’écriture :** La map `scripts` du fichier `package.json` d’un projet modifiable, ou d’un package de dépendance installé dont l’utilisateur exécutera le script de cycle de vie. Il s’agit d’un hook du workflow de développement, et non d’une exécution à l’ouverture d’un répertoire.
-- **Déclenchement et identité :** Un `npm install` ou `npm ci` ultérieur, si les scripts de cycle de vie sont autorisés, exécute `preinstall`, `install` et `postinstall` sous l’identité de l’utilisateur qui invoque npm. Un `npm run <name>` ordinaire exécute également les scripts `pre<name>` et `post<name>` correspondants. [La référence des cycles de vie de npm](https://docs.npmjs.com/cli/v11/using-npm/scripts) répertorie les événements ; [`ignore-scripts`](https://docs.npmjs.com/cli/v11/commands/npm-install#ignore-scripts) peut désactiver les scripts de cycle de vie lors de l’installation. La version et les paramètres de stratégie peuvent modifier ce qui est autorisé ; vérifiez donc la version de npm ciblée.
+- **Cible d’écriture :** la map `scripts` du fichier `package.json` d’un projet accessible en écriture, ou d’un package de dépendance installé dont l’utilisateur exécutera le script de cycle de vie. Il s’agit d’un hook du workflow de développement, et non d’une exécution déclenchée par l’ouverture d’un répertoire.
+- **Déclenchement et identité :** un `npm install` ou `npm ci` ultérieur, si les scripts de cycle de vie sont autorisés, exécute `preinstall`, `install` et `postinstall` avec les droits de l’utilisateur qui lance npm. Un `npm run <name>` ordinaire exécute également les scripts `pre<name>` et `post<name>` correspondants. [La référence des cycles de vie de npm](https://docs.npmjs.com/cli/v11/using-npm/scripts) répertorie les événements ; [`ignore-scripts`](https://docs.npmjs.com/cli/v11/commands/npm-install#ignore-scripts) peut désactiver les scripts de cycle de vie de l’installation. La version et les paramètres de stratégie peuvent modifier ce qui est autorisé : vérifiez donc la version de npm ciblée.
 
-Cette PoC à marqueur uniquement a été exécutée avec npm local dans un répertoire vide et jetable. Elle ne télécharge pas de dépendances et ne modifie pas le projet de l’utilisateur :
+Cette PoC, qui se contente de créer un marqueur, a été exécutée avec npm local dans un répertoire vide temporaire. Elle ne télécharge aucune dépendance et ne modifie pas le projet de l’utilisateur :
 
 ```bash
 lab=$(mktemp -d)
@@ -848,15 +848,15 @@ test -e "$lab/marker-preinstall" && test -e "$lab/marker-postinstall" && echo 'b
 rm -r "$lab"
 ```
 
-Cette méthode est distincte des fichiers de démarrage de l’interpréteur Python : npm doit effectuer l’action d’installation ou d’exécution concernée, tandis que le code `site` de Python peut être chargé lors d’un lancement ordinaire de l’interpréteur. De même, les cibles génériques de `Makefile` et les définitions de tâches de build nécessitent que l’utilisateur ou un outil déjà configuré invoque cette cible ; elles ne constituent pas des mécanismes de démarrage automatique distincts du système d’exploitation.
+Ceci est distinct des fichiers de démarrage de l’interpréteur Python : npm doit effectuer l’action d’installation ou d’exécution correspondante, tandis que le code `site` de Python peut être chargé lors d’un lancement ordinaire de l’interpréteur. De même, les cibles génériques de `Makefile` et les définitions de tâches de build nécessitent que l’utilisateur ou un outil déjà configuré invoque la cible ; elles ne constituent pas des mécanismes de démarrage automatique distincts du système d’exploitation.
 
 ### Configuration de démarrage de Vim
 
-- **Cible d’écriture :** `~/.vimrc` pour l’utilisateur qui lancera Vim (ou un autre fichier de démarrage sélectionné selon l’ordre d’initialisation de Vim). [La référence de démarrage de Vim](https://vimhelp.org/starting.txt.html) documente le fichier et les substitutions `VIMINIT`/`EXINIT`.
-- **Déclencheur :** un prochain lancement ordinaire de Vim qui charge cette configuration. L’option `-u NONE` de Vim ignore le vimrc utilisateur. Il s’agit d’une exécution propre à l’éditeur, et non d’un déclencheur de connexion au système d’exploitation.
-- **Identité d’exécution :** le compte de l’utilisateur de Vim.
+- **Cible d’écriture :** `~/.vimrc` pour l’utilisateur qui lancera Vim (ou un autre fichier de démarrage sélectionné selon l’ordre d’initialisation de Vim). [La référence de démarrage de Vim](https://vimhelp.org/starting.txt.html) documente le fichier ainsi que les substitutions `VIMINIT`/`EXINIT`.
+- **Déclencheur :** Un lancement ordinaire ultérieur de Vim qui charge cette configuration. L’option `-u NONE` de Vim ignore le vimrc de l’utilisateur. Il s’agit d’une exécution propre à l’éditeur, et non d’un déclencheur de connexion au système d’exploitation.
+- **Identité d’exécution :** Le compte de l’utilisateur de Vim.
 
-La PoC isolée suivante a été exécutée avec le `/usr/bin/vim` de macOS ; elle n’écrit aucune préférence Vim ni aucun document ouvert réel :
+Le PoC isolé suivant a été exécuté avec `/usr/bin/vim` de macOS ; il n’écrit aucune préférence Vim réelle ni aucun document ouvert :
 
 ```bash
 lab=$(mktemp -d)
@@ -866,15 +866,15 @@ test -e "$lab/marker" && echo 'vimrc fired'
 rm -r "$lab"
 ```
 
-Neovim dispose d’un chemin de configuration utilisateur distinct, `$XDG_CONFIG_HOME/nvim/init.lua` ou `init.vim`, et charge également des scripts dans ses répertoires d’exécution `plugin/`, conformément à sa [documentation de démarrage](https://neovim.io/doc/user/starting/). Neovim n’était pas installé sur la machine de test sous macOS 26.5.2 ; cette variante n’y a donc pas été exécutée.
+Neovim possède un chemin de configuration utilisateur distinct, `$XDG_CONFIG_HOME/nvim/init.lua` ou `init.vim`, et charge également les scripts présents dans ses répertoires d’exécution `plugin/`, conformément à sa [documentation de démarrage](https://neovim.io/doc/user/starting/). Neovim n’était pas installé sur la machine de test macOS 26.5.2 ; cette variante n’y a donc pas été exécutée.
 
 ### Commandes de configuration du client SSH
 
 - **Cible d’écriture :** `~/.ssh/config`, ou un autre fichier qu’il inclut déjà. Il s’agit d’un fichier de configuration **client**, distinct du fichier côté serveur `~/.ssh/rc` décrit ci-dessous.
-- **Déclencheur :** Une invocation de `ssh` correspondante. `Match exec` exécute une commande locale lorsque le client évalue sa configuration, même avec `ssh -G`, qui affiche la configuration sans se connecter. `ProxyCommand` s’exécute lorsque le client établit une connexion correspondante. `LocalCommand` ne s’exécute qu’après une connexion réussie et nécessite `PermitLocalCommand yes` (la valeur par défaut est `no`). Ces directives ont des moments d’exécution et des prérequis différents ; une écriture seule ne les exécute pas. Voir la documentation amont [OpenSSH `ssh_config(5)`](https://github.com/openssh/openssh-portable/blob/master/ssh_config.5).
-- **Identité d’exécution :** L’utilisateur local qui lance `ssh`. Un hôte correspondant, un fichier de configuration applicable et toute connexion requise sont nécessaires. `ssh -F` permet de sélectionner un autre fichier de configuration.
+- **Déclenchement :** un appel correspondant à `ssh`. `Match exec` exécute une commande locale pendant que le client évalue sa configuration, même avec `ssh -G`, qui affiche la configuration sans se connecter. `ProxyCommand` s’exécute lorsque le client établit une connexion correspondante. `LocalCommand` ne s’exécute qu’après une connexion réussie et nécessite `PermitLocalCommand yes` (la valeur par défaut est `no`). Ces directives ont des moments d’exécution et des prérequis différents ; une simple écriture ne les exécute pas. Voir la documentation amont [OpenSSH `ssh_config(5)`](https://github.com/openssh/openssh-portable/blob/master/ssh_config.5).
+- **Identité d’exécution :** l’utilisateur local qui lance `ssh`. Un hôte correspondant, un fichier de configuration applicable et toute connexion requise sont nécessaires. `ssh -F` permet de sélectionner un autre fichier de configuration.
 
-Ce PoC limité à un marqueur a été exécuté avec le client SSH d’Apple sous macOS 26.5.2. `-G` teste `Match exec` sans établir de connexion réseau ni lire la configuration SSH réelle de l’utilisateur :
+Cette PoC limitée à un marqueur a été exécutée avec le client SSH d’Apple sur macOS 26.5.2. `-G` teste `Match exec` sans établir de connexion réseau ni lire la configuration SSH réelle de l’utilisateur :
 
 ```bash
 lab=$(mktemp -d)
@@ -889,10 +889,10 @@ rm -r "$lab"
 
 ### Fichiers d’initialisation du débogueur
 
-- **Cible d’écriture :** `~/.lldbinit` ou fichier spécifique à l’application de priorité supérieure, tel que `~/.lldbinit-lldb`. LLDB en lit un au démarrage du débogueur. Par défaut, un fichier `.lldbinit` dans le répertoire courant **n’est pas exécuté** ; l’utilisateur doit activer `target.load-cwd-lldbinit` ou passer `--local-lldbinit`. Voir le [manuel de LLDB](https://lldb.llvm.org/man/lldb.html).
-- **Déclenchement et identité :** l’utilisateur démarre LLDB sans `--no-lldbinit` ; les commandes s’exécutent avec les droits de cet utilisateur. Le simple fait d’ouvrir un projet n’implique pas l’exécution de son fichier `.lldbinit`.
+- **Cible d’écriture :** `~/.lldbinit` ou le fichier spécifique à l’application de priorité supérieure, tel que `~/.lldbinit-lldb`. LLDB en lit un au démarrage du débogueur. Un fichier `.lldbinit` dans le répertoire courant n’est **pas** exécuté par défaut ; l’utilisateur doit activer `target.load-cwd-lldbinit` ou passer `--local-lldbinit`. Voir le [manuel LLDB](https://lldb.llvm.org/man/lldb.html).
+- **Déclenchement et identité :** l’utilisateur démarre LLDB sans `--no-lldbinit` ; les commandes s’exécutent avec les droits de cet utilisateur. Le simple fait d’ouvrir un projet n’implique pas que le fichier `.lldbinit` du projet soit exécuté.
 
-Le test utilisant uniquement un marqueur suivant a été effectué avec LLDB sous macOS 26.5.2, avec un répertoire personnel et un répertoire de travail isolés :
+Le test avec marqueur uniquement ci-dessous a été exécuté avec LLDB sur macOS 26.5.2, dans un répertoire personnel et un répertoire de travail isolés :
 
 ```bash
 lab=$(mktemp -d)
@@ -902,27 +902,27 @@ test -e "$lab/marker" && echo 'lldbinit fired'
 rm -r "$lab"
 ```
 
-Pour **GDB**, la [documentation amont sur le démarrage](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Startup.html) indique `$HOME/Library/Preferences/gdb/gdbinit`, puis `~/.gdbinit` sur macOS. Un fichier `.gdbinit` dans le répertoire courant est soumis au [chemin sécurisé d’auto-chargement](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Auto_002dloading-safe-path.html), et `-nx`/`-nh` désactivent les fichiers d’initialisation. GDB n’était pas installé sur le Mac de test ; cette variante n’a donc pas été exécutée localement.
+For **GDB**, la [documentation de démarrage en amont](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Startup.html) répertorie `$HOME/Library/Preferences/gdb/gdbinit`, puis `~/.gdbinit` sur macOS. Un fichier `.gdbinit` dans le répertoire courant est soumis au [chemin sûr de chargement automatique](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Auto_002dloading-safe-path.html), et `-nx`/`-nh` désactivent les fichiers d’initialisation. GDB n’était pas installé sur le Mac de test, cette variante n’a donc pas été testée localement.
 
 ### SSHRC
 
 Compte rendu : [https://theevilbit.github.io/beyond/beyond_0006/](https://theevilbit.github.io/beyond/beyond_0006/)<sup>[[14]](#references)</sup>
 
-- Utile pour contourner la sandbox : [✅](https://emojipedia.org/check-mark-button)
-  - Mais SSH doit être activé et utilisé
-- TCC bypass : [✅](https://emojipedia.org/check-mark-button)
-  - L’utilisation de SSH permet d’avoir un accès FDA
+- Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
+  - Mais ssh doit être activé et utilisé
+- Contournement de TCC : [✅](https://emojipedia.org/check-mark-button)
+  - L’utilisation de SSH doit avoir accès à FDA
 
 #### Emplacement
 
 - **`~/.ssh/rc`**
-  - **Déclencheur** : Connexion via SSH
+  - **Déclencheur** : Connexion via ssh
 - **`/etc/ssh/sshrc`**
-  - Droits root requis
-  - **Déclencheur** : Connexion via SSH
+  - Nécessite les droits root
+  - **Déclencheur** : Connexion via ssh
 
 > [!CAUTION]
-> L’activation de SSH nécessite un accès Full Disk Access :
+> L’activation de ssh nécessite un accès complet au disque :
 >
 > ```bash
 > sudo systemsetup -setremotelogin on
@@ -938,20 +938,20 @@ Compte rendu : [https://theevilbit.github.io/beyond/beyond_0003/](https://theevi
 
 - Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
   - Mais vous devez exécuter `osascript` avec des arguments
-- Contournement de TCC : [🔴](https://emojipedia.org/large-red-circle)
+- TCC bypass : [🔴](https://emojipedia.org/large-red-circle)
 
 #### Emplacements
 
-- **Application helper d’élément d’ouverture de session enregistrée :** `<MainApp>.app/Contents/Library/LoginItems/<Helper>.app` (emplacement courant pour les éléments intégrés).
-  - **Déclenchement :** L’enregistrement peut démarrer immédiatement le helper ; il démarre ensuite lors des connexions ultérieures de l’utilisateur, sous réserve d’approbation.
-- **Agent/daemon intégré enregistré :** `<MainApp>.app/Contents/Library/LaunchAgents/<name>.plist` ou `Contents/Library/LaunchDaemons/<name>.plist`.
-  - **Déclenchement :** Un agent approuvé peut démarrer lors de son enregistrement et aux connexions ultérieures ; un daemon approuvé démarre au démarrage. Un daemon nécessite l’approbation d’un administrateur.
+- **Application helper enregistrée comme élément d’ouverture de session :** `<MainApp>.app/Contents/Library/LoginItems/<Helper>.app` (emplacement courant dans une app groupée).
+  - **Déclenchement :** L’enregistrement peut lancer immédiatement le helper ; celui-ci se lance ensuite lors des connexions ultérieures de l’utilisateur, sous réserve d’approbation.
+- **Agent/démon groupé enregistré :** `<MainApp>.app/Contents/Library/LaunchAgents/<name>.plist` ou `Contents/Library/LaunchDaemons/<name>.plist`.
+  - **Déclenchement :** Un agent approuvé peut se lancer lors de son enregistrement et aux connexions ultérieures ; un démon approuvé se lance au démarrage. Un démon nécessite l’approbation d’un administrateur.
 
 #### Description
 
-Dans **Réglages Système → Général → Ouverture et extensions**, les utilisateurs peuvent examiner les éléments d’ouverture de session et d’arrière-plan. macOS 13 et les versions ultérieures fournissent [`SMAppService`](https://developer.apple.com/documentation/servicemanagement/smappservice) pour enregistrer les éléments d’ouverture de session, launch agents et launch daemons intégrés. Son [comportement de `register()`](https://developer.apple.com/documentation/servicemanagement/smappservice/register%28%29) varie selon le type et l’état d’approbation. **Écrire un helper dans un bundle d’application ne suffit pas à enregistrer un nouvel élément d’ouverture de session.** À l’inverse, si l’exécutable d’un helper déjà enregistré est modifiable, sa modification peut affecter son prochain lancement sans nouvel enregistrement ; vérifiez d’abord le chemin réel et les contrôles de signature du code.
+Dans **Réglages Système → Général → Éléments d’ouverture et extensions**, les utilisateurs peuvent consulter les éléments d’ouverture de session et d’arrière-plan. macOS 13 et les versions ultérieures fournissent [`SMAppService`](https://developer.apple.com/documentation/servicemanagement/smappservice) pour enregistrer les éléments d’ouverture de session, les agents de lancement et les démons de lancement groupés. Le comportement de [`register()`](https://developer.apple.com/documentation/servicemanagement/smappservice/register%28%29) varie selon le type et l’état d’approbation. **Écrire un helper dans un bundle d’app ne suffit pas à enregistrer un nouvel élément d’ouverture de session.** À l’inverse, si l’exécutable d’un helper déjà enregistré est modifiable, changer cet exécutable peut affecter son prochain lancement sans nouvel enregistrement ; vérifiez d’abord le chemin réel et les contrôles de signature du code.
 
-Voici une méthode en lecture seule pour rechercher des helpers intégrés sur un Mac ; elle n’enregistre ni ne lance aucun d’entre eux :
+Voici une méthode en lecture seule pour rechercher les helpers groupés sur un Mac ; elle n’enregistre et ne lance aucun d’entre eux :
 
 ```bash
 find /Applications -path '*/Contents/Library/LoginItems/*.app' -o \
@@ -959,9 +959,9 @@ find /Applications -path '*/Contents/Library/LoginItems/*.app' -o \
   -path '*/Contents/Library/LaunchDaemons/*.plist' 2>/dev/null
 ```
 
-Pour un plist launch intégré, résolvez `BundleProgram` **relativement à la racine du bundle de l’app** (par exemple `Contents/MacOS/Helper`), comme le précise le [guide de migration Service Management d’Apple](https://developer.apple.com/documentation/servicemanagement/updating-helper-executables-from-earlier-versions-of-macos). Un inventaire en lecture seule de `/Applications` sur le Mac de recherche a relevé 14 entrées de helpers intégrés et cinq déclarations `BundleProgram` ; les cinq cibles ont été résolues, et deux ont passé un contrôle d’écriture par l’utilisateur. Ce contrôle ne permet pas d’établir que l’un ou l’autre des helpers est enregistré, activé, exécutable après validation de la signature ou accessible depuis un sandbox. `sfltool dumpbtm` a répertorié 150 enregistrements nommés sur ce Mac ; c’est un outil d’inspection, et non un test confirmant que chaque enregistrement est en cours d’exécution.
+Pour un plist de lancement intégré à l’application, résolvez `BundleProgram` **relativement à la racine du bundle de l’application** (par exemple `Contents/MacOS/Helper`), comme le précise [le guide de migration de Service Management d’Apple](https://developer.apple.com/documentation/servicemanagement/updating-helper-executables-from-earlier-versions-of-macos). Un inventaire en lecture seule de `/Applications` sur le Mac de recherche a trouvé 14 entrées de helpers intégrés et cinq déclarations `BundleProgram` ; les cinq cibles ont été résolues, et deux ont passé un contrôle de possibilité d’écriture par l’utilisateur. Ce contrôle ne permet pas d’établir que l’un ou l’autre des helpers est enregistré, activé, exécutable après validation de la signature ou accessible depuis un sandbox. `sfltool dumpbtm` a répertorié 150 enregistrements nommés sur ce Mac ; il s’agit d’un outil d’inspection, et non d’un test établissant que chaque enregistrement est actif.
 
-Les anciens éléments d’ouverture de session peuvent également être gérés via les événements Apple. Il est possible de les répertorier, d’en ajouter et d’en supprimer depuis la ligne de commande, bien que leur ajout modifie la configuration persistante d’ouverture de session de l’utilisateur et puisse nécessiter une autorisation Automation :<sup>[[15]](#references)</sup>
+Les anciens éléments d’ouverture de session peuvent également être gérés par des événements Apple. Il est possible de les répertorier, d’en ajouter et d’en supprimer depuis la ligne de commande, bien que leur ajout modifie la configuration d’ouverture de session persistante de l’utilisateur et puisse nécessiter une autorisation Automatisation :<sup>[[15]](#references)</sup>
 
 ```bash
 #List all items:
@@ -974,52 +974,52 @@ osascript -e 'tell application "System Events" to make login item at end with pr
 osascript -e 'tell application "System Events" to delete login item "itemname"'
 ```
 
-`~/Library/Application Support/com.apple.backgroundtaskmanagementagent` est un détail d’implémentation, pas un emplacement pris en charge pour installer un payload en écrivant simplement un fichier. L’ancienne API `SMLoginItemSetEnabled` a été remplacée par `SMAppService` pour les nouveaux assistants ; le chemin `/var/db/com.apple.xpc.launchd/loginitems.501.plist` mentionné précédemment était absent de la machine de test sous macOS 26.5.2. Pour évaluer les éléments d’ouverture de session modernes, utilisez l’API d’enregistrement et l’état affiché par l’interface système, plutôt que de supposer l’existence d’un chemin de base de données.
+`~/Library/Application Support/com.apple.backgroundtaskmanagementagent` est un détail d’implémentation, et non un emplacement pris en charge pour installer un payload en y écrivant simplement un fichier. Pour les nouveaux helpers, l’ancienne API `SMLoginItemSetEnabled` est remplacée par `SMAppService` ; le chemin `/var/db/com.apple.xpc.launchd/loginitems.501.plist` mentionné auparavant sur cette page était absent de la machine de test sous macOS 26.5.2. Pour évaluer les éléments d’ouverture modernes, utilisez l’API d’enregistrement et l’état de l’interface système, plutôt que de supposer l’existence d’un chemin de base de données.
 
-### ZIP comme élément d’ouverture de session
+### ZIP comme élément d’ouverture
 
-(Voir la section précédente sur les éléments d’ouverture de session ; il s’agit d’une extension.)
+(Voir la section précédente sur les éléments d’ouverture, il s’agit d’une extension)
 
-Si vous enregistrez un fichier **ZIP** comme **élément d’ouverture de session**, **`Archive Utility`** l’ouvrira. Si, par exemple, l’archive ZIP est enregistrée dans `~/Library` et contient le dossier **`LaunchAgents/file.plist`** avec une backdoor, ce dossier sera créé (il n’existe pas par défaut) et le plist sera ajouté. Ainsi, à la prochaine ouverture de session, la **backdoor indiquée dans le plist sera exécutée**.
+Si vous stockez un fichier **ZIP** comme **élément d’ouverture**, **`Archive Utility`** l’ouvrira. Si, par exemple, l’archive ZIP était stockée dans `~/Library` et contenait le dossier **`LaunchAgents/file.plist`** avec une backdoor, ce dossier sera créé (il n’existe pas par défaut) et le plist y sera ajouté. Ainsi, à la prochaine ouverture de session, **la backdoor indiquée dans le plist sera exécutée**.
 
-Une autre option consiste à créer les fichiers **`.bash_profile`** et **`.zshenv`** dans le dossier HOME de l’utilisateur. Ainsi, cette technique fonctionnera également si le dossier LaunchAgents existe déjà.
+Une autre option serait de créer les fichiers **`.bash_profile`** et **`.zshenv`** dans le HOME de l’utilisateur ; ainsi, cette technique fonctionnerait également si le dossier LaunchAgents existe déjà.
 
 ### At
 
 Compte rendu : [https://theevilbit.github.io/beyond/beyond_0014/](https://theevilbit.github.io/beyond/beyond_0014/)<sup>[[16]](#references)</sup>
 
-- Utile pour contourner sandbox : [✅](https://emojipedia.org/check-mark-button)
-  - Mais vous devez **exécuter** **`at`**, et celui-ci doit être **activé**
+- Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
+  - Mais vous devez **exécuter** **`at`** et il doit être **activé**
 - Contournement de TCC : [🔴](https://emojipedia.org/large-red-circle)
 
 #### Emplacement
 
-- Il faut **exécuter** **`at`**, et celui-ci doit être **activé**
+- Vous devez **exécuter** **`at`** et il doit être **activé**
 
 #### **Description**
 
-Les tâches `at` sont conçues pour **planifier des tâches ponctuelles** à exécuter à des heures précises. Contrairement aux tâches cron, les tâches `at` sont automatiquement supprimées après leur exécution. Il est important de noter que ces tâches persistent après les redémarrages du système, ce qui peut poser des problèmes de sécurité dans certaines conditions.<sup>[[16]](#references)</sup>
+Les tâches `at` sont conçues pour **planifier des tâches ponctuelles** qui seront exécutées à des heures précises. Contrairement aux tâches cron, les tâches `at` sont automatiquement supprimées après leur exécution. Il est important de noter que ces tâches persistent après les redémarrages du système, ce qui en fait des risques potentiels pour la sécurité dans certaines conditions.<sup>[[16]](#references)</sup>
 
-Le fichier `com.apple.atrun.plist` fourni avec le système contient `Disabled = true`, mais launchd conserve séparément les substitutions effectives d’activation et de désactivation. Sur la machine de test sous macOS 26.5.2, `launchctl print-disabled system` indiquait que `com.apple.atrun` était **activé**, malgré cette clé intégrée. Vérifiez l’état effectif avant d’affirmer que les tâches `at` s’exécuteront :
+Le fichier `com.apple.atrun.plist` fourni avec le système a `Disabled = true`, mais launchd conserve séparément les dérogations effectives d’activation et de désactivation. Sur la machine de test sous macOS 26.5.2, `launchctl print-disabled system` indiquait que `com.apple.atrun` était **activé**, malgré cette clé fournie avec le système. Vérifiez l’état effectif avant d’affirmer que les tâches `at` s’exécuteront :
 
 ```bash
 launchctl print-disabled system | grep 'com.apple.atrun'
 launchctl print system/com.apple.atrun
 ```
 
-Un administrateur peut activer un service `atrun` désactivé avec `launchctl` ; l’exemple historique suivant modifie l’état d’un service système et **n’a pas été exécuté sur le Mac utilisé pour la recherche** :
+Un administrateur peut activer un service `atrun` désactivé avec `launchctl` ; l’exemple historique suivant modifie l’état d’un service système et **n’a pas été exécuté sur le Mac de recherche** :
 
 ```bash
 sudo launchctl load -F /System/Library/LaunchDaemons/com.apple.atrun.plist
 ```
 
-Cela créera un fichier dans 1 heure :
+Cela créera un fichier dans une heure :
 
 ```bash
 echo "echo 11 > /tmp/at.txt" | at now+1
 ```
 
-Vérifiez la file d’attente des tâches avec `atq:`
+Consultez la file d’attente des tâches avec `atq:`
 
 ```shell-session
 sh-3.2# atq
@@ -1027,7 +1027,7 @@ sh-3.2# atq
 22	Wed Apr 28 00:29:00 2021
 ```
 
-Ci-dessus, nous pouvons voir deux tâches planifiées. Nous pouvons afficher les détails d’une tâche à l’aide de `at -c JOBNUMBER`
+Ci-dessus, nous pouvons voir deux tâches planifiées. Nous pouvons afficher les détails de la tâche avec `at -c JOBNUMBER`
 
 ```shell-session
 sh-3.2# at -c 26
@@ -1063,7 +1063,7 @@ echo 11 > /tmp/at.txt
 > [!WARNING]
 > Si les tâches AT ne sont pas activées, les tâches créées ne seront pas exécutées.
 
-Les **fichiers de tâches** se trouvent dans `/private/var/at/jobs/`
+Les **fichiers de job** se trouvent dans `/private/var/at/jobs/`
 
 ```
 sh-3.2# ls -l /private/var/at/jobs/
@@ -1074,36 +1074,36 @@ total 32
 -rwx------  1 root  wheel  803 Apr 27 00:46 a0001a019bdcd2
 ```
 
-Le nom du fichier contient la file d’attente, le numéro du travail et l’heure à laquelle il est planifié. Prenons par exemple `a0001a019bdcd2`.
+Le nom du fichier contient la file d’attente, le numéro de la tâche et l’heure à laquelle elle est programmée. Prenons par exemple `a0001a019bdcd2`.
 
-- `a` - la file d’attente
-- `0001a` - le numéro du travail en hexadécimal, `0x1a = 26`
-- `019bdcd2` - l’heure en hexadécimal. Elle représente le nombre de minutes écoulées depuis l’époque Unix. `0x019bdcd2` vaut `26991826` en décimal. Si on multiplie ce nombre par 60, on obtient `1619509560`, soit `mardi 27 avril 2021, 7:46:00 GMT`.
+- `a` - il s’agit de la file d’attente
+- `0001a` - numéro de la tâche en hexadécimal, `0x1a = 26`
+- `019bdcd2` - heure en hexadécimal. Elle représente le nombre de minutes écoulées depuis l’époque Unix. `0x019bdcd2` vaut `26991826` en décimal. En multipliant ce nombre par 60, on obtient `1619509560`, soit `GMT : mardi 27 avril 2021 à 7:46:00`.
 
-Si on affiche le fichier du travail, on constate qu’il contient les mêmes informations que celles obtenues avec `at -c`.
+Si nous affichons le fichier de la tâche, nous constatons qu’il contient les mêmes informations que celles obtenues avec `at -c`.
 
-### Alertes d’ouverture de fichiers dans Calendar
+### Alertes d’ouverture de fichier du Calendrier
 
-- **Cible d’écriture :** un bundle d’application exécutable ou un autre fichier **déjà sélectionné** par une alerte personnalisée **Open file** d’un événement Calendar. La création ou la modification de l’alerte nécessite l’accès à l’événement concerné dans Calendar ou via une source de données de calendrier autorisée ; l’écriture aléatoire d’un fichier ne crée pas d’alerte.
-- **Déclenchement :** à l’heure prévue de l’alerte, sur un Mac où Calendar traite l’événement. Un événement récurrent peut répéter l’action. Le [guide actuel d’Apple sur Calendar](https://support.apple.com/guide/calendar/icl1012/mac) confirme que l’option d’alerte **Custom → Open file** est disponible dans macOS 26.
-- **Identité d’exécution et contrôles :** Calendar ouvre le fichier choisi pour l’utilisateur connecté, au moyen de l’application associée. Le lancement d’un bundle d’application peut exécuter son code en tant que cet utilisateur, sous réserve de Gatekeeper, de la quarantaine et des autres contrôles de macOS. Un simple fichier de script peut seulement s’ouvrir dans un éditeur ; son extension ne prouve pas à elle seule que du code sera exécuté.
+- **Cible d’écriture :** Une app exécutable ou un autre fichier **déjà sélectionné** par une alerte personnalisée **Ouvrir le fichier** d’un événement du Calendrier. La création ou la modification de l’alerte elle-même nécessite l’accès à l’événement du calendrier via Calendrier ou une source de données de calendrier autorisée ; l’écriture aléatoire d’un fichier ne crée pas d’alerte.
+- **Déclenchement :** À l’heure programmée de l’alerte, sur un Mac où Calendrier traite l’événement. Un événement récurrent peut répéter l’action. [Le guide actuel d’Apple pour Calendrier](https://support.apple.com/guide/calendar/icl1012/mac) confirme la disponibilité de l’option d’alerte **Personnalisé → Ouvrir le fichier** sous macOS 26.
+- **Identité d’exécution et conditions :** Calendrier ouvre le fichier choisi pour l’utilisateur connecté, à l’aide de l’application associée. Le lancement d’une app peut exécuter son code en tant que cet utilisateur, sous réserve de Gatekeeper, de la quarantaine et d’autres contrôles de macOS. Un simple fichier de script peut seulement s’ouvrir dans un éditeur ; son extension ne prouve pas à elle seule qu’il sera exécuté.
 
-Pour évaluer une cible, inspectez l’alerte de l’événement dans Calendar et les permissions du fichier sélectionné. Cette méthode a été documentée à partir du guide d’Apple et **n’a pas été testée** sur le Mac de recherche, car cela aurait modifié un calendrier actif et nécessité d’attendre un événement sur le bureau. Dans un compte jetable, un test peut sélectionner un bundle d’application ne contenant qu’un marqueur, définir une alerte Open file à une heure proche, confirmer le lancement, puis supprimer l’événement et l’application.
+Pour évaluer une cible potentielle en toute sécurité, inspectez l’alerte de l’événement dans Calendrier et les permissions du fichier sélectionné. Cette méthode a été documentée à partir du guide d’Apple et **n’a pas été testée** sur le Mac de recherche, car cela aurait modifié un calendrier actif et nécessité d’attendre un événement sur le bureau. Dans un compte jetable, un test peut sélectionner une app ne faisant qu’écrire un marqueur, configurer une alerte Ouvrir le fichier dans un futur proche, confirmer le lancement, puis supprimer l’événement et l’app.
 
-### Automatisations Shortcuts sur macOS
+### Automatisations Shortcuts sous macOS
 
-- **Cible d’écriture :** un fichier exécutable **déjà référencé** par une action de raccourci, ou un raccourci existant qu’un utilisateur autorisé peut modifier. Un fichier `.shortcut` quelconque ou une écriture dans une base de données Shortcuts non documentée n’est pas une méthode d’enregistrement d’automatisation prise en charge.
-- **Déclenchement et identité :** un événement d’automatisation déjà configuré et activé, comme une heure de la journée ou l’ouverture d’une app, lance le raccourci pour l’utilisateur connecté. Le [guide actuel d’Apple sur les automatisations Mac](https://support.apple.com/guide/shortcuts-mac/add-automations-apdfbdbd7123/mac) répertorie les événements pris en charge, explique dans quels cas une automatisation peut s’exécuter sans demander confirmation et indique comment supprimer un déclencheur. Le [guide de confidentialité d’Apple pour Shortcuts](https://support.apple.com/guide/shortcuts-mac/apdfeb05586f/mac) exige l’autorisation **Allow Running Scripts** pour les actions de script ; certaines actions peuvent toujours demander des autorisations.
+- **Cible d’écriture :** Un fichier exécutable **déjà référencé** par une action de raccourci, ou un raccourci existant qu’un utilisateur autorisé peut modifier. Un fichier `.shortcut` quelconque ou une écriture dans une base de données Shortcuts non documentée ne constitue pas une méthode d’enregistrement d’automatisation prise en charge.
+- **Déclenchement et identité :** Un événement d’automatisation précédemment configuré et activé, comme une heure de la journée ou un événement lié à une app, lance le raccourci pour l’utilisateur connecté. [Le guide actuel d’Apple sur les automatisations Mac](https://support.apple.com/guide/shortcuts-mac/add-automations-apdfbdbd7123/mac) répertorie les événements pris en charge, explique quand une automatisation peut s’exécuter sans confirmation et décrit la suppression d’un déclencheur. [Le guide de confidentialité Shortcuts d’Apple](https://support.apple.com/guide/shortcuts-mac/apdfeb05586f/mac) exige l’option **Autoriser l’exécution de scripts** pour les actions de script, et certaines actions peuvent quand même demander des permissions.
 
-Il s’agit d’un chemin conditionnel d’écriture vers l’exécution **uniquement si l’action existante charge une cible modifiable**. La création d’une nouvelle automatisation via l’interface modifie les réglages actifs et n’a pas été tentée sur le Mac de recherche. Dans un compte jetable, un propriétaire peut configurer un raccourci déclenché à une heure précise dont le script touche `/tmp/ht-shortcuts-marker`, activer les autorisations nécessaires, vérifier la présence du marqueur après l’événement, puis supprimer l’automatisation, le raccourci et le marqueur.
+Il s’agit d’un chemin conditionnel de l’écriture à l’exécution **uniquement si l’action existante charge une cible modifiable**. La création d’une nouvelle automatisation via l’interface modifie les réglages actifs et n’a pas été tentée sur le Mac de recherche. Dans un compte jetable, un propriétaire peut configurer un raccourci déclenché à une heure précise dont le script crée `/tmp/ht-shortcuts-marker`, activer les permissions nécessaires, vérifier la présence du marqueur après l’événement, puis supprimer l’automatisation, le raccourci et le marqueur.
 
 ### Actions Automator et Quick Actions
 
-- **Cibles d’écriture :** `~/Library/Automator/*.action` (utilisateur) et `/Library/Automator/*.action` (administrateur) pour les bundles d’action. Un workflow Quick Action enregistré se trouve généralement dans `~/Library/Services/*.workflow` ; vérifiez le chemin réel du workflow sélectionné par l’utilisateur. La [référence du framework Automator d’Apple](https://developer.apple.com/documentation/automator) répertorie les répertoires de recherche des actions.
-- **Déclenchement :** Automator charge les bundles d’action disponibles lorsqu’il s’exécute, mais une action n’effectue sa tâche que lorsqu’un workflow qui l’utilise est exécuté. Une Quick Action s’exécute lorsque l’utilisateur la sélectionne dans Finder, Services ou un autre menu disponible. Un workflow Folder Action s’exécute lorsque des éléments sont ajoutés au dossier auquel il est **déjà associé**, et un workflow Calendar Alarm s’exécute à l’heure de son événement. Les [types de workflows d’Apple](https://support.apple.com/guide/automator/aut7cac58839/mac) distinguent ces événements. Écrire simplement une action ou un workflow n’associe pas de dossier et ne planifie pas d’événement de calendrier.
-- **Identité d’exécution et contrôles :** le compte qui exécute le workflow ; Automator ou l’app qui l’invoque doit charger l’action et les contrôles actuels de signature de code ou de confidentialité doivent l’autoriser. Un bundle d’action modifiable déjà référencé par un workflow actif est différent de l’installation d’une nouvelle action en attendant qu’elle soit sélectionnée.
+- **Cibles d’écriture :** `~/Library/Automator/*.action` (utilisateur) et `/Library/Automator/*.action` (administrateur) pour les bundles d’action. Un workflow Quick Action enregistré se trouve généralement dans `~/Library/Services/*.workflow` ; vérifiez le chemin réel du workflow sélectionné par l’utilisateur. [La référence du framework Automator d’Apple](https://developer.apple.com/documentation/automator) répertorie les répertoires de recherche des actions.
+- **Déclenchement :** Automator charge les bundles d’action disponibles lorsqu’il s’exécute, mais une action s’exécute lorsqu’un workflow qui l’utilise est lancé. Une Quick Action s’exécute lorsque l’utilisateur la sélectionne dans le Finder, Services ou un autre menu disponible. Un workflow Folder Action s’exécute lorsque des éléments sont ajoutés à son dossier **déjà associé**, et un workflow Calendar Alarm s’exécute à l’heure de son événement. [Les types de workflows d’Apple](https://support.apple.com/guide/automator/aut7cac58839/mac) distinguent ces événements. Le simple fait d’écrire une action ou un workflow n’associe pas de dossier et ne programme pas d’événement de calendrier.
+- **Identité d’exécution et conditions :** Le compte qui exécute le workflow ; Automator ou l’app qui l’invoque doit charger l’action, et les contrôles actuels de signature du code ou de confidentialité doivent l’autoriser. Un bundle d’action modifiable déjà référencé par un workflow actif est un cas différent de l’installation d’une nouvelle action en attendant qu’elle soit sélectionnée.
 
-Les répertoires utilisateur `Automator` et `Services` étaient présents sur le Mac de test sous macOS 26.5.2 ; `/Library/Automator` était absent. Aucun workflow actif n’a été créé, associé ou exécuté. Utilisez un compte jetable et une action ou un workflow ne contenant qu’un marqueur pour confirmer un chemin de chargement donné. La section distincte sur les [Folder Actions](#folder-actions) décrit plus en détail cette source d’événements.
+Les répertoires utilisateur `Automator` et `Services` étaient présents sur le Mac de test sous macOS 26.5.2 ; `/Library/Automator` était absent. Aucun workflow actif n’a été créé, associé ou exécuté. Utilisez un compte jetable et une action/un workflow qui ne fait qu’écrire un marqueur pour confirmer un chemin de chargement donné. La section distincte [Folder Actions](#folder-actions) décrit plus en détail cette source d’événements.
 
 ### Folder Actions
 
@@ -1111,30 +1111,30 @@ Compte rendu : [https://theevilbit.github.io/beyond/beyond_0024/](https://theevi
 Compte rendu : [https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)<sup>[[18]](#references)</sup>
 
 - Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
-  - Mais il faut pouvoir appeler `osascript` avec des arguments pour contacter **`System Events`** afin de configurer les Folder Actions
+  - Mais vous devez pouvoir appeler `osascript` avec des arguments pour contacter **`System Events`** et configurer Folder Actions
 - Contournement de TCC : [🟠](https://emojipedia.org/large-orange-circle)
-  - Certaines permissions TCC de base sont accordées, comme celles pour Desktop, Documents et Downloads
+  - Il bénéficie de certaines permissions TCC de base, comme celles pour Desktop, Documents et Downloads
 
 #### Emplacement
 
 - **`/Library/Scripts/Folder Action Scripts`**
   - Droits root requis
-  - **Déclenchement** : accès au dossier indiqué
+  - **Déclenchement** : Accès au dossier spécifié
 - **`~/Library/Scripts/Folder Action Scripts`**
-  - **Déclenchement** : accès au dossier indiqué
+  - **Déclenchement** : Accès au dossier spécifié
 
 #### Description et exploitation
 
-Les Folder Actions sont des scripts automatiquement déclenchés par des changements dans un dossier, comme l’ajout ou la suppression d’éléments, ou par d’autres actions comme l’ouverture ou le redimensionnement de la fenêtre du dossier. Elles peuvent servir à diverses tâches et être déclenchées de différentes manières, par exemple via l’interface de Finder ou des commandes de terminal.<sup>[[17]](#references)[[18]](#references)</sup>
+Folder Actions sont des scripts déclenchés automatiquement par des changements dans un dossier, comme l’ajout ou la suppression d’éléments, ou d’autres actions telles que l’ouverture ou le redimensionnement de la fenêtre du dossier. Ces actions peuvent servir à diverses tâches et être déclenchées de différentes façons, notamment via l’interface du Finder ou des commandes du terminal.<sup>[[17]](#references)[[18]](#references)</sup>
 
-Pour configurer des Folder Actions, vous pouvez notamment :
+Pour configurer Folder Actions, vous pouvez notamment :
 
 1. Créer un workflow Folder Action avec [Automator](https://support.apple.com/guide/automator/welcome/mac) et l’installer comme service.
-2. Associer manuellement un script via Folder Actions Setup, accessible dans le menu contextuel d’un dossier.
-3. Utiliser OSAScript pour envoyer des messages Apple Event à `System Events.app` afin de configurer une Folder Action par programmation.
-   - Cette méthode est particulièrement utile pour intégrer l’action au système et assurer ainsi une certaine persistance.
+2. Associer manuellement un script via Folder Actions Setup dans le menu contextuel d’un dossier.
+3. Utiliser OSAScript pour envoyer des messages Apple Event à `System Events.app` afin de configurer Folder Action par programmation.
+   - Cette méthode est particulièrement utile pour intégrer l’action au système et obtenir ainsi un certain niveau de persistance.
 
-Le script suivant est un exemple de ce qui peut être exécuté par une Folder Action :
+Le script suivant est un exemple de ce qu’une Folder Action peut exécuter :
 
 ```applescript
 // source.js
@@ -1152,7 +1152,7 @@ Pour rendre le script ci-dessus utilisable par Folder Actions, compilez-le à l�
 osacompile -l JavaScript -o folder.scpt source.js
 ```
 
-Une fois le script compilé, configurez Folder Actions en exécutant le script ci-dessous. Celui-ci activera Folder Actions globalement et associera le script précédemment compilé au dossier Bureau.
+Une fois le script compilé, configurez Folder Actions en exécutant le script ci-dessous. Ce script activera Folder Actions à l’échelle globale et associera spécifiquement le script compilé précédemment au dossier Bureau.
 
 ```javascript
 // Enabling and attaching Folder Action
@@ -1192,13 +1192,13 @@ mkdir -p "$HOME/Library/Scripts/Folder Action Scripts"
 mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 ```
 
-Ensuite, ouvrez l’application `Folder Actions Setup`, sélectionnez le **dossier que vous souhaitez surveiller**, puis sélectionnez **`folder.scpt`** dans votre cas (je l’ai appelé output2.scp) :
+Ensuite, ouvrez l’app `Folder Actions Setup`, sélectionnez le **dossier que vous souhaitez surveiller**, puis sélectionnez dans votre cas **`folder.scpt`** (dans mon cas, je l’ai appelé output2.scp) :
 
 <figure><img src="../images/image (39).png" alt="" width="297"><figcaption></figcaption></figure>
 
 Maintenant, si vous ouvrez ce dossier avec **Finder**, votre script sera exécuté.
 
-Cette configuration était stockée au format base64 dans le **plist** situé à **`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`**.
+Cette configuration était stockée au format base64 dans le **plist** situé dans **`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`**.
 
 Essayons maintenant de préparer cette persistence sans accès à l’interface graphique :
 
@@ -1211,7 +1211,7 @@ Essayons maintenant de préparer cette persistence sans accès à l’interface 
 Maintenant que l’environnement est vide :
 
 3. Copiez le fichier de sauvegarde : `cp /tmp/com.apple.FolderActionsDispatcher.plist ~/Library/Preferences/`
-4. Ouvrez Folder Actions Setup.app pour charger cette configuration : `open "/System/Library/CoreServices/Applications/Folder Actions Setup.app/"`
+4. Ouvrez l’app Folder Actions Setup.app pour charger cette configuration : `open "/System/Library/CoreServices/Applications/Folder Actions Setup.app/"`
 
 > [!CAUTION]
 > Ça n’a pas fonctionné pour moi, mais voici les instructions du writeup :(
@@ -1220,9 +1220,9 @@ Maintenant que l’environnement est vide :
 
 Writeup : [https://theevilbit.github.io/beyond/beyond_0027/](https://theevilbit.github.io/beyond/beyond_0027/)<sup>[[19]](#references)</sup>
 
-- Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
+- Utile pour bypass le sandbox : [✅](https://emojipedia.org/check-mark-button)
   - Mais vous devez avoir installé une application malveillante dans le système
-- Contournement de TCC : [🔴](https://emojipedia.org/large-red-circle)
+- TCC bypass : [🔴](https://emojipedia.org/large-red-circle)
 
 #### Emplacement
 
@@ -1243,7 +1243,7 @@ defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</
 killall Dock
 ```
 
-En recourant à un peu de **social engineering**, vous pourriez **usurper par exemple Google Chrome** dans le Dock et exécuter réellement votre propre script :
+En utilisant un peu de **social engineering**, vous pourriez **vous faire passer par exemple pour Google Chrome** dans le dock et exécuter réellement votre propre script :
 
 ```bash
 #!/bin/sh
@@ -1300,36 +1300,36 @@ killall Dock
 
 ### Méthodes de saisie
 
-- **Cible d’écriture :** Un bundle d’app de méthode de saisie contenant du code, installé dans `~/Library/Input Methods/` (utilisateur) ou `/Library/Input Methods/` (administrateur). Cela diffère des fichiers de mappage de clavier `.inputplugin` en texte brut d’Apple, qui ne constituent pas en eux-mêmes une charge utile de code arbitraire.
-- **Déclenchement :** L’utilisateur ajoute/active la source de saisie dans **Réglages Système → Clavier → Saisie de texte**, puis la sélectionne ou l’utilise. Le simple fait de copier un bundle dans le répertoire ne prouve pas que macOS le lancera. [Apple's current Input Sources guide](https://support.apple.com/guide/mac-help/mchl84525d76/mac) décrit l’activation et le changement de sources ; [Apple's InputMethodKit documentation](https://developer.apple.com/documentation/inputmethodkit) porte sur les méthodes de saisie contenant du code.
-- **Identité d’exécution et contrôles :** La méthode s’exécute pour l’utilisateur connecté, sous réserve de l’enregistrement de la méthode de saisie, de la signature du code et des contrôles de sécurité actuels de macOS. Les méthodes déjà activées dont l’exécutable est modifiable nécessitent une analyse distincte de leur chemin d’accès et de leur signature.
+- **Cible d’écriture :** Un bundle d’app de méthode de saisie contenant du code, installé dans `~/Library/Input Methods/` (utilisateur) ou `/Library/Input Methods/` (administrateur). Cela diffère des fichiers de mappage de clavier `.inputplugin` en texte brut d’Apple, qui ne constituent pas à eux seuls une charge utile de code arbitraire.
+- **Déclencheur :** L’utilisateur ajoute/active la source de saisie dans **Réglages Système → Clavier → Saisie de texte**, puis la sélectionne ou l’utilise. Le simple fait de copier un bundle dans le répertoire ne prouve pas que macOS le lancera. Le [guide actuel d’Apple sur les sources de saisie](https://support.apple.com/guide/mac-help/mchl84525d76/mac) décrit l’activation et le changement de source ; la [documentation InputMethodKit d’Apple](https://developer.apple.com/documentation/inputmethodkit) couvre les méthodes de saisie contenant du code.
+- **Identité d’exécution et contrôles :** La méthode s’exécute pour l’utilisateur connecté, sous réserve de l’enregistrement de la méthode de saisie, de la signature du code et des contrôles de sécurité actuels de macOS. Les méthodes déjà activées dont l’exécutable est modifiable nécessitent une vérification distincte du chemin et de la signature.
 
-La [older third-party input-method note](https://developer.apple.com/library/archive/qa/qa1810/_index.html) d’Apple avertissait déjà que la copie de certaines méthodes de palette dans ces répertoires ne suffit même pas à les faire apparaître dans Sources de saisie. Sur le Mac de recherche sous macOS 26.5.2, le répertoire utilisateur existe, mais aucun bundle n’a été installé ni activé ; il s’agit donc d’un chemin conditionnel documenté, et non d’un résultat d’exécution local.
+La [note plus ancienne d’Apple sur les méthodes de saisie tierces](https://developer.apple.com/library/archive/qa/qa1810/_index.html) avertissait déjà que la copie de certaines méthodes de palette dans ces répertoires ne suffit même pas à les faire apparaître dans Sources de saisie. Sur le Mac de recherche sous macOS 26.5.2, le répertoire utilisateur existe, mais aucun bundle n’était installé ni activé ; il s’agit donc d’un chemin conditionnel documenté, et non d’un résultat d’exécution local.
 
 ### Sélecteurs de couleur
 
-Writeup : [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.github.io/beyond/beyond_0017/)<sup>[[20]](#references)</sup>
+Article : [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.github.io/beyond/beyond_0017/)<sup>[[20]](#references)</sup>
 
 - Utile pour contourner le sandbox : [🟠](https://emojipedia.org/large-orange-circle)
-  - Une action très précise doit être effectuée
-  - Vous finirez dans un autre sandbox
+  - Une action très spécifique doit avoir lieu
+  - Vous aboutirez dans un autre sandbox
 - Contournement de TCC : [🔴](https://emojipedia.org/large-red-circle)
 
 #### Emplacement
 
 - `/Library/ColorPickers`
-  - Accès root requis
-  - Déclenchement : utiliser le sélecteur de couleur
+  - Droits root requis
+  - Déclencheur : utiliser le sélecteur de couleur
 - `~/Library/ColorPickers`
-  - Déclenchement : utiliser le sélecteur de couleur
+  - Déclencheur : utiliser le sélecteur de couleur
 
 #### Description et exploitation
 
-**Compilez un bundle de sélecteur de couleur** avec votre code (vous pouvez utiliser [**this one for example**](https://github.com/viktorstrate/color-picker-plus)) et ajoutez-y un constructeur (comme dans la [section Économiseur d’écran](macos-auto-start-locations.md#screen-saver)), puis copiez le bundle dans `~/Library/ColorPickers`.<sup>[[20]](#references)</sup>
+**Compilez un bundle de sélecteur de couleur** contenant votre code (vous pouvez utiliser [**celui-ci, par exemple**](https://github.com/viktorstrate/color-picker-plus)), ajoutez-y un constructeur (comme dans la [section Économiseur d’écran](macos-auto-start-locations.md#screen-saver)), puis copiez le bundle dans `~/Library/ColorPickers`.<sup>[[20]](#references)</sup>
 
 Ensuite, lorsque le sélecteur de couleur est déclenché, votre bundle devrait également s’exécuter.
 
-Cela dépend de l’ouverture du panneau de couleur du système par une app compatible et de la sélection du sélecteur installé. [Apple's color-panel guide](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/DrawColor/Tasks/AddingColorPickers.html) décrit les anciens emplacements de bundles. Une vérification locale des chemins a trouvé le service XPC de sélecteur de couleur historique, mais aucun sélecteur n’était installé ni chargé sur le Mac de recherche ; ne déduisez pas un contournement de TCC du seul chemin.
+Cela dépend de l’ouverture du panneau de couleurs système par une app compatible et de la sélection du sélecteur installé. Le [guide d’Apple sur le panneau de couleurs](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/DrawColor/Tasks/AddingColorPickers.html) décrit les anciens emplacements de bundles. Une vérification locale des chemins a trouvé le service XPC de sélecteur de couleur hérité, mais aucun sélecteur n’était installé ni chargé sur le Mac de recherche ; ne déduisez pas un contournement de TCC du seul fait que le chemin existe.
 
 Notez que le binaire qui charge votre bibliothèque est soumis à un **sandbox très restrictif** : `/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/LegacyExternalColorPickerService-x86_64.xpc/Contents/MacOS/LegacyExternalColorPickerService-x86_64`
 
@@ -1342,25 +1342,25 @@ Notez que le binaire qui charge votre bibliothèque est soumis à un **sandbox t
 			[String] (allow file-read* (extension "com.apple.app-sandbox.read"))
 ```
 
-### Modules Finder Sync
+### Plugins Finder Sync
 
-**Compte rendu** : [https://theevilbit.github.io/beyond/beyond_0026/](https://theevilbit.github.io/beyond/beyond_0026/)<sup>[[21]](#references)</sup>\
-**Compte rendu** : [https://objective-see.org/blog/blog_0x11.html](https://objective-see.org/blog/blog_0x11.html)<sup>[[22]](#references)</sup>
+**Article**: [https://theevilbit.github.io/beyond/beyond_0026/](https://theevilbit.github.io/beyond/beyond_0026/)<sup>[[21]](#references)</sup>\
+**Article**: [https://objective-see.org/blog/blog_0x11.html](https://objective-see.org/blog/blog_0x11.html)<sup>[[22]](#references)</sup>
 
-- Utile pour contourner le sandbox : **Non, car vous devez exécuter votre propre app**
+- Utile pour contourner le sandbox : **Non, car vous devez exécuter votre propre application**
 - Contournement de TCC : dépend du sandbox et des permissions de l’extension activée ; aucun contournement général n’a été établi.
 
 #### Emplacement
 
-- Une app spécifique
+- Une application spécifique
 
 #### Description et exploitation
 
 Un exemple d’application avec une extension Finder Sync [**est disponible ici**](https://github.com/D00MFist/InSync).
 
-Les applications peuvent intégrer des `Finder Sync Extensions`. Cette extension se trouve dans une application qui sera exécutée. De plus, pour que l’extension puisse exécuter son code, elle **doit être signée** avec un certificat de développeur Apple valide, elle doit être **sandboxée** (bien que des exceptions assouplies puissent être ajoutées) et elle doit être enregistrée avec quelque chose comme :<sup>[[21]](#references)[[22]](#references)</sup>
+Les applications peuvent intégrer des `Finder Sync Extensions`. Cette extension est intégrée à une application qui sera exécutée. De plus, pour que l’extension puisse exécuter son code, elle **doit être signée** avec un certificat de développeur Apple valide et être **sandboxée** (bien que des exceptions plus permissives puissent être ajoutées). Elle doit également être enregistrée à l’aide d’une commande comme :<sup>[[21]](#references)[[22]](#references)</sup>
 
-Une extension installée doit également être **activée** et invoquée pour un emplacement ou un élément Finder pertinent ; écrire un bundle `.appex` arbitraire ne suffit pas. [L’API Finder Sync d’Apple](https://developer.apple.com/documentation/findersync/fifindersynccontroller/isextensionenabled) permet de vérifier si l’extension est activée. Les commandes `pluginkit` ci-dessous illustrent un enregistrement et une activation explicites, et non un démarrage automatique déclenché uniquement par la présence d’un fichier. Cette méthode a été examinée à partir de la documentation, sans installer ni activer de nouvelle extension sur le Mac de recherche.
+Une extension installée doit également être **activée** et appelée pour un emplacement ou un élément Finder pertinent ; écrire un bundle `.appex` arbitraire ne suffit pas. [L’API Finder Sync d’Apple](https://developer.apple.com/documentation/findersync/fifindersynccontroller/isextensionenabled) permet de vérifier si l’extension est activée. Les commandes `pluginkit` ci-dessous illustrent l’enregistrement et l’activation explicites, et non un démarrage automatique déclenché par la seule présence d’un fichier. Cette méthode a été examinée à partir de la documentation ; aucune nouvelle extension n’a été installée ni activée sur le Mac utilisé pour la recherche.
 
 ```bash
 pluginkit -a /Applications/FindIt.app/Contents/PlugIns/FindItSync.appex
@@ -1369,8 +1369,8 @@ pluginkit -e use -i com.example.InSync.InSync
 
 ### Économiseur d’écran
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0016/](https://theevilbit.github.io/beyond/beyond_0016/)<sup>[[23]](#references)</sup>\
-Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://posts.specterops.io/saving-your-access-d562bf5bf90b)<sup>[[24]](#references)</sup>
+Article : [https://theevilbit.github.io/beyond/beyond_0016/](https://theevilbit.github.io/beyond/beyond_0016/)<sup>[[23]](#references)</sup>\
+Article : [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://posts.specterops.io/saving-your-access-d562bf5bf90b)<sup>[[24]](#references)</sup>
 
 - Utile pour contourner le sandbox : [🟠](https://emojipedia.org/large-orange-circle)
   - Mais vous vous retrouverez dans un sandbox d’application classique
@@ -1379,13 +1379,13 @@ Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://p
 #### Emplacement
 
 - `/System/Library/Screen Savers`
-  - Root requis
-  - **Déclenchement** : Sélectionner l’économiseur d’écran
+  - Droits root requis
+  - **Déclencheur** : Sélectionner l’économiseur d’écran
 - `/Library/Screen Savers`
-  - Root requis
-  - **Déclenchement** : Sélectionner l’économiseur d’écran
+  - Droits root requis
+  - **Déclencheur** : Sélectionner l’économiseur d’écran
 - `~/Library/Screen Savers`
-  - **Déclenchement** : Sélectionner l’économiseur d’écran
+  - **Déclencheur** : Sélectionner l’économiseur d’écran
 
 <figure><img src="../images/image (38).png" alt="" width="375"><figcaption></figcaption></figure>
 
@@ -1393,7 +1393,7 @@ Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://p
 
 Créez un nouveau projet dans Xcode et sélectionnez le modèle permettant de générer un nouvel **économiseur d’écran**. Ajoutez ensuite votre code, par exemple le code suivant pour générer des journaux.<sup>[[23]](#references)[[24]](#references)</sup>
 
-**Compilez** le projet, puis copiez le bundle `.saver` dans **`~/Library/Screen Savers`**. Ensuite, ouvrez l’interface graphique de l’économiseur d’écran et cliquez simplement dessus : cela devrait générer de nombreux journaux :
+**Compilez** le projet, puis copiez le bundle `.saver` dans **`~/Library/Screen Savers`**. Ouvrez ensuite l’interface graphique des économiseurs d’écran et cliquez simplement dessus : cela devrait générer de nombreux journaux :
 
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "hello_screensaver"'
@@ -1405,9 +1405,9 @@ Timestamp                       (process)[PID]
 ```
 
 > [!CAUTION]
-> Notez que, puisque vous trouverez **`com.apple.security.app-sandbox`** dans les entitlements du binaire qui charge ce code (`/System/Library/Frameworks/ScreenSaver.framework/PlugIns/legacyScreenSaver.appex/Contents/MacOS/legacyScreenSaver`), vous serez **dans le sandbox commun des applications**.
+> Notez que, puisque les entitlements du binaire qui charge ce code (`/System/Library/Frameworks/ScreenSaver.framework/PlugIns/legacyScreenSaver.appex/Contents/MacOS/legacyScreenSaver`) contiennent **`com.apple.security.app-sandbox`**, vous serez **dans le sandbox d’application habituel**.
 
-Code de l’économiseur d’écran :
+Code de l’économiseur :
 
 ```objectivec
 //
@@ -1481,31 +1481,31 @@ writeup: [https://theevilbit.github.io/beyond/beyond_0011/](https://theevilbit.g
 
 - Utile pour contourner le sandbox : [🟠](https://emojipedia.org/large-orange-circle)
   - Mais vous vous retrouverez dans un sandbox d’application
-- Contournement de TCC : [🔴](https://emojipedia.org/large-red-circle)
+- TCC bypass : [🔴](https://emojipedia.org/large-red-circle)
   - Le sandbox semble très limité
 
 #### Emplacement
 
 - `~/Library/Spotlight/`
-  - **Déclencheur** : un nouveau fichier dont l’extension est gérée par le plugin Spotlight est créé.
+  - **Déclencheur** : Un nouveau fichier associé à une extension gérée par le plugin Spotlight est créé.
 - `/Library/Spotlight/`
-  - **Déclencheur** : un nouveau fichier dont l’extension est gérée par le plugin Spotlight est créé.
+  - **Déclencheur** : Un nouveau fichier associé à une extension gérée par le plugin Spotlight est créé.
   - Droits root requis
 - `/System/Library/Spotlight/`
-  - **Déclencheur** : un nouveau fichier dont l’extension est gérée par le plugin Spotlight est créé.
+  - **Déclencheur** : Un nouveau fichier associé à une extension gérée par le plugin Spotlight est créé.
   - Droits root requis
 - `Some.app/Contents/Library/Spotlight/`
-  - **Déclencheur** : un nouveau fichier dont l’extension est gérée par le plugin Spotlight est créé.
-  - Nouvelle application requise
+  - **Déclencheur** : Un nouveau fichier associé à une extension gérée par le plugin Spotlight est créé.
+  - Une nouvelle app est requise
 
 #### Description et exploitation
 
-Spotlight est la fonctionnalité de recherche intégrée à macOS, conçue pour offrir aux utilisateurs un **accès rapide et complet aux données présentes sur leurs ordinateurs**.\
-Pour permettre cette recherche rapide, Spotlight gère une **base de données propriétaire** et crée un index en **analysant la plupart des fichiers**, ce qui permet d’effectuer rapidement des recherches sur les noms de fichiers et leur contenu.<sup>[[25]](#references)</sup>
+Spotlight est la fonction de recherche intégrée à macOS, conçue pour fournir aux utilisateurs **un accès rapide et complet aux données présentes sur leurs ordinateurs**.\
+Pour permettre cette recherche rapide, Spotlight tient à jour une **base de données propriétaire** et crée un index en **analysant la plupart des fichiers**, ce qui permet d’effectuer rapidement des recherches dans les noms de fichiers et leur contenu.<sup>[[25]](#references)</sup>
 
-Le mécanisme sous-jacent de Spotlight repose sur un processus central nommé « mds », abréviation de **« metadata server »**. Ce processus orchestre l’ensemble du service Spotlight. Il est complété par plusieurs démons « mdworker » qui exécutent diverses tâches de maintenance, comme l’indexation de différents types de fichiers (`ps -ef | grep mdworker`). Ces tâches sont rendues possibles par les plugins d’importation Spotlight, ou **« bundles .mdimporter »**, qui permettent à Spotlight de comprendre et d’indexer le contenu d’une grande variété de formats de fichiers.
+Le mécanisme sous-jacent de Spotlight repose sur un processus central nommé « mds », abréviation de **« metadata server »**. Ce processus orchestre l’ensemble du service Spotlight. Il est complété par plusieurs daemons « mdworker » qui effectuent diverses tâches de maintenance, comme l’indexation de différents types de fichiers (`ps -ef | grep mdworker`). Ces tâches sont rendues possibles par les plugins d’importation Spotlight, ou **« bundles .mdimporter »**, qui permettent à Spotlight de comprendre et d’indexer le contenu d’un large éventail de formats de fichiers.
 
-Les plugins ou bundles **`.mdimporter`** se trouvent aux emplacements mentionnés précédemment. Un nouveau bundle doit être détecté et correspondre à un type de fichier, et Spotlight doit effectivement indexer un fichier correspondant ; copier un bundle seul ne prouve pas qu’il a été chargé. La [référence MDImporter d’Apple](https://developer.apple.com/documentation/coreservices/file_metadata/mdimporter) indique que le chargement dépend d’un fichier éligible qui a été modifié. L’exécution des importateurs Spotlight sous macOS 26 n’a pas été testée ici.
+Les plugins ou bundles **`.mdimporter`** se trouvent aux emplacements indiqués précédemment. Un nouveau bundle doit être détecté et correspondre à un type de fichier, et Spotlight doit effectivement indexer un fichier correspondant ; la simple copie d’un bundle ne prouve pas qu’il a été chargé. [La référence MDImporter d’Apple](https://developer.apple.com/documentation/coreservices/file_metadata/mdimporter) indique que le chargement dépend d’un fichier admissible ayant été modifié. L’exécution des importateurs Spotlight sous macOS 26 n’a pas été testée ici.
 
 Il est possible de **trouver tous les `mdimporters`** chargés en exécutant :
 
@@ -1518,7 +1518,7 @@ Paths: id(501) (
     [...]
 ```
 
-Et, par exemple, **/Library/Spotlight/iBooksAuthor.mdimporter** est utilisé pour analyser ce type de fichiers (extensions `.iba` et `.book`, entre autres) :
+Et par exemple, **/Library/Spotlight/iBooksAuthor.mdimporter** est utilisé pour analyser ce type de fichiers (extensions `.iba` et `.book`, entre autres) :
 
 ```json
 plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
@@ -1557,27 +1557,29 @@ plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 ```
 
 > [!CAUTION]
-> Si vous vérifiez le Plist d’autres `mdimporter`, vous ne trouverez peut-être pas l’entrée **`UTTypeConformsTo`**. C’est parce qu’il s’agit d’un _Uniform Type Identifier_ ([UTI](https://en.wikipedia.org/wiki/Uniform_Type_Identifier)) intégré, qui n’a pas besoin de spécifier d’extensions.
+> Si vous vérifiez le Plist d'autres `mdimporter`, vous ne trouverez peut-être pas l'entrée **`UTTypeConformsTo`**. En effet, il s'agit d'un _Uniform Type Identifier_ ([UTI](https://en.wikipedia.org/wiki/Uniform_Type_Identifier)) intégré, qui n'a pas besoin de spécifier d'extensions.
 >
-> De plus, les plugins par défaut du système ont toujours la priorité ; un attaquant ne peut donc accéder qu’aux fichiers qui ne sont pas déjà indexés par les `mdimporters` d’Apple.
+> De plus, les plugins par défaut du système ont toujours la priorité : un attaquant ne peut donc accéder qu'aux fichiers qui ne sont pas indexés par les `mdimporters` d'Apple.
 
-Pour créer votre propre importer, vous pouvez commencer avec ce projet : [https://github.com/megrimm/pd-spotlight-importer](https://github.com/megrimm/pd-spotlight-importer), puis modifier le nom et **`CFBundleDocumentTypes`**, et ajouter **`UTImportedTypeDeclarations`** afin qu’il prenne en charge l’extension souhaitée et la refléter dans **`schema.xml`**.\
-Ensuite, **modifiez** le code de la fonction **`GetMetadataForFile`** pour exécuter votre payload lorsqu’un fichier avec l’extension traitée est créé.
+Pour créer votre propre importer, vous pouvez commencer avec ce projet : [https://github.com/megrimm/pd-spotlight-importer](https://github.com/megrimm/pd-spotlight-importer), puis modifier le nom et **`CFBundleDocumentTypes`**, et ajouter **`UTImportedTypeDeclarations`** afin de prendre en charge l'extension souhaitée et de la refléter dans **`schema.xml`**.\
+Ensuite, **modifiez** le code de la fonction **`GetMetadataForFile`** pour exécuter votre payload lorsqu'un fichier ayant l'extension traitée est créé.
 
-Enfin, **compilez et copiez votre nouveau `.mdimporter`** dans l’un des trois emplacements précédents. Vous pouvez vérifier s’il est chargé en **surveillant les logs** ou en exécutant **`mdimport -L`**.
+Enfin, **compilez et copiez votre nouveau `.mdimporter`** dans l'un des trois emplacements précédents. Vous pouvez vérifier s'il est chargé en **surveillant les logs** ou en exécutant **`mdimport -L`**.
 
 > [!TIP]
-> Même si le sandbox de l’importer est très restrictif, `mdworker` indexe les fichiers avec un **accès en lecture privilégié**. Un `.mdimporter` malveillant peut donc lire le *contenu* de fichiers situés dans des emplacements protégés par TCC (Downloads, Pictures, Desktop, …) et exfiltrer les métadonnées collectées sans aucune invite TCC — le bypass TCC **« Sploitlight » (CVE-2025-31199)**, corrigé dans macOS Sequoia 15.4.<sup>[[55]](#references)</sup>
+> Même si le sandbox de l'importer est très restrictif, `mdworker` indexe les fichiers avec un **accès en lecture privilégié**. Un `.mdimporter` malveillant peut donc lire le *contenu* des fichiers situés dans des emplacements protégés par TCC (Downloads, Pictures, Desktop, …) et exfiltrer les métadonnées collectées sans aucune invite TCC — le bypass TCC **« Sploitlight » (CVE-2025-31199)**, corrigé dans macOS Sequoia 15.4.<sup>[[55]](#references)</sup>
 
-### ~~Preference Pane~~
+Pour la technique distincte de macOS 26 qui consiste à transporter des octets protégés dans des **noms de notifications Darwin** plutôt que dans les logs système, consultez [Spotlight importer leakage via Darwin notification names](macos-security-and-privilege-escalation/macos-security-protections/macos-tcc/macos-tcc-bypasses/#spotlight-importer-leakage-via-darwin-notification-names).<sup>[[57]](#references)</sup>
+
+### ~~Volet de préférences~~
 
 > [!CAUTION]
 > Il semble que cela ne fonctionne plus.
 
 Writeup : [https://theevilbit.github.io/beyond/beyond_0009/](https://theevilbit.github.io/beyond/beyond_0009/)<sup>[[26]](#references)</sup>
 
-- Utile pour contourner le sandbox : [🟠](https://emojipedia.org/large-orange-circle)
-  - Une action spécifique de l’utilisateur est nécessaire
+- Utile pour bypasser le sandbox : [🟠](https://emojipedia.org/large-orange-circle)
+  - Une action spécifique de l'utilisateur est nécessaire
 - Bypass TCC : [🔴](https://emojipedia.org/large-red-circle)
 
 #### Emplacement
@@ -1590,26 +1592,26 @@ Writeup : [https://theevilbit.github.io/beyond/beyond_0009/](https://theevilbit.
 
 Il semble que cela ne fonctionne plus.<sup>[[26]](#references)</sup>
 
-### Application Script Files
+### Fichiers de script d'application
 
 Writeup : [https://theevilbit.github.io/beyond/beyond_0010/](https://theevilbit.github.io/beyond/beyond_0010/)<sup>[[37]](#references)</sup>
 
-- Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
-  - Mais l’application ciblée doit être installée et lancée/utilisée par la victime
+- Utile pour bypasser le sandbox : [✅](https://emojipedia.org/check-mark-button)
+  - Mais l'application ciblée doit être installée et exécutée/utilisée par la victime
 - Bypass TCC : [🔴](https://emojipedia.org/large-red-circle)
 
 #### Emplacement
 
-Un **script interprété qu’une application ou un outil installé exécute réellement** et que l’acteur peut modifier. Vérifiez les permissions du fichier et le chemin d’appel ; trouver un fichier `.sh` ou `.py` ne suffit pas. Le [guide de signature de code](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Procedures/Procedures.html) d’Apple indique que les bundles d’apps signés scellent leurs ressources, y compris les scripts. Modifier un script dans un bundle rompt ce sceau et peut être détecté ou bloqué lors de la validation du bundle. Un script externe, tel que le lanceur de Homebrew, a un comportement différent en matière de signature et de confiance. Les exemples historiques du writeup comprennent :
+Un **script interprété qu'une application ou un outil installé exécute réellement** et que l'acteur peut modifier. Vérifiez les permissions du fichier et le chemin d'appel ; la simple présence d'un fichier `.sh` ou `.py` ne suffit pas. Le [guide de signature de code](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Procedures/Procedures.html) d'Apple indique que les bundles d'applications signés scellent leurs ressources, y compris les scripts. Modifier un script contenu dans un bundle rompt ce scellement et peut être détecté ou bloqué lors de la validation du bundle. Un script externe tel que le lanceur de Homebrew est soumis à des règles de signature et de confiance différentes. Les exemples historiques du writeup comprennent :
 
-- **`/Applications/Sublime Text.app/Contents/MacOS/sublime.py`** – un script utilisé par d’anciennes versions de Sublime Text ; la présence du fichier et son utilisation au démarrage doivent être vérifiées pour la version installée. Il était absent du Mac de test.
-- **`/opt/homebrew/bin/brew`** (Apple Silicon) ou **`/usr/local/bin/brew`** (Intel) – un lanceur Bash exécuté lorsque le chemin `brew` correspondant est invoqué, s’il est installé et modifiable par l’acteur. `/opt/homebrew/bin/brew` était un script Bash modifiable sur le Mac de test ; il s’agit d’une observation locale, pas d’une règle générale concernant les permissions de Homebrew.
-- **`idlemain.py` d’IDLE** dans un bundle d’app Python – l’écriture peut nécessiter des permissions d’administrateur, mais le script s’exécute avec l’identité de l’utilisateur d’IDLE.
-- **`/Library/Application Support/Wireshark/ChmodBPF/ChmodBPF`** – un script shell historique exécuté en tant que root lorsque la tâche launchd correspondante `org.wireshark.ChmodBPF` est installée. Le script et la tâche étaient absents du Mac de test.
+- **`/Applications/Sublime Text.app/Contents/MacOS/sublime.py`** – un script utilisé par les anciennes versions de Sublime Text ; vérifiez la présence du fichier et son utilisation au démarrage pour la version installée. Il était absent du Mac de test.
+- **`/opt/homebrew/bin/brew`** (Apple Silicon) ou **`/usr/local/bin/brew`** (Intel) – un lanceur Bash exécuté lorsque ce chemin `brew` est invoqué, si Homebrew est installé et que l'acteur peut y écrire. `/opt/homebrew/bin/brew` était un script Bash modifiable sur le Mac de test ; il s'agit d'une observation locale, et non d'une règle générale concernant les permissions de Homebrew.
+- **`idlemain.py` d'IDLE**, dans un bundle d'application Python – l'écriture peut nécessiter les droits d'administrateur, mais le script s'exécute avec l'identité de l'utilisateur d'IDLE.
+- **`/Library/Application Support/Wireshark/ChmodBPF/ChmodBPF`** – un script shell exécuté historiquement avec les privilèges root lorsque la tâche launchd correspondante `org.wireshark.ChmodBPF` est installée. Le script et la tâche étaient absents du Mac de test.
 
-#### Description & Exploitation
+#### Description et exploitation
 
-Certains outils et certaines apps exécutent des scripts interprétés à l’exécution. Un script modifiable peut exécuter des commandes ajoutées lors du prochain lancement de son appelant spécifique, si la validation de signature, la quarantaine et les autres contrôles le permettent. La recherche originale a présenté plusieurs installations de 2019 ; revérifiez leurs chemins et leurs déclencheurs sur la version ciblée.<sup>[[37]](#references)</sup>
+Certains outils et certaines applications exécutent des scripts interprétés au moment de l'exécution. Un script modifiable peut exécuter les commandes ajoutées lors de la prochaine exécution de son appelant spécifique, à condition que la validation de signature, la quarantaine et les autres contrôles le permettent. La recherche originale a présenté plusieurs installations de 2019 ; vérifiez à nouveau leurs chemins et leurs déclencheurs sur la version ciblée.<sup>[[37]](#references)</sup>
 
 ```python
 # Marker-only injection test on a COPY of Homebrew's launcher. The relocated
@@ -1627,7 +1629,7 @@ with tempfile.TemporaryDirectory(prefix='ht-script-copy-') as root:
     print('marker fired:', marker.exists())
 ```
 
-This test de copie a produit `marker fired: True` sur macOS 26.5.2 ; le lanceur d’origine n’a pas été touché. Cela prouve que le point d’insertion s’exécute dans la copie, et non qu’un bundle d’app modifié et signé ou qu’une véritable installation Homebrew passerait toutes les vérifications au lancement.
+Ce test de copie a produit `marker fired: True` sur macOS 26.5.2 ; le lanceur d’origine n’a pas été touché. Il prouve que le point d’insertion s’exécute dans la copie, pas qu’un bundle d’app signé modifié ou une véritable installation Homebrew passerait toutes les vérifications au lancement.
 
 ### Dock Tile Plugins
 
@@ -1635,18 +1637,18 @@ Writeup : [https://theevilbit.github.io/beyond/beyond_0032/](https://theevilbit.
 
 - Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
   - Nécessite qu’une app déclarant le plug-in soit découverte/enregistrée et traitée par le Dock
-  - Le plugin se charge dans un helper **signé par Apple**, qui n’a pas d’entitlement app-sandbox et pour lequel la validation des bibliothèques est désactivée. Ce helper n’apparaissait pas dans l’interface Background Task Management dans la recherche citée ; sa visibilité sur la version cible doit être vérifiée.
+  - Le plugin est chargé dans un auxiliaire **signé par Apple** qui n’a pas d’entitlement app-sandbox et pour lequel la validation des bibliothèques est désactivée. Cet auxiliaire n’était pas affiché dans l’interface Background Task Management dans la recherche citée ; sa visibilité doit être vérifiée sur la version cible.
 - Contournement de TCC : [🔴](https://emojipedia.org/large-red-circle)
 
 #### Emplacement
 
-- **`<App>.app/Contents/PlugIns/<name>.docktileplugin`**, référencé avec la clé **`NSDockTilePlugIn`** dans le `Info.plist` de l’app ; le `Info.plist` propre au plugin définit **`NSPrincipalClass`**.
+- **`<App>.app/Contents/PlugIns/<name>.docktileplugin`**, référencé avec la clé **`NSDockTilePlugIn`** dans le `Info.plist` de l’app ; le `Info.plist` du plugin définit **`NSPrincipalClass`**.
 
 #### Description et exploitation
 
-Lorsqu’une app déclare `NSDockTilePlugIn`, le Dock peut charger le bundle référencé dans le helper XPC **`com.apple.dock.external.extra`** (`...extra.arm64` sur Apple Silicon) à la connexion ou lors de l’ajout de sa tuile ; l’app elle-même n’a pas besoin d’être lancée. Cela nécessite que l’app soit découverte/enregistrée et acceptée par macOS. Le helper est **signé par Apple**, n’a pas l’entitlement `com.apple.security.app-sandbox` et possède `com.apple.security.cs.disable-library-validation`. La méthode **`setDockTile:`** de la classe principale est appelée au chargement ; à partir de là, elle peut s’abonner aux notifications distribuées (par exemple `com.apple.screenIsLocked`) pour recevoir des événements ultérieurs.<sup>[[38]](#references)</sup>
+Lorsqu’une app déclare `NSDockTilePlugIn`, le Dock peut charger le bundle référencé dans l’auxiliaire XPC **`com.apple.dock.external.extra`** (`...extra.arm64` sur Apple Silicon) à l’ouverture de session ou lorsque sa tuile est ajoutée ; l’app elle-même n’a pas besoin d’être lancée. Cela nécessite que l’app soit découverte/enregistrée et acceptée par macOS. L’auxiliaire est **signé par Apple**, ne possède pas l’entitlement `com.apple.security.app-sandbox` et possède `com.apple.security.cs.disable-library-validation`. La méthode **`setDockTile:`** de la classe principale est appelée au chargement ; elle peut ensuite s’abonner aux notifications distribuées (par ex. `com.apple.screenIsLocked`) pour recevoir des événements ultérieurs.<sup>[[38]](#references)</sup>
 
-Sur macOS 26.5.2, une inspection en lecture seule avec `codesign` a confirmé la signature Apple et les entitlements du helper, et plusieurs apps installées déclaraient `NSDockTilePlugIn`. Aucun nouveau plug-in n’a été installé ni chargé sur ce Mac ; l’exécution d’un bundle nouvellement écrit sur cette version reste donc non testée.
+Sur macOS 26.5.2, une inspection en lecture seule avec `codesign` a confirmé la signature Apple et les entitlements de l’auxiliaire, et plusieurs apps installées déclaraient `NSDockTilePlugIn`. Aucun nouveau plug-in n’a été installé ni chargé sur ce Mac ; l’exécution d’un bundle nouvellement écrit sur cette version reste donc non testée.
 
 ```bash
 # Enumerate apps already shipping a Dock tile plugin (hijack / template targets)
@@ -1672,7 +1674,7 @@ done
 
 ### Widgets (Notification Center / WidgetKit)
 
-Compte rendu : [https://theevilbit.github.io/beyond/beyond_0033/](https://theevilbit.github.io/beyond/beyond_0033/)<sup>[[39]](#references)</sup>
+Write-up : [https://theevilbit.github.io/beyond/beyond_0033/](https://theevilbit.github.io/beyond/beyond_0033/)<sup>[[39]](#references)</sup>
 
 - Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
   - L’extension du widget s’exécute dans **son propre processus**, et en ajouter une ne déclenche **pas** d’alerte Background Task Management
@@ -1686,7 +1688,7 @@ Compte rendu : [https://theevilbit.github.io/beyond/beyond_0033/](https://theevi
 
 #### Description et exploitation
 
-Une extension WidgetKit intégrée à une app s’exécute dans **son propre processus**, géré par Notification Center. L’enregistrement d’une instance dans `widgets.instances` (un blob `CHSWidget` encodé en base64 avec `NSKeyedArchiver`, contenant des données `INIntent`) et le redémarrage de NotificationCenter font charger le widget et exécuter son code `TimelineProvider`/intent.<sup>[[39]](#references)</sup>
+Une extension WidgetKit intégrée à une app s’exécute dans **son propre processus**, géré par Notification Center. Enregistrer une instance dans `widgets.instances` (un blob `CHSWidget` encodé en base64 avec `NSKeyedArchiver`, contenant des données `INIntent`) et redémarrer NotificationCenter fait charger le widget et exécuter son code `TimelineProvider`/intent.<sup>[[39]](#references)</sup>
 
 ```bash
 # Inspect currently-registered widgets (file present on stock macOS)
@@ -1694,24 +1696,24 @@ plutil -p ~/Library/Containers/com.apple.notificationcenterui/Data/Library/Prefe
   | grep -iE "widgets?\." | head
 ```
 
-### Mail.app Rules (Run AppleScript)
+### Règles de Mail.app (exécuter AppleScript)
 
-Writeup: [https://www.n00py.io/2016/10/using-email-for-persistence-on-os-x/](https://www.n00py.io/2016/10/using-email-for-persistence-on-os-x/)<sup>[[42]](#references)</sup>
+Writeup : [https://www.n00py.io/2016/10/using-email-for-persistence-on-os-x/](https://www.n00py.io/2016/10/using-email-for-persistence-on-os-x/)<sup>[[42]](#references)</sup>
 
 - Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
-  - Cependant, Mail.app doit être configuré avec un compte et en cours d’exécution ; le déclencheur est un courriel entrant
-- TCC bypass : [🔴](https://emojipedia.org/large-red-circle)
-  - Modifier les règles/scripts depuis l’extérieur de Mail peut nécessiter de fermer Mail et d’avoir Full Disk Access sur les versions récentes de macOS
+  - Mais Mail.app doit être configuré avec un compte et être en cours d’exécution ; le déclencheur est un e-mail entrant
+- Contournement TCC : [🔴](https://emojipedia.org/large-red-circle)
+  - Modifier les règles/scripts depuis l’extérieur de Mail peut nécessiter de fermer Mail et d’activer Full Disk Access sur les versions modernes de macOS
 
 #### Emplacement
 
-- **`~/Library/Mail/V10/MailData/SyncedRules.plist`** (règles locales ; `V10` sur Sonoma/Sequoia, `V11`+ sur les versions plus récentes)
+- **`~/Library/Mail/V10/MailData/SyncedRules.plist`** (règles locales ; `V10` sous Sonoma/Sequoia, `V11`+ sur les versions plus récentes)
 - **`~/Library/Mobile Documents/com~apple~mail/Data/V10/MailData/ubiquitous_SyncedRules.plist`** (règles synchronisées avec iCloud, prioritaires)
 - Activation des règles : **`RulesActiveState.plist`** ; payload AppleScript : **`~/Library/Application Scripts/com.apple.mail/*.scpt`**
 
 #### Description et exploitation
 
-Une **règle** Apple Mail peut comporter une action *« Run AppleScript »*. En ajoutant une règle qui correspond à une **ligne d’objet** spécialement conçue et exécute un script d’attaquant, l’adversaire obtient une exécution de code **déclenchable à distance et furtive** dans le contexte de Mail dès réception du courriel magique — un vecteur qui échappe à de nombreux scanners de persistance, car aucun LaunchAgent/Login Item n’est créé.<sup>[[42]](#references)</sup> Configurer la règle pour **supprimer** également le courriel déclencheur dissimule les preuves. Les défenseurs peuvent le rechercher directement :<sup>[[43]](#references)</sup>
+Une **règle** Apple Mail peut avoir une action *« Run AppleScript »*. En ajoutant une règle qui correspond à une **ligne d’objet** spécialement conçue et exécute un script de l’attaquant, l’adversaire obtient une exécution de code **déclenchable à distance et furtive** dans le contexte de Mail à l’arrivée de l’e-mail magique — un vecteur qui échappe à de nombreux scanners de persistance, car aucun LaunchAgent/Login Item n’est créé.<sup>[[42]](#references)</sup> Configurer la règle pour **supprimer** également l’e-mail déclencheur dissimule les preuves. Les défenseurs peuvent le rechercher directement :<sup>[[43]](#references)</sup>
 
 ```bash
 # Enumerate Mail rules that invoke AppleScript
@@ -1721,22 +1723,22 @@ plutil -p ~/Library/Mail/V*/MailData/SyncedRules.plist 2>/dev/null | grep -iE "A
 
 ### Profils de configuration (.mobileconfig)
 
-Writeup: [https://www.jamf.com/blog/malicious-profiles-come/](https://www.jamf.com/blog/malicious-profiles-come/)<sup>[[44]](#references)</sup>
+Étude : [https://www.jamf.com/blog/malicious-profiles-come/](https://www.jamf.com/blog/malicious-profiles-come/)<sup>[[44]](#references)</sup>
 
 - Utile pour contourner le sandbox : [🔴](https://emojipedia.org/large-red-circle)
-  - Les versions modernes de macOS exigent une **approbation manuelle de l’utilisateur** dans Réglages Système → *Gestion des appareils* (l’installation silencieuse avec `profiles install` n’est plus possible hors MDM)
+  - Les versions récentes de macOS exigent une **approbation manuelle de l’utilisateur** dans Réglages Système → *Gestion des appareils* (l’installation silencieuse avec `profiles install` n’est plus possible en dehors du MDM)
 - Contournement de TCC : [🔴](https://emojipedia.org/large-red-circle)
 
 #### Emplacement
 
-- Les profils installés se trouvent dans **`/Library/Managed Preferences/`** et **`/var/db/ConfigurationProfiles/`** ; un profil est une plist XML contenant un tableau `PayloadContent`.
+- Les profils installés se trouvent dans **`/Library/Managed Preferences/`** et **`/var/db/ConfigurationProfiles/`** ; un profil est un plist XML contenant un tableau `PayloadContent`.
 
 #### Description et exploitation
 
-Un fichier `.mobileconfig` n’est pas une primitive d’exécution de code directe, mais il peut assurer la persistance de configurations telles qu’une **CA racine de confiance** (`com.apple.security.root`), un **proxy global ou PAC** (`com.apple.proxy.*`), des **préférences gérées** (`com.apple.ManagedClient.preferences`) ou des restrictions. Sous macOS 10.15 et versions ultérieures, la définition d’Apple de [`PayloadRemovalDisallowed`](https://developer.apple.com/documentation/devicemanagement/toplevel) indique que définir cette propriété sur `true` dans un profil **installé manuellement** sans payload de mot de passe de suppression exige une **authentification administrateur** pour le supprimer ; cela ne rend pas ce profil absolument impossible à supprimer. Les profils installés par MDM sont soumis à des règles de gestion et de suppression distinctes.<sup>[[44]](#references)</sup>
+Un fichier `.mobileconfig` n’est pas un mécanisme direct d’exécution de code, mais il peut persister des configurations telles qu’une **autorité de certification racine de confiance** (`com.apple.security.root`), un **proxy global ou PAC** (`com.apple.proxy.*`), des **préférences gérées** (`com.apple.ManagedClient.preferences`) ou des restrictions. Sous macOS 10.15 et les versions ultérieures, la [définition de `PayloadRemovalDisallowed`](https://developer.apple.com/documentation/devicemanagement/toplevel) d’Apple indique que définir cette valeur sur `true` dans un profil **installé manuellement** sans charge utile de mot de passe de suppression exige une **authentification administrateur** pour le supprimer ; cela ne rend pas ce profil absolument impossible à supprimer. Les profils installés par MDM sont soumis à des règles distinctes de gestion et de suppression.<sup>[[44]](#references)</sup>
 
 > [!WARNING]
-> Un simple profil de configuration ne possède **aucun type de payload permettant d’installer un `LaunchDaemon`/`LaunchAgent` arbitraire**. Pour installer un daemon de cette manière, il faut un **enrôlement MDM** complet ainsi qu’un agent/script de gestion — ne considérez pas `.mobileconfig` comme un mécanisme de déploiement launchd.
+> Un profil de configuration ordinaire ne contient **aucun type de charge utile permettant d’installer un `LaunchDaemon`/`LaunchAgent` arbitraire**. Pour installer un daemon de cette manière, il faut un **enrôlement MDM** complet ainsi qu’un agent/script de gestion — ne considérez pas `.mobileconfig` comme un mécanisme de déploiement launchd.
 
 ```bash
 # Inspect installed profiles (user context)
@@ -1747,17 +1749,17 @@ sudo profiles show       # system (root)
 ### Persistance via DYLD_INSERT_LIBRARIES
 
 - Utile pour contourner le sandbox : [🔴](https://emojipedia.org/large-red-circle)
-  - dyld **supprime** `DYLD_*` pour les binaires SIP/de plateforme, les applications avec hardened runtime et les cibles setuid ; l’injection ne fonctionne donc que dans les processus non protégés et ne contourne **pas** SIP ni le hardened runtime
+  - dyld **supprime** `DYLD_*` pour les binaires SIP/de plateforme, les applications avec hardened runtime et les cibles setuid ; il ne s’injecte donc que dans les processus non protégés et ne contourne **pas** SIP/le hardened runtime
 - Contournement de TCC : [🔴](https://emojipedia.org/large-red-circle)
 
 #### Emplacement
 
 - Forme fiable : le dictionnaire **`EnvironmentVariables`** dans un plist malveillant de `LaunchAgent`/`LaunchDaemon` (exécuté à la connexion/au démarrage)
-- Obsolètes/historiques (à titre informatif uniquement) : **`~/.MacOSX/environment.plist`** (supprimé dans la version 10.8) et **`/etc/launchd.conf`** (supprimé dans la version 10.10)
+- Obsolètes/historiques (à titre indicatif uniquement) : **`~/.MacOSX/environment.plist`** (supprimé dans la version 10.8) et **`/etc/launchd.conf`** (supprimé dans la version 10.10)
 
 #### Description et exploitation
 
-Si un attaquant parvient à ajouter `DYLD_INSERT_LIBRARIES` à l’environnement d’un processus victime, dyld charge la dylib de l’attaquant (son constructeur s’exécute) dans ce processus. La variante persistante intègre la variable dans un LaunchAgent afin que chaque lancement de la tâche relance l’injection. Notez que `launchctl setenv DYLD_*` est filtré dans les versions modernes de macOS ; intégrez-la donc plutôt dans le plist.<sup>[[45]](#references)</sup>
+Si un attaquant parvient à ajouter `DYLD_INSERT_LIBRARIES` à l’environnement d’un processus victime, dyld charge le dylib de l’attaquant (son constructeur s’exécute) dans ce processus. La variante persistante intègre la variable dans un LaunchAgent afin que chaque lancement du job provoque une nouvelle injection. Notez que `launchctl setenv DYLD_*` est filtré sur les versions modernes de macOS ; intégrez-la donc plutôt au plist.<sup>[[45]](#references)</sup>
 
 ```xml
 <key>EnvironmentVariables</key>
@@ -1767,39 +1769,39 @@ Si un attaquant parvient à ajouter `DYLD_INSERT_LIBRARIES` à l’environnement
 </dict>
 ```
 
-Pour connaître tous les détails du dylib injection/hijacking, voir :
+Pour connaître le fonctionnement complet de l’injection et du détournement de dylib, voir :
 
 {{#ref}}
 macos-security-and-privilege-escalation/macos-proces-abuse/macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md
 {{#endref}}
 
-### CLI d’agents de codage IA (hooks, serveurs MCP, fichiers de règles)
+### Interfaces en ligne de commande d’agents de codage IA (hooks, serveurs MCP, fichiers de règles)
 
-Articles : [CVE-2025-59536 (Check Point)](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)<sup>[[47]](#references)</sup>, [Backdoor dans un fichier de règles (Pillar Security)](https://www.pillar.security/blog/new-vulnerability-in-github-copilot-and-cursor-how-hackers-can-weaponize-code-agents)<sup>[[48]](#references)</sup>
+Articles : [CVE-2025-59536 (Check Point)](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)<sup>[[47]](#references)</sup>, [Porte dérobée dans un fichier de règles (Pillar Security)](https://www.pillar.security/blog/new-vulnerability-in-github-copilot-and-cursor-how-hackers-can-weaponize-code-agents)<sup>[[48]](#references)</sup>
 
-- Utile pour contourner un sandbox : [✅](https://emojipedia.org/check-mark-button)
-  - Le développeur doit utiliser l’agent concerné. Les commandes de démarrage s’exécutent avec les privilèges de cet utilisateur lorsque l’agent accepte sa configuration ; les règles de confiance de l’espace de travail et d’approbation MCP varient selon le produit et le mode de session.
+- Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
+  - Le développeur doit utiliser l’agent concerné. Les commandes de démarrage s’exécutent avec les privilèges de cet utilisateur lorsque l’agent accepte sa configuration ; la confiance accordée à l’espace de travail et l’approbation MCP varient selon le produit et le mode de session.
 - Contournement de TCC : [🔴](https://emojipedia.org/large-red-circle) (s’exécute en tant qu’utilisateur ; hérite des autorisations déjà accordées au terminal/à l’agent)
 
 #### Emplacement
 
-Les fichiers de configuration explicites des hooks et MCP peuvent provoquer **l’exécution de commandes shell ou de processus enfants lorsque le développeur utilise l’outil** — soit depuis un fichier global par utilisateur (persistance), soit depuis un fichier validé dans un dépôt (attaque de la chaîne d’approvisionnement). `CLAUDE.md`, `AGENTS.md`, `GEMINI.md` et les règles de l’éditeur sont des **instructions destinées à un agent**, et leur lecture ne garantit pas l’exécution de commandes shell ; leur effet dépend du comportement de l’agent et des autorisations de ses outils. Vérifiez les règles de confiance et d’approbation actuelles de chaque produit.
+Les fichiers de configuration explicites des hooks et de MCP peuvent entraîner **l’exécution de commandes shell ou de processus enfants lorsque le développeur utilise l’outil** — soit à partir d’un fichier global par utilisateur (persistance), soit à partir d’un fichier enregistré dans un dépôt (supply-chain). `CLAUDE.md`, `AGENTS.md`, `GEMINI.md` et les règles de l’éditeur sont des **instructions destinées à un agent**, et leur lecture ne garantit pas l’exécution de commandes shell ; leur effet dépend du comportement de l’agent et des autorisations de ses outils. Vérifiez les règles de confiance et d’approbation actuelles de chaque produit.
 
 - **Claude Code**
-  - `~/.claude/settings.json`, `.claude/settings.json` du projet, `.claude/settings.local.json` et le fichier **`/Library/Application Support/ClaudeCode/managed-settings.json`**, accessible uniquement à root (paramètres MDM/gérés **ne pouvant pas être remplacés** par l’utilisateur → persistance forte)
+  - `~/.claude/settings.json`, `.claude/settings.json` du projet, `.claude/settings.local.json` et le fichier réservé à root **`/Library/Application Support/ClaudeCode/managed-settings.json`** (les paramètres MDM/gérés **ne peuvent pas être remplacés** par l’utilisateur → forte persistance)
   - Objet `hooks` — événements `PreToolUse`, `PostToolUse`, `UserPromptSubmit`, `Stop`, `SubagentStop`, `SessionStart`, `SessionEnd`, `Notification`, `PreCompact` — chacun exécute une commande shell `command`
-  - `statusLine.command` — commande shell exécutée pour afficher la ligne d’état (à chaque session)
-  - Serveurs MCP dans `~/.claude.json` / `.mcp.json` du projet — `command`+`args` lancés comme processus enfants
+  - `statusLine.command` — une commande shell exécutée pour afficher la ligne d’état (à chaque session)
+  - Serveurs MCP dans `~/.claude.json` / `.mcp.json` du projet — `command`+`args` sont lancés comme processus enfants
   - `CLAUDE.md` / `~/.claude/CLAUDE.md` — instructions pouvant tenter une prompt injection, selon le comportement de l’agent et les autorisations de ses outils
-- **OpenAI Codex CLI** : `~/.codex/config.toml` `[mcp_servers.*]` (`command`/`args` lancés comme processus enfants) ; instructions de projet `AGENTS.md`
+- **OpenAI Codex CLI** : `~/.codex/config.toml` `[mcp_servers.*]` (`command`/`args` lancés comme processus enfants) ; instructions de projet dans `AGENTS.md`
 - **Gemini CLI** : `~/.gemini/settings.json` (`hooks`, serveurs MCP) ; `GEMINI.md`
-- **Cursor** : `~/.cursor/hooks.json` (`beforeShellExecution`, `afterAgentResponse`, `stop`, … exécutent des commandes) ; `.cursor/rules/`, `.cursorrules`, `~/.cursor/mcp.json` ; GitHub Copilot `.github/copilot-instructions.md`
+- **Cursor** : `~/.cursor/hooks.json` (`beforeShellExecution`, `afterAgentResponse`, `stop`, … exécutent des commandes) ; `.cursor/rules/`, `.cursorrules`, `~/.cursor/mcp.json` ; instructions GitHub Copilot dans `.github/copilot-instructions.md`
 
 #### Description et exploitation
 
-Si un acteur peut modifier les paramètres globaux de l’utilisateur du compte, ses commandes de hook ou MCP peuvent s’exécuter lors de sessions ultérieures sous ce compte. Une configuration contrôlée par un dépôt est un cas distinct : [la documentation de sécurité actuelle de Claude Code](https://code.claude.com/docs/en/security) décrit une boîte de dialogue interactive de confiance de l’espace de travail et une invite d’approbation distincte pour les serveurs `.mcp.json` du projet. [Sa matrice des autorisations](https://code.claude.com/docs/en/permissions#what-runs-before-you-trust-a-folder) indique que les hooks peuvent s’exécuter après qu’un dossier parent a été déclaré fiable, et que les sessions `claude -p`/SDK n’affichent pas l’invite interactive de confiance ; dans ces modes non interactifs, les serveurs MCP du projet se connectent sans invite d’approbation. Le contournement des hooks de projet avant l’établissement de la confiance, signalé sous le nom CVE-2025-59536, a été [corrigé en 2025](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/) ; ne le considérez pas comme un comportement par défaut actuel. Les vecteurs de diffusion peuvent inclure un dépôt compromis ou un programme d’installation malveillant. L’injection de prompt dans un fichier de règles est moins déterministe qu’un hook explicite et dépend toujours des approbations des outils.<sup>[[47]](#references)</sup><sup>[[48]](#references)</sup>
+Si un acteur peut modifier les paramètres globaux de l’utilisateur, ses commandes de hook ou MCP peuvent s’exécuter lors de sessions ultérieures sous ce compte. La configuration contrôlée par un dépôt est un cas distinct : [la documentation actuelle de sécurité de Claude Code](https://code.claude.com/docs/en/security) décrit une boîte de dialogue interactive de confiance pour l’espace de travail ainsi qu’une demande d’approbation distincte pour les serveurs `.mcp.json` du projet. [Sa matrice d’autorisations](https://code.claude.com/docs/en/permissions#what-runs-before-you-trust-a-folder) indique que les hooks peuvent s’exécuter après qu’un dossier parent a été jugé fiable, et que les sessions `claude -p`/SDK n’affichent pas la demande interactive de confiance ; dans ces modes non interactifs, les serveurs MCP du projet se connectent sans demande d’approbation. Le contournement des hooks de projet avant établissement de la confiance, signalé sous CVE-2025-59536, a été [corrigé en 2025](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/) ; ne le considérez pas comme un comportement par défaut actuel. Les vecteurs de diffusion peuvent inclure un dépôt compromis ou un installateur malveillant. La prompt injection par fichier de règles est moins déterministe qu’un hook explicite et dépend toujours des approbations des outils.<sup>[[47]](#references)</sup><sup>[[48]](#references)</sup>
 
-Exemple de paramètres globaux utilisateur pour Claude Code ; utilisez-les uniquement dans un compte jetable lors des tests :
+Exemple de paramètres globaux utilisateur de Claude Code ; utilisez-les uniquement sur un compte jetable lors des tests :
 
 ```json
 {
@@ -1812,7 +1814,7 @@ Exemple de paramètres globaux utilisateur pour Claude Code ; utilisez-les uniqu
 }
 ```
 
-Exemple de configuration Codex MCP globale pour l’utilisateur :
+Exemple de configuration MCP Codex globale pour l’utilisateur :
 
 ```toml
 [mcp_servers.evil]
@@ -1820,7 +1822,7 @@ command = "/bin/sh"
 args = ["-c", "touch /tmp/hacktricks_codex_mcp; exec real-mcp-server"]
 ```
 
-Exemple de configuration d’un hook Cursor ; vérifiez le schéma de la version installée avant de l’utiliser :
+Exemple de configuration de hook pour Cursor ; vérifiez le schéma de la version installée avant de l'utiliser :
 
 ```json
 { "version": 1, "hooks": { "beforeShellExecution": [ { "command": "touch /tmp/hacktricks_cursor_hook" } ] } }
@@ -1834,16 +1836,16 @@ ls -la .claude/settings*.json .mcp.json ~/.claude/settings.json ~/.claude.json \
 python3 -c 'import json;d=json.load(open("'"$HOME"'/.claude/settings.json"));print("claude hooks:",list(d.get("hooks",{}).keys()),"statusLine:",bool(d.get("statusLine")))' 2>/dev/null
 ```
 
-### Browser Extensions (Chromium: Chrome / Brave / Edge)
+### Extensions de navigateur (Chromium : Chrome / Brave / Edge)
 
-Writeup: [Chrome external extensions](https://developer.chrome.com/docs/extensions/how-to/distribute/install-extensions)<sup>[[49]](#references)</sup>, [ExtensionInstallForcelist abuse on macOS](https://macsecurity.net/view/492-extensioninstallforcelist-chrome-policy-mac)<sup>[[50]](#references)</sup>
+Compte rendu : [Extensions externes Chrome](https://developer.chrome.com/docs/extensions/how-to/distribute/install-extensions)<sup>[[49]](#references)</sup>, [Abus d’ExtensionInstallForcelist sur macOS](https://macsecurity.net/view/492-extensioninstallforcelist-chrome-policy-mac)<sup>[[50]](#references)</sup>
 
 - Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
-  - Nécessite un navigateur pris en charge et une extension installée et activée. Sur macOS, les External Extensions nécessitent une confirmation de l’utilisateur ; une installation forcée gérée nécessite une stratégie d’entreprise applicable.
-- Contournement de TCC : [🔴](https://emojipedia.org/large-red-circle)
+  - Nécessite un navigateur compatible et une extension installée et activée. Sur macOS, les extensions externes nécessitent la confirmation de l’utilisateur ; l’installation forcée gérée nécessite une stratégie d’entreprise applicable.
+- TCC bypass : [🔴](https://emojipedia.org/large-red-circle)
 
 > [!NOTE]
-> Il s’agit d’un mécanisme distinct des **native messaging hosts** (voir la section *Chrome native messaging hosts* ci-dessus). Ici, la persistance repose sur l’**extension installée automatiquement** elle-même.
+> À ne pas confondre avec les **hôtes de messagerie native** (voir la section *Hôtes de messagerie native Chrome* ci-dessus). Ici, la persistance repose sur **l’extension installée automatiquement**.
 
 #### Emplacement
 
@@ -1851,15 +1853,15 @@ Writeup: [Chrome external extensions](https://developer.chrome.com/docs/extensio
   - Chrome : `~/Library/Application Support/Google/Chrome/External Extensions/<extID>.json` (par utilisateur) ou `/Library/Application Support/Google/Chrome/External Extensions/` (tous les utilisateurs)
   - Brave : `~/Library/Application Support/BraveSoftware/Brave-Browser/External Extensions/`
   - Edge : `~/Library/Application Support/Microsoft Edge/External Extensions/`
-- **Installation forcée par stratégie d’entreprise** via les préférences gérées / un profil de configuration :
-  - Clé `ExtensionInstallForcelist` de `com.google.Chrome` (`com.brave.Browser` pour Brave, `com.microsoft.Edge` pour Edge), lue depuis `/Library/Managed Preferences/` ou un fichier `.mobileconfig` installé
+- **Installation forcée par une stratégie d’entreprise** via les préférences gérées / un profil de configuration :
+  - clé `ExtensionInstallForcelist` de `com.google.Chrome` (`com.brave.Browser` pour Brave, `com.microsoft.Edge` pour Edge), lue depuis `/Library/Managed Preferences/` ou un fichier `.mobileconfig` installé
 
 #### Description et exploitation
 
-Il s’agit de deux méthodes d’installation différentes. La [documentation de Chrome sur l’installation externe](https://developer.chrome.com/docs/extensions/how-to/distribute/install-extensions) indique que les utilisateurs Windows et macOS doivent **confirmer et activer** une extension proposée par un fichier *External Extensions* ; celle-ci ne s’exécute pas simplement parce que ce fichier JSON a été écrit. Pour une installation destinée à tous les utilisateurs sur macOS, Chrome exige également que le fichier External Extensions soit protégé contre toute modification par des utilisateurs non privilégiés. Une stratégie gérée `ExtensionInstallForcelist` ou `ExtensionSettings` peut installer et épingler une extension sans intervention de l’utilisateur ; le [guide de Google sur les stratégies Mac](https://support.google.com/chrome/a/answer/7517624) décrit la configuration gérée et précise que l’utilisateur ne peut pas supprimer les extensions installées de force. Il s’agit d’une méthode de déploiement par stratégie, et non d’un raccourci `defaults write` par utilisateur.<sup>[[49]](#references)</sup>
+Il s’agit de deux méthodes d’installation différentes. La [documentation de Chrome sur l’installation externe](https://developer.chrome.com/docs/extensions/how-to/distribute/install-extensions) indique que les utilisateurs de **Windows et de macOS doivent confirmer et activer** une extension proposée via un fichier *External Extensions* ; elle ne s’exécute pas simplement parce que ce fichier JSON a été écrit. Pour l’installation destinée à tous les utilisateurs sur macOS, Chrome exige également que le fichier d’extension externe soit protégé contre les modifications par des utilisateurs non privilégiés. Une stratégie `ExtensionInstallForcelist` ou `ExtensionSettings` gérée peut installer et épingler une extension sans interaction de l’utilisateur ; le [guide de Google sur les stratégies Mac](https://support.google.com/chrome/a/answer/7517624) décrit la configuration gérée et précise que l’utilisateur ne peut pas supprimer les extensions installées de force. Il s’agit d’une méthode de déploiement par stratégie, et non d’un raccourci `defaults write` par utilisateur.<sup>[[49]](#references)</sup>
 
 > [!WARNING]
-> Sur macOS, un manifeste JSON *External Extensions* doit pointer vers une URL de mise à jour du **Chrome Web Store**, et non vers un CRX local. Le déploiement par stratégie gérée a ses propres prérequis d’entreprise et peut autoriser une URL de mise à jour auto-hébergée gérée. Pour charger une extension locale non empaquetée dans un profil de test, l’option de mode développeur de Chrome `--load-extension=/path` est un mécanisme distinct et ne rend pas un fichier JSON External Extensions auto-exécutable. Ne considérez pas l’écriture dans `Secure Preferences` comme équivalente à l’une ou l’autre des méthodes d’enregistrement documentées.
+> Sur macOS, un manifeste JSON *External Extensions* doit pointer vers une URL de mise à jour du **Chrome Web Store**, et non vers un fichier CRX local. Le déploiement par stratégie gérée a ses propres prérequis d’entreprise et peut autoriser une URL de mise à jour autohébergée et gérée. Pour une extension locale non empaquetée dans un profil de test, l’option `--load-extension=/path` du mode développeur de Chrome est une méthode distincte et ne rend pas un fichier JSON External Extensions auto-exécutable. Ne considérez pas une écriture dans `Secure Preferences` comme équivalente à l’une ou l’autre des méthodes d’enregistrement documentées.
 
 ```bash
 # In a disposable browser account, propose a Chrome Web Store extension for enablement
@@ -1871,9 +1873,9 @@ cat > "$external_dir/$ext_id.json" <<'JSON'
 JSON
 ```
 
-Démarrez Chrome dans ce compte jetable et observez l’invite d’activation ; le comportement propre à l’extension constitue le PoC d’exécution une fois que l’utilisateur l’accepte. Après le test, supprimez le manifeste et désactivez/désinstallez l’extension dans ce profil. Cette méthode n’a **pas** été testée dans le profil Chrome actif du Mac de recherche. La méthode par managed policy n’y a pas non plus été déployée.
+Démarrez Chrome dans ce compte jetable et observez l’invite d’activation ; le comportement propre à l’extension constitue le PoC d’exécution une fois que l’utilisateur l’accepte. Après le test, supprimez le manifeste et désactivez/désinstallez l’extension dans ce profil. Cette méthode n’a **pas** été testée dans le profil Chrome actif sur le Mac de recherche. La méthode via les stratégies gérées n’y a pas non plus été déployée.
 
-Force-install et External Extensions font référence aux identifiants d’extensions du **Chrome Web Store** ; pour l’astuce de plus bas niveau qui consiste à injecter silencieusement une extension locale en modifiant le fichier `Secure Preferences` du profil, signé par HMAC, ainsi que pour d’autres abus des processus Chromium, voir :
+Les extensions installées de force et les extensions externes font référence aux identifiants d’extensions du **Chrome Web Store** ; pour l’astuce de niveau inférieur consistant à injecter silencieusement une extension locale en modifiant les `Secure Preferences` du profil, signées avec un HMAC, ainsi que pour d’autres formes d’abus des processus Chromium, voir :
 
 {{#ref}}
 macos-security-and-privilege-escalation/macos-proces-abuse/macos-chromium-injection.md
@@ -1881,29 +1883,29 @@ macos-security-and-privilege-escalation/macos-proces-abuse/macos-chromium-inject
 
 ### Gestionnaires de schémas d’URL et de types de fichiers (LaunchServices)
 
-Compte-rendu : [Exploitation à distance d’un Mac via des schémas d’URL personnalisés (Objective-See)](https://objective-see.org/blog/blog_0x38.html)<sup>[[52]](#references)</sup>
+Article : [Exploitation à distance d’un Mac via des schémas d’URL personnalisés (Objective-See)](https://objective-see.org/blog/blog_0x38.html)<sup>[[52]](#references)</sup>
 
 - Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
-  - Le déclencheur est un clic de la victime sur un lien (par exemple dans Chrome/Brave/Safari) ou l’ouverture d’un fichier du type enregistré
+  - Le déclencheur est le clic de la victime sur un lien (par ex. dans Chrome/Brave/Safari) ou l’ouverture d’un fichier du type enregistré
 - Contournement de TCC : [🔴](https://emojipedia.org/large-red-circle)
 
 #### Emplacement
 
-- Un `Info.plist` de bundle d’app déclarant **`CFBundleURLTypes`/`CFBundleURLSchemes`** (schéma d’URL personnalisé) ou **`CFBundleDocumentTypes`** (extension de fichier/UTI)
-- Les valeurs par défaut effectives par utilisateur peuvent apparaître dans **`~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist`** (tableau `LSHandlers`). L’API prise en charge par Apple pour choisir un gestionnaire par défaut pour un schéma d’URL est `LSSetDefaultHandlerForURLScheme` ; la modification directe de ce plist n’est pas une méthode documentée d’enregistrement ni de mise à jour du cache.
+- Le `Info.plist` d’un bundle d’app déclarant **`CFBundleURLTypes`/`CFBundleURLSchemes`** (schéma d’URL personnalisé) ou **`CFBundleDocumentTypes`** (extension de fichier/UTI)
+- Les valeurs par défaut effectives propres à l’utilisateur peuvent apparaître dans **`~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist`** (tableau `LSHandlers`). L’API prise en charge par Apple pour choisir le gestionnaire par défaut d’un schéma d’URL est `LSSetDefaultHandlerForURLScheme` ; écrire directement dans ce plist n’est pas une méthode documentée d’enregistrement ou de mise à jour du cache.
 
 #### Description et exploitation
 
-Launch Services récupère les déclarations de schémas d’URL et de documents dans le `Info.plist` d’une app enregistrée. Le [guide d’enregistrement d’Apple](https://developer.apple.com/library/archive/documentation/Carbon/Conceptual/LaunchServicesConcepts/LSCTasks/LSCTasks.html) indique que l’enregistrement peut avoir lieu lorsque Finder découvre l’app, au démarrage ou à l’ouverture de session, ou via une API d’enregistrement explicite ; le simple fait d’écrire une app quelque part ne garantit pas le déclenchement immédiat de l’enregistrement. Après l’enregistrement, l’ouverture d’une URL ou d’un document correspondant peut lancer l’app gestionnaire sélectionnée, sous réserve du choix de gestionnaire par défaut de l’utilisateur et des contrôles de lancement macOS habituels. L’API prise en charge `LSSetDefaultHandlerForURLScheme` modifie le gestionnaire d’URL préféré de l’utilisateur ; elle ne fait pas en sorte qu’une app nouvellement déposée s’exécute automatiquement.<sup>[[52]](#references)</sup>
+Launch Services obtient les associations de schémas d’URL et de documents depuis le `Info.plist` d’une app enregistrée. [Le guide d’enregistrement d’Apple](https://developer.apple.com/library/archive/documentation/Carbon/Conceptual/LaunchServicesConcepts/LSCTasks/LSCTasks.html) indique que l’enregistrement peut avoir lieu lorsque Finder détecte l’app, au démarrage ou à l’ouverture de session, ou via une API d’enregistrement explicite ; le simple fait d’écrire une app à un emplacement ne garantit pas un déclenchement immédiat. Après l’enregistrement, l’ouverture d’une URL ou d’un document correspondant peut lancer l’app gestionnaire sélectionnée, sous réserve du choix de gestionnaire par défaut de l’utilisateur et des contrôles de lancement habituels de macOS. L’API prise en charge `LSSetDefaultHandlerForURLScheme` modifie le gestionnaire d’URL préféré de l’utilisateur ; elle ne fait pas en sorte qu’une app nouvellement déposée s’exécute automatiquement.<sup>[[52]](#references)</sup>
 
 ```bash
 # Inspect known handlers without registering an app or changing defaults
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -dump | grep -A3 "scheme:"
 ```
 
-Aucune app n’a été enregistrée et aucune préférence de handler n’a été modifiée sur le Mac de recherche sous macOS 26.5.2. Pour tester un handler réel, utilisez un compte utilisateur jetable, enregistrez une app ne faisant qu’écrire un marqueur avec un schéma unique, invoquez son URL, puis supprimez l’app et son enregistrement.
+Aucune app n’a été enregistrée et aucune préférence de gestionnaire n’a été modifiée sur le Mac de recherche sous macOS 26.5.2. Pour tester un gestionnaire réel, utilisez un compte utilisateur jetable, enregistrez une app contenant uniquement un marqueur avec un schéma unique, invoquez son URL, puis supprimez l’app et son enregistrement.
 
-Pour approfondir l’énumération et l’abus des handlers d’extensions de fichiers et de schémas URL, consultez :
+Pour approfondir l’énumération et l’abus des gestionnaires d’extensions de fichiers et de schémas URL, voir :
 
 {{#ref}}
 macos-security-and-privilege-escalation/macos-file-extension-apps.md
@@ -1911,30 +1913,30 @@ macos-security-and-privilege-escalation/macos-file-extension-apps.md
 
 ### Fichiers de démarrage Python (`.pth` / `usercustomize` / `sitecustomize`)
 
-Compte rendu : [https://docs.python.org/3/library/site.html](https://docs.python.org/3/library/site.html)<sup>[[56]](#references)</sup>
+Documentation : [https://docs.python.org/3/library/site.html](https://docs.python.org/3/library/site.html)<sup>[[56]](#references)</sup>
 
 - Utile pour contourner le sandbox : [✅](https://emojipedia.org/check-mark-button)
-  - S’exécute au démarrage de l’interpréteur Python concerné lorsque ce répertoire `site` est activé ; le déclenchement n’est pas universel et dépend des environnements virtuels, des builds Python et des options de démarrage
+  - S’exécute au démarrage de l’interpréteur Python concerné lorsque ce répertoire `site` est activé ; le déclenchement n’est pas universel pour tous les environnements virtuels, builds Python ou options de démarrage
 - Contournement de TCC : [🔴](https://emojipedia.org/large-red-circle)
   - S’exécute avec les privilèges et les autorisations TCC du processus qui a lancé l’interpréteur
 
 #### Emplacement
 
-- **`$(python3 -m site --user-site)/*.pth`** (builds macOS framework : `~/Library/Python/<X.Y>/lib/python/site-packages/`)
-  - Aucun accès root requis (emplacement accessible en écriture par l’utilisateur)
-  - **Déclencheur** : démarrage de ce build Python avec son site utilisateur activé ; le module `site` traite les fichiers `.pth` dans les répertoires `site` actifs
+- **`$(python3 -m site --user-site)/*.pth`** (builds du framework macOS : `~/Library/Python/<X.Y>/lib/python/site-packages/`)
+  - Aucun accès root requis (inscriptible par l’utilisateur)
+  - **Déclencheur** : démarrage de ce build Python avec son site utilisateur activé ; le module `site` traite les fichiers `.pth` des répertoires `site` actifs
 - **`<user-site>/usercustomize.py`**
   - Aucun accès root requis
-  - **Déclencheur** : démarrage avec le site utilisateur activé (importé automatiquement par `site`)
-- **`<prefix>/site-packages/sitecustomize.py`** (par exemple, `/opt/homebrew/lib/python3.13/site-packages/`, ou des chemins système)
+  - **Déclencheur** : démarrage avec le site utilisateur activé (importation automatique par `site`)
+- **`<prefix>/site-packages/sitecustomize.py`** (par ex. `/opt/homebrew/lib/python3.13/site-packages/` ou des chemins système)
   - Un accès root/admin peut être requis selon l’emplacement de l’interpréteur
   - **Déclencheur** : démarrage d’un interpréteur qui inclut ce répertoire `site`
 
 #### Description et exploitation
 
-Au démarrage, Python importe normalement `site` et parcourt les répertoires `site-packages` actifs à la recherche de fichiers `.pth`. En plus d’ajouter des chemins, une ligne `.pth` commençant par `import ` exécute du code Python, même si le module indiqué n’est jamais utilisé par ailleurs. Python tente également d’importer `sitecustomize` et, **lorsque le site utilisateur est activé**, `usercustomize`.<sup>[[56]](#references)</sup> Le déclencheur est le démarrage ultérieur d’un interpréteur qui voit le répertoire modifié. `-S` désactive le traitement de `site` ; `-s`, `-I` ou `PYTHONNOUSERSITE` désactivent les variantes du **site utilisateur**. `-I` ne désactive généralement pas un `sitecustomize` global. Les environnements virtuels peuvent également exclure le site utilisateur. Vérifiez `python3 -m site` pour l’interpréteur concerné.
+Au démarrage, Python importe normalement `site` et parcourt les répertoires `site-packages` actifs à la recherche de fichiers `.pth`. En plus d’ajouter des chemins, une ligne `.pth` commençant par `import ` exécute du code Python, même si le module nommé n’est jamais utilisé autrement. Python essaie également d’importer `sitecustomize` et, **lorsque le site utilisateur est activé**, `usercustomize`.<sup>[[56]](#references)</sup> Le déclencheur est un démarrage ultérieur d’un interpréteur qui voit le répertoire modifié. `-S` désactive le traitement de `site` ; `-s`, `-I` ou `PYTHONNOUSERSITE` désactivent les variantes du **site utilisateur**. `-I` ne désactive généralement pas un `sitecustomize` global. Les environnements virtuels peuvent également exclure le site utilisateur. Vérifiez `python3 -m site` pour l’interpréteur concerné.
 
-Le PoC suivant a été exécuté sous macOS 26.5.2. Pour ce test, `PYTHONUSERBASE` déplace le site utilisateur dans un répertoire temporaire ; aucun site utilisateur réel n’est modifié :
+La PoC suivante a été exécutée sous macOS 26.5.2. `PYTHONUSERBASE` déplace le site utilisateur dans un répertoire temporaire pour ce test ; aucun site utilisateur réel n’est modifié :
 
 ```python
 import os, pathlib, subprocess, tempfile
@@ -1959,36 +1961,36 @@ with tempfile.TemporaryDirectory(prefix='ht-python-site-') as root:
     print('pth:', pth_marker.exists(), 'usercustomize:', user_marker.exists())
 ```
 
-Both markers sont apparus. Répéter avec `-s`, `-I` ou `-S` a empêché l’apparition des deux marqueurs **user-site** dans ce test. `sitecustomize` dans un répertoire global `site` n’a pas été testé.
+Les deux marqueurs sont apparus. Dans ce test, répéter avec `-s`, `-I` ou `-S` empêchait l’apparition des deux marqueurs **user-site**. `sitecustomize` dans un répertoire global de site n’a pas été testé.
 
-## Root Sandbox Bypass
+## Contournement du sandbox en tant que root
 
 > [!TIP]
-> Vous trouverez ici des emplacements de démarrage utiles pour le **sandbox bypass**, qui vous permet simplement d’exécuter quelque chose en **l’écrivant dans un fichier**, en étant **root** et/ou en ayant besoin d’**autres conditions inhabituelles.**
+> Vous trouverez ici des emplacements de démarrage utiles pour le **contournement du sandbox**, qui permettent d’exécuter facilement quelque chose en **l’écrivant dans un fichier**, en étant **root** et/ou en nécessitant d’autres **conditions inhabituelles**.
 
 ### Periodic
 
 > [!CAUTION]
-> **Mécanisme historique :** Sur la machine de test macOS 26.5.2, `/usr/sbin/periodic`, `/etc/defaults/periodic.conf`, `/etc/periodic` et les launch daemons `com.apple.periodic-*` sont absents. Ne partez pas du principe que créer `/etc/periodic` sur un système actuel planifiera l’exécution de son contenu. Vérifiez la présence de la commande et d’un scheduler activé sur la version cible avant d’utiliser l’exemple ci-dessous.
+> **Mécanisme historique :** sur la machine de test macOS 26.5.2, `/usr/sbin/periodic`, `/etc/defaults/periodic.conf`, `/etc/periodic` et les launch daemons `com.apple.periodic-*` sont absents. Ne supposez pas que la création de `/etc/periodic` sur un système actuel planifiera l’exécution de son contenu. Avant d’utiliser l’exemple ci-dessous, vérifiez la présence de la commande et d’un planificateur activé sur la version cible.
 
-Writeup : [https://theevilbit.github.io/beyond/beyond_0019/](https://theevilbit.github.io/beyond/beyond_0019/)<sup>[[27]](#references)</sup>
+Compte rendu : [https://theevilbit.github.io/beyond/beyond_0019/](https://theevilbit.github.io/beyond/beyond_0019/)<sup>[[27]](#references)</sup>
 
 - Utile pour contourner le sandbox : [🟠](https://emojipedia.org/large-orange-circle)
-  - Mais vous devez être root
-- TCC bypass : [🔴](https://emojipedia.org/large-red-circle)
+  - Mais il faut être root
+- Contournement de TCC : [🔴](https://emojipedia.org/large-red-circle)
 
 #### Emplacement
 
 - `/etc/periodic/daily`, `/etc/periodic/weekly`, `/etc/periodic/monthly`, `/usr/local/etc/periodic`
-  - Accès root requis
+  - Droits root requis
   - **Déclenchement** : À l’heure prévue
 - `/etc/daily.local`, `/etc/weekly.local` ou `/etc/monthly.local`
-  - Accès root requis
+  - Droits root requis
   - **Déclenchement** : À l’heure prévue
 
 #### Description et exploitation
 
-Sur les anciennes versions, les scripts periodic (**`/etc/periodic`**) étaient planifiés par des **launch daemons** dans `/System/Library/LaunchDaemons/com.apple.periodic*`. Depuis macOS Big Sur 11.5, le runner periodic exécutait les scripts présents dans les répertoires periodic avec les privilèges du **propriétaire de chaque fichier**, ce qui a fermé une ancienne voie d’élévation de privilèges.<sup>[[27]](#references)</sup> Les commandes et listes de répertoires ci-dessous sont des résultats historiques, et non des résultats d’un test macOS 26.5.2.
+Sur les anciennes versions, les scripts periodic (**`/etc/periodic`**) étaient planifiés par des **launch daemons** dans `/System/Library/LaunchDaemons/com.apple.periodic*`. Depuis macOS Big Sur 11.5, le processus periodic exécutait les scripts des répertoires periodic en tant que **propriétaire de chaque fichier**, ce qui a fermé une ancienne voie d’élévation de privilèges.<sup>[[27]](#references)</sup> Les commandes et listes de répertoires ci-dessous correspondent à des sorties historiques, et non à des résultats de test sur macOS 26.5.2.
 
 ```bash
 # Launch daemons that will execute the periodic scripts
@@ -2021,7 +2023,7 @@ total 8
 -rwxr-xr-x  1 root  wheel  620 May 13 00:29 999.local
 ```
 
-D’autres scripts périodiques qui seront exécutés sont indiqués dans **`/etc/defaults/periodic.conf`** :
+D’autres scripts périodiques seront également exécutés, comme indiqué dans **`/etc/defaults/periodic.conf`** :
 
 ```bash
 grep "Local scripts" /etc/defaults/periodic.conf
@@ -2030,14 +2032,14 @@ weekly_local="/etc/weekly.local"			# Local scripts
 monthly_local="/etc/monthly.local"			# Local scripts
 ```
 
-Sur les anciens systèmes où `periodic` et ses launch daemons sont installés et activés, `/etc/daily.local`, `/etc/weekly.local` et `/etc/monthly.local` constituaient des voies d’exécution supplémentaires. Une vérification inoffensive en lecture seule est :
+Sur les anciens systèmes où `periodic` et ses launch daemons étaient installés et activés, `/etc/daily.local`, `/etc/weekly.local` et `/etc/monthly.local` constituaient des chemins d’exécution supplémentaires. Une vérification inoffensive en lecture seule est :
 
 ```bash
 test -x /usr/sbin/periodic && ls /System/Library/LaunchDaemons/com.apple.periodic-*.plist
 ```
 
 > [!WARNING]
-> La règle basée sur le propriétaire s’appliquait aux scripts directement placés dans les répertoires périodiques. L’ancien wrapper `999.local` sourçait `/etc/daily.local`, `/etc/weekly.local` ou `/etc/monthly.local` sans vérifier également leur propriétaire ; lorsque le planificateur s’exécutait en tant que root, ces fichiers locaux s’exécutaient en tant que root. Cette distinction et le changement apporté dans Big Sur 11.5 sont documentés dans la [recherche originale](https://theevilbit.github.io/beyond/beyond_0019/). Il ne faut pas supposer que l’un de ces chemins est actif lorsque `periodic` est absent.
+> La règle fondée sur le propriétaire s'appliquait aux scripts placés directement dans les répertoires périodiques. L'ancien wrapper `999.local` exécutait les fichiers `/etc/daily.local`, `/etc/weekly.local` ou `/etc/monthly.local` sans effectuer cette même vérification de propriété ; lorsque le scheduler s'exécutait en tant que root, ces fichiers locaux s'exécutaient en tant que root. Cette distinction et le changement introduit dans Big Sur 11.5 sont documentés dans la [recherche originale](https://theevilbit.github.io/beyond/beyond_0019/). Aucun de ces chemins ne doit être considéré comme actif si `periodic` est absent.
 
 ### PAM
 
@@ -2046,15 +2048,15 @@ Writeup : [https://theevilbit.github.io/beyond/beyond_0005/](https://theevilbit.
 
 - Utile pour contourner le sandbox : [🟠](https://emojipedia.org/large-orange-circle)
   - Mais vous devez être root
-- TCC bypass : [🔴](https://emojipedia.org/large-red-circle)
+- Contournement de TCC : [🔴](https://emojipedia.org/large-red-circle)
 
 #### Emplacement
 
-- Root toujours requis
+- Root est toujours requis
 
 #### Description et exploitation
 
-Comme PAM est davantage axé sur la **persistance** et les malwares que sur l’exécution facile dans macOS, ce blog ne donnera pas d’explication détaillée. **Consultez les writeups pour mieux comprendre cette technique**.<sup>[[28]](#references)</sup>
+Comme PAM est davantage axé sur la **persistence** et les malwares que sur l'exécution facile dans macOS, ce blog ne donnera pas d'explication détaillée ; **lisez les writeups pour mieux comprendre cette technique**.<sup>[[28]](#references)</sup>
 
 Vérifiez les modules PAM avec :
 
@@ -2062,13 +2064,13 @@ Vérifiez les modules PAM avec :
 ls -l /etc/pam.d
 ```
 
-Une technique de persistance/d’escalade de privilèges exploitant PAM est aussi simple que de modifier le fichier /etc/pam.d/sudo en ajoutant au début la ligne :
+Une technique de persistance/d’élévation de privilèges exploitant PAM consiste simplement à modifier le module /etc/pam.d/sudo en ajoutant au début la ligne :
 
 ```bash
 auth       sufficient     pam_permit.so
 ```
 
-Cela **ressemblera** donc à quelque chose comme ceci :
+Donc, cela **ressemblera** à quelque chose comme ceci :
 
 ```bash
 # sudo: auth account password session
@@ -2081,12 +2083,12 @@ password   required       pam_deny.so
 session    required       pam_permit.so
 ```
 
-Et par conséquent, toute tentative d'utiliser **`sudo` fonctionnera**.
+Et par conséquent, toute tentative d’utiliser **`sudo` fonctionnera**.
 
 > [!CAUTION]
-> Notez que ce répertoire est protégé par TCC, il est donc très probable que l'utilisateur reçoive une demande d'autorisation d'accès.
+> Notez que ce répertoire est protégé par TCC ; il est donc très probable que l’utilisateur voie une invite lui demandant l’autorisation d’y accéder.
 
-Un autre bon exemple est su, où l'on peut voir qu'il est également possible de transmettre des paramètres aux modules PAM (et vous pourriez aussi backdoor ce fichier) :
+Un autre bon exemple est `su` : on peut voir qu’il est également possible de fournir des paramètres aux modules PAM (et vous pourriez aussi backdoorer ce fichier) :
 
 ```bash
 cat /etc/pam.d/su
@@ -2099,13 +2101,13 @@ password   required       pam_opendirectory.so
 session    required       pam_launchd.so
 ```
 
-### Plugins d’autorisation
+### Authorization Plugins
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.github.io/beyond/beyond_0028/)<sup>[[29]](#references)</sup>\
 Writeup: [https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)<sup>[[30]](#references)</sup>
 
 - Utile pour bypass le sandbox : [🟠](https://emojipedia.org/large-orange-circle)
-  - Mais il faut être root et ajouter des configurations
+  - Mais vous devez être root et ajouter des configurations
 - TCC bypass : ???
 
 #### Emplacement
@@ -2116,7 +2118,7 @@ Writeup: [https://posts.specterops.io/persistent-credential-theft-with-authoriza
 
 #### Description et exploitation
 
-Vous pouvez créer un plugin d’autorisation qui sera exécuté lorsqu’un utilisateur se connecte, afin de maintenir la persistance. Pour plus d’informations sur la création de ce type de plugin, consultez les writeups précédents (et soyez prudent : un plugin mal écrit peut vous empêcher de vous connecter et vous devrez nettoyer votre Mac depuis le mode de récupération).<sup>[[29]](#references)[[30]](#references)</sup>
+Vous pouvez créer un plugin d’autorisation qui sera exécuté lorsqu’un utilisateur se connecte, afin de maintenir la persistance. Pour en savoir plus sur la création de ces plugins, consultez les writeups précédents (et soyez prudent : un plugin mal écrit peut vous empêcher d’accéder à votre système, et vous devrez nettoyer votre Mac depuis le mode de récupération).<sup>[[29]](#references)[[30]](#references)</sup>
 
 ```objectivec
 // Compile the code and create a real bundle
@@ -2133,13 +2135,13 @@ __attribute__((constructor)) static void run()
 }
 ```
 
-**Déplacer** le bundle vers l’emplacement depuis lequel il sera chargé :
+**Déplacez** le bundle vers l’emplacement où il sera chargé :
 
 ```bash
 cp -r CustomAuth.bundle /Library/Security/SecurityAgentPlugins/
 ```
 
-Enfin, ajoutez la **règle** pour charger ce plugin :
+Enfin, ajoutez la **règle** pour charger ce Plugin :
 
 ```bash
 cat > /tmp/rule.plist <<EOF
@@ -2160,7 +2162,7 @@ EOF
 security authorizationdb write com.asdf.asdf < /tmp/rule.plist
 ```
 
-Le **`evaluate-mechanisms`** indique au framework d’autorisation qu’il devra **appeler un mécanisme externe pour l’autorisation**. De plus, **`privileged`** le fera exécuter par root.
+The **`evaluate-mechanisms`** indiquera au framework d’autorisation qu’il devra **appeler un mécanisme externe pour l’autorisation**. De plus, **`privileged`** fera en sorte qu’il soit exécuté par root.
 
 Déclenchez-le avec :
 
@@ -2168,7 +2170,7 @@ Déclenchez-le avec :
 security authorize com.asdf.asdf
 ```
 
-Et le groupe **staff** devrait avoir accès à sudo (lisez `/etc/sudoers` pour le confirmer).
+Et le **groupe staff devrait avoir accès à sudo** (lisez `/etc/sudoers` pour le confirmer).
 
 ### Man.conf
 
@@ -2186,7 +2188,7 @@ Writeup : [https://theevilbit.github.io/beyond/beyond_0030/](https://theevilbit.
 
 #### Description et exploit
 
-Le fichier de configuration **`/private/etc/man.conf`** indique le binaire/script à utiliser pour ouvrir les fichiers de documentation de man. Le chemin de l’exécutable pourrait donc être modifié afin qu’une backdoor soit exécutée chaque fois que l’utilisateur utilise man pour lire de la documentation.<sup>[[31]](#references)</sup>
+Le fichier de configuration **`/private/etc/man.conf`** indique le binaire/script à utiliser pour ouvrir les fichiers de documentation de man. Le chemin vers l’exécutable peut donc être modifié afin qu’une backdoor soit exécutée chaque fois que l’utilisateur utilise man pour consulter de la documentation.<sup>[[31]](#references)</sup>
 
 Par exemple, définissez dans **`/private/etc/man.conf`** :
 
@@ -2194,7 +2196,7 @@ Par exemple, définissez dans **`/private/etc/man.conf`** :
 MANPAGER /tmp/view
 ```
 
-Et créez ensuite `/tmp/view` comme :
+Puis créez `/tmp/view` comme suit :
 
 ```bash
 #!/bin/zsh
@@ -2210,14 +2212,14 @@ touch /tmp/manconf
 
 - Utile pour contourner le sandbox : [🟠](https://emojipedia.org/large-orange-circle)
   - Mais vous devez être root et Apache doit être en cours d’exécution
-- Contournement de TCC : [🔴](https://emojipedia.org/large-red-circle)
+- TCC bypass : [🔴](https://emojipedia.org/large-red-circle)
   - Httpd n’a pas d’entitlements
 
 #### Emplacement
 
 - **`/etc/apache2/httpd.conf`**
   - Root requis
-  - Déclencheur : au démarrage d’Apache2
+  - Déclenchement : au démarrage d’Apache2
 
 #### Description et exploit
 
@@ -2227,7 +2229,7 @@ Vous pouvez indiquer dans `/etc/apache2/httpd.conf` de charger un module en ajou
 LoadModule my_custom_module /Users/Shared/example.dylib "My Signature Authority"
 ```
 
-De cette façon, votre module compilé sera chargé par Apache. La seule condition est de **le signer avec un certificat Apple valide**, ou d’**ajouter un nouveau certificat de confiance** au système et de **le signer** avec celui-ci.
+De cette manière, votre module compilé sera chargé par Apache. La seule chose à faire est soit de le **signer avec un certificat Apple valide**, soit d’**ajouter un nouveau certificat de confiance** au système et de le **signer** avec celui-ci.
 
 Ensuite, si nécessaire, pour vous assurer que le serveur démarre, vous pouvez exécuter :
 
@@ -2251,17 +2253,17 @@ static void myconstructor(int argc, const char **argv)
 
 ### Framework d’audit BSM
 
-Compte rendu : [https://theevilbit.github.io/beyond/beyond_0031/](https://theevilbit.github.io/beyond/beyond_0031/)<sup>[[33]](#references)</sup>
+Writeup : [https://theevilbit.github.io/beyond/beyond_0031/](https://theevilbit.github.io/beyond/beyond_0031/)<sup>[[33]](#references)</sup>
 
 - Utile pour contourner le sandbox : [🟠](https://emojipedia.org/large-orange-circle)
   - Mais vous devez être root, auditd doit être en cours d’exécution et une alerte doit être déclenchée
-- Contournement de TCC : [🔴](https://emojipedia.org/large-red-circle)
+- TCC bypass : [🔴](https://emojipedia.org/large-red-circle)
 
 #### Emplacement
 
 - **`/etc/security/audit_warn`**
   - Droits root requis
-  - **Déclencheur** : Quand auditd détecte une alerte
+  - **Déclencheur** : Lorsqu’auditd détecte une alerte
 
 #### Description et exploitation
 
@@ -2282,7 +2284,7 @@ Le **StartupItem** est un répertoire qui doit se trouver dans `/Library/Startup
 1. Un **script rc** : un script shell exécuté au démarrage.
 2. Un **fichier plist**, nommé précisément `StartupParameters.plist`, qui contient divers paramètres de configuration.
 
-Assurez-vous que le script rc et le fichier `StartupParameters.plist` sont correctement placés dans le répertoire **StartupItem** afin que le processus de démarrage puisse les détecter et les utiliser.
+Assurez-vous que le script rc et le fichier `StartupParameters.plist` sont correctement placés dans le répertoire **StartupItem** afin que le processus de démarrage puisse les reconnaître et les utiliser.
 
 {{#tabs}}
 {{#tab name="StartupParameters.plist"}}
@@ -2333,13 +2335,13 @@ RunService "$1"
 ### ~~emond~~
 
 > [!CAUTION]
-> Je ne trouve pas ce composant sur mon macOS ; pour plus d’informations, consultez le writeup.
+> Je ne trouve pas ce composant sur mon macOS ; pour en savoir plus, consultez le writeup.
 
-Writeup : [https://theevilbit.github.io/beyond/beyond_0023/](https://theevilbit.github.io/beyond/beyond_0023/)<sup>[[34]](#references)</sup>
+Writeup: [https://theevilbit.github.io/beyond/beyond_0023/](https://theevilbit.github.io/beyond/beyond_0023/)<sup>[[34]](#references)</sup>
 
-Introduit par Apple, **emond** est un mécanisme de journalisation qui semble peu développé, voire peut-être abandonné, mais qui reste accessible. Bien que ce service soit peu utile pour un administrateur Mac, il pourrait constituer une méthode de persistance discrète pour les acteurs malveillants, probablement passée inaperçue aux yeux de la plupart des administrateurs macOS.<sup>[[34]](#references)</sup>
+Introduit par Apple, **emond** est un mécanisme de journalisation qui semble peu développé, voire peut-être abandonné, mais qui reste accessible. Bien qu'il soit peu utile pour un administrateur Mac, ce service obscur pourrait servir de méthode de persistance discrète pour des acteurs malveillants, probablement sans être détecté par la plupart des administrateurs macOS.<sup>[[34]](#references)</sup>
 
-Pour ceux qui savent qu’il existe, repérer une utilisation malveillante d’**emond** est simple. Le LaunchDaemon du système associé à ce service recherche des scripts à exécuter dans un répertoire unique. Pour l’inspecter, vous pouvez utiliser la commande suivante :
+Pour ceux qui connaissent son existence, il est facile de repérer toute utilisation malveillante d'**emond**. Le LaunchDaemon système de ce service recherche les scripts à exécuter dans un répertoire unique. Pour l'inspecter, vous pouvez utiliser la commande suivante :
 
 ```bash
 ls -l /private/var/db/emondClients
@@ -2352,17 +2354,17 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.g
 #### Emplacement
 
 - **`/opt/X11/etc/X11/xinit/privileged_startx.d`**
-  - Root requis
+  - Nécessite les privilèges root
   - **Déclencheur** : avec XQuartz
 
 #### Description et exploitation
 
-XQuartz **n’est plus installé dans macOS**. Consultez le writeup pour en savoir plus.<sup>[[3]](#references)</sup>
+XQuartz n’est **plus installé dans macOS**. Consultez donc le writeup pour plus d’informations.<sup>[[3]](#references)</sup>
 
 ### ~~kext~~
 
 > [!CAUTION]
-> Installer un kext est tellement compliqué, même en tant que root, que cette technique n’est pas considérée comme pratique pour une sandbox-escape ou une persistance, à moins de disposer d’un exploit.
+> L’installation d’un kext est si compliquée, même en tant que root, qu’elle n’est pas considérée comme une technique pratique d’évasion de sandbox ou de persistance, sauf si vous disposez d’un exploit.
 
 #### Emplacement
 
@@ -2396,7 +2398,7 @@ Writeup : [https://theevilbit.github.io/beyond/beyond_0029/](https://theevilbit.
 
 #### Description et exploitation
 
-Apparemment, le `plist` de `/System/Library/LaunchAgents/com.apple.amstoold.plist` utilisait ce binaire tout en exposant un service XPC... Le problème, c’est que le binaire n’existait pas, donc vous pouviez y placer quelque chose et, lorsque le service XPC était appelé, votre binaire était exécuté.<sup>[[35]](#references)</sup>
+Apparemment, le `plist` de `/System/Library/LaunchAgents/com.apple.amstoold.plist` utilisait ce binaire tout en exposant un service XPC... Le problème, c’est que le binaire n’existait pas. On pouvait donc placer quelque chose à cet emplacement et, lorsque le service XPC était appelé, votre binaire était exécuté.<sup>[[35]](#references)</sup>
 
 Je ne le trouve plus dans mon macOS.
 
@@ -2412,13 +2414,13 @@ Writeup : [https://theevilbit.github.io/beyond/beyond_0015/](https://theevilbit.
 
 #### Description et exploitation
 
-Apparemment, ce script n’est pas souvent exécuté et je ne l’ai même pas trouvé dans mon macOS. Consultez donc le writeup pour plus d’informations.<sup>[[36]](#references)</sup>
+Apparemment, ce script est rarement exécuté et je n’ai même pas réussi à le trouver dans mon macOS. Consultez donc le writeup pour plus d’informations.<sup>[[36]](#references)</sup>
 
 ### ~~/etc/rc.common~~
 
-> [!CAUTION] > **Cela ne fonctionne pas dans les versions modernes de macOS**
+> [!CAUTION] > **Cette méthode ne fonctionne pas dans les versions modernes de macOS**
 
-Il est également possible d’y placer des **commandes qui seront exécutées au démarrage.** Exemple de script rc.common classique :
+Il est également possible de placer ici des **commandes qui seront exécutées au démarrage.** Exemple de script rc.common classique :
 
 ```bash
 #
@@ -2513,41 +2515,41 @@ RunService ()
 }
 ```
 
-### Tâches de démarrage de launchd
+### Tâches de démarrage launchd
 
 Writeup : [https://theevilbit.github.io/beyond/beyond_0034/](https://theevilbit.github.io/beyond/beyond_0034/)<sup>[[40]](#references)</sup>
 
 - Utile pour contourner le sandbox : [🔴](https://emojipedia.org/large-red-circle) (root requis)
-- Root requis, ainsi qu’un **SIP bypass** ou l’autorisation **`kTCCServiceSystemPolicySysAdminFiles`**/Accès complet au disque, selon le chemin
+- Root requis, ainsi qu’un **contournement de SIP** ou l’autorisation **`kTCCServiceSystemPolicySysAdminFiles`**/Full Disk Access, selon le chemin
 
 #### Emplacement
 
-`launchd` intègre un plist dans sa section **`__TEXT,__config`**, qui décrit les « tâches de démarrage » exécutées au début du démarrage. Plusieurs scripts/binaires de référence, qui **n’existent pas** par défaut, peuvent être créés par un attaquant :
+`launchd` intègre un plist dans sa section **`__TEXT,__config`** qui décrit les premières « tâches de démarrage ». Plusieurs scripts/binaires de référence qui n’existent **pas** par défaut et peuvent être créés par un attaquant :
 
-- Ensemble SIP bypass : **`/Library/Apple/usr/libexec/finish_demo_restore`**, **`/private/var/install/shutdown_installer_tasks`**, **`/private/var/install/deferred_install`**
-- Ensemble TCC/FDA : **`/etc/rc.server`**, **`/etc/rc.cdrom`**, **`/etc/rc.netboot`** (`rc.netboot` existe déjà uniquement sur Sequoia+)
+- Ensemble de contournement de SIP : **`/Library/Apple/usr/libexec/finish_demo_restore`**, **`/private/var/install/shutdown_installer_tasks`**, **`/private/var/install/deferred_install`**
+- Ensemble TCC/FDA : **`/etc/rc.server`**, **`/etc/rc.cdrom`**, **`/etc/rc.netboot`** (`rc.netboot` n’existe par défaut qu’à partir de Sequoia)
 
 #### Description et exploitation
 
-Dump la table des tâches intégrée pour voir quels fichiers `launchd` exécutera et quelles clés sont prises en charge (`Program`, `ProgramArguments`, `PerformAfterUserspaceReboot`, `RequireSuccess`…) :
+Extrayez la table de tâches intégrée pour voir quels fichiers `launchd` exécutera et quelles clés sont prises en charge (`Program`, `ProgramArguments`, `PerformAfterUserspaceReboot`, `RequireSuccess`…) :
 
 ```bash
 otool -X -s __TEXT __config /sbin/launchd | awk '{print $2 $3 $4 $5}' | \
   xxd -r -p | hexdump -v -e '1/4 "%08x"' -e '"\n"' | xxd -r -p
 ```
 
-La création de l’un des fichiers référencés (p. ex. `/etc/rc.server`) fait que `launchd` l’exécute au prochain redémarrage (userspace). Les entrées les plus utiles sont protégées par SIP ou nécessitent TCC SysAdminFiles/Full Disk Access : cette technique nécessite donc les privilèges root et un redémarrage.<sup>[[40]](#references)</sup>
+Créer l’un des fichiers référencés (par ex. `/etc/rc.server`) fait que `launchd` l’exécute au prochain redémarrage (de l’espace utilisateur). Les entrées les plus utiles sont bloquées par SIP ou nécessitent TCC SysAdminFiles/Full Disk Access ; il s’agit donc d’une technique de niveau root, déclenchée au redémarrage.<sup>[[40]](#references)</sup>
 
 ### ~~NVRAM (`apple-trusted-trampoline`)~~
 
 Writeup : [https://theevilbit.github.io/beyond/beyond_0035/](https://theevilbit.github.io/beyond/beyond_0035/)<sup>[[41]](#references)</sup>
 
-La tâche de démarrage `rc.trampoline` exécute au démarrage un **binaire de plateforme (signé par Apple)** stocké dans la variable NVRAM `apple-trusted-trampoline`, mais **uniquement lorsque l’argument de démarrage `rc.trampoline=1` est défini et que SIP est désactivé** (avec une limite de taille d’environ 390&nbsp;KB et une contrainte d’exécution bloquante/à retour rapide). Comme elle nécessite **les privilèges root + SIP désactivé + une charge utile signée par Apple**, cette technique est essentiellement impraticable pour la persistance en conditions réelles et n’est mentionnée ici qu’à titre exhaustif.<sup>[[41]](#references)</sup>
+La tâche de démarrage `rc.trampoline` exécute au démarrage un **binaire de plateforme (signé par Apple)** stocké dans la variable NVRAM `apple-trusted-trampoline`, mais **uniquement si l’argument de démarrage `rc.trampoline=1` est défini et si SIP est désactivé** (avec une limite de taille d’environ 390&nbsp;Ko et une contrainte d’exécution bloquante/à retour rapide). Comme cette technique nécessite **root + SIP désactivé + une charge utile signée par Apple**, elle est pratiquement inutilisable pour assurer une persistance réelle et n’est mentionnée ici qu’à titre d’exhaustivité.<sup>[[41]](#references)</sup>
 
-### /etc/paths et /etc/paths.d (détournement de PATH)
+### /etc/paths et /etc/paths.d (PATH hijack)
 
-- Utile pour contourner le sandbox : [🔴](https://emojipedia.org/large-red-circle) (écriture avec les privilèges root requise)
-- Privilèges root requis
+- Utile pour contourner le sandbox : [🔴](https://emojipedia.org/large-red-circle) (écriture avec root requise)
+- Root requis
 
 #### Emplacement
 
@@ -2555,7 +2557,7 @@ La tâche de démarrage `rc.trampoline` exécute au démarrage un **binaire de p
 
 #### Description et exploitation
 
-Les deux appartiennent à root. En ajoutant un répertoire contrôlé par l’attaquant au début du `PATH` (en modifiant `/etc/paths` ou en déposant un fichier dans `/etc/paths.d/`), ce répertoire apparaît en tête du `PATH` de chaque nouveau shell de connexion. Un binaire malveillant portant le nom d’une commande courante (`ls`, `git`, …) **prend alors la place** du véritable binaire et s’exécute la prochaine fois que la victime l’invoque.
+Ces deux éléments appartiennent à root. Ajouter en tête un répertoire contrôlé par l’attaquant (en modifiant `/etc/paths` ou en déposant un fichier dans `/etc/paths.d/`) place ce répertoire au début du `PATH` de chaque nouveau shell de connexion. Un binaire malveillant portant le nom d’une commande courante (`ls`, `git`, …) **prend alors la place** du véritable binaire et s’exécute la prochaine fois que la victime l’appelle.
 
 ```bash
 # e.g. Homebrew already ships a /etc/paths.d entry; an attacker drops their own
@@ -2565,33 +2567,33 @@ echo "/private/tmp/evil" | sudo tee /etc/paths.d/00-evil
 
 ### storagekitd SIP Bypass (CVE-2024-44243)
 
-Writeup: [https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/](https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/)<sup>[[46]](#references)</sup>
+Writeup : [https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/](https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/)<sup>[[46]](#references)</sup>
 
-- Utile pour bypass le sandbox : [🔴](https://emojipedia.org/large-red-circle) (nécessite root)
-- Root requis ; le résultat **bypass SIP**. macOS **15.0–15.1** est concerné, le problème a été corrigé dans **15.2**.
+- Utile pour bypasser le sandbox : [🔴](https://emojipedia.org/large-red-circle) (root requis)
+- Root requis ; le résultat **bypasse SIP**. macOS **15.0–15.1** est affecté ; le problème a été corrigé dans la version **15.2**
 
 #### Emplacement
 
-- Déposer un filesystem bundle dans **`/Library/Filesystems/`**.
+- Déposer un bundle de système de fichiers dans **`/Library/Filesystems/`**.
 
 #### Description et exploitation
 
-`storagekitd` détient l’entitlement **`com.apple.rootless.install.heritable`** et lançait les binaires des filesystem bundles en leur transmettant cette capacité de bypass de SIP **par héritage**. En déposant un filesystem bundle malveillant, un attaquant pouvait exécuter du code avec un bypass de SIP pour installer des **kernel extensions persistantes** ou écrire dans les répertoires `LaunchDaemon` protégés par SIP — une persistance qui survit aux protections normales et les neutralise.<sup>[[46]](#references)</sup> Apple a corrigé le problème dans macOS Sequoia 15.2.
+`storagekitd` possède l’entitlement **`com.apple.rootless.install.heritable`** et lançait les binaires des bundles de système de fichiers avec cette capacité de bypass SIP **héritée**. En installant un bundle de système de fichiers malveillant, un attaquant pouvait exécuter du code avec un bypass SIP afin d’installer des **extensions de noyau persistantes** ou d’écrire dans des répertoires `LaunchDaemon` protégés par SIP — une persistance qui résiste aux protections normales et les contourne.<sup>[[46]](#references)</sup> Apple a corrigé le problème dans macOS Sequoia 15.2.
 
 ### sudo plugins (/etc/sudo.conf)
 
 Writeup : [On Writing Sudo Plugins (sigma-star)](https://blog.sigma-star.io/2025/07/on-writing-sudo-plugins/)<sup>[[51]](#references)</sup>
 
-- Utile pour bypass le sandbox : [🔴](https://emojipedia.org/large-red-circle) (nécessite root pour écrire dans `/etc/sudo.conf`)
-- Root requis pour l’installation ; le plugin s’exécute ensuite lors de **chaque invocation de `sudo`** (contexte setuid-root)
+- Utile pour bypasser le sandbox : [🔴](https://emojipedia.org/large-red-circle) (root requis pour écrire dans `/etc/sudo.conf`)
+- Root requis pour l’installation ; le plugin s’exécute ensuite dans **chaque invocation de `sudo`** (contexte setuid-root)
 
 #### Emplacement
 
-- **`/etc/sudo.conf`** — les lignes `Plugin` chargent des objets partagés depuis **`/usr/libexec/sudo/`** (ou depuis un chemin absolu). Ce fichier est absent par défaut (sudo utilise une policy intégrée), sa création constitue donc un hook direct.
+- **`/etc/sudo.conf`** — les lignes `Plugin` chargent des objets partagés depuis **`/usr/libexec/sudo/`** (ou depuis un chemin absolu). Ce fichier est absent par défaut (sudo utilise une politique intégrée) : sa création constitue donc un hook direct.
 
 #### Description et exploitation
 
-`sudo` charge ses plugins de policy, d’approbation et d’audit depuis `/etc/sudo.conf`. Comme `sudo` est setuid-root, un plugin d’objet partagé malveillant s’exécute avec les **privilèges root à chaque fois qu’un utilisateur lance `sudo`** — une persistance root durable qui permet également de voir chaque commande sudo.<sup>[[51]](#references)</sup> macOS fournit sudo 1.9.x, qui prend en charge l’API des plugins.
+`sudo` charge ses plugins de politique, d’approbation et d’audit depuis `/etc/sudo.conf`. Comme `sudo` est setuid-root, un plugin objet partagé malveillant s’exécute avec les **privilèges root chaque fois qu’un utilisateur lance `sudo`** — une persistance root durable qui permet également de voir chaque commande sudo.<sup>[[51]](#references)</sup> macOS fournit sudo 1.9.x, qui prend en charge l’API des plugins.
 
 ```bash
 # As root: load a malicious audit/approval plugin on every sudo
@@ -2602,45 +2604,45 @@ CONF
 # ht_audit.so's constructor / audit_open runs as root on the next `sudo <anything>`
 ```
 
-### CoreMediaIO DAL Plug-Ins
+### Plug-ins CoreMediaIO DAL
 
-Writeup: [https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)<sup>[[53]](#references)</sup>\
+Compte rendu : [https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)<sup>[[53]](#references)</sup>\
 Exemple minimal : [https://github.com/johnboiles/coremediaio-dal-minimal-example](https://github.com/johnboiles/coremediaio-dal-minimal-example)<sup>[[54]](#references)</sup>
 
-- **Mécanisme hérité :** obsolète depuis macOS 12.3. macOS 14.1 et les versions ultérieures désactivent par défaut les plug-ins vidéo hérités. L’utilisateur doit rétablir la prise en charge vidéo héritée depuis Recovery pour que cette méthode fonctionne ; un répertoire accessible en écriture ne suffit pas. [Instructions d’assistance actuelles d’Apple](https://support.apple.com/en-us/108387).
-- Un accès root est requis pour écrire dans le répertoire des plug-ins. Toute exécution de code dépend d’un client compatible qui charge encore les plug-ins DAL ; ce fonctionnement n’a pas été testé en conditions réelles sur macOS 26.
+- **Mécanisme hérité :** obsolète depuis macOS 12.3. macOS 14.1 et versions ultérieures désactivent par défaut les plug-ins vidéo hérités. L’utilisateur doit rétablir la prise en charge vidéo héritée depuis Recovery pour que cette méthode fonctionne ; un répertoire accessible en écriture ne suffit pas. [Instructions d’assistance actuelles d’Apple](https://support.apple.com/en-us/108387).
+- L’accès root est nécessaire pour écrire dans le répertoire des plug-ins. Toute exécution de code dépend d’un client compatible qui charge encore les plug-ins DAL ; cette méthode n’a pas été testée à l’exécution sur macOS 26.
 
 #### Emplacement
 
 - **`/Library/CoreMediaIO/Plug-Ins/DAL/*.plugin`**
   - Accès root requis
-  - **Déclencheur :** un client caméra compatible répertorie les appareils **après le rétablissement de la prise en charge héritée**. La validation des bibliothèques du client peut bloquer un plug-in tiers.
+  - **Déclencheur :** un client caméra compatible énumère les appareils **après le rétablissement de la prise en charge héritée**. La validation de bibliothèque du client peut bloquer un plug-in tiers.
 
 #### Description et exploitation
 
-Les plug-ins **DAL** (Device Abstraction Layer) de CoreMediaIO étaient chargés en cours de processus par certaines applications de caméra. La [présentation d’Apple sur les extensions de caméra](https://developer.apple.com/videos/play/wwdc2022/10022/) précise que les anciens plug-ins DAL ne fonctionnaient **pas** avec FaceTime, QuickTime Player ou Photo Booth, et que de nombreux autres clients appliquent la validation des bibliothèques. Les [extensions Core Media I/O](https://developer.apple.com/documentation/coremediaio) modernes s’exécutent hors processus et disposent d’un modèle distinct d’installation et d’approbation. Cette technique historique en cours de processus n’implique pas un contournement général de Camera TCC sur les versions actuelles de macOS.<sup>[[53]](#references)[[54]](#references)</sup>
+Les plug-ins **DAL** (Device Abstraction Layer) de CoreMediaIO étaient chargés dans le processus par certaines applications de caméra. La [présentation d’Apple sur les extensions de caméra](https://developer.apple.com/videos/play/wwdc2022/10022/) indique précisément que les plug-ins DAL hérités ne fonctionnaient **pas** avec FaceTime, QuickTime Player ou Photo Booth, et que de nombreux autres clients appliquent la validation de bibliothèque. Les [extensions Core Media I/O](https://developer.apple.com/documentation/coremediaio) modernes s’exécutent hors processus, selon un modèle distinct d’installation et d’approbation. Cette technique historique en processus n’implique pas un contournement général de Camera TCC sur les versions actuelles de macOS.<sup>[[53]](#references)[[54]](#references)</sup>
 
-Observation en lecture seule sur macOS 26 : `/Library/CoreMediaIO/Plug-Ins/DAL` existe et appartient à root. La prise en charge héritée et le chargement par un client n’ont pas été vérifiés.
+Observation en lecture seule sur macOS 26 : `/Library/CoreMediaIO/Plug-Ins/DAL` existe et appartient à root. Ni la prise en charge héritée ni le chargement par un client n’ont été vérifiés.
 
-### Directory Service Plugins
+### Plugins Directory Service
 
-Writeup: [https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)<sup>[[53]](#references)</sup>
+Compte rendu : [https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)<sup>[[53]](#references)</sup>
 
-- **Mécanisme hérité et conditionnel :** nécessite un accès root pour l’installation ainsi qu’un plug-in réellement configuré et chargé. L’API des plug-ins de DirectoryService est obsolète ; consultez la configuration Open Directory du Mac ciblé avant de considérer ceci comme un déclencheur au démarrage.
+- **Mécanisme hérité et conditionnel :** nécessite un accès root pour l’installation, ainsi qu’un plug-in réellement configuré et chargé. L’API des plug-ins de DirectoryService est obsolète ; consultez la configuration Open Directory du Mac cible avant de considérer ce mécanisme comme un déclencheur au démarrage.
 
 #### Emplacement
 
 - **`/Library/DirectoryServices/PlugIns/*.dsplug`**
   - Accès root requis
-  - **Déclencheur :** `dspluginhelperd` charge un plug-in configuré et admissible lorsqu’Open Directory en a besoin. Le [guide d’exécution des plug-ins d’Apple](https://developer.apple.com/library/archive/documentation/Networking/Conceptual/Open_Dir_Plugin/RuntimeEnviornment/RuntimeEnviornment.html) indique que les plug-ins non configurés pour démarrer peuvent être chargés à la demande lors de l’ouverture de leur nœud.
+  - **Déclencheur :** `dspluginhelperd` charge un plug-in configuré et éligible lorsque Open Directory en a besoin. Le [guide d’exécution des plug-ins d’Apple](https://developer.apple.com/library/archive/documentation/Networking/Conceptual/Open_Dir_Plugin/RuntimeEnviornment/RuntimeEnviornment.html) indique que les plug-ins qui ne sont pas configurés pour le démarrage peuvent être chargés à la demande, à l’ouverture de leur nœud.
 
 #### Description et exploitation
 
-`dspluginhelperd` prend en charge les bundles de plug-ins DirectoryService hérités. Un plug-in malveillant peut fournir une voie d’exécution privilégiée si le plug-in hérité est accepté et activé ; il s’agit d’un mécanisme distinct des PAM et des Authorization Plugins. La présence du répertoire ne prouve pas qu’un plug-in qui vient d’y être écrit s’exécutera au prochain démarrage. Les manuels locaux d’Apple `dspluginhelperd(8)` et `opendirectoryd(8)` sur macOS 26.5 mentionnent toujours l’utilitaire et cette ancienne méthode.<sup>[[53]](#references)</sup>
+`dspluginhelperd` prend en charge les bundles de plug-ins DirectoryService hérités. Un plug-in malveillant peut constituer une voie d’exécution privilégiée si le plug-in hérité est accepté et activé ; il s’agit d’un mécanisme distinct de PAM et des Authorization Plugins. La présence du répertoire ne prouve pas qu’un nouveau plug-in qui y serait écrit s’exécutera au prochain démarrage. Les pages de manuel locales d’Apple `dspluginhelperd(8)` et `opendirectoryd(8)` sur macOS 26.5 répertorient toujours le helper et cette méthode héritée.<sup>[[53]](#references)</sup>
 
-Observation en lecture seule sur macOS 26 : `/Library/DirectoryServices/PlugIns` et `/usr/libexec/dspluginhelperd` existent. Aucun plug-in n’a été installé, configuré ou chargé lors de ce test.
+Observation en lecture seule sur macOS 26 : `/Library/DirectoryServices/PlugIns` et `/usr/libexec/dspluginhelperd` existent. Aucun plug-in n’a été installé, configuré ou chargé pendant ce test.
 
-## Techniques de persistence et outils
+## Techniques et outils de persistence
 
 - [https://github.com/cedowens/Persistent-Swift](https://github.com/cedowens/Persistent-Swift)
 - [https://github.com/D00MFist/PersistentJXA](https://github.com/D00MFist/PersistentJXA)
@@ -2652,13 +2654,13 @@ Observation en lecture seule sur macOS 26 : `/Library/DirectoryServices/PlugIns`
 - [3] [Au-delà des bons vieux LaunchAgents - 18 - X11 et XQuartz](https://theevilbit.github.io/beyond/beyond_0018/)
 - [4] [Au-delà des bons vieux LaunchAgents - 21 - applications rouvertes](https://theevilbit.github.io/beyond/beyond_0021/)
 - [5] [Au-delà des bons vieux LaunchAgents - 20 - préférences de Terminal](https://theevilbit.github.io/beyond/beyond_0020/)
-- [6] [Au-delà des bons vieux LaunchAgents - 13 - Audio Plugins](https://theevilbit.github.io/beyond/beyond_0013/)
+- [6] [Au-delà des bons vieux LaunchAgents - 13 - plugins audio](https://theevilbit.github.io/beyond/beyond_0013/)
 - [7] [Plug-ins Audio Unit (SpecterOps)](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)
-- [8] [Au-delà des bons vieux LaunchAgents - 12 - plug-ins QuickLook](https://theevilbit.github.io/beyond/beyond_0012/)
+- [8] [Au-delà des bons vieux LaunchAgents - 12 - plugins QuickLook](https://theevilbit.github.io/beyond/beyond_0012/)
 - [9] [Au-delà des bons vieux LaunchAgents - 22 - LoginHook et LogoutHook](https://theevilbit.github.io/beyond/beyond_0022/)
 - [10] [Au-delà des bons vieux LaunchAgents - 4 - tâches cron](https://theevilbit.github.io/beyond/beyond_0004/)
 - [11] [Au-delà des bons vieux LaunchAgents - 2 - démarrage d’iTerm2](https://theevilbit.github.io/beyond/beyond_0002/)
-- [12] [Au-delà des bons vieux LaunchAgents - 7 - plug-ins xbar](https://theevilbit.github.io/beyond/beyond_0007/)
+- [12] [Au-delà des bons vieux LaunchAgents - 7 - plugins xbar](https://theevilbit.github.io/beyond/beyond_0007/)
 - [13] [Au-delà des bons vieux LaunchAgents - 8 - Hammerspoon](https://theevilbit.github.io/beyond/beyond_0008/)
 - [14] [Au-delà des bons vieux LaunchAgents - 6 - SSHRC](https://theevilbit.github.io/beyond/beyond_0006/)
 - [15] [Au-delà des bons vieux LaunchAgents - 3 - éléments d’ouverture de session](https://theevilbit.github.io/beyond/beyond_0003/)
@@ -2666,17 +2668,17 @@ Observation en lecture seule sur macOS 26 : `/Library/DirectoryServices/PlugIns`
 - [17] [Au-delà des bons vieux LaunchAgents - 24 - actions de dossier](https://theevilbit.github.io/beyond/beyond_0024/)
 - [18] [Actions de dossier pour la persistence sur macOS (SpecterOps)](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)
 - [19] [Au-delà des bons vieux LaunchAgents - 27 - raccourcis du Dock](https://theevilbit.github.io/beyond/beyond_0027/)
-- [20] [Au-delà des bons vieux LaunchAgents - 17 - sélecteurs de couleur](https://theevilbit.github.io/beyond/beyond_0017/)
-- [21] [Au-delà des bons vieux LaunchAgents - 26 - plug-ins Finder Sync](https://theevilbit.github.io/beyond/beyond_0026/)
+- [20] [Au-delà des bons vieux LaunchAgents - 17 - sélecteurs de couleurs](https://theevilbit.github.io/beyond/beyond_0017/)
+- [21] [Au-delà des bons vieux LaunchAgents - 26 - plugins Finder Sync](https://theevilbit.github.io/beyond/beyond_0026/)
 - [22] [Analyse de la persistence de « Mac File Opener » (Objective-See)](https://objective-see.org/blog/blog_0x11.html)
 - [23] [Au-delà des bons vieux LaunchAgents - 16 - économiseur d’écran](https://theevilbit.github.io/beyond/beyond_0016/)
-- [24] [Préserver votre accès : économiseurs d’écran pour la persistence sur macOS (SpecterOps)](https://posts.specterops.io/saving-your-access-d562bf5bf90b)
+- [24] [Préserver son accès : les économiseurs d’écran pour la persistence sur macOS (SpecterOps)](https://posts.specterops.io/saving-your-access-d562bf5bf90b)
 - [25] [Au-delà des bons vieux LaunchAgents - 11 - importateurs Spotlight](https://theevilbit.github.io/beyond/beyond_0011/)
 - [26] [Au-delà des bons vieux LaunchAgents - 9 - panneau de préférences](https://theevilbit.github.io/beyond/beyond_0009/)
 - [27] [Au-delà des bons vieux LaunchAgents - 19 - scripts périodiques](https://theevilbit.github.io/beyond/beyond_0019/)
 - [28] [Au-delà des bons vieux LaunchAgents - 5 - modules d’authentification enfichables (PAM)](https://theevilbit.github.io/beyond/beyond_0005/)
 - [29] [Au-delà des bons vieux LaunchAgents - 28 - Authorization Plugins](https://theevilbit.github.io/beyond/beyond_0028/)
-- [30] [Vol de credentials persistant avec Authorization Plugins (SpecterOps)](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)
+- [30] [Vol de credentials persistant avec les Authorization Plugins (SpecterOps)](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)
 - [31] [Au-delà des bons vieux LaunchAgents - 30 - le fichier de configuration man - man.conf](https://theevilbit.github.io/beyond/beyond_0030/)
 - [32] [Au-delà des bons vieux LaunchAgents - 25 - modules Apache2](https://theevilbit.github.io/beyond/beyond_0025/)
 - [33] [Au-delà des bons vieux LaunchAgents - 31 - framework d’audit BSM](https://theevilbit.github.io/beyond/beyond_0031/)
@@ -2684,23 +2686,24 @@ Observation en lecture seule sur macOS 26 : `/Library/DirectoryServices/PlugIns`
 - [35] [Au-delà des bons vieux LaunchAgents - 29 - amstoold](https://theevilbit.github.io/beyond/beyond_0029/)
 - [36] [Au-delà des bons vieux LaunchAgents - 15 - xsanctl](https://theevilbit.github.io/beyond/beyond_0015/)
 - [37] [Au-delà des bons vieux LaunchAgents - 10 - fichiers de script d’application](https://theevilbit.github.io/beyond/beyond_0010/)
-- [38] [Au-delà des bons vieux LaunchAgents - 32 - plug-ins de tuile du Dock](https://theevilbit.github.io/beyond/beyond_0032/)
+- [38] [Au-delà des bons vieux LaunchAgents - 32 - plugins de vignettes du Dock](https://theevilbit.github.io/beyond/beyond_0032/)
 - [39] [Au-delà des bons vieux LaunchAgents - 33 - widgets](https://theevilbit.github.io/beyond/beyond_0033/)
 - [40] [Au-delà des bons vieux LaunchAgents - 34 - tâches de démarrage launchd](https://theevilbit.github.io/beyond/beyond_0034/)
-- [41] [Au-delà des bons vieux LaunchAgents - 35 - persistence via la NVRAM (apple-trusted-trampoline)](https://theevilbit.github.io/beyond/beyond_0035/)
-- [42] [Utiliser le courrier électronique pour assurer la persistence sur OS X (n00py)](https://www.n00py.io/2016/10/using-email-for-persistence-on-os-x/)
-- [43] [Modification suspecte du plist des règles d’Apple Mail (Elastic)](https://www.elastic.co/guide/en/security/current/suspicious-apple-mail-rule-plist-modification.html)
-- [44] [Profils malveillants - l’une des menaces les plus sérieuses pour les Mac (Jamf)](https://www.jamf.com/blog/malicious-profiles-come/)
-- [45] [L’art des malwares Mac, vol. 1 - chap. 0x2 Persistence (dyld)](https://taomm.org/PDFs/vol1/CH%200x02%20Persistence.pdf)
-- [46] [Analyse de CVE-2024-44243, un contournement de SIP sur macOS via les extensions de noyau (Microsoft)](https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/)
+- [41] [Au-delà des bons vieux LaunchAgents - 35 - persister via la NVRAM (apple-trusted-trampoline)](https://theevilbit.github.io/beyond/beyond_0035/)
+- [42] [Utiliser les e-mails pour la persistence sur OS X (n00py)](https://www.n00py.io/2016/10/using-email-for-persistence-on-os-x/)
+- [43] [Modification suspecte de la plist des règles d’Apple Mail (Elastic)](https://www.elastic.co/guide/en/security/current/suspicious-apple-mail-rule-plist-modification.html)
+- [44] [Profils malveillants - l’une des menaces les plus graves pour les Mac (Jamf)](https://www.jamf.com/blog/malicious-profiles-come/)
+- [45] [L’art du malware Mac, vol. 1 - chap. 0x2 : persistence (dyld)](https://taomm.org/PDFs/vol1/CH%200x02%20Persistence.pdf)
+- [46] [Analyse de CVE-2024-44243, un contournement de SIP de macOS via les extensions du noyau (Microsoft)](https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/)
 - [47] [RCE et exfiltration de jetons API via les fichiers de projet Claude Code (CVE-2025-59536, Check Point)](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)
-- [48] [Nouvelle vulnérabilité dans GitHub Copilot et Cursor - porte dérobée dans le fichier de règles (Pillar Security)](https://www.pillar.security/blog/new-vulnerability-in-github-copilot-and-cursor-how-hackers-can-weaponize-code-agents)
+- [48] [Nouvelle vulnérabilité dans GitHub Copilot et Cursor - porte dérobée dans le fichier Rules (Pillar Security)](https://www.pillar.security/blog/new-vulnerability-in-github-copilot-and-cursor-how-hackers-can-weaponize-code-agents)
 - [49] [Chrome - méthodes d’installation alternatives (extensions externes)](https://developer.chrome.com/docs/extensions/how-to/distribute/install-extensions)
 - [50] [Supprimer ExtensionInstallForcelist dans Chrome sur Mac (macsecurity.net)](https://macsecurity.net/view/492-extensioninstallforcelist-chrome-policy-mac)
-- [51] [Écrire des plug-ins Sudo (sigma-star)](https://blog.sigma-star.io/2025/07/on-writing-sudo-plugins/)
-- [52] [Exploitation à distance d’un Mac via des schémas d’URL personnalisés (Objective-See)](https://objective-see.org/blog/blog_0x38.html)
-- [53] [Deux astuces de persistence sur macOS exploitant des plug-ins (codecolorist)](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)
+- [51] [Écrire des plugins Sudo (sigma-star)](https://blog.sigma-star.io/2025/07/on-writing-sudo-plugins/)
+- [52] [Exploitation à distance de Mac via des schémas d’URL personnalisés (Objective-See)](https://objective-see.org/blog/blog_0x38.html)
+- [53] [Deux astuces de persistence macOS exploitant des plugins (codecolorist)](https://codecolor.ist/2019/11/21/two-macos-persistence-tricks-abusing-plugins/)
 - [54] [Exemple minimal de CoreMediaIO DAL (johnboiles)](https://github.com/johnboiles/coremediaio-dal-minimal-example)
-- [55] [Sploitlight : analyse d’une vulnérabilité macOS TCC basée sur Spotlight (Microsoft)](https://www.microsoft.com/en-us/security/blog/2025/07/28/sploitlight-analyzing-a-spotlight-based-macos-tcc-vulnerability/)
+- [55] [Sploitlight : analyse d’une vulnérabilité TCC macOS basée sur Spotlight (Microsoft)](https://www.microsoft.com/en-us/security/blog/2025/07/28/sploitlight-analyzing-a-spotlight-based-macos-tcc-vulnerability/)
 - [56] [Documentation du module Python `site` (.pth / usercustomize / sitecustomize)](https://docs.python.org/3/library/site.html)
+- [57] [De Spotlight à Apple Intelligence — exploiter un 0day pour voler les données qui alimentent l’IA de macOS](https://objective-see.org/blog/blog_0x81.html)
 {{#include ../banners/hacktricks-training.md}}
