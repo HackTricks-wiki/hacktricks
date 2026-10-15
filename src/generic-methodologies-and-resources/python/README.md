@@ -2,14 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Kurasa muhimu za kuangalia:**
+**Kurasa zinazovutia za kuangalia:**
 
-- [**Mbinu za Pyscript hacking**](pyscript.md)
-- [**Python deserializations**](../../pentesting-web/deserialization/README.md)
-- [**Keras model deserialization RCE na gadget hunting**](keras-model-deserialization-rce-and-gadget-hunting.md)
-- [**Mbinu za kupita python sandboxes**](bypass-python-sandboxes/README.md)
-- [**Syntax ya msingi ya Python web requests**](web-requests.md)
-- [**Syntax na libraries za msingi za Python**](basic-python.md)
+- [**Mbinu za udukuzi za Pyscript**](pyscript.md)
+- [**Deserializations za Python**](../../pentesting-web/deserialization/README.md)
+- [**RCE ya deserialization ya modeli ya Keras na kutafuta gadget**](keras-model-deserialization-rce-and-gadget-hunting.md)
+- [**Mbinu za kukwepa Python sandboxes**](bypass-python-sandboxes/README.md)
+- [**Sintaksia ya msingi ya maombi ya wavuti ya Python**](web-requests.md)
+- [**Sintaksia na maktaba za msingi za Python**](basic-python.md)
+- [**Utafutaji wa hash wenye kiambishi tamati cha MD5 cha ingizo lililochaguliwa na thamani sifuri ya nambari**](../../crypto/hashes/README.md#chosen-input-md5-hash-searches)
 
 ## References
 
