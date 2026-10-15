@@ -125,15 +125,6 @@
   - [Basic Python](generic-methodologies-and-resources/python/basic-python.md)
 - [Side Channel Attacks On Messaging Protocols](generic-methodologies-and-resources/side-channel-attacks-on-messaging-protocols.md)
 - [Threat Modeling](generic-methodologies-and-resources/threat-modeling.md)
-- [Blockchain & Crypto](blockchain/blockchain-and-crypto-currencies/README.md)
-  - [Investment Terms](blockchain/blockchain-and-crypto-currencies/investment-terms.md)
-  - [Defi/AMM Hook Precision](blockchain/blockchain-and-crypto-currencies/defi-amm-hook-precision.md)
-  - [Defi Amm Virtual Balance Cache Exploitation](blockchain/blockchain-and-crypto-currencies/defi-amm-virtual-balance-cache-exploitation.md)
-  - [Mutation Testing With Slither](blockchain/smart-contract-security/mutation-testing-with-slither.md)
-  - [Erc 4337 Smart Account Security Pitfalls](blockchain/blockchain-and-crypto-currencies/erc-4337-smart-account-security-pitfalls.md)
-  - [State Divergence Default Value Authorization Bypasses](blockchain/blockchain-and-crypto-currencies/state-divergence-default-value-authorization-bypasses.md)
-  - [Value Centric Web3 Red Teaming](blockchain/blockchain-and-crypto-currencies/value-centric-web3-red-teaming.md)
-  - [Web3 Signing Workflow Compromise Safe Delegatecall Proxy Takeover](blockchain/blockchain-and-crypto-currencies/web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md)
 - [Lua Sandbox Escape](generic-methodologies-and-resources/lua/bypass-lua-sandboxes/README.md)
 
 # 🕵️ Privacy
@@ -948,6 +939,18 @@
     - [CSS Injection Code](pentesting-web/xs-search/css-injection/css-injection-code.md)
     - [LESS Code Injection](pentesting-web/xs-search/css-injection/less-code-injection.md)
 - [Iframe Traps](pentesting-web/iframe-traps.md)
+
+# ⛓️ Blockchain & Smart Contract Security
+
+- [Blockchain Concepts and Web3 Security](blockchain/blockchain-and-crypto-currencies/README.md)
+  - [Investment Terms](blockchain/blockchain-and-crypto-currencies/investment-terms.md)
+  - [DeFi/AMM Hook Precision](blockchain/blockchain-and-crypto-currencies/defi-amm-hook-precision.md)
+  - [DeFi AMM Virtual Balance Cache Exploitation](blockchain/blockchain-and-crypto-currencies/defi-amm-virtual-balance-cache-exploitation.md)
+  - [Mutation Testing With Slither](blockchain/smart-contract-security/mutation-testing-with-slither.md)
+  - [ERC-4337 Smart Account Security Pitfalls](blockchain/blockchain-and-crypto-currencies/erc-4337-smart-account-security-pitfalls.md)
+  - [State Divergence Default Value Authorization Bypasses](blockchain/blockchain-and-crypto-currencies/state-divergence-default-value-authorization-bypasses.md)
+  - [Value-Centric Web3 Red Teaming](blockchain/blockchain-and-crypto-currencies/value-centric-web3-red-teaming.md)
+  - [Web3 Signing Workflow Compromise: Safe Delegatecall Proxy Takeover](blockchain/blockchain-and-crypto-currencies/web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md)
 
 # ⛈️ Cloud Security
 
