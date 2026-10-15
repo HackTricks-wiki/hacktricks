@@ -2,6 +2,8 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+This chapter covers blockchain concepts and on-chain security. For an exposed Bitcoin peer, start with [Bitcoin P2P service enumeration](../../network-services-pentesting/8333-18333-38333-18444-pentesting-bitcoin.md); for a browser frontend, wallet connection, or off-chain backend, use [DApp pentesting](../../pentesting-web/dapps-DecentralizedApplications.md). For cryptocurrency privacy operations and their limits, use the [cryptocurrency privacy chapter](../../privacy/cryptocurrency-privacy.md).
+
 ## Basic Concepts
 
 - **Smart Contracts** are defined as programs that execute on a blockchain when certain conditions are met, automating agreement executions without intermediaries.

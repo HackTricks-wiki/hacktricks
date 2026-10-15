@@ -9,9 +9,9 @@
 
 ## Canonical locations and boundaries (verified in this clone; proposed until merged)
 
-- Windows SCM/SCMR remote-service execution (PsExec, WinExec/ScExec, SMBExec, SCMExec) lives in `src/windows-hardening/lateral-movement/psexec-and-winexec.md`, with SharpMove at `#scmexec-with-sharpmove`. Shared service rights do not imply identical `ADMIN$` staging/output needs. The old `scmexec.md` route redirects here.
+- Windows SCM/SCMR execution (PsExec, WinExec/ScExec, SMBExec, SCMExec) lives in `src/windows-hardening/lateral-movement/psexec-and-winexec.md`; SharpMove is at `#scmexec-with-sharpmove`. Variants differ in `ADMIN$` staging/output needs. Old `scmexec.md` redirects here.
 - `src/network-services-pentesting/pentesting-smb/README.md` keeps SMB discovery and a short context link to the service-execution chapter, not a second PsExec/SMBExec procedure. `src/windows-hardening/ntlm/README.md` links directly to the Impacket PsExec examples for Pass-the-Hash.
-- Keep Task Scheduler (`atexec.md`), DCOM (`dcomexec.md`), WMI (`wmiexec.md`), WinRM (`winrm.md`), and RDP (`rdpexec.md`) separate: their execution interfaces and prerequisites differ from SCM service creation. `lateral-movement/README.md` is a curated route map, not a duplicate technique chapter.
+- Keep Task Scheduler (`atexec.md`), DCOM (`dcomexec.md`), WMI (`wmiexec.md`), WinRM (`winrm.md`), and RDP (`rdpexec.md`) separate from SCM: interfaces and prerequisites differ. `lateral-movement/README.md` is a route map, not a duplicate chapter.
 - Azure/Entra-to-AD pivots remain in Cloud's `pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/`; a cloud use of PsExec does not transfer general Windows SCM ownership there.
 
 - POSIX CPU timer TOCTOU/IRQ/task-work, ptrace reproducer, PoC variants, and Chronomaly are canonical at `src/binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md`. Linux Hardening's `kernel-lpe-cves/README.md` links to the root cause; the duplicate article redirects. Kernel exploitation belongs in Binary Exploitation, host assessment in Linux Hardening.
@@ -32,6 +32,7 @@
 
 - Browser `Referer` leakage, `Referrer-Policy`, and injected referrer meta behavior are at `src/pentesting-web/referer-header-and-referrer-policy.md`. OAuth code/state leakage links there; OAuth-specific consequences stay in OAuth. The former TODO route redirects here.
 - `src/pentesting-web/sensitive-information-exfiltration.md` maps session-dependent sensitive pages to CORS, XSS, dangling markup, and clickjacking without duplicating those chapters. Its cited Apache case stays with the map. Keep this focused choice-of-path task separate from the broad web checklist; the former TODO route redirects here.
+- Blockchain's nine existing chapters sit under top-level **Blockchain & Smart Contract Security**, not Generic Methodologies; `blockchain-and-crypto-currencies/README.md` remains the entry point. Bitcoin P2P enumeration stays under Network Services, DApp frontend/backend testing under Web, and operational cryptocurrency privacy under Privacy. Link entry points directly; paths and URLs are unchanged.
 
 ## Researcher lookup terms
 
@@ -52,5 +53,5 @@
 - Split the remote-service chapter only if a variant develops an independent reader task or prerequisites that make the shared flow misleading; code size alone is not a reason. Recheck repository paths, pending PR overlap, and cross-book ownership before using this guide in a later run.
 - VM-escape navigation: `src/binary-exploitation/vm-escape-and-hypervisor-exploitation.md` maps guest surfaces to QEMU/KVM, VirtualBox NAT/VMSVGA, and VMware cases. Substantive chapters retain their paths. Slirp uses a custom allocator and stays at `libc-heap/`, but its SUMMARY entry belongs with guest-to-host cases. The hub is navigation only.
 - The MIFARE Classic stored-value workflow appears in both `radio-hacking/pentesting-rfid.md` and `radio-hacking/proxmark-3.md`, with different command contexts and caveats. Audit the complete union before consolidating; do not drop either example as a mere duplicate.
-- Audit `network-services-pentesting/pentesting-web/` (91 pages) against the Web section before moving it; service entry points and inbound links need a coordinated migration. Do not merge macOS runtime startup-injection pages until their per-runtime caveats can be preserved coherently.
-- Other TODO pages remain mixed: `more-tools.md` spans unrelated surfaces; `other-web-tricks.md` needs section-level mapping and citation preservation; `post-exploitation.md` mixes local tools with SaaS-specific collection, requiring Cloud ownership review. Do not move them as a batch.
+- Audit `network-services-pentesting/pentesting-web/` (91 pages) against Web before moving it; preserve service entry points and inbound links. Keep macOS runtime startup-injection caveats distinct.
+- Remaining TODO pages mix surfaces: `more-tools.md`, `other-web-tricks.md` (section/citation mapping), and `post-exploitation.md` (Cloud ownership review). Do not move them as a batch. Blockchain overview and Privacy's cryptocurrency chapter overlap; audit their complete union before any consolidation.
