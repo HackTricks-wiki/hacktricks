@@ -14,6 +14,8 @@ Take a look on how Dyld loads libraries inside binaries in:
 macos-dyld-process.md
 {{#endref}}
 
+See also: [Reflective Mach-O Loading](../reflective-mach-o-loading.md).
+
 ## **DYLD_INSERT_LIBRARIES**
 
 This is like the [**LD_PRELOAD on Linux**](../../../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#ld_preload). It allows to indicate a process that is going to be run to load a specific library from a path (if the env var is enabled)<sup>[[4]](#references)</sup>

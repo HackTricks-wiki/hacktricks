@@ -156,6 +156,12 @@ Library Injection is a technique wherein an attacker **forces a process to load 
 macos-library-injection/
 {{#endref}}
 
+### Reflective Mach-O Loading
+
+{{#ref}}
+reflective-mach-o-loading.md
+{{#endref}}
+
 ### Function Hooking
 
 Function Hooking involves **intercepting function calls** or messages within a software code. By hooking functions, an attacker can **modify the behavior** of a process, observe sensitive data, or even gain control over the execution flow.

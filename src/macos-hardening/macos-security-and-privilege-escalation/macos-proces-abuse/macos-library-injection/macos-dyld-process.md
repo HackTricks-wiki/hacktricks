@@ -35,6 +35,8 @@ Once all are loaded the **initialisers** of these libraries are run. These are c
 
 Terminators are coded with **`__attribute__((destructor))`** and are located in a section flagged with `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**).
 
+See also: [Reflective Mach-O Loading](../reflective-mach-o-loading.md).
+
 ### Stubs
 
 All binaries sin macOS are dynamically linked. Therefore, they contain some stubs sections that helps the binary to jump to the correct code in different machines and context. It's dyld when the binary is executed the brain that needs to resolve these addresses (at least the non-lazy ones).
