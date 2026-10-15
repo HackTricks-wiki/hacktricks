@@ -121,7 +121,6 @@
   - [Pyscript](generic-methodologies-and-resources/python/pyscript.md)
   - [venv](generic-methodologies-and-resources/python/venv.md)
   - [Web Requests](generic-methodologies-and-resources/python/web-requests.md)
-  - [Bruteforce hash (few chars)](generic-methodologies-and-resources/python/bruteforce-hash-few-chars.md)
   - [Basic Python](generic-methodologies-and-resources/python/basic-python.md)
 - [Side Channel Attacks On Messaging Protocols](generic-methodologies-and-resources/side-channel-attacks-on-messaging-protocols.md)
 - [Threat Modeling](generic-methodologies-and-resources/threat-modeling.md)
