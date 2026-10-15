@@ -34,6 +34,12 @@ When the implant uses only a subset of commands, group the remaining handlers by
 - **Kernel manipulation:** unlink a loaded driver, enumerate/disable/restore notification callbacks, manually map another driver, and write to an arbitrary kernel address.
 - **Object manipulation:** delete/decrypt files and create or modify registry values.
 
+## Manual kernel mapping through a vulnerable signed driver
+
+A signed driver that exposes kernel-memory operations can be used as a loader without asking Windows to load the **unsigned** payload as a normal driver.<sup>[[2]](#references)[[7]](#references)</sup> In LocalStranger, `lsapi` opens the already-available `\\.\WinNotify` device; the repository does not establish that an unprivileged user can install or start that driver.<sup>[[2]](#references)[[3]](#references)</sup> Its `lsmapper` consumes a driver image supplied on the command line and uses the device's virtual-memory write and kernel-module-base primitives.<sup>[[4]](#references)[[5]](#references)[[7]](#references)</sup>
+
+The mapper turns kernel read/write into a kernel function call: it derives the kernel PTE base from an immediate in `MmGetVirtualForPhysical`, walks the paging entries for `NtAddAtom` (PTE address `PteBase + ((VA >> 9) & 0x7FFFFFFFF8)`), temporarily sets the covering entry writable, and replaces the syscall entry with a short jump to the chosen kernel function.<sup>[[5]](#references)[[6]](#references)[[7]](#references)</sup> Calling the user-mode `NtAddAtom` stub then enters that function; the mapper restores the original bytes and PTE afterwards.<sup>[[6]](#references)</sup> It uses this call path for `ExAllocatePool`, applies PE sections, imports and relocations in user mode, writes the image into the allocation, and calls its entry point.<sup>[[7]](#references)[[8]](#references)</sup> The PTE-base extraction assumes a fixed instruction layout (`MmGetVirtualForPhysical + 34`), so this is build-dependent, not a general-purpose KASLR bypass or proof that HVCI/PatchGuard permits the mapping.<sup>[[5]](#references)</sup> For the alternative **data-only** result of kernel R/W, see [SYSTEM token theft](arbitrary-kernel-rw-token-theft.md).
+
 ## Trusted-process exemptions
 
 A useful design pattern is an IOCTL that registers a PID plus a **trusted** flag. The same trust lookup is then consulted by file, registry, process, and thread filters: untrusted tools receive filtered enumeration results, reduced handle rights, or `STATUS_ACCESS_DENIED`, while the implant can still update its own hidden objects. Treat this as an authorization boundary and verify how entries are authenticated, synchronized, and removed after process exit or PID reuse.<sup>[[1]](#references)</sup>
@@ -82,5 +88,12 @@ The strongest signal is disagreement between layers, not one filename or hash. C
 ## References
 
 - [1] [Kaspersky Securelist - HoneyMyte Enhances CoolClient with a Signed Windows Kernel Rootkit](https://securelist.com/honeymyte-coolclient-driver-rootkit/121028)
+- [2] [LocalStranger README](https://github.com/nbs32k/LocalStranger/blob/master/README.md)
+- [3] [LocalStranger driver initialization](https://github.com/nbs32k/LocalStranger/blob/master/lsapi/init.c)
+- [4] [LocalStranger mapper command line](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/main.cpp)
+- [5] [LocalStranger kernel export and PTE-base resolution](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/core/utils.cpp)
+- [6] [LocalStranger kernel-call trampoline](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/mapper/mapper.h)
+- [7] [LocalStranger mapper allocation and entry call](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/mapper/mapper.cpp)
+- [8] [LocalStranger PE mapping](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/mapper/pe.cpp)
 
 {{#include ../../banners/hacktricks-training.md}}
