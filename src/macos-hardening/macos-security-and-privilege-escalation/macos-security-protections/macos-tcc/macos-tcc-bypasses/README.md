@@ -67,6 +67,28 @@ The entitlement **`com.apple.private.icloud-account-access`** it's possible to c
 
 For more **information** about the exploit to **get icloud tokens** from that entitlement check the talk: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)<sup>[[10]](#references)</sup>
 
+### Spotlight importer leakage via Darwin notification names
+
+A Spotlight importer can read the file that Spotlight passes to its `GetMetadataForFile` callback, even when a normal process without Full Disk Access cannot read it. Unlike [code injection into a TCC-authorized process](../macos-tcc-credential-and-data-theft.md), this requires a local foothold able to install an importer and a matching Spotlight indexing event. The importer is sandboxed, but name-only Darwin notifications can carry bytes to a listener outside that sandbox. This is a data-leak channel, not a route to root or arbitrary file access from the importer.<sup>[[24]](#references)</sup>
+
+Declare the target file type under `CFBundleDocumentTypes` → `LSItemContentTypes` in the importer's `Info.plist`, then install the bundle in `~/Library/Spotlight/` or an app's `Contents/Library/Spotlight/`. Check registration with `mdimport -L`. The [Spotlight importer section](../../../../macos-auto-start-locations.md#spotlight-plugins) covers bundle placement and file-type matching. The importer only receives files for which Spotlight selects it; an existing importer generally takes precedence. On macOS 26 Tahoe, `mdimport -i` did not reliably force immediate recursive indexing in the reported tests, while `mdimport -r ~/Library/Spotlight/Spotlight.mdimporter` requested reimport of UTIs claimed by that importer.<sup>[[24]](#references)</sup>
+
+For a channel test, start a listener outside the sandbox with `notifyutil -w TEST_TEST_TEST`, then post a notification with `CFNotificationCenterGetDarwinNotifyCenter()` and `NULL` object and `userInfo`. Unlike a distributed notification with a `userInfo` payload, the Darwin notification has only its name. For binary data, register the external listener for decimal names `0` through `255` using `notify_register_dispatch`; map each callback's registration to its byte value. Within `GetMetadataForFile`, read only the Spotlight-provided `pathToFile` and send each byte as a decimal notification name:<sup>[[24]](#references)</sup>
+
+```objectivec
+NSData *data = readBytes(pathToFile); // helper reading Spotlight's selected file
+const uint8_t *bytes = data.bytes;
+for (NSUInteger i = 0; i < data.length; i++) {
+    CFStringRef name = CFStringCreateWithFormat(NULL, NULL,
+                                                 CFSTR("%u"), bytes[i]);
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(),
+                                         name, NULL, NULL, true);
+    CFRelease(name);
+}
+```
+
+The listener reconstructs the byte sequence rather than reading the TCC-protected file itself. The published PoC recovered the first 64 bytes of `knowledgeC.db` from a non-FDA terminal with SIP enabled on macOS 26. This is low-bandwidth and not a reliable bulk-copy method: Spotlight may not index or reindex a target file, and concurrent importer instances can interleave notification streams. See [macOS Sandbox Debug & Bypass](../../macos-sandbox/macos-sandbox-debug-and-bypass/) for other sandbox-boundary mechanisms.<sup>[[24]](#references)</sup>
+
 ### kTCCServiceAppleEvents / Automation
 
 An app with the **`kTCCServiceAppleEvents`** permission will be able to **control other Apps**. This means that it could be able to **abuse the permissions granted to the other Apps**.<sup>[[2]](#references)</sup>
@@ -555,5 +577,6 @@ Another way using [**CoreGraphics events**](https://objectivebythesea.org/v2/tal
 - [21] [theevilbit - CVE-2021-30808: TCC bypass by mounting over the TCC database](https://theevilbit.github.io/posts/cve-2021-30808/)
 - [22] [20+ Ways to Bypass Your macOS Privacy Mechanisms](https://www.youtube.com/watch?v=W9GxnP8c8FU)
 - [23] [Knockout Win Against TCC - 20+ NEW Ways to Bypass Your MacOS Privacy Mechanisms](https://www.youtube.com/watch?v=a9hsxPdRxsY)
+- [24] [From Spotlight to Apple Intelligence — Abusing an 0day to steal the data that fuels macOS AI](https://objective-see.org/blog/blog_0x81.html)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
