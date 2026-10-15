@@ -470,11 +470,13 @@ In `__DATA` segment (rw-):
 - `__objc_const`: Constant data
 - `__objc_imageinfo`, `__objc_selrefs`, `objc__protorefs`...
 
+See also: [Reflective Mach-O Loading](../macos-proces-abuse/reflective-mach-o-loading.md#activating-objective-c-metadata).
+
 ## Swift
 
 - `_swift_typeref`, `_swift3_capture`, `_swift3_assocty`, `_swift3_types, _swift3_proto`, `_swift3_fieldmd`, `_swift3_builtin`, `_swift3_reflstr`
 
-{{#include ../../../banners/hacktricks-training.md}}
+
 
 ## References
 
@@ -484,3 +486,4 @@ In `__DATA` segment (rw-):
 - [4] [carlospolop/machoreader.py (gist)](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4)
 - [5] [Apple Open Source - Mach-O `fat.h` and `loader.h`](https://github.com/apple-oss-distributions/xnu/tree/main/EXTERNAL_HEADERS/mach-o)
 - [6] [Kaspersky Securelist - A new version of the MacSync macOS stealer targets crypto enthusiasts and developers](https://securelist.com/macsync-new-version/121383/)
+{{#include ../../../banners/hacktricks-training.md}}
