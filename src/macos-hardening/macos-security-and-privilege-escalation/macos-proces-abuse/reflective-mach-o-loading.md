@@ -6,6 +6,8 @@ A reflective loader maps a Mach-O image from bytes already in its own process, t
 
 On recent macOS, the old `NSCreateObjectFileImageFromMemory`/`NSLinkModule` path writes the image to disk. ReflectiveLoader instead embeds older Apple dyld loading code; Wardle demonstrated this on macOS 15 and 26.<sup>[[2]](#references)[[3]](#references)</sup>
 
+If the loader uses the Hardened Runtime, its unsigned in-memory code needs an executable-memory exception such as `com.apple.security.cs.allow-unsigned-executable-memory` or `com.apple.security.cs.disable-executable-page-protection`; otherwise execution is blocked by code-signing enforcement. This is a loader signing constraint, not an elevation primitive. See the [macOS entitlements reference](../macos-security-protections/macos-dangerous-entitlements.md#comapplesecuritycsallow-unsigned-executable-memory).<sup>[[2]](#references)</sup>
+
 For the PoC, supply a URL serving a raw Mach-O **bundle, framework, or dylib**. Its `main.mm` rejects empty downloads and states that payloads using `LC_DYLD_CHAINED_FIXUPS` are unsupported. A local pathname is also accepted, but that input is not a fileless workflow. The URL form reads bytes into `NSData` and passes its buffer and length to `custom_dlopen_from_memory`.<sup>[[4]](#references)</sup>
 
 ```bash
@@ -46,5 +48,3 @@ A reflectively loaded image does not appear in `dyld_all_image_infos` in the aut
 - [4] [ReflectiveLoader PoC main.mm](https://github.com/pwardle/ReflectiveLoader/blob/main/PoC/PoC/main.mm)
 - [5] [ReflectiveLoader custom_dlfcn.cpp](https://github.com/pwardle/ReflectiveLoader/blob/main/loader/src/custom_dlfcn.cpp)
 - [6] [ReflectiveLoader ObjCRuntime.cpp](https://github.com/pwardle/ReflectiveLoader/blob/main/loader/src/ObjCRuntime.cpp)
-
-{{#include ../../../banners/hacktricks-training.md}}

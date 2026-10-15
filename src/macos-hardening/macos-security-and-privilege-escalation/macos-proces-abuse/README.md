@@ -367,7 +367,7 @@ In [**this blog post**](https://knight.sc/reverse%20engineering/2019/04/15/detec
 
 Note that to call that function you need to be **the same uid** as the one running the process or **root** (and it returns info about the process, not a way to inject code).
 
-
+{{#include ../../../banners/hacktricks-training.md}}
 
 ## References
 
@@ -376,4 +376,3 @@ Note that to call that function you need to be **the same uid** as the one runni
 - [3] [Metnew - Why Electron apps can't store your secrets confidentially: --inspect option](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
 - [4] [Scott Knight - Detecting task modifications](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html)
 - [5] [Kaspersky Securelist - A new version of the MacSync macOS stealer targets crypto enthusiasts and developers](https://securelist.com/macsync-new-version/121383/)
-{{#include ../../../banners/hacktricks-training.md}}
