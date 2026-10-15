@@ -10,6 +10,7 @@
 - [**Tricks to bypass python sandboxes**](bypass-python-sandboxes/README.md)
 - [**Basic python web requests syntax**](web-requests.md)
 - [**Basic python syntax and libraries**](basic-python.md)
+- [**Chosen-input MD5 suffix and numeric-zero hash searches**](../../crypto/hashes/README.md#chosen-input-md5-hash-searches)
 
 ## References
 
