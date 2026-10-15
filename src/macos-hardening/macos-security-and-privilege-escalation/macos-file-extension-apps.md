@@ -1,12 +1,12 @@
-# Obsługa rozszerzeń plików i schematów URL przez aplikacje w macOS
+# Programy obsługujące rozszerzenia plików i schematy URL w macOS
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Baza danych LaunchServices
 
-Jest to baza danych wszystkich aplikacji zainstalowanych w macOS, którą można przeszukiwać, aby uzyskać informacje o każdej z nich, takie jak obsługiwane **schematy URL**, **typy dokumentów**, **UTI** i domyślne aplikacje obsługujące te typy.
+Jest to baza danych wszystkich aplikacji zainstalowanych w macOS, którą można odpytywać, aby uzyskać informacje o każdej z nich, takie jak obsługiwane **schematy URL**, **typy dokumentów**, **UTI** i domyślne programy obsługujące.
 
-Bazę danych można zrzucić za pomocą:
+Bazę tę można zrzucić za pomocą:
 
 ```
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump
@@ -14,20 +14,20 @@ Bazę danych można zrzucić za pomocą:
 
 Lub używając narzędzia [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-**`/usr/libexec/lsd`** to mózg bazy danych. Udostępnia **kilka usług XPC**, takich jak `.lsd.installation`, `.lsd.open`, `.lsd.openurl` i inne. Aby aplikacje mogły korzystać z udostępnionych funkcji XPC, wymagane są jednak **określone entitlements**, na przykład `.launchservices.changedefaulthandler` lub `.launchservices.changeurlschemehandler`, które pozwalają zmieniać domyślne aplikacje dla typów MIME lub schematów URL, a także inne.
+**`/usr/libexec/lsd`** jest mózgiem bazy danych. Udostępnia **kilka usług XPC**, takich jak `.lsd.installation`, `.lsd.open`, `.lsd.openurl` i inne. Wymaga jednak również **pewnych entitlements** od aplikacji, aby mogły korzystać z udostępnionych funkcji XPC, takich jak `.launchservices.changedefaulthandler` lub `.launchservices.changeurlschemehandler`, które umożliwiają zmianę domyślnych aplikacji dla typów MIME lub schematów URL.
 
-**`/System/Library/CoreServices/launchservicesd`** rejestruje usługę `com.apple.coreservices.launchservicesd` i można wysyłać do niej zapytania, aby uzyskać informacje o uruchomionych aplikacjach. Można wysyłać do niej zapytania za pomocą systemowego narzędzia **`/usr/bin/lsappinfo`** lub [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
+**`/System/Library/CoreServices/launchservicesd`** udostępnia usługę `com.apple.coreservices.launchservicesd`, za pomocą której można uzyskać informacje o uruchomionych aplikacjach. Można z niej korzystać przy użyciu narzędzia systemowego **`/usr/bin/lsappinfo`** lub [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
 Z perspektywy operatora warto pamiętać, że zazwyczaj przydatne są **dwa widoki**:
 
-- **Baza danych rejestracji** zarządzana przez LaunchServices / `lsd` (oparta na plikach `.csstore`).
-- **Efektywne ustawienia domyślne dla użytkownika** przechowywane w `~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist`, w tablicy `LSHandlers`.
+- **Baza rejestracji** zarządzana przez LaunchServices / `lsd` (oparta na plikach `.csstore`).
+- **Efektywne ustawienia domyślne dla użytkownika** przechowywane w tablicy `LSHandlers` w pliku `~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist`.
 
-To rozróżnienie ma znaczenie: aplikacja może być **zarejestrowana** jako obsługująca dany typ lub schemat, ale **aktualnie domyślną** aplikacją może nadal być inny identyfikator bundle.
+To rozróżnienie ma znaczenie: aplikacja może być **zarejestrowana** jako obsługująca dany typ lub schemat, ale **aktualną aplikacją domyślną** nadal może być inny bundle ID.
 
-W nowszych wersjach macOS wykrywanie zarejestrowanych aplikacji nie ogranicza się do `/Applications`: do rejestru mogą trafić aplikacje z innych dostępnych folderów widocznych dla Spotlight oraz z zamontowanych lub współdzielonych woluminów. Dlatego podczas triage zachowaj informacje o `path` i woluminie z wyniku `lsregister -dump` i nie zakładaj, że wyrejestrowanie aplikacji będzie trwałe, dopóki jej bundle pozostaje wykrywalny.<sup>[[4]](#references)</sup>
+W nowszych wydaniach macOS wyszukiwanie aplikacji do rejestracji nie ogranicza się do `/Applications`: aplikacje w innych folderach widocznych w Spotlight i dostępnych dla systemu oraz na zamontowanych lub udostępnionych woluminach mogą zostać dodane do rejestru. Dlatego podczas analizy zachowuj informacje o `path` i woluminie z `lsregister -dump` i nie zakładaj, że wyrejestrowanie aplikacji będzie trwałe, dopóki pakiet aplikacji pozostaje wykrywalny.<sup>[[4]](#references)</sup>
 
-## Obsługa plików według rozszerzenia i schematów URL
+## Obsługa aplikacji dla rozszerzeń plików i schematów URL
 
 Poniższe polecenie może pomóc znaleźć aplikacje, które mogą otwierać pliki w zależności od ich rozszerzenia:
 
@@ -44,7 +44,7 @@ Lub użyj czegoś takiego jak [**SwiftDefaultApps**](https://github.com/Lord-Kam
 ./swda getHandler --URL ftp #Get ftp handler
 ```
 
-Możesz także sprawdzić rozszerzenia obsługiwane przez aplikację, wykonując:
+Możesz też sprawdzić rozszerzenia obsługiwane przez aplikację, wykonując:
 
 ```bash
 cd /Applications/Safari.app/Contents
@@ -78,15 +78,15 @@ grep -A3 CFBundleTypeExtensions Info.plist  | grep string
 				<string>svg</string>
 ```
 
-## Ustalanie aktywnych programów obsługi
+## Enumerowanie aktywnych programów obsługi
 
-Najbardziej przydatnym plikiem zawierającym **domyślne aplikacje bieżącego użytkownika** jest zazwyczaj:
+Najbardziej przydatnym plikiem zawierającym **domyślne ustawienia bieżącego użytkownika** jest zazwyczaj:
 
 ```bash
 ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist
 ```
 
-Aby zrzucić handlery **URL scheme** z tej aplikacji:
+Aby zrzucić obsługiwane przez nią **schematy URL**:
 
 ```bash
 plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist |
@@ -94,7 +94,7 @@ plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServi
       {scheme: .LSHandlerURLScheme, handler: (.LSHandlerRoleAll // .LSHandlerRoleViewer // .LSHandlerRoleEditor)}'
 ```
 
-Aby wykonać dump obsługiwaczy **content-type / UTI**:
+Aby wykonać dump handlerów **content-type / UTI**:
 
 ```bash
 plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist |
@@ -102,13 +102,13 @@ plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServi
       {uti: .LSHandlerContentType, handler: (.LSHandlerRoleAll // .LSHandlerRoleViewer // .LSHandlerRoleEditor)}'
 ```
 
-Aby rozwiązać drzewo UTI przykładowego pliku:
+Aby ustalić drzewo UTI przykładowego pliku:
 
 ```bash
 mdls -name kMDItemContentType -name kMDItemContentTypeTree ./sample.pdf
 ```
 
-Jeśli chcesz używać bardziej przyjaznego CLI do sprawdzania lub zmieniania ustawień domyślnych:
+Jeśli chcesz korzystać z bardziej przyjaznego CLI do sprawdzania lub zmieniania ustawień domyślnych:
 
 ```bash
 # Classic tool
@@ -126,15 +126,15 @@ dutix apps show Safari
 
 ### Nadpisania `Open With` dla poszczególnych plików
 
-Rozwiązywanie skojarzeń obejmuje również warstwę **specyficzną dla pliku**. Zanim LaunchServices użyje UTI pliku i globalnego domyślnego ustawienia użytkownika, sprawdza atrybut rozszerzony `com.apple.LaunchServices.OpenWith`. Finder tworzy go po wybraniu opcji **Zawsze otwieraj za pomocą** dla jednego pliku; jego wartość to binarna lista właściwości zawierająca ścieżkę aplikacji, identyfikator pakietu i selektor wersji.<sup>[[3]](#references)</sup>
+Rozpoznawanie programu obsługującego plik ma również warstwę **specyficzną dla danego pliku**. Zanim LaunchServices użyje UTI pliku i globalnego ustawienia domyślnego użytkownika, sprawdza atrybut rozszerzony `com.apple.LaunchServices.OpenWith`. Finder tworzy go po wybraniu opcji **Zawsze otwieraj za pomocą** dla jednego pliku; jego wartość to binarna lista właściwości zawierająca ścieżkę do aplikacji, identyfikator pakietu i selektor wersji.<sup>[[3]](#references)</sup>
 
-Sprawdź i zdekoduj ten atrybut, nie ufając rozszerzeniu nazwy pliku:
+Sprawdź i zdekoduj go, nie ufając rozszerzeniu nazwy pliku:
 
 ```bash
 xattr -px com.apple.LaunchServices.OpenWith ./suspicious.doc | xxd -r -p | plutil -p -
 ```
 
-Jest to przydatne, gdy pojedynczy wabik otwiera się w nieoczekiwanej aplikacji, mimo że `duti`, `dutix` lub `LSHandlers` wskazuje bezpieczną wartość domyślną dla całego systemu. W kontrolowanym laboratorium dokładną nieprzejrzystą wartość można skopiować z pliku skonfigurowanego za pomocą Findera; jej usunięcie przywraca normalne rozpoznawanie na podstawie typu:
+Jest to przydatne, gdy pojedyncza przynęta otwiera się w nieoczekiwanej aplikacji, mimo że `duti`, `dutix` lub `LSHandlers` wskazuje bezpieślną globalną aplikację domyślną. W kontrolowanym laboratorium dokładną nieprzejrzystą wartość można skopiować z pliku skonfigurowanego w Finderze; jej usunięcie przywraca normalne rozpoznawanie na podstawie typu:
 
 ```bash
 # Clone an existing per-file association
@@ -149,32 +149,32 @@ xattr -d com.apple.LaunchServices.OpenWith ./test.doc
 
 Podczas wstępnej analizy pakietu aplikacji najważniejsze są te klucze:
 
-- **`CFBundleDocumentTypes`**: grupy dokumentów, które pakiet deklaruje, że może otwierać.
-- **`LSItemContentTypes`**: **nowoczesny / preferowany** sposób powiązania typów dokumentów z UTI.
-- **`LSHandlerRank`**: ranking używany przez LaunchServices (`Owner`, `Default`, `Alternate`, `None`).
+- **`CFBundleDocumentTypes`**: grupy dokumentów, które pakiet deklaruje jako obsługiwane.
+- **`LSItemContentTypes`**: **nowoczesny / preferowany** sposób przypisywania typów dokumentów do UTI.
+- **`LSHandlerRank`**: priorytet używany przez LaunchServices (`Owner`, `Default`, `Alternate`, `None`).
 - **`CFBundleURLTypes`** / **`CFBundleURLSchemes`**: niestandardowe schematy URI obsługiwane przez aplikację.
 - **`UTExportedTypeDeclarations`**: UTI, których aplikacja jest **właścicielem**.
-- **`UTImportedTypeDeclarations`**: UTI, których aplikacja nie jest właścicielem, ale które chce udostępnić systemowi do rozpoznawania.
+- **`UTImportedTypeDeclarations`**: UTI, których aplikacja nie jest właścicielem, ale które chce udostępnić systemowi.
 
-Przydatne polecenie do szybkiej analizy to:
+Przydatnym poleceniem do szybkiej analizy jest:
 
 ```bash
 plutil -p /Applications/Target.app/Contents/Info.plist | \
   rg 'CFBundleDocumentTypes|CFBundleURLTypes|LSItemContentTypes|LSHandlerRank|UTExportedTypeDeclarations|UTImportedTypeDeclarations'
 ```
 
-Subtelny, ale ważny szczegół: jeśli występuje **`LSItemContentTypes`**, starsze klucze, takie jak **`CFBundleTypeExtensions`**, **`CFBundleTypeMIMETypes`** i **`CFBundleTypeOSTypes`**, są w praktyce danymi zapewniającymi zgodność ze starszymi wersjami. Przy ustalaniu rzeczywistego handlera najpierw skup się na ścieżce UTI.
+Subtelny, ale ważny szczegół: jeśli obecny jest klucz **`LSItemContentTypes`**, starsze klucze, takie jak **`CFBundleTypeExtensions`**, **`CFBundleTypeMIMETypes`** i **`CFBundleTypeOSTypes`**, są w praktyce danymi zapewniającymi zgodność ze starszymi wersjami. Przy rzeczywistym rozwiązywaniu obsługi najpierw skup się na ścieżce UTI.
 
-## Notatki ofensywne
+## Uwagi ofensywne
 
-Aplikacje nie muszą być uruchamiane, aby stały się interesujące. Porzucony lub sklonowany pakiet `.app` może zostać **automatycznie przeanalizowany przez `lsd`, gdy tylko zostanie zapisany na dysku**, a zadeklarowane przez niego typy dokumentów i schematy URL mogą zostać zarejestrowane, zanim użytkownik uruchomi pakiet.
+Aplikacje nie muszą być uruchomione, aby ich deklaracje obsługi były interesujące, ale **samo zapisanie pakietu `.app` nie gwarantuje natychmiastowej rejestracji**. Finder może zarejestrować aplikację po jej wykryciu, również gdy użytkownik przegląda jej folder; rejestracja może też nastąpić podczas uruchamiania lub logowania albo przez jawne wywołanie rejestracji. Przed testowaniem deklaracji sprawdź `lsregister -dump`. Sama rejestracja ani nie uruchamia aplikacji, ani nie ustawia jej jako efektywnego domyślnego programu.<sup>[[5]](#references)</sup> Informacje o wymaganiach dotyczących persistence znajdziesz w sekcji [URL Scheme & File-Type Handlers](../macos-auto-start-locations.md#url-scheme--file-type-handlers-launchservices).
 
-Jest to przydatne zarówno w **badaniach nad persistence / hijacking**, jak i w **łańcuchach initial access**:
+Jest to przydatne zarówno w badaniach nad **persistence / hijackingiem**, jak i w **łańcuchach initial access**:
 
-- Złośliwa aplikacja może zgłosić obsługę **rzadkiego rozszerzenia** lub **niestandardowego UTI** i czekać, aż ofiara otworzy plik-przynętę.
-- Złośliwa aplikacja może zarejestrować **niestandardowy schemat URL**, dostępny z poziomu przeglądarki, aplikacji Electron, dokumentu biurowego, klienta czatu lub innej aplikacji pomocniczej.<sup>[[1]](#references)</sup>
-- Aby odróżnić normalne rozstrzyganie domyślne od testowania konkretnego kandydata na handler, wywołaj schemat przez LaunchServices poleceniem `open 'targetscheme://host/path?value=test'`, a następnie wskaż konkretny zarejestrowany pakiet poleceniem `open -b com.vendor.Target 'targetscheme://host/path?value=test'`. Przydaje się to podczas audytu sposobu, w jaki aplikacja odbierająca sprawdza i dekoduje kontrolowane przez atakującego komponenty URL.<sup>[[1]](#references)</sup>
-- Jeśli edytujesz pakiet aplikacji po jego zbudowaniu, możesz wymusić ponowną analizę przez LaunchServices za pomocą:
+- Złośliwa aplikacja może zadeklarować obsługę **rzadkiego rozszerzenia** lub **niestandardowego UTI** i czekać, aż ofiara otworzy plik-przynętę.
+- Złośliwa aplikacja może zarejestrować **niestandardowy schemat URL**, do którego można uzyskać dostęp z przeglądarki, aplikacji Electron, dokumentu biurowego, klienta czatu lub innej aplikacji pomocniczej.<sup>[[1]](#references)</sup>
+- Aby oddzielić normalne rozstrzyganie domyślnego programu od testowania konkretnego kandydata na obsługę, wywołaj schemat przez LaunchServices za pomocą `open 'targetscheme://host/path?value=test'`, a następnie wskaż konkretny zarejestrowany bundle poleceniem `open -b com.vendor.Target 'targetscheme://host/path?value=test'`. Przydaje się to do audytu sposobu, w jaki aplikacja odbierająca weryfikuje i dekoduje kontrolowane przez atakującego elementy URL.<sup>[[1]](#references)</sup>
+- Jeśli zmodyfikujesz pakiet aplikacji po jego zbudowaniu, możesz wymusić ponowne przeanalizowanie go przez LaunchServices za pomocą:
 
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -f /tmp/Evil.app
@@ -183,18 +183,41 @@ Jest to przydatne zarówno w **badaniach nad persistence / hijacking**, jak i w 
 Podczas testowania podejrzanych pakietów zwróć szczególną uwagę na:
 
 - **`LSHandlerRank=Owner`** dla nietypowych typów.
-- **Rozbudowane** tablice `CFBundleDocumentTypes`, deklarujące obsługę wielu rozszerzeń.
-- **Aplikacje pomocnicze / opakowujące**, których jedyne interesujące zachowanie uruchamia się za pośrednictwem procedury obsługi dokumentów lub URI.
-- **Pliki przypominające skróty** (`.webloc`, `.inetloc`, `.fileloc`), które ostatecznie wywołują LaunchServices. W przypadku sztuczek związanych z plikami `.fileloc` i powiązanych zagadnień dotyczących Gatekeepera sprawdź [tę inną stronę](macos-security-protections/macos-fs-tricks/README.md).<sup>[[2]](#references)</sup>
+- **Szerokie** tablice `CFBundleDocumentTypes` deklarujące obsługę wielu rozszerzeń.
+- **Aplikacje pomocnicze / opakowujące**, których jedyne interesujące zachowanie uruchamia się za pośrednictwem obsługi dokumentów lub URI.
+- **Pliki przypominające skróty** (`.webloc`, `.inetloc`, `.fileloc`), które ostatecznie przekazują obsługę do LaunchServices. Informacje o sztuczkach w stylu `.fileloc` i powiązanych aspektach Gatekeeper znajdziesz na [tej stronie](macos-security-protections/macos-fs-tricks/README.md).<sup>[[2]](#references)</sup>
 
-Jeśli celem jest pasywne wykonanie kodu przez samo przejście do folderu lub wybranie pliku, sprawdź również dedykowaną stronę dotyczącą [generatorów Quick Look](macos-proces-abuse/macos-quicklook-generators.md), ponieważ jest to inna, choć blisko powiązana powierzchnia obsługi plików.
+### Parametry URL przekazywane do dalszych opcji
+
+Potwierdzenie otwarcia zewnętrznego protokołu w przeglądarce zatwierdza jedynie otwarcie programu obsługującego ten protokół; nie oznacza, że parametry URL są godne zaufania. Prześledź parser URL odbierającej aplikacji aż do używanej biblioteki, silnika multimedialnego, procesu pomocniczego lub opcji zapisu plików. Poszukaj prefiksu klucza zapytania, który zamienia pola URL na nazwy dalszych opcji. Przetestuj zarówno separatory dosłowne, jak i zakodowane procentowo, używając nieszkodliwego znacznika na koncie testowym.<sup>[[6]](#references)</sup>
+
+Zweryfikuj **końcową opcję akceptowaną przez dalszy komponent**, a nie tylko początkowe parsowanie w aplikacji. Jeden z programów obsługujących pozwalał przekazywać klucze zapytania z prefiksem do poleceń wejściowych mpv; zablokowanie tej opcji nadal pozostawiało możliwość zapisu pliku. Testuj dostępną klasę opcji, a nie tylko jeden znany niebezpieczny klucz.<sup>[[7]](#references)</sup>
+
+### Wbudowana obsługa `applescript://`
+
+Obsługa URL `applescript://com.apple.scripteditor` akceptuje `action=new` oraz parametr `script` zakodowany w URL. Dzięki temu odnośnik w przeglądarce może otworzyć Script Editor z umieszczonym w edytorze kodem AppleScript kontrolowanym przez atakującego, bez konieczności wklejania go w Terminalu. **Nie powoduje to automatycznego wykonania**: przeglądarka może zapytać o zgodę na otwarcie Script Editor, a użytkownik musi uruchomić skrypt.<sup>[[8]](#references)</sup>
+
+Nowsze wersje macOS mogą wyświetlać ostrzeżenie dotyczące dokumentu skryptu, a XProtect skanuje AppleScript podczas wykonywania.<sup>[[8]](#references)[[9]](#references)</sup>
+
+Użyj nieszkodliwej lokalnej sondy, aby sprawdzić obsługę i monity w ocenianej wersji macOS; sonda powinna jedynie wypełnić edytor, dopóki użytkownik nie kliknie **Run**.<sup>[[8]](#references)</sup>
+
+```bash
+open 'applescript://com.apple.scripteditor?action=new&script=display%20dialog%20%22handler%20probe%22'
+```
+
+Jeśli Twoim celem jest pasywne wykonanie kodu przez samo przeglądanie folderu lub wybranie pliku, sprawdź też dedykowaną stronę dotyczącą [Quick Look generators](macos-proces-abuse/macos-quicklook-generators.md), ponieważ opisuje ona inną, ale ściśle powiązaną powierzchnię obsługi plików.
 
 
 
 ## References
 
 - [1] [Objective-See - Zdalne przejęcie Maca za pomocą niestandardowych schematów URL](https://objective-see.org/blog/blog_0x38.html)
-- [2] [Jamf Threat Labs - Omijanie bramki: bliższe spojrzenie na luki w Gatekeeperze w macOS](https://www.jamf.com/blog/gatekeeper-flaws-on-macos/)
+- [2] [Jamf Threat Labs - Ominięcie Gate: bliższe spojrzenie na luki w Gatekeeperze w macOS](https://www.jamf.com/blog/gatekeeper-flaws-on-macos/)
 - [3] [The Eclectic Light Company - Jak macOS otwiera plik we właściwej aplikacji](https://eclecticlight.co/2024/04/10/how-macos-opens-a-file-in-the-correct-app/)
 - [4] [The Eclectic Light Company - Kontrolowanie LaunchServices w macOS Sequoia](https://eclecticlight.co/2025/03/27/controlling-launchservices-in-macos-sequoia/)
+- [5] [Apple - Koncepcje Launch Services](https://developer.apple.com/library/archive/documentation/Carbon/Conceptual/LaunchServicesConcepts/LSCConcepts/LSCConcepts.html)
+- [6] [stackpointer - Badanie wykonania poleceń przez schemat URL IINA](https://binary.stackpointer.re/iina-142-url-scheme-command-execution)
+- [7] [IINA - Niebezpieczna obsługa opcji mpv w schemacie URL](https://github.com/iina/iina/security/advisories/GHSA-w5xh-98j7-jp5q)
+- [8] [Jamf Threat Labs - Technika ClickFix wykorzystuje Script Editor zamiast Terminala](https://www.jamf.com/blog/clickfix-macos-script-editor-atomic-stealer/)
+- [9] [Apple - Zabezpieczenia Terminala i skryptów](https://support.apple.com/en-ie/guide/security/sece3b202c4b/web)
 {{#include ../../banners/hacktricks-training.md}}
