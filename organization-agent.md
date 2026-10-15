@@ -23,6 +23,7 @@
 - VM escape entry point `src/binary-exploitation/vm-escape-and-hypervisor-exploitation.md` maps guest network/display/storage/shared-folder surfaces to QEMU/KVM, VirtualBox, and VMware cases; substantive chapters retain their paths. Slirp's custom-allocator mechanism stays under `libc-heap/`, but its SUMMARY entry belongs with guest-to-host cases.
 - General Web API testing (SOAP/REST/GraphQL discovery, CXF XOP and tRPC cases, tools) is at `src/pentesting-web/web-api-pentesting.md`; the 80/443 service overview links directly to it. Cloud retains provider-specific API control-plane semantics.
 - General HTTP 401/403 authorization-bypass methods and path/header variants are at `src/pentesting-web/403-and-401-bypasses.md`; the HTTP-header reference (routing/source, caching, conditional/range, security headers, request encoding, header-name casing) is at `src/pentesting-web/special-http-headers.md`. These belong to Web's reusable mechanism/checklist, not the Network Services web-technology family. `network-services-pentesting/pentesting-web/README.md` remains the 80/443 discovery and product/stack entry point, linking directly to both. Old whole-page routes redirect. Do not merge the two: the first is an authorization-bypass task; the second is a broader header reference.
+- PHP multipart temporary-upload LFI races, including the PHP 7.0/7.2 segmentation-fault cleanup-interruption variant, are at `src/pentesting-web/file-inclusion/lfi2rce-via-temp-file-uploads.md#segmentation-fault-variant-on-php-70-and-72`. The variant shares the temporary-file prerequisite and reader task, so it is a heading rather than a thin sibling. Keep phpinfo path disclosure, session upload-progress files, and filter-only payload generation separate because their primitives differ.
 
 ## Researcher entry points
 
@@ -30,6 +31,7 @@
 - Exposed board pads/debug headers, serial console, memory chip, leakage, or glitchable signals → Hardware/Physical Access / Hardware Hacking. RFID/NFC badges, sub-GHz remotes, infrared, BLE, LoRaWAN, or iButton → adjacent Radio Hacking.
 - OT asset → Industrial Control Systems / OT for process constraints; Network Services / Modbus, OPC UA, or BACnet for protocol specifics. Locked Android device/acquired image → Basic Forensic Methodology / Android Forensics; Android app testing → Mobile Pentesting.
 - Guest-controlled network, display, storage, or shared folders → Binary Exploitation / VM Escape. Discovered SOAP/REST/GraphQL endpoint → Pentesting Web / Web API Pentesting. HTTP `401`/`403`, alternate methods, proxy headers, path normalization → Pentesting Web / HTTP 401/403 Authorization Bypasses. Unknown behavior of an HTTP response/request header → Pentesting Web / Special HTTP Headers.
+- LFI plus PHP multipart upload → Web / File Inclusion / temporary-file uploads; older PHP filter-triggered worker crashes are the segmentation-fault variant there.
 
 ## Deferred audits (not approved moves)
 

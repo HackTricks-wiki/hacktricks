@@ -825,7 +825,6 @@
   - [LFI2RCE via PHP Filters](pentesting-web/file-inclusion/lfi2rce-via-php-filters.md)
   - [LFI2RCE via Nginx temp files](pentesting-web/file-inclusion/lfi2rce-via-nginx-temp-files.md)
   - [LFI2RCE via PHP_SESSION_UPLOAD_PROGRESS](pentesting-web/file-inclusion/via-php_session_upload_progress.md)
-  - [LFI2RCE via Segmentation Fault](pentesting-web/file-inclusion/lfi2rce-via-segmentation-fault.md)
   - [LFI2RCE via phpinfo()](pentesting-web/file-inclusion/lfi2rce-via-phpinfo.md)
   - [LFI2RCE Via temp file uploads](pentesting-web/file-inclusion/lfi2rce-via-temp-file-uploads.md)
   - [LFI2RCE via Eternal waiting](pentesting-web/file-inclusion/lfi2rce-via-eternal-waiting.md)
