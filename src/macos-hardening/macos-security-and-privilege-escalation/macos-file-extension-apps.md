@@ -167,7 +167,7 @@ A subtle but important detail: if **`LSItemContentTypes`** is present, older key
 
 ## Offensive notes
 
-Applications don't need to be executed to become interesting. A dropped or cloned `.app` bundle can be **parsed automatically by `lsd` as soon as it is written to disk**, and its declared document types / URL schemes may be registered without the user ever launching the bundle.
+Applications do not need to run before their handler claims become interesting, but **writing a `.app` bundle alone does not guarantee immediate registration**. Finder can register an app when it discovers it, including when a user browses its folder; registration can also occur at boot or login or through an explicit registration call. Check `lsregister -dump` before testing a claim. Registration alone neither launches the app nor makes it the effective default.<sup>[[5]](#references)</sup> For the persistence prerequisites, see [URL Scheme & File-Type Handlers](../macos-auto-start-locations.md#url-scheme--file-type-handlers-launchservices).
 
 This is useful both for **persistence / hijacking research** and for **initial-access chains**:
 
@@ -187,6 +187,24 @@ When testing suspicious bundles, pay special attention to:
 - **Helper / wrapper apps** whose only interesting behavior is behind a document or URI handler.
 - **Shortcut-like files** (`.webloc`, `.inetloc`, `.fileloc`) that end up dispatching into LaunchServices. For `.fileloc`-style tricks and related Gatekeeper angles, check [this other page](macos-security-protections/macos-fs-tricks/README.md).<sup>[[2]](#references)</sup>
 
+### URL parameters forwarded into downstream options
+
+A browser's external-protocol confirmation only approves opening the handler; it does not make the URL parameters trustworthy. Trace the receiving app's URL parser into any library, media engine, helper process, or file-writing option. Look for a query-key prefix that turns URL fields into downstream option names. Test both literal and percent-encoded separators with a harmless marker in a disposable account.<sup>[[6]](#references)</sup>
+
+Verify the **final option accepted by the downstream component**, not just the app's initial parsing. One handler allowed prefixed query keys to reach mpv input commands; blocking that option still left a file-write route. Test the reachable option class, not only one known-dangerous key.<sup>[[7]](#references)</sup>
+
+### Built-in `applescript://` handler
+
+The `applescript://com.apple.scripteditor` URL handler accepts `action=new` and a URL-encoded `script` parameter. A browser link can therefore open Script Editor with attacker-controlled AppleScript already in the editor, avoiding a Terminal paste step. This is **not automatic execution**: the browser may ask to open Script Editor, and the user must run the script.<sup>[[8]](#references)</sup>
+
+Recent macOS versions can add a script-document warning, while XProtect scans AppleScript at execution.<sup>[[8]](#references)[[9]](#references)</sup>
+
+Use a harmless local probe to check the handler and prompts on the macOS release being assessed; it should only populate the editor until **Run** is clicked.<sup>[[8]](#references)</sup>
+
+```bash
+open 'applescript://com.apple.scripteditor?action=new&script=display%20dialog%20%22handler%20probe%22'
+```
+
 If your goal is passive code-execution from merely browsing to a folder or selecting a file, also check the dedicated page for [Quick Look generators](macos-proces-abuse/macos-quicklook-generators.md), as that is a different but closely related file-handler surface.
 
 
@@ -197,4 +215,9 @@ If your goal is passive code-execution from merely browsing to a folder or selec
 - [2] [Jamf Threat Labs - Bypassing the Gate: A closer look into Gatekeeper flaws on macOS](https://www.jamf.com/blog/gatekeeper-flaws-on-macos/)
 - [3] [The Eclectic Light Company - How macOS opens a file in the correct app](https://eclecticlight.co/2024/04/10/how-macos-opens-a-file-in-the-correct-app/)
 - [4] [The Eclectic Light Company - Controlling LaunchServices in macOS Sequoia](https://eclecticlight.co/2025/03/27/controlling-launchservices-in-macos-sequoia/)
+- [5] [Apple - Launch Services Concepts](https://developer.apple.com/library/archive/documentation/Carbon/Conceptual/LaunchServicesConcepts/LSCConcepts/LSCConcepts.html)
+- [6] [stackpointer - IINA URL scheme command execution research](https://binary.stackpointer.re/iina-142-url-scheme-command-execution)
+- [7] [IINA - Unsafe handling of mpv options in its URL scheme](https://github.com/iina/iina/security/advisories/GHSA-w5xh-98j7-jp5q)
+- [8] [Jamf Threat Labs - ClickFix technique uses Script Editor instead of Terminal](https://www.jamf.com/blog/clickfix-macos-script-editor-atomic-stealer/)
+- [9] [Apple - Terminal and script protections](https://support.apple.com/en-ie/guide/security/sece3b202c4b/web)
 {{#include ../../banners/hacktricks-training.md}}
