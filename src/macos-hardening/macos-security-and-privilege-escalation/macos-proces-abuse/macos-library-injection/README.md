@@ -3,7 +3,7 @@
 {{#include ../../../../banners/hacktricks-training.md}}
 
 > [!CAUTION]
-> Code ya **dyld ni open source** na inaweza kupatikana kwenye [https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/) na inaweza kupakuliwa kama tar kupitia **URL kama** [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
+> Code ya **dyld ni open source** na inaweza kupatikana kwenye [https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/) na kupakuliwa kama tar kwa kutumia **URL kama** [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
 ## **Dyld Process**
 
@@ -14,38 +14,40 @@ Angalia jinsi Dyld inavyopakia libraries ndani ya binaries kwenye:
 macos-dyld-process.md
 {{#endref}}
 
+Tazama pia: [Reflective Mach-O Loading](../reflective-mach-o-loading.md).
+
 ## **DYLD_INSERT_LIBRARIES**
 
-Hii ni kama [**LD_PRELOAD on Linux**](../../../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#ld_preload). Inaruhusu kuonyesha process itakayoendeshwa ili ipakie library maalum kutoka kwenye path (ikiwa env var imewezeshwa)<sup>[[4]](#references)</sup>
+Hii ni kama [**LD_PRELOAD kwenye Linux**](../../../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#ld_preload). Inaruhusu kuashiria kuwa process itakayoendeshwa ipakie library mahususi kutoka kwenye path (ikiwa env var imewashwa)<sup>[[4]](#references)</sup>
 
-Technique hii pia inaweza **kutumika kama ASEP technique**, kwa sababu kila application iliyosakinishwa ina plist inayoitwa "Info.plist" inayoruhusu **kupewa environmental variables** kwa kutumia key inayoitwa `LSEnvironmental`.
+Mbinu hii pia inaweza **kutumika kama mbinu ya ASEP**, kwa kuwa kila application iliyosakinishwa ina plist inayoitwa "Info.plist" inayoruhusu **kuweka environmental variables** kwa kutumia key inayoitwa `LSEnvironmental`.
 
 > [!TIP]
-> Tangu 2012 **Apple imepunguza kwa kiasi kikubwa uwezo** wa **`DYLD_INSERT_LIBRARIES`**. Process huchukuliwa kuwa **restricted** — na hivyo `dyld` hufuta kila `DYLD_*` variable kutoka kwenye environment yake — wakati mojawapo ya masharti haya inatimia:
+> Tangu 2012 **Apple imepunguza kwa kiasi kikubwa uwezo** wa **`DYLD_INSERT_LIBRARIES`**. Process huchukuliwa kuwa **restricted** — na kisha `dyld` hufuta kila variable ya `DYLD_*` kutoka kwenye environment yake — ikiwa mojawapo ya hali hizi ni kweli:
 >
 > - Binary ni `setuid/setgid`
 > - Mach-O ina section ya **`__RESTRICT/__restrict`**
-> - Binary imesainiwa kwa hardened runtime na AMFI haijairuhusu kutumia ruhusa za "path/print variables", yaani haina [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)<sup>[[3]](#references)</sup>
->   - Kagua **entitlements** za binary kwa: `codesign -dv --entitlements :- </path/to/bin>`
+> - Binary imesainiwa kwa hardened runtime na AMFI haijaipa ruhusa za "path/print variables", yaani haina [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)<sup>[[3]](#references)</sup>
+>   - Angalia **entitlements** za binary kwa: `codesign -dv --entitlements :- </path/to/bin>`
 >
-> Katika `dyld` za sasa, hili halijaamuliwa tena na `dyld` pekee: `ProcessConfig::Security::Security()` huuliza **AMFI** kupitia `amfi_check_dyld_policy_self()` kisha huita `pruneEnvVars()`. Code halisi imeelezwa kwenye [Prune `DYLD_*` env variables](#prune-dyld_-env-variables) hapa chini.
+> Katika `dyld` ya sasa, hili haliamuliwi tena na `dyld` pekee: `ProcessConfig::Security::Security()` huuliza **AMFI** kupitia `amfi_check_dyld_policy_self()` kisha huita `pruneEnvVars()`. Mchakato halisi wa code umeelezwa kwenye [Prune `DYLD_*` env variables](#prune-dyld_-env-variables) hapa chini.
 
 ### Library Validation
 
-Hata kama binary inaruhusu **`DYLD_INSERT_LIBRARIES`** environment variable, haitapakia library maalum ikiwa inathibitisha signature ya library hiyo.
+Hata kama binary inaruhusu environment variable ya **`DYLD_INSERT_LIBRARIES`**, haitapakia library maalum ikiwa inathibitisha signature ya library hiyo.
 
-Ili ipakie library maalum, binary inahitaji kuwa na mojawapo ya **entitlements** zifuatazo:
+Ili kupakia library maalum, binary inahitaji kuwa na **mojawapo ya entitlements zifuatazo**:
 
 - [`com.apple.security.cs.disable-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.security.cs.disable-library-validation)
 - [`com.apple.private.security.clear-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.private.security.clear-library-validation)
 
-au binary **haipaswi** kuwa na **hardened runtime flag** au **library validation flag**.
+au binary **isiwe** na **hardened runtime flag** au **library validation flag**.
 
-Unaweza kuangalia kama binary ina **hardened runtime** kwa `codesign --display --verbose <bin>` na kukagua runtime flag ndani ya **`CodeDirectory`**, kama vile: **`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
+Unaweza kuangalia kama binary ina **hardened runtime** kwa kutumia `codesign --display --verbose <bin>` na kuangalia runtime flag ndani ya **`CodeDirectory`**, kama vile: **`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
 
-Pia unaweza kupakia library ikiwa **imesainiwa kwa certificate ileile kama binary**.
+Unaweza pia kupakia library ikiwa **imesainiwa kwa certificate ileile na binary**.
 
-Pata mfano wa jinsi ya kutumia vibaya hili na kukagua restrictions kwenye:
+Tazama mfano wa jinsi ya kutumia vibaya mbinu hii na uangalie vizuizi kwenye:
 
 
 {{#ref}}
@@ -55,54 +57,54 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 ## Dylib Hijacking
 
 > [!CAUTION]
-> Kumbuka kwamba **Library Validation restrictions zilizotajwa awali pia zinatumika** wakati wa kufanya Dylib hijacking attacks.
+> Kumbuka kuwa **vizuizi vya awali vya Library Validation pia hutumika** unapofanya mashambulizi ya Dylib hijacking.
 
-Kama ilivyo kwenye Windows, kwenye macOS unaweza **kuhijack dylibs** ili kufanya **applications zitekeleze arbitrary code**. Kutoka kwenye regular user account huenda isiwezekane, kwa sababu kuandika ndani ya `.app` bundle ili kuhijack library kunaweza kuhitaji TCC permission.\
-Hata hivyo, jinsi **macOS** applications **zinavyopakia** libraries ina restrictions zaidi kuliko Windows. Malware developers bado wanaweza kutumia technique hii kwa **stealth**, lakini kuitumia kuongeza privileges kuna uwezekano mdogo zaidi.
+Kama ilivyo kwenye Windows, kwenye macOS unaweza **kuteka nyara dylibs** ili kufanya **applications zitekeleze arbitrary code**. Huenda hili lisiwezekane kutoka kwenye akaunti ya kawaida ya mtumiaji, kwa sababu kuandika ndani ya `.app` bundle ili kuteka nyara library kunaweza kuhitaji ruhusa ya TCC.\
+Hata hivyo, jinsi applications za **macOS** **zinavyopakia** libraries **ina vizuizi zaidi** kuliko kwenye Windows. Watengenezaji wa malware bado wanaweza kutumia mbinu hii kwa **stealth**, lakini kuitumia vibaya ili kupandisha privileges kuna uwezekano mdogo zaidi.
 
-Kwanza, ni **kawaida zaidi** kupata kwamba **MacOS binaries zinaonyesha full path** ya libraries za kupakia. Pili, **MacOS haitafuti kamwe** libraries kwenye folders za **$PATH**.
+Kwanza, ni **jambo la kawaida zaidi** kukuta kwamba **binaries za MacOS zinaonyesha path kamili** ya libraries zitakazopakiwa. Pili, **MacOS haitafuti kamwe** libraries kwenye folders za **$PATH**.
 
-Sehemu **kuu** ya **code** inayohusiana na functionality hii iko kwenye **`ImageLoader::recursiveLoadLibraries`** ndani ya `ImageLoader.cpp`.
+Sehemu **kuu** ya **code** inayohusiana na utendaji huu iko kwenye **`ImageLoader::recursiveLoadLibraries`** katika `ImageLoader.cpp`.
 
-Kuna **header Commands 4 tofauti** ambazo macho binary inaweza kutumia kupakia libraries:
+Kuna **header Commands 4 tofauti** ambazo binary ya macho inaweza kutumia kupakia libraries:
 
-- **`LC_LOAD_DYLIB`** command ndiyo command ya kawaida ya kupakia dylib.
-- **`LC_LOAD_WEAK_DYLIB`** command hufanya kazi kama iliyotangulia, lakini ikiwa dylib haipatikani, execution inaendelea bila error yoyote.
-- **`LC_REEXPORT_DYLIB`** command hu-proxy (au ku-re-export) symbols kutoka library tofauti.
-- **`LC_LOAD_UPWARD_DYLIB`** command hutumika wakati libraries mbili zinategemeana (hii huitwa _upward dependency_).
+- Command ya **`LC_LOAD_DYLIB`** ndiyo command ya kawaida ya kupakia dylib.
+- Command ya **`LC_LOAD_WEAK_DYLIB`** hufanya kazi kama iliyotangulia, lakini ikiwa dylib haipatikani, utekelezaji huendelea bila hitilafu yoyote.
+- Command ya **`LC_REEXPORT_DYLIB`** hutumika kupitisha (au ku-export tena) symbols kutoka library nyingine.
+- Command ya **`LC_LOAD_UPWARD_DYLIB`** hutumika wakati libraries mbili zinategemeana (hili huitwa _upward dependency_).
 
 Hata hivyo, kuna **aina 2 za dylib hijacking**:
 
-- **Missing weak linked libraries**: Hii inamaanisha application itajaribu kupakia library ambayo haipo, ikiwa imesanidiwa kwa **LC_LOAD_WEAK_DYLIB**. Kisha, **ikiwa attacker ataweka dylib mahali inapotarajiwa, itapakiwa**.
-- Ukweli kwamba link ni "weak" unamaanisha application itaendelea kufanya kazi hata kama library haipatikani.
-- **Code inayohusiana** na hili iko kwenye function `ImageLoaderMachO::doGetDependentLibraries` ya `ImageLoaderMachO.cpp`, ambapo `lib->required` huwa `false` tu wakati `LC_LOAD_WEAK_DYLIB` ni true.
-- **Tafuta weak linked libraries** kwenye binaries kwa (baadaye kuna mfano wa jinsi ya kuunda hijacking libraries):
-- ```bash
-otool -l </path/to/bin> | grep LC_LOAD_WEAK_DYLIB -A 5 cmd LC_LOAD_WEAK_DYLIB
-cmdsize 56
-name /var/tmp/lib/libUtl.1.dylib (offset 24)
-time stamp 2 Wed Jun 21 12:23:31 1969
-current version 1.0.0
-compatibility version 1.0.0
-```
-- **Configured with @rpath**: Mach-O binaries zinaweza kuwa na commands **`LC_RPATH`** na **`LC_LOAD_DYLIB`**. Kulingana na **values** za commands hizo, **libraries** zitapakiwa kutoka kwenye **directories tofauti**.
-- **`LC_RPATH`** ina paths za baadhi ya folders zinazotumiwa na binary kupakia libraries.
-- **`LC_LOAD_DYLIB`** ina path ya libraries maalum za kupakia. Paths hizi zinaweza kuwa na **`@rpath`**, ambayo **itabadilishwa** na values zilizoko kwenye **`LC_RPATH`**. Ikiwa kuna paths kadhaa kwenye **`LC_RPATH`**, zote zitatumiwa kutafuta library ya kupakia. Mfano:
-- Ikiwa **`LC_LOAD_DYLIB`** ina `@rpath/library.dylib` na **`LC_RPATH`** ina `/application/app.app/Contents/Framework/v1/` na `/application/app.app/Contents/Framework/v2/`. Folders zote mbili zitatumiwa kupakia `library.dylib`**.** Ikiwa library haipo kwenye `[...]/v1/` na attacker anaweza kuiweka hapo, anaweza kuhijack library inayopakiwa kutoka `[...]/v2/`, kwa sababu mpangilio wa paths kwenye **`LC_LOAD_DYLIB`** unafuatwa.
-- **Tafuta rpath paths na libraries** kwenye binaries kwa: `otool -l </path/to/binary> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`
+- **Missing weak linked libraries**: Hii inamaanisha kuwa application itajaribu kupakia library ambayo haipo, iliyosanidiwa kwa kutumia **LC_LOAD_WEAK_DYLIB**. Kisha, **mshambuliaji akiweka dylib mahali inapotarajiwa, itapakiwa**.
+  - Kwa kuwa link ni "weak", application itaendelea kufanya kazi hata kama library haipatikani.
+  - **Code inayohusiana** iko kwenye function `ImageLoaderMachO::doGetDependentLibraries` ya `ImageLoaderMachO.cpp`, ambapo `lib->required` huwa `false` tu ikiwa `LC_LOAD_WEAK_DYLIB` ni true.
+  - **Tafuta weak linked libraries** kwenye binaries kwa kutumia (baadaye kuna mfano wa jinsi ya kutengeneza libraries za hijacking):
+    - ```bash
+      otool -l </path/to/bin> | grep LC_LOAD_WEAK_DYLIB -A 5 cmd LC_LOAD_WEAK_DYLIB
+      cmdsize 56
+      name /var/tmp/lib/libUtl.1.dylib (offset 24)
+      time stamp 2 Wed Jun 21 12:23:31 1969
+      current version 1.0.0
+      compatibility version 1.0.0
+      ```
+- **Configured with @rpath**: Mach-O binaries can have the commands **`LC_RPATH`** and **`LC_LOAD_DYLIB`**. Base on the **values** of those commands, **libraries** are going to be **loaded** from **different directories**.
+  - **`LC_RPATH`** contains the paths of some folders used to load libraries by the binary.
+  - **`LC_LOAD_DYLIB`** contains the path to specific libraries to load. These paths can contain **`@rpath`**, which will be **replaced** by the values in **`LC_RPATH`**. If there are several paths in **`LC_RPATH`** everyone will be used to search the library to load. Example:
+    - If **`LC_LOAD_DYLIB`** contains `@rpath/library.dylib` and **`LC_RPATH`** contains `/application/app.app/Contents/Framework/v1/` and `/application/app.app/Contents/Framework/v2/`. Both folders are going to be used to load `library.dylib`**.** If the library doesn't exist in `[...]/v1/` and attacker could place it there to hijack the load of the library in `[...]/v2/` as the order of paths in **`LC_LOAD_DYLIB`** is followed.
+  - **Find rpath paths and libraries** in binaries with: `otool -l </path/to/binary> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`
 
-> [!NOTE] > **`@executable_path`**: Ni **path** ya directory iliyo na **main executable file**.
+> [!NOTE] > **`@executable_path`**: Is the **path** to the directory containing the **main executable file**.
 >
-> **`@loader_path`**: Ni **path** ya **directory** iliyo na **Mach-O binary** yenye load command.
+> **`@loader_path`**: Is the **path** to the **directory** containing the **Mach-O binary** which contains the load command.
 >
-> - Inapotumiwa kwenye executable, **`@loader_path`** kwa ufanisi ni **sawa na** **`@executable_path`**.
-> - Inapotumiwa kwenye **dylib**, **`@loader_path`** hutoa **path** ya **dylib**.
+> - When used in an executable, **`@loader_path`** is effectively the **same** as **`@executable_path`**.
+> - When used in a **dylib**, **`@loader_path`** gives the **path** to the **dylib**.
 
-Njia ya **kuongeza privileges** kwa kutumia vibaya functionality hii ingekuwa katika hali adimu ambapo **application** inayoendeshwa **na** **root** **inatafuta** **library fulani kwenye folder ambayo attacker ana write permissions.**
+The way to **escalate privileges** abusing this functionality would be in the rare case that an **application** being executed **by** **root** is **looking** for some **library in some folder where the attacker has write permissions.**
 
 > [!TIP]
-> **Scanner** nzuri ya kupata **missing libraries** kwenye applications ni [**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html) au [**CLI version**](https://github.com/pandazheng/DylibHijack).\
-> Ripoti nzuri yenye **technical details** kuhusu technique hii inaweza kupatikana [**hapa**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x).
+> A nice **scanner** to find **missing libraries** in applications is [**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html) or a [**CLI version**](https://github.com/pandazheng/DylibHijack).\
+> A nice **report with technical details** about this technique can be found [**here**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x).
 
 **Example**
 
@@ -114,60 +116,61 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 ## Dlopen Hijacking
 
 > [!CAUTION]
-> Kumbuka kwamba **Library Validation restrictions zilizotajwa awali pia zinatumika** wakati wa kufanya Dlopen hijacking attacks.
+> Remember that **previous Library Validation restrictions also apply** to perform Dlopen hijacking attacks.
 
-Kutoka kwenye **`man dlopen`**:
+From **`man dlopen`**:
 
-- Wakati path **haina slash character** (yaani ni leaf name pekee), **dlopen() itafanya searching**. Ikiwa **`$DYLD_LIBRARY_PATH`** iliwekwa wakati wa launch, dyld itatafuta kwanza kwenye director**y** hiyo. Kisha, ikiwa calling mach-o file au main executable imeainisha **`LC_RPATH`**, dyld **itatfuta kwenye** directories hizo. Kisha, ikiwa process **haijazuiwa**, dyld itatafuta kwenye current working directory. Mwishowe, kwa old binaries, dyld itajaribu fallbacks. Ikiwa **`$DYLD_FALLBACK_LIBRARY_PATH`** iliwekwa wakati wa launch, dyld itatafuta kwenye **directories hizo**, vinginevyo, dyld itatafuta kwenye **`/usr/local/lib/`** (ikiwa process haijazuiwa), na kisha kwenye **`/usr/lib/`** (taarifa hii ilichukuliwa kutoka **`man dlopen`**).
-1. `$DYLD_LIBRARY_PATH`
-2. `LC_RPATH`
-3. `CWD`(if unrestricted)
-4. `$DYLD_FALLBACK_LIBRARY_PATH`
-5. `/usr/local/lib/` (if unrestricted)
-6. `/usr/lib/`
-
-> [!CAUTION]
-> Ikiwa jina halina slashes, kuna njia 2 za kufanya hijacking:
->
-> - Ikiwa **`LC_RPATH`** yoyote inaweza kuandikwa (lakini signature hukaguliwa, kwa hiyo pia unahitaji binary isiwe restricted)
-> - Ikiwa binary **haijazuiwa**, hivyo inawezekana kupakia kitu kutoka kwenye CWD (au kutumia vibaya mojawapo ya env variables zilizotajwa)
-
-- Wakati path **inaonekana kama** framework path (kwa mfano, `/stuff/foo.framework/foo`), ikiwa **`$DYLD_FRAMEWORK_PATH`** iliwekwa wakati wa launch, dyld itatafuta kwanza kwenye directory hiyo kwa **framework partial path** (kwa mfano, `foo.framework/foo`). Kisha, dyld itajaribu path iliyotolewa kama ilivyo (ikitumia current working directory kwa relative paths). Mwishowe, kwa old binaries, dyld itajaribu fallbacks. Ikiwa **`$DYLD_FALLBACK_FRAMEWORK_PATH`** iliwekwa wakati wa launch, dyld itatafuta kwenye directories hizo. Vinginevyo, itatafuta kwenye **`/Library/Frameworks`** (kwenye macOS ikiwa process haijazuiwa), kisha **`/System/Library/Frameworks`**.
-1. `$DYLD_FRAMEWORK_PATH`
-2. supplied path (using current working directory for relative paths if unrestricted)
-3. `$DYLD_FALLBACK_FRAMEWORK_PATH`
-4. `/Library/Frameworks` (if unrestricted)
-5. `/System/Library/Frameworks`
+- When path **does not contain a slash character** (i.e. it is just a leaf name), **dlopen() will do searching**. If **`$DYLD_LIBRARY_PATH`** was set at launch, dyld will first **look in that director**y. Next, if the calling mach-o file or the main executable specify an **`LC_RPATH`**, then dyld will **look in those** directories. Next, if the process is **unrestricted**, dyld will search in the **current working directory**. Lastly, for old binaries, dyld will try some fallbacks. If **`$DYLD_FALLBACK_LIBRARY_PATH`** was set at launch, dyld will search in **those directories**, otherwise, dyld will look in **`/usr/local/lib/`** (if the process is unrestricted), and then in **`/usr/lib/`** (this info was taken from **`man dlopen`**).
+  1. `$DYLD_LIBRARY_PATH`
+  2. `LC_RPATH`
+  3. `CWD`(if unrestricted)
+  4. `$DYLD_FALLBACK_LIBRARY_PATH`
+  5. `/usr/local/lib/` (if unrestricted)
+  6. `/usr/lib/`
 
 > [!CAUTION]
-> Ikiwa ni framework path, njia ya kuihijack ingekuwa:
+> If no slashes in the name, there would be 2 ways to do an hijacking:
 >
-> - Ikiwa process **haijazuiwa**, kutumia vibaya **relative path kutoka CWD** na env variables zilizotajwa (hata kama docs hazisemi ikiwa process imezuiwa, DYLD\_\* env vars huondolewa)
+> - If any **`LC_RPATH`** is **writable** (but signature is checked, so for this you also need the binary to be unrestricted)
+> - If the binary is **unrestricted** and then it's possible to load something from the CWD (or abusing one of the mentioned env variables)
 
-- Wakati path **ina slash lakini si framework path** (yaani full path au partial path ya dylib), dlopen() kwanza hutafuta (ikiwa imewekwa) kwenye **`$DYLD_LIBRARY_PATH`** (ikitumia leaf part kutoka path). Kisha, dyld **hujaribu path iliyotolewa** (ikitumia current working directory kwa relative paths (lakini kwa unrestricted processes pekee)). Mwishowe, kwa older binaries, dyld itajaribu fallbacks. Ikiwa **`$DYLD_FALLBACK_LIBRARY_PATH`** iliwekwa wakati wa launch, dyld itatafuta kwenye directories hizo, vinginevyo, dyld itatafuta kwenye **`/usr/local/lib/`** (ikiwa process haijazuiwa), na kisha kwenye **`/usr/lib/`**.
-1. `$DYLD_LIBRARY_PATH`
-2. supplied path (using current working directory for relative paths if unrestricted)
-3. `$DYLD_FALLBACK_LIBRARY_PATH`
-4. `/usr/local/lib/` (if unrestricted)
-5. `/usr/lib/`
+- When path **looks like a framework** path (e.g. `/stuff/foo.framework/foo`), if **`$DYLD_FRAMEWORK_PATH`** was set at launch, dyld will first look in that directory for the **framework partial path** (e.g. `foo.framework/foo`). Next, dyld will try the **supplied path as-is** (using current working directory for relative paths). Lastly, for old binaries, dyld will try some fallbacks. If **`$DYLD_FALLBACK_FRAMEWORK_PATH`** was set at launch, dyld will search those directories. Otherwise, it will search **`/Library/Frameworks`** (on macOS if process is unrestricted), then **`/System/Library/Frameworks`**.
+  1. `$DYLD_FRAMEWORK_PATH`
+  2. supplied path (using current working directory for relative paths if unrestricted)
+  3. `$DYLD_FALLBACK_FRAMEWORK_PATH`
+  4. `/Library/Frameworks` (if unrestricted)
+  5. `/System/Library/Frameworks`
 
 > [!CAUTION]
-> Ikiwa jina lina slashes na si framework, njia ya kuihijack ingekuwa:
+> If a framework path, the way to hijack it would be:
 >
-> - Ikiwa binary **haijazuiwa**, basi inawezekana kupakia kitu kutoka CWD au `/usr/local/lib` (au kutumia vibaya mojawapo ya env variables zilizotajwa)
+> - If the process is **unrestricted**, abusing the **relative path from CWD** the mentioned env variables (even if it's not said in the docs if the process is restricted DYLD\_\* env vars are removed)
+
+- When path **contains a slash but is not a framework path** (i.e. a full path or a partial path to a dylib), dlopen() first looks in (if set) in **`$DYLD_LIBRARY_PATH`** (with leaf part from path ). Next, dyld **tries the supplied path** (using current working directory for relative paths (but only for unrestricted processes)). Lastly, for older binaries, dyld will try fallbacks. If **`$DYLD_FALLBACK_LIBRARY_PATH`** was set at launch, dyld will search in those directories, otherwise, dyld will look in **`/usr/local/lib/`** (if the process is unrestricted), and then in **`/usr/lib/`**.
+  1. `$DYLD_LIBRARY_PATH`
+  2. supplied path (using current working directory for relative paths if unrestricted)
+  3. `$DYLD_FALLBACK_LIBRARY_PATH`
+  4. `/usr/local/lib/` (if unrestricted)
+  5. `/usr/lib/`
+
+> [!CAUTION]
+> If slashes in the name and not a framework, the way to hijack it would be:
+>
+> - If the binary is **unrestricted** and then it's possible to load something from the CWD or `/usr/local/lib` (or abusing one of the mentioned env variables)
 
 > [!TIP]
-> Kumbuka: Hakuna configuration files za **kudhibiti dlopen searching**.
+> Note: There are **no** configuration files to **control dlopen searching**.
 >
-> Kumbuka: Ikiwa main executable ni **set\[ug]id binary** au imesainiwa kwa entitlements, basi **environment variables zote hupuuzwa**, na full path pekee inaweza kutumika ([kagua DYLD_INSERT_LIBRARIES restrictions](macos-dyld-hijacking-and-dyld_insert_libraries.md#check-dyld_insert_librery-restrictions) kwa maelezo zaidi)
+> Note: If the main executable is a **set\[ug]id binary or codesigned with entitlements**, then **all environment variables are ignored**, and only a full path can be used ([check DYLD_INSERT_LIBRARIES restrictions](macos-dyld-hijacking-and-dyld_insert_libraries.md#check-dyld_insert_librery-restrictions) for more detailed info)
 >
-> Kumbuka: Apple platforms hutumia files za "universal" kuunganisha 32-bit na 64-bit libraries. Hii inamaanisha kuwa hakuna **32-bit na 64-bit search paths** tofauti.
+> Note: Apple platforms use "universal" files to combine 32-bit and 64-bit libraries. This means there are **no separate 32-bit and 64-bit search paths**.
 >
-> Kumbuka: Kwenye Apple platforms, OS dylibs nyingi **huunganishwa kwenye dyld cache** na hazipo kwenye disk. Kwa hiyo, kutumia **`stat()`** kuangalia mapema kama OS dylib ipo **hakutafanya kazi**. Hata hivyo, **`dlopen_preflight()`** hutumia hatua zilezile kama **`dlopen()`** kutafuta compatible mach-o file.
+> Note: On Apple platforms most OS dylibs are **combined into the dyld cache** and do not exist on disk. Therefore, calling **`stat()`** to preflight if an OS dylib exists **won't work**. However, **`dlopen_preflight()`** uses the same steps as **`dlopen()`** to find a compatible mach-o file.
 
 **Check paths**
 
-Tukague options zote kwa kutumia code ifuatayo:
+Lets check all the options with the following code:
+
 ```c
 // gcc dlopentest.c -o dlopentest -Wl,-rpath,/tmp/test
 #include <dlfcn.h>
@@ -175,121 +178,135 @@ Tukague options zote kwa kutumia code ifuatayo:
 
 int main(void)
 {
-void* handle;
+    void* handle;
 
-fprintf("--- No slash ---\n");
-handle = dlopen("just_name_dlopentest.dylib",1);
-if (!handle) {
-fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
-}
+    fprintf("--- No slash ---\n");
+    handle = dlopen("just_name_dlopentest.dylib",1);
+    if (!handle) {
+        fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
+    }
 
-fprintf("--- Relative framework ---\n");
-handle = dlopen("a/framework/rel_framework_dlopentest.dylib",1);
-if (!handle) {
-fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
-}
+    fprintf("--- Relative framework ---\n");
+    handle = dlopen("a/framework/rel_framework_dlopentest.dylib",1);
+    if (!handle) {
+        fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
+    }
 
-fprintf("--- Abs framework ---\n");
-handle = dlopen("/a/abs/framework/abs_framework_dlopentest.dylib",1);
-if (!handle) {
-fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
-}
+    fprintf("--- Abs framework ---\n");
+    handle = dlopen("/a/abs/framework/abs_framework_dlopentest.dylib",1);
+    if (!handle) {
+        fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
+    }
 
-fprintf("--- Relative Path ---\n");
-handle = dlopen("a/folder/rel_folder_dlopentest.dylib",1);
-if (!handle) {
-fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
-}
+    fprintf("--- Relative Path ---\n");
+    handle = dlopen("a/folder/rel_folder_dlopentest.dylib",1);
+    if (!handle) {
+        fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
+    }
 
-fprintf("--- Abs Path ---\n");
-handle = dlopen("/a/abs/folder/abs_folder_dlopentest.dylib",1);
-if (!handle) {
-fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
-}
+    fprintf("--- Abs Path ---\n");
+    handle = dlopen("/a/abs/folder/abs_folder_dlopentest.dylib",1);
+    if (!handle) {
+        fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
+    }
 
-return 0;
+    return 0;
 }
 ```
-Uki-**compile** na kui-**execute**, unaweza kuona **ni wapi kila library ilitafutwa bila mafanikio**. Pia, unaweza **kuchuja FS logs**:
+
+If you compile and execute it you can see **where each library was unsuccessfully searched for**. Also, you could **filter the FS logs**:
+
 ```bash
 sudo fs_usage | grep "dlopentest"
 ```
-## Hijacking ya Relative Path
 
-Ikiwa **privileged binary/app** (kama SUID au binary yenye entitlements zenye nguvu) **inapakia** library yenye **relative path** (kwa mfano kwa kutumia `@executable_path` au `@loader_path`) na **Library Validation imezimwa**, huenda ikawezekana kuhamisha binary hiyo hadi mahali ambapo attacker anaweza **kubadilisha library inayopakiwa kupitia relative path**, na kuitumia kuingiza code kwenye process.
+## Relative Path Hijacking
 
-## Ondoa `DYLD_*` env variables
+If a **privileged binary/app** (like a SUID or some binary with powerful entitlements) is **loading a relative path** library (for example using `@executable_path` or `@loader_path`) and has **Library Validation disabled**, it could be possible to move the binary to a location where the attacker could **modify the relative path loaded library**, and abuse it to inject code on the process.
 
-Matoleo ya zamani ya `dyld` (`dyld2.cpp`) yaliamua hili ndani ya process kwa kutumia `issetugid()`, `hasRestrictedSegment()` na `csops(CS_OPS_STATUS)`. Kwenye **dyld ya sasa, uamuzi umekabidhiwa AMFI**, na code hiyo iko kwenye `ProcessConfig::Security::Security()` katika `dyld/DyldProcessConfig.cpp`:<sup>[[1]](#references)</sup>
+## Prune `DYLD_*` env variables
+
+Older `dyld` releases (`dyld2.cpp`) decided this in-process with `issetugid()`, `hasRestrictedSegment()` and `csops(CS_OPS_STATUS)`. In **current `dyld` the decision is delegated to AMFI**, and the code lives in `ProcessConfig::Security::Security()` in `dyld/DyldProcessConfig.cpp`:<sup>[[1]](#references)</sup>
+
 ```cpp
-const uint64_t amfiFlags = getAMFI(process, syscall);
-this->allowAtPaths              = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_AT_PATH);
-this->allowEnvVarsPrint         = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_PRINT_VARS);
-this->allowEnvVarsPath          = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_PATH_VARS);
-this->allowEnvVarsSharedCache   = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_CUSTOM_SHARED_CACHE);
-this->allowClassicFallbackPaths = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_FALLBACK_PATHS);
-this->allowInsertFailures       = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_FAILED_LIBRARY_INSERTION);
-this->allowInterposing          = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_LIBRARY_INTERPOSING);
-this->allowEmbeddedVars         = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_EMBEDDED_VARS);
-this->allowDevelopmentVars      = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_DEVELOPMENT_VARS);
-this->allowLibSystemOverrides   = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_LIBSYSTEM_OVERRIDE);
-...
-// env vars are only pruned on macOS
-switch ( process.platform.value() ) {
-case PLATFORM_MACOS:
-case PLATFORM_IOSMAC:
-case PLATFORM_DRIVERKIT:
-break;
-default:
-return;
-}
+    const uint64_t amfiFlags = getAMFI(process, syscall);
+    this->allowAtPaths              = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_AT_PATH);
+    this->allowEnvVarsPrint         = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_PRINT_VARS);
+    this->allowEnvVarsPath          = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_PATH_VARS);
+    this->allowEnvVarsSharedCache   = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_CUSTOM_SHARED_CACHE);
+    this->allowClassicFallbackPaths = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_FALLBACK_PATHS);
+    this->allowInsertFailures       = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_FAILED_LIBRARY_INSERTION);
+    this->allowInterposing          = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_LIBRARY_INTERPOSING);
+    this->allowEmbeddedVars         = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_EMBEDDED_VARS);
+    this->allowDevelopmentVars      = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_DEVELOPMENT_VARS);
+    this->allowLibSystemOverrides   = (amfiFlags & AMFI_DYLD_OUTPUT_ALLOW_LIBSYSTEM_OVERRIDE);
+    ...
+    // env vars are only pruned on macOS
+    switch ( process.platform.value() ) {
+        case PLATFORM_MACOS:
+        case PLATFORM_IOSMAC:
+        case PLATFORM_DRIVERKIT:
+            break;
+        default:
+            return;
+    }
 
-// env vars are only pruned when process is restricted
-if ( this->allowEnvVarsPrint || this->allowEnvVarsPath || this->allowEnvVarsSharedCache )
-return;
+    // env vars are only pruned when process is restricted
+    if ( this->allowEnvVarsPrint || this->allowEnvVarsPath || this->allowEnvVarsSharedCache )
+        return;
 
-this->pruneEnvVars(process);
+    this->pruneEnvVars(process);
 ```
-Mambo mawili yanafaa kutolewa hapa:
 
-- Pruning hutokea tu kwenye **macOS / Mac Catalyst / DriverKit** — na pale tu AMFI ilipotoa **hakuna** kati ya `allowEnvVarsPrint`, `allowEnvVarsPath`, `allowEnvVarsSharedCache`.
-- Hoja ya AMFI hutumia properties za executable yenyewe:
+Two things are worth extracting from this:
+
+- Pruning only happens on **macOS / Mac Catalyst / DriverKit** — and only when AMFI granted **none** of `allowEnvVarsPrint`, `allowEnvVarsPath`, `allowEnvVarsSharedCache`.
+- The AMFI query is fed the executable's own properties:
+
 ```cpp
 uint64_t amfiFlags = sys.amfiFlags(proc.mainExecutableHdr->isRestricted(),
-proc.mainExecutableHdr->isFairPlayEncrypted(fpTextOffset, fpSize));
+                                   proc.mainExecutableHdr->isFairPlayEncrypted(fpTextOffset, fpSize));
 ```
-ambapo `isRestricted()` ni ukaguzi wa segment ya `__RESTRICT` kihalisi (`mach_o/UnsafeHeader.cpp`):<sup>[[2]](#references)</sup>
+
+where `isRestricted()` is literally the `__RESTRICT` segment check (`mach_o/UnsafeHeader.cpp`):<sup>[[2]](#references)</sup>
+
 ```cpp
 bool UnsafeHeader::isRestricted() const
 {
-return this->hasSection("__RESTRICT", "__restrict");
+    return this->hasSection("__RESTRICT", "__restrict");
 }
 ```
-`pruneEnvVars()` kisha huondoa **kila** variable ambayo jina lake linaanza na `DYLD_` na kusogeza chini vigezo vya `apple[]`, hivyo watoto wa process iliyowekewa vikwazo pia hawazirithi:
-```cpp
-// For security, setuid programs ignore DYLD_* environment variables.
-// Additionally, the DYLD_* environment variables are removed
-// from the environment, so that any child processes doesn't see them.
-for ( const char* const* s = proc.envp; *s != NULL; s++ ) {
-if ( strncmp(*s, "DYLD_", 5) != 0 ) {
-*d++ = *s;
-}
-...
-```
-> [!TIP]
-> Matokeo ya kivitendo: **`DYLD_*` huondolewa wakati process imewekewa vikwazo** — setuid/setgid, section ya `__RESTRICT/__restrict`, au binaries za hardened-runtime/entitled ambazo AMFI inakataa kuzipa path/print flags. Ikiwa badala yake process ina **library validation** pekee (`CS_REQUIRE_LV`), variables hubaki, lakini dylib iliyoingizwa lazima iwe signed na **Team ID** ileile (au na Apple), kwa hiyo unahitaji mojawapo ya entitlements zinazozima library-validation ili code ifike na kutekelezwa.
 
-Kwa kuwa uamuzi sasa unafanywa na AMFI, njia ya haraka zaidi ya kujua binary fulani itapata nini ni kuangalia vitu ambavyo AMFI hutumia kama msingi — entitlements na signing flags — badala ya kuangalia `dyld` yenyewe:
+`pruneEnvVars()` then strips **every** variable whose name begins with `DYLD_` and slides the `apple[]` parameters down, so the children of a restricted process don't inherit them either:
+
+```cpp
+    // For security, setuid programs ignore DYLD_* environment variables.
+    // Additionally, the DYLD_* environment variables are removed
+    // from the environment, so that any child processes doesn't see them.
+    for ( const char* const* s = proc.envp; *s != NULL; s++ ) {
+        if ( strncmp(*s, "DYLD_", 5) != 0 ) {
+            *d++ = *s;
+        }
+        ...
+```
+
+> [!TIP]
+> Practical consequence: **`DYLD_*` is pruned when the process is restricted** — setuid/setgid, a `__RESTRICT/__restrict` section, or hardened-runtime/entitled binaries that AMFI refuses to grant the path/print flags to. If instead the process only has **library validation** (`CS_REQUIRE_LV`), the variables survive but the inserted dylib must be signed by the **same Team ID** (or by Apple), so you need one of the library-validation-disabling entitlements to actually land code.
+
+Because the decision is now AMFI's, the fastest way to know what a given binary will get is to look at what AMFI keys off — entitlements and signing flags — rather than at `dyld` itself:
+
 ```bash
 BIN=/path/to/bin
 codesign -d --entitlements :- "$BIN" 2>/dev/null | \
-egrep "allow-dyld-environment-variables|disable-library-validation|clear-library-validation"
+  egrep "allow-dyld-environment-variables|disable-library-validation|clear-library-validation"
 codesign -dvvv "$BIN" 2>&1 | egrep "flags=|TeamIdentifier="
 otool -l "$BIN" | grep -A2 __RESTRICT
 ```
-## Kagua Vizuizi
+
+## Check Restrictions
 
 ### SUID & SGID
+
 ```bash
 # Make it owned by root and suid
 sudo chown root hello
@@ -300,14 +317,18 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 # Remove suid
 sudo chmod -s hello
 ```
-### Sehemu `__RESTRICT` yenye segment `__restrict`
+
+### Section `__RESTRICT` with segment `__restrict`
+
 ```bash
 gcc -sectcreate __RESTRICT __restrict /dev/null hello.c -o hello-restrict
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello-restrict
 ```
+
 ### Hardened runtime
 
-Unda certificate mpya katika Keychain na uitumie kusaini binary:
+Create a new certificate in the Keychain and use it to sign the binary:
+
 ```bash
 # Apply runtime protection
 codesign -s <cert-name> --option=runtime ./hello
@@ -327,21 +348,23 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed
 codesign -f -s <cert-name> --option=restrict hello-signed
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed # Won't work
 ```
+
 > [!CAUTION]
-> Kumbuka kwamba hata kama kuna binaries zilizosainiwa kwa flags **`0x0(none)`**, zinaweza kupata flag ya **`CS_RESTRICT`** dynamically zinapoendeshwa, na kwa hiyo mbinu hii haitafanya kazi ndani yake.
+> Note that even if there are binaries signed with flags **`0x0(none)`**, they can get the **`CS_RESTRICT`** flag dynamically when executed and therefore this technique won't work in them.
 >
-> Unaweza kuangalia kama proc ina flag hii kwa kutumia (pata [**csops hapa**](https://github.com/axelexic/CSOps)):
+> You can check if a proc has this flag with (get [**csops here**](https://github.com/axelexic/CSOps)):
 >
 > ```bash
 > csops -status <pid>
 > ```
 >
-> kisha uangalie kama flag 0x800 imewezeshwa.
+> and then check if the flag 0x800 is enabled.
 
 ## References
 
 - [1] [dyld — `dyld/DyldProcessConfig.cpp` (`ProcessConfig::Security`, `getAMFI`, `pruneEnvVars`)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/DyldProcessConfig.cpp)
 - [2] [dyld — `mach_o/UnsafeHeader.cpp` (`isRestricted()` / `__RESTRICT` check)](https://github.com/apple-oss-distributions/dyld/blob/main/mach_o/UnsafeHeader.cpp)
 - [3] [Apple Developer — `com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)
-- [4] [dyld — `dyld/dyldMain.cpp` (mchakato kuanza na kuingiza library)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/dyldMain.cpp)
+- [4] [dyld — `dyld/dyldMain.cpp` (process startup and library insertion)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/dyldMain.cpp)
+
 {{#include ../../../../banners/hacktricks-training.md}}
