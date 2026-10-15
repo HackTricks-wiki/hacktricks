@@ -31,6 +31,7 @@ default-theme = "hacktricks-light"
 hash-files = false
 
 [output.html.redirect]
+"/pentesting-web/file-inclusion/lfi2rce-via-segmentation-fault.html" = "lfi2rce-via-temp-file-uploads.html"
 "/network-services-pentesting/pentesting-web/web-api-pentesting.html" = "../../pentesting-web/web-api-pentesting.html"
 "/network-services-pentesting/pentesting-web/403-and-401-bypasses.html" = "../../pentesting-web/403-and-401-bypasses.html"
 "/network-services-pentesting/pentesting-web/special-http-headers.html" = "../../pentesting-web/special-http-headers.html"
