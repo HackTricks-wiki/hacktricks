@@ -236,6 +236,21 @@ rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
 ```
 
+## Tailcat: accountless userspace TCP forwarding
+
+Tailcat uses Tailscale's WireGuard/NAT-traversal/DERP data plane without the Tailscale control plane. It needs neither a Tailscale account nor administrator privileges, and it does not install host routes or change DNS. Unlike [Tailscale Serve/Funnel](reverse-shells/expose-local-to-the-internet.md#tailscale-funnel--serve) or the in-process [BOFScale tailnet](#bofscale---cdn-fronted-in-process-tailnet), the server shares a *tailcat address* out of band. The client uses that address to reach a port served by the remote node.<sup>[[62]](#references)</sup>
+
+For a TCP service already listening on port `4444` on the remote node, start `serve` there and pass its printed address to `forward` on the client. The second command binds `127.0.0.1:18080` by default, so a local process that only supports normal TCP sockets can connect to that loopback port while Tailcat carries its traffic to remote port `4444`. This is the same local-socket-to-tailcat pattern observed in a Windows RAT, but the port numbers are not special to Tailcat.<sup>[[62]](#references)[[63]](#references)</sup>
+
+```bash
+# Remote node with a service on localhost:4444
+tailcat serve 4444
+# Client node; replace the placeholder with the address printed above
+tailcat forward <tc-address> 18080:4444
+```
+
+The address contains the server's WireGuard public key and, by default in current releases, a pre-shared key. Treat it as a credential: an unrestricted server accepts a peer that knows the address. A default ephemeral address stops working when the server exits; use saved keys only when a stable address is needed, and restrict clients with `serve --allow` if the address may be exposed. Connections can use a direct UDP path or a DERP relay, so this removes a conventional C2 domain but does not make network activity disappear.<sup>[[62]](#references)[[63]](#references)</sup>
+
 ## BOFScale - CDN-fronted in-process tailnet
 
 [BOFScale](https://github.com/NetSPI/BOFscale) runs a modified Tailscale overlay inside a Windows C2 implant without installing a TUN driver or service. Its three components are an asynchronous CGo `c-shared` `tailscaled` BOF-PE, a small C++ BOF-PE that speaks the local API, and an asynchronous `socksportfwd` TCP-to-SOCKS5 bridge.<sup>[[53]](#references)[[54]](#references)</sup>
@@ -1077,5 +1092,7 @@ The same report details the defaults, wildcard listeners, packet decryption, rel
 - [59] [FortiGuard Labs - ClingSTUN Linux Backdoor Abuses Public STUN Infrastructure](https://www.fortinet.com/blog/threat-research/clingstun-linux-backdoor-abuses-public-stun-infrastructure)
 - [60] [RFC 8489 - Session Traversal Utilities for NAT (STUN)](https://www.rfc-editor.org/rfc/rfc8489.html)
 - [61] [RFC 4787 - NAT Behavioral Requirements for Unicast UDP](https://www.rfc-editor.org/rfc/rfc4787.html)
+- [62] [Tailcat README](https://github.com/tailscale/tailcat/blob/main/README.md)
+- [63] [Malwarebytes - Kothamine malware uses Tailscale’s tailcat to evade network detection](https://www.malwarebytes.com/blog/threat-intel/2026/09/kothamine-malware-uses-tailscales-tailcat-to-evade-network-detection)
 
 {{#include ../banners/hacktricks-training.md}}
