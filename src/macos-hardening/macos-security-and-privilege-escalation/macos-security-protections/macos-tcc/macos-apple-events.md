@@ -24,10 +24,13 @@ The public `com.apple.security.temporary-exception.apple-events` entitlement can
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'
 > ```
 
+To map an Automation grant to its sender and receiver, see [TCC Apple Events grants](index.html#identify-apple-events-sender-and-target-grants).
+
+
+
 ## References
 
 - [1] [Apple Developer Documentation - Apple Event Manager](https://developer.apple.com/documentation/applicationservices/apple_event_manager)
 - [2] [Apple Developer Documentation - App Sandbox Temporary Exception Entitlements](https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/EntitlementKeyReference/Chapters/AppSandboxTemporaryExceptionEntitlements.html)
 - [3] [Mac OS X and iOS Internals - Apple-event debug environment variables](https://www.newosxbook.com/MOXiI.pdf)
-
 {{#include ../../../../banners/hacktricks-training.md}}

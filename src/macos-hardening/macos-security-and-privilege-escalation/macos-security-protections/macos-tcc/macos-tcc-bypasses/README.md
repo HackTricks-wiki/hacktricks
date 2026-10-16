@@ -2,6 +2,8 @@
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
+For TCC grant storage and Automation sender/target attribution, see the [macOS TCC overview](../index.html#identify-apple-events-sender-and-target-grants).
+
 ## By functionality
 
 ### Write Bypass
@@ -552,6 +554,8 @@ Another way using [**CoreGraphics events**](https://objectivebythesea.org/v2/tal
 
 <figure><img src="../../../../../images/image (30).png" alt="" width="563"><figcaption></figcaption></figure>
 
+
+
 ## References
 
 - [1] [CVE-2020–9934: Bypassing the macOS Transparency, Consent, and Control (TCC) Framework](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)
@@ -578,5 +582,4 @@ Another way using [**CoreGraphics events**](https://objectivebythesea.org/v2/tal
 - [22] [20+ Ways to Bypass Your macOS Privacy Mechanisms](https://www.youtube.com/watch?v=W9GxnP8c8FU)
 - [23] [Knockout Win Against TCC - 20+ NEW Ways to Bypass Your MacOS Privacy Mechanisms](https://www.youtube.com/watch?v=a9hsxPdRxsY)
 - [24] [From Spotlight to Apple Intelligence — Abusing an 0day to steal the data that fuels macOS AI](https://objective-see.org/blog/blog_0x81.html)
-
 {{#include ../../../../../banners/hacktricks-training.md}}
