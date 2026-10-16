@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Windows ondersteun verskeie meganismes waarmee opdragte op afgeleë stelsels uitgevoer kan word. Die volgende bladsye verduidelik algemene tegnieke vir laterale beweging en hul voorvereistes:
+Windows ondersteun verskeie meganismes waarmee opdragte op afgeleë stelsels uitgevoer kan word. Die volgende bladsye verduidelik algemene laterale-bewegingstegnieke en hul voorvereistes:
 
 - [**PsExec / SCM service execution**](psexec-and-winexec.md#how-do-they-work)
 - [**SmbExec**](psexec-and-winexec.md#impacket-smbexecpy-smbexec)
@@ -10,12 +10,12 @@ Windows ondersteun verskeie meganismes waarmee opdragte op afgeleë stelsels uit
 - [**AtExec / SchtasksExec**](atexec.md)
 - [**WinRM**](winrm.md)
 - [**DCOM Exec**](dcomexec.md)
-- [**RDPexec**](rdpexec.md)
+- [**RDPexec: authenticated RDP command execution**](../../network-services-pentesting/pentesting-rdp.md#remote-command-execution-with-an-authenticated-rdp-session)
 - [**SCMExec with SharpMove**](psexec-and-winexec.md#scmexec-with-sharpmove)
 - [**SCCM / MECM client execution**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
-- **Pass the cookie** (cloud)<sup>[[1]](#references)</sup>
-- **Pass the PRT** (cloud)<sup>[[2]](#references)</sup>
-- **Pass the Microsoft Entra ID certificate** (cloud)<sup>[[3]](#references)</sup>
+- **Pass the cookie** (wolk)<sup>[[1]](#references)</sup>
+- **Pass the PRT** (wolk)<sup>[[2]](#references)</sup>
+- **Pass the Microsoft Entra ID certificate** (wolk)<sup>[[3]](#references)</sup>
 
 ## References
 
