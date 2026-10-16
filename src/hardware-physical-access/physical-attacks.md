@@ -89,6 +89,12 @@ Programmable peripherals can also attack host kernel parsers and coordinate seve
 ../binary-exploitation/linux-kernel-exploitation/usb-audio-descriptor-oob-kaslr-leak.md
 {{#endref}}
 
+For a Windows UAS mass-storage parser case, see:
+
+{{#ref}}
+../binary-exploitation/windows-kernel-exploitation/uasp-report-luns-cache-size-oob-write.md
+{{#endref}}
+
 ### Volume Shadow Copy
 
 Administrator or backup privileges can create a shadow copy or save registry hives so locked files such as **SAM** and **SYSTEM** can be acquired. This is a post-compromise collection technique, not a privilege bypass, and should be correlated with `diskshadow`/VSS and registry-hive export events.
