@@ -10,7 +10,7 @@ Windows prend en charge plusieurs mécanismes permettant d’exécuter des comma
 - [**AtExec / SchtasksExec**](atexec.md)
 - [**WinRM**](winrm.md)
 - [**DCOM Exec**](dcomexec.md)
-- [**RDPexec**](rdpexec.md)
+- [**RDPexec: authenticated RDP command execution**](../../network-services-pentesting/pentesting-rdp.md#remote-command-execution-with-an-authenticated-rdp-session)
 - [**SCMExec with SharpMove**](psexec-and-winexec.md#scmexec-with-sharpmove)
 - [**SCCM / MECM client execution**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
 - **Pass the cookie** (cloud)<sup>[[1]](#references)</sup>
