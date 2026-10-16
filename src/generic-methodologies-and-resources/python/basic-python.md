@@ -1,19 +1,49 @@
-# Python Básico
+# Python básico
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Fundamentos de Python
+## Ambientes virtuais e builds de wheel (`venv`)
+
+O módulo padrão `venv` do Python cria ambientes virtuais, cujo script de ativação POSIX é `<venv>/bin/activate`; digite `deactivate` para sair do ambiente ativo.<sup>[[3]](#references)</sup> No Ubuntu, o pacote `python3-venv` fornece o módulo quando ele não está instalado com o pacote base do Python.<sup>[[4]](#references)</sup>
+
+```bash
+sudo apt-get install python3-venv
+#Now, go to the folder you want to create the virtual environment
+python3 -m venv <Dirname>
+python3 -m venv pvenv #In this case the folder "pvenv" is going to be created
+source <Dirname>/bin/activate
+source pvenv/bin/activate #Activate the environment
+#You can now install whatever python library you need
+deactivate #To deactivate the virtual environment
+```
+
+Em workflows mais antigos baseados em setuptools que usavam `setup.py bdist_wheel`, instalar `wheel` no ambiente ativo disponibilizava o comando `bdist_wheel`.<sup>[[5]](#references)</sup> As versões atuais do setuptools já não precisam de `wheel` para esse comando, e as orientações atuais de empacotamento recomendam `python -m build --wheel` em vez de invocar `setup.py` diretamente.<sup>[[6]](#references)[[7]](#references)</sup>
+
+```text
+error: invalid command 'bdist_wheel'
+```
+
+```bash
+# Legacy workaround for older setuptools-based projects:
+python3 -m pip install wheel
+
+# Current build workflow:
+python3 -m pip install build
+python3 -m build --wheel
+```
+
+## Noções básicas de Python
 
 ### Informações úteis
 
-Todos os exemplos abaixo pressupõem **Python 3**, salvo indicação explícita em contrário.\
-`range()` retorna um objeto iterável em Python 3 (semelhante a `xrange()` no Python 2).\
-A diferença entre uma **tupla** e uma **lista** é que a **posição** de um valor em uma tupla geralmente lhe atribui significado, enquanto uma lista normalmente é apenas uma sequência ordenada de valores.
+Todos os exemplos abaixo pressupõem **Python 3**, salvo indicação explícita.\
+`range()` retorna um objeto iterável no Python 3 (semelhante a `xrange()` no Python 2).\
+A diferença entre uma **tupla** e uma **lista** é que a **posição** de um valor em uma tupla geralmente dá significado a ele, enquanto uma lista costuma ser apenas uma sequência ordenada de valores.
 
 ### Operações principais
 
 Para elevar um número, use: `3**2` (não `3^2`)\
-`2/3 == 0.666666...` em Python 3, enquanto `2//3 == 0` realiza uma divisão inteira.\
+`2/3 == 0.666666...` no Python 3, enquanto `2//3 == 0` realiza uma divisão inteira.\
 `i >= j`\
 `i <= j`\
 `i == j`\
@@ -35,7 +65,7 @@ Para elevar um número, use: `3**2` (não `3^2`)\
 `"abc" in "abcdef"`\
 `"abc\n".strip() == "abc"`\
 `"apbc".replace("p", "") == "abc"`\
-`dir(str)` = lista de métodos disponíveis\
+`dir(str)` = lista os métodos disponíveis\
 `help(str)` = definição da classe `str`\
 `"a".upper() == "A"`\
 `"A".lower() == "a"`\
@@ -43,7 +73,7 @@ Para elevar um número, use: `3**2` (não `3^2`)\
 `sum([1, 2, 3]) == 6`\
 `sorted([1, 43, 5, 3, 21, 4]) == [1, 3, 4, 5, 21, 43]`
 
-**Unir caracteres**\
+**Concatenar caracteres**\
 `3 * 'a' == 'aaa'`\
 `'a' + 'b' == 'ab'`\
 `'a' + str(3) == 'a3'`\
@@ -60,26 +90,29 @@ Para elevar um número, use: `3**2` (não `3^2`)\
 `""" Several lines comment """`
 
 **Loops**
+
 ```python
 if a:
-# something
+    # something
 elif b:
-# something
+    # something
 else:
-# something
+    # something
 
 while a:
-# something
+    # something
 
 for i in range(0, 100):
-# something from 0 to 99
+    # something from 0 to 99
 
 for letter in "hola":
-# something with each letter
+    # something with each letter
 ```
-### Bytes, hex e encodings
 
-Isto é muito comum em exploit-dev, reversing e CTFs:
+### Bytes, hex e codificações
+
+Isso é muito comum em exploit-dev, reversing e CTFs:
+
 ```python
 b"ABC".hex() == "414243"
 bytes.fromhex("414243") == b"ABC"
@@ -88,12 +121,13 @@ int.from_bytes(b"\x41\x42\x43", "big") == 0x414243
 "admin".encode() == b"admin"
 b"admin".decode() == "admin"
 ```
+
 ### Tuplas
 
 `t1 = (1, '2', 'three')`\
 `t2 = (5, 6)`\
 `t3 = t1 + t2 == (1, '2', 'three', 5, 6)`\
-`(4,)` = singleton\
+`(4,)` = tupla de um único elemento\
 `d = ()` tupla vazia\
 `d += (4,)` --> adicionar a uma tupla\
 `# t1[1] = 'new value'` --> tuplas são imutáveis\
@@ -109,6 +143,7 @@ b"admin".decode() == "admin"
 `tuple(a) == (1, 2, 3)` --> de lista para tupla
 
 ### Dicionário
+
 ```python
 month_numbers = {1: 'Jan', 2: 'Feb', 'Feb': 2}
 month_numbers[1] == 'Jan'
@@ -121,14 +156,15 @@ month_numbers.update(a)
 mn = month_numbers.copy()  # independent copy
 month_numbers.get('key', 0)  # default value if key does not exist
 ```
-### Conjuntos
+
+### Conjunto
 
 Em conjuntos, não há repetições.\
 `myset = set(['a', 'b']) == {'a', 'b'}`\
 `myset.add('c')` --> `{'a', 'b', 'c'}`\
 `myset.add('a')` --> nenhuma alteração\
 `myset.update([1, 2, 3])`\
-`myset.discard(10)` --> se estiver presente, remove; caso contrário, nada\
+`myset.discard(10)` --> se estiver presente, remove; caso contrário, não faz nada\
 `myset.remove(10)` --> se não estiver presente, gera uma exceção\
 `myset2 = set([1, 2, 3, 4])`\
 `myset.union(myset2)`\
@@ -143,44 +179,47 @@ Em conjuntos, não há repetições.\
 ### Classes
 
 O método em `__lt__` será usado por `sort()` / `sorted()` para comparar objetos.
+
 ```python
 import datetime
 
 
 class Person:
-def __init__(self, name):
-self.name = name
-self.last_name = name.split(" ")[-1]
-self.birthday = None
+    def __init__(self, name):
+        self.name = name
+        self.last_name = name.split(" ")[-1]
+        self.birthday = None
 
-def __lt__(self, other):
-if self.last_name == other.last_name:
-return self.name < other.name
-return self.last_name < other.last_name
+    def __lt__(self, other):
+        if self.last_name == other.last_name:
+            return self.name < other.name
+        return self.last_name < other.last_name
 
-def set_birthday(self, month, day, year):
-self.birthday = datetime.date(year, month, day)
+    def set_birthday(self, month, day, year):
+        self.birthday = datetime.date(year, month, day)
 
-def get_age(self):
-return (datetime.date.today() - self.birthday).days
+    def get_age(self):
+        return (datetime.date.today() - self.birthday).days
 
 
 class MITPerson(Person):
-next_id_num = 0  # class attribute
+    next_id_num = 0  # class attribute
 
-def __init__(self, name):
-super().__init__(name)
-self.id_num = MITPerson.next_id_num
-MITPerson.next_id_num += 1
+    def __init__(self, name):
+        super().__init__(name)
+        self.id_num = MITPerson.next_id_num
+        MITPerson.next_id_num += 1
 
-def __lt__(self, other):
-return self.id_num < other.id_num
+    def __lt__(self, other):
+        return self.id_num < other.id_num
 ```
-### map, zip, filter, lambda, sorted e one-liners
 
-No **Python 3**, `map()` e `filter()` retornam iteradores; portanto, converta-os com `list()` se quiser imprimir todos os valores de uma vez.
+### map, zip, filter, lambda, sorted e expressões de uma linha
+
+No **Python 3**, `map()` e `filter()` retornam iteradores; portanto, converta-os com `list()` se quiser imprimir todos os valores de uma só vez.
 
 **Map** é como `[f(x) for x in iterable]`:
+
 ```python
 list(map(tuple, [[1, 2, 3], [4, 5]]))
 # [(1, 2, 3), (4, 5)]
@@ -188,22 +227,26 @@ list(map(tuple, [[1, 2, 3], [4, 5]]))
 list(map(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
 # [False, False, True, False, False, True, False, False, True]
 ```
-**zip** para quando o iterável mais curto para:
+
+**zip** para quando o iterável mais curto termina:
+
 ```python
 for f, b in zip(foo, bar):
-print(f, b)
+    print(f, b)
 ```
-**Lambda** é usado para definir uma função:\
-`(lambda x, y: x + y)(5, 3) == 8` --> usar lambda como uma função simples\
-`sorted(range(-5, 6), key=lambda x: x**2)` --> usar lambda para ordenar\
+
+**Lambda** é usada para definir uma função:\
+`(lambda x, y: x + y)(5, 3) == 8` --> use lambda como uma função simples\
+`sorted(range(-5, 6), key=lambda x: x**2)` --> use lambda para ordenar\
 `list(filter(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9])) == [3, 6, 9]`\
 `reduce(lambda x, y: x * y, [1, 2, 3, 4]) == 24`
+
 ```python
 from functools import reduce
 
 
 def make_adder(n):
-return lambda x: x + n
+    return lambda x: x + n
 
 
 plus3 = make_adder(3)
@@ -211,51 +254,59 @@ plus3(4) == 7
 
 
 class Car:
-crash = lambda self: print("Boom!")
+    crash = lambda self: print("Boom!")
 
 
 my_car = Car()
 my_car.crash()  # Boom!
 ```
+
 `mult1 = [x for x in [1, 2, 3, 4, 5, 6, 7, 8, 9] if x % 3 == 0]`
 
 ### Exceções
+
 ```python
 def divide(x, y):
-try:
-result = x / y
-except ZeroDivisionError as e:
-print("division by zero! " + str(e))
-except TypeError:
-divide(int(x), int(y))
-else:
-print("result is", result)
-finally:
-print("executing finally clause in any case")
+    try:
+        result = x / y
+    except ZeroDivisionError as e:
+        print("division by zero! " + str(e))
+    except TypeError:
+        divide(int(x), int(y))
+    else:
+        print("result is", result)
+    finally:
+        print("executing finally clause in any case")
 ```
+
 ### Assert()
 
-Se a condição for falsa, a string será impressa.\
+Se a condição for falsa, a string será exibida.\
 Lembre-se de que as instruções `assert` podem ser desabilitadas com `python -O`; portanto, não as use para controle de acesso ou validação de entrada.
+
 ```python
 def avg(grades, weights):
-assert len(grades) != 0, 'no grades data'
-assert len(grades) == len(weights), 'wrong number of grades'
+    assert len(grades) != 0, 'no grades data'
+    assert len(grades) == len(weights), 'wrong number of grades'
 ```
+
 ### Generators, yield
 
 Um generator, em vez de retornar tudo de uma vez, **produz** valores um por um. Isso é muito útil para wordlists enormes, bruteforcers ou respostas grandes.
+
 ```python
 def my_gen(n):
-yield n
-yield n + 1
+    yield n
+    yield n + 1
 ```
+
 `g = my_gen(6)`\
 `next(g) == 6`\
 `next(g) == 7`\
 `next(g)` --> `StopIteration`
 
 ### Expressões Regulares
+
 ```python
 import re
 
@@ -263,6 +314,7 @@ re.search(r"\w", "hola").group() == "h"
 re.findall(r"\w", "hola") == ['h', 'o', 'l', 'a']
 re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 ```
+
 **Significados especiais:**\
 `.` --> qualquer caractere, exceto nova linha\
 `\w` --> `[a-zA-Z0-9_]`\
@@ -279,6 +331,7 @@ re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 `re.search(pat, string, re.IGNORECASE)`\
 `re.search(pat, string, re.DOTALL)` --> permite que o ponto corresponda a uma nova linha\
 `re.search(pat, string, re.MULTILINE)` --> permite que `^` e `$` correspondam em linhas diferentes
+
 ```python
 re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
 # ['<b>foo</b>and<i>so on</i>']
@@ -286,10 +339,12 @@ re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
 re.findall(r"<.*?>", "<b>foo</b>and<i>so on</i>")
 # ['<b>', '</b>', '<i>', '</i>']
 ```
+
 ### IterTools
 
 **product**\
 `from itertools import product` --> produto cartesiano entre 1 ou mais iteráveis
+
 ```python
 list(product([1, 2, 3], [3, 4]))
 # [(1, 3), (1, 4), (2, 3), (2, 4), (3, 3), (3, 4)]
@@ -297,137 +352,167 @@ list(product([1, 2, 3], [3, 4]))
 list(product([1, 2, 3], repeat=2))
 # [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)]
 ```
+
 **permutations**\
-`from itertools import permutations` --> todos os arranjos possíveis
+`from itertools import permutations` --> todas as disposições possíveis
+
 ```python
 list(permutations(['1', '2', '3']))
 list(permutations('123', 2))
 ```
-**combinations**\
+
+**combinações**\
 `from itertools import combinations` --> todas as combinações possíveis sem repetição
+
 ```python
 list(combinations('123', 2))
 # [('1', '2'), ('1', '3'), ('2', '3')]
 ```
+
 **combinations_with_replacement**\
 `from itertools import combinations_with_replacement`
+
 ```python
 list(combinations_with_replacement('123', 2))
 # [('1', '1'), ('1', '2'), ('1', '3'), ('2', '2'), ('2', '3'), ('3', '3')]
 ```
+
 **batched**\
-`from itertools import batched` --> disponível no Python 3.12+, útil para dividir grandes listas de candidatos de bruteforce ou arquivos de IOC em blocos
+`from itertools import batched` --> disponível no Python 3.12+, útil para dividir em blocos grandes listas de candidatos de brute force ou arquivos IOC
+
 ```python
 list(batched(range(10), 4))
 # [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
 ```
-### Decorators
 
-Decorator que mede o tempo necessário para executar uma função:
+### Decoradores
+
+Decorador que mede o tempo necessário para executar uma função:
+
 ```python
 from functools import wraps
 import time
 
 
 def timeme(func):
-@wraps(func)
-def wrapper(*args, **kwargs):
-print("Let's call our decorated function")
-start = time.time()
-result = func(*args, **kwargs)
-print(f"Execution time: {time.time() - start} seconds")
-return result
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        print("Let's call our decorated function")
+        start = time.time()
+        result = func(*args, **kwargs)
+        print(f"Execution time: {time.time() - start} seconds")
+        return result
 
-return wrapper
+    return wrapper
 
 
 @timeme
 def decorated_func():
-print("Decorated func!")
+    print("Decorated func!")
 ```
+
 Se você executá-lo, verá algo semelhante ao seguinte:
+
 ```text
 Let's call our decorated function
 Decorated func!
 Execution time: 4.79e-05 seconds
 ```
-### Helpers úteis da biblioteca padrão para pentesting
 
-**Percurso do sistema de arquivos com `pathlib`** (`Path.walk()` está disponível no Python 3.12+; use `os.walk()` em interpretadores mais antigos):
+### Auxiliares úteis da biblioteca padrão para pentesting
+
+**Percorrer o sistema de arquivos com `pathlib`** (`Path.walk()` está disponível no Python 3.12+; use `os.walk()` em interpretadores mais antigos):
+
 ```python
 from pathlib import Path
 
 for root, dirs, files in Path(".").walk():
-if ".git" in dirs:
-dirs.remove(".git")
-for name in files:
-if name.endswith((".py", ".env", ".bak")):
-print(root / name)
+    if ".git" in dirs:
+        dirs.remove(".git")
+    for name in files:
+        if name.endswith((".py", ".env", ".bak")):
+            print(root / name)
 ```
-**Execute comandos com segurança** (`shell=False` por padrão geralmente é o que você quer):
+
+**Inicie comandos com segurança** (`shell=False` geralmente é o que você quer, por padrão):
+
 ```python
 import subprocess
 
 cp = subprocess.run(
-["id"],
-capture_output=True,
-text=True,
-check=True,
+    ["id"],
+    capture_output=True,
+    text=True,
+    check=True,
 )
 print(cp.stdout)
 ```
-Se você **precisar** criar um comando de shell, coloque entre aspas primeiro cada token controlado pelo atacante:
+
+Se você **precisar** construir um comando de shell, coloque primeiro entre aspas cada token controlado pelo atacante:
+
 ```python
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
 ```
-**Arquivos / diretórios temporários** (mais seguros do que caminhos `/tmp/foo` codificados):
+
+**Arquivos / diretórios temporários** (mais seguros do que caminhos `/tmp/foo` fixos):
+
 ```python
 import tempfile
 from pathlib import Path
 
 with tempfile.TemporaryDirectory() as tmp:
-out = Path(tmp) / "loot.txt"
-out.write_text("secret\n")
-print(out.read_text())
+    out = Path(tmp) / "loot.txt"
+    out.write_text("secret\n")
+    print(out.read_text())
 ```
+
 Para automação HTTP, consulte [esta outra página sobre requisições web em Python](web-requests.md).
 
-### Cuidados importantes na extração de arquivos compactados (importantes para ferramentas e analisadores de arquivos)
+### Armadilhas na extração de arquivos (importante para ferramentas e analisadores de arquivos)
 
-A partir do **Python 3.14**, `tarfile.extract()` / `extractall()` usam o filtro mais seguro `data` por padrão. Em versões mais antigas do Python, você deve defini-lo explicitamente ao lidar com arquivos compactados controlados por um atacante.<sup>[[1]](#references)[[2]](#references)</sup>
+A partir do **Python 3.14**, `tarfile.extract()` / `extractall()` usam o filtro `data`, mais seguro, por padrão. Em versões mais antigas do Python, você deve defini-lo explicitamente ao lidar com arquivos controlados por invasores.<sup>[[1]](#references)[[2]](#references)</sup>
+
 ```python
 import tarfile
 import tempfile
 
 with tempfile.TemporaryDirectory() as out:
-with tarfile.open("sample.tar.gz") as tf:
-tf.extractall(out, filter="data")
+    with tarfile.open("sample.tar.gz") as tf:
+        tf.extractall(out, filter="data")
 ```
-Mesmo com `filter="data"`, extraia archives não confiáveis para um diretório temporário novo e valide o que foi gravado antes de mover os arquivos para qualquer local relevante.
 
-`zipfile.Path` é diferente: ele **não sanitiza nomes de arquivo** para você; portanto, valide os caminhos antes de extrair membros ZIP controlados pelo atacante:
+Mesmo com `filter="data"`, extraia arquivos não confiáveis para um diretório temporário novo e valide o que foi gravado antes de mover arquivos para qualquer lugar importante.
+
+`zipfile.Path` é diferente: ele **não sanitiza nomes de arquivos** para você, então valide os caminhos antes de extrair membros ZIP controlados por um atacante:
+
 ```python
 import os
 import zipfile
 
 base = os.path.abspath("/tmp/unzip")
 with zipfile.ZipFile("sample.zip") as zf:
-for info in zf.infolist():
-final_path = os.path.abspath(os.path.join(base, info.filename))
-if os.path.commonpath([base, final_path]) != base:
-raise ValueError(f"Path traversal inside ZIP: {info.filename}")
-zf.extract(info, base)
+    for info in zf.infolist():
+        final_path = os.path.abspath(os.path.join(base, info.filename))
+        if os.path.commonpath([base, final_path]) != base:
+            raise ValueError(f"Path traversal inside ZIP: {info.filename}")
+        zf.extract(info, base)
 ```
-### Primitivas perigosas a lembrar
 
-- `eval()` / `exec()` **não são** sandboxes.
-- `ast.literal_eval()` **não executa** código Python, mas ainda pode ser abusado para causar negação de serviço de memória / CPU com entrada controlada pelo atacante.
-- `pickle.loads()` **não é seguro**; nunca faça unpickle de bytes controlados pelo atacante.
-- Para técnicas ofensivas mais avançadas, consulte [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) e [Python deserializations](../../pentesting-web/deserialization/README.md).
+### Primitivas perigosas para lembrar
+
+- `eval()` / `exec()` **não** são sandboxes.
+- `ast.literal_eval()` **não** executa código Python, mas ainda pode ser abusado para causar negação de serviço de memória / CPU com entrada controlada por um atacante.
+- `pickle.loads()` **não é seguro**; nunca desserialize bytes controlados por um atacante.
+- Para técnicas ofensivas mais avançadas, confira [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) e [Python deserializations](../../pentesting-web/deserialization/README.md).
 
 ## References
 
-- [1] [Documentação do Python tarfile](https://docs.python.org/3/library/tarfile.html)
+- [1] [Documentação do Python para tarfile](https://docs.python.org/3/library/tarfile.html)
 - [2] [PEP 706 – Filtro para tarfile.extractall()](https://peps.python.org/pep-0706/)
+- [3] [venv — Criação de ambientes virtuais — Documentação do Python 3.14](https://docs.python.org/3/library/venv.html)
+- [4] [Pacote: python3-venv — Pacotes do Ubuntu](https://packages.ubuntu.com/noble/python/python3-venv)
+- [5] [wheel 0.24.0 — PyPI](https://pypi.org/project/wheel/0.24.0/)
+- [6] [wheel — PyPI](https://pypi.org/project/wheel/)
+- [7] [setup.py está obsoleto? — Guia do usuário de empacotamento do Python](https://packaging.python.org/en/latest/discussions/setup-py-deprecated/)
 {{#include ../../banners/hacktricks-training.md}}
