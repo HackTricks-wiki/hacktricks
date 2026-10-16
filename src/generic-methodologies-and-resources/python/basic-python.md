@@ -2,13 +2,43 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+## Віртуальні середовища та збірки wheel (`venv`)
+
+Стандартний модуль Python `venv` створює віртуальні середовища. POSIX-скрипт активації середовища розташований за шляхом `<venv>/bin/activate`; введіть `deactivate`, щоб вийти з активного середовища.<sup>[[3]](#references)</sup> В Ubuntu пакет `python3-venv` надає цей модуль, якщо він не встановлений разом із базовим пакетом Python.<sup>[[4]](#references)</sup>
+
+```bash
+sudo apt-get install python3-venv
+#Now, go to the folder you want to create the virtual environment
+python3 -m venv <Dirname>
+python3 -m venv pvenv #In this case the folder "pvenv" is going to be created
+source <Dirname>/bin/activate
+source pvenv/bin/activate #Activate the environment
+#You can now install whatever python library you need
+deactivate #To deactivate the virtual environment
+```
+
+Для старіших робочих процесів на основі setuptools із `setup.py bdist_wheel` встановлення `wheel` в активному середовищі надавало команду `bdist_wheel`.<sup>[[5]](#references)</sup> У поточних версіях setuptools для цієї команди `wheel` більше не потрібен, а актуальні рекомендації щодо пакування радять використовувати `python -m build --wheel`, а не запускати `setup.py` безпосередньо.<sup>[[6]](#references)[[7]](#references)</sup>
+
+```text
+error: invalid command 'bdist_wheel'
+```
+
+```bash
+# Legacy workaround for older setuptools-based projects:
+python3 -m pip install wheel
+
+# Current build workflow:
+python3 -m pip install build
+python3 -m build --wheel
+```
+
 ## Основи Python
 
 ### Корисна інформація
 
-Усі наведені нижче приклади передбачають використання **Python 3**, якщо явно не зазначено інше.\
-`range()` повертає ітерований об'єкт у Python 3 (аналогічно `xrange()` у Python 2).\
-Відмінність між **кортежем** і **списком** полягає в тому, що **позиція** значення в кортежі зазвичай надає йому певного значення, тоді як список зазвичай є лише впорядкованою послідовністю значень.
+У всіх наведених нижче прикладах використовується **Python 3**, якщо не зазначено інше.\
+`range()` повертає ітерований об’єкт у Python 3 (подібний до `xrange()` у Python 2).\
+Різниця між **кортежем** і **списком** полягає в тому, що **позиція** значення в кортежі зазвичай має значення, тоді як список зазвичай є просто впорядкованою послідовністю значень.
 
 ### Основні операції
 
@@ -43,7 +73,7 @@
 `sum([1, 2, 3]) == 6`\
 `sorted([1, 43, 5, 3, 21, 4]) == [1, 3, 4, 5, 21, 43]`
 
-**Об'єднання символів**\
+**Об’єднання символів**\
 `3 * 'a' == 'aaa'`\
 `'a' + 'b' == 'ab'`\
 `'a' + str(3) == 'a3'`\
@@ -60,26 +90,29 @@
 `""" Several lines comment """`
 
 **Цикли**
+
 ```python
 if a:
-# something
+    # something
 elif b:
-# something
+    # something
 else:
-# something
+    # something
 
 while a:
-# something
+    # something
 
 for i in range(0, 100):
-# something from 0 to 99
+    # something from 0 to 99
 
 for letter in "hola":
-# something with each letter
+    # something with each letter
 ```
+
 ### Байти, hex і кодування
 
 Це дуже поширено в exploit-dev, reversing і CTF:
+
 ```python
 b"ABC".hex() == "414243"
 bytes.fromhex("414243") == b"ABC"
@@ -88,16 +121,17 @@ int.from_bytes(b"\x41\x42\x43", "big") == 0x414243
 "admin".encode() == b"admin"
 b"admin".decode() == "admin"
 ```
+
 ### Кортежі
 
 `t1 = (1, '2', 'three')`\
 `t2 = (5, 6)`\
 `t3 = t1 + t2 == (1, '2', 'three', 5, 6)`\
-`(4,)` = singleton\
+`(4,)` = кортеж з одним елементом\
 `d = ()` порожній кортеж\
 `d += (4,)` --> додати до кортежу\
 `# t1[1] = 'new value'` --> кортежі незмінні\
-`list(t2) == [5, 6]` --> з кортежу до списку
+`list(t2) == [5, 6]` --> перетворення кортежу на список
 
 ### Список (масив)
 
@@ -106,9 +140,10 @@ b"admin".decode() == "admin"
 `b = [4, 5]`\
 `a + b == [1, 2, 3, 4, 5]`\
 `b.append(6)` --> `b == [4, 5, 6]`\
-`tuple(a) == (1, 2, 3)` --> зі списку до кортежу
+`tuple(a) == (1, 2, 3)` --> перетворення списку на кортеж
 
 ### Словник
+
 ```python
 month_numbers = {1: 'Jan', 2: 'Feb', 'Feb': 2}
 month_numbers[1] == 'Jan'
@@ -121,6 +156,7 @@ month_numbers.update(a)
 mn = month_numbers.copy()  # independent copy
 month_numbers.get('key', 0)  # default value if key does not exist
 ```
+
 ### Множини
 
 У множинах немає повторень.\
@@ -128,8 +164,8 @@ month_numbers.get('key', 0)  # default value if key does not exist
 `myset.add('c')` --> `{'a', 'b', 'c'}`\
 `myset.add('a')` --> без змін\
 `myset.update([1, 2, 3])`\
-`myset.discard(10)` --> якщо присутній, видалити його; якщо ні — нічого не робити\
-`myset.remove(10)` --> якщо відсутній, викликає виняток\
+`myset.discard(10)` --> якщо елемент є, видаляє його; якщо немає — нічого не робить\
+`myset.remove(10)` --> якщо елемента немає, викликає виняток\
 `myset2 = set([1, 2, 3, 4])`\
 `myset.union(myset2)`\
 `myset.intersection(myset2)`\
@@ -142,45 +178,48 @@ month_numbers.get('key', 0)  # default value if key does not exist
 
 ### Класи
 
-Метод у `__lt__` використовуватиметься `sort()` / `sorted()` для порівняння об’єктів.
+Метод у `__lt__` використовуватиметься функціями `sort()` / `sorted()` для порівняння об’єктів.
+
 ```python
 import datetime
 
 
 class Person:
-def __init__(self, name):
-self.name = name
-self.last_name = name.split(" ")[-1]
-self.birthday = None
+    def __init__(self, name):
+        self.name = name
+        self.last_name = name.split(" ")[-1]
+        self.birthday = None
 
-def __lt__(self, other):
-if self.last_name == other.last_name:
-return self.name < other.name
-return self.last_name < other.last_name
+    def __lt__(self, other):
+        if self.last_name == other.last_name:
+            return self.name < other.name
+        return self.last_name < other.last_name
 
-def set_birthday(self, month, day, year):
-self.birthday = datetime.date(year, month, day)
+    def set_birthday(self, month, day, year):
+        self.birthday = datetime.date(year, month, day)
 
-def get_age(self):
-return (datetime.date.today() - self.birthday).days
+    def get_age(self):
+        return (datetime.date.today() - self.birthday).days
 
 
 class MITPerson(Person):
-next_id_num = 0  # class attribute
+    next_id_num = 0  # class attribute
 
-def __init__(self, name):
-super().__init__(name)
-self.id_num = MITPerson.next_id_num
-MITPerson.next_id_num += 1
+    def __init__(self, name):
+        super().__init__(name)
+        self.id_num = MITPerson.next_id_num
+        MITPerson.next_id_num += 1
 
-def __lt__(self, other):
-return self.id_num < other.id_num
+    def __lt__(self, other):
+        return self.id_num < other.id_num
 ```
+
 ### map, zip, filter, lambda, sorted та однорядкові вирази
 
-У **Python 3** `map()` і `filter()` повертають ітератори, тому перетворіть їх за допомогою `list()`, якщо хочете вивести всі значення одночасно.
+У **Python 3** `map()` і `filter()` повертають ітератори, тому перетворіть їх за допомогою `list()`, якщо хочете вивести всі значення одразу.
 
-**Map** працює як `[f(x) for x in iterable]`:
+**Map** — це як `[f(x) for x in iterable]`:
+
 ```python
 list(map(tuple, [[1, 2, 3], [4, 5]]))
 # [(1, 2, 3), (4, 5)]
@@ -188,22 +227,26 @@ list(map(tuple, [[1, 2, 3], [4, 5]]))
 list(map(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
 # [False, False, True, False, False, True, False, False, True]
 ```
-**zip** зупиняється, коли завершується коротший ітерований об'єкт:
+
+**zip** зупиняється, коли закінчується коротший ітерований об’єкт:
+
 ```python
 for f, b in zip(foo, bar):
-print(f, b)
+    print(f, b)
 ```
+
 **Lambda** використовується для визначення функції:\
-`(lambda x, y: x + y)(5, 3) == 8` --> використання lambda як простої функції\
-`sorted(range(-5, 6), key=lambda x: x**2)` --> використання lambda для сортування\
+`(lambda x, y: x + y)(5, 3) == 8` --> використовуйте lambda як просту функцію\
+`sorted(range(-5, 6), key=lambda x: x**2)` --> використовуйте lambda для сортування\
 `list(filter(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9])) == [3, 6, 9]`\
 `reduce(lambda x, y: x * y, [1, 2, 3, 4]) == 24`
+
 ```python
 from functools import reduce
 
 
 def make_adder(n):
-return lambda x: x + n
+    return lambda x: x + n
 
 
 plus3 = make_adder(3)
@@ -211,51 +254,59 @@ plus3(4) == 7
 
 
 class Car:
-crash = lambda self: print("Boom!")
+    crash = lambda self: print("Boom!")
 
 
 my_car = Car()
 my_car.crash()  # Boom!
 ```
+
 `mult1 = [x for x in [1, 2, 3, 4, 5, 6, 7, 8, 9] if x % 3 == 0]`
 
 ### Винятки
+
 ```python
 def divide(x, y):
-try:
-result = x / y
-except ZeroDivisionError as e:
-print("division by zero! " + str(e))
-except TypeError:
-divide(int(x), int(y))
-else:
-print("result is", result)
-finally:
-print("executing finally clause in any case")
+    try:
+        result = x / y
+    except ZeroDivisionError as e:
+        print("division by zero! " + str(e))
+    except TypeError:
+        divide(int(x), int(y))
+    else:
+        print("result is", result)
+    finally:
+        print("executing finally clause in any case")
 ```
+
 ### Assert()
 
-Якщо умова хибна, буде виведено рядок.\
-Пам’ятайте, що інструкції `assert` можна вимкнути за допомогою `python -O`, тому не використовуйте їх для контролю доступу або перевірки вхідних даних.
+Якщо умова хибна, рядок буде виведено.\
+Пам’ятайте, що інструкції `assert` можна вимкнути за допомогою `python -O`, тому не використовуйте їх для контролю доступу чи перевірки вхідних даних.
+
 ```python
 def avg(grades, weights):
-assert len(grades) != 0, 'no grades data'
-assert len(grades) == len(weights), 'wrong number of grades'
+    assert len(grades) != 0, 'no grades data'
+    assert len(grades) == len(weights), 'wrong number of grades'
 ```
+
 ### Генератори, yield
 
-Генератор замість того, щоб повертати все одразу, **yield** значення по одному. Це дуже корисно для величезних wordlists, bruteforcers або великих відповідей.
+Генератор замість того, щоб повертати все одразу, **видає** значення одне за одним. Це дуже корисно для величезних списків слів, brute-forcers або великих відповідей.
+
 ```python
 def my_gen(n):
-yield n
-yield n + 1
+    yield n
+    yield n + 1
 ```
+
 `g = my_gen(6)`\
 `next(g) == 6`\
 `next(g) == 7`\
 `next(g)` --> `StopIteration`
 
 ### Регулярні вирази
+
 ```python
 import re
 
@@ -263,12 +314,13 @@ re.search(r"\w", "hola").group() == "h"
 re.findall(r"\w", "hola") == ['h', 'o', 'l', 'a']
 re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 ```
+
 **Спеціальні значення:**\
 `.` --> будь-який символ, крім символу нового рядка\
 `\w` --> `[a-zA-Z0-9_]`\
 `\d` --> цифра\
-`\s` --> символ пробілу `[ \n\r\t\f]`\
-`\S` --> символ, який не є пробілом\
+`\s` --> пробільний символ `[ \n\r\t\f]`\
+`\S` --> непробільний символ\
 `^` --> починається з\
 `$` --> закінчується на\
 `+` --> один або більше\
@@ -279,6 +331,7 @@ re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 `re.search(pat, string, re.IGNORECASE)`\
 `re.search(pat, string, re.DOTALL)` --> дозволяє крапці відповідати символу нового рядка\
 `re.search(pat, string, re.MULTILINE)` --> дозволяє `^` і `$` відповідати в різних рядках
+
 ```python
 re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
 # ['<b>foo</b>and<i>so on</i>']
@@ -286,10 +339,12 @@ re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
 re.findall(r"<.*?>", "<b>foo</b>and<i>so on</i>")
 # ['<b>', '</b>', '<i>', '</i>']
 ```
+
 ### IterTools
 
 **product**\
-`from itertools import product` --> декартів добуток між 1 або більше ітерованими об'єктами
+`from itertools import product` --> декартів добуток між 1 або кількома ітерованими об'єктами
+
 ```python
 list(product([1, 2, 3], [3, 4]))
 # [(1, 3), (1, 4), (2, 3), (2, 4), (3, 3), (3, 4)]
@@ -297,137 +352,167 @@ list(product([1, 2, 3], [3, 4]))
 list(product([1, 2, 3], repeat=2))
 # [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)]
 ```
-**permutations**\
-`from itertools import permutations` --> кожне можливе розташування
+
+**перестановки**\
+`from itertools import permutations` --> усі можливі варіанти розташування
+
 ```python
 list(permutations(['1', '2', '3']))
 list(permutations('123', 2))
 ```
-**combinations**\
+
+**комбінації**\
 `from itertools import combinations` --> усі можливі комбінації без повторень
+
 ```python
 list(combinations('123', 2))
 # [('1', '2'), ('1', '3'), ('2', '3')]
 ```
+
 **combinations_with_replacement**\
 `from itertools import combinations_with_replacement`
+
 ```python
 list(combinations_with_replacement('123', 2))
 # [('1', '1'), ('1', '2'), ('1', '3'), ('2', '2'), ('2', '3'), ('3', '3')]
 ```
+
 **batched**\
-`from itertools import batched` --> доступний у Python 3.12+, корисний для розбиття великих списків кандидатів для bruteforce або файлів IOC на частини
+`from itertools import batched` --> доступна в Python 3.12+, корисна для розбиття великих списків кандидатів для bruteforce або файлів IOC на частини
+
 ```python
 list(batched(range(10), 4))
 # [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
 ```
+
 ### Декоратори
 
-Декоратор, який вимірює час, необхідний для виконання функції:
+Декоратор, який вимірює час, потрібний для виконання функції:
+
 ```python
 from functools import wraps
 import time
 
 
 def timeme(func):
-@wraps(func)
-def wrapper(*args, **kwargs):
-print("Let's call our decorated function")
-start = time.time()
-result = func(*args, **kwargs)
-print(f"Execution time: {time.time() - start} seconds")
-return result
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        print("Let's call our decorated function")
+        start = time.time()
+        result = func(*args, **kwargs)
+        print(f"Execution time: {time.time() - start} seconds")
+        return result
 
-return wrapper
+    return wrapper
 
 
 @timeme
 def decorated_func():
-print("Decorated func!")
+    print("Decorated func!")
 ```
-Якщо ви запустите це, ви побачите щось на кшталт наведеного нижче:
+
+Якщо ви запустите його, побачите приблизно таке:
+
 ```text
 Let's call our decorated function
 Decorated func!
 Execution time: 4.79e-05 seconds
 ```
+
 ### Корисні допоміжні засоби стандартної бібліотеки для pentesting
 
 **Обхід файлової системи за допомогою `pathlib`** (`Path.walk()` доступний у Python 3.12+; у старіших інтерпретаторах використовуйте `os.walk()`):
+
 ```python
 from pathlib import Path
 
 for root, dirs, files in Path(".").walk():
-if ".git" in dirs:
-dirs.remove(".git")
-for name in files:
-if name.endswith((".py", ".env", ".bak")):
-print(root / name)
+    if ".git" in dirs:
+        dirs.remove(".git")
+    for name in files:
+        if name.endswith((".py", ".env", ".bak")):
+            print(root / name)
 ```
-**Безпечно запускайте команди** (`shell=False` за замовчуванням — зазвичай саме те, що вам потрібно):
+
+**Безпечно запускайте команди** (`shell=False` зазвичай — саме те, що вам потрібно):
+
 ```python
 import subprocess
 
 cp = subprocess.run(
-["id"],
-capture_output=True,
-text=True,
-check=True,
+    ["id"],
+    capture_output=True,
+    text=True,
+    check=True,
 )
 print(cp.stdout)
 ```
-Якщо ви **мусите** створити команду shell, спочатку візьміть у лапки кожен токен, контрольований зловмисником:
+
+Якщо вам **необхідно** сформувати shell-команду, спершу візьміть у лапки кожен токен, контрольований зловмисником:
+
 ```python
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
 ```
+
 **Тимчасові файли / каталоги** (безпечніше, ніж жорстко задані шляхи `/tmp/foo`):
+
 ```python
 import tempfile
 from pathlib import Path
 
 with tempfile.TemporaryDirectory() as tmp:
-out = Path(tmp) / "loot.txt"
-out.write_text("secret\n")
-print(out.read_text())
+    out = Path(tmp) / "loot.txt"
+    out.write_text("secret\n")
+    print(out.read_text())
 ```
-Для автоматизації HTTP дивіться [цю іншу сторінку про вебзапити Python](web-requests.md).
 
-### Важливі нюанси розпакування архівів (для інструментів і парсерів файлів)
+Для автоматизації HTTP дивіться [цю іншу сторінку про веб-запити Python](web-requests.md).
 
-Починаючи з **Python 3.14**, `tarfile.extract()` / `extractall()` за замовчуванням використовують безпечніший фільтр `data`. У старіших версіях Python слід явно встановлювати його під час роботи з архівами, контрольованими зловмисником.<sup>[[1]](#references)[[2]](#references)</sup>
+### Підводні камені розпакування архівів (важливо для інструментів і парсерів файлів)
+
+Починаючи з **Python 3.14**, `tarfile.extract()` / `extractall()` за замовчуванням використовують безпечніший фільтр `data`. У старіших версіях Python слід явно вказувати його під час роботи з архівами, контрольованими зловмисником.<sup>[[1]](#references)[[2]](#references)</sup>
+
 ```python
 import tarfile
 import tempfile
 
 with tempfile.TemporaryDirectory() as out:
-with tarfile.open("sample.tar.gz") as tf:
-tf.extractall(out, filter="data")
+    with tarfile.open("sample.tar.gz") as tf:
+        tf.extractall(out, filter="data")
 ```
-Навіть із `filter="data"` розпаковуйте ненадійні архіви в новий тимчасовий каталог і перевіряйте записані дані, перш ніж переміщувати файли кудись важливіше.
 
-`zipfile.Path` відрізняється: він **не санітизує імена файлів** автоматично, тому перевіряйте шляхи перед розпаковуванням контрольованих зловмисником членів ZIP:
+Навіть із `filter="data"` розпаковуйте недовірені архіви в новий тимчасовий каталог і перевіряйте записані файли, перш ніж переміщувати їх у будь-яке важливе місце.
+
+`zipfile.Path` працює інакше: він **не очищає імена файлів** за вас, тому перевіряйте шляхи перед розпакуванням контрольованих зловмисником елементів ZIP-архіву:
+
 ```python
 import os
 import zipfile
 
 base = os.path.abspath("/tmp/unzip")
 with zipfile.ZipFile("sample.zip") as zf:
-for info in zf.infolist():
-final_path = os.path.abspath(os.path.join(base, info.filename))
-if os.path.commonpath([base, final_path]) != base:
-raise ValueError(f"Path traversal inside ZIP: {info.filename}")
-zf.extract(info, base)
+    for info in zf.infolist():
+        final_path = os.path.abspath(os.path.join(base, info.filename))
+        if os.path.commonpath([base, final_path]) != base:
+            raise ValueError(f"Path traversal inside ZIP: {info.filename}")
+        zf.extract(info, base)
 ```
+
 ### Небезпечні примітиви, про які слід пам’ятати
 
-- `eval()` / `exec()` **не є** sandboxes.
-- `ast.literal_eval()` **не виконує** код Python, але його все одно можна використати для спричинення відмови в обслуговуванні через пам’ять / CPU за допомогою даних, контрольованих атакувальником.
-- `pickle.loads()` **не є безпечним**; ніколи не виконуйте unpickle байтів, контрольованих атакувальником.
+- `eval()` / `exec()` — це **не** sandbox.
+- `ast.literal_eval()` **не** виконує код Python, але його все одно можна зловживати для спричинення відмови в обслуговуванні через вичерпання пам’яті / ресурсів CPU, передаючи дані, контрольовані зловмисником.
+- `pickle.loads()` **не є безпечним**; ніколи не виконуйте unpickle байтів, контрольованих зловмисником.
 - Щоб дізнатися більше про offensive tricks, перегляньте [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) і [Python deserializations](../../pentesting-web/deserialization/README.md).
 
 ## References
 
-- [1] [Документація Python для tarfile](https://docs.python.org/3/library/tarfile.html)
+- [1] [Документація Python tarfile](https://docs.python.org/3/library/tarfile.html)
 - [2] [PEP 706 – Фільтр для tarfile.extractall()](https://peps.python.org/pep-0706/)
+- [3] [venv — Створення віртуальних середовищ — документація Python 3.14](https://docs.python.org/3/library/venv.html)
+- [4] [Пакет: python3-venv — пакети Ubuntu](https://packages.ubuntu.com/noble/python/python3-venv)
+- [5] [wheel 0.24.0 — PyPI](https://pypi.org/project/wheel/0.24.0/)
+- [6] [wheel — PyPI](https://pypi.org/project/wheel/)
+- [7] [Чи застарів setup.py? — Посібник користувача з пакування Python](https://packaging.python.org/en/latest/discussions/setup-py-deprecated/)
 {{#include ../../banners/hacktricks-training.md}}

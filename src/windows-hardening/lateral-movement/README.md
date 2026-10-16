@@ -1,8 +1,8 @@
-# Латеральне переміщення
+# Горизонтальне переміщення
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Windows підтримує кілька механізмів для виконання команд у віддалених системах. На наступних сторінках описано поширені техніки латерального переміщення та необхідні для них умови:
+Windows підтримує кілька механізмів для виконання команд у віддалених системах. На наступних сторінках описано поширені техніки горизонтального переміщення та їхні передумови:
 
 - [**PsExec / SCM service execution**](psexec-and-winexec.md#how-do-they-work)
 - [**SmbExec**](psexec-and-winexec.md#impacket-smbexecpy-smbexec)
@@ -10,16 +10,16 @@ Windows підтримує кілька механізмів для викона
 - [**AtExec / SchtasksExec**](atexec.md)
 - [**WinRM**](winrm.md)
 - [**DCOM Exec**](dcomexec.md)
-- [**RDPexec**](rdpexec.md)
+- [**RDPexec: authenticated RDP command execution**](../../network-services-pentesting/pentesting-rdp.md#remote-command-execution-with-an-authenticated-rdp-session)
 - [**SCMExec with SharpMove**](psexec-and-winexec.md#scmexec-with-sharpmove)
 - [**SCCM / MECM client execution**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
-- **Pass the cookie** (хмара)<sup>[[1]](#references)</sup>
-- **Pass the PRT** (хмара)<sup>[[2]](#references)</sup>
-- **Pass the Microsoft Entra ID certificate** (хмара)<sup>[[3]](#references)</sup>
+- **Pass the cookie** (cloud)<sup>[[1]](#references)</sup>
+- **Pass the PRT** (cloud)<sup>[[2]](#references)</sup>
+- **Pass the Microsoft Entra ID certificate** (cloud)<sup>[[3]](#references)</sup>
 
 ## References
 
-- [1] [HackTricks Cloud - Pass the cookie](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/az-pass-the-cookie.html)
-- [2] [HackTricks Cloud - Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html)
-- [3] [HackTricks Cloud - Pass the certificate](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/az-pass-the-certificate.html)
+- [1] [HackTricks Cloud — Pass the cookie](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/az-pass-the-cookie.html)
+- [2] [HackTricks Cloud — Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html)
+- [3] [HackTricks Cloud — Pass the certificate](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/az-pass-the-certificate.html)
 {{#include ../../banners/hacktricks-training.md}}

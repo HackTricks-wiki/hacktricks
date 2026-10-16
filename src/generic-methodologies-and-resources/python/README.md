@@ -1,16 +1,17 @@
-# Вихід із Python Sandbox та Pyscript
+# Втеча з Python sandbox і Pyscript
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Цікаві сторінки:**
+**Цікаві сторінки для перегляду:**
 
-- [**Трюки для злому Pyscript**](pyscript.md)
+- [**Хитрощі для hacking у Pyscript**](pyscript.md)
 - [**Десеріалізація в Python**](../../pentesting-web/deserialization/README.md)
-- [**RCE через десеріалізацію моделі Keras і пошук gadget-ів**](keras-model-deserialization-rce-and-gadget-hunting.md)
-- [**Трюки обходу Python sandbox**](bypass-python-sandboxes/README.md)
-- [**Основний синтаксис Python-запитів до вебсайтів**](web-requests.md)
-- [**Основний синтаксис Python і бібліотеки**](basic-python.md)
-- [**Пошук суфіксів MD5 для вибраного вводу та хешів із числовим нулем**](../../crypto/hashes/README.md#chosen-input-md5-hash-searches)
+- [**RCE через десеріалізацію моделей Keras і пошук gadget-ів**](keras-model-deserialization-rce-and-gadget-hunting.md)
+- [**Хитрощі для обходу Python sandbox-ів**](bypass-python-sandboxes/README.md)
+- [**Основи синтаксису Python-запитів до вебсайтів**](web-requests.md)
+- [**Основи синтаксису Python і бібліотеки**](basic-python.md)
+- [**Віртуальні середовища Python (`venv`) і збирання wheel-пакетів**](basic-python.md#virtual-environments-and-wheel-builds-venv)
+- [**Пошук суфіксів MD5 для заданих вхідних даних і хешів числового нуля**](../../crypto/hashes/README.md#chosen-input-md5-hash-searches)
 
 ## References
 
