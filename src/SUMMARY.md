@@ -1099,6 +1099,7 @@
 - [Qualcomm KGSL VBO bind race to physical-page UAF](binary-exploitation/linux-kernel-exploitation/qualcomm-kgsl-vbo-bind-race-physical-uaf.md)
 - [PS5 compromission](binary-exploitation/freebsd-ptrace-rfi-vm_map-prot_exec-bypass-ps5.md)
 - [Windows RIO registered-buffer UAF to kernel R/W](binary-exploitation/windows-kernel-exploitation/afd-rio-buffer-uaf.md)
+- [Windows UAS REPORT LUNS cached-table OOB write](binary-exploitation/windows-kernel-exploitation/uasp-report-luns-cache-size-oob-write.md)
 - [Windows Userland Heap Grooming (x86 NT Heap)](binary-exploitation/windows-userland-heap-grooming.md)
 - [Windows Exploiting (Basic Guide - OSCP lvl)](binary-exploitation/windows-exploiting-basic-guide-oscp-lvl.md)
   - [Windows Kernel Type Confusion to NPFS Arbitrary R/W](binary-exploitation/windows-kernel-type-confusion-to-npfs-arbitrary-rw.md)
