@@ -1,21 +1,21 @@
-# 横展開
+# Lateral Movement
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Windowsは、リモートシステム上でコマンドを実行するために利用できる複数のメカニズムをサポートしています。以下のページでは、一般的な横展開の手法とその前提条件について説明します。
+Windowsでは、リモートシステム上でコマンドを実行するために、いくつかの仕組みを利用できます。以下のページでは、一般的なlateral-movementテクニックと、その前提条件について説明します。
 
-- [**PsExec / SCM service execution**](psexec-and-winexec.md#how-do-they-work)
+- [**PsExec / SCMサービス実行**](psexec-and-winexec.md#how-do-they-work)
 - [**SmbExec**](psexec-and-winexec.md#impacket-smbexecpy-smbexec)
 - [**WmiExec**](wmiexec.md)
 - [**AtExec / SchtasksExec**](atexec.md)
 - [**WinRM**](winrm.md)
 - [**DCOM Exec**](dcomexec.md)
-- [**RDPexec**](rdpexec.md)
-- [**SCMExec with SharpMove**](psexec-and-winexec.md#scmexec-with-sharpmove)
-- [**SCCM / MECM client execution**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
-- **Pass the cookie** (cloud)<sup>[[1]](#references)</sup>
-- **Pass the PRT** (cloud)<sup>[[2]](#references)</sup>
-- **Pass the Microsoft Entra ID certificate** (cloud)<sup>[[3]](#references)</sup>
+- [**RDPexec: 認証済みRDPコマンド実行**](../../network-services-pentesting/pentesting-rdp.md#remote-command-execution-with-an-authenticated-rdp-session)
+- [**SharpMoveを使ったSCMExec**](psexec-and-winexec.md#scmexec-with-sharpmove)
+- [**SCCM / MECMクライアント実行**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
+- **Pass the cookie**（クラウド）<sup>[[1]](#references)</sup>
+- **Pass the PRT**（クラウド）<sup>[[2]](#references)</sup>
+- **Pass the Microsoft Entra ID certificate**（クラウド）<sup>[[3]](#references)</sup>
 
 ## References
 

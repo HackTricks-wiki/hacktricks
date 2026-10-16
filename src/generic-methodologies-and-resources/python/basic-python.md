@@ -1,19 +1,49 @@
-# Basic Python
+# 基本的なPython
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Python Basics
+## 仮想環境とwheelのビルド（`venv`）
+
+Pythonの標準`venv`モジュールは仮想環境を作成します。POSIXの有効化スクリプトは`<venv>/bin/activate`です。有効な環境を終了するには`deactivate`と入力します。<sup>[[3]](#references)</sup> Ubuntuでは、ベースのPythonパッケージに含まれていない場合、`python3-venv`パッケージによってこのモジュールが提供されます。<sup>[[4]](#references)</sup>
+
+```bash
+sudo apt-get install python3-venv
+#Now, go to the folder you want to create the virtual environment
+python3 -m venv <Dirname>
+python3 -m venv pvenv #In this case the folder "pvenv" is going to be created
+source <Dirname>/bin/activate
+source pvenv/bin/activate #Activate the environment
+#You can now install whatever python library you need
+deactivate #To deactivate the virtual environment
+```
+
+古い setuptools ベースの `setup.py bdist_wheel` ワークフローでは、アクティブな環境に `wheel` をインストールすると `bdist_wheel` コマンドが使えるようになりました。<sup>[[5]](#references)</sup> 現在の setuptools のバージョンでは、このコマンドに `wheel` は不要です。また、現在のパッケージングガイダンスでは、`setup.py` を直接実行するのではなく、`python -m build --wheel` を使うことが推奨されています。<sup>[[6]](#references)[[7]](#references)</sup>
+
+```text
+error: invalid command 'bdist_wheel'
+```
+
+```bash
+# Legacy workaround for older setuptools-based projects:
+python3 -m pip install wheel
+
+# Current build workflow:
+python3 -m pip install build
+python3 -m build --wheel
+```
+
+## Pythonの基礎
 
 ### 役立つ情報
 
-以下のすべての例は、明示的に記載されていない限り **Python 3** を前提としています。\
-`range()` は Python 3 では iterable object を返します（Python 2 の `xrange()` に相当）。\
-**tuple** と **list** の違いは、tuple では通常、値の **position** が意味を持つのに対し、list は通常、値を順番に並べた sequence にすぎない点です。
+以下の例は、特に明記されていない限り **Python 3** を前提としています。\
+Python 3では `range()` はイテラブルオブジェクトを返します（Python 2の `xrange()` に似ています）。\
+**tuple** と **list** の違いは、tupleでは値の**位置**が通常意味を持つのに対し、listは通常、値を順番に並べたものにすぎないことです。
 
 ### 主な操作
 
-数値を累乗するには、`3**2` を使用します（`3^2` ではありません）。\
-Python 3 では `2/3 == 0.666666...` ですが、`2//3 == 0` は整数除算を実行します。\
+数値のべき乗には、次のように書きます: `3**2`（`3^2` ではありません）\
+Python 3では `2/3 == 0.666666...` ですが、`2//3 == 0` は整数除算を行います。\
 `i >= j`\
 `i <= j`\
 `i == j`\
@@ -35,21 +65,21 @@ Python 3 では `2/3 == 0.666666...` ですが、`2//3 == 0` は整数除算を�
 `"abc" in "abcdef"`\
 `"abc\n".strip() == "abc"`\
 `"apbc".replace("p", "") == "abc"`\
-`dir(str)` = 利用可能なメソッドの list\
-`help(str)` = class `str` の定義\
+`dir(str)` = 使用可能なメソッドの一覧\
+`help(str)` = `str` クラスの定義\
 `"a".upper() == "A"`\
 `"A".lower() == "a"`\
 `"abc".capitalize() == "Abc"`\
 `sum([1, 2, 3]) == 6`\
 `sorted([1, 43, 5, 3, 21, 4]) == [1, 3, 4, 5, 21, 43]`
 
-**文字の結合**\
+**文字列の連結**\
 `3 * 'a' == 'aaa'`\
 `'a' + 'b' == 'ab'`\
 `'a' + str(3) == 'a3'`\
 `[1, 2, 3] + [4, 5] == [1, 2, 3, 4, 5]`
 
-**list / string の一部**\
+**リスト / 文字列の一部**\
 `'abc'[0] == 'a'`\
 `'abc'[-1] == 'c'`\
 `'abc'[1:3] == 'bc'`\
@@ -60,26 +90,29 @@ Python 3 では `2/3 == 0.666666...` ですが、`2//3 == 0` は整数除算を�
 `""" Several lines comment """`
 
 **ループ**
+
 ```python
 if a:
-# something
+    # something
 elif b:
-# something
+    # something
 else:
-# something
+    # something
 
 while a:
-# something
+    # something
 
 for i in range(0, 100):
-# something from 0 to 99
+    # something from 0 to 99
 
 for letter in "hola":
-# something with each letter
+    # something with each letter
 ```
-### Bytes、hex、encoding
 
-これは exploit-dev、reversing、CTF で非常によく使われます：
+### バイト、16進数、エンコーディング
+
+これは exploit-dev、reversing、CTF で非常によく使われます:
+
 ```python
 b"ABC".hex() == "414243"
 bytes.fromhex("414243") == b"ABC"
@@ -88,18 +121,19 @@ int.from_bytes(b"\x41\x42\x43", "big") == 0x414243
 "admin".encode() == b"admin"
 b"admin".decode() == "admin"
 ```
+
 ### タプル
 
 `t1 = (1, '2', 'three')`\
 `t2 = (5, 6)`\
 `t3 = t1 + t2 == (1, '2', 'three', 5, 6)`\
-`(4,)` = singleton\
+`(4,)` = 単一要素のタプル\
 `d = ()` 空のタプル\
 `d += (4,)` --> タプルに追加\
 `# t1[1] = 'new value'` --> タプルは変更不可\
 `list(t2) == [5, 6]` --> タプルからリストへ
 
-### リスト（array）
+### リスト（配列）
 
 `d = []` 空\
 `a = [1, 2, 3]`\
@@ -109,6 +143,7 @@ b"admin".decode() == "admin"
 `tuple(a) == (1, 2, 3)` --> リストからタプルへ
 
 ### 辞書
+
 ```python
 month_numbers = {1: 'Jan', 2: 'Feb', 'Feb': 2}
 month_numbers[1] == 'Jan'
@@ -121,9 +156,10 @@ month_numbers.update(a)
 mn = month_numbers.copy()  # independent copy
 month_numbers.get('key', 0)  # default value if key does not exist
 ```
-### Set
 
-Set には重複がありません。\
+### 集合
+
+集合には重複がありません。\
 `myset = set(['a', 'b']) == {'a', 'b'}`\
 `myset.add('c')` --> `{'a', 'b', 'c'}`\
 `myset.add('a')` --> 変更なし\
@@ -140,47 +176,50 @@ Set には重複がありません。\
 `myset.difference_update(myset2)`\
 `myset.symmetric_difference_update(myset2)`
 
-### Classes
+### クラス
 
-`__lt__` 内のメソッドが、オブジェクトの比較のために `sort()` / `sorted()` で使用されます。
+`__lt__` のメソッドは、オブジェクトの比較に `sort()` / `sorted()` で使用されます。
+
 ```python
 import datetime
 
 
 class Person:
-def __init__(self, name):
-self.name = name
-self.last_name = name.split(" ")[-1]
-self.birthday = None
+    def __init__(self, name):
+        self.name = name
+        self.last_name = name.split(" ")[-1]
+        self.birthday = None
 
-def __lt__(self, other):
-if self.last_name == other.last_name:
-return self.name < other.name
-return self.last_name < other.last_name
+    def __lt__(self, other):
+        if self.last_name == other.last_name:
+            return self.name < other.name
+        return self.last_name < other.last_name
 
-def set_birthday(self, month, day, year):
-self.birthday = datetime.date(year, month, day)
+    def set_birthday(self, month, day, year):
+        self.birthday = datetime.date(year, month, day)
 
-def get_age(self):
-return (datetime.date.today() - self.birthday).days
+    def get_age(self):
+        return (datetime.date.today() - self.birthday).days
 
 
 class MITPerson(Person):
-next_id_num = 0  # class attribute
+    next_id_num = 0  # class attribute
 
-def __init__(self, name):
-super().__init__(name)
-self.id_num = MITPerson.next_id_num
-MITPerson.next_id_num += 1
+    def __init__(self, name):
+        super().__init__(name)
+        self.id_num = MITPerson.next_id_num
+        MITPerson.next_id_num += 1
 
-def __lt__(self, other):
-return self.id_num < other.id_num
+    def __lt__(self, other):
+        return self.id_num < other.id_num
 ```
-### map, zip, filter, lambda, sorted and one-liners
 
-**Python 3** では、`map()` と `filter()` は iterator を返すため、すべての値を一度に表示したい場合は `list()` で変換します。
+### map、zip、filter、lambda、sorted、ワンライナー
 
-**Map** は `[f(x) for x in iterable]` のようなものです:
+**Python 3** では、`map()` と `filter()` はイテレーターを返します。すべての値を一度に出力するには、`list()` で変換します。
+
+**map** は `[f(x) for x in iterable]` のようなものです。
+
 ```python
 list(map(tuple, [[1, 2, 3], [4, 5]]))
 # [(1, 2, 3), (4, 5)]
@@ -188,22 +227,26 @@ list(map(tuple, [[1, 2, 3], [4, 5]]))
 list(map(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
 # [False, False, True, False, False, True, False, False, True]
 ```
-**zip** は短い方の反復可能オブジェクトが終了すると停止します:
+
+**zip** は、短い方の iterable が終了すると停止します。
+
 ```python
 for f, b in zip(foo, bar):
-print(f, b)
+    print(f, b)
 ```
-**Lambda** は関数を定義するために使用されます:\
-`(lambda x, y: x + y)(5, 3) == 8` --> use lambda as a simple function\
-`sorted(range(-5, 6), key=lambda x: x**2)` --> use lambda to sort\
+
+**Lambda**は関数を定義するために使われます:\
+`(lambda x, y: x + y)(5, 3) == 8` --> lambdaをシンプルな関数として使う\
+`sorted(range(-5, 6), key=lambda x: x**2)` --> lambdaを使ってソートする\
 `list(filter(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9])) == [3, 6, 9]`\
 `reduce(lambda x, y: x * y, [1, 2, 3, 4]) == 24`
+
 ```python
 from functools import reduce
 
 
 def make_adder(n):
-return lambda x: x + n
+    return lambda x: x + n
 
 
 plus3 = make_adder(3)
@@ -211,51 +254,59 @@ plus3(4) == 7
 
 
 class Car:
-crash = lambda self: print("Boom!")
+    crash = lambda self: print("Boom!")
 
 
 my_car = Car()
 my_car.crash()  # Boom!
 ```
+
 `mult1 = [x for x in [1, 2, 3, 4, 5, 6, 7, 8, 9] if x % 3 == 0]`
 
 ### 例外
+
 ```python
 def divide(x, y):
-try:
-result = x / y
-except ZeroDivisionError as e:
-print("division by zero! " + str(e))
-except TypeError:
-divide(int(x), int(y))
-else:
-print("result is", result)
-finally:
-print("executing finally clause in any case")
+    try:
+        result = x / y
+    except ZeroDivisionError as e:
+        print("division by zero! " + str(e))
+    except TypeError:
+        divide(int(x), int(y))
+    else:
+        print("result is", result)
+    finally:
+        print("executing finally clause in any case")
 ```
+
 ### Assert()
 
 条件が false の場合、文字列が出力されます。\
-`assert` 文は `python -O` で無効化できるため、access control や input validation には使用しないでください。
+`assert` 文は `python -O` で無効化できるため、アクセス制御や入力検証には使用しないでください。
+
 ```python
 def avg(grades, weights):
-assert len(grades) != 0, 'no grades data'
-assert len(grades) == len(weights), 'wrong number of grades'
+    assert len(grades) != 0, 'no grades data'
+    assert len(grades) == len(weights), 'wrong number of grades'
 ```
-### Generator、yield
 
-Generatorはすべてを一度にreturnする代わりに、値を1つずつ**yield**します。これは巨大なwordlist、bruteforcer、大きなレスポンスに非常に便利です。
+### Generators, yield
+
+ジェネレーターはすべてを一度に返すのではなく、値を1つずつ**yield**します。これは巨大な wordlist、bruteforcer、大きなレスポンスにとても便利です。
+
 ```python
 def my_gen(n):
-yield n
-yield n + 1
+    yield n
+    yield n + 1
 ```
+
 `g = my_gen(6)`\
 `next(g) == 6`\
 `next(g) == 7`\
 `next(g)` --> `StopIteration`
 
 ### 正規表現
+
 ```python
 import re
 
@@ -263,22 +314,24 @@ re.search(r"\w", "hola").group() == "h"
 re.findall(r"\w", "hola") == ['h', 'o', 'l', 'a']
 re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 ```
+
 **特殊な意味:**\
 `.` --> 改行以外の任意の文字\
 `\w` --> `[a-zA-Z0-9_]`\
 `\d` --> 数字\
 `\s` --> 空白文字 `[ \n\r\t\f]`\
 `\S` --> 空白以外の文字\
-`^` --> で始まる\
-`$` --> で終わる\
+`^` --> 文字列の先頭\
+`$` --> 文字列の末尾\
 `+` --> 1回以上\
 `*` --> 0回以上\
 `?` --> 0回または1回
 
 **オプション:**\
 `re.search(pat, string, re.IGNORECASE)`\
-`re.search(pat, string, re.DOTALL)` --> ドットで改行にマッチできるようにする\
-`re.search(pat, string, re.MULTILINE)` --> `^` と `$` が異なる行でもマッチできるようにする
+`re.search(pat, string, re.DOTALL)` --> ドットが改行にもマッチするようにする\
+`re.search(pat, string, re.MULTILINE)` --> `^` と `$` が各行にもマッチするようにする
+
 ```python
 re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
 # ['<b>foo</b>and<i>so on</i>']
@@ -286,10 +339,12 @@ re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
 re.findall(r"<.*?>", "<b>foo</b>and<i>so on</i>")
 # ['<b>', '</b>', '<i>', '</i>']
 ```
+
 ### IterTools
 
 **product**\
-`from itertools import product` --> 1つ以上の iterable 間の直積
+`from itertools import product` --> 1つ以上のiterable間の直積（Cartesian product）
+
 ```python
 list(product([1, 2, 3], [3, 4]))
 # [(1, 3), (1, 4), (2, 3), (2, 4), (3, 3), (3, 4)]
@@ -297,137 +352,167 @@ list(product([1, 2, 3], [3, 4]))
 list(product([1, 2, 3], repeat=2))
 # [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)]
 ```
+
 **permutations**\
-`from itertools import permutations` --> 考えられるすべての配置
+`from itertools import permutations` --> あらゆる可能な並べ替え
+
 ```python
 list(permutations(['1', '2', '3']))
 list(permutations('123', 2))
 ```
+
 **combinations**\
 `from itertools import combinations` --> 重複なしのすべての組み合わせ
+
 ```python
 list(combinations('123', 2))
 # [('1', '2'), ('1', '3'), ('2', '3')]
 ```
+
 **combinations_with_replacement**\
 `from itertools import combinations_with_replacement`
+
 ```python
 list(combinations_with_replacement('123', 2))
 # [('1', '1'), ('1', '2'), ('1', '3'), ('2', '2'), ('2', '3'), ('3', '3')]
 ```
+
 **batched**\
-`from itertools import batched` --> Python 3.12以降で利用可能。大規模なbruteforce候補リストやIOCファイルをchunkに分割するのに便利です。
+`from itertools import batched` --> Python 3.12以降で利用可能。大量のbruteforce候補リストやIOCファイルをチャンクに分割するのに便利です。
+
 ```python
 list(batched(range(10), 4))
 # [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
 ```
-### デコレータ
 
-関数の実行にかかる時間を測定するデコレータ：
+### デコレーター
+
+関数の実行にかかる時間を測定するデコレーター：
+
 ```python
 from functools import wraps
 import time
 
 
 def timeme(func):
-@wraps(func)
-def wrapper(*args, **kwargs):
-print("Let's call our decorated function")
-start = time.time()
-result = func(*args, **kwargs)
-print(f"Execution time: {time.time() - start} seconds")
-return result
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        print("Let's call our decorated function")
+        start = time.time()
+        result = func(*args, **kwargs)
+        print(f"Execution time: {time.time() - start} seconds")
+        return result
 
-return wrapper
+    return wrapper
 
 
 @timeme
 def decorated_func():
-print("Decorated func!")
+    print("Decorated func!")
 ```
-実行すると、次のような結果が表示されます：
+
+実行すると、次のように表示されます:
+
 ```text
 Let's call our decorated function
 Decorated func!
 Execution time: 4.79e-05 seconds
 ```
-### pentesting に役立つ標準ライブラリのヘルパー
 
-**`pathlib` による Filesystem の走査**（`Path.walk()` は Python 3.12 以降で利用可能です。古いインタープリターでは `os.walk()` を使用してください）：
+### pentestingに役立つ標準ライブラリのヘルパー
+
+**`pathlib`によるファイルシステムの走査**（`Path.walk()`はPython 3.12以降で利用可能。古いインタープリターでは`os.walk()`を使用してください）：
+
 ```python
 from pathlib import Path
 
 for root, dirs, files in Path(".").walk():
-if ".git" in dirs:
-dirs.remove(".git")
-for name in files:
-if name.endswith((".py", ".env", ".bak")):
-print(root / name)
+    if ".git" in dirs:
+        dirs.remove(".git")
+    for name in files:
+        if name.endswith((".py", ".env", ".bak")):
+            print(root / name)
 ```
-**コマンドを安全に起動する**（通常は `shell=False` が望ましいです）：
+
+**コマンドを安全に起動する**（通常はデフォルトの `shell=False` を使うのが望ましい）:
+
 ```python
 import subprocess
 
 cp = subprocess.run(
-["id"],
-capture_output=True,
-text=True,
-check=True,
+    ["id"],
+    capture_output=True,
+    text=True,
+    check=True,
 )
 print(cp.stdout)
 ```
-**どうしても** shell command を構築する必要がある場合は、攻撃者が制御する各 token を最初に quote してください:
+
+shell command を**どうしても**組み立てる必要がある場合は、攻撃者が制御する各トークンを先に引用符で囲んでください:
+
 ```python
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
 ```
-**一時ファイル / ディレクトリ**（ハードコードされた`/tmp/foo`パスより安全）:
+
+**一時ファイル / ディレクトリ**（ハードコードされた `/tmp/foo` パスより安全）：
+
 ```python
 import tempfile
 from pathlib import Path
 
 with tempfile.TemporaryDirectory() as tmp:
-out = Path(tmp) / "loot.txt"
-out.write_text("secret\n")
-print(out.read_text())
+    out = Path(tmp) / "loot.txt"
+    out.write_text("secret\n")
+    print(out.read_text())
 ```
-HTTP automation については、[Python の web requests に関するこちらのページ](web-requests.md)を確認してください。
 
-### Archive extraction の注意点（tooling と file parser では重要）
+HTTP automation については、[Python の Web リクエストに関するこちらのページ](web-requests.md)を確認してください。
 
-**Python 3.14** 以降では、`tarfile.extract()` / `extractall()` はデフォルトでより安全な `data` filter を使用します。古い Python バージョンで攻撃者が制御する archive を扱う場合は、明示的に設定してください。<sup>[[1]](#references)[[2]](#references)</sup>
+### アーカイブ展開時の注意点（ツールやファイルパーサーでは重要）
+
+**Python 3.14** 以降では、`tarfile.extract()` / `extractall()` はデフォルトで、より安全な `data` フィルターを使用します。古い Python バージョンでは、攻撃者が制御するアーカイブを扱う際に、明示的に設定してください。<sup>[[1]](#references)[[2]](#references)</sup>
+
 ```python
 import tarfile
 import tempfile
 
 with tempfile.TemporaryDirectory() as out:
-with tarfile.open("sample.tar.gz") as tf:
-tf.extractall(out, filter="data")
+    with tarfile.open("sample.tar.gz") as tf:
+        tf.extractall(out, filter="data")
 ```
-`filter="data"` を使用していても、信頼できないアーカイブは新しい一時ディレクトリに展開し、ファイルを重要な場所へ移動する前に、書き込まれた内容を検証してください。
 
-`zipfile.Path` は異なります。**ファイル名を自動的にサニタイズしない**ため、攻撃者が制御する ZIP メンバーを展開する前にパスを検証してください:
+`filter="data"` を指定していても、信頼できないアーカイブは新しい一時ディレクトリに展開し、書き込まれた内容を検証してから、重要な場所にファイルを移動してください。
+
+`zipfile.Path` は異なり、ファイル名を**サニタイズしません**。攻撃者が制御する ZIP メンバーを展開する前に、パスを検証してください。
+
 ```python
 import os
 import zipfile
 
 base = os.path.abspath("/tmp/unzip")
 with zipfile.ZipFile("sample.zip") as zf:
-for info in zf.infolist():
-final_path = os.path.abspath(os.path.join(base, info.filename))
-if os.path.commonpath([base, final_path]) != base:
-raise ValueError(f"Path traversal inside ZIP: {info.filename}")
-zf.extract(info, base)
+    for info in zf.infolist():
+        final_path = os.path.abspath(os.path.join(base, info.filename))
+        if os.path.commonpath([base, final_path]) != base:
+            raise ValueError(f"Path traversal inside ZIP: {info.filename}")
+        zf.extract(info, base)
 ```
+
 ### 覚えておくべき危険なプリミティブ
 
-- `eval()` / `exec()` は **sandbox ではありません**。
-- `ast.literal_eval()` は Python code を実行しませんが、attacker-controlled input によってメモリ / CPU denial of service に悪用される可能性があります。
-- `pickle.loads()` は **secure ではありません**。attacker-controlled bytes を決して unpickle しないでください。
-- より高度な offensive tricks については、[Bypass Python sandboxes](bypass-python-sandboxes/README.md)、[Python internal read gadgets](python-internal-read-gadgets.md)、[Python deserializations](../../pentesting-web/deserialization/README.md) を確認してください。
+- `eval()` / `exec()` は**サンドボックスではありません**。
+- `ast.literal_eval()` は Python コードを実行しませんが、攻撃者が制御する入力によって、メモリや CPU のサービス拒否を引き起こされる可能性があります。
+- `pickle.loads()` は**安全ではありません**。攻撃者が制御するバイト列を決して unpickle しないでください。
+- さらに高度な攻撃手法については、[Bypass Python sandboxes](bypass-python-sandboxes/README.md)、[Python internal read gadgets](python-internal-read-gadgets.md)、[Python deserializations](../../pentesting-web/deserialization/README.md)を確認してください。
 
 ## References
 
 - [1] [Python tarfile ドキュメント](https://docs.python.org/3/library/tarfile.html)
-- [2] [PEP 706 – tarfile.extractall() のフィルター](https://peps.python.org/pep-0706/)
+- [2] [PEP 706 – tarfile.extractall() 用フィルター](https://peps.python.org/pep-0706/)
+- [3] [venv — 仮想環境の作成 — Python 3.14 ドキュメント](https://docs.python.org/3/library/venv.html)
+- [4] [パッケージ: python3-venv — Ubuntu パッケージ](https://packages.ubuntu.com/noble/python/python3-venv)
+- [5] [wheel 0.24.0 — PyPI](https://pypi.org/project/wheel/0.24.0/)
+- [6] [wheel — PyPI](https://pypi.org/project/wheel/)
+- [7] [setup.py は非推奨ですか？ — Python Packaging User Guide](https://packaging.python.org/en/latest/discussions/setup-py-deprecated/)
 {{#include ../../banners/hacktricks-training.md}}
