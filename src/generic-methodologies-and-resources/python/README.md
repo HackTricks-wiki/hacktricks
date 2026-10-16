@@ -1,16 +1,17 @@
-# Python Sandbox Escape & Pyscript
+# Kutoroka kwenye Python Sandbox & Pyscript
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Kurasa zinazovutia za kuangalia:**
+**Kurasa za kuvutia za kuangalia:**
 
-- [**Mbinu za udukuzi za Pyscript**](pyscript.md)
-- [**Deserializations za Python**](../../pentesting-web/deserialization/README.md)
-- [**RCE ya deserialization ya modeli ya Keras na kutafuta gadget**](keras-model-deserialization-rce-and-gadget-hunting.md)
-- [**Mbinu za kukwepa Python sandboxes**](bypass-python-sandboxes/README.md)
-- [**Sintaksia ya msingi ya maombi ya wavuti ya Python**](web-requests.md)
-- [**Sintaksia na maktaba za msingi za Python**](basic-python.md)
-- [**Utafutaji wa hash wenye kiambishi tamati cha MD5 cha ingizo lililochaguliwa na thamani sifuri ya nambari**](../../crypto/hashes/README.md#chosen-input-md5-hash-searches)
+- [**Mbinu za hacking za Pyscript**](pyscript.md)
+- [**Python deserializations**](../../pentesting-web/deserialization/README.md)
+- [**RCE kupitia deserialization ya Keras model na kutafuta gadgets**](keras-model-deserialization-rce-and-gadget-hunting.md)
+- [**Mbinu za kupita Python sandboxes**](bypass-python-sandboxes/README.md)
+- [**Sintaksia ya msingi ya web requests za Python**](web-requests.md)
+- [**Sintaksia na libraries za msingi za Python**](basic-python.md)
+- [**Python virtual environments (`venv`) na wheel builds**](basic-python.md#virtual-environments-and-wheel-builds-venv)
+- [**Utafutaji wa MD5 suffix kwa ingizo lililochaguliwa na wa hash ya sifuri ya nambari**](../../crypto/hashes/README.md#chosen-input-md5-hash-searches)
 
 ## References
 
