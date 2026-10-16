@@ -1,8 +1,8 @@
-# 횡적 이동
+# Lateral Movement
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Windows는 원격 시스템에서 명령을 실행하는 데 사용할 수 있는 여러 메커니즘을 지원합니다. 다음 페이지에서는 일반적인 횡적 이동 기법과 사전 요구 사항을 설명합니다.
+Windows는 원격 시스템에서 명령을 실행하는 데 사용할 수 있는 여러 메커니즘을 지원합니다. 다음 페이지에서 일반적인 lateral movement 기법과 필요한 사전 조건을 설명합니다.
 
 - [**PsExec / SCM service execution**](psexec-and-winexec.md#how-do-they-work)
 - [**SmbExec**](psexec-and-winexec.md#impacket-smbexecpy-smbexec)
@@ -10,12 +10,12 @@ Windows는 원격 시스템에서 명령을 실행하는 데 사용할 수 있�
 - [**AtExec / SchtasksExec**](atexec.md)
 - [**WinRM**](winrm.md)
 - [**DCOM Exec**](dcomexec.md)
-- [**RDPexec**](rdpexec.md)
-- [**SCMExec with SharpMove**](psexec-and-winexec.md#scmexec-with-sharpmove)
-- [**SCCM / MECM client execution**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
-- **Pass the cookie** (cloud)<sup>[[1]](#references)</sup>
-- **Pass the PRT** (cloud)<sup>[[2]](#references)</sup>
-- **Pass the Microsoft Entra ID certificate** (cloud)<sup>[[3]](#references)</sup>
+- [**RDPexec: 인증된 RDP 명령 실행**](../../network-services-pentesting/pentesting-rdp.md#remote-command-execution-with-an-authenticated-rdp-session)
+- [**SharpMove를 사용한 SCMExec**](psexec-and-winexec.md#scmexec-with-sharpmove)
+- [**SCCM / MECM 클라이언트 실행**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
+- **Pass the cookie** (클라우드)<sup>[[1]](#references)</sup>
+- **Pass the PRT** (클라우드)<sup>[[2]](#references)</sup>
+- **Pass the Microsoft Entra ID certificate** (클라우드)<sup>[[3]](#references)</sup>
 
 ## References
 
