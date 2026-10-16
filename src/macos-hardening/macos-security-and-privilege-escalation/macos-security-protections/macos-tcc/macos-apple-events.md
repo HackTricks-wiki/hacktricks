@@ -4,27 +4,33 @@
 
 ## Temel Bilgiler
 
-**Apple events**, uygulamaların diğer uygulamalardan işlem veya veri istemek için kullandığı yapılandırılmış süreçler arası iletilerdir. **Apple Event Manager**, bu iletileri oluşturmak, göndermek, almak ve yanıtlamak için API'ler sağlar.<sup>[[1]](#references)</sup>
+**Apple events**, uygulamaların diğer uygulamalardan işlem veya veri istemek için kullandığı yapılandırılmış süreçler arası mesajlardır. **Apple Event Manager**, bu mesajları oluşturmak, göndermek, almak ve yanıtlamak için API'ler sağlar.<sup>[[1]](#references)</sup>
 
-macOS'ta temel broker, `com.apple.coreservices.appleevents` Mach service'ini kaydeden `/System/Library/CoreServices/appleeventsd` işlemidir. Event alan uygulamalar bu service ile bir Apple-event Mach port'u kaydeder; göndericiler hedef port'u bu service üzerinden alır.<sup>[[3]](#references)</sup>
+macOS'te temel aracı `/System/Library/CoreServices/appleeventsd`'dir. Bu servis, `com.apple.coreservices.appleevents` Mach servisini kaydeder. Event alan uygulamalar bu servise bir Apple-event Mach portu kaydeder; gönderenler hedef portu bu servis üzerinden edinir.<sup>[[3]](#references)</sup>
 
-Sandbox kuralları ve entitlement'lar bu iletişimi sınırlar. Bir sandbox profili, gerekli işlemleri genellikle `allow appleevent-send` ve `com.apple.coreservices.appleevents` için bir Mach lookup olarak ifade eder:<sup>[[3]](#references)</sup>
+Sandbox kuralları ve yetkilendirmeler bu iletişimi sınırlar. Bir sandbox profili, gerekli işlemleri genellikle `allow appleevent-send` ve `com.apple.coreservices.appleevents` için Mach lookup olarak ifade eder:<sup>[[3]](#references)</sup>
+
 ```scheme
 (allow appleevent-send)
 (allow mach-lookup (global-name "com.apple.coreservices.appleevents"))
 ```
-Genel kullanıma açık `com.apple.security.temporary-exception.apple-events` entitlement'ı, sandbox uygulanmış bir uygulamayı adlandırılmış hedef bundle identifier'larıyla sınırlayabilir. Apple tarafından imzalanmış bileşenleri analiz ederken, özel `com.apple.private.appleevents` entitlement'ını da kontrol edin; özel Apple entitlement'ları normalde üçüncü taraf uygulamaların kullanımına açık değildir.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
+
+Herkese açık `com.apple.security.temporary-exception.apple-events` entitlement’ı, sandbox’lı bir uygulamayı adı belirtilen hedef bundle identifier’larıyla kısıtlayabilir. Apple tarafından imzalanmış bileşenleri analiz ederken, özel `com.apple.private.appleevents` entitlement’ını da kontrol edin; özel Apple entitlement’ları normalde üçüncü taraf uygulamalara sunulmaz.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
 
 > [!TIP]
-> Bir process tarafından gönderilen Apple events hakkındaki bilgileri loglamak için **`AEDebugSends`** environment variable'ını ayarlayın:<sup>[[3]](#references)</sup>
+> Bir süreç tarafından gönderilen Apple event’leriyle ilgili bilgileri günlüğe kaydetmek için **`AEDebugSends`** ortam değişkenini ayarlayın:<sup>[[3]](#references)</sup>
 >
 > ```bash
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'
 > ```
 
+Bir Automation grantini gönderen ve alıcıyla eşleştirmek için bkz. [TCC Apple Events grants](index.html#identify-apple-events-sender-and-target-grants).
+
+
+
 ## References
 
-- [1] [Apple Developer Documentation - Apple Event Yöneticisi](https://developer.apple.com/documentation/applicationservices/apple_event_manager)
-- [2] [Apple Developer Documentation - App Sandbox Geçici İstisna Entitlement'ları](https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/EntitlementKeyReference/Chapters/AppSandboxTemporaryExceptionEntitlements.html)
-- [3] [Mac OS X and iOS Internals - Apple event debug environment variable'ları](https://www.newosxbook.com/MOXiI.pdf)
+- [1] [Apple Geliştirici Belgeleri - Apple Event Yöneticisi](https://developer.apple.com/documentation/applicationservices/apple_event_manager)
+- [2] [Apple Geliştirici Belgeleri - App Sandbox Geçici İstisna Yetkilendirmeleri](https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/EntitlementKeyReference/Chapters/AppSandboxTemporaryExceptionEntitlements.html)
+- [3] [Mac OS X ve iOS İç Yapısı - Apple-event hata ayıklama ortam değişkenleri](https://www.newosxbook.com/MOXiI.pdf)
 {{#include ../../../../banners/hacktricks-training.md}}
