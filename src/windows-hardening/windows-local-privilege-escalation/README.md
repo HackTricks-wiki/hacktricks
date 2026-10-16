@@ -103,6 +103,8 @@ This [site](https://msrc.microsoft.com/update-guide/vulnerability) is handy for 
 
 For a version-specific local exploit, check the **running process architecture** as well as the OS architecture. On 64-bit Windows, a 32-bit process is subject to [WOW64 file-system redirection](https://learn.microsoft.com/en-us/windows/win32/winprog64/file-system-redirector): `%windir%\System32` usually resolves to the 32-bit system directory, while `%windir%\Sysnative` gives that process access to the native system directory. The alias is unavailable to a 64-bit process. An OS build or missing-KB candidate does not prove exploitability; compare the running build, installed or superseding update, process architecture, and exploit prerequisites with the [Microsoft security bulletin](https://learn.microsoft.com/en-us/security-updates/securitybulletins/2016/ms16-032) for the exact issue.
 
+For a service-memory-corruption example, see the [client-controlled MIDI shared-memory ring offsets](../../binary-exploitation/array-indexing.md#client-controlled-shared-memory-ring-positions). The published stack offsets apply only to the tested build; reaching `LOCAL SERVICE` is distinct from the later [SeImpersonate/EfsPotato](roguepotato-and-printspoofer.md) step to `SYSTEM`.<sup>[[44]](#references)</sup>
+
 **Locally with system information**
 
 - [https://github.com/AonCyberLabs/Windows-Exploit-Suggester](https://github.com/AonCyberLabs/Windows-Exploit-Suggester)
@@ -2671,5 +2673,6 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 - [41] [Exodus Intelligence - Microsoft Windows Installer Folder Delete Privilege Escalation](https://blog.exodusintel.com/2026/07/06/microsoft-windows-installer-folder-delete-privilege-escalation/)
 - [42] [Microsoft Security Response Center - CVE-2025-27727](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-27727)
 - [43] [MDSec - Total Recall: Retracing Your Steps Back to NT AUTHORITY\SYSTEM](https://www.mdsec.co.uk/2026/02/total-recall-retracing-your-steps-back-to-nt-authoritysystem/)
+- [44] [NCC Group - Windows MIDI Services shared-memory offsets privilege escalation advisory](https://nccgroup.com/research/technical-advisory-microsoft-windows-midi-service-module-escalation-of-privileges-cve-2026-62688)
 
 {{#include ../../banners/hacktricks-training.md}}
