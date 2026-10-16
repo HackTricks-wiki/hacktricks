@@ -240,7 +240,7 @@ rportfwd_local stop [bind port]
 
 Tailcat uses Tailscale's WireGuard/NAT-traversal/DERP data plane without the Tailscale control plane. It needs neither a Tailscale account nor administrator privileges, and it does not install host routes or change DNS. Unlike [Tailscale Serve/Funnel](reverse-shells/expose-local-to-the-internet.md#tailscale-funnel--serve) or the in-process [BOFScale tailnet](#bofscale---cdn-fronted-in-process-tailnet), the server shares a *tailcat address* out of band. The client uses that address to reach a port served by the remote node.<sup>[[62]](#references)</sup>
 
-For a TCP service already listening on port `4444` on the remote node, start `serve` there and pass its printed address to `forward` on the client. The second command binds `127.0.0.1:18080` by default, so a local process that only supports normal TCP sockets can connect to that loopback port while Tailcat carries its traffic to remote port `4444`. This is the same local-socket-to-tailcat pattern observed in a Windows RAT, but the port numbers are not special to Tailcat.<sup>[[62]](#references)[[63]](#references)</sup>
+For a TCP service already listening on port `4444` on the remote node, start `serve` there and pass its printed address to `forward` on the client. The second command binds `127.0.0.1:18080` by default, so a local process that only supports normal TCP sockets can connect to that loopback port while Tailcat carries its traffic to remote port `4444`.<sup>[[62]](#references)</sup> The port numbers are not special to Tailcat.<sup>[[62]](#references)</sup>
 
 ```bash
 # Remote node with a service on localhost:4444
@@ -249,7 +249,9 @@ tailcat serve 4444
 tailcat forward <tc-address> 18080:4444
 ```
 
-The address contains the server's WireGuard public key and, by default in current releases, a pre-shared key. Treat it as a credential: an unrestricted server accepts a peer that knows the address. A default ephemeral address stops working when the server exits; use saved keys only when a stable address is needed, and restrict clients with `serve --allow` if the address may be exposed. Connections can use a direct UDP path or a DERP relay, so this removes a conventional C2 domain but does not make network activity disappear.<sup>[[62]](#references)[[63]](#references)</sup>
+The address contains the server's WireGuard public key and, by default in current releases, a pre-shared key. Treat it as a credential: an unrestricted server accepts a peer that knows the address. An ephemeral address stops working when the server exits. A saved `default` key makes plain `serve` reuse a stable address on later runs, so check the startup message and restrict clients with `serve --allow` if the address may be exposed.<sup>[[62]](#references)</sup>
+
+Connections can use a direct UDP path or a DERP relay. This avoids requiring a dedicated C2 domain but does not make the network activity disappear.<sup>[[62]](#references)[[63]](#references)</sup>
 
 ## BOFScale - CDN-fronted in-process tailnet
 
