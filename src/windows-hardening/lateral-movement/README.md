@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Windows 支持多种可用于在远程系统上执行命令的机制。以下页面介绍了常见的横向移动技术及其前提条件：
+Windows 支持多种可用于在远程系统上执行命令的机制。以下页面介绍了常见的横向移动技术及其前置条件：
 
 - [**PsExec / SCM service execution**](psexec-and-winexec.md#how-do-they-work)
 - [**SmbExec**](psexec-and-winexec.md#impacket-smbexecpy-smbexec)
@@ -10,12 +10,12 @@ Windows 支持多种可用于在远程系统上执行命令的机制。以下页
 - [**AtExec / SchtasksExec**](atexec.md)
 - [**WinRM**](winrm.md)
 - [**DCOM Exec**](dcomexec.md)
-- [**RDPexec**](rdpexec.md)
+- [**RDPexec: authenticated RDP command execution**](../../network-services-pentesting/pentesting-rdp.md#remote-command-execution-with-an-authenticated-rdp-session)
 - [**SCMExec with SharpMove**](psexec-and-winexec.md#scmexec-with-sharpmove)
 - [**SCCM / MECM client execution**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
-- **Pass the cookie**（云端）<sup>[[1]](#references)</sup>
-- **Pass the PRT**（云端）<sup>[[2]](#references)</sup>
-- **Pass the Microsoft Entra ID certificate**（云端）<sup>[[3]](#references)</sup>
+- **Pass the cookie**（cloud）<sup>[[1]](#references)</sup>
+- **Pass the PRT**（cloud）<sup>[[2]](#references)</sup>
+- **Pass the Microsoft Entra ID certificate**（cloud）<sup>[[3]](#references)</sup>
 
 ## References
 
