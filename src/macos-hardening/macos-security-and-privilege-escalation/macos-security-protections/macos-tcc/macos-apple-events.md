@@ -4,27 +4,33 @@
 
 ## Grundlegende Informationen
 
-**Apple events** sind strukturierte Interprozessnachrichten, die Anwendungen verwenden, um Operationen oder Daten von anderen Anwendungen anzufordern. Der **Apple Event Manager** stellt APIs zum Erstellen, Senden, Empfangen und Beantworten dieser Nachrichten bereit.<sup>[[1]](#references)</sup>
+**Apple-Events** sind strukturierte Interprozessnachrichten, mit denen Anwendungen Operationen oder Daten von anderen Anwendungen anfordern. Der **Apple Event Manager** stellt die APIs zum Erstellen, Senden, Empfangen und Beantworten dieser Nachrichten bereit.<sup>[[1]](#references)</sup>
 
-Unter macOS ist der wichtigste Broker `/System/Library/CoreServices/appleeventsd`, der den Mach-Service `com.apple.coreservices.appleevents` registriert. Anwendungen, die Events empfangen, registrieren bei diesem Service einen Apple-event-Mach-Port; Sender erhalten darüber den Zielport.<sup>[[3]](#references)</sup>
+Unter macOS ist der wichtigste Vermittler `/System/Library/CoreServices/appleeventsd`, der den Mach-Dienst `com.apple.coreservices.appleevents` registriert. Anwendungen, die Ereignisse empfangen, registrieren bei diesem Dienst einen Apple-Event-Mach-Port; Sender erhalten darüber den Ziel-Port.<sup>[[3]](#references)</sup>
 
-Sandbox-Regeln und Entitlements beschränken diese Kommunikation. Ein Sandbox-Profil formuliert die erforderlichen Operationen üblicherweise als `allow appleevent-send` sowie als Mach-Lookup für `com.apple.coreservices.appleevents`:<sup>[[3]](#references)</sup>
+Sandbox-Regeln und Entitlements beschränken diese Kommunikation. Ein Sandbox-Profil legt die erforderlichen Operationen üblicherweise mit `allow appleevent-send` und einer Mach-Abfrage für `com.apple.coreservices.appleevents` fest:<sup>[[3]](#references)</sup>
+
 ```scheme
 (allow appleevent-send)
 (allow mach-lookup (global-name "com.apple.coreservices.appleevents"))
 ```
-Die öffentliche `com.apple.security.temporary-exception.apple-events`-Berechtigung kann eine sandboxed Anwendung auf benannte Ziel-Bundle-Identifiers beschränken. Bei der Analyse von Apple-signierten Komponenten sollte auch die private `com.apple.private.appleevents`-Berechtigung geprüft werden; private Apple-Berechtigungen sind für Anwendungen von Drittanbietern normalerweise nicht verfügbar.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
+
+Die öffentliche `com.apple.security.temporary-exception.apple-events`-Berechtigung kann eine sandboxed Anwendung auf benannte Bundle-IDs als Ziele beschränken. Prüfen Sie bei der Analyse von Apple-signierten Komponenten auch die private Berechtigung `com.apple.private.appleevents`; private Apple-Berechtigungen stehen Drittanbieteranwendungen normalerweise nicht zur Verfügung.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
 
 > [!TIP]
-> Setze die Umgebungsvariable **`AEDebugSends`**, um Informationen über die von einem Prozess gesendeten Apple events zu protokollieren:<sup>[[3]](#references)</sup>
+> Setzen Sie die Umgebungsvariable **`AEDebugSends`**, um Informationen zu den von einem Prozess gesendeten Apple events zu protokollieren:<sup>[[3]](#references)</sup>
 >
 > ```bash
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'
 > ```
 
+Um eine Automation-Berechtigung ihrem Sender und Empfänger zuzuordnen, siehe [TCC-Berechtigungen für Apple Events](index.html#identify-apple-events-sender-and-target-grants).
+
+
+
 ## References
 
-- [1] [Apple Developer Documentation - Apple Event Manager](https://developer.apple.com/documentation/applicationservices/apple_event_manager)
-- [2] [Apple Developer Documentation - Temporäre Ausnahmeberechtigungen für die App Sandbox](https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/EntitlementKeyReference/Chapters/AppSandboxTemporaryExceptionEntitlements.html)
-- [3] [Mac OS X and iOS Internals - Umgebungsvariablen für das Apple-event-Debugging](https://www.newosxbook.com/MOXiI.pdf)
+- [1] [Apple-Entwicklerdokumentation – Apple Event Manager](https://developer.apple.com/documentation/applicationservices/apple_event_manager)
+- [2] [Apple-Entwicklerdokumentation – Berechtigungen für temporäre Ausnahmen der App Sandbox](https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/EntitlementKeyReference/Chapters/AppSandboxTemporaryExceptionEntitlements.html)
+- [3] [Mac OS X und iOS Internals – Umgebungsvariablen zur Fehlerbehebung bei Apple Events](https://www.newosxbook.com/MOXiI.pdf)
 {{#include ../../../../banners/hacktricks-training.md}}
