@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Windows supporta diversi meccanismi che possono essere usati per eseguire comandi su sistemi remoti. Le pagine seguenti illustrano le tecniche comuni di movimento laterale e i relativi prerequisiti:
+Windows supporta diversi meccanismi che possono essere usati per eseguire comandi su sistemi remoti. Le pagine seguenti illustrano le tecniche comuni di lateral movement e i relativi prerequisiti:
 
-- [**PsExec / esecuzione del servizio SCM**](psexec-and-winexec.md#how-do-they-work)
+- [**PsExec / SCM service execution**](psexec-and-winexec.md#how-do-they-work)
 - [**SmbExec**](psexec-and-winexec.md#impacket-smbexecpy-smbexec)
 - [**WmiExec**](wmiexec.md)
 - [**AtExec / SchtasksExec**](atexec.md)
 - [**WinRM**](winrm.md)
 - [**DCOM Exec**](dcomexec.md)
-- [**RDPexec**](rdpexec.md)
-- [**SCMExec con SharpMove**](psexec-and-winexec.md#scmexec-with-sharpmove)
-- [**Esecuzione del client SCCM / MECM**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
+- [**RDPexec: authenticated RDP command execution**](../../network-services-pentesting/pentesting-rdp.md#remote-command-execution-with-an-authenticated-rdp-session)
+- [**SCMExec with SharpMove**](psexec-and-winexec.md#scmexec-with-sharpmove)
+- [**SCCM / MECM client execution**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
 - **Pass the cookie** (cloud)<sup>[[1]](#references)</sup>
 - **Pass the PRT** (cloud)<sup>[[2]](#references)</sup>
 - **Pass the Microsoft Entra ID certificate** (cloud)<sup>[[3]](#references)</sup>
