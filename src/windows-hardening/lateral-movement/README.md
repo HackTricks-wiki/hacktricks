@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Windows admite varios mecanismos que se pueden usar para ejecutar comandos en sistemas remotos. En las siguientes páginas se explican técnicas comunes de lateral movement y sus requisitos previos:
+Windows admite varios mecanismos que se pueden usar para ejecutar comandos en sistemas remotos. Las siguientes páginas explican técnicas comunes de movimiento lateral y sus requisitos previos:
 
 - [**PsExec / SCM service execution**](psexec-and-winexec.md#how-do-they-work)
 - [**SmbExec**](psexec-and-winexec.md#impacket-smbexecpy-smbexec)
@@ -10,7 +10,7 @@ Windows admite varios mecanismos que se pueden usar para ejecutar comandos en si
 - [**AtExec / SchtasksExec**](atexec.md)
 - [**WinRM**](winrm.md)
 - [**DCOM Exec**](dcomexec.md)
-- [**RDPexec**](rdpexec.md)
+- [**RDPexec: authenticated RDP command execution**](../../network-services-pentesting/pentesting-rdp.md#remote-command-execution-with-an-authenticated-rdp-session)
 - [**SCMExec with SharpMove**](psexec-and-winexec.md#scmexec-with-sharpmove)
 - [**SCCM / MECM client execution**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
 - **Pass the cookie** (cloud)<sup>[[1]](#references)</sup>
