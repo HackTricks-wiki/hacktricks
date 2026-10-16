@@ -1,16 +1,17 @@
-# Διαφυγή από Python Sandbox & Pyscript
+# Python Sandbox Escape & Pyscript
 
 {{#include ../../banners/hacktricks-training.md}}
 
 **Ενδιαφέρουσες σελίδες για έλεγχο:**
 
-- [**Pyscript hacking tricks**](pyscript.md)
+- [**Κόλπα hacking για Pyscript**](pyscript.md)
 - [**Αποσειριοποιήσεις Python**](../../pentesting-web/deserialization/README.md)
 - [**RCE μέσω αποσειριοποίησης μοντέλου Keras και αναζήτηση gadget**](keras-model-deserialization-rce-and-gadget-hunting.md)
-- [**Κόλπα για παράκαμψη Python sandboxes**](bypass-python-sandboxes/README.md)
-- [**Βασική σύνταξη αιτημάτων web σε Python**](web-requests.md)
+- [**Τεχνάσματα για παράκαμψη Python sandboxes**](bypass-python-sandboxes/README.md)
+- [**Βασική σύνταξη web requests στην Python**](web-requests.md)
 - [**Βασική σύνταξη και βιβλιοθήκες Python**](basic-python.md)
-- [**Αναζητήσεις επιλεγμένων επιθεμάτων MD5 και hash με μηδενική αριθμητική τιμή**](../../crypto/hashes/README.md#chosen-input-md5-hash-searches)
+- [**Python virtual environments (`venv`) και builds wheel**](basic-python.md#virtual-environments-and-wheel-builds-venv)
+- [**Αναζητήσεις επιλεγμένου suffix MD5 και hash με αριθμητικό μηδέν**](../../crypto/hashes/README.md#chosen-input-md5-hash-searches)
 
 ## References
 
