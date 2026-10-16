@@ -10,6 +10,7 @@
 - [**Tricks to bypass python sandboxes**](bypass-python-sandboxes/README.md)
 - [**Basic python web requests syntax**](web-requests.md)
 - [**Basic python syntax and libraries**](basic-python.md)
+- [**Python virtual environments (`venv`) and wheel builds**](basic-python.md#virtual-environments-and-wheel-builds-venv)
 - [**Chosen-input MD5 suffix and numeric-zero hash searches**](../../crypto/hashes/README.md#chosen-input-md5-hash-searches)
 
 ## References
