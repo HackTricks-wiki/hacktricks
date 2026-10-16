@@ -1,8 +1,8 @@
-# Ruch lateralny
+# Ruch boczny
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Windows obsługuje kilka mechanizmów, których można użyć do wykonywania poleceń w systemach zdalnych. Na poniższych stronach omówiono popularne techniki ruchu lateralnego i ich wymagania wstępne:
+Windows obsługuje kilka mechanizmów umożliwiających wykonywanie poleceń na systemach zdalnych. Poniższe strony opisują popularne techniki ruchu bocznego i ich wymagania wstępne:
 
 - [**PsExec / SCM service execution**](psexec-and-winexec.md#how-do-they-work)
 - [**SmbExec**](psexec-and-winexec.md#impacket-smbexecpy-smbexec)
@@ -10,12 +10,12 @@ Windows obsługuje kilka mechanizmów, których można użyć do wykonywania pol
 - [**AtExec / SchtasksExec**](atexec.md)
 - [**WinRM**](winrm.md)
 - [**DCOM Exec**](dcomexec.md)
-- [**RDPexec**](rdpexec.md)
+- [**RDPexec: authenticated RDP command execution**](../../network-services-pentesting/pentesting-rdp.md#remote-command-execution-with-an-authenticated-rdp-session)
 - [**SCMExec with SharpMove**](psexec-and-winexec.md#scmexec-with-sharpmove)
 - [**SCCM / MECM client execution**](../active-directory-methodology/sccm-management-point-relay-sql-policy-secrets.md#7-sccm-client-execution-for-lateral-movement)
-- **Pass the cookie** (cloud)<sup>[[1]](#references)</sup>
-- **Pass the PRT** (cloud)<sup>[[2]](#references)</sup>
-- **Pass the Microsoft Entra ID certificate** (cloud)<sup>[[3]](#references)</sup>
+- **Pass the cookie** (chmura)<sup>[[1]](#references)</sup>
+- **Pass the PRT** (chmura)<sup>[[2]](#references)</sup>
+- **Pass the Microsoft Entra ID certificate** (chmura)<sup>[[3]](#references)</sup>
 
 ## References
 
