@@ -2,18 +2,48 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+## Sanal ortamlar ve wheel derlemeleri (`venv`)
+
+Python'ın standart `venv` modülü, POSIX etkinleştirme betiği `<venv>/bin/activate` olan sanal ortamlar oluşturur; etkin ortamdan çıkmak için `deactivate` yazın.<sup>[[3]](#references)</sup> Ubuntu'da `python3-venv` paketi, temel Python paketiyle birlikte yüklenmediğinde bu modülü sağlar.<sup>[[4]](#references)</sup>
+
+```bash
+sudo apt-get install python3-venv
+#Now, go to the folder you want to create the virtual environment
+python3 -m venv <Dirname>
+python3 -m venv pvenv #In this case the folder "pvenv" is going to be created
+source <Dirname>/bin/activate
+source pvenv/bin/activate #Activate the environment
+#You can now install whatever python library you need
+deactivate #To deactivate the virtual environment
+```
+
+Eski setuptools tabanlı `setup.py bdist_wheel` iş akışlarında, etkin ortama `wheel` yüklemek `bdist_wheel` komutunu sağlıyordu.<sup>[[5]](#references)</sup> Güncel setuptools sürümlerinde bu komut için artık `wheel` gerekmez ve güncel paketleme yönergeleri, `setup.py`'yi doğrudan çağırmak yerine `python -m build --wheel` kullanılmasını önerir.<sup>[[6]](#references)[[7]](#references)</sup>
+
+```text
+error: invalid command 'bdist_wheel'
+```
+
+```bash
+# Legacy workaround for older setuptools-based projects:
+python3 -m pip install wheel
+
+# Current build workflow:
+python3 -m pip install build
+python3 -m build --wheel
+```
+
 ## Python Temelleri
 
 ### Yararlı bilgiler
 
 Aşağıdaki tüm örneklerde, açıkça belirtilmediği sürece **Python 3** kullanıldığı varsayılır.\
-Python 3'te `range()` yinelenebilir bir nesne döndürür (Python 2'deki `xrange()` ile benzerdir).\
-**tuple** ile **list** arasındaki fark, tuple içindeki bir değerin **konumunun** genellikle ona anlam kazandırması, list'in ise genellikle yalnızca sıralı bir değer dizisi olmasıdır.
+`range()`, Python 3'te yinelenebilir bir nesne döndürür (Python 2'deki `xrange()` gibi).\
+**Tuple** ile **list** arasındaki fark, tuple içindeki bir değerin **konumunun** genellikle ona anlam kazandırması, list'in ise genellikle yalnızca sıralı bir değer dizisi olmasıdır.
 
 ### Temel işlemler
 
-Bir sayının üssünü almak için şunu kullanırsınız: `3**2` (`3^2` değil)\
-Python 3'te `2/3 == 0.666666...` iken, `2//3 == 0` tamsayı bölme işlemi gerçekleştirir.\
+Bir sayının kuvvetini almak için şunu kullanırsınız: `3**2` (`3^2` değil)\
+Python 3'te `2/3 == 0.666666...`; `2//3 == 0` ise tamsayı bölmesi yapar.\
 `i >= j`\
 `i <= j`\
 `i == j`\
@@ -49,7 +79,7 @@ Python 3'te `2/3 == 0.666666...` iken, `2//3 == 0` tamsayı bölme işlemi gerç
 `'a' + str(3) == 'a3'`\
 `[1, 2, 3] + [4, 5] == [1, 2, 3, 4, 5]`
 
-**Bir list'in / string'in bölümleri**\
+**Bir listenin / dizenin parçaları**\
 `'abc'[0] == 'a'`\
 `'abc'[-1] == 'c'`\
 `'abc'[1:3] == 'bc'`\
@@ -60,26 +90,29 @@ Python 3'te `2/3 == 0.666666...` iken, `2//3 == 0` tamsayı bölme işlemi gerç
 `""" Several lines comment """`
 
 **Döngüler**
+
 ```python
 if a:
-# something
+    # something
 elif b:
-# something
+    # something
 else:
-# something
+    # something
 
 while a:
-# something
+    # something
 
 for i in range(0, 100):
-# something from 0 to 99
+    # something from 0 to 99
 
 for letter in "hola":
-# something with each letter
+    # something with each letter
 ```
-### Byte'lar, hex ve encoding'ler
+
+### Byte'lar, hex ve kodlamalar
 
 Bu, exploit-dev, reversing ve CTF'lerde çok yaygındır:
+
 ```python
 b"ABC".hex() == "414243"
 bytes.fromhex("414243") == b"ABC"
@@ -88,27 +121,29 @@ int.from_bytes(b"\x41\x42\x43", "big") == 0x414243
 "admin".encode() == b"admin"
 b"admin".decode() == "admin"
 ```
-### Tuples
+
+### Demetler
 
 `t1 = (1, '2', 'three')`\
 `t2 = (5, 6)`\
 `t3 = t1 + t2 == (1, '2', 'three', 5, 6)`\
-`(4,)` = singleton\
-`d = ()` empty tuple\
-`d += (4,)` --> add into a tuple\
-`# t1[1] = 'new value'` --> tuples are immutable\
-`list(t2) == [5, 6]` --> from tuple to list
+`(4,)` = tek öğeli demet\
+`d = ()` boş demet\
+`d += (4,)` --> demete ekle\
+`# t1[1] = 'new value'` --> demetler değiştirilemez\
+`list(t2) == [5, 6]` --> demetten listeye
 
-### Liste (array)
+### Liste (dizi)
 
-`d = []` empty\
+`d = []` boş\
 `a = [1, 2, 3]`\
 `b = [4, 5]`\
 `a + b == [1, 2, 3, 4, 5]`\
 `b.append(6)` --> `b == [4, 5, 6]`\
-`tuple(a) == (1, 2, 3)` --> from list to tuple
+`tuple(a) == (1, 2, 3)` --> listeden demete
 
 ### Sözlük
+
 ```python
 month_numbers = {1: 'Jan', 2: 'Feb', 'Feb': 2}
 month_numbers[1] == 'Jan'
@@ -121,6 +156,7 @@ month_numbers.update(a)
 mn = month_numbers.copy()  # independent copy
 month_numbers.get('key', 0)  # default value if key does not exist
 ```
+
 ### Kümeler
 
 Kümelerde tekrar yoktur.\
@@ -128,59 +164,62 @@ Kümelerde tekrar yoktur.\
 `myset.add('c')` --> `{'a', 'b', 'c'}`\
 `myset.add('a')` --> değişiklik olmaz\
 `myset.update([1, 2, 3])`\
-`myset.discard(10)` --> mevcutsa kaldırır; değilse hiçbir şey yapmaz\
-`myset.remove(10)` --> mevcut değilse istisna oluşturur\
+`myset.discard(10)` --> varsa kaldırır; yoksa hiçbir şey yapmaz\
+`myset.remove(10)` --> yoksa istisna oluşturur\
 `myset2 = set([1, 2, 3, 4])`\
 `myset.union(myset2)`\
 `myset.intersection(myset2)`\
 `myset.difference(myset2)`\
 `myset.symmetric_difference(myset2)`\
-`myset.pop()` --> rastgele bir öğe alır ve kaldırır\
+`myset.pop()` --> rastgele bir öğeyi alır ve kaldırır\
 `myset.intersection_update(myset2)`\
 `myset.difference_update(myset2)`\
 `myset.symmetric_difference_update(myset2)`
 
 ### Sınıflar
 
-`__lt__` içindeki method, nesneleri karşılaştırmak için `sort()` / `sorted()` tarafından kullanılır.
+`__lt__` içindeki metot, nesneleri karşılaştırmak için `sort()` / `sorted()` tarafından kullanılır.
+
 ```python
 import datetime
 
 
 class Person:
-def __init__(self, name):
-self.name = name
-self.last_name = name.split(" ")[-1]
-self.birthday = None
+    def __init__(self, name):
+        self.name = name
+        self.last_name = name.split(" ")[-1]
+        self.birthday = None
 
-def __lt__(self, other):
-if self.last_name == other.last_name:
-return self.name < other.name
-return self.last_name < other.last_name
+    def __lt__(self, other):
+        if self.last_name == other.last_name:
+            return self.name < other.name
+        return self.last_name < other.last_name
 
-def set_birthday(self, month, day, year):
-self.birthday = datetime.date(year, month, day)
+    def set_birthday(self, month, day, year):
+        self.birthday = datetime.date(year, month, day)
 
-def get_age(self):
-return (datetime.date.today() - self.birthday).days
+    def get_age(self):
+        return (datetime.date.today() - self.birthday).days
 
 
 class MITPerson(Person):
-next_id_num = 0  # class attribute
+    next_id_num = 0  # class attribute
 
-def __init__(self, name):
-super().__init__(name)
-self.id_num = MITPerson.next_id_num
-MITPerson.next_id_num += 1
+    def __init__(self, name):
+        super().__init__(name)
+        self.id_num = MITPerson.next_id_num
+        MITPerson.next_id_num += 1
 
-def __lt__(self, other):
-return self.id_num < other.id_num
+    def __lt__(self, other):
+        return self.id_num < other.id_num
 ```
+
 ### map, zip, filter, lambda, sorted ve tek satırlık ifadeler
 
-**Python 3**'te `map()` ve `filter()` iterator döndürür; bu nedenle tüm değerleri aynı anda yazdırmak istiyorsanız bunları `list()` ile dönüştürün.
+**Python 3**'te `map()` ve `filter()` iterator döndürür; tüm değerleri aynı anda yazdırmak istiyorsanız bunları `list()` ile dönüştürün.
 
 **Map**, `[f(x) for x in iterable]` gibidir:
+
 ```python
 list(map(tuple, [[1, 2, 3], [4, 5]]))
 # [(1, 2, 3), (4, 5)]
@@ -188,22 +227,26 @@ list(map(tuple, [[1, 2, 3], [4, 5]]))
 list(map(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
 # [False, False, True, False, False, True, False, False, True]
 ```
+
 **zip**, daha kısa iterable sona erdiğinde durur:
+
 ```python
 for f, b in zip(foo, bar):
-print(f, b)
+    print(f, b)
 ```
-**Lambda**, bir işlev tanımlamak için kullanılır:\
-`(lambda x, y: x + y)(5, 3) == 8` --> use lambda as a simple function\
-`sorted(range(-5, 6), key=lambda x: x**2)` --> use lambda to sort\
+
+**Lambda**, bir fonksiyon tanımlamak için kullanılır:\
+`(lambda x, y: x + y)(5, 3) == 8` --> lambda'yı basit bir fonksiyon olarak kullan\
+`sorted(range(-5, 6), key=lambda x: x**2)` --> sıralama için lambda'yı kullan\
 `list(filter(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9])) == [3, 6, 9]`\
 `reduce(lambda x, y: x * y, [1, 2, 3, 4]) == 24`
+
 ```python
 from functools import reduce
 
 
 def make_adder(n):
-return lambda x: x + n
+    return lambda x: x + n
 
 
 plus3 = make_adder(3)
@@ -211,51 +254,59 @@ plus3(4) == 7
 
 
 class Car:
-crash = lambda self: print("Boom!")
+    crash = lambda self: print("Boom!")
 
 
 my_car = Car()
 my_car.crash()  # Boom!
 ```
+
 `mult1 = [x for x in [1, 2, 3, 4, 5, 6, 7, 8, 9] if x % 3 == 0]`
 
 ### İstisnalar
+
 ```python
 def divide(x, y):
-try:
-result = x / y
-except ZeroDivisionError as e:
-print("division by zero! " + str(e))
-except TypeError:
-divide(int(x), int(y))
-else:
-print("result is", result)
-finally:
-print("executing finally clause in any case")
+    try:
+        result = x / y
+    except ZeroDivisionError as e:
+        print("division by zero! " + str(e))
+    except TypeError:
+        divide(int(x), int(y))
+    else:
+        print("result is", result)
+    finally:
+        print("executing finally clause in any case")
 ```
+
 ### Assert()
 
-Koşul yanlışsa dize yazdırılır.\
-`assert` ifadelerinin `python -O` ile devre dışı bırakılabileceğini unutmayın; bu nedenle bunları erişim denetimi veya girdi doğrulama için kullanmayın.
+Koşul false ise, string yazdırılır.\
+`assert` ifadelerinin `python -O` ile devre dışı bırakılabileceğini unutmayın; bu nedenle bunları erişim kontrolü veya girdi doğrulaması için kullanmayın.
+
 ```python
 def avg(grades, weights):
-assert len(grades) != 0, 'no grades data'
-assert len(grades) == len(weights), 'wrong number of grades'
+    assert len(grades) != 0, 'no grades data'
+    assert len(grades) == len(weights), 'wrong number of grades'
 ```
-### Generators, yield
 
-Bir generator, her şeyi tek seferde döndürmek yerine değerleri birer birer **yield** eder. Bu, büyük wordlist'ler, bruteforce araçları veya büyük response'lar için çok kullanışlıdır.
+### Üreteçler, yield
+
+Bir üreteç, her şeyi tek seferde döndürmek yerine değerleri teker teker **üretir**. Bu, devasa wordlist'ler, brute force araçları veya büyük yanıtlar için çok kullanışlıdır.
+
 ```python
 def my_gen(n):
-yield n
-yield n + 1
+    yield n
+    yield n + 1
 ```
+
 `g = my_gen(6)`\
 `next(g) == 6`\
 `next(g) == 7`\
 `next(g)` --> `StopIteration`
 
 ### Düzenli İfadeler
+
 ```python
 import re
 
@@ -263,8 +314,9 @@ re.search(r"\w", "hola").group() == "h"
 re.findall(r"\w", "hola") == ['h', 'o', 'l', 'a']
 re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 ```
+
 **Özel anlamlar:**\
-`.` --> satır sonu hariç herhangi bir karakter\
+`.` --> yeni satır dışındaki herhangi bir karakter\
 `\w` --> `[a-zA-Z0-9_]`\
 `\d` --> rakam\
 `\s` --> boşluk karakteri `[ \n\r\t\f]`\
@@ -277,8 +329,9 @@ re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 
 **Seçenekler:**\
 `re.search(pat, string, re.IGNORECASE)`\
-`re.search(pat, string, re.DOTALL)` --> noktanın satır sonlarıyla eşleşmesine izin verir\
-`re.search(pat, string, re.MULTILINE)` --> `^` ve `$` karakterlerinin farklı satırlarda eşleşmesine izin verir
+`re.search(pat, string, re.DOTALL)` --> noktanın yeni satırla eşleşmesine izin verir\
+`re.search(pat, string, re.MULTILINE)` --> `^` ve `$` işaretlerinin farklı satırlarda eşleşmesine izin verir
+
 ```python
 re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
 # ['<b>foo</b>and<i>so on</i>']
@@ -286,10 +339,12 @@ re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
 re.findall(r"<.*?>", "<b>foo</b>and<i>so on</i>")
 # ['<b>', '</b>', '<i>', '</i>']
 ```
+
 ### IterTools
 
 **product**\
-`from itertools import product` --> 1 veya daha fazla iterable arasındaki kartezyen çarpım
+`from itertools import product` --> 1 veya daha fazla yinelenebilir nesne arasındaki Kartezyen çarpım
+
 ```python
 list(product([1, 2, 3], [3, 4]))
 # [(1, 3), (1, 4), (2, 3), (2, 4), (3, 3), (3, 4)]
@@ -297,137 +352,167 @@ list(product([1, 2, 3], [3, 4]))
 list(product([1, 2, 3], repeat=2))
 # [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)]
 ```
+
 **permutations**\
-`from itertools import permutations` --> olası tüm düzenlemeler
+`from itertools import permutations` --> tüm olası sıralamalar
+
 ```python
 list(permutations(['1', '2', '3']))
 list(permutations('123', 2))
 ```
-**kombinasyonlar**\
+
+**combinations**\
 `from itertools import combinations` --> tekrarsız tüm olası kombinasyonlar
+
 ```python
 list(combinations('123', 2))
 # [('1', '2'), ('1', '3'), ('2', '3')]
 ```
+
 **combinations_with_replacement**\
 `from itertools import combinations_with_replacement`
+
 ```python
 list(combinations_with_replacement('123', 2))
 # [('1', '1'), ('1', '2'), ('1', '3'), ('2', '2'), ('2', '3'), ('3', '3')]
 ```
+
 **batched**\
-`from itertools import batched` --> Python 3.12+ sürümlerinde kullanılabilir; büyük bruteforce aday listelerini veya IOC dosyalarını parçalara bölmek için kullanışlıdır
+`from itertools import batched` --> Python 3.12 ve üzeri sürümlerde kullanılabilir; büyük brute-force aday listelerini veya IOC dosyalarını parçalara ayırmak için kullanışlıdır.
+
 ```python
 list(batched(range(10), 4))
 # [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
 ```
+
 ### Dekoratörler
 
-Bir işlevin yürütülmesi için gereken süreyi ölçen dekoratör:
+Bir fonksiyonun çalıştırılması için gereken süreyi ölçen dekoratör:
+
 ```python
 from functools import wraps
 import time
 
 
 def timeme(func):
-@wraps(func)
-def wrapper(*args, **kwargs):
-print("Let's call our decorated function")
-start = time.time()
-result = func(*args, **kwargs)
-print(f"Execution time: {time.time() - start} seconds")
-return result
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        print("Let's call our decorated function")
+        start = time.time()
+        result = func(*args, **kwargs)
+        print(f"Execution time: {time.time() - start} seconds")
+        return result
 
-return wrapper
+    return wrapper
 
 
 @timeme
 def decorated_func():
-print("Decorated func!")
+    print("Decorated func!")
 ```
-Çalıştırırsanız aşağıdakine benzer bir şey görürsünüz:
+
+Çalıştırdığınızda aşağıdakine benzer bir şey görürsünüz:
+
 ```text
 Let's call our decorated function
 Decorated func!
 Execution time: 4.79e-05 seconds
 ```
-### pentesting için kullanışlı standart kütüphane yardımcıları
 
-**`pathlib` ile dosya sistemi üzerinde gezinme** (`Path.walk()` Python 3.12+ sürümlerinde kullanılabilir; daha eski yorumlayıcılarda `os.walk()` kullanın):
+### Pentesting için kullanışlı standart kütüphane yardımcıları
+
+**`pathlib` ile dosya sistemi üzerinde gezinme** (`Path.walk()` Python 3.12+ sürümlerinde kullanılabilir; eski yorumlayıcılarda `os.walk()` kullanın):
+
 ```python
 from pathlib import Path
 
 for root, dirs, files in Path(".").walk():
-if ".git" in dirs:
-dirs.remove(".git")
-for name in files:
-if name.endswith((".py", ".env", ".bak")):
-print(root / name)
+    if ".git" in dirs:
+        dirs.remove(".git")
+    for name in files:
+        if name.endswith((".py", ".env", ".bak")):
+            print(root / name)
 ```
-**Komutları güvenli şekilde başlatın** (`shell=False` varsayılan olarak genellikle istediğiniz seçenektir):
+
+**Komutları güvenli şekilde başlatın** (`shell=False` varsayılanı genellikle tercih etmeniz gerekendir):
+
 ```python
 import subprocess
 
 cp = subprocess.run(
-["id"],
-capture_output=True,
-text=True,
-check=True,
+    ["id"],
+    capture_output=True,
+    text=True,
+    check=True,
 )
 print(cp.stdout)
 ```
-**Bir shell komutu oluşturmanız gerekiyorsa**, önce saldırgan tarafından kontrol edilen her token'ı tırnak içine alın:
+
+Bir **shell komutu** oluşturmanız gerekiyorsa, önce saldırganın kontrolündeki her token'ı tırnak içine alın:
+
 ```python
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
 ```
+
 **Geçici dosyalar / dizinler** (sabit kodlanmış `/tmp/foo` yollarından daha güvenli):
+
 ```python
 import tempfile
 from pathlib import Path
 
 with tempfile.TemporaryDirectory() as tmp:
-out = Path(tmp) / "loot.txt"
-out.write_text("secret\n")
-print(out.read_text())
+    out = Path(tmp) / "loot.txt"
+    out.write_text("secret\n")
+    print(out.read_text())
 ```
-HTTP automation için [Python web requests hakkında bu diğer sayfaya](web-requests.md) bakın.
 
-### Archive extraction gotchas (tooling ve file parser'ları için önemli)
+HTTP otomasyonu için [Python web istekleri hakkındaki bu diğer sayfaya](web-requests.md) bakın.
 
-**Python 3.14** sürümünden itibaren `tarfile.extract()` / `extractall()`, varsayılan olarak daha güvenli olan `data` filter'ını kullanır. Daha eski Python sürümlerinde, attacker-controlled archive'larla çalışırken bunu açıkça ayarlamalısınız.<sup>[[1]](#references)[[2]](#references)</sup>
+### Arşivleri çıkarmayla ilgili dikkat edilmesi gerekenler (araçlar ve dosya ayrıştırıcıları için önemli)
+
+**Python 3.14** sürümünden itibaren `tarfile.extract()` / `extractall()` varsayılan olarak daha güvenli `data` filtresini kullanır. Daha eski Python sürümlerinde, saldırganların kontrolündeki arşivleri işlerken bu filtreyi açıkça ayarlamalısınız.<sup>[[1]](#references)[[2]](#references)</sup>
+
 ```python
 import tarfile
 import tempfile
 
 with tempfile.TemporaryDirectory() as out:
-with tarfile.open("sample.tar.gz") as tf:
-tf.extractall(out, filter="data")
+    with tarfile.open("sample.tar.gz") as tf:
+        tf.extractall(out, filter="data")
 ```
-`filter="data"` kullanılsa bile güvenilmeyen arşivleri yeni bir geçici dizine çıkarın ve dosyaları ilgi çekici herhangi bir yere taşımadan önce yazılanları doğrulayın.
 
-`zipfile.Path` farklıdır: dosya adlarını sizin için **sanitize etmez**, bu nedenle saldırgan kontrollü ZIP üyelerini çıkarmadan önce yolları doğrulayın:
+`filter="data"` kullansanız bile güvenilmeyen arşivleri yeni bir geçici dizine çıkarın ve dosyaları önemli bir yere taşımadan önce yazılanları doğrulayın.
+
+`zipfile.Path` farklıdır: dosya adlarını sizin için **temizlemez**; bu nedenle saldırganların kontrolündeki ZIP üyelerini çıkarmadan önce yolları doğrulayın:
+
 ```python
 import os
 import zipfile
 
 base = os.path.abspath("/tmp/unzip")
 with zipfile.ZipFile("sample.zip") as zf:
-for info in zf.infolist():
-final_path = os.path.abspath(os.path.join(base, info.filename))
-if os.path.commonpath([base, final_path]) != base:
-raise ValueError(f"Path traversal inside ZIP: {info.filename}")
-zf.extract(info, base)
+    for info in zf.infolist():
+        final_path = os.path.abspath(os.path.join(base, info.filename))
+        if os.path.commonpath([base, final_path]) != base:
+            raise ValueError(f"Path traversal inside ZIP: {info.filename}")
+        zf.extract(info, base)
 ```
-### Hatırlanması gereken tehlikeli primitives
 
-- `eval()` / `exec()` **sandbox değildir**.
-- `ast.literal_eval()` Python kodunu çalıştırmaz, ancak saldırgan kontrollü girdilerle bellek / CPU hizmet reddi saldırısı için kötüye kullanılabilir.
-- `pickle.loads()` **güvenli değildir**; saldırgan kontrollü byte'ları asla unpickle etmeyin.
-- Daha gelişmiş offensive tricks için [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) ve [Python deserializations](../../pentesting-web/deserialization/README.md) bölümlerine bakın.
+### Hatırlanması gereken tehlikeli primitive'ler
+
+- `eval()` / `exec()` **sandbox** değildir.
+- `ast.literal_eval()` Python kodunu çalıştırmaz, ancak saldırgan denetimindeki girdilerle bellek / CPU hizmet engelleme saldırıları için kötüye kullanılabilir.
+- `pickle.loads()` **güvenli değildir**; saldırgan denetimindeki verileri asla unpickle etmeyin.
+- Daha derin ofansif numaralar için [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) ve [Python deserializations](../../pentesting-web/deserialization/README.md) sayfalarına göz atın.
 
 ## References
 
 - [1] [Python tarfile belgeleri](https://docs.python.org/3/library/tarfile.html)
 - [2] [PEP 706 – tarfile.extractall() için filtre](https://peps.python.org/pep-0706/)
+- [3] [venv — Sanal ortamların oluşturulması — Python 3.14 belgeleri](https://docs.python.org/3/library/venv.html)
+- [4] [Paket: python3-venv — Ubuntu paketleri](https://packages.ubuntu.com/noble/python/python3-venv)
+- [5] [wheel 0.24.0 — PyPI](https://pypi.org/project/wheel/0.24.0/)
+- [6] [wheel — PyPI](https://pypi.org/project/wheel/)
+- [7] [setup.py kullanımdan kaldırıldı mı? — Python Paketleme Kullanıcı Kılavuzu](https://packaging.python.org/en/latest/discussions/setup-py-deprecated/)
 {{#include ../../banners/hacktricks-training.md}}
