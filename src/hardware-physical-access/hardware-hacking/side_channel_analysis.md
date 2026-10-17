@@ -4,6 +4,8 @@
 
 Side-channel attacks recover secrets by observing physical or micro-architectural "leakage" that is *correlated* with internal state but is *not* part of the logical interface of the device.  Examples range from measuring the instantaneous current drawn by a smart-card to abusing CPU power-management effects over a network.
 
+For a target with accessible ARM debug hardware, [CoreSight ETM tracing over SWO](arm-coresight-instruction-tracing.md) can provide an execution-path reference alongside power or EM captures; it is a debug trace, not a leakage channel.<sup>[[17]](#references)</sup>
+
 ---
 
 ## Main Leakage Channels
@@ -122,5 +124,6 @@ The earlier draft also claimed: a **500 MHz–3 GHz** EM setup recovering an STM
 - [14] [Decoding Intellectual Property: Acoustic and Magnetic Side-Channel Attack on a 3-D Printer](https://arxiv.org/abs/2411.10887)
 - [15] [USENIX Security — Acoustic Side-Channel Attacks on Printers](https://www.usenix.org/conference/usenixsecurity10/acoustic-side-channel-attacks-printers)
 - [16] [Spying on Temperature using DRAM](https://bearhw.ece.vt.edu/content/dam/bearhw_ece_vt_edu/publications/caslab/xiong2019spying.pdf)
+- [17] [Following the Instructions: Live ARM Tracing with the ETM, ITM, and TPIU](https://voidstarsec.com/blog/arm-tracing-etm-itm)
 
 {{#include ../../banners/hacktricks-training.md}}
