@@ -1470,6 +1470,21 @@ The supplied implementation is x64-specific: it modifies `CONTEXT.Rip`, and its 
 
 For small native helpers and payload compilation patterns, see [Windows C Payloads](windows-local-privilege-escalation/windows-c-payloads.md).
 
+## Thread-pool callback DLL injection without shellcode (DLLParty)
+
+DLLParty adapts PoolParty-style thread-pool injection to make an existing target worker call `LoadLibraryA`, rather than executing an injected callback stub. Its dispatch primitive is a `TP_DIRECT` completion queued to the target pool's I/O completion port. This does not bypass process permissions: the PoC calls `OpenProcess(PROCESS_ALL_ACCESS)` and needs readable/writable target memory plus duplicable worker-factory and completion-port handles.<sup>[[46]](#references)[[47]](#references)</sup>
+
+On Windows x64, the worker passes a pointer to its stack-backed `TP_CALLBACK_INSTANCE` in `RCX`, the first callback argument. `LoadLibraryA` interprets that same pointer as an `LPCSTR`. On the tested path, `TppWorkerThread` builds the pointer at `RSP+0x178`, while its first ordinary write into that object is at `RSP+0x1d0`. A null-terminated DLL path that fits within this 0x58-byte prefix can therefore occupy the start of the instance without being overwritten before dispatch. This is a build-specific observation, not a documented Windows ABI guarantee.<sup>[[46]](#references)[[47]](#references)</sup>
+
+The reference workflow is:<sup>[[46]](#references)[[47]](#references)</sup>
+
+1. Enumerate the target's handles with `NtQuerySystemInformation(SystemHandleInformation)` and identify `TpWorkerFactory` by querying object types. Duplicate a worker-factory handle and query `WorkerFactoryBasicInformation`; `StartParameter` gives the remote `TP_POOL`. Skip factories with `TotalWorkerCount == 0`.
+2. Read `TP_POOL.CompletionPort` and walk the pool's private worker list. On the tested Windows 10 19045 x64 build (`ntdll.dll 10.0.19041.4842`), its head is at `pool+0x60`; each link is at `worker+0x10`, so the callback-instance slot at `worker+0x38` equals `link+0x28`. The PoC checks pointer alignment, link reciprocity, pool ownership, nonzero thread IDs, repeated nodes, and a stable list head.
+3. Write the DLL path into **every** recovered worker slot because the queued completion may be consumed by any worker. Place a `TP_DIRECT` with `Callback = LoadLibraryA` in writable target memory. The PoC uses `last_slot-0x500` on a worker stack instead of `VirtualAllocEx`; that offset is experimental and must not collide with active stack data.
+4. Duplicate the target completion-port handle and call `ZwSetIoCompletion(port, remote_direct, 0, 0, 0)`. The remote `TP_DIRECT` address is the completion key. An existing worker then invokes `LoadLibraryA` with its overwritten callback-instance pointer, loading a DLL already accessible to the target.
+
+The PoC takes a target PID (`DLLParty.exe <target_pid>`) and uses a hard-coded DLL path in `DLLParty.cpp`; set a path accessible to the target before building an x64 executable. It also uses its own process's `LoadLibraryA` address as the remote callback, so it assumes that address is valid in the target. The code does not check the path length against the 0x58-byte prefix or that worker traversal found a slot before indexing the last element. Revalidate the private offsets, stack layout, and writable space for the target build. Omitting `CreateRemoteThreadEx`, shellcode, and `VirtualAllocEx` does not eliminate cross-process writes or DLL-load telemetry.<sup>[[46]](#references)[[47]](#references)</sup>
+
 ## SantaStealer Tradecraft for Fileless Evasion and Credential Theft
 
 SantaStealer (aka BluelineStealer) illustrates how modern info-stealers blend AV bypass, anti-analysis and credential access in a single workflow.<sup>[[24]](#references)</sup>
@@ -1555,5 +1570,7 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [43] [Microsoft Learn - Creating a Child Process with Redirected Input and Output](https://learn.microsoft.com/en-us/windows/win32/procthread/creating-a-child-process-with-redirected-input-and-output)
 - [44] [Praetorian - GhostPack Necromancy: Reforging C# Tools with WasmForge](https://praetorian.com/blog/wasmforge-csharp-ghostpack-edr-evasion)
 - [45] [WasmForge - Compiling C# / .NET Projects](https://github.com/praetorian-inc/wasmforge/blob/main/docs/CSHARP.md)
+- [46] [DLLParty proof-of-concept and source](https://github.com/epersic/DLLParty)
+- [47] [DLLParty — Abusing thread pool internals for shellcodeless DLL injection](https://medium.com/@persic.eno/dllparty-abusing-thread-pool-internals-for-shellcodeless-dll-injection-7c84106f7745)
 
 {{#include ../banners/hacktricks-training.md}}
