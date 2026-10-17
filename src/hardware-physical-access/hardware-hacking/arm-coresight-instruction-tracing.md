@@ -8,7 +8,7 @@ ETM emits compressed control-flow events rather than instruction bytes. A decode
 
 ## Find the trace output
 
-On the STM32F401, asynchronous SWO uses PB3. The researched controller routed PB3 to a resistor test point. When the package or net is hidden, temporarily configure the candidate SWO-capable pin as a GPIO and toggle it through SWD memory writes. Probe board points for the matching waveform, then restore the trace pin configuration. Connect the analyzer with a common ground and a compatible logic voltage.<sup>[[1]](#references)</sup>
+On the STM32F401, asynchronous SWO uses PB3. On the researched controller, PB3 was connected to resistor R15, providing an accessible probe point. When the package or net is hidden, temporarily configure the candidate SWO-capable pin as a GPIO and toggle it through SWD memory writes. Probe board points for the matching waveform, then restore the trace pin configuration. Connect the analyzer with a common ground and a compatible logic voltage.<sup>[[1]](#references)</sup>
 
 ## Enable TPIU and ETM with OpenOCD
 
@@ -48,7 +48,7 @@ The SWO rate is `HCLK / (TPIU_ACPR + 1)`. With a 16 MHz HCLK and `ACPR=3`, captu
 
 Two independent firmware actions can stop a valid trace. A PLL change raises HCLK and therefore SWO baud while `ACPR` stays fixed; the UART layer then recovers incorrect bytes and ETM replay becomes nonsense. Inspect RCC/PLL setup in [firmware analysis](../firmware-analysis/) and, on the STM32F401 example, load the Cortex-M image at `0x08000000` and import its SVD in Ghidra so clock-register writes have names. Set a hardware breakpoint on a two-byte Thumb instruction *after* clock initialization. In the example, `bp 0x080001fa 2 hw` followed by `resume` stops after PLL setup; while halted, `mww 0xe0040010 31` sets the new divider. Calculate and set the new UART rate, arm capture, then `resume` again. This captures the post-transition path; it does not recover the missed transition.<sup>[[1]](#references)</sup>
 
-Separately, firmware may remap the SWO pad to another peripheral. In the example, GPIO alternate-function setup switched PB3 to I2C2 SDA, so no decoder setting could restore trace on that wire. Find the relevant GPIO initialization in the firmware, then either replace its call sites with size-matched Thumb NOPs (`0xBF00` per halfword) or halt the core and restore the trace-compatible pin configuration through SWD. Both approaches can disable the displaced peripheral; a runtime restore may also be overwritten again by firmware. Recompute the SWO divider after changing the clock or pin configuration.<sup>[[1]](#references)</sup>
+Separately, firmware may remap the SWO pad to another peripheral. In the example, GPIO alternate-function setup switched PB3 to I2C2 SDA, so no decoder setting could restore trace on that wire. Find the relevant GPIO initialization in the firmware, then either replace its call sites with size-matched Thumb NOPs (`0xBF00` per halfword) or halt the core and restore the trace-compatible pin configuration through SWD. Both approaches can disable the displaced peripheral; a runtime restore may also be overwritten again by firmware. When restoring the pin at runtime, set the SWO divider for the current HCLK.<sup>[[1]](#references)</sup>
 
 ## References
 
