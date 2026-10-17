@@ -1102,6 +1102,10 @@ kernel-race-condition-object-manager-slowdown.md
 ../../binary-exploitation/windows-kernel-exploitation/afd-rio-buffer-uaf.md
 {{#endref}}
 
+{{#ref}}
+../../binary-exploitation/windows-kernel-exploitation/usb-midi-packet-size-pool-overflow.md
+{{#endref}}
+
 #### Cancel-safe queue UAFs, paged-pool disclosures, and I/O ring pivots
 
 Some Windows kernel LPE chains can be built from two individually weak bugs: a **cancel-safe queue lifetime race** that frees a request/CBD while the queue lock is still held, and a **lock-release-before-copy** disclosure that leaks a freed paged-pool allocation during `RtlCopyToUser`.<sup>[[29]](#references)</sup>
