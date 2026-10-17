@@ -964,6 +964,7 @@
   - [UART](hardware-physical-access/hardware-hacking/uart.md)
   - [Radio](hardware-physical-access/hardware-hacking/radio.md)
   - [JTAG](hardware-physical-access/hardware-hacking/jtag.md)
+  - [ARM CoreSight Instruction Tracing over SWO](hardware-physical-access/hardware-hacking/arm-coresight-instruction-tracing.md)
   - [SPI](hardware-physical-access/hardware-hacking/spi.md)
 - [Radio Hacking](hardware-physical-access/radio-hacking/README.md)
   - [Maxiprox Mobile Cloner](hardware-physical-access/radio-hacking/maxiprox-mobile-cloner.md)
