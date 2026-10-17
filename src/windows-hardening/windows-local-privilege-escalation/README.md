@@ -1088,6 +1088,8 @@ kernel-mode-file-access-check-bypass.md
 
 Related Windows kernel-exploitation material:
 
+For a kernel-mode ring-buffer case with user-writable read/write registers, see the [USB MIDI looped-streaming variant](../../binary-exploitation/array-indexing.md#kernel-driver-variant-usb-midi-looped-streaming).
+
 {{#ref}}
 ../../binary-exploitation/windows-kernel-type-confusion-to-npfs-arbitrary-rw.md
 {{#endref}}
