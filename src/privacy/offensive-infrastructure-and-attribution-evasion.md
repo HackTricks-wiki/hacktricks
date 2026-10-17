@@ -168,6 +168,8 @@ A **dead-drop resolver (T1102.001)** stores an encoded pointer to current C2 ins
 
 One GitHub-specific resolver variation uses the Issues Search API only when an authenticated repository channel fails. The client searches for issues matching the current date, repository and issue type, follows each issue's comments URL, and extracts ciphertext between `<!--` and `-->` markers. After per-host, date-derived decryption, fields such as `Owner`, `LicRepo` and `LicToken` replace the primary repository owner, path and token. This lets the operator rotate credentials and endpoints without replacing the client; the issue comment is a resolver, while the repository files remain the tasking channel.<sup>[[15]](#references)</sup>
 
+An Android variant selects one of two public Telegram pages at startup and extracts ciphertext between two occurrences of a marker embedded in the APK. It Base64URL-decodes the value and decrypts it with AES-128-CBC: the first 16 bytes of `SHA-256(marker)` are the key and the remaining 16 bytes are the IV. The plaintext is the actual C2 base URL, not the Telegram page URL. Preserve the page content and exact marker when reproducing resolution; changing the public page rotates the endpoint without rebuilding the APK.<sup>[[16]](#references)</sup>
+
 This provides resilience and hides back-end C2 from static binary analysis. It also creates stable object, tenant, repository, API and access-pattern identifiers. Defenders should join:
 
 1. the process that contacted the service;
@@ -278,5 +280,6 @@ If one ordinary provider can fill every column, the architecture provides concea
 - [13] [Google Threat Intelligence Group — Disrupting the World's Largest Residential Proxy Network](https://cloud.google.com/blog/topics/threat-intelligence/disrupting-largest-residential-proxy-network)
 - [14] [Unit 42 — The Shadow Campaigns: Uncovering Global Espionage](https://unit42.paloaltonetworks.com/shadow-campaigns-uncovering-global-espionage/)
 - [15] [Unit 42 - Blinder Tunnel Campaign Targets Iraqi Infrastructure](https://unit42.paloaltonetworks.com/blinder-tunnel-targets-critical-infrastructure/)
+- [16] [RemControl: AI Built the Overlays. Victims Lose their PINs](https://www.group-ib.com/blog/remcontrol-android-banking-trojan/)
 
 {{#include ../banners/hacktricks-training.md}}
