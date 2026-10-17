@@ -2,13 +2,14 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**PNG files** are very common in **CTFs**, **incident response**, and **malware staging** because they are **lossless**, **chunk-based**, and many tools will happily render them even when they contain **extra metadata**, **appended payloads**, or **partially corrupted chunks**.
+**PNGファイル**は、**可逆圧縮**で、**チャンクベース**であり、**追加のメタデータ**、**末尾に追加されたペイロード**、または**一部が破損したチャンク**を含んでいても、多くのツールで問題なく表示できるため、**CTF**、**インシデント対応**、**マルウェアのステージング**でよく使われます。
 
-PNGを単なる画像ではなく、**container**として扱いましょう。
+PNGは単なる画像ではなく、**コンテナ**として扱いましょう。
 
-## Quick triage
+## 初動トリアージ
 
-LSB stegoに進む前に、まずcontainerレベルのチェックを行います。bit-plane/LSB workflowについては、[専用の画像stegoページ](../../../stego/images/README.md)を確認してください。
+LSBステガノグラフィに取りかかる前に、まずコンテナレベルのチェックを行いましょう。ビットプレーン/LSBのワークフローについては、[専用の画像ステガノグラフィのページ](../../../stego/images/)を確認してください。
+
 ```bash
 file suspect.png
 pngcheck -vp suspect.png
@@ -16,30 +17,32 @@ exiftool -a -u -g1 suspect.png
 strings -n 6 suspect.png | head
 binwalk -eM suspect.png
 ```
-確認すべき有用な項目:
 
-- `tEXt`、`zTXt`、`iTXt`、`eXIf`、`iCCP` などの **予期しない ancillary chunks**
-- **CRC errors** または不正な chunk lengths
-- `IEND` の後にある **追加データ**
-- **複数の `IEND` markers**、またはファイルの正式な終端後に復元可能な `IDAT` fragments
-- 有効な PNG **でありながら**、carve すると ZIP/PDF/script のようにも見えるファイル
+確認すべき項目:
+
+- **予期しない補助チャンク**（`tEXt`、`zTXt`、`iTXt`、`eXIf`、`iCCP` など）
+- **CRC エラー**または不正なチャンク長
+- **`IEND` の後にある追加データ**
+- **複数の `IEND` マーカー**、またはファイルの正式な終端後に復元可能な `IDAT` フラグメントがないか
+- 有効な PNG であり、**かつ** carve すると ZIP/PDF/スクリプトのようにも見えるファイル
 
 通常、最小限の有効な構造は次のとおりです:
 
-- `IHDR`（必ず最初）
-- `IDAT`（1つ以上の連続した chunks）
-- `IEND`（必ず最後）
+- `IHDR`（先頭でなければならない）
+- `IDAT`（1 つ以上の連続したチャンク）
+- `IEND`（末尾でなければならない）
 
-## `IEND` 後の trailing data
+## `IEND` の後にある末尾データ
 
-PNG で最も signal の高い artefact の1つは、**最後の `IEND` chunk の後に追加された data** です。多くの decoders はこれを無視するため、次の用途に有効です:
+PNG で特に重要なアーティファクトの 1 つは、**最後の `IEND` チャンクの後に追加されたデータ**です。多くのデコーダーはこれを無視するため、次の用途に使われます:
 
-- **Simple stego / hidden payloads**
-- **PNG polyglots**
-- **Malware staging**
-- **Buggy editors** によって失われた古い image data の復元
+- **単純な stego / 隠しペイロード**
+- **PNG polyglot**
+- **マルウェアのステージング**
+- バグのあるエディターからの**古い画像データの復元**
 
-簡易検出:
+簡単な検出方法:
+
 ```bash
 pngcheck -v suspect.png
 # Look for: "additional data after IEND chunk"
@@ -50,77 +53,134 @@ exiftool suspect.png
 grep -aboa $'IEND\xAE\x42\x60\x82' suspect.png
 # More than one hit is suspicious
 ```
-最後の `IEND` の後にあるすべてを carve したい場合:
-```bash
-IEND_OFF=$(grep -aboa $'IEND\xAE\x42\x60\x82' suspect.png | tail -n1 | cut -d: -f1)
-dd if=suspect.png of=png-trailer.bin bs=1 skip=$((IEND_OFF+8))
-file png-trailer.bin
-binwalk -eM png-trailer.bin
-```
-また、PNG または carve した trailer に対して、汎用アーカイブパーサーを直接試してください:
+
+`IEND` のバイト列を検索するだけでは手がかりにしかなりません。同じバイト列がチャンクデータや偽造されたトレーラーに含まれる可能性があるためです。確実にカービングするには、PNG シグネチャから長さ付きチャンクをたどり、構造上最初の `IEND` で停止します。[以下のチャンクウォーカー](#extract-ancillary-chunk-payloads) はトレーラーも保存します。<sup>[[6]](#references)</sup>
+
+汎用アーカイブパーサーを PNG やカービングしたトレーラーに直接適用する方法も試してください。
+
 ```bash
 7z l suspect.png
 unzip -l suspect.png
 ```
-## Acropalypse-style の crop/redact された screenshot の復元
 
-非常に実用的な最近の PNG forensic trick は、screenshot editor が古いファイルを先に **truncating** せずに PNG を **overwritten** したかどうかを確認することです。そのような場合、**previous image** の bytes が `IEND` の後に残っている可能性があり、追加の `IDAT` data を部分的に reconstruct できることもあります。
+## Acropalypse風のトリミング／墨消し済みスクリーンショットの復元
 
-これは **aCropalypse**（Google Pixel Markup）と、関連する **Windows Snipping Tool** の issue によって広く知られるようになりました。<sup>[[3]](#references)</sup> 実際に、「cropped」または「redacted」された PNG に古い trailing data がまだ含まれている場合、元の screenshot の一部を recover できる可能性があります。<sup>[[1]](#references)</sup>
+実用性の高い最近のPNGフォレンジック手法として、スクリーンショット編集ツールが古いファイルを先に**切り詰めずに**PNGを**上書き**していないかを確認します。その場合、`IEND`の後に**以前の画像**のバイト列が残っていることがあり、追加の`IDAT`データを部分的に復元できる場合もあります。
 
-実用的な workflow:
+これは**aCropalypse**（Google Pixel Markup）と、関連する**Windows Snipping Tool**の問題によって広く知られるようになりました。<sup>[[3]](#references)</sup> 実際、「トリミング済み」または「墨消し済み」のPNGに古い末尾データが残っていれば、元のスクリーンショットの一部を復元できる可能性があります。<sup>[[1]](#references)</sup>
+
+実用的な手順：
+
 ```bash
 pngcheck -v screenshot.png
 exiftool screenshot.png | grep -i trailer
 grep -aboa 'IDAT' screenshot.png
 grep -aboa $'IEND\xAE\x42\x60\x82' screenshot.png
 ```
-深い分析を強く正当化する兆候:
 
-- `pngcheck` が **`IEND` の後に追加データがある** と報告する
+深掘り分析を強く正当化する兆候:
+
+- `pngcheck` が **`IEND` の後に追加データがある**と報告する
 - **複数の `IEND`** が見つかる
-- 画像の見かけ上の末尾より後に **追加の `IDAT` チャンク** が見つかる
-- スクリーンショットの取得元が、既知の影響を受けたデバイス/エディターである
+- 画像の見かけ上の終端より後に **余分な `IDAT` チャンク** が見つかる
+- スクリーンショットが、影響を受けたことが知られているデバイス／エディターから取得された
 
-このような場合は、redaction を信頼できるものとして扱う前に、ファイルを **aCropalypse recovery tool** にかけてください。
+このような場合、編集による隠蔽を信頼できるものとして扱う前に、ファイルを **aCropalypse recovery tool** にかけてください。
 
-## 実際に重要な Chunk abuse
+## 実際に重要なチャンク悪用
 
-調査で最も興味深い PNG チャンクは、明白な画像チャンクではなく、通常は **text**、**metadata**、または **payload bytes** を保持できるチャンクです:
+調査で最も興味深い PNG チャンクは、通常、明白な画像チャンクではなく、**テキスト**、**メタデータ**、または **ペイロードバイト**を含められるチャンクです。
 
-- `tEXt` / `zTXt` / `iTXt` – text metadata と compressed text
-- `eXIf` – PNG 内の EXIF data
-- `iCCP` – embedded ICC profile
-- `PLTE` – indexed images の palette data。ただし、payload-smuggling scenarios でも有用です。<sup>[[2]](#references)</sup>
+- `tEXt` / `zTXt` / `iTXt` – テキストメタデータと圧縮テキスト
+- `eXIf` – PNG 内の EXIF データ
+- `iCCP` – 埋め込み ICC プロファイル
+- `PLTE` – インデックスカラー画像のパレットデータ。ペイロードの隠蔽にも利用できる。<sup>[[2]](#references)</sup>
 
 次のコマンドでダンプします:
+
 ```bash
 pngcheck -vp suspect.png
 exiftool -a -u -g1 suspect.png
 ```
-PNG chunks 内に offensive payload を persistence させる場合（例: 一部の PHP image transformation を経ても残る **PLTE**、**IDAT**、**tEXt** tricks）については、より詳しい upload-focused notes をこちらで確認してください:<sup>[[2]](#references)</sup>
+
+PNGチャンク（たとえば **PLTE**、**IDAT**、**tEXt** を使う手法）内での攻撃用payloadの永続化については、一部のPHP画像変換後も残る場合があります。詳しくは、アップロードに特化したこちらのノートを確認してください:<sup>[[2]](#references)</sup>
 
 {{#ref}}
 ../../../pentesting-web/file-upload/README.md
 {{#endref}}
 
-## 破損した PNG の修復
+## 補助チャンクのpayloadを抽出する
 
-整合性の確認と正確な破損箇所の特定には、**pngcheck** が今でも最初に使うツールとして最適です。
+攻撃者は、`IEND` の前にある**未知の補助チャンク**に任意のバイト列を配置できます。通常のPNGデコーダーは未知の補助チャンクを無視できますが、画像をバイト列として取得するスクリプトはpayloadを読み取り、利用できます。PNGを開くだけでは実行されません。<sup>[[4]](#references)[[6]](#references)</sup> 元の研究では、圧縮・暗号化されたカスタムチャンクが実証されました。<sup>[[4]](#references)</sup> 後のブラウザーの例では、抽出したバイト列をHTMLやダウンロードに利用していました。<sup>[[5]](#references)</sup>
+
+チャンクタイプの1文字目が小文字なら *補助チャンク*、2文字目が小文字なら *プライベート* です。たとえば、`paMP` はプライベートですが、`pAMP` はデモ用に作られたものであるにもかかわらず、パブリック名前空間を使用します。<sup>[[4]](#references)[[6]](#references)</sup> チャンクは `length (4 bytes, big-endian) | type (4 bytes) | data | CRC (4 bytes)` の形式で、CRCの対象はtypeとdataです。圧縮された `IDAT` データ内でチャンク名をgrepするのではなく、この構造を解析してください。以下のウォーカーは境界とCRCを検証し、補助payloadを生バイト列として書き出します。また、構造上の `IEND` より後にあるバイト列は `png-trailer.bin` に書き込みます。<sup>[[6]](#references)</sup>
+
+<details>
+<summary>補助チャンクとPNGトレーラーを切り出す</summary>
+
+```bash
+python3 - suspect.png <<'PY'
+from pathlib import Path
+import sys, zlib
+
+png = Path(sys.argv[1]).read_bytes()
+assert png[:8] == b"\x89PNG\r\n\x1a\n", "not a PNG"
+off = 8
+while off + 12 <= len(png):
+    size = int.from_bytes(png[off:off + 4], "big")
+    kind = png[off + 4:off + 8]
+    if not all(65 <= c <= 90 or 97 <= c <= 122 for c in kind):
+        raise ValueError(f"invalid chunk type at {off:#x}")
+    end = off + 12 + size
+    if size >= 2**31 or end > len(png):
+        raise ValueError(f"invalid chunk length at {off:#x}")
+    body = png[off + 8:end - 4]
+    crc = int.from_bytes(png[end - 4:end], "big")
+    if zlib.crc32(kind + body) & 0xffffffff != crc:
+        raise ValueError(f"bad CRC at {off:#x}")
+    print(f"{off:#010x} {kind.decode('ascii', 'replace')} {size} bytes")
+    if 97 <= kind[0] <= 122:
+        Path(f"chunk-{kind.decode('ascii')}-{off:x}.bin").write_bytes(body)
+    off = end
+    if kind == b"IEND":
+        if size != 0:
+            raise ValueError("IEND must be empty")
+        Path("png-trailer.bin").write_bytes(png[off:])
+        break
+else:
+    raise ValueError("no complete IEND chunk")
+PY
+for f in chunk-*.bin png-trailer.bin; do [ -f "$f" ] && file "$f"; done
+```
+
+</details>
+
+切り出したバイト列を `file`、`strings`、`binwalk` で調べ、実際に圧縮されている場合にのみ展開します。<sup>[[4]](#references)</sup> 再エンコードによって carrier が取り除かれる可能性があるため、これに頼る前にアップロードしたバイト列と取得したバイト列を比較してください。<sup>[[2]](#references)[[6]](#references)</sup>
+
+## 破損したPNGの修復
+
+整合性の確認と、破損箇所の特定には、**pngcheck** が今も最初に試すツールとして有力です。
 
 - [pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)
 
-ファイルが意図的に malicious なのではなく破損している場合、CTF や lab work では、bad headers、誤った IHDR values、CRC problems、malformed chunk layouts などの一般的な問題の修正に **PCRT** が役立ちます。
+意図的な悪意あるファイルではなく、単に破損しているファイルの場合、**PCRT** は CTF やラボ作業で、ヘッダーの破損、不正な IHDR 値、CRC の問題、不正なチャンク配置など、よくある問題を修正するのに役立ちます。
 
-疑わしい trailer data を含む PNG を、表示される image を維持したまま **sanitize** することが目的なら、ExifTool で trailer を明示的に削除できます。
+不審なトレーラーデータを含む PNG を、表示される画像を保持したまま**サニタイズ**することが目的なら、ExifTool を使ってトレーラーを明示的に削除できます。
+
 ```bash
 exiftool -Trailer:All= -overwrite_original suspect.png
 ```
-重要な証拠を扱う場合は、必ず**コピー**上で作業し、修復を試みる前に元データのハッシュを保持してください。
+
+機密性の高い証拠を扱う場合は、修復を試みる前に必ず**コピー**を作成し、元のファイルのハッシュを保存してください。
+
+
 
 ## References
 
 - [1] [aCropalypseの悪用：切り詰められたPNGの復元](https://www.da.vidbuchanan.co.uk/blog/exploiting-acropalypse.html)
 - [2] [PNG内の永続的なPHP payload：画像にPHPコードを注入し、そこに保持する方法](https://www.synacktiv.com/en/publications/persistent-php-payloads-in-pngs-how-to-inject-php-code-in-an-image-and-keep-it-there)
 - [3] [NVD - CVE-2023-28303](https://nvd.nist.gov/vuln/detail/CVE-2023-28303)
+- [4] [補助チャンクは機密情報を格納するのに最適な場所](https://ignifexlabs.com/blog/hiding-data-in-png-ancillary-chunks.html)
+- [5] [有効な補助チャンクを使用してエンドポイントにデータを密かに持ち込む](https://ignifexlabs.com/blog/png-data-smuggling.html)
+- [6] [Portable Network Graphics (PNG) 仕様（第3版）](https://www.w3.org/TR/png-3/)
 {{#include ../../../banners/hacktricks-training.md}}
