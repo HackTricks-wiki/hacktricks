@@ -84,7 +84,7 @@ Web-based triage often used in CTFs:
 PNG is a chunked format. In many challenges the payload is stored at the container/chunk level rather than in pixel values:
 
 - **Extra bytes after `IEND`** (many viewers ignore trailing bytes)
-- **Non-standard ancillary chunks** carrying payloads
+- **Non-standard ancillary chunks** carrying payloads; see the [PNG chunk walker and carving workflow](../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/png-tricks.md#extract-ancillary-chunk-payloads).
 - **Corrupted headers** that hide dimensions or break parsers until fixed
 
 High-signal chunk locations to review:
@@ -238,8 +238,9 @@ Supports PNG/BMP/GIF/WebP/WAV.
 
 Repo: https://github.com/dhsdshdhk/stegpy
 
+
+
 ## References
 
 - [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
-
 {{#include ../../banners/hacktricks-training.md}}
