@@ -6,6 +6,8 @@ This page collects **small, self-contained C snippets** that are handy during Wi
 
 > ⚠️  These payloads assume that the process already has the minimum privileges necessary to perform the action (e.g. `SeDebugPrivilege`, `SeImpersonatePrivilege`, or medium-integrity context for a UAC bypass).  They are intended for **red-team or CTF settings** where exploiting a vulnerability has landed arbitrary native code execution.
 
+For a DLL-injection workflow that uses an existing Windows thread-pool worker instead of a new remote thread, see [thread-pool callback DLL injection](../av-bypass.md#thread-pool-callback-dll-injection-without-shellcode-dllparty).
+
 ---
 
 ## Add local administrator user
