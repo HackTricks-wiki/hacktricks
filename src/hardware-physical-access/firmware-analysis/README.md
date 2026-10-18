@@ -102,6 +102,12 @@ Moreover, you can use these tools to extract **files embedded inside the firmwar
 
 Or [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) to inspect the file.
 
+### Raw display assets in external flash
+
+An external SPI dump is not necessarily the MCU's executable firmware. For a Cortex-M target, compare the start of each candidate code region with the device memory map: a normal vector table begins with a plausible SRAM stack pointer and reset-handler address in executable memory. A missing vector table at offset zero alone does not prove the entire chip has no code; inspect other offsets and the boot arrangement. If `binwalk` finds no container, inspect raw bytes and correlate flash read addresses from a [decoded SPI capture](../hardware-hacking/spi.md#reconstructing-spi-flash-reads-with-a-logic-analyzer) with actions that load new screens.<sup>[[14]](#references)</sup>
+
+For a display-asset region, try candidate pixel formats and dimensions instead of assuming PNG/JPEG. The cited device used **80×160 RGB565 little-endian** frames: at two bytes per pixel, a frame is **25,600 bytes** (25 KiB), not 24 kilobits. A decoded flash-read address identified the screen asset's offset; the researcher converted a prepared image with `ffmpeg -i bubo.jpg -pix_fmt rgb565le test.rgb`, replaced the equally sized asset in the original dump, wrote it with `flashrom -p linux_spi:dev=/dev/spidev0.0 -w flashme.bin`, and confirmed the new image on the display. This demonstrates writable *external display assets*, not extraction or reflashing of the MCU's internal firmware. Keep the original dump and verify dimensions, byte order, offset, and replacement length before any write.<sup>[[14]](#references)</sup>
+
 ### Differential flash analysis and recoverable XOR secret stores
 
 When a firmware setting has no documented storage format, first take several matching flash reads, change **exactly one** setting, dump the complete chip again, and compare offsets. Repeating the experiment with controlled values distinguishes the setting from counters and write metadata; changes at new offsets rather than in place indicate an append-only or log-structured store. Keep deleted/tombstoned entries because their payload bytes may remain recoverable.<sup>[[12]](#references)[[13]](#references)</sup>
@@ -731,5 +737,6 @@ This turns "encrypted firmware" into a more general problem: **recover the appli
 - [11] [ROOT Tesla OS on QEMU Part 2: Debugging and Fixing](https://cn0xroot.wordpress.com/2026/09/20/root_tesla_os_on_qemu_part_2_debugging_fixing)
 - [12] [Dell BIOS Passwords: Weak XOR Encryption Allows Recovery from SPI Flash (CVE-2026-40639)](https://mdsec.co.uk/2026/07/dell-bios-passwords-weak-xor-encryption-allows-recovery-from-spi-flash-cve-2026-40639)
 - [13] [R3n5k1/dellpwn - Dell BIOS password recovery tooling](https://github.com/R3n5k1/dellpwn)
+- [14] [VoidStar Security — Brushing Up on Hardware Hacking Part 2](https://voidstarsec.com/blog/brushing-up-part-2)
 
 {{#include ../../banners/hacktricks-training.md}}
