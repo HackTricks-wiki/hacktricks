@@ -86,11 +86,28 @@ When active reading is not possible, capture chip select, clock, controller-to-f
 
 For a dump that appears to contain graphics rather than executable code, continue with [raw display-asset triage](../firmware-analysis/#raw-display-assets-in-external-flash).<sup>[[4]](#references)</sup>
 
+#### Scapy and mixed SPI/QSPI captures
+
+A boot-time capture can reveal flash contents without a successful programmer read, but only for addresses the controller actually fetches. On an unknown header, identify the periodic clock, the chip-select line that goes active before traffic, and the data line carrying the opcode before assigning MOSI and MISO. Check the flash datasheet to distinguish commands from response bytes; narrow glitches on a probe lead may not represent sampled bits. Extra clip wiring can also make high-speed captures unreliable.<sup>[[5]](#references)</sup>
+
+Saleae's SPI CSV export marks a chip-select-low interval with `enable`, clocked MOSI/MISO bytes with `result`, and the end with `disable`. Group rows by that interval rather than concatenating all MISO bytes. A Scapy `Packet` with an opcode `ByteEnumField` and conditional address/dummy fields can dissect the MOSI header: for a 24-bit NOR `0x03` read, the header is one opcode plus three address bytes; `0x0B` fast read also has a dummy byte. `len(req.self_build())` gives the modeled header length, so `miso[header_length:]` is the read response while the MOSI bytes after the header are controller-side don't-care data. Place each response at the decoded address in an `0xFF`-filled image and track observed offsets separately: an unobserved byte is **not** evidence that the chip contained `0xFF` there.<sup>[[5]](#references)[[6]](#references)</sup>
+
+A later transition to quad output needs a different decoder. On a W25Q-style `0x6B` (1-1-4) read, opcode and address are single-lane but response data uses IO0–IO3; activity on the former `/WP` and `/HOLD` lines is stronger evidence of this switch than a faster clock alone. A single-lane SPI analyzer can mis-decode that data. Export the quad phase with a QSPI analyzer configured for the command's lane widths and dummy cycles, then merge it with the earlier single-lane capture by flash address. `spidump` auto-detects both export formats, rejects read data decoded at the wrong lane width, and reports read coverage.<sup>[[5]](#references)[[6]](#references)[[7]](#references)</sup>
+
+```bash
+python main.py single_lane_boot.csv --merge quad_boot.txt -o recovered_flash.bin -v
+```
+
+This command is run from the `spidump` repository after installing its dependencies. The result is still a **sparse observation**, not a complete chip dump. To inspect writes separately, correlate `0x06` write-enable, `0x05` status polls, erase opcodes and `0x02` page-program commands; page-program data follows the address on MOSI and is not included by a read-only reconstruction.<sup>[[5]](#references)[[6]](#references)</sup> Analyze the resulting image with [firmware analysis](../firmware-analysis/) and retain the coverage information when interpreting missing regions.
+
 ## References
 
 - [1] [Analog Devices — Introduction to SPI Interface](https://www.analog.com/en/resources/analog-dialogue/articles/introduction-to-spi-interface.html)
 - [2] [flashrom manual — CH341A SPI programmer and read/write options](https://flashrom.org/classic_cli_manpage.html)
 - [3] [Bus Pirate documentation — flashrom](https://docs.buspirate.com/docs/software/flashrom/)
 - [4] [VoidStar Security — Brushing Up on Hardware Hacking Part 2](https://voidstarsec.com/blog/brushing-up-part-2)
+- [5] [VoidStar Security — Reconstructing SPI Flash Firmware from Logic-Analyzer Captures with Scapy](https://voidstarsec.com/blog/scapy-spi-reconstruction)
+- [6] [spidump — SPI/QSPI trace capture and reconstruction](https://github.com/wrongbaud/spidump)
+- [7] [QSPI Analyzer for Saleae Logic/KingstVIS](https://github.com/AddioElectronics/QSPI-Analyzer)
 
 {{#include ../../banners/hacktricks-training.md}}
