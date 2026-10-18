@@ -4,56 +4,56 @@
 
 ## Taarifa za Msingi
 
-SPI (Serial Peripheral Interface) ni basi la serial linalotumia saa ya kusawazisha, na hutumiwa kwa kawaida kwa mawasiliano ya umbali mfupi kati ya saketi jumuishi. Kidhibiti hutoa saa na kuchagua kifaa cha pembeni, kama vile EEPROM, kihisi, au kifaa cha kudhibiti, kwa kutumia ishara ya chip-select.<sup>[[1]](#references)</sup>
+SPI (Serial Peripheral Interface) ni basi ya seriali inayotumia synchronous communication na hutumiwa kwa kawaida kwa mawasiliano ya umbali mfupi kati ya integrated circuits. Kidhibiti hutoa clock na kuchagua peripheral, kama vile EEPROM, sensor, au kifaa cha kudhibiti, kwa kutumia ishara ya chip-select.<sup>[[1]](#references)</sup>
 
-Vifaa vingi vya pembeni vinaweza kushiriki mistari ya saa na data, kwa kawaida kila kifaa kikiwa na chip-select yake. Kidhibiti huratibu uhamishaji; kwa kawaida vifaa vya pembeni haviwasiliani moja kwa moja kupitia basi la SPI. Polarity na timing ya chip-select hutegemea kifaa; kuchagua kwa active-low ni jambo la kawaida, lakini si la kila wakati. SPI haifafanui ugunduzi, uadressishaji, amri, au urefu mmoja wa juu wa uhamishaji, kwa hivyo rejelea datasheet ya kifaa lengwa kila wakati.<sup>[[1]](#references)</sup>
+Peripherals nyingi zinaweza kutumia pamoja mistari ya clock na data, kwa kawaida kila peripheral ikiwa na chip-select yake. Kidhibiti huratibu uhamishaji; kwa kawaida peripherals haziwasiliani moja kwa moja kupitia basi ya SPI. Polarity na timing ya chip-select hutegemea kifaa; active-low selection ni ya kawaida lakini si ya jumla. SPI haifafanui discovery, addressing, commands, au urefu mmoja wa juu kabisa wa uhamishaji, kwa hiyo kila mara rejelea datasheet ya kifaa lengwa.<sup>[[1]](#references)</sup>
 
-MOSI/COPI hubeba data kutoka kwa kidhibiti kwenda kwa kifaa cha pembeni, na MISO/CIPO hubeba data kutoka kwa kifaa cha pembeni kwenda kwa kidhibiti. Pande zote mbili zinaweza kuhamisha data kwa wakati mmoja. Uhusiano kati ya amri, anwani, mizunguko ya dummy, na data inayorejeshwa hufafanuliwa na kifaa cha pembeni—si na SPI—na hutegemea polarity na phase ya saa (modes 0–3). Usidhani kwamba utoaji wa data huanza hasa saa moja baada ya ingizo kuisha.<sup>[[1]](#references)</sup>
+MOSI/COPI hubeba data kutoka kwa kidhibiti kwenda kwa peripheral, na MISO/CIPO hubeba data kutoka kwa peripheral kwenda kwa kidhibiti. Mielekeo yote miwili inaweza kusogeza data kwa wakati mmoja. Uhusiano kati ya command, address, dummy cycles, na data inayorejeshwa hufafanuliwa na peripheral—si SPI—na hutegemea clock polarity na phase (modes 0–3). Usidhani kwamba output huanza hasa clock moja baada ya input kuisha.<sup>[[1]](#references)</sup>
 
 ## Kudump Firmware kutoka kwa EEPROM
 
-Kudump firmware kunaweza kusaidia kuichanganua na kutafuta udhaifu. Huenda picha sahihi isipatikane mtandaoni, au ikatofautiana kulingana na modeli, toleo la hardware, au toleo la firmware. Kwa hiyo, kuichopoa moja kwa moja kutoka kwenye kifaa halisi hutoa lengo sahihi la tathmini.
+Kudump firmware kunaweza kusaidia kuichanganua na kupata vulnerabilities. Huenda image sahihi isipatikane mtandaoni au ikatofautiana kulingana na model, hardware revision, au version, kwa hiyo kuichopoa moja kwa moja kutoka kwenye kifaa halisi hutoa target halisi ya assessment.
 
-Serial console inaweza kusaidia, lakini mfumo wake wa faili unaweza kuwa wa kusoma pekee, na kifaa lengwa huenda kikakosa zana za uchanganuzi, zikiwemo huduma zinazohitajika kutuma/kupokea traffic ya majaribio au kuchopoa binaries kwa urahisi. Picha ya offline huhifadhi mpangilio mzima wa flash na huruhusu kuchopoa mfumo wa faili na kufanya reverse engineering bila kurekebisha kifaa lengwa kinachoendeshwa.
+Serial console inaweza kusaidia, lakini filesystem yake inaweza kuwa read-only na huenda target isiwe na tools za analysis, zikiwemo utilities zinazohitajika kutuma/kupokea test traffic au kutoa binaries kwa urahisi. Image ya offline huhifadhi mpangilio kamili wa flash na huruhusu kutoa filesystem na kufanya reverse engineering bila kurekebisha target inayoendeshwa.
 
-Wakati wa tathmini ya kimwili iliyoidhinishwa, dump iliyothibitishwa inaweza pia kusaidia majaribio yanayodhibitiwa ya kurekebisha na kuandika upya firmware. Hii inajumuisha kubadilisha faili au kuingiza payload/backdoor ya majaribio ili kuonyesha persistence ya kiwango cha firmware. Hifadhi nakala kadhaa za usomaji zinazolingana na picha asili kabla ya kuandika chochote: voltage, chip selection, mpangilio, au picha isiyo sahihi inaweza kuharibu kifaa.
+Wakati wa physical assessment iliyoidhinishwa, dump iliyothibitishwa inaweza pia kusaidia majaribio ya controlled modification na reflashing. Hii inajumuisha kubadilisha files au kuingiza test payload/backdoor ili kuonyesha persistence katika kiwango cha firmware. Hifadhi nakala nyingi za usomaji zinazolingana pamoja na image ya awali kabla ya kuandika chochote: voltage, chip selection, layout, au image isiyo sahihi inaweza kuharibu kifaa.
 
-### CH341A EEPROM Programmer na Reader
+### CH341A EEPROM Programmer and Reader
 
-Kifaa hiki cha USB cha gharama nafuu kinaweza kudump na kuandika upya serial EEPROM na SPI flash zinazooana. Hutumiwa sana na chips za SPI NOR flash zinazohifadhi firmware ya PC BIOS/UEFI, na kinafaa wakati wa ufikiaji wa kimwili wenye muda mfupi.
+Kifaa hiki cha USB cha bei nafuu kinaweza kudump na kureflash vifaa vinavyooana vya serial EEPROM na SPI flash. Hutumiwa kwa kawaida na chips za SPI NOR flash zinazohifadhi firmware ya PC BIOS/UEFI, na ni rahisi kutumia wakati wa physical access ya muda mfupi.
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-Unganisha flash memory kwenye CH341A kisha uunganishe programmer kwenye kompyuta. Ikiwa programmer yenyewe haitambuliki, kagua kebo ya USB, ruhusa za OS, na driver inayofaa ya CH341A kabla ya kutatua matatizo ya chip lengwa. Thibitisha voltage ya chip, pin 1, nyaya za adapter, na output ya programmer kwa kutumia datasheet au mita—**usitegemee** kanuni kama kuweka VCC upande wa pili wa kiunganishi cha USB. Mwelekeo usio sahihi au kuweka 5 V kwenye kifaa cha 3.3/1.8 V kunaweza kukiharibu. Usomaji wa chip ikiwa bado imeunganishwa kwenye circuit pia unaweza kushindwa kwa sababu sehemu nyingine za board huweka mzigo kwenye basi au kulipa umeme.<sup>[[2]](#references)</sup>
+Unganisha flash memory kwenye CH341A, kisha uunganishe programmer kwenye kompyuta. Ikiwa programmer yenyewe haitambuliki, kagua USB cable, ruhusa za OS, na CH341A driver inayofaa kabla ya kutatua matatizo ya chip lengwa. Thibitisha voltage ya chip, pin 1, wiring ya adapter, na output ya programmer kwa kutumia datasheets au meter—**usitegemee** kanuni kama kuweka VCC upande ulio kinyume na USB connector. Mwelekeo usio sahihi au kutumia 5 V kwenye kifaa cha 3.3/1.8 V kunaweza kukiharibu. Usomaji wa in-circuit pia unaweza kushindwa kwa sababu sehemu nyingine za board zinapakia au kuwasha basi.<sup>[[2]](#references)</sup>
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
-Tumia programu kama `flashrom` au G-Flash kusoma chip. G-Flash ni GUI rahisi na inaweza kutambua vifaa vinavyooana kiotomatiki; hili linaweza kufaa wakati wa upataji wa haraka, lakini hakikisha mwenyewe modeli na voltage zilizotambuliwa. Bainisha programmer sahihi na, inapohitajika, modeli halisi ya chip; fanya angalau usomaji mara mbili na ulinganishe hash zake kabla ya kuichukulia dump kuwa ya kuaminika.<sup>[[2]](#references)</sup>
+Tumia software kama `flashrom` au G-Flash kusoma chip. G-Flash ni GUI ndogo na inaweza kutambua kiotomatiki vifaa vinavyooana, jambo linaloweza kusaidia wakati wa kupata data haraka, lakini thibitisha mwenyewe model na voltage iliyotambuliwa. Bainisha programmer halisi na, inapohitajika, model halisi ya chip; fanya usomaji angalau mara mbili na ulinganishe hashes zake kabla ya kuchukulia dump kuwa ya kuaminika.<sup>[[2]](#references)</sup>
 
 ![drawing](../../images/connected_status_ch341a.jpg)
 
-Baada ya kudump firmware, uchanganuzi unaweza kufanywa kwenye binary files. Zana kama strings, hexdump, xxd, binwalk, n.k. zinaweza kutumika kuchopoa taarifa nyingi kuhusu firmware na mfumo mzima wa faili pia.
+Baada ya kudump firmware, analysis inaweza kufanywa kwenye binary files. Tools kama strings, hexdump, xxd, binwalk, n.k. zinaweza kutumika kutoa taarifa nyingi kuhusu firmware na pia filesystem nzima.
 
-Kwa uchunguzi wa awali, Binwalk inaweza kuchanganua signatures zinazojulikana na kuchopoa maudhui yaliyopachikwa yanayotumika:
+Kwa uchunguzi wa awali, Binwalk inaweza kuchanganua signatures zinazojulikana na kutoa maudhui yaliyopachikwa inayoyasaidia:
 
 ```
 binwalk -e <filename>
 ```
 
-Faili la matokeo linaweza kutumia `.bin`, `.rom` au kiendelezi kingine; kiendelezi hakibainishi umbizo.
+Faili ya matokeo inaweza kutumia kiendelezi `.bin`, `.rom` au kingine; kiendelezi hakibainishi umbizo.
 
 > [!CAUTION]
-> Kumbuka kuwa kutoa firmware ni mchakato nyeti unaohitaji uvumilivu mkubwa. Kushughulikia vibaya kunaweza kuharibu firmware au hata kuifuta kabisa na kufanya kifaa kisiweze kutumika. Inapendekezwa kujifunza kuhusu kifaa husika kabla ya kujaribu kutoa firmware.
+> Kumbuka kwamba kutoa firmware ni mchakato nyeti unaohitaji uvumilivu mwingi. Utunzaji usiofaa unaweza kuharibu firmware au hata kuifuta kabisa na kufanya kifaa kisitumike. Inapendekezwa uchunguze kifaa husika kabla ya kujaribu kutoa firmware.
 
 ### Bus Pirate + flashrom
 
-![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: Bus Pirate + flashrom](<../../images/image (910).png>)
+![Programmer na Kisomaji cha CH341A EEPROM - Bus Pirate + flashrom: Bus Pirate + flashrom](<../../images/image (910).png>)
 
-Baadhi ya datasheet hutaja pini za kifaa lengwa kama `DI` na `DO`: kwa muunganisho wa kawaida wa flash wenye laini moja ya data, **MOSI/COPI ya kidhibiti huunganishwa na DI**, na **MISO/CIPO ya kidhibiti huunganishwa na DO**. Thibitisha kwenye datasheet ya kifaa lengwa, kwa kuwa sehemu zinazotumia I/O mbili/nne hutumia tena pini hizo katika modi nyingine.
+Baadhi ya datasheet huandika pini lengwa kama `DI` na `DO`: kwa muunganisho wa kawaida wa flash wenye laini moja ya data, **MOSI/COPI ya controller huunganishwa na DI**, na **MISO/CIPO ya controller huunganishwa na DO**. Hakiki datasheet ya kifaa lengwa, kwa sababu sehemu za dual/quad I/O hutumia tena pini katika modi nyingine.
 
-![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: Kumbuka kuwa ingawa PINOUT ya Pirate Bus inaonyesha pini za MOSI na MISO za kuunganisha kwenye SPI, baadhi ya SPI zinaweza...](<../../images/image (360).png>)
+![Programmer na Kisomaji cha CH341A EEPROM - Bus Pirate + flashrom: Kumbuka kuwa hata kama PINOUT ya Pirate Bus inaonyesha pini za kuunganisha MOSI na MISO kwenye SPI, baadhi ya SPI zinaweza...](<../../images/image (360).png>)
 
-Katika Windows au Linux unaweza kutumia programu ya [**`flashrom`**](https://www.flashrom.org/Flashrom) kufanya dump ya maudhui ya kumbukumbu ya flash kwa kutekeleza amri kama hii:
+Katika Windows au Linux unaweza kutumia programu [**`flashrom`**](https://www.flashrom.org/Flashrom) kunakili yaliyomo kwenye flash memory kwa kutekeleza kitu kama hiki:
 
 ```bash
 # In this command we are indicating:
@@ -66,9 +66,30 @@ flashrom -VV -c "W25Q64.V" -p buspirate_spi:dev=COM3 -r flash_content.img
 
 Nyaraka za hivi karibuni za Bus Pirate pia zinaonyesha vigezo vya hiari vya `serialspeed` na `spispeed`. Anza kwa kasi ya chini ikiwa nyaya ndefu au mzigo wa mzunguko uliopo unasababisha usomaji kutokuwa thabiti.<sup>[[3]](#references)</sup>
 
+### Usomaji wa mzunguko uliopo wakati kidhibiti kinatumia basi moja la flash
+
+Klipu ya SOIC inaweza kupeleka umeme wa flash kwenye sehemu nyingine za PCB. MCU ikiwashwa na kufikia chipu hiyo hiyo, uhamishaji wake wa SPI unaweza kugongana na uhamishaji wa programu ya nje. Kwa hiyo, matokeo ya `No EEPROM/flash device found` hayathibitishi kwamba flash haipo au haitumiki. Kwanza kagua mpangilio wa pini, volteji na mgusano, kisha tambua ikiwa kidhibiti kilicho kwenye bodi pia kinafanya kazi.<sup>[[4]](#references)</sup>
+
+Ikiwa kuna pedi ya majaribio ya reset, thibitisha polarity na volteji yake kwa mita kabla ya kuiweka katika hali ya kuwashwa. Kuweka MCU kwenye reset kunaweza kuacha flash ikifikiwa huku kukisimamisha SPI host inayoshindana nayo. Njia nyingine ni kuondoa chipu kwa desoldering au kurekodi kwa njia tulivu usomaji wa MCU; njia ya pili haiwezi kufikia maeneo ambayo hayajasomwa au kuandika kwenye chipu, na nyaya za ziada za probe zinaweza kuvuruga basi la kasi. Kuingilia oscillator au hali ya boot hutegemea kifaa lengwa, na si mbadala wa kukagua schematic na mawimbi.<sup>[[4]](#references)</sup>
+
+MCU ikiwa imesimamishwa, Raspberry Pi yenye kiolesura cha `spidev` kilichowashwa inaweza kusoma kupitia programu ya `linux_spi` ya flashrom. Badilisha `-p` ukitumia adapta tofauti. Rudia usomaji na ulinganishe hash kabla ya kuuamini; utambuzi wa kiotomatiki wa SFDP na usomaji uliofanikiwa **havithibitishi** kwamba erase, write au write-protect zitafanya kazi kwenye sehemu ambayo haitumiki vinginevyo.<sup>[[4]](#references)[[2]](#references)</sup>
+
+```bash
+sudo flashrom -p linux_spi:dev=/dev/spidev0.0 -r flash-1.bin
+sudo flashrom -p linux_spi:dev=/dev/spidev0.0 -r flash-2.bin
+sha256sum flash-1.bin flash-2.bin
+```
+
+### Kuunda upya usomaji wa SPI flash kwa kutumia logic analyzer
+
+Wakati usomaji wa moja kwa moja hauwezekani, nasa chip select, clock, data ya controller-to-flash na data ya flash-to-controller wakati wa boot au kitendo kilichochaguliwa kwenye UI. Katika PulseView, tambua kwanza kipindi cha chip-select inayotumika na clock, kisha sanidi chaneli za data za SPI decoder kulingana na pinout ya flash na uhakikishe kuwa kuna command/address inayowezekana ikifuatiwa na bytes zilizorejeshwa. Hamisha bytes za **MISO/flash-output** kwa kutumia Binary Decoder Output View na hifadhi anwani za usomaji zilizodecode ili kila jibu liwekwe kwenye offset yake inayolingana ya flash. Kunasa usomaji unaoanzishwa kupitia menyu pekee hupata maeneo yaliyoombwa tu, si picha kamili ya flash; usiunganishe majibu kana kwamba yanafuatana bila kukagua anwani.<sup>[[4]](#references)</sup>
+
+Kwa dump inayoonekana kuwa na michoro badala ya code inayoweza kutekelezwa, endelea na [uchanganuzi wa awali wa raw display-asset](../firmware-analysis/#raw-display-assets-in-external-flash).<sup>[[4]](#references)</sup>
+
 ## References
 
 - [1] [Analog Devices — Utangulizi wa Kiolesura cha SPI](https://www.analog.com/en/resources/analog-dialogue/articles/introduction-to-spi-interface.html)
 - [2] [Mwongozo wa flashrom — CH341A SPI programmer na chaguo za kusoma/kuandika](https://flashrom.org/classic_cli_manpage.html)
 - [3] [Nyaraka za Bus Pirate — flashrom](https://docs.buspirate.com/docs/software/flashrom/)
+- [4] [VoidStar Security — Kuboresha Ujuzi wa Hardware Hacking, Sehemu ya 2](https://voidstarsec.com/blog/brushing-up-part-2)
 {{#include ../../banners/hacktricks-training.md}}
