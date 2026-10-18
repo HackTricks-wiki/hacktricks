@@ -96,10 +96,34 @@ Also check whether `newrole` is available:<sup>[[3]](#references)[[10]](#referen
 ```bash
 sudo -l
 which newrole runcon
-newrole -l 2>/dev/null
+newrole -V 2>/dev/null
 ```
 
 `runcon` and `newrole` are not automatically exploitable, but if a privileged wrapper or a `sudoers` rule lets you select a better role/type, they become high-value escalation primitives.<sup>[[3]](#references)[[10]](#references)[[11]](#references)</sup>
+
+### Audit writable transition entrypoints
+
+A transition graph is only a policy lead. To turn it into an attack path, identify the executable type that enters a more useful domain, then check whether you can modify an executable with that label or replace it through its parent directory.<sup>[[9]](#references)[[20]](#references)</sup> An automatic `execve` transition needs an applicable `type_transition` rule, source-domain execute access, target-domain `entrypoint` access, and permission to transition between the domains.<sup>[[20]](#references)</sup> The target domain may gain SELinux access, but execution does not itself change the Linux UID; check [SUID/SGID and ACLs](suid-sgid-and-acl-triage.md) separately.<sup>[[20]](#references)[[21]](#references)</sup>
+
+Use the reported entrypoint type to check the underlying rules, then inspect the path and its parent for write access.<sup>[[9]](#references)[[20]](#references)[[22]](#references)</sup>
+
+```bash
+src=$(id -Z | cut -d: -f3)
+sepolicy transition -s "$src"                 # Note target domain and entrypoint type
+dst=target_t                                   # Substitute a domain from the report
+entry=target_exec_t                            # Substitute its entrypoint type
+sesearch -T -s "$src" -t "$entry" -c process
+sesearch --allow -s "$src" -t "$dst" -c process -p transition
+sesearch --allow -s "$src" -t "$entry" -c file -p execute
+sesearch --allow -s "$dst" -t "$entry" -c file -p entrypoint
+sesearch --allow -s "$src" -t "$entry" -c file -p write
+ls -lZ /path/to/entrypoint
+namei -l /path/to/entrypoint
+getfacl -p /path/to/entrypoint
+getfacl -p /path/to
+```
+
+Correlate the entrypoint type with an actual executable path. Inspect DAC, ACLs, SELinux write permission on the file or parent directory, the file label, and any conditional boolean before treating a policy edge as reachable.<sup>[[20]](#references)[[22]](#references)</sup> If a path is replaced rather than edited in place, verify the new inode's context: filesystem labels are stored as extended attributes, and the replacement may not keep the entrypoint type.<sup>[[21]](#references)</sup> SELinux-aware programs can request a transition with `setexeccon`, so an absent automatic `type_transition` rule does not rule out every transition.<sup>[[20]](#references)</sup>
 
 ## Files, Relabeling, and High-Value Misconfigurations
 
@@ -249,6 +273,8 @@ This page keeps the container content short to avoid duplication. For the contai
 ../containers-namespaces/container-security/protections/selinux.md
 {{#endref}}
 
+
+
 ## References
 
 - [1] [Red Hat docs: Using SELinux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/using_selinux/index)
@@ -270,5 +296,7 @@ This page keeps the container content short to avoid duplication. For the contai
 - [17] [Why you should be using Multi-Category Security for your Linux containers](https://www.redhat.com/en/blog/why-you-should-be-using-multi-category-security-your-linux-containers)
 - [18] [Podman top documentation](https://docs.podman.io/en/latest/markdown/podman-top.1.html)
 - [19] [selinux(8) - Linux manual page](https://man7.org/linux/man-pages/man8/selinux.8.html)
-
+- [20] [SELinux Notebook: Domain and Object Transitions](https://github.com/SELinuxProject/selinux-notebook/blob/main/src/domain_object_transitions.md)
+- [21] [Red Hat Enterprise Linux 10: Using SELinux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html-single/using_selinux/using_selinux)
+- [22] [SETools sesearch(1) manual](https://manpages.debian.org/testing/setools/sesearch.1.en.html)
 {{#include ../../banners/hacktricks-training.md}}
