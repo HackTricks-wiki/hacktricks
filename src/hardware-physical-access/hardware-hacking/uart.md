@@ -33,6 +33,10 @@ Swapping TX and RX normally produces no communication; confusing power, ground, 
 
 Manufacturers may omit the header, leave series resistors unpopulated, disable the console in firmware, or expose only TX. Trace nearby test pads and resistor footprints to the SoC and add a temporary high-impedance connection only after confirming the electrical level. The presence of a warranty does not imply that an accessible UART must exist.
 
+### Recovering a low-looking TX pad
+
+A labeled TX pad that stays low in an initial scope capture is not enough to rule out UART. After confirming the target logic voltage and a common ground, try a weak pull-up (the documented example used **10 kΩ to 3.3 V**) and repeat the capture while exercising buttons or booting the device. Only use the target's verified logic rail; do not connect a pull-up to an unknown or actively driven signal. If framed transitions appear, measure the shortest clean bit period to estimate the baud rate before connecting the pad receive-only to a serial adapter. This recovered 115200-baud button-event logs in the example, but it did not expose a firmware dump.<sup>[[8]](#references)</sup>
+
 ### Identifying the UART Baud Rate
 
 The easiest way to identify the correct baud rate is to look at the **TX pin’s output and try to read the data**. If the data you receive isn’t readable, switch to the next possible baud rate until the data becomes readable. You can use a USB-to-serial adapter or a multipurpose device like Bus Pirate to do this, paired with a helper script, such as [baudrate.py](https://github.com/devttys0/baudrate/). The most common baud rates are 9600, 38400, 19200, 57600, and 115200.
@@ -260,5 +264,6 @@ U-Boot may disable interruption, require a vendor-specific key sequence, or lock
 - [5] [VoidStar Security — SCPI and Hardware Instrumentation for Reverse Engineers, Part 1](https://voidstarsec.com/blog/scpi-and-hardware-instrumentation-for-reverse-engineers-part-1)
 - [6] [Rigol MSO5000 Programming Guide](https://www.batronix.com/files/Rigol/Oszilloskope/MSO5000/MSO5000_ProgrammingGuide_EN-V2.0.pdf)
 - [7] [PyVISA — Configuring the backend](https://pyvisa.readthedocs.io/en/latest/introduction/configuring.html)
+- [8] [VoidStar Security — Brushing Up on Hardware Hacking Part 2](https://voidstarsec.com/blog/brushing-up-part-2)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -66,10 +66,31 @@ flashrom -VV -c "W25Q64.V" -p buspirate_spi:dev=COM3 -r flash_content.img
 
 Recent Bus Pirate documentation also shows optional `serialspeed` and `spispeed` parameters. Start conservatively if long wires or in-circuit loading make reads unstable.<sup>[[3]](#references)</sup>
 
+### In-circuit reads when the controller shares the flash bus
+
+A SOIC clip may feed the flash supply into the rest of the PCB. If the MCU is then powered and accesses the same chip, its SPI transfers can collide with the external programmer's transfers. A `No EEPROM/flash device found` result is therefore not proof that the flash is absent or unsupported. Check pinout, voltage and contact first, then determine whether the on-board controller is also active.<sup>[[4]](#references)</sup>
+
+If a reset test pad is available, confirm its polarity and voltage with a meter before asserting it. Holding the MCU in reset can leave the flash accessible while stopping the competing SPI host. Alternatives are desoldering the chip or passively recording the MCU's reads; the latter cannot access unread regions or write the chip, and extra probe wiring can disturb a fast bus. An oscillator or boot-mode intervention is target-specific, not a substitute for checking the schematic and signals.<sup>[[4]](#references)</sup>
+
+With the MCU held inactive, a Raspberry Pi with an enabled `spidev` interface can read through flashrom's `linux_spi` programmer. Change `-p` for a different adapter. Repeat the read and compare hashes before trusting it; SFDP autodetection and a successful read do **not** establish that erase, write, or write-protect operations work on an otherwise unsupported part.<sup>[[4]](#references)[[2]](#references)</sup>
+
+```bash
+sudo flashrom -p linux_spi:dev=/dev/spidev0.0 -r flash-1.bin
+sudo flashrom -p linux_spi:dev=/dev/spidev0.0 -r flash-2.bin
+sha256sum flash-1.bin flash-2.bin
+```
+
+### Reconstructing SPI flash reads with a logic analyzer
+
+When active reading is not possible, capture chip select, clock, controller-to-flash data and flash-to-controller data during boot or a chosen UI action. In PulseView, identify the active chip-select interval and clock first, then configure the SPI decoder's data channels using the flash pinout and verify a plausible command/address followed by returned bytes. Export the **MISO/flash-output** bytes with Binary Decoder Output View and preserve the decoded read addresses so each response can be placed at its corresponding flash offset. Capturing only menu-driven reads yields only the requested regions, not a complete flash image; do not concatenate responses as if they were contiguous without checking addresses.<sup>[[4]](#references)</sup>
+
+For a dump that appears to contain graphics rather than executable code, continue with [raw display-asset triage](../firmware-analysis/#raw-display-assets-in-external-flash).<sup>[[4]](#references)</sup>
+
 ## References
 
 - [1] [Analog Devices — Introduction to SPI Interface](https://www.analog.com/en/resources/analog-dialogue/articles/introduction-to-spi-interface.html)
 - [2] [flashrom manual — CH341A SPI programmer and read/write options](https://flashrom.org/classic_cli_manpage.html)
 - [3] [Bus Pirate documentation — flashrom](https://docs.buspirate.com/docs/software/flashrom/)
+- [4] [VoidStar Security — Brushing Up on Hardware Hacking Part 2](https://voidstarsec.com/blog/brushing-up-part-2)
 
 {{#include ../../banners/hacktricks-training.md}}
