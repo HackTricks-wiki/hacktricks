@@ -4,45 +4,112 @@
 
 ## Información básica
 
-UART es una interfaz serial asíncrona que transfiere un flujo de bits enmarcado sin un reloj compartido. No confundas UART de nivel lógico con RS-232: RS-232 usa niveles de voltaje distintos, a menudo negativos, y requiere un transceptor.<sup>[[1]](#references)[[3]](#references)</sup>
+UART es una interfaz serial asíncrona que transfiere un flujo de bits enmarcado sin un reloj compartido. No confundas UART a nivel lógico con RS-232: RS-232 utiliza niveles de voltaje diferentes, a menudo negativos, y requiere un transceptor.<sup>[[1]](#references)[[3]](#references)</sup>
 
-Por lo general, la línea se mantiene alta (en el valor lógico 1) mientras UART está en estado inactivo. Luego, para indicar el inicio de una transferencia de datos, el transmisor envía un bit de inicio al receptor, durante el cual la señal se mantiene baja (en el valor lógico 0). A continuación, el transmisor envía de cinco a ocho bits de datos que contienen el mensaje, seguidos de un bit de paridad opcional y uno o dos bits de parada (con valor lógico 1), según la configuración. El bit de paridad, que se usa para comprobar errores, rara vez se ve en la práctica. El bit o los bits de parada indican el final de la transmisión.
+Por lo general, la línea se mantiene en nivel alto (valor lógico 1) mientras UART está en estado inactivo. Luego, para señalar el inicio de una transferencia de datos, el transmisor envía un bit de inicio al receptor, durante el cual la señal se mantiene en nivel bajo (valor lógico 0). A continuación, el transmisor envía de cinco a ocho bits de datos que contienen el mensaje real, seguidos de un bit de paridad opcional y uno o dos bits de parada (con valor lógico 1), según la configuración. El bit de paridad, que se utiliza para comprobar errores, rara vez se ve en la práctica. El bit o los bits de parada indican el final de la transmisión.
 
-La configuración más común es 8N1: ocho bits de datos, sin paridad y un bit de parada. UART envía primero el bit de datos menos significativo, por lo que el carácter ASCII `C` (`0x43`) se transmite así: inicio `0`; datos `1, 1, 0, 0, 0, 0, 1, 0`; parada `1`.<sup>[[1]](#references)</sup>
+La configuración más común es 8N1: ocho bits de datos, sin paridad y un bit de parada. UART envía primero el bit de datos menos significativo, así que ASCII `C` (`0x43`) se transmite como: inicio `0`; datos `1, 1, 0, 0, 0, 0, 1, 0`; parada `1`.<sup>[[1]](#references)</sup>
 
-![UART: We call the most common configuration 8N1: eight data bits, no parity, and one stop bit. For example, if we wanted to send the character C, or 0x43 in ASCII, in an 8N1 UART](<../../images/image (764).png>)
+![UART: A la configuración más común la llamamos 8N1: ocho bits de datos, sin paridad y un bit de parada. Por ejemplo, si quisiéramos enviar el carácter C, o 0x43 en ASCII, mediante UART 8N1](<../../images/image (764).png>)
 
-Herramientas de hardware para comunicarse mediante UART:
+Herramientas de hardware para comunicarse con UART:
 
 - Adaptador USB a serial
 - Adaptadores con chips CP2102 o PL2303
-- Herramienta multipropósito como Bus Pirate, Adafruit FT232H, Shikra o Attify Badge
+- Herramientas multipropósito como Bus Pirate, Adafruit FT232H, Shikra o Attify Badge
 
 ### Identificación de puertos UART
 
-Un header de depuración típico expone **TX**, **RX** y **GND**; también puede exponer un pin **Vcc/Vref**, de reinicio o de control de flujo. Vcc no es una señal UART y normalmente solo debe usarse como referencia de voltaje, no conectarse como fuente de alimentación, a menos que se conozcan el esquema de la placa y los requisitos de corriente.<sup>[[2]](#references)[[3]](#references)</sup>
+Un conector de depuración típico expone **TX**, **RX** y **GND**; también puede exponer un pin **Vcc/Vref**, de reinicio o de control de flujo. Vcc no es una señal UART y normalmente solo debe usarse como referencia de voltaje, no conectarse como fuente de alimentación, a menos que se conozcan el esquema de la placa y los requisitos de corriente.<sup>[[2]](#references)[[3]](#references)</sup>
 
 Empieza con el dispositivo **apagado** y desconectado:
 
-- Identifica **GND** en modo de continuidad, comparándolo con un plano de tierra conocido, el blindaje del conector o la tierra de alimentación. Nunca uses el modo de continuidad/resistencia con una placa encendida.
-- Cambia al modo de voltaje de CC antes de encender el dispositivo objetivo. Mide los pines candidatos con respecto a tierra para identificar el voltaje lógico. Un riel estable puede ser Vcc/Vref; no des por hecho que es seguro conectarlo.
-- Observa los pines candidatos con un analizador lógico o un osciloscopio durante el arranque. **TX** suele estar inactivo en nivel alto y mostrar ráfagas de datos enmarcados. Un multímetro puede mostrar fluctuaciones promedio, pero no puede validar el encuadre ni la velocidad en baudios.
-- **RX** puede permanecer inactivo y no se puede identificar de forma segura solo porque esté junto a TX. Sigue las pistas de la PCB, consulta la hoja de datos del SoC o usa un analizador de alta impedancia antes de aplicarle señales.
+- Identifica **GND** en modo de continuidad, comparándolo con un plano de tierra conocido, el blindaje del conector o la tierra de la fuente de alimentación. Nunca uses el modo de continuidad/resistencia con una placa encendida.
+- Cambia al modo de voltaje DC antes de encender el objetivo. Mide los pines candidatos respecto a tierra para identificar el voltaje lógico. Una línea de alimentación estable puede ser Vcc/Vref; no des por hecho que es seguro conectarse a ella.
+- Observa los pines candidatos con un analizador lógico o un osciloscopio durante el arranque. **TX** suele estar inactivo en nivel alto y mostrar ráfagas de datos enmarcados. Un multímetro puede mostrar fluctuaciones promedio, pero no permite validar el enmarcado ni la velocidad en baudios.
+- **RX** puede permanecer inactivo y no se puede identificar de forma segura solo porque esté junto a TX. Sigue las pistas de la PCB, consulta la hoja de datos del SoC o usa un analizador de alta impedancia antes de aplicar señales.
 
-Intercambiar TX y RX normalmente no produce comunicación; confundir la alimentación, la tierra o los niveles de señal puede dañar permanentemente el dispositivo objetivo o el adaptador. Conecta primero la tierra y empieza **solo en modo de recepción** (TX del dispositivo objetivo a RX del adaptador).
+Intercambiar TX y RX normalmente no produce comunicación; confundir la alimentación, la tierra o los niveles de señal puede dañar permanentemente el objetivo o el adaptador. Conecta primero la tierra y comienza **solo en modo de recepción** (TX del objetivo a RX del adaptador).
 
-Los fabricantes pueden omitir el header, dejar sin montar las resistencias en serie, desactivar la consola en el firmware o exponer solo TX. Sigue las pistas de los puntos de prueba cercanos y las huellas de resistencias hasta el SoC, y añade una conexión temporal de alta impedancia solo después de confirmar el nivel eléctrico. La existencia de una garantía no implica que necesariamente haya una UART accesible.
+Los fabricantes pueden omitir el conector, dejar sin montar las resistencias en serie, desactivar la consola en el firmware o exponer solo TX. Sigue las pistas de los puntos de prueba cercanos y las huellas de las resistencias hasta el SoC, y añade una conexión temporal de alta impedancia solo después de confirmar el nivel eléctrico. Que exista una garantía no implica que tenga que haber un UART accesible.
 
 ### Identificación de la velocidad en baudios de UART
 
-La forma más sencilla de identificar la velocidad en baudios correcta es observar la salida del pin **TX** e intentar leer los datos. Si los datos recibidos no son legibles, cambia a la siguiente velocidad en baudios posible hasta que lo sean. Puedes usar un adaptador USB a serial o un dispositivo multipropósito como Bus Pirate, junto con un script auxiliar como [baudrate.py](https://github.com/devttys0/baudrate/). Las velocidades en baudios más comunes son 9600, 38400, 19200, 57600 y 115200.
+La forma más fácil de identificar la velocidad en baudios correcta es observar la salida del pin **TX** e intentar leer los datos. Si los datos que recibes no son legibles, prueba la siguiente velocidad en baudios posible hasta que los datos sean legibles. Puedes usar un adaptador USB a serial o un dispositivo multipropósito como Bus Pirate, junto con un script auxiliar como [baudrate.py](https://github.com/devttys0/baudrate/). Las velocidades en baudios más comunes son 9600, 38400, 19200, 57600 y 115200.
 
 > [!CAUTION]
-> ¡Es importante tener en cuenta que, en este protocolo, debes conectar el TX de un dispositivo al RX del otro!
+> ¡Es importante tener en cuenta que en este protocolo debes conectar el TX de un dispositivo al RX del otro!
 
-## Adaptador CP210X UART a TTY
+### Automatización de la captura UART durante el arranque con SCPI
 
-Los puentes USB a UART CP210x aparecen en muchas placas de prototipado y adaptadores económicos. Los módulos comunes exponen pines de alimentación junto con GND, RXD y TXD, pero los headers y los niveles de E/S varían. Confirma el voltaje real según el diseño de la placa o la hoja de datos. Normalmente, conecta solo GND y RX del adaptador a TX del dispositivo objetivo; después de validar la recepción, conecta TX del adaptador a RX del dispositivo objetivo. No conectes el pin de alimentación de 5 V/3,3 V del adaptador, salvo que quieras alimentar intencionalmente un dispositivo objetivo que sepas que admite ese voltaje.<sup>[[3]](#references)</sup>
+Si la salida de arranque es breve o aún no se conoce el pad TX, automatiza los arranques repetidos en lugar de manejar la fuente de alimentación y el osciloscopio manualmente. Conecta una fuente programable con límite de corriente a la entrada de alimentación verificada del objetivo. Sondea cada pad TX candidato con una entrada de osciloscopio de alta impedancia y una tierra común; no apliques señales al pad.<sup>[[5]](#references)</sup>
+
+VISA abre sesiones con instrumentos seriales o Ethernet, mientras que SCPI controla la salida, el disparo y la lectura de formas de onda.<sup>[[5]](#references)[[6]](#references)</sup> Instala `pyvisa` y `pyvisa-py` (además de `pyserial` para recursos VISA seriales); `ResourceManager('@py')` selecciona explícitamente el backend de Python.<sup>[[5]](#references)[[7]](#references)</sup> Sustituye las cadenas de recursos y los comandos por los que admitan los instrumentos utilizados.<sup>[[5]](#references)</sup>
+
+En el ejemplo con el Rigol MSO5000, arma un disparo único de flanco descendente antes de encender la placa: una señal UART TX inactiva en nivel alto primero baja para enviar su bit de inicio.<sup>[[5]](#references)</sup> Ajusta el umbral de disparo entre los niveles alto inactivo y bajo medidos, y configura la base de tiempo para cubrir el intervalo de arranque que te interesa.<sup>[[5]](#references)[[6]](#references)</sup> `:TRIG:HOLD` puede suprimir flancos repetidos durante capturas continuas, pero no sustituye la comprobación de que la captura de disparo único haya finalizado correctamente.<sup>[[5]](#references)</sup> El siguiente ejemplo captura un arranque y guarda tanto las muestras de bytes sin signo como sus metadatos de escala; si se agota el tiempo de espera, apaga el objetivo en lugar de esperar indefinidamente.<sup>[[5]](#references)[[6]](#references)</sup>
+
+<details>
+<summary>Captura de forma de onda UART de disparo único al encender con PyVISA</summary>
+
+```python
+import time
+from pathlib import Path
+import pyvisa
+
+rm = pyvisa.ResourceManager('@py')
+psu = rm.open_resource('ASRL/dev/ttyUSB0::INSTR')
+scope = rm.open_resource('TCPIP::192.0.2.10::INSTR')
+psu.baud_rate = 115200
+scope.timeout = 5000
+try:
+    print(psu.query('*IDN?').strip(), scope.query('*IDN?').strip())
+    psu.write('OUTP OFF')
+    psu.write('SOUR:VOLT 3.3')
+    psu.write('SOUR:CURR 0.5')
+    for cmd in (':CHAN1:DISP ON', ':CHAN1:SCAL 0.5',
+                ':TIM:MAIN:SCAL 0.05', ':TRIG:MODE EDGE',
+                ':TRIG:EDGE:SOUR CHAN1', ':TRIG:EDGE:LEV 1.5',
+                ':TRIG:EDGE:SLOP NEG'):
+        scope.write(cmd)
+    scope.write(':SING')
+    psu.write('OUTP ON')
+    deadline = time.monotonic() + 30
+    while scope.query(':TRIG:STAT?').strip() != 'STOP':
+        if time.monotonic() >= deadline:
+            raise TimeoutError('No single-shot trigger')
+        time.sleep(0.5)
+    scope.write(':WAV:SOUR CHAN1')
+    scope.write(':WAV:MODE RAW')
+    scope.write(':WAV:FORM BYTE')
+    preamble = scope.query(':WAV:PRE?').strip()
+    points = int(preamble.split(',')[2])
+    scope.write(f':WAV:POIN {points}')
+    scope.write(':WAV:STAR 1')
+    scope.write(f':WAV:STOP {points}')
+    scope.timeout = 120000
+    raw = scope.query_binary_values(':WAV:DATA?', datatype='B', container=bytes)
+    if len(raw) != points:
+        raise ValueError('Incomplete waveform; use instrument-specific batch reads')
+    Path('capture.bin').write_bytes(raw)
+    Path('capture_preamble.txt').write_text(preamble + '\n')
+finally:
+    psu.write('OUTP OFF')
+    scope.close()
+    psu.close()
+    rm.close()
+```
+
+</details>
+
+Para inspeccionar varios pads, repite la captura de una sola adquisición después de mover la sonda, o mantén abierta la sesión de alimentación y cicla su salida con un tiempo de espera de arranque y un intervalo apagado. Rearma el osciloscopio antes de cada encendido para que cada archivo corresponda a un arranque y un pad.<sup>[[5]](#references)</sup>
+
+El preámbulo de Rigol es `<format>,<type>,<points>,<count>,<xincrement>,...`.<sup>[[6]](#references)</sup> El **tercer** valor es el número de puntos, no la tasa de muestreo que se indica en el artículo.<sup>[[5]](#references)[[6]](#references)</sup> En su ejemplo, `25,000,000` puntos y `xincrement = 2e-8` segundos implican `1 / xincrement = 50,000,000` muestras/segundo, no 25 MSa/s.<sup>[[5]](#references)[[6]](#references)</sup> Conserva el preámbulo junto con el archivo binario y comprueba que la longitud de lectura coincida con `<points>`; la guía documenta lecturas segmentadas o por lotes para registros grandes.<sup>[[6]](#references)</sup>
+
+Para decodificar la señal capturada, importa `capture.bin` en PulseView como **Raw Analog Data Without Header**, selecciona valores sin signo de 8 bits (`U8`) e introduce la tasa de muestreo calculada a partir de `xincrement`.<sup>[[5]](#references)[[6]](#references)</sup> Aplica **Logic via Threshold** al canal analógico y elige un umbral entre los valores de muestra bajo y alto.<sup>[[5]](#references)</sup> Mide el ancho de un bit de inicio limpio para estimar la tasa de baudios (unos 17.36 µs para 57,600 baudios); luego aplica el decodificador UART de PulseView y verifica que varios frames se decodifiquen de forma consistente.<sup>[[5]](#references)</sup> Un flanco descendente por sí solo no demuestra que un pad sea UART.
+
+## Adaptador UART a TTY CP210X
+
+Los puentes USB a UART CP210x aparecen en muchas placas de prototipado y adaptadores económicos. Los módulos comunes exponen pines de alimentación junto con GND, RXD y TXD, pero sus conectores y niveles de E/S varían. Confirma el voltaje real en el diseño de la placa o en la hoja de datos. Normalmente, conecta solo GND y el RX del adaptador al TX del objetivo; después de validar solo la recepción, conecta el TX del adaptador al RX del objetivo. No conectes el pin de alimentación de 5 V/3.3 V del adaptador, a menos que quieras alimentar intencionalmente un objetivo que sepas que lo tolera.<sup>[[3]](#references)</sup>
 
 Si no se detecta el adaptador, asegúrate de que los controladores CP210X estén instalados en el sistema anfitrión. Una vez detectado y conectado el adaptador, puedes usar herramientas como picocom, minicom o screen.
 
@@ -52,7 +119,7 @@ Para listar los dispositivos conectados a sistemas Linux/MacOS:
 ls /dev/
 ```
 
-Para interactuar de forma básica con la interfaz UART, usa el siguiente comando:
+Para interactuar de forma básica con la interfaz UART, utiliza el siguiente comando:
 
 ```
 picocom /dev/<adapter> --baud <baudrate>
@@ -64,17 +131,17 @@ Para minicom, usa el siguiente comando para configurarlo:
 minicom -s
 ```
 
-Configura ajustes como la velocidad en baudios y el nombre del dispositivo en la opción `Serial port setup`.
+Configura los ajustes, como la tasa de baudios y el nombre del dispositivo, en la opción `Serial port setup`.
 
 Después de la configuración, ejecuta `minicom` para abrir la consola UART.
 
 ## UART mediante Arduino UNO R3 (placas con chip Atmel 328p extraíble)
 
-Si no hay adaptadores UART Serial a USB disponibles, se puede usar Arduino UNO R3 con un hack rápido. Como Arduino UNO R3 suele estar disponible en cualquier lugar, esto puede ahorrar mucho tiempo.
+Si no hay adaptadores de UART a USB disponibles, se puede usar Arduino UNO R3 con un hack rápido. Como Arduino UNO R3 suele estar disponible en cualquier lugar, esto puede ahorrar mucho tiempo.
 
-Arduino UNO R3 tiene un adaptador USB a Serial integrado en la propia placa. Para obtener una conexión UART, basta con retirar el microcontrolador Atmel 328p de la placa. Este hack funciona con las variantes de Arduino UNO R3 que tienen el Atmel 328p sin soldar a la placa (se usa la versión SMD). Conecta el pin RX de Arduino (Digital Pin 0) al pin TX de la interfaz UART, y el pin TX de Arduino (Digital Pin 1) al pin RX de la interfaz UART.
+Arduino UNO R3 tiene integrado en la propia placa un adaptador de USB a serie. Para obtener una conexión UART, solo hay que extraer de la placa el microcontrolador Atmel 328p. Este hack funciona con las variantes de Arduino UNO R3 que no tienen el Atmel 328p soldado a la placa (usan la versión SMD). Conecta el pin RX de Arduino (pin digital 0) al pin TX de la interfaz UART, y el pin TX de Arduino (pin digital 1) al pin RX de la interfaz UART.
 
-Usa el **Serial Monitor** del Arduino IDE o un terminal dedicado configurado con la velocidad en baudios del objetivo. Las señales seriales de los Uno R3 clásicos usan lógica de 5 V, así que utiliza un conversor de nivel o un divisor antes de conectarlas a un objetivo de 3,3 V o de menor voltaje.
+Usa el **Monitor Serie** del IDE de Arduino o un terminal dedicado, configurado con la tasa de baudios del dispositivo objetivo. Las señales serie de los Uno R3 clásicos usan lógica de 5 V, así que utiliza un conversor de nivel o un divisor de tensión antes de conectarlas a un dispositivo objetivo de 3,3 V o de menor voltaje.
 
 ## Bus Pirate
 
@@ -154,25 +221,25 @@ waiting a few secs to repeat....
 
 ## Volcado de firmware con la consola UART
 
-Una consola UART proporciona acceso en tiempo de ejecución a los registros de arranque y, en ocasiones, a un shell del bootloader o del sistema operativo. Incluso una consola de solo lectura revela mapas de memoria, controladores flash, argumentos de arranque, diseños de particiones y versiones del firmware. El firmware puede estar en SPI NOR/NAND, eMMC u otro dispositivo; por lo general, no se ejecuta desde una EEPROM, y los archivos escritos en un sistema de archivos persistente montado no necesariamente desaparecen al reiniciar.
+Una consola UART proporciona acceso en tiempo de ejecución a los registros de arranque y, en ocasiones, a un shell del bootloader o del sistema operativo. Incluso una consola de solo lectura revela mapas de memoria, controladores de flash, argumentos de arranque, diseños de particiones y versiones de firmware. El firmware puede estar almacenado en SPI NOR/NAND, eMMC u otro dispositivo; por lo general, no se ejecuta desde una EEPROM, y los archivos escritos en un sistema de archivos persistente montado no necesariamente desaparecen al reiniciar.
 
-Hay varias formas de adquirir el firmware; la sección sobre SPI explica las lecturas directas desde la memoria flash externa. La adquisición asistida por consola puede ser menos invasiva si el bootloader ya ofrece un comando de lectura seguro, pero interrumpir el arranque o ejecutar comandos de flash puede afectar la disponibilidad, así que registra el estado original y evita las operaciones de escritura y borrado.
+Hay varias formas de adquirir el firmware; la sección sobre SPI cubre las lecturas directas desde la memoria flash externa. La adquisición asistida por consola puede ser menos invasiva si el bootloader ya ofrece un comando de lectura seguro, pero cualquier interrupción del arranque o comando de flash puede afectar la disponibilidad, así que registra el estado original y evita las operaciones de escritura o borrado.
 
-El volcado de firmware asistido por consola suele comenzar interrumpiendo un bootloader. Muchos dispositivos Linux integrados usan **Das U-Boot**, pero otros utilizan bootloaders propietarios o desactivan la consola interactiva.
+El volcado de firmware asistido por consola suele empezar interrumpiendo un bootloader. Muchos dispositivos Linux embebidos usan **Das U-Boot**, pero otros utilizan bootloaders propietarios o deshabilitan la consola interactiva.
 
-Para comprobar si hay un bootloader interactivo, conecta la ruta de recepción UART y el terminal mientras el objetivo está apagado, inicia el registro y enciéndelo. Sigue el aviso de autoboot que aparezca; según la compilación, para interrumpirlo puede ser necesario pulsar una tecla, usar una secuencia breve o, si está desactivado, no será posible.
+Para comprobar si hay un bootloader interactivo, conecta la línea de recepción UART y el terminal mientras el dispositivo objetivo está apagado, empieza a registrar la salida y enciéndelo. Sigue el mensaje de autoboot que se muestra; según la compilación, puede que para interrumpirlo haya que pulsar una tecla, usar una secuencia breve o quizá esté deshabilitado por completo.
 
-Si logras interrumpir el arranque, usa `help`, `printenv` y comandos de reconocimiento de solo lectura para comprender la disposición de memoria y almacenamiento de ese fabricante antes de acceder a las direcciones.
+Si la interrupción funciona, usa `help`, `printenv` y comandos de reconocimiento de solo lectura para entender el diseño de memoria y almacenamiento de ese fabricante antes de acceder a direcciones.
 
-En U-Boot, `md` muestra **memoria direccionable**, no automáticamente «la EEPROM». Primero, usa comandos específicos de la placa, como `mtd list`, `sf probe`, `mmc info`, `part list`, las variables de entorno y los registros de arranque para identificar la dirección mapeada correcta o cargar una región de flash en la RAM. Luego, muestra un rango conocido byte por byte:<sup>[[4]](#references)</sup>
+En U-Boot, `md` muestra **memoria direccionable**, no automáticamente «la EEPROM». Primero usa comandos específicos de la placa, como `mtd list`, `sf probe`, `mmc info`, `part list`, variables de entorno y registros de arranque para identificar la dirección asignada correcta o cargar una región de flash en RAM. Luego muestra un rango conocido byte por byte:<sup>[[4]](#references)</sup>
 
 ```
 md.b <address> <byte_count>
 ```
 
-Registra la salida serial antes de empezar. La salida de `md.b` contiene direcciones y una columna ASCII, por lo que es una representación textual, no una imagen ROM sin procesar.
+Registra la salida serie antes de empezar. La salida de `md.b` contiene direcciones y una columna ASCII, por lo que es una representación textual y no una imagen ROM sin procesar.
 
-Elimina las columnas de direcciones y ASCII, concatena solo los campos de bytes hexadecimales y decodifícalos a binario (por ejemplo, con `xxd -r -p`). Verifica que el número de bytes sea el esperado y registra un hash antes del análisis:
+Elimina las columnas de direcciones y ASCII, concatena solo los campos de bytes hexadecimales y conviértelos a binario (por ejemplo, con `xxd -r -p`). Verifica el número de bytes esperado y registra un hash antes del análisis:
 
 ```
 xxd -r -p firmware.hex > firmware.bin
@@ -182,7 +249,7 @@ binwalk -e firmware.bin
 
 Binwalk identifica las firmas conocidas en el binario reconstruido. Una lectura directa de la flash a través de la interfaz SPI/eMMC/NAND adecuada suele ser más rápida y menos propensa a errores cuando la consola no puede transferir datos de forma fiable.
 
-U-Boot puede desactivar la interrupción, requerir una secuencia de teclas específica del proveedor o bloquear los comandos de memoria/flash. Sigue el aviso de autoboot y el registro de arranque en lugar de transmitir caracteres a ciegas. Si no se puede interrumpir la consola, conserva el registro de arranque y recurre a un método no invasivo para adquirir el firmware.
+U-Boot puede deshabilitar la interrupción, requerir una secuencia de teclas específica del proveedor o bloquear los comandos de memoria/flash. Sigue el aviso de autoboot y el registro de arranque en lugar de transmitir caracteres a ciegas. Si no se puede interrumpir la consola, conserva el registro de arranque y utiliza un método de adquisición de firmware no invasivo.
 
 ## References
 
@@ -190,4 +257,7 @@ U-Boot puede desactivar la interrupción, requerir una secuencia de teclas espec
 - [2] [Documentación de Bus Pirate - modo UART y límites eléctricos](https://docs.buspirate.com/docs/command-reference/#uart)
 - [3] [Silicon Labs - hoja de datos del CP2102C](https://www.silabs.com/documents/public/data-sheets/cp2102c-datasheet.pdf)
 - [4] [Documentación de U-Boot - comando `md` para mostrar memoria](https://docs.u-boot.org/en/latest/usage/cmd/md.html)
+- [5] [VoidStar Security — SCPI e instrumentación de hardware para ingeniería inversa, parte 1](https://voidstarsec.com/blog/scpi-and-hardware-instrumentation-for-reverse-engineers-part-1)
+- [6] [Guía de programación del Rigol MSO5000](https://www.batronix.com/files/Rigol/Oszilloskope/MSO5000/MSO5000_ProgrammingGuide_EN-V2.0.pdf)
+- [7] [PyVISA — Configuración del backend](https://pyvisa.readthedocs.io/en/latest/introduction/configuring.html)
 {{#include ../../banners/hacktricks-training.md}}
