@@ -40,6 +40,73 @@ The easiest way to identify the correct baud rate is to look at the **TX pin’s
 > [!CAUTION]
 > It's important to note that in this protocol you need to connect the TX of one device to the RX of the other!
 
+### Automating Boot-Time UART Capture with SCPI
+
+If boot output is brief or the TX pad is still unknown, automate repeated starts instead of operating the supply and oscilloscope by hand. Connect a current-limited programmable supply to the target's verified power input. Probe each candidate TX pad with a high-impedance scope input and shared ground; do not drive the pad.<sup>[[5]](#references)</sup>
+
+VISA opens serial or Ethernet instrument sessions, while SCPI controls output, trigger, and waveform readout.<sup>[[5]](#references)[[6]](#references)</sup> Install `pyvisa` and `pyvisa-py` (plus `pyserial` for serial VISA resources); `ResourceManager('@py')` explicitly selects the Python backend.<sup>[[5]](#references)[[7]](#references)</sup> Replace the resource strings and commands with those supported by the instruments in use.<sup>[[5]](#references)</sup>
+
+On the Rigol MSO5000 example, arm a single falling-edge trigger before powering the board: an idle-high UART TX first falls for its start bit.<sup>[[5]](#references)</sup> Set the trigger threshold between the measured idle and low levels, and set the timebase to cover the boot interval of interest.<sup>[[5]](#references)[[6]](#references)</sup> `:TRIG:HOLD` can suppress repeated edges in continuous captures, but it is not a substitute for checking that a single-shot capture actually completed.<sup>[[5]](#references)</sup> The following captures one boot and saves both the unsigned-byte samples and their scaling metadata; a timeout powers the target down instead of waiting forever.<sup>[[5]](#references)[[6]](#references)</sup>
+
+<details>
+<summary>PyVISA power-on and single-shot UART waveform capture</summary>
+
+```python
+import time
+from pathlib import Path
+import pyvisa
+
+rm = pyvisa.ResourceManager('@py')
+psu = rm.open_resource('ASRL/dev/ttyUSB0::INSTR')
+scope = rm.open_resource('TCPIP::192.0.2.10::INSTR')
+psu.baud_rate = 115200
+scope.timeout = 5000
+try:
+    print(psu.query('*IDN?').strip(), scope.query('*IDN?').strip())
+    psu.write('OUTP OFF')
+    psu.write('SOUR:VOLT 3.3')
+    psu.write('SOUR:CURR 0.5')
+    for cmd in (':CHAN1:DISP ON', ':CHAN1:SCAL 0.5',
+                ':TIM:MAIN:SCAL 0.05', ':TRIG:MODE EDGE',
+                ':TRIG:EDGE:SOUR CHAN1', ':TRIG:EDGE:LEV 1.5',
+                ':TRIG:EDGE:SLOP NEG'):
+        scope.write(cmd)
+    scope.write(':SING')
+    psu.write('OUTP ON')
+    deadline = time.monotonic() + 30
+    while scope.query(':TRIG:STAT?').strip() != 'STOP':
+        if time.monotonic() >= deadline:
+            raise TimeoutError('No single-shot trigger')
+        time.sleep(0.5)
+    scope.write(':WAV:SOUR CHAN1')
+    scope.write(':WAV:MODE RAW')
+    scope.write(':WAV:FORM BYTE')
+    preamble = scope.query(':WAV:PRE?').strip()
+    points = int(preamble.split(',')[2])
+    scope.write(f':WAV:POIN {points}')
+    scope.write(':WAV:STAR 1')
+    scope.write(f':WAV:STOP {points}')
+    scope.timeout = 120000
+    raw = scope.query_binary_values(':WAV:DATA?', datatype='B', container=bytes)
+    if len(raw) != points:
+        raise ValueError('Incomplete waveform; use instrument-specific batch reads')
+    Path('capture.bin').write_bytes(raw)
+    Path('capture_preamble.txt').write_text(preamble + '\n')
+finally:
+    psu.write('OUTP OFF')
+    scope.close()
+    psu.close()
+    rm.close()
+```
+
+</details>
+
+For a pad survey, repeat the single-shot capture after moving the probe, or keep the supply session open and cycle its output with a boot dwell and an off interval. Re-arm the scope before every power-on so each file corresponds to one boot and one pad.<sup>[[5]](#references)</sup>
+
+The Rigol preamble is `<format>,<type>,<points>,<count>,<xincrement>,...`.<sup>[[6]](#references)</sup> The **third** value is the number of points, not the sample rate as stated in the article.<sup>[[5]](#references)[[6]](#references)</sup> In its example, `25,000,000` points and `xincrement = 2e-8` seconds imply `1 / xincrement = 50,000,000` samples/second, not 25 MSa/s.<sup>[[5]](#references)[[6]](#references)</sup> Keep the preamble with the binary file and check that the read length matches `<points>`; the guide documents segmented/batched reads for large records.<sup>[[6]](#references)</sup>
+
+To decode the captured signal, import `capture.bin` in PulseView as **Raw Analog Data Without Header**, choose unsigned 8-bit (`U8`) values, and enter the sample rate calculated from `xincrement`.<sup>[[5]](#references)[[6]](#references)</sup> Apply **Logic via Threshold** to the analog channel, choosing a threshold between the low and high sample values.<sup>[[5]](#references)</sup> Measure a clean start-bit width to estimate the baud rate (about 17.36 µs for 57,600 baud), then apply PulseView's UART decoder and verify that several frames decode consistently.<sup>[[5]](#references)</sup> A falling edge alone does not prove a pad is UART.
+
 ## CP210X UART to TTY Adapter
 
 CP210x USB-to-UART bridges appear on many prototyping boards and inexpensive adapters. Common modules expose supply pins alongside GND, RXD, and TXD, but their headers and I/O levels vary. Confirm the actual voltage from the board design or data sheet. Usually connect only GND, adapter RX to target TX, and—after receive-only validation—adapter TX to target RX. Do not connect the adapter's 5 V/3.3 V supply pin unless intentionally powering a target known to tolerate it.<sup>[[3]](#references)</sup>
@@ -190,5 +257,8 @@ U-Boot may disable interruption, require a vendor-specific key sequence, or lock
 - [2] [Bus Pirate documentation - UART mode and electrical limits](https://docs.buspirate.com/docs/command-reference/#uart)
 - [3] [Silicon Labs - CP2102C data sheet](https://www.silabs.com/documents/public/data-sheets/cp2102c-datasheet.pdf)
 - [4] [U-Boot documentation - `md` memory-display command](https://docs.u-boot.org/en/latest/usage/cmd/md.html)
+- [5] [VoidStar Security — SCPI and Hardware Instrumentation for Reverse Engineers, Part 1](https://voidstarsec.com/blog/scpi-and-hardware-instrumentation-for-reverse-engineers-part-1)
+- [6] [Rigol MSO5000 Programming Guide](https://www.batronix.com/files/Rigol/Oszilloskope/MSO5000/MSO5000_ProgrammingGuide_EN-V2.0.pdf)
+- [7] [PyVISA — Configuring the backend](https://pyvisa.readthedocs.io/en/latest/introduction/configuring.html)
 
 {{#include ../../banners/hacktricks-training.md}}
