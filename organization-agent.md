@@ -30,6 +30,8 @@
 
 - WSGI/uWSGI, Zabbix, and ZoneMinder/motionEye/Motion remain in `network-services-pentesting/pentesting-web/`; SUMMARY nests them under 80/443 web methodology, not Kerberos. Web triage links to WSGI; SSRF/Gopher links to its pivot heading. Zabbix TCP/10051 and CCTV side-service caveats stay in their chapters.
 
+- AI fuzzing seeds/harnesses/PoV/patching stay at `src/AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md`; deterministic source review, mobile entry-point taskflows, kernel pattern audits, and evidence-gated validation are at `src/AI/AI-Assisted-Source-Review-and-Vulnerability-Validation.md`. Split by research task, not target platform; both remain in AI, with direct mobile and binary-exploitation entry links.
+
 ## Researcher entry points
 
 - SMB/RPC service-creation rights → Windows Lateral Movement / SCM execution (PsExec, SMBExec, WinExec, SharpMove). POSIX CPU timer race → Binary Exploitation / Linux kernel (CVE-2025-38352, IRQ expiry, ptrace, Chronomaly).

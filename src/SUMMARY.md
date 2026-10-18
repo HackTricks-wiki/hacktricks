@@ -1122,6 +1122,7 @@
 # 🤖 AI
 - [AI Security](AI/README.md)
   - [Ai Assisted Fuzzing And Vulnerability Discovery](AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md)
+  - [AI-Assisted Source Review and Vulnerability Validation](AI/AI-Assisted-Source-Review-and-Vulnerability-Validation.md)
   - [Web Black-Box AI Pentester Bots](AI/Web-Black-Box-AI-Pentester-Bots.md)
   - [AI Agent Security Methodology](AI/AI-Agent-Security-Methodology.md)
   - [AI Deep Learning (AI Security Methodology) / AI Deep Learning / AI Security Methodology](AI/AI-Deep-Learning.md) <!-- Original navigation label: [AI Security Methodology]() --> <!-- PR-side label provenance: AI Deep Learning / AI Security Methodology / AI Security Methodology / AI Deep Learning <!-- Preserved base navigation text: AI Deep Learning / AI Security Methodology <!-- Original navigation label: [AI Security Methodology]() -->

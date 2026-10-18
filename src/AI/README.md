@@ -105,6 +105,14 @@ AI-MCP-Servers.md
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
+### AI-Assisted Source Review and Vulnerability Validation
+
+For source/sink review, mobile entry-point taskflows, kernel pattern audits, and evidence-gated validation:
+
+{{#ref}}
+AI-Assisted-Source-Review-and-Vulnerability-Validation.md
+{{#endref}}
+
 ### AI-Assisted Reverse Engineering
 
 [Partial lifting, invariant MBA detection, environment-bound decoding, and automated-extractor validation](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
