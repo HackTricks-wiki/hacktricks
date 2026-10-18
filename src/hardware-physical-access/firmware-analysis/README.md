@@ -10,7 +10,7 @@
 
 ### Related resources
 
-For acquisition from exposed hardware interfaces, see [UART console-assisted firmware dumping](../hardware-hacking/uart.md#dumping-firmware-with-uart-console) and [SPI flash dumping](../hardware-hacking/spi.md#dumping-firmware-from-eeproms).
+For acquisition from exposed hardware interfaces, see [UART console-assisted firmware dumping](../hardware-hacking/uart.md#dumping-firmware-with-uart-console) and [SPI flash dumping](../hardware-hacking/spi.md#dumping-firmware-from-eeproms). For a repeatable boot-time UART capture before console access, see [SCPI-controlled power and oscilloscope acquisition](../hardware-hacking/uart.md#automating-boot-time-uart-capture-with-scpi).
 
 {{#ref}}
 uefi-ifr-nvram-security-setting-patching.md
