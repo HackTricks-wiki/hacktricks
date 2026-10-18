@@ -10,7 +10,7 @@
 
 ### Povezani resursi
 
-Za preuzimanje podataka preko izloženih hardverskih interfejsa pogledajte [UART console-assisted firmware dumping](../hardware-hacking/uart.md#dumping-firmware-with-uart-console) i [SPI flash dumping](../hardware-hacking/spi.md#dumping-firmware-from-eeproms).
+Za preuzimanje podataka preko izloženih hardverskih interfejsa pogledajte [UART console-assisted firmware dumping](../hardware-hacking/uart.md#dumping-firmware-with-uart-console) i [SPI flash dumping](../hardware-hacking/spi.md#dumping-firmware-from-eeproms). Za ponovljivo UART snimanje tokom pokretanja, pre pristupa konzoli, pogledajte [SCPI-controlled power and oscilloscope acquisition](../hardware-hacking/uart.md#automating-boot-time-uart-capture-with-scpi).
 
 {{#ref}}
 uefi-ifr-nvram-security-setting-patching.md
@@ -32,7 +32,7 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 mediatek-xflash-carbonara-da2-hash-bypass.md
 {{#endref}}
 
-Firmver je ključni softver koji omogućava ispravan rad uređaja upravljanjem komunikacijom između hardverskih komponenti i softvera sa kojim korisnici rade. Čuva se u trajnoj memoriji, čime se osigurava da uređaj može da pristupi ključnim instrukcijama čim se uključi, što omogućava pokretanje operativnog sistema. Analiza i potencijalno menjanje firmvera ključni su koraci u otkrivanju bezbednosnih ranjivosti.<sup>[[2]](#references)[[3]](#references)</sup>
+Firmver je ključni softver koji omogućava ispravan rad uređaja, upravljajući komunikacijom između hardverskih komponenti i softvera sa kojim korisnici rade. Čuva se u trajnoj memoriji, pa uređaj može da pristupi važnim instrukcijama čim se uključi, što dovodi do pokretanja operativnog sistema. Ispitivanje i potencijalno menjanje firmvera ključan je korak u otkrivanju bezbednosnih ranjivosti.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ## **Prikupljanje informacija**
 
@@ -40,47 +40,47 @@ Firmver je ključni softver koji omogućava ispravan rad uređaja upravljanjem k
 
 - Arhitekturi CPU-a i operativnom sistemu koji koristi
 - Specifičnostima bootloader-a
-- Rasporedu hardvera i tehničkim listovima
+- Rasporedu hardvera i tehničkoj dokumentaciji
 - Metrikama baze koda i lokacijama izvornog koda
-- Eksternim bibliotekama i vrstama licenci
+- Spoljnim bibliotekama i vrstama licenci
 - Istoriji ažuriranja i regulatornim sertifikatima
 - Arhitektonskim dijagramima i dijagramima toka
-- Bezbednosnim procenama i utvrđenim ranjivostima
+- Bezbednosnim procenama i otkrivenim ranjivostima
 
-U tu svrhu, alati za **open-source intelligence (OSINT)** su neprocenjivi, kao i analiza svih dostupnih softverskih komponenti otvorenog koda putem ručnog i automatizovanog pregleda. Alati poput [Coverity Scan](https://scan.coverity.com) i [Semmle’s LGTM](https://lgtm.com/#explore) nude besplatnu statičku analizu koja se može iskoristiti za pronalaženje potencijalnih problema.
+U tu svrhu su alati za **open-source intelligence (OSINT)** neprocenjivi, kao i analiza svih dostupnih open-source softverskih komponenti putem ručnih i automatizovanih pregleda. Alati poput [Coverity Scan](https://scan.coverity.com) i [Semmle’s LGTM](https://lgtm.com/#explore) nude besplatnu statičku analizu koja se može iskoristiti za pronalaženje potencijalnih problema.
 
-## **Nabavljanje firmvera**
+## **Preuzimanje firmvera**
 
-Firmver se može nabaviti na različite načine, od kojih svaki ima svoj nivo složenosti:
+Firmver se može pribaviti na različite načine, od kojih svaki ima svoj nivo složenosti:
 
 - **Direktno** od izvora (programera, proizvođača)
-- **Izgradnjom** prema priloženim uputstvima
-- **Preuzimanjem** sa zvaničnih sajtova za podršku
-- Korišćenjem upita **Google dork** za pronalaženje hostovanih datoteka firmvera
-- Direktnim pristupom **cloud storage-u**, pomoću alata kao što je [S3Scanner](https://github.com/sa7mon/S3Scanner)
+- **Izgradnjom** prema dostavljenim uputstvima
+- **Preuzimanjem** sa zvaničnih stranica za podršku
+- Korišćenjem upita **Google dork** za pronalaženje hostovanih firmver datoteka
+- Direktnim pristupom **cloud skladištima**, pomoću alata kao što je [S3Scanner](https://github.com/sa7mon/S3Scanner)
 - Presretanjem **ažuriranja** pomoću man-in-the-middle tehnika
 - **Izdvajanjem** sa uređaja preko veza kao što su **UART**, **JTAG** ili **PICit**
 - **Njuškanjem** zahteva za ažuriranje u komunikaciji uređaja
 - Pronalaženjem i korišćenjem **hardkodiranih krajnjih tačaka za ažuriranje**
-- **Dump-ovanjem** iz bootloader-a ili preko mreže
-- **Uklanjanjem i očitavanjem** memorijskog čipa, kada sve ostalo ne uspe, pomoću odgovarajućih hardverskih alata
+- **Izvlačenjem** iz bootloader-a ili preko mreže
+- **Uklanjanjem i čitanjem** memorijskog čipa, ako ništa drugo ne uspe, uz korišćenje odgovarajućih hardverskih alata
 
-### Samo UART logovi: prinudno pokretanje root shell-a preko U-Boot env-a u flash-u
+### Samo UART logovi: forsiranje root shell-a preko U-Boot env-a u flash memoriji
 
-Ako se UART RX ignoriše (dostupni su samo logovi), i dalje možete prinudno pokrenuti init shell tako što ćete **izmeniti U-Boot environment blob** van uređaja:<sup>[[6]](#references)</sup>
+Ako se UART RX ignoriše (dostupni su samo logovi), i dalje možete da forsirate init shell tako što ćete **izmeniti U-Boot environment blob** van mreže:<sup>[[6]](#references)</sup>
 
-1. Dump-ujte SPI flash pomoću SOIC-8 klipse i programatora (3.3V):
+1. Očitati SPI flash pomoću SOIC-8 klipse i programatora (3.3V):
    ```bash
    flashrom -p ch341a_spi -r flash.bin
    ```
-2. Pronađite U-Boot env particiju, izmenite `bootargs` tako da uključuje `init=/bin/sh` i **ponovo izračunajte U-Boot env CRC32** za blob.
-3. Ponovo flešujte samo env particiju i restartujte uređaj; shell bi trebalo da se pojavi na UART-u.
+2. Pronađite U-Boot env particiju, izmenite `bootargs` tako da sadrži `init=/bin/sh` i **ponovo izračunajte U-Boot env CRC32** za blob.
+3. Ponovo flešujte samo env particiju i restartujte uređaj; trebalo bi da se pojavi shell na UART-u.
 
-Ovo je korisno na ugrađenim uređajima kod kojih je shell bootloader-a onemogućen, ali je env particija dostupna za upis preko spoljnog pristupa flash memoriji.
+Ovo je korisno na ugrađenim uređajima kod kojih je shell bootloadera onemogućen, ali je env particija upisiva putem eksternog pristupa flash memoriji.
 
-## Analiza firmvera
+## Analiza firmware-a
 
-Sada kada **imate firmver**, potrebno je da iz njega izdvojite informacije kako biste znali kako da postupite. Evo nekoliko alata koje možete da koristite:
+Sada kada **imate firmware**, potrebno je da izdvojite informacije o njemu da biste znali kako da postupite. Evo nekoliko alata koje možete da koristite:
 
 ```bash
 file <bin>
@@ -91,40 +91,39 @@ hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
 
-Ako pomoću tih alata ne pronađete mnogo toga, proverite **entropiju** slike pomoću komande `binwalk -E <bin>`. Ako je entropija niska, slika verovatno nije šifrovana. Ako je visoka, verovatno je šifrovana (ili na neki način komprimovana).
+Ako pomoću tih alata ne pronađete mnogo toga, proverite **entropiju** slike pomoću komande `binwalk -E <bin>`. Ako je entropija niska, verovatno nije šifrovana. Ako je visoka, verovatno je šifrovana (ili na neki način komprimovana).
 
-Pored toga, pomoću ovih alata možete izdvojiti **datoteke ugrađene u firmware**:
-
+Pored toga, pomoću ovih alata možete izdvojiti **datoteke ugrađene u firmver**:
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-Ili pomoću [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) pregledati datoteku.
+Ili upotrebite [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) da biste pregledali datoteku.
 
-### Diferencijalna analiza flash memorije i povratno dobavljiva XOR skladišta tajni
+### Diferencijalna analiza fleša i oporavljiva XOR skladišta tajni
 
-Kada format skladištenja neke postavke firmware-a nije dokumentovan, prvo napravite nekoliko očitavanja iste flash memorije, promenite **tačno jednu** postavku, ponovo napravite dump celog čipa i uporedite pomeraje. Ponavljanjem eksperimenta sa kontrolisanim vrednostima možete razlikovati tu postavku od brojača i metapodataka o upisivanju; promene na novim pomerajima umesto na postojećim ukazuju na skladište koje se samo dopisuje ili ima log-strukturisanu organizaciju. Sačuvajte i obrisane/tombstone stavke jer njihovi bajtovi sa sadržajem i dalje mogu da se povrate.<sup>[[12]](#references)[[13]](#references)</sup>
+Kada format skladištenja neke postavke firmvera nije dokumentovan, prvo napravite nekoliko očitavanja fleša istog stanja, promenite **tačno jednu** postavku, ponovo napravite dump celog čipa i uporedite pomeraje. Ponavljanje eksperimenta sa kontrolisanim vrednostima pomaže da razlikujete postavku od brojača i metapodataka o upisivanju; promene na novim pomerajima umesto na postojećim ukazuju na skladište koje samo dodaje podatke ili je strukturisano kao dnevnik. Sačuvajte obrisane unose i unose označene kao obrisane jer njihovi bajtovi sadržaja možda i dalje mogu da se povrate.<sup>[[12]](#references)[[13]](#references)</sup>
 
 ```bash
 sha256sum baseline-1.bin baseline-2.bin baseline-3.bin
 cmp -l baseline-1.bin changed.bin
 ```
 
-Nakon lociranja regiona, izdvojite module firmvera pomoću alata kao što je `binwalk` i izvršite reverzni inženjering funkcija za upisivanje/proveru u Ghidra-i. U kodu potvrdite granice polja, padding, indeksiranje ključa i izvođenje ključa, umesto da šemu zaključujete samo na osnovu obrazaca u ciphertext-u.<sup>[[12]](#references)</sup>
+Nakon pronalaženja regiona, izdvojite module firmvera pomoću alata kao što je `binwalk` i reverzno analizirajte writer/validator u Ghidri. U kodu potvrdite granice polja, padding, indeksiranje ključa i izvođenje ključa, umesto da šemu zaključujete samo na osnovu obrazaca šifrata.<sup>[[12]](#references)</sup>
 
-#### Oporavak ključeva iz šifrovanog padding-a sa nulama
+#### Oporavak ključeva iz šifrovanog paddinga nulama
 
-Kao što je opisano u [XOR-based encryption](../../crypto/symmetric/#xor-based-encryption), poznati otvoreni tekst otkriva bajtove keystream-a na istim pomerajima. Polje fiksne veličine je naročito izloženo kada se njegov padding nulama prostire preko svih indeksa ponavljajućeg XOR ključa: šifrovani padding direktno otkriva te bajtove ključa jer je `0x00 XOR key_byte = key_byte`. Ako su pokriveni svi indeksi ključa, rekonstrušite ključ iz završnog dela ciphertext-a i dešifrujte popunjene bajtove.<sup>[[12]](#references)</sup>
+Kao što je opisano u [XOR-based encryption](../../crypto/symmetric/#xor-based-encryption), poznati otvoreni tekst otkriva bajtove keystream-a na istim pomerajima. Polje fiksne veličine posebno je izloženo kada se njegov padding nulama proteže kroz sve indekse ponavljajućeg XOR ključa: šifrovani padding direktno otkriva te bajtove ključa, jer je `0x00 XOR key_byte = key_byte`. Ako su obuhvaćeni svi indeksi ključa, rekonstrušite ključ iz završnog dela šifrata, pa dešifrujte popunjene bajtove.<sup>[[12]](#references)</sup>
 
-Dell-ov ranjivi DVAR format BIOS lozinke konkretan je primer: bajt `0` polja od 32 bajta je u otvorenom tekstu, dok se za bajtove `1..31` koristi ponavljajući ključ od 20 bajtova.<sup>[[12]](#references)</sup>
+Ranjivi DVAR format za BIOS lozinku kompanije Dell konkretan je primer: bajt `0` 32-bajtnog polja je otvoreni tekst, dok se za bajtove `1..31` koristi ponavljajući ključ dužine 20 bajtova.<sup>[[12]](#references)</sup>
 
 ```text
 stored[0] = password[0]
 stored[i] = password[i] XOR key[(i - 1) mod 20]  # i = 1..31
 ```
 
-Za dužinu lozinke `L`, pozicije `L..31` bile su nule pre XOR operacije. Kada je `L <= 12`, te pozicije obuhvataju svaki indeks ključa, pa se ceo ključ i lozinka mogu rekonstruisati bez brute force-a:<sup>[[12]](#references)</sup>
+Za dužinu lozinke `L`, pozicije `L..31` bile su nule pre XOR operacije. Kada je `L <= 12`, te pozicije obuhvataju svaki indeks ključa, pa se ceo ključ i lozinka mogu oporaviti bez brute force-a:<sup>[[12]](#references)</sup>
 
 ```text
 key[(i - 1) mod 20] = stored[i]                  # padding positions
@@ -133,9 +132,9 @@ password[i] = stored[i] XOR key[(i - 1) mod 20] # populated positions
 
 #### Izvucite ključeve iz istorijskih zapisa
 
-Nemojte analizirati svaki zapis zasebno. DVAR ključ se približno izvodi kao `modified_md5(device_seed || variable_GUID || password[0])`: seed uređaja i GUID su fiksni, a jedini ulaz koji zavisi od lozinke je njen prvi bajt u čistom tekstu. To daje najviše 256 ključeva po uređaju, pa zapisi koji počinju istim bajtom dele ključ. Grupisanje aktivnih i obrisanih zapisa prema tom bajtu omogućava da kratak istorijski zapis otkrije ceo ključ putem dopune i dešifruje trenutno duži zapis čija dopuna sama po sebi nije dovoljna. Rotacija lozinke zato može povećati izloženost kada se stari šifrat označi za brisanje, umesto da se ukloni.<sup>[[12]](#references)</sup>
+Nemojte analizirati svaki zapis zasebno. DVAR ključ se približno izvodi kao `modified_md5(device_seed || variable_GUID || password[0])`: seed uređaja i GUID su fiksni, a jedini ulaz koji zavisi od lozinke jeste njen prvi bajt u čistom tekstu. To daje najviše 256 ključeva po uređaju, pa zapisi koji počinju istim bajtom dele isti ključ. Grupisanje aktivnih i obrisanih zapisa prema tom bajtu može otkriti ceo ključ iz kratkog istorijskog zapisa preko padding-a, pa se njime može dešifrovati aktuelni, duži zapis čiji padding nije dovoljan. Rotacija lozinke zato može povećati izloženost ako se stari šifrat označi kao obrisan umesto da se izbriše.<sup>[[12]](#references)</sup>
 
-Alat [`dellpwn`](https://github.com/R3n5k1/dellpwn) pronalazi DVAR, proverava kandidate za zapise, oporavlja lozinke i može da prikaže sirove bajtove uskladištenih podataka i ključeva. Napravite ga iz checkout-a i skenirajte proverenu flash sliku na sledeći način:<sup>[[13]](#references)</sup>
+Alat [`dellpwn`](https://github.com/R3n5k1/dellpwn) pronalazi DVAR, proverava kandidate za zapise, oporavlja lozinke i može da prikaže sirove bajtove sačuvane u zapisu/ključu. Napravite ga iz checkout-a i skenirajte proverenu flash sliku ovako:<sup>[[13]](#references)</sup>
 
 ```bash
 cargo install --path .
@@ -143,18 +142,18 @@ dellpwn scan dump.bin --raw
 dellpwn scan dump.bin --partial  # include uncertain recoveries
 ```
 
-Za prilagođene parser-e odbacujte lažno pozitivne rezultate proverom strukture zapisa, ograničenja za štampive znakove, popune nulama, entropije ključa i doslednosti na mestu gde se ključ ponavlja. Ako ponovljeni dump-ovi pokazuju retke promene bitova pri svakom upisu, navedite uočene maske i rangirajte moguće ispravke prema ovim ograničenjima, ali prijavite dvosmislene znakove umesto da heuristički rezultat predstavite kao tačno izdvajanje.<sup>[[12]](#references)</sup>
+Za prilagođene parser-e odbacujte lažno pozitivne rezultate na osnovu strukture zapisa, ograničenja za štampive znakove, provera popunjavanja nulama, entropije ključa i doslednosti na mestu gde se ključ ciklično ponavlja. Ako ponovljeni dump-ovi pokazuju retke promene bitova po upisu, navedite uočene maske i rangirajte moguće ispravke prema ovim ograničenjima, ali prijavite dvosmislene znakove umesto da heuristički dobijen rezultat predstavljate kao tačno izdvajanje.<sup>[[12]](#references)</sup>
 
-Verifikatori lozinki treba da čuvaju soljeni, iterirani jednosmerni hash, a ne reverzibilni šifrat, dok skladišta sa log-strukturom treba bezbedno da uklanjaju zastareli tajni materijal.<sup>[[12]](#references)</sup>
+Provere lozinki treba da čuvaju jednosmerni hash sa salt-om koji se iterira, a ne reverzibilni šifrat, a skladišta sa log-strukturom treba bezbedno da uklanjaju zastareli tajni materijal.<sup>[[12]](#references)</sup>
 
-### Preuzimanje datotečnog sistema
+### Dobijanje fajl-sistema
 
-Pomoću prethodno navedenih komentisanih alata, kao što je `binwalk -ev <bin>`, trebalo je da budete u mogućnosti da **izdvojite datotečni sistem**.\
-Binwalk ga obično izdvaja u **fasciklu nazvanu po tipu datotečnog sistema**, koji je najčešće jedan od sledećih: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+Pomoću prethodno navedenih alata, kao što je `binwalk -ev <bin>`, trebalo je da možete **da izdvojite fajl-sistem**.\
+Binwalk obično izdvaja fajl-sistem u **fasciklu nazvanu prema tipu fajl-sistema**, koji je obično jedan od sledećih: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
-#### Ručno izdvajanje datotečnog sistema
+#### Ručno izdvajanje fajl-sistema
 
-Ponekad binwalk **nema magični bajt datotečnog sistema u svojim potpisima**. U tim slučajevima, pomoću binwalk-a **pronađite pomeraj datotečnog sistema i izdvojite kompresovani datotečni sistem** iz binarne datoteke, a zatim **ručno izdvojite** datotečni sistem prema njegovom tipu prateći korake u nastavku.
+Ponekad binwalk **nema magic byte fajl-sistema u svojim potpisima**. U tim slučajevima, upotrebite binwalk da **pronađete offset fajl-sistema, izdvojite kompresovani fajl-sistem** iz binarne datoteke i **ručno izdvojite** fajl-sistem u skladu s njegovim tipom, prateći korake u nastavku.
 
 ```
 $ binwalk DIR850L_REVB.bin
@@ -168,7 +167,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
 
-Pokrenite sledeću **dd komandu** za izdvajanje Squashfs sistema datoteka.
+Pokrenite sledeću **dd komandu** za izdvajanje Squashfs fajl-sistema.
 
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
@@ -188,29 +187,29 @@ Alternativno, može se pokrenuti i sledeća komanda.
 
 `$ unsquashfs dir.squashfs`
 
-Datoteke će nakon toga biti u direktorijumu "`squashfs-root`".
+Nakon toga, datoteke će se nalaziti u direktorijumu "`squashfs-root`".
 
-- CPIO arhivske datoteke
+- Datoteke CPIO arhive
 
 `$ cpio -ivd --no-absolute-filenames -F <bin>`
 
-- Za jffs2 sisteme datoteka
+- Za jffs2 fajl-sisteme
 
 `$ jefferson rootfsfile.jffs2`
 
-- Za ubifs sisteme datoteka sa NAND flash memorijom
+- Za ubifs fajl-sisteme sa NAND flash memorijom
 
 `$ ubireader_extract_images -u UBI -s <start_offset> <bin>`
 
 `$ ubidump.py <bin>`
 
-### Ponovno sastavljanje podeljenih ugrađenih korenskih sistema datoteka
+### Ponovno sastavljanje podeljenih ugrađenih root fajl-sistema
 
-Ako sirovi eMMC/SSD dump sadrži ispravno zaglavlje sistema datoteka, ali se njegovi pomaci metapodataka protežu izvan nominalne particije, nemoj ga odmah klasifikovati kao oštećen. Ugrađeni boot kod može da sastavi pravi korenski uređaj iz više fizičkih opsega pomoću Device Mapper-a, pa izdvajanje jedne GPT particije daje samo prvi segment.<sup>[[9]](#references)</sup>
+Ako sirovi eMMC/SSD dump sadrži ispravno zaglavlje fajl-sistema, ali se njegovi pomeraji metapodataka protežu izvan nominalne particije, nemoj ga odmah označiti kao oštećen. Ugrađeni boot kod može da sastavi stvarni root uređaj iz više fizičkih raspona pomoću Device Mapper-a, pa izdvajanje jedne GPT particije daje samo prvi segment.<sup>[[9]](#references)</sup>
 
 #### Početna procena kompletne slike medija
 
-Najpre proveri da li je pribavljanje podataka završeno, da li je veličina stabilna i da li neki proces i dalje drži sliku otvorenom za upis. Ako naziv datoteke sadrži početnu/krajnju adresu, uporedi taj opseg sa stvarnim brojem bajtova. Oporavi GPT u režimu samo za čitanje i priključi samo potreban opseg; **nemoj** pokretati `vgchange -ay` nad nepouzdanim fizičkim volumenom na radnoj stanici, jer može doći do sukoba grupa volumena i neželjenih upisa.<sup>[[9]](#references)</sup>
+Najpre proveri da li je prikupljanje podataka završeno, da li je veličina stabilna i da li neki proces i dalje upisuje u sliku. Ako naziv datoteke sadrži početnu i završnu adresu, uporedi taj raspon sa stvarnim brojem bajtova. Oporavi GPT u režimu samo za čitanje i prikači samo potreban raspon; **nemoj** pokretati `vgchange -ay` nad nepouzdanim fizičkim volumenom na radnoj stanici jer može doći do sukoba grupa volumena i neželjenih upisa.<sup>[[9]](#references)</sup>
 
 ```bash
 stat -c '%s bytes' firmware.bin
@@ -223,20 +222,20 @@ sudo losetup --find --show --read-only \
   --offset "$PART_OFF" --sizelimit "$PART_LEN" firmware.bin
 ```
 
-Preferirajte disposable VM kada originalna init logika ili LVM stack moraju da vide celu sliku. Istorijski boot logovi sa standardne boot particije posebno su korisni: bootloader je možda zabeležio pomeraje proprietary-container-a, dužine komponenti, izbor slota, pravila poravnanja i verifikaciju potpisa. Iskoristite te vrednosti da izdvojite ugrađenu komandnu liniju, kernel i initramfs, a zatim nezavisno proverite svaki izlaz pomoću `file`, magic bytes i `binwalk`; čitanje do kraja kontejnera može slučajno da doda initrd, ACPI objekat ili potpis kernelu.<sup>[[9]](#references)</sup>
+Preferirajte privremenu VM kada originalna init logika ili LVM stek moraju da vide celu sliku. Istorijski logovi pokretanja sa standardne boot particije naročito su korisni: bootloader je možda zabeležio pomeraje vlasničkog kontejnera, dužine komponenti, izbor slota, pravila poravnanja i proveru potpisa. Iskoristite te vrednosti da izdvojite ugrađenu komandnu liniju, kernel i initramfs, a zatim nezavisno proverite svaki izlaz pomoću `file`, magičnih bajtova i `binwalk`; čitanje do kraja kontejnera može slučajno da doda initrd, ACPI objekat ili potpis kernelu.<sup>[[9]](#references)</sup>
 
 #### Oporavite mapu blokova pri pokretanju
 
-Izdvojite initramfs kernela i izvršite reverse engineering njegovog `/init` fajla i svih storage biblioteka. U [Reversing Tools & Basic Methods](../../reversing/reversing-tools-basic-methods/), pratite reference stringova za `/proc/cmdline`, `/dev/mapper/`, `dmsetup`, `BLKGETSIZE64` i putanje particija; zatim pratite kod koji bira aktivni A/B slot i formira tabelu. Korisne početne tačke za radare2 su `r2 -A init`, `afl`, `pdf @ main` i `pdf @ fcn.xxxxx`.<sup>[[9]](#references)</sup>
+Izdvojite initramfs kernela i reverzno analizirajte njegov `/init` i biblioteke za skladištenje. U odeljku [Reversing Tools & Basic Methods](../../reversing/reversing-tools-basic-methods/) pratite reference nizova za `/proc/cmdline`, `/dev/mapper/`, `dmsetup`, `BLKGETSIZE64` i putanje particija; zatim pratite kod koji bira aktivni A/B slot i pravi tabelu. Korisne početne tačke za rad sa radare2 su `r2 -A init`, `afl`, `pdf @ main` i `pdf @ fcn.xxxxx`.<sup>[[9]](#references)</sup>
 
-Linear target mapira uzastopne opsege virtuelnog uređaja na opsege jednog ili više pratećih uređaja. Oporavljena tabela sa dva segmenta obično ima sledeći oblik (sve pozicije i dužine izražene su u sektorima od 512 bajtova):<sup>[[9]](#references)[[10]](#references)</sup>
+Cilj `linear` mapira uzastopne opsege virtuelnog uređaja na opsege jednog ili više pozadinskih uređaja. Oporavljena tabela sa dva segmenta obično ima sledeći oblik (sve pozicije i dužine su izražene u sektorima od 512 bajtova):<sup>[[9]](#references)[[10]](#references)</sup>
 
 ```text
 0              <seg1_sectors> linear /dev/mmcblk0p2 0
 <seg1_sectors> <seg2_sectors> linear /dev/mmcblk0p4 <tail_start>
 ```
 
-Ponovite aritmetiku mašinskog koda tačno, uključujući širinu celog broja, pomeranja i konverzije jedinica. Na primer, sledeći izraz zaokružuje veličinu u bajtovima naniže na granicu od 4 KiB i tek onda je pretvara u sektore od 512 bajtova; ako ga zamenite izrazom `p4_bytes // 512`, izabrani završni segment pomeriće se za `p4_bytes % 4096` kad god particija nije poravnata na granicu stranice.<sup>[[9]](#references)</sup>
+Tačno reprodukujte aritmetiku mašinskog koda, uključujući širinu celih brojeva, pomeranja i konverzije jedinica. Na primer, sledeći izraz zaokružuje veličinu u bajtovima naniže na granicu od 4 KiB i tek onda je konvertuje u sektore od 512 bajtova; ako ga zamenite izrazom `p4_bytes // 512`, izabrani kraj se pomera za `p4_bytes % 4096` kad god particija nije poravnata na granicu stranice.<sup>[[9]](#references)</sup>
 
 ```python
 p4_sectors = (p4_bytes >> 12) << 3
@@ -244,11 +243,11 @@ effective_bytes = p4_sectors * 512
 tail_start = effective_bytes - tail_distance
 ```
 
-Rekonstruišite neparticionisanu sliku za analizu kopiranjem opsega redosledom iz tabele, koristeći ograničene veličine blokova umesto učitavanja celog dump-a medija u memoriju. Time se izbegava i pravljenje host-side mapper uređaja. GPT-om izvedene pomake, obrnute brojeve sektora i rezultujuću dužinu izlaza proverite zasebnim tvrdnjama.<sup>[[9]](#references)</sup>
+Rekonstruisati flat analysis image kopiranjem opsega redosledom iz tabele, u ograničenim blokovima umesto učitavanja kompletnog media dump-a u memoriju. Time se izbegava i kreiranje mapper uređaja na strani hosta. GPT-derived ofsete, obrnute brojeve sektora i rezultujuću dužinu izlaza zadržati kao zasebne tvrdnje.<sup>[[9]](#references)</sup>
 
-#### Razlikujte oštećenje od konstantne greške u rekonstrukciji
+#### Razlikovati korupciju od konstantne greške pri rekonstrukciji
 
-Za SquashFS proverite magic vrednost `hsqs` i dekodirajte 64-bitno little-endian polje `bytes_used` na pomaku 40 u superbloku pre pokretanja komande `unsquashfs`. Ako ekstrakcija ne uspe u nekoliko nepovezanih struktura, pretražite širok opseg oko očekivanih pozicija i zahtevajte snažne strukturne kandidate: blok metapodataka koji može da se dekompresuje, nekoliko uzastopnih ispravnih unosa direktorijuma, uverljiva polja inode-a, root inode usklađen sa brojem inode-ova ili ispravnu strukturu metapodataka integriteta. Jedno poklapanje magic vrednosti nije dovoljno.<sup>[[9]](#references)</sup>
+Za SquashFS proveriti `hsqs` magic i dekodirati little-endian 64-bitno polje `bytes_used` na ofsetu 40 u superbloku pre pokretanja `unsquashfs`. Ako izdvajanje ne uspe u nekoliko nepovezanih struktura, pretražiti širok prozor oko očekivanih pozicija i zahtevati snažne strukturne kandidate: metadata blok koji može da se dekompresuje, nekoliko uzastopnih validnih stavki direktorijuma, uverljiva inode polja, root inode koji odgovara broju inode-ova ili validnu strukturu integrity metadata. Jedno podudaranje magic vrednosti nije dovoljno.<sup>[[9]](#references)</sup>
 
 ```python
 import struct
@@ -261,17 +260,17 @@ nominal_end = (bytes_used + 4095) & ~4095
 print(hex(bytes_used), hex(nominal_end))
 ```
 
-Kada isti potpisani pomeraj učini nezavisne strukture ispravnim — na primer, metapodatke direktorijuma i verity zapis — verovatni uzrok je sistematska greška u početnoj poziciji segmenta, a ne nedostajući bajtovi. Vratite se na obrnutu aritmetiku i potražite odbačene ostatke pri deljenju, predznak, prekoračenje ili zaokruživanje na granice sektora/stranica pre nego što pokušate oporavak napuštenih datoteka ili zakrpljivanje metapodataka sistema datoteka.<sup>[[9]](#references)</sup>
+Kada ista potpisana razlika učini validnim nezavisne strukture — na primer, metapodatke direktorijuma i verity zapis — verovatan uzrok je sistematska greška u početnoj poziciji segmenta, a ne nedostajući bajtovi. Vratite se na obrnutu aritmetiku i potražite odbačene ostatke pri deljenju, predznak, prekoračenje ili zaokruživanje na granicu sektora/stranice pre nego što pokušate oporavak izgubljenih podataka ili zakrpljivanje metapodataka sistema datoteka.<sup>[[9]](#references)</sup>
 
-Na kraju, razdvojite granice zaštite: LUKS volumeni čiji su ključevi zapečaćeni pomoću TPM-a štite poverljivost podataka, dok potpisano dm-verity mapiranje štiti integritet osnovnog sistema datoteka. Softverski TPM ne može da povrati ključ zapečaćen za originalni fizički TPM, a pokretanje izmenjenog SquashFS-a pomoću init-a namenjenog samo istraživanju, koji izostavlja proveru verity-ja, ne falsifikuje njegov potpis niti zaobilazi dm-verity.<sup>[[9]](#references)</sup>
+Na kraju, držite granice zaštite odvojene: LUKS volumeni čiji je ključ zapečaćen TPM-om štite poverljivost podataka, dok potpisano dm-verity mapiranje štiti integritet korenskog sistema datoteka. Softverski TPM ne može da povrati ključ zapečaćen za originalni fizički TPM, a pokretanje izmenjenog SquashFS-a preko istraživačkog init-a koji izostavlja proveru verity-ja ne falsifikuje njegov potpis niti narušava dm-verity.<sup>[[9]](#references)</sup>
 
 ## Analiza firmvera
 
-Kada se firmver pribavi, neophodno je detaljno ga analizirati kako bi se razumela njegova struktura i moguće ranjivosti. Ovaj postupak podrazumeva korišćenje različitih alata za analizu i izdvajanje korisnih podataka iz slike firmvera.
+Kada se firmver pribavi, neophodno je analizirati ga kako bi se razumela njegova struktura i moguće ranjivosti. Ovaj postupak podrazumeva korišćenje različitih alata za analizu i izdvajanje korisnih podataka iz slike firmvera.
 
-### Alati za početnu analizu
+### Početni alati za analizu
 
-Dat je skup komandi za početni pregled binarne datoteke (označene kao `<bin>`). Ove komande pomažu u prepoznavanju tipova datoteka, izdvajanju nizova znakova, analizi binarnih podataka i razumevanju detalja o particijama i sistemu datoteka:
+U nastavku je dat skup komandi za početni pregled binarne datoteke (označene kao `<bin>`). Ove komande pomažu u prepoznavanju tipova datoteka, izdvajanju nizova, analizi binarnih podataka i razumevanju detalja o particijama i sistemu datoteka:
 
 ```bash
 file <bin>
@@ -282,13 +281,13 @@ hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
 
-Da bi se procenio status enkripcije slike, proverava se **entropija** pomoću `binwalk -E <bin>`. Niska entropija ukazuje na odsustvo enkripcije, dok visoka entropija ukazuje na moguću enkripciju ili kompresiju.
+Da bi se procenio status šifrovanja slike, proverava se **entropija** pomoću `binwalk -E <bin>`. Niska entropija ukazuje na odsustvo šifrovanja, dok visoka entropija ukazuje na moguće šifrovanje ili kompresiju.
 
 Za izdvajanje **ugrađenih datoteka** preporučuju se alati i resursi kao što su dokumentacija **file-data-carving-recovery-tools** i **binvis.io** za pregled datoteka.
 
-### Izdvajanje fajl sistema
+### Izdvajanje sistema datoteka
 
-Pomoću `binwalk -ev <bin>` obično se može izdvojiti fajl sistem, često u direktorijum nazvan po tipu fajl sistema (npr. squashfs, ubifs). Međutim, kada **binwalk** ne uspe da prepozna tip fajl sistema zbog nedostajućih magic bajtova, potrebno je ručno izdvajanje. To podrazumeva korišćenje alata `binwalk` za pronalaženje offseta fajl sistema, a zatim komande `dd` za izdvajanje fajl sistema:
+Pomoću `binwalk -ev <bin>` obično je moguće izdvojiti sistem datoteka, često u direktorijum nazvan po tipu sistema datoteka (npr. squashfs, ubifs). Međutim, kada **binwalk** ne uspe da prepozna tip sistema datoteka zbog nedostajućih magičnih bajtova, potrebno je ručno izdvajanje. To podrazumeva korišćenje alata `binwalk` za pronalaženje pomeraja sistema datoteka, a zatim komande `dd` za izdvajanje sistema datoteka:
 
 ```bash
 $ binwalk DIR850L_REVB.bin
@@ -300,17 +299,17 @@ Nakon toga se, u zavisnosti od tipa sistema datoteka (npr. squashfs, cpio, jffs2
 
 ### Analiza sistema datoteka
 
-Kada se sistem datoteka izdvoji, počinje potraga za bezbednosnim propustima. Pažnja se usmerava na nezaštićene mrežne demone, hardkodovane akreditive, API endpoint-e, funkcionalnosti servera za ažuriranje, nekompajlirani kod, skripte za pokretanje i kompajlirane binarne datoteke za offline analizu.
+Kada se sistem datoteka izdvoji, počinje potraga za bezbednosnim propustima. Pažnja se obraća na nebezbedne mrežne daemon-e, hardkodovane akreditive, API endpoint-e, funkcionalnosti servera za ažuriranje, nekompajlirani kod, skripte za pokretanje i kompajlirane binarne datoteke za offline analizu.
 
-**Ključne lokacije** i **stavke** koje treba pregledati uključuju:
+**Ključne lokacije** i **stavke** koje treba pregledati obuhvataju:
 
-- **etc/shadow** i **etc/passwd** za korisničke akreditive
+- **etc/shadow** i **etc/passwd** za akreditive korisnika
 - SSL sertifikate i ključeve u **etc/ssl**
-- Konfiguracione i skriptne datoteke zbog potencijalnih ranjivosti
+- Konfiguracione i skriptne datoteke zbog mogućih ranjivosti
 - Ugrađene binarne datoteke za dalju analizu
 - Uobičajene veb-servere i binarne datoteke IoT uređaja
 
-Nekoliko alata pomaže u otkrivanju osetljivih informacija i ranjivosti u sistemu datoteka:
+Nekoliko alata pomaže u pronalaženju osetljivih informacija i ranjivosti u sistemu datoteka:
 
 - [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) i [**Firmwalker**](https://github.com/craigz28/firmwalker) za pretragu osetljivih informacija
 - [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) za sveobuhvatnu analizu firmware-a
@@ -318,9 +317,9 @@ Nekoliko alata pomaže u otkrivanju osetljivih informacija i ranjivosti u sistem
 
 ### Bezbednosne provere kompajliranih binarnih datoteka
 
-Potrebno je ispitati ranjivosti u izvornom kodu i kompajliranim binarnim datotekama pronađenim u sistemu datoteka. Alati poput **checksec.sh** za Unix binarne datoteke i **PESecurity** za Windows binarne datoteke pomažu u prepoznavanju nezaštićenih binarnih datoteka koje bi mogle biti iskorišćene.
+Izvorni kod i kompajlirane binarne datoteke pronađene u sistemu datoteka moraju se pregledati zbog ranjivosti. Alati poput **checksec.sh** za Unix binarne datoteke i **PESecurity** za Windows binarne datoteke pomažu u identifikovanju nezaštićenih binarnih datoteka koje bi mogle da se iskoriste.
 
-## Prikupljanje cloud konfiguracije i MQTT akreditiva pomoću izvedenih URL tokena
+## Prikupljanje cloud konfiguracije i MQTT akreditiva putem izvedenih URL tokena
 
 Mnogi IoT hub-ovi preuzimaju konfiguraciju za svaki uređaj sa cloud endpoint-a koji izgleda ovako:<sup>[[5]](#references)</sup>
 
@@ -328,32 +327,32 @@ Mnogi IoT hub-ovi preuzimaju konfiguraciju za svaki uređaj sa cloud endpoint-a 
 
 Tokom analize firmware-a možete otkriti da se `<token>` lokalno izvodi iz ID-a uređaja pomoću hardkodovane tajne, na primer:
 
-- token = MD5( deviceId || STATIC_KEY ) and represented as uppercase hex
+- token = MD5( deviceId || STATIC_KEY ) i predstavljen je kao heksadecimalni zapis velikim slovima
 
-Ovakav dizajn omogućava svakome ko sazna deviceId i STATIC_KEY da rekonstruiše URL i preuzme cloud konfiguraciju, koja često otkriva MQTT akreditive u čistom tekstu i prefikse tema.
+Ovakav dizajn omogućava svakome ko sazna deviceId i STATIC_KEY da rekonstruiše URL i preuzme cloud konfiguraciju, koja često otkriva MQTT akreditive u otvorenom tekstu i prefikse topic-a.
 
 Praktični postupak:
 
 1) Izdvojite deviceId iz UART boot logova
 
-- Povežite 3.3V UART adapter (TX/RX/GND) i zabeležite logove:
+- Povežite 3.3V UART adapter (TX/RX/GND) i snimite logove:
 
 ```bash
 picocom -b 115200 /dev/ttyUSB0
 ```
 
-- Potražite linije koje ispisuju obrazac URL-a cloud konfiguracije i adresu brokera, na primer:
+- Potražite linije koje ispisuju obrazac URL-a za cloud konfiguraciju i adresu brokera, na primer:
 
 ```
 Online Config URL https://api.vendor.tld/pf/<deviceId>/<token>
 MQTT: mqtt://mq-gw.vendor.tld:8001
 ```
 
-2) Oporavi STATIC_KEY i algoritam tokena iz firmware-a
+2) Oporavi STATIC_KEY i algoritam tokena iz firmvera
 
-- Učitaj binarne fajlove u Ghidra/radare2 i potraži konfiguracionu putanju ("/pf/") ili upotrebu MD5.
+- Učitaj binarne datoteke u Ghidra/radare2 i pretraži putanju konfiguracije ("/pf/") ili upotrebu MD5.
 - Potvrdi algoritam (npr. MD5(deviceId||STATIC_KEY)).
-- Izvedi token u Bash-u i pretvori heš u velika slova:
+- Izvedi token u Bash-u i pretvori digest u velika slova:
 
 ```bash
 DEVICE_ID="d88b00112233"
@@ -363,7 +362,7 @@ printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}'
 
 3) Prikupite cloud konfiguraciju i MQTT akreditive
 
-- Sastavite URL i preuzmite JSON pomoću curl-a; raščlanite ga pomoću jq da biste izdvojili tajne:
+- Sastavite URL i preuzmite JSON pomoću curl-a; parsirajte ga pomoću jq-a da biste izdvojili tajne:
 
 ```bash
 API_HOST="https://api.vendor.tld"
@@ -372,9 +371,9 @@ curl -sS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq .
 # Fields often include: mqtt host/port, clientId, username, password, topic prefix (tpkfix)
 ```
 
-4) Zloupotrebite nešifrovani MQTT i slabe ACL-ove tema (ako postoje)
+4) Zloupotreba MQTT-a u otvorenom tekstu i slabih ACL-ova za teme (ako postoje)
 
-- Koristite otkrivene akreditive da biste se pretplatili na teme za održavanje i potražili osetljive događaje:
+- Koristite pronađene akreditive da biste se pretplatili na teme za održavanje i potražili osetljive događaje:
 
 ```bash
 mosquitto_sub -h <broker> -p <port> -V mqttv311 \
@@ -384,7 +383,7 @@ mosquitto_sub -h <broker> -p <port> -V mqttv311 \
 
 5) Nabrojte predvidljive ID-jeve uređaja (u velikom obimu, uz odobrenje)
 
-- Mnogi ekosistemi ugrađuju bajtove OUI-ja/proizvoda/tipa dobavljača, a zatim sekvencijalni sufiks.
+- Mnogi ekosistemi ugrađuju bajtove OUI-ja/proizvoda/tipa dobavljača, iza kojih sledi sekvencijalni sufiks.
 - Možete iterirati kroz moguće ID-jeve, programski izvoditi tokene i preuzimati konfiguracije:
 
 ```bash
@@ -397,19 +396,19 @@ done
 ```
 
 Napomene
-- Uvek pribavite izričito odobrenje pre pokušaja masovnog enumerisanja.
-- Kad god je moguće, dajte prednost emulaciji ili statičkoj analizi za otkrivanje tajni, bez izmene ciljnog hardvera.
+- Uvek pribavite izričito ovlašćenje pre pokušaja masovnog enumerisanja.
+- Kada je moguće, dajte prednost emulaciji ili statičkoj analizi za otkrivanje tajni, bez izmene ciljnog hardvera.
 
 
-Proces emulacije firmware-a omogućava **dinamičku analizu** rada uređaja ili pojedinačnog programa. Ovaj pristup može naići na izazove zbog zavisnosti od hardvera ili arhitekture, ali prenos root filesystem-a ili određenih binarnih datoteka na uređaj sa odgovarajućom arhitekturom i endianness-om, kao što je Raspberry Pi, ili na unapred pripremljenu virtuelnu mašinu, može olakšati dalja testiranja.
+Proces emulacije firmware-a omogućava **dinamičku analizu** rada uređaja ili pojedinačnog programa. Ovaj pristup može naići na izazove zbog zavisnosti od hardvera ili arhitekture, ali prebacivanje root filesystem-a ili konkretnih binarnih datoteka na uređaj sa odgovarajućom arhitekturom i redosledom bajtova, kao što je Raspberry Pi, ili na unapred napravljenu virtuelnu mašinu, može olakšati dodatno testiranje.
 
 ### Emulacija pojedinačnih binarnih datoteka
 
-Za analizu pojedinačnih programa ključno je utvrditi endianness programa i arhitekturu CPU-a.
+Za analizu pojedinačnih programa ključno je utvrditi redosled bajtova i CPU arhitekturu programa.
 
 #### Primer sa MIPS arhitekturom
 
-Za emulaciju binarne datoteke za MIPS arhitekturu može se koristiti sledeća komanda:
+Za emulaciju binarne datoteke za MIPS arhitekturu može se koristiti komanda:
 
 ```bash
 file ./squashfs-root/bin/busybox
@@ -421,36 +420,36 @@ A za instaliranje neophodnih alata za emulaciju:
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
 
-Za MIPS (big-endian) koristi se `qemu-mips`, a za binarne datoteke little-endian formata koristi se `qemu-mipsel`.
+Za MIPS (big-endian) koristi se `qemu-mips`, a za binarne datoteke little-endian koristio bi se `qemu-mipsel`.
 
 #### Emulacija ARM arhitekture
 
-Kod ARM binarnih datoteka postupak je sličan, a za emulaciju se koristi emulator `qemu-arm`.
+Za ARM binarne datoteke postupak je sličan, pri čemu se za emulaciju koristi emulator `qemu-arm`.
 
 ### Emulacija celog sistema
 
-Alati kao što su [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) i drugi omogućavaju emulaciju celog firmvera, automatizujući proces i olakšavajući dinamičku analizu.
+Alati kao što su [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) i drugi omogućavaju emulaciju celog firmware-a, automatizujući postupak i olakšavajući dinamičku analizu.
 
 ### Rekonstrukcija podeljenih i verifikovanih root sistema datoteka za emulaciju
 
-Ako je SquashFS superblok čitljiv, ali su pomeraji inode-a, direktorijuma ili tabele fragmenata nemogući, nemojte odmah menjati `unsquashfs`. Obrnuto analizirajte rani boot binarni fajl i reprodukujte graf blokovskih uređaja koji on kreira: ugrađeni sistemi mogu da izlože nominalnu root particiju, ali da stvarni sistem datoteka naprave pomoću `dm-linear` mapiranja koje dodaje sektore preuzete sa druge particije. Provere koje se oslanjaju samo na superblok mogu da prođu čak i kada su svi naredni blokovi metapodataka pomereni.<sup>[[11]](#references)</sup>
+Ako je superblok SquashFS-a čitljiv, ali su pomeraji inode-a, direktorijuma ili fragment-tabele nemogući, nemojte odmah menjati `unsquashfs`. Obrnutim inženjeringom analizirajte rani boot binarni fajl i reprodukujte graf blokovskih uređaja koji on kreira: ugrađeni sistemi mogu izložiti nominalnu root particiju, ali izgraditi stvarni sistem datoteka pomoću `dm-linear` mapiranja koje dodaje sektore pozajmljene iz druge particije. Provere samo superbloka mogu uspeti čak i kada su svi naredni blokovi metapodataka pomereni.<sup>[[11]](#references)</sup>
 
-Sačuvajte aritmetiku firmvera tačno. Posebno utvrdite da li su dužine izražene u bajtovima, sektorima od 512 bajtova ili stranicama od 4 KiB; reprodukujte pomeranja bitova i skraćivanje prvobitnim redosledom; i uzmite u obzir završne regione koji zavise od banke u A/B rasporedima. Na primer, `(partition_bytes >> 12) << 3` najpre skraćuje vrednost na granicu od 4 KiB, a tek zatim izražava rezultat u sektorima od 512 bajtova; zamena sa `partition_bytes // 512` može da pomeri dodati opseg za nekoliko kilobajta i ošteti sve naredne SquashFS tabele.<sup>[[11]](#references)</sup>
+Sačuvajte aritmetiku firmware-a tačno. Naročito utvrdite da li su dužine izražene u bajtovima, sektorima od 512 bajtova ili stranicama od 4 KiB; reprodukujte pomeranja bitova i skraćivanje istim redosledom kao u originalu; i uzmite u obzir završne regione koji zavise od banke u A/B rasporedima. Na primer, `(partition_bytes >> 12) << 3` najpre skraćuje na granicu od 4 KiB, a tek zatim izražava rezultat u sektorima od 512 bajtova; zamena sa `partition_bytes // 512` može pomeriti dodati opseg za nekoliko kilobajta i oštetiti sve naredne SquashFS tabele.<sup>[[11]](#references)</sup>
 
 Koristan postupak validacije je:<sup>[[11]](#references)</sup>
 
-1. Iz verifier/init binarnog fajla utvrdite izvorni uređaj, početni sektor i dužinu svakog `dm-linear` segmenta.
-2. Spojite ili mapirajte opsege bez menjanja pravila poravnanja.
-3. Ako ekstrakcija i dalje ne uspeva, pretražite samo mali prozor oko predviđene granice i zahtevajte nekoliko uzastopnih validnih struktura metapodataka, umesto da prihvatite samo naizgled verovatan superblok.
-4. Pokrenite neizmenjeni `unsquashfs` nad rekonstruisanom slikom; uspešan prolazak kroz sve direktorijume i fragmente predstavlja jači dokaz od rezultata `unsquashfs -stat`.
+1. Iz binarnog fajla verifier/init utvrdite izvorni uređaj, početni sektor i dužinu svakog `dm-linear` segmenta.
+2. Spojite ili mapirajte opsege bez menjanja njihove semantike poravnanja.
+3. Ako izdvajanje i dalje ne uspeva, pretražite samo mali raspon oko predviđene granice i zahtevajte nekoliko uzastopnih validnih struktura metapodataka, umesto da prihvatite samo naizgled ispravan superblok.
+4. Pokrenite neizmenjeni `unsquashfs` nad rekonstruisanom slikom; uspešan prolazak kroz sve direktorijume i fragmente jači je dokaz od rezultata `unsquashfs -stat`.
 
-#### Zamena dm-verity koju kontroliše analitičar
+#### Zamena dm-verity pod kontrolom analitičara
 
-Kada analitičar kontroliše QEMU kernel, initramfs i virtuelne diskove, izmenjeni root može da se pokrene zamenom proizvođačevog verifikacionog PID 1 malim, statički linkovanim init procesom. Ovo je **zamena boot lanca u laboratorijskom okruženju**, a ne zaobilaženje dm-verity, njegovog RSA potpisa, Secure Boot-a ili ključa zapečaćenog u TPM-u.<sup>[[11]](#references)</sup>
+Kada analitičar kontroliše QEMU kernel, initramfs i virtuelne diskove, izmenjeni root može da se pokrene zamenom vendor-ovog verifikacionog PID 1 malim, statički povezanim init-om. Ovo je **zamena boot lanca u laboratorijskom okruženju**, a ne probijanje dm-verity-ja, njegovog RSA potpisa, Secure Boot-a ili ključa zapečaćenog pomoću TPM-a.<sup>[[11]](#references)</sup>
 
-Zamenjujući init treba da oponaša operativne delove originalnog boot procesa: montira `devtmpfs`, poziva `setsid()`, povezuje `/dev/console` sa deskriptorima datoteka 0–2, montira `/proc` i `/sys`, čeka da bude dostupan zadati blokovski uređaj, montira izmenjeni root samo za čitanje, odvaja pseudo-sisteme datoteka starog root-a, premešta novo montiranje na `/`, poziva `chroot` i izvršava (`execve()`) originalni `/sbin/init` firmvera. Odvajanje `/dev`, `/proc` i `/sys` **pre** `MS_MOVE` sprečava slučajno odvajanje tačaka montiranja koje pripadaju novom root-u.<sup>[[11]](#references)</sup>
+Zameni init treba da oponaša operativne delove originalne putanje pokretanja: montira `devtmpfs`, pozove `setsid()`, poveže `/dev/console` sa deskriptorima datoteka 0–2, montira `/proc` i `/sys`, sačeka isporučeni blokovski uređaj, montira izmenjeni root samo za čitanje, odvoji pseudo-sisteme datoteka starog root-a, premesti novi mount na `/`, pozove `chroot` i izvrši `execve()` nad originalnim firmware-ovim `/sbin/init`. Odvajanje `/dev`, `/proc` i `/sys` **pre** `MS_MOVE` sprečava slučajno odvajanje tačaka montiranja koje pripadaju novom root-u.<sup>[[11]](#references)</sup>
 
-Promenljivo stanje uređaja držite odvojeno od izmenjenog nepromenljivog root-a. qcow2 overlay može da sačuva LVM stanje originalnog diska, dok drugi virtio disk, montiran samo za čitanje, obezbeđuje izmenjeni SquashFS:<sup>[[11]](#references)</sup>
+Promenljivo stanje uređaja držite odvojeno od izmenjenog nepromenljivog root-a. qcow2 overlay može da sačuva LVM stanje originalnog diska, dok drugi virtio disk montiran samo za čitanje obezbeđuje izmenjeni SquashFS:<sup>[[11]](#references)</sup>
 
 ```bash
 qemu-img create -f qcow2 -F raw -b emmc.raw overlay.qcow2
@@ -460,9 +459,9 @@ qemu-system-x86_64 ... -kernel bzImage -initrd custom-initramfs.cpio.gz \
   -drive if=virtio,format=raw,readonly=on,file=rootfs-edited.squashfs
 ```
 
-#### Otklanjanje grešaka u stanju slike van mreže
+#### Debagovanje stanja image-a van mreže
 
-Pregledajte trajno stanje izvan gosta kada sporo pokretanje, destruktivne početne skripte ili nepouzdano evidentiranje konzole otežavaju otkrivanje uzroka greške. Nikada nemojte povezivati overlay koji koristi pokrenuta VM; izložite ga pomoću `qemu-nbd`, ograničite LVM pretragu na predviđenu NBD particiju i deaktivirajte grupu volumena pre nego što je isključite.<sup>[[11]](#references)</sup>
+Pregledajte trajno stanje izvan gostujućeg sistema kada sporo pokretanje, destruktivne skripte pri pokretanju ili nepouzdano logovanje konzole otežavaju utvrđivanje uzroka kvara. Nikada ne priključujte overlay koji koristi pokrenuta VM; izložite ga pomoću `qemu-nbd`, ograničite otkrivanje LVM-a na predviđenu NBD particiju i deaktivirajte grupu volumena pre nego što je isključite.<sup>[[11]](#references)</sup>
 
 ```bash
 sudo modprobe nbd max_part=16
@@ -473,17 +472,17 @@ sudo vgchange -an VG_NAME
 sudo qemu-nbd --disconnect /dev/nbd0
 ```
 
-Radi ponovljivog izolovanja kvarova, upisujte vremenski označene marker datoteke na stabilan volumen na koji može da se upisuje i proveravajte ih offline; `/dev/kmsg`, FIFO-ovi i prolazne konzole mogu da daju lažno negativne rezultate zbog ograničavanja brzine ili ranog prekida procesa. Takođe uporedite tačne interfejse kroz slojeve pre nego što menjate nepovezan kod: `uname -r` naspram `/lib/modules/`, funkcije ext4-a na disku naspram konfiguracije kernela i generaciju Mesa `libGL` biblioteke naspram DRI ABI-ja i naziva drajvera izvedenih iz PCI podataka. Komponenta može da postoji, pa čak i da se uspešno učita pomoću `dlopen()`, a da ipak ne može da se koristi zato što njen potrošač očekuje drugačiji ABI.<sup>[[11]](#references)</sup>
+Za ponovljivo izolovanje kvarova, upisujte vremenski označene marker fajlove na stabilan volumen sa dozvolom za upis i proveravajte ih van mreže; `/dev/kmsg`, FIFO-ovi i prolazne konzole mogu dati lažno negativne rezultate zbog ograničenja učestalosti ili ranog gašenja procesa. Takođe uporedite tačne interfejse između slojeva pre nego što menjate nepovezan kod: `uname -r` naspram `/lib/modules/`, funkcije ext4-a na disku naspram konfiguracije kernela i generaciju Mesa `libGL` biblioteke naspram ABI-ja DRI drajvera i naziva drajvera izvedenih iz PCI podataka. Komponenta može postojati i čak uspešno izvršiti `dlopen()`, a ipak biti neupotrebljiva jer njen potrošač očekuje drugačiji ABI.<sup>[[11]](#references)</sup>
 
 ## Dinamička analiza u praksi
 
-U ovoj fazi se za analizu koristi okruženje stvarnog ili emuliranog uređaja. Neophodno je zadržati shell pristup operativnom sistemu i sistemu datoteka. Emulacija možda neće savršeno oponašati interakcije sa hardverom, pa će povremeno biti potrebno ponovo pokrenuti emulaciju. Analizom treba ponovo obuhvatiti sistem datoteka, iskoristiti izložene veb-stranice i mrežne servise i istražiti ranjivosti bootloadera. Testovi integriteta firmware-a ključni su za prepoznavanje potencijalnih ranjivosti backdoor tipa.
+U ovoj fazi se za analizu koristi okruženje stvarnog ili emuliranog uređaja. Neophodno je održavati pristup shell-u operativnog sistema i fajl-sistemu. Emulacija možda neće savršeno oponašati interakcije sa hardverom, pa će možda povremeno biti potrebno ponovo pokrenuti emulaciju. Analiza treba ponovo da obuhvati fajl-sistem, iskorišćavanje izloženih veb-stranica i mrežnih servisa i istraživanje ranjivosti bootloader-a. Testovi integriteta firmware-a su ključni za otkrivanje potencijalnih ranjivosti backdoor-a.
 
 ## Tehnike analize tokom izvršavanja
 
-Analiza tokom izvršavanja obuhvata interakciju sa procesom ili binarnom datotekom u njenom operativnom okruženju, uz korišćenje alata kao što su gdb-multiarch, Frida i Ghidra za postavljanje tačaka prekida i otkrivanje ranjivosti pomoću fuzzing-a i drugih tehnika.
+Analiza tokom izvršavanja podrazumeva interakciju sa procesom ili binarnom datotekom u njihovom operativnom okruženju, uz upotrebu alata kao što su gdb-multiarch, Frida i Ghidra za postavljanje tačaka prekida i prepoznavanje ranjivosti pomoću fuzzing-a i drugih tehnika.
 
-Za ugrađene ciljne uređaje bez kompletnog debugger-a, **kopirajte statički povezani `gdbserver`** na uređaj i povežite se sa njim udaljeno:<sup>[[6]](#references)</sup>
+Za ugrađene ciljne sisteme bez potpunog debugger-a, **kopirajte statički povezani `gdbserver`** na uređaj i povežite se sa njim na daljinu:<sup>[[6]](#references)</sup>
 
 ```bash
 # On device
@@ -496,99 +495,99 @@ gdb-multiarch /path/to/targetd
 target remote <device-ip>:1234
 ```
 
-### Mapiranje Zigbee / radio-co-processor poruka
+### Zigbee / mapiranje poruka radio-koprocesora
 
-Na IoT hubovima RF stek je često podeljen između **radio MCU-a** i Linux korisničkog procesa. Koristan postupak je mapiranje putanje:<sup>[[8]](#references)</sup>
+Na IoT čvorištima RF stek je često podeljen između **radio MCU-a** i Linux procesa u korisničkom prostoru. Koristan postupak je mapiranje putanje:<sup>[[8]](#references)</sup>
 
-1. **RF okvir** u vazduhu
+1. **RF okvir** u etru
 2. **parser na strani kontrolera** na radio MCU-u
-3. **tekstualni ili TLV protokol preko serijske veze/UART-a** prosleđen Linuxu (na primer `/dev/tty*`)
+3. **serijski/UART tekstualni ili TLV protokol** prosleđen Linux-u (na primer `/dev/tty*`)
 4. **dispečer aplikacije** u glavnom demonu
 5. **rukovalac specifičan za protokol / mašina stanja**
 
-Ova arhitektura daje dve mete za reverse engineering umesto jedne. Ako kontroler pretvara binarne radio-okvire u tekstualni protokol kao što je `Group,Command,arg1,arg2,...`, utvrdite:
+Ova arhitektura pruža dve mete za reverse engineering umesto jedne. Ako kontroler pretvara binarne radio okvire u tekstualni protokol kao što je `Group,Command,arg1,arg2,...`, utvrdite:
 
 - **Grupe poruka** i tabele dispečera
-- Koje poruke mogu da stignu iz **mreže**, a koje od samog kontrolera
+- Koje poruke mogu doći sa **mreže**, a koje od samog kontrolera
 - Tačna **polja za razlikovanje specifična za proizvođača** (na primer Zigbee `manufacturer_code` i prilagođeni `cluster_command`)
-- Koji rukovaoci su dostupni samo tokom faza **commissioning**, otkrivanja ili preuzimanja firmvera/modela
+- Koji rukovaoci su dostupni samo tokom **commissioning** faze, otkrivanja ili preuzimanja firmvera/modela
 
-Konkretno za Zigbee, snimite saobraćaj uparivanja i proverite da li se meta i dalje oslanja na podrazumevani **Link Key** `ZigBeeAlliance09`. Ako je tako, prisluškivanjem commissioning saobraćaja možda može da se otkrije **Network Key**. Zigbee 3.0 install codes smanjuju ovu izloženost, pa proverite da li ih testirani uređaj zaista zahteva.
+Konkretno za Zigbee, snimite saobraćaj uparivanja i proverite da li se meta i dalje oslanja na podrazumevani **Link Key** `ZigBeeAlliance09`. Ako je tako, prisluškivanje saobraćaja tokom commissioning faze može otkriti **Network Key**. Zigbee 3.0 install codes smanjuju ovu izloženost, pa zabeležite da li ih testirani uređaj zaista zahteva.
 
-### Rukovaoci protokolima specifičnim za proizvođača i dostupnost ograničena FSM-om
+### Rukovaoci protokola specifični za proizvođača i dostupnost kontrolisana FSM-om
 
 Komande Zigbee/ZCL specifične za proizvođača često su bolja meta od standardizovanih klastera, jer vode do **prilagođenog koda za parsiranje** i internih **FSM-ova** sa manje proverenom validacijom.<sup>[[8]](#references)</sup>
 
 Praktičan postupak:
 
-- Obrnuto analizirajte dispečer komandi dok ne pronađete **rukovalac namenjen samo proizvođaču**.
-- Rekonstruišite tabele **FSM stanja**, **događaja**, **provere**, **akcije** i **sledećeg stanja**.
-- Identifikujte **prelazna stanja** koja automatski nastavljaju dalje i grane za ponovni pokušaj/grešku koje na kraju resetuju ili oslobađaju memoriju koju kontroliše napadač.
-- Utvrdite koje su legitimne razmene protokola potrebne da bi se demon doveo u ranjivo stanje, umesto da pretpostavite da je ranjivi rukovalac uvek dostupan.
+- Obratnim inženjeringom analizirajte dispečer komandi dok ne pronađete **rukovalac dostupan samo za proizvođača**.
+- Rekonstruišite tabele za **FSM state**, **event**, **check**, **action** i **next-state**.
+- Identifikujte **prelazna stanja** koja automatski napreduju i grane za retry/error koje na kraju resetuju ili oslobađaju memoriju kojom upravlja napadač.
+- Utvrdite koje su legitimne razmene protokola potrebne da se demon dovede u ranjivo stanje, umesto da pretpostavite da je ranjivi rukovalac uvek dostupan.
 
-Kod protokola osetljivih na vreme, reprodukcija paketa iz Python okvira može biti prespora. Pouzdaniji pristup je emulacija legitimnog uređaja na stvarnom hardveru (na primer **nRF52840**) pomoću steka za uređaje proizvođačkog nivoa, kako bi se omogućilo korišćenje odgovarajućih **krajnjih tačaka**, **atributa** i vremena za commissioning.
+Kod protokola osetljivih na vreme, reprodukcija paketa pomoću Python okvira može biti prespora. Pouzdaniji pristup je emulacija legitimnog uređaja na stvarnom hardveru (na primer **nRF52840**) pomoću steka namenjenog proizvođaču, kako bi se izložili odgovarajući **endpoints**, **attributes** i vremenski raspored commissioning postupka.
 
-### Klasa grešaka pri fragmentisanom preuzimanju u ugrađenim demonima
+### Klasa grešaka u fragmentisanim preuzimanjima u ugrađenim demonima
 
-Česta klasa grešaka u firmveru javlja se pri **fragmentisanom preuzimanju blob/model/konfiguracije**:<sup>[[8]](#references)</sup>
+Ponavljajuća klasa grešaka u firmveru javlja se pri **fragmentisanom preuzimanju blob/model/konfiguracionih podataka**:<sup>[[8]](#references)</sup>
 
 1. **Prvi fragment** (`offset == 0`) upisuje `ctx->total_size` i alocira `malloc(total_size)`.
 2. Kasniji fragmenti proveravaju samo **lokalna polja paketa** kojima upravlja napadač, kao što je `packet_total_size >= offset + chunk_len`.
-3. Kopiranje koristi `memcpy(&ctx->buffer[offset], chunk, chunk_len)` bez provere u odnosu na **prvobitno alociranu veličinu**.
+3. Kopiranje koristi `memcpy(&ctx->buffer[offset], chunk, chunk_len)` bez provere da li je veličina manja od **prvobitno alocirane veličine**.
 
-Napadač tako može da pošalje:
+To omogućava napadaču da pošalje:
 
-- Prvi važeći fragment sa **malom** deklarisanom ukupnom veličinom da bi izazvao malu alokaciju na hipu.
-- Kasniji fragment sa **očekivanim pomakom**, ali većim `chunk_len`.
-- Lažiranu lokalnu veličinu paketa koja zadovoljava nove provere, a ipak izaziva prekoračenje prvobitno alociranog bafera.
+- Prvi validan fragment sa **malom** deklarisanom ukupnom veličinom kako bi izazvao malu alokaciju na hipu.
+- Kasniji fragment sa **očekivanim offset-om**, ali većim `chunk_len`.
+- Krivotvorenu lokalnu veličinu paketa koja prolazi nove provere, a ipak prepisuje bafer čija je memorija prvobitno alocirana.
 
-Kada je ranjiva putanja iza commissioning logike, eksploatacija mora da uključi dovoljno **emulacije uređaja** da bi se meta dovela u očekivano stanje za preuzimanje modela ili bloba pre slanja neispravnih fragmenata.
+Kada se ranjiva putanja nalazi iza commissioning logike, eksploatacija mora da uključi dovoljno **emulacije uređaja** da bi se meta dovela do očekivanog stanja za preuzimanje modela ili blob-a pre slanja neispravnih fragmenata.
 
-### Okidači za `free()` zasnovani na protokolu
+### Okidači `free()` zasnovani na protokolu
 
-U ugrađenim demonima najlakši način da se izazove eksploatacija metapodataka hipa često nije „čekanje na čišćenje“, već **izazivanje sopstvenog rukovanja greškama u protokolu**:<sup>[[8]](#references)</sup>
+U ugrađenim demonima, najlakši način da se pokrene eksploatacija metapodataka hipa često nije „čekanje na čišćenje“, već **forsiranje sopstvene obrade grešaka protokola**:<sup>[[8]](#references)</sup>
 
-- Pošaljite neispravne naredne fragmente da biste FSM prebacili u stanja **ponovnog pokušaja** ili **greške**.
-- Pređite prag broja pokušaja da bi demon **resetovao kontekst** i oslobodio oštećeni bafer.
-- Iskoristite ovaj predvidljivi `free()` da biste pokrenuli primitive na strani alokatora pre nego što se proces sruši iz nepovezanih razloga.
+- Pošaljite neispravne naknadne fragmente kako biste FSM prebacili u stanja **retry** ili **error**.
+- Premašite prag pokušaja kako bi demon **resetovao kontekst** i oslobodio oštećeni bafer.
+- Iskoristite ovaj predvidljivi `free()` da pokrenete primitive na strani alokatora pre nego što se proces sruši iz nepovezanih razloga.
 
-Ovo je naročito korisno protiv alokatora nalik na **musl/uClibc/dlmalloc** u ugrađenom Linuxu, gde oštećivanje metapodataka blokova može da pretvori unlink/unbin logiku u primitivu za upis. Stabilan obrazac je da se ošteti **polje veličine** i preusmeri obilazak alokatora na **lažne blokove smeštene u baferu koji je prekoračen**, umesto da se odmah pregaze pokazivači stvarnih lista blokova i sruši proces.
+Ovo je naročito korisno protiv alokatora nalik na **musl/uClibc/dlmalloc** u ugrađenom Linux-u, gde korupcija metapodataka chunk-a može logiku unlink/unbin pretvoriti u primitivu za upis. Stabilan obrazac je da se ošteti **polje veličine** kako bi se obilazak alokatora preusmerio na **lažne chunk-ove postavljene unutar prepisanog bafera**, umesto da se odmah oštete stvarni pokazivači bin-ova i sruši proces.
 
-## Eksploatacija binarnih datoteka i dokaz izvodljivosti
+## Eksploatacija binarnih programa i Proof-of-Concept
 
-Izrada PoC-a za identifikovane ranjivosti zahteva duboko razumevanje arhitekture mete i programiranje u jezicima nižeg nivoa. Zaštite tokom izvršavanja binarnih datoteka retke su u ugrađenim sistemima, ali kada postoje, mogu biti potrebne tehnike kao što je Return Oriented Programming (ROP).
+Izrada PoC-a za identifikovane ranjivosti zahteva temeljno razumevanje arhitekture mete i programiranje u jezicima nižeg nivoa. Zaštite tokom izvršavanja binarnih programa retke su u ugrađenim sistemima, ali kada postoje, mogu biti potrebne tehnike kao što je Return Oriented Programming (ROP).
 
 ### Napomene o eksploataciji uClibc fastbin-a (ugrađeni Linux)
 
-- **Fastbin-ovi + konsolidacija:** uClibc koristi fastbin-ove slične onima u glibc-u. Kasnija velika alokacija može da pokrene `__malloc_consolidate()`, pa svaki lažni blok mora da prođe provere (razumna veličina, `fd = 0` i okolni blokovi prepoznati kao „zauzeti“).<sup>[[6]](#references)</sup>
-- **Binarne datoteke koje nisu PIE pod ASLR-om:** ako je ASLR omogućen, ali glavna binarna datoteka **nije PIE**, adrese unutar binarne datoteke u `.data/.bss` su stabilne. Možete ciljati oblast koja već liči na važeće zaglavlje bloka hipa i tako smestiti fastbin alokaciju u **tabelu pokazivača na funkcije**.
-- **NUL koji zaustavlja parser:** pri parsiranju JSON-a, `\x00` u sadržaju može da zaustavi parsiranje, a da za sobom ostavi bajtove pod kontrolom napadača za pivot steka/ROP lanac.
-- **Shellcode preko `/proc/self/mem`:** ROP lanac koji poziva `open("/proc/self/mem")`, `lseek()` i `write()` može da smesti izvršni shellcode u poznato mapiranje i skoči na njega.
+- **Fastbins + konsolidacija:** uClibc koristi fastbins slične onima u glibc-u. Naknadna velika alokacija može pokrenuti `__malloc_consolidate()`, pa lažni chunk mora proći provere (razumna veličina, `fd = 0` i okolni chunk-ovi prepoznati kao „zauzeti“).<sup>[[6]](#references)</sup>
+- **Binarni programi koji nisu PIE pod ASLR-om:** ako je ASLR omogućen, ali glavni binarni program **nije PIE**, adrese unutar binarnog programa u `.data/.bss` ostaju stabilne. Možete ciljati oblast koja već liči na validno zaglavlje heap chunk-a da biste fastbin alokaciju usmerili na **tabelu pokazivača na funkcije**.
+- **NUL koji zaustavlja parser:** pri parsiranju JSON-a, `\x00` u payload-u može da zaustavi parsiranje, a da pritom zadrži prateće bajtove kojima upravlja napadač za stack pivot/ROP lanac.
+- **Shellcode preko `/proc/self/mem`:** ROP lanac koji poziva `open("/proc/self/mem")`, `lseek()` i `write()` može da smesti izvršivi shellcode u poznato mapiranje i pređe na njega.
 
 ## Pripremljeni operativni sistemi za analizu firmvera
 
-Operativni sistemi kao što su [AttifyOS](https://github.com/adi0x90/attifyos) i [EmbedOS](https://github.com/scriptingxss/EmbedOS) nude unapred konfigurisana okruženja za testiranje bezbednosti firmvera, opremljena potrebnim alatima.
+Operativni sistemi kao što su [AttifyOS](https://github.com/adi0x90/attifyos) i [EmbedOS](https://github.com/scriptingxss/EmbedOS) pružaju unapred konfigurisana okruženja za testiranje bezbednosti firmvera, opremljena potrebnim alatima.
 
-## Pripremljeni OS-ovi za analizu firmvera
+## Pripremljeni operativni sistemi za analizu firmvera
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS je distribucija namenjena bezbednosnoj proceni i testiranju penetracije IoT uređaja. Štedi mnogo vremena tako što pruža unapred konfigurisano okruženje sa svim potrebnim alatima.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Operativni sistem za testiranje bezbednosti ugrađenih uređaja, zasnovan na Ubuntu 18.04, sa unapred instaliranim alatima za testiranje bezbednosti firmvera.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS je distribucija namenjena proceni bezbednosti i penetration testing-u IoT uređaja. Štedi vam mnogo vremena tako što pruža unapred konfigurisano okruženje sa svim potrebnim alatima.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Operativni sistem za testiranje bezbednosti ugrađenih sistema, zasnovan na Ubuntu 18.04 i unapred opremljen alatima za testiranje bezbednosti firmvera.
 
-## Napadi vraćanjem firmvera na stariju verziju i nebezbedni mehanizmi ažuriranja
+## Napadi vraćanjem verzije firmvera na stariju i nesigurni mehanizmi ažuriranja
 
-Čak i kada proizvođač implementira proveru kriptografskog potpisa za slike firmvera, **zaštita od vraćanja na stariju verziju (downgrade) često izostaje**. Ako boot- ili recovery-loader proverava samo potpis pomoću ugrađenog javnog ključa, ali ne upoređuje *verziju* (ili monotoni brojač) slike koja se upisuje, napadač može legitimno da instalira **stariji, ranjivi firmver sa važećim potpisom** i tako ponovo uvede ranjivosti za koje su već objavljene zakrpe.<sup>[[4]](#references)</sup>
+Čak i kada proizvođač implementira proveru kriptografskog potpisa slika firmvera, **zaštita od vraćanja na stariju verziju (downgrade) često izostaje**. Ako boot- ili recovery-loader proverava samo potpis pomoću ugrađenog javnog ključa, ali ne upoređuje *verziju* (ili monotoni brojač) slike koja se upisuje, napadač može legitimno da instalira **stariji, ranjivi firmver koji i dalje ima važeći potpis**, čime se ponovo uvode ranjivosti koje su bile otklonjene.<sup>[[4]](#references)</sup>
 
-Uobičajeni tok napada:
+Tipičan postupak napada:
 
 1. **Nabavite stariju potpisanu sliku**
-   * Preuzmite je sa javnog portala za preuzimanje, CDN-a ili sajta podrške proizvođača.
+   * Preuzmite je sa javnog portala za preuzimanje, CDN-a ili stranice za podršku proizvođača.
    * Izdvojite je iz pratećih mobilnih/desktop aplikacija (npr. iz `assets/firmware/` unutar Android APK-a).
-   * Pronađite je u repozitorijumima trećih strana, kao što su VirusTotal, internet arhive, forumi itd.
-2. **Otpremite sliku na uređaj ili je poslužite uređaju** preko dostupnog kanala za ažuriranje:
-   * Veb-interfejs, API mobilne aplikacije, USB, TFTP, MQTT itd.
-   * Mnogi potrošački IoT uređaji izlažu *neautentifikovane* HTTP(S) krajnje tačke koje prihvataju Base64-kodirane blobove firmvera, dekodiraju ih na strani servera i pokreću recovery/ažuriranje.
-3. Nakon vraćanja na stariju verziju, iskoristite ranjivost koja je zakrpljena u novijem izdanju (na primer filter za command-injection koji je dodat kasnije).
-4. Po želji ponovo upišite najnoviju sliku ili onemogućite ažuriranja da biste izbegli otkrivanje nakon sticanja perzistencije.
+   * Preuzmite je iz repozitorijuma trećih strana, kao što su VirusTotal, internet arhive, forumi itd.
+2. **Otpremite sliku na uređaj ili je učinite dostupnom za preuzimanje** preko bilo kog izloženog kanala za ažuriranje:
+   * Web UI, API mobilne aplikacije, USB, TFTP, MQTT itd.
+   * Mnogi IoT uređaji za potrošače izlažu HTTP(S) endpoint-e *bez autentifikacije*, koji prihvataju Base64-kodirane blob-ove firmvera, dekodiraju ih na strani servera i pokreću recovery/ažuriranje.
+3. Nakon vraćanja na stariju verziju, iskoristite ranjivost koja je otklonjena u novijem izdanju (na primer filter za command injection dodat u kasnijem izdanju).
+4. Po želji ponovo upišite najnoviju sliku ili onemogućite ažuriranja kako biste izbegli otkrivanje nakon uspostavljanja persistence-a.
 
 ### Primer: Command Injection nakon vraćanja na stariju verziju
 
@@ -599,11 +598,11 @@ Content-Type: application/octet-stream
 Content-Length: 0
 ```
 
-U ranjivom (na stariju verziju vraćenom) firmware-u, parametar `md5` se direktno konkatenira u shell komandu bez sanitizacije, što omogućava ubacivanje proizvoljnih komandi (ovde — omogućavanje root pristupa pomoću SSH ključa). Kasnije verzije firmware-a uvele su osnovni filter znakova, ali zbog izostanka zaštite od vraćanja na stariju verziju, ispravka je beskorisna.<sup>[[4]](#references)</sup>
+U ranjivom (vraćenom na stariju verziju) firmware-u, parametar `md5` se direktno konkatenira u shell komandu bez sanitizacije, što omogućava ubacivanje proizvoljnih komandi (ovde – omogućavanje root pristupa putem SSH ključa). Kasnije verzije firmware-a uvele su osnovni filter znakova, ali zbog nepostojanja zaštite od vraćanja na stariju verziju ta ispravka nema efekta.<sup>[[4]](#references)</sup>
 
 ### Izdvajanje firmware-a iz mobilnih aplikacija
 
-Mnogi proizvođači pakuju kompletne firmware slike u prateće mobilne aplikacije kako bi aplikacija mogla da ažurira uređaj preko Bluetooth-a/Wi-Fi-ja. Ovi paketi se obično čuvaju nešifrovani u APK/APEX fajlovima, na putanjama poput `assets/fw/` ili `res/raw/`. Alati kao što su `apktool`, `ghidra` ili čak običan `unzip` omogućavaju izdvajanje potpisanih slika bez pristupa fizičkom uređaju.<sup>[[4]](#references)</sup>
+Mnogi proizvođači uključuju kompletne firmware slike u prateće mobilne aplikacije kako bi aplikacija mogla da ažurira uređaj preko Bluetooth/Wi-Fi veze. Ovi paketi se obično čuvaju nešifrovani u APK/APEX datotekama, na putanjama kao što su `assets/fw/` ili `res/raw/`. Alati kao što su `apktool`, `ghidra` ili čak običan `unzip` omogućavaju izdvajanje potpisanih slika bez fizičkog pristupa hardveru.<sup>[[4]](#references)</sup>
 
 ```
 $ apktool d vendor-app.apk -o vendor-app
@@ -611,56 +610,56 @@ $ ls vendor-app/assets/firmware
 firmware_v1.3.11.490_signed.bin
 ```
 
-### Zaobilaženje anti-rollback zaštite samo u updateru kod dizajna sa A/B slotovima
+### Zaobilaženje anti-rollback zaštite samo u updateru kod A/B dizajna slotova
 
-Neki vendori zaista implementiraju **ratchet** za zaštitu od downgrade-a, ali samo unutar logike *updatera* (na primer UDS rutina preko CAN-a, recovery komanda ili OTA agent u userspace-u). Ako **bootloader** kasnije proverava samo potpis/CRC slike i veruje tabeli particija ili metapodacima slota, zaštita od rollback-a i dalje može da se zaobiđe.<sup>[[7]](#references)</sup>
+Neki proizvođači zaista implementiraju **ratchet** protiv vraćanja na stariju verziju, ali samo u logici *updatera* (na primer, u UDS rutini preko CAN-a, komandi za oporavak ili OTA agentu u userspaceu). Ako **bootloader** kasnije proverava samo potpis/CRC slike i veruje tabeli particija ili metapodacima slotova, zaštita od vraćanja na stariju verziju i dalje može da se zaobiđe.<sup>[[7]](#references)</sup>
 
 Tipičan slab dizajn:
 
-- Metapodaci firmvera sadrže i deskriptor verzije i **security ratchet** / monotonički brojač.
-- Updater upoređuje ratchet slike sa vrednošću sačuvanom u trajnoj memoriji i odbacuje starije potpisane slike.
-- **Bootloader** ne parsira taj ratchet i pre pokretanja izabranog slota proverava samo zaglavlje, CRC i potpis.
+- Metapodaci firmvera sadrže i deskriptor verzije i **security ratchet** / monotoni brojač.
+- Updater poredi ratchet slike sa vrednošću sačuvanom u trajnoj memoriji i odbacuje starije potpisane slike.
+- Bootloader **ne** parsira taj ratchet i pre pokretanja izabranog slota proverava samo zaglavlje, CRC i potpis.
 - Aktivacija slota čuva se odvojeno, u tabeli particija ili brojaču generacije za svaki slot, i **nije kriptografski vezana** za tačan digest firmvera koji je validiran.
 
-Time se u sistemima sa dva slota dobija primitiva **validiraj jednu sliku / pokreni drugu**. Ako napadač može da navede updater da označi slot B kao sledeći cilj pokretanja koristeći aktuelnu potpisanu sliku, a zatim da pre ponovnog pokretanja prepiše slot B, bootloader ipak može da pokrene downgraded sliku jer veruje samo već potvrđenim metapodacima slota.
+To stvara primitivu **validiraj jednu sliku / pokreni drugu sliku** u sistemima sa dva slota. Ako napadač može da natera updater da označi slot B kao sledeći cilj pokretanja koristeći aktuelnu potpisanu sliku, a zatim da pre ponovnog pokretanja prepiše slot B, bootloader i dalje može da pokrene stariju sliku jer veruje samo metapodacima slota koji su već potvrđeni.
 
-Uobičajeni obrazac zloupotrebe:
+Uobičajen obrazac zloupotrebe:
 
-1. Otpremi **aktuelni potpisani** firmver u pasivni slot i pokreni uobičajenu rutinu za validaciju/prebacivanje, kako bi raspored označio taj slot kao sledeći aktivni.
-2. **Još nemoj da pokrećeš uređaj ponovo.** U istoj sesiji ponovo pokreni rutinu za pripremu/brisanje slota.
-3. Iskoristi zastarelo stanje pokretanja ili zastarelu logiku izbora slota, da bi updater obrisao **isti fizički slot** koji je upravo promovisan.
-4. Upiši **stariji, ali i dalje potpisani** firmver в taj slot.
-5. Preskoči rutinu za validaciju koja sprovodi ratchet i direktno ponovo pokreni uređaj.
-6. Bootloader bira promovisani slot, proverava samo potpis/integritet i pokreće staru sliku.
+1. Otpremite **aktuelan, potpisan** firmver u pasivni slot i pokrenite uobičajenu rutinu za validaciju/promenu, tako da raspored označi taj slot kao sledeći aktivni slot.
+2. **Još nemojte ponovo pokretati uređaj**. U istoj sesiji ponovo pozovite rutinu za pripremu/brisanje slota.
+3. Zloupotrebite zastarelo stanje pokretanja ili zastarelu logiku izbora slota kako bi updater obrisao **isti fizički slot** koji je upravo promovisan.
+4. Zapišite u taj slot **stariji, ali i dalje potpisan** firmver.
+5. Preskočite rutinu za validaciju koja sprovodi ratchet i direktno ponovo pokrenite uređaj.
+6. Bootloader izabere promovisani slot, proveri samo potpis/integritet i pokrene staru sliku.
 
-Na šta obratiti pažnju pri reverzovanju implementacija A/B ažuriranja:
+Na šta treba obratiti pažnju pri reverznom inženjeringu A/B mehanizama ažuriranja:
 
-- Izbor slota izveden iz **zastavica pri pokretanju** koje se ne osvežavaju nakon uspešnog prebacivanja.
-- Rutina u stilu `prepare_passive_slot()` koja briše slot na osnovu zastarelog stanja umesto **trenutnog potvrđenog rasporeda**.
-- Funkcija u stilu `part_write_layout()` koja samo uvećava **brojač generacije** / aktivnu zastavicu i ne čuva hash validirane slike.
-- Provere ratchet-a implementirane u userspace-u ili kodu updatera, ali **ne** u ROM-u / bootloaderu / fazama secure boot-a.
-- Rutine za brisanje ili recovery koje ostavljaju slot označenim kao pokretljivim čak i nakon što je njegov sadržaj obrisan i ponovo upisan.
+- Izbor slota izveden iz **zastavica pri pokretanju** koje se ne osvežavaju posle uspešne promene.
+- Rutina nalik `prepare_passive_slot()`, koja briše slot na osnovu zastarelog stanja umesto **trenutnog potvrđenog rasporeda**.
+- Funkcija nalik `part_write_layout()`, koja samo uvećava **brojač generacije** / aktivnu zastavicu i ne čuva hash validirane slike.
+- Provere ratcheta implementirane u userspaceu ili updateru, ali **ne** u ROM-u / bootloaderu / fazama secure boot-a.
+- Rutine za brisanje ili oporavak koje ostavljaju slot označen kao pokretljiv čak i nakon što je njegov sadržaj obrisan i ponovo upisan.
 
 ### Kontrolna lista za procenu logike ažuriranja
 
-* Da li je transport/autentikacija *update endpointa* adekvatno zaštićena (TLS + autentikacija)?
-* Da li uređaj pre flešovanja upoređuje **brojeve verzija** ili **monotonički brojač za zaštitu od rollback-a**?
-* Da li se slika verifikuje unutar lanca secure boot-a (npr. potpise proverava ROM kod)?
+* Da li je transport/a autentifikacija *krajnje tačke za ažuriranje* adekvatno zaštićena (TLS + autentifikacija)?
+* Da li uređaj upoređuje **brojeve verzija** ili **monotoni anti-rollback brojač** pre flešovanja?
+* Da li se slika verifikuje unutar lanca secure boot-a (npr. da li ROM kod proverava potpise)?
 * Da li **bootloader sprovodi isti ratchet** kao updater, umesto da proverava samo potpis/CRC?
-* Da li su metapodaci za aktivaciju slota **vezani za digest/verziju validiranog firmvera**, ili slot može da se izmeni nakon promocije?
-* Nakon uspešnog prebacivanja slota, da li je uređaj primoran da se ponovo pokrene ili su kasnije rutine za ažuriranje/brisanje i dalje dostupne u istoj sesiji?
-* Da li kod userlanda obavlja dodatne provere ispravnosti (npr. dozvoljena mapa particija, broj modela)?
-* Da li se u *delimičnim* ili *rezervnim* tokovima ažuriranja ponovo koristi ista logika validacije?
+* Da li su metapodaci za aktivaciju slota **vezani za digest/verziju validiranog firmvera**, ili je moguće izmeniti slot nakon promocije?
+* Nakon uspešne promene slota, da li je uređaj primoran da se ponovo pokrene ili su kasnije rutine za ažuriranje/brisanje i dalje dostupne u istoj sesiji?
+* Da li korisnički kod obavlja dodatne provere ispravnosti (npr. dozvoljena mapa particija, broj modela)?
+* Da li *delimični* ili *rezervni* tokovi ažuriranja ponovo koriste istu logiku validacije?
 
-> 💡  Ako bilo šta od navedenog nedostaje, platforma je verovatno ranjiva na rollback napade.
+> 💡  Ako nešto od navedenog nedostaje, platforma je verovatno ranjiva na rollback napade.
 
-## Ranjivi firmver za vežbu
+## Ranjiv firmver za vežbu
 
-Za vežbu otkrivanja ranjivosti u firmveru, za početak koristite sledeće projekte ranjivog firmvera.
+Za vežbanje otkrivanja ranjivosti u firmveru, koristite sledeće ranjive projekte kao polaznu tačku.
 
 - OWASP IoTGoat
   - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
-- Projekat Damn Vulnerable Router Firmware
+- The Damn Vulnerable Router Firmware Project
   - [https://github.com/praetorian-code/DVRF](https://github.com/praetorian-code/DVRF)
 - Damn Vulnerable ARM Router (DVAR)
   - [https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html](https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html)
@@ -671,22 +670,22 @@ Za vežbu otkrivanja ranjivosti u firmveru, za početak koristite sledeće proje
 - Damn Vulnerable IoT Device (DVID)
   - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
-## Pronalaženje ključeva za dešifrovanje firmvera iz ugrađenog stanja KMS/Vault-a
+## Oporavak ključeva za dešifrovanje firmvera iz ugrađenog KMS/Vault stanja
 
-Kada slika ažuriranja kombinuje male metapodatke u otvorenom tekstu sa velikim blobom visoke entropije, pre brute-force pokušaja prvo analizirajte kontejner:<sup>[[1]](#references)</sup>
+Kada slika za ažuriranje kombinuje male metapodatke u otvorenom tekstu sa velikim blobom visoke entropije, najpre analizirajte kontejner, pre nego što pokušate bilo šta da razbijete grubom silom:<sup>[[1]](#references)</sup>
 
-- Izbacite zaglavlja, offsete i granice redova pomoću `hexdump`, `xxd`, `strings -tx`, `base64 -d` i `binwalk -E`.
-- `Salted__` obično označava OpenSSL `enc` format: narednih 8 bajtova je salt, a preostali bajtovi su šifrat.
-- Base64 polje koje se dekodira tačno u `256` bajtova snažan je nagoveštaj da gledate RSA-2048 šifrat koji obavija nasumičnu lozinku firmvera ili ključ sesije.
-- Odvojeni PGP materijal u istoj datoteci često služi samo za proveru autentičnosti; nemojte pretpostaviti da se njime obezbeđuje poverljivost.
+- Izdvojte zaglavlja, pomeraje i granice redova pomoću alata `hexdump`, `xxd`, `strings -tx`, `base64 -d` i `binwalk -E`.
+- `Salted__` obično označava OpenSSL `enc` format: narednih 8 bajtova čine salt, a preostali bajtovi su šifrat.
+- Base64 polje koje se dekodira u tačno `256` bajtova snažan je nagoveštaj da je reč o RSA-2048 šifratu koji obavija nasumičnu lozinku sesije/firmvera.
+- Izdvojeni PGP materijal u istoj datoteci često štiti samo autentičnost; nemojte pretpostaviti da se njime obezbeđuje poverljivost.
 
-Ako potraga za statičkim ključevima (`grep`, `strings`, PEM/PGP pretrage) ne uspe, reverzujte **operativni put dešifrovanja** umesto da samo tražite privatne ključeve:
+Ako potraga za statičkim ključevima (`grep`, `strings`, PEM/PGP pretrage) ne uspe, obrnuto analizirajte **operativni put dešifrovanja** umesto da samo tražite privatne ključeve:
 
-- Dekompajlirajte updater / upravljački binarni fajl i pratite ko čita šifrovani blob, koji pomoćni program/API ga dešifruje i koji logički naziv ključa se traži.
-- Pretražite izdvojeni root filesystem u potrazi za KMS stanjem (`vault/`, `transit/`, `pkcs11`, `keystore`, `sealed-secrets`), kao i unit fajlovima i init skriptama.
-- Tretirajte komande `vault operator unseal ...` u otvorenom tekstu, recovery ključeve, bootstrap tokene ili lokalne KMS skripte za automatsko dešifrovanje kao ekvivalent materijalu privatnog ključa.
+- Dekompajlirajte updater / binarnu datoteku za upravljanje i pratite ko čita šifrovani blob, koja pomoćna funkcija/API ga razmotava i koje logičko ime ključa traži.
+- U izdvojenom root filesystemu potražite KMS stanje (`vault/`, `transit/`, `pkcs11`, `keystore`, `sealed-secrets`), kao i unit datoteke i init skripte.
+- Tretirajte tekst u otvorenom obliku `vault operator unseal ...`, ključeve za oporavak, bootstrap tokene ili lokalne skripte za automatsko otpečaćivanje KMS-a kao ekvivalent materijala privatnog ključa.
 
-Ako uređaj sadrži originalni Vault binarni fajl i backend za skladištenje, obično je lakše ponovo pokrenuti to okruženje nego ponovo implementirati interne mehanizme Vault-a:
+Ako uređaj isporučuje originalnu Vault binarnu datoteku i pozadinsko skladište, obično je lakše ponovo pokrenuti to okruženje nego ponovo implementirati interne funkcije Vault-a:
 
 ```bash
 vault server -config=/tmp/vault.hcl
@@ -706,11 +705,11 @@ TOKEN=$(vault operator generate-root -decode="$(printf '%s\n' "$FINAL" | awk '/R
 Sa root pristupom na kloniranom KMS-u:
 
 - Učinite transit ključeve izvozivim samo unutar izolovanog klona: `vault write transit/keys/<name>/config exportable=true`
-- Izvezite unwrap ključ: `vault read transit/export/encryption-key/<name>`
-- Isprobajte oporavljeni RSA ključ sa tačnim parom padding/hash koji koristi KMS. Neuspešan PKCS#1 v1.5 decrypt i neuspešan podrazumevani OAEP decrypt **ne** dokazuju da je ključ pogrešan; mnogi tokovi zasnovani na Vault-u koriste OAEP sa SHA-256, dok su uobičajene biblioteke podrazumevano podešene na SHA-1.
-- Ako payload počinje sa `Salted__`, tačno reprodukujte OpenSSL KDF dobavljača (`EVP_BytesToKey`, često MD5 na starijim uređajima) pre pokušaja AES-CBC dekripcije.
+- Izvezite ključ za unwrap: `vault read transit/export/encryption-key/<name>`
+- Isprobajte oporavljeni RSA ključ uz tačan par padding/hash koji koristi KMS. Neuspešan PKCS#1 v1.5 decrypt i neuspešan podrazumevani OAEP decrypt **ne** dokazuju da je ključ pogrešan; mnogi tokovi zasnovani na Vault-u koriste OAEP sa SHA-256, dok uobičajene biblioteke podrazumevano koriste SHA-1.
+- Ako payload počinje sa `Salted__`, tačno reprodukujte vendorov OpenSSL KDF (`EVP_BytesToKey`, često MD5 na starijim uređajima) pre pokušaja AES-CBC dekripcije.
 
-Time se problem „šifrovanog firmware-a” svodi na opštiji zadatak: **oporavite operativne ključeve na strani uređaja, a zatim offline reprodukujte tačne parametre za unwrap + KDF**.
+Tako „šifrovani firmware” postaje opštiji problem: **oporavite operativne ključeve na strani uređaja, a zatim van mreže reprodukujte tačne parametre unwrap + KDF**.
 
 ## Obuke i sertifikati
 
@@ -718,17 +717,17 @@ Time se problem „šifrovanog firmware-a” svodi na opštiji zadatak: **oporav
 
 ## References
 
-- [1] [Probijanje firmware-a uz Claude: veštine seniora, autonomija juniora](https://bishopfox.com/blog/cracking-firmware-with-claude-senior-level-skill-junior-level-autonomy)
+- [1] [Krekovanje firmware-a uz Claude: veštine višeg nivoa, autonomija početnika](https://bishopfox.com/blog/cracking-firmware-with-claude-senior-level-skill-junior-level-autonomy)
 - [2] [Metodologija testiranja bezbednosti firmware-a](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
-- [3] [Praktični IoT hacking: Definitivni vodič za napade na Internet stvari](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
+- [3] [Praktično hakovanje IoT-a: Definitivni vodič za napade na Internet stvari](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
 - [4] [Iskorišćavanje zero-day ranjivosti u napuštenom hardveru – blog Trail of Bits](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
-- [5] [Kako mi je pametni uređaj od 20 dolara omogućio pristup vašem domu](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
-- [6] [Sad me vidiš: sad si pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
-- [7] [Synacktiv - Iskorišćavanje Tesla Wall Connector-a preko priključka za punjenje - 2. deo: zaobilaženje zaštite od vraćanja na stariju verziju](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
-- [8] [Neka treperi: iskorišćavanje Philips Hue Bridge-a putem over-the-air napada](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
+- [5] [Kako mi je pametni uređaj od 20 $ omogućio pristup vašem domu](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
+- [6] [Sad me vidiš: sad si hakovan](https://labs.taszk.io/articles/post/nowyouseemi/)
+- [7] [Synacktiv - Iskorišćavanje Tesla Wall Connector-a preko konektora za punjenje - 2. deo: zaobilaženje zaštite od vraćanja na stariju verziju](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
+- [8] [Neka zatreperi: iskorišćavanje Philips Hue Bridge-a putem bežičnog ažuriranja](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
 - [9] [ROOT Tesla OS na QEMU, 1. deo: raspakivanje](https://cn0xroot.wordpress.com/2026/09/19/root-tesla-os-on-qemu-part-1-unpacking)
 - [10] [Dokumentacija Linux kernela - dm-linear](https://docs.kernel.org/admin-guide/device-mapper/linear.html)
 - [11] [ROOT Tesla OS na QEMU, 2. deo: otklanjanje grešaka i ispravljanje](https://cn0xroot.wordpress.com/2026/09/20/root_tesla_os_on_qemu_part_2_debugging_fixing)
-- [12] [Dell BIOS lozinke: slaba XOR enkripcija omogućava oporavak iz SPI fleša (CVE-2026-40639)](https://mdsec.co.uk/2026/07/dell-bios-passwords-weak-xor-encryption-allows-recovery-from-spi-flash-cve-2026-40639)
-- [13] [R3n5k1/dellpwn - alati za oporavak Dell BIOS lozinki](https://github.com/R3n5k1/dellpwn)
+- [12] [Dell BIOS lozinke: slaba XOR enkripcija omogućava oporavak iz SPI Flash-a (CVE-2026-40639)](https://mdsec.co.uk/2026/07/dell-bios-passwords-weak-xor-encryption-allows-recovery-from-spi-flash-cve-2026-40639)
+- [13] [R3n5k1/dellpwn - Alat za oporavak Dell BIOS lozinki](https://github.com/R3n5k1/dellpwn)
 {{#include ../../banners/hacktricks-training.md}}
