@@ -405,6 +405,14 @@ satisfiability-modulo-theories-smt-z3.md
 - CoBRA also ships as an **LLVM pass plugin** (`libCobraPass.so`), which is useful when you want to normalize MBA-heavy LLVM IR before later analysis passes.
 - Unsupported carry-sensitive mixed-domain residuals should be treated as a signal to keep the original expression and reason about the carry path manually.
 
+## Recovering XOR-state control-flow flattening
+
+An OLLVM-style flattener may keep the current basic-block state in two 64-bit registers and reconstruct it with XOR at a dispatcher. Each original block writes the pair for its next state and jumps back to the dispatcher. A conditional block can use `CMOVcc` to replace one half of the pair according to CPU flags, so following only visible branch instructions misses the two successors. Unlike an indirect-jump dispatcher, this shape can use direct back-edges throughout.<sup>[[19]](#references)[[20]](#references)</sup>
+
+To recover the graph, identify the dispatcher comparison tree and the two state registers, map each compared XOR state to its target block, then trace reaching writes to the register pair in each original block. For conditional writes, include the flag-setting instruction and both `CMOVcc` outcomes. Rewrite each block's dispatcher exit to its resolved direct successor or conditional branch; the dispatcher then becomes unreachable without patching the binary. This is a full-CFG approach; if only one decoder matters, the [narrow execution-slice workflow](#bypass-flattened-control-flow-with-a-narrow-execution-slice) above may be faster.<sup>[[19]](#references)[[20]](#references)</sup>
+
+[DispatchThis](https://github.com/YungBinary/DispatchThis) automates this shape in Binary Ninja. Copy `plugins/DispatchThis` to the Binary Ninja user plugin directory and restart. On the affected function, open **Function Settings** and select `OLLVM_XOR_64`; if analysis does not start, use **Analysis → Reanalyze All Functions**. This mode rewrites MLIL control-flow edges, not file bytes, and does not need Z3 or the indirect-jump resolver. It has been exercised on Binary Ninja 5.3.9757+; it does not remove the dead per-block state writes, so do not mistake those for remaining live transitions.<sup>[[19]](#references)</sup>
+
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
 This obfuscator replaces program operations with `mov`-based instruction sequences and uses signal/exception handling to alter control flow. For details:
@@ -706,5 +714,7 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 - [16] [REA: Reverse Engineer Anything](https://github.com/morluto/rea)
 - [17] [REA managed-code analysis](https://github.com/morluto/rea/blob/main/docs/managed-code-analysis.md)
 - [18] [REA CLI and Evidence guide](https://github.com/morluto/rea/blob/main/docs/cli.md)
+- [19] [DispatchThis: Binary Ninja control-flow unflattening workflow](https://github.com/YungBinary/DispatchThis)
+- [20] [eSentire: PaperCut MF Zero-Day Intrusion, Java Loader, Web Shell, and AdaptixC2](https://esentire.com/blog/papercut-mf-zero-day-intrusion-java-loader-web-shell-and-adaptixc2-via-cve-2026-82078-and-cve-2026-81578)
 
 {{#include ../../banners/hacktricks-training.md}}
