@@ -59,7 +59,7 @@ Obtaining firmware can be approached through various means, each with its own le
 - Utilizing **Google dork** queries for finding hosted firmware files
 - Accessing **cloud storage** directly, with tools like [S3Scanner](https://github.com/sa7mon/S3Scanner)
 - Intercepting **updates** via man-in-the-middle techniques
-- **Extracting** from the device through connections like **UART**, **JTAG**, or **PICit**
+- **Extracting** from the device through connections like **UART**, [**JTAG**](../hardware-hacking/jtag.md#halting-the-cpu-and-dumping-memoryflash), or **PICit**
 - **Sniffing** for update requests within device communication
 - Identifying and using **hardcoded update endpoints**
 - **Dumping** from the bootloader or network

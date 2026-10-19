@@ -7,6 +7,14 @@
 README.md
 {{#endref}}
 
+## Safer pin hunting and hardware setup
+
+- Identify Vtref and GND first with a multimeter. Many adapters need Vtref to set I/O voltage.
+- Level shifting: prefer bidirectional level shifters designed for push‑pull signals (JTAG lines are not open‑drain). Avoid auto‑direction I2C shifters for JTAG.
+- Useful adapters: FT2232H/FT232H boards (e.g., Tigard), CMSIS‑DAP, J‑Link, ST‑LINK (vendor‑specific), ESP‑USB‑JTAG (on ESP32‑Sx). Connect at minimum TCK, TMS, TDI, TDO, GND and Vtref; optionally TRST and SRST.
+
+For an undocumented header, identify GND by continuity to a known ground plane **while the target is unpowered**. After switching to voltage mode and powering it, do not classify every high pin as Vtref: high digital inputs can look similar on a meter. Trace candidate rails to nearby decoupling capacitors and compare their power-up/power-down waveforms on an oscilloscope. A slower capacitor-shaped rise or fall is evidence for a supply/reference net, but verify the voltage and wiring before connecting a level-shifted probe. On PiFex, an external lower-voltage target reference can be selected through `VCCA_IN` instead of its default 3.3 V setting.<sup>[[4]](#references)</sup>
+
 ## JTAGenum
 
 **JTAGenum** is a tool you can load on an Arduino-compatible MCU or, experimentally, a Raspberry Pi to brute-force unknown JTAG pinouts and enumerate instruction registers.<sup>[[3]](#references)</sup>
@@ -48,14 +56,6 @@ go-jtagenum -pins "$PINS" -command scan_bypass -delay-tck 50
 ```
 
 For that board, BYPASS confirmed `TCK=10`, `TMS=14`, `TDI=9`, and `TDO=15`; the extra pins were only **possible** nTRST candidates. If a candidate returns all zeroes or an inconsistent pattern, check contact, target power, pull-ups, and clock/reset delays before assigning it a signal.<sup>[[4]](#references)[[5]](#references)</sup> The tool also accepts `-known-pins` with `test_bypass` to retest a recovered mapping.<sup>[[5]](#references)</sup>
-
-## Safer pin hunting and hardware setup
-
-- Identify Vtref and GND first with a multimeter. Many adapters need Vtref to set I/O voltage.
-- Level shifting: prefer bidirectional level shifters designed for push‑pull signals (JTAG lines are not open‑drain). Avoid auto‑direction I2C shifters for JTAG.
-- Useful adapters: FT2232H/FT232H boards (e.g., Tigard), CMSIS‑DAP, J‑Link, ST‑LINK (vendor‑specific), ESP‑USB‑JTAG (on ESP32‑Sx). Connect at minimum TCK, TMS, TDI, TDO, GND and Vtref; optionally TRST and SRST.
-
-For an undocumented header, identify GND by continuity to a known ground plane **while the target is unpowered**. After switching to voltage mode and powering it, do not classify every high pin as Vtref: high digital inputs can look similar on a meter. Trace candidate rails to nearby decoupling capacitors and compare their power-up/power-down waveforms on an oscilloscope. A slower capacitor-shaped rise or fall is evidence for a supply/reference net, but verify the voltage and wiring before connecting a level-shifted probe. On PiFex, an external lower-voltage target reference can be selected through `VCCA_IN` instead of its default 3.3 V setting.<sup>[[4]](#references)</sup>
 
 ## Characterize an undocumented TAP with UrJTAG
 
