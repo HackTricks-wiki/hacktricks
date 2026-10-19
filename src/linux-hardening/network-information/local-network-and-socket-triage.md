@@ -70,7 +70,11 @@ nmap -sT -Pn -p 80,443,8000,8080,9000 172.17.0.0/24
 
 The technique is useful when a web panel, debug endpoint, or helper service is hidden from external scans but reachable from the compromised host or container network.
 
+## Notebook service tokens across user boundaries
+
 A loopback notebook service may authenticate with a startup token printed to its process output. If that output is redirected to a log readable by another local account, the token can cross a user boundary and permit code execution in the notebook server's account. Correlate the listening process owner, log destination and permissions, current token configuration, and notebook access controls before treating a log path as an escalation lead. List log metadata during passive enumeration; do not print tokens or connect to the service merely to classify the host.
+
+A Jupyter Lab service can also expose its token in a readable systemd `ExecStart` or in the running command line (`ps auxww`), rather than only in startup logs. In the reported example, `User=analyst` and `--ServerApp.token` identified both the credential and the account behind a `127.0.0.1:8888` listener. With host access, the token and `ssh -L 8888:127.0.0.1:8888 user@host` allowed access to Jupyter Lab's Terminal as that service user. Check the effective unit user, process arguments, listener, and token validity together; loopback binding alone is not an authorization boundary.<sup>[[28]](#references)</sup>
 
 ## Local Pivot With socat or SSH
 
@@ -273,5 +277,6 @@ Prioritize services that are local-only, run as a more privileged user, expose a
 - [25] [The OAuth 2.0 Authorization Framework: Bearer Token Usage (RFC 6750)](https://www.rfc-editor.org/rfc/rfc6750.html)
 - [26] [CWE-78: Improper Neutralization of Special Elements used in an OS Command](https://cwe.mitre.org/data/definitions/78.html)
 - [27] [aiohttp maintainer advisory: static route traversal with follow_symlinks](https://github.com/aio-libs/aiohttp/security/advisories/GHSA-5h86-8mv2-jq9f)
+- [28] [HTB: DevHub — Jupyter token exposed through systemd and process arguments](https://0xdf.gitlab.io/2026/10/10/htb-devhub.html)
 
 {{#include ../../banners/hacktricks-training.md}}

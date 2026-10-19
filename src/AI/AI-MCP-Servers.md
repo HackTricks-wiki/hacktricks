@@ -478,7 +478,7 @@ curl -s http://127.0.0.1:5000/tools/call \
   --data '{"name":"ops._debug_mode","arguments":{}}'
 ```
 
-The privileged handler had no separate role check. Its `confirm` guard tested truthiness rather than requiring a JSON boolean, so even a nonempty string passed that check. Test per-tool authorization and argument validation independently of discovery filtering or a generic API-key gate.<sup>[[36]](#references)</sup>
+The privileged handler had no separate role check. Its `confirm` guard also tested truthiness rather than requiring a JSON boolean, so a nonempty string passed; a JSON `true` would have passed too. The authorization failure was the missing per-tool role check, while the string showed a separate argument-validation failure.<sup>[[36]](#references)</sup>
 
 ### Flowise MCP Workflow RCE (CVE-2025-59528 & CVE-2025-8943)
 
