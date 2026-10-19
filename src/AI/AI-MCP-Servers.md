@@ -253,6 +253,105 @@ For pentesting, pay special attention to:
 
 The current MCP authorization guidance explicitly forbids **token passthrough** and requires the MCP server to validate that tokens were issued for itself, because otherwise any OAuth-enabled MCP proxy can collapse multiple trust boundaries into one exploitable bridge.<sup>[[15]](#references)</sup>
 
+### Remote MCP server testing workflow
+
+Remote MCP servers expose a JSON‑RPC 2.0 API that fronts LLM‑centric capabilities (Prompts, Resources, Tools). They inherit classic web API flaws while adding async transports (SSE/streamable HTTP) and per‑session semantics.<sup>[[37]](#references)</sup>
+
+Key actors
+- Host: the LLM/agent frontend (Claude Desktop, Cursor, etc.).
+- Client: per‑server connector used by the Host (one client per server).
+- Server: the MCP server (local or remote) exposing Prompts/Resources/Tools.
+
+AuthN/AuthZ
+- OAuth2 is common: an IdP authenticates, the MCP server acts as resource server.<sup>[[37]](#references)</sup>
+- After OAuth, the authorization server issues an access token that the client presents to the MCP server, which acts as the protected resource/resource server. The access token is distinct from `Mcp-Session-Id`, which carries transport session state after `initialize` rather than authentication.<sup>[[40]](#references)[[41]](#references)</sup>
+
+#### Pre-session abuse: OAuth discovery to local code execution
+
+When a desktop client reaches a remote MCP server through a helper such as `mcp-remote`, the dangerous surface may appear **before** `initialize`, `tools/list`, or any ordinary JSON-RPC traffic. In 2025, researchers showed that `mcp-remote` versions `0.0.5` to `0.1.15` could accept attacker-controlled OAuth discovery metadata and forward a crafted `authorization_endpoint` string into the operating system URL handler (`open`, `xdg-open`, `start`, etc.), yielding local code execution on the connecting workstation.<sup>[[43]](#references)[[44]](#references)</sup>
+
+Offensive implications:
+- A malicious remote MCP server can weaponize the very first auth challenge, so compromise happens during server onboarding rather than during a later tool call.
+- The victim only has to connect the client to the hostile MCP endpoint; no valid tool execution path is required.
+- This sits in the same family as phishing or repo-poisoning attacks because the operator goal is to make the user *trust and connect* to attacker infrastructure, not to exploit a memory corruption bug in the host.
+
+When assessing remote MCP deployments, inspect the OAuth bootstrap path as carefully as the JSON-RPC methods themselves. If the target stack uses helper proxies or desktop bridges, check whether `401` responses, resource metadata, or dynamic discovery values are passed to OS-level openers unsafely. For more details on this auth boundary, see [OAuth account takeover and dynamic discovery abuse](../pentesting-web/oauth-to-account-takeover.md).
+
+Transports
+- Local: JSON‑RPC over STDIN/STDOUT.
+- Remote: Server‑Sent Events (SSE, still widely deployed) and streamable HTTP.<sup>[[37]](#references)[[41]](#references)</sup>
+
+A) Session initialization
+- Obtain OAuth token if required (Authorization: Bearer ...).
+- Begin a session and run the MCP handshake:
+
+```json
+{"jsonrpc":"2.0","id":0,"method":"initialize","params":{"capabilities":{}}}
+```
+
+- Persist the returned `Mcp-Session-Id` and include it on subsequent requests per transport rules.<sup>[[41]](#references)</sup>
+
+B) Enumerate capabilities
+- Tools
+
+```json
+{"jsonrpc":"2.0","id":10,"method":"tools/list"}
+```
+
+- Resources
+
+```json
+{"jsonrpc":"2.0","id":1,"method":"resources/list"}
+```
+
+- Prompts
+
+```json
+{"jsonrpc":"2.0","id":20,"method":"prompts/list"}
+```
+
+C) Exploitability checks
+- Resources → LFI/SSRF
+  - The server should only allow `resources/read` for URIs it advertised in `resources/list`. Try out‑of‑set URIs to probe weak enforcement:
+
+```json
+{"jsonrpc":"2.0","id":2,"method":"resources/read","params":{"uri":"file:///etc/passwd"}}
+```
+
+```json
+{"jsonrpc":"2.0","id":3,"method":"resources/read","params":{"uri":"http://169.254.169.254/latest/meta-data/"}}
+```
+
+  - Success indicates LFI/SSRF and possible internal pivoting.
+- Resources → IDOR (multi‑tenant)
+  - If the server is multi‑tenant, attempt to read another user’s resource URI directly; missing per‑user checks leak cross‑tenant data.
+- Tools → Code execution and dangerous sinks
+  - Enumerate tool schemas and fuzz parameters that influence command lines, subprocess calls, templating, deserializers, or file/network I/O:
+
+```json
+{"jsonrpc":"2.0","id":11,"method":"tools/call","params":{"name":"TOOL_NAME","arguments":{"query":"; id"}}}
+```
+
+  - Look for error echoes/stack traces in results to refine payloads. Independent testing has reported widespread command‑injection and related flaws in MCP tools.<sup>[[42]](#references)</sup>
+- Prompts → Injection preconditions
+  - Prompts mainly expose metadata; prompt injection matters only if you can tamper with prompt parameters (e.g., via compromised resources or client bugs).
+
+D) Tooling for interception and fuzzing
+- MCP Inspector (Anthropic): Web UI/CLI supporting STDIO, SSE and streamable HTTP with OAuth. Ideal for quick recon and manual tool invocations.<sup>[[38]](#references)</sup>
+- HTTP–MCP Bridge (NCC Group): Bridges MCP SSE to HTTP/1.1 so you can use Burp/Caido.<sup>[[39]](#references)</sup>
+  - Start the bridge pointed at the target MCP server (SSE transport).
+  - Manually perform the `initialize` handshake to acquire a valid `Mcp-Session-Id` (per README).
+  - Proxy JSON‑RPC messages like `tools/list`, `resources/list`, `resources/read`, and `tools/call` via Repeater/Intruder for replay and fuzzing.
+
+Quick test plan
+- Authenticate (OAuth if present) → run `initialize` → enumerate (`tools/list`, `resources/list`, `prompts/list`) → validate resource URI allow‑list and per‑user authorization → fuzz tool inputs at likely code‑execution and I/O sinks.
+
+Impact highlights
+- Missing resource URI enforcement → LFI/SSRF, internal discovery and data theft.
+- Missing per‑user checks → IDOR and cross‑tenant exposure.
+- Unsafe tool implementations → command injection → server‑side RCE and data exfiltration.
+
+
 ### Localhost Bridges & Inspector Abuse
 
 Do not forget the **developer tooling** around MCP. The browser-based **MCP Inspector** and similar localhost bridges often have the ability to spawn `stdio` servers, which means that a bug in the UI/proxy layer can become immediate command execution on the developer workstation.
@@ -609,6 +708,14 @@ Another suspicious primitive is **native-code preloading**. A skill that sets `L
 - [34] [Claude Code Docs — Settings files and precedence](https://code.claude.com/docs/en/settings)
 - [35] [GNU Bash Manual — Bash Startup Files](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html)
 - [36] [HTB: DevHub — MCPJam RCE and hidden tool authorization](https://0xdf.gitlab.io/2026/10/10/htb-devhub.html)
+- [37] [Assessing the Attack Surface of Remote MCP Servers](https://blog.kulkan.com/assessing-the-attack-surface-of-remote-mcp-servers-92d630a0cab0)
+- [38] [MCP Inspector (Anthropic)](https://github.com/modelcontextprotocol/inspector)
+- [39] [HTTP–MCP Bridge (NCC Group)](https://github.com/nccgroup/http-mcp-bridge)
+- [40] [MCP spec – Authorization](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization)
+- [41] [MCP spec – Transports and SSE deprecation](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#backwards-compatibility)
+- [42] [Equixly: MCP server security issues in the wild](https://equixly.com/blog/2025/03/29/mcp-server-new-security-nightmare/)
+- [43] [OS command injection in mcp-remote when connecting to untrusted MCP servers (JFrog Security Research, JFSA-2025-001290844)](https://research.jfrog.com/vulnerabilities/mcp-remote-command-injection-rce-jfsa-2025-001290844/)
+- [44] [When OAuth Becomes a Weapon: Lessons from CVE-2025-6514](https://amlalabs.com/blog/oauth-cve-2025-6514/)
 
 {{#include ../banners/hacktricks-training.md}}
 
