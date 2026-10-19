@@ -7,6 +7,14 @@
 README.md
 {{#endref}}
 
+## Safer pin hunting and hardware setup
+
+- Identify Vtref and GND first with a multimeter. Many adapters need Vtref to set I/O voltage.
+- Level shifting: prefer bidirectional level shifters designed for push‑pull signals (JTAG lines are not open‑drain). Avoid auto‑direction I2C shifters for JTAG.
+- Useful adapters: FT2232H/FT232H boards (e.g., Tigard), CMSIS‑DAP, J‑Link, ST‑LINK (vendor‑specific), ESP‑USB‑JTAG (on ESP32‑Sx). Connect at minimum TCK, TMS, TDI, TDO, GND and Vtref; optionally TRST and SRST.
+
+For an undocumented header, identify GND by continuity to a known ground plane **while the target is unpowered**. After switching to voltage mode and powering it, do not classify every high pin as Vtref: high digital inputs can look similar on a meter. Trace candidate rails to nearby decoupling capacitors and compare their power-up/power-down waveforms on an oscilloscope. A slower capacitor-shaped rise or fall is evidence for a supply/reference net, but verify the voltage and wiring before connecting a level-shifted probe. On PiFex, an external lower-voltage target reference can be selected through `VCCA_IN` instead of its default 3.3 V setting.<sup>[[4]](#references)</sup>
+
 ## JTAGenum
 
 **JTAGenum** is a tool you can load on an Arduino-compatible MCU or, experimentally, a Raspberry Pi to brute-force unknown JTAG pinouts and enumerate instruction registers.<sup>[[3]](#references)</sup>
@@ -37,11 +45,30 @@ If a valid TAP is found you will see lines starting with `FOUND!` indicating dis
 - Always share ground, and never drive unknown pins above target Vtref. If in doubt, add 100–470 Ω series resistors on candidate pins.
 - If the device uses SWD/SWJ instead of 4‑wire JTAG, JTAGenum may not detect it; try SWD tools or an adapter that supports SWJ‑DP.
 
-## Safer pin hunting and hardware setup
+## GPIO pin discovery with go-jtagenum
 
-- Identify Vtref and GND first with a multimeter. Many adapters need Vtref to set I/O voltage.
-- Level shifting: prefer bidirectional level shifters designed for push‑pull signals (JTAG lines are not open‑drain). Avoid auto‑direction I2C shifters for JTAG.
-- Useful adapters: FT2232H/FT232H boards (e.g., Tigard), CMSIS‑DAP, J‑Link, ST‑LINK (vendor‑specific), ESP‑USB‑JTAG (on ESP32‑Sx). Connect at minimum TCK, TMS, TDI, TDO, GND and Vtref; optionally TRST and SRST.
+On a powered target with a verified common ground and compatible I/O voltage, `go-jtagenum` can enumerate candidate JTAG signals from Raspberry Pi GPIOs. The `-pins` JSON maps labels to **GPIO numbers**, not physical header positions.<sup>[[5]](#references)</sup> In the SSD example, the first IDCODE scan also reported an implausibly long chain of changing values: a changing candidate TDO line alone is not proof of a valid TAP. Recheck a plausible result with a BYPASS scan, which shifts a known bit pattern from TDI through the one-bit bypass register to TDO.<sup>[[4]](#references)</sup>
+
+```bash
+PINS='{ "pin2": 2, "pin3": 3, "pin9": 9, "pin10": 10, "pin14": 14, "pin15": 15 }'
+go-jtagenum -pins "$PINS" -command scan_idcode -delay-tck 50
+go-jtagenum -pins "$PINS" -command scan_bypass -delay-tck 50
+```
+
+For that board, BYPASS confirmed `TCK=10`, `TMS=14`, `TDI=9`, and `TDO=15`; the extra pins were only **possible** nTRST candidates. If a candidate returns all zeroes or an inconsistent pattern, check contact, target power, pull-ups, and clock/reset delays before assigning it a signal.<sup>[[4]](#references)[[5]](#references)</sup> The tool also accepts `-known-pins` with `test_bypass` to retest a recovered mapping.<sup>[[5]](#references)</sup>
+
+## Characterize an undocumented TAP with UrJTAG
+
+A discovered pinout does not identify the instruction-register (IR) opcodes or data-register (DR) widths needed for debugging. With a UrJTAG build that supports the Raspberry Pi GPIO cable, set the recovered mapping and run `idcode`, `detect`, then `discover`. The SSD example returned one TAP, a four-bit IR, and different DR widths for different IR values. A `-1` DR length or “TDO stuck at 0” is not a usable register definition; inspect timing, wiring, and the selected instruction rather than assigning it a width.<sup>[[4]](#references)</sup>
+
+```text
+jtag> cable gpio tck=10 tdi=9 tms=14 tdo=15
+jtag> idcode
+jtag> detect
+jtag> discover
+```
+
+This is TAP reconnaissance, not automatic CPU identification: compare the resulting IDCODE with device documentation and supported OpenOCD targets. UrJTAG's local manufacturer database may label an otherwise valid ID as unknown.<sup>[[4]](#references)</sup>
 
 ## First contact with OpenOCD (scan and IDCODE)
 
@@ -60,6 +87,37 @@ openocd -f board/esp32s3-builtin.cfg -c "init; scan_chain; shutdown"
 
 - If you get "all ones/zeros" IDCODE, check wiring, power, Vtref, and that the port isn’t locked by fuses/option bytes.
 - See OpenOCD low‑level `irscan`/`drscan` for manual TAP interaction when bringing up unknown chains.<sup>[[1]](#references)</sup>
+
+## Bring an undocumented target into OpenOCD
+
+Once the TAP ID and IR length are known, inspect OpenOCD's `cpu/`, `target/`, and `board/` scripts for a **matching CPU architecture**, then make separate adapter and target configurations.<sup>[[4]](#references)[[6]](#references)</sup> The following Pi GPIO mapping and ARCv2 target are the tested SSD example, not a universal JTAG configuration. The ARC target choice and debug settings were assumptions that succeeded for this device; substitute the target's measured ID, IR length, architecture, and GPIO numbers on another board.<sup>[[4]](#references)</sup>
+
+```tcl
+# raspberrypi-io.cfg
+source [find interface/raspberrypi-native.cfg]
+transport select jtag
+adapter gpio tck -chip 0 10
+adapter gpio tms -chip 0 14
+adapter gpio tdi -chip 0 9
+adapter gpio tdo -chip 0 15
+adapter speed 100
+```
+
+```tcl
+# target.cfg: ARCv2 example only
+source [find cpu/arc/hs.tcl]
+set _CHIPNAME arc-em
+set _TARGETNAME $_CHIPNAME.cpu
+jtag newtap $_CHIPNAME cpu -irlen 4 -ircapture 0x1 -expected-id 0x100434b1
+target create $_TARGETNAME arcv2 -chain-position $_TARGETNAME
+$_TARGETNAME configure -coreid 0
+$_TARGETNAME configure -dbgbase 0
+$_TARGETNAME configure -event reset-assert "arc_hs_reset $_TARGETNAME"
+arc_hs_init_regs
+$_TARGETNAME arc cache l2 auto 1
+```
+
+Run `openocd -f raspberrypi-io.cfg -f target.cfg` and confirm that TAP examination succeeds before reading memory. The example opened Telnet on port `4444` and a GDB server on `3333`; a recognized IDCODE alone does not prove that the selected CPU target can be examined or debugged.<sup>[[4]](#references)</sup> Raspberry Pi GPIOs need not be the pins labeled JTAG on a breakout board when the adapter permits `adapter gpio` remapping.<sup>[[4]](#references)[[6]](#references)</sup>
 
 ## Halting the CPU and dumping memory/flash
 
@@ -85,6 +143,8 @@ openocd -f board/esp32s3-builtin.cfg \
 
 - Use `mdw/mdh/mdb` to sanity‑check memory before long dumps.
 - For multi‑device chains, set BYPASS on non‑targets or use a board file that defines all TAPs.
+
+For an undocumented memory map, the SSD research checked a 1 MiB dump for recognizable controller strings, then used an architecture-capable GDB through OpenOCD to inspect `$pc`, disassembly, and registers. Those live addresses guided a second region dump, which was checked against matching instructions in an ARC-capable Ghidra build. Strings alone are only a plausibility check, not proof that the image is complete or mapped correctly.<sup>[[4]](#references)</sup> See [firmware analysis](../firmware-analysis/) for broader static-analysis steps.
 
 ## Boundary‑scan tricks (EXTEST/SAMPLE)
 
@@ -122,5 +182,8 @@ You need the device BSDL to know boundary register bit ordering. Beware that som
 - [1] [OpenOCD User’s Guide – JTAG Commands and configuration](https://openocd.org/doc-release/html/JTAG-Commands.html)
 - [2] [Espressif ESP32‑S3 JTAG debugging (USB‑JTAG, OpenOCD usage)](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/jtag-debugging/)
 - [3] [JTAGenum – Arduino-based JTAG pinout scanner](https://github.com/cyphunk/JTAGenum)
+- [4] [VoidStar Security — JTAG Hacking with a Raspberry Pi](https://voidstarsec.com/blog/jtag-pifex)
+- [5] [gremwell/go-jtagenum — GPIO JTAG enumeration](https://github.com/gremwell/go-jtagenum)
+- [6] [OpenOCD User’s Guide — Debug Adapter Configuration](https://openocd.org/doc-release/html/Debug-Adapter-Configuration.html)
 
 {{#include ../../banners/hacktricks-training.md}}
