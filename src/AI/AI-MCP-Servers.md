@@ -465,6 +465,21 @@ If `read_ticket` and `update_ticket` reject foreign objects but `delete_ticket` 
 - Avoid leaking internal endpoints, object counts, or predictable ID ranges to low-privilege users through diagnostic tools.
 - Audit log at least the **tool name, caller identity, object ID, authorization decision, and result**, especially for destructive tool calls.
 
+### Hidden tools callable outside the discovery list
+
+Do not treat `tools/list` (or a REST wrapper's `/tools/list`) as an authorization boundary. In one root-run operations service, the list route returned only `VISIBLE_TOOLS`, but `/tools/call` accepted names from `ALL_TOOLS = {**VISIBLE_TOOLS, **HIDDEN_TOOLS}` after checking only the same `X-API-Key` used for ordinary tools. A caller with that key could invoke an unlisted debug tool to learn hidden names, then directly call an administrative tool that returned a privileged SSH key. This was a custom REST-style MCP wrapper, not the standard MCP JSON-RPC transport.<sup>[[36]](#references)</sup>
+
+When assessing a similar dispatcher, compare the advertised list with the callable registry or handler branches. With an authorized low-privilege key, test a known unlisted name directly rather than assuming its absence from the list makes it unreachable. In the reported REST wrapper, the following two requests used the same key; the second invoked a tool omitted from the first response.<sup>[[36]](#references)</sup>
+
+```bash
+curl -s http://127.0.0.1:5000/tools/list -H "X-API-Key: $KEY"
+curl -s http://127.0.0.1:5000/tools/call \
+  -H "X-API-Key: $KEY" -H 'Content-Type: application/json' \
+  --data '{"name":"ops._debug_mode","arguments":{}}'
+```
+
+The privileged handler had no separate role check. Its `confirm` guard also tested truthiness rather than requiring a JSON boolean, so a nonempty string passed; a JSON `true` would have passed too. The authorization failure was the missing per-tool role check, while the string showed a separate argument-validation failure.<sup>[[36]](#references)</sup>
+
 ### Flowise MCP Workflow RCE (CVE-2025-59528 & CVE-2025-8943)
 
 Flowise embeds MCP tooling inside its low-code LLM orchestrator, but its **CustomMCP** node trusts user-supplied JavaScript/command definitions that are later executed on the Flowise server. Two separate code paths trigger remote command execution:
@@ -593,6 +608,7 @@ Another suspicious primitive is **native-code preloading**. A skill that sets `L
 - [33] [Before the First Prompt: Code Execution Paths in Trusted Coding-Agent Projects](https://securitylabs.datadoghq.com/articles/coding-agent-project-trust-code-execution-before-first-prompt/)
 - [34] [Claude Code Docs — Settings files and precedence](https://code.claude.com/docs/en/settings)
 - [35] [GNU Bash Manual — Bash Startup Files](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html)
+- [36] [HTB: DevHub — MCPJam RCE and hidden tool authorization](https://0xdf.gitlab.io/2026/10/10/htb-devhub.html)
 
 {{#include ../banners/hacktricks-training.md}}
 
