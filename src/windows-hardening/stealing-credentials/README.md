@@ -381,7 +381,7 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v DSRMAdminLogonBehavior /t R
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v RunAsPPL /t REG_DWORD /d 0 /f
 ```
 
-* `DisableRestrictedAdmin=1` disables Restricted Admin for inbound RDP; it does **not** enable pass-the-hash through that mode. Setting the value to `0` permits Restricted Admin on the destination, but the client must request `/RestrictedAdmin` or enforce it through policy. This is separate from whether a hash has been obtained or the account has remote administrator rights.<sup>[[14]](#references)</sup>
+* `DisableRestrictedAdmin=1` disables Restricted Admin for inbound RDP; it does **not** enable pass-the-hash through that mode. Setting the value to `0` permits Restricted Admin on the destination, but the client must request `/RestrictedAdmin` or use a policy that requires Restricted Admin.<sup>[[14]](#references)</sup> A hash alone does not grant remote administrator rights; see [RDP authentication prerequisites](../../network-services-pentesting/pentesting-rdp.md).<sup>[[15]](#references)</sup>
 * `LocalAccountTokenFilterPolicy=1` disables UAC token filtering so local admins get unrestricted tokens over the network.
 * `DSRMAdminLogonBehavior=2` lets the DSRM administrator log on while the DC is online, giving attackers another built-in high-privilege account.
 * `RunAsPPL=0` removes LSASS PPL protections, making memory access trivial for dumpers such as LalsDumper.
@@ -559,6 +559,7 @@ This means **hardware binding prevents off-device export but not same-user use o
 - [11] [Microsoft Learn – CreateFileW function and `FILE_FLAG_BACKUP_SEMANTICS`](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew)
 - [12] [Microsoft Learn – Robocopy `/B` backup mode](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy)
 - [13] [Telegram FAQ – terminating active sessions](https://telegram.org/faq)
-- [14] [Microsoft: Mitigating Pass-the-Hash Attacks and Other Credential Theft, version 2](https://download.microsoft.com/download/7/7/a/77abc5bd-8320-41af-863c-6ecfb10cb4b9/mitigating-pass-the-hash-attacks-and-other-credential-theft-version-2.pdf)
+- [14] [Microsoft Learn: Remote Credential Guard and Restricted Admin](https://learn.microsoft.com/en-us/windows/security/identity-protection/remote-credential-guard)
+- [15] [Microsoft Learn: Credentials Protection and Management](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/credentials-protection-and-management)
 
 {{#include ../../banners/hacktricks-training.md}}
