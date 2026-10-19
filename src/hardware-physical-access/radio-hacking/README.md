@@ -12,9 +12,11 @@ A practical workflow is to identify the frequency band and channel width, captur
 - For a remote-control signal, use [sub-GHz RF and rolling codes](sub-ghz-rf.md) or [infrared protocols and attacks](infrared.md).
 - For nearby devices and sensors, use [BLE advertising, GATT, and mesh testing](pentesting-ble-bluetooth-low-energy.md) or [LPWAN/LoRaWAN security](low-power-wide-area-network.md).
 - For captured or unknown RF signals, use [SigDigger signal analysis](../hardware-hacking/radio.md#sigdigger) or the [FISSURE framework](fissure-the-rf-framework.md).
+- For satellite terminal downlinks, see [VSAT forward-link signal injection](vsat-forward-link-injection.md).
+
+
 
 ## References
 
 - [1] [Great Scott Gadgets - Software Defined Radio with HackRF](https://greatscottgadgets.com/sdr/1/)
-
 {{#include ../../banners/hacktricks-training.md}}
