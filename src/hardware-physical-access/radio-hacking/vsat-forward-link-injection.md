@@ -1,0 +1,26 @@
+# Injection de signal sur la liaison aller VSAT
+
+{{#include ../../banners/hacktricks-training.md}}
+
+Un terminal VSAT traite normalement la liaison descendante du satellite comme du trafic provenant du hub de l’opérateur. Dans un système DVB-RCS, cette liaison aller peut transporter à la fois des paquets IP utilisateur et des messages de contrôle du modem. Si le récepteur ne vérifie pas l’authenticité d’un message avant de le traiter, un signal injecté localement peut franchir la frontière de confiance entre la radio et le plan de contrôle. Il s’agit d’une **injection sur la liaison descendante au niveau du terminal**, et non d’une émission montante vers le satellite ni d’une interception passive de la liaison descendante. Le résultat démontré dépend de l’implémentation du protocole et de l’authentification des messages par le modem, pas du seul DVB-RCS.<sup>[[1]](#references)[[2]](#references)</sup>
+
+## Tester dans un laboratoire confiné aux RF
+
+Utilisez un terminal dont vous êtes propriétaire, son firmware et un SDR connecté à l’entrée de réception du modem au moyen d’une atténuation adaptée, ou utilisez un environnement RF blindé. N’émettez pas sur un canal satellite actif. Commencez par relever la porteuse de démarrage configurée du terminal, le débit symbole et l’ID de population ; ces informations guident l’acquisition de la liaison aller.<sup>[[1]](#references)[[3]](#references)</sup> La chaîne d’acquisition DVB-RCS utilise la Network Information Table (NIT) pour localiser la RCS Map Table (RMT), puis la Program Association Table (PAT) et la Program Map Table (PMT) pour localiser les flux de signalisation de la liaison aller. Un terminal peut passer par plusieurs porteuses de flux de transport avant d’atteindre le flux de données.<sup>[[3]](#references)</sup>
+
+1. Décodez ou reconstruisez le flux de transport de démarrage de la cible, puis examinez sa NIT, sa RMT, ses ID de service, ses ID de paquets (PID) et la gestion de sa référence d’horloge. Comparez la norme avec l’analyseur syntaxique et les journaux de la cible ; un ordre ou des descripteurs spécifiques au fournisseur peuvent empêcher l’acceptation d’un flux pourtant valide.
+2. Dans l’émetteur de laboratoire, encapsulez une sonde UDP inoffensive sous la forme `UDP/IP → MPE → MPEG-TS → DVB-S2 I/Q` et transmettez-la via une sortie SDR vers le chemin de réception isolé. Maintenez la Program Clock Reference (PCR) du flux de transport cohérente avec le débit binaire, sinon le modem risque de perdre la synchronisation avant de traiter la sonde.
+3. Confirmez à la fois le **verrouillage du démodulateur** et la réception de la sonde sur un point de terminaison interne dont vous êtes propriétaire. Le verrouillage seul prouve uniquement que la couche physique a accepté la forme d’onde. Vérifiez ensuite si une *signalisation* de gestion ou de mise à jour non authentifiée est exposée, sans installer d’image ni modifier la configuration du service.
+
+Le cas MDM2200 publié utilisait un module source GNU Radio pour DVB-RCS/MPE/MPEG-TS et `gr-dtv` pour la modulation DVB-S2. Le modem nécessitait des détails d’initialisation propres à la cible : une SDT avant la PAT/PMT, un descripteur de contenu RCS avec l’ID de table `0x3E` et un octet privé RMT de `0x01` pour son mode GSE/4CPM. Ne supposez pas que ces valeurs fonctionneront sur un autre terminal.<sup>[[1]](#references)</sup> Les chercheurs ont également observé que, dans leur configuration, les paquets MPE multicast atteignaient les modems récepteurs ; le ciblage ne se limitait donc pas à une adresse MAC unicast connue.<sup>[[1]](#references)</sup> Une analyse distincte a relevé une signalisation de contrôle et de mise à jour logicielle non protégée sur le système étudié, mais ce constat doit être vérifié pour chaque implémentation.<sup>[[2]](#references)</sup>
+
+Un tunnel IPsec ou VPN pour le trafic utilisateur n’authentifie pas la signalisation DVB-RCS antérieure ni l’analyseur de mises à jour du modem. Dans le cadre d’une évaluation autorisée, distinguez la protection cryptographique du **trafic IP utilisateur**, du **contrôle de la liaison aller** et du trafic de **maintenance/récupération**, plutôt que de considérer qu’un tunnel utilisateur sécurisé prouve que l’injection radio est bloquée.<sup>[[1]](#references)[[2]](#references)</sup>
+
+Pour une première inspection I/Q, consultez [l’analyse des signaux radio](../hardware-hacking/radio.md). Pour l’examen du firmware et de l’analyseur syntaxique côté carte, consultez [l’analyse du firmware](../firmware-analysis/). Revenez à la [présentation de Radio Hacking](./) pour découvrir d’autres interfaces.
+
+## References
+
+- [1] [Bisping et al. - Attaques par injection de signal sans fil contre les modems satellites VSAT (USENIX Security 2024)](https://www.usenix.org/system/files/usenixsecurity24-bisping.pdf)
+- [2] [Willbold et al. - VSAsTer : révéler les failles de sécurité inhérentes aux pratiques actuelles des systèmes VSAT (WiSec 2024)](https://www.lenders.ch/publications/conferences/wisec24.pdf)
+- [3] [ETSI EN 301 790 - Canal d’interaction DVB pour les systèmes de distribution par satellite](https://www.etsi.org/deliver/etsi_en/301700_301799/301790/01.04.01_40/en_301790v010401o.pdf)
+{{#include ../../banners/hacktricks-training.md}}
