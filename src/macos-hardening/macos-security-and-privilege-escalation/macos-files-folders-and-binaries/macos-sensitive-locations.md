@@ -24,6 +24,8 @@ sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex
 
 Another way to obtain the `ShadowHashData` of a user is by using `dscl`: `` sudo dscl . -read /Users/`whoami` ShadowHashData ``
 
+#### Convert copied ShadowHashData on Linux
+
 If the attribute was copied to a Linux cracking host, save **only its hexadecimal bytes** (not the `ShadowHashData:` label) in `shadowhash.hex`. On Ubuntu, `libplist-utils` converts the decoded binary plist into readable XML without macOS `plutil`.<sup>[[5]](#references)</sup>
 
 ```bash
@@ -342,7 +344,7 @@ These are notifications that the user should see in the screen:
 - [2] [Apple Platform Security – Keychain data protection](https://support.apple.com/guide/security/keychain-data-protection-secb0694df1a/web)
 - [3] [Rapid7 – Notification Center SQLite disclosure (CVE-2024-44292 et al.)](https://www.rapid7.com/db/vulnerabilities/apple-osx-notificationcenter-cve-2024-44292/)
 - [4] [9to5Mac – Apple addresses privacy concerns around Notification Center database in macOS Sequoia](https://9to5mac.com/2024/09/01/security-bite-apple-addresses-privacy-concerns-around-notification-center-database-in-macos-sequoia/)
-- [5] [SRA Labs – Extracting and Cracking macOS Local Password Hashes](https://labs.sra.io/posts/macospasswordcracking)
+- [5] [SRA Labs – macOS Password Cracking](https://labs.sra.io/posts/macospasswordcracking)
 - [6] [Hashcat example hashes – macOS v10.8+ (PBKDF2-SHA512)](https://hashcat.net/wiki/doku.php?id=example_hashes)
 
 {{#include ../../../banners/hacktricks-training.md}}
