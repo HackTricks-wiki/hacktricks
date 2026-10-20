@@ -42,6 +42,8 @@ To add an 802.11 decryption key in Wireshark, open _Edit → Preferences → Pro
 
 For WPA/WPA2, Wireshark normally needs the EAPOL four-way handshake and the matching password/SSID; supplying the transient key can avoid the handshake requirement. WPA3 per-connection decryption requires the connection's PMK.<sup>[[5]](#references)</sup>
 
+For application-layer TLS decryption after recovering Wi-Fi traffic, see [Wireshark tricks](wireshark-tricks.md#decrypting-tls).
+
 ## References
 
 - [1] [Wireshark User's Guide: WLAN Traffic](https://www.wireshark.org/docs/wsug_html_chunked/ChWirelessWLANTraffic.html)

@@ -84,6 +84,18 @@ If you want to **search** for **content** inside the **packets** of the sessions
 
 Wireshark can follow `TLS`, `HTTP/2`, and `QUIC` streams directly. Its HTTP/2 and QUIC dialogs expose connection and substream selectors, which helps isolate multiplexed streams that share the same lower-level connection.<sup>[[4]](#references)</sup>
 
+With session keys available, first identify the request's stream ID, then follow that substream instead of the whole TCP or UDP conversation. The `0,1` example selects HTTP/2 stream ID 1 on TCP stream 0; for QUIC use `follow,quic,utf-8,<connection-number>,<stream-id>`. Following only a five-tuple can mix independent requests or miss a QUIC connection after migration.<sup>[[6]](#references)[[7]](#references)[[9]](#references)</sup>
+
+```bash
+tshark -r capture.pcapng -o tls.keylog_file:keys.log \
+  -Y 'http2.headers.authority || http3.headers.authority' -T fields \
+  -e tcp.stream -e http2.streamid -e quic.connection.number \
+  -e quic.stream.stream_id -e http2.headers.authority \
+  -e http3.headers.authority
+tshark -r capture.pcapng -o tls.keylog_file:keys.log \
+  -q -z 'follow,http2,utf-8,0,1'
+```
+
 ### Free pcap labs
 
 **Practice with the free challenges of:** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
@@ -115,6 +127,26 @@ tshark -r capture.pcapng -Y "tls.handshake.type == 1" -T fields \
   -e tls.handshake.ja3 -e tls.handshake.ja4
 ```
 
+### ECH: do not mistake the outer SNI for the origin
+
+Encrypted ClientHello (ECH) can place a public cover name in the visible outer SNI while encrypting the inner name. Therefore, an SNI-only domain inventory can attribute ECH traffic to the wrong origin. The ECH extension alone is not proof that ECH succeeded: clients can send a GREASE ECH extension. On Wireshark 4.2+, find outer ECH offers with the following filter and treat the reported SNI as a cover candidate, not the requested site.<sup>[[5]](#references)[[8]](#references)</sup>
+
+```bash
+tshark -r capture.pcapng \
+  -Y 'tls.handshake.type == 1 && tls.ech.client_hello_type == 0' \
+  -T fields -e frame.number -e ip.dst \
+  -e tls.handshake.extensions_server_name -e tls.ech.config_id
+```
+
+If you have the matching client session keys, inspect the decrypted HTTP authority/Host instead of inferring the origin from outer SNI. Without the keys, check other captured origin evidence, such as plaintext DNS, but do not equate the outer SNI with the hidden name.<sup>[[1]](#references)[[6]](#references)[[7]](#references)[[8]](#references)</sup>
+
+```bash
+tshark -r capture.pcapng -o tls.keylog_file:keys.log \
+  -Y 'http.host || http2.headers.authority || http3.headers.authority' \
+  -T fields -e ip.dst -e http.host \
+  -e http2.headers.authority -e http3.headers.authority
+```
+
 ## Identifying local hostnames
 
 ### From DHCP
@@ -128,6 +160,8 @@ In current Wireshark instead of `bootp` you need to search for `DHCP`
 ![From DHCP - From NBNS: In current Wireshark instead of bootp you need to search for DHCP](<../../../images/image (1003).png>)
 
 ## Decrypting TLS
+
+Wi-Fi link-layer decryption is separate from TLS session decryption; see [Wi-Fi PCAP analysis](wifi-pcap-analysis.md) for its key and handshake prerequisites.
 
 ### Decrypting https traffic with server private key
 
@@ -199,5 +233,7 @@ f.close()
 - [5] [Display Filter Reference: Transport Layer Security](https://www.wireshark.org/docs/dfref/t/tls.html)
 - [6] [Display Filter Reference: HyperText Transfer Protocol 2](https://www.wireshark.org/docs/dfref/h/http2.html)
 - [7] [Display Filter Reference: Hypertext Transfer Protocol Version 3](https://www.wireshark.org/docs/dfref/h/http3.html)
+- [8] [RFC 9849: TLS Encrypted Client Hello](https://www.rfc-editor.org/rfc/rfc9849.html)
+- [9] [TShark manual](https://www.wireshark.org/docs/man-pages/tshark.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
