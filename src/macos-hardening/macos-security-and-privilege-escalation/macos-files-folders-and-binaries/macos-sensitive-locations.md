@@ -24,6 +24,23 @@ sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex
 
 Another way to obtain the `ShadowHashData` of a user is by using `dscl`: `` sudo dscl . -read /Users/`whoami` ShadowHashData ``
 
+#### Convert copied ShadowHashData on Linux
+
+If the attribute was copied to a Linux cracking host, save **only its hexadecimal bytes** (not the `ShadowHashData:` label) in `shadowhash.hex`. On Ubuntu, `libplist-utils` converts the decoded binary plist into readable XML without macOS `plutil`.<sup>[[5]](#references)</sup>
+
+```bash
+sudo apt install libplist-utils
+xxd -r -p shadowhash.hex > shadowhash.bplist
+plistutil -i shadowhash.bplist -o shadowhash.xml -f xml1
+```
+
+In the XML, use `iterations` and the base64 `salt` and `entropy` from **`SALTED-SHA512-PBKDF2`**, not the separate SRP verifier. Set `salt_b64` and `entropy_b64` to their respective XML `<data>` contents. Decode them to hex and form one line as `$ml$<iterations>$<salt_hex>$<entropy_hex>` for Hashcat mode `7100`. This is offline guessing after privileged hash acquisition, not an initial-access or privilege-escalation method.<sup>[[5]](#references)[[6]](#references)</sup>
+
+```bash
+printf '%s' "$salt_b64" | base64 -d | xxd -p -c 2000
+printf '%s' "$entropy_b64" | base64 -d | xxd -p -c 2000
+```
+
 ### /etc/master.passwd
 
 This file is **only used** when the system id running in **single-user mode** (so not very frequently).
@@ -327,5 +344,7 @@ These are notifications that the user should see in the screen:
 - [2] [Apple Platform Security – Keychain data protection](https://support.apple.com/guide/security/keychain-data-protection-secb0694df1a/web)
 - [3] [Rapid7 – Notification Center SQLite disclosure (CVE-2024-44292 et al.)](https://www.rapid7.com/db/vulnerabilities/apple-osx-notificationcenter-cve-2024-44292/)
 - [4] [9to5Mac – Apple addresses privacy concerns around Notification Center database in macOS Sequoia](https://9to5mac.com/2024/09/01/security-bite-apple-addresses-privacy-concerns-around-notification-center-database-in-macos-sequoia/)
+- [5] [SRA Labs – macOS Password Cracking](https://labs.sra.io/posts/macospasswordcracking)
+- [6] [Hashcat example hashes – macOS v10.8+ (PBKDF2-SHA512)](https://hashcat.net/wiki/doku.php?id=example_hashes)
 
 {{#include ../../../banners/hacktricks-training.md}}

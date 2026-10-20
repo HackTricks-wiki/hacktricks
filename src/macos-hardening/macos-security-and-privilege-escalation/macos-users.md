@@ -20,6 +20,8 @@ for i in "${state[@]}"; do sysadminctl -"${i}" status; done;
 - **Nobody**: A deliberately unprivileged identity used by services that require minimal filesystem permissions.
 - **Root**: The superuser. Interactive root login is disabled by default, although administrators can perform privileged operations through authorization and `sudo`.<sup>[[2]](#references)</sup>
 
+Local account password-verification material and its extraction workflow are covered under [Shadow Passwords](macos-files-folders-and-binaries/macos-sensitive-locations.md#shadow-passwords).
+
 ## User Privileges
 
 - **Standard user:** The normal, non-administrative account type. Administrative changes require authorization from an administrator.
