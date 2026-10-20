@@ -1,26 +1,28 @@
-# Análisis de Pcap Wi-Fi
+# Análisis de Pcap de Wifi
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Comprobar los BSSID
+## Comprobar BSSID
 
 Con una captura de Wi-Fi abierta en Wireshark, selecciona _Wireless → WLAN Traffic_ para resumir las redes inalámbricas observadas en la captura; cada fila representa una red inalámbrica.<sup>[[1]](#references)</sup>
 
-![Análisis de Pcap Wi-Fi - Comprobar los BSSID: Cuando recibes una captura cuyo tráfico principal es Wi-Fi usando WireShark, puedes comenzar a investigar todos los SSID de la captura con Wireless --...](<../../../images/image (106).png>)
+![Wifi Pcap Analysis - Check BSSIDs: When you receive a capture whose principal traffic is Wifi using WireShark you can start investigating all the SSIDs of the capture with Wireless --...](<../../../images/image (106).png>)
 
-![Análisis de Pcap Wi-Fi - Comprobar los BSSID: Cuando recibes una captura cuyo tráfico principal es Wi-Fi usando WireShark, puedes comenzar a investigar todos los SSID de la captura con Wireless --...](<../../../images/image (492).png>)
+![Wifi Pcap Analysis - Check BSSIDs: When you receive a capture whose principal traffic is Wifi using WireShark you can start investigating all the SSIDs of the capture with Wireless --...](<../../../images/image (492).png>)
 
 ### Brute Force
 
-Para capturas WPA/WPA2-PSK, `aircrack-ng` requiere un handshake EAPOL de cuatro vías utilizable y prueba frases de contraseña candidatas con un diccionario. Usa `-w` para proporcionar la wordlist y `-b` para dirigirte al BSSID del access point:<sup>[[2]](#references)</sup>
+Para capturas WPA/WPA2-PSK, `aircrack-ng` requiere un handshake EAPOL de cuatro vías utilizable y prueba frases de contraseña candidatas con un diccionario. Usa `-w` para proporcionar la wordlist y `-b` para indicar el BSSID del punto de acceso:<sup>[[2]](#references)</sup>
+
 ```bash
 aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 ```
-Si un candidato coincide, Aircrack-ng recupera la clave precompartida; la contraseña y el SSID coincidentes se pueden configurar entonces en los ajustes de descifrado 802.11 de Wireshark cuando la captura y el modo de seguridad lo admiten.<sup>[[2]](#references)[[5]](#references)</sup>
 
-## Datos en Beacons / Side Channel
+Si hay una coincidencia, Aircrack-ng recupera la clave precompartida; luego, si la captura y el modo de seguridad lo permiten, puedes configurar la contraseña y el SSID coincidentes en los ajustes de descifrado 802.11 de Wireshark.<sup>[[2]](#references)[[5]](#references)</sup>
 
-Si sospechas que **se están filtrando datos en el tráfico del beacon-side-channel**, empieza con un filtro de visualización como `wlan contains "NAMEofNETWORK"` o `wlan.ssid == "NAMEofNETWORK"`, y luego inspecciona los frames coincidentes en busca de cadenas sospechosas. La primera forma realiza una búsqueda amplia de bytes; la segunda coincide con el campo SSID.<sup>[[3]](#references)[[4]](#references)</sup>
+## Datos en beacons / canal lateral
+
+Si sospechas que **se están filtrando datos mediante tráfico de canal lateral en beacons**, empieza con un filtro de visualización como `wlan contains "NAMEofNETWORK"` o `wlan.ssid == "NAMEofNETWORK"` y luego inspecciona las tramas coincidentes para encontrar cadenas sospechosas. La primera forma busca bytes de manera amplia; la segunda coincide con el campo SSID.<sup>[[3]](#references)[[4]](#references)</sup>
 
 ## Encontrar direcciones MAC desconocidas en una red Wi-Fi
 
@@ -28,17 +30,19 @@ Wireshark expone `wlan.ta` como la dirección del transmisor y `wlan.addr` como 
 
 - `((wlan.ta == e8:de:27:16:70:c9) && !(wlan.fc == 0x8000)) && !(wlan.fc.type_subtype == 0x0005) && !(wlan.fc.type_subtype ==0x0004) && !(wlan.addr==ff:ff:ff:ff:ff:ff) && wlan.fc.type==2`
 
-Si ya conoces **las direcciones MAC, elimínalas de la salida** añadiendo comprobaciones como `&& !(wlan.addr == 5c:51:88:31:a0:3b)`.
+Si ya conoces **direcciones MAC, elimínalas de los resultados** agregando comprobaciones como `&& !(wlan.addr == 5c:51:88:31:a0:3b)`.
 
-Una vez detectadas **direcciones MAC desconocidas** comunicándose dentro de la red, utiliza un filtro como `wlan.addr == <MAC address> && (ftp || http || ssh || telnet)` para limitar su tráfico. Los filtros FTP, HTTP, SSH y Telnet solo son útiles cuando Wireshark puede diseccionar el payload descifrado correspondiente.<sup>[[3]](#references)[[5]](#references)</sup>
+Una vez que hayas detectado direcciones **MAC desconocidas** que se comunican dentro de la red, usa un filtro como `wlan.addr == <MAC address> && (ftp || http || ssh || telnet)` para limitar el tráfico. Los filtros FTP, HTTP, SSH y Telnet solo son útiles cuando Wireshark puede diseccionar la carga útil descifrada correspondiente.<sup>[[3]](#references)[[5]](#references)</sup>
 
 ## Descifrar tráfico
 
 Para añadir una clave de descifrado 802.11 en Wireshark, abre _Edit → Preferences → Protocols → IEEE 802.11_ y haz clic en _Edit_ junto a _Decryption Keys_.<sup>[[5]](#references)</sup>
 
-![Encontrar direcciones MAC desconocidas en una red Wi-Fi - Descifrar tráfico: Una vez detectadas direcciones MAC desconocidas comunicándose dentro de la red, puedes utilizar filtros como el siguiente:...](<../../../images/image (499).png>)
+![Encontrar direcciones MAC desconocidas en una red Wi-Fi - Descifrar tráfico: Una vez que hayas detectado direcciones MAC desconocidas que se comunican dentro de la red, puedes usar filtros como el siguiente:...](<../../../images/image (499).png>)
 
-Para WPA/WPA2, Wireshark normalmente necesita el handshake de cuatro vías EAPOL y la contraseña/SSID coincidentes; proporcionar la clave transitoria puede evitar el requisito del handshake. El descifrado por conexión de WPA3 requiere la PMK de la conexión.<sup>[[5]](#references)</sup>
+Para WPA/WPA2, Wireshark normalmente necesita el handshake de cuatro vías EAPOL y la contraseña/SSID correspondientes; proporcionar la clave transitoria puede evitar el requisito del handshake. El descifrado de WPA3 por conexión requiere la PMK de la conexión.<sup>[[5]](#references)</sup>
+
+Para descifrar TLS de la capa de aplicación después de recuperar el tráfico Wi-Fi, consulta [Trucos de Wireshark](wireshark-tricks.md#decrypting-tls).
 
 ## References
 
