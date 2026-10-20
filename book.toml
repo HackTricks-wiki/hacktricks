@@ -31,6 +31,7 @@ default-theme = "hacktricks-light"
 hash-files = false
 
 [output.html.redirect]
+"/generic-hacking/esim-javacard-exploitation.html" = "../mobile-pentesting/esim-javacard-exploitation.html"
 "/generic-methodologies-and-resources/python/venv.html" = "basic-python.html"
 "/windows-hardening/lateral-movement/rdpexec.html" = "../../network-services-pentesting/pentesting-rdp.html"
 "/generic-methodologies-and-resources/python/bruteforce-hash-few-chars.html" = "../../crypto/hashes/index.html"
