@@ -70,13 +70,13 @@ If you develop your own tools, there will be no known bad signatures, but this t
 
 I highly recommend you check out this [YouTube playlist](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf) about practical AV Evasion.
 
-### PE metadata classifiers and offline feature ablation
+### Offline PE-feature tests for static classifiers
 
-Packed or encrypted payload bytes are only one input to a static classifier. EMBER2024 extracts PE features including imports, exports, sections, headers, and Authenticode data. In the author's loader experiments, changing the import table alone moved an EMBER2024 score substantially: adding 141 benign-looking imports reduced the malicious score by 93%, while imports associated with malware raised it. This is a result for that model and those samples, not a reliable bypass of a particular AV/EDR product.<sup>[[48]](#references)[[49]](#references)</sup>
+Packed or encrypted payload bytes are only one input to a static classifier. EMBER2024 extracts PE features including imports, exports, sections, headers, and Authenticode data.<sup>[[48]](#references)</sup> In one loader experiment, adding 141 benign-looking imports reduced the EMBER2024 malicious score by 93%, while malware-associated imports raised it. This is a result for that model and those samples, not a reliable bypass of a particular AV/EDR product.<sup>[[50]](#references)</sup>
 
-For an authorized loader test, hold the payload and execution path constant, rebuild variants that change only one PE feature group at a time, and compare scores offline. If adding imports, reference the chosen Win32 APIs from reachable code so the linker keeps their IAT entries; vary the API selection and call sites across builds instead of creating a fixed camouflage function that can itself become a signature. The post also reports lower EMBER2024 scores with valid code signing, export entries, and more functions that enlarge `.pdata`, but an invalid certificate had little effect and the `.pdata` change was small in its experiment.<sup>[[49]](#references)</sup>
+For an authorized loader test, hold the payload and execution path constant, change one intended build variable per variant, and compare scores offline. Inspect the resulting PE features because a build change can affect more than one feature group.<sup>[[49]](#references)[[50]](#references)</sup> To keep intended imports in the IAT, call the chosen Win32 APIs from reachable code. Vary the selection and distribute call sites across builds rather than creating a fixed camouflage function that can become a signature. The experiment also reported lower scores with valid code signing, export entries, and more functions that enlarge `.pdata`; invalid signing had little effect, and the `.pdata` effect was small.<sup>[[50]](#references)</sup>
 
-The `thrember` package provides feature extraction and benchmark models. After installing it and downloading the models with `thrember.download_models("models")` into an existing directory, the PE classifier can score a directory of builds without submitting them to a scanning service:<sup>[[48]](#references)</sup>
+The `thrember` package provides feature extraction and benchmark models. After installing it, use `thrember.download_models("models")` with an existing `models` directory, then run the scorer from its parent directory: the download helper changes the current working directory. The PE classifier can score a directory of builds without submitting them to a scanning service:<sup>[[48]](#references)</sup>
 
 ```python
 from pathlib import Path
@@ -88,7 +88,7 @@ for sample in sorted(Path("builds").glob("*.exe")):
     print(sample, thrember.predict_sample(model, sample.read_bytes()))
 ```
 
-Keep the model and feature-extractor versions fixed during comparison. A lower offline score only shows that this classifier reacts to the changed metadata; it does not prove that the binary will evade behavioral analysis, emulation, or a vendor's different model. For [per-build polymorphism and outer-binary camouflage in virtualized payloads](virtualized-payload-execution.md#camouflaging-the-outer-go-executable), see the separate execution model.<sup>[[48]](#references)[[49]](#references)</sup>
+Keep the model and feature-extractor versions fixed during comparison. A lower offline score only shows how this classifier reacts to the changed binary; it does not prove evasion of behavioral analysis, emulation, or a vendor's different model.<sup>[[49]](#references)[[50]](#references)</sup> For [per-build polymorphism and outer-binary camouflage in virtualized payloads](virtualized-payload-execution.md#camouflaging-the-outer-go-executable), see the separate execution model.
 
 ### **Dynamic analysis**
 
@@ -1593,6 +1593,7 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [46] [DLLParty proof-of-concept and source](https://github.com/epersic/DLLParty)
 - [47] [DLLParty — Abusing thread pool internals for shellcodeless DLL injection](https://medium.com/@persic.eno/dllparty-abusing-thread-pool-internals-for-shellcodeless-dll-injection-7c84106f7745)
 - [48] [EMBER2024 benchmark dataset and thrember tooling](https://github.com/FutureComputing4AI/EMBER2024)
-- [49] [MSec Operations – Evading Machine Learning Based Detections](https://msecops.de/blog/posts/ml-evasion)
+- [49] [Using EMBER2024 to evaluate red team implants](https://mez0.cc/posts/evaluating-implants-with-ember/)
+- [50] [MSec Operations – Evading Machine Learning Based Detections](https://msecops.de/blog/posts/ml-evasion/)
 
 {{#include ../banners/hacktricks-training.md}}
