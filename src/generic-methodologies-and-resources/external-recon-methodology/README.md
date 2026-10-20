@@ -29,7 +29,7 @@ An autonomous system number (**ASN**) is a **unique number** assigned to an **au
 An **AS** consists of **blocks** of **IP addresses** which have a distinctly defined policy for accessing external networks and are administered by a single organisation but may be made up of several operators.
 
 It's interesting to find if the **company have assigned any ASN** to find its **IP ranges.** It will be interested to perform a **vulnerability test** against all the **hosts** inside the **scope** and **look for domains** inside these IPs.\
-You can **search** by company **name**, by **IP** or by **domain** in [**https://bgp.he.net/**](https://bgp.he.net)**,** [**https://bgpview.io/**](https://bgpview.io/) **or** [**https://ipinfo.io/**](https://ipinfo.io/).\
+You can **search** by company **name**, by **IP** or by **domain** in [**https://bgp.he.net/**](https://bgp.he.net) **or** [**https://ipinfo.io/**](https://ipinfo.io/).\
 **Depending on the region of the company this links could be useful to gather more data:** [**AFRINIC**](https://www.afrinic.net) **(Africa),** [**Arin**](https://www.arin.net/about/welcome/region/)**(North America),** [**APNIC**](https://www.apnic.net) **(Asia),** [**LACNIC**](https://www.lacnic.net) **(Latin America),** [**RIPE NCC**](https://www.ripe.net) **(Europe). Anyway, probably all the** useful information **(IP ranges and Whois)** appears already in the first link.
 
 ```bash
@@ -58,8 +58,7 @@ bbot -t tesla.com -f subdomain-enum
 
 ```
 
-You can find the IP ranges of an organisation also using [http://asnlookup.com/](http://asnlookup.com) (it has free API).\
-You can find the IP and ASN of a domain using [http://ipv4info.com/](http://ipv4info.com).
+You can also find an organisation's IP ranges using [ASNLookup](https://asnlookup.com/), which has a limited free API tier.
 
 ### **Looking for vulnerabilities**
 
@@ -87,7 +86,7 @@ dnsrecon -r 157.240.221.35/24 -n 8.8.8.8 #Using google dns
 ```
 
 For this to work, the administrator has to enable manually the PTR.\
-You can also use a online tool for this info: [http://ptrarchive.com/](http://ptrarchive.com).\
+You can also use [SecurityTrails](https://securitytrails.com/) for this information, although historical DNS data requires a paid plan.\
 For large ranges, tools like [**massdns**](https://github.com/blechschmidt/massdns) and [**dnsx**](https://github.com/projectdiscovery/dnsx) are useful to automate reverse lookups and enrichment.
 
 ### **Reverse Whois (loop)**
@@ -97,17 +96,16 @@ You can use online tools like:
 
 - [https://ip.thc.org/](https://ip.thc.org/) - **Free** (Web and API)
 - [https://viewdns.info/reversewhois/](https://viewdns.info/reversewhois/) - **Free**
-- [https://domaineye.com/reverse-whois](https://domaineye.com/reverse-whois) - **Free**
 - [https://www.reversewhois.io/](https://www.reversewhois.io) - **Free**
-- [https://www.whoxy.com/](https://www.whoxy.com) - **Free** web, not free API.
-- [http://reversewhois.domaintools.com/](http://reversewhois.domaintools.com) - Not free
+- [https://www.whoxy.com/](https://www.whoxy.com) - **Free** web interface; paid API.
+- [https://reversewhois.domaintools.com/](https://reversewhois.domaintools.com) - Paid
 - [https://drs.whoisxmlapi.com/reverse-whois-search](https://drs.whoisxmlapi.com/reverse-whois-search) - Not Free (only **100 free** searches)
 - [https://www.domainiq.com/](https://www.domainiq.com) - Not Free
-- [https://securitytrails.com/](https://securitytrails.com/) - Not free (API)
-- [https://whoisfreaks.com/](https://whoisfreaks.com/) - Not free (API)
+- [https://securitytrails.com/](https://securitytrails.com/) - Limited free API access for current DNS/subdomains; historical and reverse lookups require a paid plan.
+- [https://whoisfreaks.com/](https://whoisfreaks.com/) - 500 free API credits on signup; paid afterward.
 
 You can automate this task using [**DomLink** ](https://github.com/vysecurity/DomLink)(requires a whoxy API key).\
-You can also perform some automatic reverse whois discovery with [amass](https://github.com/OWASP/Amass): `amass intel -d tesla.com -whois`
+You can also perform some automatic reverse whois discovery with [amass](https://github.com/owasp-amass/amass): `amass intel -d tesla.com -whois`
 
 **Note that you can use this technique to discover more domain names every time you find a new domain.**
 
@@ -120,11 +118,9 @@ There are some pages and tools that let you search by these trackers and more:
 
 - [**Udon**](https://github.com/dhn/udon)
 - [**BuiltWith**](https://builtwith.com)
-- [**Sitesleuth**](https://www.sitesleuth.io)
 - [**Publicwww**](https://publicwww.com)
-- [**SpyOnWeb**](http://spyonweb.com)
-- [**Webscout**](https://github.com/straightblast/Sc0ut) (finds related sites by shared analytics/trackers)
-- [**StackScan**](https://www.stackscan.com) - **Free tier** (Web and API). Pivot on any served asset, not just tracker IDs: a script path, a self-hosted bundle name, or the host an asset loads from, returning every site carrying it
+- [**SpyOnWeb**](https://spyonweb.net/)
+- [**StackScan**](https://www.stackscan.com) - **Paid** web and API service ([pricing](https://www.stackscan.com/pricing)); no free plan is currently advertised. Pivot on any served asset, not just tracker IDs: a script path, a self-hosted bundle name, or the host an asset loads from, returning every site carrying it
 
 The API returns the stack for a single domain, which is useful for confirming a candidate asset belongs to the same estate:
 
@@ -137,7 +133,7 @@ Returns each detected technology with its category. Asset pivoting is currently 
 
 ### **Favicon**
 
-Did you know that we can find related domains and subdomains to our target by looking for the same favicon icon hash? This is exactly what [favihash.py](https://github.com/m4ll0k/Bug-Bounty-Toolz/blob/master/favihash.py) tool made by [@m4ll0k2](https://twitter.com/m4ll0k2) does. Here’s how to use it:
+Did you know that we can find related domains and subdomains to our target by looking for the same favicon icon hash? This is exactly what [favihash.py](https://github.com/m4ll0k/BBTz/blob/master/favihash.py) tool made by [@m4ll0k2](https://twitter.com/m4ll0k2) does. Here’s how to use it:
 
 ```bash
 cat my_targets.txt | xargs -I %% bash -c 'echo "http://%%/favicon.ico"' > targets.txt
@@ -205,14 +201,14 @@ to renew all certificates on a server at the same time. Correlating certificate 
 Also use **certificate transparency** logs directly:
 
 - [https://crt.sh/](https://crt.sh/)
-- [https://certspotter.com/](https://certspotter.com/)
+- [https://sslmate.com/certspotter/](https://sslmate.com/certspotter/)
 - [https://search.censys.io/](https://search.censys.io/)
 - [https://chaos.projectdiscovery.io/](https://chaos.projectdiscovery.io/) + [**chaos-client**](https://github.com/projectdiscovery/chaos-client)
 
 ### Mail DMARC information
 
 You can use a web such as [https://dmarc.live/info/google.com](https://dmarc.live/info/google.com) or a tool such as [https://github.com/Tedixx/dmarc-subdomains](https://github.com/Tedixx/dmarc-subdomains) to find **domains and subdomain sharing the same dmarc information**.\
-Other useful tools are [**spoofcheck**](https://github.com/BishopFox/spoofcheck) and [**dmarcian**](https://dmarcian.com/).
+Another useful service is [**dmarcian**](https://dmarcian.com/).
 
 ### **Passive Takeover**
 
@@ -237,9 +233,8 @@ You could access the **TLS certificate** of the main web page, obtain the **Orga
 Passive DNS data is great to find **old and forgotten records** that still resolve or that can be taken over. Look at:
 
 - [https://securitytrails.com/](https://securitytrails.com/)
-- [https://community.riskiq.com/](https://community.riskiq.com/) (PassiveTotal)
-- [https://www.domaintools.com/products/iris/](https://www.domaintools.com/products/iris/)
-- [https://www.farsightsecurity.com/solutions/dnsdb/](https://www.farsightsecurity.com/solutions/dnsdb/)
+- [https://www.domaintools.com/platform](https://www.domaintools.com/platform)
+- [https://docs.domaintools.com/dnsdb/](https://docs.domaintools.com/dnsdb/)
 
 ### **Looking for vulnerabilities**
 
@@ -285,7 +280,7 @@ bbot -t tesla.com -f subdomain-enum -rf passive
 bbot -t tesla.com -f subdomain-enum -m naabu gowitness -n my_scan -o .
 ```
 
-- [**Amass**](https://github.com/OWASP/Amass)
+- [**Amass**](https://github.com/owasp-amass/amass)
 
 ```bash
 amass enum [-active] [-ip] -d tesla.com
@@ -299,7 +294,7 @@ amass enum -d tesla.com | grep tesla.com # To just list subdomains
 ./subfinder-linux-amd64 -d tesla.com [-silent]
 ```
 
-- [**findomain**](https://github.com/Edu4rdSHL/findomain/)
+- [**findomain**](https://github.com/Findomain/Findomain)
 
 ```bash
 # findomain, use -silent to only have subdomains in the output
@@ -345,18 +340,10 @@ There are **other interesting tools/APIs** that even if not directly specialised
 curl https://ip.thc.org/tesla.com
 ```
 
-- [**Crobat**](https://github.com/cgboal/sonarsearch)**:** Uses the API [https://sonar.omnisint.io](https://sonar.omnisint.io) to obtain subdomains
+- [**AnubisDB free API**](https://github.com/jonluca/Anubis-DB)
 
 ```bash
-# Get list of subdomains in output from the API
-## This is the API the crobat tool will use
-curl https://sonar.omnisint.io/subdomains/tesla.com | jq -r ".[]"
-```
-
-- [**JLDC free API**](https://jldc.me/anubis/subdomains/google.com)
-
-```bash
-curl https://jldc.me/anubis/subdomains/tesla.com | jq -r ".[]"
+curl https://anubisdb.com/anubis/subdomains/tesla.com | jq -r ".[]"
 ```
 
 - [**RapidDNS**](https://rapiddns.io) free API
@@ -423,11 +410,11 @@ python3 censys-subdomain-finder.py tesla.com
 python3 DomainTrail.py -d example.com
 ```
 
-- [**securitytrails.com**](https://securitytrails.com/) has a free API to search for subdomains and IP history
+- [**SecurityTrails**](https://securitytrails.com/) offers limited free API access for current DNS and subdomain data; historical DNS/IP data requires a paid plan.
 - [**chaos.projectdiscovery.io**](https://chaos.projectdiscovery.io/#/)
 - [**activedns.net**](https://activedns.net/)
 
-This project offers for **free all the subdomains related to bug-bounty programs**. You can access this data also using [chaospy](https://github.com/dr-0x0x/chaospy) or even access the scope used by this project [https://github.com/projectdiscovery/chaos-public-program-list](https://github.com/projectdiscovery/chaos-public-program-list)
+This project offers for **free all the subdomains related to bug-bounty programs**. You can access this data also using [chaospy](https://github.com/Moaaz-0x/chaospy) or even access the scope used by this project [https://github.com/projectdiscovery/public-bugbounty-programs](https://github.com/projectdiscovery/public-bugbounty-programs)
 
 You can find a **comparison** of many of these tools here: [https://blog.blacklanternsecurity.com/p/subdomain-enumeration-tool-face-off](https://blog.blacklanternsecurity.com/p/subdomain-enumeration-tool-face-off)
 
@@ -483,7 +470,7 @@ aiodnsbrute -r resolvers -w wordlist.txt -vv -t 1024 domain.com
 
 After having found subdomains using open sources and brute-forcing, you could generate alterations of the subdomains found to try to find even more. Several tools are useful for this purpose:
 
-- [**dnsgen**](https://github.com/ProjectAnte/dnsgen)**:** Given the domains and subdomains generate permutations.
+- [**dnsgen**](https://github.com/AlephNullSK/dnsgen)**:** Given the domains and subdomains generate permutations.
 
 ```bash
 cat subdomains.txt | dnsgen -
@@ -605,9 +592,9 @@ _Note that sometimes the subdomain is hosted inside an IP that is not controlled
 In the initial steps you might have **found some IP ranges, domains and subdomains**.\
 It’s time to **recollect all the IPs from those ranges** and for the **domains/subdomains (DNS queries).**
 
-Using services from the following **free apis** you can also find **previous IPs used by domains and subdomains**. These IPs might still be owned by the client (and might allow you to find [**CloudFlare bypasses**](../../network-services-pentesting/pentesting-web/uncovering-cloudflare.md))
+Using services such as the following, you can also find **previous IPs used by domains and subdomains**. These IPs might still be owned by the client (and might allow you to find [**CloudFlare bypasses**](../../network-services-pentesting/pentesting-web/uncovering-cloudflare.md))
 
-- [**https://securitytrails.com/**](https://securitytrails.com/)
+- [**SecurityTrails**](https://securitytrails.com/) (historical DNS/IP data requires a paid plan)
 
 You can also check for domains pointing a specific IP address using the tool [**hakip2host**](https://github.com/hakluke/hakip2host)
 
@@ -637,7 +624,7 @@ cat /tmp/domains.txt | httprobe -p http:8080 -p https:8443 #Check port 80, 443 a
 
 Now that you have discovered **all the web servers** present in the scope (among the **IPs** of the company and all the **domains** and **subdomains**) you probably **don't know where to start**. So, let's make it simple and start just taking screenshots of all of them. Just by **taking a look** at the **main page** you can find **weird** endpoints that are more **prone** to be **vulnerable**.
 
-To perform the proposed idea you can use [**EyeWitness**](https://github.com/FortyNorthSecurity/EyeWitness), [**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot), [**Aquatone**](https://github.com/michenriksen/aquatone), [**Shutter**](https://shutter-project.org/downloads/third-party-packages/), [**Gowitness**](https://github.com/sensepost/gowitness) or [**webscreenshot**](https://github.com/maaaaz/webscreenshot)**.**
+To perform the proposed idea you can use [**EyeWitness**](https://github.com/RedSiege/EyeWitness), [**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot), [**Aquatone**](https://github.com/michenriksen/aquatone), [**Shutter**](https://shutter-project.org/downloads/third-party-packages/), [**Gowitness**](https://github.com/sensepost/gowitness) or [**webscreenshot**](https://github.com/maaaaz/webscreenshot)**.**
 
 Moreover, you could then use [**eyeballer**](https://github.com/BishopFox/eyeballer) to run over all the **screenshots** to tell you **what's likely to contain vulnerabilities**, and what isn't.
 
@@ -692,7 +679,7 @@ Credential leaks are related to hacks of companies where **sensitive information
 ### Github Leaks
 
 Credentials and APIs might be leaked in the **public repositories** of the **company** or of the **users** working by that github company.\
-You can use the **tool** [**Leakos**](https://github.com/carlospolop/Leakos) to **download** all the **public repos** of an **organization** and of its **developers** and run [**gitleaks**](https://github.com/zricethezav/gitleaks) over them automatically.
+You can use the **tool** [**Leakos**](https://github.com/carlospolop/Leakos) to **download** all the **public repos** of an **organization** and of its **developers** and run [**gitleaks**](https://github.com/gitleaks/gitleaks) over them automatically.
 
 **Leakos** can also be used to run **gitleaks** agains all the **text** provided **URLs passed** to it as sometimes **web pages also contains secrets**.
 
