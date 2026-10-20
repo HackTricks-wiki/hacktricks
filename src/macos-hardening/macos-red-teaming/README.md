@@ -1,4 +1,4 @@
-# macOS Red Teaming
+# Red Teaming macOS
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -8,9 +8,9 @@
 - JAMF Pro: `jamf checkJSSConnection`
 - Kandji
 
-Якщо вам вдасться **скомпрометувати облікові дані адміністратора** для доступу до management platform, ви **потенційно зможете скомпрометувати всі комп'ютери**, поширивши malware на ці машини.
+Якщо вам вдасться **скомпрометувати облікові дані адміністратора** для доступу до платформи керування, ви **потенційно зможете скомпрометувати всі комп’ютери**, розгорнувши на них malware.
 
-Для red teaming у середовищах MacOS наполегливо рекомендується мати певне розуміння принципів роботи MDM:
+Для Red Teaming у середовищах MacOS наполегливо рекомендується розуміти, як працюють MDM:
 
 
 {{#ref}}
@@ -19,82 +19,113 @@ macos-mdm/
 
 ### Використання MDM як C2
 
-MDM матиме дозвіл на встановлення, запит або видалення профілів, встановлення applications, створення локальних admin accounts, встановлення firmware password, зміну ключа FileVault...
+MDM матиме дозвіл установлювати, запитувати або видаляти профілі, установлювати застосунки, створювати локальні облікові записи адміністратора, встановлювати пароль прошивки, змінювати ключ FileVault...
 
-Щоб запустити власний MDM, вам потрібно, щоб ваш CSR був **підписаний vendor**, що можна спробувати отримати через [**https://mdmcert.download/**](https://mdmcert.download/). А для запуску власного MDM для Apple devices можна використати [**MicroMDM**](https://github.com/micromdm/micromdm).
+Щоб запустити власний MDM, потрібно, щоб **ваш CSR підписав постачальник**. Це можна спробувати зробити за допомогою [**https://mdmcert.download/**](https://mdmcert.download/). Для запуску власного MDM для пристроїв Apple можна скористатися [**MicroMDM**](https://github.com/micromdm/micromdm).
 
-Однак для встановлення application на enrolled device вона все одно має бути підписана developer account... проте під час MDM enrolment **device додає SSL cert MDM як trusted CA**, тож тепер ви можете підписати будь-що.<sup>[[4]](#references)</sup>
+Реєстрація в MDM **не** робить TLS-сертифікат сервера керування автоматично довіреним CA і не надає ідентифікатор для підписування застосунків. Якщо сервер використовує приватний CA, його кореневий і проміжні сертифікати потрібно додати до профілю реєстрації або окремого профілю довіри. Сертифікат клієнта, який використовується для автентифікації MDM, є іншим сертифікатом.<sup>[[7]](#references)</sup>
 
-Щоб enrol device у MDM, потрібно встановити файл **`mobileconfig`** від імені root; його можна доставити через файл **pkg** (його можна стиснути у zip, і після завантаження з Safari він буде розпакований).
+Завантажений профіль реєстрації MDM (`.mobileconfig`) потрібно відкрити й затвердити в **System Settings → General → Device Management**. Саме лише розміщення профілю в `.pkg`, установленому з правами root, або в ZIP-архіві, відкритому через Safari, не призведе до непомітної реєстрації сучасного Mac. Див. [поведінку профілів конфігурації](../macos-auto-start-locations.md#configuration-profiles-mobileconfig).<sup>[[8]](#references)</sup>
 
-**Mythic agent Orthrus** використовує цю техніку.
+Automated Device Enrollment під час Setup Assistant — це окремий процес. Інші передумови описано в матеріалі про [шахрайську реєстрацію пристрою іншої організації](macos-mdm/enrolling-devices-in-other-organisations.md).<sup>[[9]](#references)</sup>
+
+**Агент Mythic Orthrus** використовує цю техніку.
+
+### Розгортання пакета через контрольований MDM
+
+На **контрольованому Mac під керуванням macOS 26 або новішої версії** контроль над службою MDM дає змогу використовувати декларацію `com.apple.configuration.package` в системній області.<sup>[[10]](#references)</sup> Пакет має мати підпис, який пристрій може перевірити, але його застосунку не потрібен окремий підпис Developer ID: Gatekeeper не перевіряє застосунки, установлені через керування пристроями.<sup>[[11]](#references)</sup> Довірений TLS-сертифікат сервера сам по собі не надає оператору приватного ключа чи можливості підписування, потрібних для підпису такого пакета.<sup>[[11]](#references)[[12]](#references)</sup>
+
+Створіть підписаний тестовий пакет, обчисліть його digest і опублікуйте пакет та plist `ManifestURL` через HTTPS. Маніфест має містити один ресурс `software-package` із URL і SHA-256, а також унікальні `bundle-identifier` і `bundle-version`.<sup>[[11]](#references)</sup> Потім надішліть декларацію пакета з URL цього маніфесту та параметром `InstallBehavior.Install`, установленим у `Required`; перевірте елемент стану `package.list`, щоб дізнатися про встановлення або помилки.<sup>[[10]](#references)[[11]](#references)</sup>
+
+```bash
+pkgbuild --component ./Test.app --install-location /Applications --sign "Package Signing Certificate" ./Test.pkg
+shasum -a 256 ./Test.pkg
+```
+
+Мінімальна декларація обов’язкового встановлення, подана через службу MDM, має такий вигляд (замініть URL і обидва UUID).<sup>[[10]](#references)</sup>
+
+```json
+{
+  "Type": "com.apple.configuration.package",
+  "Identifier": "11111111-1111-4111-8111-111111111111",
+  "ServerToken": "22222222-2222-4222-8222-222222222222",
+  "Payload": {
+    "ManifestURL": "https://mdm.example.org/TestPackage.plist",
+    "InstallBehavior": {"Install": "Required"}
+  }
+}
+```
 
 ### Зловживання JAMF PRO
 
-JAMF може запускати **custom scripts** (scripts, розроблені sysadmin), **native payloads** (створення локального account, встановлення EFI password, file/process monitoring...) і **MDM** (device configurations, device certificates...).<sup>[[5]](#references)</sup>
+JAMF може запускати **custom scripts** (скрипти, розроблені системним адміністратором), **native payloads** (створення локальних облікових записів, встановлення пароля EFI, моніторинг файлів/процесів...) і **MDM** (конфігурації пристроїв, сертифікати пристроїв...).<sup>[[5]](#references)</sup>
 
-#### JAMF self-enrolment
+#### Самостійна реєстрація в JAMF
 
-Перейдіть на сторінку на кшталт `https://<company-name>.jamfcloud.com/enroll/`, щоб перевірити, чи ввімкнено **self-enrolment**. Якщо так, сторінка може **запитати credentials для доступу**.
+Перейдіть на сторінку на кшталт `https://<company-name>.jamfcloud.com/enroll/`, щоб перевірити, чи ввімкнено **самостійну реєстрацію**. Якщо так, для доступу можуть **запитати облікові дані**.
 
-Для виконання password spraying attack можна використати script [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py).
+Для виконання атаки password spraying можна використати скрипт [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py).
 
-Крім того, після знаходження відповідних credentials ви зможете brute-force інші usernames за допомогою такої форми:
+Крім того, знайшовши дійсні облікові дані, ви зможете виконати brute-force для інших імен користувачів за допомогою такої форми:
 
-![Зловживання JAMF PRO - JAMF self-enrolment: Крім того, після знаходження відповідних credentials ви зможете brute-force інші usernames за допомогою такої форми](<../../images/image (107).png>)
+![Зловживання JAMF PRO — самостійна реєстрація в JAMF: Крім того, знайшовши дійсні облікові дані, ви зможете виконати brute-force для інших імен користувачів за допомогою такої форми](<../../images/image (107).png>)
 
-#### JAMF device Authentication
+#### Автентифікація пристрою JAMF
 
 <figure><img src="../../images/image (167).png" alt=""><figcaption></figcaption></figure>
 
-Бінарний файл **`jamf`** містив secret для відкриття keychain, який на момент виявлення був **спільним** для всіх і мав значення: **`jk23ucnq91jfu9aj`**.<sup>[[5]](#references)</sup>\
-Крім того, jamf **persist** як **LaunchDaemon** у **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
+Бінарний файл **`jamf`** містив секрет для відкриття keychain, який на момент виявлення був **спільним** для всіх. Секрет: **`jk23ucnq91jfu9aj`**.<sup>[[5]](#references)</sup>\
+Крім того, jamf **зберігається** як **LaunchDaemon** у **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
 
-#### JAMF Device Takeover
+#### Перехоплення контролю над пристроєм JAMF
 
-**URL** **JSS** (Jamf Software Server), який використовуватиме **`jamf`**, розташований у **`/Library/Preferences/com.jamfsoftware.jamf.plist`**.\
-Цей файл фактично містить URL:
+**URL**-адреса **JSS** (Jamf Software Server), яку використовуватиме **`jamf`**, розташована в **`/Library/Preferences/com.jamfsoftware.jamf.plist`**.\
+Цей файл містить URL-адресу:
+
 ```bash
 plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 
 [...]
-<key>is_virtual_machine</key>
-<false/>
-<key>jss_url</key>
-<string>https://subdomain-company.jamfcloud.com/</string>
-<key>last_management_framework_change_id</key>
-<integer>4</integer>
+	<key>is_virtual_machine</key>
+	<false/>
+	<key>jss_url</key>
+	<string>https://subdomain-company.jamfcloud.com/</string>
+	<key>last_management_framework_change_id</key>
+	<integer>4</integer>
 [...]
 ```
-Отже, зловмисник може розмістити шкідливий пакет (`pkg`), який під час встановлення **перезапише цей файл**, встановивши **URL до Mythic C2 listener від Typhon agent**, щоб отримати можливість використовувати JAMF як C2.
+
+Отже, зловмисник міг би підкинути шкідливий пакет (`pkg`), який під час встановлення **перезаписує цей файл**, задаючи **URL прослуховувача Mythic C2 для агента Typhon**, щоб використовувати JAMF як C2.
+
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
 
 # TODO: There is an ID, maybe it's possible to have the real jamf connection and another one to the C2
 ```
-#### Імітація JAMF
 
-Щоб **імітувати комунікацію** між пристроєм і JMF, вам потрібно:
+#### Імперсонація JAMF
+
+Щоб **імітувати обмін даними** між пристроєм і JMF, вам потрібні:
 
 - **UUID** пристрою: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
-- **JAMF keychain** із: `/Library/Application\ Support/Jamf/JAMF.keychain`, який містить сертифікат пристрою
+- **keychain JAMF** з `/Library/Application\ Support/Jamf/JAMF.keychain`, який містить сертифікат пристрою
 
-Маючи цю інформацію, **створіть VM** зі **викраденим** Hardware **UUID** і з **вимкненим SIP**, скопіюйте **JAMF keychain**, встановіть **hook** на Jamf **agent** і викрадіть його інформацію.
+Маючи цю інформацію, **створіть VM** зі **вкраденим** Hardware **UUID** і **вимкненим SIP**, скопіюйте туди **keychain JAMF**, зробіть **hook** агента Jamf і викрадіть його дані.
 
-#### Викрадення secrets
+#### Крадіжка секретів
 
 <figure><img src="../../images/image (1025).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
-Ви також можете моніторити розташування `/Library/Application Support/Jamf/tmp/` на наявність **custom scripts**, які адміністратори можуть захотіти виконати через Jamf, оскільки вони **поміщаються сюди, виконуються та видаляються**. Ці scripts **можуть містити credentials**.
+Також можна стежити за каталогом `/Library/Application Support/Jamf/tmp/` — там з’являються **користувацькі скрипти**, які адміністратори можуть запускати через Jamf: їх **розміщують тут, виконують і видаляють**. Ці скрипти **можуть містити облікові дані**.
 
-Однак **credentials** можуть передаватися цим scripts як **parameters**, тому вам потрібно буде моніторити `ps aux | grep -i jamf` (навіть без root).
+Однак **облікові дані** можуть передаватися цим скриптам як **параметри**, тому потрібно стежити за `ps aux | grep -i jamf` (навіть без root).
 
-Script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) може відстежувати додавання нових файлів і нові аргументи процесів.
+Скрипт [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) може відстежувати появу нових файлів і нових аргументів процесів.
 
 ### Віддалений доступ до macOS
 
-А також щодо "спеціальних" **мережевих** **protocols** MacOS:
+Також про «особливі» **мережеві протоколи** **MacOS**:
 
 
 {{#ref}}
@@ -103,7 +134,7 @@ Script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolk
 
 ## Active Directory
 
-У деяких випадках ви виявите, що **комп'ютер MacOS підключений до AD**. У цьому сценарії вам слід спробувати **enumerate** active directory так, як ви це зазвичай робите. Знайдіть **допомогу** на таких сторінках:
+Іноді ви виявите, що комп’ютер із **MacOS під’єднаний до AD**. У такому разі спробуйте **enumerate** Active Directory звичним для вас способом. Довідку можна знайти на таких сторінках:
 
 
 {{#ref}}
@@ -120,36 +151,41 @@ Script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolk
 ../../network-services-pentesting/pentesting-kerberos-88/
 {{#endref}}
 
-Деякі **локальні інструменти MacOS**, які також можуть вам допомогти, використовують `dscl`:
+Також може стати в пригоді локальний інструмент для **MacOS** — `dscl`:
+
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
-Також існують деякі інструменти, підготовлені для MacOS, щоб автоматично виконувати enumeration AD і працювати з Kerberos:
 
-- [**Machound**](https://github.com/XMCyber/MacHound): MacHound — це розширення інструмента аудиту BloodHound, що дає змогу збирати та імпортувати зв’язки Active Directory на хостах MacOS.<sup>[[2]](#references)</sup>
-- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost — це проєкт Objective-C, призначений для взаємодії з API Heimdal krb5 у macOS. Мета проєкту — забезпечити краще тестування безпеки Kerberos на пристроях macOS за допомогою native API, без потреби в будь-яких інших framework або packages на цільовій системі.
-- [**Orchard**](https://github.com/its-a-feature/Orchard): інструмент JavaScript for Automation (JXA) для виконання enumeration Active Directory.
+Також існують інструменти для MacOS, які автоматично збирають інформацію про AD і дають змогу працювати з kerberos:
+
+- [**Machound**](https://github.com/XMCyber/MacHound): MacHound — це розширення інструмента Bloodhound для аудиту, яке дає змогу збирати та завантажувати дані про зв’язки Active Directory на хостах MacOS.<sup>[[2]](#references)</sup>
+- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost — це проєкт Objective-C, призначений для взаємодії з API Heimdal krb5 у macOS. Мета проєкту — забезпечити ефективніше тестування безпеки Kerberos на пристроях macOS за допомогою нативних API, не вимагаючи інших фреймворків або пакетів на цільовому пристрої.
+- [**Orchard**](https://github.com/its-a-feature/Orchard): інструмент JavaScript for Automation (JXA) для збору інформації про Active Directory.
 
 ### Інформація про домен
+
 ```bash
 echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 ```
+
 ### Користувачі
 
-Існує три типи користувачів MacOS:
+Є три типи користувачів MacOS:
 
 - **Локальні користувачі** — керуються локальною службою OpenDirectory і жодним чином не підключені до Active Directory.
 - **Мережеві користувачі** — тимчасові користувачі Active Directory, яким для автентифікації потрібне підключення до сервера DC.
 - **Мобільні користувачі** — користувачі Active Directory з локальною резервною копією облікових даних і файлів.
 
 Локальна інформація про користувачів і групи зберігається в папці _/var/db/dslocal/nodes/Default._\
-Наприклад, інформація про користувача з іменем _mark_ зберігається в _/var/db/dslocal/nodes/Default/users/mark.plist_, а інформація про групу _admin_ — у _/var/db/dslocal/nodes/Default/groups/admin.plist_.
+Наприклад, інформація про користувача _mark_ зберігається у файлі _/var/db/dslocal/nodes/Default/users/mark.plist_, а інформація про групу _admin_ — у файлі _/var/db/dslocal/nodes/Default/groups/admin.plist_.
 
-Окрім використання зв’язків HasSession і AdminTo, **MacHound додає до бази даних Bloodhound три нові зв’язки**:<sup>[[2]](#references)</sup>
+Окрім використання ребер HasSession і AdminTo, **MacHound додає до бази даних Bloodhound три нові ребра**:<sup>[[2]](#references)</sup>
 
-- **CanSSH** — сутність, якій дозволено виконувати SSH-підключення до хоста
-- **CanVNC** — сутність, якій дозволено виконувати VNC-підключення до хоста
+- **CanSSH** — сутність, якій дозволено підключатися до хоста через SSH
+- **CanVNC** — сутність, якій дозволено підключатися до хоста через VNC
 - **CanAE** — сутність, якій дозволено виконувати скрипти AppleEvent на хості
+
 ```bash
 #User enumeration
 dscl . ls /Users
@@ -171,42 +207,53 @@ dscl "/Active Directory/TEST/All Domains" read "/Groups/[groupname]"
 #Domain Information
 dsconfigad -show
 ```
+
 Більше інформації: [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)<sup>[[3]](#references)[[6]](#references)</sup>
 
 ### Пароль Computer$
 
-Отримуйте паролі за допомогою:
+Отримайте паролі за допомогою:
+
 ```bash
 bifrost --action askhash --username [name] --password [password] --domain [domain]
 ```
-Можна отримати доступ до пароля **`Computer$`** у System keychain.
+
+Можна отримати доступ до пароля **`Computer$`** у зв’язці ключів System.
 
 ### Over-Pass-The-Hash
 
-Отримайте TGT для певного користувача та сервісу:
+Отримайте TGT для певного користувача та служби:
+
 ```bash
 bifrost --action asktgt --username [user] --domain [domain.com] \
---hash [hash] --enctype [enctype] --keytab [/path/to/keytab]
+       --hash [hash] --enctype [enctype] --keytab [/path/to/keytab]
 ```
-Після отримання TGT його можна інжектити в поточну сесію за допомогою:
+
+Після отримання TGT його можна впровадити в поточний сеанс за допомогою:
+
 ```bash
 bifrost --action asktgt --username test_lab_admin \
---hash CF59D3256B62EE655F6430B0F80701EE05A0885B8B52E9C2480154AFA62E78 \
---enctype aes256 --domain test.lab.local
+       --hash CF59D3256B62EE655F6430B0F80701EE05A0885B8B52E9C2480154AFA62E78 \
+       --enctype aes256 --domain test.lab.local
 ```
+
 ### Kerberoasting
+
 ```bash
 bifrost --action asktgs --spn [service] --domain [domain.com] \
---username [user] --hash [hash] --enctype [enctype]
+       --username [user] --hash [hash] --enctype [enctype]
 ```
-Отримавши service tickets, можна спробувати отримати доступ до спільних ресурсів на інших комп’ютерах:
+
+Отримавши service tickets, можна спробувати отримати доступ до мережевих ресурсів на інших комп’ютерах:
+
 ```bash
 smbutil view //computer.fqdn
 mount -t smbfs //server/folder /local/mount/point
 ```
-## Отримання доступу до Keychain
 
-Keychain, найімовірніше, містить конфіденційну інформацію, яка в разі отримання доступу без виклику prompt могла б допомогти просунутися далі під час Red Team exercise:
+## Доступ до Keychain
+
+Keychain із великою ймовірністю містить конфіденційну інформацію, доступ до якої без появи запиту може допомогти просунутися в Red Team exercise:
 
 
 {{#ref}}
@@ -215,24 +262,30 @@ macos-keychain.md
 
 ## Зовнішні сервіси
 
-macOS Red Teaming відрізняється від звичайного Windows Red Teaming, оскільки **macOS зазвичай безпосередньо інтегрована з кількома зовнішніми платформами**. Поширена конфігурація macOS передбачає доступ до комп'ютера за допомогою **синхронізованих через OneLogin облікових даних**, а також доступ до кількох зовнішніх сервісів (наприклад, github, aws...) через OneLogin.
+Red Teaming у MacOS відрізняється від звичайного Red Teaming у Windows, оскільки **MacOS зазвичай безпосередньо інтегрована з кількома зовнішніми платформами**. Типова конфігурація MacOS дає змогу отримувати доступ до комп’ютера за допомогою **синхронізованих облікових даних OneLogin і користуватися кількома зовнішніми сервісами** (як-от github, aws...) через OneLogin.
 
-## Різні Red Team техніки
+## Інші техніки Red Team
 
 ### Safari
 
-Коли файл завантажується в Safari, якщо це «безпечний» файл, його буде **автоматично відкрито**. Наприклад, якщо ви **завантажите zip**, його буде автоматично розпаковано:<sup>[[1]](#references)</sup>
+Коли файл завантажується в Safari, якщо це «безпечний» файл, він **відкривається автоматично**. Наприклад, якщо ви **завантажите zip-файл**, його буде автоматично розпаковано:<sup>[[1]](#references)</sup>
 
 <figure><img src="../../images/image (226).png" alt=""><figcaption></figcaption></figure>
 
+
+
 ## References
 
-- [1] [Gone Apple Pickin': Red Teaming MacOS Environments in 2021 - Cedric Owens (DEF CON 29)](https://www.youtube.com/watch?v=IiMladUbL6E)
-- [2] [Introducing MacHound: A Solution to macOS Active Directory Based Attacks](https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6)
-- [3] [its-a-feature - Domain Enumeration Commands (dscl / net / ldapsearch equivalents)](https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0)
-- [4] [Come to the Dark Side, We Have Apples: Turning macOS Management Evil](https://www.youtube.com/watch?v=pOQOh07eMxY)
-- [5] [OBTS v3.0: "An Attackers Perspective on Jamf Configurations" - Luke Roberts / Calum Hall](https://www.youtube.com/watch?v=ju1IYWUv4ZA)
-- [6] [Active Directory Discovery with a Mac - its-a-feature](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
-
-
+- [1] [Збирання яблук: Red Teaming середовищ MacOS у 2021 році — Cedric Owens (DEF CON 29)](https://www.youtube.com/watch?v=IiMladUbL6E)
+- [2] [Представляємо MacHound: рішення для атак на Active Directory у macOS](https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6)
+- [3] [its-a-feature — команди переліку домену (еквіваленти dscl / net / ldapsearch)](https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0)
+- [4] [Переходьте на темний бік — у нас є яблука: зловмисне використання керування macOS](https://www.youtube.com/watch?v=pOQOh07eMxY)
+- [5] [OBTS v3.0: «Погляд зловмисника на конфігурації Jamf» — Luke Roberts / Calum Hall](https://www.youtube.com/watch?v=ju1IYWUv4ZA)
+- [6] [Виявлення Active Directory за допомогою Mac — its-a-feature](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
+- [7] [Apple — Керування сертифікатами для сервісів і пристроїв керування пристроями](https://developer.apple.com/documentation/devicemanagement/managing-certificates-for-device-management-services-and-devices)
+- [8] [Apple — Використання профілів конфігурації на Mac](https://support.apple.com/en-gb/guide/mac-help/mh35561/mac)
+- [9] [Apple — Розгортання профілів реєстрації керування пристроями](https://developer.apple.com/documentation/devicemanagement/deploying-device-management-enrollment-profiles)
+- [10] [Apple — Оголошення пакета](https://developer.apple.com/documentation/devicemanagement/package)
+- [11] [Apple — Встановлення пакетів](https://developer.apple.com/documentation/devicemanagement/installing-packages)
+- [12] [Apple — Ідентичності](https://developer.apple.com/documentation/security/identities)
 {{#include ../../banners/hacktricks-training.md}}
