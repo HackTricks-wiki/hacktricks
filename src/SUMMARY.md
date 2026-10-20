@@ -153,7 +153,6 @@
 
 - [Archive Extraction Path Traversal](generic-hacking/archive-extraction-path-traversal.md)
 - [Brute Force - CheatSheet](generic-hacking/brute-force.md)
-- [Esim Javacard Exploitation](generic-hacking/esim-javacard-exploitation.md)
 - [Exfiltration](generic-hacking/exfiltration.md)
 - [Reverse Shells (Linux, Windows, MSFVenom)](generic-hacking/reverse-shells/README.md)
   - [MSFVenom - CheatSheet](generic-hacking/reverse-shells/msfvenom.md)
@@ -476,6 +475,7 @@
 
 # 📱 Mobile Pentesting
 
+- [eSIM / Java Card VM Exploitation](mobile-pentesting/esim-javacard-exploitation.md)
 - [Android APK Checklist](mobile-pentesting/android-checklist.md)
 - [Android Applications Pentesting](mobile-pentesting/android-app-pentesting/README.md)
   - [Abusing Android Media Pipelines Image Parsers](mobile-pentesting/android-app-pentesting/abusing-android-media-pipelines-image-parsers.md)
