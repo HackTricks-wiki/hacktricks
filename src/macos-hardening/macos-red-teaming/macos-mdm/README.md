@@ -194,17 +194,20 @@ Typically, **activation profile** provided by an MDM vendor will **include the f
 
 ### Enrolling Devices in Other Organisations
 
-As previously commented, in order to try to enrol a device into an organization **only a Serial Number belonging to that Organization is needed**. Once the device is enrolled, several organizations will install sensitive data on the new device: certificates, applications, WiFi passwords, VPN configurations [and so on](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
-Therefore, this could be a dangerous entrypoint for attackers if the enrolment process isn't correctly protected:<sup>[[2]](#references)</sup>
+An assigned serial number can identify the organization's enrollment path, but it does **not** guarantee MDM enrollment. The server can require user authentication through `configuration_web_url` before returning the enrollment profile. Assess whether an alternate enrollment path omits that check rather than assuming every assigned serial can join the fleet.<sup>[[3]](#references)</sup>
+
+For a rogue-enrollment workflow, use the linked page below. For MDM control and package delivery after compromise, see [macOS Red Teaming](../).
 
 
 {{#ref}}
 enrolling-devices-in-other-organisations.md
 {{#endref}}
 
+
+
 ## References
 
 - [1] [A Deep Dive into macOS MDM (and How it can be Compromised)](https://www.youtube.com/watch?v=ku8jZe-MHUU)
 - [2] [Duo Labs — "MDM Me Maybe?" (DEP/MDM enrollment security research)](https://duo.com/labs/research/mdm-me-maybe)
-
+- [3] [Apple — Authenticating through web views](https://developer.apple.com/documentation/devicemanagement/authenticating-through-web-views)
 {{#include ../../../banners/hacktricks-training.md}}
