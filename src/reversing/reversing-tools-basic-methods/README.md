@@ -219,6 +219,22 @@ Start from a feature string or symbol, follow references and callers, then inspe
 
 For JavaScript/Electron entry points leading into native add-ons, see [Electron Desktop Apps](../../network-services-pentesting/pentesting-web/electron-desktop-apps/#static-asar-to-native-boundary-tracing-with-rea).
 
+## Scripted IDA and Ghidra analysis with a local TCP bridge
+
+[IDA-Ghidra-bridge](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge) runs inside an **already open** IDA database or Ghidra CodeBrowser program and lets a separate script query and modify that analysis database. Run `ID_Server.py` from IDA's Python CLI (`import ID_Server`) or `Ghidra_Server.py` from Ghidra's Script Manager. Each listener binds to `127.0.0.1`, starting at port `5073`; check the port printed by the instance before connecting. IDA scans higher ports, but the Ghidra script only tries ten ports from `5073` through `5082`. Unlike a headless analyzer, this bridge operates on the program currently open in that GUI instance.<sup>[[21]](#references)[[22]](#references)[[23]](#references)</sup>
+
+Send **one newline-terminated command per connection** and read the newline-terminated response. The result is normally JSON. For example, after finding an imported API relevant to an input path, `IMPORTXREF` finds its call sites; `DECOMP_XREF` then batch-decompiles callers of a selected address. `FUNC` inspects a function, while `PCODE` returns the decompiler's intermediate representation. Use the address from the active database, not an address copied from a differently rebased binary.<sup>[[21]](#references)[[22]](#references)[[23]](#references)</sup>
+
+```python
+import socket
+
+with socket.create_connection(("127.0.0.1", 5073)) as sock:
+    sock.sendall(b"IMPORTXREF memcpy\n")
+    print(sock.makefile("r", encoding="utf-8").readline())
+```
+
+The same channel can **change the analysis database**: `RENAME_FUNC`, `RETYPE`, `SETCONV`, `DEFSTRUCT`/`SETFIELD`, `MAKEFUNC`, and `PATCH` alter names, types, structure definitions, function boundaries, or stored bytes. `PATCH` is a database edit, **not** evidence of a live-process patch. The listener has no documented authentication, so only run it while local processes that can reach the loopback port are trusted; `QUIT` stops the listener, and IDA also exposes `ida_bridge_stop()`.<sup>[[21]](#references)[[22]](#references)[[23]](#references)</sup>
+
 ## ARM & MIPS
 
 
@@ -716,5 +732,8 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 - [18] [REA CLI and Evidence guide](https://github.com/morluto/rea/blob/main/docs/cli.md)
 - [19] [DispatchThis: Binary Ninja control-flow unflattening workflow](https://github.com/YungBinary/DispatchThis)
 - [20] [eSentire: PaperCut MF Zero-Day Intrusion, Java Loader, Web Shell, and AdaptixC2](https://esentire.com/blog/papercut-mf-zero-day-intrusion-java-loader-web-shell-and-adaptixc2-via-cve-2026-82078-and-cve-2026-81578)
+- [21] [IDA-Ghidra-bridge README](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge)
+- [22] [IDA bridge server implementation](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge/blob/main/ID_Server.py)
+- [23] [Ghidra bridge server implementation](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge/blob/main/Ghidra_Server.py)
 
 {{#include ../../banners/hacktricks-training.md}}
