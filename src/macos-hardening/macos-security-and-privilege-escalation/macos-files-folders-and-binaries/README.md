@@ -49,6 +49,8 @@ macos-sensitive-locations.md
 macos-installers-abuse.md
 {{#endref}}
 
+For the distinction between the writable Data volume and the sealed System volume visible in this hierarchy, see [macOS Sealed System Volume & DataVault](../macos-security-protections/macos-sealed-system-volume-and-datavault.md).
+
 ## OS X Specific Extensions
 
 - **`.dmg`**: Apple Disk Image files are very frequent for installers.
@@ -62,7 +64,7 @@ macos-installers-abuse.md
     - `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
 - **`.app`**: An application bundle that follows the standard macOS directory structure.
 - **`.dylib`**: Dynamic libraries (like Windows DLL files)
-- **`.pkg`**: Are the same as xar (eXtensible Archive format). The installer command can be use to install the contents of these files.
+- **`.pkg`**: Modern flat installer packages are XAR archives, but `.pkg` is an installer format, not a synonym for XAR. Older bundle-style installer packages are directories. See [macOS installers](macos-installers-abuse.md) for package structure and inspection. <sup>[[9]](#references)[[12]](#references)</sup>
 - **`.DS_Store`**: This file is on each directory, it saves the attributes and customisations of the directory.
 - **`.Spotlight-V100`**: This folder appears on the root directory of every volume on the system.
 - **`.metadata_never_index`**: If this file is at the root of a volume Spotlight won't index that volume.
@@ -117,12 +119,9 @@ Note that even if the SLC is slid on the first use, all the **processes** use th
 
 Branch pools are little Mach-O dylibs that creates small spaces between image mappings making impossible to interpose the functions.
 
-### Override SLCs
+### Shared-cache environment restrictions
 
-Using the the env variables:
-
-- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> This will allow to load a new shared library cache
-- **`DYLD_SHARED_CACHE_DIR=avoid`** and manually replace the libraries with symlinks to the shared cache with the real ones (you will need to extract them)
+`DYLD_SHARED_CACHE_DIR` names a cache directory, while `DYLD_SHARED_REGION` selects a shared-region mode. The previous `DYLD_DHARED_REGION` spelling was invalid, and `avoid` is not a value for `DYLD_SHARED_CACHE_DIR`. Current dyld gates the `private` mode on AMFI permission to use custom shared caches, so setting environment variables alone does not establish that a process can load a replacement cache. <sup>[[10]](#references)</sup>
 
 ## Special File Permissions
 
@@ -135,7 +134,7 @@ For a directory, **read** permits listing entries, **write** permits creating or
 Files can carry flags that alter their behavior. Inspect flags in a directory with `ls -lO /path/directory`.
 
 - **`uchg`**: Known as **uchange** flag will **prevent any action** changing or deleting the **file**. To set it do: `chflags uchg file.txt`
-  - The root user could **remove the flag** and modify the file
+  - The file owner or root can remove this **user** flag with `chflags nouchg file.txt`; it is not a protection against either of them. The separate **system** immutable flag (`schg`) is restricted to root. <sup>[[11]](#references)</sup>
 - **`restricted`**: This flag makes the file be **protected by SIP** (you cannot add this flag to a file).
 - **`Sticky bit`**: In a directory with the sticky bit set, only the file owner, directory owner, or root can rename or delete an entry. This is typically enabled on `/tmp` to prevent users from deleting or moving other users' files.
 
@@ -309,6 +308,8 @@ These are implementation details, not a stable public policy API; confirm the ac
 - **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Data about wireless access points.
 - **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: Legacy launchd override data.
 
+
+
 ## References
 
 - [1] [Apple - File System Programming Guide](https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/)
@@ -319,5 +320,8 @@ These are implementation details, not a stable public policy API; confirm the ac
 - [6] [`log(1)` - macOS manual page](https://manp.gs/mac/1/log)
 - [7] [Apple Developer - Launch Services](https://developer.apple.com/documentation/coreservices/launch_services)
 - [8] [`afscexpand(1)` - macOS manual page](https://manp.gs/mac/1/afscexpand)
-
+- [9] [Apple Developer Forums - Unpacking Apple Archives](https://developer.apple.com/forums/thread/133985)
+- [10] [Apple dyld - DyldProcessConfig.cpp](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/DyldProcessConfig.cpp)
+- [11] [Apple - Shell Script Security: special file permission flags](https://developer.apple.com/library/archive/documentation/OpenSource/Conceptual/ShellScripting/ShellScriptSecurity/ShellScriptSecurity.html)
+- [12] [Apple - Code Signing Tasks: installer packages](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Procedures/Procedures.html)
 {{#include ../../../banners/hacktricks-training.md}}
