@@ -2,13 +2,13 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Maskirane putanje su zaštite tokom izvršavanja koje skrivaju posebno osetljive lokacije sistema datoteka okrenute ka kernelu od containera tako što ih prekrivaju bind-mount-om ili ih na drugi način čine nedostupnim. Svrha je sprečavanje workload-a da direktno komunicira sa interfejsima koji običnim aplikacijama nisu potrebni, naročito unutar procfs-a.
+Maskirane putanje su runtime zaštite koje skrivaju posebno osetljive lokacije sistema datoteka koje koriste kernel od kontejnera, tako što se preko njih montiraju bind mount-ovi ili im se na drugi način onemogućava pristup. OCI specifikacija runtime-a definiše `maskedPaths` kao apsolutne putanje koje ne smeju biti čitljive unutar kontejnera. <sup>[[1]](#references)</sup>
 
-Ovo je važno zato što mnogi container escape-ovi i trikovi koji utiču na host počinju čitanjem ili upisivanjem specijalnih datoteka unutar `/proc` ili `/sys`. Ako su te lokacije maskirane, napadač gubi direktan pristup korisnom delu kernel kontrolne površine čak i nakon dobijanja izvršavanja koda unutar containera.
+Ovo je važno zato što mnogi načini za izlazak iz kontejnera i trikovi koji utiču na host počinju čitanjem ili upisivanjem posebnih datoteka pod `/proc` ili `/sys`. Ako su te lokacije maskirane, napadač gubi direktan pristup korisnom delu površine za kontrolu kernela, čak i nakon što dobije mogućnost izvršavanja koda unutar kontejnera.
 
-## Operacija
+## Rad
 
-Runtime-i često maskiraju odabrane putanje kao što su:
+Runtime-ovi često maskiraju odabrane putanje, kao što su:
 
 - `/proc/kcore`
 - `/proc/keys`
@@ -17,75 +17,113 @@ Runtime-i često maskiraju odabrane putanje kao što su:
 - `/proc/sched_debug`
 - `/sys/firmware`
 
-Tačan spisak zavisi od runtime-a i konfiguracije hosta. Važno svojstvo je da putanja postane nedostupna ili zamenjena iz perspektive containera, iako i dalje postoji na hostu.
+Tačan spisak zavisi od runtime-a i konfiguracije hosta. Važno je da putanja postane nedostupna ili zamenjena iz perspektive kontejnera, iako i dalje postoji na hostu.
 
-## Lab
+## Laboratorija
 
-Pregledajte konfiguraciju maskiranih putanja koju Docker izlaže:
+Pregledajte konfiguraciju maskiranih putanja koju izlaže Docker:
+
 ```bash
 docker inspect <container> | jq '.[0].HostConfig.MaskedPaths'
 ```
-Ispitajte stvarno ponašanje mountovanja unutar workload-a:
+
+Ispitajte stvarno ponašanje montiranja unutar workload-a:
+
 ```bash
 mount | grep -E '/proc|/sys'
 ls -ld /proc/kcore /proc/keys /sys/firmware 2>/dev/null
 ```
+
+Navedena putanja nije nužno čitljiva: runc može da sakrije datoteku pomoću bind mount-a na `/dev/null`, a direktorijum pomoću praznog, samo za čitanje tmpfs-a. Proverite tačnu tačku montiranja, a ne samo da li komanda `ls` uspeva. <sup>[[4]](#references)</sup>
+
 ## Bezbednosni uticaj
 
-Masking ne predstavlja glavnu granicu izolacije, ali uklanja nekoliko vrednih post-exploitation meta. Bez maskiranja, kompromitovani container može moći da pregleda stanje kernela, čita osetljive informacije o procesima ili ključevima, odnosno da komunicira sa procfs/sysfs objektima koji nikada nisu smeli da budu vidljivi aplikaciji.
+Maskiranje ne stvara glavnu granicu izolacije, ali uklanja nekoliko vrednih meta nakon eksploatacije. Bez maskiranja, napadač koji je kompromitovao kontejner može da pregleda stanje kernela, pročita osetljive informacije o procesima ili ključevima, ili da pristupi objektima procfs/sysfs koji nikada nisu smeli da budu vidljivi aplikaciji.
 
 ## Pogrešne konfiguracije
 
-Glavna greška je uklanjanje maskiranja širokih klasa putanja radi praktičnosti ili debugovanja. U Podman-u se to može pojaviti kao `--security-opt unmask=ALL` ili ciljano uklanjanje maskiranja. U Kubernetes-u, preširoko izlaganje proc sadržaja može se pojaviti kroz `procMount: Unmasked`. Drugi ozbiljan problem je izlaganje host `/proc` ili `/sys` putanje kroz bind mount, čime se u potpunosti zaobilazi ideja ograničenog prikaza container-a.
+Glavna greška je uklanjanje maskiranja sa širokih grupa putanja radi praktičnosti ili otklanjanja grešaka. U Podman-u se to može pojaviti kao `--security-opt unmask=ALL` ili ciljano uklanjanje maskiranja. <sup>[[2]](#references)</sup> U Kubernetes-u, preširoko izlaganje proc-a može se pojaviti kroz `procMount: Unmasked`; trenutni Kubernetes zahteva `spec.hostUsers: false` (korisnički namespace) za ovo podešavanje, dok verzije 1.12–1.29 nisu sprovodile ovaj zahtev. <sup>[[3]](#references)</sup> Još jedan ozbiljan problem je izlaganje host-ovog `/proc` ili `/sys` direktorijuma preko bind mount-a, čime se u potpunosti zaobilazi ideja ograničenog prikaza kontejnera.
 
 ## Zloupotreba
 
-Ako je masking slab ili ne postoji, počnite identifikovanjem osetljivih procfs/sysfs putanja kojima se može direktno pristupiti:
+Ako je maskiranje slabo ili ga nema, počnite tako što ćete utvrditi kojim osetljivim putanjama procfs/sysfs može direktno da se pristupi:
+
 ```bash
-ls -ld /proc/kcore /proc/keys /proc/timer_list /sys/firmware 2>/dev/null   # Check whether paths that are usually masked are accessible at all
-mount | grep -E '/proc|/sys'                                                # Review whether procfs/sysfs mounts look container-scoped or suspiciously host-like
+for p in /proc/kcore /proc/keys /proc/timer_list /sys/firmware; do
+  printf "%s: " "$p"
+  findmnt -M "$p" -n -o TARGET,SOURCE,FSTYPE,OPTIONS
+done
+mount | grep -E '/proc|/sys'  # Review the wider procfs/sysfs layout
 ```
+
 Ako je navodno maskirana putanja dostupna, pažljivo je pregledajte:
+
 ```bash
 head -n 20 /proc/timer_list 2>/dev/null   # Scheduler / timer internals, useful for host fingerprinting and confirming kernel data exposure
-cat /proc/keys 2>/dev/null | head         # In-kernel keyring information; may expose keys, key descriptions, or service relationships
+head /proc/keys 2>/dev/null             # View-permitted key metadata, not key payloads
 ls -la /sys/firmware 2>/dev/null          # Firmware / boot environment metadata; useful for host fingerprinting and low-level platform recon
 zcat /proc/config.gz 2>/dev/null | head   # Kernel build configuration; useful to confirm enabled subsystems and exploit preconditions
 head -n 50 /proc/sched_debug 2>/dev/null  # Scheduler and process metadata; may reveal host tasks and cgroup relationships
 ```
-Šta ove komande mogu otkriti:
 
-- `/proc/timer_list` može otkriti podatke o timerima i scheduleru na hostu. Ovo je uglavnom reconnaissance primitive, ali potvrđuje da container može da čita informacije usmerene ka kernelu koje su obično skrivene.
-- `/proc/keys` je mnogo osetljiviji. U zavisnosti od konfiguracije hosta, može otkriti unose u keyringu, opise ključeva i odnose između host servisa koji koriste kernel keyring subsystem.
-- `/sys/firmware` pomaže u identifikaciji boot moda, firmware interfejsa i detalja o platformi koji su korisni za fingerprinting hosta i razumevanje da li workload vidi stanje na nivou hosta.
-- `/proc/config.gz` može otkriti konfiguraciju kernela koji se izvršava, što je korisno za proveru preduslova javno poznatih kernel exploit-a ili za razumevanje razloga zbog kog je određena funkcija dostupna.
-- `/proc/sched_debug` otkriva stanje schedulera i često poništava intuitivno očekivanje da PID namespace treba potpuno da sakrije informacije o nepovezanim procesima.
+Šta ove komande mogu da otkriju:
 
-Zanimljivi rezultati uključuju direktno čitanje tih datoteka, dokaze da podaci pripadaju hostu, a ne ograničenom prikazu containera, ili pristup drugim procfs/sysfs lokacijama koje su podrazumevano često maskirane.
+- `/proc/timer_list` može da izloži podatke o tajmerima i raspoređivaču hosta. Ovo je uglavnom tehnika za izviđanje, ali potvrđuje da kontejner može da čita informacije usmerene ka kernelu koje su obično skrivene.
+- `/proc/keys` izlistava samo metapodatke o ključevima za koje čitalac ima dozvolu **view**, uz ograničenja koja nameću LSM provere. Može da otkrije tipove ključeva i opise, ali ne izbacuje sadržaj ključeva. <sup>[[6]](#references)</sup>
+- `/sys/firmware` pomaže u utvrđivanju režima pokretanja, firmverskih interfejsa i detalja o platformi, korisnih za otkrivanje karakteristika hosta i razumevanje da li radno opterećenje vidi stanje na nivou hosta.
+- `/proc/config.gz` može da otkrije konfiguraciju kernela koji je pokrenut, što je korisno za proveru preduslova za javno poznate kernel exploit-e ili za razumevanje zašto je određena funkcija dostupna.
+- `/proc/sched_debug` izlaže stanje raspoređivača i često zaobilazi intuitivno očekivanje da PID namespace treba u potpunosti da sakrije informacije o nepovezanim procesima.
 
-## Provere
+Zanimljivi rezultati obuhvataju direktno čitanje tih fajlova, dokaze da podaci pripadaju hostu, a ne ograničenom prikazu kontejnera, ili pristup drugim lokacijama u procfs/sysfs koje su podrazumevano često maskirane.
 
-Svrha ovih provera jeste da se utvrdi koje je putanje runtime namerno sakrio i da li trenutni workload i dalje vidi smanjeni filesystem usmeren ka kernelu.
+### Race u izvoru maskiranja tokom pokretanja kontejnera
+
+U ranjivim implementacijama runc-a, maske za fajlove zavise od inode-a kontejnerovog `/dev/null`. Napadač koji može da pokrene istovremene kontejnere sa deljenim mountovima, uključujući paralelne BuildKit korake, može da iskoristi race pri pokretanju i ukloni `/dev/null` pre nego što ga runc mount-uje preko maskiranih procfs fajlova. Runtime zatim tretira nedostajući **izvor** kao da odredište maskiranja ne postoji i tiho preskače te maske za fajlove. Do greške dolazi zbog race-a tokom podešavanja runtime-a; uklanjanje `/dev/null` nakon pokretanja ne uklanja već postavljenu masku. <sup>[[4]](#references)</sup>
+
+Nakon kontrolisanog testa, uporedite traženi spisak maski sa tačnim mountpoint-ovima unutar novog kontejnera. <sup>[[4]](#references)</sup> `findmnt -M` proverava navedeni mountpoint umesto da pređe na nadređeni mount; ako `findmnt` nije dostupan, pregledajte `/proc/self/mountinfo`. <sup>[[5]](#references)</sup> Uspešno izvršavanje komande `ls` ili prazan izlaz komande `cat` ne dokazuje da maska nedostaje. <sup>[[4]](#references)</sup>
+
+Upotrebite [provere u nastavku](#checks) da biste uporedili tražene maske sa tačnim mount-ovima u novom kontejneru.
+
+Preskočena maska za fajl može da izloži procfs podatke ako to dozvoljavaju uobičajene dozvole i LSM pravila. To samo po sebi **ne** omogućava upis u `/proc/sys`: to je zasebna kontrola za [putanje samo za čitanje](read-only-paths.md). Odvojeni slučaj zamene symlink-a `/dev/null`, koji može da preusmeri bind mount na procfs odredište u koje je moguće pisati, obrađen je u odeljku o [race-u runtime-a u PID namespace-u](namespaces/pid-namespace.md#maskedpaths-race-to-host-procfs). <sup>[[4]](#references)</sup>
+
+## Checks
+
+Svrha ovih provera je da utvrde koje je putanje runtime namerno sakrio i da li trenutno radno opterećenje i dalje vidi umanjen prikaz fajl-sistema koji je dostupan kernelu.
+
 ```bash
 docker inspect <container> | jq '.[0].HostConfig.MaskedPaths'   # Runtime-declared masked paths
 mount | grep -E '/proc|/sys'                                    # Actual procfs/sysfs mount layout
-ls -ld /proc/kcore /proc/keys /proc/timer_list /sys/firmware 2>/dev/null
+for p in /proc/kcore /proc/keys /proc/timer_list /sys/firmware; do
+  printf "%s: " "$p"
+  findmnt -M "$p" -n -o TARGET,SOURCE,FSTYPE,OPTIONS
+done
 ```
+
+Koristite proveru tačnog mountpoint-a jer maskirana datoteka i dalje može da postoji, a čitanje može da vrati prazan rezultat iz `/dev/null`. Odsustvo mountpoint-a je nalaz koji treba istražiti, a ne samo po sebi dokaz da su podaci hosta čitljivi. <sup>[[4]](#references)[[5]](#references)</sup>
+
 Šta je ovde zanimljivo:
 
-- Duga lista maskiranih putanja je uobičajena u ojačanim runtime okruženjima.
-- Nedostatak maskiranja na osetljivim procfs unosima zahteva detaljniju proveru.
-- Ako je osetljiva putanja dostupna, a container takođe ima jake capabilities ili široke mount-ove, izloženost je značajnija.
+- Dugačak spisak maskiranih putanja je uobičajen u runtime okruženjima sa pojačanom bezbednošću.
+- Nedostajuće maskiranje osetljivih unosa u procfs-u zaslužuje pažljiviju proveru.
+- Ako je osetljivoj putanji moguće pristupiti, a kontejner uz to ima moćne capabilities ili široke mount-ove, izloženost je značajnija.
 
-## Podrazumevane vrednosti runtime-a
+## Podrazumevane postavke runtime okruženja
 
-| Runtime / platforma | Podrazumevano stanje | Podrazumevano ponašanje | Uobičajeno ručno slabljenje |
+| Runtime okruženje / platforma | Podrazumevano stanje | Podrazumevano ponašanje | Uobičajeno ručno slabljenje zaštite |
 | --- | --- | --- | --- |
-| Docker Engine | Podrazumevano omogućeno | Docker definiše podrazumevanu listu maskiranih putanja | izlaganje host proc/sys mount-ova, `--privileged` |
-| Podman | Podrazumevano omogućeno | Podman primenjuje podrazumevane maskirane putanje, osim ako se ručno uklone maske | `--security-opt unmask=ALL`, ciljano uklanjanje maski, `--privileged` |
-| Kubernetes | Nasleđuje podrazumevane vrednosti runtime-a | Koristi ponašanje maskiranja osnovnog runtime-a, osim ako Pod postavke oslabe proc izloženost | `procMount: Unmasked`, obrasci privilegovanih workload-ova, široki host mount-ovi |
-| containerd / CRI-O under Kubernetes | Podrazumevana vrednost runtime-a | Obično primenjuje OCI/runtime maskirane putanje, osim ako se ne zamene | direktne promene konfiguracije runtime-a, isti Kubernetes načini slabljenja |
+| Docker Engine | Podrazumevano omogućeno | Docker definiše podrazumevani spisak maskiranih putanja | izlaganje host mount-ova proc/sys, `--privileged` |
+| Podman | Podrazumevano omogućeno | Podman primenjuje podrazumevane maskirane putanje, osim ako se ručno ne uklone iz maskiranja | `--security-opt unmask=ALL`, ciljano uklanjanje maskiranja, `--privileged` |
+| Kubernetes | Nasleđuje podrazumevane postavke runtime okruženja | Koristi ponašanje maskiranja osnovnog runtime okruženja, osim ako postavke Pod-a ne oslabe izloženost proc-a | `procMount: Unmasked` (u aktuelnim izdanjima zahteva `hostUsers: false`), obrasci privilegovanih workload-ova, široki host mount-ovi |
+| containerd / CRI-O u okviru Kubernetes-a | Podrazumevana postavka runtime okruženja | Obično primenjuje OCI/runtime maskirane putanje, osim ako se ne zamene | direktne izmene konfiguracije runtime okruženja, isti načini slabljenja zaštite u Kubernetes-у |
 
-Maskirane putanje su obično prisutne podrazumevano. Glavni operativni problem nije njihovo odsustvo iz runtime-a, već namerno uklanjanje maski ili host bind mount-ovi koji poništavaju zaštitu.
+Maskirane putanje су обично присутне подразумевано. Главни оперативни проблем није њихово одсуство из runtime окружења, већ намерно уклањање маскирања или host bind mount-ови који поништавају заштиту.
 
+## References
+
+- [1] [Open Container Initiative - Konfiguracija Linux kontejnera: maskirane putanje](https://github.com/opencontainers/runtime-spec/blob/main/config-linux.md#masked-paths)
+- [2] [Podman dokumentacija - bezbednosne opcije za `podman run`](https://docs.podman.io/en/latest/markdown/podman-run.1.html#security-opt-option)
+- [3] [Kubernetes dokumentacija - ProcMount](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-proc-mount-type-for-a-container)
+- [4] [runc bezbednosno obaveštenje: utrka u izvoru mount-a za maskiranu putanju](https://github.com/opencontainers/runc/security/advisories/GHSA-9493-h29p-rfm2)
+- [5] [Priručnik za findmnt(8)](https://man7.org/linux/man-pages/man8/findmnt.8.html)
+- [6] [Priručnik za keyrings(7)](https://man7.org/linux/man-pages/man7/keyrings.7.html)
 {{#include ../../../../banners/hacktricks-training.md}}
