@@ -1,50 +1,57 @@
-# Burp MCP: LLM-assisted traffic review
+# Burp MCP: LLMを活用したトラフィックレビュー
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## 概要
 
-Burp の **MCP Server** extension は、intercept した HTTP(S) traffic を MCP 対応の LLM client に公開し、**実際の request/response を基に推論**して vulnerability discovery や report drafting を行えるようにします。Burp を信頼できる情報源として維持し、blind scanning ではなく、passive analysis または意図的に変数を1つだけ変更した replay を使用してください。<sup>[[8]](#references)</sup>
+Burpの**MCP Server**拡張機能を使うと、インターセプトしたHTTP(S)トラフィックをMCP対応のLLMクライアントに公開し、脆弱性の発見やレポートの下書き作成のために、実際のリクエストとレスポンスを分析できます。信頼できる情報源はBurpとし、無差別なスキャンではなく、パッシブ分析や、1つの変数だけを変更した意図的なリプレイを使用してください。<sup>[[8]](#references)</sup>
 
 ## アーキテクチャ
 
-- **Burp MCP Server (BApp)** はデフォルトで `127.0.0.1:9876` を listen し、intercept した traffic を MCP 経由で公開します。<sup>[[1]](#references)[[2]](#references)[[7]](#references)</sup>
-- **MCP proxy JAR** は stdio（client 側）を Burp の MCP SSE endpoint に bridge します。
-- **Optional local reverse proxy**（Caddy）は、厳格な MCP handshake check に対応するため header を正規化します。
-- **Clients/backends**: Codex CLI（cloud）、Gemini CLI（cloud）、または Ollama（local）。
+- **Burp MCP Server (BApp)** は、デフォルトで `127.0.0.1:9876` をリッスンし、インターセプトしたトラフィックをMCP経由で公開します。<sup>[[1]](#references)[[2]](#references)[[7]](#references)</sup>
+- **MCP proxy JAR** は、stdio（クライアント側）とBurpのMCP SSEエンドポイントを橋渡しします。
+- **オプションのローカルリバースプロキシ**（Caddy）は、厳格なMCPハンドシェイクチェックに対応するためにヘッダーを正規化します。
+- **クライアント/バックエンド**: Codex CLI（cloud）、Gemini CLI（cloud）、またはOllama（local）。
 
 ## セットアップ
 
-### 1) Burp MCP Server をインストールする
+### 1) Burp MCP Serverをインストールする
 
-Burp BApp Store から **MCP Server** をインストールし、`127.0.0.1:9876` で listen していることを確認します。<sup>[[1]](#references)[[2]](#references)</sup>
+Burp BApp Storeから**MCP Server**をインストールし、`127.0.0.1:9876` でリッスンしていることを確認します。<sup>[[1]](#references)[[2]](#references)</sup>
 
-### 2) proxy JAR を抽出する
+### 2) proxy JARを抽出する
 
-MCP Server tab で **Extract server proxy jar** をクリックし、`mcp-proxy-all.jar` を保存します。<sup>[[7]](#references)</sup>
+MCP Serverタブで**Extract server proxy jar**をクリックし、`mcp-proxy-all.jar` を保存します。<sup>[[7]](#references)</sup>
 
-### 3) MCP client を設定する（Codex の例）
+### 3) MCPクライアントを設定する（Codexの例）
 
-client が proxy JAR と Burp の direct SSE endpoint を使用するように設定します。パッケージ化された proxy は stdio-to-SSE bridge であり、Burp listener の代わりになるものではありません。<sup>[[7]](#references)</sup>
+クライアントで、proxy JARとBurpの直接SSEエンドポイントを指定します。パッケージ化されたproxyはstdioからSSEへのブリッジであり、Burpのリスナーの代わりにはなりません。<sup>[[7]](#references)</sup>
+
 ```toml
 # ~/.codex/config.toml
 [mcp_servers.burp]
 command = "java"
 args = ["-jar", "/absolute/path/to/mcp-proxy-all.jar", "--sse-url", "http://127.0.0.1:9876"]
 ```
-対応する Codex コマンドは次のとおりです：<sup>[[7]](#references)[[8]](#references)</sup>
+
+同等のCodexコマンドは次のとおりです:<sup>[[7]](#references)[[8]](#references)</sup>
+
 ```bash
 codex mcp add burp -- /path/to/java -jar /path/to/mcp-proxy-all.jar \
---sse-url http://127.0.0.1:9876
+  --sse-url http://127.0.0.1:9876
 ```
-次にCodexを実行してMCP toolsを一覧表示します:
+
+次にCodexを実行し、MCP toolsを一覧表示します:
+
 ```bash
 codex
 # inside Codex: /mcp
 ```
-### 4) 必要に応じて Caddy で厳格な Origin/header 検証を修正
 
-厳格な `Origin` チェックまたは追加の header が原因で MCP handshake に失敗する場合は、ローカル reverse proxy を使用して header を正規化します（これは Burp MCP の厳格な検証問題に対する workaround と同じです）。<sup>[[1]](#references)[[3]](#references)</sup>
+### 4) Caddyで厳格なOrigin/header検証を修正する（必要な場合）
+
+厳格な`Origin`チェックや追加ヘッダーが原因でMCP handshakeに失敗する場合は、ローカルのreverse proxyを使ってヘッダーを正規化してください（これはBurp MCPの厳格な検証問題に対する回避策と同じです）。<sup>[[1]](#references)[[3]](#references)</sup>
+
 ```bash
 brew install caddy
 mkdir -p ~/burp-mcp
@@ -52,101 +59,115 @@ cat >~/burp-mcp/Caddyfile <<'EOF'
 :19876
 
 reverse_proxy 127.0.0.1:9876 {
-# lock Host/Origin to the Burp listener
-header_up Host "127.0.0.1:9876"
-header_up Origin "http://127.0.0.1:9876"
+  # lock Host/Origin to the Burp listener
+  header_up Host "127.0.0.1:9876"
+  header_up Origin "http://127.0.0.1:9876"
 
-# strip client headers that trigger Burp's 403 during SSE init
-header_up -User-Agent
-header_up -Accept
-header_up -Accept-Encoding
-header_up -Connection
+  # strip client headers that trigger Burp's 403 during SSE init
+  header_up -User-Agent
+  header_up -Accept
+  header_up -Accept-Encoding
+  header_up -Connection
 }
 EOF
 ```
-プロキシとクライアントを起動し、この Caddy listener の使用中に限り、設定済みの `--sse-url` を `http://127.0.0.1:19876` に変更します。<sup>[[1]](#references)[[3]](#references)</sup>
+
+プロキシとクライアントを起動し、この Caddy リスナーを使用している間だけ、設定済みの `--sse-url` を `http://127.0.0.1:19876` に変更します。<sup>[[1]](#references)[[3]](#references)</sup>
+
 ```bash
 caddy run --config ~/burp-mcp/Caddyfile &
 codex
 ```
-### 5) ブラウザの状態をプロキシの証拠と紐付ける（Playwright MCP）
 
-Playwright MCP を登録し、そのブラウザが Burp のプロキシを使用するように設定します。これにより、agent は、レンダリングされた DOM/アクセシビリティ state と、それを生成した正確な HTTP history を関連付けられます。<sup>[[6]](#references)[[8]](#references)</sup>
+### 5) ブラウザーの状態をプロキシの証拠と紐付ける（Playwright MCP）
+
+Playwright MCPを登録し、ブラウザーがBurpのプロキシを使用するようにします。これにより、エージェントはレンダリングされたDOM／アクセシビリティの状態を、それを生成した正確なHTTP履歴と関連付けられます。<sup>[[6]](#references)[[8]](#references)</sup>
+
 ```bash
 codex mcp add playwright -- npx -y @playwright/mcp@latest \
---proxy-server=http://127.0.0.1:8080 \
---ignore-https-errors
+  --proxy-server=http://127.0.0.1:8080 \
+  --ignore-https-errors
 ```
-リスナーアドレスを適切に設定し、Codexを再起動して、`/mcp`を使用して両方のintegrationsを確認します。この例では、Burpがローカルで生成した証明書によってHTTPS interceptionがブロックされないよう、ブラウザーの証明書エラーを無効化しています。<sup>[[6]](#references)[[8]](#references)</sup>
+
+リスナーアドレスを設定し、Codexを再起動して、`/mcp` を使って両方の連携を確認します。この例では、Burpがローカルで生成した証明書によってHTTPSのinterceptionが妨げられないよう、ブラウザーの証明書エラーを無効にしています。<sup>[[6]](#references)[[8]](#references)</sup>
 
 ## Proxy-aware browser automation (OpenBurp)
 
-Burp MCP接続とinterceptされたブラウザーパスは、別々のデータフローです。MCP serviceは`127.0.0.1:9876`でBurp toolsを公開し、専用のChromium instanceは`127.0.0.1:8080`のBurp proxy経由でHTTP(S) trafficを送信します。そのため、MCP toolから直接生成されたrequestsは**Proxy > HTTP history**に存在しない場合があります。request/responseを監視、編集、またはevidenceとして保持する必要がある場合は、proxied browserを使用してください。<sup>[[2]](#references)[[9]](#references)</sup>
+Burp MCP接続とinterceptされたブラウザーの通信経路は、別々のデータフローです。MCPサービスは`127.0.0.1:9876`でBurpのツールを提供し、一方、専用のChromiumインスタンスはHTTP(S)トラフィックをBurpのproxy（`127.0.0.1:8080`）経由で送信します。そのため、MCPツールから直接生成されたリクエストは**Proxy > HTTP history**に表示されないことがあります。リクエスト／レスポンスを確認、編集、または証拠として保存する必要がある場合は、proxy経由のブラウザーを使用してください。<sup>[[2]](#references)[[9]](#references)</sup>
 
-SSE supportを持つclientは、Burpを直接registerできます。stdio-only clientは、代わりにPortSwiggerのproxy JARを起動できます。どちらの場合も、2つ目のbrowser-control MCPをregisterし、Burpのembedded Chromium（`BURP_CHROMIUM`はlocal executable path）を指すように設定します。<sup>[[9]](#references)</sup>
+SSEに対応したクライアントは、Burpを直接登録できます。stdioのみ対応するクライアントは、代わりにPortSwiggerのproxy JARを起動できます。どちらの場合も、2つ目のbrowser-control MCPを登録し、Burp内蔵のChromiumを指定します（`BURP_CHROMIUM`はローカルの実行ファイルパスです）。<sup>[[9]](#references)</sup>
+
 ```bash
 # Claude Code: direct SSE plus a proxied browser
 claude mcp add -s project -t sse burpsuite http://127.0.0.1:9876/
 claude mcp add -s project -t stdio chrome-devtools -- chrome-devtools-mcp \
---executablePath "$BURP_CHROMIUM" --proxy-server=http://127.0.0.1:8080 \
---accept-insecure-certs --isolated
+  --executablePath "$BURP_CHROMIUM" --proxy-server=http://127.0.0.1:8080 \
+  --accept-insecure-certs --isolated
 
 # Codex: SSE-to-stdio bridge plus a proxied browser
 codex mcp add burp -- /path/to/java -jar /path/to/mcp-proxy-all.jar \
---sse-url http://127.0.0.1:9876
+  --sse-url http://127.0.0.1:9876
 codex mcp add burp-browser -- npx -y @playwright/mcp@latest \
---executable-path "$BURP_CHROMIUM" --proxy-server=http://127.0.0.1:8080 \
---ignore-https-errors --isolated
+  --executable-path "$BURP_CHROMIUM" --proxy-server=http://127.0.0.1:8080 \
+  --ignore-https-errors --isolated
 ```
-TLS-bypassフラグはinterception proxyによって生成された証明書を許容し、`--isolated`はassessmentでoperatorの通常のブラウザプロファイルが再利用されるのを防ぎます。Isolationはプロファイルの状態を保護しますが、**security sandboxではありません**: controllerはそのテストブラウザで開かれた認証済みセッションに引き続きアクセスでき、Burp MCPは機密性の高いリクエスト、レスポンス、設定を公開する可能性があります。<sup>[[9]](#references)</sup>
 
-client bridgeをデバッグする前に、SSE listenerを個別にテストしてください:<sup>[[9]](#references)</sup>
+TLS-bypass flagはinterception proxyが生成した証明書を許容し、`--isolated`はassessmentでオペレーターの通常のブラウザープロファイルが再利用されないようにします。分離によってプロファイルの状態は保護されますが、**security sandboxではありません**。controllerは、テスト用ブラウザーで開かれた認証済みセッションに引き続きアクセスでき、Burp MCPから機密性の高いリクエスト、レスポンス、設定情報が漏れる可能性があります。<sup>[[9]](#references)</sup>
+
+client bridgeのデバッグに取りかかる前に、SSE listenerを個別にテストしてください。<sup>[[9]](#references)</sup>
+
 ```bash
 curl -i --max-time 3 http://127.0.0.1:9876/
 ```
-正常な listener は `Content-Type: text/event-stream` を返します。ヘッダー受信後の timeout は、SSE stream が今後のイベントを待つため開いたままになることから、想定される動作です。クライアントが引き続き失敗する場合は、extension に設定された route を確認してください。PortSwigger によると、endpoint はクライアントと extension の設定に応じて、root path または `/sse` になる場合があります。<sup>[[9]](#references)[[7]](#references)</sup>
 
-## Using different clients
+正常なリスナーは `Content-Type: text/event-stream` を返します。ヘッダーの送信後にタイムアウトするのは、SSE stream が今後のイベントを待つため開いたままになるので、想定どおりです。それでもクライアントが失敗する場合は、拡張機能で設定された route を確認してください。PortSwigger によると、クライアントと拡張機能の設定によって、endpoint はルートパスまたは `/sse` になることがあります。<sup>[[9]](#references)[[7]](#references)</sup>
+
+## 異なるクライアントの使用
 
 ### Codex CLI
 
 - 上記のとおり `~/.codex/config.toml` を設定します。
-- `codex` を実行し、続けて `/mcp` を実行して Burp tools list を確認します。
+- `codex` を実行し、次に `/mcp` を実行して Burp tools の一覧を確認します。
 
 ### Gemini CLI
 
-**burp-mcp-agents** repo には launcher helpers が用意されています。<sup>[[4]](#references)</sup>
+**burp-mcp-agents** repo には、起動用ヘルパーが用意されています。<sup>[[4]](#references)</sup>
+
 ```bash
 source /path/to/burp-mcp-agents/gemini-cli/burpgemini.sh
 burpgemini
 ```
-### Ollama (ローカル)
 
-提供されているランチャーヘルパーを使用し、ローカルモデルを選択します：
+### Ollama (local)
+
+付属のランチャーヘルパーを使用して、ローカルモデルを選択します:
+
 ```bash
 source /path/to/burp-mcp-agents/ollama/burpollama.sh
 burpollama deepseek-r1:14b
 ```
-ローカルモデルとおおよそのVRAM要件の例：
 
-- `deepseek-r1:14b`（約16GB VRAM）
-- `gpt-oss:20b`（約20GB VRAM）
-- `llama3.1:70b`（48GB以上のVRAM）
+ローカルモデルの例とおおよそのVRAM要件:
 
-## Evidence-driven replay and validation
+- `deepseek-r1:14b` (~16GB VRAM)
+- `gpt-oss:20b` (~20GB VRAM)
+- `llama3.1:70b` (48GB+ VRAM)
 
-もっともらしい説明や中間レスポンスを、agentに証拠として扱わせないでください。すべてのテストを反証可能にするため、Burpのリクエスト/レスポンスと、独立して観測したbrowserの状態を使用します。<sup>[[8]](#references)</sup>
+## 証拠に基づく再現と検証
 
-1. ベースラインとなるリクエスト/レスポンスのペアを保存し、attackerが制御する正確なコンポーネントを特定します。
-2. authorizationの比較では、identifier、cookie、tokenを変更する前に、両方のaccountで同じworkflowを独立して取得します。
-3. mutationをreplayする前に、仮説、証拠の場所、期待されるsignal、およびそれを反証する結果を記録します。
-4. 一度に1つのcomponentだけをmutationし、結果のペアを保存して、直接観測した内容と推論を別々にラベル付けします。
-5. 各candidateを`open`、`blocked`、`rejected`、`confirmed`として追跡し、mechanismまたはprerequisiteを変える新しい証拠が得られた場合にのみ再検討します。
-6. attackerによるcontrol、到達可能性、再現性、constraint bypass、impact、および最終的なapplication stateを確認します。主張されたstate changeがdownstreamで発生する場合、redirectやtool callの成功だけでは証拠になりません。
+エージェントに、もっともらしい説明や中間応答を証拠として扱わせないでください。Burpのリクエスト/レスポンスと、ブラウザーで独立して観測した状態を使い、すべてのテストを反証可能にしてください。<sup>[[8]](#references)</sup>
 
-exploitの詳細は、該当するtechnique pageに記載してください。たとえば、browser-messageのcandidateは[PostMessage Vulnerabilities](../pentesting-web/postmessage-vulnerabilities/README.md)に、token key-selectionの挙動は[JWT Vulnerabilities](../pentesting-web/hacking-jwt-json-web-tokens.md)に記載します。<sup>[[8]](#references)</sup>
+1. ベースラインとなるリクエスト/レスポンスのペアを保存し、攻撃者が制御できる正確なコンポーネントを特定します。
+2. 認可を比較する場合は、識別子、Cookie、トークンを変更する前に、両方のアカウントで同じワークフローをそれぞれ実行して記録します。
+3. 変更を再現する前に、仮説、証拠の場所、予想されるシグナル、および仮説を否定する結果を記録します。
+4. 一度に1つのコンポーネントだけを変更し、変更後のペアを保存して、直接観測した事実と推論を分けて記録します。
+5. 各候補を `open`、`blocked`、`rejected`、`confirmed` のいずれかとして追跡し、メカニズムや前提条件を変える新たな証拠が得られた場合にのみ再検討します。
+6. 攻撃者による制御、到達可能性、再現性、制約の回避、影響、および最終的なアプリケーション状態を確認します。リダイレクトやツール呼び出しの成功だけでは、主張された状態変更が後続処理に依存する場合、証拠にはなりません。
 
-簡潔な仮説記録により、parallel agentが同じ魅力的なbranchを繰り返し試すことを防げます。<sup>[[8]](#references)</sup>
+Exploitの詳細は、該当する手法のページに記載してください。たとえば、ブラウザーメッセージの候補は[PostMessage Vulnerabilities](../pentesting-web/postmessage-vulnerabilities/README.md)に、トークンの鍵選択動作は[JWT Vulnerabilities](../pentesting-web/hacking-jwt-json-web-tokens.md)に記載します。<sup>[[8]](#references)</sup>
+
+簡潔な仮説の記録があれば、並行して作業するエージェントが、同じ魅力的な分岐を繰り返し調査するのを防げます。<sup>[[8]](#references)</sup>
+
 ```yaml
 status: open
 hypothesis: "cross-account object access ignores ownership"
@@ -155,63 +176,82 @@ next_test: "change only the object ID in user A's request"
 expected_signal: "user B's object is returned"
 falsifier: "server rejects it or returns only user A's object"
 ```
-## パッシブレビュー用のPrompt pack
 
-**burp-mcp-agents** repo には、Burp traffic の evidence-driven analysis 用 prompt templates が含まれています:<sup>[[4]](#references)</sup>
+## Burp MCP を使った対象を絞った out-of-band 検証
 
-- `passive_hunter.md`: 幅広い passive vulnerability surfacing。
-- `idor_hunter.md`: IDOR/BOLA/object/tenant drift と auth mismatches。
-- `auth_flow_mapper.md`: authenticated と unauthenticated paths を比較。
-- `ssrf_redirect_hunter.md`: URL fetch params/redirect chains から SSRF/open-redirect candidates を特定。
-- `logic_flaw_hunter.md`: multi-step logic flaws。
-- `session_scope_hunter.md`: token audience/scope misuse。
-- `rate_limit_abuse_hunter.md`: throttling/abuse gaps。
-- `report_writer.md`: evidence-focused reporting。
+Burp Suite Professional は、公式 MCP extension を通じて `generate_collaborator_payload` と `get_collaborator_interactions` を公開しています。これらを `get_proxy_http_history_regex` および `send_http1_request` による1回のリプレイと組み合わせれば、対象全体をスキャンせずに、疑わしい server-side URL fetch をテストできます。Burp では、履歴の読み取りとリクエスト送信に個別の承認が必要な場合があります。<sup>[[2]](#references)[[10]](#references)</sup>
 
-## Optional attribution tagging
+1. `url=`、`webhook`、`callback` などを含む候補リクエストを履歴から絞り込みます。元のリクエストとレスポンスを保存します。履歴ツールには `regex`、`count`、`offset` を指定します。モデルにすべてのエントリを確認させるのではなく、ページネーションを使ってください。<sup>[[10]](#references)</sup>
+2. 新しい Collaborator payload を生成し、返された **payload ID** を保持します。キャプチャしたリクエストを同じホストとポートにリプレイし、候補 URL のみを、その payload domain 配下の HTTPS URL に変更します。`send_http1_request` には、完全な HTTP/1.1 リクエストを `content` として渡し、さらに `targetHostname`、`targetPort`、`usesHttps` を指定します。送信先フィールドが示すのは Collaborator host ではなく、**アプリケーション**です。<sup>[[10]](#references)</sup>
+3. その payload ID を指定して `get_collaborator_interactions` をポーリングし、インタラクションの時刻をリプレイと照合します。HTTP インタラクションは fetch の裏付けになりますが、DNS のみの場合は名前解決を示すだけで、HTTP リクエストが完了したことは示しません。インタラクションの送信元とリクエストヘッダーを確認して、サーバーからの egress とブラウザー側での読み込みを区別し、無関係なトラフィックを除外するため、新しい payload でもう一度実行します。<sup>[[10]](#references)[[11]](#references)</sup>
 
-logs 内の Burp/LLM traffic に tag を付けるには、header rewrite（proxy または Burp Match/Replace）を追加します:<sup>[[1]](#references)</sup>
+MCP request tool はレスポンスを直接返すため、**Proxy > HTTP history** に記録されるとは限りません。リクエストとレスポンスの結果を保存するか、履歴に残る証跡が必要な場合は proxied browser または Repeater を使用してください。SSRF payload の選定と後続テストについては、out-of-band callback を内部ネットワークへの影響の証明と見なさず、[SSRF chapter](../pentesting-web/ssrf-server-side-request-forgery/) を参照してください。MCP server 自体をテストする場合は、[MCP server testing](AI-MCP-Servers.md#remote-mcp-server-testing-workflow) を参照してください。<sup>[[7]](#references)[[11]](#references)</sup>
+
+## Passive review 用プロンプトパック
+
+**burp-mcp-agents** repo には、Burp traffic を証拠に基づいて分析するためのプロンプトテンプレートが含まれています。<sup>[[4]](#references)</sup>
+
+- `passive_hunter.md`: 幅広い passive vulnerability の検出。
+- `idor_hunter.md`: IDOR/BOLA/object/tenant のずれや認証の不一致。
+- `auth_flow_mapper.md`: 認証済みパスと未認証パスの比較。
+- `ssrf_redirect_hunter.md`: URL fetch parameter や redirect chain に基づく SSRF/open-redirect 候補の検出。
+- `logic_flaw_hunter.md`: 複数ステップにまたがる logic flaw。
+- `session_scope_hunter.md`: token の audience/scope の不正使用。
+- `rate_limit_abuse_hunter.md`: throttling/abuse の不備。
+- `report_writer.md`: 証拠重視のレポート作成。
+
+## 任意の attribution tagging
+
+ログ内の Burp/LLM traffic にタグを付けるには、header rewrite を追加します（proxy または Burp Match/Replace）。<sup>[[1]](#references)</sup>
+
 ```text
 Match:   ^User-Agent: (.*)$
 Replace: User-Agent: $1 BugBounty-Username
 ```
-## Safety notes
 
-- トラフィックに機密データが含まれる場合は、**local models** を優先する。
-- finding に必要な最小限の証拠のみを共有する。
-- Burp を source of truth として維持し、model は **analysis and reporting** に使用し、scanning には使用しない。
+## 安全上の注意
 
-## Burp AI Agent (AI-assisted triage + MCP tools)
+- トラフィックに機密データが含まれる場合は、**ローカルモデル**を優先してください。
+- 脆弱性の報告に必要な最小限の証拠のみを共有してください。
+- Burpを信頼できる唯一の情報源として使用し、モデルはスキャンではなく、**分析とレポート作成**に使用してください。
 
-**Burp AI Agent** は、local/cloud LLMs と passive/active analysis（62 種類の vulnerability classes）を連携させ、外部の MCP clients が Burp をオーケストレーションできるよう 53 個以上の MCP tools を公開する Burp extension である。<sup>[[5]](#references)</sup> 主な機能：
+## Burp AI Agent（AI支援トリアージ + MCP tools）
 
-- **Context-menu triage**: Proxy 経由でトラフィックを取得し、**Proxy > HTTP History** を開いて request を右クリック → **Extensions > Burp AI Agent > Analyze this request** を選択すると、その request/response に紐付いた AI chat が起動する。
-- **Backends**（profile ごとに選択可能）：
-- Local HTTP: **Ollama**、**LM Studio**。
-- Remote HTTP: **OpenAI-compatible** endpoint（base URL + model name）。
-- Cloud CLIs: **Gemini CLI**（`gemini auth login`）、**Claude CLI**（`export ANTHROPIC_API_KEY=...` または `claude login`）、**Codex CLI**（`export OPENAI_API_KEY=...`）、**OpenCode CLI**（provider 固有の login）。
-- **Agent profiles**: prompt templates は `~/.burp-ai-agent/AGENTS/` に自動インストールされる。この場所に追加の `*.md` files を配置すると、custom analysis/scanning behaviors を追加できる。
-- **MCP server**: **Settings > MCP Server** から有効化すると、任意の MCP client に Burp operations を公開できる（53 個以上の tools）。Claude Desktop は、`~/Library/Application Support/Claude/claude_desktop_config.json`（macOS）または `%APPDATA%\Claude\claude_desktop_config.json`（Windows）を編集して server を指定できる。
-- **Privacy controls**: STRICT / BALANCED / OFF は、remote models に送信する前に機密性の高い request data を redact する。secrets を扱う場合は local backends を優先する。
-- **Audit logging**: エントリごとに SHA-256 integrity hashing を付与した JSONL logs により、AI/MCP actions の改ざん検知可能な traceability を実現する。
-- **Build/load**: release JAR を download するか、Java 21 で build する：
+**Burp AI Agent**は、ローカル/クラウドLLMとパッシブ/アクティブ分析（62の脆弱性クラス）を連携させ、外部のMCPクライアントがBurpを操作できるよう、53以上のMCP toolsを公開するBurp extensionです。<sup>[[5]](#references)</sup> 主な機能:
+
+- **コンテキストメニューでのトリアージ**: Proxyでトラフィックを取得し、**Proxy > HTTP History**を開いてリクエストを右クリック → **Extensions > Burp AI Agent > Analyze this request**を選択すると、そのリクエスト/レスポンスに紐付いたAIチャットが起動します。
+- **バックエンド**（プロファイルごとに選択可能）:
+  - ローカルHTTP: **Ollama**、**LM Studio**。
+  - リモートHTTP: **OpenAI-compatible** endpoint（base URL + model name）。
+  - Cloud CLI: **Gemini CLI**（`gemini auth login`）、**Claude CLI**（`export ANTHROPIC_API_KEY=...`または`claude login`）、**Codex CLI**（`export OPENAI_API_KEY=...`）、**OpenCode CLI**（プロバイダー固有のログイン）。
+- **Agentプロファイル**: prompt templateは`~/.burp-ai-agent/AGENTS/`に自動インストールされます。追加の`*.md`ファイルを配置すると、独自の分析/スキャン動作を追加できます。
+- **MCP server**: **Settings > MCP Server**で有効にすると、任意のMCPクライアントにBurp操作を公開できます（53以上のtools）。Claude Desktopを接続するには、`~/Library/Application Support/Claude/claude_desktop_config.json`（macOS）または`%APPDATA%\Claude\claude_desktop_config.json`（Windows）を編集します。
+- **プライバシー制御**: STRICT / BALANCED / OFFにより、リモートモデルに送信する前に機密性の高いリクエストデータをマスキングします。シークレットを扱う場合はローカルバックエンドを優先してください。
+- **監査ログ**: エントリーごとのSHA-256整合性ハッシュを含むJSONLログにより、AI/MCP操作を改ざん検知可能な形で追跡できます。
+- **ビルド/読み込み**: リリースJARをダウンロードするか、Java 21でビルドします:
+
 ```bash
 git clone https://github.com/six2dez/burp-ai-agent.git
 cd burp-ai-agent
 JAVA_HOME=/path/to/jdk-21 ./gradlew clean shadowJar
 # load build/libs/Burp-AI-Agent-<version>.jar via Burp Extensions > Add (Java)
 ```
-運用上の注意: privacy mode が強制されていない場合、cloud backends によって session cookies/PII が exfiltrate される可能性があります。MCP exposure により Burp の remote orchestration が可能になるため、アクセスを trusted agents に制限し、integrity-hashed audit log の完全性を監視してください。
+
+運用上の注意: privacy mode が適用されていない場合、cloud backend が session cookie/PII を外部に流出させる可能性があります。MCP を公開すると Burp のリモート操作が可能になるため、アクセスを信頼できる agent に限定し、整合性ハッシュ付きの audit log を監視してください。
+
+
 
 ## References
 
-- [1] [Burp MCP + Codex CLI の統合と Caddy handshake の修正](https://pentestbook.six2dez.com/others/burp)
+- [1] [Burp MCP + Codex CLI 統合と Caddy handshake の修正](https://pentestbook.six2dez.com/others/burp)
 - [2] [Burp MCP Server BApp](https://portswigger.net/bappstore/9952290f04ed4f628e624d0aa9dccebc)
-- [3] [PortSwigger MCP server の strict Origin/header validation の問題](https://github.com/PortSwigger/mcp-server/issues/34)
-- [4] [Burp MCP Agents（workflows、launchers、prompt pack）](https://github.com/six2dez/burp-mcp-agents)
+- [3] [PortSwigger MCP server の strict Origin/header 検証に関する問題](https://github.com/PortSwigger/mcp-server/issues/34)
+- [4] [Burp MCP Agents（workflow、launcher、prompt pack）](https://github.com/six2dez/burp-mcp-agents)
 - [5] [Burp AI Agent](https://github.com/six2dez/burp-ai-agent)
 - [6] [Microsoft Playwright MCP](https://github.com/microsoft/playwright-mcp)
 - [7] [PortSwigger Burp Suite MCP Server](https://github.com/PortSwigger/mcp-server)
-- [8] [Bug Bounty research に Codex を使用する方法: 幅広く探索し、厳密に検証する](https://www.yeswehack.com/learn-bug-bounty/llm-series-codex)
-- [9] [OpenBurp: Claude Code と Codex のための Burp Suite orchestration](https://github.com/luispacheco22/OpenBurp)
+- [8] [Bug Bounty 調査での Codex の使い方: 幅広く調査し、厳密に検証する](https://www.yeswehack.com/learn-bug-bounty/llm-series-codex)
+- [9] [OpenBurp: Claude Code と Codex 向け Burp Suite orchestration](https://github.com/luispacheco22/OpenBurp)
+- [10] [PortSwigger MCP Server の tool 実装と parameter](https://github.com/PortSwigger/mcp-server/blob/main/src/main/kotlin/net/portswigger/mcp/tools/Tools.kt)
+- [11] [PortSwigger Web Security Academy - Blind SSRF の脆弱性](https://portswigger.net/web-security/ssrf/blind)
 {{#include ../banners/hacktricks-training.md}}
