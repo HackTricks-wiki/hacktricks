@@ -33,18 +33,22 @@
 - Remote MCP OAuth, JSON-RPC enumeration, authorization and interception → `src/AI/AI-MCP-Servers.md#remote-mcp-server-testing-workflow`; local CLI delivery, repo config, secrets and artifacts → `src/generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md`. Server testing and client delivery are distinct.
 - eSIM/eUICC profile management, Java Card VM type confusion, OTA/APDU and local card tests → `src/mobile-pentesting/esim-javacard-exploitation.md`. It targets a mobile subscription secure element, not generic hacking or Android app internals; modem/IMS exploitation remains in `android-app-pentesting/baseband-and-soc-isolation-exploitation.md` with a direct contrast link.
 
+- Former TODO web miscellany: Host poisoning → `src/pentesting-web/reset-password.md`; session-state auth → `src/pentesting-web/403-and-401-bypasses.md`; signup/email change → `src/pentesting-web/registration-vulnerabilities.md`; Atlassian service desk → `src/network-services-pentesting/pentesting-web/jira.md`; TRACE → `src/pentesting-web/hacking-with-cookies/README.md`. Old route redirects to the web checklist.
+- Cross-platform host/SaaS collection-tool reference → `src/generic-methodologies-and-resources/post-exploitation-collection-tools.md`; OS-specific procedures stay in OS chapters. Its old TODO route redirects here.
+
+- MIFARE Classic stored-value tampering (Crypto1, balance diff/integrity, Proxmark3 transcript, magic UID caveats) → `src/hardware-physical-access/radio-hacking/pentesting-rfid.md#mifare-classic-offline-stored-value-tampering-broken-crypto1`; `proxmark-3.md` keeps generic tool commands and links to this tool-independent card-balance task.
+
 ## Researcher entry points
 
-- SMB/RPC service-creation rights → Windows Lateral Movement / SCM execution (PsExec, SMBExec, WinExec, SharpMove). POSIX CPU timer race → Binary Exploitation / Linux kernel (CVE-2025-38352, IRQ expiry, ptrace, Chronomaly).
-- Exposed board pads/debug headers, serial console, memory chip, leakage, or glitchable signals → Hardware/Physical Access / Hardware Hacking. RFID/NFC badges, sub-GHz remotes, infrared, BLE, LoRaWAN, or iButton → adjacent Radio Hacking.
-- OT asset → Industrial Control Systems / OT for process constraints; Network Services / Modbus, OPC UA, or BACnet for protocol specifics. Locked Android device/acquired image → Basic Forensic Methodology / Android Forensics; Android app testing → Mobile Pentesting.
-- Guest-controlled network, display, storage, or shared folders → Binary Exploitation / VM Escape. Discovered SOAP/REST/GraphQL endpoint → Pentesting Web / Web API Pentesting. HTTP `401`/`403`, alternate methods, proxy headers, path normalization → Pentesting Web / HTTP 401/403 Authorization Bypasses. Unknown behavior of an HTTP response/request header → Pentesting Web / Special HTTP Headers.
-- LFI plus PHP multipart upload → Web / File Inclusion / temporary-file uploads; older PHP filter-triggered worker crashes are the segmentation-fault variant there.
-- eSIM, eUICC, Java Card, RAM keys or OTA applet loading → Mobile Pentesting / eSIM; modem parser or SoC isolation → Android baseband chapter.
+- SMB/RPC SCM rights (PsExec/SMBExec/WinExec/SharpMove) → Windows Lateral Movement; POSIX CPU timers/IRQ/ptrace/Chronomaly → Binary Exploitation / Linux kernel.
+- Board pads/debug headers/serial/memory leakage/glitching → Hardware Hacking; RFID/NFC/sub-GHz/IR/BLE/LoRaWAN/iButton → Radio Hacking.
+- OT process safety → ICS; Modbus/OPC UA/BACnet → Network Services. Android device/image → Forensics; app tests → Mobile.
+- Guest network/display/storage/shared folders → VM Escape; SOAP/REST/GraphQL → Web APIs; HTTP 401/403/verbs/proxy/path → Web authorization; generic header behavior → Special HTTP Headers.
+- LFI plus PHP multipart/upload/segfault → Web File Inclusion. eSIM/eUICC/Java Card/OTA/RAM keys → Mobile eSIM; modem/SoC → Android baseband.
 
 ## Deferred audits
 
 - `network-services-pentesting/pentesting-web/` is mixed (~91 pages); audit inbound links, discovery entry points, and product prerequisites before a wholesale move. Web ownership alone does not justify URL churn.
-- TODO audit: `other-web-tricks.md` mixes host reset poisoning, session reuse, registration/email change, Atlassian desk, and TRACE; compare canonical chapters and remap citations. `more-tools.md` crosses domains; `post-exploitation.md` needs Cloud ownership review.
-- MIFARE Classic stored-value workflow appears in both `radio-hacking/pentesting-rfid.md` and `radio-hacking/proxmark-3.md` with distinct commands/caveats: audit the union before consolidation. Blockchain overview and Privacy's cryptocurrency chapter similarly need a full union audit.
+- `todo/more-tools.md` is an uncurated cross-domain link list; audit every destination before splitting. SaaS collection tools in Main still warrant coordinated Cloud ownership review without dropping unique details.
+- Blockchain overview and Privacy's cryptocurrency chapter need a full union audit before consolidation.
 - Audit long escalation, macOS startup, and iOS exploitation by task and inbound links before splitting; length alone is insufficient.
