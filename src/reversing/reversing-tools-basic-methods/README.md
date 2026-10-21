@@ -14,6 +14,12 @@ Software:
 windbg-automation.md
 {{#endref}}
 
+## Windows exception-driven control flow
+
+{{#ref}}
+../windows-exception-driven-control-flow.md
+{{#endref}}
+
 ## Windows kernel debugging
 
 {{#ref}}
