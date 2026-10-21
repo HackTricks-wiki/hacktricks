@@ -177,6 +177,16 @@ expected_signal: "user B's object is returned"
 falsifier: "server rejects it or returns only user A's object"
 ```
 
+## Targeted out-of-band validation with Burp MCP
+
+Burp Suite Professional exposes `generate_collaborator_payload` and `get_collaborator_interactions` through the official MCP extension. Combine them with `get_proxy_http_history_regex` and a single `send_http1_request` replay to test a suspected server-side URL fetch without scanning the whole target. Burp may require separate approval to read history and send a request.<sup>[[2]](#references)[[10]](#references)</sup>
+
+1. Filter history for a candidate URL-bearing request, such as one containing `url=`, `webhook`, or `callback`. Save the original request and response. The history tool takes `regex`, `count`, and `offset`; paginate rather than asking the model to inspect every entry.<sup>[[10]](#references)</sup>
+2. Generate a fresh Collaborator payload and retain its returned **payload ID**. Replay the captured request to the same host and port, changing only the candidate URL to an HTTPS URL under that payload domain. For `send_http1_request`, pass the complete HTTP/1.1 request as `content` plus `targetHostname`, `targetPort`, and `usesHttps`; the destination fields identify the **application**, not the Collaborator host.<sup>[[10]](#references)</sup>
+3. Poll `get_collaborator_interactions` with that payload ID and correlate the interaction time with the replay. An HTTP interaction supports a fetch, while DNS alone shows resolution but not a completed HTTP request. Check the interaction source and request headers to distinguish server egress from browser-side loading, then repeat with a fresh payload to rule out unrelated traffic.<sup>[[10]](#references)[[11]](#references)</sup>
+
+The MCP request tool returns the response directly and need not populate **Proxy > HTTP history**. Preserve its request/response result or use the proxied browser or Repeater for a history-backed artifact. For SSRF payload selection and follow-on tests, use the [SSRF chapter](../pentesting-web/ssrf-server-side-request-forgery/) rather than treating an out-of-band callback as proof of internal-network impact. For testing the MCP server itself, see [MCP server testing](AI-MCP-Servers.md#remote-mcp-server-testing-workflow).<sup>[[7]](#references)[[11]](#references)</sup>
+
 ## Prompt pack for passive review
 
 The **burp-mcp-agents** repo includes prompt templates for evidence-driven analysis of Burp traffic:<sup>[[4]](#references)</sup>
@@ -229,6 +239,8 @@ JAVA_HOME=/path/to/jdk-21 ./gradlew clean shadowJar
 
 Operational cautions: cloud backends may exfiltrate session cookies/PII unless privacy mode is enforced; MCP exposure grants remote orchestration of Burp so restrict access to trusted agents and monitor the integrity-hashed audit log.
 
+
+
 ## References
 
 - [1] [Burp MCP + Codex CLI integration and Caddy handshake fix](https://pentestbook.six2dez.com/others/burp)
@@ -240,6 +252,6 @@ Operational cautions: cloud backends may exfiltrate session cookies/PII unless p
 - [7] [PortSwigger Burp Suite MCP Server](https://github.com/PortSwigger/mcp-server)
 - [8] [How to use Codex for Bug Bounty research: explore broadly, validate rigorously](https://www.yeswehack.com/learn-bug-bounty/llm-series-codex)
 - [9] [OpenBurp: Burp Suite orchestration for Claude Code and Codex](https://github.com/luispacheco22/OpenBurp)
-
+- [10] [PortSwigger MCP Server tool implementations and parameters](https://github.com/PortSwigger/mcp-server/blob/main/src/main/kotlin/net/portswigger/mcp/tools/Tools.kt)
+- [11] [PortSwigger Web Security Academy - Blind SSRF vulnerabilities](https://portswigger.net/web-security/ssrf/blind)
 {{#include ../banners/hacktricks-training.md}}
-
