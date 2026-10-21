@@ -10,6 +10,7 @@
 # 🤩 Generic Methodologies & Resources
 
 - [Pentesting Methodology](generic-methodologies-and-resources/pentesting-methodology.md)
+- [Post-Exploitation Collection Tools](generic-methodologies-and-resources/post-exploitation-collection-tools.md)
 - [Fuzzing Methodology](generic-methodologies-and-resources/fuzzing.md)
 - [Proof Assistant and Formal Verification Security](generic-methodologies-and-resources/proof-assistant-formal-verification-security.md)
 - [External Recon Methodology](generic-methodologies-and-resources/external-recon-methodology/README.md)
@@ -1196,5 +1197,3 @@
 # ✍️ TODO
 
 - [More Tools](todo/more-tools.md)
-- [Other Web Tricks](todo/other-web-tricks.md)
-- [Post Exploitation](todo/post-exploitation.md)
