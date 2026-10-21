@@ -1167,6 +1167,7 @@
   - [Blobrunner](reversing/reversing-tools-basic-methods/blobrunner.md)
   - [WinDbg Automation](reversing/reversing-tools-basic-methods/windbg-automation.md)
   - [Windows Kernel Debugging with KernelFlirt](reversing/reversing-tools-basic-methods/windows-kernel-debugging-kernelflirt.md)
+- [Windows Exception-Driven Control Flow and Anti-Debugging](reversing/windows-exception-driven-control-flow.md)
 - [Common API used in Malware](reversing/common-api-used-in-malware.md)
 - [Word Macros](reversing/word-macros.md)
 
