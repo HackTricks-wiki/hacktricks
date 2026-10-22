@@ -41,6 +41,14 @@ For running, fine-tuning, serving, or trying models, use the [AI model tools and
 
 ## AI Security
 
+### LLM Gateway Trust Boundaries
+
+For gateway security, see:
+
+{{#ref}}
+AI-LLM-Gateway-Security.md
+{{#endref}}
+
 ### AI Agent Security Methodology
 
 {{#ref}}
