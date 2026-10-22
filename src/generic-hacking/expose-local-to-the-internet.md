@@ -1,6 +1,6 @@
 # Expose local to the internet
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
 
 **The goal of this page is to propose alternatives that allow AT LEAST to expose local raw TCP ports and local webs (HTTP) to the internet WITHOUT needing to install anything in the other server (only in local if needed).**
 
@@ -198,4 +198,4 @@ Adversaries have abused ephemeral tunneling, including Cloudflare's unauthentica
 - [22] [Pinggy - Simple Localhost Tunnels](https://pinggy.io/)
 - [23] [Proofpoint - Threat Actor Abuses Cloudflare Tunnels to Deliver RATs](https://www.proofpoint.com/uk/blog/threat-insight/threat-actor-abuses-cloudflare-tunnels-deliver-rats)
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include ../banners/hacktricks-training.md}}
