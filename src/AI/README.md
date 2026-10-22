@@ -1,10 +1,10 @@
-# AI in Kuberveiligheid
+# KI in Kuberveiligheid
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Belangrikste Machine Learning-algoritmes
 
-Die beste beginpunt om oor AI te leer, is om te verstaan hoe die belangrikste machine learning-algoritmes werk. Dit sal jou help verstaan hoe AI werk, hoe om dit te gebruik en hoe om dit aan te val:
+Die beste beginpunt om oor KI te leer, is om te verstaan hoe die belangrikste machine learning-algoritmes werk. Dit sal jou help verstaan hoe KI werk, hoe om dit te gebruik en hoe om dit aan te val:
 
 
 {{#ref}}
@@ -28,7 +28,7 @@ Die beste beginpunt om oor AI te leer, is om te verstaan hoe die belangrikste ma
 
 ### LLM-argitektuur
 
-Op die volgende bladsy vind jy die basiese beginsels van elke komponent wat nodig is om ’n basiese LLM met transformers te bou:
+Op die volgende bladsy vind jy die basiese beginsels van elke komponent waarmee jy ’n basiese LLM met transformers kan bou:
 
 
 {{#ref}}
@@ -37,89 +37,97 @@ AI-llm-architecture/README.md
 
 ## Modelgereedskap en -platforms
 
-Gebruik die [gids vir AI-modelgereedskap en -platforms](AI-Model-Tools-and-Platforms.md) om modelle uit te voer, te fyninstel, te bedien of uit te probeer.
+Gebruik die [gids vir AI-modelgereedskap en -platforms](AI-Model-Tools-and-Platforms.md) om modelle te laat loop, te fine-tune, te bedien of uit te toets.
 
-## AI-sekuriteit
+## KI-sekuriteit
 
-### AI Agent-sekuriteitsmetodologie
+### Vertrouensgrense van LLM-gateways
+
+Vir gateway-sekuriteit, sien:
+
+{{#ref}}
+AI-LLM-Gateway-Security.md
+{{#endref}}
+
+### Sekuriteitsmetodologie vir AI-agente
 
 {{#ref}}
 AI-Agent-Security-Methodology.md
 {{#endref}}
 
-### AI-risikoraamwerke
+### KI-risikoraamwerke
 
-Twee nuttige beginraamwerke om AI-stelselrisiko te beoordeel, is die OWASP Machine Learning Security Top 10 en Google se Secure AI Framework (SAIF). Hulle vul mekaar aan, maar is nie ’n volledige lys van AI-risikoraamwerke nie.<sup>[[1]](#references)[[2]](#references)</sup>
+Twee nuttige raamwerke om mee te begin wanneer jy die risiko van KI-stelsels beoordeel, is die OWASP Machine Learning Security Top 10 en Google se Secure AI Framework (SAIF). Hulle vul mekaar aan, maar vorm nie ’n volledige lys van KI-risikoraamwerke nie.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Adversarial Attacks gelei deur meganistiese interpreteerbaarheid
+### Adversariële aanvalle gelei deur meganistiese interpretasie
 
 {{#ref}}
 AI-Mechanistic-Interpretability-Adversarial-Attacks.md
 {{#endref}}
 
-### AI-promptsekuriteit
+### KI-aanvraagsekuriteit
 
-LLMs het die gebruik van AI die afgelope jare laat ontplof, maar hulle is nie perfek nie en kan deur adversarial prompts mislei word. Dit is ’n baie belangrike onderwerp om te verstaan hoe om AI veilig te gebruik en hoe om dit aan te val:
+LLM’s het die gebruik van KI die afgelope jare laat ontplof, maar hulle is nie perfek nie en kan deur adversariële aanvaere mislei word. Dit is ’n baie belangrike onderwerp om te verstaan hoe om KI veilig te gebruik en hoe om dit aan te val:
 
 
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
 
-### AI-modelle RCE
+### RCE in KI-modelle
 
-Dit is baie algemeen dat ontwikkelaars en maatskappye modelle uitvoer wat van die internet afgelaai is. Om ’n model bloot te laai, kan egter genoeg wees om arbitrêre kode op die stelsel uit te voer. Dit is ’n baie belangrike onderwerp om te verstaan hoe om AI veilig te gebruik en hoe om dit aan te val:
+Dit is baie algemeen dat ontwikkelaars en maatskappye modelle laat loop wat van die Internet afgelaai is. Om ’n model bloot te laai, kan egter genoeg wees om arbitrêre kode op die stelsel uit te voer. Dit is ’n baie belangrike onderwerp om te verstaan hoe om KI veilig te gebruik en hoe om dit aan te val:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### AI-ondersteunde KYC-omseiling
+### KYC-omseiling met behulp van KI
 
-Generatiewe video kan met virtuele-kamera-inspuiting en manipulasie van die kamera-API gekombineer word om swak KYC-, ouderdomsverifikasie- en biometriese lewendigheidskontroles te omseil:
+Generatiewe video kan met virtuele-kamera-inspuiting en manipulasie van kamera-API’s gekombineer word om swak KYC-, ouderdomsverifikasie- en biometriese lewendigheidsprosesse te omseil:
 
 
 {{#ref}}
 KYC-Bypass-Using-AI.md
 {{#endref}}
 
-### AI Model Context Protocol
+### KI Model Context Protocol
 
-MCP (Model Context Protocol) is ’n oop protokol om AI-toepassings met nutsmiddels en databronne te koppel. Omdat MCP-bedieners data en aksies kan blootstel, moet assesserings magtiging, toestemming, validering van nutsmiddel-invoer en ’n hersiening van vertrouensgrense insluit.<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol) is ’n oop protokol om KI-toepassings met nutsmiddels en databronne te verbind. Omdat MCP-bedieners data en aksies kan blootstel, moet assesserings magtiging, toestemming, validering van nutsmiddel-invoer en ’n hersiening van vertrouensgrense insluit.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### AI-ondersteunde Fuzzing en outomatiese kwesbaarheidsontdekking
+### Fuzzing met KI-hulp en outomatiese kwesbaarheidsontdekking
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### AI-ondersteunde bronkodehersiening en kwesbaarheidsvalidering
+### Bronkodehersiening met KI-hulp en kwesbaarheidsvalidering
 
-Vir bron/sink-hersiening, taakvloei-analise van mobiele toegangspunte, kernpatroonoudits en validering wat deur bewyse vereis word:
+Vir hersiening van bronne en sinks, mobile entry-point-taakvloeie, kernel-patroonoudits en validering met bewysvereistes:
 
 {{#ref}}
 AI-Assisted-Source-Review-and-Vulnerability-Validation.md
 {{#endref}}
 
-### AI-ondersteunde Reverse Engineering
+### Reverse engineering met KI-hulp
 
-[Deeltelike lifting, opsporing van invariant MBA, omgewingsgebonde dekodering en validering van outomatiese extractors](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[Partial lifting, opsporing van invariant MBA, omgewingsgebonde dekodering en validering van outomatiese extractors](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
-### Web Black-Box AI Pentester Bots
+### Web-pentesterbots vir black-box-KI
 
-LLM-aangedrewe agente kan langdurige black-box-web-pentesting-werkvloeie outomatiseer wanneer hulle deur waarneembaarheid, orkestrasie, geverifieerde sessiehantering en adversarial validering ondersteun word:
+LLM-aangedrewe agente kan langdurige black-box-web-pentesting-werkvloeie outomatiseer wanneer hulle deur waarneembaarheid, orkestrasie, geverifieerde sessiehantering en adversariële validering ondersteun word:
 
 
 {{#ref}}
@@ -128,7 +136,7 @@ Web-Black-Box-AI-Pentester-Bots.md
 
 ## References
 
-- [1] [OWASP Top 10 vir Machine Learning-sekuriteit](https://owasp.org/www-project-machine-learning-security-top-10/)
-- [2] [Google — Veilige AI-raamwerk (SAIF)](https://saif.google/)
+- [1] [OWASP Machine Learning Security Top 10](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [2] [Google — Secure AI Framework (SAIF)](https://saif.google/)
 - [3] [Model Context Protocol — Inleiding](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}
