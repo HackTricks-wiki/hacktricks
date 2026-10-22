@@ -8,7 +8,7 @@
 
 ## [Shells - Windows](windows.md)
 
-## Uruchamianie payloadów w zwirtualizowanym Windowsie
+## Uruchamianie payloadów w zwirtualizowanym systemie Windows
 
 {{#ref}}
 ../../windows-hardening/virtualized-payload-execution.md
@@ -22,16 +22,18 @@
 
 ## [Full TTYs](full-ttys.md)
 
+Aby listener lokalny był osiągalny przez internet, zobacz [opcje publicznych tuneli HTTP i TCP](../expose-local-to-the-internet.md).
+
 ---
 
 ## Automatycznie generowane narzędzia shell
 
-Różne narzędzia webowe i wiersza poleceń mogą generować payloady bind-shell i reverse-shell dla różnych interpreterów i systemów operacyjnych:
+Kilka narzędzi webowych i wiersza poleceń może generować payloady bind shell i reverse shell dla różnych interpreterów i systemów operacyjnych:
 
-- **reverse-shell.sh** i **revshells.com** udostępniają działające w przeglądarce generatory payloadów.<sup>[[1]](#references)[[2]](#references)</sup>
-- **Shellerator**, **ShellPop**, **ShellReverse**, **Reverse Shell Generator**, **revshellgen** i **rsg** generują payloady z wiersza poleceń lub za pomocą lokalnego interfejsu.<sup>[[3]](#references)[[4]](#references)[[5]](#references)[[8]](#references)[[9]](#references)[[10]](#references)</sup>
-- **xc** to niewielki, wieloplatformowy reverse shell dla Linuxa i Windowsa.<sup>[[7]](#references)</sup>
-- **pyminifier** nie jest generatorem shelli, ale może minifikować lub obfuskować payloady Python, gdy takie przekształcenie jest przydatne.<sup>[[6]](#references)</sup>
+- **reverse-shell.sh** i **revshells.com** udostępniają generatory payloadów działające w przeglądarce.<sup>[[1]](#references)[[2]](#references)</sup>
+- **Shellerator**, **ShellPop**, **ShellReverse**, **Reverse Shell Generator**, **revshellgen** i **rsg** generują payloady z wiersza poleceń lub lokalnego interfejsu.<sup>[[3]](#references)[[4]](#references)[[5]](#references)[[8]](#references)[[9]](#references)[[10]](#references)</sup>
+- **xc** to niewielki, wieloplatformowy reverse shell dla systemów Linux i Windows.<sup>[[7]](#references)</sup>
+- **pyminifier** nie jest generatorem shelli, ale może minifikować lub zaciemniać payloady Python, gdy takie przekształcenie jest przydatne.<sup>[[6]](#references)</sup>
 
 ## References
 
@@ -39,10 +41,10 @@ Różne narzędzia webowe i wiersza poleceń mogą generować payloady bind-shel
 - [2] [revshells.com - Generator reverse shelli](https://www.revshells.com/)
 - [3] [Shellerator - Narzędzie CLI do generowania bind shelli i reverse shelli w wielu językach](https://github.com/ShutdownRepo/shellerator)
 - [4] [ShellPop - Uruchamiaj shelle jak mistrz](https://github.com/0x00-0x00/ShellPop)
-- [5] [ShellReverse - Generator reverse shelli dla python, perl, ruby, bash, netcat, php, java, powershell itd.](https://github.com/cybervaca/ShellReverse)
-- [6] [pyminifier - Minifikator/obfuscator kodu Python](https://liftoff.github.io/pyminifier/)
-- [7] [xc - Niewielki reverse shell dla Linuxa i Windowsa](https://github.com/xct/xc/)
+- [5] [ShellReverse - Generator reverse shelli dla Python, Perl, Ruby, Bash, Netcat, PHP, Java, PowerShell itd.](https://github.com/cybervaca/ShellReverse)
+- [6] [pyminifier - Narzędzie do minifikacji i zaciemniania kodu Python](https://liftoff.github.io/pyminifier/)
+- [7] [xc - Niewielki reverse shell dla systemów Linux i Windows](https://github.com/xct/xc/)
 - [8] [Reverse Shell Generator](https://weibell.github.io/reverse-shell-generator/)
-- [9] [revshellgen - Generator reverse shelli napisany w Pythonie 3](https://github.com/t0thkr1s/revshellgen)
-- [10] [rsg (ReverShellGenerator) - Narzędzie do generowania różnych sposobów na uzyskanie reverse shell](https://github.com/mthbernardes/rsg)
+- [9] [revshellgen - Generator reverse shelli napisany w Python 3](https://github.com/t0thkr1s/revshellgen)
+- [10] [rsg (ReverShellGenerator) - Narzędzie do generowania różnych sposobów uzyskania reverse shell](https://github.com/mthbernardes/rsg)
 {{#include ../../banners/hacktricks-training.md}}
