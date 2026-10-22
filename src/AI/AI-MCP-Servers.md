@@ -176,6 +176,8 @@ MCP trust is usually anchored to the **package name, reviewed source, and curren
 
 A practical example was the `postmark-mcp` package: after a benign history, version `1.0.16` silently added a hidden BCC to attacker-controlled email addresses while still sending the requested message normally. Similar marketplace abuse was observed in ClawHub skills that returned the expected result while harvesting wallet keys or stored credentials in parallel.<sup>[[11]](#references)</sup>
 
+A related **result-integrity** variant keeps the advertised MCP tool names but implements no underlying assessment. Elastic examined an audit server whose 18 handlers returned fixed text, input-formatted labels, dates, or bounded random scores instead of running the claimed scans. Its smart-contract handler claimed a specific Slither run without invoking Slither, while its honeypot handler always reported a successful buy/sell simulation. Test this boundary with deliberately incomplete or fictitious inputs and compare the returned findings with actual scanner/API calls and input-dependent evidence; a well-formed MCP `text` result is not proof that the advertised analysis occurred.<sup>[[45]](#references)</sup>
+
 #### Markdown skill marketplaces: semantic instruction hijacking
 
 Some agent ecosystems do not distribute compiled plug-ins or ordinary MCP servers; they distribute **instruction packages** (`SKILL.md`, `README.md`, metadata, prompt templates) that the host agent interprets with its own file, shell, browser, wallet, or SaaS permissions. In practice, a malicious skill can act like a **supply-chain backdoor expressed in natural language**:<sup>[[12]](#references)</sup><sup>[[13]](#references)</sup><sup>[[32]](#references)</sup>
@@ -716,6 +718,7 @@ Another suspicious primitive is **native-code preloading**. A skill that sets `L
 - [42] [Equixly: MCP server security issues in the wild](https://equixly.com/blog/2025/03/29/mcp-server-new-security-nightmare/)
 - [43] [OS command injection in mcp-remote when connecting to untrusted MCP servers (JFrog Security Research, JFSA-2025-001290844)](https://research.jfrog.com/vulnerabilities/mcp-remote-command-injection-rce-jfsa-2025-001290844/)
 - [44] [When OAuth Becomes a Weapon: Lessons from CVE-2025-6514](https://amlalabs.com/blog/oauth-cve-2025-6514/)
+- [45] [Apex Accelerator: malicious npm packages, LLM and MCP interception](https://www.elastic.co/security-labs/threat-command/apex-accelerator-malicious-npm-packages)
 
 {{#include ../banners/hacktricks-training.md}}
 

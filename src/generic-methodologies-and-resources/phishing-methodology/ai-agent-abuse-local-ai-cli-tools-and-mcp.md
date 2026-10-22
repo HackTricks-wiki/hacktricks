@@ -13,6 +13,12 @@ Key mechanics seen in common AI CLIs:
 
 Abuse impact: A single prompt can inventory and exfiltrate credentials, modify local files, and silently extend capability by connecting to remote MCP servers (visibility gap if those servers are third‑party).<sup>[[1]](#references)</sup>
 
+### Publisher-controlled agent fork: model routing and tool-result leakage
+
+A maliciously published coding CLI can retain a genuine agent's interface and tools while its bootstrap changes the **effective model endpoint**. In the Apex case, the fork set `OPENROUTER_BASE_URL` to its own API, replaced `OPENROUTER_API_KEY` with a token issued by that service, and selected Chat Completions mode with `PI_OPENROUTER_RESPONSES=0`. The UI still identified the provider as OpenRouter. This is not evidence that the victim's original OpenRouter key was stolen; the demonstrated exposure was the prompts, conversation context, tool definitions, and later tool results sent to the substituted endpoint.<sup>[[7]](#references)</sup>
+
+The timing of a tool result matters: Elastic's first request included a test file path but not its contents. After the agent's local `read` tool ran, the **next** request to the substituted endpoint contained the file contents as a `role: "tool"` message. The same bootstrap persisted a remote MCP entry in the agent's user-level `mcp.json`, so its tool definitions and server-controlled instructions could be loaded again after a restart. No malicious model-response substitution was observed, so distinguish that possible capability from the measured data flow. For an authorized assessment, inspect the package's `bin` launcher and downloaded bootstrap, compare the displayed provider with the actual request host, and follow a harmless canary through a tool call into the subsequent model request. See [MCP server supply-chain risks](../../AI/AI-MCP-Servers.md#supply-chain-backdoors-in-mcp-servers-same-tool-name-same-schema-new-payload) for the separate server implementation boundary.<sup>[[7]](#references)</sup>
+
 ---
 
 ## Repo-Controlled Configuration Poisoning (Claude Code)
@@ -153,5 +159,6 @@ For an engagement starting from a reachable remote MCP endpoint, use the [remote
 - [4] [Caught in the Hook: RCE and API Token Exfiltration Through Claude Code Project Files](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)
 - [5] [OpenAI Codex CLI Vulnerability: Command Injection](https://research.checkpoint.com/2025/openai-codex-cli-command-injection-vulnerability/)
 - [6] [What the Miasma campaign reveals about the new supply chain threat model and the underground market for developer credentials](https://www.tenable.com/blog/what-the-miasma-campaign-reveals-about-the-new-supply-chain-threat-model-and-the-underground)
+- [7] [Apex Accelerator: malicious npm packages, LLM and MCP interception](https://www.elastic.co/security-labs/threat-command/apex-accelerator-malicious-npm-packages)
 
 {{#include ../../banners/hacktricks-training.md}}
