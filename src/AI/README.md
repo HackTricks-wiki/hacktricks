@@ -4,7 +4,7 @@
 
 ## मुख्य Machine Learning Algorithms
 
-AI के बारे में जानने की सबसे अच्छी शुरुआत यह समझने से होती है कि मुख्य machine learning algorithms कैसे काम करते हैं। इससे आपको यह समझने में मदद मिलेगी कि AI कैसे काम करता है, इसका उपयोग कैसे करें और इस पर हमला कैसे करें:
+AI के बारे में सीखने की सबसे अच्छी शुरुआत यह समझने से होती है कि मुख्य machine learning algorithms कैसे काम करते हैं। इससे आपको समझने में मदद मिलेगी कि AI कैसे काम करता है, इसका उपयोग कैसे करें और इस पर हमला कैसे करें:
 
 
 {{#ref}}
@@ -26,9 +26,9 @@ AI के बारे में जानने की सबसे अच्�
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### LLMs की Architecture
+### LLM Architecture
 
-अगले पेज पर आपको transformers का उपयोग करके एक बुनियादी LLM बनाने के लिए प्रत्येक component की बुनियादी जानकारी मिलेगी:
+अगले पेज पर आपको transformers का उपयोग करके एक बुनियादी LLM बनाने के लिए हर component की बुनियादी जानकारी मिलेगी:
 
 
 {{#ref}}
@@ -37,9 +37,17 @@ AI-llm-architecture/README.md
 
 ## Model tools और platforms
 
-Models को चलाने, fine-tune करने, serve करने या आज़माने के लिए, [AI model tools और platforms guide](AI-Model-Tools-and-Platforms.md) का उपयोग करें।
+Models को चलाने, fine-tune करने, serve करने या आज़माने के लिए [AI model tools और platforms guide](AI-Model-Tools-and-Platforms.md) देखें।
 
 ## AI Security
+
+### LLM Gateway Trust Boundaries
+
+Gateway security के लिए देखें:
+
+{{#ref}}
+AI-LLM-Gateway-Security.md
+{{#endref}}
 
 ### AI Agent Security Methodology
 
@@ -49,7 +57,7 @@ AI-Agent-Security-Methodology.md
 
 ### AI Risk Frameworks
 
-AI-system risk का आकलन करने के लिए दो उपयोगी शुरुआती frameworks हैं OWASP Machine Learning Security Top 10 और Google का Secure AI Framework (SAIF)। ये एक-दूसरे के पूरक हैं, AI risk frameworks की पूरी सूची नहीं।<sup>[[1]](#references)[[2]](#references)</sup>
+AI-system के जोखिम का आकलन करने के लिए दो उपयोगी शुरुआती frameworks हैं OWASP Machine Learning Security Top 10 और Google's Secure AI Framework (SAIF)। ये एक-दूसरे के पूरक हैं, न कि AI risk frameworks की पूरी सूची।<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
@@ -64,7 +72,7 @@ AI-Mechanistic-Interpretability-Adversarial-Attacks.md
 
 ### AI Prompts Security
 
-पिछले कुछ वर्षों में LLMs के कारण AI का उपयोग तेज़ी से बढ़ा है, लेकिन वे परिपूर्ण नहीं हैं और adversarial prompts से उन्हें धोखा दिया जा सकता है। AI का सुरक्षित रूप से उपयोग करने और इस पर हमला करने का तरीका समझने के लिए यह एक बहुत महत्वपूर्ण विषय है:
+पिछले कुछ वर्षों में LLMs के कारण AI का उपयोग तेज़ी से बढ़ा है, लेकिन वे परिपूर्ण नहीं हैं और adversarial prompts से उन्हें धोखा दिया जा सकता है। AI का सुरक्षित उपयोग करने और उस पर हमला करने का तरीका समझने के लिए यह एक बहुत महत्वपूर्ण विषय है:
 
 
 {{#ref}}
@@ -73,7 +81,7 @@ AI-Prompts.md
 
 ### AI Models RCE
 
-Developers और कंपनियों के लिए Internet से डाउनलोड किए गए models चलाना बहुत आम है। हालाँकि, किसी model को सिर्फ load करना ही system पर arbitrary code execute करने के लिए पर्याप्त हो सकता है। AI का सुरक्षित रूप से उपयोग करने और इस पर हमला करने का तरीका समझने के लिए यह एक बहुत महत्वपूर्ण विषय है:
+Developers और कंपनियों द्वारा Internet से डाउनलोड किए गए models चलाना बहुत आम है। हालांकि, सिर्फ़ model load करने से ही system पर arbitrary code execute हो सकता है। AI का सुरक्षित उपयोग करने और उस पर हमला करने का तरीका समझने के लिए यह एक बहुत महत्वपूर्ण विषय है:
 
 
 {{#ref}}
@@ -82,7 +90,7 @@ AI-Models-RCE.md
 
 ### AI-Assisted KYC Bypass
 
-Generative video को virtual-camera injection और camera API manipulation के साथ मिलाकर कमजोर KYC, age-verification और biometric liveness workflows को bypass किया जा सकता है:
+Generative video को virtual-camera injection और camera API manipulation के साथ मिलाकर कमज़ोर KYC, age-verification और biometric liveness workflows को bypass किया जा सकता है:
 
 
 {{#ref}}
@@ -91,14 +99,14 @@ KYC-Bypass-Using-AI.md
 
 ### AI Model Context Protocol
 
-MCP (Model Context Protocol), AI applications को tools और data sources से जोड़ने के लिए एक open protocol है। चूँकि MCP servers data और actions उपलब्ध करा सकते हैं, इसलिए assessments में authorization, consent, tool-input validation और trust-boundary review शामिल होने चाहिए।<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol), AI applications को tools और data sources से जोड़ने के लिए एक open protocol है। चूंकि MCP servers data और actions उपलब्ध करा सकते हैं, इसलिए assessments में authorization, consent, tool-input validation और trust-boundary review शामिल होने चाहिए।<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### AI-Assisted Fuzzing और Automated Vulnerability Discovery
+### AI-Assisted Fuzzing & Automated Vulnerability Discovery
 
 
 {{#ref}}
