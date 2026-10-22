@@ -159,8 +159,8 @@
   - [MSFVenom - CheatSheet](generic-hacking/reverse-shells/msfvenom.md)
   - [Reverse Shells - Windows](generic-hacking/reverse-shells/windows.md)
   - [Reverse Shells - Linux](generic-hacking/reverse-shells/linux.md)
-  - [Expose local to the internet](generic-hacking/reverse-shells/expose-local-to-the-internet.md)
   - [Full TTYs](generic-hacking/reverse-shells/full-ttys.md)
+- [Expose Local Services to the Internet](generic-hacking/expose-local-to-the-internet.md)
 - [Search Exploits](generic-hacking/search-exploits.md)
 - [Tunneling and Port Forwarding](generic-hacking/tunneling-and-port-forwarding.md)
 

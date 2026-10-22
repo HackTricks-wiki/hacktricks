@@ -22,6 +22,8 @@
 
 ## [Full TTYs](full-ttys.md)
 
+To make a local listener reachable over the internet, see [public HTTP and TCP tunnel options](../expose-local-to-the-internet.md).
+
 ---
 
 ## Auto-generated shell tools

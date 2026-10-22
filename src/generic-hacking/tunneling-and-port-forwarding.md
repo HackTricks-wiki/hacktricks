@@ -2,6 +2,8 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
+To publish a local HTTP or TCP service through a public relay, see [exposing local services to the internet](expose-local-to-the-internet.md). This chapter covers forwarding and pivoting between hosts.
+
 ## Nmap tip
 
 > [!WARNING]
@@ -238,7 +240,7 @@ rportfwd_local stop [bind port]
 
 ## Tailcat: accountless userspace TCP forwarding
 
-Tailcat uses Tailscale's WireGuard/NAT-traversal/DERP data plane without the Tailscale control plane. It needs neither a Tailscale account nor administrator privileges, and it does not install host routes or change DNS. Unlike [Tailscale Serve/Funnel](reverse-shells/expose-local-to-the-internet.md#tailscale-funnel--serve) or the in-process [BOFScale tailnet](#bofscale---cdn-fronted-in-process-tailnet), the server shares a *tailcat address* out of band. The client uses that address to reach a port served by the remote node.<sup>[[62]](#references)</sup>
+Tailcat uses Tailscale's WireGuard/NAT-traversal/DERP data plane without the Tailscale control plane. It needs neither a Tailscale account nor administrator privileges, and it does not install host routes or change DNS. Unlike [Tailscale Serve/Funnel](expose-local-to-the-internet.md#tailscale-funnel--serve) or the in-process [BOFScale tailnet](#bofscale---cdn-fronted-in-process-tailnet), the server shares a *tailcat address* out of band. The client uses that address to reach a port served by the remote node.<sup>[[62]](#references)</sup>
 
 For a TCP service already listening on port `4444` on the remote node, start `serve` there and pass its printed address to `forward` on the client. The second command binds `127.0.0.1:18080` by default, so a local process that only supports normal TCP sockets can connect to that loopback port while Tailcat carries its traffic to remote port `4444`.<sup>[[62]](#references)</sup> The port numbers are not special to Tailcat.<sup>[[62]](#references)</sup>
 
