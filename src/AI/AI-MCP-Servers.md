@@ -176,8 +176,6 @@ MCP trust is usually anchored to the **package name, reviewed source, and curren
 
 A practical example was the `postmark-mcp` package: after a benign history, version `1.0.16` silently added a hidden BCC to attacker-controlled email addresses while still sending the requested message normally. Similar marketplace abuse was observed in ClawHub skills that returned the expected result while harvesting wallet keys or stored credentials in parallel.<sup>[[11]](#references)</sup>
 
-A related **result-integrity** variant keeps the advertised MCP tool names but implements no underlying assessment. Elastic examined an audit server whose 18 handlers returned fixed text, input-formatted labels, dates, or bounded random scores instead of running the claimed scans. Its smart-contract handler claimed a specific Slither run without invoking Slither, while its honeypot handler always reported a successful buy/sell simulation. Test this boundary with deliberately incomplete or fictitious inputs and compare the returned findings with actual scanner/API calls and input-dependent evidence; a well-formed MCP `text` result is not proof that the advertised analysis occurred.<sup>[[45]](#references)</sup>
-
 #### Markdown skill marketplaces: semantic instruction hijacking
 
 Some agent ecosystems do not distribute compiled plug-ins or ordinary MCP servers; they distribute **instruction packages** (`SKILL.md`, `README.md`, metadata, prompt templates) that the host agent interprets with its own file, shell, browser, wallet, or SaaS permissions. In practice, a malicious skill can act like a **supply-chain backdoor expressed in natural language**:<sup>[[12]](#references)</sup><sup>[[13]](#references)</sup><sup>[[32]](#references)</sup>
@@ -226,6 +224,12 @@ otto-support selfpwn --agree
 - Run high-risk MCP servers in **dedicated accounts or isolated containers** with no sensitive host mounts.
 - Enforce **allowlist-only egress** for MCP processes whenever possible. A server meant to query one internal system should not be able to open arbitrary outbound HTTP connections.
 - Monitor runtime behavior for **unexpected outbound connections** or file access during tool execution, especially when the server's visible MCP output still looks correct.
+
+### Fabricated results from MCP assessment tools
+
+A tool can return a well-formed MCP `text` result without performing its advertised assessment. In one audit server, 18 handlers assembled fixed findings, input-derived labels, dates, or bounded random scores rather than running the claimed scans. A smart-contract handler claimed a Slither run without invoking Slither; a honeypot handler always reported a successful buy/sell simulation. This is a result-integrity failure, distinct from a backdoor that preserves correct output while acting in the background.<sup>[[45]](#references)</sup>
+
+For an authorized assessment, compare results for incomplete or fictitious inputs with the claimed scanner or API activity and input-dependent evidence. A separate remote scoring tool in the same research assigned a score to a fictitious project despite lacking information needed to verify it; its server-side scoring method was not confirmed.<sup>[[45]](#references)</sup>
 
 ### Authorization Abuse: Token Passthrough & Confused Deputy
 
