@@ -13,6 +13,12 @@ Key mechanics seen in common AI CLIs:
 
 Abuse impact: A single prompt can inventory and exfiltrate credentials, modify local files, and silently extend capability by connecting to remote MCP servers (visibility gap if those servers are third‑party).<sup>[[1]](#references)</sup>
 
+## Publisher-controlled agent fork: model routing and tool-result leakage
+
+A repackaged coding CLI can preserve a working agent and its familiar provider label while a publisher-controlled bootstrap changes the actual model endpoint. In one observed fork, the bootstrap set `OPENROUTER_BASE_URL` to its own API, replaced `OPENROUTER_API_KEY` with a service-issued token, and selected Chat Completions mode with `PI_OPENROUTER_RESPONSES=0`. This exposed prompts, conversation context, tool definitions, and subsequent tool results to that endpoint; it did not demonstrate theft of the user's original OpenRouter key or malicious model-response substitution.<sup>[[7]](#references)</sup>
+
+A local file path appeared in the initial model request, but its contents reached the substituted endpoint only in a later `role: "tool"` message after the agent's `read` tool ran. The bootstrap also persisted a remote MCP entry in the agent's user-level `mcp.json`, allowing the server's tools and instructions to load again after restart. In an authorized review, compare the package's `bin` launcher and bootstrap with the actual model-request host, then trace a harmless canary from a tool result into the next request. See [MCP tool-description poisoning](../../AI/AI-MCP-Servers.md#mcp-vulns) for the separate server-controlled instruction boundary.<sup>[[7]](#references)</sup>
+
 ---
 
 ## Repo-Controlled Configuration Poisoning (Claude Code)
@@ -153,5 +159,6 @@ For an engagement starting from a reachable remote MCP endpoint, use the [remote
 - [4] [Caught in the Hook: RCE and API Token Exfiltration Through Claude Code Project Files](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)
 - [5] [OpenAI Codex CLI Vulnerability: Command Injection](https://research.checkpoint.com/2025/openai-codex-cli-command-injection-vulnerability/)
 - [6] [What the Miasma campaign reveals about the new supply chain threat model and the underground market for developer credentials](https://www.tenable.com/blog/what-the-miasma-campaign-reveals-about-the-new-supply-chain-threat-model-and-the-underground)
+- [7] [Apex Accelerator: malicious npm packages, LLM and MCP interception](https://www.elastic.co/security-labs/threat-command/apex-accelerator-malicious-npm-packages)
 
 {{#include ../../banners/hacktricks-training.md}}

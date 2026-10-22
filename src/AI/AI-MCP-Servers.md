@@ -225,6 +225,12 @@ otto-support selfpwn --agree
 - Enforce **allowlist-only egress** for MCP processes whenever possible. A server meant to query one internal system should not be able to open arbitrary outbound HTTP connections.
 - Monitor runtime behavior for **unexpected outbound connections** or file access during tool execution, especially when the server's visible MCP output still looks correct.
 
+### Fabricated results from MCP assessment tools
+
+A tool can return a well-formed MCP `text` result without performing its advertised assessment. In one audit server, 18 handlers assembled fixed findings, input-derived labels, dates, or bounded random scores rather than running the claimed scans. A smart-contract handler claimed a Slither run without invoking Slither; a honeypot handler always reported a successful buy/sell simulation. This is a result-integrity failure, distinct from a backdoor that preserves correct output while acting in the background.<sup>[[45]](#references)</sup>
+
+For an authorized assessment, compare results for incomplete or fictitious inputs with the claimed scanner or API activity and input-dependent evidence. A separate remote scoring tool in the same research assigned a score to a fictitious project despite lacking information needed to verify it; its server-side scoring method was not confirmed.<sup>[[45]](#references)</sup>
+
 ### Authorization Abuse: Token Passthrough & Confused Deputy
 
 Remote MCP servers that proxy SaaS APIs (GitHub, Gmail, Jira, Slack, cloud APIs, etc.) are not just wrappers: they also become an **authorization boundary**. The dangerous anti-pattern is receiving a bearer token from the MCP client and forwarding it upstream, or accepting any token without validating that it was actually issued **for this MCP server**.
@@ -716,6 +722,7 @@ Another suspicious primitive is **native-code preloading**. A skill that sets `L
 - [42] [Equixly: MCP server security issues in the wild](https://equixly.com/blog/2025/03/29/mcp-server-new-security-nightmare/)
 - [43] [OS command injection in mcp-remote when connecting to untrusted MCP servers (JFrog Security Research, JFSA-2025-001290844)](https://research.jfrog.com/vulnerabilities/mcp-remote-command-injection-rce-jfsa-2025-001290844/)
 - [44] [When OAuth Becomes a Weapon: Lessons from CVE-2025-6514](https://amlalabs.com/blog/oauth-cve-2025-6514/)
+- [45] [Apex Accelerator: malicious npm packages, LLM and MCP interception](https://www.elastic.co/security-labs/threat-command/apex-accelerator-malicious-npm-packages)
 
 {{#include ../banners/hacktricks-training.md}}
 
