@@ -10,6 +10,7 @@
 
 ## Canonical locations and boundaries in the target clone
 
+- Trusted-host Rlogin (513/TCP) and Rsh (514/TCP) → `src/network-services-pentesting/pentesting-rlogin.md`; Rexec (512/TCP) stays separate because it uses passwords and a distinct wire protocol.
 - SCM/SCMR execution (PsExec, WinExec, SMBExec, SCMExec, SharpMove) → `src/windows-hardening/lateral-movement/psexec-and-winexec.md`; scheduler, DCOM, WMI, WinRM and RDP are separate interfaces. Cloud pivots stay in Cloud.
 - POSIX CPU timer TOCTOU/IRQ/task-work, ptrace reproducer, PoC variants, and Chronomaly are at `src/binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md`; Linux Hardening's `kernel-lpe-cves/README.md` links there. Memory corruption/kernel exploitation belongs in Binary Exploitation; host assessment belongs in Linux Hardening.
 - Board, side-channel, fault and signal work → `src/hardware-physical-access/hardware-hacking/`; physical access → `physical-attacks.md`; firmware → `firmware-analysis/`; radio/iButton → `radio-hacking/`.
