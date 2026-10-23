@@ -66,15 +66,15 @@ The last argument is the window style. `7` keeps the window minimized. Operation
 
 **For more info about this technique check the original post [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)**<sup>[[2]](#references)</sup>
 
-The **MMC20.Application** object was identified to lack explicit "LaunchPermissions," defaulting to permissions that permit Administrators access. For further details, a thread can be explored [here](https://twitter.com/tiraniddo/status/817532039771525120), and the usage of [@tiraniddo](https://twitter.com/tiraniddo)’s OleView .NET for filtering objects without explicit Launch Permission is recommended.
+The **MMC20.Application** object was observed without an application-specific `LaunchPermission` value.<sup>[[2]](#references)</sup> This does not grant access by itself: COM checks the machine’s `DefaultLaunchPermission` ACL and machine-wide launch/access restrictions when applicable.<sup>[[9]](#references)[[10]](#references)</sup> For further details, a thread can be explored [here](https://twitter.com/tiraniddo/status/817532039771525120), and the usage of [@tiraniddo](https://twitter.com/tiraniddo)’s OleView .NET for filtering objects without explicit Launch Permission is recommended.
 
-Two specific objects, `ShellBrowserWindow` and `ShellWindows`, were highlighted due to their lack of explicit Launch Permissions. The absence of a `LaunchPermission` registry entry under `HKCR:\AppID\{guid}` signifies no explicit permissions.
+Two specific objects, `ShellBrowserWindow` and `ShellWindows`, were highlighted due to their lack of explicit Launch Permissions.<sup>[[2]](#references)</sup> An absent `LaunchPermission` value under `HKCR:\AppID\{guid}` means there is no application-specific launch ACL; it does **not** mean remote activation is unrestricted.<sup>[[9]](#references)[[10]](#references)</sup>
 
 Compared with `MMC20.Application`, these objects are often quieter from an OPSEC perspective because the command commonly ends up as a child of `explorer.exe` on the remote host instead of `mmc.exe`.
 
 ### ShellWindows
 
-For `ShellWindows`, which lacks a ProgID, the .NET methods `Type.GetTypeFromCLSID` and `Activator.CreateInstance` facilitate object instantiation using its AppID. This process leverages OleView .NET to retrieve the CLSID for `ShellWindows`. Once instantiated, interaction is possible through the `WindowsShell.Item` method, leading to method invocation like `Document.Application.ShellExecute`.
+For `ShellWindows`, which lacks a ProgID, the .NET methods `Type.GetTypeFromCLSID` and `Activator.CreateInstance` facilitate object instantiation using its CLSID. This process leverages OleView .NET to retrieve the CLSID for `ShellWindows`. Once instantiated, interaction is possible through the `WindowsShell.Item` method, leading to method invocation like `Document.Application.ShellExecute`.<sup>[[2]](#references)</sup>
 
 Example PowerShell commands were provided to instantiate the object and execute commands remotely:
 
@@ -237,6 +237,8 @@ SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\tem
 
 
 
+
+
 ## References
 
 - [1] [Lateral Movement using the MMC20.Application COM Object](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)
@@ -247,4 +249,6 @@ SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\tem
 - [6] [technet.microsoft.com - MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx)
 - [7] [Using DCOM objects for remote command execution](https://securelist.com/lateral-movement-via-dcom-abusing-control-panel/118232/)
 - [8] [CPLDCOMTrigger](https://github.com/klsecservices/CPLDCOMTrigger)
+- [9] [DefaultLaunchPermission - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/com/defaultlaunchpermission)
+- [10] [MS-DCOM: Appendix B, Product Behavior - Microsoft Learn](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dcom/acc42954-4073-4f05-b850-efd562022077)
 {{#include ../../banners/hacktricks-training.md}}
