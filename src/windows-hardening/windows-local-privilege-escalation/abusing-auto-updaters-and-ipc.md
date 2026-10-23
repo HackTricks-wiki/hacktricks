@@ -42,6 +42,10 @@ Exploit flow:
 Notes:
 - If caller verification is path/name-based, originate the request from an allow-listed vendor binary (see §4).<sup>[[1]](#references)[[2]](#references)</sup>
 
+### Network-exposed management IPC
+
+This trust boundary is not always limited to localhost. In the reported MyReport Updater 2.1.1 case, a `LocalSystem` service listened on all interfaces and accepted an unauthenticated gRPC configuration change for the reference host, port and operating mode. Network access to the listener and outbound access from the service to the chosen reference were both required for the remote variant. Assess these separately from whether the later package flow can cross the file-write boundary.<sup>[[16]](#references)</sup>
+
 ---
 ## 2) Hijacking the update channel to run code as SYSTEM
 
@@ -67,6 +71,8 @@ C:\ProgramData\Netskope\stAgent\data\*.msi
 executing arbitrary code as NT AUTHORITY\SYSTEM.<sup>[[1]](#references)[[2]](#references)</sup>
 
 Patch-bypass lesson: if a vendor responds by allow-listing a small set of “trusted” domains instead of cryptographically authenticating the update source, look for vendor-owned redirectors or reverse proxies that still let you steer traffic. In Netskope's case, public follow-up research showed that an R129-era allow-list could still be abused through `rproxy.goskope.com`, which proxied attacker-controlled Azure App Service content. Treat hostname allow-lists as a speed bump, not as a trust boundary.<sup>[[14]](#references)</sup>
+
+Another failure mode is **self-consistent but unauthenticated package metadata**. In the MyReport case, an attacker-controlled reference served a modified archive while an intermediary changed the vendor's MD5 digest and size responses before they reached the updater. Matching those values checked response consistency, not vendor origin; no MD5 collision was needed. A caller-selected installation directory then made the privileged extraction a file-write boundary. The resulting DLL-loading primitive is covered under [chaining an arbitrary file write into DLL hijacking](dll-hijacking/#chaining-an-arbitrary-file-write-into-a-missing-dll-hijack).<sup>[[16]](#references)</sup>
 
 ---
 ## 3) Forging encrypted IPC requests (when present)
@@ -382,5 +388,6 @@ These patterns generalize to any updater that accepts unsigned manifests or fail
 - [13] [Notepad++ – hijacked infrastructure incident update](https://notepad-plus-plus.org/news/hijacked-incident-info-update/)
 - [14] [AmberWolf – Bypassing the fix for CVE-2025-0309 in Netskope Client for Windows](https://blog.amberwolf.com/blog/2026/march/patch-bypass---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
 - [15] [Atredis – Uncovering Privilege Escalation Bugs in Lenovo Vantage](https://www.atredis.com/blog/2025/7/7/uncovering-privilege-escalation-bugs-in-lenovo-vantage)
+- [16] [Quarkslab – MyReport Updater: From gRPC to SYSTEM](https://blog.quarkslab.com/myreport-updater-from-grpc-to-system.html)
 
 {{#include ../../banners/hacktricks-training.md}}
