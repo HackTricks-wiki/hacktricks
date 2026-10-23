@@ -4,9 +4,11 @@
 
 **The goal of this page is to propose alternatives that allow AT LEAST to expose local raw TCP ports and local webs (HTTP) to the internet WITHOUT needing to install anything in the other server (only in local if needed).**
 
+For forwarding between hosts rather than publishing a service through a public relay, see [Tunneling and Port Forwarding](tunneling-and-port-forwarding.md).
+
 ## **Serveo**
 
-Serveo's documentation describes SSH forwarding for HTTP endpoints and private/public TCP forwarding; requesting a non-80/443 public TCP port (including port 0 for a random port) requires a registered user.<sup>[[1]](#references)</sup>
+Serveo's documentation describes SSH forwarding for HTTP endpoints and private/public TCP forwarding. Port `0` requests a random public TCP port even for anonymous sessions, but those sessions have short time and connection limits; requesting a chosen public TCP port requires a paid account.<sup>[[1]](#references)</sup>
 
 ```bash
 # Get a random port from serveo.net to expose local port 4444
@@ -30,7 +32,7 @@ socketxp connect http://localhost:8080
 
 ## Ngrok
 
-ngrok's CLI documents HTTP and TCP tunnels; its FAQ says free-tier TCP endpoints require a valid payment method and that the card is not charged.<sup>[[3]](#references)[[4]](#references)</sup>
+ngrok's CLI documents HTTP and TCP tunnels. TCP endpoints require a reserved TCP address on the account; the free tier also requires a valid payment method, which the FAQ says is not charged.<sup>[[3]](#references)[[4]](#references)</sup>
 
 ```bash
 # Expose a local web service on port 8000
@@ -87,7 +89,7 @@ npx localtunnel --port 8000
 
 ## Cloudflare Tunnel (cloudflared)
 
-Cloudflare's current docs show unauthenticated "Quick" tunnels for local development, and the product overview lists HTTP, HTTPS, TCP, SSH, and RDP among supported published protocols.<sup>[[11]](#references)[[12]](#references)</sup>
+Cloudflare's current docs show unauthenticated "Quick" tunnels for local development, and the product overview lists HTTP, HTTPS, TCP, SSH, and RDP among supported published protocols.<sup>[[11]](#references)[[12]](#references)</sup> Unlike HTTP(S), published TCP, SSH, and RDP routes are not directly accessible with a stock client: Cloudflare requires `cloudflared` on the connecting client, so these routes do not meet this page's no-client-install requirement for raw TCP.<sup>[[24]](#references)</sup>
 
 For a locally managed named tunnel, Cloudflare documents the `tunnel login`, `create`, `route dns`, and `--config ... run ...` workflow.<sup>[[13]](#references)[[14]](#references)[[17]](#references)</sup>
 
@@ -197,5 +199,6 @@ Adversaries have abused ephemeral tunneling, including Cloudflare's unauthentica
 - [21] [Pinggy Documentation - Usage](https://pinggy.io/docs/usages/)
 - [22] [Pinggy - Simple Localhost Tunnels](https://pinggy.io/)
 - [23] [Proofpoint - Threat Actor Abuses Cloudflare Tunnels to Deliver RATs](https://www.proofpoint.com/uk/blog/threat-insight/threat-actor-abuses-cloudflare-tunnels-deliver-rats)
+- [24] [Cloudflare Docs - Tunnel routing and supported protocols](https://developers.cloudflare.com/tunnel/concepts/routing/)
 
 {{#include ../banners/hacktricks-training.md}}
