@@ -83,6 +83,8 @@ Virtualization imposes interpretation overhead, increases toolchain and ABI comp
 
 ## Related pages
 
+For analysis of VMProtect 3.x packing, see [emulated unpacking and import repair](../generic-methodologies-and-resources/basic-forensic-methodology/malware-analysis.md#vmprotect-3x-emulated-unpacking-and-import-repair).
+
 {{#ref}}
 ../reversing/common-api-used-in-malware.md
 {{#endref}}
