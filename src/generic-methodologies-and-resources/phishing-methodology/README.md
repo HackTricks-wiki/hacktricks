@@ -578,6 +578,12 @@ Notes:
 
 ---
 
+## Display-triggered malvertising through RTB
+
+Unlike a sponsored search result that needs a click, an RTB ad can load third-party JavaScript when its creative renders in a website or app. Citizen Lab observed ad tags calling a separate decision server with advertising identifiers. Most impressions received an empty response; selected impressions could receive JavaScript. A benign response during replay therefore does not establish that every viewer received the same content.<sup>[[14]](#references)</sup>
+
+This is a **delivery mechanism**, not an exploit by itself: executing JavaScript in an ad-rendering context does not automatically install spyware. The underlying browser or OS exploit was not disclosed, so an ad impression or decision-server request alone is not proof of infection. For the identifier-linkage side of RTB targeting, see [Threat Modeling and Identity Separation](../../privacy/threat-modeling-and-identity-separation.md).<sup>[[14]](#references)</sup>
+
 ## AI-Enhanced Phishing Operations
 Attackers now chain **LLM & voice-clone APIs** for fully personalised lures and real-time interaction.
 
@@ -711,5 +717,6 @@ Defence tips:
 - [11] [Hijacking traffic to Microsoft's windows.com with bitflipping (BleepingComputer)](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 - [12] [Love? Actually: Fake dating app used as lure in targeted spyware campaign in Pakistan](https://www.welivesecurity.com/en/eset-research/love-actually-fake-dating-app-used-lure-targeted-spyware-campaign-pakistan/)
 - [13] [ESET GhostChat IoCs and samples](https://github.com/eset/malware-ioc/tree/master/ghostchat)
+- [14] [Exposing AdFection: How Discover-Tech Turned Targeted Ads Into a Pipeline for Zero-Click Mercenary Spyware](https://citizenlab.ca/research/how-discover-tech-turned-targeted-ads-into-a-pipeline-for-spyware/)
 
 {{#include ../../banners/hacktricks-training.md}}
