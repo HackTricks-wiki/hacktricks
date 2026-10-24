@@ -46,6 +46,14 @@ Test channels, not only prompt wording. Start with direct injection to establish
 
 Use a benign, unique marker first. Preserve the source artifact, assembled context if observable, selected tool call, approval data, backend request/response, and final state. This separates influence from a hallucinated claim that an action occurred.<sup>[[2]](#references)</sup>
 
+### Policy-shaped text in a tool-risk judge
+
+A model-based tool gate can receive attacker-controlled text inside otherwise useful classification context. LangChain's experimental `AutoModeMiddleware`, for example, sends a proposed tool call, its arguments, an optional tool description, and up to 30 recent messages to a TypeSafe `is_risky` judge. It blocks configured tools when the returned Noul probability is at least `0.5`; unlisted tools are not classified by this middleware.<sup>[[5]](#references)</sup> TypeSafe also warns that adversarial text in state can influence a classification even when state is intended to be data.<sup>[[6]](#references)</sup>
+
+A **counterfeit policy** is different from simply claiming to be a system message. It places alternative labels or risk definitions inside lower-trust state and invites the judge to use those definitions instead of its developer-defined criteria. In Datadog's test, a user-editable `profile_description` was copied into the tool arguments alongside `can_edit:false`. Its policy-like text argued that a write attempt was low risk because a separate permission check should reject it before any mutation. Across 40 runs, the mean `is_risky` score fell from `0.893` to `0.290`, while a direct role-spoofing comparison averaged `0.905`. The mean falling below `0.5` does not prove every individual call passed the gate, and the experiment did **not** demonstrate a completed unauthorized write.<sup>[[7]](#references)</sup>
+
+When testing this boundary, distinguish the classifier verdict from the tool's actual authorization result. Check which editable fields reach the judge, compare the same proposed action with and without policy-like text, and verify the final state independently. A separate permission check must still use the authenticated requester's authority rather than the connector's service-account rights.<sup>[[7]](#references)</sup> See [prompt-filter bypasses](AI-Prompts.md#prompt-waf-bypass) for other classifier failure modes; [LLM gateway trust boundaries](AI-LLM-Gateway-Security.md) concern a different routing and credential boundary.
+
 ### Subagent context isolation
 
 A non-fork Claude Agent SDK subagent receives its own `AgentDefinition.prompt`, the delegation prompt, and its available tools, but not the parent system prompt or conversation. If `tools` is omitted from its definition, it inherits the tools available to subagents; project `CLAUDE.md` may still load. This makes a parent-only prompt restriction an unreliable boundary when the child can use the same filesystem or execution tools.<sup>[[4]](#references)</sup>
@@ -104,5 +112,8 @@ Prompt filters and a better system prompt can raise attacker cost, but they shou
 - [2] [The Hacker's Guide to Attacking AI Agents](https://darkmarc.substack.com/p/the-hackers-guide-to-attacking-ai)
 - [3] [How Hard Is It Really to Break an AI Agent Out of Its Sandbox?](https://www.nccgroup.com/research/how-hard-is-it-really-to-break-an-ai-agent-out-of-its-sandbox/)
 - [4] [Subagents in the SDK](https://code.claude.com/docs/en/agent-sdk/subagents)
+- [5] [LangChain TypeSafe Auto Mode middleware source](https://github.com/langchain-ai/langchain/blob/master/libs/partners/typesafe/langchain_typesafe/experimental/middleware/auto_mode.py)
+- [6] [TypeSafe AI Jev model jaggedness: adversarial content](https://docs.typesafe.ai/model-jaggedness/jev-1.13#adversarial-content)
+- [7] [Jev as a judge: How counterfeit policy steers Jev](https://securitylabs.datadoghq.com/articles/jev-as-a-judge-how-counterfeit-policy-steers-jev/)
 
 {{#include ../banners/hacktricks-training.md}}
