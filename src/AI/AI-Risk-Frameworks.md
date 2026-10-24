@@ -101,6 +101,8 @@ Running a local LLM server for confidential data creates a different attack surf
 
 Treat the inference API as a **multi-user sensitive service**. Debug or monitoring routes can expose prompt contents, slot state, model metadata, or internal queue information. In `llama.cpp`, the `/slots` endpoint is especially sensitive because it exposes per-slot state and is only meant for slot inspection/management.<sup>[[8]](#references)</sup>
 
+For how to find and abuse exposed Ollama, llama.cpp, vLLM and similar services from the outside, check [Exposed Self-Hosted AI Services](AI-Exposed-Self-Hosted-AI-Services.md).
+
 - Put a reverse proxy in front of the inference server and **deny by default**.
 - Only allowlist the exact HTTP method + path combinations that are needed by the client/UI.
 - Disable introspection endpoints in the backend itself whenever possible, for example `llama-server --no-slots`.<sup>[[9]](#references)</sup>

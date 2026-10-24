@@ -263,6 +263,8 @@ The current MCP authorization guidance explicitly forbids **token passthrough** 
 
 Remote MCP servers expose a JSON‑RPC 2.0 API that fronts LLM‑centric capabilities (Prompts, Resources, Tools). They inherit classic web API flaws while adding async transports (SSE/streamable HTTP) and per‑session semantics.<sup>[[37]](#references)</sup>
 
+For the agent-to-agent counterpart of MCP (agent cards, `message/send` / `SendMessage`, task IDOR and push-notification SSRF), see [A2A Protocol](AI-A2A-Protocol.md).
+
 Key actors
 - Host: the LLM/agent frontend (Claude Desktop, Cursor, etc.).
 - Client: per‑server connector used by the Host (one client per server).
