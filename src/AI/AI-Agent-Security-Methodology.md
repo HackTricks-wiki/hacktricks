@@ -2,74 +2,74 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-エージェントの評価では、**攻撃者が制御する入力から、外部から観測可能な影響まで**を追跡します。Jailbreaking、文字の変更、システムプロンプトの開示によって、推論チャネルが影響を受けることは示せます。しかし、重大な発見となるのは、データアクセス、不正なツール操作、後続のインジェクションシンク、永続化、または別のエージェントへと連鎖することです。<sup>[[2]](#references)</sup>
+エージェントの評価では、**攻撃者が制御する入力から、外部から観測可能な影響まで**を追跡します。Jailbreaking、文字の変更、system promptの開示は、推論チャネルが操作可能であることを示します。しかし、重大な発見となるのは、データアクセス、不正なtoolの実行、下流のinjection sink、永続化、別のエージェントなどにつながる一連の流れです。<sup>[[2]](#references)</sup>
 
-[OWASP Top 10 for Agentic Applications](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)は、網羅範囲（目標の乗っ取り、ツールの悪用、権限の濫用、サプライチェーン、コード実行、メモリポイズニング、エージェント間の信頼、連鎖的な障害、人間の信頼、rogue agents）のラベル付けに役立ちます。モデルが予想外のテキストを返しただけでテストを終えず、エンドツーエンドの攻撃経路を構築してから、これらのラベルを使ってください。<sup>[[1]](#references)[[2]](#references)</sup>
+[OWASP Top 10 for Agentic Applications](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)は、テスト範囲（goal hijacking、tool misuse、privilege abuse、supply chain、code execution、memory poisoning、inter-agent trust、cascading failures、human trust、rogue agents）の分類に役立ちます。モデルが予想外のテキストを出した時点でテストを終わらせず、エンドツーエンドの攻撃経路を構築してから、これらの分類を使用してください。<sup>[[1]](#references)[[2]](#references)</sup>
 
-## ターゲットマップの作成
+## Build the target map
 
-ペイロードを作成する前に、各エージェントワークフローについて次の5つの観点を記録します。<sup>[[2]](#references)</sup>
+payloadを作成する前に、各エージェントワークフローについて、次の5つの観点を記録してください。<sup>[[2]](#references)</sup>
 
-| 観点 | 列挙するもの | セキュリティ上の問い |
+| 観点 | 洗い出す項目 | セキュリティ上の問い |
 |---|---|---|
-| **信頼できない入力** | チャット/APIパラメーター、URL、ドキュメント、メール、チケット、カレンダー項目、取得したチャンク、メモリ、ツールの結果、エージェント間メッセージ | 攻撃者が、後でモデルのコンテキストに入るコンテンツを配置できる場所はどこか？ |
-| **ツール** | ツール名とスキーマ、副作用、自動実行、確認動作、動的に読み込まれるツール | どの呼び出しが、秘密情報の読み取り、状態の書き込み、メッセージ送信、データ削除、コード実行、または価値の移転を行うか？ |
-| **権限** | ユーザーによる委任、サービスアカウント、APIトークン、認証情報の有効期間、テナント/リソースのスコープ、ネットワーク到達範囲 | 各呼び出しはどのIDで実行され、ツール境界で認可は再確認されるか？ |
-| **処理** | クエリビルダー、シェル、URLフェッチャー、テンプレートエンジン、インタープリター、パーサー、ファイル操作、デシリアライザー | モデルが生成したデータが、別のインタープリターの構文になる場所はどこか？ |
-| **出力** | 応答、レンダリングされたMarkdown/HTML、リンク、画像フェッチ、webhook、メール、ファイル、ログ、レポート、メトリクス、エージェント間通信 | どの観測可能なチャネルが、秘密情報を運んだり、二次リクエストを発生させたりするか？ |
+| **信頼できない入力** | Chat/APIパラメーター、URL、ドキュメント、メール、チケット、カレンダー項目、取得したチャンク、メモリ、toolの結果、他のエージェントからのメッセージ | 攻撃者が、後にモデルのコンテキストに入る内容を配置できる場所はどこか？ |
+| **Tools** | toolの名前とスキーマ、副作用、自動実行、確認動作、動的に読み込まれるtool | どの呼び出しが秘密情報を読み取り、状態を書き換え、メッセージを送信し、データを削除し、コードを実行し、価値を移転するか？ |
+| **権限** | ユーザー委任、サービスアカウント、API token、認証情報の有効期間、テナント/リソースの範囲、ネットワーク到達性 | 各呼び出しはどのIDで実行され、toolの境界で認可が再確認されるか？ |
+| **処理** | クエリビルダー、shell、URL fetcher、template engine、interpreter、parser、ファイル操作、deserializer | モデルが生成したデータが、別のinterpreterの構文になるのはどこか？ |
+| **出力** | 応答、レンダリングされたMarkdown/HTML、リンク、画像fetch、webhook、メール、ファイル、ログ、レポート、メトリクス、他のエージェントとの通信 | どの観測可能なチャネルが秘密情報を運んだり、二次リクエストを発生させたりするか？ |
 
-これを、宣伝されている連携機能の一覧にまとめてしまわないでください。有用な成果物では、各ソースが到達する具体的なコンテキスト内の位置、その時点で利用可能なツール、各ツールが使う認証情報、後続のインタープリター、すべての送信経路を対応付けます。同じツールでも、ユーザーごとの読み取りトークンであれば影響は小さい一方、共有の管理者認証情報であれば重大な影響を及ぼします。<sup>[[2]](#references)</sup>
+これを、宣伝されている連携機能の一覧にまとめてはいけません。有用な成果物では、各入力元が到達する正確なコンテキスト位置、その時点で利用可能なtool、各toolが使う認証情報、下流のinterpreter、すべての外向き通信経路を対応づけます。同じtoolでも、ユーザーごとの読み取りtokenであれば影響は小さく、共有のadministrator認証情報を使う場合は重大になり得ます。<sup>[[2]](#references)</sup>
 
-## 偵察
+## Reconnaissance
 
-### すべての配信経路と取り込み経路を把握する
+### あらゆる入力・取り込み経路を洗い出す
 
-配信面（web、モバイル、API、メール、チャットプラットフォーム、ブラウザー拡張機能）から始め、クライアントからバックエンドへの通信をプロキシします。UIから隠されているフィールド、検索/オートコンプリート/フィルターのパラメーター、会話状態オブジェクト、アップロードとインデックス作成のジョブ、ツールの応答、サブエージェントの通信を調べます。モバイル専用クライアントでは、実際のリクエストスキーマが見えるようになる前に、証明書ピンニングを回避するためエミュレーターと計測ツールが必要な場合があります。<sup>[[2]](#references)</sup>
+入力面（web、mobile、API、email、chat platform、browser extension）から始め、クライアントとバックエンド間の通信をproxy経由で確認します。UIで隠されているフィールド、検索/autocomplete/filterのパラメーター、会話状態オブジェクト、uploadとindexingのjob、toolの応答、sub-agentの通信を調べます。Mobile専用クライアントの場合、実際のrequestスキーマを確認する前に、証明書pinningを回避するためemulatorとinstrumentationが必要になることがあります。<sup>[[2]](#references)</sup>
 
-次に、モデルの下にあるスタックを把握します。オーケストレーションフレームワーク、プロンプトの組み立て、検索とメモリのストア、ランタイム（例: Python、コンテナ、WASM）、マウントされたボリューム、ホストサービス、内部API、クラウドメタデータへの到達可能性、隣接ネットワークを確認します。フレームワークのデフォルト設定は重要です。「ツール呼び出し」の中には、コードを生成または評価して実装されるものがあるためです。その結果が封じ込められるかどうかは、ランタイム/サンドボックスの境界によって決まります。<sup>[[2]](#references)</sup>
+次に、モデルの下にあるstackを洗い出します。orchestration framework、prompt assembly、retrievalとmemoryのstore、runtime（例：Python、container、WASM）、mountされたvolume、host service、内部API、cloud metadataへの到達性、隣接するnetworkを確認します。frameworkのデフォルト設定も重要です。コードを生成または評価することで実装される「tool call」があり、生成結果が封じ込められるかどうかはruntime/sandboxの境界によって決まるためです。<sup>[[2]](#references)</sup>
 
-### 破壊的でないプローブでルーティングを特定する
+### 破壊的でないprobeでルーティングを特定する
 
-対象範囲内のリクエストと、無関係な複数のリクエストを比較し、完全な応答、ステータスコード、レイテンシ、ストリーミングの挙動を記録します。タスク固有の推論が始まる前に一貫して拒否される場合は、別のゲートウェイ/分類器が存在する可能性があります。文脈に応じた拒否は、リクエストがモデルに到達したことを示唆します。空の応答や抽出だけの回答は、キーワード検索や限定的な検索を示している可能性があります。これらは仮説として扱い、同じプローブを別のAPIフィールドや取り込み経路から再送信して確認してください。<sup>[[2]](#references)</sup>
+対象範囲内のrequestを、無関係な複数のrequestと比較します。その際、応答全体、status code、latency、streaming動作を保持してください。タスク固有の推論が始まる前に常に同じ拒否が返る場合は、別のgateway/classifierの存在が考えられます。文脈に応じた拒否は、requestがモデルに到達したことを示唆します。空の回答や、抽出のみの回答は、キーワード検索または限定的なretrievalを示している可能性があります。これらは仮説として扱い、同じprobeを別のAPI fieldや取り込み経路から再送して確認してください。<sup>[[2]](#references)</sup>
 
-偵察が完了したと言えるのは、評価者がエージェントの挙動を変える最も早い攻撃者制御のソース**と**、そのソースから到達できるツール、ID、インタープリター、出力を特定できたときです。<sup>[[2]](#references)</sup>
+評価で特定すべきなのは、エージェントの動作を変える、攻撃者が制御可能な最も早い入力元と、そこから到達可能なtool、ID、interpreter、出力です。これができた時点でReconは完了です。<sup>[[2]](#references)</sup>
 
-## 悪用: 信頼境界を越える
+## Exploitation: trust boundaryを越える
 
-プロンプトの文言だけでなく、チャネルをテストしてください。まず直接的なインジェクションで、表向きの入口が何をブロックするかを確認し、その後、同等の意図を以下の目立ちにくい経路で繰り返します。<sup>[[2]](#references)</sup>
+promptの文言だけでなく、チャネルをテストしてください。まずdirect injectionで、ユーザーに見える入口が何をブロックするかを確認し、次に、以下の見えにくい経路を通して同等の意図を再度試します。<sup>[[2]](#references)</sup>
 
-- **間接コンテンツ:** ページ、ファイル、メール、チケット、メタデータ、altテキスト、HTMLコメント、画面外のテキスト、またはゼロ幅文字。ペイロードを配信する手法については、[AI Prompts](AI-Prompts.md#third-party-or-indirect-prompt-injection)を参照してください。
-- **検索とメモリ:** 後で取得されるコンテンツや、後のセッションで再読み込みされる状態をポイズニングします。元のソースを削除すると挙動もなくなるか記録してください。
-- **ツールの出力とピアエージェント:** ツールの応答またはエージェント間メッセージにマーカーを埋め込み、ユーザー入力と最終出力にのみ適用されるフィルターを内部通信が回避できるかテストします。
-- **サプライチェーン:** ツールの記述子、プラグイン、接続されたサーバー、スキル、モデル、依存関係を、信頼された指示ソースとして確認します。MCP固有のテストについては、[MCP Servers](AI-MCP-Servers.md#mcp-vulns)を参照してください。
-- **人間による承認:** 実際の構造化ツール呼び出しと、モデルが生成した承認テキストを比較します。攻撃者の影響によって、宛先、スコープ、対象オブジェクト、または不可逆な副作用が省略されるかテストします。
+- **間接コンテンツ:** ページ、ファイル、メール、チケット、metadata、alt text、HTMLコメント、画面外のテキスト、zero-width character。payloadの配信手法については[AI Prompts](AI-Prompts.md#third-party-or-indirect-prompt-injection)を参照してください。
+- **Retrievalとmemory:** 後でretrievalされるコンテンツ、または後続セッションで再読み込みされる状態を汚染します。元のソースを削除すると動作もなくなるかどうかを記録してください。
+- **Toolの出力と他のエージェント:** toolの応答またはエージェント間のメッセージにmarkerを埋め込み、ユーザー入力と最終出力にのみ適用されるfilterを、内部通信が回避するかどうかをテストします。
+- **Supply chain:** tool descriptor、plugin、接続先server、skill、model、dependencyを、信頼された指示のソースとして確認します。MCP固有のテストについては[MCP Servers](AI-MCP-Servers.md#mcp-vulns)を参照してください。
+- **人間による承認:** 実際の構造化tool callと、モデルが生成した承認文を比較します。攻撃者の影響によって、宛先、範囲、影響を受けるオブジェクト、取り消せない副作用が省略されるかどうかをテストしてください。
 
-まず、無害で一意なマーカーを使います。ソースの成果物、観測可能であれば組み立てられたコンテキスト、選択されたツール呼び出し、承認データ、バックエンドのリクエスト/応答、最終状態を保存します。これにより、実際に操作が行われたという幻覚的な主張と、影響を区別できます。<sup>[[2]](#references)</sup>
+まず、無害で一意なmarkerを使います。ソースのartifact、観測可能であれば組み立てられたコンテキスト、選択されたtool call、承認データ、バックエンドのrequest/response、最終状態を保存してください。これにより、影響を受けた状態と、実際には発生していない処理を発生したかのように述べるhallucinationを区別できます。<sup>[[2]](#references)</sup>
 
-### ツールリスク判定におけるポリシー風テキスト
+### Toolリスク判定器に対するpolicy風テキスト
 
-モデルベースのツールゲートは、有用な分類コンテキスト内に攻撃者制御のテキストを含む場合があります。たとえば、LangChainの実験的な`AutoModeMiddleware`は、提案されたツール呼び出し、その引数、任意のツール説明、直近30件までのメッセージをTypeSafeの`is_risky`判定器に送信します。返されたNoul確率が`0.5`以上の場合、設定されたツールをブロックします。このミドルウェアでは、リストにないツールは分類されません。<sup>[[5]](#references)</sup> TypeSafeも、状態がデータとして扱われる想定であっても、状態内の敵対的なテキストが分類に影響を与える可能性があると警告しています。<sup>[[6]](#references)</sup>
+モデルベースのtool gateは、有用な分類コンテキストに含まれた攻撃者制御テキストを受け取る場合があります。たとえばLangChainのexperimental `AutoModeMiddleware`は、提案されたtool call、その引数、任意のtool description、直近最大30件のメッセージをTypeSafeの`is_risky` judgeに送信します。返されたNoulの確率が`0.5`以上の場合、設定済みのtoolをブロックします。このmiddlewareは、リストにないtoolを分類しません。<sup>[[5]](#references)</sup> TypeSafeも、stateがデータとして扱われる想定であっても、state内の敵対的なテキストが分類結果に影響する可能性があると警告しています。<sup>[[6]](#references)</sup>
 
-**偽装ポリシー**は、単にシステムメッセージを装うのとは異なります。信頼度の低い状態に別のラベルやリスク定義を埋め込み、開発者が定義した基準ではなく、その定義を判定器に使わせようとします。Datadogのテストでは、ユーザーが編集できる`profile_description`が、`can_edit:false`とともにツールの引数にコピーされていました。そこに含まれたポリシー風のテキストは、変更が実行される前に別の権限チェックで拒否されるため、書き込みの試みは低リスクだと主張していました。40回の実行では、`is_risky`の平均スコアが`0.893`から`0.290`に低下しました。一方、直接的なロールなりすましの比較では平均`0.905`でした。平均が`0.5`を下回ったからといって、個々の呼び出しがすべてゲートを通過したとは限りません。また、この実験では不正な書き込みが完了したことは**実証されていません**。<sup>[[7]](#references)</sup>
+**偽装policy**は、単にsystem messageを装うのとは異なります。信頼度の低いstateに別のラベルやリスク定義を置き、developerが定義した基準ではなく、そちらをjudgeに使わせようとします。Datadogのテストでは、ユーザーが編集可能な`profile_description`が、`can_edit:false`とともにtoolの引数へコピーされていました。そのpolicy風テキストは、変更前に別の権限チェックで拒否されるはずなので、書き込みの試行は低リスクだと主張していました。40回の試行で、`is_risky`の平均スコアは`0.893`から`0.290`に下がりました。一方、直接的なrole spoofingとの比較では平均`0.905`でした。平均が`0.5`を下回ったからといって、個々の呼び出しがすべてgateを通過したことにはなりません。また、この実験では不正な書き込みが完了したことも実証されていません。<sup>[[7]](#references)</sup>
 
-この境界をテストするときは、分類器の判定と、ツールの実際の認可結果を区別してください。編集可能なフィールドのうちどれが判定器に渡されるかを確認し、ポリシー風のテキストがある場合とない場合で同じ操作を比較し、最終状態を独立して検証します。別の権限チェックでは、コネクターのサービスアカウントの権限ではなく、認証済みのリクエスト送信者の権限を必ず使用してください。<sup>[[7]](#references)</sup> その他の分類器の失敗パターンについては[prompt-filter bypasses](AI-Prompts.md#prompt-waf-bypass)を参照してください。[LLM gateway trust boundaries](AI-LLM-Gateway-Security.md)は、別のルーティングと認証情報の境界を扱います。
+この境界をテストする際は、classifierの判定とtoolの実際の認可結果を区別してください。編集可能なfieldのうち、どれがjudgeに渡されるかを確認し、同じ操作をpolicy風テキストあり/なしで比較して、最終状態を個別に検証します。別個の権限チェックでは、connectorのサービスアカウント権限ではなく、認証済みrequesterの権限を必ず使う必要があります。<sup>[[7]](#references)</sup> その他のclassifierの失敗パターンについては[prompt-filter bypasses](AI-Prompts.md#prompt-waf-bypass)を参照してください。[LLM gateway trust boundaries](AI-LLM-Gateway-Security.md)は、これとは異なるルーティングと認証情報の境界を扱っています。
 
-### サブエージェントのコンテキスト分離
+### Subagentのコンテキスト分離
 
-Claude Agent SDKの非forkサブエージェントは、独自の`AgentDefinition.prompt`、委任プロンプト、利用可能なツールを受け取りますが、親のシステムプロンプトや会話は受け取りません。定義で`tools`が省略されている場合、サブエージェントが利用できるツールを継承します。プロジェクトの`CLAUDE.md`が読み込まれる場合もあります。子エージェントが同じファイルシステムや実行ツールを使えるなら、親だけに適用されるプロンプト制限は信頼できる境界になりません。<sup>[[4]](#references)</sup>
+forkされないClaude Agent SDKのsubagentは、独自の`AgentDefinition.prompt`、委任prompt、利用可能なtoolを受け取りますが、親のsystem promptや会話は受け取りません。定義で`tools`が省略されている場合、subagentが利用可能なtoolを継承します。また、プロジェクトの`CLAUDE.md`が読み込まれる場合があります。そのため、子が親と同じfilesystemまたは実行toolを使える場合、親だけに適用されるprompt制限は、信頼できる境界とは言えません。<sup>[[4]](#references)</sup>
 
-親が拒否する直接リクエストと、同じタスクを名前付きサブエージェントに委任した場合を比較して、この境界をテストします。NCC Groupは、拒否されたOSのファイル列挙が、子エージェントに無害な「レイアウトマップ」と言い換えて依頼すると成功したと報告しています。<sup>[[3]](#references)</sup>
+親が拒否するrequestと、同じタスクを名前付きsubagentに委任した場合とを比較して、この境界をテストしてください。NCC Groupの報告では、OSのファイル一覧の取得は拒否されたものの、子に対する無害な「layout map」という依頼に言い換えると成功しました。<sup>[[3]](#references)</sup>
 
-親の最終回答だけでなく、子エージェントが実際に行ったツール呼び出しと、有効なツール許可リストを確認します。親ならアクセスしないファイルに子がアクセスしたかどうかを確かめてください。<sup>[[4]](#references)</sup>これはガードレールの継承に関する失敗であり、[Python sandbox](../generic-methodologies-and-resources/python/bypass-python-sandboxes/)やコンテナからのエスケープを証明するものではありません。<sup>[[3]](#references)[[4]](#references)</sup>
+親の最終回答だけでなく、子が実際に行ったtool callと有効なtool allowlistを調べてください。子が親ならアクセスしないはずのファイルにアクセスしたかどうかを確認します。<sup>[[4]](#references)</sup> これはguardrailの継承失敗であり、[Python sandbox](../generic-methodologies-and-resources/python/bypass-python-sandboxes/)やcontainerからの脱出を証明するものではありません。<sup>[[3]](#references)[[4]](#references)</sup>
 
-## 実行: 実際の影響を実証する
+## Execution: 実際の影響を証明する
 
-影響に至る経路は、次の2種類に分けられます。<sup>[[2]](#references)</sup>
+影響に至る経路は、操作から大きく2つに分かれます。<sup>[[2]](#references)</sup>
 
-1. **権限の悪用:** 認可済みのツールが、すでに目的の操作を実行できるケースです。たとえば、あるテナントのレコードを読み取り、攻撃者が閲覧できるレポートに書き込む、メールを送信する、レコードを変更する、ファイルを削除する、または支払いを開始するといった例があります。二次的なソフトウェアの脆弱性は必要ありません。
-2. **後続シンクの悪用:** 攻撃者に誘導されたモデル出力が、別のコンポーネントの構文になるケースです。データベースクエリでは[SQL injection](../pentesting-web/sql-injection/README.md)または[NoSQL injection](../pentesting-web/nosql-injection.md)、シェルラッパーでは[command injection](../pentesting-web/command-injection.md)、選択されたURLでは[SSRF](../pentesting-web/ssrf-server-side-request-forgery/README.md)、ファイル操作ではパストラバーサル、テンプレート/コード評価器ではRCE、オブジェクトパーサーでは[unsafe deserialization](../pentesting-web/deserialization/README.md)を調べます。
+1. **権限の悪用:** 許可されたtoolが、すでに目的の処理を実行できる場合です。たとえば、あるtenantのレコードを読み取って攻撃者が確認できるレポートに書き込む、メールを送信する、レコードを変更する、ファイルを削除する、支払いを開始するといった操作が該当します。二次的なソフトウェアの脆弱性は必要ありません。
+2. **下流sinkの悪用:** 攻撃者に誘導されたモデルの出力が、別のコンポーネントにとっての構文になる場合です。[SQL injection](../pentesting-web/sql-injection/README.md)や[NoSQL injection](../pentesting-web/nosql-injection.md)につながるdatabase query、[command injection](../pentesting-web/command-injection.md)につながるshell wrapper、[SSRF](../pentesting-web/ssrf-server-side-request-forgery/README.md)につながる指定可能なURL、path traversalにつながるファイル操作、RCEにつながるtemplate/code evaluator、[unsafe deserialization](../pentesting-web/deserialization/README.md)につながるobject parserを確認してください。
 
-候補ごとに、次の連鎖を実証します。<sup>[[2]](#references)</sup>
+候補ごとに、次の一連の流れを証明してください。<sup>[[2]](#references)</sup>
 
 ```text
 attacker-controlled source
@@ -80,39 +80,41 @@ attacker-controlled source
   -> externally verified state change or data egress
 ```
 
-読み取り専用の連携であっても、後続のコンポーネントが読み取った内容を公開できる場合は悪用可能です。通常の応答に加えて、攻撃者が制御するリンク、自動画像取得、webhook、ログ、レポート、カウンター、通知、他のエージェントへのメッセージなど、見落とされやすい外部送信経路もテストしてください。<sup>[[2]](#references)</sup>
+読み取り専用の integration でも、後続のコンポーネントが読み取った内容を公開できるなら、悪用される可能性があります。通常の応答に加え、攻撃者が制御するリンク、自動画像取得、webhook、ログ、レポート、カウンター、通知、他の agent へのメッセージなど、見落とされがちなデータ流出経路もテストしてください。<sup>[[2]](#references)</sup>
 
 ## 目的に対するアクション
 
-1つのアクションを確認したら、最初に目に見えた影響だけで終わらせず、影響範囲全体を評価してください。<sup>[[2]](#references)</sup>
+1つのアクションを確認したら、最初に見えた影響で調査を終えず、影響範囲全体を評価してください。<sup>[[2]](#references)</sup>
 
-- **情報窃取:** 秘密情報、ユーザーレコード、内部ファイル、会話データ、またはプロンプトやコンテキストの内容が、観測可能な経路を通じて外部に送信される。
-- **不正なアクション:** エージェントが正規の書き込み権限を攻撃者の目的に利用する。
-- **サービス拒否:** 破壊的なツールや、コストの高い操作の繰り返しによって、完全性または可用性に影響が及ぶ。
-- **永続化:** 汚染されたメモリ、インデックス化されたコンテンツ、信頼済み状態、またはランタイムの変更が、元のセッションの終了後や情報源の削除後も残る。
-- **伝播:** 信頼されたピアが侵害されたエージェントのメッセージや共有状態を利用し、自らのツールと認証情報で同じアクションを繰り返す。
+- **情報漏えい:** 秘密情報、ユーザーレコード、内部ファイル、会話データ、または prompt/context の内容が、観測可能な経路を通じて外部に送信される。
+- **不正なアクション:** agent が正規の書き込み機能を攻撃者の目的に利用する。
+- **サービス拒否:** 破壊的なツールや、繰り返される高コストな操作が、完全性または可用性に影響を与える。
+- **永続化:** 汚染されたメモリ、インデックス化されたコンテンツ、信頼された状態、またはランタイムの変更が、元のセッションやコンテンツの削除後も残る。
+- **伝播:** 信頼された peer が侵害された agent のメッセージや共有状態を受け取り、自身のツールと認証情報を使って同じアクションを繰り返す。
 
-深刻度は、モデルの出力がどれほど意外に見えるかではなく、アクセス可能なデータ、実効権限、シンクの悪用可能性、外部送信、永続化、伝播に基づいて判断してください。<sup>[[2]](#references)</sup>
+深刻度は、model のテキストがどれほど意外に見えるかではなく、アクセス可能なデータ、実効権限、sink の悪用可能性、データ流出経路、永続化、伝播に基づいて判断してください。<sup>[[2]](#references)</sup>
 
-## 評価中に検証するコントロール
+## 評価中に検証する対策
 
-プロンプトフィルターや、より優れたシステムプロンプトは攻撃者のコストを高める可能性がありますが、認可境界として扱ってはいけません。以下のコントロールについて、直接入力、間接的なコンテンツ、メモリ、ツール、ピアエージェントを経由して同じ攻撃チェーンを再実行し、検証してください。<sup>[[2]](#references)</sup>
+prompt フィルターや、より優れた system prompt は攻撃者のコストを上げることはできますが、認可の境界として扱うべきではありません。直接入力、間接コンテンツ、メモリ、ツール、peer agent を介して同じ攻撃チェーンを再実行し、以下の対策を検証してください。<sup>[[2]](#references)</sup>
 
-- 決定論的なポリシーレイヤーが、**すべてのツール呼び出し**で認証済みユーザー、テナント、オブジェクト、アクション、宛先を確認する。モデルが呼び出し元のIDを指定したり、上書きしたりできない。
-- 読み取りと書き込みの権限には、個別の最小権限かつ短命な認証情報を使用する。影響の大きいツールは必要なときだけ公開し、取り込んだコンテンツを契機に自動実行しない。
-- ネットワークの外部送信と内部宛先は、モデルが選択したURLとは独立して許可リストで管理する。必要な場合を除き、ランタイムからメタデータエンドポイント、マウントされた秘密情報、隣接サービスへのアクセスを遮断する。
-- 承認UIは正規の構造化リクエストから生成し、自由形式のモデル要約ではなく、正確な引数、ID、宛先、影響を受けるオブジェクト、副作用を表示する。
-- 成功は宛先システムまたは信頼できる記録システムで確認する。エージェントによる説明、ツール呼び出しのリクエスト、HTTPリダイレクトは、主張された状態変更の証明にならない。
-- メモリと検索エントリには出所と信頼ラベルを保持し、無効化できるようにする。また、後続のアクションで使用する際に再認可する。
-- エージェント間のメッセージは、認証・認可された、信頼できないリクエストとして扱う。ピアの評判やエージェントカードによって、受信側のツール利用権限が暗黙に委譲されることはない。
+- 決定論的なポリシーレイヤーが、**すべてのツール呼び出し**で、認証済みユーザー、tenant、オブジェクト、アクション、宛先を確認する。model が呼び出し元の identity を指定したり上書きしたりできない。
+- 読み取りと書き込みの権限に、分離された最小権限の短命な認証情報を使用する。影響の大きいツールは必要な時だけ公開し、取り込んだコンテンツから自動実行しない。
+- ネットワークの egress と内部宛先を、model が選択した URL とは独立して allowlist に登録する。必要な場合を除き、metadata endpoint、マウントされた secret、隣接サービスへのランタイムアクセスをブロックする。
+- 承認 UI は、正規の構造化リクエストから生成し、自由形式の model 要約ではなく、正確な引数、identity、宛先、影響対象オブジェクト、副作用を表示する。
+- 成功は宛先システムまたは system of record で検証する。agent の説明、ツール呼び出しリクエスト、HTTP redirect は、主張された状態変更の証明にはならない。
+- メモリと検索エントリは出所と信頼ラベルを保持し、無効化できるようにする。また、後続のアクションで使用する際に再認可する。
+- agent 間メッセージは、信頼できないリクエストとして認証・認可する。peer の評判や agent card によって、受信側のツール使用権限が暗黙に委譲されることはない。
+
+A2A agent card、task flow、およびその攻撃対象領域については、[A2A Protocol Security](AI-A2A-Protocol.md)を確認してください。
 
 ## References
 
-- [1] [2026年版 OWASP Agentic Applications Top 10](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)
-- [2] [AIエージェントを攻撃するためのハッカーガイド](https://darkmarc.substack.com/p/the-hackers-guide-to-attacking-ai)
-- [3] [AIエージェントをサンドボックスから脱出させるのは、実際どれほど難しいのか？](https://www.nccgroup.com/research/how-hard-is-it-really-to-break-an-ai-agent-out-of-its-sandbox/)
-- [4] [SDKのサブエージェント](https://code.claude.com/docs/en/agent-sdk/subagents)
-- [5] [LangChain TypeSafe Auto Modeミドルウェアのソースコード](https://github.com/langchain-ai/langchain/blob/master/libs/partners/typesafe/langchain_typesafe/experimental/middleware/auto_mode.py)
-- [6] [TypeSafe AI Jevモデルの不均一性：敵対的コンテンツ](https://docs.typesafe.ai/model-jaggedness/jev-1.13#adversarial-content)
-- [7] [判定役としてのJev：偽造ポリシーがJevを誘導する仕組み](https://securitylabs.datadoghq.com/articles/jev-as-a-judge-how-counterfeit-policy-steers-jev/)
+- [1] [2026年版 OWASP Agentic Applications トップ10](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)
+- [2] [AI Agent を攻撃するための Hacker ガイド](https://darkmarc.substack.com/p/the-hackers-guide-to-attacking-ai)
+- [3] [AI Agent を sandbox から脱出させるのは、実際どれほど難しいのか？](https://www.nccgroup.com/research/how-hard-is-it-really-to-break-an-ai-agent-out-of-its-sandbox/)
+- [4] [SDK の Subagent](https://code.claude.com/docs/en/agent-sdk/subagents)
+- [5] [LangChain TypeSafe Auto Mode middleware のソースコード](https://github.com/langchain-ai/langchain/blob/master/libs/partners/typesafe/langchain_typesafe/experimental/middleware/auto_mode.py)
+- [6] [TypeSafe AI Jev model jaggedness: 敵対的コンテンツ](https://docs.typesafe.ai/model-jaggedness/jev-1.13#adversarial-content)
+- [7] [judge としての Jev: 偽造されたポリシーが Jev を操る仕組み](https://securitylabs.datadoghq.com/articles/jev-as-a-judge-how-counterfeit-policy-steers-jev/)
 {{#include ../banners/hacktricks-training.md}}
