@@ -4,15 +4,15 @@
 
 ## Häufige CTF-Muster
 
-- „Signatur“ ist tatsächlich `hash(secret || message)` → length extension.
-- Ungesalzene Passwort-Hashes → schnelleres wiederholtes cracking und vorberechnete Lookup-Angriffe.
-- Hash mit MAC verwechseln (hash != Authentifizierung).
+- „Signatur“ ist eigentlich `hash(secret || message)` → Length Extension.
+- Ungesalzene Passwort-Hashes → schnelleres wiederholtes Cracken und vorberechnete Lookup-Angriffe.
+- Hash mit MAC verwechseln (Hash != Authentifizierung).
 
-## MD5-Hash-Suchen mit gewählter Eingabe
+## MD5-Hash-Suchen mit gewählten Eingaben
 
-Diese Python-Beispiele suchen nach zwei unterschiedlichen Ausgabemustern: einem gewählten MD5-Suffix und einem MD5-Wert, der mit `0e` beginnt, gefolgt von Ziffern. Das zweite Muster ist relevant, wenn eine Anwendung numerische Zeichenfolgen nicht strikt vergleicht; siehe das PHP-spezifische Verhalten und die Versionshinweise unter [PHP loose comparisons](../../network-services-pentesting/pentesting-web/php-tricks-esp/README.md#loose-comparisons-and-type-juggling).
+Diese Python-Beispiele suchen nach zwei verschiedenen Ausgabemustern: einem gewählten MD5-Suffix und einem MD5-Wert, der mit `0e` beginnt, auf das ausschließlich Ziffern folgen. Das zweite Muster ist relevant, wenn eine Anwendung numerische Strings lose vergleicht; siehe das PHP-spezifische Verhalten und die Versionshinweise unter [losen Vergleichen in PHP](../../network-services-pentesting/pentesting-web/php-tricks-esp/README.md#loose-comparisons-and-type-juggling).
 
-### Brute Force für MD5-Hash-Suffixe
+### Brute-Force-Suche nach einem MD5-Hash-Suffix
 
 ```python
 import hashlib
@@ -28,7 +28,7 @@ while True:
     candidate = candidate + 1
 ```
 
-### MD5-0e-Hash-Generierung für nicht-strikte Vergleiche
+### MD5-0e-Hash-Generierung für lose Vergleiche
 
 ```python
 #From isHaacK
@@ -69,9 +69,9 @@ main()
 
 ## Hash length extension attack
 
-### Technik
+### Technique
 
-Ein length-extension attack kann möglich sein, wenn ein Server eine „Signatur“ wie folgt berechnet:
+Ein length-extension attack kann möglich sein, wenn ein Server eine „Signatur“ wie diese berechnet:
 
 `sig = HASH(secret || message)`
 
@@ -82,7 +82,7 @@ Wenn du Folgendes kennst:
 - `message`
 - `sig`
 - die Hashfunktion
-- (oder die Länge von `secret` brute-forcen kannst)
+- (oder die Länge von `secret` per Brute-Force ermitteln kannst)
 
 Dann kannst du eine gültige Signatur für Folgendes berechnen:
 
@@ -92,12 +92,14 @@ ohne das Secret zu kennen.<sup>[[1]](#references)</sup>
 
 ### Wichtige Einschränkung: HMAC ist nicht betroffen
 
-Length-extension attacks betreffen anfällige Prefix-Konstruktionen wie `HASH(secret || message)`. Sie ermöglichen keinen Angriff auf die HMAC-Konstruktion (zum Beispiel HMAC-SHA256), die einen Schlüssel mit separaten inneren und äußeren Hash-Anwendungen kombiniert.<sup>[[1]](#references)[[2]](#references)</sup>
+Length-extension attacks gelten für anfällige Präfix-Konstruktionen wie `HASH(secret || message)`. Sie legen die HMAC-Konstruktion (zum Beispiel HMAC-SHA256) nicht offen, die einen Schlüssel mit separaten inneren und äußeren Hash-Anwendungen kombiniert.<sup>[[1]](#references)[[2]](#references)</sup>
+
+Wie du solche Signaturen in Web-APIs findest und testest, erfährst du unter [Request and parameter signatures](../../pentesting-web/web-api-pentesting.md#request-and-parameter-signatures).
 
 ### Tools
 
 - [`hash_extender`](https://github.com/iagox86/hash_extender)<sup>[[3]](#references)</sup>
-- [`hashpumpy`](https://pypi.org/project/hashpumpy/), Python-Bindings für das HashPump-Tool für length-extension attacks<sup>[[7]](#references)</sup>
+- [`hashpumpy`](https://pypi.org/project/hashpumpy/), Python-Bindings für das Length-Extension-Tool HashPump<sup>[[7]](#references)</sup>
 
 ### Gute Erklärung
 
@@ -107,7 +109,7 @@ Length-extension attacks betreffen anfällige Prefix-Konstruktionen wie `HASH(se
 
 ### Boundary-confusion attack
 
-Inkrementelle Hash-APIs authentifizieren keine Aufrufgrenzen. `update(A); update(B)` hasht dieselbe Bytefolge wie `update(A + B)`. Daher authentifiziert das Hashen oder MACen einer rohen Verkettung kein Tuple. Haben benachbarte Felder variable Längen, kann ein Angreifer die Bytes in ein anderes Tuple aufteilen, ohne eine Kollision im zugrunde liegenden Hash zu finden:<sup>[[8]](#references)[[9]](#references)</sup>
+Inkrementelle Hash-APIs authentifizieren keine Aufrufgrenzen. `update(A); update(B)` hasht dieselbe Bytefolge wie `update(A + B)`. Das Hashen oder MACen einer rohen Konkatenation authentifiziert daher kein Tuple. Haben benachbarte Felder variable Längen, kann ein Angreifer die Bytes zu einem anderen Tuple neu aufteilen, ohne eine Kollision im zugrunde liegenden Hash zu finden:<sup>[[8]](#references)[[9]](#references)</sup>
 
 ```python
 import hashlib
@@ -121,19 +123,19 @@ def raw_hash(parts):
 assert raw_hash([b"alice", b"admin"]) == raw_hash([b"aliceadmin", b""])
 ```
 
-Dies wird ausnutzbar, wenn der Verifier davon ausgeht, dass der Digest die Bedeutung der Felder bindet, vom Angreifer kontrollierte Eingaben jedoch einen anderen Parser oder Protokollschritt erreichen können, der andere Grenzen zuweist. Commitments können dadurch alternative Öffnungen erhalten, und Fiat-Shamir-Transkripte können als andere Aussagen interpretiert werden. HMAC verhindert [hash length extension](#hash-length-extension-attack), aber `HMAC(K, A || B)` weist weiterhin diese Mehrdeutigkeit der Tupel-Kodierung auf, da beide Tupel dieselben Nachrichtenbytes erzeugen.<sup>[[8]](#references)[[9]](#references)</sup>
+Dies wird ausnutzbar, wenn der Verifier glaubt, dass der Digest die Bedeutung der Felder bindet, Angreifer-kontrollierte Eingaben jedoch einen anderen Parser oder Protokollschritt erreichen können, der andere Grenzen festlegt. Commitments können dadurch alternative Öffnungen erhalten, und Fiat-Shamir-Transkripte können als andere Aussagen interpretiert werden. HMAC verhindert [Hash Length Extension](#hash-length-extension-attack), aber `HMAC(K, A || B)` weist weiterhin diese Mehrdeutigkeit der Tupel-Kodierung auf, da beide Tupel dieselben Nachrichtenbytes ergeben.<sup>[[8]](#references)[[9]](#references)</sup>
 
-Verwende diesen Audit-Workflow, um zu prüfen, ob eine mehrdeutige Tupel-Kodierung eine Sicherheitsgrenze überschreitet.<sup>[[8]](#references)[[9]](#references)</sup>
+Verwende diesen Audit-Ablauf, um zu prüfen, ob eine mehrdeutige Tupel-Kodierung eine Sicherheitsgrenze überschreitet.<sup>[[8]](#references)[[9]](#references)</sup>
 
-1. Finde `HASH(A || B)`, `HMAC(K, A || B)` und aufeinanderfolgende `update()`-/`Write()`-Aufrufe mit mindestens zwei Feldern.
-2. Markiere alle vom Angreifer kontrollierten oder variabel langen Felder. Versuche, Bytes über jede Grenze hinweg zu verschieben, während die vollständige Verkettung unverändert bleibt. Berücksichtige auch leere Felder.
-3. Prüfe bei Trennzeichenverfahren, ob Eingaben Trennzeichenbytes enthalten können, ob es Abweichungen beim Escaping gibt und ob nur einige Felder längenkodiert werden.
-4. Verfolge, wie jeder Verbraucher die authentifizierten Bytes parst. Ein möglicher Angriff ist nur dann relevant, wenn eine alternative Aufteilung eine Sicherheitsentscheidung, einen Beweis, einen Datensatz, eine Transaktion oder eine Commitment-Öffnung verändert. Felder mit fester Breite oder eine kanonische, injektive Serialisierung verhindern diesen konkreten Angriff.
-5. Prüfe, ob derselbe kodierte Digest in einer anderen Protokollversion, einem anderen Nachrichtentyp, einer anderen Runde oder einer anderen Anwendung akzeptiert wird. Binde diese Kontexte explizit ein, statt darauf zu vertrauen, dass Aufrufer sie getrennt halten.
+1. Suche nach `HASH(A || B)`, `HMAC(K, A || B)` und aufeinanderfolgenden `update()`-/`Write()`-Aufrufen für zwei oder mehr Felder.
+2. Markiere alle Angreifer-kontrollierten oder variabel langen Felder. Versuche, Bytes über jede Grenze hinweg zu verschieben, während die vollständige Konkatenation unverändert bleibt. Berücksichtige leere Felder.
+3. Prüfe bei Trennzeichenschemata, ob Eingaben Trennzeichen enthalten können, ob es Abweichungen beim Escaping gibt und ob Designs nur einige Felder mit Längen versehen.
+4. Verfolge, wie jeder Verbraucher die authentifizierten Bytes parst. Ein möglicher Angriff ist nur dann relevant, wenn eine alternative Aufteilung eine Sicherheitsentscheidung, einen Beweis, einen Datensatz, eine Transaktion oder eine Commitment-Öffnung verändert. Felder mit fester Breite oder eine kanonische, injektive Serialisierung verhindern diesen speziellen Angriff.
+5. Prüfe, ob derselbe kodierte Digest in einer anderen Protokollversion, einem anderen Nachrichtentyp, Durchlauf oder einer anderen Anwendung akzeptiert wird. Binde diese Kontexte explizit ein, statt dich darauf zu verlassen, dass Aufrufer sie getrennt halten.
 
 ### SequenceHash und SequenceMAC
 
-SequenceHash ist eine hash-unabhängige Konstruktion für Folgen von Byte-Strings. Jede `add()`-Operation ist atomar: Sie hängt den Wert und ein festes 16-Byte-Längensuffix im Little-Endian-Format an den inneren Hash an. Leere Werte bleiben unterschiedliche Objekte. Ein äußerer Hash verhindert, dass ein durch Längenverlängerung erweiterbarer innerer Zustand offengelegt wird, während eine optionale Customization-Zeichenfolge die Domain Separation ermöglicht. Ersetze `add()` nicht durch die gewöhnlichen Schreibaufrufe der zugrunde liegenden Hash-API.<sup>[[8]](#references)[[9]](#references)</sup>
+SequenceHash ist eine Hash-agnostische Konstruktion für Folgen von Byte-Strings. Jede `add()`-Operation ist atomar: Sie hängt den Wert und ein festes, 16 Byte langes Längensuffix in Little-Endian-Reihenfolge an den inneren Hash an. Leere Werte bleiben unterschiedliche Objekte. Ein äußerer Hash verhindert, dass ein längenerweiterbarer innerer Zustand offengelegt wird, während ein optionaler Customization-String Domain Separation ermöglicht. Ersetze `add()` nicht durch gewöhnliche Schreibvorgänge der zugrunde liegenden Hash-API.<sup>[[8]](#references)[[9]](#references)</sup>
 
 ```python
 import sequencehash
@@ -144,9 +146,9 @@ h.add(b"admin")
 digest = h.result_with_customizer(b"example:v1:user-record")
 ```
 
-Wählen Sie den Customizer als Teil der Protokolldefinition und geben Sie genügend Informationen an, um die Anwendung, die Protokollversion, den Nachrichtentyp und den Round zu unterscheiden. SequenceHash erfordert weiterhin, dass sich alle Parteien auf die Feldreihenfolge, die Byte-Kodierung und die kanonische Serialisierung einigen, und kann ein ausgelassenes Feld nicht schützen. Portierungen sollten anhand der C2SP-Zwischen- und finalen Testvektoren geprüft werden.<sup>[[8]](#references)[[11]](#references)</sup>
+Wählen Sie den Customizer als Teil der Protokolldefinition und geben Sie genügend Informationen an, um Anwendung, Protokollversion, Nachrichtentyp und Runde zu unterscheiden. SequenceHash setzt weiterhin voraus, dass sich alle Parteien auf Feldreihenfolge, Byte-Kodierung und kanonische Serialisierung einigen, und kann kein ausgelassenes Feld schützen. Ports sollten anhand der C2SP-Zwischen- und finalen Testvektoren überprüft werden.<sup>[[8]](#references)[[11]](#references)</sup>
 
-Für die Authentifizierung bietet SequenceMAC dieselbe atomare Kodierungs- und Customization-Schnittstelle. Es erfordert einen Schlüssel von mindestens 32 Byte. Anders als bei der HMAC-Schlüsselvorverarbeitung legen seine Header die exakte Schlüssellänge fest: Ein langer Rohschlüssel ist nicht gleichwertig mit seinem Prehash, und das Anhängen von Null-Bytes ändert den Schlüssel. Dieser Unterschied ist wichtig, wenn Komponenten unterschiedliche Schlüsseldarstellungen oder Längenmetadaten akzeptieren.<sup>[[8]](#references)[[9]](#references)</sup>
+Für die Authentifizierung bietet SequenceMAC dieselbe atomare Kodierung und Customization-Schnittstelle. Es erfordert einen Schlüssel mit mindestens 32 Byte. Anders als bei der Schlüsselvorverarbeitung von HMAC legen seine Header die exakte Schlüssellänge fest: Ein langer roher Schlüssel ist nicht mit seinem Prehash gleichwertig, und das Anhängen von Null-Bytes ändert den Schlüssel. Dieser Unterschied ist wichtig, wenn Komponenten unterschiedliche Schlüsseldarstellungen oder Längenmetadaten akzeptieren.<sup>[[8]](#references)[[9]](#references)</sup>
 
 ```python
 key = b"\x00" * 32
@@ -156,48 +158,48 @@ mac.add(body_bytes)
 tag = mac.result_with_customizer(b"example:v1:request-mac")
 ```
 
-Die Python-API sowie entsprechende Implementierungen in Go und Rust sind als Referenzen verfügbar. Protokollimplementierungen sollten sich jedoch an der aktuellen C2SP-Spezifikation orientieren, statt die Kodierung anhand dieser Zusammenfassung nachzubilden.<sup>[[8]](#references)[[10]](#references)</sup>
+Die Python-API und entsprechende Implementierungen in Go und Rust stehen als Referenzen zur Verfügung. Protokollimplementierungen sollten sich jedoch an der aktuellen C2SP-Spezifikation orientieren, anstatt die Kodierung anhand dieser Zusammenfassung nachzubilden.<sup>[[8]](#references)[[10]](#references)</sup>
 
-## Passwort-Hashing und Cracking
+## Passwort-Hashing und Cracken
 
 ### Erste Fragen<sup>[[4]](#references)</sup>
 
 - Ist der Hash **gesalzen**? (Achte auf Formate wie `salt$hash`.)
 - Handelt es sich um einen **schnellen Hash** (MD5/SHA1/SHA256) oder eine **langsame KDF** (bcrypt/scrypt/argon2/PBKDF2)?
-- Gibt es einen **Format-Hinweis** (Hashcat-Modus / John-Format)?
+- Gibt es einen **Format-Hinweis** (hashcat-Modus / John-Format)?
 
 ### Praktischer Ablauf<sup>[[5]](#references)[[6]](#references)</sup>
 
-1. Hash identifizieren:
+1. Den Hash identifizieren:
    - `hashid <hash>`
    - `hashcat --example-hashes | rg -n "<pattern>"`
-2. Bei einem ungesalzenen, verbreiteten Hash: Online-Datenbanken und Identifizierungstools aus dem Abschnitt zum Krypto-Workflow ausprobieren.
+2. Wenn der Hash ungesalzen und weitverbreitet ist: Online-Datenbanken und Identifizierungstools aus dem Abschnitt zum Crypto-Workflow ausprobieren.
 3. Andernfalls cracken:
    - `hashcat -m <mode> -a 0 hashes.txt wordlist.txt`
    - `john --wordlist=wordlist.txt --format=<fmt> hashes.txt`
 
 ### Häufige Fehler, die du ausnutzen kannst
 
-- Dasselbe Passwort wird von mehreren Benutzern verwendet → eines cracken und weiter pivoten.
+- Dasselbe Passwort wird von mehreren Nutzern wiederverwendet → eines cracken und dich darüber weiter vorarbeiten.
 - Abgeschnittene Hashes / benutzerdefinierte Transformationen → normalisieren und erneut versuchen.
-- Schwache KDF-Parameter (z. B. zu wenige PBKDF2-Iterationen) → lassen sich trotzdem cracken.
+- Schwache KDF-Parameter (z. B. wenige PBKDF2-Iterationen) → trotzdem crackbar.
 
-### Bcrypt-Oracle mit gewählter Eingabe und angehängtem Secret
+### bcrypt-Oracle mit frei gewählter Eingabe und angehängtem Secret
 
-Ein aufrufbarer Helfer, der `bcrypt(user_input || secret)` zurückgibt, kann Informationen über ein angehängtes Secret preisgeben, wenn seine bcrypt-Implementierung Eingaben nach 72 **Bytes** stillschweigend abschneidet. Eine Begrenzung der Zeichenanzahl vor der UTF-8-Kodierung setzt dieses Byte-Limit nicht durch: Mehrbytezeichen können die bcrypt-Eingabe füllen und nur Platz für ein kurzes Präfix des Secrets lassen. Gewählte Eingaben und die zugehörigen zurückgegebenen Hashes können dann Offline-Prüfungen möglicher Suffix-Bytes erlauben. Dafür musst du die Eingabe des Helfers kontrollieren und seine genaue Transformation und Kodierung kennen; außerdem muss die Implementierung tatsächlich abschneiden. Ein aufrufbarer Helfer oder ein bcrypt-Hash allein belegt diese Angriffskette nicht. [pyca/bcrypt dokumentiert](https://github.com/pyca/bcrypt#maximum-password-length), dass die aktuelle `hashpw`-Funktion bei Eingaben über 72 Bytes einen Fehler auslöst, während frühere Versionen sie stillschweigend abgeschnitten haben. Andere Wrapper können lange Eingaben vorab hashen oder zurückweisen. Prüfe daher die installierte Implementierung, statt ein Abschneiden anzunehmen.
+Ein aufrufbarer Helper, der `bcrypt(user_input || secret)` zurückgibt, kann Informationen über ein angehängtes Secret preisgeben, wenn seine bcrypt-Implementierung Eingaben nach 72 **Bytes** stillschweigend abschneidet. Eine Begrenzung der Zeichenanzahl vor der UTF-8-Kodierung setzt dieses Byte-Limit nicht durch: Mehrbytezeichen können die bcrypt-Eingabe füllen, sodass nur ein kleiner Präfix des Secrets Platz hat. Frei gewählte Eingaben und die zurückgegebenen Hashes können dann Offline-Prüfungen möglicher Suffix-Bytes ermöglichen. Dafür muss die Eingabe des Helpers kontrollierbar sein, seine genaue Transformation und Kodierung müssen bekannt sein und die Implementierung muss tatsächlich abschneiden; ein aufrufbarer Helper oder ein bcrypt-Hash allein belegt diese Voraussetzungen nicht. [pyca/bcrypt dokumentiert](https://github.com/pyca/bcrypt#maximum-password-length), dass `hashpw` bei Eingaben über 72 Bytes inzwischen einen Fehler auslöst, während frühere Versionen sie stillschweigend abgeschnitten haben. Andere Wrapper können lange Eingaben vorab hashen oder zurückweisen. Prüfe daher die installierte Implementierung, statt ein Abschneiden vorauszusetzen.
 
-Ein wiederhergestelltes Secret für ein anderes Konto zu verwenden, setzt außerdem Belege dafür voraus, dass dessen offengelegter Hash mit demselben Secret und derselben Transformation erzeugt wurde, sowie einen separaten Zugangsdaten- oder Anmeldepfad. Ein Hashing-Helfer, der als root läuft, sollte nur dann als Oracle betrachtet werden, wenn der Benutzer mit geringeren Rechten ihn gemäß den geltenden Richtlinien aufrufen kann. Bei der passiven Host-Aufzählung muss der Helfer weder aufgerufen noch müssen ihm gewählte Passwörter übergeben werden.
+Um ein wiederhergestelltes Secret gegen ein anderes Konto zu verwenden, muss außerdem belegt sein, dass dessen offengelegter Hash mit **demselben** Secret und derselben Transformation erzeugt wurde. Zusätzlich ist ein separater Zugangsdaten- oder Login-Pfad erforderlich. Ein mit Root-Rechten ausgeführter Hashing-Helper sollte nur dann als Oracle betrachtet werden, wenn der Nutzer mit geringeren Rechten ihn gemäß den geltenden Richtlinien aufrufen kann; bei einer passiven Host-Aufzählung muss der Helper weder aufgerufen noch mit frei gewählten Passwörtern gefüttert werden.
 
 ## References
 
-- [1] [SkullSecurity – Alles, was du über Hash-Length-Extension-Angriffe wissen musst](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
-- [2] [NIST FIPS 198-1 – Der keyed-hash Message Authentication Code](https://csrc.nist.gov/pubs/fips/198-1/final)
+- [1] [SkullSecurity - Alles, was du über Hash-Längen-Erweiterungsangriffe wissen musst](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
+- [2] [NIST FIPS 198-1 - Der Keyed-Hash Message Authentication Code](https://csrc.nist.gov/pubs/fips/198-1/final)
 - [3] [hash_extender](https://github.com/iagox86/hash_extender)
 - [4] [OWASP-Leitfaden zur Passwortspeicherung](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
 - [5] [Hashcat-Beispiel-Hashes](https://hashcat.net/wiki/doku.php?id=example_hashes)
-- [6] [Befehlszeilenoptionen von John the Ripper](https://www.openwall.com/john/doc/OPTIONS.shtml)
+- [6] [John the Ripper: Befehlszeilenoptionen](https://www.openwall.com/john/doc/OPTIONS.shtml)
 - [7] [PyPI: `hashpumpy`-Python-Bindings für HashPump](https://pypi.org/project/hashpumpy/)
-- [8] [C2SP – Spezifikation für SequenceHash und SequenceMAC](https://c2sp.org/sequencehash)
-- [9] [Trail of Bits – SequenceHash: Multihashing für alle](https://blog.trailofbits.com/2026/10/02/sequencehash-multihashing-for-the-rest-of-us/)
-- [10] [Trail of Bits – SequenceHash-Python-Implementierung](https://github.com/trailofbits/sequencehash-py)
-- [11] [C2SP CCTV – SequenceHash-Testvektoren](https://github.com/C2SP/CCTV/tree/main/sequencehash)
+- [8] [C2SP - Spezifikation für SequenceHash und SequenceMAC](https://c2sp.org/sequencehash)
+- [9] [Trail of Bits - SequenceHash: Multi-Hashing für den Rest von uns](https://blog.trailofbits.com/2026/10/02/sequencehash-multihashing-for-the-rest-of-us/)
+- [10] [Trail of Bits - SequenceHash-Python-Implementierung](https://github.com/trailofbits/sequencehash-py)
+- [11] [C2SP CCTV - SequenceHash-Testvektoren](https://github.com/C2SP/CCTV/tree/main/sequencehash)
