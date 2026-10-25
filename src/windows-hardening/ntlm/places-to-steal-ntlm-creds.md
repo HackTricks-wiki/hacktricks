@@ -186,7 +186,7 @@ From a detection perspective, repeated `rundll32.exe davclnt.dll,DavSetCookie` e
 
 ### Remote notification URIs for WebDAV NTLM coercion
 
-If an application accepts remotely controlled popup or web-view addresses and renders `file://` URIs, control of that configuration can coerce outbound authentication **without a document open or executable payload**. In the AOMEI case, the notification configuration replaced a visible banner with this one-pixel, high-priority popup. `DavWWWRoot` made the address a WebDAV resource; Windows attempted integrated authentication to the remote IP and exposed a NetNTLMv2 challenge-response. This depends on the application's URI handler, [Windows WebClient behavior](../../network-services-pentesting/pentesting-web/put-method-webdav.md#client-side-webdav-delivery-and-execution), and outbound authentication policy rather than on the popup being visible.<sup>[[16]](#references)</sup>
+If an application dereferences remotely configured popup or web-view addresses, a `file://` address can coerce outbound authentication **without a document open or executable payload**. In the AOMEI case, a one-pixel notification pointed to a remote `DavWWWRoot` WebDAV path. Windows attempted integrated authentication to that address, exposing a NetNTLMv2 challenge-response. The trigger was URI dereferencing, not popup visibility; it still depends on the application's URI handler, [Windows WebClient behavior](../../network-services-pentesting/pentesting-web/put-method-webdav.md#client-side-webdav-delivery-and-execution), and outbound authentication policy.<sup>[[16]](#references)</sup>
 
 ```ini
 [PopWindow1]
@@ -196,7 +196,7 @@ Height=1
 Priority=9999
 ```
 
-The entry point was a [short-lived, attacker-controlled software notification configuration](../windows-local-privilege-escalation/abusing-auto-updaters-and-ipc.md#short-lived-origin-configuration-tampering), not the `rundll32` command above. The `Address` path and window settings illustrate that an invisible render can be enough when a client dereferences the URI.<sup>[[16]](#references)</sup>
+Unlike the command-based coercion above, this entry point requires control of a [software notification configuration](../windows-local-privilege-escalation/abusing-auto-updaters-and-ipc.md#notification-configuration-as-a-second-update-trigger). The one-pixel window and high priority show that an unobtrusive notification can still make the client dereference the URI.<sup>[[16]](#references)</sup>
 
 ### Office remote template injection (.docx/.dotm) to coerce NTLM
 
@@ -250,4 +250,3 @@ README.md
 - [14] [p0dalirius/windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)
 - [15] [HTB: Hercules — ODT external-object NTLM capture](https://0xdf.gitlab.io/2026/09/21/htb-hercules.html)
 - [16] [Google Threat Intelligence Group and Mandiant – Investigating Ephemeral Supply Chain Tampering](https://cloud.google.com/blog/topics/threat-intelligence/investigating-ephemeral-supply-chain-tampering)
-{{#include ../../banners/hacktricks-training.md}}

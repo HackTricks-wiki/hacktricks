@@ -371,13 +371,11 @@ config case_sensitive = false
 
 These patterns generalize to any updater that accepts unsigned manifests or fails to pin installer signers—network hijack + malicious installer + BYO-signed sideloading yields remote code execution under the guise of “trusted” updates.
 
-### Short-lived origin configuration tampering
+### Notification configuration as a second update trigger
 
-An attacker with write access to an updater's **origin or distribution configuration** need not modify a release binary. In the AOMEI case, the client fetched `down_html.ini` over HTTPS. That file supplied the archive `Url`, version field `thrid`, and expected MD5 `Val`. During brief windows, the attacker changed all three together so a higher-version malicious `upgrade-now.zip` matched the attacker-supplied checksum. This was not an MD5 collision: the checksum and download destination came from the same compromised trust boundary. The article does not establish how origin access was obtained.<sup>[[17]](#references)</sup>
+An updater can use separate remote configurations to **stage content and trigger its execution**. This requires control of the configurations or their responses; the reports do not identify how origin access was obtained. In the AOMEI case, `down_html.ini` selected an archive URL, version (`thrid`), and MD5 (`Val`); the attacker raised the version and changed the URL and matching checksum together. This is the [metadata trust-boundary failure](#2-hijacking-the-update-channel-to-run-code-as-system) covered above. The additional execution path was `Notifycfg.ini`: it directed `ABNotify.exe` to load an extracted `upgrade-now.html` through a local `file:///` URL in a WebView. The page automatically navigated to a sibling executable, which the WebView handed to the system shell. The child inherited the notifier's privileges; this did not inherently elevate it to SYSTEM.<sup>[[17]](#references)[[18]](#references)</sup>
 
-A separate `Notifycfg.ini` controlled the notification process and could launch a program extracted into the local `html` directory. One observed tampered file contained more than 35,000 lines of repeated `[dummy_XXXXXX]` sections; in this client, that bloat bypassed the usual version gate and forced execution of the unpacked updater. The malicious files remained on the origin for only five to ten minutes before being restored. Consequently, only clients polling in that interval received them, while a later live fetch could return clean configuration. The same notification channel also carried a [WebDAV/NTLM coercion lure](../ntlm/places-to-steal-ntlm-creds.md#remote-notification-uris-for-webdav-ntlm-coercion), independent of whether the archive executed. Subsequent signed-binary sideloading is the existing [DLL search-order hijacking](dll-hijacking/#dll-search-order) technique, not a property of the update parser.<sup>[[17]](#references)</sup>
-
-
+Google also reported a tampered `Notifycfg.ini` with more than 35,000 repeated dummy sections that overcame this client's normal version gate. The report does not establish a general parser bypass. The attacker restored the remote files after five- to ten-minute windows, so only clients polling during those windows received the changed configuration. This notification channel also carried a distinct [WebDAV/NTLM coercion lure](../ntlm/places-to-steal-ntlm-creds.md#remote-notification-uris-for-webdav-ntlm-coercion) that did not require the archive to execute.<sup>[[18]](#references)</sup>
 
 ---
 ## References
@@ -397,5 +395,5 @@ A separate `Notifycfg.ini` controlled the notification process and could launch 
 - [14] [AmberWolf – Bypassing the fix for CVE-2025-0309 in Netskope Client for Windows](https://blog.amberwolf.com/blog/2026/march/patch-bypass---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
 - [15] [Atredis – Uncovering Privilege Escalation Bugs in Lenovo Vantage](https://www.atredis.com/blog/2025/7/7/uncovering-privilege-escalation-bugs-in-lenovo-vantage)
 - [16] [Quarkslab – MyReport Updater: From gRPC to SYSTEM](https://blog.quarkslab.com/myreport-updater-from-grpc-to-system.html)
-- [17] [Google Threat Intelligence Group and Mandiant – Investigating Ephemeral Supply Chain Tampering](https://cloud.google.com/blog/topics/threat-intelligence/investigating-ephemeral-supply-chain-tampering)
-{{#include ../../banners/hacktricks-training.md}}
+- [17] [ManageEngine Threat Analysis Lab – AOMEI Backupper supply-chain compromise](https://www.manageengine.com/threat-analysis-lab/aomei-backupper-supply-chain-compromise.html)
+- [18] [Google Threat Intelligence Group and Mandiant – Investigating Ephemeral Supply Chain Tampering](https://cloud.google.com/blog/topics/threat-intelligence/investigating-ephemeral-supply-chain-tampering)
