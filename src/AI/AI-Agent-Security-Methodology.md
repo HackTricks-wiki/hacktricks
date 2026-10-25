@@ -1,75 +1,75 @@
-# Metodologija za bezbednost AI agenata
+# Metodologija bezbednosti AI agenata
 
 {{#include ../banners/hacktricks-training.md}}
 
-Procena agenta treba da prati **put od ulaza pod kontrolom napadača do spolja uočljivog efekta**. Jailbreaking, izmene karaktera i otkrivanje sistemskog prompta dokazuju da je moguće uticati na kanal zaključivanja, ali je nalaz visokog uticaja lanac koji vodi do pristupa podacima, neovlašćene radnje alata, nizvodnog injection sinka, postojanosti ili drugog agenta.<sup>[[2]](#references)</sup>
+Procena agenta treba da prati **put od ulaza pod kontrolom napadača do spolja uočljivog efekta**. Jailbreaking, promene karaktera i otkrivanje sistemskog prompta dokazuju da se na kanal rezonovanja može uticati, ali nalaz visokog uticaja jeste lanac koji vodi do pristupa podacima, neovlašćene radnje pomoću alata, nizvodnog mesta za injekciju, perzistencije ili drugog agenta.<sup>[[2]](#references)</sup>
 
-[OWASP Top 10 for Agentic Applications](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) koristan je za označavanje obuhvata (preuzimanje kontrole nad ciljem, zloupotreba alata, zloupotreba privilegija, lanac snabdevanja, izvršavanje koda, trovanje memorije, poverenje među agentima, kaskadni kvarovi, poverenje ljudi i neovlašćeni agenti). Koristite te oznake nakon što sastavite napadni put od početka do kraja, umesto da neočekivani tekst modela tretirate kao završetak testa.<sup>[[1]](#references)[[2]](#references)</sup>
+[OWASP Top 10 for Agentic Applications](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) koristan je za označavanje obuhvata (otmica cilja, zloupotreba alata, zloupotreba privilegija, lanac snabdevanja, izvršavanje koda, trovanje memorije, poverenje između agenata, kaskadni otkazi, ljudsko poverenje i rogue agenti). Koristite te oznake nakon što sastavite napadni put od početka do kraja, umesto da neočekivani tekst modela tretirate kao završetak testa.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Napravite mapu cilja
 
-Pre pisanja payload-a zabeležite ovih pet dimenzija za svaki tok rada agenta:<sup>[[2]](#references)</sup>
+Pre pisanja payload-a, za svaki tok rada agenta zabeležite ovih pet dimenzija:<sup>[[2]](#references)</sup>
 
 | Dimenzija | Šta popisati | Bezbednosno pitanje |
 |---|---|---|
-| **Nepouzdani ulaz** | Parametri za chat/API, URL-ovi, dokumenti, email, tiketi, unosi u kalendar, preuzeti isečci, memorija, rezultati alata i poruke drugih agenata | Gde napadač može da postavi sadržaj koji će kasnije ući u kontekst modela? |
-| **Alati** | Nazivi i šeme alata, sporedni efekti, automatsko izvršavanje, ponašanje pri potvrdi i dinamički učitani alati | Koji pozivi čitaju tajne, menjaju stanje, šalju poruke, brišu podatke, izvršavaju kod ili prenose vrednost? |
-| **Ovlašćenja** | Delegiranje korisnika, servisni nalozi, API tokeni, trajanje akreditiva, opseg tenant-a/resursa i mrežni doseg | Kao koji identitet se izvršava svaki poziv i da li se autorizacija ponavlja na granici alata? |
-| **Obrada** | Graditelji upita, shell-ovi, URL fetcher-i, template engine-i, interpreteri, parser-i, operacije nad datotekama i deserializer-i | Gde podaci koje generiše model postaju sintaksa za drugi interpreter? |
-| **Izlaz** | Odgovori, renderovani Markdown/HTML, linkovi, preuzimanje slika, webhook-ovi, email, datoteke, logovi, izveštaji, metrike i saobraćaj između agenata | Koji vidljivi kanal može da prenese tajnu ili pokrene sekundarni zahtev? |
+| **Nepoverljiv ulaz** | Parametre za chat/API, URL-ove, dokumente, email, tikete, stavke kalendara, preuzete isečke, memoriju, rezultate alata i poruke agenata-saradnika | Gde napadač može da postavi sadržaj koji će kasnije ući u kontekst modela? |
+| **Alati** | Nazive i šeme alata, sporedne efekte, automatsko izvršavanje, ponašanje pri potvrdi i dinamički učitane alate | Koji pozivi čitaju tajne, menjaju stanje, šalju poruke, brišu podatke, izvršavaju kod ili prenose vrednost? |
+| **Ovlašćenja** | Delegiranje korisnika, servisne naloge, API tokene, vek trajanja akreditiva, opseg tenant-a/resursa i mrežni domet | U ime kog identiteta se izvršava svaki poziv i da li se autorizacija ponavlja na granici alata? |
+| **Obrada** | Graditelje upita, shell-ove, preuzimače URL-ova, template engine-e, interpretere, parsere, operacije nad fajlovima i deserializatore | Gde podaci koje generiše model postaju sintaksa za drugi interpreter? |
+| **Izlaz** | Odgovore, renderovani Markdown/HTML, linkove, preuzimanje slika, webhook-ove, email, fajlove, logove, izveštaje, metrike i saobraćaj agenata-saradnika | Koji uočljivi kanal može da prenese tajnu ili pokrene sekundarni zahtev? |
 
-Nemojte ovo svoditi na listu reklamiranih integracija. Koristan artefakt mapira svaki izvor na tačnu poziciju u kontekstu do koje stiže, alate dostupne na toj tački, akreditive koje koristi svaki alat, nizvodni interpreter i sve izlazne kanale. Isti alat može imati mali uticaj uz token za čitanje po korisniku, a kritičan uticaj uz zajednički administratorski akreditiv.<sup>[[2]](#references)</sup>
+Nemojte ovo svesti na spisak reklamiranih integracija. Koristan artefakt mapira svaki izvor na tačno mesto u kontekstu do kog stiže, alate koji su tada dostupni, akreditive koje svaki alat koristi, nizvodni interpreter i sve izlazne puteve. Isti alat može imati mali uticaj uz token za čitanje po korisniku, a kritičan uz zajednički administratorski akreditiv.<sup>[[2]](#references)</sup>
 
 ## Izviđanje
 
-### Mapirajte sve puteve isporuke i unosa
+### Mapirajte svaki put isporuke i unosa
 
-Počnite od površine za isporuku (web, mobilna aplikacija, API, email, chat platforma, browser ekstenzija) i presretnite saobraćaj između klijenta i backend-a. Pregledajte polja skrivena u UI-ju, parametre za pretragu/autocomplete/filter, objekte stanja razgovora, poslove za otpremanje i indeksiranje, odgovore alata i saobraćaj podagenata. Za mobilne klijente možda će biti potreban emulator i instrumentacija za zaobilaženje certificate pinning-a pre nego što postane vidljiva stvarna šema zahteva.<sup>[[2]](#references)</sup>
+Počnite od površine za isporuku (web, mobilna aplikacija, API, email, platforma za chat, ekstenzija pregledača) i presretnite saobraćaj između klijenta i backend-a. Pregledajte polja skrivena u UI-ju, parametre za pretragu/autodovršavanje/filtriranje, objekte stanja razgovora, poslove za otpremanje i indeksiranje, odgovore alata i saobraćaj podagenata. Za mobilne klijente možda će biti potreban emulator i instrumentacija za zaobilaženje certificate pinning-a pre nego što se otkrije stvarna šema zahteva.<sup>[[2]](#references)</sup>
 
-Zatim mapirajte slojeve ispod modela: framework za orkestraciju, sastavljanje prompta, skladišta za retrieval i memoriju, runtime (na primer Python, container ili WASM), montirane volumene, host servise, interne API-je, dostupnost cloud metadata-e i susedne mreže. Podrazumevane postavke framework-a su važne jer se neki „pozivi alata” ostvaruju generisanjem ili evaluacijom koda; granica runtime-a/sandbox-a određuje da li rezultat ostaje ograničen.<sup>[[2]](#references)</sup>
+Zatim mapirajte stek ispod modela: orchestration framework, sastavljanje prompta, skladišta za retrieval i memoriju, runtime (na primer Python, container ili WASM), montirane volumene, host servise, interne API-je, dostupnost cloud metadata i susedne mreže. Podrazumevane postavke framework-a su važne jer se neki „pozivi alata“ izvršavaju generisanjem ili evaluacijom koda; granica runtime/sandbox određuje da li rezultat ostaje ograničen.<sup>[[2]](#references)</sup>
 
-### Utvrdite rutiranje pomoću bezbednih proba
+### Utvrdite rutiranje nedestruktivnim probama
 
-Uporedite zahtev unutar opsega sa nekoliko nepovezanih zahteva, uz očuvanje celog odgovora, statusnog koda, latencije i ponašanja pri streamingu. Stabilno odbijanje pre bilo kakvog rezonovanja specifičnog za zadatak može ukazivati na zaseban gateway/classifier; kontekstualno odbijanje sugeriše da je zahtev stigao do modela; prazan ili isključivo ekstraktivan odgovor može ukazivati na pretragu po ključnim rečima ili usko ograničen retrieval. Tretirajte ovo kao hipoteze i potvrdite ih ponovnim slanjem iste probe kroz alternativna API polja i putanje unosa.<sup>[[2]](#references)</sup>
+Uporedite zahtev u opsegu sa nekoliko nepovezanih zahteva, uz očuvanje celog odgovora, statusnog koda, kašnjenja i ponašanja pri stream-ovanju. Stabilno odbijanje pre rezonovanja specifičnog za zadatak može ukazivati na zaseban gateway/classifier; kontekstualno odbijanje sugeriše da je zahtev stigao do modela; prazan ili isključivo ekstraktivan odgovor može ukazivati na pretragu po ključnim rečima ili ograničen retrieval. Tretirajte ovo kao hipoteze i potvrdite ih ponovnim slanjem iste probe kroz alternativna API polja i puteve unosa.<sup>[[2]](#references)</sup>
 
-Izviđanje je završeno kada procena može da navede najraniji izvor pod kontrolom napadača koji menja ponašanje agenta **i** alate, identitete, interpretere i izlaze do kojih taj izvor može da dođe.<sup>[[2]](#references)</sup>
+Izviđanje je završeno kada procena može da navede najraniji izvor pod kontrolom napadača koji menja ponašanje agenta **i** alate, identitete, interpretere i izlaze dostupne iz tog izvora.<sup>[[2]](#references)</sup>
 
 ## Eksploatacija: pređite granicu poverenja
 
-Testirajte kanale, a ne samo formulacije prompta. Počnite direktnim injection-om da biste utvrdili šta blokira vidljivi ulazni kanal, a zatim ponovite ekvivalentnu nameru kroz manje vidljive puteve u nastavku:<sup>[[2]](#references)</sup>
+Testirajte kanale, ne samo formulacije prompta. Počnite direktnom injekcijom da biste utvrdili šta blokira vidljivi ulazni kanal, a zatim ponovite istu nameru kroz manje vidljive puteve ispod:<sup>[[2]](#references)</sup>
 
-- **Indirektan sadržaj:** stranice, datoteke, email, tiketi, metapodaci, alt tekst, HTML komentari, tekst van vidljivog dela ekrana ili znakovi nulte širine. Tehnike isporuke payload-a potražite u odeljku [AI Prompts](AI-Prompts.md#third-party-or-indirect-prompt-injection).
-- **Retrieval i memorija:** ubacite zlonameran sadržaj koji će kasnije biti preuzet ili stanje koje će se ponovo učitati u narednim sesijama. Zabeležite da li se ponašanje uklanja brisanjem izvornog sadržaja.
-- **Izlaz alata i drugi agenti:** postavite marker u odgovor alata ili poruku između agenata da biste proverili da li interni saobraćaj zaobilazi filtere koji se primenjuju samo na korisnički ulaz i konačni izlaz.
-- **Lanac snabdevanja:** pregledajte opise alata, dodatke, povezane servere, veštine, modele i zavisnosti kao pouzdane izvore instrukcija. Za specifične MCP testove pogledajte [MCP Servers](AI-MCP-Servers.md#mcp-vulns).
+- **Indirektni sadržaj:** stranice, fajlovi, email, tiketi, metapodaci, alt tekst, HTML komentari, tekst van vidljivog dela ekrana ili zero-width karakteri. Pogledajte [AI Prompts](AI-Prompts.md#third-party-or-indirect-prompt-injection) za tehnike isporuke payload-a.
+- **Retrieval i memorija:** zagadite sadržaj koji će kasnije biti preuzet ili stanje koje će se ponovo učitati u narednim sesijama. Zabeležite da li brisanje izvornog sadržaja uklanja ponašanje.
+- **Izlaz alata i agenti-saradnici:** postavite marker u odgovor alata ili poruku između agenata da biste proverili da li interni saobraćaj zaobilazi filtere koji se primenjuju samo na korisnički ulaz i konačni izlaz.
+- **Lanac snabdevanja:** pregledajte deskriptore alata, dodatke, povezane servere, veštine, modele i zavisnosti kao izvore pouzdanih instrukcija. Za testove specifične za MCP pogledajte [MCP Servers](AI-MCP-Servers.md#mcp-vulns).
 - **Ljudsko odobrenje:** uporedite stvarni strukturirani poziv alata sa tekstom odobrenja koji je generisao model. Testirajte da li uticaj napadača može da izostavi odredište, opseg, pogođene objekte ili nepovratne sporedne efekte.
 
-Prvo upotrebite bezazlen, jedinstven marker. Sačuvajte izvorni artefakt, sastavljeni kontekst ako je vidljiv, izabrani poziv alata, podatke za odobrenje, backend zahtev/odgovor i konačno stanje. Tako ćete razlikovati uticaj od halucinirane tvrdnje da je neka radnja izvršena.<sup>[[2]](#references)</sup>
+Najpre upotrebite bezopasan, jedinstven marker. Sačuvajte izvorni artefakt, sastavljeni kontekst ako je vidljiv, izabrani poziv alata, podatke o odobrenju, backend zahtev/odgovor i konačno stanje. Tako ćete razlikovati stvarni uticaj od halucinirane tvrdnje da je neka radnja izvršena.<sup>[[2]](#references)</sup>
 
-### Tekst nalik pravilima u procenjivaču rizika alata
+### Tekst nalik politici u procenjivaču rizika alata
 
-Kapija za alate zasnovana na modelu može da primi tekst pod kontrolom napadača unutar inače korisnog konteksta za klasifikaciju. Na primer, LangChain-ov eksperimentalni `AutoModeMiddleware` prosleđuje predloženi poziv alata, njegove argumente, opcioni opis alata i do 30 nedavnih poruka TypeSafe `is_risky` judge-у. Он блокира конфигурисане алате када је враћена Noul вероватноћа најмање `0.5`; овај middleware не класификује алате који нису наведени.<sup>[[5]](#references)</sup> TypeSafe такође упозорава да противнички текст у стању може да утиче на класификацију, чак и када је стање намењено да представља податке.<sup>[[6]](#references)</sup>
+Model-based kapija za alate može da primi tekst pod kontrolom napadača unutar inače korisnog konteksta za klasifikaciju. LangChain-ov eksperimentalni `AutoModeMiddleware`, na primer, prosleđuje predloženi poziv alata, njegove argumente, opcioni opis alata i do 30 nedavnih poruka TypeSafe `is_risky` procenjivaču. Blokira podešene alate kada je vraćena Noul verovatnoća najmanje `0.5`; ovaj middleware ne klasifikuje alate koji nisu na spisku.<sup>[[5]](#references)</sup> TypeSafe takođe upozorava da adversarial tekst u stanju može da utiče na klasifikaciju čak i kada je predviđeno da stanje bude samo podatak.<sup>[[6]](#references)</sup>
 
-**Лажна политика** се разликује од обичне тврдње да је порука системска. Она у стање нижег нивоа поверења уноси алтернативне ознаке или дефиниције ризика и наводи judge да примени те дефиниције уместо критеријума које је дефинисао developer. У Datadog-овом тесту, корисник је могао да мења `profile_description`, који је копиран у аргументе алата заједно са `can_edit:false`. Текст налик политици тврдио је да је покушај уписа ниског ризика јер би засебна провера дозвола требало да га одбије пре било какве измене. Током 40 покретања, средња вредност `is_risky` пала је са `0.893` на `0.290`, док је поређење са директним лажирањем улоге имало просек `0.905`. Пад средње вредности испод `0.5` не доказује да је сваки појединачни позив прошао капију, а експеримент **није** показао да је дошло до неовлашћеног уписа.<sup>[[7]](#references)</sup>
+**Lažna politika** razlikuje se od pukog predstavljanja kao sistemska poruka. Ona postavlja alternativne oznake ili definicije rizika unutar stanja sa nižim stepenom poverenja i podstiče procenjivač da koristi te definicije umesto kriterijuma koje je definisao developer. U Datadog-ovom testu, korisnik je mogao da menja `profile_description`, koji je prosleđen u argumentima alata zajedno sa `can_edit:false`. Tekst nalik politici tvrdio je da je pokušaj upisa niskorizičan jer bi ga zasebna provera dozvola odbila pre bilo kakve izmene. Tokom 40 pokretanja, prosečna ocena `is_risky` pala je sa `0.893` na `0.290`, dok je direktno poređenje sa lažnim predstavljanjem uloge imalo prosek `0.905`. Pad prosečne vrednosti ispod `0.5` ne dokazuje da je svaki pojedinačni poziv prošao kapiju, a eksperiment **nije** pokazao da je izvršen neovlašćeni upis.<sup>[[7]](#references)</sup>
 
-При тестирању ове границе разликујте пресуду класификатора од стварног резултата ауторизације алата. Проверите која изменљива поља стижу до judge-а, упоредите исту предложену радњу са текстом налик политици и без њега и независно проверите коначно стање. Засебна провера дозвола и даље мора да користи овлашћења аутентификованог подносиоца захтева, а не права сервисног налога конектора.<sup>[[7]](#references)</sup> За друге начине отказа класификатора погледајте [prompt-filter bypasses](AI-Prompts.md#prompt-waf-bypass); [LLM gateway trust boundaries](AI-LLM-Gateway-Security.md) обрађују другу границу рутирања и акредитива.
+Pri testiranju ove granice razlikujte odluku klasifikatora od stvarnog rezultata autorizacije alata. Proverite koja polja koja korisnik može da menja stižu do procenjivača, uporedite istu predloženu radnju sa tekstom nalik politici i bez njega i nezavisno proverite konačno stanje. Zasebna provera dozvola i dalje mora da koristi ovlašćenja autentifikovanog podnosioca zahteva, a ne prava servisnog naloga konektora.<sup>[[7]](#references)</sup> Pogledajte [prompt-filter bypasses](AI-Prompts.md#prompt-waf-bypass) za druge načine otkaza klasifikatora; [LLM gateway trust boundaries](AI-LLM-Gateway-Security.md) odnose se na drugu granicu rutiranja i akreditiva.
 
-### Изолација контекста подагента
+### Izolacija konteksta podagenta
 
-Подагент Claude Agent SDK који није fork добија сопствени `AgentDefinition.prompt`, prompt за делегирање и доступне алате, али не и родитељски системски prompt или разговор. Ако је `tools` изостављен из његове дефиниције, наслеђује алате доступне подагентима; пројектни `CLAUDE.md` и даље може да се учита. Због тога ограничење prompt-а које важи само за родитеља није поуздана граница ако дете може да користи исте алате за датотечни систем или извршавање.<sup>[[4]](#references)</sup>
+Podagent Claude Agent SDK-ja koji nije fork dobija sopstveni `AgentDefinition.prompt`, prompt za delegiranje i dostupne alate, ali ne i sistemski prompt ili razgovor roditeljskog agenta. Ako je `tools` izostavljen iz njegove definicije, nasleđuje alate dostupne podagentima; projektni `CLAUDE.md` se i dalje može učitati. Zbog toga ograničenje prompta postavljeno samo kod roditeljskog agenta nije pouzdana granica kada dete može da koristi iste alate za fajl-sistem ili izvršavanje.<sup>[[4]](#references)</sup>
 
-Тестирајте границу тако што ћете упоредити директан захтев који родитељ одбија са истим задатком делегираним именованом подагенту. NCC Group наводи да је попис датотека оперативног система, који је одбијен, успео када је детету представљен као безопасна „мапа распореда”.<sup>[[3]](#references)</sup>
+Testirajte granicu tako što ćete uporediti direktan zahtev koji roditeljski agent odbija sa istim zadatkom delegiranim imenovanom podagentu. NCC Group navodi da je popis fajlova operativnog sistema, koji je bio odbijen, uspeo kada je preformulisan za dete kao bezopasna „mapa rasporeda“.<sup>[[3]](#references)</sup>
 
-Проверите стварне позиве алата детета и ефективну листу дозвољених алата, а не само коначни одговор родитеља; потврдите да ли је дете приступило датотекама којима родитељ не би приступио.<sup>[[4]](#references)</sup> Ово је пропуст у наслеђивању заштитних механизама, а не доказ [Python sandbox](../generic-methodologies-and-resources/python/bypass-python-sandboxes/) или бекства из container-а.<sup>[[3]](#references)[[4]](#references)</sup>
+Pregledajte stvarne pozive alata deteta i efektivnu listu dozvoljenih alata, a ne samo konačni odgovor roditeljskog agenta; potvrdite da li je dete pristupilo fajlovima kojima roditeljski agent ne bi pristupio.<sup>[[4]](#references)</sup> Ovo je otkaz nasleđivanja zaštitnih ograda, a ne dokaz zaobilaska [Python sandbox](../generic-methodologies-and-resources/python/bypass-python-sandboxes/) ili izlaska iz container-a.<sup>[[3]](#references)[[4]](#references)</sup>
 
-## Извршавање: докажите стварни утицај
+## Izvršavanje: dokažite stvarni uticaj
 
-Постоје два различита пута од утицаја до последица:<sup>[[2]](#references)</sup>
+Postoje dva različita puta od uticaja do posledica:<sup>[[2]](#references)</sup>
 
-1. **Злоупотреба могућности:** овлашћени алат већ обавља жељену радњу. Примери укључују читање записа једног tenant-а и уписивање у извештај видљив нападачу, слање email-а, измену записа, брисање датотеке или покретање уплате. Није потребан додатни софтверски пропуст.
-2. **Експлоатација низводног sink-а:** излаз модела којим управља нападач постаје синтакса за другу компоненту. Проверите упите ка бази података због [SQL injection](../pentesting-web/sql-injection/README.md) или [NoSQL injection](../pentesting-web/nosql-injection.md), shell обавијаче због [command injection](../pentesting-web/command-injection.md), изабране URL-ове због [SSRF](../pentesting-web/ssrf-server-side-request-forgery/README.md), операције над датотекама због traversal-а, template/code евалуаторе због RCE-а и парсере објеката због [unsafe deserialization](../pentesting-web/deserialization/README.md).
+1. **Zloupotreba mogućnosti:** ovlašćeni alat već može da ostvari cilj. Primeri obuhvataju čitanje zapisa jednog tenant-a i upisivanje u izveštaj vidljiv napadaču, slanje email-a, menjanje zapisa, brisanje fajla ili pokretanje plaćanja. Nije potrebna sekundarna softverska ranjivost.
+2. **Eksploatacija nizvodnog mesta:** izlazom modela, kojim upravlja napadač, postaje sintaksa za drugu komponentu. Pregledajte upite ka bazi podataka zbog [SQL injection](../pentesting-web/sql-injection/README.md) ili [NoSQL injection](../pentesting-web/nosql-injection.md), shell omotače zbog [command injection](../pentesting-web/command-injection.md), izabrane URL-ove zbog [SSRF](../pentesting-web/ssrf-server-side-request-forgery/README.md), operacije nad fajlovima zbog path traversal-a, evaluatore template-a/koda zbog RCE-a i parsere objekata zbog [unsafe deserialization](../pentesting-web/deserialization/README.md).
 
-За сваки кандидат докажите овај ланац:<sup>[[2]](#references)</sup>
+Za svakog kandidata dokažite ovaj lanac:<sup>[[2]](#references)</sup>
 
 ```text
 attacker-controlled source
@@ -80,39 +80,41 @@ attacker-controlled source
   -> externally verified state change or data egress
 ```
 
-Integracija samo za čitanje i dalje je ranjiva ako bilo koja kasnija komponenta može da objavi ono što je pročitala. Testirajte uobičajene odgovore, ali i manje očigledne izlazne kanale, kao što su linkovi pod kontrolom napadača, automatsko preuzimanje slika, webhook-ovi, logovi, izveštaji, brojači, obaveštenja i poruke drugim agentima.<sup>[[2]](#references)</sup>
+Integracija samo za čitanje i dalje može biti iskorišćena ako bilo koja kasnija komponenta može da objavi ono što je pročitala. Testirajte uobičajene odgovore, kao i manje očigledne kanale za izlaz podataka, poput linkova koje kontroliše napadač, automatskog preuzimanja slika, webhookova, logova, izveštaja, brojača, obaveštenja i poruka drugim agentima.<sup>[[2]](#references)</sup>
 
-## Aktivnosti nad ciljevima
+## Radnje u vezi sa ciljevima
 
-Nakon što potvrdite jednu radnju, procenite celokupan opseg posledica umesto da stanete na prvom vidljivom efektu:<sup>[[2]](#references)</sup>
+Nakon potvrde jedne radnje, procenite celokupan radijus uticaja umesto da se zaustavite na prvom vidljivom efektu:<sup>[[2]](#references)</sup>
 
-- **Eksfiltracija:** tajne, zapisi o korisnicima, interne datoteke, podaci iz razgovora ili sadržaj prompta/konteksta izlaze kroz kanal koji se može nadzirati.
-- **Neovlašćena radnja:** agent koristi legitimne mogućnosti pisanja u cilju napadača.
+- **Eksfiltracija:** tajne, korisnički zapisi, interne datoteke, podaci iz razgovora ili sadržaj prompta/konteksta izlaze kroz kanal koji se može nadzirati.
+- **Neovlašćena radnja:** agent koristi legitimne mogućnosti upisa da bi ostvario cilj napadača.
 - **Uskraćivanje usluge:** destruktivni alati ili ponovljene skupe operacije utiču na integritet ili dostupnost.
-- **Postojanost:** zatrovana memorija, indeksirani sadržaj, pouzdano stanje ili izmene tokom izvršavanja opstaju nakon završetka sesije koja ih je izazvala ili uklanjanja izvora.
-- **Širenje:** pouzdani agent prima poruku ili deljeno stanje kompromitovanog agenta i ponavlja radnju pomoću sopstvenih alata i akreditiva.
+- **Postojanost:** zatrovana memorija, indeksirani sadržaj, pouzdano stanje ili izmene tokom izvršavanja opstaju nakon završetka sesije ili uklanjanja izvora.
+- **Širenje:** pouzdani peer obrađuje poruku ili deljeno stanje kompromitovanog agenta i ponavlja radnju koristeći sopstvene alate i akreditive.
 
-Ozbiljnost treba da zavisi od dostupnih podataka, efektivnih privilegija, mogućnosti iskorišćavanja odredišta, izlaznih kanala, postojanosti i širenja — a ne od toga koliko tekst modela deluje iznenađujuće.<sup>[[2]](#references)</sup>
+Ozbiljnost treba da zavisi od dostupnih podataka, efektivnih privilegija, mogućnosti iskorišćavanja odredišta, izlaza podataka, postojanosti i širenja — a ne od toga koliko neočekivano zvuči tekst modela.<sup>[[2]](#references)</sup>
 
 ## Kontrole koje treba proveriti tokom procene
 
-Filteri za promptove i bolji sistemski prompt mogu da povećaju trošak za napadača, ali ne treba ih smatrati granicama autorizacije. Proverite kontrole u nastavku tako što ćete ponovo pokrenuti isti lanac kroz direktan unos, indirektan sadržaj, memoriju, alate i agentske kolege:<sup>[[2]](#references)</sup>
+Filteri za promptove i bolji sistemski prompt mogu povećati trošak napadača, ali ih ne treba smatrati granicama autorizacije. Proverite sledeće kontrole tako što ćete ponovo pokrenuti isti lanac kroz direktni unos, indirektni sadržaj, memoriju, alate i peer agente:<sup>[[2]](#references)</sup>
 
-- Deterministički sloj politike proverava autentifikovanog korisnika, zakupca, objekat, radnju i odredište pri **svakom pozivu alata**; model ne može da navede niti promeni identitet pozivaoca.
-- Mogućnosti čitanja i pisanja koriste zasebne akreditive sa najmanjim potrebnim privilegijama i kratkim rokom važenja; alati visokog uticaja dostupni su samo po potrebi i nikada se ne izvršavaju automatski na osnovu unetog sadržaja.
-- Izlazni mrežni saobraćaj i interna odredišta zasebno su na listi dozvoljenih, nezavisno od URL-ova koje odabere model; pristup tokom izvršavanja metapodacima, montiranim tajnama i susednim servisima blokiran je osim ako je neophodan.
-- Interfejs za odobravanje generiše se iz kanonskog strukturiranog zahteva i prikazuje tačne argumente, identitet, odredište, pogođene objekte i sporedne efekte — a ne slobodno sastavljen sažetak modela.
-- Uspeh se proverava u odredišnom sistemu ili sistemu evidencije. Agentovo objašnjenje, zahtev za poziv alata ili HTTP preusmeravanje nisu dokaz da je navedena promena stanja zaista izvršena.
-- Unosi u memoriju i sistem za pronalaženje informacija zadržavaju poreklo i oznake pouzdanosti, mogu se poništiti i ponovo se proverava njihova autorizacija prilikom korišćenja za kasniju radnju.
-- Poruke između agenata autentifikuju se i autorizuju kao nepouzdani zahtevi; reputacija drugog agenta ili njegova kartica ne prenosi implicitno alate primaoca.
+- Deterministički sloj pravila proverava autentifikovanog korisnika, zakupca, objekat, radnju i odredište pri **svakom pozivu alata**; model ne može da navede niti izmeni identitet pozivaoca.
+- Mogućnosti čitanja i upisa koriste odvojene akreditive sa najmanjim potrebnim privilegijama i kratkim rokom važenja; alati visokog uticaja se aktiviraju neposredno pre upotrebe i nikada se ne izvršavaju automatski na osnovu unetog sadržaja.
+- Izlazni mrežni saobraćaj i interna odredišta stavljeni su na liste dozvoljenih nezavisno od URL-ova koje odabere model; pristup okruženja za izvršavanje metapodacima, montiranim tajnama i susednim servisima je blokiran, osim ako je neophodan.
+- Interfejs za odobravanje generiše se iz kanonskog strukturiranog zahteva i prikazuje tačne argumente, identitet, odredište, pogođene objekte i sporedne efekte — a ne slobodno formiran sažetak modela.
+- Uspeh se proverava u odredišnom sistemu ili sistemu evidencije. Opis agenta, zahtev za poziv alata ili HTTP preusmeravanje nisu dokaz da je došlo do navedene promene stanja.
+- Unosi u memoriju i sistem za preuzimanje sadržaja čuvaju poreklo i oznake pouzdanosti, mogu da se ponište i ponovo se proverava njihova autorizacija kada se koriste za kasniju radnju.
+- Poruke između agenata se autentifikuju i autorizuju kao nepouzdani zahtevi; reputacija peer-a ili njegova agent kartica ne delegiraju implicitno alate primaoca.
+
+Za agent kartice A2A, tokove zadataka i njihovu površinu napada, pogledajte [A2A Protocol Security](AI-A2A-Protocol.md).
 
 ## References
 
-- [1] [OWASP Top 10 za agentičke aplikacije za 2026. godinu](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)
+- [1] [OWASP Top 10 za agentne aplikacije za 2026. godinu](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)
 - [2] [Hakerski vodič za napad na AI agente](https://darkmarc.substack.com/p/the-hackers-guide-to-attacking-ai)
-- [3] [Koliko je zaista teško izvući AI agenta iz njegovog sandbox-a?](https://www.nccgroup.com/research/how-hard-is-it-really-to-break-an-ai-agent-out-of-its-sandbox/)
+- [3] [Koliko je zaista teško izvući AI agenta iz njegovog sandboxa?](https://www.nccgroup.com/research/how-hard-is-it-really-to-break-an-ai-agent-out-of-its-sandbox/)
 - [4] [Podagenti u SDK-u](https://code.claude.com/docs/en/agent-sdk/subagents)
 - [5] [Izvorni kod TypeSafe Auto Mode middleware-a za LangChain](https://github.com/langchain-ai/langchain/blob/master/libs/partners/typesafe/langchain_typesafe/experimental/middleware/auto_mode.py)
-- [6] [Neravnomernost Jev modela TypeSafe AI: adversarijalni sadržaj](https://docs.typesafe.ai/model-jaggedness/jev-1.13#adversarial-content)
-- [7] [Jev kao sudija: kako lažna politika usmerava Jev](https://securitylabs.datadoghq.com/articles/jev-as-a-judge-how-counterfeit-policy-steers-jev/)
+- [6] [Neujednačenost modela TypeSafe AI Jev: adversarijalni sadržaj](https://docs.typesafe.ai/model-jaggedness/jev-1.13#adversarial-content)
+- [7] [Jev kao sudija: kako lažirana pravila usmeravaju Jev](https://securitylabs.datadoghq.com/articles/jev-as-a-judge-how-counterfeit-policy-steers-jev/)
 {{#include ../banners/hacktricks-training.md}}
