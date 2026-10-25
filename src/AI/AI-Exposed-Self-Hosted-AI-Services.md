@@ -57,7 +57,7 @@ Registry pulls are also a parser attack surface, because the server stores blobs
 
 ### Job submission APIs
 
-Distributed compute frameworks treat code execution as their main feature. The Ray Jobs API on the dashboard port (8265) accepts an `entrypoint` shell command and runs it on the cluster.<sup>[[19]](#references)</sup> The Oligo ShadowRay research reports that the Jobs API has no authorization and that the dashboard binds to `0.0.0.0`. The matching CVE-2023-48022 is disputed because Ray expects to run only inside a controlled network.<sup>[[20]](#references)</sup> Ray added optional token authentication (`RAY_AUTH_MODE=token`) in 2.52.0. Ray 2.59 enables it by default for local clusters and Ray 2.61 for all clusters, so older or misconfigured clusters stay open.<sup>[[21]](#references)</sup>
+Distributed compute frameworks treat code execution as their main feature. The Ray Jobs API on the dashboard port (8265) accepts an `entrypoint` shell command and runs it on the cluster.<sup>[[19]](#references)</sup> The Oligo ShadowRay research reports that the Jobs API has no authorization and that the dashboard binds to `0.0.0.0`. The matching CVE-2023-48022 is disputed because Ray expects to run only inside a controlled network.<sup>[[20]](#references)</sup> Ray added optional token authentication (`RAY_AUTH_MODE=token`) in 2.52.0. Ray 2.59 enables it by default for local clusters started with `ray.init()`; `ray start --head` without an available token can still start unauthenticated. Ray documents a broader default-authentication rollout for 2.61, so check the deployed version and launch mode rather than assuming the dashboard is open.<sup>[[21]](#references)</sup>
 
 ```bash
 curl -s http://target:8265/api/version
@@ -115,14 +115,14 @@ On Hugging Face Spaces the Space secrets are environment variables, so `/proc/se
 
 RAG stores chunks of the original documents, their embeddings and metadata in a vector database, and the assistant places the top results in its prompt. Read access therefore leaks the **plain text of private documents**. Write access lets an attacker insert chunks that are later retrieved into other users' prompts, which is persistent indirect prompt injection (see [AI Prompts](AI-Prompts.md#third-party-or-indirect-prompt-injection)).
 
-The main self-hosted vector databases ship without authentication:
+For self-hosted vector databases, check whether authentication is configured or anonymous access is enabled:
 
 - **Qdrant**: self-deployed instances listen on all interfaces with no authentication. When configured, the key goes in the `api-key` header or as `Authorization: Bearer`. Read-only and per-collection keys can exist.<sup>[[11]](#references)</sup>
 - **Chroma**: authentication is disabled by default. Token auth uses `Authorization` or `X-Chroma-Token`.<sup>[[29]](#references)</sup>
 - **Weaviate**: requests without credentials are authenticated as `user: anonymous` when anonymous access is enabled, and get whatever permissions that user has.<sup>[[30]](#references)</sup>
 - **Milvus**: authentication is off unless `common.security.authorizationEnabled` is `true`. When it is on, the default `root` user has the password `Milvus` and the token format is `username:password`.<sup>[[31]](#references)[[14]](#references)</sup>
 
-A `200` with data and no key is the vulnerable signal:<sup>[[12]](#references)[[10]](#references)[[13]](#references)[[14]](#references)</sup>
+A response containing private data without credentials indicates exposure. Where authentication is enabled, assess any unchanged default account separately:<sup>[[12]](#references)[[10]](#references)[[13]](#references)[[14]](#references)</sup>
 
 ```bash
 curl -s http://target:6333/collections
@@ -151,7 +151,7 @@ Authentication on these servers can also come too late. In Chroma's Python FastA
 - [11] [Qdrant - Security](https://qdrant.tech/documentation/security/)
 - [12] [Qdrant OpenAPI specification](https://github.com/qdrant/qdrant/blob/master/docs/redoc/master/openapi.json)
 - [13] [Weaviate OpenAPI specification](https://github.com/weaviate/weaviate/blob/main/openapi-specs/schema.json)
-- [14] [Milvus - Connect to Milvus Server](https://github.com/milvus-io/milvus-docs/blob/v2.6.x/site/en/getstarted/connect-to-milvus-server.md)
+- [14] [Milvus - Connect to Milvus Server](https://milvus.io/docs/connect-to-milvus-server.md)
 - [15] [Wiz - Probllama: Ollama Remote Code Execution Vulnerability (CVE-2024-37032)](https://www.wiz.io/blog/probllama-ollama-vulnerability-cve-2024-37032)
 - [16] [Ollama Dockerfile](https://github.com/ollama/ollama/blob/main/Dockerfile)
 - [17] [Ollama Docker documentation](https://github.com/ollama/ollama/blob/main/docs/docker.mdx)
@@ -168,7 +168,7 @@ Authentication on these servers can also come too late. In Chroma's Python FastA
 - [28] [Gradio fix commit for `/component_server`](https://github.com/gradio-app/gradio/commit/24a583688046867ca8b8b02959c441818bdb34a2)
 - [29] [Chroma Cookbook - Chroma-native Auth](https://cookbook.chromadb.dev/security/legacy-auth/)
 - [30] [Weaviate - Authentication](https://docs.weaviate.io/weaviate/configuration/authentication)
-- [31] [Milvus - Authenticate User Access](https://github.com/milvus-io/milvus-docs/blob/v2.6.x/site/en/adminGuide/authenticate.md)
+- [31] [Milvus - Authenticate User Access](https://milvus.io/docs/authenticate.md)
 - [32] [HiddenLayer - ChromaToast Served Pre-Auth](https://www.hiddenlayer.com/research/chromatoast-served-pre-auth)
 
 {{#include ../banners/hacktricks-training.md}}
