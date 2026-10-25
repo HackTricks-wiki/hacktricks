@@ -371,6 +371,14 @@ config case_sensitive = false
 
 These patterns generalize to any updater that accepts unsigned manifests or fails to pin installer signers—network hijack + malicious installer + BYO-signed sideloading yields remote code execution under the guise of “trusted” updates.
 
+### Short-lived origin configuration tampering
+
+An attacker with write access to an updater's **origin or distribution configuration** need not modify a release binary. In the AOMEI case, the client fetched `down_html.ini` over HTTPS. That file supplied the archive `Url`, version field `thrid`, and expected MD5 `Val`. During brief windows, the attacker changed all three together so a higher-version malicious `upgrade-now.zip` matched the attacker-supplied checksum. This was not an MD5 collision: the checksum and download destination came from the same compromised trust boundary. The article does not establish how origin access was obtained.<sup>[[17]](#references)</sup>
+
+A separate `Notifycfg.ini` controlled the notification process and could launch a program extracted into the local `html` directory. One observed tampered file contained more than 35,000 lines of repeated `[dummy_XXXXXX]` sections; in this client, that bloat bypassed the usual version gate and forced execution of the unpacked updater. The malicious files remained on the origin for only five to ten minutes before being restored. Consequently, only clients polling in that interval received them, while a later live fetch could return clean configuration. The same notification channel also carried a [WebDAV/NTLM coercion lure](../ntlm/places-to-steal-ntlm-creds.md#remote-notification-uris-for-webdav-ntlm-coercion), independent of whether the archive executed. Subsequent signed-binary sideloading is the existing [DLL search-order hijacking](dll-hijacking/#dll-search-order) technique, not a property of the update parser.<sup>[[17]](#references)</sup>
+
+
+
 ---
 ## References
 - [1] [Advisory – Netskope Client for Windows – Local Privilege Escalation via Rogue Server (CVE-2025-0309)](https://blog.amberwolf.com/blog/2025/august/advisory---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
@@ -389,5 +397,5 @@ These patterns generalize to any updater that accepts unsigned manifests or fail
 - [14] [AmberWolf – Bypassing the fix for CVE-2025-0309 in Netskope Client for Windows](https://blog.amberwolf.com/blog/2026/march/patch-bypass---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
 - [15] [Atredis – Uncovering Privilege Escalation Bugs in Lenovo Vantage](https://www.atredis.com/blog/2025/7/7/uncovering-privilege-escalation-bugs-in-lenovo-vantage)
 - [16] [Quarkslab – MyReport Updater: From gRPC to SYSTEM](https://blog.quarkslab.com/myreport-updater-from-grpc-to-system.html)
-
+- [17] [Google Threat Intelligence Group and Mandiant – Investigating Ephemeral Supply Chain Tampering](https://cloud.google.com/blog/topics/threat-intelligence/investigating-ephemeral-supply-chain-tampering)
 {{#include ../../banners/hacktricks-training.md}}
