@@ -2,54 +2,58 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Kuendesha na kufunza modeli ndani ya kifaa chako
+## Kuendesha na kufundisha modeli ndani ya kifaa chako
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
 
-Hugging Face Transformers ni maktaba huria ya kupakia, kufunza na kutoa huduma kwa modeli zilizofunzwa awali katika kazi za maandishi, picha, sauti, video na za aina nyingi. Uwekaji wa modeli na seti za data hufanywa kando kupitia Hugging Face Hub.<sup>[[1]](#references)</sup>
+Hugging Face Transformers ni maktaba ya chanzo-wazi ya kupakia, kufundisha na kutoa modeli zilizofundishwa awali kwa kazi za maandishi, picha, sauti, video na kazi za multimodal. Ukaribishaji wa modeli na dataset hutolewa kando kupitia Hugging Face Hub.<sup>[[1]](#references)</sup>
 
 ### [**LangChain**](https://github.com/langchain-ai/langchain)
 
-LangChain ni mfumo wa kujenga programu na mawakala wanaoendeshwa na modeli, wenye uwezo wa kuunda prompt, kusimamia historia/hali ya mazungumzo, kutumia zana, kufanya retrieval, na kuunganisha modeli, API na hifadhidata.<sup>[[2]](#references)</sup>
+LangChain ni mfumo wa kujenga programu na mawakala wanaoendeshwa na modeli, wenye vipengele vya kuunda prompt, kudhibiti historia ya mazungumzo/hali, zana, retrieval, na miunganisho ya modeli, API na hifadhidata.<sup>[[2]](#references)</sup>
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 
-LitGPT hutoa utekelezaji unaosomeka na workflows za mstari wa amri za kufanya pretraining, fine-tuning, kutathmini na kupeleka modeli za lugha zinazotumika.<sup>[[3]](#references)</sup>
+LitGPT hutoa utekelezaji unaosomeka na mtiririko wa kazi wa mstari wa amri kwa ajili ya kufundisha modeli zinazotumika kuanzia mwanzo, kuzifanyia fine-tuning, kuzitathmini na kuzisambaza.<sup>[[3]](#references)</sup>
 
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
 **Maelezo:**\
-LitServe ni mfumo wa Lightning AI wa kutoa huduma kwa modeli, unaowezesha kufichua API za inference zenye batching, streaming, uharakishaji na hooks za kuongeza uwezo.<sup>[[4]](#references)</sup>
+LitServe ni mfumo wa Lightning AI wa kutoa huduma za modeli kupitia inference APIs, ukiwa na uwezo wa batching, streaming, acceleration na scaling.<sup>[[4]](#references)</sup>
 
 ### [**Axolotl**](https://github.com/axolotl-ai-cloud/axolotl)
 
-Axolotl ni mfumo huria wa post-training na fine-tuning unaotegemea usanidi wa YAML. Unaunga mkono mbinu kama vile fine-tuning kamili, LoRA/QLoRA, uboreshaji wa mapendeleo na mafunzo ya GPU nyingi; si jukwaa la kupeleka modeli kwenye cloud.<sup>[[5]](#references)</sup>
+Axolotl ni mfumo wa chanzo-wazi wa post-training na fine-tuning unaoendeshwa kwa usanidi wa YAML. Unaunga mkono mbinu kama full fine-tuning, LoRA/QLoRA, preference optimization na training ya multi-GPU; wenyewe si jukwaa la kusambaza huduma kwenye cloud.<sup>[[5]](#references)</sup>
 
 ## Kujaribu modeli mtandaoni
 
 ### [**Hugging Face**](https://huggingface.co/)
 
-**Hugging Face** ni jukwaa na jumuiya maarufu ya machine learning, inayojulikana hasa kwa kazi yake katika uchakataji wa lugha asilia (NLP). Hutoa zana, maktaba na rasilimali zinazorahisisha kuunda, kushiriki na kupeleka modeli za machine learning.\
+**Hugging Face** ni jukwaa na jumuiya inayoongoza katika machine learning, inayojulikana hasa kwa kazi yake katika usindikaji wa lugha asilia (NLP). Hutoa zana, maktaba na rasilimali zinazorahisisha kuunda, kushiriki na kusambaza modeli za machine learning.\
 Hub ina sehemu kadhaa muhimu:<sup>[[6]](#references)</sup>
 
-* **Modeli:** Hazina kubwa ya **modeli za machine learning zilizofunzwa awali** ambapo watumiaji wanaweza kuvinjari, kupakua na kuunganisha modeli kwa kazi mbalimbali kama vile kuzalisha maandishi, kutafsiri, kutambua picha na zaidi.
-* **Seti za data:** **Mkusanyiko kamili wa seti za data** zinazotumika kufunza na kutathmini modeli. Huwezesha ufikiaji rahisi wa vyanzo mbalimbali vya data, na kuwawezesha watumiaji kupata na kutumia data kwa miradi yao mahususi ya machine learning.
-* **Spaces:** Jukwaa la kupangisha na kushiriki **programu shirikishi za machine learning** na demo. Huwezesha wasanidi programu **kuonyesha** modeli zao zikifanya kazi, kuunda violesura vinavyofaa watumiaji na kushirikiana na wengine kwa kushiriki demo zinazotumika moja kwa moja.
+* **Models**: Hifadhi kubwa ya **modeli za machine learning zilizofundishwa awali** ambamo watumiaji wanaweza kuvinjari, kupakua na kuunganisha modeli kwa kazi mbalimbali kama vile utengenezaji wa maandishi, tafsiri, utambuzi wa picha na nyinginezo.
+* **Datasets:** **Mkusanyiko wa dataset** unaotumika kufundisha na kutathmini modeli. Huwezesha ufikiaji rahisi wa vyanzo mbalimbali vya data, na kuwawezesha watumiaji kupata na kutumia data kwa miradi yao mahususi ya machine learning.
+* **Spaces:** Jukwaa la kukaribisha na kushiriki **programu shirikishi za machine learning** na demo. Huwaruhusu watengenezaji **kuonyesha** modeli zao zikifanya kazi, kuunda violesura vinavyofaa kwa watumiaji na kushirikiana na wengine kwa kushiriki demo za moja kwa moja.
 
-## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **na** [**Kaggle**](https://www.kaggle.com/)
+## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
-**TensorFlow Hub** ni hazina na maktaba ya vipengele vya modeli zilizofunzwa vinavyoweza kutumiwa tena, hasa moduli zinazotumiwa kupitia TensorFlow/Keras. **Kaggle** hutoa notebooks, seti za data, mashindano na modeli kando.<sup>[[7]](#references)[[9]](#references)</sup>
+**TensorFlow Hub** ni hifadhi na maktaba ya vipengele vya modeli vilivyofundishwa ambavyo vinaweza kutumika tena, hasa moduli zinazotumiwa kupitia TensorFlow/Keras. **Kaggle** hutoa kivyake notebooks, dataset, mashindano na modeli.<sup>[[7]](#references)[[9]](#references)</sup>
 
-* **Moduli:** Mkusanyiko mkubwa wa modeli zilizofunzwa awali na vipengele vya modeli ambapo watumiaji wanaweza kuvinjari, kupakua na kuunganisha moduli kwa kazi kama vile uainishaji wa picha, uwekaji wa maandishi katika embeddings na zaidi.
-* **Mafunzo elekezi:** Miongozo na mifano ya hatua kwa hatua inayowasaidia watumiaji kutekeleza na kufanya fine-tuning ya modeli kwa kutumia TensorFlow Hub.
-* **Nyaraka:** Miongozo ya kina na marejeo ya API yanayowasaidia wasanidi programu kutumia rasilimali za hazina hiyo kwa ufanisi.
+* **Modules:** Mkusanyiko mkubwa wa modeli zilizofundishwa awali na vipengele vya modeli ambamo watumiaji wanaweza kuvinjari, kupakua na kuunganisha moduli kwa kazi kama vile uainishaji wa picha, uwekaji wa maandishi katika embedding na nyinginezo.
+* **Tutorials:** Miongozo na mifano ya hatua kwa hatua inayowasaidia watumiaji kutekeleza na kufanya fine-tuning ya modeli kwa kutumia TensorFlow Hub.
+* **Documentation:** Miongozo ya kina na marejeleo ya API yanayowasaidia watengenezaji kutumia rasilimali za hifadhi hii kwa ufanisi.
 
 ## [**Replicate**](https://replicate.com/home)
 
-**Replicate** ni jukwaa linalopangisha modeli za machine learning zilizofungashwa ili ziendeshwe kupitia kiolesura cha wavuti au API.<sup>[[8]](#references)</sup>
+**Replicate** ni jukwaa linalokaribisha modeli za machine learning zilizofungashwa ili ziendeshwe kupitia kiolesura cha wavuti au API.<sup>[[8]](#references)</sup>
 
-* **Modeli:** Hazina ya modeli za machine learning zilizochangiwa na jumuiya, ambapo watumiaji wanaweza kuvinjari na kujaribu modeli hizo, na kuziunganisha katika programu zao kwa juhudi ndogo.
-* **Ufikiaji wa API:** API za kuita modeli kutoka kwenye programu bila kuendesha miundombinu ya inference inayozitegemeza.
+* **Models:** Hifadhi ya modeli za machine learning zilizochangiwa na jumuiya, ambamo watumiaji wanaweza kuvinjari na kujaribu modeli hizo, kisha kuziunganisha kwenye programu zao kwa juhudi ndogo.
+* **API access:** APIs za kuita modeli kutoka kwenye programu bila kuendesha miundombinu ya inference yenyewe.
+
+## Kushambulia huduma za AI zinazojiendesha zikiwa zimefichuliwa
+
+Kwa fingerprinting na majaribio ya black-box ya mifumo ya kuendesha modeli inayojihostia, wajenzi wa mawakala, violesura vya demo za ML, makundi ya kompyuta na hifadhidata za vector, angalia [Huduma za AI Zinazojihostia Zilizofichuliwa](AI-Exposed-Self-Hosted-AI-Services.md).
 
 ## References
 
