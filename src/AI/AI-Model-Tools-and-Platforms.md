@@ -51,6 +51,10 @@ The Hub offers several relevant sections:<sup>[[6]](#references)</sup>
 * **Models:** A repository of machine learning models contributed by the community which users can browse, try, and integrate models into their applications with minimal effort.
 * **API access:** APIs for invoking models from applications without operating the underlying inference infrastructure.
 
+## Attacking exposed self-hosted AI services
+
+For black-box fingerprinting and testing of self-hosted model runners, agent builders, ML demo UIs, compute clusters and vector databases, check [Exposed Self-Hosted AI Services](AI-Exposed-Self-Hosted-AI-Services.md).
+
 ## References
 
 - [1] [Hugging Face Transformers](https://github.com/huggingface/transformers)

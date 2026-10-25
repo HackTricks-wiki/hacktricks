@@ -322,7 +322,7 @@ During assessment, distinguish permission to create a run from permission to ove
 
 ### Exposed model servers and ML infrastructure
 
-Loading a malicious model is not the only way to execute code on ML infrastructure. Some services run code or load models as a normal API feature and have no authentication by default, for example the Ray Jobs API (ShadowRay), the Langflow code validator, Ollama model pulls (Probllama) or the Gradio `/component_server`. See [Exposed Self-Hosted AI Services](AI-Exposed-Self-Hosted-AI-Services.md).
+Loading a malicious model is not the only way to run code on ML infrastructure. Job submission APIs, code-validation endpoints and model registry pulls of self-hosted AI services can lead to code execution without any model file. See [Exposed Self-Hosted AI Services](AI-Exposed-Self-Hosted-AI-Services.md).
 
 ## Models to Path Traversal
 

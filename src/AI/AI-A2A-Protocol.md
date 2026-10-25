@@ -4,7 +4,7 @@
 
 ## What is A2A
 
-A2A (Agent2Agent) is an open protocol that lets one AI agent discover another agent and send it work over HTTP. MCP connects an agent to **tools and data**; A2A connects an agent to **other agents**, which are usually remote services owned by another team or company. Because an A2A server is just a web API that runs an LLM agent behind it, it has the usual web API bugs (missing authentication, IDOR, SSRF) plus prompt-injection risks between agents.<sup>[[1]](#references)[[2]](#references)</sup>
+A2A (Agent2Agent) is an open protocol that lets one AI agent discover another agent and send it work over HTTP. MCP connects an agent to **tools and data**; A2A connects an agent to **other agents**, which are usually remote services owned by another team or company. An A2A server is a web API with an LLM agent behind it, so the protocol's own objects (agent cards, tasks, push-notification webhooks, extended cards) add specific authentication, IDOR and SSRF checks to a normal API test.<sup>[[1]](#references)[[2]](#references)</sup>
 
 The main pieces are:
 
@@ -13,7 +13,7 @@ The main pieces are:
 - **Transports:** JSON-RPC 2.0 over HTTP (with SSE for streaming), gRPC, and an HTTP+JSON REST binding.<sup>[[1]](#references)</sup>
 - **Authentication:** credentials go in HTTP headers (for example `Authorization: Bearer ...`), never inside the JSON-RPC payload. The agent card says which scheme is required.<sup>[[1]](#references)</sup>
 
-Method names changed between versions, so try both sets:
+Method names changed between versions, so try both sets:<sup>[[1]](#references)[[3]](#references)[[4]](#references)</sup>
 
 | Operation | JSON-RPC 0.2/0.3 | JSON-RPC 1.0 | REST 1.0 |
 | --- | --- | --- | --- |
@@ -23,9 +23,9 @@ Method names changed between versions, so try both sets:
 | List tasks | - | `ListTasks` | `GET /tasks` |
 | Cancel task | `tasks/cancel` | `CancelTask` | `POST /tasks/{id}:cancel` |
 | Push notification config | `tasks/pushNotificationConfig/set` | `CreateTaskPushNotificationConfig` | `POST /tasks/{id}/pushNotificationConfigs` |
-| Extended card | `agent/getAuthenticatedExtendedCard` | `GetExtendedAgentCard` | `GET /extendedAgentCard` |
+| Extended card | `agent/getAuthenticatedExtendedCard` (0.3); HTTP `GET agent/authenticatedExtendedCard` (0.2.5) | `GetExtendedAgentCard` | `GET /extendedAgentCard` |
 
-The 1.0 spec uses the `A2A-Version` header to select the version; requests without it are treated as 0.3.<sup>[[1]](#references)[[4]](#references)</sup>
+The 1.0 spec uses the `A2A-Version` header (or a request parameter) to select the version, and requests without it are treated as 0.3.<sup>[[1]](#references)</sup>
 
 ## Discovery
 
@@ -81,15 +81,19 @@ Vulnerable: B receives A's history, artifacts or status, or can change A's task.
 
 ### Push notification webhook SSRF
 
-When `capabilities.pushNotifications` is true, the client gives the agent a webhook URL, and the agent later sends `POST` requests with task updates to that URL. The spec says agents should reject private ranges, localhost and link-local addresses, and use allowlists.<sup>[[1]](#references)</sup> Create a task, register a push notification config whose `url` points to your OAST host to confirm outbound requests, and then (only if the scope allows it) to internal targets such as `http://127.0.0.1:<port>/` or `http://169.254.169.254/`. Compare errors and timing to map internal services. The agent also adds the configured authentication header to these requests, so check that it is not sent to an attacker-chosen host when you can change the URL of another user's config. See [SSRF](../pentesting-web/ssrf-server-side-request-forgery/README.md).
+When `capabilities.pushNotifications` is true, the client gives the agent a webhook URL, and the agent later sends `POST` requests with task updates to that URL. The spec says agents should reject private ranges, localhost and link-local addresses, and use allowlists.<sup>[[1]](#references)</sup> Create a task, register a push notification config whose `url` points to your OAST host to confirm outbound requests, and then (only if the scope allows it) to internal targets such as `http://127.0.0.1:<port>/` or `http://169.254.169.254/`. Compare errors and timing to map internal services. The agent also adds the configured authentication header to these requests, so check that it is not sent to an attacker-chosen host when you can change the URL of another user's config. See [SSRF](../pentesting-web/ssrf-server-side-request-forgery/).
 
 ### Extended agent card access
 
 `GetExtendedAgentCard` must require authentication and may return more skills and configuration than the public card.<sup>[[1]](#references)</sup> Call it without credentials and with a low-privilege identity, and compare the result with the public card.
 
-### Agent-to-agent prompt injection
+### Push notification config and in-task credential leaks
 
-Everything a remote agent returns (message parts, artifacts, files, even the description and skills in its agent card) is untrusted text that the calling agent will put in its prompt. A malicious or compromised peer agent can therefore inject instructions into the caller, in the same way a malicious MCP tool description does. Test by registering or simulating a peer agent whose card description or task result contains a canary instruction, and check whether the orchestrator follows it or uses its own tools because of it. See [AI Prompts](AI-Prompts.md#third-party-or-indirect-prompt-injection), [MCP Servers](AI-MCP-Servers.md) and [AI Agent Security Methodology](AI-Agent-Security-Methodology.md).
+Push notification configs store a webhook URL and the credentials the agent sends to it. The spec requires every push notification config operation (create, get, list, delete) to verify that the caller may access the task.<sup>[[1]](#references)</sup> Repeat the two-identity test from the [task IDOR section](#task-idor-tasksget-gettask-cancel-subscribe) on these routes. A readable config of another user leaks a webhook token, and a writable one redirects that user's task updates to your host.
+
+When an agent needs extra authorization during a task, it moves the task to `TASK_STATE_AUTH_REQUIRED` and the client must supply the credential. The spec warns that in-band credential exchange can pass the credential across a chain of A2A agents and expose it to every agent in that chain.<sup>[[1]](#references)</sup> In an orchestrator test, check whether a credential that the user gives for one downstream agent appears in messages, artifacts or task history that other agents (or other users through task IDOR) can read.
+
+Agent card fields and task results are also untrusted input for the calling agent. Test them with the indirect prompt injection techniques in [AI Prompts](AI-Prompts.md#third-party-or-indirect-prompt-injection) and the inter-agent trust checks in [AI Agent Security Methodology](AI-Agent-Security-Methodology.md).
 
 ## References
 

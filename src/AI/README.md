@@ -108,8 +108,7 @@ AI-MCP-Servers.md
 
 ### AI Agent-to-Agent (A2A) Protocol
 
-A2A lets agents discover each other through an agent card and send each other tasks over HTTP. Its endpoints must be tested like any web API (authentication, task IDOR, webhook SSRF), and peer-agent output must be treated as untrusted input:
-
+A2A lets agents discover each other through an agent card and send each other tasks over HTTP. Test agent cards, task authorization, push-notification webhooks and extended cards:
 
 {{#ref}}
 AI-A2A-Protocol.md
@@ -117,8 +116,7 @@ AI-A2A-Protocol.md
 
 ### Exposed Self-Hosted AI Services
 
-Model runners, agent builders, ML demo UIs, compute clusters and vector databases (Ollama, Langflow, Gradio, Ray, Chroma, Qdrant, Weaviate, Milvus) often run without authentication, and several of them expose code execution or file read:
-
+Fingerprinting and testing exposed model runners, agent builders, ML demo UIs, compute clusters and vector databases that run without authentication:
 
 {{#ref}}
 AI-Exposed-Self-Hosted-AI-Services.md
