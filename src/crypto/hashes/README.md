@@ -94,6 +94,8 @@ without knowing the secret.<sup>[[1]](#references)</sup>
 
 Length-extension attacks apply to vulnerable prefix constructions such as `HASH(secret || message)`. They do not expose the HMAC construction (for example, HMAC-SHA256), which combines a key with separate inner and outer hash applications.<sup>[[1]](#references)[[2]](#references)</sup>
 
+For how to find and test these signatures in web APIs, check [Request and parameter signatures](../../pentesting-web/web-api-pentesting.md#request-and-parameter-signatures).
+
 ### Tools
 
 - [`hash_extender`](https://github.com/iagox86/hash_extender)<sup>[[3]](#references)</sup>
