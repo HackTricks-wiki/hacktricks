@@ -1,18 +1,18 @@
-# Hashes, MACs i KDF-ovi
+# Hash vrednosti, MAC-ovi i KDF-ovi
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Uobičajeni CTF obrasci
 
 - „Potpis“ je zapravo `hash(secret || message)` → length extension.
-- Nesoljeni password hash-evi → brže ponovljeno crackingovanje i napadi pomoću unapred izračunatih vrednosti.
+- Hash vrednosti lozinki bez salt-a → brže ponovljeno razbijanje i napadi pomoću unapred izračunatih tabela.
 - Mešanje hash-a sa MAC-om (hash != autentifikacija).
 
-## Pretrage MD5 hash-eva sa izabranim ulazom
+## Pretrage MD5 hash vrednosti sa izabranim ulazom
 
-Ovi Python primeri pretražuju dva različita obrasca izlaznih vrednosti: izabrani MD5 sufiks i MD5 vrednost koja počinje sa `0e`, iza čega slede samo cifre. Drugi obrazac je relevantan kada aplikacija ne pravi stroga poređenja numeričkih stringova; pogledajte ponašanje specifično za PHP i napomene o verzijama u odeljku [PHP loose comparisons](../../network-services-pentesting/pentesting-web/php-tricks-esp/README.md#loose-comparisons-and-type-juggling).
+Ovi Python primeri pretražuju dva različita obrasca izlaza: izabrani MD5 sufiks i MD5 vrednost koja počinje sa `0e`, a nakon toga sadrži samo cifre. Potonji obrazac je relevantan kada aplikacija labavo upoređuje numeričke nizove; pogledajte ponašanje specifično za PHP i napomene o verzijama u odeljku [Labava poređenja u PHP-u](../../network-services-pentesting/pentesting-web/php-tricks-esp/README.md#loose-comparisons-and-type-juggling).
 
-### Brute force MD5 hash sufiksa
+### Brute-force pretraga MD5 hash sufiksa
 
 ```python
 import hashlib
@@ -28,7 +28,7 @@ while True:
     candidate = candidate + 1
 ```
 
-### Generisanje MD5 hash vrednosti 0e za labava poređenja
+### Generisanje MD5 0e hash vrednosti za labava poređenja
 
 ```python
 #From isHaacK
@@ -69,22 +69,22 @@ main()
 
 ## Hash length extension attack
 
-### Technique
+### Tehnika
 
-Napad produžavanjem dužine može biti moguć kada server izračunava „potpis“ poput:
+Napad produženjem dužine može biti moguć kada server izračunava „potpis“ poput:
 
 `sig = HASH(secret || message)`
 
-i koristi Merkle-Damgård heš, kao što su MD5, SHA-1 ili SHA-256.
+i koristi hash funkciju Merkle-Damgård, kao što su MD5, SHA-1 ili SHA-256.
 
 Ako znate:
 
 - `message`
 - `sig`
-- heš funkciju
-- (ili možete da brute-force-ujete) `len(secret)`
+- hash funkciju
+- (ili možete brute-force-om da utvrdite) `len(secret)`
 
-onda možete da izračunate važeći potpis za:
+onda možete izračunati važeći potpis za:
 
 `message || padding || appended_data`
 
@@ -92,22 +92,24 @@ bez poznavanja tajne.<sup>[[1]](#references)</sup>
 
 ### Važno ograničenje: HMAC nije pogođen
 
-Napadi produžavanjem dužine primenjuju se na ranjive konstrukcije sa prefiksom, kao što je `HASH(secret || message)`. Oni ne otkrivaju konstrukciju HMAC-a (na primer, HMAC-SHA256), koja kombinuje ključ sa zasebnim unutrašnjim i spoljnim primenama heš funkcije.<sup>[[1]](#references)[[2]](#references)</sup>
+Napadi produženjem dužine odnose se na ranjive konstrukcije sa prefiksom, poput `HASH(secret || message)`. Oni ne otkrivaju HMAC konstrukciju (na primer, HMAC-SHA256), koja kombinuje ključ sa zasebnim unutrašnjim i spoljašnjim hash operacijama.<sup>[[1]](#references)[[2]](#references)</sup>
+
+Da biste saznali kako da pronađete i testirate ove potpise u web API-jima, pogledajte [Potpisi zahteva i parametara](../../pentesting-web/web-api-pentesting.md#request-and-parameter-signatures).
 
 ### Alati
 
 - [`hash_extender`](https://github.com/iagox86/hash_extender)<sup>[[3]](#references)</sup>
-- [`hashpumpy`](https://pypi.org/project/hashpumpy/), Python bindings za alat HashPump za produžavanje dužine<sup>[[7]](#references)</sup>
+- [`hashpumpy`](https://pypi.org/project/hashpumpy/), Python povezivanja za alat HashPump za produženje dužine<sup>[[7]](#references)</sup>
 
 ### Dobro objašnjenje
 
-[Everything you need to know about hash length extension attacks](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)<sup>[[1]](#references)</sup>
+[Sve što treba da znate o napadima produženjem dužine hash-a](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)<sup>[[1]](#references)</sup>
 
-## Dvosmisleno heširanje torki i MAC-ovi
+## Dvosmisleno hashiranje torki i MAC-ovi
 
 ### Boundary-confusion attack
 
-Inkrementalni API-ji za heširanje ne autentifikuju granice poziva. `update(A); update(B)` hešira isti niz bajtova kao `update(A + B)`. Zato heširanje ili MAC-ovanje sirove konkatenacije ne autentifikuje torku. Ako susedna polja imaju promenljivu dužinu, napadač može da preraspodeli bajtove u drugu torku bez pronalaženja kolizije u osnovnoj heš funkciji:<sup>[[8]](#references)[[9]](#references)</sup>
+Inkrementalni hash API-ji ne autentifikuju granice poziva. `update(A); update(B)` izračunava hash istog niza bajtova kao `update(A + B)`. Zato hashiranje ili izračunavanje MAC-a nad sirovim konkateniranim podacima ne autentifikuje torku. Ako susedna polja imaju promenljivu dužinu, napadač može drugačije da podeli bajtove u torku, a da pritom ne pronađe koliziju u osnovnoj hash funkciji:<sup>[[8]](#references)[[9]](#references)</sup>
 
 ```python
 import hashlib
@@ -121,19 +123,19 @@ def raw_hash(parts):
 assert raw_hash([b"alice", b"admin"]) == raw_hash([b"aliceadmin", b""])
 ```
 
-Ovo postaje iskoristivo kada verifikator veruje da sažetak vezuje značenja polja, ali ulaz koji kontroliše napadač može da stigne do drugog parsera ili koraka protokola koji dodeljuje drugačije granice. Commitments mogu dobiti alternativna otvaranja, a Fiat-Shamir transkripti mogu biti protumačeni kao različite tvrdnje. HMAC sprečava [hash length extension](#hash-length-extension-attack), ali `HMAC(K, A || B)` i dalje ima ovu dvosmislenost kodiranja torke, jer obe torke daju iste bajtove poruke.<sup>[[8]](#references)[[9]](#references)</sup>
+Ovo postaje moguće iskoristiti kada verifikator veruje da sažetak vezuje značenja polja, ali ulaz koji kontroliše napadač može stići do drugog parsera ili koraka protokola koji dodeljuje drugačije granice. Obavezivanja mogu dobiti alternativna otvaranja, a Fiat-Shamir transkripti mogu biti protumačeni kao drugačije tvrdnje. HMAC sprečava [hash length extension](#hash-length-extension-attack), ali `HMAC(K, A || B)` i dalje ima ovu dvosmislenost kodiranja torki, jer obe torke daju iste bajtove poruke.<sup>[[8]](#references)[[9]](#references)</sup>
 
-Koristite ovaj postupak revizije da proverite da li dvosmisleno kodiranje torke prelazi bezbednosnu granicu.<sup>[[8]](#references)[[9]](#references)</sup>
+Koristite ovaj postupak revizije da biste proverili da li dvosmisleno kodiranje torke prelazi bezbednosnu granicu.<sup>[[8]](#references)[[9]](#references)</sup>
 
-1. Pronađite `HASH(A || B)`, `HMAC(K, A || B)` i uzastopne pozive `update()`/`Write()` nad dvama ili više polja.
-2. Označite svako polje koje kontroliše napadač ili čija je dužina promenljiva. Pokušajte da prebacujete bajtove preko svake granice, a da pritom zadržite nepromenjenu ukupnu konkatenaciju. Uključite i prazna polja.
-3. Proverite da li šeme s razdvajačima koriste bajtove razdvajača koje ulazi mogu da sadrže, da li postoje neslaganja u escapovanju i da li dizajni kodiraju dužinu samo nekih polja.
-4. Pratite kako svaki potrošač parsira autentifikovane bajtove. Potencijalni slučaj je relevantan samo ako alternativna podela menja bezbednosnu odluku, tvrdnju dokaza, zapis, transakciju ili otvaranje commitmenta. Polja fiksne širine ili kanonska, injektivna serijalizacija sprečavaju ovaj konkretan napad.
-5. Proverite da li se isti kodirani sažetak prihvata u drugoj verziji protokola, tipu poruke, rundi ili aplikaciji. Eksplicitno vežite ove kontekste umesto da se oslanjate na pozivaoce da ih drže odvojenim.
+1. Pronađite `HASH(A || B)`, `HMAC(K, A || B)` i uzastopne pozive `update()`/`Write()` nad dva ili više polja.
+2. Označite svako polje koje kontroliše napadač ili čija je dužina promenljiva. Pokušajte da pomerite bajtove preko svake granice, a da pritom celokupna konkatenacija ostane nepromenjena. Uključite i prazna polja.
+3. Proverite šeme sa graničnicima da biste utvrdili mogu li ulazi sadržati bajtove graničnika, postoje li neslaganja u escapovanju i da li dizajni kodiraju dužinu samo nekih polja.
+4. Pratite kako svaki potrošač parsira autentifikovane bajtove. Alternativna podela je relevantna samo ako menja bezbednosnu odluku, iskaz dokaza, zapis, transakciju ili otvaranje obavezivanja. Polja fiksne dužine ili kanonizovana, injektivna serijalizacija sprečavaju ovaj konkretan napad.
+5. Proverite da li je isti kodirani sažetak prihvaćen u drugoj verziji protokola, tipu poruke, rundi ili aplikaciji. Eksplicitno vežite ove kontekste, umesto da se oslanjate na pozivaoce da ih razdvoje.
 
 ### SequenceHash i SequenceMAC
 
-SequenceHash je konstrukcija nezavisna od hash funkcije za sekvence nizova bajtova. Svaka operacija `add()` je atomska: dodaje vrednost unutrašnjem hash-u, a zatim i fiksni 16-bajtni sufiks dužine u little-endian formatu. Prazne vrednosti ostaju zasebni objekti. Spoljašnji hash sprečava otkrivanje unutrašnjeg stanja podložnog proširenju dužine, dok opcioni niz za prilagođavanje omogućava razdvajanje domena. Nemojte zameniti `add()` uobičajenim upisima preko API-ja osnovne hash funkcije.<sup>[[8]](#references)[[9]](#references)</sup>
+SequenceHash je konstrukcija nezavisna od hash funkcije za nizove bajtovnih stringova. Svaka operacija `add()` je atomska: dodaje vrednost i fiksni 16-bajtni sufiks dužine u little-endian formatu unutrašnjem hash-u. Prazne vrednosti ostaju zasebni objekti. Spoljašnji hash sprečava izlaganje unutrašnjeg stanja čija se dužina može produžavati, dok opcioni prilagođeni string omogućava razdvajanje domena. Nemojte zameniti `add()` običnim upisima kroz API osnovne hash funkcije.<sup>[[8]](#references)[[9]](#references)</sup>
 
 ```python
 import sequencehash
@@ -144,9 +146,9 @@ h.add(b"admin")
 digest = h.result_with_customizer(b"example:v1:user-record")
 ```
 
-Izaberite customizer kao deo definicije protokola, uključujući dovoljno informacija za razlikovanje aplikacije, verzije protokola, tipa poruke i runde. SequenceHash i dalje zahteva da se sve strane usaglase oko redosleda polja, bajtnog kodiranja i kanonske serijalizacije, a ne može da zaštiti izostavljeno polje. Portove treba proveriti u odnosu na C2SP međuvectorske i završne test-vektore.<sup>[[8]](#references)[[11]](#references)</sup>
+Izaberite prilagođivač kao deo definicije protokola, uključujući dovoljno informacija za razlikovanje aplikacije, verzije protokola, tipa poruke i runde. SequenceHash i dalje zahteva da se sve strane usaglase oko redosleda polja, kodiranja bajtova i kanonske serijalizacije, a ne može da zaštiti izostavljeno polje. Implementacije treba proveriti pomoću C2SP međuvektora i konačnih testnih vektora.<sup>[[8]](#references)[[11]](#references)</sup>
 
-Za autentifikaciju, SequenceMAC pruža isti interfejs za atomsko kodiranje i prilagođavanje. Zahteva ključ od najmanje 32 bajta. Za razliku od predobrade HMAC ključa, njegova zaglavlja vezuju se za tačnu dužinu ključa: dugačak sirovi ključ nije ekvivalentan svom prehešu, a dodavanje nultih bajtova menja ključ. Ova razlika je važna kada komponente prihvataju različite reprezentacije ključa ili metapodatke o dužini.<sup>[[8]](#references)[[9]](#references)</sup>
+Za autentifikaciju, SequenceMAC pruža isti interfejs za atomsko kodiranje i prilagođavanje. Zahteva ključ od najmanje 32 bajta. Za razliku od predobrade ključa u HMAC-u, njegova zaglavlja vezuju se za tačnu dužinu ključa: dugi sirovi ključ nije ekvivalentan svom prehešu, a dodavanje nultih bajtova menja ključ. Ova razlika je važna kada komponente prihvataju različite prikaze ključa ili metapodatke o njegovoj dužini.<sup>[[8]](#references)[[9]](#references)</sup>
 
 ```python
 key = b"\x00" * 32
@@ -156,48 +158,48 @@ mac.add(body_bytes)
 tag = mac.result_with_customizer(b"example:v1:request-mac")
 ```
 
-Python API i ekvivalentne implementacije u Go i Rust dostupne su kao reference, ali implementacije protokola treba da prate važeću C2SP specifikaciju, umesto da ponovo stvaraju kodiranje na osnovu ovog sažetka.<sup>[[8]](#references)[[10]](#references)</sup>
+Python API i ekvivalentne implementacije u Go i Rust dostupne su kao reference, ali implementacije protokola treba da prate važeću C2SP specifikaciju, umesto da ponovo implementiraju kodiranje na osnovu ovog sažetka.<sup>[[8]](#references)[[10]](#references)</sup>
 
-## Hashiranje lozinki i probijanje
+## Hashiranje lozinki i cracking
 
 ### Prva pitanja<sup>[[4]](#references)</sup>
 
-- Da li koristi **salt**? (potražite formate `salt$hash`)
-- Da li je u pitanju **brz hash** (MD5/SHA1/SHA256) ili **spor KDF** (bcrypt/scrypt/argon2/PBKDF2)?
+- Da li hash koristi **salt**? (potražite formate `salt$hash`)
+- Da li je u pitanju **brzi hash** (MD5/SHA1/SHA256) ili **spori KDF** (bcrypt/scrypt/argon2/PBKDF2)?
 - Imate li **naznaku o formatu** (hashcat mode / John format)?
 
-### Praktičan postupak<sup>[[5]](#references)[[6]](#references)</sup>
+### Praktični postupak<sup>[[5]](#references)[[6]](#references)</sup>
 
-1. Utvrdite hash:
+1. Identifikujte hash:
    - `hashid <hash>`
    - `hashcat --example-hashes | rg -n "<pattern>"`
-2. Ako nije salted i čest je: isprobajte online baze podataka i alate za identifikaciju iz odeljka o crypto workflow-u.
-3. U suprotnom, pokušajte da ga probijete:
+2. Ako je hash bez salta i čest: isprobajte online baze podataka i alate za identifikaciju iz odeljka o crypto workflow-u.
+3. U suprotnom, pokušajte cracking:
    - `hashcat -m <mode> -a 0 hashes.txt wordlist.txt`
    - `john --wordlist=wordlist.txt --format=<fmt> hashes.txt`
 
-### Česte greške koje možete iskoristiti
+### Česte greške koje možete da iskoristite
 
-- Ista lozinka se ponovo koristi za više korisnika → probijte jednu, pa napravite pivot.
+- Ista lozinka se koristi za više korisnika → crackujte jednu i pivotujte.
 - Skraćeni hash-evi / prilagođene transformacije → normalizujte ih i pokušajte ponovo.
-- Slabi KDF parametri (npr. mali broj PBKDF2 iteracija) → i dalje ih je moguće probiti.
+- Slabi KDF parametri (npr. mali broj PBKDF2 iteracija) → hash je i dalje moguće crackovati.
 
 ### bcrypt oracle sa izabranim ulazom i dodatnom tajnom
 
-Pozivni pomoćni program koji vraća `bcrypt(user_input || secret)` može otkriti informacije o dodatoj tajni ako njegova bcrypt implementacija neprimetno odseca ulaz nakon 72 **bajta**. Ograničenje broja znakova pre UTF-8 kodiranja ne nameće to ograničenje broja bajtova: višebajtni znakovi mogu popuniti bcrypt ulaz, ostavljajući mesta samo za mali prefiks tajne. Izabrani ulazi i hash-evi koje program vrati tada mogu omogućiti offline proveru kandidata za završne bajtove. Za ovo je potrebno da možete da kontrolišete ulaz programa, da znate njegovu tačnu transformaciju i kodiranje i da implementacija zaista odseca ulaz; samo postojanje pozivnog programa ili bcrypt hash-a ne dokazuje da je ovaj lanac moguć. [Dokumentacija za pyca/bcrypt](https://github.com/pyca/bcrypt#maximum-password-length) navodi da aktuelni `hashpw` podiže grešku za ulaze duže od 72 bajta, dok ih je ranije neprimetno odsecao. Drugi omotači mogu unapred da izračunaju hash ili da odbiju dugačke ulaze, zato proverite instaliranu implementaciju umesto da pretpostavljate da dolazi do odsecanja.
+Pozivni pomoćni program koji vraća `bcrypt(user_input || secret)` može otkriti informacije o dodatnoj tajni ako njegova bcrypt implementacija нечујно скраћује улаз после 72 **бајта**. Ограничење броја знакова пре UTF-8 кодирања не спроводи то ограничење у бајтовима: вишебајтни знакови могу да попуне bcrypt улаз, остављајући места само за мали префикс тајне. Изабрани улази и њихови враћени хешеви тада могу да омогуће офлајн проверу могућих наставка у бајтовима. За ово је потребно да контролишете улаз помоћног програма, да знате његову тачну трансформацију и кодирање и да се имплементација заиста скраћује; сам позивни помоћни програм или bcrypt hash не доказује да је цео ланац могућ. [pyca/bcrypt документује](https://github.com/pyca/bcrypt#maximum-password-length) да актуелни `hashpw` изазива грешку за улазе дуже од 72 бајта, док је раније понашање било њихово нечујно скраћивање. Други wrappers могу да хеширају унапред или одбију дугачке улазе, зато проверите инсталирану имплементацију уместо да претпоставите да долази до скраћивања.
 
-Upotreba oporavljene tajne za drugi nalog zahteva i dokaz da je njegov izloženi hash generisan sa **istom** tajnom i transformacijom, kao i zasebnu putanju za autentifikaciju ili prijavu. Pomoćni program za hashiranje koji se izvršava kao root treba posmatrati kao oracle samo ako korisnik sa nižim privilegijama može da ga pozove u skladu sa važećom politikom; pasivna enumeracija hosta ne mora da ga poziva niti da mu šalje izabrane lozinke.
+За коришћење откривене тајне против другог налога потребан је и доказ да је изложени hash генерисан помоћу **исте** тајне и трансформације, као и засебан пут за приступ акредитивима или пријаву. Помоћни програм за хеширање који се покреће као root треба посматрати као oracle само ако корисник са нижим привилегијама може да га позове у складу са важећом политиком; пасивно испитивање хоста не мора да га позива нити да му шаље изабране лозинке.
 
 ## References
 
 - [1] [SkullSecurity - Sve što treba da znate o napadima produžavanja dužine hash-a](https://www.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
-- [2] [NIST FIPS 198-1 - Kod za autentifikaciju poruka zasnovan na ključnom hash-u](https://csrc.nist.gov/pubs/fips/198-1/final)
+- [2] [NIST FIPS 198-1 - Kod za autentifikaciju poruka sa ključem i hash-om](https://csrc.nist.gov/pubs/fips/198-1/final)
 - [3] [hash_extender](https://github.com/iagox86/hash_extender)
 - [4] [OWASP - Podsetnik za čuvanje lozinki](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
-- [5] [Primeri hash-eva za Hashcat](https://hashcat.net/wiki/doku.php?id=example_hashes)
-- [6] [John the Ripper - Opcije komandne linije](https://www.openwall.com/john/doc/OPTIONS.shtml)
-- [7] [PyPI: `hashpumpy` Python binding-i za HashPump](https://pypi.org/project/hashpumpy/)
+- [5] [Hashcat primeri hash-eva](https://hashcat.net/wiki/doku.php?id=example_hashes)
+- [6] [John the Ripper opcije komandne linije](https://www.openwall.com/john/doc/OPTIONS.shtml)
+- [7] [PyPI: Python bindings za HashPump `hashpumpy`](https://pypi.org/project/hashpumpy/)
 - [8] [C2SP - Specifikacija za SequenceHash i SequenceMAC](https://c2sp.org/sequencehash)
-- [9] [Trail of Bits - SequenceHash: višestruko hashiranje za sve](https://blog.trailofbits.com/2026/10/02/sequencehash-multihashing-for-the-rest-of-us/)
-- [10] [Trail of Bits - Python implementacija za SequenceHash](https://github.com/trailofbits/sequencehash-py)
-- [11] [C2SP CCTV - Testni vektori za SequenceHash](https://github.com/C2SP/CCTV/tree/main/sequencehash)
+- [9] [Trail of Bits - SequenceHash: multihashing za sve](https://blog.trailofbits.com/2026/10/02/sequencehash-multihashing-for-the-rest-of-us/)
+- [10] [Trail of Bits - Python implementacija SequenceHash-a](https://github.com/trailofbits/sequencehash-py)
+- [11] [C2SP CCTV - Test vektori za SequenceHash](https://github.com/C2SP/CCTV/tree/main/sequencehash)
