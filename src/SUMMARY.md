@@ -793,6 +793,7 @@
 - [Client Side Template Injection (CSTI)](pentesting-web/client-side-template-injection-csti.md)
 - [Client Side Path Traversal](pentesting-web/client-side-path-traversal.md)
 - [Command Injection](pentesting-web/command-injection.md)
+- [Apache Commons Text String Interpolation Injection](pentesting-web/commons-text-string-interpolation.md)
 - [Content Security Policy (CSP) Bypass](pentesting-web/content-security-policy-csp-bypass/README.md)
   - [CSP bypass: self + 'unsafe-inline' with Iframes](pentesting-web/content-security-policy-csp-bypass/csp-bypass-self-+-unsafe-inline-with-iframes.md)
 - [Cookies Hacking](pentesting-web/hacking-with-cookies/README.md)
