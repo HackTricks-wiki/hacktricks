@@ -493,7 +493,7 @@ python3 -m http.server
 # Download the zip from the browser and decompress it, the file should be without a quarantine xattr
 ```
 
-Check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) for more information.<sup>[[9]](#references)</sup>
+Check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) for more information.<sup>[[9]](#references)</sup> See the [AppleDouble/ACL reproduction](macos-fs-tricks/macos-xattr-acls-extra-stuff.md) for the sidecar construction and validation steps.
 
 Note that this could also be be exploited with AppleArchives:
 
@@ -586,6 +586,8 @@ find ./out -type d -name '*.app' -prune -exec sh -c \
 In an ".app" bundle if the quarantine xattr is not added to it, when executing it **Gatekeeper won't be triggered**.
 
 See [macOS FS Tricks](macos-fs-tricks/README.md#avoid-quarantine-xattrs-tricks) for filesystem-, flag-, ACL-, and AppleDouble-based primitives that can prevent or discard extended attributes.
+
+
 
 
 
