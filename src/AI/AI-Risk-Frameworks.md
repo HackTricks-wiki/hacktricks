@@ -4,109 +4,111 @@
 
 ## 10 najważniejszych podatności machine learning według OWASP
 
-OWASP zidentyfikował 10 najważniejszych podatności machine learning, które mogą wpływać na systemy AI. Mogą one prowadzić do różnych problemów z bezpieczeństwem, w tym do zatruwania danych, inwersji modelu i ataków adwersarialnych. Zrozumienie tych podatności ma kluczowe znaczenie dla budowania bezpiecznych systemów AI.
+OWASP zidentyfikowało 10 najważniejszych podatności machine learning, które mogą wpływać na systemy AI. Mogą one prowadzić do różnych problemów z bezpieczeństwem, w tym zatruwania danych, odwracania modelu i ataków adwersarialnych. Zrozumienie tych podatności ma kluczowe znaczenie dla budowania bezpiecznych systemów AI.
 
-Aktualną i szczegółową listę 10 najważniejszych podatności machine learning znajdziesz w projekcie [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/).<sup>[[1]](#references)</sup>
+Zaktualizowaną i szczegółową listę 10 najważniejszych podatności machine learning można znaleźć w projekcie [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/).<sup>[[1]](#references)</sup>
 
-- **Input Manipulation Attack**: Atakujący wprowadza niewielkie, często niewidoczne zmiany do **danych wejściowych**, aby model podjął błędną decyzję.\
+- **Atak manipulacją danymi wejściowymi**: Atakujący wprowadza niewielkie, często niewidoczne zmiany w **danych wejściowych**, aby skłonić model do podjęcia błędnej decyzji.\
     *Przykład*: Kilka plamek farby na znaku stopu sprawia, że samochód autonomiczny „widzi” znak ograniczenia prędkości.
 
-- **Data Poisoning Attack**: **Zbiór treningowy** zostaje celowo zanieczyszczony błędnymi próbkami, przez co model uczy się szkodliwych reguł.\
-*Przykład*: Pliki binarne malware zostają błędnie oznaczone jako „bezpieczne” w zbiorze treningowym programu antywirusowego, dzięki czemu podobne malware może później uniknąć wykrycia.
+- **Atak zatruwaniem danych**: **Zbiór treningowy** zostaje celowo zanieczyszczony szkodliwymi próbkami, które uczą model niebezpiecznych reguł.\
+*Przykład*: Pliki malware są błędnie oznaczane jako „nieszkodliwe” w zbiorze treningowym programu antywirusowego, przez co podobne malware może później uniknąć wykrycia.
 
-- **Model Inversion Attack**: Analizując wyniki, atakujący tworzy **model odwrotny**, który odtwarza wrażliwe cechy oryginalnych danych wejściowych.\
-*Przykład*: Odtworzenie obrazu MRI pacjenta na podstawie predykcji modelu wykrywającego raka.
+- **Atak odwracaniem modelu**: Analizując odpowiedzi, atakujący buduje **model odwrotny**, który odtwarza wrażliwe cechy oryginalnych danych wejściowych.\
+*Przykład*: Odtworzenie obrazu MRI pacjenta na podstawie przewidywań modelu wykrywającego raka.
 
-- **Membership Inference Attack**: Atakujący sprawdza, czy **konkretny rekord** został użyty podczas treningu, wykrywając różnice w poziomie pewności modelu.\
-*Przykład*: Potwierdzenie, że transakcja bankowa danej osoby znajduje się w danych treningowych modelu wykrywającego oszustwa.
+- **Atak wnioskowaniem o przynależności**: Adwersarz sprawdza, czy **konkretny rekord** został użyty podczas treningu, analizując różnice w poziomie pewności modelu.\
+*Przykład*: Potwierdzenie, że transakcja bankowa danej osoby znajduje się w danych treningowych modelu wykrywania oszustw.
 
-- **Model Theft**: Wielokrotne wysyłanie zapytań pozwala atakującemu poznać granice decyzyjne i **sklonować działanie modelu** (oraz jego własność intelektualną).\
-*Przykład*: Zebranie wystarczającej liczby par pytań i odpowiedzi z API ML-as-a-Service, aby zbudować niemal równoważny model lokalny.
+- **Kradzież modelu**: Wielokrotne wysyłanie zapytań pozwala atakującemu poznać granice decyzyjne i **sklonować działanie modelu** (oraz własność intelektualną).\
+*Przykład*: Pozyskanie wystarczającej liczby par pytań i odpowiedzi z API ML-as-a-Service, aby zbudować niemal równoważny model lokalny.
 
-- **AI Supply‑Chain Attack**: Naruszenie dowolnego komponentu (**danych, bibliotek, wstępnie wytrenowanych wag, CI/CD**) w **potoku ML** może doprowadzić do uszkodzenia modeli pochodnych.\
-*Przykład*: Zatruta zależność z model-hub instaluje model analizy sentymentu z backdoorem w wielu aplikacjach.
+- **Atak na łańcuch dostaw AI**: Przejęcie dowolnego komponentu (**danych, bibliotek, wstępnie wytrenowanych wag, CI/CD**) w **potoku ML** może doprowadzić do uszkodzenia modeli na dalszych etapach.\
+*Przykład*: Zatruta zależność z repozytorium modeli instaluje model analizy sentymentu z backdoorem w wielu aplikacjach.
 
-- **Transfer Learning Attack**: Złośliwa logika zostaje umieszczona w **wstępnie wytrenowanym modelu** i przetrwa fine-tuning na zadaniu ofiary.\
-*Przykład*: Szkielet modelu wizyjnego z ukrytym wyzwalaczem nadal zmienia etykiety po dostosowaniu do obrazowania medycznego.
+- **Atak na transfer learning**: Szkodliwa logika zostaje osadzona we **wstępnie wytrenowanym modelu** i przetrwa dostrajanie do zadania ofiary.\
+*Przykład*: Sieć bazowa do rozpoznawania obrazów z ukrytym wyzwalaczem nadal błędnie klasyfikuje obrazy po dostosowaniu jej do obrazowania medycznego.
 
-- **Model Skewing**: Subtelnie stronnicze lub błędnie oznaczone dane **przesuwają wyniki modelu**, wspierając cele atakującego.\
-*Przykład*: Dodanie „czystych” e-maili spamowych oznaczonych jako ham sprawia, że filtr antyspamowy przepuszcza podobne wiadomości.
+- **Zniekształcenie modelu**: Subtelnie stronnicze lub błędnie oznaczone dane **zmieniają wyniki modelu**, aby sprzyjały celom atakującego.\
+*Przykład*: Wstrzyknięcie „czystych” wiadomości spamowych oznaczonych jako niebędące spamem sprawia, że filtr antyspamowy przepuszcza podobne wiadomości w przyszłości.
 
-- **Output Integrity Attack**: Atakujący **modyfikuje predykcje modelu podczas przesyłania**, nie zmieniając samego modelu, i w ten sposób oszukuje systemy dalszego przetwarzania.\
-*Przykład*: Zmiana werdyktu klasyfikatora malware z „złośliwy” na „bezpieczny”, zanim plik trafi do etapu kwarantanny.
+- **Atak na integralność wyników**: Atakujący **zmienia przewidywania modelu podczas przesyłania**, nie modyfikując samego modelu, i wprowadza w błąd systemy korzystające z jego wyników.\
+*Przykład*: Zmiana werdyktu klasyfikatora malware z „złośliwy” na „nieszkodliwy”, zanim plik trafi do etapu kwarantanny.
 
-- **Model Poisoning** --- Bezpośrednie, ukierunkowane modyfikacje samych **parametrów modelu**, często po uzyskaniu dostępu z prawami zapisu, w celu zmiany jego działania.\
-*Przykład*: Zmiana wag modelu wykrywającego oszustwa w środowisku produkcyjnym tak, aby transakcje z określonych kart były zawsze zatwierdzane.
+- **Zatrucie modelu** --- Bezpośrednie, ukierunkowane zmiany w **parametrach modelu**, często po uzyskaniu dostępu z prawem zapisu, w celu zmiany jego działania.\
+*Przykład*: Zmiana wag modelu wykrywania oszustw działającego produkcyjnie, aby transakcje z określonych kart były zawsze zatwierdzane.
 
 
-## Zagrożenia SAIF według Google
+## Zagrożenia SAIF Google
 
-[SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) firmy Google przedstawia różne zagrożenia związane z systemami AI:<sup>[[2]](#references)</sup>
+Framework [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) firmy Google przedstawia różne zagrożenia związane z systemami AI:<sup>[[2]](#references)</sup>
 
-- **Data Poisoning**: Złośliwe podmioty zmieniają lub wstrzykują dane treningowe lub dostrajające, aby obniżyć dokładność, umieścić backdoory lub zniekształcić wyniki, podważając integralność modelu na wszystkich etapach cyklu życia danych.
+- **Zatruwanie danych**: Szkodliwi aktorzy modyfikują dane treningowe lub dostrajające albo dodają do nich nowe próbki, aby obniżyć dokładność, osadzić backdoory lub zniekształcić wyniki, naruszając integralność modelu na każdym etapie cyklu życia danych.
 
-- **Unauthorized Training Data**: Wykorzystanie chronionych prawem autorskim, wrażliwych lub niedozwolonych zbiorów danych wiąże się z ryzykiem prawnym, etycznym i wydajnościowym, ponieważ model uczy się na danych, których nie wolno było użyć.
+- **Nieautoryzowane dane treningowe**: Wykorzystywanie chronionych prawem autorskim, wrażliwych lub niezatwierdzonych zbiorów danych wiąże się z ryzykiem prawnym, etycznym i wydajnościowym, ponieważ model uczy się na danych, do których użycia nie miał uprawnień.
 
-- **Model Source Tampering**: Manipulacja kodem modelu, zależnościami lub wagami przed treningiem albo w jego trakcie, przeprowadzona w ramach ataku na łańcuch dostaw lub przez osobę z wewnątrz, może wprowadzić ukrytą logikę, która przetrwa nawet ponowny trening.
+- **Manipulacja kodem źródłowym modelu**: Manipulacja kodem modelu, zależnościami lub wagami przed treningiem lub w jego trakcie, dokonana przez atakujących z łańcucha dostaw lub osoby z wewnątrz organizacji, może osadzić ukrytą logikę, która przetrwa nawet ponowny trening.
 
-- **Excessive Data Handling**: Słabe mechanizmy przechowywania danych i zarządzania nimi sprawiają, że systemy przechowują lub przetwarzają więcej danych osobowych, niż to konieczne, zwiększając ryzyko ujawnienia i braku zgodności.
+- **Nadmierne przetwarzanie danych**: Słabe mechanizmy retencji i nadzoru nad danymi sprawiają, że systemy przechowują lub przetwarzają więcej danych osobowych, niż to konieczne, zwiększając ryzyko ich ujawnienia i niezgodności z przepisami.
 
-- **Model Exfiltration**: Atakujący kradną pliki lub wagi modelu, powodując utratę własności intelektualnej i umożliwiając tworzenie usług naśladujących oryginał lub przeprowadzanie kolejnych ataków.
+- **Eksfiltracja modelu**: Atakujący kradną pliki lub wagi modelu, powodując utratę własności intelektualnej i umożliwiając tworzenie usług kopiujących model lub przeprowadzanie kolejnych ataków.
 
-- **Model Deployment Tampering**: Atakujący modyfikują artefakty modelu lub infrastrukturę serwującą, przez co uruchomiony model różni się od zatwierdzonej wersji i może działać inaczej.
+- **Manipulacja wdrożonym modelem**: Adwersarze modyfikują artefakty modelu lub infrastrukturę usługową, przez co działający model różni się od zatwierdzonej wersji, co może zmienić jego zachowanie.
 
-- **Denial of ML Service**: Zalewanie API żądaniami lub wysyłanie wejść typu „sponge” może wyczerpać zasoby obliczeniowe lub energię i unieruchomić model, podobnie jak w klasycznych atakach DoS.
+- **Odmowa dostępu do usługi ML**: Zalewanie API zapytaniami lub wysyłanie danych wejściowych typu „sponge” może wyczerpać zasoby obliczeniowe lub energię i wyłączyć model, podobnie jak w klasycznych atakach DoS.
 
-- **Model Reverse Engineering**: Zbierając dużą liczbę par wejście-wyjście, atakujący mogą sklonować model lub przeprowadzić jego destylację, tworząc imitujące go produkty i spersonalizowane ataki adwersarialne.
+- **Inżynieria wsteczna modelu**: Gromadząc dużą liczbę par danych wejściowych i wyjściowych, atakujący mogą sklonować lub destylować model, co sprzyja tworzeniu produktów naśladujących oryginał i dostosowanych ataków adwersarialnych.
 
-- **Insecure Integrated Component**: Podatne wtyczki, agenty lub usługi nadrzędne pozwalają atakującym wstrzykiwać kod lub eskalować uprawnienia w potoku AI.
+- **Niezabezpieczony zintegrowany komponent**: Podatne wtyczki, agenci lub usługi nadrzędne pozwalają atakującym wstrzykiwać kod lub eskalować uprawnienia w potoku AI.
 
-- **Prompt Injection**: Tworzenie promptów (bezpośrednio lub pośrednio), aby przemycić instrukcje nadpisujące zamierzenia systemu i skłonić model do wykonania niezamierzonych poleceń.
+- **Prompt Injection**: Konstruowanie promptów — bezpośrednio lub pośrednio — w celu przemycenia instrukcji, które nadpisują intencje systemu i skłaniają model do wykonania niezamierzonych poleceń.
 
-- **Model Evasion**: Starannie przygotowane dane wejściowe powodują błędną klasyfikację, halucynacje lub wygenerowanie niedozwolonych treści, osłabiając bezpieczeństwo i zaufanie.
+- **Obejście zabezpieczeń modelu**: Starannie przygotowane dane wejściowe skłaniają model do błędnej klasyfikacji, halucynowania lub generowania niedozwolonych treści, podważając bezpieczeństwo i zaufanie.
 
-- **Sensitive Data Disclosure**: Model ujawnia prywatne lub poufne informacje ze swoich danych treningowych lub kontekstu użytkownika, naruszając prywatność i przepisy.
+- **Ujawnienie wrażliwych danych**: Model ujawnia prywatne lub poufne informacje z danych treningowych lub kontekstu użytkownika, naruszając prywatność i przepisy.
 
-- **Inferred Sensitive Data**: Model wnioskuje o cechach osobistych, których nigdy mu nie podano, powodując nowe szkody dla prywatności.
+- **Wywnioskowanie wrażliwych danych**: Model wyciąga wnioski na temat cech osobistych, które nie zostały mu podane, powodując nowe zagrożenia dla prywatności.
 
-- **Insecure Model Output**: Niesanitowane odpowiedzi przekazują użytkownikom lub systemom dalszego przetwarzania szkodliwy kod, dezinformację lub nieodpowiednie treści.
+- **Niezabezpieczone wyniki modelu**: Niesanitowane odpowiedzi przekazują użytkownikom lub systemom dalszego przetwarzania szkodliwy kod, dezinformację lub nieodpowiednie treści.
 
-- **Rogue Actions**: Zintegrowane autonomicznie agenty wykonują niezamierzone działania w świecie rzeczywistym (zapis plików, wywołania API, zakupy itp.) bez odpowiedniego nadzoru użytkownika.
+- **Nieautoryzowane działania**: Agenci zintegrowani z systemem autonomicznie wykonują niezamierzone działania w świecie rzeczywistym (zapis plików, wywołania API, zakupy itp.) bez odpowiedniego nadzoru użytkownika.
 
 ## Macierz MITRE AI ATLAS
 
-[Macierz MITRE AI ATLAS](https://atlas.mitre.org/matrices/ATLAS) zapewnia kompleksowe ramy do zrozumienia i ograniczania zagrożeń związanych z systemami AI. Klasyfikuje różne techniki i taktyki ataków, których przeciwnicy mogą używać przeciwko modelom AI, a także sposoby wykorzystania systemów AI do przeprowadzania różnych ataków.<sup>[[3]](#references)</sup>
+[Macierz MITRE AI ATLAS](https://atlas.mitre.org/matrices/ATLAS) zapewnia kompleksowe ramy do zrozumienia i ograniczania zagrożeń związanych z systemami AI. Klasyfikuje różne techniki i taktyki ataków, których adwersarze mogą używać przeciwko modelom AI, a także sposoby wykorzystania systemów AI do przeprowadzania różnych ataków.<sup>[[3]](#references)</sup>
 
-## LLMJacking (kradzież tokenów i odsprzedaż dostępu do hostowanych w chmurze LLM)
+## LLMJacking (kradzież tokenów i odsprzedaż dostępu do LLM hostowanych w chmurze)
 
-Atakujący kradną aktywne tokeny sesji lub poświadczenia API w chmurze i bez upoważnienia wywołują płatne, hostowane w chmurze LLM. Dostęp jest często odsprzedawany za pośrednictwem reverse proxy, które pośredniczą w dostępie do konta ofiary, np. wdrożeń „oai-reverse-proxy”. Konsekwencje obejmują straty finansowe, użycie modelu niezgodne z polityką oraz przypisanie działań do dzierżawy ofiary.<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup><sup>[[7]](#references)</sup>
+Atakujący kradną aktywne tokeny sesji lub poświadczenia cloud API i bez uprawnień wywołują płatne LLM hostowane w chmurze. Dostęp jest często odsprzedawany za pośrednictwem reverse proxy, które przekazują żądania przez konto ofiary, np. wdrożenia „oai-reverse-proxy”. Skutki obejmują straty finansowe, niewłaściwe użycie modelu niezgodne z zasadami oraz przypisanie działań do dzierżawy ofiary.<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup><sup>[[7]](#references)</sup>
 
 TTP:
-- Pozyskiwanie tokenów z zainfekowanych urządzeń deweloperów lub przeglądarek; kradzież sekretów CI/CD; kupowanie wykradzionych cookies.<sup>[[5]](#references)</sup>
-- Uruchomienie reverse proxy, które przekazuje żądania do prawdziwego dostawcy, ukrywa klucz upstream i obsługuje wielu klientów.<sup>[[5]](#references)</sup><sup>[[7]](#references)</sup>
-- Nadużywanie bezpośrednich endpointów modelu bazowego, aby ominąć zabezpieczenia i limity szybkości w przedsiębiorstwie.<sup>[[4]](#references)</sup>
+- Pozyskiwanie tokenów z zainfekowanych komputerów deweloperów lub przeglądarek; kradzież sekretów CI/CD; kupowanie wyciekłych cookies.<sup>[[5]](#references)</sup>
+- Uruchomienie reverse proxy, które przekazuje żądania do prawdziwego dostawcy, ukrywa klucz upstream i obsługuje wielu klientów jednocześnie.<sup>[[5]](#references)</sup><sup>[[7]](#references)</sup>
+- Nadużywanie bezpośrednich endpointów modelu bazowego w celu ominięcia zabezpieczeń dla przedsiębiorstw i limitów szybkości.<sup>[[4]](#references)</sup>
 
 Środki zaradcze:
-- Powiąż tokeny z odciskiem urządzenia, zakresami adresów IP i atestacją klienta; stosuj krótkie czasy wygaśnięcia i odnawiaj tokeny przy użyciu MFA.
-- Ogranicz zakres kluczy do niezbędnego minimum (bez dostępu do narzędzi, tylko do odczytu, jeśli ma to zastosowanie); zmieniaj klucze po wykryciu anomalii.
-- Kieruj cały ruch po stronie serwera przez bramę polityk, która egzekwuje filtry bezpieczeństwa, limity dla poszczególnych tras i izolację dzierżaw.
+- Powiąż tokeny z odciskiem urządzenia, zakresami adresów IP i atestacją klienta; stosuj krótkie terminy ważności i wymagaj MFA przy odświeżaniu.
+- Ogranicz zakres kluczy do minimum (bez dostępu do narzędzi, tylko do odczytu tam, gdzie to możliwe); rotuj klucze w przypadku anomalii.
+- Kieruj cały ruch po stronie serwera przez bramę polityk, która wymusza stosowanie filtrów bezpieczeństwa, limitów dla poszczególnych tras i izolacji dzierżaw.
 - Monitoruj nietypowe wzorce użycia (nagłe skoki wydatków, nietypowe regiony, ciągi UA) i automatycznie unieważniaj podejrzane sesje.
 - Zamiast długotrwałych statycznych kluczy API używaj mTLS lub podpisanych JWT wystawianych przez IdP.
 
-## Zabezpieczanie inferencji self-hosted LLM
+## Zabezpieczanie wnioskowania przez samodzielnie hostowane LLM
 
-Uruchomienie lokalnego serwera LLM do obsługi poufnych danych tworzy inną powierzchnię ataku niż API hostowane w chmurze: endpointy inferencji i debugowania mogą ujawniać prompty, stos serwujący zwykle udostępnia reverse proxy, a węzły urządzeń GPU zapewniają dostęp do rozbudowanych interfejsów `ioctl()`. Jeśli oceniasz lub wdrażasz lokalną usługę inferencji, sprawdź co najmniej poniższe kwestie.<sup>[[8]](#references)</sup>
+Uruchomienie lokalnego serwera LLM do obsługi poufnych danych tworzy inną powierzchnię ataku niż korzystanie z API hostowanych w chmurze: endpointy wnioskowania i debugowania mogą ujawniać prompty, stos usługowy zwykle udostępnia reverse proxy, a węzły urządzeń GPU dają dostęp do rozbudowanych powierzchni `ioctl()`. Jeśli oceniasz lub wdrażasz lokalną usługę wnioskowania on-prem, sprawdź co najmniej poniższe kwestie.<sup>[[8]](#references)</sup>
 
-### Ujawnianie promptów przez endpointy debugowania i monitorowania
+### Wyciek promptów przez endpointy debugowania i monitorowania
 
-Traktuj API inferencji jako **wrażliwą usługę dla wielu użytkowników**. Trasy debugowania lub monitorowania mogą ujawniać treść promptów, stan slotów, metadane modelu lub wewnętrzne informacje o kolejce. W `llama.cpp` endpoint `/slots` jest szczególnie wrażliwy, ponieważ ujawnia stan poszczególnych slotów i jest przeznaczony wyłącznie do ich inspekcji lub zarządzania nimi.<sup>[[8]](#references)</sup>
+Traktuj API wnioskowania jako **wrażliwą usługę wieloużytkownikową**. Trasy debugowania lub monitorowania mogą ujawniać treść promptów, stan slotów, metadane modelu lub wewnętrzne informacje o kolejce. W `llama.cpp` endpoint `/slots` jest szczególnie wrażliwy, ponieważ udostępnia stan poszczególnych slotów i służy wyłącznie do ich inspekcji lub zarządzania nimi.<sup>[[8]](#references)</sup>
 
-- Umieść reverse proxy przed serwerem inferencji i **domyślnie odmawiaj dostępu**.
-- Dodaj do allowlisty wyłącznie dokładne kombinacje metod HTTP i ścieżek wymagane przez klienta lub UI.
-- W miarę możliwości wyłącz endpointy introspekcji bezpośrednio w backendzie, na przykład `llama-server --no-slots`.<sup>[[9]](#references)</sup>
-- Powiąż reverse proxy z `127.0.0.1` i udostępniaj je przez uwierzytelniony transport, taki jak lokalne przekierowanie portu SSH, zamiast publikować je w sieci LAN.
+Aby przeprowadzić black-box fingerprinting i testy ujawnionych runnerów modeli oraz powiązanych usług AI, sprawdź [Exposed Self-Hosted AI Services](AI-Exposed-Self-Hosted-AI-Services.md).
 
-Przykładowa allowlista nginx:
+- Umieść reverse proxy przed serwerem wnioskowania i **domyślnie odrzucaj żądania**.
+- Dodaj do allowlisty tylko dokładne kombinacje metod HTTP i ścieżek wymagane przez klienta/UI.
+- Jeśli to możliwe, wyłącz endpointy introspekcji bezpośrednio w backendzie, na przykład `llama-server --no-slots`.<sup>[[9]](#references)</sup>
+- Powiąż reverse proxy z `127.0.0.1` i udostępniaj je przez uwierzytelniony transport, taki jak przekierowanie lokalnego portu SSH, zamiast publikować je w sieci LAN.
+
+Przykładowa allowlista w nginx:
 
 ```nginx
 map "$request_method:$uri" $llm_whitelist {
@@ -130,7 +132,7 @@ server {
 
 ### Kontenery rootless bez sieci i gniazda UNIX
 
-Jeśli daemon wnioskowania obsługuje nasłuchiwanie na gnieździe UNIX, wybierz tę opcję zamiast TCP i uruchom kontener **bez stosu sieciowego**:<sup>[[8]](#references)</sup>
+Jeśli demon wnioskowania obsługuje nasłuchiwanie na gnieździe UNIX, wybierz tę opcję zamiast TCP i uruchom kontener **bez stosu sieciowego**:<sup>[[8]](#references)</sup>
 
 ```bash
 podman run --rm -d \
@@ -148,21 +150,21 @@ podman run --rm -d \
 ```
 
 Korzyści:
-- `--network none` eliminuje ekspozycję TCP/IP przychodzącą i wychodzącą oraz pozwala uniknąć pomocników działających w przestrzeni użytkownika, których w przeciwnym razie wymagałyby kontenery rootless.
-- Gniazdo UNIX pozwala używać uprawnień POSIX/ACL na ścieżce gniazda jako pierwszej warstwy kontroli dostępu.
-- `--userns=keep-id` i rootless Podman ograniczają skutki ucieczki z kontenera, ponieważ root w kontenerze nie jest rootem hosta.
-- Montowanie modeli tylko do odczytu zmniejsza ryzyko ich modyfikacji z poziomu kontenera.
+- `--network none` eliminuje ekspozycję TCP/IP na ruch przychodzący i wychodzący oraz pozwala uniknąć pomocników działających w przestrzeni użytkownika, których w przeciwnym razie potrzebowałyby kontenery rootless.
+- Socket UNIX pozwala używać uprawnień POSIX/ACL na ścieżce socketu jako pierwszej warstwy kontroli dostępu.
+- `--userns=keep-id` i rootless Podman ograniczają skutki ucieczki z kontenera, ponieważ root w kontenerze nie jest rootem na hoście.
+- Montowanie modeli tylko do odczytu zmniejsza ryzyko ich modyfikacji z wnętrza kontenera.
 
-W przypadku wdrożeń trwałych te same ograniczenia można zdefiniować za pomocą jednostek Podman Quadlet. Jeśli dostęp do GPU jest delegowany przez Container Device Interface, specyfikacja urządzenia CDI powinna być jak najbardziej zawężona, zamiast udostępniać wszystkie węzły akceleratorów.<sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
+W przypadku wdrożeń trwałych te same ograniczenia można skonfigurować za pomocą jednostek Podman Quadlet. Jeśli dostęp do GPU jest delegowany przez Container Device Interface, specyfikacja urządzeń CDI powinna być możliwie wąska, zamiast udostępniać wszystkie węzły akceleratorów.<sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
 
-### Minimalizacja węzłów urządzeń GPU
+### Ograniczanie liczby węzłów urządzeń GPU
 
-W przypadku wnioskowania wykorzystującego GPU pliki `/dev/nvidia*` stanowią cenne lokalne powierzchnie ataku, ponieważ udostępniają rozbudowane procedury obsługi sterownika `ioctl()` oraz potencjalnie współdzielone ścieżki zarządzania pamięcią GPU.<sup>[[8]](#references)</sup>
+W przypadku wnioskowania z użyciem GPU pliki `/dev/nvidia*` stanowią wartościowe lokalne powierzchnie ataku, ponieważ udostępniają rozbudowane procedury obsługi sterownika `ioctl()` oraz potencjalnie współdzielone ścieżki zarządzania pamięcią GPU.<sup>[[8]](#references)</sup>
 
-- Nie pozostawiaj plików `/dev/nvidia*` z prawem zapisu dla wszystkich użytkowników.
-- Ogranicz dostęp do `nvidia`, `nvidiactl` i `nvidia-uvm` za pomocą `NVreg_DeviceFileUID/GID/Mode`, reguł udev i ACL, tak aby otwierać je mógł tylko zmapowany UID kontenera.
-- Na hostach do wnioskowania bez monitora blokuj niepotrzebne moduły, takie jak `nvidia_drm`, `nvidia_modeset` i `nvidia_peermem`.
-- Załaduj wstępnie tylko wymagane moduły podczas uruchamiania systemu, zamiast pozwalać środowisku uruchomieniowemu na ich oportunistyczne ładowanie przez `modprobe` podczas uruchamiania wnioskowania.
+- Nie pozostawiaj plików `/dev/nvidia*` z prawem zapisu dla wszystkich.
+- Ogranicz dostęp do `nvidia`, `nvidiactl` i `nvidia-uvm` za pomocą `NVreg_DeviceFileUID/GID/Mode`, reguł udev i ACL, tak aby mogły je otwierać tylko mapowane identyfikatory UID kontenerów.
+- Na hostach do wnioskowania bez interfejsu graficznego blokuj niepotrzebne moduły, takie jak `nvidia_drm`, `nvidia_modeset` i `nvidia_peermem`.
+- Załaduj wstępnie tylko wymagane moduły podczas uruchamiania systemu, zamiast pozwalać środowisku wykonawczemu na ich doraźne ładowanie za pomocą `modprobe` podczas uruchamiania wnioskowania.
 
 Przykład:
 
@@ -172,16 +174,16 @@ options nvidia NVreg_DeviceFileGID=0
 options nvidia NVreg_DeviceFileMode=0660
 ```
 
-Ważnym punktem przeglądu jest **`/dev/nvidia-uvm`**. Nawet jeśli obciążenie nie używa jawnie `cudaMallocManaged()`, nowsze środowiska uruchomieniowe CUDA mogą nadal wymagać `nvidia-uvm`. Ponieważ to urządzenie jest współdzielone i obsługuje zarządzanie pamięcią wirtualną GPU, należy traktować je jako powierzchnię narażenia danych między tenantami. Jeśli backend wnioskowania to obsługuje, backend Vulkan może być interesującym kompromisem, ponieważ może całkowicie wyeliminować potrzebę udostępniania `nvidia-uvm` kontenerowi.<sup>[[8]](#references)</sup>
+Jednym z ważnych punktów do sprawdzenia jest **`/dev/nvidia-uvm`**. Nawet jeśli workload nie używa jawnie `cudaMallocManaged()`, nowsze środowiska uruchomieniowe CUDA mogą nadal wymagać `nvidia-uvm`. Ponieważ to urządzenie jest współdzielone i obsługuje zarządzanie wirtualną pamięcią GPU, należy traktować je jako powierzchnię narażenia na wyciek danych między tenantami. Jeśli backend wnioskowania to obsługuje, backend Vulkan może być interesującym kompromisem, ponieważ może całkowicie wyeliminować konieczność udostępniania `nvidia-uvm` kontenerowi.<sup>[[8]](#references)</sup>
 
-### Ograniczanie dostępu workerów wnioskowania za pomocą LSM
+### Izolacja LSM dla workerów wnioskowania
 
 AppArmor/SELinux/seccomp należy stosować jako dodatkową warstwę ochrony procesu wnioskowania:<sup>[[8]](#references)</sup>
 
-- Zezwalaj wyłącznie na wymagane biblioteki współdzielone, ścieżki modeli, katalog gniazd i węzły urządzeń GPU.
-- Jawnie blokuj uprawnienia wysokiego ryzyka, takie jak `sys_admin`, `sys_module`, `sys_rawio` i `sys_ptrace`.
-- Ustaw katalog modelu jako tylko do odczytu, a zapisywalne ścieżki ogranicz wyłącznie do katalogów gniazd/cache środowiska uruchomieniowego.
-- Monitoruj logi odmów dostępu, ponieważ dostarczają użytecznych danych telemetrycznych do wykrywania prób ucieczki model servera lub payloadu post-exploitation poza oczekiwane zachowanie.
+- Zezwalaj wyłącznie na współdzielone biblioteki, ścieżki modeli, katalog gniazd i węzły urządzeń GPU, które są rzeczywiście wymagane.
+- Jawnie blokuj niebezpieczne uprawnienia, takie jak `sys_admin`, `sys_module`, `sys_rawio` i `sys_ptrace`.
+- Ustaw katalog modelu jako tylko do odczytu, a zapisy dozwól wyłącznie w katalogach gniazd i pamięci podręcznej środowiska uruchomieniowego.
+- Monitoruj logi odmów, ponieważ dostarczają przydatnych danych telemetrycznych do wykrywania prób ucieczki z oczekiwanego zachowania przez serwer modelu lub payload po eksploatacji.
 
 Przykładowe reguły AppArmor dla workera korzystającego z GPU:
 
@@ -200,60 +202,60 @@ owner /srv/llm/** rw,
 
 ## Phantom Squatting: domeny halucynowane przez LLM jako wektor ataku na łańcuch dostaw AI
 
-Phantom squatting jest **odpowiednikiem slopsquattingu dla domen/URL-i**. Zamiast halucynować nieistniejącą nazwę pakietu, LLM halucynuje wiarygodną **domenę portalu, API, webhooka, rozliczeń, SSO, pobierania lub pomocy technicznej** prawdziwej marki, a atakujący rejestruje tę przestrzeń nazw, zanim użyje jej człowiek lub agent.<sup>[[12]](#references)</sup><sup>[[13]](#references)</sup>
+Phantom squatting to **odpowiednik slopsquattingu dla domen/URL-i**. Zamiast halucynować nieistniejącą nazwę pakietu, LLM halucynuje wiarygodną domenę **portalu, API, webhooka, rozliczeń, SSO, pobierania lub pomocy technicznej** prawdziwej marki, a atakujący rejestruje tę przestrzeń nazw, zanim użyje jej człowiek lub agent.<sup>[[12]](#references)</sup><sup>[[13]](#references)</sup>
 
-Ma to znaczenie, ponieważ w wielu przepływach pracy wspomaganych przez AI wynik modelu jest traktowany jak **zaufana zależność**:
-- Programiści wklejają sugerowany endpoint do kodu lub integracji CI/CD.
-- Agenci AI automatycznie pobierają dokumentację, schematy, pliki APK, ZIP lub adresy webhooków.
+Ma to znaczenie, ponieważ w wielu przepływach pracy wspomaganych przez AI wynik modelu traktowany jest jako **zaufana zależność**:
+- Deweloperzy wklejają sugerowany endpoint do kodu lub integracji CI/CD.
+- Agenci AI automatycznie pobierają dokumentację, schematy, pliki APK, ZIP lub adresy docelowe webhooków.
 - Wygenerowane instrukcje operacyjne lub dokumentacja mogą zawierać fałszywy URL, jakby był wiarygodny.
 
 ### Przebieg ataku
 
-1. **Zbadaj powierzchnię halucynacji**: zadawaj pytania dotyczące konkretnej marki i realistycznych przepływów pracy, np. portali `admin`, `billing`, `sandbox`, `benefits`, `api`, `download`, `support`, `webhook` lub `mobile app`.<sup>[[12]](#references)</sup>
-2. **Normalizuj kandydatów**: rozwiąż wygenerowane URL-e, sprowadź odpowiedzi NXDOMAIN do nadrzędnej domeny możliwej do zarejestrowania i usuń duplikaty rodzin promptów. Zestawy promptów powinny być zróżnicowane, na przykład przez odrzucanie niemal identycznych promptów na podstawie **podobieństwa Jaccarda**.
+1. **Zbadaj powierzchnię halucynacji**: zadawaj pytania dotyczące konkretnej marki i realistycznych przepływów pracy, takich jak portale `admin`, `billing`, `sandbox`, `benefits`, `api`, `download`, `support`, `webhook` lub `mobile app`.<sup>[[12]](#references)</sup>
+2. **Normalizuj kandydatów**: rozwiązuj wygenerowane URL-e, sprowadzaj odpowiedzi NXDOMAIN do nadrzędnej domeny, którą można zarejestrować, i usuwaj duplikaty z rodzin promptów. Zbiory promptów powinny być zróżnicowane, na przykład przez odrzucanie niemal identycznych promptów z użyciem **podobieństwa Jaccarda**.
 3. **Nadaj priorytet przewidywalnym halucynacjom**:
-   - **Thermal Hallucination Persistence (THP)**: ta sama fałszywa domena pojawia się przy różnych temperaturach, w tym niskich, takich jak `T=0.1`.
-   - **Zgodność między modelami**: różne rodziny LLM generują tę samą fałszywą domenę.
-4. **Zarejestruj i uzbrój** nadrzędną domenę, a następnie hostuj na niej strony phishingowe, fałszywe pliki APK/ZIP do pobrania, narzędzia do wykradania danych uwierzytelniających, złośliwe dokumenty lub endpointy API zbierające sekrety albo treści webhooków. **Halucynacje obejmujące samą domenę** najłatwiej wykorzystać do zarobku, ponieważ atakujący kontroluje całą przestrzeń nazw; halucynacje dotyczące subdomen lub ścieżek również można wykorzystać, jeśli znormalizowana domena nadrzędna nie jest zarejestrowana.
-5. **Wykorzystaj okres zerowej reputacji**: nowo zarejestrowane domeny często nie mają historii na listach blokowanych, reputacji URL ani rozwiniętej telemetrii, więc mogą omijać zabezpieczenia, dopóki systemy wykrywania nie zareagują. Atakujący mogą wydłużyć ten okres, zwracając nieszkodliwe odpowiedzi wyłącznie crawlerom, stosując maskowanie przekierowań, bramki CAPTCHA lub opóźnione wdrażanie ładunku.
+   - **Thermal Hallucination Persistence (THP)**: ta sama fałszywa domena pojawia się przy różnych wartościach temperatury, w tym niskich, takich jak `T=0.1`.
+   - **Konsensus między modelami**: wiele rodzin LLM generuje tę samą fałszywą domenę.
+4. **Zarejestruj i uzbrój** domenę nadrzędną, a następnie udostępniaj phishing, fałszywe pliki APK/ZIP do pobrania, narzędzia do wyłudzania danych uwierzytelniających, złośliwe dokumenty lub endpointy API zbierające sekrety/payloady webhooków. **Halucynacje dotyczące samej domeny** najłatwiej monetyzować, ponieważ atakujący kontroluje całą przestrzeń nazw; halucynacje dotyczące subdomen/ścieżek również można wykorzystać, jeśli znormalizowana domena nadrzędna nie jest zarejestrowana.
+5. **Wykorzystaj okno zerowej reputacji**: nowo zarejestrowane domeny często nie mają historii na listach blokowanych, reputacji URL ani dojrzałej telemetrii, więc mogą omijać zabezpieczenia, dopóki systemy wykrywania nie nadrobią zaległości. Atakujący mogą wydłużyć to okno, stosując nieszkodliwe odpowiedzi widoczne tylko dla crawlerów, ukrywanie przekierowań, bramki CAPTCHA lub opóźnione przygotowanie payloadu.
 
-### Dlaczego jest to niebezpieczne w przypadku agentów
+### Dlaczego jest to niebezpieczne dla agentów
 
-W przypadku człowieka fałszywa domena zwykle wymaga kliknięcia i wykonania kolejnej czynności. W **agentowym przepływie pracy** LLM może być zarówno **wabikiem**, jak i **wykonawcą**: agent otrzymuje halucynowany URL, pobiera go, analizuje odpowiedź, a następnie może ujawnić tokeny, wykonać instrukcje, pobrać zależność lub wprowadzić zatrute dane do CI/CD bez weryfikacji przez człowieka.<sup>[[12]](#references)</sup>
+W przypadku człowieka domena zwykle nadal wymaga kliknięcia i wykonania kolejnej czynności. W **agentowym przepływie pracy** LLM może być jednocześnie **przynętą** i **wykonawcą**: agent otrzymuje halucynowany URL, pobiera go, analizuje odpowiedź, a następnie może ujawnić tokeny, wykonać instrukcje, pobrać zależność lub umieścić zatrute dane w CI/CD bez jakiejkolwiek weryfikacji przez człowieka.<sup>[[12]](#references)</sup>
 
-### Praktyczne prompty atakującego
+### Przykładowe prompty atakującego
 
-Najskuteczniejsze prompty zwykle przypominają typowe zadania firmowe, a nie jawne próby phishingu:<sup>[[12]](#references)</sup>
-- „Jaki jest URL sandboxa płatności dla integracji `<brand>`?”
-- „Jakiego endpointu webhooka użyć do powiadomień o kompilacji `<brand>`?”
+Najskuteczniejsze prompty zwykle przypominają normalne zadania korporacyjne, a nie jawne przynęty phishingowe:<sup>[[12]](#references)</sup>
+- „Jaki jest adres URL piaskownicy płatności dla integracji `<brand>`?”
+- „Jakiego endpointu webhooka użyć do powiadomień o kompilacjach `<brand>`?”
 - „Gdzie znajduje się portal świadczeń pracowniczych / rozliczeń / SSO dla `<brand>`?”
-- „Podaj bezpośredni link do pobrania pliku APK na Androida lub klienta desktopowego dla `<brand>`.”
+- „Podaj bezpośredni link do pobrania aplikacji APK na Androida lub klienta desktopowego dla `<brand>`.”
 
-### Odwrócenie podejścia obronnego
+### Odwrócenie podejścia na obronne
 
-Traktuj to jako problem proaktywnego monitorowania domen, a nie tylko problem prompt injection:<sup>[[12]](#references)</sup>
-- Utwórz **zestaw promptów dotyczących marki** i okresowo testuj LLM-y, na których polegają użytkownicy lub agenci.
-- Zapisuj halucynowane URL-e i śledź, które z nich powtarzają się przy różnych temperaturach i modelach.
-- Śledź **Adversarial Exploitation Window (AEW)**: czas między pierwszą halucynacją a rejestracją domeny przez atakującego. Dodatnia wartość AEW oznacza, że obrońcy mogą zarejestrować domenę, skierować ją do sinkhole’a lub zablokować przed jej uzbrojeniem.
-- Monitoruj przejścia **NXDOMAIN → zarejestrowana** dla domen nadrzędnych.
-- Po rejestracji sprawdź rejestratora, datę utworzenia, serwery nazw, ochronę prywatności, zawartość strony, zrzuty ekranu, status strony parkingowej i podobieństwo do zasobów marki.
-- Wprowadź kontrolę polityk, aby agenci i programiści **nie ufali domyślnie domenom wygenerowanym przez LLM**: wymagaj list dozwolonych, weryfikacji własności, kontroli CT/RDAP lub zatwierdzenia przez człowieka przed pierwszym użyciem.
+Potraktuj to jako problem proaktywnego monitorowania domen, a nie tylko problem prompt injection:<sup>[[12]](#references)</sup>
+- Zbuduj **zbiór promptów dotyczących marek** i okresowo sonduj LLM-y, z których korzystają Twoi użytkownicy/agenci.
+- Zapisuj halucynowane URL-e i śledź, które z nich są stabilne w różnych temperaturach/modelach.
+- Śledź **Adversarial Exploitation Window (AEW)**: czas między pierwszą halucynacją a rejestracją przez atakującego. Dodatnie AEW oznacza, że obrońcy mogą wcześniej zarejestrować domenę, skierować ją do sinkhole'a lub zablokować przed uzbrojeniem.
+- Monitoruj zmiany **NXDOMAIN → zarejestrowana** dla domen nadrzędnych.
+- Po rejestracji sprawdź rejestratora, datę utworzenia, serwery nazw, ochronę prywatności, zawartość strony, zrzuty ekranu, status strony parkingowej i podobieństwo zasobów marki.
+- Dodaj bramki polityk, aby agenci/deweloperzy **domyślnie nie ufali domenom wygenerowanym przez LLM**: wymagaj list dozwolonych, walidacji własności, kontroli CT/RDAP lub zatwierdzenia przez człowieka przed pierwszym użyciem.
 
-Zjawisko to należy jednocześnie do kilku kategorii ryzyka AI: **atak na łańcuch dostaw AI**, **niebezpieczne wyjście modelu** oraz **nieautoryzowane działania**, gdy agenci samodzielnie korzystają z halucynowanego URL-a.
+Zjawisko to wpisuje się jednocześnie w kilka kategorii ryzyka AI: **atak na łańcuch dostaw AI**, **niebezpieczne wyniki modelu** oraz **nieautoryzowane działania**, gdy agenci autonomicznie korzystają z halucynowanego URL-a.
 
 ## References
 
-- [1] [OWASP Top 10 podatności uczenia maszynowego](https://owasp.org/www-project-machine-learning-security-top-10/)
-- [2] [Google SAIF (Secure AI Framework) – zagrożenia](https://saif.google/secure-ai-framework/risks)
+- [1] [OWASP Top 10 — podatności uczenia maszynowego](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [2] [Google SAIF (Secure AI Framework) — zagrożenia](https://saif.google/secure-ai-framework/risks)
 - [3] [Macierz zagrożeń MITRE ATLAS](https://atlas.mitre.org/)
-- [4] [Unit 42 – Zagrożenia związane z LLM-ami wspomagającymi programowanie: szkodliwe treści, nadużycia i wprowadzanie w błąd](https://unit42.paloaltonetworks.com/code-assistant-llms/)
-- [5] [Sysdig – LLMjacking: skradzione poświadczenia chmurowe wykorzystane w nowym ataku AI](https://sysdig.com/blog/llmjacking-stolen-cloud-credentials-used-in-new-ai-attack/)
-- [6] [Omówienie procederu LLMJacking – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
+- [4] [Unit 42 — zagrożenia związane z LLM-ami wspomagającymi kodowanie: szkodliwe treści, nadużycia i oszustwa](https://unit42.paloaltonetworks.com/code-assistant-llms/)
+- [5] [Sysdig — LLMjacking: skradzione poświadczenia chmurowe wykorzystane w nowym ataku AI](https://sysdig.com/blog/llmjacking-stolen-cloud-credentials-used-in-new-ai-attack/)
+- [6] [Omówienie schematu LLMJacking — The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
 - [7] [oai-reverse-proxy (odsprzedaż skradzionego dostępu do LLM)](https://gitgud.io/khanon/oai-reverse-proxy)
-- [8] [Synacktiv - Dogłębna analiza wdrożenia lokalnego serwera LLM z ograniczonymi uprawnieniami](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
+- [8] [Synacktiv — szczegółowa analiza wdrożenia lokalnego serwera LLM o niskich uprawnieniach](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
 - [9] [README serwera llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
 - [10] [Quadlety Podman: podman-systemd.unit](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
 - [11] [Specyfikacja CNCF Container Device Interface (CDI)](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
-- [12] [Unit 42 – Phantom Squatting: domeny halucynowane przez AI jako wektor ataku na łańcuch dostaw oprogramowania](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
-- [13] [Socket – Slopsquatting: jak halucynacje AI napędzają nową klasę ataków na łańcuch dostaw](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
+- [12] [Unit 42 — Phantom Squatting: domeny halucynowane przez AI jako wektor ataku na łańcuch dostaw oprogramowania](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
+- [13] [Socket — Slopsquatting: jak halucynacje AI napędzają nową klasę ataków na łańcuch dostaw](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
 {{#include ../banners/hacktricks-training.md}}

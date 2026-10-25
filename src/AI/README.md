@@ -4,7 +4,7 @@
 
 ## Główne algorytmy uczenia maszynowego
 
-Najlepiej zacząć naukę o AI od poznania działania głównych algorytmów uczenia maszynowego. Pomoże Ci to zrozumieć, jak działa AI, jak z niego korzystać i jak je atakować:
+Najlepiej zacząć naukę o AI od zrozumienia, jak działają główne algorytmy uczenia maszynowego. Pomoże Ci to zrozumieć, jak działa AI, jak z niego korzystać i jak je atakować:
 
 
 {{#ref}}
@@ -28,20 +28,20 @@ Najlepiej zacząć naukę o AI od poznania działania głównych algorytmów ucz
 
 ### Architektura LLM
 
-Na następnej stronie znajdziesz podstawowe informacje o każdym komponencie potrzebnym do zbudowania podstawowego LLM z użyciem transformerów:
+Na kolejnej stronie znajdziesz podstawowe informacje o każdym komponencie potrzebnym do zbudowania podstawowego LLM z użyciem transformerów:
 
 
 {{#ref}}
 AI-llm-architecture/README.md
 {{#endref}}
 
-## Narzędzia i platformy do modeli
+## Narzędzia i platformy modeli
 
-Aby uruchamiać, dostrajać, udostępniać lub testować modele, skorzystaj z [przewodnika po narzędziach i platformach do modeli AI](AI-Model-Tools-and-Platforms.md).
+Aby uruchamiać, dostrajać, udostępniać lub testować modele, skorzystaj z [przewodnika po narzędziach i platformach modeli AI](AI-Model-Tools-and-Platforms.md).
 
 ## Bezpieczeństwo AI
 
-### Granice zaufania w bramach LLM
+### Granice zaufania bram LLM
 
 Informacje o bezpieczeństwie bram znajdziesz tutaj:
 
@@ -57,14 +57,14 @@ AI-Agent-Security-Methodology.md
 
 ### Ramy oceny ryzyka AI
 
-Dwa przydatne punkty wyjścia do oceny ryzyka systemów AI to OWASP Machine Learning Security Top 10 i Secure AI Framework (SAIF) firmy Google. Uzupełniają się, ale nie stanowią wyczerpującego przeglądu ram oceny ryzyka AI.<sup>[[1]](#references)[[2]](#references)</sup>
+Dwa przydatne punkty wyjścia do oceny ryzyka systemów AI to OWASP Machine Learning Security Top 10 i Secure AI Framework (SAIF) firmy Google. Uzupełniają się, ale nie stanowią wyczerpującego zestawu ram oceny ryzyka AI.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Ataki adwersarialne wspomagane interpretowalnością mechanistyczną
+### Ataki adwersarialne kierowane interpretowalnością mechanicystyczną
 
 {{#ref}}
 AI-Mechanistic-Interpretability-Adversarial-Attacks.md
@@ -72,7 +72,7 @@ AI-Mechanistic-Interpretability-Adversarial-Attacks.md
 
 ### Bezpieczeństwo promptów AI
 
-W ostatnich latach LLM-y znacznie upowszechniły wykorzystanie AI, ale nie są doskonałe i można je oszukać za pomocą adwersarialnych promptów. To bardzo ważny temat, jeśli chcesz zrozumieć, jak bezpiecznie korzystać z AI i jak je atakować:
+W ostatnich latach LLM doprowadziły do gwałtownego wzrostu wykorzystania AI, ale nie są doskonałe i można je oszukać za pomocą adwersarialnych promptów. To bardzo ważny temat, który pozwala zrozumieć, jak bezpiecznie korzystać z AI i jak je atakować:
 
 
 {{#ref}}
@@ -81,16 +81,16 @@ AI-Prompts.md
 
 ### RCE w modelach AI
 
-Deweloperzy i firmy często uruchamiają modele pobrane z Internetu, jednak samo załadowanie modelu może wystarczyć do wykonania dowolnego kodu w systemie. To bardzo ważny temat, jeśli chcesz zrozumieć, jak bezpiecznie korzystać z AI i jak je atakować:
+Deweloperzy i firmy często uruchamiają modele pobrane z Internetu, jednak samo załadowanie modelu może wystarczyć do wykonania dowolnego kodu w systemie. To bardzo ważny temat, który pozwala zrozumieć, jak bezpiecznie korzystać z AI i jak je atakować:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### Wspomagane przez AI obejście KYC
+### Obejście KYC z użyciem AI
 
-Generowanie wideo można połączyć z wstrzykiwaniem wirtualnej kamery i manipulacją API kamery, aby ominąć słabe procedury KYC, weryfikacji wieku i biometrycznego wykrywania żywotności:
+Generatywne wideo można połączyć z wstrzykiwaniem obrazu z wirtualnej kamery i manipulacją API kamery, aby omijać słabe mechanizmy KYC, weryfikacji wieku i biometrycznej kontroli żywotności:
 
 
 {{#ref}}
@@ -106,28 +106,44 @@ MCP (Model Context Protocol) to otwarty protokół łączący aplikacje AI z nar
 AI-MCP-Servers.md
 {{#endref}}
 
-### Wspomagane przez AI fuzzing i automatyczne wykrywanie podatności
+### Protokół AI agent–agent (A2A)
+
+A2A umożliwia agentom wzajemne odnajdywanie się za pomocą karty agenta i przesyłanie sobie zadań przez HTTP. Testuj karty agentów, autoryzację zadań, webhooki powiadomień push i rozszerzone karty:
+
+{{#ref}}
+AI-A2A-Protocol.md
+{{#endref}}
+
+### Ujawnione, samodzielnie hostowane usługi AI
+
+Rozpoznawanie i testowanie ujawnionych bez uwierzytelniania środowisk uruchomieniowych modeli, kreatorów agentów, interfejsów demonstracyjnych ML, klastrów obliczeniowych i baz danych wektorowych:
+
+{{#ref}}
+AI-Exposed-Self-Hosted-AI-Services.md
+{{#endref}}
+
+### Fuzzing wspomagany przez AI i automatyczne wykrywanie podatności
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### Wspomagany przez AI przegląd kodu źródłowego i walidacja podatności
+### Analiza kodu źródłowego wspomagana przez AI i weryfikacja podatności
 
-Informacje o przeglądzie source/sink, przepływach zadań dla mobilnych punktów wejścia, audytach wzorców jądra i walidacji opartej na dowodach znajdziesz tutaj:
+Informacje o analizie źródeł i ujść, przepływach zadań dla mobilnych punktów wejścia, audytach wzorców w jądrze oraz weryfikacji opartej na dowodach:
 
 {{#ref}}
 AI-Assisted-Source-Review-and-Vulnerability-Validation.md
 {{#endref}}
 
-### Wspomniona przez AI inżynieria wsteczna
+### Inżynieria wsteczna wspomagana przez AI
 
-[Częściowe podnoszenie kodu, wykrywanie niezmienników MBA, dekodowanie zależne od środowiska i walidacja automatycznych ekstraktorów](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[Częściowe podnoszenie poziomu abstrakcji, wykrywanie niezmienników MBA, dekodowanie zależne od środowiska i walidacja automatycznych ekstraktorów](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
 ### Boty AI do black-box pentestingu aplikacji webowych
 
-Agenci oparte na LLM mogą automatyzować długotrwałe procesy black-box pentestingu aplikacji webowych, jeśli są wspierane przez obserwowalność, orkiestrację, obsługę uwierzytelnionych sesji i walidację adwersarialną:
+Agenci oparci na LLM mogą automatyzować długotrwałe przepływy pracy black-box pentestingu aplikacji webowych, jeśli zapewniono im obserwowalność, orkiestrację, obsługę uwierzytelnionych sesji i walidację adwersarialną:
 
 
 {{#ref}}
@@ -136,7 +152,7 @@ Web-Black-Box-AI-Pentester-Bots.md
 
 ## References
 
-- [1] [OWASP Top 10 bezpieczeństwa uczenia maszynowego](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [1] [10 najważniejszych zagrożeń bezpieczeństwa uczenia maszynowego według OWASP](https://owasp.org/www-project-machine-learning-security-top-10/)
 - [2] [Google — Bezpieczne ramy AI (SAIF)](https://saif.google/)
-- [3] [Model Context Protocol — Wprowadzenie](https://modelcontextprotocol.io/docs/getting-started/intro)
+- [3] [Model Context Protocol — wprowadzenie](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}
