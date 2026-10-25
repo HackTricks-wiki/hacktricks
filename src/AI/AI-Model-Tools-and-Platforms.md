@@ -1,55 +1,59 @@
-# AI-modelle en platforms
+# AI Model Tools and Platforms
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Voer modelle plaaslik uit en lei hulle op
+## Laat models plaaslik loop en oplei
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
 
-Hugging Face Transformers is ’n oopbronbiblioteek om voorafopgeleide modelle vir teks-, visie-, oudio-, video- en multimodale take te laai, op te lei en te bedien. Modelle en datastelle word afsonderlik deur die Hugging Face Hub gehuisves.<sup>[[1]](#references)</sup>
+Hugging Face Transformers is ’n oopbronbiblioteek om voorafopgeleide models vir teks-, visie-, oudio-, video- en multimodale take te laai, op te lei en aan te bied. Model- en datastelhuisvesting word afsonderlik deur die Hugging Face Hub verskaf.<sup>[[1]](#references)</sup>
 
 ### [**LangChain**](https://github.com/langchain-ai/langchain)
 
-LangChain is ’n raamwerk vir die bou van modelgedrewe toepassings en agente met prompt-samestelling, bestuur van gesprekgeskiedenis/-toestand, tools, herwinning, model-, API- en databasisintegrasies.<sup>[[2]](#references)</sup>
+LangChain is ’n raamwerk vir die bou van modelgedrewe toepassings en agents met prompt-konstruksie, bestuur van gesprekgeskiedenis/-toestand, nutsmiddels, herwinning, model-, API- en databasisintegrasies.<sup>[[2]](#references)</sup>
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 
-LitGPT bied leesbare implementasies en opdragreël-werkvloeie om ondersteunde taalmodelle vooraf op te lei, fyn in te stel, te evalueer en te ontplooi.<sup>[[3]](#references)</sup>
+LitGPT bied leesbare implementasies en opdragreëlwerkvloeie vir die voorafopleiding, fyninstelling, evaluering en ontplooiing van ondersteunde taalmodels.<sup>[[3]](#references)</sup>
 
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
 **Beskrywing:**\
-LitServe is ’n modelbedieningsraamwerk van Lightning AI om inferensie-API’s beskikbaar te stel, met bondelverwerking, streaming, versnelling en skaalhaakpunte.<sup>[[4]](#references)</sup>
+LitServe is ’n modelbedieningsraamwerk van Lightning AI om inferensie-API’s met bondelverwerking, stroomlewering, versnelling en skaalbaarheidshulpmiddels beskikbaar te stel.<sup>[[4]](#references)</sup>
 
 ### [**Axolotl**](https://github.com/axolotl-ai-cloud/axolotl)
 
-Axolotl is ’n oopbronraamwerk vir natraining en fyninstelling wat deur YAML-konfigurasie aangedryf word. Dit ondersteun tegnieke soos volledige fyninstelling, LoRA/QLoRA, voorkeuroptimalisering en multi-GPU-opleiding; dit is nie self ’n wolkontplooiingsplatform nie.<sup>[[5]](#references)</sup>
+Axolotl is ’n oopbronraamwerk vir na-opleiding en fyninstelling wat deur YAML-konfigurasie aangedryf word. Dit ondersteun tegnieke soos volledige fyninstelling, LoRA/QLoRA, voorkeuroptimalisering en multi-GPU-opleiding; dit is nie self ’n wolkontplooiingsplatform nie.<sup>[[5]](#references)</sup>
 
-## Probeer modelle aanlyn
+## Probeer models aanlyn
 
 ### [**Hugging Face**](https://huggingface.co/)
 
-**Hugging Face** is ’n toonaangewende platform en gemeenskap vir masjienleer, veral bekend vir sy werk in natuurlike taalverwerking (NLP). Dit bied tools, biblioteke en hulpbronne wat dit makliker maak om masjienleermodelle te ontwikkel, te deel en te ontplooi.\
+**Hugging Face** is ’n toonaangewende platform en gemeenskap vir masjienleer, veral bekend vir sy werk in natuurliketaalverwerking (NLP). Dit bied nutsmiddels, biblioteke en hulpbronne wat dit makliker maak om masjienleermodels te ontwikkel, te deel en te ontplooi.\
 Die Hub bied verskeie relevante afdelings:<sup>[[6]](#references)</sup>
 
-* **Models**: ’n Groot bewaarplek van **voorafopgeleide masjienleermodelle** waar gebruikers modelle vir verskeie take, soos teksgenerering, vertaling, beeldherkenning en meer, kan deursoek, aflaai en integreer.
-* **Datasets:** ’n Omvattende **versameling datastelle** wat gebruik word om modelle op te lei en te evalueer. Dit vergemaklik toegang tot uiteenlopende databronne, sodat gebruikers data vir hul spesifieke masjienleerprojekte kan vind en gebruik.
-* **Spaces:** ’n Platform vir die huisvesting en deel van **interaktiewe masjienleertoepassings** en demonstrasies. Dit stel ontwikkelaars in staat om hul modelle in werking te **demonstreer**, gebruikersvriendelike koppelvlakke te skep en met ander saam te werk deur regstreekse demonstrasies te deel.
+* **Models**: ’n Groot bewaarplek van **voorafopgeleide masjienleermodels** waar gebruikers models vir verskeie take, soos teksgenerering, vertaling, beeldherkenning en meer, kan verken, aflaai en integreer.
+* **Datasets:** ’n Omvattende **versameling datastelle** wat gebruik word om models op te lei en te evalueer. Dit maak dit maklik om toegang tot uiteenlopende databronne te verkry, sodat gebruikers data vir hul spesifieke masjienleerprojekte kan vind en benut.
+* **Spaces:** ’n Platform vir die huisvesting en deel van **interaktiewe masjienleertoepassings** en demonstrasies. Dit stel ontwikkelaars in staat om hul models in aksie te **demonstreer**, gebruikersvriendelike koppelvlakke te skep en met ander saam te werk deur regstreekse demonstrasies te deel.
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
-**TensorFlow Hub** is ’n bewaarplek en biblioteek vir herbruikbare opgeleide modelkomponente, veral modules wat deur TensorFlow/Keras gebruik word. **Kaggle** bied afsonderlik notaboeke, datastelle, kompetisies en modelle.<sup>[[7]](#references)[[9]](#references)</sup>
+**TensorFlow Hub** is ’n bewaarplek en biblioteek vir herbruikbare opgeleide modelkomponente, veral modules wat deur TensorFlow/Keras gebruik word. **Kaggle** bied afsonderlik notebooks, datastelle, kompetisies en models.<sup>[[7]](#references)[[9]](#references)</sup>
 
-* **Modules:** ’n Groot versameling voorafopgeleide modelle en modelkomponente waar gebruikers modules vir take soos beeldklassifikasie, teksinbedding en meer kan deursoek, aflaai en integreer.
-* **Tutorials:** Stap-vir-stap-gidse en voorbeelde wat gebruikers help om modelle met TensorFlow Hub te implementeer en fyn in te stel.
-* **Documentation:** Omvattende gidse en API-verwysings wat ontwikkelaars help om die hulpbronne van die bewaarplek doeltreffend te gebruik.
+* **Modules:** ’n Groot versameling voorafopgeleide models en modelkomponente waar gebruikers modules vir take soos beeldklassifikasie, teksinbedding en meer kan verken, aflaai en integreer.
+* **Tutorials:** Stap-vir-stap-gidse en voorbeelde wat gebruikers help om models met TensorFlow Hub te implementeer en fyn in te stel.
+* **Documentation:** Omvattende gidse en API-verwysings wat ontwikkelaars help om die hulpbronne van die bewaarplek doeltreffend te benut.
 
 ## [**Replicate**](https://replicate.com/home)
 
-**Replicate** is ’n gehuisveste platform om verpakte masjienleermodelle deur ’n webkoppelvlak of API uit te voer.<sup>[[8]](#references)</sup>
+**Replicate** is ’n gehuisveste platform om verpakte masjienleermodels deur ’n webkoppelvlak of API te laat loop.<sup>[[8]](#references)</sup>
 
-* **Models:** ’n Bewaarplek van masjienleermodelle wat deur die gemeenskap bygedra word. Gebruikers kan modelle deursoek, probeer en met minimale moeite in hul toepassings integreer.
-* **API access:** API’s om modelle vanuit toepassings aan te roep sonder om die onderliggende inferensie-infrastruktuur te bedryf.
+* **Models:** ’n Bewaarplek van masjienleermodels wat deur die gemeenskap bygedra is en waar gebruikers models kan verken en probeer, en dit met minimale moeite in hul toepassings kan integreer.
+* **API access:** API’s om models vanuit toepassings aan te roep sonder om die onderliggende inferensie-infrastruktuur te bedryf.
+
+## Aanval op blootgestelde selfgehoste AI-dienste
+
+Vir black-box-vingerafdrukke en toetsing van selfgehoste model-runner-dienste, agentbouers, ML-demonstrasie-UI’s, rekenaarklusters en vektordatabasisse, sien [Exposed Self-Hosted AI Services](AI-Exposed-Self-Hosted-AI-Services.md).
 
 ## References
 
