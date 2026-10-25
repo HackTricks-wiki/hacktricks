@@ -898,7 +898,7 @@
     - [MySQL File priv to SSRF/RCE](pentesting-web/sql-injection/mysql-injection/mysql-ssrf.md)
   - [Oracle injection](pentesting-web/sql-injection/oracle-injection.md)
   - [Cypher Injection (neo4j)](pentesting-web/sql-injection/cypher-injection-neo4j.md)
-  - [HQL / JPQL Injection (Hibernate, JPA)](pentesting-web/sql-injection/hql-jpql-injection.md)
+  - [HQL Injection (Hibernate)](pentesting-web/sql-injection/hql-jpql-injection.md)
   - [SQLite Injection](pentesting-web/sql-injection/sqlite-injection.md)
   - [Sqlmap](pentesting-web/sql-injection/sqlmap.md)
   - [PostgreSQL injection](pentesting-web/sql-injection/postgresql-injection/README.md)
