@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Principaux algorithmes de machine learning
+## Principaux algorithmes d’apprentissage automatique
 
-Pour commencer à découvrir l’IA, il est préférable de comprendre le fonctionnement des principaux algorithmes de machine learning. Cela vous aidera à comprendre le fonctionnement de l’IA, comment l’utiliser et comment l’attaquer :
+Pour commencer à découvrir l’IA, il est préférable de comprendre le fonctionnement des principaux algorithmes d’apprentissage automatique. Cela vous aidera à comprendre comment fonctionne l’IA, comment l’utiliser et comment l’attaquer :
 
 
 {{#ref}}
@@ -37,19 +37,19 @@ AI-llm-architecture/README.md
 
 ## Outils et plateformes pour les modèles
 
-Pour exécuter, effectuer le fine-tuning, déployer ou tester des modèles, consultez le [guide des outils et plateformes pour les modèles d’IA](AI-Model-Tools-and-Platforms.md).
+Pour exécuter, affiner, déployer ou essayer des modèles, consultez le [guide des outils et plateformes pour les modèles d’IA](AI-Model-Tools-and-Platforms.md).
 
 ## Sécurité de l’IA
 
-### Limites de confiance des LLM Gateway
+### Limites de confiance des passerelles LLM
 
-Pour la sécurité des gateways, consultez :
+Pour la sécurité des passerelles, consultez :
 
 {{#ref}}
 AI-LLM-Gateway-Security.md
 {{#endref}}
 
-### Méthodologie de sécurité des agents d’IA
+### Méthodologie de sécurité des agents IA
 
 {{#ref}}
 AI-Agent-Security-Methodology.md
@@ -57,14 +57,14 @@ AI-Agent-Security-Methodology.md
 
 ### Cadres de gestion des risques liés à l’IA
 
-Deux cadres utiles pour commencer à évaluer les risques des systèmes d’IA sont l’OWASP Machine Learning Security Top 10 et le Secure AI Framework (SAIF) de Google. Ils sont complémentaires et ne constituent pas une liste exhaustive des cadres de gestion des risques liés à l’IA.<sup>[[1]](#references)[[2]](#references)</sup>
+Deux cadres de référence utiles pour évaluer les risques liés aux systèmes d’IA sont l’OWASP Machine Learning Security Top 10 et le Secure AI Framework (SAIF) de Google. Ils sont complémentaires et ne constituent pas une liste exhaustive des cadres de gestion des risques liés à l’IA.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Attaques adversariales guidées par l’interprétabilité mécanistique
+### Attaques adversariales guidées par l’interprétabilité mécaniste
 
 {{#ref}}
 AI-Mechanistic-Interpretability-Adversarial-Attacks.md
@@ -72,7 +72,7 @@ AI-Mechanistic-Interpretability-Adversarial-Attacks.md
 
 ### Sécurité des prompts d’IA
 
-L’utilisation de l’IA a explosé ces dernières années grâce aux LLM, mais ceux-ci ne sont pas parfaits et peuvent être trompés par des prompts adversariaux. Il est très important de comprendre comment utiliser l’IA en toute sécurité et comment l’attaquer :
+L’utilisation de l’IA a explosé ces dernières années avec l’essor des LLM, mais ces modèles ne sont pas parfaits et peuvent être trompés par des prompts adversariaux. Il est essentiel de comprendre ce sujet pour utiliser l’IA en toute sécurité et savoir comment l’attaquer :
 
 
 {{#ref}}
@@ -81,7 +81,7 @@ AI-Prompts.md
 
 ### RCE dans les modèles d’IA
 
-Les développeurs et les entreprises exécutent très souvent des modèles téléchargés depuis Internet. Or, le simple fait de charger un modèle peut suffire à exécuter du code arbitraire sur le système. Il est très important de comprendre comment utiliser l’IA en toute sécurité et comment l’attaquer :
+Il est courant que des développeurs et des entreprises exécutent des modèles téléchargés depuis Internet. Pourtant, le simple fait de charger un modèle peut suffire à exécuter du code arbitraire sur le système. Il est essentiel de comprendre ce sujet pour utiliser l’IA en toute sécurité et savoir comment l’attaquer :
 
 
 {{#ref}}
@@ -90,7 +90,7 @@ AI-Models-RCE.md
 
 ### Contournement du KYC assisté par l’IA
 
-La vidéo générative peut être combinée à l’injection d’une caméra virtuelle et à la manipulation de l’API de la caméra pour contourner les processus KYC, de vérification de l’âge et de détection de présence biométrique peu robustes :
+La vidéo générative peut être combinée à l’injection de caméra virtuelle et à la manipulation de l’API de la caméra pour contourner des processus KYC, de vérification de l’âge et de détection de présence biométrique peu robustes :
 
 
 {{#ref}}
@@ -99,14 +99,30 @@ KYC-Bypass-Using-AI.md
 
 ### Model Context Protocol pour l’IA
 
-MCP (Model Context Protocol) est un protocole ouvert qui permet de connecter des applications d’IA à des outils et à des sources de données. Comme les serveurs MCP peuvent exposer des données et des actions, les évaluations doivent inclure l’autorisation, le consentement, la validation des entrées des outils et l’examen des limites de confiance.<sup>[[3]](#references)</sup>
+MCP (Model Context Protocol) est un protocole ouvert qui permet de connecter des applications d’IA à des outils et à des sources de données. Comme les serveurs MCP peuvent exposer des données et des actions, les évaluations doivent couvrir l’autorisation, le consentement, la validation des entrées des outils et l’examen des limites de confiance.<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### Fuzzing assisté par l’IA et découverte automatisée de vulnérabilités
+### Protocole agent-à-agent (A2A) pour l’IA
+
+A2A permet aux agents de se découvrir grâce à une fiche d’agent et de s’envoyer des tâches via HTTP. Testez les fiches d’agent, l’autorisation des tâches, les webhooks de notification push et les fiches étendues :
+
+{{#ref}}
+AI-A2A-Protocol.md
+{{#endref}}
+
+### Services d’IA auto-hébergés exposés
+
+Identifiez et testez les exécuteurs de modèles, les outils de création d’agents, les interfaces de démonstration de ML, les clusters de calcul et les bases de données vectorielles exposés et fonctionnant sans authentification :
+
+{{#ref}}
+AI-Exposed-Self-Hosted-AI-Services.md
+{{#endref}}
+
+### Fuzzing et découverte automatisée de vulnérabilités assistés par l’IA
 
 
 {{#ref}}
@@ -115,7 +131,7 @@ AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 
 ### Analyse du code source et validation des vulnérabilités assistées par l’IA
 
-Pour l’analyse des sources et des sinks, des flux de tâches liés aux points d’entrée mobiles, l’audit de patterns du noyau et la validation conditionnée par des preuves :
+Pour l’analyse des sources et des puits, des workflows des points d’entrée mobiles, l’audit des motifs du noyau et la validation soumise à des exigences de preuve :
 
 {{#ref}}
 AI-Assisted-Source-Review-and-Vulnerability-Validation.md
@@ -123,11 +139,11 @@ AI-Assisted-Source-Review-and-Vulnerability-Validation.md
 
 ### Rétro-ingénierie assistée par l’IA
 
-[Levée partielle, détection d’invariants MBA, décodage lié à l’environnement et validation d’extracteurs automatisés](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
+[Relèvement partiel en langage de haut niveau, détection d’invariants MBA, décodage lié à l’environnement et validation d’extracteurs automatisés](../reversing/reversing-tools-basic-methods/README.md#bypass-flattened-control-flow-with-a-narrow-execution-slice)
 
-### Bots de pentesting web black-box assistés par l’IA
+### Bots de pentest web en boîte noire utilisant l’IA
 
-Les agents propulsés par les LLM peuvent automatiser des workflows de pentesting web black-box de longue durée lorsqu’ils bénéficient d’observabilité, d’orchestration, de gestion de sessions authentifiées et de validation adversariale :
+Les agents propulsés par des LLM peuvent automatiser des workflows de pentest web en boîte noire de longue durée, à condition de disposer d’outils d’observabilité et d’orchestration, de la gestion de sessions authentifiées et de mécanismes de validation adversariale :
 
 
 {{#ref}}
@@ -137,6 +153,6 @@ Web-Black-Box-AI-Pentester-Bots.md
 ## References
 
 - [1] [Top 10 OWASP de la sécurité du machine learning](https://owasp.org/www-project-machine-learning-security-top-10/)
-- [2] [Google — Cadre d’IA sécurisée (SAIF)](https://saif.google/)
+- [2] [Google — Cadre de sécurité de l’IA (SAIF)](https://saif.google/)
 - [3] [Model Context Protocol — Présentation](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}
