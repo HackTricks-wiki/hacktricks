@@ -16,6 +16,8 @@ history | tail -50
 
 `type` and `command -V` reveal whether a name resolves to an alias, function, builtin, or file. `command -v` and `which` may not tell the same story for aliases and functions. Shell history can expose commands or credentials, but it may be incomplete, disabled, or held in memory until the session exits.
 
+A modified `.bashrc` can define a `sudo` alias that imitates an authentication prompt, records the entered password, and then invokes the real `sudo`; successful execution can conceal the interception.<sup>[[5]](#references)</sup> This is a shell-level substitution, not a change to the `sudo` executable or `PATH`.<sup>[[5]](#references)[[6]](#references)</sup> Bash normally expands aliases only in interactive shells, so the alias does not by itself affect a non-interactive script unless `expand_aliases` is enabled.<sup>[[6]](#references)</sup> Check the effective alias before trusting a familiar command name.
+
 ## Review startup and history files
 
 ```bash
@@ -57,4 +59,6 @@ For a real target, resolve its effective `ZDOTDIR`/`HOME`, inspect both the text
 - [2] [Shell startup environment injection advisory](https://github.com/openclaw/openclaw/security/advisories/GHSA-xgf2-vxv2-rrmg)
 - [3] [Zsh shell builtins: zcompile](https://zsh.sourceforge.io/Doc/Release/Shell-Builtin-Commands.html)
 - [4] [The .zshrc.zwc You Forgot to Check](https://dfir.ch/posts/compiled_zsh/)
+- [5] [AI-Powered Espionage Campaign Targets Government Linux Infrastructure](https://unit42.paloaltonetworks.com/ai-campaign-targets-linux-infrastructure/)
+- [6] [Bash manual: Aliases](https://www.gnu.org/software/bash/manual/html_node/Aliases.html)
 {{#include ../../banners/hacktricks-training.md}}
