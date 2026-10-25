@@ -655,7 +655,7 @@
   - [Spring Data Binding ClassLoader Manipulation](network-services-pentesting/pentesting-web/spring-data-binding-classloader-manipulation.md)
   - [Swagger UI and OpenAPI Docs](network-services-pentesting/pentesting-web/swagger-openapi-ui.md)
   - [Symfony](network-services-pentesting/pentesting-web/symphony.md)
-  - [Traefik HTTP/3 Slow-Body Timeout Testing](network-services-pentesting/pentesting-web/traefik.md)
+  - [Traefik](network-services-pentesting/pentesting-web/traefik.md)
   - [Tomcat](network-services-pentesting/pentesting-web/tomcat/README.md)
   - [Telerik Ui Aspnet Ajax Unsafe Reflection Webresource Axd](network-services-pentesting/pentesting-web/telerik-ui-aspnet-ajax-unsafe-reflection-webresource-axd.md)
   - [Uncovering CloudFlare](network-services-pentesting/pentesting-web/uncovering-cloudflare.md)
