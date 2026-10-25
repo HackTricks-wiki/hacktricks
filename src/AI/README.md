@@ -106,6 +106,22 @@ MCP (Model Context Protocol) is an open protocol for connecting AI applications 
 AI-MCP-Servers.md
 {{#endref}}
 
+### AI Agent-to-Agent (A2A) Protocol
+
+A2A lets agents discover each other through an agent card and send each other tasks over HTTP. Test agent cards, task authorization, push-notification webhooks and extended cards:
+
+{{#ref}}
+AI-A2A-Protocol.md
+{{#endref}}
+
+### Exposed Self-Hosted AI Services
+
+Fingerprinting and testing exposed model runners, agent builders, ML demo UIs, compute clusters and vector databases that run without authentication:
+
+{{#ref}}
+AI-Exposed-Self-Hosted-AI-Services.md
+{{#endref}}
+
 ### AI-Assisted Fuzzing & Automated Vulnerability Discovery
 
 
