@@ -106,6 +106,8 @@ Prompt filters and a better system prompt can raise attacker cost, but they shou
 - Memory and retrieval entries retain provenance and trust labels, can be invalidated, and are re-authorized when used for a later action.
 - Inter-agent messages are authenticated and authorized as untrusted requests; a peer's reputation or agent card does not implicitly delegate the receiver's tools.
 
+For A2A agent cards, task flows and their attack surface, check [A2A Protocol Security](AI-A2A-Protocol.md).
+
 ## References
 
 - [1] [OWASP Top 10 for Agentic Applications for 2026](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)
