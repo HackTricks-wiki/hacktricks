@@ -17,7 +17,7 @@ export HT_LANG="master" # Leave master for English
 # "el" for Greek
 # "es" for Spanish
 # "fr" for French
-# "hi" for HindiP
+# "hi" for Hindi
 # "it" for Italian
 # "ja" for Japanese
 # "ko" for Korean
