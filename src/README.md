@@ -27,6 +27,7 @@ export HT_LANG="master" # Leave master for English
 # "sw" for Swahili
 # "tr" for Turkish
 # "uk" for Ukrainian
+# "vi" for Vietnamese
 # "zh" for Chinese
 
 # Run the docker container indicating the path to the hacktricks folder
