@@ -1,167 +1,164 @@
 {{#include ./banners/hacktricks-training.md}}
 
-<a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" /></a><br>Copyright © Carlos Polop 2021. Except where otherwise specified (the external information copied into the book belongs to the original authors), the text on <a href="https://github.com/carlospolop/hacktricks">HACK TRICKS</a> by Carlos Polop is licensed under the <a href="https://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a>.
+<a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" /></a><br>Bản quyền © Carlos Polop 2021. Trừ khi có quy định khác (thông tin bên ngoài được sao chép vào sách thuộc về các tác giả ban đầu), nội dung trên <a href="https://github.com/carlospolop/hacktricks">HACK TRICKS</a> của Carlos Polop được cấp phép theo <a href="https://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Ghi công-Phi thương mại 4.0 Quốc tế (CC BY-NC 4.0)</a>.
 
-License: Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)<br>
-Human Readable License: https://creativecommons.org/licenses/by-nc/4.0/<br>
-Complete Legal Terms: https://creativecommons.org/licenses/by-nc/4.0/legalcode<br>
-Formatting: https://github.com/jmatsushita/Creative-Commons-4.0-Markdown/blob/master/licenses/by-nc.markdown<br>
+Giấy phép: Ghi công-Phi thương mại 4.0 Quốc tế (CC BY-NC 4.0)<br>Giấy phép bản dễ đọc: https://creativecommons.org/licenses/by-nc/4.0/<br>Điều khoản pháp lý đầy đủ: https://creativecommons.org/licenses/by-nc/4.0/legalcode<br>Định dạng: https://github.com/jmatsushita/Creative-Commons-4.0-Markdown/blob/master/licenses/by-nc.markdown<br>
 
 # creative commons
 
-# Attribution-NonCommercial 4.0 International
+# Ghi công-Phi thương mại 4.0 Quốc tế
 
-Creative Commons Corporation (“Creative Commons”) is not a law firm and does not provide legal services or legal advice. Distribution of Creative Commons public licenses does not create a lawyer-client or other relationship. Creative Commons makes its licenses and related information available on an “as-is” basis. Creative Commons gives no warranties regarding its licenses, any material licensed under their terms and conditions, or any related information. Creative Commons disclaims all liability for damages resulting from their use to the fullest extent possible.
+Creative Commons Corporation (“Creative Commons”) không phải là công ty luật và không cung cấp dịch vụ hay tư vấn pháp lý. Việc phân phối giấy phép công khai của Creative Commons không tạo ra quan hệ luật sư-khách hàng hay bất kỳ quan hệ nào khác. Creative Commons cung cấp các giấy phép và thông tin liên quan theo nguyên trạng. Creative Commons không bảo đảm bất kỳ điều gì liên quan đến giấy phép, tài liệu được cấp phép theo các điều khoản và điều kiện của giấy phép, hoặc thông tin liên quan. Trong phạm vi tối đa pháp luật cho phép, Creative Commons từ chối mọi trách nhiệm đối với thiệt hại phát sinh từ việc sử dụng chúng.
 
-## Using Creative Commons Public Licenses
+## Sử dụng giấy phép công khai của Creative Commons
 
-Creative Commons public licenses provide a standard set of terms and conditions that creators and other rights holders may use to share original works of authorship and other material subject to copyright and certain other rights specified in the public license below. The following considerations are for informational purposes only, are not exhaustive, and do not form part of our licenses.
+Các giấy phép công khai của Creative Commons cung cấp một bộ điều khoản và điều kiện tiêu chuẩn mà người sáng tạo và các chủ thể quyền khác có thể sử dụng để chia sẻ tác phẩm gốc do mình sáng tạo và các tài liệu khác thuộc phạm vi quyền tác giả cùng một số quyền khác được quy định trong giấy phép công khai dưới đây. Những nội dung sau chỉ nhằm mục đích cung cấp thông tin, không đầy đủ và không thuộc phạm vi giấy phép của chúng tôi.
 
-- **Considerations for licensors:** Our public licenses are intended for use by those authorized to give the public permission to use material in ways otherwise restricted by copyright and certain other rights. Our licenses are irrevocable. Licensors should read and understand the terms and conditions of the license they choose before applying it. Licensors should also secure all rights necessary before applying our licenses so that the public can reuse the material as expected. Licensors should clearly mark any material not subject to the license. This includes other CC-licensed material, or material used under an exception or limitation to copyright. [More considerations for licensors](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensors).
+- **Lưu ý dành cho bên cấp phép:** Các giấy phép công khai của chúng tôi dành cho những người có thẩm quyền cho phép công chúng sử dụng tài liệu theo những cách vốn bị hạn chế bởi quyền tác giả và một số quyền khác. Giấy phép của chúng tôi không thể bị thu hồi. Bên cấp phép nên đọc và hiểu các điều khoản và điều kiện của giấy phép mình chọn trước khi áp dụng. Bên cấp phép cũng nên bảo đảm có đầy đủ mọi quyền cần thiết trước khi áp dụng giấy phép để công chúng có thể tái sử dụng tài liệu như dự kiến. Bên cấp phép nên đánh dấu rõ mọi tài liệu không thuộc phạm vi giấy phép. Điều này bao gồm tài liệu được cấp phép theo giấy phép CC khác, hoặc tài liệu được sử dụng theo ngoại lệ hay giới hạn đối với quyền tác giả. [Các lưu ý khác dành cho bên cấp phép](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensors).
 
-- **Considerations for the public:** By using one of our public licenses, a licensor grants the public permission to use the licensed material under specified terms and conditions. If the licensor’s permission is not necessary for any reason–for example, because of any applicable exception or limitation to copyright–then that use is not regulated by the license. Our licenses grant only permissions under copyright and certain other rights that a licensor has authority to grant. Use of the licensed material may still be restricted for other reasons, including because others have copyright or other rights in the material. A licensor may make special requests, such as asking that all changes be marked or described. Although not required by our licenses, you are encouraged to respect those requests where reasonable. [More considerations for the public](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensees).
+- **Lưu ý dành cho công chúng:** Khi sử dụng một trong các giấy phép công khai của chúng tôi, bên cấp phép cho phép công chúng sử dụng tài liệu được cấp phép theo các điều khoản và điều kiện đã nêu. Nếu vì bất kỳ lý do nào không cần sự cho phép của bên cấp phép—ví dụ: do áp dụng ngoại lệ hoặc giới hạn đối với quyền tác giả—thì việc sử dụng đó không chịu sự điều chỉnh của giấy phép. Giấy phép của chúng tôi chỉ cấp các quyền theo quyền tác giả và một số quyền khác mà bên cấp phép có thẩm quyền cấp. Việc sử dụng tài liệu được cấp phép vẫn có thể bị hạn chế vì các lý do khác, bao gồm cả việc người khác có quyền tác giả hoặc các quyền khác đối với tài liệu. Bên cấp phép có thể đưa ra yêu cầu đặc biệt, chẳng hạn như yêu cầu đánh dấu hoặc mô tả mọi thay đổi. Dù giấy phép của chúng tôi không bắt buộc, bạn được khuyến khích tôn trọng những yêu cầu đó khi hợp lý. [Các lưu ý khác dành cho công chúng](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensees).
 
-# Creative Commons Attribution-NonCommercial 4.0 International Public License
+# Giấy phép công khai Creative Commons Ghi công-Phi thương mại 4.0 Quốc tế
 
-By exercising the Licensed Rights (defined below), You accept and agree to be bound by the terms and conditions of this Creative Commons Attribution-NonCommercial 4.0 International Public License ("Public License"). To the extent this Public License may be interpreted as a contract, You are granted the Licensed Rights in consideration of Your acceptance of these terms and conditions, and the Licensor grants You such rights in consideration of benefits the Licensor receives from making the Licensed Material available under these terms and conditions.
+Bằng việc thực thi các Quyền được cấp phép (được định nghĩa dưới đây), Bạn chấp nhận và đồng ý chịu sự ràng buộc của các điều khoản và điều kiện trong Giấy phép công khai Creative Commons Ghi công-Phi thương mại 4.0 Quốc tế này (“Giấy phép công khai”). Trong phạm vi Giấy phép công khai này có thể được xem là một hợp đồng, Bạn được cấp các Quyền được cấp phép để đổi lấy việc chấp nhận các điều khoản và điều kiện này, và Bên cấp phép cấp cho Bạn các quyền đó để đổi lấy những lợi ích mà Bên cấp phép nhận được từ việc cung cấp Tài liệu được cấp phép theo các điều khoản và điều kiện này.
 
-## Section 1 – Definitions.
+## Mục 1 – Định nghĩa.
 
-a. **Adapted Material** means material subject to Copyright and Similar Rights that is derived from or based upon the Licensed Material and in which the Licensed Material is translated, altered, arranged, transformed, or otherwise modified in a manner requiring permission under the Copyright and Similar Rights held by the Licensor. For purposes of this Public License, where the Licensed Material is a musical work, performance, or sound recording, Adapted Material is always produced where the Licensed Material is synched in timed relation with a moving image.
+a. **Tài liệu phái sinh** là tài liệu thuộc phạm vi Quyền tác giả và các quyền tương tự, được tạo ra từ hoặc dựa trên Tài liệu được cấp phép, trong đó Tài liệu được cấp phép được dịch, chỉnh sửa, sắp xếp, chuyển đổi hoặc thay đổi theo cách khác cần có sự cho phép theo Quyền tác giả và các quyền tương tự do Bên cấp phép nắm giữ. Theo Giấy phép công khai này, nếu Tài liệu được cấp phép là tác phẩm âm nhạc, buổi biểu diễn hoặc bản ghi âm thì luôn được xem là tạo ra Tài liệu phái sinh khi Tài liệu được cấp phép được đồng bộ theo thời gian với hình ảnh chuyển động.
 
-b. **Adapter's License** means the license You apply to Your Copyright and Similar Rights in Your contributions to Adapted Material in accordance with the terms and conditions of this Public License.
+b. **Giấy phép của bên chuyển thể** là giấy phép Bạn áp dụng cho Quyền tác giả và các quyền tương tự đối với những đóng góp của Bạn vào Tài liệu phái sinh, theo các điều khoản và điều kiện của Giấy phép công khai này.
 
-c. **Copyright and Similar Rights** means copyright and/or similar rights closely related to copyright including, without limitation, performance, broadcast, sound recording, and Sui Generis Database Rights, without regard to how the rights are labeled or categorized. For purposes of this Public License, the rights specified in Section 2(b)(1)-(2) are not Copyright and Similar Rights.
+c. **Quyền tác giả và các quyền tương tự** là quyền tác giả và/hoặc các quyền tương tự có liên quan chặt chẽ với quyền tác giả, bao gồm nhưng không giới hạn ở quyền biểu diễn, phát sóng, bản ghi âm và Quyền cơ sở dữ liệu sui generis, bất kể cách gọi hay phân loại các quyền đó. Theo Giấy phép công khai này, các quyền quy định tại Mục 2(b)(1)-(2) không phải là Quyền tác giả và các quyền tương tự.
 
-d. **Effective Technological Measures** means those measures that, in the absence of proper authority, may not be circumvented under laws fulfilling obligations under Article 11 of the WIPO Copyright Treaty adopted on December 20, 1996, and/or similar international agreements.
+d. **Biện pháp công nghệ hữu hiệu** là các biện pháp mà nếu không có thẩm quyền phù hợp thì không được phép vượt qua theo các luật thực hiện nghĩa vụ quy định tại Điều 11 của Hiệp ước của WIPO về Quyền tác giả được thông qua ngày 20 tháng 12 năm 1996 và/hoặc các thỏa thuận quốc tế tương tự.
 
-e. **Exceptions and Limitations** means fair use, fair dealing, and/or any other exception or limitation to Copyright and Similar Rights that applies to Your use of the Licensed Material.
+e. **Ngoại lệ và giới hạn** là việc sử dụng hợp lý, giao dịch hợp lý và/hoặc bất kỳ ngoại lệ hay giới hạn nào khác đối với Quyền tác giả và các quyền tương tự áp dụng cho việc Bạn sử dụng Tài liệu được cấp phép.
 
-f. **Licensed Material** means the artistic or literary work, database, or other material to which the Licensor applied this Public License.
+f. **Tài liệu được cấp phép** là tác phẩm nghệ thuật hoặc văn học, cơ sở dữ liệu hoặc tài liệu khác mà Bên cấp phép áp dụng Giấy phép công khai này.
 
-g. **Licensed Rights** means the rights granted to You subject to the terms and conditions of this Public License, which are limited to all Copyright and Similar Rights that apply to Your use of the Licensed Material and that the Licensor has authority to license.
+g. **Quyền được cấp phép** là các quyền được cấp cho Bạn theo các điều khoản và điều kiện của Giấy phép công khai này, chỉ bao gồm toàn bộ Quyền tác giả và các quyền tương tự áp dụng cho việc Bạn sử dụng Tài liệu được cấp phép và thuộc thẩm quyền cấp phép của Bên cấp phép.
 
-h. **Licensor** means the individual(s) or entity(ies) granting rights under this Public License.
+h. **Bên cấp phép** là cá nhân hoặc tổ chức cấp quyền theo Giấy phép công khai này.
 
-i. **NonCommercial** means not primarily intended for or directed towards commercial advantage or monetary compensation. For purposes of this Public License, the exchange of the Licensed Material for other material subject to Copyright and Similar Rights by digital file-sharing or similar means is NonCommercial provided there is no payment of monetary compensation in connection with the exchange.
+i. **Phi thương mại** nghĩa là không chủ yếu nhằm mục đích hoặc hướng đến lợi thế thương mại hay khoản bồi thường bằng tiền. Theo Giấy phép công khai này, việc trao đổi Tài liệu được cấp phép lấy tài liệu khác thuộc phạm vi Quyền tác giả và các quyền tương tự thông qua chia sẻ tệp kỹ thuật số hoặc phương thức tương tự được xem là Phi thương mại, miễn là việc trao đổi không liên quan đến khoản thanh toán bằng tiền.
 
-j. **Share** means to provide material to the public by any means or process that requires permission under the Licensed Rights, such as reproduction, public display, public performance, distribution, dissemination, communication, or importation, and to make material available to the public including in ways that members of the public may access the material from a place and at a time individually chosen by them.
+j. **Chia sẻ** là cung cấp tài liệu cho công chúng bằng bất kỳ phương tiện hay quy trình nào cần có sự cho phép theo các Quyền được cấp phép, chẳng hạn như sao chép, trưng bày công khai, biểu diễn công khai, phân phối, phổ biến, truyền đạt hoặc nhập khẩu; đồng thời cung cấp tài liệu cho công chúng, kể cả theo cách cho phép các thành viên công chúng truy cập tài liệu từ địa điểm và vào thời điểm do từng người lựa chọn.
 
-k. **Sui Generis Database Rights** means rights other than copyright resulting from Directive 96/9/EC of the European Parliament and of the Council of 11 March 1996 on the legal protection of databases, as amended and/or succeeded, as well as other essentially equivalent rights anywhere in the world.
+k. **Quyền cơ sở dữ liệu sui generis** là các quyền không phải quyền tác giả phát sinh từ Chỉ thị 96/9/EC của Nghị viện Châu Âu và Hội đồng ngày 11 tháng 3 năm 1996 về bảo hộ pháp lý cơ sở dữ liệu, cùng các văn bản sửa đổi và/hoặc thay thế chỉ thị này, cũng như các quyền tương đương về cơ bản khác ở bất kỳ nơi nào trên thế giới.
 
-l. **You** means the individual or entity exercising the Licensed Rights under this Public License. Your has a corresponding meaning.
+l. **Bạn** là cá nhân hoặc tổ chức thực thi các Quyền được cấp phép theo Giấy phép công khai này. Từ “Của Bạn” có nghĩa tương ứng.
 
-## Section 2 – Scope.
+## Mục 2 – Phạm vi.
 
-a. **_License grant._**
+a. **_Cấp phép._**
 
-1.  Subject to the terms and conditions of this Public License, the Licensor hereby grants You a worldwide, royalty-free, non-sublicensable, non-exclusive, irrevocable license to exercise the Licensed Rights in the Licensed Material to:
+1.  Theo các điều khoản và điều kiện của Giấy phép công khai này, Bên cấp phép theo đây cấp cho Bạn giấy phép trên toàn thế giới, miễn phí bản quyền, không thể cấp phép lại, không độc quyền và không thể thu hồi để thực thi các Quyền được cấp phép đối với Tài liệu được cấp phép nhằm:
 
-A. reproduce and Share the Licensed Material, in whole or in part, for NonCommercial purposes only; and
+A. sao chép và Chia sẻ toàn bộ hoặc một phần Tài liệu được cấp phép, chỉ cho mục đích Phi thương mại; và
 
-B. produce, reproduce, and Share Adapted Material for NonCommercial purposes only.
+B. tạo ra, sao chép và Chia sẻ Tài liệu phái sinh, chỉ cho mục đích Phi thương mại.
 
-2.  **Exceptions and Limitations.** For the avoidance of doubt, where Exceptions and Limitations apply to Your use, this Public License does not apply, and You do not need to comply with its terms and conditions.
-3.  **Term.** The term of this Public License is specified in Section 6(a).
+2.  **Ngoại lệ và giới hạn.** Để tránh hiểu nhầm, khi Ngoại lệ và giới hạn áp dụng cho việc Bạn sử dụng tài liệu thì Giấy phép công khai này không áp dụng, và Bạn không cần tuân thủ các điều khoản và điều kiện của giấy phép.
+3.  **Thời hạn.** Thời hạn của Giấy phép công khai này được quy định tại Mục 6(a).
 
-4.  **Media and formats; technical modifications allowed.** The Licensor authorizes You to exercise the Licensed Rights in all media and formats whether now known or hereafter created, and to make technical modifications necessary to do so. The Licensor waives and/or agrees not to assert any right or authority to forbid You from making technical modifications necessary to exercise the Licensed Rights, including technical modifications necessary to circumvent Effective Technological Measures. For purposes of this Public License, simply making modifications authorized by this Section 2(a)(4) never produces Adapted Material.
-5.  **Downstream recipients.**
+4.  **Phương tiện và định dạng; cho phép sửa đổi kỹ thuật.** Bên cấp phép cho phép Bạn thực thi các Quyền được cấp phép trên mọi phương tiện và định dạng, dù đã biết hoặc sẽ được tạo ra sau này, đồng thời thực hiện những sửa đổi kỹ thuật cần thiết để làm việc đó. Bên cấp phép từ bỏ và/hoặc đồng ý không viện dẫn bất kỳ quyền hay thẩm quyền nào nhằm ngăn cấm Bạn thực hiện các sửa đổi kỹ thuật cần thiết để thực thi các Quyền được cấp phép, bao gồm cả những sửa đổi kỹ thuật cần thiết để vượt qua Biện pháp công nghệ hữu hiệu. Theo Giấy phép công khai này, việc chỉ thực hiện các sửa đổi được cho phép theo Mục 2(a)(4) không bao giờ tạo ra Tài liệu phái sinh.
+5.  **Người nhận tiếp theo.**
 
-A. **Offer from the Licensor – Licensed Material.** Every recipient of the Licensed Material automatically receives an offer from the Licensor to exercise the Licensed Rights under the terms and conditions of this Public License.
+A. **Đề nghị từ Bên cấp phép – Tài liệu được cấp phép.** Mọi người nhận Tài liệu được cấp phép tự động nhận được đề nghị từ Bên cấp phép để thực thi các Quyền được cấp phép theo các điều khoản và điều kiện của Giấy phép công khai này.
 
-B. **No downstream restrictions.** You may not offer or impose any additional or different terms or conditions on, or apply any Effective Technological Measures to, the Licensed Material if doing so restricts exercise of the Licensed Rights by any recipient of the Licensed Material.
+B. **Không áp đặt hạn chế với người nhận tiếp theo.** Bạn không được đưa ra hoặc áp đặt bất kỳ điều khoản hay điều kiện bổ sung hoặc khác biệt nào, cũng không được áp dụng bất kỳ Biện pháp công nghệ hữu hiệu nào lên Tài liệu được cấp phép nếu việc đó hạn chế bất kỳ người nhận Tài liệu được cấp phép nào thực thi các Quyền được cấp phép.
 
-6.  **No endorsement.** Nothing in this Public License constitutes or may be construed as permission to assert or imply that You are, or that Your use of the Licensed Material is, connected with, or sponsored, endorsed, or granted official status by, the Licensor or others designated to receive attribution as provided in Section 3(a)(1)(A)(i).
+6.  **Không xác nhận.** Không nội dung nào trong Giấy phép công khai này cấu thành hoặc có thể được hiểu là sự cho phép để khẳng định hoặc ngụ ý rằng Bạn, hoặc việc Bạn sử dụng Tài liệu được cấp phép, có liên quan đến, được tài trợ, xác nhận hoặc trao tư cách chính thức bởi Bên cấp phép hay những người khác được chỉ định nhận ghi công theo quy định tại Mục 3(a)(1)(A)(i).
 
-b. **_Other rights._**
+b. **_Các quyền khác._**
 
-1.  Moral rights, such as the right of integrity, are not licensed under this Public License, nor are publicity, privacy, and/or other similar personality rights; however, to the extent possible, the Licensor waives and/or agrees not to assert any such rights held by the Licensor to the limited extent necessary to allow You to exercise the Licensed Rights, but not otherwise.
+1.  Các quyền nhân thân, chẳng hạn như quyền bảo vệ tính toàn vẹn của tác phẩm, không được cấp phép theo Giấy phép công khai này; quyền công khai, quyền riêng tư và/hoặc các quyền nhân thân tương tự khác cũng vậy. Tuy nhiên, trong phạm vi có thể, Bên cấp phép từ bỏ và/hoặc đồng ý không viện dẫn bất kỳ quyền nào như vậy mà Bên cấp phép nắm giữ, trong phạm vi giới hạn cần thiết để cho phép Bạn thực thi các Quyền được cấp phép, nhưng không vượt quá phạm vi đó.
 
-2.  Patent and trademark rights are not licensed under this Public License.
+2.  Quyền sáng chế và quyền nhãn hiệu không được cấp phép theo Giấy phép công khai này.
 
-3.  To the extent possible, the Licensor waives any right to collect royalties from You for the exercise of the Licensed Rights, whether directly or through a collecting society under any voluntary or waivable statutory or compulsory licensing scheme. In all other cases the Licensor expressly reserves any right to collect such royalties, including when the Licensed Material is used other than for NonCommercial purposes.
+3.  Trong phạm vi có thể, Bên cấp phép từ bỏ mọi quyền thu tiền bản quyền từ Bạn khi Bạn thực thi các Quyền được cấp phép, dù trực tiếp hay thông qua tổ chức thu hộ theo bất kỳ cơ chế cấp phép tự nguyện, có thể từ bỏ theo luật định hoặc bắt buộc nào. Trong mọi trường hợp khác, Bên cấp phép bảo lưu rõ ràng mọi quyền thu tiền bản quyền đó, kể cả khi Tài liệu được cấp phép được sử dụng không vì mục đích Phi thương mại.
 
-## Section 3 – License Conditions.
+## Mục 3 – Điều kiện cấp phép.
 
-Your exercise of the Licensed Rights is expressly made subject to the following conditions.
+Việc Bạn thực thi các Quyền được cấp phép phải tuân theo các điều kiện sau.
 
-a. **_Attribution._**
+a. **_Ghi công._**
 
-1.  If You Share the Licensed Material (including in modified form), You must:
+1.  Nếu Bạn Chia sẻ Tài liệu được cấp phép (kể cả ở dạng đã chỉnh sửa), Bạn phải:
 
-A. retain the following if it is supplied by the Licensor with the Licensed Material:
+A. giữ lại những nội dung sau nếu Bên cấp phép cung cấp kèm Tài liệu được cấp phép:
 
-i. identification of the creator(s) of the Licensed Material and any others designated to receive attribution, in any reasonable manner requested by the Licensor (including by pseudonym if designated);
+i. thông tin nhận diện (các) tác giả của Tài liệu được cấp phép và bất kỳ người nào khác được chỉ định nhận ghi công, theo bất kỳ cách thức hợp lý nào mà Bên cấp phép yêu cầu (bao gồm cả bút danh nếu được chỉ định);
 
-ii. a copyright notice;
+ii. thông báo bản quyền;
 
-iii. a notice that refers to this Public License;
+iii. thông báo dẫn chiếu đến Giấy phép công khai này;
 
-iv. a notice that refers to the disclaimer of warranties;
+iv. thông báo dẫn chiếu đến nội dung miễn trừ bảo đảm;
 
-v. a URI or hyperlink to the Licensed Material to the extent reasonably practicable;
+v. URI hoặc siêu liên kết đến Tài liệu được cấp phép trong phạm vi hợp lý có thể thực hiện;
 
-B. indicate if You modified the Licensed Material and retain an indication of any previous modifications; and
+B. nêu rõ nếu Bạn đã chỉnh sửa Tài liệu được cấp phép và giữ lại thông tin về mọi chỉnh sửa trước đó; và
 
-C. indicate the Licensed Material is licensed under this Public License, and include the text of, or the URI or hyperlink to, this Public License.
+C. nêu rõ Tài liệu được cấp phép được cấp phép theo Giấy phép công khai này, đồng thời đính kèm toàn văn hoặc URI hay siêu liên kết đến Giấy phép công khai này.
 
-2.  You may satisfy the conditions in Section 3(a)(1) in any reasonable manner based on the medium, means, and context in which You Share the Licensed Material. For example, it may be reasonable to satisfy the conditions by providing a URI or hyperlink to a resource that includes the required information.
+2.  Bạn có thể đáp ứng các điều kiện tại Mục 3(a)(1) theo bất kỳ cách thức hợp lý nào tùy theo phương tiện, cách thức và bối cảnh Bạn Chia sẻ Tài liệu được cấp phép. Ví dụ: có thể đáp ứng các điều kiện này một cách hợp lý bằng cách cung cấp URI hoặc siêu liên kết đến tài nguyên có chứa thông tin bắt buộc.
 
-3.  If requested by the Licensor, You must remove any of the information required by Section 3(a)(1)(A) to the extent reasonably practicable.
+3.  Nếu Bên cấp phép yêu cầu, Bạn phải xóa mọi thông tin bắt buộc theo Mục 3(a)(1)(A) trong phạm vi hợp lý có thể thực hiện.
 
-4.  If You Share Adapted Material You produce, the Adapter's License You apply must not prevent recipients of the Adapted Material from complying with this Public License.
+4.  Nếu Bạn Chia sẻ Tài liệu phái sinh do mình tạo ra, Giấy phép của bên chuyển thể mà Bạn áp dụng không được ngăn người nhận Tài liệu phái sinh tuân thủ Giấy phép công khai này.
 
-## Section 4 – Sui Generis Database Rights.
+## Mục 4 – Quyền cơ sở dữ liệu sui generis.
 
-Where the Licensed Rights include Sui Generis Database Rights that apply to Your use of the Licensed Material:
+Nếu các Quyền được cấp phép bao gồm Quyền cơ sở dữ liệu sui generis áp dụng cho việc Bạn sử dụng Tài liệu được cấp phép:
 
-a. for the avoidance of doubt, Section 2(a)(1) grants You the right to extract, reuse, reproduce, and Share all or a substantial portion of the contents of the database for NonCommercial purposes only;
+a. để tránh hiểu nhầm, Mục 2(a)(1) cấp cho Bạn quyền trích xuất, tái sử dụng, sao chép và Chia sẻ toàn bộ hoặc một phần đáng kể nội dung cơ sở dữ liệu, chỉ cho mục đích Phi thương mại;
 
-b. if You include all or a substantial portion of the database contents in a database in which You have Sui Generis Database Rights, then the database in which You have Sui Generis Database Rights (but not its individual contents) is Adapted Material; and
+b. nếu Bạn đưa toàn bộ hoặc một phần đáng kể nội dung cơ sở dữ liệu vào một cơ sở dữ liệu mà Bạn có Quyền cơ sở dữ liệu sui generis, thì cơ sở dữ liệu mà Bạn có Quyền cơ sở dữ liệu sui generis (nhưng không bao gồm từng nội dung riêng lẻ của cơ sở dữ liệu đó) là Tài liệu phái sinh; và
 
-c. You must comply with the conditions in Section 3(a) if You Share all or a substantial portion of the contents of the database.
+c. Bạn phải tuân thủ các điều kiện tại Mục 3(a) nếu Chia sẻ toàn bộ hoặc một phần đáng kể nội dung cơ sở dữ liệu.
 
-For the avoidance of doubt, this Section 4 supplements and does not replace Your obligations under this Public License where the Licensed Rights include other Copyright and Similar Rights.
+Để tránh hiểu nhầm, Mục 4 này bổ sung chứ không thay thế các nghĩa vụ của Bạn theo Giấy phép công khai này khi các Quyền được cấp phép bao gồm các Quyền tác giả và quyền tương tự khác.
 
-## Section 5 – Disclaimer of Warranties and Limitation of Liability.
+## Mục 5 – Miễn trừ bảo đảm và giới hạn trách nhiệm.
 
-a. **Unless otherwise separately undertaken by the Licensor, to the extent possible, the Licensor offers the Licensed Material as-is and as-available, and makes no representations or warranties of any kind concerning the Licensed Material, whether express, implied, statutory, or other. This includes, without limitation, warranties of title, merchantability, fitness for a particular purpose, non-infringement, absence of latent or other defects, accuracy, or the presence or absence of errors, whether or not known or discoverable. Where disclaimers of warranties are not allowed in full or in part, this disclaimer may not apply to You.**
+a. **Trừ khi Bên cấp phép có cam kết riêng khác, trong phạm vi có thể, Bên cấp phép cung cấp Tài liệu được cấp phép theo nguyên trạng và tùy khả năng cung cấp, đồng thời không đưa ra bất kỳ tuyên bố hay bảo đảm nào dưới bất kỳ hình thức nào về Tài liệu được cấp phép, dù rõ ràng, ngụ ý, theo luật định hay hình thức khác. Điều này bao gồm nhưng không giới hạn ở các bảo đảm về quyền sở hữu, khả năng tiêu thụ, tính phù hợp với mục đích cụ thể, không vi phạm, không có khiếm khuyết tiềm ẩn hoặc khiếm khuyết khác, độ chính xác, hoặc việc có hay không có lỗi, bất kể lỗi đó đã được biết đến hay có thể được phát hiện hay chưa. Khi pháp luật không cho phép miễn trừ toàn bộ hoặc một phần các bảo đảm, nội dung miễn trừ này có thể không áp dụng cho Bạn.**
 
-b. **To the extent possible, in no event will the Licensor be liable to You on any legal theory (including, without limitation, negligence) or otherwise for any direct, special, indirect, incidental, consequential, punitive, exemplary, or other losses, costs, expenses, or damages arising out of this Public License or use of the Licensed Material, even if the Licensor has been advised of the possibility of such losses, costs, expenses, or damages. Where a limitation of liability is not allowed in full or in part, this limitation may not apply to You.**
+b. **Trong phạm vi có thể, Bên cấp phép sẽ không chịu trách nhiệm với Bạn theo bất kỳ căn cứ pháp lý nào (bao gồm nhưng không giới hạn ở sơ suất) hoặc căn cứ nào khác đối với bất kỳ tổn thất, chi phí, khoản phí hay thiệt hại nào, dù trực tiếp, đặc biệt, gián tiếp, ngẫu nhiên, do hậu quả, mang tính trừng phạt, mang tính răn đe hay thuộc loại khác, phát sinh từ Giấy phép công khai này hoặc việc sử dụng Tài liệu được cấp phép, ngay cả khi Bên cấp phép đã được thông báo về khả năng xảy ra những tổn thất, chi phí, khoản phí hay thiệt hại đó. Khi pháp luật không cho phép giới hạn toàn bộ hoặc một phần trách nhiệm, giới hạn này có thể không áp dụng cho Bạn.**
 
-c. The disclaimer of warranties and limitation of liability provided above shall be interpreted in a manner that, to the extent possible, most closely approximates an absolute disclaimer and waiver of all liability.
+c. Nội dung miễn trừ bảo đảm và giới hạn trách nhiệm nêu trên phải được diễn giải theo cách gần nhất có thể với việc miễn trừ và từ bỏ hoàn toàn mọi trách nhiệm.
 
-## Section 6 – Term and Termination.
+## Mục 6 – Thời hạn và chấm dứt.
 
-a. This Public License applies for the term of the Copyright and Similar Rights licensed here. However, if You fail to comply with this Public License, then Your rights under this Public License terminate automatically.
+a. Giấy phép công khai này có hiệu lực trong suốt thời hạn của Quyền tác giả và các quyền tương tự được cấp phép tại đây. Tuy nhiên, nếu Bạn không tuân thủ Giấy phép công khai này, các quyền của Bạn theo Giấy phép công khai này sẽ tự động chấm dứt.
 
-b. Where Your right to use the Licensed Material has terminated under Section 6(a), it reinstates:
+b. Khi quyền sử dụng Tài liệu được cấp phép của Bạn chấm dứt theo Mục 6(a), quyền đó sẽ được khôi phục:
 
-1.  automatically as of the date the violation is cured, provided it is cured within 30 days of Your discovery of the violation; or
+1.  tự động kể từ ngày vi phạm được khắc phục, với điều kiện Bạn khắc phục vi phạm trong vòng 30 ngày kể từ ngày phát hiện vi phạm; hoặc
 
-2.  upon express reinstatement by the Licensor.
+2.  khi Bên cấp phép khôi phục quyền một cách rõ ràng.
 
-For the avoidance of doubt, this Section 6(b) does not affect any right the Licensor may have to seek remedies for Your violations of this Public License.
+Để tránh hiểu nhầm, Mục 6(b) này không ảnh hưởng đến bất kỳ quyền nào mà Bên cấp phép có thể có để yêu cầu biện pháp khắc phục đối với hành vi vi phạm Giấy phép công khai này của Bạn.
 
-c. For the avoidance of doubt, the Licensor may also offer the Licensed Material under separate terms or conditions or stop distributing the Licensed Material at any time; however, doing so will not terminate this Public License.
+c. Để tránh hiểu nhầm, Bên cấp phép cũng có thể cung cấp Tài liệu được cấp phép theo các điều khoản hoặc điều kiện riêng, hoặc ngừng phân phối Tài liệu được cấp phép bất cứ lúc nào; tuy nhiên, việc đó không làm chấm dứt Giấy phép công khai này.
 
-d. Sections 1, 5, 6, 7, and 8 survive termination of this Public License.
+d. Các Mục 1, 5, 6, 7 và 8 vẫn có hiệu lực sau khi Giấy phép công khai này chấm dứt.
 
-## Section 7 – Other Terms and Conditions.
+## Mục 7 – Các điều khoản và điều kiện khác.
 
-a. The Licensor shall not be bound by any additional or different terms or conditions communicated by You unless expressly agreed.
+a. Bên cấp phép không bị ràng buộc bởi bất kỳ điều khoản hay điều kiện bổ sung hoặc khác biệt nào do Bạn thông báo, trừ khi Bên cấp phép đồng ý rõ ràng.
 
-b. Any arrangements, understandings, or agreements regarding the Licensed Material not stated herein are separate from and independent of the terms and conditions of this Public License.
+b. Mọi thỏa thuận, sự hiểu biết hoặc thỏa thuận khác liên quan đến Tài liệu được cấp phép nhưng không được nêu tại đây đều tách biệt và độc lập với các điều khoản và điều kiện của Giấy phép công khai này.
 
-## Section 8 – Interpretation.
+## Mục 8 – Diễn giải.
 
-a. For the avoidance of doubt, this Public License does not, and shall not be interpreted to, reduce, limit, restrict, or impose conditions on any use of the Licensed Material that could lawfully be made without permission under this Public License.
+a. Để tránh hiểu nhầm, Giấy phép công khai này không làm giảm, giới hạn, hạn chế hoặc đặt ra điều kiện đối với bất kỳ việc sử dụng Tài liệu được cấp phép nào có thể được thực hiện hợp pháp mà không cần sự cho phép theo Giấy phép công khai này, và không được diễn giải theo hướng đó.
 
-b. To the extent possible, if any provision of this Public License is deemed unenforceable, it shall be automatically reformed to the minimum extent necessary to make it enforceable. If the provision cannot be reformed, it shall be severed from this Public License without affecting the enforceability of the remaining terms and conditions.
+b. Trong phạm vi có thể, nếu bất kỳ điều khoản nào của Giấy phép công khai này bị xem là không thể thi hành, điều khoản đó sẽ tự động được điều chỉnh ở mức tối thiểu cần thiết để có thể thi hành. Nếu không thể điều chỉnh, điều khoản đó sẽ bị tách khỏi Giấy phép công khai này mà không ảnh hưởng đến khả năng thi hành của các điều khoản và điều kiện còn lại.
 
-c. No term or condition of this Public License will be waived and no failure to comply consented to unless expressly agreed to by the Licensor.
+c. Không điều khoản hay điều kiện nào của Giấy phép công khai này được miễn trừ, và không hành vi không tuân thủ nào được chấp thuận, trừ khi Bên cấp phép đồng ý rõ ràng.
 
-d. Nothing in this Public License constitutes or may be interpreted as a limitation upon, or waiver of, any privileges and immunities that apply to the Licensor or You, including from the legal processes of any jurisdiction or authority.
+d. Không nội dung nào trong Giấy phép công khai này cấu thành hoặc có thể được diễn giải là sự hạn chế hay từ bỏ bất kỳ đặc quyền và quyền miễn trừ nào áp dụng cho Bên cấp phép hoặc Bạn, bao gồm cả các đặc quyền và quyền miễn trừ trước thủ tục pháp lý của bất kỳ khu vực tài phán hay cơ quan có thẩm quyền nào.
 
 ```
 Creative Commons is not a party to its public licenses. Notwithstanding, Creative Commons may elect to apply one of its public licenses to material it publishes and in those instances will be considered the “Licensor.” Except for the limited purpose of indicating that material is shared under a Creative Commons public license or as otherwise permitted by the Creative Commons policies published at [creativecommons.org/policies](http://creativecommons.org/policies), Creative Commons does not authorize the use of the trademark “Creative Commons” or any other trademark or logo of Creative Commons without its prior written consent including, without limitation, in connection with any unauthorized modifications to any of its public licenses or any other arrangements, understandings, or agreements concerning use of licensed material. For the avoidance of doubt, this paragraph does not form part of the public licenses.

@@ -1,31 +1,31 @@
-# Burp MCP: LLM-assisted traffic review
+# Burp MCP: Rà soát lưu lượng với sự hỗ trợ của LLM
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Overview
+## Tổng quan
 
-Burp's **MCP Server** extension can expose intercepted HTTP(S) traffic to MCP-capable LLM clients so they can **reason over real requests/responses** for vulnerability discovery and report drafting. Keep Burp as the source of truth: use passive analysis or deliberate one-variable replays rather than blind scanning.<sup>[[8]](#references)</sup>
+Extension **MCP Server** của Burp có thể cung cấp lưu lượng HTTP(S) đã chặn cho các LLM client hỗ trợ MCP, giúp chúng **phân tích các request/response thực tế** để tìm lỗ hổng và soạn thảo báo cáo. Hãy xem Burp là nguồn dữ liệu chuẩn: dùng phân tích thụ động hoặc chủ động replay với một biến mỗi lần, thay vì quét mù.<sup>[[8]](#references)</sup>
 
-## Architecture
+## Kiến trúc
 
-- **Burp MCP Server (BApp)** listens on `127.0.0.1:9876` by default and exposes intercepted traffic via MCP.<sup>[[1]](#references)[[2]](#references)[[7]](#references)</sup>
-- **MCP proxy JAR** bridges stdio (client side) to Burp's MCP SSE endpoint.
-- **Optional local reverse proxy** (Caddy) normalizes headers for strict MCP handshake checks.
-- **Clients/backends**: Codex CLI (cloud), Gemini CLI (cloud), or Ollama (local).
+- **Burp MCP Server (BApp)** mặc định lắng nghe trên `127.0.0.1:9876` và cung cấp lưu lượng đã chặn qua MCP.<sup>[[1]](#references)[[2]](#references)[[7]](#references)</sup>
+- **MCP proxy JAR** làm cầu nối giữa stdio (phía client) và endpoint MCP SSE của Burp.
+- **Reverse proxy cục bộ tùy chọn** (Caddy) chuẩn hóa header để đáp ứng các bước kiểm tra handshake MCP nghiêm ngặt.
+- **Client/backend**: Codex CLI (cloud), Gemini CLI (cloud) hoặc Ollama (local).
 
-## Setup
+## Thiết lập
 
-### 1) Install Burp MCP Server
+### 1) Cài đặt Burp MCP Server
 
-Install **MCP Server** from the Burp BApp Store and verify it is listening on `127.0.0.1:9876`.<sup>[[1]](#references)[[2]](#references)</sup>
+Cài đặt **MCP Server** từ Burp BApp Store và xác minh rằng nó đang lắng nghe trên `127.0.0.1:9876`.<sup>[[1]](#references)[[2]](#references)</sup>
 
-### 2) Extract the proxy JAR
+### 2) Trích xuất proxy JAR
 
-In the MCP Server tab, click **Extract server proxy jar** and save `mcp-proxy-all.jar`.<sup>[[7]](#references)</sup>
+Trong tab MCP Server, nhấp **Extract server proxy jar** và lưu `mcp-proxy-all.jar`.<sup>[[7]](#references)</sup>
 
-### 3) Configure an MCP client (Codex example)
+### 3) Cấu hình MCP client (ví dụ với Codex)
 
-Point the client to the proxy JAR and Burp's direct SSE endpoint. The packaged proxy is a stdio-to-SSE bridge; it does not replace the Burp listener.<sup>[[7]](#references)</sup>
+Trỏ client đến proxy JAR và endpoint SSE trực tiếp của Burp. Proxy đi kèm làm cầu nối stdio-to-SSE; nó không thay thế listener của Burp.<sup>[[7]](#references)</sup>
 
 ```toml
 # ~/.codex/config.toml
@@ -34,23 +34,23 @@ command = "java"
 args = ["-jar", "/absolute/path/to/mcp-proxy-all.jar", "--sse-url", "http://127.0.0.1:9876"]
 ```
 
-The equivalent Codex command is:<sup>[[7]](#references)[[8]](#references)</sup>
+Lệnh Codex tương đương là:<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```bash
 codex mcp add burp -- /path/to/java -jar /path/to/mcp-proxy-all.jar \
   --sse-url http://127.0.0.1:9876
 ```
 
-Then run Codex and list MCP tools:
+Sau đó chạy Codex và liệt kê các công cụ MCP:
 
 ```bash
 codex
 # inside Codex: /mcp
 ```
 
-### 4) Fix strict Origin/header validation with Caddy (if needed)
+### 4) Khắc phục kiểm tra Origin/header nghiêm ngặt bằng Caddy (nếu cần)
 
-If the MCP handshake fails due to strict `Origin` checks or extra headers, use a local reverse proxy to normalize headers (this matches the workaround for the Burp MCP strict validation issue).<sup>[[1]](#references)[[3]](#references)</sup>
+Nếu quá trình bắt tay MCP thất bại do kiểm tra `Origin` nghiêm ngặt hoặc có header bổ sung, hãy dùng reverse proxy cục bộ để chuẩn hóa header (đây là cách khắc phục vấn đề kiểm tra nghiêm ngặt của Burp MCP).<sup>[[1]](#references)[[3]](#references)</sup>
 
 ```bash
 brew install caddy
@@ -72,16 +72,16 @@ reverse_proxy 127.0.0.1:9876 {
 EOF
 ```
 
-Start the proxy and the client, and change the configured `--sse-url` to `http://127.0.0.1:19876` only while using this Caddy listener:<sup>[[1]](#references)[[3]](#references)</sup>
+Khởi động proxy và client, và chỉ đổi giá trị `--sse-url` đã cấu hình thành `http://127.0.0.1:19876` khi sử dụng Caddy listener này:<sup>[[1]](#references)[[3]](#references)</sup>
 
 ```bash
 caddy run --config ~/burp-mcp/Caddyfile &
 codex
 ```
 
-### 5) Pair browser state with proxy evidence (Playwright MCP)
+### 5) Ghép trạng thái trình duyệt với bằng chứng từ proxy (Playwright MCP)
 
-Register Playwright MCP so its browser uses Burp's proxy. This lets the agent correlate rendered DOM/accessibility state with the exact HTTP history that produced it.<sup>[[6]](#references)[[8]](#references)</sup>
+Đăng ký Playwright MCP để trình duyệt sử dụng proxy của Burp. Nhờ đó, agent có thể đối chiếu trạng thái DOM/trợ năng đã render với lịch sử HTTP chính xác đã tạo ra trạng thái đó.<sup>[[6]](#references)[[8]](#references)</sup>
 
 ```bash
 codex mcp add playwright -- npx -y @playwright/mcp@latest \
@@ -89,13 +89,13 @@ codex mcp add playwright -- npx -y @playwright/mcp@latest \
   --ignore-https-errors
 ```
 
-Adapt the listener address, restart Codex, and use `/mcp` to verify both integrations. The example disables browser certificate errors so HTTPS interception is not blocked by Burp's locally generated certificate.<sup>[[6]](#references)[[8]](#references)</sup>
+Điều chỉnh địa chỉ listener, khởi động lại Codex và dùng `/mcp` để xác minh cả hai integration. Ví dụ này tắt lỗi chứng chỉ của trình duyệt để Burp không chặn việc intercept HTTPS bằng chứng chỉ do Burp tạo cục bộ.<sup>[[6]](#references)[[8]](#references)</sup>
 
-## Proxy-aware browser automation (OpenBurp)
+## Tự động hóa trình duyệt nhận biết proxy (OpenBurp)
 
-The Burp MCP connection and the intercepted browser path are separate data flows. The MCP service exposes Burp tools on `127.0.0.1:9876`, whereas a dedicated Chromium instance sends its HTTP(S) traffic through Burp's proxy on `127.0.0.1:8080`. Requests generated directly by an MCP tool may therefore be absent from **Proxy > HTTP history**; use the proxied browser whenever the request/response must be observable, editable, or retained as evidence.<sup>[[2]](#references)[[9]](#references)</sup>
+Kết nối Burp MCP và luồng trình duyệt bị intercept là hai luồng dữ liệu riêng biệt. Dịch vụ MCP cung cấp các công cụ Burp trên `127.0.0.1:9876`, trong khi một phiên bản Chromium riêng gửi lưu lượng HTTP(S) qua proxy của Burp tại `127.0.0.1:8080`. Vì vậy, các request được tạo trực tiếp bằng công cụ MCP có thể không xuất hiện trong **Proxy > HTTP history**; hãy dùng trình duyệt qua proxy khi cần quan sát, chỉnh sửa hoặc lưu request/response làm bằng chứng.<sup>[[2]](#references)[[9]](#references)</sup>
 
-A client with SSE support can register Burp directly. A stdio-only client can launch PortSwigger's proxy JAR instead. In both cases, register a second browser-control MCP and point it at Burp's embedded Chromium (`BURP_CHROMIUM` is a local executable path):<sup>[[9]](#references)</sup>
+Client hỗ trợ SSE có thể đăng ký Burp trực tiếp. Client chỉ hỗ trợ stdio có thể khởi chạy proxy JAR của PortSwigger. Trong cả hai trường hợp, hãy đăng ký thêm một MCP điều khiển trình duyệt và trỏ nó đến Chromium được tích hợp trong Burp (`BURP_CHROMIUM` là đường dẫn đến tệp thực thi cục bộ):<sup>[[9]](#references)</sup>
 
 ```bash
 # Claude Code: direct SSE plus a proxied browser
@@ -112,61 +112,61 @@ codex mcp add burp-browser -- npx -y @playwright/mcp@latest \
   --ignore-https-errors --isolated
 ```
 
-The TLS-bypass flag tolerates certificates generated by the interception proxy, while `--isolated` prevents the assessment from reusing the operator's normal browser profile. Isolation protects profile state but is **not a security sandbox**: the controller can still access authenticated sessions opened in that test browser, and the Burp MCP can expose sensitive requests, responses, and configuration.<sup>[[9]](#references)</sup>
+Cờ TLS-bypass chấp nhận các chứng chỉ do interception proxy tạo ra, còn `--isolated` ngăn quá trình đánh giá sử dụng lại browser profile thông thường của operator. Tính năng cô lập bảo vệ trạng thái profile nhưng **không phải là sandbox bảo mật**: controller vẫn có thể truy cập các phiên đã xác thực được mở trong trình duyệt thử nghiệm đó, và Burp MCP có thể làm lộ các request, response và cấu hình nhạy cảm.<sup>[[9]](#references)</sup>
 
-Test the SSE listener independently before debugging the client bridge:<sup>[[9]](#references)</sup>
+Hãy kiểm tra độc lập SSE listener trước khi debug client bridge:<sup>[[9]](#references)</sup>
 
 ```bash
 curl -i --max-time 3 http://127.0.0.1:9876/
 ```
 
-A healthy listener returns `Content-Type: text/event-stream`. A timeout after the headers is expected because an SSE stream remains open for future events. If the client still fails, confirm the extension's configured route: PortSwigger notes that the endpoint may be the root path or `/sse`, depending on the client and extension configuration.<sup>[[9]](#references)[[7]](#references)</sup>
+Một listener hoạt động bình thường sẽ trả về `Content-Type: text/event-stream`. Việc hết thời gian chờ sau khi nhận header là bình thường vì luồng SSE vẫn mở để chờ các event tiếp theo. Nếu client vẫn gặp lỗi, hãy xác nhận route đã cấu hình cho extension: PortSwigger lưu ý endpoint có thể là đường dẫn gốc hoặc `/sse`, tùy thuộc vào cấu hình client và extension.<sup>[[9]](#references)[[7]](#references)</sup>
 
-## Using different clients
+## Sử dụng các client khác nhau
 
 ### Codex CLI
 
-- Configure `~/.codex/config.toml` as above.
-- Run `codex`, then `/mcp` to verify the Burp tools list.
+- Cấu hình `~/.codex/config.toml` như trên.
+- Chạy `codex`, sau đó chạy `/mcp` để xác minh danh sách công cụ Burp.
 
 ### Gemini CLI
 
-The **burp-mcp-agents** repo provides launcher helpers:<sup>[[4]](#references)</sup>
+Repo **burp-mcp-agents** cung cấp các helper khởi chạy:<sup>[[4]](#references)</sup>
 
 ```bash
 source /path/to/burp-mcp-agents/gemini-cli/burpgemini.sh
 burpgemini
 ```
 
-### Ollama (local)
+### Ollama (cục bộ)
 
-Use the provided launcher helper and select a local model:
+Sử dụng trình trợ giúp khởi chạy được cung cấp và chọn một mô hình cục bộ:
 
 ```bash
 source /path/to/burp-mcp-agents/ollama/burpollama.sh
 burpollama deepseek-r1:14b
 ```
 
-Example local models and approximate VRAM needs:
+Ví dụ về model cục bộ và nhu cầu VRAM ước tính:
 
 - `deepseek-r1:14b` (~16GB VRAM)
 - `gpt-oss:20b` (~20GB VRAM)
 - `llama3.1:70b` (48GB+ VRAM)
 
-## Evidence-driven replay and validation
+## Replay và xác thực dựa trên bằng chứng
 
-Do not let the agent treat a plausible explanation or an intermediate response as proof. Use Burp requests/responses and independently observed browser state to make every test falsifiable.<sup>[[8]](#references)</sup>
+Không để agent xem một lời giải thích có vẻ hợp lý hoặc phản hồi trung gian là bằng chứng. Dùng request/response của Burp và trạng thái trình duyệt được quan sát độc lập để mọi phép thử đều có thể bác bỏ.<sup>[[8]](#references)</sup>
 
-1. Save a baseline request/response pair and identify the exact attacker-controlled component.
-2. For authorization comparisons, capture the same workflow independently under both accounts before mutating identifiers, cookies, or tokens.
-3. Before replaying a mutation, record the hypothesis, evidence location, expected signal, and the result that would disprove it.
-4. Mutate one component at a time, preserve the resulting pair, and label direct observations separately from inference.
-5. Track each candidate as `open`, `blocked`, `rejected`, or `confirmed`; revisit it only when new evidence changes the mechanism or a prerequisite.
-6. Confirm attacker control, reachability, repeatability, constraint bypass, impact, and the final application state. A redirect or successful tool call is not proof if the claimed state change is downstream.
+1. Lưu một cặp request/response baseline và xác định chính xác thành phần do attacker kiểm soát.
+2. Khi so sánh authorization, ghi lại độc lập cùng một workflow bằng cả hai tài khoản trước khi thay đổi identifier, cookie hoặc token.
+3. Trước khi replay một thay đổi, ghi lại giả thuyết, vị trí bằng chứng, tín hiệu mong đợi và kết quả có thể bác bỏ giả thuyết đó.
+4. Mỗi lần chỉ thay đổi một thành phần, lưu lại cặp kết quả và phân biệt rõ quan sát trực tiếp với suy luận.
+5. Theo dõi từng ứng viên bằng trạng thái `open`, `blocked`, `rejected` hoặc `confirmed`; chỉ xem xét lại khi có bằng chứng mới làm thay đổi cơ chế hoặc điều kiện tiên quyết.
+6. Xác nhận attacker kiểm soát được, khả năng tiếp cận, tính lặp lại, việc bypass ràng buộc, tác động và trạng thái cuối cùng của ứng dụng. Redirect hoặc tool call thành công không phải là bằng chứng nếu trạng thái được tuyên bố là thay đổi ở bước tiếp theo.
 
-Keep the exploitation details in the relevant technique page. For example, browser-message candidates belong in [PostMessage Vulnerabilities](../pentesting-web/postmessage-vulnerabilities/README.md), while token key-selection behavior belongs in [JWT Vulnerabilities](../pentesting-web/hacking-jwt-json-web-tokens.md).<sup>[[8]](#references)</sup>
+Giữ chi tiết khai thác trong trang kỹ thuật phù hợp. Ví dụ, các ứng viên liên quan đến browser-message thuộc về [PostMessage Vulnerabilities](../pentesting-web/postmessage-vulnerabilities/README.md), còn hành vi lựa chọn key của token thuộc về [JWT Vulnerabilities](../pentesting-web/hacking-jwt-json-web-tokens.md).<sup>[[8]](#references)</sup>
 
-A compact hypothesis record keeps parallel agents from repeating the same attractive branch:<sup>[[8]](#references)</sup>
+Một bản ghi giả thuyết ngắn gọn giúp các agent chạy song song không lặp lại cùng một nhánh hấp dẫn:<sup>[[8]](#references)</sup>
 
 ```yaml
 status: open
@@ -177,58 +177,58 @@ expected_signal: "user B's object is returned"
 falsifier: "server rejects it or returns only user A's object"
 ```
 
-## Targeted out-of-band validation with Burp MCP
+## Xác thực out-of-band có mục tiêu bằng Burp MCP
 
-Burp Suite Professional exposes `generate_collaborator_payload` and `get_collaborator_interactions` through the official MCP extension. Combine them with `get_proxy_http_history_regex` and a single `send_http1_request` replay to test a suspected server-side URL fetch without scanning the whole target. Burp may require separate approval to read history and send a request.<sup>[[2]](#references)[[10]](#references)</sup>
+Burp Suite Professional cung cấp `generate_collaborator_payload` và `get_collaborator_interactions` thông qua extension MCP chính thức. Kết hợp chúng với `get_proxy_http_history_regex` và một lần replay bằng `send_http1_request` để kiểm tra nghi vấn server fetch URL mà không cần scan toàn bộ mục tiêu. Burp có thể yêu cầu phê duyệt riêng để đọc history và gửi request.<sup>[[2]](#references)[[10]](#references)</sup>
 
-1. Filter history for a candidate URL-bearing request, such as one containing `url=`, `webhook`, or `callback`. Save the original request and response. The history tool takes `regex`, `count`, and `offset`; paginate rather than asking the model to inspect every entry.<sup>[[10]](#references)</sup>
-2. Generate a fresh Collaborator payload and retain its returned **payload ID**. Replay the captured request to the same host and port, changing only the candidate URL to an HTTPS URL under that payload domain. For `send_http1_request`, pass the complete HTTP/1.1 request as `content` plus `targetHostname`, `targetPort`, and `usesHttps`; the destination fields identify the **application**, not the Collaborator host.<sup>[[10]](#references)</sup>
-3. Poll `get_collaborator_interactions` with that payload ID and correlate the interaction time with the replay. An HTTP interaction supports a fetch, while DNS alone shows resolution but not a completed HTTP request. Check the interaction source and request headers to distinguish server egress from browser-side loading, then repeat with a fresh payload to rule out unrelated traffic.<sup>[[10]](#references)[[11]](#references)</sup>
+1. Lọc history để tìm request có URL tiềm năng, chẳng hạn request chứa `url=`, `webhook` hoặc `callback`. Lưu request và response gốc. Công cụ history nhận các tham số `regex`, `count` và `offset`; hãy phân trang thay vì yêu cầu model kiểm tra mọi mục.<sup>[[10]](#references)</sup>
+2. Tạo một Collaborator payload mới và lưu **payload ID** được trả về. Replay request đã ghi lại đến cùng host và port, chỉ thay URL tiềm năng bằng URL HTTPS thuộc domain của payload đó. Với `send_http1_request`, truyền toàn bộ request HTTP/1.1 dưới dạng `content`, cùng với `targetHostname`, `targetPort` và `usesHttps`; các trường đích xác định **ứng dụng**, không phải host Collaborator.<sup>[[10]](#references)</sup>
+3. Dùng payload ID đó để thăm dò `get_collaborator_interactions` và đối chiếu thời điểm tương tác với lần replay. Tương tác HTTP là dấu hiệu hỗ trợ giả thuyết có fetch, còn chỉ có DNS thì cho thấy đã phân giải tên miền nhưng không chứng minh có request HTTP hoàn tất. Kiểm tra nguồn tương tác và request headers để phân biệt egress từ server với việc tải từ phía browser, sau đó lặp lại với payload mới để loại trừ traffic không liên quan.<sup>[[10]](#references)[[11]](#references)</sup>
 
-The MCP request tool returns the response directly and need not populate **Proxy > HTTP history**. Preserve its request/response result or use the proxied browser or Repeater for a history-backed artifact. For SSRF payload selection and follow-on tests, use the [SSRF chapter](../pentesting-web/ssrf-server-side-request-forgery/) rather than treating an out-of-band callback as proof of internal-network impact. For testing the MCP server itself, see [MCP server testing](AI-MCP-Servers.md#remote-mcp-server-testing-workflow).<sup>[[7]](#references)[[11]](#references)</sup>
+Công cụ request MCP trả response trực tiếp và không nhất thiết ghi vào **Proxy > HTTP history**. Hãy lưu kết quả request/response hoặc dùng browser qua proxy hay Repeater để có artifact được lưu trong history. Để chọn SSRF payload và thực hiện các kiểm thử tiếp theo, hãy dùng [chương SSRF](../pentesting-web/ssrf-server-side-request-forgery/) thay vì xem callback out-of-band là bằng chứng về tác động lên mạng nội bộ. Để kiểm thử chính MCP server, xem [kiểm thử MCP server](AI-MCP-Servers.md#remote-mcp-server-testing-workflow).<sup>[[7]](#references)[[11]](#references)</sup>
 
-## Prompt pack for passive review
+## Bộ prompt để rà soát thụ động
 
-The **burp-mcp-agents** repo includes prompt templates for evidence-driven analysis of Burp traffic:<sup>[[4]](#references)</sup>
+Repo **burp-mcp-agents** bao gồm các mẫu prompt để phân tích traffic Burp dựa trên bằng chứng:<sup>[[4]](#references)</sup>
 
-- `passive_hunter.md`: broad passive vulnerability surfacing.
-- `idor_hunter.md`: IDOR/BOLA/object/tenant drift and auth mismatches.
-- `auth_flow_mapper.md`: compare authenticated vs unauthenticated paths.
-- `ssrf_redirect_hunter.md`: SSRF/open-redirect candidates from URL fetch params/redirect chains.
-- `logic_flaw_hunter.md`: multi-step logic flaws.
-- `session_scope_hunter.md`: token audience/scope misuse.
-- `rate_limit_abuse_hunter.md`: throttling/abuse gaps.
-- `report_writer.md`: evidence-focused reporting.
+- `passive_hunter.md`: phát hiện lỗ hổng thụ động trên diện rộng.
+- `idor_hunter.md`: tìm IDOR/BOLA, sai lệch object/tenant và không khớp auth.
+- `auth_flow_mapper.md`: so sánh các đường dẫn đã xác thực và chưa xác thực.
+- `ssrf_redirect_hunter.md`: tìm ứng viên SSRF/open-redirect từ tham số fetch URL/chuỗi redirect.
+- `logic_flaw_hunter.md`: tìm lỗi logic qua nhiều bước.
+- `session_scope_hunter.md`: tìm việc sử dụng sai audience/scope của token.
+- `rate_limit_abuse_hunter.md`: tìm lỗ hổng về throttling/abuse.
+- `report_writer.md`: viết báo cáo tập trung vào bằng chứng.
 
-## Optional attribution tagging
+## Gắn thẻ attribution tùy chọn
 
-To tag Burp/LLM traffic in logs, add a header rewrite (proxy or Burp Match/Replace):<sup>[[1]](#references)</sup>
+Để gắn thẻ traffic Burp/LLM trong log, hãy thêm quy tắc viết lại header (proxy hoặc Burp Match/Replace):<sup>[[1]](#references)</sup>
 
 ```text
 Match:   ^User-Agent: (.*)$
 Replace: User-Agent: $1 BugBounty-Username
 ```
 
-## Safety notes
+## Lưu ý về an toàn
 
-- Prefer **local models** when traffic contains sensitive data.
-- Only share the minimum evidence needed for a finding.
-- Keep Burp as the source of truth; use the model for **analysis and reporting**, not scanning.
+- Ưu tiên **local models** khi traffic chứa dữ liệu nhạy cảm.
+- Chỉ chia sẻ lượng bằng chứng tối thiểu cần thiết cho một phát hiện.
+- Coi Burp là nguồn thông tin chuẩn; dùng model để **phân tích và báo cáo**, không dùng để scan.
 
-## Burp AI Agent (AI-assisted triage + MCP tools)
+## Burp AI Agent (triage có hỗ trợ AI + công cụ MCP)
 
-**Burp AI Agent** is a Burp extension that couples local/cloud LLMs with passive/active analysis (62 vulnerability classes) and exposes 53+ MCP tools so external MCP clients can orchestrate Burp.<sup>[[5]](#references)</sup> Highlights:
+**Burp AI Agent** là một extension của Burp, kết hợp LLM local/cloud với phân tích thụ động/chủ động (62 lớp lỗ hổng) và cung cấp hơn 53 công cụ MCP để các MCP client bên ngoài điều phối Burp.<sup>[[5]](#references)</sup> Các tính năng nổi bật:
 
-- **Context-menu triage**: capture traffic via Proxy, open **Proxy > HTTP History**, right-click a request → **Extensions > Burp AI Agent > Analyze this request** to spawn an AI chat bound to that request/response.
-- **Backends** (selectable per profile):
+- **Triage từ menu ngữ cảnh**: capture traffic qua Proxy, mở **Proxy > HTTP History**, nhấp chuột phải vào một request → **Extensions > Burp AI Agent > Analyze this request** để mở một cuộc trò chuyện AI gắn với request/response đó.
+- **Backend** (có thể chọn theo từng profile):
   - Local HTTP: **Ollama**, **LM Studio**.
-  - Remote HTTP: **OpenAI-compatible** endpoint (base URL + model name).
-  - Cloud CLIs: **Gemini CLI** (`gemini auth login`), **Claude CLI** (`export ANTHROPIC_API_KEY=...` or `claude login`), **Codex CLI** (`export OPENAI_API_KEY=...`), **OpenCode CLI** (provider-specific login).
-- **Agent profiles**: prompt templates auto-installed under `~/.burp-ai-agent/AGENTS/`; drop extra `*.md` files there to add custom analysis/scanning behaviors.
-- **MCP server**: enable via **Settings > MCP Server** to expose Burp operations to any MCP client (53+ tools). Claude Desktop can be pointed at the server by editing `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows).
-- **Privacy controls**: STRICT / BALANCED / OFF redact sensitive request data before sending it to remote models; prefer local backends when handling secrets.
-- **Audit logging**: JSONL logs with per-entry SHA-256 integrity hashing for tamper-evident traceability of AI/MCP actions.
-- **Build/load**: download the release JAR or build with Java 21:
+  - Remote HTTP: endpoint tương thích **OpenAI** (base URL + tên model).
+  - Cloud CLI: **Gemini CLI** (`gemini auth login`), **Claude CLI** (`export ANTHROPIC_API_KEY=...` hoặc `claude login`), **Codex CLI** (`export OPENAI_API_KEY=...`), **OpenCode CLI** (đăng nhập tùy theo provider).
+- **Agent profile**: các template prompt được tự động cài đặt trong `~/.burp-ai-agent/AGENTS/`; thêm các file `*.md` vào đó để bổ sung hành vi phân tích/scan tùy chỉnh.
+- **MCP server**: bật tại **Settings > MCP Server** để cung cấp các thao tác Burp cho mọi MCP client (hơn 53 công cụ). Có thể trỏ Claude Desktop tới server bằng cách chỉnh sửa `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) hoặc `%APPDATA%\Claude\claude_desktop_config.json` (Windows).
+- **Kiểm soát quyền riêng tư**: STRICT / BALANCED / OFF sẽ ẩn dữ liệu nhạy cảm trong request trước khi gửi tới remote model; ưu tiên backend local khi xử lý secrets.
+- **Audit logging**: log JSONL với cơ chế băm toàn vẹn SHA-256 cho từng mục, giúp truy vết các thao tác AI/MCP và phát hiện việc chỉnh sửa.
+- **Build/load**: tải JAR bản phát hành hoặc build bằng Java 21:
 
 ```bash
 git clone https://github.com/six2dez/burp-ai-agent.git
@@ -237,21 +237,21 @@ JAVA_HOME=/path/to/jdk-21 ./gradlew clean shadowJar
 # load build/libs/Burp-AI-Agent-<version>.jar via Burp Extensions > Add (Java)
 ```
 
-Operational cautions: cloud backends may exfiltrate session cookies/PII unless privacy mode is enforced; MCP exposure grants remote orchestration of Burp so restrict access to trusted agents and monitor the integrity-hashed audit log.
+Thận trọng trong vận hành: backend cloud có thể exfiltrate session cookies/PII nếu không bật chế độ bảo mật; việc để lộ MCP cho phép điều phối Burp từ xa, vì vậy hãy giới hạn quyền truy cập cho các agent đáng tin cậy và giám sát nhật ký kiểm tra có hash bảo đảm tính toàn vẹn.
 
 
 
 ## References
 
-- [1] [Burp MCP + Codex CLI integration and Caddy handshake fix](https://pentestbook.six2dez.com/others/burp)
+- [1] [Tích hợp Burp MCP + Codex CLI và bản sửa lỗi bắt tay Caddy](https://pentestbook.six2dez.com/others/burp)
 - [2] [Burp MCP Server BApp](https://portswigger.net/bappstore/9952290f04ed4f628e624d0aa9dccebc)
-- [3] [PortSwigger MCP server strict Origin/header validation issue](https://github.com/PortSwigger/mcp-server/issues/34)
-- [4] [Burp MCP Agents (workflows, launchers, prompt pack)](https://github.com/six2dez/burp-mcp-agents)
+- [3] [Vấn đề xác thực Origin/header nghiêm ngặt của PortSwigger MCP server](https://github.com/PortSwigger/mcp-server/issues/34)
+- [4] [Burp MCP Agents (quy trình, trình khởi chạy, bộ prompt)](https://github.com/six2dez/burp-mcp-agents)
 - [5] [Burp AI Agent](https://github.com/six2dez/burp-ai-agent)
 - [6] [Microsoft Playwright MCP](https://github.com/microsoft/playwright-mcp)
 - [7] [PortSwigger Burp Suite MCP Server](https://github.com/PortSwigger/mcp-server)
-- [8] [How to use Codex for Bug Bounty research: explore broadly, validate rigorously](https://www.yeswehack.com/learn-bug-bounty/llm-series-codex)
-- [9] [OpenBurp: Burp Suite orchestration for Claude Code and Codex](https://github.com/luispacheco22/OpenBurp)
-- [10] [PortSwigger MCP Server tool implementations and parameters](https://github.com/PortSwigger/mcp-server/blob/main/src/main/kotlin/net/portswigger/mcp/tools/Tools.kt)
-- [11] [PortSwigger Web Security Academy - Blind SSRF vulnerabilities](https://portswigger.net/web-security/ssrf/blind)
+- [8] [Cách dùng Codex để nghiên cứu Bug Bounty: khám phá rộng, xác thực nghiêm ngặt](https://www.yeswehack.com/learn-bug-bounty/llm-series-codex)
+- [9] [OpenBurp: điều phối Burp Suite cho Claude Code và Codex](https://github.com/luispacheco22/OpenBurp)
+- [10] [Triển khai công cụ và tham số của PortSwigger MCP Server](https://github.com/PortSwigger/mcp-server/blob/main/src/main/kotlin/net/portswigger/mcp/tools/Tools.kt)
+- [11] [PortSwigger Web Security Academy - Lỗ hổng Blind SSRF](https://portswigger.net/web-security/ssrf/blind)
 {{#include ../banners/hacktricks-training.md}}

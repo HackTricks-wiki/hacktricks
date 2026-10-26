@@ -1,114 +1,114 @@
-# AI Risks
+# Rủi ro AI
 
 {{#include ../banners/hacktricks-training.md}}
 
-## OWASP Top 10 Machine Learning Vulnerabilities
+## OWASP Top 10 Lỗ hổng Machine Learning
 
-Owasp has identified the top 10 machine learning vulnerabilities that can affect AI systems. These vulnerabilities can lead to various security issues, including data poisoning, model inversion, and adversarial attacks. Understanding these vulnerabilities is crucial for building secure AI systems.
+OWASP đã xác định 10 lỗ hổng machine learning hàng đầu có thể ảnh hưởng đến các hệ thống AI. Những lỗ hổng này có thể dẫn đến nhiều vấn đề bảo mật, bao gồm đầu độc dữ liệu, đảo ngược mô hình và tấn công đối kháng. Hiểu rõ các lỗ hổng này là điều thiết yếu để xây dựng các hệ thống AI an toàn.
 
-For an updated and detailed list of the top 10 machine learning vulnerabilities, refer to the [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/) project.<sup>[[1]](#references)</sup>
+Để xem danh sách 10 lỗ hổng machine learning hàng đầu đã cập nhật và chi tiết, hãy tham khảo dự án [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/).<sup>[[1]](#references)</sup>
 
-- **Input Manipulation Attack**: An attacker adds tiny, often invisible changes to **incoming data** so the model makes the wrong decision.\
-    *Example*: A few specks of paint on a stop‑sign fool a self‑driving car into "seeing" a speed‑limit sign.
+- **Input Manipulation Attack**: Kẻ tấn công thêm những thay đổi rất nhỏ, thường không nhìn thấy được, vào **dữ liệu đầu vào** khiến mô hình đưa ra quyết định sai.\
+    *Ví dụ*: Vài đốm sơn trên biển báo dừng đánh lừa xe tự lái, khiến xe "nhìn thấy" biển giới hạn tốc độ.
 
-- **Data Poisoning Attack**: The **training set** is deliberately polluted with bad samples, teaching the model harmful rules.\
-*Example*: Malware binaries are mislabeled as "benign" in an antivirus training corpus, letting similar malware slip past later.
+- **Data Poisoning Attack**: **Tập huấn luyện** bị cố ý làm nhiễm bẩn bằng các mẫu sai lệch, khiến mô hình học theo những quy tắc có hại.\
+*Ví dụ*: Các tệp nhị phân malware bị gắn nhãn nhầm là "lành tính" trong tập dữ liệu huấn luyện antivirus, khiến những malware tương tự dễ dàng qua mặt hệ thống sau này.
 
-- **Model Inversion Attack**: By probing outputs, an attacker builds a **reverse model** that reconstructs sensitive features of the original inputs.\
-*Example*: Re‑creating a patient's MRI image from a cancer‑detection model's predictions.
+- **Model Inversion Attack**: Bằng cách thăm dò đầu ra, kẻ tấn công tạo ra một **mô hình ngược** để tái dựng các đặc điểm nhạy cảm từ đầu vào ban đầu.\
+*Ví dụ*: Tái tạo ảnh MRI của bệnh nhân từ các dự đoán của mô hình phát hiện ung thư.
 
-- **Membership Inference Attack**: The adversary tests whether a **specific record** was used during training by spotting confidence differences.\
-*Example*: Confirming that a person's bank transaction appears in a fraud‑detection model's training data.
+- **Membership Inference Attack**: Kẻ tấn công kiểm tra xem một **bản ghi cụ thể** có được dùng trong quá trình huấn luyện hay không bằng cách nhận biết sự khác biệt về độ tin cậy.\
+*Ví dụ*: Xác nhận rằng giao dịch ngân hàng của một người xuất hiện trong dữ liệu huấn luyện của mô hình phát hiện gian lận.
 
-- **Model Theft**: Repeated querying lets an attacker learn decision boundaries and **clone the model's behavior** (and IP).\
-*Example*: Harvesting enough Q&A pairs from an ML‑as‑a‑Service API to build a near‑equivalent local model.
+- **Model Theft**: Truy vấn lặp đi lặp lại giúp kẻ tấn công tìm hiểu ranh giới quyết định và **sao chép hành vi của mô hình** (cùng IP).\
+*Ví dụ*: Thu thập đủ cặp hỏi đáp từ API ML-as-a-Service để xây dựng một mô hình cục bộ gần tương đương.
 
-- **AI Supply‑Chain Attack**: Compromise any component (data, libraries, pre‑trained weights, CI/CD) in the **ML pipeline** to corrupt downstream models.\
-*Example*: A poisoned dependency on a model‑hub installs a backdoored sentiment‑analysis model across many apps.
+- **AI Supply‑Chain Attack**: Xâm phạm bất kỳ thành phần nào (dữ liệu, thư viện, trọng số tiền huấn luyện, CI/CD) trong **ML pipeline** để làm hỏng các mô hình phía sau.\
+*Ví dụ*: Một dependency bị đầu độc trên model hub cài đặt mô hình phân tích cảm xúc có backdoor trên nhiều ứng dụng.
 
-- **Transfer Learning Attack**: Malicious logic is planted in a **pre‑trained model** and survives fine‑tuning on the victim's task.\
-*Example*: A vision backbone with a hidden trigger still flips labels after being adapted for medical imaging.
+- **Transfer Learning Attack**: Logic độc hại được cài vào **mô hình tiền huấn luyện** và vẫn tồn tại sau khi fine-tune cho tác vụ của nạn nhân.\
+*Ví dụ*: Một vision backbone có trigger ẩn vẫn làm đảo nhãn sau khi được điều chỉnh cho việc chụp ảnh y tế.
 
-- **Model Skewing**: Subtly biased or mislabeled data **shifts the model's outputs** to favor the attacker's agenda.\
-*Example*: Injecting "clean" spam emails labeled as ham so a spam filter lets similar future emails through.
+- **Model Skewing**: Dữ liệu bị thiên lệch hoặc gắn nhãn sai một cách tinh vi **làm lệch đầu ra của mô hình** theo hướng có lợi cho mục đích của kẻ tấn công.\
+*Ví dụ*: Chèn email spam "sạch" được gắn nhãn là thư thường, khiến bộ lọc spam cho phép các email tương tự trong tương lai đi qua.
 
-- **Output Integrity Attack**: The attacker **alters model predictions in transit**, not the model itself, tricking downstream systems.\
-*Example*: Flipping a malware classifier's "malicious" verdict to "benign" before the file‑quarantine stage sees it.
+- **Output Integrity Attack**: Kẻ tấn công **thay đổi dự đoán của mô hình khi dữ liệu đang được truyền**, chứ không thay đổi bản thân mô hình, để đánh lừa các hệ thống phía sau.\
+*Ví dụ*: Đổi kết quả "độc hại" của bộ phân loại malware thành "lành tính" trước khi tệp được chuyển đến giai đoạn cách ly.
 
-- **Model Poisoning** --- Direct, targeted changes to the **model parameters** themselves, often after gaining write access, to alter behavior.\
-*Example*: Tweaking weights on a fraud‑detection model in production so transactions from certain cards are always approved.
+- **Model Poisoning** --- Thay đổi trực tiếp, có chủ đích đối với **các tham số mô hình**, thường là sau khi giành được quyền ghi, nhằm thay đổi hành vi.\
+*Ví dụ*: Điều chỉnh trọng số của mô hình phát hiện gian lận trong môi trường production để các giao dịch từ một số thẻ nhất định luôn được chấp thuận.
 
 
-## Google SAIF Risks
+## Rủi ro Google SAIF
 
-Google's [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) outlines various risks associated with AI systems:<sup>[[2]](#references)</sup>
+[SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) của Google nêu ra nhiều rủi ro liên quan đến các hệ thống AI:<sup>[[2]](#references)</sup>
 
-- **Data Poisoning**: Malicious actors alter or inject training/tuning data to degrade accuracy, implant backdoors, or skew results, undermining model integrity across the entire data-lifecycle. 
+- **Data Poisoning**: Các tác nhân độc hại thay đổi hoặc chèn dữ liệu huấn luyện/tinh chỉnh để làm giảm độ chính xác, cài backdoor hoặc làm lệch kết quả, từ đó làm suy yếu tính toàn vẹn của mô hình trong toàn bộ vòng đời dữ liệu.
 
-- **Unauthorized Training Data**: Ingesting copyrighted, sensitive, or unpermitted datasets creates legal, ethical, and performance liabilities because the model learns from data it was never allowed to use. 
+- **Unauthorized Training Data**: Việc tiếp nhận các tập dữ liệu có bản quyền, nhạy cảm hoặc chưa được cho phép tạo ra rủi ro pháp lý, đạo đức và hiệu năng vì mô hình học từ dữ liệu mà nó không được phép sử dụng.
 
-- **Model Source Tampering**: Supply-chain or insider manipulation of model code, dependencies, or weights before or during training can embed hidden logic that persists even after retraining. 
+- **Model Source Tampering**: Việc thao túng mã mô hình, dependency hoặc trọng số trước hay trong quá trình huấn luyện bởi kẻ tấn công chuỗi cung ứng hoặc người nội bộ có thể cài logic ẩn vẫn tồn tại ngay cả sau khi huấn luyện lại.
 
-- **Excessive Data Handling**: Weak data-retention and governance controls lead systems to store or process more personal data than necessary, heightening exposure and compliance risk. 
+- **Excessive Data Handling**: Các biện pháp kiểm soát lưu giữ và quản trị dữ liệu yếu kém khiến hệ thống lưu trữ hoặc xử lý nhiều dữ liệu cá nhân hơn mức cần thiết, làm tăng nguy cơ lộ lọt và rủi ro tuân thủ.
 
-- **Model Exfiltration**: Attackers steal model files/weights, causing loss of intellectual property and enabling copy-cat services or follow-on attacks. 
+- **Model Exfiltration**: Kẻ tấn công đánh cắp tệp/trọng số mô hình, gây mất tài sản trí tuệ và cho phép tạo dịch vụ sao chép hoặc thực hiện các cuộc tấn công tiếp theo.
 
-- **Model Deployment Tampering**: Adversaries modify model artifacts or serving infrastructure so the running model differs from the vetted version, potentially changing behaviour. 
+- **Model Deployment Tampering**: Kẻ tấn công sửa đổi hiện vật mô hình hoặc hạ tầng phục vụ để mô hình đang chạy khác với phiên bản đã được kiểm duyệt, có thể làm thay đổi hành vi.
 
-- **Denial of ML Service**: Flooding APIs or sending “sponge” inputs can exhaust compute/energy and knock the model offline, mirroring classic DoS attacks. 
+- **Denial of ML Service**: Làm ngập API hoặc gửi đầu vào “sponge” có thể làm cạn kiệt tài nguyên tính toán/năng lượng và khiến mô hình ngừng hoạt động, tương tự các cuộc tấn công DoS kinh điển.
 
-- **Model Reverse Engineering**: By harvesting large numbers of input-output pairs, attackers can clone or distil the model, fueling imitation products and customized adversarial attacks. 
+- **Model Reverse Engineering**: Bằng cách thu thập số lượng lớn cặp đầu vào-đầu ra, kẻ tấn công có thể sao chép hoặc chưng cất mô hình, tạo điều kiện cho sản phẩm bắt chước và các cuộc tấn công đối kháng được tùy chỉnh.
 
-- **Insecure Integrated Component**: Vulnerable plugins, agents, or upstream services let attackers inject code or escalate privileges within the AI pipeline. 
+- **Insecure Integrated Component**: Các plugin, agent hoặc dịch vụ thượng nguồn có lỗ hổng cho phép kẻ tấn công chèn mã hoặc leo thang đặc quyền bên trong AI pipeline.
 
-- **Prompt Injection**: Crafting prompts (directly or indirectly) to smuggle instructions that override system intent, making the model perform unintended commands. 
+- **Prompt Injection**: Tạo prompt (trực tiếp hoặc gián tiếp) để lén đưa vào các chỉ dẫn ghi đè mục đích của hệ thống, khiến mô hình thực hiện các lệnh ngoài dự kiến.
 
-- **Model Evasion**: Carefully designed inputs trigger the model to mis-classify, hallucinate, or output disallowed content, eroding safety and trust. 
+- **Model Evasion**: Các đầu vào được thiết kế cẩn thận khiến mô hình phân loại sai, hallucinate hoặc tạo ra nội dung bị cấm, làm suy giảm độ an toàn và niềm tin.
 
-- **Sensitive Data Disclosure**: The model reveals private or confidential information from its training data or user context, violating privacy and regulations. 
+- **Sensitive Data Disclosure**: Mô hình tiết lộ thông tin riêng tư hoặc bí mật từ dữ liệu huấn luyện hay ngữ cảnh người dùng, vi phạm quyền riêng tư và quy định.
 
-- **Inferred Sensitive Data**: The model deduces personal attributes that were never provided, creating new privacy harms through inference. 
+- **Inferred Sensitive Data**: Mô hình suy luận ra các thuộc tính cá nhân chưa từng được cung cấp, tạo ra những tác hại mới về quyền riêng tư thông qua suy luận.
 
-- **Insecure Model Output**: Unsanitized responses pass harmful code, misinformation, or inappropriate content to users or downstream systems. 
+- **Insecure Model Output**: Các phản hồi chưa được làm sạch truyền mã độc hại, thông tin sai lệch hoặc nội dung không phù hợp đến người dùng hay các hệ thống phía sau.
 
-- **Rogue Actions**: Autonomously-integrated agents execute unintended real-world operations (file writes, API calls, purchases, etc.) without adequate user oversight.
+- **Rogue Actions**: Các agent được tích hợp khả năng tự hành thực hiện những thao tác ngoài dự kiến trong thế giới thực (ghi tệp, gọi API, mua hàng, v.v.) mà không có sự giám sát đầy đủ của người dùng.
 
-## Mitre AI ATLAS Matrix
+## Ma trận MITRE AI ATLAS
 
-The [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) provides a comprehensive framework for understanding and mitigating risks associated with AI systems. It categorizes various attack techniques and tactics that adversaries may use against AI models and also how to use AI systems to perform different attacks.<sup>[[3]](#references)</sup>
+[MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) cung cấp một khuôn khổ toàn diện để tìm hiểu và giảm thiểu các rủi ro liên quan đến hệ thống AI. Ma trận phân loại nhiều kỹ thuật và chiến thuật tấn công mà đối thủ có thể sử dụng nhắm vào các mô hình AI, cũng như cách sử dụng hệ thống AI để thực hiện nhiều cuộc tấn công khác nhau.<sup>[[3]](#references)</sup>
 
-## LLMJacking (Token Theft & Resale of Cloud-hosted LLM Access)
+## LLMJacking (Đánh cắp token và bán lại quyền truy cập LLM được lưu trữ trên cloud)
 
-Attackers steal active session tokens or cloud API credentials and invoke paid, cloud-hosted LLMs without authorization. Access is often resold via reverse proxies that front the victim’s account, e.g. "oai-reverse-proxy" deployments. Consequences include financial loss, model misuse outside policy, and attribution to the victim tenant.<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup><sup>[[7]](#references)</sup>
+Kẻ tấn công đánh cắp token phiên đang hoạt động hoặc thông tin xác thực API cloud để sử dụng trái phép các LLM trả phí được lưu trữ trên cloud. Quyền truy cập thường được bán lại thông qua các reverse proxy đứng ra làm trung gian cho tài khoản của nạn nhân, chẳng hạn như các bản triển khai "oai-reverse-proxy". Hậu quả bao gồm thiệt hại tài chính, sử dụng mô hình trái với chính sách và khiến tenant của nạn nhân bị quy trách nhiệm.<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup><sup>[[7]](#references)</sup>
 
 TTPs:
-- Harvest tokens from infected developer machines or browsers; steal CI/CD secrets; buy leaked cookies.<sup>[[5]](#references)</sup>
-- Stand up a reverse proxy that forwards requests to the genuine provider, hiding the upstream key and multiplexing many customers.<sup>[[5]](#references)</sup><sup>[[7]](#references)</sup>
-- Abuse direct base-model endpoints to bypass enterprise guardrails and rate limits.<sup>[[4]](#references)</sup>
+- Thu thập token từ máy tính hoặc trình duyệt của nhà phát triển đã bị nhiễm; đánh cắp secrets trong CI/CD; mua cookies bị leak.<sup>[[5]](#references)</sup>
+- Dựng reverse proxy chuyển tiếp yêu cầu đến nhà cung cấp chính thức, che giấu key upstream và phân phối yêu cầu cho nhiều khách hàng.<sup>[[5]](#references)</sup><sup>[[7]](#references)</sup>
+- Lạm dụng các endpoint base model trực tiếp để vượt qua guardrail và giới hạn tốc độ của doanh nghiệp.<sup>[[4]](#references)</sup>
 
-Mitigations:
-- Bind tokens to device fingerprint, IP ranges, and client attestation; enforce short expirations and refresh with MFA.
-- Scope keys minimally (no tool access, read-only where applicable); rotate on anomaly.
-- Terminate all traffic server-side behind a policy gateway that enforces safety filters, per-route quotas, and tenant isolation.
-- Monitor for unusual usage patterns (sudden spend spikes, atypical regions, UA strings) and auto-revoke suspicious sessions.
-- Prefer mTLS or signed JWTs issued by your IdP over long-lived static API keys.
+Biện pháp giảm thiểu:
+- Gắn token với fingerprint thiết bị, dải IP và client attestation; đặt thời hạn ngắn và yêu cầu MFA khi làm mới.
+- Giới hạn phạm vi key ở mức tối thiểu (không cấp quyền truy cập công cụ, chỉ đọc nếu phù hợp); xoay vòng khi phát hiện bất thường.
+- Chuyển toàn bộ lưu lượng qua gateway chính sách phía máy chủ để áp dụng bộ lọc an toàn, hạn mức theo từng route và cách ly tenant.
+- Theo dõi các kiểu sử dụng bất thường (chi phí tăng đột biến, khu vực lạ, chuỗi UA) và tự động thu hồi các phiên đáng ngờ.
+- Ưu tiên mTLS hoặc JWT có chữ ký do IdP của bạn cấp thay vì API key tĩnh có thời hạn dài.
 
-## Self-hosted LLM inference hardening
+## Tăng cường bảo mật cho inference LLM tự lưu trữ
 
-Running a local LLM server for confidential data creates a different attack surface from cloud-hosted APIs: inference/debug endpoints may leak prompts, the serving stack usually exposes a reverse proxy, and GPU device nodes give access to large `ioctl()` surfaces. If you are assessing or deploying an on-prem inference service, review at least the following points.<sup>[[8]](#references)</sup>
+Chạy máy chủ LLM cục bộ để xử lý dữ liệu bảo mật tạo ra bề mặt tấn công khác với API lưu trữ trên cloud: các endpoint inference/debug có thể làm lộ prompt, stack phục vụ thường cung cấp một reverse proxy, còn các device node GPU cho phép truy cập vào nhiều giao diện `ioctl()`. Nếu bạn đang đánh giá hoặc triển khai dịch vụ inference on-prem, hãy xem xét ít nhất các điểm sau.<sup>[[8]](#references)</sup>
 
-### Prompt leakage via debug and monitoring endpoints
+### Rò rỉ prompt qua endpoint debug và giám sát
 
-Treat the inference API as a **multi-user sensitive service**. Debug or monitoring routes can expose prompt contents, slot state, model metadata, or internal queue information. In `llama.cpp`, the `/slots` endpoint is especially sensitive because it exposes per-slot state and is only meant for slot inspection/management.<sup>[[8]](#references)</sup>
+Hãy xem API inference là một **dịch vụ nhạy cảm dành cho nhiều người dùng**. Các route debug hoặc giám sát có thể làm lộ nội dung prompt, trạng thái slot, metadata mô hình hoặc thông tin hàng đợi nội bộ. Trong `llama.cpp`, endpoint `/slots` đặc biệt nhạy cảm vì nó cung cấp trạng thái từng slot và chỉ dành cho việc kiểm tra/quản lý slot.<sup>[[8]](#references)</sup>
 
-For black-box fingerprinting and testing of exposed model runners and related AI services, check [Exposed Self-Hosted AI Services](AI-Exposed-Self-Hosted-AI-Services.md).
+Để fingerprint và kiểm thử theo kiểu black-box các model runner bị lộ và những dịch vụ AI liên quan, hãy xem [Exposed Self-Hosted AI Services](AI-Exposed-Self-Hosted-AI-Services.md).
 
-- Put a reverse proxy in front of the inference server and **deny by default**.
-- Only allowlist the exact HTTP method + path combinations that are needed by the client/UI.
-- Disable introspection endpoints in the backend itself whenever possible, for example `llama-server --no-slots`.<sup>[[9]](#references)</sup>
-- Bind the reverse proxy to `127.0.0.1` and expose it through an authenticated transport such as SSH local port forwarding instead of publishing it on the LAN.
+- Đặt reverse proxy phía trước máy chủ inference và **mặc định từ chối**.
+- Chỉ cho phép các tổ hợp phương thức HTTP + path chính xác mà client/UI cần.
+- Tắt các endpoint introspection ngay trong backend bất cứ khi nào có thể, ví dụ `llama-server --no-slots`.<sup>[[9]](#references)</sup>
+- Bind reverse proxy vào `127.0.0.1` và cung cấp quyền truy cập thông qua phương thức truyền tải có xác thực như SSH local port forwarding, thay vì công khai nó trên LAN.
 
-Example allowlist with nginx:
+Ví dụ allowlist với nginx:
 
 ```nginx
 map "$request_method:$uri" $llm_whitelist {
@@ -130,9 +130,9 @@ server {
 }
 ```
 
-### Rootless containers with no network and UNIX sockets
+### Rootless containers không có mạng và UNIX socket
 
-If the inference daemon supports listening on a UNIX socket, prefer that over TCP and run the container with **no network stack**:<sup>[[8]](#references)</sup>
+Nếu inference daemon hỗ trợ lắng nghe trên UNIX socket, hãy ưu tiên cách đó thay vì TCP và chạy container **không có network stack**:<sup>[[8]](#references)</sup>
 
 ```bash
 podman run --rm -d \
@@ -149,24 +149,24 @@ podman run --rm -d \
     --no-slots
 ```
 
-Benefits:
-- `--network none` removes inbound/outbound TCP/IP exposure and avoids user-mode helpers that rootless containers would otherwise need.
-- A UNIX socket lets you use POSIX permissions/ACLs on the socket path as the first access-control layer.
-- `--userns=keep-id` and rootless Podman reduce the impact of a container breakout because container root is not host root.
-- Read-only model mounts reduce the chance of model tampering from inside the container.
+Lợi ích:
+- `--network none` loại bỏ khả năng tiếp xúc TCP/IP inbound/outbound và tránh các user-mode helper mà container rootless nếu không sẽ cần.
+- UNIX socket cho phép sử dụng quyền POSIX/ACL trên đường dẫn socket làm lớp kiểm soát truy cập đầu tiên.
+- `--userns=keep-id` và Podman rootless giảm tác động của việc container breakout vì root trong container không phải root trên host.
+- Các model mount chỉ đọc giảm nguy cơ model bị sửa đổi từ bên trong container.
 
-For persistent deployments, the same restrictions can be expressed as Podman Quadlet units. If GPU access is delegated through the Container Device Interface, keep the CDI device specification as narrow as possible instead of exposing every accelerator node.<sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
+Đối với các triển khai chạy lâu dài, có thể biểu diễn cùng những hạn chế này bằng các đơn vị Podman Quadlet. Nếu quyền truy cập GPU được ủy quyền thông qua Container Device Interface, hãy giữ thông số thiết bị CDI càng giới hạn càng tốt, thay vì để lộ mọi nút accelerator.<sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
 
-### GPU device-node minimization
+### Giảm thiểu các nút thiết bị GPU
 
-For GPU-backed inference, `/dev/nvidia*` files are high-value local attack surfaces because they expose large driver `ioctl()` handlers and potentially shared GPU memory-management paths.<sup>[[8]](#references)</sup>
+Đối với inference dùng GPU, các tệp `/dev/nvidia*` là bề mặt tấn công cục bộ có giá trị cao vì chúng làm lộ các trình xử lý driver `ioctl()` lớn và có thể cả những đường dẫn quản lý bộ nhớ GPU dùng chung.<sup>[[8]](#references)</sup>
 
-- Do not leave `/dev/nvidia*` world writable.
-- Restrict `nvidia`, `nvidiactl`, and `nvidia-uvm` with `NVreg_DeviceFileUID/GID/Mode`, udev rules, and ACLs so only the mapped container UID can open them.
-- Blacklist unnecessary modules such as `nvidia_drm`, `nvidia_modeset`, and `nvidia_peermem` on headless inference hosts.
-- Preload only required modules at boot instead of letting the runtime opportunistically `modprobe` them during inference startup.
+- Không để `/dev/nvidia*` có quyền ghi cho mọi người dùng.
+- Hạn chế `nvidia`, `nvidiactl` và `nvidia-uvm` bằng `NVreg_DeviceFileUID/GID/Mode`, quy tắc udev và ACL để chỉ UID container được ánh xạ mới có thể mở chúng.
+- Vô hiệu hóa các module không cần thiết như `nvidia_drm`, `nvidia_modeset` và `nvidia_peermem` trên các host inference không dùng màn hình.
+- Nạp trước chỉ những module cần thiết khi khởi động thay vì để runtime tự ý chạy `modprobe` trong lúc khởi chạy inference.
 
-Example:
+Ví dụ:
 
 ```bash
 options nvidia NVreg_DeviceFileUID=0
@@ -174,18 +174,18 @@ options nvidia NVreg_DeviceFileGID=0
 options nvidia NVreg_DeviceFileMode=0660
 ```
 
-One important review point is **`/dev/nvidia-uvm`**. Even if the workload does not explicitly use `cudaMallocManaged()`, recent CUDA runtimes may still require `nvidia-uvm`. Because this device is shared and handles GPU virtual memory management, treat it as a cross-tenant data-exposure surface. If the inference backend supports it, a Vulkan backend can be an interesting trade-off because it may avoid exposing `nvidia-uvm` to the container at all.<sup>[[8]](#references)</sup>
+Một điểm quan trọng cần xem xét là **`/dev/nvidia-uvm`**. Ngay cả khi workload không sử dụng rõ ràng `cudaMallocManaged()`, các CUDA runtime gần đây vẫn có thể cần `nvidia-uvm`. Vì thiết bị này được chia sẻ và quản lý bộ nhớ ảo GPU, hãy xem nó là một bề mặt có nguy cơ lộ dữ liệu giữa các tenant. Nếu inference backend hỗ trợ, Vulkan backend có thể là một lựa chọn đáng cân nhắc vì có thể tránh hoàn toàn việc để lộ `nvidia-uvm` cho container.<sup>[[8]](#references)</sup>
 
-### LSM confinement for inference workers
+### Hạn chế inference worker bằng LSM
 
-AppArmor/SELinux/seccomp should be used as defense in depth around the inference process:<sup>[[8]](#references)</sup>
+Nên dùng AppArmor/SELinux/seccomp để tăng cường phòng thủ cho tiến trình inference:<sup>[[8]](#references)</sup>
 
-- Allow only the shared libraries, model paths, socket directory, and GPU device nodes that are actually required.
-- Explicitly deny high-risk capabilities such as `sys_admin`, `sys_module`, `sys_rawio`, and `sys_ptrace`.
-- Keep the model directory read-only and scope writable paths to the runtime socket/cache directories only.
-- Monitor denial logs because they provide useful detection telemetry when the model server or a post-exploitation payload tries to escape its expected behaviour.
+- Chỉ cho phép các shared library, đường dẫn model, thư mục socket và GPU device node thực sự cần thiết.
+- Chủ động từ chối các capability có rủi ro cao như `sys_admin`, `sys_module`, `sys_rawio` và `sys_ptrace`.
+- Để thư mục model ở chế độ chỉ đọc và chỉ giới hạn các đường dẫn có quyền ghi trong thư mục socket/cache của runtime.
+- Theo dõi log từ chối vì chúng cung cấp telemetry phát hiện hữu ích khi model server hoặc payload post-exploitation tìm cách thoát khỏi hành vi dự kiến.
 
-Example AppArmor rules for a GPU-backed worker:
+Ví dụ về các quy tắc AppArmor cho worker sử dụng GPU:
 
 ```text
 deny capability sys_admin,
@@ -200,63 +200,62 @@ deny capability sys_ptrace,
 owner /srv/llm/** rw,
 ```
 
-## Phantom Squatting: LLM-Hallucinated Domains as an AI Supply-Chain Vector
+## Phantom Squatting: Tên miền do LLM ảo giác như một vector tấn công chuỗi cung ứng AI
 
-Phantom squatting is the **domain/URL equivalent of slopsquatting**. Instead of hallucinating a non-existent package name, the LLM hallucinates a plausible **portal, API, webhook, billing, SSO, download or support domain** for a real brand, and an attacker registers that namespace before a human or agent uses it.<sup>[[12]](#references)</sup><sup>[[13]](#references)</sup>
+Phantom squatting là **phiên bản tương đương domain/URL của slopsquatting**. Thay vì ảo giác ra tên package không tồn tại, LLM ảo giác ra một **domain portal, API, webhook, billing, SSO, download hoặc support** có vẻ hợp lý cho một thương hiệu có thật, rồi kẻ tấn công đăng ký namespace đó trước khi con người hoặc agent sử dụng nó.<sup>[[12]](#references)</sup><sup>[[13]](#references)</sup>
 
-This matters because in many AI-assisted workflows the model output is treated as a **trusted dependency**:
-- Developers paste the suggested endpoint into code or CI/CD integrations.
-- AI agents fetch documentation, schemas, APKs, ZIPs or webhook targets automatically.
-- Generated runbooks or docs can embed the fake URL as if it were authoritative.
+Điều này quan trọng vì trong nhiều quy trình làm việc có AI hỗ trợ, đầu ra của model được xem như một **dependency đáng tin cậy**:
+- Developer dán endpoint được đề xuất vào code hoặc các tích hợp CI/CD.
+- AI agent tự động fetch tài liệu, schema, APK, ZIP hoặc webhook target.
+- Runbook hoặc tài liệu được tạo ra có thể nhúng URL giả như thể đó là nguồn có thẩm quyền.
 
-### Offensive workflow
+### Quy trình tấn công
 
-1. **Probe the hallucination surface**: ask brand-specific questions about realistic workflows such as `admin`, `billing`, `sandbox`, `benefits`, `api`, `download`, `support`, `webhook`, or `mobile app` portals.<sup>[[12]](#references)</sup>
-2. **Normalize candidates**: resolve generated URLs, collapse NXDOMAIN responses to the parent registerable domain, and deduplicate prompt families. Prompt corpora should stay diverse, for example by dropping near-duplicates with **Jaccard similarity**.
-3. **Prioritize predictable hallucinations**:
-   - **Thermal Hallucination Persistence (THP)**: the same fake domain appears across temperatures, including low temperature like `T=0.1`.
-   - **Cross-model consensus**: multiple LLM families generate the same fake domain.
-4. **Register and weaponize** the parent domain, then host phishing, fake APK/ZIP downloads, credential harvesters, malicious docs, or API endpoints that collect secrets/webhook payloads. **Pure domain-level hallucinations** are the easiest to monetize because the attacker controls the whole namespace; subdomain/path hallucinations can still be abused when the normalized parent is unregistered.
-5. **Exploit the zero-reputation window**: newly registered domains often lack blocklist history, URL reputation, and mature telemetry, so they can bypass controls until detections catch up. Attackers can stretch this window with crawler-only benign responses, redirect cloaking, CAPTCHA gates, or delayed payload staging.
+1. **Thăm dò bề mặt ảo giác**: đặt câu hỏi cụ thể về thương hiệu, xoay quanh các quy trình thực tế như portal `admin`, `billing`, `sandbox`, `benefits`, `api`, `download`, `support`, `webhook` hoặc `mobile app`.<sup>[[12]](#references)</sup>
+2. **Chuẩn hóa các ứng viên**: phân giải URL được tạo ra, quy các phản hồi NXDOMAIN về domain cha có thể đăng ký và loại bỏ các nhóm prompt trùng lặp. Tập hợp prompt nên đa dạng, chẳng hạn loại bỏ các prompt gần trùng bằng **độ tương đồng Jaccard**.
+3. **Ưu tiên các ảo giác dễ dự đoán**:
+   - **Độ bền của ảo giác theo nhiệt độ (THP)**: cùng một domain giả xuất hiện ở nhiều mức temperature, kể cả mức thấp như `T=0.1`.
+   - **Đồng thuận giữa các model**: nhiều họ LLM tạo ra cùng một domain giả.
+4. **Đăng ký và vũ khí hóa** domain cha, sau đó lưu trữ trang phishing, bản tải APK/ZIP giả, công cụ thu thập thông tin xác thực, tài liệu độc hại hoặc endpoint API thu thập secret/webhook payload. **Ảo giác chỉ ở cấp domain** dễ kiếm tiền nhất vì kẻ tấn công kiểm soát toàn bộ namespace; ảo giác ở subdomain/path vẫn có thể bị lạm dụng nếu domain cha sau khi chuẩn hóa chưa được đăng ký.
+5. **Khai thác khoảng thời gian chưa có uy tín**: domain mới đăng ký thường chưa có lịch sử blocklist, uy tín URL và telemetry đầy đủ, nên có thể vượt qua các biện pháp kiểm soát cho đến khi hệ thống phát hiện bắt kịp. Kẻ tấn công có thể kéo dài khoảng thời gian này bằng cách chỉ trả về nội dung lành tính cho crawler, cloaking bằng redirect, dùng CAPTCHA hoặc trì hoãn triển khai payload.
 
-### Why it is dangerous for agents
+### Vì sao điều này nguy hiểm với agent
 
-For a human victim, the fake domain usually still needs a click and another action. For an **agentic workflow**, the LLM can be both the **lure** and the **executor**: the agent receives the hallucinated URL, fetches it, parses the response, and may then leak tokens, execute instructions, download a dependency, or push poisoned data into CI/CD without any human review.<sup>[[12]](#references)</sup>
+Với nạn nhân là con người, domain giả thường vẫn cần một cú click và một hành động khác. Trong **quy trình agentic**, LLM có thể vừa là **mồi nhử** vừa là **bên thực thi**: agent nhận URL do ảo giác tạo ra, fetch URL đó, phân tích phản hồi, rồi có thể leak token, thực thi chỉ thị, tải dependency hoặc đưa dữ liệu bị đầu độc vào CI/CD mà không có sự xem xét của con người.<sup>[[12]](#references)</sup>
 
-### Practical attacker prompts
+### Prompt thực tế dành cho attacker
 
-High-yield prompts usually look like normal enterprise tasks instead of explicit phishing lures:<sup>[[12]](#references)</sup>
-- “What is the payment sandbox URL for `<brand>` integrations?”
-- “What webhook endpoint should I use for `<brand>` build notifications?”
-- “Where is the employee benefits / billing / SSO portal for `<brand>`?”
-- “Give me the direct Android APK or desktop client download for `<brand>`.”
+Các prompt có tỷ lệ thành công cao thường giống những tác vụ doanh nghiệp thông thường thay vì mồi nhử phishing rõ ràng:<sup>[[12]](#references)</sup>
+- “URL sandbox thanh toán cho các tích hợp `<brand>` là gì?”
+- “Tôi nên dùng webhook endpoint nào cho thông báo build của `<brand>`?”
+- “Portal benefits / billing / SSO dành cho nhân viên của `<brand>` ở đâu?”
+- “Hãy cho tôi link tải trực tiếp Android APK hoặc desktop client của `<brand>`.”
 
-### Defensive inversion
+### Đảo ngược để phòng thủ
 
-Treat this as a proactive domain-monitoring problem, not just a prompt-injection problem:<sup>[[12]](#references)</sup>
-- Build a **brand prompt corpus** and periodically probe the LLMs your users/agents rely on.
-- Store hallucinated URLs and track which ones are stable across temperatures/models.
-- Track the **Adversarial Exploitation Window (AEW)**: time between first hallucination and attacker registration. Positive AEW means defenders can pre-register, sinkhole, or pre-block before weaponization.
-- Monitor **NXDOMAIN → registered** transitions for the parent domains.
-- On registration, triage registrar, creation date, nameservers, privacy shielding, page content, screenshots, parked-page status, and brand-asset similarity.
-- Add policy gates so agents/developers do **not trust LLM-generated domains by default**: require allowlists, ownership validation, CT/RDAP checks, or human approval before first use.
+Hãy xem đây là vấn đề giám sát domain chủ động, không chỉ là vấn đề prompt injection:<sup>[[12]](#references)</sup>
+- Xây dựng **tập hợp prompt về thương hiệu** và định kỳ thăm dò các LLM mà người dùng/agent của bạn dựa vào.
+- Lưu các URL bị ảo giác tạo ra và theo dõi URL nào ổn định qua nhiều mức temperature/model.
+- Theo dõi **Khoảng thời gian bị khai thác (AEW)**: thời gian từ lần đầu xuất hiện ảo giác đến khi attacker đăng ký domain. AEW dương nghĩa là bên phòng thủ có thể đăng ký trước, sinkhole hoặc chặn trước khi domain bị vũ khí hóa.
+- Giám sát các chuyển đổi **NXDOMAIN → đã đăng ký** của domain cha.
+- Khi domain được đăng ký, phân loại registrar, ngày tạo, nameserver, lớp bảo vệ quyền riêng tư, nội dung trang, ảnh chụp màn hình, trạng thái trang đỗ và mức độ tương đồng với tài sản thương hiệu.
+- Thêm các cổng chính sách để agent/developer **không mặc định tin cậy domain do LLM tạo ra**: yêu cầu allowlist, xác minh quyền sở hữu, kiểm tra CT/RDAP hoặc phê duyệt của con người trước lần sử dụng đầu tiên.
 
-This fits several AI risk buckets at once: **AI supply-chain attack**, **insecure model output**, and **rogue actions** when agents autonomously consume the hallucinated URL.
+Điều này đồng thời thuộc một số nhóm rủi ro AI: **tấn công chuỗi cung ứng AI**, **đầu ra model không an toàn** và **hành động ngoài dự kiến** khi agent tự động sử dụng URL bị ảo giác tạo ra.
 
 ## References
 
-- [1] [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/)
-- [2] [Google SAIF (Secure AI Framework) – Risks](https://saif.google/secure-ai-framework/risks)
-- [3] [MITRE ATLAS Threat Matrix](https://atlas.mitre.org/)
-- [4] [Unit 42 – The Risks of Code Assistant LLMs: Harmful Content, Misuse and Deception](https://unit42.paloaltonetworks.com/code-assistant-llms/)
-- [5] [Sysdig – LLMjacking: Stolen Cloud Credentials Used in New AI Attack](https://sysdig.com/blog/llmjacking-stolen-cloud-credentials-used-in-new-ai-attack/)
-- [6] [LLMJacking scheme overview – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
-- [7] [oai-reverse-proxy (reselling stolen LLM access)](https://gitgud.io/khanon/oai-reverse-proxy)
-- [8] [Synacktiv - Deep-dive into the deployment of an on-premise low-privileged LLM server](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
-- [9] [llama.cpp server README](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
+- [1] [Top 10 lỗ hổng Machine Learning của OWASP](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [2] [Google SAIF (Khung AI an toàn) – Rủi ro](https://saif.google/secure-ai-framework/risks)
+- [3] [Ma trận mối đe dọa MITRE ATLAS](https://atlas.mitre.org/)
+- [4] [Unit 42 – Rủi ro của LLM hỗ trợ viết code: Nội dung có hại, lạm dụng và lừa đảo](https://unit42.paloaltonetworks.com/code-assistant-llms/)
+- [5] [Sysdig – LLMjacking: Thông tin xác thực Cloud bị đánh cắp được dùng trong cuộc tấn công AI mới](https://sysdig.com/blog/llmjacking-stolen-cloud-credentials-used-in-new-ai-attack/)
+- [6] [Tổng quan về chiến dịch LLMJacking – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
+- [7] [oai-reverse-proxy (bán lại quyền truy cập LLM bị đánh cắp)](https://gitgud.io/khanon/oai-reverse-proxy)
+- [8] [Synacktiv - Phân tích chuyên sâu về triển khai máy chủ LLM tại chỗ với quyền thấp](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
+- [9] [README của máy chủ llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
 - [10] [Podman quadlets: podman-systemd.unit](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
-- [11] [CNCF Container Device Interface (CDI) specification](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
-- [12] [Unit 42 – Phantom Squatting: AI-Hallucinated Domains as a Software Supply Chain Vector](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
-- [13] [Socket – Slopsquatting: How AI Hallucinations Are Fueling a New Class of Supply Chain Attacks](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
-
+- [11] [Đặc tả CNCF Container Device Interface (CDI)](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
+- [12] [Unit 42 – Phantom Squatting: Domain do AI ảo giác tạo ra như một vector tấn công chuỗi cung ứng phần mềm](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
+- [13] [Socket – Slopsquatting: Cách ảo giác của AI tiếp tay cho một lớp tấn công chuỗi cung ứng mới](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
 {{#include ../banners/hacktricks-training.md}}

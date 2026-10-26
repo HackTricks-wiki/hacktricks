@@ -1,35 +1,35 @@
-# Model Data Preparation & Evaluation
+# Chuẩn bị và đánh giá dữ liệu mô hình
 
 {{#include ../banners/hacktricks-training.md}}
 
-Model data preparation is a crucial step in the machine learning pipeline, as it involves transforming raw data into a format suitable for training machine learning models. This process includes several key steps:
+Chuẩn bị dữ liệu mô hình là bước quan trọng trong quy trình machine learning, vì bước này chuyển đổi dữ liệu thô sang định dạng phù hợp để huấn luyện các mô hình machine learning. Quy trình này gồm một số bước chính:
 
-1. **Data Collection**: Gathering data from various sources, such as databases, APIs, or files. The data can be structured (e.g., tables) or unstructured (e.g., text, images).
-2. **Data Cleaning**: Removing or correcting erroneous, incomplete, or irrelevant data points. This step may involve handling missing values, removing duplicates, and filtering outliers.
-3. **Data Transformation**: Converting the data into a suitable format for modeling. This may include normalization, scaling, encoding categorical variables, and creating new features through techniques like feature engineering.
-4. **Data Splitting**: Dividing the dataset into training, validation, and test sets to ensure the model can generalize well to unseen data.
+1. **Thu thập dữ liệu**: Thu thập dữ liệu từ nhiều nguồn, chẳng hạn như cơ sở dữ liệu, API hoặc tệp. Dữ liệu có thể có cấu trúc (ví dụ: bảng) hoặc phi cấu trúc (ví dụ: văn bản, hình ảnh).
+2. **Làm sạch dữ liệu**: Loại bỏ hoặc sửa các điểm dữ liệu sai, không đầy đủ hoặc không liên quan. Bước này có thể bao gồm xử lý giá trị bị thiếu, loại bỏ dữ liệu trùng lặp và lọc các giá trị ngoại lệ.
+3. **Chuyển đổi dữ liệu**: Chuyển đổi dữ liệu sang định dạng phù hợp để lập mô hình. Việc này có thể bao gồm chuẩn hóa, co giãn, mã hóa biến phân loại và tạo đặc trưng mới bằng các kỹ thuật như feature engineering.
+4. **Chia dữ liệu**: Chia tập dữ liệu thành các tập huấn luyện, xác thực và kiểm tra để đảm bảo mô hình có thể tổng quát hóa tốt với dữ liệu chưa từng gặp.
 
-## Data Collection
+## Thu thập dữ liệu
 
-Data collection involves gathering data from various sources, which can include:
-- **Databases**: Extracting data from relational databases (e.g., SQL databases) or NoSQL databases (e.g., MongoDB).
-- **APIs**: Fetching data from web APIs, which can provide real-time or historical data.
-- **Files**: Reading data from files in formats like CSV, JSON, or XML.
-- **Web Scraping**: Collecting data from websites using web scraping techniques.
+Thu thập dữ liệu bao gồm việc lấy dữ liệu từ nhiều nguồn, có thể gồm:
+- **Cơ sở dữ liệu**: Trích xuất dữ liệu từ cơ sở dữ liệu quan hệ (ví dụ: cơ sở dữ liệu SQL) hoặc cơ sở dữ liệu NoSQL (ví dụ: MongoDB).
+- **API**: Lấy dữ liệu từ web API, có thể cung cấp dữ liệu theo thời gian thực hoặc dữ liệu lịch sử.
+- **Tệp**: Đọc dữ liệu từ các tệp có định dạng như CSV, JSON hoặc XML.
+- **Web Scraping**: Thu thập dữ liệu từ các trang web bằng kỹ thuật web scraping.
 
-Depending on the goal of the machine learning project, the data will be extracted and collected from relevant sources to ensure it is representative of the problem domain.
+Tùy theo mục tiêu của dự án machine learning, dữ liệu sẽ được trích xuất và thu thập từ các nguồn phù hợp để đảm bảo dữ liệu phản ánh đúng lĩnh vực của bài toán.
 
-## Data Cleaning <sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
+## Làm sạch dữ liệu <sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
-Data cleaning is the process of identifying and correcting errors or inconsistencies in the dataset. This step is essential to ensure the quality of the data used for training machine learning models. Key tasks in data cleaning include:
-- **Handling Missing Values**: Identifying and addressing missing data points. Common strategies include:
-  - Removing rows or columns with missing values.
-  - Imputing missing values using techniques like mean, median, or mode imputation.
-  - Using advanced methods like K-nearest neighbors (KNN) imputation or regression imputation.
-- **Removing Duplicates**: Identifying and removing duplicate records to ensure each data point is unique.
-- **Filtering Outliers**: Detecting and removing outliers that may skew the model's performance. Techniques like Z-score, IQR (Interquartile Range), or visualizations (e.g., box plots) can be used to identify outliers.
+Làm sạch dữ liệu là quá trình xác định và sửa lỗi hoặc điểm không nhất quán trong tập dữ liệu. Bước này rất cần thiết để đảm bảo chất lượng dữ liệu dùng trong quá trình huấn luyện mô hình machine learning. Các tác vụ chính trong quá trình làm sạch dữ liệu gồm:
+- **Xử lý giá trị bị thiếu**: Xác định và xử lý các điểm dữ liệu bị thiếu. Các chiến lược phổ biến gồm:
+  - Xóa các hàng hoặc cột có giá trị bị thiếu.
+  - Điền giá trị bị thiếu bằng các kỹ thuật như điền giá trị trung bình, trung vị hoặc mode.
+  - Sử dụng các phương pháp nâng cao như điền giá trị bằng K-nearest neighbors (KNN) hoặc hồi quy.
+- **Loại bỏ dữ liệu trùng lặp**: Xác định và xóa các bản ghi trùng lặp để đảm bảo mỗi điểm dữ liệu là duy nhất.
+- **Lọc giá trị ngoại lệ**: Phát hiện và loại bỏ các giá trị ngoại lệ có thể làm sai lệch hiệu suất của mô hình. Có thể dùng các kỹ thuật như Z-score, IQR (Interquartile Range) hoặc hình ảnh trực quan (ví dụ: biểu đồ hộp) để xác định giá trị ngoại lệ.
 
-### Example of data cleaning
+### Ví dụ về làm sạch dữ liệu
 
 ```python
 import re
@@ -97,156 +97,155 @@ z_scores = np.abs(stats.zscore(df.select_dtypes(include=['float64', 'int64']), n
 df = df[(z_scores < 3).all(axis=1)]
 ```
 
-## Data Transformation <sup>[[1]](#references)</sup>
+## Chuyển đổi dữ liệu <sup>[[1]](#references)</sup>
 
-Data transformation involves converting the data into a format suitable for modeling. This step may include:
-- **Normalization and standardization**: Scaling numerical features to a common range, typically [0, 1] or [-1, 1]. This can improve the convergence of optimization algorithms.
-    - **Min-Max Scaling**: Rescaling features to a fixed range, usually [0, 1]. This is done using the formula: `X' = (X - X_{min}) / (X_{max} - X_{min})`
-    - **Z-Score Normalization**: Standardizing features by subtracting the mean and dividing by the standard deviation, resulting in a distribution with a mean of 0 and a standard deviation of 1. This is done using the formula: `X' = (X - μ) / σ`, where μ is the mean and σ is the standard deviation.
-    - **Skewness and kurtosis**: Adjusting feature distributions with transformations such as logarithm, square root, or Box-Cox. For example, a logarithmic transformation can reduce positive skew.
-    - **String Normalization**: Converting strings to a consistent format, such as:
-      - Lowercasing
-      - Removing special characters (keeping the relevant ones)
-      - Removing stop words (common words that do not contribute to the meaning, such as "the", "is", "and")
-      - Removing too frequent words and too rare words (e.g., words that appear in more than 90% of the documents or less than 5 times in the corpus)
-      - Trimming whitespace
-      - Stemming/Lemmatization: Reducing words to their base or root form (e.g., "running" to "run").
+Chuyển đổi dữ liệu là quá trình chuyển dữ liệu sang định dạng phù hợp để mô hình hóa. Bước này có thể bao gồm:
+- **Chuẩn hóa và tiêu chuẩn hóa**: Điều chỉnh tỷ lệ các đặc trưng số về một khoảng chung, thường là [0, 1] hoặc [-1, 1]. Việc này có thể giúp các thuật toán tối ưu hội tụ tốt hơn.
+    - **Min-Max Scaling**: Đưa các đặc trưng về một khoảng cố định, thường là [0, 1]. Thực hiện bằng công thức: `X' = (X - X_{min}) / (X_{max} - X_{min})`
+    - **Z-Score Normalization**: Chuẩn hóa các đặc trưng bằng cách trừ đi giá trị trung bình rồi chia cho độ lệch chuẩn, tạo ra phân phối có giá trị trung bình bằng 0 và độ lệch chuẩn bằng 1. Thực hiện bằng công thức: `X' = (X - μ) / σ`, trong đó μ là giá trị trung bình và σ là độ lệch chuẩn.
+    - **Độ lệch và độ nhọn**: Điều chỉnh phân phối đặc trưng bằng các phép biến đổi như logarit, căn bậc hai hoặc Box-Cox. Ví dụ, phép biến đổi logarit có thể làm giảm độ lệch dương.
+    - **Chuẩn hóa chuỗi**: Chuyển đổi chuỗi sang định dạng nhất quán, chẳng hạn như:
+      - Chuyển thành chữ thường
+      - Loại bỏ ký tự đặc biệt (giữ lại các ký tự cần thiết)
+      - Loại bỏ stop word (các từ phổ biến không đóng góp vào ý nghĩa, chẳng hạn như "the", "is", "and")
+      - Loại bỏ các từ xuất hiện quá thường xuyên hoặc quá hiếm (ví dụ: từ xuất hiện trong hơn 90% tài liệu hoặc ít hơn 5 lần trong kho ngữ liệu)
+      - Xóa khoảng trắng thừa
+      - Stemming/Lemmatization: Đưa từ về dạng gốc hoặc căn tố (ví dụ: "running" thành "run").
 
-- **Encoding Categorical Variables**: Converting categorical variables into numerical representations. Common techniques include:
-  - **One-Hot Encoding**: Creating binary columns for each category.
-    - For example, if a feature has categories "red", "green", and "blue", it will be transformed into three binary columns: `is_red`(100), `is_green`(010), and `is_blue`(001).
-  - **Label Encoding**: Assigning a unique integer to each category.
-    - For example, "red" = 0, "green" = 1, "blue" = 2.
-  - **Ordinal Encoding**: Assigning integers based on the order of categories.
-    - For example, if the categories are "low", "medium", and "high", they can be encoded as 0, 1, and 2, respectively.
-  - **Hashing Encoding**: Using a hash function to convert categories into fixed-size vectors, which can be useful for high-cardinality categorical variables.
-    - For example, if a feature has many unique categories, hashing can reduce the dimensionality while preserving some information about the categories.
-  - **Bag of Words (BoW)**: Representing text data as a matrix of word counts or frequencies, where each row corresponds to a document and each column corresponds to a unique word in the corpus.
-    - For example, if the corpus contains the words "cat", "dog", and "fish", a document containing "cat" and "dog" would be represented as [1, 1, 0]. This specific representation is called "unigram" and does not capture the order of words, so it loses semantic information.
-    - **Bigram/Trigram**: Extending BoW to capture sequences of words (bigrams or trigrams) to retain some context. For example, "cat and dog" would be represented as a bigram [1, 1] for "cat and" and [1, 1] for "and dog". In these case more semantic information is gathered (increasing the dimensionality of the representation) but only for 2 or 3 words at a time.
-  - **TF-IDF (Term Frequency-Inverse Document Frequency)**: A statistical measure that evaluates the importance of a word in a document relative to a collection of documents (corpus). It combines term frequency (how often a word appears in a document) and inverse document frequency (how rare a word is across all documents).
-    - For example, if the word "cat" appears frequently in a document but is rare in the entire corpus, it will have a high TF-IDF score, indicating its importance in that document.
+- **Mã hóa biến phân loại**: Chuyển đổi biến phân loại thành biểu diễn số. Các kỹ thuật phổ biến gồm:
+  - **One-Hot Encoding**: Tạo các cột nhị phân cho từng danh mục.
+    - Ví dụ: nếu một đặc trưng có các danh mục "red", "green" và "blue", nó sẽ được chuyển thành ba cột nhị phân: `is_red`(100), `is_green`(010) và `is_blue`(001).
+  - **Label Encoding**: Gán một số nguyên duy nhất cho từng danh mục.
+    - Ví dụ: "red" = 0, "green" = 1, "blue" = 2.
+  - **Ordinal Encoding**: Gán số nguyên dựa trên thứ tự của các danh mục.
+    - Ví dụ: nếu các danh mục là "low", "medium" và "high", chúng có thể được mã hóa lần lượt thành 0, 1 và 2.
+  - **Hashing Encoding**: Dùng hàm băm để chuyển danh mục thành các vector có kích thước cố định; kỹ thuật này có thể hữu ích với các biến phân loại có nhiều giá trị riêng biệt.
+    - Ví dụ: nếu một đặc trưng có nhiều danh mục duy nhất, hashing có thể giảm số chiều mà vẫn giữ lại một phần thông tin về các danh mục.
+  - **Bag of Words (BoW)**: Biểu diễn dữ liệu văn bản dưới dạng ma trận số lượng hoặc tần suất từ, trong đó mỗi hàng tương ứng với một tài liệu và mỗi cột tương ứng với một từ duy nhất trong kho ngữ liệu.
+    - Ví dụ: nếu kho ngữ liệu có các từ "cat", "dog" và "fish", một tài liệu chứa "cat" và "dog" sẽ được biểu diễn thành [1, 1, 0]. Biểu diễn cụ thể này được gọi là "unigram" và không ghi nhận thứ tự từ, nên làm mất thông tin ngữ nghĩa.
+    - **Bigram/Trigram**: Mở rộng BoW để ghi nhận các chuỗi từ (bigram hoặc trigram), qua đó giữ lại một phần ngữ cảnh. Ví dụ: "cat and dog" sẽ được biểu diễn bằng bigram [1, 1] cho "cat and" và [1, 1] cho "and dog". Trong trường hợp này, biểu diễn thu thập thêm thông tin ngữ nghĩa (làm tăng số chiều), nhưng chỉ cho 2 hoặc 3 từ mỗi lần.
+  - **TF-IDF (Tần suất thuật ngữ-Tần suất tài liệu nghịch đảo)**: Thước đo thống kê đánh giá mức độ quan trọng của một từ trong tài liệu so với tập hợp tài liệu (kho ngữ liệu). Thước đo này kết hợp tần suất thuật ngữ (mức độ thường xuyên một từ xuất hiện trong tài liệu) và tần suất tài liệu nghịch đảo (mức độ hiếm của từ trong toàn bộ tài liệu).
+    - Ví dụ: nếu từ "cat" xuất hiện thường xuyên trong một tài liệu nhưng hiếm trong toàn bộ kho ngữ liệu, từ này sẽ có điểm TF-IDF cao, cho thấy nó quan trọng trong tài liệu đó.
 
-- **Feature Engineering**: Creating new features from existing ones to enhance the model's predictive power. This can involve combining features, extracting date/time components, or applying domain-specific transformations.
+- **Thiết kế đặc trưng**: Tạo đặc trưng mới từ các đặc trưng hiện có để tăng khả năng dự đoán của mô hình. Việc này có thể bao gồm kết hợp đặc trưng, trích xuất thành phần ngày/giờ hoặc áp dụng các phép biến đổi theo lĩnh vực cụ thể.
 
-## Data Splitting <sup>[[3]](#references)</sup>
+## Chia tách dữ liệu <sup>[[3]](#references)</sup>
 
-Data splitting involves dividing the dataset into separate subsets for training, validation, and testing. This is essential to evaluate the model's performance on unseen data and prevent overfitting. Common strategies include:
-- **Train-Test Split**: Dividing the dataset into a training set (typically 60-80% of the data), a validation set (10-15% of the data) to tune hyperparameters, and a test set (10-15% of the data). The model is trained on the training set and evaluated on the test set.
-  - For example, if you have a dataset of 1000 samples, you might use 700 samples for training, 150 for validation, and 150 for testing.
-- **Stratified Sampling**: Ensuring that the distribution of classes in the training and test sets is similar to the overall dataset. This is particularly important for imbalanced datasets, where some classes may have significantly fewer samples than others.
-- **Time Series Split**: For time series data, the dataset is split based on time, ensuring that the training set contains data from earlier time periods and the test set contains data from later periods. This helps evaluate the model's performance on future data.
-- **K-Fold Cross-Validation**: Splitting the dataset into K subsets (folds) and training the model K times, each time using a different fold as the test set and the remaining folds as the training set. This helps ensure that the model is evaluated on different subsets of data, providing a more robust estimate of its performance.
+Chia tách dữ liệu là quá trình chia tập dữ liệu thành các tập con riêng biệt để huấn luyện, xác thực và kiểm thử. Việc này cần thiết để đánh giá hiệu suất của mô hình trên dữ liệu chưa từng thấy và ngăn hiện tượng overfitting. Các chiến lược phổ biến gồm:
+- **Train-Test Split**: Chia tập dữ liệu thành tập huấn luyện (thường chiếm 60-80% dữ liệu), tập xác thực (10-15% dữ liệu) để tinh chỉnh siêu tham số và tập kiểm thử (10-15% dữ liệu). Mô hình được huấn luyện trên tập huấn luyện và đánh giá trên tập kiểm thử.
+  - Ví dụ: với tập dữ liệu gồm 1000 mẫu, bạn có thể dùng 700 mẫu để huấn luyện, 150 mẫu để xác thực và 150 mẫu để kiểm thử.
+- **Lấy mẫu phân tầng**: Đảm bảo phân phối lớp trong các tập huấn luyện và kiểm thử tương tự như trong toàn bộ tập dữ liệu. Điều này đặc biệt quan trọng với các tập dữ liệu mất cân bằng, trong đó một số lớp có thể có số mẫu ít hơn đáng kể so với các lớp khác.
+- **Time Series Split**: Với dữ liệu chuỗi thời gian, tập dữ liệu được chia theo thời gian, đảm bảo tập huấn luyện chứa dữ liệu từ các giai đoạn trước và tập kiểm thử chứa dữ liệu từ các giai đoạn sau. Điều này giúp đánh giá hiệu suất của mô hình trên dữ liệu tương lai.
+- **K-Fold Cross-Validation**: Chia tập dữ liệu thành K tập con (fold) và huấn luyện mô hình K lần; mỗi lần dùng một fold khác nhau làm tập kiểm thử, còn các fold còn lại làm tập huấn luyện. Cách này giúp đảm bảo mô hình được đánh giá trên nhiều tập con dữ liệu, từ đó đưa ra ước tính hiệu suất đáng tin cậy hơn.
 
-## Model Evaluation <sup>[[4]](#references)</sup>
+## Đánh giá mô hình <sup>[[4]](#references)</sup>
 
-Model evaluation is the process of assessing the performance of a machine learning model on unseen data. It involves using various metrics to quantify how well the model generalizes to new data. Common evaluation metrics include:
+Đánh giá mô hình là quá trình xác định hiệu suất của mô hình machine learning trên dữ liệu chưa từng thấy. Quá trình này sử dụng nhiều chỉ số để định lượng mức độ khái quát hóa của mô hình trên dữ liệu mới. Các chỉ số đánh giá phổ biến gồm:
 
 ### Accuracy
 
-Accuracy is the proportion of correctly predicted instances out of the total instances. It is calculated as:
+Accuracy là tỷ lệ số mẫu được dự đoán chính xác trên tổng số mẫu. Chỉ số này được tính như sau:
 ```plaintext
 Accuracy = (Number of Correct Predictions) / (Total Number of Predictions)
 ```
 
 > [!TIP]
-> Accuracy is a simple and intuitive metric, but it may not be suitable for imbalanced datasets where one class dominates the others as it can give a misleading impression of model performance. For example, if 90% of the data belongs to class A and the model predicts all instances as class A, it will achieve 90% accuracy, but it won't be useful for predicting class B.
+> Accuracy là một chỉ số đơn giản và trực quan, nhưng có thể không phù hợp với các tập dữ liệu mất cân bằng, trong đó một lớp chiếm ưu thế hơn các lớp khác, vì nó có thể gây hiểu lầm về hiệu suất của mô hình. Ví dụ: nếu 90% dữ liệu thuộc lớp A và mô hình dự đoán tất cả các mẫu là lớp A, mô hình sẽ đạt accuracy 90%, nhưng sẽ không hữu ích trong việc dự đoán lớp B.
 
 ### Precision
 
-Precision is the proportion of true positive predictions out of all positive predictions made by the model. It is calculated as:
+Precision là tỷ lệ dự đoán dương tính đúng trên tổng số dự đoán dương tính của mô hình. Chỉ số này được tính như sau:
 ```plaintext
 Precision = (True Positives) / (True Positives + False Positives)
 ```
 
 > [!TIP]
-> Precision is particularly important in scenarios where false positives are costly or undesirable, such as in medical diagnoses or fraud detection. For example, if a model predicts 100 instances as positive, but only 80 of them are actually positive, the precision would be 0.8 (80%).
+> Độ chính xác đặc biệt quan trọng trong những tình huống mà false positive gây tốn kém hoặc không mong muốn, chẳng hạn như chẩn đoán y tế hoặc phát hiện gian lận. Ví dụ: nếu một mô hình dự đoán 100 trường hợp là dương tính, nhưng chỉ có 80 trường hợp thực sự dương tính, thì độ chính xác sẽ là 0.8 (80%).
 
-### Recall (Sensitivity)
+### Độ bao phủ (Độ nhạy)
 
-Recall, also known as sensitivity or true positive rate, is the proportion of true positive predictions out of all actual positive instances. It is calculated as:
+Độ bao phủ, còn gọi là độ nhạy hoặc tỷ lệ dương tính thật, là tỷ lệ các dự đoán dương tính thật trên tổng số trường hợp thực tế dương tính. Độ bao phủ được tính như sau:
 ```plaintext
 Recall = (True Positives) / (True Positives + False Negatives)
 ```
 
 > [!TIP]
-> Recall is crucial in scenarios where false negatives are costly or undesirable, such as in disease detection or spam filtering. For example, if a model identifies 80 out of 100 actual positive instances, the recall would be 0.8 (80%).
+> Recall rất quan trọng trong các tình huống mà false negative gây tốn kém hoặc không mong muốn, chẳng hạn như phát hiện bệnh hoặc lọc spam. Ví dụ, nếu một model xác định đúng 80 trong số 100 trường hợp dương tính thực tế, recall sẽ là 0.8 (80%).
 
-### F1 Score
+### Điểm F1
 
-The F1 score is the harmonic mean of precision and recall, providing a balance between the two metrics. It is calculated as:
+Điểm F1 là trung bình điều hòa của precision và recall, giúp cân bằng hai chỉ số này. Công thức tính như sau:
 ```plaintext
 F1 Score = 2 * (Precision * Recall) / (Precision + Recall)
 ```
 
 > [!TIP]
-> The F1 score is particularly useful when dealing with imbalanced datasets, as it considers both false positives and false negatives. It provides a single metric that captures the trade-off between precision and recall. For example, if a model has a precision of 0.8 and a recall of 0.6, the F1 score would be approximately 0.69.
+> Điểm F1 đặc biệt hữu ích khi làm việc với các tập dữ liệu mất cân bằng, vì nó xét đến cả false positive và false negative. Điểm này cung cấp một chỉ số duy nhất thể hiện sự cân bằng giữa precision và recall. Ví dụ, nếu một mô hình có precision là 0.8 và recall là 0.6, điểm F1 sẽ xấp xỉ 0.69.
 
-### ROC-AUC (Receiver Operating Characteristic - Area Under the Curve)
+### ROC-AUC (Đặc tính hoạt động của bộ thu - Diện tích dưới đường cong)
 
-The ROC-AUC metric evaluates the model's ability to distinguish between classes by plotting the true positive rate (sensitivity) against the false positive rate at various threshold settings. The area under the ROC curve (AUC) quantifies the model's performance, with a value of 1 indicating perfect classification and a value of 0.5 indicating random guessing.
+Chỉ số ROC-AUC đánh giá khả năng phân biệt giữa các lớp của mô hình bằng cách biểu diễn tỷ lệ true positive (độ nhạy) theo tỷ lệ false positive tại nhiều ngưỡng khác nhau. Diện tích dưới đường cong ROC (AUC) định lượng hiệu suất của mô hình; giá trị 1 biểu thị phân loại hoàn hảo, còn giá trị 0.5 biểu thị việc đoán ngẫu nhiên.
 
 > [!TIP]
-> ROC-AUC is particularly useful for binary classification problems and provides a comprehensive view of the model's performance across different thresholds. It is less sensitive to class imbalance compared to accuracy. For example, a model with an AUC of 0.9 indicates that it has a high ability to distinguish between positive and negative instances.
+> ROC-AUC đặc biệt hữu ích cho các bài toán phân loại nhị phân và cung cấp cái nhìn toàn diện về hiệu suất của mô hình ở các ngưỡng khác nhau. Chỉ số này ít nhạy với tình trạng mất cân bằng lớp hơn accuracy. Ví dụ, mô hình có AUC là 0.9 cho thấy khả năng phân biệt các trường hợp dương tính và âm tính cao.
 
 ### Specificity
 
-Specificity, also known as true negative rate, is the proportion of true negative predictions out of all actual negative instances. It is calculated as:
+Specificity, còn gọi là tỷ lệ true negative, là tỷ lệ dự đoán âm tính đúng trên tổng số trường hợp âm tính thực tế. Chỉ số này được tính như sau:
 ```plaintext
 Specificity = (True Negatives) / (True Negatives + False Positives)
 ```
 
 > [!TIP]
-> Specificity is important in scenarios where false positives are costly or undesirable, such as in medical testing or fraud detection. It helps assess how well the model identifies negative instances. For example, if a model correctly identifies 90 out of 100 actual negative instances, the specificity would be 0.9 (90%).
+> Độ đặc hiệu rất quan trọng trong những tình huống mà kết quả dương tính giả gây tốn kém hoặc không mong muốn, chẳng hạn như xét nghiệm y tế hoặc phát hiện gian lận. Chỉ số này giúp đánh giá mức độ hiệu quả của mô hình trong việc nhận diện các trường hợp âm tính. Ví dụ, nếu mô hình xác định chính xác 90 trong số 100 trường hợp âm tính thực tế, độ đặc hiệu sẽ là 0.9 (90%).
 
-### Matthews Correlation Coefficient (MCC)
-The Matthews Correlation Coefficient (MCC) is a measure of the quality of binary classifications. It takes into account true and false positives and negatives, providing a balanced view of the model's performance. The MCC is calculated as:
+### Hệ số tương quan Matthews (MCC)
+Hệ số tương quan Matthews (MCC) là thước đo chất lượng của các phép phân loại nhị phân. Chỉ số này tính đến cả kết quả dương tính và âm tính thật lẫn giả, qua đó đưa ra đánh giá cân bằng về hiệu suất của mô hình. MCC được tính như sau:
 ```plaintext
 MCC = (TP * TN - FP * FN) / sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))
 ```
 where:
-- **TP**: True Positives
-- **TN**: True Negatives
-- **FP**: False Positives
-- **FN**: False Negatives
+- **TP**: Dương tính thật
+- **TN**: Âm tính thật
+- **FP**: Dương tính giả
+- **FN**: Âm tính giả
 
 > [!TIP]
-> The MCC ranges from -1 to 1, where 1 indicates perfect classification, 0 indicates random guessing, and -1 indicates total disagreement between prediction and observation. It is particularly useful for imbalanced datasets, as it considers all four confusion matrix components.
+> MCC có giá trị từ -1 đến 1, trong đó 1 biểu thị phân loại hoàn hảo, 0 biểu thị dự đoán ngẫu nhiên và -1 biểu thị sự bất đồng hoàn toàn giữa dự đoán và quan sát. Chỉ số này đặc biệt hữu ích với các tập dữ liệu mất cân bằng vì tính đến cả bốn thành phần của ma trận nhầm lẫn.
 
-### Mean Absolute Error (MAE)
-Mean Absolute Error (MAE) is a regression metric that measures the average absolute difference between predicted and actual values. It is calculated as:
+### Sai số tuyệt đối trung bình (MAE)
+Sai số tuyệt đối trung bình (MAE) là một metric hồi quy đo lường độ chênh lệch tuyệt đối trung bình giữa các giá trị dự đoán và giá trị thực tế. Công thức tính như sau:
 ```plaintext
 MAE = (1/n) * Σ|y_i - ŷ_i|
 ```
-where:
-- **n**: Number of instances
-- **y_i**: Actual value for instance i
-- **ŷ_i**: Predicted value for instance i
+trong đó:
+- **n**: Số lượng mẫu
+- **y_i**: Giá trị thực tế của mẫu i
+- **ŷ_i**: Giá trị dự đoán của mẫu i
 
 > [!TIP]
-> MAE provides a straightforward interpretation of the average error in predictions, making it easy to understand. It is less sensitive to outliers compared to other metrics like Mean Squared Error (MSE). For example, if a model has an MAE of 5, it means that, on average, the model's predictions deviate from the actual values by 5 units.
+> MAE giúp diễn giải trực quan sai số trung bình của các dự đoán, nhờ đó dễ hiểu. Chỉ số này ít nhạy cảm với các giá trị ngoại lệ hơn những chỉ số khác như Mean Squared Error (MSE). Ví dụ, nếu một model có MAE bằng 5, điều đó có nghĩa là trung bình các dự đoán của model lệch 5 đơn vị so với giá trị thực tế.
 
-### Confusion Matrix
+### Ma trận nhầm lẫn
 
-The confusion matrix is a table that summarizes the performance of a classification model by showing the counts of true positive, true negative, false positive, and false negative predictions. It provides a detailed view of how well the model performs on each class.
+Ma trận nhầm lẫn là một bảng tóm tắt hiệu suất của model phân loại bằng cách hiển thị số lượng dự đoán true positive, true negative, false positive và false negative. Bảng này cung cấp cái nhìn chi tiết về hiệu suất của model trên từng lớp.
 
-|               | Predicted Positive | Predicted Negative |
+|               | Positive được dự đoán | Negative được dự đoán |
 |---------------|---------------------|---------------------|
-| Actual Positive| True Positive (TP)  | False Negative (FN)  |
-| Actual Negative| False Positive (FP) | True Negative (TN)   |
+| Positive thực tế| True Positive (TP)  | False Negative (FN)  |
+| Negative thực tế| False Positive (FP) | True Negative (TN)   |
 
-- **True Positive (TP)**: The model correctly predicted the positive class.
-- **True Negative (TN)**: The model correctly predicted the negative class.
-- **False Positive (FP)**: The model incorrectly predicted the positive class (Type I error).
-- **False Negative (FN)**: The model incorrectly predicted the negative class (Type II error).
+- **True Positive (TP)**: Model dự đoán chính xác lớp positive.
+- **True Negative (TN)**: Model dự đoán chính xác lớp negative.
+- **False Positive (FP)**: Model dự đoán nhầm lớp positive (lỗi Type I).
+- **False Negative (FN)**: Model dự đoán nhầm lớp negative (lỗi Type II).
 
-The confusion matrix can be used to calculate evaluation metrics such as accuracy, precision, recall, and F1 score.
+Có thể dùng ma trận nhầm lẫn để tính các chỉ số đánh giá như accuracy, precision, recall và F1 score.
 
 ## References
 
-- [1] [scikit-learn - Preprocessing data](https://scikit-learn.org/stable/modules/preprocessing.html)
-- [2] [scikit-learn - Imputation of missing values](https://scikit-learn.org/stable/modules/impute.html)
-- [3] [scikit-learn - Cross-validation: evaluating estimator performance](https://scikit-learn.org/stable/modules/cross_validation.html)
-- [4] [scikit-learn - Metrics and scoring](https://scikit-learn.org/stable/modules/model_evaluation.html)
-
+- [1] [scikit-learn - Tiền xử lý dữ liệu](https://scikit-learn.org/stable/modules/preprocessing.html)
+- [2] [scikit-learn - Bù các giá trị bị thiếu](https://scikit-learn.org/stable/modules/impute.html)
+- [3] [scikit-learn - Cross-validation: đánh giá hiệu suất của estimator](https://scikit-learn.org/stable/modules/cross_validation.html)
+- [4] [scikit-learn - Các chỉ số và cách tính điểm](https://scikit-learn.org/stable/modules/model_evaluation.html)
 {{#include ../banners/hacktricks-training.md}}

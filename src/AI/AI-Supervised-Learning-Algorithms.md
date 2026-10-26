@@ -1,46 +1,46 @@
-# Supervised Learning Algorithms
+# Các thuật toán học có giám sát
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Basic Information
+## Thông tin cơ bản
 
-Supervised learning uses labeled data to train models that can make predictions on new, unseen inputs. In cybersecurity, supervised machine learning is widely applied to tasks such as intrusion detection (classifying network traffic as *normal* or *attack*), malware detection (distinguishing malicious software from benign), phishing detection (identifying fraudulent websites or emails), and spam filtering, among others.<sup>[[1]](#references)</sup> Each algorithm has its strengths and is suited to different types of problems (classification or regression). Below we review key supervised learning algorithms, explain how they work, and demonstrate their use on real cybersecurity datasets. We also discuss how combining models (ensemble learning) can often improve predictive performance.
+Học có giám sát sử dụng dữ liệu được gắn nhãn để huấn luyện các mô hình có thể đưa ra dự đoán trên những dữ liệu đầu vào mới chưa từng thấy. Trong an ninh mạng, machine learning có giám sát được ứng dụng rộng rãi vào các tác vụ như phát hiện xâm nhập (phân loại lưu lượng mạng là *bình thường* hoặc *tấn công*), phát hiện malware (phân biệt phần mềm độc hại với phần mềm lành tính), phát hiện phishing (xác định các trang web hoặc email lừa đảo) và lọc spam, cùng nhiều tác vụ khác.<sup>[[1]](#references)</sup> Mỗi thuật toán đều có thế mạnh riêng và phù hợp với các loại bài toán khác nhau (phân loại hoặc hồi quy). Dưới đây, chúng ta sẽ xem xét các thuật toán học có giám sát chính, giải thích cách chúng hoạt động và minh họa cách sử dụng chúng trên các tập dữ liệu an ninh mạng thực tế. Chúng ta cũng sẽ thảo luận về cách kết hợp các mô hình (học ensemble) thường có thể cải thiện hiệu suất dự đoán.
 
-## Algorithms
+## Thuật toán
 
--   **Linear Regression:** A fundamental regression algorithm for predicting numeric outcomes by fitting a linear equation to data.
+-   **Linear Regression:** Thuật toán hồi quy nền tảng dùng để dự đoán các kết quả dạng số bằng cách khớp một phương trình tuyến tính với dữ liệu.
 
--   **Logistic Regression:** A classification algorithm (despite its name) that uses a logistic function to model the probability of a binary outcome.
+-   **Logistic Regression:** Thuật toán phân loại (mặc dù tên gọi có chữ hồi quy) sử dụng hàm logistic để mô hình hóa xác suất của một kết quả nhị phân.
 
--   **Decision Trees:** Tree-structured models that split data by features to make predictions; often used for their interpretability.
+-   **Decision Trees:** Các mô hình có cấu trúc dạng cây, phân chia dữ liệu theo các đặc trưng để đưa ra dự đoán; thường được sử dụng vì dễ diễn giải.
 
--   **Random Forests:** An ensemble of decision trees (via bagging) that improves accuracy and reduces overfitting.
+-   **Random Forests:** Tổ hợp các decision tree (thông qua bagging) giúp cải thiện độ chính xác và giảm overfitting.
 
--   **Support Vector Machines (SVM):** Max-margin classifiers that find the optimal separating hyperplane; can use kernels for non-linear data.
+-   **Support Vector Machines (SVM):** Các bộ phân loại tối đa hóa biên, tìm siêu phẳng phân tách tối ưu; có thể sử dụng kernel cho dữ liệu phi tuyến.
 
--   **Naive Bayes:** A probabilistic classifier based on Bayes' theorem with an assumption of feature independence, famously used in spam filtering.
+-   **Naive Bayes:** Bộ phân loại xác suất dựa trên định lý Bayes, với giả định các đặc trưng độc lập; nổi tiếng với ứng dụng lọc spam.
 
--   **k-Nearest Neighbors (k-NN):** A simple "instance-based" classifier that labels a sample based on the majority class of its nearest neighbors.
+-   **k-Nearest Neighbors (k-NN):** Bộ phân loại "dựa trên mẫu" đơn giản, gán nhãn cho một mẫu dựa trên lớp chiếm đa số trong các láng giềng gần nhất của nó.
 
--   **Gradient Boosting Machines:** Ensemble models (e.g., XGBoost, LightGBM) that build a strong predictor by sequentially adding weaker learners (typically decision trees).
+-   **Gradient Boosting Machines:** Các mô hình ensemble (ví dụ: XGBoost, LightGBM) xây dựng một bộ dự đoán mạnh bằng cách lần lượt thêm các learner yếu hơn (thường là decision tree).
 
-Each section below provides an improved description of the algorithm and a **Python code example** using libraries like `pandas` and `scikit-learn` (and `PyTorch` for the neural network example). The examples use publicly available cybersecurity datasets (such as NSL-KDD for intrusion detection and a Phishing Websites dataset) and follow a consistent structure:
+Mỗi phần bên dưới cung cấp mô tả cải tiến về thuật toán và **ví dụ mã Python** sử dụng các thư viện như `pandas` và `scikit-learn` (và `PyTorch` cho ví dụ về neural network). Các ví dụ sử dụng những tập dữ liệu an ninh mạng công khai (chẳng hạn như NSL-KDD để phát hiện xâm nhập và tập dữ liệu Phishing Websites) và tuân theo cấu trúc thống nhất:
 
-1.  **Load the dataset** (download via URL if available).
+1.  **Tải tập dữ liệu** (tải xuống qua URL nếu có).
 
-2.  **Preprocess the data** (e.g. encode categorical features, scale values, split into train/test sets).
+2.  **Tiền xử lý dữ liệu** (ví dụ: mã hóa các đặc trưng phân loại, chuẩn hóa giá trị, chia thành các tập huấn luyện/kiểm tra).
 
-3.  **Train the model** on the training data.
+3.  **Huấn luyện mô hình** trên dữ liệu huấn luyện.
 
-4.  **Evaluate** on a test set using metrics: accuracy, precision, recall, F1-score, and ROC AUC for classification (and mean squared error for regression).
+4.  **Đánh giá** trên tập kiểm tra bằng các chỉ số: accuracy, precision, recall, F1-score và ROC AUC cho bài toán phân loại (và mean squared error cho bài toán hồi quy).
 
-Let's dive into each algorithm:
+Hãy cùng tìm hiểu từng thuật toán:
 
 ### Linear Regression
 
-Linear regression is a **regression** algorithm used to predict continuous numeric values. It assumes a linear relationship between the input features (independent variables) and the output (dependent variable). The model attempts to fit a straight line (or hyperplane in higher dimensions) that best describes the relationship between features and the target. This is typically done by minimizing the sum of squared errors between predicted and actual values (Ordinary Least Squares method).<sup>[[2]](#references)</sup>
+Linear regression là thuật toán **hồi quy** dùng để dự đoán các giá trị số liên tục. Thuật toán giả định rằng có mối quan hệ tuyến tính giữa các đặc trưng đầu vào (biến độc lập) và đầu ra (biến phụ thuộc). Mô hình cố gắng khớp một đường thẳng (hoặc siêu phẳng trong không gian nhiều chiều) mô tả tốt nhất mối quan hệ giữa các đặc trưng và biến mục tiêu. Việc này thường được thực hiện bằng cách tối thiểu hóa tổng bình phương sai số giữa các giá trị dự đoán và giá trị thực tế (phương pháp Ordinary Least Squares).<sup>[[2]](#references)</sup>
 
-The simplest for to represent linear regression is with a line:
+Cách đơn giản nhất để biểu diễn linear regression là bằng một đường thẳng:
 
 ```plaintext
 y = mx + b
@@ -48,36 +48,36 @@ y = mx + b
 
 Where:
 
-- `y` is the predicted value (output)
-- `m` is the slope of the line (coefficient)
-- `x` is the input feature
-- `b` is the y-intercept
+- `y` là giá trị dự đoán (đầu ra)
+- `m` là độ dốc của đường thẳng (hệ số)
+- `x` là đặc trưng đầu vào
+- `b` là tung độ gốc
 
-The goal of linear regression is to find the best-fitting line that minimizes the difference between the predicted values and the actual values in the dataset. Of course, this is very simple, it would be a straight line sepparating 2 categories, but if more dimensions are added, the line becomes more complex:
+Mục tiêu của linear regression là tìm đường thẳng phù hợp nhất, sao cho chênh lệch giữa giá trị dự đoán và giá trị thực tế trong tập dữ liệu là nhỏ nhất. Tất nhiên, đây là trường hợp rất đơn giản: một đường thẳng phân tách 2 nhóm. Nhưng khi thêm nhiều chiều hơn, đường thẳng sẽ trở nên phức tạp hơn:
 
 ```plaintext
 y = w1*x1 + w2*x2 + ... + wn*xn + b
 ```
 
 > [!TIP]
-> *Use cases in cybersecurity:* Linear regression itself is less common for core security tasks (which are often classification), but it can be applied to predict numerical outcomes. For example, one could use linear regression to **predict the volume of network traffic** or **estimate the number of attacks in a time period** based on historical data. It could also predict a risk score or the expected time until detection of an attack, given certain system metrics. In practice, classification algorithms (like logistic regression or trees) are more frequently used for detecting intrusions or malware, but linear regression serves as a foundation and is useful for regression-oriented analyses.
+> *Các trường hợp sử dụng trong an ninh mạng:* Bản thân hồi quy tuyến tính ít được dùng cho các tác vụ bảo mật cốt lõi (thường là phân loại), nhưng có thể được áp dụng để dự đoán các kết quả dạng số. Ví dụ, có thể dùng hồi quy tuyến tính để **dự đoán lưu lượng mạng** hoặc **ước tính số cuộc tấn công trong một khoảng thời gian** dựa trên dữ liệu lịch sử. Phương pháp này cũng có thể dự đoán điểm rủi ro hoặc thời gian dự kiến cho đến khi phát hiện một cuộc tấn công dựa trên một số chỉ số hệ thống. Trên thực tế, các thuật toán phân loại (như hồi quy logistic hoặc cây) được dùng phổ biến hơn để phát hiện xâm nhập hoặc malware, nhưng hồi quy tuyến tính đóng vai trò nền tảng và hữu ích cho các phân tích hướng hồi quy.
 
-#### **Key characteristics of Linear Regression:**
+#### **Đặc điểm chính của hồi quy tuyến tính:**
 
--   **Type of Problem:** Regression (predicting continuous values). Not suited for direct classification unless a threshold is applied to the output.
+-   **Loại bài toán:** Hồi quy (dự đoán các giá trị liên tục). Không phù hợp để phân loại trực tiếp, trừ khi áp dụng một ngưỡng cho đầu ra.
 
--   **Interpretability:** High -- coefficients are straightforward to interpret, showing the linear effect of each feature.
+-   **Khả năng diễn giải:** Cao -- các hệ số dễ diễn giải, thể hiện tác động tuyến tính của từng đặc trưng.
 
--   **Advantages:** Simple and fast; a good baseline for regression tasks; works well when the true relationship is approximately linear.
+-   **Ưu điểm:** Đơn giản và nhanh; là mô hình cơ sở tốt cho các tác vụ hồi quy; hoạt động hiệu quả khi mối quan hệ thực tế gần tuyến tính.
 
--   **Limitations:** Can't capture complex or non-linear relationships (without manual feature engineering); prone to underfitting if relationships are non-linear; sensitive to outliers which can skew the results.
+-   **Hạn chế:** Không thể nắm bắt các mối quan hệ phức tạp hoặc phi tuyến (nếu không thiết kế đặc trưng thủ công); dễ bị underfitting nếu các mối quan hệ là phi tuyến; nhạy cảm với outlier, có thể làm sai lệch kết quả.
 
--   **Finding the Best Fit:** To find the best fit line that sepparates the possible categories, we use a method called **Ordinary Least Squares (OLS)**. This method minimizes the sum of the squared differences between the observed values and the values predicted by the linear model.
+-   **Tìm đường khớp tốt nhất:** Để tìm đường thẳng khớp tốt nhất nhằm phân tách các danh mục có thể có, ta sử dụng một phương pháp gọi là **Ordinary Least Squares (OLS)**. Phương pháp này giảm thiểu tổng bình phương các chênh lệch giữa giá trị quan sát được và giá trị do mô hình tuyến tính dự đoán.
 
 <details>
-<summary>Example -- Predicting Connection Duration (Regression) in an Intrusion Dataset
+<summary>Ví dụ -- Dự đoán thời lượng kết nối (hồi quy) trong tập dữ liệu xâm nhập
 </summary>
-Below we demonstrate linear regression using the NSL-KDD cybersecurity dataset. We'll treat this as a regression problem by predicting the `duration` of network connections based on other features. (In reality, `duration` is one feature of NSL-KDD; we use it here just to illustrate regression.) We load the dataset, preprocess it (encode categorical features), train a linear regression model, and evaluate the Mean Squared Error (MSE) and R² score on a test set.
+Dưới đây, chúng ta minh họa hồi quy tuyến tính bằng tập dữ liệu an ninh mạng NSL-KDD. Ta sẽ xem đây là bài toán hồi quy bằng cách dự đoán `duration` của các kết nối mạng dựa trên những đặc trưng khác. (Trên thực tế, `duration` là một đặc trưng của NSL-KDD; ở đây ta chỉ dùng nó để minh họa hồi quy.) Ta tải tập dữ liệu, tiền xử lý (mã hóa các đặc trưng phân loại), huấn luyện mô hình hồi quy tuyến tính và đánh giá Mean Squared Error (MSE) cùng điểm R² trên tập kiểm thử.
 
 
 ```python
@@ -135,14 +135,14 @@ Test R² : -0.526
 """
 ```
 
-In this example, the linear regression model tries to predict connection `duration` from other network features. We measure performance with Mean Squared Error (MSE) and R². An R² close to 1.0 would indicate the model explains most variance in `duration`, whereas a low or negative R² indicates a poor fit. (Don't be surprised if the R² is low here -- predicting `duration` might be difficult from the given features, and linear regression may not capture the patterns if they are complex.)
+Trong ví dụ này, mô hình hồi quy tuyến tính cố gắng dự đoán `duration` của kết nối từ các đặc trưng mạng khác. Chúng ta đo hiệu suất bằng Mean Squared Error (MSE) và R². R² gần 1.0 cho biết mô hình giải thích được phần lớn phương sai của `duration`, trong khi R² thấp hoặc âm cho biết mô hình khớp kém. (Đừng ngạc nhiên nếu R² ở đây thấp — có thể khó dự đoán `duration` từ các đặc trưng đã cho, và hồi quy tuyến tính có thể không nắm bắt được các mẫu nếu chúng phức tạp.)
 </details>
 
-### Logistic Regression
+### Hồi quy Logistic
 
-Logistic regression is a **classification** algorithm that models the probability that an instance belongs to a particular class (typically the "positive" class). Despite its name, *logistic* regression is used for discrete outcomes (unlike linear regression which is for continuous outcomes). It is especially used for **binary classification** (two classes, e.g., malicious vs. benign), but it can be extended to multi-class problems (using softmax or one-vs-rest approaches).<sup>[[3]](#references)</sup>
+Hồi quy logistic là thuật toán **phân loại**, mô hình hóa xác suất một mẫu thuộc về một lớp cụ thể (thường là lớp "dương tính"). Dù tên gọi như vậy, hồi quy *logistic* được dùng cho các kết quả rời rạc (không giống hồi quy tuyến tính, vốn dùng cho các kết quả liên tục). Thuật toán này đặc biệt được dùng cho **phân loại nhị phân** (hai lớp, ví dụ: độc hại và lành tính), nhưng có thể mở rộng cho các bài toán đa lớp (bằng cách sử dụng softmax hoặc phương pháp one-vs-rest).<sup>[[3]](#references)</sup>
 
-The logistic regression uses the logistic function (also known as the sigmoid function) to map predicted values to probabilities. Note that the sigmoid function is a function with values between 0 and 1 that grows in a S-shaped curve according to the needs of the classification, which is useful for binary classification tasks. Therefore, each feature of each input is multiplied by its assigned weight, and the result is passed through the sigmoid function to produce a probability:
+Hồi quy logistic sử dụng hàm logistic (còn gọi là hàm sigmoid) để ánh xạ các giá trị dự đoán thành xác suất. Lưu ý rằng hàm sigmoid trả về các giá trị từ 0 đến 1, tăng theo đường cong hình chữ S tùy theo yêu cầu của bài toán phân loại; đặc điểm này hữu ích cho các tác vụ phân loại nhị phân. Do đó, mỗi đặc trưng của mỗi đầu vào được nhân với trọng số tương ứng, sau đó kết quả được đưa qua hàm sigmoid để tạo ra xác suất:
 
 ```plaintext
 p(y=1|x) = 1 / (1 + e^(-z))
@@ -150,32 +150,32 @@ p(y=1|x) = 1 / (1 + e^(-z))
 
 Where:
 
-- `p(y=1|x)` is the probability that the output `y` is 1 given the input `x`
-- `e` is the base of the natural logarithm
-- `z` is a linear combination of the input features, typically represented as `z = w1*x1 + w2*x2 + ... + wn*xn + b`. Note how again in it simplest form it is a straight line, but in more complex cases it becomes a hyperplane with several dimensiones (one per feature).
+- `p(y=1|x)` là xác suất đầu ra `y` bằng 1 khi biết đầu vào `x`
+- `e` là cơ số của logarit tự nhiên
+- `z` là tổ hợp tuyến tính của các đặc trưng đầu vào, thường được biểu diễn dưới dạng `z = w1*x1 + w2*x2 + ... + wn*xn + b`. Lưu ý rằng ở dạng đơn giản nhất, nó là một đường thẳng, nhưng trong các trường hợp phức tạp hơn, nó trở thành một siêu phẳng với nhiều chiều (mỗi chiều ứng với một đặc trưng).
 
 > [!TIP]
-> *Use cases in cybersecurity:* Because many security problems are essentially yes/no decisions, logistic regression is widely used. For instance, an intrusion detection system might use logistic regression to decide if a network connection is an attack based on features of that connection. In phishing detection, logistic regression can combine features of a website (URL length, presence of "@" symbol, etc.) into a probability of being phishing. It has been used in early-generation spam filters and remains a strong baseline for many classification tasks.
+> *Các trường hợp sử dụng trong an ninh mạng:* Vì nhiều vấn đề bảo mật về bản chất là các quyết định có/không, hồi quy logistic được sử dụng rộng rãi. Ví dụ, hệ thống phát hiện xâm nhập có thể dùng hồi quy logistic để quyết định một kết nối mạng có phải là cuộc tấn công hay không dựa trên các đặc trưng của kết nối đó. Trong phát hiện phishing, hồi quy logistic có thể kết hợp các đặc trưng của một website (độ dài URL, sự hiện diện của ký hiệu "@", v.v.) để tính xác suất website đó là phishing. Phương pháp này từng được sử dụng trong các bộ lọc spam thế hệ đầu và vẫn là một mô hình cơ sở vững chắc cho nhiều tác vụ phân loại.
 
-#### Logistic Regression for non binary classification
+#### Hồi quy Logistic cho phân loại không nhị phân
 
-Logistic regression is designed for binary classification, but it can be extended to handle multi-class problems using techniques like **one-vs-rest** (OvR) or **softmax regression**. In OvR, a separate logistic regression model is trained for each class, treating it as the positive class against all others. The class with the highest predicted probability is chosen as the final prediction. Softmax regression generalizes logistic regression to multiple classes by applying the softmax function to the output layer, producing a probability distribution over all classes.
+Hồi quy logistic được thiết kế cho phân loại nhị phân, nhưng có thể được mở rộng để xử lý các bài toán đa lớp bằng những kỹ thuật như **one-vs-rest** (OvR) hoặc **softmax regression**. Trong OvR, một mô hình hồi quy logistic riêng được huấn luyện cho từng lớp, xem lớp đó là lớp dương và tất cả các lớp còn lại là lớp âm. Lớp có xác suất dự đoán cao nhất được chọn làm dự đoán cuối cùng. Softmax regression khái quát hóa hồi quy logistic cho nhiều lớp bằng cách áp dụng hàm softmax vào lớp đầu ra, tạo ra phân phối xác suất trên tất cả các lớp.
 
-#### **Key characteristics of Logistic Regression:**
+#### **Đặc điểm chính của hồi quy Logistic:**
 
--   **Type of Problem:** Classification (usually binary). It predicts the probability of the positive class.
+-   **Loại bài toán:** Phân loại (thường là nhị phân). Mô hình dự đoán xác suất của lớp dương.
 
--   **Interpretability:** High -- like linear regression, the feature coefficients can indicate how each feature influences the log-odds of the outcome. This transparency is often appreciated in security for understanding which factors contribute to an alert.
+-   **Khả năng diễn giải:** Cao -- giống như hồi quy tuyến tính, các hệ số đặc trưng có thể cho biết mỗi đặc trưng ảnh hưởng như thế nào đến log-odds của kết quả. Tính minh bạch này thường hữu ích trong bảo mật để hiểu những yếu tố nào góp phần tạo ra cảnh báo.
 
--   **Advantages:** Simple and fast to train; works well when the relationship between features and log-odds of the outcome is linear. Outputs probabilities, enabling risk scoring. With appropriate regularization, it generalizes well and can handle multicollinearity better than plain linear regression.
+-   **Ưu điểm:** Đơn giản và huấn luyện nhanh; hoạt động tốt khi mối quan hệ giữa các đặc trưng và log-odds của kết quả là tuyến tính. Mô hình đưa ra xác suất, cho phép chấm điểm rủi ro. Với regularization phù hợp, mô hình khái quát hóa tốt và xử lý đa cộng tuyến tốt hơn hồi quy tuyến tính thông thường.
 
--   **Limitations:** Assumes a linear decision boundary in feature space (fails if the true boundary is complex/non-linear). It may underperform on problems where interactions or non-linear effects are critical, unless you manually add polynomial or interaction features. Also, logistic regression is less effective if classes are not easily separable by a linear combination of features.
+-   **Hạn chế:** Giả định ranh giới quyết định trong không gian đặc trưng là tuyến tính (không hiệu quả nếu ranh giới thực tế phức tạp/phi tuyến). Mô hình có thể hoạt động kém trong các bài toán mà tương tác hoặc tác động phi tuyến đóng vai trò quan trọng, trừ khi bạn tự thêm các đặc trưng đa thức hoặc tương tác. Ngoài ra, hồi quy logistic kém hiệu quả hơn nếu các lớp không dễ phân tách bằng tổ hợp tuyến tính của các đặc trưng.
 
 
 <details>
-<summary>Example -- Phishing Website Detection with Logistic Regression:</summary>
+<summary>Ví dụ -- Phát hiện website phishing bằng hồi quy Logistic:</summary>
 
-We'll use a **Phishing Websites Dataset** (from the UCI repository) which contains extracted features of websites (like whether the URL has an IP address, the age of the domain, presence of suspicious elements in HTML, etc.) and a label indicating if the site is phishing or legitimate.<sup>[[4]](#references)</sup> We train a logistic regression model to classify websites and then evaluate its accuracy, precision, recall, F1-score, and ROC AUC on a test split.
+Chúng ta sẽ sử dụng **Phishing Websites Dataset** (từ kho lưu trữ UCI), gồm các đặc trưng được trích xuất từ website (chẳng hạn URL có chứa địa chỉ IP hay không, tuổi của tên miền, sự hiện diện của các thành phần đáng ngờ trong HTML, v.v.) cùng nhãn cho biết trang web là phishing hay hợp pháp.<sup>[[4]](#references)</sup> Chúng ta huấn luyện một mô hình hồi quy logistic để phân loại website, sau đó đánh giá accuracy, precision, recall, F1-score và ROC AUC trên tập kiểm thử.
 
 ```python
 import pandas as pd
@@ -232,26 +232,26 @@ ROC AUC  : 0.979
 """
 ```
 
-In this phishing detection example, logistic regression produces a probability for each website being phishing. By evaluating accuracy, precision, recall, and F1, we get a sense of the model's performance. For instance, a high recall would mean it catches most phishing sites (important for security to minimize missed attacks), while high precision means it has few false alarms (important to avoid analyst fatigue). The ROC AUC (Area Under the ROC Curve) gives a threshold-independent measure of performance (1.0 is ideal, 0.5 is no better than chance). Logistic regression often performs well on such tasks, but if the decision boundary between phishing and legitimate sites is complex, more powerful non-linear models might be needed.
+Trong ví dụ phát hiện phishing này, logistic regression tạo ra xác suất mỗi website là phishing. Đánh giá accuracy, precision, recall và F1 giúp chúng ta nắm được hiệu suất của mô hình. Chẳng hạn, recall cao nghĩa là mô hình phát hiện được phần lớn các trang phishing (điều quan trọng để giảm thiểu các cuộc tấn công bị bỏ sót), còn precision cao nghĩa là mô hình có ít cảnh báo sai (điều quan trọng để tránh khiến chuyên viên phân tích bị quá tải). ROC AUC (Area Under the ROC Curve) cung cấp thước đo hiệu suất không phụ thuộc vào ngưỡng (1.0 là lý tưởng, 0.5 không tốt hơn đoán ngẫu nhiên). Logistic regression thường hoạt động tốt với các tác vụ như vậy, nhưng nếu ranh giới quyết định giữa các trang phishing và trang hợp lệ phức tạp, có thể cần đến các mô hình phi tuyến mạnh hơn.
 
 </details>
 
-### Decision Trees
+### Cây quyết định
 
-A decision tree is a versatile **supervised learning algorithm** that can be used for both classification and regression tasks. It learns a hierarchical tree-like model of decisions based on the features of the data. Each internal node of the tree represents a test on a particular feature, each branch represents an outcome of that test, and each leaf node represents a predicted class (for classification) or value (for regression).<sup>[[5]](#references)</sup>
+Cây quyết định là một **thuật toán học có giám sát** linh hoạt, có thể dùng cho cả tác vụ phân loại lẫn hồi quy. Thuật toán này học một mô hình phân cấp dạng cây về các quyết định dựa trên các đặc trưng của dữ liệu. Mỗi nút bên trong cây biểu thị một phép kiểm tra trên một đặc trưng cụ thể, mỗi nhánh biểu thị một kết quả của phép kiểm tra đó, còn mỗi nút lá biểu thị lớp dự đoán (đối với phân loại) hoặc giá trị dự đoán (đối với hồi quy).<sup>[[5]](#references)</sup>
 
-To build a tree, algorithms like CART (Classification and Regression Tree) use measures such as **Gini impurity** or **information gain (entropy)** to choose the best feature and threshold to split the data at each step. The goal at each split is to partition the data to increase the homogeneity of the target variable in the resulting subsets (for classification, each node aims to be as pure as possible, containing predominantly a single class).
+Để xây dựng cây, các thuật toán như CART (Classification and Regression Tree) sử dụng những thước đo như **độ hỗn tạp Gini** hoặc **information gain (entropy)** để chọn đặc trưng và ngưỡng phân chia dữ liệu phù hợp nhất ở mỗi bước. Mục tiêu của mỗi lần phân chia là chia dữ liệu sao cho biến mục tiêu trong các tập con thu được trở nên đồng nhất hơn (đối với phân loại, mỗi nút hướng đến độ thuần cao nhất có thể, chủ yếu chỉ chứa một lớp).
 
-Decision trees are **highly interpretable** -- one can follow the path from root to leaf to understand the logic behind a prediction (e.g., *"IF `service = telnet` AND `src_bytes > 1000` AND `failed_logins > 3` THEN classify as attack"*). This is valuable in cybersecurity for explaining why a certain alert was raised. Trees can naturally handle both numerical and categorical data and require little preprocessing (e.g., feature scaling is not needed).
+Cây quyết định **có khả năng diễn giải cao** -- có thể lần theo đường đi từ nút gốc đến nút lá để hiểu logic đằng sau một dự đoán (ví dụ: *"NẾU `service = telnet` VÀ `src_bytes > 1000` VÀ `failed_logins > 3` THÌ phân loại là tấn công"*). Điều này hữu ích trong an ninh mạng để giải thích lý do phát ra một cảnh báo. Cây có thể xử lý tự nhiên cả dữ liệu số lẫn dữ liệu phân loại và cần rất ít tiền xử lý (ví dụ: không cần chuẩn hóa đặc trưng).
 
-However, a single decision tree can easily overfit the training data, especially if grown deep (many splits). Techniques like pruning (limiting tree depth or requiring a minimum number of samples per leaf) are often used to prevent overfitting.
+Tuy nhiên, một cây quyết định đơn lẻ có thể dễ dàng overfit dữ liệu huấn luyện, đặc biệt nếu cây được phát triển quá sâu (có nhiều lần phân chia). Các kỹ thuật như pruning (giới hạn độ sâu của cây hoặc yêu cầu số lượng mẫu tối thiểu cho mỗi nút lá) thường được dùng để ngăn overfitting.
 
-There are 3 main components of a decision tree:
-- **Root Node**: The top node of the tree, representing the entire dataset.
-- **Internal Nodes**: Nodes that represent features and decisions based on those features.
-- **Leaf Nodes**: Nodes that represent the final outcome or prediction.
+Cây quyết định có 3 thành phần chính:
+- **Nút gốc**: Nút trên cùng của cây, biểu thị toàn bộ tập dữ liệu.
+- **Nút bên trong**: Các nút biểu thị đặc trưng và quyết định dựa trên những đặc trưng đó.
+- **Nút lá**: Các nút biểu thị kết quả cuối cùng hoặc dự đoán.
 
-A tree might end up looking like this:
+Cây có thể trông như sau:
 
 ```plaintext
           [Root Node]
@@ -262,50 +262,50 @@ A tree might end up looking like this:
 ```
 
 > [!TIP]
-> *Use cases in cybersecurity:* Decision trees have been used in intrusion detection systems to derive **rules** for identifying attacks. For example, early IDS like ID3/C4.5-based systems would generate human-readable rules to distinguish normal vs. malicious traffic. They are also used in malware analysis to decide if a file is malicious based on its attributes (file size, section entropy, API calls, etc.). The clarity of decision trees makes them useful when transparency is needed -- an analyst can inspect the tree to validate the detection logic.
+> *Ứng dụng trong an ninh mạng:* Cây quyết định đã được sử dụng trong các hệ thống phát hiện xâm nhập để rút ra **các quy tắc** nhận diện tấn công. Ví dụ, các IDS đời đầu dựa trên ID3/C4.5 sẽ tạo ra các quy tắc dễ đọc để phân biệt lưu lượng bình thường với lưu lượng độc hại. Chúng cũng được dùng trong phân tích malware để xác định một tệp có độc hại hay không dựa trên các thuộc tính của nó (kích thước tệp, entropy của section, các lệnh gọi API, v.v.). Tính rõ ràng của cây quyết định khiến chúng hữu ích khi cần tính minh bạch — nhà phân tích có thể kiểm tra cây để xác thực logic phát hiện.
 
-#### **Key characteristics of Decision Trees:**
+#### **Các đặc điểm chính của Cây quyết định:**
 
--   **Type of Problem:** Both classification and regression. Commonly used for classification of attacks vs. normal traffic, etc.
+-   **Loại bài toán:** Cả phân loại và hồi quy. Thường được dùng để phân loại tấn công và lưu lượng bình thường, v.v.
 
--   **Interpretability:** Very high -- the model's decisions can be visualized and understood as a set of if-then rules. This is a major advantage in security for trust and verification of model behavior.
+-   **Khả năng diễn giải:** Rất cao — các quyết định của mô hình có thể được trực quan hóa và hiểu như một tập hợp các quy tắc nếu-thì. Đây là một lợi thế lớn trong lĩnh vực bảo mật, giúp tăng độ tin cậy và xác minh hành vi của mô hình.
 
--   **Advantages:** Can capture non-linear relationships and interactions between features (each split can be seen as an interaction). No need to scale features or one-hot encode categorical variables -- trees handle those natively. Fast inference (prediction is just following a path in the tree).
+-   **Ưu điểm:** Có thể nắm bắt các mối quan hệ phi tuyến và tương tác giữa các đặc trưng (mỗi lần phân nhánh có thể được xem là một tương tác). Không cần chuẩn hóa đặc trưng hoặc mã hóa one-hot các biến phân loại — cây xử lý chúng theo cách riêng. Dự đoán nhanh (chỉ cần đi theo một nhánh trong cây).
 
--   **Limitations:** Prone to overfitting if not controlled (a deep tree can memorize the training set). They can be unstable -- small changes in data might lead to a different tree structure. As single models, their accuracy might not match more advanced methods (ensembles like Random Forests typically perform better by reducing variance).
+-   **Hạn chế:** Dễ bị overfitting nếu không được kiểm soát (cây sâu có thể ghi nhớ tập huấn luyện). Chúng có thể không ổn định — những thay đổi nhỏ trong dữ liệu có thể dẫn đến cấu trúc cây khác. Khi dùng làm mô hình đơn lẻ, độ chính xác có thể không bằng các phương pháp tiên tiến hơn (các phương pháp ensemble như Random Forest thường cho hiệu quả tốt hơn nhờ giảm phương sai).
 
--   **Finding the Best Split:**
-  - **Gini Impurity**: Measures the impurity of a node. A lower Gini impurity indicates a better split. The formula is:
+-   **Tìm điểm phân nhánh tốt nhất:**
+  - **Gini Impurity**: Đo mức độ hỗn tạp của một nút. Gini impurity càng thấp thì điểm phân nhánh càng tốt. Công thức là:
   
   ```plaintext
   Gini = 1 - Σ(p_i^2)
   ```
 
-  Where `p_i` is the proportion of instances in class `i`.
+  Trong đó `p_i` là tỷ lệ các mẫu thuộc lớp `i`.
   
-  - **Entropy**: Measures the uncertainty in the dataset. A lower entropy indicates a better split. The formula is:
+  - **Entropy**: Đo mức độ bất định trong tập dữ liệu. Entropy thấp hơn cho thấy phép chia tốt hơn. Công thức là:
 
   ```plaintext
   Entropy = -Σ(p_i * log2(p_i))
   ```
 
-  Where `p_i` is the proportion of instances in class `i`.
+  Trong đó `p_i` là tỷ lệ các mẫu thuộc lớp `i`.
   
-  - **Information Gain**: The reduction in entropy or Gini impurity after a split. The higher the information gain, the better the split. It is calculated as:
+  - **Mức tăng thông tin**: Mức giảm entropy hoặc độ hỗn tạp Gini sau khi phân tách. Mức tăng thông tin càng cao, phép phân tách càng tốt. Giá trị này được tính như sau:
 
   ```plaintext
   Information Gain = Entropy(parent) - (Weighted Average of Entropy(children))
   ```
 
-Moreover, a tree is ended when:
-- All instances in a node belong to the same class. This might lead to overfitting.
-- The maximum depth (hardcoded) of the tree is reached. This is a way to prevent overfitting.
-- The number of instances in a node is below a certain threshold. This is also a way to prevent overfitting.
-- The information gain from further splits is below a certain threshold. This is also a way to prevent overfitting.
+Moreover, một cây kết thúc khi:
+- Tất cả các mẫu trong một nút đều thuộc cùng một lớp. Điều này có thể dẫn đến quá khớp.
+- Đạt đến độ sâu tối đa (được mã hóa cứng) của cây. Đây là một cách để ngăn quá khớp.
+- Số lượng mẫu trong một nút thấp hơn một ngưỡng nhất định. Đây cũng là một cách để ngăn quá khớp.
+- Mức tăng thông tin từ các lần phân tách tiếp theo thấp hơn một ngưỡng nhất định. Đây cũng là một cách để ngăn quá khớp.
 
 <details>
-<summary>Example -- Decision Tree for Intrusion Detection:</summary>
-We'll train a decision tree on the NSL-KDD dataset to classify network connections as either *normal* or *attack*. NSL-KDD is an improved version of the classic KDD Cup 1999 dataset, with features like protocol type, service, duration, number of failed logins, etc., and a label indicating the attack type or "normal". We will map all attack types to an "anomaly" class (binary classification: normal vs anomaly). After training, we'll evaluate the tree's performance on the test set.
+<summary>Ví dụ -- Cây quyết định dùng để phát hiện xâm nhập:</summary>
+Chúng ta sẽ huấn luyện một cây quyết định trên tập dữ liệu NSL-KDD để phân loại các kết nối mạng là *bình thường* hoặc *tấn công*. NSL-KDD là phiên bản cải tiến của tập dữ liệu KDD Cup 1999 kinh điển, với các đặc trưng như loại giao thức, dịch vụ, thời lượng, số lần đăng nhập thất bại, v.v., cùng nhãn cho biết loại tấn công hoặc "bình thường". Chúng ta sẽ ánh xạ tất cả các loại tấn công thành lớp "bất thường" (phân loại nhị phân: bình thường và bất thường). Sau khi huấn luyện, chúng ta sẽ đánh giá hiệu suất của cây trên tập kiểm tra.
 
 
 ```python
@@ -372,40 +372,40 @@ ROC AUC  : 0.758
 """
 ```
 
-In this decision tree example, we limited the tree depth to 10 to avoid extreme overfitting (the `max_depth=10` parameter). The metrics show how well the tree distinguishes normal vs. attack traffic. A high recall would mean it catches most attacks (important for an IDS), while high precision means few false alarms. Decision trees often achieve decent accuracy on structured data, but a single tree might not reach the best performance possible. Nonetheless, the *interpretability* of the model is a big plus -- we could examine the tree's splits to see, for instance, which features (e.g., `service`, `src_bytes`, etc.) are most influential in flagging a connection as malicious.
+Trong ví dụ về cây quyết định này, chúng ta giới hạn độ sâu của cây ở mức 10 để tránh overfitting quá mức (tham số `max_depth=10`). Các chỉ số cho thấy cây phân biệt lưu lượng bình thường với lưu lượng tấn công tốt đến đâu. Recall cao nghĩa là phát hiện được hầu hết các cuộc tấn công (điều quan trọng đối với IDS), còn precision cao nghĩa là có ít cảnh báo giả. Cây quyết định thường đạt độ chính xác khá tốt trên dữ liệu có cấu trúc, nhưng một cây đơn lẻ có thể không đạt được hiệu suất tối ưu. Tuy vậy, *khả năng diễn giải* của mô hình là một ưu điểm lớn -- chúng ta có thể kiểm tra các nút phân tách của cây để xem, chẳng hạn, những đặc trưng nào (ví dụ: `service`, `src_bytes`, v.v.) có ảnh hưởng lớn nhất đến việc đánh dấu một kết nối là độc hại.
 
 </details>
 
 ### Random Forests
 
-Random Forest is an **ensemble learning** method that builds upon decision trees to improve performance. A random forest trains multiple decision trees (hence "forest") and combines their outputs to make a final prediction (for classification, typically by majority vote). The two main ideas in a random forest are **bagging** (bootstrap aggregating) and **feature randomness**:
+Random Forest là một phương pháp **học tập tổ hợp** dựa trên cây quyết định để cải thiện hiệu suất. Random Forest huấn luyện nhiều cây quyết định (do đó có tên "rừng") rồi kết hợp kết quả của chúng để đưa ra dự đoán cuối cùng (đối với bài toán phân loại, thường là bỏ phiếu theo đa số). Hai ý tưởng chính trong Random Forest là **bagging** (bootstrap aggregating) và **tính ngẫu nhiên của đặc trưng**:
 
--   **Bagging:** Each tree is trained on a random bootstrap sample of the training data (sampled with replacement). This introduces diversity among the trees.
+-   **Bagging:** Mỗi cây được huấn luyện trên một mẫu bootstrap ngẫu nhiên của dữ liệu huấn luyện (lấy mẫu có hoàn lại). Điều này tạo ra sự đa dạng giữa các cây.
 
--   **Feature Randomness:** At each split in a tree, a random subset of features is considered for splitting (instead of all features). This further decorrelates the trees.
+-   **Tính ngẫu nhiên của đặc trưng:** Ở mỗi nút phân tách trong cây, một tập con đặc trưng ngẫu nhiên được chọn để xem xét phân tách (thay vì dùng tất cả đặc trưng). Điều này giúp các cây ít tương quan với nhau hơn.
 
-By averaging the results of many trees, the random forest reduces the variance that a single decision tree might have. In simple terms, individual trees might overfit or be noisy, but a large number of diverse trees voting together smooths out those errors. The result is often a model with **higher accuracy** and better generalization than a single decision tree. In addition, random forests can provide an estimate of feature importance (by looking at how much each feature split reduces impurity on average).
+Bằng cách lấy trung bình kết quả từ nhiều cây, Random Forest giảm phương sai mà một cây quyết định đơn lẻ có thể gặp phải. Nói đơn giản, từng cây riêng lẻ có thể bị overfit hoặc đưa ra kết quả nhiễu, nhưng nhiều cây đa dạng cùng bỏ phiếu sẽ giúp giảm các sai sót đó. Kết quả thường là mô hình có **độ chính xác cao hơn** và khả năng tổng quát hóa tốt hơn so với một cây quyết định đơn lẻ. Ngoài ra, Random Forest có thể ước tính độ quan trọng của đặc trưng (bằng cách tính mức giảm độ hỗn tạp trung bình do mỗi đặc trưng tạo ra khi phân tách).
 
-Random forests have become a **workhorse in cybersecurity** for tasks like intrusion detection, malware classification, and spam detection. They often perform well out-of-the-box with minimal tuning and can handle large feature sets. For example, in intrusion detection, a random forest may outperform an individual decision tree by catching more subtle patterns of attacks with fewer false positives. Research has shown random forests performing favorably compared to other algorithms in classifying attacks in datasets like NSL-KDD and UNSW-NB15.<sup>[[6]](#references)</sup><sup>[[7]](#references)</sup>
+Random Forest đã trở thành một **công cụ chủ lực trong an ninh mạng** cho các tác vụ như phát hiện xâm nhập, phân loại malware và phát hiện spam. Chúng thường hoạt động tốt ngay khi dùng mà không cần tinh chỉnh nhiều và có thể xử lý các tập đặc trưng lớn. Ví dụ, trong phát hiện xâm nhập, Random Forest có thể hoạt động tốt hơn một cây quyết định riêng lẻ bằng cách phát hiện nhiều mẫu tấn công tinh vi hơn với ít kết quả dương tính giả hơn. Nghiên cứu cho thấy Random Forest hoạt động hiệu quả so với các thuật toán khác trong việc phân loại tấn công trên các bộ dữ liệu như NSL-KDD và UNSW-NB15.<sup>[[6]](#references)</sup><sup>[[7]](#references)</sup>
 
-#### **Key characteristics of Random Forests:**
+#### **Đặc điểm chính của Random Forest:**
 
--   **Type of Problem:** Primarily classification (also used for regression). Very well-suited for high-dimensional structured data common in security logs.
+-   **Loại bài toán:** Chủ yếu là phân loại (cũng được dùng cho hồi quy). Rất phù hợp với dữ liệu có cấu trúc, nhiều chiều thường gặp trong nhật ký bảo mật.
 
--   **Interpretability:** Lower than a single decision tree -- you can't easily visualize or explain hundreds of trees at once. However, feature importance scores provide some insight into which attributes are most influential.
+-   **Khả năng diễn giải:** Thấp hơn so với một cây quyết định đơn lẻ -- bạn không thể dễ dàng trực quan hóa hoặc giải thích hàng trăm cây cùng lúc. Tuy nhiên, điểm độ quan trọng của đặc trưng cung cấp một số thông tin về những thuộc tính có ảnh hưởng lớn nhất.
 
--   **Advantages:** Generally higher accuracy than single-tree models due to ensemble effect. Robust to overfitting -- even if individual trees overfit, the ensemble generalizes better. Handles both numerical and categorical features and can manage missing data to some extent. It's also relatively robust to outliers.
+-   **Ưu điểm:** Nhìn chung có độ chính xác cao hơn các mô hình cây đơn lẻ nhờ hiệu ứng tổ hợp. Có khả năng chống overfitting -- ngay cả khi từng cây riêng lẻ bị overfit, mô hình tổ hợp vẫn tổng quát hóa tốt hơn. Xử lý được cả đặc trưng dạng số và dạng phân loại, đồng thời có thể xử lý dữ liệu bị thiếu ở một mức độ nhất định. Mô hình cũng tương đối bền vững trước các giá trị ngoại lệ.
 
--   **Limitations:** Model size can be large (many trees, each potentially deep). Predictions are slower than a single tree (as you must aggregate over many trees). Less interpretable -- while you know important features, the exact logic isn't easily traceable as a simple rule. If the dataset is extremely high-dimensional and sparse, training a very large forest can be computationally heavy.
+-   **Hạn chế:** Kích thước mô hình có thể lớn (nhiều cây, mỗi cây có thể có độ sâu lớn). Tốc độ dự đoán chậm hơn một cây đơn lẻ (vì phải tổng hợp kết quả của nhiều cây). Khả năng diễn giải thấp hơn -- dù biết các đặc trưng quan trọng, không dễ lần theo chính xác logic như một quy tắc đơn giản. Nếu tập dữ liệu có số chiều cực lớn và thưa, việc huấn luyện một Random Forest rất lớn có thể đòi hỏi nhiều tài nguyên tính toán.
 
--   **Training Process:**
-  1. **Bootstrap Sampling**: Randomly sample the training data with replacement to create multiple subsets (bootstrap samples).
-  2. **Tree Construction**: For each bootstrap sample, build a decision tree using a random subset of features at each split. This introduces diversity among the trees.
-  3. **Aggregation**: For classification tasks, the final prediction is made by taking a majority vote among the predictions of all trees. For regression tasks, the final prediction is the average of the predictions from all trees.
+-   **Quy trình huấn luyện:**
+  1. **Lấy mẫu Bootstrap**: Lấy mẫu ngẫu nhiên có hoàn lại từ dữ liệu huấn luyện để tạo nhiều tập con (mẫu bootstrap).
+  2. **Xây dựng cây**: Với mỗi mẫu bootstrap, xây dựng một cây quyết định bằng cách chọn ngẫu nhiên một tập con đặc trưng tại mỗi nút phân tách. Điều này tạo ra sự đa dạng giữa các cây.
+  3. **Tổng hợp**: Với các tác vụ phân loại, dự đoán cuối cùng được đưa ra bằng cách lấy phiếu đa số từ dự đoán của tất cả các cây. Với các tác vụ hồi quy, dự đoán cuối cùng là trung bình các dự đoán của tất cả các cây.
 
 <details>
-<summary>Example -- Random Forest for Intrusion Detection (NSL-KDD):</summary>
-We'll use the same NSL-KDD dataset (binary labeled as normal vs anomaly) and train a Random Forest classifier. We expect the random forest to perform as well as or better than the single decision tree, thanks to the ensemble averaging reducing variance. We'll evaluate it with the same metrics.
+<summary>Ví dụ -- Random Forest trong phát hiện xâm nhập (NSL-KDD):</summary>
+Chúng ta sẽ dùng cùng bộ dữ liệu NSL-KDD (được gán nhãn nhị phân là bình thường hoặc bất thường) và huấn luyện một bộ phân loại Random Forest. Chúng ta kỳ vọng Random Forest sẽ hoạt động tốt ngang hoặc tốt hơn cây quyết định đơn lẻ, nhờ phép lấy trung bình trên mô hình tổ hợp giúp giảm phương sai. Chúng ta sẽ đánh giá mô hình bằng các chỉ số tương tự.
 
 
 ```python
@@ -500,35 +500,35 @@ ROC AUC:   0.962
 """
 ```
 
-The random forest typically achieves strong results on this intrusion detection task. We might observe an improvement in metrics like F1 or AUC compared to the single decision tree, especially in recall or precision, depending on the data. This aligns with the understanding that *"Random Forest (RF) is an ensemble classifier and performs well compared to other traditional classifiers for effective classification of attacks."*.<sup>[[6]](#references)</sup> In a security operations context, a random forest model might more reliably flag attacks while reducing false alarms, thanks to the averaging of many decision rules. Feature importance from the forest could tell us which network features are most indicative of attacks (e.g., certain network services or unusual counts of packets).
+Cây random forest thường đạt kết quả tốt trong tác vụ phát hiện xâm nhập này. Ta có thể thấy các chỉ số như F1 hoặc AUC cải thiện so với cây quyết định đơn, đặc biệt là recall hoặc precision, tùy thuộc vào dữ liệu. Điều này phù hợp với nhận định rằng *"Random Forest (RF) là một bộ phân loại tổ hợp và hoạt động tốt so với các bộ phân loại truyền thống khác trong việc phân loại tấn công hiệu quả."*.<sup>[[6]](#references)</sup> Trong bối cảnh vận hành bảo mật, mô hình random forest có thể gắn cờ các cuộc tấn công đáng tin cậy hơn đồng thời giảm cảnh báo sai, nhờ lấy trung bình từ nhiều quy tắc quyết định. Độ quan trọng của đặc trưng từ forest có thể cho biết những đặc trưng mạng nào là dấu hiệu rõ nhất của các cuộc tấn công (ví dụ: một số dịch vụ mạng nhất định hoặc số lượng gói tin bất thường).
 
 </details>
 
 ### Support Vector Machines (SVM)
 
-Support Vector Machines are powerful supervised learning models used primarily for classification (and also regression as SVR). An SVM tries to find the **optimal separating hyperplane** that maximizes the margin between two classes. Only a subset of training points (the "support vectors" closest to the boundary) determines the position of this hyperplane. By maximizing the margin (distance between support vectors and the hyperplane), SVMs tend to achieve good generalization.<sup>[[8]](#references)</sup>
+Support Vector Machines là các mô hình học có giám sát mạnh mẽ, chủ yếu được dùng cho phân loại (và cả hồi quy dưới dạng SVR). SVM tìm **siêu phẳng phân tách tối ưu** để tối đa hóa biên giữa hai lớp. Chỉ một tập con các điểm huấn luyện (các "support vector" gần ranh giới nhất) quyết định vị trí của siêu phẳng này. Bằng cách tối đa hóa biên (khoảng cách giữa các support vector và siêu phẳng), SVM thường đạt khả năng tổng quát hóa tốt.<sup>[[8]](#references)</sup>
 
-Key to SVM's power is the ability to use **kernel functions** to handle non-linear relationships. The data can be implicitly transformed into a higher-dimensional feature space where a linear separator might exist. Common kernels include polynomial, radial basis function (RBF), and sigmoid. For example, if network traffic classes aren't linearly separable in the raw feature space, an RBF kernel can map them into a higher dimension where the SVM finds a linear split (which corresponds to a non-linear boundary in original space). The flexibility of choosing kernels allows SVMs to tackle a variety of problems.
+Điểm cốt yếu tạo nên sức mạnh của SVM là khả năng sử dụng **hàm kernel** để xử lý các mối quan hệ phi tuyến. Dữ liệu có thể được biến đổi ngầm sang không gian đặc trưng có số chiều cao hơn, nơi có thể tồn tại một bộ phân tách tuyến tính. Các kernel phổ biến gồm polynomial, radial basis function (RBF) và sigmoid. Ví dụ, nếu các lớp lưu lượng mạng không thể phân tách tuyến tính trong không gian đặc trưng thô, kernel RBF có thể ánh xạ chúng sang không gian nhiều chiều hơn, nơi SVM tìm được một ranh giới phân tách tuyến tính (tương ứng với ranh giới phi tuyến trong không gian ban đầu). Khả năng lựa chọn kernel linh hoạt cho phép SVM xử lý nhiều loại bài toán.
 
-SVMs are known to perform well in situations with high-dimensional feature spaces (like text data or malware opcode sequences) and in cases where the number of features is large relative to number of samples. They were popular in many early cybersecurity applications such as malware classification and anomaly-based intrusion detection in the 2000s, often showing high accuracy.
+SVM nổi tiếng với hiệu quả trong các tình huống có không gian đặc trưng nhiều chiều (như dữ liệu văn bản hoặc chuỗi opcode của malware) và các trường hợp số lượng đặc trưng lớn so với số lượng mẫu. Chúng từng phổ biến trong nhiều ứng dụng an ninh mạng thời kỳ đầu, chẳng hạn như phân loại malware và phát hiện xâm nhập dựa trên bất thường vào những năm 2000, thường đạt độ chính xác cao.
 
-However, SVMs do not scale easily to very large datasets (training complexity is super-linear in number of samples, and memory usage can be high since it may need to store many support vectors). In practice, for tasks like network intrusion detection with millions of records, SVM might be too slow without careful subsampling or using approximate methods.
+Tuy nhiên, SVM không dễ mở rộng cho các tập dữ liệu rất lớn (độ phức tạp huấn luyện tăng nhanh hơn tuyến tính theo số lượng mẫu, và mức sử dụng bộ nhớ có thể cao vì mô hình có thể cần lưu trữ nhiều support vector). Trên thực tế, với các tác vụ như phát hiện xâm nhập mạng có hàng triệu bản ghi, SVM có thể quá chậm nếu không lấy mẫu con cẩn thận hoặc sử dụng các phương pháp xấp xỉ.
 
-#### **Key characteristics of SVM:**
+#### **Đặc điểm chính của SVM:**
 
--   **Type of Problem:** Classification (binary or multiclass via one-vs-one/one-vs-rest) and regression variants. Often used in binary classification with clear margin separation.
+-   **Loại bài toán:** Phân loại (nhị phân hoặc đa lớp thông qua one-vs-one/one-vs-rest) và các biến thể hồi quy. Thường được dùng trong phân loại nhị phân với ranh giới biên rõ ràng.
 
--   **Interpretability:** Medium -- SVMs are not as interpretable as decision trees or logistic regression. While you can identify which data points are support vectors and get some sense of which features might be influential (through the weights in the linear kernel case), in practice SVMs (especially with non-linear kernels) are treated as black-box classifiers.
+-   **Khả năng diễn giải:** Trung bình -- SVM không dễ diễn giải như cây quyết định hoặc logistic regression. Dù có thể xác định các điểm dữ liệu là support vector và phần nào nhận biết được những đặc trưng có thể ảnh hưởng (thông qua trọng số trong trường hợp dùng linear kernel), trên thực tế SVM (đặc biệt là khi dùng kernel phi tuyến) thường được xem là bộ phân loại hộp đen.
 
--   **Advantages:** Effective in high-dimensional spaces; can model complex decision boundaries with kernel trick; robust to overfitting if margin is maximized (especially with a proper regularization parameter C); works well even when classes are not separated by a large distance (finds best compromise boundary).
+-   **Ưu điểm:** Hiệu quả trong không gian nhiều chiều; có thể mô hình hóa các ranh giới quyết định phức tạp bằng kernel trick; chống overfitting tốt nếu biên được tối đa hóa (đặc biệt khi chọn tham số regularization C phù hợp); hoạt động tốt ngay cả khi các lớp không cách nhau quá xa (tìm ranh giới dung hòa tốt nhất).
 
--   **Limitations:** **Computationally intensive** for large datasets (both training and prediction scale poorly as data grows). Requires careful tuning of kernel and regularization parameters (C, kernel type, gamma for RBF, etc.). Doesn't directly provide probabilistic outputs (though one can use Platt scaling to get probabilities). Also, SVMs can be sensitive to the choice of kernel parameters --- a poor choice can lead to underfit or overfit.
+-   **Hạn chế:** **Tốn nhiều tài nguyên tính toán** với các tập dữ liệu lớn (cả huấn luyện lẫn dự đoán đều mở rộng kém khi dữ liệu tăng). Cần tinh chỉnh cẩn thận các tham số kernel và regularization (C, loại kernel, gamma cho RBF, v.v.). Không trực tiếp cung cấp đầu ra xác suất (mặc dù có thể dùng Platt scaling để tính xác suất). Ngoài ra, SVM có thể nhạy với việc chọn tham số kernel --- lựa chọn không phù hợp có thể dẫn đến underfit hoặc overfit.
 
-*Use cases in cybersecurity:* SVMs have been used in **malware detection** (e.g., classifying files based on extracted features or opcode sequences), **network anomaly detection** (classifying traffic as normal vs malicious), and **phishing detection** (using features of URLs). For instance, an SVM could take features of an email (counts of certain keywords, sender reputation scores, etc.) and classify it as phishing or legitimate. They have also been applied to **intrusion detection** on feature sets like KDD, often achieving high accuracy at the cost of computation.
+*Các trường hợp sử dụng trong an ninh mạng:* SVM đã được dùng trong **phát hiện malware** (ví dụ: phân loại tệp dựa trên các đặc trưng đã trích xuất hoặc chuỗi opcode), **phát hiện bất thường mạng** (phân loại lưu lượng là bình thường hay độc hại) và **phát hiện phishing** (dùng các đặc trưng của URL). Chẳng hạn, SVM có thể sử dụng các đặc trưng của email (số lần xuất hiện của một số từ khóa, điểm uy tín của người gửi, v.v.) để phân loại email là phishing hay hợp lệ. SVM cũng được áp dụng cho **phát hiện xâm nhập** trên các tập đặc trưng như KDD, thường đạt độ chính xác cao nhưng tiêu tốn nhiều tài nguyên tính toán.
 
 <details>
-<summary>Example -- SVM for Malware Classification:</summary>
-We'll use the phishing website dataset again, this time with an SVM. Because SVMs can be slow, we'll use a subset of the data for training if needed (the dataset is about 11k instances, which SVM can handle reasonably). We'll use an RBF kernel which is a common choice for non-linear data, and we'll enable probability estimates to calculate ROC AUC.
+<summary>Ví dụ -- SVM dùng để phân loại Malware:</summary>
+Ta sẽ lại dùng tập dữ liệu website phishing, lần này với SVM. Vì SVM có thể chạy chậm, nếu cần ta sẽ dùng một phần dữ liệu để huấn luyện (tập dữ liệu có khoảng 11k mẫu, mức này SVM có thể xử lý tương đối tốt). Ta sẽ dùng kernel RBF, một lựa chọn phổ biến cho dữ liệu phi tuyến, và bật tính năng ước lượng xác suất để tính ROC AUC.
 
 ```python
 import pandas as pd
@@ -598,77 +598,77 @@ ROC AUC  : 0.989
 """
 ```
 
-The SVM model will output metrics that we can compare to logistic regression on the same task. We might find that SVM achieves a high accuracy and AUC if the data is well-separated by the features. On the flip side, if the dataset had a lot of noise or overlapping classes, SVM might not significantly outperform logistic regression. In practice, SVMs can give a boost when there are complex, non-linear relations between features and class -- the RBF kernel can capture curved decision boundaries that logistic regression would miss. As with all models, careful tuning of the `C` (regularization) and kernel parameters (like `gamma` for RBF) is needed to balance bias and variance.
+Mô hình SVM sẽ đưa ra các chỉ số mà ta có thể so sánh với hồi quy logistic trên cùng tác vụ. Ta có thể thấy SVM đạt độ chính xác và AUC cao nếu các đặc trưng phân tách tốt dữ liệu. Ngược lại, nếu tập dữ liệu có nhiều nhiễu hoặc các lớp chồng lấn, SVM có thể không vượt trội đáng kể so với hồi quy logistic. Trên thực tế, SVM có thể cải thiện kết quả khi có các mối quan hệ phức tạp, phi tuyến giữa đặc trưng và lớp — kernel RBF có thể nắm bắt các ranh giới quyết định cong mà hồi quy logistic sẽ bỏ lỡ. Như với mọi mô hình, cần tinh chỉnh cẩn thận `C` (regularization) và các tham số kernel (chẳng hạn `gamma` cho RBF) để cân bằng độ chệch và phương sai.
 
 </details>
 
-#### Differences Between Logistic Regression and SVM
+#### Khác biệt giữa hồi quy logistic và SVM
 
-| Aspect | **Logistic Regression** | **Support Vector Machines** |
+| Khía cạnh | **Hồi quy Logistic** | **Support Vector Machines** |
 |---|---|---|
-| **Objective function** | Minimises **log‑loss** (cross‑entropy). | Maximises the **margin** while minimising **hinge‑loss**. |
-| **Decision boundary** | Finds the **best‑fit hyperplane** that models _P(y\|x)_. | Finds the **maximum‑margin hyperplane** (largest gap to the closest points). |
-| **Output** | **Probabilistic** – gives calibrated class probabilities via σ(w·x + b). | **Deterministic** – returns class labels; probabilities need extra work (e.g. Platt scaling). |
-| **Regularisation** | L2 (default) or L1, directly balances under/over‑fitting. | C parameter trades off margin width vs. mis‑classifications; kernel parameters add complexity. |
-| **Kernels / Non‑linear** | Native form is **linear**; non‑linearity added by feature engineering. | Built‑in **kernel trick** (RBF, poly, etc.) lets it model complex boundaries in high‑dim. space. |
-| **Scalability** | Solves a convex optimisation in **O(nd)**; handles very large n well. | Training can be **O(n²–n³)** memory/time without specialised solvers; less friendly to huge n. |
-| **Interpretability** | **High** – weights show feature influence; odds ratio intuitive. | **Low** for non‑linear kernels; support vectors are sparse but not easy to explain. |
-| **Sensitivity to outliers** | Uses smooth log‑loss → less sensitive. | Hinge‑loss with hard margin can be **sensitive**; soft‑margin (C) mitigates. |
-| **Typical use cases** | Credit scoring, medical risk, A/B testing – where **probabilities & explainability** matter. | Image/text classification, bio‑informatics – where **complex boundaries** and **high‑dimensional data** matter. |
+| **Hàm mục tiêu** | Tối thiểu hóa **log-loss** (cross-entropy). | Tối đa hóa **margin** đồng thời tối thiểu hóa **hinge-loss**. |
+| **Ranh giới quyết định** | Tìm **siêu phẳng khớp tốt nhất** để mô hình hóa _P(y\|x)_. | Tìm **siêu phẳng có margin lớn nhất** (khoảng cách lớn nhất đến các điểm gần nhất). |
+| **Đầu ra** | **Xác suất** – cung cấp xác suất lớp đã hiệu chỉnh thông qua σ(w·x + b). | **Xác định** – trả về nhãn lớp; cần xử lý thêm để có xác suất (ví dụ: Platt scaling). |
+| **Regularization** | L2 (mặc định) hoặc L1, trực tiếp cân bằng giữa khớp thiếu và khớp quá mức. | Tham số C đánh đổi giữa độ rộng margin và lỗi phân loại; các tham số kernel làm tăng độ phức tạp. |
+| **Kernel / Phi tuyến** | Dạng cơ bản là **tuyến tính**; có thể thêm tính phi tuyến thông qua kỹ thuật tạo đặc trưng. | **Kỹ thuật kernel** tích hợp sẵn (RBF, poly, v.v.) cho phép mô hình hóa các ranh giới phức tạp trong không gian nhiều chiều. |
+| **Khả năng mở rộng** | Giải bài toán tối ưu lồi trong **O(nd)**; xử lý tốt n rất lớn. | Quá trình huấn luyện có thể cần **O(n²–n³)** bộ nhớ/thời gian nếu không dùng bộ giải chuyên biệt; kém phù hợp với n cực lớn. |
+| **Khả năng diễn giải** | **Cao** – trọng số cho thấy mức độ ảnh hưởng của đặc trưng; tỷ lệ odds dễ hiểu. | **Thấp** với kernel phi tuyến; support vector thưa nhưng không dễ giải thích. |
+| **Độ nhạy với giá trị ngoại lệ** | Dùng log-loss trơn → ít nhạy hơn. | Hinge-loss với hard margin có thể **nhạy**; soft-margin (C) giúp giảm điều này. |
+| **Trường hợp sử dụng phổ biến** | Chấm điểm tín dụng, rủi ro y tế, thử nghiệm A/B – khi **xác suất và khả năng giải thích** là quan trọng. | Phân loại ảnh/văn bản, tin sinh học – khi **ranh giới phức tạp** và **dữ liệu nhiều chiều** là quan trọng. |
 
-* **If you need calibrated probabilities, interpretability, or operate on huge datasets — choose Logistic Regression.**
-* **If you need a flexible model that can capture non‑linear relations without manual feature engineering — choose SVM (with kernels).**
-* Both optimise convex objectives, so **global minima are guaranteed**, but SVM’s kernels add hyper‑parameters and computational cost.
+* **Nếu cần xác suất đã hiệu chỉnh, khả năng diễn giải hoặc xử lý tập dữ liệu khổng lồ — hãy chọn hồi quy Logistic.**
+* **Nếu cần một mô hình linh hoạt có thể nắm bắt các mối quan hệ phi tuyến mà không cần tạo đặc trưng thủ công — hãy chọn SVM (với kernel).**
+* Cả hai đều tối ưu các hàm mục tiêu lồi, vì vậy **đảm bảo tìm được cực tiểu toàn cục**, nhưng kernel của SVM làm tăng số siêu tham số và chi phí tính toán.
 
 ### Naive Bayes
 
-Naive Bayes is a family of **probabilistic classifiers** based on applying Bayes' Theorem with a strong independence assumption between features. Despite this "naive" assumption, Naive Bayes often works surprisingly well for certain applications, especially those involving text or categorical data, such as spam detection.<sup>[[9]](#references)</sup>
+Naive Bayes là một nhóm **bộ phân loại xác suất** dựa trên việc áp dụng Định lý Bayes với giả định độc lập mạnh giữa các đặc trưng. Dù có giả định "ngây thơ" này, Naive Bayes thường hoạt động tốt đáng ngạc nhiên trong một số ứng dụng nhất định, đặc biệt là các ứng dụng liên quan đến văn bản hoặc dữ liệu phân loại, chẳng hạn như phát hiện thư rác.<sup>[[9]](#references)</sup>
 
 
-#### Bayes' Theorem
+#### Định lý Bayes
 
-Bayes' theorem is the foundation of Naive Bayes classifiers. It relates the conditional and marginal probabilities of random events. The formula is:
+Định lý Bayes là nền tảng của các bộ phân loại Naive Bayes. Định lý này liên hệ xác suất có điều kiện với xác suất biên của các sự kiện ngẫu nhiên. Công thức là:
 
 ```plaintext
 P(A|B) = (P(B|A) * P(A)) / P(B)
 ```
 
 Where:
-- `P(A|B)` is the posterior probability of class `A` given feature `B`.
-- `P(B|A)` is the likelihood of feature `B` given class `A`.
-- `P(A)` is the prior probability of class `A`.
-- `P(B)` is the prior probability of feature `B`.
+- `P(A|B)` là xác suất hậu nghiệm của lớp `A` khi biết đặc trưng `B`.
+- `P(B|A)` là khả năng xảy ra của đặc trưng `B` khi biết lớp `A`.
+- `P(A)` là xác suất tiên nghiệm của lớp `A`.
+- `P(B)` là xác suất tiên nghiệm của đặc trưng `B`.
 
-For example, if we want to classify whether a text is written by a child or an adult, we can use the words in the text as features. Based on some initial data, the Naive Bayes classifier will previously calculate the probabilities of each word being on each potential class (child or adult). When a new text is given, it will calculate the probability of each potential class given the words in the text and choose the class with the highest probability.
+Ví dụ, nếu muốn phân loại một văn bản được viết bởi trẻ em hay người lớn, ta có thể dùng các từ trong văn bản làm đặc trưng. Dựa trên một số dữ liệu ban đầu, bộ phân loại Naive Bayes sẽ tính trước xác suất mỗi từ thuộc về từng lớp tiềm năng (trẻ em hoặc người lớn). Khi có văn bản mới, nó sẽ tính xác suất của từng lớp tiềm năng dựa trên các từ trong văn bản và chọn lớp có xác suất cao nhất.
 
-As you can see in this example, the Naive Bayes classifier is very simple and fast, but it assumes that the features are independent, which is not always the case in real-world data.
-
-
-#### Types of Naive Bayes Classifiers
-
-There are several types of Naive Bayes classifiers, depending on the type of data and the distribution of the features:
-- **Gaussian Naive Bayes**: Assumes that the features follow a Gaussian (normal) distribution. It is suitable for continuous data.
-- **Multinomial Naive Bayes**: Assumes that the features follow a multinomial distribution. It is suitable for discrete data, such as word counts in text classification.
-- **Bernoulli Naive Bayes**: Assumes that the features are binary (0 or 1). It is suitable for binary data, such as presence or absence of words in text classification.
-- **Categorical Naive Bayes**: Assumes that the features are categorical variables. It is suitable for categorical data, such as classifying fruits based on their color and shape.
+Như bạn có thể thấy trong ví dụ này, bộ phân loại Naive Bayes rất đơn giản và nhanh, nhưng giả định rằng các đặc trưng độc lập với nhau, điều này không phải lúc nào cũng đúng với dữ liệu thực tế.
 
 
-#### **Key characteristics of Naive Bayes:**
+#### Các loại bộ phân loại Naive Bayes
 
--   **Type of Problem:** Classification (binary or multi-class). Commonly used for text classification tasks in cybersecurity (spam, phishing, etc.).
+Có một số loại bộ phân loại Naive Bayes, tùy thuộc vào loại dữ liệu và phân phối của các đặc trưng:
+- **Gaussian Naive Bayes**: Giả định rằng các đặc trưng tuân theo phân phối Gaussian (chuẩn). Phù hợp với dữ liệu liên tục.
+- **Multinomial Naive Bayes**: Giả định rằng các đặc trưng tuân theo phân phối đa thức. Phù hợp với dữ liệu rời rạc, chẳng hạn như số lần xuất hiện của từ trong phân loại văn bản.
+- **Bernoulli Naive Bayes**: Giả định rằng các đặc trưng là nhị phân (0 hoặc 1). Phù hợp với dữ liệu nhị phân, chẳng hạn như sự hiện diện hoặc vắng mặt của từ trong phân loại văn bản.
+- **Categorical Naive Bayes**: Giả định rằng các đặc trưng là biến phân loại. Phù hợp với dữ liệu phân loại, chẳng hạn như phân loại trái cây dựa trên màu sắc và hình dạng.
 
--   **Interpretability:** Medium -- it's not as directly interpretable as a decision tree, but one can inspect the learned probabilities (e.g., which words are most likely in spam vs ham emails). The model's form (probabilities for each feature given the class) can be understood if needed.
 
--   **Advantages:** **Very fast** training and prediction, even on large datasets (linear in the number of instances * number of features). Requires relatively small amount of data to estimate probabilities reliably, especially with proper smoothing. It's often surprisingly accurate as a baseline, especially when features independently contribute evidence to the class. Works well with high-dimensional data (e.g., thousands of features from text). No complex tuning required beyond setting a smoothing parameter.
+#### **Đặc điểm chính của Naive Bayes:**
 
--   **Limitations:** The independence assumption can limit accuracy if features are highly correlated. For example, in network data, features like `src_bytes` and `dst_bytes` might be correlated; Naive Bayes won't capture that interaction. As data size grows very large, more expressive models (like ensembles or neural nets) can surpass NB by learning feature dependencies. Also, if a certain combination of features is needed to identify an attack (not just individual features independently), NB will struggle.
+-   **Loại bài toán:** Phân loại (nhị phân hoặc đa lớp). Thường được dùng cho các tác vụ phân loại văn bản trong cybersecurity (spam, phishing, v.v.).
+
+-   **Khả năng diễn giải:** Trung bình -- không dễ diễn giải trực tiếp như cây quyết định, nhưng có thể kiểm tra các xác suất đã học (ví dụ: từ nào có khả năng xuất hiện cao nhất trong email spam so với email hợp lệ). Có thể hiểu cấu trúc của mô hình (xác suất của từng đặc trưng ứng với mỗi lớp) nếu cần.
+
+-   **Ưu điểm:** Huấn luyện và dự đoán **rất nhanh**, ngay cả trên các tập dữ liệu lớn (tuyến tính theo số lượng mẫu * số lượng đặc trưng). Cần tương đối ít dữ liệu để ước tính xác suất đáng tin cậy, đặc biệt khi có làm trơn phù hợp. Mô hình này thường có độ chính xác đáng ngạc nhiên khi dùng làm baseline, nhất là khi các đặc trưng đóng góp bằng chứng độc lập cho lớp. Hoạt động tốt với dữ liệu có số chiều cao (ví dụ: hàng nghìn đặc trưng từ văn bản). Không cần tinh chỉnh phức tạp ngoài việc thiết lập tham số làm trơn.
+
+-   **Hạn chế:** Giả định độc lập có thể làm giảm độ chính xác nếu các đặc trưng có tương quan cao. Ví dụ: trong dữ liệu mạng, các đặc trưng như `src_bytes` và `dst_bytes` có thể tương quan; Naive Bayes sẽ không nắm bắt được mối tương tác đó. Khi kích thước dữ liệu tăng rất lớn, các mô hình biểu đạt tốt hơn (như ensemble hoặc neural net) có thể vượt trội NB nhờ học được các mối phụ thuộc giữa đặc trưng. Ngoài ra, nếu cần kết hợp một số đặc trưng để nhận diện một cuộc tấn công (thay vì xét riêng từng đặc trưng), NB sẽ gặp khó khăn.
 
 > [!TIP]
-> *Use cases in cybersecurity:* The classic use is **spam detection** -- Naive Bayes was the core of early spam filters, using the frequencies of certain tokens (words, phrases, IP addresses) to calculate the probability an email is spam. It's also used in **phishing email detection** and **URL classification**, where presence of certain keywords or characteristics (like "login.php" in a URL, or `@` in a URL path) contribute to phishing probability. In malware analysis, one could imagine a Naive Bayes classifier that uses the presence of certain API calls or permissions in software to predict if it's malware. While more advanced algorithms often perform better, Naive Bayes remains a good baseline due to its speed and simplicity.
+> *Trường hợp sử dụng trong cybersecurity:* Ứng dụng kinh điển là **phát hiện spam** -- Naive Bayes là cốt lõi của các bộ lọc spam thời kỳ đầu, sử dụng tần suất của một số token (từ, cụm từ, địa chỉ IP) để tính xác suất email là spam. Mô hình này cũng được dùng trong **phát hiện email phishing** và **phân loại URL**, trong đó sự hiện diện của một số từ khóa hoặc đặc điểm nhất định (như "login.php" trong URL hoặc `@` trong đường dẫn URL) góp phần làm tăng xác suất phishing. Trong phân tích malware, có thể hình dung một bộ phân loại Naive Bayes sử dụng sự hiện diện của một số lệnh gọi API hoặc quyền trong phần mềm để dự đoán phần mềm đó có phải malware hay không. Dù các thuật toán tiên tiến hơn thường cho hiệu quả tốt hơn, Naive Bayes vẫn là một baseline tốt nhờ tốc độ và sự đơn giản.
 
 <details>
-<summary>Example -- Naive Bayes for Phishing Detection:</summary>
-To demonstrate Naive Bayes, we'll use Gaussian Naive Bayes on the NSL-KDD intrusion dataset (with binary labels). Gaussian NB will treat each feature as following a normal distribution per class. This is a rough choice since many network features are discrete or highly skewed, but it shows how one would apply NB to continuous feature data. We could also choose Bernoulli NB on a dataset of binary features (like a set of triggered alerts), but we'll stick with NSL-KDD here for continuity.
+<summary>Ví dụ -- Naive Bayes để phát hiện Phishing:</summary>
+Để minh họa Naive Bayes, chúng ta sẽ dùng Gaussian Naive Bayes trên tập dữ liệu xâm nhập NSL-KDD (với nhãn nhị phân). Gaussian NB sẽ coi mỗi đặc trưng tuân theo phân phối chuẩn trong từng lớp. Đây là lựa chọn tương đối thô vì nhiều đặc trưng mạng là rời rạc hoặc có phân phối lệch mạnh, nhưng ví dụ này cho thấy cách áp dụng NB với dữ liệu đặc trưng liên tục. Ta cũng có thể chọn Bernoulli NB trên một tập dữ liệu gồm các đặc trưng nhị phân (như một tập hợp cảnh báo đã được kích hoạt), nhưng ở đây chúng ta sẽ tiếp tục dùng NSL-KDD để nhất quán.
 
 ```python
 import pandas as pd
@@ -731,34 +731,34 @@ ROC AUC:   0.867
 """
 ```
 
-This code trains a Naive Bayes classifier to detect attacks. Naive Bayes will compute things like `P(service=http | Attack)` and `P(Service=http | Normal)` based on the training data, assuming independence among features. It will then use these probabilities to classify new connections as either normal or attack based on the features observed. The performance of NB on NSL-KDD may not be as high as more advanced models (since feature independence is violated), but it's often decent and comes with the benefit of extreme speed. In scenarios like real-time email filtering or initial triage of URLs, a Naive Bayes model can quickly flag obviously malicious cases with low resource usage.
+This code huấn luyện bộ phân loại Naive Bayes để phát hiện các cuộc tấn công. Naive Bayes sẽ tính những xác suất như `P(service=http | Attack)` và `P(Service=http | Normal)` dựa trên dữ liệu huấn luyện, với giả định các đặc trưng độc lập với nhau. Sau đó, thuật toán dùng các xác suất này để phân loại những kết nối mới là bình thường hay tấn công, dựa trên các đặc trưng quan sát được. Hiệu suất của NB trên NSL-KDD có thể không cao bằng các mô hình tiên tiến hơn (vì giả định các đặc trưng độc lập bị vi phạm), nhưng thường vẫn khá tốt và có ưu điểm là cực kỳ nhanh. Trong các tình huống như lọc email theo thời gian thực hoặc phân loại sơ bộ URL, mô hình Naive Bayes có thể nhanh chóng đánh dấu những trường hợp rõ ràng là độc hại mà chỉ cần ít tài nguyên.
 
 </details>
 
 ### k-Nearest Neighbors (k-NN)
 
-k-Nearest Neighbors is one of the simplest machine learning algorithms. It's a **non-parametric, instance-based** method that makes predictions based on the similarity to examples in the training set. The idea for classification is: to classify a new data point, find the **k** closest points in the training data (its "nearest neighbors"), and assign the majority class among those neighbors. "Closeness" is defined by a distance metric, typically Euclidean distance for numeric data (other distances can be used for different types of features or problems).<sup>[[10]](#references)</sup>
+k-Nearest Neighbors là một trong những thuật toán machine learning đơn giản nhất. Đây là phương pháp **phi tham số, dựa trên mẫu**, đưa ra dự đoán dựa trên mức độ tương đồng với các ví dụ trong tập huấn luyện. Ý tưởng phân loại là: để phân loại một điểm dữ liệu mới, tìm **k** điểm gần nhất trong dữ liệu huấn luyện ("các láng giềng gần nhất" của nó), rồi gán lớp chiếm đa số trong số các láng giềng đó. "Độ gần" được xác định bằng một metric khoảng cách, thường là khoảng cách Euclid đối với dữ liệu dạng số (có thể dùng các khoảng cách khác cho những loại đặc trưng hoặc bài toán khác nhau).<sup>[[10]](#references)</sup>
 
-K-NN requires *no explicit training* -- the "training" phase is just storing the dataset. All the work happens during the query (prediction): the algorithm must compute distances from the query point to all training points to find the nearest ones. This makes prediction time **linear in the number of training samples**, which can be costly for large datasets. Due to this, k-NN is best suited for smaller datasets or scenarios where you can trade off memory and speed for simplicity.
+K-NN *không cần huấn luyện tường minh* -- giai đoạn "huấn luyện" chỉ đơn giản là lưu trữ tập dữ liệu. Mọi việc diễn ra khi truy vấn (dự đoán): thuật toán phải tính khoảng cách từ điểm truy vấn đến tất cả các điểm huấn luyện để tìm những điểm gần nhất. Điều này khiến thời gian dự đoán **tăng tuyến tính theo số lượng mẫu huấn luyện**, có thể gây tốn kém với các tập dữ liệu lớn. Vì vậy, k-NN phù hợp nhất với các tập dữ liệu nhỏ hơn hoặc những tình huống có thể đánh đổi bộ nhớ và tốc độ để lấy sự đơn giản.
 
-Despite its simplicity, k-NN can model very complex decision boundaries (since effectively the decision boundary can be any shape dictated by the distribution of examples). It tends to do well when the decision boundary is very irregular and you have a lot of data -- essentially letting the data "speak for itself". However, in high dimensions, distance metrics can become less meaningful (curse of dimensionality), and the method can struggle unless you have a huge number of samples.
+Dù đơn giản, k-NN có thể mô hình hóa các ranh giới quyết định rất phức tạp (vì về bản chất, ranh giới quyết định có thể mang bất kỳ hình dạng nào do phân bố các ví dụ quy định). Thuật toán thường hoạt động tốt khi ranh giới quyết định rất bất quy tắc và có nhiều dữ liệu -- về cơ bản, để dữ liệu "tự lên tiếng". Tuy nhiên, trong không gian nhiều chiều, các metric khoảng cách có thể trở nên kém ý nghĩa hơn (lời nguyền số chiều), và phương pháp này có thể gặp khó khăn nếu không có số lượng mẫu khổng lồ.
 
-*Use cases in cybersecurity:* k-NN has been applied to anomaly detection -- for example, an intrusion detection system might label a network event as malicious if most of its nearest neighbors (previous events) were malicious. If normal traffic forms clusters and attacks are outliers, a K-NN approach (with k=1 or small k) essentially does a **nearest-neighbor anomaly detection**. K-NN has also been used for classifying malware families by binary feature vectors: a new file might be classified as a certain malware family if it's very close (in feature space) to known instances of that family. In practice, k-NN is not as common as more scalable algorithms, but it's conceptually straightforward and sometimes used as a baseline or for small-scale problems.
+*Trường hợp sử dụng trong an ninh mạng:* k-NN đã được áp dụng để phát hiện bất thường -- ví dụ, một hệ thống phát hiện xâm nhập có thể gắn nhãn một sự kiện mạng là độc hại nếu phần lớn các láng giềng gần nhất của nó (những sự kiện trước đó) là độc hại. Nếu lưu lượng bình thường tạo thành các cụm còn các cuộc tấn công là những điểm ngoại lệ, cách tiếp cận K-NN (với k=1 hoặc k nhỏ) về cơ bản sẽ thực hiện **phát hiện bất thường bằng láng giềng gần nhất**. K-NN cũng được dùng để phân loại các họ malware bằng vector đặc trưng nhị phân: một tệp mới có thể được phân loại vào một họ malware nhất định nếu nó rất gần (trong không gian đặc trưng) với các mẫu đã biết thuộc họ đó. Trên thực tế, k-NN không phổ biến bằng các thuật toán có khả năng mở rộng tốt hơn, nhưng về mặt khái niệm thì khá dễ hiểu và đôi khi được dùng làm mô hình cơ sở hoặc cho các bài toán quy mô nhỏ.
 
-#### **Key characteristics of k-NN:**
+#### **Đặc điểm chính của k-NN:**
 
--   **Type of Problem:** Classification (and regression variants exist). It's a *lazy learning* method -- no explicit model fitting.
+-   **Loại bài toán:** Phân loại (cũng có các biến thể hồi quy). Đây là phương pháp *học lười* -- không cần khớp mô hình tường minh.
 
--   **Interpretability:** Low to medium -- there is no global model or concise explanation, but one can interpret results by looking at the nearest neighbors that influenced a decision (e.g., "this network flow was classified as malicious because it's similar to these 3 known malicious flows"). So, explanations can be example-based.
+-   **Khả năng diễn giải:** Thấp đến trung bình -- không có mô hình tổng quát hay lời giải thích ngắn gọn, nhưng có thể diễn giải kết quả bằng cách xem xét các láng giềng gần nhất đã ảnh hưởng đến quyết định (ví dụ: "luồng mạng này được phân loại là độc hại vì nó tương tự 3 luồng độc hại đã biết này"). Do đó, lời giải thích có thể dựa trên ví dụ.
 
--   **Advantages:** Very simple to implement and understand. Makes no assumptions about the data distribution (non-parametric). Can naturally handle multi-class problems. It's **adaptive** in the sense that decision boundaries can be very complex, shaped by the data distribution.
+-   **Ưu điểm:** Rất đơn giản để triển khai và hiểu. Không đưa ra giả định nào về phân bố dữ liệu (phi tham số). Có thể xử lý tự nhiên các bài toán nhiều lớp. Thuật toán **thích ứng** theo nghĩa ranh giới quyết định có thể rất phức tạp và được định hình bởi phân bố dữ liệu.
 
--   **Limitations:** Prediction can be slow for large datasets (must compute many distances). Memory-intensive -- it stores all training data. Performance degrades in high-dimensional feature spaces because all points tend to become nearly equidistant (making the concept of "nearest" less meaningful). Need to choose *k* (number of neighbors) appropriately -- too small k can be noisy, too large k can include irrelevant points from other classes. Also, features should be scaled appropriately because distance calculations are sensitive to scale.
+-   **Hạn chế:** Dự đoán có thể chậm với các tập dữ liệu lớn (phải tính nhiều khoảng cách). Tốn bộ nhớ -- thuật toán lưu trữ toàn bộ dữ liệu huấn luyện. Hiệu suất giảm trong không gian đặc trưng nhiều chiều vì mọi điểm có xu hướng gần như cách đều nhau (khiến khái niệm "gần nhất" kém ý nghĩa hơn). Cần chọn *k* (số lượng láng giềng) phù hợp -- k quá nhỏ có thể gây nhiễu, k quá lớn có thể bao gồm các điểm không liên quan thuộc lớp khác. Ngoài ra, cần điều chỉnh tỷ lệ các đặc trưng cho phù hợp vì phép tính khoảng cách nhạy với tỷ lệ.
 
 <details>
-<summary>Example -- k-NN for Phishing Detection:</summary>
+<summary>Ví dụ -- k-NN để phát hiện Phishing:</summary>
 
-We'll again use NSL-KDD (binary classification). Because k-NN is computationally heavy, we'll use a subset of the training data to keep it tractable in this demonstration. We'll pick, say, 20,000 training samples out of the full 125k, and use k=5 neighbors. After training (really just storing the data), we'll evaluate on the test set. We'll also scale features for distance calculation to ensure no single feature dominates due to scale.
+Ta sẽ tiếp tục dùng NSL-KDD (phân loại nhị phân). Vì k-NN đòi hỏi nhiều tính toán, ta sẽ dùng một tập con dữ liệu huấn luyện để phần minh họa này có thể thực hiện được. Chẳng hạn, ta sẽ chọn 20,000 mẫu huấn luyện trong tổng số 125k và dùng k=5 láng giềng. Sau khi huấn luyện (thực chất chỉ là lưu trữ dữ liệu), ta sẽ đánh giá trên tập kiểm tra. Ta cũng sẽ chuẩn hóa các đặc trưng để tính khoảng cách, nhằm đảm bảo không có đặc trưng nào chi phối chỉ vì tỷ lệ của nó.
 
 ```python
 import pandas as pd
@@ -829,33 +829,33 @@ ROC AUC:   0.837
 """
 ```
 
-The k-NN model will classify a connection by looking at the 5 closest connections in the training set subset. If, for example, 4 of those neighbors are attacks (anomalies) and 1 is normal, the new connection will be classified as an attack. The performance might be reasonable, though often not as high as a well-tuned Random Forest or SVM on the same data. However, k-NN can sometimes shine when the class distributions are very irregular and complex -- effectively using a memory-based lookup. In cybersecurity, k-NN (with k=1 or small k) could be used for detection of known attack patterns by example, or as a component in more complex systems (e.g., for clustering and then classifying based on cluster membership).
+Mô hình k-NN sẽ phân loại một kết nối bằng cách xem xét 5 kết nối gần nhất trong tập con của tập huấn luyện. Ví dụ, nếu 4 trong số các láng giềng đó là các cuộc tấn công (bất thường) và 1 là bình thường, kết nối mới sẽ được phân loại là một cuộc tấn công. Hiệu suất có thể khá tốt, dù thường không cao bằng Random Forest hoặc SVM được tinh chỉnh tốt trên cùng dữ liệu. Tuy nhiên, đôi khi k-NN có thể vượt trội khi phân bố lớp rất bất quy tắc và phức tạp -- về cơ bản là sử dụng phương thức tra cứu dựa trên bộ nhớ. Trong an ninh mạng, k-NN (với k=1 hoặc k nhỏ) có thể được dùng để phát hiện các mẫu tấn công đã biết dựa trên ví dụ, hoặc làm thành phần trong các hệ thống phức tạp hơn (ví dụ: phân cụm rồi phân loại dựa trên việc thuộc cụm nào).
 </details>
 
-### Gradient Boosting Machines (e.g., XGBoost)
+### Gradient Boosting Machines (ví dụ: XGBoost)
 
-Gradient Boosting Machines are among the most powerful algorithms for structured data. **Gradient boosting** refers to the technique of building an ensemble of weak learners (often decision trees) in a sequential manner, where each new model corrects the errors of the previous ensemble. Unlike bagging (Random Forests) which build trees in parallel and average them, boosting builds trees *one by one*, each focusing more on the instances that previous trees mis-predicted.<sup>[[11]](#references)</sup>
+Gradient Boosting Machines là một trong những thuật toán mạnh nhất dành cho dữ liệu có cấu trúc. **Gradient boosting** là kỹ thuật xây dựng một tổ hợp các mô hình học yếu (thường là cây quyết định) theo trình tự, trong đó mỗi mô hình mới sửa các lỗi của tổ hợp trước đó. Không giống bagging (Random Forests), vốn xây dựng các cây song song rồi lấy trung bình, boosting xây dựng cây *lần lượt*, mỗi cây tập trung nhiều hơn vào các mẫu mà những cây trước đó dự đoán sai.<sup>[[11]](#references)</sup>
 
-The most popular implementations in recent years are **XGBoost**, **LightGBM**, and **CatBoost**, all of which are gradient boosting decision tree (GBDT) libraries. They have been extremely successful in machine learning competitions and applications, often **achieving state-of-the-art performance on tabular datasets**. In cybersecurity, researchers and practitioners have used gradient boosted trees for tasks like **malware detection** (using features extracted from files or runtime behavior) and **network intrusion detection**. For example, a gradient boosting model can combine many weak rules (trees) such as "if many SYN packets and unusual port -> likely scan" into a strong composite detector that accounts for many subtle patterns.
+Các thư viện phổ biến nhất trong những năm gần đây là **XGBoost**, **LightGBM** và **CatBoost**; tất cả đều là thư viện cây quyết định gradient boosting (GBDT). Chúng đã đạt được thành công lớn trong các cuộc thi và ứng dụng machine learning, thường **đạt hiệu suất tiên tiến nhất trên các tập dữ liệu dạng bảng**. Trong an ninh mạng, các nhà nghiên cứu và chuyên gia đã sử dụng cây gradient boosting cho những tác vụ như **phát hiện malware** (dùng các đặc trưng trích xuất từ tệp hoặc hành vi khi chạy) và **phát hiện xâm nhập mạng**. Ví dụ, một mô hình gradient boosting có thể kết hợp nhiều quy tắc yếu (cây) như "nếu có nhiều gói SYN và cổng bất thường -> có khả năng là quét" thành một bộ phát hiện tổng hợp mạnh, có khả năng nhận biết nhiều mẫu tinh vi.
 
-Why are boosted trees so effective? Each tree in the sequence is trained on the *residual errors* (gradients) of the current ensemble's predictions. This way, the model gradually **"boosts"** the areas where it's weak. The use of decision trees as base learners means the final model can capture complex interactions and non-linear relations. Also, boosting inherently has a form of built-in regularization: by adding many small trees (and using a learning rate to scale their contributions), it often generalizes well without huge overfitting, provided proper parameters are chosen.
+Vì sao cây boosted lại hiệu quả đến vậy? Mỗi cây trong chuỗi được huấn luyện dựa trên *sai số phần dư* (gradient) của các dự đoán từ tổ hợp hiện tại. Nhờ vậy, mô hình dần **"boost"** những khía cạnh mà nó còn yếu. Việc sử dụng cây quyết định làm mô hình cơ sở giúp mô hình cuối cùng nắm bắt được các tương tác phức tạp và quan hệ phi tuyến. Ngoài ra, boosting vốn có một dạng điều chuẩn tích hợp: bằng cách thêm nhiều cây nhỏ (và dùng learning rate để điều chỉnh mức đóng góp của chúng), mô hình thường khái quát hóa tốt mà không bị overfitting quá mức, miễn là chọn tham số phù hợp.
 
-#### **Key characteristics of Gradient Boosting:**
+#### **Các đặc điểm chính của Gradient Boosting:**
 
--   **Type of Problem:** Primarily classification and regression. In security, usually classification (e.g., binary classify a connection or file). It handles binary, multi-class (with appropriate loss), and even ranking problems.
+-   **Loại bài toán:** Chủ yếu là phân loại và hồi quy. Trong bảo mật, thường là phân loại (ví dụ: phân loại kết nối hoặc tệp thành hai nhóm). Mô hình xử lý được bài toán nhị phân, đa lớp (với hàm mất mát phù hợp), và cả bài toán xếp hạng.
 
--   **Interpretability:** Low to medium. While a single boosted tree is small, a full model might have hundreds of trees, which is not human-interpretable as a whole. However, like Random Forest, it can provide feature importance scores, and tools like SHAP (SHapley Additive exPlanations) can be used to interpret individual predictions to some extent.
+-   **Khả năng diễn giải:** Thấp đến trung bình. Một cây boosted đơn lẻ có thể nhỏ, nhưng toàn bộ mô hình có thể gồm hàng trăm cây nên không thể diễn giải trực tiếp bằng con người. Tuy nhiên, giống Random Forest, mô hình có thể cung cấp điểm số mức độ quan trọng của đặc trưng; các công cụ như SHAP (SHapley Additive exPlanations) cũng có thể được dùng để diễn giải phần nào các dự đoán riêng lẻ.
 
--   **Advantages:** Often the **best performing** algorithm for structured/tabular data. Can detect complex patterns and interactions. Has many tuning knobs (number of trees, depth of trees, learning rate, regularization terms) to tailor model complexity and prevent overfitting. Modern implementations are optimized for speed (e.g., XGBoost uses second-order gradient info and efficient data structures). Tends to handle imbalanced data better when combined with appropriate loss functions or by adjusting sample weights.
+-   **Ưu điểm:** Thường là thuật toán **có hiệu suất tốt nhất** cho dữ liệu có cấu trúc/dạng bảng. Có thể phát hiện các mẫu và tương tác phức tạp. Có nhiều tham số để tinh chỉnh (số lượng cây, độ sâu của cây, learning rate, các hạng tử điều chuẩn) nhằm điều chỉnh độ phức tạp của mô hình và ngăn overfitting. Các triển khai hiện đại được tối ưu hóa về tốc độ (ví dụ, XGBoost sử dụng thông tin gradient bậc hai và cấu trúc dữ liệu hiệu quả). Có xu hướng xử lý dữ liệu mất cân bằng tốt hơn khi kết hợp với hàm mất mát phù hợp hoặc điều chỉnh trọng số mẫu.
 
--   **Limitations:** More complex to tune than simpler models; training can be slow if trees are deep or number of trees is large (though still usually faster than training a comparable deep neural network on the same data). The model can overfit if not tuned (e.g., too many deep trees with insufficient regularization). Because of many hyperparameters, using gradient boosting effectively may require more expertise or experimentation. Also, like tree-based methods, it doesn't inherently handle very sparse high-dimensional data as efficiently as linear models or Naive Bayes (though it can still be applied, e.g., in text classification, but might not be first choice without feature engineering).
+-   **Hạn chế:** Khó tinh chỉnh hơn các mô hình đơn giản; quá trình huấn luyện có thể chậm nếu cây sâu hoặc số lượng cây lớn (dù thường vẫn nhanh hơn huấn luyện mạng nơ-ron sâu tương đương trên cùng dữ liệu). Mô hình có thể bị overfit nếu không được tinh chỉnh (ví dụ: quá nhiều cây sâu mà không có đủ điều chuẩn). Do có nhiều siêu tham số, việc sử dụng gradient boosting hiệu quả có thể đòi hỏi nhiều chuyên môn hoặc thử nghiệm hơn. Ngoài ra, giống các phương pháp dựa trên cây, mô hình không thể tự xử lý dữ liệu thưa, nhiều chiều hiệu quả bằng mô hình tuyến tính hoặc Naive Bayes (dù vẫn có thể áp dụng, chẳng hạn trong phân loại văn bản, nhưng có thể không phải lựa chọn hàng đầu nếu không có kỹ thuật tạo đặc trưng).
 
 > [!TIP]
-> *Use cases in cybersecurity:* Almost anywhere a decision tree or random forest could be used, a gradient boosting model might achieve better accuracy. For example, **Microsoft's malware detection** competitions have seen heavy use of XGBoost on engineered features from binary files. **Network intrusion detection** research often reports top results with GBDTs (e.g., XGBoost on CIC-IDS2017 or UNSW-NB15 datasets). These models can take a wide range of features (protocol types, frequency of certain events, statistical features of traffic, etc.) and combine them to detect threats. In phishing detection, gradient boosting can combine lexical features of URLs, domain reputation features, and page content features to achieve very high accuracy. The ensemble approach helps cover many corner cases and subtleties in the data.
+> *Các trường hợp sử dụng trong an ninh mạng:* Hầu như ở bất cứ đâu có thể dùng cây quyết định hoặc random forest, mô hình gradient boosting có thể đạt độ chính xác cao hơn. Ví dụ, các cuộc thi **phát hiện malware của Microsoft** đã sử dụng rộng rãi XGBoost trên các đặc trưng được tạo từ tệp nhị phân. Nghiên cứu về **phát hiện xâm nhập mạng** thường ghi nhận kết quả hàng đầu với GBDT (ví dụ: XGBoost trên các tập dữ liệu CIC-IDS2017 hoặc UNSW-NB15). Các mô hình này có thể sử dụng nhiều loại đặc trưng (loại giao thức, tần suất của một số sự kiện, đặc trưng thống kê của lưu lượng mạng, v.v.) và kết hợp chúng để phát hiện mối đe dọa. Trong phát hiện phishing, gradient boosting có thể kết hợp các đặc trưng từ vựng của URL, đặc trưng về uy tín của tên miền và đặc trưng nội dung trang để đạt độ chính xác rất cao. Phương pháp tổ hợp giúp bao quát nhiều trường hợp ngoại lệ và sắc thái tinh tế trong dữ liệu.
 
 <details>
-<summary>Example -- XGBoost for Phishing Detection:</summary>
-We'll use a gradient boosting classifier on the phishing dataset. To keep things simple and self-contained, we'll use `sklearn.ensemble.GradientBoostingClassifier` (which is a slower but straightforward implementation). Normally, one might use `xgboost` or `lightgbm` libraries for better performance and additional features. We will train the model and evaluate it similarly to before.
+<summary>Ví dụ -- XGBoost để phát hiện phishing:</summary>
+Chúng ta sẽ dùng một bộ phân loại gradient boosting trên tập dữ liệu phishing. Để giữ cho ví dụ đơn giản và độc lập, chúng ta sẽ dùng `sklearn.ensemble.GradientBoostingClassifier` (một triển khai chậm hơn nhưng dễ hiểu). Thông thường, có thể dùng các thư viện `xgboost` hoặc `lightgbm` để đạt hiệu suất tốt hơn và có thêm tính năng. Chúng ta sẽ huấn luyện mô hình và đánh giá tương tự như trước.
 
 ```python
 import pandas as pd
@@ -905,23 +905,23 @@ ROC AUC:   0.990
 """
 ```
 
-The gradient boosting model will likely achieve very high accuracy and AUC on this phishing dataset (often these models can exceed 95% accuracy with proper tuning on such data, as seen in literature. This demonstrates why GBDTs are considered *"the state of the art model for tabular dataset"* -- they often outperform simpler algorithms by capturing complex patterns.<sup>[[11]](#references)</sup> In a cybersecurity context, this could mean catching more phishing sites or attacks with fewer misses. Of course, one must be cautious about overfitting -- we would typically use techniques like cross-validation and monitor performance on a validation set when developing such a model for deployment.
+Mô hình gradient boosting có khả năng đạt độ chính xác và AUC rất cao trên tập dữ liệu phishing này (với dữ liệu như vậy, các mô hình này thường có thể vượt 95% độ chính xác nếu được tinh chỉnh phù hợp, như đã thấy trong các tài liệu nghiên cứu. Điều này cho thấy vì sao GBDT được xem là *"mô hình tiên tiến nhất cho tập dữ liệu dạng bảng"* -- chúng thường vượt trội hơn các thuật toán đơn giản hơn nhờ khả năng nắm bắt các mẫu phức tạp.<sup>[[11]](#references)</sup> Trong lĩnh vực an ninh mạng, điều này có thể giúp phát hiện nhiều trang phishing hoặc cuộc tấn công hơn và bỏ sót ít trường hợp hơn. Tất nhiên, cần thận trọng với hiện tượng overfitting -- thông thường, khi phát triển mô hình để triển khai, chúng ta sẽ dùng các kỹ thuật như cross-validation và theo dõi hiệu suất trên tập validation.
 
 </details>
 
-### Combining Models: Ensemble Learning and Stacking
+### Kết hợp mô hình: Ensemble Learning và Stacking
 
-Ensemble learning is a strategy of **combining multiple models** to improve overall performance. We already saw specific ensemble methods: Random Forest (an ensemble of trees via bagging) and Gradient Boosting (an ensemble of trees via sequential boosting). But ensembles can be created in other ways too, such as **voting ensembles** or **stacked generalization (stacking)**. The main idea is that different models may capture different patterns or have different weaknesses; by combining them, we can **compensate for each model's errors with another's strengths**.<sup>[[12]](#references)</sup>
+Ensemble learning là chiến lược **kết hợp nhiều mô hình** để cải thiện hiệu suất tổng thể. Chúng ta đã thấy một số phương pháp ensemble cụ thể: Random Forest (ensemble gồm các cây thông qua bagging) và Gradient Boosting (ensemble gồm các cây thông qua boosting tuần tự). Tuy nhiên, cũng có thể tạo ensemble theo những cách khác, chẳng hạn như **voting ensemble** hoặc **stacked generalization (stacking)**. Ý tưởng chính là các mô hình khác nhau có thể nắm bắt những mẫu khác nhau hoặc có những điểm yếu khác nhau; bằng cách kết hợp chúng, chúng ta có thể **bù đắp lỗi của mỗi mô hình bằng thế mạnh của mô hình khác**.<sup>[[12]](#references)</sup>
 
--   **Voting Ensemble:** In a simple voting classifier, we train multiple diverse models (say, a logistic regression, a decision tree, and an SVM) and have them vote on the final prediction (majority vote for classification). If we weight the votes (e.g., higher weight to more accurate models), it's a weighted voting scheme. This typically improves performance when the individual models are reasonably good and independent -- the ensemble reduces the risk of an individual model's mistake since others may correct it. It's like having a panel of experts rather than a single opinion.
+-   **Voting Ensemble:** Trong một voting classifier đơn giản, chúng ta huấn luyện nhiều mô hình đa dạng (chẳng hạn logistic regression, decision tree và SVM), rồi để chúng bỏ phiếu cho dự đoán cuối cùng (classification dùng đa số phiếu). Nếu gán trọng số cho các phiếu (ví dụ: trọng số cao hơn cho những mô hình chính xác hơn), ta có voting scheme có trọng số. Cách này thường cải thiện hiệu suất khi các mô hình riêng lẻ hoạt động khá tốt và độc lập với nhau -- ensemble làm giảm nguy cơ một mô hình mắc lỗi, vì các mô hình khác có thể sửa lỗi đó. Cách này giống như có một hội đồng chuyên gia thay vì chỉ có một ý kiến.
 
--   **Stacking (Stacked Ensemble):** Stacking goes a step further. Instead of a simple vote, it trains a **meta-model** to **learn how to best combine the predictions** of base models. For example, you train 3 different classifiers (base learners), then feed their outputs (or probabilities) as features into a meta-classifier (often a simple model like logistic regression) that learns the optimal way to blend them. The meta-model is trained on a validation set or via cross-validation to avoid overfitting. Stacking can often outperform simple voting by learning *which models to trust more in which circumstances*. In cybersecurity, one model might be better at catching network scans while another is better at catching malware beaconing; a stacking model could learn to rely on each appropriately.
+-   **Stacking (Stacked Ensemble):** Stacking tiến thêm một bước. Thay vì chỉ bỏ phiếu đơn giản, phương pháp này huấn luyện một **meta-model** để **học cách kết hợp tốt nhất các dự đoán** từ các mô hình cơ sở. Ví dụ, bạn huấn luyện 3 classifier khác nhau (base learner), rồi đưa đầu ra (hoặc xác suất) của chúng làm feature cho một meta-classifier (thường là mô hình đơn giản như logistic regression), để mô hình này học cách kết hợp chúng tối ưu. Meta-model được huấn luyện trên tập validation hoặc thông qua cross-validation để tránh overfitting. Stacking thường có thể vượt trội hơn voting đơn giản vì nó học được *nên tin cậy mô hình nào hơn trong từng trường hợp*. Trong an ninh mạng, một mô hình có thể phát hiện network scan tốt hơn, trong khi mô hình khác phát hiện malware beaconing tốt hơn; stacking model có thể học cách dựa vào từng mô hình phù hợp.
 
-Ensembles, whether by voting or stacking, tend to **boost accuracy** and robustness. The downside is increased complexity and sometimes reduced interpretability (though some ensemble approaches like an average of decision trees can still provide some insight, e.g., feature importance). In practice, if operational constraints allow, using an ensemble can lead to higher detection rates. Many winning solutions in cybersecurity challenges (and Kaggle competitions in general) use ensemble techniques to squeeze out the last bit of performance.
+Các ensemble, dù dùng voting hay stacking, thường **tăng độ chính xác** và độ vững chắc. Nhược điểm là độ phức tạp tăng và đôi khi khả năng diễn giải giảm (dù một số phương pháp ensemble như lấy trung bình các decision tree vẫn có thể cung cấp một số thông tin, chẳng hạn feature importance). Trong thực tế, nếu các ràng buộc vận hành cho phép, sử dụng ensemble có thể giúp tăng tỷ lệ phát hiện. Nhiều giải pháp chiến thắng trong các thử thách an ninh mạng (và các cuộc thi Kaggle nói chung) sử dụng kỹ thuật ensemble để cải thiện thêm hiệu suất.
 
 <details>
-<summary>Example -- Voting Ensemble for Phishing Detection:</summary>
-To illustrate model stacking, let's combine a few of the models we discussed on the phishing dataset. We'll use a logistic regression, a decision tree, and a k-NN as base learners, and use a Random Forest as a meta-learner to aggregate their predictions. The meta-learner will be trained on the outputs of the base learners (using cross-validation on the training set). We expect the stacked model to perform as well as or slightly better than the individual models.
+<summary>Ví dụ -- Voting Ensemble để phát hiện phishing:</summary>
+Để minh họa model stacking, hãy kết hợp một vài mô hình đã thảo luận trên tập dữ liệu phishing. Chúng ta sẽ dùng logistic regression, decision tree và k-NN làm base learner, đồng thời dùng Random Forest làm meta-learner để tổng hợp các dự đoán của chúng. Meta-learner sẽ được huấn luyện trên đầu ra của các base learner (bằng cross-validation trên tập training). Chúng ta kỳ vọng mô hình stacking sẽ hoạt động ngang bằng hoặc tốt hơn đôi chút so với các mô hình riêng lẻ.
 
 ```python
 import pandas as pd
@@ -1001,28 +1001,27 @@ F1‑score : 0.948
 ROC AUC  : 0.992
 """
 ```
-The stacked ensemble takes advantage of the complementary strengths of the base models. For instance, logistic regression might handle linear aspects of the data, the decision tree might capture specific rule-like interactions, and k-NN might excel in local neighborhoods of the feature space. The meta-model (a random forest here) can learn how to weigh these inputs. The resulting metrics often show an improvement (even if slight) over any single model's metrics. In our phishing example, if logistic alone had an F1 of say 0.95 and the tree 0.94, the stack might achieve 0.96 by picking up where each model errs.
+Ensemble xếp chồng tận dụng những điểm mạnh bổ trợ cho nhau của các mô hình cơ sở. Chẳng hạn, logistic regression có thể xử lý các khía cạnh tuyến tính của dữ liệu, decision tree có thể nắm bắt các tương tác cụ thể giống như quy tắc, còn k-NN có thể hoạt động tốt trong các vùng lân cận cục bộ của không gian đặc trưng. Meta-model (ở đây là random forest) có thể học cách gán trọng số cho các đầu vào này. Các chỉ số thu được thường cho thấy sự cải thiện (dù nhỏ) so với chỉ số của từng mô hình riêng lẻ. Trong ví dụ phishing của chúng ta, nếu riêng logistic đạt F1 là 0.95 và tree đạt 0.94, thì mô hình kết hợp có thể đạt 0.96 nhờ tận dụng những điểm mà mỗi mô hình mắc lỗi.
 
-Ensemble methods like this demonstrate the principle that *"combining multiple models typically leads to better generalization"*.<sup>[[12]](#references)</sup> In cybersecurity, this can be implemented by having multiple detection engines (one might be rule-based, one machine learning, one anomaly-based) and then a layer that aggregates their alerts -- effectively a form of ensemble -- to make a final decision with higher confidence. When deploying such systems, one must consider the added complexity and ensure that the ensemble doesn't become too hard to manage or explain. But from an accuracy standpoint, ensembles and stacking are powerful tools for improving model performance.
+Các phương pháp ensemble như thế này minh họa nguyên lý *"kết hợp nhiều mô hình thường giúp khái quát hóa tốt hơn"*.<sup>[[12]](#references)</sup> Trong an ninh mạng, có thể triển khai phương pháp này bằng cách sử dụng nhiều engine phát hiện (một engine có thể dựa trên quy tắc, một engine dùng machine learning, một engine dựa trên phát hiện bất thường), rồi thêm một lớp tổng hợp các cảnh báo của chúng -- về bản chất là một dạng ensemble -- để đưa ra quyết định cuối cùng với độ tin cậy cao hơn. Khi triển khai các hệ thống như vậy, cần cân nhắc độ phức tạp tăng thêm và đảm bảo ensemble không trở nên quá khó quản lý hoặc giải thích. Tuy nhiên, xét về độ chính xác, ensemble và stacking là những công cụ mạnh mẽ giúp cải thiện hiệu suất mô hình.
 
 </details>
 
-The neural-network approaches described in the [deep-learning page](AI-Deep-Learning.md) can complement these classical models for intrusion detection when the dataset and compute budget justify the additional complexity.<sup>[[13]](#references)</sup>
+Các phương pháp tiếp cận neural network được mô tả trong [trang deep-learning](AI-Deep-Learning.md) có thể bổ trợ cho những mô hình cổ điển này trong việc phát hiện xâm nhập khi tập dữ liệu và ngân sách tính toán đủ đáp ứng độ phức tạp tăng thêm.<sup>[[13]](#references)</sup>
 
 ## References
 
-- [1] [AI and Machine Learning in Cybersecurity - zvelo](https://zvelo.com/ai-and-machine-learning-in-cybersecurity/)
-- [2] [Linear Regression, Explained - Medium](https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae)
+- [1] [AI và Machine Learning trong an ninh mạng - zvelo](https://zvelo.com/ai-and-machine-learning-in-cybersecurity/)
+- [2] [Giải thích về Linear Regression - Medium](https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae)
 - [3] [Logistic Regression - Medium](https://madhuramiah.medium.com/logistic-regression-6e55553cc003)
-- [4] [Sohail Ahmed Khan, Wasiq Khan, Abir Hussain - "Phishing Attacks and Websites Classification Using Machine Learning and Multiple Datasets (A Comparative Analysis)"](https://arxiv.org/pdf/2101.02552)
+- [4] [Sohail Ahmed Khan, Wasiq Khan, Abir Hussain - "Phân loại các cuộc tấn công phishing và website bằng Machine Learning và nhiều tập dữ liệu (Phân tích so sánh)"](https://arxiv.org/pdf/2101.02552)
 - [5] [Decision Tree - GeeksforGeeks](https://www.geeksforgeeks.org/decision-tree-introduction-example/)
-- [6] [Reena Singh Rajput, Sanjay Agrawal - "Denial of Services Attack Detection using Random Forest Classifier with Information Gain"](https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132)
-- [7] [Raisa Abedin Disha, Sajjad Waheed - "Performance analysis of machine learning models for intrusion detection system using Gini Impurity-based Weighted Random Forest (GIWRF) feature selection technique"](https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8)
-- [8] [What is a Support Vector Machine? - IBM](https://www.ibm.com/think/topics/support-vector-machine)
-- [9] [Naive Bayes spam filtering - Wikipedia](https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering)
-- [10] [What is k-Nearest Neighbors (KNN)? - IBM](https://www.ibm.com/think/topics/knn)
-- [11] [GBDT Demystified: How LightGBM, XGBoost and CatBoost Work - Medium](https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644)
-- [12] [Ensemble Learning: Boosting Model Performance by Combining Strengths - Medium](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
-- [13] [How Deep Learning Enhances Intrusion Detection Systems](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
-
+- [6] [Reena Singh Rajput, Sanjay Agrawal - "Phát hiện tấn công từ chối dịch vụ bằng bộ phân loại Random Forest với Information Gain"](https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132)
+- [7] [Raisa Abedin Disha, Sajjad Waheed - "Phân tích hiệu suất của các mô hình machine learning cho hệ thống phát hiện xâm nhập bằng kỹ thuật lựa chọn đặc trưng Gini Impurity-based Weighted Random Forest (GIWRF)"](https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8)
+- [8] [Support Vector Machine là gì? - IBM](https://www.ibm.com/think/topics/support-vector-machine)
+- [9] [Lọc spam bằng Naive Bayes - Wikipedia](https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering)
+- [10] [k-Nearest Neighbors (KNN) là gì? - IBM](https://www.ibm.com/think/topics/knn)
+- [11] [Giải mã GBDT: Cách LightGBM, XGBoost và CatBoost hoạt động - Medium](https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644)
+- [12] [Ensemble Learning: Cải thiện hiệu suất mô hình bằng cách kết hợp các điểm mạnh - Medium](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
+- [13] [Deep Learning cải thiện hệ thống phát hiện xâm nhập như thế nào](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
 {{#include ../banners/hacktricks-training.md}}

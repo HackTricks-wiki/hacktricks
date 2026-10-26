@@ -1,75 +1,75 @@
-# AI Agent Security Methodology
+# Phương pháp luận bảo mật tác tử AI
 
 {{#include ../banners/hacktricks-training.md}}
 
-An agent assessment should follow **attacker-controlled input to an externally observable effect**. Jailbreaking, character changes, and system-prompt disclosure prove that a reasoning channel is influenceable, but the high-impact finding is the chain into data access, an unauthorized tool action, a downstream injection sink, persistence, or another agent.<sup>[[2]](#references)</sup>
+Đánh giá tác tử nên lần theo **đầu vào do kẻ tấn công kiểm soát đến một tác động có thể quan sát từ bên ngoài**. Jailbreaking, thay đổi tính cách và tiết lộ system prompt chứng minh rằng kênh suy luận có thể bị tác động, nhưng phát hiện có tác động lớn là chuỗi dẫn đến truy cập dữ liệu, hành động trái phép qua tool, điểm tiếp nhận injection ở bước xử lý sau, khả năng duy trì trạng thái hoặc một tác tử khác.<sup>[[2]](#references)</sup>
 
-The [OWASP Top 10 for Agentic Applications](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) is useful for labeling coverage (goal hijacking, tool misuse, privilege abuse, supply chain, code execution, memory poisoning, inter-agent trust, cascading failures, human trust, and rogue agents). Use those labels after constructing an end-to-end attack path rather than treating a model's unexpected text as the end of the test.<sup>[[1]](#references)[[2]](#references)</sup>
+[OWASP Top 10 for Agentic Applications](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) hữu ích để gắn nhãn phạm vi kiểm tra (chiếm quyền mục tiêu, lạm dụng tool, lạm dụng đặc quyền, chuỗi cung ứng, thực thi mã, đầu độc bộ nhớ, niềm tin giữa các tác tử, lỗi dây chuyền, niềm tin của con người và tác tử bất hảo). Hãy dùng các nhãn này sau khi xây dựng đường tấn công đầu cuối, thay vì xem văn bản bất ngờ từ model là điểm kết thúc của bài kiểm tra.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Build the target map
+## Lập bản đồ mục tiêu
 
-Record these five dimensions for every agent workflow before writing payloads:<sup>[[2]](#references)</sup>
+Trước khi viết payload, hãy ghi lại năm khía cạnh sau cho từng quy trình làm việc của tác tử:<sup>[[2]](#references)</sup>
 
-| Dimension | What to enumerate | Security question |
+| Khía cạnh | Những gì cần liệt kê | Câu hỏi bảo mật |
 |---|---|---|
-| **Untrusted input** | Chat/API parameters, URLs, documents, email, tickets, calendar entries, retrieved chunks, memory, tool results, and peer-agent messages | Where can an attacker place content that later enters model context? |
-| **Tools** | Tool names and schemas, side effects, auto-execution, confirmation behavior, and dynamically loaded tools | Which calls read secrets, write state, send messages, delete data, execute code, or transfer value? |
-| **Authority** | User delegation, service accounts, API tokens, credential lifetime, tenant/resource scope, and network reach | As which identity does each call run, and is authorization repeated at the tool boundary? |
-| **Processing** | Query builders, shells, URL fetchers, template engines, interpreters, parsers, file operations, and deserializers | Where does model-generated data become syntax for another interpreter? |
-| **Output** | Responses, rendered Markdown/HTML, links, image fetches, webhooks, email, files, logs, reports, metrics, and peer-agent traffic | Which observable channel can carry a secret or trigger a secondary request? |
+| **Đầu vào không đáng tin cậy** | Tham số Chat/API, URL, tài liệu, email, ticket, mục lịch, các đoạn truy xuất, bộ nhớ, kết quả từ tool và tin nhắn từ tác tử ngang hàng | Kẻ tấn công có thể đưa nội dung vào đâu để sau đó nội dung ấy đi vào ngữ cảnh của model? |
+| **Tool** | Tên và schema của tool, tác động phụ, khả năng tự động thực thi, hành vi xác nhận và tool được tải động | Những lệnh gọi nào đọc bí mật, ghi trạng thái, gửi tin nhắn, xóa dữ liệu, thực thi mã hoặc chuyển giá trị? |
+| **Quyền hạn** | Quyền ủy quyền của người dùng, tài khoản dịch vụ, API token, thời hạn hiệu lực của thông tin xác thực, phạm vi tenant/tài nguyên và khả năng truy cập mạng | Mỗi lệnh gọi chạy dưới danh tính nào, và quyền có được kiểm tra lại tại ranh giới của tool không? |
+| **Xử lý** | Trình tạo truy vấn, shell, trình tải URL, template engine, trình thông dịch, parser, thao tác tệp và bộ giải tuần tự | Dữ liệu do model tạo ra trở thành cú pháp cho một trình thông dịch khác ở đâu? |
+| **Đầu ra** | Phản hồi, Markdown/HTML được render, liên kết, yêu cầu tải ảnh, webhook, email, tệp, log, báo cáo, chỉ số và lưu lượng giữa các tác tử ngang hàng | Kênh có thể quan sát nào có thể mang theo bí mật hoặc kích hoạt một yêu cầu thứ cấp? |
 
-Do not collapse this into a list of advertised integrations. A useful artifact maps each source to the exact context position it reaches, the tools available at that point, the credential used by each tool, the downstream interpreter, and every egress route. The same tool can be low impact with a per-user read token and critical with a shared administrator credential.<sup>[[2]](#references)</sup>
+Đừng giản lược việc này thành danh sách các tích hợp được quảng bá. Một tài liệu hữu ích sẽ ánh xạ từng nguồn đến vị trí chính xác trong ngữ cảnh mà nguồn đó đi tới, các tool khả dụng tại thời điểm đó, thông tin xác thực được từng tool sử dụng, trình thông dịch xử lý tiếp theo và mọi đường truyền dữ liệu ra ngoài. Cùng một tool có thể có tác động thấp khi dùng token chỉ đọc của từng người dùng, nhưng có mức độ nghiêm trọng cao khi dùng thông tin xác thực quản trị viên dùng chung.<sup>[[2]](#references)</sup>
 
-## Reconnaissance
+## Trinh sát
 
-### Map every delivery and ingestion path
+### Lập bản đồ mọi đường gửi và tiếp nhận dữ liệu
 
-Start with the delivery surface (web, mobile, API, email, chat platform, browser extension) and proxy the client-to-backend traffic. Inspect fields hidden by the UI, search/autocomplete/filter parameters, conversation-state objects, upload and indexing jobs, tool responses, and sub-agent traffic. Mobile-only clients may require an emulator and instrumentation to bypass certificate pinning before the real request schema becomes visible.<sup>[[2]](#references)</sup>
+Bắt đầu từ bề mặt gửi dữ liệu (web, di động, API, email, nền tảng chat, tiện ích mở rộng trình duyệt) và proxy lưu lượng giữa client với backend. Kiểm tra các trường bị ẩn khỏi giao diện người dùng, tham số tìm kiếm/tự động hoàn tất/lọc, đối tượng trạng thái hội thoại, tác vụ tải lên và lập chỉ mục, phản hồi từ tool, cũng như lưu lượng giữa các tác tử phụ. Với client chỉ có trên di động, có thể cần trình giả lập và công cụ instrument để vượt certificate pinning trước khi schema yêu cầu thực tế xuất hiện.<sup>[[2]](#references)</sup>
 
-Then map the stack beneath the model: orchestration framework, prompt assembly, retrieval and memory stores, runtime (for example Python, container, or WASM), mounted volumes, host services, internal APIs, cloud metadata reachability, and neighboring networks. Framework defaults matter because some “tool calls” are implemented by generating or evaluating code; the runtime/sandbox boundary determines whether that result stays contained.<sup>[[2]](#references)</sup>
+Tiếp đó, lập bản đồ ngăn xếp bên dưới model: framework điều phối, quá trình lắp ráp prompt, kho lưu trữ truy xuất và bộ nhớ, runtime (ví dụ Python, container hoặc WASM), volume được mount, dịch vụ trên host, API nội bộ, khả năng truy cập metadata của cloud và các mạng lân cận. Cấu hình mặc định của framework rất quan trọng vì một số “lệnh gọi tool” được triển khai bằng cách tạo hoặc đánh giá mã; ranh giới runtime/sandbox quyết định liệu kết quả đó có được giữ trong phạm vi cô lập hay không.<sup>[[2]](#references)</sup>
 
-### Fingerprint routing with non-destructive probes
+### Nhận diện định tuyến bằng probe không phá hoại
 
-Compare an in-scope request with several unrelated requests while preserving the complete response, status code, latency, and streaming behavior. A stable rejection before any task-specific reasoning may indicate a separate gateway/classifier; a contextual refusal suggests that the request reached the model; an empty or purely extractive answer may indicate keyword search or narrow retrieval. Treat these as hypotheses and confirm them by replaying the same probe through alternate API fields and ingestion paths.<sup>[[2]](#references)</sup>
+So sánh một yêu cầu nằm trong phạm vi với một số yêu cầu không liên quan, đồng thời lưu lại toàn bộ phản hồi, mã trạng thái, độ trễ và hành vi streaming. Việc bị từ chối ổn định trước khi có suy luận đặc thù cho tác vụ có thể cho thấy có gateway/classifier riêng; lời từ chối dựa trên ngữ cảnh cho thấy yêu cầu đã đến model; câu trả lời trống hoặc chỉ trích xuất thông tin có thể cho thấy hệ thống dùng tìm kiếm từ khóa hoặc truy xuất giới hạn. Hãy xem đây là các giả thuyết và xác nhận bằng cách gửi lại cùng probe qua những trường API và đường tiếp nhận dữ liệu khác.<sup>[[2]](#references)</sup>
 
-Recon is complete when the assessment can name the earliest attacker-controlled source that changes agent behavior **and** the tools, identities, interpreters, and outputs reachable from that source.<sup>[[2]](#references)</sup>
+Hoàn tất trinh sát khi cuộc đánh giá có thể xác định nguồn sớm nhất do kẻ tấn công kiểm soát làm thay đổi hành vi của tác tử **và** các tool, danh tính, trình thông dịch và đầu ra có thể tiếp cận từ nguồn đó.<sup>[[2]](#references)</sup>
 
-## Exploitation: cross a trust boundary
+## Khai thác: vượt qua ranh giới tin cậy
 
-Test channels, not only prompt wording. Start with direct injection to establish what the visible front door blocks, then repeat equivalent intent through the less-visible paths below:<sup>[[2]](#references)</sup>
+Kiểm tra các kênh, không chỉ cách diễn đạt prompt. Bắt đầu bằng injection trực tiếp để xác định những gì lối vào hiển thị chặn được, rồi lặp lại ý đồ tương tự qua các đường ít hiển thị hơn bên dưới:<sup>[[2]](#references)</sup>
 
-- **Indirect content:** pages, files, email, tickets, metadata, alt text, HTML comments, off-screen text, or zero-width characters. See [AI Prompts](AI-Prompts.md#third-party-or-indirect-prompt-injection) for payload-delivery techniques.
-- **Retrieval and memory:** poison content that will be retrieved later or state that will be reloaded in later sessions. Record whether deletion of the original source removes the behavior.
-- **Tool output and peer agents:** place the marker in a tool response or agent-to-agent message to test whether internal traffic bypasses filters applied only to user input and final output.
-- **Supply chain:** review tool descriptors, plugins, connected servers, skills, models, and dependencies as trusted instruction sources. For MCP-specific tests, see [MCP Servers](AI-MCP-Servers.md#mcp-vulns).
-- **Human approval:** compare the actual structured tool call with the model-generated approval text. Test whether attacker influence can omit the destination, scope, affected objects, or irreversible side effects.
+- **Nội dung gián tiếp:** trang web, tệp, email, ticket, metadata, alt text, HTML comment, văn bản ngoài màn hình hoặc ký tự zero-width. Xem [AI Prompts](AI-Prompts.md#third-party-or-indirect-prompt-injection) để biết các kỹ thuật gửi payload.
+- **Truy xuất và bộ nhớ:** đầu độc nội dung sẽ được truy xuất về sau hoặc trạng thái sẽ được tải lại trong các phiên sau. Ghi lại xem việc xóa nguồn ban đầu có loại bỏ hành vi đó không.
+- **Đầu ra từ tool và tác tử ngang hàng:** đặt marker trong phản hồi của tool hoặc tin nhắn giữa các tác tử để kiểm tra xem lưu lượng nội bộ có bỏ qua các bộ lọc chỉ áp dụng cho đầu vào người dùng và đầu ra cuối cùng hay không.
+- **Chuỗi cung ứng:** xem xét các mô tả tool, plugin, server được kết nối, skill, model và dependency như những nguồn chỉ thị đáng tin cậy. Để kiểm tra riêng MCP, xem [MCP Servers](AI-MCP-Servers.md#mcp-vulns).
+- **Phê duyệt của con người:** so sánh lệnh gọi tool có cấu trúc thực tế với nội dung phê duyệt do model tạo. Kiểm tra xem tác động của kẻ tấn công có thể làm thiếu đích, phạm vi, đối tượng bị ảnh hưởng hoặc tác động phụ không thể đảo ngược hay không.
 
-Use a benign, unique marker first. Preserve the source artifact, assembled context if observable, selected tool call, approval data, backend request/response, and final state. This separates influence from a hallucinated claim that an action occurred.<sup>[[2]](#references)</sup>
+Trước tiên, hãy dùng một marker duy nhất, vô hại. Lưu lại hiện vật nguồn, ngữ cảnh đã lắp ráp nếu có thể quan sát, lệnh gọi tool được chọn, dữ liệu phê duyệt, yêu cầu/phản hồi backend và trạng thái cuối cùng. Việc này giúp phân biệt tác động thực sự với lời khẳng định bịa đặt rằng một hành động đã xảy ra.<sup>[[2]](#references)</sup>
 
-### Policy-shaped text in a tool-risk judge
+### Văn bản giả dạng chính sách trong bộ đánh giá rủi ro tool
 
-A model-based tool gate can receive attacker-controlled text inside otherwise useful classification context. LangChain's experimental `AutoModeMiddleware`, for example, sends a proposed tool call, its arguments, an optional tool description, and up to 30 recent messages to a TypeSafe `is_risky` judge. It blocks configured tools when the returned Noul probability is at least `0.5`; unlisted tools are not classified by this middleware.<sup>[[5]](#references)</sup> TypeSafe also warns that adversarial text in state can influence a classification even when state is intended to be data.<sup>[[6]](#references)</sup>
+Một cổng kiểm soát tool dựa trên model có thể nhận văn bản do kẻ tấn công kiểm soát nằm trong ngữ cảnh phân loại vốn hữu ích. Ví dụ, `AutoModeMiddleware` thử nghiệm của LangChain gửi lệnh gọi tool được đề xuất, các đối số của lệnh gọi, mô tả tool tùy chọn và tối đa 30 tin nhắn gần nhất đến bộ đánh giá `is_risky` của TypeSafe. Middleware này chặn các tool được cấu hình khi xác suất Noul trả về đạt ít nhất `0.5`; các tool không được liệt kê sẽ không được middleware này phân loại.<sup>[[5]](#references)</sup> TypeSafe cũng cảnh báo rằng văn bản đối kháng trong state có thể tác động đến kết quả phân loại, ngay cả khi state được dự định chỉ là dữ liệu.<sup>[[6]](#references)</sup>
 
-A **counterfeit policy** is different from simply claiming to be a system message. It places alternative labels or risk definitions inside lower-trust state and invites the judge to use those definitions instead of its developer-defined criteria. In Datadog's test, a user-editable `profile_description` was copied into the tool arguments alongside `can_edit:false`. Its policy-like text argued that a write attempt was low risk because a separate permission check should reject it before any mutation. Across 40 runs, the mean `is_risky` score fell from `0.893` to `0.290`, while a direct role-spoofing comparison averaged `0.905`. The mean falling below `0.5` does not prove every individual call passed the gate, and the experiment did **not** demonstrate a completed unauthorized write.<sup>[[7]](#references)</sup>
+**Chính sách giả mạo** khác với việc chỉ tự nhận là system message. Nó đặt các nhãn hoặc định nghĩa rủi ro thay thế trong state có mức độ tin cậy thấp hơn và khuyến khích bộ đánh giá dùng các định nghĩa đó thay cho tiêu chí do developer xác định. Trong thử nghiệm của Datadog, `profile_description` do người dùng chỉnh sửa được sao chép vào đối số của tool cùng với `can_edit:false`. Văn bản giống chính sách lập luận rằng thao tác ghi có rủi ro thấp vì một bước kiểm tra quyền riêng sẽ từ chối thao tác đó trước khi có bất kỳ thay đổi nào. Qua 40 lần chạy, điểm `is_risky` trung bình giảm từ `0.893` xuống `0.290`, trong khi phép so sánh giả mạo vai trò trực tiếp đạt trung bình `0.905`. Việc điểm trung bình giảm xuống dưới `0.5` không chứng minh mọi lệnh gọi riêng lẻ đều vượt qua cổng kiểm soát, và thử nghiệm **không** chứng minh đã hoàn tất thao tác ghi trái phép nào.<sup>[[7]](#references)</sup>
 
-When testing this boundary, distinguish the classifier verdict from the tool's actual authorization result. Check which editable fields reach the judge, compare the same proposed action with and without policy-like text, and verify the final state independently. A separate permission check must still use the authenticated requester's authority rather than the connector's service-account rights.<sup>[[7]](#references)</sup> See [prompt-filter bypasses](AI-Prompts.md#prompt-waf-bypass) for other classifier failure modes; [LLM gateway trust boundaries](AI-LLM-Gateway-Security.md) concern a different routing and credential boundary.
+Khi kiểm tra ranh giới này, hãy phân biệt phán quyết của bộ phân loại với kết quả cấp quyền thực tế của tool. Kiểm tra những trường có thể chỉnh sửa nào được gửi đến bộ đánh giá, so sánh cùng một hành động được đề xuất khi có và không có văn bản giống chính sách, rồi xác minh trạng thái cuối cùng độc lập. Bước kiểm tra quyền riêng vẫn phải dùng quyền hạn của người yêu cầu đã xác thực, thay vì quyền của tài khoản dịch vụ thuộc connector.<sup>[[7]](#references)</sup> Xem [prompt-filter bypasses](AI-Prompts.md#prompt-waf-bypass) để biết các kiểu lỗi khác của bộ phân loại; [LLM gateway trust boundaries](AI-LLM-Gateway-Security.md) đề cập đến một ranh giới định tuyến và thông tin xác thực khác.
 
-### Subagent context isolation
+### Cách ly ngữ cảnh của subagent
 
-A non-fork Claude Agent SDK subagent receives its own `AgentDefinition.prompt`, the delegation prompt, and its available tools, but not the parent system prompt or conversation. If `tools` is omitted from its definition, it inherits the tools available to subagents; project `CLAUDE.md` may still load. This makes a parent-only prompt restriction an unreliable boundary when the child can use the same filesystem or execution tools.<sup>[[4]](#references)</sup>
+Subagent Claude Agent SDK không fork nhận `AgentDefinition.prompt` riêng, prompt ủy quyền và các tool khả dụng, nhưng không nhận system prompt hoặc hội thoại của tác tử cha. Nếu bỏ qua `tools` trong định nghĩa của nó, subagent sẽ kế thừa các tool khả dụng cho subagent; `CLAUDE.md` của dự án vẫn có thể được tải. Vì vậy, một giới hạn prompt chỉ áp dụng cho tác tử cha không phải là ranh giới đáng tin cậy nếu tác tử con có thể dùng cùng công cụ hệ thống tệp hoặc thực thi.<sup>[[4]](#references)</sup>
 
-Test the boundary by comparing a direct request the parent refuses with the same task delegated to a named subagent. NCC Group reports that a refused operating-system file enumeration succeeded when reframed for a child as a harmless "layout map".<sup>[[3]](#references)</sup>
+Kiểm tra ranh giới bằng cách so sánh một yêu cầu trực tiếp mà tác tử cha từ chối với cùng tác vụ được giao cho một subagent có tên. NCC Group cho biết thao tác liệt kê tệp của hệ điều hành bị từ chối đã thành công khi được diễn đạt lại cho tác tử con như một “bản đồ bố cục” vô hại.<sup>[[3]](#references)</sup>
 
-Inspect the child's actual tool calls and effective tool allowlist, not just the parent's final answer; confirm whether the child accessed files the parent would not.<sup>[[4]](#references)</sup> This is a guardrail inheritance failure, not proof of a [Python sandbox](../generic-methodologies-and-resources/python/bypass-python-sandboxes/) or container escape.<sup>[[3]](#references)[[4]](#references)</sup>
+Kiểm tra các lệnh gọi tool thực tế của tác tử con và danh sách cho phép tool có hiệu lực, không chỉ câu trả lời cuối cùng của tác tử cha; xác nhận xem tác tử con có truy cập những tệp mà tác tử cha không được phép truy cập hay không.<sup>[[4]](#references)</sup> Đây là lỗi kế thừa guardrail, không phải bằng chứng về việc thoát khỏi [Python sandbox](../generic-methodologies-and-resources/python/bypass-python-sandboxes/) hoặc container.<sup>[[3]](#references)[[4]](#references)</sup>
 
-## Execution: prove real impact
+## Thực thi: chứng minh tác động thực tế
 
-There are two distinct routes from influence to impact:<sup>[[2]](#references)</sup>
+Có hai đường riêng biệt dẫn từ việc gây ảnh hưởng đến tác động thực tế:<sup>[[2]](#references)</sup>
 
-1. **Capability abuse:** the authorized tool already performs the objective. Examples include reading one tenant's record and writing it to an attacker-visible report, sending email, changing records, deleting a file, or initiating a payment. No secondary software bug is required.
-2. **Downstream sink exploitation:** attacker-steered model output becomes syntax for another component. Review database queries for [SQL injection](../pentesting-web/sql-injection/README.md) or [NoSQL injection](../pentesting-web/nosql-injection.md), shell wrappers for [command injection](../pentesting-web/command-injection.md), chosen URLs for [SSRF](../pentesting-web/ssrf-server-side-request-forgery/README.md), file operations for traversal, template/code evaluators for RCE, and object parsers for [unsafe deserialization](../pentesting-web/deserialization/README.md).
+1. **Lạm dụng năng lực:** tool được cấp quyền vốn đã thực hiện được mục tiêu. Ví dụ: đọc bản ghi của một tenant rồi ghi bản ghi đó vào báo cáo mà kẻ tấn công xem được, gửi email, thay đổi bản ghi, xóa tệp hoặc khởi tạo khoản thanh toán. Không cần có lỗi phần mềm thứ cấp.
+2. **Khai thác điểm tiếp nhận ở bước xử lý sau:** đầu ra của model bị kẻ tấn công điều hướng trở thành cú pháp cho một thành phần khác. Kiểm tra các truy vấn cơ sở dữ liệu để tìm [SQL injection](../pentesting-web/sql-injection/README.md) hoặc [NoSQL injection](../pentesting-web/nosql-injection.md), shell wrapper để tìm [command injection](../pentesting-web/command-injection.md), URL do kẻ tấn công chọn để tìm [SSRF](../pentesting-web/ssrf-server-side-request-forgery/README.md), thao tác tệp để tìm path traversal, template/code evaluator để tìm RCE và object parser để tìm [unsafe deserialization](../pentesting-web/deserialization/README.md).
 
-For every candidate, prove this chain:<sup>[[2]](#references)</sup>
+Với từng trường hợp có thể khai thác, hãy chứng minh chuỗi sau:<sup>[[2]](#references)</sup>
 
 ```text
 attacker-controlled source
@@ -80,42 +80,41 @@ attacker-controlled source
   -> externally verified state change or data egress
 ```
 
-A read-only integration is still exploitable when any later component can publish what it read. Test ordinary responses plus less-obvious egress such as attacker-controlled links, automatic image retrieval, webhooks, logs, reports, counters, notifications, and messages to other agents.<sup>[[2]](#references)</sup>
+Một integration chỉ có quyền đọc vẫn có thể bị khai thác nếu bất kỳ thành phần nào về sau có thể công bố nội dung đã đọc. Kiểm tra các phản hồi thông thường cùng những kênh egress ít hiển nhiên hơn như liên kết do attacker kiểm soát, tự động tải ảnh, webhook, log, báo cáo, bộ đếm, thông báo và tin nhắn gửi cho các agent khác.<sup>[[2]](#references)</sup>
 
-## Actions on objectives
+## Hành động trên mục tiêu
 
-After confirming one action, evaluate the complete blast radius rather than stopping at the first visible effect:<sup>[[2]](#references)</sup>
+Sau khi xác nhận một hành động, hãy đánh giá toàn bộ phạm vi ảnh hưởng thay vì dừng lại ở hiệu ứng đầu tiên nhìn thấy được:<sup>[[2]](#references)</sup>
 
-- **Exfiltration:** secrets, user records, internal files, conversation data, or prompt/context content leave through an observable channel.
-- **Unauthorized action:** the agent uses legitimate write capabilities for the attacker's objective.
-- **Denial of service:** destructive tools or repeated expensive operations affect integrity or availability.
-- **Persistence:** poisoned memory, indexed content, trusted state, or runtime changes survive the originating session or source removal.
-- **Propagation:** a trusted peer consumes the compromised agent's message or shared state and repeats the action with its own tools and credentials.
+- **Exfiltration:** bí mật, hồ sơ người dùng, tệp nội bộ, dữ liệu hội thoại hoặc nội dung prompt/context được gửi ra ngoài qua một kênh có thể quan sát.
+- **Hành động trái phép:** agent sử dụng các khả năng ghi hợp lệ để phục vụ mục tiêu của attacker.
+- **Từ chối dịch vụ:** các công cụ phá hoại hoặc những hoạt động tốn kém lặp đi lặp lại ảnh hưởng đến tính toàn vẹn hoặc tính khả dụng.
+- **Duy trì quyền truy cập:** memory bị đầu độc, nội dung được lập chỉ mục, trạng thái đáng tin cậy hoặc thay đổi runtime vẫn tồn tại sau khi phiên hoặc nguồn khởi tạo bị gỡ bỏ.
+- **Lan truyền:** một peer đáng tin cậy tiếp nhận tin nhắn hoặc trạng thái chia sẻ từ agent bị xâm phạm, rồi lặp lại hành động bằng công cụ và thông tin xác thực của chính nó.
 
-Severity should follow reachable data, effective privilege, sink exploitability, egress, persistence, and propagation—not how surprising the model's text appears.<sup>[[2]](#references)</sup>
+Mức độ nghiêm trọng nên dựa trên dữ liệu có thể truy cập, quyền hiệu lực, khả năng khai thác sink, egress, khả năng duy trì và lan truyền—chứ không phải mức độ bất ngờ trong câu chữ của model.<sup>[[2]](#references)</sup>
 
-## Controls to validate during the assessment
+## Các biện pháp kiểm soát cần xác thực trong quá trình đánh giá
 
-Prompt filters and a better system prompt can raise attacker cost, but they should not be treated as authorization boundaries. Validate the controls below by re-running the same chain through direct input, indirect content, memory, tools, and peer agents:<sup>[[2]](#references)</sup>
+Bộ lọc prompt và system prompt tốt hơn có thể làm tăng chi phí cho attacker, nhưng không nên được xem là ranh giới phân quyền. Xác thực các biện pháp kiểm soát dưới đây bằng cách chạy lại cùng một chuỗi qua đầu vào trực tiếp, nội dung gián tiếp, memory, tools và các agent ngang hàng:<sup>[[2]](#references)</sup>
 
-- A deterministic policy layer checks the authenticated user, tenant, object, action, and destination on **every tool invocation**; the model cannot supply or override the caller identity.
-- Read and write capabilities use separate, least-privilege, short-lived credentials; high-impact tools are exposed just in time and never auto-execute from ingested content.
-- Network egress and internal destinations are allowlisted independently of model-selected URLs; runtime access to metadata endpoints, mounted secrets, and neighboring services is blocked unless required.
-- Approval UI is generated from the canonical structured request and shows exact arguments, identity, destination, affected objects, and side effects—not a free-form model summary.
-- Success is verified from the destination system or system of record. Agent narration, a tool-call request, or an HTTP redirect is not proof of the claimed state change.
-- Memory and retrieval entries retain provenance and trust labels, can be invalidated, and are re-authorized when used for a later action.
-- Inter-agent messages are authenticated and authorized as untrusted requests; a peer's reputation or agent card does not implicitly delegate the receiver's tools.
+- Một lớp chính sách xác định kiểm tra người dùng đã xác thực, tenant, đối tượng, hành động và đích đến trong **mỗi lần gọi tool**; model không thể cung cấp hoặc ghi đè danh tính người gọi.
+- Quyền đọc và ghi sử dụng thông tin xác thực riêng biệt, đặc quyền tối thiểu và có thời hạn ngắn; các tool có tác động lớn chỉ được cung cấp đúng lúc cần thiết và không bao giờ tự động thực thi dựa trên nội dung đã tiếp nhận.
+- Egress mạng và các đích nội bộ được allowlist độc lập với URL do model chọn; quyền truy cập runtime tới endpoint metadata, secrets được mount và các dịch vụ lân cận bị chặn trừ khi cần thiết.
+- Giao diện phê duyệt được tạo từ yêu cầu có cấu trúc chuẩn tắc và hiển thị chính xác các đối số, danh tính, đích đến, đối tượng bị ảnh hưởng và tác dụng phụ—không phải bản tóm tắt tự do do model tạo ra.
+- Thành công được xác minh từ hệ thống đích hoặc hệ thống lưu trữ dữ liệu chuẩn. Lời tường thuật của agent, yêu cầu gọi tool hoặc chuyển hướng HTTP không chứng minh trạng thái được tuyên bố đã thay đổi.
+- Các mục trong memory và retrieval lưu giữ provenance cùng nhãn độ tin cậy, có thể bị vô hiệu hóa và được phân quyền lại khi dùng cho hành động về sau.
+- Tin nhắn giữa các agent được xác thực và phân quyền như các yêu cầu không đáng tin cậy; uy tín của peer hoặc agent card không mặc nhiên ủy quyền các tool của bên nhận.
 
-For A2A agent cards, task flows and their attack surface, check [A2A Protocol Security](AI-A2A-Protocol.md).
+Để tìm hiểu về agent card A2A, luồng tác vụ và bề mặt tấn công của chúng, hãy xem [A2A Protocol Security](AI-A2A-Protocol.md).
 
 ## References
 
-- [1] [OWASP Top 10 for Agentic Applications for 2026](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)
-- [2] [The Hacker's Guide to Attacking AI Agents](https://darkmarc.substack.com/p/the-hackers-guide-to-attacking-ai)
-- [3] [How Hard Is It Really to Break an AI Agent Out of Its Sandbox?](https://www.nccgroup.com/research/how-hard-is-it-really-to-break-an-ai-agent-out-of-its-sandbox/)
-- [4] [Subagents in the SDK](https://code.claude.com/docs/en/agent-sdk/subagents)
-- [5] [LangChain TypeSafe Auto Mode middleware source](https://github.com/langchain-ai/langchain/blob/master/libs/partners/typesafe/langchain_typesafe/experimental/middleware/auto_mode.py)
-- [6] [TypeSafe AI Jev model jaggedness: adversarial content](https://docs.typesafe.ai/model-jaggedness/jev-1.13#adversarial-content)
-- [7] [Jev as a judge: How counterfeit policy steers Jev](https://securitylabs.datadoghq.com/articles/jev-as-a-judge-how-counterfeit-policy-steers-jev/)
-
+- [1] [Top 10 ứng dụng Agentic của OWASP năm 2026](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)
+- [2] [Cẩm nang của Hacker về tấn công AI Agent](https://darkmarc.substack.com/p/the-hackers-guide-to-attacking-ai)
+- [3] [Thực sự khó đến mức nào để thoát khỏi sandbox của AI Agent?](https://www.nccgroup.com/research/how-hard-is-it-really-to-break-an-ai-agent-out-of-its-sandbox/)
+- [4] [Subagent trong SDK](https://code.claude.com/docs/en/agent-sdk/subagents)
+- [5] [Mã nguồn middleware LangChain TypeSafe Auto Mode](https://github.com/langchain-ai/langchain/blob/master/libs/partners/typesafe/langchain_typesafe/experimental/middleware/auto_mode.py)
+- [6] [Tính gồ ghề của model TypeSafe AI Jev: nội dung đối kháng](https://docs.typesafe.ai/model-jaggedness/jev-1.13#adversarial-content)
+- [7] [Jev với vai trò giám khảo: Chính sách giả mạo điều hướng Jev như thế nào](https://securitylabs.datadoghq.com/articles/jev-as-a-judge-how-counterfeit-policy-steers-jev/)
 {{#include ../banners/hacktricks-training.md}}

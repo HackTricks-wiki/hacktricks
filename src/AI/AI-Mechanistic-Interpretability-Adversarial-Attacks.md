@@ -1,31 +1,31 @@
-# Mechanistic-Interpretability-Guided Adversarial Attacks
+# Tấn công đối kháng được hướng dẫn bởi khả năng diễn giải cơ chế
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Superposition as an attack surface
+## Chồng lấp như một bề mặt tấn công
 
-An under-parameterised activation space can encode more semantic features than it has dimensions by assigning features to non-orthogonal vectors. Consequently, an activated feature also projects onto other feature directions. Training can compensate for combinations seen in-distribution, but an unusual combination of otherwise valid features may add constructively in the direction of a target feature that is absent from the input.<sup>[[1]](#references)[[2]](#references)</sup>
+Một không gian activation thiếu tham số có thể mã hóa nhiều đặc trưng ngữ nghĩa hơn số chiều của nó bằng cách gán các đặc trưng cho những vector không trực giao. Do đó, một đặc trưng được kích hoạt cũng chiếu lên các hướng đặc trưng khác. Quá trình huấn luyện có thể bù trừ cho các tổ hợp xuất hiện trong phân phối dữ liệu, nhưng một tổ hợp bất thường gồm các đặc trưng hợp lệ riêng lẻ có thể cộng dồn theo hướng của một đặc trưng đích không có trong đầu vào.<sup>[[1]](#references)[[2]](#references)</sup>
 
-For feature vectors `v_i ∈ R^D`, activations `a_i`, and target `t`, the following magnitude is useful for finding candidate combinations:<sup>[[1]](#references)</sup>
+Với các vector đặc trưng `v_i ∈ R^D`, các giá trị kích hoạt `a_i` và mục tiêu `t`, độ lớn sau đây hữu ích để tìm các tổ hợp tiềm năng:<sup>[[1]](#references)</sup>
 
 ```text
 I_t = Σ_i≠t |a_i (v_i · v_t) / ||v_t|| |
 candidate condition: I_t > max(a)
 ```
 
-This is only a screening heuristic. An exploit must retain the signs and magnitudes and evaluate the real decoder, for example `h_hat[t] = ReLU(b_t + Σ_i a_i(v_i · v_t))` in a tied-weight linear decoder. Negative terms can cancel the attack, while decoder bias, feature-vector norms, activation thresholds, and ReLU gating can prevent a large absolute cosine score from producing the target activation.<sup>[[1]](#references)</sup>
+Đây chỉ là một heuristic sàng lọc. Một exploit phải giữ nguyên dấu và độ lớn, đồng thời đánh giá decoder thực tế, chẳng hạn `h_hat[t] = ReLU(b_t + Σ_i a_i(v_i · v_t))` trong một tied-weight linear decoder. Các số hạng âm có thể triệt tiêu cuộc tấn công, trong khi bias của decoder, chuẩn vector đặc trưng, ngưỡng kích hoạt và cơ chế ReLU gating có thể khiến điểm cosine tuyệt đối lớn không tạo ra được activation mục tiêu.<sup>[[1]](#references)</sup>
 
-## White-box attack workflow
+## Quy trình tấn công White-box
 
-A practical assessment can use a model bottleneck, a sparse autoencoder (SAE), or another interpretable feature dictionary. The objective is not merely to change the final class: it is to make reconstruction introduce a chosen internal feature that was not active before compression. The proposed workflow is:<sup>[[1]](#references)</sup>
+Một đánh giá thực tế có thể sử dụng nút thắt của mô hình, sparse autoencoder (SAE) hoặc một từ điển đặc trưng có thể diễn giải khác. Mục tiêu không chỉ là thay đổi lớp đầu ra: mà còn khiến quá trình tái tạo đưa vào một đặc trưng nội bộ đã chọn, vốn chưa hoạt động trước khi nén. Quy trình được đề xuất như sau:<sup>[[1]](#references)</sup>
 
-1. **Recover feature directions:** extract the relevant encoder/decoder vectors, remove dead features, and map active directions to concepts using maximally activating samples or feature-circuit analysis.
-2. **Rank interference:** normalize a copy of the vectors, calculate their cosine-similarity matrix, clear the diagonal, and inspect the strongest off-diagonal neighbours of the target. Recalculate candidates with actual activation magnitudes and signed raw dot products.
-3. **Enforce co-activation:** retain a small set of positively contributing features that can be activated in the same layer or residual stream. Prefer combinations rare or absent in training data; ordinary correlated combinations are more likely to have been compensated for during training.
-4. **Synthesize the input:** combine dataset examples or activation-maximizing patterns for the selected contributors. For a bounded linear pixel detector, set a pixel high for a positive weight and low for a negative weight, then overlay the resulting patterns. Manually preserving in-distribution structure and inhibitory **negative space** can suppress unrelated features.
-5. **Verify the mechanism:** record activations before compression, the compressed coordinates, reconstructed activations, and downstream output in one forward pass. A successful test shows the target inactive before reconstruction but active afterwards, with the predicted change disappearing when contributors are ablated.
+1. **Khôi phục các hướng đặc trưng:** trích xuất các vector encoder/decoder liên quan, loại bỏ các đặc trưng chết và ánh xạ các hướng đang hoạt động sang khái niệm bằng cách dùng mẫu kích hoạt tối đa hoặc phân tích mạch đặc trưng.
+2. **Xếp hạng mức độ can nhiễu:** chuẩn hóa một bản sao của các vector, tính ma trận độ tương đồng cosine, xóa các phần tử trên đường chéo và kiểm tra các đặc trưng lân cận ngoài đường chéo có điểm cao nhất của mục tiêu. Tính lại điểm các ứng viên bằng độ lớn activation thực tế và tích vô hướng thô có dấu.
+3. **Đảm bảo đồng kích hoạt:** giữ lại một tập nhỏ các đặc trưng đóng góp dương có thể được kích hoạt trong cùng một layer hoặc residual stream. Ưu tiên các tổ hợp hiếm hoặc không có trong dữ liệu huấn luyện; các tổ hợp tương quan thông thường có khả năng đã được bù trừ trong quá trình huấn luyện.
+4. **Tổng hợp đầu vào:** kết hợp các ví dụ trong dataset hoặc các mẫu tối đa hóa activation cho những đặc trưng đóng góp đã chọn. Với bộ phát hiện pixel tuyến tính có giới hạn, đặt pixel ở mức cao nếu trọng số dương và mức thấp nếu trọng số âm, rồi chồng các mẫu thu được lên nhau. Việc giữ cấu trúc theo phân phối dữ liệu và các **khoảng trống âm** một cách thủ công có thể triệt tiêu các đặc trưng không liên quan.
+5. **Xác minh cơ chế:** ghi lại activation trước khi nén, các tọa độ đã nén, activation được tái tạo và đầu ra phía sau trong cùng một lượt forward. Một phép thử thành công cho thấy mục tiêu không hoạt động trước khi tái tạo nhưng hoạt động sau đó; đồng thời, thay đổi dự đoán sẽ biến mất khi ablate các đặc trưng đóng góp.
 
-The following minimal triage ranks contributors for a tied-weight decoder whose **rows** are feature vectors (transpose first when features are columns). Use raw weights for the signed score and normalized weights only for cosine ranking.<sup>[[1]](#references)</sup>
+Đoạn triage tối giản sau đây xếp hạng các đặc trưng đóng góp cho một decoder tied-weight có các vector đặc trưng nằm trên **các hàng** (nếu đặc trưng nằm trên các cột thì hãy chuyển vị trước). Dùng trọng số thô để tính điểm có dấu và chỉ dùng trọng số đã chuẩn hóa để xếp hạng cosine.<sup>[[1]](#references)</sup>
 
 ```python
 import numpy as np
@@ -43,11 +43,11 @@ print([(int(i), float(signed[i]), float(cosine[i, target]))
        for i in order[:20] if signed[i] > 0])
 ```
 
-Do not infer exploitability from cosine similarity alone. Test the full decoder with its bias and non-linearity, confirm that the contributors can actually co-occur, and compare against matched in-distribution combinations. Similar directions may encode a legitimate semantic relationship rather than exploitable packing interference.<sup>[[1]](#references)</sup>
+Không nên suy luận về khả năng khai thác chỉ dựa trên cosine similarity. Hãy kiểm thử toàn bộ decoder cùng bias và tính phi tuyến của nó, xác nhận rằng các thành phần đóng góp thực sự có thể đồng thời xuất hiện, và so sánh với các tổ hợp trong phân phối có đặc điểm tương đồng. Các hướng tương tự có thể biểu diễn một mối liên hệ ngữ nghĩa hợp lệ, chứ không phải hiện tượng can thiệp do đóng gói gây ra, có thể khai thác được.<sup>[[1]](#references)</sup>
 
-## Demonstrated toy-model attack
+## Tấn công toy model đã được chứng minh
 
-The proof of concept used a deliberately interpretable MNIST classifier with two branches. A sparse 128-dimensional ReLU feature vector was classified directly in one branch and compressed into a two-dimensional superposition space in the other; the same classifier processed both the original and reconstructed features.<sup>[[1]](#references)</sup>
+Bằng chứng khái niệm sử dụng một bộ phân loại MNIST có chủ đích dễ diễn giải, gồm hai nhánh. Một vector đặc trưng ReLU thưa, 128 chiều, được phân loại trực tiếp ở một nhánh và nén vào không gian chồng lấp hai chiều ở nhánh còn lại; cùng một bộ phân loại xử lý cả các đặc trưng ban đầu lẫn các đặc trưng được tái tạo.<sup>[[1]](#references)</sup>
 
 ```text
 h       = ReLU(MLP(x))
@@ -57,21 +57,20 @@ y_plain = C(h)
 y_super = C(h_hat)
 ```
 
-Two feature directions associated with 3/0-like shapes geometrically enclosed class-5 directions. Adding their maximally activating images made those contributor features strongest before compression, but reconstruction activated several class-5 features and the superposition branch predicted 5. A hand-drawn input using only minimum/maximum pixel values reproduced the effect, showing that exact gradient-optimized pixel perturbations were not required in this toy setting.<sup>[[1]](#references)</sup>
+Hai hướng feature gắn với hình dạng giống 3/0 được bao quanh về mặt hình học bởi các hướng class-5. Việc cộng các ảnh kích hoạt tối đa của chúng khiến các feature đóng góp này mạnh nhất trước khi nén, nhưng quá trình tái tạo đã kích hoạt một số feature class-5 và nhánh superposition dự đoán 5. Một đầu vào vẽ tay chỉ sử dụng các giá trị pixel tối thiểu/tối đa cũng tái tạo hiệu ứng này, cho thấy trong thiết lập đồ chơi này, không cần các nhiễu loạn pixel được tối ưu hóa chính xác theo gradient.<sup>[[1]](#references)</sup>
 
-## Larger-model geometric triage
+## Sàng lọc hình học trên mô hình lớn hơn
 
-The paper also examined the Gemma Scope `layer 20 / width 65k / average L0 20` SAE. It multiplied the unit-normalized decoder matrix by its transpose, cleared the diagonal, sorted each feature's neighbours, and averaged by rank. The mean strongest-neighbour cosine similarity was `0.49`, while the mean 27th-neighbour similarity was `0.25`; geometrically, four such directions could match one unit target projection. These figures identify candidates only—they do not show that four suitable features can be jointly activated or that the target crosses its decoder threshold.<sup>[[1]](#references)</sup>
+Bài báo cũng khảo sát SAE Gemma Scope `layer 20 / width 65k / average L0 20`. Nhóm tác giả nhân ma trận decoder đã chuẩn hóa theo đơn vị với ma trận chuyển vị của nó, xóa đường chéo, sắp xếp các láng giềng của từng feature, rồi lấy trung bình theo thứ hạng. Độ tương đồng cosine trung bình của láng giềng mạnh nhất là `0.49`, trong khi độ tương đồng của láng giềng thứ 27 là `0.25`; xét về hình học, bốn hướng như vậy có thể khớp với phép chiếu mục tiêu của một đơn vị. Các con số này chỉ giúp xác định các ứng viên—chúng không chứng minh rằng có thể cùng kích hoạt bốn feature phù hợp hoặc mục tiêu vượt ngưỡng decoder của nó.<sup>[[1]](#references)</sup>
 
-## Scope and limitations
+## Phạm vi và hạn chế
 
-This is a research-stage **white-box** technique, not a demonstrated attack against a deployed CNN or frontier LLM. It requires superposition, useful non-orthogonal directions, interpretable access to internal features, controllable activation of the contributors, and their collection in the same layer during one forward pass.<sup>[[1]](#references)</sup>
+Đây là kỹ thuật đang ở giai đoạn nghiên cứu **white-box**, không phải một cuộc tấn công đã được chứng minh nhằm vào CNN đang triển khai hoặc LLM tiên tiến. Kỹ thuật này đòi hỏi superposition, các hướng không trực giao hữu ích, khả năng truy cập có thể diễn giải vào các feature bên trong, khả năng kiểm soát việc kích hoạt các feature đóng góp, và việc tập hợp chúng trong cùng một layer trong một lượt truyền xuôi.<sup>[[1]](#references)</sup>
 
-Image MLPs make feature composition unusually direct. A transformer is harder because attention must gather the chosen feature activations into the same residual stream; the paper does not show how to force this for an out-of-distribution combination. Claims about manipulating behavioural or refusal directions, physical vision systems, or frontier models therefore remain hypotheses.<sup>[[1]](#references)</sup>
+MLP xử lý ảnh giúp việc kết hợp feature đặc biệt trực tiếp. Transformer khó hơn vì attention phải tập hợp các activation feature đã chọn vào cùng một residual stream; bài báo không chỉ ra cách ép buộc điều này với một tổ hợp nằm ngoài phân phối. Do đó, các tuyên bố về việc thao túng hướng hành vi hoặc hướng từ chối, hệ thống thị giác vật lý hay mô hình tiên tiến vẫn chỉ là giả thuyết.<sup>[[1]](#references)</sup>
 
 ## References
 
 - [1] [Wilkinson and Anley — A Preliminary Investigation Into Interpretable Adversarial Attacks Through Feature Interference in Superposition (PDF)](https://www.nccgroup.com/media/kahclmxj/interpretable-adversarial-attacks-in-superpos_.pdf)
 - [2] [NCC Group — Interpretable Adversarial Attacks in Superposition](https://www.nccgroup.com/research/interpretable-adversarial-attacks-in-superposition/)
-
 {{#include ../banners/hacktricks-training.md}}

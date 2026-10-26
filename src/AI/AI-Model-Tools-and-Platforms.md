@@ -1,59 +1,59 @@
-# AI Model Tools and Platforms
+# Công cụ và nền tảng cho mô hình AI
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Run & train models locally
+## Chạy và huấn luyện mô hình trên máy cục bộ
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
 
-Hugging Face Transformers is an open-source library for loading, training, and serving pretrained models across text, vision, audio, video, and multimodal tasks. Model and dataset hosting are provided separately by the Hugging Face Hub.<sup>[[1]](#references)</sup>
+Hugging Face Transformers là thư viện mã nguồn mở để tải, huấn luyện và cung cấp các mô hình đã được huấn luyện trước cho các tác vụ về văn bản, hình ảnh, âm thanh, video và đa phương thức. Việc lưu trữ mô hình và tập dữ liệu được Hugging Face Hub cung cấp riêng.<sup>[[1]](#references)</sup>
 
 ### [**LangChain**](https://github.com/langchain-ai/langchain)
 
-LangChain is a framework for building model-driven applications and agents with prompt construction, conversation-history/state management, tools, retrieval, model, API, and database integrations.<sup>[[2]](#references)</sup>
+LangChain là framework để xây dựng các ứng dụng và agent dựa trên mô hình, với các tính năng tạo prompt, quản lý lịch sử hội thoại/trạng thái, tích hợp công cụ, truy xuất, mô hình, API và cơ sở dữ liệu.<sup>[[2]](#references)</sup>
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 
-LitGPT provides readable implementations and command-line workflows for pretraining, fine-tuning, evaluating, and deploying supported language models.<sup>[[3]](#references)</sup>
+LitGPT cung cấp các bản triển khai dễ đọc và quy trình làm việc qua dòng lệnh để pretrain, fine-tune, đánh giá và triển khai các mô hình ngôn ngữ được hỗ trợ.<sup>[[3]](#references)</sup>
 
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
-**Description:**\
-LitServe is a model-serving framework from Lightning AI for exposing inference APIs with batching, streaming, acceleration, and scaling hooks.<sup>[[4]](#references)</sup>
+**Mô tả:**\
+LitServe là framework phục vụ mô hình của Lightning AI, cho phép cung cấp API inference với các hook hỗ trợ batching, streaming, tăng tốc và mở rộng quy mô.<sup>[[4]](#references)</sup>
 
 ### [**Axolotl**](https://github.com/axolotl-ai-cloud/axolotl)
 
-Axolotl is an open-source post-training and fine-tuning framework driven by YAML configuration. It supports techniques such as full fine-tuning, LoRA/QLoRA, preference optimization, and multi-GPU training; it is not itself a cloud deployment platform.<sup>[[5]](#references)</sup>
+Axolotl là framework mã nguồn mở cho post-training và fine-tuning, được cấu hình bằng YAML. Framework hỗ trợ các kỹ thuật như fine-tuning toàn phần, LoRA/QLoRA, tối ưu hóa theo sở thích và huấn luyện đa GPU; bản thân nó không phải là nền tảng triển khai cloud.<sup>[[5]](#references)</sup>
 
-## Try models online
+## Dùng thử mô hình trực tuyến
 
 ### [**Hugging Face**](https://huggingface.co/)
 
-**Hugging Face** is a leading platform and community for machine learning, particularly known for its work in natural language processing (NLP). It provides tools, libraries, and resources that make it easier to develop, share, and deploy machine learning models.\
-The Hub offers several relevant sections:<sup>[[6]](#references)</sup>
+**Hugging Face** là một nền tảng và cộng đồng hàng đầu về machine learning, đặc biệt nổi tiếng với các hoạt động trong lĩnh vực xử lý ngôn ngữ tự nhiên (NLP). Nền tảng này cung cấp công cụ, thư viện và tài nguyên giúp việc phát triển, chia sẻ và triển khai mô hình machine learning dễ dàng hơn.\
+Hub có một số mục liên quan sau:<sup>[[6]](#references)</sup>
 
-* **Models**: A vast repository of **pre-trained machine learning models** where users can browse, download, and integrate models for various tasks like text generation, translation, image recognition, and more.
-* **Datasets:** A comprehensive **collection of datasets** used for training and evaluating models. It facilitates easy access to diverse data sources, enabling users to find and utilize data for their specific machine learning projects.
-* **Spaces:** A platform for hosting and sharing **interactive machine learning applications** and demos. It allows developers to **showcase** their models in action, create user-friendly interfaces, and collaborate with others by sharing live demos.
+* **Mô hình**: Kho lưu trữ rộng lớn các **mô hình machine learning đã được huấn luyện trước**, nơi người dùng có thể duyệt, tải xuống và tích hợp mô hình cho nhiều tác vụ như tạo văn bản, dịch thuật, nhận dạng hình ảnh, v.v.
+* **Tập dữ liệu:** **Bộ sưu tập tập dữ liệu** toàn diện dùng để huấn luyện và đánh giá mô hình. Mục này giúp truy cập dễ dàng vào nhiều nguồn dữ liệu, cho phép người dùng tìm và sử dụng dữ liệu phù hợp với các dự án machine learning cụ thể.
+* **Spaces:** Nền tảng lưu trữ và chia sẻ **các ứng dụng machine learning tương tác** và bản demo. Nền tảng này cho phép nhà phát triển **giới thiệu** mô hình đang hoạt động, tạo giao diện thân thiện với người dùng và cộng tác với người khác bằng cách chia sẻ bản demo trực tiếp.
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
-**TensorFlow Hub** is a repository and library for reusable trained model components, especially modules consumed through TensorFlow/Keras. **Kaggle** separately provides notebooks, datasets, competitions, and models.<sup>[[7]](#references)[[9]](#references)</sup>
+**TensorFlow Hub** là kho lưu trữ và thư viện các thành phần mô hình đã huấn luyện có thể tái sử dụng, đặc biệt là các module được dùng thông qua TensorFlow/Keras. **Kaggle** cung cấp riêng notebook, tập dữ liệu, cuộc thi và mô hình.<sup>[[7]](#references)[[9]](#references)</sup>
 
-* **Modules:** A vast collection of pre-trained models and model components where users can browse, download, and integrate modules for tasks such as image classification, text embedding, and more.
-* **Tutorials:** Step-by-step guides and examples that help users implement and fine-tune models using TensorFlow Hub.
-* **Documentation:** Comprehensive guides and API references that assist developers in effectively utilizing the repository’s resources.
+* **Module:** Bộ sưu tập lớn các mô hình đã được huấn luyện trước và thành phần mô hình, nơi người dùng có thể duyệt, tải xuống và tích hợp module cho các tác vụ như phân loại hình ảnh, nhúng văn bản, v.v.
+* **Hướng dẫn:** Hướng dẫn từng bước và ví dụ giúp người dùng triển khai và fine-tune mô hình bằng TensorFlow Hub.
+* **Tài liệu:** Hướng dẫn toàn diện và tài liệu tham khảo API giúp nhà phát triển sử dụng hiệu quả các tài nguyên của kho lưu trữ.
 
 ## [**Replicate**](https://replicate.com/home)
 
-**Replicate** is a hosted platform for running packaged machine-learning models through a web interface or API.<sup>[[8]](#references)</sup>
+**Replicate** là nền tảng được lưu trữ để chạy các mô hình machine learning đã đóng gói thông qua giao diện web hoặc API.<sup>[[8]](#references)</sup>
 
-* **Models:** A repository of machine learning models contributed by the community which users can browse, try, and integrate models into their applications with minimal effort.
-* **API access:** APIs for invoking models from applications without operating the underlying inference infrastructure.
+* **Mô hình:** Kho lưu trữ các mô hình machine learning do cộng đồng đóng góp, cho phép người dùng duyệt, dùng thử và tích hợp mô hình vào ứng dụng một cách dễ dàng.
+* **Truy cập API:** API cho phép gọi mô hình từ ứng dụng mà không cần vận hành hạ tầng inference bên dưới.
 
-## Attacking exposed self-hosted AI services
+## Tấn công các dịch vụ AI tự lưu trữ bị lộ
 
-For black-box fingerprinting and testing of self-hosted model runners, agent builders, ML demo UIs, compute clusters and vector databases, check [Exposed Self-Hosted AI Services](AI-Exposed-Self-Hosted-AI-Services.md).
+Để fingerprint và kiểm tra black-box các trình chạy mô hình, công cụ xây dựng agent, giao diện demo ML, cụm tính toán và cơ sở dữ liệu vector tự lưu trữ, hãy xem [Các dịch vụ AI tự lưu trữ bị lộ](AI-Exposed-Self-Hosted-AI-Services.md).
 
 ## References
 
@@ -62,9 +62,8 @@ For black-box fingerprinting and testing of self-hosted model runners, agent bui
 - [3] [LitGPT](https://github.com/Lightning-AI/litgpt)
 - [4] [LitServe](https://github.com/Lightning-AI/LitServe)
 - [5] [Axolotl](https://github.com/axolotl-ai-cloud/axolotl)
-- [6] [Hugging Face Hub documentation](https://huggingface.co/docs/hub/index)
+- [6] [Tài liệu Hugging Face Hub](https://huggingface.co/docs/hub/index)
 - [7] [TensorFlow Hub](https://www.tensorflow.org/hub)
-- [8] [Replicate documentation](https://replicate.com/docs)
-- [9] [Kaggle documentation](https://www.kaggle.com/docs)
-
+- [8] [Tài liệu Replicate](https://replicate.com/docs)
+- [9] [Tài liệu Kaggle](https://www.kaggle.com/docs)
 {{#include ../banners/hacktricks-training.md}}
