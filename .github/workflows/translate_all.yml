@@ -20,6 +20,16 @@ on:
         description: "Optional head commit for a catch-up translation range"
         required: false
         type: string
+      only_language:
+        description: "Optional language branch code to resume only that language"
+        required: false
+        default: ''
+      batch_size:
+        description: "Pages per Vietnamese translation batch"
+        type: choice
+        options: ['20', '40', '80']
+        required: false
+        default: '80'
 
 permissions:
   packages: write
@@ -29,32 +39,27 @@ permissions:
   pull-requests: read
 
 jobs:
+  select-languages:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.select.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v6
+      - id: select
+        env:
+          ONLY_LANGUAGE: ${{ inputs.only_language }}
+        run: python3 scripts/translation_matrix.py --only "$ONLY_LANGUAGE" >> "$GITHUB_OUTPUT"
+
   translate:
     name: Translate → ${{ matrix.name }} (${{ matrix.branch }})
+    needs: select-languages
     runs-on: ubuntu-latest
 
     # Run N languages in parallel (tune max-parallel if needed)
     strategy:
       fail-fast: false
       # max-parallel: 3 #Nothing to run all in parallel
-      matrix:
-        include:
-          - { name: "Afrikaans", language: "Afrikaans", branch: "af" }
-          - { name: "German", language: "German", branch: "de" }
-          - { name: "Greek", language: "Greek", branch: "el" }
-          - { name: "Spanish", language: "Spanish", branch: "es" }
-          - { name: "French",  language: "French",  branch: "fr" }
-          - { name: "Hindi",  language: "Hindi",  branch: "hi" }
-          - { name: "Italian", language: "Italian", branch: "it" }
-          - { name: "Japanese", language: "Japanese", branch: "ja" }
-          - { name: "Korean", language: "Korean", branch: "ko" }
-          - { name: "Polish", language: "Polish", branch: "pl" }
-          - { name: "Portuguese", language: "Portuguese", branch: "pt" }
-          - { name: "Serbian", language: "Serbian", branch: "sr" }
-          - { name: "Swahili", language: "Swahili", branch: "sw" }
-          - { name: "Turkish", language: "Turkish", branch: "tr" }
-          - { name: "Ukrainian", language: "Ukrainian", branch: "uk" }
-          - { name: "Chinese", language: "Chinese", branch: "zh" }
+      matrix: ${{ fromJSON(needs.select-languages.outputs.matrix) }}
 
     # Ensure only one job per branch runs at a time (even across workflow runs)
     concurrency:
@@ -85,6 +90,7 @@ jobs:
           wget -O get_and_save_refs.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/get_and_save_refs.py
           wget -O compare_and_fix_refs.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/compare_and_fix_refs.py
           wget -O translator.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/translator.py
+          cp translation_backlog.py /tmp/translation_backlog.py
           cp mark_unchanged_s3_files.py /tmp/mark_unchanged_s3_files.py
           cp upload_immutable_images.sh /tmp/upload_immutable_images.sh
           cd ..
@@ -124,8 +130,40 @@ jobs:
         env:
           TRANSLATION_BASE_SHA: ${{ inputs.translation_base_sha }}
           TRANSLATION_HEAD_SHA: ${{ inputs.translation_head_sha }}
+          BATCH_SIZE: ${{ inputs.batch_size || '80' }}
         run: |
           git checkout master
+          if [ "$BRANCH" = vi ]; then
+            python /tmp/translation_backlog.py plan \
+              --language "$BRANCH" \
+              --output /tmp/pending-pages.txt \
+              --extras /tmp/file_paths.txt
+            echo "$(wc -l < /tmp/pending-pages.txt) pages pending for $BRANCH"
+            if [ -s /tmp/pending-pages.txt ]; then
+              case "$BATCH_SIZE" in 20|40|80) ;; *) echo "Invalid batch size: $BATCH_SIZE" >&2; exit 1 ;; esac
+              split -l "$BATCH_SIZE" -d -a 3 /tmp/pending-pages.txt /tmp/translation-batch-
+              for batch in /tmp/translation-batch-*; do
+                git checkout master
+                python scripts/translator.py \
+                  --language "$LANGUAGE" \
+                  --branch "$BRANCH" \
+                  --api-key "${{ secrets.OPENAI_API_KEY }}" \
+                  --file-list "$batch" \
+                  --threads 3
+                python /tmp/translation_backlog.py mark \
+                  --language "$BRANCH" \
+                  --file-list "$batch"
+                git add .translation-source-blobs.json
+                if ! git diff --cached --quiet; then
+                  git commit -m "Record translated English source blobs for $BRANCH"
+                  git push origin "$BRANCH"
+                fi
+              done
+            fi
+            git checkout master
+            python /tmp/translation_backlog.py verify --language "$BRANCH"
+            exit 0
+          fi
           export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
           HEAD_SHA="${TRANSLATION_HEAD_SHA:-$GITHUB_SHA}"
           BASE_SHA="${TRANSLATION_BASE_SHA:-${HEAD_SHA}^}"
