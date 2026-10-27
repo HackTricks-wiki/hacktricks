@@ -1,39 +1,39 @@
-# MediaTek bl2_ext Secure-Boot Bypass (EL3 Code Execution)
+# Bypass Secure-Boot của MediaTek bl2_ext (Thực thi mã EL3)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-This page documents a practical secure-boot break on multiple MediaTek platforms by abusing a verification gap when the device bootloader configuration (seccfg) is "unlocked". The flaw allows running a patched bl2_ext at ARM EL3 to disable downstream signature verification, collapsing the chain of trust and enabling arbitrary unsigned TEE/GZ/LK/Kernel loading.<sup>[[1]](#references)</sup>
+Trang này ghi lại một cách phá vỡ Secure-Boot thực tế trên nhiều nền tảng MediaTek bằng cách lợi dụng lỗ hổng xác minh khi cấu hình bootloader của thiết bị (seccfg) ở trạng thái "unlocked". Lỗ hổng cho phép chạy bl2_ext đã được patch ở ARM EL3 để vô hiệu hóa việc xác minh chữ ký ở các giai đoạn sau, làm sụp đổ chuỗi tin cậy và cho phép tải tùy ý TEE/GZ/LK/Kernel chưa ký.<sup>[[1]](#references)</sup>
 
-> Caution: Early-boot patching can permanently brick devices if offsets are wrong. Always keep full dumps and a reliable recovery path.
+> Cảnh báo: Patch ở giai đoạn khởi động sớm có thể khiến thiết bị bị brick vĩnh viễn nếu offset không chính xác. Luôn giữ bản dump đầy đủ và có sẵn phương án khôi phục đáng tin cậy.
 
-## Affected boot flow (MediaTek)
+## Luồng khởi động bị ảnh hưởng (MediaTek)
 
-- Normal path: BootROM → Preloader → bl2_ext (EL3, verified) → TEE → GenieZone (GZ) → LK/AEE → Linux kernel (EL1)
-- Vulnerable path: When seccfg is set to unlocked, Preloader may skip verifying bl2_ext. Preloader still jumps into bl2_ext at EL3, so a crafted bl2_ext can load unverified components thereafter.
+- Luồng thông thường: BootROM → Preloader → bl2_ext (EL3, đã xác minh) → TEE → GenieZone (GZ) → LK/AEE → Linux kernel (EL1)
+- Luồng dễ bị tấn công: Khi seccfg được đặt thành unlocked, Preloader có thể bỏ qua việc xác minh bl2_ext. Preloader vẫn chuyển điều khiển đến bl2_ext ở EL3, vì vậy bl2_ext được tạo thủ công có thể tải các thành phần chưa được xác minh ở những giai đoạn sau.
 
-Key trust boundary:
-- bl2_ext executes at EL3 and is responsible for verifying TEE, GenieZone, LK/AEE and the kernel. If bl2_ext itself is not authenticated, the rest of the chain is trivially bypassed.<sup>[[1]](#references)</sup>
+Ranh giới tin cậy chính:
+- bl2_ext thực thi ở EL3 và chịu trách nhiệm xác minh TEE, GenieZone, LK/AEE và kernel. Nếu bản thân bl2_ext không được xác thực, có thể dễ dàng bypass các bước còn lại trong chuỗi.<sup>[[1]](#references)</sup>
 
-## Root cause
+## Nguyên nhân gốc
 
-On affected devices, the Preloader does not enforce authentication of the bl2_ext partition when seccfg indicates an "unlocked" state. This allows flashing an attacker-controlled bl2_ext that runs at EL3.
+Trên các thiết bị bị ảnh hưởng, Preloader không thực thi việc xác thực phân vùng bl2_ext khi seccfg cho biết trạng thái "unlocked". Điều này cho phép flash bl2_ext do kẻ tấn công kiểm soát và chạy ở EL3.
 
-Inside bl2_ext, the verification policy function can be patched to unconditionally report that verification is not required (or always succeeds), forcing the boot chain to accept unsigned TEE/GZ/LK/Kernel images. Because this patch runs at EL3, it is effective even if downstream components implement their own checks.<sup>[[1]](#references)</sup>
+Bên trong bl2_ext, có thể patch hàm chính sách xác minh để luôn báo rằng không cần xác minh (hoặc luôn xác minh thành công), buộc chuỗi khởi động chấp nhận các image TEE/GZ/LK/Kernel chưa ký. Vì patch này chạy ở EL3, nó vẫn có hiệu lực ngay cả khi các thành phần phía sau tự triển khai bước kiểm tra riêng.<sup>[[1]](#references)</sup>
 
-## Practical exploit chain
+## Chuỗi khai thác thực tế
 
-1. Obtain bootloader partitions (Preloader, bl2_ext, LK/AEE, etc.) via OTA/firmware packages, EDL/DA readback, or hardware dumping.
-2. Identify bl2_ext verification routine and patch it to always skip/accept verification.
-3. Flash modified bl2_ext using fastboot, DA, or similar maintenance channels that are still allowed on unlocked devices.
-4. Reboot; Preloader jumps to patched bl2_ext at EL3 which then loads unsigned downstream images (patched TEE/GZ/LK/Kernel) and disables signature enforcement.<sup>[[1]](#references)</sup>
+1. Thu thập các phân vùng bootloader (Preloader, bl2_ext, LK/AEE, v.v.) từ gói OTA/firmware, đọc dữ liệu bằng EDL/DA hoặc dump phần cứng.
+2. Xác định routine xác minh bl2_ext và patch để luôn bỏ qua/chấp nhận xác minh.
+3. Flash bl2_ext đã sửa đổi bằng fastboot, DA hoặc các kênh bảo trì tương tự vẫn được phép sử dụng trên thiết bị unlocked.
+4. Khởi động lại; Preloader chuyển điều khiển đến bl2_ext đã patch ở EL3, sau đó bl2_ext tải các image phía sau chưa ký (TEE/GZ/LK/Kernel đã patch) và vô hiệu hóa việc thực thi kiểm tra chữ ký.<sup>[[1]](#references)</sup>
 
-If the device is configured as locked (seccfg locked), the Preloader is expected to verify bl2_ext. In that configuration, this attack will fail unless another vulnerability permits loading an unsigned bl2_ext.
+Nếu thiết bị được cấu hình ở trạng thái locked (seccfg locked), Preloader được kỳ vọng sẽ xác minh bl2_ext. Ở cấu hình đó, cuộc tấn công này sẽ thất bại, trừ khi có một lỗ hổng khác cho phép tải bl2_ext chưa ký.
 
-## Triage (expdb boot logs)
+## Phân loại (log khởi động expdb)
 
-- Dump boot/expdb logs around the bl2_ext load. If `img_auth_required = 0` and certificate verification time is ~0 ms, verification is likely skipped.<sup>[[1]](#references)</sup>
+- Dump log boot/expdb quanh thời điểm tải bl2_ext. Nếu `img_auth_required = 0` và thời gian xác minh certificate xấp xỉ 0 ms, có khả năng bước xác minh đã bị bỏ qua.<sup>[[1]](#references)</sup>
 
-Example log excerpt:
+Ví dụ trích đoạn log:
 
 ```
 [PART] img_auth_required = 0
@@ -41,25 +41,25 @@ Example log excerpt:
 [PART] part: lk_a img: bl2_ext cert vfy(0 ms)
 ```
 
-- Some devices skip bl2_ext verification even when locked; lk2 secondary bootloader paths have shown the same gap. If a post-OTA Preloader logs `img_auth_required = 1` for bl2_ext while unlocked, enforcement was likely restored.<sup>[[1]](#references)[[2]](#references)</sup>
+- Một số thiết bị bỏ qua bước xác minh bl2_ext ngay cả khi đã khóa; các đường dẫn bootloader phụ lk2 cũng cho thấy lỗ hổng tương tự. Nếu Preloader sau OTA ghi log `img_auth_required = 1` cho bl2_ext khi thiết bị đang mở khóa, thì nhiều khả năng cơ chế thực thi đã được khôi phục.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Verification logic locations
+## Vị trí logic xác minh
 
-- The relevant check typically resides inside the bl2_ext image in functions named similarly to `verify_img` or `sec_img_auth`.
-- The patched version forces the function to return success or to bypass the verification call entirely.<sup>[[1]](#references)</sup>
+- Kiểm tra liên quan thường nằm trong image bl2_ext, bên trong các hàm có tên tương tự `verify_img` hoặc `sec_img_auth`.
+- Phiên bản đã được vá buộc hàm trả về thành công hoặc bỏ qua hoàn toàn lệnh gọi xác minh.<sup>[[1]](#references)</sup>
 
-Example patch approach (conceptual):
-- Locate the function that calls `sec_img_auth` on TEE, GZ, LK, and kernel images.
-- Replace its body with a stub that immediately returns success, or overwrite the conditional branch that handles verification failure.
+Ví dụ về cách vá (mang tính khái niệm):
+- Tìm hàm gọi `sec_img_auth` đối với các image TEE, GZ, LK và kernel.
+- Thay phần thân hàm bằng một stub trả về thành công ngay lập tức, hoặc ghi đè nhánh điều kiện xử lý lỗi xác minh.
 
-Ensure the patch preserves stack/frame setup and returns expected status codes to callers.<sup>[[1]](#references)</sup>
+Đảm bảo bản vá giữ nguyên thiết lập stack/frame và trả về các mã trạng thái mà bên gọi mong đợi.<sup>[[1]](#references)</sup>
 
-## Fenrir PoC workflow (Nothing/CMF)
+## Quy trình PoC của Fenrir (Nothing/CMF)
 
-Fenrir is a reference patching toolkit for this issue (Nothing Phone (2a) fully supported; CMF Phone 1 partially).<sup>[[1]](#references)</sup> High level:
-- Place the device bootloader image as `bin/<device>.bin`.
-- Build a patched image that disables the bl2_ext verification policy.
-- Flash the resulting payload (fastboot helper provided).
+Fenrir là bộ công cụ vá tham khảo cho vấn đề này (hỗ trợ đầy đủ Nothing Phone (2a); hỗ trợ một phần CMF Phone 1).<sup>[[1]](#references)</sup> Các bước tổng quát:
+- Đặt image bootloader của thiết bị tại `bin/<device>.bin`.
+- Tạo image đã vá để vô hiệu hóa chính sách xác minh bl2_ext.
+- Flash payload tạo ra (có sẵn công cụ hỗ trợ fastboot).
 
 ```bash
 ./build.sh pacman                    # build from bin/pacman.bin
@@ -67,37 +67,37 @@ Fenrir is a reference patching toolkit for this issue (Nothing Phone (2a) fully 
 ./flash.sh                           # flash via fastboot
 ```
 
-Use another flashing channel if fastboot is unavailable.
+Sử dụng kênh flashing khác nếu không có fastboot.
 
-## EL3 patching notes
+## Ghi chú về patch EL3
 
-- bl2_ext executes in ARM EL3. Crashes here can brick a device until reflashed via EDL/DA or test points.
-- Use board-specific logging/UART to validate execution path and diagnose crashes.
-- Keep backups of all partitions being modified and test on disposable hardware first.<sup>[[1]](#references)</sup>
+- bl2_ext chạy trong ARM EL3. Sự cố tại đây có thể làm thiết bị bị brick cho đến khi được flash lại qua EDL/DA hoặc test point.
+- Sử dụng logging/UART dành riêng cho bo mạch để xác nhận đường thực thi và chẩn đoán sự cố.
+- Sao lưu tất cả phân vùng sẽ chỉnh sửa và thử nghiệm trước trên phần cứng không dùng cho mục đích khác.<sup>[[1]](#references)</sup>
 
-## Implications
+## Hệ quả
 
-- EL3 code execution after Preloader and full chain-of-trust collapse for the rest of the boot path.
-- Ability to boot unsigned TEE/GZ/LK/Kernel, bypassing secure/verified boot expectations and enabling persistent compromise.<sup>[[1]](#references)</sup>
+- Thực thi mã EL3 sau Preloader và toàn bộ chuỗi tin cậy bị sụp đổ trong phần còn lại của quá trình khởi động.
+- Có thể khởi động TEE/GZ/LK/Kernel chưa ký, vượt qua các yêu cầu của secure/verified boot và cho phép xâm nhập dai dẳng.<sup>[[1]](#references)</sup>
 
-## Device notes
+## Ghi chú về thiết bị
 
-- Confirmed supported: Nothing Phone (2a) (Pacman)
-- Known working (incomplete support): CMF Phone 1 (Tetris)
-- Observed: Vivo X80 Pro reportedly did not verify bl2_ext even when locked<sup>[[1]](#references)</sup>
-- NothingOS 4 stable (BP2A.250605.031.A3, Nov 2025) re-enabled bl2_ext verification; fenrir `pacman-v2.0` restores the bypass by mixing the beta Preloader with a patched LK<sup>[[3]](#references)</sup>
-- Industry coverage highlights additional lk2-based vendors shipping the same logic flaw, so expect further overlap across 2024–2025 MTK releases.<sup>[[2]](#references)[[4]](#references)</sup>
+- Đã xác nhận hỗ trợ: Nothing Phone (2a) (Pacman)
+- Đã biết là hoạt động (hỗ trợ chưa hoàn chỉnh): CMF Phone 1 (Tetris)
+- Đã quan sát: Vivo X80 Pro được cho là không xác minh bl2_ext ngay cả khi bị khóa<sup>[[1]](#references)</sup>
+- NothingOS 4 stable (BP2A.250605.031.A3, Nov 2025) đã bật lại xác minh bl2_ext; fenrir `pacman-v2.0` khôi phục bypass bằng cách kết hợp Preloader beta với LK đã patch<sup>[[3]](#references)</sup>
+- Các bài viết trong ngành nêu bật những nhà cung cấp khác dựa trên lk2 cũng đang phát hành thiết bị có cùng lỗi logic, vì vậy có thể sẽ có thêm nhiều trường hợp tương tự trong các bản MTK 2024–2025.<sup>[[2]](#references)[[4]](#references)</sup>
 
-## MTK DA readback and seccfg manipulation with Penumbra
+## Đọc dữ liệu MTK DA và thao tác seccfg bằng Penumbra
 
-Penumbra is a Rust crate/CLI/TUI that automates interaction with MTK preloader/bootrom over USB for DA-mode operations. With physical access to a vulnerable handset (DA extensions allowed), it can discover the MTK USB port, load a Download Agent (DA) blob, and issue privileged commands such as seccfg lock flipping and partition readback.<sup>[[5]](#references)</sup>
+Penumbra là một crate/CLI/TUI viết bằng Rust, tự động hóa việc tương tác với preloader/bootrom MTK qua USB để thực hiện các thao tác ở DA mode. Khi có quyền truy cập vật lý vào thiết bị dễ bị tấn công (cho phép DA extensions), công cụ này có thể tìm cổng USB MTK, tải blob Download Agent (DA) và gửi các lệnh đặc quyền như thay đổi trạng thái khóa seccfg và đọc dữ liệu phân vùng.<sup>[[5]](#references)</sup>
 
-- **Environment/driver setup**: On Linux install `libudev`, add the user to the `dialout` group, and create udev rules or run with `sudo` if the device node is not accessible. Windows support is unreliable; it sometimes works only after replacing the MTK driver with WinUSB using Zadig (per project guidance).
-- **Workflow**: Read a DA payload (e.g., `std::fs::read("../DA_penangf.bin")`), poll for the MTK port with `find_mtk_port()`, and build a session using `DeviceBuilder::with_mtk_port(...).with_da_data(...)`. After `init()` completes the handshake and gathers device info, check protections via `dev_info.target_config()` bitfields (bit 0 set → SBC enabled). Enter DA mode and attempt `set_seccfg_lock_state(LockFlag::Unlock)`—this only succeeds if the device accepts extensions. Partitions can be dumped with `read_partition("lk_a", &mut progress_cb, &mut writer)` for offline analysis or patching.
-- **Security impact**: Successful seccfg unlocking reopens flashing paths for unsigned boot images, enabling persistent compromises such as the bl2_ext EL3 patching described above. Partition readback provides firmware artifacts for reverse engineering and crafting modified images.
+- **Thiết lập môi trường/driver**: Trên Linux, cài đặt `libudev`, thêm người dùng vào nhóm `dialout` và tạo quy tắc udev hoặc chạy bằng `sudo` nếu không thể truy cập node thiết bị. Hỗ trợ Windows không ổn định; đôi khi chỉ hoạt động sau khi thay driver MTK bằng WinUSB bằng Zadig (theo hướng dẫn của dự án).
+- **Quy trình**: Đọc payload DA (ví dụ: `std::fs::read("../DA_penangf.bin")`), dò tìm cổng MTK bằng `find_mtk_port()` và tạo session bằng `DeviceBuilder::with_mtk_port(...).with_da_data(...)`. Sau khi `init()` hoàn tất quá trình bắt tay và thu thập thông tin thiết bị, kiểm tra các cơ chế bảo vệ qua các bitfield của `dev_info.target_config()` (bit 0 được đặt → SBC đang bật). Vào DA mode và thử `set_seccfg_lock_state(LockFlag::Unlock)`—thao tác này chỉ thành công nếu thiết bị chấp nhận extensions. Có thể dump phân vùng bằng `read_partition("lk_a", &mut progress_cb, &mut writer)` để phân tích hoặc patch ngoại tuyến.
+- **Tác động bảo mật**: Mở khóa seccfg thành công sẽ mở lại các đường flashing cho boot image chưa ký, cho phép xâm nhập dai dẳng như kỹ thuật patch EL3 bl2_ext được mô tả ở trên. Đọc dữ liệu phân vùng cung cấp firmware artifact để reverse engineering và tạo image đã chỉnh sửa.
 
 <details>
-<summary>Rust DA session + seccfg unlock + partition dump (Penumbra)</summary>
+<summary>Phiên DA Rust + mở khóa seccfg + dump phân vùng (Penumbra)</summary>
 
 ```rust
 use tokio::fs::File;
@@ -136,10 +136,9 @@ async fn main() -> Result<()> {
 
 ## References
 
-- [1] [Fenrir – MediaTek bl2_ext secure‑boot bypass (PoC)](https://github.com/R0rt1z2/fenrir)
-- [2] [Cyber Security News – PoC Exploit Released For Nothing Phone Code Execution Vulnerability](https://cybersecuritynews.com/nothing-phone-code-execution-vulnerability/)
-- [3] [Fenrir pacman-v2.0 release (NothingOS 4 bypass bundle)](https://github.com/R0rt1z2/fenrir/releases/tag/pacman-v2.0)
-- [4] [The Cyber Express – Fenrir PoC breaks secure boot on Nothing Phone 2a/CMF1](https://thecyberexpress.com/fenrir-poc-for-nothing-phone-2a-cmf1/)
-- [5] [Penumbra – MTK DA flash/readback & seccfg tooling](https://github.com/shomykohai/penumbra)
-
+- [1] [Fenrir – bypass secure-boot bl2_ext của MediaTek (PoC)](https://github.com/R0rt1z2/fenrir)
+- [2] [Cyber Security News – Phát hành PoC exploit cho lỗ hổng thực thi mã trên Nothing Phone](https://cybersecuritynews.com/nothing-phone-code-execution-vulnerability/)
+- [3] [Bản phát hành Fenrir pacman-v2.0 (gói bypass NothingOS 4)](https://github.com/R0rt1z2/fenrir/releases/tag/pacman-v2.0)
+- [4] [The Cyber Express – PoC Fenrir phá vỡ secure boot trên Nothing Phone 2a/CMF1](https://thecyberexpress.com/fenrir-poc-for-nothing-phone-2a-cmf1/)
+- [5] [Penumbra – công cụ flash/readback DA & seccfg của MTK](https://github.com/shomykohai/penumbra)
 {{#include ../../banners/hacktricks-training.md}}

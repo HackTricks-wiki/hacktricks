@@ -1,60 +1,60 @@
-# Escaping from KIOSKs
+# Thoát khỏi KIOSK
 
 {{#include ../banners/hacktricks-training.md}}
 
 ---
 
-## Check physical device
+## Kiểm tra thiết bị vật lý
 
-| Component    | Action                                                             |
+| Thành phần    | Hành động                                                            |
 | ------------ | ------------------------------------------------------------------ |
-| Power button | Turning the device off and on again may expose the start screen    |
-| Power cable  | Check whether the device reboots when the power is cut off briefly |
-| USB ports    | Connect physical keyboard with more shortcuts                      |
-| Ethernet     | Network scan or sniffing may enable further exploitation           |
+| Nút nguồn | Tắt rồi bật lại thiết bị có thể làm lộ màn hình khởi động    |
+| Cáp nguồn  | Kiểm tra xem thiết bị có khởi động lại khi bị ngắt nguồn trong thời gian ngắn không |
+| Cổng USB    | Kết nối bàn phím vật lý để dùng thêm phím tắt                      |
+| Ethernet     | Quét mạng hoặc nghe lén lưu lượng có thể hỗ trợ khai thác sâu hơn           |
 
-## Check for possible actions inside the GUI application
+## Kiểm tra các thao tác có thể thực hiện trong ứng dụng GUI
 
-**Common Dialogs** are those options of **saving a file**, **opening a file**, selecting a font, a color... Most of them will **offer a full Explorer functionality**. This means that you will be able to access Explorer functionalities if you can access these options:
+**Hộp thoại phổ biến** gồm các tùy chọn **lưu tệp**, **mở tệp**, chọn phông chữ, màu sắc... Hầu hết các hộp thoại này **cung cấp đầy đủ chức năng của Explorer**. Điều này có nghĩa là bạn có thể truy cập các chức năng của Explorer nếu truy cập được những tùy chọn sau:
 
-- Close/Close as
-- Open/Open with
-- Print
-- Export/Import
-- Search
-- Scan
+- Đóng/Đóng dưới dạng
+- Mở/Mở bằng
+- In
+- Xuất/Nhập
+- Tìm kiếm
+- Quét
 
-You should check if you can:
+Bạn nên kiểm tra xem có thể:
 
-- Modify or create new files
-- Create symbolic links
-- Get access to restricted areas
-- Execute other apps
+- Sửa đổi hoặc tạo tệp mới
+- Tạo symbolic link
+- Truy cập các khu vực bị hạn chế
+- Thực thi ứng dụng khác
 
-### Command Execution
+### Thực thi lệnh
 
-Maybe **using a `Open with`** option\*\* you can open/execute some kind of shell.
+Có thể **dùng tùy chọn `Open with`** để mở/thực thi một dạng shell nào đó\*\*.
 
 #### Windows
 
-For example _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ find more binaries that can be used to execute commands (and perform unexpected actions) here: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
+Ví dụ: _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ Tìm thêm các binary có thể dùng để thực thi lệnh (và thực hiện các thao tác ngoài dự kiến) tại đây: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
 
 #### \*NIX \_\_
 
-_bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.github.io)
+_bash, sh, zsh..._ Xem thêm tại đây: [https://gtfobins.github.io/](https://gtfobins.github.io)
 
 ## Windows
 
-### Bypassing path restrictions
+### Vượt qua giới hạn đường dẫn
 
-- **Environment variables**: There are a lot of environment variables that are pointing to some path
-- **Other protocols**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
-- **Symbolic links**
-- **Shortcuts**: CTRL+N (open new session), CTRL+R (Execute Commands), CTRL+SHIFT+ESC (Task Manager), Windows+E (open explorer), CTRL-B, CTRL-I (Favourites), CTRL-H (History), CTRL-L, CTRL-O (File/Open Dialog), CTRL-P (Print Dialog), CTRL-S (Save As)
-  - Hidden Administrative menu: CTRL-ALT-F8, CTRL-ESC-F9
-- **Shell URIs**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
-- **UNC paths**: Paths to connect to shared folders. You should try to connect to the C$ of the local machine ("\\\127.0.0.1\c$\Windows\System32")
-  - **More UNC paths:**
+- **Biến môi trường**: Có nhiều biến môi trường trỏ đến một đường dẫn
+- **Các giao thức khác**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
+- **Symbolic link**
+- **Phím tắt**: CTRL+N (mở phiên mới), CTRL+R (thực thi lệnh), CTRL+SHIFT+ESC (Task Manager), Windows+E (mở Explorer), CTRL-B, CTRL-I (Mục yêu thích), CTRL-H (Lịch sử), CTRL-L, CTRL-O (hộp thoại Tệp/Mở), CTRL-P (hộp thoại In), CTRL-S (Lưu dưới dạng)
+  - Menu quản trị ẩn: CTRL-ALT-F8, CTRL-ESC-F9
+- **Shell URI**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
+- **Đường dẫn UNC**: Đường dẫn dùng để kết nối đến thư mục chia sẻ. Hãy thử kết nối đến C$ trên máy cục bộ ("\\\127.0.0.1\c$\Windows\System32")
+  - **Các đường dẫn UNC khác:**
 
 | UNC                       | UNC            | UNC                  |
 | ------------------------- | -------------- | -------------------- |
@@ -68,14 +68,14 @@ _bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.git
 | %TMP%                     | %USERDOMAIN%   | %USERNAME%           |
 | %USERPROFILE%             | %WINDIR%       |                      |
 
-### Restricted Desktop Breakouts (Citrix/RDS/VDI)
+### Thoát khỏi Desktop bị hạn chế (Citrix/RDS/VDI)
 
-- **Dialog-box pivoting**: Use *Open/Save/Print-to-file* dialogs as Explorer-lite. Try `*.*` / `*.exe` in the filename field, right-click folders for **Open in new window**, and use **Properties → Open file location** to expand navigation.<sup>[[1]](#references)</sup>
-- **Create execution paths from dialogs**: Create a new file and rename it to `.CMD` or `.BAT`, or create a shortcut pointing to `%WINDIR%\System32` (or a specific binary like `%WINDIR%\System32\cmd.exe`).
-- **Shell launch pivots**: If you can browse to `cmd.exe`, try **drag-and-drop** any file onto it to launch a prompt. If Task Manager is reachable (`CTRL+SHIFT+ESC`), use **Run new task**.
-- **Task Scheduler bypass**: If interactive shells are blocked but scheduling is allowed, create a task to run `cmd.exe` (GUI `taskschd.msc` or `schtasks.exe`).
-- **Weak allowlists**: If execution is allowed by **filename/extension**, rename your payload to a permitted name. If allowed by **directory**, copy the payload into an allowed program folder and run it there.
-- **Find writable staging paths**: Start with `%TEMP%` and enumerate writeable folders with Sysinternals AccessChk.
+- **Chuyển hướng qua hộp thoại**: Dùng hộp thoại *Open/Save/Print-to-file* như một Explorer thu gọn. Thử `*.*` / `*.exe` trong trường tên tệp, nhấp chuột phải vào thư mục để chọn **Open in new window**, và dùng **Properties → Open file location** để mở rộng điều hướng.<sup>[[1]](#references)</sup>
+- **Tạo đường dẫn thực thi từ hộp thoại**: Tạo tệp mới rồi đổi tên thành `.CMD` hoặc `.BAT`, hoặc tạo shortcut trỏ đến `%WINDIR%\System32` (hoặc một binary cụ thể như `%WINDIR%\System32\cmd.exe`).
+- **Chuyển hướng khởi chạy shell**: Nếu có thể duyệt đến `cmd.exe`, thử **kéo và thả** bất kỳ tệp nào lên đó để mở prompt. Nếu truy cập được Task Manager (`CTRL+SHIFT+ESC`), dùng **Run new task**.
+- **Vượt qua Task Scheduler**: Nếu shell tương tác bị chặn nhưng vẫn được phép lên lịch, hãy tạo tác vụ chạy `cmd.exe` (GUI `taskschd.msc` hoặc `schtasks.exe`).
+- **Allowlist yếu**: Nếu việc thực thi được cho phép theo **tên tệp/phần mở rộng**, hãy đổi tên payload thành tên được cho phép. Nếu được cho phép theo **thư mục**, hãy sao chép payload vào thư mục chương trình được phép rồi chạy tại đó.
+- **Tìm đường dẫn tạm có quyền ghi**: Bắt đầu với `%TEMP%` và liệt kê các thư mục có thể ghi bằng Sysinternals AccessChk.
 
 ```cmd
 echo %TEMP%
@@ -83,18 +83,18 @@ accesschk.exe -uwdqs Users c:\
 accesschk.exe -uwdqs "Authenticated Users" c:\
 ```
 
-- **Next step**: If you gain a shell, pivot to the Windows LPE checklist:
+- **Bước tiếp theo**: Nếu lấy được shell, chuyển sang checklist Windows LPE:
 {{#ref}}
 ../windows-hardening/checklist-windows-privilege-escalation.md
 {{#endref}}
 
-### Download Your Binaries
+### Tải các binary của bạn
 
 Console: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
 Explorer: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
 Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
 
-### Accessing filesystem from the browser
+### Truy cập filesystem từ trình duyệt
 
 | PATH                | PATH              | PATH               | PATH                |
 | ------------------- | ----------------- | ------------------ | ------------------- |
@@ -106,47 +106,47 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 | %TEMP%              | %SYSTEMDRIVE%     | %SYSTEMROOT%       | %APPDATA%           |
 | %HOMEDRIVE%         | %HOMESHARE        |                    | <p><br></p>         |
 
-### ShortCuts
+### Phím tắt
 
-- Sticky Keys – Press SHIFT 5 times
+- Sticky Keys – Nhấn SHIFT 5 lần
 - Mouse Keys – SHIFT+ALT+NUMLOCK
 - High Contrast – SHIFT+ALT+PRINTSCN
-- Toggle Keys – Hold NUMLOCK for 5 seconds
-- Filter Keys – Hold right SHIFT for 12 seconds
+- Toggle Keys – Giữ NUMLOCK trong 5 giây
+- Filter Keys – Giữ SHIFT bên phải trong 12 giây
 - WINDOWS+F1 – Windows Search
-- WINDOWS+D – Show Desktop
-- WINDOWS+E – Launch Windows Explorer
+- WINDOWS+D – Hiển thị Desktop
+- WINDOWS+E – Khởi chạy Windows Explorer
 - WINDOWS+R – Run
 - WINDOWS+U – Ease of Access Centre
 - WINDOWS+F – Search
 - SHIFT+F10 – Context Menu
 - CTRL+SHIFT+ESC – Task Manager
-- CTRL+ALT+DEL – Splash screen on newer Windows versions
-- F1 – Help F3 – Search
+- CTRL+ALT+DEL – Màn hình khởi động trên các phiên bản Windows mới hơn
+- F1 – Trợ giúp F3 – Search
 - F6 – Address Bar
-- F11 – Toggle full screen within Internet Explorer
-- CTRL+H – Internet Explorer History
-- CTRL+T – Internet Explorer – New Tab
-- CTRL+N – Internet Explorer – New Page
-- CTRL+O – Open File
-- CTRL+S – Save CTRL+N – New RDP / Citrix
+- F11 – Bật/tắt chế độ toàn màn hình trong Internet Explorer
+- CTRL+H – Lịch sử Internet Explorer
+- CTRL+T – Internet Explorer – Tab mới
+- CTRL+N – Internet Explorer – Trang mới
+- CTRL+O – Mở tệp
+- CTRL+S – Lưu CTRL+N – RDP / Citrix mới
 
-### Swipes
+### Vuốt
 
-- Swipe from the left side to the right to see all open Windows, minimizing the KIOSK app and accessing the whole OS directly;
-- Swipe from the right side to the left to open Action Center, minimizing the KIOSK app and accessing the whole OS directly;
-- Swipe in from the top edge to make the title bar visible for an app opened in full screen mode;
-- Swipe up from the bottom to show the taskbar in a full screen app.
+- Vuốt từ trái sang phải để xem tất cả cửa sổ Windows đang mở, thu nhỏ ứng dụng KIOSK và truy cập trực tiếp toàn bộ OS;
+- Vuốt từ phải sang trái để mở Action Center, thu nhỏ ứng dụng KIOSK và truy cập trực tiếp toàn bộ OS;
+- Vuốt từ cạnh trên vào trong để hiển thị thanh tiêu đề của ứng dụng đang mở ở chế độ toàn màn hình;
+- Vuốt lên từ cạnh dưới để hiển thị taskbar trong ứng dụng toàn màn hình.
 
-### Internet Explorer Tricks
+### Thủ thuật Internet Explorer
 
 #### 'Image Toolbar'
 
-It's a toolbar that appears on the top-left of image when it's clicked. You will be able to Save, Print, Mailto, Open "My Pictures" in Explorer. The Kiosk needs to be using Internet Explorer.
+Đây là thanh công cụ xuất hiện ở phía trên bên trái của hình ảnh khi bạn nhấp vào đó. Bạn có thể lưu, in, gửi mail hoặc mở "My Pictures" trong Explorer. Kiosk cần sử dụng Internet Explorer.
 
 #### Shell Protocol
 
-Type this URLs to obtain an Explorer view:
+Nhập các URL sau để mở chế độ xem Explorer:
 
 - `shell:Administrative Tools`
 - `shell:DocumentsLibrary`
@@ -170,41 +170,41 @@ Type this URLs to obtain an Explorer view:
 - `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> My Network Places
 - `shell:::{871C5380-42A0-1069-A2EA-08002B30309D}` --> Internet Explorer
 
-### Show File Extensions
+### Hiển thị phần mở rộng tệp
 
-Check this page for more information: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)<sup>[[7]](#references)</sup>
+Xem trang này để biết thêm thông tin: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)<sup>[[7]](#references)</sup>
 
-## Browsers tricks
+## Thủ thuật trình duyệt
 
-Backup iKat versions:
+Các phiên bản iKat dự phòng:
 
 [http://swin.es/k/](http://swin.es/k/)\
 [http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)
 
-Create a common dialog using JavaScript and access file explorer: `document.write('<input/type=file>')`<sup>[[2]](#references)</sup>\
-Source: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
+Tạo hộp thoại phổ biến bằng JavaScript và truy cập file explorer: `document.write('<input/type=file>')`<sup>[[2]](#references)</sup>\
+Nguồn: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
 
 ## iPad
 
-### Gestures and bottoms
+### Cử chỉ và nút
 
-- Swipe up with four (or five) fingers / Double-tap Home button: To view the multitask view and change App
-- Swipe one way or another with four or five fingers: In order to change to the next/last App
-- Pinch the screen with five fingers / Touch Home button / Swipe up with 1 finger from the bottom of the screen in a quick motion to the up: To access Home
-- Swipe one finger from the bottom of the screen just 1-2 inches (slow): The dock will appear
-- Swipe down from the top of the display with 1 finger: To view your notifications
-- Swipe down with 1 finger the top-right corner of the screen: To see iPad Pro's control centre
-- Swipe 1 finger from the left of the screen 1-2 inches: To see Today view
-- Swipe fast 1 finger from the centre of the screen to the right or left: To change to next/last App
-- Press and hold the On/**Off**/Sleep button at the upper-right corner of the **iPad +** Move the Slide to **power off** slider all the way to the right: To power off
-- Press the On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button for a few second**: To force a hard power off
-- Press the On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button quickly**: To take a screenshot that will pop up in the lower left of the display. Press both buttons at the same time very briefly as if you hold them a few seconds a hard power off will be performed.<sup>[[3]](#references)</sup>
+- Vuốt lên bằng bốn (hoặc năm) ngón tay / Nhấn nút Home hai lần: Xem chế độ đa nhiệm và chuyển ứng dụng
+- Vuốt theo một hướng bất kỳ bằng bốn hoặc năm ngón tay: Chuyển sang ứng dụng tiếp theo/trước đó
+- Chụm màn hình bằng năm ngón tay / Chạm nút Home / Vuốt nhanh lên bằng một ngón tay từ cạnh dưới màn hình: Truy cập Home
+- Vuốt chậm lên bằng một ngón tay từ cạnh dưới màn hình khoảng 1-2 inch: Dock sẽ xuất hiện
+- Vuốt xuống từ cạnh trên màn hình bằng một ngón tay: Xem thông báo
+- Vuốt xuống bằng một ngón tay từ góc trên bên phải màn hình: Mở Control Center của iPad Pro
+- Vuốt từ cạnh trái màn hình vào khoảng 1-2 inch bằng một ngón tay: Xem Today view
+- Vuốt nhanh bằng một ngón tay từ giữa màn hình sang phải hoặc trái: Chuyển sang ứng dụng tiếp theo/trước đó
+- Nhấn và giữ nút On/**Off**/Sleep ở góc trên bên phải của **iPad +** Kéo thanh trượt Slide to **power off** hết sang phải: Tắt nguồn
+- Nhấn nút On/**Off**/Sleep ở góc trên bên phải của **iPad và nút Home trong vài giây**: Buộc tắt nguồn
+- Nhấn nhanh nút On/**Off**/Sleep ở góc trên bên phải của **iPad và nút Home**: Chụp ảnh màn hình; ảnh sẽ xuất hiện ở góc dưới bên trái màn hình. Nhấn nhanh đồng thời cả hai nút; nếu giữ chúng trong vài giây, thiết bị sẽ bị buộc tắt nguồn.<sup>[[3]](#references)</sup>
 
-### Shortcuts
+### Phím tắt
 
-You should have an iPad keyboard or a USB keyboard adaptor. Only shortcuts that could help escaping from the application will be shown here.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
+Bạn cần có bàn phím iPad hoặc bộ chuyển đổi bàn phím USB. Ở đây chỉ liệt kê các phím tắt có thể giúp thoát khỏi ứng dụng.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 
-| Key | Name         |
+| Phím | Tên          |
 | --- | ------------ |
 | ⌘   | Command      |
 | ⌥   | Option (Alt) |
@@ -212,91 +212,90 @@ You should have an iPad keyboard or a USB keyboard adaptor. Only shortcuts that 
 | ↩   | Return       |
 | ⇥   | Tab          |
 | ^   | Control      |
-| ←   | Left Arrow   |
-| →   | Right Arrow  |
-| ↑   | Up Arrow     |
-| ↓   | Down Arrow   |
+| ←   | Mũi tên trái |
+| →   | Mũi tên phải |
+| ↑   | Mũi tên lên   |
+| ↓   | Mũi tên xuống |
 
-#### System shortcuts
+#### Phím tắt hệ thống
 
-These shortcuts are for the visual settings and sound settings, depending on the use of the iPad.
+Các phím tắt này dùng cho cài đặt hiển thị và âm thanh, tùy theo cách sử dụng iPad.
 
-| Shortcut | Action                                                                         |
+| Phím tắt | Thao tác                                                                       |
 | -------- | ------------------------------------------------------------------------------ |
-| F1       | Dim Sscreen                                                                    |
-| F2       | Brighten screen                                                                |
-| F7       | Back one song                                                                  |
-| F8       | Play/pause                                                                     |
-| F9       | Skip song                                                                      |
-| F10      | Mute                                                                           |
-| F11      | Decrease volume                                                                |
-| F12      | Increase volume                                                                |
-| ⌘ Space  | Display a list of available languages; to choose one, tap the space bar again. |
+| F1       | Giảm độ sáng màn hình                                                          |
+| F2       | Tăng độ sáng màn hình                                                          |
+| F7       | Lùi về bài hát trước                                                           |
+| F8       | Phát/tạm dừng                                                                   |
+| F9       | Bỏ qua bài hát                                                                 |
+| F10      | Tắt tiếng                                                                       |
+| F11      | Giảm âm lượng                                                                   |
+| F12      | Tăng âm lượng                                                                   |
+| ⌘ Space  | Hiển thị danh sách ngôn ngữ khả dụng; để chọn một ngôn ngữ, nhấn lại phím cách. |
 
-#### iPad navigation
+#### Điều hướng iPad
 
-| Shortcut                                           | Action                                                  |
+| Phím tắt                                           | Thao tác                                                 |
 | -------------------------------------------------- | ------------------------------------------------------- |
-| ⌘H                                                 | Go to Home                                              |
-| ⌘⇧H (Command-Shift-H)                              | Go to Home                                              |
-| ⌘ (Space)                                          | Open Spotlight                                          |
-| ⌘⇥ (Command-Tab)                                   | List last ten used apps                                 |
-| ⌘\~                                                | Go t the last App                                       |
-| ⌘⇧3 (Command-Shift-3)                              | Screenshot (hovers in bottom left to save or act on it) |
-| ⌘⇧4                                                | Screenshot and open it in the editor                    |
-| Press and hold ⌘                                   | List of shortcuts available for the App                 |
-| ⌘⌥D (Command-Option/Alt-D)                         | Brings up the dock                                      |
-| ^⌥H (Control-Option-H)                             | Home button                                             |
-| ^⌥H H (Control-Option-H-H)                         | Show multitask bar                                      |
-| ^⌥I (Control-Option-i)                             | Item chooser                                            |
-| Escape                                             | Back button                                             |
-| → (Right arrow)                                    | Next item                                               |
-| ← (Left arrow)                                     | Previous item                                           |
-| ↑↓ (Up arrow, Down arrow)                          | Simultaneously tap selected item                        |
-| ⌥ ↓ (Option-Down arrow)                            | Scroll down                                             |
-| ⌥↑ (Option-Up arrow)                               | Scroll up                                               |
-| ⌥← or ⌥→ (Option-Left arrow or Option-Right arrow) | Scroll left or right                                    |
-| ^⌥S (Control-Option-S)                             | Turn VoiceOver speech on or off                         |
-| ⌘⇧⇥ (Command-Shift-Tab)                            | Switch to the previous app                              |
-| ⌘⇥ (Command-Tab)                                   | Switch back to the original app                         |
-| ←+→, then Option + ← or Option+→                   | Navigate through Dock                                   |
+| ⌘H                                                 | Về Home                                                 |
+| ⌘⇧H (Command-Shift-H)                              | Về Home                                                 |
+| ⌘ (Space)                                          | Mở Spotlight                                           |
+| ⌘⇥ (Command-Tab)                                   | Liệt kê mười ứng dụng được dùng gần đây nhất             |
+| ⌘\~                                                | Chuyển về ứng dụng trước đó                              |
+| ⌘⇧3 (Command-Shift-3)                              | Chụp ảnh màn hình (hiện ở góc dưới bên trái để lưu hoặc thao tác) |
+| ⌘⇧4                                                | Chụp ảnh màn hình và mở trong trình chỉnh sửa            |
+| Nhấn và giữ ⌘                                      | Liệt kê các phím tắt khả dụng cho ứng dụng               |
+| ⌘⌥D (Command-Option/Alt-D)                         | Hiển thị dock                                            |
+| ^⌥H (Control-Option-H)                             | Nút Home                                                |
+| ^⌥H H (Control-Option-H-H)                         | Hiển thị thanh đa nhiệm                                  |
+| ^⌥I (Control-Option-i)                             | Bộ chọn mục                                              |
+| Escape                                             | Nút quay lại                                             |
+| → (Mũi tên phải)                                   | Mục tiếp theo                                            |
+| ← (Mũi tên trái)                                   | Mục trước đó                                             |
+| ↑↓ (Mũi tên lên, Mũi tên xuống)                    | Chạm đồng thời vào mục đã chọn                           |
+| ⌥ ↓ (Option-Mũi tên xuống)                         | Cuộn xuống                                               |
+| ⌥↑ (Option-Mũi tên lên)                            | Cuộn lên                                                 |
+| ⌥← hoặc ⌥→ (Option-Mũi tên trái hoặc Option-Mũi tên phải) | Cuộn sang trái hoặc phải                           |
+| ^⌥S (Control-Option-S)                             | Bật hoặc tắt giọng nói VoiceOver                         |
+| ⌘⇧⇥ (Command-Shift-Tab)                            | Chuyển sang ứng dụng trước đó                            |
+| ⌘⇥ (Command-Tab)                                   | Chuyển về ứng dụng ban đầu                               |
+| ←+→, sau đó Option + ← hoặc Option+→               | Điều hướng trong Dock                                    |
 
-#### Safari shortcuts
+#### Phím tắt Safari
 
-| Shortcut                | Action                                           |
+| Phím tắt                | Thao tác                                           |
 | ----------------------- | ------------------------------------------------ |
-| ⌘L (Command-L)          | Open Location                                    |
-| ⌘T                      | Open a new tab                                   |
-| ⌘W                      | Close the current tab                            |
-| ⌘R                      | Refresh the current tab                          |
-| ⌘.                      | Stop loading the current tab                     |
-| ^⇥                      | Switch to the next tab                           |
-| ^⇧⇥ (Control-Shift-Tab) | Move to the previous tab                         |
-| ⌘L                      | Select the text input/URL field to modify it     |
-| ⌘⇧T (Command-Shift-T)   | Open last closed tab (can be used several times) |
-| ⌘\[                     | Goes back one page in your browsing history      |
-| ⌘]                      | Goes forward one page in your browsing history   |
-| ⌘⇧R                     | Activate Reader Mode                             |
+| ⌘L (Command-L)          | Mở vị trí                                         |
+| ⌘T                      | Mở tab mới                                       |
+| ⌘W                      | Đóng tab hiện tại                                 |
+| ⌘R                      | Làm mới tab hiện tại                              |
+| ⌘.                      | Dừng tải tab hiện tại                             |
+| ^⇥                      | Chuyển sang tab tiếp theo                         |
+| ^⇧⇥ (Control-Shift-Tab) | Chuyển về tab trước đó                            |
+| ⌘L                      | Chọn trường nhập văn bản/URL để chỉnh sửa         |
+| ⌘⇧T (Command-Shift-T)   | Mở tab vừa đóng gần nhất (có thể dùng nhiều lần)  |
+| ⌘\[                     | Quay lại một trang trong lịch sử duyệt web         |
+| ⌘]                      | Tiến lên một trang trong lịch sử duyệt web         |
+| ⌘⇧R                     | Bật Reader Mode                                   |
 
-#### Mail shortcuts
+#### Phím tắt Mail
 
-| Shortcut                   | Action                       |
+| Phím tắt                   | Thao tác                       |
 | -------------------------- | ---------------------------- |
-| ⌘L                         | Open Location                |
-| ⌘T                         | Open a new tab               |
-| ⌘W                         | Close the current tab        |
-| ⌘R                         | Refresh the current tab      |
-| ⌘.                         | Stop loading the current tab |
-| ⌘⌥F (Command-Option/Alt-F) | Search in your mailbox       |
+| ⌘L                         | Mở vị trí                     |
+| ⌘T                         | Mở tab mới                    |
+| ⌘W                         | Đóng tab hiện tại              |
+| ⌘R                         | Làm mới tab hiện tại           |
+| ⌘.                         | Dừng tải tab hiện tại          |
+| ⌘⌥F (Command-Option/Alt-F) | Tìm kiếm trong hộp thư         |
 
 ## References
 
-- [1] [Breaking Out of Citrix and other Restricted Desktop Environments](https://www.pentestpartners.com/security-blog/breaking-out-of-citrix-and-other-restricted-desktop-environments/)
-- [2] [Give me a browser, I'll give you a shell](https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811defa0)
-- [3] [6 only-for-iPad gestures you need to know](https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html)
-- [4] [iPad shortcuts guide](https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html)
-- [5] [Best iPad Keyboard Shortcuts](https://thesweetsetup.com/best-ipad-keyboard-shortcuts/)
-- [6] [iPad Keyboard Shortcuts](http://www.iphonehacks.com/2018/03/ipad-keyboard-shortcuts.html)
-- [7] [howtohaven.com - Show File Extensions In Windows Explorer](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
-
+- [1] [Thoát khỏi Citrix và các môi trường desktop bị giới hạn khác](https://www.pentestpartners.com/security-blog/breaking-out-of-citrix-and-other-restricted-desktop-environments/)
+- [2] [Đưa tôi một trình duyệt, tôi sẽ đưa bạn một shell](https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811defa0)
+- [3] [6 cử chỉ chỉ có trên iPad mà bạn cần biết](https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html)
+- [4] [Hướng dẫn phím tắt iPad](https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html)
+- [5] [Các phím tắt bàn phím iPad tốt nhất](https://thesweetsetup.com/best-ipad-keyboard-shortcuts/)
+- [6] [Phím tắt bàn phím iPad](http://www.iphonehacks.com/2018/03/ipad-keyboard-shortcuts.html)
+- [7] [howtohaven.com - Hiển thị phần mở rộng tệp trong Windows Explorer](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
 {{#include ../banners/hacktricks-training.md}}

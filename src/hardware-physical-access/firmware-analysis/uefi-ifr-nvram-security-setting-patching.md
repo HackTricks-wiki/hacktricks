@@ -1,59 +1,59 @@
-# UEFI IFR and NVRAM Security-Setting Patching
+# UEFI IFR và vá cài đặt bảo mật NVRAM
 
 {{#include ../../banners/hacktricks-training.md}}
 
-A setup password protects the firmware user interface, but it does not necessarily authenticate the configuration bytes stored in SPI flash. With physical write access, an assessor can map a hidden or locked UEFI setting from its **Human Interface Infrastructure (HII) Internal Forms Representation (IFR)** to the backing NVRAM variable, patch that value offline, and reflash it. On an affected Dell system, this changed the pre-boot IOMMU state while the graphical setup still displayed DMA protection as enabled.<sup>[[3]](#references)</sup>
+Mật khẩu thiết lập bảo vệ giao diện người dùng firmware, nhưng không nhất thiết xác thực các byte cấu hình được lưu trong SPI flash. Khi có quyền ghi vật lý, chuyên gia đánh giá có thể ánh xạ một cài đặt UEFI ẩn hoặc bị khóa từ **Human Interface Infrastructure (HII) Internal Forms Representation (IFR)** đến biến NVRAM chứa giá trị tương ứng, vá giá trị đó khi offline rồi flash lại. Trên một hệ thống Dell bị ảnh hưởng, thao tác này đã thay đổi trạng thái IOMMU trước khi khởi động, trong khi giao diện thiết lập đồ họa vẫn hiển thị rằng tính năng bảo vệ DMA đang bật.<sup>[[3]](#references)</sup>
 
 > [!CAUTION]
-> Firmware writes can permanently brick the target. Work on an authorized, recoverable test device; keep the original image; and obtain at least three independent reads whose cryptographic hashes match before modifying anything.<sup>[[3]](#references)</sup>
+> Việc ghi firmware có thể khiến thiết bị mục tiêu bị brick vĩnh viễn. Chỉ thao tác trên thiết bị thử nghiệm được cấp phép và có thể khôi phục; giữ lại image gốc; và thực hiện ít nhất ba lần đọc độc lập có hash mật mã trùng khớp trước khi chỉnh sửa bất cứ thứ gì.<sup>[[3]](#references)</sup>
 
-## Acquire the firmware image
+## Thu thập firmware image
 
-Read only the BIOS region when the Intel flash descriptor permits host access, or use a voltage-correct external programmer and in-circuit clip. An external programmer is normally required to restore a machine that no longer boots.<sup>[[3]](#references)[[9]](#references)</sup>
+Chỉ đọc vùng BIOS khi flash descriptor của Intel cho phép host truy cập, hoặc dùng programmer bên ngoài có điện áp phù hợp và clip gắn trực tiếp vào mạch. Thông thường cần programmer bên ngoài để khôi phục máy không còn khởi động được.<sup>[[3]](#references)[[9]](#references)</sup>
 
 ```bash
 flashrom -p internal -r dump.bin --ifd -i bios
 sha256sum dump*.bin
 ```
 
-Do not assume that a vendor update capsule is equivalent to the chip contents: it may omit NVRAM, contain encapsulation, or be encrypted. [UEFITool](https://github.com/LongSoft/UEFITool) can parse a raw UEFI image into firmware volumes, files, and sections.<sup>[[7]](#references)</sup>
+Đừng cho rằng capsule cập nhật của nhà cung cấp tương đương với nội dung chip: nó có thể không chứa NVRAM, có lớp đóng gói hoặc được mã hóa. [UEFITool](https://github.com/LongSoft/UEFITool) có thể phân tích ảnh UEFI thô thành các firmware volume, file và section.<sup>[[7]](#references)</sup>
 
-## Map an IFR question to NVRAM
+## Ánh xạ câu hỏi IFR sang NVRAM
 
-[IFRExtractor-RS](https://github.com/LongSoft/IFRExtractor-RS) converts HII form packages into text and exposes settings that a vendor GUI hides, renames, or suppresses. Its output can identify the question, variable store, byte offset, storage width, valid values, and conditional visibility.<sup>[[8]](#references)</sup>
+[IFRExtractor-RS](https://github.com/LongSoft/IFRExtractor-RS) chuyển đổi các gói biểu mẫu HII thành văn bản và hiển thị những cài đặt mà GUI của nhà cung cấp ẩn, đổi tên hoặc loại bỏ. Đầu ra có thể xác định câu hỏi, kho biến, độ lệch byte, độ rộng lưu trữ, các giá trị hợp lệ và điều kiện hiển thị.<sup>[[8]](#references)</sup>
 
-1. Open the dump in UEFITool, search for the firmware file named `Setup`, expand it to the PE32 image section, and use **Extract body**.
-2. Run IFRExtractor-RS on the extracted EFI/PE32 body, then search the generated text for controls such as `DMA`, `IOMMU`, `VT-d`, `Secure Boot`, or the vendor-facing label.
-3. Record `VarStoreId`, `VarOffset`, `Size`, valid options, and the question ID. Do not infer value semantics from `Flags` alone.
-4. Find the matching `VarStore`/`VarStoreEfi` declaration and map the numeric store ID to its variable **name and GUID**.
-5. Search that GUID in UEFITool until the corresponding NVRAM object is reached. Open **Body hex view** and navigate to `VarOffset` relative to the variable body—not the whole flash image.<sup>[[3]](#references)</sup>
+1. Mở bản dump trong UEFITool, tìm file firmware có tên `Setup`, mở rộng đến section ảnh PE32 và chọn **Extract body**.
+2. Chạy IFRExtractor-RS trên phần thân EFI/PE32 đã trích xuất, sau đó tìm trong văn bản được tạo ra các điều khiển như `DMA`, `IOMMU`, `VT-d`, `Secure Boot` hoặc nhãn hiển thị cho người dùng của nhà cung cấp.
+3. Ghi lại `VarStoreId`, `VarOffset`, `Size`, các tùy chọn hợp lệ và ID câu hỏi. Đừng suy luận ý nghĩa của giá trị chỉ dựa vào `Flags`.
+4. Tìm khai báo `VarStore`/`VarStoreEfi` tương ứng và ánh xạ ID kho số sang **tên và GUID** của biến.
+5. Tìm GUID đó trong UEFITool cho đến khi tới đối tượng NVRAM tương ứng. Mở **Body hex view** và chuyển đến `VarOffset` tính từ phần thân của biến—không phải từ toàn bộ ảnh flash.<sup>[[3]](#references)</sup>
 
 ```bash
 ./ifrextractor Section_PE32_image_Setup_body.efi
 rg -i 'dma|iommu|vt-d|secure boot' *.ifr.txt
 ```
 
-For example, one Dell image described the relevant question as `Control Iommu Pre-boot Behavior`, with `VarStoreId: 0x1`, `VarOffset: 0x975`, and an 8-bit field. Store `0x1` mapped to variable `Setup` and GUID `EC87D643-EBA4-4BB5-A1E5-3F3E36B20DA9`; differential dumps established `01` as enabled and `00` as disabled on that firmware.<sup>[[3]](#references)</sup>
+Ví dụ, một image Dell mô tả câu hỏi liên quan là `Control Iommu Pre-boot Behavior`, với `VarStoreId: 0x1`, `VarOffset: 0x975` và trường 8-bit. Store `0x1` ánh xạ tới biến `Setup` và GUID `EC87D643-EBA4-4BB5-A1E5-3F3E36B20DA9`; các bản dump vi sai xác định `01` là bật và `00` là tắt trên firmware đó.<sup>[[3]](#references)</sup>
 
 > [!WARNING]
-> GUIDs, offsets, structure layouts, duplicate variable instances, and value encodings can change across models and firmware versions. Never reuse the example offset as a universal Dell value.
+> GUID, offset, bố cục cấu trúc, các bản sao biến trùng lặp và cách mã hóa giá trị có thể thay đổi tùy theo model và phiên bản firmware. Không bao giờ dùng lại offset trong ví dụ như một giá trị chung cho mọi thiết bị Dell.
 
-## Validate with differential dumps
+## Xác minh bằng bản dump vi sai
 
-When the setup interface is available on an equivalent test unit, create a dump with the option enabled and another with it disabled. Compare the IFR-derived variable body and confirm that only the expected field changes. This determines the actual encoding and distinguishes an active variable from stale/default/recovery copies. Patch a copy of the verified original image, re-open it in UEFITool, and confirm that the edit is outside authenticated or measured code ranges before reflashing.<sup>[[3]](#references)[[4]](#references)</sup>
+Khi có giao diện setup trên một thiết bị thử nghiệm tương đương, hãy tạo một bản dump khi tùy chọn được bật và một bản khác khi tùy chọn đó bị tắt. So sánh phần thân biến suy ra từ IFR và xác nhận rằng chỉ trường dự kiến thay đổi. Việc này xác định cách mã hóa thực tế và phân biệt biến đang hoạt động với các bản sao cũ/mặc định/khôi phục. Vá một bản sao của image gốc đã xác minh, mở lại trong UEFITool và xác nhận rằng chỉnh sửa nằm ngoài các vùng code được xác thực hoặc đo lường trước khi flash lại.<sup>[[3]](#references)[[4]](#references)</sup>
 
-A targeted edit can have fewer side effects than clearing a firmware password, which may enter a factory state, require device-specific data to be re-entered, or change TPM PCR measurements. However, a targeted offline edit can also create a dangerous **displayed-state/effective-state divergence**: the UI and management tooling may show the old value while early firmware consumes the patched byte. The demonstrated change did not request BitLocker recovery and survived a vendor BIOS update because the update preserved the altered NVRAM state.<sup>[[3]](#references)</sup>
+Chỉnh sửa có mục tiêu có thể gây ít tác dụng phụ hơn việc xóa mật khẩu firmware, vốn có thể đưa thiết bị về trạng thái xuất xưởng, yêu cầu nhập lại dữ liệu riêng của thiết bị hoặc làm thay đổi các phép đo TPM PCR. Tuy nhiên, chỉnh sửa offline có mục tiêu cũng có thể tạo ra **sự bất nhất giữa trạng thái hiển thị và trạng thái hiệu lực**, trong đó giao diện và công cụ quản lý hiển thị giá trị cũ, còn firmware giai đoạn đầu lại sử dụng byte đã được vá. Thay đổi được minh họa không yêu cầu khôi phục BitLocker và vẫn tồn tại sau khi cập nhật BIOS của nhà sản xuất vì bản cập nhật giữ nguyên trạng thái NVRAM đã bị thay đổi.<sup>[[3]](#references)</sup>
 
-The author's [Dell UEFI Patcher](https://github.com/craigsblackie/Dell_UEFI_Patcher) illustrates a model-specific patcher that discovers Intel Boot Guard Initial Boot Block ranges and refuses normal writes inside them. Use its analysis mode before `--apply`, inspect every candidate match, and treat its defaults as examples rather than portable offsets.<sup>[[4]](#references)</sup>
+[Dell UEFI Patcher](https://github.com/craigsblackie/Dell_UEFI_Patcher) của tác giả minh họa một công cụ vá dành riêng cho từng model, có thể tìm các vùng Intel Boot Guard Initial Boot Block và từ chối các thao tác ghi thông thường bên trong những vùng đó. Hãy dùng chế độ phân tích trước khi chạy `--apply`, kiểm tra mọi kết quả khớp tiềm năng và xem các giá trị mặc định của công cụ là ví dụ, không phải các offset có thể dùng chung.<sup>[[4]](#references)</sup>
 
 ```bash
 python3 dell_bios_patcher.py bios_dump.bin
 python3 dell_bios_patcher.py bios_dump.bin patched.bin --apply
 ```
 
-## Automate the mapping with NVRAMap
+## Tự động hóa việc ánh xạ bằng NVRAMap
 
-[NVRAMap](https://github.com/PN-Tester/NVRAMap) automates IFR extraction, resolves a question's `VarStoreId` to the NVRAM GUID/name, displays current option values, and can edit the selected field. It can work from a full firmware dump or from separately extracted EFI and NVRAM blobs.<sup>[[5]](#references)</sup>
+[NVRAMap](https://github.com/PN-Tester/NVRAMap) tự động trích xuất IFR, xác định GUID/tên NVRAM tương ứng với `VarStoreId` của câu hỏi, hiển thị các giá trị tùy chọn hiện tại và có thể chỉnh sửa trường được chọn. Công cụ này có thể hoạt động với bản dump firmware đầy đủ hoặc các blob EFI và NVRAM được trích xuất riêng.<sup>[[5]](#references)</sup>
 
 ```bash
 # EFI question -> backing NVRAM value
@@ -63,32 +63,31 @@ python3 NVRAMap.py -mode 1 -firmware dump.bin -terms DMA,IOMMU --dump-ifr ifr.tx
 python3 NVRAMap.py -mode 1 -firmware dump.bin -terms DMA,IOMMU --modify
 ```
 
-Automation does not remove the need for matching dumps, recovery hardware, region-integrity checks, or post-flash validation.
+Tự động hóa không loại bỏ nhu cầu phải có các bản dump phù hợp, phần cứng phục hồi, kiểm tra tính toàn vẹn của vùng và xác thực sau khi flash.
 
-## Chaining a pre-boot IOMMU downgrade into Windows DMA access
+## Kết hợp hạ cấp IOMMU trước khi khởi động với quyền truy cập DMA trong Windows
 
-If the patched value permits PCIe DMA before ExitBootServices, [DMAReaper](https://github.com/PN-Tester/DMAReaper) can walk from the EFI System Table through the ACPI root tables, locate the `DMAR` table, and overwrite it before Windows parses it. Without usable DMAR data, Windows may fail to initialize IOMMU-backed Kernel DMA Protection. DMAReaper does **not** disable VBS/HVCI by itself.<sup>[[1]](#references)</sup>
+Nếu giá trị đã patch cho phép PCIe DMA trước ExitBootServices, [DMAReaper](https://github.com/PN-Tester/DMAReaper) có thể lần theo EFI System Table qua các bảng gốc ACPI, tìm bảng `DMAR` và ghi đè lên bảng đó trước khi Windows phân tích nó. Nếu không có dữ liệu DMAR khả dụng, Windows có thể không khởi tạo được Kernel DMA Protection dựa trên IOMMU. Bản thân DMAReaper **không** vô hiệu hóa VBS/HVCI.<sup>[[1]](#references)</sup>
 
-In the demonstrated chain, the target was then booted in Safe Mode to remove the remaining VBS barrier and [PCILeech](https://github.com/ufrisk/pcileech) patched physical memory with a Sticky Keys signature:<sup>[[2]](#references)[[3]](#references)</sup>
+Trong chuỗi tấn công được minh họa, mục tiêu sau đó được khởi động vào Safe Mode để loại bỏ rào cản VBS còn lại, rồi [PCILeech](https://github.com/ufrisk/pcileech) patch bộ nhớ vật lý bằng chữ ký Sticky Keys:<sup>[[2]](#references)[[3]](#references)</sup>
 
 ```bash
 sudo ./pcileech patch -sig stickykeys_cmd_win
 ```
 
-After a successful, build-compatible patch, invoking Sticky Keys at the Windows sign-in screen launched a command prompt as `NT AUTHORITY\SYSTEM`. Signatures and reachable memory ranges are target/build/hardware dependent; a reported match is not evidence that every Windows version is exploitable.<sup>[[2]](#references)[[3]](#references)</sup>
+Sau một bản vá thành công và tương thích với bản build, gọi Sticky Keys tại màn hình đăng nhập Windows đã mở command prompt dưới quyền `NT AUTHORITY\SYSTEM`. Chữ ký và các phạm vi bộ nhớ có thể truy cập phụ thuộc vào mục tiêu/bản build/phần cứng; một kết quả khớp được báo cáo không chứng minh rằng mọi phiên bản Windows đều có thể bị khai thác.<sup>[[2]](#references)[[3]](#references)</sup>
 
-Do not trust the firmware menu as validation. Check **System Information (`msinfo32.exe`) → Kernel DMA Protection**, verify VBS separately, inspect whether the OS received a valid DMAR table, and test actual DMA reachability. Windows reports Kernel DMA Protection only when the platform and firmware support the required IOMMU configuration.<sup>[[6]](#references)</sup>
+Đừng tin vào menu firmware như một cách xác thực. Kiểm tra **System Information (`msinfo32.exe`) → Kernel DMA Protection**, xác minh riêng VBS, kiểm tra xem hệ điều hành có nhận được bảng DMAR hợp lệ hay không, và kiểm tra khả năng truy cập DMA thực tế. Windows chỉ báo cáo Kernel DMA Protection khi nền tảng và firmware hỗ trợ cấu hình IOMMU bắt buộc.<sup>[[6]](#references)</sup>
 
 ## References
 
-- [1] [DMAReaper - Disable Kernel DMA Protection via pre-boot DMAR overwrite](https://github.com/PN-Tester/DMAReaper)
-- [2] [PCILeech - Direct Memory Access attack software](https://github.com/ufrisk/pcileech)
-- [3] [MDSec - Disabling Security Features in a Locked BIOS](https://mdsec.co.uk/2026/03/disabling-security-features-in-a-locked-bios)
-- [4] [Dell UEFI Patcher - IBB-aware NVRAM patching](https://github.com/craigsblackie/Dell_UEFI_Patcher)
-- [5] [NVRAMap - Map EFI settings to NVRAM values](https://github.com/PN-Tester/NVRAMap)
+- [1] [DMAReaper - Vô hiệu hóa Kernel DMA Protection bằng cách ghi đè DMAR trước khi khởi động](https://github.com/PN-Tester/DMAReaper)
+- [2] [PCILeech - Phần mềm tấn công Direct Memory Access](https://github.com/ufrisk/pcileech)
+- [3] [MDSec - Vô hiệu hóa các tính năng bảo mật trong BIOS bị khóa](https://mdsec.co.uk/2026/03/disabling-security-features-in-a-locked-bios)
+- [4] [Dell UEFI Patcher - Vá NVRAM nhận biết IBB](https://github.com/craigsblackie/Dell_UEFI_Patcher)
+- [5] [NVRAMap - Ánh xạ cài đặt EFI sang giá trị NVRAM](https://github.com/PN-Tester/NVRAMap)
 - [6] [Microsoft Learn - Kernel DMA Protection](https://learn.microsoft.com/en-us/windows/security/hardware-security/kernel-dma-protection-for-thunderbolt)
-- [7] [UEFITool - UEFI firmware image viewer and parser](https://github.com/LongSoft/UEFITool)
-- [8] [IFRExtractor-RS - Extract UEFI IFR into human-readable text](https://github.com/LongSoft/IFRExtractor-RS)
-- [9] [flashrom manual - programmers and read/write operations](https://flashrom.org/classic_cli_manpage.html)
-
+- [7] [UEFITool - Trình xem và phân tích ảnh firmware UEFI](https://github.com/LongSoft/UEFITool)
+- [8] [IFRExtractor-RS - Trích xuất IFR UEFI thành văn bản dễ đọc](https://github.com/LongSoft/IFRExtractor-RS)
+- [9] [Tài liệu flashrom - Programmer và các thao tác đọc/ghi](https://flashrom.org/classic_cli_manpage.html)
 {{#include ../../banners/hacktricks-training.md}}

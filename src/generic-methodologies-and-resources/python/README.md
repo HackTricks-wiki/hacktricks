@@ -1,17 +1,17 @@
-# Python Sandbox Escape & Pyscript
+# Thoát Python Sandbox & Pyscript
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Interesting pages to check:**
+**Các trang thú vị cần xem:**
 
-- [**Pyscript hacking tricks**](pyscript.md)
-- [**Python deserializations**](../../pentesting-web/deserialization/README.md)
-- [**Keras model deserialization RCE and gadget hunting**](keras-model-deserialization-rce-and-gadget-hunting.md)
-- [**Tricks to bypass python sandboxes**](bypass-python-sandboxes/README.md)
-- [**Basic python web requests syntax**](web-requests.md)
-- [**Basic python syntax and libraries**](basic-python.md)
-- [**Python virtual environments (`venv`) and wheel builds**](basic-python.md#virtual-environments-and-wheel-builds-venv)
-- [**Chosen-input MD5 suffix and numeric-zero hash searches**](../../crypto/hashes/README.md#chosen-input-md5-hash-searches)
+- [**Thủ thuật hacking Pyscript**](pyscript.md)
+- [**Giải tuần tự hóa Python**](../../pentesting-web/deserialization/README.md)
+- [**RCE khi giải tuần tự hóa mô hình Keras và săn tìm gadget**](keras-model-deserialization-rce-and-gadget-hunting.md)
+- [**Thủ thuật bypass sandbox Python**](bypass-python-sandboxes/README.md)
+- [**Cú pháp yêu cầu web cơ bản của Python**](web-requests.md)
+- [**Cú pháp và thư viện Python cơ bản**](basic-python.md)
+- [**Môi trường ảo Python (`venv`) và tạo wheel**](basic-python.md#virtual-environments-and-wheel-builds-venv)
+- [**Tìm kiếm hậu tố MD5 với đầu vào tùy chọn và hash có giá trị bằng 0**](../../crypto/hashes/README.md#chosen-input-md5-hash-searches)
 
 ## References
 

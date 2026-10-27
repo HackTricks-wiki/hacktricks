@@ -1,126 +1,125 @@
-# Threat Modeling
+# Mô hình hóa mối đe dọa
 
 {{#include ../banners/hacktricks-training.md}}
 
-Welcome to HackTricks' comprehensive guide on Threat Modeling! Embark on an exploration of this critical aspect of cybersecurity, where we identify, understand, and strategize against potential vulnerabilities in a system. This thread serves as a step-by-step guide packed with real-world examples, helpful software, and easy-to-understand explanations. Ideal for both novices and experienced practitioners looking to fortify their cybersecurity defenses.
+Chào mừng bạn đến với hướng dẫn toàn diện về Mô hình hóa mối đe dọa của HackTricks! Hãy cùng khám phá khía cạnh then chốt này của an ninh mạng, nơi chúng ta xác định, tìm hiểu và xây dựng chiến lược đối phó với các lỗ hổng tiềm ẩn trong hệ thống. Bài viết này là hướng dẫn từng bước, bao gồm các ví dụ thực tế, phần mềm hữu ích và lời giải thích dễ hiểu. Nội dung phù hợp cho cả người mới bắt đầu lẫn những người có kinh nghiệm muốn củng cố hệ thống phòng thủ an ninh mạng.
 
-### Commonly Used Scenarios
+### Các tình huống thường gặp
 
-1. **Software Development**: As part of the Secure Software Development Life Cycle (SSDLC), threat modeling helps in **identifying potential sources of vulnerabilities** in the early stages of development.<sup>[[1]](#references)[[4]](#references)</sup>
-2. **Penetration Testing**: The Penetration Testing Execution Standard (PTES) treats threat modeling as required for correct execution and calls for documenting business assets, business processes, threat communities, and their capabilities.<sup>[[2]](#references)</sup>
+1. **Phát triển phần mềm**: Là một phần của Vòng đời Phát triển Phần mềm An toàn (SSDLC), mô hình hóa mối đe dọa giúp **xác định các nguồn lỗ hổng tiềm ẩn** ở những giai đoạn đầu của quá trình phát triển.<sup>[[1]](#references)[[4]](#references)</sup>
+2. **Penetration Testing**: Penetration Testing Execution Standard (PTES) xem mô hình hóa mối đe dọa là yêu cầu cần thiết để thực hiện đúng quy trình, đồng thời yêu cầu ghi lại các tài sản kinh doanh, quy trình kinh doanh, cộng đồng mối đe dọa và năng lực của họ.<sup>[[2]](#references)</sup>
 
-### Threat Model in a Nutshell
+### Khái quát về mô hình mối đe dọa
 
-A threat model is typically represented as a diagram, image, or other visual illustration of a planned architecture or existing application. Data-flow diagrams (DFDs) are a common way to model a system and its interactions, while threat modeling adds a security-focused analysis.<sup>[[1]](#references)</sup>
+Mô hình mối đe dọa thường được thể hiện dưới dạng sơ đồ, hình ảnh hoặc hình minh họa trực quan khác về kiến trúc dự kiến hoặc ứng dụng hiện có. Sơ đồ luồng dữ liệu (DFD) là cách phổ biến để mô hình hóa hệ thống và các tương tác của nó, còn mô hình hóa mối đe dọa bổ sung bước phân tích tập trung vào bảo mật.<sup>[[1]](#references)</sup>
 
-In Microsoft's Threat Modeling Tool, red dotted lines indicate trust boundaries; other tools may use different visual conventions.<sup>[[4]](#references)</sup> To streamline risk identification, teams may use the CIA (Confidentiality, Integrity, Availability) triad or STRIDE threat categories, but the appropriate methodology depends on the project's context and requirements.<sup>[[1]](#references)[[3]](#references)[[10]](#references)</sup>
+Trong Microsoft Threat Modeling Tool, các đường chấm đỏ biểu thị ranh giới tin cậy; các công cụ khác có thể sử dụng quy ước trực quan khác.<sup>[[4]](#references)</sup> Để đơn giản hóa việc xác định rủi ro, các nhóm có thể sử dụng bộ ba CIA (Tính bảo mật, Tính toàn vẹn, Tính sẵn sàng) hoặc các nhóm mối đe dọa STRIDE. Tuy nhiên, phương pháp phù hợp phụ thuộc vào bối cảnh và yêu cầu của dự án.<sup>[[1]](#references)[[3]](#references)[[10]](#references)</sup>
 
-### The CIA Triad
+### Bộ ba CIA
 
-The CIA Triad is a widely recognized information-security model standing for Confidentiality, Integrity, and Availability. These properties are commonly used to describe security goals for data and systems.<sup>[[3]](#references)</sup>
+Bộ ba CIA là mô hình bảo mật thông tin được công nhận rộng rãi, gồm Tính bảo mật (Confidentiality), Tính toàn vẹn (Integrity) và Tính sẵn sàng (Availability). Các thuộc tính này thường được dùng để mô tả mục tiêu bảo mật cho dữ liệu và hệ thống.<sup>[[3]](#references)</sup>
 
-1. **Confidentiality**: Ensuring that the data or system is not accessed by unauthorized individuals. This is a central aspect of security, requiring appropriate access controls, encryption, and other measures to prevent data breaches.
-2. **Integrity**: The accuracy, consistency, and trustworthiness of the data over its lifecycle. This principle ensures that the data is not altered or tampered with by unauthorized parties. It often involves checksums, hashing, and other data verification methods.
-3. **Availability**: This ensures that data and services are accessible to authorized users when needed. This often involves redundancy, fault tolerance, and high-availability configurations to keep systems running even in the face of disruptions.
+1. **Tính bảo mật**: Đảm bảo dữ liệu hoặc hệ thống không bị truy cập bởi những người không được phép. Đây là khía cạnh cốt lõi của bảo mật, đòi hỏi các biện pháp kiểm soát truy cập, mã hóa và những biện pháp khác để ngăn chặn rò rỉ dữ liệu.
+2. **Tính toàn vẹn**: Đảm bảo tính chính xác, nhất quán và đáng tin cậy của dữ liệu trong suốt vòng đời của nó. Nguyên tắc này đảm bảo dữ liệu không bị các bên trái phép sửa đổi hoặc can thiệp. Việc này thường sử dụng checksum, hashing và các phương pháp xác minh dữ liệu khác.
+3. **Tính sẵn sàng**: Đảm bảo người dùng được phép có thể truy cập dữ liệu và dịch vụ khi cần. Việc này thường bao gồm dự phòng, khả năng chịu lỗi và cấu hình tính sẵn sàng cao để duy trì hoạt động của hệ thống ngay cả khi xảy ra gián đoạn.
 
-### Threat Modeling Methodologies
+### Phương pháp mô hình hóa mối đe dọa
 
-1. **STRIDE**: Microsoft's STRIDE approach categorizes software threats as **Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, and Elevation of Privilege**. These categories help analysts identify possible threats at each vulnerable point in a design.<sup>[[5]](#references)</sup>
-2. **DREAD**: This Microsoft assessment approach scores threats using **Damage, Reproducibility, Exploitability, Affected users, and Discoverability**. The resulting score can help prioritize threats for mitigation.<sup>[[5]](#references)</sup>
-3. **PASTA** (Process for Attack Simulation and Threat Analysis): This is a seven-stage, **risk-centric** methodology covering objectives, technical scope, application decomposition, threat analysis, vulnerability and weakness analysis, attack modeling, and risk/impact analysis.<sup>[[8]](#references)</sup>
-4. **Trike**: This security-audit framework approaches threat modeling from a **risk-management** and defensive perspective.<sup>[[9]](#references)</sup>
-5. **VAST** (Visual, Agile, and Simple Threat modeling): This method emphasizes scalable, usable threat models for application and operational views and can integrate with development and DevOps lifecycles.<sup>[[10]](#references)</sup>
-6. **OCTAVE** (Operationally Critical Threat, Asset, and Vulnerability Evaluation): Created by the CERT Division of Carnegie Mellon's Software Engineering Institute, OCTAVE is a risk-based strategic assessment and planning method focused on organizational risk rather than technology alone.<sup>[[10]](#references)</sup>
+1. **STRIDE**: Phương pháp STRIDE của Microsoft phân loại các mối đe dọa phần mềm thành **Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service và Elevation of Privilege**. Các nhóm này giúp chuyên viên phân tích xác định những mối đe dọa có thể xuất hiện tại từng điểm dễ bị tổn thương trong thiết kế.<sup>[[5]](#references)</sup>
+2. **DREAD**: Phương pháp đánh giá này của Microsoft chấm điểm mối đe dọa dựa trên **Damage, Reproducibility, Exploitability, Affected users và Discoverability**. Điểm số thu được có thể giúp ưu tiên các mối đe dọa cần giảm thiểu.<sup>[[5]](#references)</sup>
+3. **PASTA** (Process for Attack Simulation and Threat Analysis): Đây là phương pháp luận **lấy rủi ro làm trọng tâm**, gồm bảy giai đoạn: mục tiêu, phạm vi kỹ thuật, phân rã ứng dụng, phân tích mối đe dọa, phân tích lỗ hổng và điểm yếu, mô hình hóa tấn công, và phân tích rủi ro/tác động.<sup>[[8]](#references)</sup>
+4. **Trike**: Khung kiểm tra bảo mật này tiếp cận mô hình hóa mối đe dọa theo hướng **quản lý rủi ro** và phòng thủ.<sup>[[9]](#references)</sup>
+5. **VAST** (Visual, Agile, and Simple Threat modeling): Phương pháp này chú trọng tạo ra các mô hình mối đe dọa có khả năng mở rộng và dễ sử dụng cho cả góc nhìn ứng dụng lẫn vận hành, đồng thời có thể tích hợp vào vòng đời phát triển và DevOps.<sup>[[10]](#references)</sup>
+6. **OCTAVE** (Operationally Critical Threat, Asset, and Vulnerability Evaluation): Được tạo ra bởi CERT Division thuộc Software Engineering Institute của Carnegie Mellon, OCTAVE là phương pháp đánh giá và lập kế hoạch chiến lược dựa trên rủi ro, tập trung vào rủi ro của tổ chức thay vì chỉ tập trung vào công nghệ.<sup>[[10]](#references)</sup>
 
-## Tools
+## Công cụ
 
-There are several tools and software solutions available that can **assist** with the creation and management of threat models. Here are a few you might consider.
+Có nhiều công cụ và giải pháp phần mềm có thể **hỗ trợ** việc tạo và quản lý mô hình mối đe dọa. Dưới đây là một số lựa chọn bạn có thể cân nhắc.
 
 ### [SpiderSuite](https://github.com/3nock/SpiderSuite)
 
-SpiderSuite is a cross-platform web crawler for security professionals that supports attack-surface mapping, endpoint discovery, and web-application analysis.<sup>[[6]](#references)</sup>
+SpiderSuite là trình thu thập dữ liệu web đa nền tảng dành cho chuyên gia bảo mật, hỗ trợ lập bản đồ bề mặt tấn công, phát hiện endpoint và phân tích ứng dụng web.<sup>[[6]](#references)</sup>
 
-**Usage**
+**Cách sử dụng**
 
-1. Pick a URL and Crawl
+1. Chọn URL và Crawl
 
 <figure><img src="../images/threatmodel_spidersuite_1.png" alt=""><figcaption></figcaption></figure>
 
-2. View Graph
+2. Xem biểu đồ
 
 <figure><img src="../images/threatmodel_spidersuite_2.png" alt=""><figcaption></figcaption></figure>
 
 ### [OWASP Threat Dragon](https://github.com/OWASP/threat-dragon/releases)
 
-OWASP Threat Dragon is a free, open-source, cross-platform threat-modeling application for drawing diagrams, suggesting threats, and recording mitigations. It is available as web and desktop applications.<sup>[[7]](#references)</sup>
+OWASP Threat Dragon là ứng dụng mô hình hóa mối đe dọa miễn phí, mã nguồn mở và đa nền tảng, dùng để vẽ sơ đồ, đề xuất mối đe dọa và ghi lại các biện pháp giảm thiểu. Ứng dụng có phiên bản web và desktop.<sup>[[7]](#references)</sup>
 
-**Usage**
+**Cách sử dụng**
 
-1. Create New Project
+1. Tạo dự án mới
 
 <figure><img src="../images/create_new_project_1.jpg" alt=""><figcaption></figcaption></figure>
 
-Sometimes it could look like this:
+Đôi khi giao diện có thể trông như sau:
 
 <figure><img src="../images/1_threatmodel_create_project.jpg" alt=""><figcaption></figcaption></figure>
 
-2. Launch New Project
+2. Mở dự án mới
 
 <figure><img src="../images/launch_new_project_2.jpg" alt=""><figcaption></figcaption></figure>
 
-3. Save The New Project
+3. Lưu dự án mới
 
 <figure><img src="../images/save_new_project.jpg" alt=""><figcaption></figcaption></figure>
 
-4. Create your model
+4. Tạo mô hình
 
-You can use tools like SpiderSuite Crawler to give you inspiration, a basic model would look something like this
+Bạn có thể tham khảo các công cụ như SpiderSuite Crawler để lấy ý tưởng. Một mô hình cơ bản có thể trông như sau:
 
 <figure><img src="../images/0_basic_threat_model.jpg" alt=""><figcaption></figcaption></figure>
 
-Just a little bit of explanation about the entities:
+Giải thích ngắn gọn về các thực thể:
 
-- Process (The entity itself such as Webserver or web functionality)
-- Actor (A Person such as a Website Visitor, User or Administrator)
-- Data Flow Line (Indicator of Interaction)
-- Trust Boundary (Different network segments or scopes.)
-- Store (Things where data are stored at such as Databases)
+- Process (Thực thể như Webserver hoặc chức năng web)
+- Actor (Một người, chẳng hạn như khách truy cập website, người dùng hoặc quản trị viên)
+- Data Flow Line (Chỉ báo tương tác)
+- Trust Boundary (Các phân đoạn mạng hoặc phạm vi khác nhau.)
+- Store (Nơi lưu trữ dữ liệu, chẳng hạn như cơ sở dữ liệu)
 
-5. Create a Threat (Step 1)
+5. Tạo mối đe dọa (Bước 1)
 
-First you have to pick the layer you wish to add a threat to
+Trước tiên, bạn cần chọn lớp mà mình muốn thêm mối đe dọa vào
 
 <figure><img src="../images/3_threatmodel_chose-threat-layer.jpg" alt=""><figcaption></figcaption></figure>
 
-Now you can create the threat
+Bây giờ bạn có thể tạo mối đe dọa
 
 <figure><img src="../images/4_threatmodel_create-threat.jpg" alt=""><figcaption></figcaption></figure>
 
-Keep in mind that there is a difference between Actor Threats and Process Threats. If you would add a threat to an Actor then you will only be able to choose "Spoofing" and "Repudiation. However in our example we add threat to a Process entity so we will see this in the threat creation box:
+Hãy lưu ý rằng Actor Threats và Process Threats có sự khác biệt. Nếu thêm mối đe dọa vào một Actor, bạn chỉ có thể chọn "Spoofing" và "Repudiation". Tuy nhiên, trong ví dụ này, chúng ta thêm mối đe dọa vào một Process entity, vì vậy hộp tạo mối đe dọa sẽ hiển thị các lựa chọn sau:
 
 <figure><img src="../images/2_threatmodel_type-option.jpg" alt=""><figcaption></figcaption></figure>
 
-6. Done
+6. Hoàn tất
 
-Now your finished model should look something like this. And this is how you make a simple threat model with OWASP Threat Dragon.
+Mô hình hoàn chỉnh của bạn sẽ trông tương tự như sau. Đây là cách tạo mô hình mối đe dọa đơn giản bằng OWASP Threat Dragon.
 
 <figure><img src="../images/threat_model_finished.jpg" alt=""><figcaption></figcaption></figure>
 
 ### [Microsoft Threat Modeling Tool](https://aka.ms/threatmodelingtool)
 
-Microsoft's Threat Modeling Tool is a free downloadable tool for software design analysis. Its workflow creates a diagram, identifies threats, and supports mitigation and validation using the STRIDE approach.<sup>[[4]](#references)</sup>
+Microsoft Threat Modeling Tool là công cụ có thể tải xuống miễn phí để phân tích thiết kế phần mềm. Quy trình làm việc của công cụ tạo sơ đồ, xác định mối đe dọa và hỗ trợ giảm thiểu cũng như xác thực bằng phương pháp STRIDE.<sup>[[4]](#references)</sup>
 
 ## References
 
-- [1] [Threat Modeling Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Threat_Modeling_Cheat_Sheet.html)
-- [2] [Threat Modeling - The Penetration Testing Execution Standard](https://www.pentest-standard.org/index.php/Threat_Modeling)
-- [3] [Security fundamentals - OWASP Developer Guide](https://devguide.owasp.org/en/02-foundations/01-security-fundamentals/)
-- [4] [Getting Started with the Microsoft Threat Modeling Tool](https://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool-getting-started)
-- [5] [Threat Modeling for Drivers - Windows drivers](https://learn.microsoft.com/en-us/windows-hardware/drivers/driversecurity/threat-modeling-for-drivers)
+- [1] [Tài liệu hướng dẫn nhanh về mô hình hóa mối đe dọa](https://cheatsheetseries.owasp.org/cheatsheets/Threat_Modeling_Cheat_Sheet.html)
+- [2] [Mô hình hóa mối đe dọa - Tiêu chuẩn thực hiện Penetration Testing](https://www.pentest-standard.org/index.php/Threat_Modeling)
+- [3] [Các nguyên tắc cơ bản về bảo mật - Hướng dẫn dành cho nhà phát triển OWASP](https://devguide.owasp.org/en/02-foundations/01-security-fundamentals/)
+- [4] [Bắt đầu với Microsoft Threat Modeling Tool](https://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool-getting-started)
+- [5] [Mô hình hóa mối đe dọa cho driver - Windows drivers](https://learn.microsoft.com/en-us/windows-hardware/drivers/driversecurity/threat-modeling-for-drivers)
 - [6] [SpiderSuite](https://spidersuite.io/)
 - [7] [OWASP Threat Dragon](https://github.com/OWASP/threat-dragon)
-- [8] [PASTA Threat Modeling: The 7 Stages Explained](https://versprite.com/cybersecurity-listings/devsecops/pasta-threat-modeling/)
-- [9] [Trike v1 Methodology Document](https://trike.sourceforge.net/papers/Trike_v1_Methodology_Document-draft.pdf)
-- [10] [Threat Modeling: A Summary of Available Methods](https://www.sei.cmu.edu/documents/569/2018_019_001_524597.pdf)
-
+- [8] [Mô hình hóa mối đe dọa PASTA: Giải thích 7 giai đoạn](https://versprite.com/cybersecurity-listings/devsecops/pasta-threat-modeling/)
+- [9] [Tài liệu phương pháp luận Trike v1](https://trike.sourceforge.net/papers/Trike_v1_Methodology_Document-draft.pdf)
+- [10] [Mô hình hóa mối đe dọa: Tóm tắt các phương pháp hiện có](https://www.sei.cmu.edu/documents/569/2018_019_001_524597.pdf)
 {{#include ../banners/hacktricks-training.md}}

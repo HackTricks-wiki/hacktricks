@@ -1,16 +1,16 @@
-# Cloning a Website
+# Sao chép một website
 
 {{#include ../../banners/hacktricks-training.md}}
 
-For a phishing assessment sometimes it might be useful to completely **clone/dump a website**.
+Trong một đợt đánh giá phishing, đôi khi việc **clone/dump hoàn toàn một website** có thể hữu ích.
 
-Note that you can add also some payloads to the cloned website like a BeEF hook to "control" the tab of the user.
+Lưu ý rằng bạn cũng có thể thêm một số payload vào website đã clone, chẳng hạn như BeEF hook để "điều khiển" tab của người dùng.
 
-There are different tools you can use for this purpose:
+Có nhiều công cụ bạn có thể dùng cho mục đích này:
 
 ## wget
 
-The following command uses Wget's mirroring, page-requisite, link-conversion, and extension-adjustment modes, then serves the downloaded files from the current directory with Python's `http.server` module on port 8000.<sup>[[1]](#references)[[2]](#references)</sup>
+Lệnh sau sử dụng các chế độ mirror, page-requisite, link-conversion và extension-adjustment của Wget, sau đó phục vụ các tệp đã tải xuống từ thư mục hiện tại bằng mô-đun `http.server` của Python trên cổng 8000.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```bash
 wget --mirror --page-requisites --convert-links --adjust-extension <URL>
@@ -20,16 +20,16 @@ python3 -m http.server 8000
 
 ## goclone
 
-The goclone repository describes the utility as downloading a website to a local directory while preserving its relative link structure, and documents the `goclone <url>` invocation.<sup>[[3]](#references)</sup>
+Kho lưu trữ goclone mô tả tiện ích này là công cụ tải một website về thư mục cục bộ mà vẫn giữ nguyên cấu trúc liên kết tương đối, đồng thời hướng dẫn cách gọi `goclone <url>`.<sup>[[3]](#references)</sup>
 
 ```bash
 #https://github.com/imthaghost/goclone
 goclone <url>
 ```
 
-## Social Engineering Toolit
+## Bộ công cụ Social Engineering
 
-The Social-Engineer Toolkit (SET) repository identifies SET as an open-source penetration-testing framework for authorized social-engineering assessments.<sup>[[4]](#references)</sup>
+Kho lưu trữ Social-Engineer Toolkit (SET) mô tả SET là một framework kiểm thử xâm nhập mã nguồn mở dành cho các hoạt động đánh giá social engineering được ủy quyền.<sup>[[4]](#references)</sup>
 
 ```bash
 #https://github.com/trustedsec/social-engineer-toolkit
@@ -37,9 +37,8 @@ The Social-Engineer Toolkit (SET) repository identifies SET as an open-source pe
 
 ## References
 
-- [1] [GNU Wget Manual](https://www.gnu.org/software/wget/manual/wget.html)
-- [2] [Python `http.server` documentation](https://docs.python.org/3/library/http.server.html)
-- [3] [goclone repository](https://github.com/imthaghost/goclone)
-- [4] [Social-Engineer Toolkit repository](https://github.com/trustedsec/social-engineer-toolkit)
-
+- [1] [Sổ tay GNU Wget](https://www.gnu.org/software/wget/manual/wget.html)
+- [2] [Tài liệu Python `http.server`](https://docs.python.org/3/library/http.server.html)
+- [3] [Kho lưu trữ goclone](https://github.com/imthaghost/goclone)
+- [4] [Kho lưu trữ Social-Engineer Toolkit](https://github.com/trustedsec/social-engineer-toolkit)
 {{#include ../../banners/hacktricks-training.md}}

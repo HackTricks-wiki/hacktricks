@@ -2,207 +2,206 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-For protocol-specific work after signal identification, see [RFID/NFC, sub-GHz, infrared, BLE, and LoRaWAN testing](../radio-hacking/README.md).
+Để thực hiện công việc chuyên biệt theo giao thức sau khi nhận diện tín hiệu, xem [kiểm thử RFID/NFC, sub-GHz, hồng ngoại, BLE và LoRaWAN](../radio-hacking/README.md).
 
 ## SigDigger
 
-[**SigDigger**](https://github.com/BatchDrake/SigDigger) is a free digital-signal analyzer for GNU/Linux and macOS designed to extract information from unknown radio signals. It supports SDR devices through SoapySDR and provides real-time demodulation and analysis tools for FSK, PSK, ASK, analog video, bursty signals, and analog voice channels.<sup>[[1]](#references)</sup>
+[**SigDigger**](https://github.com/BatchDrake/SigDigger) là trình phân tích tín hiệu số miễn phí dành cho GNU/Linux và macOS, được thiết kế để trích xuất thông tin từ các tín hiệu vô tuyến chưa xác định. Công cụ hỗ trợ thiết bị SDR thông qua SoapySDR và cung cấp các công cụ giải điều chế, phân tích theo thời gian thực cho FSK, PSK, ASK, video analog, tín hiệu dạng burst và kênh thoại analog.<sup>[[1]](#references)</sup>
 
-### Basic Config
+### Cấu hình cơ bản
 
-After installing there are a few things that you could consider configuring.\
-In settings (the second tab button), select an **SDR device** or an input file, the frequency to tune, and the sample rate. A rate up to 2.56 Msps may be practical if the host supports it.
+Sau khi cài đặt, bạn có thể cân nhắc cấu hình một số mục.\
+Trong phần cài đặt (nút tab thứ hai), hãy chọn **thiết bị SDR** hoặc tệp đầu vào, tần số cần dò và tốc độ lấy mẫu. Tốc độ lên đến 2.56 Msps có thể phù hợp nếu máy chủ hỗ trợ.
 
-![SigDigger settings showing SDR device, input file, frequency and sample rate options](<../../images/image (245).png>)
+![Cài đặt SigDigger hiển thị các tùy chọn thiết bị SDR, tệp đầu vào, tần số và tốc độ lấy mẫu](<../../images/image (245).png>)
 
-In the GUI behaviour it's recommended to enable a few things if your PC support it:
+Trong phần hành vi của GUI, bạn nên bật một số mục nếu PC của bạn hỗ trợ:
 
-![SigDigger - Basic Config: In the GUI behaviour it's recommended to enable a few things if your PC support it](<../../images/image (472).png>)
+![SigDigger - Cấu hình cơ bản: Trong phần hành vi của GUI, bạn nên bật một số mục nếu PC của bạn hỗ trợ](<../../images/image (472).png>)
 
 > [!TIP]
-> If you realise that your PC is not capturing things try to disable OpenGL and lowering the sample rate.
+> Nếu bạn nhận thấy PC không thu được tín hiệu, hãy thử tắt OpenGL và giảm tốc độ lấy mẫu.
 
-### Uses
+### Cách sử dụng
 
-- Just to **capture some time of a signal and analyze it** just maintain the button "Push to capture" as long as you need.
+- Để **thu tín hiệu trong một khoảng thời gian và phân tích**, hãy giữ nút "Push to capture" trong khoảng thời gian cần thiết.
 
-![Basic Config - Uses: Just to capture some time of a signal and analyze it just maintain the button "Push to capture" as long as you need](<../../images/image (960).png>)
+![Cấu hình cơ bản - Cách sử dụng: Để thu tín hiệu trong một khoảng thời gian và phân tích, hãy giữ nút "Push to capture" trong khoảng thời gian cần thiết](<../../images/image (960).png>)
 
-- The **Tuner** of SigDigger helps to **capture better signals** (but it can also degrade them). Ideally start with 0 and keep **making it bigger until** you find the **noise** introduce is **bigger** than the **improvement of the signal** you need).
+- **Tuner** của SigDigger giúp **thu tín hiệu tốt hơn** (nhưng cũng có thể làm tín hiệu kém đi). Tốt nhất, hãy bắt đầu ở mức 0 rồi **tăng dần cho đến khi** thấy **nhiễu** gây ra **nhiều hơn** mức **cải thiện tín hiệu** bạn cần.
 
-![SigDigger tuner control adjusted to improve the captured radio signal](<../../images/image (1099).png>)
+![Điều khiển tuner của SigDigger được điều chỉnh để cải thiện tín hiệu vô tuyến thu được](<../../images/image (1099).png>)
 
-### Synchronize with radio channel
+### Đồng bộ hóa với kênh vô tuyến
 
-With [**SigDigger** ](https://github.com/BatchDrake/SigDigger)synchronize with the channel you want to hear, configure "Baseband audio preview" option, configure the bandwith to get all the info being sent and then set the Tuner to the level before the noise is really starting to increase:<sup>[[1]](#references)</sup>
+Với [**SigDigger** ](https://github.com/BatchDrake/SigDigger), hãy đồng bộ hóa với kênh bạn muốn nghe, cấu hình tùy chọn "Baseband audio preview", đặt băng thông để thu toàn bộ thông tin đang được truyền, rồi điều chỉnh Tuner đến mức ngay trước khi nhiễu bắt đầu tăng đáng kể:<sup>[[1]](#references)</sup>
 
-![SigDigger synchronized radio channel with baseband audio preview and bandwidth configured](<../../images/image (585).png>)
+![Kênh vô tuyến được đồng bộ hóa trong SigDigger với tùy chọn xem trước âm thanh baseband và băng thông đã cấu hình](<../../images/image (585).png>)
 
-## Interesting tricks
+## Một số thủ thuật hữu ích
 
-- When a device is sending bursts of information, usually the **first part is going to be a preamble** so you **don't** need to **worry** if you **don't find information** in there **or if there are some errors** there.
-- In frames of information you usually should **find different frames well aligned between them**:
+- Khi thiết bị gửi các burst thông tin, **phần đầu tiên thường là preamble**, vì vậy bạn **không cần lo lắng** nếu **không tìm thấy thông tin** ở đó **hoặc nếu có một vài lỗi**.
+- Trong các frame thông tin, bạn thường sẽ **thấy các frame khác nhau được căn chỉnh với nhau**:
 
-![Synchronize with radio channel - Interesting tricks: In frames of information you usually should find different frames well aligned between them](<../../images/image (1076).png>)
+![Đồng bộ hóa với kênh vô tuyến - Một số thủ thuật hữu ích: Trong các frame thông tin, bạn thường sẽ thấy các frame khác nhau được căn chỉnh với nhau](<../../images/image (1076).png>)
 
-![Synchronize with radio channel - Interesting tricks: In frames of information you usually should find different frames well aligned between them](<../../images/image (597).png>)
+![Đồng bộ hóa với kênh vô tuyến - Một số thủ thuật hữu ích: Trong các frame thông tin, bạn thường sẽ thấy các frame khác nhau được căn chỉnh với nhau](<../../images/image (597).png>)
 
-- **After recovering the level transitions, you may need to decode them.** For Manchester encoding, one transition direction represents `0` and the opposite direction represents `1`; the exact polarity depends on the convention in use.
-- A preamble may contain a run of the same sampled level even when the payload uses Manchester encoding, so identify the frame boundary before decoding.
+- **Sau khi khôi phục các chuyển mức, bạn có thể cần giải mã chúng.** Với mã hóa Manchester, một hướng chuyển mức biểu thị `0` và hướng ngược lại biểu thị `1`; cực tính cụ thể tùy thuộc vào quy ước được sử dụng.
+- Preamble có thể chứa một chuỗi các mức lấy mẫu giống nhau ngay cả khi payload sử dụng mã hóa Manchester, vì vậy hãy xác định ranh giới frame trước khi giải mã.
 
-### Uncovering modulation type with IQ
+### Nhận diện kiểu điều chế bằng IQ
 
-There are 3 ways to store information in signals: Modulating the **amplitude**, **frequency** or **phase**.\
-If you are checking a signal there are different ways to try to figure out what is being used to store information (fin more ways below) but a good one is to check the IQ graph.
+Có 3 cách lưu trữ thông tin trong tín hiệu: điều chế **biên độ**, **tần số** hoặc **pha**.\
+Khi kiểm tra tín hiệu, có nhiều cách để xác định kiểu điều chế được sử dụng (xem thêm các cách khác bên dưới), nhưng một cách hiệu quả là kiểm tra biểu đồ IQ.
 
-![SigDigger IQ graph used to identify whether a signal uses amplitude, frequency or phase modulation](<../../images/image (788).png>)
+![Biểu đồ IQ của SigDigger dùng để xác định tín hiệu có điều chế biên độ, tần số hay pha](<../../images/image (788).png>)
 
-- **Detecting AM**: If in the IQ graph appears for example **2 circles** (probably one in 0 and other in a different amplitude), it could means that this is an AM signal. This is because in the IQ graph the distance between the 0 and the circle is the amplitude of the signal, so it's easy to visualize different amplitudes being used.
-- **Detecting PM**: Like in the previous image, if you find small circles not related between them it probably means that a phase modulation is used. This is because in the IQ graph, the angle between the point and the 0,0 is the phase of the signal, so that means that 4 different phases are used.
-  - Note that if the information is hidden in the fact that a phase is changed and not in the phase itself, you won't see different phases clearly differentiated.
-- **Detecting FM**: IQ doesn't have a field to identify frequencies (distance to centre is amplitude and angle is phase).\
-  Therefore, to identify FM, you should **only see basically a circle** in this graph.\
-  Moreover, a frequency offset changes the rotation rate around the IQ circle. In SigDigger, a change in rotation speed or direction can therefore indicate FM.
+- **Phát hiện AM**: Nếu biểu đồ IQ hiển thị, chẳng hạn, **2 vòng tròn** (có thể một vòng ở mức 0 và vòng kia ở biên độ khác), thì đây có thể là tín hiệu AM. Trong biểu đồ IQ, khoảng cách từ điểm 0 đến vòng tròn là biên độ tín hiệu, nên bạn có thể dễ dàng quan sát các biên độ khác nhau được sử dụng.
+- **Phát hiện PM**: Như trong hình trước, nếu bạn thấy các vòng tròn nhỏ không liên quan với nhau thì có thể tín hiệu sử dụng điều chế pha. Trong biểu đồ IQ, góc giữa điểm và tọa độ 0,0 là pha của tín hiệu, nghĩa là có 4 pha khác nhau được sử dụng.
+  - Lưu ý rằng nếu thông tin được mã hóa bằng sự thay đổi pha chứ không phải giá trị pha, bạn sẽ không thấy các pha khác nhau được phân biệt rõ ràng.
+- **Phát hiện FM**: IQ không có trường để xác định tần số (khoảng cách đến tâm biểu thị biên độ, còn góc biểu thị pha).\
+  Vì vậy, để nhận diện FM, về cơ bản bạn **chỉ nên thấy một vòng tròn** trên biểu đồ này.\
+  Ngoài ra, độ lệch tần số làm thay đổi tốc độ quay quanh vòng tròn IQ. Do đó, trong SigDigger, thay đổi về tốc độ hoặc hướng quay có thể là dấu hiệu của FM.
 
-## AM Example
+## Ví dụ AM
 
 {{#file}}
 sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw
 {{#endfile}}
 
-### Uncovering AM
+### Nhận diện AM
 
-#### Checking the envelope
+#### Kiểm tra đường bao
 
-When inspecting AM data with [**SigDigger**](https://github.com/BatchDrake/SigDigger), the signal **envelope** can reveal distinct amplitude levels. The sample signal sends information as amplitude-modulated pulses; one pulse looks like this:<sup>[[1]](#references)</sup>
+Khi kiểm tra dữ liệu AM bằng [**SigDigger**](https://github.com/BatchDrake/SigDigger), **đường bao** của tín hiệu có thể cho thấy các mức biên độ khác biệt. Tín hiệu mẫu gửi thông tin dưới dạng các xung điều chế biên độ; một xung có dạng như sau:<sup>[[1]](#references)</sup>
 
-![SigDigger AM signal envelope with clear pulse amplitude levels](<../../images/image (590).png>)
+![Đường bao tín hiệu AM trong SigDigger với các mức biên độ xung rõ ràng](<../../images/image (590).png>)
 
-And this is how part of the symbol looks like with the waveform:
+Đây là dạng sóng của một phần ký hiệu:
 
-![Uncovering AM - Checking the envelope: And this is how part of the symbol looks like with the waveform](<../../images/image (734).png>)
+![Nhận diện AM - Kiểm tra đường bao: Dạng sóng của một phần ký hiệu](<../../images/image (734).png>)
 
-#### Checking the Histogram
+#### Kiểm tra biểu đồ histogram
 
-You can **select the whole signal** where information is located, select **Amplitude** mode and **Selection** and click on **Histogram.** You can observer that 2 clear levels are only found
+Bạn có thể **chọn toàn bộ tín hiệu** chứa thông tin, chọn chế độ **Amplitude** và **Selection**, rồi nhấp vào **Histogram**. Bạn sẽ thấy chỉ có 2 mức rõ ràng.
 
-![SigDigger amplitude histogram showing two clear levels for the selected AM signal](<../../images/image (264).png>)
+![Biểu đồ histogram biên độ trong SigDigger hiển thị hai mức rõ ràng của tín hiệu AM đã chọn](<../../images/image (264).png>)
 
-For example, if you select Frequency instead of Amplitude in this AM signal you find just 1 frequency (no way information modulated in frequency is just using 1 freq).
+Ví dụ, nếu chọn Frequency thay vì Amplitude cho tín hiệu AM này, bạn sẽ chỉ thấy 1 tần số (không thể điều chế thông tin theo tần số mà chỉ dùng 1 tần số).
 
-![SigDigger frequency histogram for the AM signal showing one frequency](<../../images/image (732).png>)
+![Biểu đồ histogram tần số trong SigDigger hiển thị một tần số của tín hiệu AM](<../../images/image (732).png>)
 
-If you find a lot of frequencies potentially this won't be a FM, probably the signal frequency was just modified because of the channel.
+Nếu thấy nhiều tần số, có thể đây không phải FM; tần số tín hiệu có thể chỉ bị thay đổi do kênh truyền.
 
-#### With IQ
+#### Với IQ
 
-In this example you can see how there is a **big circle** but also **a lot of points in the centre.**
+Trong ví dụ này, bạn có thể thấy **một vòng tròn lớn** cùng **nhiều điểm ở tâm**.
 
-![Checking the Histogram - With IQ: In this example you can see how there is a big circle but also a lot of points in the centre](<../../images/image (222).png>)
+![Kiểm tra biểu đồ histogram - Với IQ: Ví dụ này cho thấy một vòng tròn lớn cùng nhiều điểm ở tâm](<../../images/image (222).png>)
 
-### Get Symbol Rate
+### Tìm tốc độ ký hiệu
 
-#### With one symbol
+#### Với một ký hiệu
 
-Select the smallest interval that clearly contains one symbol and check **Selection freq**. In this example it is 1.013 kHz, approximately 1 kHz.
+Chọn khoảng nhỏ nhất chứa rõ ràng một ký hiệu, rồi kiểm tra **Selection freq**. Trong ví dụ này, giá trị là 1.013 kHz, xấp xỉ 1 kHz.
 
-![Get Symbol Rate - With one symbol: Select the smallest symbol you can find (so you are sure it is just one) and check the "Selection freq". In this case it would be 1.013 kHz (so 1 kHz).](<../../images/image (78).png>)
+![Tìm tốc độ ký hiệu - Với một ký hiệu: Chọn khoảng nhỏ nhất chứa rõ ràng một ký hiệu, rồi kiểm tra "Selection freq". Trong trường hợp này, giá trị là 1.013 kHz (tức 1 kHz).](<../../images/image (78).png>)
 
-#### With a group of symbols
+#### Với một nhóm ký hiệu
 
-You can also indicate the number of symbols you are going to select and SigDigger will calculate the frequency of 1 symbol (the more symbols selected the better probably). In this scenario I selected 10 symbols and the "Selection freq" is 1.004 Khz:
+Bạn cũng có thể chỉ định số lượng ký hiệu cần chọn; SigDigger sẽ tính tần số của 1 ký hiệu (có lẽ chọn càng nhiều ký hiệu thì kết quả càng chính xác). Trong ví dụ này, tôi chọn 10 ký hiệu và "Selection freq" là 1.004 Khz:
 
-![SigDigger symbol-rate calculation using a selected group of ten symbols](<../../images/image (1008).png>)
+![Tính tốc độ ký hiệu trong SigDigger bằng một nhóm gồm mười ký hiệu được chọn](<../../images/image (1008).png>)
 
-### Get Bits
+### Lấy bit
 
-After identifying AM and estimating the **symbol rate**, select the signal region, configure amplitude sampling and the decision levels, choose **Gardner clock recovery**, and press **Sample**:
+Sau khi nhận diện AM và ước tính **tốc độ ký hiệu**, hãy chọn vùng tín hiệu, cấu hình lấy mẫu biên độ và các mức quyết định, chọn **Gardner clock recovery**, rồi nhấn **Sample**:
 
-![SigDigger Get Bits panel configured for AM sampling, symbol rate and Gardner clock recovery](<../../images/image (965).png>)
+![Bảng Get Bits trong SigDigger được cấu hình để lấy mẫu AM, đặt tốc độ ký hiệu và khôi phục xung nhịp Gardner](<../../images/image (965).png>)
 
-- **Sync to selection intervals** means that if you previously selected intervals to find the symbol rate, that symbol rate will be used.
-- **Manual** means that the indicated symbol rate is going to be used
-- In **Fixed interval selection** you indicate the number of intervals that should be selected and it calculates the symbol rate from it
-- **Gardner clock recovery** is a useful default, but it still needs an approximate symbol rate.
+- **Sync to selection intervals** nghĩa là nếu trước đó bạn đã chọn các khoảng để tìm tốc độ ký hiệu thì tốc độ đó sẽ được sử dụng.
+- **Manual** nghĩa là sử dụng tốc độ ký hiệu đã nhập.
+- Trong **Fixed interval selection**, bạn nhập số khoảng cần chọn và SigDigger sẽ tính tốc độ ký hiệu từ đó.
+- **Gardner clock recovery** là lựa chọn mặc định hữu ích, nhưng vẫn cần tốc độ ký hiệu ước tính.
 
-Pressing sample this appears:
+Sau khi nhấn Sample, màn hình sẽ hiển thị như sau:
 
-![With a group of symbols - Get Bits: Pressing sample this appears](<../../images/image (644).png>)
+![Với một nhóm ký hiệu - Lấy bit: Màn hình hiển thị sau khi nhấn Sample](<../../images/image (644).png>)
 
-Now, to make SigDigger understand **where is the range** of the level carrying information you need to click on the **lower level** and maintain clicked until the biggest level:
+Để SigDigger xác định **khoảng mức** mang thông tin, hãy nhấp vào **mức thấp hơn** rồi giữ chuột và kéo đến mức cao nhất:
 
-![SigDigger level-range selection from the lower amplitude level to the upper level](<../../images/image (439).png>)
+![Chọn khoảng mức trong SigDigger từ mức biên độ thấp đến mức cao](<../../images/image (439).png>)
 
-If there would have been for example **4 different levels of amplitude**, you should have need to configure the **Bits per symbol to 2** and select from the smallest to the biggest.
+Nếu có, chẳng hạn, **4 mức biên độ khác nhau**, bạn cần đặt **Bits per symbol thành 2** rồi chọn từ mức thấp nhất đến mức cao nhất.
 
-Finally **increasing** the **Zoom** and **changing the Row size** you can see the bits (and you can select all and copy to get all the bits):
+Cuối cùng, bằng cách **tăng** **Zoom** và **thay đổi kích thước hàng**, bạn có thể xem các bit (và có thể chọn tất cả rồi sao chép để lấy toàn bộ bit):
 
-![With a group of symbols - Get Bits: Finally increasing the Zoom and changing the Row size you can see the bits (and you can select all and copy to get all the bits)](<../../images/image (276).png>)
+![Với một nhóm ký hiệu - Lấy bit: Cuối cùng, bằng cách tăng Zoom và thay đổi kích thước hàng, bạn có thể xem các bit (và có thể chọn tất cả rồi sao chép để lấy toàn bộ bit)](<../../images/image (276).png>)
 
-If the signal has more than 1 bit per symbol (for example 2), SigDigger has **no way to know which symbol is** 00, 01, 10, 11, so it will use different **grey scales** the represent each (and if you copy the bits it will use **numbers from 0 to 3**, you will need to treat them).
+Nếu tín hiệu có nhiều hơn 1 bit trên mỗi ký hiệu (ví dụ: 2), SigDigger **không thể biết ký hiệu nào là** 00, 01, 10 hay 11. Vì vậy, công cụ sẽ dùng các **mức xám** khác nhau để biểu thị từng ký hiệu (và khi sao chép bit, công cụ sẽ dùng **các số từ 0 đến 3**; bạn sẽ cần xử lý chúng).
 
-For line encodings such as **Manchester**, translate each valid transition pair (`01` or `10`) into a data bit according to the convention used by the protocol.
+Với các kiểu mã hóa đường truyền như **Manchester**, hãy chuyển từng cặp chuyển mức hợp lệ (`01` hoặc `10`) thành một bit dữ liệu theo quy ước được sử dụng trong giao thức.
 
-## FM Example
+## Ví dụ FM
 
 {{#file}}
 sigdigger_20220308_170858Z_2560000_433500000_float32_iq.raw
 {{#endfile}}
 
-### Uncovering FM
+### Nhận diện FM
 
-#### Checking the frequencies and waveform
+#### Kiểm tra tần số và dạng sóng
 
-Signal example sending information modulated in FM:
+Ví dụ về tín hiệu truyền thông tin bằng điều chế FM:
 
-![Uncovering FM - Checking the frequencies and waveform: Signal example sending information modulated in FM](<../../images/image (725).png>)
+![Nhận diện FM - Kiểm tra tần số và dạng sóng: Ví dụ về tín hiệu truyền thông tin bằng điều chế FM](<../../images/image (725).png>)
 
-The spectrum clearly shows **two frequencies**, although they may be difficult to distinguish in the time-domain waveform:
+Phổ tín hiệu cho thấy rõ **hai tần số**, dù có thể khó phân biệt chúng trên dạng sóng miền thời gian:
 
-![SigDigger FM waveform where the two frequencies are difficult to distinguish directly](<../../images/image (717).png>)
+![Dạng sóng FM trong SigDigger, trong đó khó phân biệt trực tiếp hai tần số](<../../images/image (717).png>)
 
-This happens because the capture is centered between both frequencies, so their frequency offsets are approximately opposite:
+Điều này xảy ra vì tín hiệu thu được được căn giữa giữa hai tần số, nên độ lệch tần số của chúng xấp xỉ đối nhau:
 
-![SigDigger FM capture showing the two frequencies as approximate negatives of each other](<../../images/image (942).png>)
+![Tín hiệu FM thu được trong SigDigger hiển thị hai tần số với độ lệch xấp xỉ đối nhau](<../../images/image (942).png>)
 
-If the synchronized frequency is **closer to one frequency than to the other** you can easily see the 2 different frequencies:
+Nếu tần số đồng bộ **gần một tần số hơn tần số còn lại**, bạn có thể dễ dàng thấy 2 tần số khác nhau:
 
-![Uncovering FM - Checking the frequencies and waveform: If the synchronized frequency is closer to one frequency than to the other you can easily see the 2 different frequencies](<../../images/image (422).png>)
+![Nhận diện FM - Kiểm tra tần số và dạng sóng: Nếu tần số đồng bộ gần một tần số hơn tần số còn lại, bạn có thể dễ dàng thấy 2 tần số khác nhau](<../../images/image (422).png>)
 
-![Uncovering FM - Checking the frequencies and waveform: If the synchronized frequency is closer to one frequency than to the other you can easily see the 2 different frequencies](<../../images/image (488).png>)
+![Nhận diện FM - Kiểm tra tần số và dạng sóng: Nếu tần số đồng bộ gần một tần số hơn tần số còn lại, bạn có thể dễ dàng thấy 2 tần số khác nhau](<../../images/image (488).png>)
 
-#### Checking the histogram
+#### Kiểm tra biểu đồ histogram
 
-Checking the frequency histogram of the signal with information you can easily see 2 different signals:
+Kiểm tra biểu đồ histogram tần số của tín hiệu chứa thông tin sẽ giúp bạn dễ dàng thấy 2 tín hiệu khác nhau:
 
-![Checking the frequencies and waveform - Checking the histogram: Checking the frequency histogram of the signal with information you can easily see 2 different signals](<../../images/image (871).png>)
+![Kiểm tra tần số và dạng sóng - Kiểm tra biểu đồ histogram: Kiểm tra biểu đồ histogram tần số của tín hiệu chứa thông tin sẽ giúp bạn dễ dàng thấy 2 tín hiệu khác nhau](<../../images/image (871).png>)
 
-In this case if you check the **Amplitude histogram** you will find **only one amplitude**, so it **cannot be AM** (if you find a lot of amplitudes it might be because the signal has been losing power along the channel):
+Trong trường hợp này, nếu kiểm tra **biểu đồ histogram biên độ**, bạn sẽ chỉ thấy **một biên độ**, vì vậy tín hiệu **không thể là AM** (nếu thấy nhiều biên độ, có thể tín hiệu đã bị suy hao công suất trên kênh truyền):
 
-![SigDigger amplitude histogram for FM signal showing a single amplitude level](<../../images/image (817).png>)
+![Biểu đồ histogram biên độ của tín hiệu FM trong SigDigger hiển thị một mức biên độ duy nhất](<../../images/image (817).png>)
 
-And this is would be phase histogram (which makes very clear the signal is not modulated in phase):
+Đây là biểu đồ histogram pha (cho thấy rõ tín hiệu không được điều chế theo pha):
 
-![Checking the frequencies and waveform - Checking the histogram: And this is would be phase histogram (which makes very clear the signal is not modulated in phase)](<../../images/image (996).png>)
+![Kiểm tra tần số và dạng sóng - Kiểm tra biểu đồ histogram: Đây là biểu đồ histogram pha, cho thấy rõ tín hiệu không được điều chế theo pha](<../../images/image (996).png>)
 
-#### With IQ
+#### Với IQ
 
-IQ doesn't have a field to identify frequencies (distance to centre is amplitude and angle is phase).\
-Therefore, to identify FM, you should **only see basically a circle** in this graph.\
-Moreover, a frequency offset changes the rotation rate around the IQ circle. In SigDigger, a change in rotation speed or direction can therefore indicate FM:
+IQ không có trường để xác định tần số (khoảng cách đến tâm biểu thị biên độ, còn góc biểu thị pha).\
+Vì vậy, để nhận diện FM, về cơ bản bạn **chỉ nên thấy một vòng tròn** trên biểu đồ này.\
+Ngoài ra, độ lệch tần số làm thay đổi tốc độ quay quanh vòng tròn IQ. Do đó, trong SigDigger, thay đổi về tốc độ hoặc hướng quay có thể là dấu hiệu của FM:
 
-![SigDigger IQ graph where FM appears as acceleration changes around the circle](<../../images/image (81).png>)
+![Biểu đồ IQ trong SigDigger, trong đó FM xuất hiện dưới dạng thay đổi gia tốc quanh vòng tròn](<../../images/image (81).png>)
 
-### Get Symbol Rate
+### Tìm tốc độ ký hiệu
 
-You can use the **same technique as the one used in the AM example** to get the symbol rate once you have found the frequencies carrying symbols.
+Sau khi tìm thấy các tần số mang ký hiệu, bạn có thể dùng **cùng phương pháp như trong ví dụ AM** để tìm tốc độ ký hiệu.
 
-### Get Bits
+### Lấy bit
 
-You can use the **same technique as the one used in the AM example** to get the bits once you have **found the signal is modulated in frequency** and the **symbol rate**.
+Sau khi **xác định tín hiệu được điều chế theo tần số** và tìm được **tốc độ ký hiệu**, bạn có thể dùng **cùng phương pháp như trong ví dụ AM** để lấy bit.
 
 ## References
 
-- [1] [SigDigger - Free digital signal analyzer for GNU/Linux and macOS](https://github.com/BatchDrake/SigDigger)
-
+- [1] [SigDigger - Trình phân tích tín hiệu số miễn phí cho GNU/Linux và macOS](https://github.com/BatchDrake/SigDigger)
 {{#include ../../banners/hacktricks-training.md}}

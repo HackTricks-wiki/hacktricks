@@ -1,62 +1,62 @@
-# Detecting Phishing
+# Phát hiện Phishing
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Introduction
+## Giới thiệu
 
-To detect a phishing attempt it's important to **understand the phishing techniques that are being used nowadays**. On the parent page of this post, you can find this information, so if you aren't aware of which techniques are being used today I recommend you to go to the parent page and read at least that section.
+Để phát hiện một cuộc tấn công phishing, điều quan trọng là **hiểu các kỹ thuật phishing đang được sử dụng hiện nay**. Bạn có thể tìm thấy thông tin này trên trang cha của bài viết này. Vì vậy, nếu bạn chưa biết những kỹ thuật nào đang được sử dụng ngày nay, tôi khuyên bạn nên truy cập trang cha và đọc ít nhất phần đó.
 
-This post is based on the idea that the **attackers will try to somehow mimic or use the victim's domain name**. If your domain is called `example.com` and you are phished using a completely different domain name for some reason like `youwonthelottery.com`, these techniques aren't going to uncover it.
+Bài viết này dựa trên ý tưởng rằng **kẻ tấn công sẽ cố gắng bằng cách nào đó bắt chước hoặc sử dụng tên miền của nạn nhân**. Nếu tên miền của bạn là `example.com` và vì lý do nào đó bạn bị phishing bằng một tên miền hoàn toàn khác như `youwonthelottery.com`, thì các kỹ thuật này sẽ không phát hiện được.
 
-## Domain name variations
+## Biến thể tên miền
 
-It's kind of **easy** to **uncover** those **phishing** attempts that will use a **similar domain** name inside the email.\
-It's enough to **generate a list of the most probable phishing names** that an attacker may use and **check** if it's **registered** or just check if there is any **IP** using it.
+Việc **phát hiện** những cuộc tấn công **phishing** sử dụng tên miền **tương tự** trong email khá **dễ dàng**.\
+Chỉ cần **tạo danh sách những tên miền phishing có khả năng được kẻ tấn công sử dụng cao nhất**, rồi **kiểm tra** xem chúng đã được **đăng ký** hay chưa, hoặc kiểm tra xem có **IP** nào đang sử dụng chúng không.
 
-### Finding suspicious domains
+### Tìm các tên miền đáng ngờ
 
-For this purpose, you can use any of the following tools. Both resolve candidate domains to check whether they are in use.<sup>[[3]](#references)[[4]](#references)</sup>
+Bạn có thể dùng bất kỳ công cụ nào sau đây cho mục đích này. Cả hai đều phân giải các tên miền ứng viên để kiểm tra xem chúng có đang được sử dụng hay không.<sup>[[3]](#references)[[4]](#references)</sup>
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
-Tip: If you generate a candidate list, also feed it into your DNS resolver logs to detect **NXDOMAIN lookups from inside your org** (users trying to reach a typo before the attacker actually registers it). Sinkhole or pre-block these domains if policy allows.
+Mẹo: Nếu tạo danh sách tên miền ứng viên, hãy đưa danh sách đó vào cả log DNS resolver để phát hiện **các truy vấn NXDOMAIN từ bên trong tổ chức** (người dùng cố truy cập một tên miền gõ sai trước khi kẻ tấn công thực sự đăng ký nó). Hãy sinkhole hoặc chặn trước các tên miền này nếu chính sách cho phép.
 
 ### Bitflipping
 
-**For a short explanation, see the parent page; for primary Windows.com bitsquatting research, see [Remy Hax's write-up](https://remyhax.xyz/posts/bitsquatting-windows/) and [BleepingComputer's report](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)**.<sup>[[1]](#references)[[2]](#references)</sup>
+**Để xem giải thích ngắn gọn, hãy truy cập trang cha; để đọc nghiên cứu gốc về bitsquatting trên Windows.com, xem [bài viết của Remy Hax](https://remyhax.xyz/posts/bitsquatting-windows/) và [báo cáo của BleepingComputer](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)**.<sup>[[1]](#references)[[2]](#references)</sup>
 
-For example, a 1 bit modification in the domain microsoft.com can transform it into _windnws.com._\
-**Attackers may register as many bit-flipping domains as possible related to the victim to redirect legitimate users to their infrastructure**.<sup>[[1]](#references)[[2]](#references)</sup>
+Ví dụ, thay đổi 1 bit trong tên miền microsoft.com có thể biến nó thành _windnws.com._\
+**Kẻ tấn công có thể đăng ký càng nhiều tên miền bit-flipping liên quan đến nạn nhân càng tốt để chuyển hướng người dùng hợp pháp đến hạ tầng của chúng**.<sup>[[1]](#references)[[2]](#references)</sup>
 
-**All possible bit-flipping domain names should be also monitored.**
+**Cũng cần giám sát tất cả các tên miền bit-flipping có thể có.**
 
-If you also need to consider homoglyph/IDN lookalikes (e.g., mixing Latin/Cyrillic characters), check:
+Nếu bạn cũng cần xem xét các tên miền giả mạo bằng homoglyph/IDN (ví dụ: trộn ký tự Latin/Cyrillic), hãy xem:
 
 {{#ref}}
 homograph-attacks.md
 {{#endref}}
 
-### Basic checks
+### Kiểm tra cơ bản
 
-Once you have a list of potential suspicious domain names you should **check** them (mainly the ports HTTP and HTTPS) to **see if they are using some login form similar** to someone of the victim's domain.\
-You could also check port 3333 to see if it's open and running an instance of `gophish`.\
-It's also interesting to know **how old each discovered suspicions domain is**, the younger it's the riskier it is.\
-You can also get **screenshots** of the HTTP and/or HTTPS suspicious web page to see if it's suspicious and in that case **access it to take a deeper look**.
+Sau khi có danh sách tên miền đáng ngờ tiềm năng, bạn nên **kiểm tra** chúng (chủ yếu là các cổng HTTP và HTTPS) để **xem chúng có đang sử dụng biểu mẫu đăng nhập tương tự** biểu mẫu của một tên miền thuộc nạn nhân hay không.\
+Bạn cũng có thể kiểm tra cổng 3333 để xem cổng này có đang mở và chạy một instance `gophish` hay không.\
+Việc biết **tuổi của từng tên miền đáng ngờ được phát hiện** cũng rất hữu ích; tên miền càng mới thì rủi ro càng cao.\
+Bạn cũng có thể chụp **ảnh màn hình** trang web đáng ngờ qua HTTP và/hoặc HTTPS để xem trang đó có đáng ngờ không, rồi trong trường hợp đó **truy cập để kiểm tra kỹ hơn**.
 
-### Advanced checks
+### Kiểm tra nâng cao
 
-If you want to go one step further I would recommend you to **monitor those suspicious domains and search for more** once in a while (every day? it only takes a few seconds/minutes). You should also **check** the open **ports** of the related IPs and **search for instances of `gophish` or similar tools** (yes, attackers also make mistakes) and **monitor the HTTP and HTTPS web pages of the suspicious domains and subdomains** to see if they have copied any login form from the victim's web pages.\
-In order to **automate this** I would recommend having a list of login forms of the victim's domains, spider the suspicious web pages and comparing each login form found inside the suspicious domains with each login form of the victim's domain using something like `ssdeep`.\
-If you have located the login forms of the suspicious domains, you can try to **send junk credentials** and **check if it's redirecting you to the victim's domain**.
+Nếu muốn tiến thêm một bước, tôi khuyên bạn nên **giám sát các tên miền đáng ngờ đó và định kỳ tìm thêm tên miền mới** (mỗi ngày chăng? việc này chỉ mất vài giây/phút). Bạn cũng nên **kiểm tra** các **cổng** đang mở của những IP liên quan, **tìm các instance `gophish` hoặc công cụ tương tự** (đúng vậy, kẻ tấn công cũng mắc lỗi), đồng thời **giám sát các trang web HTTP và HTTPS của những tên miền và tên miền phụ đáng ngờ** để xem chúng có sao chép biểu mẫu đăng nhập từ các trang web của nạn nhân hay không.\
+Để **tự động hóa việc này**, tôi khuyên bạn nên lập danh sách các biểu mẫu đăng nhập trên những tên miền của nạn nhân, crawl các trang web đáng ngờ, rồi so sánh từng biểu mẫu đăng nhập tìm thấy trên các tên miền đáng ngờ với từng biểu mẫu đăng nhập trên tên miền của nạn nhân bằng công cụ như `ssdeep`.\
+Nếu đã xác định được các biểu mẫu đăng nhập trên những tên miền đáng ngờ, bạn có thể thử **gửi thông tin đăng nhập rác** và **kiểm tra xem chúng có chuyển hướng bạn đến tên miền của nạn nhân hay không**.
 
 ---
 
-### Hunting by favicon and web fingerprints (Shodan/Censys)
+### Truy tìm bằng favicon và dấu vân tay web (Shodan/Censys)
 
-Many phishing kits reuse favicons from the brand they impersonate. Shodan hashes its base64-encoded favicon data with MurmurHash3, while Censys exposes its own favicon hash fields.<sup>[[5]](#references)[[6]](#references)[[7]](#references)</sup> You can generate a Shodan-compatible hash and pivot on it:
+Nhiều phishing kit sử dụng lại favicon của thương hiệu mà chúng giả mạo. Shodan băm dữ liệu favicon được mã hóa base64 bằng MurmurHash3, trong khi Censys cung cấp các trường hash favicon riêng.<sup>[[5]](#references)[[6]](#references)[[7]](#references)</sup> Bạn có thể tạo hash tương thích với Shodan rồi pivot dựa trên hash đó:
 
-Python example (mmh3):
+Ví dụ Python (mmh3):
 
 ```python
 import base64, requests, mmh3
@@ -65,23 +65,23 @@ b64 = base64.encodebytes(requests.get(url, timeout=10).content)
 print(mmh3.hash(b64))  # e.g., 309020573
 ```
 
-- Query Shodan: `http.favicon.hash:309020573`
-- With tooling: look at community tools like favfreak to calculate hashes and generate Shodan dorks.<sup>[[16]](#references)</sup>
+- Truy vấn Shodan: `http.favicon.hash:309020573`
+- Dùng công cụ: tham khảo các công cụ cộng đồng như favfreak để tính hash và tạo Shodan dork.<sup>[[16]](#references)</sup>
 
-Notes
-- Favicons are reused; treat matches as leads and validate content and certs before acting.
-- Combine with domain-age and keyword heuristics for better precision.
+Lưu ý
+- Favicon được dùng lại; hãy xem các kết quả trùng khớp là manh mối và xác thực nội dung cũng như chứng chỉ trước khi hành động.
+- Kết hợp với heuristic về độ tuổi domain và từ khóa để tăng độ chính xác.
 
-### URL telemetry hunting (urlscan.io)
+### Săn tìm telemetry URL (urlscan.io)
 
-`urlscan.io` stores historical screenshots, DOM, requests and TLS metadata of submitted URLs. You can hunt for brand abuse and clones:<sup>[[8]](#references)</sup>
+`urlscan.io` lưu trữ ảnh chụp màn hình, DOM, request và metadata TLS lịch sử của các URL đã gửi. Bạn có thể săn tìm hành vi lạm dụng thương hiệu và các bản sao:<sup>[[8]](#references)</sup>
 
-Example queries (UI or API):
-- Find lookalikes excluding your legit domains: `page.domain:(/.*yourbrand.*/ AND NOT yourbrand.com AND NOT www.yourbrand.com)`
-- Find sites hotlinking your assets: `domain:yourbrand.com AND NOT page.domain:yourbrand.com`
-- Restrict to recent results: append `AND date:>now-7d`
+Ví dụ truy vấn (UI hoặc API):
+- Tìm các domain giả mạo, loại trừ domain hợp pháp của bạn: `page.domain:(/.*yourbrand.*/ AND NOT yourbrand.com AND NOT www.yourbrand.com)`
+- Tìm các site hotlink tài nguyên của bạn: `domain:yourbrand.com AND NOT page.domain:yourbrand.com`
+- Giới hạn kết quả gần đây: thêm `AND date:>now-7d`
 
-API example:
+Ví dụ API:
 
 ```bash
 # Search recent scans mentioning your brand
@@ -89,13 +89,13 @@ curl -s 'https://urlscan.io/api/v1/search/?q=page.domain:(/.*yourbrand.*/%20AND%
   -H 'API-Key: <YOUR_URLSCAN_KEY>' | jq '.results[].page.url'
 ```
 
-From the JSON, pivot on:
-- `page.tlsIssuer`, `page.tlsValidFrom`, `page.tlsAgeDays` to spot very new certs for lookalikes
-- `task.source` values like `certstream-suspicious` to tie findings to CT monitoring
+Từ JSON, pivot dựa trên:
+- `page.tlsIssuer`, `page.tlsValidFrom`, `page.tlsAgeDays` để phát hiện chứng chỉ rất mới của các domain nhái
+- Các giá trị `task.source` như `certstream-suspicious` để liên kết kết quả với hoạt động giám sát CT
 
-### Domain age via RDAP (scriptable)
+### Tuổi domain qua RDAP (có thể viết script)
 
-RDAP returns machine-readable registration events. Useful to flag **newly registered domains (NRDs)**.<sup>[[9]](#references)[[10]](#references)</sup>
+RDAP trả về các sự kiện đăng ký ở định dạng máy có thể đọc được. Hữu ích để phát hiện **domain mới đăng ký (NRDs)**.<sup>[[9]](#references)[[10]](#references)</sup>
 
 ```bash
 # .com/.net RDAP (Verisign)
@@ -106,62 +106,61 @@ curl -s https://rdap.verisign.com/com/v1/domain/suspicious-example.com | \
 curl -s https://www.rdap.net/domain/suspicious-example.com | jq
 ```
 
-Enrich your pipeline by tagging domains with registration age buckets (e.g., <7 days, <30 days) and prioritise triage accordingly.
+Làm phong phú pipeline bằng cách gắn thẻ các domain theo nhóm tuổi đăng ký (ví dụ: <7 ngày, <30 ngày) và ưu tiên phân loại tương ứng.
 
-### TLS/JAx fingerprints to spot AiTM infrastructure
+### Dấu vân tay TLS/JAx để phát hiện hạ tầng AiTM
 
-Credential-phishing can use **Adversary-in-the-Middle (AiTM)** reverse proxies (e.g., Evilginx) to steal session tokens.<sup>[[11]](#references)</sup> You can add network-side detections:
+Phishing đánh cắp thông tin xác thực có thể dùng reverse proxy **Adversary-in-the-Middle (AiTM)** (ví dụ: Evilginx) để đánh cắp session token.<sup>[[11]](#references)</sup> Bạn có thể bổ sung các cơ chế phát hiện ở phía mạng:
 
-- Log TLS/HTTP fingerprints (JA3/JA4/JA4S/JA4H) at egress. Some Evilginx builds have been observed with stable JA4 client/server values. Alert on known-bad fingerprints only as a weak signal and always confirm with content and domain intel.<sup>[[12]](#references)</sup>
-- Proactively record TLS certificate metadata (issuer, SAN count, wildcard use, validity) for lookalike hosts discovered via CT or urlscan and correlate with DNS age and geolocation.
+- Ghi lại dấu vân tay TLS/HTTP (JA3/JA4/JA4S/JA4H) tại điểm lưu lượng ra. Một số bản dựng Evilginx được ghi nhận có giá trị JA4 phía client/server ổn định. Chỉ cảnh báo dựa trên dấu vân tay đã biết là độc hại như một tín hiệu yếu; luôn xác minh bằng nội dung và thông tin tình báo về domain.<sup>[[12]](#references)</sup>
+- Chủ động ghi lại metadata chứng chỉ TLS (issuer, số lượng SAN, việc sử dụng wildcard, thời hạn hiệu lực) của các host giả mạo được phát hiện qua CT hoặc urlscan, rồi đối chiếu với tuổi DNS và vị trí địa lý.
 
-> Note: Treat fingerprints as enrichment, not as sole blockers; frameworks evolve and may randomise or obfuscate.
+> Lưu ý: Hãy xem dấu vân tay là thông tin bổ sung, không phải cơ sở duy nhất để chặn; framework liên tục thay đổi và có thể ngẫu nhiên hóa hoặc làm rối dấu vân tay.
 
-### Domain names using keywords
+### Tên domain sử dụng từ khóa
 
-The parent page also mentions a domain name variation technique that consists of putting the **victim's domain name inside a bigger domain** (e.g. paypal-financial.com for paypal.com).
+Trang cha cũng đề cập đến một kỹ thuật biến thể tên domain, trong đó **tên domain của nạn nhân được đặt bên trong một domain dài hơn** (ví dụ: paypal-financial.com cho paypal.com).
 
 #### Certificate Transparency
 
-Certificate Transparency (CT) logs expose certificate identities, so searching Subject or SAN names for brand keywords can reveal lookalike domains (for example, a certificate for `paypal-financial.com` exposes the `paypal` keyword). Filter results by issuance date and CA when useful, and validate candidates because keyword matches can be false positives.<sup>[[13]](#references)</sup>
+Log Certificate Transparency (CT) công khai danh tính chứng chỉ, vì vậy tìm kiếm từ khóa thương hiệu trong tên Subject hoặc SAN có thể giúp phát hiện domain giả mạo (ví dụ: chứng chỉ cho `paypal-financial.com` có từ khóa `paypal`). Khi cần, hãy lọc kết quả theo ngày cấp và CA, đồng thời xác minh các domain tiềm năng vì kết quả khớp từ khóa có thể là false positive.<sup>[[13]](#references)</sup>
 
-Patrik Hudak's original [phishing-domain hunting write-up](https://0xpatrik.com/phishing-domains/) demonstrates this workflow in Censys, including filters for certificate date and issuer such as Let's Encrypt.<sup>[[13]](#references)</sup>
+Bài viết gốc của Patrik Hudak về [săn tìm domain phishing](https://0xpatrik.com/phishing-domains/) minh họa quy trình này trên Censys, bao gồm các bộ lọc theo ngày cấp chứng chỉ và issuer, chẳng hạn như Let's Encrypt.<sup>[[13]](#references)</sup>
 
-![Censys certificate search results used to identify lookalike domains](<../../images/image (1115).png>)
+![Kết quả tìm kiếm chứng chỉ Censys được dùng để nhận diện các domain giả mạo](<../../images/image (1115).png>)
 
-You can also use the free [**crt.sh**](https://crt.sh) service to search for a keyword and filter results by date and CA.<sup>[[13]](#references)</sup>
+Bạn cũng có thể dùng dịch vụ miễn phí [**crt.sh**](https://crt.sh) để tìm kiếm từ khóa và lọc kết quả theo ngày và CA.<sup>[[13]](#references)</sup>
 
-![crt.sh keyword search for suspicious certificate identities](<../../images/image (519).png>)
+![Tìm kiếm từ khóa trên crt.sh để tìm danh tính chứng chỉ đáng ngờ](<../../images/image (519).png>)
 
-Its Matching Identities field can help compare identities from the real domain with suspicious domains, but treat matches as leads rather than proof.<sup>[[13]](#references)</sup>
+Trường Matching Identities có thể giúp so sánh danh tính của domain thật với các domain đáng ngờ, nhưng hãy xem các kết quả khớp là đầu mối chứ không phải bằng chứng.<sup>[[13]](#references)</sup>
 
-[*CertStream*](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067) streams CT updates in near real time, and [*phishing_catcher*](https://github.com/x0rz/phishing_catcher) consumes that stream to score suspicious certificate names.<sup>[[14]](#references)[[15]](#references)</sup>
+[*CertStream*](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067) truyền phát các cập nhật CT gần như theo thời gian thực, còn [*phishing_catcher*](https://github.com/x0rz/phishing_catcher) lấy dữ liệu từ luồng đó để chấm điểm các tên chứng chỉ đáng ngờ.<sup>[[14]](#references)[[15]](#references)</sup>
 
-Practical tip: when triaging CT hits, prioritise NRDs, untrusted/unknown registrars, privacy-proxy WHOIS, and certs with very recent `NotBefore` times. Maintain an allowlist of your owned domains/brands to reduce noise.
+Mẹo thực tế: khi phân loại kết quả CT, hãy ưu tiên NRD, registrar không đáng tin cậy/không rõ danh tính, WHOIS dùng dịch vụ bảo vệ quyền riêng tư và chứng chỉ có thời điểm `NotBefore` rất gần đây. Duy trì allowlist các domain/thương hiệu thuộc sở hữu của bạn để giảm nhiễu.
 
-#### **New domains**
+#### **Domain mới**
 
-A second option is to collect newly registered domains by TLD (for example, via [Whoxy](https://www.whoxy.com/newly-registered-domains/)) and filter for brand keywords. This misses phishing hosted on subdomains when the keyword is absent from the registered domain.<sup>[[13]](#references)</sup>
+Một lựa chọn khác là thu thập các domain mới đăng ký theo TLD (ví dụ: qua [Whoxy](https://www.whoxy.com/newly-registered-domains/)) rồi lọc theo từ khóa thương hiệu. Cách này bỏ sót phishing được lưu trữ trên subdomain nếu từ khóa không xuất hiện trong domain đã đăng ký.<sup>[[13]](#references)</sup>
 
-Additional heuristic: treat certain **file-extension TLDs** (e.g., `.zip`, `.mov`) with extra suspicion in alerting. These are commonly confused for filenames in lures; combine the TLD signal with brand keywords and NRD age for better precision.
+Heuristic bổ sung: hãy tăng mức độ cảnh giác khi cảnh báo về một số **TLD có phần mở rộng giống tên tệp** (ví dụ: `.zip`, `.mov`). Những TLD này thường bị nhầm với tên tệp trong các nội dung dụ nhấp; hãy kết hợp tín hiệu TLD với từ khóa thương hiệu và tuổi NRD để tăng độ chính xác.
 
 ## References
 
-- [1] [Remy Hax – Bitsquatting Windows.com](https://remyhax.xyz/posts/bitsquatting-windows/)
-- [2] [Hijacking traffic to Microsoft's windows.com with bitflipping](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+- [1] [Remy Hax – Bit-squatting Windows.com](https://remyhax.xyz/posts/bitsquatting-windows/)
+- [2] [Chiếm quyền lưu lượng truy cập đến windows.com của Microsoft bằng cách lật bit](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 - [3] [dnstwist](https://github.com/elceef/dnstwist)
 - [4] [urlcrazy](https://github.com/urbanadventurer/urlcrazy)
-- [5] [Deep Dive: http.favicon](https://blog.shodan.io/deep-dive-http-favicon/)
-- [6] [mmh3 documentation](https://mmh3.readthedocs.io/en/stable/quickstart.html)
-- [7] [Platform Web Property Dataset](https://docs.censys.com/docs/platform-web-property-dataset)
-- [8] [urlscan.io – Search API Reference](https://urlscan.io/docs/search/)
-- [9] [Registration Data Access Protocol Help](https://www.verisign.com/news-insights/registration-data-access-protocol/help/)
-- [10] [RFC 9083: JSON Responses for the Registration Data Access Protocol](https://www.rfc-editor.org/rfc/rfc9083.html)
-- [11] [Token tactics: How to prevent, detect, and respond to cloud token theft](https://www.microsoft.com/en-us/security/blog/2022/11/16/token-tactics-how-to-prevent-detect-and-respond-to-cloud-token-theft/)
-- [12] [APNIC Blog – JA4+ network fingerprinting](https://blog.apnic.net/2023/11/22/ja4-network-fingerprinting/)
-- [13] [Patrik Hudak – Finding Phishing: Tools and Techniques](https://0xpatrik.com/phishing-domains/)
-- [14] [Ryan Sears – Introducing CertStream](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067)
+- [5] [Phân tích chuyên sâu: http.favicon](https://blog.shodan.io/deep-dive-http-favicon/)
+- [6] [Tài liệu mmh3](https://mmh3.readthedocs.io/en/stable/quickstart.html)
+- [7] [Tập dữ liệu thuộc tính web của nền tảng](https://docs.censys.com/docs/platform-web-property-dataset)
+- [8] [urlscan.io – Tài liệu tham khảo Search API](https://urlscan.io/docs/search/)
+- [9] [Trợ giúp về Registration Data Access Protocol](https://www.verisign.com/news-insights/registration-data-access-protocol/help/)
+- [10] [RFC 9083: Phản hồi JSON cho Registration Data Access Protocol](https://www.rfc-editor.org/rfc/rfc9083.html)
+- [11] [Chiến thuật token: Cách ngăn chặn, phát hiện và ứng phó với hành vi đánh cắp cloud token](https://www.microsoft.com/en-us/security/blog/2022/11/16/token-tactics-how-to-prevent-detect-and-respond-to-cloud-token-theft/)
+- [12] [APNIC Blog – Dấu vân tay mạng JA4+](https://blog.apnic.net/2023/11/22/ja4-network-fingerprinting/)
+- [13] [Patrik Hudak – Tìm kiếm phishing: Công cụ và kỹ thuật](https://0xpatrik.com/phishing-domains/)
+- [14] [Ryan Sears – Giới thiệu CertStream](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067)
 - [15] [x0rz – Phishing Catcher](https://github.com/x0rz/phishing_catcher)
 - [16] [Devansh Batham – FavFreak](https://github.com/devanshbatham/FavFreak)
-
 {{#include ../../banners/hacktricks-training.md}}

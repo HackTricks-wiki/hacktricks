@@ -1,21 +1,21 @@
-# Proof Assistant and Formal Verification Security
+# Bảo mật Proof Assistant và xác minh hình thức
 
 {{#include ../banners/hacktricks-training.md}}
 
-Proof assistants can execute the same term through several paths: kernel reduction, an interpreter, generated code, runtime primitives, or an external checker. A proof is only as strong as every component allowed to contribute trusted results. In Lean, native decision procedures trade faster evaluation for a larger trusted computing base (TCB): the compiler and definitions with native implementations become relevant to proof integrity.<sup>[[3]](#references)</sup>
+Proof assistant có thể thực thi cùng một term qua nhiều đường: kernel reduction, interpreter, code được tạo, runtime primitive hoặc checker bên ngoài. Proof chỉ mạnh ngang với mọi thành phần được phép đóng góp kết quả đáng tin cậy. Trong Lean, các native decision procedure đánh đổi tốc độ đánh giá để lấy trusted computing base (TCB) lớn hơn: compiler và các định nghĩa có native implementation trở nên quan trọng đối với tính toàn vẹn của proof.<sup>[[3]](#references)</sup>
 
-## Logical/native differential evaluation
+## Đánh giá vi sai giữa logic và native
 
-Prioritize primitives whose executable implementation is different from their logical model (for example compiler intrinsics, foreign-function interfaces, runtime overrides, and definitions marked with `@[implemented_by]`). Differentially evaluate the **same closed term** through the logical and compiled paths, and treat any value, exception, or termination mismatch as a security finding.<sup>[[1]](#references)[[3]](#references)[[4]](#references)</sup>
+Ưu tiên các primitive có implementation thực thi khác với mô hình logic của chúng (ví dụ compiler intrinsic, foreign-function interface, runtime override và các định nghĩa được đánh dấu bằng `@[implemented_by]`). Đánh giá vi sai **cùng một term đóng** qua đường logic và đường biên dịch, đồng thời xem mọi khác biệt về giá trị, exception hoặc việc kết thúc là một phát hiện bảo mật.<sup>[[1]](#references)[[3]](#references)[[4]](#references)</sup>
 
-Useful boundary-value classes include:<sup>[[1]](#references)[[4]](#references)</sup>
+Các nhóm giá trị biên hữu ích gồm:<sup>[[1]](#references)[[4]](#references)</sup>
 
-- indexes around `0`, the input length, the machine-word limit, and values such as `2^63` or larger;
-- zero/one-byte ranges, `start = end`, `start > end`, and positions far beyond the object;
-- empty and non-empty inputs, multibyte strings, invalid boundaries, and arithmetic that may truncate when compiled;
-- heap-backed values when a native primitive has ownership or borrowing behavior absent from the logical model.
+- index quanh `0`, độ dài đầu vào, giới hạn machine-word và các giá trị như `2^63` trở lên;
+- các range có độ dài 0/1 byte, `start = end`, `start > end` và vị trí nằm xa ngoài object;
+- đầu vào rỗng và không rỗng, chuỗi nhiều byte, ranh giới không hợp lệ và phép toán số học có thể bị cắt cụt khi biên dịch;
+- giá trị được cấp phát trên heap khi native primitive có hành vi ownership hoặc borrowing không có trong mô hình logic.
 
-The following reduced Lean pattern illustrates the issue found in `String.Pos.Raw.extract`: vulnerable native code returned the original string for an enormous one-byte range, while definitional reduction returned the empty string. This semantic mismatch was fixed separately from the related memory-safety defect.<sup>[[1]](#references)[[2]](#references)[[4]](#references)</sup>
+Mẫu Lean rút gọn sau minh họa vấn đề được phát hiện trong `String.Pos.Raw.extract`: native code dễ bị lỗi trả về chuỗi gốc cho một range một byte cực lớn, trong khi definitional reduction trả về chuỗi rỗng. Sai khác ngữ nghĩa này được sửa riêng với lỗi an toàn bộ nhớ liên quan.<sup>[[1]](#references)[[2]](#references)[[4]](#references)</sup>
 
 ```lean
 def value : String := "non-empty"
@@ -29,42 +29,41 @@ example : False := by
   exact (by decide) (logical.symm.trans native)
 ```
 
-This pattern generalizes beyond strings: if logical evaluation proves `E = A` and trusted native evaluation proves `E = B`, transitivity produces `A = B`. When `A` and `B` are observably distinct, this yields `False`; `False.elim` (the explosion principle) can then prove any target proposition. The kernel need not have an incorrect reduction rule—the integrity failure occurs because a compiler-backed result entered the logic through an axiom.<sup>[[1]](#references)[[3]](#references)[[4]](#references)</sup>
+Mẫu này tổng quát hóa vượt ra ngoài chuỗi: nếu đánh giá logic chứng minh `E = A` và đánh giá native đáng tin cậy chứng minh `E = B`, thì tính bắc cầu cho ra `A = B`. Khi `A` và `B` khác biệt có thể quan sát được, điều này dẫn đến `False`; sau đó, `False.elim` (nguyên lý bùng nổ) có thể chứng minh bất kỳ mệnh đề đích nào. Kernel không cần có quy tắc rút gọn sai—lỗi toàn vẹn xảy ra vì một kết quả dựa trên compiler đã đi vào logic thông qua một tiên đề.<sup>[[1]](#references)[[3]](#references)[[4]](#references)</sup>
 
-## Auditing the expanded TCB in Lean
+## Kiểm tra TCB mở rộng trong Lean
 
-Do not use editor checkmarks or a successful build as the only validation for an untrusted proof. Inspect the complete dependency closure of each security-critical theorem with `#print axioms`; Lean's validation guidance identifies `_native` names as native-evaluation dependencies, `sorryAx` as an incomplete proof, and other nonstandard names as custom axioms.<sup>[[3]](#references)</sup>
+Không dùng dấu kiểm trong editor hoặc một lần build thành công làm cách xác thực duy nhất cho một proof không đáng tin cậy. Kiểm tra toàn bộ closure phụ thuộc của từng định lý quan trọng về bảo mật bằng `#print axioms`; hướng dẫn xác thực của Lean xác định các tên `_native` là phụ thuộc vào đánh giá native, `sorryAx` là proof chưa hoàn chỉnh, và các tên không chuẩn khác là custom axioms.<sup>[[3]](#references)</sup>
 
 ```lean
 #print axioms targetTheorem
 ```
 
-For example, a generated dependency resembling the following means compiled execution contributed an assumed result rather than a proof derived solely by kernel reduction:<sup>[[1]](#references)[[4]](#references)</sup>
+Ví dụ, một phụ thuộc được tạo ra giống như sau có nghĩa là quá trình thực thi đã biên dịch đóng góp một kết quả được giả định, thay vì một chứng minh chỉ được suy ra bằng phép rút gọn của kernel:<sup>[[1]](#references)[[4]](#references)</sup>
 
 ```text
 targetTheorem._native.native_decide.ax_1_1
 ```
 
-During source review, search for native decision procedures and explicit escape hatches, but confirm the result with `#print axioms` because dependencies may be indirect or generated:<sup>[[3]](#references)</sup>
+Trong quá trình rà soát mã nguồn, hãy tìm các thủ tục quyết định gốc và các cơ chế thoát tường minh, nhưng xác nhận kết quả bằng `#print axioms` vì các phụ thuộc có thể gián tiếp hoặc được tạo tự động:<sup>[[3]](#references)</sup>
 
 ```bash
 rg -n 'native_decide|decide\s+\+native|bv_decide|sorry|axiom' .
 ```
 
-Distinguish the layers when triaging a finding:<sup>[[3]](#references)</sup>
+Phân biệt các lớp khi phân loại một phát hiện:<sup>[[3]](#references)</sup>
 
-1. **Statement integrity:** verify that notation, type-class instances, imports, and definitions express the intended claim.
-2. **Proof dependencies:** reject or explicitly review unexpected axioms, especially generated native-evaluation axioms.
-3. **Kernel replay:** after `lake build`, run `lean4checker --fresh <Module>` to replay declarations from the `.olean` files.
-4. **Hostile-proof validation:** build untrusted code in a sandbox and use `lake comparator` with external checkers against a trusted challenge statement.
+1. **Tính toàn vẹn của mệnh đề:** xác minh ký hiệu, các instance của type class, imports và định nghĩa thể hiện đúng mệnh đề dự định.
+2. **Các phụ thuộc của chứng minh:** từ chối hoặc xem xét rõ ràng các tiên đề bất ngờ, đặc biệt là các tiên đề native-evaluation được tạo tự động.
+3. **Phát lại bằng kernel:** sau `lake build`, chạy `lean4checker --fresh <Module>` để phát lại các khai báo từ tệp `.olean`.
+4. **Xác thực chứng minh độc hại:** build mã không đáng tin cậy trong sandbox và dùng `lake comparator` cùng các checker bên ngoài để kiểm tra một mệnh đề thử thách đáng tin cậy.
 
-`lean4checker` provides useful defense in depth, but it trusts the structural correctness of `.olean` files and running untrusted Lean meta-code can itself compromise the checking environment. For high-risk proofs, comparator exports the proof outside the sandbox, checks the statement against the trusted challenge, and can replay it through independently implemented checkers; implementation diversity reduces the chance that one compiler, runtime, or kernel defect validates the same false result everywhere.<sup>[[3]](#references)</sup>
+`lean4checker` cung cấp thêm một lớp phòng vệ hữu ích, nhưng tin cậy vào tính đúng đắn về cấu trúc của các tệp `.olean`; việc chạy meta-code Lean không đáng tin cậy cũng có thể tự làm tổn hại môi trường kiểm tra. Với các chứng minh có rủi ro cao, comparator xuất chứng minh ra ngoài sandbox, đối chiếu mệnh đề với thử thách đáng tin cậy và có thể phát lại chứng minh qua các checker được triển khai độc lập; sự đa dạng trong triển khai làm giảm khả năng một lỗi của compiler, runtime hoặc kernel khiến cùng một kết quả sai được xác thực ở mọi nơi.<sup>[[3]](#references)</sup>
 
 ## References
 
-- [1] [`String.Pos.Raw.extract` model/runtime mismatch and use-after-free - Lean issue #14684](https://github.com/leanprover/lean4/issues/14684)
-- [2] [Fix `String.Pos.Raw.extract` model/runtime mismatch - Lean PR #14717](https://github.com/leanprover/lean4/pull/14717)
-- [3] [Lean Language Reference: Validating a Lean Proof](https://lean-lang.org/doc/reference/latest/ValidatingProofs/)
-- [4] [A “Proof” of Fermat’s Last Theorem That Fits the Margin](https://blog.trailofbits.com/2026/09/09/a-proof-of-fermats-last-theorem-that-fits-the-margin/)
-
+- [1] [`String.Pos.Raw.extract` sai khác giữa mô hình/runtime và use-after-free - Lean issue #14684](https://github.com/leanprover/lean4/issues/14684)
+- [2] [Sửa lỗi sai khác giữa mô hình/runtime của `String.Pos.Raw.extract` - Lean PR #14717](https://github.com/leanprover/lean4/pull/14717)
+- [3] [Tài liệu tham khảo ngôn ngữ Lean: Xác thực một chứng minh Lean](https://lean-lang.org/doc/reference/latest/ValidatingProofs/)
+- [4] [Một “chứng minh” Định lý cuối cùng của Fermat vừa khít lề trang](https://blog.trailofbits.com/2026/09/09/a-proof-of-fermats-last-theorem-that-fits-the-margin/)
 {{#include ../banners/hacktricks-training.md}}

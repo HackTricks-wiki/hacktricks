@@ -1,14 +1,14 @@
-# Rust Basics
+# Kiến thức cơ bản về Rust
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Ownership of variables
+### Quyền sở hữu biến
 
-Memory is managed through a system of ownership with the following rules that the compiler checks at compile time:
+Bộ nhớ được quản lý thông qua hệ thống quyền sở hữu với các quy tắc sau, được trình biên dịch kiểm tra tại thời điểm biên dịch:
 
-1. Each value in Rust has a variable that's called its owner.
-2. There can only be one owner at a time.
-3. When the owner goes out of scope, the value will be dropped.
+1. Mỗi giá trị trong Rust có một biến được gọi là chủ sở hữu của nó.
+2. Tại một thời điểm chỉ có thể có một chủ sở hữu.
+3. Khi chủ sở hữu ra khỏi phạm vi, giá trị sẽ bị hủy.
 
 ```rust
 fn main() {
@@ -26,7 +26,7 @@ fn main() {
 
 ### Generic Types
 
-Create a struct where 1 of their values could be any type
+Tạo một struct trong đó một giá trị có thể thuộc bất kỳ kiểu nào.
 
 ```rust
 struct Wrapper<T> {
@@ -45,7 +45,7 @@ Wrapper::new("Foo").value, "Foo"
 
 ### Option, Some & None
 
-The Option type means that the value might by of type Some (there is something) or None:
+Kiểu Option có nghĩa là giá trị có thể thuộc kiểu Some (có giá trị) hoặc None (không có giá trị):
 
 ```rust
 pub enum Option<T> {
@@ -54,12 +54,12 @@ pub enum Option<T> {
 }
 ```
 
-You can use functions such as `is_some()` or `is_none()` to check the value of the Option.
+Bạn có thể dùng các hàm như `is_some()` hoặc `is_none()` để kiểm tra giá trị của Option.
 
 
 ### Result, Ok & Err
 
-Used for returning and propagating errors
+Dùng để trả về và lan truyền lỗi
 
 ```rust
 pub enum Result<T, E> {
@@ -68,15 +68,15 @@ pub enum Result<T, E> {
 }
 ```
 
-You can use functions such as `is_ok()` or `is_err()` to check the value of the result
+Bạn có thể dùng các hàm như `is_ok()` hoặc `is_err()` để kiểm tra giá trị của kết quả.
 
-The `Option` enum should be used in situations where a value might not exist (be `None`).
-The `Result` enum should be used in situations where you do something that might go wrong
+Enum `Option` nên được dùng trong những trường hợp một giá trị có thể không tồn tại (là `None`).
+Enum `Result` nên được dùng trong những trường hợp bạn thực hiện việc gì đó có thể gặp lỗi.
 
 
 ### Macros
 
-Macros are more powerful than functions because they expand to produce more code than the code you’ve written manually. For example, a function signature must declare the number and type of parameters the function has. Macros, on the other hand, can take a variable number of parameters: we can call `println!("hello")` with one argument or `println!("hello {}", name)` with two arguments. Also, macros are expanded before the compiler interprets the meaning of the code, so a macro can, for example, implement a trait on a given type. A function can’t, because it gets called at runtime and a trait needs to be implemented at compile time.
+Macros mạnh hơn functions vì chúng mở rộng để tạo ra nhiều mã hơn phần mã bạn viết thủ công. Ví dụ, chữ ký của function phải khai báo số lượng và kiểu của các tham số. Mặt khác, macros có thể nhận số lượng tham số thay đổi: ta có thể gọi `println!("hello")` với một đối số hoặc `println!("hello {}", name)` với hai đối số. Ngoài ra, macros được mở rộng trước khi compiler diễn giải ý nghĩa của mã, vì vậy macro có thể, chẳng hạn, triển khai một trait cho một kiểu nhất định. Function không thể làm được điều này, vì nó được gọi tại runtime còn trait cần được triển khai tại compile time.
 
 ```rust
 macro_rules! my_macro {
@@ -103,7 +103,7 @@ mod macros {
 }
 ```
 
-### Iterate
+### Lặp lại
 
 ```rust
 // Iterate through a vector
@@ -122,7 +122,7 @@ for key in map.keys() {
 for value in map.values() {
 ```
 
-### Recursive Box
+### Hộp đệ quy
 
 ```rust
 enum List {
@@ -133,7 +133,7 @@ enum List {
 let list = Cons(1, Cons(2, Cons(3, Nil)));
 ```
 
-### Conditionals
+### Câu lệnh điều kiện
 
 #### if
 
@@ -173,7 +173,7 @@ let binary = match boolean {
 };
 ```
 
-#### loop (infinite)
+#### loop (vô hạn)
 
 ```rust
 loop {
@@ -288,7 +288,7 @@ while let Some(i) = optional {
 
 ### Traits
 
-Create a new method for a type
+Tạo một phương thức mới cho một kiểu
 
 ```rust
 trait AppendBar {
@@ -306,7 +306,7 @@ let s = s.append_bar();
 println!("s: {}", s);
 ```
 
-### Tests
+### Kiểm thử
 
 ```rust
 #[cfg(test)]
@@ -320,11 +320,11 @@ mod tests {
 }
 ```
 
-### Threading
+### Đa luồng
 
 #### Arc
 
-An Arc can use Clone to create more references over the object to pass them to the threads. When the last reference pointer to a value is out of scope, the variable is dropped.
+Arc có thể dùng Clone để tạo thêm các tham chiếu đến đối tượng, rồi truyền chúng cho các luồng. Khi con trỏ tham chiếu cuối cùng đến một giá trị ra khỏi phạm vi, biến sẽ bị hủy.
 
 ```rust
 use std::sync::Arc;
@@ -337,9 +337,9 @@ for _ in 0..10 {
 }
 ```
 
-#### Threads
+#### Luồng
 
-In this case we will pass the thread a variable it will be able to modify
+Trong trường hợp này, chúng ta sẽ truyền cho luồng một biến mà nó có thể sửa đổi.
 
 ```rust
 fn main() {
@@ -360,19 +360,19 @@ fn main() {
 ```
 
 
-### Security Essentials
+### Những điều cốt yếu về bảo mật
 
-Rust provides strong memory-safety guarantees by default, but you can still introduce critical vulnerabilities through `unsafe` code, dependency issues or logic mistakes. The following mini-cheatsheet gathers the primitives you will most commonly touch during offensive or defensive security reviews of Rust software.
+Rust mặc định cung cấp các đảm bảo mạnh mẽ về an toàn bộ nhớ, nhưng bạn vẫn có thể tạo ra các lỗ hổng nghiêm trọng thông qua mã `unsafe`, vấn đề về dependency hoặc sai sót logic. Cheatsheet ngắn sau đây tập hợp các primitive mà bạn thường gặp nhất khi rà soát bảo mật phần mềm Rust theo hướng tấn công hoặc phòng thủ.
 
-#### Unsafe code & memory safety
+#### Mã unsafe & an toàn bộ nhớ
 
-`unsafe` blocks opt-out of the compiler’s aliasing and bounds checks, so **all traditional memory-corruption bugs (OOB, use-after-free, double free, etc.) can appear again**. A quick audit checklist:
+Các khối `unsafe` bỏ qua những bước kiểm tra aliasing và giới hạn của compiler, vì vậy **mọi lỗi gây hỏng bộ nhớ truyền thống (OOB, use-after-free, double free, v.v.) đều có thể xuất hiện trở lại**. Danh sách kiểm tra nhanh:
 
-* Look for `unsafe` blocks, `extern "C"` functions, calls to `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, raw pointers or `ffi` modules.
-* Validate every pointer arithmetic and length argument passed to low-level functions.
-* Prefer `#![forbid(unsafe_code)]` (crate-wide) or `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) to fail compilation when someone re-introduces `unsafe`.
+* Tìm các khối `unsafe`, hàm `extern "C"`, lời gọi `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, raw pointer hoặc module `ffi`.
+* Xác thực mọi phép tính số học trên pointer và đối số độ dài được truyền cho các hàm cấp thấp.
+* Ưu tiên `#![forbid(unsafe_code)]` (toàn crate) hoặc `#[deny(unsafe_op_in_unsafe_fn)]` (từ phiên bản 1.68 trở lên) để khiến quá trình biên dịch thất bại nếu ai đó thêm lại `unsafe`.
 
-Example overflow created with raw pointers:
+Ví dụ về lỗi tràn được tạo bằng raw pointer:
 ```rust
 use std::ptr;
 
@@ -386,56 +386,55 @@ fn vuln_copy(src: &[u8]) -> Vec<u8> {
     dst
 }
 ```
-Running Miri is an inexpensive way to detect UB at test time:
+Chạy Miri là một cách ít tốn kém để phát hiện UB khi chạy kiểm thử:
 ```bash
 rustup component add miri
 cargo miri test  # hunts for OOB / UAF during unit tests
 ```
 
-#### Auditing dependencies with RustSec / cargo-audit
+#### Kiểm tra dependency bằng RustSec / cargo-audit
 
-Most real-world Rust vulns live in third-party crates. The RustSec advisory DB (community-powered) can be queried locally:<sup>[[1]](#references)</sup>
+Phần lớn lỗ hổng Rust trong thực tế nằm trong các crate của bên thứ ba. Có thể truy vấn RustSec advisory DB (do cộng đồng đóng góp) trên máy cục bộ:<sup>[[1]](#references)</sup>
 ```bash
 cargo install cargo-audit
 cargo audit              # flags vulnerable versions listed in Cargo.lock
 ```
-Integrate it in CI and fail on `--deny warnings`.
+Tích hợp vào CI và làm cho quy trình thất bại khi dùng `--deny warnings`.
 
-`cargo deny check advisories` offers similar functionality plus licence and ban-list checks.
+`cargo deny check advisories` cung cấp chức năng tương tự, cùng với các kiểm tra giấy phép và danh sách cấm.
 
-#### Code coverage with cargo-tarpaulin
+#### Độ bao phủ mã với cargo-tarpaulin
 
-`cargo tarpaulin` is a code coverage reporting tool for the Cargo build system
+`cargo tarpaulin` là công cụ báo cáo độ bao phủ mã dành cho hệ thống build Cargo.
 
 ```bash
 cargo binstall cargo-tarpaulin
 cargo tarpaulin              # no options are required, if no root directory is defined Tarpaulin will run in the current working directory.
 ```
-On Linux, Tarpaulin's default tracing backend is still Ptrace and will only work on x86_64 processors. This can be changed to the llvm coverage instrumentation with `--engine llvm`. For Mac and Windows, this is the default collection method.
+Trên Linux, backend tracing mặc định của Tarpaulin vẫn là Ptrace và chỉ hoạt động trên các bộ xử lý x86_64. Có thể chuyển sang instrumentation coverage của llvm bằng `--engine llvm`. Đây là phương thức thu thập mặc định trên Mac và Windows.
 
-#### Supply-chain verification with cargo-vet (2024)
+#### Xác minh chuỗi cung ứng bằng cargo-vet (2024)
 
-`cargo vet` records a review hash for every crate you import and prevents unnoticed upgrades:
+`cargo vet` ghi lại hash đánh giá cho mọi crate bạn import và ngăn các lần nâng cấp không được chú ý:
 ```bash
 cargo install cargo-vet
 cargo vet init      # generates vet.toml
 cargo vet --locked  # verifies packages referenced in Cargo.lock
 ```
-The tool is being adopted by the Rust project infrastructure and a growing number of orgs to mitigate poisoned-package attacks.<sup>[[2]](#references)</sup>
+Công cụ này đang được hạ tầng của dự án Rust và ngày càng nhiều tổ chức áp dụng để giảm thiểu các cuộc tấn công bằng package bị đầu độc.<sup>[[2]](#references)</sup>
 
-#### Fuzzing your API surface (cargo-fuzz)
+#### Fuzzing bề mặt API của bạn (cargo-fuzz)
 
-Fuzz tests easily catch panics, integer overflows and logic bugs that might become DoS or side-channel issues:
+Các bài kiểm thử fuzz dễ dàng phát hiện panic, tràn số nguyên và lỗi logic có thể dẫn đến DoS hoặc vấn đề side-channel:
 ```bash
 cargo install cargo-fuzz
 cargo fuzz init              # creates fuzz_targets/
 cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
 ```
-Add the fuzz target to your repo and run it in your pipeline.
+Thêm fuzz target vào repo của bạn và chạy nó trong pipeline.
 
 ## References
 
-- [1] [RustSec Advisory Database](https://rustsec.org)
-- [2] [Cargo-vet: "Auditing your Rust Dependencies"](https://mozilla.github.io/cargo-vet/)
-
+- [1] [Cơ sở dữ liệu khuyến cáo RustSec](https://rustsec.org)
+- [2] [Cargo-vet: "Kiểm tra các dependency Rust của bạn"](https://mozilla.github.io/cargo-vet/)
 {{#include ../banners/hacktricks-training.md}}

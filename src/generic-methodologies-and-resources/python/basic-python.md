@@ -1,10 +1,10 @@
-# Basic Python
+# Python cơ bản
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Virtual environments and wheel builds (`venv`)
+## Môi trường ảo và bản dựng wheel (`venv`)
 
-Python's standard `venv` module creates virtual environments, whose POSIX activation script is `<venv>/bin/activate`; type `deactivate` to leave the active environment.<sup>[[3]](#references)</sup> On Ubuntu, the `python3-venv` package supplies the module when it is not installed with the base Python package.<sup>[[4]](#references)</sup>
+Module `venv` tiêu chuẩn của Python tạo các môi trường ảo, trong đó script kích hoạt POSIX là `<venv>/bin/activate`; nhập `deactivate` để thoát khỏi môi trường đang hoạt động.<sup>[[3]](#references)</sup> Trên Ubuntu, gói `python3-venv` cung cấp module này nếu nó không được cài đặt cùng gói Python cơ bản.<sup>[[4]](#references)</sup>
 
 ```bash
 sudo apt-get install python3-venv
@@ -17,7 +17,7 @@ source pvenv/bin/activate #Activate the environment
 deactivate #To deactivate the virtual environment
 ```
 
-For older setuptools-based `setup.py bdist_wheel` workflows, installing `wheel` in the active environment provided the `bdist_wheel` command.<sup>[[5]](#references)</sup> Current setuptools versions no longer need `wheel` for that command, and current packaging guidance recommends `python -m build --wheel` rather than invoking `setup.py` directly.<sup>[[6]](#references)[[7]](#references)</sup>
+Đối với các quy trình cũ dựa trên setuptools dùng `setup.py bdist_wheel`, cài đặt `wheel` trong môi trường đang hoạt động sẽ cung cấp lệnh `bdist_wheel`.<sup>[[5]](#references)</sup> Các phiên bản setuptools hiện tại không còn cần `wheel` cho lệnh đó, và hướng dẫn đóng gói hiện nay khuyến nghị dùng `python -m build --wheel` thay vì gọi trực tiếp `setup.py`.<sup>[[6]](#references)[[7]](#references)</sup>
 
 ```text
 error: invalid command 'bdist_wheel'
@@ -32,18 +32,18 @@ python3 -m pip install build
 python3 -m build --wheel
 ```
 
-## Python Basics
+## Cơ bản về Python
 
-### Useful information
+### Thông tin hữu ích
 
-All the examples below assume **Python 3** unless explicitly noted.\
-`range()` returns an iterable object in Python 3 (similar to `xrange()` in Python 2).\
-The difference between a **tuple** and a **list** is that the **position** of a value in a tuple usually gives it meaning, while a list is usually just an ordered sequence of values.
+Tất cả ví dụ bên dưới đều giả định dùng **Python 3**, trừ khi có ghi chú rõ ràng.\
+`range()` trả về một đối tượng iterable trong Python 3 (tương tự `xrange()` trong Python 2).\
+Điểm khác biệt giữa **tuple** và **list** là **vị trí** của một giá trị trong tuple thường mang ý nghĩa, còn list thường chỉ là một chuỗi giá trị có thứ tự.
 
-### Main operations
+### Các phép toán chính
 
-To raise a number you use: `3**2` (not `3^2`)\
-`2/3 == 0.666666...` in Python 3, while `2//3 == 0` performs integer division.\
+Để lũy thừa một số, dùng: `3**2` (không phải `3^2`)\
+`2/3 == 0.666666...` trong Python 3, còn `2//3 == 0` thực hiện phép chia lấy phần nguyên.\
 `i >= j`\
 `i <= j`\
 `i == j`\
@@ -65,31 +65,31 @@ To raise a number you use: `3**2` (not `3^2`)\
 `"abc" in "abcdef"`\
 `"abc\n".strip() == "abc"`\
 `"apbc".replace("p", "") == "abc"`\
-`dir(str)` = list available methods\
-`help(str)` = definition of the class `str`\
+`dir(str)` = danh sách các phương thức khả dụng\
+`help(str)` = định nghĩa của lớp `str`\
 `"a".upper() == "A"`\
 `"A".lower() == "a"`\
 `"abc".capitalize() == "Abc"`\
 `sum([1, 2, 3]) == 6`\
 `sorted([1, 43, 5, 3, 21, 4]) == [1, 3, 4, 5, 21, 43]`
 
-**Join chars**\
+**Nối ký tự**\
 `3 * 'a' == 'aaa'`\
 `'a' + 'b' == 'ab'`\
 `'a' + str(3) == 'a3'`\
 `[1, 2, 3] + [4, 5] == [1, 2, 3, 4, 5]`
 
-**Parts of a list / string**\
+**Các phần tử của list / chuỗi**\
 `'abc'[0] == 'a'`\
 `'abc'[-1] == 'c'`\
 `'abc'[1:3] == 'bc'`\
 `"qwertyuiop"[:-1] == 'qwertyuio'`
 
-**Comments**\
+**Chú thích**\
 `# One line comment`\
 `""" Several lines comment """`
 
-**Loops**
+**Vòng lặp**
 
 ```python
 if a:
@@ -109,9 +109,9 @@ for letter in "hola":
     # something with each letter
 ```
 
-### Bytes, hex and encodings
+### Bytes, hex và encoding
 
-This is very common in exploit-dev, reversing and CTFs:
+Điều này rất phổ biến trong exploit-dev, reversing và CTFs:
 
 ```python
 b"ABC".hex() == "414243"
@@ -122,27 +122,27 @@ int.from_bytes(b"\x41\x42\x43", "big") == 0x414243
 b"admin".decode() == "admin"
 ```
 
-### Tuples
+### Tuple
 
 `t1 = (1, '2', 'three')`\
 `t2 = (5, 6)`\
 `t3 = t1 + t2 == (1, '2', 'three', 5, 6)`\
-`(4,)` = singleton\
-`d = ()` empty tuple\
-`d += (4,)` --> add into a tuple\
-`# t1[1] = 'new value'` --> tuples are immutable\
-`list(t2) == [5, 6]` --> from tuple to list
+`(4,)` = tuple đơn phần tử\
+`d = ()` tuple rỗng\
+`d += (4,)` --> thêm vào tuple\
+`# t1[1] = 'new value'` --> tuple là bất biến\
+`list(t2) == [5, 6]` --> chuyển từ tuple sang list
 
-### List (array)
+### Danh sách (mảng)
 
-`d = []` empty\
+`d = []` rỗng\
 `a = [1, 2, 3]`\
 `b = [4, 5]`\
 `a + b == [1, 2, 3, 4, 5]`\
 `b.append(6)` --> `b == [4, 5, 6]`\
-`tuple(a) == (1, 2, 3)` --> from list to tuple
+`tuple(a) == (1, 2, 3)` --> chuyển từ list sang tuple
 
-### Dictionary
+### Từ điển
 
 ```python
 month_numbers = {1: 'Jan', 2: 'Feb', 'Feb': 2}
@@ -157,28 +157,28 @@ mn = month_numbers.copy()  # independent copy
 month_numbers.get('key', 0)  # default value if key does not exist
 ```
 
-### Set
+### Tập hợp
 
-In sets there are no repetitions.\
+Trong tập hợp không có phần tử trùng lặp.\
 `myset = set(['a', 'b']) == {'a', 'b'}`\
 `myset.add('c')` --> `{'a', 'b', 'c'}`\
-`myset.add('a')` --> no change\
+`myset.add('a')` --> không thay đổi\
 `myset.update([1, 2, 3])`\
-`myset.discard(10)` --> if present, remove it; if not, nothing\
-`myset.remove(10)` --> if not present, raises exception\
+`myset.discard(10)` --> nếu có, xóa phần tử đó; nếu không, không làm gì\
+`myset.remove(10)` --> nếu không có, sẽ phát sinh ngoại lệ\
 `myset2 = set([1, 2, 3, 4])`\
 `myset.union(myset2)`\
 `myset.intersection(myset2)`\
 `myset.difference(myset2)`\
 `myset.symmetric_difference(myset2)`\
-`myset.pop()` --> get an arbitrary element and remove it\
+`myset.pop()` --> lấy một phần tử bất kỳ và xóa phần tử đó\
 `myset.intersection_update(myset2)`\
 `myset.difference_update(myset2)`\
 `myset.symmetric_difference_update(myset2)`
 
-### Classes
+### Lớp
 
-The method in `__lt__` will be the one used by `sort()` / `sorted()` to compare objects.
+Phương thức trong `__lt__` sẽ được `sort()` / `sorted()` sử dụng để so sánh các đối tượng.
 
 ```python
 import datetime
@@ -214,11 +214,11 @@ class MITPerson(Person):
         return self.id_num < other.id_num
 ```
 
-### map, zip, filter, lambda, sorted and one-liners
+### map, zip, filter, lambda, sorted và one-liners
 
-In **Python 3**, `map()` and `filter()` return iterators, so convert them with `list()` if you want to print all values at once.
+Trong **Python 3**, `map()` và `filter()` trả về các iterator, vì vậy hãy chuyển đổi chúng bằng `list()` nếu bạn muốn in tất cả giá trị cùng lúc.
 
-**Map** is like `[f(x) for x in iterable]`:
+**Map** tương tự như `[f(x) for x in iterable]`:
 
 ```python
 list(map(tuple, [[1, 2, 3], [4, 5]]))
@@ -228,16 +228,16 @@ list(map(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
 # [False, False, True, False, False, True, False, False, True]
 ```
 
-**zip** stops when the shorter iterable stops:
+**zip** dừng khi iterable ngắn hơn kết thúc:
 
 ```python
 for f, b in zip(foo, bar):
     print(f, b)
 ```
 
-**Lambda** is used to define a function:\
-`(lambda x, y: x + y)(5, 3) == 8` --> use lambda as a simple function\
-`sorted(range(-5, 6), key=lambda x: x**2)` --> use lambda to sort\
+**Lambda** được dùng để định nghĩa một hàm:\
+`(lambda x, y: x + y)(5, 3) == 8` --> dùng lambda như một hàm đơn giản\
+`sorted(range(-5, 6), key=lambda x: x**2)` --> dùng lambda để sắp xếp\
 `list(filter(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9])) == [3, 6, 9]`\
 `reduce(lambda x, y: x * y, [1, 2, 3, 4]) == 24`
 
@@ -263,7 +263,7 @@ my_car.crash()  # Boom!
 
 `mult1 = [x for x in [1, 2, 3, 4, 5, 6, 7, 8, 9] if x % 3 == 0]`
 
-### Exceptions
+### Ngoại lệ
 
 ```python
 def divide(x, y):
@@ -281,8 +281,8 @@ def divide(x, y):
 
 ### Assert()
 
-If the condition is false, the string will be printed.\
-Remember that `assert` statements can be disabled with `python -O`, so do not use them for access control or input validation.
+Nếu điều kiện sai, chuỗi sẽ được in ra.\
+Hãy nhớ rằng có thể vô hiệu hóa các câu lệnh `assert` bằng `python -O`, vì vậy đừng dùng chúng để kiểm soát quyền truy cập hoặc xác thực đầu vào.
 
 ```python
 def avg(grades, weights):
@@ -292,7 +292,7 @@ def avg(grades, weights):
 
 ### Generators, yield
 
-A generator, instead of returning everything at once, it **yields** values one by one. This is very useful for huge wordlists, bruteforcers or large responses.
+Thay vì trả về tất cả cùng lúc, generator **yield** các giá trị lần lượt từng giá trị một. Điều này rất hữu ích với wordlist khổng lồ, bruteforcer hoặc response lớn.
 
 ```python
 def my_gen(n):
@@ -305,7 +305,7 @@ def my_gen(n):
 `next(g) == 7`\
 `next(g)` --> `StopIteration`
 
-### Regular Expressions
+### Biểu thức chính quy
 
 ```python
 import re
@@ -315,22 +315,22 @@ re.findall(r"\w", "hola") == ['h', 'o', 'l', 'a']
 re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 ```
 
-**Special meanings:**\
-`.` --> any char except newline\
+**Ý nghĩa đặc biệt:**\
+`.` --> mọi ký tự trừ ký tự xuống dòng\
 `\w` --> `[a-zA-Z0-9_]`\
-`\d` --> digit\
-`\s` --> whitespace char `[ \n\r\t\f]`\
-`\S` --> non-whitespace char\
-`^` --> starts with\
-`$` --> ends with\
-`+` --> one or more\
-`*` --> 0 or more\
-`?` --> 0 or 1 occurrences
+`\d` --> chữ số\
+`\s` --> ký tự khoảng trắng `[ \n\r\t\f]`\
+`\S` --> ký tự không phải khoảng trắng\
+`^` --> bắt đầu bằng\
+`$` --> kết thúc bằng\
+`+` --> một hoặc nhiều\
+`*` --> 0 hoặc nhiều\
+`?` --> 0 hoặc 1 lần xuất hiện
 
-**Options:**\
+**Tùy chọn:**\
 `re.search(pat, string, re.IGNORECASE)`\
-`re.search(pat, string, re.DOTALL)` --> allow dot to match newline\
-`re.search(pat, string, re.MULTILINE)` --> allow `^` and `$` to match in different lines
+`re.search(pat, string, re.DOTALL)` --> cho phép dấu chấm khớp với ký tự xuống dòng\
+`re.search(pat, string, re.MULTILINE)` --> cho phép `^` và `$` khớp ở các dòng khác nhau
 
 ```python
 re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
@@ -343,7 +343,7 @@ re.findall(r"<.*?>", "<b>foo</b>and<i>so on</i>")
 ### IterTools
 
 **product**\
-`from itertools import product` --> cartesian product between 1 or more iterables
+`from itertools import product` --> tích Descartes giữa 1 hoặc nhiều iterable`s
 
 ```python
 list(product([1, 2, 3], [3, 4]))
@@ -354,15 +354,15 @@ list(product([1, 2, 3], repeat=2))
 ```
 
 **permutations**\
-`from itertools import permutations` --> every possible arrangement
+`from itertools import permutations` --> mọi cách sắp xếp có thể
 
 ```python
 list(permutations(['1', '2', '3']))
 list(permutations('123', 2))
 ```
 
-**combinations**\
-`from itertools import combinations` --> all possible combinations without repetition
+**tổ hợp**\
+`from itertools import combinations` --> tất cả các tổ hợp có thể có mà không lặp lại
 
 ```python
 list(combinations('123', 2))
@@ -378,7 +378,7 @@ list(combinations_with_replacement('123', 2))
 ```
 
 **batched**\
-`from itertools import batched` --> available in Python 3.12+, useful to chunk big bruteforce candidate lists or IOC files
+`from itertools import batched` --> có trong Python 3.12+, hữu ích để chia danh sách ứng viên bruteforce lớn hoặc file IOC thành các nhóm Lenovo
 
 ```python
 list(batched(range(10), 4))
@@ -387,7 +387,7 @@ list(batched(range(10), 4))
 
 ### Decorators
 
-Decorator that measures the time a function needs to be executed:
+Decorator đo thời gian cần thiết để thực thi một hàm:
 
 ```python
 from functools import wraps
@@ -411,7 +411,7 @@ def decorated_func():
     print("Decorated func!")
 ```
 
-If you run it, you will see something like the following:
+Nếu chạy nó, bạn sẽ thấy nội dung tương tự như sau:
 
 ```text
 Let's call our decorated function
@@ -419,9 +419,9 @@ Decorated func!
 Execution time: 4.79e-05 seconds
 ```
 
-### Useful standard library helpers for pentesting
+### Các hàm trợ giúp hữu ích trong thư viện chuẩn cho pentesting
 
-**Filesystem traversal with `pathlib`** (`Path.walk()` is available in Python 3.12+; use `os.walk()` on older interpreters):
+**Duyệt hệ thống tệp bằng `pathlib`** (`Path.walk()` có trong Python 3.12 trở lên; dùng `os.walk()` với các trình thông dịch cũ hơn):
 
 ```python
 from pathlib import Path
@@ -434,7 +434,7 @@ for root, dirs, files in Path(".").walk():
             print(root / name)
 ```
 
-**Spawn commands safely** (`shell=False` by default is usually what you want):
+**Khởi chạy lệnh an toàn** (`shell=False` thường là lựa chọn bạn muốn theo mặc định):
 
 ```python
 import subprocess
@@ -448,14 +448,14 @@ cp = subprocess.run(
 print(cp.stdout)
 ```
 
-If you **must** build a shell command, quote each attacker-controlled token first:
+Nếu bạn **bắt buộc** phải tạo một lệnh shell, hãy đặt từng token do attacker kiểm soát trong dấu nháy trước:
 
 ```python
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
 ```
 
-**Temporary files / dirs** (safer than hardcoded `/tmp/foo` paths):
+**Tệp/thư mục tạm thời** (an toàn hơn các đường dẫn `/tmp/foo` được ghi cứng):
 
 ```python
 import tempfile
@@ -467,11 +467,11 @@ with tempfile.TemporaryDirectory() as tmp:
     print(out.read_text())
 ```
 
-For HTTP automation, check [this other page about Python web requests](web-requests.md).
+Để tự động hóa HTTP, hãy xem [trang khác này về các yêu cầu web bằng Python](web-requests.md).
 
-### Archive extraction gotchas (important for tooling and file parsers)
+### Những điều cần lưu ý khi giải nén archive (quan trọng đối với tooling và trình phân tích tệp)
 
-Starting in **Python 3.14**, `tarfile.extract()` / `extractall()` use the safer `data` filter by default. In older Python versions you should set it explicitly when handling attacker-controlled archives.<sup>[[1]](#references)[[2]](#references)</sup>
+Bắt đầu từ **Python 3.14**, `tarfile.extract()` / `extractall()` mặc định sử dụng filter `data` an toàn hơn. Trong các phiên bản Python cũ hơn, bạn nên đặt filter này một cách tường minh khi xử lý archive do kẻ tấn công kiểm soát.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```python
 import tarfile
@@ -482,9 +482,9 @@ with tempfile.TemporaryDirectory() as out:
         tf.extractall(out, filter="data")
 ```
 
-Even with `filter="data"`, extract untrusted archives into a fresh temporary directory and validate what was written before moving files anywhere interesting.
+Ngay cả khi dùng `filter="data"`, hãy giải nén các archive không đáng tin cậy vào một thư mục tạm mới và xác thực nội dung đã ghi trước khi di chuyển tệp đến bất kỳ vị trí quan trọng nào.
 
-`zipfile.Path` is different: it **does not sanitize filenames** for you, so validate paths before extracting attacker-controlled ZIP members:
+`zipfile.Path` thì khác: nó **không tự làm sạch tên tệp** cho bạn, vì vậy hãy xác thực đường dẫn trước khi giải nén các thành viên ZIP do kẻ tấn công kiểm soát:
 
 ```python
 import os
@@ -499,21 +499,20 @@ with zipfile.ZipFile("sample.zip") as zf:
         zf.extract(info, base)
 ```
 
-### Dangerous primitives to remember
+### Các primitive nguy hiểm cần nhớ
 
-- `eval()` / `exec()` are **not** sandboxes.
-- `ast.literal_eval()` does **not** execute Python code, but it can still be abused for memory / CPU denial of service with attacker-controlled input.
-- `pickle.loads()` is **not secure**; never unpickle attacker-controlled bytes.
-- For deeper offensive tricks, check [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) and [Python deserializations](../../pentesting-web/deserialization/README.md).
+- `eval()` / `exec()` **không phải** là sandbox.
+- `ast.literal_eval()` **không** thực thi mã Python, nhưng vẫn có thể bị lợi dụng để gây từ chối dịch vụ do cạn kiệt bộ nhớ / CPU bằng đầu vào do kẻ tấn công kiểm soát.
+- `pickle.loads()` **không an toàn**; tuyệt đối không unpickle byte do kẻ tấn công kiểm soát.
+- Để tìm hiểu sâu hơn về các thủ thuật tấn công, hãy xem [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) và [Python deserializations](../../pentesting-web/deserialization/README.md).
 
 ## References
 
-- [1] [Python tarfile docs](https://docs.python.org/3/library/tarfile.html)
-- [2] [PEP 706 – Filter for tarfile.extractall()](https://peps.python.org/pep-0706/)
-- [3] [venv — Creation of virtual environments — Python 3.14 documentation](https://docs.python.org/3/library/venv.html)
-- [4] [Package: python3-venv — Ubuntu Packages](https://packages.ubuntu.com/noble/python/python3-venv)
+- [1] [Tài liệu Python tarfile](https://docs.python.org/3/library/tarfile.html)
+- [2] [PEP 706 – Bộ lọc cho tarfile.extractall()](https://peps.python.org/pep-0706/)
+- [3] [venv — Tạo môi trường ảo — Tài liệu Python 3.14](https://docs.python.org/3/library/venv.html)
+- [4] [Gói: python3-venv — Các gói Ubuntu](https://packages.ubuntu.com/noble/python/python3-venv)
 - [5] [wheel 0.24.0 — PyPI](https://pypi.org/project/wheel/0.24.0/)
 - [6] [wheel — PyPI](https://pypi.org/project/wheel/)
-- [7] [Is setup.py deprecated? — Python Packaging User Guide](https://packaging.python.org/en/latest/discussions/setup-py-deprecated/)
-
+- [7] [setup.py có bị deprecated không? — Hướng dẫn sử dụng Python Packaging](https://packaging.python.org/en/latest/discussions/setup-py-deprecated/)
 {{#include ../../banners/hacktricks-training.md}}

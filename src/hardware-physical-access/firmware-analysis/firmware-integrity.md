@@ -1,41 +1,41 @@
-# Firmware Integrity
+# Tính toàn vẹn của firmware
 
 {{#include ../../banners/hacktricks-training.md}}
 
-When an authorized assessment finds weak or missing firmware-signature verification, a modified firmware image can demonstrate the integrity impact. The following lab workflow adds a bind shell while retaining the original extraction, emulation, and repacking steps.<sup>[[2]](#references)[[3]](#references)</sup>
+Khi một đợt đánh giá được ủy quyền phát hiện cơ chế xác minh chữ ký firmware yếu hoặc không có, có thể dùng một image firmware đã chỉnh sửa để minh họa tác động đến tính toàn vẹn. Quy trình lab sau đây thêm một bind shell đồng thời giữ nguyên các bước trích xuất, mô phỏng và đóng gói lại ban đầu.<sup>[[2]](#references)[[3]](#references)</sup>
 
-1. The firmware can be extracted using firmware-mod-kit (FMK).
-2. The target firmware architecture and endianness should be identified.
-3. A cross compiler can be built using Buildroot or other suitable methods for the environment.
-4. The backdoor can be built using the cross compiler.
-5. The backdoor can be copied to the extracted firmware /usr/bin directory.
-6. The appropriate QEMU binary can be copied to the extracted firmware rootfs.
-7. The backdoor can be emulated using chroot and QEMU.
-8. The backdoor can be accessed via netcat.
-9. The QEMU binary should be removed from the extracted firmware rootfs.
-10. The modified firmware can be repackaged using FMK.
-11. The backdoored firmware can be tested by emulating it with firmware analysis toolkit (FAT) and connecting to the target backdoor IP and port using netcat.
+1. Có thể trích xuất firmware bằng firmware-mod-kit (FMK).
+2. Cần xác định kiến trúc và thứ tự byte của firmware mục tiêu.
+3. Có thể xây dựng cross compiler bằng Buildroot hoặc phương pháp phù hợp khác với môi trường.
+4. Có thể dùng cross compiler để xây dựng backdoor.
+5. Có thể sao chép backdoor vào thư mục /usr/bin của firmware đã trích xuất.
+6. Có thể sao chép binary QEMU phù hợp vào rootfs của firmware đã trích xuất.
+7. Có thể mô phỏng backdoor bằng chroot và QEMU.
+8. Có thể truy cập backdoor qua netcat.
+9. Cần xóa binary QEMU khỏi rootfs của firmware đã trích xuất.
+10. Có thể đóng gói lại firmware đã chỉnh sửa bằng FMK.
+11. Có thể kiểm thử firmware đã cài backdoor bằng cách mô phỏng với firmware analysis toolkit (FAT), rồi kết nối đến IP và cổng của backdoor mục tiêu bằng netcat.
 
-If a root shell has already been obtained through dynamic analysis, bootloader manipulation, or hardware security testing, precompiled test binaries such as implants or reverse shells can be executed. Metasploit's `msfvenom` can generate an architecture-specific payload for this validation workflow:<sup>[[4]](#references)</sup>
+Nếu đã có root shell thông qua dynamic analysis, thao túng bootloader hoặc kiểm thử bảo mật phần cứng, có thể chạy các binary kiểm thử biên dịch sẵn như implant hoặc reverse shell. `msfvenom` của Metasploit có thể tạo payload dành riêng cho kiến trúc để phục vụ quy trình xác thực này:<sup>[[4]](#references)</sup>
 
-1. The target firmware architecture and endianness should be identified.
-2. Msfvenom can be used to specify the target payload, attacker host IP, listening port number, filetype, architecture, platform, and the output file.
-3. The payload can be transferred to the compromised device and ensured that it has execution permissions.
-4. Metasploit can be prepared to handle incoming requests by starting msfconsole and configuring the settings according to the payload.
-5. The meterpreter reverse shell can be executed on the compromised device.
+1. Cần xác định kiến trúc và thứ tự byte của firmware mục tiêu.
+2. Có thể dùng Msfvenom để chỉ định payload mục tiêu, IP của host tấn công, số cổng lắng nghe, filetype, kiến trúc, nền tảng và file đầu ra.
+3. Có thể chuyển payload đến thiết bị đã bị xâm nhập và đảm bảo payload có quyền thực thi.
+4. Có thể chuẩn bị Metasploit để xử lý các yêu cầu đến bằng cách khởi chạy msfconsole và cấu hình các thiết lập theo payload.
+5. Có thể chạy meterpreter reverse shell trên thiết bị đã bị xâm nhập.
 
-## Unauthenticated transport bridges to privileged update protocols
+## Cầu nối truyền tải không xác thực đến các giao thức cập nhật có đặc quyền
 
-A common embedded design mistake is exposing the **same internal command protocol over several transports** but enforcing authentication on only one of them. For example, USB may require challenge-response while BLE simply forwards unauthenticated **GATT writes** into the same privileged firmware-update handler.<sup>[[1]](#references)</sup>
+Một lỗi thiết kế phổ biến ở các thiết bị nhúng là để lộ **cùng một giao thức lệnh nội bộ qua nhiều phương thức truyền tải**, nhưng chỉ yêu cầu xác thực trên một phương thức. Ví dụ: USB có thể yêu cầu challenge-response, trong khi BLE chỉ chuyển tiếp các **GATT write** không xác thực đến cùng một trình xử lý cập nhật firmware có đặc quyền.<sup>[[1]](#references)</sup>
 
-Typical offensive workflow:
+Quy trình tấn công thường gặp:
 
-1. Enumerate the BLE GATT database and identify writable characteristics used by the official mobile app.
-2. Sniff app traffic and look for **magic bytes / opcodes** that match the wired protocol.
-3. Replay privileged commands over BLE **without pairing** and verify whether sensitive operations still work.
-4. If firmware upgrade, config write, debug, or factory-test opcodes are reachable, treat BLE as a **radio-reachable admin port**.
+1. Liệt kê cơ sở dữ liệu BLE GATT và xác định các characteristic có thể ghi mà ứng dụng di động chính thức sử dụng.
+2. Bắt lưu lượng ứng dụng và tìm các **magic bytes / opcode** trùng khớp với giao thức có dây.
+3. Phát lại các lệnh có đặc quyền qua BLE **mà không pairing** và xác minh xem các thao tác nhạy cảm có còn hoạt động hay không.
+4. Nếu có thể truy cập các opcode nâng cấp firmware, ghi cấu hình, debug hoặc kiểm thử tại nhà máy, hãy xem BLE như một **cổng quản trị có thể truy cập qua sóng vô tuyến**.
 
-Quick checks:
+Kiểm tra nhanh:
 
 ```bash
 # Enumerate services/characteristics
@@ -48,83 +48,82 @@ ble.write <MAC> <UUID> <HEX_DATA>
 # gatttool -b <MAC> --char-write-req -a <HANDLE> -n <HEX_DATA>
 ```
 
-Things to verify while reversing:
+Những điều cần xác minh khi reverse:
 
-- Does BLE require **pairing/bonding** or just a plain connection?
-- Are all transports routed to the same internal dispatcher table?
-- Are privileged opcodes filtered differently on USB / BLE / UART / Wi-Fi?
-- Can the mobile app trigger firmware update, recovery, or diagnostic handlers remotely?
+- BLE có yêu cầu **pairing/bonding** hay chỉ cần kết nối thông thường?
+- Tất cả transport có được định tuyến đến cùng một bảng dispatcher nội bộ không?
+- Các opcode đặc quyền có bị lọc khác nhau trên USB / BLE / UART / Wi-Fi không?
+- Ứng dụng di động có thể kích hoạt từ xa các handler cập nhật firmware, khôi phục hoặc chẩn đoán không?
 
-## Checksum-only firmware containers are still attacker-controlled firmware
+## Các firmware container chỉ có checksum vẫn chứa firmware do attacker kiểm soát
 
-A firmware container protected only by an **unkeyed checksum** (CRC32, SHA-256, MD5, etc.) provides corruption detection, **not authenticity**. If the attacker can reach the update routine, they can patch the image, recompute the checksum, and flash arbitrary code.<sup>[[1]](#references)</sup>
+Firmware container chỉ được bảo vệ bằng **checksum không khóa** (CRC32, SHA-256, MD5, v.v.) chỉ phát hiện lỗi dữ liệu, **không xác thực tính xác thực**. Nếu attacker có thể truy cập routine cập nhật, họ có thể vá image, tính lại checksum rồi flash mã tùy ý.<sup>[[1]](#references)</sup>
 
-Red flags during RE:
+Dấu hiệu đáng ngờ trong quá trình RE:
 
-- Update code validates only a trailing checksum blob such as `CHK2`, `CRC`, or `SHA256`.
-- No signature verification or secure-boot root of trust is present.
-- No device-bound MAC / HMAC / authenticated encryption is used.
-- Recovery mode accepts the same unauthenticated image format.
+- Code cập nhật chỉ xác thực một blob checksum ở cuối, chẳng hạn `CHK2`, `CRC` hoặc `SHA256`.
+- Không có xác minh chữ ký hoặc root of trust cho secure boot.
+- Không sử dụng MAC / HMAC gắn với thiết bị hoặc mã hóa có xác thực.
+- Chế độ recovery chấp nhận cùng định dạng image không xác thực.
 
-Practical validation flow:
+Quy trình xác thực thực tế:
 
-1. Extract the firmware container and identify bootloader, main firmware, and integrity metadata.
-2. Modify a harmless string or banner in the image.
-3. Recompute the checksum exactly as the updater expects.
-4. Reflash the image through the normal update path.
-5. Confirm the change on boot to prove arbitrary firmware replacement.
+1. Trích xuất firmware container và xác định bootloader, firmware chính cùng metadata về tính toàn vẹn.
+2. Sửa một chuỗi hoặc banner vô hại trong image.
+3. Tính lại checksum chính xác theo cách updater yêu cầu.
+4. Flash lại image qua quy trình cập nhật thông thường.
+5. Xác nhận thay đổi sau khi khởi động để chứng minh có thể thay thế firmware bằng mã tùy ý.
 
-If this works over a remotely reachable transport such as BLE/Wi-Fi, the bug is effectively **unauthenticated OTA firmware replacement**.
+Nếu cách này hoạt động qua transport có thể truy cập từ xa như BLE/Wi-Fi, lỗi này về bản chất là **thay thế firmware OTA không cần xác thực**.
 
-## Turning a trusted USB peripheral into BadUSB via firmware reflashing
+## Biến thiết bị ngoại vi USB đáng tin cậy thành BadUSB bằng cách flash lại firmware
 
-When the target device is already trusted by the host over USB, malicious firmware may not need to implement a full new USB stack. A much easier pivot is often to **reuse existing HID support**.<sup>[[1]](#references)</sup>
+Khi host đã tin cậy thiết bị mục tiêu qua USB, firmware độc hại có thể không cần triển khai một USB stack hoàn toàn mới. Một hướng đi dễ hơn thường là **tái sử dụng hỗ trợ HID sẵn có**.<sup>[[1]](#references)</sup>
 
-Useful pattern:
+Cách thực hiện hữu ích:
 
-1. Check whether the device already enumerates as a **HID Consumer Control** / media / vendor HID interface.
-2. Locate the existing **HID report descriptor** in firmware.
-3. Append or replace descriptor entries so the device also advertises **keyboard** capability.
-4. Reuse existing firmware routines that already send HID reports instead of writing a new transport implementation.
-5. Inject key press + key release reports to type commands on the host.
+1. Kiểm tra xem thiết bị đã enumerate dưới dạng giao diện **HID Consumer Control** / media / vendor HID hay chưa.
+2. Tìm **HID report descriptor** hiện có trong firmware.
+3. Thêm hoặc thay thế các mục descriptor để thiết bị cũng khai báo khả năng **keyboard**.
+4. Tái sử dụng các routine firmware hiện có để gửi HID report thay vì viết phần triển khai transport mới.
+5. Gửi report nhấn phím + nhả phím để nhập lệnh trên host.
 
-This turns firmware compromise into **host compromise** because the PC will trust the reflashed peripheral as a legitimate keyboard.
+Việc này biến việc chiếm quyền firmware thành **chiếm quyền host** vì PC sẽ tin thiết bị ngoại vi đã flash lại như một bàn phím hợp lệ.
 
-### Minimal assessment checklist
+### Checklist đánh giá tối thiểu
 
-- Does `dmesg`, Device Manager, or USB descriptors show an existing HID interface?
-- Is there spare room near the report descriptor or a relocatable descriptor table?
-- Can existing media-control send routines be reused for keyboard reports?
-- Does the host auto-accept the new keyboard interface after reflashing?
+- `dmesg`, Device Manager hoặc USB descriptor có hiển thị giao diện HID hiện có không?
+- Có chỗ trống gần report descriptor hoặc một bảng descriptor có thể relocate không?
+- Có thể tái sử dụng các routine gửi media-control hiện có để gửi keyboard report không?
+- Host có tự động chấp nhận giao diện keyboard mới sau khi flash lại không?
 
-## Reliable payload execution inside RTOS firmware
+## Thực thi payload đáng tin cậy trong firmware RTOS
 
-Instead of inserting fragile trampolines into random code paths, look for **existing RTOS tasks** that are unused or low-impact in normal operation.<sup>[[1]](#references)</sup>
+Thay vì chèn các trampoline dễ lỗi vào những code path bất kỳ, hãy tìm **các RTOS task hiện có** nhưng không được sử dụng hoặc ít ảnh hưởng trong hoạt động bình thường.<sup>[[1]](#references)</sup>
 
-Why this is useful:
+Lý do cách này hữu ích:
 
-- The scheduler starts your payload naturally during boot.
-- You avoid corrupting critical control flow.
-- Delayed payloads are less likely to trigger watchdog resets than when run inside a latency-sensitive USB/network handler.
+- Scheduler khởi chạy payload tự nhiên trong quá trình boot.
+- Tránh làm hỏng luồng điều khiển quan trọng.
+- Payload chạy trễ ít có khả năng kích hoạt watchdog reset hơn so với khi chạy bên trong handler USB/network nhạy với độ trễ.
 
-Good targets are diagnostic, factory-test, telemetry, or coprocessor service tasks that appear dormant in normal usage.
+Các mục tiêu phù hợp là task chẩn đoán, kiểm thử tại nhà máy, telemetry hoặc dịch vụ coprocessor có vẻ đang ở trạng thái chờ trong quá trình sử dụng bình thường.
 
-## Fast exploit iteration: repurpose benign protocol handlers
+## Lặp nhanh quá trình khai thác: tái sử dụng handler giao thức vô hại
 
-Once firmware patching is possible, a compact way to accelerate RE is to overwrite a harmless command handler (for example an **echo/debug opcode**) with custom **memory read / write / execute** primitives. This avoids full reflashing for every experiment and is especially useful when the device supports the modified handler over a fast wired transport.<sup>[[1]](#references)</sup>
+Khi đã có thể vá firmware, một cách gọn nhẹ để đẩy nhanh RE là ghi đè một command handler vô hại (ví dụ **echo/debug opcode**) bằng các primitive **đọc / ghi / thực thi bộ nhớ** tùy chỉnh. Cách này tránh phải flash lại toàn bộ firmware cho mỗi thử nghiệm và đặc biệt hữu ích khi thiết bị hỗ trợ handler đã sửa đổi qua transport có dây tốc độ cao.<sup>[[1]](#references)</sup>
 
-Use this to:
+Dùng cách này để:
 
-- Verify scatter-loaded memory maps
-- Inspect heap/task state live
-- Test small payloads before burning them into flash
-- Recover function pointers, strings, and descriptor tables safely
+- Xác minh memory map được scatter-load
+- Kiểm tra trực tiếp trạng thái heap/task
+- Thử payload nhỏ trước khi ghi chúng vào flash
+- An toàn khôi phục function pointer, chuỗi và bảng descriptor
 
 ## References
 
-- [1] [Pwnd Blaster: Hacking your PC using your speaker without ever touching it](https://blog.nns.ee/2026/06/03/katana-badusb/)
+- [1] [Pwnd Blaster: Hack PC của bạn bằng loa mà không cần chạm vào máy](https://blog.nns.ee/2026/06/03/katana-badusb/)
 - [2] [firmware-mod-kit](https://github.com/rampageX/firmware-mod-kit)
-- [3] [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit)
-- [4] [Metasploit - How to use `msfvenom`](https://docs.metasploit.com/docs/using-metasploit/basics/how-to-use-msfvenom.html)
-
+- [3] [Bộ công cụ phân tích firmware](https://github.com/attify/firmware-analysis-toolkit)
+- [4] [Metasploit - Cách sử dụng `msfvenom`](https://docs.metasploit.com/docs/using-metasploit/basics/how-to-use-msfvenom.html)
 {{#include ../../banners/hacktricks-training.md}}

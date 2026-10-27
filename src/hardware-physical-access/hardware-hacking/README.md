@@ -2,61 +2,60 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-For a device with physical access, start with the interface exposed by its board or signals: [UART serial consoles](uart.md), [JTAG/SWD debug access](jtag.md), [CoreSight instruction tracing](arm-coresight-instruction-tracing.md), [I²C](i2c.md) and [SPI flash](spi.md) buses. [Side-channel analysis](side_channel_analysis.md) and [fault injection](fault_injection_attacks.md) address different measurement and glitching tasks; [radio signal analysis](radio.md) covers an over-the-air entry point. For target-specific RFID/NFC, sub-GHz, infrared, BLE, LoRaWAN, and iButton procedures, use [Radio Hacking and Proximity Interfaces](../radio-hacking/README.md). Check the target's electrical levels and the limitations in the relevant chapter before attaching tools.
+Với thiết bị có thể tiếp cận vật lý, hãy bắt đầu từ giao diện được bo mạch hoặc các tín hiệu của thiết bị đưa ra: [UART serial consoles](uart.md), [JTAG/SWD debug access](jtag.md), [CoreSight instruction tracing](arm-coresight-instruction-tracing.md), các bus [I²C](i2c.md) và [SPI flash](spi.md). [Side-channel analysis](side_channel_analysis.md) và [fault injection](fault_injection_attacks.md) phục vụ các tác vụ đo lường và tạo glitch khác nhau; [radio signal analysis](radio.md) bao quát một điểm xâm nhập qua sóng vô tuyến. Với các quy trình cụ thể theo mục tiêu dành cho RFID/NFC, sub-GHz, hồng ngoại, BLE, LoRaWAN và iButton, hãy xem [Radio Hacking and Proximity Interfaces](../radio-hacking/README.md). Hãy kiểm tra mức điện áp của mục tiêu và các giới hạn được nêu trong chương liên quan trước khi kết nối công cụ.
 
 ## JTAG
 
-JTAG (IEEE 1149.1) supports boundary-scan testing through cells placed around a device's I/O pins. Many processors also expose vendor-specific debug functions through the same Test Access Port (TAP); boundary scan and CPU debugging are related uses of JTAG, not synonyms.<sup>[[1]](#references)</sup>
+JTAG (IEEE 1149.1) hỗ trợ kiểm thử boundary-scan thông qua các cell được đặt quanh các chân I/O của thiết bị. Nhiều bộ xử lý cũng cung cấp các chức năng debug riêng của nhà cung cấp thông qua cùng Test Access Port (TAP); boundary scan và debug CPU là những cách sử dụng JTAG có liên quan, nhưng không đồng nghĩa với nhau.<sup>[[1]](#references)</sup>
 
-The JTAG standard defines **specific commands for conducting boundary scans**, including the following:
+Tiêu chuẩn JTAG định nghĩa **các lệnh cụ thể để thực hiện boundary scan**, bao gồm:
 
-- **BYPASS** selects a one-bit bypass register so other devices in a scan chain can be reached with minimal overhead.
-- **SAMPLE/PRELOAD** captures pin values during normal operation and can preload the boundary-scan register before another instruction.
-- **EXTEST** sets and reads pin states.
+- **BYPASS** chọn một thanh ghi bypass một bit để có thể truy cập các thiết bị khác trong scan chain với mức overhead tối thiểu.
+- **SAMPLE/PRELOAD** ghi nhận giá trị chân trong quá trình hoạt động bình thường và có thể nạp trước thanh ghi boundary-scan trước khi thực hiện một lệnh khác.
+- **EXTEST** thiết lập và đọc trạng thái chân.
 
-It can also support other commands such as:
+JTAG cũng có thể hỗ trợ các lệnh khác như:
 
-- **IDCODE** for identifying a device
-- **INTEST** for the internal testing of the device
+- **IDCODE** dùng để nhận dạng thiết bị
+- **INTEST** dùng để kiểm thử nội bộ thiết bị
 
-You might come across these instructions when you use a tool like the JTAGulator.
+Bạn có thể gặp các lệnh này khi sử dụng công cụ như JTAGulator.
 
-### The Test Access Port
+### Test Access Port
 
-The **Test Access Port (TAP)** provides access to a component's JTAG test logic. Four signals are required and `TRST` is optional:<sup>[[1]](#references)</sup>
+**Test Access Port (TAP)** cung cấp quyền truy cập vào logic kiểm thử JTAG của một linh kiện. Cần có bốn tín hiệu; `TRST` là tùy chọn:<sup>[[1]](#references)</sup>
 
-- Test clock input (**TCK**) The TCK is the **clock** that defines how often the TAP controller will take a single action (in other words, jump to the next state in the state machine).
-- Test mode select (**TMS**) input TMS controls the **finite state machine**. On each beat of the clock, the device’s JTAG TAP controller checks the voltage on the TMS pin. If the voltage is below a certain threshold, the signal is considered low and interpreted as 0, whereas if the voltage is above a certain threshold, the signal is considered high and interpreted as 1.
-- Test data input (**TDI**) shifts serial instruction or test data into the selected TAP register. IEEE 1149.1 defines the TAP transfer behavior, while vendors define optional instructions and debug registers.
-- Test data output (**TDO**) TDO is the pin that sends **data out of the chip**.
-- Test reset (**TRST**) input The optional TRST resets the finite state machine **to a known good state**. Alternatively, if the TMS is held at 1 for five consecutive clock cycles, it invokes a reset, the same way the TRST pin would, which is why TRST is optional.
+- Đầu vào xung nhịp kiểm thử (**TCK**) TCK là **xung nhịp** xác định tần suất bộ điều khiển TAP thực hiện một hành động (nói cách khác, chuyển sang trạng thái tiếp theo trong máy trạng thái).
+- Đầu vào chọn chế độ kiểm thử (**TMS**) TMS điều khiển **máy trạng thái hữu hạn**. Ở mỗi nhịp xung nhịp, bộ điều khiển JTAG TAP của thiết bị kiểm tra điện áp trên chân TMS. Nếu điện áp thấp hơn một ngưỡng nhất định, tín hiệu được xem là mức thấp và được hiểu là 0; nếu điện áp cao hơn ngưỡng đó, tín hiệu được xem là mức cao và được hiểu là 1.
+- Đầu vào dữ liệu kiểm thử (**TDI**) dịch nối tiếp lệnh hoặc dữ liệu kiểm thử vào thanh ghi TAP được chọn. IEEE 1149.1 định nghĩa cách truyền dữ liệu của TAP, còn các nhà cung cấp định nghĩa những lệnh tùy chọn và thanh ghi debug.
+- Đầu ra dữ liệu kiểm thử (**TDO**) TDO là chân gửi **dữ liệu ra khỏi chip**.
+- Đầu vào reset kiểm thử (**TRST**) TRST tùy chọn sẽ đưa máy trạng thái về **trạng thái tốt đã biết**. Ngoài ra, nếu giữ TMS ở mức 1 trong năm chu kỳ xung nhịp liên tiếp, thiết bị sẽ được reset tương tự như khi dùng chân TRST; vì vậy TRST là tùy chọn.
 
-Sometimes you will be able to find those pins marked in the PCB. In other occasions you might need to **find them**.
+Đôi khi bạn có thể tìm thấy các chân đó được đánh dấu trên PCB. Trong những trường hợp khác, bạn có thể cần **tìm chúng**.
 
-### Identifying JTAG pins
+### Xác định các chân JTAG
 
-A fast, purpose-built—but comparatively expensive—option for detecting JTAG ports is the **JTAGulator**, which can also identify UART pinouts.<sup>[[2]](#references)</sup>
+Một lựa chọn nhanh, được thiết kế chuyên dụng nhưng tương đối đắt để phát hiện cổng JTAG là **JTAGulator**; công cụ này cũng có thể xác định sơ đồ chân UART.<sup>[[2]](#references)</sup>
 
-It has **24 channels** that can be connected to board test points. It enumerates candidate pin combinations using **IDCODE** and **BYPASS** scans and reports the channels corresponding to the detected JTAG signals.
+Thiết bị có **24 kênh** có thể kết nối với các điểm kiểm tra trên bo mạch. Thiết bị liệt kê các tổ hợp chân khả dĩ bằng các lần quét **IDCODE** và **BYPASS**, rồi báo cáo các kênh tương ứng với những tín hiệu JTAG được phát hiện.
 
-A cheaper but much slower way of identifying JTAG pinouts is by using the [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) loaded on an Arduino-compatible microcontroller.
+Một cách rẻ hơn nhưng chậm hơn nhiều để xác định sơ đồ chân JTAG là dùng [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) được nạp lên một vi điều khiển tương thích Arduino.
 
-With **JTAGenum**, first define the probing microcontroller pins used for enumeration. Consult its pinout, then connect those pins to candidate test points on the target board.<sup>[[3]](#references)</sup>
+Với **JTAGenum**, trước tiên hãy xác định các chân của vi điều khiển dùng để thăm dò khi liệt kê. Tham khảo sơ đồ chân của thiết bị, sau đó nối các chân đó với những điểm kiểm tra khả dĩ trên bo mạch mục tiêu.<sup>[[3]](#references)</sup>
 
-A **third way** to identify JTAG pins is by **inspecting the PCB** for a known footprint. Some boards expose a **Tag-Connect** footprint, although Tag-Connect is a connector system that can carry JTAG, SWD, UART, or another interface—it is not proof by itself that the pins are JTAG. Component datasheets and continuity measurements can then identify the actual signals.<sup>[[5]](#references)</sup>
+**Cách thứ ba** để xác định các chân JTAG là **kiểm tra PCB** để tìm footprint đã biết. Một số bo mạch có footprint **Tag-Connect**, nhưng Tag-Connect là một hệ thống đầu nối có thể mang JTAG, SWD, UART hoặc giao diện khác — bản thân nó không chứng minh các chân đó là JTAG. Sau đó, có thể dùng datasheet của linh kiện và phép đo thông mạch để xác định các tín hiệu thực tế.<sup>[[5]](#references)</sup>
 
 ## SDW
 
-SWD is Arm's two-pin, packet-based debug interface.<sup>[[4]](#references)</sup>
+SWD là giao diện debug dạng gói hai chân của Arm.<sup>[[4]](#references)</sup>
 
-The interface uses bidirectional **SWDIO** for data and **SWCLK** for the clock. Many devices implement a **Serial Wire/JTAG Debug Port (SWJ-DP)** that permits selection between SWD and JTAG on shared pins.<sup>[[4]](#references)</sup>
+Giao diện này sử dụng **SWDIO** hai chiều để truyền dữ liệu và **SWCLK** làm xung nhịp. Nhiều thiết bị triển khai **Serial Wire/JTAG Debug Port (SWJ-DP)**, cho phép chọn giữa SWD và JTAG trên các chân dùng chung.<sup>[[4]](#references)</sup>
 
 ## References
 
-- [1] [IEEE 1149.1 working group — JTAG and boundary scan](https://sagroups.ieee.org/1149/1/)
-- [2] [JTAGulator documentation](https://github.com/grandideastudio/jtagulator/wiki)
-- [3] [JTAGenum — Arduino JTAG pin enumeration](https://github.com/cyphunk/JTAGenum/)
-- [4] [Arm — Low Pin-count Debug Interfaces for Multi-device Systems](https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/Low_Pin-Count_Debug_Interfaces_for_Multi-device_Systems.pdf)
-- [5] [Tag-Connect — Debug and programming cable footprints](https://www.tag-connect.com/info/)
-
+- [1] [Nhóm công tác IEEE 1149.1 — JTAG và boundary scan](https://sagroups.ieee.org/1149/1/)
+- [2] [Tài liệu JTAGulator](https://github.com/grandideastudio/jtagulator/wiki)
+- [3] [JTAGenum — Liệt kê chân JTAG trên Arduino](https://github.com/cyphunk/JTAGenum/)
+- [4] [Arm — Giao diện debug ít chân cho các hệ thống đa thiết bị](https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/Low_Pin-Count_Debug_Interfaces_for_Multi-device_Systems.pdf)
+- [5] [Tag-Connect — Footprint cáp debug và lập trình](https://www.tag-connect.com/info/)
 {{#include ../../banners/hacktricks-training.md}}

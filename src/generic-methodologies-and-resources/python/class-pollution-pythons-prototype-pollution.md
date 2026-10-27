@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Example
+## Ví dụ cơ bản
 
-Changing `__qualname__` through an instance's class reference updates the class and its mutable base classes.<sup>[[1]](#references)</sup>
+Thay đổi `__qualname__` thông qua tham chiếu class của một instance sẽ cập nhật class đó cùng các base class có thể thay đổi của nó.<sup>[[1]](#references)</sup>
 
 ```python
 class Company: pass
@@ -30,9 +30,9 @@ print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
 
-## Basic Vulnerability Example
+## Ví dụ về lỗ hổng cơ bản
 
-A recursive merge can accept attacker-controlled mapping keys and write nested values through either item or attribute access.<sup>[[1]](#references)</sup>
+Một thao tác merge đệ quy có thể chấp nhận các khóa mapping do kẻ tấn công kiểm soát và ghi các giá trị lồng nhau thông qua truy cập item hoặc attribute.<sup>[[1]](#references)</sup>
 
 ```python
 # Initial state
@@ -67,13 +67,13 @@ merge(USER_INPUT, emp)
 print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 ```
 
-## Gadget Examples
+## Ví dụ về Gadget
 
 <details>
 
-<summary>Creating class property default value to RCE (subprocess)</summary>
+<summary>Tạo giá trị mặc định cho thuộc tính của class để dẫn đến RCE (subprocess)</summary>
 
-A shared base class can supply a default attribute consumed by a sibling-class command gadget.<sup>[[1]](#references)</sup>
+Một base class dùng chung có thể cung cấp thuộc tính mặc định được gadget lệnh của một sibling class sử dụng.<sup>[[1]](#references)</sup>
 
 ```python
 from os import popen
@@ -126,9 +126,9 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Polluting other classes and global vars through <code>globals</code></summary>
+<summary>Làm nhiễm bẩn các class khác và biến toàn cục thông qua <code>globals</code></summary>
 
-A function's `__globals__` mapping exposes the module namespace reachable from a method defined in that module.<sup>[[1]](#references)[[4]](#references)</sup>
+Ánh xạ `__globals__` của một hàm cho phép truy cập namespace của module từ một method được định nghĩa trong module đó.<sup>[[1]](#references)[[4]](#references)</sup>
 
 ```python
 def merge(src, dst):
@@ -162,9 +162,9 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>Arbitrary subprocess execution</summary>
+<summary>Thực thi subprocess tùy ý</summary>
 
-On Windows, `Popen(..., shell=True)` uses the `COMSPEC` environment variable as the default shell, so this gadget demonstrates environment-backed command redirection.<sup>[[1]](#references)[[5]](#references)</sup>
+Trên Windows, `Popen(..., shell=True)` sử dụng biến môi trường `COMSPEC` làm shell mặc định, vì vậy gadget này minh họa việc chuyển hướng lệnh thông qua môi trường.<sup>[[1]](#references)[[5]](#references)</sup>
 
 ```python
 import subprocess, json
@@ -198,9 +198,9 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary>Overwritting <strong><code>__kwdefaults__</code></strong></summary>
+<summary>Ghi đè <strong><code>__kwdefaults__</code></strong></summary>
 
-Python documents `__kwdefaults__` as the mapping of default values for keyword-only parameters, which follow `*` or `*args` in a function definition.<sup>[[4]](#references)</sup> The following gadget overwrites that mapping through a polluted function path.<sup>[[1]](#references)</sup>
+Python mô tả `__kwdefaults__` là ánh xạ các giá trị mặc định cho những tham số chỉ nhận đối số từ khóa, đứng sau `*` hoặc `*args` trong định nghĩa hàm.<sup>[[4]](#references)</sup> Gadget sau ghi đè ánh xạ đó thông qua một đường dẫn hàm bị nhiễm độc.<sup>[[1]](#references)</sup>
 
 ```python
 from os import system
@@ -243,29 +243,28 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Overwriting Flask secret across files</summary>
+<summary>Ghi đè secret của Flask giữa các file</summary>
 
-If the polluted object's class lives in a module different from the application's entry-point module, its methods' `__globals__` initially expose the class module's namespace. A traversal through the loader and `sys.modules.__main__` can then reach the entry-point module and its Flask `app` object.<sup>[[1]](#references)[[2]](#references)</sup>
+Nếu class của đối tượng bị ô nhiễm nằm trong module khác với module entry-point của ứng dụng, `__globals__` của các phương thức ban đầu sẽ hiển thị namespace của module chứa class. Sau đó, có thể duyệt qua loader và `sys.modules.__main__` để truy cập module entry-point và đối tượng `app` của Flask.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
 
-Flask uses `app.secret_key` to sign the session cookie; knowing the key allows an attacker to create valid session data.<sup>[[6]](#references)</sup>
+Flask dùng `app.secret_key` để ký session cookie; biết khóa này cho phép kẻ tấn công tạo dữ liệu phiên hợp lệ.<sup>[[6]](#references)</sup>
 
-The original writeup demonstrates the following path to reach `app.secret_key`; CTFtime also hosts a copy of the writeup.<sup>[[2]](#references)[[3]](#references)</sup>
+Bài writeup gốc trình bày đường dẫn sau để truy cập `app.secret_key`; CTFtime cũng lưu trữ một bản sao của bài writeup.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
 
-Changing the key can allow signing replacement session cookies and may enable privilege escalation; see [the Flask session tooling page](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
+Thay đổi key có thể cho phép ký session cookie thay thế và có thể dẫn đến leo thang đặc quyền; xem [trang công cụ session Flask](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
 
 </details>
 
-Check also the following page for more read only gadgets:
-
+Cũng xem trang sau để biết thêm các read-only gadget:
 
 {{#ref}}
 python-internal-read-gadgets.md
@@ -273,11 +272,10 @@ python-internal-read-gadgets.md
 
 ## References
 
-- [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
-- [2] [idekCTF 2022 task manager writeup (original)](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
-- [3] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
-- [4] [inspect — Inspect live objects](https://docs.python.org/3/library/inspect.html)
-- [5] [subprocess — Subprocess management](https://docs.python.org/3/library/subprocess.html)
-- [6] [Quickstart — Flask Documentation](https://flask.palletsprojects.com/en/stable/quickstart/)
-
+- [1] [Prototype Pollution trong Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [2] [Bài viết lời giải task manager idekCTF 2022 (bản gốc)](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
+- [3] [CTFtime - Bài viết lời giải task manager idekCTF 2022](https://ctftime.org/writeup/36082)
+- [4] [inspect — Kiểm tra các đối tượng đang hoạt động](https://docs.python.org/3/library/inspect.html)
+- [5] [subprocess — Quản lý subprocess](https://docs.python.org/3/library/subprocess.html)
+- [6] [Hướng dẫn nhanh — Tài liệu Flask](https://flask.palletsprojects.com/en/stable/quickstart/)
 {{#include ../../banners/hacktricks-training.md}}

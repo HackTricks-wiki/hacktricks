@@ -1,52 +1,52 @@
-# Homograph / Homoglyph Attacks in Phishing
+# Tấn công Homograph / Homoglyph trong Phishing
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Overview
+## Tổng quan
 
-A homograph (aka homoglyph) attack abuses the fact that many **Unicode code points from non-Latin scripts are visually identical or extremely similar to ASCII characters**. By replacing one or more Latin characters with their look-alike counterparts, an attacker can craft:
+Tấn công homograph (còn gọi là homoglyph) lợi dụng thực tế rằng nhiều **điểm mã Unicode thuộc các hệ chữ phi Latin trông giống hệt hoặc rất giống các ký tự ASCII**. Bằng cách thay một hoặc nhiều ký tự Latin bằng các ký tự tương tự về hình thức, kẻ tấn công có thể tạo ra:
 
-* Display names, subjects or message bodies that look legitimate to the human eye but bypass keyword-based detections.
-* Domains, sub-domains or URL paths that fool victims into believing they are visiting a trusted site.<sup>[[1]](#references)</sup>
+* Tên hiển thị, chủ đề hoặc nội dung thư trông hợp pháp với mắt người nhưng vượt qua các cơ chế phát hiện dựa trên từ khóa.
+* Tên miền, tên miền phụ hoặc đường dẫn URL đánh lừa nạn nhân, khiến họ tin rằng mình đang truy cập một trang đáng tin cậy.<sup>[[1]](#references)</sup>
 
-Because every glyph is identified internally by its **Unicode code point**, a single substituted character is enough to defeat naïve string comparisons (e.g., `"Παypal.com"` vs. `"Paypal.com"`).<sup>[[1]](#references)[[3]](#references)</sup>
+Vì mỗi ký tự được nhận diện nội bộ bằng **điểm mã Unicode**, chỉ cần thay thế một ký tự là đủ để đánh bại các phép so sánh chuỗi đơn giản (ví dụ: `"Παypal.com"` so với `"Paypal.com"`).<sup>[[1]](#references)[[3]](#references)</sup>
 
-## Typical Phishing Workflow
+## Quy trình Phishing điển hình
 
-1. **Craft message content** – Replace specific Latin letters in the impersonated brand / keyword with visually indistinguishable characters from another script (Greek, Cyrillic, Armenian, Cherokee, etc.).
-2. **Register supporting infrastructure** – Optionally register a homoglyph domain and obtain a TLS certificate (most CAs do no visual similarity checks).
-3. **Send email / SMS** – The message contains homoglyphs in one or more of the following locations:
-   * Sender display name (e.g., `Ηеlрdеѕk`)
-   * Subject line (`Urgеnt Аctіon Rеquіrеd`)
-   * Hyperlink text or fully qualified domain name
-4. **Redirect chain** – Victim is bounced through seemingly benign websites or URL shorteners before landing on the malicious host that harvests credentials / delivers malware.<sup>[[1]](#references)</sup>
+1. **Tạo nội dung thông điệp** – Thay thế một số chữ cái Latin trong thương hiệu / từ khóa bị mạo danh bằng các ký tự trông không thể phân biệt được thuộc hệ chữ khác (Hy Lạp, Cyrillic, Armenia, Cherokee, v.v.).
+2. **Đăng ký hạ tầng hỗ trợ** – Có thể đăng ký tên miền homoglyph và lấy chứng chỉ TLS (hầu hết CA không kiểm tra độ tương đồng về hình thức).
+3. **Gửi email / SMS** – Thông điệp chứa homoglyph ở một hoặc nhiều vị trí sau:
+   * Tên hiển thị của người gửi (ví dụ: `Ηеlрdеѕk`)
+   * Dòng chủ đề (`Urgеnt Аctіon Rеquіrеd`)
+   * Văn bản liên kết hoặc tên miền đầy đủ
+4. **Chuỗi chuyển hướng** – Nạn nhân được chuyển qua các trang web có vẻ vô hại hoặc dịch vụ rút gọn URL trước khi đến máy chủ độc hại dùng để thu thập thông tin xác thực / phát tán malware.<sup>[[1]](#references)</sup>
 
-## Unicode Ranges Commonly Abused
+## Các dải Unicode thường bị lạm dụng
 
-The following examples are Unicode blocks that contain characters commonly used to create cross-script look-alikes.<sup>[[2]](#references)[[3]](#references)</sup>
+Các ví dụ sau là những khối Unicode chứa các ký tự thường được dùng để tạo ra các ký tự trông giống nhau giữa các hệ chữ.<sup>[[2]](#references)[[3]](#references)</sup>
 
-| Script | Range | Example glyph | Looks like |
+| Hệ chữ | Dải | Ký tự ví dụ | Trông giống |
 |--------|-------|---------------|------------|
-| Greek  | U+0370-03FF | `Η` (U+0397) | Latin `H` |
-| Greek  | U+0370-03FF | `ρ` (U+03C1) | Latin `p` |
+| Hy Lạp  | U+0370-03FF | `Η` (U+0397) | Latin `H` |
+| Hy Lạp  | U+0370-03FF | `ρ` (U+03C1) | Latin `p` |
 | Cyrillic | U+0400-04FF | `а` (U+0430) | Latin `a` |
 | Cyrillic | U+0400-04FF | `е` (U+0435) | Latin `e` |
-| Armenian | U+0530-058F | `օ` (U+0585) | Latin `o` |
+| Armenia | U+0530-058F | `օ` (U+0585) | Latin `o` |
 | Cherokee | U+13A0-13FF | `Ꭲ` (U+13A2) | Latin `T` |
 
-> Tip: Use the Unicode code charts to look up blocks and code points.
+> Mẹo: Tra cứu các khối và điểm mã trong biểu đồ mã Unicode.
 
-## Detection Techniques
+## Kỹ thuật phát hiện
 
-### 1. Mixed-Script Inspection
+### 1. Kiểm tra hệ chữ hỗn hợp
 
-Phishing emails aimed at an English-speaking organisation should rarely mix characters from multiple scripts.  A simple but effective heuristic is to:
+Email Phishing nhắm đến một tổ chức nói tiếng Anh hiếm khi nên trộn ký tự từ nhiều hệ chữ. Một heuristic đơn giản nhưng hiệu quả là:
 
-1. Iterate each character of the inspected string.
-2. Map the code point to its script name or Unicode block.
-3. Raise an alert if more than one script is present **or** if non-Latin scripts appear where they are not expected (display name, domain, subject, URL, etc.).<sup>[[3]](#references)</sup>
+1. Duyệt từng ký tự trong chuỗi cần kiểm tra.
+2. Ánh xạ điểm mã sang tên hệ chữ hoặc khối Unicode tương ứng.
+3. Cảnh báo nếu có nhiều hơn một hệ chữ **hoặc** nếu xuất hiện hệ chữ phi Latin ở nơi không được mong đợi (tên hiển thị, tên miền, chủ đề, URL, v.v.).<sup>[[3]](#references)</sup>
 
-Python proof-of-concept:
+Proof-of-concept Python:
 
 ```python
 import unicodedata as ud
@@ -71,9 +71,9 @@ for field, value in SUSPECT_FIELDS.items():
         print(f"[!] Mixed scripts in {field}: {dict(blocks)} -> {value}")
 ```
 
-### 2. Punycode Normalisation (Domains)
+### 2. Chuẩn hóa Punycode (Tên miền)
 
-Internationalised Domain Names (IDNs) have a Unicode form and an ASCII-compatible **Punycode** form prefixed with `xn--`. Convert hostnames to the IDNA/Punycode form before allow-listing or comparing them, while retaining the Unicode form for display.<sup>[[6]](#references)</sup>
+Tên miền quốc tế hóa (IDN) có dạng Unicode và dạng **Punycode** tương thích với ASCII, có tiền tố `xn--`. Hãy chuyển hostname sang dạng IDNA/Punycode trước khi đưa vào allow-list hoặc so sánh, đồng thời giữ lại dạng Unicode để hiển thị.<sup>[[6]](#references)</sup>
 
 ```python
 import idna
@@ -82,32 +82,31 @@ puny = idna.encode(hostname).decode()
 print(puny)  # xn--ypal-9nd08d.com
 ```
 
-### 3. Homoglyph Dictionaries / Algorithms
+### 3. Từ điển / thuật toán Homoglyph
 
-Tools such as **dnstwist** (`--fuzzers homoglyph`) or **urlcrazy** can enumerate visually-similar domain permutations and are useful for proactive takedown / monitoring.<sup>[[4]](#references)[[5]](#references)</sup>
+Các công cụ như **dnstwist** (`--fuzzers homoglyph`) hoặc **urlcrazy** có thể liệt kê các biến thể tên miền trông giống nhau và hữu ích cho việc chủ động yêu cầu gỡ bỏ / giám sát.<sup>[[4]](#references)[[5]](#references)</sup>
 
-## Prevention & Mitigation
+## Phòng ngừa & giảm thiểu
 
-* Enforce strict DMARC/DKIM/SPF policies – prevent spoofing from unauthorised domains.
-* Implement the detection logic above in **Secure Email Gateways** and **SIEM/XSOAR** playbooks.
-* Flag or quarantine messages where display name domain ≠ sender domain.
-* Educate users: copy-paste suspicious text into a Unicode inspector, hover links, never trust URL shorteners.
+* Thực thi các chính sách DMARC/DKIM/SPF nghiêm ngặt – ngăn giả mạo từ các tên miền trái phép.
+* Triển khai logic phát hiện ở trên trong **Secure Email Gateways** và các playbook **SIEM/XSOAR**.
+* Gắn cờ hoặc cách ly các thư có tên miền trong tên hiển thị ≠ tên miền người gửi.
+* Hướng dẫn người dùng: sao chép-dán văn bản đáng ngờ vào công cụ kiểm tra Unicode, di chuột qua các liên kết, không bao giờ tin tưởng các dịch vụ rút gọn URL.
 
-## Real-World Examples
+## Ví dụ thực tế
 
-* Display name: `Сonfidеntiаl Ꭲiꮯkеt` (Cyrillic `С`, `е`, `а`; Cherokee `Ꭲ`; Latin small capital `ꮯ`).
-* Domain chain: `bestseoservices.com` ➜ municipal `/templates` directory ➜ `kig.skyvaulyt.ru` ➜ fake Microsoft login at `mlcorsftpsswddprotcct.approaches.it.com` protected by custom OTP CAPTCHA.
-* Spotify impersonation: `Sρօtifս` sender with link hidden behind `redirects.ca`.
+* Tên hiển thị: `Сonfidеntiаl Ꭲiꮯkеt` (chữ Cyrillic `С`, `е`, `а`; chữ Cherokee `Ꭲ`; chữ Latin viết hoa nhỏ `ꮯ`).
+* Chuỗi tên miền: `bestseoservices.com` ➜ thư mục `/templates` của một đô thị ➜ `kig.skyvaulyt.ru` ➜ trang đăng nhập Microsoft giả mạo tại `mlcorsftpsswddprotcct.approaches.it.com`, được bảo vệ bằng CAPTCHA OTP tùy chỉnh.
+* Mạo danh Spotify: người gửi `Sρօtifս` với liên kết ẩn sau `redirects.ca`.
 
-These samples originate from Unit 42 research (July 2025) and illustrate how homograph abuse is combined with URL redirection and CAPTCHA evasion to bypass automated analysis.<sup>[[1]](#references)</sup>
+Các mẫu này xuất phát từ nghiên cứu của Unit 42 (tháng 7 năm 2025) và minh họa cách lạm dụng homograph kết hợp chuyển hướng URL và né tránh CAPTCHA để vượt qua phân tích tự động.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [The Homograph Illusion: Not Everything Is As It Seems](https://unit42.paloaltonetworks.com/homograph-attacks/)
-- [2] [Unicode Character Code Charts](https://www.unicode.org/charts/)
-- [3] [Unicode Technical Standard #39: Unicode Security Mechanisms](https://unicode.org/reports/tr39/)
-- [4] [dnstwist – domain permutation engine](https://github.com/elceef/dnstwist)
-- [5] [URLCrazy – domain typo and variation generator](https://github.com/urbanadventurer/urlcrazy)
-- [6] [RFC 5890: Internationalized Domain Names for Applications (IDNA): Definitions and Document Framework](https://www.rfc-editor.org/rfc/rfc5890)
-
+- [1] [Ảo ảnh Homograph: Không phải mọi thứ đều như vẻ ngoài](https://unit42.paloaltonetworks.com/homograph-attacks/)
+- [2] [Bảng mã ký tự Unicode](https://www.unicode.org/charts/)
+- [3] [Tiêu chuẩn kỹ thuật Unicode #39: Cơ chế bảo mật Unicode](https://unicode.org/reports/tr39/)
+- [4] [dnstwist – công cụ tạo biến thể tên miền](https://github.com/elceef/dnstwist)
+- [5] [URLCrazy – công cụ tạo lỗi chính tả và biến thể tên miền](https://github.com/urbanadventurer/urlcrazy)
+- [6] [RFC 5890: Tên miền quốc tế hóa cho ứng dụng (IDNA): Định nghĩa và khuôn khổ tài liệu](https://www.rfc-editor.org/rfc/rfc5890)
 {{#include ../../banners/hacktricks-training.md}}
