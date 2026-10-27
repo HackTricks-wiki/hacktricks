@@ -177,6 +177,16 @@ expected_signal: "user B's object is returned"
 falsifier: "server rejects it or returns only user A's object"
 ```
 
+## WebSocket frame triage with Burp MCP
+
+The official extension exposes `get_proxy_websocket_history_regex` for read-only, paginated searches of Burp's WebSocket history. It takes `regex`, `count`, and `offset`; unlike `send_http1_request`, it does not send a WebSocket frame. Burp records both message directions even when Intercept is off, so filter the history before handing the model a small set of relevant frames.<sup>[[10]](#references)[[12]](#references)[[13]](#references)</sup>
+
+1. Drive the same WebSocket-backed action through the Burp-proxied browser with two independently authenticated test accounts. Keep each upgrade handshake and its cookies, the connection ID, frame direction, and response frames together; a server-to-client event on the first account's connection is not evidence that the second account received it.
+2. Search `get_proxy_websocket_history_regex` with a narrow expression such as `(?i)(subscribe|room|tenant|objectId)`, `count: 20`, and `offset: 0`. Advance `offset` to inspect later matches. Compare the outbound frame's object or topic identifier with the response on that **same connection**.
+3. In **Proxy > WebSockets history**, send the candidate outbound frame to Repeater. Attach it to the appropriate open connection or reconnect using the second account's handshake. Change only the object/topic identifier and compare the resulting server messages and application state against both baselines. The MCP history tool cannot perform this replay; WebSocket Repeater can edit, resend, and reconnect frames.
+
+For protocol-specific tests such as cross-site WebSocket hijacking and broker topic authorization, continue in [WebSocket Attacks](../pentesting-web/websocket-attacks.md). Do not treat an accepted upgrade or a client-side echo as proof that a protected subscription succeeded.
+
 ## Targeted out-of-band validation with Burp MCP
 
 Burp Suite Professional exposes `generate_collaborator_payload` and `get_collaborator_interactions` through the official MCP extension. Combine them with `get_proxy_http_history_regex` and a single `send_http1_request` replay to test a suspected server-side URL fetch without scanning the whole target. Burp may require separate approval to read history and send a request.<sup>[[2]](#references)[[10]](#references)</sup>
@@ -254,4 +264,6 @@ Operational cautions: cloud backends may exfiltrate session cookies/PII unless p
 - [9] [OpenBurp: Burp Suite orchestration for Claude Code and Codex](https://github.com/luispacheco22/OpenBurp)
 - [10] [PortSwigger MCP Server tool implementations and parameters](https://github.com/PortSwigger/mcp-server/blob/main/src/main/kotlin/net/portswigger/mcp/tools/Tools.kt)
 - [11] [PortSwigger Web Security Academy - Blind SSRF vulnerabilities](https://portswigger.net/web-security/ssrf/blind)
+- [12] [PortSwigger - WebSockets history](https://portswigger.net/burp/documentation/desktop/tools/proxy/websockets-history)
+- [13] [PortSwigger - Working with WebSocket messages in Burp Repeater](https://portswigger.net/burp/documentation/desktop/tools/repeater/websocket-messages)
 {{#include ../banners/hacktricks-training.md}}
