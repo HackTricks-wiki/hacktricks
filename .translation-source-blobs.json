@@ -48,7 +48,7 @@
     "src/binary-exploitation/basic-stack-binary-exploitation-methodology/elf-tricks.md": "8978325a4d04464a911525efea876b84f4b3914f",
     "src/binary-exploitation/basic-stack-binary-exploitation-methodology/tools/README.md": "a1fe858fc129fa611cb1e224486a81333346d8d3",
     "src/binary-exploitation/basic-stack-binary-exploitation-methodology/tools/pwntools.md": "bb57eea4ce2fade6d9299dd2e6859952cc03a2d1",
-    "src/binary-exploitation/chrome-exploiting.md": "dcf9af23c5f7496fc998449d0ba153bf957af00e",
+    "src/binary-exploitation/chrome-exploiting.md": "1560b837e8270c4c3781454d2766e8aa7614a522",
     "src/binary-exploitation/common-binary-protections-and-bypasses/README.md": "092d74cea4b5c60def237448ff327889fb09e0ec",
     "src/binary-exploitation/common-binary-protections-and-bypasses/aslr/README.md": "491b012f23f58f530e42df5046a80becd8a3364f",
     "src/binary-exploitation/common-binary-protections-and-bypasses/aslr/ret2plt.md": "6de183c6662de775935fa81016b256e1a5bd120f",
