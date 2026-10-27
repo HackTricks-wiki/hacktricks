@@ -1,17 +1,16 @@
-# About the author
+# Về tác giả
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Hello!!
+### Xin chào!!
 
-Techniques contributed by other researchers remain credited to their original authors. Kudos to everyone who shares knowledge to improve internet security.
+Các kỹ thuật do những nhà nghiên cứu khác đóng góp vẫn được ghi công cho tác giả ban đầu. Xin cảm ơn tất cả mọi người đã chia sẻ kiến thức để cải thiện bảo mật internet.
 
-Carlos leads HackTricks. The project is a community-maintained cybersecurity wiki that collects practical security techniques and welcomes contributions; if you find something missing or outdated, please open a pull request in the project repository.<sup>[[1]](#references)</sup>
+Carlos điều hành HackTricks. Đây là một wiki an ninh mạng do cộng đồng duy trì, tập hợp các kỹ thuật bảo mật thực tiễn và chào đón các đóng góp; nếu bạn phát hiện nội dung còn thiếu hoặc lỗi thời, vui lòng mở pull request trong kho lưu trữ của dự án.<sup>[[1]](#references)</sup>
 
-HackTricks also gives researchers a place to share new findings, helping readers keep up with current security techniques.
+HackTricks cũng tạo nơi để các nhà nghiên cứu chia sẻ phát hiện mới, giúp độc giả cập nhật các kỹ thuật bảo mật hiện hành.
 
 ## References
 
-- [1] [HackTricks-wiki/hacktricks — GitHub repository](https://github.com/HackTricks-wiki/hacktricks)
-
+- [1] [HackTricks-wiki/hacktricks — kho lưu trữ GitHub](https://github.com/HackTricks-wiki/hacktricks)
 {{#include ../banners/hacktricks-training.md}}

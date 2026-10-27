@@ -1,29 +1,29 @@
-# AD CS Domain Persistence
+# Persistence trong miền AD CS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This is a summary of the domain persistence techniques shared in [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**. Check it for further details.<sup>[[5]](#references)</sup>
+**Đây là bản tóm tắt các kỹ thuật persistence trong miền được chia sẻ trong [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**. Hãy xem tài liệu để biết thêm chi tiết.<sup>[[5]](#references)</sup>
 
-## Forging Certificates with Stolen CA Certificates (Golden Certificate) - DPERSIST1
+## Giả mạo chứng chỉ bằng chứng chỉ CA bị đánh cắp (Golden Certificate) - DPERSIST1
 
-How can you tell that a certificate is a CA certificate?
+Làm thế nào để biết một chứng chỉ có phải là chứng chỉ CA hay không?
 
-It can be determined that a certificate is a CA certificate if several conditions are met:<sup>[[5]](#references)</sup>
+Có thể xác định một chứng chỉ là chứng chỉ CA nếu đáp ứng một số điều kiện sau:<sup>[[5]](#references)</sup>
 
-- The certificate is stored on the CA server, with its private key secured by the machine's DPAPI, or by hardware such as a TPM/HSM if the operating system supports it.
-- Both the Issuer and Subject fields of the certificate match the distinguished name of the CA.
-- A "CA Version" extension is present in the CA certificates exclusively.
-- The certificate lacks Extended Key Usage (EKU) fields.
+- Chứng chỉ được lưu trên máy chủ CA, khóa riêng được bảo vệ bằng DPAPI của máy hoặc bằng phần cứng như TPM/HSM nếu hệ điều hành hỗ trợ.
+- Cả trường Issuer và Subject của chứng chỉ đều khớp với tên phân biệt của CA.
+- Phần mở rộng "CA Version" chỉ xuất hiện trong các chứng chỉ CA.
+- Chứng chỉ không có trường Extended Key Usage (EKU).
 
-To extract the private key of this certificate, the `certsrv.msc` tool on the CA server is the supported method via the built-in GUI. Nonetheless, this certificate does not differ from others stored within the system; thus, methods such as the [THEFT2 technique](certificate-theft.md#user-certificate-theft-via-dpapi-theft2) can be applied for extraction.
+Để trích xuất khóa riêng của chứng chỉ này, phương pháp được hỗ trợ là dùng công cụ `certsrv.msc` trên máy chủ CA thông qua giao diện GUI tích hợp. Tuy nhiên, chứng chỉ này không khác các chứng chỉ khác được lưu trong hệ thống; do đó, có thể áp dụng các phương pháp như kỹ thuật [THEFT2](certificate-theft.md#user-certificate-theft-via-dpapi-theft2) để trích xuất.
 
-The certificate and private key can also be obtained using Certipy with the following command:<sup>[[2]](#references)</sup>
+Cũng có thể lấy chứng chỉ và khóa riêng bằng Certipy với lệnh sau:<sup>[[2]](#references)</sup>
 
 ```bash
 certipy ca 'corp.local/administrator@ca.corp.local' -hashes :123123.. -backup
 ```
 
-Upon acquiring the CA certificate and its private key in `.pfx` format, tools like [ForgeCert](https://github.com/GhostPack/ForgeCert) can be utilized to generate valid certificates:
+Sau khi thu thập được chứng chỉ CA và khóa riêng tương ứng ở định dạng `.pfx`, có thể sử dụng các công cụ như [ForgeCert](https://github.com/GhostPack/ForgeCert) để tạo chứng chỉ hợp lệ:
 
 ```bash
 # Generating a new certificate with ForgeCert
@@ -40,19 +40,19 @@ certipy auth -pfx administrator_forged.pfx -dc-ip 172.16.126.128
 ```
 
 > [!WARNING]
-> The user targeted for certificate forgery must be active and capable of authenticating in Active Directory for the process to succeed. Forging a certificate for special accounts like krbtgt is ineffective.
+> Người dùng được nhắm mục tiêu để giả mạo chứng chỉ phải đang hoạt động và có khả năng xác thực trong Active Directory thì quy trình mới thành công. Giả mạo chứng chỉ cho các tài khoản đặc biệt như krbtgt sẽ không hiệu quả.
 
-This forged certificate will be **valid** until the end date specified and as **long as the root CA certificate is valid** (usually from 5 to **10+ years**). It's also valid for **machines**, so combined with **S4U2Self**, an attacker can **maintain persistence on any domain machine** for as long as the CA certificate is valid.\
-Moreover, the **certificates generated** with this method **cannot be revoked** as CA is not aware of them.
+Chứng chỉ giả mạo này sẽ **có hiệu lực** đến ngày kết thúc được chỉ định và **chừng nào chứng chỉ CA gốc còn hiệu lực** (thường từ 5 đến **hơn 10 năm**). Chứng chỉ này cũng có hiệu lực đối với **máy**, vì vậy khi kết hợp với **S4U2Self**, kẻ tấn công có thể **duy trì persistence trên bất kỳ máy nào trong domain** chừng nào chứng chỉ CA còn hiệu lực.\
+Ngoài ra, **các chứng chỉ được tạo** bằng phương pháp này **không thể bị thu hồi** vì CA không biết đến chúng.
 
-### Operating under Strong Certificate Mapping Enforcement (2025+)
+### Hoạt động khi áp dụng Strong Certificate Mapping Enforcement (2025+)
 
-Since February 11, 2025 (after KB5014754 rollout), domain controllers default to **Full Enforcement** for certificate mappings. Practically this means your forged certificates must either:
+Kể từ ngày 11 tháng 2 năm 2025 (sau khi triển khai KB5014754), domain controller mặc định áp dụng **Full Enforcement** cho certificate mapping. Trên thực tế, điều này có nghĩa là chứng chỉ giả mạo của bạn phải đáp ứng một trong các điều kiện sau:
 
-- Contain a strong binding to the target account (for example, the SID security extension), or
-- Be paired with a strong, explicit mapping on the target object’s `altSecurityIdentities` attribute.<sup>[[1]](#references)</sup>
+- Chứa liên kết mạnh với tài khoản mục tiêu (ví dụ: SID security extension), hoặc
+- Đi kèm với một mapping tường minh, mạnh trên thuộc tính `altSecurityIdentities` của đối tượng mục tiêu.<sup>[[1]](#references)</sup>
 
-A reliable approach for persistence is to mint a forged certificate chained to the stolen Enterprise CA and then add a strong explicit mapping to the victim principal:
+Một cách tiếp cận đáng tin cậy để duy trì persistence là tạo chứng chỉ giả mạo được liên kết với Enterprise CA bị đánh cắp, sau đó thêm mapping tường minh, mạnh vào principal nạn nhân:
 
 ```powershell
 # Example: map a forged cert to a target account using Issuer+Serial (strong mapping)
@@ -62,13 +62,13 @@ $Map     = "X509:<I>$Issuer<SR>$SerialR"             # strong mapping format
 Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
 ```
 
-Notes
-- If you can craft forged certificates that include the SID security extension, those will map implicitly even under Full Enforcement. Otherwise, prefer explicit strong mappings. See [account-persistence](account-persistence.md) for more on explicit mappings.
-- Revocation does not help defenders here: forged certificates are unknown to the CA database and thus cannot be revoked.
+Ghi chú
+- Nếu bạn có thể tạo chứng chỉ giả mạo có chứa tiện ích bảo mật SID, chúng sẽ được ánh xạ ngầm ngay cả khi bật Full Enforcement. Nếu không, hãy ưu tiên ánh xạ mạnh tường minh. Xem [account-persistence](account-persistence.md) để biết thêm về ánh xạ tường minh.
+- Thu hồi không giúp ích cho bên phòng thủ trong trường hợp này: chứng chỉ giả mạo không có trong cơ sở dữ liệu CA nên không thể bị thu hồi.
 
-#### Full-Enforcement compatible forging (SID-aware)
+#### Tạo chứng chỉ giả mạo tương thích với Full Enforcement (nhận biết SID)
 
-Updated tooling lets you embed the SID directly, keeping golden certificates usable even when DCs reject weak mappings:<sup>[[3]](#references)</sup>
+Các công cụ mới cho phép nhúng SID trực tiếp, giúp golden certificates vẫn sử dụng được ngay cả khi DC từ chối các ánh xạ yếu:<sup>[[3]](#references)</sup>
 
 ```bash
 # Certify 2.0 integrates ForgeCert and can embed SID
@@ -81,15 +81,15 @@ certipy forge -ca-pfx CORP-DC-CA.pfx -upn administrator@corp.local \
   -sid S-1-5-21-1111111111-2222222222-3333333333-500 -out administrator_sid.pfx
 ```
 
-By embedding the SID you avoid having to touch `altSecurityIdentities`, which may be monitored, while still satisfying strong mapping checks.
+Bằng cách nhúng SID, bạn tránh phải động đến `altSecurityIdentities`, thuộc tính có thể bị giám sát, nhưng vẫn đáp ứng các kiểm tra ánh xạ mạnh.
 
 ## Trusting Rogue CA Certificates - DPERSIST2
 
-The `NTAuthCertificates` object is defined to contain one or more **CA certificates** within its `cacertificate` attribute, which Active Directory (AD) utilizes. The verification process by the **domain controller** involves checking the `NTAuthCertificates` object for an entry matching the **CA specified** in the Issuer field of the authenticating **certificate**. Authentication proceeds if a match is found.<sup>[[5]](#references)</sup>
+Đối tượng `NTAuthCertificates` được thiết kế để chứa một hoặc nhiều **chứng chỉ CA** trong thuộc tính `cacertificate`, được Active Directory (AD) sử dụng. Quá trình xác minh của **domain controller** bao gồm việc kiểm tra đối tượng `NTAuthCertificates` để tìm mục khớp với **CA được chỉ định** trong trường Issuer của **chứng chỉ** dùng để xác thực. Quá trình xác thực tiếp tục nếu tìm thấy kết quả khớp.<sup>[[5]](#references)</sup>
 
-A self-signed CA certificate can be added to the `NTAuthCertificates` object by an attacker, provided they have control over this AD object. Normally, only members of the **Enterprise Admin** group, along with **Domain Admins** or **Administrators** in the **forest root’s domain**, are granted permission to modify this object. They can edit the `NTAuthCertificates` object using `certutil.exe` with the command `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA`, or by employing the [**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool).
+Kẻ tấn công có thể thêm chứng chỉ CA tự ký vào đối tượng `NTAuthCertificates` nếu kiểm soát được đối tượng AD này. Thông thường, chỉ thành viên của nhóm **Enterprise Admin**, cùng với **Domain Admins** hoặc **Administrators** trong **miền gốc của forest**, mới được cấp quyền sửa đổi đối tượng này. Họ có thể chỉnh sửa đối tượng `NTAuthCertificates` bằng `certutil.exe` với lệnh `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA`, hoặc sử dụng [**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool).
 
-Additional helpful commands for this technique:
+Các lệnh bổ sung hữu ích cho kỹ thuật này:
 
 ```bash
 # Add/remove and inspect the Enterprise NTAuth store
@@ -102,33 +102,33 @@ certutil -dspublish -f C:\Temp\CERT.crt RootCA          # CN=Certification Autho
 certutil -dspublish -f C:\Temp\CERT.crt CA               # CN=AIA
 ```
 
-This capability is especially relevant when used in conjunction with a previously outlined method involving ForgeCert to dynamically generate certificates.
+Khả năng này đặc biệt phù hợp khi kết hợp với phương pháp đã nêu trước đó, sử dụng ForgeCert để tạo chứng chỉ động.
 
-> Post-2025 mapping considerations: placing a rogue CA in NTAuth only establishes trust in the issuing CA. To use leaf certificates for logon when DCs are in **Full Enforcement**, the leaf must either contain the SID security extension or there must be a strong explicit mapping on the target object (for example, Issuer+Serial in `altSecurityIdentities`). See {{#ref}}account-persistence.md{{#endref}}.
+> Các cân nhắc về mapping sau năm 2025: việc thêm CA giả mạo vào NTAuth chỉ thiết lập độ tin cậy đối với CA cấp chứng chỉ. Để dùng chứng chỉ leaf đăng nhập khi DC ở chế độ **Full Enforcement**, chứng chỉ leaf phải chứa SID security extension hoặc phải có strong explicit mapping trên đối tượng đích (ví dụ: Issuer+Serial trong `altSecurityIdentities`). Xem {{#ref}}account-persistence.md{{#endref}}.
 
-## Malicious Misconfiguration - DPERSIST3
+## Cấu hình sai độc hại - DPERSIST3
 
-Opportunities for **persistence** through **security descriptor modifications of AD CS** components are plentiful. Modifications described in the "[Domain Escalation](domain-escalation.md)" section can be maliciously implemented by an attacker with elevated access. This includes the addition of "control rights" (e.g., WriteOwner/WriteDACL/etc.) to sensitive components such as:<sup>[[5]](#references)</sup>
+Có rất nhiều cơ hội để duy trì **persistence** thông qua việc **sửa đổi security descriptor của các thành phần AD CS**. Kẻ tấn công có quyền truy cập nâng cao có thể triển khai độc hại các sửa đổi được mô tả trong phần "[Domain Escalation](domain-escalation.md)". Trong đó có việc thêm "quyền kiểm soát" (ví dụ: WriteOwner/WriteDACL/...) vào các thành phần nhạy cảm như:<sup>[[5]](#references)</sup>
 
-- The **CA server’s AD computer** object
-- The **CA server’s RPC/DCOM server**
-- Any **descendant AD object or container** in **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** (for instance, the Certificate Templates container, Certification Authorities container, the NTAuthCertificates object, etc.)
-- **AD groups explicitly delegated CA or template control rights** by the organization. The built-in Cert Publishers group is authorized to publish certificates to user objects in AD; membership alone does not grant CA or template control or enrollment rights. Check the relevant CA and template permissions separately. See [Microsoft's description of Cert Publishers](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-identifiers) and [certificate template permissions](https://learn.microsoft.com/en-us/intune/configmgr/protect/plan-design/planning-for-certificate-template-permissions).
+- Đối tượng **máy tính AD của máy chủ CA**
+- **Máy chủ RPC/DCOM của máy chủ CA**
+- Bất kỳ **đối tượng AD hậu duệ hoặc container** nào trong **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** (ví dụ: container Certificate Templates, container Certification Authorities, đối tượng NTAuthCertificates, v.v.)
+- **Các nhóm AD được tổ chức ủy quyền rõ ràng quyền kiểm soát CA hoặc template**. Nhóm Cert Publishers tích hợp sẵn được phép phát hành chứng chỉ cho các đối tượng người dùng trong AD; chỉ là thành viên nhóm không cấp quyền kiểm soát CA hoặc template hay quyền enrollment. Hãy kiểm tra riêng các quyền liên quan của CA và template. Xem [Microsoft's description of Cert Publishers](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-identifiers) và [certificate template permissions](https://learn.microsoft.com/en-us/intune/configmgr/protect/plan-design/planning-for-certificate-template-permissions).
 
-An example of malicious implementation would involve an attacker, who has **elevated permissions** in the domain, adding the **`WriteOwner`** permission to the default **`User`** certificate template, with the attacker being the principal for the right. To exploit this, the attacker would first change the ownership of the **`User`** template to themselves. Following this, the **`mspki-certificate-name-flag`** would be set to **1** on the template to enable **`ENROLLEE_SUPPLIES_SUBJECT`**, allowing a user to provide a Subject Alternative Name in the request. Subsequently, the attacker could **enroll** using the **template**, choosing a **domain administrator** name as an alternative name, and utilize the acquired certificate for authentication as the DA.
+Ví dụ về cách triển khai độc hại: kẻ tấn công có **quyền nâng cao** trong domain thêm quyền **`WriteOwner`** vào certificate template **`User`** mặc định, với principal của quyền này là chính kẻ tấn công. Để khai thác, trước tiên kẻ tấn công đổi chủ sở hữu template **`User`** thành chính mình. Sau đó, đặt **`mspki-certificate-name-flag`** thành **1** trên template để bật **`ENROLLEE_SUPPLIES_SUBJECT`**, cho phép người dùng cung cấp Subject Alternative Name trong yêu cầu. Tiếp theo, kẻ tấn công có thể **enroll** bằng **template**, chọn tên của **domain administrator** làm tên thay thế, rồi dùng chứng chỉ nhận được để xác thực với tư cách DA.
 
-Practical knobs attackers may set for long-term domain persistence (see {{#ref}}domain-escalation.md{{#endref}} for full details and detection):
+Các thiết lập thực tế mà kẻ tấn công có thể cấu hình để duy trì persistence lâu dài trong domain (xem {{#ref}}domain-escalation.md{{#endref}} để biết đầy đủ chi tiết và cách phát hiện):
 
-- CA policy flags that allow SAN from requesters (e.g., enabling `EDITF_ATTRIBUTESUBJECTALTNAME2`). This keeps ESC1-like paths exploitable.
-- Template DACL or settings that allow authentication-capable issuance (e.g., adding Client Authentication EKU, enabling `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`).
-- Controlling the `NTAuthCertificates` object or the CA containers to continuously re-introduce rogue issuers if defenders attempt cleanup.
+- Các policy flag của CA cho phép requester chỉ định SAN (ví dụ: bật `EDITF_ATTRIBUTESUBJECTALTNAME2`). Điều này giúp các đường khai thác kiểu ESC1 tiếp tục khả dụng.
+- DACL hoặc thiết lập của template cho phép cấp chứng chỉ có khả năng xác thực (ví dụ: thêm EKU Client Authentication, bật `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`).
+- Kiểm soát đối tượng `NTAuthCertificates` hoặc các container CA để liên tục thêm lại issuer giả mạo nếu bên phòng thủ tìm cách dọn dẹp.
 
 > [!TIP]
-> In hardened environments after KB5014754, pairing these misconfigurations with explicit strong mappings (`altSecurityIdentities`) ensures your issued or forged certificates remain usable even when DCs enforce strong mapping.
+> Trong các môi trường được harden sau KB5014754, kết hợp các cấu hình sai này với strong mapping tường minh (`altSecurityIdentities`) sẽ đảm bảo các chứng chỉ đã cấp hoặc giả mạo vẫn dùng được ngay cả khi DC thực thi strong mapping.
 
-### Certificate renewal abuse (ESC14) for persistence
+### Lạm dụng gia hạn chứng chỉ (ESC14) để duy trì persistence
 
-If you compromise an authentication-capable certificate (or an Enrollment Agent one), you can **renew it indefinitely** as long as the issuing template remains published and your CA still trusts the issuer chain. Renewal keeps the original identity bindings but extends validity, making eviction difficult unless the template is fixed or the CA is republished.<sup>[[4]](#references)</sup>
+Nếu bạn xâm phạm được một chứng chỉ có khả năng xác thực (hoặc chứng chỉ Enrollment Agent), bạn có thể **gia hạn nó vô thời hạn** miễn là template cấp chứng chỉ vẫn được publish và CA vẫn tin cậy chuỗi issuer. Việc gia hạn giữ nguyên các liên kết danh tính ban đầu nhưng kéo dài thời hạn hiệu lực, khiến việc loại bỏ trở nên khó khăn trừ khi template được sửa hoặc CA được publish lại.<sup>[[4]](#references)</sup>
 
 ```bash
 # Renew a stolen user cert to extend validity
@@ -138,15 +138,14 @@ certipy req -ca CORP-DC-CA -template User -pfx stolen_user.pfx -renew -out user_
 certipy req -ca CORP-DC-CA -on-behalf-of 'CORP/victim' -pfx agent.pfx -renew -out victim_renewed.pfx
 ```
 
-If domain controllers are in **Full Enforcement**, add `-sid <victim SID>` (or use a template that still includes the SID security extension) so the renewed leaf certificate continues to map strongly without touching `altSecurityIdentities`. Attackers with CA admin rights may also tweak `policy\RenewalValidityPeriodUnits` to lengthen renewed lifetimes before issuing themselves a cert.<sup>[[2]](#references)[[4]](#references)</sup>
+Nếu domain controller đang ở chế độ **Full Enforcement**, hãy thêm `-sid <victim SID>` (hoặc dùng template vẫn bao gồm SID security extension) để certificate lá được gia hạn tiếp tục ánh xạ mạnh mà không cần chỉnh sửa `altSecurityIdentities`. Attacker có quyền CA admin cũng có thể điều chỉnh `policy\RenewalValidityPeriodUnits` để kéo dài thời hạn của certificate được gia hạn trước khi cấp certificate cho chính mình.<sup>[[2]](#references)[[4]](#references)</sup>
 
 
 ## References
 
-- [1] [Microsoft KB5014754 – Certificate-based authentication changes on Windows domain controllers (enforcement timeline and strong mappings)](https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
-- [2] [Certipy – Command Reference and forge/auth usage](https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference)
-- [3] [SpecterOps – Certify 2.0 (integrated forge with SID support)](https://specterops.io/blog/2025/08/11/certify-2-0/)
-- [4] [ESC14 renewal abuse overview](https://www.adcs-security.com/attacks/esc14)
-- [5] [SpecterOps – Certified Pre-Owned: Abusing Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
-
+- [1] [Microsoft KB5014754 – Các thay đổi về xác thực dựa trên certificate trên domain controller Windows (lộ trình enforcement và strong mapping)](https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
+- [2] [Certipy – Tham chiếu lệnh và cách dùng forge/auth](https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference)
+- [3] [SpecterOps – Certify 2.0 (forge tích hợp hỗ trợ SID)](https://specterops.io/blog/2025/08/11/certify-2-0/)
+- [4] [Tổng quan về lạm dụng gia hạn ESC14](https://www.adcs-security.com/attacks/esc14)
+- [5] [SpecterOps – Certified Pre-Owned: Lạm dụng Active Directory Certificate Services](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 {{#include ../../../banners/hacktricks-training.md}}

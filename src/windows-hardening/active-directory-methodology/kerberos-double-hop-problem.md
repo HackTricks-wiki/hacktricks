@@ -1,33 +1,33 @@
-# Kerberos Double Hop Problem
+# Vấn đề Kerberos Double Hop
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Introduction
+## Giới thiệu
 
-The Kerberos "Double Hop" problem appears when an attacker attempts to use **Kerberos authentication across two** **hops**, for example using **PowerShell**/**WinRM**.
+Vấn đề Kerberos "Double Hop" xảy ra khi attacker cố sử dụng **xác thực Kerberos qua hai** **hop**, chẳng hạn như khi dùng **PowerShell**/**WinRM**.
 
-When an **authentication** occurs through **Kerberos**, **credentials** **aren't** cached in **memory.** Therefore, if you run mimikatz you **won't find credentials** of the user in the machine even if he is running processes.
+Khi **xác thực** bằng **Kerberos**, **thông tin xác thực** **không** được lưu vào bộ nhớ. Vì vậy, nếu chạy mimikatz, bạn **sẽ không tìm thấy thông tin xác thực** của người dùng trên máy, ngay cả khi người đó đang chạy các tiến trình.
 
-This is because when connecting with Kerberos these are the steps:<sup>[[1]](#references)</sup>
+Điều này là do khi kết nối bằng Kerberos, các bước diễn ra như sau:<sup>[[1]](#references)</sup>
 
-1. User1 provides credentials and **domain controller** returns a Kerberos **TGT** to the User1.
-2. User1 uses **TGT** to request a **service ticket** to **connect** to Server1.
-3. User1 **connects** to **Server1** and provides **service ticket**.
-4. **Server1** **doesn't** have **credentials** of User1 cached or the **TGT** of User1. Therefore, when User1 from Server1 tries to login to a second server, he is **not able to authenticate**.
+1. User1 cung cấp thông tin xác thực và **domain controller** trả về một **TGT** Kerberos cho User1.
+2. User1 dùng **TGT** để yêu cầu một **service ticket** nhằm **kết nối** với Server1.
+3. User1 **kết nối** với **Server1** và cung cấp **service ticket**.
+4. **Server1** **không** có **thông tin xác thực** của User1 được lưu trong bộ nhớ hoặc **TGT** của User1. Vì vậy, khi User1 từ Server1 cố đăng nhập vào server thứ hai, người đó **không thể xác thực**.
 
 ### Unconstrained Delegation
 
-If **unconstrained delegation** is enabled in the PC, this won't happen as the **Server** will **get** a **TGT** of each user accessing it. Moreover, if unconstrained delegation is used you probably can **compromise the Domain Controller** from it.\
-[**More info in the unconstrained delegation page**](unconstrained-delegation.md).
+Nếu **unconstrained delegation** được bật trên PC, điều này sẽ không xảy ra vì **Server** sẽ **nhận** **TGT** của mỗi người dùng truy cập vào nó. Hơn nữa, nếu sử dụng unconstrained delegation, có khả năng bạn có thể **chiếm quyền kiểm soát Domain Controller** từ đó.\
+[**Tìm hiểu thêm trên trang unconstrained delegation**](unconstrained-delegation.md).
 
 ### CredSSP
 
-Another way to avoid this problem which is [**notably insecure**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) is **Credential Security Support Provider**. From Microsoft:
+Một cách khác để tránh vấn đề này, nhưng [**không an toàn**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7), là **Credential Security Support Provider**. Theo Microsoft:
 
-> CredSSP authentication delegates the user credentials from the local computer to a remote computer. This practice increases the security risk of the remote operation. If the remote computer is compromised, when credentials are passed to it, the credentials can be used to control the network session.
+> Xác thực CredSSP ủy quyền thông tin xác thực của người dùng từ máy tính cục bộ sang máy tính từ xa. Cách làm này làm tăng rủi ro bảo mật của thao tác từ xa. Nếu máy tính từ xa bị xâm nhập sau khi nhận thông tin xác thực, thông tin này có thể được dùng để kiểm soát phiên mạng.
 
-It is highly recommended that **CredSSP** be disabled on production systems, sensitive networks, and similar environments due to security concerns. To determine whether **CredSSP** is enabled, the `Get-WSManCredSSP` command can be run. This command allows for the **checking of CredSSP status** and can even be executed remotely, provided **WinRM** is enabled.
+Chúng tôi đặc biệt khuyến nghị tắt **CredSSP** trên các hệ thống production, mạng nhạy cảm và các môi trường tương tự do những lo ngại về bảo mật. Có thể chạy lệnh `Get-WSManCredSSP` để xác định **CredSSP** có được bật hay không. Lệnh này cho phép **kiểm tra trạng thái CredSSP** và thậm chí có thể được thực thi từ xa, miễn là **WinRM** được bật.
 
 ```bash
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
@@ -37,9 +37,9 @@ Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
 
 ### Remote Credential Guard (RCG)
 
-**Remote Credential Guard** keeps the user's TGT on the originating workstation while still allowing the RDP session to request new Kerberos service tickets on the next hop. Enable **Computer Configuration > Administrative Templates > System > Credentials Delegation > Restrict delegation of credentials to remote servers** and select **Require Remote Credential Guard**, then connect with `mstsc.exe /remoteGuard /v:server1` instead of falling back to CredSSP.
+**Remote Credential Guard** giữ TGT của người dùng trên máy trạm khởi tạo, đồng thời vẫn cho phép phiên RDP yêu cầu các service ticket Kerberos mới ở hop tiếp theo. Bật **Computer Configuration > Administrative Templates > System > Credentials Delegation > Restrict delegation of credentials to remote servers** và chọn **Require Remote Credential Guard**, sau đó kết nối bằng `mstsc.exe /remoteGuard /v:server1` thay vì chuyển sang CredSSP.
 
-Microsoft broke RCG for multi-hop access on Windows 11 22H2+ until the **April 2024 cumulative updates** (KB5036896/KB5036899/KB5036894). Patch the client and intermediary server or the second hop will still fail.<sup>[[5]](#references)</sup> Quick hotfix check:
+Microsoft đã làm hỏng RCG khi truy cập multi-hop trên Windows 11 22H2+ cho đến khi phát hành **bản cập nhật tích lũy tháng 4 năm 2024** (KB5036896/KB5036899/KB5036894). Hãy cập nhật client và máy chủ trung gian, nếu không hop thứ hai vẫn sẽ thất bại.<sup>[[5]](#references)</sup> Cách kiểm tra hotfix nhanh:
 
 ```powershell
 ("KB5036896","KB5036899","KB5036894") | ForEach-Object {
@@ -47,13 +47,13 @@ Microsoft broke RCG for multi-hop access on Windows 11 22H2+ until the **April 2
 }
 ```
 
-With those builds installed, the RDP hop can satisfy downstream Kerberos challenges without exposing reusable secrets on the first server.
+Khi các bản build đó được cài đặt, RDP hop có thể đáp ứng các thử thách Kerberos ở máy chủ tiếp theo mà không làm lộ thông tin bí mật có thể tái sử dụng trên máy chủ đầu tiên.
 
 ## Workarounds
 
 ### Invoke Command
 
-To address the double hop issue, a method involving a nested `Invoke-Command` is presented. This does not solve the problem directly but offers a workaround without needing special configurations. The approach allows executing a command (`hostname`) on a secondary server through a PowerShell command executed from an initial attacking machine or through a previously established PS-Session with the first server. Here's how it's done:<sup>[[2]](#references)</sup>
+Để xử lý vấn đề double hop, tài liệu trình bày một phương pháp sử dụng `Invoke-Command` lồng nhau. Phương pháp này không trực tiếp giải quyết vấn đề, nhưng đưa ra một cách khắc phục không cần cấu hình đặc biệt. Cách tiếp cận này cho phép thực thi lệnh (`hostname`) trên máy chủ thứ hai thông qua lệnh PowerShell được chạy từ máy tấn công ban đầu hoặc thông qua một PS-Session đã thiết lập trước đó với máy chủ đầu tiên. Cách thực hiện như sau:<sup>[[2]](#references)</sup>
 
 ```bash
 $cred = Get-Credential ta\redsuit
@@ -62,11 +62,11 @@ Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
 }
 ```
 
-Alternatively, establishing a PS-Session with the first server and running the `Invoke-Command` using `$cred` is suggested for centralizing tasks.
+Ngoài ra, nên thiết lập một PS-Session với máy chủ đầu tiên rồi chạy `Invoke-Command` bằng `$cred` để tập trung hóa các tác vụ.
 
-### Register PSSession Configuration
+### Đăng ký cấu hình PSSession
 
-A solution to bypass the double hop problem involves using `Register-PSSessionConfiguration` with `Enter-PSSession`. This method requires a different approach than `evil-winrm` and allows for a session that does not suffer from the double hop limitation.<sup>[[3]](#references)[[4]](#references)</sup>
+Một giải pháp để vượt qua vấn đề double hop là dùng `Register-PSSessionConfiguration` với `Enter-PSSession`. Phương pháp này đòi hỏi cách tiếp cận khác với `evil-winrm` và cho phép tạo một phiên không bị giới hạn double hop.<sup>[[3]](#references)[[4]](#references)</sup>
 
 ```bash
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
@@ -77,7 +77,7 @@ klist
 
 ### PortForwarding
 
-For local administrators on an intermediary target, port forwarding allows requests to be sent to a final server. Using `netsh`, a rule can be added for port forwarding, alongside a Windows firewall rule to allow the forwarded port.<sup>[[2]](#references)</sup>
+Đối với quản trị viên cục bộ trên một target trung gian, port forwarding cho phép gửi các yêu cầu đến máy chủ đích. Có thể dùng `netsh` để thêm quy tắc port forwarding, đồng thời thêm quy tắc Windows Firewall để cho phép cổng được chuyển tiếp.<sup>[[2]](#references)</sup>
 
 ```bash
 netsh interface portproxy add v4tov4 listenport=5446 listenaddress=10.35.8.17 connectport=5985 connectaddress=10.35.8.23
@@ -86,7 +86,7 @@ netsh advfirewall firewall add rule name=fwd dir=in action=allow protocol=TCP lo
 
 #### winrs.exe
 
-`winrs.exe` can be used for forwarding WinRM requests, potentially as a less detectable option if PowerShell monitoring is a concern.<sup>[[2]](#references)</sup> The command below demonstrates its use:
+`winrs.exe` có thể được dùng để chuyển tiếp các yêu cầu WinRM, có khả năng là một lựa chọn ít bị phát hiện hơn nếu việc giám sát PowerShell là mối lo ngại.<sup>[[2]](#references)</sup> Lệnh dưới đây minh họa cách sử dụng:
 
 ```bash
 winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
@@ -94,42 +94,41 @@ winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 
 ### OpenSSH
 
-Installing OpenSSH on the first server enables a workaround for the double-hop issue, particularly useful for jump box scenarios. This method requires CLI installation and setup of OpenSSH for Windows. When configured for Password Authentication, this allows the intermediary server to obtain a TGT on behalf of the user.<sup>[[2]](#references)</sup>
+Cài đặt OpenSSH trên máy chủ đầu tiên giúp khắc phục sự cố double-hop, đặc biệt hữu ích trong các tình huống sử dụng jump box. Phương pháp này yêu cầu cài đặt và thiết lập OpenSSH cho Windows qua CLI. Khi được cấu hình với Password Authentication, phương pháp này cho phép máy chủ trung gian lấy TGT thay mặt người dùng.<sup>[[2]](#references)</sup>
 
-#### OpenSSH Installation Steps
+#### Các bước cài đặt OpenSSH
 
-1. Download and move the latest OpenSSH release zip to the target server.
-2. Unzip and run the `Install-sshd.ps1` script.
-3. Add a firewall rule to open port 22 and verify SSH services are running.
+1. Tải xuống và chuyển tệp zip bản phát hành OpenSSH mới nhất sang máy chủ mục tiêu.
+2. Giải nén và chạy script `Install-sshd.ps1`.
+3. Thêm quy tắc tường lửa để mở cổng 22 và xác minh các dịch vụ SSH đang chạy.
 
-To resolve `Connection reset` errors, permissions might need to be updated to allow everyone read and execute access on the OpenSSH directory.
+Để khắc phục lỗi `Connection reset`, có thể cần cập nhật quyền để cho phép mọi người có quyền đọc và thực thi trên thư mục OpenSSH.
 
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```
 
-### LSA Whisperer CacheLogon (Advanced)
+### LSA Whisperer CacheLogon (Nâng cao)
 
-**LSA Whisperer** (2024) exposes the `msv1_0!CacheLogon` package call so you can seed an existing *network logon* with a known NT hash instead of creating a fresh session with `LogonUser`. By injecting the hash into the logon session that WinRM/PowerShell already opened on hop #1, that host can authenticate to hop #2 without storing explicit credentials or generating extra 4624 events.<sup>[[6]](#references)</sup>
+**LSA Whisperer** (2024) cung cấp package call `msv1_0!CacheLogon` để bạn có thể nạp một NT hash đã biết vào *network logon* hiện có, thay vì tạo một session mới bằng `LogonUser`. Bằng cách inject hash vào logon session mà WinRM/PowerShell đã mở ở hop #1, host đó có thể xác thực với hop #2 mà không cần lưu thông tin xác thực tường minh hoặc tạo thêm các sự kiện 4624.<sup>[[6]](#references)</sup>
 
-1. Get code execution inside LSASS (either disable/abuse PPL or run on a lab VM you control).
-2. Enumerate logon sessions (e.g. `lsa.exe sessions`) and capture the LUID corresponding to your remoting context.
-3. Pre-compute the NT hash and feed it to `CacheLogon`, then clear it when done.
+1. Có được quyền thực thi code bên trong LSASS (bằng cách vô hiệu hóa/lạm dụng PPL hoặc chạy trên một lab VM do bạn kiểm soát).
+2. Liệt kê các logon session (ví dụ: `lsa.exe sessions`) và lấy LUID tương ứng với remoting context của bạn.
+3. Tính trước NT hash rồi truyền nó vào `CacheLogon`, sau đó xóa hash khi hoàn tất.
 
 ```powershell
 lsa.exe cachelogon --session 0x3e4 --domain ta --username redsuit --nthash a7c5480e8c1ef0ffec54e99275e6e0f7
 lsa.exe cacheclear --session 0x3e4
 ```
 
-After the cache seed, rerun `Invoke-Command`/`New-PSSession` from hop #1: LSASS will reuse the injected hash to satisfy Kerberos/NTLM challenges for the second hop, neatly bypassing the double hop constraint. The trade-off is heavier telemetry (code execution in LSASS) so keep it for high-friction environments where CredSSP/RCG are disallowed.
+Sau khi seed cache, chạy lại `Invoke-Command`/`New-PSSession` từ hop #1: LSASS sẽ dùng lại hash đã inject để đáp ứng các challenge Kerberos/NTLM cho hop thứ hai, qua đó dễ dàng vượt qua giới hạn double hop. Đổi lại, thao tác này tạo telemetry nhiều hơn (thực thi code trong LSASS), vì vậy chỉ nên dùng trong các môi trường có nhiều hạn chế, nơi CredSSP/RCG không được phép.
 
 ## References
 
-- [1] [Understanding Kerberos Double Hop - Microsoft Community Hub](https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20)
-- [2] [Kerberos Double-Hop Workarounds](https://posts.slayerlabs.com/double-hop/)
-- [3] [Another solution to multi-hop PowerShell remoting](https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting)
-- [4] [Solve the PowerShell multi-hop problem without using CredSSP](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
-- [5] [April 9, 2024—KB5036896 (OS Build 17763.5696)](https://support.microsoft.com/en-au/topic/april-9-2024-kb5036896-os-build-17763-5696-efb580f1-2ce4-4695-b76c-d2068a00fb92)
+- [1] [Tìm hiểu về Kerberos Double Hop - Microsoft Community Hub](https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20)
+- [2] [Các cách xử lý Kerberos Double-Hop](https://posts.slayerlabs.com/double-hop/)
+- [3] [Một giải pháp khác cho PowerShell remoting nhiều hop](https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting)
+- [4] [Khắc phục vấn đề PowerShell nhiều hop mà không dùng CredSSP](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
+- [5] [Ngày 9 tháng 4 năm 2024—KB5036896 (OS Build 17763.5696)](https://support.microsoft.com/en-au/topic/april-9-2024-kb5036896-os-build-17763-5696-efb580f1-2ce4-4695-b76c-d2068a00fb92)
 - [6] [LSA Whisperer](https://specterops.io/blog/2024/04/17/lsa-whisperer/)
-
 {{#include ../../banners/hacktricks-training.md}}

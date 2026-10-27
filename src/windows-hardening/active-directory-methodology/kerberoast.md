@@ -4,38 +4,38 @@
 
 ## Kerberoast
 
-Kerberoasting focuses on the acquisition of TGS tickets, specifically those related to services operating under user accounts in Active Directory (AD), excluding computer accounts. The encryption of these tickets utilizes keys that originate from user passwords, allowing for offline credential cracking. The use of a user account as a service is indicated by a non-empty ServicePrincipalName (SPN) property.
+Kerberoasting tập trung vào việc thu thập vé TGS, cụ thể là những vé liên quan đến các dịch vụ chạy dưới tài khoản người dùng trong Active Directory (AD), không bao gồm tài khoản máy tính. Các vé này được mã hóa bằng khóa bắt nguồn từ mật khẩu người dùng, cho phép crack thông tin xác thực offline. Việc dùng tài khoản người dùng làm dịch vụ được thể hiện qua thuộc tính ServicePrincipalName (SPN) không rỗng.
 
-Any authenticated domain user can request TGS tickets, so no special privileges are needed.<sup>[[4]](#references)[[5]](#references)</sup>
+Bất kỳ người dùng domain nào đã xác thực cũng có thể yêu cầu vé TGS, nên không cần đặc quyền đặc biệt.<sup>[[4]](#references)[[5]](#references)</sup>
 
-### Key Points
+### Điểm chính
 
-- Targets TGS tickets for services that run under user accounts (i.e., accounts with SPN set; not computer accounts).
-- Tickets are encrypted with a key derived from the service account’s password and can be cracked offline.
-- No elevated privileges required; any authenticated account can request TGS tickets.
+- Nhắm vào vé TGS của các dịch vụ chạy dưới tài khoản người dùng (tức tài khoản có SPN được thiết lập; không phải tài khoản máy tính).
+- Vé được mã hóa bằng khóa dẫn xuất từ mật khẩu tài khoản dịch vụ và có thể bị crack offline.
+- Không cần đặc quyền cao; bất kỳ tài khoản đã xác thực nào cũng có thể yêu cầu vé TGS.
 
 > [!WARNING]
-> Most public tools prefer requesting RC4-HMAC (etype 23) service tickets because they’re faster to crack than AES. RC4 TGS hashes start with `$krb5tgs$23$*`, AES128 with `$krb5tgs$17$*`, and AES256 with `$krb5tgs$18$*`. However, many environments are moving to AES-only. Do not assume only RC4 is relevant.
-> Also, avoid “spray-and-pray” roasting. Rubeus’ default kerberoast can query and request tickets for all SPNs and is noisy. Enumerate and target interesting principals first.
+> Hầu hết công cụ công khai ưu tiên yêu cầu vé dịch vụ RC4-HMAC (etype 23) vì crack nhanh hơn AES. Hash TGS RC4 bắt đầu bằng `$krb5tgs$23$*`, AES128 bằng `$krb5tgs$17$*`, và AES256 bằng `$krb5tgs$18$*`. Tuy nhiên, nhiều môi trường đang chuyển sang chỉ dùng AES. Đừng cho rằng chỉ RC4 mới đáng quan tâm.
+> Ngoài ra, tránh kiểu roast “spray-and-pray”. Kerberoast mặc định của Rubeus có thể truy vấn và yêu cầu vé cho mọi SPN, gây nhiều dấu vết. Trước tiên hãy liệt kê và nhắm vào các principal đáng chú ý.
 
-### Service account secrets & Kerberos crypto cost
+### Bí mật tài khoản dịch vụ và chi phí mã hóa Kerberos
 
-Many services still run under user accounts with hand-managed passwords. The KDC encrypts service tickets with keys derived from those passwords and hands the ciphertext to any authenticated principal, so kerberoasting gives unlimited offline guesses without lockouts or DC telemetry. The encryption mode determines the cracking budget:
+Nhiều dịch vụ vẫn chạy dưới tài khoản người dùng với mật khẩu được quản lý thủ công. KDC mã hóa vé dịch vụ bằng các khóa dẫn xuất từ những mật khẩu đó rồi gửi ciphertext cho mọi principal đã xác thực, vì vậy kerberoasting cho phép thử đoán offline không giới hạn mà không gây khóa tài khoản hay tạo telemetry trên DC. Chế độ mã hóa quyết định mức tài nguyên cần để crack:
 
-| Mode | Key derivation | Encryption type | Approx. RTX 5090 throughput* | Notes |
+| Chế độ | Dẫn xuất khóa | Loại mã hóa | Thông lượng ước tính của RTX 5090* | Ghi chú |
 | --- | --- | --- | --- | --- |
-| AES + PBKDF2 | PBKDF2-HMAC-SHA1 with 4,096 iterations and a per-principal salt generated from the domain + SPN | etype 17/18 (`$krb5tgs$17$`, `$krb5tgs$18$`) | ~6.8 million guesses/s | Salt blocks rainbow tables but still allows fast cracking of short passwords. |
-| RC4 + NT hash | Single MD4 of the password (unsalted NT hash); Kerberos only mixes in an 8-byte confounder per ticket | etype 23 (`$krb5tgs$23$`) | ~4.18 **billion** guesses/s | ~1000× faster than AES; attackers force RC4 whenever `msDS-SupportedEncryptionTypes` permits it. |
+| AES + PBKDF2 | PBKDF2-HMAC-SHA1 với 4.096 vòng lặp và salt riêng cho từng principal, được tạo từ domain + SPN | etype 17/18 (`$krb5tgs$17$`, `$krb5tgs$18$`) | ~6.8 triệu lần đoán/giây | Salt ngăn rainbow table nhưng vẫn cho phép crack nhanh các mật khẩu ngắn. |
+| RC4 + NT hash | Một lần MD4 trên mật khẩu (NT hash không có salt); Kerberos chỉ trộn thêm confounder 8 byte cho mỗi vé | etype 23 (`$krb5tgs$23$`) | ~4.18 **tỷ** lần đoán/giây | Nhanh hơn AES ~1000 lần; attacker ép dùng RC4 bất cứ khi nào `msDS-SupportedEncryptionTypes` cho phép. |
 
-*Benchmarks from Chick3nman as cited in [Matthew Green's Kerberoasting analysis](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/).<sup>[[3]](#references)</sup>
+*Benchmark từ Chick3nman, được trích dẫn trong [phân tích Kerberoasting của Matthew Green](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/).<sup>[[3]](#references)</sup>
 
-RC4’s confounder only randomizes the keystream; it does not add work per guess. Unless service accounts rely on random secrets (gMSA/dMSA, machine accounts, or vault-managed strings), compromise speed is purely GPU budget. Enforcing AES-only etypes removes the billion-guesses-per-second downgrade, but weak human passwords still fall to PBKDF2.<sup>[[3]](#references)</sup>
+Confounder của RC4 chỉ ngẫu nhiên hóa keystream; nó không làm tăng khối lượng công việc cho mỗi lần đoán. Nếu tài khoản dịch vụ không dùng bí mật ngẫu nhiên (gMSA/dMSA, tài khoản máy hoặc chuỗi được quản lý bằng vault), tốc độ xâm nhập hoàn toàn phụ thuộc vào năng lực GPU. Bắt buộc chỉ dùng etype AES sẽ loại bỏ khả năng hạ cấp xuống tốc độ hàng tỷ lần đoán mỗi giây, nhưng mật khẩu yếu do con người đặt vẫn có thể bị crack bằng PBKDF2.<sup>[[3]](#references)</sup>
 
-### Attack
+### Tấn công
 
 #### Linux
 
-A practical end-to-end example using NetExec to request roastable tickets and Hashcat to crack them is available in reference [1].<sup>[[1]](#references)</sup>
+Có ví dụ thực tế từ đầu đến cuối về cách dùng NetExec để yêu cầu các vé có thể roast và Hashcat để crack chúng trong tài liệu tham khảo [1].<sup>[[1]](#references)</sup>
 
 ```bash
 # Metasploit Framework
@@ -58,7 +58,7 @@ kerberoast ldap spn 'ldap+ntlm-password://<DOMAIN>\\<USER>:<PASS>@<DC_IP>' -o ke
 kerberoast spnroast 'kerberos+password://<DOMAIN>\\<USER>:<PASS>@<DC_IP>' -t kerberoastable_spn_users.txt -o kerberoast.hashes
 ```
 
-Multi-feature tools including kerberoast checks:
+Các công cụ đa tính năng bao gồm kiểm tra kerberoast:
 
 ```bash
 # ADenum: https://github.com/SecuProject/ADenum
@@ -67,7 +67,7 @@ adenum -d <DOMAIN> -ip <DC_IP> -u <USER> -p <PASS> -c
 
 #### Windows
 
-- Enumerate kerberoastable users
+- Liệt kê người dùng có thể bị Kerberoast
 
 ```powershell
 # Built-in
@@ -80,7 +80,7 @@ Get-NetUser -SPN | Select-Object serviceprincipalname
 .\Rubeus.exe kerberoast /stats
 ```
 
-- Technique 1: Ask for TGS and dump from memory
+- Kỹ thuật 1: Yêu cầu TGS và dump từ bộ nhớ
 
 ```powershell
 # Acquire a single service ticket in memory for a known SPN
@@ -99,7 +99,7 @@ python2.7 kirbi2john.py .\some_service.kirbi > tgs.john
 sed 's/\$krb5tgs\$\(.*\):\(.*\)/\$krb5tgs\$23\$*\1*$\2/' tgs.john > tgs.hashcat
 ```
 
-- Technique 2: Automatic tools
+- Kỹ thuật 2: Công cụ tự động
 
 ```powershell
 # PowerView — single SPN to hashcat format
@@ -116,21 +116,21 @@ Get-DomainUser * -SPN | Get-DomainSPNTicket -Format Hashcat | Export-Csv .\kerbe
 ```
 
 > [!WARNING]
-> A TGS request generates Windows Security Event 4769 (A Kerberos service ticket was requested).
+> Một yêu cầu TGS tạo Windows Security Event 4769 (Đã yêu cầu vé dịch vụ Kerberos).
 
-### OPSEC and AES-only environments
+### OPSEC và môi trường chỉ dùng AES
 
-- Request RC4 on purpose for accounts without AES:
-  - Rubeus: `/rc4opsec` uses tgtdeleg to enumerate accounts without AES and requests RC4 service tickets.
-  - Rubeus: `/tgtdeleg` with kerberoast also triggers RC4 requests where possible.<sup>[[6]](#references)</sup>
-- Roast AES-only accounts instead of failing silently:
-  - Rubeus: `/aes` enumerates accounts with AES enabled and requests AES service tickets (etype 17/18).
-  - If you already hold a TGT (PTT or from a .kirbi), you can use `/ticket:<blob|path>` with `/spn:<SPN>` or `/spns:<file>` and skip LDAP.
-- Targeting, throttling and less noise:
-  - Use `/user:<sam>`, `/spn:<spn>`, `/resultlimit:<N>`, `/delay:<ms>` and `/jitter:<1-100>`.
-  - Filter for likely weak passwords using `/pwdsetbefore:<MM-dd-yyyy>` (older passwords) or target privileged OUs with `/ou:<DN>`.<sup>[[8]](#references)</sup>
+- Cố ý yêu cầu RC4 cho các tài khoản không có AES:
+  - Rubeus: `/rc4opsec` dùng tgtdeleg để liệt kê các tài khoản không có AES và yêu cầu vé dịch vụ RC4.
+  - Rubeus: `/tgtdeleg` kết hợp với kerberoast cũng kích hoạt yêu cầu RC4 khi có thể.<sup>[[6]](#references)</sup>
+- Roast các tài khoản chỉ dùng AES thay vì âm thầm thất bại:
+  - Rubeus: `/aes` liệt kê các tài khoản đã bật AES và yêu cầu vé dịch vụ AES (etype 17/18).
+  - Nếu bạn đã có TGT (PTT hoặc từ tệp .kirbi), bạn có thể dùng `/ticket:<blob|path>` cùng với `/spn:<SPN>` hoặc `/spns:<file>` để bỏ qua LDAP.
+- Nhắm mục tiêu, giới hạn tốc độ và giảm dấu vết:
+  - Dùng `/user:<sam>`, `/spn:<spn>`, `/resultlimit:<N>`, `/delay:<ms>` và `/jitter:<1-100>`.
+  - Lọc các tài khoản có khả năng dùng mật khẩu yếu bằng `/pwdsetbefore:<MM-dd-yyyy>` (mật khẩu cũ hơn) hoặc nhắm đến các OU có đặc quyền bằng `/ou:<DN>`.<sup>[[8]](#references)</sup>
 
-Examples (Rubeus):
+Ví dụ (Rubeus):
 
 ```powershell
 # Kerberoast only AES-enabled accounts
@@ -156,15 +156,15 @@ hashcat -m 19600 -a 0 hashes.aes128 wordlist.txt
 hashcat -m 19700 -a 0 hashes.aes256 wordlist.txt
 ```
 
-### Persistence / Abuse
+### Duy trì quyền truy cập / Lạm dụng
 
-If you control or can modify an account, you can make it kerberoastable by adding an SPN:
+Nếu bạn kiểm soát hoặc có thể sửa đổi một tài khoản, bạn có thể khiến tài khoản đó kerberoastable bằng cách thêm SPN:
 
 ```powershell
 Set-DomainObject -Identity <username> -Set @{serviceprincipalname='fake/WhateverUn1Que'} -Verbose
 ```
 
-Downgrade an account to enable RC4 for easier cracking (requires write privileges on the target object):
+Hạ cấp một tài khoản để bật RC4, giúp cracking dễ dàng hơn (cần có quyền ghi trên object mục tiêu):
 
 ```powershell
 # Allow only RC4 (value 4) — very noisy/risky from a blue-team perspective
@@ -173,14 +173,14 @@ Set-ADUser -Identity <username> -Replace @{msDS-SupportedEncryptionTypes=4}
 Set-ADUser -Identity <username> -Replace @{msDS-SupportedEncryptionTypes=28}
 ```
 
-#### Targeted Kerberoast via GenericWrite/GenericAll over a user (temporary SPN)
+#### Targeted Kerberoast qua GenericWrite/GenericAll trên một user (SPN tạm thời)
 
-When BloodHound shows that you have control over a user object (e.g., GenericWrite/GenericAll), you can reliably “targeted-roast” that specific user even if they do not currently have any SPNs:<sup>[[9]](#references)</sup>
+Khi BloodHound cho thấy bạn có quyền kiểm soát một user object (ví dụ: GenericWrite/GenericAll), bạn có thể “targeted-roast” user cụ thể đó một cách đáng tin cậy, ngay cả khi hiện tại họ không có SPN nào:<sup>[[9]](#references)</sup>
 
-- Add a temporary SPN to the controlled user to make it roastable.
-- Request a TGS-REP encrypted with RC4 (etype 23) for that SPN to favor cracking.
-- Crack the `$krb5tgs$23$...` hash with hashcat.
-- Clean up the SPN to reduce footprint.
+- Thêm SPN tạm thời vào user được kiểm soát để user đó có thể bị roast.
+- Yêu cầu TGS-REP được mã hóa bằng RC4 (etype 23) cho SPN đó để ưu tiên việc crack.
+- Dùng hashcat để crack hash `$krb5tgs$23$...`.
+- Xóa SPN để giảm footprint.
 
 Windows (PowerView/Rubeus):
 
@@ -195,35 +195,35 @@ Set-DomainObject -Identity <targetUser> -Set @{serviceprincipalname='fake/TempSv
 Set-DomainObject -Identity <targetUser> -Clear serviceprincipalname -Verbose
 ```
 
-Linux one-liner (targetedKerberoast.py automates add SPN -> request TGS (etype 23) -> remove SPN):<sup>[[2]](#references)</sup>
+Linux one-liner (targetedKerberoast.py tự động hóa việc thêm SPN -> yêu cầu TGS (etype 23) -> xóa SPN):<sup>[[2]](#references)</sup>
 
 ```bash
 targetedKerberoast.py -d '<DOMAIN>' -u <WRITER_SAM> -p '<WRITER_PASS>'
 ```
 
-Crack the output with hashcat autodetect (mode 13100 for `$krb5tgs$23$`):
+Crack output bằng hashcat autodetect (mode 13100 cho `$krb5tgs$23$`):
 
 ```bash
 hashcat <outfile>.hash /path/to/rockyou.txt
 ```
 
-Detection notes: adding/removing SPNs produces directory changes (Event ID 5136/4738 on the target user) and the TGS request generates Event ID 4769. Consider throttling and prompt cleanup.
+Ghi chú về phát hiện: việc thêm/xóa SPN tạo ra các thay đổi trong directory (Event ID 5136/4738 trên user mục tiêu), còn yêu cầu TGS tạo ra Event ID 4769. Hãy cân nhắc điều tiết tần suất và dọn dẹp ngay.
 
-You can find useful tools for kerberoast attacks here: https://github.com/nidem/kerberoast
+Bạn có thể tìm thấy các công cụ hữu ích cho các cuộc tấn công kerberoast tại đây: https://github.com/nidem/kerberoast
 
-If you find this error from Linux: `Kerberos SessionError: KRB_AP_ERR_SKEW (Clock skew too great)` it’s due to local time skew. Sync to the DC:
+Nếu gặp lỗi này trên Linux: `Kerberos SessionError: KRB_AP_ERR_SKEW (Clock skew too great)`, nguyên nhân là do độ lệch giờ cục bộ. Đồng bộ thời gian với DC:
 
-- `ntpdate <DC_IP>` (deprecated on some distros)
+- `ntpdate <DC_IP>` (không còn được khuyến nghị trên một số distro)
 - `rdate -n <DC_IP>`
 
-### Kerberoast without a domain account (AS-requested STs)
+### Kerberoast không cần tài khoản domain (AS-requested STs)
 
-In September 2022, Charlie Clark showed that if a principal does not require pre-authentication, it’s possible to obtain a service ticket via a crafted KRB_AS_REQ by altering the sname in the request body, effectively getting a service ticket instead of a TGT. This mirrors AS-REP roasting and does not require valid domain credentials.
+Vào tháng 9 năm 2022, Charlie Clark cho thấy rằng nếu một principal không yêu cầu pre-authentication, ta có thể lấy service ticket thông qua một KRB_AS_REQ được tạo thủ công bằng cách thay đổi sname trong phần thân yêu cầu, qua đó lấy service ticket thay vì TGT. Cách này tương tự AS-REP roasting và không yêu cầu thông tin xác thực domain hợp lệ.
 
-See details: Semperis write-up “New Attack Paths: AS-requested STs”.<sup>[[10]](#references)</sup>
+Xem chi tiết: bài viết của Semperis “New Attack Paths: AS-requested STs”.<sup>[[10]](#references)</sup>
 
 > [!WARNING]
-> You must provide a list of users because without valid credentials you cannot query LDAP with this technique.
+> Bạn phải cung cấp danh sách user vì không có thông tin xác thực hợp lệ thì không thể truy vấn LDAP bằng kỹ thuật này.
 
 Linux
 
@@ -241,24 +241,24 @@ Windows
 Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:domain.local /dc:dc.domain.local /nopreauth:NO_PREAUTH_USER /spn:TARGET_SERVICE
 ```
 
-Related
+Liên quan
 
-If you are targeting AS-REP roastable users, see also:
+Nếu bạn đang nhắm mục tiêu vào các user có thể bị AS-REP roast, hãy xem thêm:
 
 {{#ref}}
 asreproast.md
 {{#endref}}
 
-### Detection
+### Phát hiện
 
-Kerberoasting can be stealthy. Hunt for Event ID 4769 from DCs and apply filters to reduce noise:
+Kerberoasting có thể khó bị phát hiện. Tìm Event ID 4769 từ các DC và áp dụng bộ lọc để giảm nhiễu:
 
-- Exclude service name `krbtgt` and service names ending with `$` (computer accounts).
-- Exclude requests from machine accounts (`*$$@*`).
-- Only successful requests (Failure Code `0x0`).
-- Track encryption types: RC4 (`0x17`), AES128 (`0x11`), AES256 (`0x12`). Don’t alert only on `0x17`.
+- Loại trừ service name `krbtgt` và các service name kết thúc bằng `$` (tài khoản máy tính).
+- Loại trừ các yêu cầu từ tài khoản máy (`*$$@*`).
+- Chỉ lấy các yêu cầu thành công (Failure Code `0x0`).
+- Theo dõi các loại mã hóa: RC4 (`0x17`), AES128 (`0x11`), AES256 (`0x12`). Không chỉ cảnh báo với `0x17`.
 
-Example PowerShell triage:
+Ví dụ PowerShell để phân loại ban đầu:
 
 ```powershell
 Get-WinEvent -FilterHashtable @{Logname='Security'; ID=4769} -MaxEvents 1000 |
@@ -272,30 +272,29 @@ Get-WinEvent -FilterHashtable @{Logname='Security'; ID=4769} -MaxEvents 1000 |
   Select-Object -ExpandProperty Message
 ```
 
-Additional ideas:
+Ý tưởng bổ sung:
 
-- Baseline normal SPN usage per host/user; alert on large bursts of distinct SPN requests from a single principal.
-- Flag unusual RC4 usage in AES-hardened domains.
+- Thiết lập baseline về cách sử dụng SPN bình thường theo từng host/user; cảnh báo khi một principal gửi nhiều yêu cầu SPN khác nhau trong thời gian ngắn.
+- Đánh dấu việc sử dụng RC4 bất thường trong các domain đã được harden bằng AES.
 
-### Mitigation / Hardening
+### Giảm thiểu / Hardening
 
-- Use gMSA/dMSA or machine accounts for services. Managed accounts have 120+ character random passwords and rotate automatically, making offline cracking impractical.<sup>[[7]](#references)</sup>
-- Enforce AES on service accounts by setting `msDS-SupportedEncryptionTypes` to AES-only (decimal 24 / hex 0x18) and then rotating the password so AES keys are derived.<sup>[[7]](#references)</sup>
-- Where possible, disable RC4 in your environment and monitor for attempted RC4 usage. On DCs you can use the `DefaultDomainSupportedEncTypes` registry value to steer defaults for accounts without `msDS-SupportedEncryptionTypes` set. Test thoroughly.
-- Remove unnecessary SPNs from user accounts.<sup>[[7]](#references)</sup>
-- Use long, random service account passwords (25+ chars) if managed accounts are not feasible; ban common passwords and audit regularly.<sup>[[7]](#references)</sup>
+- Dùng gMSA/dMSA hoặc machine account cho các dịch vụ. Tài khoản được quản lý có mật khẩu ngẫu nhiên dài hơn 120 ký tự và tự động xoay vòng, khiến việc cracking offline không thực tế.<sup>[[7]](#references)</sup>
+- Bắt buộc dùng AES cho service account bằng cách đặt `msDS-SupportedEncryptionTypes` chỉ dùng AES (thập phân 24 / thập lục phân 0x18), sau đó xoay vòng mật khẩu để các khóa AES được tạo.<sup>[[7]](#references)</sup>
+- Nếu có thể, hãy tắt RC4 trong môi trường của bạn và giám sát các lần thử sử dụng RC4. Trên DC, bạn có thể dùng giá trị registry `DefaultDomainSupportedEncTypes` để điều chỉnh các giá trị mặc định cho những account chưa đặt `msDS-SupportedEncryptionTypes`. Hãy kiểm tra kỹ lưỡng.
+- Xóa các SPN không cần thiết khỏi user account.<sup>[[7]](#references)</sup>
+- Nếu không thể dùng tài khoản được quản lý, hãy dùng mật khẩu service account dài, ngẫu nhiên (từ 25 ký tự trở lên); cấm các mật khẩu phổ biến và thường xuyên kiểm tra.<sup>[[7]](#references)</sup>
 
 ## References
 
-- [1] [HTB: Breach – NetExec LDAP kerberoast + hashcat cracking in practice](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
+- [1] [HTB: Breach – NetExec LDAP kerberoast + cracking hashcat trong thực tế](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
 - [2] [ShutdownRepo/targetedKerberoast](https://github.com/ShutdownRepo/targetedKerberoast)
-- [3] [Matthew Green – Kerberoasting: Low-Tech, High-Impact Attacks from Legacy Kerberos Crypto (2025-09-10)](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/)
-- [4] [Kerberos (II): How to attack Kerberos?](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-- [5] [ired.team – Active Directory Kerberos Abuse: T1208 Kerberoasting](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)
-- [6] [ired.team – Kerberoasting: Requesting RC4 Encrypted TGS when AES is Enabled](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
-- [7] [Microsoft Security Blog (2024-10-11) – Microsoft’s guidance to help mitigate Kerberoasting](https://www.microsoft.com/en-us/security/blog/2024/10/11/microsofts-guidance-to-help-mitigate-kerberoasting/)
-- [8] [SpecterOps – Rubeus kerberoast command documentation](https://docs.specterops.io/ghostpack-docs/Rubeus-mdx/commands/roasting/kerberoast)
-- [9] [HTB: Delegate — SYSVOL creds → Targeted Kerberoast → Unconstrained Delegation → DCSync to DA](https://0xdf.gitlab.io/2025/09/12/htb-delegate.html)
-- [10] [Semperis – New Attack Paths? AS Requested Service Tickets (Charlie Clark, Sept 2022)](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/)
-
+- [3] [Matthew Green – Kerberoasting: Tấn công tác động lớn, kỹ thuật thấp từ mật mã Kerberos lỗi thời (2025-09-10)](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/)
+- [4] [Kerberos (II): Tấn công Kerberos như thế nào?](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [5] [ired.team – Lạm dụng Active Directory Kerberos: T1208 Kerberoasting](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)
+- [6] [ired.team – Kerberoasting: Yêu cầu TGS được mã hóa bằng RC4 khi AES được bật](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
+- [7] [Microsoft Security Blog (2024-10-11) – Hướng dẫn của Microsoft giúp giảm thiểu Kerberoasting](https://www.microsoft.com/en-us/security/blog/2024/10/11/microsofts-guidance-to-help-mitigate-kerberoasting/)
+- [8] [SpecterOps – Tài liệu lệnh kerberoast của Rubeus](https://docs.specterops.io/ghostpack-docs/Rubeus-mdx/commands/roasting/kerberoast)
+- [9] [HTB: Delegate — thông tin xác thực SYSVOL → Targeted Kerberoast → Unconstrained Delegation → DCSync để lên DA](https://0xdf.gitlab.io/2025/09/12/htb-delegate.html)
+- [10] [Semperis – Đường tấn công mới? AS Requested Service Tickets (Charlie Clark, Sept 2022)](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/)
 {{#include ../../banners/hacktricks-training.md}}

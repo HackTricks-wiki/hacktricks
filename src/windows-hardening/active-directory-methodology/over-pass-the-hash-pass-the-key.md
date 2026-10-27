@@ -5,18 +5,18 @@
 
 ## Overpass The Hash/Pass The Key (PTK)
 
-The **Overpass The Hash/Pass The Key (PTK)** attack is designed for environments where the traditional NTLM protocol is restricted, and Kerberos authentication takes precedence. This attack leverages the NTLM hash or AES keys of a user to solicit Kerberos tickets, enabling unauthorized access to resources within a network.
+Cuộc tấn công **Overpass The Hash/Pass The Key (PTK)** được thiết kế cho các môi trường hạn chế giao thức NTLM truyền thống và ưu tiên xác thực Kerberos. Cuộc tấn công này tận dụng NTLM hash hoặc khóa AES của người dùng để yêu cầu vé Kerberos, cho phép truy cập trái phép vào các tài nguyên trong mạng.
 
-Strictly speaking:
+Nói chính xác:
 
-- **Over-Pass-the-Hash** usually means turning the **NT hash** into a Kerberos TGT via the **RC4-HMAC** Kerberos key.
-- **Pass-the-Key** is the more generic version where you already have a Kerberos key such as **AES128/AES256** and request a TGT directly with it.
+- **Over-Pass-the-Hash** thường có nghĩa là chuyển **NT hash** thành Kerberos TGT thông qua khóa Kerberos **RC4-HMAC**.
+- **Pass-the-Key** là phiên bản tổng quát hơn, trong đó bạn đã có khóa Kerberos như **AES128/AES256** và dùng khóa đó để yêu cầu TGT trực tiếp.
 
-This difference matters in hardened environments: if **RC4 is disabled** or no longer assumed by the KDC, the **NT hash alone is not enough** and you need an **AES key** (or the cleartext password to derive it).
+Sự khác biệt này rất quan trọng trong các môi trường được tăng cường bảo mật: nếu **RC4 bị vô hiệu hóa** hoặc KDC không còn mặc định sử dụng RC4, chỉ **NT hash** là chưa đủ và bạn cần **khóa AES** (hoặc mật khẩu dạng rõ để suy ra khóa này).
 
-To execute this attack, the initial step involves acquiring the NTLM hash or password of the targeted user's account. Upon securing this information, a Ticket Granting Ticket (TGT) for the account can be obtained, allowing the attacker to access services or machines to which the user has permissions.
+Để thực hiện cuộc tấn công này, bước đầu tiên là lấy NTLM hash hoặc mật khẩu của tài khoản người dùng mục tiêu. Sau khi có được thông tin này, có thể lấy Ticket Granting Ticket (TGT) cho tài khoản, cho phép kẻ tấn công truy cập các dịch vụ hoặc máy tính mà người dùng có quyền truy cập.
 
-The process can be initiated with the following commands:<sup>[[1]](#references)</sup>
+Có thể bắt đầu quy trình bằng các lệnh sau:<sup>[[1]](#references)</sup>
 
 ```bash
 python getTGT.py -dc-ip 10.10.10.10 jurassic.park/velociraptor -hashes :2a3de7fe356ee524cc9f3d579f2e0aa7
@@ -24,7 +24,7 @@ export KRB5CCNAME=/root/impacket-examples/velociraptor.ccache
 python psexec.py jurassic.park/velociraptor@labwws02.jurassic.park -k -no-pass
 ```
 
-For scenarios necessitating AES256, the `-aesKey [AES key]` option can be utilized:<sup>[[1]](#references)</sup>
+Trong các tình huống cần AES256, có thể sử dụng tùy chọn `-aesKey [AES key]`:<sup>[[1]](#references)</sup>
 
 ```bash
 python getTGT.py -dc-ip 10.10.10.10 jurassic.park/velociraptor -aesKey <AES256_HEX>
@@ -32,80 +32,79 @@ export KRB5CCNAME=velociraptor.ccache
 python wmiexec.py -k -no-pass jurassic.park/velociraptor@labwws02.jurassic.park
 ```
 
-`getTGT.py` also supports requesting a **service ticket directly through an AS-REQ** with `-service <SPN>`, which can be useful when you want a ticket for a specific SPN without an extra TGS-REQ:
+`getTGT.py` cũng hỗ trợ yêu cầu trực tiếp service ticket thông qua AS-REQ bằng `-service <SPN>`, hữu ích khi bạn muốn lấy ticket cho một SPN cụ thể mà không cần thêm TGS-REQ:
 
 ```bash
 python getTGT.py -dc-ip 10.10.10.10 -aesKey <AES256_HEX> -service cifs/labwws02.jurassic.park jurassic.park/velociraptor
 ```
 
-Moreover, the acquired ticket might be employed with various tools, including `smbexec.py` or `wmiexec.py`, broadening the scope of the attack.
+Ngoài ra, ticket thu được có thể được sử dụng với nhiều công cụ khác nhau, bao gồm `smbexec.py` hoặc `wmiexec.py`, giúp mở rộng phạm vi tấn công.
 
-Encountered issues such as _PyAsn1Error_ or _KDC cannot find the name_ are typically resolved by updating the Impacket library or using the hostname instead of the IP address, ensuring compatibility with the Kerberos KDC.
+Các lỗi như _PyAsn1Error_ hoặc _KDC cannot find the name_ thường được khắc phục bằng cách cập nhật thư viện Impacket hoặc sử dụng hostname thay vì địa chỉ IP, để đảm bảo tương thích với Kerberos KDC.
 
-An alternative command sequence using Rubeus.exe demonstrates another facet of this technique:<sup>[[1]](#references)</sup>
+Một chuỗi lệnh thay thế sử dụng Rubeus.exe minh họa một khía cạnh khác của kỹ thuật này:<sup>[[1]](#references)</sup>
 
 ```bash
 .\Rubeus.exe asktgt /domain:jurassic.park /user:velociraptor /rc4:2a3de7fe356ee524cc9f3d579f2e0aa7 /ptt
 .\PsExec.exe -accepteula \\labwws02.jurassic.park cmd
 ```
 
-This method mirrors the **Pass the Key** approach, with a focus on commandeering and utilizing the ticket directly for authentication purposes. In practice:
+Phương pháp này tương tự cách tiếp cận **Pass the Key**, tập trung vào việc chiếm quyền kiểm soát và sử dụng trực tiếp ticket để xác thực. Trên thực tế:
 
-- `Rubeus asktgt` sends the **raw Kerberos AS-REQ/AS-REP** itself and does **not** need admin rights unless you want to target another logon session with `/luid` or create a separate one with `/createnetonly`.<sup>[[2]](#references)</sup>
-- `mimikatz sekurlsa::pth` patches credential material into a logon session and therefore **touches LSASS**, which usually requires local admin or `SYSTEM` and is noisier from an EDR perspective.
+- `Rubeus asktgt` tự gửi **raw Kerberos AS-REQ/AS-REP** và không cần quyền admin, trừ khi bạn muốn nhắm đến một logon session khác bằng `/luid` hoặc tạo một session riêng bằng `/createnetonly`.<sup>[[2]](#references)</sup>
+- `mimikatz sekurlsa::pth` chèn credential material vào một logon session nên sẽ **tác động đến LSASS**. Vì vậy, thao tác này thường cần quyền local admin hoặc `SYSTEM` và dễ bị EDR phát hiện hơn.
 
-Examples with Mimikatz:
+Ví dụ với Mimikatz:
 
 ```bash
 sekurlsa::pth /user:velociraptor /domain:jurassic.park /ntlm:2a3de7fe356ee524cc9f3d579f2e0aa7 /run:cmd.exe
 sekurlsa::pth /user:velociraptor /domain:jurassic.park /aes256:<AES256_HEX> /run:cmd.exe
 ```
 
-To conform to operational security and use AES256, the following command can be applied:
+Để tuân thủ bảo mật hoạt động và sử dụng AES256, có thể áp dụng lệnh sau:
 
 ```bash
 .\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:HASH /nowrap /opsec
 ```
 
-`/opsec` is relevant because Rubeus-generated traffic differs slightly from native Windows Kerberos. Also note that `/opsec` is intended for **AES256** traffic; using it with RC4 usually requires `/force`, which defeats much of the point because **RC4 in modern domains is itself a strong signal**.
+`/opsec` có liên quan vì lưu lượng do Rubeus tạo ra hơi khác so với Kerberos gốc của Windows. Cũng lưu ý rằng `/opsec` được thiết kế cho lưu lượng **AES256**; dùng nó với RC4 thường cần `/force`, điều này làm mất phần lớn ý nghĩa vì **RC4 trong các domain hiện đại tự nó đã là một dấu hiệu rõ ràng**.
 
-## Detection notes
+## Ghi chú phát hiện
 
-Every TGT request generates **event `4768`** on the DC. In current Windows builds this event contains more useful fields than older writeups mention:
+Mỗi yêu cầu TGT đều tạo **event `4768`** trên DC. Trong các bản dựng Windows hiện tại, event này chứa nhiều trường hữu ích hơn những tài liệu cũ đề cập:
 
-- `TicketEncryptionType` tells you which enctype was used for the issued TGT. Typical values are `0x17` for **RC4-HMAC**, `0x11` for **AES128**, and `0x12` for **AES256**.<sup>[[3]](#references)</sup>
-- Updated events also expose `SessionKeyEncryptionType`, `PreAuthEncryptionType`, and the client's advertised enctypes, which helps distinguish **real RC4 dependence** from confusing legacy defaults.
-- Seeing `0x17` in a modern environment is a good clue that the account, host, or KDC fallback path still permits RC4 and is therefore more friendly to NT-hash-based Over-Pass-the-Hash.
+- `TicketEncryptionType` cho biết enctype được dùng cho TGT đã cấp. Các giá trị thường gặp là `0x17` cho **RC4-HMAC**, `0x11` cho **AES128** và `0x12` cho **AES256**.<sup>[[3]](#references)</sup>
+- Các event đã cập nhật cũng hiển thị `SessionKeyEncryptionType`, `PreAuthEncryptionType` và các enctype mà client quảng bá, giúp phân biệt **sự phụ thuộc thực sự vào RC4** với các mặc định cũ dễ gây nhầm lẫn.
+- Thấy `0x17` trong môi trường hiện đại là dấu hiệu đáng chú ý cho thấy tài khoản, host hoặc đường dẫn fallback của KDC vẫn cho phép RC4, do đó thuận lợi hơn cho Over-Pass-the-Hash dựa trên NT hash.
 
-Microsoft has been progressively reducing RC4-by-default behavior since the November 2022 Kerberos hardening updates, and the current published guidance is to **remove RC4 as the default assumed enctype for AD DCs by the end of Q2 2026**. From an offensive perspective, that means **Pass-the-Key with AES** is increasingly the reliable path, while classic **NT-hash-only OpTH** will keep failing more often in hardened estates.<sup>[[3]](#references)</sup>
+Microsoft đã từng bước giảm hành vi mặc định dùng RC4 kể từ các bản cập nhật tăng cường bảo mật Kerberos tháng 11 năm 2022, và hướng dẫn hiện được công bố là **loại bỏ RC4 khỏi các enctype mặc định được giả định cho AD DC trước cuối Q2 2026**. Từ góc độ tấn công, điều này có nghĩa là **Pass-the-Key với AES** ngày càng là phương án đáng tin cậy, trong khi **OpTH chỉ dùng NT hash** kiểu cũ sẽ tiếp tục thất bại thường xuyên hơn trong các môi trường đã được tăng cường bảo mật.<sup>[[3]](#references)</sup>
 
-For more details on Kerberos encryption types and related ticketing behaviour, check:
+Để biết thêm chi tiết về các loại mã hóa Kerberos và hành vi cấp ticket liên quan, hãy xem:
 
 {{#ref}}
 kerberos-authentication.md
 {{#endref}}
 
-## Stealthier version
+## Phiên bản kín đáo hơn
 
 > [!WARNING]
-> Each logon session can only have one active TGT at a time so be careful.
+> Mỗi phiên đăng nhập chỉ có thể có một TGT đang hoạt động tại một thời điểm, vì vậy hãy cẩn thận.
 
-1. Create a new logon session with **`make_token`** from Cobalt Strike.
-2. Then, use Rubeus to generate a TGT for the new logon session without affecting the existing one.
+1. Tạo một phiên đăng nhập mới bằng **`make_token`** từ Cobalt Strike.
+2. Sau đó, dùng Rubeus để tạo TGT cho phiên đăng nhập mới mà không ảnh hưởng đến phiên hiện có.
 
-You can achieve a similar isolation from Rubeus itself with a sacrificial **logon type 9** session:
+Bạn cũng có thể tạo vùng cách ly tương tự ngay trong Rubeus bằng một phiên **logon type 9** dùng một lần:
 
 ```bash
 .\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:<AES256_HEX> /createnetonly:C:\Windows\System32\cmd.exe /show /ptt
 ```
 
-This avoids overwriting the current session TGT and is usually safer than importing the ticket into your existing logon session.
+Điều này giúp tránh ghi đè TGT của phiên hiện tại và thường an toàn hơn so với nhập ticket vào phiên đăng nhập hiện có.
 
 ## References
 
-- [1] [Tarlogic - Kerberos (II): ¿Cómo atacar Kerberos?](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)
-- [2] [GhostPack - Rubeus (GitHub repository)](https://github.com/GhostPack/Rubeus)
-- [3] [Microsoft Learn - Detect and Remediate RC4 Usage in Kerberos](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
-
+- [1] [Tarlogic - Kerberos (II): Tấn công Kerberos như thế nào?](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)
+- [2] [GhostPack - Rubeus (Kho lưu trữ GitHub)](https://github.com/GhostPack/Rubeus)
+- [3] [Microsoft Learn - Phát hiện và khắc phục việc sử dụng RC4 trong Kerberos](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
 {{#include ../../banners/hacktricks-training.md}}
 

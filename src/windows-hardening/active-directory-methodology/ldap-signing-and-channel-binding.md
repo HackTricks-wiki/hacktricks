@@ -1,67 +1,67 @@
-# LDAP Signing & Channel Binding Hardening
+# Tăng cường bảo mật LDAP Signing & Channel Binding
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Why it matters
+## Vì sao điều này quan trọng
 
-LDAP relay/MITM attacks forward authentication to a domain controller to obtain an authenticated LDAP context. The [name-resolution poisoning and relay overview](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) covers the broader workflow. Two related controls reduce these paths:
+Các cuộc tấn công LDAP relay/MITM chuyển tiếp quá trình xác thực đến domain controller để lấy ngữ cảnh LDAP đã xác thực. [Tổng quan về đầu độc phân giải tên và relay](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) trình bày quy trình tổng quát. Hai biện pháp kiểm soát liên quan giúp giảm thiểu các hướng tấn công này:
 
-- **LDAP channel binding (CBT)** binds applicable authentication to the TLS server certificate/channel used by LDAPS, frustrating cross-channel relay.
-- **LDAP signing** requires integrity protection for SASL LDAP binds. It does not add confidentiality; use TLS when LDAP contents also need encryption.<sup>[[2]](#references)</sup>
+- **LDAP channel binding (CBT)** liên kết quá trình xác thực tương ứng với chứng chỉ/kênh TLS được LDAPS sử dụng, gây khó khăn cho relay xuyên kênh.
+- **LDAP signing** yêu cầu bảo vệ tính toàn vẹn cho các LDAP bind dùng SASL. Tính năng này không bổ sung tính bảo mật; hãy dùng TLS nếu nội dung LDAP cũng cần được mã hóa.<sup>[[2]](#references)</sup>
 
-**Quick posture check**: tools such as `netexec ldap <dc> -u user -p pass` report observed signing and channel-binding policy. `(signing:None)` and `(channel binding:Never)` indicate missing controls, but a successful relay still depends on the captured authentication type, EPA behavior, account privileges, target protocol, and relay protections. When the relayed principal has the necessary rights, tooling such as KrbRelayUp can write `msDS-AllowedToActOnBehalfOfOtherIdentity`, configure resource-based constrained delegation (RBCD), and use the resulting delegation path to impersonate a privileged principal.<sup>[[4]](#references)</sup>
+**Kiểm tra nhanh trạng thái**: các công cụ như `netexec ldap <dc> -u user -p pass` báo cáo chính sách signing và channel binding được quan sát. `(signing:None)` và `(channel binding:Never)` cho thấy thiếu các biện pháp kiểm soát, nhưng relay thành công vẫn phụ thuộc vào loại xác thực thu được, hành vi EPA, quyền của tài khoản, giao thức đích và các biện pháp bảo vệ relay. Khi principal được relay có đủ quyền cần thiết, các công cụ như KrbRelayUp có thể ghi `msDS-AllowedToActOnBehalfOfOtherIdentity`, cấu hình resource-based constrained delegation (RBCD) và sử dụng đường dẫn delegation thu được để mạo danh một principal có đặc quyền.<sup>[[4]](#references)</sup>
 
-**Server 2025 DCs** introduce a new GPO (**LDAP server signing requirements Enforcement**) that defaults to **Require Signing** when left **Not Configured**. To avoid enforcement you must explicitly set that policy to **Disabled**.<sup>[[1]](#references)</sup>
+**Các DC Server 2025** giới thiệu GPO mới (**LDAP server signing requirements Enforcement**), mặc định là **Require Signing** nếu để ở trạng thái **Not Configured**. Để tránh việc thực thi chính sách, bạn phải đặt rõ chính sách đó thành **Disabled**.<sup>[[1]](#references)</sup>
 
-## LDAP Channel Binding (LDAPS only)
+## LDAP Channel Binding (chỉ LDAPS)
 
-- **Requirements**:
-  - CVE-2017-8563 patch (2017) adds Extended Protection for Authentication support.<sup>[[3]](#references)</sup>
-  - **KB4520412** (Server 2019/2022) adds LDAPS CBT “what-if” telemetry.<sup>[[2]](#references)</sup>
+- **Yêu cầu**:
+  - Bản vá CVE-2017-8563 (2017) bổ sung hỗ trợ Extended Protection for Authentication.<sup>[[3]](#references)</sup>
+  - **KB4520412** (Server 2019/2022) bổ sung telemetry “what-if” cho LDAPS CBT.<sup>[[2]](#references)</sup>
 - **GPO (DCs)**: `Domain controller: LDAP server channel binding token requirements`
-  - `Never` (default, no CBT)
-  - `When Supported` (partial enforcement: CBT-capable clients must provide a valid token; clients without CBT support can still bind, and audit events are emitted)
-  - `Always` (enforce: rejects LDAPS binds without valid CBT)<sup>[[1]](#references)</sup>
-- **Audit**: set **When Supported** to surface:
-  - **3074** – LDAPS bind would have failed CBT validation if enforced.
-  - **3075** – LDAPS bind omitted CBT data and would be rejected if enforced.
-  - (Event **3039** still signals CBT failures on older builds.)<sup>[[1]](#references)[[2]](#references)</sup>
-- **Enforcement**: set **Always** once LDAPS clients send CBTs; only effective on **LDAPS** (not raw 389).<sup>[[1]](#references)</sup>
+  - `Never` (mặc định, không dùng CBT)
+  - `When Supported` (thực thi một phần: client hỗ trợ CBT phải cung cấp token hợp lệ; client không hỗ trợ CBT vẫn có thể bind và các audit event sẽ được phát ra)
+  - `Always` (thực thi: từ chối LDAPS bind không có CBT hợp lệ)<sup>[[1]](#references)</sup>
+- **Audit**: đặt thành **When Supported** để phát hiện:
+  - **3074** – LDAPS bind sẽ không vượt qua xác thực CBT nếu được thực thi.
+  - **3075** – LDAPS bind không có dữ liệu CBT và sẽ bị từ chối nếu được thực thi.
+  - (Event **3039** vẫn báo hiệu lỗi CBT trên các bản build cũ hơn.)<sup>[[1]](#references)[[2]](#references)</sup>
+- **Thực thi**: đặt thành **Always** khi client LDAPS gửi CBT; chỉ có hiệu lực với **LDAPS** (không áp dụng cho cổng 389 không mã hóa).<sup>[[1]](#references)</sup>
 
-`When Supported` is not audit-only: it validates CBT for capable clients while allowing clients without CBT support. The [Microsoft policy reference](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/ldap-channel-binding) describes its version-dependent defaults. LDAP signing applies to applicable binds on LDAP/389; channel binding applies to TLS-protected LDAP authentication.
+`When Supported` không chỉ dùng cho audit: chính sách xác thực CBT cho client có hỗ trợ, đồng thời cho phép client không hỗ trợ CBT. [Tài liệu tham khảo chính sách của Microsoft](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/ldap-channel-binding) mô tả các giá trị mặc định tùy theo phiên bản. LDAP signing áp dụng cho các bind tương ứng trên LDAP/389; channel binding áp dụng cho xác thực LDAP được bảo vệ bằng TLS.
 
 
 ## LDAP Signing
 
-- **Client GPO**: `Network security: LDAP client signing requirements` = `Require signing` (vs `Negotiate signing` default on modern Windows).<sup>[[1]](#references)</sup>
-- **DC GPO**:
-  - Legacy: `Domain controller: LDAP server signing requirements` = `Require signing` (default is `None`).<sup>[[2]](#references)</sup>
-  - **Server 2025**: leave legacy policy at `None` and set `LDAP server signing requirements Enforcement` = `Enabled` (Not Configured = enforced by default; set `Disabled` to avoid it).<sup>[[1]](#references)</sup>
-- **Compatibility**: Inventory non-Windows appliances and applications using simple binds or unsigned SASL binds. Microsoft documents support on maintained Windows versions; legacy-client compatibility statements should be verified against the actual client stack rather than reduced to an XP version threshold.<sup>[[2]](#references)</sup>
+- **GPO client**: `Network security: LDAP client signing requirements` = `Require signing` (thay vì mặc định `Negotiate signing` trên Windows hiện đại).<sup>[[1]](#references)</sup>
+- **GPO DC**:
+  - Bản cũ: `Domain controller: LDAP server signing requirements` = `Require signing` (mặc định là `None`).<sup>[[2]](#references)</sup>
+  - **Server 2025**: giữ chính sách cũ ở `None` và đặt `LDAP server signing requirements Enforcement` = `Enabled` (mặc định được thực thi khi để Not Configured; đặt `Disabled` để tránh thực thi).<sup>[[1]](#references)</sup>
+- **Tương thích**: kiểm kê các thiết bị và ứng dụng không chạy Windows sử dụng simple bind hoặc SASL bind không signing. Microsoft nêu tài liệu hỗ trợ trên các phiên bản Windows còn được duy trì; cần xác minh các tuyên bố về khả năng tương thích với client cũ dựa trên stack client thực tế, thay vì chỉ dựa vào ngưỡng phiên bản XP.<sup>[[2]](#references)</sup>
 
-## Audit-first rollout (recommended ~30 days)
+## Triển khai ưu tiên audit (khuyến nghị khoảng 30 ngày)
 
-1. Enable LDAP interface diagnostics on each DC to log unsigned binds (Event **2889**):<sup>[[1]](#references)</sup>
+1. Bật chẩn đoán giao diện LDAP trên từng DC để ghi log các bind không signing (Event **2889**):<sup>[[1]](#references)</sup>
 
 ```bash
 Reg Add HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics /v "16 LDAP Interface Events" /t REG_DWORD /d 2
 ```
 
-2. Set DC GPO `LDAP server channel binding token requirements` = **When Supported** for partial CBT enforcement and telemetry; validate legacy-client compatibility first.<sup>[[1]](#references)</sup>
-3. Monitor Directory Service events:<sup>[[1]](#references)[[2]](#references)</sup>
-   - **2889** – unsigned/unsigned-allow binds (signing noncompliant).
-   - **3074/3075** – LDAPS binds that would fail or omit CBT (requires KB4520412 on 2019/2022 and step 2 above).
-4. Enforce in separate changes:<sup>[[1]](#references)</sup>
-   - `LDAP server channel binding token requirements` = **Always** (DCs).
-   - `LDAP client signing requirements` = **Require signing** (clients).
-   - `LDAP server signing requirements` = **Require signing** (DCs) **or** (Server 2025) `LDAP server signing requirements Enforcement` = **Enabled**.
+2. Đặt GPO DC `LDAP server channel binding token requirements` = **When Supported** để thực thi CBT một phần và thu thập telemetry; trước tiên hãy xác thực khả năng tương thích với client cũ.<sup>[[1]](#references)</sup>
+3. Giám sát các sự kiện Directory Service:<sup>[[1]](#references)[[2]](#references)</sup>
+   - **2889** – các bind không ký/cho phép không ký (không tuân thủ yêu cầu signing).
+   - **3074/3075** – các bind LDAPS sẽ thất bại hoặc không có CBT (cần KB4520412 trên 2019/2022 và bước 2 ở trên).
+4. Thực thi bằng các thay đổi riêng biệt:<sup>[[1]](#references)</sup>
+   - `LDAP server channel binding token requirements` = **Always** (DC).
+   - `LDAP client signing requirements` = **Require signing** (client).
+   - `LDAP server signing requirements` = **Require signing** (DC) **hoặc** (Server 2025) `LDAP server signing requirements Enforcement` = **Enabled**.
 
 
 
 ## References
 
-- [1] [TrustedSec - LDAP Channel Binding and LDAP Signing](https://trustedsec.com/blog/ldap-channel-binding-and-ldap-signing)
-- [2] [Microsoft KB4520412 - LDAP channel binding & signing requirements](https://support.microsoft.com/en-us/topic/2020-and-2023-ldap-channel-binding-and-ldap-signing-requirements-for-windows-kb4520412-ef185fb8-00f7-167d-744c-f299a66fc00a)
-- [3] [Microsoft CVE-2017-8563 - LDAP relay mitigation update](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2017-8563)
-- [4] [0xdf – HTB Bruno (LDAP signing disabled → Kerberos relay → RBCD)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
+- [1] [TrustedSec - Ràng buộc kênh LDAP và LDAP Signing](https://trustedsec.com/blog/ldap-channel-binding-and-ldap-signing)
+- [2] [Microsoft KB4520412 - Yêu cầu ràng buộc kênh LDAP & signing](https://support.microsoft.com/en-us/topic/2020-and-2023-ldap-channel-binding-and-ldap-signing-requirements-for-windows-kb4520412-ef185fb8-00f7-167d-744c-f299a66fc00a)
+- [3] [Microsoft CVE-2017-8563 - Bản cập nhật giảm thiểu LDAP relay](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2017-8563)
+- [4] [0xdf – HTB Bruno (tắt LDAP signing → Kerberos relay → RBCD)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 {{#include ../../banners/hacktricks-training.md}}

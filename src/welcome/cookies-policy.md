@@ -1,53 +1,52 @@
-# Cookies Policy
+# Chính sách Cookie
 
 {{#include ../banners/hacktricks-training.md}}
 
-Last updated: 02/04/2023
+Cập nhật lần cuối: 02/04/2023
 
-### Introduction
+### Giới thiệu
 
-This Cookies Policy applies to the following websites owned and operated by HackTricks team ("HackTricks", "we", "us" or "our"):
+Chính sách Cookie này áp dụng cho các website sau do đội ngũ HackTricks sở hữu và vận hành ("HackTricks", "chúng tôi" hoặc "của chúng tôi"):
 
 * hacktricks.wiki
 * [www.hacktricks.wiki](https://www.hacktricks.wiki/)
 * book.hacktricks.wiki
 * cloud.hacktricks.wiki
 
-By using any of these websites, you agree to the use of cookies in accordance with this Cookies Policy. If you do not agree, please disable cookies in your browser settings or refrain from using our websites.
+Khi sử dụng bất kỳ website nào trong số này, bạn đồng ý với việc sử dụng cookie theo Chính sách Cookie này. Nếu không đồng ý, vui lòng tắt cookie trong cài đặt trình duyệt hoặc không sử dụng các website của chúng tôi.
 
-### What are cookies?
+### Cookie là gì?
 
-Cookies are small text files that are stored on your computer or mobile device when you visit a website. They are widely used to make websites work, improve their functionality, and provide a more personalized user experience.
+Cookie là các tệp văn bản nhỏ được lưu trên máy tính hoặc thiết bị di động của bạn khi truy cập một website. Cookie được sử dụng rộng rãi để giúp website hoạt động, cải thiện chức năng và mang lại trải nghiệm người dùng được cá nhân hóa hơn.
 
-### How we use cookies
+### Cách chúng tôi sử dụng cookie
 
-We use cookies on our websites for the following purposes:
+Chúng tôi sử dụng cookie trên các website của mình cho những mục đích sau:
 
-1. Essential cookies: These cookies are necessary for the basic functionality of our websites, such as enabling user authentication, maintaining security, and remembering your preferences.
-2. Performance cookies: These cookies help us understand how visitors interact with our websites, by collecting and reporting information anonymously. This allows us to improve our website performance and user experience.
-3. Functionality cookies: These cookies enable our websites to remember choices you make, such as your language or region, to provide a more personalized experience.
-4. Targeting/advertising cookies: These cookies are used to deliver relevant ads and marketing communications based on your interests, browsing history, and interactions with our websites.
+1. Cookie thiết yếu: Các cookie này cần thiết cho chức năng cơ bản của website, chẳng hạn như cho phép xác thực người dùng, duy trì bảo mật và ghi nhớ tùy chọn của bạn.
+2. Cookie hiệu suất: Các cookie này giúp chúng tôi hiểu cách khách truy cập tương tác với website bằng cách thu thập và báo cáo thông tin ẩn danh. Nhờ đó, chúng tôi có thể cải thiện hiệu suất website và trải nghiệm người dùng.
+3. Cookie chức năng: Các cookie này cho phép website ghi nhớ những lựa chọn của bạn, chẳng hạn như ngôn ngữ hoặc khu vực, để mang lại trải nghiệm cá nhân hóa hơn.
+4. Cookie nhắm mục tiêu/quảng cáo: Các cookie này được sử dụng để phân phối quảng cáo phù hợp và thông tin tiếp thị dựa trên sở thích, lịch sử duyệt web và hoạt động tương tác của bạn với website.
 
-Moreover, the pages book.hacktricks.wiki and cloud.hacktricks.wiki are hosted by GitBook. GitBook documents the cookies used by its visitor-authentication and analytics features in its privacy documentation.<sup>[[1]](#references)</sup>
+Ngoài ra, các trang book.hacktricks.wiki và cloud.hacktricks.wiki được GitBook lưu trữ. GitBook mô tả các cookie được sử dụng cho tính năng xác thực khách truy cập và phân tích trong tài liệu quyền riêng tư của mình.<sup>[[1]](#references)</sup>
 
-### Third-party cookies
+### Cookie của bên thứ ba
 
-In addition to our own cookies, we may also use third-party cookies to report website usage statistics, deliver advertisements, and enable social media sharing buttons. The use of third-party cookies is subject to their respective privacy policies.
+Ngoài cookie của chúng tôi, chúng tôi cũng có thể sử dụng cookie của bên thứ ba để thống kê việc sử dụng website, phân phối quảng cáo và bật các nút chia sẻ trên mạng xã hội. Việc sử dụng cookie của bên thứ ba tuân theo chính sách quyền riêng tư tương ứng của các bên đó.
 
-Managing cookies
+Quản lý cookie
 
-Most web browsers allow you to manage cookies through their settings. You can choose to block, delete, or limit the use of cookies on your device. However, please note that disabling cookies may affect the functionality and performance of our websites.
+Hầu hết trình duyệt web cho phép bạn quản lý cookie thông qua phần cài đặt. Bạn có thể chặn, xóa hoặc giới hạn việc sử dụng cookie trên thiết bị của mình. Tuy nhiên, xin lưu ý rằng việc tắt cookie có thể ảnh hưởng đến chức năng và hiệu suất của website.
 
-Changes to this Cookies Policy
+Thay đổi đối với Chính sách Cookie này
 
-We may update this Cookies Policy from time to time to reflect changes in our practices or relevant laws. We encourage you to periodically review this page for the latest information on our cookie practices.
+Đôi khi, chúng tôi có thể cập nhật Chính sách Cookie này để phản ánh những thay đổi trong quy trình của mình hoặc trong các luật có liên quan. Chúng tôi khuyến khích bạn định kỳ xem lại trang này để biết thông tin mới nhất về cách chúng tôi sử dụng cookie.
 
-### Contact us
+### Liên hệ với chúng tôi
 
-If you have any questions or concerns about this Cookies Policy, please contact us at [support@hacktricks.xyz](mailto:support@hacktricks.xyz).
+Nếu có câu hỏi hoặc thắc mắc về Chính sách Cookie này, vui lòng liên hệ với chúng tôi qua địa chỉ [support@hacktricks.xyz](mailto:support@hacktricks.xyz).
 
 ## References
 
-- [1] [GitBook — Visitor Authentication: cookies](https://gitbook.com/docs/publishing-documentation/visitor-authentication)
-
+- [1] [GitBook — Xác thực khách truy cập: cookie](https://gitbook.com/docs/publishing-documentation/visitor-authentication)
 {{#include ../banners/hacktricks-training.md}}

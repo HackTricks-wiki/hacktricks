@@ -1,34 +1,34 @@
-# Golden gMSA/dMSA Attack (Offline Derivation of Managed Service Account Passwords)
+# Golden gMSA/dMSA Attack (Tính toán ngoại tuyến mật khẩu Managed Service Account)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Overview
+## Tổng quan
 
-Windows Managed Service Accounts are domain principals intended to run services without an administrator handling a long-lived password:
+Windows Managed Service Account là các domain principal được thiết kế để chạy dịch vụ mà không cần quản trị viên xử lý mật khẩu có thời hạn sử dụng dài:
 
-1. **gMSA** (group Managed Service Account) can be used by the computers authorised through `msDS-GroupMSAMembership` / `PrincipalsAllowedToRetrieveManagedPassword`.
-2. **dMSA** (delegated Managed Service Account) was introduced in **Windows Server 2025**. It binds normal authentication to authorised machine identities and can replace a legacy service account through a migration workflow.
+1. **gMSA** (group Managed Service Account) có thể được sử dụng bởi các máy tính được cấp quyền thông qua `msDS-GroupMSAMembership` / `PrincipalsAllowedToRetrieveManagedPassword`.
+2. **dMSA** (delegated Managed Service Account) được giới thiệu trong **Windows Server 2025**. Nó ràng buộc xác thực thông thường với danh tính máy được cấp quyền và có thể thay thế một service account cũ thông qua quy trình migration.
 
-Do not confuse **Golden dMSA** with **BadSuccessor**. Golden dMSA requires compromise of KDS root-key material and derives managed-account keys; [BadSuccessor](badsuccessor-dmsa-migration-abuse.md) instead abuses control of a dMSA object and its migration attributes.
+Đừng nhầm **Golden dMSA** với **BadSuccessor**. Golden dMSA yêu cầu chiếm được dữ liệu khóa gốc KDS và tính toán khóa của managed account; [BadSuccessor](badsuccessor-dmsa-migration-abuse.md) thay vào đó khai thác quyền kiểm soát đối tượng dMSA và các thuộc tính migration của nó.
 
-A DC does not store an independently generated clear-text password for every gMSA. It derives the account password from a **KDS root key**, a time-indexed Group Key Distribution Protocol (GKDI) key, and the account SID. The root-key objects are `msKds-ProvRootKey` objects below `CN=Master Root Keys,CN=Group Key Distribution Service,CN=Services,CN=Configuration,...`; the sensitive value is `msKds-RootKeyData`. `msDS-ManagedPasswordId` is **not a GUID**: it is a binary key identifier containing the KDS root-key GUID, the GKDI `L0`/`L1`/`L2` indexes, and domain/forest metadata. The DC applies the KDF with the label `GMSA PASSWORD` and the binary SID as context, then exposes an `MSDS-MANAGEDPASSWORD_BLOB` only to principals authorised to retrieve a gMSA password.<sup>[[2]](#references)</sup>
+DC không lưu trữ mật khẩu dạng clear-text được tạo độc lập cho từng gMSA. Nó tính toán mật khẩu account từ **KDS root key**, khóa Group Key Distribution Protocol (GKDI) được lập chỉ mục theo thời gian và SID của account. Các đối tượng root-key là đối tượng `msKds-ProvRootKey` nằm bên dưới `CN=Master Root Keys,CN=Group Key Distribution Service,CN=Services,CN=Configuration,...`; giá trị nhạy cảm là `msKds-RootKeyData`. `msDS-ManagedPasswordId` **không phải GUID**: đây là một key identifier dạng nhị phân chứa GUID của KDS root-key, các chỉ mục GKDI `L0`/`L1`/`L2` và metadata domain/forest. DC áp dụng KDF với label `GMSA PASSWORD` và SID dạng nhị phân làm context, sau đó chỉ cung cấp `MSDS-MANAGEDPASSWORD_BLOB` cho các principal được cấp quyền truy xuất mật khẩu gMSA.<sup>[[2]](#references)</sup>
 
-A dMSA normally differs operationally: its secret is meant to remain on the DC and the KDC issues credentials to an authorised machine. However, dMSAs reuse the underlying KDS/GKDI password derivation. Golden dMSA reconstructs that secret directly and therefore bypasses the intended machine-bound flow and Credential Guard on the service host.<sup>[[1]](#references)</sup>
+Về hoạt động thông thường, dMSA có một điểm khác biệt: secret của nó được giữ trên DC và KDC cấp credential cho một máy được cấp quyền. Tuy nhiên, dMSA tái sử dụng cơ chế tính toán mật khẩu KDS/GKDI bên dưới. Golden dMSA tái tạo trực tiếp secret đó, do vậy bỏ qua luồng dự kiến ràng buộc với máy và Credential Guard trên service host.<sup>[[1]](#references)</sup>
 
 ## Golden gMSA / Golden dMSA Attack
 
-After extracting a KDS root key, an attacker can derive passwords for accounts tied to that key without reading `msDS-ManagedPassword`. This bypasses the per-account password-retrieval ACL and survives ordinary managed-password rotations while the compromised root key remains in use. For gMSAs, the readable `msDS-ManagedPasswordId` normally supplies the exact key identifier. For ACL-restricted dMSAs, Golden dMSA reduces the missing identifier to only **1,024 candidates**.<sup>[[1]](#references)[[2]](#references)</sup>
+Sau khi trích xuất KDS root key, attacker có thể tính toán mật khẩu cho các account gắn với khóa đó mà không cần đọc `msDS-ManagedPassword`. Cách này vượt qua ACL truy xuất mật khẩu ở cấp account và vẫn hiệu quả qua các lần xoay vòng mật khẩu thông thường trong khi root key bị chiếm đoạt vẫn còn được sử dụng. Với gMSA, `msDS-ManagedPasswordId` có thể đọc được và thường cung cấp chính xác key identifier. Với dMSA bị giới hạn ACL, Golden dMSA giảm số identifier còn thiếu xuống chỉ còn **1.024 ứng viên**.<sup>[[1]](#references)[[2]](#references)</sup>
 
-### Prerequisites
+### Điều kiện tiên quyết
 
-* The relevant KDS root-key object, usually obtained with Enterprise Admin / forest-root Domain Admin rights, `SYSTEM` on a DC, or from an exposed DC database or backup.<sup>[[1]](#references)[[2]](#references)</sup>
-* The target account's SID, DNS domain, forest name, and `sAMAccountName`.<sup>[[1]](#references)[[2]](#references)</sup>
-* For direct gMSA computation, its base64-encoded `msDS-ManagedPasswordId`; for Golden dMSA this can instead be guessed.<sup>[[1]](#references)[[2]](#references)</sup>
-* An x64 Windows host with .NET Framework 4.7.2 for [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA).<sup>[[3]](#references)</sup>
+* Đối tượng KDS root-key liên quan, thường thu được bằng quyền Enterprise Admin / Domain Admin ở forest root, `SYSTEM` trên DC, hoặc từ cơ sở dữ liệu hay bản sao lưu DC bị lộ.<sup>[[1]](#references)[[2]](#references)</sup>
+* SID, DNS domain, tên forest và `sAMAccountName` của account mục tiêu.<sup>[[1]](#references)[[2]](#references)</sup>
+* Để tính toán trực tiếp gMSA, cần `msDS-ManagedPasswordId` được mã hóa base64; với Golden dMSA, có thể đoán giá trị này.<sup>[[1]](#references)[[2]](#references)</sup>
+* Máy Windows x64 có .NET Framework 4.7.2 để chạy [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA).<sup>[[3]](#references)</sup>
 
-### Phase 1 - Extract the KDS root key
+### Giai đoạn 1 - Trích xuất KDS root key
 
-`GoldenDMSA` and [`GoldenGMSA`](https://github.com/Semperis/GoldenGMSA) export the root-key object fields as a base64 blob. Without a domain argument, the tools query the forest root and require suitable privileged directory access. With the domain/forest argument, `SYSTEM` on a DC can query that DC's local Configuration naming-context replica.<sup>[[1]](#references)[[2]](#references)</sup>
+`GoldenDMSA` và [`GoldenGMSA`](https://github.com/Semperis/GoldenGMSA) xuất các trường của đối tượng root-key thành một blob base64. Nếu không có tham số domain, các công cụ sẽ truy vấn forest root và yêu cầu quyền truy cập thư mục đủ cao. Khi có tham số domain/forest, `SYSTEM` trên DC có thể truy vấn bản sao naming context Configuration cục bộ của DC đó.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```cmd
 :: GoldenDMSA: Enterprise Admin, or SYSTEM on a DC with --domain
@@ -41,11 +41,11 @@ GoldenGMSA.exe kdsinfo
 GoldenGMSA.exe kdsinfo --guid KDS_ROOT_KEY_GUID
 ```
 
-Record both the root-key GUID and the base64 root-key blob. A registry `SECURITY`/`SYSTEM` hive export is not by itself the KDS root key: the authoritative material is in the AD Configuration partition.<sup>[[1]](#references)[[2]](#references)</sup>
+Ghi lại cả GUID khóa gốc và blob khóa gốc dạng base64. Bản xuất hive registry `SECURITY`/`SYSTEM` tự nó không phải là KDS root key: dữ liệu có thẩm quyền nằm trong phân vùng AD Configuration.<sup>[[1]](#references)[[2]](#references)</sup>
 
-### Phase 2 - Enumerate gMSA / dMSA objects
+### Phase 2 - Liệt kê các đối tượng gMSA / dMSA
 
-For gMSAs, obtain `sAMAccountName`, `objectSid`, and the binary `msDS-ManagedPasswordId`. The latter is normally readable even when the caller is not allowed to retrieve `msDS-ManagedPassword`.<sup>[[2]](#references)</sup>
+Với gMSA, hãy lấy `sAMAccountName`, `objectSid` và `msDS-ManagedPasswordId` dạng nhị phân. Thuộc tính sau thường có thể đọc được ngay cả khi caller không được phép truy xuất `msDS-ManagedPassword`.<sup>[[2]](#references)</sup>
 
 ```powershell
 Get-ADServiceAccount -Filter * -Properties objectSid,msDS-ManagedPasswordId |
@@ -54,16 +54,16 @@ Get-ADServiceAccount -Filter * -Properties objectSid,msDS-ManagedPasswordId |
 GoldenGMSA.exe gmsainfo --domain example.local
 ```
 
-A dMSA's default ACL can prevent low-privileged LDAP enumeration. `GoldenDMSA info` can either query LDAP or enumerate candidate RIDs and resolve SIDs through `LsaLookupSids` over `\PIPE\lsarpc`, then distinguish dMSAs from computer accounts and gMSAs.<sup>[[1]](#references)[[3]](#references)</sup>
+ACL mặc định của dMSA có thể ngăn việc liệt kê LDAP với quyền thấp. `GoldenDMSA info` có thể truy vấn LDAP hoặc liệt kê các RID ứng viên rồi phân giải SID thông qua `LsaLookupSids` trên `\PIPE\lsarpc`, sau đó phân biệt dMSA với tài khoản máy tính và gMSA.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ```cmd
 GoldendMSA.exe info -d example.local -m ldap
 GoldendMSA.exe info -d example.local -m brute -u alice -p PASSWORD -o EXAMPLE -r 5000
 ```
 
-### Phase 3 - Reconstruct or guess `msDS-ManagedPasswordId`
+### Giai đoạn 3 - Dựng lại hoặc đoán `msDS-ManagedPasswordId`
 
-The key identifier includes `L0Index`, `L1Index`, and `L2Index`, not an account-creation timestamp followed by random bits. Semperis found that the password-generation path does not consume the candidate `L0Index`, while `L1Index` and `L2Index` are each limited to values `0..31`. Consequently, an attacker who knows the root-key GUID, domain, forest, and SID can construct all `32 * 32 = 1,024` candidate identifiers.<sup>[[1]](#references)</sup>
+Mã định danh khóa bao gồm `L0Index`, `L1Index` và `L2Index`, chứ không phải dấu thời gian tạo tài khoản theo sau bởi các bit ngẫu nhiên. Semperis phát hiện rằng quy trình tạo mật khẩu không sử dụng `L0Index` ứng viên, trong khi `L1Index` và `L2Index` mỗi giá trị chỉ nằm trong phạm vi `0..31`. Do đó, kẻ tấn công biết GUID của root key, domain, forest và SID có thể tạo tất cả `32 * 32 = 1,024` mã định danh ứng viên.<sup>[[1]](#references)</sup>
 
 ```cmd
 :: Write 1,024 base64 ManagedPasswordId candidates to KDS_ROOT_KEY_GUID.txt
@@ -73,11 +73,11 @@ GoldendMSA.exe wordlist -s DMSA_SID -d example.local -f example.local -k KDS_ROO
 GoldendMSA.exe bruteforce -s DMSA_SID -i KDS_ROOT_KEY_GUID -k KDS_ROOT_KEY_BASE64 -d example.local -u svc_dmsa$ -t
 ```
 
-The derivations are offline, but identifying the live candidate usually requires authentication attempts. This can produce a burst of failed Kerberos pre-authentication or NTLM validation before the valid key is found. For AES Kerberos keys, the managed-account salt used by the tool is `UPPERCASE.DNS.DOMAIN` + `host` + the lower-case account UPN without the trailing `$` (for example, `EXAMPLE.LOCALhostsvc_dmsa.example.local`).<sup>[[1]](#references)</sup>
+Các phép tính được thực hiện offline, nhưng việc xác định ứng viên đang hoạt động thường cần các lần thử xác thực. Điều này có thể tạo ra một loạt lỗi Kerberos pre-authentication hoặc xác thực NTLM trước khi tìm được key hợp lệ. Với các key Kerberos AES, salt của managed-account mà công cụ sử dụng là `UPPERCASE.DNS.DOMAIN` + `host` + UPN viết thường của tài khoản, không bao gồm ký tự `$` ở cuối (ví dụ: `EXAMPLE.LOCALhostsvc_dmsa.example.local`).<sup>[[1]](#references)</sup>
 
-### Phase 4 - Compute and use the password
+### Giai đoạn 4 - Tính toán và sử dụng mật khẩu
 
-If the exact identifier is known, compute the 256-byte password buffer and convert it to NTLM/AES material. The base64 value printed by these tools is the encoded password buffer, **not** the LDAP `MSDS-MANAGEDPASSWORD_BLOB` itself.<sup>[[2]](#references)[[3]](#references)</sup>
+Nếu biết chính xác identifier, hãy tính toán bộ đệm mật khẩu 256 byte và chuyển đổi nó thành dữ liệu NTLM/AES. Giá trị base64 do các công cụ này in ra là bộ đệm mật khẩu đã mã hóa, **không phải** chính `MSDS-MANAGEDPASSWORD_BLOB` trong LDAP.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ```cmd
 GoldendMSA.exe compute -s ACCOUNT_SID -k KDS_ROOT_KEY_BASE64 -d example.local -m MANAGED_PASSWORD_ID_BASE64
@@ -86,11 +86,11 @@ GoldendMSA.exe convert -d example.local -u svc_account$ -p BASE64_PASSWORD
 GoldenGMSA.exe compute --sid ACCOUNT_SID --kdskey KDS_ROOT_KEY_BASE64 --pwdid MANAGED_PASSWORD_ID_BASE64
 ```
 
-The NTLM result can be used where NTLM is accepted; the AES key can be used for overpass-the-hash / TGT requests where the managed account is AES-only. This gives the privileges, SPNs, delegation configuration, and resource access of the compromised managed service account without adding the attacker's machine to `PrincipalsAllowedToRetrieveManagedPassword`.<sup>[[1]](#references)[[2]](#references)</sup>
+Kết quả NTLM có thể được dùng ở nơi chấp nhận NTLM; AES key có thể được dùng cho overpass-the-hash / yêu cầu TGT trong trường hợp managed account chỉ dùng AES. Điều này mang lại các quyền, SPN, cấu hình delegation và quyền truy cập tài nguyên của managed service account bị compromise mà không cần thêm máy của attacker vào `PrincipalsAllowedToRetrieveManagedPassword`.<sup>[[1]](#references)[[2]](#references)</sup>
 
-### Cross-domain Configuration-partition abuse
+### Lạm dụng phân vùng Configuration xuyên domain
 
-KDS root-key objects live in the forest Configuration naming context, which is replicated to DCs in child domains. Consequently, `SYSTEM` on a child-domain DC can read the forest-root KDS material from the child DC's local replica, even though child Domain Admins cannot read the object from a forest-root DC directly. If the attacker can also read a parent-domain gMSA's `msDS-ManagedPasswordId`, GoldenGMSA can calculate that parent account's password; SID filtering does not prevent this cryptographic attack.<sup>[[5]](#references)</sup>
+Các KDS root-key object nằm trong forest Configuration naming context, được replicate đến các DC trong child domain. Do đó, `SYSTEM` trên DC của child domain có thể đọc KDS material của forest-root từ replica cục bộ trên DC child, dù Domain Admin của child domain không thể đọc trực tiếp object này từ DC của forest-root. Nếu attacker cũng có thể đọc `msDS-ManagedPasswordId` của gMSA thuộc parent domain, GoldenGMSA có thể tính password của account parent đó; SID filtering không ngăn được cuộc tấn công mật mã này.<sup>[[5]](#references)</sup>
 
 ```cmd
 :: Run as SYSTEM on a child.example.local DC
@@ -101,27 +101,27 @@ GoldenGMSA.exe gmsainfo --domain example.local
 GoldenGMSA.exe compute --sid PARENT_GMSA_SID --domain example.local --forest child.example.local
 ```
 
-## Detection, Containment and Recovery
+## Phát hiện, cô lập và khôi phục
 
-* Configure a SACL on the **Master Root Keys** container, inherited by `msKds-ProvRootKey` objects, for successful reads of `msKds-RootKeyData`. With Directory Service Access auditing enabled, an online extraction produces Security event **4662**; investigate subjects that are not expected DCs or Tier-0 operators. Also audit changes to these SACLs and root-key object ACLs.<sup>[[1]](#references)[[2]](#references)[[4]](#references)</sup>
-* A child-to-parent attack reads the KDS object from the compromised child DC's local replica, so the forest-root domain might not observe that read. In the parent domain, audit successful reads of `msDS-ManagedPasswordId` (schema GUID `0e78295a-c6d3-0a40-b491-d62251ffa0a6`) on `msDS-GroupManagedServiceAccount` objects and investigate reads by principals from another domain.<sup>[[5]](#references)</sup>
-* Correlate KDS-object access with unusual logons by managed accounts and bursts of Kerberos/NTLM failures for `$`-suffixed service accounts. Offline computation after prior database/backup theft is not visible to a live DC.<sup>[[1]](#references)[[3]](#references)</sup>
-* Ordinary password rotation is not sufficient after root-key exposure. Microsoft's current recovery procedure creates a new KDS root key, restarts KDS on all relevant DCs, and moves affected accounts to that key. If the exposure scope/time is unknown and waiting for a safe roll is unacceptable, replace every gMSA that used the compromised key; if the scope is known, Microsoft documents an authoritative-restore workflow to force safe rolling. Validate the new key GUID in `msDS-ManagedPasswordId` before deleting the old key.<sup>[[4]](#references)</sup>
-* Treat DC database and backup access, Configuration-partition replication, and KDS root-key administration as Tier-0. Reducing `ManagedPasswordIntervalInDays` limits some recovery windows but does not revoke an already compromised root key.<sup>[[4]](#references)</sup>
+* Cấu hình SACL trên container **Master Root Keys**, kế thừa bởi các đối tượng `msKds-ProvRootKey`, để ghi nhận các lần đọc `msKds-RootKeyData` thành công. Khi bật kiểm tra Directory Service Access, thao tác trích xuất trực tuyến sẽ tạo sự kiện Security **4662**; điều tra các chủ thể không phải DC hoặc người vận hành Tier-0 được kỳ vọng. Đồng thời kiểm tra các thay đổi đối với những SACL này và ACL của đối tượng root-key.<sup>[[1]](#references)[[2]](#references)[[4]](#references)</sup>
+* Tấn công từ miền con lên miền cha đọc đối tượng KDS từ bản sao cục bộ của DC miền con bị xâm nhập, do đó miền gốc của forest có thể không thấy lần đọc đó. Trong miền cha, kiểm tra các lần đọc `msDS-ManagedPasswordId` thành công (schema GUID `0e78295a-c6d3-0a40-b491-d62251ffa0a6`) trên các đối tượng `msDS-GroupManagedServiceAccount` và điều tra các lần đọc do principal từ miền khác thực hiện.<sup>[[5]](#references)</sup>
+* Đối chiếu quyền truy cập đối tượng KDS với các lần đăng nhập bất thường bằng tài khoản được quản lý và các đợt Kerberos/NTLM thất bại tăng đột biến đối với tài khoản dịch vụ có hậu tố `$`. Việc tính toán ngoại tuyến sau khi cơ sở dữ liệu/bản sao lưu đã bị đánh cắp sẽ không hiển thị trên DC đang hoạt động.<sup>[[1]](#references)[[3]](#references)</sup>
+* Xoay vòng mật khẩu thông thường là không đủ sau khi root-key bị lộ. Quy trình khôi phục hiện tại của Microsoft tạo một KDS root key mới, khởi động lại KDS trên tất cả DC liên quan và chuyển các tài khoản bị ảnh hưởng sang key đó. Nếu không biết phạm vi/thời điểm bị lộ và không thể chờ quá trình chuyển đổi an toàn, hãy thay thế mọi gMSA đã sử dụng key bị xâm phạm; nếu biết phạm vi, Microsoft có tài liệu về quy trình authoritative restore để buộc chuyển đổi an toàn. Xác thực GUID key mới trong `msDS-ManagedPasswordId` trước khi xóa key cũ.<sup>[[4]](#references)</sup>
+* Xem quyền truy cập cơ sở dữ liệu DC và bản sao lưu, replication phân vùng Configuration, cũng như việc quản trị KDS root-key là Tier-0. Giảm `ManagedPasswordIntervalInDays` sẽ giới hạn một số khoảng thời gian cần khôi phục, nhưng không thu hồi root-key đã bị xâm phạm.<sup>[[4]](#references)</sup>
 
-## Tooling
+## Công cụ
 
-* [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) - dMSA/gMSA enumeration, identifier generation, 1,024-candidate validation, password computation, and NTLM/AES conversion.<sup>[[3]](#references)</sup>
-* [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) - gMSA/KDS enumeration and online, offline, and cross-domain password computation.<sup>[[2]](#references)</sup>
-* [`Rubeus`](https://github.com/GhostPack/Rubeus) and [`Impacket`](https://github.com/fortra/impacket) - use or validate the derived NTLM/AES keys in authorised testing.
+* [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) - liệt kê dMSA/gMSA, tạo identifier, xác thực 1.024 candidate, tính toán mật khẩu và chuyển đổi NTLM/AES.<sup>[[3]](#references)</sup>
+* [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) - liệt kê gMSA/KDS và tính toán mật khẩu trực tuyến, ngoại tuyến và xuyên miền.<sup>[[2]](#references)</sup>
+* [`Rubeus`](https://github.com/GhostPack/Rubeus) và [`Impacket`](https://github.com/fortra/impacket) - sử dụng hoặc xác thực các khóa NTLM/AES đã suy ra trong quá trình kiểm thử được ủy quyền.
 
 
 
 ## References
 
-- [1] [Golden dMSA - authentication bypass for delegated Managed Service Accounts](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
-- [2] [gMSA Active Directory Attacks](https://www.semperis.com/blog/golden-gmsa-attack/)
-- [3] [Semperis/GoldenDMSA GitHub repository](https://github.com/Semperis/GoldenDMSA)
-- [4] [Microsoft - How to recover from a Golden gMSA attack](https://learn.microsoft.com/en-us/troubleshoot/windows-server/windows-security/recover-from-golden-gmsa-attack)
-- [5] [SID filter as security boundary between domains? Part 5 - Golden gMSA trust attack](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-5)
+- [1] [Golden dMSA - bỏ qua xác thực đối với Managed Service Account được ủy quyền](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
+- [2] [Các cuộc tấn công Active Directory nhắm vào gMSA](https://www.semperis.com/blog/golden-gmsa-attack/)
+- [3] [Kho GitHub Semperis/GoldenDMSA](https://github.com/Semperis/GoldenDMSA)
+- [4] [Microsoft - Cách khôi phục sau cuộc tấn công Golden gMSA](https://learn.microsoft.com/en-us/troubleshoot/windows-server/windows-security/recover-from-golden-gmsa-attack)
+- [5] [SID filter làm ranh giới bảo mật giữa các miền? Phần 5 - Tấn công trust Golden gMSA](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-5)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,4 +1,4 @@
-# BloodHound & Other Active Directory Enumeration Tools
+# BloodHound & Các công cụ liệt kê Active Directory khác
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,29 +6,29 @@
 adws-enumeration.md
 {{#endref}}
 
-> NOTE: This page groups some of the most useful utilities to **enumerate** and **visualise** Active Directory relationships.  For collection over the stealthy **Active Directory Web Services (ADWS)** channel check the reference above.
+> LƯU Ý: Trang này tổng hợp một số tiện ích hữu ích nhất để **liệt kê** và **trực quan hóa** các mối quan hệ trong Active Directory. Để thu thập dữ liệu qua kênh **Active Directory Web Services (ADWS)** kín đáo, hãy xem tài liệu tham khảo ở trên.
 
 ---
 
 ## AD Explorer
 
-[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) (Sysinternals) is an advanced **AD viewer & editor** which allows:
+[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) (Sysinternals) là một **trình xem và chỉnh sửa AD** nâng cao, cho phép:
 
-* GUI browsing of the directory tree
-* Editing of object attributes & security descriptors
-* Snapshot creation / comparison for offline analysis
+* Duyệt cây thư mục bằng GUI
+* Chỉnh sửa thuộc tính đối tượng và security descriptor
+* Tạo / so sánh snapshot để phân tích ngoại tuyến
 
-### Quick usage
+### Cách sử dụng nhanh
 
-1. Start the tool and connect to `dc01.corp.local` with any domain credentials.
-2. Create an offline snapshot via `File ➜ Create Snapshot`.
-3. Compare two snapshots with `File ➜ Compare` to spot permission drifts.
+1. Khởi chạy công cụ và kết nối tới `dc01.corp.local` bằng bất kỳ thông tin đăng nhập domain nào.
+2. Tạo snapshot ngoại tuyến qua `File ➜ Create Snapshot`.
+3. So sánh hai snapshot bằng `File ➜ Compare` để phát hiện các thay đổi về quyền.
 
 ---
 
 ## ADRecon
 
-[ADRecon](https://github.com/adrecon/ADRecon) extracts a large set of artefacts from a domain (ACLs, GPOs, trusts, CA templates …) and produces an **Excel report**.
+[ADRecon](https://github.com/adrecon/ADRecon) trích xuất nhiều artefact từ một domain (ACL, GPO, trust, mẫu CA …) và tạo **báo cáo Excel**.
 
 ```powershell
 # On a Windows host in the domain
@@ -37,28 +37,28 @@ PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
 
 ---
 
-## BloodHound (graph visualisation)
+## BloodHound (trực quan hóa đồ thị)
 
-[BloodHound](https://github.com/SpecterOps/BloodHound) uses graph theory to reveal hidden privilege relationships inside on-prem AD, Entra ID, and any extra attack-surface data you ingest through OpenGraph.<sup>[[1]](#references)</sup>
+[BloodHound](https://github.com/SpecterOps/BloodHound) sử dụng lý thuyết đồ thị để phát hiện các mối quan hệ đặc quyền ẩn bên trong AD tại chỗ, Entra ID và mọi dữ liệu bề mặt tấn công bổ sung mà bạn đưa vào thông qua OpenGraph.<sup>[[1]](#references)</sup>
 
-### Deployment (Docker CE)
+### Triển khai (Docker CE)
 
 ```bash
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 # Web UI ➜ http://localhost:8080  (user: admin / password from logs)
 ```
 
-### Collectors
+### Bộ thu thập
 
-* `SharpHound.exe` / `Invoke-BloodHound` – native or PowerShell variant
-* `RustHound-CE` – cross-platform CE collector for Linux, macOS, and Windows
-* `NetExec --bloodhound` – quick LDAP-driven collection from Linux
-* `AzureHound` – Entra ID enumeration
-* **SoaPy + BOFHound** – ADWS collection (see link at top)
+* `SharpHound.exe` / `Invoke-BloodHound` – biến thể native hoặc PowerShell
+* `RustHound-CE` – bộ thu thập CE đa nền tảng cho Linux, macOS và Windows
+* `NetExec --bloodhound` – thu thập nhanh dựa trên LDAP từ Linux
+* `AzureHound` – liệt kê Entra ID
+* **SoaPy + BOFHound** – thu thập qua ADWS (xem link ở đầu)
 
-> BloodHound CE `v8+` changed the collector output format when OpenGraph landed. After upgrading from legacy BloodHound or older CE installs, re-run discovery with current collectors before importing the data.<sup>[[1]](#references)</sup>
+> BloodHound CE `v8+` đã thay đổi định dạng đầu ra của bộ thu thập khi OpenGraph ra mắt. Sau khi nâng cấp từ BloodHound legacy hoặc các bản cài CE cũ hơn, hãy chạy lại discovery bằng các bộ thu thập hiện tại trước khi nhập dữ liệu.<sup>[[1]](#references)</sup>
 
-#### Common SharpHound modes
+#### Các chế độ SharpHound phổ biến
 
 ```powershell
 SharpHound.exe --CollectionMethods All               # Full sweep (noisy)
@@ -67,11 +67,11 @@ SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
 SharpHound.exe --CollectionMethods Session --Loop --Loopduration 03:09:41
 ```
 
-The collectors generate JSON which is ingested via the BloodHound GUI.
+Các collector tạo JSON được nhập thông qua giao diện GUI của BloodHound.
 
-#### SharpHound from a non-domain-joined Windows host
+#### SharpHound từ máy chủ Windows không tham gia domain
 
-If your operator VM is not joined to the target domain, point DNS to a DC, start a **network-only** shell, verify you can see `SYSVOL`/`NETLOGON` on a DC, and then collect against the remote domain:
+Nếu VM operator của bạn không tham gia domain mục tiêu, hãy trỏ DNS đến một DC, khởi chạy shell **network-only**, xác minh bạn có thể thấy `SYSVOL`/`NETLOGON` trên một DC, sau đó thu thập dữ liệu từ domain từ xa:
 
 ```cmd
 runas /netonly /user:CORP\svc_bh cmd.exe
@@ -79,9 +79,9 @@ net view \\dc01.corp.local
 SharpHound.exe -d corp.local --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
 ```
 
-This is useful for disposable jump boxes or operator workstations that should not be domain-joined.
+Điều này hữu ích cho các jump box dùng một lần hoặc máy trạm của người vận hành không nên tham gia domain.
 
-#### Cross-platform collection from Linux/macOS
+#### Thu thập đa nền tảng từ Linux/macOS
 
 ```bash
 # CE-compatible ZIP from Linux/macOS/Windows
@@ -91,11 +91,11 @@ rusthound-ce -d corp.local -u svc.collector@corp.local -p 'Passw0rd!' -z
 nxc ldap dc01.corp.local -u svc.collector -p 'Passw0rd!' --bloodhound --collection All
 ```
 
-`RustHound-CE` is a good default when you want CE-compatible output from a non-Windows host.<sup>[[2]](#references)</sup> `NetExec` is convenient when you are already using it for LDAP validation or spraying and want a quick graph import. For non-AD datasets, BloodHound OpenGraph can be extended with collectors such as [ShareHound](../../network-services-pentesting/pentesting-smb/README.md).<sup>[[1]](#references)</sup>
+`RustHound-CE` là lựa chọn mặc định tốt khi bạn muốn đầu ra tương thích với CE từ máy chủ không chạy Windows.<sup>[[2]](#references)</sup> `NetExec` rất tiện lợi khi bạn đã dùng nó để xác thực LDAP hoặc spraying và muốn nhập graph nhanh chóng. Với các bộ dữ liệu không thuộc AD, có thể mở rộng BloodHound OpenGraph bằng các collector như [ShareHound](../../network-services-pentesting/pentesting-smb/README.md).<sup>[[1]](#references)</sup>
 
-### ADPathFinder (OpenGraph path prioritisation)
+### ADPathFinder (ưu tiên đường dẫn OpenGraph)
 
-[ADPathFinder](https://github.com/NetSPI/AD-PathFinder) sits on top of BloodHound CE/OpenGraph when the graph is too large to manually pivot. Instead of only asking whether one principal can reach one target, it calculates shortest paths from many low-privileged users and computers to high-value objects, groups paths that reuse the same edges, and surfaces the shared choke point that should be remediated first.<sup>[[4]](#references)</sup>
+[ADPathFinder](https://github.com/NetSPI/AD-PathFinder) hoạt động trên BloodHound CE/OpenGraph khi graph quá lớn để pivot thủ công. Thay vì chỉ hỏi liệu một principal có thể tiếp cận một mục tiêu hay không, công cụ này tính các đường dẫn ngắn nhất từ nhiều người dùng và máy tính có đặc quyền thấp đến các đối tượng có giá trị cao, nhóm các đường dẫn dùng chung các cạnh và làm nổi bật điểm nghẽn chung cần được khắc phục trước tiên.<sup>[[4]](#references)</sup>
 
 ```bash
 adpathfinder --setup-bloodhound-api
@@ -103,7 +103,7 @@ adpathfinder -i SharpHound.zip --ad
 adpathfinder -i SharpHound.zip MSSQLHound.zip ConfigManBearPig.zip --ad --pwd Contoso,ContosoIT --ntds ntds.txt -p hashcat.potfile
 ```
 
-With `MSSQLHound` and `ConfigManBearPig` data imported, one finding can cross [AD CS](ad-certificates.md), [MSSQL AD abuse](abusing-ad-mssql.md), and [SCCM attack paths](sccm-management-point-relay-sql-policy-secrets.md) instead of leaving them as separate leads.<sup>[[4]](#references)</sup> Example shared path:
+Khi đã nhập dữ liệu từ `MSSQLHound` và `ConfigManBearPig`, một phát hiện có thể kết nối [AD CS](ad-certificates.md), [lạm dụng MSSQL AD](abusing-ad-mssql.md) và [các đường tấn công SCCM](sccm-management-point-relay-sql-policy-secrets.md), thay vì xem chúng là các đầu mối riêng biệt.<sup>[[4]](#references)</sup> Ví dụ về đường tấn công kết hợp:
 
 ```text
 J.REPORTER > MSSQL_HasLogin > j.reporter > MSSQL_ExecuteAs > ReportSvc >
@@ -112,49 +112,49 @@ MSSQL_ExecuteOnHost (as DA@TRAINING.LOCAL) > SCCMDB.TRAINING.LOCAL >
 SCCM_AssignAllPermissions > SCCM_Site(TRN)
 ```
 
-- Track the **effective security context** at every edge. A path becomes domain-critical as soon as one transition executes as a privileged domain identity, even if it started from a normal user.
-- Grouped findings are ideal for **choke-point remediation**: removing one SQL impersonation permission, linked-server trust, certificate-template abuse path, or SCCM assignment can collapse many shortest paths at once.
-- Re-prioritise "medium" findings with **graph context**. SMB signing disabled, WebClient exposure, delegation mistakes, or NTLM-relayable SQL servers deserve higher priority when the compromised node has onward paths to Domain Admins, Domain Controllers, CAs, or SCCM site servers.
-- If you also have `NTDS.dit` output and a hashcat potfile, `--pwd` correlates cracked passwords with BloodHound properties so you can quickly separate ordinary password reuse from cracked creds on privileged, Kerberoastable, AS-REP roastable, or path-relevant accounts.
+- Theo dõi **ngữ cảnh bảo mật hiệu lực** tại mọi cạnh. Một đường đi trở nên trọng yếu với domain ngay khi có chuyển tiếp thực thi dưới danh tính domain có đặc quyền, kể cả khi đường đi bắt đầu từ người dùng thông thường.
+- Các phát hiện được nhóm lại rất hữu ích để **khắc phục điểm nghẽn**: loại bỏ một quyền SQL impersonation, linked-server trust, đường khai thác certificate template hoặc SCCM assignment có thể đồng thời loại bỏ nhiều đường đi ngắn nhất.
+- Ưu tiên lại các phát hiện mức "medium" dựa trên **ngữ cảnh đồ thị**. SMB signing bị tắt, WebClient bị lộ, lỗi delegation hoặc SQL server có thể bị NTLM relay xứng đáng được ưu tiên cao hơn nếu node bị xâm phạm có đường đi tiếp đến Domain Admins, Domain Controllers, CA hoặc SCCM site server.
+- Nếu bạn cũng có output `NTDS.dit` và hashcat potfile, `--pwd` sẽ đối chiếu các mật khẩu đã crack với thuộc tính BloodHound để bạn nhanh chóng phân biệt việc dùng lại mật khẩu thông thường với thông tin đăng nhập đã crack của các tài khoản có đặc quyền, có thể bị Kerberoast, có thể bị AS-REP roast hoặc liên quan đến đường đi.
 
-### Privilege & logon-right collection
+### Thu thập đặc quyền và quyền đăng nhập
 
-Windows **token privileges** (e.g., `SeBackupPrivilege`, `SeDebugPrivilege`, `SeImpersonatePrivilege`, `SeAssignPrimaryTokenPrivilege`) can bypass DACL checks, so mapping them domain-wide exposes local LPE edges that ACL-only graphs miss. **Logon rights** (`SeInteractiveLogonRight`, `SeRemoteInteractiveLogonRight`, `SeNetworkLogonRight`, `SeServiceLogonRight`, `SeBatchLogonRight` and their `SeDeny*` counterparts) are enforced by LSA before a token even exists, and denies take precedence, so they materially gate lateral movement (RDP/SMB/scheduled task/service logon).<sup>[[3]](#references)</sup>
+Các **token privilege** của Windows (ví dụ: `SeBackupPrivilege`, `SeDebugPrivilege`, `SeImpersonatePrivilege`, `SeAssignPrimaryTokenPrivilege`) có thể bỏ qua kiểm tra DACL, vì vậy việc ánh xạ chúng trên toàn domain giúp phát hiện các cạnh LPE cục bộ mà đồ thị chỉ dựa trên ACL bỏ sót. **Quyền đăng nhập** (`SeInteractiveLogonRight`, `SeRemoteInteractiveLogonRight`, `SeNetworkLogonRight`, `SeServiceLogonRight`, `SeBatchLogonRight` và các quyền `SeDeny*` tương ứng) được LSA thực thi trước khi token được tạo, và quyền từ chối được ưu tiên, nên chúng ảnh hưởng đáng kể đến di chuyển ngang (đăng nhập RDP/SMB/tác vụ đã lên lịch/dịch vụ).<sup>[[3]](#references)</sup>
 
-**Run collectors elevated** when possible: UAC creates a filtered token for interactive admins (via `NtFilterToken`), stripping sensitive privileges and marking admin SIDs as deny-only. If you enumerate privileges from a non-elevated shell, high-value privileges will be invisible and BloodHound won’t ingest the edges.<sup>[[3]](#references)</sup>
+**Chạy collector với quyền nâng cao** khi có thể: UAC tạo token đã lọc cho admin tương tác (thông qua `NtFilterToken`), loại bỏ các privilege nhạy cảm và đánh dấu SID admin là deny-only. Nếu bạn liệt kê privilege từ shell không nâng cao, các privilege có giá trị cao sẽ không hiển thị và BloodHound sẽ không thu thập được các cạnh này.<sup>[[3]](#references)</sup>
 
-Two complementary SharpHound collection strategies now exist:<sup>[[3]](#references)</sup>
+Hiện có hai chiến lược thu thập SharpHound bổ trợ cho nhau:<sup>[[3]](#references)</sup>
 
-- **GPO/SYSVOL parsing (stealthy, low-privilege):**
-  1. Enumerate GPOs over LDAP (`(objectCategory=groupPolicyContainer)`) and read each `gPCFileSysPath`.
-  2. Fetch `MACHINE\Microsoft\Windows NT\SecEdit\GptTmpl.inf` from SYSVOL and parse the `[Privilege Rights]` section that maps privilege/logon-right names to SIDs.
-  3. Resolve GPO links via `gPLink` on OUs/sites/domains, list computers in the linked containers, and attribute the rights to those machines.
-  4. Upside: works with a normal user and is quiet; downside: only sees rights pushed via GPO (local tweaks are missed).
+- **Phân tích GPO/SYSVOL (kín đáo, quyền thấp):**
+  1. Liệt kê GPO qua LDAP (`(objectCategory=groupPolicyContainer)`) và đọc `gPCFileSysPath` của từng mục.
+  2. Tải `MACHINE\Microsoft\Windows NT\SecEdit\GptTmpl.inf` từ SYSVOL và phân tích phần `[Privilege Rights]`, nơi ánh xạ tên privilege/quyền đăng nhập với SID.
+  3. Tra cứu liên kết GPO qua `gPLink` trên OU/site/domain, liệt kê máy tính trong các container được liên kết và gán các quyền đó cho những máy này.
+  4. Ưu điểm: hoạt động với tài khoản người dùng thông thường và ít gây chú ý; nhược điểm: chỉ thấy các quyền được áp dụng qua GPO (bỏ sót các thay đổi cục bộ).
 
-- **LSA RPC enumeration (noisy, accurate):**
-  - From a context with local admin on the target, open the Local Security Policy and call `LsaEnumerateAccountsWithUserRight` for each privilege/logon right to enumerate assigned principals over RPC.
-  - Upside: captures rights set locally or outside GPO; downside: noisy network traffic and admin requirement on every host.
+- **Liệt kê qua LSA RPC (ồn ào, chính xác):**
+  - Từ ngữ cảnh có quyền admin cục bộ trên mục tiêu, mở Local Security Policy và gọi `LsaEnumerateAccountsWithUserRight` cho từng privilege/quyền đăng nhập để liệt kê các principal được gán qua RPC.
+  - Ưu điểm: thu thập được các quyền được đặt cục bộ hoặc ngoài GPO; nhược điểm: tạo lưu lượng mạng ồn ào và cần quyền admin trên từng host.
 
-**Example abuse path surfaced by these edges:** `CanRDP` ➜ host where your user also has `SeBackupPrivilege` ➜ start an elevated shell to avoid filtered tokens ➜ use backup semantics to read `SAM` and `SYSTEM` hives despite restrictive DACLs ➜ exfiltrate and run `secretsdump.py` offline to recover the local Administrator NT hash for lateral movement/privilege escalation.<sup>[[3]](#references)</sup>
+**Ví dụ về đường khai thác được phát hiện nhờ các cạnh này:** `CanRDP` ➜ host nơi người dùng của bạn cũng có `SeBackupPrivilege` ➜ mở shell nâng cao để tránh token đã lọc ➜ dùng ngữ nghĩa backup để đọc các hive `SAM` và `SYSTEM` bất chấp DACL hạn chế ➜ exfiltrate và chạy `secretsdump.py` offline để lấy NT hash của tài khoản Administrator cục bộ, phục vụ di chuyển ngang/nâng quyền.<sup>[[3]](#references)</sup>
 
-### Prioritising Kerberoasting with BloodHound
+### Ưu tiên Kerberoasting bằng BloodHound
 
-Use graph context to keep roasting targeted:
+Dùng ngữ cảnh đồ thị để nhắm mục tiêu roasting hiệu quả:
 
-1. Collect once with an ADWS-compatible collector and work offline:
+1. Thu thập một lần bằng collector tương thích ADWS rồi phân tích offline:
    ```bash
    rusthound-ce -d corp.local -u svc.collector -p 'Passw0rd!' -c All -z
    ```
-2. Import the ZIP, mark the compromised principal as owned, and run built-in queries (*Kerberoastable Users*, *Shortest Paths to Domain Admins*) to surface SPN accounts with admin/infra rights.
-3. Prioritise SPNs by blast radius; review `pwdLastSet`, `lastLogon`, and allowed encryption types before cracking.
-4. Request only selected tickets, crack offline, then re-query BloodHound with the new access:
+2. Import ZIP, đánh dấu principal bị xâm phạm là đã chiếm quyền, rồi chạy các truy vấn tích hợp sẵn (*Kerberoastable Users*, *Shortest Paths to Domain Admins*) để tìm các tài khoản SPN có quyền admin/infra.
+3. Ưu tiên SPN theo phạm vi ảnh hưởng; kiểm tra `pwdLastSet`, `lastLogon` và các loại mã hóa được phép trước khi crack.
+4. Chỉ yêu cầu các ticket đã chọn, crack offline, sau đó truy vấn lại BloodHound với quyền truy cập mới:
    ```bash
    netexec ldap dc01.corp.local -u svc.collector -p 'Passw0rd!' --kerberoasting kerberoast.txt --spn svc-sql
    ```
 
 ## Group3r
 
-[Group3r](https://github.com/Group3r/Group3r) enumerates **Group Policy Objects** and highlights misconfigurations.
+[Group3r](https://github.com/Group3r/Group3r) liệt kê **Group Policy Objects** và làm nổi bật các cấu hình sai.
 
 ```bash
 # Execute inside the domain
@@ -165,7 +165,7 @@ Group3r.exe -f gpo.log   # -s to stdout
 
 ## PingCastle
 
-[PingCastle](https://www.pingcastle.com/documentation/) performs a **health-check** of Active Directory and generates an HTML report with risk scoring.
+[PingCastle](https://www.pingcastle.com/documentation/) thực hiện **kiểm tra tình trạng** của Active Directory và tạo báo cáo HTML kèm điểm đánh giá rủi ro.
 
 ```powershell
 PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd!"
@@ -173,9 +173,8 @@ PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd
 
 ## References
 
-- [1] [BloodHound Community Edition v8 Launches with OpenGraph: Identity Attack Paths Beyond Active Directory & Entra ID](https://specterops.io/blog/2025/07/29/bloodhound-community-edition-v8-launches-with-opengraph-identity-attack-paths-beyond-active-directory-entra-id/)
+- [1] [BloodHound Community Edition v8 ra mắt với OpenGraph: Các đường tấn công danh tính vượt ra ngoài Active Directory & Entra ID](https://specterops.io/blog/2025/07/29/bloodhound-community-edition-v8-launches-with-opengraph-identity-attack-paths-beyond-active-directory-entra-id/)
 - [2] [RustHound-CE](https://github.com/g0h4n/RustHound-CE)
-- [3] [Beyond ACLs: Mapping Windows Privilege Escalation Paths with BloodHound](https://www.synacktiv.com/en/publications/beyond-acls-mapping-windows-privilege-escalation-paths-with-bloodhound.html)
-- [4] [ADPathFinder: OpenGraph Attack Path Mapping in BloodHound CE](https://www.netspi.com/blog/technical-blog/network-pentesting/adpathfinder-opengraph-attack-path-mapping-in-bloodhound-ce/)
-
+- [3] [Vượt ra ngoài ACL: Lập bản đồ các đường leo thang đặc quyền Windows bằng BloodHound](https://www.synacktiv.com/en/publications/beyond-acls-mapping-windows-privilege-escalation-paths-with-bloodhound.html)
+- [4] [ADPathFinder: Lập bản đồ đường tấn công OpenGraph trong BloodHound CE](https://www.netspi.com/blog/technical-blog/network-pentesting/adpathfinder-opengraph-attack-path-mapping-in-bloodhound-ce/)
 {{#include ../../banners/hacktricks-training.md}}

