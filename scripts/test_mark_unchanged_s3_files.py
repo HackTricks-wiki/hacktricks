@@ -62,6 +62,11 @@ class MarkUnchangedS3FilesTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             load_remote_objects(manifest, "/en/")
 
+    def test_empty_manifest_for_new_language_prefix(self) -> None:
+        manifest = self.root / "manifest.json"
+        manifest.write_text("", encoding="utf-8")
+        self.assertEqual(load_remote_objects(manifest, "vi/"), {})
+
     def test_rejects_non_list_contents(self) -> None:
         path = self.root / "manifest.json"
         path.write_text('{"Contents": {}}', encoding="utf-8")

@@ -37,7 +37,9 @@ def load_remote_objects(manifest_path: Path, remote_prefix: str) -> dict[str, di
     if remote_prefix and not remote_prefix.endswith("/"):
         remote_prefix += "/"
 
-    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest = manifest_path.read_text(encoding="utf-8")
+    # AWS CLI prints no JSON when a newly created language prefix has no objects.
+    payload = json.loads(manifest) if manifest.strip() else {}
     contents = payload.get("Contents", [])
     if contents is None:
         contents = []
