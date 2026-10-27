@@ -1,41 +1,42 @@
-# Firmware Integrity
+# Firmware Bütünlüğü
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Yetkili bir değerlendirmede zayıf veya eksik firmware-signature doğrulaması tespit edildiğinde, değiştirilmiş bir firmware image bütünlük üzerindeki etkiyi gösterebilir. Aşağıdaki lab workflow, orijinal extraction, emulation ve repacking adımlarını korurken bir bind shell ekler.<sup>[[2]](#references)[[3]](#references)</sup>
+Yetkili bir değerlendirmede firmware imza doğrulamasının zayıf veya eksik olduğu tespit edilirse, değiştirilmiş bir firmware imajı kullanılarak bütünlük üzerindeki etki gösterilebilir. Aşağıdaki laboratuvar iş akışı, özgün çıkarma, emülasyon ve yeniden paketleme adımlarını korurken bir bind shell ekler.<sup>[[2]](#references)[[3]](#references)</sup>
 
-1. Firmware, firmware-mod-kit (FMK) kullanılarak extract edilebilir.
-2. Hedef firmware architecture ve endianness belirlenmelidir.
-3. Ortam için Buildroot veya diğer uygun yöntemler kullanılarak bir cross compiler oluşturulabilir.
-4. Backdoor, cross compiler kullanılarak build edilebilir.
-5. Backdoor, extract edilmiş firmware içindeki /usr/bin dizinine kopyalanabilir.
-6. Uygun QEMU binary'si, extract edilmiş firmware rootfs'ine kopyalanabilir.
-7. Backdoor, chroot ve QEMU kullanılarak emulate edilebilir.
-8. Backdoor'a netcat üzerinden erişilebilir.
-9. QEMU binary'si, extract edilmiş firmware rootfs'inden kaldırılmalıdır.
+1. Firmware, firmware-mod-kit (FMK) kullanılarak çıkarılabilir.
+2. Hedef firmware mimarisi ve endianness belirlenmelidir.
+3. Ortam için Buildroot veya başka uygun yöntemlerle bir cross compiler oluşturulabilir.
+4. Backdoor, cross compiler kullanılarak derlenebilir.
+5. Backdoor, çıkarılmış firmware’in /usr/bin dizinine kopyalanabilir.
+6. Uygun QEMU binary’si, çıkarılmış firmware’in rootfs dizinine kopyalanabilir.
+7. Backdoor, chroot ve QEMU kullanılarak emüle edilebilir.
+8. Backdoor’a netcat aracılığıyla erişilebilir.
+9. QEMU binary’si, çıkarılmış firmware’in rootfs dizininden kaldırılmalıdır.
 10. Değiştirilmiş firmware, FMK kullanılarak yeniden paketlenebilir.
-11. Backdoored firmware, firmware analysis toolkit (FAT) ile emulate edilerek ve netcat kullanılarak hedef backdoor IP'sine ve portuna bağlanılarak test edilebilir.
+11. Backdoor eklenmiş firmware, firmware analysis toolkit (FAT) ile emüle edilerek ve netcat kullanılarak hedef backdoor IP adresine ve portuna bağlanılarak test edilebilir.
 
-Dynamic analysis, bootloader manipulation veya hardware security testing yoluyla zaten bir root shell elde edildiyse, implants veya reverse shells gibi önceden derlenmiş test binary'leri çalıştırılabilir. Metasploit'in `msfvenom` aracı, bu validation workflow için architecture-specific bir payload oluşturabilir:<sup>[[4]](#references)</sup>
+Dinamik analiz, bootloader manipülasyonu veya donanım güvenlik testleri yoluyla zaten bir root shell elde edilmişse, implant veya reverse shell gibi önceden derlenmiş test binary’leri çalıştırılabilir. Metasploit’in `msfvenom` aracı, bu doğrulama iş akışı için mimariye özgü bir payload oluşturabilir:<sup>[[4]](#references)</sup>
 
-1. Hedef firmware architecture ve endianness belirlenmelidir.
-2. Msfvenom; hedef payload'u, attacker host IP'sini, listening port numarasını, filetype'ı, architecture'ı, platform'u ve output file'ı belirtmek için kullanılabilir.
-3. Payload, compromised device'a aktarılmalı ve execution permissions'a sahip olduğu doğrulanmalıdır.
-4. Payload'a göre msfconsole başlatılıp ayarlar yapılandırılarak Metasploit, incoming requests'leri karşılayacak şekilde hazırlanabilir.
-5. Meterpreter reverse shell, compromised device üzerinde çalıştırılabilir.
+1. Hedef firmware mimarisi ve endianness belirlenmelidir.
+2. Hedef payload, saldırganın host IP adresi, dinleme port numarası, filetype, mimari, platform ve çıktı dosyası belirtmek için Msfvenom kullanılabilir.
+3. Payload, ele geçirilmiş cihaza aktarılabilir ve çalıştırma izinlerine sahip olduğu doğrulanabilir.
+4. msfconsole başlatılıp ayarlar payload’a göre yapılandırılarak gelen bağlantıları karşılamak üzere Metasploit hazırlanabilir.
+5. Meterpreter reverse shell, ele geçirilmiş cihazda çalıştırılabilir.
 
-## Unauthenticated transport bridges to privileged update protocols
+## Ayrıcalıklı güncelleme protokollerine kimlik doğrulamasız taşıma köprüleri
 
-Yaygın bir embedded design hatası, **aynı internal command protocol'ünü birkaç transport üzerinden sunmak**, ancak authentication'ı bunlardan yalnızca birinde uygulamaktır. Örneğin USB challenge-response gerektirebilirken BLE, unauthenticated **GATT writes** işlemlerini aynı privileged firmware-update handler'a iletebilir.<sup>[[1]](#references)</sup>
+Yaygın bir gömülü sistem tasarım hatası, **aynı dahili komut protokolünü birden fazla taşıma yöntemi üzerinden sunmak**, ancak kimlik doğrulamayı yalnızca bunlardan birinde uygulamaktır. Örneğin USB üzerinden challenge-response gerekirken BLE, kimlik doğrulamasız **GATT yazmalarını** doğrudan aynı ayrıcalıklı firmware güncelleme işleyicisine iletebilir.<sup>[[1]](#references)</sup>
 
-Tipik offensive workflow:
+Tipik saldırı iş akışı:
 
-1. BLE GATT database'ini enumerate edin ve official mobile app tarafından kullanılan writable characteristics'leri belirleyin.
-2. App traffic'i sniff edin ve wired protocol ile eşleşen **magic bytes / opcodes** arayın.
-3. Privileged commands'leri **pairing olmadan** BLE üzerinden replay edin ve sensitive operations'ların hâlâ çalışıp çalışmadığını doğrulayın.
-4. Firmware upgrade, config write, debug veya factory-test opcodes'larına erişilebiliyorsa BLE'yi **radio-reachable admin port** olarak değerlendirin.
+1. BLE GATT veritabanını numaralandırın ve resmi mobil uygulamanın kullandığı yazılabilir karakteristikleri belirleyin.
+2. Uygulama trafiğini dinleyin ve kablolu protokolle eşleşen **magic bytes / opcode** değerlerini arayın.
+3. Ayrıcalıklı komutları **eşleştirme yapmadan** BLE üzerinden yeniden gönderin ve hassas işlemlerin hâlâ çalışıp çalışmadığını doğrulayın.
+4. Firmware yükseltme, yapılandırma yazma, hata ayıklama veya fabrika testi opcode’larına erişilebiliyorsa BLE’yi **radyo üzerinden erişilebilen bir yönetici portu** olarak değerlendirin.
 
 Hızlı kontroller:
+
 ```bash
 # Enumerate services/characteristics
 ble.enum <MAC>
@@ -46,82 +47,98 @@ ble.write <MAC> <UUID> <HEX_DATA>
 # gatttool equivalent
 # gatttool -b <MAC> --char-write-req -a <HANDLE> -n <HEX_DATA>
 ```
-Tersine mühendislik sırasında doğrulanması gerekenler:
 
-- BLE yalnızca **pairing/bonding** mi gerektiriyor, yoksa sadece basit bir bağlantı yeterli mi?
-- Tüm transport katmanları aynı dahili dispatcher tablosuna mı yönlendiriliyor?
-- Privileged opcode'lar USB / BLE / UART / Wi-Fi üzerinde farklı şekilde mi filtreleniyor?
-- Mobil uygulama firmware update, recovery veya diagnostic handler'larını uzaktan tetikleyebiliyor mu?
+Doğrulama sırasında kontrol edilmesi gerekenler:
 
-## Yalnızca checksum kullanan firmware container'ları hâlâ saldırgan kontrolündeki firmware'dir
+- BLE için **eşleştirme/bonding** gerekiyor mu, yoksa düz bir bağlantı yeterli mi?
+- Tüm taşıma katmanları aynı dahili dispatcher tablosuna mı yönlendiriliyor?
+- Ayrıcalıklı opcode'lar USB / BLE / UART / Wi-Fi üzerinden farklı şekilde mi filtreleniyor?
+- Mobil uygulama firmware güncelleme, kurtarma veya tanılama işleyicilerini uzaktan tetikleyebiliyor mu?
 
-Yalnızca **unkeyed checksum** (CRC32, SHA-256, MD5 vb.) ile korunan bir firmware container, **corruption detection** sağlar; **authenticity** sağlamaz. Saldırgan update routine'e erişebiliyorsa image'ı patch'leyebilir, checksum'ı yeniden hesaplayabilir ve istediği kodu flash'layabilir.<sup>[[1]](#references)</sup>
+## Yalnızca checksum ile korunan firmware kapsayıcıları hâlâ saldırganın kontrolündedir
 
-RE sırasında dikkat edilmesi gereken red flag'ler:
+Yalnızca **anahtarsız bir checksum** (CRC32, SHA-256, MD5 vb.) ile korunan bir firmware kapsayıcısı bozulma tespiti sağlar, **özgünlük doğrulaması sağlamaz**. Saldırgan güncelleme yordamına erişebiliyorsa görüntüyü yamalayabilir, checksum'u yeniden hesaplayabilir ve istediği kodu flash'a yazabilir.<sup>[[1]](#references)</sup>
 
-- Update code yalnızca `CHK2`, `CRC` veya `SHA256` gibi sondaki bir checksum blob'unu doğruluyor.
-- Signature verification veya secure-boot root of trust bulunmuyor.
-- Device-bound MAC / HMAC / authenticated encryption kullanılmıyor.
-- Recovery mode aynı unauthenticated image formatını kabul ediyor.
+RE sırasında dikkat edilmesi gereken uyarı işaretleri:
+
+- Güncelleme kodu yalnızca `CHK2`, `CRC` veya `SHA256` gibi sondaki bir checksum verisini doğruluyor.
+- İmza doğrulaması veya secure-boot kök güveni yok.
+- Cihaza bağlı MAC / HMAC / kimliği doğrulanmış şifreleme kullanılmıyor.
+- Kurtarma modu aynı kimliği doğrulanmamış görüntü biçimini kabul ediyor.
 
 Pratik doğrulama akışı:
 
-1. Firmware container'ı extract edin ve bootloader, main firmware ile integrity metadata'yı belirleyin.
-2. Image içindeki zararsız bir string'i veya banner'ı değiştirin.
-3. Checksum'ı updater'ın beklediği şekilde yeniden hesaplayın.
-4. Image'ı normal update path üzerinden yeniden flash'layın.
-5. Arbitrary firmware replacement'ı kanıtlamak için değişikliği boot sırasında doğrulayın.
+1. Firmware kapsayıcısını çıkarın; bootloader'ı, ana firmware'i ve bütünlük meta verilerini belirleyin.
+2. Görüntüde zararsız bir metni veya banner'ı değiştirin.
+3. Checksum'u güncelleyicinin beklediği şekilde yeniden hesaplayın.
+4. Görüntüyü normal güncelleme yoluyla yeniden flash'a yazın.
+5. İstediğiniz firmware'in yüklendiğini doğrulamak için açılışta değişikliği kontrol edin.
 
-Bu işlem BLE/Wi-Fi gibi uzaktan erişilebilen bir transport üzerinden çalışıyorsa bug, fiilen **unauthenticated OTA firmware replacement** anlamına gelir.
+Bu işlem BLE/Wi-Fi gibi uzaktan erişilebilen bir taşıma katmanı üzerinden çalışıyorsa, açık fiilen **kimlik doğrulaması olmadan OTA firmware değiştirme** anlamına gelir.
 
-## Güvenilen bir USB peripheral'ını firmware reflashing ile BadUSB'ye dönüştürme
+## Parçalı güncelleme durumu ve yazılabilir bütünlük meta verileri
 
-Hedef cihaz host tarafından USB üzerinden zaten güveniliyorsa malicious firmware'in tamamen yeni bir USB stack uygulaması gerekmeyebilir. Çoğu zaman çok daha kolay bir pivot, **mevcut HID desteğini yeniden kullanmaktır**.<sup>[[1]](#references)</sup>
+Bir güncelleyici kurulum sırasında imzalı firmware başlığını doğrulasa da görüntüleri açılışta yalnızca kayıtlı bir bütünlük özetiyle doğrulayabilir. Cypherock X1'de Bootloader, başlığı doğrulamak ve sürüm/boyut bilgilerini RAM'e almak, firmware imzasını RAM'de tutmak, yazılan görüntüyü doğrulamak ve son olarak görüntünün özetini kalıcı Primary Bootloader Data'ya yazmak için ayrı Firewall görevleri çağırıyordu. İmzanın kendisi kalıcı olarak saklanmıyordu. Bu görevler, kimliği doğrulanmış tek bir yükseltme işlemi zorunlu kılınmadan ayrı ayrı çağrılabiliyordu.<sup>[[5]](#references)</sup>
 
-Yararlı yaklaşım:
+MCU'da kod çalıştırma ve Flash'a yazma erişimiyle, bildirilen saldırı uygulama görüntüsünü yeniden yazıyor, Bootloader RAM'inde Firewall ile paylaşılan sürüm/boyut değerlerini değiştiriyor, ardından kötü amaçlı görüntünün özetini kaydetmek ve normal açılış durumunu geri yüklemek için son meta veri görevini çağırıyordu. Normal açılışta yapılan bütünlük kontrolü, imzayı yeniden doğrulamadan bu özeti kabul ediyordu. Benzer bir güncelleyiciyi incelerken **her görevi hangi bileşenin çağırabildiğini**, doğrulanmış değerlerin nerede tutulduğunu ve açılış kararının, özeti kaydedilen *aynı görüntünün* kimliğini doğrulayıp doğrulamadığını izleyin. Bu durum, yalnızca checksum kullanan görüntü biçimlerinden daha spesifiktir: imza doğrulaması vardı, ancak durum geçişi bu doğrulamaya bağlanmamıştı.<sup>[[5]](#references)</sup>
 
-1. Cihazın zaten **HID Consumer Control** / media / vendor HID interface olarak enumerate olup olmadığını kontrol edin.
-2. Firmware içindeki mevcut **HID report descriptor**'ı bulun.
-3. Cihazın ayrıca **keyboard** capability'si olduğunu duyurması için descriptor entry'lerini ekleyin veya değiştirin.
-4. Yeni bir transport implementation yazmak yerine, HID report'larını zaten gönderen mevcut firmware routine'lerini yeniden kullanın.
-5. Host üzerinde command yazmak için key press + key release report'ları inject edin.
+## Güvenilmeyen firmware ölçümleri üzerinde secure element imzaları
 
-Bu işlem firmware compromise'ı **host compromise**'a dönüştürür; çünkü PC, yeniden flash'lanmış peripheral'ı legitimate bir keyboard olarak kabul eder.
+Bir secure element, yalnızca kodun kendisinin sağladığı bir özeti imzalayarak çalışan kodun kimliğini doğrulayamaz. Aynı cüzdanda secure element, cihaz seri numarasını ve MCU üzerinden sağlanan bir cloud nonce'u ile firmware özetinin XOR'unu imzalıyordu. Ele geçirilmiş firmware, farklı baytları çalıştırırken imzalanması için beklenen özeti sunabiliyordu. Eşlik eden istemci firmware sürümünü de cloud'a gönderiyordu; bu nedenle doğrulayıcının beklenen özet karşılaştırması, Flash'ın bağımsız bir okuması yerine hâlâ MCU kaynaklı bir ölçüme dayanıyordu.<sup>[[5]](#references)</sup>
 
-### Minimal assessment checklist
+Cihaz tarafındaki sonuç, ayrı bir güven sınırıydı: cloud cihazı kontrol ediyordu, ancak cihaz cloud'un kararını doğrulamıyordu. Değiştirilmiş bir istemci, kurcalanmış bir cihaza yerel başarı bildirebilirdi. Ölçümün kaynağını ve yanıt kimlik doğrulamasını ayrı ayrı test edin; geçerli bir secure-element imzası ve başarı ekranı, yüklü uygulamanın özgün olduğunu tek başına kanıtlamaz.<sup>[[5]](#references)</sup>
 
-- `dmesg`, Device Manager veya USB descriptor'ları mevcut bir HID interface gösteriyor mu?
-- Report descriptor'ın yakınında veya relocatable bir descriptor table içinde boş alan var mı?
-- Mevcut media-control send routine'leri keyboard report'ları için yeniden kullanılabilir mi?
-- Reflashing sonrasında host yeni keyboard interface'ını otomatik olarak kabul ediyor mu?
+Bu güncelleyicinin analiz edilmesini sağlayan korumalı kodun açığa çıkarılmasıyla ilgili bilgi için bkz. [Firewall copy-task firmware acquisition](index.html#disclosing-protected-code-through-a-firewall-copy-task).<sup>[[5]](#references)</sup>
 
-## RTOS firmware içinde güvenilir payload execution
+## Güvenilir bir USB çevre birimini firmware'i yeniden flash'layarak BadUSB'ye dönüştürme
 
-Fragile trampoline'leri rastgele code path'lerine eklemek yerine, normal operation sırasında kullanılmayan veya düşük etkili olan **mevcut RTOS task'larını** arayın.<sup>[[1]](#references)</sup>
+Hedef cihaz USB üzerinden ana bilgisayar tarafından zaten güvenilir kabul ediliyorsa, kötü amaçlı firmware'in tamamen yeni bir USB yığını uygulaması gerekmeyebilir. Daha kolay bir geçiş yolu çoğu zaman **mevcut HID desteğini yeniden kullanmaktır**.<sup>[[1]](#references)</sup>
 
-Bunun yararlı olmasının nedenleri:
+İzlenebilecek yöntem:
 
-- Scheduler, payload'ınızı boot sırasında doğal olarak başlatır.
-- Kritik control flow'u bozma riskini önlersiniz.
-- Delayed payload'ların, latency-sensitive bir USB/network handler içinde çalıştırılmalarına kıyasla watchdog reset'lerini tetikleme olasılığı daha düşüktür.
+1. Cihazın zaten bir **HID Consumer Control** / medya / üretici HID arayüzü olarak tanınıp tanınmadığını kontrol edin.
+2. Firmware'deki mevcut **HID report descriptor**'ı bulun.
+3. Cihazın **klavye** özelliğini de duyurması için descriptor girdilerini ekleyin veya değiştirin.
+4. Yeni bir taşıma katmanı uygulaması yazmak yerine, HID raporlarını zaten gönderen mevcut firmware yordamlarını yeniden kullanın.
+5. Ana bilgisayarda komut yazmak için tuş basma + tuş bırakma raporlarını gönderin.
 
-İyi hedefler arasında normal kullanımda dormant görünen diagnostic, factory-test, telemetry veya coprocessor service task'ları bulunur.
+Bu, firmware'in ele geçirilmesini **ana bilgisayarın ele geçirilmesine** dönüştürür; çünkü PC, yeniden flash'lanan çevre birimini meşru bir klavye olarak kabul eder.
 
-## Hızlı exploit iteration: benign protocol handler'larını yeniden kullanma
+### Asgari değerlendirme kontrol listesi
 
-Firmware patching mümkün olduğunda RE'yi hızlandırmanın kompakt bir yolu, zararsız bir command handler'ını (örneğin bir **echo/debug opcode**) custom **memory read / write / execute** primitive'leriyle overwrite etmektir. Bu yöntem her deneme için full reflashing gereksinimini ortadan kaldırır ve özellikle cihaz, değiştirilmiş handler'a hızlı bir wired transport üzerinden erişimi destekliyorsa yararlıdır.<sup>[[1]](#references)</sup>
+- `dmesg`, Device Manager veya USB descriptor'ları mevcut bir HID arayüzü gösteriyor mu?
+- Report descriptor'ın yakınında kullanılmayan alan veya taşınabilir bir descriptor tablosu var mı?
+- Mevcut medya denetimi gönderme yordamları klavye raporları için yeniden kullanılabilir mi?
+- Yeniden flash işleminden sonra ana bilgisayar yeni klavye arayüzünü otomatik olarak kabul ediyor mu?
+
+## RTOS firmware içinde güvenilir payload çalıştırma
+
+Rastgele kod yollarına kırılgan trampoline'ler eklemek yerine, normal çalışmada kullanılmayan veya etkisi düşük olan **mevcut RTOS görevlerini** arayın.<sup>[[1]](#references)</sup>
+
+Bunun yararları:
+
+- Scheduler, payload'ınızı açılış sırasında doğal olarak başlatır.
+- Kritik kontrol akışını bozma riskini önlersiniz.
+- Gecikmeli payload'ların watchdog reset'lerini tetikleme olasılığı, gecikmeye duyarlı bir USB/ağ işleyicisi içinde çalıştırılmalarına kıyasla daha düşüktür.
+
+İyi hedefler arasında normal kullanımda etkin görünmeyen tanılama, fabrika testi, telemetri veya coprocessor hizmet görevleri bulunur.
+
+## Hızlı exploit yinelemesi: zararsız protokol işleyicilerini yeniden kullanma
+
+Firmware yamalanabildiğinde, RE'yi hızlandırmanın pratik bir yolu zararsız bir komut işleyicisini (örneğin bir **echo/debug opcode**) özel **bellek okuma / yazma / çalıştırma** işlevleriyle değiştirmektir. Böylece her deney için baştan flash'a yazma ihtiyacı ortadan kalkar. Bu yöntem, özellikle cihaz değiştirilmiş işleyiciyi hızlı bir kablolu taşıma katmanı üzerinden destekliyorsa kullanışlıdır.<sup>[[1]](#references)</sup>
 
 Bunu şu amaçlarla kullanın:
 
-- Scatter-loaded memory map'lerini doğrulamak
-- Heap/task state'i canlı olarak incelemek
+- Scatter-loaded bellek haritalarını doğrulamak
+- Heap/görev durumunu çalışırken incelemek
 - Küçük payload'ları flash'a yazmadan önce test etmek
-- Function pointer'ları, string'leri ve descriptor table'ları güvenli şekilde kurtarmak
+- İşaretçileri, metinleri ve descriptor tablolarını güvenle kurtarmak
 
 ## References
 
-- [1] [Pwnd Blaster: Hoparlörünüze hiç dokunmadan PC'nizi kullanarak hack'leme](https://blog.nns.ee/2026/06/03/katana-badusb/)
+- [1] [Pwnd Blaster: Hoparlörünüze dokunmadan onu kullanarak PC'nizi hacklemek](https://blog.nns.ee/2026/06/03/katana-badusb/)
 - [2] [firmware-mod-kit](https://github.com/rampageX/firmware-mod-kit)
 - [3] [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit)
 - [4] [Metasploit - `msfvenom` nasıl kullanılır](https://docs.metasploit.com/docs/using-metasploit/basics/how-to-use-msfvenom.html)
+- [5] [Cypherock Donanım Cüzdanını Nasıl ve Neden Hack'ledik: Tüm Hikâye](https://www.darknavy.org/blog/how_and_why_we_hacked_cypherock_hardware_wallet_the_full_story/)
 {{#include ../../banners/hacktricks-training.md}}
