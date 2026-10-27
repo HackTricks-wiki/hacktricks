@@ -2,7 +2,7 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricksのロゴとモーションデザイン：_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_
+_Hacktricksのロゴとモーションデザイン制作：_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_.
 
 ### HackTricksをローカルで実行する
 
@@ -17,7 +17,7 @@ export HT_LANG="master" # Leave master for English
 # "el" for Greek
 # "es" for Spanish
 # "fr" for French
-# "hi" for HindiP
+# "hi" for Hindi
 # "it" for Italian
 # "ja" for Japanese
 # "ko" for Korean
@@ -27,37 +27,38 @@ export HT_LANG="master" # Leave master for English
 # "sw" for Swahili
 # "tr" for Turkish
 # "uk" for Ukrainian
+# "vi" for Vietnamese
 # "zh" for Chinese
 
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $HT_LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 
-HackTricks のローカルコピーは、5 分以内に [http://localhost:3337](http://localhost:3337) で**利用可能になります**（書籍のビルドが必要なので、しばらくお待ちください）。
+HackTricks のローカルコピーは、5 分以内に [http://localhost:3337](http://localhost:3337) で**利用可能になります**（書籍のビルドが必要なため、しばらくお待ちください）。
 
-または、Docker Compose がある場合は、リポジトリのルートから次のコマンドを実行してください。
+または、Docker Compose がある場合は、リポジトリのルートから以下を実行してください。
 
 ```bash
 docker compose up
 ```
 
-これは同梱の `docker-compose.yml` を使用して、ホスト上で現在チェックアウトされているブランチを [http://localhost:3337](http://localhost:3337) でライブリロード付きで配信します。Compose の使用中に言語を変更するには、サービスを起動する前に目的の言語のブランチをチェックアウトしてください。
+これは、同梱の `docker-compose.yml` を使って、ホストで現在チェックアウトされているブランチをライブリロード付きで [http://localhost:3337](http://localhost:3337) から配信します。Compose を使って言語を切り替えるには、サービスを起動する前に目的の言語のブランチをチェックアウトしてください。
 
 ## HackTricks パートナー
 
 ---
 
-## HackTricks フレンド
+## HackTricks の仲間
 
 ### [STM Cyber](https://www.stmcyber.com)
 
 <figure class="sponsor-logo"><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-STM Cyber は、ペネトレーションテスト、セキュリティ監査、exploit および研究業務、ツール、セキュリティ意識向上サービスを提供しています。同社のサイトによると、ペネトレーションテスター、プログラマー、セキュリティ研究者からなるチームは、10年以上の経験を有しています。<sup>[[1]](#references)</sup>
+STM Cyber は、penetration testing、security audits、exploit および research 関連の業務、ツール、セキュリティ意識向上サービスを提供しています。同社のサイトによると、penetration tester、プログラマー、security researcher からなるチームで、10年以上の経験があります。<sup>[[1]](#references)</sup>
 
-同社の**ブログ**は [**https://blog.stmcyber.com**](https://blog.stmcyber.com) でご覧いただけます。
+**ブログ**は [**https://blog.stmcyber.com**](https://blog.stmcyber.com) でご覧いただけます。
 
-**STM Cyber** は HackTricks のようなサイバーセキュリティのオープンソースプロジェクトも支援しています :)
+**STM Cyber** は、HackTricks のようなサイバーセキュリティ分野のオープンソースプロジェクトも支援しています :)
 
 ---
 
@@ -65,19 +66,19 @@ STM Cyber は、ペネトレーションテスト、セキュリティ監査、e
 
 <figure class="sponsor-logo"><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-Intigriti は、世界中のリサーチャーコミュニティを通じて bug bounty とペネトレーションテストのサービスを提供する、クラウドソーシング型のセキュリティプロバイダーです。同社のプラットフォームは、継続的な bug bounty 対応に加え、オンデマンドの PTaaS と脆弱性開示プログラムの運用を提供します。<sup>[[2]](#references)</sup>
+Intigriti は、世界中の researcher コミュニティを通じて bug bounty と penetration-testing サービスを提供する、crowdsourced security プロバイダーです。同社のプラットフォームでは、継続的な bug bounty に加え、オンデマンドの PTaaS とマネージド vulnerability disclosure プログラムを利用できます。<sup>[[2]](#references)</sup>
 
 **Bug bounty のヒント**: [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) から Intigriti に登録し、bug bounty プログラムをご覧ください。
 
 ---
 
-### [Modern Security – AI & Application Security Training Platform](https://modernsecurity.io/)
+### [Modern Security – AI・アプリケーションセキュリティトレーニングプラットフォーム](https://modernsecurity.io/)
 
 <figure class="sponsor-logo"><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
-Modern Security は、セキュリティエンジニア、AppSec の専門家、開発者向けに、自分のペースで学べる実践的な AI セキュリティトレーニングを提供しています。AI Security Certification では、LLM と agent の基礎、RAG と vector database、脅威モデリング、prompt injection と MCP 攻撃、防御アーキテクチャを学べます。<sup>[[3]](#references)</sup>
+Modern Security は、security engineer、AppSec 専門家、developer 向けに、自分のペースで進められる実践的な AI security トレーニングを提供しています。AI Security Certification では、LLM と agent の基礎、RAG と vector database、threat modeling、prompt-injection と MCP 攻撃、防御アーキテクチャを扱います。<sup>[[3]](#references)</sup>
 
-👉 AI Security コースの詳細:  
+👉 AI Security コースの詳細はこちら:  
 https://www.modernsecurity.io/courses/ai-security-certification
 
 ---
@@ -86,29 +87,29 @@ https://www.modernsecurity.io/courses/ai-security-certification
 
 <figure class="sponsor-logo"><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** は Google などの検索エンジン向けの API を提供し、位置情報に応じた検索結果、Maps、Shopping、Knowledge Graph の結果などの機能とともに、構造化された SERP データを返します。<sup>[[4]](#references)</sup>
+**SerpApi** は、Google などの検索エンジン向け API を提供し、位置情報に応じた結果、Maps、Shopping、Knowledge Graph の結果などの機能を備えた、構造化された SERP データを返します。<sup>[[4]](#references)</sup>
 
-詳細については、同社の[**ブログ**](https://serpapi.com/blog/)をご覧になるか、[**playground**](https://serpapi.com/playground)で例をお試しいただくか、[**無料アカウントを作成**](https://serpapi.com/users/sign_up)してください。
+詳細については、[**ブログ**](https://serpapi.com/blog/)をご覧いただくか、[**playground**](https://serpapi.com/playground)で例を試すか、[**無料アカウントを作成**](https://serpapi.com/users/sign_up)してください。
 
 ---
 
-### [8kSec Academy – In-Depth Mobile & AI Security Courses](https://academy.8ksec.io/)
+### [8kSec Academy – モバイル・AIセキュリティを深く学べるコース](https://academy.8ksec.io/)
 
 <figure class="sponsor-logo"><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-**8kSec Academy** は、自分のペースで学べるモバイルおよび AI セキュリティコースを提供しています。コースには、Ghidra、Frida、LLDB などのツールを使ったモバイルアプリケーションの監査とリバースエンジニアリングのほか、AI/LLM の攻撃と防御を学ぶラボが含まれます。<sup>[[5]](#references)[[6]](#references)</sup>
+**8kSec Academy** は、自分のペースで進められるモバイルおよび AI security のコースを提供しています。カタログには、Ghidra、Frida、LLDB などのツールを用いたモバイルアプリケーションの監査やリバースエンジニアリングのほか、AI/LLM の攻撃・防御ラボが含まれています。<sup>[[5]](#references)[[6]](#references)</sup>
 
-[8kSec Academy のコース一覧](https://academy.8ksec.io/)をご覧ください。
+[8kSec Academy のコースカタログ](https://academy.8ksec.io/)をご覧ください。
 
 ---
 
-### [NaxusAI – AI Powered Security Scanner](https://www.naxusai.com/)
+### [NaxusAI – AI搭載セキュリティスキャナー](https://www.naxusai.com/)
 
 <figure class="sponsor-logo"><img src="images/logo-naxus.png" alt=""><figcaption></figcaption></figure>
 
-**Naxus** は、コードとインフラストラクチャをマッピングし、静的および動的 agent を活用して、悪用可能な弱点を発見・検証する offensive AI プラットフォームを提供しています。検証結果には概念実証の証拠と修正ガイダンスが含まれます。<sup>[[7]](#references)</sup>
+**Naxus** は、コードとインフラストラクチャをマッピングし、static および dynamic agent を使用して、悪用可能な弱点を発見・検証する offensive-AI プラットフォームを提供しています。検証には proof-of-concept の証拠と修復ガイダンスが含まれます。<sup>[[7]](#references)</sup>
 
-**コードセキュリティのヒント**: Naxus を使って、コードやインフラストラクチャを対象とした脆弱性の発見をお試しください。
+**コードセキュリティのヒント**: コードとインフラストラクチャを対象とする脆弱性の発見に、Naxus をご活用ください。
 
 ---
 
@@ -116,11 +117,11 @@ https://www.modernsecurity.io/courses/ai-security-certification
 
 <figure class="sponsor-logo"><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-WebSec は、ペネトレーションテスト、セキュリティサブスクリプション、人材派遣、脆弱性評価のサービスを提供しています。同社のサイトによると、国際的に事業を展開し、offensive security、defensive security、ガバナンス・リスク・コンプライアンス業務を扱っています。<sup>[[8]](#references)</sup>
+WebSec は、penetration testing、セキュリティサブスクリプション、人材派遣、脆弱性評価サービスを提供しています。同社のサイトによると、世界各地で事業を展開し、offensive security、defensive security、ガバナンス、リスク、コンプライアンス関連の業務を手がけています。<sup>[[8]](#references)</sup>
 
 詳細については、[**ウェブサイト**](https://websec.net/en/)または[**ブログ**](https://websec.net/blog/)をご覧ください。
 
-上記に加えて、WebSec は HackTricks の**熱心な支援者**でもあります。
+上記に加え、WebSec はHackTricksを**継続的に支援**しています。
 
 ---
 
@@ -130,12 +131,12 @@ WebSec は、ペネトレーションテスト、セキュリティサブスク�
 
 
 **現場のために。あなたに合わせて。**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) は、実際のインフラストラクチャを基盤とするカスタムコンテンツとラボを用いた、専門家主導のサイバーセキュリティトレーニングを提供しています。プログラムは組織のニーズに合わせて調整され、評価から実装までを網羅します。<sup>[[9]](#references)</sup> カスタムトレーニングに関するお問い合わせは[**こちら**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks)から。
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) は、実際のインフラストラクチャに基づくカスタムコンテンツとラボを用いた、専門家主導のサイバーセキュリティトレーニングを提供しています。プログラムは組織のニーズに合わせて調整され、評価から実装までを網羅しています。<sup>[[9]](#references)</sup> カスタムトレーニングについてのお問い合わせは[**こちら**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks)から。
 
 **トレーニングの特長:**
 * カスタムコンテンツとラボ
-* トップクラスのツールとプラットフォームを活用
-* 実務者が設計・指導
+* 一流のツールとプラットフォームを活用
+* 実務経験者が設計・指導
 
 ---
 
@@ -143,23 +144,23 @@ WebSec は、ペネトレーションテスト、セキュリティサブスク�
 
 <figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions は、**教育**および**FinTech**分野のサイバーセキュリティコンサルティングを専門とし、クラウド評価、内部・外部ペネトレーションテスト、脆弱性評価、コンプライアンス支援を提供しています。<sup>[[10]](#references)</sup>
+Last Tower Solutions は、**教育**および**FinTech**分野のサイバーセキュリティコンサルティングを専門とし、クラウド評価、内部・外部 penetration test、脆弱性評価、コンプライアンス支援を提供しています。<sup>[[10]](#references)</sup>
 
-[**ブログ**](https://www.lasttowersolutions.com/blog)をご覧いただき、サイバーセキュリティの最新情報をご確認ください。
+[**ブログ**](https://www.lasttowersolutions.com/blog)で、サイバーセキュリティの最新情報をご確認ください。
 
 ---
 
-### [K8Studio - The Smarter GUI to Manage Kubernetes.](https://k8studio.io/)
+### [K8Studio - Kubernetesを管理する、よりスマートなGUI。](https://k8studio.io/)
 
 <figure class="sponsor-logo"><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
 
-K8Studio は、CloudMaps の可視化、マルチクラスターのナビゲーション、RBAC、Helm、ログ、YAML、ターミナル表示を備えた、デスクトップ向け Kubernetes IDE です。提供元によると、agent をインストールせずに kubeconfig 経由で接続でき、macOS、Windows、Linux、エアギャップ環境のクラスターに対応しています。<sup>[[11]](#references)</sup>
+K8Studio は、CloudMaps による可視化、マルチクラスター間のナビゲーション、RBAC、Helm、ログ、YAML、ターミナル表示に対応した、デスクトップ向け Kubernetes IDE です。ベンダーによると、agent をインストールせずに kubeconfig 経由で接続でき、macOS、Windows、Linux、air-gapped cluster に対応しています。<sup>[[11]](#references)</sup>
 
 ---
 
 ## ライセンスと免責事項
 
-下記の References にある HackTricks Values & FAQ の項目をご覧ください。
+下記の References にある HackTricks Values & FAQ をご覧ください。
 
 ## Github 統計
 
@@ -172,7 +173,7 @@ K8Studio は、CloudMaps の可視化、マルチクラスターのナビゲー�
 - [3] [AI Security Certification – Modern Security](https://www.modernsecurity.io/courses/ai-security-certification)
 - [4] [SerpApi](https://serpapi.com/)
 - [5] [8kSec Academy](https://academy.8ksec.io/)
-- [6] [実践的な AI セキュリティ: 攻撃、防御、応用](https://academy.8ksec.io/course/practical-ai-security)
+- [6] [実践的なAIセキュリティ: 攻撃、防御、応用](https://academy.8ksec.io/course/practical-ai-security)
 - [7] [Naxus](https://www.naxusai.com/)
 - [8] [WebSec](https://websec.net/)
 - [9] [Cyber Helmets](https://cyberhelmets.com/)
@@ -180,7 +181,7 @@ K8Studio は、CloudMaps の可視化、マルチクラスターのナビゲー�
 - [11] [K8Studio](https://k8studio.io/)
 - [12] [Intigriti HackTricks 紹介リンク](https://go.intigriti.com/hacktricks)
 - [13] [Modern Security](https://modernsecurity.io/)
-- [14] [WebSec スポンサー紹介動画](https://www.youtube.com/watch?v=Zq2JycGDCPM)
-- [15] [Cyber Helmets のコース](https://cyberhelmets.com/courses/?ref=hacktricks)
-- [16] [HackTricks の理念と FAQ](welcome/hacktricks-values-and-faq.md)
+- [14] [WebSec スポンサーシップ動画](https://www.youtube.com/watch?v=Zq2JycGDCPM)
+- [15] [Cyber Helmets コース](https://cyberhelmets.com/courses/?ref=hacktricks)
+- [16] [HackTricks の価値観とよくある質問](welcome/hacktricks-values-and-faq.md)
 {{#include banners/hacktricks-training.md}}
