@@ -1,41 +1,42 @@
-# Firmwareの完全性
+# Firmware Integrity
 
 {{#include ../../banners/hacktricks-training.md}}
 
-認証済みの評価で、firmware署名の検証が弱い、または存在しないことが判明した場合、modified firmware imageによって完全性への影響を実証できます。以下のlab workflowでは、元の抽出、emulation、repacking手順を維持しながらbind shellを追加します。<sup>[[2]](#references)[[3]](#references)</sup>
+認可された評価でファームウェア署名の検証が不十分、または存在しないことが判明した場合、ファームウェアイメージを改変することで完全性への影響を実証できます。以下のラボワークフローでは、元の抽出、エミュレーション、再パッケージ化の手順を維持しながら、bind shellを追加します。<sup>[[2]](#references)[[3]](#references)</sup>
 
-1. firmwareはfirmware-mod-kit (FMK)を使用して抽出できます。
-2. 対象firmwareのarchitectureとendiannessを特定します。
-3. 環境に適した方法として、Buildrootなどを使用してcross compilerを構築します。
-4. cross compilerを使用してbackdoorをbuildします。
-5. backdoorを抽出したfirmwareの`/usr/bin` directoryにコピーします。
-6. 適切なQEMU binaryを抽出したfirmwareのrootfsにコピーします。
-7. chrootとQEMUを使用してbackdoorをemulateします。
-8. netcat経由でbackdoorにアクセスします。
-9. 抽出したfirmwareのrootfsからQEMU binaryを削除します。
-10. FMKを使用してmodified firmwareをrepackageします。
-11. firmware analysis toolkit (FAT)でemulateし、netcatを使用して対象backdoorのIPとportに接続することで、backdoored firmwareをtestします。
+1. firmware-mod-kit (FMK) を使用してファームウェアを抽出できます。
+2. 対象ファームウェアのアーキテクチャとエンディアンを特定します。
+3. Buildrootまたは環境に適した別の方法で、クロスコンパイラを構築できます。
+4. クロスコンパイラを使用してバックドアをビルドできます。
+5. バックドアを、抽出したファームウェアの /usr/bin ディレクトリにコピーできます。
+6. 適切なQEMUバイナリを、抽出したファームウェアのrootfsにコピーできます。
+7. chrootとQEMUを使用してバックドアをエミュレートできます。
+8. netcatを介してバックドアにアクセスできます。
+9. 抽出したファームウェアのrootfsからQEMUバイナリを削除します。
+10. FMKを使用して、改変したファームウェアを再パッケージ化できます。
+11. firmware analysis toolkit (FAT) でバックドア入りファームウェアをエミュレートし、netcatを使用して対象のバックドアのIPとポートに接続することでテストできます。
 
-dynamic analysis、bootloader manipulation、またはhardware security testingによってすでにroot shellを取得している場合、implantsやreverse shellsなどのprecompiled test binariesを実行できます。Metasploitの`msfvenom`は、このvalidation workflow用にarchitecture-specific payloadを生成できます。<sup>[[4]](#references)</sup>
+動的解析、ブートローダーの操作、またはハードウェアセキュリティテストを通じてすでにroot shellを取得している場合は、implantやreverse shellなどの事前コンパイル済みテストバイナリを実行できます。Metasploitの `msfvenom` は、この検証ワークフロー向けにアーキテクチャ固有のpayloadを生成できます。<sup>[[4]](#references)</sup>
 
-1. 対象firmwareのarchitectureとendiannessを特定します。
-2. Msfvenomを使用して、target payload、attacker hostのIP、listening port number、filetype、architecture、platform、およびoutput fileを指定できます。
-3. payloadをcompromised deviceに転送し、execution permissionsが付与されていることを確認します。
-4. msfconsoleを起動し、payloadに従ってsettingsを設定することで、Metasploitがincoming requestsを処理できるよう準備します。
-5. meterpreter reverse shellをcompromised device上で実行します。
+1. 対象ファームウェアのアーキテクチャとエンディアンを特定します。
+2. Msfvenomを使用して、対象のpayload、攻撃者のホストIP、リスニングポート番号、filetype、アーキテクチャ、プラットフォーム、および出力ファイルを指定できます。
+3. payloadを侵害済みデバイスに転送し、実行権限があることを確認します。
+4. msfconsoleを起動し、payloadに合わせて設定することで、Metasploitが受信リクエストを処理できるようにします。
+5. 侵害済みデバイス上でmeterpreter reverse shellを実行します。
 
-## 認証なしでprivileged update protocolsに接続できるtransport bridges
+## Unauthenticated transport bridges to privileged update protocols
 
-embedded designでよくある誤りは、**同じinternal command protocolを複数のtransportで公開しながら、認証をそのうち1つでしか適用しないこと**です。たとえば、USBではchallenge-responseが必要でも、BLEでは認証なしの**GATT writes**を同じprivileged firmware-update handlerにそのまま転送している場合があります。<sup>[[1]](#references)</sup>
+よくある組み込み機器の設計ミスは、**同じ内部コマンドプロトコルを複数のトランスポートで公開しながら、そのうち1つでしか認証を強制しない**ことです。たとえば、USBではchallenge-responseが必要でも、BLEでは認証なしの**GATT writes**を同じ特権ファームウェア更新ハンドラーにそのまま転送する場合があります。<sup>[[1]](#references)</sup>
 
-Typical offensive workflow:
+典型的な攻撃ワークフロー:
 
-1. BLE GATT databaseをenumerateし、公式mobile appが使用するwritable characteristicsを特定します。
-2. app trafficをsniffし、有線protocolと一致する**magic bytes / opcodes**を探します。
-3. **pairingなし**でBLE経由でprivileged commandsをreplayし、sensitive operationsが引き続き機能するか確認します。
-4. firmware upgrade、config write、debug、またはfactory-test opcodesに到達できる場合、BLEを**radio-reachable admin port**として扱います。
+1. BLE GATTデータベースを列挙し、公式モバイルアプリが使用する書き込み可能なcharacteristicsを特定します。
+2. アプリの通信をスニッフィングし、有線プロトコルと一致する**magic bytes / opcodes**を探します。
+3. **ペアリングせずに**BLE経由で特権コマンドをリプレイし、機密性の高い操作が引き続き可能か確認します。
+4. ファームウェアアップグレード、config書き込み、debug、またはfactory-testのopcodeにアクセスできる場合、BLEを**無線から到達可能な管理ポート**として扱います。
 
-Quick checks:
+簡易チェック:
+
 ```bash
 # Enumerate services/characteristics
 ble.enum <MAC>
@@ -46,82 +47,98 @@ ble.write <MAC> <UUID> <HEX_DATA>
 # gatttool equivalent
 # gatttool -b <MAC> --char-write-req -a <HANDLE> -n <HEX_DATA>
 ```
-逆アセンブル時に確認する事項:
 
-- BLE には **pairing/bonding** が必要か、それとも単純な接続だけでよいか?
-- すべての transport が同じ内部 dispatcher table にルーティングされているか?
-- privileged opcode は USB / BLE / UART / Wi-Fi で異なる方法によりフィルタリングされているか?
-- mobile app から firmware update、recovery、または diagnostic handler をリモートでトリガーできるか?
+リバース時に確認すること:
 
-## Checksum-only firmware containers are still attacker-controlled firmware
+- BLEは**ペアリング／ボンディング**を必要とするか、それとも通常の接続だけでよいか？
+- すべてのトランスポートは同じ内部ディスパッチャテーブルにルーティングされるか？
+- 特権opcodeは、USB / BLE / UART / Wi-Fiで異なる方法でフィルタリングされるか？
+- モバイルアプリから、ファームウェア更新、リカバリ、診断の各ハンドラをリモートで起動できるか？
 
-**unkeyed checksum** (CRC32、SHA-256、MD5 など) のみによって保護された firmware container は、改ざん検出は提供しますが、**authenticity** は提供しません。attacker が update routine に到達できる場合、image にパッチを適用し、checksum を再計算して、任意の code を flash できます。<sup>[[1]](#references)</sup>
+## チェックサムのみのファームウェアコンテナも、依然として攻撃者に制御されるファームウェア
 
-RE 中の red flags:
+**鍵なしチェックサム**（CRC32、SHA-256、MD5など）のみで保護されたファームウェアコンテナが提供するのは、破損の検出であり、**真正性の保証ではありません**。攻撃者が更新ルーチンに到達できる場合、イメージにパッチを適用し、チェックサムを再計算して、任意のコードを書き込めます。<sup>[[1]](#references)</sup>
 
-- Update code が `CHK2`、`CRC`、`SHA256` などの末尾の checksum blob だけを検証している。
-- signature verification または secure-boot root of trust が存在しない。
-- device-bound MAC / HMAC / authenticated encryption が使用されていない。
-- Recovery mode が同じ unauthenticated image format を受け入れる。
+REで注意すべき点:
 
-実践的な検証フロー:
+- 更新コードが、`CHK2`、`CRC`、`SHA256`などの末尾のチェックサムblobだけを検証する。
+- 署名検証も、セキュアブートの信頼の起点も存在しない。
+- デバイス固有のMAC / HMAC / 認証付き暗号化が使われていない。
+- リカバリモードが、同じ未認証のイメージ形式を受け付ける。
 
-1. Firmware container を抽出し、bootloader、main firmware、integrity metadata を特定する。
-2. Image 内の無害な string または banner を変更する。
-3. Updater が期待する形式で checksum を正確に再計算する。
-4. 通常の update path を通じて image を reflash する。
-5. Boot 時に変更を確認し、任意の firmware replacement が可能であることを証明する。
+実践的な検証手順:
 
-これが BLE/Wi-Fi などのリモート到達可能な transport 経由で機能する場合、この bug は実質的に **unauthenticated OTA firmware replacement** となります。
+1. ファームウェアコンテナを抽出し、ブートローダー、メインファームウェア、完全性メタデータを特定する。
+2. イメージ内の無害な文字列またはバナーを変更する。
+3. アップデーターが期待する形式でチェックサムを再計算する。
+4. 通常の更新経路を使ってイメージを書き込む。
+5. 起動時に変更を確認し、任意のファームウェアに置き換えられることを実証する。
 
-## Turning a trusted USB peripheral into BadUSB via firmware reflashing
+BLE / Wi-Fiなど、リモートから到達できるトランスポート経由でこれが成功する場合、実質的に**未認証OTAファームウェア置き換え**が可能です。
 
-対象 device が USB 経由で host からすでに信頼されている場合、malicious firmware は新しい USB stack 全体を実装する必要がないことがあります。多くの場合、より簡単な pivot は **existing HID support** の **reuse** です。<sup>[[1]](#references)</sup>
+## 断片化された更新状態と書き換え可能な完全性メタデータ
 
-有用な pattern:
+アップデーターはインストール時に署名済みファームウェアヘッダーを検証していても、保存済みの完全性ハッシュだけを使ってイメージを起動する場合があります。Cypherock X1では、Bootloaderが個別のFirewallタスクを呼び出し、ヘッダーを検証してバージョン／サイズをRAMに格納し、ファームウェア署名をRAMに保存し、書き込み済みイメージを検証し、最後にイメージをハッシュして永続的なPrimary Bootloader Dataに保存していました。署名自体は永続化されていませんでした。これらのタスクは、認証済みのアップグレードトランザクションを強制することなく、個別に呼び出せました。<sup>[[5]](#references)</sup>
 
-1. Device がすでに **HID Consumer Control** / media / vendor HID interface として enumerate されているか確認する。
-2. Firmware 内の既存の **HID report descriptor** を特定する。
-3. Descriptor entry を追加または置換し、device が **keyboard** capability も advertise するようにする。
-4. 新しい transport implementation を記述する代わりに、HID report をすでに送信している既存の firmware routine を reuse する。
-5. Key press + key release report を inject して host 上で command を入力する。
+MCUコード実行とFlash書き込みアクセスを得た攻撃では、アプリケーションイメージを書き換え、BootloaderとFirewallの間で共有されるRAM内のバージョン／サイズ値を変更し、最後のメタデータタスクを呼び出して、悪意あるイメージのハッシュを保存し、通常の起動状態に戻しました。通常の起動時の完全性チェックは、署名を再検証せずにそのハッシュを受け入れました。同様のアップデーターを調査するときは、**各タスクをどのコンポーネントが呼び出せるか**、検証済みの値がどこに保存されるか、そして起動時の判定が、保存されたハッシュと*同じイメージ*を認証しているかを追跡してください。これはチェックサムのみのイメージ形式とは異なります。署名検証は存在しましたが、状態遷移が署名検証に結び付けられていませんでした。<sup>[[5]](#references)</sup>
 
-これにより、PC は reflash された peripheral を正規の keyboard として信頼するため、firmware compromise が **host compromise** に変わります。
+## 信頼できないファームウェア測定値に対するセキュアエレメントの署名
 
-### Minimal assessment checklist
+セキュアエレメントが、そのコードから提供されたハッシュに署名しても、それだけで実行中のコードを証明することにはなりません。同じウォレットでは、セキュアエレメントがデバイスのシリアル番号と、クラウドnonceとMCU経由で渡されたファームウェアハッシュのXOR値に署名していました。侵害されたファームウェアは、異なるバイト列を実行しながら、期待されるハッシュを提示して署名させることができます。また、コンパニオンクライアントはファームウェアのバージョンをクラウドに送信していたため、検証側の期待ハッシュとの比較も、Flashを独立して読み取った値ではなく、MCU由来の測定値に依存していました。<sup>[[5]](#references)</sup>
 
-- `dmesg`、Device Manager、または USB descriptor に既存の HID interface が表示されるか?
-- Report descriptor の近く、または relocatable descriptor table に空き領域があるか?
-- 既存の media-control send routine を keyboard report に reuse できるか?
-- Reflash 後、host が新しい keyboard interface を自動的に受け入れるか?
+デバイス側の結果は、別個の信頼境界でした。クラウドはデバイスを検証しましたが、デバイスはクラウドの判定を認証しませんでした。改変されたクライアントは、改ざんされたデバイスに対してローカルで成功したと報告できます。測定値の由来と応答の認証を別々にテストしてください。有効なセキュアエレメントの署名や成功画面だけでは、インストール済みアプリケーションの真正性は証明されません。<sup>[[5]](#references)</sup>
 
-## Reliable payload execution inside RTOS firmware
+このアップデーターの解析を可能にした保護コードの開示については、[Firewall copy-taskによるファームウェア取得](index.html#disclosing-protected-code-through-a-firewall-copy-task)を参照してください。<sup>[[5]](#references)</sup>
 
-ランダムな code path に fragile な trampoline を挿入する代わりに、通常の operation では未使用または影響の小さい **existing RTOS task** を探します。<sup>[[1]](#references)</sup>
+## ファームウェアの書き換えによって、信頼済みUSB周辺機器をBadUSBに変える
 
-これが有用な理由:
+対象デバイスがすでにUSB経由でホストから信頼されている場合、悪意あるファームウェアに新しいUSBスタック全体を実装する必要はないことがあります。多くの場合、より簡単な方法は、**既存のHIDサポートを再利用すること**です。<sup>[[1]](#references)</sup>
 
-- Scheduler が boot 中に payload を自然に開始する。
-- Critical control flow の破損を回避できる。
-- Latency-sensitive な USB/network handler 内で実行する場合と比べ、delayed payload は watchdog reset を引き起こしにくい。
+有用な手順:
 
-適した target は、通常の usage では dormant に見える diagnostic、factory-test、telemetry、または coprocessor service task です。
+1. デバイスがすでに**HID Consumer Control** / メディア / ベンダーHIDインターフェースとして列挙されるか確認する。
+2. ファームウェア内で既存の**HID report descriptor**を見つける。
+3. descriptorエントリを追加または置き換え、デバイスが**キーボード**機能も通知するようにする。
+4. 新しいトランスポート実装を書く代わりに、すでにHIDレポートを送信している既存のファームウェアルーチンを再利用する。
+5. キー押下とキー解放のレポートを注入して、ホスト上でコマンドを入力する。
 
-## Fast exploit iteration: repurpose benign protocol handlers
+これにより、PCは書き換えられた周辺機器を正規のキーボードとして信頼するため、ファームウェア侵害が**ホスト侵害**につながります。
 
-Firmware patching が可能になったら、RE を高速化する簡潔な方法は、無害な command handler (たとえば **echo/debug opcode**) を custom **memory read / write / execute** primitive で overwrite することです。これにより、実験ごとに full reflashing を行う必要がなくなり、modified handler を高速な wired transport 経由で device がサポートしている場合に特に有用です。<sup>[[1]](#references)</sup>
+### 最小限の評価チェックリスト
 
-これを使用して:
+- `dmesg`、Device Manager、またはUSB descriptorsに既存のHIDインターフェースが表示されるか？
+- report descriptorの近くに空き領域があるか、descriptor tableを再配置できるか？
+- 既存のメディアコントロール送信ルーチンをキーボードレポートに再利用できるか？
+- 書き換え後、ホストは新しいキーボードインターフェースを自動的に受け入れるか？
 
-- Scatter-loaded memory map を検証する
-- Heap/task state を live で調査する
-- Flash に書き込む前に小さな payload をテストする
-- Function pointer、string、descriptor table を安全に復元する
+## RTOSファームウェア内での信頼性の高いpayload実行
+
+ランダムなコードパスに壊れやすいtrampolineを挿入するのではなく、通常の動作では使われていない、または影響の小さい**既存のRTOSタスク**を探してください。<sup>[[1]](#references)</sup>
+
+有効な理由:
+
+- スケジューラーが起動時に自然にpayloadを開始する。
+- 重要な制御フローの破損を避けられる。
+- 遅延実行されるpayloadは、レイテンシに敏感なUSB / ネットワークハンドラ内で実行する場合より、watchdog resetを引き起こしにくい。
+
+有望な対象は、通常の使用では休止しているように見える診断、工場テスト、テレメトリ、またはコプロセッサのサービスタスクです。
+
+## exploitの反復を高速化する: 無害なプロトコルハンドラを転用する
+
+ファームウェアへのパッチ適用が可能になったら、REを効率化する手軽な方法として、無害なコマンドハンドラ（**echo/debug opcode**など）を、独自の**メモリ読み取り／書き込み／実行**プリミティブで上書きできます。実験のたびに完全な再書き込みを行う必要がなくなり、特に変更したハンドラを高速な有線トランスポート経由で使えるデバイスで有用です。<sup>[[1]](#references)</sup>
+
+次の用途に使えます:
+
+- scatter-loadedメモリマップを検証する
+- heap / taskの状態を実行中に調べる
+- Flashに書き込む前に小さなpayloadをテストする
+- 関数ポインター、文字列、descriptor tableを安全に復元する
 
 ## References
 
-- [1] [Pwnd Blaster: スピーカーに一切触れずにスピーカーを使って PC を hack する方法](https://blog.nns.ee/2026/06/03/katana-badusb/)
+- [1] [Pwnd Blaster: スピーカーに一切触れずにPCをハッキングする方法](https://blog.nns.ee/2026/06/03/katana-badusb/)
 - [2] [firmware-mod-kit](https://github.com/rampageX/firmware-mod-kit)
 - [3] [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit)
-- [4] [Metasploit - `msfvenom` の使用方法](https://docs.metasploit.com/docs/using-metasploit/basics/how-to-use-msfvenom.html)
+- [4] [Metasploit - `msfvenom`の使い方](https://docs.metasploit.com/docs/using-metasploit/basics/how-to-use-msfvenom.html)
+- [5] [Cypherockハードウェアウォレットをハッキングした方法と理由: 全容](https://www.darknavy.org/blog/how_and_why_we_hacked_cypherock_hardware_wallet_the_full_story/)
 {{#include ../../banners/hacktricks-training.md}}
