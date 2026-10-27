@@ -2,13 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-This page collects **small, self-contained C snippets** that are handy during Windows Local Privilege Escalation or post-exploitation.  Each payload is designed to be **copy-paste friendly**, requires only the Windows API / C runtime, and can be compiled with `i686-w64-mingw32-gcc` (x86) or `x86_64-w64-mingw32-gcc` (x64).
+Trang này tổng hợp các **đoạn mã C nhỏ, độc lập** hữu ích trong quá trình Windows Local Privilege Escalation hoặc post-exploitation. Mỗi payload được thiết kế để **dễ sao chép và dán**, chỉ cần Windows API / C runtime và có thể biên dịch bằng `i686-w64-mingw32-gcc` (x86) hoặc `x86_64-w64-mingw32-gcc` (x64).
 
-> ⚠️  These payloads assume that the process already has the minimum privileges necessary to perform the action (e.g. `SeDebugPrivilege`, `SeImpersonatePrivilege`, or medium-integrity context for a UAC bypass).  They are intended for **red-team or CTF settings** where exploiting a vulnerability has landed arbitrary native code execution.
+> ⚠️ Các payload này giả định tiến trình đã có đủ quyền tối thiểu cần thiết để thực hiện hành động (ví dụ: `SeDebugPrivilege`, `SeImpersonatePrivilege` hoặc ngữ cảnh medium-integrity để vượt qua UAC). Chúng dành cho các tình huống **red-team hoặc CTF**, trong đó việc khai thác lỗ hổng đã cho phép thực thi mã native tùy ý.
 
 ---
 
-## Add local administrator user
+## Thêm người dùng quản trị cục bộ
 
 ```c
 // i686-w64-mingw32-gcc -s -O2 -o addadmin.exe addadmin.c
@@ -22,14 +22,14 @@ int main(void) {
 
 ---
 
-## UAC Bypass – `fodhelper.exe` Registry Hijack (Medium → High integrity)
-When the trusted binary **`fodhelper.exe`** is executed, it queries the registry path below **without filtering the `DelegateExecute` verb**.  By planting our command under that key an attacker can bypass UAC *without* dropping a file to disk.<sup>[[1]](#references)</sup>
+## UAC Bypass – `fodhelper.exe` Registry Hijack (Toàn vẹn trung bình → cao)
+Khi binary đáng tin cậy **`fodhelper.exe`** được thực thi, nó truy vấn đường dẫn registry bên dưới **mà không lọc verb `DelegateExecute`**. Bằng cách đặt lệnh của chúng ta dưới khóa đó, kẻ tấn công có thể bypass UAC *mà không cần ghi file xuống đĩa*.<sup>[[1]](#references)</sup>
 
-*Registry path queried by `fodhelper.exe`*
+*Đường dẫn registry được `fodhelper.exe` truy vấn*
 ```
 HKCU\Software\Classes\ms-settings\Shell\Open\command
 ```
-A minimal PoC that pops an elevated `cmd.exe`:
+PoC tối giản mở một `cmd.exe` với quyền nâng cao:
 
 ```c
 // x86_64-w64-mingw32-gcc -municode -s -O2 -o uac_fodhelper.exe uac_fodhelper.c
@@ -64,21 +64,21 @@ int main(void) {
     return 0;
 }
 ```
-*Tested on Windows 10 22H2 and Windows 11 23H2 (July 2025 patches). The bypass still works because Microsoft has not fixed the missing integrity check in the `DelegateExecute` path.*
+*Đã thử nghiệm trên Windows 10 22H2 và Windows 11 23H2 (bản vá tháng 7 năm 2025). Cách bypass vẫn hoạt động vì Microsoft chưa sửa lỗi thiếu kiểm tra tính toàn vẹn trong đường dẫn `DelegateExecute`.*
 
 ---
 
 ## UAC Bypass – Activation Context Cache Poisoning (`ctfmon.exe`, CVE-2024-6769)
-Drive remapping + activation context cache poisoning still works against patched Windows 10/11 builds because `ctfmon.exe` runs as a high-integrity trusted UI process that happily loads from the caller’s impersonated `C:` drive and reuses whatever DLL redirections `CSRSS` has cached. Abuse goes as follows: re-point `C:` at attacker-controlled storage, drop a trojanized `msctf.dll`, launch `ctfmon.exe` to gain high integrity, then ask `CSRSS` to cache a manifest that redirects a DLL used by an auto-elevated binary (e.g., `fodhelper.exe`) so the next launch inherits your payload without a UAC prompt.<sup>[[5]](#references)</sup>
+Việc ánh xạ lại ổ đĩa kết hợp với đầu độc cache activation context vẫn hoạt động trên các bản dựng Windows 10/11 đã được vá, vì `ctfmon.exe` chạy dưới dạng tiến trình giao diện người dùng đáng tin cậy với mức toàn vẹn cao, sẵn sàng tải từ ổ `C:` đã bị giả mạo của caller và tái sử dụng mọi chuyển hướng DLL mà `CSRSS` đã lưu cache. Cách khai thác như sau: trỏ lại `C:` đến nơi lưu trữ do attacker kiểm soát, thả một `msctf.dll` đã bị trojan hóa, khởi chạy `ctfmon.exe` để đạt mức toàn vẹn cao, sau đó yêu cầu `CSRSS` lưu cache một manifest chuyển hướng DLL được một binary tự động nâng quyền sử dụng (ví dụ: `fodhelper.exe`), để lần khởi chạy tiếp theo kế thừa payload của bạn mà không hiện lời nhắc UAC.<sup>[[5]](#references)</sup>
 
-Practical workflow:
-1. Prepare a fake `%SystemRoot%\System32` tree and copy the legitimate binary you plan to hijack (often `ctfmon.exe`).
-2. Use `DefineDosDevice(DDD_RAW_TARGET_PATH)` to remap `C:` inside your process, keeping `DDD_NO_BROADCAST_SYSTEM` so the change stays local.
-3. Drop your DLL + manifest into the fake tree, call `CreateActCtx/ActivateActCtx` to push the manifest into the activation-context cache, then launch the auto-elevated binary so it resolves the redirected DLL straight into your shellcode.
-4. Delete the cache entry (`sxstrace ClearCache`) or reboot when finished to erase attacker fingerprints.
+Quy trình thực tế:
+1. Chuẩn bị một cây thư mục `%SystemRoot%\System32` giả và sao chép vào đó binary hợp lệ mà bạn định chiếm quyền (thường là `ctfmon.exe`).
+2. Dùng `DefineDosDevice(DDD_RAW_TARGET_PATH)` để ánh xạ lại `C:` trong tiến trình của bạn, đồng thời giữ `DDD_NO_BROADCAST_SYSTEM` để thay đổi chỉ có hiệu lực cục bộ.
+3. Thả DLL và manifest vào cây thư mục giả, gọi `CreateActCtx/ActivateActCtx` để đưa manifest vào cache activation context, rồi khởi chạy binary tự động nâng quyền để nó phân giải DLL được chuyển hướng và chạy thẳng vào shellcode của bạn.
+4. Xóa mục cache (`sxstrace ClearCache`) hoặc khởi động lại khi hoàn tất để xóa dấu vết của attacker.
 
 <details>
-<summary>C - Fake drive + manifest poison helper (CVE-2024-6769)</summary>
+<summary>C - Trợ giúp đầu độc ổ đĩa giả + manifest (CVE-2024-6769)</summary>
 
 ```c
 #define WIN32_LEAN_AND_MEAN
@@ -132,12 +132,12 @@ int wmain(void) {
 
 </details>
 
-Cleanup tip: after popping SYSTEM, call `sxstrace Trace -logfile %TEMP%\sxstrace.etl` followed by `sxstrace Parse` when testing—if you see your manifest name in the log, defenders can too, so rotate paths each run.
+Mẹo dọn dẹp: sau khi lấy được SYSTEM, hãy chạy `sxstrace Trace -logfile %TEMP%\sxstrace.etl`, sau đó chạy `sxstrace Parse` khi kiểm thử—nếu thấy tên manifest của bạn trong log, thì bên phòng thủ cũng có thể thấy, vì vậy hãy đổi đường dẫn mỗi lần chạy.
 
 ---
 
-## Spawn SYSTEM shell via token duplication (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
-If the current process holds **both** `SeDebug` and `SeImpersonate` privileges (typical for many service accounts), you can steal the token from `winlogon.exe`, duplicate it, and start an elevated process:
+## Tạo shell SYSTEM qua token duplication (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
+Nếu tiến trình hiện tại có **cả hai** quyền `SeDebug` và `SeImpersonate` (điển hình với nhiều tài khoản dịch vụ), bạn có thể lấy token từ `winlogon.exe`, nhân bản token đó và khởi chạy một tiến trình có quyền nâng cao:
 
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o system_shell.exe system_shell.c -ladvapi32 -luser32
@@ -186,7 +186,7 @@ int wmain(void) {
     return 0;
 }
 ```
-For a deeper explanation of how that works see:
+Để biết giải thích chi tiết hơn về cách hoạt động, xem:
 
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
@@ -194,8 +194,8 @@ sedebug-+-seimpersonate-copy-token.md
 
 ---
 
-## In-Memory AMSI & ETW Patch (Defence Evasion)
-Most modern AV/EDR engines rely on **AMSI** and **ETW** to inspect malicious behaviours.  Patching both interfaces early inside the current process prevents script-based payloads (e.g. PowerShell, JScript) from being scanned.<sup>[[2]](#references)</sup>
+## Patch AMSI & ETW trong bộ nhớ (né tránh phòng thủ)
+Hầu hết các engine AV/EDR hiện đại đều dựa vào **AMSI** và **ETW** để kiểm tra các hành vi độc hại. Patch cả hai giao diện ngay từ đầu trong tiến trình hiện tại sẽ ngăn các payload dựa trên script (ví dụ: PowerShell, JScript) bị quét.<sup>[[2]](#references)</sup>
 
 ```c
 // gcc -o patch_amsi.exe patch_amsi.c -lntdll
@@ -223,12 +223,12 @@ int main(void) {
     return 0;
 }
 ```
-*The patch above is process-local; spawning a new PowerShell after running it will execute without AMSI/ETW inspection.*
+*Bản vá ở trên chỉ áp dụng cho tiến trình hiện tại; khởi chạy PowerShell mới sau khi chạy bản vá sẽ không bị AMSI/ETW kiểm tra.*
 
 ---
 
-## Create child as Protected Process Light (PPL)
-Request a PPL protection level for a child at creation time using `STARTUPINFOEX` + `PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL`. This is a documented API and will only succeed if the target image is signed for the requested signer class (Windows/WindowsLight/Antimalware/LSA/WinTcb).<sup>[[3]](#references)[[4]](#references)</sup>
+## Tạo tiến trình con dưới dạng Protected Process Light (PPL)
+Yêu cầu mức bảo vệ PPL cho tiến trình con ngay khi tạo bằng `STARTUPINFOEX` + `PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL`. Đây là API được tài liệu hóa và chỉ thành công nếu image đích được ký cho lớp signer được yêu cầu (Windows/WindowsLight/Antimalware/LSA/WinTcb).<sup>[[3]](#references)[[4]](#references)</sup>
 
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o spawn_ppl.exe spawn_ppl.c
@@ -262,25 +262,25 @@ int wmain(void) {
 }
 ```
 
-Levels used most commonly:
+Các level được sử dụng phổ biến nhất:
 - `PROTECTION_LEVEL_WINDOWS_LIGHT` (2)
 - `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` (3)
 - `PROTECTION_LEVEL_LSA_LIGHT` (4)
 
-Validate the result with Process Explorer/Process Hacker by checking the Protection column.
+Xác thực kết quả bằng Process Explorer/Process Hacker qua cột Protection.
 
 ---
 
-## Local Service -> Kernel via `appid.sys` Smart-Hash (`IOCTL 0x22A018`, CVE-2024-21338)
-`appid.sys` exposes a device object (`\\.\\AppID`) whose smart-hash maintenance IOCTL accepts user-supplied function pointers whenever the caller runs as `LOCAL SERVICE`; Lazarus is abusing that to disable PPL and load arbitrary drivers, so red teams should have a ready-made trigger for lab use.<sup>[[6]](#references)</sup>
+## Local Service -> Kernel qua `appid.sys` Smart-Hash (`IOCTL 0x22A018`, CVE-2024-21338)
+`appid.sys` cung cấp một device object (`\\.\\AppID`), trong đó IOCTL bảo trì smart-hash chấp nhận các function pointer do người dùng cung cấp khi caller chạy dưới quyền `LOCAL SERVICE`; Lazarus đang lạm dụng cơ chế này để vô hiệu hóa PPL và nạp driver tùy ý, vì vậy red team nên chuẩn bị sẵn trigger để dùng trong lab.<sup>[[6]](#references)</sup>
 
-Operational notes:
-- You still need a `LOCAL SERVICE` token. Steal it from `Schedule` or `WdiServiceHost` using `SeImpersonatePrivilege`, then impersonate before touching the device so ACL checks pass.
-- IOCTL `0x22A018` expects a struct containing two callback pointers (query length + read function). Point both at user-mode stubs that craft a token overwrite or map ring-0 primitives, but keep the buffers RWX so KernelPatchGuard does not crash mid-chain.
-- After success, drop out of impersonation and revert the device handle; defenders now look for unexpected `Device\\AppID` handles, so close it immediately once privilege is gained.
+Lưu ý vận hành:
+- Bạn vẫn cần token `LOCAL SERVICE`. Đánh cắp token này từ `Schedule` hoặc `WdiServiceHost` bằng `SeImpersonatePrivilege`, sau đó impersonate trước khi truy cập device để vượt qua các bước kiểm tra ACL.
+- IOCTL `0x22A018` yêu cầu một struct chứa hai callback pointer (query length + read function). Trỏ cả hai đến các stub ở user mode để tạo token overwrite hoặc ánh xạ các ring-0 primitive, nhưng giữ các buffer ở chế độ RWX để KernelPatchGuard không gây crash giữa chừng.
+- Sau khi thành công, thoát impersonation và thu hồi device handle; hiện các nhóm phòng thủ đang tìm kiếm handle `Device\\AppID` bất thường, vì vậy hãy đóng handle ngay khi có được quyền cao hơn.
 
 <details>
-<summary>C - Skeleton trigger for `appid.sys` smart-hash abuse</summary>
+<summary>C - Bộ khung trigger để lạm dụng smart-hash của `appid.sys`</summary>
 
 ```c
 #define WIN32_LEAN_AND_MEAN
@@ -321,17 +321,16 @@ int wmain(void) {
 
 </details>
 
-Minimal fix-up for a weaponized build: map an RWX section with `VirtualAlloc`, copy your token duplication stub there, set `KernelThunk = section`, and once `DeviceIoControl` returns you should be SYSTEM even under PPL.
+Bản sửa tối thiểu cho một weaponized build: dùng `VirtualAlloc` để ánh xạ một section RWX, sao chép token duplication stub vào đó, đặt `KernelThunk = section`, và sau khi `DeviceIoControl` trả về, bạn sẽ có quyền SYSTEM, kể cả khi chạy dưới PPL.
 
 ---
 
 ## References
 
-- [1] [First entry: Welcome and fileless UAC bypass (fodhelper.exe / ms-settings DelegateExecute)](https://winscripting.blog/2017/05/12/first-entry-welcome-and-uac-bypass/)
+- [1] [Mục đầu tiên: Chào mừng và fileless UAC bypass (fodhelper.exe / ms-settings DelegateExecute)](https://winscripting.blog/2017/05/12/first-entry-welcome-and-uac-bypass/)
 - [2] [Memory Patching AMSI Bypass](https://rastamouse.me/memory-patching-amsi-bypass/)
-- [3] [CreateProcessAsPPL – minimal PPL process launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
-- [4] [UpdateProcThreadAttribute function (Win32 apps) - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-updateprocthreadattribute)
-- [5] [Novel Exploit Chain Enables Windows UAC Bypass](https://www.darkreading.com/vulnerabilities-threats/exploit-chain-windows-uac-bypass)
-- [6] [Lazarus and the FudModule Rootkit: Beyond BYOVD with an Admin-to-Kernel Zero-Day](https://www.gendigital.com/blog/insights/research/lazarus-and-the-fudmodule-rootkit-beyond-byovd-with-an-admin-to-kernel-zero-day)
-
+- [3] [CreateProcessAsPPL – trình khởi chạy tiến trình PPL tối giản](https://github.com/2x7EQ13/CreateProcessAsPPL)
+- [4] [Hàm UpdateProcThreadAttribute (ứng dụng Win32) - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-updateprocthreadattribute)
+- [5] [Chuỗi khai thác mới cho phép bypass UAC trên Windows](https://www.darkreading.com/vulnerabilities-threats/exploit-chain-windows-uac-bypass)
+- [6] [Lazarus và FudModule Rootkit: Vượt ra ngoài BYOVD với Zero-Day từ Admin lên Kernel](https://www.gendigital.com/blog/insights/research/lazarus-and-the-fudmodule-rootkit-beyond-byovd-with-an-admin-to-kernel-zero-day)
 {{#include ../../banners/hacktricks-training.md}}

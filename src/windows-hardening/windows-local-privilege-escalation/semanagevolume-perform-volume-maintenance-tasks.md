@@ -1,34 +1,34 @@
-# SeManageVolumePrivilege: Volume-maintenance abuse and raw-access validation
+# SeManageVolumePrivilege: Lạm dụng bảo trì volume và xác thực quyền truy cập thô
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Overview
+## Tổng quan
 
-Windows user right: Perform volume maintenance tasks (constant: SeManageVolumePrivilege).
+Quyền người dùng Windows: Thực hiện các tác vụ bảo trì volume (hằng số: SeManageVolumePrivilege).
 
-The right authorizes volume-maintenance operations such as defragmentation and creating or removing volumes. Microsoft warns that a holder may be able to extend files into storage containing other data and then read or modify the acquired bytes.<sup>[[1]](#references)</sup>
+Quyền này cho phép thực hiện các thao tác bảo trì volume như chống phân mảnh và tạo hoặc xóa volume. Microsoft cảnh báo rằng người có quyền này có thể mở rộng tệp vào vùng lưu trữ chứa dữ liệu khác, rồi đọc hoặc sửa đổi các byte đã chiếm được.<sup>[[1]](#references)</sup>
 
-Do not equate possession of `SeManageVolumePrivilege` with guaranteed raw-disk access. Microsoft documents that opening a physical disk or volume through `CreateFile` for direct access requires administrative privileges, and normal object/device access checks still apply. On a particular build or product, test whether the token, device ACL, requested access, share flags, and volume state permit a raw handle before claiming arbitrary file read.<sup>[[3]](#references)</sup>
+Không nên xem việc có `SeManageVolumePrivilege` là bảo đảm có quyền truy cập đĩa thô. Microsoft nêu rõ rằng việc mở đĩa hoặc volume vật lý qua `CreateFile` để truy cập trực tiếp đòi hỏi đặc quyền quản trị viên, đồng thời các kiểm tra quyền truy cập đối tượng/thiết bị thông thường vẫn được áp dụng. Trên một bản dựng hoặc sản phẩm cụ thể, hãy kiểm tra xem token, ACL thiết bị, quyền truy cập được yêu cầu, cờ chia sẻ và trạng thái volume có cho phép mở handle thô hay không trước khi khẳng định có thể đọc tùy ý tệp.<sup>[[3]](#references)</sup>
 
-Default: Administrators on servers and domain controllers.<sup>[[1]](#references)</sup>
+Mặc định: Quản trị viên trên máy chủ và bộ điều khiển miền.<sup>[[1]](#references)</sup>
 
-## Abuse scenarios
+## Các tình huống lạm dụng
 
-- If the account can actually obtain a readable raw-volume handle, an NTFS-aware parser can bypass per-file ACLs and recover protected or locked files from allocated clusters.
-- Possible targets include locked or ACL-protected content under `C:\Windows\System32`, registry hives, DPAPI master keys, the SAM, and—where separately accessible through a snapshot or offline volume—`ntds.dit`.
-- On certificate services hosts, useful software-key locations include `%ProgramData%\Microsoft\Crypto\RSA\MachineKeys` and `%ProgramData%\Microsoft\Crypto\Keys`; recovering a file is useful only when its key material is exportable and can also be decrypted.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
-- On an AD CS host, a successfully recovered **exportable/software-backed** CA private key can enable Golden Certificate abuse. Hardware-backed or non-exportable key designs change this path.<sup>[[2]](#references)</sup>
-- Some volume-maintenance tooling uses `FSCTL_SD_GLOBAL_CHANGE` to replace filesystem ACL entries when that operation is permitted. This changes access controls rather than passively reading raw blocks, can affect a large part of a volume, and must be validated against the actual token and device behavior. The [tool source](https://github.com/CsEnox/SeManageVolumeExploit) shows this specific mechanism; possession of the privilege alone does not prove it will succeed.
-- Gaining file access through ACL changes does not decrypt an EFS-encrypted file. Plaintext still requires a matching user or recovery private key. Likewise, exporting a software-backed CA key with [`certutil -exportPFX`](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/certutil) depends on the key being locally available, exportable, and accessible.
+- Nếu tài khoản thực sự có thể lấy được handle volume thô cho phép đọc, trình phân tích cú pháp có hỗ trợ NTFS có thể bỏ qua ACL từng tệp và khôi phục các tệp được bảo vệ hoặc bị khóa từ các cluster đã cấp phát.
+- Các mục tiêu tiềm năng gồm nội dung bị khóa hoặc được bảo vệ bằng ACL trong `C:\Windows\System32`, registry hive, khóa chính DPAPI, SAM và—khi có thể truy cập riêng qua snapshot hoặc volume ngoại tuyến—`ntds.dit`.
+- Trên máy chủ dịch vụ chứng chỉ, các vị trí khóa phần mềm hữu ích gồm `%ProgramData%\Microsoft\Crypto\RSA\MachineKeys` và `%ProgramData%\Microsoft\Crypto\Keys`; việc khôi phục tệp chỉ hữu ích khi có thể xuất vật liệu khóa và cũng có thể giải mã tệp đó.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
+- Trên máy chủ AD CS, khôi phục thành công khóa riêng tư CA **có thể xuất/được hỗ trợ bằng phần mềm** có thể cho phép lạm dụng Golden Certificate. Các thiết kế dùng khóa phần cứng hoặc khóa không thể xuất sẽ làm thay đổi hướng khai thác này.<sup>[[2]](#references)</sup>
+- Một số công cụ bảo trì volume dùng `FSCTL_SD_GLOBAL_CHANGE` để thay thế các mục ACL của hệ thống tệp khi thao tác đó được cho phép. Cách này thay đổi quyền kiểm soát truy cập thay vì đọc thụ động các khối thô, có thể ảnh hưởng đến phần lớn volume và cần được xác thực với token cũng như hành vi thực tế của thiết bị. [Mã nguồn công cụ](https://github.com/CsEnox/SeManageVolumeExploit) cho thấy cơ chế cụ thể này; chỉ có đặc quyền không chứng minh được rằng cách này sẽ thành công.
+- Có quyền truy cập tệp nhờ thay đổi ACL không đồng nghĩa với việc giải mã được tệp mã hóa bằng EFS. Muốn có bản rõ vẫn cần khóa riêng tư khôi phục hoặc khóa riêng tư của người dùng tương ứng. Tương tự, việc xuất khóa CA được hỗ trợ bằng phần mềm bằng [`certutil -exportPFX`](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/certutil) phụ thuộc vào việc khóa có sẵn cục bộ, có thể xuất và có thể truy cập hay không.
 
-Note: You still need a parser for NTFS structures unless you rely on helper tools. Many off-the-shelf tools abstract the raw access.
+Lưu ý: Bạn vẫn cần trình phân tích cấu trúc NTFS trừ khi dùng các công cụ hỗ trợ. Nhiều công cụ có sẵn đã trừu tượng hóa việc truy cập thô.
 
-## Practical techniques
+## Kỹ thuật thực tế
 
-- Open a raw volume handle and read clusters:
+- Mở handle volume thô và đọc các cluster:
 
 <details>
-<summary>Click to expand</summary>
+<summary>Nhấn để mở rộng</summary>
 
 ```powershell
 # Validation attempt: current Windows versions normally require an administrative token
@@ -56,41 +56,40 @@ class R {
 
 </details>
 
-- Use an NTFS-aware tool to recover specific files from raw volume:
-  - RawCopy/RawCopy64 (sector-level copy of in-use files)
-  - FTK Imager or The Sleuth Kit (read-only imaging, then carve files)
-  - vssadmin/diskshadow + shadow copy, then copy target file from the snapshot (if you can create VSS; often requires admin but commonly available to the same operators that hold SeManageVolumePrivilege)
+- Dùng công cụ hỗ trợ NTFS để khôi phục các tệp cụ thể từ volume thô:
+  - RawCopy/RawCopy64 (sao chép ở cấp sector các tệp đang được sử dụng)
+  - FTK Imager hoặc The Sleuth Kit (tạo ảnh đĩa chỉ đọc, sau đó carve tệp)
+  - vssadmin/diskshadow + bản sao shadow, sau đó sao chép tệp mục tiêu từ snapshot (nếu bạn có thể tạo VSS; thường cần quyền admin nhưng thường có sẵn cho cùng những operator có SeManageVolumePrivilege)
 
-Typical sensitive paths to target:
+Các đường dẫn nhạy cảm thường cần nhắm đến:
 - %ProgramData%\Microsoft\Crypto\RSA\MachineKeys\
 - %ProgramData%\Microsoft\Crypto\Keys\
-- C:\Windows\System32\config\SAM, SYSTEM, SECURITY (local secrets)
-- C:\Windows\NTDS\ntds.dit (domain controllers – via shadow copy)
-- C:\Windows\System32\CertSrv\CertEnroll\ (CA certs/CRLs; private keys live in the machine key store above)
+- C:\Windows\System32\config\SAM, SYSTEM, SECURITY (bí mật cục bộ)
+- C:\Windows\NTDS\ntds.dit (domain controller – thông qua bản sao shadow)
+- C:\Windows\System32\CertSrv\CertEnroll\ (chứng chỉ/CRL của CA; private key nằm trong kho machine key ở trên)
 
-## AD CS tie‑in: Forging a Golden Certificate
+## Liên hệ với AD CS: Forging a Golden Certificate
 
-If you can read the Enterprise CA’s private key from the machine key store, you can forge client‑auth certificates for arbitrary principals and authenticate via PKINIT/Schannel. This is often referred to as a Golden Certificate.<sup>[[2]](#references)</sup> See:
+Nếu bạn có thể đọc private key của Enterprise CA từ kho machine key, bạn có thể giả mạo chứng chỉ client-auth cho các principal bất kỳ và xác thực qua PKINIT/Schannel. Kỹ thuật này thường được gọi là Golden Certificate.<sup>[[2]](#references)</sup> Xem:
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
 {{#endref}}
 
-(Section: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
+(Phần: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
 
-## Detection and hardening
+## Phát hiện và gia cố bảo mật
 
-- Strongly limit assignment of SeManageVolumePrivilege (Perform volume maintenance tasks) to only trusted admins.
-- Monitor Sensitive Privilege Use and process handle opens to device objects like \\.\C:, \\.\PhysicalDrive0.
-- Prefer properly configured HSM- or TPM-backed, non-exportable CA keys so a copied key-container file is not sufficient to recover usable private-key material.
-- For application secrets outside the CA-key path, DPAPI or DPAPI-NG can make a copied data file insufficient by protecting it to a user, machine, group, or other authorized principal. This does not protect plaintext already accessible to the compromised principal.<sup>[[4]](#references)</sup>
-- Keep uploads, temp, and extraction paths non-executable and separated (web context defense that often pairs with this chain post‑exploitation).
+- Giới hạn nghiêm ngặt việc cấp SeManageVolumePrivilege (Perform volume maintenance tasks), chỉ cấp cho admin đáng tin cậy.
+- Giám sát Sensitive Privilege Use và các lần mở process handle tới device object như \\.\C:, \\.\PhysicalDrive0.
+- Ưu tiên dùng khóa CA không thể xuất, được HSM hoặc TPM cấu hình đúng cách bảo vệ, để việc sao chép tệp key-container không đủ để khôi phục private-key có thể sử dụng.
+- Với application secret nằm ngoài đường dẫn CA-key, DPAPI hoặc DPAPI-NG có thể khiến việc sao chép tệp dữ liệu không đủ để truy cập, bằng cách bảo vệ tệp theo user, machine, group hoặc principal được ủy quyền khác. Cách này không bảo vệ plaintext vốn đã có thể được principal bị xâm phạm truy cập.<sup>[[4]](#references)</sup>
+- Đảm bảo các đường dẫn upload, temp và extraction không thể thực thi và được tách biệt (biện pháp phòng thủ trong web context thường đi kèm với chuỗi post-exploitation này).
 
 ## References
 
-- [1] [Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege)](https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks)
-- [2] [0xdf – HTB: Certificate (SeManageVolumePrivilege used to read CA key → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
-- [3] [Microsoft - `CreateFile` physical disks and volumes](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea#physical-disks-and-volumes)
-- [4] [Microsoft - Cryptography API: Next Generation and DPAPI-NG](https://learn.microsoft.com/en-us/windows/win32/seccng/cng-portal)
-
+- [1] [Microsoft – Thực hiện tác vụ bảo trì volume (SeManageVolumePrivilege)](https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks)
+- [2] [0xdf – HTB: Certificate (SeManageVolumePrivilege được dùng để đọc CA key → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
+- [3] [Microsoft - `CreateFile` với physical disk và volume](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea#physical-disks-and-volumes)
+- [4] [Microsoft - Cryptography API: Next Generation và DPAPI-NG](https://learn.microsoft.com/en-us/windows/win32/seccng/cng-portal)
 {{#include ../../banners/hacktricks-training.md}}

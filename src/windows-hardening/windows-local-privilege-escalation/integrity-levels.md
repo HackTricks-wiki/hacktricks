@@ -1,34 +1,34 @@
-# Integrity Levels
+# Mức độ toàn vẹn
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Integrity Levels
+## Mức độ toàn vẹn
 
-In Windows Vista and later versions, securable objects can carry an **integrity level** label. Most objects are treated as medium integrity, while specific locations intended for low-integrity applications can be labelled low. Processes started by standard users normally run at medium integrity, elevated applications run at high integrity, and many services run at system integrity.<sup>[[1]](#references)</sup>
+Trong Windows Vista và các phiên bản mới hơn, các đối tượng có thể được bảo vệ có thể mang nhãn **mức độ toàn vẹn**. Hầu hết đối tượng được xem là có mức toàn vẹn trung bình, trong khi một số vị trí dành cho ứng dụng có mức toàn vẹn thấp có thể được gắn nhãn thấp. Các tiến trình do người dùng tiêu chuẩn khởi chạy thường chạy ở mức toàn vẹn trung bình, ứng dụng được nâng quyền chạy ở mức cao, và nhiều dịch vụ chạy ở mức hệ thống.<sup>[[1]](#references)</sup>
 
-A key rule is that objects cannot be modified by processes with a lower integrity level than the object's level. Windows applies this Mandatory Integrity Control (MIC) check before evaluating the object's discretionary access control list (DACL). The commonly encountered levels are:<sup>[[1]](#references)[[2]](#references)</sup>
+Một quy tắc quan trọng là tiến trình có mức toàn vẹn thấp hơn mức của đối tượng không thể sửa đổi đối tượng đó. Windows thực hiện bước kiểm tra Mandatory Integrity Control (MIC) này trước khi đánh giá danh sách kiểm soát truy cập tùy ý (DACL) của đối tượng. Các mức thường gặp gồm:<sup>[[1]](#references)[[2]](#references)</sup>
 
-- **Untrusted**: The lowest level, represented by `SECURITY_MANDATORY_UNTRUSTED_RID` (`S-1-16-0`). Do not confuse this integrity label with the **Anonymous Logon** identity (`S-1-5-7`); authentication identities and MIC labels are separate SID namespaces. As a real-world example, Chromium's Windows sandbox initially assigns sandboxed targets Low integrity and then lowers renderer targets to Untrusted integrity after startup.<sup>[[5]](#references)[[6]](#references)</sup>
-- **Low**: Mainly for internet interactions, especially in Internet Explorer's Protected Mode, affecting associated files and processes, and certain folders like the **Temporary Internet Folder**. Low integrity processes face significant restrictions, including no registry write access and limited user profile write access.
-- **Medium**: The default level for most activities, assigned to standard users and objects without specific integrity levels. Even members of the Administrators group operate at this level by default.
-- **High**: Reserved for administrators, allowing them to modify objects at lower integrity levels, including those at the high level itself.
-- **System**: The highest operational level for the Windows kernel and core services, out of reach even for administrators, ensuring protection of vital system functions.
+- **Untrusted**: Mức thấp nhất, được biểu diễn bằng `SECURITY_MANDATORY_UNTRUSTED_RID` (`S-1-16-0`). Không nên nhầm nhãn toàn vẹn này với danh tính **Anonymous Logon** (`S-1-5-7`); danh tính xác thực và nhãn MIC thuộc các không gian SID riêng biệt. Ví dụ thực tế, sandbox Windows của Chromium ban đầu gán mức toàn vẹn Low cho các tiến trình đích trong sandbox, sau đó hạ mức của các tiến trình đích renderer xuống Untrusted sau khi khởi động.<sup>[[5]](#references)[[6]](#references)</sup>
+- **Low**: Chủ yếu dùng cho các tương tác với internet, đặc biệt trong Protected Mode của Internet Explorer, ảnh hưởng đến các tệp và tiến trình liên quan cũng như một số thư mục như **Temporary Internet Folder**. Các tiến trình có mức toàn vẹn Low chịu nhiều hạn chế, bao gồm không có quyền ghi vào registry và quyền ghi hạn chế vào hồ sơ người dùng.
+- **Medium**: Mức mặc định cho hầu hết hoạt động, được gán cho người dùng tiêu chuẩn và các đối tượng không có mức toàn vẹn cụ thể. Ngay cả thành viên của nhóm Administrators cũng hoạt động ở mức này theo mặc định.
+- **High**: Dành cho quản trị viên, cho phép họ sửa đổi các đối tượng có mức toàn vẹn thấp hơn, bao gồm cả đối tượng ở chính mức High.
+- **System**: Mức hoạt động cao nhất dành cho Windows kernel và các dịch vụ cốt lõi, nằm ngoài khả năng truy cập của cả quản trị viên, giúp bảo vệ các chức năng hệ thống thiết yếu.
 
-Windows also defines a protected-process integrity value above System. **TrustedInstaller**, however, is a Windows service identity rather than a separate MIC level; its ability to modify protected operating-system resources comes from the permissions granted to that identity.
+Windows cũng định nghĩa một giá trị mức toàn vẹn cho tiến trình được bảo vệ, cao hơn System. Tuy nhiên, **TrustedInstaller** là danh tính dịch vụ Windows chứ không phải một mức MIC riêng; khả năng sửa đổi tài nguyên hệ điều hành được bảo vệ của danh tính này đến từ các quyền được cấp cho nó.
 
-Do not assume that a location such as the root of a system drive always has a fixed High integrity label. Inspect the effective DACL and any explicit mandatory label with `icacls`; an unlabeled object is treated as Medium for MIC, while its DACL and ownership can still independently restrict access.<sup>[[1]](#references)[[4]](#references)</sup>
+Không nên cho rằng một vị trí như thư mục gốc của ổ đĩa hệ thống luôn có nhãn mức toàn vẹn High cố định. Hãy kiểm tra DACL có hiệu lực và mọi nhãn bắt buộc được đặt rõ ràng bằng `icacls`; đối tượng không có nhãn sẽ được MIC xem là Medium, nhưng DACL và quyền sở hữu vẫn có thể hạn chế quyền truy cập một cách độc lập.<sup>[[1]](#references)[[4]](#references)</sup>
 
-You can obtain the integrity level of a process using **Process Explorer** from **Sysinternals** by opening the process properties and viewing the **Security** tab:<sup>[[3]](#references)</sup>
+Bạn có thể xem mức toàn vẹn của một tiến trình bằng **Process Explorer** của **Sysinternals**: mở thuộc tính tiến trình rồi xem thẻ **Security**:<sup>[[3]](#references)</sup>
 
-![Integrity Levels - Integrity Levels: You can get the integrity level of a process using Process Explorer from Sysinternals , accessing the properties of the process and viewing the "...](<../../images/image (824).png>)
+![Mức độ toàn vẹn - Mức độ toàn vẹn: Bạn có thể xem mức toàn vẹn của một tiến trình bằng Process Explorer của Sysinternals, bằng cách mở thuộc tính tiến trình và xem thẻ "...](<../../images/image (824).png>)
 
-You can also obtain your **current integrity level** using `whoami /groups`:
+Bạn cũng có thể xem **mức toàn vẹn hiện tại** bằng `whoami /groups`:
 
-![Integrity Levels - Integrity Levels: You can also get your current integrity level using whoami /groups](<../../images/image (325).png>)
+![Mức độ toàn vẹn - Mức độ toàn vẹn: Bạn cũng có thể xem mức toàn vẹn hiện tại bằng whoami /groups](<../../images/image (325).png>)
 
-### Integrity Levels in the File System
+### Mức độ toàn vẹn trong hệ thống tệp
 
-An object in the file system may have a **minimum integrity-level requirement**. A process below that level is subject to the object's mandatory policy even when its DACL would otherwise grant access. For example, create a regular file from a standard-user console and inspect its permissions:<sup>[[1]](#references)[[4]](#references)</sup>
+Một đối tượng trong hệ thống tệp có thể có **yêu cầu mức toàn vẹn tối thiểu**. Tiến trình thấp hơn mức đó sẽ chịu chính sách bắt buộc của đối tượng, ngay cả khi DACL của đối tượng thông thường cho phép truy cập. Ví dụ: tạo một tệp thông thường từ console của người dùng tiêu chuẩn rồi kiểm tra quyền của tệp:<sup>[[1]](#references)[[4]](#references)</sup>
 
 ```
 echo asd >asd.txt
@@ -41,7 +41,7 @@ asd.txt BUILTIN\Administrators:(I)(F)
         NT AUTHORITY\BATCH:(I)(M,DC)
 ```
 
-Now, assign a minimum integrity level of **High** to the file. This **must be done from a console** running as **administrator**, because a regular console runs at Medium integrity and **will not be allowed** to assign High integrity to an object:
+Bây giờ, hãy gán mức integrity tối thiểu là **High** cho tệp. Việc này **phải được thực hiện từ console** chạy với quyền **administrator**, vì console thông thường chạy ở mức integrity Medium và **không được phép** gán mức integrity High cho một đối tượng:
 
 ```
 icacls asd.txt /setintegritylevel(oi)(ci) High
@@ -58,7 +58,7 @@ asd.txt BUILTIN\Administrators:(I)(F)
         Mandatory Label\High Mandatory Level:(NW)
 ```
 
-The user `DESKTOP-IDJHTKP\user` has **FULL privileges** over the file because that user created it. However, the mandatory label prevents the user from modifying the file unless the process is running at High integrity. The user can still read it because the displayed mandatory policy is `(NW)`, or no-write-up:
+Người dùng `DESKTOP-IDJHTKP\user` có **TOÀN QUYỀN** đối với tệp vì người dùng đó đã tạo tệp. Tuy nhiên, mandatory label ngăn người dùng sửa đổi tệp trừ khi tiến trình đang chạy ở mức High integrity. Người dùng vẫn có thể đọc tệp vì mandatory policy được hiển thị là `(NW)`, tức no-write-up:
 
 ```
 echo 1234 > asd.txt
@@ -70,11 +70,11 @@ Access is denied.
 ```
 
 > [!TIP]
-> **Therefore, when a file has a minimum integrity level, in order to modify it you need to be running at least in that integrity level.**
+> **Do đó, khi một tệp có mức toàn vẹn tối thiểu, bạn cần chạy ở mức toàn vẹn đó trở lên để sửa đổi tệp.**
 
-### Integrity Levels in Binaries
+### Mức toàn vẹn trong các tệp nhị phân
 
-The following example uses a copy of `cmd.exe` at `C:\Windows\System32\cmd-low.exe` and assigns it a **Low integrity level from an administrator console**:
+Ví dụ sau sử dụng một bản sao của `cmd.exe` tại `C:\Windows\System32\cmd-low.exe` và gán cho nó **mức toàn vẹn Thấp từ một cửa sổ dòng lệnh quản trị viên**:
 
 ```
 icacls C:\Windows\System32\cmd-low.exe
@@ -86,25 +86,24 @@ C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
                                 Mandatory Label\Low Mandatory Level:(NW)
 ```
 
-Now, when I run `cmd-low.exe` it will **run under a low-integrity level** instead of a medium one:
+Bây giờ, khi chạy `cmd-low.exe`, nó sẽ **chạy ở mức toàn vẹn thấp** thay vì mức trung bình:
 
-![Integrity Levels in File-system - Integrity Levels in Binaries: Now, when I run cmd-low.exe it will run under a low-integrity level instead of a medium one](<../../images/image (313).png>)
+![Mức toàn vẹn trong hệ thống tệp - Mức toàn vẹn trong tệp nhị phân: Bây giờ, khi chạy cmd-low.exe, nó sẽ chạy ở mức toàn vẹn thấp thay vì mức trung bình](<../../images/image (313).png>)
 
-Assigning a High integrity label to a binary (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) does not make it run at High integrity automatically. If invoked from a Medium-integrity process, it runs at Medium integrity because a new process receives the lower of the executable file's and the caller's integrity levels.<sup>[[1]](#references)</sup>
+Gán nhãn toàn vẹn Cao cho một tệp nhị phân (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) không khiến nó tự động chạy ở mức toàn vẹn Cao. Nếu được gọi từ một tiến trình có mức toàn vẹn Trung bình, nó sẽ chạy ở mức toàn vẹn Trung bình vì tiến trình mới nhận mức toàn vẹn thấp hơn giữa tệp thực thi và tiến trình gọi nó.<sup>[[1]](#references)</sup>
 
-### Integrity Levels in Processes
+### Mức toàn vẹn trong tiến trình
 
-Not all files and folders have an explicit minimum integrity label, **but every process runs at an integrity level**. As with file-system objects, **a process that wants write access to another process must have at least the same integrity level**. Therefore, a Low-integrity process cannot open a Medium-integrity process with full access.<sup>[[1]](#references)</sup>
+Không phải mọi tệp và thư mục đều có nhãn toàn vẹn tối thiểu rõ ràng, **nhưng mọi tiến trình đều chạy ở một mức toàn vẹn**. Tương tự như các đối tượng hệ thống tệp, **một tiến trình muốn có quyền ghi vào tiến trình khác phải có mức toàn vẹn ít nhất bằng mức của tiến trình đó**. Vì vậy, tiến trình có mức toàn vẹn Thấp không thể mở tiến trình có mức toàn vẹn Trung bình với toàn quyền truy cập.<sup>[[1]](#references)</sup>
 
-Because of these restrictions, the safest approach is to **run each process at the lowest integrity level that still lets it perform its intended work**.
+Do những hạn chế này, cách an toàn nhất là **chạy mỗi tiến trình ở mức toàn vẹn thấp nhất mà vẫn cho phép nó thực hiện công việc dự định**.
 
 ## References
 
-- [1] [Microsoft Learn – Mandatory Integrity Control](https://learn.microsoft.com/en-us/windows/win32/secauthz/mandatory-integrity-control)
-- [2] [Microsoft Learn – MANDATORY_LEVEL enumeration](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-mandatory_level)
+- [1] [Microsoft Learn – Kiểm soát toàn vẹn bắt buộc](https://learn.microsoft.com/en-us/windows/win32/secauthz/mandatory-integrity-control)
+- [2] [Microsoft Learn – Kiểu liệt kê MANDATORY_LEVEL](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-mandatory_level)
 - [3] [Microsoft Sysinternals – Process Explorer](https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer)
 - [4] [Microsoft Learn – icacls](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/icacls)
-- [5] [Chromium source – Default Windows sandbox integrity policy](https://github.com/chromium/chromium/blob/main/sandbox/policy/win/sandbox_win.cc#L212-L216)
-- [6] [Microsoft Learn – Well-known SIDs](https://learn.microsoft.com/en-us/windows/win32/secauthz/well-known-sids)
-
+- [5] [Mã nguồn Chromium – Chính sách toàn vẹn mặc định của sandbox Windows](https://github.com/chromium/chromium/blob/main/sandbox/policy/win/sandbox_win.cc#L212-L216)
+- [6] [Microsoft Learn – SID nổi tiếng](https://learn.microsoft.com/en-us/windows/win32/secauthz/well-known-sids)
 {{#include ../../banners/hacktricks-training.md}}

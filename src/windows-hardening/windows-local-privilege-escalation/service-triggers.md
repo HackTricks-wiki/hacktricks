@@ -1,70 +1,70 @@
-# Windows Service Triggers: Enumeration and Abuse
+# Windows Service Triggers: Liệt kê và khai thác
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Windows Service Triggers allow the Service Control Manager (SCM) to start/stop a service when a condition occurs (e.g., an IP address becomes available, a named pipe connection is attempted, an ETW event is published). Even when you lack SERVICE_START rights on a target service, you may still be able to start it by causing its trigger to fire.<sup>[[1]](#references)</sup>
+Windows Service Triggers cho phép Service Control Manager (SCM) khởi động/dừng một service khi một điều kiện xảy ra (ví dụ: địa chỉ IP khả dụng, có kết nối đến named pipe, hoặc một sự kiện ETW được phát). Ngay cả khi không có quyền SERVICE_START trên service mục tiêu, bạn vẫn có thể khởi động service bằng cách khiến trigger của nó được kích hoạt.<sup>[[1]](#references)</sup>
 
-This page focuses on attacker-friendly enumeration and low-friction ways to activate common triggers.
+Trang này tập trung vào các cách liệt kê thuận tiện cho attacker và những phương pháp đơn giản để kích hoạt các trigger phổ biến.
 
-> Tip: Starting a privileged built-in service (e.g., RemoteRegistry, WebClient/WebDAV, EFS) can expose new RPC/named-pipe listeners and unlock further abuse chains.
+> Mẹo: Khởi động một service tích hợp có đặc quyền (ví dụ: RemoteRegistry, WebClient/WebDAV, EFS) có thể mở ra các RPC/named-pipe listener mới và mở khóa những chuỗi khai thác tiếp theo.
 
-## Enumerating Service Triggers
+## Liệt kê Service Triggers
 
 - sc.exe (local)
-  - List a service's triggers: `sc.exe qtriggerinfo <ServiceName>`
+  - Liệt kê trigger của một service: `sc.exe qtriggerinfo <ServiceName>`
 - Registry (local)
-  - Triggers live under: `HKLM\SYSTEM\CurrentControlSet\Services\<ServiceName>\TriggerInfo`
-  - Dump recursively: `reg query HKLM\SYSTEM\CurrentControlSet\Services\<ServiceName>\TriggerInfo /s`
+  - Trigger nằm tại: `HKLM\SYSTEM\CurrentControlSet\Services\<ServiceName>\TriggerInfo`
+  - Dump đệ quy: `reg query HKLM\SYSTEM\CurrentControlSet\Services\<ServiceName>\TriggerInfo /s`
 - Win32 API (local)
-  - Call QueryServiceConfig2 with SERVICE_CONFIG_TRIGGER_INFO (8) to retrieve SERVICE_TRIGGER_INFO.
-    - Docs: QueryServiceConfig2[W/A] and SERVICE_TRIGGER/SERVICE_TRIGGER_SPECIFIC_DATA<sup>[[2]](#references)</sup>
-- RPC over MS‑SCMR (remote)
-  - The SCM can be queried remotely to fetch trigger info using MS‑SCMR. TrustedSec’s Titanis exposes this: `Scm.exe qtriggers`.
-  - Impacket defines the structures in msrpc MS-SCMR; you can implement a remote query using those.<sup>[[1]](#references)[[3]](#references)[[4]](#references)</sup>
-- PowerShell (bulk enumeration)
-  - Quickly list every service exposing a `TriggerInfo` key:
+  - Gọi QueryServiceConfig2 với SERVICE_CONFIG_TRIGGER_INFO (8) để lấy SERVICE_TRIGGER_INFO.
+    - Tài liệu: QueryServiceConfig2[W/A] và SERVICE_TRIGGER/SERVICE_TRIGGER_SPECIFIC_DATA<sup>[[2]](#references)</sup>
+- RPC qua MS‑SCMR (remote)
+  - Có thể truy vấn SCM từ xa để lấy thông tin trigger bằng MS‑SCMR. Titanis của TrustedSec hỗ trợ tính năng này: `Scm.exe qtriggers`.
+  - Impacket định nghĩa các cấu trúc trong msrpc MS-SCMR; bạn có thể triển khai truy vấn từ xa bằng các cấu trúc đó.<sup>[[1]](#references)[[3]](#references)[[4]](#references)</sup>
+- PowerShell (liệt kê hàng loạt)
+  - Nhanh chóng liệt kê mọi service có khóa `TriggerInfo`:
     ```powershell
     Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Services' |
       Where-Object { Test-Path "$($_.PSPath)\TriggerInfo" } |
       ForEach-Object { sc.exe qtriggerinfo $_.PSChildName }
     ```
-- PowerShell (programmatic)
-  - James Forshaw's `NtObjectManager` module exposes `Get-Win32ServiceTrigger` for parsing trigger metadata without scraping `sc.exe` output.
+- PowerShell (lập trình)
+  - Module `NtObjectManager` của James Forshaw cung cấp `Get-Win32ServiceTrigger` để phân tích metadata của trigger mà không cần trích xuất từ đầu ra của `sc.exe`.
 
-## High-Value Trigger Types and How to Activate Them
+## Các loại trigger có giá trị cao và cách kích hoạt chúng
 
-### Network Endpoint Triggers
+### Trigger endpoint mạng
 
-These start a service when a client attempts to talk to an IPC endpoint. Useful to low-priv users because the SCM will auto-start the service before your client can actually connect.<sup>[[1]](#references)</sup>
+Các trigger này khởi động một service khi client cố gắng kết nối đến một IPC endpoint. Chúng hữu ích với người dùng có đặc quyền thấp vì SCM sẽ tự động khởi động service trước khi client của bạn thực sự có thể kết nối.<sup>[[1]](#references)</sup>
 
-- Named pipe trigger
-  - Behavior: A client connection attempt to \\.\pipe\<PipeName> causes the SCM to start the service so it can begin listening.
-  - Activation (PowerShell):
+- Trigger named pipe
+  - Hành vi: Một lần thử kết nối của client tới \\.\pipe\<PipeName> khiến SCM khởi động service để service bắt đầu lắng nghe.
+  - Kích hoạt (PowerShell):
     ```powershell
     $pipe = new-object System.IO.Pipes.NamedPipeClientStream('.', 'PipeNameFromTrigger', [System.IO.Pipes.PipeDirection]::InOut)
     try { $pipe.Connect(1000) } catch {}
     $pipe.Dispose()
     ```
-  - Internals note: named-pipe triggers are backed by `npsvctrig.sys`, a filesystem minifilter that watches for opens against registered trigger pipe names. This is why the open attempt can start the service even before the service itself has created/listened on the pipe.<sup>[[5]](#references)</sup>
-  - See also: Named Pipe Client Impersonation for post-start abuse.
+  - Ghi chú nội bộ: các trigger named pipe được hỗ trợ bởi `npsvctrig.sys`, một filesystem minifilter theo dõi các lần mở tên pipe trigger đã đăng ký. Vì vậy, lần thử mở có thể khởi động service ngay cả trước khi service tự tạo/đang lắng nghe trên pipe.<sup>[[5]](#references)</sup>
+  - Xem thêm: Named Pipe Client Impersonation để khai thác sau khi khởi động.
 
 - RPC endpoint trigger (Endpoint Mapper)
-  - Behavior: Querying the Endpoint Mapper (EPM, TCP/135) for an interface UUID associated with a service causes the SCM to start it so it can register its endpoint.
-  - Activation (Impacket):
+  - Cách hoạt động: Truy vấn Endpoint Mapper (EPM, TCP/135) về UUID giao diện liên kết với một service sẽ khiến SCM khởi động service đó để nó có thể đăng ký endpoint.
+  - Kích hoạt (Impacket):
     ```bash
     # Queries local EPM; replace UUID with the service interface GUID
     python3 rpcdump.py @127.0.0.1 -uuid <INTERFACE-UUID>
     ```
 
-### Custom (ETW) Triggers
+### Trigger tùy chỉnh (ETW)
 
-A service can register a trigger bound to an ETW provider/event. If no additional filters (keyword/level/binary/string) are configured, any event from that provider will start the service.<sup>[[1]](#references)</sup>
+Một service có thể đăng ký trigger được liên kết với một ETW provider/event. Nếu không cấu hình thêm bộ lọc nào (keyword/level/binary/string), bất kỳ event nào từ provider đó cũng sẽ khởi động service.<sup>[[1]](#references)</sup>
 
-- Example (WebClient/WebDAV): provider {22B6D684-FA63-4578-87C9-EFFCBE6643C7}<sup>[[6]](#references)</sup>
-  - List trigger: `sc.exe qtriggerinfo webclient`
-  - Verify provider is registered: `logman query providers | findstr /I 22b6d684-fa63-4578-87c9-effcbe6643c7`
-  - Emitting matching events typically requires code that logs to that provider; if no filters are present, any event suffices.
-  - Minimal C shape for firing the provider (when no additional ETW filters are configured):
+- Ví dụ (WebClient/WebDAV): provider {22B6D684-FA63-4578-87C9-EFFCBE6643C7}<sup>[[6]](#references)</sup>
+  - Liệt kê trigger: `sc.exe qtriggerinfo webclient`
+  - Xác minh provider đã được đăng ký: `logman query providers | findstr /I 22b6d684-fa63-4578-87c9-effcbe6643c7`
+  - Việc phát các event phù hợp thường cần code ghi log vào provider đó; nếu không có bộ lọc, event nào cũng đủ.
+  - Cấu trúc C tối giản để phát event từ provider (khi không cấu hình thêm bộ lọc ETW):
     ```c
     GUID g = {0x22B6D684,0xFA63,0x4578,{0x87,0xC9,0xEF,0xFC,0xBE,0x66,0x43,0xC7}};
     REGHANDLE h; EVENT_DESCRIPTOR d;
@@ -76,99 +76,98 @@ A service can register a trigger bound to an ETW provider/event. If no additiona
 
 ### Group Policy Triggers
 
-Subtypes: Machine/User. On domain-joined hosts where the corresponding policy exists, the trigger runs at boot. `gpupdate` alone won’t trigger without changes, but:<sup>[[1]](#references)</sup>
+Các loại phụ: Machine/User. Trên các máy chủ đã join domain có policy tương ứng, trigger chạy khi khởi động. Chỉ chạy `gpupdate` sẽ không kích hoạt nếu không có thay đổi, nhưng:<sup>[[1]](#references)</sup>
 
-- Activation: `gpupdate /force`
-  - If the relevant policy type exists, this reliably causes the trigger to fire and start the service.
+- Kích hoạt: `gpupdate /force`
+  - Nếu tồn tại loại policy liên quan, thao tác này sẽ kích hoạt trigger một cách đáng tin cậy và khởi chạy service.
 
 ### IP Address Available
 
-Fires when the first IP is obtained (or last is lost). Often triggers at boot.<sup>[[1]](#references)</sup>
+Kích hoạt khi nhận được IP đầu tiên (hoặc mất IP cuối cùng). Thường được kích hoạt khi khởi động.<sup>[[1]](#references)</sup>
 
-- Activation: Toggle connectivity to retrigger, e.g.:
+- Kích hoạt: Chuyển đổi kết nối để kích hoạt lại, ví dụ:
   ```cmd
   netsh interface set interface name="Ethernet" admin=disabled
   netsh interface set interface name="Ethernet" admin=enabled
   ```
 
-### Device Interface Arrival
+### Giao diện thiết bị được kết nối
 
-Starts a service when a matching device interface arrives. If no data item is specified, any device matching the trigger subtype GUID will fire the trigger. Evaluated at boot and upon hot‑plug.<sup>[[1]](#references)</sup>
+Khởi chạy một service khi có giao diện thiết bị phù hợp được kết nối. Nếu không chỉ định mục dữ liệu, mọi thiết bị khớp với GUID subtype của trigger đều sẽ kích hoạt trigger. Được đánh giá khi boot và khi thiết bị được hot-plug.<sup>[[1]](#references)</sup>
 
-- Activation: Attach/insert a device (physical or virtual) that matches the class/hardware ID specified by the trigger subtype.
+- Kích hoạt: Kết nối/cắm một thiết bị (vật lý hoặc ảo) khớp với class/hardware ID được chỉ định bởi subtype của trigger.
 
-### Domain Join State
+### Trạng thái tham gia domain
 
-Despite confusing MSDN wording, this evaluates domain state at boot:<sup>[[1]](#references)</sup>
-- DOMAIN_JOIN_GUID → start the service if domain-joined
-- DOMAIN_LEAVE_GUID → start the service only if NOT domain-joined
+Dù cách diễn đạt trên MSDN dễ gây nhầm lẫn, trạng thái domain này được đánh giá khi boot:<sup>[[1]](#references)</sup>
+- DOMAIN_JOIN_GUID → khởi chạy service nếu đã tham gia domain
+- DOMAIN_LEAVE_GUID → chỉ khởi chạy service nếu CHƯA tham gia domain
 
-### System State Change – WNF (undocumented)
+### Thay đổi trạng thái hệ thống – WNF (không được tài liệu hóa)
 
-Some services use undocumented WNF-based triggers (SERVICE_TRIGGER_TYPE 0x7). Activation requires publishing the relevant WNF state; specifics depend on the state name. Research background: Windows Notification Facility internals.
+Một số service sử dụng trigger dựa trên WNF không được tài liệu hóa (SERVICE_TRIGGER_TYPE 0x7). Để kích hoạt, cần publish trạng thái WNF liên quan; chi tiết phụ thuộc vào tên trạng thái. Tài liệu tham khảo: Windows Notification Facility internals.
 
-### Aggregate Service Triggers (undocumented)
+### Trigger tổng hợp của service (không được tài liệu hóa)
 
-Observed on Windows 11 for some services (e.g., CDPSvc). The aggregated configuration is stored in:
+Được quan sát trên Windows 11 ở một số service (ví dụ: CDPSvc). Cấu hình tổng hợp được lưu tại:
 
 - HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents
 
-A service’s Trigger value is a GUID; the subkey with that GUID defines the aggregated event. Triggering any constituent event starts the service.<sup>[[1]](#references)</sup>
+Giá trị Trigger của service là một GUID; subkey có GUID đó định nghĩa event tổng hợp. Kích hoạt bất kỳ event thành phần nào cũng sẽ khởi chạy service.<sup>[[1]](#references)</sup>
 
-### Firewall Port Event (quirks and DoS risk)
+### Event cổng firewall (đặc điểm bất thường và nguy cơ DoS)
 
-A trigger scoped to a specific port/protocol has been observed to start on any firewall rule change (disable/delete/add), not just the specified port. Worse, configuring a port without a protocol can corrupt BFE startup across reboots, cascading into many service failures and breaking firewall management. Treat with extreme caution.<sup>[[1]](#references)</sup>
+Một trigger giới hạn theo cổng/giao thức cụ thể đã được ghi nhận là khởi chạy khi có bất kỳ thay đổi nào đối với firewall rule (vô hiệu hóa/xóa/thêm), chứ không chỉ với cổng được chỉ định. Tệ hơn, cấu hình cổng mà không có giao thức có thể làm hỏng quá trình khởi động BFE qua các lần reboot, kéo theo lỗi ở nhiều service và khiến việc quản lý firewall bị gián đoạn. Hãy hết sức thận trọng.<sup>[[1]](#references)</sup>
 
-## Practical Workflow
+## Quy trình thực tế
 
-1) Enumerate triggers on interesting services (RemoteRegistry, WebClient, EFS, …):
+1) Liệt kê trigger trên các service đáng chú ý (RemoteRegistry, WebClient, EFS, …):
 - `sc.exe qtriggerinfo <Service>`
 - `reg query HKLM\SYSTEM\CurrentControlSet\Services\<Service>\TriggerInfo /s`
 
-2) If a Network Endpoint trigger exists:
-- Named pipe → attempt a client open to \\.\pipe\<PipeName>
-- RPC endpoint → perform an Endpoint Mapper lookup for the interface UUID
+2) Nếu có Network Endpoint trigger:
+- Named pipe → thử mở kết nối client tới \\.\pipe\<PipeName>
+- RPC endpoint → thực hiện tra cứu Endpoint Mapper cho interface UUID
 
-3) If an ETW trigger exists:
-- Check provider and filters with `sc.exe qtriggerinfo`; if no filters, any event from that provider will start the service
+3) Nếu có ETW trigger:
+- Kiểm tra provider và filter bằng `sc.exe qtriggerinfo`; nếu không có filter, bất kỳ event nào từ provider đó cũng sẽ khởi chạy service
 
-4) For Group Policy/IP/Device/Domain triggers:
-- Use environmental levers: `gpupdate /force`, toggle NICs, hot-plug devices, etc.
+4) Với trigger Group Policy/IP/Device/Domain:
+- Sử dụng các tác động từ môi trường: `gpupdate /force`, bật/tắt NIC, hot-plug thiết bị, v.v.
 
-## Related
+## Liên quan
 
-- After starting a privileged service via a Named Pipe trigger, you may be able to impersonate it:
+- Sau khi khởi chạy một service đặc quyền thông qua trigger Named Pipe, bạn có thể impersonate service đó:
 
 {{#ref}}
 named-pipe-client-impersonation.md
 {{#endref}}
 
-## Quick command recap
+## Tóm tắt lệnh nhanh
 
-- List triggers (local): `sc.exe qtriggerinfo <Service>`
-- Registry view: `reg query HKLM\SYSTEM\CurrentControlSet\Services\<Service>\TriggerInfo /s`
+- Liệt kê trigger (cục bộ): `sc.exe qtriggerinfo <Service>`
+- Xem trong Registry: `reg query HKLM\SYSTEM\CurrentControlSet\Services\<Service>\TriggerInfo /s`
 - Win32 API: `QueryServiceConfig2(..., SERVICE_CONFIG_TRIGGER_INFO, ...)`
-- RPC remote (Titanis): `Scm.exe qtriggers`
-- ETW provider check (WebClient): `logman query providers | findstr /I 22b6d684-fa63-4578-87c9-effcbe6643c7`
+- RPC từ xa (Titanis): `Scm.exe qtriggers`
+- Kiểm tra ETW provider (WebClient): `logman query providers | findstr /I 22b6d684-fa63-4578-87c9-effcbe6643c7`
 
-## Gotchas / Operator Notes
+## Lưu ý / Ghi chú cho operator
 
-- Check the service start type first with `sc.exe qc <Service>`. If it is `DISABLED`, firing the trigger is not enough; you must first find a way to change the configuration.
-- Trigger-start services may stop again after they become idle. If your follow-on action depends on a short-lived listener (RPC/named pipe/WebDAV), trigger and consume it immediately.
-- `sc.exe qtriggerinfo` does not fully understand every undocumented trigger type. For aggregate triggers on newer Windows builds, confirm the backing GUID and constituent events in `HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents`.
+- Trước tiên, kiểm tra kiểu khởi động service bằng `sc.exe qc <Service>`. Nếu là `DISABLED`, kích hoạt trigger là chưa đủ; trước hết bạn phải tìm cách thay đổi cấu hình.
+- Các service khởi chạy bằng trigger có thể dừng lại khi chuyển sang trạng thái idle. Nếu hành động tiếp theo của bạn phụ thuộc vào listener tồn tại trong thời gian ngắn (RPC/named pipe/WebDAV), hãy kích hoạt trigger và sử dụng ngay.
+- `sc.exe qtriggerinfo` không hiểu đầy đủ mọi loại trigger không được tài liệu hóa. Với trigger tổng hợp trên các bản Windows mới hơn, hãy xác nhận GUID nền và các event thành phần trong `HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents`.
 
-## Detection and Hardening Notes
+## Ghi chú về phát hiện và hardening
 
-- Baseline and audit TriggerInfo across services. Also review HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents for aggregate triggers.
-- Monitor for suspicious EPM lookups for privileged service UUIDs and named-pipe connection attempts that precede service starts.
-- Restrict who can modify service triggers; treat unexpected BFE failures after trigger changes as suspicious.
+- Tạo baseline và audit TriggerInfo trên các service. Đồng thời xem lại HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents để tìm trigger tổng hợp.
+- Theo dõi các lượt tra cứu EPM đáng ngờ đối với UUID của service đặc quyền và các lần thử kết nối named pipe xảy ra trước khi service khởi chạy.
+- Hạn chế những ai có thể sửa đổi trigger của service; xem các lỗi BFE bất thường sau khi thay đổi trigger là dấu hiệu đáng ngờ.
 
 ## References
-- [1] [There’s More than One Way to Trigger a Windows Service (TrustedSec)](https://trustedsec.com/blog/theres-more-than-one-way-to-trigger-a-windows-service)
-- [2] [QueryServiceConfig2 function (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-queryserviceconfig2a)
-- [3] [MS-SCMR: Service Control Manager Remote Protocol – QueryServiceConfig2](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-scmr/705b624a-13de-43cc-b8a2-99573da3635f)
-- [4] [TrustedSec Titanis (SCM trigger enumeration)](https://github.com/trustedsec/Titanis)
-- [5] [Reversing npsvctrig.sys - Named Pipe Service Triggers (Inbits)](https://inbits-sec.com/posts/npsvctrig-notes/)
-- [6] [Starting WebClient Service Programmatically (Tyranid)](https://www.tiraniddo.dev/2015/03/starting-webclient-service.html)
-
+- [1] [Có nhiều cách để kích hoạt Windows Service (TrustedSec)](https://trustedsec.com/blog/theres-more-than-one-way-to-trigger-a-windows-service)
+- [2] [Hàm QueryServiceConfig2 (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-queryserviceconfig2a)
+- [3] [MS-SCMR: Giao thức từ xa Service Control Manager – QueryServiceConfig2](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-scmr/705b624a-13de-43cc-b8a2-99573da3635f)
+- [4] [TrustedSec Titanis (liệt kê trigger SCM)](https://github.com/trustedsec/Titanis)
+- [5] [Reverse npsvctrig.sys - Trigger service Named Pipe (Inbits)](https://inbits-sec.com/posts/npsvctrig-notes/)
+- [6] [Khởi chạy WebClient Service bằng chương trình (Tyranid)](https://www.tiraniddo.dev/2015/03/starting-webclient-service.html)
 {{#include ../../banners/hacktricks-training.md}}

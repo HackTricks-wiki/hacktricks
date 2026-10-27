@@ -1,20 +1,20 @@
-# Kernel Race Condition Exploitation via Object Manager Slow Paths
+# Khai thác Kernel Race Condition thông qua các Slow Path của Object Manager
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Why stretching the race window matters
+## Vì sao việc kéo dài race window lại quan trọng
 
-Many Windows kernel LPEs follow the classic pattern `check_state(); NtOpenX("name"); privileged_action();`. On modern hardware a cold `NtOpenEvent`/`NtOpenSection` resolves a short name in ~2 µs, leaving almost no time to flip the checked state before the secure action happens. By deliberately forcing the Object Manager Namespace (OMNS) lookup in step 2 to take tens of microseconds, the attacker gains enough time to consistently win otherwise flaky races without needing thousands of attempts.<sup>[[1]](#references)</sup>
+Nhiều lỗ hổng LPE trong Windows kernel tuân theo mẫu kinh điển `check_state(); NtOpenX("name"); privileged_action();`. Trên phần cứng hiện đại, một lệnh `NtOpenEvent`/`NtOpenSection` khi cache chưa nóng chỉ mất khoảng 2 µs để phân giải một tên ngắn, gần như không để lại thời gian để thay đổi trạng thái đã kiểm tra trước khi hành động bảo vệ được thực hiện. Bằng cách cố ý khiến bước 2, quá trình tra cứu trong Object Manager Namespace (OMNS), mất hàng chục micro giây, kẻ tấn công có đủ thời gian để thắng các race vốn khó ổn định, mà không cần thử hàng nghìn lần.<sup>[[1]](#references)</sup>
 
-## Object Manager lookup internals in a nutshell
+## Tóm lược nội bộ quá trình tra cứu của Object Manager
 
-* **OMNS structure** – Names such as `\BaseNamedObjects\Foo` are resolved directory-by-directory. Each component causes the kernel to find/open an *Object Directory* and compare Unicode strings. Symbolic links (e.g., drive letters) may be traversed en route.
-* **UNICODE_STRING limit** – OM paths are carried inside a `UNICODE_STRING` whose `Length` is a 16-bit value. The absolute limit is 65 535 bytes (32 767 UTF-16 codepoints). With prefixes like `\BaseNamedObjects\`, an attacker still controls ≈32 000 characters.
-* **Attacker prerequisites** – Any user can create objects underneath writable directories such as `\BaseNamedObjects`. When the vulnerable code uses a name inside, or follows a symbolic link that lands there, the attacker controls the lookup performance with no special privileges.<sup>[[1]](#references)</sup>
+* **Cấu trúc OMNS** – Các tên như `\BaseNamedObjects\Foo` được phân giải lần lượt theo từng thư mục. Mỗi thành phần khiến kernel tìm/mở một *Object Directory* và so sánh các chuỗi Unicode. Các symbolic link (ví dụ: ký tự ổ đĩa) có thể được duyệt qua trên đường phân giải.
+* **Giới hạn UNICODE_STRING** – Các đường dẫn OM được lưu trong một `UNICODE_STRING`, có trường `Length` dài 16 bit. Giới hạn tuyệt đối là 65 535 byte (32 767 codepoint UTF-16). Với các tiền tố như `\BaseNamedObjects\`, kẻ tấn công vẫn kiểm soát được khoảng 32 000 ký tự.
+* **Điều kiện tiên quyết của kẻ tấn công** – Bất kỳ người dùng nào cũng có thể tạo object bên dưới các thư mục cho phép ghi, chẳng hạn `\BaseNamedObjects`. Khi mã dễ bị tấn công sử dụng tên bên trong thư mục này, hoặc đi theo một symbolic link dẫn đến đó, kẻ tấn công có thể kiểm soát hiệu năng tra cứu mà không cần đặc quyền đặc biệt.<sup>[[1]](#references)</sup>
 
-## Slowdown primitive #1 – Single maximal component
+## Primitive làm chậm #1 – Một component có độ dài tối đa
 
-The cost of resolving a component is roughly linear with its length because the kernel must perform a Unicode comparison against every entry in the parent directory. Creating an event with a 32 kB-long name immediately increases the `NtOpenEvent` latency from ~2 µs to ~35 µs on Windows 11 24H2 (Snapdragon X Elite testbed).
+Chi phí phân giải một component gần như tuyến tính theo độ dài của nó, vì kernel phải so sánh Unicode với từng entry trong thư mục cha. Tạo một event có tên dài 32 kB ngay lập tức làm tăng độ trễ của `NtOpenEvent` từ khoảng 2 µs lên khoảng 35 µs trên Windows 11 24H2 (môi trường thử nghiệm Snapdragon X Elite).
 
 ```cpp
 std::wstring path;
@@ -25,15 +25,15 @@ while (path.size() <= 32000) {
 }
 ```
 
-*Practical notes*
+*Ghi chú thực tế*
 
-- You can hit the length limit using any named kernel object (events, sections, semaphores…).
-- Symbolic links or reparse points can point a short “victim” name to this giant component so the slowdown is applied transparently.
-- Because everything lives in user-writable namespaces, the payload works from a standard user integrity level.<sup>[[1]](#references)</sup>
+- Bạn có thể đạt giới hạn độ dài bằng bất kỳ kernel object có tên nào (events, sections, semaphores…).
+- Symbolic links hoặc reparse points có thể trỏ một tên “victim” ngắn đến thành phần khổng lồ này, nhờ đó áp dụng slowdown một cách trong suốt.
+- Vì mọi thứ đều nằm trong các namespace mà người dùng có thể ghi, payload hoạt động ở mức integrity tiêu chuẩn của người dùng.<sup>[[1]](#references)</sup>
 
-## Slowdown primitive #2 – Deep recursive directories
+## Slowdown primitive #2 – Thư mục đệ quy sâu
 
-A more aggressive variant allocates a chain of thousands of directories (`\BaseNamedObjects\A\A\...\X`). Each hop triggers directory resolution logic (ACL checks, hash lookups, reference counting), so the per-level latency is higher than a single string compare. With ~16 000 levels (limited by the same `UNICODE_STRING` size), empirical timings surpass the 35 µs barrier achieved by long single components.
+Một biến thể mạnh hơn tạo ra một chuỗi hàng nghìn thư mục (`\BaseNamedObjects\A\A\...\X`). Mỗi bước đều kích hoạt logic phân giải thư mục (kiểm tra ACL, tra cứu hash, đếm reference), vì vậy độ trễ mỗi cấp cao hơn so với việc chỉ so sánh một chuỗi đơn lẻ. Với khoảng 16 000 cấp (bị giới hạn bởi cùng kích thước `UNICODE_STRING`), thời gian đo được vượt ngưỡng 35 µs mà các thành phần đơn dài đạt được.
 
 ```cpp
 ScopedHandle base_dir = OpenDirectory(L"\\BaseNamedObjects");
@@ -51,17 +51,17 @@ for (int i = 0; i < 16000; i++) {
 
 Tips:
 
-* Alternate the character per level (`A/B/C/...`) if the parent directory starts rejecting duplicates.
-* Keep a handle array so you can delete the chain cleanly after exploitation to avoid polluting the namespace.<sup>[[1]](#references)</sup>
+* Thay phiên ký tự ở mỗi cấp (`A/B/C/...`) nếu thư mục cha bắt đầu từ chối các tên trùng lặp.
+* Giữ một mảng handle để có thể xóa chuỗi liên kết gọn gàng sau khi khai thác, tránh làm ô nhiễm namespace.<sup>[[1]](#references)</sup>
 
-## Slowdown primitive #3 – Shadow directories, hash collisions & symlink reparses (minutes instead of microseconds)
+## Slowdown primitive #3 – Shadow directories, hash collisions & symlink reparses (phút thay vì microsecond)
 
-Object directories support **shadow directories** (fallback lookups) and bucketed hash tables for entries. Abuse both plus the 64-component symbolic-link reparse limit to multiply slowdown without exceeding the `UNICODE_STRING` length:
+Object directories hỗ trợ **shadow directories** (fallback lookups) và các hash table phân nhóm bucket cho entry. Lạm dụng cả hai cùng giới hạn reparse 64 thành phần của symbolic link để tăng độ trễ mà không vượt quá độ dài `UNICODE_STRING`:
 
-1. Create two directories under `\BaseNamedObjects`, e.g. `A` (shadow) and `A\A` (target). Create the second using the first as the shadow directory (`NtCreateDirectoryObjectEx`), so missing lookups in `A` fall through to `A\A`.
-2. Fill each directory with thousands of **colliding names** that land in the same hash bucket (e.g., varying trailing digits while keeping the same `RtlHashUnicodeString` value). Lookups now degrade to O(n) linear scans inside a single directory.
-3. Build a chain of ~63 **object manager symbolic links** that repeatedly reparse into the long `A\A\…` suffix, consuming the reparse budget. Each reparse restarts parsing from the top, multiplying the collision cost.
-4. Lookup of the final component (`...\\0`) now takes **minutes** on Windows 11 when 16 000 collisions are present per directory, providing a practically guaranteed race win for one-shot kernel LPEs.
+1. Tạo hai thư mục dưới `\BaseNamedObjects`, ví dụ `A` (shadow) và `A\A` (target). Tạo thư mục thứ hai với thư mục thứ nhất làm shadow directory (`NtCreateDirectoryObjectEx`), để các lookup không tìm thấy trong `A` chuyển tiếp sang `A\A`.
+2. Điền vào mỗi thư mục hàng nghìn **tên va chạm** cùng rơi vào một hash bucket (ví dụ, thay đổi các chữ số ở cuối nhưng giữ nguyên giá trị `RtlHashUnicodeString`). Lookup lúc này suy giảm thành quét tuyến tính O(n) bên trong một thư mục.
+3. Tạo chuỗi khoảng 63 **object manager symbolic link** liên tục reparse vào hậu tố `A\A\…` dài, tiêu tốn ngân sách reparse. Mỗi lần reparse khởi động lại quá trình phân tích từ đầu, nhân chi phí va chạm lên nhiều lần.
+4. Lookup thành phần cuối (`...\\0`) hiện mất **vài phút** trên Windows 11 khi mỗi thư mục có 16 000 va chạm, giúp gần như chắc chắn thắng race trong các kernel LPE chỉ có một lần thử.
 
 ```cpp
 ScopedHandle shadow = CreateDirectory(L"\\BaseNamedObjects\\A");
@@ -72,16 +72,16 @@ CreateSymlinkChain(shadow, LongSuffix(L"\\A", 16000), 63);
 printf("%f\n", RunTest(LongSuffix(L"\\A", 16000) + L"\\0", 1));
 ```
 
-*Why it matters*: A minutes-long slowdown turns one-shot race-based LPEs into deterministic exploits.<sup>[[1]](#references)</sup>
+*Vì sao điều này quan trọng*: Việc làm chậm kéo dài vài phút biến các LPE dựa trên race chỉ dùng được một lần thành exploit có tính xác định.<sup>[[1]](#references)</sup>
 
-### 2025 retest notes & ready-made tooling
+### Ghi chú retest năm 2025 & công cụ có sẵn
 
-- James Forshaw republished the technique with updated timings on Windows 11 24H2 (ARM64). Baseline opens remain ~2 µs; a 32 kB component raises this to ~35 µs, and shadow-dir + collision + 63-reparse chains still reach ~3 minutes, confirming the primitives survive current builds. Source code and perf harness are in the refreshed Project Zero post.<sup>[[1]](#references)</sup>
-- You can script setup using the public `symboliclink-testing-tools` bundle: `CreateObjectDirectory.exe` to spawn the shadow/target pair and `NativeSymlink.exe` in a loop to emit the 63-hop chain. This avoids hand-written `NtCreate*` wrappers and keeps ACLs consistent.<sup>[[2]](#references)</sup>
+- James Forshaw đã đăng lại kỹ thuật này cùng các mốc thời gian được cập nhật trên Windows 11 24H2 (ARM64). Các thao tác mở cơ bản vẫn mất khoảng 2 µs; một thành phần 32 kB tăng thời gian này lên khoảng 35 µs, còn chuỗi shadow-dir + collision + 63-reparse vẫn đạt khoảng 3 phút, xác nhận các primitive vẫn hoạt động trên những bản build hiện tại. Mã nguồn và bộ công cụ đo hiệu năng nằm trong bài đăng Project Zero đã được cập nhật.<sup>[[1]](#references)</sup>
+- Bạn có thể viết script thiết lập bằng gói `symboliclink-testing-tools` công khai: dùng `CreateObjectDirectory.exe` để tạo cặp shadow/target và chạy `NativeSymlink.exe` trong vòng lặp để tạo chuỗi 63 bước nhảy. Cách này tránh phải tự viết wrapper `NtCreate*` và giúp ACL nhất quán.<sup>[[2]](#references)</sup>
 
-## Measuring your race window
+## Đo race window
 
-Embed a quick harness inside your exploit to measure how large the window becomes on the victim hardware. The snippet below opens the target object `iterations` times and returns the average per-open cost using `QueryPerformanceCounter`.<sup>[[1]](#references)</sup>
+Nhúng một bộ công cụ đo nhanh vào exploit để đo độ dài của window trên phần cứng máy nạn nhân. Đoạn mã bên dưới mở object đích `iterations` lần và trả về thời gian trung bình cho mỗi lần mở bằng `QueryPerformanceCounter`.<sup>[[1]](#references)</sup>
 
 ```cpp
 static double RunTest(const std::wstring name, int iterations,
@@ -102,27 +102,27 @@ static double RunTest(const std::wstring name, int iterations,
 }
 ```
 
-The results feed directly into your race orchestration strategy (e.g., number of worker threads needed, sleep intervals, how early you need to flip the shared state).
+Kết quả được đưa trực tiếp vào chiến lược điều phối race của bạn (ví dụ: số worker thread cần thiết, khoảng thời gian sleep, thời điểm sớm nhất bạn cần chuyển trạng thái dùng chung).
 
-## Exploitation workflow
+## Quy trình khai thác
 
-1. **Locate the vulnerable open** – Trace the kernel path (via symbols, ETW, hypervisor tracing, or reversing) until you find an `NtOpen*`/`ObOpenObjectByName` call that walks an attacker-controlled name or a symbolic link in a user-writable directory.
-2. **Replace that name with a slow path**
-   - Create the long component or directory chain under `\BaseNamedObjects` (or another writable OM root).
-   - Create a symbolic link so that the name the kernel expects now resolves to the slow path. You can point the vulnerable driver’s directory lookup to your structure without touching the original target.
-3. **Trigger the race**
-   - Thread A (victim) executes the vulnerable code and blocks inside the slow lookup.
-   - Thread B (attacker) flips the guarded state (e.g., swaps a file handle, rewrites a symbolic link, toggles object security) while Thread A is occupied.
-   - When Thread A resumes and performs the privileged action, it observes stale state and performs the attacker-controlled operation.
-4. **Clean up** – Delete the directory chain and symbolic links to avoid leaving suspicious artifacts or breaking legitimate IPC users.<sup>[[1]](#references)</sup>
+1. **Xác định open dễ bị tổn thương** – Lần theo đường đi trong kernel (qua symbols, ETW, hypervisor tracing hoặc reverse) cho đến khi bạn tìm thấy lời gọi `NtOpen*`/`ObOpenObjectByName` duyệt qua một tên do attacker kiểm soát hoặc symbolic link trong thư mục có quyền ghi của user.
+2. **Thay tên đó bằng một đường dẫn chậm**
+   - Tạo component dài hoặc chuỗi thư mục bên dưới `\BaseNamedObjects` (hoặc một OM root khác có quyền ghi).
+   - Tạo symbolic link để tên mà kernel mong đợi giờ phân giải thành đường dẫn chậm. Bạn có thể trỏ thao tác tra cứu thư mục của vulnerable driver đến cấu trúc của mình mà không cần chạm vào target ban đầu.
+3. **Kích hoạt race**
+   - Thread A (victim) thực thi đoạn code dễ bị tổn thương và bị chặn bên trong thao tác tra cứu chậm.
+   - Thread B (attacker) chuyển trạng thái được bảo vệ (ví dụ: hoán đổi file handle, viết lại symbolic link, bật/tắt security của object) trong khi Thread A đang bận.
+   - Khi Thread A tiếp tục và thực hiện thao tác có đặc quyền, nó thấy trạng thái cũ và thực hiện thao tác do attacker kiểm soát.
+4. **Dọn dẹp** – Xóa chuỗi thư mục và symbolic link để tránh để lại dấu vết đáng ngờ hoặc làm gián đoạn các user IPC hợp lệ.<sup>[[1]](#references)</sup>
 
-## Applied chain: mutable Cloud Files placeholders + Object Manager path switching
+## Chuỗi khai thác áp dụng: Cloud Files placeholder có thể thay đổi + chuyển hướng đường dẫn Object Manager
 
-[ShieldBreak](https://github.com/MSNightmare/ShieldBreak), published as a bypass for RoguePlanet (CVE-2026-50656), demonstrates a broader exploitation pattern: make a privileged scanner classify one representation of a logical file, then change both its bytes and namespace resolution before remediation uses it. The PoC combines a Cloud Files hydration TOCTOU, an Object Manager shadow-directory fallback, CLFS-generated-name capture, and a local administrative-share link to turn Defender cleanup into a protected DLL write.<sup>[[3]](#references)[[4]](#references)</sup>
+[ShieldBreak](https://github.com/MSNightmare/ShieldBreak), được công bố như một cách bypass RoguePlanet (CVE-2026-50656), minh họa một mô hình khai thác rộng hơn: khiến một scanner có đặc quyền phân loại một dạng biểu diễn của file logic, rồi thay đổi cả byte của file lẫn cách phân giải namespace trước khi remediation sử dụng file đó. PoC kết hợp TOCTOU trong Cloud Files hydration, cơ chế dự phòng shadow-directory của Object Manager, việc bắt tên do CLFS tạo ra và một link đến administrative share cục bộ để biến thao tác dọn dẹp của Defender thành một lần ghi DLL được bảo vệ.<sup>[[3]](#references)[[4]](#references)</sup>
 
-### 1. Substitute content through Cloud Files hydration
+### 1. Thay nội dung thông qua Cloud Files hydration
 
-Register an attacker-writable directory as a Cloud Files sync root, connect a `CF_CALLBACK_TYPE_FETCH_DATA` callback, and create a placeholder whose advertised size matches a deterministic detection trigger such as the EICAR ZIP. The first fetch returns the trigger and flips callback state; later fetches return the payload. After the scanner has classified the first representation, obtain the transfer key and restart hydration with payload-sized metadata, then force hydration to EOF.<sup>[[4]](#references)</sup>
+Đăng ký một thư mục do attacker ghi được làm Cloud Files sync root, kết nối callback `CF_CALLBACK_TYPE_FETCH_DATA` và tạo một placeholder có kích thước được quảng bá khớp với một trigger phát hiện xác định, chẳng hạn như EICAR ZIP. Lần fetch đầu tiên trả về trigger và chuyển trạng thái callback; các lần fetch sau trả về payload. Sau khi scanner phân loại dạng biểu diễn đầu tiên, lấy transfer key và khởi động lại hydration với metadata có kích thước bằng payload, rồi buộc hydration chạy đến EOF.<sup>[[4]](#references)</sup>
 
 ```cpp
 CfRegisterSyncRoot(sync_root, &registration, &policies, flags);
@@ -135,82 +135,82 @@ CfExecute(&opInfo, &restart_params);
 CfHydratePlaceholder(placeholder_handle, {0}, CF_EOF, 0, NULL);
 ```
 
-The security boundary fails if scan, verdict, and remediation refer only to a pathname or placeholder identity: neither guarantees that a later hydration returns the bytes that were inspected.<sup>[[4]](#references)</sup>
+Ranh giới bảo mật thất bại nếu quá trình quét, kết luận và khắc phục chỉ tham chiếu đến một pathname hoặc danh tính placeholder: không yếu tố nào đảm bảo rằng lần hydration sau đó sẽ trả về đúng các byte đã được kiểm tra.<sup>[[4]](#references)</sup>
 
-### 2. Switch an invariant path through a shadow-directory fallback
+### 2. Chuyển một đường dẫn bất biến qua cơ chế dự phòng shadow-directory
 
-Create a target Object Manager directory and a second directory with `NtCreateDirectoryObjectEx`, passing the target handle as its shadow/fallback directory. Put a same-named `WD_SCAN` entry in both resolution layers: the visible entry points to the normal working directory, while the fallback entry points to `\CLFS\??\<working-directory>`. Supply Defender only the invariant path below; deleting the visible link while the operation is active makes the same string fall through to the CLFS-backed entry.<sup>[[4]](#references)</sup>
+Tạo một thư mục Object Manager đích và một thư mục thứ hai bằng `NtCreateDirectoryObjectEx`, truyền handle của thư mục đích làm thư mục shadow/fallback. Thêm một mục `WD_SCAN` cùng tên vào cả hai lớp phân giải: mục hiển thị trỏ đến thư mục làm việc thông thường, còn mục dự phòng trỏ đến `\CLFS\??\<working-directory>`. Chỉ cung cấp cho Defender đường dẫn bất biến bên dưới; xóa liên kết hiển thị khi thao tác đang diễn ra sẽ khiến cùng một chuỗi đường dẫn chuyển sang mục được CLFS hỗ trợ.<sup>[[4]](#references)</sup>
 
 ```text
 \\.\globalroot\BaseNamedObjects\Restricted\WD_SHADOW_<GUID>\WD_SCAN\BERLIN
 ```
 
-This is distinct from using shadow directories only to slow lookup: the attacker changes the **meaning** of a previously accepted path without modifying its string.<sup>[[4]](#references)</sup>
+Điều này khác với việc chỉ sử dụng shadow directories để làm chậm quá trình tra cứu: attacker thay đổi **ý nghĩa** của một path đã được chấp nhận trước đó mà không sửa chuỗi của nó.<sup>[[4]](#references)</sup>
 
-### 3. Capture the generated name and install a filename-specific link
+### 3. Bắt tên được tạo và cài đặt link dành riêng cho filename
 
-Monitor the working directory with `ReadDirectoryChangesW`. On the first `FILE_ACTION_ADDED`, remove the visible `WD_SCAN` link to activate fallback lookup. Capture the second generated filename, open that CLFS-related file, and lock the range `0..MAXLONGLONG` with `LockFileEx`. While the privileged operation is stalled, replace `WD_SCAN` in the visible directory with a real Object Manager directory and create a child symbolic link named from the observed filename (the PoC strips its final four characters). Point it to the protected destination through local SMB:<sup>[[4]](#references)</sup>
+Theo dõi working directory bằng `ReadDirectoryChangesW`. Khi nhận được `FILE_ACTION_ADDED` đầu tiên, xóa link `WD_SCAN` hiển thị để kích hoạt fallback lookup. Bắt filename được tạo thứ hai, mở file liên quan đến CLFS đó và khóa phạm vi `0..MAXLONGLONG` bằng `LockFileEx`. Trong khi thao tác có đặc quyền bị đình trệ, thay `WD_SCAN` trong directory hiển thị bằng một directory Object Manager thực và tạo một symbolic link con có tên lấy từ filename đã quan sát được (PoC loại bỏ bốn ký tự cuối). Trỏ nó đến destination được bảo vệ thông qua SMB cục bộ:<sup>[[4]](#references)</sup>
 
 ```text
 \??\UNC\127.0.0.1\C$\Windows\System32\phoneinfo.dll
 ```
 
-The unprivileged process cannot write that destination itself, but Defender's SYSTEM context can traverse the loopback administrative share. Combining generated-name observation with a filename-specific Object Manager link avoids having to predict the remediation artifact in advance.<sup>[[4]](#references)</sup>
+Tiến trình không có đặc quyền không thể tự ghi vào đích đó, nhưng ngữ cảnh SYSTEM của Defender có thể truy cập qua administrative share loopback. Kết hợp việc quan sát tên được tạo với một Object Manager link dành riêng cho tên tệp giúp không phải dự đoán trước artifact khắc phục.<sup>[[4]](#references)</sup>
 
-### 4. Stabilize the cleanup race and trigger a privileged loader
+### 4. Ổn định race cleanup và kích hoạt privileged loader
 
-Before scanning, the PoC stores a valid PE (`ntdll.dll`) in the placeholder's `:stream` NTFS alternate data stream. After redirection creates the protected base file, it opens `phoneinfo.dll:stream` with execute access and keeps a `PAGE_EXECUTE_READ | SEC_IMAGE` mapping alive while cleanup resumes; the live file/section objects constrain deletion or replacement during the final race. The restarted hydration now returns the payload DLL rather than EICAR, so the protected base file contains attacker-controlled code.<sup>[[4]](#references)</sup>
+Trước khi quét, PoC lưu một PE hợp lệ (`ntdll.dll`) trong NTFS alternate data stream `:stream` của placeholder. Sau khi redirection tạo tệp cơ sở được bảo vệ, nó mở `phoneinfo.dll:stream` với quyền thực thi và giữ mapping `PAGE_EXECUTE_READ | SEC_IMAGE` tồn tại trong khi cleanup tiếp tục; các file/section object đang hoạt động hạn chế việc xóa hoặc thay thế trong race cuối cùng. Quá trình hydration được khởi động lại giờ trả về payload DLL thay vì EICAR, vì vậy tệp cơ sở được bảo vệ chứa mã do attacker kiểm soát.<sup>[[4]](#references)</sup>
 
-A protected write is then converted to SYSTEM execution by placing a crafted `Report.wer` under `C:\ProgramData\Microsoft\Windows\WER\ReportQueue\...` and invoking `\Microsoft\Windows\Windows Error Reporting\QueueReporting` through the Task Scheduler COM API. In this chain, privileged WER processing loads the planted `C:\Windows\System32\phoneinfo.dll`; a named-pipe connection is used as the payload execution signal.<sup>[[4]](#references)</sup>
+Sau đó, một thao tác ghi được bảo vệ được chuyển thành thực thi SYSTEM bằng cách đặt một `Report.wer` được tạo thủ công trong `C:\ProgramData\Microsoft\Windows\WER\ReportQueue\...` và gọi `\Microsoft\Windows\Windows Error Reporting\QueueReporting` thông qua Task Scheduler COM API. Trong chuỗi này, WER xử lý với đặc quyền cao và nạp `C:\Windows\System32\phoneinfo.dll` đã được cài cắm; kết nối named pipe được dùng làm tín hiệu thực thi payload.<sup>[[4]](#references)</sup>
 
-### Detection pivots
+### Các điểm pivot để phát hiện
 
-Useful correlations are more specific than any single temporary filename and cover all namespace transitions in the chain:<sup>[[4]](#references)</sup>
+Các tương quan hữu ích cụ thể hơn bất kỳ tên tệp tạm thời đơn lẻ nào và bao quát mọi lần chuyển đổi namespace trong chuỗi:<sup>[[4]](#references)</sup>
 
-- A newly registered Cloud Files provider followed by EICAR detection and `CF_OPERATION_TYPE_RESTART_HYDRATION` on the same placeholder.
-- Object Manager paths containing `WD_TARGET_*`, `WD_SHADOW_*`, or `WD_SCAN`, especially a scan path below `\\.\globalroot\BaseNamedObjects\Restricted\`.
-- CLFS file creation followed by an exclusive whole-file lock and loopback access to `\\127.0.0.1\C$\Windows\System32\*.dll` from a privileged security process.
-- Creation of a System32 DLL together with an NTFS ADS, followed by `SEC_IMAGE` mapping of the stream.
-- An attacker-created WER queue entry followed by an unusual manual run of `\Microsoft\Windows\Windows Error Reporting\QueueReporting` and an image load of the planted DLL.
+- Cloud Files provider mới được đăng ký, sau đó là phát hiện EICAR và `CF_OPERATION_TYPE_RESTART_HYDRATION` trên cùng placeholder.
+- Các đường dẫn Object Manager chứa `WD_TARGET_*`, `WD_SHADOW_*` hoặc `WD_SCAN`, đặc biệt là đường dẫn quét bên dưới `\\.\globalroot\BaseNamedObjects\Restricted\`.
+- Tạo tệp CLFS, sau đó khóa toàn bộ tệp ở chế độ độc quyền và truy cập loopback vào `\\127.0.0.1\C$\Windows\System32\*.dll` từ một tiến trình bảo mật có đặc quyền.
+- Tạo DLL trong System32 cùng với NTFS ADS, sau đó mapping stream bằng `SEC_IMAGE`.
+- Tạo mục WER queue bởi attacker, sau đó chạy thủ công bất thường `\Microsoft\Windows\Windows Error Reporting\QueueReporting` và nạp image của DLL đã cài cắm.
 
-## Applied chain: oplock-gated mount-point switch against privileged remediation
+## Chuỗi áp dụng: chuyển mount point được điều khiển bằng oplock nhắm vào quá trình khắc phục có đặc quyền
 
-A reusable LPE pattern appears when a privileged scanner checks an attacker-controlled file and later remediates it by reopening the **pathname** rather than continuing through validated handles. FalconFlank is a public example targeting CrowdStrike Falcon's Office macro-removal workflow; the repository claims testing on Windows 11 25H2 and Windows Server 2025 with the relevant policy enabled, but publishes no CVE, affected-build range, vendor advisory, or patch status, so treat the product-specific claim as unverified and build-dependent.<sup>[[5]](#references)[[6]](#references)</sup>
+Một mẫu LPE có thể tái sử dụng xuất hiện khi scanner có đặc quyền kiểm tra tệp do attacker kiểm soát, rồi khắc phục bằng cách mở lại **pathname** thay vì tiếp tục dùng các handle đã xác thực. FalconFlank là ví dụ công khai nhắm vào workflow xóa macro Office của CrowdStrike Falcon; repository tuyên bố đã thử nghiệm trên Windows 11 25H2 và Windows Server 2025 khi bật policy liên quan, nhưng không công bố CVE, phạm vi build bị ảnh hưởng, tư vấn từ nhà cung cấp hoặc trạng thái bản vá. Vì vậy, hãy xem tuyên bố liên quan đến sản phẩm là chưa được xác minh và phụ thuộc vào build.<sup>[[5]](#references)[[6]](#references)</sup>
 
-### Race layout
+### Bố trí race
 
-1. Build a writable tree whose final relative name is useful at the intended destination. The example uses `%TEMP%\\Flanker_{GUID}\\WindowsPowerShell\\v1.0\\bcrypt.dll`, but initially writes an OLE macro document—not a PE DLL—to `bcrypt.dll`. Content-based detection triggers the remediation while the attacker-controlled basename is preserved for the later side-load.<sup>[[5]](#references)</sup>
-2. Open the directories with broad sharing and `FILE_OPEN_REPARSE_POINT`, then request an asynchronous RH oplock on the trigger with `FSCTL_REQUEST_OPLOCK`, `OPLOCK_LEVEL_CACHE_READ | OPLOCK_LEVEL_CACHE_HANDLE`, and `REQUEST_OPLOCK_INPUT_FLAG_REQUEST`. Wait for the overlapped event and use its completion as the path-switch cue. An RH oplock-break notification is advisory rather than proof that every conflicting operation is blocked, so exploitability still depends on the victim's exact open/remediation sequence.<sup>[[5]](#references)[[7]](#references)</sup>
-3. After the break, remove the leaf directory with `FileDispositionInformationEx` (information class 64) using delete plus POSIX-semantics flags, close its handle, and apply an `IO_REPARSE_TAG_MOUNT_POINT` to the now-empty parent with `FSCTL_SET_REPARSE_POINT_EX`. The mount point redirects the unchanged suffix into a protected tree such as `\\SystemRoot\\System32\\WindowsPowerShell`; setting a reparse point fails if the directory is not empty, which explains the preceding deletion step.<sup>[[5]](#references)[[8]](#references)</sup>
-4. Resume the privileged workflow. If it resolves the string again without proving that the directory chain and final object are the ones previously inspected, the same logical pathname now reaches the attacker-selected protected directory. In the example, success is tested by reopening `C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\bcrypt.dll` read/write from the original process; this distinguishes the confused-deputy write primitive from the later code-execution stage.<sup>[[5]](#references)</sup>
-5. Replace the resulting file with the real DLL and activate a privileged loader. The PoC uses `CreateTransaction` + `CreateFileTransacted`, truncates the file, maps the DLL-sized replacement, copies the PE, and commits; TxF binds the file handle and subsequent handle-based operations to the transaction, but it is a post-race replacement mechanism rather than the source of the privilege boundary failure.<sup>[[5]](#references)[[9]](#references)</sup>
-6. Finally, run an existing privileged scheduled task whose executable probes the planted adjacent filename. FalconFlank invokes `\\Microsoft\\Windows\\Application Experience\\MareBackup`, waits for the DLL to connect to `\\??\\pipe\\FALCONFLANK`, and then deletes the planted file. Do not assume a particular resulting token solely from the task name—verify the launched process, module path, integrity level, and token on the tested build.<sup>[[5]](#references)</sup>
+1. Tạo một cây thư mục có thể ghi với tên tương đối cuối cùng phù hợp với đích dự định. Ví dụ sử dụng `%TEMP%\\Flanker_{GUID}\\WindowsPowerShell\\v1.0\\bcrypt.dll`, nhưng ban đầu ghi tài liệu macro OLE—không phải DLL PE—vào `bcrypt.dll`. Phát hiện dựa trên nội dung kích hoạt quá trình khắc phục trong khi basename do attacker kiểm soát vẫn được giữ nguyên để side-load sau đó.<sup>[[5]](#references)</sup>
+2. Mở các thư mục với chế độ chia sẻ rộng và `FILE_OPEN_REPARSE_POINT`, sau đó yêu cầu RH oplock bất đồng bộ trên trigger bằng `FSCTL_REQUEST_OPLOCK`, `OPLOCK_LEVEL_CACHE_READ | OPLOCK_LEVEL_CACHE_HANDLE` và `REQUEST_OPLOCK_INPUT_FLAG_REQUEST`. Chờ overlapped event và dùng thời điểm hoàn tất làm tín hiệu chuyển đường dẫn. Thông báo RH oplock-break chỉ mang tính cảnh báo, không chứng minh rằng mọi thao tác xung đột đều bị chặn; do đó, khả năng khai thác vẫn phụ thuộc vào chính xác chuỗi mở/khắc phục của tiến trình nạn nhân.<sup>[[5]](#references)[[7]](#references)</sup>
+3. Sau break, xóa thư mục lá bằng `FileDispositionInformationEx` (information class 64) với các cờ xóa và POSIX semantics, đóng handle của nó rồi áp dụng `IO_REPARSE_TAG_MOUNT_POINT` lên thư mục cha hiện đã trống bằng `FSCTL_SET_REPARSE_POINT_EX`. Mount point chuyển hướng phần hậu tố không đổi vào cây được bảo vệ như `\\SystemRoot\\System32\\WindowsPowerShell`; việc đặt reparse point sẽ thất bại nếu thư mục không trống, điều này giải thích bước xóa trước đó.<sup>[[5]](#references)[[8]](#references)</sup>
+4. Tiếp tục workflow có đặc quyền. Nếu workflow phân giải lại chuỗi mà không xác minh rằng chuỗi thư mục và object cuối cùng chính là những gì đã được kiểm tra trước đó, cùng pathname logic giờ sẽ trỏ đến thư mục được bảo vệ do attacker chọn. Trong ví dụ, thành công được kiểm tra bằng cách mở lại `C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\bcrypt.dll` với quyền đọc/ghi từ tiến trình ban đầu; việc này phân biệt primitive ghi confused-deputy với giai đoạn thực thi mã sau đó.<sup>[[5]](#references)</sup>
+5. Thay tệp kết quả bằng DLL thật và kích hoạt privileged loader. PoC dùng `CreateTransaction` + `CreateFileTransacted`, truncate tệp, map phần thay thế có kích thước DLL, sao chép PE rồi commit; TxF gắn file handle và các thao tác tiếp theo dựa trên handle với transaction, nhưng đây là cơ chế thay thế sau race chứ không phải nguyên nhân gây lỗi ranh giới đặc quyền.<sup>[[5]](#references)[[9]](#references)</sup>
+6. Cuối cùng, chạy một scheduled task có đặc quyền sẵn có, với executable kiểm tra tên tệp liền kề đã được cài cắm. FalconFlank gọi `\\Microsoft\\Windows\\Application Experience\\MareBackup`, chờ DLL kết nối đến `\\??\\pipe\\FALCONFLANK`, rồi xóa tệp đã cài cắm. Không nên chỉ dựa vào tên task để giả định token thu được—hãy xác minh tiến trình được khởi chạy, module path, integrity level và token trên build đã thử nghiệm.<sup>[[5]](#references)</sup>
 
-The core audit question is therefore not “does the service validate the original input path?” but “does every privileged mutation remain bound to the same opened file and directory objects that were validated?” Holding handles across check and use, opening child objects relative to a trusted directory handle, rejecting unexpected reparse tags, and revalidating file identity before mutation close this class of pathname-substitution bug.<sup>[[1]](#references)[[8]](#references)</sup>
+Do đó, câu hỏi cốt lõi khi audit không phải là “service có xác thực đường dẫn đầu vào ban đầu không?” mà là “mọi thao tác thay đổi có đặc quyền có luôn gắn với cùng file và directory object đã mở mà quá trình xác thực đã kiểm tra không?” Giữ handle xuyên suốt quá trình kiểm tra và sử dụng, mở object con tương đối với handle thư mục đáng tin cậy, từ chối reparse tag bất ngờ và xác thực lại danh tính tệp trước khi thay đổi sẽ khắc phục nhóm lỗi thay thế pathname này.<sup>[[1]](#references)[[8]](#references)</sup>
 
-### Detection and PoC triage
+### Phát hiện và phân loại PoC
 
-High-signal detection correlates the namespace transition with the privileged consumer: an OLE header under a DLL basename in a GUID-named temporary tree, an oplock break, POSIX-style removal of the leaf directory, creation of a mount point targeting a protected Windows directory, and creation or modification of the same basename below that destination. For the public example, add `C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\bcrypt.dll`, manual execution of `MareBackup`, and the `FALCONFLANK` named pipe as narrower pivots; none is sufficient alone.<sup>[[5]](#references)</sup>
+Phát hiện có tín hiệu cao sẽ tương quan quá trình chuyển đổi namespace với thành phần có đặc quyền sử dụng nó: header OLE dưới basename DLL trong cây tạm thời có tên GUID, oplock break, xóa thư mục lá theo kiểu POSIX, tạo mount point nhắm đến thư mục Windows được bảo vệ, và tạo hoặc sửa đổi cùng basename bên dưới đích đó. Với ví dụ công khai, hãy bổ sung `C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\bcrypt.dll`, việc chạy thủ công `MareBackup` và named pipe `FALCONFLANK` làm các điểm pivot cụ thể hơn; không dấu hiệu nào trong số này đủ để kết luận nếu đứng riêng.<sup>[[5]](#references)</sup>
 
-When reproducing the PoC, account for three reliability defects in the published source: it calls `FlushFileBuffers` with the embedded byte-array pointer rather than the file handle, tests a stale `HRESULT` after `GetFolder`, `GetTask`, and `Run`, and uses unbounded retry/wait loops for directory deletion, reparse creation, the oplock event, and pipe connection.<sup>[[5]](#references)</sup>
+Khi tái hiện PoC, cần lưu ý ba lỗi về độ tin cậy trong source đã công bố: nó gọi `FlushFileBuffers` với con trỏ byte-array nhúng thay vì file handle, kiểm tra `HRESULT` đã cũ sau `GetFolder`, `GetTask` và `Run`, đồng thời dùng các vòng lặp retry/wait không giới hạn để xóa thư mục, tạo reparse point, chờ oplock event và kết nối pipe.<sup>[[5]](#references)</sup>
 
-## Operational considerations
+## Các lưu ý vận hành
 
-- **Combine primitives** – You can use a long name *per level* in a directory chain for even higher latency until you exhaust the `UNICODE_STRING` size.
-- **One-shot bugs** – The expanded window (tens of microseconds to minutes) makes “single trigger” bugs realistic when paired with CPU affinity pinning or hypervisor-assisted preemption.
-- **Side effects** – The slowdown only affects the malicious path, so overall system performance remains unaffected; defenders will rarely notice unless they monitor namespace growth.
-- **Cleanup** – Keep handles to every directory/object you create so you can call `NtMakeTemporaryObject`/`NtClose` afterwards. Unbounded directory chains may persist across reboots otherwise.
-- **File-system races** – If the vulnerable path ultimately resolves through NTFS, you can stack an Oplock (e.g., `SetOpLock.exe` from the same toolkit) on the backing file while the OM slowdown runs, freezing the consumer for additional milliseconds without altering the OM graph.<sup>[[2]](#references)</sup>
+- **Kết hợp primitive** – Có thể dùng tên dài *ở mỗi cấp* trong chuỗi thư mục để tăng độ trễ hơn nữa, cho đến khi đạt giới hạn kích thước `UNICODE_STRING`.
+- **Lỗi chỉ kích hoạt một lần** – Cửa sổ thời gian được mở rộng (từ hàng chục microsecond đến hàng phút) khiến các lỗi “single trigger” trở nên khả thi khi kết hợp với ghim CPU affinity hoặc preemption có hỗ trợ hypervisor.
+- **Tác dụng phụ** – Việc làm chậm chỉ ảnh hưởng đến đường dẫn độc hại, vì vậy hiệu năng toàn hệ thống không bị ảnh hưởng; defender hiếm khi nhận thấy trừ khi họ giám sát sự tăng trưởng namespace.
+- **Dọn dẹp** – Giữ handle đến mọi thư mục/object bạn tạo để có thể gọi `NtMakeTemporaryObject`/`NtClose` sau đó. Nếu không, các chuỗi thư mục không giới hạn có thể tồn tại qua các lần khởi động lại.
+- **Race hệ thống tệp** – Nếu đường dẫn dễ bị tấn công cuối cùng được phân giải qua NTFS, bạn có thể đặt Oplock (ví dụ `SetOpLock.exe` từ cùng toolkit) lên tệp nền trong khi OM slowdown đang chạy, làm đóng băng thành phần sử dụng thêm vài millisecond mà không thay đổi OM graph.<sup>[[2]](#references)</sup>
 
-## Defensive notes
+## Ghi chú phòng thủ
 
-- Kernel code that relies on named objects should re-validate security-sensitive state *after* the open, or take a reference before the check (closing the TOCTOU gap).
-- Enforce upper bounds on OM path depth/length before dereferencing user-controlled names. Rejecting overly long names forces attackers back into the microsecond window.
-- Instrument object manager namespace growth (ETW `Microsoft-Windows-Kernel-Object`) to detect suspicious thousands-of-components chains under `\BaseNamedObjects`.
+- Code kernel dựa vào named object nên xác thực lại trạng thái nhạy cảm về bảo mật *sau khi* mở object, hoặc lấy reference trước khi kiểm tra (khép lại khoảng trống TOCTOU).
+- Áp đặt giới hạn trên cho độ sâu/độ dài OM path trước khi dereference tên do người dùng kiểm soát. Từ chối tên quá dài buộc attacker quay lại cửa sổ microsecond.
+- Theo dõi sự tăng trưởng namespace của Object Manager (ETW `Microsoft-Windows-Kernel-Object`) để phát hiện các chuỗi gồm hàng nghìn thành phần đáng ngờ bên dưới `\BaseNamedObjects`.
 
 ## References
 
-- [1] [Project Zero – Windows Exploitation Techniques: Winning Race Conditions with Path Lookups](https://projectzero.google/2025/12/windows-exploitation-techniques.html)
+- [1] [Project Zero – Kỹ thuật khai thác Windows: Thắng race condition bằng tra cứu đường dẫn](https://projectzero.google/2025/12/windows-exploitation-techniques.html)
 - [2] [googleprojectzero/symboliclink-testing-tools](https://github.com/googleprojectzero/symboliclink-testing-tools)
 - [3] [MSNightmare/ShieldBreak](https://github.com/MSNightmare/ShieldBreak)
 - [4] [ShieldBreak.cpp (commit be016d8)](https://github.com/MSNightmare/ShieldBreak/blob/be016d8c18c8355a12753286c1ce9d5a48a0dab4/ShieldBreak.cpp)
@@ -218,6 +218,5 @@ When reproducing the PoC, account for three reliability defects in the published
 - [6] [MSNightmare/FalconFlank](https://github.com/MSNightmare/FalconFlank)
 - [7] [Microsoft Learn - FSCTL_REQUEST_OPLOCK](https://learn.microsoft.com/en-us/windows/win32/api/winioctl/ni-winioctl-fsctl_request_oplock)
 - [8] [Microsoft Learn - FSCTL_SET_REPARSE_POINT_EX](https://learn.microsoft.com/en-us/windows-hardware/drivers/ifs/fsctl-set-reparse-point-ex)
-- [9] [Microsoft Learn - How to Use Transactional NTFS](https://learn.microsoft.com/en-us/windows/win32/fileio/how-to-use-transactional-ntfs)
-
+- [9] [Microsoft Learn - Cách sử dụng Transactional NTFS](https://learn.microsoft.com/en-us/windows/win32/fileio/how-to-use-transactional-ntfs)
 {{#include ../../banners/hacktricks-training.md}}

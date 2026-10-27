@@ -1,10 +1,10 @@
-# SeImpersonate from High To System
+# SeImpersonate từ High lên System
 
 {{#include ../../banners/hacktricks-training.md}}
 
-This page is about the **manual** version of going from a **High Integrity administrator process** to **`NT AUTHORITY\SYSTEM`** by **opening a non-protected SYSTEM process, duplicating its token, and spawning a child process with that token**.
+Trang này nói về cách **thủ công** chuyển từ **tiến trình quản trị viên có mức toàn vẹn High** sang **`NT AUTHORITY\SYSTEM`** bằng cách **mở một tiến trình SYSTEM không được bảo vệ, sao chép token của tiến trình đó và khởi chạy tiến trình con bằng token ấy**.
 
-If you only have **`SeImpersonatePrivilege`** / **`SeAssignPrimaryTokenPrivilege`** but **cannot open a suitable SYSTEM process**, the **Potato / named-pipe** path is usually more reliable:
+Nếu bạn chỉ có **`SeImpersonatePrivilege`** / **`SeAssignPrimaryTokenPrivilege`** nhưng **không thể mở một tiến trình SYSTEM phù hợp**, phương pháp **Potato / named-pipe** thường đáng tin cậy hơn:
 
 {{#ref}}
 named-pipe-client-impersonation.md
@@ -14,50 +14,50 @@ named-pipe-client-impersonation.md
 roguepotato-and-printspoofer.md
 {{#endref}}
 
-If what you want is not only `SYSTEM` but a **SYSTEM token with as many privileges as possible**, also check:
+Nếu bạn không chỉ cần `SYSTEM` mà còn muốn có **token SYSTEM với nhiều đặc quyền nhất có thể**, hãy xem thêm:
 
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
 {{#endref}}
 
-## Quick triage
+## Kiểm tra nhanh
 
-Before trying to steal a token, quickly validate the context:
+Trước khi thử đánh cắp token, hãy nhanh chóng xác minh ngữ cảnh:
 
 ```cmd
 whoami /groups | findstr /i "high mandatory"
 whoami /priv | findstr /i "SeDebugPrivilege SeImpersonatePrivilege SeAssignPrimaryTokenPrivilege"
 ```
 
-Practical notes:
+Ghi chú thực tế:
 
-- A **High Integrity** admin token is usually enough to **enable `SeDebugPrivilege`** and open many non-protected SYSTEM processes.
-- **`CreateProcessWithTokenW` requires `SeImpersonatePrivilege`** on the caller. If that API fails with `1314`, switch to `CreateProcessAsUserW` after you already duplicated a SYSTEM primary token.
-- On modern Windows, **`lsass.exe` is often a bad target** because **LSA protection / PPL** blocks access even for administrators with `SeDebugPrivilege`. Prefer **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`**, or an early **`svchost.exe`** running as SYSTEM.
-- Not every SYSTEM process has an equally useful token. If you get SYSTEM but notice missing privileges, try a different SYSTEM process instead of assuming the technique is broken.
+- Admin token có **High Integrity** thường đủ để **bật `SeDebugPrivilege`** và mở nhiều tiến trình SYSTEM không được bảo vệ.
+- `CreateProcessWithTokenW` yêu cầu caller có **`SeImpersonatePrivilege`**. Nếu API đó trả về lỗi `1314`, hãy chuyển sang `CreateProcessAsUserW` sau khi đã duplicate một SYSTEM primary token.
+- Trên Windows hiện đại, **`lsass.exe` thường là mục tiêu không phù hợp** vì **LSA protection / PPL** chặn truy cập ngay cả với administrator có `SeDebugPrivilege`. Hãy ưu tiên **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`** hoặc một **`svchost.exe`** chạy sớm với quyền SYSTEM.
+- Không phải tiến trình SYSTEM nào cũng có token hữu ích như nhau. Nếu bạn có SYSTEM nhưng nhận thấy thiếu privilege, hãy thử một tiến trình SYSTEM khác thay vì cho rằng kỹ thuật này bị lỗi.
 
-## Pick the PID carefully
+## Chọn PID cẩn thận
 
-The easiest way to make this work reliably is to **choose a SYSTEM process whose DACL actually allows Administrators to query the process and duplicate its token**.
+Cách dễ nhất để kỹ thuật này hoạt động ổn định là **chọn một tiến trình SYSTEM có DACL thực sự cho phép Administrators truy vấn tiến trình và duplicate token của nó**.
 
-Good candidates to test first:
+Các mục tiêu tốt nên thử trước:
 
 - `winlogon.exe`
 - `wininit.exe`
 - `services.exe`
-- some early `svchost.exe` instances running as SYSTEM
+- một số instance `svchost.exe` khởi chạy sớm, chạy với quyền SYSTEM
 
-Avoid by default:
+Mặc định nên tránh:
 
-- `lsass.exe` on hosts where **RunAsPPL / LSA protection** is enabled
-- protected / security-sensitive processes that return `Access denied` even after enabling `SeDebugPrivilege`
+- `lsass.exe` trên các máy chủ đã bật **RunAsPPL / LSA protection**
+- các tiến trình được bảo vệ / nhạy cảm về bảo mật, trả về `Access denied` ngay cả sau khi bật `SeDebugPrivilege`
 
-You can inspect candidate processes and their token/ACLs with **Process Explorer** or **Process Hacker** running elevated.
+Bạn có thể kiểm tra các tiến trình mục tiêu cùng token/ACL của chúng bằng **Process Explorer** hoặc **Process Hacker** đang chạy elevated.
 
 ### Code
 
-The following code comes from [this access-token article](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). It accepts a **process ID as an argument** and starts a command shell **as the user** of that process.<sup>[[3]](#references)</sup>\
-Running in a High Integrity process you can **indicate the PID of a process running as System** (like `winlogon`, `wininit`) and execute a `cmd.exe` as SYSTEM.<sup>[[3]](#references)</sup>
+Đoạn code sau lấy từ [bài viết về access token này](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Đoạn code nhận **process ID làm đối số** và khởi chạy command shell **với tư cách người dùng** của tiến trình đó.<sup>[[3]](#references)</sup>\
+Khi chạy trong tiến trình High Integrity, bạn có thể **chỉ định PID của một tiến trình đang chạy với quyền System** (như `winlogon`, `wininit`) rồi thực thi `cmd.exe` với quyền SYSTEM.<sup>[[3]](#references)</sup>
 
 ```cpp
 impersonateuser.exe 1234
@@ -194,20 +194,20 @@ int main(int argc, char** argv) {
 }
 ```
 
-## Useful API / access-right notes
+## Lưu ý hữu ích về API / quyền truy cập
 
-The sample uses `MAXIMUM_ALLOWED`, but for real operations it's useful to remember the minimum pieces involved:
+Ví dụ sử dụng `MAXIMUM_ALLOWED`, nhưng với các thao tác thực tế, cần nhớ những thành phần tối thiểu sau:
 
-- `OpenProcessToken()` only requires that the **process handle** was opened with **`PROCESS_QUERY_LIMITED_INFORMATION`**.
-- To use `CreateProcessWithTokenW()`, the **primary token handle** must have **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.<sup>[[1]](#references)</sup>
-- `DuplicateTokenEx()` must create a **primary token** (`TokenPrimary`), not only an impersonation token.
-- If you already impersonated SYSTEM and `CreateProcessWithTokenW()` still fails with `1314`, try `CreateProcessAsUserW()` instead.
+- `OpenProcessToken()` chỉ yêu cầu **process handle** được mở với **`PROCESS_QUERY_LIMITED_INFORMATION`**.
+- Để sử dụng `CreateProcessWithTokenW()`, **primary token handle** phải có **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.<sup>[[1]](#references)</sup>
+- `DuplicateTokenEx()` phải tạo một **primary token** (`TokenPrimary`), không chỉ là impersonation token.
+- Nếu bạn đã impersonate SYSTEM mà `CreateProcessWithTokenW()` vẫn thất bại với lỗi `1314`, hãy thử dùng `CreateProcessAsUserW()`.
 
-That means that **opening the target process with `PROCESS_ALL_ACCESS` is usually unnecessary and noisier** than just requesting the rights needed to query the token.
+Điều đó có nghĩa là **thường không cần mở target process với `PROCESS_ALL_ACCESS` và việc này cũng gây nhiều dấu vết hơn** so với chỉ yêu cầu các quyền cần thiết để truy vấn token.
 
-## Error
+## Lỗi
 
-On some occasions you may try to impersonate System and it won't work showing an output like the following:
+Đôi khi bạn có thể thử impersonate System nhưng không thành công, và thấy đầu ra như sau:
 
 ```cpp
 [+] OpenProcess() success!
@@ -220,45 +220,44 @@ On some occasions you may try to impersonate System and it won't work showing an
 [-] CreateProcessWithTokenW Error: 1326
 ```
 
-This means that even if you are running on a High Integrity level **you don't have enough permissions** over that target process/token.\
-Let's check current Administrator permissions over `svchost.exe` processes with **Process Explorer** (or you can also use **Process Hacker**):
+Điều này có nghĩa là ngay cả khi bạn đang chạy ở mức **toàn vẹn cao**, bạn **không có đủ quyền** đối với tiến trình/token mục tiêu đó.\
+Hãy kiểm tra quyền hiện tại của Administrator đối với các tiến trình `svchost.exe` bằng **Process Explorer** (hoặc bạn cũng có thể dùng **Process Hacker**):
 
-1. Select a process of `svchost.exe`
-2. Right Click --> Properties
-3. Inside "Security" Tab click in the bottom right the button "Permissions"
-4. Click on "Advanced"
-5. Select "Administrators" and click on "Edit"
-6. Click on "Show advanced permissions"
+1. Chọn một tiến trình `svchost.exe`
+2. Nhấp chuột phải --> Properties
+3. Trong tab "Security", nhấp vào nút "Permissions" ở góc dưới bên phải
+4. Nhấp vào "Advanced"
+5. Chọn "Administrators" rồi nhấp vào "Edit"
+6. Nhấp vào "Show advanced permissions"
 
-![Code - Error: 6. Click on "Show advanced permissions"](<../../images/image (437).png>)
+![Code - Lỗi: 6. Nhấp vào "Show advanced permissions"](<../../images/image (437).png>)
 
-The previous image contains all the privileges that "Administrators" have over the selected process (as you can see in case of `svchost.exe` they only have "Query" privileges)
+Hình ảnh trên chứa tất cả quyền mà "Administrators" có đối với tiến trình đã chọn (như bạn thấy, trong trường hợp `svchost.exe`, họ chỉ có quyền "Query")
 
-See the privileges "Administrators" have over `winlogon.exe`:
+Xem các quyền mà "Administrators" có đối với `winlogon.exe`:
 
-![Code - Error: See the privileges "Administrators" have over winlogon.exe](<../../images/image (1102).png>)
+![Code - Lỗi: Xem các quyền mà "Administrators" có đối với winlogon.exe](<../../images/image (1102).png>)
 
-Inside that process "Administrators" can "Read Memory" and "Read Permissions" which probably allows Administrators to impersonate the token used by this process.
+Trong tiến trình đó, "Administrators" có thể "Read Memory" và "Read Permissions", điều này có thể cho phép Administrators impersonate token mà tiến trình này sử dụng.
 
-### Common failure causes
+### Các nguyên nhân thường gặp khiến thất bại
 
-- **`OpenProcess()` / `OpenProcessToken()` -> `5 (Access denied)`**: the process DACL blocks you, or the target is **protected/PPL**. Pick another SYSTEM process.
-- **`DuplicateTokenEx()` -> `5 (Access denied)`**: your token handle was opened without enough rights, or the target token DACL prevents duplication.
-- **`CreateProcessWithTokenW()` -> `1314`**: the caller doesn't currently have **`SeImpersonatePrivilege`** enabled. Try enabling it first or use `CreateProcessAsUserW()` with the duplicated primary token.
-- **`CreateProcessWithTokenW()` -> `1326`** after previous failures: this often just means the earlier token duplication/impersonation step failed, so there is no usable primary token to launch the child process.
+- **`OpenProcess()` / `OpenProcessToken()` -> `5 (Access denied)`**: DACL của tiến trình chặn bạn hoặc mục tiêu là **protected/PPL**. Hãy chọn một tiến trình SYSTEM khác.
+- **`DuplicateTokenEx()` -> `5 (Access denied)`**: handle token của bạn được mở mà không có đủ quyền, hoặc DACL của token mục tiêu ngăn việc sao chép.
+- **`CreateProcessWithTokenW()` -> `1314`**: caller hiện không bật **`SeImpersonatePrivilege`**. Hãy thử bật quyền này trước hoặc dùng `CreateProcessAsUserW()` với primary token đã sao chép.
+- **`CreateProcessWithTokenW()` -> `1326`** sau các lần thất bại trước đó: điều này thường chỉ có nghĩa là bước sao chép/impersonation token trước đó đã thất bại, nên không có primary token khả dụng để khởi chạy tiến trình con.
 
-## Operator notes
+## Ghi chú cho operator
 
-- This technique is great when you are already **local admin + high integrity** and just want a quick, manual path to SYSTEM without spinning up a service or a named-pipe coercion chain.
-- On hardened Windows 11 / Server environments, **LSA protection is increasingly common**, so a workflow that assumes `lsass.exe` is always readable is brittle. **`winlogon.exe` / `wininit.exe` / `services.exe` are usually better first picks**.<sup>[[2]](#references)</sup>
-- If you land in a **service account** context instead of an elevated admin desktop, the **Potato family** is usually a better fit than this page.
+- Kỹ thuật này rất hữu ích khi bạn đã có **local admin + mức toàn vẹn cao** và chỉ muốn có cách nhanh chóng, thực hiện thủ công để lên SYSTEM mà không cần chạy service hoặc dựng chuỗi named-pipe coercion.
+- Trong các môi trường Windows 11 / Server được harden, **LSA protection ngày càng phổ biến**, vì vậy quy trình giả định rằng `lsass.exe` luôn có thể đọc được sẽ không đáng tin cậy. **`winlogon.exe` / `wininit.exe` / `services.exe` thường là những lựa chọn đầu tiên tốt hơn**.<sup>[[2]](#references)</sup>
+- Nếu bạn có được ngữ cảnh của **service account** thay vì desktop admin đã elevated, **họ Potato** thường phù hợp hơn trang này.
 
 
 
 ## References
 
 - [1] [Microsoft: CreateProcessWithTokenW](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
-- [2] [SensePost: Abusing Windows' tokens to compromise Active Directory without touching LSASS](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
-- [3] [Understanding and Abusing Process Tokens — Part II](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
-
+- [2] [SensePost: Lạm dụng token của Windows để xâm nhập Active Directory mà không đụng đến LSASS](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
+- [3] [Tìm hiểu và lạm dụng Process Token — Phần II](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
 {{#include ../../banners/hacktricks-training.md}}

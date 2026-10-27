@@ -1,28 +1,28 @@
-# Writable System PATH + DLL Hijacking Privilege Escalation
+# Leo thang đặc quyền bằng DLL Hijacking qua System PATH có thể ghi
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Introduction
+## Giới thiệu
 
-If you can **write to a directory in the system-wide `PATH`** (not merely your user `PATH`), you may be able to **escalate privileges** on the system.
+Nếu bạn có thể **ghi vào một thư mục trong `PATH` toàn hệ thống** (không chỉ `PATH` của người dùng), bạn có thể **leo thang đặc quyền** trên hệ thống.
 
-This can be abused through **DLL hijacking** when a more-privileged service or process tries to load a DLL that does not exist in its earlier search locations and eventually searches the writable system `PATH` directory.
+Có thể lạm dụng điều này thông qua **DLL hijacking** khi một dịch vụ hoặc tiến trình có đặc quyền cao hơn cố tải một DLL không tồn tại ở các vị trí tìm kiếm trước đó và cuối cùng tìm trong thư mục system `PATH` có thể ghi.
 
-A writable Machine `PATH` entry is only a **primitive**, not proof of code execution. For an unpackaged application using the standard search order, `PATH` is reached after redirection, API sets, SxS, the loaded-module list, KnownDLLs, the application and Windows directories, and the current directory. A full path or `LOAD_LIBRARY_SEARCH_*` / `SetDefaultDllDirectories` policy may exclude `PATH` completely.<sup>[[4]](#references)</sup>
+Một mục Machine `PATH` có thể ghi chỉ là một **primitive**, không phải bằng chứng cho thấy mã sẽ được thực thi. Với ứng dụng không đóng gói sử dụng thứ tự tìm kiếm tiêu chuẩn, `PATH` được xét sau redirection, API sets, SxS, danh sách module đã tải, KnownDLLs, thư mục ứng dụng và Windows, cũng như thư mục hiện tại. Chính sách dùng đường dẫn đầy đủ hoặc `LOAD_LIBRARY_SEARCH_*` / `SetDefaultDllDirectories` có thể loại trừ hoàn toàn `PATH`.<sup>[[4]](#references)</sup>
 
-For more information about **DLL hijacking**, see:
+Để biết thêm thông tin về **DLL hijacking**, xem:
 
 {{#ref}}
 ./
 {{#endref}}
 
-## Privesc with DLL Hijacking
+## Leo thang đặc quyền bằng DLL Hijacking
 
-### Finding a Missing DLL
+### Tìm DLL bị thiếu
 
-First, **identify a process** running with **more privileges** that tries to **load a DLL from a writable system `PATH` directory**.
+Trước tiên, **xác định một tiến trình** đang chạy với **đặc quyền cao hơn** và cố **tải DLL từ một thư mục system `PATH` có thể ghi**.
 
-Remember that this technique depends on a **Machine/System PATH** entry, not only on your **User PATH**. Therefore, before spending time on Procmon, it's worth enumerating the **Machine PATH** entries and checking which ones are writable:<sup>[[1]](#references)</sup>
+Hãy nhớ rằng kỹ thuật này phụ thuộc vào mục **Machine/System PATH**, không chỉ **User PATH** của bạn. Vì vậy, trước khi mất thời gian dùng Procmon, bạn nên liệt kê các mục **Machine PATH** và kiểm tra xem mục nào có thể ghi:<sup>[[1]](#references)</sup>
 
 ```powershell
 $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine") -split ';' | Where-Object { $_ }
@@ -35,7 +35,7 @@ $machinePath | ForEach-Object {
 }
 ```
 
-ACL text can be misleading because group membership, deny ACEs, and inherited permissions affect the result. In an authorized test, a create/delete probe checks the **effective access of the current token** (it is intrusive and may generate alerts):<sup>[[1]](#references)</sup>
+ACL text có thể gây hiểu nhầm vì tư cách thành viên nhóm, các deny ACE và quyền kế thừa ảnh hưởng đến kết quả. Trong một cuộc kiểm thử được ủy quyền, phép thử tạo/xóa sẽ kiểm tra **quyền truy cập hiệu lực của token hiện tại** (có tính xâm nhập và có thể tạo cảnh báo):<sup>[[1]](#references)</sup>
 
 ```powershell
 $dirs = [Environment]::GetEnvironmentVariable('Path','Machine') -split ';' |
@@ -49,16 +49,16 @@ foreach ($dir in $dirs) {
 }
 ```
 
-### Confirm the target's effective `PATH`
+### Xác nhận `PATH` hiệu lực của mục tiêu
 
-The Machine `PATH` read from the registry is configuration data; the loader uses the environment block of the **target process**. Every process owns an environment block, and a child normally inherits a copy of its parent's environment. Consequently, a long-running service can retain an older value, and a service launched with a custom environment can differ from the value seen in your shell. Treat an observed Procmon probe of the exact directory by the target PID as ground truth; after changing `PATH` in a lab, restart the relevant process tree or reboot before concluding that the lookup does not occur.<sup>[[5]](#references)</sup>
+`PATH` của Machine được đọc từ registry là dữ liệu cấu hình; loader sử dụng environment block của **process mục tiêu**. Mỗi process có environment block riêng, và process con thường kế thừa một bản sao môi trường của process cha. Vì vậy, một service chạy lâu có thể giữ giá trị cũ, còn service được khởi chạy với môi trường tùy chỉnh có thể khác với giá trị bạn thấy trong shell. Hãy xem Procmon ghi nhận probe của PID mục tiêu đến đúng thư mục là dữ liệu xác thực; sau khi thay đổi `PATH` trong lab, hãy khởi động lại cây process liên quan hoặc reboot trước khi kết luận rằng việc tra cứu không xảy ra.<sup>[[5]](#references)</sup>
 
-The problem in these cases is that those processes are probably already running. To identify DLLs that services try and fail to load, launch Procmon as early as possible (before the processes start), then:
+Vấn đề trong những trường hợp này là các process đó có thể đã chạy từ trước. Để xác định các DLL mà service cố tải nhưng không thành công, hãy khởi chạy Procmon sớm nhất có thể (trước khi các process khởi chạy), sau đó:
 
 > [!WARNING]
-> Adding a user-writable directory to the Machine `PATH` **creates the vulnerable condition**. Do this only in an isolated research VM to reveal which privileged processes reach the `PATH`; on an assessed host, monitor the existing writable entry without changing system configuration.<sup>[[1]](#references)</sup>
+> Thêm một thư mục mà user có thể ghi vào Machine `PATH` **sẽ tạo ra điều kiện dễ bị tấn công**. Chỉ thực hiện việc này trong một research VM cô lập để phát hiện những process đặc quyền nào truy cập `PATH`; trên host đang được đánh giá, hãy theo dõi entry có quyền ghi sẵn có mà không thay đổi cấu hình hệ thống.<sup>[[1]](#references)</sup>
 
-- **Create** the folder `C:\privesc_hijacking` and add the path `C:\privesc_hijacking` to **System Path env variable**. You can do this **manually** or with **PS**:
+- **Tạo** thư mục `C:\privesc_hijacking` và thêm đường dẫn `C:\privesc_hijacking` vào **biến môi trường System Path**. Bạn có thể thực hiện việc này **thủ công** hoặc bằng **PS**:
 
 ```bash
 # Set the folder path to create and check events for
@@ -77,24 +77,24 @@ if ($envPath -notlike "*$folderPath*") {
 }
 ```
 
-- Launch **`procmon`** and go to **`Options`** --> **`Enable boot logging`** and press **`OK`** in the prompt.
-- Then, **reboot**. When the computer is restarted **`procmon`** will start **recording** events asap.
-- Once **Windows** is **started execute `procmon`** again, it'll tell you that it has been running and will **ask you if you want to store** the events in a file. Say **yes** and **store the events in a file**.
-- **After** the **file** is **generated**, **close** the opened **`procmon`** window and **open the events file**.
-- Add these **filters** to find all DLLs that a **process tried to load** from the writable System Path folder:
+- Khởi chạy **`procmon`**, vào **`Options`** --> **`Enable boot logging`** rồi nhấn **`OK`** trong lời nhắc.
+- Sau đó, **khởi động lại**. Khi máy tính khởi động lại, **`procmon`** sẽ bắt đầu **ghi lại** sự kiện ngay lập tức.
+- Sau khi **Windows** **khởi động**, chạy lại `procmon`. Chương trình sẽ thông báo rằng nó đã chạy và **hỏi bạn có muốn lưu** sự kiện vào tệp hay không. Chọn yes và **lưu sự kiện vào tệp**.
+- **Sau khi** **tệp** được **tạo**, **đóng** cửa sổ **`procmon`** đang mở rồi **mở tệp sự kiện**.
+- Thêm các **bộ lọc** sau để tìm tất cả DLL mà một **process đã thử tải** từ thư mục System Path có quyền ghi:
 
 <figure><img src="../../../images/image (945).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> **Boot logging is only required for services that start too early** to observe otherwise. If you can **trigger the target service/program on demand** (for example, by interacting with its COM interface, restarting the service, or relaunching a scheduled task), it is usually faster to keep a normal Procmon capture with filters such as **`Path contains .dll`**, **`Result is NAME NOT FOUND`**, and **`Path begins with <writable_machine_path>`**.
+> Chỉ cần bật **Boot logging** đối với các service khởi động quá sớm để có thể quan sát theo cách khác. Nếu bạn có thể **kích hoạt service/program mục tiêu theo yêu cầu** (ví dụ: tương tác với giao diện COM, khởi động lại service hoặc chạy lại scheduled task), thì thường sẽ nhanh hơn nếu dùng Procmon để capture thông thường với các bộ lọc như **`Path contains .dll`**, **`Result is NAME NOT FOUND`** và **`Path begins with <writable_machine_path>`**.
 
-### Missed DLLs
+### Các DLL bị bỏ sót
 
-Running this in a free **virtual (vmware) Windows 11 machine** I got these results:
+Khi chạy thử trên một máy ảo **Windows 11** miễn phí (**vmware**), tôi nhận được kết quả sau:
 
 <figure><img src="../../../images/image (607).png" alt=""><figcaption></figcaption></figure>
 
-In this case, ignore the `.exe` results. The missing-DLL probes came from:
+Trong trường hợp này, hãy bỏ qua các kết quả `.exe`. Các lần dò tìm DLL bị thiếu đến từ:
 
 | Service                         | Dll                | CMD line                                                             |
 | ------------------------------- | ------------------ | -------------------------------------------------------------------- |
@@ -102,64 +102,64 @@ In this case, ignore the `.exe` results. The missing-DLL probes came from:
 | Diagnostic Policy Service (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
 | ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                |
 
-The following example uses the technique described in this article about [**abusing `WptsExtensions.dll` for privilege escalation**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll).<sup>[[3]](#references)</sup>
+Ví dụ sau sử dụng kỹ thuật được mô tả trong bài viết này về [**abusing `WptsExtensions.dll` for privilege escalation**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll).<sup>[[3]](#references)</sup>
 
-### Other candidates worth triaging
+### Các ứng viên khác đáng để phân loại
 
-`WptsExtensions.dll` is a good example, but it is not the only recurring **phantom DLL** that shows up in privileged services. Modern hunting rules and public hijack catalogs still track names such as:<sup>[[2]](#references)</sup>
+`WptsExtensions.dll` là một ví dụ điển hình, nhưng không phải là **phantom DLL** duy nhất thường xuất hiện trong các service có đặc quyền. Các quy tắc hunting hiện đại và danh mục hijack công khai vẫn theo dõi những tên như sau:<sup>[[2]](#references)</sup>
 
 | Service / Scenario | Missing DLL | Notes |
 | --- | --- | --- |
-| Task Scheduler (`Schedule`) | `WptsExtensions.dll` | Classic **SYSTEM** candidate on client systems. Good when the writable directory is in the **Machine PATH** and the service probes the DLL during startup. |
-| NetMan on Windows Server | `wlanhlp.dll` / `wlanapi.dll` | Interesting on **server editions** because the service runs as **SYSTEM** and can be **triggered on demand by a normal user** in some builds, making it better than reboot-only cases. |
-| Connected Devices Platform Service (`CDPSvc`) | `cdpsgshims.dll` | Usually yields **`NT AUTHORITY\LOCAL SERVICE`** first. That is often still enough because the token has **`SeImpersonatePrivilege`**, so you can chain it with [RoguePotato / PrintSpoofer](../roguepotato-and-printspoofer.md). |
+| Task Scheduler (`Schedule`) | `WptsExtensions.dll` | Ứng viên **SYSTEM** kinh điển trên các hệ thống client. Phù hợp khi thư mục có quyền ghi nằm trong **Machine PATH** và service dò tìm DLL lúc khởi động. |
+| NetMan trên Windows Server | `wlanhlp.dll` / `wlanapi.dll` | Đáng chú ý trên các **phiên bản server** vì service chạy với quyền **SYSTEM** và trong một số bản dựng, **người dùng thông thường có thể kích hoạt theo yêu cầu**, khiến trường hợp này tốt hơn những trường hợp chỉ xảy ra khi khởi động lại. |
+| Connected Devices Platform Service (`CDPSvc`) | `cdpsgshims.dll` | Thường trước tiên sẽ cho kết quả **`NT AUTHORITY\LOCAL SERVICE`**. Điều đó thường vẫn đủ vì token có **`SeImpersonatePrivilege`**, nên bạn có thể kết hợp nó với [RoguePotato / PrintSpoofer](../roguepotato-and-printspoofer.md). |
 
-Treat these names as **triage hints**, not guaranteed wins: they are **SKU/build dependent**, and Microsoft may change the behavior between releases. The important takeaway is to look for **missing DLLs in privileged services that traverse the Machine PATH**, especially if the service can be **re-triggered without rebooting**.
+Hãy xem các tên này là **gợi ý để phân loại**, không phải kết quả chắc chắn: chúng **phụ thuộc vào SKU/bản dựng**, và Microsoft có thể thay đổi hành vi giữa các phiên bản phát hành. Điểm quan trọng là tìm các **DLL bị thiếu trong những service có đặc quyền truy vấn Machine PATH**, đặc biệt nếu có thể **kích hoạt lại service mà không cần khởi động lại**.
 
-### Validate a candidate before weaponizing it
+### Xác thực ứng viên trước khi weaponize
 
-A `NAME NOT FOUND` event by itself is not enough. Before placing a payload, verify the complete chain:<sup>[[1]](#references)[[4]](#references)</sup>
+Một sự kiện `NAME NOT FOUND` riêng lẻ là chưa đủ. Trước khi đặt payload, hãy xác minh toàn bộ chuỗi:<sup>[[1]](#references)[[4]](#references)</sup>
 
-1. The event belongs to the expected **PID, command line, service account, and integrity level**, and the missing path is the exact writable Machine `PATH` directory.
-2. For the same DLL basename, no earlier directory returns `SUCCESS`, and the module is not satisfied by the loaded-module list, KnownDLLs, redirection, or an SxS manifest.
-3. The probe repeats when a low-privileged user invokes the intended trigger. A boot-only lookup is usable but operationally much worse than an on-demand one.
-4. The payload architecture matches the process. If the application later resolves exports, proxy the legitimate DLL or export the expected symbols; see [Creating and compiling DLLs](README.md#creating-and-compiling-dlls).
-5. First use a harmless canary DLL that records the PID, identity, and timestamp. In Procmon, require a successful **`Load Image`** from the planted path rather than assuming that a preceding file probe caused execution.
+1. Sự kiện thuộc về **PID, command line, tài khoản service và mức độ toàn vẹn** dự kiến, đồng thời đường dẫn bị thiếu chính là thư mục Machine `PATH` có quyền ghi.
+2. Với cùng một tên DLL cơ sở, không có thư mục nào đứng trước trả về `SUCCESS`, và module không được tìm thấy trong danh sách module đã nạp, KnownDLLs, cơ chế chuyển hướng hoặc manifest SxS.
+3. Lần dò tìm lặp lại khi người dùng có đặc quyền thấp gọi trigger dự kiến. Tra cứu chỉ xảy ra lúc khởi động vẫn có thể dùng được, nhưng kém thuận tiện hơn nhiều so với trigger theo yêu cầu.
+4. Kiến trúc của payload phải khớp với process. Nếu ứng dụng sau đó phân giải các export, hãy proxy DLL hợp lệ hoặc export các symbol mà ứng dụng mong đợi; xem [Creating and compiling DLLs](README.md#creating-and-compiling-dlls).
+5. Trước tiên, hãy dùng một DLL canary vô hại để ghi lại PID, danh tính và dấu thời gian. Trong Procmon, hãy xác nhận có sự kiện **`Load Image`** thành công từ đường dẫn đã đặt DLL, thay vì cho rằng một lần dò tìm tệp trước đó đã khiến DLL được thực thi.
 
-### Exploitation
+### Khai thác
 
-To **escalate privileges**, hijack **`WptsExtensions.dll`**. Once the **path** and **name** are known, generate the malicious DLL.
+Để **leo thang đặc quyền**, hãy hijack **`WptsExtensions.dll`**. Khi đã biết **đường dẫn** và **tên**, hãy tạo DLL độc hại.
 
-You can [**try to use any of these examples**](README.md#creating-and-compiling-dlls). You could run payloads such as: get a rev shell, add a user, execute a beacon...
+Bạn có thể [**thử dùng bất kỳ ví dụ nào trong số này**](README.md#creating-and-compiling-dlls). Bạn có thể chạy các payload như: lấy rev shell, thêm người dùng, thực thi beacon...
 
 > [!WARNING]
-> Note that **not all services run** as **`NT AUTHORITY\SYSTEM`**. Some run as **`NT AUTHORITY\LOCAL SERVICE`**, which has **fewer privileges**, so abusing one of these services may not let you create a new user.\
-> However, that account has the **`SeImpersonatePrivilege`** user right, so you can use the [**Potato suite to escalate privileges**](../roguepotato-and-printspoofer.md). In this case, a reverse shell is a better option than trying to create a user.
+> Lưu ý rằng **không phải service nào cũng chạy** với quyền **`NT AUTHORITY\SYSTEM`**. Một số chạy với quyền **`NT AUTHORITY\LOCAL SERVICE`**, vốn có **ít đặc quyền hơn**, nên abuse một trong các service này có thể không cho phép bạn tạo người dùng mới.\
+> Tuy nhiên, tài khoản đó có user right **`SeImpersonatePrivilege`**, vì vậy bạn có thể dùng [**bộ công cụ Potato để leo thang đặc quyền**](../roguepotato-and-printspoofer.md). Trong trường hợp này, reverse shell là lựa chọn tốt hơn so với việc cố tạo người dùng.
 
-The **Task Scheduler** service normally runs as **`NT AUTHORITY\SYSTEM`**, but verify the actual deployment and do not infer the execution identity only from the service name:<sup>[[3]](#references)</sup>
+Service **Task Scheduler** thường chạy với quyền **`NT AUTHORITY\SYSTEM`**, nhưng hãy xác minh môi trường triển khai thực tế và đừng suy đoán danh tính thực thi chỉ dựa trên tên service:<sup>[[3]](#references)</sup>
 
 ```powershell
 Get-CimInstance Win32_Service -Filter "Name='Schedule'" | Select-Object Name, StartName, State, PathName
 ```
 
-Having **generated the malicious Dll** (_in my case I used x64 rev shell and I got a shell back but defender killed it because it was from msfvenom_), save it in the writable System Path with the name **WptsExtensions.dll** and **restart** the computer (or restart the service or do whatever it takes to rerun the affected service/program).
+Sau khi **tạo DLL độc hại** (_trong trường hợp của tôi, tôi dùng x64 rev shell và nhận được shell, nhưng Defender đã kill nó vì nó được tạo bằng msfvenom_), hãy lưu nó vào System Path có quyền ghi với tên **WptsExtensions.dll** rồi **khởi động lại** máy tính (hoặc khởi động lại service hay làm bất cứ điều gì cần thiết để chạy lại service/chương trình bị ảnh hưởng).
 
-When the service is re-started, the **DLL should be loaded and executed** (you can **reuse** the **Procmon** trick to check if the **library was loaded as expected**).
+Khi service khởi động lại, **DLL sẽ được tải và thực thi** (bạn có thể **dùng lại** thủ thuật **Procmon** để kiểm tra xem **thư viện có được tải như mong đợi hay không**).
 
 > [!NOTE]
-> Plan cleanup before triggering. A service may keep the DLL mapped and lock the file until it stops; for `WptsExtensions.dll`, stopping Task Scheduler requires elevated rights. After obtaining the intended context, stop the target safely, remove the payload, and restore any lab-only `PATH` change.<sup>[[1]](#references)</sup>
+> Hãy lên kế hoạch cleanup trước khi kích hoạt. Service có thể giữ DLL được map và khóa file cho đến khi dừng; với `WptsExtensions.dll`, cần quyền elevated để dừng Task Scheduler. Sau khi có được context mong muốn, hãy dừng target một cách an toàn, xóa payload và khôi phục mọi thay đổi `PATH` chỉ dùng trong lab.<sup>[[1]](#references)</sup>
 
-### Remediation / detection
+### Khắc phục / phát hiện
 
-Remove weak write grants from every Machine `PATH` directory and remove stale entries. Developers should load trusted libraries by full path or constrain resolution with `SetDefaultDllDirectories` / `LoadLibraryEx` search flags. Defenders can correlate changes to the Machine `PATH` with privileged processes loading DLLs from non-system, user-writable directories.<sup>[[2]](#references)[[4]](#references)</sup>
+Xóa các quyền ghi yếu khỏi mọi thư mục trong Machine `PATH` và xóa các mục cũ. Developer nên tải các library đáng tin cậy bằng full path hoặc giới hạn cơ chế tìm kiếm bằng các cờ `SetDefaultDllDirectories` / `LoadLibraryEx`. Defender có thể đối chiếu các thay đổi đối với Machine `PATH` với những tiến trình có đặc quyền tải DLL từ các thư mục không thuộc hệ thống và cho phép người dùng ghi.<sup>[[2]](#references)[[4]](#references)</sup>
 
 
 
 ## References
 
-- [1] [Windows DLL Hijacking (Hopefully) Clarified](https://itm4n.github.io/windows-dll-hijacking-clarified/)
-- [2] [Suspicious DLL Loaded for Persistence or Privilege Escalation](https://www.elastic.co/guide/en/security/current/suspicious-dll-loaded-for-persistence-or-privilege-escalation.html)
-- [3] [DLL Hijacking – Windows Privilege Escalation](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll)
-- [4] [Dynamic-link library search order](https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order)
-- [5] [Environment Variables](https://learn.microsoft.com/en-us/windows/win32/procthread/environment-variables)
+- [1] [Windows DLL Hijacking (hy vọng đã được giải thích rõ)](https://itm4n.github.io/windows-dll-hijacking-clarified/)
+- [2] [DLL đáng ngờ được tải để duy trì truy cập hoặc leo thang đặc quyền](https://www.elastic.co/guide/en/security/current/suspicious-dll-loaded-for-persistence-or-privilege-escalation.html)
+- [3] [DLL Hijacking – Leo thang đặc quyền trên Windows](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll)
+- [4] [Thứ tự tìm kiếm thư viện liên kết động](https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order)
+- [5] [Biến môi trường](https://learn.microsoft.com/en-us/windows/win32/procthread/environment-variables)
 {{#include ../../../banners/hacktricks-training.md}}

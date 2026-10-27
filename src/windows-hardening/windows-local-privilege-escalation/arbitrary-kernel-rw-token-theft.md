@@ -1,38 +1,38 @@
-# Windows kernel EoP: Token stealing with arbitrary kernel R/W
+# Windows kernel EoP: Token stealing với arbitrary kernel R/W
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Overview
+## Tổng quan
 
-If a vulnerable driver exposes an IOCTL that gives an attacker arbitrary kernel read and/or write primitives, elevating to NT AUTHORITY\SYSTEM can often be achieved by stealing a SYSTEM access token. The technique copies the Token pointer from a SYSTEM process’ EPROCESS into the current process’ EPROCESS.<sup>[[2]](#references)</sup>
+Nếu một vulnerable driver cung cấp IOCTL cho phép attacker có các primitive arbitrary kernel read và/hoặc write, thường có thể nâng quyền lên NT AUTHORITY\SYSTEM bằng cách đánh cắp access token của SYSTEM. Kỹ thuật này sao chép con trỏ Token từ EPROCESS của một SYSTEM process sang EPROCESS của process hiện tại.<sup>[[2]](#references)</sup>
 
-Why it works:
-- Each process has an EPROCESS structure that contains (among other fields) a Token (actually an EX_FAST_REF to a token object).
-- The SYSTEM process (PID 4) holds a token with all privileges enabled.
-- Replacing the current process’ EPROCESS.Token with the SYSTEM token pointer makes the current process run as SYSTEM immediately.<sup>[[1]](#references)</sup>
+Cách thức hoạt động:
+- Mỗi process có một cấu trúc EPROCESS chứa (cùng với các trường khác) Token (thực chất là một EX_FAST_REF trỏ đến token object).
+- SYSTEM process (PID 4) giữ một token có mọi privilege được bật.
+- Thay EPROCESS.Token của process hiện tại bằng con trỏ token của SYSTEM khiến process hiện tại lập tức chạy với quyền SYSTEM.<sup>[[1]](#references)</sup>
 
-> Offsets in EPROCESS vary across Windows versions. Determine them dynamically (symbols) or use version-specific constants. Also remember that EPROCESS.Token is an EX_FAST_REF (low 3 bits are reference count flags).
+> Các offset trong EPROCESS khác nhau tùy phiên bản Windows. Hãy xác định chúng một cách động (symbols) hoặc dùng các hằng số dành riêng cho từng phiên bản. Cũng cần nhớ rằng EPROCESS.Token là một EX_FAST_REF (3 bit thấp là các cờ reference count).
 
-## High-level steps
+## Các bước tổng quát
 
-1) Locate ntoskrnl.exe base and resolve the address of PsInitialSystemProcess.
-   - From user mode, use NtQuerySystemInformation(SystemModuleInformation) or EnumDeviceDrivers to get loaded driver bases.
-   - Add the offset of PsInitialSystemProcess (from symbols/reversing) to the kernel base to get its address.
-2) Read the pointer at PsInitialSystemProcess → this is a kernel pointer to SYSTEM’s EPROCESS.
-3) From SYSTEM EPROCESS, read UniqueProcessId and ActiveProcessLinks offsets to traverse the doubly linked list of EPROCESS structures (ActiveProcessLinks.Flink/Blink) until you find the EPROCESS whose UniqueProcessId equals GetCurrentProcessId(). Keep both:
-   - EPROCESS_SYSTEM (for SYSTEM)
-   - EPROCESS_SELF (for the current process)
-4) Read SYSTEM token value: Token_SYS = *(EPROCESS_SYSTEM + TokenOffset).
-   - Mask out the low 3 bits: Token_SYS_masked = Token_SYS & ~0xF (commonly ~0xF or ~0x7 depending on build; on x64 the low 3 bits are used — 0xFFFFFFFFFFFFFFF8 mask).
-5) Option A (common): Preserve the low 3 bits from your current token and splice them onto SYSTEM’s pointer to keep the embedded ref count consistent.
+1) Xác định base của ntoskrnl.exe và resolve địa chỉ của PsInitialSystemProcess.
+   - Từ user mode, dùng NtQuerySystemInformation(SystemModuleInformation) hoặc EnumDeviceDrivers để lấy base của các driver đã được load.
+   - Cộng offset của PsInitialSystemProcess (lấy từ symbols/reversing) vào kernel base để có địa chỉ của nó.
+2) Đọc con trỏ tại PsInitialSystemProcess → đây là con trỏ kernel đến EPROCESS của SYSTEM.
+3) Từ EPROCESS của SYSTEM, đọc các offset UniqueProcessId và ActiveProcessLinks để duyệt danh sách liên kết đôi các cấu trúc EPROCESS (ActiveProcessLinks.Flink/Blink) cho đến khi tìm thấy EPROCESS có UniqueProcessId bằng GetCurrentProcessId(). Lưu lại cả hai:
+   - EPROCESS_SYSTEM (của SYSTEM)
+   - EPROCESS_SELF (của process hiện tại)
+4) Đọc giá trị token của SYSTEM: Token_SYS = *(EPROCESS_SYSTEM + TokenOffset).
+   - Mask 3 bit thấp: Token_SYS_masked = Token_SYS & ~0xF (thường là ~0xF hoặc ~0x7 tùy build; trên x64, 3 bit thấp được sử dụng — mask 0xFFFFFFFFFFFFFFF8).
+5) Phương án A (phổ biến): Giữ lại 3 bit thấp từ token hiện tại và ghép chúng vào con trỏ của SYSTEM để duy trì tính nhất quán của ref count được nhúng.
    - Token_ME = *(EPROCESS_SELF + TokenOffset)
    - Token_NEW = (Token_SYS_masked | (Token_ME & 0x7))
-6) Write Token_NEW back into (EPROCESS_SELF + TokenOffset) using your kernel write primitive.
-7) Your current process is now SYSTEM. Optionally spawn a new cmd.exe or powershell.exe to confirm.<sup>[[1]](#references)</sup>
+6) Dùng kernel write primitive để ghi Token_NEW trở lại (EPROCESS_SELF + TokenOffset).
+7) Process hiện tại của bạn giờ đã là SYSTEM. Có thể spawn cmd.exe hoặc powershell.exe mới để xác nhận.<sup>[[1]](#references)</sup>
 
 ## Pseudocode
 
-Below is a skeleton that only uses two IOCTLs from a vulnerable driver, one for 8-byte kernel read and one for 8-byte kernel write. Replace with your driver’s interface.<sup>[[1]](#references)</sup>
+Dưới đây là skeleton chỉ dùng hai IOCTL từ một vulnerable driver: một IOCTL để đọc 8 byte kernel và một IOCTL để ghi 8 byte kernel. Thay bằng interface của driver bạn dùng.<sup>[[1]](#references)</sup>
 
 ```c
 #include <Windows.h>
@@ -107,19 +107,18 @@ int main(void) {
 }
 ```
 
-Notes:
-- Offsets: Use WinDbg’s `dt nt!_EPROCESS` with the target’s PDBs, or a runtime symbol loader, to get correct offsets. Do not hardcode blindly.
-- Mask: On x64 the token is an EX_FAST_REF; low 3 bits are reference count bits. Keeping the original low bits from your token avoids immediate refcount inconsistencies.
-- Stability: Prefer elevating the current process; if you elevate a short-lived helper you may lose SYSTEM when it exits.<sup>[[1]](#references)</sup>
+Ghi chú:
+- Offsets: Dùng `dt nt!_EPROCESS` của WinDbg với PDB của mục tiêu hoặc runtime symbol loader để lấy offsets chính xác. Không hardcode một cách mù quáng.
+- Mask: Trên x64, token là EX_FAST_REF; 3 bit thấp là các bit reference count. Giữ nguyên các bit thấp ban đầu từ token của bạn để tránh gây bất nhất refcount tức thì.
+- Stability: Ưu tiên nâng quyền process hiện tại; nếu nâng quyền một helper tồn tại ngắn hạn, bạn có thể mất quyền SYSTEM khi nó thoát.<sup>[[1]](#references)</sup>
 
-## Detection & mitigation
-- Loading unsigned or untrusted third‑party drivers that expose powerful IOCTLs is the root cause.
-- Kernel Driver Blocklist (HVCI/CI), DeviceGuard, and Attack Surface Reduction rules can prevent vulnerable drivers from loading.
-- EDR can watch for suspicious IOCTL sequences that implement arbitrary read/write and for token swaps.
+## Phát hiện & giảm thiểu
+- Nguyên nhân gốc là việc load các driver bên thứ ba không được ký hoặc không đáng tin cậy, có các IOCTL mạnh.
+- Kernel Driver Blocklist (HVCI/CI), DeviceGuard và các quy tắc Attack Surface Reduction có thể ngăn các driver dễ bị tấn công được load.
+- EDR có thể theo dõi các chuỗi IOCTL đáng ngờ dùng để thực hiện arbitrary read/write và các lần hoán đổi token.
 
 ## References
 
-- [1] [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
-- [2] [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
-
+- [1] [HTB Reaper: Lỗi leak format string + stack BOF → VirtualAlloc ROP (RCE) và đánh cắp kernel token](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
+- [2] [FuzzySecurity – Windows Kernel ExploitDev (ví dụ đánh cắp token)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
 {{#include ../../banners/hacktricks-training.md}}

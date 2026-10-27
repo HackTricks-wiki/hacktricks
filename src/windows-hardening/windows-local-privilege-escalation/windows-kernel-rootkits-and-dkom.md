@@ -1,16 +1,16 @@
-# Windows Kernel Rootkits and DKOM
+# Rootkit nhân Windows và DKOM
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Scope
+## Phạm vi
 
-A post-compromise implant can load a signed kernel driver as a service and expose a user-mode control plane through `IRP_MJ_DEVICE_CONTROL`. Driver signing only establishes that Windows accepts the image; it does not make the IOCTL authorization, memory operations, callbacks, or hooks safe. One analyzed rootkit used three handlers during normal operation but exposed dozens of additional post-exploitation primitives, so reverse engineering must cover the complete dispatcher rather than only the requests observed in a malware trace.<sup>[[1]](#references)</sup>
+Một implant hậu xâm nhập có thể tải một kernel driver đã ký dưới dạng service và cung cấp mặt phẳng điều khiển user-mode thông qua `IRP_MJ_DEVICE_CONTROL`. Việc ký driver chỉ xác nhận rằng Windows chấp nhận image; điều đó không khiến việc phân quyền IOCTL, thao tác bộ nhớ, callback hay hook trở nên an toàn. Một rootkit được phân tích sử dụng ba handler trong hoạt động bình thường nhưng cung cấp thêm hàng chục primitive hậu khai thác, vì vậy việc reverse engineering phải bao quát toàn bộ dispatcher thay vì chỉ các request quan sát được trong một dấu vết malware.<sup>[[1]](#references)</sup>
 
-## Signed-driver and IOCTL triage
+## Phân loại driver đã ký và IOCTL
 
-Start at `DriverEntry`, record device objects and DOS symbolic links, locate the `MajorFunction[IRP_MJ_DEVICE_CONTROL]` routine, and map every comparison/table entry that reaches a handler. Cross-check the names opened by user mode against the names actually created by the driver: one observed chain opened `\\.\msagent`, while its driver created `\Device\ToolTool` and `\DosDevices\ToolTool`. This mismatch can identify another sample/configuration, missing setup logic, or an analysis inconsistency.<sup>[[1]](#references)</sup>
+Bắt đầu từ `DriverEntry`, ghi lại các device object và symbolic link DOS, tìm routine `MajorFunction[IRP_MJ_DEVICE_CONTROL]`, rồi lập bản đồ mọi phép so sánh/mục trong bảng dẫn đến một handler. Đối chiếu tên mà user-mode mở với tên mà driver thực sự tạo: một chuỗi được quan sát đã mở `\\.\msagent`, trong khi driver tạo `\Device\ToolTool` và `\DosDevices\ToolTool`. Sự không khớp này có thể cho thấy có một sample/cấu hình khác, thiếu logic thiết lập hoặc có điểm không nhất quán trong quá trình phân tích.<sup>[[1]](#references)</sup>
 
-Decode each control code before reconstructing its input structure.<sup>[[1]](#references)</sup>
+Giải mã từng control code trước khi tái dựng cấu trúc input của nó.<sup>[[1]](#references)</sup>
 
 ```python
 def decode_ioctl(code):
@@ -25,79 +25,78 @@ for code in (0x2220F0, 0x222120, 0x2221E0):
     print(hex(code), decode_ioctl(code))
 ```
 
-These three codes decode as `FILE_DEVICE_UNKNOWN`, `FILE_ANY_ACCESS`, and `METHOD_BUFFERED`. That does **not** prove an unprivileged caller can reach them: also inspect the device DACL, create/open dispatch, per-request caller checks, expected buffer lengths, embedded pointers, PID lifetime handling, and whether the handler trusts a caller-supplied PID or flag.<sup>[[1]](#references)</sup>
+Ba mã này giải mã thành `FILE_DEVICE_UNKNOWN`, `FILE_ANY_ACCESS` và `METHOD_BUFFERED`. Điều đó **không** chứng minh người gọi không có đặc quyền có thể truy cập chúng: hãy kiểm tra thêm DACL của thiết bị, các hàm dispatch create/open, kiểm tra caller trên từng request, độ dài buffer được yêu cầu, con trỏ nhúng, cách xử lý vòng đời PID và liệu handler có tin PID hoặc flag do caller cung cấp hay không.<sup>[[1]](#references)</sup>
 
-When the implant uses only a subset of commands, group the remaining handlers by primitive rather than dismissing them as dead code. A single multifunction driver has exposed all of the following classes:<sup>[[1]](#references)</sup>
+Khi implant chỉ dùng một tập hợp lệnh con, hãy nhóm các handler còn lại theo primitive thay vì coi chúng là code chết. Một driver đa chức năng duy nhất đã để lộ tất cả các nhóm sau:<sup>[[1]](#references)</sup>
 
-- **Control/configuration:** toggle rootkit state; add, remove, query, or clear protected paths, processes, and C2 addresses.
-- **Process manipulation:** terminate a PID, unmap its image, inject with `NtCreateThreadEx`, hide/restore processes or user modules, and remove PPL protection.
-- **Kernel manipulation:** unlink a loaded driver, enumerate/disable/restore notification callbacks, manually map another driver, and write to an arbitrary kernel address.
-- **Object manipulation:** delete/decrypt files and create or modify registry values.
+- **Điều khiển/cấu hình:** bật/tắt trạng thái rootkit; thêm, xóa, truy vấn hoặc xóa sạch các đường dẫn, tiến trình và địa chỉ C2 được bảo vệ.
+- **Thao túng tiến trình:** chấm dứt một PID, unmap image của nó, inject bằng `NtCreateThreadEx`, ẩn/khôi phục tiến trình hoặc user module, và gỡ bỏ bảo vệ PPL.
+- **Thao túng kernel:** unlink một driver đã load, liệt kê/vô hiệu hóa/khôi phục notification callback, map thủ công một driver khác và ghi vào địa chỉ kernel tùy ý.
+- **Thao túng object:** xóa/giải mã file và tạo hoặc sửa registry value.
 
-## Manual kernel mapping through a vulnerable signed driver
+## Map kernel thủ công thông qua vulnerable signed driver
 
-A signed driver with kernel-memory read/write operations can provide a loader for an unsigned driver image without asking Windows to load that image as a normal driver.<sup>[[2]](#references)[[7]](#references)</sup> The LocalStranger example opens an existing `\\.\WinNotify` device; its source does not show that an unprivileged user can install, start, or open the driver on an arbitrary host.<sup>[[2]](#references)[[3]](#references)</sup> The mapper takes an image path, queries the loaded kernel's base, and uses the device's virtual-memory read/write IOCTLs.<sup>[[4]](#references)[[9]](#references)[[10]](#references)</sup>
+Một signed driver có các thao tác đọc/ghi kernel memory có thể cung cấp loader cho một unsigned driver image mà không yêu cầu Windows load image đó như một driver thông thường.<sup>[[2]](#references)[[7]](#references)</sup> Ví dụ LocalStranger mở một thiết bị `\\.\WinNotify` có sẵn; source của nó không cho thấy người dùng không có đặc quyền có thể cài đặt, khởi động hoặc mở driver trên một host bất kỳ.<sup>[[2]](#references)[[3]](#references)</sup> Mapper nhận đường dẫn image, truy vấn base của kernel đã load và sử dụng các IOCTL đọc/ghi virtual memory của thiết bị.<sup>[[4]](#references)[[9]](#references)[[10]](#references)</sup>
 
-To turn that read/write access into a kernel call, the mapper reads a PTE-base immediate from `MmGetVirtualForPhysical` and walks the paging entries covering `NtAddAtom`.<sup>[[5]](#references)[[7]](#references)</sup> Its PTE calculation is `PteBase + ((VA >> 9) & 0x7FFFFFFFF8)`; the code also checks for a large-page PDE.<sup>[[5]](#references)[[7]](#references)</sup> It temporarily makes the covering entry writable, replaces the syscall entry with a jump to the desired kernel function, invokes the user-mode `NtAddAtom` stub, then restores both the original bytes and page entry.<sup>[[6]](#references)</sup>
+Để biến quyền đọc/ghi đó thành một lời gọi kernel, mapper đọc một immediate chứa PTE-base từ `MmGetVirtualForPhysical` rồi duyệt các paging entry bao phủ `NtAddAtom`.<sup>[[5]](#references)[[7]](#references)</sup> Phép tính PTE là `PteBase + ((VA >> 9) & 0x7FFFFFFFF8)`; code cũng kiểm tra PDE của large page.<sup>[[5]](#references)[[7]](#references)</sup> Nó tạm thời cho phép ghi vào entry bao phủ, thay syscall entry bằng một jump đến kernel function mong muốn, gọi user-mode stub `NtAddAtom`, sau đó khôi phục cả byte ban đầu lẫn page entry.<sup>[[6]](#references)</sup>
 
-The mapper uses that call path for `ExAllocatePool`, maps PE sections, imports and relocations into the image, writes it to the allocation, and calls its entry point.<sup>[[7]](#references)[[8]](#references)</sup> This implementation accepts only x64, relocatable PE images; its PTE-base read also assumes a fixed `MmGetVirtualForPhysical + 34` layout.<sup>[[5]](#references)[[8]](#references)</sup> Treat it as build-dependent, not an independent KASLR bypass or proof that HVCI or PatchGuard permits the mapping.<sup>[[5]](#references)[[8]](#references)</sup> For a data-only use of kernel R/W, see [SYSTEM token theft](arbitrary-kernel-rw-token-theft.md).
+Mapper dùng đường gọi đó cho `ExAllocatePool`, map các PE section, import và relocation vào image, ghi image vào vùng cấp phát rồi gọi entry point của nó.<sup>[[7]](#references)[[8]](#references)</sup> Triển khai này chỉ chấp nhận PE image x64 có thể relocation; thao tác đọc PTE-base cũng giả định layout cố định `MmGetVirtualForPhysical + 34`.<sup>[[5]](#references)[[8]](#references)</sup> Hãy xem đây là kỹ thuật phụ thuộc vào build, không phải cách bypass KASLR độc lập hay bằng chứng rằng HVCI hoặc PatchGuard cho phép việc map này.<sup>[[5]](#references)[[8]](#references)</sup> Để dùng kernel R/W chỉ nhằm thao tác dữ liệu, xem [SYSTEM token theft](arbitrary-kernel-rw-token-theft.md).
 
-## Trusted-process exemptions
+## Miễn trừ cho tiến trình đáng tin cậy
 
-A useful design pattern is an IOCTL that registers a PID plus a **trusted** flag. The same trust lookup is then consulted by file, registry, process, and thread filters: untrusted tools receive filtered enumeration results, reduced handle rights, or `STATUS_ACCESS_DENIED`, while the implant can still update its own hidden objects. Treat this as an authorization boundary and verify how entries are authenticated, synchronized, and removed after process exit or PID reuse.<sup>[[1]](#references)</sup>
+Một mẫu thiết kế hữu ích là IOCTL đăng ký PID cùng một flag **trusted**. Cùng một cơ chế tra cứu trust sau đó được dùng trong các bộ lọc file, registry, process và thread: công cụ không đáng tin cậy nhận kết quả liệt kê đã lọc, quyền handle bị giảm hoặc `STATUS_ACCESS_DENIED`, trong khi implant vẫn có thể cập nhật các object ẩn của chính nó. Hãy xem đây là ranh giới ủy quyền và xác minh cách các entry được xác thực, đồng bộ hóa và xóa sau khi tiến trình kết thúc hoặc PID được tái sử dụng.<sup>[[1]](#references)</sup>
 
-Rootkits can persist policy in `REG_MULTI_SZ` values and compile file, directory, registry-key, registry-value, ignored-image, protected-image, and hidden-image lists into AVL trees. During analysis, trace every reader and writer of these shared trees; it links registry configuration, IOCTLs, callbacks, and filtering logic even when function names are stripped.<sup>[[1]](#references)</sup>
+Rootkit có thể lưu policy trong các giá trị `REG_MULTI_SZ` và biên dịch danh sách file, directory, registry key, registry value, image bị bỏ qua, image được bảo vệ và image bị ẩn thành AVL tree. Khi phân tích, hãy lần theo mọi nơi đọc và ghi các tree dùng chung này; chúng kết nối cấu hình registry, IOCTL, callback và logic lọc ngay cả khi tên function đã bị loại bỏ.<sup>[[1]](#references)</sup>
 
-## DKOM process and module hiding
+## Ẩn process và module bằng DKOM
 
 ### `EPROCESS.ActiveProcessLinks`
 
-`ActiveProcessLinks` offsets vary by Windows build. A version-tolerant rootkit can test known candidates and then scan `EPROCESS` for a self-consistent `LIST_ENTRY` whose neighbors point back to the candidate. It retains the discovered offset, hides a process by reconnecting its neighbors' `Flink`/`Blink`, and preserves state to relink the entry later. The process continues running but disappears from enumerators that walk the active-process list.<sup>[[1]](#references)</sup>
+Offset của `ActiveProcessLinks` thay đổi theo Windows build. Rootkit tương thích nhiều phiên bản có thể kiểm tra các offset đã biết rồi quét `EPROCESS` để tìm một `LIST_ENTRY` nhất quán, có các node lân cận trỏ ngược về candidate. Nó lưu offset tìm được, ẩn một tiến trình bằng cách nối lại `Flink`/`Blink` của các node lân cận và giữ trạng thái để liên kết lại entry sau đó. Tiến trình vẫn chạy nhưng biến mất khỏi các enumerator duyệt active-process list.<sup>[[1]](#references)</sup>
 
-This is **DKOM**, not termination. Detection should compare list-based results with independent evidence such as pool/object scans, thread ownership, handle tables, scheduler artifacts, and kernel memory inspection. A process visible to a scan but absent from the canonical list is more meaningful than either view alone.<sup>[[1]](#references)</sup>
+Đây là **DKOM**, không phải chấm dứt tiến trình. Việc phát hiện cần đối chiếu kết quả dựa trên list với các bằng chứng độc lập như quét pool/object, quyền sở hữu thread, handle table, dấu vết scheduler và kiểm tra kernel memory. Một tiến trình xuất hiện trong kết quả quét nhưng không có trong list chuẩn có ý nghĩa hơn khi xem riêng từng góc nhìn.<sup>[[1]](#references)</sup>
 
 ### `PsLoadedModuleList`
 
-The equivalent module-hiding primitive finds the target entry in `PsLoadedModuleList` and patches adjacent `Flink`/`Blink` pointers. The driver remains mapped and executable, but list-backed module queries omit it. Compare the loader list with executable kernel mappings, pool tags, device/driver objects, service keys, callback addresses, and dispatch pointers that land outside a listed image.<sup>[[1]](#references)</sup>
+Primitive ẩn module tương tự tìm entry mục tiêu trong `PsLoadedModuleList` rồi sửa các con trỏ `Flink`/`Blink` liền kề. Driver vẫn được map và có thể thực thi, nhưng các truy vấn module dựa trên list sẽ không liệt kê nó. Hãy đối chiếu loader list với executable kernel mapping, pool tag, device/driver object, service key, callback address và dispatch pointer trỏ ra ngoài image được liệt kê.<sup>[[1]](#references)</sup>
 
-## Callback-based protection and cloaking
+## Bảo vệ và che giấu bằng callback
 
-A rootkit can layer documented callback frameworks with DKOM and hooks:<sup>[[1]](#references)</sup>
+Rootkit có thể kết hợp các callback framework được tài liệu hóa với DKOM và hook:<sup>[[1]](#references)</sup>
 
-- `ObRegisterCallbacks` pre-operation handlers for `PsProcessType` and `PsThreadType` remove rights used for termination, VM access, duplication, or thread manipulation when an untrusted caller opens a protected target. Record the callback altitude and resolve each callback address to its owning module.
-- `PsSetCreateProcessNotifyRoutineEx` and `PsSetLoadImageNotifyRoutine` maintain protected/ignored/hidden process state as processes and images appear; a one-time process walk can backfill objects that existed before registration.
-- A filesystem minifilter denies access to configured paths. An unusual implementation may create its `Instances` key, choose an altitude dynamically, and increment/retry when `FltRegisterFilter` reports a collision.
-- A `CmRegisterCallbackEx` routine can suppress protected names from enumeration and deny direct open, rename, set, or delete operations while exempting registered trusted processes.
+- Handler pre-operation của `ObRegisterCallbacks` dành cho `PsProcessType` và `PsThreadType` loại bỏ các quyền dùng để chấm dứt, truy cập VM, duplicate hoặc thao túng thread khi caller không đáng tin cậy mở một target được bảo vệ. Ghi lại altitude của callback và xác định module sở hữu từng callback address.
+- `PsSetCreateProcessNotifyRoutineEx` và `PsSetLoadImageNotifyRoutine` duy trì trạng thái tiến trình được bảo vệ/bỏ qua/ẩn khi tiến trình và image xuất hiện; một lần duyệt tiến trình có thể bổ sung các object đã tồn tại trước khi đăng ký.
+- Filesystem minifilter từ chối truy cập vào các đường dẫn được cấu hình. Một triển khai khác thường có thể tạo key `Instances`, chọn altitude động và tăng giá trị/thử lại khi `FltRegisterFilter` báo xung đột.
+- Routine `CmRegisterCallbackEx` có thể ẩn các tên được bảo vệ khỏi kết quả liệt kê và từ chối thao tác mở trực tiếp, đổi tên, đặt hoặc xóa, đồng thời miễn trừ các tiến trình đáng tin cậy đã đăng ký.
 
-Correlate `ObRegisterCallbacks` registrations, registry-callback altitudes, `fltmc filters` output, service `Instances` keys, and callback addresses. If normal tools are being filtered, inspect these structures from an offline memory image or another trusted acquisition layer.<sup>[[1]](#references)</sup>
+Đối chiếu các đăng ký `ObRegisterCallbacks`, registry-callback altitude, kết quả `fltmc filters`, service `Instances` key và callback address. Nếu các công cụ thông thường bị lọc, hãy kiểm tra những cấu trúc này từ offline memory image hoặc một lớp thu thập đáng tin cậy khác.<sup>[[1]](#references)</sup>
 
-## Nsiproxy result filtering
+## Lọc kết quả Nsiproxy
 
-Network concealment can target `\Driver\Nsiproxy`: obtain the driver object with `ObReferenceObjectByName`, save a handler pointer, replace it with a wrapper, and remove returned IPv4 records matching an IOCTL-managed C2 list before user mode receives them. Applications backed by the filtered NSI data may no longer display the connection even though the traffic still exists.<sup>[[1]](#references)</sup>
+Cơ chế che giấu mạng có thể nhắm đến `\Driver\Nsiproxy`: lấy driver object bằng `ObReferenceObjectByName`, lưu handler pointer, thay nó bằng một wrapper rồi loại bỏ các IPv4 record được trả về nếu khớp với danh sách C2 do IOCTL quản lý, trước khi dữ liệu đến user mode. Các ứng dụng dựa trên dữ liệu NSI đã lọc có thể không còn hiển thị kết nối dù traffic vẫn tồn tại.<sup>[[1]](#references)</sup>
 
-Compare host connection views with packet capture, WFP/ETW telemetry, and kernel-memory network objects. Also inspect `Nsiproxy` dispatch/handler pointers and confirm that each resolves inside the expected signed module; a pointer into an unlisted mapping can connect network filtering with `PsLoadedModuleList` DKOM.<sup>[[1]](#references)</sup>
+Đối chiếu chế độ xem kết nối trên host với packet capture, WFP/ETW telemetry và network object trong kernel memory. Đồng thời kiểm tra dispatch/handler pointer của `Nsiproxy` và xác nhận mỗi pointer đều trỏ vào signed module dự kiến; một pointer nằm trong mapping không được liệt kê có thể kết nối việc lọc mạng với DKOM trên `PsLoadedModuleList`.<sup>[[1]](#references)</sup>
 
-## Investigation checklist
+## Checklist điều tra
 
-The strongest signal is disagreement between layers, not one filename or hash. Correlate:<sup>[[1]](#references)</sup>
+Dấu hiệu mạnh nhất là sự bất nhất giữa các lớp, không phải một filename hay hash đơn lẻ. Hãy đối chiếu:<sup>[[1]](#references)</sup>
 
-1. Kernel-service creation and a signed driver whose certificate age, publisher, or path is inconsistent with the installed product.
-2. Device creation, DOS links, and IOCTL traffic, including mismatched user-mode and kernel device names.
-3. A PID registration request followed by failures from other processes to open, enumerate, modify, or delete the same objects.
-4. Object/registry/process/image callbacks, minifilter instances, and hooks whose addresses do not belong to a normally enumerated driver.
-5. Differences between list-based and scan-based process, module, callback, and network inventories.
+1. Việc tạo kernel service và một signed driver có tuổi chứng chỉ, publisher hoặc đường dẫn không phù hợp với sản phẩm đã cài đặt.
+2. Việc tạo device, DOS link và IOCTL traffic, bao gồm tên device phía user mode và kernel không khớp nhau.
+3. Một request đăng ký PID, sau đó là việc các tiến trình khác không thể mở, liệt kê, sửa đổi hoặc xóa cùng những object đó.
+4. Object/registry/process/image callback, minifilter instance và hook có address không thuộc về driver được liệt kê bình thường.
+5. Khác biệt giữa inventory process, module, callback và network dựa trên list với dựa trên scan.
 
 ## References
 
-- [1] [Kaspersky Securelist - HoneyMyte Enhances CoolClient with a Signed Windows Kernel Rootkit](https://securelist.com/honeymyte-coolclient-driver-rootkit/121028)
-- [2] [LocalStranger README](https://github.com/nbs32k/LocalStranger/blob/master/README.md)
-- [3] [LocalStranger driver initialization](https://github.com/nbs32k/LocalStranger/blob/master/lsapi/init.c)
-- [4] [LocalStranger mapper command line](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/main.cpp)
-- [5] [LocalStranger kernel export and PTE-base resolution](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/core/utils.cpp)
-- [6] [LocalStranger kernel-call trampoline](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/mapper/mapper.h)
-- [7] [LocalStranger mapper allocation and entry call](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/mapper/mapper.cpp)
-- [8] [LocalStranger PE mapping](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/mapper/pe.cpp)
-- [9] [LocalStranger kernel and syscall context](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/core/context.cpp)
-- [10] [LocalStranger virtual-memory IOCTL wrappers](https://github.com/nbs32k/LocalStranger/blob/master/lsapi/virtual.c)
-
+- [1] [Kaspersky Securelist - HoneyMyte cải tiến CoolClient bằng Windows kernel rootkit có chữ ký](https://securelist.com/honeymyte-coolclient-driver-rootkit/121028)
+- [2] [README LocalStranger](https://github.com/nbs32k/LocalStranger/blob/master/README.md)
+- [3] [Khởi tạo driver LocalStranger](https://github.com/nbs32k/LocalStranger/blob/master/lsapi/init.c)
+- [4] [Command line của LocalStranger mapper](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/main.cpp)
+- [5] [Giải quyết kernel export và PTE-base của LocalStranger](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/core/utils.cpp)
+- [6] [Kernel-call trampoline của LocalStranger](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/mapper/mapper.h)
+- [7] [Cấp phát và gọi entry của LocalStranger mapper](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/mapper/mapper.cpp)
+- [8] [PE mapping của LocalStranger](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/mapper/pe.cpp)
+- [9] [Ngữ cảnh kernel và syscall của LocalStranger](https://github.com/nbs32k/LocalStranger/blob/master/lsmapper/core/context.cpp)
+- [10] [Virtual-memory IOCTL wrapper của LocalStranger](https://github.com/nbs32k/LocalStranger/blob/master/lsapi/virtual.c)
 {{#include ../../banners/hacktricks-training.md}}

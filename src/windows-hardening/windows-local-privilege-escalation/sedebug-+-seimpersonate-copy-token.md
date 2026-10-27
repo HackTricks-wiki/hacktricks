@@ -2,15 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-This page covers the **manual token-theft** variant where a **High Integrity** context that already has **`SeDebugPrivilege`** and **`SeImpersonatePrivilege`** opens a suitable **SYSTEM** process, **duplicates its token**, and **spawns a new process** with that token.
+Trang này trình bày biến thể **manual token-theft**, trong đó một context **High Integrity** đã có **`SeDebugPrivilege`** và **`SeImpersonatePrivilege`** mở một process **SYSTEM** phù hợp, **duplicate token** của process đó, rồi **spawn process** mới bằng token này.
 
-If you only need a quick `SYSTEM` shell from a privileged admin process, also check:
+Nếu bạn chỉ cần một shell `SYSTEM` nhanh từ một process admin có đặc quyền, hãy xem thêm:
 
 {{#ref}}
 seimpersonate-from-high-to-system.md
 {{#endref}}
 
-If you do **not** have a process-handle path but you do have **`SeImpersonatePrivilege`**, the **named-pipe / Potato** route is usually easier:
+Nếu bạn **không** có đường dẫn đến process handle nhưng có **`SeImpersonatePrivilege`**, cách **named-pipe / Potato** thường dễ hơn:
 
 {{#ref}}
 named-pipe-client-impersonation.md
@@ -20,41 +20,41 @@ named-pipe-client-impersonation.md
 roguepotato-and-printspoofer.md
 {{#endref}}
 
-## Quick triage
+## Phân loại nhanh
 
-Before trying the token-copy path, confirm that the current process is already in a useful context:
+Trước khi thử cách copy token, hãy xác nhận process hiện tại đã ở trong một context phù hợp:
 
 ```cmd
 whoami /groups | findstr /i "high mandatory"
 whoami /priv | findstr /i "SeDebugPrivilege SeImpersonatePrivilege"
 ```
 
-Notes:
+Ghi chú:
 
-- **`SeDebugPrivilege`** is what lets you open many **non-protected** SYSTEM processes even when their DACL would normally block you.
-- **`SeImpersonatePrivilege`** is what makes **`CreateProcessWithTokenW`** practical afterwards.
-- If the token-copy path only gives you a weak or filtered SYSTEM token, just steal from a **different SYSTEM process**.
+- **`SeDebugPrivilege`** cho phép bạn mở nhiều tiến trình SYSTEM **không được bảo vệ**, ngay cả khi DACL của chúng thường sẽ chặn bạn.
+- **`SeImpersonatePrivilege`** giúp **`CreateProcessWithTokenW`** trở nên hữu dụng sau đó.
+- Nếu đường dẫn sao chép token chỉ cung cấp cho bạn một token SYSTEM yếu hoặc đã bị lọc, hãy đánh cắp token từ **một tiến trình SYSTEM khác**.
 
-## Pick the target process carefully
+## Chọn tiến trình mục tiêu cẩn thận
 
-The technique is usually shown against **`lsass.exe`**, but on modern Windows that is often the **wrong target**:
+Kỹ thuật này thường được minh họa với **`lsass.exe`**, nhưng trên Windows hiện đại, đó thường là **mục tiêu sai**:
 
-- If **LSA Protection / RunAsPPL** is enabled, **`lsass.exe`** is protected and a normal admin process with `SeDebugPrivilege` still won't be able to open it.<sup>[[2]](#references)</sup>
-- Prefer **non-PPL SYSTEM processes** such as **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`**, or an early **`svchost.exe`** instance.
-- **Protected processes** and some special processes such as **`System`** or **`csrss.exe`** are not realistic user-mode targets for this technique.
-- Use **Process Hacker / Process Explorer** running elevated to verify whether the target token actually has the privileges you want before duplicating it.
+- Nếu bật **LSA Protection / RunAsPPL**, **`lsass.exe`** được bảo vệ và một tiến trình admin thông thường có `SeDebugPrivilege` vẫn không thể mở nó.<sup>[[2]](#references)</sup>
+- Ưu tiên các tiến trình SYSTEM không phải PPL, chẳng hạn như **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`** hoặc một phiên bản **`svchost.exe`** khởi chạy sớm.
+- **Tiến trình được bảo vệ** và một số tiến trình đặc biệt như **`System`** hoặc **`csrss.exe`** không phải là mục tiêu thực tế cho kỹ thuật này ở user-mode.
+- Dùng **Process Hacker / Process Explorer** chạy với quyền elevated để xác minh token của mục tiêu thực sự có các đặc quyền bạn cần trước khi sao chép token đó.
 
-## API details that matter in practice
+## Chi tiết API quan trọng trong thực tế
 
-A lot of public PoCs request **`PROCESS_ALL_ACCESS`** and **`TOKEN_ALL_ACCESS`**, but that is noisier than necessary. In practice:
+Nhiều PoC công khai yêu cầu **`PROCESS_ALL_ACCESS`** và **`TOKEN_ALL_ACCESS`**, nhưng cách đó gây chú ý hơn mức cần thiết. Trong thực tế:
 
-- Open the target process with only the rights you need (commonly **`PROCESS_QUERY_INFORMATION`** or **`PROCESS_QUERY_LIMITED_INFORMATION`**).
-- Open the token with the rights needed for process creation: **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
-- Use **`DuplicateTokenEx(..., TokenPrimary, ...)`** to create a **primary token**; an impersonation token alone is not enough to create a new process.
-- If **`CreateProcessWithTokenW`** fails with **`1314`**, switch to **`CreateProcessAsUserW`**.
-- If you launch from a **service / Session 0**, remember that **`CreateProcessWithTokenW`** keeps the child in the **caller's session**. If you need a visible desktop shell, use **`CreateProcessAsUserW`** and move the token to the desired session.<sup>[[1]](#references)</sup>
+- Mở tiến trình mục tiêu chỉ với những quyền bạn cần (thường là **`PROCESS_QUERY_INFORMATION`** hoặc **`PROCESS_QUERY_LIMITED_INFORMATION`**).
+- Mở token với các quyền cần thiết để tạo tiến trình: **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
+- Dùng **`DuplicateTokenEx(..., TokenPrimary, ...)`** để tạo **primary token**; chỉ có impersonation token thì không đủ để tạo tiến trình mới.
+- Nếu **`CreateProcessWithTokenW`** thất bại với mã **`1314`**, hãy chuyển sang **`CreateProcessAsUserW`**.
+- Nếu bạn khởi chạy từ **service / Session 0**, hãy nhớ rằng **`CreateProcessWithTokenW`** giữ tiến trình con trong **session của tiến trình gọi**. Nếu cần một shell desktop hiển thị được, hãy dùng **`CreateProcessAsUserW`** và chuyển token sang session mong muốn.<sup>[[1]](#references)</sup>
 
-A minimal modern flow looks like:
+Một luồng xử lý hiện đại tối giản như sau:
 
 ```c
 HANDLE hp = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
@@ -67,15 +67,15 @@ CreateProcessWithTokenW(hDup, LOGON_WITH_PROFILE,
                         NULL, 0, NULL, NULL, &si, &pi);
 ```
 
-## Full service PoC
+## PoC dịch vụ đầy đủ
 
-The following code **exploits the privileges `SeDebugPrivilege` and `SeImpersonatePrivilege`** to copy the token from a **process running as SYSTEM** and with **all the token privileges**. In this case, the code can be compiled and used as a **Windows service binary** to verify that the primitive works.<sup>[[3]](#references)</sup>
+Đoạn code sau **khai thác các quyền `SeDebugPrivilege` và `SeImpersonatePrivilege`** để sao chép token từ một **process chạy với quyền SYSTEM** và có **tất cả các token privilege**. Trong trường hợp này, có thể biên dịch code và dùng làm **Windows service binary** để xác minh primitive này hoạt động.<sup>[[3]](#references)</sup>
 
-The main part of the **code where the elevation occurs** is inside the **`Exploit`** function. Inside that function you can see that **`lsass.exe`** is searched, its **token is copied**, and finally that token is used to spawn a new **`cmd.exe`** with all the privileges of the copied token.
+Phần chính của **code thực hiện nâng quyền** nằm trong hàm **`Exploit`**. Bên trong hàm đó, bạn có thể thấy **`lsass.exe`** được tìm kiếm, **token của nó được sao chép**, và cuối cùng token đó được dùng để khởi chạy một **`cmd.exe`** mới với tất cả privilege của token đã sao chép.
 
-On modern hosts, you will often want to replace **`lsass.exe`** with another **non-PPL SYSTEM process** such as **`winlogon.exe`**, **`wininit.exe`**, or **`services.exe`**.
+Trên các host hiện đại, bạn thường sẽ muốn thay **`lsass.exe`** bằng một **process SYSTEM không phải PPL** khác, chẳng hạn như **`winlogon.exe`**, **`wininit.exe`** hoặc **`services.exe`**.
 
-Other processes running as SYSTEM with all or most of the token privileges are: **`services.exe`**, **`svchost.exe`** (some of the first ones), **`wininit.exe`**, **`csrss.exe`**... Remember that you generally **won't be able to copy a token from a protected process**.
+Các process khác chạy với quyền SYSTEM và có tất cả hoặc hầu hết token privilege là: **`services.exe`**, **`svchost.exe`** (một số process đầu tiên), **`wininit.exe`**, **`csrss.exe`**... Hãy nhớ rằng nhìn chung bạn **không thể sao chép token từ một protected process**.
 
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
@@ -284,8 +284,7 @@ int _tmain( int argc, TCHAR* argv[] )
 
 ## References
 
-- [1] [CreateProcessWithTokenW function (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
-- [2] [Configure added LSA protection (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
-- [3] [Running my program as a service (cboard.cprogramming.com) – Windows service skeleton used by the PoC](https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html)
-
+- [1] [Hàm CreateProcessWithTokenW (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [2] [Cấu hình bảo vệ LSA bổ sung (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
+- [3] [Chạy chương trình của tôi dưới dạng dịch vụ (cboard.cprogramming.com) – Windows service skeleton used by the PoC](https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html)
 {{#include ../../banners/hacktricks-training.md}}

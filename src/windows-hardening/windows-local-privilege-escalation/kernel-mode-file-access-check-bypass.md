@@ -1,32 +1,32 @@
-# Kernel-Mode File Access Check Bypasses
+# Bypass kiểm tra truy cập tệp ở kernel mode
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Vulnerable driver pattern
+## Mẫu driver dễ bị tấn công
 
-A driver does not preserve a caller's security boundary merely by impersonating that caller. Kernel-mode object opens normally bypass access checks. `OBJ_KERNEL_HANDLE` only makes the resulting handle accessible from kernel mode. When a driver opens or manipulates an object on behalf of user mode, it must also use `OBJ_FORCE_ACCESS_CHECK` so the Object Manager evaluates the requested access against the effective token.<sup>[[3]](#references)[[4]](#references)</sup>
+Driver không duy trì ranh giới bảo mật của caller chỉ bằng cách mạo danh caller đó. Các thao tác mở object ở kernel mode thường bỏ qua kiểm tra quyền truy cập. `OBJ_KERNEL_HANDLE` chỉ khiến handle được tạo có thể truy cập từ kernel mode. Khi driver mở hoặc thao tác với một object thay mặt user mode, driver cũng phải dùng `OBJ_FORCE_ACCESS_CHECK` để Object Manager đánh giá quyền truy cập được yêu cầu dựa trên token hiệu lực.<sup>[[3]](#references)[[4]](#references)</sup>
 
-Audit file-handling IOCTLs and create callbacks for this sequence:<sup>[[3]](#references)[[4]](#references)</sup>
+Kiểm tra các IOCTL xử lý tệp và create callback để tìm chuỗi hành vi sau:<sup>[[3]](#references)[[4]](#references)</sup>
 
-1. User mode supplies a path, source handle, desired access, or operation type.
-2. The driver impersonates the caller, but calls `IoCreateFileEx`, `ZwCreateFile`, or a similar routine without `OBJ_FORCE_ACCESS_CHECK`.
-3. A kernel-only file or directory handle is saved in per-handle state.
-4. A later operation decides whether to impersonate from attacker-influenced state such as the access mask requested during the first open.
-5. The privileged branch performs a rename or link with a `BypassAccessCheck` information class.
+1. User mode cung cấp đường dẫn, source handle, quyền truy cập mong muốn hoặc loại thao tác.
+2. Driver mạo danh caller nhưng gọi `IoCreateFileEx`, `ZwCreateFile` hoặc routine tương tự mà không có `OBJ_FORCE_ACCESS_CHECK`.
+3. Handle tệp hoặc thư mục chỉ dành cho kernel được lưu trong trạng thái theo từng handle.
+4. Một thao tác về sau quyết định có mạo danh hay không dựa trên trạng thái chịu ảnh hưởng của attacker, chẳng hạn access mask được yêu cầu trong lần mở đầu tiên.
+5. Nhánh có đặc quyền thực hiện thao tác đổi tên hoặc tạo liên kết bằng một information class `BypassAccessCheck`.
 
-This is a **confused-deputy file primitive**, not necessarily memory corruption. A particularly dangerous state inversion is “write requested means impersonate; no write requested means remain privileged.” In that design, deliberately requesting only read access can unlock the more powerful path.<sup>[[3]](#references)</sup>
+Đây là **primitive tệp confused-deputy**, không nhất thiết là lỗi memory corruption. Một kiểu đảo ngược trạng thái đặc biệt nguy hiểm là “yêu cầu quyền ghi thì mạo danh; không yêu cầu quyền ghi thì giữ đặc quyền”. Trong thiết kế đó, cố ý chỉ yêu cầu quyền đọc có thể mở ra con đường mạnh hơn.<sup>[[3]](#references)</sup>
 
-## vSMB example: privileged root plus privileged rename
+## Ví dụ vSMB: root có đặc quyền cộng với đổi tên có đặc quyền
 
-`storvsp.sys` implements Virtual Server Message Block (vSMB). When the **Virtual Machine Platform** feature is enabled, user mode can reach `\Device\STORVSP` through `\\.\STORVSP`. A vSMB filesystem path has the form `\\.\STORVSP\VSMB\??\C:\path`. CVE-2025-59517 and CVE-2025-64673 showed how two inconsistent access-control decisions could turn this interface into local privilege escalation.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+`storvsp.sys` triển khai Virtual Server Message Block (vSMB). Khi bật tính năng **Virtual Machine Platform**, user mode có thể truy cập `\Device\STORVSP` thông qua `\\.\STORVSP`. Đường dẫn hệ thống tệp vSMB có dạng `\\.\STORVSP\VSMB\??\C:\path`. CVE-2025-59517 và CVE-2025-64673 cho thấy hai quyết định kiểm soát truy cập không nhất quán có thể biến giao diện này thành lỗ hổng leo thang đặc quyền cục bộ.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
-The source's function-to-CVE mapping comes from reverse engineering of the patched binary rather than Microsoft source. The researchers warn that the two identifiers may map to the opposite functions.<sup>[[3]](#references)</sup>
+Ánh xạ giữa function và CVE trong nguồn được xác định bằng reverse engineering binary đã vá, chứ không dựa trên mã nguồn của Microsoft. Các nhà nghiên cứu cảnh báo rằng hai mã định danh có thể tương ứng với các function ngược lại.<sup>[[3]](#references)</sup>
 
-### 1. Create a read-only share rooted at a protected directory
+### 1. Tạo share chỉ đọc có root trỏ đến thư mục được bảo vệ
 
-The vulnerable create path recorded requested rights in persistent flags such as `HasReadAccess`, `HasWriteAccess`, and `HasAppendAccess`. It then opened the backing path with `OBJ_KERNEL_HANDLE` but without `OBJ_FORCE_ACCESS_CHECK`. The attempted impersonation therefore did not make the file open respect the caller's NTFS permissions.<sup>[[3]](#references)[[4]](#references)</sup>
+Đường xử lý create dễ bị tấn công ghi lại các quyền được yêu cầu trong những flag lưu trữ lâu dài như `HasReadAccess`, `HasWriteAccess` và `HasAppendAccess`. Sau đó, nó mở đường dẫn backing bằng `OBJ_KERNEL_HANDLE` nhưng không có `OBJ_FORCE_ACCESS_CHECK`. Vì vậy, việc mạo danh không khiến thao tác mở tệp tuân thủ quyền NTFS của caller.<sup>[[3]](#references)[[4]](#references)</sup>
 
-Request only `FILE_READ_DATA`. This leaves `HasWriteAccess` clear while still obtaining a share whose internal root is a protected directory:<sup>[[3]](#references)</sup>
+Chỉ yêu cầu `FILE_READ_DATA`. Thao tác này giữ `HasWriteAccess` ở trạng thái clear, đồng thời vẫn tạo được share có root nội bộ là một thư mục được bảo vệ:<sup>[[3]](#references)</sup>
 
 ```c
 HANDLE root = CreateFileW(
@@ -39,11 +39,11 @@ HANDLE root = CreateFileW(
 );
 ```
 
-The important artifact is not a user-mode System32 directory handle. It is a vSMB device handle associated with driver state that contains a privileged kernel root handle.<sup>[[3]](#references)</sup>
+Artifact quan trọng không phải là handle đến thư mục System32 ở user mode. Đó là handle thiết bị vSMB gắn với trạng thái của driver, trong đó có một root handle đặc quyền ở kernel.<sup>[[3]](#references)</sup>
 
-### 2. Turn the state mismatch into protected file replacement
+### 2. Biến sự không khớp trạng thái thành thao tác thay thế file được bảo vệ
 
-IOCTL `0x240330` accepted a source file handle, an information class, and a variable-length information buffer:<sup>[[3]](#references)</sup>
+IOCTL `0x240330` chấp nhận một file handle nguồn, một information class và một information buffer có độ dài thay đổi:<sup>[[3]](#references)</sup>
 
 ```c
 #define IOCTL_VSMB_SET_INFORMATION_FILE_REQUEST 0x240330
@@ -58,26 +58,26 @@ typedef struct _VSMB_SET_INFO {
 } VSMB_SET_INFO;
 ```
 
-The vulnerable handler accepted `FileRenameInformation`, `FileLinkInformation`, and `FileRenameInformationEx`. For a normal rename path it split the parent path from the final component, then opened the parent relative to the stored root handle. That open again used `OBJ_KERNEL_HANDLE | OBJ_CASE_INSENSITIVE` without `OBJ_FORCE_ACCESS_CHECK`. A nonzero attacker-supplied `RootDirectory` inside the rename structure was rejected, so the driver supplied its own privileged directory handle.<sup>[[3]](#references)</sup>
+Handler dễ bị tấn công chấp nhận `FileRenameInformation`, `FileLinkInformation` và `FileRenameInformationEx`. Với đường dẫn đổi tên thông thường, handler tách đường dẫn thư mục cha khỏi thành phần cuối, rồi mở thư mục cha tương đối với root handle đã lưu. Lệnh mở này cũng dùng `OBJ_KERNEL_HANDLE | OBJ_CASE_INSENSITIVE` mà không có `OBJ_FORCE_ACCESS_CHECK`. Một `RootDirectory` khác 0 do attacker cung cấp trong cấu trúc rename sẽ bị từ chối, nên driver tự cung cấp directory handle có đặc quyền.<sup>[[3]](#references)</sup>
 
-The exploitable branch was selected by **not** requesting write access during stage 1:<sup>[[3]](#references)</sup>
+Nhánh có thể khai thác được chọn bằng cách **không yêu cầu quyền ghi trong stage 1**:<sup>[[3]](#references)</sup>
 
-- `HasWriteAccess == 1`: impersonate the saved root security context.
-- `HasWriteAccess == 0`: skip impersonation and convert `FileRenameInformation` or `FileRenameInformationEx` to its `BypassAccessCheck` variant.
+- `HasWriteAccess == 1`: mạo danh security context của root đã lưu.
+- `HasWriteAccess == 0`: bỏ qua bước mạo danh và chuyển `FileRenameInformation` hoặc `FileRenameInformationEx` thành biến thể `BypassAccessCheck` tương ứng.
 
-The handler duplicated the attacker-supplied source handle into `PsInitialSystemProcess`, referenced it as a file object, installed the privileged target-directory handle in the rename structure, and called `ZwSetInformationFile`. With `ReplaceIfExists = TRUE`, a file controlled by the caller could therefore replace an existing file below the protected root.<sup>[[3]](#references)</sup>
+Handler sao chép source handle do attacker cung cấp vào `PsInitialSystemProcess`, tham chiếu nó dưới dạng file object, cài target-directory handle có đặc quyền vào cấu trúc rename rồi gọi `ZwSetInformationFile`. Với `ReplaceIfExists = TRUE`, một file do caller kiểm soát có thể thay thế file hiện có bên dưới protected root.<sup>[[3]](#references)</sup>
 
-When reviewing a similar handler, track **both handle provenance and security context** across every branch. Input validation, integer-overflow checks, `IO_STOP_ON_SYMLINK`, and restricting the accepted information classes do not compensate for a privileged root handle combined with an access-check-bypass operation.<sup>[[3]](#references)</sup>
+Khi xem xét handler tương tự, hãy theo dõi **cả nguồn gốc handle lẫn security context** qua mọi nhánh. Kiểm tra đầu vào, kiểm tra integer overflow, `IO_STOP_ON_SYMLINK` và giới hạn các information class được chấp nhận không thể bù đắp cho việc kết hợp root handle có đặc quyền với thao tác bỏ qua kiểm tra quyền truy cập.<sup>[[3]](#references)</sup>
 
-## From protected write to SYSTEM execution
+## Từ ghi file được bảo vệ đến thực thi với quyền SYSTEM
 
-A protected file-replacement primitive becomes code execution when a privileged process later loads the replaced module. In the demonstrated chain, the destination was `C:\Windows\System32\wuapi.dll`. Activating the local-server COM class `{72566E27-1ABB-4EB3-B4F0-EB431CB1CB32}` for interface `{b4c1d279-966e-44e9-a9c5-ccaf4a77023d}` and calling `IWaaSRemediation::LaunchDetectionOnly()` caused a SYSTEM process to load that DLL.<sup>[[3]](#references)</sup>
+Một primitive thay thế file được bảo vệ sẽ dẫn đến thực thi mã khi một process có đặc quyền sau đó tải module đã bị thay thế. Trong chuỗi tấn công được minh họa, đích là `C:\Windows\System32\wuapi.dll`. Kích hoạt local-server COM class `{72566E27-1ABB-4EB3-B4F0-EB431CB1CB32}` cho interface `{b4c1d279-966e-44e9-a9c5-ccaf4a77023d}` rồi gọi `IWaaSRemediation::LaunchDetectionOnly()` khiến một process SYSTEM tải DLL đó.<sup>[[3]](#references)</sup>
 
-This COM call is an **activation trigger**, not [COM registry hijacking](com-hijacking.md). The file primitive supplies the planted module and the privileged loader supplies execution. For other protected-write chains, identify the exact image, DLL path, signature policy, bitness, exported functions, and reliable trigger before choosing a target. See [chaining an arbitrary file write into DLL hijacking](dll-hijacking/#chaining-an-arbitrary-file-write-into-a-missing-dll-hijack) for the general loader-analysis workflow.<sup>[[3]](#references)</sup>
+Lệnh gọi COM này là một **trigger kích hoạt**, không phải [chiếm quyền registry COM](com-hijacking.md). Primitive file cung cấp module được cài vào, còn privileged loader đảm nhiệm việc thực thi. Với các chuỗi tấn công ghi file được bảo vệ khác, hãy xác định chính xác image, đường dẫn DLL, chính sách chữ ký, bitness, các hàm được export và trigger đáng tin cậy trước khi chọn mục tiêu. Xem [kết hợp arbitrary file write với DLL hijacking](dll-hijacking/#chaining-an-arbitrary-file-write-into-a-missing-dll-hijack) để biết quy trình phân tích loader tổng quát.<sup>[[3]](#references)</sup>
 
-### Moving a Session 0 token to the interactive desktop
+### Chuyển token của Session 0 sang desktop tương tác
 
-A payload loaded by a service normally executes in Session 0. To create an interactive process, it can obtain the active console session with `WTSGetActiveConsoleSessionId`, enable the required token privileges, duplicate the current SYSTEM token as a primary token, and set its `TokenSessionId` to the active session. `CreateProcessAsUserW` then uses that token with `STARTUPINFO.lpDesktop = L"winsta0\\default"`.<sup>[[3]](#references)[[5]](#references)</sup>
+Payload được service tải thường chạy trong Session 0. Để tạo một process tương tác, payload có thể lấy active console session bằng `WTSGetActiveConsoleSessionId`, bật các token privilege cần thiết, sao chép token SYSTEM hiện tại thành primary token và đặt `TokenSessionId` của token này thành active session. Sau đó, `CreateProcessAsUserW` sử dụng token đó với `STARTUPINFO.lpDesktop = L"winsta0\\default"`.<sup>[[3]](#references)[[5]](#references)</sup>
 
 ```c
 DWORD sid = WTSGetActiveConsoleSessionId();
@@ -90,27 +90,26 @@ CreateProcessAsUserW(primary, L"C:\\Windows\\System32\\cmd.exe",
                      NULL, NULL, &si, &pi);
 ```
 
-`SeTcbPrivilege` is required to set a token's session ID in this scenario. The interactive window station and desktop must also grant the token access. See [token duplication from Session 0](sedebug-+-seimpersonate-copy-token.md) for the broader token-copy workflow.<sup>[[3]](#references)[[5]](#references)</sup>
+`SeTcbPrivilege` là quyền cần thiết để đặt session ID của token trong tình huống này. Interactive window station và desktop cũng phải cấp quyền truy cập cho token. Xem [token duplication from Session 0](sedebug-+-seimpersonate-copy-token.md) để biết quy trình sao chép token rộng hơn.<sup>[[3]](#references)[[5]](#references)</sup>
 
-## Patch and review guidance
+## Hướng dẫn vá lỗi và rà soát
 
-Microsoft's December 2025 updates fixed the demonstrated chain. Reverse engineering found that the patched vSMB create path rejects untrusted callers that request a share root without `FILE_WRITE_DATA`. Relevant operations also gained forced access checking. This blocks the state inversion before an unprivileged caller can obtain the privileged root.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+Các bản cập nhật tháng 12 năm 2025 của Microsoft đã khắc phục chuỗi khai thác được trình diễn. Quá trình reverse engineering cho thấy đường dẫn tạo vSMB đã vá từ chối các caller không đáng tin cậy yêu cầu share root mà không có `FILE_WRITE_DATA`. Các thao tác liên quan cũng được bổ sung kiểm tra quyền bắt buộc. Điều này chặn việc đảo ngược trạng thái trước khi caller không có đặc quyền có thể lấy được root có đặc quyền.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
-For driver code, apply these rules:<sup>[[3]](#references)[[4]](#references)</sup>
+Đối với mã driver, hãy áp dụng các quy tắc sau:<sup>[[3]](#references)[[4]](#references)</sup>
 
-- Add `OBJ_FORCE_ACCESS_CHECK` whenever an object is opened on behalf of a user-mode request. Do not treat `OBJ_KERNEL_HANDLE` as an authorization control.<sup>[[4]](#references)</sup>
-- Capture and validate the requestor mode and effective subject context. Do not let requested rights select a more privileged execution branch.
-- Validate user handles with the correct object type, access mask, and `UserMode`. Duplicating a handle into the system process does not validate the authority of the requested operation.
-- Keep target resolution relative to a trusted handle, but ensure that the trusted handle itself was opened under the requestor's enforced access check.
-- Avoid `File*BypassAccessCheck` classes for user-driven operations. If internal code genuinely needs them, gate that path with an authorization decision independent of user-controlled access flags.
-- Patch affected systems. The vulnerable surface is relevant when Virtual Machine Platform loads `storvsp.sys`.<sup>[[3]](#references)</sup>
+- Thêm `OBJ_FORCE_ACCESS_CHECK` bất cứ khi nào mở một object thay mặt cho yêu cầu từ user-mode. Không xem `OBJ_KERNEL_HANDLE` là cơ chế kiểm soát quyền hạn.<sup>[[4]](#references)</sup>
+- Thu thập và xác thực requestor mode cùng subject context hiệu lực. Không để quyền được yêu cầu quyết định nhánh thực thi có đặc quyền cao hơn.
+- Xác thực user handle bằng đúng loại object, access mask và `UserMode`. Duplicate một handle vào system process không xác thực thẩm quyền của thao tác được yêu cầu.
+- Giữ việc phân giải target tương đối với một handle đáng tin cậy, nhưng đảm bảo chính handle đáng tin cậy đó đã được mở sau khi áp dụng kiểm tra quyền bắt buộc cho requestor.
+- Tránh các lớp `File*BypassAccessCheck` cho thao tác do user điều khiển. Nếu mã nội bộ thực sự cần dùng chúng, hãy giới hạn đường dẫn đó bằng một quyết định cấp quyền độc lập với các cờ truy cập do user kiểm soát.
+- Vá các hệ thống bị ảnh hưởng. Bề mặt dễ bị tấn công có liên quan khi Virtual Machine Platform tải `storvsp.sys`.<sup>[[3]](#references)</sup>
 
 ## References
 
 - [1] [Microsoft Security Response Center - CVE-2025-59517](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-59517)
 - [2] [Microsoft Security Response Center - CVE-2025-64673](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-64673)
-- [3] [Exodus Intelligence - From Virtual Share to Physical Shell: Leveraging Windows' Inconsistent Access Control for LPE](https://blog.exodusintel.com/2026/07/27/from-virtual-share-to-physical-shell-leveraging-windows-inconsistent-access-control-for-lpe/)
+- [3] [Exodus Intelligence - Từ Virtual Share đến Physical Shell: Khai thác cơ chế kiểm soát truy cập thiếu nhất quán của Windows để nâng quyền cục bộ](https://blog.exodusintel.com/2026/07/27/from-virtual-share-to-physical-shell-leveraging-windows-inconsistent-access-control-for-lpe/)
 - [4] [Microsoft Learn - Object Handles](https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/object-handles)
-- [5] [Microsoft Learn - CreateProcessAsUserW function](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessasuserw)
-
+- [5] [Microsoft Learn - Hàm CreateProcessAsUserW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessasuserw)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,10 +1,10 @@
-# From High Integrity to SYSTEM with Name Pipes
+# Từ High Integrity lên SYSTEM bằng Name Pipes
 
 {{#include ../../banners/hacktricks-training.md}}
 
-This is the **administrator/SCM variant** of named-pipe impersonation: an elevated process creates a temporary service whose child connects as `SYSTEM`, then impersonates that client. If the starting context cannot create services but has `SeImpersonatePrivilege`, use a privileged-service coercion instead; see [Named Pipe Client Impersonation](named-pipe-client-impersonation.md) and [RoguePotato, PrintSpoofer, SharpEfsPotato, GodPotato](roguepotato-and-printspoofer.md). Creating the service requires access to the SCM and `SERVICE_START` access to the new service, while `CreateProcessWithTokenW` requires `SeImpersonatePrivilege`.<sup>[[2]](#references)[[3]](#references)</sup>
+Đây là **biến thể administrator/SCM** của named-pipe impersonation: một process đã được nâng quyền tạo một service tạm thời, process con của service kết nối với tư cách `SYSTEM`, rồi impersonate client đó. Nếu context ban đầu không thể tạo service nhưng có `SeImpersonatePrivilege`, hãy dùng privileged-service coercion; xem [Named Pipe Client Impersonation](named-pipe-client-impersonation.md) và [RoguePotato, PrintSpoofer, SharpEfsPotato, GodPotato](roguepotato-and-printspoofer.md). Việc tạo service yêu cầu quyền truy cập SCM và quyền `SERVICE_START` đối với service mới, còn `CreateProcessWithTokenW` yêu cầu `SeImpersonatePrivilege`.<sup>[[2]](#references)[[3]](#references)</sup>
 
-Quickly confirm the expected starting context:
+Nhanh chóng xác nhận context ban đầu dự kiến:
 
 ```cmd
 whoami /groups | findstr /i "High Mandatory"
@@ -12,19 +12,19 @@ whoami /priv | findstr /i "SeImpersonatePrivilege"
 sc.exe query PiperSrv
 ```
 
-**Code flow:**
+**Luồng code:**
 
-1. Create the named-pipe server **before** starting the service. When waiting, treat `ConnectNamedPipe` returning `FALSE` with `ERROR_PIPE_CONNECTED` as success: it means the client won the race and connected between `CreateNamedPipe` and `ConnectNamedPipe`.<sup>[[4]](#references)</sup>
-2. Create and start a service that will connect to the created pipe and write something. The service code will execute this encoded PS code: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
-3. After the service connects and writes, call `ImpersonateNamedPipeClient`, open the resulting thread token, and duplicate it as a primary token.<sup>[[1]](#references)</sup>
-4. Use that primary token to spawn `cmd.exe`.<sup>[[2]](#references)</sup>
+1. Tạo named-pipe server **trước** khi khởi động service. Khi chờ, hãy coi `ConnectNamedPipe` trả về `FALSE` cùng với `ERROR_PIPE_CONNECTED` là thành công: điều đó có nghĩa client đã kết nối trong khoảng thời gian giữa `CreateNamedPipe` và `ConnectNamedPipe`.<sup>[[4]](#references)</sup>
+2. Tạo và khởi động một service sẽ kết nối với pipe vừa tạo rồi ghi dữ liệu. Code của service sẽ thực thi đoạn PS đã mã hóa này: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
+3. Sau khi service kết nối và ghi dữ liệu, gọi `ImpersonateNamedPipeClient`, mở thread token thu được, rồi duplicate token đó thành primary token.<sup>[[1]](#references)</sup>
+4. Dùng primary token đó để tạo tiến trình `cmd.exe`.<sup>[[2]](#references)</sup>
 
-This route assumes the caller can create/start a service and possesses the privileges required by `CreateProcessWithTokenW` (normally `SeImpersonatePrivilege`). It is a high-integrity-to-SYSTEM technique, not a primitive available to an arbitrary low-privileged user.<sup>[[2]](#references)[[3]](#references)</sup>
+Cách này giả định caller có thể tạo/khởi động service và có các quyền cần thiết cho `CreateProcessWithTokenW` (thường là `SeImpersonatePrivilege`). Đây là kỹ thuật từ high-integrity lên SYSTEM, không phải primitive dành cho người dùng bất kỳ có đặc quyền thấp.<sup>[[2]](#references)[[3]](#references)</sup>
 
 > [!WARNING]
-> If service creation/start fails, the sample does not signal the pipe thread and can wait indefinitely. Add error handling and an overlapped pipe timeout before using it outside a lab. Also use a random pipe/service name to avoid collisions.
+> Nếu tạo/khởi động service thất bại, mẫu này không báo hiệu cho pipe thread và có thể chờ vô thời hạn. Hãy bổ sung xử lý lỗi và timeout cho overlapped pipe trước khi dùng ngoài môi trường lab. Đồng thời, hãy dùng tên pipe/service ngẫu nhiên để tránh xung đột.
 
-`ImpersonateNamedPipeClient` adopts the context associated with the **last message read**, so a connection alone is insufficient: make the privileged client write, verify that `ReadFile` returned data, and only then impersonate. Duplicate the thread impersonation token into a `TokenPrimary` token with `SecurityImpersonation`; a primary token is what the process-creation API consumes.<sup>[[1]](#references)[[5]](#references)</sup>
+`ImpersonateNamedPipeClient` áp dụng context gắn với **message cuối cùng được đọc**, vì vậy chỉ kết nối thôi là chưa đủ: hãy yêu cầu client có đặc quyền ghi dữ liệu, xác minh `ReadFile` trả về dữ liệu, rồi mới impersonate. Duplicate thread impersonation token thành token `TokenPrimary` với `SecurityImpersonation`; API tạo tiến trình sử dụng primary token.<sup>[[1]](#references)[[5]](#references)</sup>
 
 ```c
 #include <windows.h>
@@ -138,12 +138,12 @@ int main() {
 }
 ```
 
-### Failure triage
+### Chẩn đoán lỗi
 
-- `ConnectNamedPipe == FALSE` with `ERROR_PIPE_CONNECTED`: continue; the pipe is already connected.<sup>[[4]](#references)</sup>
-- `ImpersonateNamedPipeClient` fails with `ERROR_CANNOT_IMPERSONATE` (`1368`): confirm the SYSTEM client actually wrote data and `ReadFile` completed. Also inspect the client's requested impersonation level; identification/anonymous-level clients cannot be fully impersonated.<sup>[[1]](#references)</sup>
-- `CreateProcessWithTokenW` fails with `ERROR_PRIVILEGE_NOT_HELD` (`1314`): the original caller does not hold `SeImpersonatePrivilege`. From a high-integrity administrator context, use the token-copy route documented in [SeImpersonate from High To System](seimpersonate-from-high-to-system.md), or use `CreateProcessAsUserW` while impersonating SYSTEM if its required privileges are present.<sup>[[2]](#references)</sup>
-- `CreateServiceA` returns `ERROR_SERVICE_EXISTS` (`1073`): delete the stale `PiperSrv` entry or randomize `PIPESRV`; always delete the temporary service after the trigger.<sup>[[3]](#references)</sup>
+- `ConnectNamedPipe == FALSE` với `ERROR_PIPE_CONNECTED`: tiếp tục; pipe đã được kết nối.<sup>[[4]](#references)</sup>
+- `ImpersonateNamedPipeClient` thất bại với `ERROR_CANNOT_IMPERSONATE` (`1368`): xác nhận client SYSTEM thực sự đã ghi dữ liệu và `ReadFile` đã hoàn tất. Đồng thời kiểm tra mức impersonation mà client yêu cầu; client ở mức identification/anonymous không thể bị impersonate hoàn toàn.<sup>[[1]](#references)</sup>
+- `CreateProcessWithTokenW` thất bại với `ERROR_PRIVILEGE_NOT_HELD` (`1314`): caller ban đầu không có `SeImpersonatePrivilege`. Trong ngữ cảnh administrator có integrity cao, hãy dùng cách sao chép token được mô tả trong [SeImpersonate from High To System](seimpersonate-from-high-to-system.md), hoặc dùng `CreateProcessAsUserW` khi đang impersonate SYSTEM nếu có các privilege cần thiết.<sup>[[2]](#references)</sup>
+- `CreateServiceA` trả về `ERROR_SERVICE_EXISTS` (`1073`): xóa mục `PiperSrv` cũ hoặc tạo tên ngẫu nhiên cho `PIPESRV`; luôn xóa service tạm sau khi trigger.<sup>[[3]](#references)</sup>
 
 
 

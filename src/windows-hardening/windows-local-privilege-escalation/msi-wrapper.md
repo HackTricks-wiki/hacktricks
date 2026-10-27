@@ -2,29 +2,28 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-MSI Wrapper can package an executable or script as a Windows Installer (`.msi`) file. Download and start the free edition, then select the executable to package.<sup>[[3]](#references)</sup> To run a sequence of commands, select a `.bat` file as the input rather than packaging `cmd.exe`.<sup>[[1]](#references)</sup>
+MSI Wrapper có thể đóng gói một tệp thực thi hoặc script thành tệp Windows Installer (`.msi`). Tải xuống và khởi chạy phiên bản miễn phí, sau đó chọn tệp thực thi cần đóng gói.<sup>[[3]](#references)</sup> Để chạy một chuỗi lệnh, hãy chọn tệp `.bat` làm đầu vào thay vì đóng gói `cmd.exe`.<sup>[[1]](#references)</sup>
 
-![Selecting the source executable or batch script in MSI Wrapper](<../../images/image (417).png>)
+![Chọn tệp thực thi nguồn hoặc batch script trong MSI Wrapper](<../../images/image (417).png>)
 
-Configure the execution context and other installer properties carefully:
+Cấu hình cẩn thận ngữ cảnh thực thi và các thuộc tính khác của trình cài đặt:
 
-![Configuring the application ID and security context in MSI Wrapper](<../../images/image (312).png>)
+![Cấu hình ID ứng dụng và ngữ cảnh bảo mật trong MSI Wrapper](<../../images/image (312).png>)
 
-![Configuring installer properties in MSI Wrapper](<../../images/image (346).png>)
+![Cấu hình các thuộc tính của trình cài đặt trong MSI Wrapper](<../../images/image (346).png>)
 
-![Reviewing the MSI Wrapper build settings](<../../images/image (1072).png>)
+![Kiểm tra cài đặt bản dựng MSI Wrapper](<../../images/image (1072).png>)
 
-These values can be changed when packaging a custom binary.
+Có thể thay đổi các giá trị này khi đóng gói binary tùy chỉnh.
 
-Continue through the remaining wizard pages and select **Build** to generate the installer.<sup>[[1]](#references)</sup>
+Tiếp tục qua các trang còn lại của trình hướng dẫn và chọn **Build** để tạo trình cài đặt.<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> Creating an MSI does not by itself grant elevated privileges. Whether installation is elevated depends on Windows Installer policy, package context, and user authorization. Microsoft warns that enabling `AlwaysInstallElevated` for both the user and computer lets non-administrators install packages with system privileges.<sup>[[2]](#references)</sup>
+> Việc tạo MSI không tự cấp quyền nâng cao. Việc cài đặt có được nâng quyền hay không phụ thuộc vào chính sách Windows Installer, ngữ cảnh gói và sự cho phép của người dùng. Microsoft cảnh báo rằng bật `AlwaysInstallElevated` cho cả người dùng lẫn máy tính sẽ cho phép người không có quyền quản trị cài đặt các gói với đặc quyền hệ thống.<sup>[[2]](#references)</sup>
 
 ## References
 
-- [1] [MSI Wrapper documentation - Getting started](https://www.exemsi.com/documentation/getting-started/)
-- [2] [Microsoft Learn - Installing a package with elevated privileges for a non-admin](https://learn.microsoft.com/en-us/windows/win32/msi/installing-a-package-with-elevated-privileges-for-a-non-admin)
-- [3] [MSI Wrapper - Download](https://www.exemsi.com/download/)
-
+- [1] [Tài liệu MSI Wrapper - Bắt đầu](https://www.exemsi.com/documentation/getting-started/)
+- [2] [Microsoft Learn - Cài đặt gói với quyền nâng cao cho người không có quyền quản trị](https://learn.microsoft.com/en-us/windows/win32/msi/installing-a-package-with-elevated-privileges-for-a-non-admin)
+- [3] [MSI Wrapper - Tải xuống](https://www.exemsi.com/download/)
 {{#include ../../banners/hacktricks-training.md}}

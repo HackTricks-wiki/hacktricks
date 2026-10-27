@@ -1,12 +1,12 @@
-# Creating a Custom-Action MSI with WiX
+# Tạo MSI với Custom-Action bằng WiX
 
 {{#include ../../banners/hacktricks-training.md}}
 
-This historical Hack The Box chain used WiX Toolset v3 to build an MSI that launched a previously planted `.lnk` file. **An MSI is not automatically privileged**: execution occurs in the context selected by Windows Installer policy, the custom-action attributes, and whoever installs it. In the cited scenario, the attacker also stole a trusted signing CA and placed the signed MSI in a folder watched by another user.<sup>[[1]](#references)[[3]](#references)</sup>
+Chuỗi khai thác Hack The Box mang tính lịch sử này đã dùng WiX Toolset v3 để tạo một MSI chạy tệp `.lnk` đã được cài sẵn. **MSI không tự động có đặc quyền cao**: quá trình thực thi diễn ra trong ngữ cảnh được xác định bởi chính sách Windows Installer, các thuộc tính custom-action và người cài đặt nó. Trong tình huống được trích dẫn, attacker cũng đã đánh cắp một CA đáng tin cậy để ký, rồi đặt MSI đã ký vào thư mục được một người dùng khác theo dõi.<sup>[[1]](#references)[[3]](#references)</sup>
 
-For a comprehensive understanding of wix MSI usage examples, it is advisable to consult [this page](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Here, you can find various examples that demonstrate the usage of wix MSI.<sup>[[2]](#references)</sup>
+Để hiểu toàn diện các ví dụ sử dụng MSI của WiX, bạn nên tham khảo [trang này](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Tại đây, bạn có thể tìm thấy nhiều ví dụ minh họa cách sử dụng MSI của WiX.<sup>[[2]](#references)</sup>
 
-The MSI runs `C:\Users\Public\Desktop\Shortcuts\rick.lnk`. The original WiX v3 XML is preserved below:<sup>[[1]](#references)</sup>
+MSI chạy `C:\Users\Public\Desktop\Shortcuts\rick.lnk`. XML WiX v3 gốc được giữ nguyên bên dưới:<sup>[[1]](#references)</sup>
 
 ```html
 <?xml version="1.0"?>
@@ -40,23 +40,23 @@ fail_here
 </Wix>
 ```
 
-`InstallerVersion` declares the minimum Windows Installer version and `Compressed="yes"` marks the package as compressed. `Stage1` is deferred but has `Impersonate="yes"`, so it runs with the installing user's impersonated token; change of privilege in this scenario came from the privileged user who later opened the MSI, not from that attribute magically granting SYSTEM.<sup>[[3]](#references)</sup>
+`InstallerVersion` khai báo phiên bản Windows Installer tối thiểu và `Compressed="yes"` đánh dấu package là đã nén. `Stage1` là deferred nhưng có `Impersonate="yes"`, nên nó chạy với token được impersonate của người dùng đang cài đặt; sự thay đổi quyền trong tình huống này đến từ người dùng có đặc quyền mở MSI sau đó, chứ thuộc tính đó không tự cấp quyền SYSTEM.<sup>[[3]](#references)</sup>
 
-Compile the source to a WiX object with `candle.exe`:<sup>[[1]](#references)</sup>
+Biên dịch mã nguồn thành đối tượng WiX bằng `candle.exe`:<sup>[[1]](#references)</sup>
 
 ```
 candle.exe -out C:\tmp\wix.wixobj C:\tmp\Ethereal\msi.xml
 ```
 
-Link that object into an MSI with `light.exe`:<sup>[[1]](#references)</sup>
+Liên kết đối tượng đó vào một MSI bằng `light.exe`:<sup>[[1]](#references)</sup>
 
 ```
 light.exe -out C:\tmp\Ethereal\rick.msi C:\tmp\wix.wixobj
 ```
 
-### Signing step used in the original chain
+### Bước ký được sử dụng trong chuỗi khai thác ban đầu
 
-The target workflow accepted packages signed by a compromised internal CA. The write-up derived a signing certificate from the recovered `MyCA.cer`/`MyCA.pvk`, created a PFX, and signed the MSI:<sup>[[1]](#references)</sup>
+Quy trình mục tiêu chấp nhận các gói được ký bởi một CA nội bộ đã bị xâm phạm. Bài viết hướng dẫn tạo chứng chỉ ký từ `MyCA.cer`/`MyCA.pvk` đã khôi phục, tạo PFX và ký MSI:<sup>[[1]](#references)</sup>
 
 ```powershell
 makecert.exe -n "CN=Ethereal" -pe -cy end `
@@ -66,12 +66,11 @@ pvk2pfx.exe -pvk C:\tmp\rick.pvk -spc C:\tmp\rick.cer -pfx C:\tmp\rick.pfx
 signtool.exe sign /f C:\tmp\rick.pfx C:\tmp\Ethereal\rick.msi
 ```
 
-The attacker then placed the signed package in `D:\DEV\MSIs` and waited for the privileged workflow/user to execute it. Preserve that precondition when adapting the technique: without an elevated installation path, unsafe policy such as `AlwaysInstallElevated`, or a privileged victim, this package executes only with the current user's rights.
+Kẻ tấn công sau đó đặt package đã ký vào `D:\DEV\MSIs` và chờ workflow/người dùng có đặc quyền thực thi nó. Hãy giữ nguyên điều kiện tiên quyết này khi áp dụng kỹ thuật: nếu không có đường dẫn cài đặt nâng quyền, policy không an toàn như `AlwaysInstallElevated` hoặc nạn nhân có đặc quyền, package này chỉ thực thi với quyền của người dùng hiện tại.
 
 ## References
 
-- [1] [Hack The Box - Ethereal: Creating Malicious msi and getting root - 0xRick's Blog](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
-- [2] [A quick introduction: Create an MSI installer with WiX - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) (see also [wixtools](http://wixtoolset.org))
-- [3] [Microsoft Learn — Deferred execution custom actions (`Impersonate`)](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-in-script-execution-options)
-
+- [1] [Hack The Box - Ethereal: Tạo MSI độc hại và chiếm quyền root - Blog của 0xRick](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
+- [2] [Giới thiệu nhanh: Tạo trình cài đặt MSI bằng WiX - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) (see also [wixtools](http://wixtoolset.org))
+- [3] [Microsoft Learn — Custom action thực thi trì hoãn (`Impersonate`)](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-in-script-execution-options)
 {{#include ../../banners/hacktricks-training.md}}
