@@ -26,6 +26,7 @@ DEFAULT_LANGUAGES = [
     "sw",
     "tr",
     "uk",
+    "vi",
 ]
 
 SKIP_HTML = {"404.html", "print.html", "toc.html"}
@@ -65,6 +66,7 @@ LANGUAGE_LOCALES = {
     "sw": "sw_KE",
     "tr": "tr_TR",
     "uk": "uk_UA",
+    "vi": "vi_VN",
     "zh": "zh_CN",
 }
 DESCRIPTION_SKIP_PATTERNS = (
