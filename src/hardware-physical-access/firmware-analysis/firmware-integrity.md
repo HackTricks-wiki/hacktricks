@@ -1,41 +1,42 @@
-# Ακεραιότητα Firmware
+# Ακεραιότητα υλικολογισμικού
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Όταν μια εξουσιοδοτημένη αξιολόγηση εντοπίζει ανεπαρκή ή ανύπαρκτη επαλήθευση υπογραφής του firmware, μια τροποποιημένη εικόνα firmware μπορεί να καταδείξει τον αντίκτυπο στην ακεραιότητα. Η ακόλουθη εργαστηριακή ροή εργασίας προσθέτει ένα bind shell, διατηρώντας παράλληλα τα αρχικά βήματα εξαγωγής, emulation και repacking.<sup>[[2]](#references)[[3]](#references)</sup>
+Όταν μια εξουσιοδοτημένη αξιολόγηση εντοπίζει αδύναμη ή ανύπαρκτη επαλήθευση υπογραφής υλικολογισμικού, μια τροποποιημένη εικόνα υλικολογισμικού μπορεί να καταδείξει τον αντίκτυπο στην ακεραιότητα. Η ακόλουθη εργαστηριακή ροή εργασιών προσθέτει ένα bind shell, διατηρώντας τα αρχικά βήματα εξαγωγής, εξομοίωσης και επανασυσκευασίας.<sup>[[2]](#references)[[3]](#references)</sup>
 
-1. Το firmware μπορεί να εξαχθεί χρησιμοποιώντας το firmware-mod-kit (FMK).
-2. Θα πρέπει να αναγνωριστούν η αρχιτεκτονική και το endianness του firmware-στόχου.
+1. Το υλικολογισμικό μπορεί να εξαχθεί χρησιμοποιώντας το firmware-mod-kit (FMK).
+2. Θα πρέπει να προσδιοριστούν η αρχιτεκτονική και το endianness του υλικολογισμικού-στόχου.
 3. Μπορεί να δημιουργηθεί ένας cross compiler χρησιμοποιώντας το Buildroot ή άλλες κατάλληλες μεθόδους για το περιβάλλον.
-4. Το backdoor μπορεί να δημιουργηθεί με τον cross compiler.
-5. Το backdoor μπορεί να αντιγραφεί στον κατάλογο /usr/bin του εξαχθέντος firmware.
-6. Το κατάλληλο binary του QEMU μπορεί να αντιγραφεί στο rootfs του εξαχθέντος firmware.
-7. Το backdoor μπορεί να γίνει emulated χρησιμοποιώντας chroot και QEMU.
+4. Το backdoor μπορεί να μεταγλωττιστεί χρησιμοποιώντας τον cross compiler.
+5. Το backdoor μπορεί να αντιγραφεί στον κατάλογο /usr/bin του εξαγμένου υλικολογισμικού.
+6. Το κατάλληλο εκτελέσιμο QEMU μπορεί να αντιγραφεί στο rootfs του εξαγμένου υλικολογισμικού.
+7. Το backdoor μπορεί να εξομοιωθεί χρησιμοποιώντας chroot και QEMU.
 8. Η πρόσβαση στο backdoor μπορεί να γίνει μέσω netcat.
-9. Το binary του QEMU θα πρέπει να αφαιρεθεί από το rootfs του εξαχθέντος firmware.
-10. Το τροποποιημένο firmware μπορεί να γίνει repackaged χρησιμοποιώντας το FMK.
-11. Το firmware με backdoor μπορεί να ελεγχθεί με emulation μέσω του firmware analysis toolkit (FAT) και σύνδεση στη διεύθυνση IP και τη θύρα του backdoor-στόχου χρησιμοποιώντας netcat.
+9. Το εκτελέσιμο QEMU θα πρέπει να αφαιρεθεί από το rootfs του εξαγμένου υλικολογισμικού.
+10. Το τροποποιημένο υλικολογισμικό μπορεί να επανασυσκευαστεί χρησιμοποιώντας το FMK.
+11. Το υλικολογισμικό με το backdoor μπορεί να δοκιμαστεί με εξομοίωσή του μέσω του firmware analysis toolkit (FAT) και σύνδεση στη διεύθυνση IP και τη θύρα του backdoor-στόχου μέσω netcat.
 
-Εάν έχει ήδη αποκτηθεί root shell μέσω dynamic analysis, χειραγώγησης bootloader ή hardware security testing, μπορούν να εκτελεστούν precompiled test binaries, όπως implants ή reverse shells. Το `msfvenom` του Metasploit μπορεί να δημιουργήσει ένα payload ειδικό για την αρχιτεκτονική, για αυτήν τη ροή εργασίας επικύρωσης:<sup>[[4]](#references)</sup>
+Αν έχει ήδη αποκτηθεί root shell μέσω δυναμικής ανάλυσης, χειρισμού του bootloader ή δοκιμών ασφάλειας υλικού, μπορούν να εκτελεστούν προμεταγλωττισμένα δοκιμαστικά δυαδικά αρχεία, όπως implants ή reverse shells. Το `msfvenom` του Metasploit μπορεί να δημιουργήσει ένα payload ειδικό για την αρχιτεκτονική, για αυτήν τη ροή εργασιών επικύρωσης:<sup>[[4]](#references)</sup>
 
-1. Θα πρέπει να αναγνωριστούν η αρχιτεκτονική και το endianness του firmware-στόχου.
-2. Το Msfvenom μπορεί να χρησιμοποιηθεί για τον καθορισμό του payload-στόχου, της IP του host του attacker, του αριθμού της listening port, του filetype, της αρχιτεκτονικής, της πλατφόρμας και του αρχείου εξόδου.
-3. Το payload μπορεί να μεταφερθεί στη compromised συσκευή και να διασφαλιστεί ότι διαθέτει δικαιώματα εκτέλεσης.
-4. Το Metasploit μπορεί να προετοιμαστεί για τη διαχείριση εισερχόμενων αιτημάτων με εκκίνηση του msfconsole και ρύθμιση των παραμέτρων σύμφωνα με το payload.
-5. Το meterpreter reverse shell μπορεί να εκτελεστεί στη compromised συσκευή.
+1. Θα πρέπει να προσδιοριστούν η αρχιτεκτονική και το endianness του υλικολογισμικού-στόχου.
+2. Το Msfvenom μπορεί να χρησιμοποιηθεί για τον καθορισμό του payload-στόχου, της διεύθυνσης IP του host του επιτιθέμενου, του αριθμού θύρας ακρόασης, του filetype, της αρχιτεκτονικής, της πλατφόρμας και του αρχείου εξόδου.
+3. Το payload μπορεί να μεταφερθεί στη συσκευή που έχει παραβιαστεί και να διασφαλιστεί ότι διαθέτει δικαιώματα εκτέλεσης.
+4. Το Metasploit μπορεί να προετοιμαστεί για τη διαχείριση εισερχόμενων αιτημάτων, με εκκίνηση του msfconsole και ρύθμιση των παραμέτρων σύμφωνα με το payload.
+5. Το reverse shell meterpreter μπορεί να εκτελεστεί στη συσκευή που έχει παραβιαστεί.
 
-## Unauthenticated transport bridges to privileged update protocols
+## Γέφυρες μεταφοράς χωρίς έλεγχο ταυτότητας προς προνομιούχα πρωτόκολλα ενημέρωσης
 
-Ένα συνηθισμένο σχεδιαστικό λάθος σε embedded συστήματα είναι η έκθεση του **ίδιου εσωτερικού command protocol μέσω πολλών transports**, με επιβολή authentication μόνο σε ένα από αυτά. Για παράδειγμα, το USB μπορεί να απαιτεί challenge-response, ενώ το BLE απλώς προωθεί μη authenticated **GATT writes** στον ίδιο privileged firmware-update handler.<sup>[[1]](#references)</sup>
+Ένα συνηθισμένο σφάλμα σχεδιασμού ενσωματωμένων συστημάτων είναι η έκθεση του **ίδιου εσωτερικού πρωτοκόλλου εντολών μέσω πολλών μέσων μεταφοράς**, ενώ ο έλεγχος ταυτότητας εφαρμόζεται μόνο σε ένα από αυτά. Για παράδειγμα, το USB μπορεί να απαιτεί challenge-response, ενώ το BLE απλώς προωθεί μη πιστοποιημένα **GATT writes** στον ίδιο προνομιούχο χειριστή ενημέρωσης υλικολογισμικού.<sup>[[1]](#references)</sup>
 
-Τυπική offensive ροή εργασίας:
+Τυπική επιθετική ροή εργασιών:
 
-1. Κάντε enumerate τη BLE GATT database και αναγνωρίστε τα writable characteristics που χρησιμοποιούνται από την επίσημη mobile app.
-2. Κάντε sniff την κίνηση της app και αναζητήστε **magic bytes / opcodes** που αντιστοιχούν στο wired protocol.
-3. Κάντε replay privileged commands μέσω BLE **χωρίς pairing** και επαληθεύστε αν οι sensitive operations εξακολουθούν να λειτουργούν.
-4. Εάν είναι προσβάσιμα opcodes για firmware upgrade, config write, debug ή factory-test, αντιμετωπίστε το BLE ως **radio-reachable admin port**.
+1. Καταγράψτε τη βάση δεδομένων BLE GATT και εντοπίστε εγγράψιμα χαρακτηριστικά που χρησιμοποιεί η επίσημη εφαρμογή για κινητά.
+2. Υποκλέψτε την κίνηση της εφαρμογής και αναζητήστε **magic bytes / opcodes** που αντιστοιχούν στο ενσύρματο πρωτόκολλο.
+3. Επαναλάβετε προνομιούχες εντολές μέσω BLE **χωρίς pairing** και επαληθεύστε αν εξακολουθούν να λειτουργούν ευαίσθητες λειτουργίες.
+4. Αν είναι προσβάσιμα opcodes για αναβάθμιση υλικολογισμικού, εγγραφή ρυθμίσεων, αποσφαλμάτωση ή εργοστασιακές δοκιμές, αντιμετωπίστε το BLE ως **θύρα διαχείρισης προσβάσιμη μέσω ασύρματης σύνδεσης**.
 
 Γρήγοροι έλεγχοι:
+
 ```bash
 # Enumerate services/characteristics
 ble.enum <MAC>
@@ -46,82 +47,98 @@ ble.write <MAC> <UUID> <HEX_DATA>
 # gatttool equivalent
 # gatttool -b <MAC> --char-write-req -a <HANDLE> -n <HEX_DATA>
 ```
+
 Πράγματα που πρέπει να επαληθεύσετε κατά το reversing:
 
-- Απαιτεί το BLE **pairing/bonding** ή μόνο μια απλή σύνδεση;
-- Δρομολογούνται όλα τα transports στον ίδιο εσωτερικό dispatcher table;
-- Φιλτράρονται διαφορετικά τα privileged opcodes μέσω USB / BLE / UART / Wi-Fi;
-- Μπορεί η mobile app να ενεργοποιήσει απομακρυσμένα firmware update, recovery ή diagnostic handlers;
+- Απαιτεί το BLE **pairing/bonding** ή αρκεί μια απλή σύνδεση;
+- Δρομολογούνται όλα τα transports στον ίδιο εσωτερικό πίνακα dispatcher;
+- Φιλτράρονται διαφορετικά τα privileged opcodes σε USB / BLE / UART / Wi-Fi;
+- Μπορεί η mobile app να ενεργοποιήσει απομακρυσμένα handlers για firmware update, recovery ή diagnostics;
 
-## Τα firmware containers που προστατεύονται μόνο με checksum εξακολουθούν να περιέχουν firmware υπό τον έλεγχο του attacker
+## Τα firmware containers που βασίζονται μόνο σε checksum παραμένουν υπό τον έλεγχο του attacker
 
-Ένα firmware container που προστατεύεται μόνο από ένα **unkeyed checksum** (CRC32, SHA-256, MD5 κ.λπ.) παρέχει ανίχνευση αλλοίωσης, **όχι αυθεντικότητα**. Αν ο attacker μπορεί να φτάσει στη διαδικασία update, μπορεί να τροποποιήσει το image, να υπολογίσει ξανά το checksum και να κάνει flash arbitrary code.<sup>[[1]](#references)</sup>
+Ένα firmware container που προστατεύεται μόνο από **unkeyed checksum** (CRC32, SHA-256, MD5 κ.λπ.) εντοπίζει αλλοίωση, **όχι αυθεντικότητα**. Αν ο attacker μπορεί να φτάσει στη ρουτίνα ενημέρωσης, μπορεί να τροποποιήσει το image, να επανυπολογίσει το checksum και να κάνει flash αυθαίρετου κώδικα.<sup>[[1]](#references)</sup>
 
-Red flags κατά το RE:
+Ενδείξεις κινδύνου κατά το RE:
 
-- Ο κώδικας update επικυρώνει μόνο ένα trailing checksum blob όπως `CHK2`, `CRC` ή `SHA256`.
-- Δεν υπάρχει signature verification ή secure-boot root of trust.
-- Δεν χρησιμοποιείται device-bound MAC / HMAC / authenticated encryption.
-- Το recovery mode δέχεται το ίδιο unauthenticated image format.
+- Ο κώδικας ενημέρωσης επικυρώνει μόνο ένα checksum blob στο τέλος, όπως `CHK2`, `CRC` ή `SHA256`.
+- Δεν υπάρχει επαλήθευση υπογραφής ή root of trust για secure boot.
+- Δεν χρησιμοποιείται MAC / HMAC δεσμευμένο στη συσκευή ή authenticated encryption.
+- Το recovery mode δέχεται την ίδια μη αυθεντικοποιημένη μορφή image.
 
-Πρακτική ροή validation:
+Πρακτική διαδικασία επαλήθευσης:
 
-1. Κάντε extract το firmware container και εντοπίστε τα bootloader, main firmware και integrity metadata.
-2. Τροποποιήστε ένα harmless string ή banner στο image.
-3. Υπολογίστε ξανά το checksum ακριβώς όπως απαιτεί ο updater.
-4. Κάντε reflash το image μέσω της κανονικής διαδρομής update.
-5. Επιβεβαιώστε την αλλαγή κατά το boot, ώστε να αποδείξετε την arbitrary firmware replacement.
+1. Εξαγάγετε το firmware container και εντοπίστε το bootloader, το κύριο firmware και τα metadata ακεραιότητας.
+2. Τροποποιήστε μια ακίνδυνη συμβολοσειρά ή ένα banner στο image.
+3. Επανυπολογίστε το checksum ακριβώς όπως το αναμένει ο updater.
+4. Κάντε ξανά flash στο image μέσω της κανονικής διαδικασίας ενημέρωσης.
+5. Επιβεβαιώστε κατά την εκκίνηση ότι η αλλαγή εφαρμόστηκε, αποδεικνύοντας έτσι την αντικατάσταση firmware με αυθαίρετο κώδικα.
 
-Αν αυτό λειτουργεί μέσω ενός remotely reachable transport, όπως BLE/Wi-Fi, το bug είναι ουσιαστικά **unauthenticated OTA firmware replacement**.
+Αν αυτό είναι εφικτό μέσω transport προσβάσιμου εξ αποστάσεως, όπως BLE/Wi-Fi, το bug ισοδυναμεί ουσιαστικά με **αντικατάσταση OTA firmware χωρίς authentication**.
 
-## Μετατροπή ενός trusted USB peripheral σε BadUSB μέσω firmware reflashing
+## Κατακερματισμένη κατάσταση ενημέρωσης και εγγράψιμα metadata ακεραιότητας
 
-Όταν η συσκευή-στόχος είναι ήδη trusted από το host μέσω USB, το malicious firmware μπορεί να μη χρειάζεται να υλοποιήσει ένα πλήρες νέο USB stack. Ένα πολύ ευκολότερο pivot είναι συχνά η **επαναχρησιμοποίηση του υπάρχοντος HID support**.<sup>[[1]](#references)</sup>
+Ένας updater μπορεί να επαληθεύει μια υπογεγραμμένη κεφαλίδα firmware κατά την εγκατάσταση, αλλά να εκκινεί τα images χρησιμοποιώντας μόνο ένα αποθηκευμένο hash ακεραιότητας. Στο Cypherock X1, το Bootloader καλούσε ξεχωριστά Firewall tasks για την επαλήθευση της κεφαλίδας και την τοποθέτηση της έκδοσης/του μεγέθους στη RAM, την αποθήκευση της υπογραφής του firmware στη RAM, την επαλήθευση του γραμμένου image και, τέλος, τον υπολογισμό του hash του image και την αποθήκευσή του στο persistent Primary Bootloader Data. Η ίδια η υπογραφή δεν αποθηκευόταν μόνιμα. Αυτά τα tasks μπορούσαν να κληθούν ανεξάρτητα, αντί να επιβάλλουν μία ενιαία αυθεντικοποιημένη συναλλαγή αναβάθμισης.<sup>[[5]](#references)</sup>
 
-Χρήσιμο pattern:
+Με εκτέλεση κώδικα στον MCU και πρόσβαση εγγραφής στο Flash, η αναφερόμενη επίθεση ξαναέγραψε το application image, άλλαξε τις τιμές έκδοσης/μεγέθους στη RAM του Bootloader που ήταν κοινόχρηστη με το Firewall και, έπειτα, κάλεσε το τελικό task metadata για να αποθηκεύσει το hash του κακόβουλου image και να επαναφέρει την κανονική κατάσταση εκκίνησης. Ο συνήθης έλεγχος ακεραιότητας κατά την εκκίνηση αποδέχτηκε αυτό το hash χωρίς να επανελέγξει την υπογραφή. Κατά την εξέταση ενός παρόμοιου updater, παρακολουθήστε **ποιο component μπορεί να καλέσει κάθε task**, πού βρίσκονται οι επαληθευμένες τιμές και αν η απόφαση κατά την εκκίνηση αυθεντικοποιεί το *ίδιο image* του οποίου το hash είναι αποθηκευμένο. Αυτό είναι πιο συγκεκριμένο από μια μορφή image που βασίζεται μόνο σε checksum: υπήρχε επαλήθευση υπογραφής, αλλά η μετάβαση κατάστασης δεν ήταν δεσμευμένη σε αυτήν.<sup>[[5]](#references)</sup>
 
-1. Ελέγξτε αν η συσκευή κάνει ήδη enumeration ως **HID Consumer Control** / media / vendor HID interface.
+## Υπογραφές secure element πάνω σε μη έμπιστες μετρήσεις firmware
+
+Ένα secure element δεν πιστοποιεί τον κώδικα που εκτελείται απλώς και μόνο υπογράφοντας ένα hash που του παρέχεται από αυτόν τον κώδικα. Στο ίδιο wallet, το secure element υπέγραφε τον σειριακό αριθμό της συσκευής και, στη συνέχεια, το XOR ενός cloud nonce και ενός hash firmware που παρεχόταν μέσω του MCU. Το compromised firmware μπορούσε να δώσει προς υπογραφή ένα αναμενόμενο hash, ενώ εκτελούσε διαφορετικά bytes. Ο companion client υπέβαλλε επίσης την έκδοση του firmware στο cloud, επομένως η σύγκριση του αναμενόμενου hash από τον verifier εξακολουθούσε να βασίζεται σε μέτρηση προερχόμενη από τον MCU, αντί σε ανεξάρτητη ανάγνωση του Flash.<sup>[[5]](#references)</sup>
+
+Το αποτέλεσμα στην πλευρά της συσκευής αποτελούσε ξεχωριστό trust boundary: το cloud έλεγχε τη συσκευή, αλλά η συσκευή δεν αυθεντικοποιούσε την ετυμηγορία του cloud. Ένας τροποποιημένος client μπορούσε να αναφέρει τοπικά επιτυχία σε μια παραποιημένη συσκευή. Ελέγξτε ξεχωριστά την προέλευση της μέτρησης και την αυθεντικοποίηση της απάντησης· μια έγκυρη υπογραφή secure element και μια οθόνη επιτυχίας δεν αποδεικνύουν από μόνες τους ότι η εγκατεστημένη εφαρμογή είναι αυθεντική.<sup>[[5]](#references)</sup>
+
+Για τη γνωστοποίηση του protected code που επέτρεψε την ανάλυση αυτού του updater, δείτε το [Firewall copy-task firmware acquisition](index.html#disclosing-protected-code-through-a-firewall-copy-task).<sup>[[5]](#references)</sup>
+
+## Μετατροπή ενός έμπιστου USB peripheral σε BadUSB μέσω επαναπρογραμματισμού firmware
+
+Όταν ο host εμπιστεύεται ήδη τη συσκευή-στόχο μέσω USB, το κακόβουλο firmware ίσως να μη χρειάζεται να υλοποιήσει ολόκληρο νέο USB stack. Συχνά, μια πολύ ευκολότερη λύση είναι να **επαναχρησιμοποιήσει την υπάρχουσα υποστήριξη HID**.<sup>[[1]](#references)</sup>
+
+Χρήσιμο μοτίβο:
+
+1. Ελέγξτε αν η συσκευή εμφανίζεται ήδη ως **HID Consumer Control** / media / vendor HID interface.
 2. Εντοπίστε το υπάρχον **HID report descriptor** στο firmware.
-3. Προσθέστε ή αντικαταστήστε descriptor entries, ώστε η συσκευή να διαφημίζει επίσης **keyboard** capability.
-4. Επαναχρησιμοποιήστε τις υπάρχουσες firmware routines που στέλνουν ήδη HID reports, αντί να γράψετε νέα transport implementation.
-5. Κάντε inject key press + key release reports, για να πληκτρολογείτε commands στο host.
+3. Προσθέστε ή αντικαταστήστε εγγραφές στο descriptor ώστε η συσκευή να διαφημίζει και δυνατότητα **keyboard**.
+4. Επαναχρησιμοποιήστε υπάρχουσες ρουτίνες firmware που στέλνουν ήδη HID reports, αντί να γράψετε νέα υλοποίηση transport.
+5. Εισαγάγετε reports πατήματος και απελευθέρωσης πλήκτρων για να πληκτρολογήσετε εντολές στον host.
 
-Αυτό μετατρέπει το firmware compromise σε **host compromise**, επειδή το PC θα εμπιστευτεί το reflashed peripheral ως legitimate keyboard.
+Έτσι, ο συμβιβασμός του firmware οδηγεί σε **συμβιβασμό του host**, επειδή το PC θα εμπιστεύεται το επαναπρογραμματισμένο peripheral ως νόμιμο keyboard.
 
-### Minimal assessment checklist
+### Ελάχιστη λίστα ελέγχου αξιολόγησης
 
-- Εμφανίζουν τα `dmesg`, Device Manager ή τα USB descriptors ένα υπάρχον HID interface;
-- Υπάρχει διαθέσιμος χώρος κοντά στο report descriptor ή relocatable descriptor table;
-- Μπορούν να επαναχρησιμοποιηθούν οι υπάρχουσες media-control send routines για keyboard reports;
-- Αποδέχεται αυτόματα το host το νέο keyboard interface μετά το reflashing;
+- Εμφανίζουν τα `dmesg`, Device Manager ή τα USB descriptors υπάρχον HID interface;
+- Υπάρχει διαθέσιμος χώρος κοντά στο report descriptor ή ένας relocatable πίνακας descriptors;
+- Μπορούν να επαναχρησιμοποιηθούν οι υπάρχουσες ρουτίνες αποστολής media-control για keyboard reports;
+- Αποδέχεται αυτόματα ο host το νέο keyboard interface μετά τον επαναπρογραμματισμό;
 
-## Αξιόπιστη payload execution μέσα σε RTOS firmware
+## Αξιόπιστη εκτέλεση payload μέσα σε RTOS firmware
 
-Αντί να εισάγετε fragile trampolines σε τυχαία code paths, αναζητήστε **υπάρχοντα RTOS tasks** που δεν χρησιμοποιούνται ή έχουν χαμηλό impact κατά την κανονική λειτουργία.<sup>[[1]](#references)</sup>
+Αντί να εισάγετε εύθραυστα trampolines σε τυχαία code paths, αναζητήστε **υπάρχοντα RTOS tasks** που δεν χρησιμοποιούνται ή έχουν μικρό αντίκτυπο κατά την κανονική λειτουργία.<sup>[[1]](#references)</sup>
 
 Γιατί είναι χρήσιμο:
 
-- Ο scheduler ξεκινά το payload φυσικά κατά το boot.
-- Αποφεύγετε την αλλοίωση κρίσιμου control flow.
-- Τα delayed payloads είναι λιγότερο πιθανό να προκαλέσουν watchdog resets σε σχέση με την εκτέλεσή τους μέσα σε latency-sensitive USB/network handler.
+- Ο scheduler εκκινεί φυσικά το payload κατά την εκκίνηση.
+- Αποφεύγετε την αλλοίωση κρίσιμης ροής ελέγχου.
+- Τα καθυστερημένα payloads είναι λιγότερο πιθανό να ενεργοποιήσουν watchdog resets απ’ ό,τι όταν εκτελούνται μέσα σε handler USB/network ευαίσθητο ως προς το latency.
 
-Καλοί στόχοι είναι diagnostic, factory-test, telemetry ή coprocessor service tasks που φαίνονται dormant κατά τη συνήθη χρήση.
+Καλοί στόχοι είναι tasks για diagnostics, factory tests, telemetry ή υπηρεσίες coprocessor που φαίνονται ανενεργά κατά την κανονική χρήση.
 
-## Γρήγορο exploit iteration: επαναχρησιμοποίηση benign protocol handlers
+## Γρήγορη επανάληψη exploit: επαναχρησιμοποίηση αβλαβών protocol handlers
 
-Μόλις καταστεί δυνατή η τροποποίηση firmware, ένας compact τρόπος επιτάχυνσης του RE είναι η αντικατάσταση ενός harmless command handler (για παράδειγμα ενός **echo/debug opcode**) με custom **memory read / write / execute** primitives. Έτσι αποφεύγεται το πλήρες reflashing για κάθε experiment και είναι ιδιαίτερα χρήσιμο όταν η συσκευή υποστηρίζει τον τροποποιημένο handler μέσω fast wired transport.<sup>[[1]](#references)</sup>
+Όταν είναι εφικτή η τροποποίηση firmware, ένας σύντομος τρόπος επιτάχυνσης του RE είναι η αντικατάσταση ενός αβλαβούς command handler (για παράδειγμα ενός **echo/debug opcode**) με προσαρμοσμένα primitives **memory read / write / execute**. Έτσι αποφεύγεται η πλήρης διαδικασία flash για κάθε πείραμα και είναι ιδιαίτερα χρήσιμο όταν η συσκευή υποστηρίζει τον τροποποιημένο handler μέσω γρήγορου ενσύρματου transport.<sup>[[1]](#references)</sup>
 
-Χρησιμοποιήστε το για:
+Χρησιμοποιήστε το για να:
 
-- Επαλήθευση scatter-loaded memory maps
-- Live inspection της κατάστασης heap/task
-- Δοκιμή μικρών payloads πριν την εγγραφή τους στο flash
-- Ασφαλή ανάκτηση function pointers, strings και descriptor tables
+- Επαληθεύσετε memory maps που φορτώνονται σε μη συνεχόμενες περιοχές
+- Επιθεωρήσετε ζωντανά την κατάσταση του heap/task
+- Δοκιμάσετε μικρά payloads πριν τα γράψετε στο flash
+- Ανακτήσετε με ασφάλεια function pointers, strings και descriptor tables
 
 ## References
 
-- [1] [Pwnd Blaster: Hacking your PC using your speaker without ever touching it](https://blog.nns.ee/2026/06/03/katana-badusb/)
+- [1] [Pwnd Blaster: Παραβίαση του PC σας μέσω των ηχείων του χωρίς καν να το αγγίξετε](https://blog.nns.ee/2026/06/03/katana-badusb/)
 - [2] [firmware-mod-kit](https://github.com/rampageX/firmware-mod-kit)
 - [3] [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit)
-- [4] [Metasploit - How to use `msfvenom`](https://docs.metasploit.com/docs/using-metasploit/basics/how-to-use-msfvenom.html)
+- [4] [Metasploit - Πώς να χρησιμοποιήσετε το `msfvenom`](https://docs.metasploit.com/docs/using-metasploit/basics/how-to-use-msfvenom.html)
+- [5] [Πώς και γιατί παραβιάσαμε το hardware wallet Cypherock: Η πλήρης ιστορία](https://www.darknavy.org/blog/how_and_why_we_hacked_cypherock_hardware_wallet_the_full_story/)
 {{#include ../../banners/hacktricks-training.md}}
