@@ -1,31 +1,31 @@
-# Burp MCP: Έλεγχος traffic με τη βοήθεια LLM
+# Burp MCP: Έλεγχος κίνησης με τη βοήθεια LLM
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Επισκόπηση
 
-Η επέκταση **MCP Server** του Burp μπορεί να εκθέτει το HTTP(S) traffic που έχει υποκλαπεί σε clients LLM με υποστήριξη MCP, ώστε να μπορούν να **αναλύουν πραγματικά requests/responses** για τον εντοπισμό ευπαθειών και τη σύνταξη αναφορών. Χρησιμοποιείτε το Burp ως πηγή αλήθειας: προτιμήστε παθητική ανάλυση ή ελεγχόμενες επαναλήψεις με αλλαγή μίας μεταβλητής κάθε φορά, αντί για τυφλό scanning.<sup>[[8]](#references)</sup>
+Η επέκταση **MCP Server** του Burp μπορεί να εκθέτει την υποκλαπείσα κίνηση HTTP(S) σε clients LLM που υποστηρίζουν MCP, ώστε να μπορούν να **αναλύουν πραγματικά αιτήματα/αποκρίσεις** για τον εντοπισμό ευπαθειών και τη σύνταξη αναφορών. Κρατήστε το Burp ως την αξιόπιστη πηγή: χρησιμοποιήστε παθητική ανάλυση ή ελεγχόμενα replays με αλλαγή μίας μεταβλητής κάθε φορά, αντί για τυφλή σάρωση.<sup>[[8]](#references)</sup>
 
 ## Αρχιτεκτονική
 
-- Ο **Burp MCP Server (BApp)** ακούει από προεπιλογή στη διεύθυνση `127.0.0.1:9876` και εκθέτει το traffic που έχει υποκλαπεί μέσω MCP.<sup>[[1]](#references)[[2]](#references)[[7]](#references)</sup>
+- Ο **Burp MCP Server (BApp)** ακούει από προεπιλογή στη διεύθυνση `127.0.0.1:9876` και εκθέτει την υποκλαπείσα κίνηση μέσω MCP.<sup>[[1]](#references)[[2]](#references)[[7]](#references)</sup>
 - Το **MCP proxy JAR** γεφυρώνει το stdio (πλευρά client) με το MCP SSE endpoint του Burp.
-- Ένας **προαιρετικός τοπικός reverse proxy** (Caddy) κανονικοποιεί τα headers για αυστηρούς ελέγχους του MCP handshake.
-- **Clients/backends**: Codex CLI (cloud), Gemini CLI (cloud) ή Ollama (local).
+- **Προαιρετικός τοπικός reverse proxy** (Caddy) κανονικοποιεί τις κεφαλίδες για αυστηρούς ελέγχους χειραψίας MCP.
+- **Clients/backends**: Codex CLI (cloud), Gemini CLI (cloud) ή Ollama (τοπικά).
 
 ## Ρύθμιση
 
-### 1) Εγκαταστήστε το Burp MCP Server
+### 1) Εγκατάσταση του Burp MCP Server
 
 Εγκαταστήστε το **MCP Server** από το Burp BApp Store και επαληθεύστε ότι ακούει στη διεύθυνση `127.0.0.1:9876`.<sup>[[1]](#references)[[2]](#references)</sup>
 
-### 2) Εξαγάγετε το proxy JAR
+### 2) Εξαγωγή του proxy JAR
 
 Στην καρτέλα MCP Server, κάντε κλικ στο **Extract server proxy jar** και αποθηκεύστε το `mcp-proxy-all.jar`.<sup>[[7]](#references)</sup>
 
-### 3) Ρυθμίστε έναν MCP client (παράδειγμα με Codex)
+### 3) Διαμόρφωση client MCP (παράδειγμα Codex)
 
-Ορίστε στο client τη διαδρομή προς το proxy JAR και το απευθείας SSE endpoint του Burp. Το ενσωματωμένο proxy λειτουργεί ως γέφυρα stdio-to-SSE· δεν αντικαθιστά τον listener του Burp.<sup>[[7]](#references)</sup>
+Ορίστε ως προορισμό του client το proxy JAR και το απευθείας SSE endpoint του Burp. Το πακεταρισμένο proxy λειτουργεί ως γέφυρα stdio-to-SSE· δεν αντικαθιστά τον listener του Burp.<sup>[[7]](#references)</sup>
 
 ```toml
 # ~/.codex/config.toml
@@ -41,16 +41,16 @@ codex mcp add burp -- /path/to/java -jar /path/to/mcp-proxy-all.jar \
   --sse-url http://127.0.0.1:9876
 ```
 
-Στη συνέχεια, εκτελέστε το Codex και παραθέστε τα εργαλεία MCP:
+Στη συνέχεια, εκτελέστε το Codex και εμφανίστε τα εργαλεία MCP:
 
 ```bash
 codex
 # inside Codex: /mcp
 ```
 
-### 4) Διόρθωση αυστηρής επικύρωσης Origin/header με Caddy (αν χρειάζεται)
+### 4) Διόρθωση αυστηρής επικύρωσης Origin/header με το Caddy (αν χρειάζεται)
 
-Αν το handshake του MCP αποτύχει λόγω αυστηρών ελέγχων Origin ή επιπλέον headers, χρησιμοποιήστε έναν τοπικό reverse proxy για την κανονικοποίηση των headers (αυτός είναι ο ίδιος τρόπος αντιμετώπισης του προβλήματος αυστηρής επικύρωσης του Burp MCP).<sup>[[1]](#references)[[3]](#references)</sup>
+Αν αποτύχει το MCP handshake λόγω αυστηρών ελέγχων `Origin` ή πρόσθετων headers, χρησιμοποιήστε έναν τοπικό reverse proxy για την κανονικοποίηση των headers (αυτό αντιστοιχεί στη λύση παράκαμψης για το ζήτημα αυστηρής επικύρωσης του Burp MCP).<sup>[[1]](#references)[[3]](#references)</sup>
 
 ```bash
 brew install caddy
@@ -72,16 +72,16 @@ reverse_proxy 127.0.0.1:9876 {
 EOF
 ```
 
-Εκκινήστε το proxy και τον client και αλλάξτε το διαμορφωμένο `--sse-url` σε `http://127.0.0.1:19876` μόνο κατά τη χρήση αυτού του Caddy listener:<sup>[[1]](#references)[[3]](#references)</sup>
+Εκκινήστε τον proxy και τον client και αλλάξτε το ρυθμισμένο `--sse-url` σε `http://127.0.0.1:19876` μόνο όταν χρησιμοποιείτε αυτόν τον listener του Caddy:<sup>[[1]](#references)[[3]](#references)</sup>
 
 ```bash
 caddy run --config ~/burp-mcp/Caddyfile &
 codex
 ```
 
-### 5) Συσχετίστε την κατάσταση του browser με τα στοιχεία του proxy (Playwright MCP)
+### 5) Συνδυάστε την κατάσταση του browser με τα στοιχεία του proxy (Playwright MCP)
 
-Καταχωρίστε το Playwright MCP, ώστε το browser του να χρησιμοποιεί το proxy του Burp. Έτσι, ο agent μπορεί να συσχετίζει την κατάσταση του αποδοσμένου DOM/της προσβασιμότητας με το ακριβές ιστορικό HTTP που την προκάλεσε.<sup>[[6]](#references)[[8]](#references)</sup>
+Ρυθμίστε το Playwright MCP ώστε ο browser του να χρησιμοποιεί το proxy του Burp. Έτσι, ο agent μπορεί να συσχετίζει την κατάσταση του DOM και της προσβασιμότητας που εμφανίζεται με το ακριβές ιστορικό HTTP που την παρήγαγε.<sup>[[6]](#references)[[8]](#references)</sup>
 
 ```bash
 codex mcp add playwright -- npx -y @playwright/mcp@latest \
@@ -89,13 +89,13 @@ codex mcp add playwright -- npx -y @playwright/mcp@latest \
   --ignore-https-errors
 ```
 
-Προσαρμόστε τη διεύθυνση του listener, επανεκκινήστε το Codex και χρησιμοποιήστε το `/mcp` για να επαληθεύσετε και τις δύο ενσωματώσεις. Το παράδειγμα απενεργοποιεί τα σφάλματα πιστοποιητικών του browser, ώστε η HTTPS interception να μην αποκλείεται από το πιστοποιητικό που δημιουργεί τοπικά το Burp.<sup>[[6]](#references)[[8]](#references)</sup>
+Προσαρμόστε τη διεύθυνση του listener, επανεκκινήστε το Codex και χρησιμοποιήστε το `/mcp` για να επαληθεύσετε και τις δύο ενσωματώσεις. Το παράδειγμα απενεργοποιεί τα σφάλματα πιστοποιητικών του browser, ώστε η HTTPS interception να μην εμποδίζεται από το πιστοποιητικό που δημιουργεί τοπικά το Burp.<sup>[[6]](#references)[[8]](#references)</sup>
 
 ## Αυτοματοποίηση browser με υποστήριξη proxy (OpenBurp)
 
-Η σύνδεση Burp MCP και η διαδρομή του browser που υποβάλλεται σε interception είναι ξεχωριστές ροές δεδομένων. Η υπηρεσία MCP διαθέτει τα εργαλεία του Burp στη διεύθυνση `127.0.0.1:9876`, ενώ μια αποκλειστική παρουσία Chromium στέλνει την κίνηση HTTP(S) μέσω του proxy του Burp στη διεύθυνση `127.0.0.1:8080`. Επομένως, αιτήματα που δημιουργούνται απευθείας από ένα εργαλείο MCP ενδέχεται να μην εμφανίζονται στο **Proxy > HTTP history**· χρησιμοποιήστε τον browser που περνά από το proxy όποτε πρέπει να είναι ορατό, επεξεργάσιμο ή να διατηρηθεί ως αποδεικτικό στοιχείο το αίτημα/η απόκριση.<sup>[[2]](#references)[[9]](#references)</sup>
+Η σύνδεση Burp MCP και η διαδρομή του browser μέσω interception είναι ξεχωριστές ροές δεδομένων. Η υπηρεσία MCP εκθέτει τα εργαλεία του Burp στη διεύθυνση `127.0.0.1:9876`, ενώ ένα ειδικό instance του Chromium στέλνει την HTTP(S) κίνησή του μέσω του proxy του Burp στη διεύθυνση `127.0.0.1:8080`. Επομένως, αιτήματα που δημιουργούνται απευθείας από ένα εργαλείο MCP μπορεί να μην εμφανίζονται στο **Proxy > HTTP history**· χρησιμοποιήστε τον browser μέσω proxy όποτε πρέπει να είναι ορατό, επεξεργάσιμο ή να διατηρηθεί ως αποδεικτικό στοιχείο το αίτημα/η απόκριση.<sup>[[2]](#references)[[9]](#references)</sup>
 
-Ένας client με υποστήριξη SSE μπορεί να καταχωρίσει απευθείας το Burp. Αν ο client υποστηρίζει μόνο stdio, μπορεί να εκκινήσει το proxy JAR της PortSwigger. Και στις δύο περιπτώσεις, καταχωρίστε ένα δεύτερο MCP ελέγχου browser και κατευθύνετέ το στο ενσωματωμένο Chromium του Burp (`BURP_CHROMIUM` είναι μια τοπική διαδρομή εκτελέσιμου αρχείου):<sup>[[9]](#references)</sup>
+Ένας client με υποστήριξη SSE μπορεί να καταχωρίσει απευθείας το Burp. Ένας client που υποστηρίζει μόνο stdio μπορεί αντί γι' αυτό να εκκινήσει το proxy JAR της PortSwigger. Και στις δύο περιπτώσεις, καταχωρίστε ένα δεύτερο MCP για τον έλεγχο του browser και συνδέστε το με το ενσωματωμένο Chromium του Burp (το `BURP_CHROMIUM` είναι μια τοπική διαδρομή εκτελέσιμου αρχείου):<sup>[[9]](#references)</sup>
 
 ```bash
 # Claude Code: direct SSE plus a proxied browser
@@ -112,22 +112,22 @@ codex mcp add burp-browser -- npx -y @playwright/mcp@latest \
   --ignore-https-errors --isolated
 ```
 
-Η σημαία TLS-bypass αποδέχεται πιστοποιητικά που δημιουργούνται από το proxy υποκλοπής, ενώ το `--isolated` αποτρέπει την επαναχρησιμοποίηση του κανονικού προφίλ περιήγησης του χειριστή κατά την αξιολόγηση. Η απομόνωση προστατεύει την κατάσταση του προφίλ, αλλά **δεν αποτελεί sandbox ασφαλείας**: ο controller εξακολουθεί να έχει πρόσβαση σε αυθεντικοποιημένες συνεδρίες που έχουν ανοιχτεί σε αυτό το πρόγραμμα περιήγησης δοκιμών, ενώ το Burp MCP μπορεί να εκθέσει ευαίσθητα αιτήματα, αποκρίσεις και ρυθμίσεις.<sup>[[9]](#references)</sup>
+Η σημαία TLS-bypass δέχεται πιστοποιητικά που δημιουργούνται από το proxy παρεμβολής, ενώ το `--isolated` εμποδίζει την αξιολόγηση να επαναχρησιμοποιήσει το συνηθισμένο προφίλ browser του χειριστή. Η απομόνωση προστατεύει την κατάσταση του προφίλ, αλλά **δεν αποτελεί sandbox ασφαλείας**: ο controller εξακολουθεί να έχει πρόσβαση σε authenticated sessions που έχουν ανοιχτεί σε αυτόν τον browser δοκιμών, ενώ το Burp MCP μπορεί να εκθέσει ευαίσθητα requests, responses και ρυθμίσεις.<sup>[[9]](#references)</sup>
 
-Δοκιμάστε ανεξάρτητα τον listener SSE πριν από την αντιμετώπιση προβλημάτων του client bridge:<sup>[[9]](#references)</sup>
+Ελέγξτε ανεξάρτητα τον listener SSE πριν διερευνήσετε προβλήματα στο client bridge:<sup>[[9]](#references)</sup>
 
 ```bash
 curl -i --max-time 3 http://127.0.0.1:9876/
 ```
 
-Ένας υγιής listener επιστρέφει `Content-Type: text/event-stream`. Είναι αναμενόμενο να υπάρξει timeout μετά τις κεφαλίδες, επειδή ένα SSE stream παραμένει ανοιχτό για μελλοντικά events. Αν ο client εξακολουθεί να αποτυγχάνει, επιβεβαιώστε τη διαδρομή που έχει ρυθμιστεί στην επέκταση: η PortSwigger σημειώνει ότι το endpoint μπορεί να είναι το root path ή το `/sse`, ανάλογα με τον client και τη ρύθμιση της επέκτασης.<sup>[[9]](#references)[[7]](#references)</sup>
+Ένας υγιής listener επιστρέφει `Content-Type: text/event-stream`. Είναι αναμενόμενο να υπάρξει timeout μετά τις κεφαλίδες, καθώς ένα SSE stream παραμένει ανοιχτό για μελλοντικά συμβάντα. Αν ο client εξακολουθεί να αποτυγχάνει, επιβεβαιώστε τη διαδρομή που έχει ρυθμιστεί στην επέκταση: η PortSwigger σημειώνει ότι το endpoint μπορεί να είναι η διαδρομή root ή `/sse`, ανάλογα με τον client και τη ρύθμιση της επέκτασης.<sup>[[9]](#references)[[7]](#references)</sup>
 
 ## Χρήση διαφορετικών clients
 
 ### Codex CLI
 
 - Ρυθμίστε το `~/.codex/config.toml` όπως παραπάνω.
-- Εκτελέστε το `codex` και έπειτα το `/mcp` για να επαληθεύσετε τη λίστα εργαλείων του Burp.
+- Εκτελέστε το `codex` και έπειτα το `/mcp` για να επαληθεύσετε τη λίστα εργαλείων Burp.
 
 ### Gemini CLI
 
@@ -153,20 +153,20 @@ burpollama deepseek-r1:14b
 - `gpt-oss:20b` (~20GB VRAM)
 - `llama3.1:70b` (48GB+ VRAM)
 
-## Επαναλήψεις και επικύρωση με βάση τα στοιχεία
+## Replay και επικύρωση βάσει αποδεικτικών στοιχείων
 
-Μην αφήνετε τον agent να αντιμετωπίζει μια εύλογη εξήγηση ή μια ενδιάμεση απόκριση ως απόδειξη. Χρησιμοποιήστε αιτήματα/αποκρίσεις του Burp και την κατάσταση του browser που παρατηρήσατε ανεξάρτητα, ώστε κάθε δοκιμή να μπορεί να διαψευστεί.<sup>[[8]](#references)</sup>
+Μην αφήνετε τον agent να θεωρεί μια εύλογη εξήγηση ή μια ενδιάμεση απόκριση ως απόδειξη. Χρησιμοποιείτε αιτήματα/αποκρίσεις του Burp και την κατάσταση του browser που παρατηρείτε ανεξάρτητα, ώστε κάθε δοκιμή να μπορεί να διαψευστεί.<sup>[[8]](#references)</sup>
 
-1. Αποθηκεύστε ένα ζεύγος αρχικού αιτήματος/απόκρισης και εντοπίστε το ακριβές στοιχείο που ελέγχεται από τον attacker.
-2. Για συγκρίσεις εξουσιοδότησης, καταγράψτε την ίδια ροή εργασίας ανεξάρτητα και στους δύο λογαριασμούς, προτού τροποποιήσετε αναγνωριστικά, cookies ή tokens.
-3. Πριν επαναλάβετε μια τροποποίηση, καταγράψτε την υπόθεση, τη θέση των στοιχείων, το αναμενόμενο σήμα και το αποτέλεσμα που θα την αναιρούσε.
-4. Τροποποιήστε ένα στοιχείο κάθε φορά, διατηρήστε το ζεύγος που προκύπτει και διαχωρίστε τις άμεσες παρατηρήσεις από τα συμπεράσματα.
-5. Παρακολουθήστε κάθε υποψήφιο ως `open`, `blocked`, `rejected` ή `confirmed`· επανεξετάστε τον μόνο όταν νέα στοιχεία αλλάζουν τον μηχανισμό ή κάποια προϋπόθεση.
-6. Επιβεβαιώστε τον έλεγχο από τον attacker, την προσβασιμότητα, την επαναληψιμότητα, την παράκαμψη περιορισμών, τον αντίκτυπο και την τελική κατάσταση της εφαρμογής. Μια ανακατεύθυνση ή μια επιτυχής κλήση εργαλείου δεν αποτελεί απόδειξη, αν η υποτιθέμενη αλλαγή κατάστασης συμβαίνει σε επόμενο στάδιο.
+1. Αποθηκεύστε ένα αρχικό ζεύγος αιτήματος/απόκρισης και προσδιορίστε το ακριβές στοιχείο που ελέγχεται από τον επιτιθέμενο.
+2. Για συγκρίσεις εξουσιοδότησης, καταγράψτε ανεξάρτητα την ίδια ροή εργασίας και με τους δύο λογαριασμούς πριν τροποποιήσετε αναγνωριστικά, cookies ή tokens.
+3. Πριν επαναλάβετε μια τροποποίηση, καταγράψτε την υπόθεση, τη θέση των αποδεικτικών στοιχείων, το αναμενόμενο σήμα και το αποτέλεσμα που θα τη διέψευδε.
+4. Τροποποιείτε ένα στοιχείο κάθε φορά, διατηρείτε το ζεύγος που προκύπτει και επισημαίνετε ξεχωριστά τις άμεσες παρατηρήσεις και τα συμπεράσματα.
+5. Καταγράφετε κάθε υποψήφια περίπτωση ως `open`, `blocked`, `rejected` ή `confirmed`· επανεξετάζετέ την μόνο όταν νέα αποδεικτικά στοιχεία αλλάζουν τον μηχανισμό ή κάποια προϋπόθεση.
+6. Επιβεβαιώνετε τον έλεγχο από τον επιτιθέμενο, την προσβασιμότητα, την επαναληψιμότητα, την παράκαμψη περιορισμών, τον αντίκτυπο και την τελική κατάσταση της εφαρμογής. Μια ανακατεύθυνση ή μια επιτυχής κλήση εργαλείου δεν αποτελεί απόδειξη αν η υποτιθέμενη αλλαγή κατάστασης γίνεται σε επόμενο στάδιο.
 
-Διατηρήστε τις λεπτομέρειες εκμετάλλευσης στην αντίστοιχη σελίδα τεχνικής. Για παράδειγμα, τα πιθανά προβλήματα με μηνύματα browser ανήκουν στο [PostMessage Vulnerabilities](../pentesting-web/postmessage-vulnerabilities/README.md), ενώ η συμπεριφορά επιλογής κλειδιού token ανήκει στο [JWT Vulnerabilities](../pentesting-web/hacking-jwt-json-web-tokens.md).<sup>[[8]](#references)</sup>
+Διατηρείτε τις λεπτομέρειες εκμετάλλευσης στη σχετική σελίδα τεχνικής. Για παράδειγμα, οι υποψήφιες περιπτώσεις browser-message ανήκουν στο [PostMessage Vulnerabilities](../pentesting-web/postmessage-vulnerabilities/README.md), ενώ η συμπεριφορά επιλογής κλειδιού token ανήκει στο [JWT Vulnerabilities](../pentesting-web/hacking-jwt-json-web-tokens.md).<sup>[[8]](#references)</sup>
 
-Μια σύντομη καταγραφή υποθέσεων αποτρέπει την επανάληψη του ίδιου δελεαστικού μονοπατιού από παράλληλους agents:<sup>[[8]](#references)</sup>
+Μια συνοπτική καταγραφή υπόθεσης βοηθά τους παράλληλους agents να μην επαναλαμβάνουν την ίδια δελεαστική διαδρομή:<sup>[[8]](#references)</sup>
 
 ```yaml
 status: open
@@ -177,27 +177,37 @@ expected_signal: "user B's object is returned"
 falsifier: "server rejects it or returns only user A's object"
 ```
 
+## Διαλογή WebSocket frames με Burp MCP
+
+Η επίσημη επέκταση παρέχει το `get_proxy_websocket_history_regex` για αναζητήσεις μόνο για ανάγνωση, με σελιδοποίηση, στο ιστορικό WebSocket του Burp. Δέχεται τα `regex`, `count` και `offset`· σε αντίθεση με το `send_http1_request`, δεν στέλνει WebSocket frame. Το Burp καταγράφει μηνύματα και προς τις δύο κατευθύνσεις, ακόμη κι όταν το Intercept είναι απενεργοποιημένο, επομένως φιλτράρετε το ιστορικό πριν δώσετε στο μοντέλο ένα μικρό σύνολο σχετικών frames.<sup>[[10]](#references)[[12]](#references)[[13]](#references)</sup>
+
+1. Εκτελέστε την ίδια ενέργεια που βασίζεται σε WebSocket μέσω του browser που περνά από το Burp proxy, χρησιμοποιώντας δύο ανεξάρτητα αυθεντικοποιημένους δοκιμαστικούς λογαριασμούς. Διατηρήστε μαζί κάθε handshake αναβάθμισης σύνδεσης και τα cookies του, το connection ID, την κατεύθυνση του frame και τα frames απόκρισης· ένα συμβάν από διακομιστή προς πελάτη στη σύνδεση του πρώτου λογαριασμού δεν αποδεικνύει ότι το έλαβε ο δεύτερος λογαριασμός.
+2. Αναζητήστε στο `get_proxy_websocket_history_regex` με μια συγκεκριμένη έκφραση, όπως `(?i)(subscribe|room|tenant|objectId)`, `count: 20` και `offset: 0`. Αυξήστε το `offset` για να εξετάσετε μεταγενέστερα αποτελέσματα. Συγκρίνετε το αναγνωριστικό αντικειμένου ή topic του εξερχόμενου frame με την απόκριση στην **ίδια σύνδεση**.
+3. Στο **Proxy > WebSockets history**, στείλτε το υποψήφιο εξερχόμενο frame στο Repeater. Συνδέστε το στην κατάλληλη ανοιχτή σύνδεση ή επανασυνδεθείτε χρησιμοποιώντας το handshake του δεύτερου λογαριασμού. Αλλάξτε μόνο το αναγνωριστικό αντικειμένου ή topic και συγκρίνετε τα μηνύματα του διακομιστή και την κατάσταση της εφαρμογής με τις δύο γραμμές βάσης. Το εργαλείο ιστορικού MCP δεν μπορεί να εκτελέσει αυτήν την επανάληψη· το WebSocket Repeater μπορεί να επεξεργαστεί, να ξαναστείλει και να επανασυνδέσει frames.
+
+Για δοκιμές ειδικές για το πρωτόκολλο, όπως cross-site WebSocket hijacking και εξουσιοδότηση topic broker, συνεχίστε στην ενότητα [WebSocket Attacks](../pentesting-web/websocket-attacks.md). Μην εκλαμβάνετε ένα αποδεκτό upgrade ή ένα echo στην πλευρά του client ως απόδειξη ότι πέτυχε μια προστατευμένη εγγραφή.
+
 ## Στοχευμένη επικύρωση out-of-band με Burp MCP
 
-Το Burp Suite Professional εκθέτει τις `generate_collaborator_payload` και `get_collaborator_interactions` μέσω της επίσημης επέκτασης MCP. Συνδυάστε τις με τις `get_proxy_http_history_regex` και μία επανάληψη αιτήματος μέσω `send_http1_request`, για να ελέγξετε αν υπάρχει υποψία ανάκτησης URL από την πλευρά του server, χωρίς να σαρώσετε ολόκληρο τον στόχο. Το Burp μπορεί να απαιτεί ξεχωριστή έγκριση για ανάγνωση του history και αποστολή αιτήματος.<sup>[[2]](#references)[[10]](#references)</sup>
+Το Burp Suite Professional παρέχει τα `generate_collaborator_payload` και `get_collaborator_interactions` μέσω της επίσημης επέκτασης MCP. Συνδυάστε τα με το `get_proxy_http_history_regex` και μία επανάληψη με `send_http1_request` για να ελέγξετε μια ύποπτη ανάκτηση URL από την πλευρά του διακομιστή, χωρίς να σαρώσετε ολόκληρο τον στόχο. Το Burp ενδέχεται να απαιτεί ξεχωριστή έγκριση για την ανάγνωση του ιστορικού και την αποστολή αιτήματος.<sup>[[2]](#references)[[10]](#references)</sup>
 
-1. Φιλτράρετε το history για ένα υποψήφιο αίτημα που περιέχει URL, όπως ένα με `url=`, `webhook` ή `callback`. Αποθηκεύστε το αρχικό request και response. Το εργαλείο history δέχεται `regex`, `count` και `offset`· χρησιμοποιήστε σελιδοποίηση αντί να ζητήσετε από το μοντέλο να εξετάσει κάθε καταχώριση.<sup>[[10]](#references)</sup>
-2. Δημιουργήστε ένα νέο Collaborator payload και κρατήστε το **payload ID** που επιστρέφεται. Επαναλάβετε το αίτημα που καταγράψατε προς τον ίδιο host και port, αλλάζοντας μόνο το υποψήφιο URL σε ένα HTTPS URL κάτω από το domain του payload. Για το `send_http1_request`, δώστε ολόκληρο το HTTP/1.1 request ως `content`, μαζί με τα `targetHostname`, `targetPort` και `usesHttps`· τα πεδία προορισμού προσδιορίζουν την **εφαρμογή**, όχι τον host του Collaborator.<sup>[[10]](#references)</sup>
-3. Ελέγξτε περιοδικά το `get_collaborator_interactions` με αυτό το payload ID και συσχετίστε τον χρόνο της αλληλεπίδρασης με την επανάληψη του αιτήματος. Μια αλληλεπίδραση HTTP αποτελεί ένδειξη ανάκτησης, ενώ μόνο το DNS δείχνει επίλυση ονόματος και όχι ολοκληρωμένο HTTP request. Ελέγξτε την πηγή της αλληλεπίδρασης και τις κεφαλίδες του request, ώστε να διακρίνετε την εξερχόμενη κίνηση του server από τη φόρτωση από την πλευρά του browser. Στη συνέχεια, επαναλάβετε με νέο payload για να αποκλείσετε άσχετη κίνηση.<sup>[[10]](#references)[[11]](#references)</sup>
+1. Φιλτράρετε το ιστορικό για ένα υποψήφιο αίτημα που περιέχει URL, όπως ένα με `url=`, `webhook` ή `callback`. Αποθηκεύστε το αρχικό αίτημα και την απόκριση. Το εργαλείο ιστορικού δέχεται τα `regex`, `count` και `offset`· χρησιμοποιήστε σελιδοποίηση αντί να ζητήσετε από το μοντέλο να εξετάσει κάθε εγγραφή.<sup>[[10]](#references)</sup>
+2. Δημιουργήστε ένα νέο Collaborator payload και διατηρήστε το **payload ID** που επιστρέφεται. Επαναλάβετε το καταγεγραμμένο αίτημα προς τον ίδιο host και port, αλλάζοντας μόνο το υποψήφιο URL σε ένα HTTPS URL κάτω από το συγκεκριμένο payload domain. Για το `send_http1_request`, περάστε ολόκληρο το αίτημα HTTP/1.1 ως `content`, μαζί με τα `targetHostname`, `targetPort` και `usesHttps`· τα πεδία προορισμού προσδιορίζουν την **εφαρμογή**, όχι τον host του Collaborator.<sup>[[10]](#references)</sup>
+3. Κάντε polling στο `get_collaborator_interactions` με αυτό το payload ID και συσχετίστε την ώρα της αλληλεπίδρασης με την επανάληψη. Μια αλληλεπίδραση HTTP υποστηρίζει ότι έγινε ανάκτηση, ενώ μόνο DNS υποδεικνύει επίλυση ονόματος, όχι ολοκληρωμένο αίτημα HTTP. Ελέγξτε την πηγή της αλληλεπίδρασης και τις κεφαλίδες του αιτήματος για να ξεχωρίσετε την εξερχόμενη κίνηση του διακομιστή από τη φόρτωση στην πλευρά του browser και, στη συνέχεια, επαναλάβετε με νέο payload για να αποκλείσετε άσχετη κίνηση.<sup>[[10]](#references)[[11]](#references)</sup>
 
-Το εργαλείο αιτημάτων MCP επιστρέφει απευθείας το response και δεν είναι απαραίτητο να το καταγράψει στο **Proxy > HTTP history**. Διατηρήστε το αποτέλεσμα του request/response ή χρησιμοποιήστε browser μέσω proxy ή το Repeater για τεκμήριο που καταγράφεται στο history. Για την επιλογή SSRF payload και τις επόμενες δοκιμές, χρησιμοποιήστε το [κεφάλαιο SSRF](../pentesting-web/ssrf-server-side-request-forgery/) αντί να θεωρήσετε ότι μια out-of-band callback αποδεικνύει επίπτωση στο εσωτερικό δίκτυο. Για δοκιμές του ίδιου του MCP server, δείτε τη [δοκιμή MCP server](AI-MCP-Servers.md#remote-mcp-server-testing-workflow).<sup>[[7]](#references)[[11]](#references)</sup>
+Το εργαλείο αιτημάτων MCP επιστρέφει απευθείας την απόκριση και ενδέχεται να μην καταχωρίσει το αίτημα στο **Proxy > HTTP history**. Διατηρήστε το αποτέλεσμα αιτήματος/απόκρισης ή χρησιμοποιήστε τον browser που περνά από το proxy ή το Repeater για τεκμήριο που βασίζεται στο ιστορικό. Για την επιλογή SSRF payloads και τις επακόλουθες δοκιμές, χρησιμοποιήστε το [κεφάλαιο SSRF](../pentesting-web/ssrf-server-side-request-forgery/) αντί να θεωρήσετε ότι ένα out-of-band callback αποδεικνύει επίπτωση στο εσωτερικό δίκτυο. Για δοκιμές του ίδιου του MCP server, δείτε τη [δοκιμή MCP server](AI-MCP-Servers.md#remote-mcp-server-testing-workflow).<sup>[[7]](#references)[[11]](#references)</sup>
 
-## Πακέτο prompts για παθητική ανασκόπηση
+## Prompt pack για παθητική επισκόπηση
 
-Το repo **burp-mcp-agents** περιλαμβάνει πρότυπα prompt για ανάλυση της κίνησης του Burp με βάση τεκμήρια:<sup>[[4]](#references)</sup>
+Το repo **burp-mcp-agents** περιλαμβάνει πρότυπα prompt για ανάλυση της κίνησης Burp με βάση τα τεκμήρια:<sup>[[4]](#references)</sup>
 
 - `passive_hunter.md`: ευρεία παθητική ανάδειξη ευπαθειών.
-- `idor_hunter.md`: IDOR/BOLA/αποκλίσεις σε αντικείμενα ή tenants και ασυμφωνίες ελέγχου ταυτότητας.
-- `auth_flow_mapper.md`: σύγκριση διαδρομών με και χωρίς έλεγχο ταυτότητας.
-- `ssrf_redirect_hunter.md`: υποψήφιες περιπτώσεις SSRF/open-redirect από παραμέτρους ανάκτησης URL και αλυσίδες ανακατεύθυνσης.
-- `logic_flaw_hunter.md`: λογικά σφάλματα πολλαπλών βημάτων.
-- `session_scope_hunter.md`: κακή χρήση κοινού ή εύρους token.
-- `rate_limit_abuse_hunter.md`: κενά στον περιορισμό ρυθμού ή στην αποτροπή κατάχρησης.
+- `idor_hunter.md`: αποκλίσεις IDOR/BOLA/αντικειμένου/tenant και ασυμφωνίες αυθεντικοποίησης.
+- `auth_flow_mapper.md`: σύγκριση αυθεντικοποιημένων και μη αυθεντικοποιημένων διαδρομών.
+- `ssrf_redirect_hunter.md`: υποψήφιες περιπτώσεις SSRF/open-redirect από παραμέτρους ανάκτησης URL/αλυσίδες ανακατευθύνσεων.
+- `logic_flaw_hunter.md`: λογικά σφάλματα πολλών βημάτων.
+- `session_scope_hunter.md`: κακή χρήση audience/scope token.
+- `rate_limit_abuse_hunter.md`: κενά περιορισμού ρυθμού/κατάχρησης.
 - `report_writer.md`: σύνταξη αναφορών με έμφαση στα τεκμήρια.
 
 ## Προαιρετική προσθήκη ετικέτας απόδοσης
@@ -209,25 +219,25 @@ Match:   ^User-Agent: (.*)$
 Replace: User-Agent: $1 BugBounty-Username
 ```
 
-## Σημειώσεις ασφαλείας
+## Σημειώσεις ασφάλειας
 
 - Προτιμήστε **local models** όταν η κίνηση περιέχει ευαίσθητα δεδομένα.
-- Κοινοποιείτε μόνο τα ελάχιστα απαραίτητα στοιχεία για ένα εύρημα.
-- Διατηρείτε το Burp ως πηγή αλήθειας· χρησιμοποιείτε το μοντέλο για **ανάλυση και σύνταξη αναφορών**, όχι για σάρωση.
+- Κοινοποιείτε μόνο τα ελάχιστα απαραίτητα αποδεικτικά στοιχεία για ένα εύρημα.
+- Διατηρείτε το Burp ως την πηγή αλήθειας· χρησιμοποιείτε το μοντέλο για **ανάλυση και αναφορά**, όχι για scanning.
 
 ## Burp AI Agent (διαλογή με τη βοήθεια AI + εργαλεία MCP)
 
-Το **Burp AI Agent** είναι μια επέκταση του Burp που συνδυάζει local/cloud LLMs με παθητική/ενεργητική ανάλυση (62 κλάσεις ευπαθειών) και παρέχει πάνω από 53 εργαλεία MCP, ώστε εξωτερικοί MCP clients να μπορούν να ενορχηστρώνουν το Burp.<sup>[[5]](#references)</sup> Βασικά χαρακτηριστικά:
+Το **Burp AI Agent** είναι ένα extension του Burp που συνδυάζει local/cloud LLMs με παθητική/ενεργή ανάλυση (62 κατηγορίες ευπαθειών) και παρέχει 53+ εργαλεία MCP, ώστε εξωτερικοί MCP clients να μπορούν να ενορχηστρώνουν το Burp.<sup>[[5]](#references)</sup> Κύρια χαρακτηριστικά:
 
-- **Διαλογή μέσω μενού περιβάλλοντος**: καταγράψτε την κίνηση μέσω του Proxy, ανοίξτε το **Proxy > HTTP History**, κάντε δεξί κλικ σε ένα αίτημα → **Extensions > Burp AI Agent > Analyze this request** για να ξεκινήσετε μια συνομιλία AI συνδεδεμένη με το συγκεκριμένο αίτημα/απόκριση.
-- **Backends** (επιλέγονται ανά προφίλ):
+- **Διαλογή από το μενού περιβάλλοντος**: καταγράψτε κίνηση μέσω του Proxy, ανοίξτε το **Proxy > HTTP History**, κάντε δεξί κλικ σε ένα request → **Extensions > Burp AI Agent > Analyze this request** για να ανοίξετε μια συνομιλία AI συνδεδεμένη με το συγκεκριμένο request/response.
+- **Backends** (επιλέγονται ανά profile):
   - Local HTTP: **Ollama**, **LM Studio**.
   - Remote HTTP: endpoint συμβατό με **OpenAI** (base URL + όνομα μοντέλου).
-  - Cloud CLIs: **Gemini CLI** (`gemini auth login`), **Claude CLI** (`export ANTHROPIC_API_KEY=...` ή `claude login`), **Codex CLI** (`export OPENAI_API_KEY=...`), **OpenCode CLI** (σύνδεση ανάλογα με τον πάροχο).
-- **Agent profiles**: τα πρότυπα prompt εγκαθίστανται αυτόματα στο `~/.burp-ai-agent/AGENTS/`· τοποθετήστε εκεί επιπλέον αρχεία `*.md` για να προσθέσετε προσαρμοσμένες συμπεριφορές ανάλυσης/σάρωσης.
-- **MCP server**: ενεργοποιήστε τον από το **Settings > MCP Server** για να διαθέσετε λειτουργίες του Burp σε οποιονδήποτε MCP client (πάνω από 53 εργαλεία). Μπορείτε να συνδέσετε το Claude Desktop στον server τροποποιώντας το `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) ή το `%APPDATA%\Claude\claude_desktop_config.json` (Windows).
-- **Έλεγχοι απορρήτου**: οι λειτουργίες STRICT / BALANCED / OFF αποκρύπτουν ευαίσθητα δεδομένα αιτημάτων πριν από την αποστολή τους σε remote models· προτιμήστε local backends όταν διαχειρίζεστε μυστικά.
-- **Καταγραφή ελέγχου**: αρχεία καταγραφής JSONL με κατακερματισμό ακεραιότητας SHA-256 για κάθε καταχώριση, ώστε να υπάρχει ανιχνεύσιμη ιχνηλασιμότητα ενεργειών AI/MCP με αποδεικτικά στοιχεία αλλοίωσης.
+  - Cloud CLIs: **Gemini CLI** (`gemini auth login`), **Claude CLI** (`export ANTHROPIC_API_KEY=...` ή `claude login`), **Codex CLI** (`export OPENAI_API_KEY=...`), **OpenCode CLI** (σύνδεση ανάλογα με τον provider).
+- **Προφίλ agent**: τα πρότυπα prompt εγκαθίστανται αυτόματα στο `~/.burp-ai-agent/AGENTS/`· τοποθετήστε εκεί επιπλέον αρχεία `*.md` για να προσθέσετε προσαρμοσμένες συμπεριφορές ανάλυσης/scanning.
+- **MCP server**: ενεργοποιήστε τον μέσω του **Settings > MCP Server** για να διαθέσετε λειτουργίες του Burp σε οποιονδήποτε MCP client (53+ εργαλεία). Μπορείτε να συνδέσετε το Claude Desktop στον server τροποποιώντας το `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) ή το `%APPDATA%\Claude\claude_desktop_config.json` (Windows).
+- **Έλεγχοι ιδιωτικότητας**: οι ρυθμίσεις STRICT / BALANCED / OFF αποκρύπτουν ευαίσθητα δεδομένα request πριν από την αποστολή τους σε remote models· προτιμήστε local backends όταν διαχειρίζεστε secrets.
+- **Καταγραφή ελέγχου**: αρχεία καταγραφής JSONL με κατακερματισμό ακεραιότητας SHA-256 ανά εγγραφή, για ανιχνεύσιμη παραβίαση ιχνηλασιμότητα ενεργειών AI/MCP.
 - **Build/load**: κατεβάστε το JAR της έκδοσης ή κάντε build με Java 21:
 
 ```bash
@@ -237,21 +247,23 @@ JAVA_HOME=/path/to/jdk-21 ./gradlew clean shadowJar
 # load build/libs/Burp-AI-Agent-<version>.jar via Burp Extensions > Add (Java)
 ```
 
-Λειτουργικές προφυλάξεις: τα cloud backends ενδέχεται να κάνουν exfiltrate session cookies/PII, εκτός αν επιβάλλεται η λειτουργία απορρήτου· η έκθεση του MCP παρέχει δυνατότητα απομακρυσμένου συντονισμού του Burp, επομένως περιορίστε την πρόσβαση σε έμπιστους agents και παρακολουθείτε το audit log με hash ακεραιότητας.
+Προφυλάξεις λειτουργίας: τα cloud backends ενδέχεται να διαρρεύσουν session cookies/PII, εκτός αν είναι ενεργοποιημένη η λειτουργία απορρήτου· η έκθεση του MCP παρέχει δυνατότητα απομακρυσμένου orchestration του Burp, επομένως περιορίστε την πρόσβαση σε έμπιστους agents και παρακολουθείτε το αρχείο καταγραφής ελέγχου με hash ακεραιότητας.
 
 
 
 ## References
 
-- [1] [Ενσωμάτωση Burp MCP + Codex CLI και διόρθωση του Caddy handshake](https://pentestbook.six2dez.com/others/burp)
-- [2] [Burp MCP Server BApp](https://portswigger.net/bappstore/9952290f04ed4f628e624d0aa9dccebc)
+- [1] [Ενσωμάτωση Burp MCP + Codex CLI και διόρθωση handshake του Caddy](https://pentestbook.six2dez.com/others/burp)
+- [2] [BApp του Burp MCP Server](https://portswigger.net/bappstore/9952290f04ed4f628e624d0aa9dccebc)
 - [3] [Ζήτημα αυστηρής επικύρωσης Origin/header στον MCP server του PortSwigger](https://github.com/PortSwigger/mcp-server/issues/34)
-- [4] [Burp MCP Agents (workflows, launchers, πακέτο prompts)](https://github.com/six2dez/burp-mcp-agents)
+- [4] [Burp MCP Agents (workflows, launchers, prompt pack)](https://github.com/six2dez/burp-mcp-agents)
 - [5] [Burp AI Agent](https://github.com/six2dez/burp-ai-agent)
 - [6] [Microsoft Playwright MCP](https://github.com/microsoft/playwright-mcp)
-- [7] [PortSwigger Burp Suite MCP Server](https://github.com/PortSwigger/mcp-server)
+- [7] [MCP Server του PortSwigger Burp Suite](https://github.com/PortSwigger/mcp-server)
 - [8] [Πώς να χρησιμοποιήσετε το Codex για έρευνα Bug Bounty: ευρεία διερεύνηση, αυστηρή επικύρωση](https://www.yeswehack.com/learn-bug-bounty/llm-series-codex)
-- [9] [OpenBurp: συντονισμός του Burp Suite για Claude Code και Codex](https://github.com/luispacheco22/OpenBurp)
-- [10] [Υλοποιήσεις εργαλείων και παράμετροι του PortSwigger MCP Server](https://github.com/PortSwigger/mcp-server/blob/main/src/main/kotlin/net/portswigger/mcp/tools/Tools.kt)
-- [11] [PortSwigger Web Security Academy - Ευπάθειες Blind SSRF](https://portswigger.net/web-security/ssrf/blind)
+- [9] [OpenBurp: orchestration του Burp Suite για Claude Code και Codex](https://github.com/luispacheco22/OpenBurp)
+- [10] [Υλοποιήσεις εργαλείων και παράμετροι του MCP Server του PortSwigger](https://github.com/PortSwigger/mcp-server/blob/main/src/main/kotlin/net/portswigger/mcp/tools/Tools.kt)
+- [11] [PortSwigger Web Security Academy - ευπάθειες Blind SSRF](https://portswigger.net/web-security/ssrf/blind)
+- [12] [PortSwigger - ιστορικό WebSockets](https://portswigger.net/burp/documentation/desktop/tools/proxy/websockets-history)
+- [13] [PortSwigger - Εργασία με μηνύματα WebSocket στο Burp Repeater](https://portswigger.net/burp/documentation/desktop/tools/repeater/websocket-messages)
 {{#include ../banners/hacktricks-training.md}}
