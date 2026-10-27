@@ -3,51 +3,51 @@
 {{#include ../../../../banners/hacktricks-training.md}}
 
 > [!CAUTION]
-> The code of **dyld is open source** and can be found in [https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/) and cab be downloaded a tar using a **URL such as** [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
+> Mã nguồn của **dyld là mã nguồn mở** và có thể tìm thấy tại [https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/) và tải xuống dưới dạng tar bằng **URL chẳng hạn như** [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
 ## **Dyld Process**
 
-Take a look on how Dyld loads libraries inside binaries in:
+Xem cách Dyld tải thư viện bên trong các binary tại:
 
 
 {{#ref}}
 macos-dyld-process.md
 {{#endref}}
 
-See also: [Reflective Mach-O Loading](../reflective-mach-o-loading.md).
+Xem thêm: [Reflective Mach-O Loading](../reflective-mach-o-loading.md).
 
 ## **DYLD_INSERT_LIBRARIES**
 
-This is like the [**LD_PRELOAD on Linux**](../../../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#ld_preload). It allows to indicate a process that is going to be run to load a specific library from a path (if the env var is enabled)<sup>[[4]](#references)</sup>
+Tương tự như [**LD_PRELOAD on Linux**](../../../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#ld_preload). Biến này cho phép chỉ định một tiến trình sẽ được chạy để tải một thư viện cụ thể từ một đường dẫn (nếu biến môi trường được bật)<sup>[[4]](#references)</sup>
 
-This technique may be also **used as an ASEP technique** as every application installed has a plist called "Info.plist" that allows for the **assigning of environmental variables** using a key called `LSEnvironmental`.
+Kỹ thuật này cũng có thể được **dùng như một kỹ thuật ASEP**, vì mỗi ứng dụng được cài đặt đều có một plist tên là "Info.plist", cho phép **gán các biến môi trường** bằng khóa `LSEnvironmental`.
 
 > [!TIP]
-> Since 2012 **Apple has drastically reduced the power** of **`DYLD_INSERT_LIBRARIES`**. A process is considered **restricted** — and then `dyld` deletes every `DYLD_*` variable from its environment — when any of these hold:
+> Kể từ năm 2012, **Apple đã giảm đáng kể khả năng** của **`DYLD_INSERT_LIBRARIES`**. Một tiến trình được xem là **bị hạn chế** — khi đó `dyld` xóa mọi biến `DYLD_*` khỏi môi trường của tiến trình — nếu thỏa mãn bất kỳ điều kiện nào sau đây:
 >
-> - The binary is `setuid/setgid`
-> - The Mach-O has a **`__RESTRICT/__restrict`** section
-> - The binary is signed with the hardened runtime and AMFI does not grant it the "path/print variables" permissions, i.e. it lacks [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)<sup>[[3]](#references)</sup>
->   - Check **entitlements** of a binary with: `codesign -dv --entitlements :- </path/to/bin>`
+> - Binary có `setuid/setgid`
+> - Mach-O có section **`__RESTRICT/__restrict`**
+> - Binary được ký bằng hardened runtime và AMFI không cấp quyền "path/print variables", tức là binary không có [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)<sup>[[3]](#references)</sup>
+>   - Kiểm tra **entitlements** của binary bằng: `codesign -dv --entitlements :- </path/to/bin>`
 >
-> In current `dyld` this is no longer decided by `dyld` alone: `ProcessConfig::Security::Security()` asks **AMFI** via `amfi_check_dyld_policy_self()` and then calls `pruneEnvVars()`. The exact code is walked through in [Prune `DYLD_*` env variables](#prune-dyld_-env-variables) below.
+> Trong `dyld` hiện tại, quyết định này không còn do riêng `dyld` đưa ra: `ProcessConfig::Security::Security()` truy vấn **AMFI** qua `amfi_check_dyld_policy_self()` rồi gọi `pruneEnvVars()`. Phần mã chính xác sẽ được phân tích trong [Prune `DYLD_*` env variables](#prune-dyld_-env-variables) bên dưới.
 
 ### Library Validation
 
-Even if the binary allows the **`DYLD_INSERT_LIBRARIES`** environment variable, it will not load a custom library if it validates the library's signature.
+Ngay cả khi binary cho phép biến môi trường **`DYLD_INSERT_LIBRARIES`**, nó sẽ không tải thư viện tùy chỉnh nếu xác thực chữ ký của thư viện.
 
-In order to load a custom library, the binary needs to have **one of the following entitlements**:
+Để tải thư viện tùy chỉnh, binary cần có **một trong các entitlements sau**:
 
 - [`com.apple.security.cs.disable-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.security.cs.disable-library-validation)
 - [`com.apple.private.security.clear-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.private.security.clear-library-validation)
 
-or the binary **shouldn't** have the **hardened runtime flag** or the **library validation flag**.
+hoặc binary **không được** có **hardened runtime flag** hay **library validation flag**.
 
-You can check if a binary has **hardened runtime** with `codesign --display --verbose <bin>` checking the flag runtime in **`CodeDirectory`** like: **`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
+Bạn có thể kiểm tra binary có **hardened runtime** hay không bằng `codesign --display --verbose <bin>`, xem runtime flag trong **`CodeDirectory`**, ví dụ: **`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
 
-You can also load a library if it's **signed with the same certificate as the binary**.
+Bạn cũng có thể tải một thư viện nếu thư viện đó **được ký bằng cùng chứng chỉ với binary**.
 
-Find a example on how to (ab)use this and check the restrictions in:
+Xem ví dụ về cách (lạm dụng) kỹ thuật này và kiểm tra các giới hạn tại:
 
 
 {{#ref}}
@@ -57,28 +57,28 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 ## Dylib Hijacking
 
 > [!CAUTION]
-> Remember that **previous Library Validation restrictions also apply** to perform Dylib hijacking attacks.
+> Hãy nhớ rằng **các giới hạn Library Validation đã nêu ở trên cũng áp dụng** cho các cuộc tấn công Dylib hijacking.
 
-As on Windows, on macOS you can **hijack dylibs** to make **applications execute arbitrary code**. From a regular user account this may not be possible, because writing inside an `.app` bundle to hijack a library can require a TCC permission.\
-However, the way **macOS** applications **load** libraries is **more restricted** than on Windows. Malware developers can still use this technique for **stealth**, but abusing it to escalate privileges is much less likely.
+Tương tự Windows, trên macOS, bạn có thể **chiếm quyền dylib** để khiến **ứng dụng thực thi mã tùy ý**. Việc này có thể không khả thi từ tài khoản người dùng thông thường, vì ghi vào bên trong một bundle `.app` để chiếm quyền thư viện có thể cần quyền TCC.\
+Tuy nhiên, cách các ứng dụng **macOS** **tải** thư viện **bị hạn chế hơn** so với Windows. Nhà phát triển malware vẫn có thể dùng kỹ thuật này để **ẩn mình**, nhưng khả năng lạm dụng nó để leo thang đặc quyền thấp hơn nhiều.
 
-First of all, is **more common** to find that **MacOS binaries indicates the full path** to the libraries to load. And second, **MacOS never search** in the folders of the **$PATH** for libraries.
+Trước hết, việc **binary MacOS chỉ định đường dẫn đầy đủ** đến thư viện cần tải là **phổ biến hơn**. Thứ hai, **MacOS không bao giờ tìm kiếm** thư viện trong các thư mục thuộc **$PATH**.
 
-The **main** part of the **code** related to this functionality is in **`ImageLoader::recursiveLoadLibraries`** in `ImageLoader.cpp`.
+Phần **chính** của **mã nguồn** liên quan đến chức năng này nằm trong **`ImageLoader::recursiveLoadLibraries`** ở `ImageLoader.cpp`.
 
-There are **4 different header Commands** a macho binary can use to load libraries:
+Có **4 loại header Command** mà binary macho có thể dùng để tải thư viện:
 
-- **`LC_LOAD_DYLIB`** command is the common command to load a dylib.
-- **`LC_LOAD_WEAK_DYLIB`** command works like the previous one, but if the dylib is not found, execution continues without any error.
-- **`LC_REEXPORT_DYLIB`** command it proxies (or re-exports) the symbols from a different library.
-- **`LC_LOAD_UPWARD_DYLIB`** command is used when two libraries depend on each other (this is called an _upward dependency_).
+- Command **`LC_LOAD_DYLIB`** là command thường dùng để tải dylib.
+- Command **`LC_LOAD_WEAK_DYLIB`** hoạt động như command trước, nhưng nếu không tìm thấy dylib, quá trình thực thi vẫn tiếp tục mà không báo lỗi.
+- Command **`LC_REEXPORT_DYLIB`** chuyển tiếp (hoặc tái xuất) các symbol từ một thư viện khác.
+- Command **`LC_LOAD_UPWARD_DYLIB`** được dùng khi hai thư viện phụ thuộc lẫn nhau (được gọi là _upward dependency_).
 
-However, there are **2 types of dylib hijacking**:
+Tuy nhiên, có **2 loại dylib hijacking**:
 
-- **Missing weak linked libraries**: This means that the application will try to load a library that doesn't exist configured with **LC_LOAD_WEAK_DYLIB**. Then, **if an attacker places a dylib where it's expected it will be loaded**.
-  - The fact that the link is "weak" means that the application will continue running even if the library isn't found.
-  - The **code related** to this is in the function `ImageLoaderMachO::doGetDependentLibraries` of `ImageLoaderMachO.cpp` where `lib->required` is only `false` when `LC_LOAD_WEAK_DYLIB` is true.
-  - **Find weak linked libraries** in binaries with (you have later an example on how to create hijacking libraries):
+- **Missing weak linked libraries**: Nghĩa là ứng dụng sẽ cố tải một thư viện không tồn tại, được cấu hình bằng **LC_LOAD_WEAK_DYLIB**. Khi đó, **nếu kẻ tấn công đặt một dylib vào vị trí ứng dụng mong đợi, dylib đó sẽ được tải**.
+  - Việc liên kết là "weak" có nghĩa là ứng dụng vẫn tiếp tục chạy ngay cả khi không tìm thấy thư viện.
+  - **Mã nguồn liên quan** nằm trong hàm `ImageLoaderMachO::doGetDependentLibraries` của `ImageLoaderMachO.cpp`, nơi `lib->required` chỉ là `false` khi `LC_LOAD_WEAK_DYLIB` là true.
+  - **Tìm các thư viện weak linked** trong binary bằng lệnh sau (bên dưới có ví dụ về cách tạo thư viện hijacking):
     - ```bash
       otool -l </path/to/bin> | grep LC_LOAD_WEAK_DYLIB -A 5 cmd LC_LOAD_WEAK_DYLIB
       cmdsize 56

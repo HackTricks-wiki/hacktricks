@@ -1,10 +1,10 @@
-# macOS Apple Scripts
+# AppleScript trên macOS
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-## Apple Scripts
+## AppleScript
 
-AppleScript is an automation language that can send Apple Events to scriptable applications. With the relevant grants, malware can inject JavaScript into a scriptable browser tab or use System Events/Accessibility to click a permission dialog. Apple Events and Accessibility are distinct TCC services and generally require their respective user approvals.<sup>[[3]](#references)</sup>
+AppleScript là ngôn ngữ tự động hóa có thể gửi Apple Events đến các ứng dụng hỗ trợ scripting. Với các quyền phù hợp, malware có thể chèn JavaScript vào một tab trình duyệt hỗ trợ scripting hoặc dùng System Events/Accessibility để nhấp vào hộp thoại cấp quyền. Apple Events và Accessibility là các dịch vụ TCC riêng biệt và thường cần người dùng phê duyệt riêng.<sup>[[3]](#references)</sup>
 
 ```applescript
 tell window 1 of process "SecurityAgent"
@@ -12,23 +12,23 @@ tell window 1 of process "SecurityAgent"
 end tell
 ```
 
-The `abbeycode/AppleScripts` repository contains automation examples.<sup>[[7]](#references)</sup>\
-Find more info about malware using applescripts [**here**](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/).<sup>[[3]](#references)</sup>
+Kho lưu trữ `abbeycode/AppleScripts` chứa các ví dụ tự động hóa.<sup>[[7]](#references)</sup>\
+Tìm hiểu thêm về malware sử dụng applescripts [**tại đây**](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/).<sup>[[3]](#references)</sup>
 
-### Automation / TCC quirks
+### Tự động hóa / các đặc điểm của TCC
 
-Apple Events approvals are **directional**: the prompt is for a **source process -> target process** pair. Once the user clicks **Allow**, future requests from the same source to the same target are allowed until the entry is reset. During testing, granting `Terminal -> Finder` or `Terminal -> System Events` once is enough to reuse the permission later without another popup.<sup>[[1]](#references)</sup>
+Các phê duyệt Apple Events có tính **định hướng**: lời nhắc áp dụng cho một cặp **tiến trình nguồn -> tiến trình đích**. Sau khi người dùng nhấp **Cho phép**, các yêu cầu tiếp theo từ cùng tiến trình nguồn đến cùng tiến trình đích sẽ được cho phép cho đến khi mục đó được đặt lại. Trong quá trình kiểm thử, chỉ cần cấp quyền `Terminal -> Finder` hoặc `Terminal -> System Events` một lần là có thể dùng lại quyền đó sau này mà không hiện cửa sổ bật lên.<sup>[[1]](#references)</sup>
 
 ```bash
 # Remove previously granted Automation permissions from Terminal
 tccutil reset AppleEvents com.apple.Terminal
 ```
 
-This is especially relevant when the **target** is **Finder**, because Finder always has **Full Disk Access** even if it doesn't appear in the FDA UI. Therefore, any host that already has Automation over Finder can be used as an AppleScript/JXA proxy to access TCC-protected files.<sup>[[1]](#references)</sup> The generic Finder and System Events payloads are already documented in [the main TCC page](../README.md) and in [the Apple Events page](../macos-apple-events.md).
+Điều này đặc biệt liên quan khi **target** là **Finder**, vì Finder luôn có **Full Disk Access** ngay cả khi không xuất hiện trong giao diện FDA. Vì vậy, bất kỳ host nào đã có Automation với Finder đều có thể được dùng làm proxy AppleScript/JXA để truy cập các tệp được TCC bảo vệ.<sup>[[1]](#references)</sup> Các payload Finder và System Events tổng quát đã được ghi lại trong [trang TCC chính](../README.md) và [trang Apple Events](../macos-apple-events.md).
 
-### Modern offensive tradecraft
+### Kỹ thuật tấn công hiện đại
 
-`/usr/bin/osascript` is only the most visible entry point. AppleScript and JXA can also execute from **Mach-O binaries** via **`NSAppleScript`** / **`OSAScript`**, which is useful both for evasion and for living inside a host that already has interesting TCC grants.<sup>[[2]](#references)</sup>
+`/usr/bin/osascript` chỉ là điểm truy cập dễ thấy nhất. AppleScript và JXA cũng có thể được thực thi từ **Mach-O binaries** thông qua **`NSAppleScript`** / **`OSAScript`**, hữu ích cho cả việc né tránh phát hiện lẫn hoạt động bên trong một host vốn đã có các quyền TCC đáng chú ý.<sup>[[2]](#references)</sup>
 
 ```bash
 osascript -l JavaScript <<'EOF'
@@ -38,11 +38,11 @@ app.doShellScript("id > /tmp/jxa_id");
 EOF
 ```
 
-If you build a custom helper that sends Apple Events directly, giving it a **real app identity** makes testing and operations much more reliable. In practice this means embedding an `Info.plist` with `CFBundleIdentifier` and `NSAppleEventsUsageDescription`, signing the binary, and granting the `com.apple.security.automation.apple-events` entitlement. Otherwise the Apple Events prompt is frequently attributed to the **parent host** (for example `Terminal`) or the `NSAppleScript` execution just fails with confusing `-1750` / `errOSASystemError` errors.<sup>[[2]](#references)</sup>
+Nếu bạn tạo một helper tùy chỉnh gửi Apple Events trực tiếp, việc gán cho nó một **danh tính ứng dụng thực** sẽ giúp quá trình thử nghiệm và vận hành đáng tin cậy hơn nhiều. Trên thực tế, điều này có nghĩa là nhúng `Info.plist` chứa `CFBundleIdentifier` và `NSAppleEventsUsageDescription`, ký binary và cấp entitlement `com.apple.security.automation.apple-events`. Nếu không, lời nhắc Apple Events thường được gán cho **ứng dụng host cha** (ví dụ: `Terminal`), hoặc quá trình thực thi `NSAppleScript` sẽ thất bại với các lỗi khó hiểu `-1750` / `errOSASystemError`.<sup>[[2]](#references)</sup>
 
-AppleScripts can be saved in compiled form and ordinarily decompiled with `osadecompile`.
+AppleScripts có thể được lưu ở dạng đã biên dịch và thường có thể được giải biên dịch bằng `osadecompile`.
 
-However, these scripts can also be **exported as "Read only"** (via the "Export..." option):
+Tuy nhiên, các script này cũng có thể được **xuất dưới dạng "Read only"** (thông qua tùy chọn "Export..."):
 
 <figure><img src="https://github.com/carlospolop/hacktricks/raw/master/images/image%20(556).png" alt=""><figcaption></figcaption></figure>
 
@@ -51,18 +51,17 @@ file mal.scpt
 mal.scpt: AppleScript compiled
 ```
 
-In that case `osadecompile` refuses to recover normal source, but the bytecode and Apple Event terminology can still be analyzed.
+Trong trường hợp đó, `osadecompile` từ chối khôi phục mã nguồn thông thường, nhưng vẫn có thể phân tích bytecode và thuật ngữ Apple Event.
 
-SentinelOne's run-only research describes how to recover structure despite that restriction. `applescript-disassembler` and `aevt_decompile` help inspect the compiled script and Apple Event data.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
+Nghiên cứu về run-only của SentinelOne mô tả cách khôi phục cấu trúc dù gặp hạn chế đó. `applescript-disassembler` và `aevt_decompile` hỗ trợ kiểm tra script đã biên dịch và dữ liệu Apple Event.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 
 ## References
 
-- [1] [Bypassing macOS TCC User Privacy Protections by Accident and Design](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
-- [2] [Making AppleScript Work in macOS CLI Tools: The Undocumented Parts](https://steipete.me/posts/2025/applescript-cli-macos-complete-guide)
-- [3] [How Offensive Actors Use AppleScript For Attacking macOS](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/)
-- [4] [FADE DEAD | Adventures in Reversing Malicious Run-Only AppleScripts](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)
+- [1] [Vô tình và có chủ đích vượt qua các biện pháp bảo vệ quyền riêng tư người dùng TCC của macOS](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
+- [2] [Giúp AppleScript hoạt động trong các công cụ CLI của macOS: Những phần không được tài liệu hóa](https://steipete.me/posts/2025/applescript-cli-macos-complete-guide)
+- [3] [Cách các tác nhân tấn công sử dụng AppleScript để tấn công macOS](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/)
+- [4] [FADE DEAD | Những cuộc phiêu lưu trong quá trình dịch ngược AppleScript run-only độc hại](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)
 - [5] [Jinmo/applescript-disassembler](https://github.com/Jinmo/applescript-disassembler)
 - [6] [SentineLabs/aevt_decompile](https://github.com/SentineLabs/aevt_decompile)
-- [7] [abbeycode/AppleScripts examples](https://github.com/abbeycode/AppleScripts)
-
+- [7] [Các ví dụ AppleScripts của abbeycode](https://github.com/abbeycode/AppleScripts)
 {{#include ../../../../../banners/hacktricks-training.md}}

@@ -2,18 +2,18 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Basic Information**
+## **Thông tin cơ bản**
 
-**System Integrity Protection (SIP)** in macOS is a mechanism designed to prevent even the most privileged users from making unauthorized changes to key system folders. This feature plays a crucial role in maintaining the integrity of the system by restricting actions like adding, modifying, or deleting files in protected areas. The primary folders shielded by SIP include:
+**Bảo vệ tính toàn vẹn hệ thống (System Integrity Protection, SIP)** trong macOS là một cơ chế được thiết kế để ngăn cả những người dùng có đặc quyền cao nhất thực hiện các thay đổi trái phép đối với những thư mục hệ thống quan trọng. Tính năng này đóng vai trò thiết yếu trong việc duy trì tính toàn vẹn của hệ thống bằng cách hạn chế các hành động như thêm, sửa đổi hoặc xóa tệp trong những khu vực được bảo vệ. Các thư mục chính được SIP bảo vệ gồm:
 
 - **/System**
 - **/bin**
 - **/sbin**
 - **/usr**
 
-The rules that govern SIP's behavior are defined in the configuration file located at **`/System/Library/Sandbox/rootless.conf`**. Within this file, paths that are prefixed with an asterisk (\*) are denoted as exceptions to the otherwise stringent SIP restrictions.
+Các quy tắc chi phối hoạt động của SIP được xác định trong tệp cấu hình tại **`/System/Library/Sandbox/rootless.conf`**. Trong tệp này, những đường dẫn có tiền tố là dấu hoa thị (\*) được xem là ngoại lệ đối với các hạn chế nghiêm ngặt khác của SIP.
 
-Consider the example below:
+Hãy xem ví dụ dưới đây:
 
 ```javascript
 /usr
@@ -22,133 +22,133 @@ Consider the example below:
 * /usr/share/man
 ```
 
-This snippet implies that while SIP generally secures the **`/usr`** directory, there are specific subdirectories (`/usr/libexec/cups`, `/usr/local`, and `/usr/share/man`) where modifications are permissible, as indicated by the asterisk (\*) preceding their paths.
+Đoạn trích này cho thấy mặc dù SIP thường bảo vệ thư mục **`/usr`**, vẫn có một số thư mục con cụ thể (`/usr/libexec/cups`, `/usr/local` và `/usr/share/man`) cho phép sửa đổi, như dấu hoa thị (\*) đứng trước các đường dẫn này cho biết.
 
-To verify whether a directory or file is protected by SIP, you can use the **`ls -lOd`** command to check for the presence of the **`restricted`** or **`sunlnk`** flag. For example:
+Để xác minh một thư mục hoặc tệp có được SIP bảo vệ hay không, bạn có thể dùng lệnh **`ls -lOd`** để kiểm tra xem có cờ **`restricted`** hoặc **`sunlnk`** hay không. Ví dụ:
 
 ```bash
 ls -lOd /usr/libexec/cups
 drwxr-xr-x  11 root  wheel  sunlnk 352 May 13 00:29 /usr/libexec/cups
 ```
 
-In this case, the **`sunlnk`** flag signifies that the `/usr/libexec/cups` directory itself **cannot be deleted**, though files within it can be created, modified, or deleted.
+Trong trường hợp này, flag **`sunlnk`** có nghĩa là không thể xóa chính thư mục `/usr/libexec/cups`, dù có thể tạo, sửa đổi hoặc xóa các tệp bên trong.
 
-On the other hand:
+Mặt khác:
 
 ```bash
 ls -lOd /usr/libexec
 drwxr-xr-x  338 root  wheel  restricted 10816 May 13 00:29 /usr/libexec
 ```
 
-Here, the **`restricted`** flag indicates that the `/usr/libexec` directory is protected by SIP. In a SIP-protected directory, files cannot be created, modified, or deleted.
+Ở đây, cờ **`restricted`** cho biết thư mục `/usr/libexec` được SIP bảo vệ. Trong thư mục được SIP bảo vệ, không thể tạo, sửa đổi hoặc xóa tệp.
 
-Moreover, if a file contains the attribute **`com.apple.rootless`** extended **attribute**, that file will also be **protected by SIP**.
+Ngoài ra, nếu một tệp có **extended attribute** **`com.apple.rootless`**, thì tệp đó cũng sẽ được **SIP bảo vệ**.
 
 > [!TIP]
-> Note that **Sandbox** hook **`hook_vnode_check_setextattr`** prevents any attempt to modify the extended attribute **`com.apple.rootless`.**
+> Lưu ý rằng hook **Sandbox** **`hook_vnode_check_setextattr`** ngăn mọi nỗ lực sửa đổi extended attribute **`com.apple.rootless`.**
 
-**SIP also limits other root actions** like:
+**SIP cũng giới hạn các thao tác root khác**, chẳng hạn như:
 
-- Loading untrusted kernel extensions
-- Getting task-ports for Apple-signed processes
-- Modifying NVRAM variables
-- Allowing kernel debugging
+- Tải các kernel extension không đáng tin cậy
+- Lấy task-port của các tiến trình do Apple ký
+- Sửa đổi các biến NVRAM
+- Cho phép kernel debugging
 
-Options are maintained in nvram variable as a bitflag (`csr-active-config` on Intel and `lp-sip0` is read from the booted Device Tree for ARM). You can find the flags in the XNU source code in `csr.sh`:
+Các tùy chọn được lưu trong biến NVRAM dưới dạng bitflag (`csr-active-config` trên Intel và `lp-sip0` được đọc từ Device Tree đã khởi động trên ARM). Bạn có thể tìm các cờ trong mã nguồn XNU tại `csr.sh`:
 
 <figure><img src="../../../images/image (1192).png" alt=""><figcaption></figcaption></figure>
 
-### SIP Status
+### Trạng thái SIP
 
-You can check if SIP is enabled on your system with the following command:
+Bạn có thể kiểm tra xem SIP có được bật trên hệ thống của mình hay không bằng lệnh sau:
 
 ```bash
 csrutil status
 ```
 
-If you need to disable SIP, you must restart your computer in recovery mode (by pressing Command+R during startup), then execute the following command:
+Nếu cần tắt SIP, bạn phải khởi động lại máy tính ở chế độ recovery (bằng cách nhấn Command+R trong khi khởi động), sau đó chạy lệnh sau:
 
 ```bash
 csrutil disable
 ```
 
-If you wish to keep SIP enabled but remove debugging protections, you can do so with:
+Nếu bạn muốn giữ SIP bật nhưng loại bỏ các biện pháp bảo vệ chống gỡ lỗi, bạn có thể thực hiện như sau:
 
 ```bash
 csrutil enable --without debug
 ```
 
-### Other Restrictions
+### Các hạn chế khác
 
-- **Disallows loading of unsigned kernel extensions** (kexts), ensuring only verified extensions interact with the system kernel.
-- **Prevents the debugging** of macOS system processes, safeguarding core system components from unauthorized access and modification.
-- **Inhibits tools** like dtrace from inspecting system processes, further protecting the integrity of the system's operation.
+- **Không cho phép tải các kernel extension (kext) chưa được ký**, đảm bảo chỉ các extension đã được xác minh mới tương tác với kernel hệ thống.
+- **Ngăn debug các tiến trình hệ thống macOS**, bảo vệ các thành phần cốt lõi của hệ thống khỏi bị truy cập và chỉnh sửa trái phép.
+- **Ngăn các công cụ** như dtrace kiểm tra tiến trình hệ thống, qua đó tiếp tục bảo vệ tính toàn vẹn trong hoạt động của hệ thống.
 
-[**Learn more about SIP info in this talk**](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)**.**<sup>[[1]](#references)</sup>
+[**Tìm hiểu thêm về SIP trong bài nói chuyện này**](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)**.**<sup>[[1]](#references)</sup>
 
-### **SIP related Entitlements**
+### **Entitlements liên quan đến SIP**
 
-- `com.apple.rootless.xpc.bootstrap`: Control launchd
-- `com.apple.rootless.install[.heritable]`: Access file system
+- `com.apple.rootless.xpc.bootstrap`: Điều khiển launchd
+- `com.apple.rootless.install[.heritable]`: Truy cập hệ thống tệp
 - `com.apple.rootless.kext-management`: `kext_request`
-- `com.apple.rootless.datavault.controller`: Manage UF_DATAVAULT
-- `com.apple.rootless.xpc.bootstrap`: XPC setup capabilities
-- `com.apple.rootless.xpc.effective-root`: Root via launchd XPC
-- `com.apple.rootless.restricted-block-devices`: Access to raw block devices
-- `com.apple.rootless.internal.installer-equivalent`: Unfettered filesystem access
-- `com.apple.rootless.restricted-nvram-variables[.heritable]`: Full access to NVRAM
-- `com.apple.rootless.storage.label`: Modify files restricted by com.apple.rootless xattr with the corresponding label
-- `com.apple.rootless.volume.VM.label`: Maintain VM swap on volume
+- `com.apple.rootless.datavault.controller`: Quản lý UF_DATAVAULT
+- `com.apple.rootless.xpc.bootstrap`: Các khả năng thiết lập XPC
+- `com.apple.rootless.xpc.effective-root`: Quyền root thông qua launchd XPC
+- `com.apple.rootless.restricted-block-devices`: Truy cập các thiết bị block thô
+- `com.apple.rootless.internal.installer-equivalent`: Toàn quyền truy cập hệ thống tệp
+- `com.apple.rootless.restricted-nvram-variables[.heritable]`: Toàn quyền truy cập NVRAM
+- `com.apple.rootless.storage.label`: Sửa đổi các tệp bị hạn chế bởi xattr com.apple.rootless có nhãn tương ứng
+- `com.apple.rootless.volume.VM.label`: Duy trì bộ nhớ hoán đổi VM trên volume
 
-## SIP Bypasses
+## Bypass SIP
 
-Bypassing SIP enables an attacker to:
+Bypass SIP cho phép kẻ tấn công:
 
-- **Access User Data**: Read sensitive user data like mail, messages, and Safari history from all user accounts.
-- **TCC Bypass**: Directly manipulate the TCC (Transparency, Consent, and Control) database to grant unauthorized access to the webcam, microphone, and other resources.
-- **Establish Persistence**: Place malware in SIP-protected locations, making it resistant to removal, even by root privileges. This also includes the potential to tamper with the Malware Removal Tool (MRT).
-- **Load Kernel Extensions**: Although there are additional safeguards, bypassing SIP simplifies the process of loading unsigned kernel extensions.
+- **Truy cập dữ liệu người dùng**: Đọc dữ liệu nhạy cảm như thư, tin nhắn và lịch sử Safari từ tất cả tài khoản người dùng.
+- **Bypass TCC**: Trực tiếp thao túng cơ sở dữ liệu TCC (Transparency, Consent, and Control) để cấp quyền truy cập trái phép vào webcam, microphone và các tài nguyên khác.
+- **Thiết lập persistence**: Đặt malware vào các vị trí được SIP bảo vệ, khiến việc gỡ bỏ trở nên khó khăn ngay cả với quyền root. Việc này cũng có thể bao gồm thao túng Malware Removal Tool (MRT).
+- **Tải kernel extension**: Dù có thêm các biện pháp bảo vệ, bypass SIP sẽ đơn giản hóa quá trình tải các kernel extension chưa được ký.
 
-### Installer Packages
+### Gói cài đặt
 
-**Installer packages signed with Apple's certificate** can bypass its protections. This means that even packages signed by standard developers will be blocked if they attempt to modify SIP-protected directories.
+**Các gói cài đặt được ký bằng chứng chỉ của Apple** có thể bypass các biện pháp bảo vệ của SIP. Điều này có nghĩa là ngay cả các gói được ký bởi nhà phát triển thông thường cũng sẽ bị chặn nếu cố sửa đổi các thư mục được SIP bảo vệ.
 
-### Inexistent SIP file
+### Tệp SIP không tồn tại
 
-One potential loophole is that if a file is specified in **`rootless.conf` but does not currently exist**, it can be created. Malware could exploit this to **establish persistence** on the system. For example, a malicious program could create a .plist file in `/System/Library/LaunchDaemons` if it is listed in `rootless.conf` but not present.
+Một lỗ hổng tiềm ẩn là nếu một tệp được chỉ định trong **`rootless.conf` nhưng hiện không tồn tại**, tệp đó vẫn có thể được tạo. Malware có thể khai thác điều này để **thiết lập persistence** trên hệ thống. Ví dụ, một chương trình độc hại có thể tạo tệp .plist trong `/System/Library/LaunchDaemons` nếu đường dẫn này được liệt kê trong `rootless.conf` nhưng tệp chưa tồn tại.
 
 ### com.apple.rootless.install.heritable
 
 > [!CAUTION]
-> The entitlement **`com.apple.rootless.install.heritable`** allows to bypass SIP
+> Entitlement **`com.apple.rootless.install.heritable`** cho phép bypass SIP
 
 #### [CVE-2019-8561](https://objective-see.org/blog/blog_0x42.html) <a href="#cve" id="cve"></a>
 
-It was discovered that it was possible to **swap the installer package after the system verified its code** signature and then, the system would install the malicious package instead of the original. As these actions were performed by **`system_installd`**, it would allow to bypass SIP.<sup>[[2]](#references)</sup>
+Người ta phát hiện có thể **thay thế gói cài đặt sau khi hệ thống xác minh chữ ký** code của gói, khiến hệ thống cài đặt gói độc hại thay vì gói ban đầu. Vì các thao tác này được thực hiện bởi **`system_installd`**, chúng có thể bypass SIP.<sup>[[2]](#references)</sup>
 
 #### [CVE-2020–9854](https://objective-see.org/blog/blog_0x4D.html) <a href="#cve-unauthd-chain" id="cve-unauthd-chain"></a>
 
-If a package was installed from a mounted image or external drive the **installer** would **execute** the binary from **that file system** (instead from a SIP protected location), making **`system_installd`** execute an arbitrary binary.<sup>[[3]](#references)</sup>
+Nếu một gói được cài đặt từ image đã mount hoặc ổ đĩa ngoài, **installer** sẽ **thực thi** binary từ **hệ thống tệp đó** (thay vì từ vị trí được SIP bảo vệ), khiến **`system_installd`** thực thi một binary tùy ý.<sup>[[3]](#references)</sup>
 
 #### CVE-2021-30892 - Shrootless
 
-[**Researchers from this blog post**](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/) discovered a vulnerability in macOS's System Integrity Protection (SIP) mechanism, dubbed the 'Shrootless' vulnerability. This vulnerability centers around the **`system_installd`** daemon, which has an entitlement, **`com.apple.rootless.install.heritable`**, that allows any of its child processes to bypass SIP's file system restrictions.<sup>[[4]](#references)</sup>
+[**Các nhà nghiên cứu trong bài viết này**](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/) phát hiện một lỗ hổng trong cơ chế System Integrity Protection (SIP) của macOS, được đặt tên là lỗ hổng “Shrootless”. Lỗ hổng này liên quan đến daemon **`system_installd`**, có entitlement **`com.apple.rootless.install.heritable`**, cho phép mọi tiến trình con của nó bypass các hạn chế hệ thống tệp của SIP.<sup>[[4]](#references)</sup>
 
-**`system_installd`** daemon will install packages that have been signed by **Apple**.
+Daemon **`system_installd`** sẽ cài đặt các gói được **Apple** ký.
 
-Researchers found that during the installation of an Apple-signed package (.pkg file), **`system_installd`** **runs** any **post-install** scripts included in the package. These scripts are executed by the default shell, **`zsh`**, which automatically **runs** commands from the **`/etc/zshenv`** file, if it exists, even in non-interactive mode. This behaviour could be exploited by attackers: by creating a malicious `/etc/zshenv` file and waiting for **`system_installd` to invoke `zsh`**, they could perform arbitrary operations on the device.<sup>[[4]](#references)</sup>
+Các nhà nghiên cứu phát hiện rằng trong quá trình cài đặt một gói được Apple ký (tệp .pkg), **`system_installd`** **chạy** mọi script **post-install** có trong gói. Các script này được thực thi bởi shell mặc định, **`zsh`**, và shell này tự động **chạy** các lệnh trong tệp **`/etc/zshenv`** nếu tệp tồn tại, kể cả ở chế độ không tương tác. Kẻ tấn công có thể khai thác hành vi này bằng cách tạo tệp `/etc/zshenv` độc hại rồi chờ **`system_installd` gọi `zsh`** để thực hiện các thao tác tùy ý trên thiết bị.<sup>[[4]](#references)</sup>
 
-Moreover, it was discovered that **`/etc/zshenv` could be used as a general attack technique**, not just for a SIP bypass. Each user profile has a `~/.zshenv` file, which behaves the same way as `/etc/zshenv` but doesn't require root permissions. This file could be used as a persistence mechanism, triggering every time `zsh` starts, or as an elevation of privilege mechanism. If an admin user elevates to root using `sudo -s` or `sudo <command>`, the `~/.zshenv` file would be triggered, effectively elevating to root.<sup>[[4]](#references)</sup>
+Ngoài ra, người ta phát hiện **`/etc/zshenv` có thể được dùng như một kỹ thuật tấn công tổng quát**, không chỉ để bypass SIP. Mỗi hồ sơ người dùng đều có tệp `~/.zshenv`, hoạt động tương tự `/etc/zshenv` nhưng không cần quyền root. Tệp này có thể được dùng làm cơ chế persistence, kích hoạt mỗi khi `zsh` khởi chạy, hoặc làm cơ chế nâng quyền. Nếu người dùng admin nâng quyền lên root bằng `sudo -s` hoặc `sudo <command>`, tệp `~/.zshenv` sẽ được kích hoạt, qua đó nâng quyền lên root.<sup>[[4]](#references)</sup>
 
 #### [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/)
 
-In [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/) it was discovered that the same **`system_installd`** process could still be abused because it was putting the **post-install script inside a random named folder protected by SIP inside `/tmp`**. The thing is that **`/tmp` itself isn't protected by SIP**, so it was possible to **mount** a **virtual image on it**, then the **installer** would put in there the **post-install script**, **unmount** the virtual image, **recreate** all the **folders** and **add** the **post installation** script with the **payload** to execute.<sup>[[5]](#references)</sup>
+Trong [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/), người ta phát hiện tiến trình **`system_installd`** vẫn có thể bị khai thác vì nó đặt **script post-install vào một thư mục có tên ngẫu nhiên được SIP bảo vệ bên trong `/tmp`**. Vấn đề là bản thân **`/tmp` không được SIP bảo vệ**, nên có thể **mount** một **virtual image lên đó**. Sau đó, **installer** sẽ đặt **script post-install** vào đó, **unmount** virtual image, **tạo lại** các **thư mục**, rồi **thêm** script **post-install** chứa **payload** cần thực thi.<sup>[[5]](#references)</sup>
 
-#### [fsck_cs utility](https://www.theregister.com/2016/03/30/apple_os_x_rootless/)
+#### [Tiện ích fsck_cs](https://www.theregister.com/2016/03/30/apple_os_x_rootless/)
 
-A vulnerability was identified where **`fsck_cs`** was misled into corrupting a crucial file, due to its ability to follow **symbolic links**. Specifically, attackers crafted a link from _`/dev/diskX`_ to the file `/System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist`. Executing **`fsck_cs`** on _`/dev/diskX`_ led to the corruption of `Info.plist`. This file's integrity is vital for the operating system's SIP (System Integrity Protection), which controls the loading of kernel extensions. Once corrupted, SIP's ability to manage kernel exclusions is compromised.<sup>[[6]](#references)</sup>
+Một lỗ hổng được phát hiện khi **`fsck_cs`** bị đánh lừa để làm hỏng một tệp quan trọng do có thể lần theo **symbolic link**. Cụ thể, kẻ tấn công tạo một liên kết từ _`/dev/diskX`_ đến tệp `/System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist`. Chạy **`fsck_cs`** trên _`/dev/diskX`_ sẽ làm hỏng `Info.plist`. Tính toàn vẹn của tệp này rất quan trọng đối với SIP (System Integrity Protection) của hệ điều hành, cơ chế kiểm soát việc tải kernel extension. Khi tệp bị hỏng, khả năng quản lý các kernel extension bị loại trừ của SIP sẽ bị ảnh hưởng.<sup>[[6]](#references)</sup>
 
-The commands to exploit this vulnerability are:
+Các lệnh để khai thác lỗ hổng này là:
 
 ```bash
 ln -s /System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist /dev/diskX
@@ -157,11 +157,11 @@ touch /Library/Extensions/
 reboot
 ```
 
-The exploitation of this vulnerability has severe implications. The `Info.plist` file, normally responsible for managing permissions for kernel extensions, becomes ineffective. This includes the inability to blacklist certain extensions, such as `AppleHWAccess.kext`. Consequently, with the SIP's control mechanism out of order, this extension can be loaded, granting unauthorized read and write access to the system's RAM.<sup>[[6]](#references)</sup>
+Việc khai thác lỗ hổng này gây ra những hậu quả nghiêm trọng. Tệp `Info.plist`, vốn chịu trách nhiệm quản lý quyền cho các kernel extension, trở nên vô hiệu. Điều này bao gồm việc không thể đưa một số extension vào blacklist, chẳng hạn như `AppleHWAccess.kext`. Do cơ chế kiểm soát của SIP bị vô hiệu hóa, extension này có thể được tải, cấp quyền đọc và ghi trái phép vào RAM của hệ thống.<sup>[[6]](#references)</sup>
 
-#### [Mount over SIP protected folders](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)
+#### [Mount đè lên các thư mục được SIP bảo vệ](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)
 
-It was possible to mount a new file system over **SIP protected folders to bypass the protection**.<sup>[[1]](#references)</sup>
+Có thể mount một hệ thống tệp mới đè lên **các thư mục được SIP bảo vệ để bypass cơ chế bảo vệ**.<sup>[[1]](#references)</sup>
 
 ```bash
 mkdir evil
@@ -172,56 +172,56 @@ hdiutil attach -mountpoint /System/Library/Snadbox/ evil.dmg
 
 #### [Upgrader bypass (2016)](https://objective-see.org/blog/blog_0x14.html)
 
-The system is set to boot from an embedded installer disk image within the `Install macOS Sierra.app` to upgrade the OS, utilizing the `bless` utility. The command used is as follows:<sup>[[7]](#references)</sup>
+Hệ thống được thiết lập để khởi động từ image đĩa trình cài đặt được nhúng trong `Install macOS Sierra.app` nhằm nâng cấp hệ điều hành, sử dụng tiện ích `bless`. Lệnh được dùng như sau:<sup>[[7]](#references)</sup>
 
 ```bash
 /usr/sbin/bless -setBoot -folder /Volumes/Macintosh HD/macOS Install Data -bootefi /Volumes/Macintosh HD/macOS Install Data/boot.efi -options config="\macOS Install Data\com.apple.Boot" -label macOS Installer
 ```
 
-The security of this process can be compromised if an attacker alters the upgrade image (`InstallESD.dmg`) before booting. The strategy involves substituting a dynamic loader (dyld) with a malicious version (`libBaseIA.dylib`). This replacement results in the execution of the attacker's code when the installer is initiated.<sup>[[7]](#references)</sup>
+Tính bảo mật của quy trình này có thể bị xâm phạm nếu kẻ tấn công sửa đổi ảnh nâng cấp (`InstallESD.dmg`) trước khi khởi động. Chiến lược này thay thế dynamic loader (dyld) bằng một phiên bản độc hại (`libBaseIA.dylib`). Việc thay thế này khiến mã của kẻ tấn công được thực thi khi trình cài đặt khởi chạy.<sup>[[7]](#references)</sup>
 
-The attacker's code gains control during the upgrade process, exploiting the system's trust in the installer. The attack proceeds by altering the `InstallESD.dmg` image via method swizzling, particularly targeting the `extractBootBits` method. This allows the injection of malicious code before the disk image is employed.<sup>[[7]](#references)</sup>
+Mã của kẻ tấn công giành quyền kiểm soát trong quá trình nâng cấp, khai thác sự tin cậy của hệ thống đối với trình cài đặt. Cuộc tấn công tiến hành bằng cách sửa đổi ảnh `InstallESD.dmg` thông qua method swizzling, đặc biệt nhắm vào phương thức `extractBootBits`. Cách này cho phép chèn mã độc trước khi ảnh đĩa được sử dụng.<sup>[[7]](#references)</sup>
 
-Moreover, within the `InstallESD.dmg`, there's a `BaseSystem.dmg`, which serves as the upgrade code's root file system. Injecting a dynamic library into this allows the malicious code to operate within a process capable of altering OS-level files, significantly increasing the potential for system compromise.<sup>[[7]](#references)</sup>
+Ngoài ra, bên trong `InstallESD.dmg` còn có `BaseSystem.dmg`, đóng vai trò là hệ thống tệp gốc của mã nâng cấp. Chèn một dynamic library vào đây cho phép mã độc hoạt động trong một process có khả năng sửa đổi các tệp cấp OS, làm tăng đáng kể nguy cơ hệ thống bị xâm phạm.<sup>[[7]](#references)</sup>
 
 #### [systemmigrationd (2023)](https://www.youtube.com/watch?v=zxZesAN-TEk)
 
-In this talk from [**DEF CON 31**](https://www.youtube.com/watch?v=zxZesAN-TEk), it's shown how **`systemmigrationd`** (which can bypass SIP) executes a **bash** and a **perl** script, which can be abused via env variables **`BASH_ENV`** and **`PERL5OPT`**.<sup>[[8]](#references)</sup>
+Trong bài nói chuyện tại [**DEF CON 31**](https://www.youtube.com/watch?v=zxZesAN-TEk), họ trình bày cách **`systemmigrationd`** (có thể bypass SIP) thực thi một script **bash** và một script **perl**. Các script này có thể bị khai thác thông qua các biến môi trường **`BASH_ENV`** và **`PERL5OPT`**.<sup>[[8]](#references)</sup>
 
 #### CVE-2023-42860 <a href="#cve-a-detailed-look" id="cve-a-detailed-look"></a>
 
-As [**detailed in this blog post**](https://blog.kandji.io/apple-mitigates-vulnerabilities-installer-scripts), a `postinstall` script from `InstallAssistant.pkg` packages allowed was executing:<sup>[[9]](#references)</sup>
+Như [**được trình bày chi tiết trong bài viết này**](https://blog.kandji.io/apple-mitigates-vulnerabilities-installer-scripts), một script `postinstall` trong các gói `InstallAssistant.pkg` được phép thực thi:<sup>[[9]](#references)</sup>
 
 ```bash
 /usr/bin/chflags -h norestricted "${SHARED_SUPPORT_PATH}/SharedSupport.dmg"
 ```
 
-and it was possible to crate a symlink in `${SHARED_SUPPORT_PATH}/SharedSupport.dmg` that would allow a user to **unrestrict any file, bypassing SIP protection**.<sup>[[9]](#references)</sup>
+và có thể tạo một symlink tại `${SHARED_SUPPORT_PATH}/SharedSupport.dmg`, cho phép người dùng **gỡ hạn chế đối với bất kỳ tệp nào, qua mặt cơ chế bảo vệ SIP**.<sup>[[9]](#references)</sup>
 
 ### **com.apple.rootless.install**
 
 > [!CAUTION]
-> The entitlement **`com.apple.rootless.install`** allows to bypass SIP
+> Entitlement **`com.apple.rootless.install`** cho phép qua mặt SIP
 
-The entitlement `com.apple.rootless.install` is known to bypass System Integrity Protection (SIP) on macOS. This was notably mentioned in relation to [**CVE-2022-26712**](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/).<sup>[[10]](#references)</sup>
+Entitlement `com.apple.rootless.install` được biết đến là có thể qua mặt System Integrity Protection (SIP) trên macOS. Điều này được đề cập đáng chú ý liên quan đến [**CVE-2022-26712**](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/).<sup>[[10]](#references)</sup>
 
-In this specific case, the system XPC service located at `/System/Library/PrivateFrameworks/ShoveService.framework/Versions/A/XPCServices/SystemShoveService.xpc` possesses this entitlement. This allows the related process to circumvent SIP constraints. Furthermore, this service notably presents a method that permits the movement of files without enforcing any security measures.<sup>[[10]](#references)</sup>
+Trong trường hợp cụ thể này, dịch vụ XPC của hệ thống tại `/System/Library/PrivateFrameworks/ShoveService.framework/Versions/A/XPCServices/SystemShoveService.xpc` sở hữu entitlement này. Điều này cho phép tiến trình liên quan vượt qua các ràng buộc của SIP. Hơn nữa, dịch vụ này có một phương thức cho phép di chuyển tệp mà không áp dụng bất kỳ biện pháp bảo mật nào.<sup>[[10]](#references)</sup>
 
 ## Sealed System Snapshots
 
-Sealed System Snapshots are a feature introduced by Apple in **macOS Big Sur (macOS 11)** as a part of its **System Integrity Protection (SIP)** mechanism to provide an additional layer of security and system stability. They are essentially read-only versions of the system volume.
+Sealed System Snapshots là một tính năng được Apple giới thiệu trong **macOS Big Sur (macOS 11)** như một phần của cơ chế **System Integrity Protection (SIP)**, nhằm cung cấp thêm một lớp bảo mật và độ ổn định cho hệ thống. Về cơ bản, chúng là các phiên bản chỉ đọc của volume hệ thống.
 
-Here's a more detailed look:
+Dưới đây là giải thích chi tiết hơn:
 
-1. **Immutable System**: Sealed System Snapshots make the macOS system volume "immutable", meaning that it cannot be modified. This prevents any unauthorised or accidental changes to the system that could compromise security or system stability.
-2. **System Software Updates**: When you install macOS updates or upgrades, macOS creates a new system snapshot. The macOS startup volume then uses **APFS (Apple File System)** to switch to this new snapshot. The entire process of applying updates becomes safer and more reliable as the system can always revert to the previous snapshot if something goes wrong during the update.
-3. **Data Separation**: In conjunction with the concept of Data and System volume separation introduced in macOS Catalina, the Sealed System Snapshot feature makes sure that all your data and settings are stored on a separate "**Data**" volume. This separation makes your data independent from the system, which simplifies the process of system updates and enhances system security.
+1. **Hệ thống bất biến**: Sealed System Snapshots khiến volume hệ thống macOS trở nên "bất biến", nghĩa là không thể sửa đổi. Điều này ngăn chặn những thay đổi trái phép hoặc vô tình đối với hệ thống, vốn có thể làm ảnh hưởng đến bảo mật hoặc độ ổn định của hệ thống.
+2. **Cập nhật phần mềm hệ thống**: Khi bạn cài đặt bản cập nhật hoặc nâng cấp macOS, macOS tạo một system snapshot mới. Volume khởi động macOS sau đó dùng **APFS (Apple File System)** để chuyển sang snapshot mới này. Toàn bộ quá trình áp dụng bản cập nhật trở nên an toàn và đáng tin cậy hơn, vì hệ thống luôn có thể quay lại snapshot trước đó nếu xảy ra sự cố trong quá trình cập nhật.
+3. **Tách biệt dữ liệu**: Kết hợp với khái niệm tách biệt volume Data và System được giới thiệu trong macOS Catalina, tính năng Sealed System Snapshot đảm bảo rằng tất cả dữ liệu và cài đặt của bạn được lưu trên một volume "**Data**" riêng. Việc tách biệt này giúp dữ liệu độc lập với hệ thống, đơn giản hóa quá trình cập nhật hệ thống và tăng cường bảo mật hệ thống.
 
-Remember that these snapshots are automatically managed by macOS and don't take up additional space on your disk, thanks to the space sharing capabilities of APFS. It’s also important to note that these snapshots are different from **Time Machine snapshots**, which are user-accessible backups of the entire system.
+Hãy nhớ rằng macOS tự động quản lý các snapshot này và chúng không chiếm thêm dung lượng trên đĩa nhờ khả năng chia sẻ dung lượng của APFS. Cũng cần lưu ý rằng các snapshot này khác với **Time Machine snapshots**, vốn là các bản sao lưu toàn bộ hệ thống mà người dùng có thể truy cập.
 
-### Check Snapshots
+### Kiểm tra Snapshots
 
-The command **`diskutil apfs list`** lists the **details of the APFS volumes** and their layout:
+Lệnh **`diskutil apfs list`** liệt kê **thông tin chi tiết về các volume APFS** và cách bố trí của chúng:
 
 <pre><code>+-- Container disk3 966B902E-EDBA-4775-B743-CF97A0556A13
 |   ====================================================
@@ -260,18 +260,18 @@ The command **`diskutil apfs list`** lists the **details of the APFS volumes** a
     |   FileVault:                 Yes (Unlocked)
 </code></pre>
 
-In the previous output it's possible to see that **user-accessible locations** are mounted under `/System/Volumes/Data`.
+Trong kết quả trên, có thể thấy các **vị trí người dùng có thể truy cập** được gắn kết dưới `/System/Volumes/Data`.
 
-Moreover, **macOS System volume snapshot** is mounted in `/` and it's **sealed** (cryptographically signed by the OS). So, if SIP is bypassed and modifies it, the **OS won't boot anymore**.
+Ngoài ra, **snapshot của volume hệ thống macOS** được gắn kết tại `/` và được **seal** (được hệ điều hành ký bằng mật mã). Vì vậy, nếu SIP bị qua mặt và snapshot này bị sửa đổi, **hệ điều hành sẽ không thể khởi động**.
 
-It's also possible to **verify that seal is enabled** by running:
+Cũng có thể **xác minh seal đã được bật** bằng cách chạy:
 
 ```bash
 csrutil authenticated-root status
 Authenticated Root status: enabled
 ```
 
-Moreover, the snapshot disk is also mounted as **read-only**:
+Hơn nữa, ổ đĩa snapshot cũng được mount ở chế độ **chỉ đọc**:
 
 ```bash
 mount
@@ -280,15 +280,14 @@ mount
 
 ## References
 
-- [1] [SyScan360 - Stefan Esser - OS X El Capitan sinking the S\H/IP](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)
-- [2] [CVE-2019-8561 - Objective-See Blog](https://objective-see.org/blog/blog_0x42.html)
-- [3] [CVE-2020–9854: "Unauthd" (three) logic bugs ftw! - Objective-See Blog](https://objective-see.org/blog/blog_0x4D.html)
-- [4] [Microsoft finds new macOS vulnerability, Shrootless, that could bypass System Integrity Protection](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)
-- [5] [Technical Analysis: CVE-2022-22583 - Perception Point](https://perception-point.io/blog/technical-analysis-cve-2022-22583/)
-- [6] [Apple's fruitless rootless security broken by code that fits in a tweet - The Register](https://www.theregister.com/2016/03/30/apple_os_x_rootless/)
-- [7] [\[0day\] Bypassing Apple's System Integrity Protection - Objective-See Blog](https://objective-see.org/blog/blog_0x14.html)
-- [8] [DEF CON 31 - Getting a Migraine - Unique SIP Bypass on MacOS - Or, Pearse, Bohra](https://www.youtube.com/watch?v=zxZesAN-TEk)
-- [9] [Apple Mitigates Vulnerabilities in Installer Scripts - Kandji Blog](https://blog.kandji.io/apple-mitigates-vulnerabilities-installer-scripts)
-- [10] [CVE-2022-26712: The POC for SIP-Bypass Is Even Tweetable](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/)
-
+- [1] [SyScan360 - Stefan Esser - OS X El Capitan đang đánh chìm S\H/IP](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)
+- [2] [CVE-2019-8561 - Blog Objective-See](https://objective-see.org/blog/blog_0x42.html)
+- [3] [CVE-2020–9854: “Unauthd” (ba) lỗi logic FTW! - Blog Objective-See](https://objective-see.org/blog/blog_0x4D.html)
+- [4] [Microsoft phát hiện lỗ hổng macOS mới Shrootless có thể bypass System Integrity Protection](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)
+- [5] [Phân tích kỹ thuật: CVE-2022-22583 - Perception Point](https://perception-point.io/blog/technical-analysis-cve-2022-22583/)
+- [6] [Bảo mật rootless vô ích của Apple bị phá vỡ bởi đoạn code vừa trong một tweet - The Register](https://www.theregister.com/2016/03/30/apple_os_x_rootless/)
+- [7] [\[0day\] Bypass System Integrity Protection của Apple - Blog Objective-See](https://objective-see.org/blog/blog_0x14.html)
+- [8] [DEF CON 31 - Đau đầu - SIP Bypass độc đáo trên MacOS - Or, Pearse, Bohra](https://www.youtube.com/watch?v=zxZesAN-TEk)
+- [9] [Apple giảm thiểu lỗ hổng trong Installer Scripts - Blog Kandji](https://blog.kandji.io/apple-mitigates-vulnerabilities-installer-scripts)
+- [10] [CVE-2022-26712: POC cho SIP-Bypass thậm chí còn vừa trong một tweet](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/)
 {{#include ../../../banners/hacktricks-training.md}}

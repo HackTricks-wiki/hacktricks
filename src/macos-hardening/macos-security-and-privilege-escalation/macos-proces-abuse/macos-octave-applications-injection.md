@@ -4,7 +4,7 @@
 
 ## `OCTAVE_SITE_INITFILE` / `OCTAVE_VERSION_INITFILE`
 
-GNU Octave executes several files containing valid Octave commands during startup. `OCTAVE_SITE_INITFILE` overrides the site-wide startup file and `OCTAVE_VERSION_INITFILE` overrides the version-specific one, allowing either variable to redirect automatic execution to an attacker-readable file.<sup>[[1]](#references)</sup>
+GNU Octave thực thi một số tệp chứa các lệnh Octave hợp lệ khi khởi động. `OCTAVE_SITE_INITFILE` ghi đè tệp khởi động áp dụng trên toàn site, còn `OCTAVE_VERSION_INITFILE` ghi đè tệp dành riêng cho phiên bản, cho phép một trong hai biến chuyển hướng quá trình thực thi tự động đến một tệp mà kẻ tấn công có thể đọc được.<sup>[[1]](#references)</sup>
 
 ```bash
 cat >/tmp/octave-startup.m <<'OCTAVE'
@@ -14,11 +14,10 @@ OCTAVE
 OCTAVE_SITE_INITFILE=/tmp/octave-startup.m octave-cli --quiet victim.m
 ```
 
-`--no-init-file` only skips user files such as `~/.octaverc`; it does **not** stop the site-file override above. Use `--no-site-file` for the site files or `--norc` / `-f` to disable all startup files.<sup>[[2]](#references)</sup>
+`--no-init-file` chỉ bỏ qua các tệp của người dùng như `~/.octaverc`; tùy chọn này **không** ngăn chặn việc ghi đè tệp site ở trên. Dùng `--no-site-file` cho các tệp site hoặc `--norc` / `-f` để tắt tất cả các tệp khởi động.<sup>[[2]](#references)</sup>
 
 ## References
 
-- [1] [GNU Octave Startup Files](https://docs.octave.org/latest/Startup-Files.html)
-- [2] [GNU Octave Command Line Options](https://docs.octave.org/latest/Command-Line-Options.html)
-
+- [1] [Tệp khởi động GNU Octave](https://docs.octave.org/latest/Startup-Files.html)
+- [2] [Tùy chọn dòng lệnh GNU Octave](https://docs.octave.org/latest/Command-Line-Options.html)
 {{#include ../../../banners/hacktricks-training.md}}

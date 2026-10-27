@@ -1,34 +1,34 @@
-# macOS Authorizations DB & Authd
+# CSDL Authorization của macOS & Authd
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Authorization Database
+## Cơ sở dữ liệu Authorization
 
-The Security framework's Authorization Services let privileged helpers and other components evaluate named authorization rights. On current macOS versions, many of those rules are persisted in `/var/db/auth.db` and evaluated by `authd`; this file and its SQLite schema are implementation details and can change between releases.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
+Security framework's Authorization Services cho phép các helper có đặc quyền và những thành phần khác đánh giá các quyền authorization được đặt tên. Trên các phiên bản macOS hiện tại, nhiều quy tắc trong số đó được lưu trong `/var/db/auth.db` và được `authd` đánh giá; tệp này cùng schema SQLite của nó là chi tiết triển khai và có thể thay đổi giữa các bản phát hành.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
 
-System defaults have historically been seeded from `/System/Library/Security/authorization.plist`, and installers or privileged services may add named rights. Prefer the supported `security authorizationdb read|write|remove` interface over editing the database directly.<sup>[[3]](#references)</sup>
+Theo truyền thống, các giá trị mặc định của hệ thống được khởi tạo từ `/System/Library/Security/authorization.plist`, còn trình cài đặt hoặc dịch vụ có đặc quyền có thể thêm các quyền được đặt tên. Nên dùng giao diện được hỗ trợ `security authorizationdb read|write|remove` thay vì chỉnh sửa trực tiếp cơ sở dữ liệu.<sup>[[3]](#references)</sup>
 
-The `rules` table observed on the documented build contains the following columns. Treat this as a forensic map, not a stable public schema:
+Bảng `rules` được quan sát trên bản dựng được ghi nhận có các cột sau. Hãy xem đây là bản đồ pháp chứng, không phải schema công khai ổn định:
 
-- **id**: A unique identifier for each rule, automatically incremented and serving as the primary key.
-- **name**: The unique name of the rule used to identify and reference it within the authorization system.
-- **type**: Specifies the type of the rule, restricted to values 1 or 2 to define its authorization logic.
-- **class**: Categorizes the rule into a specific class, ensuring it is a positive integer.
-  - Common rule classes include `allow`, `deny`, `user`, `rule`, and `evaluate-mechanisms`. Mechanisms can be built-ins or Security Agent plug-ins under `/System/Library/CoreServices/SecurityAgentPlugins/` or `/Library/Security/SecurityAgentPlugins/`.<sup>[[2]](#references)</sup>
-- **group**: Indicates the user group associated with the rule for group-based authorization.
-- **kofn**: Represents the "k-of-n" parameter, determining how many subrules must be satisfied out of a total number.
-- **timeout**: Defines the duration in seconds before the authorization granted by the rule expires.
-- **flags**: Contains various flags that modify the behavior and characteristics of the rule.
-- **tries**: Limits the number of allowed authorization attempts to enhance security.
-- **version**: Tracks the version of the rule for version control and updates.
-- **created**: Records the timestamp when the rule was created for auditing purposes.
-- **modified**: Stores the timestamp of the last modification made to the rule.
-- **hash**: Holds a hash value of the rule to ensure its integrity and detect tampering.
-- **identifier**: Provides a unique string identifier, such as a UUID, for external references to the rule.
-- **requirement**: Contains serialized data defining the rule's specific authorization requirements and mechanisms.
-- **comment**: Offers a human-readable description or comment about the rule for documentation and clarity.
+- **id**: Mã định danh duy nhất cho mỗi quy tắc, được tự động tăng và đóng vai trò khóa chính.
+- **name**: Tên duy nhất của quy tắc, dùng để nhận diện và tham chiếu quy tắc trong hệ thống authorization.
+- **type**: Chỉ định loại quy tắc, giới hạn ở giá trị 1 hoặc 2 để xác định logic authorization.
+- **class**: Phân loại quy tắc vào một lớp cụ thể, đảm bảo đây là số nguyên dương.
+  - Các lớp quy tắc phổ biến gồm `allow`, `deny`, `user`, `rule` và `evaluate-mechanisms`. Mechanism có thể là thành phần tích hợp sẵn hoặc plug-in Security Agent trong `/System/Library/CoreServices/SecurityAgentPlugins/` hoặc `/Library/Security/SecurityAgentPlugins/`.<sup>[[2]](#references)</sup>
+- **group**: Cho biết nhóm người dùng được liên kết với quy tắc để thực hiện authorization dựa trên nhóm.
+- **kofn**: Thể hiện tham số "k-of-n", xác định cần đáp ứng bao nhiêu quy tắc con trong tổng số quy tắc.
+- **timeout**: Xác định khoảng thời gian tính bằng giây trước khi authorization được cấp theo quy tắc hết hạn.
+- **flags**: Chứa các cờ khác nhau để thay đổi hành vi và đặc tính của quy tắc.
+- **tries**: Giới hạn số lần thử authorization được phép nhằm tăng cường bảo mật.
+- **version**: Theo dõi phiên bản của quy tắc để kiểm soát phiên bản và cập nhật.
+- **created**: Ghi lại dấu thời gian tạo quy tắc nhằm phục vụ kiểm tra.
+- **modified**: Lưu dấu thời gian của lần chỉnh sửa quy tắc gần nhất.
+- **hash**: Chứa giá trị hash của quy tắc để đảm bảo tính toàn vẹn và phát hiện hành vi giả mạo.
+- **identifier**: Cung cấp chuỗi định danh duy nhất, chẳng hạn UUID, để tham chiếu quy tắc từ bên ngoài.
+- **requirement**: Chứa dữ liệu đã tuần tự hóa, định nghĩa các yêu cầu và mechanism authorization cụ thể của quy tắc.
+- **comment**: Cung cấp mô tả hoặc chú thích dễ đọc về quy tắc để tài liệu hóa và làm rõ.
 
-### Example
+### Ví dụ
 
 ```bash
 # List by name and comments
@@ -58,7 +58,7 @@ security authorizationdb read com.apple.tcc.util.admin
 </plist>
 ```
 
-The following decoded rule illustrates `authenticate-admin-nonshared` on a documented macOS version:<sup>[[1]](#references)</sup>
+Quy tắc đã giải mã sau minh họa `authenticate-admin-nonshared` trên một phiên bản macOS đã được tài liệu hóa:<sup>[[1]](#references)</sup>
 
 ```json
 {
@@ -77,21 +77,19 @@ The following decoded rule illustrates `authenticate-admin-nonshared` on a docum
 
 ## Authd
 
-`authd` is the XPC service that evaluates Authorization Services requests. On current macOS builds its bundle can be inspected at `/System/Library/Frameworks/Security.framework/XPCServices/authd.xpc`; the path is an implementation detail and may differ across releases. Older releases wrote `/var/log/authd.log`; current releases primarily use the unified logging system, which can be queried with `log show`/`log stream` using an `authd` process predicate.<sup>[[2]](#references)</sup><sup>[[5]](#references)</sup>
+`authd` là dịch vụ XPC đánh giá các yêu cầu Authorization Services. Trên các bản dựng macOS hiện tại, có thể kiểm tra bundle của dịch vụ tại `/System/Library/Frameworks/Security.framework/XPCServices/authd.xpc`; đường dẫn này là chi tiết triển khai và có thể khác nhau giữa các phiên bản. Các phiên bản cũ ghi log tại `/var/log/authd.log`; các phiên bản hiện tại chủ yếu dùng hệ thống unified logging, có thể truy vấn bằng `log show`/`log stream` với predicate cho tiến trình `authd`.<sup>[[2]](#references)</sup><sup>[[5]](#references)</sup>
 
-The `security` tool exposes several Authorization Services operations. A historical example invokes `AuthorizationExecuteWithPrivileges` with `security execute-with-privileges /bin/ls`. Apple deprecated that API in macOS 10.7; modern privileged helpers should use a launchd-managed helper and XPC authorization instead.<sup>[[2]](#references)</sup><sup>[[4]](#references)</sup>
+Công cụ `security` cung cấp một số thao tác Authorization Services. Một ví dụ cũ gọi `AuthorizationExecuteWithPrivileges` bằng lệnh `security execute-with-privileges /bin/ls`. Apple đã ngừng hỗ trợ API đó trong macOS 10.7; các privileged helper hiện đại nên dùng helper do launchd quản lý và XPC authorization.<sup>[[2]](#references)</sup><sup>[[4]](#references)</sup>
 
-On releases that still support it, this uses `/usr/libexec/security_authtrampoline` and displays an authorization prompt before running the command as root:
+Trên các phiên bản vẫn hỗ trợ tính năng này, lệnh sử dụng `/usr/libexec/security_authtrampoline` và hiển thị lời nhắc xác thực trước khi chạy lệnh dưới quyền root:
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 
 ## References
 
-- [1] [authenticate-admin-nonshared - Overview of the macOS Authorization Right](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
-- [2] [Apple Authorization Services Programming Guide (archive)](https://developer.apple.com/library/archive/documentation/Security/Conceptual/authorization_concepts/)
-- [3] [`security(1)` macOS manual page](https://keith.github.io/xcode-man-pages/security.1.html)
-- [4] [Apple - Daemons and Services Programming Guide: Creating launchd jobs](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html)
-- [5] [Apple open-source Security project - `authd`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/authd)
-
-
+- [1] [authenticate-admin-nonshared - Tổng quan về Authorization Right của macOS](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
+- [2] [Hướng dẫn lập trình Apple Authorization Services (lưu trữ)](https://developer.apple.com/library/archive/documentation/Security/Conceptual/authorization_concepts/)
+- [3] [Trang hướng dẫn sử dụng macOS `security(1)`](https://keith.github.io/xcode-man-pages/security.1.html)
+- [4] [Apple - Hướng dẫn lập trình Daemons and Services: Tạo các tác vụ launchd](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html)
+- [5] [Dự án Security mã nguồn mở của Apple - `authd`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/authd)
 {{#include ../../../banners/hacktricks-training.md}}

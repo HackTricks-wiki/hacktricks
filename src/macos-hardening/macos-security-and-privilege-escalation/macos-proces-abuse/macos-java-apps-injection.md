@@ -1,10 +1,10 @@
-# macOS Java Applications Injection
+# Injection vào ứng dụng Java trên macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Enumeration
+## Liệt kê
 
-Find Java applications installed in your system. It was noticed that Java apps in the **Info.plist** will contain some java parameters which contain the string **`java.`**, so you can search for that:
+Tìm các ứng dụng Java đã cài đặt trên hệ thống. Có thể thấy rằng **Info.plist** của các ứng dụng Java sẽ chứa một số tham số Java có chuỗi **`java.`**, vì vậy bạn có thể tìm kiếm chuỗi này:
 
 ```bash
 # Search only in /Applications folder
@@ -16,14 +16,14 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 
 ## \_JAVA_OPTIONS
 
-The environment variable **`_JAVA_OPTIONS`** can be used to inject arbitrary Java VM parameters when a Java application starts.<sup>[[1]](#references)</sup>
+Biến môi trường **`_JAVA_OPTIONS`** có thể được dùng để chèn các tham số Java VM tùy ý khi một ứng dụng Java khởi chạy.<sup>[[1]](#references)</sup>
 
-The Java launch stack also recognizes two better-defined variables with different scopes:
+Ngăn xếp khởi chạy Java cũng nhận diện hai biến được định nghĩa rõ hơn với phạm vi khác nhau:
 
-- `JAVA_TOOL_OPTIONS` is read when the VM is created, including some embedded launch paths that do not pass through the `java` launcher. It can inject instrumentation options such as `-javaagent`, `-agentlib`, or `-agentpath`.<sup>[[4]](#references)</sup>
-- `JDK_JAVA_OPTIONS` is prepended by the `java` launcher to its command line. Options that select the main class or terminate the launcher are prohibited, but `-javaagent` is accepted.<sup>[[5]](#references)</sup>
+- `JAVA_TOOL_OPTIONS` được đọc khi VM được tạo, kể cả một số đường dẫn khởi chạy nhúng không đi qua trình khởi chạy `java`. Biến này có thể chèn các tùy chọn instrumentation như `-javaagent`, `-agentlib` hoặc `-agentpath`.<sup>[[4]](#references)</sup>
+- `JDK_JAVA_OPTIONS` được trình khởi chạy `java` thêm vào trước dòng lệnh. Các tùy chọn dùng để chọn lớp chính hoặc kết thúc trình khởi chạy bị cấm, nhưng `-javaagent` được chấp nhận.<sup>[[5]](#references)</sup>
 
-All three variables should be treated as JVM code-execution controls when an attacker can also provide a compatible readable agent. `_JAVA_OPTIONS` is a HotSpot implementation detail, so validate it against the exact vendor and version; `JAVA_TOOL_OPTIONS` or `JDK_JAVA_OPTIONS` are preferable for portable testing.
+Cả ba biến này nên được xem là các cơ chế kiểm soát thực thi mã JVM khi kẻ tấn công cũng có thể cung cấp một agent tương thích và có thể đọc được. `_JAVA_OPTIONS` là chi tiết triển khai của HotSpot, vì vậy hãy xác thực biến này theo đúng nhà cung cấp và phiên bản; `JAVA_TOOL_OPTIONS` hoặc `JDK_JAVA_OPTIONS` phù hợp hơn cho việc kiểm thử đa nền tảng.
 
 ```bash
 # Write your payload in a script called /tmp/payload.sh
@@ -31,7 +31,7 @@ export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
 
-To execute it as a new process and not as a child of the current terminal you can use:
+Để thực thi nó dưới dạng một tiến trình mới, thay vì tiến trình con của terminal hiện tại, bạn có thể dùng:
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -86,7 +86,7 @@ int main(int argc, const char * argv[]) {
 }
 ```
 
-However, that technique triggers an error in the executed application. A stealthier alternative is to create a Java agent and use `-javaagent`:<sup>[[2]](#references)</sup>
+Tuy nhiên, kỹ thuật đó gây ra lỗi trong ứng dụng đang chạy. Một giải pháp kín đáo hơn là tạo Java agent và sử dụng `-javaagent`:<sup>[[2]](#references)</sup>
 
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
@@ -104,9 +104,9 @@ JDK_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar' java -jar /path/to/application.jar
 ```
 
 > [!CAUTION]
-> Creating the agent with a **different Java version** from the application can crash both the agent and the application.
+> Tạo agent bằng **phiên bản Java khác** với phiên bản của ứng dụng có thể khiến cả agent lẫn ứng dụng gặp sự cố.
 
-Where the agent can be:
+Agent có thể nằm ở:
 
 ```java:Agent.java
 import java.io.*;
@@ -125,14 +125,14 @@ public class Agent {
 }
 ```
 
-To compile the agent run:
+Để biên dịch agent, hãy chạy:
 
 ```bash
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
 ```
 
-With `manifest.txt`:
+Với `manifest.txt`:
 
 ```
 Premain-Class: Agent
@@ -141,7 +141,7 @@ Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
 
-And then export the env variable and run the java application like:
+Sau đó export biến môi trường và chạy ứng dụng Java như sau:
 
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
@@ -152,14 +152,14 @@ export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 
-## vmoptions file
+## tệp vmoptions
 
-This file supports the specification of **Java parameters** when Java is executed. You can use some of the previous techniques to change the Java parameters and **make the process execute arbitrary commands**.\
-Moreover, this file can also **include other files** with the `include` directive, so you can also change an included file.
+Tệp này hỗ trợ chỉ định **các tham số Java** khi Java được thực thi. Bạn có thể sử dụng một số kỹ thuật trước đó để thay đổi các tham số Java và **khiến tiến trình thực thi các lệnh tùy ý**.\
+Ngoài ra, tệp này cũng có thể **bao gồm các tệp khác** bằng chỉ thị `include`, vì vậy bạn cũng có thể thay đổi một tệp được bao gồm.
 
-Even more, some Java apps will **load more than one `vmoptions`** file.
+Hơn nữa, một số ứng dụng Java sẽ **tải nhiều tệp `vmoptions`**.
 
-Some applications, such as Android Studio, indicate in their **output where they look** for these files:<sup>[[3]](#references)</sup>
+Một số ứng dụng, chẳng hạn như Android Studio, cho biết trong **đầu ra vị trí chúng tìm kiếm** các tệp này:<sup>[[3]](#references)</sup>
 
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
@@ -172,7 +172,7 @@ Some applications, such as Android Studio, indicate in their **output where they
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
 
-If they do not, you can check for it with:
+Nếu không, bạn có thể kiểm tra điều đó bằng:
 
 ```bash
 # Monitor
@@ -182,14 +182,13 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
 
-Notice that Android Studio in this example tries to load **`/Applications/Android Studio.app.vmoptions`**, a location where any user in the **`admin` group has write access**.
+Lưu ý rằng Android Studio trong ví dụ này cố tải **`/Applications/Android Studio.app.vmoptions`**, một vị trí mà bất kỳ người dùng nào trong nhóm **`admin` đều có quyền ghi**.
 
 ## References
 
-- [1] [OpenJDK — `_JAVA_OPTIONS` parsing in `arguments.cpp`](https://cr.openjdk.org/~never/bsd_headers/src/share/vm/runtime/arguments.cpp.html)
-- [2] [Oracle Java — `java.lang.instrument` package specification](https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html)
-- [3] [JetBrains — Configuring JVM options and platform properties](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties)
+- [1] [OpenJDK — Phân tích cú pháp `_JAVA_OPTIONS` trong `arguments.cpp`](https://cr.openjdk.org/~never/bsd_headers/src/share/vm/runtime/arguments.cpp.html)
+- [2] [Oracle Java — Đặc tả gói `java.lang.instrument`](https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html)
+- [3] [JetBrains — Cấu hình tùy chọn JVM và thuộc tính nền tảng](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties)
 - [4] [Oracle Java — `JAVA_TOOL_OPTIONS`](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/envvars002.html)
-- [5] [The `java` launcher — `JDK_JAVA_OPTIONS`](https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html#using-the-jdk_java_options-launcher-environment-variable)
-
+- [5] [Trình khởi chạy `java` — `JDK_JAVA_OPTIONS`](https://docs.oracle.com/en/java/javase/25/docs/specs/man/java.html#using-the-jdk_java_options-launcher-environment-variable)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,24 +2,24 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Thông tin cơ bản
 
-Quick Look is macOS's **file preview framework**. When a user selects a file in Finder, presses Space, hovers over it, or views a directory with thumbnails enabled, Quick Look **automatically loads a generator plugin** to parse the file and render a visual preview.<sup>[[1]](#references)</sup>
+Quick Look là **framework xem trước file** của macOS. Khi người dùng chọn một file trong Finder, nhấn Space, di chuột lên file hoặc xem một thư mục khi đã bật hình thu nhỏ, Quick Look sẽ **tự động tải một plugin generator** để phân tích file và hiển thị bản xem trước trực quan.<sup>[[1]](#references)</sup>
 
-Quick Look generators are **bundles** (`.qlgenerator`) that register for specific **Uniform Type Identifiers (UTIs)**. When macOS needs a preview for a file matching that UTI, it loads the generator into a sandboxed helper process (`QuickLookSatellite` or `qlmanage`) and calls its generator function.
+Quick Look generators là các **bundle** (`.qlgenerator`) đăng ký xử lý những **Uniform Type Identifiers (UTIs)** cụ thể. Khi macOS cần xem trước một file khớp với UTI đó, hệ thống sẽ tải generator vào một tiến trình trợ giúp sandbox (`QuickLookSatellite` hoặc `qlmanage`) rồi gọi hàm generator của nó.
 
-### Why This Matters for Security
+### Vì sao điều này quan trọng đối với bảo mật
 
 > [!WARNING]
-> Quick Look generators are triggered by **simply selecting or viewing a file** — no "Open" action is required. This makes them a powerful **passive exploitation vector**: the user just needs to navigate to a directory containing a malicious file.
+> Quick Look generators được kích hoạt khi người dùng **chỉ cần chọn hoặc xem một file** — không cần thao tác "Open". Điều này biến chúng thành một **vector khai thác thụ động** mạnh mẽ: người dùng chỉ cần mở một thư mục có chứa file độc hại.
 
-**Attack surface:**
-- Generators **parse arbitrary file content** from disk, downloads, email attachments, or network shares
-- A crafted file can exploit **parsing vulnerabilities** (buffer overflows, format strings, type confusion) in the generator code
-- The preview rendering happens **automatically** — viewing a Downloads folder where a malicious file landed is enough
-- Quick Look runs in a **sandboxed helper**, but sandbox escapes from this context have been demonstrated
+**Bề mặt tấn công:**
+- Generators **phân tích nội dung file tùy ý** từ ổ đĩa, nội dung tải xuống, tệp đính kèm email hoặc network share
+- Một file được tạo có chủ đích có thể khai thác **lỗ hổng phân tích** (buffer overflow, format string, type confusion) trong mã generator
+- Việc hiển thị bản xem trước diễn ra **tự động** — chỉ cần xem thư mục Downloads nơi có file độc hại là đủ
+- Quick Look chạy trong một **tiến trình trợ giúp sandbox**, nhưng các trường hợp thoát sandbox từ bối cảnh này đã được chứng minh
 
-## Architecture
+## Kiến trúc
 
 ```
 User selects file in Finder
@@ -33,9 +33,9 @@ Plugin parses file content → Returns preview image/HTML
 Preview displayed to user
 ```
 
-## Enumeration
+## Trinh sát
 
-### List Installed Generators
+### Liệt kê các Generator đã cài đặt
 
 ```bash
 # List all Quick Look generators with their UTI registrations
@@ -53,7 +53,7 @@ ls /System/Library/QuickLook/
 defaults read /path/to/Generator.qlgenerator/Contents/Info.plist 2>/dev/null
 ```
 
-### Using the Scanner
+### Sử dụng Scanner
 
 ```bash
 sqlite3 /tmp/executables.db "
@@ -65,11 +65,11 @@ WHERE h.handler_type = 'quicklook_generator'
 ORDER BY e.path;"
 ```
 
-## Attack Scenarios
+## Kịch bản tấn công
 
-### File-Based Exploitation
+### Khai thác dựa trên tệp
 
-A third-party Quick Look generator that parses complex file formats (3D models, scientific data, archive formats) is a prime target:
+Một Quick Look generator của bên thứ ba phân tích các định dạng tệp phức tạp (mô hình 3D, dữ liệu khoa học, định dạng lưu trữ) là mục tiêu hàng đầu:
 
 ```bash
 # 1. Identify a third-party generator and its UTI
@@ -88,7 +88,7 @@ cp malicious.xyz ~/Downloads/
 # 5. When user opens Downloads in Finder → preview triggers → exploit fires
 ```
 
-### Drive-By via Downloads
+### Drive-By qua Downloads
 
 ```
 1. Send crafted file via email/AirDrop/web download
@@ -99,9 +99,9 @@ cp malicious.xyz ~/Downloads/
 6. (Optional) Sandbox escape from QuickLookSatellite context
 ```
 
-### Third-Party Generator Replacement
+### Thay thế Generator của bên thứ ba
 
-If a Quick Look generator bundle is installed in a **user-writable location** (`~/Library/QuickLook/`), it can be replaced:
+Nếu một bundle Quick Look generator được cài đặt tại **vị trí người dùng có thể ghi** (`~/Library/QuickLook/`), nó có thể bị thay thế:
 
 ```bash
 # Check for user-writable generators
@@ -112,7 +112,7 @@ ls -la ~/Library/QuickLook/ 2>/dev/null
 # 2. Optionally still generates a valid preview to avoid suspicion
 ```
 
-### Trigger Quick Look Remotely
+### Kích hoạt Quick Look từ xa
 
 ```bash
 # Force Quick Look preview generation (for testing)
@@ -125,14 +125,14 @@ qlmanage -t /path/to/malicious/file
 qlmanage -r cache
 ```
 
-## Sandbox Considerations
+## Các cân nhắc về Sandbox
 
-Quick Look generators run inside a sandboxed helper process. The sandbox profile limits:
-- File system access (mostly read-only to the file being previewed)
-- Network access (restricted)
-- IPC (limited mach-lookup)
+Quick Look generators chạy bên trong một helper process bị sandbox. Hồ sơ sandbox giới hạn:
+- Quyền truy cập hệ thống tệp (hầu hết chỉ đọc tệp đang được xem trước)
+- Quyền truy cập mạng (bị hạn chế)
+- IPC (mach-lookup bị giới hạn)
 
-However, the sandbox has known escape vectors:
+Tuy nhiên, sandbox có các vector thoát đã được biết đến:
 
 ```bash
 # Check the sandbox profile used by QuickLookSatellite
@@ -143,14 +143,14 @@ sandbox-exec -p '(version 1)(allow default)' /usr/bin/true 2>&1
 # A sandbox escape chain: QLGenerator vuln → QuickLookSatellite → mach-lookup → system daemon
 ```
 
-## Real-World CVEs<sup>[[2]](#references)</sup>
+## CVE thực tế<sup>[[2]](#references)</sup>
 
-| CVE | Description |
+| CVE | Mô tả |
 |---|---|
-| CVE-2019-8741 | Quick Look preview memory corruption via crafted file |
-| CVE-2018-4293 | Quick Look generator sandbox escape |
-| CVE-2020-9963 | Quick Look preview processing information disclosure |
-| CVE-2021-30876 | Thumbnail generation memory corruption |
+| CVE-2019-8741 | Lỗi hỏng bộ nhớ trong bản xem trước Quick Look qua tệp được tạo thủ công |
+| CVE-2018-4293 | Thoát sandbox của trình tạo Quick Look |
+| CVE-2020-9963 | Tiết lộ thông tin trong quá trình xử lý bản xem trước Quick Look |
+| CVE-2021-30876 | Lỗi hỏng bộ nhớ trong quá trình tạo hình thu nhỏ |
 
 ## Fuzzing Quick Look Generators
 
@@ -178,7 +178,6 @@ done
 
 ## References
 
-- [1] [Apple Developer — Quick Look Programming Guide](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html)
-- [2] [Apple Security Updates — Quick Look CVEs](https://support.apple.com/en-us/HT201222)
-
+- [1] [Apple Developer — Hướng dẫn lập trình Quick Look](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html)
+- [2] [Bản cập nhật bảo mật của Apple — CVE về Quick Look](https://support.apple.com/en-us/HT201222)
 {{#include ../../../banners/hacktricks-training.md}}

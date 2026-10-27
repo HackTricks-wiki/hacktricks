@@ -1,19 +1,19 @@
-# macOS Security Protections
+# Các biện pháp bảo vệ an ninh của macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Gatekeeper
 
-Gatekeeper is usually used to refer to the combination of **Quarantine + Gatekeeper + XProtect**, 3 macOS security modules that will try to **prevent users from executing potentially malicious software downloaded**.
+Gatekeeper thường được dùng để chỉ sự kết hợp của **Quarantine + Gatekeeper + XProtect**, 3 mô-đun bảo mật của macOS nhằm **ngăn người dùng thực thi phần mềm có khả năng độc hại được tải xuống**.
 
-More information in:
+Tìm hiểu thêm tại:
 
 
 {{#ref}}
 macos-gatekeeper.md
 {{#endref}}
 
-## Processes Limitants
+## Các giới hạn đối với tiến trình
 
 ### MACF
 
@@ -26,7 +26,7 @@ macos-sip.md
 
 ### Sandbox
 
-MacOS Sandbox **limits applications** running inside the sandbox to the **allowed actions specified in the Sandbox profile** the app is running with. This helps to ensure that **the application will be accessing only expected resources**.
+macOS Sandbox **giới hạn các ứng dụng** chạy bên trong sandbox, chỉ cho phép chúng thực hiện **các hành động được chỉ định trong Sandbox profile** mà ứng dụng đang sử dụng. Điều này giúp đảm bảo **ứng dụng chỉ truy cập các tài nguyên dự kiến**.
 
 
 {{#ref}}
@@ -35,46 +35,46 @@ macos-sandbox/
 
 ### TCC - **Transparency, Consent, and Control**
 
-**TCC (Transparency, Consent, and Control)** is a security framework. It's designed to **manage the permissions** of applications, specifically by regulating their access to sensitive features. This includes elements like **location services, contacts, photos, microphone, camera, accessibility, and full disk access**. TCC ensures that apps can only access these features after obtaining explicit user consent, thereby bolstering privacy and control over personal data.
+**TCC (Transparency, Consent, and Control)** là một framework bảo mật. Framework này được thiết kế để **quản lý quyền** của ứng dụng, cụ thể là kiểm soát quyền truy cập vào các tính năng nhạy cảm. Những tính năng này bao gồm **dịch vụ định vị, danh bạ, ảnh, microphone, camera, trợ năng và quyền truy cập toàn bộ ổ đĩa**. TCC đảm bảo ứng dụng chỉ có thể truy cập các tính năng này sau khi được người dùng đồng ý rõ ràng, qua đó tăng cường quyền riêng tư và khả năng kiểm soát dữ liệu cá nhân.
 
 
 {{#ref}}
 macos-tcc/
 {{#endref}}
 
-### Launch/Environment Constraints & Trust Cache
+### Ràng buộc khởi chạy/môi trường và Trust Cache
 
-Launch constraints in macOS are a security feature to **regulate process initiation** by defining **who can launch** a process, **how**, and **from where**. Introduced in macOS Ventura, they categorize system binaries into constraint categories within a **trust cache**. Every executable binary has set **rules** for its **launch**, including **self**, **parent**, and **responsible** constraints. Extended to third-party apps as **Environment** Constraints in macOS Sonoma, these features help mitigate potential system exploitations by governing process launching conditions.
+Ràng buộc khởi chạy trong macOS là một tính năng bảo mật giúp **kiểm soát việc khởi chạy tiến trình** bằng cách xác định **ai có thể khởi chạy** một tiến trình, **bằng cách nào** và **từ đâu**. Được giới thiệu trong macOS Ventura, các ràng buộc này phân loại các binary của hệ thống thành các danh mục ràng buộc trong một **trust cache**. Mỗi binary thực thi đều có các **quy tắc** xác định cách **khởi chạy**, bao gồm các ràng buộc **self**, **parent** và **responsible**. Được mở rộng sang các ứng dụng bên thứ ba dưới dạng ràng buộc **Environment** trong macOS Sonoma, những tính năng này giúp giảm thiểu nguy cơ khai thác hệ thống bằng cách kiểm soát các điều kiện khởi chạy tiến trình.
 
 
 {{#ref}}
 macos-launch-environment-constraints.md
 {{#endref}}
 
-## MRT - Malware Removal Tool
+## MRT - Công cụ loại bỏ phần mềm độc hại
 
-The Malware Removal Tool (MRT) is another part of macOS's security infrastructure. As the name suggests, MRT's main function is to **remove known malware from infected systems**.
+Malware Removal Tool (MRT) là một phần khác trong cơ sở hạ tầng bảo mật của macOS. Đúng như tên gọi, chức năng chính của MRT là **loại bỏ phần mềm độc hại đã biết khỏi các hệ thống bị nhiễm**.
 
-Once malware is detected on a Mac (either by XProtect or by some other means), MRT can be used to automatically **remove the malware**. MRT operates silently in the background and typically runs whenever the system is updated or when a new malware definition is downloaded (it looks like the rules MRT has to detect malware are inside the binary).
+Khi phần mềm độc hại được phát hiện trên máy Mac (bởi XProtect hoặc bằng cách khác), MRT có thể tự động **loại bỏ phần mềm độc hại**. MRT chạy âm thầm ở chế độ nền và thường được thực thi mỗi khi hệ thống được cập nhật hoặc khi có định nghĩa phần mềm độc hại mới được tải xuống (có vẻ như các quy tắc MRT dùng để phát hiện phần mềm độc hại nằm bên trong binary).
 
-While both XProtect and MRT are part of macOS's security measures, they perform different functions:
+Mặc dù XProtect và MRT đều là một phần trong các biện pháp bảo mật của macOS, chúng thực hiện các chức năng khác nhau:
 
-- **XProtect** is a preventative tool. It **checks files as they're downloaded** (via certain applications), and if it detects any known types of malware, it **prevents the file from opening**, thereby preventing the malware from infecting your system in the first place.
-- **MRT**, on the other hand, is a **reactive tool**. It operates after malware has been detected on a system, with the goal of removing the offending software to clean up the system.
+- **XProtect** là công cụ phòng ngừa. Công cụ này **kiểm tra các tệp khi chúng được tải xuống** (thông qua một số ứng dụng nhất định) và nếu phát hiện bất kỳ loại phần mềm độc hại đã biết nào, nó sẽ **ngăn tệp mở**, qua đó ngăn phần mềm độc hại lây nhiễm vào hệ thống ngay từ đầu.
+- **MRT**, mặt khác, là một công cụ **phản ứng**. Công cụ này hoạt động sau khi phần mềm độc hại được phát hiện trên hệ thống, với mục tiêu loại bỏ phần mềm gây hại để dọn sạch hệ thống.
 
-The MRT application is located in **`/Library/Apple/System/Library/CoreServices/MRT.app`**
+Ứng dụng MRT nằm tại **`/Library/Apple/System/Library/CoreServices/MRT.app`**
 
-## Background Tasks Management
+## Quản lý tác vụ nền
 
-**macOS** now **alerts** every time a tool uses a well known **technique to persist code execution** (such as Login Items, Daemons...), so the user knows better **which software is persisting**.<sup>[[3]](#references)</sup>
+**macOS** hiện **cảnh báo** mỗi khi một công cụ sử dụng **kỹ thuật phổ biến để duy trì thực thi mã** (chẳng hạn như Login Items, Daemons...), giúp người dùng biết rõ hơn **phần mềm nào đang duy trì persistence**.<sup>[[3]](#references)</sup>
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
-This runs with a **daemon** located in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` and the **agent** in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`<sup>[[1]](#references)</sup>
+Việc này được thực hiện bởi một **daemon** nằm tại `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` và **agent** nằm tại `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`<sup>[[1]](#references)</sup>
 
-The way **`backgroundtaskmanagementd`** knows something is installed in a persistent folder is by **getting the FSEvents** and creating some **handlers** for those.<sup>[[1]](#references)</sup>
+**`backgroundtaskmanagementd`** xác định một thành phần đã được cài đặt trong thư mục persistent bằng cách **nhận các FSEvents** và tạo một số **handler** cho chúng.<sup>[[1]](#references)</sup>
 
-Moreover, there is a plist file that contains **well known applications** that frequently persists maintained by apple located in: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`<sup>[[3]](#references)</sup>
+Ngoài ra, một tệp plist chứa danh sách **các ứng dụng phổ biến** thường xuyên duy trì persistence, do Apple quản lý, nằm tại: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`<sup>[[3]](#references)</sup>
 
 ```json
 [...]
@@ -92,16 +92,16 @@ Moreover, there is a plist file that contains **well known applications** that f
 [...]
 ```
 
-### Enumeration
+### Liệt kê
 
-It's possible to **enumerate all** the configured background items running the Apple cli tool:<sup>[[3]](#references)</sup>
+Có thể **liệt kê tất cả** các mục chạy nền đã cấu hình bằng công cụ cli của Apple:<sup>[[3]](#references)</sup>
 
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
 ```
 
-Moreover, it's also possible to list this information with [**DumpBTM**](https://github.com/objective-see/DumpBTM).<sup>[[2]](#references)</sup>
+Hơn nữa, cũng có thể liệt kê thông tin này bằng [**DumpBTM**](https://github.com/objective-see/DumpBTM).<sup>[[2]](#references)</sup>
 
 ```bash
 # You need to grant the Terminal Full Disk Access for this to work
@@ -110,21 +110,21 @@ xattr -rc dumpBTM # Remove quarantine attr
 ./dumpBTM
 ```
 
-This information is being stored in **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** and the Terminal needs FDA.<sup>[[2]](#references)</sup>
+Thông tin này được lưu trong **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** và Terminal cần FDA.<sup>[[2]](#references)</sup>
 
-### Messing with BTM
+### Can thiệp vào BTM
 
-When a new persistence is found an event of type **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. So, any way to **prevent** this **event** from being sent or the **agent from alerting** the user will help an attacker to _**bypass**_ BTM.<sup>[[1]](#references)</sup>
+Khi phát hiện một persistence mới, một event thuộc loại **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** sẽ được tạo. Vì vậy, bất kỳ cách nào để **ngăn** event này được gửi hoặc **ngăn agent cảnh báo** người dùng đều giúp attacker _**bypass**_ BTM.<sup>[[1]](#references)</sup>
 
-- **Resetting the database**: Running the following command resets the database (which should rebuild it from scratch). However, after doing this, **no new persistence alerts appear until the system is rebooted**.<sup>[[1]](#references)</sup>
-  - **root** is required.
+- **Resetting the database**: Chạy lệnh sau sẽ reset database (database sẽ được tạo lại từ đầu). Tuy nhiên, sau khi thực hiện việc này, **sẽ không có cảnh báo persistence mới nào xuất hiện cho đến khi hệ thống được khởi động lại**.<sup>[[1]](#references)</sup>
+  - Cần quyền **root**.
 
 ```bash
 # Reset the database
 sfltool resettbtm
 ```
 
-- **Stop the Agent**: It's possible to send a stop signal to the agent so it **won't be alerting the user** when new detections are found.<sup>[[1]](#references)</sup>
+- **Dừng Agent**: Có thể gửi tín hiệu dừng đến agent để agent **không cảnh báo người dùng** khi phát hiện các mối đe dọa mới.<sup>[[1]](#references)</sup>
 
 ```bash
 # Get PID
@@ -139,12 +139,11 @@ ps -o state 1011
 T
 ```
 
-- **Bug**: If the **process that created the persistence exits immediately afterward**, the daemon tries to **get information** about it, **fails**, and **cannot send the event** indicating that a new item is persisting.<sup>[[1]](#references)</sup>
+- **Bug**: Nếu **process tạo persistence thoát ngay sau đó**, daemon cố gắng **lấy thông tin** về process đó nhưng **thất bại**, và **không thể gửi sự kiện** cho biết một mục mới đang được persist.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [OBTS v6.0: "Demystifying (& Bypassing) macOS's Background Task Management" - Patrick Wardle & Chris Lopez](https://youtu.be/9hjUmT031tc?t=26481)
-- [2] [New (Developer) Tool: "DumpBTM" - Patrick Wardle (Patreon)](https://www.patreon.com/posts/new-developer-77420730?l=fr)
-- [3] [Manage login items and background tasks on Mac - Apple Platform Deployment](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
-
+- [1] [OBTS v6.0: "Giải mã (& Bypass) Background Task Management của macOS" - Patrick Wardle & Chris Lopez](https://youtu.be/9hjUmT031tc?t=26481)
+- [2] [Công cụ mới dành cho nhà phát triển: "DumpBTM" - Patrick Wardle (Patreon)](https://www.patreon.com/posts/new-developer-77420730?l=fr)
+- [3] [Quản lý mục đăng nhập và tác vụ nền trên Mac - Apple Platform Deployment](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,21 +1,21 @@
-# macOS R Applications Injection
+# Chèn mã vào ứng dụng R trên macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## `R_PROFILE_USER` / `R_PROFILE`
 
-At startup R sources site and user profile files containing R code. `R_PROFILE` selects the site profile and `R_PROFILE_USER` selects the user profile, allowing an inherited environment to redirect either lookup to an attacker-readable file.<sup>[[1]](#references)</sup>
+Khi khởi động, R nạp các tệp profile của site và người dùng chứa mã R. `R_PROFILE` chọn profile của site, còn `R_PROFILE_USER` chọn profile của người dùng, cho phép môi trường được kế thừa chuyển hướng một trong hai thao tác tìm kiếm này đến tệp mà kẻ tấn công có thể đọc được.<sup>[[1]](#references)</sup>
 
 ```bash
 echo 'file.create("/tmp/r-profile-executed")' >/tmp/attacker.Rprofile
 R_PROFILE_USER=/tmp/attacker.Rprofile Rscript victim.R
 ```
 
-`--no-init-file` skips the user profile, `--no-site-file` skips the site profile, and `--vanilla` includes both protections. R first processes environment files selected by `R_ENVIRON` and `R_ENVIRON_USER`, but those files only set variables; the profile variables are the direct arbitrary-code primitive.
+`--no-init-file` bỏ qua user profile, `--no-site-file` bỏ qua site profile, còn `--vanilla` bao gồm cả hai biện pháp bảo vệ. R xử lý trước các tệp môi trường được chọn bằng `R_ENVIRON` và `R_ENVIRON_USER`, nhưng các tệp đó chỉ thiết lập biến; các biến profile mới là primitive thực thi mã tùy ý trực tiếp.
 
-## `R_DEFAULT_PACKAGES` / `R_SCRIPT_DEFAULT_PACKAGES` and library paths
+## `R_DEFAULT_PACKAGES` / `R_SCRIPT_DEFAULT_PACKAGES` và đường dẫn thư viện
 
-R attaches the comma-separated packages in `R_DEFAULT_PACKAGES` during startup. `Rscript` gives `R_SCRIPT_DEFAULT_PACKAGES` precedence. Combining either variable with `R_LIBS`, `R_LIBS_USER`, or `R_LIBS_SITE` can make R find and load an attacker-controlled installed package; its `.onLoad` or `.onAttach` hook executes automatically.<sup>[[1]](#references)[[2]](#references)</sup>
+R attach các package được phân tách bằng dấu phẩy trong `R_DEFAULT_PACKAGES` khi khởi động. `Rscript` ưu tiên `R_SCRIPT_DEFAULT_PACKAGES`. Kết hợp một trong hai biến này với `R_LIBS`, `R_LIBS_USER` hoặc `R_LIBS_SITE` có thể khiến R tìm và load một package đã cài đặt do attacker kiểm soát; hook `.onLoad` hoặc `.onAttach` của package sẽ tự động thực thi.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```bash
 # Assume an installed package named htpayload exists below /tmp/r-library.
@@ -28,11 +28,10 @@ R_SCRIPT_DEFAULT_PACKAGES=htpayload \
 Rscript victim.R
 ```
 
-This needs a structurally valid installed R package, not merely a loose `.R` file. `--vanilla` does not clear direct inherited variables, so a trusted wrapper must unset or replace the default-package and library-path variables as well as disabling profile files.
+Điều này đòi hỏi một R package đã cài đặt và có cấu trúc hợp lệ, không chỉ là một tệp `.R` rời. `--vanilla` không xóa các biến được kế thừa trực tiếp, vì vậy một wrapper đáng tin cậy phải bỏ đặt hoặc thay thế các biến package mặc định và đường dẫn thư viện, đồng thời vô hiệu hóa các tệp profile.
 
 ## References
 
-- [1] [Initialization at Start of an R Session](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Startup.html)
-- [2] [R Installation and Administration: Add-on packages](https://stat.ethz.ch/CRAN/doc/manuals/r-release/R-admin.html)
-
+- [1] [Khởi tạo khi bắt đầu một phiên R](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Startup.html)
+- [2] [Cài đặt và quản trị R: Các package bổ trợ](https://stat.ethz.ch/CRAN/doc/manuals/r-release/R-admin.html)
 {{#include ../../../banners/hacktricks-training.md}}

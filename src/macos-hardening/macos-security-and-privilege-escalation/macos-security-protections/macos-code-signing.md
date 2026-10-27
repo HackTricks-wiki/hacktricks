@@ -1,20 +1,20 @@
-# macOS Code Signing
+# Ký mã macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Thông tin cơ bản
 
 {{#ref}}
 ../../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
 
 
-Mach-o binaries contains a load command called **`LC_CODE_SIGNATURE`** that indicates the **offset** and **size** of the signatures inside the binary. Actually, using the GUI tool MachOView, it's possible to find at the end of the binary a section called **Code Signature** with this information:
+Các binary Mach-o chứa một lệnh nạp có tên **`LC_CODE_SIGNATURE`**, cho biết **offset** và **kích thước** của chữ ký bên trong binary. Thực tế, bằng công cụ GUI MachOView, bạn có thể tìm thấy một phần có tên **Code Signature** ở cuối binary, chứa thông tin này:
 
 <figure><img src="../../../images/image (1) (1) (1) (1).png" alt="" width="431"><figcaption></figcaption></figure>
 
-The magic header of the Code Signature is **`0xFADE0CC0`** (embedded code signature) or **`0xFADE0CC1`** (detached code signature). Then you have information such as the length and the number of blobs of the superBlob that contains them.\
-It's possible to find this information in the [source code here](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276):<sup>[[1]](#references)</sup>
+Magic header của Code Signature là **`0xFADE0CC0`** (chữ ký mã nhúng) hoặc **`0xFADE0CC1`** (chữ ký mã tách rời). Sau đó là các thông tin như độ dài và số lượng blob trong superBlob chứa chúng.\
+Bạn có thể tìm thấy thông tin này trong [mã nguồn tại đây](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276):<sup>[[1]](#references)</sup>
 
 ```c
 /*
@@ -45,14 +45,14 @@ typedef struct __SC_GenericBlob {
 __attribute__ ((aligned(1)));
 ```
 
-Common blobs contained are Code Directory, Requirements and Entitlements and a Cryptographic Message Syntax (CMS).\
-Moreover, note how the data encoded in the blobs is encoded in **Big Endian.**
+Các blob thường chứa Code Directory, Requirements và Entitlements, cùng với Cryptographic Message Syntax (CMS).\
+Ngoài ra, lưu ý rằng dữ liệu được mã hóa trong các blob được mã hóa theo thứ tự **Big Endian.**
 
-Moreover, signatures cloud be detached from the binaries and stored in `/var/db/DetachedSignatures` (used by iOS).
+Ngoài ra, chữ ký có thể được tách khỏi các tệp nhị phân và lưu trữ trong `/var/db/DetachedSignatures` (được iOS sử dụng).
 
 ## Code Directory Blob
 
-It's possible to find the declaration of the [Code Directory Blob in the code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):<sup>[[1]](#references)</sup>
+Có thể tìm thấy khai báo của [Code Directory Blob trong mã nguồn](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):<sup>[[1]](#references)</sup>
 
 ```c
 typedef struct __CodeDirectory {
@@ -110,14 +110,14 @@ typedef struct __CodeDirectory {
 __attribute__ ((aligned(1)));
 ```
 
-Note that there are different versions of this struct where old ones might contain less information.
+Lưu ý rằng có nhiều phiên bản khác nhau của struct này, trong đó các phiên bản cũ có thể chứa ít thông tin hơn.
 
-Note that the Code directory can use any hashing algorithm. At the moment, the most common one is **SHA256** (indicated by the value 2 in the field `hashType`) but in the future if this hash is broken, Apple could start using a different one.
+Lưu ý rằng thư mục Code có thể sử dụng bất kỳ thuật toán hashing nào. Hiện tại, thuật toán phổ biến nhất là **SHA256** (được biểu thị bằng giá trị 2 trong trường `hashType`), nhưng trong tương lai, nếu hash này bị phá vỡ, Apple có thể bắt đầu sử dụng thuật toán khác.
 
 ## Signing Code Pages
 
-Hashing the full binary would be inefficient and even useless if when it's only loaded in memory partially. Therefore, the code signature is actually a hash of hashes where each binary page is hashed individually.\
-Actually, in the previous **Code Directory** code you can see that the **page size is specified** in one of its fields. Moreover, if the size of the binary is not a multiple of the size of a page, the field **CodeLimit** specifies where is the end of the signature.
+Hashing toàn bộ binary sẽ không hiệu quả, thậm chí vô ích nếu binary chỉ được tải một phần vào bộ nhớ. Vì vậy, code signature thực chất là một hash của các hash, trong đó từng page của binary được hash riêng.\
+Trên thực tế, trong đoạn code **Code Directory** ở trên, bạn có thể thấy **kích thước page được chỉ định** trong một trường. Hơn nữa, nếu kích thước của binary không phải là bội số của kích thước page, trường **CodeLimit** sẽ chỉ định điểm kết thúc của signature.
 
 ```bash
 # Get all hashes of /bin/ps
@@ -190,27 +190,27 @@ openssl sha256 /tmp/*.page.*
 
 ## Entitlements Blob
 
-Note that applications might also contain an **entitlement blob** where all the entitlements are defined. Moreover, some iOS binaries might have their entitlements specific in the special slot -7 (instead of in the -5 entitlements special slot).
+Lưu ý rằng các ứng dụng cũng có thể chứa **entitlement blob**, nơi định nghĩa tất cả các entitlements. Ngoài ra, một số binary iOS có thể lưu entitlements trong slot đặc biệt -7 (thay vì slot đặc biệt -5 dành cho entitlements).
 
 ## Special Slots
 
-MacOS applications doesn't have everything they need to execute inside the binary but they also use **external resources** (usually inside the applications **bundle**). Therefore, there are some slots inside the binary who will be containing the hashes of some interesting external resources to check they weren't modified.
+Ứng dụng macOS không chứa mọi thứ cần thiết để thực thi bên trong binary mà còn sử dụng **external resources** (thường nằm trong **bundle** của ứng dụng). Vì vậy, trong binary có một số slot chứa hash của các external resources quan trọng để kiểm tra xem chúng có bị sửa đổi hay không.
 
-Actually, it's possible to see in the Code Directory structs a parameter called **`nSpecialSlots`** indicating the number of the special slots. The there isn't a special slot 0 and the most common ones (from -1 to -6 are):
+Thực tế, trong các struct Code Directory có thể thấy một tham số tên là **`nSpecialSlots`**, cho biết số lượng special slot. Không có special slot 0, và các slot phổ biến nhất (từ -1 đến -6) là:
 
-- Hash of `info.plist` (or the one inside `__TEXT.__info__plist`).
-- Has of the Requirements
-- Hash of the Resource Directory (hash of `_CodeSignature/CodeResources` file inside the bundle).
-- Application specific (unused)
-- Hash of the entitlements
-- DMG code signatures only
+- Hash của `info.plist` (hoặc tệp nằm trong `__TEXT.__info__plist`).
+- Hash của Requirements
+- Hash của Resource Directory (hash của tệp `_CodeSignature/CodeResources` bên trong bundle).
+- Dành riêng cho ứng dụng (không sử dụng)
+- Hash của entitlements
+- Chỉ dùng cho chữ ký code của DMG
 - DER Entitlements
 
 ## Code Signing Flags
 
-Every process has related a bitmask known as the `status` which is started by the kernel and some of them can be overridden by the **code signature**. These flags that can be included in the code signing are [defined in the code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):<sup>[[1]](#references)</sup>
+Mỗi process có một bitmask liên quan gọi là `status`, được kernel khởi tạo và một số giá trị có thể được **code signature** ghi đè. Các flags có thể được đưa vào code signing này được [định nghĩa trong mã nguồn](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):<sup>[[1]](#references)</sup>
 
-User space can query or update permitted parts of this state through the `csops` and `csops_audittoken` operations defined by XNU.<sup>[[5]](#references)</sup>
+User space có thể truy vấn hoặc cập nhật các phần được phép của trạng thái này thông qua các thao tác `csops` và `csops_audittoken` do XNU định nghĩa.<sup>[[5]](#references)</sup>
 
 ```c
 /* code signing attributes of a process */
@@ -257,15 +257,15 @@ User space can query or update permitted parts of this state through the `csops`
 #define CS_ENTITLEMENT_FLAGS        (CS_GET_TASK_ALLOW | CS_INSTALLER | CS_DATAVAULT_CONTROLLER | CS_NVRAM_UNRESTRICTED)
 ```
 
-Note that the function [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) can also add the `CS_EXEC_*` flags dynamically when starting the execution.
+Lưu ý rằng hàm [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) cũng có thể thêm các flag `CS_EXEC_*` một cách động khi bắt đầu thực thi.
 
-## Code Signature Requirements
+## Yêu cầu về chữ ký mã
 
-Each application store some **requirements** that it must **satisfy** in order to be able to be executed. If the **application contains requirements aren't satisfied by the application**, it won't be executed (as it has probably been altered).
+Mỗi ứng dụng lưu trữ một số **yêu cầu** mà nó phải **đáp ứng** để có thể được thực thi. Nếu **ứng dụng chứa các yêu cầu mà chính nó không đáp ứng**, ứng dụng sẽ không được thực thi (vì có thể nó đã bị chỉnh sửa).
 
-The requirements of a binary use a **special grammar** which is a stream of **expressions** and are encoded as blobs using `0xfade0c00` as the magic whose **hash is stored in a special code slot**.<sup>[[4]](#references)</sup>
+Các yêu cầu của một binary sử dụng **ngữ pháp đặc biệt**, gồm một chuỗi các **biểu thức** và được mã hóa thành các blob bằng cách dùng `0xfade0c00` làm magic; **hash** của giá trị này được lưu trong một code slot đặc biệt.<sup>[[4]](#references)</sup>
 
-The requirements of a binary can be seen running:
+Có thể xem các yêu cầu của một binary bằng cách chạy:
 
 ```bash
 codesign -d -r- /bin/ls
@@ -278,9 +278,9 @@ designated => identifier "org.whispersystems.signal-desktop" and anchor apple ge
 ```
 
 > [!TIP]
-> Note how this signatures can check things like certification information, TeamID, IDs, entitlements and many other data.
+> Lưu ý rằng các chữ ký này có thể kiểm tra những thông tin như thông tin chứng chỉ, TeamID, ID, entitlements và nhiều dữ liệu khác.
 
-Moreover, it's possible to generate some compiled requirements using the `csreq` tool:
+Ngoài ra, có thể tạo một số compiled requirements bằng công cụ `csreq`:
 
 ```bash
 # Generate compiled requirements
@@ -294,60 +294,60 @@ od -A x -t x1 /tmp/output.csreq
 [...]
 ```
 
-It's possible to access this information and create or modify requirements with some APIs from the `Security.framework` like:<sup>[[3]](#references)</sup>
+Có thể truy cập thông tin này và tạo hoặc sửa đổi requirement bằng một số API trong `Security.framework` như sau:<sup>[[3]](#references)</sup>
 
-#### **Checking Validity**
+#### **Kiểm tra tính hợp lệ**
 
-- **`Sec[Static]CodeCheckValidity`**: Check the validity of SecCodeRef per Requirement.
-- **`SecRequirementEvaluate`**: Validate requirement in certificate context
-- **`SecTaskValidateForRequirement`**: Validate a running SecTask against `CFString` requirement.
+- **`Sec[Static]CodeCheckValidity`**: Kiểm tra tính hợp lệ của SecCodeRef theo Requirement.
+- **`SecRequirementEvaluate`**: Xác thực requirement trong ngữ cảnh certificate
+- **`SecTaskValidateForRequirement`**: Xác thực một SecTask đang chạy theo requirement `CFString`.
 
-#### **Creating and Managing Code Requirements**
+#### **Tạo và quản lý Code Requirement**
 
-- **`SecRequirementCreateWithData`:** Creates a `SecRequirementRef` from binary data representing the requirement.
-- **`SecRequirementCreateWithString`:** Creates a `SecRequirementRef` from a string expression of the requirement.
-- **`SecRequirementCopy[Data/String]`**: Retrieves the binary data representation of a `SecRequirementRef`.
-- **`SecRequirementCreateGroup`**: Create a requirement for app-group membership
+- **`SecRequirementCreateWithData`:** Tạo `SecRequirementRef` từ dữ liệu nhị phân biểu diễn requirement.
+- **`SecRequirementCreateWithString`:** Tạo `SecRequirementRef` từ biểu thức chuỗi của requirement.
+- **`SecRequirementCopy[Data/String]`**: Lấy biểu diễn dữ liệu nhị phân của `SecRequirementRef`.
+- **`SecRequirementCreateGroup`**: Tạo requirement cho tư cách thành viên app-group
 
-#### **Accessing Code Signing Information**
+#### **Truy cập thông tin Code Signing**
 
-- **`SecStaticCodeCreateWithPath`**: Initializes a `SecStaticCodeRef` object from a file system path for inspecting code signatures.
-- **`SecCodeCopySigningInformation`**: Obtains signing information from a `SecCodeRef` or `SecStaticCodeRef`.
+- **`SecStaticCodeCreateWithPath`**: Khởi tạo đối tượng `SecStaticCodeRef` từ đường dẫn hệ thống tệp để kiểm tra chữ ký mã.
+- **`SecCodeCopySigningInformation`**: Lấy thông tin signing từ `SecCodeRef` hoặc `SecStaticCodeRef`.
 
-#### **Modifying Code Requirements**
+#### **Sửa đổi Code Requirement**
 
-- **`SecCodeSignerCreate`**: Creates a `SecCodeSignerRef` object for performing code signing operations.
-- **`SecCodeSignerSetRequirement`**: Sets a new requirement for the code signer to apply during signing.
-- **`SecCodeSignerAddSignature`**: Adds a signature to the code being signed with the specified signer.
+- **`SecCodeSignerCreate`**: Tạo đối tượng `SecCodeSignerRef` để thực hiện các thao tác code signing.
+- **`SecCodeSignerSetRequirement`**: Đặt requirement mới để code signer áp dụng trong quá trình signing.
+- **`SecCodeSignerAddSignature`**: Thêm chữ ký vào mã đang được ký bằng signer được chỉ định.
 
-#### **Validating Code with Requirements**
+#### **Xác thực mã bằng Requirement**
 
-- **`SecStaticCodeCheckValidity`**: Validates a static code object against specified requirements.
+- **`SecStaticCodeCheckValidity`**: Xác thực đối tượng mã tĩnh theo các requirement được chỉ định.
 
-#### **Additional Useful APIs**
+#### **Các API hữu ích khác**
 
-- **`SecCodeCopy[Internal/Designated]Requirement`: Get SecRequirementRef from SecCodeRef**
-- **`SecCodeCopyGuestWithAttributes`**: Creates a `SecCodeRef` representing a code object based on specific attributes, useful for sandboxing.
-- **`SecCodeCopyPath`**: Retrieves the file system path associated with a `SecCodeRef`.
-- **`SecCodeCopySigningIdentifier`**: Obtains the signing identifier (e.g., Team ID) from a `SecCodeRef`.
-- **`SecCodeGetTypeID`**: Returns the type identifier for `SecCodeRef` objects.
-- **`SecRequirementGetTypeID`**: Gets a CFTypeID of a `SecRequirementRef`
+- **`SecCodeCopy[Internal/Designated]Requirement`: Lấy SecRequirementRef từ SecCodeRef**
+- **`SecCodeCopyGuestWithAttributes`**: Tạo `SecCodeRef` đại diện cho một đối tượng mã dựa trên các thuộc tính cụ thể, hữu ích cho sandboxing.
+- **`SecCodeCopyPath`**: Lấy đường dẫn hệ thống tệp được liên kết với `SecCodeRef`.
+- **`SecCodeCopySigningIdentifier`**: Lấy signing identifier (ví dụ: Team ID) từ `SecCodeRef`.
+- **`SecCodeGetTypeID`**: Trả về type identifier cho các đối tượng `SecCodeRef`.
+- **`SecRequirementGetTypeID`**: Lấy CFTypeID của `SecRequirementRef`
 
-#### **Code Signing Flags and Constants**
+#### **Các cờ và hằng số Code Signing**
 
-- **`kSecCSDefaultFlags`**: Default flags used in many Security.framework functions for code signing operations.
-- **`kSecCSSigningInformation`**: Flag used to specify that signing information should be retrieved.
+- **`kSecCSDefaultFlags`**: Các cờ mặc định được nhiều hàm `Security.framework` sử dụng cho thao tác code signing.
+- **`kSecCSSigningInformation`**: Cờ dùng để chỉ định rằng cần lấy thông tin signing.
 
-## Code Signature Enforcement
+## Thực thi Code Signature
 
-The **kernel** is the one that **checks the code signature** before allowing the code of the app to execute. Moreover, one way to be able to write and execute in memory new code is abusing JIT if `mprotect` is called with `MAP_JIT` flag. Note that the application needs a special entitlement to be able to do this.
+**Kernel** là thành phần **kiểm tra code signature** trước khi cho phép mã của ứng dụng thực thi. Ngoài ra, một cách để ghi và thực thi mã mới trong bộ nhớ là lạm dụng JIT nếu `mprotect` được gọi với cờ `MAP_JIT`. Lưu ý rằng ứng dụng cần có entitlement đặc biệt mới làm được điều này.
 
 ## `cs_blobs` & `cs_blob`
 
-[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) struct contains the information about the entitlement of the running process on it. `csb_platform_binary` also informs if the application is a **platform binary** (which is checked in different moments by the OS to apply security mechanisms like to protect the SEND rights to the task ports of these processes).<sup>[[2]](#references)</sup>
+Struct [**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) chứa thông tin về entitlement của tiến trình đang chạy trên đó. `csb_platform_binary` cũng cho biết ứng dụng có phải là **platform binary** hay không (điều này được OS kiểm tra ở nhiều thời điểm khác nhau để áp dụng các cơ chế bảo mật, chẳng hạn như bảo vệ quyền SEND đối với task port của những tiến trình này).<sup>[[2]](#references)</sup>
 
 > [!WARNING]
-> Note that several security measures depend on the binary being a platform binary, so way to escalate privileges is to **make the binary a platform binary** (for example, by re-signing it with a certificate that allows it).
+> Lưu ý rằng một số biện pháp bảo mật phụ thuộc vào việc binary có phải là platform binary hay không, vì vậy một cách để leo thang đặc quyền là **biến binary thành platform binary** (ví dụ: ký lại nó bằng certificate cho phép điều này).
 
 ```c
 struct cs_blob {
@@ -410,10 +410,9 @@ struct cs_blob {
 
 ## References
 
-- [1] [XNU — `osfmk/kern/cs_blobs.h` (`CodeDirectory`, `CS_*` flags, blob magic values)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
-- [2] [XNU — `bsd/kern/ubc_subr.c` (`cs_blob` handling and signature validation)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/ubc_subr.c)
-- [3] [Apple Security framework source — `libsecurity_codesigning`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/libsecurity_codesigning)
-- [4] [Apple Developer — Code Signing Guide](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Introduction/Introduction.html)
-- [5] [XNU — `bsd/sys/codesign.h` (`csops`/`csops_audittoken` operations)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
-
+- [1] [XNU — `osfmk/kern/cs_blobs.h` (`CodeDirectory`, cờ `CS_*`, các giá trị magic của blob)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
+- [2] [XNU — `bsd/kern/ubc_subr.c` (xử lý `cs_blob` và xác thực chữ ký)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/ubc_subr.c)
+- [3] [Mã nguồn Apple Security framework — `libsecurity_codesigning`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/libsecurity_codesigning)
+- [4] [Apple Developer — Hướng dẫn Code Signing](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Introduction/Introduction.html)
+- [5] [XNU — `bsd/sys/codesign.h` (các thao tác `csops`/`csops_audittoken`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
 {{#include ../../../banners/hacktricks-training.md}}

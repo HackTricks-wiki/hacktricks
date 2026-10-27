@@ -1,10 +1,10 @@
-# macOS Lua Applications Injection
+# Tiêm mã vào ứng dụng Lua trên macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## `LUA_INIT`
 
-Before processing command-line options or the target script, the standalone Lua interpreter executes `LUA_INIT_<major>_<minor>` or, if the versioned variable is absent, `LUA_INIT`. A value beginning with `@` names a file; any other value is evaluated directly as Lua code. This gives both file-backed and fileless startup execution.<sup>[[1]](#references)</sup>
+Trước khi xử lý các tùy chọn dòng lệnh hoặc script đích, trình thông dịch Lua độc lập sẽ thực thi `LUA_INIT_<major>_<minor>` hoặc, nếu biến có phiên bản không tồn tại, `LUA_INIT`. Giá trị bắt đầu bằng `@` sẽ chỉ định một tệp; mọi giá trị khác sẽ được đánh giá trực tiếp dưới dạng mã Lua. Điều này cho phép thực thi lúc khởi động thông qua cả tệp lẫn không cần tệp.<sup>[[1]](#references)</sup>
 
 ```bash
 # File-backed
@@ -15,10 +15,9 @@ LUA_INIT_5_4=@/tmp/lua-init.lua lua victim.lua
 LUA_INIT='os.execute("touch /tmp/lua-inline-executed")' lua victim.lua
 ```
 
-The exact versioned name changes with the interpreter, for example `LUA_INIT_5_4`. `lua -E` ignores all environment variables, including startup code and Lua module paths.
+Tên có phiên bản cụ thể thay đổi tùy theo trình thông dịch, ví dụ `LUA_INIT_5_4`. `lua -E` bỏ qua mọi biến môi trường, bao gồm mã khởi động và đường dẫn module Lua.
 
 ## References
 
-- [1] [Lua 5.4 standalone interpreter](https://www.lua.org/manual/5.4/manual.html#7)
-
+- [1] [Trình thông dịch độc lập Lua 5.4](https://www.lua.org/manual/5.4/manual.html#7)
 {{#include ../../../banners/hacktricks-training.md}}

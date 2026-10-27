@@ -1,30 +1,30 @@
-# macOS Credential & Data Theft via TCC Permissions
+# Đánh cắp thông tin xác thực và dữ liệu trên macOS qua quyền TCC
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Overview
+## Tổng quan
 
-macOS TCC (Transparency, Consent, and Control) protects access to sensitive user data. When an attacker **compromises a binary that already has TCC grants**, they inherit those permissions. This page documents the exploitation potential of each data-theft-related TCC permission.<sup>[[2]](#references)</sup>
+TCC (Transparency, Consent, and Control) của macOS bảo vệ quyền truy cập vào dữ liệu nhạy cảm của người dùng. Khi attacker **chiếm quyền kiểm soát một binary đã được cấp quyền TCC**, họ thừa hưởng các quyền đó. Trang này ghi lại tiềm năng khai thác của từng quyền TCC liên quan đến đánh cắp dữ liệu.<sup>[[2]](#references)</sup>
 
 > [!WARNING]
-> Code injection into a TCC-granted binary (via DYLD injection, dylib hijacking, or task port) **silently inherits all its TCC permissions**. There is no additional prompt or verification when the same process reads protected data.<sup>[[4]](#references)</sup>
+> Code injection vào một binary được cấp quyền TCC (thông qua DYLD injection, dylib hijacking hoặc task port) **âm thầm thừa hưởng tất cả quyền TCC của binary đó**. Không có prompt hay bước xác minh bổ sung nào khi cùng một process đọc dữ liệu được bảo vệ.<sup>[[4]](#references)</sup>
 
 ---
 
-## Keychain Access Groups
+## Nhóm quyền truy cập Keychain
 
-### The Prize
+### Mục tiêu
 
-The macOS Keychain stores:
-- **Wi-Fi passwords** — all saved wireless network credentials
-- **Website passwords** — Safari, Chrome (when using Keychain), and other browser passwords
-- **Application passwords** — email accounts, VPN credentials, development tokens
-- **Certificates and private keys** — code signing, client TLS, S/MIME encryption
-- **Secure notes** — user-stored secrets
+macOS Keychain lưu trữ:
+- **Mật khẩu Wi-Fi** — thông tin xác thực của tất cả mạng không dây đã lưu
+- **Mật khẩu website** — mật khẩu của Safari, Chrome (khi dùng Keychain) và các trình duyệt khác
+- **Mật khẩu ứng dụng** — tài khoản email, thông tin xác thực VPN, token phát triển
+- **Chứng chỉ và private key** — dùng cho code signing, TLS client, mã hóa S/MIME
+- **Ghi chú bảo mật** — các bí mật do người dùng lưu
 
 ### Entitlement: `keychain-access-groups`
 
-Keychain items are organized into **access groups**. An application's `keychain-access-groups` entitlement lists which groups it can access:<sup>[[1]](#references)</sup>
+Các mục Keychain được sắp xếp theo **nhóm truy cập**. Entitlement `keychain-access-groups` của ứng dụng liệt kê những nhóm mà ứng dụng có thể truy cập:<sup>[[1]](#references)</sup>
 
 ```xml
 <key>keychain-access-groups</key>
@@ -36,7 +36,7 @@ Keychain items are organized into **access groups**. An application's `keychain-
 </array>
 ```
 
-### Exploitation
+### Khai thác
 
 ```bash
 # Find binaries with broad keychain access groups
@@ -54,7 +54,7 @@ security find-generic-password -s "Wi-Fi" -w 2>&1
 security find-internet-password -s "github.com" 2>&1
 ```
 
-### Code Injection → Keychain Theft
+### Code Injection → Đánh cắp Keychain
 
 ```objc
 // Injected dylib code — runs with the target's keychain groups
@@ -87,11 +87,11 @@ void dumpKeychain(void) {
 
 ---
 
-## Camera Access (kTCCServiceCamera)
+## Truy cập Camera (kTCCServiceCamera)
 
-### Exploitation
+### Khai thác
 
-A binary with camera TCC grant (via `kTCCServiceCamera` or `com.apple.security.device.camera` entitlement) can capture photos and video:
+Một binary được cấp quyền camera qua `kTCCServiceCamera` hoặc entitlement `com.apple.security.device.camera` có thể chụp ảnh và quay video:
 
 ```bash
 # Find camera-authorized binaries
@@ -99,7 +99,7 @@ sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
   "SELECT client FROM access WHERE service='kTCCServiceCamera' AND auth_value=2;"
 ```
 
-### Silent Capture
+### Thu thập âm thầm
 
 ```objc
 // Injected into a camera-entitled process
@@ -135,15 +135,15 @@ sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 ```
 
 > [!TIP]
-> Starting with **macOS Sonoma**, the camera indicator in the menu bar is persistent and cannot be hidden programmatically. On **older macOS versions**, a brief capture may not produce a noticeable indicator.
+> Bắt đầu từ **macOS Sonoma**, chỉ báo camera trên thanh menu luôn hiển thị và không thể bị ẩn bằng lập trình. Trên **các phiên bản macOS cũ hơn**, một lần ghi hình ngắn có thể không hiển thị chỉ báo dễ nhận thấy.
 
 ---
 
-## Microphone Access (kTCCServiceMicrophone)
+## Quyền truy cập microphone (kTCCServiceMicrophone)
 
 ### Exploitation
 
-Microphone access captures all audio from the built-in mic, headset, or connected audio input devices:
+Quyền truy cập microphone thu toàn bộ âm thanh từ mic tích hợp, tai nghe hoặc các thiết bị đầu vào âm thanh được kết nối:
 
 ```bash
 # Find mic-authorized binaries
@@ -151,7 +151,7 @@ sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
   "SELECT client FROM access WHERE service='kTCCServiceMicrophone' AND auth_value=2;"
 ```
 
-### Attack: Ambient Recording
+### Tấn công: Ghi âm môi trường
 
 ```objc
 // Injected into a mic-entitled process
@@ -179,7 +179,7 @@ sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 
 ---
 
-## Location Tracking (kTCCServiceLocation)
+## Theo dõi vị trí (kTCCServiceLocation)
 
 ### Exploitation
 
@@ -189,7 +189,7 @@ sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
   "SELECT client FROM access WHERE service LIKE '%Location%' AND auth_value=2;"
 ```
 
-### Continuous Tracking
+### Theo dõi liên tục
 
 ```objc
 #import <CoreLocation/CoreLocation.h>
@@ -219,15 +219,15 @@ sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 
 ---
 
-## Contacts / Calendar / Photos
+## Danh bạ / Lịch / Ảnh
 
-### Personal Data Exfiltration
+### Trích xuất dữ liệu cá nhân
 
-| TCC Service | Framework | Data |
+| Dịch vụ TCC | Framework | Dữ liệu |
 |---|---|---|
-| `kTCCServiceAddressBook` | `Contacts.framework` | Names, emails, phones, addresses |
-| `kTCCServiceCalendar` | `EventKit` | Meetings, attendees, locations |
-| `kTCCServicePhotos` | `Photos.framework` | Photos, screenshots, location metadata |
+| `kTCCServiceAddressBook` | `Contacts.framework` | Tên, email, số điện thoại, địa chỉ |
+| `kTCCServiceCalendar` | `EventKit` | Cuộc họp, người tham dự, địa điểm |
+| `kTCCServicePhotos` | `Photos.framework` | Ảnh, ảnh chụp màn hình, metadata vị trí |
 
 ```bash
 # Find authorized binaries for each service
@@ -238,7 +238,7 @@ for svc in kTCCServiceAddressBook kTCCServiceCalendar kTCCServicePhotos; do
 done
 ```
 
-### Contacts Harvesting
+### Thu thập danh bạ
 
 ```objc
 #import <Contacts/Contacts.h>
@@ -258,15 +258,15 @@ CNContactFetchRequest *request = [[CNContactFetchRequest alloc] initWithKeysToFe
 
 ---
 
-## iCloud Account Access
+## Truy cập tài khoản iCloud
 
 ### Entitlement: `com.apple.private.icloud-account-access`
 
-This entitlement allows communicating with `com.apple.iCloudHelper` XPC service, providing access to:
-- **iCloud tokens** — authentication tokens for the user's Apple ID
-- **iCloud Drive** — synced documents from all devices
-- **iCloud Keychain** — passwords synced across all Apple devices
-- **Find My** — location of all the user's Apple devices<sup>[[3]](#references)</sup>
+Entitlement này cho phép giao tiếp với dịch vụ XPC `com.apple.iCloudHelper`, cung cấp quyền truy cập vào:
+- **iCloud tokens** — token xác thực cho Apple ID của người dùng
+- **iCloud Drive** — tài liệu được đồng bộ hóa từ tất cả thiết bị
+- **iCloud Keychain** — mật khẩu được đồng bộ hóa trên tất cả thiết bị Apple
+- **Find My** — vị trí của tất cả thiết bị Apple của người dùng<sup>[[3]](#references)</sup>
 
 ```bash
 # Find iCloud-entitled binaries
@@ -277,20 +277,20 @@ ORDER BY privileged DESC;"
 ```
 
 > [!CAUTION]
-> Compromising an iCloud-entitled binary extends the attack from a **single device to the entire Apple ecosystem**: other Macs, iPhones, iPads, Apple Watch. iCloud Keychain sync means passwords from all devices are accessible.
+> Xâm nhập một binary có entitlement iCloud mở rộng cuộc tấn công từ **một thiết bị duy nhất sang toàn bộ hệ sinh thái Apple**: các máy Mac, iPhone, iPad và Apple Watch khác. iCloud Keychain sync đồng nghĩa với việc có thể truy cập mật khẩu từ tất cả thiết bị.
 
 ---
 
 ## Full Disk Access (kTCCServiceSystemPolicyAllFiles)
 
-### The Most Powerful TCC Permission
+### Quyền TCC mạnh nhất
 
-Full Disk Access grants read capability to **every file on the system**, including:
-- Other apps' data (Messages, Mail, Safari history)
-- TCC databases (revealing all other permissions)
-- SSH keys and configuration
-- Browser cookies and session tokens
-- Application databases and caches
+Full Disk Access cấp quyền đọc **mọi tệp trên hệ thống**, bao gồm:
+- Dữ liệu của các ứng dụng khác (Messages, Mail, lịch sử Safari)
+- Cơ sở dữ liệu TCC (tiết lộ mọi quyền khác)
+- SSH keys và cấu hình
+- Cookies trình duyệt và session tokens
+- Cơ sở dữ liệu và cache của ứng dụng
 
 ```bash
 # Find FDA-granted binaries
@@ -306,25 +306,25 @@ cat ~/.ssh/id_rsa                           # SSH private key
 
 ---
 
-## Exploitation Priority Matrix
+## Ma trận ưu tiên khai thác
 
-When assessing injectable TCC-granted binaries, prioritize by data value:
+Khi đánh giá các binary được cấp quyền TCC có thể inject, hãy ưu tiên dựa trên giá trị dữ liệu:
 
-| Priority | TCC Permission | Why |
+| Mức ưu tiên | Quyền TCC | Lý do |
 |---|---|---|
-| **Critical** | Full Disk Access | Access to everything |
-| **Critical** | TCC Manager | Can grant any permission |
-| **High** | Keychain Access Groups | All stored passwords |
-| **High** | iCloud Account Access | Multi-device compromise |
+| **Critical** | Full Disk Access | Truy cập mọi thứ |
+| **Critical** | TCC Manager | Có thể cấp bất kỳ quyền nào |
+| **High** | Keychain Access Groups | Toàn bộ mật khẩu đã lưu |
+| **High** | iCloud Account Access | Xâm nhập nhiều thiết bị |
 | **High** | Input Monitoring (ListenEvent) | Keylogging |
-| **High** | Accessibility | GUI control, self-granting |
-| **Medium** | Screen Capture | Visual data capture |
-| **Medium** | Camera + Microphone | Surveillance |
-| **Medium** | Contacts + Calendar | Social engineering data |
-| **Low** | Location | Physical tracking |
-| **Low** | Photos | Personal data |
+| **High** | Accessibility | Điều khiển GUI, tự cấp quyền |
+| **Medium** | Screen Capture | Thu thập dữ liệu hình ảnh |
+| **Medium** | Camera + Microphone | Giám sát |
+| **Medium** | Contacts + Calendar | Dữ liệu phục vụ social engineering |
+| **Low** | Location | Theo dõi vị trí thực tế |
+| **Low** | Photos | Dữ liệu cá nhân |
 
-## Enumeration Script
+## Script liệt kê
 
 ```bash
 #!/bin/bash
@@ -354,7 +354,6 @@ SELECT path FROM executables WHERE iCloudAccs = 1;" 2>/dev/null
 
 - [1] [Apple Developer — Keychain Services](https://developer.apple.com/documentation/security/keychain_services)
 - [2] [Apple Developer — TCC](https://developer.apple.com/documentation/security/protecting-the-user-s-privacy)
-- [3] [OBTS v5.0 — "What Happens on your Mac, Stays on Apple's iCloud?!" (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
-- [4] [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
-
+- [3] [OBTS v5.0 — "Điều gì xảy ra trên máy Mac của bạn sẽ ở lại trên iCloud của Apple?!" (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+- [4] [Objective-See — Khai thác TCC](https://objective-see.org/blog/blog_0x4C.html)
 {{#include ../../../../banners/hacktricks-training.md}}

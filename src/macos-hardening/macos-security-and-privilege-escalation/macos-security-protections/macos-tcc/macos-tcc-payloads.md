@@ -1,18 +1,18 @@
-# macOS TCC Payloads
+# Payload TCC trên macOS
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> TCC decisions are tied to the **identity of the process** requesting the resource. In post-exploitation, the usual goal is to **inject these payloads into an already-approved app** (or otherwise execute them in its bundle / signature context) instead of running a fresh helper that will trigger its own prompt.
+> Các quyết định của TCC gắn với **danh tính của tiến trình** yêu cầu quyền truy cập tài nguyên. Trong post-exploitation, mục tiêu thường là **inject các payload này vào một ứng dụng đã được cấp quyền** (hoặc thực thi chúng trong bundle / ngữ cảnh chữ ký của ứng dụng đó) thay vì chạy một helper mới khiến hệ thống hiển thị lời nhắc riêng.
 >
-> For **Screen Recording**, **Input Monitoring**, and **synthetic input**, modern macOS also exposes explicit preflight / request APIs such as `CGPreflightScreenCaptureAccess`, `CGRequestScreenCaptureAccess`, `CGRequestListenEventAccess`, and `CGRequestPostEventAccess`.
+> Đối với **Screen Recording**, **Input Monitoring** và **synthetic input**, các phiên bản macOS hiện đại cũng cung cấp các API preflight / request cụ thể như `CGPreflightScreenCaptureAccess`, `CGRequestScreenCaptureAccess`, `CGRequestListenEventAccess` và `CGRequestPostEventAccess`.
 
 > [!WARNING]
-> This is still a very realistic attack path: recent permission-theft research against Microsoft macOS apps showed that **weak library validation / plugin loading** can let an attacker reuse the victim app's already-granted **camera**, **microphone**, and other TCC permissions without a second prompt.<sup>[[1]](#references)</sup>
+> Đây vẫn là một hướng tấn công rất thực tế: nghiên cứu gần đây về đánh cắp quyền trên các ứng dụng macOS của Microsoft cho thấy **library validation yếu / tải plugin** có thể cho phép kẻ tấn công tái sử dụng các quyền TCC **camera**, **microphone** và các quyền khác mà ứng dụng nạn nhân đã được cấp mà không cần hiển thị lời nhắc lần nữa.<sup>[[1]](#references)</sup>
 
-## Quick triage before using a payload
+## Phân loại nhanh trước khi dùng payload
 
-Recent permission-theft research keeps reinforcing the same workflow: first find an app that already has the TCC grant you want, then verify that it is a realistic injection target.<sup>[[1]](#references)</sup>
+Nghiên cứu gần đây về đánh cắp quyền liên tục củng cố cùng một quy trình: trước tiên tìm một ứng dụng đã có quyền TCC bạn muốn, sau đó xác minh rằng ứng dụng đó là mục tiêu injection khả thi.<sup>[[1]](#references)</sup>
 
 ```bash
 sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" \
@@ -22,16 +22,16 @@ codesign -d --entitlements :- /Applications/Target.app 2>/dev/null | \
   egrep 'disable-library-validation|allow-dyld-environment-variables'
 ```
 
-If the target also loads attacker-controlled plug-ins / frameworks, these payloads become much more interesting. For broader post-exploitation ideas after landing inside an already-approved process, check [this related page](macos-tcc-credential-and-data-theft.md).
+Si el objetivo también carga plug-ins o frameworks controlados por el atacante, estos payloads se vuelven mucho más interesantes. Para obtener más ideas de post-explotación después de entrar en un proceso que ya cuenta con aprobación, consulta [esta página relacionada](macos-tcc-credential-and-data-theft.md).
 
-### Desktop
+### Escritorio
 
-- **Entitlement**: None
+- **Entitlement**: Ninguno
 - **TCC**: kTCCServiceSystemPolicyDesktopFolder
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-Copy `$HOME/Desktop` to `/tmp/desktop`.
+Copia `$HOME/Desktop` a `/tmp/desktop`.
 
 ```objectivec
 #include <syslog.h>
@@ -68,7 +68,7 @@ void myconstructor(int argc, const char **argv)
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Copy `$HOME/Desktop` to `/tmp/desktop`.
+Sao chép `$HOME/Desktop` vào `/tmp/desktop`.
 
 ```bash
 cp -r "$HOME/Desktop" "/tmp/desktop"
@@ -77,14 +77,14 @@ cp -r "$HOME/Desktop" "/tmp/desktop"
 {{#endtab}}
 {{#endtabs}}
 
-### Documents
+### Tài liệu
 
-- **Entitlement**: None
+- **Entitlement**: Không
 - **TCC**: `kTCCServiceSystemPolicyDocumentsFolder`
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-Copy `$HOME/Documents` to `/tmp/documents`.
+Sao chép `$HOME/Documents` vào `/tmp/documents`.
 
 ```objectivec
 #include <syslog.h>
@@ -121,7 +121,7 @@ void myconstructor(int argc, const char **argv)
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Copy `$HOME/`Documents to `/tmp/documents`.
+Sao chép `$HOME/`Documents vào `/tmp/documents`.
 
 ```bash
 cp -r "$HOME/Documents" "/tmp/documents"
@@ -130,14 +130,14 @@ cp -r "$HOME/Documents" "/tmp/documents"
 {{#endtab}}
 {{#endtabs}}
 
-### Downloads
+### Tệp tải xuống
 
 - **Entitlement**: None
 - **TCC**: `kTCCServiceSystemPolicyDownloadsFolder`
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-Copy `$HOME/Downloads` to `/tmp/downloads`.
+Sao chép `$HOME/Downloads` vào `/tmp/downloads`.
 
 ```objectivec
 #include <syslog.h>
@@ -174,7 +174,7 @@ void myconstructor(int argc, const char **argv)
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Copy `$HOME/Downloads` to `/tmp/downloads`.
+Sao chép `$HOME/Downloads` vào `/tmp/downloads`.
 
 ```bash
 cp -r "$HOME/Downloads" "/tmp/downloads"
@@ -183,14 +183,14 @@ cp -r "$HOME/Downloads" "/tmp/downloads"
 {{#endtab}}
 {{#endtabs}}
 
-### Photos Library
+### Thư viện Ảnh
 
 - **Entitlement**: `com.apple.security.personal-information.photos-library`
 - **TCC**: `kTCCServicePhotos`
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-Copy `$HOME/Pictures/Photos Library.photoslibrary` to `/tmp/photos`.
+Sao chép `$HOME/Pictures/Photos Library.photoslibrary` vào `/tmp/photos`.
 
 ```objectivec
 #include <syslog.h>
@@ -227,7 +227,7 @@ void myconstructor(int argc, const char **argv)
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Copy `$HOME/Pictures/Photos Library.photoslibrary` to `/tmp/photos`.
+Sao chép `$HOME/Pictures/Photos Library.photoslibrary` vào `/tmp/photos`.
 
 ```bash
 cp -r "$HOME/Pictures/Photos Library.photoslibrary" "/tmp/photos"
@@ -236,14 +236,14 @@ cp -r "$HOME/Pictures/Photos Library.photoslibrary" "/tmp/photos"
 {{#endtab}}
 {{#endtabs}}
 
-### Contacts
+### Danh bạ
 
 - **Entitlement**: `com.apple.security.personal-information.addressbook`
 - **TCC**: `kTCCServiceAddressBook`
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-Copy `$HOME/Library/Application Support/AddressBook` to `/tmp/contacts`.
+Sao chép `$HOME/Library/Application Support/AddressBook` vào `/tmp/contacts`.
 
 ```objectivec
 #include <syslog.h>
@@ -280,7 +280,7 @@ void myconstructor(int argc, const char **argv)
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Copy `$HOME/Library/Application Support/AddressBook` to `/tmp/contacts`.
+Sao chép `$HOME/Library/Application Support/AddressBook` vào `/tmp/contacts`.
 
 ```bash
 cp -r "$HOME/Library/Application Support/AddressBook" "/tmp/contacts"
@@ -289,14 +289,14 @@ cp -r "$HOME/Library/Application Support/AddressBook" "/tmp/contacts"
 {{#endtab}}
 {{#endtabs}}
 
-### Calendar
+### Lịch
 
 - **Entitlement**: `com.apple.security.personal-information.calendars`
 - **TCC**: `kTCCServiceCalendar`
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-Copy `$HOME/Library/Calendars` to `/tmp/calendars`.
+Sao chép `$HOME/Library/Calendars` vào `/tmp/calendars`.
 
 ```objectivec
 #include <syslog.h>
@@ -333,7 +333,7 @@ void myconstructor(int argc, const char **argv)
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Copy `$HOME/Library/Calendars` to `/tmp/calendars`.
+Sao chép `$HOME/Library/Calendars` vào `/tmp/calendars`.
 
 ```bash
 cp -r "$HOME/Library/Calendars" "/tmp/calendars"
@@ -349,7 +349,7 @@ cp -r "$HOME/Library/Calendars" "/tmp/calendars"
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Record"}}
-Record a 3s video and save it in **`/tmp/recording.mov`**<sup>[[5]](#references)</sup>
+Quay video dài 3 giây và lưu vào **`/tmp/recording.mov`**<sup>[[5]](#references)</sup>
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -430,7 +430,7 @@ static void myconstructor(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check"}}
-Check if the program has access to the camera.<sup>[[5]](#references)</sup>
+Kiểm tra xem chương trình có quyền truy cập camera hay không.<sup>[[5]](#references)</sup>
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -465,7 +465,7 @@ static void telegram(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Prompt"}}
-Trigger the camera prompt if the current process is still `NotDetermined`.<sup>[[3]](#references)</sup>
+Kích hoạt lời nhắc camera nếu tiến trình hiện tại vẫn ở trạng thái `NotDetermined`.<sup>[[3]](#references)</sup>
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -486,7 +486,7 @@ static void camprompt(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Take a photo with the camera
+Chụp ảnh bằng camera
 
 ```bash
 ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
@@ -495,14 +495,14 @@ ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
 {{#endtab}}
 {{#endtabs}}
 
-### Microphone
+### Micrô
 
-- **Entitlement**: **com.apple.security.device.audio-input**
+- **Quyền**: **com.apple.security.device.audio-input**
 - **TCC**: `kTCCServiceMicrophone`
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Record"}}
-Record 5s of audio and store it in `/tmp/recording.m4a`<sup>[[6]](#references)</sup>
+Ghi âm trong 5 giây và lưu vào `/tmp/recording.m4a`<sup>[[6]](#references)</sup>
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -604,7 +604,7 @@ static void myconstructor(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check"}}
-Check if the app has access to the microphone.<sup>[[5]](#references)</sup>
+Kiểm tra xem ứng dụng có quyền truy cập vào microphone hay không.<sup>[[5]](#references)</sup>
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -637,7 +637,7 @@ static void telegram(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Prompt"}}
-Trigger the microphone prompt if the current process is still `NotDetermined`.<sup>[[3]](#references)</sup>
+Kích hoạt lời nhắc cấp quyền microphone nếu tiến trình hiện tại vẫn ở trạng thái `NotDetermined`.<sup>[[3]](#references)</sup>
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -658,7 +658,7 @@ static void micprompt(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Record a 5s audio and store it in `/tmp/recording.wav`
+Ghi âm trong 5 giây và lưu vào `/tmp/recording.wav`
 
 ```bash
 # Check the microphones
@@ -670,15 +670,15 @@ ffmpeg -f avfoundation -i ":1" -t 5 /tmp/recording.wav
 {{#endtab}}
 {{#endtabs}}
 
-### System Audio (Core Audio process taps)
+### Âm thanh hệ thống (Core Audio process taps)
 
-- **Entitlement**: No dedicated system-audio-capture entitlement for an unsandboxed client (normal sandbox restrictions still apply)
-- **Usage description**: `NSAudioCaptureUsageDescription`
-- **TCC**: System Audio Recording (independent from the Microphone grant)
+- **Entitlement**: Không có entitlement chuyên dụng để ghi âm thanh hệ thống cho client không bị sandbox (các hạn chế sandbox thông thường vẫn áp dụng)
+- **Mô tả mục đích sử dụng**: `NSAudioCaptureUsageDescription`
+- **TCC**: Ghi âm thanh hệ thống (độc lập với quyền Microphone)
 
-On **macOS 14.2+**, Core Audio process taps can copy the outgoing audio of selected processes, a group of processes, or the global mix without installing a virtual loopback driver. The low-level chain is `CATapDescription` -> `AudioHardwareCreateProcessTap` -> private aggregate device -> `AudioDeviceIOProc`; the first attempt to start recording through an aggregate containing the tap causes macOS to request System Audio Recording access. A bundle must contain `NSAudioCaptureUsageDescription` or the consent flow cannot work correctly.<sup>[[7]](#references)</sup>
+Trên **macOS 14.2+**, Core Audio process taps có thể sao chép âm thanh đầu ra của các process được chọn, một nhóm process hoặc bản trộn toàn cục mà không cần cài đặt virtual loopback driver. Chuỗi cấp thấp là `CATapDescription` -> `AudioHardwareCreateProcessTap` -> thiết bị aggregate riêng -> `AudioDeviceIOProc`; lần đầu thử ghi âm thông qua aggregate có chứa tap sẽ khiến macOS yêu cầu quyền Ghi âm thanh hệ thống. Bundle phải chứa `NSAudioCaptureUsageDescription`, nếu không quy trình đồng ý sẽ không hoạt động chính xác.<sup>[[7]](#references)</sup>
 
-For a fast payload, [`catap`](https://github.com/sbetko/catap) wraps the tap, aggregate-device, IO callback, WAV writer, and cleanup lifecycle:<sup>[[8]](#references)</sup>
+Để tạo payload nhanh, [`catap`](https://github.com/sbetko/catap) bao bọc tap, thiết bị aggregate, IO callback, WAV writer và vòng đời dọn dẹp:<sup>[[8]](#references)</sup>
 
 ```bash
 python3 -m venv /tmp/catap-env
@@ -690,19 +690,19 @@ catap record --system -d 10 -o /tmp/system-mix.wav
 ```
 
 > [!WARNING]
-> TCC attributes a CLI capture to the **hosting terminal app**, not merely to the Python process. Without the System Audio Recording grant, the Core Audio graph may start and deliver correctly sized but **zero-filled buffers**, which is easy to mistake for a working capture of a quiet target. Grant the host, restart it, and repeat with a known audible source; `catap` also reports when a recording contained only silence.<sup>[[8]](#references)</sup>
+> TCC ghi nhận thao tác thu âm từ CLI thuộc về **ứng dụng terminal lưu trữ**, chứ không chỉ riêng tiến trình Python. Nếu không có quyền System Audio Recording, đồ thị Core Audio vẫn có thể khởi chạy và cung cấp các buffer có kích thước chính xác nhưng **chỉ chứa các giá trị 0**, rất dễ khiến bạn lầm tưởng việc thu âm mục tiêu yên tĩnh đang hoạt động. Hãy cấp quyền cho ứng dụng lưu trữ, khởi động lại ứng dụng đó và thử lại với một nguồn âm thanh đã biết; `catap` cũng báo khi bản ghi chỉ chứa khoảng lặng.<sup>[[8]](#references)</sup>
 
-### Location
+### Vị trí
 
 > [!TIP]
-> For an app to get the location, **Location Services** (from Privacy & Security) **must be enabled,** if not it won't be able to access it.
+> Để ứng dụng lấy được vị trí, **Location Services** (trong Privacy & Security) **phải được bật**; nếu không, ứng dụng sẽ không thể truy cập.
 
 - **Entitlement**: `com.apple.security.personal-information.location`
-- **TCC**: Granted in `/var/db/locationd/clients.plist`
+- **TCC**: Được cấp trong `/var/db/locationd/clients.plist`
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-Write the location in `/tmp/logs.txt`
+Ghi vị trí vào `/tmp/logs.txt`
 
 ```objectivec
 #include <syslog.h>
@@ -754,7 +754,7 @@ void myconstructor(int argc, const char **argv)
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Get the current location from shell.<sup>[[2]](#references)</sup>
+Lấy vị trí hiện tại từ shell.<sup>[[2]](#references)</sup>
 
 ```bash
 # Fast option: use a dedicated CoreLocation CLI helper
@@ -766,19 +766,19 @@ CoreLocationCLI --watch --format '%latitude %longitude %speed %time'
 ```
 
 > [!TIP]
-> This still depends on **Location Services** being enabled and the tool / terminal getting TCC approval. `CoreLocationCLI` also relies on Wi-Fi-assisted positioning on most Macs, so having Wi-Fi disabled often ends in `kCLErrorDomain error 0`.
+> Điều này vẫn phụ thuộc vào việc **Location Services** được bật và công cụ / terminal được TCC phê duyệt. `CoreLocationCLI` cũng dựa vào định vị hỗ trợ qua Wi-Fi trên hầu hết máy Mac, vì vậy tắt Wi-Fi thường dẫn đến `kCLErrorDomain error 0`.
 
 {{#endtab}}
 {{#endtabs}}
 
-### Screen Recording
+### Ghi màn hình
 
-- **Entitlement**: None
+- **Entitlement**: Không có
 - **TCC**: `kTCCServiceScreenCapture`
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-Record the main screen for 5s in `/tmp/screen.mov`
+Ghi màn hình chính trong 5 giây vào `/tmp/screen.mov`
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -838,7 +838,7 @@ void myconstructor(int argc, const char **argv)
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check / Prompt"}}
-Check whether the current process can capture the screen and trigger the TCC prompt if needed.
+Kiểm tra xem tiến trình hiện tại có thể chụp màn hình hay không và kích hoạt lời nhắc TCC nếu cần.
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -861,7 +861,7 @@ static void screencheck(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Record the main screen for 5s
+Ghi lại màn hình chính trong 5 giây
 
 ```bash
 screencapture -V 5 /tmp/screen.mov
@@ -871,14 +871,14 @@ screencapture -V 5 /tmp/screen.mov
 {{#endtabs}}
 
 > [!TIP]
-> On **macOS 12.3+**, `ScreenCaptureKit` is usually the better post-exploitation primitive than `AVCaptureScreenInput`: it can do high-performance streaming, single-frame grabs with `SCScreenshotManager`, and stream **system audio**. Recent `ScreenCaptureKit` updates also added `captureMicrophone` / `microphoneCaptureDeviceID` on `SCStreamConfiguration` plus `SCRecordingOutput` for straight-to-file recording, so one hijacked screen-capture client can save screen + system audio directly and add mic audio when the process also holds `kTCCServiceMicrophone`.<sup>[[4]](#references)</sup> For more desktop-session abuse primitives, see [this related page](../macos-input-monitoring-screen-capture-accessibility.md).
+> Trên **macOS 12.3+**, `ScreenCaptureKit` thường là primitive hậu khai thác tốt hơn `AVCaptureScreenInput`: nó hỗ trợ streaming hiệu suất cao, chụp từng khung hình bằng `SCScreenshotManager` và streaming **âm thanh hệ thống**. Các bản cập nhật `ScreenCaptureKit` gần đây cũng bổ sung `captureMicrophone` / `microphoneCaptureDeviceID` cho `SCStreamConfiguration` cùng `SCRecordingOutput` để ghi trực tiếp ra tệp, nhờ đó một client ghi màn hình bị chiếm quyền có thể lưu trực tiếp màn hình + âm thanh hệ thống, đồng thời thêm âm thanh mic khi tiến trình cũng có `kTCCServiceMicrophone`.<sup>[[4]](#references)</sup> Để biết thêm các primitive lạm dụng phiên desktop, xem [trang liên quan này](../macos-input-monitoring-screen-capture-accessibility.md).
 
 ### Accessibility
 
-- **Entitlement**: None
+- **Entitlement**: Không có
 - **TCC**: `kTCCServiceAccessibility`
 
-Use the TCC privilege to accept the control of Finder pressing enter and bypass TCC that way
+Dùng quyền TCC để chấp nhận thao tác điều khiển Finder bằng cách nhấn Enter và vượt qua TCC theo cách đó
 
 {{#tabs}}
 {{#tab name="Accept TCC"}}
@@ -937,7 +937,7 @@ int main() {
 {{#endtab}}
 
 {{#tab name="Check / Prompt"}}
-Check whether the current process is already trusted for Accessibility and ask macOS to show the consent UI if it is not.
+Kiểm tra xem tiến trình hiện tại đã được cấp quyền Accessibility hay chưa; nếu chưa, yêu cầu macOS hiển thị giao diện xin cấp quyền.
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -953,7 +953,7 @@ static void axprompt(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="Keylogger"}}
-Store the pressed keys in **`/tmp/keystrokes.txt`**
+Lưu các phím đã nhấn vào **`/tmp/keystrokes.txt`**
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -1062,20 +1062,19 @@ int main() {
 {{#endtab}}
 {{#endtabs}}
 
-> [!CAUTION] > **Accessibility is a very powerful permission**, you could abuse it in other ways, for example you could perform the **keystrokes attack** just from it without needed to call System Events.
+> [!CAUTION] > **Accessibility là một quyền rất mạnh**, bạn có thể lạm dụng nó theo những cách khác, chẳng hạn như thực hiện **keystrokes attack** chỉ bằng quyền này mà không cần gọi System Events.
 
 > [!TIP]
-> Newer macOS versions also split desktop-session abuse across **Input Monitoring** (`kTCCServiceListenEvent`) and **synthetic input** (`kTCCServicePostEvent`). If you need keylogging, screen grabs, or raw event injection instead of AXUIElement automation, check [macOS Input Monitoring, Screen Capture & Accessibility Abuse](../macos-input-monitoring-screen-capture-accessibility.md).
+> Các phiên bản macOS mới hơn cũng tách việc lạm dụng desktop session giữa **Input Monitoring** (`kTCCServiceListenEvent`) và **synthetic input** (`kTCCServicePostEvent`). Nếu bạn cần keylogging, chụp màn hình hoặc injection sự kiện thô thay vì tự động hóa AXUIElement, hãy xem [macOS Input Monitoring, Screen Capture & Accessibility Abuse](../macos-input-monitoring-screen-capture-accessibility.md).
 
 ## References
 
-- [1] [Cisco Talos - How multiple vulnerabilities in Microsoft apps for macOS pave the way to stealing permissions](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
+- [1] [Cisco Talos - Cách nhiều lỗ hổng trong các ứng dụng Microsoft dành cho macOS mở đường cho việc đánh cắp quyền](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
 - [2] [CoreLocationCLI](https://github.com/fulldecent/corelocationcli)
-- [3] [Apple Developer - Requesting Authorization for Media Capture on macOS](https://developer.apple.com/documentation/bundleresources/requesting-authorization-for-media-capture-on-macos?language=objc)
-- [4] [Apple Developer - Capture HDR content with ScreenCaptureKit (WWDC24)](https://developer.apple.com/videos/play/wwdc2024/10088/)
-- [5] [vsociety - CVE-2023-26818: MacOS TCC Bypass with Telegram using DyLib Injection Part1](https://vsociety.medium.com/cve-2023-26818-macos-tcc-bypass-with-telegram-using-dylib-injection-part1-768b34efd8c4)
-- [6] [Vicarius vsociety - CVE-2023-26818: Exploit macOS TCC Bypass w/ Telegram (Part 1)](https://www.vicarius.io/vsociety/posts/cve-2023-26818-exploit-macos-tcc-bypass-w-telegram-part-1-2)
-- [7] [Apple Developer - Capturing system audio with Core Audio taps](https://developer.apple.com/documentation/coreaudio/capturing-system-audio-with-core-audio-taps)
-- [8] [catap - Python bindings and recorder for Core Audio process taps](https://github.com/sbetko/catap)
-
+- [3] [Apple Developer - Yêu cầu cấp quyền cho việc thu thập media trên macOS](https://developer.apple.com/documentation/bundleresources/requesting-authorization-for-media-capture-on-macos?language=objc)
+- [4] [Apple Developer - Thu thập nội dung HDR bằng ScreenCaptureKit (WWDC24)](https://developer.apple.com/videos/play/wwdc2024/10088/)
+- [5] [vsociety - CVE-2023-26818: Bypass macOS TCC bằng Telegram qua DyLib Injection Phần 1](https://vsociety.medium.com/cve-2023-26818-macos-tcc-bypass-with-telegram-using-dylib-injection-part1-768b34efd8c4)
+- [6] [Vicarius vsociety - CVE-2023-26818: Khai thác bypass macOS TCC bằng Telegram (Phần 1)](https://www.vicarius.io/vsociety/posts/cve-2023-26818-exploit-macos-tcc-bypass-w-telegram-part-1-2)
+- [7] [Apple Developer - Thu thập âm thanh hệ thống bằng Core Audio taps](https://developer.apple.com/documentation/coreaudio/capturing-system-audio-with-core-audio-taps)
+- [8] [catap - Python bindings và recorder cho Core Audio process taps](https://github.com/sbetko/catap)
 {{#include ../../../../banners/hacktricks-training.md}}

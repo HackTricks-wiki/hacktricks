@@ -5,29 +5,29 @@
 
 ## Gatekeeper
 
-**Gatekeeper** is a security feature developed for Mac operating systems, designed to ensure that users **run only trusted software** on their systems. It functions by **validating software** that a user downloads and attempts to open from **sources outside the App Store**, such as an app, a plug-in, or an installer package.
+**Gatekeeper** là một tính năng bảo mật được phát triển cho hệ điều hành Mac, nhằm đảm bảo người dùng **chỉ chạy phần mềm đáng tin cậy** trên hệ thống của họ. Tính năng này hoạt động bằng cách **xác thực phần mềm** mà người dùng tải xuống và cố mở từ **các nguồn bên ngoài App Store**, chẳng hạn như ứng dụng, plug-in hoặc gói cài đặt.
 
-The key mechanism of Gatekeeper lies in its **verification** process. It checks if the downloaded software is **signed by a recognized developer**, ensuring the software's authenticity. Further, it ascertains whether the software is **notarised by Apple**, confirming that it is devoid of known malicious content and has not been tampered with after notarisation.
+Cơ chế cốt lõi của Gatekeeper nằm ở quy trình **xác minh**. Tính năng này kiểm tra xem phần mềm đã tải xuống có **được ký bởi nhà phát triển được công nhận** hay không, qua đó đảm bảo tính xác thực của phần mềm. Ngoài ra, Gatekeeper xác định xem phần mềm có được Apple **notarized** hay không, nhằm xác nhận rằng phần mềm không chứa nội dung độc hại đã biết và chưa bị chỉnh sửa sau khi notarization.
 
-Additionally, Gatekeeper reinforces user control and security by **prompting users to approve the opening** of downloaded software for the first time. This safeguard helps prevent users from inadvertently running potentially harmful executable code that they may have mistaken for a harmless data file.
+Bên cạnh đó, Gatekeeper tăng cường quyền kiểm soát và bảo mật cho người dùng bằng cách **nhắc người dùng phê duyệt việc mở** phần mềm đã tải xuống trong lần đầu tiên. Biện pháp bảo vệ này giúp ngăn người dùng vô tình chạy mã thực thi có khả năng gây hại mà họ có thể nhầm là tệp dữ liệu vô hại.
 
 ### Application Signatures
 
-Application signatures, also known as code signatures, are a critical component of Apple's security infrastructure. They're used to **verify the identity of the software author** (the developer) and to ensure that the code hasn't been tampered with since it was last signed.
+Application signature, còn được gọi là code signature, là một thành phần thiết yếu trong cơ sở hạ tầng bảo mật của Apple. Chúng được dùng để **xác minh danh tính của tác giả phần mềm** (nhà phát triển) và đảm bảo mã chưa bị chỉnh sửa kể từ lần ký gần nhất.
 
-Here's how it works:
+Quy trình hoạt động như sau:
 
-1. **Signing the Application:** When a developer is ready to distribute their application, they **sign the application using a private key**. This private key is associated with a **certificate that Apple issues to the developer** when they enrol in the Apple Developer Program. The signing process involves creating a cryptographic hash of all parts of the app and encrypting this hash with the developer's private key.
-2. **Distributing the Application:** The signed application is then distributed to users along with the developer's certificate, which contains the corresponding public key.
-3. **Verifying the Application:** When a user downloads and attempts to run the application, their Mac operating system uses the public key from the developer's certificate to decrypt the hash. It then recalculates the hash based on the current state of the application and compares this with the decrypted hash. If they match, it means **the application hasn't been modified** since the developer signed it, and the system permits the application to run.
+1. **Ký ứng dụng:** Khi sẵn sàng phân phối ứng dụng, nhà phát triển **ký ứng dụng bằng khóa riêng**. Khóa riêng này gắn với **chứng chỉ Apple cấp cho nhà phát triển** khi họ đăng ký Apple Developer Program. Quá trình ký gồm việc tạo hash mật mã của tất cả các thành phần trong ứng dụng rồi mã hóa hash này bằng khóa riêng của nhà phát triển.
+2. **Phân phối ứng dụng:** Sau đó, ứng dụng đã ký được phân phối cho người dùng cùng với chứng chỉ của nhà phát triển, trong đó có khóa công khai tương ứng.
+3. **Xác minh ứng dụng:** Khi người dùng tải xuống và thử chạy ứng dụng, hệ điều hành Mac dùng khóa công khai trong chứng chỉ của nhà phát triển để giải mã hash. Sau đó, hệ thống tính toán lại hash dựa trên trạng thái hiện tại của ứng dụng và so sánh với hash đã giải mã. Nếu chúng khớp, điều đó có nghĩa là **ứng dụng chưa bị sửa đổi** kể từ khi nhà phát triển ký, và hệ thống cho phép ứng dụng chạy.
 
-Application signatures are an essential part of Apple's Gatekeeper technology. When a user attempts to **open an application downloaded from the internet**, Gatekeeper verifies the application signature. If it's signed with a certificate issued by Apple to a known developer and the code hasn't been tampered with, Gatekeeper permits the application to run. Otherwise, it blocks the application and alerts the user.
+Application signature là một phần thiết yếu của công nghệ Gatekeeper của Apple. Khi người dùng cố **mở một ứng dụng tải xuống từ Internet**, Gatekeeper sẽ xác minh application signature. Nếu ứng dụng được ký bằng chứng chỉ do Apple cấp cho nhà phát triển đã biết và mã chưa bị chỉnh sửa, Gatekeeper cho phép ứng dụng chạy. Nếu không, Gatekeeper chặn ứng dụng và cảnh báo người dùng.
 
-Starting from macOS Catalina, **Gatekeeper also checks whether the application has been notarized** by Apple, adding an extra layer of security. The notarization process checks the application for known security issues and malicious code, and if these checks pass, Apple adds a ticket to the application that Gatekeeper can verify.
+Kể từ macOS Catalina, **Gatekeeper cũng kiểm tra xem ứng dụng đã được Apple notarized hay chưa**, bổ sung thêm một lớp bảo mật. Quy trình notarization kiểm tra ứng dụng để tìm các vấn đề bảo mật đã biết và mã độc; nếu ứng dụng vượt qua các bước kiểm tra này, Apple sẽ thêm một ticket vào ứng dụng để Gatekeeper xác minh.
 
 #### Check Signatures
 
-When checking some **malware sample** you should always **check the signature** of the binary as the **developer** that signed it may be already **related** with **malware.**
+Khi kiểm tra một **mẫu malware**, bạn luôn nên **kiểm tra chữ ký** của binary vì **nhà phát triển** ký nó có thể đã **liên quan** đến **malware**.
 
 ```bash
 # Get signer
@@ -46,20 +46,20 @@ spctl --assess --verbose /Applications/Safari.app
 codesign -s <cert-name-keychain> toolsdemo
 ```
 
-### Notarization
+### Công chứng
 
-Apple's notarization process serves as an additional safeguard to protect users from potentially harmful software. It involves the **developer submitting their application for examination** by **Apple's Notary Service**, which should not be confused with App Review. This service is an **automated system** that scrutinizes the submitted software for the presence of **malicious content** and any potential issues with code-signing.
+Quy trình công chứng của Apple là một biện pháp bảo vệ bổ sung nhằm bảo vệ người dùng khỏi phần mềm có khả năng gây hại. Quy trình này bao gồm việc **nhà phát triển gửi ứng dụng để** **Dịch vụ Công chứng của Apple** **kiểm tra**; không nên nhầm lẫn dịch vụ này với App Review. Đây là một **hệ thống tự động** kiểm tra kỹ phần mềm được gửi để tìm **nội dung độc hại** và mọi vấn đề tiềm ẩn liên quan đến ký mã.
 
-If the software **passes** this inspection without raising any concerns, the Notary Service generates a notarization ticket. The developer is then required to **attach this ticket to their software**, a process known as 'stapling.' Furthermore, the notarization ticket is also published online where Gatekeeper, Apple's security technology, can access it.
+Nếu phần mềm **vượt qua** quá trình kiểm tra này mà không phát sinh vấn đề đáng lo ngại, Dịch vụ Công chứng sẽ tạo một vé công chứng. Sau đó, nhà phát triển cần **đính kèm vé này vào phần mềm**; quá trình này được gọi là “stapling”. Ngoài ra, vé công chứng cũng được đăng trực tuyến để Gatekeeper, công nghệ bảo mật của Apple, có thể truy cập.
 
-Upon the user's first installation or execution of the software, the existence of the notarization ticket - whether stapled to the executable or found online - **informs Gatekeeper that the software has been notarized by Apple**. As a result, Gatekeeper displays a descriptive message in the initial launch dialog, indicating that the software has undergone checks for malicious content by Apple. This process thereby enhances user confidence in the security of the software they install or run on their systems.
+Khi người dùng cài đặt hoặc chạy phần mềm lần đầu, sự hiện diện của vé công chứng — dù được stapling vào tệp thực thi hay tìm thấy trực tuyến — **cho Gatekeeper biết rằng phần mềm đã được Apple công chứng**. Nhờ đó, Gatekeeper hiển thị thông báo mô tả trong hộp thoại khởi chạy lần đầu, cho biết Apple đã kiểm tra phần mềm để tìm nội dung độc hại. Quy trình này giúp người dùng yên tâm hơn về độ an toàn của phần mềm họ cài đặt hoặc chạy trên hệ thống.
 
 ### spctl & syspolicyd
 
 > [!CAUTION]
-> Note that from Sequoia version, **`spctl`** doesn't allow to modify Gatekeeper configuration anymore.
+> Lưu ý rằng kể từ phiên bản Sequoia, **`spctl`** không còn cho phép sửa đổi cấu hình Gatekeeper.
 
-**`spctl`** is the CLI tool to enumerate and interact with Gatekeeper (with the `syspolicyd` daemon via XPC messages). For example, it's possible to see the **status** of GateKeeper with:
+**`spctl`** là công cụ CLI dùng để liệt kê và tương tác với Gatekeeper (thông qua các thông điệp XPC gửi đến daemon `syspolicyd`). Ví dụ, có thể xem **trạng thái** của GateKeeper bằng:
 
 ```bash
 # Check the status
@@ -67,15 +67,15 @@ spctl --status
 ```
 
 > [!CAUTION]
-> Note that GateKeeper signature checks are performed only to **files with the Quarantine attribute**, not to every file.
+> Lưu ý rằng GateKeeper chỉ kiểm tra chữ ký đối với **các tệp có thuộc tính Quarantine**, không phải mọi tệp.
 
-GateKeeper will check if according to the **preferences & the signature** a binary can be executed:
+GateKeeper sẽ kiểm tra xem một binary có thể được thực thi hay không dựa trên **các tùy chọn và chữ ký**:
 
 <figure><img src="../../../images/image (1150).png" alt=""><figcaption></figcaption></figure>
 
-**`syspolicyd`** is the main daemon responsible to enforcing Gatekeeper. It maintains a database located in `/var/db/SystemPolicy` and it's possible to find the code to support the [database here](https://opensource.apple.com/source/Security/Security-58286.240.4/OSX/libsecurity_codesigning/lib/policydb.cpp) and the [SQL template here](https://opensource.apple.com/source/Security/Security-58286.240.4/OSX/libsecurity_codesigning/lib/syspolicy.sql). Note that the database is unrestricted by SIP and writable by root and the database `/var/db/.SystemPolicy-default` is used as an original backup in case the other gets corrupted.
+**`syspolicyd`** là daemon chính chịu trách nhiệm thực thi Gatekeeper. Nó duy trì một database tại `/var/db/SystemPolicy`; có thể tìm thấy mã hỗ trợ [database tại đây](https://opensource.apple.com/source/Security/Security-58286.240.4/OSX/libsecurity_codesigning/lib/policydb.cpp) và [mẫu SQL tại đây](https://opensource.apple.com/source/Security/Security-58286.240.4/OSX/libsecurity_codesigning/lib/syspolicy.sql). Lưu ý rằng database này không bị SIP hạn chế và root có thể ghi vào; database `/var/db/.SystemPolicy-default` được dùng làm bản sao lưu ban đầu trong trường hợp database kia bị hỏng.
 
-Moreover, the bundles **`/var/db/gke.bundle`** and **`/var/db/gkopaque.bundle`** contains files with rules that are inserted in the database. You can check this database as root with:
+Ngoài ra, các bundle **`/var/db/gke.bundle`** và **`/var/db/gkopaque.bundle`** chứa các tệp có quy tắc được chèn vào database. Bạn có thể kiểm tra database này với quyền root bằng lệnh:
 
 ```bash
 # Open database
@@ -91,12 +91,12 @@ anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] exists an
 [...]
 ```
 
-**`syspolicyd`** also exposes a XPC server with different operations like `assess`, `update`, `record` and `cancel` which are also reachable using **`Security.framework`'s `SecAssessment*`** APIs and **`spctl`** actually talks to **`syspolicyd`** via XPC.
+**`syspolicyd`** cũng cung cấp một XPC server với nhiều thao tác như `assess`, `update`, `record` và `cancel`. Các thao tác này cũng có thể được gọi bằng các API **`SecAssessment*`** của **`Security.framework`**, và **`spctl`** thực sự giao tiếp với **`syspolicyd`** qua XPC.
 
-Note how the first rule ended in "**App Store**" and the second one in "**Developer ID**" and that in the previous imaged it was **enabled to execute apps from the App Store and identified developers**.\
-If you **modify** that setting to App Store, the "**Notarized Developer ID" rules will disappear**.
+Lưu ý rằng quy tắc đầu tiên kết thúc bằng "**App Store**" và quy tắc thứ hai kết thúc bằng "**Developer ID**". Trong hình trước đó, tùy chọn cho phép chạy ứng dụng từ App Store và từ các nhà phát triển đã xác định đang **được bật**.\
+Nếu bạn **thay đổi** cài đặt đó thành App Store, các quy tắc "**Notarized Developer ID" sẽ biến mất**.
 
-There are also thousands of rules of **type GKE** :
+Ngoài ra còn có hàng nghìn quy tắc thuộc **loại GKE**:
 
 ```bash
 SELECT requirement,allow,disabled,label from authority where label = 'GKE' limit 5;
@@ -107,19 +107,19 @@ cdhash H"0a71962e7a32f0c2b41ddb1fb8403f3420e1d861"|1|0|GKE
 cdhash H"8d0d90ff23c3071211646c4c9c607cdb601cb18f"|1|0|GKE
 ```
 
-These are hashes that from:
+Đây là các hash từ:
 
 - `/var/db/SystemPolicyConfiguration/gke.bundle/Contents/Resources/gke.auth`
 - `/var/db/gke.bundle/Contents/Resources/gk.db`
 - `/var/db/gkopaque.bundle/Contents/Resources/gkopaque.db`
 
-Or you could list the previous info with:
+Hoặc bạn có thể liệt kê thông tin trước đó bằng:
 
 ```bash
 sudo spctl --list
 ```
 
-The options **`--master-disable`** and **`--global-disable`** of **`spctl`** will completely **disable** these signature checks:
+Các tùy chọn **`--master-disable`** và **`--global-disable`** của **`spctl`** sẽ **vô hiệu hóa** hoàn toàn các bước kiểm tra chữ ký này:
 
 ```bash
 # Disable GateKeeper
@@ -131,17 +131,17 @@ spctl --global-enable
 spctl --master-enable
 ```
 
-When completely enabled, a new option will appear:
+Khi được bật hoàn toàn, một tùy chọn mới sẽ xuất hiện:
 
 <figure><img src="../../../images/image (1151).png" alt=""><figcaption></figcaption></figure>
 
-It's possible to **check if an App will be allowed by GateKeeper** with:
+Có thể **kiểm tra xem một ứng dụng có được GateKeeper cho phép hay không** bằng cách:
 
 ```bash
 spctl --assess -v /Applications/App.app
 ```
 
-On macOS 14 and later, **`syspolicy_check`** is a useful higher-level pre-distribution check for an application bundle. It produces more actionable trusted-execution diagnostics than a bare `spctl` result, although Apple still recommends testing the real download/extraction/first-launch path because that also exercises quarantine propagation.<sup>[[14]](#references)</sup>
+Trên macOS 14 trở lên, **`syspolicy_check`** là công cụ kiểm tra ở cấp cao hữu ích trước khi phân phối một application bundle. Công cụ này đưa ra chẩn đoán về trusted execution hữu ích hơn kết quả `spctl` đơn thuần, dù Apple vẫn khuyến nghị kiểm thử quy trình tải xuống/giải nén/khởi chạy lần đầu thực tế vì quy trình đó cũng kiểm tra việc lan truyền quarantine.<sup>[[14]](#references)</sup>
 
 ```bash
 # Check the complete app bundle before distribution
@@ -151,7 +151,7 @@ syspolicy_check distribution /path/to/App.app
 spctl --assess --type execute -vv /path/to/App.app
 ```
 
-It's possible to add new rules in GateKeeper to allow the execution of certain apps with:
+Có thể thêm các quy tắc mới trong GateKeeper để cho phép thực thi một số ứng dụng bằng:
 
 ```bash
 # Check if allowed - nop
@@ -168,17 +168,17 @@ spctl --assess -v /Applications/App.app
 /Applications/App.app: accepted
 ```
 
-Regarding **kernel extensions**, the folder `/var/db/SystemPolicyConfiguration` contains files with lists of kexts allowed to be loaded. Moreover, `spctl` has the entitlement `com.apple.private.iokit.nvram-csr` because it's capable of adding new pre-approved kernel extensions which need to be saved also in NVRAM in a `kext-allowed-teams` key.
+Đối với **kernel extensions**, thư mục `/var/db/SystemPolicyConfiguration` chứa các tệp liệt kê những kext được phép tải. Ngoài ra, `spctl` có entitlement `com.apple.private.iokit.nvram-csr` vì nó có thể thêm các kernel extension được phê duyệt trước; các extension này cũng cần được lưu trong NVRAM dưới khóa `kext-allowed-teams`.
 
-#### Managing Gatekeeper on macOS 15 (Sequoia) and later
+#### Quản lý Gatekeeper trên macOS 15 (Sequoia) trở lên
 
-- The long‑standing Finder **Ctrl+Open / Right‑click → Open** bypass has been removed; users must explicitly allow a blocked app from **System Settings → Privacy & Security → Open Anyway** after the first block dialog.<sup>[[4]](#references)</sup>
-- `spctl --master-disable/--global-disable` are no longer accepted as unattended policy changes. Operations that modify the rule database or global assessment state are deprecated, so use `spctl` for assessment and configure enforcement through the UI or MDM.
+- Cách vượt qua lâu đời bằng Finder **Ctrl+Open / nhấp chuột phải → Open** đã bị loại bỏ; sau hộp thoại chặn đầu tiên, người dùng phải cho phép rõ ràng ứng dụng bị chặn tại **System Settings → Privacy & Security → Open Anyway**.<sup>[[4]](#references)</sup>
+- `spctl --master-disable/--global-disable` không còn được chấp nhận để thay đổi chính sách mà không có sự giám sát của người dùng. Các thao tác sửa đổi cơ sở dữ liệu quy tắc hoặc trạng thái đánh giá toàn cục đã bị deprecated, vì vậy hãy dùng `spctl` để đánh giá và cấu hình việc thực thi thông qua giao diện người dùng hoặc MDM.
 
-Starting in macOS 15 Sequoia, end users can no longer toggle Gatekeeper policy from `spctl`. Management is performed via System Settings or by deploying an MDM configuration profile with the `com.apple.systempolicy.control` payload. Example profile snippet to allow App Store and identified developers (but not "Anywhere"):
+Kể từ macOS 15 Sequoia, người dùng cuối không còn có thể bật/tắt chính sách Gatekeeper bằng `spctl`. Việc quản lý được thực hiện qua System Settings hoặc bằng cách triển khai cấu hình MDM có payload `com.apple.systempolicy.control`. Ví dụ đoạn cấu hình để cho phép App Store và nhà phát triển đã xác định (nhưng không cho phép "Anywhere"):
 
 <details>
-<summary>MDM profile to allow App Store and identified developers</summary>
+<summary>Cấu hình MDM để cho phép App Store và nhà phát triển đã xác định</summary>
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -216,26 +216,26 @@ Starting in macOS 15 Sequoia, end users can no longer toggle Gatekeeper policy f
 
 </details>
 
-### Quarantine Files
+### Tệp Quarantine
 
-Upon **downloading** an application or file, specific macOS **applications** such as web browsers or email clients **attach an extended file attribute**, commonly known as the "**quarantine flag**," to the downloaded file. This attribute acts as a security measure to **mark the file** as coming from an untrusted source (the internet), and potentially carrying risks. However, not all applications attach this attribute, for instance, common BitTorrent client software usually bypasses this process.
+Khi **tải xuống** một ứng dụng hoặc tệp, một số **ứng dụng** macOS như trình duyệt web hoặc ứng dụng email sẽ **đính kèm một thuộc tính tệp mở rộng**, thường được gọi là "**quarantine flag**", vào tệp đã tải xuống. Thuộc tính này đóng vai trò như một biện pháp bảo mật để **đánh dấu tệp** là đến từ một nguồn không đáng tin cậy (internet) và có thể tiềm ẩn rủi ro. Tuy nhiên, không phải ứng dụng nào cũng đính kèm thuộc tính này; chẳng hạn, phần mềm máy khách BitTorrent phổ biến thường bỏ qua quy trình này.
 
-**The presence of a quarantine flag signals macOS's Gatekeeper security feature when a user attempts to execute the file**.
+**Sự hiện diện của quarantine flag sẽ kích hoạt tính năng bảo mật Gatekeeper của macOS khi người dùng cố thực thi tệp**.
 
-In the case where the **quarantine flag is not present** (as with files downloaded via some BitTorrent clients), Gatekeeper's **checks may not be performed**. Thus, users should exercise caution when opening files downloaded from less secure or unknown sources.
+Nếu **quarantine flag không hiện diện** (như với các tệp được tải xuống bằng một số máy khách BitTorrent), **các bước kiểm tra của Gatekeeper có thể không được thực hiện**. Vì vậy, người dùng nên thận trọng khi mở các tệp được tải xuống từ những nguồn kém an toàn hoặc không xác định.
 
-> [!NOTE] > **Checking** the **validity** of code signatures is a **resource-intensive** process that includes generating cryptographic **hashes** of the code and all its bundled resources. Furthermore, checking certificate validity involves doing an **online check** to Apple's servers to see if it has been revoked after it was issued. For these reasons, a full code signature and notarization check is **impractical to run every time an app is launched**.
+> [!NOTE] > Việc **kiểm tra** **tính hợp lệ** của chữ ký mã là một quy trình **tốn nhiều tài nguyên**, bao gồm tạo **hash** mật mã của mã và tất cả tài nguyên đi kèm. Ngoài ra, việc kiểm tra tính hợp lệ của chứng chỉ còn cần **kiểm tra trực tuyến** với máy chủ của Apple để xác định xem chứng chỉ có bị thu hồi sau khi được cấp hay không. Vì những lý do này, việc kiểm tra đầy đủ chữ ký mã và notarization **không khả thi nếu chạy mỗi khi ứng dụng được khởi chạy**.
 >
-> Therefore, these checks are **only run when executing apps with the quarantined attribute.**
+> Do đó, các bước kiểm tra này **chỉ được thực hiện khi chạy ứng dụng có thuộc tính quarantine**.
 
 > [!WARNING]
-> This attribute must be **set by the application creating/downloading** the file.
+> Thuộc tính này phải được **ứng dụng tạo/tải xuống** tệp **thiết lập**.
 >
-> However, files that are sandboxed will have this attribute set to every file they create. And non sandboxed apps can set it themselves, or specify the [**LSFileQuarantineEnabled**](https://developer.apple.com/documentation/bundleresources/information_property_list/lsfilequarantineenabled?language=objc) key in the **Info.plist** which will make the system set the `com.apple.quarantine` extended attribute on the files created,
+> Tuy nhiên, các tệp được tạo trong sandbox sẽ có thuộc tính này. Các ứng dụng không chạy trong sandbox có thể tự thiết lập thuộc tính này hoặc chỉ định khóa [**LSFileQuarantineEnabled**](https://developer.apple.com/documentation/bundleresources/information_property_list/lsfilequarantineenabled?language=objc) trong **Info.plist** để hệ thống thiết lập thuộc tính mở rộng `com.apple.quarantine` cho các tệp được tạo.
 
-Moreover, all files created by a process calling **`qtn_proc_apply_to_self`** are quarantined. Or the API **`qtn_file_apply_to_path`** adds the quarantine attribute to a specified file path.
+Ngoài ra, tất cả tệp được tạo bởi một tiến trình gọi **`qtn_proc_apply_to_self`** đều bị quarantine. Hoặc API **`qtn_file_apply_to_path`** sẽ thêm thuộc tính quarantine vào đường dẫn tệp được chỉ định.
 
-It's possible to **check it's status and enable/disable** (root required) with:
+Có thể **kiểm tra trạng thái và bật/tắt** (cần quyền root) bằng:
 
 ```bash
 spctl --status
@@ -246,7 +246,7 @@ spctl --disable
 #You can also allow nee identifies to execute code using the binary "spctl"
 ```
 
-You can also **find if a file has the quarantine extended attribute** with:
+Bạn cũng có thể **kiểm tra xem một tệp có thuộc tính mở rộng quarantine hay không** bằng cách:
 
 ```bash
 xattr file.png
@@ -254,7 +254,7 @@ com.apple.macl
 com.apple.quarantine
 ```
 
-Check the **value** of the **extended** **attributes** and find out the app that wrote the quarantine attr with:
+Kiểm tra **giá trị** của **thuộc tính** **mở rộng** và tìm ứng dụng đã ghi quarantine attr bằng:
 
 ```bash
 xattr -l portada.png
@@ -272,11 +272,11 @@ com.apple.quarantine: 00C1;607842eb;Brave;F643CD5F-6071-46AB-83AB-390BA944DEC5
 # F643CD5F-6071-46AB-83AB-390BA944DEC5 -- UID assigned to the file downloaded
 ```
 
-Actually a process "could set quarantine flags to the files it creates" (I already tried to apply the USER_APPROVED flag in a created file but it won't apply it):
+Thực ra, một tiến trình “có thể đặt cờ quarantine cho các tệp mà nó tạo ra” (tôi đã thử áp dụng cờ USER_APPROVED cho một tệp được tạo nhưng không áp dụng được):
 
 <details>
 
-<summary>Source Code apply quarantine flags</summary>
+<summary>Mã nguồn áp dụng cờ quarantine</summary>
 
 ```c
 #include <stdio.h>
@@ -338,9 +338,7 @@ int main() {
 }
 ```
 
-</details>
-
-And **remove** that attribute with:
+Và **xóa** thuộc tính đó bằng:
 
 ```bash
 xattr -d com.apple.quarantine portada.png
@@ -348,39 +346,39 @@ xattr -d com.apple.quarantine portada.png
 find . -iname '*' -print0 | xargs -0 xattr -d com.apple.quarantine
 ```
 
-And find all the quarantined files with:
+Và tìm tất cả các tệp bị cách ly bằng:
 
 ```bash
 find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.quarantine"
 ```
 
-Quarantine information is also stored in a central database managed by LaunchServices in **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`** which allows the GUI to obtain data about the file origins. Moreover this can be overwritten by applications which might be interested in hiding its origins. Moreover, this can be done from LaunchServices APIS.
+Thông tin quarantine cũng được lưu trong cơ sở dữ liệu trung tâm do LaunchServices quản lý tại **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**, cho phép GUI lấy dữ liệu về nguồn gốc của tệp. Ngoài ra, các ứng dụng muốn che giấu nguồn gốc của mình có thể ghi đè thông tin này. Việc này cũng có thể được thực hiện thông qua LaunchServices APIs.
 
 #### **libquarantine.dylib**
 
-This library exports several functions that allow to manipulate the extended attribute fields.
+Thư viện này xuất một số hàm cho phép thao tác với các trường extended attribute.
 
-The `qtn_file_*` APIs deal with file quarantine policies, the `qtn_proc_*` APIs are applied to processes (files created by the process). The unexported `__qtn_syscall_quarantine*` functions are the ones that applies the policies which calls `mac_syscall` with "Quarantine" as first argument which sends the requests to `Quarantine.kext`.
+Các API `qtn_file_*` xử lý chính sách quarantine của tệp; các API `qtn_proc_*` được áp dụng cho tiến trình (các tệp do tiến trình tạo). Các hàm chưa được export `__qtn_syscall_quarantine*` là những hàm áp dụng chính sách bằng cách gọi `mac_syscall` với `"Quarantine"` làm đối số đầu tiên, qua đó gửi yêu cầu đến `Quarantine.kext`.
 
 #### **Quarantine.kext**
 
-The kernel extension is only available through the **kernel cache on the system**; however, you _can_ download the **Kernel Debug Kit from** [**https://developer.apple.com/**](https://developer.apple.com/), which will contain a symbolicated version of the extension.
+Kernel extension này chỉ có trong **kernel cache trên hệ thống**; tuy nhiên, bạn _có thể_ tải **Kernel Debug Kit từ** [**https://developer.apple.com/**](https://developer.apple.com/), trong đó có phiên bản extension đã được symbolicate.
 
-This Kext will hook via MACF several calls in order to traps all file lifecycle events: Creation, opening, renaming, hard-linkning... even `setxattr` to prevent it from setting the `com.apple.quarantine` extended attribute.
+Kext này dùng MACF để hook một số lời gọi nhằm chặn mọi sự kiện trong vòng đời tệp: tạo, mở, đổi tên, tạo hard link... thậm chí cả `setxattr` để ngăn việc thiết lập extended attribute `com.apple.quarantine`.
 
-It also uses a couple of MIBs:
+Nó cũng sử dụng một vài MIB:
 
-- `security.mac.qtn.sandbox_enforce`: Enforce quarantine along Sandbox
-- `security.mac.qtn.user_approved_exec`: Querantined procs can only execute approved files
+- `security.mac.qtn.sandbox_enforce`: Thực thi quarantine cùng với Sandbox
+- `security.mac.qtn.user_approved_exec`: Các tiến trình bị quarantine chỉ có thể thực thi những tệp đã được phê duyệt
 
-#### Provenance xattr (Ventura and later)
+#### Provenance xattr (Ventura trở lên)
 
-macOS 13 Ventura introduced a separate provenance mechanism which is populated the first time a quarantined app is allowed to run.<sup>[[2]](#references)</sup> Two artefacts are created:
+macOS 13 Ventura giới thiệu một cơ chế provenance riêng, được thiết lập lần đầu tiên khi một ứng dụng bị quarantine được phép chạy.<sup>[[2]](#references)</sup> Hai artefact được tạo ra:
 
-- The `com.apple.provenance` xattr on the `.app` bundle directory (fixed-size binary value containing a primary key and flags).
-- A row in the `provenance_tracking` table inside the ExecPolicy database at `/var/db/SystemPolicyConfiguration/ExecPolicy/` storing the app’s cdhash and metadata.
+- xattr `com.apple.provenance` trên thư mục bundle `.app` (giá trị nhị phân có kích thước cố định, chứa khóa chính và các cờ).
+- Một hàng trong bảng `provenance_tracking` bên trong cơ sở dữ liệu ExecPolicy tại `/var/db/SystemPolicyConfiguration/ExecPolicy/`, lưu cdhash và metadata của ứng dụng.
 
-Practical usage:
+Cách sử dụng thực tế:
 
 ```bash
 # Inspect provenance xattr (if present)
@@ -395,85 +393,85 @@ log show --last 2d --style syslog --predicate 'process == "syspolicyd" && eventM
 
 ### XProtect
 
-XProtect is a built-in **anti-malware** feature in macOS. XProtect **checks any application when it's first launched or modified against its database** of known malware and unsafe file types. When you download a file through certain apps, such as Safari, Mail, or Messages, XProtect automatically scans the file. If it matches any known malware in its database, XProtect will **prevent the file from running** and alert you to the threat.
+XProtect là tính năng **chống phần mềm độc hại** tích hợp sẵn trong macOS. XProtect **kiểm tra mọi ứng dụng khi ứng dụng được khởi chạy lần đầu hoặc được sửa đổi, đối chiếu với cơ sở dữ liệu** về phần mềm độc hại đã biết và các loại tệp không an toàn. Khi bạn tải tệp xuống bằng một số ứng dụng nhất định, chẳng hạn như Safari, Mail hoặc Messages, XProtect sẽ tự động quét tệp. Nếu tệp khớp với phần mềm độc hại đã biết trong cơ sở dữ liệu, XProtect sẽ **ngăn tệp chạy** và cảnh báo bạn về mối đe dọa.
 
-The XProtect database is **updated regularly** by Apple with new malware definitions, and these updates are automatically downloaded and installed on your Mac. This ensures that XProtect is always up-to-date with the latest known threats.
+Apple **thường xuyên cập nhật** cơ sở dữ liệu XProtect bằng các định nghĩa phần mềm độc hại mới, và những bản cập nhật này được tự động tải xuống và cài đặt trên máy Mac của bạn. Điều này đảm bảo XProtect luôn được cập nhật với các mối đe dọa mới nhất đã biết.
 
-However, it's worth noting that **XProtect isn't a full-featured antivirus solution**. It only checks for a specific list of known threats and doesn't perform on-access scanning like most antivirus software.
+Tuy nhiên, cần lưu ý rằng **XProtect không phải là giải pháp chống virus đầy đủ tính năng**. Tính năng này chỉ kiểm tra một danh sách cụ thể gồm các mối đe dọa đã biết và không thực hiện quét khi truy cập như hầu hết phần mềm chống virus.
 
-You can get information about the latest XProtect update running:
+Bạn có thể lấy thông tin về bản cập nhật XProtect mới nhất bằng cách chạy:
 
 ```bash
 system_profiler SPInstallHistoryDataType 2>/dev/null | grep -A 4 "XProtectPlistConfigData" | tail -n 5
 ```
 
-XProtect is located on. SIP protected location at **/Library/Apple/System/Library/CoreServices/XProtect.bundle** and inside the bundle you can find information XProtect uses:
+XProtect nằm trong vị trí được SIP bảo vệ tại **/Library/Apple/System/Library/CoreServices/XProtect.bundle** và bên trong bundle, bạn có thể tìm thấy thông tin mà XProtect sử dụng:
 
-- **`XProtect.bundle/Contents/Resources/LegacyEntitlementAllowlist.plist`**: Allows code with those cdhashes to use legacy entitlements.
-- **`XProtect.bundle/Contents/Resources/XProtect.meta.plist`**: List of plugins and extensions that are disallowed to load via BundleID and TeamID or indicating a minimum version.
-- **`XProtect.bundle/Contents/Resources/XProtect.yara`**: Yara rules to detect malware.
-- **`XProtect.bundle/Contents/Resources/gk.db`**: SQLite3 database with hashes of blocked applications and TeamIDs.
+- **`XProtect.bundle/Contents/Resources/LegacyEntitlementAllowlist.plist`**: Cho phép mã có các cdhash đó sử dụng legacy entitlements.
+- **`XProtect.bundle/Contents/Resources/XProtect.meta.plist`**: Danh sách các plugin và extension không được phép tải, được xác định bằng BundleID và TeamID, hoặc chỉ định phiên bản tối thiểu.
+- **`XProtect.bundle/Contents/Resources/XProtect.yara`**: Các quy tắc Yara để phát hiện malware.
+- **`XProtect.bundle/Contents/Resources/gk.db`**: Cơ sở dữ liệu SQLite3 chứa hash của các ứng dụng bị chặn và TeamID.
 
-Note that there is another App in **`/Library/Apple/System/Library/CoreServices/XProtect.app`** related to XProtect that isn't involved with the Gatekeeper process.
+Lưu ý rằng có một App khác tại **`/Library/Apple/System/Library/CoreServices/XProtect.app`** liên quan đến XProtect nhưng không tham gia vào quy trình Gatekeeper.
 
-> XProtect Remediator: On modern macOS, Apple ships on-demand scanners (XProtect Remediator) that run periodically via launchd to detect and remediate families of malware. You can observe these scans in unified logs:
+> XProtect Remediator: Trên các phiên bản macOS hiện đại, Apple cung cấp các trình quét theo yêu cầu (XProtect Remediator), chạy định kỳ qua launchd để phát hiện và khắc phục các nhóm malware. Bạn có thể quan sát các lần quét này trong unified logs:
 >
 > ```bash
 > log show --last 2h --predicate 'subsystem == "com.apple.XProtectFramework" || category CONTAINS "XProtect"' --style syslog
 > ```
 
-### Not Gatekeeper
+### Không phải Gatekeeper
 
 > [!CAUTION]
-> Note that Gatekeeper **isn't executed every time** you execute an application, just _**AppleMobileFileIntegrity**_ (AMFI) will only **verify executable code signatures** when you execute an app that has been already executed and verified by Gatekeeper.
+> Lưu ý rằng Gatekeeper **không được thực thi mỗi lần** bạn chạy một ứng dụng; chỉ có _**AppleMobileFileIntegrity**_ (AMFI) **xác minh chữ ký code thực thi** khi bạn chạy một ứng dụng đã được Gatekeeper chạy và xác minh trước đó.
 
-Therefore, previously it was possible to execute an app to cache it with Gatekeeper, then **modify not executables files of the application** (like Electron asar or NIB files) and if no other protections were in place, the application was **executed** with the **malicious** additions.
+Do đó, trước đây có thể chạy một ứng dụng để Gatekeeper cache ứng dụng đó, sau đó **sửa đổi các file không thực thi của ứng dụng** (như Electron asar hoặc file NIB) và nếu không có biện pháp bảo vệ nào khác, ứng dụng sẽ được **chạy** cùng các phần bổ sung **độc hại**.
 
-However, now this is not possible because macOS **prevents modifying files** inside applications bundles. So, if you try the [Dirty NIB](../macos-proces-abuse/macos-dirty-nib.md) attack, you will find that it's not longer possible to abuse it because after executing the app to cache it with Gatekeeper, you won't be able to modify the bundle. And if you change for example the name of the Contents directory to NotCon (as indicated in the exploit), and then execute the main binary of the app to cache it with Gatekeeper, it will trigger an error and won't execute.
+Tuy nhiên, hiện nay điều này không còn khả thi vì macOS **ngăn sửa đổi file** bên trong application bundle. Vì vậy, nếu thử tấn công [Dirty NIB](../macos-proces-abuse/macos-dirty-nib.md), bạn sẽ thấy không thể khai thác nó nữa: sau khi chạy ứng dụng để Gatekeeper cache ứng dụng đó, bạn sẽ không thể sửa đổi bundle. Và nếu bạn đổi tên thư mục Contents thành NotCon chẳng hạn (như exploit hướng dẫn), rồi chạy binary chính của ứng dụng để Gatekeeper cache ứng dụng đó, thao tác này sẽ gây ra lỗi và ứng dụng sẽ không chạy.
 
-## Gatekeeper Bypasses
+## Các cách vượt qua Gatekeeper
 
-Any way to bypass Gatekeeper (manage to make the user download something and execute it when Gatekeeper should disallow it) is considered a vulnerability in macOS. These are some CVEs assigned to techniques that allowed to bypass Gatekeeper in the past:
+Bất kỳ cách nào vượt qua Gatekeeper (khiến người dùng tải xuống và chạy thứ gì đó mà Gatekeeper lẽ ra phải chặn) đều được xem là lỗ hổng trong macOS. Sau đây là một số CVE được gán cho các kỹ thuật từng cho phép vượt qua Gatekeeper:
 
 ### [CVE-2021-1810](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810)
 
-It was observed that if the **Archive Utility** is used for extraction, files with **paths exceeding 886 characters** do not receive the com.apple.quarantine extended attribute. This situation inadvertently allows those files to **circumvent Gatekeeper's** security checks.<sup>[[5]](#references)</sup>
+Người ta phát hiện rằng nếu dùng **Archive Utility** để giải nén, các file có **đường dẫn dài hơn 886 ký tự** sẽ không nhận được extended attribute com.apple.quarantine. Điều này vô tình cho phép các file đó **né tránh** các bước kiểm tra bảo mật của Gatekeeper.<sup>[[5]](#references)</sup>
 
-Check the [**original report**](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810) for more information.<sup>[[5]](#references)</sup>
+Xem [**báo cáo gốc**](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810) để biết thêm thông tin.<sup>[[5]](#references)</sup>
 
 ### [CVE-2021-30990](https://ronmasas.com/posts/bypass-macos-gatekeeper)
 
-When an application is created with **Automator**, the information about what it needs to execute is inside `application.app/Contents/document.wflow` not in the executable. The executable is just a generic Automator binary called **Automator Application Stub**.
+Khi tạo ứng dụng bằng **Automator**, thông tin về những gì ứng dụng cần thực thi nằm trong `application.app/Contents/document.wflow`, chứ không nằm trong executable. Executable chỉ là một binary Automator dùng chung có tên **Automator Application Stub**.
 
-Therefore, you could make `application.app/Contents/MacOS/Automator\ Application\ Stub` **point with a symbolic link to another Automator Application Stub inside the system** and it will execute what is inside `document.wflow` (you script) **without triggering Gatekeeper** because the actual executable doesn't have the quarantine xattr.<sup>[[6]](#references)</sup>
+Do đó, bạn có thể tạo symbolic link từ `application.app/Contents/MacOS/Automator\ Application\ Stub` đến một Automator Application Stub khác trong hệ thống, và nó sẽ thực thi nội dung trong `document.wflow` (script của bạn) **mà không kích hoạt Gatekeeper**, vì executable thực tế không có quarantine xattr.<sup>[[6]](#references)</sup>
 
-Example os expected location: `/System/Library/CoreServices/Automator\ Application\ Stub.app/Contents/MacOS/Automator\ Application\ Stub`
+Ví dụ về vị trí dự kiến: `/System/Library/CoreServices/Automator\ Application\ Stub.app/Contents/MacOS/Automator\ Application\ Stub`
 
-Check the [**original report**](https://ronmasas.com/posts/bypass-macos-gatekeeper) for more information.<sup>[[6]](#references)</sup>
+Xem [**báo cáo gốc**](https://ronmasas.com/posts/bypass-macos-gatekeeper) để biết thêm thông tin.<sup>[[6]](#references)</sup>
 
 ### [CVE-2022-22616](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/)
 
-In this bypass a zip file was created with an application starting to compress from `application.app/Contents` instead of `application.app`. Therefore, the **quarantine attr** was applied to all the **files from `application.app/Contents`** but **not to `application.app`**, which is was Gatekeeper was checking, so Gatekeeper was bypassed because when `application.app` was triggered it **didn't have the quarantine attribute.**<sup>[[7]](#references)</sup>
+Trong cách vượt qua này, một file zip được tạo bằng cách bắt đầu nén từ `application.app/Contents` thay vì `application.app`. Vì vậy, **quarantine attr** được áp dụng cho tất cả **file trong `application.app/Contents`** nhưng **không áp dụng cho `application.app`**, vốn là đối tượng Gatekeeper kiểm tra. Nhờ đó, Gatekeeper bị vượt qua vì khi `application.app` được kích hoạt, nó **không có quarantine attribute.**<sup>[[7]](#references)</sup>
 
 ```bash
 zip -r test.app/Contents test.zip
 ```
 
-Check the [**original report**](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/) for more information.<sup>[[7]](#references)</sup>
+Xem [**báo cáo gốc**](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/) để biết thêm thông tin.<sup>[[7]](#references)</sup>
 
 ### [CVE-2022-32910](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-32910)
 
-Even if the components are different the exploitation of this vulnerability is very similar to the previous one. In this case with will generate an Apple Archive from **`application.app/Contents`** so **`application.app` won't get the quarantine attr** when decompressed by **Archive Utility**.<sup>[[8]](#references)</sup>
+Dù các thành phần khác nhau, cách khai thác lỗ hổng này rất giống với lỗ hổng trước đó. Trong trường hợp này, chúng ta sẽ tạo một Apple Archive từ **`application.app/Contents`**, nhờ đó **`application.app` sẽ không có thuộc tính quarantine** khi được giải nén bằng **Archive Utility**.<sup>[[8]](#references)</sup>
 
 ```bash
 aa archive -d test.app/Contents -o test.app.aar
 ```
 
-Check the [**original report**](https://www.jamf.com/blog/jamf-threat-labs-macos-archive-utility-vulnerability/) for more information.<sup>[[8]](#references)</sup>
+Xem [**báo cáo gốc**](https://www.jamf.com/blog/jamf-threat-labs-macos-archive-utility-vulnerability/) để biết thêm thông tin.<sup>[[8]](#references)</sup>
 
 ### [CVE-2022-42821](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
 
-The ACL **`writeextattr`** can be used to prevent anyone from writing an attribute in a file:
+ACL **`writeextattr`** có thể được dùng để ngăn bất kỳ ai ghi thuộc tính vào một tệp:
 
 ```bash
 touch /tmp/no-attr
@@ -482,9 +480,9 @@ xattr -w attrname vale /tmp/no-attr
 xattr: [Errno 13] Permission denied: '/tmp/no-attr'
 ```
 
-Moreover, **AppleDouble** file format copies a file including its ACEs.<sup>[[9]](#references)</sup>
+Hơn nữa, định dạng tệp **AppleDouble** sao chép tệp cùng với các ACE của tệp đó.<sup>[[9]](#references)</sup>
 
-In the [**source code**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) it's possible to see that the ACL text representation stored inside the xattr called **`com.apple.acl.text`** is going to be set as ACL in the decompressed file. So, if you compressed an application into a zip file with **AppleDouble** file format with an ACL that prevents other xattrs to be written to it... the quarantine xattr wasn't set into de application:
+Trong [**mã nguồn**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html), có thể thấy biểu diễn văn bản ACL được lưu bên trong xattr có tên **`com.apple.acl.text`** sẽ được đặt làm ACL cho tệp sau khi giải nén. Vì vậy, nếu bạn nén một ứng dụng thành tệp zip ở định dạng **AppleDouble** với ACL ngăn không cho ghi các xattr khác vào ứng dụng đó... thì xattr quarantine sẽ không được đặt vào ứng dụng:
 
 ```bash
 chmod +a "everyone deny write,writeattr,writeextattr" /tmp/test
@@ -493,9 +491,9 @@ python3 -m http.server
 # Download the zip from the browser and decompress it, the file should be without a quarantine xattr
 ```
 
-Check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) for more information.<sup>[[9]](#references)</sup> See the [AppleDouble/ACL reproduction](macos-fs-tricks/macos-xattr-acls-extra-stuff.md) for the sidecar construction and validation steps.
+Xem [**báo cáo gốc**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) để biết thêm thông tin.<sup>[[9]](#references)</sup> Xem [hướng dẫn tái hiện AppleDouble/ACL](macos-fs-tricks/macos-xattr-acls-extra-stuff.md) để biết các bước tạo và xác thực sidecar.
 
-Note that this could also be be exploited with AppleArchives:
+Lưu ý rằng cách này cũng có thể bị khai thác bằng AppleArchives:
 
 ```bash
 mkdir app
@@ -506,11 +504,11 @@ aa archive -d app -o test.aar
 
 ### [CVE-2023-27943](https://blog.f-secure.com/discovery-of-gatekeeper-bypass-cve-2023-27943/)
 
-It was discovered that **Google Chrome wasn't setting the quarantine attribute** to downloaded files because of some macOS internal problems.<sup>[[10]](#references)</sup>
+Phát hiện rằng **Google Chrome không thiết lập thuộc tính quarantine** cho các tệp đã tải xuống do một số vấn đề nội bộ của macOS.<sup>[[10]](#references)</sup>
 
 ### [CVE-2023-27951](https://redcanary.com/blog/gatekeeper-bypass-vulnerabilities/)
 
-AppleDouble stores a file's attributes in a separate file whose name starts with `._`; this helps copy file attributes **across macOS machines**. However, after decompressing an AppleDouble file, the file starting with `._` **wasn't given the quarantine attribute**.<sup>[[11]](#references)</sup>
+AppleDouble lưu trữ thuộc tính của tệp trong một tệp riêng có tên bắt đầu bằng `._`; điều này giúp sao chép thuộc tính tệp **giữa các máy macOS**. Tuy nhiên, sau khi giải nén tệp AppleDouble, tệp bắt đầu bằng `._` **không được gán thuộc tính quarantine**.<sup>[[11]](#references)</sup>
 
 ```bash
 mkdir test
@@ -522,8 +520,8 @@ aa archive -d test/ -o test.aar
 # If you download and decompress the resulting test.aar, test/._a won't have a quarantine attribute
 ```
 
-Being able to create a file that won't have the quarantine attribute set, it was **possible to bypass Gatekeeper.** The trick was to **create a DMG file application** using the AppleDouble name convention (start it with `._`) and create a **visible file as a sym link to this hidden** file without the quarantine attribute.\
-When the **dmg file is executed**, as it doesn't have a quarantine attribute it'll **bypass Gatekeeper**.
+Có thể **bypass Gatekeeper** bằng cách tạo một file không có thuộc tính quarantine. Thủ thuật này là **tạo một ứng dụng dưới dạng file DMG** theo quy ước đặt tên AppleDouble (bắt đầu bằng `._`), rồi tạo một **file hiển thị dưới dạng symlink trỏ đến file ẩn** không có thuộc tính quarantine.\
+Khi **file DMG được thực thi**, do không có thuộc tính quarantine, nó sẽ **bypass Gatekeeper**.
 
 ```bash
 # Create an app bundle with the backdoor an call it app.app
@@ -543,21 +541,21 @@ aa archive -d s/ -o app.aar
 
 ### [CVE-2023-41067]
 
-Apple fixed a LaunchServices logic error in macOS Sonoma 14.0 through improved checks. The public advisory only states that an app could bypass Gatekeeper, so do not infer a specific carrier format or exploitation chain from the CVE entry alone.<sup>[[13]](#references)</sup>
+Apple đã khắc phục lỗi logic trong LaunchServices trên macOS Sonoma 14.0 bằng cách cải thiện các bước kiểm tra. Thông báo công khai chỉ nêu rằng một ứng dụng có thể bypass Gatekeeper, vì vậy không nên suy luận định dạng vật chứa cụ thể hay chuỗi khai thác chỉ từ mục CVE.<sup>[[13]](#references)</sup>
 
 ### [CVE-2024-27853]
 
-A Gatekeeper bypass in macOS 14.4 (released March 2024) stemming from `libarchive` handling of malicious ZIPs allowed apps to evade assessment. Update to 14.4 or later where Apple addressed the issue.<sup>[[1]](#references)</sup>
+Lỗ hổng bypass Gatekeeper trong macOS 14.4 (phát hành vào tháng 3 năm 2024), bắt nguồn từ cách `libarchive` xử lý các tệp ZIP độc hại, cho phép ứng dụng né bước đánh giá. Hãy cập nhật lên phiên bản 14.4 trở lên, nơi Apple đã khắc phục sự cố.<sup>[[1]](#references)</sup>
 
 ### [CVE-2024-44128](https://support.apple.com/en-us/121234)
 
-An **Automator Quick Action workflow** embedded in a downloaded app could trigger without Gatekeeper assessment, because workflows were treated as data and executed by the Automator helper outside the normal notarization prompt path. A crafted `.app` bundling a Quick Action that runs a shell script (e.g., inside `Contents/PlugIns/*.workflow/Contents/document.wflow`) could therefore execute immediately on launch. Apple added an extra consent dialog and fixed the assessment path in Ventura **13.7**, Sonoma **14.7**, and Sequoia **15**.<sup>[[3]](#references)</sup>
+Một **quy trình Quick Action của Automator** được nhúng trong ứng dụng đã tải xuống có thể được kích hoạt mà không qua bước đánh giá của Gatekeeper, vì các quy trình được xem là dữ liệu và được helper của Automator thực thi bên ngoài luồng nhắc xác nhận notarization thông thường. Do đó, một tệp `.app` được tạo thủ công, chứa Quick Action chạy shell script (ví dụ: bên trong `Contents/PlugIns/*.workflow/Contents/document.wflow`), có thể thực thi ngay khi khởi chạy. Apple đã thêm hộp thoại xác nhận bổ sung và sửa luồng đánh giá trong Ventura **13.7**, Sonoma **14.7** và Sequoia **15**.<sup>[[3]](#references)</sup>
 
-### Quarantine propagation failures at extraction and copy boundaries
+### Lỗi truyền trạng thái quarantine tại ranh giới giải nén và sao chép
 
-A 2024 study found propagation gaps in the tested versions of iZip (ZIP/TAR/7Z), Archiver (ARCHIVER/ZIP/TAR/7Z), BetterZip (ZIP/TAR/7Z), WinRAR (ZIP/TAR/7Z), and 7z Utility (DMG/ZIP/7Z); it also observed the attribute being lost during VMware Tools host-to-guest copies. Several vendors subsequently announced fixes, so treat these names as leads for **version-specific retesting**, not as a permanent vulnerable-software list. The same trust-boundary problem applies to native Unix workflows: `curl`/`scp` do not add quarantine, and command-line `tar`/`unzip` do not automatically inherit it from a carrier archive.<sup>[[15]](#references)</sup>
+Một nghiên cứu năm 2024 phát hiện các lỗ hổng truyền trạng thái quarantine trong những phiên bản đã thử nghiệm của iZip (ZIP/TAR/7Z), Archiver (ARCHIVER/ZIP/TAR/7Z), BetterZip (ZIP/TAR/7Z), WinRAR (ZIP/TAR/7Z) và 7z Utility (DMG/ZIP/7Z); nghiên cứu cũng ghi nhận thuộc tính này bị mất khi sao chép từ máy chủ sang máy khách bằng VMware Tools. Sau đó, một số nhà cung cấp đã thông báo phát hành bản sửa lỗi, vì vậy hãy xem các tên này là gợi ý để **kiểm tra lại theo từng phiên bản**, không phải danh sách phần mềm luôn dễ bị tấn công. Vấn đề ranh giới tin cậy tương tự cũng áp dụng cho quy trình Unix gốc: `curl`/`scp` không thêm quarantine, còn `tar`/`unzip` chạy qua command line không tự động kế thừa trạng thái này từ tệp lưu trữ vật chứa.<sup>[[15]](#references)</sup>
 
-For offensive testing, compare the carrier and the final app after **every** browser, mail client, archive, disk-image, cloud-sync, shared-folder, and VM-copy transition. An explicit `spctl` rejection does not repair a missing xattr: without quarantine, the normal first-open Gatekeeper path might never request that assessment.<sup>[[15]](#references)</sup>
+Khi kiểm thử offensive, hãy so sánh vật chứa và ứng dụng cuối cùng sau **mỗi** lần chuyển qua trình duyệt, ứng dụng email, công cụ lưu trữ, ảnh đĩa, đồng bộ đám mây, thư mục dùng chung và thao tác sao chép VM. Việc `spctl` từ chối rõ ràng không khắc phục được xattr bị thiếu: nếu không có quarantine, luồng Gatekeeper thông thường khi mở lần đầu có thể không bao giờ yêu cầu đánh giá ứng dụng đó.<sup>[[15]](#references)</sup>
 
 ```bash
 # 1. Confirm the browser-downloaded carrier is quarantined
@@ -572,20 +570,20 @@ find ./out -type d -name '*.app' -prune -exec sh -c \
   'for app do xattr -p com.apple.quarantine "$app" >/dev/null 2>&1 || echo "$app"; done' sh {} +
 ```
 
-### uchg (from this [talk](https://codeblue.jp/2023/result/pdf/cb23-bypassing-macos-security-and-privacy-mechanisms-from-gatekeeper-to-system-integrity-protection-by-koh-nakagawa.pdf))
+### uchg (từ [bài nói chuyện này](https://codeblue.jp/2023/result/pdf/cb23-bypassing-macos-security-and-privacy-mechanisms-from-gatekeeper-to-system-integrity-protection-by-koh-nakagawa.pdf))
 
-- Create a directory containing an app.
-- Add uchg to the app.
-- Compress the app to a tar.gz file.
-- Send the tar.gz file to a victim.
-- The victim opens the tar.gz file and runs the app.
-- Gatekeeper does not check the app.<sup>[[12]](#references)</sup>
+- Tạo một thư mục chứa một app.
+- Thêm uchg vào app.
+- Nén app thành tệp tar.gz.
+- Gửi tệp tar.gz cho nạn nhân.
+- Nạn nhân mở tệp tar.gz và chạy app.
+- Gatekeeper không kiểm tra app.<sup>[[12]](#references)</sup>
 
-### Prevent Quarantine xattr
+### Ngăn thêm quarantine xattr
 
-In an ".app" bundle if the quarantine xattr is not added to it, when executing it **Gatekeeper won't be triggered**.
+Trong một gói ".app", nếu quarantine xattr không được thêm vào thì khi thực thi, **Gatekeeper sẽ không được kích hoạt**.
 
-See [macOS FS Tricks](macos-fs-tricks/README.md#avoid-quarantine-xattrs-tricks) for filesystem-, flag-, ACL-, and AppleDouble-based primitives that can prevent or discard extended attributes.
+Xem [macOS FS Tricks](macos-fs-tricks/README.md#avoid-quarantine-xattrs-tricks) để biết các primitive dựa trên filesystem, flag, ACL và AppleDouble có thể ngăn hoặc loại bỏ extended attributes.
 
 
 
@@ -593,19 +591,19 @@ See [macOS FS Tricks](macos-fs-tricks/README.md#avoid-quarantine-xattrs-tricks) 
 
 ## References
 
-- [1] [Apple Platform Security: About the security content of macOS Sonoma 14.4 (includes CVE-2024-27853)](https://support.apple.com/en-us/HT214084)
-- [2] [Eclectic Light: How macOS now tracks the provenance of apps](https://eclecticlight.co/2023/05/10/how-macos-now-tracks-the-provenance-of-apps/)
-- [3] [Apple: About the security content of macOS Sonoma 14.7 / Ventura 13.7 (CVE-2024-44128)](https://support.apple.com/en-us/121234)
-- [4] [MacRumors: macOS 15 Sequoia removes the Control‑click “Open” Gatekeeper bypass](https://www.macrumors.com/2024/08/06/macos-sequoia-gatekeeper-security-change/)
-- [5] [WithSecure Labs: The Discovery of CVE-2021-1810](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810)
-- [6] [CVE-2021-30990, Bypassing The macOS Gatekeeper](https://ronmasas.com/posts/bypass-macos-gatekeeper)
-- [7] [Jamf Threat Labs identifies Safari vulnerability allowing for Gatekeeper bypass](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/)
-- [8] [Jamf Threat Labs identifies macOS Archive Utility vulnerability allowing for Gatekeeper bypass (CVE-2022-32910)](https://www.jamf.com/blog/jamf-threat-labs-macos-archive-utility-vulnerability/)
-- [9] [Gatekeeper's Achilles heel: Unearthing a macOS vulnerability](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
-- [10] [F-Secure: Discovery of a Gatekeeper Bypass (CVE-2023-27943)](https://blog.f-secure.com/discovery-of-gatekeeper-bypass-cve-2023-27943/)
-- [11] [Finding and reporting a Gatekeeper bypass exploit with help from Mac Monitor](https://redcanary.com/blog/gatekeeper-bypass-vulnerabilities/)
-- [12] [CODE BLUE 2023: Bypassing macOS Security and Privacy Mechanisms — From Gatekeeper to System Integrity Protection (Koh Nakagawa)](https://codeblue.jp/2023/result/pdf/cb23-bypassing-macos-security-and-privacy-mechanisms-from-gatekeeper-to-system-integrity-protection-by-koh-nakagawa.pdf)
-- [13] [Apple: About the security content of macOS Sonoma 14 (CVE-2023-41067)](https://support.apple.com/en-us/HT213940)
-- [14] [Apple Developer Forums: Testing a notarised product](https://developer.apple.com/forums/thread/130560)
-- [15] [Unit 42: Gatekeeper Bypass — Uncovering Weaknesses in a macOS Security Mechanism](https://unit42.paloaltonetworks.com/gatekeeper-bypass-macos/)
+- [1] [Apple Platform Security: Nội dung bảo mật của macOS Sonoma 14.4 (bao gồm CVE-2024-27853)](https://support.apple.com/en-us/HT214084)
+- [2] [Eclectic Light: Cách macOS hiện theo dõi nguồn gốc của các app](https://eclecticlight.co/2023/05/10/how-macos-now-tracks-the-provenance-of-apps/)
+- [3] [Apple: Nội dung bảo mật của macOS Sonoma 14.7 / Ventura 13.7 (CVE-2024-44128)](https://support.apple.com/en-us/121234)
+- [4] [MacRumors: macOS 15 Sequoia loại bỏ cách bypass Gatekeeper bằng thao tác Control-click “Open”](https://www.macrumors.com/2024/08/06/macos-sequoia-gatekeeper-security-change/)
+- [5] [WithSecure Labs: Phát hiện CVE-2021-1810](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810)
+- [6] [CVE-2021-30990, Bypass macOS Gatekeeper](https://ronmasas.com/posts/bypass-macos-gatekeeper)
+- [7] [Jamf Threat Labs phát hiện lỗ hổng Safari cho phép bypass Gatekeeper](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/)
+- [8] [Jamf Threat Labs phát hiện lỗ hổng macOS Archive Utility cho phép bypass Gatekeeper (CVE-2022-32910)](https://www.jamf.com/blog/jamf-threat-labs-macos-archive-utility-vulnerability/)
+- [9] [Điểm yếu chí mạng của Gatekeeper: Phát hiện lỗ hổng macOS](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
+- [10] [F-Secure: Phát hiện cách bypass Gatekeeper (CVE-2023-27943)](https://blog.f-secure.com/discovery-of-gatekeeper-bypass-cve-2023-27943/)
+- [11] [Phát hiện và báo cáo một exploit bypass Gatekeeper với sự trợ giúp của Mac Monitor](https://redcanary.com/blog/gatekeeper-bypass-vulnerabilities/)
+- [12] [CODE BLUE 2023: Bypass các cơ chế bảo mật và quyền riêng tư của macOS — Từ Gatekeeper đến System Integrity Protection (Koh Nakagawa)](https://codeblue.jp/2023/result/pdf/cb23-bypassing-macos-security-and-privacy-mechanisms-from-gatekeeper-to-system-integrity-protection-by-koh-nakagawa.pdf)
+- [13] [Apple: Nội dung bảo mật của macOS Sonoma 14 (CVE-2023-41067)](https://support.apple.com/en-us/HT213940)
+- [14] [Apple Developer Forums: Kiểm thử sản phẩm đã notarize](https://developer.apple.com/forums/thread/130560)
+- [15] [Unit 42: Bypass Gatekeeper — Khám phá điểm yếu trong một cơ chế bảo mật của macOS](https://unit42.paloaltonetworks.com/gatekeeper-bypass-macos/)
 {{#include ../../../banners/hacktricks-training.md}}

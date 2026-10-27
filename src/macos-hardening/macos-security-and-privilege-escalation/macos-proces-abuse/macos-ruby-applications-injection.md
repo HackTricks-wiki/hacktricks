@@ -4,33 +4,33 @@
 
 ## RUBYOPT
 
-Ruby parses supported command-line switches from the `RUBYOPT` environment variable before running a script. Ruby rejects code execution through `-e` in `RUBYOPT`, but `-I` can prepend a library-search directory and `-r` can require a library. A process that launches Ruby with attacker-controlled environment variables can therefore be made to load attacker-controlled Ruby code.<sup>[[1]](#references)</sup>
+Ruby phân tích các tùy chọn dòng lệnh được hỗ trợ từ biến môi trường `RUBYOPT` trước khi chạy script. Ruby từ chối thực thi code thông qua `-e` trong `RUBYOPT`, nhưng `-I` có thể thêm thư mục tìm kiếm thư viện vào đầu danh sách và `-r` có thể require một thư viện. Vì vậy, một tiến trình khởi chạy Ruby với các biến môi trường do attacker kiểm soát có thể bị buộc nạp code Ruby do attacker kiểm soát.<sup>[[1]](#references)</sup>
 
-Create `/tmp/inject.rb`:
+Tạo `/tmp/inject.rb`:
 
 ```ruby:inject.rb
 puts `whoami`
 ```
 
-Create a benign Ruby script such as `hello.rb`:
+Tạo một script Ruby vô hại, chẳng hạn như `hello.rb`:
 
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```
 
-Run it with a controlled `RUBYOPT` value:
+Chạy nó với giá trị `RUBYOPT` được kiểm soát:
 
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb
 ```
 
-To disable this behavior, pass `--disable=rubyopt` (or `--disable-rubyopt`) **before** the script name:<sup>[[1]](#references)</sup>
+Để vô hiệu hóa hành vi này, hãy truyền `--disable=rubyopt` (hoặc `--disable-rubyopt`) **trước** tên script:<sup>[[1]](#references)</sup>
 
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby --disable=rubyopt hello.rb
 ```
 
-An option written after `hello.rb` is passed to the script in `ARGV`; it does not disable Ruby's earlier processing of `RUBYOPT`.<sup>[[1]](#references)</sup>
+Một tùy chọn được ghi sau `hello.rb` sẽ được truyền cho script trong `ARGV`; tùy chọn đó không vô hiệu hóa việc Ruby xử lý `RUBYOPT` trước đó.<sup>[[1]](#references)</sup>
 
 ```bash
 # This still loads /tmp/inject.rb because --disable-rubyopt is an argument to hello.rb.
@@ -39,7 +39,7 @@ RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
 
 ## RUBYLIB
 
-Instead of prepending the load directory with `-I` inside `RUBYOPT`, the separate `RUBYLIB` environment variable adds directories to Ruby's `$LOAD_PATH`. Combined with `RUBYOPT=-r<module>` it loads attacker code without needing `-I` in `RUBYOPT`:<sup>[[1]](#references)</sup>
+Thay vì thêm thư mục tải vào đầu danh sách bằng `-I` bên trong `RUBYOPT`, biến môi trường riêng `RUBYLIB` thêm các thư mục vào `$LOAD_PATH` của Ruby. Kết hợp với `RUBYOPT=-r<module>`, cách này tải mã của attacker mà không cần `-I` trong `RUBYOPT`:<sup>[[1]](#references)</sup>
 
 ```bash
 echo "puts \`whoami\`" > /tmp/inject.rb
@@ -48,6 +48,5 @@ RUBYLIB=/tmp RUBYOPT=-rinject ruby hello.rb
 
 ## References
 
-- [1] [Ruby documentation - Ruby command-line options](https://ruby-doc.org/3.4/ruby/options_md.html)
-
+- [1] [Tài liệu Ruby - Các tùy chọn dòng lệnh của Ruby](https://ruby-doc.org/3.4/ruby/options_md.html)
 {{#include ../../../banners/hacktricks-training.md}}

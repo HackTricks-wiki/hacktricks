@@ -2,35 +2,35 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Thông tin cơ bản
 
-**Apple events** are structured interprocess messages that applications use to request operations or data from other applications. The **Apple Event Manager** provides the APIs for creating, sending, receiving, and responding to these messages.<sup>[[1]](#references)</sup>
+**Apple events** là các thông điệp liên tiến trình có cấu trúc mà ứng dụng dùng để yêu cầu ứng dụng khác thực hiện thao tác hoặc cung cấp dữ liệu. **Apple Event Manager** cung cấp các API để tạo, gửi, nhận và phản hồi những thông điệp này.<sup>[[1]](#references)</sup>
 
-On macOS, the principal broker is `/System/Library/CoreServices/appleeventsd`, which registers the `com.apple.coreservices.appleevents` Mach service. Applications that receive events register an Apple-event Mach port with this service; senders obtain the destination port through it.<sup>[[3]](#references)</sup>
+Trên macOS, broker chính là `/System/Library/CoreServices/appleeventsd`, đăng ký Mach service `com.apple.coreservices.appleevents`. Các ứng dụng nhận sự kiện đăng ký một cổng Mach dành cho Apple event với dịch vụ này; bên gửi lấy cổng đích thông qua dịch vụ đó.<sup>[[3]](#references)</sup>
 
-Sandbox rules and entitlements limit this communication. A sandbox profile commonly expresses the required operations as `allow appleevent-send` and a Mach lookup for `com.apple.coreservices.appleevents`:<sup>[[3]](#references)</sup>
+Các quy tắc sandbox và entitlement giới hạn hoạt động giao tiếp này. Một sandbox profile thường chỉ định các thao tác cần thiết bằng `allow appleevent-send` và Mach lookup cho `com.apple.coreservices.appleevents`:<sup>[[3]](#references)</sup>
 
 ```scheme
 (allow appleevent-send)
 (allow mach-lookup (global-name "com.apple.coreservices.appleevents"))
 ```
 
-The public `com.apple.security.temporary-exception.apple-events` entitlement can restrict a sandboxed application to named destination bundle identifiers. When analyzing Apple-signed components, also check for the private `com.apple.private.appleevents` entitlement; private Apple entitlements are not normally available to third-party applications.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
+Entitlement công khai `com.apple.security.temporary-exception.apple-events` có thể giới hạn ứng dụng trong sandbox chỉ gửi Apple events đến các bundle identifier đích được chỉ định. Khi phân tích các thành phần do Apple ký, hãy kiểm tra cả entitlement riêng tư `com.apple.private.appleevents`; các entitlement riêng tư của Apple thường không được cung cấp cho ứng dụng bên thứ ba.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
 
 > [!TIP]
-> Set the **`AEDebugSends`** environment variable to log information about Apple events sent by a process:<sup>[[3]](#references)</sup>
+> Đặt biến môi trường **`AEDebugSends`** để ghi nhật ký thông tin về Apple events do một tiến trình gửi:<sup>[[3]](#references)</sup>
 >
 > ```bash
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'
 > ```
 
-To map an Automation grant to its sender and receiver, see [TCC Apple Events grants](index.html#identify-apple-events-sender-and-target-grants).
+Để ánh xạ một quyền Automation tới bên gửi và bên nhận, xem [các quyền TCC Apple Events](index.html#identify-apple-events-sender-and-target-grants).
 
 
 
 ## References
 
-- [1] [Apple Developer Documentation - Apple Event Manager](https://developer.apple.com/documentation/applicationservices/apple_event_manager)
-- [2] [Apple Developer Documentation - App Sandbox Temporary Exception Entitlements](https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/EntitlementKeyReference/Chapters/AppSandboxTemporaryExceptionEntitlements.html)
-- [3] [Mac OS X and iOS Internals - Apple-event debug environment variables](https://www.newosxbook.com/MOXiI.pdf)
+- [1] [Tài liệu dành cho nhà phát triển của Apple - Apple Event Manager](https://developer.apple.com/documentation/applicationservices/apple_event_manager)
+- [2] [Tài liệu dành cho nhà phát triển của Apple - Các entitlement ngoại lệ tạm thời của App Sandbox](https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/EntitlementKeyReference/Chapters/AppSandboxTemporaryExceptionEntitlements.html)
+- [3] [Mac OS X và iOS Internals - Các biến môi trường gỡ lỗi Apple-event](https://www.newosxbook.com/MOXiI.pdf)
 {{#include ../../../../banners/hacktricks-training.md}}

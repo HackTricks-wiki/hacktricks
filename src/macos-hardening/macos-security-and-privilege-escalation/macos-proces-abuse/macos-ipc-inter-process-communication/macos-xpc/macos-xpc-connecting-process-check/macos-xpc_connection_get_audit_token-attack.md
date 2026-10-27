@@ -1,140 +1,140 @@
-# macOS xpc_connection_get_audit_token Attack
+# Tấn công macOS xpc_connection_get_audit_token
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
-**For further information check the original post:** [**https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/**](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/). This is a summary:<sup>[[1]](#references)</sup>
+**Để biết thêm thông tin, hãy xem bài đăng gốc:** [**https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/**](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/). Đây là bản tóm tắt:<sup>[[1]](#references)</sup>
 
-## Mach Messages Basic Info
+## Thông tin cơ bản về Mach Messages
 
-If you don't know what Mach Messages are start checking this page:
+Nếu bạn chưa biết Mach Messages là gì, hãy bắt đầu xem trang này:
 
 
 {{#ref}}
 ../../
 {{#endref}}
 
-For the moment remember that ([definition from here](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing)):<sup>[[1]](#references)</sup>\
-Mach messages are sent over a _mach port_, which is a **single receiver, multiple sender communication** channel built into the mach kernel. **Multiple processes can send messages** to a mach port, but at any point **only a single process can read from it**. Just like file descriptors and sockets, mach ports are allocated and managed by the kernel and processes only see an integer, which they can use to indicate to the kernel which of their mach ports they want to use.
+Trước mắt, hãy nhớ rằng ([định nghĩa tại đây](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing)):<sup>[[1]](#references)</sup>\
+Mach messages được gửi qua một _mach port_, một kênh **giao tiếp một bên nhận, nhiều bên gửi** được tích hợp trong mach kernel. **Nhiều process có thể gửi messages** đến một mach port, nhưng tại mỗi thời điểm, **chỉ một process có thể đọc từ port đó**. Tương tự file descriptors và sockets, mach ports được kernel cấp phát và quản lý; process chỉ thấy một số nguyên để chỉ định cho kernel biết chúng muốn sử dụng mach port nào.
 
 ## XPC Connection
 
-If you don't know how a XPC connection is established check:
+Nếu bạn chưa biết cách thiết lập XPC connection, hãy xem:
 
 
 {{#ref}}
 ../
 {{#endref}}
 
-## Vuln Summary
+## Tóm tắt lỗ hổng
 
-What is interesting for you to know is that **XPC’s abstraction is a one-to-one connection**, but it is based on top of a technology which **can have multiple senders, so:**
+Điều đáng chú ý là **abstraction của XPC là một kết nối một-một**, nhưng nó được xây dựng trên công nghệ **có thể có nhiều bên gửi, vì vậy:**
 
-- Mach ports are single receiver, **multiple sender**.
-- An XPC connection’s audit token is the audit token of **copied from the most recently received message**.
-- Obtaining the **audit token** of an XPC connection is critical to many **security checks**.<sup>[[1]](#references)</sup>
+- Mach ports có một bên nhận, **nhiều bên gửi**.
+- Audit token của XPC connection là audit token được **sao chép từ message nhận được gần nhất**.
+- Việc lấy **audit token** của XPC connection rất quan trọng đối với nhiều **kiểm tra bảo mật**.<sup>[[1]](#references)</sup>
 
-Although the previous situation sounds promising there are some scenarios where this is not going to cause problems ([from here](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing)):<sup>[[1]](#references)</sup>
+Mặc dù tình huống trên có vẻ thuận lợi, nhưng có một số trường hợp sẽ không gây ra vấn đề ([theo bài này](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing)):<sup>[[1]](#references)</sup>
 
-- Audit tokens are often used for an authorization check to decide whether to accept a connection. As this happens using a message to the service port, there is **no connection established yet**. More messages on this port will just be handled as additional connection requests. So any **checks before accepting a connection are not vulnerable** (this also means that within `-listener:shouldAcceptNewConnection:` the audit token is safe). We are therefore **looking for XPC connections that verify specific actions**.
-- XPC event handlers are handled synchronously. This means that the event handler for one message must be completed before calling it for the next one, even on concurrent dispatch queues. So inside an **XPC event handler the audit token can not be overwritten** by other normal (non-reply!) messages.<sup>[[1]](#references)</sup>
+- Audit tokens thường được dùng để kiểm tra quyền truy cập nhằm quyết định có chấp nhận một connection hay không. Vì việc này diễn ra thông qua một message gửi đến service port nên **connection vẫn chưa được thiết lập**. Các messages khác trên port này chỉ được xử lý như những yêu cầu kết nối bổ sung. Do đó, **các bước kiểm tra trước khi chấp nhận connection không dễ bị tấn công** (điều này cũng có nghĩa là audit token an toàn bên trong `-listener:shouldAcceptNewConnection:`). Vì vậy, chúng ta **cần tìm các XPC connections xác minh những hành động cụ thể**.
+- XPC event handlers được xử lý đồng bộ. Điều này có nghĩa là event handler của một message phải hoàn tất trước khi được gọi cho message tiếp theo, kể cả trên các dispatch queues đồng thời. Vì vậy, bên trong **XPC event handler, audit token không thể bị ghi đè** bởi các messages thông thường khác (không phải reply!).<sup>[[1]](#references)</sup>
 
-Two different methods this might be exploitable:
+Có hai cách khác nhau để khai thác vấn đề này:
 
-1. Variant1:
-   - **Exploit** **connects** to service **A** and service **B**
-     - Service **B** can call a **privileged functionality** in service A that the user cannot
-   - Service **A** calls **`xpc_connection_get_audit_token`** while _**not**_ inside the **event handler** for a connection in a **`dispatch_async`**.
-     - So a **different** message could **overwrite the Audit Token** because it's being dispatched asynchronously outside of the event handler.
-   - The exploit passes to **service B the SEND right to service A**.
-     - So svc **B** will be actually **sending** the **messages** to service **A**.
-   - The **exploit** tries to **call** the **privileged action.** In a RC svc **A** **checks** the authorization of this **action** while **svc B overwrote the Audit token** (giving the exploit access to call the privileged action).
+1. Variant 1:
+   - **Exploit** kết nối với service **A** và service **B**.
+     - Service **B** có thể gọi một **chức năng đặc quyền** trong service A mà người dùng không thể gọi.
+   - Service **A** gọi **`xpc_connection_get_audit_token`** khi _**không**_ ở bên trong **event handler** cho một connection trong **`dispatch_async`**.
+     - Do đó, một message **khác** có thể **ghi đè Audit Token** vì nó được dispatch bất đồng bộ bên ngoài event handler.
+   - Exploit chuyển **quyền SEND đến service A** cho **service B**.
+     - Như vậy, svc **B** thực sự sẽ **gửi** các **messages** đến service **A**.
+   - **Exploit** cố **gọi** **hành động đặc quyền**. Trong một RC, svc **A** **kiểm tra** quyền thực hiện **hành động** này khi **svc B đã ghi đè Audit token** (cho phép exploit gọi hành động đặc quyền).
 2. Variant 2:
-   - Service **B** can call a **privileged functionality** in service A that the user cannot
-   - Exploit connects with **service A** which **sends** the exploit a **message expecting a response** in a specific **replay** **port**.
-   - Exploit sends **service** B a message passing **that reply port**.
-   - When service **B replies**, it s**ends the message to service A**, **while** the **exploit** sends a different **message to service A** trying to **reach a privileged functionality** and expecting that the reply from service B will overwrite the Audit token in the perfect moment (Race Condition).
+   - Service **B** có thể gọi một **chức năng đặc quyền** trong service A mà người dùng không thể gọi.
+   - Exploit kết nối với **service A**, nơi **gửi** cho exploit một **message chờ phản hồi** trên một port **reply** cụ thể.
+   - Exploit gửi cho **service** B một message có kèm **reply port đó**.
+   - Khi service **B phản hồi**, nó **gửi message đến service A**, **trong khi** **exploit** gửi một **message khác đến service A** để cố gọi **chức năng đặc quyền**, đồng thời chờ phản hồi từ service B ghi đè Audit token đúng thời điểm (Race Condition).
 
-## Variant 1: calling xpc_connection_get_audit_token outside of an event handler <a href="#variant-1-calling-xpc_connection_get_audit_token-outside-of-an-event-handler" id="variant-1-calling-xpc_connection_get_audit_token-outside-of-an-event-handler"></a>
+## Variant 1: gọi xpc_connection_get_audit_token bên ngoài event handler <a href="#variant-1-calling-xpc_connection_get_audit_token-outside-of-an-event-handler" id="variant-1-calling-xpc_connection_get_audit_token-outside-of-an-event-handler"></a>
 
-Scenario:
+Tình huống:
 
-- Two mach services **`A`** and **`B`** that we can both connect to (based on the sandbox profile and the authorization checks before accepting the connection).
-- _**A**_ must have an **authorization check** for a specific action that **`B`** can pass (but our app can’t).
-  - For example, if B has some **entitlements** or is running as **root**, it might allow him to ask A to perform a privileged action.
-- For this authorization check, **`A`** obtains the audit token asynchronously, for example by calling `xpc_connection_get_audit_token` from **`dispatch_async`**.
+- Có hai mach services **`A`** và **`B`** mà chúng ta có thể kết nối (dựa trên sandbox profile và các bước kiểm tra quyền trước khi chấp nhận connection).
+- _**A**_ phải có **kiểm tra quyền** đối với một hành động cụ thể mà **`B`** có thể vượt qua (nhưng ứng dụng của chúng ta thì không).
+  - Ví dụ, nếu B có một số **entitlements** hoặc chạy dưới quyền **root**, nó có thể được phép yêu cầu A thực hiện hành động đặc quyền.
+- Để kiểm tra quyền này, **`A`** lấy audit token bất đồng bộ, chẳng hạn bằng cách gọi `xpc_connection_get_audit_token` từ **`dispatch_async`**.
 
 > [!CAUTION]
-> In this case an attacker could trigger a **Race Condition** making a **exploit** that **asks A to perform an action** several times while making **B send messages to `A`**. When the RC is **successful**, the **audit token** of **B** will be copied in memory **while** the request of our **exploit** is being **handled** by A, giving it **access to the privilege action only B could request**.
+> Trong trường hợp này, attacker có thể kích hoạt **Race Condition** bằng cách tạo một **exploit** liên tục yêu cầu **A thực hiện một hành động**, đồng thời khiến **B gửi messages đến `A`**. Khi RC **thành công**, **audit token** của **B** sẽ được sao chép vào bộ nhớ **trong lúc** yêu cầu của **exploit** đang được A xử lý, giúp exploit **truy cập hành động đặc quyền vốn chỉ B mới có thể yêu cầu**.
 
-This happened with **`A`** as `smd` and **`B`** as `diagnosticd`. The function [`SMJobBless`](https://developer.apple.com/documentation/servicemanagement/1431078-smjobbless?language=objc) from smb an be used to install a new privileged helper toot (as **root**). If a **process running as root contact** **smd**, no other checks will be performed.
+Tình huống này xảy ra với **`A`** là `smd` và **`B`** là `diagnosticd`. Có thể dùng hàm [`SMJobBless`](https://developer.apple.com/documentation/servicemanagement/1431078-smjobbless?language=objc) từ smb để cài đặt một privileged helper tool mới (dưới quyền **root**). Nếu một **process chạy dưới quyền root liên hệ với** **smd**, sẽ không có bước kiểm tra nào khác được thực hiện.
 
-Therefore, the service **B** is **`diagnosticd`** because it runs as **root** and can be used to **monitor** a process, so once monitoring has started, it will **send multiple messages per second.**
+Do đó, service **B** là **`diagnosticd`** vì nó chạy dưới quyền **root** và có thể được dùng để **giám sát** một process. Khi bắt đầu giám sát, nó sẽ **gửi nhiều messages mỗi giây**.
 
-To perform the attack:
+Để thực hiện cuộc tấn công:
 
-1. Initiate a **connection** to the service named `smd` using the standard XPC protocol.
-2. Form a secondary **connection** to `diagnosticd`. Contrary to normal procedure, rather than creating and sending two new mach ports, the client port send right is substituted with a duplicate of the **send right** associated with the `smd` connection.
-3. As a result, XPC messages can be dispatched to `diagnosticd`, but responses from `diagnosticd` are rerouted to `smd`. To `smd`, it appears as though the messages from both the user and `diagnosticd` are originating from the same connection.
+1. Tạo **connection** đến service có tên `smd` bằng giao thức XPC tiêu chuẩn.
+2. Tạo **connection** thứ hai đến `diagnosticd`. Khác với quy trình thông thường, thay vì tạo và gửi hai mach ports mới, client port send right được thay bằng một bản sao của **send right** gắn với connection `smd`.
+3. Kết quả là XPC messages có thể được gửi đến `diagnosticd`, nhưng các phản hồi từ `diagnosticd` được chuyển hướng đến `smd`. Đối với `smd`, các messages từ cả người dùng lẫn `diagnosticd` dường như đều xuất phát từ cùng một connection.
 
-![Image depicting the exploit process](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/exploit.png)
+![Hình minh họa quy trình khai thác](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/exploit.png)
 
-4. The next step involves instructing `diagnosticd` to initiate monitoring of a chosen process (potentially the user's own). Concurrently, a flood of routine 1004 messages is sent to `smd`. The intent here is to install a tool with elevated privileges.
-5. This action triggers a race condition within the `handle_bless` function. The timing is critical: the `xpc_connection_get_pid` function call must return the PID of the user's process (as the privileged tool resides in the user's app bundle). However, the `xpc_connection_get_audit_token` function, specifically within the `connection_is_authorized` subroutine, must reference the audit token belonging to `diagnosticd`.<sup>[[1]](#references)</sup>
+4. Bước tiếp theo là yêu cầu `diagnosticd` bắt đầu giám sát một process được chọn (có thể là process của chính người dùng). Đồng thời, một loạt messages 1004 thông thường được gửi đến `smd`. Mục đích là cài đặt một công cụ với đặc quyền nâng cao.
+5. Hành động này gây ra race condition bên trong hàm `handle_bless`. Thời điểm thực hiện rất quan trọng: lời gọi hàm `xpc_connection_get_pid` phải trả về PID của process người dùng (vì công cụ đặc quyền nằm trong app bundle của người dùng). Tuy nhiên, hàm `xpc_connection_get_audit_token`, cụ thể là bên trong hàm con `connection_is_authorized`, phải tham chiếu đến audit token thuộc về `diagnosticd`.<sup>[[1]](#references)</sup>
 
-## Variant 2: reply forwarding
+## Variant 2: chuyển tiếp reply
 
-In an XPC (Cross-Process Communication) environment, although event handlers don't execute concurrently, the handling of reply messages has a unique behavior. Specifically, two distinct methods exist for sending messages that expect a reply:
+Trong môi trường XPC (Cross-Process Communication), mặc dù các event handlers không chạy đồng thời, việc xử lý reply messages có hành vi đặc biệt. Cụ thể, có hai cách gửi messages chờ reply:
 
-1. **`xpc_connection_send_message_with_reply`**: Here, the XPC message is received and processed on a designated queue.
-2. **`xpc_connection_send_message_with_reply_sync`**: Conversely, in this method, the XPC message is received and processed on the current dispatch queue.
+1. **`xpc_connection_send_message_with_reply`**: XPC message được nhận và xử lý trên một queue được chỉ định.
+2. **`xpc_connection_send_message_with_reply_sync`**: Ngược lại, với phương thức này, XPC message được nhận và xử lý trên dispatch queue hiện tại.
 
-This distinction is crucial because it allows for the possibility of **reply packets being parsed concurrently with the execution of an XPC event handler**. Notably, while `_xpc_connection_set_creds` does implement locking to safeguard against the partial overwrite of the audit token, it does not extend this protection to the entire connection object. Consequently, this creates a vulnerability where the audit token can be replaced during the interval between the parsing of a packet and the execution of its event handler.
+Sự khác biệt này rất quan trọng vì nó cho phép **reply packets được phân tích đồng thời với lúc thực thi một XPC event handler**. Đáng chú ý, mặc dù `_xpc_connection_set_creds` có triển khai locking để ngăn audit token bị ghi đè một phần, cơ chế này không bảo vệ toàn bộ connection object. Vì vậy, audit token có thể bị thay thế trong khoảng thời gian giữa lúc phân tích packet và lúc thực thi event handler tương ứng.
 
-To exploit this vulnerability, the following setup is required:
+Để khai thác lỗ hổng này, cần có thiết lập sau:
 
-- Two mach services, referred to as **`A`** and **`B`**, both of which can establish a connection.
-- Service **`A`** should include an authorization check for a specific action that only **`B`** can perform (the user's application cannot).
-- Service **`A`** should send a message that anticipates a reply.
-- The user can send a message to **`B`** that it will respond to.
+- Hai mach services, gọi là **`A`** và **`B`**, cả hai đều có thể thiết lập connection.
+- Service **`A`** cần có bước kiểm tra quyền đối với một hành động cụ thể mà chỉ **`B`** mới có thể thực hiện (ứng dụng của người dùng không thể).
+- Service **`A`** cần gửi một message chờ reply.
+- Người dùng có thể gửi một message đến **`B`** và service này sẽ phản hồi.
 
-The exploitation process involves the following steps:
+Quy trình khai thác gồm các bước sau:
 
-1. Wait for service **`A`** to send a message that expects a reply.
-2. Instead of replying directly to **`A`**, the reply port is hijacked and used to send a message to service **`B`**.
-3. Subsequently, a message involving the forbidden action is dispatched, with the expectation that it will be processed concurrently with the reply from **`B`**.<sup>[[1]](#references)</sup>
+1. Chờ service **`A`** gửi một message chờ reply.
+2. Thay vì phản hồi trực tiếp cho **`A`**, chiếm quyền reply port và dùng nó để gửi message đến service **`B`**.
+3. Sau đó, gửi một message yêu cầu thực hiện hành động bị cấm, với kỳ vọng message này sẽ được xử lý đồng thời với reply từ **`B`**.<sup>[[1]](#references)</sup>
 
-Below is a visual representation of the described attack scenario:
+Dưới đây là hình minh họa tình huống tấn công đã mô tả:
 
 !\[https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/variant2.png]\(../../../../../../images/image (1) (1) (1) (1) (1) (1) (1).png)
 
 <figure><img src="../../../../../../images/image (33).png" alt="https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/variant2.png" width="563"><figcaption></figcaption></figure>
 
-## Discovery Problems
+## Khó khăn khi phát hiện
 
-- **Difficulties in Locating Instances**: Searching for instances of `xpc_connection_get_audit_token` usage was challenging, both statically and dynamically.
-- **Methodology**: Frida was employed to hook the `xpc_connection_get_audit_token` function, filtering calls not originating from event handlers. However, this method was limited to the hooked process and required active usage.
-- **Analysis Tooling**: Tools like IDA/Ghidra were used for examining reachable mach services, but the process was time-consuming, complicated by calls involving the dyld shared cache.
-- **Scripting Limitations**: Attempts to script the analysis for calls to `xpc_connection_get_audit_token` from `dispatch_async` blocks were hindered by complexities in parsing blocks and interactions with the dyld shared cache.<sup>[[1]](#references)</sup>
+- **Khó tìm các trường hợp sử dụng**: Việc tìm các trường hợp sử dụng `xpc_connection_get_audit_token` rất khó, cả bằng phương pháp phân tích tĩnh lẫn động.
+- **Phương pháp**: Frida được dùng để hook hàm `xpc_connection_get_audit_token`, lọc các lời gọi không xuất phát từ event handlers. Tuy nhiên, phương pháp này chỉ áp dụng được cho process đã hook và cần process đó đang được sử dụng.
+- **Công cụ phân tích**: Các công cụ như IDA/Ghidra được dùng để kiểm tra các mach services có thể truy cập, nhưng quá trình này tốn thời gian và phức tạp do các lời gọi liên quan đến dyld shared cache.
+- **Hạn chế khi viết script**: Các nỗ lực viết script để phân tích lời gọi `xpc_connection_get_audit_token` từ các khối `dispatch_async` gặp trở ngại do việc phân tích blocks và tương tác với dyld shared cache khá phức tạp.<sup>[[1]](#references)</sup>
 
-## The fix <a href="#the-fix" id="the-fix"></a>
+## Bản sửa lỗi <a href="#the-fix" id="the-fix"></a>
 
-- **Reported Issues**: A report was submitted to Apple detailing the general and specific issues found within `smd`.
-- **Apple's Response**: Apple addressed the issue in `smd` by substituting `xpc_connection_get_audit_token` with `xpc_dictionary_get_audit_token`.<sup>[[1]](#references)[[2]](#references)</sup>
-- **Nature of the Fix**: The `xpc_dictionary_get_audit_token` function is considered secure as it retrieves the audit token directly from the mach message tied to the received XPC message. However, it's not part of the public API, similar to `xpc_connection_get_audit_token`.
-- **Absence of a Broader Fix**: It remains unclear why Apple didn't implement a more comprehensive fix, such as discarding messages not aligning with the saved audit token of the connection. The possibility of legitimate audit token changes in certain scenarios (e.g., `setuid` usage) might be a factor.
-- **Current Status**: The issue persists in iOS 17 and macOS 14, posing a challenge for those seeking to identify and understand it.<sup>[[1]](#references)</sup>
+- **Báo cáo vấn đề**: Một báo cáo về các vấn đề chung và cụ thể được phát hiện trong `smd` đã được gửi đến Apple.
+- **Phản hồi của Apple**: Apple đã khắc phục vấn đề trong `smd` bằng cách thay `xpc_connection_get_audit_token` bằng `xpc_dictionary_get_audit_token`.<sup>[[1]](#references)[[2]](#references)</sup>
+- **Bản chất của cách sửa lỗi**: Hàm `xpc_dictionary_get_audit_token` được xem là an toàn vì nó lấy audit token trực tiếp từ mach message gắn với XPC message nhận được. Tuy nhiên, hàm này không thuộc public API, tương tự `xpc_connection_get_audit_token`.
+- **Chưa có cách sửa lỗi tổng quát hơn**: Chưa rõ vì sao Apple không đưa ra cách sửa toàn diện hơn, chẳng hạn loại bỏ các messages không khớp với audit token đã lưu của connection. Một nguyên nhân có thể là trong một số trường hợp (ví dụ, sử dụng `setuid`), audit token có thể thay đổi hợp lệ.
+- **Tình trạng hiện tại**: Vấn đề vẫn tồn tại trên iOS 17 và macOS 14, gây khó khăn cho những người muốn xác định và tìm hiểu vấn đề này.<sup>[[1]](#references)</sup>
 
-## Finding vulnerable code paths in practice (2024–2025)
+## Tìm các code paths dễ bị tấn công trong thực tế (2024–2025)
 
-When auditing XPC services for this bug class, focus on authorization performed outside the message’s event handler or concurrently with reply processing.
+Khi kiểm tra các XPC services để tìm nhóm lỗi này, hãy tập trung vào việc kiểm tra quyền được thực hiện bên ngoài event handler của message hoặc đồng thời với quá trình xử lý reply.
 
-Static triage hints:
-- Search for calls to `xpc_connection_get_audit_token` reachable from blocks queued via `dispatch_async`/`dispatch_after` or other worker queues that run outside the message handler.
-- Look for authorization helpers that mix per-connection and per-message state (e.g., fetch PID from `xpc_connection_get_pid` but audit token from `xpc_connection_get_audit_token`).
-- In NSXPC code, verify that checks are done in `-listener:shouldAcceptNewConnection:` or, for per-message checks, that the implementation uses a per-message audit token (e.g., the message’s dictionary via `xpc_dictionary_get_audit_token` in lower-level code).
+Gợi ý phân loại tĩnh:
+- Tìm các lời gọi `xpc_connection_get_audit_token` có thể được thực thi từ các blocks được đưa vào hàng đợi thông qua `dispatch_async`/`dispatch_after` hoặc các worker queues khác chạy bên ngoài message handler.
+- Tìm các hàm kiểm tra quyền kết hợp trạng thái theo connection và theo message (ví dụ: lấy PID từ `xpc_connection_get_pid` nhưng lấy audit token từ `xpc_connection_get_audit_token`).
+- Với NSXPC code, hãy xác minh rằng các bước kiểm tra được thực hiện trong `-listener:shouldAcceptNewConnection:` hoặc, với các bước kiểm tra theo từng message, implementation sử dụng audit token theo từng message (ví dụ: dictionary của message thông qua `xpc_dictionary_get_audit_token` trong lower-level code).
 
-Dynamic triage tips:
-- Hook `xpc_connection_get_audit_token` and flag invocations whose user stack does not include the event-delivery path (e.g., `_xpc_connection_mach_event`). Example Frida hook:
+Mẹo phân loại động:
+- Hook `xpc_connection_get_audit_token` và đánh dấu các lời gọi có user stack không chứa đường đi xử lý event (ví dụ: `_xpc_connection_mach_event`). Ví dụ Frida hook:
 
 ```javascript
 Interceptor.attach(Module.getExportByName(null, 'xpc_connection_get_audit_token'), {
@@ -148,13 +148,13 @@ Interceptor.attach(Module.getExportByName(null, 'xpc_connection_get_audit_token'
 });
 ```
 
-Notes:
-- On macOS, instrumenting protected/Apple binaries may require SIP disabled or a development environment; prefer testing your own builds or userland services.
-- For reply-forwarding races (Variant 2), monitor concurrent parsing of reply packets by fuzzing timings of `xpc_connection_send_message_with_reply` vs. normal requests and checking whether the effective audit token used during authorization can be influenced.
+Ghi chú:
+- Trên macOS, việc instrument các binary được bảo vệ/của Apple có thể yêu cầu tắt SIP hoặc sử dụng môi trường phát triển; nên ưu tiên kiểm thử các bản build của chính bạn hoặc các dịch vụ userland.
+- Đối với các race condition chuyển tiếp phản hồi (Variant 2), hãy theo dõi việc phân tích đồng thời các gói phản hồi bằng cách fuzz thời điểm gọi `xpc_connection_send_message_with_reply` so với các request thông thường, rồi kiểm tra xem audit token hiệu lực được dùng trong quá trình authorization có thể bị ảnh hưởng hay không.
 
-## Exploitation primitives you will likely need
+## Các primitive khai thác có thể bạn sẽ cần
 
-- Multi-sender setup (Variant 1): create connections to A and B; duplicate the send right of A’s client port and use it as B’s client port so that B’s replies are delivered to A.
+- Thiết lập nhiều sender (Variant 1): tạo kết nối đến A và B; duplicate send right của client port của A và dùng nó làm client port của B để các phản hồi của B được chuyển đến A.
 
 ```c
 // Duplicate a SEND right you already hold
@@ -163,22 +163,20 @@ mach_port_insert_right(mach_task_self(), a_client, a_client, MACH_MSG_TYPE_MAKE_
 dup = a_client; // use `dup` when crafting B’s connect packet instead of a fresh client port
 ```
 
-- Reply hijack (Variant 2): capture the send-once right from A’s pending request (reply port), then send a crafted message to B using that reply port so B’s reply lands on A while your privileged request is being parsed.
+- Reply hijack (Variant 2): chiếm send-once right từ request đang chờ của A (reply port), sau đó gửi một message được tạo thủ công đến B bằng reply port đó để phản hồi của B đến A trong khi request có privileged của bạn đang được phân tích.
 
-These require low-level mach message crafting for the XPC bootstrap and message formats; review the mach/XPC primer pages in this section for the exact packet layouts and flags.
+Các cách này yêu cầu tạo message mach cấp thấp cho định dạng bootstrap và message của XPC; hãy xem lại các trang giới thiệu về mach/XPC trong phần này để biết chính xác bố cục packet và các flag.
 
-## Useful tooling
+## Công cụ hữu ích
 
-- XPC sniffing/dynamic inspection: gxpc (open-source XPC sniffer) can help enumerate connections and observe traffic to validate multi-sender setups and timing. Example: `gxpc -p <PID> --whitelist <service-name>`.
-- Classic dyld interposing for libxpc: interpose on `xpc_connection_send_message*` and `xpc_connection_get_audit_token` to log call sites and stacks during black-box testing.
+- XPC sniffing/kiểm tra động: gxpc (XPC sniffer mã nguồn mở) có thể giúp liệt kê các kết nối và quan sát traffic để xác thực thiết lập multi-sender và thời điểm. Ví dụ: `gxpc -p <PID> --whitelist <service-name>`.
+- Kỹ thuật interposing dyld cổ điển cho libxpc: interpose vào `xpc_connection_send_message*` và `xpc_connection_get_audit_token` để ghi lại các vị trí gọi và stack trong quá trình kiểm thử black-box.
 
 
 
 ## References
 
-- [1] [Sector 7 – Don’t Talk All at Once! Elevating Privileges on macOS by Audit Token Spoofing](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
-- [2] [Apple – About the security content of macOS Ventura 13.4 (CVE‑2023‑32405)](https://support.apple.com/en-us/106333)
-
-
+- [1] [Sector 7 – Đừng nói cùng lúc! Nâng cao đặc quyền trên macOS bằng cách giả mạo Audit Token](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
+- [2] [Apple – Giới thiệu về nội dung bảo mật của macOS Ventura 13.4 (CVE‑2023‑32405)](https://support.apple.com/en-us/106333)
 {{#include ../../../../../../banners/hacktricks-training.md}}
 

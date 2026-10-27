@@ -1,10 +1,10 @@
-# macOS Default Sandbox Debug
+# Gỡ lỗi Sandbox mặc định của macOS
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-This page builds a small command runner and signs it with the macOS App Sandbox entitlement. Commands launched with `system()` inherit the app's sandbox restrictions, so this is useful for testing behavior inside a sandbox; it is not a sandbox escape.<sup>[[1]](#references)</sup>
+Trang này tạo một trình chạy lệnh nhỏ và ký ứng dụng bằng entitlement App Sandbox của macOS. Các lệnh được khởi chạy bằng `system()` kế thừa các hạn chế sandbox của ứng dụng, vì vậy công cụ này hữu ích để kiểm tra hành vi bên trong sandbox; đây không phải là cách thoát sandbox.<sup>[[1]](#references)</sup>
 
-1. Compile the application:
+1. Biên dịch ứng dụng:
 
 ```objectivec:main.m
 #include <Foundation/Foundation.h>
@@ -39,13 +39,13 @@ int main(int argc, const char * argv[]) {
 }
 ```
 
-Compile it with:
+Biên dịch nó bằng:
 
 ```bash
 clang -framework Foundation -o SandboxedShellApp main.m
 ```
 
-2. Build the `.app` bundle:
+2. Tạo bundle `.app`:
 
 ```bash
 mkdir -p SandboxedShellApp.app/Contents/MacOS
@@ -69,7 +69,7 @@ cat << EOF > SandboxedShellApp.app/Contents/Info.plist
 EOF
 ```
 
-3. Define the entitlements. The second variant also grants read/write access to the user's Downloads folder.<sup>[[2]](#references)</sup>
+3. Xác định các quyền. Biến thể thứ hai cũng cấp quyền truy cập đọc/ghi vào thư mục Downloads của người dùng.<sup>[[2]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="sandbox"}}
@@ -109,7 +109,7 @@ EOF
 {{#endtab}}
 {{#endtabs}}
 
-4. Sign the app with a signing identity available in the keychain, and then run it. When signing manually, `codesign --entitlements` embeds the entitlement property list in the app's signature.<sup>[[1]](#references)</sup>
+4. Ký ứng dụng bằng danh tính ký có sẵn trong keychain, sau đó chạy ứng dụng. Khi ký thủ công, `codesign --entitlements` nhúng danh sách thuộc tính entitlement vào chữ ký của ứng dụng.<sup>[[1]](#references)</sup>
 
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
@@ -121,7 +121,6 @@ codesign --remove-signature SandboxedShellApp.app
 
 ## References
 
-- [1] [Apple Code Signing Guide: Adding Entitlements for Sandboxing Manually](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Procedures/Procedures.html#//apple_ref/doc/uid/TP40005929-CH4-SW31)
-- [2] [Apple: `com.apple.security.files.downloads.read-write` entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.files.downloads.read-write)
-
+- [1] [Hướng dẫn ký mã của Apple: Thêm entitlement để sandboxing theo cách thủ công](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Procedures/Procedures.html#//apple_ref/doc/uid/TP40005929-CH4-SW31)
+- [2] [Apple: entitlement `com.apple.security.files.downloads.read-write`](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.files.downloads.read-write)
 {{#include ../../../../banners/hacktricks-training.md}}

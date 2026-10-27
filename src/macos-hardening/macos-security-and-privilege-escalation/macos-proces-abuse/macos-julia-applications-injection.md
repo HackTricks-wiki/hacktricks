@@ -1,10 +1,10 @@
-# macOS Julia Applications Injection
+# Chèn mã vào ứng dụng Julia trên macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## `JULIA_DEPOT_PATH` and `startup.jl`
+## `JULIA_DEPOT_PATH` và `startup.jl`
 
-Julia normally executes `config/startup.jl` from its first depot at startup. `JULIA_DEPOT_PATH` controls the depot list, so pointing it to an attacker-readable tree redirects the automatically loaded startup file.<sup>[[1]](#references)[[2]](#references)</sup>
+Julia thường thực thi `config/startup.jl` từ depot đầu tiên khi khởi động. `JULIA_DEPOT_PATH` kiểm soát danh sách depot, vì vậy trỏ biến này đến một cây thư mục mà attacker có thể ghi sẽ chuyển hướng tệp startup được tự động tải.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```bash
 mkdir -p /tmp/julia-depot/config
@@ -14,11 +14,10 @@ echo 'run(`touch /tmp/julia-startup-executed`)' >/tmp/julia-depot/config/startup
 JULIA_DEPOT_PATH=/tmp/julia-depot: julia victim.jl
 ```
 
-The trailing separator is useful when the victim still needs its normal packages. `julia --startup-file=no` disables this startup file. Clear the variable before launch because it also controls package registries, environments, caches, and code-loading locations.
+Dấu phân cách ở cuối hữu ích khi máy nạn nhân vẫn cần các package thông thường. `julia --startup-file=no` sẽ vô hiệu hóa startup file này. Xóa biến trước khi khởi chạy vì biến này cũng kiểm soát package registry, môi trường, bộ nhớ đệm và vị trí tải code.
 
 ## References
 
-- [1] [Julia command-line interface: Startup file](https://docs.julialang.org/en/v1/manual/command-line-interface/#Startup-file)
-- [2] [Julia environment variables: `JULIA_DEPOT_PATH`](https://docs.julialang.org/en/v1/manual/environment-variables/#JULIA_DEPOT_PATH)
-
+- [1] [Giao diện dòng lệnh Julia: Startup file](https://docs.julialang.org/en/v1/manual/command-line-interface/#Startup-file)
+- [2] [Biến môi trường Julia: `JULIA_DEPOT_PATH`](https://docs.julialang.org/en/v1/manual/environment-variables/#JULIA_DEPOT_PATH)
 {{#include ../../../banners/hacktricks-training.md}}

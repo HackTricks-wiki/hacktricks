@@ -1,14 +1,14 @@
-# macOS Useful Commands
+# Các lệnh hữu ích trên macOS
 
 {{#include ../banners/hacktricks-training.md}}
 
-### MacOS Automatic Enumeration Tools
+### Công cụ tự động thu thập thông tin trên macOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Specific MacOS Commands
+### Các lệnh macOS cụ thể
 
 ```bash
 #System info
@@ -117,9 +117,9 @@ dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
 
-### Quick anti-analysis / virtualization check
+### Kiểm tra nhanh anti-analysis / ảo hóa
 
-Some macOS stealers call `system_profiler` to detect VMs and **abort with a distinct exit code (e.g., 100)** to avoid sandbox detonation<sup>[[1]](#references)</sup>:
+Một số macOS stealers gọi `system_profiler` để phát hiện VM và **thoát với mã thoát riêng biệt (ví dụ: 100)** nhằm tránh bị kích nổ trong sandbox<sup>[[1]](#references)</sup>:
 
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
@@ -127,9 +127,9 @@ if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|v
 fi
 ```
 
-### Installed Software & Services
+### Phần mềm và dịch vụ đã cài đặt
 
-Check for **suspicious** applications installed and **privileges** over the.installed resources:
+Kiểm tra các ứng dụng **đáng ngờ** đã cài đặt và **quyền** đối với các tài nguyên đã cài đặt:
 
 ```
 system_profiler SPApplicationsDataType #Installed Apps
@@ -138,7 +138,7 @@ lsappinfo list #Installed Apps
 launchctl list #Services
 ```
 
-### User Processes
+### Các tiến trình người dùng
 
 ```bash
 # will print all the running services under that particular user domain.
@@ -151,14 +151,13 @@ launchctl print system
 launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 
-### Create a user
+### Tạo người dùng
 
-Without prompts
+Không cần lời nhắc
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
 ## References
 
-- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-
+- [1] [2025, năm của Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 {{#include ../banners/hacktricks-training.md}}

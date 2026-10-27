@@ -4,18 +4,18 @@
 
 ## Sealed System Volume (SSV)
 
-### Basic Information
+### Thông tin cơ bản
 
-Starting with **macOS Big Sur (11.0)**, the system volume is cryptographically sealed using an **APFS snapshot hash tree**. This is called the **Sealed System Volume (SSV)**. The system partition is mounted **read-only** and any modification breaks the seal, which is verified during boot.<sup>[[11]](#references)</sup>
+Bắt đầu từ **macOS Big Sur (11.0)**, system volume được niêm phong bằng mật mã thông qua **cây băm snapshot APFS**. Tính năng này được gọi là **Sealed System Volume (SSV)**. Phân vùng hệ thống được gắn kết ở chế độ **chỉ đọc**; mọi sửa đổi đều phá vỡ niêm phong, và trạng thái này được xác minh trong quá trình khởi động.<sup>[[11]](#references)</sup>
 
-The SSV provides:
-- **Tamper detection** — any modification to system binaries/frameworks changes the Merkle-tree root and invalidates the Apple-signed seal
-- **Boot-time authentication** — the boot chain verifies the selected system snapshot before it becomes the root filesystem
-- **Rootkit resistance** — even root cannot persistently replace files in the authenticated system snapshot without disabling authenticated root or compromising an authorized update path
+SSV cung cấp:
+- **Phát hiện giả mạo** — mọi sửa đổi đối với system binary/framework đều làm thay đổi gốc cây Merkle và khiến niêm phong do Apple ký không còn hợp lệ
+- **Xác thực lúc khởi động** — chuỗi khởi động xác minh snapshot hệ thống được chọn trước khi snapshot đó trở thành root filesystem
+- **Khả năng chống rootkit** — ngay cả root cũng không thể thay thế lâu dài các tệp trong snapshot hệ thống đã xác thực nếu không tắt authenticated root hoặc xâm phạm một đường dẫn cập nhật được ủy quyền
 
-SSV protects the **System** volume, not the writable **Data** volume paired with it. Firmlinks merge both volumes into the namespace visible at `/`, so a writable-looking path does not prove that the underlying object belongs to the sealed snapshot. FileVault and Data Protection cover confidentiality of data at rest; they are separate from SSV integrity.<sup>[[11]](#references)</sup>
+SSV bảo vệ volume **System**, chứ không phải volume **Data** có thể ghi được ghép cặp với nó. Firmlinks hợp nhất cả hai volume vào namespace hiển thị tại `/`, vì vậy một đường dẫn trông có vẻ ghi được không chứng minh rằng đối tượng bên dưới thuộc về snapshot đã niêm phong. FileVault và Data Protection bảo vệ tính bí mật của dữ liệu khi lưu trữ; chúng tách biệt với tính toàn vẹn của SSV.<sup>[[11]](#references)</sup>
 
-### Checking SSV Status
+### Kiểm tra trạng thái SSV
 
 ```bash
 # Check if authenticated root is enabled (SSV seal verification)
@@ -32,29 +32,29 @@ diskutil apfs listVolumeGroups
 diskutil apfs list | grep -B 8 -A 8 'Sealed:'
 ```
 
-### Effective system view: SSV + Cryptex grafts
+### Góc nhìn hệ thống thực tế: SSV + Cryptex grafts
 
-On recent macOS releases, not every executable visible below `/System` necessarily comes from the booted SSV snapshot. **Cryptexes** are separately authenticated APFS disk images whose content is grafted over selected directories; Rapid Security Responses can therefore replace security-sensitive components without rebuilding the base SSV. When triaging persistence or diffing system code, inventory the live mounts and the Preboot Cryptex store instead of hashing only the base snapshot:
+Trong các bản phát hành macOS gần đây, không phải mọi tệp thực thi hiển thị bên dưới `/System` đều nhất thiết đến từ snapshot SSV đã khởi động. **Cryptexes** là các disk image APFS được xác thực riêng, với nội dung được graft lên các thư mục được chọn; do đó, Rapid Security Responses có thể thay thế các thành phần nhạy cảm về bảo mật mà không cần dựng lại SSV cơ sở. Khi điều tra persistence hoặc diff mã hệ thống, hãy kiểm kê các mount đang hoạt động và kho Cryptex trong Preboot, thay vì chỉ hash snapshot cơ sở:
 
 ```bash
 mount | grep -Ei 'cryptex|graft'
 find /System/Volumes/Preboot/Cryptexes -maxdepth 4 -type d 2>/dev/null
 ```
 
-The boot-chain and Rapid Security Response details are covered in [macOS Architecture — Cryptexes](../mac-os-architecture/README.md#cryptexes-and-rapid-security-responses); this section focuses on the SSV boundary itself.
+Chuỗi khởi động và thông tin chi tiết về Rapid Security Response được trình bày trong [Kiến trúc macOS — Cryptexes](../mac-os-architecture/README.md#cryptexes-and-rapid-security-responses); phần này tập trung vào ranh giới của SSV.
 
-### SSV Writer Entitlements
+### Entitlement của SSV Writer
 
-Certain Apple system binaries have entitlements that allow them to modify or manage the sealed system volume:
+Một số binary hệ thống của Apple có entitlement cho phép chúng sửa đổi hoặc quản lý sealed system volume:
 
-| Entitlement | Purpose |
+| Entitlement | Mục đích |
 |---|---|
-| `com.apple.private.apfs.revert-to-snapshot` | Revert the system volume to a previous snapshot |
-| `com.apple.private.apfs.create-sealed-snapshot` | Create a new sealed snapshot after system updates |
-| `com.apple.rootless.install.heritable` | Write to SIP-protected paths (inherited by child processes) |
-| `com.apple.rootless.install` | Write to SIP-protected paths |
+| `com.apple.private.apfs.revert-to-snapshot` | Khôi phục system volume về snapshot trước đó |
+| `com.apple.private.apfs.create-sealed-snapshot` | Tạo sealed snapshot mới sau các bản cập nhật hệ thống |
+| `com.apple.rootless.install.heritable` | Ghi vào các đường dẫn được SIP bảo vệ (được tiến trình con kế thừa) |
+| `com.apple.rootless.install` | Ghi vào các đường dẫn được SIP bảo vệ |
 
-### Finding SSV Writers
+### Tìm các SSV Writer
 
 ```bash
 # Search for binaries with SSV-related entitlements
@@ -72,11 +72,11 @@ JOIN capabilities c ON ec.capability_id = c.id
 WHERE c.name = 'ssv_writer';"
 ```
 
-### Attack Scenarios
+### Kịch bản tấn công
 
 #### Snapshot Rollback Attack
 
-If an attacker compromises a binary with `com.apple.private.apfs.revert-to-snapshot`, they can **roll back the system volume to a pre-update state**, restoring known vulnerabilities:
+Nếu kẻ tấn công xâm phạm một binary có `com.apple.private.apfs.revert-to-snapshot`, họ có thể **khôi phục system volume về trạng thái trước khi cập nhật**, khôi phục các lỗ hổng đã biết:
 
 ```bash
 # Conceptual — the snapshot revert operation would:
@@ -88,47 +88,47 @@ diskutil apfs listSnapshots disk3s1
 ```
 
 > [!WARNING]
-> Snapshot rollback effectively **undoes security updates**, restoring previously-patched kernel and system vulnerabilities. This is one of the most dangerous operations possible on modern macOS.
+> Rollback snapshot thực chất **hoàn tác các bản cập nhật bảo mật**, khôi phục những lỗ hổng kernel và hệ thống đã được vá trước đó. Đây là một trong những thao tác nguy hiểm nhất có thể thực hiện trên các phiên bản macOS hiện đại.
 
-#### System Binary Replacement
+#### Thay thế tệp nhị phân hệ thống
 
-With SIP bypass + SSV write capability, an attacker can:
+Khi kết hợp bypass SIP + khả năng ghi vào SSV, kẻ tấn công có thể:
 
-1. Mount the system volume read-write
-2. Replace a system daemon or framework library with a trojaned version
-3. Re-seal the snapshot (or accept the broken seal if SIP is already degraded)
-4. The rootkit persists across reboots and is invisible to userland detection tools
+1. Gắn kết system volume ở chế độ đọc-ghi
+2. Thay thế một system daemon hoặc thư viện framework bằng phiên bản chứa trojan
+3. Niêm phong lại snapshot (hoặc chấp nhận seal bị hỏng nếu SIP đã suy yếu)
+4. Rootkit tồn tại qua các lần khởi động lại và không thể bị các công cụ phát hiện ở userland phát hiện
 
-### Real-World CVEs
+### Các CVE ngoài thực tế
 
-| CVE | Description |
+| CVE | Mô tả |
 |---|---|
-| CVE-2021-30892 | **Shrootless** — SIP bypass abusing `system_installd`'s `com.apple.rootless.install.heritable` entitlement to run arbitrary post-install scripts ([Microsoft](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/))<sup>[[1]](#references)</sup> |
-| CVE-2022-22583 | SIP bypass: `system_installd` staged the post-install script in a SIP-protected folder under `/tmp`, but `/tmp` itself isn't SIP-protected, so the folder could be swapped by mounting an image over it ([Trend Micro](https://www.trendmicro.com/en_us/research/22/l/a-technical-analysis-of-cve-2022-22583-and-cve-2022-32800.html))<sup>[[2]](#references)</sup> |
-| CVE-2022-46689 | **MacDirtyCow** — copy-on-write race in XNU allowing writes to read-only root-owned files ([Worth Doing Badly](https://worthdoingbadly.com/macdirtycow/))<sup>[[3]](#references)</sup> |
+| CVE-2021-30892 | **Shrootless** — bypass SIP bằng cách khai thác entitlement `com.apple.rootless.install.heritable` của `system_installd` để chạy các post-install script tùy ý ([Microsoft](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/))<sup>[[1]](#references)</sup> |
+| CVE-2022-22583 | Bypass SIP: `system_installd` đặt post-install script trong một thư mục được SIP bảo vệ bên dưới `/tmp`, nhưng bản thân `/tmp` không được SIP bảo vệ, vì vậy có thể thay thế thư mục đó bằng cách gắn kết một image lên trên nó ([Trend Micro](https://www.trendmicro.com/en_us/research/22/l/a-technical-analysis-of-cve-2022-22583-and-cve-2022-32800.html))<sup>[[2]](#references)</sup> |
+| CVE-2022-46689 | **MacDirtyCow** — race condition copy-on-write trong XNU cho phép ghi vào các tệp chỉ đọc do root sở hữu ([Worth Doing Badly](https://worthdoingbadly.com/macdirtycow/))<sup>[[3]](#references)</sup> |
 
 ---
 
 ## DataVault
 
-### Basic Information
+### Thông tin cơ bản
 
-**DataVault** is an entitlement-gated filesystem protection for sensitive files and directories. The BSD flag `UF_DATAVAULT` (`0x00000080`) marks an object as requiring an entitlement for both reading and writing; unlike normal DAC, merely becoming **root** or receiving Full Disk Access does not satisfy that check while the protection is enforced.<sup>[[4]](#references)[[13]](#references)</sup>
+**DataVault** là cơ chế bảo vệ filesystem dựa trên entitlement dành cho các tệp và thư mục nhạy cảm. BSD flag `UF_DATAVAULT` (`0x00000080`) đánh dấu một đối tượng là cần entitlement để đọc và ghi; không giống DAC thông thường, việc chỉ trở thành **root** hoặc được cấp Full Disk Access không đáp ứng yêu cầu này khi cơ chế bảo vệ đang được thực thi.<sup>[[4]](#references)[[13]](#references)</sup>
 
-Do not use “DataVault” as a synonym for every protected database. The TCC databases are governed by TCC/FDA and SIP-specific policy (see [macOS TCC](macos-tcc/README.md)), while keychain item access also depends on Keychain ACLs and cryptographic protection (see [macOS Keychain](../../macos-red-teaming/macos-keychain.md)). Actual DataVault examples commonly appear as service-owned stores below `/private/var/folders/.../0/`, such as the Screen Time store; the flag is visible as `datavault` in BSD file flags when the parent can be statted.
+Không nên dùng “DataVault” như từ đồng nghĩa cho mọi database được bảo vệ. Các database TCC được quản lý bằng chính sách dành riêng cho TCC/FDA và SIP (xem [macOS TCC](macos-tcc/README.md)), trong khi quyền truy cập vào các mục keychain còn phụ thuộc vào Keychain ACL và cơ chế bảo vệ bằng mật mã (xem [macOS Keychain](../../macos-red-teaming/macos-keychain.md)). Các ví dụ DataVault thực tế thường xuất hiện dưới dạng kho lưu trữ do service sở hữu bên dưới `/private/var/folders/.../0/`, chẳng hạn như kho lưu trữ Screen Time; flag này hiển thị là `datavault` trong BSD file flags khi có thể stat thư mục cha.
 
-### DataVault Controller Entitlements
+### Entitlement của DataVault Controller
 
-| Entitlement | Boundary |
+| Entitlement | Phạm vi |
 |---|---|
-| `com.apple.rootless.datavault.controller` | Access/manage `UF_DATAVAULT` objects<sup>[[13]](#references)</sup> |
-| `com.apple.private.tcc.manager` | Manage TCC decisions; this is a related but separate privacy boundary |
-| `com.apple.private.tcc.allow` | Bypass selected TCC services named in the entitlement value |
-| `com.apple.rootless.storage.TCC` | Write the SIP-protected TCC store |
+| `com.apple.rootless.datavault.controller` | Truy cập/quản lý các đối tượng `UF_DATAVAULT`<sup>[[13]](#references)</sup> |
+| `com.apple.private.tcc.manager` | Quản lý các quyết định TCC; đây là ranh giới quyền riêng tư có liên quan nhưng tách biệt |
+| `com.apple.private.tcc.allow` | Bypass các dịch vụ TCC được chọn, nêu trong giá trị entitlement |
+| `com.apple.rootless.storage.TCC` | Ghi vào kho lưu trữ TCC được SIP bảo vệ |
 
-A process that combines a DataVault-controller entitlement with FDA, backup, indexing, or IPC functionality is especially interesting: look for a confused-deputy primitive that copies a protected object to an ordinary path rather than trying to open the vault directly.<sup>[[14]](#references)</sup>
+Một process kết hợp entitlement DataVault-controller với chức năng FDA, backup, indexing hoặc IPC đặc biệt đáng chú ý: hãy tìm primitive confused-deputy sao chép một đối tượng được bảo vệ sang một đường dẫn thông thường, thay vì cố mở vault trực tiếp.<sup>[[14]](#references)</sup>
 
-### Finding DataVault Controllers
+### Tìm DataVault Controller
 
 ```bash
 # BSD flags: a protected object is printed with the `datavault` keyword
@@ -150,11 +150,11 @@ JOIN capabilities c ON ec.capability_id = c.id
 WHERE c.name = 'datavault_controller';"
 ```
 
-### Attack Scenarios
+### Các kịch bản tấn công
 
-#### Direct TCC Database Modification (separate TCC boundary)
+#### Sửa đổi trực tiếp cơ sở dữ liệu TCC (ranh giới TCC riêng biệt)
 
-If an attacker compromises a TCC manager process (e.g., via code injection into one carrying `com.apple.private.tcc.manager`), they can **directly modify the TCC database** to grant any application any TCC permission:<sup>[[12]](#references)</sup>
+Nếu kẻ tấn công xâm phạm một tiến trình quản lý TCC (ví dụ: bằng cách chèn mã vào tiến trình có `com.apple.private.tcc.manager`), họ có thể **sửa đổi trực tiếp cơ sở dữ liệu TCC** để cấp bất kỳ quyền TCC nào cho bất kỳ ứng dụng nào:<sup>[[12]](#references)</sup>
 
 ```sql
 -- Grant Full Disk Access to a malicious binary (conceptual)
@@ -167,15 +167,15 @@ VALUES ('kTCCServiceCamera', 'com.attacker.malware', 0, 2, 4, 1);
 ```
 
 > [!CAUTION]
-> TCC database modification is the **ultimate privacy bypass** — it grants any permission silently, without any user prompt or visible indicator. Historically, multiple macOS privilege escalation chains have ended with TCC database writes as the final payload.
+> Việc sửa đổi cơ sở dữ liệu TCC là **cách vượt qua quyền riêng tư triệt để nhất** — nó âm thầm cấp mọi quyền mà không hiển thị lời nhắc hay dấu hiệu nào cho người dùng. Trong lịch sử, nhiều chuỗi leo thang đặc quyền trên macOS đã kết thúc bằng việc ghi vào cơ sở dữ liệu TCC như payload cuối cùng.
 
-#### Keychain Database Access
+#### Truy cập cơ sở dữ liệu Keychain
 
-Raw access to a keychain backing database is not equivalent to plaintext secret access. If another privilege boundary lets an attacker copy the database, key material and item ACLs still have to be attacked; see the dedicated [macOS Keychain](../../macos-red-teaming/macos-keychain.md) page instead of assuming a DataVault-controller entitlement is sufficient.
+Truy cập thô vào cơ sở dữ liệu nền của keychain không đồng nghĩa với việc có thể truy cập bí mật ở dạng văn bản thuần. Nếu một ranh giới đặc quyền khác cho phép kẻ tấn công sao chép cơ sở dữ liệu, thì vẫn phải tấn công khóa mật mã và ACL của các mục; hãy xem trang [macOS Keychain](../../macos-red-teaming/macos-keychain.md) chuyên biệt thay vì cho rằng entitlement DataVault-controller là đủ.
 
-#### Backup-copy boundary: Time Machine
+#### Ranh giới bản sao lưu: Time Machine
 
-A 2026 analysis demonstrated a useful general pattern: `backupd` carries both `com.apple.rootless.datavault.controller` and Full Disk Access so it can copy protected stores. On the tested configuration, `/private/var/folders` was included in Time Machine and the mounted backup copy did not enforce the live DataVault boundary. The researcher used this to locate the Screen Time SQLite store and read its plaintext restrictions PIN without opening the live vault. Treat this as a **copy-boundary attack**: enumerate backup, export, migration, indexing, and diagnostic deputies that can materialize vault data under a weaker mount or path.<sup>[[13]](#references)[[14]](#references)</sup>
+Một phân tích năm 2026 đã chứng minh một mô hình tổng quát hữu ích: `backupd` có cả `com.apple.rootless.datavault.controller` lẫn Full Disk Access để có thể sao chép các kho dữ liệu được bảo vệ. Trên cấu hình được thử nghiệm, `/private/var/folders` nằm trong phạm vi sao lưu của Time Machine và bản sao lưu được mount không thực thi ranh giới DataVault đang áp dụng cho dữ liệu trực tiếp. Nhà nghiên cứu đã dùng cách này để xác định vị trí cơ sở dữ liệu SQLite của Screen Time và đọc mã PIN giới hạn ở dạng văn bản thuần mà không mở kho dữ liệu trực tiếp. Hãy xem đây là một **tấn công qua ranh giới bản sao**: rà soát các tiến trình phụ trách sao lưu, xuất dữ liệu, di chuyển, lập chỉ mục và chẩn đoán có thể đưa dữ liệu trong vault ra dưới một điểm mount hoặc đường dẫn ít bị hạn chế hơn.<sup>[[13]](#references)[[14]](#references)</sup>
 
 ```bash
 # Confirm the deputy's privileges and whether the source tree is included
@@ -188,35 +188,35 @@ db="$(find "$backup/Data/private/var/folders" -path '*/com.apple.ScreenTimeAgent
 sqlite3 "$db" 'SELECT ZPASSCODE1 FROM ZCOREORGANIZATIONSETTINGS WHERE ZPASSCODE1 IS NOT NULL LIMIT 1;'
 ```
 
-This behavior is version- and backup-layout-dependent. Validate it on the target build, and remember that an encrypted Time Machine destination only protects the copy while it is locked; once mounted, its access controls become part of the attack surface.
+Hành vi này phụ thuộc vào phiên bản và bố cục bản sao lưu. Hãy xác minh trên bản build mục tiêu và nhớ rằng đích Time Machine được mã hóa chỉ bảo vệ bản sao khi ổ đĩa đang khóa; khi đã được gắn kết, các quyền truy cập của nó trở thành một phần của bề mặt tấn công.
 
-### Real-World CVEs Involving DataVault/TCC Bypass
+### Các CVE ngoài thực tế liên quan đến bypass DataVault/TCC
 
-| CVE | Description |
+| CVE | Mô tả |
 |---|---|
-| CVE-2024-44131 | FileProvider symlink race letting a privileged helper reach TCC-protected data ([Jamf](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/))<sup>[[5]](#references)</sup> |
-| CVE-2023-40424 | As root, **create a new user whose `NFSHomeDirectory` points at an attacker-controlled `TCC.db`**; on login `tccd` consumes it and the grants apply, reaching other users' data ([Kandji](https://blog.kandji.io/malware-bypass-tcc))<sup>[[6]](#references)</sup> |
-| CVE-2021-30970 | "powerdir": changing the user's home dir to plant an attacker-controlled TCC.db ([Microsoft](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/))<sup>[[7]](#references)</sup> |
-| CVE-2021-30713 | Bundle-conclusion flaw letting an app **inherit the TCC grants of a donor bundle** without a prompt; exploited in the wild by **XCSSET** to screenshot the desktop ([Jamf](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/))<sup>[[8]](#references)</sup> |
-| CVE-2020-9934 | `tccd` built the DB path from `$HOME`, so `launchctl setenv HOME` redirected it to an attacker-controlled `TCC.db` ([Matt Shockley](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8))<sup>[[9]](#references)</sup> |
-| CVE-2020-29621 | `coreaudiod` held `com.apple.private.tcc.manager` **and** disabled library validation, so a HAL plug-in dropped in `/Library/Audio/Plug-Ins/HAL` could grant arbitrary TCC rights ([Wojciech Reguła](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/))<sup>[[10]](#references)</sup> |
+| CVE-2024-44131 | Lỗi race symlink trong FileProvider cho phép một helper có đặc quyền truy cập dữ liệu được TCC bảo vệ ([Jamf](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/))<sup>[[5]](#references)</sup> |
+| CVE-2023-40424 | Với quyền root, **tạo người dùng mới có `NFSHomeDirectory` trỏ đến `TCC.db` do kẻ tấn công kiểm soát**; khi đăng nhập, `tccd` sử dụng tệp này và áp dụng các quyền đã cấp, qua đó truy cập dữ liệu của người dùng khác ([Kandji](https://blog.kandji.io/malware-bypass-tcc))<sup>[[6]](#references)</sup> |
+| CVE-2021-30970 | "powerdir": thay đổi thư mục home của người dùng để cài `TCC.db` do kẻ tấn công kiểm soát ([Microsoft](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/))<sup>[[7]](#references)</sup> |
+| CVE-2021-30713 | Lỗi xác định bundle cho phép ứng dụng **kế thừa các quyền TCC của một bundle khác** mà không cần hỏi người dùng; **XCSSET** đã khai thác lỗi này ngoài thực tế để chụp ảnh màn hình desktop ([Jamf](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/))<sup>[[8]](#references)</sup> |
+| CVE-2020-9934 | `tccd` dựng đường dẫn DB từ `$HOME`, vì vậy `launchctl setenv HOME` chuyển hướng nó đến `TCC.db` do kẻ tấn công kiểm soát ([Matt Shockley](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8))<sup>[[9]](#references)</sup> |
+| CVE-2020-29621 | `coreaudiod` có `com.apple.private.tcc.manager` **và** tắt library validation, vì vậy một HAL plug-in được đặt trong `/Library/Audio/Plug-Ins/HAL` có thể cấp mọi quyền TCC ([Wojciech Reguła](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/))<sup>[[10]](#references)</sup> |
 
 
 
 ## References
 
-- [1] [Microsoft finds new macOS vulnerability, Shrootless, that could bypass System Integrity Protection](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)
-- [2] [Technical Analysis: CVE-2022-22583 - Trend Micro](https://www.trendmicro.com/en_us/research/22/l/a-technical-analysis-of-cve-2022-22583-and-cve-2022-32800.html)
-- [3] [MacDirtyCow - Worth Doing Badly](https://worthdoingbadly.com/macdirtycow/)
-- [4] [Apple Platform Security — Data Protection](https://support.apple.com/guide/security/data-protection-overview-sece3bee0835/web)
-- [5] [Jamf Threat Labs - CVE-2024-44131: TCC bypass steals data from iCloud](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)
-- [6] [Kandji - Uncovering macOS Malware: Bypassing TCC](https://blog.kandji.io/malware-bypass-tcc)
-- [7] [New macOS vulnerability, "powerdir," could lead to unauthorized user data access](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)
-- [8] [Zero-Day TCC bypass discovered in XCSSET malware](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
-- [9] [CVE-2020–9934: Bypassing the macOS Transparency, Consent, and Control (TCC) Framework](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)
-- [10] [Play the music and bypass TCC aka CVE-2020-29621](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)
-- [11] [The Nightmare of Apple OTA Updates (APFS Snapshots)](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
-- [12] [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
+- [1] [Microsoft phát hiện lỗ hổng macOS mới Shrootless, có thể bypass System Integrity Protection](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)
+- [2] [Phân tích kỹ thuật: CVE-2022-22583 - Trend Micro](https://www.trendmicro.com/en_us/research/22/l/a-technical-analysis-of-cve-2022-22583-and-cve-2022-32800.html)
+- [3] [MacDirtyCow - Làm dở còn hơn không làm](https://worthdoingbadly.com/macdirtycow/)
+- [4] [Bảo mật nền tảng Apple — Data Protection](https://support.apple.com/guide/security/data-protection-overview-sece3bee0835/web)
+- [5] [Jamf Threat Labs - CVE-2024-44131: TCC bypass đánh cắp dữ liệu từ iCloud](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)
+- [6] [Kandji - Vạch trần malware macOS: Bypass TCC](https://blog.kandji.io/malware-bypass-tcc)
+- [7] [Lỗ hổng macOS mới "powerdir" có thể dẫn đến truy cập trái phép dữ liệu người dùng](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)
+- [8] [Phát hiện TCC bypass zero-day trong malware XCSSET](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
+- [9] [CVE-2020–9934: Bypass framework Transparency, Consent, and Control (TCC) của macOS](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)
+- [10] [Phát nhạc và bypass TCC, hay CVE-2020-29621](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)
+- [11] [Cơn ác mộng về các bản cập nhật OTA của Apple (APFS Snapshots)](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
+- [12] [Objective-See — Khai thác TCC](https://objective-see.org/blog/blog_0x4C.html)
 - [13] [XNU `stat.h` — `UF_DATAVAULT`](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/stat.h)
-- [14] [How to bypass your own Screen Time passcode — source and Time Machine/DataVault analysis](https://tangled.org/dunkirk.sh/zera/commit/e6b6236c395e5c9ec1a27ad2a76217d8cc2b4312)
+- [14] [Cách bypass mật mã Screen Time của chính bạn — phân tích mã nguồn và Time Machine/DataVault](https://tangled.org/dunkirk.sh/zera/commit/e6b6236c395e5c9ec1a27ad2a76217d8cc2b4312)
 {{#include ../../../banners/hacktricks-training.md}}

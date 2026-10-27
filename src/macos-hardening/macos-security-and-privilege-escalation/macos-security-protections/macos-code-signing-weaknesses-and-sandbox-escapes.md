@@ -1,22 +1,22 @@
-# macOS Code Signing Weaknesses & Sandbox Escapes
+# Điểm yếu của Code Signing trên macOS & Sandbox Escape
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Ad-Hoc Signed Binaries
+## Binary được ký Ad-Hoc
 
-### Basic Information
+### Thông tin cơ bản
 
-**Ad-hoc signing** (`CS_ADHOC`) creates a code signature with **no certificate chain**. It still hashes the signed code, so validation can detect modification, but it provides no developer identity that another component can authenticate. Replacing and re-signing the executable produces a different CodeDirectory/CDHash.<sup>[[1]](#references)[[4]](#references)</sup>
+**Ad-hoc signing** (`CS_ADHOC`) tạo chữ ký mã **không có chuỗi chứng chỉ**. Chữ ký vẫn băm mã đã ký, nên quá trình xác thực có thể phát hiện việc sửa đổi, nhưng không cung cấp danh tính nhà phát triển để thành phần khác xác thực. Thay thế và ký lại executable sẽ tạo ra CodeDirectory/CDHash khác.<sup>[[1]](#references)[[4]](#references)</sup>
 
-On Apple Silicon Macs, all executables require at minimum an ad-hoc signature. This means you'll find ad-hoc signatures on many development tools, Homebrew packages, and third-party utilities.
+Trên máy Mac dùng Apple Silicon, mọi executable đều cần ít nhất chữ ký ad-hoc. Vì vậy, bạn sẽ thấy chữ ký ad-hoc trên nhiều công cụ phát triển, gói Homebrew và tiện ích của bên thứ ba.
 
-### Why This Matters
+### Vì sao điều này quan trọng
 
-- **No verifiable signer identity** — checks that accept only a path, an ad-hoc status, or an unpinned identifier cannot establish who produced the binary.
-- Third-party ad-hoc binaries in **privileged positions** (FDA, daemons, helpers) are high-priority targets when their file or a parent directory is writable.
-- A CDHash, designated-requirement, or requirement-backed TCC check **does** notice replacement. A path-based policy may not; inspect the actual requirement and retest the grant instead of assuming that it survives re-signing.
+- **Không có danh tính người ký có thể xác minh** — các kiểm tra chỉ chấp nhận đường dẫn, trạng thái ad-hoc hoặc identifier chưa được ghim sẽ không thể xác định ai tạo ra binary.
+- Binary ad-hoc của bên thứ ba nằm ở **vị trí đặc quyền** (FDA, daemon, helper) là mục tiêu ưu tiên cao nếu có thể ghi vào file hoặc thư mục cha.
+- Kiểm tra TCC dựa trên CDHash, designated-requirement hoặc requirement **sẽ phát hiện việc thay thế**. Chính sách dựa trên đường dẫn có thể không phát hiện; hãy kiểm tra requirement thực tế và kiểm tra lại quyền được cấp thay vì cho rằng quyền đó vẫn còn sau khi ký lại.
 
-### Discovery
+### Khám phá
 
 ```bash
 # Find ad-hoc signed binaries
@@ -30,7 +30,7 @@ codesign -dv --verbose=4 /path/to/binary 2>&1 | grep -E "Signature|flags|Authori
 # Ad-hoc shows: "Signature=adhoc" and no Authority lines
 ```
 
-### Attack: Binary Replacement
+### Tấn công: Binary Replacement
 
 ```bash
 # If an ad-hoc signed daemon binary is in a writable location:
@@ -53,18 +53,18 @@ codesign -s - /path/to/target
 
 ---
 
-## Debuggable Processes (get-task-allow)
+## Tiến trình có thể debug (get-task-allow)
 
-### Basic Information
+### Thông tin cơ bản
 
-The **`com.apple.security.get-task-allow`** entitlement (or `CS_GET_TASK_ALLOW` flag) permits an authorized debugger to obtain the process task port even when Hardened Runtime would normally prevent it. A successful debugger can read memory, modify registers, inject code, and control execution.<sup>[[3]](#references)</sup>
+Entitlement **`com.apple.security.get-task-allow`** (hoặc flag `CS_GET_TASK_ALLOW`) cho phép debugger được ủy quyền lấy task port của tiến trình, ngay cả khi Hardened Runtime thường ngăn việc này. Debugger thành công có thể đọc bộ nhớ, sửa đổi các thanh ghi, inject code và điều khiển quá trình thực thi.<sup>[[3]](#references)</sup>
 
-This is intended **only for development builds**. However, some third-party binaries ship with this entitlement in production.
+Entitlement này **chỉ dành cho các bản build phát triển**. Tuy nhiên, một số binary của bên thứ ba vẫn được phân phối kèm entitlement này trong môi trường production.
 
 > [!CAUTION]
-> A production binary with `get-task-allow` is a strong exploitation primitive. `taskgated`, caller identity, sandboxing, debugger entitlements, and Developer Tools authorization still affect whether a particular client can obtain the task port; test with both `lldb`/`debugserver` and the intended injector. Once attachment succeeds, injected code runs with the target's entitlements, TCC grants, and security context.
+> Binary production có `get-task-allow` là một primitive khai thác mạnh. `taskgated`, danh tính của bên gọi, sandboxing, entitlement của debugger và quyền Developer Tools vẫn ảnh hưởng đến việc một client cụ thể có thể lấy task port hay không; hãy thử với cả `lldb`/`debugserver` và injector dự định sử dụng. Khi attach thành công, code được inject sẽ chạy với các entitlement, quyền TCC và ngữ cảnh bảo mật của mục tiêu.
 
-### Discovery
+### Phát hiện
 
 ```bash
 # Find debuggable binaries
@@ -81,7 +81,7 @@ WHERE c.name = 'get_task_allow_signature'
 ORDER BY e.privileged DESC;"
 ```
 
-### Attack: Task Port Injection
+### Tấn công: Task Port Injection
 
 ```c
 #include <mach/mach.h>
@@ -110,21 +110,21 @@ if (kr == KERN_SUCCESS) {
 
 ---
 
-## No Library Validation + DYLD Environment
+## Không xác thực thư viện + môi trường DYLD
 
-### Runtime Library-Validation Clearing
+### Xóa kiểm tra thư viện lúc runtime
 
-The private entitlement **`com.apple.private.security.clear-library-validation`** does not disable library validation at process launch. Instead, it permits the process to call `csops(..., CS_OPS_CLEAR_LV, ...)` on itself at runtime. XNU then clears `CS_REQUIRE_LV | CS_FORCED_LV`, provided the caller has the entitlement and satisfies the handler's additional checks. Consequently, a process may become a viable library-injection target only after it reaches the code path that clears library validation.<sup>[[4]](#references)[[5]](#references)</sup>
+Entitlement riêng **`com.apple.private.security.clear-library-validation`** không vô hiệu hóa kiểm tra thư viện khi process khởi chạy. Thay vào đó, entitlement này cho phép process gọi `csops(..., CS_OPS_CLEAR_LV, ...)` trên chính nó trong lúc chạy. Sau đó, XNU xóa `CS_REQUIRE_LV | CS_FORCED_LV`, với điều kiện caller có entitlement và đáp ứng các kiểm tra bổ sung của handler. Do đó, process chỉ có thể trở thành mục tiêu khả thi để library injection sau khi đi đến code path xóa kiểm tra thư viện.<sup>[[4]](#references)[[5]](#references)</sup>
 
-### The Deadly Combination
+### Tổ hợp nguy hiểm
 
-When a binary has **both**:<sup>[[3]](#references)</sup>
-- `com.apple.security.cs.disable-library-validation` (loads any dylib)
-- `com.apple.security.cs.allow-dyld-environment-variables` (accepts DYLD env vars)
+Khi một binary có **cả hai** entitlement sau:<sup>[[3]](#references)</sup>
+- `com.apple.security.cs.disable-library-validation` (tải bất kỳ dylib nào)
+- `com.apple.security.cs.allow-dyld-environment-variables` (chấp nhận các biến môi trường DYLD)
 
-This is a high-value code-injection combination because Hardened Runtime permits both the untrusted library and the DYLD environment variable. The launch context can still scrub DYLD variables (for example, protected or privileged execution paths), so verify the exact invocation rather than treating the entitlement pair as unconditional.
+Đây là tổ hợp có giá trị cao để code injection vì Hardened Runtime cho phép cả thư viện không đáng tin cậy lẫn biến môi trường DYLD. Tuy vậy, ngữ cảnh khởi chạy vẫn có thể loại bỏ các biến DYLD (ví dụ: trong các đường dẫn thực thi được bảo vệ hoặc có đặc quyền), vì vậy hãy xác minh chính xác cách gọi thay vì xem cặp entitlement này là điều kiện luôn được đáp ứng.
 
-### Discovery
+### Khám phá
 
 ```bash
 # Find binaries with the deadly combo
@@ -142,7 +142,7 @@ WHERE noLibVal = 1 AND allowDyldEnv = 1
 ORDER BY privileged DESC;"
 ```
 
-### Attack: DYLD_INSERT_LIBRARIES Injection
+### Tấn công: DYLD_INSERT_LIBRARIES Injection
 
 ```bash
 # 1. Create the injection dylib
@@ -181,23 +181,23 @@ cat /tmp/injected_proof.txt
 
 ---
 
-## Sandbox Temporary Exceptions
+## Các ngoại lệ tạm thời của Sandbox
 
-### How They Weaken the Sandbox
+### Chúng làm suy yếu Sandbox như thế nào
 
-Sandbox temporary exceptions (`com.apple.security.temporary-exception.*`) punch holes in the App Sandbox:<sup>[[2]](#references)</sup>
+Các ngoại lệ tạm thời của Sandbox (`com.apple.security.temporary-exception.*`) tạo lỗ hổng trong App Sandbox:<sup>[[2]](#references)</sup>
 
-| Exception | What It Allows |
+| Ngoại lệ | Cho phép làm gì |
 |---|---|
-| `temporary-exception.mach-lookup.global-name` | Connect to system-wide XPC/Mach services |
-| `temporary-exception.files.absolute-path.read-write` | Read/write files outside the app container |
-| `temporary-exception.iokit-user-client-class` | Open IOKit user-client connections |
-| `temporary-exception.shared-preference.read-only` | Read other apps' preferences |
-| `temporary-exception.files.home-relative-path.read-write` | Access paths relative to `~` |
+| `temporary-exception.mach-lookup.global-name` | Kết nối với các dịch vụ XPC/Mach trên toàn hệ thống |
+| `temporary-exception.files.absolute-path.read-write` | Đọc/ghi tệp bên ngoài vùng chứa của ứng dụng |
+| `temporary-exception.iokit-user-client-class` | Mở kết nối IOKit user-client |
+| `temporary-exception.shared-preference.read-only` | Đọc tùy chọn của các ứng dụng khác |
+| `temporary-exception.files.home-relative-path.read-write` | Truy cập các đường dẫn tương đối với `~` |
 
-### Mach-Lookup Exceptions = Sandbox Escape Primitive
+### Ngoại lệ Mach-Lookup = Primitive thoát Sandbox
 
-The most dangerous exception is **mach-lookup** — it allows a sandboxed app to talk to privileged daemons:
+Ngoại lệ nguy hiểm nhất là **mach-lookup** — nó cho phép ứng dụng bị sandbox giới hạn giao tiếp với các daemon có đặc quyền:
 
 ```bash
 # Find apps with mach-lookup exceptions
@@ -213,7 +213,7 @@ find /Applications -name "*.app" -exec sh -c '
 ' _ {} \; 2>/dev/null | sort -rn
 ```
 
-### Attack: Sandbox Escape via Mach-Lookup
+### Tấn công: Sandbox Escape qua Mach-Lookup
 
 ```
 1. Compromise sandboxed app (renderer exploit, malicious document, etc.)
@@ -228,16 +228,16 @@ find /Applications -name "*.app" -exec sh -c '
 
 ---
 
-## Code-Signing Checks Are Not XPC Client Integrity
+## Kiểm tra Code-Signing không đồng nghĩa với tính toàn vẹn của XPC Client
 
-An XPC service may authenticate a connection by extracting code-signing state from its audit token and accepting an Apple **platform binary** or a client carrying `CS_REQUIRE_LV`/`CS_FORCED_LV`. These tests describe the executable and selected process flags; they do not prove that the current address space contains only trusted code. Research against ImageCapture services showed that an injectable Apple binary such as `/bin/ls` could load an attacker dylib through `DYLD_INSERT_LIBRARIES` and then connect as a platform client. A follow-up check for library-validation flags was also bypassed before Apple changed the service to require its private authorization entitlement in macOS 15.<sup>[[6]](#references)</sup>
+Một XPC service có thể xác thực kết nối bằng cách trích xuất trạng thái code-signing từ audit token và chấp nhận **platform binary** của Apple hoặc client có `CS_REQUIRE_LV`/`CS_FORCED_LV`. Các kiểm tra này mô tả executable và một số process flag được chọn; chúng không chứng minh rằng address space hiện tại chỉ chứa code đáng tin cậy. Nghiên cứu trên các ImageCapture service cho thấy một Apple binary có thể bị inject, chẳng hạn `/bin/ls`, có thể tải dylib của attacker thông qua `DYLD_INSERT_LIBRARIES`, rồi kết nối với tư cách platform client. Một bước kiểm tra tiếp theo đối với library-validation flag cũng bị bypass trước khi Apple sửa service để yêu cầu private authorization entitlement trong macOS 15.<sup>[[6]](#references)</sup>
 
-### Offensive Audit Workflow
+### Quy trình Audit Offensive
 
-1. Reverse `listener:shouldAcceptNewConnection:` (or the equivalent low-level XPC handler) and identify decisions based only on `isPlatformBinary`, `kSecCodeInfoFlags`, `CS_PLATFORM_BINARY`, `CS_REQUIRE_LV`, or `CS_FORCED_LV`.
-2. Enumerate Apple-signed clients that can speak the protocol, then inspect Hardened Runtime and entitlements. A platform signature alone is not evidence that DYLD injection is blocked.
-3. Test the candidate on the **target macOS build**. If a constructor dylib loads, make the service connection from that constructor so the audit token belongs to the accepted platform process.
-4. Retest every vendor patch: adding another mutable process-status flag to the same authorization decision may not remove the confused-deputy primitive.
+1. Reverse `listener:shouldAcceptNewConnection:` (hoặc XPC handler cấp thấp tương đương) và xác định các quyết định chỉ dựa trên `isPlatformBinary`, `kSecCodeInfoFlags`, `CS_PLATFORM_BINARY`, `CS_REQUIRE_LV` hoặc `CS_FORCED_LV`.
+2. Liệt kê các client được Apple ký có thể giao tiếp qua protocol, sau đó kiểm tra Hardened Runtime và entitlements. Chữ ký platform tự nó không chứng minh rằng DYLD injection bị chặn.
+3. Kiểm tra ứng viên trên **bản dựng macOS mục tiêu**. Nếu constructor dylib được tải, hãy tạo kết nối tới service từ constructor đó để audit token thuộc về process platform được chấp nhận.
+4. Kiểm tra lại mọi bản vá của vendor: thêm một mutable process-status flag khác vào cùng quyết định authorization có thể không loại bỏ được confused-deputy primitive.
 
 ```bash
 # Static triage of the intended client
@@ -249,17 +249,17 @@ DYLD_PRINT_LIBRARIES=1 DYLD_INSERT_LIBRARIES=/tmp/inject.dylib /bin/ls
 ```
 
 > [!NOTE]
-> DYLD behavior, AMFI policy, and service-side checks change between macOS releases. Failure against a fully patched host does not establish that the same chain failed on the vulnerable release.
+> Hành vi của DYLD, chính sách AMFI và các bước kiểm tra phía dịch vụ thay đổi giữa các bản phát hành macOS. Việc thất bại trên máy đã cài đầy đủ bản vá không chứng minh rằng cùng chuỗi khai thác cũng thất bại trên bản phát hành dễ bị tấn công.
 
 ---
 
 ## Security-Scoped Bookmark Forgery (CVE-2025-31191)
 
-Security-scoped bookmarks persist a user's file choice across launches. A sandbox extension is boot-bound, so `ScopedBookmarkAgent` validates it and creates a long-lived HMAC-authenticated bookmark; when the app later presents that bookmark, the agent validates it and issues a fresh sandbox extension. The signing secret is stored in the login keychain and a per-app key is derived using the bundle identifier.<sup>[[7]](#references)</sup>
+Bookmark có phạm vi bảo mật lưu lại lựa chọn tệp của người dùng qua các lần khởi chạy. Sandbox extension gắn với lần khởi động, vì vậy `ScopedBookmarkAgent` xác thực extension này và tạo bookmark dài hạn được xác thực bằng HMAC; khi ứng dụng xuất trình bookmark đó sau này, agent xác thực nó và cấp sandbox extension mới. Bí mật ký được lưu trong login keychain và một khóa riêng cho từng ứng dụng được tạo dựa trên bundle identifier.<sup>[[7]](#references)</sup>
 
-On affected systems, the keychain ACL prevented an untrusted process from **reading** the `com.apple.scopedbookmarksagent.xpc` secret but did not prevent deletion. A compromised sandboxed app could replace the item with a known secret and attacker-controlled ACL, derive the app-specific HMAC key, forge entries in the writable container bookmark plist, and ask `ScopedBookmarkAgent` to exchange them for file-access extensions. This turned any sandboxed application using security-scoped bookmarks into a potential arbitrary-file-access sandbox escape without an additional file-picker interaction. Apple fixed the issue in the March 31, 2025 security updates.<sup>[[7]](#references)</sup>
+Trên các hệ thống bị ảnh hưởng, ACL của keychain ngăn tiến trình không đáng tin **đọc** bí mật `com.apple.scopedbookmarksagent.xpc`, nhưng không ngăn việc xóa mục này. Ứng dụng bị xâm nhập trong sandbox có thể thay mục đó bằng một bí mật đã biết và ACL do kẻ tấn công kiểm soát, suy ra khóa HMAC riêng cho ứng dụng, giả mạo các mục trong bookmark plist có thể ghi của container, rồi yêu cầu `ScopedBookmarkAgent` đổi chúng thành các extension cấp quyền truy cập tệp. Điều này biến mọi ứng dụng trong sandbox sử dụng bookmark có phạm vi bảo mật thành một nguy cơ sandbox escape cho phép truy cập tệp tùy ý mà không cần thêm lần tương tác nào với trình chọn tệp. Apple đã khắc phục sự cố trong các bản cập nhật bảo mật ngày 31 tháng 3 năm 2025.<sup>[[7]](#references)</sup>
 
-### Triage and Attack Chain
+### Phân loại và Chuỗi tấn công
 
 ```bash
 APP=/Applications/Target.app
@@ -278,37 +278,37 @@ find "$HOME/Library/Containers" -type f \
 security find-generic-password -s com.apple.scopedbookmarksagent.xpc
 ```
 
-The exploitation sequence on a vulnerable host is:
+Trình tự khai thác trên một host dễ bị tấn công là:
 
-1. Gain code execution inside a sandboxed app that uses persistent scoped bookmarks.
-2. Replace the agent's keychain signing item with a known secret and permissive ACL.
-3. Compute `HMAC-SHA256(key=known_secret, data=bundle_id)` and forge a bookmark for a useful path in the app's writable bookmark store.
-4. Trigger the application's normal bookmark-resolution path so `ScopedBookmarkAgent` returns a sandbox extension.
-5. Use the new file access to overwrite an out-of-sandbox execution or data target available to that user.
+1. Có được khả năng thực thi mã bên trong một app bị sandbox có sử dụng persistent scoped bookmarks.
+2. Thay signing item trong keychain của agent bằng một secret đã biết và ACL rộng quyền.
+3. Tính `HMAC-SHA256(key=known_secret, data=bundle_id)` và giả mạo một bookmark trỏ đến đường dẫn hữu ích trong bookmark store có quyền ghi của app.
+4. Kích hoạt luồng xử lý bookmark thông thường của ứng dụng để `ScopedBookmarkAgent` trả về một sandbox extension.
+5. Dùng quyền truy cập file mới để ghi đè một mục tiêu thực thi hoặc dữ liệu ngoài sandbox có sẵn cho người dùng đó.
 
-This is a **patched-version technique**: use it to understand the trust boundary and to assess unpatched systems, not as an assumption about current releases. For current testing, focus on bookmark parsing, identity binding, keychain-item lifecycle, and confused-deputy behavior around the agent.
+Đây là **kỹ thuật dành cho phiên bản đã được vá**: hãy dùng nó để hiểu ranh giới tin cậy và đánh giá các hệ thống chưa được vá, không nên mặc định rằng nó áp dụng cho các bản phát hành hiện tại. Khi kiểm thử hiện nay, hãy tập trung vào việc phân tích bookmark, liên kết danh tính, vòng đời của keychain item và hành vi confused-deputy quanh agent.
 
 ---
 
 ## Private Apple Entitlements
 
-### What They Are
+### Chúng là gì
 
-Entitlements prefixed with `com.apple.private.*` provide access to **Apple-internal APIs** not documented or available to third-party developers. Third-party binaries with private entitlements obtained them through enterprise cert, MDM, or non-App-Store distribution.
+Các entitlement có tiền tố `com.apple.private.*` cung cấp quyền truy cập vào **API nội bộ của Apple**, không được tài liệu hóa hoặc cung cấp cho nhà phát triển bên thứ ba. Binary của bên thứ ba có private entitlement thông qua enterprise cert, MDM hoặc hình thức phân phối ngoài App Store.
 
-### Dangerous Private Entitlements
+### Private Entitlement nguy hiểm
 
-| Entitlement | Capability |
+| Entitlement | Khả năng |
 |---|---|
-| `com.apple.private.tcc.manager` | Full TCC database read/write |
-| `com.apple.private.tcc.allow` | Access specific TCC services |
-| `com.apple.private.security.no-sandbox` | Run without sandbox |
-| `com.apple.private.iokit` | Direct IOKit driver access |
-| `com.apple.private.kernel.\*` | Kernel interface access |
-| `com.apple.private.xpc.launchd.job-label` | Register/manage launchd jobs |
-| `com.apple.rootless.install` | Write to SIP-protected paths |
+| `com.apple.private.tcc.manager` | Đọc/ghi toàn bộ cơ sở dữ liệu TCC |
+| `com.apple.private.tcc.allow` | Truy cập các dịch vụ TCC cụ thể |
+| `com.apple.private.security.no-sandbox` | Chạy không bị sandbox |
+| `com.apple.private.iokit` | Truy cập trực tiếp driver IOKit |
+| `com.apple.private.kernel.\*` | Truy cập giao diện kernel |
+| `com.apple.private.xpc.launchd.job-label` | Đăng ký/quản lý các launchd job |
+| `com.apple.rootless.install` | Ghi vào các đường dẫn được SIP bảo vệ |
 
-### Discovery
+### Khám phá
 
 ```bash
 # Find third-party binaries with private entitlements
@@ -329,13 +329,13 @@ ORDER BY privileged DESC;"
 
 ---
 
-## Custom Sandbox Profiles (SBPL)
+## Các profile sandbox tùy chỉnh (SBPL)
 
-### What They Are
+### Chúng là gì
 
-Binaries can ship with **custom sandbox profiles** written in SBPL (Seatbelt Profile Language). These profiles can be more restrictive OR **more permissive** than the default App Sandbox.
+Các binary có thể đi kèm **profile sandbox tùy chỉnh** được viết bằng SBPL (Seatbelt Profile Language). Các profile này có thể hạn chế hơn HOẶC **ít hạn chế hơn** App Sandbox mặc định.
 
-### Auditing Custom Profiles
+### Kiểm tra các profile tùy chỉnh
 
 ```bash
 # Find custom sandbox profiles
@@ -355,13 +355,13 @@ cat /path/to/custom.sb | grep "(allow" | sort -u
 
 ---
 
-## Writable Library Paths
+## Đường dẫn thư viện có thể ghi
 
-### What They Are
+### Chúng là gì
 
-When a binary loads a dynamic library from a path that the current user can **write to**, the library can be replaced with malicious code.
+Khi một binary tải thư viện động từ đường dẫn mà người dùng hiện tại có thể **ghi vào**, thư viện đó có thể bị thay thế bằng mã độc.
 
-### Discovery
+### Phát hiện
 
 ```bash
 # Using the scanner — find privileged binaries loading from writable paths
@@ -380,7 +380,7 @@ otool -L /path/to/binary | awk '{print $1}' | while read lib; do
 done
 ```
 
-### Attack: Dylib Replacement
+### Tấn công: Thay thế Dylib
 
 ```bash
 # 1. Find the writable library
@@ -410,11 +410,11 @@ cp /tmp/evil.dylib /path/to/writable.dylib
 
 ## References
 
-- [1] [Apple Developer — Code Signing Guide](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
+- [1] [Apple Developer — Hướng dẫn Code Signing](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
 - [2] [Apple Developer — App Sandbox](https://developer.apple.com/library/archive/documentation/Security/Conceptual/AppSandboxDesignGuide/AboutAppSandbox/AboutAppSandbox.html)
 - [3] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
-- [4] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*` operations and `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
-- [5] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV` handler)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
-- [6] [A New Era of macOS Sandbox Escapes: Diving into an Overlooked Attack Surface and Uncovering 10+ New Vulnerabilities](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)
-- [7] [Analyzing CVE-2025-31191: A macOS security-scoped bookmarks-based sandbox escape](https://www.microsoft.com/en-us/security/blog/2025/05/01/analyzing-cve-2025-31191-a-macos-security-scoped-bookmarks-based-sandbox-escape/)
+- [4] [XNU — `bsd/sys/codesign.h` (các thao tác `CS_OPS_*` và `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [5] [XNU — `bsd/kern/kern_proc.c` (trình xử lý `csops` / `CS_OPS_CLEAR_LV`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
+- [6] [Kỷ nguyên mới của macOS Sandbox Escape: Khám phá bề mặt tấn công bị bỏ qua và tìm ra hơn 10 lỗ hổng mới](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)
+- [7] [Phân tích CVE-2025-31191: macOS sandbox escape dựa trên security-scoped bookmarks](https://www.microsoft.com/en-us/security/blog/2025/05/01/analyzing-cve-2025-31191-a-macos-security-scoped-bookmarks-based-sandbox-escape/)
 {{#include ../../../banners/hacktricks-training.md}}

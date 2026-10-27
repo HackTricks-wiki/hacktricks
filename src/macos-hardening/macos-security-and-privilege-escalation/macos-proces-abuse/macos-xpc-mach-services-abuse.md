@@ -1,17 +1,17 @@
-# macOS XPC Mach Services Abuse
+# Lạm dụng macOS XPC Mach Services
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Thông tin cơ bản
 
-**XPC** (Cross-Process Communication) is the primary IPC mechanism on macOS. System daemons expose **Mach services** — named ports registered with `launchd` — that other processes can connect to via `NSXPCConnection`.<sup>[[1]](#references)</sup>
+**XPC** (Cross-Process Communication) là cơ chế IPC chính trên macOS. Các daemon hệ thống cung cấp **Mach services** — các cổng có tên được đăng ký với `launchd` — để các tiến trình khác có thể kết nối thông qua `NSXPCConnection`.<sup>[[1]](#references)</sup>
 
-Every **LaunchDaemon** and **LaunchAgent** plist with a `MachServices` key registers one or more named Mach ports. These are system-wide XPC endpoints that any process can attempt to connect to.<sup>[[2]](#references)</sup>
+Mỗi plist **LaunchDaemon** và **LaunchAgent** có khóa `MachServices` sẽ đăng ký một hoặc nhiều cổng Mach có tên. Đây là các endpoint XPC trên toàn hệ thống mà mọi tiến trình đều có thể thử kết nối.<sup>[[2]](#references)</sup>
 
 > [!WARNING]
-> XPC Mach services are the **single largest local privilege escalation attack surface** on macOS. Most local root exploits in recent years went through vulnerable XPC services in LaunchDaemons. Every exposed method in a root daemon is a potential escalation vector.
+> XPC Mach services là **bề mặt tấn công leo thang đặc quyền cục bộ lớn nhất** trên macOS. Hầu hết các exploit root cục bộ trong những năm gần đây đều khai thác các XPC service dễ bị tấn công trong LaunchDaemon. Mọi method được công khai trong một daemon chạy với quyền root đều có thể là một vector leo thang đặc quyền.
 
-### Architecture
+### Kiến trúc
 
 ```
 Client Process (user context)
@@ -23,9 +23,9 @@ Daemon Process (root context)
     ↓ Performs privileged operation
 ```
 
-## Enumeration
+## Liệt kê
 
-### Finding Daemons with Mach Services
+### Tìm Daemon có Mach Services
 
 ```bash
 # Find all LaunchDaemons with MachServices
@@ -51,9 +51,9 @@ ORDER BY e.privileged DESC
 LIMIT 50;"
 ```
 
-### Enumerating XPC Interfaces
+### Liệt kê các giao diện XPC
 
-Once you identify a daemon, reverse-engineer its XPC interface:
+Sau khi xác định được một daemon, hãy reverse-engineer giao diện XPC của nó:
 
 ```bash
 # Find the protocol definition in the binary
@@ -66,15 +66,15 @@ class-dump /path/to/daemon | grep -A20 "@protocol"
 find /Applications -path "*/XPCServices/*.xpc" 2>/dev/null
 ```
 
-## XPC Client Verification Vulnerabilities
+## Lỗ hổng xác minh XPC client
 
-The most common vulnerability class in XPC services is **insufficient client verification**. The daemon should verify:
+Loại lỗ hổng phổ biến nhất trong các dịch vụ XPC là **xác minh client không đầy đủ**. Daemon cần xác minh:
 
-1. **Code signature** of the connecting process
-2. **Entitlements** of the connecting process
-3. **Audit token** (not PID, which can be reused)
+1. **Chữ ký mã** của tiến trình kết nối
+2. **Entitlement** của tiến trình kết nối
+3. **Audit token** (không dùng PID vì PID có thể được tái sử dụng)
 
-### Vulnerable Pattern: No Verification
+### Mẫu dễ bị tổn thương: Không xác minh
 
 ```objc
 // VULNERABLE — daemon accepts any connection
@@ -87,7 +87,7 @@ The most common vulnerability class in XPC services is **insufficient client ver
 }
 ```
 
-### Vulnerable Pattern: PID-Based Verification (Race Condition)
+### Mẫu dễ bị khai thác: Xác minh dựa trên PID (Race Condition)
 
 ```objc
 // VULNERABLE — PID can be reused between check and use
@@ -103,7 +103,7 @@ The most common vulnerability class in XPC services is **insufficient client ver
 }
 ```
 
-### Secure Pattern: Audit Token Verification
+### Mẫu hình bảo mật: Xác minh Audit Token
 
 ```objc
 // SECURE — Uses audit token which cannot be spoofed
@@ -133,7 +133,7 @@ The most common vulnerability class in XPC services is **insufficient client ver
 }
 ```
 
-## Attack: Connecting to Unprotected XPC Services
+## Tấn công: Kết nối tới các XPC Service không được bảo vệ
 
 ```objc
 // Minimal XPC client — connect to a LaunchDaemon's Mach service
@@ -169,9 +169,9 @@ int main(void) {
 }
 ```
 
-## Attack: XPC Object Deserialization
+## Tấn công: Giải tuần tự hóa đối tượng XPC
 
-XPC services that accept complex objects (`NSSecureCoding` conformant) can be vulnerable to **deserialization attacks**:
+Các dịch vụ XPC chấp nhận các đối tượng phức tạp (tuân thủ `NSSecureCoding`) có thể dễ bị **tấn công giải tuần tự hóa**:
 
 ```objc
 // If the daemon accepts NSObject subclasses via XPC:
@@ -184,9 +184,9 @@ XPC services that accept complex objects (`NSSecureCoding` conformant) can be vu
 
 ## Mach-Lookup Sandbox Exceptions
 
-### How Exceptions Enable Sandbox Escape
+### Cách các ngoại lệ cho phép thoát khỏi sandbox
 
-Sandboxed applications normally can only communicate with their own XPC services. However, **mach-lookup exceptions** allow reaching system-wide services:
+Các ứng dụng bị sandbox thường chỉ có thể giao tiếp với các dịch vụ XPC của chính chúng. Tuy nhiên, **mach-lookup exceptions** cho phép truy cập các dịch vụ trên toàn hệ thống:
 
 ```xml
 <!-- Entitlement granting mach-lookup exception -->
@@ -198,7 +198,7 @@ Sandboxed applications normally can only communicate with their own XPC services
 </array>
 ```
 
-### Finding Applications with Broad Exceptions
+### Tìm ứng dụng có các ngoại lệ rộng
 
 ```bash
 # Find sandboxed apps with mach-lookup exceptions
@@ -214,7 +214,7 @@ find /Applications -name "*.app" -exec sh -c '
 ' _ {} \; 2>/dev/null
 ```
 
-### Sandbox Escape Chain
+### Chuỗi thoát sandbox
 
 ```
 1. Compromise sandboxed app (e.g., via renderer exploit in browser/email)
@@ -225,17 +225,17 @@ find /Applications -name "*.app" -exec sh -c '
 6. Escalate from daemon's privilege level (often root)
 ```
 
-## Privileged Helper Tools (SMJobBless)
+## Công cụ trợ giúp có đặc quyền (SMJobBless)
 
-### How They Work
+### Cách chúng hoạt động
 
-`SMJobBless` installs a privileged helper that runs as root via launchd. The helper communicates with its parent app via XPC:
+`SMJobBless` cài đặt một helper có đặc quyền chạy với quyền root thông qua launchd. Helper giao tiếp với ứng dụng cha qua XPC:
 
 ```
 App (user context) ←→ XPC ←→ Helper (root via launchd)
 ```
 
-### Common Vulnerability: Weak Authorization
+### Lỗ hổng phổ biến: Phân quyền yếu
 
 ```objc
 // Many helpers check authorization but:
@@ -264,7 +264,7 @@ App (user context) ←→ XPC ←→ Helper (root via launchd)
 }
 ```
 
-### Exploiting Weak Helpers
+### Khai thác các Helper yếu
 
 ```bash
 # 1. Find installed privileged helpers
@@ -303,19 +303,19 @@ class-dump /path/to/daemon
 log stream --predicate 'process == "daemon-name" AND (eventMessage CONTAINS "crash" OR eventMessage CONTAINS "fault")'
 ```
 
-## Real-World CVEs
+## CVE thực tế
 
-| CVE | Description |
+| CVE | Mô tả |
 |---|---|
-| CVE-2023-41993 | XPC service deserialization vulnerability |
-| CVE-2022-22616 | Gatekeeper bypass via XPC service abuse |
+| CVE-2023-41993 | Lỗ hổng deserialization của dịch vụ XPC |
+| CVE-2022-22616 | Gatekeeper bypass qua việc lạm dụng dịch vụ XPC |
 | CVE-2021-30657 | Sysmond XPC privilege escalation |
-| CVE-2020-9839 | XPC race condition in system daemon |
-| CVE-2019-8802 | Privileged helper tool missing client verification<sup>[[5]](#references)</sup> |
-| CVE-2023-32369 | Migraine — SIP bypass through `systemmigrationd` XPC<sup>[[3]](#references)</sup> |
+| CVE-2020-9839 | Race condition XPC trong system daemon |
+| CVE-2019-8802 | Công cụ helper có đặc quyền thiếu xác minh client<sup>[[5]](#references)</sup> |
+| CVE-2023-32369 | Migraine — SIP bypass thông qua XPC của `systemmigrationd`<sup>[[3]](#references)</sup> |
 | CVE-2022-26712 | PackageKit XPC root escalation<sup>[[4]](#references)</sup> |
 
-## Enumeration Script
+## Script liệt kê
 
 ```bash
 #!/bin/bash
@@ -347,10 +347,9 @@ done
 
 ## References
 
-- [1] [Apple Developer — XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
-- [2] [Apple Developer — Daemons and Services Programming Guide](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
-- [3] [New macOS vulnerability, Migraine, could bypass System Integrity Protection — Microsoft Security Blog](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
-- [4] [CVE-2022-26712: The POC for SIP-Bypass Is Even Tweetable](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/)
-- [5] [Objective-See — XPC client validation and Rootpipe](https://objective-see.org/blog/blog_0x3E.html)
-
+- [1] [Apple Developer — Dịch vụ XPC](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
+- [2] [Apple Developer — Hướng dẫn lập trình Daemon và dịch vụ](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
+- [3] [Lỗ hổng macOS mới, Migraine, có thể vượt qua System Integrity Protection — Microsoft Security Blog](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
+- [4] [CVE-2022-26712: POC để bypass SIP thậm chí có thể đăng trong một tweet](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/)
+- [5] [Objective-See — Xác thực client XPC và Rootpipe](https://objective-see.org/blog/blog_0x3E.html)
 {{#include ../../../banners/hacktricks-training.md}}

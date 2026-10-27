@@ -2,42 +2,42 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Entitlements declare capabilities and security exceptions that the operating system grants to signed code. The entries below focus on those that are especially useful during offensive review.<sup>[[13]](#references)</sup>
+Entitlements khai báo các khả năng và ngoại lệ bảo mật mà hệ điều hành cấp cho mã đã ký. Các mục bên dưới tập trung vào những entitlement đặc biệt hữu ích khi rà soát bảo mật theo hướng tấn công.<sup>[[13]](#references)</sup>
 
 > [!WARNING]
-> Note that entitlements starting with **`com.apple`** are not available to third-parties, only Apple can grant them... Or if you are using an enterprise certificate you could create your own entitlements starting with **`com.apple`** actually and bypass protections based on this.
+> Lưu ý rằng các entitlement bắt đầu bằng **`com.apple`** không dành cho bên thứ ba; chỉ Apple mới có thể cấp chúng... Hoặc nếu đang sử dụng chứng chỉ doanh nghiệp, bạn thực sự có thể tự tạo entitlement bắt đầu bằng **`com.apple`** để vượt qua các biện pháp bảo vệ dựa trên entitlement này.
 
 ## High
 
 ### `com.apple.rootless.install.heritable`
 
-The entitlement **`com.apple.rootless.install.heritable`** allows a process to **bypass SIP**. Check [this for more info](macos-sip.md#com.apple.rootless.install.heritable).
+Entitlement **`com.apple.rootless.install.heritable`** cho phép một process **bypass SIP**. Xem [thông tin thêm tại đây](macos-sip.md#com.apple.rootless.install.heritable).
 
 ### **`com.apple.rootless.install`**
 
-The entitlement **`com.apple.rootless.install`** allows a process to **bypass SIP**. Check [this for more info](macos-sip.md#com.apple.rootless.install).
+Entitlement **`com.apple.rootless.install`** cho phép một process **bypass SIP**. Xem [thông tin thêm tại đây](macos-sip.md#com.apple.rootless.install).
 
-### **`com.apple.system-task-ports` (previously called `task_for_pid-allow`)**
+### **`com.apple.system-task-ports` (trước đây có tên là `task_for_pid-allow`)**
 
-This entitlement allows a process to get the **task port for any** process except the kernel. Check [**this for more info**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
+Entitlement này cho phép một process lấy **task port của bất kỳ** process nào, ngoại trừ kernel. Xem [**thông tin thêm tại đây**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.get-task-allow`
 
-This entitlement allows other processes with the **`com.apple.security.cs.debugger`** entitlement to get the task port of the process run by the binary with this entitlement and **inject code on it**. Check [**this for more info**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
+Entitlement này cho phép các process khác có entitlement **`com.apple.security.cs.debugger`** lấy task port của process được chạy bởi binary có entitlement này và **inject code vào đó**. Xem [**thông tin thêm tại đây**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.cs.debugger`
 
-Apps with the Debugging Tool Entitlement can call `task_for_pid()` to retrieve a valid task port for unsigned and third-party apps with the `Get Task Allow` entitlement set to `true`. However, even with the debugging tool entitlement, a debugger **can’t get the task ports** of processes that **don’t have the `Get Task Allow` entitlement**, and that are therefore protected by System Integrity Protection. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).<sup>[[3]](#references)</sup>
+Các ứng dụng có Debugging Tool Entitlement có thể gọi `task_for_pid()` để lấy task port hợp lệ của các ứng dụng unsigned và bên thứ ba có `Get Task Allow` được đặt thành `true`. Tuy nhiên, ngay cả khi có debugging tool entitlement, debugger **không thể lấy task port** của các process **không có entitlement `Get Task Allow`**, do đó được System Integrity Protection bảo vệ. Xem [**thông tin thêm tại đây**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).<sup>[[3]](#references)</sup>
 
 ### `com.apple.security.cs.disable-library-validation`
 
-This entitlement allows an application to **load frameworks, plug-ins, or libraries without requiring them to be signed by Apple or with the same Team ID** as the main executable, so an attacker could abuse an arbitrary library load to inject code. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).<sup>[[4]](#references)</sup>
+Entitlement này cho phép ứng dụng **tải framework, plug-in hoặc library mà không cần chúng được Apple ký hoặc có cùng Team ID** với executable chính, vì vậy attacker có thể lợi dụng việc tải library tùy ý để inject code. Xem [**thông tin thêm tại đây**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).<sup>[[4]](#references)</sup>
 
 ### `com.apple.private.security.clear-library-validation`
 
-This entitlement is very similar to **`com.apple.security.cs.disable-library-validation`** but **instead** of **directly disabling** library validation, it allows the process to **call a `csops` system call to disable it** at runtime.
+Entitlement này rất giống **`com.apple.security.cs.disable-library-validation`**, nhưng **thay vì** **vô hiệu hóa trực tiếp** library validation, nó cho phép process **gọi system call `csops` để vô hiệu hóa tính năng này** khi đang chạy.
 
-The entitlement name is hardcoded in XNU next to the `csops` operation that consumes it:<sup>[[1]](#references)</sup>
+Tên entitlement được hardcode trong XNU, ngay cạnh thao tác `csops` sử dụng nó:<sup>[[1]](#references)</sup>
 
 ```c
 /* bsd/sys/codesign.h */
@@ -46,7 +46,7 @@ The entitlement name is hardcoded in XNU next to the `csops` operation that cons
 #define CS_OPS_CLEAR_LV     15  /* clear the library validation flag */
 ```
 
-The kernel handler for `CS_OPS_CLEAR_LV` (`bsd/kern/kern_proc.c`) shows exactly how narrow the primitive is:<sup>[[2]](#references)</sup>
+Bộ xử lý kernel cho `CS_OPS_CLEAR_LV` (`bsd/kern/kern_proc.c`) cho thấy primitive này bị giới hạn đến mức nào:<sup>[[2]](#references)</sup>
 
 ```c
 case CS_OPS_CLEAR_LV: {
@@ -61,58 +61,58 @@ case CS_OPS_CLEAR_LV: {
                         error = 0;
 ```
 
-So the operation:
+Vì vậy, thao tác này:
 
-- Is **macOS-only** (`ENOTSUP` on every other platform).
-- Only works on **itself** (`forself == 1`) — you cannot strip library validation off another process with it.
-- Requires the process to actually **hold the entitlement**, and refuses if the process is flagged `CS_INSTALLER` or is running under a subsystem root path.
-- Clears **`CS_REQUIRE_LV | CS_FORCED_LV`** from the process' code-signing flags.
+- Chỉ dành cho **macOS** (`ENOTSUP` trên mọi nền tảng khác).
+- Chỉ hoạt động trên chính tiến trình đó (`forself == 1`) — bạn không thể dùng nó để gỡ library validation khỏi tiến trình khác.
+- Yêu cầu tiến trình thực sự **có entitlement này**, đồng thời từ chối nếu tiến trình được đánh dấu `CS_INSTALLER` hoặc đang chạy trong đường dẫn root của subsystem.
+- Xóa **`CS_REQUIRE_LV | CS_FORCED_LV`** khỏi các cờ code-signing của tiến trình.
 
-The XNU comment explains the intended use case, and also why it is interesting to an attacker:
+Comment trong XNU giải thích trường hợp sử dụng dự kiến, đồng thời cho thấy vì sao điều này đáng chú ý với attacker:
 
-> This option is used to remove library validation from a running process. This is used in plugin architectures when a program needs to load untrusted libraries. [...] Once a process has loaded the untrusted library, relying on library validation in the future will not be effective.
+> Tùy chọn này được dùng để gỡ library validation khỏi một tiến trình đang chạy. Tùy chọn này được dùng trong các kiến trúc plugin khi chương trình cần tải các thư viện không đáng tin cậy. [...] Sau khi tiến trình đã tải thư viện không đáng tin cậy, việc dựa vào library validation về sau sẽ không còn hiệu quả.
 
-In other words, **any binary carrying this entitlement is a dylib-injection target**: get code running inside it (or convince it to load your plug-in) after it has dropped `CS_REQUIRE_LV`, and you inherit whatever the host process is trusted to do.
+Nói cách khác, **bất kỳ binary nào có entitlement này đều là mục tiêu dylib-injection**: chạy code bên trong nó (hoặc thuyết phục nó tải plugin của bạn) sau khi nó đã bỏ `CS_REQUIRE_LV`, và bạn sẽ thừa hưởng mọi quyền mà tiến trình host được tin cậy để thực hiện.
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
-This entitlement allows to **use DYLD environment variables** that could be used to inject libraries and code. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).<sup>[[5]](#references)</sup>
+Entitlement này cho phép **sử dụng các biến môi trường DYLD**, vốn có thể được dùng để inject library và code. Xem [**thông tin chi tiết tại đây**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).<sup>[[5]](#references)</sup>
 
-### `com.apple.private.tcc.manager` or `com.apple.rootless.storage`.`TCC`
+### `com.apple.private.tcc.manager` hoặc `com.apple.rootless.storage`.`TCC`
 
-[**According to this blog**](https://objective-see.org/blog/blog_0x4C.html) **and** [**this blog**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), these entitlements allow a process to **modify** the **TCC** database.<sup>[[6]](#references)[[7]](#references)</sup>
+[**Theo blog này**](https://objective-see.org/blog/blog_0x4C.html) **và** [**blog này**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), các entitlement này cho phép tiến trình **chỉnh sửa** cơ sở dữ liệu **TCC**.<sup>[[6]](#references)[[7]](#references)</sup>
 
-### Authorization rights **`system.install.apple-software`** and **`system.install.apple-software.standard-user`**
+### Các quyền Authorization **`system.install.apple-software`** và **`system.install.apple-software.standard-user`**
 
-These Authorization Services rights govern the installation of Apple-provided software. A process entitled to obtain them may bypass the usual authorization flow, which can be helpful for **privilege escalation**.<sup>[[14]](#references)</sup>
+Các quyền Authorization Services này kiểm soát việc cài đặt phần mềm do Apple cung cấp. Tiến trình được cấp quyền để nhận các quyền này có thể bỏ qua luồng authorization thông thường, điều này có thể hữu ích cho **privilege escalation**.<sup>[[14]](#references)</sup>
 
 ### `com.apple.private.security.kext-management`
 
-Entitlement needed to ask the **kernel to load a kernel extension**.
+Entitlement cần thiết để yêu cầu **kernel tải một kernel extension**.
 
 ### **`com.apple.private.icloud-account-access`**
 
-The entitlement **`com.apple.private.icloud-account-access`** makes it possible to communicate with the **`com.apple.iCloudHelper`** XPC service, which will **provide iCloud tokens**.
+Entitlement **`com.apple.private.icloud-account-access`** cho phép giao tiếp với dịch vụ XPC **`com.apple.iCloudHelper`**, dịch vụ này sẽ **cung cấp iCloud token**.
 
-**iMovie** and **Garageband** had this entitlement.
+**iMovie** và **Garageband** từng có entitlement này.
 
-For more **information** about the exploit to **get icloud tokens** from that entitlement check the talk: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)<sup>[[8]](#references)</sup>
+Để biết thêm **thông tin** về exploit dùng entitlement này để **lấy iCloud token**, hãy xem bài nói chuyện: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)<sup>[[8]](#references)</sup>
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
-TODO: I don't know what this allows to do
+TODO: Tôi không biết entitlement này cho phép làm gì
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO: [**This report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) mentions that this entitlement could be used to update SSV-protected contents after a reboot. If you know how, please send a PR!<sup>[[9]](#references)</sup>
+TODO: [**Báo cáo này**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) đề cập rằng entitlement này có thể được dùng để cập nhật nội dung được SSV bảo vệ sau khi khởi động lại. Nếu bạn biết cách thực hiện, hãy gửi PR!<sup>[[9]](#references)</sup>
 
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO: [**The same report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) mentions that creating a sealed snapshot could be used to update SSV-protected contents after a reboot. If you know how, please send a PR!<sup>[[9]](#references)</sup>
+TODO: [**Báo cáo tương tự**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) đề cập rằng việc tạo sealed snapshot có thể được dùng để cập nhật nội dung được SSV bảo vệ sau khi khởi động lại. Nếu bạn biết cách thực hiện, hãy gửi PR!<sup>[[9]](#references)</sup>
 
 ### `keychain-access-groups`
 
-This entitlement list **keychain** groups the application has access to:
+Danh sách entitlement này liệt kê các nhóm **keychain** mà ứng dụng có quyền truy cập:
 
 ```xml
 <key>keychain-access-groups</key>
@@ -127,63 +127,63 @@ This entitlement list **keychain** groups the application has access to:
 
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
-Gives **Full Disk Access** permissions, one of the TCC highest permissions you can have.
+Cấp quyền **Truy cập toàn bộ ổ đĩa**, một trong những quyền cao nhất của TCC.
 
 ### **`kTCCServiceAppleEvents`**
 
-Allows the app to send events to other applications that are commonly used for **automating tasks**. Controlling other apps, it can abuse the permissions granted to these other apps.
+Cho phép ứng dụng gửi sự kiện đến các ứng dụng khác thường được dùng để **tự động hóa tác vụ**. Bằng cách kiểm soát các ứng dụng khác, nó có thể lạm dụng những quyền được cấp cho các ứng dụng đó.
 
-Like making them ask the user for its password:
+Chẳng hạn, khiến chúng yêu cầu người dùng nhập mật khẩu:
 
 ```bash
 osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
 ```
 
-Or making them perform **arbitrary actions**.
+Hoặc khiến chúng thực hiện **các hành động tùy ý**.
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
-Allows, among other permissions, to **write the users TCC database**.
+Cho phép, cùng với các quyền khác, **ghi vào cơ sở dữ liệu TCC của người dùng**.
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
-Allows to **change** the **`NFSHomeDirectory`** attribute of a user that changes his home folder path and therefore allows to **bypass TCC**.
+Cho phép **thay đổi** thuộc tính **`NFSHomeDirectory`** của người dùng, làm thay đổi đường dẫn thư mục home của họ và do đó cho phép **bypass TCC**.
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Allow to modify files inside apps bundle (inside app.app), which is **disallowed by default**.
+Cho phép sửa đổi các tệp bên trong app bundle (bên trong app.app), vốn **bị cấm theo mặc định**.
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
-It's possible to check who has this access in _System Settings_ > _Privacy & Security_ > _App Management._
+Có thể kiểm tra ứng dụng nào được cấp quyền này trong _System Settings_ > _Privacy & Security_ > _App Management._
 
 ### `kTCCServiceAccessibility`
 
-The process will be able to **abuse the macOS accessibility features**, Which means that for example he will be able to press keystrokes. SO he could request access to control an app like Finder and approve the dialog with this permission.
+Process có thể **abuse các tính năng trợ năng của macOS**. Điều này có nghĩa là, chẳng hạn, process có thể nhấn các phím. Vì vậy, nó có thể yêu cầu quyền kiểm soát một ứng dụng như Finder rồi dùng quyền này để chấp thuận hộp thoại.
 
-## Trustcache/CDhash related entitlements
+## Các entitlement liên quan đến Trustcache/CDhash
 
-There are some entitlements that could be used to bypass Trustcache/CDhash protections, which prevent the execution of downgraded versions of Apple binaries.
+Một số entitlement có thể được dùng để bypass các biện pháp bảo vệ Trustcache/CDhash, vốn ngăn thực thi các phiên bản cũ hơn của binary Apple.
 
-## Medium
+## Trung bình
 
 ### `com.apple.security.cs.allow-jit`
 
-This entitlement allows a process to **create memory that is writable and executable** by passing the `MAP_JIT` flag to the `mmap()` system function. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).<sup>[[10]](#references)</sup>
+Entitlement này cho phép process **tạo vùng nhớ có thể ghi và thực thi** bằng cách truyền cờ `MAP_JIT` cho hàm hệ thống `mmap()`. Xem [**tại đây để biết thêm thông tin**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).<sup>[[10]](#references)</sup>
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-This entitlement allows to **override or patch C code**, use the long-deprecated **`NSCreateObjectFileImageFromMemory`** (which is fundamentally insecure), or use the **DVDPlayback** framework. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).<sup>[[11]](#references)</sup>
+Entitlement này cho phép **ghi đè hoặc vá mã C**, sử dụng **`NSCreateObjectFileImageFromMemory`** đã bị ngừng hỗ trợ từ lâu (vốn không an toàn về bản chất), hoặc sử dụng framework **DVDPlayback**. Xem [**tại đây để biết thêm thông tin**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).<sup>[[11]](#references)</sup>
 
 > [!CAUTION]
-> Including this entitlement exposes your app to common vulnerabilities in memory-unsafe code languages. Carefully consider whether your app needs this exception.
+> Việc đưa entitlement này vào khiến ứng dụng của bạn dễ gặp các lỗ hổng phổ biến trong những ngôn ngữ lập trình không an toàn về bộ nhớ. Hãy cân nhắc kỹ xem ứng dụng có cần ngoại lệ này hay không.
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-This entitlement allows to **modify sections of its own executable files** on disk to forcefully exit. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).<sup>[[12]](#references)</sup>
+Entitlement này cho phép **sửa đổi các phần trong tệp thực thi của chính ứng dụng trên đĩa** để buộc ứng dụng thoát. Xem [**tại đây để biết thêm thông tin**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).<sup>[[12]](#references)</sup>
 
 > [!CAUTION]
-> The Disable Executable Memory Protection Entitlement is an extreme entitlement that removes a fundamental security protection from your app, making it possible for an attacker to rewrite your app’s executable code without detection. Prefer narrower entitlements if possible.
+> Entitlement Disable Executable Memory Protection là một entitlement cực đoan, loại bỏ một biện pháp bảo vệ an ninh cơ bản khỏi ứng dụng, khiến kẻ tấn công có thể viết lại mã thực thi của ứng dụng mà không bị phát hiện. Nếu có thể, hãy ưu tiên các entitlement có phạm vi hẹp hơn.
 
 ### `com.apple.security.cs.allow-relative-library-loads`
 
@@ -191,11 +191,11 @@ TODO
 
 ### `com.apple.private.nullfs_allow`
 
-This entitlement allows to mount a nullfs file system (forbidden by default). Tool: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
+Entitlement này cho phép mount hệ thống tệp nullfs (bị cấm theo mặc định). Công cụ: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
 
 ### `kTCCServiceAll`
 
-According to this blogpost, this TCC permission usually found in the form:
+Theo bài blog này, quyền TCC này thường có dạng:
 
 ```
 [Key] com.apple.private.tcc.allow-prompting
@@ -204,13 +204,13 @@ According to this blogpost, this TCC permission usually found in the form:
 			[String] kTCCServiceAll
 ```
 
-Allow the process to **ask for all the TCC permissions**.
+Cho phép tiến trình **yêu cầu tất cả quyền TCC**.
 
 ### **`kTCCServicePostEvent`**
 
-Allows **injecting synthetic keyboard and mouse events** system-wide via `CGEventPost()`. A process with this permission can simulate keystrokes, mouse clicks, and scroll events in any application — effectively providing **remote control** of the desktop.
+Cho phép **inject các sự kiện bàn phím và chuột giả lập** trên toàn hệ thống thông qua `CGEventPost()`. Tiến trình có quyền này có thể giả lập thao tác nhấn phím, nhấp chuột và cuộn trong bất kỳ ứng dụng nào — về cơ bản là **điều khiển từ xa** desktop.
 
-This is especially dangerous combined with `kTCCServiceAccessibility` or `kTCCServiceListenEvent`, as it allows both reading AND injecting input.
+Điều này đặc biệt nguy hiểm khi kết hợp với `kTCCServiceAccessibility` hoặc `kTCCServiceListenEvent`, vì cho phép vừa đọc VỪA inject dữ liệu đầu vào.
 
 ```objc
 // Inject a keystroke (Enter key)
@@ -220,9 +220,9 @@ CGEventPost(kCGSessionEventTap, keyDown);
 
 ### **`kTCCServiceListenEvent`**
 
-Allows **intercepting all keyboard and mouse events** system-wide (input monitoring / keylogging). A process can register a `CGEventTap` to capture every keystroke typed in any application, including passwords, credit card numbers, and private messages.
+Cho phép **chặn mọi sự kiện bàn phím và chuột** trên toàn hệ thống (theo dõi đầu vào / keylogging). Một tiến trình có thể đăng ký `CGEventTap` để thu thập mọi lần nhấn phím trong bất kỳ ứng dụng nào, bao gồm mật khẩu, số thẻ tín dụng và tin nhắn riêng tư.
 
-For detailed exploitation techniques see:
+Để biết các kỹ thuật khai thác chi tiết, xem:
 
 {{#ref}}
 macos-input-monitoring-screen-capture-accessibility.md
@@ -230,38 +230,38 @@ macos-input-monitoring-screen-capture-accessibility.md
 
 ### **`kTCCServiceScreenCapture`**
 
-Allows **reading the display buffer** — taking screenshots and recording screen video of any application, including secure text fields. Combined with OCR, this can automatically extract passwords and sensitive data from the screen.
+Cho phép **đọc bộ đệm hiển thị** — chụp ảnh màn hình và quay video màn hình của bất kỳ ứng dụng nào, kể cả các trường văn bản bảo mật. Kết hợp với OCR, quyền này có thể tự động trích xuất mật khẩu và dữ liệu nhạy cảm trên màn hình.
 
 > [!WARNING]
-> Starting with macOS Sonoma, screen capture shows a persistent menu bar indicator. On older versions, screen recording can be completely silent.
+> Kể từ macOS Sonoma, tính năng quay màn hình hiển thị một chỉ báo liên tục trên thanh menu. Trên các phiên bản cũ hơn, có thể quay màn hình hoàn toàn im lặng.
 
 ### **`kTCCServiceCamera`**
 
-Allows **capturing photos and video** from the built-in camera or connected USB cameras. Code injection into a camera-entitled binary enables silent visual surveillance.
+Cho phép **chụp ảnh và quay video** bằng camera tích hợp hoặc camera USB được kết nối. Chèn code vào một binary có quyền truy cập camera sẽ cho phép giám sát hình ảnh một cách im lặng.
 
 ### **`kTCCServiceMicrophone`**
 
-Allows **recording audio** from all input devices. Background daemons with mic access provide persistent ambient audio surveillance with no visible application window.
+Cho phép **ghi âm** từ mọi thiết bị đầu vào. Các daemon chạy nền có quyền truy cập mic cho phép giám sát âm thanh xung quanh liên tục mà không có cửa sổ ứng dụng hiển thị.
 
 ### **`kTCCServiceLocation`**
 
-Allows querying the device's **physical location** via Wi-Fi triangulation or Bluetooth beacons. Continuous monitoring reveals home/work addresses, travel patterns, and daily routines.
+Cho phép truy vấn **vị trí thực tế** của thiết bị thông qua định vị tam giác Wi-Fi hoặc beacon Bluetooth. Việc giám sát liên tục có thể tiết lộ địa chỉ nhà/nơi làm việc, lịch trình di chuyển và thói quen hằng ngày.
 
 ### **`kTCCServiceAddressBook`** / **`kTCCServiceCalendar`** / **`kTCCServicePhotos`**
 
-Access to **Contacts** (names, emails, phones — useful for spear-phishing), **Calendar** (meeting schedules, attendee lists), and **Photos** (personal photos, screenshots that may contain credentials, location metadata).
+Quyền truy cập vào **Danh bạ** (tên, email, số điện thoại — hữu ích cho spear-phishing), **Lịch** (lịch họp, danh sách người tham dự) và **Ảnh** (ảnh cá nhân, ảnh chụp màn hình có thể chứa thông tin xác thực, siêu dữ liệu vị trí).
 
-For complete credential theft exploitation techniques via TCC permissions, see:
+Để biết đầy đủ các kỹ thuật khai thác nhằm đánh cắp thông tin xác thực qua quyền TCC, xem:
 
 {{#ref}}
 macos-tcc/macos-tcc-credential-and-data-theft.md
 {{#endref}}
 
-## Sandbox & Code Signing Entitlements
+## Quyền Sandbox và Code Signing
 
 ### `com.apple.security.temporary-exception.mach-lookup.global-name`
 
-**Sandbox temporary exceptions** weaken the App Sandbox by allowing communication with system-wide Mach/XPC services that the sandbox normally blocks. This is the **primary sandbox escape primitive** — a compromised sandboxed app can use mach-lookup exceptions to reach privileged daemons and exploit their XPC interfaces.
+**Các ngoại lệ tạm thời của Sandbox** làm suy yếu App Sandbox bằng cách cho phép giao tiếp với các dịch vụ Mach/XPC trên toàn hệ thống mà sandbox thường chặn. Đây là **cơ chế chính để thoát sandbox** — một ứng dụng sandbox bị xâm nhập có thể dùng các ngoại lệ mach-lookup để tiếp cận daemon có đặc quyền và khai thác các giao diện XPC của chúng.
 
 ```bash
 # Find apps with mach-lookup exceptions
@@ -271,7 +271,7 @@ find /Applications -name "*.app" -exec sh -c '
 ' _ {} \; 2>/dev/null
 ```
 
-For detailed exploitation chain: sandboxed app → mach-lookup exception → vulnerable daemon → sandbox escape, see:
+For exploitation chain chi tiết: ứng dụng sandbox → ngoại lệ mach-lookup → daemon dễ bị tấn công → sandbox escape, xem:
 
 {{#ref}}
 macos-code-signing-weaknesses-and-sandbox-escapes.md
@@ -279,12 +279,12 @@ macos-code-signing-weaknesses-and-sandbox-escapes.md
 
 ### `com.apple.developer.driverkit`
 
-**DriverKit entitlements** allow user-space driver binaries to communicate directly with the kernel through IOKit interfaces. DriverKit binaries manage hardware: USB, Thunderbolt, PCIe, HID devices, audio, and networking.
+**DriverKit entitlements** cho phép các binary driver trong user space giao tiếp trực tiếp với kernel thông qua các giao diện IOKit. Các binary DriverKit quản lý phần cứng: USB, Thunderbolt, PCIe, thiết bị HID, âm thanh và mạng.
 
-Compromising a DriverKit binary enables:
-- **Kernel attack surface** via malformed `IOConnectCallMethod` calls
-- **USB device spoofing** (emulate keyboard for HID injection)
-- **DMA attacks** through PCIe/Thunderbolt interfaces
+Xâm nhập một binary DriverKit cho phép:
+- **Bề mặt tấn công kernel** thông qua các lệnh gọi `IOConnectCallMethod` được tạo sai định dạng
+- **Giả mạo thiết bị USB** (mô phỏng bàn phím để HID injection)
+- **Tấn công DMA** thông qua các giao diện PCIe/Thunderbolt
 
 ```bash
 # Find DriverKit binaries
@@ -292,7 +292,7 @@ find / -name "*.dext" -type d 2>/dev/null
 systemextensionsctl list
 ```
 
-For detailed IOKit/DriverKit exploitation, see:
+Để xem chi tiết về khai thác IOKit/DriverKit, hãy xem:
 
 {{#ref}}
 ../mac-os-architecture/macos-iokit.md
@@ -300,19 +300,18 @@ For detailed IOKit/DriverKit exploitation, see:
 
 ## References
 
-- [1] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*` operations and `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
-- [2] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV` handler)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
-- [3] [Apple Developer — Debugging Tool Entitlement (`com.apple.security.cs.debugger`)](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger)
-- [4] [Apple Developer — Disable Library Validation Entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation)
-- [5] [Apple Developer — Allow DYLD Environment Variables Entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)
-- [6] [Objective-See — CVE-2020-9934: Bypassing TCC](https://objective-see.org/blog/blog_0x4C.html)
-- [7] [Wojciech Reguła — Play the music and bypass TCC aka CVE-2020-29621](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)
-- [8] [#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula (YouTube)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
-- [9] [The Nightmare of Apple's OTA Update: Bypassing the Signature Verification and Pwning the Kernel](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
-- [10] [Apple Developer — Allow Execution of JIT-compiled Code Entitlement (`com.apple.security.cs.allow-jit`)](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit)
-- [11] [Apple Developer — Allow Unsigned Executable Memory Entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory)
-- [12] [Apple Developer — Disable Executable Memory Protection Entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection)
+- [1] [XNU — `bsd/sys/codesign.h` (các thao tác `CS_OPS_*` và `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [2] [XNU — `bsd/kern/kern_proc.c` (trình xử lý `csops` / `CS_OPS_CLEAR_LV`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
+- [3] [Apple Developer — Entitlement Công cụ gỡ lỗi (`com.apple.security.cs.debugger`)](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger)
+- [4] [Apple Developer — Entitlement Tắt Xác thực Thư viện](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation)
+- [5] [Apple Developer — Entitlement Cho phép Biến Môi trường DYLD](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)
+- [6] [Objective-See — CVE-2020-9934: Bypass TCC](https://objective-see.org/blog/blog_0x4C.html)
+- [7] [Wojciech Reguła — Phát nhạc và bypass TCC, hay CVE-2020-29621](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)
+- [8] [#OBTS v5.0: "Điều gì xảy ra trên máy Mac của bạn sẽ nằm lại trên iCloud của Apple?!" - Wojciech Regula (YouTube)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+- [9] [Cơn ác mộng về bản cập nhật OTA của Apple: Bypass xác minh chữ ký và chiếm quyền Kernel](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
+- [10] [Apple Developer — Entitlement Cho phép Thực thi Mã JIT-compiled (`com.apple.security.cs.allow-jit`)](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit)
+- [11] [Apple Developer — Entitlement Cho phép Bộ nhớ Thực thi Không có Chữ ký](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory)
+- [12] [Apple Developer — Entitlement Tắt Bảo vệ Bộ nhớ Thực thi](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection)
 - [13] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
-- [14] [Apple Developer Archive — Authorization Services Programming Guide](https://developer.apple.com/library/archive/documentation/Security/Conceptual/authorization_concepts/01introduction/introduction.html)
-
+- [14] [Apple Developer Archive — Hướng dẫn Lập trình Authorization Services](https://developer.apple.com/library/archive/documentation/Security/Conceptual/authorization_concepts/01introduction/introduction.html)
 {{#include ../../../banners/hacktricks-training.md}}
