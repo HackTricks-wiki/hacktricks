@@ -1,8 +1,8 @@
-# Lateral Movement
+# Di chuyển ngang
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Windows supports several mechanisms that can be used to execute commands on remote systems. The following pages explain common lateral-movement techniques and their prerequisites:
+Windows hỗ trợ một số cơ chế có thể được dùng để thực thi lệnh trên hệ thống từ xa. Các trang sau giải thích những kỹ thuật di chuyển ngang phổ biến và các điều kiện tiên quyết:
 
 - [**PsExec / SCM service execution**](psexec-and-winexec.md#how-do-they-work)
 - [**SmbExec**](psexec-and-winexec.md#impacket-smbexecpy-smbexec)
@@ -22,5 +22,4 @@ Windows supports several mechanisms that can be used to execute commands on remo
 - [1] [HackTricks Cloud - Pass the cookie](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/az-pass-the-cookie.html)
 - [2] [HackTricks Cloud - Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html)
 - [3] [HackTricks Cloud - Pass the certificate](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/az-pass-the-certificate.html)
-
 {{#include ../../banners/hacktricks-training.md}}

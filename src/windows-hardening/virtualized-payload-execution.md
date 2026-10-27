@@ -1,89 +1,89 @@
-# Virtualized Payload Execution and Custom VM Evasion
+# Thực thi payload được ảo hóa và né tránh VM tùy chỉnh
 
 {{#include ../banners/hacktricks-training.md}}
 
-Payload virtualization compiles offensive logic to a guest instruction set and executes it with a native interpreter. Unlike a packer, which must eventually expose the original native instructions in memory, a virtualized payload can keep the protected logic as bytecode for its entire lifetime. This removes that specific unpacking window, but it does **not** hide host-visible behavior such as syscalls, network activity, or the VM-to-native call boundary.<sup>[[2]](#references)[[3]](#references)</sup>
+Payload virtualization biên dịch logic tấn công thành tập lệnh của guest rồi thực thi bằng một trình thông dịch native. Khác với packer, vốn cuối cùng phải để lộ các lệnh native ban đầu trong bộ nhớ, payload được ảo hóa có thể giữ logic được bảo vệ dưới dạng bytecode trong suốt vòng đời của nó. Cách này loại bỏ khoảng thời gian giải nén cụ thể đó, nhưng **không** che giấu hành vi mà host có thể quan sát, chẳng hạn như syscall, hoạt động mạng hoặc ranh giới gọi từ VM sang native.<sup>[[2]](#references)[[3]](#references)</sup>
 
-## WebAssembly re-hosting for static-analysis evasion
+## Re-hosting WebAssembly để né tránh phân tích tĩnh
 
-Instead of editing a heavily signatured Go tool, it can be compiled as a `wasip1` guest and embedded in a separate native loader. The guest is built against a patched GOROOT in which unsupported operations such as `net.Dial`, `net.Listen`, `os/exec` and `os.Pipe` delegate through `//go:wasmimport`; a Wazero host module then implements sockets, process operations, Win32 calls and macOS framework calls. This keeps the original project's Go API usage intact while moving most of its logic into an encrypted WASM module that static PE tooling may not understand.<sup>[[4]](#references)</sup>
+Thay vì chỉnh sửa một công cụ Go có nhiều signature, có thể biên dịch công cụ đó thành guest `wasip1` rồi nhúng vào một loader native riêng. Guest được xây dựng dựa trên GOROOT đã vá, trong đó các thao tác không được hỗ trợ như `net.Dial`, `net.Listen`, `os/exec` và `os.Pipe` chuyển tiếp qua `//go:wasmimport`; sau đó, một host module Wazero triển khai socket, thao tác tiến trình, lệnh gọi Win32 và lệnh gọi framework macOS. Cách này giữ nguyên việc sử dụng Go API của dự án gốc, đồng thời chuyển phần lớn logic vào một module WASM được mã hóa mà các công cụ PE tĩnh có thể không hiểu được.<sup>[[4]](#references)</sup>
 
-### Bridging linear memory to native APIs
+### Kết nối linear memory với native API
 
-A guest pointer is a 32-bit offset into WASM linear memory, not a host virtual address. Before a native call, the bridge can translate an argument only when it is marked as a local pointer and falls in the range `0x10000 <= value < wasmMemorySize`, producing `wasmMemoryBase + value`. The lower bound avoids rewriting small handles, flags and `nil`; per-API masks generated from `win32metadata` distinguish real pointers from handles, sizes and remote-process addresses, with overrides for inaccurate or ambiguous metadata.<sup>[[4]](#references)</sup>
+Con trỏ guest là một offset 32-bit trong WASM linear memory, không phải địa chỉ ảo của host. Trước một lệnh gọi native, bridge chỉ có thể chuyển đổi một đối số khi đối số đó được đánh dấu là con trỏ cục bộ và nằm trong phạm vi `0x10000 <= value < wasmMemorySize`, tạo ra `wasmMemoryBase + value`. Giới hạn dưới giúp tránh ghi đè các handle nhỏ, flag và `nil`; các mask theo từng API được tạo từ `win32metadata` dùng để phân biệt con trỏ thực với handle, kích thước và địa chỉ tiến trình từ xa, kèm các ngoại lệ cho metadata không chính xác hoặc không rõ ràng.<sup>[[4]](#references)</sup>
 
-Native APIs may also return host pointers through guest output buffers. A mirror table can assign such objects guest-memory representations and retain a reverse mapping to the original host address. COM requires mirroring both the interface and its vtable: data pointers can be followed and mirrored, whereas executable pointers in `MEM_IMAGE` regions must remain opaque tokens because WASM cannot execute native instructions. This model does not directly support host-to-guest callback APIs such as `EnumWindows` or `SetWindowsHookEx`.<sup>[[4]](#references)</sup>
+Native API cũng có thể trả về con trỏ host thông qua các buffer đầu ra của guest. Bảng mirror có thể gán biểu diễn trong guest memory cho các đối tượng đó và giữ ánh xạ ngược đến địa chỉ host ban đầu. COM yêu cầu mirror cả interface lẫn vtable: có thể lần theo và mirror các con trỏ dữ liệu, nhưng các con trỏ thực thi trong vùng `MEM_IMAGE` phải được giữ dưới dạng token opaque vì WASM không thể thực thi lệnh native. Mô hình này không hỗ trợ trực tiếp các API callback từ host sang guest như `EnumWindows` hoặc `SetWindowsHookEx`.<sup>[[4]](#references)</sup>
 
-### Per-build WASM VM polymorphism
+### Tính đa hình của WASM VM theo từng build
 
-The runtime and payload can be transformed together on every build: shuffle the opcode-to-handler table, rewrite every guest opcode to the new mapping, randomize section identifiers, replace the standard `\0asm` magic with a build-specific marker and change runtime cache magic. Identical source then yields bytewise-different modules, and ordinary WASM tooling cannot parse the payload until the analyst recovers the custom mapping and framing from the host loader.<sup>[[4]](#references)</sup>
+Runtime và payload có thể được biến đổi cùng nhau ở mỗi build: xáo trộn bảng ánh xạ opcode sang handler, viết lại mọi opcode guest theo ánh xạ mới, ngẫu nhiên hóa định danh section, thay magic chuẩn `\0asm` bằng marker riêng cho từng build và thay đổi magic của runtime cache. Cùng một source sẽ tạo ra các module khác nhau từng byte, còn các công cụ WASM thông thường không thể phân tích payload cho đến khi nhà phân tích khôi phục ánh xạ và framing tùy chỉnh từ host loader.<sup>[[4]](#references)</sup>
 
-For reverse engineering, start with the native host rather than carving only on `\0asm`: identify the compiled marker, module-decryption path, opcode dispatch table and `env` host-function registrations, then reconstruct a standard module or instrument the import boundary. The bridge remains a useful behavioral choke point because calls for networking, process creation, registry access, dynamic loading and generic Win32 dispatch cross it even when the embedded bytecode changes between builds.<sup>[[4]](#references)</sup>
+Để reverse engineering, hãy bắt đầu từ native host thay vì chỉ tìm dữ liệu theo `\0asm`: xác định marker đã biên dịch, luồng giải mã module, bảng dispatch opcode và các đăng ký host-function `env`, sau đó tái dựng một module chuẩn hoặc instrument ranh giới import. Bridge vẫn là một điểm kiểm soát hành vi hữu ích vì các lệnh gọi mạng, tạo tiến trình, truy cập registry, nạp động và dispatch Win32 tổng quát đều đi qua nó, ngay cả khi bytecode nhúng thay đổi giữa các build.<sup>[[4]](#references)</sup>
 
-### Camouflaging the outer Go executable
+### Ngụy trang tệp thực thi Go bên ngoài
 
-Changing the guest alone still leaves a recognizable loader. The demonstrated outer-binary transformations splice dense symbol profiles harvested from legitimate Go projects into `gopclntab`, rotate a small plausible set of DLL imports, and vary PE `VERSIONINFO` plus Authenticode identity strings. These transformations target static and machine-learning features of the container; they do not remove the runtime behavior exposed by the host shims.<sup>[[4]](#references)</sup>
+Chỉ thay đổi guest vẫn để lại một loader dễ nhận biết. Các phép biến đổi binary bên ngoài đã được trình diễn gồm ghép các profile symbol dày đặc thu thập từ những dự án Go hợp pháp vào `gopclntab`, xoay vòng một tập nhỏ các DLL import hợp lý, và thay đổi `VERSIONINFO` của PE cùng các chuỗi nhận dạng Authenticode. Những phép biến đổi này nhắm vào các đặc trưng tĩnh và machine-learning của container; chúng không loại bỏ hành vi runtime do các host shim để lộ.<sup>[[4]](#references)</sup>
 
-## Execution model
+## Mô hình thực thi
 
-A compact virtualized loader can split execution into the following layers.<sup>[[3]](#references)</sup>
+Một loader được ảo hóa gọn nhẹ có thể chia quá trình thực thi thành các lớp sau.<sup>[[3]](#references)</sup>
 
-1. Compile freestanding C, BOF source, or runtime libraries through LLVM into a custom bytecode ISA.
-2. Start a small native interpreter and initialize a build-specific opcode mapping.
-3. Run the PE linker-loader itself as bytecode: parse headers, map sections, apply relocations, resolve imports, and populate the IAT.
-4. Keep guest-to-guest calls inside the interpreter. Route targets outside the bytecode region, such as imported DLL functions, through a native host-call thunk.
-5. Move supporting facilities such as HTTP framing, TLS, and parts of the C runtime behind the same interpretation boundary.
+1. Biên dịch C freestanding, mã nguồn BOF hoặc runtime library qua LLVM thành một custom bytecode ISA.
+2. Khởi chạy một native interpreter nhỏ và khởi tạo ánh xạ opcode riêng cho từng build.
+3. Chạy chính PE linker-loader dưới dạng bytecode: phân tích header, ánh xạ section, áp dụng relocation, phân giải import và điền IAT.
+4. Giữ các lệnh gọi từ guest đến guest bên trong interpreter. Chuyển các đích nằm ngoài vùng bytecode, chẳng hạn hàm DLL được import, qua một native host-call thunk.
+5. Đưa các thành phần hỗ trợ như HTTP framing, TLS và một phần C runtime qua cùng ranh giới diễn giải.
 
-This model avoids allocating a separate native code region for every plugin and prevents the original payload from appearing as a recognizable x86-64 instruction stream. It is still an evasion/obfuscation boundary rather than a security boundary: the native interpreter and every external effect remain observable.<sup>[[2]](#references)[[3]](#references)</sup>
+Mô hình này tránh cấp phát một vùng mã native riêng cho từng plugin và ngăn payload gốc xuất hiện dưới dạng một luồng lệnh x86-64 dễ nhận diện. Đây vẫn là ranh giới né tránh/làm rối, không phải ranh giới bảo mật: native interpreter và mọi tác động bên ngoài đều có thể bị quan sát.<sup>[[2]](#references)[[3]](#references)</sup>
 
-## Shared-memory host bridge
+## Host bridge dùng chung bộ nhớ
 
-An isolated VM represents pointers as offsets into a guest buffer, so every host API crossing requires pointer translation and special handling for output parameters. A shared-memory VM instead makes guest addresses valid host-process addresses. Reads and writes can therefore use `memcpy`-style operations, and a pointer returned by a native allocation ECALL can be dereferenced directly by bytecode. RISC-Y Business demonstrated that this design can reduce the bridge to obtaining the PEB and issuing arbitrary host calls.<sup>[[1]](#references)</sup>
+VM cô lập biểu diễn con trỏ dưới dạng offset trong guest buffer, vì vậy mỗi lần gọi API qua host đều cần chuyển đổi con trỏ và xử lý đặc biệt các tham số đầu ra. VM dùng chung bộ nhớ thay vào đó khiến địa chỉ guest trở thành địa chỉ hợp lệ trong tiến trình host. Do đó, thao tác đọc và ghi có thể dùng kiểu `memcpy`, còn con trỏ do native allocation ECALL trả về có thể được bytecode dereference trực tiếp. RISC-Y Business đã chứng minh rằng thiết kế này có thể rút gọn bridge xuống còn việc lấy PEB và thực hiện các lệnh gọi host tùy ý.<sup>[[1]](#references)</sup>
 
-For Windows x64, the virtual register file can mirror the ABI: place the first four integer or pointer arguments in `RCX`, `RDX`, `R8`, and `R9`, with later arguments and shadow space on the stack. When a virtual `CALL` resolves outside the bytecode range, a universal thunk marshals that state into a native call and copies the return value back to the VM. This permits IAT calls, heap allocation, and socket operations without pointer fixups.<sup>[[2]](#references)[[3]](#references)</sup>
+Trên Windows x64, virtual register file có thể phản chiếu ABI: đặt bốn đối số integer hoặc con trỏ đầu tiên vào `RCX`, `RDX`, `R8` và `R9`, các đối số tiếp theo cùng shadow space nằm trên stack. Khi một lệnh `CALL` ảo phân giải đến địa chỉ ngoài vùng bytecode, universal thunk sẽ marshal trạng thái đó thành lệnh gọi native rồi sao chép giá trị trả về về VM. Điều này cho phép gọi IAT, cấp phát heap và thực hiện thao tác socket mà không cần hiệu chỉnh con trỏ.<sup>[[2]](#references)[[3]](#references)</sup>
 
-The tradeoff is complete loss of isolation. Guest memory corruption can affect the host directly, native callees can retain or modify guest pointers, and the interpreter must treat bytecode as fully trusted. Native-to-VM callbacks also need a reverse bridge; a VM that only supports outbound calls cannot directly satisfy callback-based APIs such as `EnumWindows`.<sup>[[1]](#references)[[3]](#references)</sup>
+Đổi lại, thiết kế này mất hoàn toàn tính cô lập. Lỗi bộ nhớ trong guest có thể ảnh hưởng trực tiếp đến host, native callee có thể giữ lại hoặc sửa đổi con trỏ guest, và interpreter phải xem bytecode là hoàn toàn đáng tin cậy. Callback từ native sang VM cũng cần một bridge ngược; VM chỉ hỗ trợ gọi ra ngoài không thể trực tiếp đáp ứng các API dựa trên callback như `EnumWindows`.<sup>[[1]](#references)[[3]](#references)</sup>
 
-## Per-build ISA polymorphism
+## Tính đa hình ISA theo từng build
 
-A fixed-width custom ISA simplifies decoding, dispatch, relocation, and virtual-register mapping. Centurion uses an 18-byte, x86-64-inspired instruction format, which trades code density for predictable parsing and also leaves a possible path for translating existing x86-64 artifacts into bytecode.<sup>[[3]](#references)</sup>
+Custom ISA có độ rộng cố định giúp đơn giản hóa việc giải mã, dispatch, relocation và ánh xạ virtual register. Centurion sử dụng định dạng lệnh 18 byte lấy cảm hứng từ x86-64, đánh đổi độ gọn của mã để có thể phân tích cú pháp dễ dự đoán, đồng thời mở ra khả năng chuyển các artifact x86-64 hiện có thành bytecode.<sup>[[3]](#references)</sup>
 
-Randomizing the opcode-to-handler mapping for each build makes identical guest logic produce different byte sequences. Encrypting the mapping table and recovering it only at runtime further removes a stable on-disk opcode dictionary. This frustrates fixed signatures and reusable disassembly rules, but it does not polymorph the native dispatcher, table-decryption routine, or host-call boundary automatically.<sup>[[3]](#references)</sup>
+Ngẫu nhiên hóa ánh xạ opcode sang handler cho mỗi build khiến cùng một logic guest tạo ra các chuỗi byte khác nhau. Mã hóa bảng ánh xạ và chỉ khôi phục nó khi runtime càng loại bỏ thêm một từ điển opcode ổn định trên đĩa. Cách này gây khó khăn cho signature cố định và quy tắc disassembly có thể tái sử dụng, nhưng tự nó không làm đa hình native dispatcher, routine giải mã bảng hoặc ranh giới host-call.<sup>[[3]](#references)</sup>
 
-## Bringing the execution environment into the VM
+## Đưa môi trường thực thi vào VM
 
-The host process can be reduced to memory, syscall, and socket primitives while freestanding libraries provide higher-level services inside the VM. For example, FreeRTOS coreHTTP can implement HTTP framing and mbedTLS can implement TLS without calling WinHTTP or an operating-system TLS API. Raw sockets through `afd.sys` or a similar interface then become the narrow native networking boundary.<sup>[[3]](#references)</sup>
+Có thể thu gọn host process thành các primitive bộ nhớ, syscall và socket, trong khi các thư viện freestanding cung cấp dịch vụ cấp cao hơn bên trong VM. Ví dụ, FreeRTOS coreHTTP có thể xử lý HTTP framing và mbedTLS có thể xử lý TLS mà không cần gọi WinHTTP hoặc API TLS của hệ điều hành. Khi đó, raw socket qua `afd.sys` hoặc một interface tương tự trở thành ranh giới mạng native hẹp nhất.<sup>[[3]](#references)</sup>
 
-This **Bring Your Own Execution Environment (BYOEE)** design can also place PE loading, runtime support, and an in-memory filesystem behind the interpreter. It reduces recognizable native implementations rather than eliminating telemetry: raw socket operations remain visible, and environments that require explicit proxies or TLS interception may prevent the networking design from working.<sup>[[3]](#references)</sup>
+Thiết kế **Bring Your Own Execution Environment (BYOEE)** này cũng có thể đặt PE loading, runtime support và filesystem trong bộ nhớ sau interpreter. Nó giảm số lượng triển khai native dễ nhận biết thay vì loại bỏ telemetry: thao tác raw socket vẫn hiển thị, và các môi trường yêu cầu proxy tường minh hoặc TLS interception có thể khiến thiết kế mạng không hoạt động.<sup>[[3]](#references)</sup>
 
-## Selective native acceleration
+## Tăng tốc native có chọn lọc
 
-Interpreting every instruction is especially expensive in public-key cryptography. A practical split uses mbedTLS's `MBEDTLS_ALT` hooks as a software-coprocessor interface: retain TLS state, certificate parsing, negotiation, allocation, and the high-level bignum code in bytecode, but dispatch the hot arithmetic kernels from `bignum_core.c` through native ECALLs. In the Centurion prototype, `bignum.c`, `bignum_mod.c`, and `bignum_mod_raw.c` stayed virtualized while the inner loops ran natively, reducing an ECDHE handshake from minutes to seconds.<sup>[[3]](#references)</sup>
+Diễn giải mọi lệnh đặc biệt tốn kém trong mật mã khóa công khai. Một cách phân chia thực tế là dùng các hook `MBEDTLS_ALT` của mbedTLS như một giao diện software-coprocessor: giữ trạng thái TLS, phân tích chứng chỉ, thương lượng, cấp phát và mã bignum cấp cao trong bytecode, nhưng dispatch các kernel số học nóng trong `bignum_core.c` qua native ECALL. Trong prototype Centurion, `bignum.c`, `bignum_mod.c` và `bignum_mod_raw.c` vẫn được ảo hóa, còn các vòng lặp bên trong chạy native, giúp giảm thời gian bắt tay ECDHE từ vài phút xuống còn vài giây.<sup>[[3]](#references)</sup>
 
-Make accelerators optional so payloads that do not need TLS omit the additional native entry points. This pattern generalizes to any interpreter workload: profile first, then expose the smallest possible native primitive instead of moving an entire subsystem outside the VM.<sup>[[3]](#references)</sup>
+Hãy để tùy chọn tăng tốc ở trạng thái có thể bật/tắt để payload không cần TLS có thể bỏ các native entry point bổ sung. Mẫu này áp dụng được cho mọi workload của interpreter: trước tiên hãy profiling, sau đó chỉ đưa primitive native nhỏ nhất có thể ra ngoài, thay vì chuyển cả subsystem ra khỏi VM.<sup>[[3]](#references)</sup>
 
-Centurion validated the complete chain with a TLS 1.2 bind shell: the bytecode loader mapped the PE, socket calls crossed the universal thunk, mbedTLS handled the protocol inside the VM, and native ECALLs accelerated ECDHE arithmetic. The approximately 18 KB native interpreter therefore supported an encrypted command channel without materializing the payload as native x86-64 code.<sup>[[3]](#references)</sup>
+Centurion đã kiểm chứng toàn bộ chuỗi bằng một bind shell TLS 1.2: bytecode loader ánh xạ PE, các lệnh gọi socket đi qua universal thunk, mbedTLS xử lý giao thức bên trong VM, còn native ECALL tăng tốc phép toán ECDHE. Nhờ đó, native interpreter có kích thước khoảng 18 KB hỗ trợ một kênh lệnh được mã hóa mà không tạo payload thành mã x86-64 native trong bộ nhớ.<sup>[[3]](#references)</sup>
 
-## Reversing and detection anchors
+## Điểm neo cho reverse engineering và phát hiện
 
-The following are practical analysis anchors inferred from the architecture; virtualization changes where analysts observe behavior, but does not remove the behavior itself.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+Dưới đây là các điểm neo phân tích thực tế suy ra từ kiến trúc; virtualization thay đổi vị trí nhà phân tích quan sát hành vi, nhưng không loại bỏ chính hành vi đó.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
-- Identify the fetch/decode/dispatch loop, virtual program counter, register file, and repeated fixed-width instruction stepping.
-- Dump the opcode table after runtime decryption and map handler addresses back to semantic operations rather than matching encrypted bytecode on disk.
-- Break on the universal thunk or ECALL dispatcher to record the native target, virtual argument registers, stack arguments, and return value.
-- Trace PEB access, export resolution, PE-header parsing, relocation writes, and IAT population even when the loader implementation itself is bytecode.
-- Correlate socket creation and `afd.sys` traffic with an absence of expected WinHTTP or native TLS calls; the missing high-level imports are a clue, not proof of benign behavior.
-- Treat native arithmetic accelerators as semantic chokepoints: their callers can reveal key exchange and certificate-validation activity while the surrounding TLS state machine remains virtualized.
+- Xác định vòng lặp fetch/decode/dispatch, virtual program counter, register file và bước tiến lặp lại theo lệnh có độ rộng cố định.
+- Dump bảng opcode sau khi giải mã runtime rồi ánh xạ địa chỉ handler về các thao tác ngữ nghĩa, thay vì đối chiếu bytecode đã mã hóa trên đĩa.
+- Đặt breakpoint tại universal thunk hoặc ECALL dispatcher để ghi lại đích native, virtual argument register, stack argument và giá trị trả về.
+- Theo dõi truy cập PEB, phân giải export, phân tích PE header, ghi relocation và điền IAT, ngay cả khi chính phần triển khai loader là bytecode.
+- Đối chiếu việc tạo socket và lưu lượng `afd.sys` với sự vắng mặt của các lệnh gọi WinHTTP hoặc TLS native dự kiến; thiếu các high-level import là một manh mối, không phải bằng chứng về hành vi vô hại.
+- Xem native arithmetic accelerator là các điểm kiểm soát ngữ nghĩa: caller của chúng có thể tiết lộ hoạt động trao đổi khóa và xác thực chứng chỉ trong khi state machine TLS xung quanh vẫn được ảo hóa.
 
-For analysis workflows that start from the dispatcher rather than the original control-flow graph, see the [malware-analysis guidance for virtualizing packers](../generic-methodologies-and-resources/basic-forensic-methodology/malware-analysis.md#virtualizing-packers-and-no-labels-obfuscation).
+Để xem quy trình phân tích bắt đầu từ dispatcher thay vì control-flow graph gốc, hãy tham khảo [malware-analysis guidance for virtualizing packers](../generic-methodologies-and-resources/basic-forensic-methodology/malware-analysis.md#virtualizing-packers-and-no-labels-obfuscation).
 
-## Operational constraints
+## Ràng buộc vận hành
 
-Virtualization imposes interpretation overhead, increases toolchain and ABI complexity, and does not solve behavioral detection. Shared memory is unsafe by design, raw-socket networking may fail behind mandatory proxies, and callback-heavy Win32 APIs require native-to-VM trampolines. The interpreter, syscall bridge, and any native accelerators also remain a conventional native footprint that defenders can signature or instrument.<sup>[[2]](#references)[[3]](#references)</sup>
+Virtualization tạo thêm chi phí diễn giải, làm tăng độ phức tạp của toolchain và ABI, đồng thời không giải quyết được vấn đề phát hiện hành vi. Shared memory vốn không an toàn, mạng raw-socket có thể không hoạt động phía sau proxy bắt buộc, còn các Win32 API dùng nhiều callback cần trampoline từ native sang VM. Interpreter, syscall bridge và mọi native accelerator cũng vẫn tạo ra dấu vết native thông thường mà bên phòng thủ có thể tạo signature hoặc instrument.<sup>[[2]](#references)[[3]](#references)</sup>
 
-## Related pages
+## Các trang liên quan
 
-For analysis of VMProtect 3.x packing, see [emulated unpacking and import repair](../generic-methodologies-and-resources/basic-forensic-methodology/malware-analysis.md#vmprotect-3x-emulated-unpacking-and-import-repair).
+Để phân tích việc đóng gói VMProtect 3.x, xem [emulated unpacking and import repair](../generic-methodologies-and-resources/basic-forensic-methodology/malware-analysis.md#vmprotect-3x-emulated-unpacking-and-import-repair).
 
 {{#ref}}
 ../reversing/common-api-used-in-malware.md
@@ -95,9 +95,8 @@ For analysis of VMProtect 3.x packing, see [emulated unpacking and import repair
 
 ## References
 
-- [1] [RISC-Y Business: Building a RISC-V Virtual Machine for Payload Obfuscation](https://secret.club/2023/12/24/riscy-business.html)
-- [2] [Fox-IT: Red Teaming in the Age of EDR — Evasion Through Malware Virtualisation](https://blog.fox-it.com/2024/09/25/red-teaming-in-the-age-of-edr-evasion-of-endpoint-detection-through-malware-virtualisation/)
-- [3] [Praetorian: Centurion — Bring Your Own Execution Environment](https://praetorian.com/blog/virtualized-loader-centurion/)
-- [4] [Praetorian - Enter the WasmForge: Compiling Sliver into WebAssembly](https://praetorian.com/blog/wasmforge-sliver-webassembly)
-
+- [1] [RISC-Y Business: Xây dựng máy ảo RISC-V để làm rối payload](https://secret.club/2023/12/24/riscy-business.html)
+- [2] [Fox-IT: Red Teaming trong kỷ nguyên EDR — Né tránh bằng cách ảo hóa malware](https://blog.fox-it.com/2024/09/25/red-teaming-in-the-age-of-edr-evasion-of-endpoint-detection-through-malware-virtualisation/)
+- [3] [Praetorian: Centurion — Tự mang theo môi trường thực thi](https://praetorian.com/blog/virtualized-loader-centurion/)
+- [4] [Praetorian - Bước vào WasmForge: Biên dịch Sliver sang WebAssembly](https://praetorian.com/blog/wasmforge-sliver-webassembly)
 {{#include ../banners/hacktricks-training.md}}

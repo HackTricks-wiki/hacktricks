@@ -2,57 +2,57 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-WinRM is one of the most convenient **lateral movement** transports in Windows environments because it gives you a remote shell over **WS-Man/HTTP(S)** without needing SMB service creation tricks. If the target exposes **5985/5986** and your principal is allowed to use remoting, you can often move from "valid creds" to "interactive shell" very quickly.
+WinRM là một trong những phương tiện **lateral movement** tiện lợi nhất trong môi trường Windows vì cung cấp shell từ xa qua **WS-Man/HTTP(S)** mà không cần đến các thủ thuật tạo service SMB. Nếu mục tiêu mở **5985/5986** và tài khoản của bạn được phép dùng remoting, bạn thường có thể nhanh chóng chuyển từ “thông tin xác thực hợp lệ” sang “shell tương tác”.
 
-For the **protocol/service enumeration**, listeners, enabling WinRM, `Invoke-Command`, and generic client usage, check:
+Để tìm hiểu về **enumeration** giao thức/service, listeners, bật WinRM, `Invoke-Command` và cách dùng client nói chung, hãy xem:
 
 {{#ref}}
 ../../network-services-pentesting/5985-5986-pentesting-winrm.md
 {{#endref}}
 
-## Why operators like WinRM
+## Vì sao operator ưa dùng WinRM
 
-- Uses **HTTP/HTTPS** instead of SMB/RPC, so it often works where PsExec-style execution is blocked.
-- With **Kerberos**, it avoids sending reusable credentials to the target.
-- Works cleanly from **Windows**, **Linux**, and **Python** tooling (`winrs`, `evil-winrm`, `pypsrp`, `netexec`).
-- The interactive PowerShell remoting path spawns **`wsmprovhost.exe`** on the target under the authenticated user context, which is operationally different from service-based exec.
+- Dùng **HTTP/HTTPS** thay vì SMB/RPC, nên thường hoạt động trong các môi trường chặn thực thi kiểu PsExec.
+- Với **Kerberos**, không cần gửi thông tin xác thực có thể tái sử dụng đến mục tiêu.
+- Hoạt động tốt trên **Windows**, **Linux** và các công cụ **Python** (`winrs`, `evil-winrm`, `pypsrp`, `netexec`).
+- Luồng PowerShell remoting tương tác khởi chạy **`wsmprovhost.exe`** trên mục tiêu trong ngữ cảnh người dùng đã xác thực; về mặt vận hành, cách này khác với thực thi dựa trên service.
 
-## Access model and prerequisites
+## Mô hình truy cập và các điều kiện tiên quyết
 
-In practice, successful WinRM lateral movement depends on **three** things:
+Trên thực tế, lateral movement qua WinRM thành công phụ thuộc vào **ba** yếu tố:
 
-1. The target has a **WinRM listener** (`5985`/`5986`) and firewall rules that allow access.
-2. The account can **authenticate** to the endpoint.
-3. The account is allowed to **open a remoting session**.
+1. Mục tiêu có **WinRM listener** (`5985`/`5986`) và các quy tắc firewall cho phép truy cập.
+2. Tài khoản có thể **xác thực** với endpoint.
+3. Tài khoản được phép **mở phiên remoting**.
 
-Common ways to gain that access:
+Các cách phổ biến để có quyền truy cập đó:
 
-- **Local Administrator** on the target.
-- Membership in **Remote Management Users** on newer systems or **WinRMRemoteWMIUsers__** on systems/components that still honor that group.
-- Explicit remoting rights delegated through local security descriptors / PowerShell remoting ACL changes.
+- Là **Local Administrator** trên mục tiêu.
+- Thuộc nhóm **Remote Management Users** trên các hệ thống mới hơn hoặc **WinRMRemoteWMIUsers__** trên các hệ thống/thành phần vẫn còn áp dụng nhóm đó.
+- Được cấp quyền remoting rõ ràng thông qua security descriptor cục bộ / thay đổi ACL của PowerShell remoting.
 
-If you already control a box with admin rights, remember you can also **delegate WinRM access without full admin group membership** using the techniques described here:
+Nếu bạn đã kiểm soát một máy với quyền admin, hãy nhớ rằng bạn cũng có thể **ủy quyền truy cập WinRM mà không cần là thành viên của nhóm admin** bằng các kỹ thuật được mô tả tại đây:
 
 {{#ref}}
 ../active-directory-methodology/security-descriptors.md
 {{#endref}}
 
-### Authentication gotchas that matter during lateral movement
+### Những lưu ý về xác thực cần biết khi lateral movement
 
-- **Kerberos requires a hostname/FQDN**. If you connect by IP, the client usually falls back to **NTLM/Negotiate**.
-- In **workgroup** or cross-trust edge cases, NTLM commonly requires either **HTTPS** or the target to be added to **TrustedHosts** on the client.
-- With **local accounts** over Negotiate in a workgroup, UAC remote restrictions may prevent access unless the built-in Administrator account is used or `LocalAccountTokenFilterPolicy=1`.
-- PowerShell remoting defaults to the **`HTTP/<host>` SPN**. In environments where `HTTP/<host>` is already registered to some other service account, WinRM Kerberos may fail with `0x80090322`; use a port-qualified SPN or switch to **`WSMAN/<host>`** where that SPN exists.<sup>[[3]](#references)</sup>
+- **Kerberos yêu cầu hostname/FQDN**. Nếu kết nối bằng IP, client thường chuyển sang **NTLM/Negotiate**.
+- Trong các trường hợp workgroup hoặc ranh giới trust chéo, NTLM thường yêu cầu **HTTPS** hoặc phải thêm mục tiêu vào **TrustedHosts** trên client.
+- Với tài khoản cục bộ dùng Negotiate trong workgroup, các hạn chế UAC từ xa có thể ngăn truy cập, trừ khi dùng tài khoản Administrator tích hợp sẵn hoặc đặt `LocalAccountTokenFilterPolicy=1`.
+- PowerShell remoting mặc định dùng **SPN `HTTP/<host>`**. Trong các môi trường mà `HTTP/<host>` đã được đăng ký cho một service account khác, WinRM Kerberos có thể lỗi với `0x80090322`; hãy dùng SPN có kèm port hoặc chuyển sang **`WSMAN/<host>`** nếu SPN đó tồn tại.<sup>[[3]](#references)</sup>
 
-If you land valid credentials during password spraying, validating them over WinRM is often the fastest way to check whether they translate into a shell:
+Nếu thu thập được thông tin xác thực hợp lệ trong quá trình password spraying, xác thực chúng qua WinRM thường là cách nhanh nhất để kiểm tra xem chúng có thể giúp bạn mở shell hay không:
 
 {{#ref}}
 ../active-directory-methodology/password-spraying.md
 {{#endref}}
 
-## Linux-to-Windows lateral movement
+## Lateral movement từ Linux sang Windows
 
-### NetExec / CrackMapExec for validation and one-shot execution
+### NetExec / CrackMapExec để xác thực và thực thi one-shot
 
 ```bash
 # Validate creds and execute a simple command
@@ -65,9 +65,9 @@ netexec winrm <HOST_FQDN> -u <USER> -H <NTHASH> -x "hostname"
 netexec winrm <HOST_FQDN> -u <USER> -H <NTHASH> -X '$PSVersionTable'
 ```
 
-### Evil-WinRM for interactive shells
+### Evil-WinRM cho shell tương tác
 
-`evil-winrm` remains the most convenient interactive option from Linux because it supports **passwords**, **NT hashes**, **Kerberos tickets**, **client certificates**, file transfer, and in-memory PowerShell/.NET loading.
+`evil-winrm` vẫn là lựa chọn tương tác tiện lợi nhất trên Linux vì hỗ trợ **mật khẩu**, **NT hashes**, **Kerberos tickets**, **client certificates**, truyền tệp và tải PowerShell/.NET vào bộ nhớ.
 
 ```bash
 # Password
@@ -81,9 +81,9 @@ export KRB5CCNAME=./user.ccache
 evil-winrm -i <HOST_FQDN> -r <REALM.LOCAL>
 ```
 
-### Kerberos SPN edge case: `HTTP` vs `WSMAN`
+### Trường hợp đặc biệt của Kerberos SPN: `HTTP` và `WSMAN`
 
-When the default **`HTTP/<host>`** SPN causes Kerberos failures, try requesting/using a **`WSMAN/<host>`** ticket instead. This appears in hardened or odd enterprise setups where `HTTP/<host>` is already attached to another service account.<sup>[[3]](#references)</sup>
+Khi SPN mặc định **`HTTP/<host>`** gây ra lỗi Kerberos, hãy thử yêu cầu/sử dụng ticket **`WSMAN/<host>`** thay thế. Tình huống này có thể xảy ra trong các môi trường doanh nghiệp được harden hoặc thiết lập bất thường, nơi **`HTTP/<host>`** đã được gắn với một service account khác.<sup>[[3]](#references)</sup>
 
 ```bash
 # Example: use a WSMAN ticket instead of the default HTTP SPN
@@ -91,25 +91,25 @@ export KRB5CCNAME=administrator@WSMAN_srv01.domain.local@DOMAIN.LOCAL.ccache
 evil-winrm -i srv01.domain.local -r DOMAIN.LOCAL --spn WSMAN
 ```
 
-This is also useful after **RBCD / S4U** abuse when you specifically forged or requested a **WSMAN** service ticket rather than a generic `HTTP` ticket.
+Điều này cũng hữu ích sau khi lạm dụng **RBCD / S4U**, khi bạn chủ ý giả mạo hoặc yêu cầu service ticket **WSMAN** thay vì ticket `HTTP` thông thường.
 
-### Certificate-based authentication
+### Xác thực bằng chứng chỉ
 
-WinRM also supports **client certificate authentication**, but the certificate must be mapped on the target to a **local account**. From an offensive perspective this matters when:
+WinRM cũng hỗ trợ **xác thực bằng chứng chỉ client**, nhưng chứng chỉ phải được ánh xạ trên máy đích tới một **local account**. Từ góc độ tấn công, điều này hữu ích khi:
 
-- you stole/exported a valid client certificate and private key already mapped for WinRM;
-- you abused **AD CS / Pass-the-Certificate** to obtain a certificate for a principal and then pivot into another authentication path;
-- you are operating in environments that deliberately avoid password-based remoting.
+- bạn đã đánh cắp/xuất một chứng chỉ client hợp lệ cùng private key đã được ánh xạ cho WinRM;
+- bạn lạm dụng **AD CS / Pass-the-Certificate** để lấy chứng chỉ cho một principal rồi pivot sang một đường xác thực khác;
+- bạn đang hoạt động trong các môi trường cố tình tránh remoting dựa trên mật khẩu.
 
 ```bash
 evil-winrm -i <HOST_FQDN> -S -c user.crt -k user.key
 ```
 
-Client-certificate WinRM is much less common than password/hash/Kerberos auth, but when it exists it can provide a **passwordless lateral movement** path that survives password rotation.
+WinRM xác thực bằng client certificate ít phổ biến hơn nhiều so với xác thực bằng password/hash/Kerberos, nhưng khi có thể sử dụng, nó cung cấp một con đường **lateral movement không cần password** vẫn hoạt động sau khi password được đổi.
 
-### Python / automation with `pypsrp`
+### Python / automation với `pypsrp`
 
-If you need automation rather than an operator shell, `pypsrp` gives you WinRM/PSRP from Python with **NTLM**, **certificate auth**, **Kerberos**, and **CredSSP** support.<sup>[[2]](#references)</sup>
+Nếu bạn cần automation thay vì operator shell, `pypsrp` cung cấp WinRM/PSRP từ Python với hỗ trợ **NTLM**, **xác thực bằng certificate**, **Kerberos** và **CredSSP**.<sup>[[2]](#references)</sup>
 
 ```python
 from pypsrp.client import Client
@@ -125,10 +125,10 @@ print(stdout, stderr, rc)
 ```
 
 
-If you need finer control than the high-level `Client` wrapper, the lower-level `WSMan` + `RunspacePool` APIs are useful for two common operator problems:
+Nếu cần kiểm soát chi tiết hơn so với lớp bọc cấp cao `Client`, các API cấp thấp hơn `WSMan` + `RunspacePool` hữu ích để xử lý hai vấn đề thường gặp của người vận hành:
 
-- forcing **`WSMAN`** as the Kerberos service/SPN instead of the default `HTTP` expectation used by many PowerShell clients;
-- connecting to a **non-default PSRP endpoint** such as a **JEA** / custom session configuration instead of `Microsoft.PowerShell`.
+- buộc dùng **`WSMAN`** làm dịch vụ/SPN Kerberos thay vì kỳ vọng mặc định là **`HTTP`** của nhiều PowerShell client;
+- kết nối đến **PSRP endpoint không mặc định**, chẳng hạn cấu hình phiên **JEA** / tùy chỉnh, thay vì `Microsoft.PowerShell`.
 
 ```python
 from pypsrp.wsman import WSMan
@@ -147,78 +147,78 @@ with wsman, RunspacePool(wsman, configuration_name="MyJEAEndpoint") as pool, Pow
     print(output)
 ```
 
-### Custom PSRP endpoints and JEA matter during lateral movement
+### Các endpoint PSRP tùy chỉnh và JEA rất quan trọng trong lateral movement
 
-A successful WinRM authentication does **not** always mean you land in the default unrestricted `Microsoft.PowerShell` endpoint. Mature environments may expose **custom session configurations** or **JEA** endpoints with their own ACLs and run-as behavior.<sup>[[1]](#references)</sup>
+Xác thực WinRM thành công **không** phải lúc nào cũng có nghĩa là bạn sẽ vào endpoint `Microsoft.PowerShell` mặc định, không bị hạn chế. Các môi trường được quản lý tốt có thể cung cấp **cấu hình phiên tùy chỉnh** hoặc endpoint **JEA** với ACL và hành vi run-as riêng.<sup>[[1]](#references)</sup>
 
-If you already have code execution on a Windows host and want to understand what remoting surfaces exist, enumerate the registered endpoints:
+Nếu bạn đã có khả năng thực thi mã trên một máy chủ Windows và muốn tìm hiểu các bề mặt remoting hiện có, hãy liệt kê các endpoint đã đăng ký:
 
 ```powershell
 Get-PSSessionConfiguration | Select-Object Name, Permission
 ```
 
-When a useful endpoint exists, target it explicitly instead of the default shell:
+Khi có endpoint hữu ích, hãy target trực tiếp endpoint đó thay vì shell mặc định:
 
 ```powershell
 Enter-PSSession -ComputerName srv01.domain.local -ConfigurationName MyJEAEndpoint
 ```
 
-Practical offensive implications:
+Các hệ quả thực tiễn đối với offensive security:
 
-- A **restricted** endpoint can still be enough for lateral movement if it exposes just the right cmdlets/functions for service control, file access, process creation, or arbitrary .NET / external command execution.
-- A **misconfigured JEA** role is especially valuable when it exposes dangerous commands such as `Start-Process`, broad wildcards, writable providers, or custom proxy functions that let you escape the intended restrictions.
-- Endpoints backed by **RunAs virtual accounts** or **gMSAs** change the effective security context of the commands you run. In particular, a gMSA-backed endpoint can provide **network identity on the second hop** even when a normal WinRM session would hit the classic delegation problem.
+- Một endpoint **restricted** vẫn có thể đủ để lateral movement nếu nó chỉ cung cấp đúng các cmdlet/function cần thiết để điều khiển service, truy cập file, tạo process hoặc thực thi lệnh .NET / lệnh bên ngoài tùy ý.
+- Một role **JEA misconfigured** đặc biệt có giá trị khi nó cung cấp các lệnh nguy hiểm như `Start-Process`, wildcard quá rộng, provider có quyền ghi hoặc custom proxy function cho phép thoát khỏi các hạn chế dự kiến.
+- Endpoint sử dụng **RunAs virtual account** hoặc **gMSA** sẽ thay đổi security context thực tế của các lệnh bạn chạy. Cụ thể, endpoint dùng gMSA có thể cung cấp **network identity ở second hop**, ngay cả khi một phiên WinRM thông thường gặp vấn đề delegation kinh điển.
 
-For a custom restricted endpoint, inspect its effective command and script permissions separately: a short `Get-Command` list alone does not prove that an existing `.ps1` cannot run. [JEA role capabilities](https://learn.microsoft.com/en-us/powershell/scripting/security/remoting/jea/role-capabilities) explicitly control which script paths can be invoked; other custom endpoints may apply different session rules. If a permitted script uses a stored `SecureString` to create a credential for another host, a blob made without an explicit key uses [Windows DPAPI](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/convertfrom-securestring) and generally needs the protecting user and machine context to decrypt. Review the script's ACL, permitted invocation, run-as identity, and downstream credential rights before treating writable source or a copied blob as a cross-host escalation path. Do not print the protected value during passive enumeration.
+Với endpoint restricted tùy chỉnh, hãy kiểm tra riêng quyền đối với command và script thực tế: danh sách `Get-Command` ngắn không chứng minh rằng một file `.ps1` có sẵn không thể chạy. [JEA role capabilities](https://learn.microsoft.com/en-us/powershell/scripting/security/remoting/jea/role-capabilities) quy định rõ những đường dẫn script nào có thể được gọi; các endpoint tùy chỉnh khác có thể áp dụng quy tắc session khác. Nếu một script được phép dùng `SecureString` đã lưu để tạo credential cho host khác, blob được tạo mà không chỉ định key sẽ dùng [Windows DPAPI](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/convertfrom-securestring) và thường cần đúng user context cùng machine context đã bảo vệ nó để giải mã. Trước khi xem source có quyền ghi hoặc blob được sao chép là đường dẫn leo thang đặc quyền xuyên host, hãy kiểm tra ACL của script, quyền gọi script, danh tính run-as và quyền của credential ở các hệ thống tiếp theo. Không in giá trị được bảo vệ trong quá trình enumeration thụ động.
 
-For a JEA custom function that accepts a file path, review the registered endpoint ACL, mapped role capability, and effective run-as identity together. A caller may have `NoLanguage` while the function body runs in the system's default language mode; a virtual account can also have local administrator rights. If the function checks an allowed directory with a raw string prefix and later reads the supplied path, `..` components may resolve outside that directory. The boundary is the resolved path under the function's identity, not the caller's language mode or the apparent prefix. Confirm the reachable function and its final-path validation before treating a readable `.psrc` or `.pssc` file as a privileged file-read finding. See Microsoft's [JEA role capability](https://learn.microsoft.com/en-us/powershell/scripting/security/remoting/jea/role-capabilities) and [security considerations](https://learn.microsoft.com/en-us/powershell/scripting/security/remoting/jea/security-considerations) guidance.
+Với custom function JEA nhận đường dẫn file, hãy kiểm tra đồng thời ACL của endpoint đã đăng ký, role capability được ánh xạ và danh tính run-as thực tế. Caller có thể bị giới hạn ở `NoLanguage`, trong khi phần thân function chạy ở language mode mặc định của hệ thống; virtual account cũng có thể có quyền local administrator. Nếu function kiểm tra thư mục được phép bằng tiền tố chuỗi thô rồi đọc đường dẫn được cung cấp, các thành phần `..` có thể phân giải ra ngoài thư mục đó. Ranh giới cần xét là đường dẫn đã phân giải dưới danh tính của function, không phải language mode của caller hay tiền tố nhìn thấy được. Hãy xác nhận function có thể truy cập và việc kiểm tra đường dẫn cuối cùng trước khi xem file `.psrc` hoặc `.pssc` có thể đọc được là một phát hiện đọc file đặc quyền. Xem hướng dẫn của Microsoft về [JEA role capability](https://learn.microsoft.com/en-us/powershell/scripting/security/remoting/jea/role-capabilities) và [các vấn đề bảo mật](https://learn.microsoft.com/en-us/powershell/scripting/security/remoting/jea/security-considerations).
 
-## Windows-native WinRM lateral movement
+## Lateral movement qua WinRM bằng công cụ tích hợp sẵn của Windows
 
 ### `winrs.exe`
 
-`winrs.exe` is built in and useful when you want **native WinRM command execution** without opening an interactive PowerShell remoting session:
+`winrs.exe` được tích hợp sẵn và hữu ích khi bạn muốn **thực thi lệnh bằng WinRM nguyên bản** mà không cần mở một phiên PowerShell remoting tương tác:
 
 ```cmd
 winrs -r:srv01.domain.local cmd /c whoami
 winrs -r:https://srv01.domain.local:5986 -u:DOMAIN\\user -p:Password123! hostname
 ```
 
-Two flags are easy to forget and matter in practice:
+Hai flag thường dễ bị quên nhưng rất quan trọng trong thực tế:
 
-- `/noprofile` is often required when the remote principal is **not** a local administrator.
-- `/allowdelegate` enables the remote shell to use your credentials against a **third host** (for example, when the command needs `\\fileserver\share`).
+- `/noprofile` thường cần thiết khi principal từ xa **không** phải là quản trị viên cục bộ.
+- `/allowdelegate` cho phép remote shell sử dụng thông tin xác thực của bạn để truy cập **máy chủ thứ ba** (ví dụ: khi lệnh cần `\\fileserver\share`).
 
 ```cmd
 winrs -r:srv01.domain.local /noprofile cmd /c set
 winrs -r:srv01.domain.local /allowdelegate cmd /c dir \\fileserver.domain.local\share
 ```
 
-Operationally, `winrs.exe` commonly results in a remote process chain similar to:
+Về mặt vận hành, `winrs.exe` thường tạo ra một chuỗi tiến trình từ xa tương tự như:
 
 ```text
 svchost.exe (DcomLaunch) -> winrshost.exe -> cmd.exe /c <command>
 ```
 
-This is worth remembering because it differs from service-based exec and from interactive PSRP sessions.
+Điều này đáng ghi nhớ vì nó khác với exec dựa trên service và các phiên PSRP tương tác.
 
-### `winrm.cmd` / WS-Man COM instead of PowerShell remoting
+### `winrm.cmd` / WS-Man COM thay vì PowerShell remoting
 
-You can also execute through **WinRM transport** without `Enter-PSSession` by invoking WMI classes over WS-Man. This keeps the transport as WinRM while the remote execution primitive becomes **WMI `Win32_Process.Create`**:
+Bạn cũng có thể thực thi qua **WinRM transport** mà không cần `Enter-PSSession` bằng cách gọi các lớp WMI qua WS-Man. Cách này giữ nguyên transport là WinRM, còn primitive thực thi từ xa chuyển thành **WMI `Win32_Process.Create`**:
 
 ```cmd
 winrm invoke Create wmicimv2/Win32_Process @{CommandLine="cmd.exe /c whoami > C:\\Windows\\Temp\\who.txt"} -r:srv01.domain.local
 ```
 
-That approach is useful when:
+Cách tiếp cận đó hữu ích khi:
 
-- PowerShell logging is heavily monitored.
-- You want **WinRM transport** but not a classic PS remoting workflow.
-- You are building or using custom tooling around the **`WSMan.Automation`** COM object.
+- PowerShell logging bị giám sát chặt chẽ.
+- Bạn muốn dùng **WinRM transport** nhưng không muốn dùng quy trình PS remoting cổ điển.
+- Bạn đang xây dựng hoặc sử dụng tooling tùy chỉnh dựa trên đối tượng COM **`WSMan.Automation`**.
 
-## NTLM relay to WinRM (WS-Man)
+## NTLM relay tới WinRM (WS-Man)
 
-When SMB relay is blocked by signing and LDAP relay is constrained, **WS-Man/WinRM** may still be an attractive relay target. Modern `ntlmrelayx.py` includes **WinRM relay servers** and can relay to **`wsman://`** or **`winrms://`** targets.
+Khi SMB relay bị chặn do signing và LDAP relay bị hạn chế, **WS-Man/WinRM** vẫn có thể là mục tiêu relay hấp dẫn. `ntlmrelayx.py` hiện đại có **WinRM relay servers** và có thể relay tới các mục tiêu **`wsman://`** hoặc **`winrms://`**.
 
 ```bash
 # Relay to HTTP WinRM
@@ -228,31 +228,29 @@ ntlmrelayx.py -t wsman://srv01.domain.local --no-smb-server -smb2support
 ntlmrelayx.py -t winrms://srv01.domain.local --no-smb-server -smb2support
 ```
 
-Two practical notes:
+Hai lưu ý thực tế:
 
-- Relay is most useful when the target accepts **NTLM** and the relayed principal is allowed to use WinRM.
-- Recent Impacket code specifically handles **`WSMANIDENTIFY: unauthenticated`** requests so `Test-WSMan`-style probes do not break the relay flow.
+- Relay hữu ích nhất khi target chấp nhận **NTLM** và principal được relay có quyền sử dụng WinRM.
+- Mã Impacket gần đây xử lý riêng các yêu cầu **`WSMANIDENTIFY: unauthenticated`**, để các probe kiểu `Test-WSMan` không làm gián đoạn luồng relay.
 
-For multi-hop constraints after landing a first WinRM session, check:
+Để biết về các giới hạn multi-hop sau khi có được phiên WinRM đầu tiên, hãy xem:
 
 {{#ref}}
 ../active-directory-methodology/kerberos-double-hop-problem.md
 {{#endref}}
 
-## OPSEC and detection notes
+## Lưu ý về OPSEC và phát hiện
 
-- **Interactive PowerShell remoting** usually creates **`wsmprovhost.exe`** on the target.
-- **`winrs.exe`** commonly creates **`winrshost.exe`** and then the requested child process.
-- Custom **JEA** endpoints may execute actions as **`WinRM_VA_*`** virtual accounts or as a configured **gMSA**, which changes both telemetry and second-hop behavior compared to a normal user-context shell.<sup>[[1]](#references)</sup>
-- Expect **network logon** telemetry, WinRM service events, and PowerShell operational/script-block logging if you use PSRP rather than raw `cmd.exe`.
-- If you only need a single command, `winrs.exe` or one-shot WinRM execution may be quieter than a long-lived interactive remoting session.
-- If Kerberos is available, prefer **FQDN + Kerberos** over IP + NTLM to reduce both trust issues and awkward client-side `TrustedHosts` changes.
+- **Interactive PowerShell remoting** thường tạo tiến trình **`wsmprovhost.exe`** trên target.
+- **`winrs.exe`** thường tạo **`winrshost.exe`**, sau đó là tiến trình con được yêu cầu.
+- Các endpoint **JEA** tùy chỉnh có thể thực thi hành động dưới dạng virtual account **`WinRM_VA_*`** hoặc **gMSA** đã cấu hình. Điều này làm thay đổi cả telemetry lẫn hành vi second-hop so với shell chạy trong context của người dùng thông thường.<sup>[[1]](#references)</sup>
+- Nếu dùng PSRP thay vì `cmd.exe` thuần, hãy dự kiến có telemetry về **network logon**, các sự kiện dịch vụ WinRM và ghi log hoạt động/script block của PowerShell.
+- Nếu chỉ cần chạy một lệnh, `winrs.exe` hoặc thực thi WinRM một lần có thể ít gây chú ý hơn một phiên remoting tương tác kéo dài.
+- Nếu có Kerberos, hãy ưu tiên **FQDN + Kerberos** thay vì IP + NTLM để giảm cả vấn đề trust lẫn việc phải thay đổi `TrustedHosts` ở phía client.
 
 ## References
 
-- [1] [Microsoft: JEA Security Considerations](https://learn.microsoft.com/en-us/powershell/scripting/security/remoting/jea/security-considerations?view=powershell-7.6)
+- [1] [Microsoft: Các lưu ý bảo mật về JEA](https://learn.microsoft.com/en-us/powershell/scripting/security/remoting/jea/security-considerations?view=powershell-7.6)
 - [2] [pypsrp README](https://github.com/jborean93/pypsrp)
-- [3] [Microsoft: Error `0x80090322` when connecting PowerShell to a remote server via WinRM](https://learn.microsoft.com/en-us/troubleshoot/windows-server/system-management-components/error-0x80090322-when-connecting-powershell-to-remote-server-via-winrm)
-
-
+- [3] [Microsoft: Lỗi `0x80090322` khi kết nối PowerShell với máy chủ từ xa qua WinRM](https://learn.microsoft.com/en-us/troubleshoot/windows-server/system-management-components/error-0x80090322-when-connecting-powershell-to-remote-server-via-winrm)
 {{#include ../../banners/hacktricks-training.md}}

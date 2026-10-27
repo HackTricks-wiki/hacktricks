@@ -2,44 +2,44 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Listeners
+### Trình lắng nghe
 
-### C2 Listeners
+### Trình lắng nghe C2
 
-`Cobalt Strike -> Listeners -> Add/Edit` then you can select where to listen, which kind of beacon to use (http, dns, smb...) and more.
+`Cobalt Strike -> Listeners -> Add/Edit` rồi bạn có thể chọn nơi lắng nghe, loại beacon cần sử dụng (http, dns, smb...) và nhiều tùy chọn khác.
 
-### Peer2Peer Listeners
+### Trình lắng nghe Peer2Peer
 
-The beacons of these listeners don't need to talk to the C2 directly, they can communicate to it through other beacons.
+Các beacon của những trình lắng nghe này không cần giao tiếp trực tiếp với C2; chúng có thể giao tiếp với C2 thông qua các beacon khác.
 
-`Cobalt Strike -> Listeners -> Add/Edit` then you need to select the TCP or SMB beacons
+`Cobalt Strike -> Listeners -> Add/Edit` rồi chọn beacon TCP hoặc SMB
 
-* The **TCP beacon will set a listener in the port selected**. To connect to a TCP beacon use the command `connect <ip> <port>` from another beacon
-* The **smb beacon will listen in a pipename with the selected name**. To connect to a SMB beacon you need to use the command `link [target] [pipe]`.
+* **Beacon TCP sẽ thiết lập một trình lắng nghe trên cổng đã chọn**. Để kết nối với beacon TCP, hãy dùng lệnh `connect <ip> <port>` từ một beacon khác.
+* **Beacon SMB sẽ lắng nghe trên một pipename có tên đã chọn**. Để kết nối với beacon SMB, bạn cần dùng lệnh `link [target] [pipe]`.
 
-### Generate & Host payloads
+### Tạo và host payload
 
-#### Generate payloads in files
+#### Tạo payload dưới dạng file
 
 `Attacks -> Packages ->`
 
-* **`HTMLApplication`** for HTA files
-* **`MS Office Macro`** for an office document with a macro
-* **`Windows Executable`** for a .exe, .dll orr service .exe
-* **`Windows Executable (S)`** for a **stageless** .exe, .dll or service .exe (better stageless than staged, less IoCs)
+* **`HTMLApplication`** cho file HTA
+* **`MS Office Macro`** cho tài liệu Office có macro
+* **`Windows Executable`** cho file .exe, .dll hoặc service .exe
+* **`Windows Executable (S)`** cho file .exe, .dll hoặc service .exe **stageless** (stageless tốt hơn staged và có ít IoC hơn)
 
-#### Generate & Host payloads
+#### Tạo và host payload
 
-`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` This will generate a script/executable to download the beacon from cobalt strike in formats such as: bitsadmin, exe, powershell and python
+`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` sẽ tạo script/file thực thi để tải beacon từ Cobalt Strike ở các định dạng như: bitsadmin, exe, powershell và python.
 
-#### Host Payloads
+#### Host payload
 
-If you already has the file you want to host in a web sever just go to `Attacks -> Web Drive-by -> Host File` and select the file to host and web server config.
+Nếu bạn đã có file muốn host trên một web server, hãy vào `Attacks -> Web Drive-by -> Host File`, rồi chọn file cần host và cấu hình web server.
 
-### Beacon Options
+### Tùy chọn Beacon
 
 <details>
-<summary>Beacon options and commands</summary>
+<summary>Tùy chọn và lệnh của Beacon</summary>
 
 ```bash
 # Execute local .NET binary
@@ -196,31 +196,31 @@ beacon> ssh 10.10.17.12:22 username password
 
 ### Custom implants / Linux Beacons
 
-- A custom agent only needs to speak the Cobalt Strike Team Server HTTP/S protocol (default malleable C2 profile) to register/check-in and receive tasks. Implement the same URIs/headers/metadata crypto defined in the profile to reuse the Cobalt Strike UI for tasking and output.<sup>[[1]](#references)[[4]](#references)[[5]](#references)[[6]](#references)[[7]](#references)</sup>
-- An Aggressor Script (e.g., `CustomBeacon.cna`) can wrap payload generation for the non-Windows beacon so operators can select the listener and produce ELF payloads directly from the GUI.
-- Example Linux task handlers exposed to the Team Server: `sleep`, `cd`, `pwd`, `shell` (exec arbitrary commands), `ls`, `upload`, `download`, and `exit`. These map to task IDs expected by the Team Server and must be implemented server-side to return output in the proper format.
-- BOF support on Linux can be added by loading Beacon Object Files in-process with [TrustedSec's ELFLoader](https://github.com/trustedsec/ELFLoader) (supports Outflank-style BOFs too), allowing modular post-exploitation to run inside the implant's context/privileges without spawning new processes.<sup>[[2]](#references)[[3]](#references)</sup>
-  For Linux loader-format and process-boundary caveats with a separate BOF tasking example, see [Linux BOF loader formats and process boundaries](../linux-hardening/post-exploitation/linux-fileless-execution.md#linux-bof-loader-formats-and-process-boundaries).
-- Embed a SOCKS handler in the custom beacon to keep pivoting parity with Windows Beacons: when the operator runs `socks <port>` the implant should open a local proxy to route operator tooling through the compromised Linux host into internal networks.
+- Một custom agent chỉ cần giao tiếp theo giao thức HTTP/S của Cobalt Strike Team Server (malleable C2 profile mặc định) để đăng ký/check-in và nhận task. Triển khai cùng URI/header/metadata crypto được định nghĩa trong profile để dùng lại giao diện Cobalt Strike cho việc giao task và xem output.<sup>[[1]](#references)[[4]](#references)[[5]](#references)[[6]](#references)[[7]](#references)</sup>
+- Aggressor Script (ví dụ: `CustomBeacon.cna`) có thể bọc quy trình tạo payload cho beacon không phải Windows, để operator có thể chọn listener và tạo payload ELF trực tiếp từ GUI.
+- Ví dụ về các trình xử lý task Linux được cung cấp cho Team Server: `sleep`, `cd`, `pwd`, `shell` (thực thi lệnh tùy ý), `ls`, `upload`, `download` và `exit`. Các lệnh này ánh xạ tới task ID mà Team Server yêu cầu và phải được triển khai phía server để trả về output đúng định dạng.
+- Có thể bổ sung hỗ trợ BOF trên Linux bằng cách nạp Beacon Object Files trong tiến trình với [ELFLoader của TrustedSec](https://github.com/trustedsec/ELFLoader) (cũng hỗ trợ BOF kiểu Outflank), cho phép chạy post-exploitation theo mô-đun trong context/privilege của implant mà không tạo tiến trình mới.<sup>[[2]](#references)[[3]](#references)</sup>
+  Để biết thêm về định dạng loader của Linux và các lưu ý về ranh giới tiến trình, kèm ví dụ giao task BOF riêng, xem [Linux BOF loader formats and process boundaries](../linux-hardening/post-exploitation/linux-fileless-execution.md#linux-bof-loader-formats-and-process-boundaries).
+- Nhúng SOCKS handler vào custom beacon để duy trì khả năng pivot tương đương Windows Beacons: khi operator chạy `socks <port>`, implant cần mở một proxy cục bộ để định tuyến công cụ của operator qua máy Linux bị xâm nhập vào các mạng nội bộ.
 
 ## Opsec
 
 ### Execute-Assembly
 
-The **`execute-assembly`** uses a **sacrificial process** using remote process injection to execute the indicated program. This is very noisy as to inject inside a process certain Win APIs are used that every EDR is checking. However, there are some custom tools that can be used to load something in the same process:
+**`execute-assembly`** sử dụng **sacrificial process** và remote process injection để thực thi chương trình được chỉ định. Cách này rất ồn ào, vì để inject vào một tiến trình, cần dùng một số Win API mà mọi EDR đều kiểm tra. Tuy nhiên, có một số công cụ tùy chỉnh có thể dùng để nạp nội dung ngay trong cùng tiến trình:
 
 - [https://github.com/anthemtotheego/InlineExecute-Assembly](https://github.com/anthemtotheego/InlineExecute-Assembly)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
-- In Cobalt Strike you can also use BOF (Beacon Object Files): [https://github.com/CCob/BOF.NET](https://github.com/CCob/BOF.NET)
+- Trong Cobalt Strike, bạn cũng có thể dùng BOF (Beacon Object Files): [https://github.com/CCob/BOF.NET](https://github.com/CCob/BOF.NET)
 
-The agressor script `https://github.com/outflanknl/HelpColor` will create the `helpx` command in Cobalt Strike which will put colors in commands indicating if they are BOFs (green), if they are Frok&Run (yellow) and similar, or if they are ProcessExecution, injection or similar (red). Which helps to know which commands are more stealthy.
+Aggressor Script `https://github.com/outflanknl/HelpColor` sẽ tạo lệnh `helpx` trong Cobalt Strike, lệnh này tô màu các command để cho biết chúng là BOF (màu xanh lá), Frok&Run (màu vàng) hoặc ProcessExecution, injection hay tương tự (màu đỏ). Điều này giúp nhận biết command nào stealthier hơn.
 
-### Modern in-process post-execution
+### Post-execution hiện đại trong tiến trình
 
-Recent versions add two alternatives when a classic COFF BOF is too constrained:
+Các phiên bản gần đây bổ sung hai lựa chọn thay thế khi một COFF BOF cổ điển bị giới hạn quá nhiều:
 
-- **Beacon Interpreter** compiles C on the Team Server to intermediate bytecode and executes it in a VM embedded in Beacon. The bytecode remains data rather than native executable code, so this avoids the extra executable allocation and RW-to-RX permission transition normally required to load a BOF. Scripts can import the Beacon API and declare BOF-style Dynamic Function Resolution (DFR) prototypes.
-- **BOF-PE** loads a complete EXE or DLL in the current Beacon. This format supports normal PE imports, exception handling, richer C++ and external libraries while retaining the Beacon API. This is heavier than a small COFF BOF, so choose it only when the additional runtime is useful.
+- **Beacon Interpreter** biên dịch C trên Team Server thành bytecode trung gian và thực thi bytecode trong VM được nhúng trong Beacon. Bytecode vẫn là dữ liệu thay vì mã thực thi native, nhờ đó tránh phải cấp phát vùng nhớ thực thi bổ sung và chuyển quyền từ RW sang RX như thường cần khi nạp BOF. Script có thể import Beacon API và khai báo các prototype Dynamic Function Resolution (DFR) theo kiểu BOF.
+- **BOF-PE** nạp một EXE hoặc DLL hoàn chỉnh vào Beacon hiện tại. Định dạng này hỗ trợ PE import thông thường, xử lý exception, C++ phong phú hơn và thư viện bên ngoài, đồng thời vẫn giữ Beacon API. Cách này nặng hơn một COFF BOF nhỏ, vì vậy chỉ nên chọn khi runtime bổ sung thực sự hữu ích.
 
 ```bash
 # Compile a C script on the Team Server and execute its bytecode
@@ -230,32 +230,32 @@ beacon-interpreter /path/to/script.c
 inline-execute-pe /path/to/tool.x64.exe
 ```
 
-These mechanisms reduce loader-related signals, not the telemetry produced by the script's actions or Windows API calls.<sup>[[8]](#references)</sup>
+Các cơ chế này giảm tín hiệu liên quan đến loader, chứ không giảm telemetry do các hành động của script hoặc các lệnh gọi Windows API tạo ra.<sup>[[8]](#references)</sup>
 
-### Act as the user
+### Đóng vai người dùng
 
-You could check events like `Seatbelt.exe LogonEvents ExplicitLogonEvents PoweredOnEvents`: 
+Bạn có thể kiểm tra các sự kiện như `Seatbelt.exe LogonEvents ExplicitLogonEvents PoweredOnEvents`: 
 
-- Security EID 4624 - Check all the interactive logons to know the usual operating hours.
-- System EID 12,13 - Check the shutdown/startup/sleep frequency.
-- Security EID 4624/4625 - Check inbound valid/invalid NTLM attempts.
-- Security EID 4648 - This event is created when plaintext credentials are used to logon. If a process generated it, the binary potentially has the credentials in clear text ina  config file or inside the code.
+- Security EID 4624 - Kiểm tra tất cả các lần đăng nhập tương tác để biết giờ hoạt động thông thường.
+- System EID 12,13 - Kiểm tra tần suất tắt máy/khởi động/ngủ.
+- Security EID 4624/4625 - Kiểm tra các lần thử NTLM đến hợp lệ/không hợp lệ.
+- Security EID 4648 - Sự kiện này được tạo khi thông tin xác thực dạng plaintext được dùng để đăng nhập. Nếu một process tạo ra sự kiện này, binary có thể chứa thông tin xác thực ở dạng văn bản thuần trong file cấu hình hoặc trong code.
 
-When using `jump` from cobalt strike, it's better to use the `wmi_msbuild` method to make the new process look more legit.
+Khi dùng `jump` từ Cobalt Strike, tốt hơn nên dùng phương thức `wmi_msbuild` để process mới trông hợp lệ hơn.
 
-### Use computer accounts
+### Dùng computer account
 
-It's common for defenders to be checking weird behaviours generated from users abd **exclude service accounts and computer accounts like `*$` from their monitoring**. You could use these accounts to perform lateral movement or privilege escalation.
+Defender thường kiểm tra các hành vi bất thường do người dùng tạo ra và **loại trừ service account cùng computer account như `*$` khỏi phạm vi giám sát**. Bạn có thể dùng các account này để lateral movement hoặc privilege escalation.
 
-### Use stageless payloads
+### Dùng stageless payload
 
-Stageless payloads are less noisy than staged ones because they don't need to download a second stage from the C2 server. This means that they don't generate any network traffic after the initial connection, making them less likely to be detected by network-based defenses.
+Stageless payload ít gây chú ý hơn staged payload vì chúng không cần tải stage thứ hai từ máy chủ C2. Điều này có nghĩa là sau kết nối ban đầu, chúng không tạo thêm lưu lượng mạng, nên ít có khả năng bị các cơ chế phòng thủ dựa trên mạng phát hiện hơn.
 
-### Tokens & Token Store
+### Token & Token Store
 
-Be careful when stealing or generating tokens because an EDR may enumerate thread tokens and detect a **token belonging to a different user** or even SYSTEM inside the process.
+Hãy cẩn thận khi đánh cắp hoặc tạo token vì EDR có thể liệt kê thread token và phát hiện **token thuộc về người dùng khác** hoặc thậm chí là SYSTEM bên trong process.
 
-This allows to store tokens **per beacon** so it's not needed to steal the same token again and again. This is useful for lateral movement or when you need to use a stolen token multiple times:
+Tính năng này cho phép lưu token **theo từng beacon**, do đó không cần đánh cắp cùng một token nhiều lần. Điều này hữu ích cho lateral movement hoặc khi bạn cần dùng token đã đánh cắp nhiều lần:
 
 - `token-store steal <pid>`
 - `token-store steal-and-use <pid>`
@@ -264,41 +264,41 @@ This allows to store tokens **per beacon** so it's not needed to steal the same 
 - `token-store remove <id>`
 - token-store remove-all
 
-When moving laterally, usually is better to **steal a token than to generate a new one** or perform a pass the hash attack.
+Khi lateral movement, thông thường **đánh cắp token sẽ tốt hơn tạo token mới** hoặc thực hiện tấn công pass the hash.
 
 ### Guardrails
 
-Cobalt Strike has a feature called **Guardrails** that helps to prevent the use of certain commands or actions that could be detected by defenders. Guardrails can be configured to block specific commands, such as `make_token`, `jump`, `remote-exec`, and others that are commonly used for lateral movement or privilege escalation.
+Cobalt Strike có tính năng **Guardrails**, giúp ngăn việc dùng một số lệnh hoặc hành động có thể bị defender phát hiện. Có thể cấu hình Guardrails để chặn các lệnh cụ thể như `make_token`, `jump`, `remote-exec` và những lệnh khác thường được dùng cho lateral movement hoặc privilege escalation.
 
-Moreover, the repo [https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks](https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks) also contains some checks and ideas you could consider before executing a payload.
+Ngoài ra, repo [https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks](https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks) cũng có một số bước kiểm tra và ý tưởng bạn có thể cân nhắc trước khi thực thi payload.
 
-### Tickets encryption
+### Mã hóa ticket
 
-In an AD be careful with the encryption of the tickets. By default, some tools will use RC4 encryption for Kerberos tickets, which is less secure than AES encryption and by default up to date environments will use AES. This can be detected by defenders who are monitoring for weak encryption algorithms.
+Trong AD, hãy chú ý đến phương thức mã hóa ticket. Theo mặc định, một số công cụ sẽ dùng mã hóa RC4 cho Kerberos ticket, vốn kém an toàn hơn mã hóa AES; các môi trường được cập nhật thường dùng AES theo mặc định. Defender giám sát các thuật toán mã hóa yếu có thể phát hiện điều này.
 
-### Avoid Defaults
+### Tránh dùng mặc định
 
-When using Cobalt Stricke by default the SMB pipes will have the name `msagent_####` and `"status_####`. Change those names. It's possible to check the names of the existing pipes from Cobal Strike with the command: `ls \\.\pipe\`
+Khi dùng Cobalt Strike, theo mặc định các SMB pipe sẽ có tên `msagent_####` và `"status_####`. Hãy đổi các tên này. Có thể kiểm tra tên các pipe hiện có từ Cobalt Strike bằng lệnh: `ls \\.\pipe\`
 
-Moreover, with SSH sessions a pipe called `\\.\pipe\postex_ssh_####` is created. Chage it with `set ssh_pipename "<new_name>";`.
+Ngoài ra, trong các phiên SSH, một pipe có tên `\\.\pipe\postex_ssh_####` sẽ được tạo. Hãy đổi tên bằng `set ssh_pipename "<new_name>";`.
 
-Also in poext exploitation attack the pipes `\\.\pipe\postex_####` can be modified with `set pipename "<new_name>"`.
+Tương tự, trong các cuộc tấn công khai thác poext, có thể sửa các pipe `\\.\pipe\postex_####` bằng `set pipename "<new_name>"`.
 
-In Cobalt Strike profiles you can also modify things like:
+Trong profile Cobalt Strike, bạn cũng có thể sửa những mục như:
 
-- Avoiding using `rwx`
-- How the process injection behavior works (which APIs will be used) in the `process-inject {...}` block
-- How the "fork and run" works in the `post-ex {…}` block
-- The sleep time
-- The max size of binaries to be loaded in memory
-- The memory footprint and DLL content with `stage {...}` block
-- The network traffic
+- Tránh dùng `rwx`
+- Cách hoạt động của process injection (API nào sẽ được dùng) trong khối `process-inject {...}`
+- Cách hoạt động của "fork and run" trong khối `post-ex {…}`
+- Thời gian sleep
+- Kích thước tối đa của binary được tải vào bộ nhớ
+- Dấu chân bộ nhớ và nội dung DLL bằng khối `stage {...}`
+- Lưu lượng mạng
 
-### Sleepmask and BeaconGate
+### Sleepmask và BeaconGate
 
-A Sleepmask transforms Beacon and its tracked heap allocations while it is dormant, then restores them for task execution. Current releases provide an evasive default, but custom Sleepmask BOFs remain useful when memory layout, allocation or call-stack requirements differ. As of 4.13, the default Sleepmask also spoofs the return address for APIs proxied through BeaconGate.<sup>[[8]](#references)</sup>
+Sleepmask biến đổi Beacon cùng các heap allocation được theo dõi khi Beacon đang ngủ, sau đó khôi phục chúng để thực thi tác vụ. Các bản phát hành hiện tại cung cấp cấu hình mặc định có tính né tránh, nhưng Sleepmask BOF tùy chỉnh vẫn hữu ích khi có yêu cầu khác về bố cục bộ nhớ, allocation hoặc call stack. Kể từ phiên bản 4.13, Sleepmask mặc định cũng giả mạo địa chỉ trả về của các API được proxy thông qua BeaconGate.<sup>[[8]](#references)</sup>
 
-**BeaconGate** extends this design beyond `Sleep`: selected WinAPI calls are represented as `FUNCTION_CALL` structures and forwarded to the Sleepmask BOF, which can mask Beacon while executing the call. The profile can gate a group (`Comms`, `Core`, `Cleanup` or `All`) or only individual APIs:<sup>[[9]](#references)</sup>
+**BeaconGate** mở rộng thiết kế này ra ngoài `Sleep`: các lệnh gọi WinAPI được chọn sẽ được biểu diễn dưới dạng cấu trúc `FUNCTION_CALL` và chuyển tiếp đến Sleepmask BOF, nơi có thể che giấu Beacon trong khi thực thi lệnh gọi. Profile có thể bật gate cho một nhóm (`Comms`, `Core`, `Cleanup` hoặc `All`) hoặc chỉ cho từng API riêng lẻ:<sup>[[9]](#references)</sup>
 
 ```text
 stage {
@@ -313,40 +313,40 @@ stage {
 }
 ```
 
-For an API listed under `beacon_gate`, the gate takes precedence over `syscall_method`; APIs not listed can still use the configured syscall method. `beacon_gate disable` and `beacon_gate enable` toggle the feature at runtime. Avoid enabling `All` blindly: commands such as `ps` repeatedly call `OpenProcess`/`CloseHandle` and can produce a CPU spike when every call masks and unmasks Beacon. Sleepmask-VS provides mocked Beacon/Sleepmask state for debugging custom gates without repeatedly testing them through a live implant.<sup>[[9]](#references)</sup>
+For API được liệt kê trong `beacon_gate`, gate được ưu tiên hơn `syscall_method`; các API không được liệt kê vẫn có thể dùng phương thức syscall đã cấu hình. `beacon_gate disable` và `beacon_gate enable` bật/tắt tính năng khi chạy. Tránh bật `All` một cách mù quáng: các lệnh như `ps` gọi `OpenProcess`/`CloseHandle` liên tục và có thể làm CPU tăng đột biến khi mọi lời gọi đều che giấu rồi bỏ che giấu Beacon. Sleepmask-VS cung cấp trạng thái Beacon/Sleepmask giả lập để debug các gate tùy chỉnh mà không phải liên tục kiểm thử chúng thông qua implant đang hoạt động.<sup>[[9]](#references)</sup>
 
-### Noisy proc injections
+### Tiêm mã vào process gây nhiều cảnh báo
 
-When injecting code into a process this is usually very noisy, this is because **no regular process usually performs this action and because the ways to do this are very limited**. Tehrefore, it' could be detected by behaviour-based detection systems. Moroever, it could also be detected by EDRs scanning the network for **threads containing code that is not in disk** (although processes such as browsers using JIT have this commonly). Example: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
+Việc tiêm mã vào một process thường gây nhiều cảnh báo, vì **thông thường không có process nào thực hiện hành động này và các cách thực hiện cũng rất hạn chế**. Vì vậy, hành vi này có thể bị các hệ thống phát hiện dựa trên hành vi phát hiện. Hơn nữa, EDR cũng có thể quét mạng để tìm **các thread chứa mã không có trên đĩa** (mặc dù những process như trình duyệt thường có mã như vậy khi dùng JIT). Ví dụ: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
 
-### Spawnas | PID and PPID relationships
+### Spawnas | Quan hệ PID và PPID
 
-When spawning a new process it's important to **maintain a regular parent-child** relationship between processes to avoid detection. If svchost.exec is executing iexplorer.exe it'll look suspicious, as svchost.exe is not a parent of iexplorer.exe in a normal Windows environment.
+Khi tạo một process mới, điều quan trọng là **duy trì quan hệ cha-con thông thường** giữa các process để tránh bị phát hiện. Nếu svchost.exec chạy iexplorer.exe thì sẽ trông đáng ngờ, vì svchost.exe không phải là process cha của iexplorer.exe trong môi trường Windows thông thường.
 
-When a new beacon is spawned in Cobalt Strike by default a process using **`rundll32.exe`** is created to run the new listener. This is not very stealthy and can be easily detected by EDRs. Moreover, `rundll32.exe` is run without any args making it even more suspicious.
+Theo mặc định, khi một Beacon mới được tạo trong Cobalt Strike, một process dùng **`rundll32.exe`** sẽ được tạo để chạy listener mới. Cách này không kín đáo và EDR có thể dễ dàng phát hiện. Hơn nữa, `rundll32.exe` được chạy mà không có tham số nào, khiến nó càng đáng ngờ hơn.
 
-With the following Cobalt Strike command, you can specify a different process to spawn the new beacon, making it less detectable:
+Với lệnh Cobalt Strike sau đây, bạn có thể chỉ định một process khác để tạo Beacon mới, giúp nó khó bị phát hiện hơn:
 
 ```bash
 spawnto x86 svchost.exe
 ```
 
-You can aso change this setting **`spawnto_x86` and `spawnto_x64`** in a profile.
+Bạn cũng có thể thay đổi thiết lập **`spawnto_x86` và `spawnto_x64`** trong profile.
 
-### Proxying attackers traffic
+### Chuyển tiếp traffic của attacker
 
-Atters sometime will need to be able to run tools lically, even in linux machines and make the traffic of the victims reach the tool (e.g. NTLM relay).
+Đôi khi attacker cần chạy công cụ cục bộ, kể cả trên máy Linux, và chuyển traffic của victim đến công cụ đó (ví dụ: NTLM relay).
 
-Moreover, sometimes to do a pass-the.hash or pass-the-ticket attack it's stealthier for the attacker to **add this hash or ticket in his own LSASS process** locally and then pivot from it instead of modifying an LSASS process of a victim machine.
+Ngoài ra, đôi khi để thực hiện tấn công pass-the.hash hoặc pass-the-ticket, attacker sẽ kín đáo hơn nếu **thêm hash hoặc ticket này vào tiến trình LSASS của chính mình** trên máy cục bộ, rồi pivot từ đó thay vì sửa đổi tiến trình LSASS trên máy của victim.
 
-However, you need to be **careful with the generated traffic**, as you might be sending uncommon traffic (kerberos?) from your backdoor process. For this you could pivot to a browser process (although you could get caught injecting yourself into a process so think about a stealth way to do this).
+Tuy nhiên, bạn cần **cẩn thận với traffic được tạo ra**, vì backdoor có thể gửi traffic bất thường (Kerberos?) từ tiến trình của nó. Để tránh điều này, bạn có thể pivot sang một tiến trình trình duyệt (dù bạn có thể bị phát hiện khi inject vào tiến trình, nên hãy nghĩ cách thực hiện kín đáo).
 
 
-### Avoiding AVs
+### Tránh AV
 
-#### AV/AMSI/ETW Bypass
+#### Bypass AV/AMSI/ETW
 
-Check the page:
+Xem trang:
 
 
 {{#ref}}
@@ -356,49 +356,49 @@ av-bypass.md
 
 #### Artifact Kit
 
-Usually in `/opt/cobaltstrike/artifact-kit` you can find the code and pre-compiled templates (in `/src-common`) of the payloads that cobalt strike is going to use to generate the binary beacons.
+Thông thường, bạn có thể tìm thấy mã nguồn và các template được biên dịch sẵn (trong `/src-common`) của các payload mà Cobalt Strike sẽ dùng để tạo binary beacon tại `/opt/cobaltstrike/artifact-kit`.
 
-Using [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) with the generated backdoor (or just with the compiled template) you can find what is making defender trigger. It's usually a string. Therefore you can just modify the code that is generating the backdoor so that string doesn't appear in the final binary.
+Dùng [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) với backdoor đã tạo (hoặc chỉ với template đã biên dịch), bạn có thể tìm ra nguyên nhân khiến Defender kích hoạt cảnh báo. Nguyên nhân thường là một chuỗi ký tự. Do đó, bạn chỉ cần sửa mã tạo backdoor để chuỗi đó không xuất hiện trong binary cuối cùng.
 
-After modifying the code just run `./build.sh` from the same directory and copy the `dist-pipe/` folder into the Windows client in `C:\Tools\cobaltstrike\ArtifactKit`.
+Sau khi sửa mã, chỉ cần chạy `./build.sh` từ cùng thư mục và sao chép thư mục `dist-pipe/` vào Windows client tại `C:\Tools\cobaltstrike\ArtifactKit`.
 
 ```
 pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
 
-Don't forget to load the aggressive script `dist-pipe\artifact.cna` to indicate Cobalt Strike to use the resources from disk that we want and not the ones loaded.
+Đừng quên tải script aggressive `dist-pipe\artifact.cna` để chỉ định Cobalt Strike sử dụng các tài nguyên trên ổ đĩa mà chúng ta muốn, thay vì các tài nguyên đã được tải.
 
 #### Resource Kit
 
-The ResourceKit folder contains the templates for Cobalt Strike's script-based payloads including PowerShell, VBA and HTA.
+Thư mục ResourceKit chứa các template cho payload dựa trên script của Cobalt Strike, bao gồm PowerShell, VBA và HTA.
 
-Using [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) with the templates you can find what is defender (AMSI in this case) not liking and modify it:
+Sử dụng [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) cùng với các template, bạn có thể tìm ra Defender (trong trường hợp này là AMSI) không thích điều gì và chỉnh sửa nó:
 
 ```
 .\ThreatCheck.exe -e AMSI -f .\cobaltstrike\ResourceKit\template.x64.ps1
 ```
 
-Modifying the detected lines one can generate a template that won't be caught.
+Chỉnh sửa các dòng được phát hiện, bạn có thể tạo một template không bị phát hiện.
 
-Don't forget to load the aggressive script `ResourceKit\resources.cna` to indicate Cobalt Strike to luse the resources from disk that we want and not the ones loaded.
+Đừng quên nạp script aggressive `ResourceKit\resources.cna` để chỉ định cho Cobalt Strike sử dụng các resource trên disk mà chúng ta muốn, thay vì những resource đã được nạp.
 
 #### Function hooks | Syscall
 
-Function hooking is a very common method of ERDs to detect malicious activity. Cobalt Strike allows you to bypass these hooks by using **syscalls** instead of the standard Windows API calls using the **`None`** config, or use the `Nt*` version of a function with the **`Direct`** setting, or just jumping over the `Nt*` function with the **`Indirect`** option in the malleable profile. Depending on the system, an optino might be more stealth then the other.
+Function hooking là một phương pháp rất phổ biến được các EDR sử dụng để phát hiện hoạt động độc hại. Cobalt Strike cho phép bạn bypass các hook này bằng cách sử dụng **syscalls** thay cho các lệnh gọi Windows API tiêu chuẩn với cấu hình **`None`**, sử dụng phiên bản `Nt*` của một function với thiết lập **`Direct`**, hoặc chỉ nhảy qua function `Nt*` bằng tùy chọn **`Indirect`** trong malleable profile. Tùy hệ thống, một tùy chọn có thể stealth hơn tùy chọn khác.
 
-This can be set in the profile or suing the command **`syscall-method`**
+Bạn có thể thiết lập điều này trong profile hoặc dùng lệnh **`syscall-method`**.
 
- However, this could also be noisy.
+Tuy nhiên, cách này cũng có thể gây nhiều tiếng ồn.
 
-Some option granted by Cobalt Strike to bypass function hooks is to remove those hooks with: [**unhook-bof**](https://github.com/Cobalt-Strike/unhook-bof).
+Một tùy chọn Cobalt Strike cung cấp để bypass function hook là gỡ bỏ các hook đó bằng [**unhook-bof**](https://github.com/Cobalt-Strike/unhook-bof).
 
-You could also check with functions are hooked with [**https://github.com/Mr-Un1k0d3r/EDRs**](https://github.com/Mr-Un1k0d3r/EDRs) or [**https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector**](https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector)
+Bạn cũng có thể kiểm tra những function nào đang bị hook bằng [**https://github.com/Mr-Un1k0d3r/EDRs**](https://github.com/Mr-Un1k0d3r/EDRs) hoặc [**https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector**](https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector)
 
 
 
 
 <details>
-<summary>Misc Cobalt Strike commands</summary>
+<summary>Các lệnh Cobalt Strike khác</summary>
 
 ```bash
 cd C:\Tools\neo4j\bin
@@ -428,13 +428,13 @@ pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 
 ## References
 
-- [1] [Cobalt Strike Linux Beacon (custom implant PoC)](https://github.com/EricEsquivel/CobaltStrike-Linux-Beacon)
+- [1] [Cobalt Strike Linux Beacon (PoC implant tùy chỉnh)](https://github.com/EricEsquivel/CobaltStrike-Linux-Beacon)
 - [2] [TrustedSec ELFLoader & Linux BOFs](https://github.com/trustedsec/ELFLoader)
-- [3] [Outflank nix BOF template](https://github.com/outflanknl/nix_bof_template)
-- [4] [Unit42 analysis of Cobalt Strike metadata encryption](https://unit42.paloaltonetworks.com/cobalt-strike-metadata-encryption-decryption/)
-- [5] [SANS ISC diary on Cobalt Strike traffic](https://isc.sans.edu/diary/27968)
+- [3] [Mẫu nix BOF của Outflank](https://github.com/outflanknl/nix_bof_template)
+- [4] [Phân tích của Unit42 về mã hóa metadata của Cobalt Strike](https://unit42.paloaltonetworks.com/cobalt-strike-metadata-encryption-decryption/)
+- [5] [Nhật ký SANS ISC về lưu lượng Cobalt Strike](https://isc.sans.edu/diary/27968)
 - [6] [cs-decrypt-metadata-py](https://blog.didierstevens.com/2021/10/22/new-tool-cs-decrypt-metadata-py/)
 - [7] [SentinelOne CobaltStrikeParser](https://github.com/Sentinel-One/CobaltStrikeParser)
-- [8] [Cobalt Strike 4.13: Lost In Translation](https://www.cobaltstrike.com/blog/cobalt-strike-413-lost-in-translation)
-- [9] [Cobalt Strike 4.10: Through the BeaconGate](https://www.cobaltstrike.com/blog/cobalt-strike-410-through-the-beacongate?p=6046)
+- [8] [Cobalt Strike 4.13: Lạc mất trong bản dịch](https://www.cobaltstrike.com/blog/cobalt-strike-413-lost-in-translation)
+- [9] [Cobalt Strike 4.10: Băng qua BeaconGate](https://www.cobaltstrike.com/blog/cobalt-strike-410-through-the-beacongate?p=6046)
 {{#include ../banners/hacktricks-training.md}}

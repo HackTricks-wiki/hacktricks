@@ -1,10 +1,10 @@
-# Visual Studio Project Design-Time MSBuild Execution
+# Thực thi MSBuild trong thời gian thiết kế của dự án Visual Studio
 
 {{#include ../banners/hacktricks-training.md}}
 
-Opening a C# project in Visual Studio is not a passive read. Its design-time build invokes named MSBuild targets to initialize IntelliSense, references and debugging **before** the developer selects Build or Run. `GetFrameworkPaths` is one of those targets. A project that redefines it can turn project load into user-context code execution without a separate payload click.<sup>[[1]](#references)[[2]](#references)</sup>
+Mở một dự án C# trong Visual Studio không phải là thao tác chỉ đọc. Bản dựng trong thời gian thiết kế sẽ gọi các target MSBuild có tên để khởi tạo IntelliSense, references và debugging **trước khi** nhà phát triển chọn Build hoặc Run. `GetFrameworkPaths` là một trong những target đó. Một dự án định nghĩa lại target này có thể biến việc tải dự án thành thực thi mã trong ngữ cảnh người dùng mà không cần nhấp vào payload riêng.<sup>[[1]](#references)[[2]](#references)</sup>
 
-The reported project declared resource files, then used `MakeDir`, `Copy` and `Exec` inside its replacement target to stage and launch a colocated payload. This reduced extract preserves the execution path shown in the source's Figure 6; it belongs inside a `.csproj`, not in a standalone XML file.<sup>[[1]](#references)</sup>
+Dự án được báo cáo khai báo các tệp tài nguyên, sau đó dùng `MakeDir`, `Copy` và `Exec` bên trong target được thay thế để chuẩn bị và khởi chạy payload đặt cùng thư mục. Đoạn trích rút gọn này giữ nguyên luồng thực thi được minh họa trong Figure 6 của nguồn; nó phải nằm trong một tệp `.csproj`, không phải một tệp XML độc lập.<sup>[[1]](#references)</sup>
 
 ```xml
 <ItemGroup>
@@ -19,15 +19,14 @@ The reported project declared resource files, then used `MakeDir`, `Copy` and `E
 </Target>
 ```
 
-**Import order matters:** MSBuild uses the *last* definition of a target. A target written in a project file is not guaranteed to replace the Microsoft target if a later import redefines it. SDK-style projects using `<Project Sdk="...">` implicitly import SDK targets after the project body, so inspect the evaluated import order rather than assuming this exact override works in every project. `MSBuild.exe -preprocess:expanded.xml project.csproj` expands imports without building the project and can help locate the effective target definition.<sup>[[3]](#references)[[4]](#references)</sup>
+**Thứ tự import rất quan trọng:** MSBuild sử dụng định nghĩa *cuối cùng* của một target. Không đảm bảo target được viết trong tệp project sẽ thay thế target của Microsoft nếu một import sau đó định nghĩa lại target này. Các project theo kiểu SDK sử dụng `<Project Sdk="...">` sẽ ngầm import các target của SDK sau phần thân project, vì vậy hãy kiểm tra thứ tự import sau khi đánh giá thay vì cho rằng cách ghi đè chính xác này sẽ hoạt động trong mọi project. `MSBuild.exe -preprocess:expanded.xml project.csproj` mở rộng các import mà không build project và có thể giúp xác định định nghĩa target đang có hiệu lực.<sup>[[3]](#references)[[4]](#references)</sup>
 
-This is a developer-project execution surface, not a VSIX extension installation and not a privilege escalation by itself. If the staged executable uses a malicious adjacent `.exe.config` or DLL, continue with [AppDomainManager hijacking and DLL sideloading](windows-local-privilege-escalation/dll-hijacking/).
+Đây là một bề mặt thực thi trong project dành cho nhà phát triển, không phải cài đặt tiện ích mở rộng VSIX và bản thân nó không phải là leo thang đặc quyền. Nếu executable được đặt vào thư mục staging sử dụng tệp `.exe.config` hoặc DLL độc hại nằm cạnh nó, hãy tiếp tục với [chiếm quyền điều khiển AppDomainManager và DLL sideloading](windows-local-privilege-escalation/dll-hijacking/).
 
 ## References
 
-- [1] [Unit 42 - Blinder Tunnel Campaign Targets Iraqi Infrastructure](https://unit42.paloaltonetworks.com/blinder-tunnel-targets-critical-infrastructure/)
-- [2] [Microsoft Learn - Visual Studio Integration (MSBuild)](https://learn.microsoft.com/en-us/visualstudio/msbuild/visual-studio-integration-msbuild?view=visualstudio)
-- [3] [Microsoft Learn - MSBuild Targets](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-targets)
-- [4] [Microsoft Learn - MSBuild Command-Line Reference](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference?view=visualstudio)
-
+- [1] [Unit 42 - Chiến dịch Blinder Tunnel nhắm vào hạ tầng Iraq](https://unit42.paloaltonetworks.com/blinder-tunnel-targets-critical-infrastructure/)
+- [2] [Microsoft Learn - Tích hợp Visual Studio (MSBuild)](https://learn.microsoft.com/en-us/visualstudio/msbuild/visual-studio-integration-msbuild?view=visualstudio)
+- [3] [Microsoft Learn - Các target của MSBuild](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-targets)
+- [4] [Microsoft Learn - Tham chiếu dòng lệnh MSBuild](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference?view=visualstudio)
 {{#include ../banners/hacktricks-training.md}}

