@@ -107,7 +107,7 @@ jobs:
             src/images/arte-sponsor-v1.webp \
             /tmp/immutable-images/
           cp theme/discount.js /tmp/discount.js
-          wget -O /tmp/seo_postprocess.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/master/scripts/seo_postprocess.py
+          cp scripts/seo_postprocess.py /tmp/seo_postprocess.py
 
       - name: Run get_and_save_refs.py
         run: |
