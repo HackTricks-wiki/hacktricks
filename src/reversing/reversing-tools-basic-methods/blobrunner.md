@@ -2,22 +2,22 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**BlobRunner**](https://github.com/OALabs/BlobRunner) is a tiny Windows **shellcode loader for debugging**: it allocates RWX memory, copies the blob, prints the base address / entry point, and transfers execution there. This is handy when the sample is **raw shellcode**, a **decrypted stage extracted from malware**, or a **position-independent blob** that does not have a PE header.
+[**BlobRunner**](https://github.com/OALabs/BlobRunner) là một **shellcode loader dùng để debug** nhỏ gọn trên Windows: nó cấp phát vùng nhớ RWX, sao chép blob vào đó, in địa chỉ cơ sở / entry point rồi chuyển quyền thực thi đến đó. Công cụ này rất hữu ích khi mẫu là **raw shellcode**, một **stage đã giải mã được trích xuất từ malware**, hoặc một **blob độc lập vị trí** không có PE header.
 
-The snippet below keeps the original idea, but uses **`%p` for printed pointers** so the x64 build doesn't truncate addresses while you are trying to attach a debugger or rebase the blob in your RE tool.
+Đoạn mã bên dưới giữ nguyên ý tưởng ban đầu, nhưng dùng **`%p` để in các con trỏ** nhằm tránh bản dựng x64 cắt cụt địa chỉ khi bạn đang cố gắng gắn debugger hoặc rebase blob trong RE tool.
 
-## Build
+## Xây dựng
 
-The simplest way to build the original project is from a **Visual Studio Developer Command Prompt**:
+Cách đơn giản nhất để build project gốc là dùng **Visual Studio Developer Command Prompt**:
 
 ```bash
 cl blobrunner.c
 cl /Feblobrunner64.exe /Foblobrunner64.out blobrunner.c
 ```
 
-You can also paste the code into a small Visual Studio / VS Code C project and compile it there.
+Bạn cũng có thể dán code vào một dự án C nhỏ trong Visual Studio / VS Code rồi biên dịch tại đó.
 
-## Useful usage patterns
+## Các mẫu sử dụng hữu ích
 
 ```bash
 # Execute from the beginning of the blob
@@ -33,21 +33,21 @@ BlobRunner.exe shellcode.bin --nopause
 BlobRunner.exe shellcode.bin --jit
 ```
 
-- In **x86**, BlobRunner pauses and then performs a direct jump to the blob entry point.
-- In **x64**, it creates a **suspended thread**, so you can break on the thread start address before resuming execution.
-- `--offset` is especially useful when the dumped blob starts with a **decoder / unpacking stub** and you already know the real entry point.
+- Trong **x86**, BlobRunner tạm dừng rồi thực hiện một lệnh nhảy trực tiếp đến entry point của blob.
+- Trong **x64**, nó tạo một **suspended thread**, vì vậy bạn có thể đặt breakpoint tại địa chỉ bắt đầu của thread trước khi tiếp tục thực thi.
+- `--offset` đặc biệt hữu ích khi blob được dump bắt đầu bằng **decoder / unpacking stub** và bạn đã biết entry point thực sự.
 
-## Practical notes
+## Ghi chú thực tế
 
-### Fix the printed addresses in x64 labs
+### Sửa các địa chỉ được in ra trong lab x64
 
-Older BlobRunner code prints addresses via casts such as `(int)(size_t)lpvBase` and `%08x` / `%016x`. In 64-bit workflows this can truncate the high half of the pointer and make rebasing / breakpoint placement annoying. The snippet below already fixes that by printing **`%p`** values directly.
+Các phiên bản BlobRunner cũ in địa chỉ qua những phép ép kiểu như `(int)(size_t)lpvBase` và `%08x` / `%016x`. Trong quy trình làm việc 64-bit, cách này có thể làm mất nửa trên của con trỏ và khiến việc rebasing / đặt breakpoint trở nên phiền phức. Đoạn mã bên dưới đã khắc phục điều đó bằng cách in trực tiếp các giá trị **`%p`**.
 
-### `--jit` is useful for first-instruction breakpoints
+### `--jit` hữu ích khi đặt breakpoint ở lệnh đầu tiên
 
-`--jit` removes execute access from the first byte of the shellcode and lets Windows raise an **access violation** when the blob starts executing. This is useful when you want the **configured JIT debugger** (for example x64dbg) to catch the first execution attempt instead of manually racing to attach. After the debugger breaks, restore execute rights and continue.
+`--jit` bỏ quyền thực thi khỏi byte đầu tiên của shellcode và để Windows phát sinh **access violation** khi blob bắt đầu thực thi. Tính năng này hữu ích khi bạn muốn **JIT debugger đã cấu hình** (ví dụ x64dbg) bắt lần thử thực thi đầu tiên, thay vì phải nhanh tay attach. Sau khi debugger dừng lại, khôi phục quyền thực thi rồi tiếp tục.
 
-A practical **x64dbg** flow is:
+Một quy trình **x64dbg** thực tế như sau:
 
 ```text
 setjit
@@ -56,41 +56,41 @@ BlobRunner.exe shellcode.bin --jit
 setpagerights <region>, ExecuteReadWrite
 ```
 
-The first two commands register x64dbg as the JIT debugger, and `setpagerights` restores execute rights on the region printed by BlobRunner after the debugger catches the access violation.
+Hai lệnh đầu tiên đăng ký x64dbg làm JIT debugger, còn `setpagerights` khôi phục quyền thực thi trên vùng mà BlobRunner in ra sau khi debugger bắt được access violation.
 
-### Time-travel the shellcode instead of single-stepping it live
+### Dịch chuyển thời gian trong shellcode thay vì single-step trực tiếp
 
-A very practical recent workflow is to record BlobRunner under **TTD** and then inspect the trace in **Binary Ninja** / **WinDbg**. This is great when the blob decrypts itself, resolves APIs dynamically, or performs several short-lived stages. Since **Binary Ninja 4.1**, TTD support is no longer just beta quality: it can drive reverse-debugging and simplify the WinDbg / TTD workflow directly from Binary Ninja.<sup>[[1]](#references)</sup>
+Một workflow rất thiết thực gần đây là ghi lại BlobRunner bằng **TTD**, sau đó kiểm tra trace trong **Binary Ninja** / **WinDbg**. Cách này rất hữu ích khi blob tự giải mã, phân giải API động hoặc thực hiện nhiều stage tồn tại trong thời gian ngắn. Kể từ **Binary Ninja 4.1**, hỗ trợ TTD không còn chỉ ở mức beta: nó có thể thực hiện reverse-debugging và đơn giản hóa workflow WinDbg / TTD trực tiếp từ Binary Ninja.<sup>[[1]](#references)</sup>
 
 ```bash
 TTD.exe .\blobrunner.exe .\shellcode.bin
 ```
 
-The important part is to **note the allocated base address printed by BlobRunner** and then **rebase** the shellcode view to that address before replaying the trace. Also note that Microsoft documents TTD recording as **invasive**: run it from an **elevated** prompt, expect noticeable slowdown, and keep the recording window short to avoid massive trace files.<sup>[[1]](#references)</sup>
+Phần quan trọng là **ghi lại địa chỉ cơ sở được BlobRunner cấp phát và in ra**, sau đó **rebase** chế độ xem shellcode về địa chỉ đó trước khi phát lại trace. Cũng lưu ý rằng Microsoft mô tả việc ghi TTD là **xâm lấn**: hãy chạy từ một cửa sổ nhắc lệnh **được nâng quyền**, dự kiến hiệu năng sẽ giảm đáng kể và giữ khoảng thời gian ghi ngắn để tránh tạo các tệp trace khổng lồ.<sup>[[1]](#references)</sup>
 
-### If the blob needs companion data, use a PE wrapper instead
+### Nếu blob cần dữ liệu đi kèm, hãy dùng PE wrapper
 
-Some shellcode expects a **second blob**, a **mapped file**, or some other **structured content** to exist in memory. BlobRunner is intentionally minimal, so for these cases a runner such as **SCLauncher** can be more convenient because it can:<sup>[[2]](#references)</sup>
+Một số shellcode cần có **blob thứ hai**, **tệp được ánh xạ** hoặc một loại **nội dung có cấu trúc** khác trong bộ nhớ. BlobRunner được thiết kế tối giản, nên trong những trường hợp này, một runner như **SCLauncher** có thể tiện hơn vì nó có thể:<sup>[[2]](#references)</sup>
 
-- pause before execution,
-- insert an `INT3` breakpoint,
-- load **additional content** into memory,
-- memory-map that extra content, or
-- wrap the shellcode inside a temporary **PE** for easier analysis in tools that prefer normal executables.
+- tạm dừng trước khi thực thi,
+- chèn breakpoint `INT3`,
+- nạp **nội dung bổ sung** vào bộ nhớ,
+- ánh xạ nội dung bổ sung đó vào bộ nhớ, hoặc
+- bọc shellcode bên trong một **PE** tạm thời để dễ phân tích hơn bằng các công cụ ưu tiên tệp thực thi thông thường.
 
-Example:
+Ví dụ:
 
 ```bash
 SCLauncher.exe -f=shellcode.bin -pause -d=config.bin -mm
 SCLauncher.exe -f=shellcode.bin -pe -64 -ep=0x120
 ```
 
-For complementary workflows such as **jmp2it**, **Cutter** emulation, or **scdbg**-based shellcode tracing, check the [parent shellcode reversing page](README.md).
+Đối với các quy trình bổ trợ như **jmp2it**, mô phỏng **Cutter** hoặc truy vết shellcode dựa trên **scdbg**, hãy xem [trang reversing shellcode chính](README.md).
 
-## Source code
+## Mã nguồn
 
-The only modified lines from the [original code](https://github.com/OALabs/BlobRunner) are the pointer-printing lines used to avoid x64 address truncation.  
-In order to compile it just **create a C/C++ project in Visual Studio Code, copy and paste the code and build it**.
+Các dòng duy nhất được chỉnh sửa so với [mã nguồn gốc](https://github.com/OALabs/BlobRunner) là những dòng in con trỏ, nhằm tránh bị cắt cụt địa chỉ x64.  
+Để biên dịch, chỉ cần **tạo một dự án C/C++ trong Visual Studio Code, sao chép và dán mã rồi build**.
 
 ```c
 #include <stdio.h>
@@ -300,7 +300,6 @@ int main(int argc, char* argv[])
 
 ## References
 
-- [1] [Time Travel Debugging Shellcode with Binary Ninja](https://www.lrqa.com/en/cyber-labs/time-travel-debugging-shellcode-with-binary-ninja/)
-- [2] [Analyzing Shellcode with SCLauncher](https://www.thecyberyeti.com/post/analyzing-shellcode-with-sclauncher)
-
+- [1] [Debugging Shellcode bằng Time Travel với Binary Ninja](https://www.lrqa.com/en/cyber-labs/time-travel-debugging-shellcode-with-binary-ninja/)
+- [2] [Phân tích Shellcode bằng SCLauncher](https://www.thecyberyeti.com/post/analyzing-shellcode-with-sclauncher)
 {{#include ../../banners/hacktricks-training.md}}

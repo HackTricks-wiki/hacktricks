@@ -1,24 +1,24 @@
-# Covert Physical and Wireless Access
+# Truy cập vật lý và không dây bí mật
 
 {{#include ../banners/hacktricks-training.md}}
 
-For a detailed, owner-approved implementation covering outbound rendezvous, power/uplink recovery, minimal device-held secrets, capture testing and monitoring for possible discovery, see [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md).
+Để xem hướng dẫn triển khai chi tiết được chủ sở hữu phê duyệt, bao gồm rendezvous outbound, khôi phục nguồn điện/uplink, giảm thiểu bí mật lưu trên thiết bị, kiểm thử capture và giám sát khả năng bị phát hiện, hãy xem [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md).
 
-Changing the network path can also change apparent physical origin. A sophisticated actor may use a nearby compromised system, a hidden device, public access, cellular backhaul or a satellite receiver so that target logs point away from the operator. None of these removes physical, radio or provider evidence; it moves attribution into different datasets.
+Thay đổi đường đi của mạng cũng có thể làm thay đổi nguồn gốc vật lý được nhận diện. Một tác nhân tinh vi có thể dùng một hệ thống bị xâm phạm ở gần đó, một thiết bị ẩn, mạng truy cập công cộng, backhaul di động hoặc bộ thu vệ tinh để khiến log của mục tiêu trỏ ra xa vị trí của người vận hành. Không phương án nào trong số này loại bỏ bằng chứng vật lý, vô tuyến hoặc từ nhà cung cấp; chúng chuyển việc quy kết sang các bộ dữ liệu khác.
 
-## Technique matrix
+## Ma trận kỹ thuật
 
-| Technique | Apparent origin | Necessary condition | High-value evidence |
+| Kỹ thuật | Nguồn gốc được nhận diện | Điều kiện cần thiết | Bằng chứng có giá trị cao |
 |---|---|---|---|
-| Nearby wireless pivot | a business/home beside the target | compromised dual-homed host and target Wi-Fi access | neighbor-host endpoint logs, RF association and target RADIUS/DHCP |
-| Public/guest network | venue NAT or tunnel exit | lawful access or access-control bypass | captive portal, DHCP, AP association, CCTV and payment/location records |
-| Covert drop device | target/nearby wired, Wi-Fi or cellular address | physical placement or delivery | switchport/USB, RF, inventory, power and outbound tunnel telemetry |
-| Cellular router/eSIM | carrier NAT or dedicated APN | modem/SIM/subscription | IMEI/IMSI/eSIM, cell-sector, carrier account and traffic timing |
-| Satellite-link abuse | subscriber address in beam footprint | protocol- and service-specific weakness | RF location, uplink flow, impossible RTT/routing and provider records |
+| Điểm trung chuyển không dây ở gần | doanh nghiệp/nhà ở cạnh mục tiêu | máy chủ dual-homed bị xâm phạm và có quyền truy cập Wi-Fi của mục tiêu | log endpoint trên máy chủ lân cận, kết nối RF và RADIUS/DHCP của mục tiêu |
+| Mạng công cộng/khách | NAT của địa điểm hoặc điểm thoát tunnel | quyền truy cập hợp pháp hoặc vượt qua kiểm soát truy cập | captive portal, DHCP, kết nối AP, CCTV và hồ sơ thanh toán/vị trí |
+| Thiết bị thả bí mật | địa chỉ có dây, Wi-Fi hoặc di động của mục tiêu/khu vực lân cận | đặt hoặc chuyển giao thiết bị trực tiếp | cổng switch/USB, RF, kiểm kê, nguồn điện và telemetry tunnel outbound |
+| Router di động/eSIM | NAT của nhà mạng hoặc APN chuyên dụng | modem/SIM/thuê bao | IMEI/IMSI/eSIM, khu vực phủ sóng của trạm di động, tài khoản nhà mạng và thời điểm lưu lượng |
+| Lạm dụng liên kết vệ tinh | địa chỉ thuê bao trong vùng phủ sóng của chùm vệ tinh | điểm yếu đặc thù giao thức và dịch vụ | định vị RF, luồng uplink, RTT/định tuyến bất khả thi và hồ sơ nhà cung cấp |
 
-## Nearest-neighbor attack
+## Tấn công Nearest Neighbor
 
-Volexity documented a 2022 APT28/GRU operation in which the actor was remote from its ultimate target. It password-sprayed the target's public service to obtain valid credentials, but MFA prevented direct Internet login. The target's enterprise Wi-Fi accepted those credentials without MFA. The actor compromised organizations physically close to the target, found a dual-homed system with wireless reach, and used that system to authenticate to the target Wi-Fi. Volexity named this the **Nearest Neighbor Attack**.<sup>[[1]](#references)</sup>
+Volexity ghi nhận một chiến dịch APT28/GRU năm 2022, trong đó tác nhân ở xa mục tiêu cuối cùng. Tác nhân password-spray dịch vụ công khai của mục tiêu để lấy thông tin xác thực hợp lệ, nhưng MFA đã ngăn đăng nhập trực tiếp từ Internet. Wi-Fi doanh nghiệp của mục tiêu chấp nhận các thông tin xác thực đó mà không cần MFA. Tác nhân xâm nhập các tổ chức ở gần mục tiêu về mặt vật lý, tìm thấy một hệ thống dual-homed có khả năng kết nối không dây, rồi dùng hệ thống đó để xác thực vào Wi-Fi của mục tiêu. Volexity đặt tên cho phương thức này là **Nearest Neighbor Attack**.<sup>[[1]](#references)</sup>
 
 ```text
 remote operator
@@ -30,30 +30,30 @@ compromised organization B -- Wi-Fi radio --> target organization A
                                         internal service
 ```
 
-The novelty is the composition. No operator travels to the target and the Internet-facing service's MFA still works. The compromised neighbor supplies physical proximity; the stolen target credential supplies logical access; the target Wi-Fi becomes the boundary-crossing path.
+Điểm mới nằm ở cách kết hợp. Không có operator nào di chuyển đến mục tiêu và MFA của dịch vụ hướng ra Internet vẫn hoạt động. Thiết bị của hàng xóm bị xâm nhập tạo điều kiện tiếp cận vật lý; credential mục tiêu bị đánh cắp cung cấp quyền truy cập logic; Wi-Fi của mục tiêu trở thành đường đi vượt qua ranh giới.
 
-### Preconditions and visibility
+### Điều kiện tiên quyết và khả năng hiển thị
 
-- A nearby system must be remotely controllable and have a compatible radio or access to another nearby pivot.
-- The target SSID must reach that system, and Wi-Fi admission must accept a reusable credential/certificate/device state.
-- The pivot often needs two simultaneous paths: one back to the operator and one into the target WLAN.
-- The target may see a new station MAC and a legitimate username but no corresponding managed-device certificate, posture, history or expected building entry.
-- Neighbor endpoint logs may show wireless scans, new profiles, interface changes, tunneling and remote-control activity.
+- Một hệ thống ở gần phải có thể được điều khiển từ xa và có radio tương thích hoặc có quyền truy cập vào một pivot khác ở gần.
+- SSID mục tiêu phải phủ sóng đến hệ thống đó và Wi-Fi phải chấp nhận credential/chứng chỉ/trạng thái thiết bị có thể tái sử dụng.
+- Pivot thường cần hai đường kết nối đồng thời: một đường về operator và một đường vào WLAN mục tiêu.
+- Mục tiêu có thể thấy MAC station mới và username hợp lệ nhưng không có chứng chỉ thiết bị được quản lý, posture, lịch sử hoặc lượt ra vào tòa nhà như dự kiến.
+- Log trên endpoint của hàng xóm có thể ghi nhận các lần quét wireless, profile mới, thay đổi interface, tunneling và hoạt động điều khiển từ xa.
 
-### Detection and prevention
+### Phát hiện và phòng ngừa
 
-1. Require certificate-backed EAP-TLS and managed-device posture for enterprise Wi-Fi; do not make a password that failed MFA on the Internet sufficient merely because it arrives over radio.
-2. Correlate RADIUS authentication with MDM/NAC identity, historical station/device binding, AP location, physical-access events and concurrent sessions.
-3. Alert when an account associates for the first time, from an unusual AP edge, without a managed certificate, or while the same identity is active elsewhere.
-4. Monitor endpoints capable of bridging interfaces. On Windows, Linux and network appliances, investigate unexpected WLAN profiles, forwarding/NAT configuration, virtual adapters and persistent tunnels.
-5. Reduce unnecessary signal spill with sensible AP placement and power planning. This is a supporting control, not authentication.
-6. Coordinate incident response with neighboring tenants: the final radio source may itself be a victim.
+1. Yêu cầu EAP-TLS dựa trên chứng chỉ và posture thiết bị được quản lý cho Wi-Fi doanh nghiệp; đừng coi password đã thất bại MFA trên Internet là đủ chỉ vì nó được gửi qua radio.
+2. Đối chiếu xác thực RADIUS với danh tính MDM/NAC, mối liên kết station/thiết bị trước đây, vị trí AP, sự kiện kiểm soát ra vào vật lý và các phiên đồng thời.
+3. Cảnh báo khi tài khoản kết nối lần đầu, từ rìa AP bất thường, không có chứng chỉ thiết bị được quản lý hoặc khi cùng danh tính đó đang hoạt động ở nơi khác.
+4. Giám sát các endpoint có khả năng bridge interface. Trên Windows, Linux và thiết bị mạng, kiểm tra các WLAN profile bất thường, cấu hình forwarding/NAT, virtual adapter và tunnel tồn tại lâu dài.
+5. Giảm vùng phủ sóng tràn không cần thiết bằng cách bố trí AP và hoạch định công suất hợp lý. Đây là biện pháp hỗ trợ, không phải xác thực.
+6. Phối hợp ứng phó sự cố với các đơn vị thuê mặt bằng lân cận: nguồn phát radio cuối cùng có thể chính là nạn nhân.
 
-The [owned two-organization lab](authorized-adversary-emulation-labs.md#lab-4-nearest-neighbor-wireless-pivot) reproduces these observables without attacking a neighbor.
+[Lab hai tổ chức do mình sở hữu](authorized-adversary-emulation-labs.md#lab-4-nearest-neighbor-wireless-pivot) tái hiện các dấu hiệu này mà không tấn công hàng xóm.
 
-### Validate a Windows pivot path
+### Xác thực đường đi pivot trên Windows
 
-A dual-homed Windows host does not bridge its interfaces automatically. Inventory its adapters, routes and WLAN state first, then associate only through an approved profile. The `name` argument to `netsh wlan connect` identifies an installed profile, not an arbitrary SSID and password. Compare the route table before and after association so a new default route does not break the control path or invalidate the result. Continue with the [post-association checks](../generic-methodologies-and-resources/pentesting-wifi/wifi-post-association-and-client-isolation-attacks.md) only after confirming the intended interface and route.<sup>[[1]](#references)[[6]](#references)</sup>
+Một máy chủ Windows có hai kết nối mạng không tự động bridge các interface của nó. Trước tiên, hãy kiểm kê adapter, route và trạng thái WLAN, sau đó chỉ kết nối thông qua profile đã được phê duyệt. Đối số `name` của `netsh wlan connect` xác định một profile đã cài đặt, không phải SSID và password tùy ý. So sánh bảng route trước và sau khi kết nối để bảo đảm default route mới không làm gián đoạn đường điều khiển hoặc khiến kết quả mất hiệu lực. Chỉ tiếp tục với các [kiểm tra sau khi kết nối](../generic-methodologies-and-resources/pentesting-wifi/wifi-post-association-and-client-isolation-attacks.md) sau khi xác nhận đúng interface và route.<sup>[[1]](#references)[[6]](#references)</sup>
 
 ```powershell
 Get-NetAdapter -Physical | Sort-Object Status -Descending
@@ -69,21 +69,21 @@ netsh wlan connect name="<approved-profile>" interface="Wi-Fi"
 Get-NetConnectionProfile
 ```
 
-Volexity's released incident artifact shows another useful distinction. Its embedded C# opens the WLAN API, enumerates interfaces, reads EAP XML from disk and calls `WlanSetProfileEapXmlUserData` for a named profile on the first wireless interface. The API sets EAP user credentials on an existing 802.1X profile, but the released component contains neither `WlanConnect` nor the discovery logic described in the report. Treat it as profile provisioning rather than a complete connector, and inspect the resulting profile as part of the [client and supplicant assessment](../generic-methodologies-and-resources/pentesting-wifi/wifi-client-and-supplicant-assessment.md).<sup>[[5]](#references)[[7]](#references)</sup>
+Artifact sự cố được Volexity công bố cho thấy một điểm khác biệt hữu ích khác. C# được nhúng trong đó mở WLAN API, liệt kê các giao diện, đọc XML EAP từ ổ đĩa và gọi `WlanSetProfileEapXmlUserData` cho một profile được chỉ định trên giao diện không dây đầu tiên. API này thiết lập thông tin xác thực EAP của người dùng trên một profile 802.1X hiện có, nhưng component được công bố không có `WlanConnect` hay logic dò tìm được mô tả trong báo cáo. Hãy xem đây là hoạt động cấp cấu hình profile thay vì một connector hoàn chỉnh, đồng thời kiểm tra profile thu được trong quá trình [đánh giá client và supplicant](../generic-methodologies-and-resources/pentesting-wifi/wifi-client-and-supplicant-assessment.md).<sup>[[5]](#references)[[7]](#references)</sup>
 
-## Public venues and third-party Wi-Fi
+## Địa điểm công cộng và Wi-Fi của bên thứ ba
 
-Using café, hotel, airport or municipal Wi-Fi changes the IP shown to a destination. It does not create anonymity. The venue or its provider may retain AP association, device MAC, DHCP lease, captive-portal account, SMS/email validation and flow logs. Physical entry, CCTV, purchase, mobile-location and travel records can bridge the digital event to a person.
+Sử dụng Wi-Fi ở quán cà phê, khách sạn, sân bay hoặc khu vực đô thị sẽ thay đổi IP mà đích đến nhìn thấy. Điều đó không tạo ra sự ẩn danh. Địa điểm hoặc nhà cung cấp dịch vụ có thể lưu nhật ký về việc kết nối với AP, MAC thiết bị, DHCP lease, tài khoản captive portal, xác minh qua SMS/email và luồng lưu lượng. Việc có mặt tại địa điểm, CCTV, giao dịch mua hàng, dữ liệu vị trí di động và hồ sơ di chuyển có thể liên kết sự kiện kỹ thuật số với một người.
 
-An actor may try to reduce one handle by using randomized MAC addresses, a separate device, cash or a tunnel. Cross-layer correlation remains possible through arrival time, repeated venue pattern, radio fingerprints, portal behavior, traffic timing, camera footage and the tunnel provider. A VPN also moves the destination from venue logs to VPN logs; it does not remove the venue's knowledge that the device was present.
+Một tác nhân có thể tìm cách giảm bớt một dấu vết bằng cách dùng địa chỉ MAC ngẫu nhiên, thiết bị riêng, tiền mặt hoặc tunnel. Tuy nhiên, vẫn có thể đối chiếu dữ liệu giữa các lớp thông qua thời điểm đến, quy luật ghé lại địa điểm, dấu vân tay vô tuyến, hành vi trên portal, thời điểm lưu lượng, hình ảnh camera và nhà cung cấp tunnel. VPN cũng chỉ chuyển dữ liệu về đích từ nhật ký của địa điểm sang nhật ký VPN; nó không xóa bỏ việc địa điểm biết thiết bị đã có mặt.
 
-Defenders of public access should isolate clients, block lateral traffic, use WPA2/3-Enterprise or per-device keys where feasible, retain proportionate DHCP/RADIUS/security logs, protect captive portals, and publish an abuse process. Red teams should use such a venue only when its terms and the engagement allow it; bypassing a portal, stealing access or targeting other guests is not an authorized testing shortcut.
+Đơn vị quản lý mạng truy cập công cộng nên cô lập client, chặn lưu lượng ngang hàng, sử dụng WPA2/3-Enterprise hoặc khóa riêng cho từng thiết bị khi khả thi, lưu giữ nhật ký DHCP/RADIUS/an ninh ở mức phù hợp, bảo vệ captive portal và công bố quy trình xử lý hành vi lạm dụng. Red team chỉ nên sử dụng địa điểm như vậy khi điều khoản sử dụng và phạm vi engagement cho phép; vượt qua portal, đánh cắp quyền truy cập hoặc nhắm mục tiêu khách khác không phải là lối tắt kiểm thử được ủy quyền.
 
-## Covert drop devices and warshipping
+## Thiết bị drop bí mật và warshipping
 
-A drop is a small system placed on or delivered into a site, then controlled through outbound Ethernet, Wi-Fi or cellular. “Warshipping” packages the device so ordinary delivery carries it inside the radio perimeter. Possible hardware ranges from a single-board computer to a modified charger, USB peripheral, network appliance or battery-powered modem.
+Thiết bị drop là một hệ thống nhỏ được đặt hoặc đưa vào một địa điểm, sau đó được điều khiển qua Ethernet, Wi-Fi hoặc mạng di động. “Warshipping” đóng gói thiết bị để việc giao hàng thông thường đưa nó vào bên trong phạm vi phủ sóng vô tuyến. Phần cứng có thể là máy tính bo mạch đơn, bộ sạc đã chỉnh sửa, thiết bị ngoại vi USB, thiết bị mạng hoặc modem chạy bằng pin.
 
-Operational architecture:
+Kiến trúc vận hành:
 
 ```text
 operator -> controlled rendezvous <- outbound encrypted tunnel <- drop
@@ -91,40 +91,40 @@ operator -> controlled rendezvous <- outbound encrypted tunnel <- drop
                                              scoped local interface
 ```
 
-The device may provide a remote foothold, perform wireless measurements, emulate an authorized exercise peripheral, or relay traffic. Its apparent source is local, but it creates physical artifacts: serial numbers, packaging, fingerprints, cameras, access logs, power draw, USB descriptors, switchport negotiation, DHCP fingerprints, MAC OUI/randomization behavior, RF emissions and recurring rendezvous connections.
+Thiết bị có thể cung cấp foothold từ xa, thực hiện đo đạc không dây, giả lập thiết bị ngoại vi dùng trong diễn tập được ủy quyền hoặc chuyển tiếp lưu lượng. Nguồn có vẻ là tại chỗ, nhưng thiết bị để lại dấu vết vật lý: số sê-ri, bao bì, dấu vân tay, camera, nhật ký ra vào, mức tiêu thụ điện, USB descriptor, quá trình thương lượng switchport, dấu vân tay DHCP, hành vi OUI/ngẫu nhiên hóa MAC, phát xạ RF và các kết nối rendezvous lặp lại.
 
-### Defensive controls
+### Biện pháp phòng vệ
 
-- Maintain receiving-room and asset-inventory procedures; inspect unexpected electronics and packages addressed to nonexistent staff.
-- Use 802.1X/NAC on wired and wireless access, disable unused ports, and place unknown devices in a restricted remediation VLAN.
-- Alert on new DHCP fingerprints, locally administered MACs that persist, new USB network/HID devices, unauthorized Wi-Fi Direct/Bluetooth and long-lived outbound tunnels.
-- Baseline switchport, power-over-Ethernet, DNS and TLS behavior. A tiny host with no inventory record making periodic encrypted connections is higher-signal than “Raspberry Pi OUI” alone.
-- During an exercise, inventory, label, scope, encrypt, provide a remote kill, set a retrieval deadline and ensure loss cannot expose reusable credentials.
+- Duy trì quy trình tiếp nhận và kiểm kê tài sản; kiểm tra các thiết bị điện tử bất ngờ và kiện hàng gửi cho nhân viên không tồn tại.
+- Dùng 802.1X/NAC cho truy cập có dây và không dây, vô hiệu hóa các cổng không sử dụng và đưa thiết bị lạ vào VLAN khắc phục hạn chế.
+- Cảnh báo khi phát hiện dấu vân tay DHCP mới, MAC được quản trị cục bộ tồn tại dai dẳng, thiết bị USB mạng/HID mới, Wi-Fi Direct/Bluetooth trái phép và tunnel đi ra tồn tại lâu.
+- Lập đường cơ sở cho hành vi của switchport, nguồn qua Ethernet, DNS và TLS. Một máy chủ nhỏ không có trong hồ sơ kiểm kê nhưng định kỳ tạo kết nối mã hóa là tín hiệu đáng chú ý hơn chỉ riêng “Raspberry Pi OUI”.
+- Trong diễn tập, hãy kiểm kê, dán nhãn, xác định phạm vi, mã hóa, cung cấp remote kill, đặt hạn chót thu hồi và bảo đảm việc mất thiết bị không làm lộ thông tin xác thực có thể tái sử dụng.
 
-## Cellular and eSIM backhaul
+## Kết nối backhaul qua mạng di động và eSIM
 
-A cellular modem avoids the target's Internet gateway and can keep a drop reachable behind carrier NAT through an outbound rendezvous. Mobile addresses may rotate or be shared; the cellular operator still has strong subscriber and network evidence: SIM/eSIM identity, IMSI, device IMEI, assigned addresses/ports, cell/sector timing, account/payment and roaming records.
+Modem di động tránh cổng Internet của mục tiêu và có thể giữ cho thiết bị cấy ghép truy cập được phía sau NAT của nhà mạng thông qua rendezvous đi ra. Địa chỉ di động có thể thay đổi hoặc được dùng chung; nhà mạng di động vẫn lưu giữ bằng chứng mạnh về thuê bao và mạng: danh tính SIM/eSIM, IMSI, IMEI thiết bị, địa chỉ/cổng được cấp, thời gian kết nối với trạm/khu vực phủ sóng, cùng hồ sơ tài khoản/thanh toán và roaming.
 
-From the enterprise view, detect unexpected modems and personal hotspots with wireless/RF surveys, endpoint USB/PCI inventory, MDM restrictions, rogue-SSID monitoring and physical inspection. A drop that uses cellular for control can still be caught by its local Ethernet/Wi-Fi behavior and its radio emissions.
+Từ góc độ doanh nghiệp, hãy phát hiện modem và hotspot cá nhân bất ngờ bằng khảo sát không dây/RF, kiểm kê USB/PCI trên endpoint, hạn chế qua MDM, giám sát SSID giả mạo và kiểm tra thực tế. Thiết bị cấy ghép dùng mạng di động để điều khiển vẫn có thể bị phát hiện qua hành vi Ethernet/Wi-Fi tại chỗ và phát xạ vô tuyến.
 
-For authorized exercises, the organization should own the subscription and modem, record identifiers with the controller and validate that carrier/provider terms permit the traffic. A prepaid label or cryptocurrency purchase does not erase tower, device or retail records.
+Trong các diễn tập được ủy quyền, tổ chức nên sở hữu gói thuê bao và modem, ghi lại các mã định danh cùng thông tin của người điều khiển, đồng thời xác minh điều khoản của nhà mạng/nhà cung cấp có cho phép lưu lượng đó hay không. Nhãn trả trước hoặc việc mua bằng tiền mã hóa không xóa được hồ sơ trạm phát, thiết bị hay điểm bán lẻ.
 
-## MAC randomization and device fingerprinting
+## Ngẫu nhiên hóa MAC và fingerprinting thiết bị
 
-Modern systems can use a locally administered random MAC per network. This reduces passive long-term tracking by a stable factory MAC; it does not hide:
+Các hệ thống hiện đại có thể sử dụng MAC ngẫu nhiên được quản trị cục bộ cho từng mạng. Điều này làm giảm khả năng theo dõi thụ động lâu dài bằng MAC xuất xưởng ổn định; nhưng không che giấu:
 
-- probe/association timing and the set of requested network capabilities;
-- 802.11 information elements, supported rates and vendor-specific behavior;
-- DHCP options/hostname, IPv6 identifiers and captive-portal/browser fingerprint;
-- authenticated 802.1X identity or certificate;
-- higher-layer account, tunnel and traffic pattern; or
-- physical observation.
+- thời điểm probe/association và tập hợp các khả năng mạng được yêu cầu;
+- information element 802.11, tốc độ được hỗ trợ và hành vi riêng của nhà cung cấp;
+- tùy chọn/tên máy chủ DHCP, mã định danh IPv6 và fingerprint trình duyệt/captive portal;
+- danh tính 802.1X đã xác thực hoặc chứng chỉ;
+- tài khoản ở tầng cao hơn, tunnel và mẫu lưu lượng; hoặc
+- việc quan sát trực tiếp.
 
-Defenders should not use MAC allowlists as authentication. Join radio identity to certificate/device posture and treat changing MACs as normal unless other context is anomalous.
+Đội phòng thủ không nên dùng danh sách cho phép MAC làm cơ chế xác thực. Hãy liên kết danh tính vô tuyến với chứng chỉ/trạng thái bảo mật thiết bị và xem MAC thay đổi là bình thường, trừ khi có ngữ cảnh khác bất thường.
 
-## Satellite-link hijacking
+## Chiếm quyền liên kết vệ tinh
 
-Kaspersky documented Turla using weaknesses in older one-way DVB-S satellite Internet. In the reported model, a legitimate remote subscriber sent outbound requests over a terrestrial link but received downstream data via an unencrypted wide-area satellite broadcast. An actor inside the satellite footprint could observe the downlink, choose an active subscriber IP and arrange for C2 replies to be addressed to that IP. Both the legitimate subscriber and actor received the broadcast; the actor extracted traffic for the selected port while the legitimate subscriber discarded unsolicited packets. The C2 operator then appeared to use a satellite-provider address in another geography.<sup>[[2]](#references)</sup>
+Kaspersky ghi nhận Turla khai thác các điểm yếu trong dịch vụ Internet vệ tinh DVB-S một chiều đời cũ. Theo mô hình được báo cáo, một thuê bao từ xa hợp pháp gửi yêu cầu đi ra qua liên kết mặt đất nhưng nhận dữ liệu chiều xuống qua tín hiệu phát quảng bá vệ tinh diện rộng không mã hóa. Tác nhân nằm trong vùng phủ sóng vệ tinh có thể quan sát đường xuống, chọn IP của một thuê bao đang hoạt động và sắp xếp để các phản hồi C2 được gửi đến IP đó. Cả thuê bao hợp pháp lẫn tác nhân đều nhận được tín hiệu phát quảng bá; tác nhân trích xuất lưu lượng cho cổng đã chọn, trong khi thuê bao hợp pháp loại bỏ các gói tin không được yêu cầu. Sau đó, nhà điều hành C2 có vẻ như đang sử dụng địa chỉ của nhà cung cấp vệ tinh tại một khu vực địa lý khác.<sup>[[2]](#references)</sup>
 
 ```text
 actor uplink request -> C2 server -> Internet -> satellite gateway
@@ -134,27 +134,27 @@ actor uplink request -> C2 server -> Internet -> satellite gateway
                          legitimate subscriber          actor receiver
 ```
 
-This was protocol/service specific, bandwidth-constrained and not equivalent to compromising a modern bidirectional encrypted satellite terminal. It also did not hide the actor's outbound request path from a sufficiently capable observer. Detection opportunities include asymmetric/impossible routing, traffic to a subscriber that did not initiate the flow, unusual destination ports, provider telemetry, receiver location/RF investigation and malware configuration. Use this case to challenge the assumption that geolocating a C2 IP geolocates its controller—not as a build recipe.
+Điều này chỉ áp dụng cho một giao thức/dịch vụ cụ thể, bị giới hạn băng thông và không tương đương với việc xâm nhập một terminal vệ tinh hai chiều hiện đại được mã hóa. Nó cũng không che giấu đường đi của yêu cầu gửi đi của tác nhân trước một giám sát viên có đủ năng lực. Các cơ hội phát hiện bao gồm định tuyến bất đối xứng/không thể xảy ra, lưu lượng đến một thuê bao không khởi tạo luồng đó, cổng đích bất thường, telemetry của nhà cung cấp, điều tra vị trí bộ thu/RF và cấu hình malware. Hãy dùng trường hợp này để chất vấn giả định rằng định vị địa lý IP C2 sẽ xác định vị trí của người điều khiển — không phải như một hướng dẫn triển khai.
 
-## Physical-to-digital correlation worksheet
+## Bảng đối chiếu sự kiện vật lý với kỹ thuật số
 
-When an apparently local source is suspicious, build one timeline:
+Khi một nguồn có vẻ cục bộ bị nghi ngờ, hãy lập một dòng thời gian:
 
-1. normalize AP, RADIUS, DHCP, DNS, proxy, VPN, EDR, switch and physical-access clocks;
-2. identify the first radio association or link-up, not just the first alert;
-3. map the station to certificate, device posture, DHCP fingerprint and switch/AP location;
-4. look for simultaneous remote-control/tunnel activity on nearby systems;
-5. review deliveries, visitors, inventory exceptions, cameras and RF findings under applicable policy/law;
-6. preserve the suspected device and volatile network state; do not power-cycle blindly;
-7. determine whether the apparent source is actor-controlled infrastructure or another victim.
+1. chuẩn hóa đồng hồ AP, RADIUS, DHCP, DNS, proxy, VPN, EDR, switch và hệ thống kiểm soát ra vào vật lý;
+2. xác định lần kết nối radio hoặc liên kết đầu tiên, không chỉ cảnh báo đầu tiên;
+3. đối chiếu trạm với chứng chỉ, trạng thái thiết bị, dấu vân tay DHCP và vị trí switch/AP;
+4. tìm hoạt động điều khiển từ xa/tunnel đồng thời trên các hệ thống lân cận;
+5. xem xét việc giao nhận, khách đến thăm, sai lệch kiểm kê, camera và phát hiện RF theo chính sách/pháp luật hiện hành;
+6. bảo quản thiết bị bị nghi ngờ và trạng thái mạng khả biến; không tùy tiện tắt rồi bật nguồn;
+7. xác định liệu nguồn có vẻ là cơ sở hạ tầng do tác nhân kiểm soát hay là một nạn nhân khác.
 
 ## References
 
-- [1] [Volexity — The Nearest Neighbor Attack: How a Russian APT weaponized nearby Wi-Fi networks](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
-- [2] [Kaspersky Securelist — Satellite Turla: APT command and control in the sky](https://securelist.com/satellite-turla-apt-command-and-control-in-the-sky/72081/)
-- [3] [MITRE ATT&CK — Hardware Additions (T1200)](https://attack.mitre.org/techniques/T1200/)
-- [4] [NIST SP 800-153 — Guidelines for Securing Wireless Local Area Networks](https://csrc.nist.gov/pubs/sp/800/153/final)
-- [5] [Volexity — Redacted PowerShell/C# WLAN profile code](https://github.com/volexity/threat-intel/blob/main/2024/2024-11-22%20GruesomeLarch/wifi_ps1_redacted.cs)
+- [1] [Volexity — Tấn công Nearest Neighbor: Cách một APT của Nga vũ khí hóa các mạng Wi-Fi lân cận](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
+- [2] [Kaspersky Securelist — Turla vệ tinh: C2 của APT trên bầu trời](https://securelist.com/satellite-turla-apt-command-and-control-in-the-sky/72081/)
+- [3] [MITRE ATT&CK — Bổ sung phần cứng (T1200)](https://attack.mitre.org/techniques/T1200/)
+- [4] [NIST SP 800-153 — Hướng dẫn bảo mật mạng cục bộ không dây](https://csrc.nist.gov/pubs/sp/800/153/final)
+- [5] [Volexity — Mã hồ sơ WLAN PowerShell/C# đã biên tập](https://github.com/volexity/threat-intel/blob/main/2024/2024-11-22%20GruesomeLarch/wifi_ps1_redacted.cs)
 - [6] [Microsoft — netsh wlan](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/netsh-wlan)
-- [7] [Microsoft — WlanSetProfileEapXmlUserData function](https://learn.microsoft.com/en-us/windows/win32/api/wlanapi/nf-wlanapi-wlansetprofileeapxmluserdata)
+- [7] [Microsoft — Hàm WlanSetProfileEapXmlUserData](https://learn.microsoft.com/en-us/windows/win32/api/wlanapi/nf-wlanapi-wlansetprofileeapxmluserdata)
 {{#include ../banners/hacktricks-training.md}}

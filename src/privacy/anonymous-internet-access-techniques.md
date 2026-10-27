@@ -1,693 +1,693 @@
-# Anonymous Internet Access Technique Catalog
+# Danh mục kỹ thuật truy cập Internet ẩn danh
 
 {{#include ../banners/hacktricks-training.md}}
 
-This is the canonical access-path inventory. It covers protocol and operational **families**, not every vendor name. No Internet path guarantees anonymity: account, browser, endpoint, timing, payment, cloud-control-plane and physical evidence can defeat a perfect-looking route.
+Đây là danh mục chuẩn về các đường truy cập. Danh mục bao quát các **nhóm** giao thức và vận hành, không liệt kê mọi tên nhà cung cấp. Không đường truy cập Internet nào bảo đảm tính ẩn danh: bằng chứng về tài khoản, trình duyệt, thiết bị đầu cuối, thời điểm, thanh toán, control plane đám mây và vị trí thực tế có thể làm lộ danh tính dù đường truy cập trông hoàn hảo.
 
-Every entry uses the same fields. “Procedure” means a lawful deployment or an owned-lab emulation. Where the real technique depends on compromising a router, stealing access or abusing an unwilling intermediary, the reproduction substitutes systems owned by the exercise.
+Mỗi mục sử dụng cùng một trường thông tin. “Quy trình” nghĩa là triển khai hợp pháp hoặc mô phỏng trong lab do bạn sở hữu. Khi kỹ thuật thực tế phụ thuộc vào việc xâm nhập router, đánh cắp quyền truy cập hoặc lạm dụng một bên trung gian không đồng thuận, bản tái hiện sẽ thay thế bằng các hệ thống thuộc quyền sở hữu của bài tập.
 
-## Coverage matrix
+## Ma trận phạm vi
 
-| Family | Destination sees | Strongest property | Speed | Treatment |
+| Nhóm | Đích đến nhìn thấy | Thuộc tính mạnh nhất | Tốc độ | Cách sử dụng |
 |---|---|---|---|---|
-| Shared NAT/CGNAT | shared public address | ambiguity among subscribers | high | deployable |
-| VPN, VPS, SOCKS/HTTP/SSH proxy | relay address | fast source-address separation | high | deployable |
-| Multi-hop/split relay, MASQUE | final proxy | knowledge split or full-IP tunnel | high/moderate | deployable with trusted relays |
-| Tor, bridge, onion service | exit or onion identity | multi-party path and common browser | moderate | deployable |
-| I2P, GNUnet, mixnet | overlay peer/gateway | overlay or timing resistance | low/variable | application-specific |
-| OHTTP/ODoH, Private Relay | gateway/egress | source/request partitioning | high | supported applications only |
-| Public Wi-Fi, travel router | venue/tunnel address | location/access-path change | high | permission required |
-| Cellular/eSIM, satellite | carrier/provider address | independent physical uplink | high/variable | subscription/provider observes |
-| Remote browser/jump host | remote workspace | endpoint and egress separation | high | deployable |
-| Residential/mobile proxy | consumer/carrier address | consumer-network appearance | high | consent/provenance critical |
-| ORB/compromised relay | another victim's address | origin concealment and borrowed reputation | high | owned-lab reproduction only |
-| CDN/fronting/redirector | CDN/front address | protects back-end infrastructure | high | provider/owner approval required |
-| Fast flux/DGA/dead drop | rotating node/service | infrastructure discovery resistance | variable | owned-lab reproduction only |
-| Drop/nearest-neighbor | local target-adjacent address | crosses geographic/network boundary | high | owned-site lab only |
-| Store-and-forward/offline | gateway or physical receiver | reduces interactive timing linkage | low | application-specific |
-| Pluggable/refraction transport | Tor entry or cooperating diversion proxy | censorship-resistant reachability | variable | supported client or research lab |
-| IPFS gateway/PIR/remote fetcher | gateway or application service | publisher/query/request partitioning | variable | bounded application only |
-| Anycast/QUIC/MPTCP | stable broker or multiple subflows | rendezvous and session continuity | high | availability, not anonymity |
-| CI/CD automation runner | hosted runner address | disposable accountable egress | high | owned workflow only |
-| Non-IP local first hop | organization gateway | removes Internet stack from sensor | low | owner-approved deployment |
+| Shared NAT/CGNAT | địa chỉ công khai dùng chung | tạo sự mơ hồ giữa các thuê bao | cao | có thể triển khai |
+| VPN, VPS, SOCKS/HTTP/SSH proxy | địa chỉ relay | tách địa chỉ nguồn nhanh chóng | cao | có thể triển khai |
+| Multi-hop/split relay, MASQUE | proxy cuối | chia tách thông tin hoặc tunnel toàn bộ IP | cao/trung bình | có thể triển khai với relay đáng tin cậy |
+| Tor, bridge, onion service | exit hoặc danh tính onion | đường đi qua nhiều bên và trình duyệt dùng chung | trung bình | có thể triển khai |
+| I2P, GNUnet, mixnet | peer/gateway của overlay | overlay hoặc khả năng chống phân tích thời gian | thấp/thay đổi | tùy ứng dụng |
+| OHTTP/ODoH, Private Relay | gateway/egress | phân tách thông tin nguồn/yêu cầu | cao | chỉ ứng dụng được hỗ trợ |
+| Wi-Fi công cộng, travel router | địa chỉ của địa điểm/tunnel | thay đổi vị trí/đường truy cập | cao | cần được cho phép |
+| Cellular/eSIM, vệ tinh | địa chỉ của nhà mạng/nhà cung cấp | uplink vật lý độc lập | cao/thay đổi | thuê bao/nhà cung cấp có thể quan sát |
+| Trình duyệt từ xa/jump host | workspace từ xa | tách biệt thiết bị đầu cuối và egress | cao | có thể triển khai |
+| Residential/mobile proxy | địa chỉ mạng dân dụng/nhà mạng | tạo cảm giác như đang dùng mạng dân dụng | cao | sự đồng thuận/nguồn gốc đặc biệt quan trọng |
+| ORB/relay bị xâm nhập | địa chỉ của nạn nhân khác | che giấu nguồn gốc và mượn uy tín | cao | chỉ tái hiện trong lab do bạn sở hữu |
+| CDN/fronting/redirector | địa chỉ CDN/front | bảo vệ hạ tầng back-end | cao | cần nhà cung cấp/chủ sở hữu chấp thuận |
+| Fast flux/DGA/dead drop | node/dịch vụ luân phiên | chống phát hiện hạ tầng | thay đổi | chỉ tái hiện trong lab do bạn sở hữu |
+| Drop/nearest-neighbor | địa chỉ gần mục tiêu trên mạng nội bộ | vượt qua ranh giới địa lý/mạng | cao | chỉ trong lab tại địa điểm do bạn sở hữu |
+| Store-and-forward/offline | gateway hoặc thiết bị nhận vật lý | giảm liên kết thời gian tương tác | thấp | tùy ứng dụng |
+| Pluggable/refraction transport | điểm vào Tor hoặc proxy chuyển hướng có hợp tác | khả năng truy cập chống kiểm duyệt | thay đổi | client được hỗ trợ hoặc lab nghiên cứu |
+| IPFS gateway/PIR/remote fetcher | gateway hoặc dịch vụ ứng dụng | phân tách nhà phát hành/truy vấn/yêu cầu | thay đổi | chỉ ứng dụng có phạm vi giới hạn |
+| Anycast/QUIC/MPTCP | broker ổn định hoặc nhiều subflow | rendezvous và duy trì phiên | cao | tăng tính sẵn sàng, không phải tính ẩn danh |
+| CI/CD automation runner | địa chỉ runner do nhà cung cấp lưu trữ | egress có thể kiểm soát, tồn tại ngắn hạn | cao | chỉ workflow do bạn sở hữu |
+| Chặng đầu nội bộ không dùng IP | gateway của tổ chức | loại bỏ stack Internet khỏi sensor | thấp | triển khai được chủ sở hữu chấp thuận |
 
-## Direct shared NAT and carrier-grade NAT
+## Shared NAT trực tiếp và carrier-grade NAT
 
-**Mechanics:** several users share one public address; the access provider maps subscriber-side addresses and ports to the public tuple.
+**Cơ chế:** nhiều người dùng dùng chung một địa chỉ công khai; nhà cung cấp dịch vụ truy cập ánh xạ địa chỉ và port phía thuê bao sang tuple công khai.
 
-**Pros:** fast; no special client; destination-side IP alone may identify only a household, venue or carrier pool.
+**Ưu điểm:** nhanh; không cần client đặc biệt; chỉ nhìn địa chỉ IP phía đích có thể chỉ nhận diện được một hộ gia đình, địa điểm hoặc nhóm thuê bao của nhà mạng.
 
-**Cons:** the provider can retain subscriber/port/time mappings; accounts and fingerprints remain; other users can damage address reputation.
+**Nhược điểm:** nhà cung cấp có thể lưu ánh xạ thuê bao/port/thời gian; tài khoản và dấu vân tay vẫn còn; người dùng khác có thể làm giảm uy tín của địa chỉ.
 
-**Procedure:** (1) confirm whether the authorized access uses NAT/CGNAT; (2) record the exact public IP and source port at an owned endpoint; (3) keep application identities separated; (4) do not treat shared addressing as a privacy control; (5) use a stronger path if the ISP must not learn destinations.
+**Quy trình:** (1) xác nhận đường truy cập được ủy quyền có dùng NAT/CGNAT hay không; (2) ghi lại IP công khai chính xác và source port tại endpoint do bạn sở hữu; (3) tách biệt danh tính ứng dụng; (4) không xem việc dùng chung địa chỉ là biện pháp kiểm soát quyền riêng tư; (5) dùng đường truy cập mạnh hơn nếu cần ngăn ISP biết các đích đến.
 
-**Detection:** destinations should retain source port and precise time, not IP alone. Providers correlate NAT allocation logs; investigators join account/device/browser evidence.
+**Phát hiện:** các đích đến nên lưu source port và thời gian chính xác, không chỉ IP. Nhà cung cấp đối chiếu log phân bổ NAT; điều tra viên kết hợp bằng chứng tài khoản/thiết bị/trình duyệt.
 
-## Commercial VPN
+## VPN thương mại
 
-**Mechanics:** an encrypted full-tunnel connection terminates at the VPN; destinations see its egress. The VPN can normally associate source, timing and destinations.
+**Cơ chế:** kết nối full-tunnel được mã hóa và kết thúc tại VPN; các đích đến nhìn thấy egress của VPN. VPN thường có thể liên kết nguồn, thời gian và đích đến.
 
-**Pros:** fast; simple; protects against local passive observation; stable or shared exits; good for controlled red-team egress.
+**Ưu điểm:** nhanh; đơn giản; bảo vệ trước việc quan sát thụ động tại mạng cục bộ; có exit ổn định hoặc dùng chung; phù hợp cho egress red-team được kiểm soát.
 
-**Cons:** concentrated trust; billing/login telemetry; kill-switch/DNS/IPv6 failures; shared exits are often reputation-blocked.
+**Nhược điểm:** tập trung niềm tin; dữ liệu thanh toán/đăng nhập; lỗi kill-switch/DNS/IPv6; exit dùng chung thường bị chặn do uy tín kém.
 
-**Procedure:** (1) identify provider, owner, jurisdiction, retention and assessment policy; (2) install the signed official client; (3) enable full tunnel, always-on and fail-closed behavior; (4) route DNS and IPv6 deliberately; (5) verify observed IPv4/IPv6/DNS at an owned endpoint; (6) stop/reconnect the tunnel and confirm no clear fallback.<sup>[[1]](#references)</sup>
+**Quy trình:** (1) xác định nhà cung cấp, chủ sở hữu, khu vực pháp lý, chính sách lưu trữ và đánh giá; (2) cài client chính thức có chữ ký; (3) bật full tunnel, always-on và chế độ fail-closed; (4) chủ động định tuyến DNS và IPv6; (5) xác minh IPv4/IPv6/DNS được quan sát tại endpoint do bạn sở hữu; (6) dừng/kết nối lại tunnel và xác nhận không có đường dự phòng dạng clear.<sup>[[1]](#references)</sup>
 
-**Detection:** local networks see a long encrypted flow to VPN infrastructure; providers have authentication/connection records; destinations use ASN/reputation plus account, TLS/browser and behavior correlation.
+**Phát hiện:** mạng cục bộ thấy một luồng mã hóa kéo dài tới hạ tầng VPN; nhà cung cấp có bản ghi xác thực/kết nối; đích đến dùng ASN/uy tín cùng thông tin tài khoản, TLS/trình duyệt và tương quan hành vi.
 
-## Self-hosted VPN or rented VPS egress
+## VPN tự host hoặc egress qua VPS thuê
 
-**Mechanics:** the operator controls a WireGuard/OpenVPN gateway or forwards traffic through a rented server.
+**Cơ chế:** người vận hành kiểm soát gateway WireGuard/OpenVPN hoặc chuyển tiếp lưu lượng qua máy chủ thuê.
 
-**Pros:** predictable high speed; fixed allowlistable address; custom logging/firewall; good incident control.
+**Ưu điểm:** tốc độ cao, dễ dự đoán; địa chỉ cố định có thể đưa vào allowlist; tùy chỉnh logging/firewall; kiểm soát sự cố tốt.
 
-**Cons:** low anonymity set; cloud tenant, payment, source login, API and image history link the operator; a distinctive new server is easy to cluster.
+**Nhược điểm:** nhóm ẩn danh nhỏ; tenant đám mây, thanh toán, đăng nhập nguồn, API và lịch sử image có thể liên kết người vận hành; máy chủ mới có dấu hiệu riêng biệt rất dễ bị nhóm lại.
 
-**Procedure:** (1) create an engagement-specific organization project; (2) provision a supported image and fixed address; (3) restrict management to MFA/key-based administration; (4) configure full-tunnel egress and DNS; (5) allow only scoped destinations where practical; (6) test leak/failure behavior; (7) retain controller audit records; (8) destroy credentials and resources at teardown.
+**Quy trình:** (1) tạo project trong tổ chức dành riêng cho từng engagement; (2) cấp phát image được hỗ trợ và địa chỉ cố định; (3) chỉ cho phép quản trị bằng MFA/khóa; (4) cấu hình egress full-tunnel và DNS; (5) giới hạn chỉ các đích trong phạm vi khi có thể; (6) kiểm tra rò rỉ/hành vi khi lỗi; (7) giữ bản ghi audit của control plane; (8) hủy thông tin xác thực và tài nguyên khi kết thúc.
 
-**Detection:** correlate hosting ASN, first-seen address, certificate/service fingerprint and scanning behavior; cloud owners use control-plane, console, billing and flow logs.
+**Phát hiện:** tương quan ASN hosting, địa chỉ xuất hiện lần đầu, dấu vân tay certificate/service và hành vi scanning; chủ sở hữu đám mây dùng log control plane, console, billing và flow.
 
-## HTTP CONNECT, SOCKS and SSH forwarding
+## Chuyển tiếp HTTP CONNECT, SOCKS và SSH
 
-**Mechanics:** an application asks a proxy to open a TCP stream; SOCKS can also convey name resolution and UDP depending on version; SSH forwards streams inside one encrypted session.
+**Cơ chế:** ứng dụng yêu cầu proxy mở một luồng TCP; SOCKS cũng có thể chuyển tiếp phân giải tên và UDP tùy phiên bản; SSH chuyển tiếp luồng bên trong một phiên mã hóa.
 
-**Pros:** lightweight; per-application; fast; useful for chaining and reaching segmented networks.
+**Ưu điểm:** gọn nhẹ; theo từng ứng dụng; nhanh; hữu ích để nối chuỗi và truy cập mạng phân đoạn.
 
-**Cons:** applications can bypass it; DNS may leak; proxy sees adjacent endpoints; browser state remains; open proxies may be traps or compromised systems.
+**Nhược điểm:** ứng dụng có thể bỏ qua proxy; DNS có thể bị leak; proxy thấy các endpoint liền kề; trạng thái trình duyệt vẫn còn; open proxy có thể là bẫy hoặc hệ thống bị xâm nhập.
 
-**Procedure:** (1) deploy the proxy on an owned host; (2) require authentication and restrict source/destination; (3) configure one disposable application profile; (4) ensure remote DNS resolution when required; (5) verify with an owned DNS/HTTP endpoint; (6) block direct egress for the workload; (7) inspect and rotate proxy credentials.
+**Quy trình:** (1) triển khai proxy trên host do bạn sở hữu; (2) yêu cầu xác thực và giới hạn nguồn/đích; (3) cấu hình một profile ứng dụng dùng một lần; (4) đảm bảo phân giải DNS từ xa khi cần; (5) xác minh bằng endpoint DNS/HTTP do bạn sở hữu; (6) chặn egress trực tiếp của workload; (7) kiểm tra và luân chuyển thông tin xác thực proxy.
 
-**Detection:** identify tunnel-capable processes, CONNECT/SOCKS negotiation, long SSH sessions and destinations inconsistent with the application; proxy logs reconstruct streams.
+**Phát hiện:** nhận diện tiến trình có khả năng tạo tunnel, thương lượng CONNECT/SOCKS, phiên SSH dài và đích đến không phù hợp với ứng dụng; log proxy có thể tái dựng các luồng.
 
-## URL-rewriting web proxy and browser proxy extension
+## Web proxy viết lại URL và browser proxy extension
 
-**Mechanics:** a website fetches a destination and rewrites links/forms through its own origin, or an extension directs browser requests to a proxy. The destination sees the service, while the service can see plaintext after TLS termination and inject or retain content.
+**Cơ chế:** website tải một đích đến rồi viết lại liên kết/form qua origin của chính nó, hoặc extension chuyển yêu cầu trình duyệt qua proxy. Đích đến nhìn thấy dịch vụ, còn dịch vụ có thể đọc plaintext sau khi kết thúc TLS và chèn hoặc lưu nội dung.
 
-**Pros:** no system-wide client; fast for simple browsing; works where VPN installation is impossible.
+**Ưu điểm:** không cần client toàn hệ thống; nhanh khi duyệt web đơn giản; dùng được khi không thể cài VPN.
 
-**Cons:** proxy can read credentials/content, rewrite downloads and fingerprint users; scripts/WebSockets/downloads may bypass; browser extension has broad privileges; small anonymity set and frequent blocking.
+**Nhược điểm:** proxy có thể đọc thông tin đăng nhập/nội dung, viết lại download và lấy dấu vân tay người dùng; script/WebSocket/download có thể bỏ qua; browser extension có quyền rộng; nhóm ẩn danh nhỏ và thường bị chặn.
 
-**Procedure:** (1) use only an organization-operated proxy for authorized testing; (2) isolate it in a disposable browser with no personal accounts; (3) prohibit password entry and sensitive downloads; (4) verify every subresource at an owned page resolves through the proxy; (5) test WebSocket, download and form behavior; (6) remove the extension/profile after use.
+**Quy trình:** (1) chỉ dùng proxy do tổ chức vận hành cho kiểm thử được ủy quyền; (2) cô lập proxy trong trình duyệt dùng một lần, không đăng nhập tài khoản cá nhân; (3) cấm nhập mật khẩu và tải nội dung nhạy cảm; (4) xác minh mọi subresource trên trang do bạn sở hữu đều được phân giải qua proxy; (5) kiểm thử hành vi WebSocket, download và form; (6) gỡ extension/profile sau khi dùng.
 
-**Detection:** destination logs the proxy; enterprise proxy/DNS and extension inventory identify the service; content-security/reporting or owned canary subresources reveal direct bypass; proxy logs map user session to targets.
+**Phát hiện:** đích đến ghi nhận proxy; proxy/DNS doanh nghiệp và danh mục extension giúp nhận diện dịch vụ; content-security/reporting hoặc subresource canary do bạn sở hữu phát hiện đường đi trực tiếp bị bỏ qua; log proxy ánh xạ phiên người dùng tới các đích.
 
-## Multi-hop proxy or provider multi-hop VPN
+## Multi-hop proxy hoặc VPN multi-hop của nhà cung cấp
 
-**Mechanics:** an entry sees the source while one or more traversal relays separate it from an exit that sees the destination.
+**Cơ chế:** entry thấy nguồn trong khi một hoặc nhiều relay trung gian tách nguồn đó khỏi exit vốn nhìn thấy đích đến.
 
-**Pros:** no ordinary relay needs both ends; failure/seizure of one node reveals less; flexible geography.
+**Ưu điểm:** relay thông thường không cần biết cả hai đầu; một node bị lỗi/bị thu giữ sẽ làm lộ ít thông tin hơn; linh hoạt về địa lý.
 
-**Cons:** shared administration/logs defeat the split; latency; timing correlation; more failure and DNS routes; same account/payment can join every hop.
+**Nhược điểm:** cùng một bên quản trị/log có thể phá vỡ việc phân tách; độ trễ; tương quan thời gian; nhiều đường lỗi và DNS hơn; cùng tài khoản/thanh toán có thể liên kết mọi hop.
 
-**Procedure:** (1) define which observer each hop removes; (2) use independently administered owned/approved relays when separation matters; (3) enforce entry-only access from the workload; (4) ensure each relay can reach only the next hop; (5) verify logs at every layer; (6) stop each hop and confirm fail-closed behavior. Reproduce with [Lab 1](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain).
+**Quy trình:** (1) xác định observer nào bị loại bỏ ở mỗi hop; (2) dùng relay do các bên độc lập quản trị, thuộc sở hữu hoặc được phê duyệt khi cần phân tách; (3) chỉ cho workload truy cập entry; (4) đảm bảo mỗi relay chỉ kết nối được tới hop kế tiếp; (5) xác minh log ở mọi lớp; (6) dừng từng hop và xác nhận chế độ fail-closed. Tái hiện bằng [Lab 1](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain).
 
-**Detection:** correlate adjacent NetFlow timing/volume, repeated proxy handshakes and common controller infrastructure; do not infer operator geography from the exit.
+**Phát hiện:** tương quan thời gian/lưu lượng NetFlow liền kề, các lần bắt tay proxy lặp lại và hạ tầng controller dùng chung; không suy đoán địa lý của người vận hành từ exit.
 
-## Split-knowledge application relay and OHTTP
+## Relay ứng dụng phân tách thông tin và OHTTP
 
-**Mechanics:** the client encrypts a stateless HTTP message to a gateway and sends it through a relay. The relay sees client IP but not the request; the gateway sees the request but normally only the relay IP.
+**Cơ chế:** client mã hóa thông điệp HTTP phi trạng thái tới gateway rồi gửi qua relay. Relay thấy IP client nhưng không thấy yêu cầu; gateway thấy yêu cầu nhưng thường chỉ thấy IP relay.
 
-**Pros:** strong, auditable privacy partition for supported requests; lower overhead than general anonymity networks.
+**Ưu điểm:** phân tách quyền riêng tư mạnh, có thể kiểm toán cho các yêu cầu được hỗ trợ; overhead thấp hơn mạng ẩn danh tổng quát.
 
-**Cons:** not arbitrary browsing; cookies/authentication can relink; relay/gateway collusion and traffic analysis remain; application must implement it.
+**Nhược điểm:** không hỗ trợ duyệt web tùy ý; cookie/xác thực có thể liên kết lại; thông đồng giữa relay/gateway và phân tích lưu lượng vẫn có thể xảy ra; ứng dụng phải triển khai tính năng này.
 
-**Procedure:** (1) select an application that explicitly supports RFC 9458; (2) verify gateway keys through the official configuration path; (3) avoid stable per-user fields; (4) send only the supported stateless request; (5) compare relay, gateway and target logs; (6) test key rotation/failure without direct fallback.<sup>[[2]](#references)</sup>
+**Quy trình:** (1) chọn ứng dụng hỗ trợ rõ ràng RFC 9458; (2) xác minh khóa gateway qua đường cấu hình chính thức; (3) tránh các trường ổn định theo từng người dùng; (4) chỉ gửi yêu cầu phi trạng thái được hỗ trợ; (5) so sánh log relay, gateway và đích; (6) kiểm thử luân chuyển khóa/lỗi mà không fallback trực tiếp.<sup>[[2]](#references)</sup>
 
-**Detection:** enterprise endpoints expose the initiating process and OHTTP relay; gateways detect malformed/replayed traffic; timing and stable payload/account fields can correlate requests.
+**Phát hiện:** endpoint doanh nghiệp cho biết tiến trình khởi tạo và relay OHTTP; gateway phát hiện lưu lượng sai định dạng/phát lại; thời gian và các trường payload/tài khoản ổn định có thể liên kết yêu cầu.
 
-## MASQUE CONNECT-UDP/CONNECT-IP and HTTP privacy proxies
+## MASQUE CONNECT-UDP/CONNECT-IP và HTTP privacy proxy
 
-**Mechanics:** HTTP Extended CONNECT over TLS/QUIC carries UDP or IP packets through a proxy. It can implement a modern VPN-like tunnel and blend transport with HTTP/3, but the proxy remains an observer.<sup>[[3]](#references)</sup>
+**Cơ chế:** HTTP Extended CONNECT qua TLS/QUIC truyền các gói UDP hoặc IP qua proxy. Cơ chế này có thể tạo tunnel hiện đại giống VPN và hòa lẫn với HTTP/3, nhưng proxy vẫn có thể quan sát.<sup>[[3]](#references)</sup>
 
-**Pros:** efficient multiplexing/roaming; supports UDP or full IP; deploys through modern HTTP infrastructure.
+**Ưu điểm:** ghép kênh/chuyển mạng hiệu quả; hỗ trợ UDP hoặc toàn bộ IP; triển khai qua hạ tầng HTTP hiện đại.
 
-**Cons:** not an anonymity network; proxy/account sees source and destinations; QUIC/HTTP fingerprints and well-known paths are visible to endpoints/providers.
+**Nhược điểm:** không phải mạng ẩn danh; proxy/tài khoản thấy nguồn và đích; dấu vân tay QUIC/HTTP và các path phổ biến hiển thị với endpoint/nhà cung cấp.
 
-**Procedure:** (1) use a client/service that documents RFC 9298/9484 support; (2) authenticate the proxy certificate/configuration; (3) define allowed target routes; (4) enable encrypted DNS inside the path; (5) verify UDP, TCP, IPv6 and failover against owned endpoints; (6) inspect proxy request and flow logs.
+**Quy trình:** (1) dùng client/dịch vụ có tài liệu hỗ trợ RFC 9298/9484; (2) xác thực certificate/cấu hình proxy; (3) xác định các route đích được phép; (4) bật DNS mã hóa bên trong đường truy cập; (5) kiểm tra UDP, TCP, IPv6 và failover với endpoint do bạn sở hữu; (6) kiểm tra log yêu cầu và flow của proxy.
 
-**Detection:** endpoints see the client process and virtual interface; networks can classify sustained QUIC/TLS to a proxy; proxy logs expose CONNECT target/path and assigned routes.
+**Phát hiện:** endpoint thấy tiến trình client và virtual interface; mạng có thể phân loại lưu lượng QUIC/TLS kéo dài tới proxy; log proxy để lộ đích/path CONNECT và route được gán.
 
 ## Tor Browser
 
-**Mechanics:** Tor selects guard, middle and exit relays; layered encryption limits each relay's view. Tor Browser adds a standardized browser intended to resist fingerprinting.
+**Cơ chế:** Tor chọn các relay guard, middle và exit; mã hóa nhiều lớp giới hạn thông tin mỗi relay nhìn thấy. Tor Browser bổ sung một trình duyệt chuẩn hóa nhằm chống lấy dấu vân tay.
 
-**Pros:** large public anonymity set; no one ordinary relay knows both ends; destination unlinkability without operating servers.
+**Ưu điểm:** nhóm ẩn danh công khai lớn; không relay thông thường nào biết cả hai đầu; không cần vận hành máy chủ để tránh liên kết với đích đến.
 
-**Cons:** slower; TCP-focused; exit reputation/blocks; logins and disclosures identify the user; low-latency timing correlation remains.
+**Nhược điểm:** chậm hơn; chủ yếu dùng TCP; exit có uy tín thấp/dễ bị chặn; đăng nhập và tiết lộ thông tin có thể nhận diện người dùng; vẫn có thể bị tương quan thời gian với mạng độ trễ thấp.
 
-**Procedure:** (1) download and verify Tor Browser from the project; (2) keep defaults and avoid extensions; (3) choose an appropriate security level; (4) create a separate identity/session; (5) avoid identifying accounts and external active documents; (6) use HTTPS or authenticated onion services; (7) verify the exit only with an owned endpoint.<sup>[[4]](#references)</sup>
+**Quy trình:** (1) tải và xác minh Tor Browser từ dự án; (2) giữ cấu hình mặc định và tránh extension; (3) chọn mức bảo mật phù hợp; (4) tạo danh tính/phiên riêng; (5) tránh tài khoản có thể nhận diện và tài liệu chủ động bên ngoài; (6) dùng HTTPS hoặc onion service có xác thực; (7) chỉ xác minh exit bằng endpoint do bạn sở hữu.<sup>[[4]](#references)</sup>
 
-**Detection:** local networks can identify known guard traffic unless a bridge/transport is used; destinations see exits and Tor Browser behavior; end-to-end observers correlate timing/volume.
+**Phát hiện:** mạng cục bộ có thể nhận diện lưu lượng tới guard đã biết, trừ khi dùng bridge/transport; đích đến thấy exit và hành vi Tor Browser; observer ở hai đầu có thể tương quan thời gian/lưu lượng.
 
-## Tor bridges and pluggable transports
+## Tor bridge và pluggable transport
 
-**Mechanics:** a non-public bridge replaces the public guard; obfs4, Snowflake or WebTunnel changes the first-hop transport to resist simple blocking/probing.
+**Cơ chế:** bridge không công khai thay cho public guard; obfs4, Snowflake hoặc WebTunnel thay đổi transport của hop đầu để chống chặn/dò quét đơn giản.
 
-**Pros:** circumvents censorship and hides obvious public-relay destinations; retains the Tor circuit after entry.
+**Ưu điểm:** vượt kiểm duyệt và che giấu các đích đến relay công khai dễ nhận diện; duy trì mạch Tor sau khi vào mạng.
 
-**Cons:** transport patterns/bridge discovery remain possible; variable performance; does not add protection against accounts or global timing.
+**Nhược điểm:** vẫn có thể nhận diện pattern transport/tìm ra bridge; hiệu năng thay đổi; không tăng khả năng bảo vệ trước tài khoản hoặc tương quan thời gian toàn cục.
 
-**Procedure:** (1) try direct Tor first; (2) in Tor Browser Connection settings select a built-in supported transport or request an official bridge; (3) do not use random binaries/lists; (4) connect and run a benign test; (5) test reconnect and clock; (6) keep all other browser settings standard.<sup>[[5]](#references)</sup>
+**Quy trình:** (1) thử Tor trực tiếp trước; (2) trong cài đặt Connection của Tor Browser, chọn transport tích hợp được hỗ trợ hoặc yêu cầu bridge chính thức; (3) không dùng binary/danh sách ngẫu nhiên; (4) kết nối và chạy kiểm thử lành tính; (5) kiểm tra kết nối lại và đồng hồ; (6) giữ các cài đặt trình duyệt khác ở chế độ chuẩn.<sup>[[5]](#references)</sup>
 
-**Detection:** censors use destination discovery, protocol/flow classification and active probing; defenders should distinguish circumvention use from compromise and rely on endpoint process/context.
+**Phát hiện:** bên kiểm duyệt dùng tìm kiếm đích đến, phân loại giao thức/flow và dò quét chủ động; bên phòng thủ nên phân biệt việc dùng công cụ vượt kiểm duyệt với việc bị xâm nhập, đồng thời dựa vào tiến trình/context trên endpoint.
 
-## VPN before Tor and Tor before VPN
+## VPN trước Tor và Tor trước VPN
 
-**Mechanics:** VPN-before-Tor hides direct Tor use from the access ISP but exposes the source to the VPN. Tor-before-VPN gives the VPN post-Tor traffic and often a stable customer/tunnel identity.
+**Cơ chế:** VPN-trước-Tor che việc dùng Tor trực tiếp khỏi ISP truy cập nhưng để lộ nguồn với VPN. Tor-trước-VPN đưa lưu lượng sau Tor tới VPN và thường tạo danh tính khách hàng/tunnel ổn định.
 
-**Pros:** removes a specific observer when designed correctly; can reach networks that block one layer.
+**Ưu điểm:** loại bỏ một observer cụ thể nếu thiết kế đúng; có thể truy cập mạng chặn một lớp.
 
-**Cons:** complexity, uncommon fingerprint, leaks, reduced anonymity set and false confidence; Tor Project treats combinations as advanced.<sup>[[6]](#references)</sup>
+**Nhược điểm:** phức tạp, dấu vân tay không phổ biến, rò rỉ, nhóm ẩn danh nhỏ hơn và cảm giác an toàn giả; Tor Project xem các kết hợp này là nâng cao.<sup>[[6]](#references)</sup>
 
-**Procedure:** (1) write the observer removed and new observer introduced; (2) use a disposable environment; (3) establish only the intended outer path; (4) enforce firewall routes; (5) verify DNS/IPv4/IPv6 and each failure order; (6) compare both providers' visibility; (7) abandon the stack if it has no measurable advantage.
+**Quy trình:** (1) ghi rõ observer bị loại bỏ và observer mới được đưa vào; (2) dùng môi trường dùng một lần; (3) chỉ thiết lập đường truy cập bên ngoài đã định; (4) áp dụng route bằng firewall; (5) xác minh DNS/IPv4/IPv6 và thứ tự lỗi ở từng lớp; (6) so sánh thông tin mỗi nhà cung cấp có thể thấy; (7) bỏ cấu hình nhiều lớp nếu không có lợi ích đo lường được.
 
-**Detection:** local/VPN/Tor observers see different adjacent layers; timing remains end-to-end; unusual nested tunnel fingerprints and provider accounts can link sessions.
+**Phát hiện:** observer cục bộ/VPN/Tor thấy các lớp liền kề khác nhau; tương quan thời gian vẫn có thể thực hiện từ đầu đến cuối; dấu vân tay tunnel lồng nhau bất thường và tài khoản nhà cung cấp có thể liên kết phiên.
 
 ## Onion service
 
-**Mechanics:** both client and service build Tor circuits to a rendezvous, hiding the service IP and avoiding an exit.
+**Cơ chế:** cả client và dịch vụ đều tạo mạch Tor tới một rendezvous, che giấu IP dịch vụ và không cần exit.
 
-**Pros:** source and service location protection; end-to-end onion authentication; no public inbound port; optional client authorization.
+**Ưu điểm:** bảo vệ nguồn và vị trí dịch vụ; xác thực onion đầu-cuối; không cần port inbound công khai; có thể yêu cầu client được cấp quyền.
 
-**Cons:** origin leaks through updates/analytics/errors; onion key is critical; application identity/timing and host compromise remain.
+**Nhược điểm:** bản cập nhật/analytics/lỗi có thể làm lộ origin; khóa onion rất quan trọng; danh tính ứng dụng/thời gian và việc host bị xâm nhập vẫn là rủi ro.
 
-**Procedure:** (1) isolate the application and bind it only to loopback/socket; (2) install supported Tor; (3) configure a v3 onion service using official instructions; (4) protect/back up its key only if stable identity is needed; (5) add client authorization for closed use; (6) remove third-party fetches; (7) externally verify the origin is not reachable.<sup>[[7]](#references)</sup>
+**Quy trình:** (1) cô lập ứng dụng và chỉ bind vào loopback/socket; (2) cài Tor được hỗ trợ; (3) cấu hình onion service v3 theo hướng dẫn chính thức; (4) bảo vệ/sao lưu khóa chỉ khi cần danh tính ổn định; (5) thêm client authorization khi sử dụng nội bộ; (6) bỏ các truy vấn tới bên thứ ba; (7) xác minh bên ngoài rằng origin không thể truy cập được.<sup>[[7]](#references)</sup>
 
-**Detection:** host/network defenders find Tor process/configuration and outbound circuits; application errors, DNS, certificates or third-party resources can expose origin.
+**Phát hiện:** bên phòng thủ host/mạng tìm tiến trình/cấu hình Tor và các circuit outbound; lỗi ứng dụng, DNS, certificate hoặc tài nguyên bên thứ ba có thể làm lộ origin.
 
-## I2P internal services
+## Dịch vụ nội bộ I2P
 
-**Mechanics:** I2P uses separate unidirectional inbound/outbound tunnels for destinations inside the overlay; public-Internet outproxies add a trust point.
+**Cơ chế:** I2P dùng các tunnel inbound/outbound một chiều riêng biệt cho các đích đến bên trong overlay; outproxy ra Internet công cộng tạo thêm một điểm cần tin cậy.
 
-**Pros:** decentralized internal publishing; no official exit dependency; separate inbound/outbound paths.
+**Ưu điểm:** xuất bản nội bộ phi tập trung; không phụ thuộc exit chính thức; đường inbound/outbound riêng biệt.
 
-**Cons:** not a general web replacement; smaller ecosystem; long-running peer behavior; outproxy can observe public browsing.
+**Nhược điểm:** không thay thế web nói chung; hệ sinh thái nhỏ hơn; hành vi peer chạy lâu dài; outproxy có thể quan sát hoạt động duyệt web công cộng.
 
-**Procedure:** (1) install from the official source; (2) use a dedicated context; (3) allow integration/bandwidth stabilization; (4) access an I2P-native owned service; (5) avoid outproxies unless explicitly required; (6) verify shutdown gives no direct fallback; (7) inspect local peer and service logs.<sup>[[8]](#references)</sup>
+**Quy trình:** (1) cài từ nguồn chính thức; (2) dùng context riêng; (3) cho phép tích hợp/ổn định băng thông; (4) truy cập dịch vụ I2P do bạn sở hữu; (5) tránh outproxy trừ khi được yêu cầu rõ ràng; (6) xác minh khi tắt không có fallback trực tiếp; (7) kiểm tra log peer và dịch vụ cục bộ.<sup>[[8]](#references)</sup>
 
-**Detection:** local networks see long-lived peer traffic and bootstrap behavior; endpoints expose router/application processes; outproxies log exits.
+**Phát hiện:** mạng cục bộ thấy lưu lượng peer kéo dài và hành vi bootstrap; endpoint để lộ tiến trình router/ứng dụng; outproxy ghi log các phiên truy cập ra ngoài.
 
-## Mixnets
+## Mixnet
 
-**Mechanics:** fixed-size packets, batching, delay, reordering and cover traffic reduce timing correlation; gateways bridge applications.
+**Cơ chế:** packet có kích thước cố định, batching, trì hoãn, sắp xếp lại và lưu lượng cover giúp giảm tương quan thời gian; gateway kết nối tới ứng dụng.
 
-**Pros:** better resistance to timing analysis than low-latency proxies; useful for asynchronous messages/transactions.
+**Ưu điểm:** chống phân tích thời gian tốt hơn proxy độ trễ thấp; hữu ích cho tin nhắn/giao dịch bất đồng bộ.
 
-**Cons:** latency, bandwidth overhead, smaller deployment and application limits; gateway/account metadata can persist.
+**Nhược điểm:** độ trễ, overhead băng thông, triển khai hạn chế và giới hạn ứng dụng; metadata gateway/tài khoản có thể được lưu lại.
 
-**Procedure:** (1) select a maintained client and supported application; (2) read the actual threat model; (3) install in a separate compartment; (4) send benign data to an owned endpoint; (5) measure latency/reliability and reply path; (6) test gateway failure; (7) never disable delays/cover traffic merely for speed.<sup>[[9]](#references)</sup>
+**Quy trình:** (1) chọn client được duy trì và ứng dụng được hỗ trợ; (2) đọc mô hình đe dọa thực tế; (3) cài trong compartment riêng; (4) gửi dữ liệu lành tính tới endpoint do bạn sở hữu; (5) đo độ trễ/độ tin cậy và đường phản hồi; (6) kiểm tra lỗi gateway; (7) không bao giờ tắt độ trễ/lưu lượng cover chỉ để tăng tốc.<sup>[[9]](#references)</sup>
 
-**Detection:** endpoints identify the client; access networks can classify gateways/packet cadence; gateways and exits observe adjacent roles, while broader correlation requires longer statistical windows.
+**Phát hiện:** endpoint nhận diện client; mạng truy cập có thể phân loại gateway/nhịp packet; gateway và exit thấy vai trò liền kề, trong khi tương quan rộng hơn cần các cửa sổ thống kê dài hơn.
 
-## GNUnet anonymous file sharing
+## Chia sẻ tệp ẩn danh GNUnet
 
-**Mechanics:** GNUnet can route publish/search/download requests through peers and add cover traffic according to an anonymity level. Its own documentation warns that default level 1 does not require cover traffic and powerful traffic analysis may identify origin.<sup>[[10]](#references)</sup>
+**Cơ chế:** GNUnet có thể định tuyến yêu cầu xuất bản/tìm kiếm/tải xuống qua peer và thêm lưu lượng cover tùy mức độ ẩn danh. Tài liệu của GNUnet cảnh báo rằng mức mặc định 1 không yêu cầu lưu lượng cover và phân tích lưu lượng mạnh có thể nhận diện nguồn gốc.<sup>[[10]](#references)</sup>
 
-**Pros:** decentralized, application-native anonymous sharing; tunable cover-traffic requirement.
+**Ưu điểm:** chia sẻ phi tập trung, ẩn danh ngay trong ứng dụng; có thể điều chỉnh yêu cầu lưu lượng cover.
 
-**Cons:** not ordinary anonymous web access; performance/storage cost; peer and traffic-analysis limitations; GNUnet VPN documentation says its IP overlay does not provide good anonymity.
+**Nhược điểm:** không phải truy cập web ẩn danh thông thường; tốn hiệu năng/lưu trữ; hạn chế về peer và phân tích lưu lượng; tài liệu GNUnet VPN cho biết overlay IP của nó không cung cấp tính ẩn danh tốt.
 
-**Procedure:** (1) install a maintained official build; (2) isolate a test peer; (3) cap bandwidth/storage; (4) publish a harmless unique test file with a chosen anonymity level; (5) retrieve from another owned peer; (6) record cover-traffic and latency; (7) avoid claiming the IP VPN component provides equivalent anonymity.
+**Quy trình:** (1) cài bản dựng chính thức được duy trì; (2) cô lập peer kiểm thử; (3) giới hạn băng thông/lưu trữ; (4) xuất bản tệp kiểm thử duy nhất, vô hại với mức ẩn danh đã chọn; (5) truy xuất từ peer khác do bạn sở hữu; (6) ghi nhận lưu lượng cover và độ trễ; (7) tránh tuyên bố thành phần IP VPN cung cấp mức ẩn danh tương đương.
 
-**Detection:** peer bootstrap, overlay traffic, local datastore/process and file identifiers; a broad observer can analyze traffic volume against cover traffic.
+**Phát hiện:** bootstrap peer, lưu lượng overlay, datastore/tiến trình cục bộ và mã định danh tệp; observer diện rộng có thể phân tích lượng lưu lượng so với lưu lượng cover.
 
-## Encrypted DNS, ODoH and ECH
+## DNS mã hóa, ODoH và ECH
 
-**Mechanics:** DoH/DoT/DoQ encrypt to a resolver; ODoH splits client address from query between proxy and resolver; ECH encrypts the inner TLS ClientHello/server name.
+**Cơ chế:** DoH/DoT/DoQ mã hóa kết nối tới resolver; ODoH phân tách địa chỉ client khỏi truy vấn giữa proxy và resolver; ECH mã hóa tên máy chủ/ClientHello TLS bên trong.
 
-**Pros:** removes plaintext DNS/SNI from some local observers; ODoH partitions source/query knowledge.
+**Ưu điểm:** loại bỏ DNS/SNI dạng plaintext khỏi một số observer cục bộ; ODoH phân tách thông tin nguồn/truy vấn.
 
-**Cons:** not an IP-anonymity path; resolver/proxy/server retain roles; destination IP/timing/volume and endpoint remain; fallback can leak.
+**Nhược điểm:** không phải đường truy cập ẩn danh IP; resolver/proxy/server vẫn có vai trò; IP đích/thời gian/lưu lượng và endpoint vẫn bị lộ; fallback có thể gây leak.
 
-**Procedure:** (1) choose whether OS, application or tunnel owns DNS; (2) enable strict encrypted mode or supported ODoH; (3) test a unique owned domain; (4) capture locally to confirm no clear query; (5) fail the resolver and verify intended behavior; (6) for ECH, confirm server diagnostics show inner ClientHello acceptance.<sup>[[11]](#references)</sup>
+**Quy trình:** (1) quyết định DNS do OS, ứng dụng hay tunnel quản lý; (2) bật chế độ mã hóa nghiêm ngặt hoặc ODoH được hỗ trợ; (3) kiểm thử bằng domain riêng do bạn sở hữu; (4) capture cục bộ để xác nhận không có truy vấn rõ; (5) làm resolver lỗi và xác minh hành vi mong muốn; (6) với ECH, xác nhận chẩn đoán server cho thấy ClientHello bên trong được chấp nhận.<sup>[[11]](#references)</sup>
 
-**Detection:** endpoint/resolver logs expose queries; networks identify encrypted-resolver endpoints and destination flows; ECH state is visible at endpoints/CDN even when hidden on path.
+**Phát hiện:** log endpoint/resolver để lộ truy vấn; mạng nhận diện endpoint của encrypted resolver và các flow tới đích; trạng thái ECH hiển thị với endpoint/CDN dù bị ẩn trên đường truyền.
 
 ## Split-provider privacy relay
 
-**Mechanics:** products such as iCloud Private Relay use an ingress that knows the client and an independently operated egress that knows the destination, with coarse region handling.
+**Cơ chế:** sản phẩm như iCloud Private Relay dùng ingress biết client và egress do bên khác vận hành biết đích đến, đồng thời xử lý vùng địa lý ở mức khái quát.
 
-**Pros:** low-friction split knowledge; fast; integrated DNS/web protection for supported traffic.
+**Ưu điểm:** phân tách thông tin dễ sử dụng; nhanh; tích hợp bảo vệ DNS/web cho lưu lượng được hỗ trợ.
 
-**Cons:** product/application scope is limited; account/platform provider still identifies customer; not arbitrary system anonymity; collusion/legal and timing risks.
+**Nhược điểm:** phạm vi sản phẩm/ứng dụng bị giới hạn; nhà cung cấp nền tảng vẫn nhận diện khách hàng; không ẩn danh toàn hệ thống tùy ý; có rủi ro thông đồng/pháp lý và tương quan thời gian.
 
-**Procedure:** (1) confirm exact applications and traffic types supported; (2) enable the feature under a dedicated platform context where appropriate; (3) select region behavior; (4) test Safari/DNS and unsupported applications separately; (5) inspect the destination address; (6) test network switching/failure.<sup>[[12]](#references)</sup>
+**Quy trình:** (1) xác nhận chính xác ứng dụng và loại lưu lượng được hỗ trợ; (2) bật tính năng trong context nền tảng riêng khi phù hợp; (3) chọn cách xử lý vùng; (4) kiểm tra riêng Safari/DNS và ứng dụng không được hỗ trợ; (5) kiểm tra địa chỉ phía đích; (6) thử chuyển mạng/lỗi.<sup>[[12]](#references)</sup>
 
-**Detection:** access sees ingress; destination sees egress; platform/relay logs and account records span their respective layer; unsupported applications expose normal paths.
+**Phát hiện:** bên truy cập thấy ingress; đích đến thấy egress; log nền tảng/relay và bản ghi tài khoản bao phủ lớp tương ứng; ứng dụng không được hỗ trợ để lộ đường truy cập thông thường.
 
-## Remote browser, VDI, RDP or organization jump host
+## Trình duyệt từ xa, VDI, RDP hoặc jump host của tổ chức
 
-**Mechanics:** browsing/tool execution occurs on a remote system; the destination sees its egress while the workspace provider sees the operator connection and control plane.
+**Cơ chế:** hoạt động duyệt web/thực thi công cụ diễn ra trên hệ thống từ xa; đích đến thấy egress của hệ thống đó trong khi nhà cung cấp workspace thấy kết nối của người vận hành và control plane.
 
-**Pros:** fast; isolates risky content; stable controlled egress; disposable state and strong organizational audit.
+**Ưu điểm:** nhanh; cô lập nội dung rủi ro; egress ổn định, có kiểm soát; trạng thái dùng một lần và khả năng audit tổ chức mạnh.
 
-**Cons:** provider/admin can observe session/account; screen/clipboard/file channels leak; remote browser fingerprint may be unique; not anonymous to the workspace owner.
+**Nhược điểm:** nhà cung cấp/admin có thể quan sát phiên/tài khoản; kênh màn hình/clipboard/tệp có thể làm lộ dữ liệu; dấu vân tay trình duyệt từ xa có thể khác biệt; không ẩn danh với chủ sở hữu workspace.
 
-**Procedure:** (1) create one organization-owned workspace per engagement; (2) require MFA and restrict administration; (3) disable or constrain clipboard/upload/download; (4) route through approved fixed egress; (5) use no personal IdP/sync; (6) export only reviewed evidence; (7) destroy workspace and credentials on schedule.
+**Quy trình:** (1) tạo một workspace do tổ chức sở hữu cho mỗi engagement; (2) yêu cầu MFA và giới hạn quyền quản trị; (3) tắt hoặc hạn chế clipboard/upload/download; (4) định tuyến qua egress cố định đã được phê duyệt; (5) không dùng IdP/sync cá nhân; (6) chỉ xuất bằng chứng đã được xem xét; (7) hủy workspace và thông tin xác thực theo lịch.
 
-**Detection:** provider and IdP logs map user to session; destinations cluster workspace egress/browser; enterprise defenders identify remote-control protocols and anomalous cloud sessions.
+**Phát hiện:** log nhà cung cấp và IdP ánh xạ người dùng tới phiên; đích đến nhóm egress/trình duyệt workspace; bên phòng thủ doanh nghiệp nhận diện giao thức điều khiển từ xa và phiên đám mây bất thường.
 
-## Public or guest Wi-Fi
+## Wi-Fi công cộng hoặc guest
 
-**Mechanics:** traffic exits through the venue NAT or a tunnel started there.
+**Cơ chế:** lưu lượng đi ra qua NAT của địa điểm hoặc qua tunnel khởi tạo tại đó.
 
-**Pros:** high speed and a shared non-home address; no dedicated infrastructure.
+**Ưu điểm:** tốc độ cao và địa chỉ không phải địa chỉ nhà; không cần hạ tầng riêng.
 
-**Cons:** venue association/DHCP/portal, camera, purchase and location evidence; hostile peers/APs; terms; physical risk.
+**Nhược điểm:** bằng chứng liên kết với địa điểm/DHCP/captive portal, camera, giao dịch mua và vị trí; peer/AP độc hại; điều khoản sử dụng; rủi ro vật lý.
 
-**Procedure:** (1) obtain access offered to guests and verify SSID with staff; (2) use a patched low-trust device; (3) disable sharing/auto-join and enable private MAC; (4) complete the portal without reused identity; (5) start a fail-closed VPN/Tor path; (6) verify tethered traffic; (7) forget the network.
+**Quy trình:** (1) xin quyền truy cập dành cho khách và xác minh SSID với nhân viên; (2) dùng thiết bị đã vá và có mức độ tin cậy thấp; (3) tắt chia sẻ/tự động kết nối và bật private MAC; (4) hoàn tất portal mà không dùng lại danh tính; (5) bật đường VPN/Tor fail-closed; (6) xác minh lưu lượng được tether; (7) xóa mạng khỏi thiết bị.
 
-**Detection:** venue correlates AP, MAC, DHCP, portal and time; destination sees venue/tunnel; investigators combine physical and device evidence. Never bypass access control.
+**Phát hiện:** địa điểm tương quan AP, MAC, DHCP, portal và thời gian; đích đến thấy địa điểm/tunnel; điều tra viên kết hợp bằng chứng vật lý và thiết bị. Không bao giờ vượt qua kiểm soát truy cập.
 
 ## Travel router
 
-**Mechanics:** an operator-owned router joins venue Wi-Fi/Ethernet and provides an isolated internal network with enforced tunnel policy.
+**Cơ chế:** router do người vận hành sở hữu kết nối Wi-Fi/Ethernet của địa điểm và cung cấp mạng nội bộ cô lập với chính sách tunnel bắt buộc.
 
-**Pros:** isolates workstations; central kill switch/DNS; consistent client network; shields privileged endpoints from local broadcasts.
+**Ưu điểm:** cô lập workstation; kill switch/DNS tập trung; mạng client nhất quán; bảo vệ endpoint có quyền cao khỏi broadcast cục bộ.
 
-**Cons:** router becomes a stable radio/DHCP fingerprint; adds attack surface; captive portals and tethering can bypass tunnel.
+**Nhược điểm:** router trở thành dấu vân tay radio/DHCP ổn định; tăng bề mặt tấn công; captive portal và tethering có thể bỏ qua tunnel.
 
-**Procedure:** (1) update supported firmware; (2) set unique management credentials and disable WAN admin/WPS/UPnP; (3) configure private upstream MAC where permitted; (4) create a separate internal SSID; (5) enforce full-tunnel DNS/IPv6 firewall policy; (6) test portal, reconnect and tunnel failure.
+**Quy trình:** (1) cập nhật firmware được hỗ trợ; (2) đặt thông tin quản trị riêng và tắt WAN admin/WPS/UPnP; (3) cấu hình MAC upstream riêng tư nếu được phép; (4) tạo SSID nội bộ riêng; (5) áp dụng chính sách firewall full-tunnel cho DNS/IPv6; (6) kiểm tra portal, kết nối lại và lỗi tunnel.
 
-**Detection:** venue sees the router association and traffic shape; local RF/DHCP fingerprinting identifies it; VPN provider sees venue source.
+**Phát hiện:** địa điểm thấy router kết nối và hình dạng lưu lượng; nhận diện dấu vân tay RF/DHCP cục bộ; nhà cung cấp VPN thấy nguồn tại địa điểm.
 
-## Cellular, prepaid SIM and eSIM
+## Cellular, SIM trả trước và eSIM
 
-**Mechanics:** a modem uses carrier radio access and usually carrier NAT; a VPN/Tor layer can change the destination-visible exit.
+**Cơ chế:** modem dùng truy cập vô tuyến của nhà mạng và thường qua carrier NAT; lớp VPN/Tor có thể thay đổi exit mà đích đến nhìn thấy.
 
-**Pros:** independent from local wired/Wi-Fi network; mobile; high speed; useful backhaul for authorized drops.
+**Ưu điểm:** độc lập với mạng có dây/Wi-Fi cục bộ; di động; tốc độ cao; hữu ích làm backhaul cho drop được ủy quyền.
 
-**Cons:** carrier knows subscriber/eSIM, IMSI, IMEI, cells, time and assigned ports; registration laws vary; co-location with personal phone links devices.
+**Nhược điểm:** nhà mạng biết thuê bao/eSIM, IMSI, IMEI, cell, thời gian và port được gán; luật đăng ký khác nhau; ở cùng địa điểm với điện thoại cá nhân có thể liên kết thiết bị.
 
-**Procedure:** (1) obtain service lawfully with accurate required details; (2) use an organization-owned separate modem/device; (3) record it with the exercise controller; (4) disable unrelated radios/accounts; (5) establish approved tunnel; (6) test whether tethered clients actually follow it; (7) verify provider and retention assumptions before travel.<sup>[[13]](#references)</sup>
+**Quy trình:** (1) đăng ký dịch vụ hợp pháp với thông tin bắt buộc chính xác; (2) dùng modem/thiết bị riêng do tổ chức sở hữu; (3) ghi nhận với controller của bài tập; (4) tắt radio/tài khoản không liên quan; (5) thiết lập tunnel được phê duyệt; (6) kiểm tra client tether có thực sự đi qua tunnel hay không; (7) xác minh giả định về nhà cung cấp và lưu trữ trước khi di chuyển.<sup>[[13]](#references)</sup>
 
-**Detection:** carrier records and RF location; enterprise USB/PCI/MDM inventory and rogue-hotspot surveys; destination/tunnel timing.
+**Phát hiện:** bản ghi nhà mạng và vị trí RF; inventory USB/PCI/MDM doanh nghiệp và khảo sát rogue hotspot; thời gian đích đến/tunnel.
 
-## Satellite Internet and satellite downlink abuse
+## Internet vệ tinh và lạm dụng downlink vệ tinh
 
-**Mechanics:** normal service uses a registered terminal/provider. Older one-way DVB-S abuse let a receiver inside a beam observe unencrypted downlink traffic addressed to a legitimate subscriber while using another path for outbound requests.
+**Cơ chế:** dịch vụ thông thường dùng terminal/nhà cung cấp đã đăng ký. Kiểu lạm dụng DVB-S một chiều trước đây cho phép bộ thu nằm trong beam quan sát lưu lượng downlink không mã hóa gửi tới thuê bao hợp pháp, đồng thời dùng đường khác để gửi yêu cầu outbound.
 
-**Pros:** wide footprint; independent last mile; historical one-way abuse could misattribute C2 to a subscriber geography.
+**Ưu điểm:** vùng phủ rộng; chặng cuối độc lập; lạm dụng một chiều trong quá khứ có thể khiến C2 bị gán nhầm với địa lý của thuê bao.
 
-**Cons:** equipment/RF/provider records; latency and coverage; modern bidirectional systems differ; outbound path and asymmetric routing remain evidence.
+**Nhược điểm:** thiết bị/bản ghi RF của nhà cung cấp; độ trễ và vùng phủ; hệ thống hai chiều hiện đại khác biệt; đường outbound và định tuyến bất đối xứng vẫn là bằng chứng.
 
-**Procedure:** for lawful access, register an owned terminal and tunnel traffic as required. To emulate historical Turla behavior, replay synthetic one-way packet captures inside an RF-free lab and test whether analysts detect a reply to a host that made no request; do not intercept live satellite traffic.<sup>[[14]](#references)</sup>
+**Quy trình:** để truy cập hợp pháp, đăng ký terminal do bạn sở hữu và tunnel lưu lượng khi cần. Để mô phỏng hành vi Turla trong lịch sử, phát lại packet capture một chiều tổng hợp trong lab không có RF và kiểm tra liệu nhà phân tích có phát hiện phản hồi tới host chưa gửi yêu cầu hay không; không chặn lưu lượng vệ tinh trực tiếp.<sup>[[14]](#references)</sup>
 
-**Detection:** provider/terminal telemetry, RF direction finding, impossible/asymmetric flow, RTT/routing inconsistency and malware configuration.
+**Phát hiện:** telemetry của nhà cung cấp/terminal, định hướng RF, luồng bất khả thi/bất đối xứng, bất nhất RTT/định tuyến và cấu hình malware.
 
-## Residential/mobile proxy or consented proxyware
+## Residential/mobile proxy hoặc proxyware có sự đồng thuận
 
-**Mechanics:** a backconnect gateway assigns consumer broadband/mobile exits, either sticky or rotating. Supply may be consensual, deceptively bundled or malicious.
+**Cơ chế:** backconnect gateway cấp egress broadband di động/dân dụng, có thể cố định hoặc luân phiên. Nguồn cung có thể dựa trên sự đồng thuận, bị đóng gói kèm theo theo cách gây hiểu lầm hoặc mang tính độc hại.
 
-**Pros:** high speed; geographic choice; consumer ASN avoids some hosting blocks; large pools.
+**Ưu điểm:** tốc độ cao; lựa chọn địa lý; ASN dân dụng tránh được một số chặn hosting; pool lớn.
 
-**Cons:** provenance/consent and legal risk; broker sees customer; infected exits harm victims; rotation creates anomalies; expensive and unreliable.
+**Nhược điểm:** rủi ro về nguồn gốc/sự đồng thuận và pháp lý; broker thấy khách hàng; exit bị nhiễm làm hại nạn nhân; luân phiên tạo bất thường; tốn kém và thiếu tin cậy.
 
-**Procedure:** use only documented, informed-consent organization-owned agents for emulation: (1) enroll test endpoints; (2) inventory owners/IPs; (3) configure a gateway; (4) rotate sticky/per-request modes; (5) send only to an owned target; (6) compare gateway/exit/target logs; (7) remove every agent.
+**Quy trình:** chỉ dùng agent thuộc sở hữu tổ chức, có văn bản mô tả rõ và được đồng thuận để mô phỏng: (1) đăng ký endpoint kiểm thử; (2) lập danh sách chủ sở hữu/IP; (3) cấu hình gateway; (4) luân phiên chế độ cố định/theo từng yêu cầu; (5) chỉ gửi tới target do bạn sở hữu; (6) so sánh log gateway/exit/target; (7) gỡ mọi agent.
 
-**Detection:** impossible travel, stable browser/account across rapid IP/ASN changes, backconnect protocols, proxyware process/network artifacts and broker/controller relations.
+**Phát hiện:** di chuyển bất khả thi, browser/tài khoản ổn định dù IP/ASN thay đổi nhanh, giao thức backconnect, dấu vết tiến trình/mạng proxyware và mối liên hệ broker/controller.
 
-## ORB, botnet and compromised edge-device relays
+## ORB, botnet và relay thiết bị edge bị xâm nhập
 
-**Mechanics:** leased or compromised routers/IoT/servers form access, traversal and exit roles administered as a fleet. Multiple APT customers may share it.
+**Cơ chế:** router/IoT/server được thuê hoặc bị xâm nhập tạo thành các vai trò access, traversal và exit do một fleet quản trị. Nhiều khách hàng APT có thể dùng chung.
 
-**Pros:** borrowed reputation/geography; short-lived exits; resilient multi-hop mesh; weak direct actor-to-IP link.
+**Ưu điểm:** mượn uy tín/địa lý; exit tồn tại ngắn; mesh multi-hop có khả năng chống chịu; liên kết trực tiếp giữa tác nhân và IP yếu.
 
-**Cons:** criminal victimization; implant/controller and fleet patterns; intermediary seizure; inconsistent performance; operator/customer service records.
+**Nhược điểm:** gây hại cho nạn nhân, phạm pháp; có pattern implant/controller và fleet; trung gian có thể bị thu giữ; hiệu năng không ổn định; hồ sơ dịch vụ của người vận hành/khách hàng.
 
-**Procedure:** never compromise real devices. Use [Lab 1](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain): (1) create isolated entry/transit/target networks; (2) attach owned dual-homed relay containers; (3) forward only one test port; (4) send a benign request; (5) verify target sees only exit; (6) rotate exit; (7) tear down all named assets.<sup>[[15]](#references)</sup>
+**Quy trình:** không bao giờ xâm nhập thiết bị thật. Dùng [Lab 1](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain): (1) tạo mạng entry/transit/target cô lập; (2) kết nối container relay hai card mạng do bạn sở hữu; (3) chỉ chuyển tiếp một test port; (4) gửi yêu cầu lành tính; (5) xác minh target chỉ thấy exit; (6) luân phiên exit; (7) gỡ toàn bộ tài sản được đặt tên.<sup>[[15]](#references)</sup>
 
-**Detection:** track topology, ports/services, controller relations, implant fingerprints and node lifecycle; centralize edge configuration/flow/integrity telemetry; do not equate exit IP with actor.
+**Phát hiện:** theo dõi topology, port/service, mối liên hệ controller, dấu vân tay implant và vòng đời node; tập trung telemetry cấu hình/flow/toàn vẹn của edge; không đồng nhất exit IP với tác nhân.
 
-## CDN redirector, domain fronting and domainless fronting
+## CDN redirector, domain fronting và domainless fronting
 
-**Mechanics:** a public edge forwards only traffic matching a grammar; fronting places a benign outer SNI and different inner HTTP authority, or blank SNI, when the intermediary permits it.
+**Cơ chế:** public edge chỉ chuyển tiếp lưu lượng khớp với một grammar; fronting dùng SNI bên ngoài trông vô hại và HTTP authority bên trong khác, hoặc SNI trống, khi intermediary cho phép.
 
-**Pros:** hides/protects back-end; fast global edge; blends destination with a shared service; rapid cutover.
+**Ưu điểm:** che giấu/bảo vệ back-end; edge toàn cầu nhanh; hòa lẫn đích đến với dịch vụ dùng chung; chuyển đổi nhanh.
 
-**Cons:** CDN sees all routing and tenant; many providers prohibit cross-tenant fronting; SNI/Host/process/flow and account artifacts; configuration reuse clusters campaigns.
+**Nhược điểm:** CDN thấy toàn bộ định tuyến và tenant; nhiều nhà cung cấp cấm fronting xuyên tenant; dấu vết SNI/Host/process/flow và tài khoản; việc tái sử dụng cấu hình giúp nhóm các chiến dịch lại với nhau.
 
-**Procedure:** reproduce only on an owned reverse proxy with [Lab 2](authorized-adversary-emulation-labs.md#lab-2-snihost-mismatch-and-redirector-logging): create a local certificate/edge, route one mismatched Host to an owned target, log SNI and Host, send normal/mismatched requests, then remove containers.<sup>[[16]](#references)</sup>
+**Quy trình:** chỉ tái hiện trên reverse proxy do bạn sở hữu bằng [Lab 2](authorized-adversary-emulation-labs.md#lab-2-snihost-mismatch-and-redirector-logging): tạo certificate/edge cục bộ, định tuyến một Host không khớp tới target do bạn sở hữu, ghi log SNI và Host, gửi yêu cầu thông thường/không khớp, sau đó gỡ container.<sup>[[16]](#references)</sup>
 
-**Detection:** compare SNI/ECH/Host/`:authority` at endpoint or terminating edge; join initiating process, tenant/origin, request grammar and flow cadence.
+**Phát hiện:** so sánh SNI/ECH/Host/`:authority` tại endpoint hoặc edge kết thúc kết nối; liên kết tiến trình khởi tạo, tenant/origin, grammar yêu cầu và nhịp flow.
 
-## Dynamic DNS, DGA, fast flux and double flux
+## Dynamic DNS, DGA, fast flux và double flux
 
-**Mechanics:** DDNS updates a stable name; DGA derives changing candidate names; fast flux rotates service addresses at low TTL; double flux also rotates name servers.
+**Cơ chế:** DDNS cập nhật một tên ổn định; DGA tạo các tên ứng viên thay đổi; fast flux luân phiên địa chỉ dịch vụ với TTL thấp; double flux cũng luân phiên name server.
 
-**Pros:** resilient discovery; rapid infrastructure replacement; shields controller behind many nodes.
+**Ưu điểm:** chống chịu tốt khi phát hiện; thay thế hạ tầng nhanh; che giấu controller phía sau nhiều node.
 
-**Cons:** DNS creates centralized telemetry; entropy/NXDOMAIN/churn; low TTL and broad ASN patterns; registration and authoritative infrastructure remain.
+**Nhược điểm:** DNS tạo telemetry tập trung; entropy/NXDOMAIN/churn; TTL thấp và pattern ASN rộng; thông tin đăng ký và hạ tầng authoritative vẫn còn.
 
-**Procedure:** use [Lab 3](authorized-adversary-emulation-labs.md#lab-3-fast-flux-dns-telemetry): serve an owned zone returning RFC 5737 addresses with five-second TTL, query it repeatedly, change the synthetic epoch, and validate analytics. Never point test records at third parties.<sup>[[17]](#references)</sup>
+**Quy trình:** dùng [Lab 3](authorized-adversary-emulation-labs.md#lab-3-fast-flux-dns-telemetry): phục vụ zone do bạn sở hữu, trả về địa chỉ RFC 5737 với TTL năm giây, truy vấn lặp lại, thay đổi epoch tổng hợp và xác thực analytics. Không bao giờ trỏ bản ghi kiểm thử tới bên thứ ba.<sup>[[17]](#references)</sup>
 
-**Detection:** sliding-window unique answers/ASNs, median TTL, geography, authoritative churn, DGA NXDOMAIN/lexical/temporal clusters and process follow-on; exclude legitimate CDNs with context.
+**Phát hiện:** số lượng answer/ASN duy nhất trong cửa sổ trượt, TTL trung vị, địa lý, churn authoritative, nhóm NXDOMAIN/đặc điểm từ vựng/thời gian của DGA và hoạt động tiếp theo của tiến trình; dùng context để loại trừ CDN hợp pháp.
 
-## Legitimate web service, dead-drop resolver and one-way tasking
+## Dịch vụ web hợp pháp, dead-drop resolver và tasking một chiều
 
-**Mechanics:** a public post, repository, document, object or feed contains an encoded current endpoint or task. The client may return results over another channel.
+**Cơ chế:** bài đăng, repository, tài liệu, object hoặc feed công khai chứa endpoint hiện tại hoặc task đã mã hóa. Client có thể trả kết quả qua một kênh khác.
 
-**Pros:** allowed high-reputation service; TLS; endpoint rotation without changing binary; asymmetric tasking frustrates simple flow correlation.
+**Ưu điểm:** dịch vụ có uy tín cao và được cho phép; TLS; luân phiên endpoint mà không đổi binary; tasking bất đối xứng gây khó khăn cho việc tương quan flow đơn giản.
 
-**Cons:** stable object/account/API identifiers; provider records; endpoint decode/follow-on sequence; content can be seized or changed.
+**Nhược điểm:** mã định danh object/tài khoản/API ổn định; bản ghi của nhà cung cấp; chuỗi giải mã endpoint/hoạt động tiếp theo; nội dung có thể bị thu giữ hoặc thay đổi.
 
-**Procedure:** use [Lab 5](authorized-adversary-emulation-labs.md#lab-5-dead-drop-resolver-sequence): host an encoded pointer on one owned container, fetch/decode from a short-lived client, contact a second owned service, preserve both logs, then tear down.
+**Quy trình:** dùng [Lab 5](authorized-adversary-emulation-labs.md#lab-5-dead-drop-resolver-sequence): host pointer đã mã hóa trên một container do bạn sở hữu, tải/giải mã từ client tồn tại ngắn hạn, kết nối tới dịch vụ thứ hai do bạn sở hữu, giữ cả hai log rồi gỡ.
 
-**Detection:** correlate unusual process → stable object read → decode → new destination; hash/preserve content and retain full object paths, not just domain.
+**Phát hiện:** tương quan chuỗi tiến trình bất thường → đọc object ổn định → giải mã → đích mới; hash/lưu giữ nội dung và giữ toàn bộ path object, không chỉ domain.
 
-## Serverless, ephemeral container and cloud-NAT egress
+## Serverless, container tồn tại ngắn hạn và egress cloud-NAT
 
-**Mechanics:** functions/short-lived jobs run behind provider NAT or a front; logical service stays stable while instances and addresses rotate.
+**Cơ chế:** function/job chạy ngắn hạn phía sau NAT hoặc front của nhà cung cấp; dịch vụ logic vẫn ổn định trong khi instance và địa chỉ luân phiên.
 
-**Pros:** rapid deployment/destruction; provider-scale shared egress; little local disk; elastic regional routing.
+**Ưu điểm:** triển khai/hủy nhanh; egress dùng chung quy mô nhà cung cấp; ít đĩa cục bộ; định tuyến vùng linh hoạt.
 
-**Cons:** tenant, role, API, image, secret, invocation, billing and front-to-origin logs are durable; cold-start and platform fingerprints; provider policy.
+**Nhược điểm:** tenant, role, API, image, secret, invocation, billing và log front-to-origin tồn tại lâu; dấu vân tay cold-start/nền tảng; chính sách nhà cung cấp.
 
-**Procedure:** (1) use an organization-owned exercise tenant; (2) deploy a benign function that requests only an owned endpoint; (3) record project/role/image/config; (4) invoke across several instances; (5) compare target IPs with audit/request IDs; (6) test log retention; (7) remove function, roles and secrets.
+**Quy trình:** (1) dùng tenant bài tập do tổ chức sở hữu; (2) triển khai function lành tính chỉ gửi yêu cầu tới endpoint do bạn sở hữu; (3) ghi lại project/role/image/config; (4) gọi qua nhiều instance; (5) so sánh IP target với audit/request ID; (6) kiểm tra thời hạn lưu log; (7) xóa function, role và secret.
 
-**Detection:** cloud audit/invocation logs, unusual role creation, shared egress plus stable request grammar, image/layer and secret reuse, and front-origin correlation.
+**Phát hiện:** log audit/invocation đám mây, tạo role bất thường, egress dùng chung cùng grammar yêu cầu ổn định, việc tái sử dụng image/layer và secret, tương quan front-origin.
 
-## Authorized on-site drop
+## Drop tại chỗ được ủy quyền
 
-**Mechanics:** an inventoried small computer uses local wired/Wi-Fi and outbound VPN/cellular rendezvous, presenting a local source.
+**Cơ chế:** máy tính nhỏ đã được kiểm kê dùng mạng có dây/Wi-Fi cục bộ và rendezvous outbound qua VPN/cellular, tạo nguồn cục bộ.
 
-**Pros:** realistic internal-origin testing; high speed; can test NAC, physical inventory and egress controls.
+**Ưu điểm:** kiểm thử thực tế nguồn nội bộ; tốc độ cao; có thể kiểm tra NAC, kiểm kê vật lý và kiểm soát egress.
 
-**Cons:** physical discovery/theft; serial/MAC/USB/DHCP/PoE/RF and camera evidence; loss may expose credentials.
+**Nhược điểm:** bị phát hiện/đánh cắp về mặt vật lý; bằng chứng serial/MAC/USB/DHCP/PoE/RF và camera; mất thiết bị có thể làm lộ thông tin xác thực.
 
-**Procedure:** follow [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md): (1) obtain exact written placement authority; (2) record serial, MAC, photo, location and retrieval time; (3) use a signed minimal image and short-lived mutual credentials; (4) restrict outbound-only destinations/capabilities; (5) add server-side quarantine and bandwidth limits; (6) test SOC visibility and loss response; (7) retrieve, preserve required evidence, then sanitize under the agreed lifecycle policy. Never hide one in an unconsenting venue.
+**Quy trình:** làm theo [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md): (1) có văn bản cho phép chính xác vị trí lắp đặt; (2) ghi serial, MAC, ảnh, vị trí và thời gian thu hồi; (3) dùng image tối giản có chữ ký và thông tin xác thực mutual tồn tại ngắn hạn; (4) chỉ giới hạn destination/capability outbound; (5) bổ sung quarantine phía server và giới hạn băng thông; (6) kiểm tra SOC có nhìn thấy và quy trình xử lý khi mất; (7) thu hồi, giữ bằng chứng cần thiết rồi sanitize theo chính sách vòng đời đã thống nhất. Không bao giờ giấu thiết bị tại địa điểm không đồng thuận.
 
-**Detection:** NAC/802.1X, switchport/PoE/DHCP, USB inventory, RF survey, recurring tunnel, receiving/camera and physical inspection.
+**Phát hiện:** NAC/802.1X, switchport/PoE/DHCP, kiểm kê USB, khảo sát RF, tunnel định kỳ, thiết bị nhận/camera và kiểm tra vật lý.
 
-## Nearest-neighbor wireless pivot
+## Pivot không dây nearest-neighbor
 
-**Mechanics:** an actor controls a host in radio range of the target, then uses target Wi-Fi credentials to cross the boundary remotely. APT28 used nearby compromised organizations this way.<sup>[[18]](#references)</sup>
+**Cơ chế:** tác nhân kiểm soát host trong tầm vô tuyến của mục tiêu, rồi dùng thông tin xác thực Wi-Fi của mục tiêu để vượt ranh giới từ xa. APT28 từng dùng cách này qua các tổ chức lân cận bị xâm nhập.<sup>[[18]](#references)</sup>
 
-**Pros:** no operator travel; target sees a local radio source; bypasses controls applied only to Internet entry.
+**Ưu điểm:** người vận hành không cần di chuyển; mục tiêu thấy nguồn radio cục bộ; vượt qua các kiểm soát chỉ áp dụng cho truy cập Internet.
 
-**Cons:** requires nearby compromised/owned dual-radio host and valid access; RADIUS/NAC/AP and neighbor endpoint evidence; signal/device anomalies.
+**Nhược điểm:** cần host hai radio ở gần, bị xâm nhập hoặc thuộc quyền sở hữu và có quyền truy cập hợp lệ; có bằng chứng từ RADIUS/NAC/AP và endpoint lân cận; bất thường về tín hiệu/thiết bị.
 
-**Procedure:** reproduce only with the [two-owned-AP Lab 4](authorized-adversary-emulation-labs.md#lab-4-nearest-neighbor-wireless-pivot): join an owned pivot to neighbor and target lab SSIDs, forward only one service, collect both AP/pivot logs, then enable EAP-TLS/device posture and confirm the second attempt fails.
+**Quy trình:** chỉ tái hiện bằng [Lab 4 với hai AP do bạn sở hữu](authorized-adversary-emulation-labs.md#lab-4-nearest-neighbor-wireless-pivot): kết nối pivot do bạn sở hữu với SSID lab lân cận và mục tiêu, chỉ chuyển tiếp một dịch vụ, thu thập log của cả hai AP/pivot, sau đó bật EAP-TLS/device posture và xác nhận lần thử thứ hai thất bại.
 
-**Detection:** correlate RADIUS identity, managed certificate/posture, first-seen device, AP edge/signal, concurrent login and physical presence; hunt nearby endpoints for simultaneous radios, forwarding and tunnels.
+**Phát hiện:** tương quan danh tính RADIUS, certificate/posture được quản lý, thiết bị xuất hiện lần đầu, edge/tín hiệu AP, đăng nhập đồng thời và sự hiện diện vật lý; tìm endpoint gần đó có radio đồng thời, chuyển tiếp và tunnel.
 
-## Community mesh, delay-tolerant and offline store-and-forward
+## Community mesh, delay-tolerant và store-and-forward offline
 
-**Mechanics:** traffic traverses local peers, asynchronous gateways, removable media or scheduled queues rather than one interactive Internet session.
+**Cơ chế:** lưu lượng đi qua peer cục bộ, gateway bất đồng bộ, thiết bị lưu trữ tháo rời hoặc queue theo lịch thay vì một phiên Internet tương tác.
 
-**Pros:** works during disruption/censorship; delayed/batched delivery weakens simple timing; no central last mile for local communication.
+**Ưu điểm:** hoạt động khi có gián đoạn/kiểm duyệt; giao nhận trễ/theo lô làm suy yếu tương quan thời gian đơn giản; không cần chặng cuối tập trung để liên lạc cục bộ.
 
-**Cons:** high latency; small anonymity set; custody/physical metadata; malicious peers; data eventually reaches a gateway that observes it.
+**Nhược điểm:** độ trễ cao; nhóm ẩn danh nhỏ; metadata về lưu trữ/di chuyển vật lý; peer độc hại; dữ liệu cuối cùng vẫn tới gateway có thể quan sát.
 
-**Procedure:** (1) build an isolated owned three-node mesh or file queue; (2) encrypt/authenticate content end to end; (3) remove direct Internet routes from origin; (4) relay a benign file after a controlled delay; (5) verify only gateway contacts owned destination; (6) compare custody/timestamps; (7) preserve required evidence, then sanitize temporary media/queues at approved closeout.
+**Quy trình:** (1) xây mesh ba node hoặc file queue cô lập do bạn sở hữu; (2) mã hóa/xác thực nội dung đầu-cuối; (3) gỡ route Internet trực tiếp khỏi nguồn; (4) chuyển tiếp tệp lành tính sau một khoảng trễ có kiểm soát; (5) xác minh chỉ gateway liên hệ với đích đến do bạn sở hữu; (6) so sánh thông tin lưu trữ/thời gian; (7) giữ bằng chứng cần thiết, sau đó sanitize media/queue tạm thời khi kết thúc đã được phê duyệt.
 
-**Detection:** endpoint file/process activity, peer-radio links, removable-media audit, queue/gateway periodicity and content identifiers. Longer correlation windows replace interactive-flow analysis.
+**Phát hiện:** hoạt động tệp/tiến trình trên endpoint, liên kết radio giữa peer, audit media tháo rời, tính định kỳ của queue/gateway và mã định danh nội dung. Phân tích flow tương tác được thay bằng cửa sổ tương quan dài hơn.
 
-## TURN relay and forced-relay WebRTC
+## TURN relay và WebRTC buộc dùng relay
 
-**Mechanics:** Traversal Using Relays around NAT (TURN) allocates a public relay address and carries UDP, TCP or TLS traffic between a client and peers. An ICE policy can force relay use instead of exposing a direct candidate. TURN solves reachability, not general anonymity: the server authenticates the client and observes allocations, peers, time and volume.<sup>[[19]](#references)</sup>
+**Cơ chế:** Traversal Using Relays around NAT (TURN) cấp địa chỉ relay công khai và truyền lưu lượng UDP, TCP hoặc TLS giữa client và peer. Chính sách ICE có thể buộc dùng relay thay vì để lộ candidate trực tiếp. TURN giải quyết khả năng kết nối, không phải tính ẩn danh nói chung: server xác thực client và quan sát allocation, peer, thời gian và lưu lượng.<sup>[[19]](#references)</sup>
 
-**Pros:** widely implemented; handles restrictive NAT; supports mobile WebRTC; the peer does not receive the client's direct transport address when relay-only policy is correctly enforced.
+**Ưu điểm:** được triển khai rộng rãi; xử lý NAT hạn chế; hỗ trợ WebRTC di động; peer không nhận được địa chỉ transport trực tiếp của client nếu chính sách chỉ dùng relay được áp dụng đúng.
 
-**Cons:** the TURN operator sees both adjacent sides; application identity, media fingerprint and signaling remain; relay-only costs bandwidth and latency; misconfiguration can still gather host or server-reflexive candidates.
+**Nhược điểm:** bên vận hành TURN thấy cả hai phía liền kề; danh tính ứng dụng, dấu vân tay media và signaling vẫn còn; chỉ dùng relay tốn băng thông/độ trễ; cấu hình sai vẫn có thể thu thập host candidate hoặc server-reflexive candidate.
 
-**Procedure:** (1) deploy an organization-owned TURN service with TLS and short-lived credentials; (2) restrict realms, peers, ports, quotas and expiration; (3) set the test application to relay-only ICE; (4) call an owned peer; (5) inspect `getStats()` and packet capture to confirm only relay candidates carried media; (6) fail the relay and confirm there is no direct fallback; (7) retain allocation logs for the engagement.
+**Quy trình:** (1) triển khai dịch vụ TURN do tổ chức sở hữu với TLS và thông tin xác thực tồn tại ngắn hạn; (2) giới hạn realm, peer, port, quota và thời hạn; (3) đặt ứng dụng kiểm thử dùng chính sách ICE chỉ dùng relay; (4) gọi peer do bạn sở hữu; (5) kiểm tra `getStats()` và packet capture để xác nhận chỉ relay candidate truyền media; (6) làm relay lỗi và xác nhận không có fallback trực tiếp; (7) giữ log allocation trong engagement.
 
-**Detection:** signaling, browser process and TURN allocations join the session to the relay; networks observe sustained flows to TURN ports or TLS endpoints; the peer sees the allocated relay. **Captured node:** application state and ephemeral TURN credentials may reveal the realm and rendezvous service. Minimize exposure with per-device, short-lived credentials and keep operator authentication only at the controller.
+**Phát hiện:** signaling, tiến trình trình duyệt và TURN allocation liên kết phiên với relay; mạng quan sát các flow kéo dài tới port TURN hoặc TLS endpoint; peer thấy relay được cấp. **Node bị thu giữ:** trạng thái ứng dụng và thông tin xác thực TURN tạm thời có thể làm lộ realm và dịch vụ rendezvous. Giảm phơi lộ bằng thông tin xác thực tồn tại ngắn hạn theo từng thiết bị và chỉ giữ xác thực của người vận hành tại controller.
 
-## Outbound-only rendezvous or reverse overlay
+## Outbound-only rendezvous hoặc reverse overlay
 
-**Mechanics:** a node behind NAT initiates an authenticated connection to an organization-controlled broker. The operator separately authenticates to the broker, which authorizes a narrow management channel; neither inbound port forwarding nor a direct operator-to-node route is required.
+**Cơ chế:** node phía sau NAT khởi tạo kết nối đã xác thực tới broker do tổ chức kiểm soát. Người vận hành xác thực riêng với broker, broker cấp quyền cho kênh quản trị hẹp; không cần chuyển tiếp port inbound hay route trực tiếp từ người vận hành tới node.
 
-**Pros:** stable behind NAT and captive last miles; central revocation and audit; field-node address changes do not require operator discovery; cleanly separates operator identity from the node credential.
+**Ưu điểm:** ổn định sau NAT và qua chặng cuối captive; thu hồi và audit tập trung; địa chỉ field node thay đổi không yêu cầu người vận hành tìm lại; tách biệt danh tính người vận hành khỏi thông tin xác thực của node.
 
-**Cons:** the broker becomes a high-value correlation point; periodic keepalives are recognizable; a broad tunnel can become an unsafe pivot; loss of the broker ends management.
+**Nhược điểm:** broker trở thành điểm tương quan có giá trị cao; keepalive định kỳ dễ nhận diện; tunnel rộng có thể trở thành pivot không an toàn; broker ngừng hoạt động sẽ chấm dứt quản trị.
 
-**Procedure:** follow [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md#step-4-stable-outbound-rendezvous): issue one scoped device identity, permit only an owned broker and approved management service, use authenticated keepalive, enforce fail-closed routing, test address changes and reboot recovery, and revoke the identity during the loss drill. WireGuard documents a 25-second persistent keepalive as a broadly useful NAT interval when it is actually needed.<sup>[[20]](#references)</sup>
+**Quy trình:** làm theo [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md#step-4-stable-outbound-rendezvous): cấp một danh tính thiết bị có phạm vi giới hạn, chỉ cho phép broker do bạn sở hữu và dịch vụ quản trị được phê duyệt, dùng keepalive đã xác thực, áp dụng định tuyến fail-closed, kiểm thử thay đổi địa chỉ và khôi phục sau reboot, rồi thu hồi danh tính trong diễn tập mất thiết bị. WireGuard mô tả persistent keepalive 25 giây là khoảng NAT hữu ích trong nhiều trường hợp khi thực sự cần.<sup>[[20]](#references)</sup>
 
-**Detection:** broker and identity-provider logs map both sides; the access network sees a repeated encrypted destination/cadence; endpoint inventory shows the overlay agent. **Captured node:** assume its device key, broker name, tunnel addresses and cached task data are exposed. It must contain no operator private key, personal account or reusable controller token.
+**Phát hiện:** log broker và identity provider ánh xạ cả hai phía; mạng truy cập thấy đích mã hóa/nhịp lặp lại; inventory endpoint nhận diện agent overlay. **Node bị thu giữ:** giả định khóa thiết bị, tên broker, địa chỉ tunnel và dữ liệu task được cache đã bị lộ. Node không được chứa khóa riêng của người vận hành, tài khoản cá nhân hoặc token controller có thể tái sử dụng.
 
-## Pull mailbox, message queue or object-store rendezvous
+## Pull mailbox, message queue hoặc rendezvous qua object-store
 
-**Mechanics:** a field workload polls an authenticated mailbox for signed, pre-approved jobs and posts bounded results. The operator writes to the queue through a separate control plane; there is no interactive socket between them.
+**Cơ chế:** workload thực địa polling mailbox đã xác thực để nhận job được ký và phê duyệt trước, rồi đăng kết quả có giới hạn. Người vận hành ghi vào queue qua control plane riêng; không có socket tương tác giữa hai bên.
 
-**Pros:** tolerates intermittent links; decouples timing and addressing; quotas and schemas can constrain capability; easy centralized audit and revocation.
+**Ưu điểm:** chịu được kết nối gián đoạn; tách thời gian và địa chỉ; quota/schema giới hạn được capability; audit và thu hồi tập trung dễ dàng.
 
-**Cons:** polling cadence and stable object/queue names fingerprint the system; provider logs join producer and consumer; delayed control; captured queued data may expose the exercise.
+**Nhược điểm:** nhịp polling và tên object/queue ổn định tạo dấu vân tay hệ thống; log nhà cung cấp liên kết producer và consumer; điều khiển có độ trễ; dữ liệu queue bị thu giữ có thể làm lộ bài tập.
 
-**Procedure:** (1) create one engagement queue and one device identity; (2) define a signed schema of benign, explicitly scoped jobs; (3) set message TTL, maximum result size and rate; (4) allow the node to pull only its queue and write only its result prefix; (5) test offline accumulation, duplicate delivery and revocation; (6) centralize immutable access logs; (7) delete the queue after retention requirements are met.
+**Quy trình:** (1) tạo một queue cho mỗi engagement và một danh tính thiết bị; (2) xác định schema đã ký cho job lành tính, có phạm vi rõ ràng; (3) đặt TTL thông điệp, kích thước kết quả tối đa và tốc độ; (4) chỉ cho node đọc queue của nó và chỉ ghi vào prefix kết quả của nó; (5) kiểm tra tích lũy khi offline, gửi trùng và thu hồi; (6) tập trung log truy cập bất biến; (7) xóa queue sau khi đáp ứng yêu cầu lưu trữ.
 
-**Detection:** hunt for periodic API calls by an unusual process, stable bucket/object/queue paths, identical user-agent or TLS behavior, and a fetch-then-new-connection sequence. **Captured node:** local cache can reveal pending jobs and object names; keep cache encrypted, bounded and disposable, while preserving authoritative controller logs.
+**Phát hiện:** tìm API call định kỳ từ tiến trình bất thường, path bucket/object/queue ổn định, user-agent hoặc hành vi TLS giống nhau và chuỗi tải dữ liệu rồi mở kết nối mới. **Node bị thu giữ:** cache cục bộ có thể làm lộ job đang chờ và tên object; giữ cache được mã hóa, có giới hạn và dùng một lần, đồng thời bảo toàn log controller có thẩm quyền.
 
-## Dual-uplink failover and connection migration
+## Failover dual-uplink và di chuyển kết nối
 
-**Mechanics:** an approved field node has two independent uplinks—such as venue Ethernet/Wi-Fi and organization cellular—and keeps its control session through an overlay or message broker as routes change. This is availability engineering, not anonymity.
+**Cơ chế:** field node được phê duyệt có hai uplink độc lập—chẳng hạn Ethernet/Wi-Fi tại địa điểm và cellular của tổ chức—và duy trì phiên điều khiển qua overlay hoặc message broker khi route thay đổi. Đây là kỹ thuật tăng tính sẵn sàng, không phải tính ẩn danh.
 
-**Pros:** survives one provider, AP or captive-portal failure; supports planned maintenance; permits quick isolation of a suspect path.
+**Ưu điểm:** chịu được lỗi của một nhà cung cấp, AP hoặc captive portal; hỗ trợ bảo trì theo kế hoạch; cho phép nhanh chóng cô lập đường truy cập đáng ngờ.
 
-**Cons:** two providers create two location/account records; simultaneous use makes correlation easier; route and DNS leaks during failover; cellular co-location evidence remains.
+**Nhược điểm:** hai nhà cung cấp tạo hai bộ hồ sơ về vị trí/tài khoản; sử dụng đồng thời khiến việc tương quan dễ hơn; rò rỉ route/DNS khi failover; bằng chứng ở cùng vị trí với cellular vẫn còn.
 
-**Procedure:** (1) register both organization-owned interfaces and providers; (2) assign deterministic route priorities and health checks to owned endpoints; (3) bind DNS and management to the overlay; (4) prevent the secondary path from accepting inbound traffic; (5) unplug each path and verify session recovery, source policy and no direct destination access; (6) alert on unplanned path change; (7) document data use and roaming limits.
+**Quy trình:** (1) đăng ký cả hai giao diện và nhà cung cấp thuộc sở hữu tổ chức; (2) gán thứ tự route và health check xác định tới endpoint do bạn sở hữu; (3) gắn DNS và quản trị với overlay; (4) ngăn đường phụ nhận lưu lượng inbound; (5) ngắt từng đường và xác minh khôi phục phiên, chính sách nguồn và không truy cập đích trực tiếp; (6) cảnh báo khi đường thay đổi ngoài kế hoạch; (7) ghi rõ giới hạn sử dụng dữ liệu và roaming.
 
-**Detection:** correlate the same device certificate, request grammar and timing across ASNs; local inventory sees both radios; carriers/venues retain their own records. **Captured node:** both SIM/device identifiers and known SSIDs may be visible; use organization assets and never co-locate or pair the node with personal devices.
+**Phát hiện:** tương quan cùng device certificate, grammar yêu cầu và thời gian qua nhiều ASN; inventory cục bộ thấy cả hai radio; nhà mạng/địa điểm giữ bản ghi riêng. **Node bị thu giữ:** có thể thấy cả mã định danh SIM/thiết bị và SSID đã biết; dùng tài sản tổ chức, không đặt node cùng vị trí hoặc ghép nối với thiết bị cá nhân.
 
-## Organization private APN or managed cellular tunnel
+## Private APN của tổ chức hoặc cellular tunnel được quản lý
 
-**Mechanics:** a carrier private APN places enrolled SIMs into a private routed domain or tunnels traffic to an enterprise gateway. It separates the device from the public mobile Internet but does not hide it from the carrier or contracting organization.
+**Cơ chế:** private APN của nhà mạng đưa SIM đã đăng ký vào miền định tuyến riêng hoặc tunnel lưu lượng tới enterprise gateway. Cơ chế này tách thiết bị khỏi Internet di động công cộng nhưng không che giấu thiết bị với nhà mạng hoặc tổ chức ký hợp đồng.
 
-**Pros:** stable private addressing; carrier-level enrollment and traffic policy; avoids public inbound exposure; useful for authorized remote appliances.
+**Ưu điểm:** địa chỉ riêng ổn định; chính sách lưu lượng và đăng ký cấp nhà mạng; tránh để lộ truy cập inbound công khai; hữu ích cho thiết bị từ xa được ủy quyền.
 
-**Cons:** subscriber, IMSI/IMEI, cell and billing attribution are strong; procurement lead time and cost; carrier/gateway outage; not anonymous to the operator.
+**Nhược điểm:** có khả năng quy kết mạnh từ thuê bao, IMSI/IMEI, cell và billing; thời gian mua sắm và chi phí; sự cố nhà mạng/gateway; không ẩn danh với bên vận hành.
 
-**Procedure:** (1) contract the APN in the assessment organization's name; (2) whitelist only registered SIMs and gateway prefixes; (3) add application-layer mutual authentication; (4) restrict the APN route to the rendezvous and update services; (5) test SIM removal, roaming, public-Internet breakout and revocation; (6) monitor carrier and gateway records; (7) cancel or quarantine every SIM at closeout.
+**Quy trình:** (1) ký hợp đồng APN dưới tên tổ chức đánh giá; (2) chỉ cho phép SIM đã đăng ký và prefix gateway; (3) bổ sung mutual authentication ở tầng ứng dụng; (4) chỉ cho route APN tới rendezvous và dịch vụ cập nhật; (5) kiểm tra tháo SIM, roaming, breakout ra Internet công cộng và thu hồi; (6) giám sát bản ghi nhà mạng và gateway; (7) hủy hoặc quarantine mọi SIM khi kết thúc.
 
-**Detection:** carrier inventory and cell telemetry, APN gateway flows, SIM/IMEI mismatch and enterprise asset records. **Captured node:** the SIM and modem identify the contract even when storage is encrypted; capture resilience therefore means rapid suspension and narrow authorization, not deniability.
+**Phát hiện:** inventory nhà mạng và telemetry cell, flow của APN gateway, sai lệch SIM/IMEI và hồ sơ tài sản doanh nghiệp. **Node bị thu giữ:** SIM và modem xác định được hợp đồng ngay cả khi storage đã mã hóa; vì vậy, khả năng chống chịu khi bị thu giữ nghĩa là đình chỉ nhanh và cấp quyền hẹp, không phải khả năng chối bỏ.
 
-## Long-range point-to-point wireless bridge
+## Cầu nối vô tuyến point-to-point tầm xa
 
-**Mechanics:** directional Wi-Fi or another licensed/unlicensed point-to-point radio connects two owner-approved sites, with Internet egress at the remote site. It can move the apparent IP location without using a commercial proxy.
+**Cơ chế:** Wi-Fi định hướng hoặc radio point-to-point được cấp phép/không cần cấp phép kết nối hai địa điểm được chủ sở hữu cho phép, với egress Internet tại địa điểm từ xa. Cơ chế này có thể thay đổi vị trí IP hiển thị mà không dùng proxy thương mại.
 
-**Pros:** high throughput; independent of intermediate wired carriers; controllable RF and routing; useful for testing segmentation and remote-site monitoring.
+**Ưu điểm:** thông lượng cao; độc lập với nhà mạng có dây trung gian; kiểm soát được RF và định tuyến; hữu ích để kiểm thử phân đoạn và giám sát địa điểm từ xa.
 
-**Cons:** line-of-sight, spectrum, landlord and regulatory constraints; distinctive RF emissions and hardware; both endpoints are physical evidence; weather/power/alignment affect stability.
+**Nhược điểm:** yêu cầu tầm nhìn thẳng, tuân thủ phổ tần, sự cho phép của chủ nhà và quy định; phát xạ RF và phần cứng dễ nhận diện; cả hai endpoint đều là bằng chứng vật lý; thời tiết/nguồn điện/căn chỉnh ảnh hưởng độ ổn định.
 
-**Procedure:** (1) obtain written permission for both sites and verify spectrum/power rules; (2) survey the path without transmitting outside approved parameters; (3) use authenticated encryption and a management VLAN; (4) restrict the bridge to an owned rendezvous or test subnet; (5) test failover, alignment, power recovery and RF containment; (6) label/inventory both radios; (7) remove them and verify configuration reset after the exercise.
+**Quy trình:** (1) có văn bản cho phép ở cả hai địa điểm và xác minh quy định phổ tần/công suất; (2) khảo sát đường truyền mà không phát ngoài tham số được phê duyệt; (3) dùng mã hóa đã xác thực và VLAN quản trị; (4) chỉ giới hạn cầu nối tới rendezvous hoặc subnet kiểm thử do bạn sở hữu; (5) kiểm tra failover, căn chỉnh, khôi phục nguồn và kiểm soát RF; (6) dán nhãn/kiểm kê cả hai radio; (7) tháo chúng và xác minh đã reset cấu hình sau bài tập.
 
-**Detection:** RF surveys, spectrum analysis, rooftop/site inspection, bridge MAC/OUI, management traffic and remote-site egress logs. **Captured node:** configuration reveals its peer and management domain; use unique exercise credentials, no personal management accounts and rapid peer-key revocation.
+**Phát hiện:** khảo sát RF, phân tích phổ, kiểm tra mái nhà/địa điểm, MAC/OUI của bridge, lưu lượng quản trị và log egress tại địa điểm từ xa. **Node bị thu giữ:** cấu hình làm lộ peer và miền quản trị; dùng thông tin xác thực riêng cho bài tập, không dùng tài khoản quản trị cá nhân và thu hồi khóa peer nhanh chóng.
 
-## Consented cooperative or community exit
+## Cooperative hoặc community exit có sự đồng thuận
 
-**Mechanics:** volunteers or partner organizations knowingly run relays under a published policy. Traffic exits from a shared community pool while the coordination layer accounts for abuse and revocation.
+**Cơ chế:** tình nguyện viên hoặc tổ chức đối tác chủ động vận hành relay theo chính sách được công bố. Lưu lượng đi ra từ một pool cộng đồng dùng chung trong khi lớp điều phối xử lý lạm dụng và thu hồi.
 
-**Pros:** diverse non-cloud networks; explicit consent is safer than proxyware; shared governance can distribute trust; useful for research and censorship-resilience studies.
+**Ưu điểm:** đa dạng mạng ngoài đám mây; có sự đồng thuận rõ ràng an toàn hơn proxyware; quản trị chung có thể phân tán niềm tin; hữu ích cho nghiên cứu và nghiên cứu khả năng chống kiểm duyệt.
 
-**Cons:** small pools and membership records reduce anonymity; exit operators receive complaints and observe traffic metadata; malicious participants, variable uptime and jurisdiction differences.
+**Nhược điểm:** pool nhỏ và hồ sơ thành viên làm giảm tính ẩn danh; người vận hành exit nhận khiếu nại và thấy metadata lưu lượng; thành viên độc hại, thời gian hoạt động không ổn định và khác biệt pháp lý.
 
-**Procedure:** (1) publish an acceptable-use and logging policy; (2) obtain informed opt-in from each operator; (3) issue a unique relay identity and restrict destinations/rates; (4) provide abuse handling and one-action revocation; (5) send only authorized traffic to owned endpoints during testing; (6) measure churn and correlation exposure; (7) remove the relay cleanly when consent ends.
+**Quy trình:** (1) công bố chính sách sử dụng được chấp nhận và logging; (2) lấy sự đồng thuận rõ ràng từ từng bên vận hành; (3) cấp danh tính relay riêng và giới hạn đích/tốc độ; (4) cung cấp xử lý lạm dụng và cơ chế thu hồi bằng một thao tác; (5) trong kiểm thử, chỉ gửi lưu lượng được phép tới endpoint do bạn sở hữu; (6) đo churn và mức phơi lộ do tương quan; (7) gỡ relay đúng quy trình khi hết thời hạn đồng thuận.
 
-**Detection:** membership/control-plane records, relay certificates, common software fingerprint and exit behavior identify the pool. **Captured node:** relay configuration may identify the cooperative but should not contain client identities; store client-to-session accountability at the authorized controller under access control.
+**Phát hiện:** bản ghi membership/control plane, relay certificate, dấu vân tay phần mềm dùng chung và hành vi exit giúp nhận diện pool. **Node bị thu giữ:** cấu hình relay có thể nhận diện cooperative nhưng không nên chứa danh tính client; lưu ánh xạ client-to-session tại controller được ủy quyền, có kiểm soát truy cập.
 
-## IPv6 temporary addresses and prefix rotation
+## IPv6 temporary address và luân phiên prefix
 
-**Mechanics:** IPv6 privacy extensions create temporary interface identifiers so a stable address is not reused for every outbound connection. Provider prefix changes can add rotation, but the delegated prefix, subscriber record and upper-layer fingerprint remain.<sup>[[21]](#references)</sup>
+**Cơ chế:** IPv6 privacy extension tạo interface identifier tạm thời để không tái sử dụng một địa chỉ ổn định cho mọi kết nối outbound. Việc nhà cung cấp đổi prefix có thể tạo thêm luân phiên, nhưng delegated prefix, hồ sơ thuê bao và dấu vân tay tầng trên vẫn còn.<sup>[[21]](#references)</sup>
 
-**Pros:** reduces passive long-term tracking by a stable interface identifier; built into common operating systems; no relay overhead.
+**Ưu điểm:** giảm theo dõi thụ động dài hạn bằng interface identifier ổn định; có sẵn trong các hệ điều hành phổ biến; không cần overhead relay.
 
-**Cons:** not source anonymity; ISP and local network still know the prefix/device; DNS, accounts and browser state link sessions; address churn complicates allowlists and logging.
+**Nhược điểm:** không ẩn danh nguồn; ISP và mạng cục bộ vẫn biết prefix/thiết bị; DNS, tài khoản và trạng thái trình duyệt liên kết các phiên; địa chỉ thay đổi gây khó khăn cho allowlist và logging.
 
-**Procedure:** (1) inspect current stable and temporary addresses on an owned client; (2) enable the OS-supported privacy-address default rather than third-party spoofing; (3) request an owned IPv6 endpoint repeatedly across address lifetimes; (4) confirm inbound services bind only intended stable addresses; (5) retain DHCPv6/RA/neighbor and precise endpoint logs; (6) test VPN/firewall behavior for every IPv6 address.
+**Quy trình:** (1) kiểm tra địa chỉ ổn định và tạm thời hiện tại trên client do bạn sở hữu; (2) bật mặc định địa chỉ riêng tư được OS hỗ trợ thay vì giả mạo bằng công cụ bên thứ ba; (3) gửi yêu cầu lặp lại tới endpoint IPv6 do bạn sở hữu qua nhiều vòng đời địa chỉ; (4) xác nhận dịch vụ inbound chỉ bind vào địa chỉ ổn định dự định dùng; (5) lưu log DHCPv6/RA/neighbor và endpoint có thời gian chính xác; (6) kiểm tra hành vi VPN/firewall cho mọi địa chỉ IPv6.
 
-**Detection:** correlate delegated prefix, layer-2 identity, neighbor discovery, account and endpoint telemetry instead of treating one address as one device. **Captured node:** network profiles and interface identifiers remain; temporary addressing prevents one passive identifier, not forensic attribution.
+**Phát hiện:** tương quan delegated prefix, danh tính layer 2, neighbor discovery, tài khoản và telemetry endpoint thay vì xem một địa chỉ là một thiết bị. **Node bị thu giữ:** profile mạng và interface identifier vẫn còn; dùng địa chỉ tạm thời ngăn một định danh thụ động, không ngăn quy kết pháp chứng.
 
-## Tor pluggable transports: Snowflake, WebTunnel, obfs4 and meek
+## Tor pluggable transport: Snowflake, WebTunnel, obfs4 và meek
 
-**Mechanics:** a pluggable transport changes how the first Tor connection appears or how it reaches a bridge. Snowflake uses short-lived volunteer WebRTC proxies, WebTunnel resembles ordinary HTTPS, obfs4 resists simple protocol identification and active probing, and meek relays through supported web infrastructure. They are censorship-circumvention transports into Tor, not extra end-to-end anonymity layers.<sup>[[22]](#references)</sup>
+**Cơ chế:** pluggable transport thay đổi cách kết nối Tor đầu tiên xuất hiện hoặc cách kết nối tới bridge. Snowflake dùng proxy WebRTC tình nguyện tồn tại ngắn hạn, WebTunnel trông giống HTTPS thông thường, obfs4 chống nhận diện giao thức đơn giản và dò quét chủ động, còn meek chuyển tiếp qua hạ tầng web được hỗ trợ. Đây là transport vượt kiểm duyệt để vào Tor, không phải lớp ẩn danh đầu-cuối bổ sung.<sup>[[22]](#references)</sup>
 
-**Pros:** useful when direct Tor or known relays are blocked; Snowflake avoids a stable public bridge address; integrated into maintained Tor clients; destination still receives ordinary Tor properties.
+**Ưu điểm:** hữu ích khi Tor trực tiếp hoặc relay đã biết bị chặn; Snowflake tránh địa chỉ bridge công khai ổn định; tích hợp trong client Tor được duy trì; đích đến vẫn nhận các thuộc tính thông thường của Tor.
 
-**Cons:** lower or variable performance; broker/front/bridge and local network observe different metadata; transport fingerprints and blocking remain possible; volunteer proxy does not replace Tor and should not be trusted with application plaintext.
+**Nhược điểm:** hiệu năng thấp hơn hoặc thay đổi; broker/front/bridge và mạng cục bộ quan sát metadata khác nhau; vẫn có thể nhận diện dấu vân tay transport và chặn; proxy tình nguyện không thay thế Tor và không nên được tin cậy với plaintext ứng dụng.
 
-**Procedure:** (1) install and verify the official Tor Browser or supported Tor client; (2) select the built-in transport in Connection/Bridges; (3) connect only to an owned diagnostic page; (4) confirm the page sees a Tor exit, not the Snowflake/WebTunnel peer; (5) compare bootstrap and performance; (6) fail the transport and confirm the client does not silently connect directly; (7) return to the standard supported configuration after the test.
+**Quy trình:** (1) cài và xác minh Tor Browser chính thức hoặc client Tor được hỗ trợ; (2) chọn transport tích hợp trong Connection/Bridges; (3) chỉ kết nối tới trang chẩn đoán do bạn sở hữu; (4) xác nhận trang thấy Tor exit chứ không phải peer Snowflake/WebTunnel; (5) so sánh bootstrap và hiệu năng; (6) làm transport lỗi và xác nhận client không âm thầm kết nối trực tiếp; (7) sau kiểm thử, quay lại cấu hình chuẩn được hỗ trợ.
 
-**Detection:** a censor can combine destination allowlists, TLS/WebRTC behavior, broker discovery and flow analysis; endpoints expose Tor and transport configuration. **Capture-resilient OPSEC:** use the standard client, never copy personal browser state into it, and assume bridge/broker history is recoverable. **Monitoring:** watch Tor bootstrap logs, unexpected direct DNS/connection attempts and controller-side owned-page observations; transport failure is not proof of discovery.
+**Phát hiện:** bên kiểm duyệt có thể kết hợp allowlist đích đến, hành vi TLS/WebRTC, phát hiện broker và phân tích flow; endpoint cho thấy Tor và cấu hình transport. **OPSEC chống chịu khi bị thu giữ:** dùng client chuẩn, không bao giờ chép trạng thái trình duyệt cá nhân vào đó và giả định lịch sử bridge/broker có thể khôi phục. **Giám sát:** theo dõi log bootstrap Tor, nỗ lực kết nối/DNS trực tiếp bất ngờ và quan sát trang do bạn sở hữu từ phía controller; transport lỗi không chứng minh đã bị phát hiện.
 
-## Refraction networking or decoy routing
+## Refraction networking hoặc decoy routing
 
-**Mechanics:** a cooperating network operator detects a covert signal in traffic apparently addressed to an allowed decoy and diverts the flow to a circumvention proxy. Deployment requires infrastructure in the network path; it is not something a client can create merely by selecting an innocent website.<sup>[[23]](#references)</sup>
+**Cơ chế:** nhà vận hành mạng hợp tác phát hiện tín hiệu bí mật trong lưu lượng có vẻ gửi tới decoy được cho phép rồi chuyển hướng flow tới proxy vượt kiểm duyệt. Cần triển khai hạ tầng trên đường truyền; client không thể tự tạo cơ chế này chỉ bằng cách chọn một website vô hại.<sup>[[23]](#references)</sup>
 
-**Pros:** the apparent destination may be difficult for a censor to block without collateral damage; no public bridge address must be distributed; useful research model for on-path-assisted circumvention.
+**Ưu điểm:** kiểm duyệt có thể khó chặn đích đến hiển thị mà không gây ảnh hưởng ngoài ý muốn; không cần phân phối địa chỉ bridge công khai; mô hình nghiên cứu hữu ích cho cơ chế vượt kiểm duyệt có hỗ trợ trên đường truyền.
 
-**Cons:** specialized ISP/transit participation; deployability and performance depend on routing; client-to-decoy flow and proxy-side activity remain; a global or cooperating observer can correlate timing.
+**Nhược điểm:** cần ISP/transit tham gia chuyên biệt; khả năng triển khai và hiệu năng phụ thuộc định tuyến; flow client-to-decoy và hoạt động phía proxy vẫn còn; observer toàn cục hoặc có hợp tác có thể tương quan thời gian.
 
-**Procedure:** do not signal through uninvolved networks. Reproduce the architecture in an isolated lab: (1) create owned client, router, decoy and proxy namespaces; (2) use a benign tagged test request; (3) let the owned router redirect only that tag to the proxy; (4) log pre/post-routing tuples and request IDs; (5) compare ordinary and signaled flows; (6) test false positives and removal; (7) destroy the lab routes.
+**Quy trình:** không phát tín hiệu qua mạng của bên không liên quan. Tái hiện kiến trúc trong lab cô lập: (1) tạo namespace client, router, decoy và proxy do bạn sở hữu; (2) dùng yêu cầu kiểm thử có gắn tag lành tính; (3) để router do bạn sở hữu chỉ chuyển hướng tag đó tới proxy; (4) ghi log tuple trước/sau định tuyến và request ID; (5) so sánh flow thông thường với flow có tín hiệu; (6) kiểm tra false positive và gỡ cấu hình; (7) xóa route lab.
 
-**Detection:** authorized network operators can inspect routing divergence, unusual client hello/tag behavior and decoy-versus-back-end flow discrepancies. **Capture-resilient OPSEC:** a research client should hold only test keys and documentation addresses. **Monitoring:** compare signed lab-router decisions with proxy arrivals; do not probe production transit providers to determine whether they detected signaling.
+**Phát hiện:** nhà vận hành mạng được ủy quyền có thể kiểm tra sai lệch định tuyến, hành vi client hello/tag bất thường và khác biệt giữa flow decoy với back-end. **OPSEC chống chịu khi bị thu giữ:** client nghiên cứu chỉ nên giữ khóa kiểm thử và địa chỉ tài liệu. **Giám sát:** so sánh quyết định của lab-router có chữ ký với yêu cầu đến proxy; không thăm dò nhà cung cấp transit production để xác định họ có phát hiện tín hiệu hay không.
 
-## Content-addressed gateway or cached peer retrieval
+## Content-addressed gateway hoặc truy xuất peer có cache
 
-**Mechanics:** an HTTP gateway retrieves an IPFS content identifier (CID), possibly from its cache or peers, and returns the verifiable content to the client. The original publisher may see the gateway or other peers rather than the final reader; the gateway sees the reader IP and requested CID. Native peer-to-peer retrieval exposes the client to peers and DHT/routing participants.<sup>[[24]](#references)</sup>
+**Cơ chế:** HTTP gateway truy xuất content identifier (CID) của IPFS, có thể từ cache hoặc peer, rồi trả nội dung có thể xác minh cho client. Nhà phát hành ban đầu có thể thấy gateway hoặc peer khác thay vì người đọc cuối; gateway thấy IP người đọc và CID được yêu cầu. Truy xuất ngang hàng nguyên bản làm lộ client với peer và bên tham gia DHT/định tuyến.<sup>[[24]](#references)</sup>
 
-**Pros:** publisher and reader can be separated by caches; immutable content is hash-verifiable; replicated data survives one host; HTTP clients require no native peer stack.
+**Ưu điểm:** cache có thể tách nhà phát hành khỏi người đọc; nội dung bất biến có thể xác minh bằng hash; dữ liệu sao chép vẫn tồn tại khi một host ngừng hoạt động; HTTP client không cần stack peer nguyên bản.
 
-**Cons:** public CIDs and gateway logs reveal interests; first retrieval timing can correlate publisher and reader; malicious web content and path-style same-origin hazards; public gateways are best-effort and prohibit abuse.
+**Nhược điểm:** CID công khai và log gateway làm lộ mối quan tâm; thời điểm truy xuất lần đầu có thể liên kết nhà phát hành/người đọc; nội dung web độc hại và nguy cơ same-origin từ path-style; gateway công khai hoạt động theo nỗ lực tốt nhất và cấm lạm dụng.
 
-**Procedure:** (1) publish a harmless test file to an owned private IPFS swarm or owned gateway; (2) record its CID; (3) retrieve it through a separate owned HTTP gateway using subdomain isolation; (4) verify the bytes against the CID; (5) repeat after caching; (6) compare publisher, peer and gateway logs; (7) unpin and remove test content when retention ends.
+**Quy trình:** (1) xuất bản tệp kiểm thử vô hại lên private IPFS swarm hoặc gateway do bạn sở hữu; (2) ghi CID; (3) truy xuất qua HTTP gateway riêng do bạn sở hữu, dùng cô lập subdomain; (4) xác minh byte theo CID; (5) lặp lại sau khi cache; (6) so sánh log publisher, peer và gateway; (7) unpin và xóa nội dung kiểm thử khi hết thời hạn lưu giữ.
 
-**Detection:** gateways log source/CID; DHT and peer connections reveal retrieval; endpoint history and file hashes identify content. **Capture-resilient OPSEC:** store no private publishing key on a read-only field client and encrypt sensitive content before content addressing. **Monitoring:** alert on unexpected pinning, peer-set change, CID requests outside the allowlist or gateway account notices.
+**Phát hiện:** gateway ghi log nguồn/CID; kết nối DHT và peer làm lộ quá trình truy xuất; lịch sử endpoint và hash tệp nhận diện nội dung. **OPSEC chống chịu khi bị thu giữ:** không lưu khóa xuất bản riêng tư trên field client chỉ đọc và mã hóa nội dung nhạy cảm trước khi content-addressing. **Giám sát:** cảnh báo pin bất ngờ, thay đổi peer-set, yêu cầu CID ngoài allowlist hoặc thông báo lạm dụng từ gateway.
 
-## Private information retrieval service
+## Dịch vụ private information retrieval
 
-**Mechanics:** Private Information Retrieval (PIR) lets a client retrieve one record from a database while cryptographically hiding the selected index from the server under a stated single- or multi-server threat model. It protects query selection for a bounded dataset; it is not general web access or IP anonymity.<sup>[[25]](#references)</sup>
+**Cơ chế:** Private Information Retrieval (PIR) cho phép client truy xuất một bản ghi từ cơ sở dữ liệu mà máy chủ không biết chỉ mục được chọn, theo mô hình đe dọa một hoặc nhiều máy chủ đã nêu. PIR bảo vệ lựa chọn truy vấn cho tập dữ liệu có giới hạn; đây không phải truy cập web tổng quát hay ẩn danh IP.<sup>[[25]](#references)</sup>
 
-**Pros:** strong application-specific query privacy; measurable leakage model; useful for key directories, blocklists or small public databases; can reduce the need to reveal exact lookup terms.
+**Ưu điểm:** quyền riêng tư truy vấn chuyên biệt cho ứng dụng mạnh; mô hình rò rỉ có thể đo lường; hữu ích cho thư mục khóa, blocklist hoặc cơ sở dữ liệu công khai nhỏ; giảm nhu cầu tiết lộ chính xác từ khóa tra cứu.
 
-**Cons:** computation/bandwidth overhead; server learns connection time/IP unless combined with a relay; dataset version, response size and application state can partition users; implementation maturity varies.
+**Nhược điểm:** overhead tính toán/băng thông; máy chủ vẫn biết thời gian/IP kết nối nếu không kết hợp relay; phiên bản tập dữ liệu, kích thước phản hồi và trạng thái ứng dụng có thể phân biệt người dùng; mức độ hoàn thiện triển khai khác nhau.
 
-**Procedure:** (1) deploy an audited PIR implementation against a synthetic owned database; (2) publish dataset version and parameters; (3) retrieve several indices through identical request sizes; (4) verify correctness locally; (5) compare server logs and confirm the index is absent; (6) test malicious/truncated responses and version mismatch; (7) document the exact privacy assumption rather than calling it anonymous browsing.
+**Quy trình:** (1) triển khai implementation PIR đã được audit trên cơ sở dữ liệu tổng hợp do bạn sở hữu; (2) công bố phiên bản tập dữ liệu và tham số; (3) truy xuất một số chỉ mục với kích thước yêu cầu giống nhau; (4) xác minh tính đúng đắn cục bộ; (5) so sánh log máy chủ và xác nhận chỉ mục không xuất hiện; (6) kiểm tra phản hồi độc hại/bị cắt và sai phiên bản; (7) ghi rõ giả định quyền riêng tư thay vì gọi đây là duyệt web ẩn danh.
 
-**Detection:** networks see service use and volume; endpoint telemetry exposes the client and final record use; a compromised server can manipulate datasets or timing. **Capture-resilient OPSEC:** keep only public database parameters and a bounded cache on the client. **Monitoring:** validate signed dataset roots, fixed request shapes, error-rate changes and server-key rotations.
+**Phát hiện:** mạng thấy việc sử dụng dịch vụ và lưu lượng; telemetry endpoint làm lộ client và việc sử dụng bản ghi cuối; máy chủ bị xâm nhập có thể thao túng tập dữ liệu hoặc thời gian. **OPSEC chống chịu khi bị thu giữ:** chỉ giữ tham số cơ sở dữ liệu công khai và cache có giới hạn trên client. **Giám sát:** xác thực root tập dữ liệu đã ký, hình dạng yêu cầu cố định, thay đổi tỷ lệ lỗi và việc luân chuyển server key.
 
-## Constrained server-side fetcher, preview or rendering service
+## Fetcher phía server, preview hoặc dịch vụ render có giới hạn
 
-**Mechanics:** a remote service fetches or renders a URL and returns a screenshot, metadata or sanitized content. The destination sees the fetcher address; the service sees the requester, URL and result. Abusing link-preview bots, security scanners or third-party URL fetchers is not authorized proxy use.
+**Cơ chế:** dịch vụ từ xa fetch hoặc render URL rồi trả screenshot, metadata hoặc nội dung đã làm sạch. Đích đến thấy địa chỉ fetcher; dịch vụ thấy người yêu cầu, URL và kết quả. Lạm dụng link-preview bot, security scanner hoặc dịch vụ fetch URL của bên thứ ba không phải là sử dụng proxy được ủy quyền.
 
-**Pros:** isolates active content from the workstation; destination receives a controlled fetcher fingerprint; can enforce file type, size, destination and rendering limits; disposable execution environment.
+**Ưu điểm:** cô lập nội dung chủ động khỏi workstation; đích đến nhận dấu vân tay fetcher có kiểm soát; có thể áp dụng giới hạn loại tệp, kích thước, đích đến và render; môi trường thực thi dùng một lần.
 
-**Cons:** service has complete request knowledge; account/API/billing records; SSRF and data-exfiltration risk; scripts, authentication and interactive sites may not work; unique URLs correlate requester and fetch.
+**Nhược điểm:** dịch vụ biết toàn bộ yêu cầu; có bản ghi tài khoản/API/billing; rủi ro SSRF và rò rỉ dữ liệu; script, xác thực và website tương tác có thể không hoạt động; URL riêng có thể liên kết người yêu cầu với lượt fetch.
 
-**Procedure:** (1) deploy an organization-owned fetcher with a strict allowlist of owned test domains; (2) block private, link-local, metadata and redirect-to-unapproved addresses; (3) cap methods, redirects, bytes and render time; (4) strip credentials/cookies; (5) submit an owned URL; (6) compare requester, fetcher and target logs; (7) destroy the render instance and retain central audit according to policy.
+**Quy trình:** (1) triển khai fetcher do tổ chức sở hữu với allowlist nghiêm ngặt chỉ gồm domain kiểm thử của bạn; (2) chặn địa chỉ private, link-local, metadata và redirect tới địa chỉ không được phê duyệt; (3) giới hạn method, redirect, byte và thời gian render; (4) loại bỏ thông tin xác thực/cookie; (5) gửi URL do bạn sở hữu; (6) so sánh log người yêu cầu, fetcher và target; (7) hủy instance render và lưu audit tập trung theo chính sách.
 
-**Detection:** target sees the service ASN/fingerprint; provider and controller logs map requester to URL; endpoint process/API calls show submission. **Capture-resilient OPSEC:** use one short-lived project token with no arbitrary destination authority. **Monitoring:** alert on allowlist denials, redirect violations, fetches without a controller job ID and provider abuse notices.
+**Phát hiện:** target thấy ASN/dấu vân tay dịch vụ; log nhà cung cấp/controller ánh xạ người yêu cầu tới URL; tiến trình/API call trên endpoint cho thấy việc gửi yêu cầu. **OPSEC chống chịu khi bị thu giữ:** dùng một project token tồn tại ngắn hạn, không có quyền truy cập đích đến tùy ý. **Giám sát:** cảnh báo từ chối allowlist, vi phạm redirect, fetch không có controller job ID và thông báo lạm dụng từ nhà cung cấp.
 
 ## Anycast rendezvous pool
 
-**Mechanics:** multiple organization-controlled nodes advertise or front one stable service address, and routing selects a nearby instance. Anycast improves availability and hides an individual back-end from the client, but the operator still controls all instances and the service address is stable.<sup>[[26]](#references)</sup>
+**Cơ chế:** nhiều node do tổ chức kiểm soát quảng bá hoặc đứng trước một địa chỉ dịch vụ ổn định; định tuyến chọn instance gần nhất. Anycast tăng tính sẵn sàng và che giấu back-end riêng lẻ với client, nhưng người vận hành vẫn kiểm soát mọi instance và địa chỉ dịch vụ vẫn ổn định.<sup>[[26]](#references)</sup>
 
-**Pros:** resilient regional ingress; no field reconfiguration when one instance fails; DDoS/load distribution; central policy can move sessions among known nodes.
+**Ưu điểm:** ingress vùng có khả năng chống chịu; không cần cấu hình lại field khi một instance lỗi; phân phối DDoS/tải; chính sách tập trung có thể chuyển phiên giữa các node đã biết.
 
-**Cons:** BGP/CDN and provider records identify the organization; path changes can break stateful sessions; monitoring differs by client location; a single stable address is easily blocked or reputation-clustered.
+**Nhược điểm:** hồ sơ BGP/CDN và nhà cung cấp nhận diện tổ chức; thay đổi đường đi có thể làm hỏng phiên có trạng thái; monitoring khác nhau theo vị trí client; địa chỉ ổn định duy nhất dễ bị chặn hoặc nhóm theo uy tín.
 
-**Procedure:** use a provider-supported organization project or an isolated routing lab: (1) deploy two identical authenticated health endpoints; (2) expose one documented service address; (3) keep session state at the broker rather than an edge; (4) withdraw one node and verify reconnection; (5) test certificate, policy and log consistency; (6) alert on unauthorized origin/region; (7) remove advertisements and credentials at closeout.
+**Quy trình:** dùng project của tổ chức được nhà cung cấp hỗ trợ hoặc lab định tuyến cô lập: (1) triển khai hai health endpoint đã xác thực giống nhau; (2) công khai một địa chỉ dịch vụ có tài liệu; (3) giữ trạng thái phiên tại broker thay vì edge; (4) rút một node và xác minh kết nối lại; (5) kiểm tra tính nhất quán certificate, chính sách và log; (6) cảnh báo origin/vùng không được ủy quyền; (7) gỡ quảng bá và thông tin xác thực khi kết thúc.
 
-**Detection:** BGP/RPKI/history, provider tenancy, certificates and identical service behavior identify the pool. **Capture-resilient OPSEC:** an edge holds only regional service identity and no operator or fleet-enrollment key. **Monitoring:** probe every region from authorized monitors, compare route origin and configuration digest, and treat an unexpected origin as an incident.
+**Phát hiện:** BGP/RPKI/lịch sử, tenant nhà cung cấp, certificate và hành vi dịch vụ giống nhau giúp nhận diện pool. **OPSEC chống chịu khi bị thu giữ:** edge chỉ giữ danh tính dịch vụ vùng, không giữ khóa đăng ký của người vận hành hoặc fleet. **Giám sát:** thăm dò mọi vùng từ monitor được ủy quyền, so sánh route origin và configuration digest, xem origin bất ngờ là sự cố.
 
-## QUIC migration and Multipath TCP continuity
+## Duy trì kết nối QUIC migration và Multipath TCP
 
-**Mechanics:** QUIC connection IDs can keep a client session alive across NAT rebinding or address changes; Multipath TCP can carry one reliable byte stream across multiple subflows. They improve continuity across Wi-Fi/cellular transitions but expose old and new paths to the common peer and can make cross-path correlation easier.<sup>[[27]](#references)</sup>
+**Cơ chế:** connection ID của QUIC có thể duy trì phiên client qua NAT rebinding hoặc thay đổi địa chỉ; Multipath TCP có thể truyền cùng một byte stream đáng tin cậy qua nhiều subflow. Chúng tăng tính liên tục khi chuyển giữa Wi-Fi/cellular nhưng làm lộ các đường cũ và mới với cùng peer, đồng thời có thể khiến tương quan giữa các đường dễ hơn.<sup>[[27]](#references)</sup>
 
-**Pros:** faster recovery during uplink changes; application session need not restart; MPTCP can combine resilience and throughput; valuable for approved field nodes.
+**Ưu điểm:** khôi phục nhanh hơn khi uplink thay đổi; phiên ứng dụng không cần khởi động lại; MPTCP có thể kết hợp khả năng chống chịu và thông lượng; hữu ích cho field node được phê duyệt.
 
-**Cons:** not anonymity; peer sees migration/subflows; connection identifiers and simultaneous traffic link paths; middlebox/carrier support varies; duplicated provider records increase exposure.
+**Nhược điểm:** không ẩn danh; peer thấy quá trình di chuyển/subflow; connection identifier và lưu lượng đồng thời liên kết các đường; hỗ trợ của middlebox/nhà mạng khác nhau; hồ sơ từ nhiều nhà cung cấp làm tăng phơi lộ.
 
-**Procedure:** (1) enable the supported transport only between an owned field client and rendezvous; (2) authenticate the application independently of IP; (3) begin a bounded transfer on approved Wi-Fi; (4) switch to organization cellular; (5) confirm path validation, data integrity and no clear/direct fallback; (6) test idle timeout and return; (7) retain broker records of every path transition.
+**Quy trình:** (1) chỉ bật transport được hỗ trợ giữa field client do bạn sở hữu và rendezvous; (2) xác thực ứng dụng độc lập với IP; (3) bắt đầu truyền dữ liệu có giới hạn qua Wi-Fi được phê duyệt; (4) chuyển sang cellular của tổ chức; (5) xác nhận kiểm tra đường đi, tính toàn vẹn dữ liệu và không fallback trực tiếp/dạng clear; (6) kiểm tra idle timeout và chuyển lại; (7) giữ bản ghi broker về mọi lần chuyển đường.
 
-**Detection:** the peer directly observes address migration or MPTCP subflows; access providers see their part; connection IDs, TLS identity and timing join both. **Capture-resilient OPSEC:** store only device-scoped session material and expire resumable state quickly. **Monitoring:** alert on impossible path changes, simultaneous unapproved networks, migration storms and resumption after quarantine.
+**Phát hiện:** peer trực tiếp thấy địa chỉ thay đổi hoặc MPTCP subflow; nhà cung cấp truy cập thấy phần của họ; connection ID, danh tính TLS và thời gian liên kết cả hai. **OPSEC chống chịu khi bị thu giữ:** chỉ lưu session material theo thiết bị và hết hạn trạng thái resume nhanh chóng. **Giám sát:** cảnh báo thay đổi đường đi bất khả thi, mạng không được phê duyệt dùng đồng thời, migration storm và resume sau quarantine.
 
-## Managed CI/CD or ephemeral automation runner egress
+## Egress từ CI/CD runner được quản lý hoặc automation runner tồn tại ngắn hạn
 
-**Mechanics:** an organization-owned workflow executes a bounded network check on a hosted runner. The destination sees a cloud runner address while the platform retains repository, actor, workflow, token, log and billing attribution. This is remote execution with accountable egress, not anonymity from the provider.<sup>[[28]](#references)</sup>
+**Cơ chế:** workflow do tổ chức sở hữu thực hiện kiểm tra mạng có giới hạn trên runner do nhà cung cấp lưu trữ. Đích đến thấy địa chỉ cloud runner, còn nền tảng giữ thông tin quy kết repository, actor, workflow, token, log và billing. Đây là thực thi từ xa với egress có thể quy trách nhiệm, không phải ẩn danh với nhà cung cấp.<sup>[[28]](#references)</sup>
 
-**Pros:** disposable clean environment; reproducible job definition; no inbound connection; useful for geographically distributed availability checks; strong controller audit.
+**Ưu điểm:** môi trường sạch, dùng một lần; định nghĩa job có thể tái lập; không cần kết nối inbound; hữu ích cho kiểm tra tính sẵn sàng phân tán địa lý; audit controller mạnh.
 
-**Cons:** platform and organization identify the initiator; broad workflow tokens and untrusted pull requests are dangerous; shared IP reputation; logs/artifacts can retain secrets or target data.
+**Nhược điểm:** nền tảng và tổ chức nhận diện người khởi tạo; workflow token rộng và pull request không tin cậy nguy hiểm; uy tín IP dùng chung; log/artifact có thể lưu secret hoặc dữ liệu target.
 
-**Procedure:** (1) create a private organization repository and environment for the assessment; (2) permit only manually approved, fixed benign jobs against owned endpoints; (3) use minimal read-only workflow permissions and no production secrets; (4) run the check; (5) compare workflow, provider and target records; (6) verify artifacts contain no credentials; (7) delete the environment token and retain required audit.
+**Quy trình:** (1) tạo repository và environment riêng tư của tổ chức cho bài đánh giá; (2) chỉ cho phép job lành tính, cố định, được phê duyệt thủ công để kiểm tra endpoint do bạn sở hữu; (3) dùng quyền workflow chỉ đọc tối thiểu và không có secret production; (4) chạy kiểm tra; (5) so sánh bản ghi workflow, nhà cung cấp và target; (6) xác minh artifact không chứa thông tin xác thực; (7) xóa environment token và giữ audit cần thiết.
 
-**Detection:** provider audit and workflow logs provide direct attribution; targets identify runner ASNs/ranges and stable request grammar. **Capture-resilient OPSEC:** never place field-device, signing, wallet or cloud-administrator secrets in runner variables. **Monitoring:** require branch/environment approval and alert on workflow edits, fork execution, secret reads and unexpected destinations.
+**Phát hiện:** audit nhà cung cấp và log workflow cung cấp quy kết trực tiếp; target nhận diện ASN/range của runner và grammar yêu cầu ổn định. **OPSEC chống chịu khi bị thu giữ:** không bao giờ đặt secret của field device, signing, wallet hoặc quản trị đám mây trong biến runner. **Giám sát:** yêu cầu phê duyệt branch/environment và cảnh báo chỉnh sửa workflow, thực thi fork, đọc secret và đích đến bất ngờ.
 
-## Non-IP local first hop to an owned gateway
+## Chặng đầu nội bộ không dùng IP tới gateway do bạn sở hữu
 
-**Mechanics:** Bluetooth mesh, Wi-Fi Aware/Direct, low-power radio or a serial/optical link carries bounded messages from a nearby sensor to an owner-approved Internet gateway. The field device itself has no Internet route; the gateway is the only egress. Radio range and protocol limits make this a telemetry/store-and-forward design, not interactive anonymous Internet.
+**Cơ chế:** Bluetooth mesh, Wi-Fi Aware/Direct, radio công suất thấp hoặc kết nối serial/quang truyền các thông điệp có giới hạn từ sensor gần đó tới gateway Internet được chủ sở hữu cho phép. Field device không có route Internet; gateway là egress duy nhất. Phạm vi radio và giới hạn giao thức khiến đây là thiết kế telemetry/store-and-forward, không phải Internet tương tác ẩn danh.
 
-**Pros:** removes an Internet stack and credentials from the smallest field device; low power; gateway centralizes policy; can bridge temporary dead zones.
+**Ưu điểm:** loại bỏ stack Internet và thông tin xác thực khỏi field device nhỏ nhất; tiêu thụ ít điện; gateway tập trung chính sách; có thể bắc cầu qua vùng mất kết nối tạm thời.
 
-**Cons:** RF/physical discovery, pairing and device identifiers; small bandwidth and range; gateway still links all messages; spectrum and encryption restrictions vary; capture can expose queued data.
+**Nhược điểm:** bị phát hiện qua RF/vật lý, ghép nối và mã định danh thiết bị; băng thông/phạm vi nhỏ; gateway vẫn liên kết mọi thông điệp; quy định phổ tần và mã hóa khác nhau; khi bị thu giữ có thể lộ dữ liệu đang chờ.
 
-**Procedure:** (1) obtain site and spectrum approval; (2) pair one owned sensor with one owned gateway using unique keys; (3) define signed fixed-size message types, TTL and rate; (4) give the sensor no default IP route; (5) let the gateway forward only to an owned collector; (6) test replay, range loss and gateway outage; (7) inventory and retrieve both devices.
+**Quy trình:** (1) xin phê duyệt địa điểm và phổ tần; (2) ghép nối một sensor do bạn sở hữu với một gateway do bạn sở hữu bằng khóa riêng; (3) xác định loại thông điệp cố định đã ký, TTL và tốc độ; (4) không cấp default IP route cho sensor; (5) để gateway chỉ chuyển tiếp tới collector do bạn sở hữu; (6) kiểm thử replay, mất phạm vi và lỗi gateway; (7) kiểm kê và thu hồi cả hai thiết bị.
 
-**Detection:** RF survey, pairing database, physical inspection and gateway process/flow logs reveal the path. **Capture-resilient OPSEC:** the sensor holds only its pairwise key and bounded encrypted queue, never operator, Wi-Fi, cellular or controller credentials. **Monitoring:** alert on new peers, sequence rollback, key failure, unusual RF rate and messages arriving through an unregistered gateway.
+**Phát hiện:** khảo sát RF, cơ sở dữ liệu ghép nối, kiểm tra vật lý và log tiến trình/flow gateway làm lộ đường truy cập. **OPSEC chống chịu khi bị thu giữ:** sensor chỉ giữ khóa pairwise và queue mã hóa có giới hạn, không bao giờ giữ thông tin xác thực của người vận hành, Wi-Fi, cellular hoặc controller. **Giám sát:** cảnh báo peer mới, sequence rollback, lỗi khóa, tốc độ RF bất thường và thông điệp đến qua gateway chưa đăng ký.
 
-## Capture/compromise exposure matrix
+## Ma trận phơi lộ khi bị thu giữ/xâm nhập
 
-This table applies a capture-resilience check to every family above. “Minimize” means reduce secrets and blast radius on authorized assets; it never means clearing evidence or hiding from an investigation.
+Bảng này áp dụng kiểm tra khả năng chống chịu khi bị thu giữ cho mọi nhóm ở trên. “Giảm thiểu” nghĩa là giảm secret và phạm vi ảnh hưởng trên tài sản được ủy quyền; không bao giờ có nghĩa là xóa bằng chứng hoặc che giấu khỏi điều tra.
 
-| Technique family | A captured endpoint/relay can reveal | Minimum authorized control |
+| Nhóm kỹ thuật | Endpoint/relay bị thu giữ có thể làm lộ | Kiểm soát tối thiểu được ủy quyền |
 |---|---|---|
-| NAT/CGNAT, public Wi-Fi, travel router | known networks, DHCP/portal history, MACs, tunnel peer | separate organization device; private MAC where supported; no personal accounts; controller inventory |
-| VPN, VPS, HTTP/SOCKS/SSH, multi-hop | provider/hostnames, keys, routes, logs and adjacent hop | one identity per engagement; short TTL; narrow routes; broker-side revocation; no master keys |
-| OHTTP/ODoH, MASQUE, split-provider relay | relay/gateway configuration, application identifiers and cached requests | minimize payload identifiers; pin approved config; bounded cache; strict no-direct fallback |
-| Tor, bridge, onion service, I2P, mixnet, GNUnet | installed software, bridge/onion material, local state and peer history | standard client; separate service keys; encrypted minimal state; rotate compromised service identity |
-| Remote browser/VDI/jump host | workspace token, clipboard/files and remote tenant | phishing-resistant MFA at gateway; disabled transfer channels; rapid session revocation |
-| Cellular, satellite, private APN | SIM/eSIM, IMEI/terminal identity, provider and approximate location | organization contract; no personal co-location; narrow APN/overlay policy; provider suspension runbook |
-| Residential/cooperative proxy, ORB lab | agent identity, controller/next hop, cached traffic | only consented/owned nodes; signed agent; per-node credential; controller-held participant mapping |
-| CDN/fronting, fast flux, serverless | tenant/origin/config, API tokens, deployment and billing references | dedicated project; least-privilege role; short-lived deploy token; provider audit retained centrally |
-| Dead drop, pull mailbox, store-and-forward | object names, queue, cached jobs/results and custody data | signed bounded jobs; TTL; encrypted cache; separate producer identity; immutable server logs |
-| Drop, nearest-neighbor, long-range bridge | serial/radio/SSID/peer, device key, physical placement artifacts | written placement; unique device identity; no operator secret; tamper/state telemetry; revoke and recover |
-| TURN, reverse overlay, dual-uplink | realm/broker, device credential, peer/route and uplink profiles | outbound-only narrow service; short-lived device credential; independent operator login; fail-closed paths |
-| IPv6 temporary addressing | profiles, prefix history and endpoint/application state | treat as anti-tracking only; preserve network logs; pair with endpoint compartmentation |
-| Pluggable transport/refraction lab | bridge/broker/decoy settings, Tor state and research keys | standard client or isolated lab; no personal browser state; no production signaling |
-| IPFS/PIR/fetcher | requested CID/query client, cached content, gateway or service token | encrypted bounded cache; public-only parameters; short-lived allowlisted service token |
-| Anycast/QUIC/MPTCP | service nodes, connection IDs, resumable state and every known path | regional identity only; short resumption lifetime; central route/session revocation |
-| Managed CI/CD runner | repository, workflow, provider token, logs and artifacts | least-privilege workflow; no production/field/wallet secrets; environment approval |
-| Non-IP local hop | radio peer, pairwise key, queued messages and gateway identity | unique pairwise key; fixed message schema; no Wi-Fi/cellular/operator credential |
+| NAT/CGNAT, Wi-Fi công cộng, travel router | mạng đã biết, lịch sử DHCP/portal, MAC, peer tunnel | thiết bị riêng của tổ chức; private MAC nếu được hỗ trợ; không dùng tài khoản cá nhân; inventory controller |
+| VPN, VPS, HTTP/SOCKS/SSH, multi-hop | nhà cung cấp/hostname, khóa, route, log và hop liền kề | một danh tính cho mỗi engagement; TTL ngắn; route hẹp; thu hồi phía broker; không có khóa chủ |
+| OHTTP/ODoH, MASQUE, split-provider relay | cấu hình relay/gateway, mã định danh ứng dụng và yêu cầu đã cache | giảm trường định danh payload; pin cấu hình được phê duyệt; cache có giới hạn; nghiêm cấm fallback trực tiếp |
+| Tor, bridge, onion service, I2P, mixnet, GNUnet | phần mềm đã cài, bridge/onion material, trạng thái cục bộ và lịch sử peer | client chuẩn; khóa dịch vụ riêng; trạng thái tối thiểu được mã hóa; luân chuyển danh tính dịch vụ bị xâm phạm |
+| Trình duyệt từ xa/VDI/jump host | workspace token, clipboard/tệp và tenant từ xa | MFA chống phishing tại gateway; tắt kênh truyền dữ liệu; thu hồi phiên nhanh |
+| Cellular, vệ tinh, private APN | SIM/eSIM, danh tính IMEI/terminal, nhà cung cấp và vị trí gần đúng | hợp đồng của tổ chức; không đặt cùng thiết bị cá nhân; chính sách APN/overlay hẹp; quy trình đình chỉ từ nhà cung cấp |
+| Residential/cooperative proxy, ORB lab | danh tính agent, controller/hop tiếp theo, lưu lượng cache | chỉ node có sự đồng thuận/thuộc sở hữu; agent có chữ ký; thông tin xác thực riêng từng node; mapping participant do controller giữ |
+| CDN/fronting, fast flux, serverless | tenant/origin/config, API token, tài liệu triển khai và billing | project riêng; role theo least privilege; deploy token tồn tại ngắn hạn; giữ audit nhà cung cấp ở nơi tập trung |
+| Dead drop, pull mailbox, store-and-forward | tên object, queue, job/kết quả đã cache và dữ liệu lưu trữ | job có chữ ký và giới hạn; TTL; cache mã hóa; danh tính producer riêng; log máy chủ bất biến |
+| Drop, nearest-neighbor, long-range bridge | serial/radio/SSID/peer, khóa thiết bị, dấu vết vị trí vật lý | văn bản cho phép lắp đặt; danh tính thiết bị riêng; không có secret của người vận hành; telemetry chống can thiệp/trạng thái; thu hồi và khôi phục |
+| TURN, reverse overlay, dual-uplink | realm/broker, thông tin xác thực thiết bị, peer/route và profile uplink | dịch vụ outbound-only, phạm vi hẹp; thông tin xác thực thiết bị tồn tại ngắn hạn; đăng nhập người vận hành độc lập; đường fail-closed |
+| IPv6 temporary addressing | profile, lịch sử prefix và trạng thái endpoint/ứng dụng | chỉ xem là biện pháp chống theo dõi; giữ log mạng; kết hợp compartmentation endpoint |
+| Pluggable transport/refraction lab | cài đặt bridge/broker/decoy, trạng thái Tor và khóa nghiên cứu | client chuẩn hoặc lab cô lập; không dùng trạng thái trình duyệt cá nhân; không phát tín hiệu production |
+| IPFS/PIR/fetcher | client truy vấn CID/query, nội dung cache, token gateway/dịch vụ | cache mã hóa có giới hạn; chỉ tham số công khai; service token allowlist tồn tại ngắn hạn |
+| Anycast/QUIC/MPTCP | node dịch vụ, connection ID, trạng thái resume và mọi đường đã biết | chỉ danh tính theo vùng; thời hạn resume ngắn; thu hồi route/phiên tập trung |
+| CI/CD runner được quản lý | repository, workflow, token nhà cung cấp, log và artifact | workflow theo least privilege; không có secret production/field/wallet; phê duyệt environment |
+| Chặng nội bộ không dùng IP | peer radio, khóa pairwise, thông điệp trong queue và danh tính gateway | khóa pairwise riêng; schema thông điệp cố định; không có thông tin xác thực Wi-Fi/cellular/người vận hành |
 
-## Monitoring possible discovery for every access family
+## Giám sát khả năng bị phát hiện với mọi nhóm truy cập
 
-No client-side test proves that an investigator or defender is watching. Monitor changes in systems the engagement owns, corroborate them with the controller/client, and stop rather than probing observers. The rows below cover every technique above; combine them with the [field-node alert states and response runbook](capture-resilient-authorized-field-nodes.md#monitoring-for-discovery-loss-or-compromise).
+Không phép kiểm tra phía client nào chứng minh được điều tra viên hoặc bên phòng thủ đang theo dõi. Giám sát các hệ thống thuộc quyền sở hữu của engagement, đối chiếu với controller/client và dừng lại thay vì thăm dò observer. Các dòng dưới đây bao quát mọi kỹ thuật ở trên; kết hợp với [trạng thái cảnh báo field node và runbook ứng phó](capture-resilient-authorized-field-nodes.md#monitoring-for-discovery-loss-or-compromise).
 
-| Covered techniques | Safe controller-side signals | Quarantine/stop condition |
+| Kỹ thuật được bao quát | Tín hiệu an toàn phía controller | Điều kiện quarantine/dừng |
 |---|---|---|
-| NAT/CGNAT, public/guest Wi-Fi, travel router, cellular/eSIM, satellite, private APN | lease/portal/carrier session, public tuple, BSSID/cell/path change, provider notice | unapproved network/SIM/device, unexplained relocation or provider/SOC escalation |
-| VPN/VPS, HTTP/SOCKS/SSH, multi-hop, residential/cooperative proxy | peer authentication, tunnel state, route/DNS leaks, new admin/API event, complaint | duplicate/stolen credential, unknown administrator, direct fallback or out-of-scope egress |
-| OHTTP/ODoH/ECH, MASQUE, split-provider relay, TURN | relay/gateway allocation, key/config version, unsupported direct connection, error/replay rate | key mismatch, direct fallback, unknown realm/peer or provider abuse notice |
-| Tor Browser, bridges, Snowflake/WebTunnel/obfs4/meek, VPN±Tor, onion service | bootstrap state, circuit failure, onion descriptor/service health and owned canary page | personal-account crossover, unexpected non-Tor connection or compromised service key |
-| I2P, mixnet, GNUnet, mesh/store-forward, non-IP local hop | peer set, queue age/sequence, gateway arrival, radio association and content hash | unknown peer/gateway, sequence rollback, unauthorized content or missing custody record |
-| Remote browser/VDI/jump host, CI/CD runner, serverless | IdP session, workflow/image/config change, new token use, artifact/export and cloud audit | unknown login/workflow edit, secret read, unexpected destination or project-role escalation |
-| ORB lab, fast flux/DGA, CDN/fronting, dead drop/pull mailbox | owned node inventory, DNS/edge/object access, controller graph, job signature and TTL | unknown node/origin/object writer, unsigned/replayed job, topology escape from lab |
-| Drop/nearest-neighbor/long-range bridge/outbound overlay/dual uplink | signed heartbeat, boot/config hash, enclosure state, AP/switch context, duplicate identity | moved/opened node, unexpected boot/hash/path, sentinel use or site report |
-| IPv6 temporary addresses, QUIC migration, MPTCP | delegated prefix, connection ID/subflows, path-validation and broker session | impossible migration, simultaneous unapproved paths or session resumption after revoke |
-| IPFS/cache, PIR, constrained fetcher | CID/query-shape/root version, peer/gateway change, redirect/allowlist denial | unexpected pin/query/destination, unsigned dataset root or provider abuse notice |
-| Refraction/decoy-routing lab, anycast rendezvous | owned diversion decision, proxy arrival, BGP/RPKI origin, regional config digest | production-path signal, unknown route origin, region/config inconsistency |
+| NAT/CGNAT, Wi-Fi công cộng/guest, travel router, cellular/eSIM, vệ tinh, private APN | phiên lease/portal/nhà mạng, tuple công khai, thay đổi BSSID/cell/đường đi, thông báo nhà cung cấp | mạng/SIM/thiết bị không được phê duyệt, di chuyển không giải thích được hoặc nhà cung cấp/SOC nâng cấp sự cố |
+| VPN/VPS, HTTP/SOCKS/SSH, multi-hop, residential/cooperative proxy | xác thực peer, trạng thái tunnel, rò rỉ route/DNS, sự kiện admin/API mới, khiếu nại | thông tin xác thực bị trùng/đánh cắp, admin lạ, fallback trực tiếp hoặc egress ngoài phạm vi |
+| OHTTP/ODoH/ECH, MASQUE, split-provider relay, TURN | allocation relay/gateway, phiên bản khóa/config, kết nối trực tiếp không được hỗ trợ, tỷ lệ lỗi/replay | khóa không khớp, fallback trực tiếp, realm/peer lạ hoặc thông báo lạm dụng từ nhà cung cấp |
+| Tor Browser, bridge, Snowflake/WebTunnel/obfs4/meek, VPN±Tor, onion service | trạng thái bootstrap, lỗi circuit, descriptor onion/tình trạng dịch vụ và canary page do bạn sở hữu | dùng lẫn tài khoản cá nhân, kết nối không phải Tor bất ngờ hoặc khóa dịch vụ bị xâm phạm |
+| I2P, mixnet, GNUnet, mesh/store-forward, chặng nội bộ không dùng IP | peer set, tuổi/thứ tự queue, gateway nhận, liên kết radio và hash nội dung | peer/gateway lạ, sequence rollback, nội dung không được ủy quyền hoặc thiếu hồ sơ lưu trữ |
+| Trình duyệt từ xa/VDI/jump host, CI/CD runner, serverless | phiên IdP, thay đổi workflow/image/config, lượt dùng token mới, artifact/export và audit đám mây | đăng nhập/chỉnh sửa workflow lạ, đọc secret, đích đến bất ngờ hoặc nâng quyền project/role |
+| ORB lab, fast flux/DGA, CDN/fronting, dead drop/pull mailbox | inventory node do bạn sở hữu, truy cập DNS/edge/object, đồ thị controller, chữ ký job và TTL | node/origin/object writer lạ, job không ký/được phát lại, topology thoát khỏi lab |
+| Drop/nearest-neighbor/long-range bridge/outbound overlay/dual uplink | heartbeat có chữ ký, hash boot/config, trạng thái vỏ thiết bị, context AP/switch, danh tính trùng | node bị di chuyển/mở, boot/hash/đường đi bất ngờ, sentinel được sử dụng hoặc có báo cáo từ địa điểm |
+| IPv6 temporary address, QUIC migration, MPTCP | delegated prefix, connection ID/subflow, xác thực đường đi và broker session | di chuyển bất khả thi, các đường không được phê duyệt hoạt động đồng thời hoặc phiên resume sau thu hồi |
+| IPFS/cache, PIR, fetcher có giới hạn | CID/query-shape/root version, thay đổi peer/gateway, từ chối redirect/allowlist | pin/query/đích đến bất ngờ, dataset root không ký hoặc thông báo lạm dụng từ nhà cung cấp |
+| Refraction/decoy-routing lab, anycast rendezvous | quyết định chuyển hướng thuộc quyền sở hữu, proxy nhận, BGP/RPKI origin, config digest theo vùng | tín hiệu qua đường production, route origin lạ, vùng/config không nhất quán |
 
-## Choosing and testing a path
+## Chọn và kiểm thử đường truy cập
 
-1. Name the observer to remove and data to hide.
-2. Select the least complex family that removes it.
-3. Draw source, entry, traversal, exit, DNS, account and payment observers.
-4. Use a separate endpoint/application identity.
-5. Verify IPv4, IPv6, DNS, WebRTC/application bypass and destination view.
-6. Break every hop and confirm failure is closed.
-7. Compare logs at every component you control.
-8. Record residual timing, provider, endpoint and physical links.
+1. Xác định observer cần loại bỏ và dữ liệu cần che giấu.
+2. Chọn nhóm kỹ thuật ít phức tạp nhất có thể loại bỏ observer đó.
+3. Vẽ sơ đồ observer nguồn, entry, traversal, exit, DNS, tài khoản và thanh toán.
+4. Dùng danh tính endpoint/ứng dụng riêng.
+5. Xác minh IPv4, IPv6, DNS, WebRTC/việc ứng dụng bỏ qua proxy và góc nhìn của đích đến.
+6. Làm lỗi từng hop và xác nhận kết nối bị đóng an toàn.
+7. So sánh log tại mọi thành phần bạn kiểm soát.
+8. Ghi nhận các liên kết còn lại về thời gian, nhà cung cấp, endpoint và vật lý.
 
 ## References
 
-- [1] [EFF — Choosing the VPN that is right for you](https://ssd.eff.org/module/choosing-vpn-thats-right-you)
-- [2] [RFC 9458 — Oblivious HTTP](https://www.rfc-editor.org/rfc/rfc9458.html)
-- [3] [RFC 9298 — Proxying UDP in HTTP](https://www.rfc-editor.org/rfc/rfc9298.html) and [RFC 9484 — Proxying IP in HTTP](https://www.rfc-editor.org/rfc/rfc9484.html)
-- [4] [Tor Project — Tor protections](https://support.torproject.org/about-tor/introduction/protections/) and [Tor specification introduction](https://spec.torproject.org/intro/)
-- [5] [Tor Project — Unblocking Tor](https://support.torproject.org/tor-browser/circumvention/unblocking-tor/)
-- [6] [Tor Project — Using Tor Browser with a VPN](https://support.torproject.org/tor-browser/general/vpn-with-tor/)
-- [7] [Tor Project — Onion services overview](https://community.torproject.org/onion-services/overview/)
-- [8] [I2P — Threat model](https://www.i2p.net/en/docs/overview/threat-model/)
-- [9] [Katzenpost — Threat model](https://katzenpost.network/docs/threat_model/)
-- [10] [GNUnet — Anonymous file sharing](https://docs.gnunet.org/master/users/fs.html) and [GNUnet VPN limitations](https://docs.gnunet.org/latest/users/vpn.html)
-- [11] [RFC 9230 — Oblivious DoH](https://www.rfc-editor.org/rfc/rfc9230.html) and [RFC 9849 — Encrypted Client Hello](https://www.rfc-editor.org/rfc/rfc9849.html)
-- [12] [Apple Platform Security — iCloud Private Relay security](https://support.apple.com/guide/security/secad8ce3233/web)
-- [13] [GSMA — Mandatory SIM registration](https://www.gsma.com/solutions-and-impact/connectivity-for-good/mobile-for-development/programme/digital-identity/mandatory-sim-registration-policy-and-regulatory-perspectives-in-the-absence-of-data-protection-laws/)
-- [14] [Kaspersky Securelist — Satellite Turla](https://securelist.com/satellite-turla-apt-command-and-control-in-the-sky/72081/)
-- [15] [Google Cloud/Mandiant — China-nexus espionage actors use ORB networks](https://cloud.google.com/blog/topics/threat-intelligence/china-nexus-espionage-orb-networks)
+- [1] [EFF — Chọn VPN phù hợp với bạn](https://ssd.eff.org/module/choosing-vpn-thats-right-you)
+- [2] [RFC 9458 — HTTP ẩn danh](https://www.rfc-editor.org/rfc/rfc9458.html)
+- [3] [RFC 9298 — Chuyển tiếp UDP qua HTTP](https://www.rfc-editor.org/rfc/rfc9298.html) and [RFC 9484 — Proxying IP in HTTP](https://www.rfc-editor.org/rfc/rfc9484.html)
+- [4] [Tor Project — Các biện pháp bảo vệ của Tor](https://support.torproject.org/about-tor/introduction/protections/) and [Tor specification introduction](https://spec.torproject.org/intro/)
+- [5] [Tor Project — Bỏ chặn Tor](https://support.torproject.org/tor-browser/circumvention/unblocking-tor/)
+- [6] [Tor Project — Dùng Tor Browser với VPN](https://support.torproject.org/tor-browser/general/vpn-with-tor/)
+- [7] [Tor Project — Tổng quan về onion service](https://community.torproject.org/onion-services/overview/)
+- [8] [I2P — Mô hình đe dọa](https://www.i2p.net/en/docs/overview/threat-model/)
+- [9] [Katzenpost — Mô hình đe dọa](https://katzenpost.network/docs/threat_model/)
+- [10] [GNUnet — Chia sẻ tệp ẩn danh](https://docs.gnunet.org/master/users/fs.html) and [GNUnet VPN limitations](https://docs.gnunet.org/latest/users/vpn.html)
+- [11] [RFC 9230 — DoH ẩn danh](https://www.rfc-editor.org/rfc/rfc9230.html) and [RFC 9849 — Encrypted Client Hello](https://www.rfc-editor.org/rfc/rfc9849.html)
+- [12] [Apple Platform Security — Bảo mật iCloud Private Relay](https://support.apple.com/guide/security/secad8ce3233/web)
+- [13] [GSMA — Đăng ký SIM bắt buộc](https://www.gsma.com/solutions-and-impact/connectivity-for-good/mobile-for-development/programme/digital-identity/mandatory-sim-registration-policy-and-regulatory-perspectives-in-the-absence-of-data-protection-laws/)
+- [14] [Kaspersky Securelist — Turla vệ tinh](https://securelist.com/satellite-turla-apt-command-and-control-in-the-sky/72081/)
+- [15] [Google Cloud/Mandiant — Các tác nhân gián điệp liên hệ Trung Quốc sử dụng mạng ORB](https://cloud.google.com/blog/topics/threat-intelligence/china-nexus-espionage-orb-networks)
 - [16] [MITRE ATT&CK — Domain Fronting (T1090.004)](https://attack.mitre.org/techniques/T1090/004/)
 - [17] [MITRE ATT&CK — Fast Flux DNS (T1568.001)](https://attack.mitre.org/techniques/T1568/001/)
-- [18] [Volexity — The Nearest Neighbor Attack](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
+- [18] [Volexity — Tấn công Nearest Neighbor](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
 - [19] [RFC 8656 — Traversal Using Relays around NAT (TURN)](https://www.rfc-editor.org/rfc/rfc8656.html)
-- [20] [WireGuard — Quick Start: NAT and Firewall Traversal Persistence](https://www.wireguard.com/quickstart/)
-- [21] [RFC 8981 — Temporary Address Extensions for Stateless Address Autoconfiguration in IPv6](https://www.rfc-editor.org/rfc/rfc8981.html)
-- [22] [Tor Project — Pluggable transports and bridges](https://support.torproject.org/tor-browser/circumvention/unblocking-tor/) and [Using Snowflake](https://support.torproject.org/anti-censorship/how-can-i-use-snowflake/)
-- [23] [Refraction Networking — project and deployment research](https://refraction.network/) and [Running Refraction Networking for Real](https://refraction.network/papers/deployment-pets20.pdf)
-- [24] [IPFS — HTTP Gateway concepts and request lifecycle](https://docs.ipfs.tech/concepts/ipfs-gateway/)
-- [25] [IETF PEARG — Private Information Retrieval overview](https://datatracker.ietf.org/meeting/121/materials/slides-121-pearg-call-me-by-my-name-simple-practical-private-information-retrieval-for-keyword-queries-00)
-- [26] [RFC 4786 — Operation of Anycast Services](https://www.rfc-editor.org/rfc/rfc4786.html)
-- [27] [RFC 9000 — QUIC connection migration](https://www.rfc-editor.org/rfc/rfc9000.html) and [RFC 8684 — Multipath TCP](https://www.rfc-editor.org/rfc/rfc8684.html)
-- [28] [GitHub — GitHub-hosted runners reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
+- [20] [WireGuard — Quick Start: NAT và duy trì khả năng xuyên qua firewall](https://www.wireguard.com/quickstart/)
+- [21] [RFC 8981 — Extension địa chỉ tạm thời cho Stateless Address Autoconfiguration trong IPv6](https://www.rfc-editor.org/rfc/rfc8981.html)
+- [22] [Tor Project — Pluggable transport và bridge](https://support.torproject.org/tor-browser/circumvention/unblocking-tor/) and [Using Snowflake](https://support.torproject.org/anti-censorship/how-can-i-use-snowflake/)
+- [23] [Refraction Networking — Nghiên cứu dự án và triển khai](https://refraction.network/) and [Running Refraction Networking for Real](https://refraction.network/papers/deployment-pets20.pdf)
+- [24] [IPFS — Khái niệm HTTP Gateway và vòng đời yêu cầu](https://docs.ipfs.tech/concepts/ipfs-gateway/)
+- [25] [IETF PEARG — Tổng quan về Private Information Retrieval](https://datatracker.ietf.org/meeting/121/materials/slides-121-pearg-call-me-by-my-name-simple-practical-private-information-retrieval-for-keyword-queries-00)
+- [26] [RFC 4786 — Hoạt động của dịch vụ Anycast](https://www.rfc-editor.org/rfc/rfc4786.html)
+- [27] [RFC 9000 — Di chuyển kết nối QUIC](https://www.rfc-editor.org/rfc/rfc9000.html) and [RFC 8684 — Multipath TCP](https://www.rfc-editor.org/rfc/rfc8684.html)
+- [28] [GitHub — Tài liệu tham khảo về runner do GitHub lưu trữ](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
 {{#include ../banners/hacktricks-training.md}}

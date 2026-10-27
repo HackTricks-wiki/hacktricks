@@ -1,133 +1,133 @@
-# Operational Privacy Playbooks
+# Các playbook về quyền riêng tư vận hành
 
 {{#include ../banners/hacktricks-training.md}}
 
-These playbooks combine the controls from the rest of this section. They are starting points, not guarantees: update the threat model whenever a new observer, account, device, location, payment, file or counterparty enters the workflow.
+Các playbook này kết hợp những biện pháp kiểm soát trong các phần còn lại của mục này. Đây là điểm khởi đầu, không phải sự bảo đảm: hãy cập nhật mô hình mối đe dọa mỗi khi có người quan sát, tài khoản, thiết bị, địa điểm, phương thức thanh toán, tệp hoặc bên liên quan mới tham gia quy trình.
 
-## Universal preflight
+## Kiểm tra trước khi bắt đầu
 
-1. Write the legitimate objective and what must remain private **from whom**.
-2. Record the identities, devices, networks, accounts, payment rails, counterparties, physical locations and data that the activity will touch.
-3. Identify the strongest likely observer and consequence of failure.
-4. Confirm authorization, applicable law, provider terms and organizational policy.
-5. Decide what must remain attributable internally for safety, incident response, accounting and audit.
-6. Pick the smallest workable compartment; establish its recovery and shutdown paths before use.
-7. Test the compartment against a controlled service, including IP/DNS/IPv6, browser identity, document metadata, payment statement and notification leakage.
+1. Ghi rõ mục tiêu hợp pháp và những gì cần được giữ riêng tư **với ai**.
+2. Liệt kê danh tính, thiết bị, mạng, tài khoản, phương thức thanh toán, bên liên quan, địa điểm thực tế và dữ liệu mà hoạt động sẽ tác động đến.
+3. Xác định người quan sát có khả năng cao nhất và hậu quả nếu thất bại.
+4. Xác nhận quyền hạn, luật hiện hành, điều khoản của nhà cung cấp và chính sách của tổ chức.
+5. Quyết định những gì cần được ghi nhận nội bộ để đảm bảo an toàn, ứng phó sự cố, kế toán và kiểm toán.
+6. Chọn vùng ngăn cách nhỏ nhất có thể sử dụng; thiết lập phương án khôi phục và tắt trước khi dùng.
+7. Kiểm tra vùng ngăn cách với một dịch vụ có kiểm soát, bao gồm nguy cơ rò rỉ IP/DNS/IPv6, danh tính trình duyệt, metadata tài liệu, sao kê thanh toán và thông báo.
 
-Use the detailed model in [Threat Modeling and Identity Separation](threat-modeling-and-identity-separation.md).
+Sử dụng mô hình chi tiết trong [Threat Modeling and Identity Separation](threat-modeling-and-identity-separation.md).
 
-## Everyday privacy baseline
+## Quyền riêng tư cơ bản hằng ngày
 
-Goal: reduce commercial tracking, account takeover and unnecessary exposure without trying to become anonymous.
+Mục tiêu: giảm việc theo dõi thương mại, chiếm đoạt tài khoản và phơi lộ không cần thiết mà không cố gắng trở nên ẩn danh.
 
-- Use a maintained OS with full-disk encryption, automatic updates, screen lock and secure boot where available.
-- Put password manager, recovery email and phishing-resistant MFA/security keys in order first.
-- Review app permissions, location history, advertising identifiers, cloud sync and third-party account connections.
-- Use a mainstream browser with few extensions, tracking protection, HTTPS, and separate profiles for work/personal/high-risk browsing.
-- Use private relay aliases or distinct email addresses by relationship; do not use a personal phone number when it is merely optional.
-- Prefer end-to-end encrypted messaging for content, while remembering that participants, timing, groups and endpoints remain metadata.
-- Remove metadata from files deliberately and inspect the exported copy—not the original—before publishing.
-- Use virtual-card or wallet tokens for payment-credential compartmentalization; do not call them anonymous.
-- Back up encrypted recovery material and test restoration.
+- Dùng OS được duy trì, có mã hóa toàn bộ ổ đĩa, cập nhật tự động, khóa màn hình và secure boot nếu có.
+- Ưu tiên thiết lập trình quản lý mật khẩu, email khôi phục và MFA/khóa bảo mật chống phishing.
+- Rà soát quyền ứng dụng, lịch sử vị trí, mã định danh quảng cáo, đồng bộ đám mây và kết nối tài khoản bên thứ ba.
+- Dùng trình duyệt phổ biến với ít extension, tính năng chống theo dõi, HTTPS và các profile riêng cho hoạt động duyệt web cá nhân/công việc/rủi ro cao.
+- Dùng alias chuyển tiếp riêng tư hoặc địa chỉ email riêng theo từng mối quan hệ; không dùng số điện thoại cá nhân nếu chỉ là tùy chọn.
+- Ưu tiên nhắn tin mã hóa đầu cuối để bảo vệ nội dung, nhưng hãy nhớ rằng người tham gia, thời điểm, nhóm và endpoint vẫn là metadata.
+- Chủ động xóa metadata khỏi tệp và kiểm tra bản đã xuất — không phải bản gốc — trước khi đăng.
+- Dùng thẻ ảo hoặc token ví để phân tách thông tin thanh toán; đừng gọi chúng là ẩn danh.
+- Sao lưu tài liệu khôi phục đã mã hóa và kiểm tra khả năng khôi phục.
 
-## Pseudonymous publication
+## Xuất bản bằng danh tính giả danh
 
-Goal: prevent casual readers and platforms from trivially linking a publication to a civil identity. This does not defeat a capable targeted investigation.
+Mục tiêu: ngăn độc giả thông thường và nền tảng dễ dàng liên kết nội dung xuất bản với danh tính pháp lý. Cách này không chống lại được một cuộc điều tra có chủ đích và đủ năng lực.
 
-1. Define whether the platform, hosting provider, readers, contacts, local network, payment provider or legal process is in the threat model.
-2. Create a dedicated endpoint/account context from a clean baseline. Disable personal browser sync, cloud documents, contact upload and notification previews.
-3. Create the pseudonymous account through the chosen network compartment. Do not reuse usernames, avatars, recovery channels, writing boilerplate or personal identity-provider login.
-4. Use Tor Browser when destination unlinkability is more important than speed; do not add extensions, resize/customize it heavily, or open downloaded documents while online in an ordinary desktop session.
-5. Draft with a process that does not embed personal template names, revision authors, printer paths, GPS/EXIF, thumbnails or hidden layers. Export a copy and inspect it with appropriate metadata tools.
-6. Check content for self-identifying facts: unique dates, workplace details, local weather/time zone, reflections, background audio, linguistic habits and prior-publication text reuse.
-7. Use a separate reply channel. Treat every direct contact, attachment and link as a potential correlation or phishing attempt.
-8. If money is involved, use the lawful method that exposes only the necessary data. Assume the platform and regulated intermediary may know the payee even if readers do not.
-9. Publish, then inspect the public result from a different clean context. Record what the platform added or transformed.
-10. Maintain a planned cadence only if it does not create a stable behavioral fingerprint; retire the compartment instead of silently repurposing it.
+1. Xác định nền tảng, nhà cung cấp hosting, độc giả, người liên hệ, mạng cục bộ, nhà cung cấp thanh toán hoặc quy trình pháp lý có nằm trong mô hình mối đe dọa hay không.
+2. Tạo ngữ cảnh endpoint/tài khoản chuyên biệt từ một môi trường sạch. Tắt đồng bộ trình duyệt cá nhân, tài liệu đám mây, tải lên danh bạ và bản xem trước thông báo.
+3. Tạo tài khoản giả danh thông qua vùng ngăn cách mạng đã chọn. Không dùng lại username, avatar, kênh khôi phục, mẫu văn bản soạn sẵn hoặc thông tin đăng nhập identity provider cá nhân.
+4. Dùng Tor Browser khi việc không thể liên kết hoạt động đến đích quan trọng hơn tốc độ; không thêm extension, thay đổi kích thước/tùy chỉnh quá nhiều hoặc mở tài liệu đã tải xuống khi đang online trong phiên desktop thông thường.
+5. Soạn thảo theo quy trình không nhúng tên mẫu cá nhân, tác giả bản sửa đổi, đường dẫn máy in, GPS/EXIF, thumbnail hoặc layer ẩn. Xuất một bản sao và kiểm tra bản đó bằng công cụ metadata phù hợp.
+6. Kiểm tra nội dung để tìm thông tin có thể nhận diện chính người viết: ngày tháng đặc biệt, chi tiết nơi làm việc, thời tiết/múi giờ địa phương, phản chiếu, âm thanh nền, thói quen ngôn ngữ và văn bản trùng với nội dung đã xuất bản trước đây.
+7. Dùng kênh trả lời riêng. Xem mọi liên hệ trực tiếp, tệp đính kèm và liên kết là nguy cơ bị liên kết hoặc phishing.
+8. Nếu có tiền liên quan, dùng phương thức hợp pháp chỉ tiết lộ dữ liệu cần thiết. Giả định nền tảng và trung gian chịu quản lý có thể biết người nhận tiền ngay cả khi độc giả không biết.
+9. Đăng nội dung, sau đó kiểm tra kết quả công khai từ một ngữ cảnh sạch khác. Ghi lại những gì nền tảng đã thêm hoặc biến đổi.
+10. Chỉ duy trì lịch đăng đã định nếu nó không tạo ra dấu vân tay hành vi ổn định; hãy ngừng sử dụng vùng ngăn cách thay vì âm thầm tái sử dụng nó.
 
-For serious journalism, activism, domestic abuse or state-level risk, obtain tailored help from an experienced digital-security organization; a static checklist cannot model local law or a live adversary.
+Đối với báo chí nghiêm túc, hoạt động xã hội, bạo lực gia đình hoặc rủi ro cấp nhà nước, hãy tìm hỗ trợ phù hợp từ một tổ chức an ninh số giàu kinh nghiệm; checklist tĩnh không thể mô hình hóa luật địa phương hoặc đối thủ đang hoạt động.
 
-## Authorized red-team engagement
+## Hoạt động red-team được ủy quyền
 
-Goal: keep operators' personal identities and home networks out of target telemetry while preserving authorization, control and incident response.
+Mục tiêu: giữ danh tính cá nhân và mạng gia đình của người vận hành khỏi telemetry của mục tiêu, đồng thời vẫn đảm bảo ủy quyền, kiểm soát và ứng phó sự cố.
 
-### Before the start window
+### Trước thời điểm bắt đầu
 
-- Finalize the ROE infrastructure annex, targets/exclusions, source ranges, dates, emergency stop and third-party/provider permissions.
-- Allocate a dedicated operator profile or VM, engagement secrets, evidence store, cloud project, domains and budget.
-- Prefer client-provided egress or an organization-controlled fixed bastion. Test full-tunnel IPv4/IPv6/DNS behavior and fail-closed policy.
-- Store the mapping from operator to public infrastructure with the exercise controller or agreed escrow contact.
-- Establish rate limits, destination allowlists and separate approval for destructive, wireless, physical, phishing or credential-collection actions.
-- Use an organization-controlled payment rail and record approvals internally.
+- Hoàn tất phụ lục hạ tầng ROE, mục tiêu/phạm vi loại trừ, dải địa chỉ nguồn, ngày thực hiện, quy trình dừng khẩn cấp và quyền của bên thứ ba/nhà cung cấp.
+- Cấp profile operator hoặc VM chuyên dụng, secrets của đợt thực hiện, kho bằng chứng, dự án cloud, domain và ngân sách.
+- Ưu tiên egress do khách hàng cung cấp hoặc bastion cố định do tổ chức kiểm soát. Kiểm tra hành vi full-tunnel IPv4/IPv6/DNS và chính sách fail-closed.
+- Lưu thông tin liên kết operator với hạ tầng công khai cho người điều phối cuộc diễn tập hoặc đầu mối escrow đã thống nhất.
+- Thiết lập giới hạn tốc độ, allowlist đích và quy trình phê duyệt riêng cho các hành động phá hoại, wireless, tại chỗ, phishing hoặc thu thập thông tin xác thực.
+- Dùng phương thức thanh toán do tổ chức kiểm soát và ghi nhận các phê duyệt nội bộ.
 
-### During the engagement
+### Trong quá trình thực hiện
 
-- Start from the approved endpoint and tunnel; verify observed egress before assessment traffic.
-- Keep personal accounts, devices, phone numbers, repositories, SSH/GPG keys and cloud sync out of the compartment.
-- Log operator/job, start/stop, source, scoped destination and configuration change without collecting unnecessary client content.
-- Stop on scope ambiguity, unexpected third-party systems, provider abuse notification, safety impact, lost equipment or loss of controller contact.
-- Never improvise with a neighbor's Wi-Fi, stolen credentials, an unapproved SIM/account, or hardware hidden at a venue.
+- Bắt đầu từ endpoint và tunnel đã được phê duyệt; xác minh egress quan sát được trước khi gửi lưu lượng đánh giá.
+- Không dùng tài khoản, thiết bị, số điện thoại, repository, khóa SSH/GPG và đồng bộ cloud cá nhân trong vùng ngăn cách.
+- Ghi log operator/công việc, thời điểm bắt đầu/dừng, nguồn, đích trong phạm vi và thay đổi cấu hình mà không thu thập nội dung khách hàng không cần thiết.
+- Dừng nếu phạm vi không rõ ràng, phát hiện hệ thống bên thứ ba ngoài dự kiến, nhận thông báo lạm dụng từ nhà cung cấp, có ảnh hưởng đến an toàn, thất lạc thiết bị hoặc mất liên lạc với người điều phối.
+- Tuyệt đối không ứng biến bằng Wi-Fi của hàng xóm, thông tin xác thực đánh cắp, SIM/tài khoản chưa được phê duyệt hoặc phần cứng giấu tại địa điểm tổ chức.
 
-### End of engagement
+### Kết thúc đợt thực hiện
 
-- Stop jobs and C2; recover approved drop devices; revoke tokens, credentials and certificates.
-- Reconcile infrastructure, domains, source addresses, expenses, data and provider cases against the inventory.
-- Return/delete/retain client data according to contract, preserve the minimum required audit evidence, and have a second operator verify shutdown.
+- Dừng các job và C2; thu hồi thiết bị cài cắm đã được phê duyệt; thu hồi token, thông tin xác thực và certificate.
+- Đối chiếu hạ tầng, domain, địa chỉ nguồn, chi phí, dữ liệu và vụ việc với nhà cung cấp theo danh mục.
+- Hoàn trả/xóa/lưu giữ dữ liệu khách hàng theo hợp đồng, giữ lại lượng bằng chứng kiểm toán tối thiểu cần thiết và yêu cầu operator thứ hai xác minh việc tắt hệ thống.
 
-See [Authorized Red-Team Infrastructure](authorized-red-team-infrastructure.md) for the full build and teardown guide.
+Xem [Authorized Red-Team Infrastructure](authorized-red-team-infrastructure.md) để biết hướng dẫn đầy đủ về triển khai và tháo dỡ.
 
-## Lawful private purchase or donation
+## Mua hàng hoặc quyên góp riêng tư hợp pháp
 
-Goal: minimize disclosure to the merchant or public while meeting issuer, accounting, tax and sanctions obligations.
+Mục tiêu: giảm tiết lộ thông tin cho người bán hoặc công chúng, đồng thời tuân thủ nghĩa vụ với đơn vị phát hành, kế toán, thuế và lệnh trừng phạt.
 
-1. List who must not learn what: public audience, merchant, payment intermediary, employer/family account delegate, delivery service, or blockchain observer.
-2. Check local rules, the recipient/counterparty, provider terms, cash limits and recordkeeping needs.
-3. Choose the rail:
-   - cash for accepted lawful local payments with no payment-network record;
-   - a regulated virtual/merchant-specific card for online credential separation;
-   - cryptocurrency only after analyzing acquisition, ledger, wallet backend, network, counterparty and later-spend links.
-4. Use truthful required details and omit only optional loyalty/marketing information. Do not use another person's identity/address or split a transaction around a threshold.
-5. Separate the merchant browser/account context and avoid unrelated social login, loyalty or personal recovery channels.
-6. Confirm what appears on statements, receipts, notifications, shipping and public donor lists.
-7. Store required receipt/tax/authorization evidence encrypted; revoke disposable payment credentials after the refund window.
+1. Liệt kê ai không được biết thông tin gì: công chúng, người bán, trung gian thanh toán, người được ủy quyền trên tài khoản của cơ quan/gia đình, dịch vụ giao hàng hoặc người quan sát blockchain.
+2. Kiểm tra quy định địa phương, người nhận/bên liên quan, điều khoản nhà cung cấp, giới hạn tiền mặt và yêu cầu lưu trữ hồ sơ.
+3. Chọn phương thức thanh toán:
+   - tiền mặt cho các khoản thanh toán hợp pháp tại địa phương được chấp nhận, không tạo hồ sơ trên mạng thanh toán;
+   - thẻ ảo được quản lý/thẻ riêng cho từng người bán để tách biệt thông tin xác thực khi thanh toán trực tuyến;
+   - cryptocurrency chỉ sau khi phân tích các liên kết từ việc mua, ledger, backend ví, mạng, bên liên quan và các lần chi tiêu sau đó.
+4. Cung cấp thông tin bắt buộc chính xác và chỉ bỏ qua thông tin khách hàng thân thiết/tiếp thị không bắt buộc. Không dùng danh tính/địa chỉ của người khác hoặc chia nhỏ giao dịch để né ngưỡng.
+5. Tách biệt ngữ cảnh tài khoản/trình duyệt dùng với người bán và tránh đăng nhập mạng xã hội, chương trình khách hàng thân thiết hoặc kênh khôi phục cá nhân không liên quan.
+6. Xác nhận những gì sẽ xuất hiện trên sao kê, biên lai, thông báo, thông tin giao hàng và danh sách nhà tài trợ công khai.
+7. Lưu bằng chứng biên lai/thuế/ủy quyền bắt buộc dưới dạng mã hóa; thu hồi thông tin thanh toán dùng một lần sau thời hạn hoàn tiền.
 
-See [Private Digital Payments](private-digital-payments.md) and [Cryptocurrency Privacy](cryptocurrency-privacy.md).
+Xem [Private Digital Payments](private-digital-payments.md) và [Cryptocurrency Privacy](cryptocurrency-privacy.md).
 
-## Travel and untrusted networks
+## Du lịch và mạng không đáng tin cậy
 
-Goal: protect data and accounts on networks not administered by the user—not to conceal unauthorized activity.
+Mục tiêu: bảo vệ dữ liệu và tài khoản trên mạng không do người dùng quản lý — không phải che giấu hoạt động trái phép.
 
-- Update devices and download needed credentials/maps before travel.
-- Minimize stored data; use full-disk encryption, strong unlock, remote-recovery planning and powered-off border/physical-risk procedures appropriate to legal advice.
-- Verify the venue SSID/captive portal. Prefer a personal hotspot when appropriate, but remember cellular subscriber and location records.
-- Use a full/forced approved VPN for organizational data; verify tethered devices share it and test IPv6/DNS behavior.
-- Use a travel router for client isolation and repeatable policy, not as an anonymity guarantee.
-- Treat public USB charging, borrowed computers, public printers and shared meeting-room systems as separate threats.
-- Assume physical presence, radio identifiers, portal login, cameras and payment/location records can correlate the visit.
+- Cập nhật thiết bị và tải trước thông tin xác thực/bản đồ cần thiết trước chuyến đi.
+- Giảm thiểu dữ liệu lưu trên thiết bị; dùng mã hóa toàn bộ ổ đĩa, phương thức mở khóa mạnh, kế hoạch khôi phục từ xa và quy trình tắt nguồn khi qua biên giới/trước rủi ro vật lý phù hợp với tư vấn pháp lý.
+- Xác minh SSID/captive portal của địa điểm. Khi phù hợp, ưu tiên hotspot cá nhân nhưng nhớ rằng hồ sơ thuê bao và vị trí di động vẫn được lưu.
+- Dùng VPN full/forced đã được phê duyệt cho dữ liệu của tổ chức; xác minh các thiết bị tethering cũng dùng VPN và kiểm tra hành vi IPv6/DNS.
+- Dùng travel router để cách ly client và áp dụng chính sách nhất quán, không phải như một sự bảo đảm ẩn danh.
+- Xem sạc USB công cộng, máy tính mượn, máy in công cộng và hệ thống dùng chung trong phòng họp là các mối đe dọa riêng biệt.
+- Giả định sự hiện diện thực tế, mã định danh vô tuyến, đăng nhập portal, camera và hồ sơ thanh toán/vị trí có thể liên kết chuyến ghé thăm.
 
-The comparison and setup details are in [Network Privacy and Anonymous Connectivity](network-privacy-and-anonymous-connectivity.md).
+Thông tin so sánh và thiết lập có trong [Network Privacy and Anonymous Connectivity](network-privacy-and-anonymous-connectivity.md).
 
-## Failure and exposure response
+## Ứng phó khi thất bại hoặc bị lộ
 
-When a compartment leaks or may be linked:
+Khi một vùng ngăn cách bị leak hoặc có thể bị liên kết:
 
-1. Stop the activity if continuation increases harm; use the engagement emergency stop where applicable.
-2. Preserve necessary evidence without spreading sensitive data. Record exact time, observed indicator and affected assets.
-3. Notify the appropriate owner/controller/security contact. Do not conceal an incident to preserve a privacy narrative.
-4. Revoke sessions, tokens, payment credentials and infrastructure access; rotate secrets from a known-clean endpoint.
-5. Determine which edges linked: endpoint, account recovery, network, payment, metadata, content, behavior, counterparty or physical presence.
-6. Treat the whole affected compartment as burned. Do not merely change its username or exit IP.
-7. Meet breach, provider, client, financial and legal notification duties.
-8. Rebuild only after changing the process that caused the link; document the control and test it.
+1. Dừng hoạt động nếu tiếp tục sẽ làm tăng thiệt hại; nếu phù hợp, dùng quy trình dừng khẩn cấp của đợt thực hiện.
+2. Bảo toàn bằng chứng cần thiết mà không phát tán dữ liệu nhạy cảm. Ghi lại thời gian chính xác, dấu hiệu quan sát được và tài sản bị ảnh hưởng.
+3. Thông báo cho chủ sở hữu/điều phối viên/đầu mối an ninh phù hợp. Đừng che giấu sự cố để bảo vệ câu chuyện về quyền riêng tư.
+4. Thu hồi phiên đăng nhập, token, thông tin thanh toán và quyền truy cập hạ tầng; xoay vòng secrets từ một endpoint đã biết là sạch.
+5. Xác định những liên kết nào đã bị lộ: endpoint, tài khoản khôi phục, mạng, thanh toán, metadata, nội dung, hành vi, bên liên quan hoặc sự hiện diện thực tế.
+6. Coi toàn bộ vùng ngăn cách bị ảnh hưởng là đã bị lộ. Đừng chỉ đổi username hoặc IP thoát.
+7. Thực hiện nghĩa vụ thông báo về vi phạm, nhà cung cấp, khách hàng, tài chính và pháp lý.
+8. Chỉ dựng lại sau khi thay đổi quy trình gây ra liên kết; ghi lại biện pháp kiểm soát và kiểm tra biện pháp đó.
 
-## Periodic audit
+## Kiểm toán định kỳ
 
-- [ ] Threat model and legal/provider assumptions reviewed on a dated schedule.
-- [ ] Devices, accounts, aliases, domains, network paths and payment credentials inventoried.
-- [ ] Recovery paths do not cross compartments unexpectedly.
-- [ ] Full-tunnel, DNS, IPv6 and fail-closed behavior tested.
-- [ ] Public files and profiles checked for metadata/content reuse.
-- [ ] Wallet nodes/backends and crypto protocol assumptions remain current.
-- [ ] Logs and receipts are minimal, encrypted, access-controlled and within retention.
-- [ ] Old compartments and engagement infrastructure were fully retired.
+- [ ] Mô hình mối đe dọa và các giả định pháp lý/nhà cung cấp được rà soát theo lịch có ghi ngày.
+- [ ] Thiết bị, tài khoản, alias, domain, đường dẫn mạng và thông tin thanh toán được kiểm kê.
+- [ ] Các phương án khôi phục không vô tình đi qua những vùng ngăn cách khác.
+- [ ] Đã kiểm tra hành vi full-tunnel, DNS, IPv6 và fail-closed.
+- [ ] Tệp công khai và profile đã được kiểm tra để tìm metadata/nội dung trùng lặp.
+- [ ] Các giả định về node/backend ví và giao thức crypto vẫn còn phù hợp.
+- [ ] Log và biên lai được tối giản, mã hóa, giới hạn quyền truy cập và nằm trong thời hạn lưu giữ.
+- [ ] Các vùng ngăn cách cũ và hạ tầng phục vụ đợt thực hiện đã được loại bỏ hoàn toàn.
 {{#include ../banners/hacktricks-training.md}}

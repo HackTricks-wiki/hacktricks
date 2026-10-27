@@ -1,28 +1,28 @@
-# Stego Workflow
+# Quy trình Stego
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Most stego problems are solved faster by systematic triage than by trying random tools.
+Hầu hết các bài toán stego được giải quyết nhanh hơn bằng cách phân loại có hệ thống thay vì thử ngẫu nhiên các công cụ.
 
-## Core flow
+## Quy trình cốt lõi
 
-### Quick triage checklist
+### Danh sách kiểm tra phân loại nhanh
 
-The goal is to answer two questions efficiently:
+Mục tiêu là nhanh chóng trả lời hai câu hỏi:
 
-1. What is the real container/format?
-2. Is the payload in metadata, appended bytes, embedded files, or content-level stego?
+1. Container/định dạng thực sự là gì?
+2. Payload nằm trong metadata, các byte được nối thêm, các file nhúng hay stego ở cấp nội dung?
 
-#### 1) Identify the container
+#### 1) Xác định container
 
 ```bash
 file target
 ls -lah target
 ```
 
-If `file` and the extension disagree, investigate the signature instead of trusting the suffix. `file` is also heuristic and can be confused by malformed or polyglot input. Treat common formats as containers when appropriate (for example, OOXML documents are ZIP packages).<sup>[[2]](#references)</sup>
+Nếu `file` và phần mở rộng không khớp, hãy kiểm tra chữ ký thay vì tin vào hậu tố. `file` cũng dựa trên heuristic và có thể bị đánh lừa bởi dữ liệu đầu vào sai định dạng hoặc polyglot. Khi phù hợp, hãy xem các định dạng phổ biến như những container (ví dụ: tài liệu OOXML là các gói ZIP).<sup>[[2]](#references)</sup>
 
-#### 2) Look for metadata and obvious strings
+#### 2) Tìm metadata và các chuỗi dễ nhận thấy
 
 ```bash
 exiftool target
@@ -30,38 +30,38 @@ strings -n 6 target | head
 strings -n 6 target | tail
 ```
 
-Try multiple encodings:
+Thử nhiều cách mã hóa:
 
 ```bash
 strings -e l -n 6 target | head
 strings -e b -n 6 target | head
 ```
 
-#### 3) Check for appended data / embedded files
+#### 3) Kiểm tra dữ liệu được nối thêm / tệp được nhúng
 
 ```bash
 binwalk target
 binwalk -e target
 ```
 
-If extraction fails but signatures are reported, manually carve offsets with `dd` and re-run `file` on the carved region.
+Nếu trích xuất thất bại nhưng có báo cáo signature, hãy dùng `dd` để trích thủ công theo offset rồi chạy lại `file` trên vùng đã trích.
 
-#### 4) If image
+#### 4) Nếu là ảnh
 
-- Inspect anomalies: `magick identify -verbose file`
-- If PNG/BMP, enumerate bit-planes/LSB: `zsteg -a file.png`
-- Validate PNG structure: `pngcheck -v file.png`
-- Use visual filters (Stegsolve / StegoVeritas) when content may be revealed by channel/plane transforms
+- Kiểm tra các điểm bất thường: `magick identify -verbose file`
+- Nếu là PNG/BMP, liệt kê bit-plane/LSB: `zsteg -a file.png`
+- Xác thực cấu trúc PNG: `pngcheck -v file.png`
+- Dùng bộ lọc hình ảnh (Stegsolve / StegoVeritas) khi nội dung có thể được tiết lộ qua các phép biến đổi channel/plane
 
-#### 5) If audio
+#### 5) Nếu là âm thanh
 
-- Spectrogram first (Sonic Visualiser)
-- Decode/inspect streams: `ffmpeg -v info -i file -f null -`
-- If the audio resembles structured tones, test DTMF decoding
+- Tạo spectrogram trước (Sonic Visualiser)
+- Giải mã/kiểm tra các stream: `ffmpeg -v info -i file -f null -`
+- Nếu âm thanh giống các âm đơn có cấu trúc, hãy thử giải mã DTMF
 
-### Bread-and-butter tools
+### Công cụ thiết yếu
 
-These catch high-frequency container-level cases: metadata payloads, appended bytes, and embedded files disguised by extension.<sup>[[1]](#references)[[3]](#references)</sup>
+Các công cụ này phát hiện những trường hợp phổ biến ở cấp container: payload trong metadata, byte được nối thêm và file nhúng bị ngụy trang bằng phần mở rộng.<sup>[[1]](#references)[[3]](#references)</sup>
 
 #### Binwalk
 
@@ -79,7 +79,7 @@ Repo: https://github.com/ReFirmLabs/binwalk
 foremost -i file
 ```
 
-Project repository: `korczis/foremost`.<sup>[[4]](#references)</sup>
+Kho lưu trữ dự án: `korczis/foremost`.<sup>[[4]](#references)</sup>
 
 #### Exiftool / Exiv2
 
@@ -101,22 +101,22 @@ strings -n 6 file
 cmp original.jpg stego.jpg -b -l
 ```
 
-### Containers, appended data, and polyglot tricks
+### Container, dữ liệu nối thêm và thủ thuật polyglot
 
-Many steganography challenges are extra bytes after a valid file, or embedded archives disguised by extension.
+Nhiều thử thách steganography liên quan đến các byte thừa sau một tệp hợp lệ hoặc các archive được nhúng nhưng ngụy trang bằng phần mở rộng.
 
-#### Appended payloads
+#### Payload nối thêm
 
-Many formats ignore trailing bytes. A ZIP/PDF/script can be appended to an image/audio container.
+Nhiều định dạng bỏ qua các byte ở cuối. Có thể nối ZIP/PDF/script vào một container hình ảnh/âm thanh.
 
-Fast checks:
+Kiểm tra nhanh:
 
 ```bash
 binwalk file
 tail -c 200 file | xxd
 ```
 
-If you know an offset, carve with `dd`:
+Nếu bạn biết offset, hãy carve bằng `dd`:
 
 ```bash
 dd if=file of=carved.bin bs=1 skip=<offset>
@@ -125,7 +125,7 @@ file carved.bin
 
 #### Magic bytes
 
-When `file` is confused, look for magic bytes with `xxd` and compare to known signatures:
+Khi `file` bị nhầm lẫn, hãy dùng `xxd` để tìm magic bytes và so sánh với các chữ ký đã biết:
 
 ```bash
 xxd -g 1 -l 32 file
@@ -133,44 +133,43 @@ xxd -g 1 -l 32 file
 
 #### Zip-in-disguise
 
-Try `7z` and `unzip` even if the extension doesn’t say zip:
+Hãy thử `7z` và `unzip` ngay cả khi phần mở rộng không cho biết đây là file zip:
 
 ```bash
 7z l file
 unzip -l file
 ```
 
-### Near-stego oddities
+### Những điều bất thường liên quan đến stego
 
-Quick links for patterns that regularly show up adjacent to stego (QR-from-binary, braille, etc).
+Các liên kết nhanh đến những dạng thường xuất hiện bên cạnh stego (QR tạo từ dữ liệu nhị phân, braille, v.v.).
 
-#### QR codes from binary
+#### QR codes từ dữ liệu nhị phân
 
-If a blob length is a perfect square, it may be raw pixels for an image/QR.
+Nếu độ dài của blob là một số chính phương, blob đó có thể là dữ liệu pixel thô của một hình ảnh/QR.
 
 ```python
 import math
 math.isqrt(2500)  # 50
 ```
 
-Binary-to-image helper:
+Trợ lý chuyển đổi nhị phân sang hình ảnh:
 
-- dCode binary-image helper.<sup>[[5]](#references)</sup>
+- Trợ lý chuyển đổi nhị phân sang hình ảnh của dCode.<sup>[[5]](#references)</sup>
 
 #### Braille
 
-- Branah Braille translator.<sup>[[6]](#references)</sup>
+- Công cụ dịch Braille của Branah.<sup>[[6]](#references)</sup>
 
-For broader collections of steganography utilities and technique-specific resources, see the bundled stego-toolkit and 0xRick's curated list.<sup>[[1]](#references)[[7]](#references)</sup>
+Để xem thêm các bộ sưu tập công cụ steganography và tài nguyên chuyên biệt theo kỹ thuật, hãy tham khảo stego-toolkit đi kèm và danh sách được 0xRick tuyển chọn.<sup>[[1]](#references)[[7]](#references)</sup>
 
 ## References
 
-- [1] [DominicBreuker/stego-toolkit - Docker image with the most popular steganography tools bundled together](https://github.com/DominicBreuker/stego-toolkit)
-- [2] [Daston et al. — ECMA-376 Open Packaging Conventions](https://ecma-international.org/publications-and-standards/standards/ecma-376/)
-- [3] [ReFirmLabs/binwalk](https://github.com/ReFirmLabs/binwalk)
+- [1] [DominicBreuker/stego-toolkit - Docker image với các công cụ steganography phổ biến nhất được đóng gói cùng nhau](https://github.com/DominicBreuker/stego-toolkit)
+- [2] [Daston và cộng sự — Các quy ước đóng gói mở ECMA-376](https://ecma-international.org/publications-and-standards/standards/ecma-376/)
+- [3] [korczis/foremost](https://github.com/ReFirmLabs/binwalk)
 - [4] [korczis/foremost](https://github.com/korczis/foremost)
-- [5] [dCode — Binary Image](https://www.dcode.fr/binary-image)
-- [6] [Branah — Braille Translator](https://www.branah.com/braille-translator)
-- [7] [0xRick - Steganography Resources](https://0xrick.github.io/lists/stego/)
-
+- [5] [dCode — Hình ảnh nhị phân](https://www.dcode.fr/binary-image)
+- [6] [Branah — Công cụ dịch Braille](https://www.branah.com/braille-translator)
+- [7] [0xRick - Tài nguyên Steganography](https://0xrick.github.io/lists/stego/)
 {{#include ../../banners/hacktricks-training.md}}

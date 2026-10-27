@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Part of this cheatsheet is based on the [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
+Một phần nội dung trong cheatsheet này dựa trên [tài liệu angr](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
 
-## Installation
+## Cài đặt
 
 ```bash
 sudo apt-get install python3-dev libffi-dev build-essential
@@ -14,7 +14,7 @@ source ang/bin/activate
 pip install angr
 ```
 
-## Basic Actions
+## Thao tác cơ bản
 
 ```python
 import angr
@@ -34,9 +34,9 @@ proj.filename #Get filename "/bin/true"
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
 
-## Loaded and Main object information
+## Thông tin về đối tượng đã tải và đối tượng chính
 
-### Loaded Data
+### Dữ liệu đã tải
 
 ```python
 #LOADED DATA
@@ -61,7 +61,7 @@ proj.loader.all_pe_objects #Get all binaries loaded (Windows)
 proj.loader.find_object_containing(0x400000)#Get object loaded in an address "<ELF Object fauxware, maps [0x400000:0x60105f]>"
 ```
 
-### Main Object
+### Đối tượng chính
 
 ```python
 #Main Object (main binary loaded)
@@ -77,7 +77,7 @@ obj.plt['strcmp'] #Get plt address of a funcion (0x400550)
 obj.reverse_plt[0x400550] #Get function from plt address ('strcmp')
 ```
 
-### Symbols and Relocations
+### Symbol và Relocation
 
 ```python
 strcmp = proj.loader.find_symbol('strcmp') #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
@@ -96,7 +96,7 @@ main_strcmp.is_import #True
 main_strcmp.resolvedby #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 ```
 
-### Blocks
+### Các khối
 
 ```python
 #Blocks
@@ -106,9 +106,9 @@ block.instructions #"0xb" Get number of instructions
 block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x401675, 0x401676, 0x401679, 0x40167d, 0x40167e, 0x40167f, 0x401686, 0x40168d, 0x401694]"
 ```
 
-## Dynamic Analysis
+## Phân tích động
 
-### Simulation Manager, States
+### Trình quản lý mô phỏng, trạng thái
 
 ```python
 #Live States
@@ -133,11 +133,11 @@ simgr.step() #Execute one step
 simgr.active[0].regs.rip #Get RIP from the last state
 ```
 
-### Calling functions
+### Gọi hàm
 
-- You can pass a list of arguments through `args` and a dictionary of environment variables through `env` into `entry_state` and `full_init_state`. The values in these structures can be strings or bitvectors, and will be serialized into the state as the arguments and environment to the simulated execution. The default `args` is an empty list, so if the program you're analyzing expects to find at least an `argv[0]`, you should always provide that!
-- If you'd like to have `argc` be symbolic, you can pass a symbolic bitvector as `argc` to the `entry_state` and `full_init_state` constructors. Be careful, though: if you do this, you should also add a constraint to the resulting state that your value for argc cannot be larger than the number of args you passed into `args`.
-- To use the call state, you should call it with `.call_state(addr, arg1, arg2, ...)`, where `addr` is the address of the function you want to call and `argN` is the Nth argument to that function, either as a python integer, string, or array, or a bitvector. If you want to have memory allocated and actually pass in a pointer to an object, you should wrap it in an PointerWrapper, i.e. `angr.PointerWrapper("point to me!")`. The results of this API can be a little unpredictable, but we're working on it.
+- Bạn có thể truyền một danh sách đối số qua `args` và một từ điển biến môi trường qua `env` vào `entry_state` và `full_init_state`. Các giá trị trong những cấu trúc này có thể là chuỗi hoặc bitvector và sẽ được tuần tự hóa vào state dưới dạng đối số và môi trường cho lần thực thi mô phỏng. `args` mặc định là một danh sách rỗng, vì vậy nếu chương trình bạn đang phân tích cần có ít nhất một `argv[0]`, hãy luôn cung cấp giá trị đó!
+- Nếu muốn `argc` có giá trị symbolic, bạn có thể truyền một bitvector symbolic làm `argc` cho các hàm khởi tạo `entry_state` và `full_init_state`. Tuy nhiên, hãy cẩn thận: nếu làm vậy, bạn cũng nên thêm một constraint vào state kết quả để đảm bảo giá trị `argc` không lớn hơn số lượng đối số bạn đã truyền vào `args`.
+- Để sử dụng call state, bạn nên gọi nó bằng `.call_state(addr, arg1, arg2, ...)`, trong đó `addr` là địa chỉ của hàm bạn muốn gọi và `argN` là đối số thứ N của hàm đó, có thể là số nguyên, chuỗi hoặc mảng của Python, hoặc một bitvector. Nếu muốn cấp phát memory và thực sự truyền vào một con trỏ tới một object, bạn nên bọc nó bằng `PointerWrapper`, tức là `angr.PointerWrapper("point to me!")`. Kết quả của API này đôi khi hơi khó đoán, nhưng chúng tôi đang cải thiện điều đó.
 
 ### BitVectors
 
@@ -150,7 +150,7 @@ bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
 
-### Symbolic BitVectors & Constraints
+### BitVector ký hiệu & các ràng buộc
 
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
@@ -206,12 +206,11 @@ True
 True
 ```
 
-Furthermore, you can use `proj.hook_symbol(name, hook)`, providing the name of a symbol as the first argument, to hook the address where the symbol lives<sup>[[1]](#references)</sup>
+Ngoài ra, bạn có thể dùng `proj.hook_symbol(name, hook)`, cung cấp tên của một symbol làm đối số đầu tiên để hook địa chỉ nơi symbol đó tồn tại<sup>[[1]](#references)</sup>
 
 ## Examples
 
 ## References
 
-- [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
-
+- [1] [tài liệu angr](https://docs.angr.io/_/downloads/en/stable/pdf/)
 {{#include ../../../banners/hacktricks-training.md}}

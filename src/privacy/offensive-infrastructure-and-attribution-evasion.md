@@ -1,10 +1,10 @@
-# Offensive Infrastructure and Attribution Evasion
+# Hạ tầng tấn công và né tránh quy kết
 
 {{#include ../banners/hacktricks-training.md}}
 
-An operator rarely obtains meaningful anonymity from a single proxy. Real campaigns build a **separation graph**: the operator reaches an access node, traversal nodes hide that node from the exit, redirectors protect the real C2, and disposable names point to the public edge.
+Một operator hiếm khi có được mức độ ẩn danh đáng kể chỉ nhờ một proxy. Các chiến dịch thực tế xây dựng một **đồ thị phân tách**: operator truy cập một access node, các traversal node che giấu access node khỏi exit, redirector bảo vệ C2 thực, còn các tên miền dùng một lần trỏ đến public edge.
 
-Use the [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md) for a normalized pros/cons/deployment/detection view of every path. This page goes deeper into adversarial infrastructure composition.
+Sử dụng [Danh mục kỹ thuật truy cập Internet ẩn danh](anonymous-internet-access-techniques.md) để xem tổng quan chuẩn hóa về ưu điểm/nhược điểm/triển khai/phát hiện của từng đường đi. Trang này đi sâu hơn vào cách kết hợp hạ tầng đối kháng.
 
 ```text
 operator -> access relay -> traversal mesh -> exit/redirector -> target
@@ -12,59 +12,59 @@ operator -> access relay -> traversal mesh -> exit/redirector -> target
           account/provider   relay operator   target telemetry
 ```
 
-The last address seen by a target is therefore evidence of a path, not proof of who controlled the keyboard. MITRE maps the major components to Acquire Infrastructure (T1583), Compromise Infrastructure (T1584), Proxy (T1090), Dynamic Resolution (T1568) and Web Service (T1102).<sup>[[1]](#references)</sup>
+Địa chỉ cuối cùng mà mục tiêu nhìn thấy là bằng chứng về một đường đi, chứ không phải bằng chứng cho biết ai đã điều khiển bàn phím. MITRE ánh xạ các thành phần chính sang Acquire Infrastructure (T1583), Compromise Infrastructure (T1584), Proxy (T1090), Dynamic Resolution (T1568) và Web Service (T1102).<sup>[[1]](#references)</sup>
 
-## Infrastructure classes
+## Các lớp hạ tầng
 
-| Class | Why an actor uses it | Durable exposure | Defender's best pivot |
+| Lớp | Lý do tác nhân sử dụng | Dấu vết tồn tại lâu dài | Điểm pivot tốt nhất cho người phòng thủ |
 |---|---|---|---|
-| Rented VPS/cloud | Fast, predictable, routable, easy to rebuild | tenant, billing, console, source-login and image history | account/control-plane events and repeated server fingerprint |
-| Commercial VPN/Tor | Large shared egress set; no server administration | provider/guard visibility and end-to-end timing | destination behavior, endpoint evidence and flow correlation |
-| Residential/mobile proxy | Consumer ASN and geographic plausibility | broker/customer records; proxyware or infected-host behavior | impossible travel, proxy protocols and address churn by session |
-| Compromised server/router/IoT | Borrows victim reputation and jurisdiction | implant, management flow and repeated upstream controller | device telemetry and ORB topology, not one exit IP |
-| CDN/redirector | Separates public edge from back-end C2 | TLS/HTTP grammar, certificate, routing and cloud-account artifacts | edge-to-origin correlation and request-shape clustering |
-| Legitimate web service | Blends into allowed GitHub/cloud/social traffic | API token, tenant/object identifiers and unusual process lineage | endpoint process plus service/API semantics |
-| Physical/cellular/satellite path | Changes the apparent physical origin | RF, carrier, subscriber, device and location records | radio/physical and network evidence combined |
+| VPS/cloud thuê | Nhanh, ổn định, có thể định tuyến, dễ dựng lại | tenant, thanh toán, console, lịch sử đăng nhập nguồn và image | sự kiện tài khoản/control plane và dấu vân tay máy chủ lặp lại |
+| VPN thương mại/Tor | Tập hợp egress dùng chung lớn; không cần quản trị máy chủ | khả năng giám sát của nhà cung cấp/giám sát viên và tương quan thời gian đầu-cuối | hành vi đích, bằng chứng endpoint và tương quan luồng |
+| Proxy dân dụng/di động | ASN người dùng và vị trí địa lý có vẻ hợp lý | hồ sơ của broker/khách hàng; hành vi của proxyware hoặc host bị nhiễm | di chuyển bất khả thi, giao thức proxy và thay đổi địa chỉ theo phiên |
+| Máy chủ/router/IoT bị xâm nhập | Mượn uy tín và thẩm quyền pháp lý của nạn nhân | implant, luồng quản lý và controller upstream lặp lại | telemetry thiết bị và cấu trúc ORB, không phải một IP thoát đơn lẻ |
+| CDN/redirector | Tách edge công khai khỏi C2 back-end | dấu vết TLS/HTTP, chứng chỉ, định tuyến và tài khoản cloud | tương quan edge-to-origin và phân cụm hình dạng request |
+| Web service hợp pháp | Hòa lẫn vào lưu lượng GitHub/cloud/mạng xã hội được cho phép | API token, mã định danh tenant/object và dòng tiến trình bất thường | tiến trình endpoint cùng ngữ nghĩa service/API |
+| Đường truyền vật lý/di động/vệ tinh | Thay đổi nguồn gốc vật lý được hiển thị | hồ sơ RF, nhà mạng, thuê bao, thiết bị và vị trí | kết hợp bằng chứng vô tuyến/vật lý và mạng |
 
-## Operational relay box networks
+## Mạng relay box vận hành
 
-An **ORB network** is a managed proxy fleet used as an intermediate service. Mandiant divides them into provisioned networks of leased servers, non-provisioned networks of compromised routers/IoT, and hybrids. A mature topology has four logical roles:<sup>[[2]](#references)</sup>
+**Mạng ORB** là một đội proxy được quản lý, dùng làm dịch vụ trung gian. Mandiant chia chúng thành mạng được cung cấp sẵn gồm máy chủ thuê, mạng không được cung cấp sẵn gồm router/IoT bị xâm nhập và mạng lai. Một cấu trúc liên kết trưởng thành có bốn vai trò logic:<sup>[[2]](#references)</sup>
 
-1. **Administration server (ACOS):** maintains inventory, credentials, health and routing policy.
-2. **Access/relay node:** authenticates customers or operators; it is the stable entry to a changing mesh.
-3. **Traversal nodes:** one or more leased or compromised systems relay opaque connections.
-4. **Exit/staging node:** presents the final source address to reconnaissance, exploitation or C2 targets.
+1. **Máy chủ quản trị (ACOS):** duy trì danh mục, thông tin xác thực, trạng thái hoạt động và chính sách định tuyến.
+2. **Nút truy cập/relay:** xác thực khách hàng hoặc người vận hành; đây là điểm vào ổn định tới một mạng lưới thường xuyên thay đổi.
+3. **Nút trung chuyển:** một hoặc nhiều hệ thống thuê hoặc bị xâm nhập relay các kết nối không rõ nội dung.
+4. **Nút thoát/staging:** hiển thị địa chỉ nguồn cuối cùng cho các mục tiêu trinh sát, khai thác hoặc C2.
 
-The mesh can select exits by country, ASN, latency or availability and rotate unhealthy nodes. Multiple threat groups may rent the same network. Mandiant observed an IPv4 address remain associated with some ORBs for as little as 31 days; it therefore recommends treating the **network as an evolving actor-like entity**, rather than blocking a stale list of IPs.<sup>[[2]](#references)</sup>
+Mạng lưới có thể chọn nút thoát theo quốc gia, ASN, độ trễ hoặc tình trạng sẵn sàng, đồng thời thay thế các nút hoạt động không ổn định. Nhiều nhóm đe dọa có thể cùng thuê một mạng. Mandiant quan sát thấy một địa chỉ IPv4 chỉ gắn với một số ORB trong thời gian ngắn nhất là 31 ngày; do đó, tổ chức này khuyến nghị xem **mạng là một thực thể đang biến đổi, có đặc tính như tác nhân**, thay vì chặn một danh sách IP đã lỗi thời.<sup>[[2]](#references)</sup>
 
-### What this buys—and what it leaks
+### Những gì cách này mang lại — và làm lộ
 
-- The target sees an exit that may be geographically nearby and apparently residential.
-- The exit sees the target and the preceding hop, not necessarily the operator.
-- The access service sees the customer and the route request. An independently managed mesh may keep the customer separated from the exits, but it creates a powerful counterparty record.
-- Repeated ports, handshake order, server banners, certificates, uptime windows and controller relationships can expose the fleet even while IPs rotate.
-- A compromised router frequently lacks endpoint telemetry, but its ISP still has subscriber and flow data; a seizure exposes implant/configuration artifacts.
+- Mục tiêu nhìn thấy một nút thoát có thể ở gần về mặt địa lý và có vẻ là địa chỉ dân dụng.
+- Nút thoát nhìn thấy mục tiêu và hop đứng trước nó, nhưng không nhất thiết thấy người vận hành.
+- Dịch vụ truy cập nhìn thấy khách hàng và yêu cầu định tuyến. Một mạng lưới do đơn vị độc lập quản lý có thể tách khách hàng khỏi các nút thoát, nhưng lại tạo ra hồ sơ đối tác có giá trị cao.
+- Cổng, thứ tự bắt tay, banner máy chủ, chứng chỉ, khoảng thời gian hoạt động và mối liên hệ với controller lặp lại có thể làm lộ cả đội máy dù IP liên tục thay đổi.
+- Router bị xâm nhập thường thiếu telemetry endpoint, nhưng ISP của nó vẫn có dữ liệu thuê bao và luồng; việc thu giữ sẽ làm lộ các dấu vết implant/cấu hình.
 
 {% hint style="info" %}
-For an authorized exercise, reproduce the topology with organization-owned VMs or routers and keep the controller's attribution map. Do not recruit open proxies or third-party devices. The [lab guide](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain) creates the same defender-visible hop structure without victimizing an intermediary.
+Trong một bài thực hành được cấp phép, hãy tái tạo cấu trúc liên kết bằng VM hoặc router do tổ chức sở hữu và lưu giữ bản đồ quy kết của controller. Không huy động open proxy hoặc thiết bị của bên thứ ba. [Hướng dẫn lab](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain) tạo ra cùng cấu trúc hop mà người phòng thủ có thể quan sát, nhưng không biến một bên trung gian thành nạn nhân.
 {% endhint %}
 
-## Residential and mobile proxy networks
+## Mạng proxy dân dụng và di động
 
-Residential proxy services assign sessions to consumer broadband addresses; mobile proxies egress through carrier NAT pools. Supply can come from expressly enrolled appliances, SDK/proxyware bundled into consumer applications, resellers, or malware. These origins are not equivalent: lack of informed consent turns a privacy service into compromised infrastructure.
+Dịch vụ proxy dân dụng cấp các phiên sử dụng địa chỉ băng thông rộng của người tiêu dùng; proxy di động egress qua các pool NAT của nhà mạng. Nguồn cung có thể đến từ thiết bị được đăng ký rõ ràng, SDK/proxyware đi kèm ứng dụng dành cho người tiêu dùng, bên bán lại hoặc malware. Các nguồn này không tương đương: nếu thiếu sự đồng thuận đầy đủ thông tin, dịch vụ bảo vệ quyền riêng tư sẽ trở thành hạ tầng bị xâm nhập.
 
-Rotation modes affect detection:
+Các chế độ xoay vòng ảnh hưởng đến việc phát hiện:
 
-- **per-request rotation** produces rapid IP and ASN/geography discontinuities while higher-layer identity remains stable;
-- **sticky sessions** keep an exit for minutes or hours, resembling an ordinary subscriber;
-- **backconnect gateways** expose one broker endpoint to the customer and choose exits internally;
-- **mobile pools** place many genuine subscribers behind a small set of carrier NAT addresses, making an IP block costly.
+- **xoay vòng theo từng request** tạo ra sự gián đoạn nhanh về IP và ASN/vị trí địa lý trong khi danh tính ở các lớp cao hơn vẫn ổn định;
+- **phiên cố định** giữ nguyên một nút thoát trong vài phút hoặc vài giờ, trông giống một thuê bao thông thường;
+- **backconnect gateway** cung cấp cho khách hàng một endpoint broker duy nhất và tự chọn nút thoát ở phía trong;
+- **pool di động** đặt nhiều thuê bao thật sau một số ít địa chỉ NAT của nhà mạng, khiến việc chặn IP gây tốn kém.
 
-Defenders should correlate the IP with authenticated session, TLS/client fingerprint, HTTP ordering, device cookie and behavior. A supposedly local residential login followed by another country while all higher-layer features remain identical is stronger than reputation alone. Conversely, address sharing and mobile handoff create legitimate churn, so never treat residential/proxy classification as a verdict.
+Người phòng thủ nên tương quan IP với phiên đã xác thực, dấu vân tay TLS/client, thứ tự HTTP, cookie thiết bị và hành vi. Một lần đăng nhập dân dụng được cho là tại địa phương, sau đó xuất hiện ở một quốc gia khác trong khi mọi đặc điểm ở các lớp cao hơn vẫn giống hệt nhau, là tín hiệu mạnh hơn chỉ dựa vào uy tín. Ngược lại, việc chia sẻ địa chỉ và chuyển giao giữa các mạng di động tạo ra thay đổi hợp lệ, vì vậy đừng bao giờ xem phân loại dân dụng/proxy là kết luận cuối cùng.
 
-### Proxyware control planes and reseller overlap
+### Control plane của proxyware và sự chồng lấn giữa các bên bán lại
 
-Do not model a residential pool as a flat list of exits. Analysis of the IPIDEA ecosystem exposed a reusable **two-tier control plane**: an embedded SDK first reports device/enrollment metadata to a Tier One domain and receives scheduling plus Tier Two `connect`/`proxy` IP:port pairs. The node periodically polls the Tier Two connect port for an encoded task, opens a second connection to the paired proxy port, and relays the supplied bytes to the requested destination. Nominally different SDKs and proxy brands had separate discovery domains but converged on shared Tier Two infrastructure and overlapping exit pools through common ownership and reseller relationships.<sup>[[13]](#references)</sup>
+Đừng mô hình hóa một pool dân dụng như một danh sách phẳng các nút thoát. Phân tích hệ sinh thái IPIDEA cho thấy một **control plane hai tầng có thể tái sử dụng**: SDK nhúng trước tiên gửi metadata thiết bị/đăng ký tới một domain Tier One và nhận thông tin lập lịch cùng các cặp IP:port `connect`/`proxy` của Tier Two. Nút này định kỳ truy vấn cổng connect Tier Two để lấy một tác vụ được mã hóa, mở kết nối thứ hai tới cổng proxy tương ứng, rồi relay các byte được cung cấp tới đích được yêu cầu. Các SDK và thương hiệu proxy bề ngoài khác nhau có domain khám phá riêng, nhưng hội tụ vào hạ tầng Tier Two dùng chung và các pool nút thoát chồng lấn thông qua mối quan hệ sở hữu chung và bán lại.<sup>[[13]](#references)</sup>
 
 ```text
 enrolled node -> Tier One domain        -> Tier Two IP:port pairs
@@ -72,35 +72,35 @@ enrolled node -> Tier Two connect port  -> destination + connection ID
 enrolled node -> Tier Two proxy port   <-> customer bytes -> destination
 ```
 
-This produces more durable hunting pivots than a residential IP block:<sup>[[13]](#references)</sup>
+Điều này tạo ra các pivot săn tìm bền vững hơn một dải IP dân dụng:<sup>[[13]](#references)</sup>
 
-- an unexpected utility, VPN, game or embedded-device process sends a stable device ID/customer key and receives a changing server list;
-- the endpoint polls a direct IP on an unusual port, then connects to another port on the same address immediately before opening a new destination socket;
-- several apparent brands share Tier Two addresses, protocol grammar, SDK code or exit-node overlap;
-- distinct applications contacting different Tier One domains receive addresses from the same Tier Two pool.
+- một tiến trình tiện ích, VPN, game hoặc thiết bị nhúng bất ngờ gửi ID thiết bị/khóa khách hàng ổn định và nhận về danh sách máy chủ thay đổi;
+- endpoint thăm dò một IP trực tiếp trên cổng bất thường, rồi kết nối đến một cổng khác trên cùng địa chỉ ngay trước khi mở socket đến đích mới;
+- nhiều thương hiệu có vẻ khác nhau dùng chung địa chỉ Tier Two, cú pháp giao thức, mã SDK hoặc các node thoát trùng lặp;
+- các ứng dụng riêng biệt liên hệ với những domain Tier One khác nhau nhưng nhận địa chỉ từ cùng một pool Tier Two.
 
-The overlap also limits attribution: seeing an IP in one vendor's advertised pool does not establish which reseller, customer or threat actor used it at the relevant time. Preserve flow timestamps, process lineage, Tier One response bodies and Tier Two task identifiers.<sup>[[13]](#references)</sup> In an authorized exercise, emulate this hierarchy only with organization-owned endpoints; never enroll consumer devices or third-party proxyware.
+Sự trùng lặp này cũng hạn chế khả năng quy kết: việc thấy một IP trong pool được một vendor quảng bá không xác định được reseller, khách hàng hay threat actor nào đã sử dụng IP đó vào thời điểm liên quan. Hãy lưu giữ dấu thời gian luồng, lineage tiến trình, nội dung phản hồi Tier One và mã định danh tác vụ Tier Two.<sup>[[13]](#references)</sup> Trong một bài tập được ủy quyền, chỉ mô phỏng hệ thống phân cấp này bằng các endpoint thuộc sở hữu của tổ chức; tuyệt đối không đăng ký thiết bị tiêu dùng hoặc proxyware của bên thứ ba.
 
-## Multi-hop proxy chains
+## Chuỗi proxy nhiều hop
 
-MITRE distinguishes external proxies from **multi-hop proxies (T1090.003)**. The important property is not hop count but separation of knowledge and administration.<sup>[[3]](#references)</sup>
+MITRE phân biệt proxy bên ngoài với **multi-hop proxies (T1090.003)**. Đặc tính quan trọng không phải số lượng hop mà là sự tách biệt về thông tin và quyền quản trị.<sup>[[3]](#references)</sup>
 
 ```text
 operator --encrypted--> entry A --encrypted/relayed--> exit B --> target
               sees source                         sees destination
 ```
 
-If one party operates A and B, shared logs or flow timing can reconstruct the circuit. Adding sequential commercial VPNs from the same endpoint/account may add latency while leaving common identity, payment and timing evidence. Tor reduces this problem with independently selected relays and a shared client design, but a low-latency interactive network cannot promise resistance to an observer that measures both ends.
+Nếu một bên vận hành A và B, các log dùng chung hoặc thời điểm lưu lượng có thể giúp tái dựng circuit. Thêm các VPN thương mại nối tiếp từ cùng endpoint/account có thể làm tăng độ trễ nhưng vẫn để lộ bằng chứng về danh tính, thanh toán và thời điểm chung. Tor giảm vấn đề này bằng các relay được chọn độc lập và thiết kế client dùng chung, nhưng một mạng tương tác có độ trễ thấp không thể đảm bảo chống lại một observer đo được cả hai đầu.
 
-Common failures are DNS or IPv6 bypass, applications opening their own sockets, management traffic reaching relays directly, synchronized activity, reused SSH keys, and logging into identifying accounts. The correct verification is a failure test: stop every relay in turn and show that the workload cannot fall back to a clear path.
+Các lỗi phổ biến gồm DNS hoặc IPv6 bypass, ứng dụng tự mở socket, lưu lượng quản lý kết nối trực tiếp tới relay, hoạt động đồng bộ, dùng lại SSH key và đăng nhập vào các tài khoản có thể nhận diện danh tính. Cách xác minh đúng là kiểm tra lỗi: lần lượt dừng từng relay và chứng minh rằng workload không thể chuyển sang đường truyền không được mã hóa.
 
-### Tunnel collapse and upstream leakage
+### Sụp đổ tunnel và rò rỉ upstream
 
-A relay architecture is often most attributable when it fails. Unit 42 documented a multi-tier espionage path using victim-facing VPSs, relay VPSs, residential proxies, Tor and other proxy services; when a tunnel was omitted or collapsed, hidden upstream infrastructure connected directly to relay and victim-facing systems. The same investigation also used an X.509 certificate briefly exposed on upstream infrastructure as a cross-tier pivot.<sup>[[14]](#references)</sup>
+Kiến trúc relay thường dễ bị quy kết nhất khi xảy ra lỗi. Unit 42 ghi nhận một đường đi gián điệp nhiều tầng sử dụng VPS hướng tới nạn nhân, VPS relay, proxy residential, Tor và các dịch vụ proxy khác; khi một tunnel bị bỏ sót hoặc sụp đổ, hạ tầng upstream ẩn kết nối trực tiếp tới relay và các hệ thống hướng tới nạn nhân. Cuộc điều tra tương tự cũng dùng một certificate X.509 tạm thời bị lộ trên hạ tầng upstream làm điểm pivot giữa các tầng.<sup>[[14]](#references)</sup>
 
-Keep the **data plane** (`victim <-> exit`) separate from the **control plane** (`operator/upstream -> relay administration`). Retain ingress and authentication logs at every owned tier, certificate histories and short failed connections—not only successful C2 sessions. A source that appears only during relay outages or directly administers multiple victim-facing nodes is a stronger upstream candidate than an ordinary exit, but its ASN/geolocation is still a hypothesis, not proof of an operator's identity.
+Tách riêng **data plane** (`victim <-> exit`) khỏi **control plane** (`operator/upstream -> relay administration`). Lưu giữ log ingress và xác thực ở mọi tầng do bạn sở hữu, lịch sử certificate và các kết nối lỗi ngắn—không chỉ các phiên C2 thành công. Một nguồn chỉ xuất hiện khi relay gặp sự cố hoặc trực tiếp quản trị nhiều node hướng tới nạn nhân là ứng viên upstream đáng chú ý hơn một exit thông thường, nhưng ASN/vị trí địa lý vẫn chỉ là giả thuyết, không phải bằng chứng về danh tính operator.
 
-An authorized lab should make the workload fail closed. For a workload isolated in a Linux network namespace, the first route must use the tunnel; after removing it, both the request and route lookup must fail rather than select the physical uplink:
+Trong lab được ủy quyền, workload phải fail closed. Với workload được cô lập trong Linux network namespace, route đầu tiên phải đi qua tunnel; sau khi gỡ tunnel, cả request lẫn tra cứu route đều phải thất bại thay vì chọn uplink vật lý:
 
 ```bash
 ip netns exec workload ip route get "$OWNED_TEST_IP"  # expect: dev wg0
@@ -110,11 +110,11 @@ ip netns exec workload curl --fail --connect-timeout 3 \
 ip netns exec workload ip route get "$OWNED_TEST_IP"  # expect: unreachable
 ```
 
-Repeat the test for DNS and IPv6 and at each relay boundary. If any probe succeeds, record the actual interface/source address before repairing policy routing or the firewall; that observation is the attribution leak an investigator would see.
+Lặp lại kiểm tra với DNS và IPv6, cũng như tại mỗi ranh giới relay. Nếu bất kỳ phép thăm dò nào thành công, hãy ghi lại giao diện/địa chỉ nguồn thực tế trước khi sửa policy routing hoặc firewall; quan sát đó chính là attribution leak mà điều tra viên sẽ thấy.
 
-## Redirector tiers and traffic shaping
+## Các tầng redirector và điều chỉnh lưu lượng
 
-A public **redirector** accepts traffic that matches an operation-specific grammar and forwards it to a protected team server. Everything else can be rejected or served innocuous content.
+Một **redirector** công khai tiếp nhận lưu lượng phù hợp với grammar dành riêng cho từng chiến dịch và chuyển tiếp đến team server được bảo vệ. Mọi thứ khác có thể bị từ chối hoặc được trả về nội dung vô hại.
 
 ```text
 implant/browser -> CDN or redirector -> relay -> team server
@@ -123,163 +123,162 @@ implant/browser -> CDN or redirector -> relay -> team server
            host + path + method + header + time
 ```
 
-Multiple tiers limit exposure: burning a public domain need not expose the team server. CDNs add anycast capacity and a reputable outer domain, but the CDN account and edge logs become attribution points. TLS fingerprints, certificate histories, distinctive paths/header order, response sizes, redirect behavior and origin allowlists can cluster supposedly unrelated fronts.
+Nhiều tầng giúp hạn chế lộ diện: việc đốt một public domain không nhất thiết làm lộ team server. CDN cung cấp năng lực anycast và một domain bên ngoài có uy tín, nhưng tài khoản CDN và log ở edge trở thành điểm có thể dùng để quy kết. TLS fingerprint, lịch sử chứng chỉ, path/thứ tự header đặc trưng, kích thước phản hồi, cách chuyển hướng và allowlist origin có thể liên kết các front tưởng như không liên quan.
 
-For detection, record reverse-proxy fields before normalization, compare SNI/Host/authority, inspect rare header combinations, cluster response bodies and TLS fingerprints, and search cloud/CDN audit logs for configuration overlap. For authorized red teams, avoid copying a real brand or placing credential collection behind an unrelated third party.
+Để phát hiện, hãy ghi lại các trường reverse proxy trước khi chuẩn hóa, so sánh SNI/Host/authority, kiểm tra các tổ hợp header hiếm, phân nhóm nội dung phản hồi và TLS fingerprint, đồng thời tìm các cấu hình trùng lặp trong audit log của cloud/CDN. Với red team được ủy quyền, tránh sao chép thương hiệu thật hoặc đặt chức năng thu thập thông tin xác thực sau một bên thứ ba không liên quan.
 
-## Domain fronting and domainless fronting
+## Domain fronting và domainless fronting
 
-With classic **domain fronting (T1090.004)**, the TLS connection advertises an allowed front domain in SNI while the encrypted HTTP `Host` or HTTP/2 `:authority` requests a different back-end domain. A cooperating CDN routes on the inner value. A network observer without TLS decryption sees the front; the CDN sees both values and the origin. In domainless variants, SNI may be empty while another routing field selects the destination.<sup>[[4]](#references)</sup>
+Với **domain fronting (T1090.004)** kiểu cổ điển, kết nối TLS quảng bá một front domain được cho phép trong SNI, trong khi HTTP `Host` hoặc HTTP/2 `:authority` đã mã hóa yêu cầu một domain back-end khác. CDN phối hợp sẽ định tuyến dựa trên giá trị bên trong. Người quan sát mạng không giải mã TLS chỉ thấy front; CDN thấy cả hai giá trị và origin.<sup>[[4]](#references)</sup> Trong các biến thể domainless, SNI có thể để trống trong khi một trường định tuyến khác chọn đích đến.
 
-This is not magic impersonation: it works only when the intermediary intentionally or accidentally permits the mismatch and knows how to route the inner name. Major providers have restricted cross-account fronting. Encrypted ClientHello (ECH) changes what an on-path observer can see but does not erase CDN, endpoint or application records.
+Đây không phải là giả mạo thần kỳ: kỹ thuật này chỉ hoạt động khi intermediary cố ý hoặc vô tình cho phép sự không khớp và biết cách định tuyến theo tên bên trong. Các nhà cung cấp lớn đã hạn chế fronting xuyên tài khoản. Encrypted ClientHello (ECH) thay đổi những gì người quan sát trên đường truyền có thể thấy, nhưng không xóa log của CDN, endpoint hay ứng dụng.
 
-Detection points include:
+Các điểm cần phát hiện gồm:
 
-- endpoint process ancestry and destination not expected for that application;
-- SNI versus HTTP authority mismatch where TLS inspection is lawful and available;
-- CDN logs showing one tenant/front routing to another authority/origin;
-- unusual long-lived or periodic sessions to a normally interactive service;
-- stable encrypted flow sizes and cadence across changing front domains.
+- quan hệ tiến trình trên endpoint và đích đến không mong đợi đối với ứng dụng đó;
+- SNI không khớp với HTTP authority, trong trường hợp việc kiểm tra TLS hợp pháp và khả thi;
+- log CDN cho thấy một tenant/front định tuyến đến authority/origin khác;
+- các phiên kéo dài bất thường hoặc có chu kỳ đến một dịch vụ vốn thường được tương tác;
+- kích thước và nhịp luồng mã hóa ổn định khi front domain thay đổi.
 
-The safe lab simulates the routing mismatch on an owned reverse proxy; it does not abuse a public CDN.
+Lab an toàn mô phỏng sự không khớp định tuyến trên reverse proxy do mình sở hữu; không lạm dụng CDN công cộng.
 
-## Dynamic resolution: DDNS, DGA and fast flux
+## Dynamic resolution: DDNS, DGA và fast flux
 
-Dynamic resolution decouples a logical service from fixed infrastructure:
+Dynamic resolution tách một dịch vụ logic khỏi hạ tầng cố định:
 
-- **DDNS:** an authenticated client updates a stable name after its address changes.
-- **DGA:** both endpoint and controller derive candidate domain names from a time/key seed; the operator registers a small subset.
-- **Fast flux:** a name returns a rapidly changing set of compromised/proxy addresses, often with low TTLs.
-- **Double flux:** both service addresses and authoritative name-server addresses rotate, hiding the control layer too.
+- **DDNS:** client đã xác thực cập nhật một tên ổn định sau khi địa chỉ của nó thay đổi.
+- **DGA:** cả endpoint lẫn controller đều tạo các domain ứng viên từ seed thời gian/khóa; operator đăng ký một nhóm nhỏ.
+- **Fast flux:** một tên trả về tập địa chỉ bị xâm nhập/proxy thay đổi nhanh, thường có TTL thấp.
+- **Double flux:** cả địa chỉ dịch vụ lẫn địa chỉ name server có thẩm quyền đều luân phiên, qua đó che giấu cả lớp điều khiển.
 
-Fast flux is a load-distribution pattern used adversarially, not merely “many DNS answers.” Stronger evidence combines low TTL, high unique-address count, wide ASN/geography dispersion, short node lifetime, repeated application behavior and suspicious registration history. CDNs legitimately share several of those properties. MITRE recommends correlating DNS behavior with the process and subsequent connections.<sup>[[5]](#references)</sup>
+Fast flux là một mô hình phân phối tải được sử dụng với mục đích đối kháng, không đơn thuần là “nhiều câu trả lời DNS”. Bằng chứng mạnh hơn kết hợp TTL thấp, số lượng địa chỉ duy nhất cao, phân tán rộng theo ASN/địa lý, vòng đời node ngắn, hành vi ứng dụng lặp lại và lịch sử đăng ký đáng ngờ. CDN cũng có thể hợp pháp sở hữu một số đặc điểm này. MITRE khuyến nghị đối chiếu hành vi DNS với tiến trình và các kết nối tiếp theo.<sup>[[5]](#references)</sup>
 
-A DGA can be detected through lexical entropy, consonant/digit patterns, NXDOMAIN bursts, synchronized first-seen domains and process context. Wordlist DGAs and generative models defeat simple entropy rules, making fleet-wide temporal clustering and endpoint lineage more important.
+Có thể phát hiện DGA qua entropy từ vựng, mẫu phụ âm/chữ số, các đợt NXDOMAIN, domain mới xuất hiện đồng bộ và ngữ cảnh tiến trình. DGA dùng wordlist và mô hình sinh có thể qua mặt các quy tắc entropy đơn giản, khiến việc phân cụm theo thời gian trên toàn bộ đội máy và truy vết nguồn gốc endpoint trở nên quan trọng hơn.
 
-## Compromised domains and domain shadowing
+## Domain bị xâm nhập và domain shadowing
 
-An actor may hijack a registrar/DNS account, take over a dangling subdomain, or add records beneath an otherwise reputable domain. **Domain shadowing** preserves the legitimate apex while large numbers of attacker-controlled subdomains point at changing delivery or C2 hosts. It borrows age and reputation and may evade domain-wide blocking.<sup>[[6]](#references)</sup>
+Actor có thể chiếm quyền tài khoản registrar/DNS, chiếm một subdomain bị bỏ quên hoặc thêm bản ghi bên dưới một domain vốn có uy tín. **Domain shadowing** giữ nguyên apex hợp pháp trong khi tạo số lượng lớn subdomain do attacker kiểm soát, trỏ đến các máy chủ phân phối hoặc C2 thay đổi liên tục. Cách này tận dụng tuổi đời và uy tín của domain, đồng thời có thể né việc chặn toàn bộ domain.<sup>[[6]](#references)</sup>
 
-Defenders need registrar and authoritative-DNS audit logs, MFA, registry/registrar locks, alerts for new delegations/API tokens/name servers, certificate-transparency monitoring, and an inventory of cloud resources referenced by DNS. Investigate a subdomain's resolution and certificate history independently of the apex reputation.
+Defender cần audit log của registrar và DNS có thẩm quyền, MFA, khóa registry/registrar, cảnh báo khi có delegation/API token/name server mới, theo dõi certificate transparency và kiểm kê tài nguyên cloud được DNS tham chiếu. Hãy điều tra quá trình phân giải và lịch sử chứng chỉ của từng subdomain độc lập với uy tín của apex.
 
-## Web services and dead-drop resolvers
+## Web services và dead-drop resolver
 
-A **dead-drop resolver (T1102.001)** stores an encoded pointer to current C2 inside a legitimate post, profile, document, repository, cloud object or blockchain field. Malware fetches the public object, decodes a domain/IP and contacts the next stage. Bidirectional variants exchange commands or files through service APIs.<sup>[[7]](#references)</sup>
+**Dead-drop resolver (T1102.001)** lưu một con trỏ đã mã hóa đến C2 hiện tại bên trong một bài đăng, hồ sơ, tài liệu, repository, cloud object hoặc trường blockchain hợp pháp. Malware tải object công khai, giải mã domain/IP rồi kết nối đến stage tiếp theo. Các biến thể hai chiều trao đổi lệnh hoặc tệp qua API dịch vụ.<sup>[[7]](#references)</sup>
 
-One GitHub-specific resolver variation uses the Issues Search API only when an authenticated repository channel fails. The client searches for issues matching the current date, repository and issue type, follows each issue's comments URL, and extracts ciphertext between `<!--` and `-->` markers. After per-host, date-derived decryption, fields such as `Owner`, `LicRepo` and `LicToken` replace the primary repository owner, path and token. This lets the operator rotate credentials and endpoints without replacing the client; the issue comment is a resolver, while the repository files remain the tasking channel.<sup>[[15]](#references)</sup>
+Một biến thể resolver riêng cho GitHub chỉ dùng Issues Search API khi kênh repository đã xác thực không hoạt động. Client tìm các issue khớp ngày hiện tại, repository và loại issue, mở URL comments của từng issue rồi trích ciphertext nằm giữa các dấu `<!--` và `-->`. Sau khi giải mã theo từng host bằng khóa được tạo từ ngày, các trường như `Owner`, `LicRepo` và `LicToken` thay thế owner, path và token của repository chính. Nhờ vậy operator có thể luân phiên thông tin xác thực và endpoint mà không cần thay client; comment của issue đóng vai trò resolver, còn các tệp repository vẫn là kênh tasking.<sup>[[15]](#references)</sup>
 
-An Android variant selects one of two public Telegram pages at startup and extracts ciphertext between two occurrences of a marker embedded in the APK. It Base64URL-decodes the value and decrypts it with AES-128-CBC: the first 16 bytes of `SHA-256(marker)` are the key and the remaining 16 bytes are the IV. The plaintext is the actual C2 base URL, not the Telegram page URL. Preserve the page content and exact marker when reproducing resolution; changing the public page rotates the endpoint without rebuilding the APK.<sup>[[16]](#references)</sup>
+Một biến thể Android chọn một trong hai trang Telegram công khai khi khởi động và trích ciphertext nằm giữa hai lần xuất hiện của một marker được nhúng trong APK. Nó giải mã giá trị bằng Base64URL rồi giải mã bằng AES-128-CBC: 16 byte đầu của `SHA-256(marker)` là khóa, 16 byte còn lại là IV. Plaintext là URL cơ sở C2 thực tế, không phải URL trang Telegram. Khi tái tạo quá trình phân giải, hãy giữ nguyên nội dung trang và marker chính xác; thay đổi trang công khai sẽ xoay endpoint mà không cần dựng lại APK.<sup>[[16]](#references)</sup>
 
-This provides resilience and hides back-end C2 from static binary analysis. It also creates stable object, tenant, repository, API and access-pattern identifiers. Defenders should join:
+Cách này tăng khả năng phục hồi và che giấu back-end C2 khỏi phân tích tĩnh binary. Tuy nhiên, nó cũng tạo ra các định danh ổn định về object, tenant, repository, API và mẫu truy cập. Defender nên liên kết:
 
-1. the process that contacted the service;
-2. exact API path/object and response hash;
-3. decoding or string-processing activity;
-4. the new outbound connection shortly afterward; and
-5. identical behavior elsewhere in the fleet.
+1. tiến trình đã kết nối đến dịch vụ;
+2. API path/object chính xác và hash phản hồi;
+3. hoạt động giải mã hoặc xử lý chuỗi;
+4. kết nối outbound mới ngay sau đó; và
+5. hành vi giống hệt ở nơi khác trong đội máy.
 
-Blocking all GitHub, cloud storage or social media is rarely viable. Service-aware egress policy and process-level correlation outperform domain-only blocking.
+Chặn toàn bộ GitHub, cloud storage hoặc mạng xã hội hiếm khi khả thi. Chính sách egress nhận biết dịch vụ và đối chiếu ở cấp tiến trình hiệu quả hơn chặn chỉ dựa trên domain.
 
-## Personas, accounts and procurement compartments
+## Persona, tài khoản và các ngăn cách trong quy trình mua sắm
 
-Infrastructure anonymity fails when a persona, recovery email, phone, payment, browser or admin IP bridges compartments. State-linked operations have cultivated social profiles, email identities and cloud accounts long before use; ATT&CK records this as Establish Accounts (T1585), including social, email and cloud sub-techniques.<sup>[[8]](#references)</sup>
+Tính ẩn danh của hạ tầng thất bại khi persona, email khôi phục, điện thoại, phương thức thanh toán, browser hoặc IP quản trị nối liền các ngăn cách. Các chiến dịch có liên hệ với nhà nước đã xây dựng hồ sơ mạng xã hội, danh tính email và tài khoản cloud từ lâu trước khi sử dụng; ATT&CK ghi nhận việc này là Establish Accounts (T1585), bao gồm các kỹ thuật con về mạng xã hội, email và cloud.<sup>[[8]](#references)</sup>
 
-A defender or investigator builds a graph from:
+Defender hoặc điều tra viên xây dựng đồ thị từ:
 
-- creation and first-login time, locale, time zone and working schedule;
-- recovery fields, MFA devices, identity documents and payment instruments;
-- browser/TLS fingerprints and source-network history;
-- avatar reuse, image provenance, writing style and social-graph growth;
-- shared domain registrant, name server, certificate, analytics ID or repository commit;
-- management-plane actions that bypass the public relay architecture.
+- thời điểm tạo và đăng nhập lần đầu, locale, múi giờ và lịch làm việc;
+- thông tin khôi phục, thiết bị MFA, giấy tờ định danh và phương tiện thanh toán;
+- TLS fingerprint của browser và lịch sử mạng nguồn;
+- việc dùng lại avatar, nguồn gốc hình ảnh, văn phong và tốc độ phát triển đồ thị xã hội;
+- registrant domain, name server, chứng chỉ, analytics ID hoặc commit repository dùng chung;
+- các thao tác trên management plane bỏ qua kiến trúc public relay.
 
-For an authorized red team, synthetic personas should be documented to the exercise controller, use organization-owned recovery/payment channels, avoid impersonating real uninvolved people, and have a planned retirement. The SOC may remain blind; the operation must not become unaccountable.
+Với red team được ủy quyền, persona tổng hợp cần được ghi lại cho người điều phối cuộc diễn tập, sử dụng kênh khôi phục/thanh toán do tổ chức sở hữu, tránh mạo danh người thật không liên quan và có kế hoạch ngừng sử dụng. SOC có thể vẫn chưa biết; nhưng hoạt động không được trở thành thứ không ai chịu trách nhiệm.
 
-## Emerging compound patterns to threat-model
+## Các mẫu kết hợp mới nổi cần mô hình hóa mối đe dọa
 
-The following are **defender-driven compositions**, not claims that a named actor has deployed each exact design. They combine already observed primitives and are useful purple-team hypotheses.
+Những nội dung sau là **các mô hình kết hợp do defender xây dựng**, không phải khẳng định rằng một actor cụ thể đã triển khai chính xác từng thiết kế. Chúng kết hợp các thành phần đã được ghi nhận và hữu ích làm giả thuyết cho purple team.
 
-### Asymmetric one-way tasking
+### Tasking bất đối xứng một chiều
 
-Commands arrive through a public, broadcast or append-only source while results leave through an unrelated channel after a delay. Examples of the primitive include web-service one-way communication and dead drops. Separation prevents a single flow from looking bidirectional and frustrates simple request/response correlation.<sup>[[9]](#references)</sup>
+Lệnh đến qua một nguồn công khai, broadcast hoặc chỉ cho phép ghi nối tiếp, trong khi kết quả được gửi qua một kênh không liên quan sau một khoảng trễ. Các thành phần ví dụ gồm liên lạc một chiều qua web service và dead drop. Việc tách kênh ngăn một luồng đơn lẻ trông như liên lạc hai chiều và cản trở việc đối chiếu request/response đơn giản.<sup>[[9]](#references)</sup>
 
-**Detection:** preserve object-level reads, then correlate process state changes and later outbound transfers across a wider window. Hunt for a rare process reading the same public object even when no immediate reply follows.
+**Phát hiện:** lưu lại các lần đọc ở cấp object, sau đó đối chiếu thay đổi trạng thái tiến trình với các lần truyền outbound sau đó trong một khoảng thời gian rộng hơn. Tìm tiến trình hiếm đọc cùng một object công khai dù không có phản hồi ngay lập tức.
 
-### Multi-stage channel promotion
+### Nâng cấp kênh nhiều giai đoạn
 
-A quiet first stage performs inventory and only promotes selected systems to an unrelated second-stage channel. The second endpoint, protocol and process may share no infrastructure with the first. This limits exposure of capable infrastructure and is explicitly modeled as ATT&CK T1104.<sup>[[10]](#references)</sup>
+Stage đầu ít gây chú ý thực hiện kiểm kê và chỉ nâng cấp một số hệ thống được chọn sang kênh stage thứ hai không liên quan. Endpoint, protocol và process thứ hai có thể không dùng chung hạ tầng nào với stage đầu. Cách này hạn chế việc lộ hạ tầng có năng lực cao và được mô hình hóa rõ ràng trong ATT&CK T1104.<sup>[[10]](#references)</sup>
 
-**Detection:** join `first network process -> downloaded/configured state -> new process or injection -> unrelated destination`; do not close the incident after blocking the first domain.
+**Phát hiện:** liên kết `first network process -> downloaded/configured state -> new process or injection -> unrelated destination`; đừng kết thúc sự cố sau khi chặn domain đầu tiên.
 
-### Cross-protocol relay translation
+### Dịch chuyển tiếp xuyên protocol
 
-Different hops translate HTTPS, QUIC, WebSocket, DNS, SSH or a message-queue API rather than transparently forwarding packets. Translation removes a single end-to-end protocol fingerprint but creates gateways with distinctive timing, buffering and semantic conversion. Protocol tunneling (T1572) can be combined with proxies and service impersonation.<sup>[[11]](#references)</sup>
+Các hop khác nhau chuyển đổi HTTPS, QUIC, WebSocket, DNS, SSH hoặc API message-queue thay vì chuyển tiếp packet một cách trong suốt. Việc chuyển đổi loại bỏ một TLS fingerprint đầu cuối duy nhất, nhưng tạo ra các gateway có timing, buffering và chuyển đổi ngữ nghĩa đặc trưng. Có thể kết hợp protocol tunneling (T1572) với proxy và giả mạo dịch vụ.<sup>[[11]](#references)</sup>
 
-**Detection:** look for gateway hosts that receive one protocol and initiate another with tightly coupled byte/time behavior; compare endpoint intent to the protocol actually carried.
+**Phát hiện:** tìm các gateway host nhận một protocol rồi khởi tạo protocol khác với hành vi byte/thời gian gắn kết chặt chẽ; so sánh mục đích của endpoint với protocol thực tế được truyền tải.
 
-### Passive activation on edge devices
+### Kích hoạt thụ động trên thiết bị edge
 
-Instead of beaconing, an implant monitors traffic already reaching a router/VPN and activates only on a magic value, source-port pattern or authenticated token. Normal traffic continues to the real service. ATT&CK calls this Traffic Signaling (T1205), with documented network-device and APT examples.<sup>[[12]](#references)</sup>
+Thay vì beacon, implant giám sát lưu lượng vốn đã đến router/VPN và chỉ kích hoạt khi gặp magic value, mẫu source-port hoặc token đã xác thực. Lưu lượng bình thường vẫn tiếp tục đến dịch vụ thật. ATT&CK gọi kỹ thuật này là Traffic Signaling (T1205), với các ví dụ đã được ghi nhận trên thiết bị mạng và APT.<sup>[[12]](#references)</sup>
 
-**Detection:** firmware/file integrity, raw packet capture during an authorized hunt, unexpected socket filters and differential service behavior. Absence of a periodic beacon does not prove an edge device is clean.
+**Phát hiện:** kiểm tra tính toàn vẹn firmware/tệp, capture packet thô trong một cuộc hunt được ủy quyền, tìm socket filter bất thường và hành vi dịch vụ khác biệt. Không có beacon định kỳ không chứng minh thiết bị edge sạch.
 
-### Serverless and ephemeral origin rotation
+### Xoay vòng origin serverless và ephemeral
 
-A front keeps a stable logical identity while short-lived functions/containers handle individual stages in several regions/accounts. This reduces disk lifetime and fixed origin IPs, but control-plane creation, image/layer, role, secret, request ID and billing telemetry become the durable graph.
+Một front duy trì danh tính logic ổn định trong khi các function/container tồn tại ngắn xử lý từng stage ở nhiều region/tài khoản. Cách này giảm thời gian tồn tại trên disk và tránh IP origin cố định, nhưng hoạt động tạo tài nguyên trên control plane, image/layer, role, secret, request ID và dữ liệu billing trở thành đồ thị bền vững.
 
-**Detection:** retain cloud audit and invocation logs outside the workload; cluster deployment templates, roles, environment keys and front-to-origin relationships.
+**Phát hiện:** lưu audit log và invocation log của cloud bên ngoài workload; phân nhóm deployment template, role, environment key và quan hệ front-to-origin.
 
-### Privacy-layer diversity
+### Đa dạng lớp quyền riêng tư
 
-An operation may deliberately avoid one homogeneous chain: for example, one channel uses a leased relay, tasking uses a public object, an exit comes from an owned lab cellular link, and administration uses a separate organization network. This reduces the value of compromising one provider but increases cross-layer timing and operational-error risk.
+Một chiến dịch có thể cố ý tránh dùng một chuỗi đồng nhất: chẳng hạn, một kênh dùng relay thuê, tasking dùng object công khai, exit dùng liên kết cellular lab do mình sở hữu, còn quản trị dùng một mạng tổ chức riêng. Cách này giảm giá trị của việc xâm nhập một nhà cung cấp, nhưng làm tăng rủi ro đối chiếu thời gian giữa các lớp và rủi ro sai sót vận hành.
 
-**Detection:** build campaign timelines across identity, DNS, SaaS, network and cloud sensors. Search for synchronized state transitions rather than identical indicators.
+**Phát hiện:** xây dựng dòng thời gian chiến dịch trên các cảm biến identity, DNS, SaaS, network và cloud. Tìm các chuyển đổi trạng thái đồng bộ thay vì indicator giống hệt nhau.
 
-### Decentralized or transparency-log dead drops
+### Dead drop trên hệ thống phi tập trung hoặc transparency log
 
-An actor can place a small encrypted pointer in any durable public append-only system, content-addressed store or transparency-like feed. The public object is resilient, but its exact index/content hash and the client polling behavior become stable identifiers.
+Actor có thể đặt một con trỏ mã hóa nhỏ trong bất kỳ hệ thống công khai bền vững nào có tính nối tiếp, kho lưu trữ content-addressed hoặc feed dạng transparency. Object công khai có khả năng tồn tại lâu, nhưng index/hash nội dung chính xác và hành vi polling của client trở thành định danh ổn định.
 
-**Detection:** record full API/object identifiers and response hashes; alert on nonstandard processes polling immutable objects followed by decoding or new connections.
+**Phát hiện:** ghi lại đầy đủ API/object identifier và hash phản hồi; cảnh báo khi process không phổ biến polling các object bất biến rồi giải mã hoặc tạo kết nối mới.
 
-### Delayed store-and-forward operations
+### Hoạt động store-and-forward có độ trễ
 
-Interactive C2 creates strong timing correlation. A store-and-forward design batches encrypted jobs and returns results minutes or hours later through a different queue or physical transfer. It sacrifices responsiveness for weaker end-to-end timing.
+C2 tương tác tạo ra tương quan thời gian mạnh. Thiết kế store-and-forward gom các job đã mã hóa theo đợt và trả kết quả sau vài phút hoặc vài giờ qua queue khác hoặc phương thức truyền vật lý. Cách này đánh đổi tốc độ phản hồi để giảm tương quan thời gian đầu-cuối.
 
-**Detection:** lengthen correlation windows, model periodic queue access and examine endpoint staging. Batching moves the signal from packet timing to scheduled process/file behavior; it does not erase it.
+**Phát hiện:** kéo dài khoảng thời gian đối chiếu, mô hình hóa việc truy cập queue định kỳ và kiểm tra hoạt động staging trên endpoint. Gom theo đợt chuyển tín hiệu từ timing packet sang hành vi tiến trình/tệp theo lịch; không xóa được tín hiệu.
 
-## Design review: think in observers
+## Rà soát thiết kế: suy nghĩ theo góc nhìn của observer
 
-For every path, fill this table before deployment and after collection:
+Với mỗi đường đi, hãy điền bảng này trước khi triển khai và sau khi thu thập dữ liệu:
 
-| Layer | Sees source? | Sees destination? | Sees content? | Stable identifiers | Retention/legal owner |
+| Lớp | Thấy nguồn? | Thấy đích? | Thấy nội dung? | Định danh ổn định | Thời hạn lưu trữ/chủ thể pháp lý |
 |---|---:|---:|---:|---|---|
-| local network/carrier | | | | | |
-| entry/access service | | | | | |
-| traversal operator(s) | | | | | |
+| mạng nội bộ/nhà mạng | | | | | |
+| dịch vụ entry/access | | | | | |
+| operator trung chuyển | | | | | |
 | exit/redirector/CDN | | | | | |
-| authoritative DNS/registrar | | | | | |
-| target | | | | | |
-| account/payment provider | | | | | |
+| DNS có thẩm quyền/registrar | | | | | |
+| mục tiêu | | | | | |
+| nhà cung cấp tài khoản/thanh toán | | | | | |
 
-If one ordinary provider can fill every column, the architecture provides concealment from the target but not robust separation. If no internal controller can map activity back to an engagement, it is unsuitable for professional red teaming.
+Nếu một nhà cung cấp thông thường có thể điền mọi cột, kiến trúc chỉ che giấu hoạt động khỏi mục tiêu chứ không tạo được sự phân tách vững chắc. Nếu không controller nội bộ nào có thể liên kết hoạt động với một cuộc diễn tập, kiến trúc đó không phù hợp cho red teaming chuyên nghiệp.
 
 ## References
 
-- [1] [MITRE ATT&CK — Acquire Infrastructure (T1583), Compromise Infrastructure (T1584), and Proxy (T1090)](https://attack.mitre.org/techniques/T1584/)
-- [2] [Google Cloud/Mandiant — China-nexus espionage actors use ORB networks](https://cloud.google.com/blog/topics/threat-intelligence/china-nexus-espionage-orb-networks)
+- [1] [MITRE ATT&CK — Thu thập hạ tầng (T1583), Xâm nhập hạ tầng (T1584) và Proxy (T1090)](https://attack.mitre.org/techniques/T1584/)
+- [2] [Google Cloud/Mandiant — Các actor gián điệp có liên hệ với Trung Quốc sử dụng mạng ORB](https://cloud.google.com/blog/topics/threat-intelligence/china-nexus-espionage-orb-networks)
 - [3] [MITRE ATT&CK — Multi-hop Proxy (T1090.003)](https://attack.mitre.org/techniques/T1090/003/)
 - [4] [MITRE ATT&CK — Domain Fronting (T1090.004)](https://attack.mitre.org/techniques/T1090/004/)
 - [5] [MITRE ATT&CK — Fast Flux DNS (T1568.001)](https://attack.mitre.org/techniques/T1568/001/)
-- [6] [MITRE ATT&CK — Compromise Infrastructure: Domains (T1584.001)](https://attack.mitre.org/techniques/T1584/001/)
+- [6] [MITRE ATT&CK — Xâm nhập hạ tầng: Domain (T1584.001)](https://attack.mitre.org/techniques/T1584/001/)
 - [7] [MITRE ATT&CK — Web Service: Dead Drop Resolver (T1102.001)](https://attack.mitre.org/techniques/T1102/001/)
-- [8] [MITRE ATT&CK — Establish Accounts (T1585)](https://attack.mitre.org/techniques/T1585/)
-- [9] [MITRE ATT&CK — Web Service: One-Way Communication (T1102.003)](https://attack.mitre.org/techniques/T1102/003/)
-- [10] [MITRE ATT&CK — Multi-Stage Channels (T1104)](https://attack.mitre.org/techniques/T1104/)
+- [8] [MITRE ATT&CK — Thiết lập tài khoản (T1585)](https://attack.mitre.org/techniques/T1585/)
+- [9] [MITRE ATT&CK — Web Service: Liên lạc một chiều (T1102.003)](https://attack.mitre.org/techniques/T1102/003/)
+- [10] [MITRE ATT&CK — Kênh nhiều giai đoạn (T1104)](https://attack.mitre.org/techniques/T1104/)
 - [11] [MITRE ATT&CK — Protocol Tunneling (T1572)](https://attack.mitre.org/techniques/T1572/)
 - [12] [MITRE ATT&CK — Traffic Signaling (T1205)](https://attack.mitre.org/techniques/T1205/)
-- [13] [Google Threat Intelligence Group — Disrupting the World's Largest Residential Proxy Network](https://cloud.google.com/blog/topics/threat-intelligence/disrupting-largest-residential-proxy-network)
-- [14] [Unit 42 — The Shadow Campaigns: Uncovering Global Espionage](https://unit42.paloaltonetworks.com/shadow-campaigns-uncovering-global-espionage/)
-- [15] [Unit 42 - Blinder Tunnel Campaign Targets Iraqi Infrastructure](https://unit42.paloaltonetworks.com/blinder-tunnel-targets-critical-infrastructure/)
-- [16] [RemControl: AI Built the Overlays. Victims Lose their PINs](https://www.group-ib.com/blog/remcontrol-android-banking-trojan/)
-
+- [13] [Google Threat Intelligence Group — Phá vỡ mạng proxy dân cư lớn nhất thế giới](https://cloud.google.com/blog/topics/threat-intelligence/disrupting-largest-residential-proxy-network)
+- [14] [Unit 42 — Các chiến dịch Shadow: Phát hiện hoạt động gián điệp toàn cầu](https://unit42.paloaltonetworks.com/shadow-campaigns-uncovering-global-espionage/)
+- [15] [Unit 42 - Chiến dịch Blinder Tunnel nhắm vào hạ tầng Iraq](https://unit42.paloaltonetworks.com/blinder-tunnel-targets-critical-infrastructure/)
+- [16] [RemControl: AI xây dựng các lớp phủ. Nạn nhân mất mã PIN](https://www.group-ib.com/blog/remcontrol-android-banking-trojan/)
 {{#include ../banners/hacktricks-training.md}}

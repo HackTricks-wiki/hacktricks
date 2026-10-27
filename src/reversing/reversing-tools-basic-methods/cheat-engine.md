@@ -2,168 +2,168 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them.\
-When you download and run it, you are **presented** with a **tutorial** of how to use the tool. If you want to learn how to use the tool it's highly recommended to complete it.
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) là một chương trình hữu ích để tìm vị trí lưu các giá trị quan trọng trong bộ nhớ của game đang chạy và thay đổi chúng.\
+Khi tải xuống và chạy chương trình, bạn sẽ được **giới thiệu** một **hướng dẫn** cách sử dụng công cụ. Nếu muốn học cách sử dụng, bạn nên hoàn thành hướng dẫn này.
 
-## What are you searching?
+## Bạn đang tìm gì?
 
-![Cheat Engine - What are you searching?: What are you searching?](<../../images/image (762).png>)
+![Cheat Engine - Bạn đang tìm gì?: Bạn đang tìm gì?](<../../images/image (762).png>)
 
-This tool is very useful to find **where some value** (usually a number) **is stored in the memory** of a program.\
-**Usually numbers** are stored in **4bytes** form, but you could also find them in **double** or **float** formats, or you may want to look for something **different from a number**. For that reason you need to be sure you **select** what you want to **search for**:
+Công cụ này rất hữu ích để tìm **vị trí một giá trị nào đó** (thường là một con số) **được lưu trong bộ nhớ** của chương trình.\
+**Các con số** thường được lưu dưới dạng **4bytes**, nhưng bạn cũng có thể tìm chúng ở định dạng **double** hoặc **float**, hoặc có thể muốn tìm thứ gì đó **không phải là số**. Vì vậy, hãy đảm bảo bạn **chọn** đúng thứ muốn **tìm kiếm**:
 
-![Cheat Engine - What are you searching?: Usually numbers are stored in 4bytes form, but you could also find them in double or float formats, or you may want to look for something...](<../../images/image (324).png>)
+![Cheat Engine - Bạn đang tìm gì?: Các con số thường được lưu dưới dạng 4bytes, nhưng bạn cũng có thể tìm chúng ở định dạng double hoặc float, hoặc có thể muốn tìm thứ gì đó...](<../../images/image (324).png>)
 
-Also you can indicate **different** types of **searches**:
+Bạn cũng có thể chọn **các kiểu tìm kiếm khác nhau**:
 
-![Cheat Engine - What are you searching?: Also you can indicate different types of searches](<../../images/image (311).png>)
+![Cheat Engine - Bạn đang tìm gì?: Bạn cũng có thể chọn các kiểu tìm kiếm khác nhau](<../../images/image (311).png>)
 
-You can also check the box to **stop the game while scanning the memory**:
+Bạn cũng có thể đánh dấu ô để **tạm dừng game trong khi quét bộ nhớ**:
 
-![Cheat Engine - What are you searching?: You can also check the box to stop the game while scanning the memory](<../../images/image (1052).png>)
+![Cheat Engine - Bạn đang tìm gì?: Bạn cũng có thể đánh dấu ô để tạm dừng game trong khi quét bộ nhớ](<../../images/image (1052).png>)
 
-### Hotkeys
+### Phím nóng
 
-In _**Edit --> Settings --> Hotkeys**_ you can set different **hotkeys** for different purposes like **stopping** the **game** (which is quiet useful if at some point you want to scan the memory). Other options are available:
+Trong _**Edit --> Settings --> Hotkeys**_, bạn có thể thiết lập các **phím nóng** cho nhiều mục đích khác nhau, chẳng hạn như **tạm dừng** **game** (điều này khá hữu ích nếu có lúc bạn muốn quét bộ nhớ). Ngoài ra còn có các tùy chọn khác:
 
-![What are you searching? - Hotkeys: In Edit -- Settings -- Hotkeys you can set different hotkeys for different purposes like stopping the game (which is quiet useful if at some point you...](<../../images/image (864).png>)
+![Bạn đang tìm gì? - Phím nóng: Trong Edit -- Settings -- Hotkeys, bạn có thể thiết lập các phím nóng cho nhiều mục đích khác nhau, chẳng hạn như tạm dừng game (điều này khá hữu ích nếu có lúc bạn...](<../../images/image (864).png>)
 
-## Modifying the value
+## Thay đổi giá trị
 
-Once you **found** where is the **value** you are **looking for** (more about this in the following steps) you can **modify it** double clicking it, then double clicking its value:
+Sau khi **tìm thấy** vị trí của **giá trị** cần **tìm** (sẽ nói thêm ở các bước sau), bạn có thể **thay đổi giá trị** bằng cách nhấp đúp vào nó, rồi nhấp đúp vào giá trị của nó:
 
-![Hotkeys - Modifying the value: Once you found where is the value you are looking for (more about this in the following steps) you can modify it double clicking it, then double clicking...](<../../images/image (563).png>)
+![Phím nóng - Thay đổi giá trị: Sau khi tìm thấy vị trí của giá trị cần tìm (sẽ nói thêm ở các bước sau), bạn có thể thay đổi giá trị bằng cách nhấp đúp vào nó, rồi nhấp đúp...](<../../images/image (563).png>)
 
-And finally **marking the check** to get the modification done in the memory:
+Cuối cùng, **đánh dấu vào ô** để áp dụng thay đổi trong bộ nhớ:
 
-![Hotkeys - Modifying the value: And finally marking the check to get the modification done in the memory](<../../images/image (385).png>)
+![Phím nóng - Thay đổi giá trị: Cuối cùng, đánh dấu vào ô để áp dụng thay đổi trong bộ nhớ](<../../images/image (385).png>)
 
-The **change** to the **memory** will be immediately **applied** (note that until the game doesn't use this value again the value **won't be updated in the game**).
+Thay đổi trong **bộ nhớ** sẽ được **áp dụng** ngay lập tức (lưu ý rằng giá trị **sẽ không được cập nhật trong game** cho đến khi game sử dụng lại giá trị đó).
 
-## Searching the value
+## Tìm kiếm giá trị
 
-So, we are going to suppose that there is an important value (like the life of your user) that you want to improve, and you are looking for this value in the memory)
+Giả sử có một giá trị quan trọng (chẳng hạn như máu của nhân vật) mà bạn muốn tăng, và bạn đang tìm giá trị này trong bộ nhớ.
 
-### Through a known change
+### Dựa trên một thay đổi đã biết
 
-Supposing you are looking for the value 100, you **perform a scan** searching for that value and you find a lot of coincidences:
+Giả sử bạn đang tìm giá trị 100. Bạn **quét** để tìm giá trị đó và nhận được rất nhiều kết quả trùng khớp:
 
-![Searching the value - Through a known change: Supposing you are looking for the value 100, you perform a scan searching for that value and you find a lot of coincidences](<../../images/image (108).png>)
+![Tìm kiếm giá trị - Dựa trên một thay đổi đã biết: Giả sử bạn đang tìm giá trị 100. Bạn quét để tìm giá trị đó và nhận được rất nhiều kết quả trùng khớp](<../../images/image (108).png>)
 
-Then, you do something so that **value changes**, and you **stop** the game and **perform** a **next scan**:
+Sau đó, bạn làm gì đó để **thay đổi giá trị**, rồi **tạm dừng** game và **quét tiếp**:
 
-![Searching the value - Through a known change: Then, you do something so that value changes , and you stop the game and perform a next scan](<../../images/image (684).png>)
+![Tìm kiếm giá trị - Dựa trên một thay đổi đã biết: Sau đó, bạn làm gì đó để thay đổi giá trị, rồi tạm dừng game và quét tiếp](<../../images/image (684).png>)
 
-Cheat Engine will search for the **values** that **went from 100 to the new value**. Congrats, you **found** the **address** of the value you were looking for, you can now modify it.\
-_If you still have several values, do something to modify again that value, and perform another "next scan" to filter the addresses._
+Cheat Engine sẽ tìm các **giá trị** đã **thay đổi từ 100 sang giá trị mới**. Chúc mừng, bạn đã **tìm thấy địa chỉ** của giá trị cần tìm và giờ có thể thay đổi nó.\
+_Nếu vẫn còn nhiều kết quả, hãy làm gì đó để thay đổi giá trị lần nữa, rồi thực hiện thêm một lần "next scan" để lọc các địa chỉ._
 
-### Unknown Value, known change
+### Không biết giá trị, nhưng biết thay đổi
 
-In the scenario you **don't know the value** but you know **how to make it change** (and even the value of the change) you can look for your number.
+Nếu bạn **không biết giá trị** nhưng biết **cách làm nó thay đổi** (thậm chí biết mức thay đổi), bạn vẫn có thể tìm con số đó.
 
-So, start by performing a scan of type "**Unknown initial value**":
+Trước tiên, hãy quét với kiểu "**Unknown initial value**":
 
-![Through a known change - Unknown Value, known change: So, start by performing a scan of type " Unknown initial value "](<../../images/image (890).png>)
+![Dựa trên một thay đổi đã biết - Không biết giá trị, nhưng biết thay đổi: Trước tiên, hãy quét với kiểu "Unknown initial value"](../../images/image (890).png>)
 
-Then, make the value change, indicate **how** the **value** **changed** (in my case it was decreased by 1) and perform a **next scan**:
+Sau đó, làm cho giá trị thay đổi, cho biết giá trị đã thay đổi **như thế nào** (trong trường hợp của tôi, nó giảm 1) và thực hiện **quét tiếp**:
 
-![Through a known change - Unknown Value, known change: Then, make the value change, indicate how the value changed (in my case it was decreased by 1) and perform a next scan](<../../images/image (371).png>)
+![Dựa trên một thay đổi đã biết - Không biết giá trị, nhưng biết thay đổi: Sau đó, làm cho giá trị thay đổi, cho biết giá trị đã thay đổi như thế nào (trong trường hợp của tôi, nó giảm 1) và thực hiện quét tiếp](<../../images/image (371).png>)
 
-You will be presented **all the values that were modified in the selected way**:
+Bạn sẽ thấy **tất cả các giá trị đã thay đổi theo cách đã chọn**:
 
-![Through a known change - Unknown Value, known change: You will be presented all the values that were modified in the selected way](<../../images/image (569).png>)
+![Dựa trên một thay đổi đã biết - Không biết giá trị, nhưng biết thay đổi: Bạn sẽ thấy tất cả các giá trị đã thay đổi theo cách đã chọn](<../../images/image (569).png>)
 
-Once you have found your value, you can modify it.
+Khi đã tìm thấy giá trị cần tìm, bạn có thể thay đổi nó.
 
-Note that there are a **lot of possible changes** and you can do these **steps as much as you want** to filter the results:
+Lưu ý rằng có **nhiều kiểu thay đổi** và bạn có thể thực hiện các **bước này bao nhiêu lần tùy ý** để lọc kết quả:
 
-![Through a known change - Unknown Value, known change: Note that there are a lot of possible changes and you can do these steps as much as you want to filter the results](<../../images/image (574).png>)
+![Dựa trên một thay đổi đã biết - Không biết giá trị, nhưng biết thay đổi: Lưu ý rằng có nhiều kiểu thay đổi và bạn có thể thực hiện các bước này bao nhiêu lần tùy ý để lọc kết quả](<../../images/image (574).png>)
 
-### Random Memory Address - Finding the code
+### Địa chỉ bộ nhớ ngẫu nhiên - Tìm code
 
-Until know we learnt how to find an address storing a value, but it's highly probably that in **different executions of the game that address is in different places of the memory**. So lets find out how to always find that address.
+Đến đây, chúng ta đã biết cách tìm địa chỉ lưu giá trị, nhưng có khả năng **địa chỉ đó sẽ nằm ở vị trí khác trong bộ nhớ mỗi lần chạy game**. Vì vậy, hãy tìm cách luôn xác định được địa chỉ đó.
 
-Using some of the mentioned tricks, find the address where your current game is storing the important value. Then (stopping the game if you whish) do a **right click** on the found **address** and select "**Find out what accesses this address**" or "**Find out what writes to this address**":
+Dùng một trong các thủ thuật đã nêu để tìm địa chỉ đang lưu giá trị quan trọng trong game hiện tại. Sau đó (có thể tạm dừng game nếu muốn), **nhấp chuột phải** vào **địa chỉ** vừa tìm được và chọn "**Find out what accesses this address**" hoặc "**Find out what writes to this address**":
 
-![Unknown Value, known change - Random Memory Address - Finding the code: Using some of the mentioned tricks, find the address where your current game is storing the important value. Then...](<../../images/image (1067).png>)
+![Không biết giá trị, nhưng biết thay đổi - Địa chỉ bộ nhớ ngẫu nhiên - Tìm code: Dùng một trong các thủ thuật đã nêu để tìm địa chỉ đang lưu giá trị quan trọng trong game hiện tại. Sau đó...](<../../images/image (1067).png>)
 
-The **first option** is useful to know which **parts** of the **code** are **using** this **address** (which is useful for more things like **knowing where you can modify the code** of the game).\
-The **second option** is more **specific**, and will be more helpful in this case as we are interested in knowing **from where this value is being written**.
+**Tùy chọn đầu tiên** giúp xác định những **phần** nào của **code** đang **sử dụng** **địa chỉ này** (điều này còn hữu ích cho nhiều việc khác, chẳng hạn như **biết vị trí có thể sửa code** của game).\
+**Tùy chọn thứ hai** cụ thể hơn và hữu ích hơn trong trường hợp này, vì chúng ta muốn biết **giá trị này được ghi từ đâu**.
 
-Once you have selected one of those options, the **debugger** will be **attached** to the program and a new **empty window** will appear. Now, **play** the **game** and **modify** that **value** (without restarting the game). The **window** should be **filled** with the **addresses** that are **modifying** the **value**:
+Sau khi chọn một trong hai tùy chọn, **debugger** sẽ được **gắn** vào chương trình và một **cửa sổ trống** mới sẽ xuất hiện. Giờ hãy **chơi game** và **thay đổi** **giá trị đó** (không khởi động lại game). **Cửa sổ** sẽ được **điền** các **địa chỉ** đang **thay đổi** **giá trị**:
 
-![Unknown Value, known change - Random Memory Address - Finding the code: Once you have selected one of those options, the debugger will be attached to the program and a new empty window...](<../../images/image (91).png>)
+![Không biết giá trị, nhưng biết thay đổi - Địa chỉ bộ nhớ ngẫu nhiên - Tìm code: Sau khi chọn một trong hai tùy chọn, debugger sẽ được gắn vào chương trình và một cửa sổ trống mới...](<../../images/image (91).png>)
 
-Now that you found the address it's modifying the value you can **modify the code at your pleasure** (Cheat Engine allows you to modify it for NOPs real quick):
+Sau khi tìm thấy địa chỉ đang thay đổi giá trị, bạn có thể **tùy ý sửa code** (Cheat Engine cho phép bạn nhanh chóng thay bằng NOP):
 
-![Unknown Value, known change - Random Memory Address - Finding the code: Now that you found the address it's modifying the value you can modify the code at your pleasure (Cheat Engine...](<../../images/image (1057).png>)
+![Không biết giá trị, nhưng biết thay đổi - Địa chỉ bộ nhớ ngẫu nhiên - Tìm code: Sau khi tìm thấy địa chỉ đang thay đổi giá trị, bạn có thể tùy ý sửa code (Cheat Engine...](<../../images/image (1057).png>)
 
-So, you can now modify it so the code won't affect your number, or will always affect in a positive way.
+Giờ bạn có thể sửa nó để code không tác động đến con số của mình, hoặc luôn tác động theo hướng có lợi.
 
-### Random Memory Address - Finding the pointer
+### Địa chỉ bộ nhớ ngẫu nhiên - Tìm pointer
 
-Following the previous steps, find where the value you are interested is. Then, using "**Find out what writes to this address**" find out which address writes this value and double click on it to get the disassembly view:
+Làm theo các bước trước để tìm vị trí của giá trị bạn quan tâm. Sau đó, dùng "**Find out what writes to this address**" để tìm địa chỉ ghi giá trị này và nhấp đúp vào địa chỉ đó để mở chế độ xem disassembly:
 
-![Random Memory Address - Finding the code - Random Memory Address - Finding the pointer: Following the previous steps, find where the value you are interested is. Then, using " Find out...](<../../images/image (1039).png>)
+![Địa chỉ bộ nhớ ngẫu nhiên - Tìm code - Địa chỉ bộ nhớ ngẫu nhiên - Tìm pointer: Làm theo các bước trước để tìm vị trí của giá trị bạn quan tâm. Sau đó, dùng "Find out...](<../../images/image (1039).png>)
 
-Then, perform a new scan **searching for the hex value between "\[]"** (the value of $edx in this case):
+Tiếp theo, thực hiện một lần quét mới để **tìm giá trị hex nằm giữa "\[]"** (trong trường hợp này là giá trị của $edx):
 
-![Random Memory Address - Finding the code - Random Memory Address - Finding the pointer: Then, perform a new scan searching for the hex value between " ()" (the value of $edx in this case)](<../../images/image (994).png>)
+![Địa chỉ bộ nhớ ngẫu nhiên - Tìm code - Địa chỉ bộ nhớ ngẫu nhiên - Tìm pointer: Tiếp theo, thực hiện một lần quét mới để tìm giá trị hex nằm giữa " ()" (trong trường hợp này là giá trị của $edx)](<../../images/image (994).png>)
 
-(_If several appear you usually need the smallest address one_)\
-Now, we have f**ound the pointer that will be modifying the value we are interested in**.
+(_Nếu có nhiều kết quả, thường thì bạn cần địa chỉ nhỏ nhất_)\
+Giờ chúng ta đã **tìm thấy pointer sẽ thay đổi giá trị cần quan tâm**.
 
-Click on "**Add Address Manually**":
+Nhấp vào "**Add Address Manually**":
 
-![Random Memory Address - Finding the code - Random Memory Address - Finding the pointer: Click on " Add Address Manually "](<../../images/image (990).png>)
+![Địa chỉ bộ nhớ ngẫu nhiên - Tìm code - Địa chỉ bộ nhớ ngẫu nhiên - Tìm pointer: Nhấp vào "Add Address Manually"](../../images/image (990).png>)
 
-Now, click on the "Pointer" check box and add the found address in the text box (in this scenario, the found address in the previous image was "Tutorial-i386.exe"+2426B0):
+Giờ hãy đánh dấu vào ô "Pointer" và nhập địa chỉ tìm được vào hộp văn bản (trong trường hợp này, địa chỉ tìm được ở hình trước là "Tutorial-i386.exe"+2426B0):
 
-![Random Memory Address - Finding the code - Random Memory Address - Finding the pointer: Now, click on the "Pointer" check box and add the found address in the text box (in this scenario,...](<../../images/image (392).png>)
+![Địa chỉ bộ nhớ ngẫu nhiên - Tìm code - Địa chỉ bộ nhớ ngẫu nhiên - Tìm pointer: Giờ hãy đánh dấu vào ô "Pointer" và nhập địa chỉ tìm được vào hộp văn bản (trong trường hợp này,...](<../../images/image (392).png>)
 
-(Note how the first "Address" is automatically populated from the pointer address you introduce)
+(Lưu ý rằng "Address" đầu tiên sẽ tự động được điền từ địa chỉ pointer bạn nhập vào)
 
-Click OK and a new pointer will be created:
+Nhấp OK để tạo pointer mới:
 
-![Random Memory Address - Finding the code - Random Memory Address - Finding the pointer: Click OK and a new pointer will be created](<../../images/image (308).png>)
+![Địa chỉ bộ nhớ ngẫu nhiên - Tìm code - Địa chỉ bộ nhớ ngẫu nhiên - Tìm pointer: Nhấp OK để tạo pointer mới](<../../images/image (308).png>)
 
-Now, every time you modifies that value you are **modifying the important value even if the memory address where the value is is different.**
+Giờ đây, mỗi lần bạn thay đổi giá trị đó, bạn sẽ **thay đổi được giá trị quan trọng, ngay cả khi địa chỉ bộ nhớ lưu giá trị đó đã khác.**
 
 ### Code Injection
 
-Code injection is a technique where you inject a piece of code into the target process, and then reroute the execution of code to go through your own written code (like giving you points instead of resting them).
+Code injection là kỹ thuật đưa một đoạn code vào process mục tiêu, sau đó chuyển hướng luồng thực thi để chạy qua đoạn code do bạn viết (chẳng hạn như cộng điểm thay vì trừ điểm).
 
-So, imagine you have found the address that is subtracting 1 to the life of your player:
+Giả sử bạn đã tìm thấy địa chỉ đang trừ 1 máu của người chơi:
 
-![Random Memory Address - Finding the pointer - Code Injection: So, imagine you have found the address that is subtracting 1 to the life of your player](<../../images/image (203).png>)
+![Địa chỉ bộ nhớ ngẫu nhiên - Tìm pointer - Code Injection: Giả sử bạn đã tìm thấy địa chỉ đang trừ 1 máu của người chơi](<../../images/image (203).png>)
 
-Click on Show disassembler to get the **disassemble code**.\
-Then, click **CTRL+a** to invoke the Auto assemble window and select _**Template --> Code Injection**_
+Nhấp vào Show disassembler để xem **code disassemble**.\
+Sau đó, nhấn **CTRL+a** để mở cửa sổ Auto assemble và chọn _**Template --> Code Injection**_
 
-![Random Memory Address - Finding the pointer - Code Injection: Then, click CTRL+a to invoke the Auto assemble window and select Template -- Code Injection](<../../images/image (902).png>)
+![Địa chỉ bộ nhớ ngẫu nhiên - Tìm pointer - Code Injection: Sau đó, nhấn CTRL+a để mở cửa sổ Auto assemble và chọn Template -- Code Injection](<../../images/image (902).png>)
 
-Fill the **address of the instruction you want to modify** (this is usually autofilled):
+Điền **địa chỉ của instruction bạn muốn sửa đổi** (thường thì địa chỉ này được điền tự động):
 
-![Random Memory Address - Finding the pointer - Code Injection: Fill the address of the instruction you want to modify (this is usually autofilled)](<../../images/image (744).png>)
+![Địa chỉ bộ nhớ ngẫu nhiên - Tìm pointer - Code Injection: Điền địa chỉ của instruction bạn muốn sửa đổi (thường thì địa chỉ này được điền tự động)](<../../images/image (744).png>)
 
-A template will be generated:
+Một template sẽ được tạo:
 
-![Random Memory Address - Finding the pointer - Code Injection: A template will be generated](<../../images/image (944).png>)
+![Địa chỉ bộ nhớ ngẫu nhiên - Tìm pointer - Code Injection: Một template sẽ được tạo](<../../images/image (944).png>)
 
-So, insert your new assembly code in the "**newmem**" section and remove the original code from the "**originalcode**" if you don't want it to be executed**.** In this example the injected code will add 2 points instead of substracting 1:
+Hãy chèn assembly code mới vào phần "**newmem**" và xóa code gốc khỏi phần "**originalcode**" nếu bạn không muốn nó được thực thi**.** Trong ví dụ này, code được inject sẽ cộng 2 điểm thay vì trừ 1:
 
-![Random Memory Address - Finding the pointer - Code Injection: So, insert your new assembly code in the " newmem " section and remove the original code from the " originalcode " if you...](<../../images/image (521).png>)
+![Địa chỉ bộ nhớ ngẫu nhiên - Tìm pointer - Code Injection: Hãy chèn assembly code mới vào phần "newmem" và xóa code gốc khỏi phần "originalcode" nếu bạn...](<../../images/image (521).png>)
 
-**Click on execute and so on and your code should be injected in the program changing the behaviour of the functionality!**
+**Nhấp vào execute, v.v. để inject code vào chương trình. Thao tác này sẽ thay đổi hành vi của chức năng!**
 
-## Relocation-safe code injection with AOB signatures
+## Code injection an toàn khi relocation bằng AOB signature
 
-A script that hooks `game.exe+123456` can break after ASLR or a software update. An **Array of Bytes (AOB) signature** finds the instruction from its surrounding machine code instead. Use `aobscanmodule` to restrict the search to one module. Make the signature long enough to return one match. Wildcard relocation bytes, addresses and other bytes that may change. Do not wildcard the whole instruction that you need to restore.<sup>[[4]](#references)</sup>
+Một script hook vào `game.exe+123456` có thể bị lỗi sau khi ASLR hoặc phần mềm được cập nhật. **Array of Bytes (AOB) signature** tìm instruction dựa trên machine code xung quanh nó. Dùng `aobscanmodule` để giới hạn tìm kiếm trong một module. Signature cần đủ dài để chỉ khớp một kết quả. Dùng wildcard cho các byte relocation, địa chỉ và những byte khác có thể thay đổi. Không dùng wildcard cho toàn bộ instruction mà bạn cần khôi phục.<sup>[[4]](#references)</sup>
 
-In Memory View, select the instruction and use **Tools → Auto Assemble → Template → AOB Injection**. The generated `[DISABLE]` block is important. It must restore every overwritten byte and free the allocation.<sup>[[4]](#references)</sup>
+Trong Memory View, chọn instruction rồi dùng **Tools → Auto Assemble → Template → AOB Injection**. Block `[DISABLE]` được tạo rất quan trọng. Block này phải khôi phục mọi byte đã bị ghi đè và giải phóng vùng nhớ đã cấp phát.<sup>[[4]](#references)</sup>
 
 <details>
-<summary>Minimal x64 AOB injection skeleton</summary>
+<summary>Bộ khung AOB injection x64 tối giản</summary>
 
 ```asm
 [ENABLE]
@@ -189,61 +189,61 @@ dealloc(newmem)
 
 </details>
 
-Before enabling the script, verify these points:
+Trước khi bật script, hãy xác minh các điểm sau:
 
-1. The AOB returns **one** address. Add stable instructions on both sides if it returns more.
-2. The jump replaces complete instructions. Never split an instruction.
-3. The allocated cave is reachable by the generated jump. On x64, a far allocation may need a 14-byte jump.
-4. The injected code preserves registers, flags and stack alignment that the original function expects.
-5. The disable block restores the exact original bytes. Test enable and disable several times before saving the table.
+1. AOB trả về **một** địa chỉ. Nếu có nhiều kết quả, hãy thêm các instruction ổn định ở cả hai phía.
+2. Lệnh nhảy thay thế các instruction hoàn chỉnh. Không bao giờ cắt đôi một instruction.
+3. Code cave được cấp phát nằm trong phạm vi mà lệnh nhảy được tạo có thể tới. Trên x64, nếu vùng cấp phát ở xa, có thể cần lệnh nhảy 14 byte.
+4. Code được inject bảo toàn các register, flag và căn chỉnh stack mà function gốc yêu cầu.
+5. Khối disable khôi phục chính xác các byte ban đầu. Hãy thử bật và tắt nhiều lần trước khi lưu table.
 
-## Reliable pointer workflow
+## Quy trình tìm pointer đáng tin cậy
 
-A pointer found in one run is only a candidate. Build pointer maps in several fresh executions and rescan against all of them. Restart the target between captures so ASLR and heap allocations change. Prefer paths whose base is a module or another stable symbol. Reject paths that only work with one save, level or object instance.
+Pointer tìm được trong một lần chạy chỉ là ứng viên. Hãy tạo pointer map trong nhiều lần chạy mới và rescan với tất cả các map đó. Khởi động lại target giữa các lần thu thập để ASLR và các vùng cấp phát trên heap thay đổi. Ưu tiên các đường dẫn có base là module hoặc một symbol ổn định khác. Loại bỏ các đường dẫn chỉ hoạt động với một save, level hoặc instance của object.
 
-The **pointer must end with specific offsets** filter and its deviation option can keep useful paths when a nearby field moves between builds. The 7.5 release also added this deviation control. It is a filter, not proof that a pointer chain is stable.<sup>[[1]](#references)</sup>
+Bộ lọc **pointer must end with specific offsets** cùng tùy chọn deviation có thể giữ lại các đường dẫn hữu ích khi một field lân cận dịch chuyển giữa các bản build. Bản phát hành 7.5 cũng bổ sung tùy chọn kiểm soát deviation này. Đây là bộ lọc, không phải bằng chứng cho thấy pointer chain ổn định.<sup>[[1]](#references)</sup>
 
-When a structure moves too often for pointer scanning, hook the instruction that accesses it. Capture the live object pointer from a register into an allocated symbol. This is often more reliable for entity lists and managed objects.
+Khi một structure dịch chuyển quá thường xuyên để pointer scanning hoạt động hiệu quả, hãy hook instruction truy cập nó. Lưu pointer object đang hoạt động từ một register vào một symbol được cấp phát. Cách này thường đáng tin cậy hơn với danh sách entity và object được quản lý.
 
-## Tracing code instead of scanning values
+## Trace code thay vì scan giá trị
 
-Use **Find out what writes to this address** when the value is directly modified. Use **Find out what accesses this address** when you need the owning object or when the write happens through copied data. Trigger only one action in the target. Then compare the hit count and register state.
+Dùng **Find out what writes to this address** khi giá trị bị sửa đổi trực tiếp. Dùng **Find out what accesses this address** khi bạn cần tìm object sở hữu nó hoặc khi thao tác ghi diễn ra thông qua dữ liệu đã được sao chép. Chỉ thực hiện một hành động trong target. Sau đó, so sánh số lần trúng và trạng thái register.
 
-**Ultimap 2** uses Intel Processor Trace on supported Intel CPUs. It records executed control flow with less interruption than stepping every instruction. Filter for code that executed while the interesting action occurred and remove code that also executed during an idle capture. Intel PT is not a stealth feature. The target can still detect tracing, timing changes or Cheat Engine itself.<sup>[[1]](#references)</sup>
+**Ultimap 2** sử dụng Intel Processor Trace trên các CPU Intel được hỗ trợ. Công cụ này ghi lại luồng điều khiển đã thực thi và ít gây gián đoạn hơn so với việc step từng instruction. Lọc các đoạn code đã thực thi trong lúc hành động cần quan tâm diễn ra, rồi loại bỏ những đoạn cũng xuất hiện trong lần capture khi target ở trạng thái nhàn rỗi. Intel PT không phải tính năng ẩn mình. Target vẫn có thể phát hiện việc tracing, thay đổi timing hoặc chính Cheat Engine.<sup>[[1]](#references)</sup>
 
-Cheat Engine 7.5 also added an Intel PT interface provided by Windows. The older DBVM-backed Ultimap mode and the Intel PT mode have different hardware and OS requirements. Do not assume that a DBVM-capable CPU supports Intel PT.<sup>[[1]](#references)</sup>
+Cheat Engine 7.5 cũng bổ sung giao diện Intel PT do Windows cung cấp. Chế độ Ultimap cũ dựa trên DBVM và chế độ Intel PT có yêu cầu phần cứng và OS khác nhau. Đừng cho rằng CPU hỗ trợ DBVM cũng hỗ trợ Intel PT.<sup>[[1]](#references)</sup>
 
-## Debugger and breakpoint selection
+## Chọn debugger và breakpoint
 
-Choose the least invasive debugger that works:
+Chọn debugger ít xâm lấn nhất nhưng vẫn hoạt động:
 
-- **Windows debugger** is simple but creates normal debug events. Anti-debugging checks can detect it.
-- **VEH debugger** handles breakpoints through a vectored exception handler. It avoids some basic debugger checks but it is not invisible.
-- **Hardware breakpoints** do not patch the instruction bytes, but x86/x64 provides only a small number of debug-register slots.
-- **Software breakpoints** replace a byte with `INT3`. They are easy to detect and can conflict with integrity checks.
-- **DBVM debugger** moves some operations below the guest OS. It has much more privilege and can crash the host if it is misconfigured.
+- **Windows debugger** đơn giản nhưng tạo ra các debug event thông thường. Các kiểm tra anti-debugging có thể phát hiện nó.
+- **VEH debugger** xử lý breakpoint thông qua vectored exception handler. Nó tránh được một số kiểm tra debugger cơ bản nhưng không vô hình.
+- **Hardware breakpoint** không sửa các byte của instruction, nhưng x86/x64 chỉ cung cấp một số lượng nhỏ slot debug-register.
+- **Software breakpoint** thay một byte bằng `INT3`. Cách này dễ bị phát hiện và có thể xung đột với các kiểm tra integrity.
+- **DBVM debugger** đưa một số thao tác xuống dưới guest OS. Nó có nhiều quyền hơn và có thể làm host bị crash nếu cấu hình sai.
 
-Cheat Engine 7.5 can use a one-byte jump based on an exception handler and `INT3` when there is not enough room for a normal relative jump. Treat it like a software breakpoint. Verify exception flow and do not assume that it bypasses anti-tamper checks.<sup>[[1]](#references)</sup>
+Cheat Engine 7.5 có thể dùng lệnh nhảy một byte dựa trên exception handler và `INT3` khi không đủ chỗ cho lệnh nhảy relative thông thường. Hãy xem nó như một software breakpoint. Xác minh luồng exception và đừng cho rằng nó vượt qua được các kiểm tra anti-tamper.<sup>[[1]](#references)</sup>
 
-DBVM is a hypervisor, not a general invisibility switch. Use it only in a disposable lab. Do not expose its control interface to untrusted code. Kernel anti-cheat and endpoint products may still detect the driver, hypervisor state or modified memory.
+DBVM là hypervisor, không phải công tắc giúp ẩn mình trong mọi tình huống. Chỉ sử dụng nó trong lab dùng một lần. Không để lộ giao diện điều khiển của nó cho code không đáng tin cậy. Anti-cheat cấp kernel và các sản phẩm endpoint vẫn có thể phát hiện driver, trạng thái hypervisor hoặc memory đã bị sửa đổi.
 
-## Managed runtimes and recent 7.6/7.7 features
+## Runtime được quản lý và các tính năng mới trong 7.6/7.7
 
-For Mono, IL2CPP, .NET and Java targets, prefer runtime metadata over blind scans when it is available. Open **Mono → Activate mono features** or the corresponding runtime information window. Locate the class, field or method first. Then use the native disassembly when the managed method is JIT-compiled.
+Với các target Mono, IL2CPP, .NET và Java, hãy ưu tiên metadata của runtime thay vì blind scan nếu có thể. Mở **Mono → Activate mono features** hoặc cửa sổ thông tin runtime tương ứng. Trước tiên, xác định class, field hoặc method. Sau đó dùng native disassembly khi method được managed đã được JIT compile.
 
-The 7.6 line added `AOBSCANEX` for executable-memory-only signatures, a `gdbserver` debugger interface, Java metadata inspection, faster IL2CPP enumeration and a pointer-scan option that ignores the upper pointer byte used by ARM memory tagging. The 7.7 line added native Linux builds, `HOOK`/`UNHOOK`, `aobscanfunction`, better generic Mono method lookup, improved PDB structure support and basic Unreal Engine structure dissection.<sup>[[3]](#references)</sup>
+Nhánh 7.6 bổ sung `AOBSCANEX` để chỉ tìm signature trong executable memory, giao diện debugger `gdbserver`, khả năng kiểm tra Java metadata, duyệt IL2CPP nhanh hơn và tùy chọn pointer-scan bỏ qua byte cao của pointer được dùng cho ARM memory tagging. Nhánh 7.7 bổ sung bản native cho Linux, `HOOK`/`UNHOOK`, `aobscanfunction`, khả năng tìm generic Mono method tốt hơn, hỗ trợ PDB structure được cải thiện và khả năng phân tích structure cơ bản của Unreal Engine.<sup>[[3]](#references)</sup>
 
-These additions enable a useful workflow:
+Các bổ sung này hỗ trợ một quy trình hữu ích:
 
-1. Resolve a managed method or static field from metadata.
-2. Trace or disassemble the native code produced for that method.
-3. Use `AOBSCANEX` or `aobscanfunction` to locate a stable executable signature.
-4. Generate a reversible hook. Keep the original instructions and validate the disable path.
-5. Recheck the signature after every target update. A successful match does not guarantee that the surrounding logic still has the same meaning.
+1. Xác định managed method hoặc static field từ metadata.
+2. Trace hoặc disassemble native code được tạo cho method đó.
+3. Dùng `AOBSCANEX` hoặc `aobscanfunction` để tìm một executable signature ổn định.
+4. Tạo một hook có thể hoàn tác. Giữ lại các instruction gốc và xác thực đường dẫn disable.
+5. Kiểm tra lại signature sau mỗi lần target được cập nhật. Tìm thấy kết quả khớp không đảm bảo logic xung quanh vẫn giữ nguyên ý nghĩa.
 
-## Remote targets with `ceserver`
+## Target từ xa với `ceserver`
 
-`ceserver` exposes process enumeration, memory access and debugging to the Cheat Engine GUI. Official builds cover Linux and Android. Run the matching architecture on the target and connect through the **Network** tab. On Android, forwarding the default port avoids exposing it on the network:<sup>[[3]](#references)</sup>
+`ceserver` cung cấp khả năng liệt kê process, truy cập memory và debugging cho giao diện Cheat Engine. Các bản build chính thức hỗ trợ Linux và Android. Chạy đúng kiến trúc trên target rồi kết nối qua tab **Network**. Trên Android, chuyển tiếp port mặc định sẽ tránh phải để port lộ ra mạng:<sup>[[3]](#references)</sup>
 
 ```bash
 adb push ceserver_arm64 /data/local/tmp/ceserver
@@ -251,22 +251,22 @@ adb shell 'su -c "chmod 700 /data/local/tmp/ceserver && /data/local/tmp/ceserver
 adb forward tcp:52736 tcp:52736
 ```
 
-The third-party `frida-ceserver` bridge can provide a Cheat Engine-compatible interface for iOS targets. It is not the official `ceserver` and its supported operations may differ.<sup>[[2]](#references)</sup>
+Bridge bên thứ ba `frida-ceserver` có thể cung cấp giao diện tương thích với Cheat Engine cho các mục tiêu iOS. Đây không phải `ceserver` chính thức và các thao tác được hỗ trợ có thể khác nhau.<sup>[[2]](#references)</sup>
 
-Assume the protocol grants debugger-level access. Bind it to loopback or place it behind an SSH/ADB tunnel. Never expose TCP 52736 to an untrusted network. Stop the server when the session ends.
+Giả định rằng giao thức cấp quyền truy cập ở cấp debugger. Hãy liên kết nó với loopback hoặc đặt nó sau một SSH/ADB tunnel. Tuyệt đối không để TCP 52736 lộ ra mạng không đáng tin cậy. Dừng server khi kết thúc phiên.
 
-## Operational safety
+## An toàn vận hành
 
-Only attach to software you own or are authorized to test. Do not run Cheat Engine beside an online game or production endpoint. Memory writes, injected code, drivers and DBVM can crash or corrupt the target.<sup>[[3]](#references)</sup>
+Chỉ attach vào phần mềm mà bạn sở hữu hoặc được phép kiểm thử. Không chạy Cheat Engine bên cạnh trò chơi trực tuyến hoặc endpoint production. Các thao tác ghi bộ nhớ, code được inject, driver và DBVM có thể làm crash hoặc hỏng mục tiêu.<sup>[[3]](#references)</sup>
 
-Download builds from the official site or compile the published source. Security products often classify memory editors, debuggers and their drivers as hack tools. Do not disable host protection globally. Use a dedicated VM or lab host and verify the artifact before running it.<sup>[[3]](#references)</sup>
+Tải các bản build từ trang chính thức hoặc compile source đã công bố. Các sản phẩm bảo mật thường phân loại memory editor, debugger và driver của chúng là hack tools. Không tắt toàn bộ biện pháp bảo vệ trên host. Hãy dùng VM hoặc host lab chuyên dụng và xác minh artifact trước khi chạy.<sup>[[3]](#references)</sup>
 
 
 
 ## References
 
-- [1] [Cheat Engine 7.5 release notes](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
-- [2] [frida-ceserver bridge for remote targets](https://github.com/gmh5225/frida-ceserver)
-- [3] [Cheat Engine official release news](https://www.cheatengine.org/)
-- [4] [Cheat Engine Wiki: Auto Assembler AOBs](https://wiki.cheatengine.org/index.php?title=Tutorials:AOBs)
+- [1] [Ghi chú phát hành Cheat Engine 7.5](https://github.com/cheat-engine/cheat-engine/releases/tag/7.5)
+- [2] [Bridge frida-ceserver dành cho mục tiêu từ xa](https://github.com/gmh5225/frida-ceserver)
+- [3] [Tin tức phát hành chính thức của Cheat Engine](https://www.cheatengine.org/)
+- [4] [Wiki Cheat Engine: AOB trong Auto Assembler](https://wiki.cheatengine.org/index.php?title=Tutorials:AOBs)
 {{#include ../../banners/hacktricks-training.md}}

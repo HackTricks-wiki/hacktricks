@@ -1,39 +1,39 @@
-# Capture-Resilient Authorized Field Nodes
+# Các nút thực địa được ủy quyền có khả năng chống bị thu giữ
 
 {{#include ../banners/hacktricks-training.md}}
 
-An on-site Raspberry Pi, mini-PC, travel router or cellular appliance can give an authorized red team a durable vantage point. It is also a likely point of discovery, theft and attribution. The right design objective is therefore **stable, controlled access with little authority on the field node**, not an untraceable implant.
+Raspberry Pi, mini-PC, travel router hoặc thiết bị di động qua mạng di động được đặt tại chỗ có thể mang lại cho red team được ủy quyền một vị trí quan sát bền vững. Đây cũng là mục tiêu có khả năng bị phát hiện, đánh cắp và truy nguồn cao. Vì vậy, mục tiêu thiết kế phù hợp là **duy trì quyền truy cập ổn định, có kiểm soát và hạn chế quyền trên nút thực địa**, chứ không phải tạo implant không thể truy dấu.
 
-This guide applies only to equipment placed with the site owner's written authorization. A coffee shop, neighbor, hotel or shared building is not in scope merely because its network is reachable. Do not hide hardware in an unconsenting venue, bypass a captive portal, use another person's credentials, interfere with monitoring, or attempt to erase evidence after discovery.
+Hướng dẫn này chỉ áp dụng cho thiết bị được đặt với sự cho phép bằng văn bản của chủ sở hữu địa điểm. Quán cà phê, nhà hàng xóm, khách sạn hoặc tòa nhà dùng chung không thuộc phạm vi chỉ vì có thể kết nối vào mạng của họ. Không giấu phần cứng tại địa điểm không đồng thuận, vượt qua captive portal, dùng thông tin xác thực của người khác, can thiệp vào hoạt động giám sát hoặc cố xóa bằng chứng sau khi bị phát hiện.
 
 {% hint style="warning" %}
-There is no dependable “leave no traces” setting. Radio association, DHCP/NAT, carrier, camera, purchase, device, provider, controller and destination records can survive the device. An accountable red team instead removes **personal and unrelated secrets** from the node, retains protected controller-side attribution, and makes capture cheap to contain.
+Không có thiết lập “không để lại dấu vết” nào đáng tin cậy. Các bản ghi về kết nối vô tuyến, DHCP/NAT, nhà mạng, camera, giao dịch mua, thiết bị, nhà cung cấp, bộ điều khiển và đích đến có thể vẫn tồn tại sau khi thiết bị không còn. Thay vào đó, red team có trách nhiệm sẽ loại bỏ **bí mật cá nhân và không liên quan** khỏi nút, lưu giữ thông tin truy nguồn được bảo vệ ở phía bộ điều khiển và chuẩn bị để việc xử lý khi thiết bị bị thu giữ diễn ra nhanh chóng.
 {% endhint %}
 
-## Pros and cons
+## Ưu và nhược điểm
 
-**Pros:** realistic internal or target-adjacent source; stable high-speed testing; validates NAC, egress, physical inventory and SOC coverage; can continue through operator address changes; bounded access can be revoked centrally.
+**Ưu điểm:** cung cấp nguồn truy cập thực tế từ bên trong hoặc gần mục tiêu; hỗ trợ kiểm thử ổn định, tốc độ cao; xác thực NAC, egress, kiểm kê vật lý và phạm vi bao phủ của SOC; có thể tiếp tục hoạt động khi địa chỉ của operator thay đổi; có thể thu hồi quyền truy cập giới hạn từ trung tâm.
 
-**Cons:** physical placement creates strong evidence; loss can expose device credentials, network profiles and collected data; repeated control traffic is detectable; power, portals and radio changes impair reliability; a broad tunnel can become an uncontrolled pivot.
+**Nhược điểm:** việc đặt thiết bị tại chỗ tạo ra bằng chứng rõ ràng; nếu bị mất, thiết bị có thể làm lộ thông tin xác thực, hồ sơ mạng và dữ liệu đã thu thập; lưu lượng điều khiển lặp lại có thể bị phát hiện; nguồn điện, portal và thay đổi vô tuyến làm giảm độ tin cậy; tunnel quá rộng có thể trở thành pivot ngoài tầm kiểm soát.
 
-## Threat model and design invariants
+## Mô hình đe dọa và các nguyên tắc bất biến trong thiết kế
 
-Assume that a finder can remove storage, inspect firmware, copy every software-held secret, observe later network behavior and provide the device to the client or law enforcement. Full-disk encryption protects a powered-off device only under its stated threat model; a running unlocked node and keys released to memory are different cases.
+Giả định rằng người tìm thấy thiết bị có thể tháo bộ nhớ, kiểm tra firmware, sao chép mọi bí mật được lưu bằng phần mềm, quan sát hành vi mạng sau đó và giao thiết bị cho khách hàng hoặc cơ quan thực thi pháp luật. Mã hóa toàn bộ ổ đĩa chỉ bảo vệ thiết bị đang tắt theo mô hình đe dọa đã nêu; nút đang chạy nhưng đã mở khóa và các khóa được đưa vào bộ nhớ là những trường hợp khác.
 
-| Invariant | Practical consequence |
+| Nguyên tắc bất biến | Hệ quả thực tế |
 |---|---|
-| No direct operator-to-node identity | Operator signs in to the organization gateway; the node has a different device identity |
-| No personal workstation material | No personal SSH key, browser profile, email, password manager, phone pairing or cloud CLI cache |
-| No controller master secret | One node cannot enroll another, change policy or decrypt other engagements |
-| Outbound-only and narrow | The field network accepts no management listener; the node reaches only named rendezvous/update/time services |
-| Short-lived, scoped authority | Each credential has one device, audience, service, expiry and immediate revocation path |
-| Minimal local data | Results stream to the controller; caches are encrypted, size/TTL bounded and non-authoritative |
-| Controller accountability survives capture | Asset-to-engagement mapping, approvals, operator access and commands are stored centrally and access-controlled |
-| Loss stops work | Discovery or unexplained state change triggers stop, revoke, notify and evidence preservation—not remote destruction |
+| Không để lộ danh tính trực tiếp từ operator đến nút | Operator đăng nhập vào gateway của tổ chức; nút có danh tính thiết bị riêng |
+| Không có dữ liệu từ máy trạm cá nhân | Không có SSH key cá nhân, hồ sơ trình duyệt, email, trình quản lý mật khẩu, ghép nối điện thoại hoặc bộ nhớ đệm cloud CLI |
+| Không có bí mật chủ của bộ điều khiển | Một nút không thể đăng ký nút khác, thay đổi chính sách hoặc giải mã dữ liệu của các đợt engagement khác |
+| Chỉ kết nối đi và giới hạn chặt chẽ | Mạng thực địa không chấp nhận listener quản lý; nút chỉ kết nối đến các dịch vụ rendezvous/update/time được chỉ định |
+| Quyền hạn có phạm vi giới hạn và thời hạn ngắn | Mỗi thông tin xác thực chỉ áp dụng cho một thiết bị, audience, dịch vụ và thời hạn, đồng thời có thể thu hồi ngay lập tức |
+| Giảm thiểu dữ liệu lưu cục bộ | Kết quả được truyền về bộ điều khiển; bộ nhớ đệm được mã hóa, giới hạn dung lượng/thời gian lưu và không có thẩm quyền quyết định |
+| Trách nhiệm giải trình ở bộ điều khiển vẫn được duy trì khi thiết bị bị thu giữ | Thông tin liên kết tài sản với engagement, phê duyệt, quyền truy cập của operator và lệnh được lưu tập trung, có kiểm soát truy cập |
+| Mất thiết bị đồng nghĩa với dừng hoạt động | Nếu thiết bị bị phát hiện hoặc trạng thái thay đổi không rõ nguyên nhân, phải dừng, thu hồi quyền, thông báo và bảo toàn bằng chứng—không phá hủy từ xa |
 
-NIST's IoT baseline groups device identification, configuration, data protection, logical access, secure software update and cybersecurity-state awareness as core capabilities. It specifically treats state awareness and off-device event records as support for compromise investigation.<sup>[[1]](#references)</sup>
+Chuẩn cơ sở IoT của NIST nhóm các năng lực nhận diện thiết bị, cấu hình, bảo vệ dữ liệu, truy cập logic, cập nhật phần mềm an toàn và nhận biết trạng thái an ninh mạng thành các năng lực cốt lõi. Tiêu chuẩn này đặc biệt xem việc nhận biết trạng thái và lưu bản ghi sự kiện ngoài thiết bị là cơ sở hỗ trợ điều tra sự cố xâm nhập.<sup>[[1]](#references)</sup>
 
-## Reference architecture
+## Kiến trúc tham chiếu
 
 ```text
 operator workstation
@@ -47,48 +47,48 @@ rendezvous/broker <==== outbound mTLS or WireGuard ==== field node
   +---- allowlisted owned test services                 +-- organization cellular fallback
 ```
 
-The gateway must know which named operator reached which named device. The field node needs only a device credential for the rendezvous. It never learns the operator's source address or authentication secret, and the operator never copies a private management key to it. This reduces the personal link recoverable **from the field storage** without destroying exercise accountability.
+Gateway phải biết operator có tên nào đã truy cập device có tên nào. Field node chỉ cần device credential để kết nối đến rendezvous. Nó không bao giờ biết địa chỉ nguồn hay secret xác thực của operator, và operator không bao giờ sao chép private management key vào đó. Điều này giảm mức độ liên kết cá nhân có thể khôi phục **từ dữ liệu lưu trữ trên field node** mà không làm mất khả năng quy trách nhiệm cho exercise.
 
-For a larger fleet, a workload-identity system can issue short-lived X.509 identities and rotate keys automatically. SPIFFE recommends X.509 SVIDs where possible and describes short lifetimes and frequent rotation as limiting key-compromise exposure.<sup>[[2]](#references)</sup> A small team can apply the same properties with a private CA and automated per-device certificates; installing SPIRE is not required simply to satisfy the pattern.
+Với một fleet lớn hơn, hệ thống workload identity có thể cấp danh tính X.509 có thời hạn ngắn và tự động luân chuyển key. SPIFFE khuyến nghị dùng X.509 SVID khi có thể, đồng thời mô tả rằng thời hạn ngắn và việc luân chuyển thường xuyên giúp hạn chế mức độ lộ lọt khi key bị xâm phạm.<sup>[[2]](#references)</sup> Một nhóm nhỏ có thể áp dụng các đặc tính tương tự bằng CA riêng và certificate riêng cho từng device được cấp tự động; không cần cài SPIRE chỉ để đáp ứng mô hình này.
 
-## Step 1: authorize and register the placement
+## Step 1: authorize và đăng ký vị trí triển khai
 
-1. Record owner, site, exact allowed placement zone, allowed networks, assessment window, allowed destinations/actions and emergency contacts.
-2. Record model, serial, storage serial, wired/wireless MACs, modem IMEI/eSIM or SIM ICCID, power supply and a current photograph.
-3. Give the device a non-personal engagement identifier, for example `E2026-014-DROP03`. Do not encode a client name in broadcast hostnames or SSIDs.
-4. Tell the exercise controller and the smallest necessary physical-security/SOC deconfliction group what “lost,” “moved,” and “discovered” mean for this test.
-5. Pre-agree who may retrieve it and how a finder can report it. A safety label can omit sensitive client detail while providing a controlled callback.
-6. Set an automatic authorization expiry. Connectivity continuing after scope end must not extend permission.
+1. Ghi lại chủ sở hữu, địa điểm, khu vực triển khai chính xác được phép, các network được phép, thời gian đánh giá, các đích/hành động được phép và thông tin liên hệ khẩn cấp.
+2. Ghi lại model, serial, serial của storage, MAC có dây/không dây, IMEI modem/eSIM hoặc ICCID SIM, bộ nguồn và ảnh hiện trạng.
+3. Cấp cho device một mã định danh engagement không gắn với cá nhân, ví dụ `E2026-014-DROP03`. Không đưa tên client vào hostname hoặc SSID phát quảng bá.
+4. Thông báo cho người điều phối exercise và nhóm physical security/SOC nhỏ nhất cần thiết về ý nghĩa của các trạng thái “mất,” “bị di chuyển” và “bị phát hiện” trong bài kiểm thử này.
+5. Thống nhất trước ai được phép thu hồi thiết bị và cách người phát hiện có thể báo tin. Nhãn an toàn có thể lược bỏ thông tin nhạy cảm về client nhưng vẫn cung cấp một kênh liên hệ có kiểm soát.
+6. Đặt thời điểm hết hạn authorization tự động. Kết nối còn hoạt động sau khi hết scope không được kéo dài quyền cho phép.
 
-## Step 2: build a minimal recoverable image
+## Step 2: tạo image tối thiểu có thể khôi phục
 
-Use a supported OS image, verify its signature/checksum through the vendor's documented channel, install security updates and keep a reproducible build manifest. Prefer a read-only or immutable base with a small writable data partition where the software permits it.
+Dùng image OS được hỗ trợ, xác minh chữ ký/checksum qua kênh được vendor ghi rõ, cài security update và duy trì manifest build có thể tái tạo. Ưu tiên base chỉ đọc hoặc bất biến cùng phân vùng dữ liệu có thể ghi nhỏ nếu phần mềm cho phép.
 
-1. Remove default accounts, demo services, compilers and packages not needed for the authorized workload.
-2. Disable local GUI, Bluetooth, discovery protocols, file sharing, Wi-Fi P2P and inbound administration unless the exercise explicitly requires one.
-3. Enable secure boot and measured boot/TPM-backed key release if the hardware genuinely supports them; do not claim that a Raspberry Pi configuration has PC-class measured boot without validating the exact model.
-4. Encrypt local writable state and configure a strict maximum size and retention time. Encryption is a delay/containment control, not proof that a running node reveals nothing.
-5. Send important logs off-device. Bound local journals to prevent storage exhaustion, but do not configure log wiping or anti-forensic deletion.
-6. Store the image manifest, package versions, configuration hash and recovery instructions at the controller.
-7. Reimage a spare from the manifest and run the same health test. A design that only its builder can recover is not field-ready.
+1. Xóa account mặc định, dịch vụ demo, compiler và package không cần cho workload được authorization.
+2. Tắt GUI cục bộ, Bluetooth, giao thức discovery, chia sẻ file, Wi-Fi P2P và quản trị inbound trừ khi exercise yêu cầu rõ ràng.
+3. Bật secure boot và measured boot/giải phóng key dựa trên TPM nếu phần cứng thực sự hỗ trợ; không tuyên bố rằng cấu hình Raspberry Pi có measured boot cấp PC nếu chưa xác thực chính xác model.
+4. Mã hóa trạng thái cục bộ có thể ghi và cấu hình kích thước tối đa cùng thời gian lưu giữ nghiêm ngặt. Mã hóa là biện pháp trì hoãn/kiềm chế, không phải bằng chứng rằng node đang chạy sẽ không tiết lộ gì.
+5. Gửi log quan trọng ra khỏi device. Giới hạn journal cục bộ để tránh cạn storage, nhưng không cấu hình xóa log hoặc xóa dữ liệu chống điều tra.
+6. Lưu manifest image, phiên bản package, hash cấu hình và hướng dẫn khôi phục tại controller.
+7. Cài lại image cho một thiết bị dự phòng từ manifest và chạy cùng bài kiểm tra tình trạng. Thiết kế mà chỉ người tạo ra nó mới có thể khôi phục thì chưa sẵn sàng triển khai thực địa.
 
-## Step 3: issue identities with one-way trust
+## Step 3: cấp identity với cơ chế tin cậy một chiều
 
-Create three different identities:
+Tạo ba identity khác nhau:
 
-- a **device identity**, accepted only by the rendezvous for this device;
-- an **operator identity**, accepted by the organization gateway and protected with phishing-resistant MFA; and
-- a **controller/deployment identity**, used to sign approved jobs or configuration, held outside both operator and field node.
+- **device identity**, chỉ được rendezvous dành cho device này chấp nhận;
+- **operator identity**, được gateway của tổ chức chấp nhận và bảo vệ bằng MFA chống phishing; và
+- **controller/deployment identity**, dùng để ký job hoặc cấu hình đã được phê duyệt, được lưu giữ bên ngoài cả operator lẫn field node.
 
-The node should have the public key needed to verify signed jobs, never the signing key. A captured device credential must not authenticate to cloud consoles, source repositories, payment accounts, other nodes or client production.
+Node cần có public key để xác minh job đã ký, tuyệt đối không được có signing key. Device credential bị thu thập không được dùng để xác thực vào cloud console, source repository, tài khoản thanh toán, node khác hoặc môi trường production của client.
 
-Use short certificate lifetimes where automatic renewal is dependable. When a long-lived WireGuard key is operationally necessary, treat its public key as the revocation handle and constrain it with peer-specific tunnel address, firewall policy and broker authorization. Keep a tested controller action that removes that peer immediately.
+Dùng certificate có thời hạn ngắn nếu việc tự động gia hạn đáng tin cậy. Khi cần dùng WireGuard key dài hạn vì lý do vận hành, hãy coi public key của nó là thông tin định danh để thu hồi và giới hạn nó bằng địa chỉ tunnel riêng cho từng peer, chính sách firewall và authorization của broker. Duy trì một thao tác trên controller đã được kiểm thử để gỡ peer đó ngay lập tức.
 
-## Step 4: stable outbound rendezvous
+## Step 4: rendezvous outbound ổn định
 
-The following owned-lab pattern provides stable management through NAT without exposing an inbound service. It is ordinary WireGuard networking, not a covert reverse shell. Use documentation addresses and replace them only with organization-owned endpoints.
+Mô hình lab do tổ chức sở hữu dưới đây cung cấp khả năng quản trị ổn định qua NAT mà không để lộ dịch vụ inbound. Đây là networking WireGuard thông thường, không phải reverse shell bí mật. Dùng địa chỉ dành cho tài liệu và chỉ thay bằng endpoint do tổ chức sở hữu.
 
-At the organization rendezvous, assign `10.77.0.1/32`; assign the field node `10.77.0.20/32`. The gateway peer entry should accept only the node's single address:
+Tại rendezvous của tổ chức, gán `10.77.0.1/32`; gán `10.77.0.20/32` cho field node. Peer entry của gateway chỉ nên chấp nhận địa chỉ duy nhất của node:
 
 ```ini
 # rendezvous: /etc/wireguard/wg-field.conf (relevant peer only)
@@ -97,7 +97,7 @@ PublicKey = <DROP03_PUBLIC_KEY>
 AllowedIPs = 10.77.0.20/32
 ```
 
-The node points outbound to the rendezvous and keeps the NAT mapping only when required:
+Nút kết nối ra ngoài tới rendezvous và chỉ duy trì ánh xạ NAT khi cần thiết:
 
 ```ini
 # field node: /etc/wireguard/wg-field.conf
@@ -112,136 +112,136 @@ AllowedIPs = 10.77.0.1/32
 PersistentKeepalive = 25
 ```
 
-WireGuard documents 25 seconds as a sensible keepalive interval across many NAT/firewall implementations when persistence is needed; leaving it disabled is preferable when it is not needed.<sup>[[3]](#references)</sup> `AllowedIPs = 10.77.0.1/32` deliberately makes this a management path, not a default-route pivot.
+WireGuard ghi nhận 25 giây là khoảng thời gian keepalive hợp lý trên nhiều cách triển khai NAT/firewall khi cần duy trì kết nối; nếu không cần thì nên tắt tính năng này.<sup>[[3]](#references)</sup> `AllowedIPs = 10.77.0.1/32` cố ý biến đây thành đường quản trị, không phải điểm chuyển tiếp default route.
 
-Then apply controls outside WireGuard:
+Sau đó áp dụng các biện pháp kiểm soát bên ngoài WireGuard:
 
-1. Resolve `vpn.redteam.example` through the approved bootstrap DNS path and pin the expected organization endpoint in deployment records.
-2. On the node, allow outbound DHCP/RA, required DNS/NTP, the rendezvous endpoint and the minimum approved update path. Deny unsolicited inbound traffic on every uplink.
-3. On the rendezvous, allow `10.77.0.20` to reach only the broker/health service required for the exercise. Do not forward it generally into a client network.
-4. Put interactive operator access behind the organization gateway. Avoid exposing SSH from the node across the tunnel if a signed pull-job interface satisfies the assessment.
-5. Configure the service manager to start the tunnel after networking, restart it after failure with bounded backoff and alert after repeated failure. A restart loop must not overwhelm the venue or hide the underlying fault.
-6. Verify the peer's latest handshake, but do not use “handshake exists” as proof that the device is uncompromised.
+1. Phân giải `vpn.redteam.example` thông qua đường DNS bootstrap được phê duyệt và ghi nhận endpoint dự kiến của tổ chức trong hồ sơ triển khai.
+2. Trên node, cho phép DHCP/RA đi ra, DNS/NTP cần thiết, endpoint rendezvous và đường cập nhật tối thiểu được phê duyệt. Chặn lưu lượng đến không được yêu cầu trên mọi uplink.
+3. Trên rendezvous, chỉ cho phép `10.77.0.20` truy cập broker/health service cần thiết cho bài diễn tập. Không chuyển tiếp lưu lượng từ node này vào mạng máy khách một cách tổng quát.
+4. Đặt quyền truy cập tương tác của operator phía sau gateway của tổ chức. Tránh để SSH từ node đi qua tunnel nếu giao diện signed pull-job đáp ứng được yêu cầu đánh giá.
+5. Cấu hình service manager khởi động tunnel sau khi có mạng, khởi động lại khi lỗi với backoff có giới hạn và phát cảnh báo sau nhiều lần lỗi. Vòng lặp khởi động lại không được gây quá tải cho địa điểm hoặc che giấu lỗi gốc.
+6. Xác minh thời điểm handshake gần nhất của peer, nhưng không xem việc “có handshake” là bằng chứng thiết bị không bị xâm phạm.
 
-TURN can provide relay-only reachability for a purpose-built WebRTC control plane, and a message queue can tolerate intermittent service. TURN explicitly gives a client a public relay address behind NAT; its server remains an observer.<sup>[[4]](#references)</sup> Choose one control architecture rather than stacking tunnels without a stated observer or reliability benefit.
+TURN có thể cung cấp khả năng kết nối chỉ qua relay cho một control plane WebRTC được thiết kế riêng, còn message queue có thể chịu được tình trạng dịch vụ gián đoạn. TURN công khai rõ ràng địa chỉ relay công cộng cho client nằm sau NAT; máy chủ TURN vẫn có thể quan sát lưu lượng.<sup>[[4]](#references)</sup> Hãy chọn một kiến trúc điều khiển thay vì chồng nhiều tunnel mà không nêu rõ lợi ích về bên quan sát hoặc độ tin cậy.
 
-## Step 5: uplink stability without personal links
+## Bước 5: duy trì uplink ổn định mà không dùng kết nối cá nhân
 
-For an authorized venue node, prefer this order:
+Với node tại địa điểm được ủy quyền, ưu tiên theo thứ tự sau:
 
-1. client-provided wired or dedicated test VLAN;
-2. owner-approved enterprise/guest Wi-Fi profile;
-3. organization-contracted cellular/private APN fallback.
+1. kết nối có dây do khách hàng cung cấp hoặc VLAN kiểm thử riêng;
+2. cấu hình Wi-Fi doanh nghiệp/khách được chủ sở hữu phê duyệt;
+3. phương án dự phòng qua mạng di động/APN riêng do tổ chức ký hợp đồng.
 
-Never seed it with a personal phone hotspot, home SSID, personal eSIM, personal Apple/Google account or a Wi-Fi profile exported from a daily laptop. Those are exactly the artifacts a capture will join.
+Không bao giờ cấu hình sẵn điểm phát sóng từ điện thoại cá nhân, SSID ở nhà, eSIM cá nhân, tài khoản Apple/Google cá nhân hoặc cấu hình Wi-Fi xuất từ laptop dùng hằng ngày. Đây chính là những dấu vết mà việc thu giữ sẽ liên kết được.
 
-For each approved uplink:
+Với mỗi uplink được phê duyệt:
 
-- record SSID/BSSID or switch/VLAN and expected captive-portal behavior;
-- set deterministic priority and a health check to an owned endpoint;
-- make failover change only the underlay; the device and operator identities remain at the broker;
-- ensure DNS, IPv6 and application traffic do not bypass the rendezvous during transition;
-- alert on an unknown SSID/BSSID, SIM change, new default gateway, public-IP/ASN change or simultaneous uplinks;
-- test power loss, DHCP renewal, AP restart, public-IP change, 24-hour idle, tunnel loss and primary-to-secondary-to-primary recovery before deployment.
+- ghi lại SSID/BSSID hoặc switch/VLAN và hành vi captive portal dự kiến;
+- đặt mức ưu tiên xác định trước và kiểm tra tình trạng kết nối tới endpoint do tổ chức sở hữu;
+- bảo đảm chuyển đổi dự phòng chỉ thay đổi underlay; danh tính thiết bị và operator vẫn được giữ tại broker;
+- bảo đảm DNS, IPv6 và lưu lượng ứng dụng không đi vòng qua rendezvous trong quá trình chuyển đổi;
+- cảnh báo khi xuất hiện SSID/BSSID không xác định, thay đổi SIM, default gateway mới, thay đổi public IP/ASN hoặc nhiều uplink hoạt động đồng thời;
+- kiểm thử mất nguồn, gia hạn DHCP, khởi động lại AP, thay đổi public IP, không hoạt động trong 24 giờ, mất tunnel và khôi phục từ kết nối chính sang kết nối phụ rồi quay lại trước khi triển khai.
 
-Private MAC addressing can reduce casual cross-network tracking, but a stable per-network MAC is often needed for authorized NAC. Record what the chosen OS actually does and do not rotate around an owner's access control.
+Địa chỉ MAC riêng tư có thể giảm khả năng theo dõi thông thường giữa các mạng, nhưng thường cần MAC ổn định theo từng mạng để NAC được ủy quyền hoạt động. Ghi lại hành vi thực tế của hệ điều hành đã chọn và không xoay địa chỉ để né kiểm soát truy cập của chủ sở hữu.
 
-## Step 6: constrain work and data
+## Bước 6: giới hạn công việc và dữ liệu
 
-A safe field node should not accept arbitrary shell text from a mailbox. Define signed job types such as `health`, `fetch-owned-url`, `capture-approved-interface-for-60s` or another action explicitly named in the rules of engagement. Validate destination, duration, rate, output size and scope again on the node.
+Node tại hiện trường an toàn không nên chấp nhận văn bản shell tùy ý từ mailbox. Hãy xác định các loại job có chữ ký như `health`, `fetch-owned-url`, `capture-approved-interface-for-60s` hoặc hành động khác được nêu rõ trong quy tắc thực hiện. Xác thực lại đích đến, thời lượng, tốc độ, kích thước đầu ra và phạm vi ngay trên node.
 
-1. Give every job a unique ID, device audience, issue time, expiry, scope reference and maximum output.
-2. Sign it with the controller/deployment identity.
-3. Reject unknown fields, expired/replayed jobs and jobs for another device.
-4. Stream results to an owned collector; encrypt and TTL any unavoidable local spool.
-5. Log accepted/rejected job ID and result hash at the controller. Do not place sensitive command parameters in a public monitoring channel.
-6. Stop processing when authorization expires, identity rotation fails or the controller marks the device quarantined.
+1. Cấp cho mỗi job một ID duy nhất, đối tượng thiết bị, thời điểm phát hành, thời điểm hết hạn, tham chiếu phạm vi và giới hạn đầu ra.
+2. Ký job bằng danh tính controller/deployment.
+3. Từ chối các trường không xác định, job đã hết hạn/được phát lại và job dành cho thiết bị khác.
+4. Gửi kết quả trực tiếp tới collector do tổ chức sở hữu; mã hóa và đặt TTL cho mọi dữ liệu bắt buộc phải lưu tạm trên node.
+5. Ghi log ID job được chấp nhận/từ chối và hash kết quả tại controller. Không đưa tham số lệnh nhạy cảm vào kênh giám sát công khai.
+6. Dừng xử lý khi giấy phép hết hạn, việc xoay vòng danh tính thất bại hoặc controller đánh dấu thiết bị là bị cách ly.
 
-## Monitoring for discovery, loss or compromise
+## Giám sát việc phát hiện, mất thiết bị hoặc xâm phạm
 
-Monitoring can tell the controller that observed state changed. It cannot reliably prove “investigators found the device,” and trying to surveil responders or probe their systems would exceed an authorized assessment.
+Giám sát có thể báo cho controller biết trạng thái quan sát được đã thay đổi. Nó không thể chứng minh đáng tin cậy rằng “điều tra viên đã tìm thấy thiết bị”; việc cố theo dõi người ứng cứu hoặc dò quét hệ thống của họ sẽ vượt quá phạm vi đánh giá được ủy quyền.
 
-### Collect off-device state
+### Thu thập trạng thái ngoài thiết bị
 
-Send a signed, low-volume health record to the controller at a randomized but bounded operational interval. Include only what the controller needs:
+Gửi bản ghi tình trạng có chữ ký, dung lượng thấp tới controller theo chu kỳ vận hành ngẫu nhiên nhưng có giới hạn. Chỉ bao gồm thông tin controller cần:
 
-- device ID, boot ID/counter and monotonic uptime;
-- configuration/image hash and software version;
-- device-certificate serial and renewal state;
-- uplink class, interface, BSSID or switch context as authorized, default-gateway hash and public IP/ASN as observed by an owned service;
-- tunnel handshake age, packet counters and queue depth;
-- enclosure switch or hardware-tamper state if the owner approved the sensor;
-- disk pressure, temperature, clock-offset estimate and last successful job ID;
-- a sequence number and signature to expose replay or gaps.
+- ID thiết bị, ID/bộ đếm khởi động và thời gian hoạt động đơn điệu;
+- hash cấu hình/image và phiên bản phần mềm;
+- số sê-ri chứng chỉ thiết bị và trạng thái gia hạn;
+- loại uplink, giao diện, BSSID hoặc thông tin switch theo phạm vi được ủy quyền, hash default gateway và public IP/ASN do dịch vụ sở hữu quan sát được;
+- thời gian từ lần handshake tunnel gần nhất, bộ đếm packet và độ sâu hàng đợi;
+- trạng thái công tắc vỏ hoặc cảm biến can thiệp phần cứng nếu chủ sở hữu phê duyệt cảm biến đó;
+- dung lượng đĩa còn lại, nhiệt độ, ước tính độ lệch đồng hồ và ID job thành công gần nhất;
+- số thứ tự và chữ ký để phát hiện phát lại hoặc thiếu dữ liệu.
 
-Store gateway authentication, policy decisions, operator access, job submission, result hashes, provider audit events and alerts centrally. CISA recommends centralizing logs, protecting them from deletion, baselining normal activity and designating incident-response contacts.<sup>[[5]](#references)</sup>
+Lưu tập trung các bản ghi xác thực gateway, quyết định chính sách, quyền truy cập của operator, lần gửi job, hash kết quả, sự kiện kiểm toán của nhà cung cấp và cảnh báo. CISA khuyến nghị tập trung log, bảo vệ log khỏi bị xóa, thiết lập đường cơ sở cho hoạt động bình thường và chỉ định đầu mối ứng phó sự cố.<sup>[[5]](#references)</sup>
 
-### Discovery/compromise indicators
+### Chỉ báo phát hiện/xâm phạm
 
-| Signal | Possible explanations | Controller action |
+| Tín hiệu | Các khả năng giải thích | Hành động của controller |
 |---|---|---|
-| Heartbeat absent | power/network failure, portal change, damage, deliberate blocking or removal | corroborate provider/site state; do not reconnect from an unapproved path |
-| Boot counter changed unexpectedly | power cut, crash, removal or maintenance | quarantine jobs; compare time and site events |
-| Config/image hash changed | update error, storage fault or tampering | stop work; revoke if not a controller-approved release |
-| New uplink/BSSID/gateway/ASN | AP replacement, roaming, moved device or interception | compare approved inventory; quarantine an unexplained transition |
-| Repeated rejected job/signature | corruption, replay or unauthorized controller | stop processing and investigate gateway/controller logs |
-| Device credential used twice or from incompatible paths | cloned key, snapshot reuse or network transition | revoke immediately; retain both session records |
-| Unexpected local login, interface, process or privilege event | maintenance or compromise | isolate through broker policy; preserve evidence |
-| Enclosure switch/state transition | service, movement or discovery | notify the named site contact; do not trigger destructive action |
-| Provider abuse notice/account query or SOC alert | detection, misconfiguration or out-of-scope traffic | stop activity and invoke deconfliction/incident process |
-| Sentinel credential touched | someone read a no-privilege decoy secret unique to this node | revoke real device identity and preserve the alert trail |
+| Không nhận heartbeat | lỗi nguồn/mạng, thay đổi portal, hư hỏng, bị chặn có chủ ý hoặc bị tháo đi | đối chiếu trạng thái nhà cung cấp/địa điểm; không kết nối lại qua đường chưa được phê duyệt |
+| Bộ đếm khởi động thay đổi bất ngờ | mất nguồn, crash, bị tháo đi hoặc bảo trì | cách ly job; đối chiếu thời gian và sự kiện tại địa điểm |
+| Hash cấu hình/image thay đổi | lỗi cập nhật, lỗi lưu trữ hoặc can thiệp trái phép | dừng hoạt động; thu hồi nếu không phải bản phát hành do controller phê duyệt |
+| Uplink/BSSID/gateway/ASN mới | thay AP, roaming, di chuyển thiết bị hoặc bị chặn bắt | đối chiếu danh mục đã phê duyệt; cách ly nếu có chuyển đổi không rõ nguyên nhân |
+| Job/chữ ký liên tục bị từ chối | hỏng dữ liệu, phát lại hoặc controller trái phép | dừng xử lý và điều tra log gateway/controller |
+| Thông tin xác thực thiết bị được dùng hai lần hoặc từ các đường kết nối không tương thích | khóa bị sao chép, dùng lại snapshot hoặc chuyển mạng | thu hồi ngay; lưu giữ bản ghi của cả hai phiên |
+| Đăng nhập cục bộ, giao diện, tiến trình hoặc sự kiện đặc quyền bất ngờ | bảo trì hoặc xâm phạm | cô lập bằng chính sách broker; bảo toàn bằng chứng |
+| Trạng thái công tắc vỏ thay đổi | bảo dưỡng, di chuyển hoặc bị phát hiện | thông báo đầu mối địa điểm đã chỉ định; không kích hoạt hành động phá hủy |
+| Thông báo lạm dụng/truy vấn tài khoản của nhà cung cấp hoặc cảnh báo SOC | bị phát hiện, cấu hình sai hoặc lưu lượng ngoài phạm vi | dừng hoạt động và kích hoạt quy trình phối hợp/ứng phó sự cố |
+| Sentinel credential bị truy cập | có người đọc bí mật mồi không có quyền, chỉ dành riêng cho node này | thu hồi danh tính thiết bị thật và bảo toàn dấu vết cảnh báo |
 
-A sentinel credential must grant **no access**, call only an organization-owned alert service and be disclosed in the rules of engagement. It is a tripwire for unauthorized reading, not a beacon for tracking whoever found the equipment.
+Sentinel credential không được cấp **bất kỳ quyền truy cập nào**, chỉ được gọi dịch vụ cảnh báo do tổ chức sở hữu và phải được nêu trong quy tắc thực hiện. Đây là bẫy phát hiện việc đọc trái phép, không phải beacon để theo dõi người tìm thấy thiết bị.
 
-### Alert thresholds
+### Ngưỡng cảnh báo
 
-Use stateful rules, not one dramatic “caught” alarm:
+Dùng quy tắc có lưu trạng thái, không dùng một cảnh báo kịch tính kiểu “bị bắt quả tang”:
 
-- **warning:** one missed interval, normal address change or queue growth;
-- **degraded:** three consecutive misses, renewal delay, primary-uplink loss or repeated restart;
-- **quarantine:** unapproved hash/boot/uplink change, duplicate credential, sentinel use or unexpected privileged event;
-- **confirmed discovery/loss:** site/controller report, physical inventory mismatch, device recovery by an unplanned party or validated provider/SOC escalation.
+- **cảnh báo:** lỡ một chu kỳ, thay đổi địa chỉ thông thường hoặc hàng đợi tăng;
+- **suy giảm:** lỡ ba chu kỳ liên tiếp, gia hạn chậm, mất uplink chính hoặc khởi động lại nhiều lần;
+- **cách ly:** hash/boot/uplink thay đổi không được phê duyệt, thông tin xác thực bị dùng trùng, sentinel bị sử dụng hoặc xuất hiện sự kiện đặc quyền bất ngờ;
+- **xác nhận bị phát hiện/mất thiết bị:** báo cáo từ địa điểm/controller, sai lệch kiểm kê thực tế, thiết bị được một bên ngoài kế hoạch thu hồi hoặc sự việc được nhà cung cấp/SOC xác nhận và nâng cấp xử lý.
 
-Test alert delivery through a channel independent of the field node. Avoid sending sensitive client/device detail to personal messaging or consumer push accounts.
+Kiểm thử việc gửi cảnh báo qua một kênh độc lập với node tại hiện trường. Tránh gửi thông tin nhạy cảm về khách hàng/thiết bị tới ứng dụng nhắn tin cá nhân hoặc tài khoản push dành cho người tiêu dùng.
 
-## Suspected discovery or capture runbook
+## Quy trình xử lý khi nghi bị phát hiện hoặc thu giữ
 
-1. **Stop:** suspend new jobs and operator sessions. Do not send a “check if watched” probe.
-2. **Quarantine:** make the broker deny the device identity and its routes while retaining existing logs.
-3. **Revoke:** revoke the device certificate/key, queue token, update credential and any single-purpose service token. Suspend the organization SIM when physical loss is plausible.
-4. **Preserve:** snapshot controller, gateway, provider and alert records; record trusted time, who acted and the last known configuration. Do not clear or remotely wipe the node.
-5. **Notify:** contact the exercise controller, client incident contact and legal/privacy contacts defined in the authorization. If a third party found it, use the pre-agreed recovery process.
-6. **Assess:** assume every secret and cached result on the node is exposed. Enumerate exactly what each secret could access and whether it was used after the suspicious event.
-7. **Contain downstream:** rotate affected service credentials, invalidate pending jobs and inspect owned target/provider logs for unexpected behavior.
-8. **Recover safely:** retrieve only through an authorized person; photograph/package it, record custody and acquire forensic evidence as the client directs.
-9. **Resume with a new identity:** never silently re-enable the captured credential. Rebuild from the known manifest, fix the control failure and obtain explicit approval.
+1. **Dừng:** tạm ngừng job mới và phiên operator. Không gửi phép dò “kiểm tra xem có bị theo dõi không”.
+2. **Cách ly:** yêu cầu broker từ chối danh tính thiết bị và các route của nó, đồng thời giữ lại log hiện có.
+3. **Thu hồi:** thu hồi chứng chỉ/khóa thiết bị, queue token, thông tin xác thực cập nhật và mọi service token chỉ dùng cho một mục đích. Tạm ngưng SIM của tổ chức nếu có khả năng thiết bị đã bị mất về mặt vật lý.
+4. **Bảo toàn:** chụp snapshot bản ghi controller, gateway, nhà cung cấp và cảnh báo; ghi lại thời gian đáng tin cậy, người thực hiện và cấu hình được biết gần nhất. Không xóa hoặc xóa từ xa node.
+5. **Thông báo:** liên hệ controller của bài diễn tập, đầu mối sự cố của khách hàng và các đầu mối pháp lý/quyền riêng tư được xác định trong giấy phép. Nếu bên thứ ba tìm thấy thiết bị, hãy dùng quy trình thu hồi đã thống nhất trước.
+6. **Đánh giá:** giả định mọi bí mật và kết quả đã lưu trên node đều bị lộ. Liệt kê chính xác từng bí mật có thể truy cập những gì và liệu nó có được sử dụng sau sự kiện đáng ngờ hay không.
+7. **Khoanh vùng ảnh hưởng tiếp theo:** xoay vòng thông tin xác thực dịch vụ bị ảnh hưởng, vô hiệu hóa job đang chờ và kiểm tra log của mục tiêu/nhà cung cấp thuộc quyền sở hữu để tìm hoạt động bất thường.
+8. **Thu hồi an toàn:** chỉ thu hồi thông qua người được ủy quyền; chụp ảnh/đóng gói thiết bị, ghi nhận chuỗi bàn giao và thu thập bằng chứng pháp chứng theo chỉ dẫn của khách hàng.
+9. **Tiếp tục bằng danh tính mới:** không âm thầm kích hoạt lại thông tin xác thực đã bị thu giữ. Dựng lại từ manifest đã biết, khắc phục lỗi kiểm soát và xin phê duyệt rõ ràng.
 
-NIST's current incident-response guidance integrates preparation, detection, response and recovery into organization-wide cybersecurity risk management; preserve first so the client can determine what happened and choose the appropriate response.<sup>[[6]](#references)</sup>
+Hướng dẫn ứng phó sự cố hiện hành của NIST tích hợp công tác chuẩn bị, phát hiện, ứng phó và khôi phục vào quản lý rủi ro an ninh mạng trên toàn tổ chức; hãy bảo toàn bằng chứng trước để khách hàng xác định sự việc đã xảy ra như thế nào và chọn phương án ứng phó phù hợp.<sup>[[6]](#references)</sup>
 
-## Capture drill before deployment
+## Diễn tập thu giữ trước khi triển khai
 
-Hand an unlocked test unit or copy of its storage to a separate reviewer and ask them to enumerate:
+Đưa cho một người đánh giá độc lập một thiết bị thử nghiệm đang mở khóa hoặc bản sao bộ nhớ của thiết bị, rồi yêu cầu họ liệt kê:
 
-1. device/site/engagement identifiers;
-2. operator names, personal accounts, home/workstation networks and recovery contacts;
-3. controller/broker destinations and credentials;
-4. client network profiles and cached results;
-5. other devices/projects reachable with each secret;
-6. value or payment credentials;
-7. what the controller can revoke and how quickly;
-8. which activity remains attributable from central logs.
+1. ID thiết bị/địa điểm/dự án;
+2. tên operator, tài khoản cá nhân, mạng ở nhà/máy trạm và thông tin liên hệ khôi phục;
+3. địa chỉ và thông tin xác thực của controller/broker;
+4. cấu hình mạng khách hàng và kết quả đã lưu trong cache;
+5. các thiết bị/dự án khác có thể truy cập bằng từng bí mật;
+6. thông tin xác thực có giá trị hoặc dùng để thanh toán;
+7. những gì controller có thể thu hồi và thời gian cần thiết;
+8. hoạt động nào vẫn có thể truy ngược từ log tập trung.
 
-Pass criteria: zero personal accounts/workstation keys; zero cross-engagement or enrollment authority; no payment credential; bounded encrypted cache; one documented device-revocation action; complete controller-side accountability. Treat any unexpected personal link or lateral capability as a release blocker.
+Tiêu chí đạt: không có tài khoản cá nhân/khóa máy trạm; không có quyền truy cập chéo giữa các dự án hoặc quyền cấp quyền truy cập; không có thông tin xác thực thanh toán; cache được mã hóa và giới hạn dung lượng; có một thao tác thu hồi thiết bị được ghi lại; đầy đủ khả năng truy trách nhiệm ở phía controller. Xem mọi liên kết cá nhân bất ngờ hoặc khả năng di chuyển ngang là điều kiện chặn phát hành.
 
-## Closeout
+## Kết thúc
 
-1. Stop jobs and disable the broker route at scope end.
-2. Retrieve and reconcile the exact inventory; report anything missing.
-3. Preserve logs/results and, if required, a forensic image according to the engagement retention plan.
-4. Revoke device, SIM, queue, update and service identities even when the hardware was recovered.
-5. Only after preservation/acceptance, sanitize or destroy media with the owner's approved data-disposal process and record completion. This is lifecycle management, not concealment.
-6. Remove venue NAC/DHCP reservations, broker routes, DNS, cloud roles, alert rules and temporary contacts.
-7. Document observed detection, missed telemetry, time to quarantine and every artifact that capture exposed.
+1. Dừng job và vô hiệu hóa route broker khi hết phạm vi.
+2. Thu hồi và đối chiếu đúng danh mục thiết bị; báo cáo mọi thiết bị bị thiếu.
+3. Bảo toàn log/kết quả và, nếu cần, ảnh pháp chứng theo kế hoạch lưu giữ của dự án.
+4. Thu hồi danh tính thiết bị, SIM, queue, cập nhật và dịch vụ ngay cả khi đã thu hồi được phần cứng.
+5. Chỉ sau khi hoàn tất bảo toàn/tiếp nhận, xóa dữ liệu hoặc hủy phương tiện lưu trữ theo quy trình xử lý dữ liệu được chủ sở hữu phê duyệt và ghi nhận việc hoàn tất. Đây là quản lý vòng đời, không phải che giấu.
+6. Gỡ bỏ cấu hình NAC/DHCP tại địa điểm, route broker, DNS, vai trò cloud, quy tắc cảnh báo và đầu mối tạm thời.
+7. Ghi lại hoạt động phát hiện đã quan sát, telemetry bị bỏ sót, thời gian cần để cách ly và mọi dấu vết bị lộ khi thu giữ.
 
 ## References
 

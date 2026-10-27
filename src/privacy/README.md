@@ -1,141 +1,141 @@
-# Offensive Privacy, Attribution Evasion and OPSEC
+# Quyền riêng tư trong tấn công, né tránh quy kết và OPSEC
 
 {{#include ../banners/hacktricks-training.md}}
 
-This section studies privacy from the viewpoint of a red team, an intrusion operator and the defender trying to reconstruct that operator. **Anonymity is not merely hiding an IP address.** Mature operations separate the people, endpoints, accounts, infrastructure, network paths, payloads and payments that could be joined into an attribution graph.
+Phần này nghiên cứu quyền riêng tư từ góc nhìn của red team, người vận hành xâm nhập và người phòng thủ đang cố tái dựng hoạt động của họ. **Ẩn danh không chỉ đơn thuần là che giấu địa chỉ IP.** Các hoạt động tinh vi tách biệt con người, endpoint, tài khoản, hạ tầng, đường đi mạng, payload và khoản thanh toán để tránh những yếu tố này bị liên kết thành một đồ thị quy kết.
 
-The material deliberately includes techniques reported in government and APT operations: operational-relay-box (ORB) networks, compromised edge devices, residential exits, redirector tiers, fast flux, domain fronting, dead-drop resolvers, nearby wireless pivots, covert drop devices, satellite-link abuse, false personas and financial layering. Each technique is presented as:
+Tài liệu chủ ý đề cập đến các kỹ thuật được ghi nhận trong hoạt động của chính phủ và APT: mạng operational-relay-box (ORB), thiết bị biên bị xâm nhập, điểm thoát qua mạng dân dụng, các tầng redirector, fast flux, domain fronting, dead-drop resolver, pivot qua mạng không dây ở gần, thiết bị thả bí mật, lạm dụng liên kết vệ tinh, danh tính giả và phân lớp tài chính. Mỗi kỹ thuật được trình bày theo các mục:
 
-1. the operational objective and ATT&CK mapping;
-2. the mechanism and trust boundaries;
-3. what every observer can still record;
-4. the mistakes and stable artifacts that defeat it;
-5. defensive telemetry, analytics and mitigations; and
-6. an authorized emulation using owned or explicitly scoped infrastructure.
+1. mục tiêu vận hành và ánh xạ ATT&CK;
+2. cơ chế và ranh giới tin cậy;
+3. những gì mỗi bên quan sát vẫn có thể ghi lại;
+4. các sai sót và dấu vết ổn định có thể làm lộ hoạt động;
+5. telemetry, phân tích và biện pháp giảm thiểu dành cho phòng thủ; và
+6. mô phỏng được ủy quyền bằng hạ tầng thuộc sở hữu hoặc được cho phép rõ ràng trong phạm vi.
 
-This is therefore both an offensive tradecraft reference and a defender's attribution manual. The aim is to make advanced behavior understandable and testable, not to pretend that one commercial service makes an operator invisible.
+Vì vậy, đây vừa là tài liệu tham khảo về tradecraft tấn công, vừa là cẩm nang quy kết dành cho người phòng thủ. Mục tiêu là giúp hiểu và kiểm thử các hành vi nâng cao, chứ không giả vờ rằng chỉ cần một dịch vụ thương mại là người vận hành có thể trở nên vô hình.
 
-**Research cutoff:** 8 September 2026. Provider availability, product behavior, sanctions, cash/prepaid thresholds, SIM-registration rules, and crypto regulation change frequently; verify them again before relying on them.
+**Thời điểm chốt nghiên cứu:** 8 September 2026. Tình trạng khả dụng của nhà cung cấp, cách sản phẩm hoạt động, lệnh trừng phạt, ngưỡng tiền mặt/thẻ trả trước, quy định đăng ký SIM và quy định về crypto thường xuyên thay đổi; hãy xác minh lại trước khi dựa vào chúng.
 
 {% hint style="danger" %}
-Understanding a technique is not authorization to perform it. The pages explain criminal abuse such as compromised routers, a neighbor's Wi-Fi, hidden devices, stolen identities and laundering at the mechanism-and-detection level. Reproduction steps use only owned lab systems, synthetic identities and test assets. Never access a third party, evade KYC or sanctions, or conceal criminal proceeds. Unauthorized access is criminalized in many jurisdictions, including under the US CFAA, the UK Computer Misuse Act, and EU member-state laws implementing Directive 2013/40/EU.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup><sup>[[4]](#references)</sup>
+Hiểu một kỹ thuật không có nghĩa là được phép thực hiện kỹ thuật đó. Các trang này giải thích hành vi lạm dụng mang tính tội phạm như xâm nhập router, sử dụng Wi-Fi của hàng xóm, thiết bị ẩn, danh tính bị đánh cắp và rửa tiền ở cấp độ cơ chế và phát hiện. Các bước tái hiện chỉ sử dụng hệ thống lab thuộc sở hữu, danh tính tổng hợp và tài sản thử nghiệm. Không bao giờ truy cập bên thứ ba, né tránh KYC hoặc lệnh trừng phạt, hay che giấu tiền thu được từ hoạt động phạm pháp. Nhiều khu vực pháp lý hình sự hóa hành vi truy cập trái phép, bao gồm theo US CFAA, UK Computer Misuse Act và luật của các quốc gia thành viên EU thực thi Directive 2013/40/EU.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup><sup>[[4]](#references)</sup>
 {% endhint %}
 
-## Adversary objective map
+## Bản đồ mục tiêu của đối thủ
 
-| Adversary objective | Technique families | Principal defensive question |
+| Mục tiêu của đối thủ | Nhóm kỹ thuật | Câu hỏi phòng thủ chủ yếu |
 |---|---|---|
-| Hide the operator's origin | VPN/Tor, external and multi-hop proxies, residential/mobile exits, ORBs, satellite links | Is the last-hop address an actor asset, an unwitting victim or a short-lived relay? |
-| Keep the real C2 undiscoverable | redirectors, CDNs, domain fronting, dead-drop resolvers, dynamic DNS, fast flux | Which stable behavior survives IP/domain rotation? |
-| Borrow trust and reputation | compromised servers, routers, cloud and web-service accounts, domain shadowing | Is a reputable asset behaving differently from its historical baseline? |
-| Cross a physical or network boundary | nearest-neighbor Wi-Fi pivots, on-site drops, rogue peripherals, cellular backhaul | What new radio, device, switchport or outbound tunnel appeared? |
-| Separate the human from the operation | personas, account/device compartmentation, cover communications, procurement separation | Which recovery field, browser, schedule, language, payment or admin event joins the personas? |
-| Obscure funding and cash-out | mules/nominees, prepaid value, mixers, CoinJoin, peel chains, chain hopping, OTC brokers | Where do on-chain and off-chain identity records reconnect? |
+| Che giấu nguồn gốc của người vận hành | VPN/Tor, proxy bên ngoài và multi-hop, điểm thoát qua mạng dân dụng/di động, ORB, liên kết vệ tinh | Địa chỉ ở hop cuối thuộc về tác nhân, nạn nhân vô tình hay relay tồn tại ngắn hạn? |
+| Giữ cho C2 thật không bị phát hiện | redirector, CDN, domain fronting, dead-drop resolver, dynamic DNS, fast flux | Hành vi ổn định nào vẫn tồn tại sau khi IP/domain bị thay đổi? |
+| Mượn lòng tin và uy tín | server, router, tài khoản cloud và dịch vụ web bị xâm nhập, domain shadowing | Tài sản có uy tín có hành vi khác với đường cơ sở lịch sử của nó không? |
+| Vượt qua ranh giới vật lý hoặc mạng | pivot qua Wi-Fi của hàng xóm, thiết bị thả tại chỗ, thiết bị ngoại vi giả mạo, backhaul di động | Có radio, thiết bị, switchport hay tunnel outbound mới nào xuất hiện? |
+| Tách con người khỏi hoạt động | persona, phân tách tài khoản/thiết bị, liên lạc ngụy trang, tách biệt khâu mua sắm | Trường khôi phục tài khoản, trình duyệt, lịch hoạt động, ngôn ngữ, thanh toán hay sự kiện quản trị nào liên kết các persona? |
+| Che giấu nguồn tiền và rút tiền | người trung gian/người đứng tên hộ, giá trị trả trước, mixer, CoinJoin, chuỗi peel, chain hopping, môi giới OTC | Hồ sơ danh tính on-chain và off-chain nối lại với nhau ở đâu? |
 
-The closest ATT&CK resource-development and C2 concepts are **Acquire Infrastructure (T1583)**, **Compromise Infrastructure (T1584)**, **Establish/Compromise Accounts (T1585/T1586)**, **Proxy (T1090)**, **Dynamic Resolution (T1568)** and **Web Service (T1102)**.<sup>[[6]](#references)</sup><sup>[[7]](#references)</sup>
+Các khái niệm gần nhất trong ATT&CK về phát triển tài nguyên và C2 là **Acquire Infrastructure (T1583)**, **Compromise Infrastructure (T1584)**, **Establish/Compromise Accounts (T1585/T1586)**, **Proxy (T1090)**, **Dynamic Resolution (T1568)** và **Web Service (T1102)**.<sup>[[6]](#references)</sup><sup>[[7]](#references)</sup>
 
-## Privacy, pseudonymity, anonymity and security
+## Quyền riêng tư, danh tính giả danh, tính ẩn danh và bảo mật
 
-| Goal | Meaning | Typical failure |
+| Mục tiêu | Ý nghĩa | Lỗi thường gặp |
 |---|---|---|
-| **Confidentiality** | Outsiders cannot read content | Metadata still identifies the parties |
-| **Privacy** | Information disclosure is limited to what is necessary | A provider retains more data than expected |
-| **Pseudonymity** | Activity uses a stable identity not publicly tied to a legal identity | Recovery email, payment, IP, photo, or writing style links it |
-| **Anonymity** | An observer cannot distinguish the actor from a meaningful set of others | Login, fingerprint, timing, location, or transaction correlation shrinks the set |
-| **Unlinkability** | Two actions cannot reliably be attributed to the same actor | Reused identifiers, simultaneous activity, or shared infrastructure joins them |
-| **Security** | Systems resist compromise | A secure but identified account remains non-anonymous |
+| **Tính bí mật** | Người bên ngoài không thể đọc nội dung | Metadata vẫn xác định được các bên |
+| **Quyền riêng tư** | Việc tiết lộ thông tin được giới hạn ở mức cần thiết | Nhà cung cấp lưu giữ nhiều dữ liệu hơn dự kiến |
+| **Danh tính giả danh** | Hoạt động sử dụng một danh tính ổn định không công khai liên kết với danh tính pháp lý | Email khôi phục, thanh toán, IP, ảnh hoặc văn phong tạo liên kết |
+| **Tính ẩn danh** | Người quan sát không thể phân biệt tác nhân với một tập hợp người khác đủ lớn | Đăng nhập, dấu vân tay thiết bị, thời điểm, vị trí hoặc tương quan giao dịch làm thu hẹp tập hợp |
+| **Tính không thể liên kết** | Hai hành động không thể được quy cho cùng một tác nhân một cách đáng tin cậy | Tái sử dụng định danh, hoạt động đồng thời hoặc hạ tầng dùng chung tạo liên kết |
+| **Bảo mật** | Hệ thống chống lại việc bị xâm nhập | Một tài khoản an toàn nhưng đã được nhận dạng vẫn không ẩn danh |
 
-These properties are observer-specific. A merchant might not see a card number while the issuer still knows the customer and transaction. A website might see a Tor exit rather than a home IP while an account login identifies the user immediately.
+Các thuộc tính này phụ thuộc vào đối tượng quan sát. Người bán có thể không nhìn thấy số thẻ trong khi tổ chức phát hành vẫn biết khách hàng và giao dịch. Một website có thể thấy Tor exit thay vì IP nhà riêng, nhưng việc đăng nhập tài khoản lập tức xác định người dùng.
 
-## Start with the observer
+## Bắt đầu bằng việc xác định đối tượng quan sát
 
-Before choosing tools, write down:
+Trước khi chọn công cụ, hãy ghi rõ:
 
-1. **Assets:** identity, location, browsing destinations, message contents, social graph, payment details, client name, red-team source infrastructure, or stored evidence.
-2. **Observers:** local Wi-Fi operator, ISP/mobile carrier, VPN, Tor entry/exit, DNS resolver, website, ad network, cloud host, payment issuer, merchant, exchange, counterparties, employer, or government.
-3. **Correlation handles:** IP address, account/recovery fields, phone number, device identifiers, cookies, browser fingerprint, time zone, payment instrument, shipping address, writing style, transaction graph, physical presence, and cameras.
-4. **Capability and time:** passive commercial tracking is different from a targeted observer able to subpoena providers, seize endpoints, or watch both ends of a connection.
-5. **Failure cost:** embarrassment, account suspension, client harm, financial loss, physical danger, or legal exposure.
+1. **Tài sản:** danh tính, vị trí, các trang đã truy cập, nội dung tin nhắn, đồ thị xã hội, chi tiết thanh toán, tên khách hàng, hạ tầng nguồn của red team hoặc bằng chứng được lưu trữ.
+2. **Đối tượng quan sát:** đơn vị vận hành Wi-Fi cục bộ, ISP/nhà mạng di động, VPN, Tor entry/exit, DNS resolver, website, mạng quảng cáo, cloud host, tổ chức phát hành thanh toán, người bán, sàn giao dịch, đối tác giao dịch, chủ lao động hoặc chính phủ.
+3. **Yếu tố dùng để tương quan:** địa chỉ IP, trường tài khoản/khôi phục, số điện thoại, định danh thiết bị, cookie, dấu vân tay trình duyệt, múi giờ, phương tiện thanh toán, địa chỉ giao hàng, văn phong, đồ thị giao dịch, sự hiện diện vật lý và camera.
+4. **Năng lực và thời gian:** theo dõi thụ động của bên thương mại khác với một đối tượng nhắm mục tiêu có thể yêu cầu nhà cung cấp giao nộp dữ liệu, thu giữ endpoint hoặc quan sát cả hai đầu kết nối.
+5. **Cái giá của thất bại:** bẽ mặt, khóa tài khoản, gây hại cho khách hàng, tổn thất tài chính, nguy hiểm thân thể hoặc rủi ro pháp lý.
 
-Then select the smallest sustainable controls. A complicated plan that is routinely bypassed is weaker than a simpler plan used consistently.
+Sau đó, chọn các biện pháp kiểm soát tối thiểu có thể duy trì. Một kế hoạch phức tạp nhưng thường xuyên bị bỏ qua sẽ kém hiệu quả hơn một kế hoạch đơn giản được tuân thủ nhất quán.
 
-## Quick decision table
+## Bảng quyết định nhanh
 
-| Need | Sensible starting point | What it does **not** solve |
+| Nhu cầu | Điểm bắt đầu hợp lý | Những gì biện pháp này **không** giải quyết |
 |---|---|---|
-| Hide browsing metadata from an ISP/local network | Reputable VPN or Tor Browser | Accounts, cookies, device fingerprint, endpoint compromise |
-| Stronger web anonymity | Tor Browser; Tails for an amnesic session | Global traffic correlation, personal disclosures, physical observation |
-| Persistent compartmentalized work | Whonix or Qubes-Whonix; separate qubes/profiles | Hypervisor/host compromise, behavior linking identities |
-| Fast authorized red-team egress | Client-provided jump host or engagement-specific VPS/VPN | Provider/customer attribution; scope and cloud policy obligations |
-| Reduce merchant exposure of a card number | Issuer virtual card or tokenized wallet | Issuer/network knowledge, shipping, account and device data |
-| Minimize point-of-sale payment data | Lawfully obtained cash where accepted | CCTV, receipts, withdrawal trail, cash limits |
-| Improve public-chain crypto privacy | Own wallet/node, new addresses, coin control, Tor, supported PayJoin | Exchange/KYC, counterparty records, permanent-chain analysis |
-| Default on-chain amount/receiver/sender confidentiality | Monero with separate wallet contexts and network privacy | Acquisition/off-ramp records, endpoint compromise, merchant/shipping data |
+| Che giấu metadata duyệt web khỏi ISP/mạng cục bộ | VPN uy tín hoặc Tor Browser | Tài khoản, cookie, dấu vân tay thiết bị, endpoint bị xâm nhập |
+| Tăng cường ẩn danh trên web | Tor Browser; Tails cho phiên không lưu dấu vết | Tương quan lưu lượng toàn cục, tiết lộ thông tin cá nhân, quan sát vật lý |
+| Công việc cần phân tách lâu dài | Whonix hoặc Qubes-Whonix; qube/profile riêng biệt | Hypervisor/host bị xâm nhập, hành vi liên kết danh tính |
+| Egress red team được ủy quyền, triển khai nhanh | Jump host do khách hàng cung cấp hoặc VPS/VPN dành riêng cho engagement | Khả năng nhà cung cấp/khách hàng bị quy kết; nghĩa vụ tuân thủ phạm vi và chính sách cloud |
+| Giảm lộ số thẻ cho người bán | Thẻ ảo của tổ chức phát hành hoặc ví token hóa | Thông tin mà tổ chức phát hành/mạng lưới nắm giữ, dữ liệu giao hàng, tài khoản và thiết bị |
+| Giảm dữ liệu thanh toán tại điểm bán | Tiền mặt có nguồn gốc hợp pháp, tại nơi chấp nhận | CCTV, biên lai, lịch sử rút tiền, giới hạn tiền mặt |
+| Tăng quyền riêng tư cho crypto trên public chain | Ví/node riêng, địa chỉ mới, coin control, PayJoin được hỗ trợ | Sàn giao dịch/KYC, hồ sơ đối tác, phân tích chuỗi vĩnh viễn |
+| Mặc định giữ bí mật số tiền/người nhận/người gửi on-chain | Monero với ngữ cảnh ví riêng biệt và quyền riêng tư mạng | Hồ sơ mua/bán, endpoint bị xâm nhập, dữ liệu người bán/giao hàng |
 
-## Core rules
+## Nguyên tắc cốt lõi
 
-- **Separate contexts before activity starts.** Retrofitting separation after accounts, devices, and payments have already been linked rarely undoes the history.
-- **Do not customize yourself into uniqueness.** Browser fingerprinting can correlate activity even after cookies are cleared or an IP changes; standard configurations with larger anonymity sets are usually preferable.<sup>[[5]](#references)</sup>
-- **Protect the endpoint.** Network anonymity cannot save an unlocked, infected, or seized device.
-- **Encrypt content and minimize metadata.** End-to-end encryption protects message content, not necessarily who communicated, when, from where, or with which device.
-- **Treat providers as observers.** VPNs, email services, cloud hosts, exchanges, payment issuers, and alias forwarders see different parts of the activity.
-- **Prefer verifiable claims.** Look for protocol documentation, reproducible software, public audits, retention details, and transparency reports instead of “military-grade” marketing.
-- **Reassess periodically.** Services, laws, threat actors, and defaults change.
+- **Phân tách các ngữ cảnh trước khi bắt đầu hoạt động.** Cố thiết lập phân tách sau khi tài khoản, thiết bị và khoản thanh toán đã bị liên kết hiếm khi xóa được lịch sử đó.
+- **Đừng tự tùy biến đến mức trở nên độc nhất.** Browser fingerprinting có thể liên kết hoạt động ngay cả sau khi xóa cookie hoặc đổi IP; cấu hình tiêu chuẩn với tập hợp ẩn danh lớn hơn thường là lựa chọn tốt hơn.<sup>[[5]](#references)</sup>
+- **Bảo vệ endpoint.** Tính ẩn danh mạng không thể cứu một thiết bị đang mở khóa, bị nhiễm mã độc hoặc bị thu giữ.
+- **Mã hóa nội dung và giảm thiểu metadata.** Mã hóa đầu cuối bảo vệ nội dung tin nhắn, nhưng không nhất thiết bảo vệ danh tính người liên lạc, thời điểm, địa điểm hay thiết bị được sử dụng.
+- **Coi nhà cung cấp là đối tượng quan sát.** VPN, dịch vụ email, cloud host, sàn giao dịch, tổ chức phát hành thanh toán và dịch vụ chuyển tiếp alias nhìn thấy những phần khác nhau của hoạt động.
+- **Ưu tiên các tuyên bố có thể kiểm chứng.** Hãy tìm tài liệu giao thức, phần mềm có thể tái tạo, kiểm toán công khai, chi tiết lưu giữ dữ liệu và báo cáo minh bạch thay vì quảng cáo “military-grade”.
+- **Đánh giá lại định kỳ.** Dịch vụ, luật pháp, tác nhân đe dọa và cài đặt mặc định đều thay đổi.
 
-## Offensive-first section map
+## Bản đồ phần ưu tiên tấn công
 
-- [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md) — 48 access-path families with pros, cons, deployment/emulation steps, detection, capture exposure and controller-side discovery monitoring.
-- [Anonymous Payment Technique Catalog](anonymous-payment-techniques.md) — 48 payment families with pros, cons, lawful workflows, detection, capture exposure and compromise monitoring.
-- [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md) — stable outbound rendezvous, dual-uplink recovery, secret minimization, capture drills and discovery/compromise monitoring for owner-approved drops.
-- [Offensive Infrastructure and Attribution Evasion](offensive-infrastructure-and-attribution-evasion.md) — ORBs, multi-hop/residential relays, redirectors, fronting, fast flux, domain shadowing, web services and persona infrastructure.
-- [Covert Physical and Wireless Access](covert-physical-wireless-access.md) — nearest-neighbor attacks, public access, drop devices, cellular backhaul and satellite abuse.
-- [Government and APT Case Studies](government-and-apt-case-studies.md) — reconstructed public cases and the telemetry that exposed them.
-- [Financial Obfuscation Tradecraft](financial-obfuscation-tradecraft.md) — how payment layering works, why it fails and how investigators follow it.
-- [Attribution, Detection and Countermeasures](attribution-detection-and-countermeasures.md) — a cross-layer detection model and practical hunting logic.
-- [Authorized Adversary-Emulation Labs](authorized-adversary-emulation-labs.md) — reproducible exercises using owned networks and synthetic data.
+- [Danh mục kỹ thuật truy cập Internet ẩn danh](anonymous-internet-access-techniques.md) — 48 nhóm đường truy cập cùng ưu/nhược điểm, các bước triển khai/mô phỏng, phát hiện, nguy cơ bị thu thập và giám sát phát hiện từ phía bên kiểm soát.
+- [Danh mục kỹ thuật thanh toán ẩn danh](anonymous-payment-techniques.md) — 48 nhóm thanh toán cùng ưu/nhược điểm, quy trình hợp pháp, phát hiện, nguy cơ bị thu thập và giám sát xâm nhập.
+- [Field node được ủy quyền, chống chịu khi bị thu giữ](capture-resilient-authorized-field-nodes.md) — rendezvous outbound ổn định, khôi phục qua hai uplink, giảm thiểu bí mật, diễn tập thu giữ và giám sát phát hiện/xâm nhập cho các thiết bị thả được chủ sở hữu phê duyệt.
+- [Hạ tầng tấn công và né tránh quy kết](offensive-infrastructure-and-attribution-evasion.md) — ORB, relay multi-hop/mạng dân dụng, redirector, fronting, fast flux, domain shadowing, web service và hạ tầng persona.
+- [Truy cập vật lý và không dây bí mật](covert-physical-wireless-access.md) — tấn công lân cận, truy cập công cộng, thiết bị thả, backhaul di động và lạm dụng vệ tinh.
+- [Nghiên cứu tình huống về chính phủ và APT](government-and-apt-case-studies.md) — các vụ việc công khai được tái dựng và telemetry đã làm lộ chúng.
+- [Tradecraft che giấu tài chính](financial-obfuscation-tradecraft.md) — cách thức phân lớp thanh toán, lý do thất bại và cách điều tra viên lần theo dấu vết.
+- [Quy kết, phát hiện và biện pháp đối phó](attribution-detection-and-countermeasures.md) — mô hình phát hiện đa lớp và logic săn tìm thực tế.
+- [Lab mô phỏng đối thủ được ủy quyền](authorized-adversary-emulation-labs.md) — bài tập có thể tái tạo bằng mạng thuộc sở hữu và dữ liệu tổng hợp.
 
-## Operator fundamentals and supporting guides
+## Nguyên tắc cơ bản cho người vận hành và hướng dẫn hỗ trợ
 
-- [Threat Modeling & Identity Separation](threat-modeling-and-identity-separation.md)
-- [Network Privacy & Anonymous Connectivity](network-privacy-and-anonymous-connectivity.md)
-- [Advanced Network Privacy Architectures](advanced-network-privacy-architectures.md)
-- [Privacy Operating Systems](privacy-operating-systems.md)
-- [Privacy-Preserving Communications and Sharing](privacy-preserving-communications-and-sharing.md)
-- [Authorized Red-Team Infrastructure](authorized-red-team-infrastructure.md)
-- [Private Digital Payments](private-digital-payments.md)
-- [Cryptocurrency Privacy](cryptocurrency-privacy.md)
-- [Privacy-Preserving Payment Protocols](privacy-preserving-payment-protocols.md)
-- [Reproducible Privacy Testing](reproducible-privacy-testing.md)
-- [Operational Privacy Playbooks](operational-privacy-playbooks.md)
+- [Lập mô hình mối đe dọa & phân tách danh tính](threat-modeling-and-identity-separation.md)
+- [Quyền riêng tư mạng & kết nối ẩn danh](network-privacy-and-anonymous-connectivity.md)
+- [Kiến trúc quyền riêng tư mạng nâng cao](advanced-network-privacy-architectures.md)
+- [Hệ điều hành bảo vệ quyền riêng tư](privacy-operating-systems.md)
+- [Liên lạc và chia sẻ bảo vệ quyền riêng tư](privacy-preserving-communications-and-sharing.md)
+- [Hạ tầng red team được ủy quyền](authorized-red-team-infrastructure.md)
+- [Thanh toán số riêng tư](private-digital-payments.md)
+- [Quyền riêng tư của tiền mã hóa](cryptocurrency-privacy.md)
+- [Giao thức thanh toán bảo vệ quyền riêng tư](privacy-preserving-payment-protocols.md)
+- [Kiểm thử quyền riêng tư có thể tái tạo](reproducible-privacy-testing.md)
+- [Cẩm nang quyền riêng tư vận hành](operational-privacy-playbooks.md)
 
-## Guide and verification index
+## Mục lục hướng dẫn và xác minh
 
-| Technique | Deployment guide | Verification/failure test |
+| Kỹ thuật | Hướng dẫn triển khai | Kiểm thử xác minh/thất bại |
 |---|---|---|
-| All Internet-access technique families | [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md) | Per-technique detection plus [reproducible labs](authorized-adversary-emulation-labs.md) |
-| All payment technique families | [Anonymous Payment Technique Catalog](anonymous-payment-techniques.md) | Per-technique detection plus [synthetic payment lab](authorized-adversary-emulation-labs.md#lab-6-synthetic-peel-chain-and-bridge-graph) |
-| Owner-approved physical field node | [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md) | Capture drill, off-device state monitoring and suspected-discovery runbook |
-| ORBs, residential relays, fronting, fast flux and dead drops | [Offensive Infrastructure and Attribution Evasion](offensive-infrastructure-and-attribution-evasion.md) | [Owned emulation labs](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain) |
-| Nearest-neighbor Wi-Fi, drops, cellular and satellite paths | [Covert Physical and Wireless Access](covert-physical-wireless-access.md) | [Owned wireless-pivot lab](authorized-adversary-emulation-labs.md#lab-4-nearest-neighbor-wireless-pivot) |
-| Cross-layer infrastructure and operator attribution | [Attribution, Detection and Countermeasures](attribution-detection-and-countermeasures.md) | [Exercise report template](authorized-adversary-emulation-labs.md#exercise-report-template) |
-| Peel chains, mixers, chain hopping, nominees and OTC conversion | [Financial Obfuscation Tradecraft](financial-obfuscation-tradecraft.md) | [Synthetic transaction graph](authorized-adversary-emulation-labs.md#lab-6-synthetic-peel-chain-and-bridge-graph) |
-| Identity/browser compartment | [Threat Modeling & Identity Separation](threat-modeling-and-identity-separation.md) | [Browser and OS tests](reproducible-privacy-testing.md#browser-compartment-test) |
-| VPN, Tor, guest Wi-Fi, travel router, cellular | [Network Privacy & Anonymous Connectivity](network-privacy-and-anonymous-connectivity.md) | [Network-path test](reproducible-privacy-testing.md#network-path-test) |
-| Split relays, OHTTP, namespaces, bridges, onions, I2P | [Advanced Network Privacy Architectures](advanced-network-privacy-architectures.md) | [Tor/onion and route tests](reproducible-privacy-testing.md#tor-and-onion-service-test) |
-| Tails, Whonix and Qubes | [Privacy Operating Systems](privacy-operating-systems.md) | [OS isolation test](reproducible-privacy-testing.md#operating-system-isolation-test) |
-| Signal, SimpleX, Briar, OnionShare and encrypted files | [Privacy-Preserving Communications and Sharing](privacy-preserving-communications-and-sharing.md) | [Communications/file tests](reproducible-privacy-testing.md#communications-metadata-test) |
-| Authorized red-team egress/drop nodes | [Authorized Red-Team Infrastructure](authorized-red-team-infrastructure.md) | [Accountability drill](reproducible-privacy-testing.md#authorized-red-team-accountability-drill) |
-| Cash, prepaid and virtual cards | [Private Digital Payments](private-digital-payments.md) | [Payment privacy test](reproducible-privacy-testing.md#payment-privacy-test) |
-| Bitcoin, PayJoin/CoinJoin, Lightning and Monero | [Cryptocurrency Privacy](cryptocurrency-privacy.md) | [Payment privacy test](reproducible-privacy-testing.md#payment-privacy-test) |
-| Silent Payments, Zcash, Taler and federated e-cash | [Privacy-Preserving Payment Protocols](privacy-preserving-payment-protocols.md) | [Payment privacy test](reproducible-privacy-testing.md#payment-privacy-test) |
+| Tất cả nhóm kỹ thuật truy cập Internet | [Danh mục kỹ thuật truy cập Internet ẩn danh](anonymous-internet-access-techniques.md) | Phát hiện theo từng kỹ thuật và [lab có thể tái tạo](authorized-adversary-emulation-labs.md) |
+| Tất cả nhóm kỹ thuật thanh toán | [Danh mục kỹ thuật thanh toán ẩn danh](anonymous-payment-techniques.md) | Phát hiện theo từng kỹ thuật và [lab thanh toán tổng hợp](authorized-adversary-emulation-labs.md#lab-6-synthetic-peel-chain-and-bridge-graph) |
+| Field node vật lý được chủ sở hữu phê duyệt | [Field node được ủy quyền, chống chịu khi bị thu giữ](capture-resilient-authorized-field-nodes.md) | Diễn tập thu giữ, giám sát trạng thái ngoài thiết bị và quy trình ứng phó khi nghi ngờ bị phát hiện |
+| ORB, relay mạng dân dụng, fronting, fast flux và dead drop | [Hạ tầng tấn công và né tránh quy kết](offensive-infrastructure-and-attribution-evasion.md) | [Lab mô phỏng trên hạ tầng sở hữu](authorized-adversary-emulation-labs.md#lab-1-owned-orb-and-redirector-chain) |
+| Wi-Fi lân cận, thiết bị thả, tuyến di động và vệ tinh | [Truy cập vật lý và không dây bí mật](covert-physical-wireless-access.md) | [Lab mô phỏng pivot không dây trên hạ tầng sở hữu](authorized-adversary-emulation-labs.md#lab-4-nearest-neighbor-wireless-pivot) |
+| Quy kết hạ tầng và người vận hành đa lớp | [Quy kết, phát hiện và biện pháp đối phó](attribution-detection-and-countermeasures.md) | [Mẫu báo cáo diễn tập](authorized-adversary-emulation-labs.md#exercise-report-template) |
+| Chuỗi peel, mixer, chain hopping, người đứng tên hộ và chuyển đổi qua OTC | [Tradecraft che giấu tài chính](financial-obfuscation-tradecraft.md) | [Đồ thị giao dịch tổng hợp](authorized-adversary-emulation-labs.md#lab-6-synthetic-peel-chain-and-bridge-graph) |
+| Phân tách danh tính/trình duyệt | [Lập mô hình mối đe dọa & phân tách danh tính](threat-modeling-and-identity-separation.md) | [Kiểm thử trình duyệt và OS](reproducible-privacy-testing.md#browser-compartment-test) |
+| VPN, Tor, Wi-Fi khách, router du lịch, di động | [Quyền riêng tư mạng & kết nối ẩn danh](network-privacy-and-anonymous-connectivity.md) | [Kiểm thử đường đi mạng](reproducible-privacy-testing.md#network-path-test) |
+| Relay phân tách, OHTTP, namespace, bridge, onion, I2P | [Kiến trúc quyền riêng tư mạng nâng cao](advanced-network-privacy-architectures.md) | [Kiểm thử Tor/onion và tuyến mạng](reproducible-privacy-testing.md#tor-and-onion-service-test) |
+| Tails, Whonix và Qubes | [Hệ điều hành bảo vệ quyền riêng tư](privacy-operating-systems.md) | [Kiểm thử cô lập OS](reproducible-privacy-testing.md#operating-system-isolation-test) |
+| Signal, SimpleX, Briar, OnionShare và tệp mã hóa | [Liên lạc và chia sẻ bảo vệ quyền riêng tư](privacy-preserving-communications-and-sharing.md) | [Kiểm thử liên lạc/tệp](reproducible-privacy-testing.md#communications-metadata-test) |
+| Egress/drop node cho red team được ủy quyền | [Hạ tầng red team được ủy quyền](authorized-red-team-infrastructure.md) | [Diễn tập trách nhiệm giải trình](reproducible-privacy-testing.md#authorized-red-team-accountability-drill) |
+| Tiền mặt, thẻ trả trước và thẻ ảo | [Thanh toán số riêng tư](private-digital-payments.md) | [Kiểm thử quyền riêng tư thanh toán](reproducible-privacy-testing.md#payment-privacy-test) |
+| Bitcoin, PayJoin/CoinJoin, Lightning và Monero | [Quyền riêng tư của tiền mã hóa](cryptocurrency-privacy.md) | [Kiểm thử quyền riêng tư thanh toán](reproducible-privacy-testing.md#payment-privacy-test) |
+| Silent Payments, Zcash, Taler và tiền điện tử liên bang | [Giao thức thanh toán bảo vệ quyền riêng tư](privacy-preserving-payment-protocols.md) | [Kiểm thử quyền riêng tư thanh toán](reproducible-privacy-testing.md#payment-privacy-test) |
 
 ## References
 
-- [1] [EFF Surveillance Self-Defense — Your Security Plan](https://ssd.eff.org/module/your-security-plan)
-- [2] [US Code, 18 USC §1030 — Fraud and related activity in connection with computers](https://uscode.house.gov/view.xhtml?req=title:18%20section:1030%20edition:prelim)
-- [3] [UK Computer Misuse Act 1990, section 1](https://www.legislation.gov.uk/ukpga/1990/18/section/1)
-- [4] [EUR-Lex — Directive 2013/40/EU on attacks against information systems](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32013L0040)
-- [5] [W3C — Mitigating Browser Fingerprinting in Web Specifications](https://www.w3.org/TR/fingerprinting-guidance/)
-- [6] [MITRE ATT&CK — Acquire Infrastructure (T1583) and Compromise Infrastructure (T1584)](https://attack.mitre.org/techniques/T1584/)
+- [1] [EFF Surveillance Self-Defense — Kế hoạch bảo mật của bạn](https://ssd.eff.org/module/your-security-plan)
+- [2] [Bộ luật Hoa Kỳ, 18 USC §1030 — Gian lận và các hoạt động liên quan đến máy tính](https://uscode.house.gov/view.xhtml?req=title:18%20section:1030%20edition:prelim)
+- [3] [UK Computer Misuse Act 1990, mục 1](https://www.legislation.gov.uk/ukpga/1990/18/section/1)
+- [4] [EUR-Lex — Directive 2013/40/EU về các cuộc tấn công vào hệ thống thông tin](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32013L0040)
+- [5] [W3C — Giảm thiểu browser fingerprinting trong các đặc tả web](https://www.w3.org/TR/fingerprinting-guidance/)
+- [6] [MITRE ATT&CK — Acquire Infrastructure (T1583) và Compromise Infrastructure (T1584)](https://attack.mitre.org/techniques/T1584/)
 - [7] [MITRE ATT&CK — Proxy (T1090)](https://attack.mitre.org/techniques/T1090/)
 {{#include ../banners/hacktricks-training.md}}

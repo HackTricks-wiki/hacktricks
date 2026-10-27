@@ -2,54 +2,54 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Most CTF image stego reduces to one of these buckets:
+Hầu hết stego ảnh trong CTF đều thuộc một trong các nhóm sau:
 
 - LSB/bit-planes (PNG/BMP)
-- Metadata/comment payloads
-- PNG chunk weirdness / corruption repair
-- JPEG DCT-domain tools (OutGuess, etc)
-- Frame-based (GIF/APNG)
+- Payload trong metadata/comment
+- PNG chunk bất thường / sửa lỗi hỏng
+- Công cụ trên miền DCT của JPEG (OutGuess, v.v.)
+- Dựa trên frame (GIF/APNG)
 
-## Quick triage
+## Phân loại nhanh
 
-Prioritize container-level evidence before deep content analysis:
+Ưu tiên kiểm tra bằng chứng ở cấp container trước khi phân tích sâu nội dung:
 
-- Validate the file and inspect structure: `file`, `magick identify -verbose`, format validators (e.g., `pngcheck`).
-- Extract metadata and visible strings: `exiftool -a -u -g1`, `strings`.
-- Check for embedded/appended content: `binwalk` and end-of-file inspection (`tail | xxd`).
-- Branch by container:
-  - PNG/BMP: bit-planes/LSB and chunk-level anomalies.
-  - JPEG: metadata + DCT-domain tooling (OutGuess/F5-style families).
-  - GIF/APNG: frame extraction, frame differencing, palette tricks.
+- Xác thực file và kiểm tra cấu trúc: `file`, `magick identify -verbose`, công cụ xác thực định dạng (ví dụ: `pngcheck`).
+- Trích xuất metadata và các chuỗi có thể đọc được: `exiftool -a -u -g1`, `strings`.
+- Kiểm tra nội dung được nhúng/nối thêm: `binwalk` và kiểm tra cuối file (`tail | xxd`).
+- Chọn hướng theo container:
+  - PNG/BMP: bit-planes/LSB và bất thường ở cấp chunk.
+  - JPEG: metadata + công cụ trên miền DCT (các họ kiểu OutGuess/F5).
+  - GIF/APNG: trích xuất frame, so sánh sai khác giữa các frame, thủ thuật palette.
 
 ## Bit-planes / LSB
 
-### Technique
+### Kỹ thuật
 
-PNG/BMP are popular in CTFs because they store pixels in a way that makes **bit-level manipulation** easy. The classic hide/extract mechanism is:
+PNG/BMP phổ biến trong CTF vì cách lưu pixel giúp **thao tác ở cấp bit** trở nên dễ dàng. Cơ chế ẩn/trích xuất kinh điển là:
 
-- Each pixel channel (R/G/B/A) has multiple bits.
-- The **least significant bit** (LSB) of each channel changes the image very little.
-- Attackers hide data in those low-order bits, sometimes with a stride, permutation, or per-channel choice.
+- Mỗi kênh pixel (R/G/B/A) có nhiều bit.
+- **Bit ít quan trọng nhất** (LSB) của mỗi kênh chỉ làm thay đổi hình ảnh rất ít.
+- Attacker giấu dữ liệu trong các bit bậc thấp đó, đôi khi dùng bước nhảy, hoán vị hoặc lựa chọn kênh riêng.
 
-What to expect in challenges:
+Những điều cần lưu ý trong các thử thách:
 
-- The payload is in one channel only (e.g., `R` LSB).
-- The payload is in the alpha channel.
-- Payload is compressed/encoded after extraction.
-- The message is spread across planes or hidden via XOR between planes.
+- Payload chỉ nằm trong một kênh (ví dụ: LSB của `R`).
+- Payload nằm trong kênh alpha.
+- Payload được nén/mã hóa sau khi trích xuất.
+- Thông điệp được trải trên nhiều plane hoặc được ẩn bằng XOR giữa các plane.
 
-Additional families you may encounter (implementation-dependent):
+Các nhóm khác bạn có thể gặp (tùy cách triển khai):
 
-- **LSB matching** (not just flipping the bit, but +/-1 adjustments to match target bit)
-- **Palette/index-based hiding** (indexed PNG/GIF: payload in color indices rather than raw RGB)
-- **Alpha-only payloads** (completely invisible in RGB view)
+- **LSB matching** (không chỉ lật bit mà còn điều chỉnh +/-1 để khớp bit đích)
+- **Ẩn dựa trên palette/index** (PNG/GIF dạng indexed: payload nằm trong chỉ số màu thay vì RGB thô)
+- **Payload chỉ trong alpha** (hoàn toàn không nhìn thấy khi xem RGB)
 
-### Tooling
+### Công cụ
 
 #### zsteg
 
-`zsteg` enumerates many LSB/bit-plane extraction patterns for PNG/BMP:
+`zsteg` liệt kê nhiều mẫu trích xuất LSB/bit-plane cho PNG/BMP:
 
 ```bash
 zsteg -a file.png
@@ -59,80 +59,80 @@ Repo: https://github.com/zed-0xff/zsteg
 
 #### StegoVeritas / Stegsolve
 
-- `stegoVeritas`: runs a battery of transforms (metadata, image transforms, brute forcing LSB variants).
-- `stegsolve`: manual visual filters (channel isolation, plane inspection, XOR, etc).
+- `stegoVeritas`: chạy một loạt phép biến đổi (metadata, biến đổi ảnh, brute forcing các biến thể LSB).
+- `stegsolve`: các bộ lọc trực quan để kiểm tra thủ công (tách kênh, kiểm tra plane, XOR, v.v.).
 
-Stegsolve download: https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve
+Tải Stegsolve: https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve
 
-#### FFT-based visibility tricks
+#### Thủ thuật làm nội dung dễ thấy bằng FFT
 
-FFT is not LSB extraction; it is for cases where content is deliberately hidden in frequency space or subtle patterns.
+FFT không dùng để trích xuất LSB; kỹ thuật này áp dụng khi nội dung được cố ý ẩn trong miền tần số hoặc trong các mẫu tinh vi.
 
-- EPFL demo: http://bigwww.epfl.ch/demo/ip/demos/FFT/
+- Bản demo EPFL: http://bigwww.epfl.ch/demo/ip/demos/FFT/
 - Fourifier: https://www.ejectamenta.com/Fourifier-fullscreen/
 - FFTStegPic: https://github.com/0xcomposure/FFTStegPic
 
-Web-based triage often used in CTFs:
+Các công cụ triage trên web thường được dùng trong CTF:
 
 - Aperi’Solve: https://aperisolve.com/
 - StegOnline: https://stegonline.georgeom.net/
 
-## PNG internals: chunks, corruption, and hidden data
+## Cấu trúc bên trong PNG: chunk, lỗi hỏng và dữ liệu ẩn
 
-### Technique
+### Kỹ thuật
 
-PNG is a chunked format. In many challenges the payload is stored at the container/chunk level rather than in pixel values:
+PNG là định dạng chia thành các chunk. Trong nhiều thử thách, payload được lưu ở cấp container/chunk thay vì trong giá trị pixel:
 
-- **Extra bytes after `IEND`** (many viewers ignore trailing bytes)
-- **Non-standard ancillary chunks** carrying payloads; see the [PNG chunk walker and carving workflow](../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/png-tricks.md#extract-ancillary-chunk-payloads).
-- **Corrupted headers** that hide dimensions or break parsers until fixed
+- **Byte thừa sau `IEND`** (nhiều trình xem bỏ qua các byte ở cuối)
+- **Các chunk phụ trợ không chuẩn** chứa payload; xem [quy trình duyệt chunk PNG và trích xuất dữ liệu](../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/png-tricks.md#extract-ancillary-chunk-payloads).
+- **Header bị hỏng** làm ẩn kích thước hoặc khiến parser gặp lỗi cho đến khi được sửa
 
-High-signal chunk locations to review:
+Các vị trí chunk cần ưu tiên kiểm tra:
 
-- `tEXt` / `iTXt` / `zTXt` (text metadata, sometimes compressed)
-- `iCCP` (ICC profile) and other ancillary chunks used as a carrier
-- `eXIf` (EXIF data in PNG)
+- `tEXt` / `iTXt` / `zTXt` (metadata văn bản, đôi khi được nén)
+- `iCCP` (ICC profile) và các chunk phụ trợ khác được dùng làm vật mang dữ liệu
+- `eXIf` (dữ liệu EXIF trong PNG)
 
-### Triage commands
+### Lệnh triage
 
 ```bash
 magick identify -verbose file.png
 pngcheck -v file.png
 ```
 
-What to look for:
+Cần tìm gì:
 
-- Weird width/height/bit-depth/colour-type combinations
-- CRC/chunk errors (pngcheck usually points to the exact offset)
-- Warnings about additional data after `IEND`
+- Các tổ hợp width/height/bit-depth/colour-type bất thường
+- Lỗi CRC/chunk (pngcheck thường chỉ rõ offset chính xác)
+- Cảnh báo về dữ liệu bổ sung sau `IEND`
 
-If you need a deeper chunk view:
+Nếu cần xem chi tiết hơn về chunk:
 
 ```bash
 pngcheck -vp file.png
 exiftool -a -u -g1 file.png
 ```
 
-Useful references:
+Tài liệu tham khảo hữu ích:
 
-- PNG specification (structure, chunks): https://www.w3.org/TR/PNG/
-- File format tricks (PNG/JPEG/GIF corner cases): https://github.com/corkami/docs
+- Đặc tả PNG (cấu trúc, chunk): https://www.w3.org/TR/PNG/
+- Thủ thuật định dạng tệp (các trường hợp đặc biệt của PNG/JPEG/GIF): https://github.com/corkami/docs
 
-## JPEG: metadata, DCT-domain tools, and ELA limitations
+## JPEG: metadata, công cụ trên miền DCT và hạn chế của ELA
 
-### Technique
+### Kỹ thuật
 
-JPEG is not stored as raw pixels; it’s compressed in the DCT domain. That’s why JPEG stego tools differ from PNG LSB tools:
+JPEG không được lưu dưới dạng pixel thô; nó được nén trong miền DCT. Đó là lý do các công cụ stego cho JPEG khác với công cụ LSB cho PNG:
 
-- Metadata/comment payloads are file-level (high-signal and quick to inspect)
-- DCT-domain stego tools embed bits into frequency coefficients
+- Payload metadata/comment nằm ở cấp tệp (dễ nhận biết và kiểm tra nhanh)
+- Công cụ stego trên miền DCT nhúng bit vào các hệ số tần số
 
-Operationally, treat JPEG as:
+Về mặt vận hành, hãy xem JPEG là:
 
-- A container for metadata segments (high-signal, quick to inspect)
-- A compressed signal domain (DCT coefficients) where specialized stego tools operate
+- Một container chứa các phân đoạn metadata (dễ nhận biết và kiểm tra nhanh)
+- Một miền tín hiệu đã nén (các hệ số DCT), nơi các công cụ stego chuyên dụng hoạt động
 
-### Quick checks
+### Kiểm tra nhanh
 
 ```bash
 exiftool file.jpg
@@ -140,61 +140,61 @@ strings -n 6 file.jpg | head
 binwalk file.jpg
 ```
 
-High-signal locations:
+Vị trí có tín hiệu rõ:
 
-- EXIF/XMP/IPTC metadata
-- JPEG comment segment (`COM`)
-- Application segments (`APP1` for EXIF, `APPn` for vendor data)
+- Metadata EXIF/XMP/IPTC
+- Segment comment JPEG (`COM`)
+- Các segment ứng dụng (`APP1` cho EXIF, `APPn` cho dữ liệu của nhà cung cấp)
 
-### Common tools
+### Công cụ phổ biến
 
 - OutGuess: https://github.com/resurrecting-open-source-projects/outguess
 - OpenStego: https://www.openstego.com/
 
-If you are specifically facing steghide payloads in JPEGs, consider using `stegseek` (faster bruteforce than older scripts):
+Nếu bạn đang xử lý payload steghide trong JPEG, hãy cân nhắc dùng `stegseek` (bruteforce nhanh hơn các script cũ):
 
 - [https://github.com/RickdeJager/stegseek](https://github.com/RickdeJager/stegseek)
 
 ### Error Level Analysis
 
-ELA highlights different recompression artifacts; it can point you to regions that were edited, but it’s not a stego detector by itself:
+ELA làm nổi bật các tạo tác nén lại khác nhau; phương pháp này có thể chỉ ra các vùng đã bị chỉnh sửa, nhưng bản thân nó không phải là công cụ phát hiện stego:
 
 - [https://29a.ch/sandbox/2012/imageerrorlevelanalysis/](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
 
-## Animated images
+## Ảnh động
 
-### Technique
+### Kỹ thuật
 
-For animated images, assume the message is:
+Với ảnh động, hãy giả định thông điệp:
 
-- In a single frame (easy), or
-- Spread across frames (ordering matters), or
-- Only visible when you diff consecutive frames
+- Nằm trong một khung hình duy nhất (dễ), hoặc
+- Được phân bố qua nhiều khung hình (thứ tự rất quan trọng), hoặc
+- Chỉ hiển thị khi bạn lấy hiệu giữa các khung hình liên tiếp
 
-### Extract frames
+### Trích xuất các khung hình
 
 ```bash
 ffmpeg -i anim.gif frame_%04d.png
 ```
 
-Then treat frames like normal PNGs: `zsteg`, `pngcheck`, channel isolation.
+Sau đó xử lý các frame như PNG thông thường: `zsteg`, `pngcheck`, cô lập kênh.
 
-Alternative tooling:
+Các công cụ thay thế:
 
-- `gifsicle --explode anim.gif` (fast frame extraction)
-- `imagemagick`/`magick` for per-frame transforms
+- `gifsicle --explode anim.gif` (trích xuất frame nhanh)
+- `imagemagick`/`magick` để biến đổi từng frame
 
-Frame differencing is often decisive:
+So sánh sai khác giữa các frame thường mang tính quyết định:
 
 ```bash
 magick frame_0001.png frame_0002.png -compose difference -composite diff.png
 ```
 
-### APNG pixel-count encoding
+### Mã hóa bằng số lượng pixel APNG
 
-- Detect APNG containers: `exiftool -a -G1 file.png | grep -i animation` or `file`.
-- Extract frames without re-timing: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`.
-- Recover payloads encoded as per-frame pixel counts:
+- Phát hiện container APNG: `exiftool -a -G1 file.png | grep -i animation` hoặc `file`.
+- Trích xuất frame mà không thay đổi thời gian: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`.
+- Khôi phục payload được mã hóa dưới dạng số lượng pixel theo từng frame:
 
 ```python
 from PIL import Image
@@ -207,15 +207,15 @@ for f in sorted(glob.glob('frames/frame_*.png')):
 print(bytes(out).decode('latin1'))
 ```
 
-Animated challenges may encode each byte as the count of a specific color in each frame; concatenating the counts reconstructs the message.<sup>[[1]](#references)</sup>
+Các thử thách dạng ảnh động có thể mã hóa mỗi byte thành số lượng của một màu cụ thể trong mỗi khung hình; nối các số lượng này lại sẽ khôi phục thông điệp.<sup>[[1]](#references)</sup>
 
-## Password-protected embedding
+## Nhúng được bảo vệ bằng mật khẩu
 
-If you suspect embedding protected by a passphrase rather than pixel-level manipulation, this is usually the fastest path.
+Nếu bạn nghi ngờ dữ liệu được nhúng bằng cụm mật khẩu thay vì chỉnh sửa ở cấp pixel, đây thường là cách nhanh nhất.
 
 ### steghide
 
-Supports `JPEG, BMP, WAV, AU` and can embed/extract encrypted payloads.
+Hỗ trợ `JPEG, BMP, WAV, AU` và có thể nhúng/trích xuất dữ liệu được mã hóa.
 
 ```bash
 steghide info file
@@ -234,7 +234,7 @@ Repo: https://github.com/Paradoxis/StegCracker
 
 ### stegpy
 
-Supports PNG/BMP/GIF/WebP/WAV.
+Hỗ trợ PNG/BMP/GIF/WebP/WAV.
 
 Repo: https://github.com/dhsdshdhk/stegpy
 
@@ -242,5 +242,5 @@ Repo: https://github.com/dhsdshdhk/stegpy
 
 ## References
 
-- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Trung bình) — màu hồng, Danh sách mong ước của Santa, Siêu dữ liệu Giáng sinh, Nhiễu được ghi lại](https://0xdf.gitlab.io/flagvent2025/medium)
 {{#include ../../banners/hacktricks-training.md}}

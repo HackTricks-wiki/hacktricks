@@ -1,83 +1,83 @@
-# Reversing Tools & Basic Methods
+# Công cụ Reversing & các phương pháp cơ bản
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## ImGui Based Reversing tools
+## Công cụ reversing dựa trên ImGui
 
-Software:
+Phần mềm:
 
 - ReverseKit: [https://github.com/zer0condition/ReverseKit](https://github.com/zer0condition/ReverseKit)
 
-## WinDbg user-mode automation
+## Tự động hóa WinDbg ở chế độ user-mode
 
 {{#ref}}
 windbg-automation.md
 {{#endref}}
 
-## Windows exception-driven control flow
+## Luồng điều khiển dựa trên exception của Windows
 
 {{#ref}}
 ../windows-exception-driven-control-flow.md
 {{#endref}}
 
-## Windows kernel debugging
+## Debug kernel Windows
 
 {{#ref}}
 windows-kernel-debugging-kernelflirt.md
 {{#endref}}
 
-## Wasm decompiler / Wat compiler
+## Trình decompiler Wasm / trình biên dịch Wat
 
-Online:
+Trực tuyến:
 
-- Use [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) to **decompile** from wasm (binary) to wat (clear text)
-- Use [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) to **compile** from wat to wasm
-- You can also try [web-wasmdec](https://wwwg.github.io/web-wasmdec/) for decompilation.
+- Dùng [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) để **decompile** từ wasm (dạng binary) sang wat (văn bản dễ đọc)
+- Dùng [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) để **compile** từ wat sang wasm
+- Bạn cũng có thể thử [web-wasmdec](https://wwwg.github.io/web-wasmdec/) để decompile.
 
-Software:
+Phần mềm:
 
 - [https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
 - [https://github.com/wwwg/wasmdec](https://github.com/wwwg/wasmdec)
 
-## Node.js / V8 cached bytecode
+## Bytecode đã cache của Node.js / V8
 
 {{#ref}}
 nodejs-v8-cached-bytecode.md
 {{#endref}}
 
-## Virtualized payloads and custom VMs
+## Payload được virtualize và VM tùy chỉnh
 
 {{#ref}}
 ../../windows-hardening/virtualized-payload-execution.md
 {{#endref}}
 
-## .NET decompiler
+## Trình decompiler .NET
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek is a decompiler that **decompiles and examines multiple formats**, including **libraries** (.dll), **Windows metadata file**s (.winmd), and **executables** (.exe). Once decompiled, an assembly can be saved as a Visual Studio project (.csproj).
+dotPeek là một trình decompiler có thể **decompile và kiểm tra nhiều định dạng**, bao gồm **library** (.dll), **file metadata của Windows** (.winmd) và **file thực thi** (.exe). Sau khi decompile, có thể lưu assembly dưới dạng project Visual Studio (.csproj).
 
-The merit here is that if a lost source code requires restoration from a legacy assembly, this action can save time. Further, dotPeek provides handy navigation throughout the decompiled code, making it one of the perfect tools for **Xamarin algorithm analysis.**
+Điểm hữu ích là nếu cần khôi phục mã nguồn bị thất lạc từ một assembly cũ, thao tác này có thể tiết kiệm thời gian. Ngoài ra, dotPeek cung cấp tính năng điều hướng thuận tiện trong mã đã decompile, khiến nó trở thành một trong những công cụ lý tưởng để **phân tích thuật toán Xamarin.**
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-With a comprehensive add-in model and an API that extends the tool to suit your exact needs, .NET reflector saves time and simplifies development. Let's take a look at the plethora of reverse engineering services this tool provides:
+Với mô hình add-in toàn diện và API cho phép mở rộng công cụ để đáp ứng chính xác nhu cầu của bạn, .NET Reflector giúp tiết kiệm thời gian và đơn giản hóa quá trình phát triển. Hãy cùng xem qua những dịch vụ reverse engineering đa dạng mà công cụ này cung cấp:
 
-- Provides an insight into how the data flows through a library or component
-- Provides insight into the implementation and usage of .NET languages and frameworks
-- Finds undocumented and unexposed functionality to get more out of the APIs and technologies used.
-- Finds dependencies and different assemblies
-- Tracks down the exact location of errors in your code, third-party components, and libraries.
-- Debugs into the source of all the .NET code you work with.
+- Giúp hiểu cách dữ liệu di chuyển qua một library hoặc component
+- Giúp hiểu cách triển khai và sử dụng các ngôn ngữ và framework .NET
+- Tìm các chức năng chưa được tài liệu hóa hoặc chưa được công khai để khai thác tốt hơn các API và công nghệ đang dùng.
+- Tìm các dependency và những assembly khác nhau
+- Xác định chính xác vị trí lỗi trong code, component của bên thứ ba và library.
+- Debug vào source của toàn bộ code .NET mà bạn làm việc cùng.
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[ILSpy plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): You can have it in any OS (you can install it directly from VSCode, no need to download the git. Click on **Extensions** and **search ILSpy**).\
-If you need to **decompile**, **modify** and **recompile** again you can use [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) or an actively maintained fork of it, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Right Click -> Modify Method** to change something inside a function).
+[Plugin ILSpy cho Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Có thể dùng trên mọi OS (bạn có thể cài trực tiếp từ VSCode, không cần tải git. Nhấp vào **Extensions** rồi **tìm ILSpy**).\
+Nếu cần **decompile**, **chỉnh sửa** rồi **recompile**, bạn có thể dùng [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) hoặc fork của nó đang được duy trì tích cực là [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Right Click -> Modify Method** để thay đổi nội dung bên trong một hàm).
 
-### Execution-free managed inspection with REA
+### Kiểm tra managed code không cần thực thi bằng REA
 
-**REA** can inspect PE/CLI metadata and CIL without loading the assembly. Start with the artifact identity, then inspect members and declared native boundaries; this is useful when reviewing suspicious calls before using a decompiler or running the program.<sup>[[16]](#references)[[17]](#references)</sup>
+**REA** có thể kiểm tra metadata PE/CLI và CIL mà không cần nạp assembly. Hãy bắt đầu bằng cách xác định artifact, sau đó kiểm tra các member và ranh giới native được khai báo; cách này hữu ích khi xem xét các lời gọi đáng ngờ trước khi dùng decompiler hoặc chạy chương trình.<sup>[[16]](#references)[[17]](#references)</sup>
 
 ```bash
 rea inspect-managed-artifact /absolute/path/Assembly.dll --json
@@ -85,11 +85,11 @@ rea inspect-managed-members /absolute/path/Assembly.dll --json
 rea inspect-managed-native-boundaries /absolute/path/Assembly.dll --json
 ```
 
-For version diffing, `compare_managed_members` uses raw CIL/signature identity and decoded-instruction fingerprints rather than treating metadata tokens as stable across builds. A P/Invoke declaration is not proof that native code ran; `verify_managed_native_boundaries` needs matching native export or function Evidence to check that boundary. Keep the artifact digest, MVID and unresolved mappings with the result.<sup>[[17]](#references)</sup>
+Khi so sánh các phiên bản, `compare_managed_members` sử dụng danh tính CIL/chữ ký thô và dấu vân tay của các instruction đã giải mã, thay vì xem metadata token là ổn định giữa các bản dựng. Khai báo P/Invoke không chứng minh rằng mã native đã chạy; `verify_managed_native_boundaries` cần có native export hoặc bằng chứng về function tương ứng để kiểm tra ranh giới đó. Hãy lưu kèm digest của artifact, MVID và các mapping chưa được phân giải trong kết quả.<sup>[[17]](#references)</sup>
 
-### DNSpy Logging
+### Ghi nhật ký DNSpy
 
-In order to make **DNSpy log some information in a file**, you could use this snippet:
+Để **DNSpy ghi một số thông tin vào file**, bạn có thể dùng đoạn mã sau:
 
 ```cs
 using System.IO;
@@ -97,21 +97,21 @@ path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
 ```
 
-### DNSpy Debugging
+### Gỡ lỗi bằng DNSpy
 
-In order to debug code using DNSpy you need to:
+Để gỡ lỗi mã bằng DNSpy, bạn cần:
 
-First, change the **Assembly attributes** related to **debugging**:
+Trước tiên, thay đổi **các thuộc tính Assembly** liên quan đến **gỡ lỗi**:
 
-![DNSpy Logging - DNSpy Debugging: First, change the Assembly attributes related to debugging](<../../images/image (973).png>)
+![DNSpy Logging - Gỡ lỗi bằng DNSpy: Trước tiên, thay đổi các thuộc tính Assembly liên quan đến gỡ lỗi](<../../images/image (973).png>)
 
-From:
+Từ:
 
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
 
-To:
+Đến:
 
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
@@ -120,43 +120,43 @@ DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints |
 DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 ```
 
-And click on **compile**:
+Và nhấp vào **compile**:
 
-![DNSpy Logging - DNSpy Debugging: And click on compile](<../../images/image (314) (1).png>)
+![DNSpy Logging - DNSpy Debugging: Và nhấp vào compile](<../../images/image (314) (1).png>)
 
-Then save the new file via _**File >> Save module...**_:
+Sau đó lưu tệp mới bằng _**File >> Save module...**_:
 
-![DNSpy Logging - DNSpy Debugging: Then save the new file via File Save module](<../../images/image (602).png>)
+![DNSpy Logging - DNSpy Debugging: Sau đó lưu tệp mới bằng File Save module](<../../images/image (602).png>)
 
-This is necessary because if you don't do this, at **runtime** several **optimisations** will be applied to the code and it could be possible that while debugging a **break-point is never hit** or some **variables don't exist**.
+Việc này cần thiết vì nếu không làm vậy, khi **runtime**, mã sẽ được áp dụng một số **tối ưu hóa**, và có thể xảy ra trường hợp khi debug, **breakpoint không bao giờ được kích hoạt** hoặc một số **biến không tồn tại**.
 
-Then, if your .NET application is being **run** by **IIS** you can **restart** it with:
+Sau đó, nếu ứng dụng .NET của bạn đang được **chạy** bởi **IIS**, bạn có thể **khởi động lại** ứng dụng bằng:
 
 ```
 iisreset /noforce
 ```
 
-Then, in order to start debugging you should close all the opened files and inside the **Debug Tab** select **Attach to Process...**:
+Sau đó, để bắt đầu debug, hãy đóng tất cả các file đang mở và trong **Debug Tab**, chọn **Attach to Process...**:
 
-![DNSpy Logging - DNSpy Debugging: Then, in order to start debugging you should close all the opened files and inside the Debug Tab select Attach to Process](<../../images/image (318).png>)
+![DNSpy Logging - DNSpy Debugging: Sau đó, để bắt đầu debug, hãy đóng tất cả các file đang mở và trong Debug Tab, chọn Attach to Process](<../../images/image (318).png>)
 
-Then select **w3wp.exe** to attach to the **IIS server** and click **attach**:
+Tiếp theo, chọn **w3wp.exe** để attach vào **IIS server** rồi nhấp **attach**:
 
-![DNSpy Logging - DNSpy Debugging: Then select w3wp.exe to attach to the IIS server and click attach](<../../images/image (113).png>)
+![DNSpy Logging - DNSpy Debugging: Tiếp theo, chọn w3wp.exe để attach vào IIS server rồi nhấp attach](<../../images/image (113).png>)
 
-Now that we are debugging the process, it's time to stop it and load all the modules. First click on _Debug >> Break All_ and then click on _**Debug >> Windows >> Modules**_:
+Giờ ta đang debug process, đã đến lúc tạm dừng và tải tất cả module. Trước tiên, nhấp _Debug >> Break All_, sau đó nhấp _**Debug >> Windows >> Modules**_:
 
-![DNSpy Logging - DNSpy Debugging: Now that we are debugging the process, it's time to stop it and load all the modules. First click on Debug Break All and then click on Debug Windows Modules](<../../images/image (132).png>)
+![DNSpy Logging - DNSpy Debugging: Giờ ta đang debug process, đã đến lúc tạm dừng và tải tất cả module. Trước tiên, nhấp vào Debug Break All, sau đó nhấp vào Debug Windows Modules](<../../images/image (132).png>)
 
-![DNSpy Logging - DNSpy Debugging: Now that we are debugging the process, it's time to stop it and load all the modules. First click on Debug Break All and then click on Debug Windows Modules](<../../images/image (834).png>)
+![DNSpy Logging - DNSpy Debugging: Giờ ta đang debug process, đã đến lúc tạm dừng và tải tất cả module. Trước tiên, nhấp vào Debug Break All, sau đó nhấp vào Debug Windows Modules](<../../images/image (834).png>)
 
-Click any module on **Modules** and select **Open All Modules**:
+Nhấp vào bất kỳ module nào trong **Modules** rồi chọn **Open All Modules**:
 
-![DNSpy Logging - DNSpy Debugging: Click any module on Modules and select Open All Modules](<../../images/image (922).png>)
+![DNSpy Logging - DNSpy Debugging: Nhấp vào bất kỳ module nào trong Modules rồi chọn Open All Modules](<../../images/image (922).png>)
 
-Right click any module in **Assembly Explorer** and click **Sort Assemblies**:
+Nhấp chuột phải vào bất kỳ module nào trong **Assembly Explorer** rồi nhấp **Sort Assemblies**:
 
-![DNSpy Logging - DNSpy Debugging: Right click any module in Assembly Explorer and click Sort Assemblies](<../../images/image (339).png>)
+![DNSpy Logging - DNSpy Debugging: Nhấp chuột phải vào bất kỳ module nào trong Assembly Explorer rồi nhấp Sort Assemblies](<../../images/image (339).png>)
 
 ## Java decompiler
 
@@ -167,49 +167,49 @@ Right click any module in **Assembly Explorer** and click **Sort Assemblies**:
 
 ### Using IDA
 
-- **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
-- Select **Windbg** debugger
-- Select "**Suspend on library load/unload**"
+- **Tải rundll32** (bản 64bits ở C:\Windows\System32\rundll32.exe và bản 32 bits ở C:\Windows\SysWOW64\rundll32.exe)
+- Chọn debugger **Windbg**
+- Chọn "**Suspend on library load/unload**"
 
-![Debugging DLLs - Using IDA: Select " Suspend on library load/unload "](<../../images/image (868).png>)
+![Debugging DLLs - Using IDA: Chọn " Suspend on library load/unload "](<../../images/image (868).png>)
 
-- Configure the **parameters** of the execution putting the **path to the DLL** and the function that you want to call:
+- Cấu hình **parameters** khi thực thi bằng cách điền **path đến DLL** và function bạn muốn gọi:
 
-![Debugging DLLs - Using IDA: Configure the parameters of the execution putting the path to the DLL and the function that you want to call](<../../images/image (704).png>)
+![Debugging DLLs - Using IDA: Cấu hình parameters khi thực thi bằng cách điền path đến DLL và function bạn muốn gọi](<../../images/image (704).png>)
 
-Then, when you start debugging **the execution will be stopped when each DLL is loaded**, then, when rundll32 load your DLL the execution will be stopped.
+Sau đó, khi bắt đầu debug, **process sẽ tạm dừng mỗi khi một DLL được tải**. Vì vậy, khi rundll32 tải DLL của bạn, process sẽ tạm dừng.
 
-This method stops on module-load events, but reaching the loaded DLL's entry point is less direct than with the x64dbg workflow below.
+Phương pháp này tạm dừng tại các sự kiện tải module, nhưng việc đi đến entry point của DLL đã tải không trực tiếp bằng workflow x64dbg bên dưới.
 
 ### Using x64dbg/x32dbg
 
-- **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
-- **Change the Command Line** ( _File --> Change Command Line_ ) and set the path of the dll and the function that you want to call, for example: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
-- Change _Options --> Settings_ and select "**DLL Entry**".
-- Then **start the execution**, the debugger will stop at each dll main, at some point you will **stop in the dll Entry of your dll**. From there, just search for the points where you want to put a breakpoint.
+- **Tải rundll32** (bản 64bits ở C:\Windows\System32\rundll32.exe và bản 32 bits ở C:\Windows\SysWOW64\rundll32.exe)
+- **Thay đổi Command Line** ( _File --> Change Command Line_ ) và đặt path của DLL cùng function bạn muốn gọi, ví dụ: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- Thay đổi _Options --> Settings_ rồi chọn "**DLL Entry**".
+- Sau đó, **bắt đầu thực thi**. Debugger sẽ tạm dừng tại main của mỗi DLL; đến một thời điểm nào đó, bạn sẽ **dừng tại Entry của DLL mình**. Từ đó, chỉ cần tìm các vị trí bạn muốn đặt breakpoint.
 
-Notice that when the execution is stopped by any reason in win64dbg you can see **in which code you are** looking in the **top of the win64dbg window**:
+Lưu ý rằng khi process bị tạm dừng vì bất kỳ lý do nào trong win64dbg, bạn có thể xem **mình đang ở đoạn code nào** ở **phía trên cửa sổ win64dbg**:
 
-![Using IDA - Using x64dbg/x32dbg: Notice that when the execution is stopped by any reason in win64dbg you can see in which code you are looking in the top of the win64dbg window](<../../images/image (842).png>)
+![Using IDA - Using x64dbg/x32dbg: Lưu ý rằng khi process bị tạm dừng vì bất kỳ lý do nào trong win64dbg, bạn có thể xem mình đang ở đoạn code nào ở phía trên cửa sổ win64dbg](<../../images/image (842).png>)
 
-This indicator confirms when execution has stopped inside the DLL you want to debug.
+Chỉ báo này xác nhận rằng process đã tạm dừng bên trong DLL bạn muốn debug.
 
 ## GUI Apps / Videogames
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them. More info in:
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) là một chương trình hữu ích để tìm nơi lưu các giá trị quan trọng trong memory của một game đang chạy và thay đổi chúng. Xem thêm tại:
 
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) is a front-end/reverse engineering tool for the GNU Project Debugger (GDB), focused on games. However, it can be used for any reverse-engineering related stuff
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) là công cụ front-end/reverse engineering cho GNU Project Debugger (GDB), tập trung vào game. Tuy nhiên, công cụ này có thể dùng cho mọi tác vụ liên quan đến reverse engineering.
 
-[**Decompiler Explorer**](https://dogbolt.org/) is a web front-end to a number of decompilers. This web service lets you compare the output of different decompilers on small executables.
+[**Decompiler Explorer**](https://dogbolt.org/) là front-end trên web cho nhiều decompiler. Dịch vụ web này cho phép bạn so sánh kết quả của các decompiler khác nhau trên những executable nhỏ.
 
-## Evidence-backed native investigation with REA
+## Điều tra native có bằng chứng với REA
 
-**REA** exposes Hopper, Ghidra and IDA analysis through CLI and MCP. It requires Node.js 22.x (at least 22.19), 24.x (at least 24.11), or 26+, plus npm. Configure an existing native provider first; check `rea providers --json` and select a provider explicitly when more than one supports the target. Use an observed function name or address from the inventory in place of `0x1000` below.<sup>[[16]](#references)[[18]](#references)</sup>
+**REA** cung cấp khả năng phân tích bằng Hopper, Ghidra và IDA thông qua CLI và MCP. Công cụ yêu cầu Node.js 22.x (tối thiểu 22.19), 24.x (tối thiểu 24.11) hoặc 26+, cùng với npm. Trước tiên, hãy cấu hình một native provider hiện có; kiểm tra `rea providers --json` và chọn provider một cách rõ ràng nếu có nhiều provider hỗ trợ target. Thay `0x1000` bên dưới bằng tên hoặc địa chỉ function được quan sát trong inventory.<sup>[[16]](#references)[[18]](#references)</sup>
 
 ```bash
 npm install --global rea-agents
@@ -221,15 +221,15 @@ rea xrefs /absolute/path/to/program 0x1000 --provider ghidra --json
 rea function /absolute/path/to/program 0x1000 --provider ghidra --json
 ```
 
-Start from a feature string or symbol, follow references and callers, then inspect the selected function dossier and pseudocode with `rea decompile`. REA binds a session to the selected provider rather than silently replacing it after a failure. For repeatable queries, `--snapshot PATH` reuses only matching artifact bytes, provider, settings, operation and parameters; a snapshot is a local cache, not a saved provider database. Preserve the returned Evidence and explicit unknowns instead of treating inferred paths or decompiler text as original source.<sup>[[16]](#references)[[18]](#references)</sup>
+Bắt đầu từ một chuỗi tính năng hoặc symbol, lần theo các tham chiếu và caller, sau đó kiểm tra hồ sơ function đã chọn cùng pseudocode bằng `rea decompile`. REA gắn một session với provider đã chọn thay vì âm thầm thay thế provider đó khi xảy ra lỗi. Để truy vấn có thể lặp lại, `--snapshot PATH` chỉ dùng lại các byte artifact, provider, cài đặt, operation và tham số khớp nhau; snapshot là bộ nhớ đệm cục bộ, không phải cơ sở dữ liệu provider đã lưu. Giữ nguyên Evidence được trả về và các phần chưa rõ được nêu rõ, thay vì xem các đường dẫn suy luận hoặc văn bản decompiler là mã nguồn gốc.<sup>[[16]](#references)[[18]](#references)</sup>
 
-For JavaScript/Electron entry points leading into native add-ons, see [Electron Desktop Apps](../../network-services-pentesting/pentesting-web/electron-desktop-apps/#static-asar-to-native-boundary-tracing-with-rea).
+Đối với các entry point JavaScript/Electron dẫn vào native add-on, xem [Electron Desktop Apps](../../network-services-pentesting/pentesting-web/electron-desktop-apps/#static-asar-to-native-boundary-tracing-with-rea).
 
-## Scripted IDA and Ghidra analysis with a local TCP bridge
+## Phân tích IDA và Ghidra bằng script với cầu nối TCP cục bộ
 
-[IDA-Ghidra-bridge](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge) runs inside an **already open** IDA database or Ghidra CodeBrowser program and lets a separate script query and modify that analysis database. Run `ID_Server.py` from IDA's Python CLI (`import ID_Server`) or `Ghidra_Server.py` from Ghidra's Script Manager. IDA binds to `127.0.0.1` starting at port `5073` and scans higher ports. The current Ghidra script starts at port `5093` and tries ten ports through `5102`; its Java socket binds to the wildcard address, not just loopback. Check the port printed by the instance before connecting. Unlike a headless analyzer, this bridge operates on the program currently open in that GUI instance.<sup>[[21]](#references)[[22]](#references)[[23]](#references)[[24]](#references)</sup>
+[IDA-Ghidra-bridge](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge) chạy bên trong một cơ sở dữ liệu IDA hoặc chương trình Ghidra CodeBrowser **đã mở sẵn**, cho phép một script riêng biệt truy vấn và sửa đổi cơ sở dữ liệu phân tích đó. Chạy `ID_Server.py` từ Python CLI của IDA (`import ID_Server`) hoặc `Ghidra_Server.py` từ Script Manager của Ghidra. IDA bind vào `127.0.0.1`, bắt đầu từ port `5073` và quét các port cao hơn. Script Ghidra hiện tại bắt đầu từ port `5093` và thử mười port cho đến `5102`; socket Java của nó bind vào địa chỉ wildcard, không chỉ loopback. Kiểm tra port được instance in ra trước khi kết nối. Không giống headless analyzer, bridge này hoạt động trên chương trình hiện đang mở trong instance GUI đó.<sup>[[21]](#references)[[22]](#references)[[23]](#references)[[24]](#references)</sup>
 
-Send **one newline-terminated command per connection** and read the newline-terminated response. The result is normally JSON. For example, after finding an imported API relevant to an input path, `IMPORTXREF` finds its call sites; `DECOMP_XREF` then batch-decompiles callers of a selected address. `FUNC` inspects a function, while `PCODE` returns the decompiler's intermediate representation. Use the address from the active database, not an address copied from a differently rebased binary. The example below uses IDA's default port; for Ghidra, use the port printed by its script.<sup>[[21]](#references)[[22]](#references)[[23]](#references)</sup>
+Gửi **mỗi kết nối một command kết thúc bằng newline** và đọc response kết thúc bằng newline. Kết quả thường là JSON. Ví dụ, sau khi tìm thấy một API được import có liên quan đến đường dẫn đầu vào, `IMPORTXREF` tìm các call site của API đó; tiếp theo, `DECOMP_XREF` decompile hàng loạt các caller của một địa chỉ đã chọn. `FUNC` kiểm tra một function, còn `PCODE` trả về biểu diễn trung gian của decompiler. Dùng địa chỉ từ cơ sở dữ liệu đang hoạt động, không dùng địa chỉ được sao chép từ một binary đã được rebase khác. Ví dụ bên dưới dùng port mặc định của IDA; với Ghidra, hãy dùng port được script in ra.<sup>[[21]](#references)[[22]](#references)[[23]](#references)</sup>
 
 ```python
 import socket
@@ -239,7 +239,7 @@ with socket.create_connection(("127.0.0.1", 5073)) as sock:
     print(sock.makefile("r", encoding="utf-8").readline())
 ```
 
-The same channel can **change the analysis database**: `RENAME_FUNC`, `RETYPE`, `SETCONV`, `DEFSTRUCT`/`SETFIELD`, `MAKEFUNC`, and `PATCH` alter names, types, structure definitions, function boundaries, or stored bytes. `PATCH` is a database edit, **not** evidence of a live-process patch. Neither listener documents authentication. IDA is loopback-only, but Ghidra may be reachable through network interfaces; restrict access to the Ghidra listener when using it. `QUIT` stops either listener, and IDA also exposes `ida_bridge_stop()`.<sup>[[21]](#references)[[22]](#references)[[23]](#references)[[24]](#references)</sup>
+Kênh tương tự có thể **thay đổi cơ sở dữ liệu phân tích**: `RENAME_FUNC`, `RETYPE`, `SETCONV`, `DEFSTRUCT`/`SETFIELD`, `MAKEFUNC` và `PATCH` thay đổi tên, kiểu, định nghĩa cấu trúc, ranh giới hàm hoặc byte được lưu trữ. `PATCH` là thao tác chỉnh sửa cơ sở dữ liệu, **không phải** bằng chứng cho thấy có bản vá trên tiến trình đang chạy. Không listener nào tài liệu hóa việc xác thực. IDA chỉ lắng nghe trên loopback, nhưng Ghidra có thể truy cập qua các giao diện mạng; hãy hạn chế quyền truy cập vào listener của Ghidra khi sử dụng. `QUIT` dừng một trong hai listener, còn IDA cũng cung cấp `ida_bridge_stop()`.<sup>[[21]](#references)[[22]](#references)[[23]](#references)[[24]](#references)</sup>
 
 ## ARM & MIPS
 
@@ -250,49 +250,49 @@ https://github.com/nongiach/arm_now
 
 ## Shellcodes
 
-### Debugging a shellcode with blobrunner
+### Debug shellcode bằng blobrunner
 
-[**BlobRunner**](https://github.com/OALabs/BlobRunner) allocates the **shellcode**, prints its **memory address**, and pauses execution.\
-Attach a debugger such as IDA or x64dbg, set a breakpoint at the printed address, and resume execution to debug the shellcode.
+[**BlobRunner**](https://github.com/OALabs/BlobRunner) cấp phát **shellcode**, in ra **địa chỉ bộ nhớ** của nó và tạm dừng thực thi.\
+Gắn debugger như IDA hoặc x64dbg, đặt breakpoint tại địa chỉ được in ra, rồi tiếp tục thực thi để debug shellcode.
 
-The releases github page contains zips containing the compiled releases: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-You can find a slightly modified version of Blobrunner in the following link. In order to compile it just **create a C/C++ project in Visual Studio Code, copy and paste the code and build it**.
+Trang GitHub releases có các tệp zip chứa những bản phát hành đã biên dịch: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+Bạn có thể tìm thấy một phiên bản BlobRunner đã chỉnh sửa đôi chút tại liên kết sau. Để biên dịch, chỉ cần **tạo một dự án C/C++ trong Visual Studio Code, sao chép và dán mã rồi build**.
 
 
 {{#ref}}
 blobrunner.md
 {{#endref}}
 
-### Debugging a shellcode with jmp2it
+### Debug shellcode bằng jmp2it
 
-[**jmp2it**](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) is similar to BlobRunner. It allocates the shellcode and enters an infinite loop. Attach the debugger, resume for **2–5 seconds**, pause inside that loop, and step to the following call that transfers execution to the allocated shellcode.
+[**jmp2it**](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) tương tự BlobRunner. Nó cấp phát shellcode rồi đi vào một vòng lặp vô hạn. Gắn debugger, tiếp tục thực thi trong **2–5 giây**, tạm dừng bên trong vòng lặp đó, rồi step đến lệnh gọi tiếp theo chuyển quyền thực thi sang shellcode đã cấp phát.
 
-![Debugger paused in jmp2it's infinite loop immediately before the call to the allocated shellcode](<../../images/image (509).png>)
+![Debugger tạm dừng trong vòng lặp vô hạn của jmp2it, ngay trước lệnh gọi đến shellcode đã cấp phát](<../../images/image (509).png>)
 
-You can download a compiled version of [jmp2it inside the releases page](https://github.com/adamkramer/jmp2it/releases/).
+Bạn có thể tải phiên bản đã biên dịch của [jmp2it tại trang releases](https://github.com/adamkramer/jmp2it/releases/).
 
-### Debugging shellcode using Cutter
+### Debug shellcode bằng Cutter
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) is the GUI of radare. Using cutter you can emulate the shellcode and inspect it dynamically.
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) là GUI của radare. Dùng Cutter, bạn có thể giả lập shellcode và kiểm tra nó khi đang chạy.
 
-Note that Cutter allows you to "Open File" and "Open Shellcode". In my case when I opened the shellcode as a file it decompiled it correctly, but when I opened it as a shellcode it didn't:
+Lưu ý rằng Cutter cho phép bạn chọn "Open File" và "Open Shellcode". Trong trường hợp của tôi, khi mở shellcode dưới dạng tệp, nó decompile chính xác, nhưng khi mở dưới dạng shellcode thì không:
 
-![Cutter showing different analysis results when opening the same bytes as a file or as shellcode](<../../images/image (562).png>)
+![Cutter hiển thị kết quả phân tích khác nhau khi mở cùng một byte dưới dạng tệp hoặc shellcode](<../../images/image (562).png>)
 
-In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically start the emulation from there:
+Để bắt đầu giả lập tại vị trí mong muốn, hãy đặt bp ở đó; có vẻ như Cutter sẽ tự động bắt đầu giả lập từ vị trí đó:
 
-![Setting a breakpoint at the desired shellcode entry before starting Cutter emulation](<../../images/image (589).png>)
+![Đặt breakpoint tại entry của shellcode mong muốn trước khi bắt đầu giả lập trong Cutter](<../../images/image (589).png>)
 
-![Cutter emulator paused at the selected shellcode breakpoint](<../../images/image (387).png>)
+![Trình giả lập Cutter tạm dừng tại breakpoint shellcode đã chọn](<../../images/image (387).png>)
 
-You can see the stack for example inside a hex dump:
+Ví dụ, bạn có thể xem stack trong một hex dump:
 
-![Viewing the emulated shellcode stack in Cutter's hex dump](<../../images/image (186).png>)
+![Xem stack shellcode được giả lập trong hex dump của Cutter](<../../images/image (186).png>)
 
-### Deobfuscating shellcode and getting executed functions
+### Deobfuscate shellcode và tìm các hàm được thực thi
 
-You should try [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
-It will tell you things like **which functions** is the shellcode using and if the shellcode is **decoding** itself in memory.
+Bạn nên thử [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
+Công cụ này sẽ cho bạn biết những thông tin như shellcode đang dùng **những hàm nào** và liệu nó có đang **giải mã** chính nó trong bộ nhớ hay không.
 
 ```bash
 scdbg.exe -f shellcode # Get info
@@ -303,48 +303,48 @@ scdbg.exe -f shellcode /findsc #Find offset where starts
 scdbg.exe -f shellcode /foff 0x0000004D #Start the executing in that offset
 ```
 
-scDbg also counts with a graphical launcher where you can select the options you want and execute the shellcode
+scDbg cũng có trình khởi chạy đồ họa, cho phép bạn chọn các tùy chọn mong muốn và thực thi shellcode
 
-![scDbg graphical launcher for selecting shellcode emulation and tracing options](<../../images/image (258).png>)
+![Trình khởi chạy đồ họa scDbg để chọn các tùy chọn mô phỏng và truy vết shellcode](<../../images/image (258).png>)
 
-The **Create Dump** option will dump the final shellcode if any change is done to the shellcode dynamically in memory (useful to download the decoded shellcode). The **start offset** can be useful to start the shellcode at a specific offset. The **Debug Shell** option is useful to debug the shellcode using the scDbg terminal (however I find any of the options explained before better for this matter as you will be able to use Ida or x64dbg).
+Tùy chọn **Create Dump** sẽ dump shellcode cuối cùng nếu shellcode được thay đổi động trong bộ nhớ (hữu ích để tải xuống shellcode đã giải mã). **start offset** có thể hữu ích khi muốn bắt đầu chạy shellcode từ một offset cụ thể. Tùy chọn **Debug Shell** hữu ích để debug shellcode bằng terminal scDbg (tuy nhiên, tôi thấy các tùy chọn đã giải thích trước đó phù hợp hơn cho việc này vì bạn có thể dùng Ida hoặc x64dbg).
 
-### Disassembling using CyberChef
+### Disassemble bằng CyberChef
 
-Upload your shellcode file as input and use the following recipe to decompile it: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+Tải tệp shellcode lên làm đầu vào và dùng recipe sau để dịch ngược nó: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
-## MBA obfuscation deobfuscation
+## Gỡ obfuscation MBA
 
-**Mixed Boolean-Arithmetic (MBA)** obfuscation hides simple expressions such as `x + y` behind formulas that mix arithmetic (`+`, `-`, `*`) and bitwise operators (`&`, `|`, `^`, `~`, shifts). The important part is that these identities are usually only correct under **fixed-width modular arithmetic**, so carries and overflows matter:
+Obfuscation **Mixed Boolean-Arithmetic (MBA)** che giấu các biểu thức đơn giản như `x + y` bằng các công thức kết hợp phép toán số học (`+`, `-`, `*`) với toán tử bitwise (`&`, `|`, `^`, `~`, dịch bit). Điểm quan trọng là các đồng nhất thức này thường chỉ đúng trong **phép toán modular có độ rộng cố định**, vì vậy carry và tràn số rất quan trọng:
 
 ```c
 (x ^ y) + 2 * (x & y) == x + y
 ```
 
-If you simplify this kind of expression with generic algebra tooling you can easily get a wrong result because the bit-width semantics were ignored.<sup>[[1]](#references)</sup>
+Nếu đơn giản hóa biểu thức kiểu này bằng công cụ đại số tổng quát, bạn có thể dễ dàng nhận được kết quả sai vì ngữ nghĩa độ rộng bit đã bị bỏ qua.<sup>[[1]](#references)</sup>
 
-### Practical workflow
+### Quy trình thực tế
 
-1. **Keep the original bit-width** from the lifted code/IR/decompiler output (`8/16/32/64` bits).
-2. **Classify the expression** before trying to simplify it:
-   - **Linear**: weighted sums of bitwise atoms
-   - **Semilinear**: linear plus constant masks such as `x & 0xFF`
-   - **Polynomial**: products appear
-   - **Mixed**: products and bitwise logic are interleaved, often with repeated subexpressions
-3. **Verify every candidate rewrite** with random testing or an SMT proof. If the equivalence cannot be proven, keep the original expression instead of guessing.
+1. **Giữ nguyên độ rộng bit** của mã/IR/decompiler output đã được nâng lên (`8/16/32/64` bits).
+2. **Phân loại biểu thức** trước khi thử đơn giản hóa:
+   - **Tuyến tính**: tổng có trọng số của các thành phần bitwise
+   - **Bán tuyến tính**: tuyến tính cộng với các mask hằng như `x & 0xFF`
+   - **Đa thức**: có phép nhân
+   - **Hỗn hợp**: phép nhân và logic bitwise đan xen, thường có các biểu thức con lặp lại
+3. **Xác minh mọi phép biến đổi ứng viên** bằng kiểm thử ngẫu nhiên hoặc chứng minh SMT. Nếu không thể chứng minh tính tương đương, hãy giữ nguyên biểu thức ban đầu thay vì phỏng đoán.
 
-### Bypass flattened control flow with a narrow execution slice
+### Bỏ qua control flow đã flatten bằng một lát thực thi hẹp
 
-Recovering the complete control-flow graph is often unnecessary. With control-flow flattening, opaque predicates, large dispatchers, or MBA-heavy code, follow references from encrypted blobs and output buffers to the smallest routine that transforms them. Then reproduce only that data-flow slice, or execute it independently; the dispatcher is not part of the required solution if the relevant state can be initialized directly.<sup>[[7]](#references)</sup>
+Thường không cần khôi phục toàn bộ control-flow graph. Khi gặp control-flow flattening, opaque predicates, dispatcher lớn hoặc mã nặng MBA, hãy lần theo tham chiếu từ các blob được mã hóa và buffer đầu ra đến routine nhỏ nhất có nhiệm vụ biến đổi chúng. Sau đó chỉ cần tái tạo lát data-flow đó hoặc thực thi riêng nó; dispatcher không cần thiết nếu có thể khởi tạo trực tiếp trạng thái liên quan.<sup>[[7]](#references)</sup>
 
-A practical workflow is:<sup>[[7]](#references)</sup>
+Quy trình thực tế:<sup>[[7]](#references)</sup>
 
-1. Inventory executable and data sections, relocations, and cross-references. Dump candidate tables from `.rodata` while preserving their byte order and element width.
-2. Identify the last routine that writes the plaintext or output buffer. Record its inputs, referenced tables, imported calls, and required global state.
-3. Lift only those operations into a fixed-width Python model. If the slice still depends on too much state, invoke the routine under Unicorn, QEMU, or a debugger and hook irrelevant imports instead of emulating the whole program.
-4. Validate that the extractor actually derives its output from the supplied binary: remove silent fallbacks, search it for embedded answers, and run it against unseen builds with changed strings, keys, identifiers, layouts, and obfuscation seeds.
+1. Kiểm kê các section executable và data, relocation, cùng các cross-reference. Dump các bảng khả nghi từ `.rodata`, giữ nguyên thứ tự byte và độ rộng phần tử.
+2. Xác định routine cuối cùng ghi plaintext hoặc buffer đầu ra. Ghi lại các đầu vào, bảng được tham chiếu, lời gọi đã import và trạng thái global cần thiết.
+3. Chỉ chuyển các phép toán đó thành mô hình Python có độ rộng cố định. Nếu lát này vẫn phụ thuộc quá nhiều vào trạng thái, hãy gọi routine bằng Unicorn, QEMU hoặc debugger và hook các import không liên quan thay vì giả lập toàn bộ chương trình.
+4. Xác minh extractor thực sự tạo đầu ra từ binary được cung cấp: loại bỏ fallback im lặng, tìm kiếm câu trả lời được nhúng trong đó và chạy extractor trên các bản build chưa từng thấy có strings, keys, identifiers, layouts và obfuscation seeds đã thay đổi.
 
-Useful first-pass commands are:<sup>[[7]](#references)</sup>
+Các lệnh hữu ích để bắt đầu:<sup>[[7]](#references)</sup>
 
 ```bash
 readelf -SW target
@@ -352,9 +352,9 @@ objdump -s -j .rodata target > rodata.txt
 objdump -d target | rg 'adrp|add|ldr|str'
 ```
 
-#### Detect MBA expressions that are disguised constants
+#### Phát hiện các biểu thức MBA ngụy trang hằng số
 
-An apparently input-dependent byte expression may cancel its input completely. After extracting its tables, evaluate the expression over the complete 8-bit domain; a singleton output set proves that byte is constant without recovering the surrounding state machine.<sup>[[7]](#references)</sup>
+Một biểu thức byte có vẻ phụ thuộc vào đầu vào có thể triệt tiêu hoàn toàn đầu vào đó. Sau khi trích xuất các bảng, hãy đánh giá biểu thức trên toàn bộ miền 8-bit; nếu tập đầu ra chỉ có một giá trị, điều đó chứng minh byte đó là hằng số mà không cần khôi phục state machine bao quanh.<sup>[[7]](#references)</sup>
 
 ```python
 def mba(a, b, c, d, e, x):
@@ -370,17 +370,17 @@ for row in zip(A, B, C, D, E):
 print(decoded)
 ```
 
-Keep the final mask because the original addition has byte-width wraparound. For a wider domain, ask an SMT solver whether `f(x1) != f(x2)` is satisfiable for two same-width symbolic inputs: `unsat` proves invariance, while `sat` provides a counterexample and means the input cannot be discarded.<sup>[[7]](#references)</sup>
+Giữ lại mask cuối cùng vì phép cộng ban đầu có hiện tượng tràn vòng theo độ rộng byte. Với miền rộng hơn, hãy hỏi SMT solver xem `f(x1) != f(x2)` có thỏa mãn với hai đầu vào ký hiệu cùng độ rộng hay không: `unsat` chứng minh tính bất biến, còn `sat` đưa ra một phản ví dụ và có nghĩa là không thể loại bỏ đầu vào.<sup>[[7]](#references)</sup>
 
-#### Recognize environment-bound decoding
+#### Nhận diện giải mã phụ thuộc môi trường
 
-Anti-analysis checks need not branch or crash. A decoder can mix a sensor result into a key bit, an opaque-predicate constant, or flattened-dispatcher state, continue normally, and produce plausible but false plaintext in an emulator. Therefore, patching only visible failure branches is insufficient; trace data dependencies from environment probes into decoder state, compare the same slice on the authentic device and emulator, and test how forcing each sensor result changes the final buffer.<sup>[[7]](#references)</sup>
+Các bước kiểm tra anti-analysis không nhất thiết phải rẽ nhánh hoặc gây crash. Bộ giải mã có thể trộn kết quả cảm biến vào bit khóa, hằng số opaque predicate hoặc trạng thái flattened-dispatcher, tiếp tục chạy bình thường và tạo ra plaintext có vẻ hợp lý nhưng sai trong emulator. Vì vậy, chỉ patch các nhánh lỗi hiển thị là chưa đủ; hãy lần theo các phụ thuộc dữ liệu từ các phép dò môi trường đến trạng thái bộ giải mã, so sánh cùng một lát mã trên thiết bị thật và emulator, rồi kiểm tra cách việc ép kết quả của từng cảm biến làm thay đổi buffer cuối cùng.<sup>[[7]](#references)</sup>
 
 ### CoBRA
 
-[**CoBRA**](https://github.com/trailofbits/CoBRA) is a practical MBA simplifier for malware analysis and protected-binary reversing. It classifies the expression and routes it through specialized pipelines instead of applying one generic rewrite pass to everything.<sup>[[2]](#references)</sup>
+[**CoBRA**](https://github.com/trailofbits/CoBRA) là công cụ đơn giản hóa MBA thực tiễn dành cho phân tích malware và reversing binary được bảo vệ. Công cụ phân loại biểu thức rồi chuyển biểu thức qua các pipeline chuyên biệt thay vì áp dụng một lượt viết lại chung cho mọi thứ.<sup>[[2]](#references)</sup>
 
-Quick usage:
+Cách dùng nhanh:
 
 ```bash
 # Recover arithmetic from a logic-heavy MBA
@@ -395,98 +395,98 @@ cobra-cli --mba "(x&0xFF)+(x&0xFF00)" --bitwidth 16
 cobra-cli --mba "(a^b)+(a&b)+(a&b)" --verify
 ```
 
-Useful cases:
+Các trường hợp hữu ích:
 
-- **Linear MBA**: CoBRA evaluates the expression on Boolean inputs, derives a signature, and races several recovery methods such as pattern matching, ANF conversion, and coefficient interpolation.
-- **Semilinear MBA**: constant-masked atoms are rebuilt with bit-partitioned reconstruction so masked regions remain correct.
-- **Polynomial/Mixed MBA**: products are decomposed into cores and repeated subexpressions can be lifted into temporaries before simplifying the outer relation.
+- **Linear MBA**: CoBRA đánh giá biểu thức trên các đầu vào Boolean, suy ra chữ ký và chạy song song một số phương pháp khôi phục như so khớp mẫu, chuyển đổi ANF và nội suy hệ số.
+- **Semilinear MBA**: Các atom được mask bằng hằng số được dựng lại bằng phương pháp tái dựng phân vùng bit để các vùng được mask vẫn chính xác.
+- **Polynomial/Mixed MBA**: Các tích được phân rã thành lõi, và các biểu thức con lặp lại có thể được đưa vào biến tạm trước khi đơn giản hóa quan hệ bên ngoài.
 
-Example of a mixed identity commonly worth trying to recover:
+Ví dụ về một đẳng thức hỗn hợp thường đáng thử khôi phục:
 
 ```c
 (x & y) * (x | y) + (x & ~y) * (~x & y)
 ```
 
-This can collapse to:
+Điều này có thể được rút gọn thành:
 
 ```c
 x * y
 ```
 
-### Reversing notes
+### Ghi chú về reversing
 
-- Prefer running CoBRA on **lifted IR expressions** or decompiler output after you isolated the exact computation.
-- Use `--bitwidth` explicitly when the expression came from masked arithmetic or narrow registers.
-- If you need a stronger proof step, check the local Z3 notes here:
+- Ưu tiên chạy CoBRA trên **biểu thức IR đã nâng cấp** hoặc đầu ra decompiler sau khi đã cô lập phép tính chính xác.
+- Dùng `--bitwidth` một cách tường minh khi biểu thức bắt nguồn từ phép toán có mask hoặc thanh ghi hẹp.
+- Nếu cần bước chứng minh mạnh hơn, hãy xem ghi chú Z3 tại đây:
 
 
 {{#ref}}
 satisfiability-modulo-theories-smt-z3.md
 {{#endref}}
 
-- CoBRA also ships as an **LLVM pass plugin** (`libCobraPass.so`), which is useful when you want to normalize MBA-heavy LLVM IR before later analysis passes.
-- Unsupported carry-sensitive mixed-domain residuals should be treated as a signal to keep the original expression and reason about the carry path manually.
+- CoBRA cũng đi kèm dưới dạng **plugin LLVM pass** (`libCobraPass.so`), hữu ích khi bạn muốn chuẩn hóa LLVM IR có nhiều MBA trước các pass phân tích tiếp theo.
+- Các phần dư hỗn hợp miền nhạy với carry nhưng không được hỗ trợ nên được xem là dấu hiệu cần giữ nguyên biểu thức ban đầu và tự phân tích đường đi của carry.
 
-## Recovering XOR-state control-flow flattening
+## Khôi phục control-flow flattening dùng trạng thái XOR
 
-An OLLVM-style flattener may keep the current basic-block state in two 64-bit registers and reconstruct it with XOR at a dispatcher. Each original block writes the pair for its next state and jumps back to the dispatcher. A conditional block can use `CMOVcc` to replace one half of the pair according to CPU flags, so following only visible branch instructions misses the two successors. Unlike an indirect-jump dispatcher, this shape can use direct back-edges throughout.<sup>[[19]](#references)[[20]](#references)</sup>
+Một flattener kiểu OLLVM có thể lưu trạng thái basic block hiện tại trong hai thanh ghi 64-bit và dựng lại trạng thái bằng XOR tại dispatcher. Mỗi block gốc ghi cặp giá trị ứng với trạng thái tiếp theo rồi nhảy về dispatcher. Một block có điều kiện có thể dùng `CMOVcc` để thay thế một nửa của cặp theo các cờ CPU, vì vậy chỉ theo dõi các lệnh nhánh hiển thị sẽ bỏ sót hai successor. Khác với dispatcher dùng indirect-jump, kiểu này có thể chỉ sử dụng các back-edge trực tiếp.<sup>[[19]](#references)[[20]](#references)</sup>
 
-To recover the graph, identify the dispatcher comparison tree and the two state registers, map each compared XOR state to its target block, then trace reaching writes to the register pair in each original block. For conditional writes, include the flag-setting instruction and both `CMOVcc` outcomes. Rewrite each block's dispatcher exit to its resolved direct successor or conditional branch; the dispatcher then becomes unreachable without patching the binary. This is a full-CFG approach; if only one decoder matters, the [narrow execution-slice workflow](#bypass-flattened-control-flow-with-a-narrow-execution-slice) above may be faster.<sup>[[19]](#references)[[20]](#references)</sup>
+Để khôi phục đồ thị, hãy xác định cây so sánh của dispatcher và hai thanh ghi trạng thái, ánh xạ từng trạng thái XOR được so sánh tới block đích, sau đó lần theo các lệnh ghi đến cặp thanh ghi trong mỗi block gốc. Với các lệnh ghi có điều kiện, hãy xét cả lệnh thiết lập cờ và hai kết quả `CMOVcc`. Viết lại lối ra dispatcher của từng block thành successor trực tiếp đã xác định hoặc nhánh có điều kiện; khi đó dispatcher sẽ không còn được truy cập mà không cần vá binary. Đây là cách tiếp cận toàn bộ CFG; nếu chỉ một decoder quan trọng, workflow [narrow execution-slice](#bypass-flattened-control-flow-with-a-narrow-execution-slice) ở trên có thể nhanh hơn.<sup>[[19]](#references)[[20]](#references)</sup>
 
-[DispatchThis](https://github.com/YungBinary/DispatchThis) automates this shape in Binary Ninja. Copy `plugins/DispatchThis` to the Binary Ninja user plugin directory and restart. On the affected function, open **Function Settings** and select `OLLVM_XOR_64`; if analysis does not start, use **Analysis → Reanalyze All Functions**. This mode rewrites MLIL control-flow edges, not file bytes, and does not need Z3 or the indirect-jump resolver. It has been exercised on Binary Ninja 5.3.9757+; it does not remove the dead per-block state writes, so do not mistake those for remaining live transitions.<sup>[[19]](#references)</sup>
+[DispatchThis](https://github.com/YungBinary/DispatchThis) tự động hóa kiểu này trong Binary Ninja. Sao chép `plugins/DispatchThis` vào thư mục plugin người dùng của Binary Ninja rồi khởi động lại. Trên function bị ảnh hưởng, mở **Function Settings** và chọn `OLLVM_XOR_64`; nếu phân tích không bắt đầu, hãy dùng **Analysis → Reanalyze All Functions**. Chế độ này viết lại các cạnh control-flow của MLIL, không thay đổi byte trong file và không cần Z3 hay indirect-jump resolver. Công cụ đã được thử nghiệm trên Binary Ninja 5.3.9757+; nó không xóa các lệnh ghi trạng thái theo từng block đã chết, vì vậy đừng nhầm chúng với các chuyển trạng thái vẫn còn hoạt động.<sup>[[19]](#references)</sup>
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
-This obfuscator replaces program operations with `mov`-based instruction sequences and uses signal/exception handling to alter control flow. For details:
+Obfuscator này thay các thao tác của chương trình bằng các chuỗi lệnh dựa trên `mov` và dùng xử lý signal/exception để thay đổi control flow. Xem chi tiết:
 
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
 
-For supported binaries, [demovfuscator](https://github.com/kirschju/demovfuscator) can deobfuscate the result. It has several dependencies.
+Với các binary được hỗ trợ, [demovfuscator](https://github.com/kirschju/demovfuscator) có thể deobfuscate kết quả. Công cụ này có một số dependency.
 
 ```
 apt-get install libcapstone-dev
 apt-get install libz3-dev
 ```
 
-And [install keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
+And [cài đặt keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
 
-If you are playing a **CTF, this workaround to find the flag** could be very useful: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+Nếu bạn đang chơi **CTF, cách giải quyết này để tìm flag** có thể rất hữu ích: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
 ## Rust
 
-To find the **entry point** search the functions by `::main` like in:
+Để tìm **entry point**, hãy tìm các hàm có tên chứa `::main`, như sau:
 
-![Finding a Rust entry point in Ghidra by searching function names for double-colon main](<../../images/image (1080).png>)
+![Tìm entry point của Rust trong Ghidra bằng cách tìm tên hàm chứa hai dấu hai chấm theo sau là main](<../../images/image (1080).png>)
 
-In this case the binary was called authenticator, so it's pretty obvious that this is the interesting main function.\
-Having the **name** of the **functions** being called, search for them on the **Internet** to learn about their **inputs** and **outputs**.
+Trong trường hợp này, binary có tên là authenticator, nên khá rõ ràng đây là hàm main đáng chú ý.\
+Dựa vào **tên** của các **hàm** được gọi, hãy tìm kiếm chúng trên **Internet** để tìm hiểu về **đầu vào** và **đầu ra** của chúng.
 
-### Recovering Rust strings from ELF firmware
+### Khôi phục chuỗi Rust từ firmware ELF
 
-In **Rust ELF** binaries, many static strings are not referenced as C-style NUL-terminated pointers. A common `rustc` layout is a **pointer/length tuple** inside **`.data.rel.ro`** pointing into the real string blob stored in **`.rodata`**:
+Trong các binary **Rust ELF**, nhiều chuỗi tĩnh không được tham chiếu bằng con trỏ kết thúc bằng NUL kiểu C. Một bố cục phổ biến của `rustc` là **bộ đôi con trỏ/độ dài** nằm trong **`.data.rel.ro`**, trỏ đến vùng chứa chuỗi thực sự được lưu trong **`.rodata`**:
 
 ```text
 [8-byte little-endian pointer][8-byte little-endian length]
 ```
 
-This means `strings` or default Ghidra analysis may merge adjacent strings or miss cross-references entirely.<sup>[[3]](#references)</sup>
+Điều này có nghĩa là `strings` hoặc phân tích mặc định của Ghidra có thể gộp các chuỗi liền kề hoặc bỏ sót hoàn toàn các tham chiếu chéo.<sup>[[3]](#references)</sup>
 
-Quick workflow:
+Quy trình nhanh:
 
 ```bash
 readelf -S <bin>
 objdump -h <bin>
 ```
 
-1. Get the virtual address and size of **`.rodata`**.
-2. Enumerate **`.data.rel.ro`** one word at a time.
-3. Treat any value inside the `.rodata` address range as a candidate string pointer.
-4. Treat the next word as the candidate length.
-5. Apply sanity filters (for example, keep lengths between **4** and **100** bytes).
-6. Read exactly `length` bytes from `.rodata` instead of scanning until `0x00`.
+1. Lấy địa chỉ ảo và kích thước của **`.rodata`**.
+2. Liệt kê **`.data.rel.ro`** từng word một.
+3. Xem mọi giá trị nằm trong phạm vi địa chỉ của `.rodata` là một con trỏ chuỗi tiềm năng.
+4. Xem word tiếp theo là độ dài tiềm năng.
+5. Áp dụng các bộ lọc hợp lý (ví dụ: giữ các độ dài từ **4** đến **100** byte).
+6. Đọc chính xác `length` byte từ `.rodata` thay vì quét cho đến khi gặp `0x00`.
 
-Minimal extractor logic:
+Logic extractor tối thiểu:
 
 ```python
 for off in range(0, len(data_rel_ro), 8):
@@ -497,52 +497,52 @@ for off in range(0, len(data_rel_ro), 8):
         print(rodata[start:start+length])
 ```
 
-This is especially useful in firmware reversing because recovered Rust strings often reveal **HTTP routes, RPC names, log messages, assertions, filenames, config keys, command handlers, and auth-related logic**.
+Điều này đặc biệt hữu ích khi reversing firmware vì các chuỗi Rust được khôi phục thường tiết lộ **HTTP routes, RPC names, log messages, assertions, filenames, config keys, command handlers và logic liên quan đến auth**.
 
-If Ghidra misses those strings, run a custom script/plugin that applies the same heuristic and creates string data at the referenced `.rodata` offsets. The published `rust-strings` and `RustStrings.py` tools from Pen Test Partners are good references for adapting the idea to other **word sizes, endianness, and section layouts**.<sup>[[4]](#references)</sup><sup>[[5]](#references)</sup>
+Nếu Ghidra bỏ sót các chuỗi đó, hãy chạy script/plugin tùy chỉnh áp dụng cùng heuristic và tạo dữ liệu chuỗi tại các offset `.rodata` được tham chiếu. Các công cụ `rust-strings` và `RustStrings.py` do Pen Test Partners công bố là tài liệu tham khảo hữu ích để điều chỉnh ý tưởng này cho các **word size, endianness và bố cục section** khác.<sup>[[4]](#references)</sup><sup>[[5]](#references)</sup>
 
 ## **Delphi**
 
-For Delphi compiled binaries you can use [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
+Đối với các binary được biên dịch bằng Delphi, bạn có thể dùng [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-If you have to reverse a Delphi binary I would suggest you to use the IDA plugin [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+Nếu cần reverse một binary Delphi, tôi khuyên bạn nên dùng plugin IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
-Press **Alt+F7** in IDA to load a Python plugin, then select the plugin file.
+Nhấn **Alt+F7** trong IDA để tải plugin Python, sau đó chọn file plugin.
 
-This plugin will execute the binary and resolve function names dynamically at the start of the debugging. After starting the debugging press again the Start button (the green one or f9) and a breakpoint will hit in the beginning of the real code.
+Plugin này sẽ thực thi binary và phân giải động tên các function khi bắt đầu debugging. Sau khi bắt đầu debugging, nhấn lại nút Start (nút màu xanh lá hoặc f9) để breakpoint dừng ở đầu phần code thực.
 
-If you press a button in the graphical application, the debugger can stop in the function invoked by that button.
+Nếu nhấn một nút trong ứng dụng đồ họa, debugger có thể dừng tại function được nút đó gọi.
 
 ## Golang
 
-For ordinary Go binaries, [IDAGolangHelper](https://github.com/sibears/IDAGolangHelper) can recover runtime structures and improve function names in IDA. Load its Python plugin with **Alt+F7**.
+Đối với các binary Go thông thường, [IDAGolangHelper](https://github.com/sibears/IDAGolangHelper) có thể khôi phục các cấu trúc runtime và cải thiện tên function trong IDA. Tải plugin Python bằng **Alt+F7**.
 
-If you have to reverse a Golang binary I would suggest you to use the IDA plugin [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+Nếu cần reverse một binary Golang, tôi khuyên bạn nên dùng plugin IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
-Press **Alt+F7** in IDA to load a Python plugin, then select the plugin file.
+Nhấn **Alt+F7** trong IDA để tải plugin Python, sau đó chọn file plugin.
 
-This will resolve the names of the functions.
+Công cụ này sẽ phân giải tên các function.
 
-### Recover metadata without the symbol table
+### Khôi phục metadata mà không cần symbol table
 
-A stripped Go executable still needs runtime metadata to map program counters to functions. [GoReSym](https://github.com/mandiant/GoReSym) locates and parses structures such as `pclntab` and `moduledata` using code derived from the Go runtime. This can recover function boundaries, names, source paths, types and build details without relying on the conventional symbol table.<sup>[[9]](#references)[[13]](#references)</sup>
+Một file thực thi Go đã bị strip vẫn cần metadata runtime để ánh xạ program counter sang function. [GoReSym](https://github.com/mandiant/GoReSym) tìm và phân tích các cấu trúc như `pclntab` và `moduledata` bằng code có nguồn gốc từ Go runtime. Công cụ này có thể khôi phục ranh giới function, tên, đường dẫn source, kiểu dữ liệu và thông tin build mà không cần dựa vào symbol table thông thường.<sup>[[9]](#references)[[13]](#references)</sup>
 
 ```bash
 GoReSym.exe -t -d -p /path/to/sample.exe > goresym.json
 ```
 
-An obfuscator can leave those structures usable while replacing the recovered names. Garble, for example, hashes identifiers and package paths and removes build, module and debug information.<sup>[[12]](#references)</sup> The obfuscated package token must remain consistent across functions from that package. Group functions by the repeated token, infer one package from its callees, strings and APIs, then propagate that package label to the entire group.<sup>[[13]](#references)</sup>
+Một obfuscator có thể giữ cho các cấu trúc đó vẫn dùng được trong khi thay thế các tên đã khôi phục. Ví dụ, Garble băm các identifier và package path, đồng thời xóa thông tin build, module và debug.<sup>[[12]](#references)</sup> Token package đã bị obfuscate phải nhất quán giữa các function thuộc package đó. Nhóm các function theo token lặp lại, suy luận một package dựa trên các callee, string và API của nó, sau đó áp dụng nhãn package đó cho toàn bộ nhóm.<sup>[[13]](#references)</sup>
 
-### Recover Garble names with GoResolver
+### Khôi phục tên Garble bằng GoResolver
 
-[GoResolver](https://github.com/volexity/GoResolver) combines runtime-symbol extraction with clean-reference generation and control-flow-graph (CFG) matching. Use this sequence:<sup>[[10]](#references)[[13]](#references)</sup>
+[GoResolver](https://github.com/volexity/GoResolver) kết hợp việc trích xuất runtime symbol với tạo tham chiếu sạch và đối chiếu control-flow graph (CFG). Thực hiện theo trình tự sau:<sup>[[10]](#references)[[13]](#references)</sup>
 
-1. **Identify the compiler version.** Try `BuildInfo` and embedded version strings first. If the obfuscator removed them, compare portions of the bundled Go runtime with versioned reference runtimes. In Volexity's tests, about `2%` of the runtime was enough to distinguish major Go versions. Treat this as an empirical optimization, not a universal threshold.<sup>[[13]](#references)</sup>
-2. **Build matching references.** Generate clean binaries for the identified Go version, target architecture and likely libraries. Matching the toolchain reduces compiler-generated CFG differences.<sup>[[10]](#references)[[13]](#references)</sup>
-3. **Compare functions.** GoGrapher matches function CFGs and emits normalized scores from `0.0` to `1.0`. Its basic-block matching is based on a weighted comparison of similar instructions. High-confidence matches map randomized functions to the clean implementation. Weaker matches can still identify a package or module.<sup>[[8]](#references)[[11]](#references)[[13]](#references)</sup>
-4. **Validate and import.** Confirm proposed names with call relationships, constants, strings and side effects, then import the JSON report with the GoResolver plugin for IDA or Ghidra.<sup>[[10]](#references)[[13]](#references)</sup>
+1. **Xác định phiên bản compiler.** Trước tiên, thử `BuildInfo` và các version string được nhúng. Nếu obfuscator đã xóa chúng, hãy so sánh các phần của Go runtime đi kèm với các runtime tham chiếu theo phiên bản. Trong các bài kiểm thử của Volexity, khoảng `2%` runtime là đủ để phân biệt các phiên bản Go chính. Hãy xem đây là một tối ưu hóa dựa trên thực nghiệm, không phải ngưỡng áp dụng phổ quát.<sup>[[13]](#references)</sup>
+2. **Tạo các bản tham chiếu tương thích.** Tạo binary sạch cho phiên bản Go đã xác định, kiến trúc đích và các thư viện có khả năng được sử dụng. Khớp toolchain giúp giảm khác biệt CFG do compiler tạo ra.<sup>[[10]](#references)[[13]](#references)</sup>
+3. **So sánh các function.** GoGrapher đối chiếu CFG của các function và đưa ra điểm số đã chuẩn hóa từ `0.0` đến `1.0`. Việc đối chiếu basic block dựa trên so sánh có trọng số giữa các instruction tương tự. Các kết quả khớp có độ tin cậy cao ánh xạ function đã được ngẫu nhiên hóa sang phần triển khai sạch. Kết quả khớp yếu hơn vẫn có thể xác định package hoặc module.<sup>[[8]](#references)[[11]](#references)[[13]](#references)</sup>
+4. **Xác minh và nhập.** Xác nhận các tên được đề xuất dựa trên quan hệ gọi, constant, string và side effect, sau đó nhập báo cáo JSON bằng plugin GoResolver cho IDA hoặc Ghidra.<sup>[[10]](#references)[[13]](#references)</sup>
 
-Install the toolchain and run the combined extractor and graph matcher:<sup>[[10]](#references)</sup>
+Cài đặt toolchain rồi chạy extractor và graph matcher kết hợp:<sup>[[10]](#references)</sup>
 
 ```bash
 python3 -m venv goresolver-env
@@ -557,34 +557,34 @@ goresolver resolve -v go1.23.4 -l os/exec net/http \
   -t 0.9 -o report.json /path/to/sample.exe
 ```
 
-The default significant-match threshold is `0.9`. The `--extract` and `--graph` switches can isolate either stage, while the default runs both because the recovered runtime metadata and CFG evidence complement each other.<sup>[[10]](#references)</sup> CFG scores are heuristic: inlining, build flags, architecture and library-version differences can change graph shape, so preserve unresolved functions instead of forcing low-confidence names.<sup>[[13]](#references)</sup>
+Ngưỡng khớp đáng kể mặc định là `0.9`. Các tùy chọn `--extract` và `--graph` có thể chạy riêng từng giai đoạn, trong khi mặc định chạy cả hai vì metadata runtime được khôi phục và bằng chứng CFG bổ trợ cho nhau.<sup>[[10]](#references)</sup> Điểm CFG mang tính heuristic: inlining, cờ build, kiến trúc và khác biệt phiên bản thư viện có thể làm thay đổi cấu trúc đồ thị, vì vậy hãy giữ lại các hàm chưa xác định thay vì gán tên với độ tin cậy thấp.<sup>[[13]](#references)</sup>
 
-### Recovering the Go string table
+### Khôi phục bảng chuỗi Go
 
-Go binaries place string bytes from every linked package in one contiguous table. The entries are not NUL-terminated and runtime structures do not expose the table base or size. However, the compiler orders entries first by length and then alphabetically across operating systems and architectures. After finding one entry, an analyst can therefore walk adjacent entries and use data cross-references to associate strings with code.<sup>[[15]](#references)</sup>
+Các binary Go đặt byte chuỗi từ mọi package được liên kết vào một bảng liên tục. Các mục không kết thúc bằng NUL và cấu trúc runtime không cung cấp base hoặc kích thước của bảng. Tuy nhiên, compiler sắp xếp các mục theo độ dài trước, rồi theo thứ tự alphabet trên các hệ điều hành và kiến trúc. Vì vậy, sau khi tìm được một mục, analyst có thể lần theo các mục liền kề và dùng cross-reference dữ liệu để liên kết chuỗi với code.<sup>[[15]](#references)</sup>
 
-[GoStringExtractor](https://github.com/volexity/GoStringExtractor) automates this workflow in IDA Pro and Ghidra. Let auto-analysis finish first because the plugin relies on data-segment cross-references. Its default anchor is the runtime string `entersyscall`, after which it can scan in either direction, define the recovered strings in the database, and export a JSON mapping of strings to referencing functions.<sup>[[14]](#references)</sup>
+[GoStringExtractor](https://github.com/volexity/GoStringExtractor) tự động hóa quy trình này trong IDA Pro và Ghidra. Trước tiên, hãy để auto-analysis hoàn tất vì plugin dựa vào cross-reference của data segment. Anchor mặc định là chuỗi runtime `entersyscall`; sau đó, công cụ có thể quét theo cả hai hướng, định nghĩa các chuỗi đã khôi phục trong database và xuất mapping JSON giữa chuỗi với các hàm tham chiếu đến chúng.<sup>[[14]](#references)</sup>
 
-Filter the report by the package of the referencing function to separate application or malware code from linked library noise. This technique cannot recover literals destroyed by obfuscation such as Garble's `-literals` transformation. It can still organize runtime strings that remain unobfuscated.<sup>[[14]](#references)[[15]](#references)</sup>
+Lọc báo cáo theo package của hàm tham chiếu để tách code ứng dụng hoặc malware khỏi dữ liệu nhiễu từ các thư viện được liên kết. Kỹ thuật này không thể khôi phục các literal bị phá hủy bởi quá trình obfuscation như phép biến đổi `-literals` của Garble. Tuy vậy, nó vẫn có thể sắp xếp các chuỗi runtime còn không bị obfuscation.<sup>[[14]](#references)[[15]](#references)</sup>
 
-### Recovering Go runtime types
+### Khôi phục kiểu runtime của Go
 
-Go embeds runtime type information used by features such as garbage collection. When build information is stripped or the disassembler does not parse this metadata, instructions may appear to load arbitrary data addresses and the target region remains untyped. Recovering the metadata turns those addresses into readable type references and makes package capabilities easier to understand.<sup>[[15]](#references)</sup>
+Go nhúng thông tin kiểu runtime được dùng bởi các tính năng như garbage collection. Khi thông tin build bị loại bỏ hoặc disassembler không phân tích metadata này, các instruction có thể trông như đang tải những địa chỉ dữ liệu tùy ý và vùng đích vẫn chưa được định kiểu. Khôi phục metadata sẽ biến các địa chỉ đó thành tham chiếu kiểu dễ đọc và giúp hiểu rõ hơn các khả năng của package.<sup>[[15]](#references)</sup>
 
-[GoResolver](https://github.com/volexity/GoResolver) can extract symbols and parse runtime types into a JSON report. The current CLI uses the `resolve` subcommand:<sup>[[10]](#references)</sup>
+[GoResolver](https://github.com/volexity/GoResolver) có thể trích xuất symbol và phân tích kiểu runtime thành báo cáo JSON. CLI hiện tại dùng subcommand `resolve`:<sup>[[10]](#references)</sup>
 
 ```bash
 pip install goresolver
 goresolver resolve -x -y -o report.json sample_bin.exe
 ```
 
-The `-y`/`--types` option enables type parsing. Import the report with GoResolver's IDA Pro or Ghidra plugin to define the recovered types and apply their references in the analysis database. In the report format introduced with this feature, omitting `-y` leaves the RTTI address and recovered-types members null.<sup>[[10]](#references)[[15]](#references)</sup>
+Tùy chọn `-y`/`--types` bật tính năng phân tích kiểu. Nhập báo cáo bằng plugin IDA Pro hoặc Ghidra của GoResolver để định nghĩa các kiểu đã khôi phục và áp dụng các tham chiếu của chúng trong cơ sở dữ liệu phân tích. Trong định dạng báo cáo được giới thiệu cùng tính năng này, nếu bỏ qua `-y`, các thành viên địa chỉ RTTI và kiểu đã khôi phục sẽ có giá trị null.<sup>[[10]](#references)[[15]](#references)</sup>
 
-GoResolver supports PE, ELF, and Mach-O samples for x86, AMD64, ARM, and ARM64, so the same workflow applies to Go binaries from Windows, Linux, and macOS.<sup>[[10]](#references)</sup>
+GoResolver hỗ trợ các mẫu PE, ELF và Mach-O cho x86, AMD64, ARM và ARM64, vì vậy cùng quy trình này áp dụng được cho các binary Go trên Windows, Linux và macOS.<sup>[[10]](#references)</sup>
 
-## Compiled Python
+## Python đã biên dịch
 
-In this page you can find how to get the python code from an ELF/EXE python compiled binary:
+Trong trang này, bạn có thể tìm hiểu cách lấy mã python từ một binary Python đã biên dịch ELF/EXE:
 
 
 {{#ref}}
@@ -593,18 +593,18 @@ In this page you can find how to get the python code from an ELF/EXE python comp
 
 ## GBA - Game Boy Advance
 
-If you get the **binary** of a GBA game you can use different tools to **emulate** and **debug** it:
+Nếu có **binary** của một game GBA, bạn có thể dùng nhiều công cụ khác nhau để **emulate** và **debug** game:
 
-- [**no$gba**](https://problemkaputt.de/gba.htm) (_Download the debug version_) - Contains a debugger with interface
-- [**mgba** ](https://mgba.io)- Contains a CLI debugger
-- [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra plugin
-- [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra plugin
+- [**no$gba**](https://problemkaputt.de/gba.htm) (_Tải bản debug_) - Có debugger với giao diện
+- [**mgba** ](https://mgba.io)- Có CLI debugger
+- [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Plugin Ghidra
+- [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Plugin Ghidra
 
-In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Options --> Emulation Setup --> Controls**_** ** you can see how to press the Game Boy Advance **buttons**
+Trong [**no$gba**](https://problemkaputt.de/gba.htm), tại _**Options --> Emulation Setup --> Controls**_** **, bạn có thể xem cách nhấn các **nút** của Game Boy Advance
 
 ![no$gba controls configuration showing Game Boy Advance button mappings](<../../images/image (581).png>)
 
-When pressed, each **key has a value** to identify it:
+Khi được nhấn, mỗi **phím có một giá trị** để nhận diện:
 
 ```
 A = 1
@@ -619,13 +619,13 @@ R = 256
 L = 256
 ```
 
-So, in this kind of program, the interesting part will be **how the program treats the user input**. In the address **0x4000130** you will find the commonly found function: **KEYINPUT**.
+Vì vậy, trong loại chương trình này, phần đáng chú ý là **cách chương trình xử lý dữ liệu đầu vào của người dùng**. Tại địa chỉ **0x4000130**, bạn sẽ tìm thấy hàm thường gặp: **KEYINPUT**.
 
 ![Ghidra view of a GBA binary referencing KEYINPUT at address 0x4000130](<../../images/image (447).png>)
 
-In the previous image you can find that the function is called from **FUN_080015a8** (addresses: _0x080015fa_ and _0x080017ac_).
+Trong hình trước, bạn có thể thấy hàm được gọi từ **FUN_080015a8** (các địa chỉ: _0x080015fa_ và _0x080017ac_).
 
-In that function, after some init operations (without any importance):
+Trong hàm đó, sau một số thao tác khởi tạo (không quan trọng):
 
 ```c
 void FUN_080015a8(void)
@@ -648,7 +648,7 @@ void FUN_080015a8(void)
   uVar4 = DAT_030004d8;
 ```
 
-It's found this code:
+Tìm thấy đoạn mã này:
 
 ```c
   do {
@@ -662,7 +662,7 @@ It's found this code:
       if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
 
-The last if is checking **`uVar4`** is in the **last Keys** and not is the current key, also called letting go off a button (current key is stored in **`uVar1`**).
+Điều kiện if cuối cùng kiểm tra xem **`uVar4`** có nằm trong **danh sách phím trước đó** và không phải là phím hiện tại hay không; đây cũng được gọi là nhả một nút (phím hiện tại được lưu trong **`uVar1`**).
 
 ```c
         if (uVar1 == 4) {
@@ -692,17 +692,17 @@ The last if is checking **`uVar4`** is in the **last Keys** and not is the curre
                 DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
 
-In the previous code you can see that we are comparing **uVar1** (the place where the **value of the pressed button** is) with some values:
+Trong đoạn code trước, bạn có thể thấy chúng ta đang so sánh **uVar1** (nơi lưu **giá trị của nút được nhấn**) với một số giá trị:
 
-- First, it's compared with the **value 4** (**SELECT** button): In the challenge this button clears the screen
-- Then it compares the value with **8** (the **START** button); in this challenge, that path checks whether the entered code is valid.
-  - In this case the var **`DAT_030000d8`** is compared with 0xf3 and if the value is the same some code is executed.
-- In every other case, a counter (`DAT_030000d4`) is checked and incremented.\
-  While the counter is below 8, the pressed-key values are accumulated in `DAT_030000d8`.
+- Đầu tiên, nó được so sánh với **giá trị 4** (nút **SELECT**): Trong thử thách này, nút đó xóa màn hình
+- Sau đó, giá trị được so sánh với **8** (nút **START**); trong thử thách này, nhánh đó kiểm tra xem mã đã nhập có hợp lệ hay không.
+  - Trong trường hợp này, biến **`DAT_030000d8`** được so sánh với 0xf3 và nếu giá trị trùng khớp thì một đoạn code sẽ được thực thi.
+- Trong mọi trường hợp khác, một bộ đếm (`DAT_030000d4`) được kiểm tra và tăng lên.\
+  Khi bộ đếm nhỏ hơn 8, các giá trị của những phím được nhấn sẽ được cộng dồn vào `DAT_030000d8`.
 
-So, in this challenge, knowing the values of the buttons, you needed to **press a combination with a length smaller than 8 that the resulting addition is 0xf3.**
+Vì vậy, trong thử thách này, khi biết giá trị của các nút, bạn cần **nhấn một tổ hợp có độ dài nhỏ hơn 8 sao cho tổng các giá trị bằng 0xf3.**
 
-**Reference for this tutorial:** [archived Nostalgia challenge writeup](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/).<sup>[[6]](#references)</sup>
+**Tài liệu tham khảo cho hướng dẫn này:** [bài viết hướng dẫn giải thử thách Nostalgia đã lưu trữ](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/).<sup>[[6]](#references)</sup>
 
 ## Game Boy
 
@@ -711,36 +711,35 @@ So, in this challenge, knowing the values of the buttons, you needed to **press 
 https://www.youtube.com/watch?v=VVbRe7wr3G4
 {{#endref}}
 
-## Courses
+## Khóa học
 
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
 - [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Binary deobfuscation)
 
 ## References
 
-- [1] [Simplifying MBA obfuscation with CoBRA](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
-- [2] [Trail of Bits CoBRA repository](https://github.com/trailofbits/CoBRA)
-- [3] [Decoding Rust strings - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
-- [4] [pentestpartners/reverse-engineering - rust-strings](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
+- [1] [Đơn giản hóa kỹ thuật làm rối MBA với CoBRA](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
+- [2] [Kho lưu trữ Trail of Bits CoBRA](https://github.com/trailofbits/CoBRA)
+- [3] [Giải mã chuỗi Rust - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
+- [4] [pentestpartners/reverse-engineering - chuỗi Rust](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
 - [5] [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
-- [6] [Nostalgia - GBA reversing tutorial (archived)](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/)
-- [7] [Defeating AI-Assisted Reverse Engineering, or at Least Trying To](http://blog.quarkslab.com/defeating-ai-assisted-reverse-engineering-or-at-least-trying-to.html)
-- [8] [An Approach to Comparing Control Flow Graphs Based on Basic Block Matching](https://www.ijcse.com/docs/INDJCSE20-11-03-237.pdf)
+- [6] [Nostalgia - hướng dẫn reversing GBA (đã lưu trữ)](https://web.archive.org/web/20220328215728/https://exp.codes/Nostalgia/)
+- [7] [Đánh bại kỹ thuật reverse engineering có AI hỗ trợ, hoặc ít nhất là cố gắng](http://blog.quarkslab.com/defeating-ai-assisted-reverse-engineering-or-at-least-trying-to.html)
+- [8] [Một phương pháp so sánh đồ thị luồng điều khiển dựa trên việc so khớp basic block](https://www.ijcse.com/docs/INDJCSE20-11-03-237.pdf)
 - [9] [Mandiant GoReSym](https://github.com/mandiant/GoReSym)
-- [10] [Volexity GoResolver repository](https://github.com/volexity/GoResolver)
+- [10] [Kho lưu trữ Volexity GoResolver](https://github.com/volexity/GoResolver)
 - [11] [Volexity GoGrapher](https://github.com/volexity/GoGrapher)
-- [12] [Garble obfuscation mechanism](https://github.com/burrowers/garble#mechanism)
-- [13] [GoResolver: Using Control-Flow Graph Similarity to Automatically Deobfuscate Golang Binaries](https://volexity.com/blog/2025/04/01/goresolver-using-control-flow-graph-similarity-to-deobfuscate-golang-binaries-automatically)
-- [14] [Volexity GoStringExtractor repository](https://github.com/volexity/GoStringExtractor)
-- [15] [Go Get 'Em: Updates to Volexity Golang Tooling](https://www.volexity.com/blog/2025/08/11/go-get-em-updates-to-volexity-golang-tooling/)
+- [12] [Cơ chế làm rối Garble](https://github.com/burrowers/garble#mechanism)
+- [13] [GoResolver: Sử dụng độ tương đồng của đồ thị luồng điều khiển để tự động gỡ làm rối các binary Golang](https://volexity.com/blog/2025/04/01/goresolver-using-control-flow-graph-similarity-to-deobfuscate-golang-binaries-automatically)
+- [14] [Kho lưu trữ Volexity GoStringExtractor](https://github.com/volexity/GoStringExtractor)
+- [15] [Go Get 'Em: Các bản cập nhật cho bộ công cụ Golang của Volexity](https://www.volexity.com/blog/2025/08/11/go-get-em-updates-to-volexity-golang-tooling/)
 - [16] [REA: Reverse Engineer Anything](https://github.com/morluto/rea)
-- [17] [REA managed-code analysis](https://github.com/morluto/rea/blob/main/docs/managed-code-analysis.md)
-- [18] [REA CLI and Evidence guide](https://github.com/morluto/rea/blob/main/docs/cli.md)
-- [19] [DispatchThis: Binary Ninja control-flow unflattening workflow](https://github.com/YungBinary/DispatchThis)
-- [20] [eSentire: PaperCut MF Zero-Day Intrusion, Java Loader, Web Shell, and AdaptixC2](https://esentire.com/blog/papercut-mf-zero-day-intrusion-java-loader-web-shell-and-adaptixc2-via-cve-2026-82078-and-cve-2026-81578)
-- [21] [IDA-Ghidra-bridge README](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge)
-- [22] [IDA bridge server implementation](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge/blob/main/ID_Server.py)
-- [23] [Ghidra bridge server implementation](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge/blob/main/Ghidra_Server.py)
-- [24] [Oracle - InetSocketAddress(int) binds to the wildcard address](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/net/InetSocketAddress.html)
-
+- [17] [Phân tích mã managed của REA](https://github.com/morluto/rea/blob/main/docs/managed-code-analysis.md)
+- [18] [Hướng dẫn CLI và Evidence của REA](https://github.com/morluto/rea/blob/main/docs/cli.md)
+- [19] [DispatchThis: Quy trình làm phẳng luồng điều khiển trong Binary Ninja](https://github.com/YungBinary/DispatchThis)
+- [20] [eSentire: Xâm nhập PaperCut MF Zero-Day, Java Loader, Web Shell và AdaptixC2](https://esentire.com/blog/papercut-mf-zero-day-intrusion-java-loader-web-shell-and-adaptixc2-via-cve-2026-82078-and-cve-2026-81578)
+- [21] [README của IDA-Ghidra-bridge](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge)
+- [22] [Triển khai máy chủ bridge IDA](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge/blob/main/ID_Server.py)
+- [23] [Triển khai máy chủ bridge Ghidra](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge/blob/main/Ghidra_Server.py)
+- [24] [Oracle - InetSocketAddress(int) liên kết với địa chỉ wildcard](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/net/InetSocketAddress.html)
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,57 +2,57 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-This section focuses on **finding and extracting hidden data** from images, audio, video, documents, archives, and text. Steganography conceals the existence of a communication by embedding data inside other data.<sup>[[1]](#references)</sup>
+Phần này tập trung vào **tìm và trích xuất dữ liệu ẩn** trong hình ảnh, âm thanh, video, tài liệu, archive và văn bản. Steganography che giấu sự tồn tại của một cuộc giao tiếp bằng cách nhúng dữ liệu vào bên trong dữ liệu khác.<sup>[[1]](#references)</sup>
 
-If you're here for cryptographic attacks, go to the **Crypto** section.
+Nếu bạn đang tìm các cuộc tấn công cryptographic, hãy đến phần **Crypto**.
 
-## Entry Point
+## Điểm bắt đầu
 
-Approach steganography as a forensics problem: identify the real container, enumerate high-signal locations (metadata, appended data, embedded files), and only then apply content-level extraction techniques.
+Tiếp cận steganography như một vấn đề pháp chứng: xác định container thực sự, kiểm tra các vị trí có tín hiệu cao (metadata, dữ liệu được nối thêm, file nhúng), sau đó mới áp dụng các kỹ thuật trích xuất ở cấp nội dung.
 
-### Workflow & triage
+### Quy trình & phân loại ban đầu
 
-A structured workflow that prioritizes container identification, metadata/string inspection, carving, and format-specific branching.
+Quy trình có cấu trúc, ưu tiên xác định container, kiểm tra metadata/chuỗi, carving và phân nhánh theo định dạng.
 
 {{#ref}}
 workflow/README.md
 {{#endref}}
 
-### Images
+### Hình ảnh
 
-Where most CTF stego lives: LSB/bit-planes (PNG/BMP), chunk/file-format weirdness, JPEG tooling, and multi-frame GIF tricks.
+Phần lớn stego trong CTF nằm ở đây: LSB/bit-plane (PNG/BMP), các điểm bất thường trong chunk/định dạng file, công cụ JPEG và thủ thuật GIF nhiều frame.
 
 {{#ref}}
 images/README.md
 {{#endref}}
 
-### Audio
+### Âm thanh
 
-Spectrogram messages, sample LSB embedding, and telephone keypad tones (DTMF) are recurring patterns.
+Thông điệp trong spectrogram, nhúng LSB vào sample và âm báo bàn phím điện thoại (DTMF) là những dạng thường gặp.
 
 {{#ref}}
 audio/README.md
 {{#endref}}
 
-### Text
+### Văn bản
 
-If text renders normally but behaves unexpectedly, consider Unicode homoglyphs, zero-width characters, or whitespace-based encoding.
+Nếu văn bản hiển thị bình thường nhưng hoạt động bất thường, hãy xem xét homoglyph Unicode, ký tự zero-width hoặc mã hóa dựa trên khoảng trắng.
 
 {{#ref}}
 text/README.md
 {{#endref}}
 
-### Documents
+### Tài liệu
 
-PDFs and Office files are containers first; attacks usually revolve around embedded files/streams, object/relationship graphs, and ZIP extraction.
+PDF và file Office trước hết là các container; các cuộc tấn công thường xoay quanh file/stream nhúng, đồ thị object/relationship và giải nén ZIP.
 
 {{#ref}}
 documents/README.md
 {{#endref}}
 
-### Malware and delivery-style steganography
+### Malware và steganography kiểu phân phối payload
 
-Payload delivery can use valid-looking files, such as GIF or PNG images, that carry marker-delimited text payloads rather than hiding data in pixels.
+Việc phân phối payload có thể sử dụng các file trông hợp lệ, chẳng hạn như hình ảnh GIF hoặc PNG, chứa payload văn bản được phân tách bằng marker thay vì ẩn dữ liệu trong pixel.
 
 {{#ref}}
 malware-and-network/README.md
@@ -60,6 +60,5 @@ malware-and-network/README.md
 
 ## References
 
-- [1] [NIST CSRC Glossary - Steganography](https://csrc.nist.gov/glossary/term/steganography)
-
+- [1] [Bảng thuật ngữ NIST CSRC - Steganography](https://csrc.nist.gov/glossary/term/steganography)
 {{#include ../banners/hacktricks-training.md}}

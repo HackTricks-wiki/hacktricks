@@ -1,8 +1,8 @@
-# Very basically, this tool will help us to find values for variables that need to satisfy some conditions and calculating them by hand will be so annoying. Therefore, you can indicate to Z3 the conditions the variables need to satisfy and it will find some values (if possible).
+# Về cơ bản, công cụ này giúp chúng ta tìm giá trị cho các biến cần thỏa mãn một số điều kiện; tự tính các giá trị đó sẽ rất phiền phức. Vì vậy, bạn có thể chỉ định cho Z3 các điều kiện mà biến cần thỏa mãn, và Z3 sẽ tìm một số giá trị (nếu có thể).
 
 {{#include ../../banners/hacktricks-training.md}}
 
-# Basic Operations
+# Các phép toán cơ bản
 
 ## Booleans/And/Or/Not
 
@@ -48,7 +48,7 @@ set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
 
-## Printing Model
+## Mô hình in
 
 ```python
 from z3 import *
@@ -64,9 +64,9 @@ for d in m.decls():
     print("%s = %s" % (d.name(), m[d]))
 ```
 
-# Machine Arithmetic
+# Số học máy
 
-Modern CPUs and main-stream programming languages use arithmetic over fixed-size bit-vectors. Machine arithmetic is available in Z3Py as Bit-Vectors.
+CPU hiện đại và các ngôn ngữ lập trình phổ biến sử dụng phép toán số học trên các vector bit có kích thước cố định. Trong Z3Py, có thể dùng Bit-Vectors để thực hiện số học máy.
 
 ```python
 from z3 import *
@@ -83,9 +83,9 @@ b = BitVecVal(65535, 32)
 print(simplify(a == b)) # This is False
 ```
 
-## Signed/Unsigned Numbers
+## Số có dấu/không dấu
 
-Z3 provides special signed versions of arithmetical operations where it makes a difference whether the bit-vector is treated as signed or unsigned. In Z3Py, the operators `<`, `<=`, `>`, `>=`, `/`, `%` and `>>` correspond to the signed versions. The corresponding unsigned operators are `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` and `LShR`.<sup>[[1]](#references)</sup>
+Z3 cung cấp các phiên bản có dấu riêng của các phép toán số học, trong đó kết quả phụ thuộc vào việc vector bit được xem là có dấu hay không dấu. Trong Z3Py, các toán tử `<`, `<=`, `>`, `>=`, `/`, `%` và `>>` tương ứng với các phiên bản có dấu. Các toán tử không dấu tương ứng là `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` và `LShR`.<sup>[[1]](#references)</sup>
 
 ```python
 from z3 import *
@@ -107,9 +107,9 @@ solve(ULT(x, 0))
 
 ## Functions
 
-Interpreted functions such as arithmetic have a fixed standard interpretation. Uninterpreted functions and constants are maximally flexible; they allow any interpretation that is consistent with the constraints over the function or constant.<sup>[[1]](#references)</sup>
+Các hàm được diễn giải, chẳng hạn như phép toán số học, có cách diễn giải chuẩn cố định. Các hàm và hằng chưa được diễn giải có tính linh hoạt tối đa; chúng cho phép mọi cách diễn giải phù hợp với các ràng buộc áp dụng cho hàm hoặc hằng đó.<sup>[[1]](#references)</sup>
 
-Example: `f` applied twice to `x` results in `x` again, but `f` applied once to `x` is different from `x`.
+Ví dụ: áp dụng `f` hai lần lên `x` sẽ cho kết quả là `x`, nhưng áp dụng `f` một lần lên `x` sẽ cho kết quả khác `x`.
 
 ```python
 from z3 import *
@@ -130,13 +130,13 @@ s.check()
 print(s.model())
 ```
 
-# Reversing-Oriented Patterns
+# Các mẫu hướng tới Reversing
 
-If you need full symbolic execution over a binary instead of manually lifting only a few checks, check [Angr - Examples](angr/angr-examples.md). In practice, a very common workflow is to recover the relevant predicates from the decompiler/assembly and rebuild only the interesting arithmetic or memory constraints in Z3.
+Nếu bạn cần symbolic execution đầy đủ trên một binary thay vì tự nâng cấp thủ công chỉ một vài bước kiểm tra, hãy xem [Angr - Examples](angr/angr-examples.md). Trên thực tế, quy trình rất phổ biến là khôi phục các predicate liên quan từ decompiler/assembly rồi chỉ dựng lại trong Z3 những ràng buộc số học hoặc bộ nhớ đáng chú ý.
 
-## Model user-controlled data as bytes first
+## Trước tiên, mô hình hóa dữ liệu do người dùng kiểm soát dưới dạng byte
 
-For reversing, it is usually better to start with `BitVec(..., 8)` for each input byte and then rebuild words exactly as the target does. This preserves wrap-around, signedness bugs, shifts, rotates, and byte-order issues.<sup>[[2]](#references)</sup>
+Khi reversing, thường nên bắt đầu bằng `BitVec(..., 8)` cho mỗi byte đầu vào, rồi dựng lại các word chính xác theo cách chương trình mục tiêu thực hiện. Cách này giữ nguyên hiện tượng tràn vòng, lỗi về dấu, phép dịch bit, phép xoay bit và vấn đề thứ tự byte.<sup>[[2]](#references)</sup>
 
 ```python
 from z3 import *
@@ -153,16 +153,16 @@ print(s.check())
 print(hex(s.model().eval(dword).as_long()))
 ```
 
-Useful helpers when translating assembly or decompiler code:
+Các hàm trợ giúp hữu ích khi dịch mã assembly hoặc decompiler:
 
-- `Concat`: rebuild 16/32/64-bit values from bytes
-- `Extract`: compare high/low words or emulate masks/shifts
-- `ZeroExt` / `SignExt`: model zero/sign extension bugs correctly
-- `LShR` / `RotateLeft` / `RotateRight`: common in crackmes, hashes, and obfuscators
+- `Concat`: dựng lại giá trị 16/32/64-bit từ các byte
+- `Extract`: so sánh các word cao/thấp hoặc mô phỏng mask/shift
+- `ZeroExt` / `SignExt`: mô hình hóa chính xác các lỗi mở rộng zero/sign
+- `LShR` / `RotateLeft` / `RotateRight`: thường gặp trong crackmes, hash và obfuscator
 
-## Model memory/register tables with arrays
+## Mô hình hóa bảng bộ nhớ/thanh ghi bằng mảng
 
-When a check depends on `buf[i]`, lookup tables, or emulated memory, `Array` can be cleaner than creating dozens of separate variables.<sup>[[3]](#references)</sup>
+Khi một phép kiểm tra phụ thuộc vào `buf[i]`, bảng tra cứu hoặc bộ nhớ được mô phỏng, dùng `Array` có thể gọn hơn việc tạo hàng chục biến riêng biệt.<sup>[[3]](#references)</sup>
 
 ```python
 from z3 import *
@@ -181,11 +181,11 @@ s.add(word == 0x4241)
 print(s.check())
 ```
 
-This is especially handy when the binary copies values around memory before validating them, or when you want to model the effect of a few `mov`/`xor`/`add` operations without running the whole program.
+Điều này đặc biệt hữu ích khi binary sao chép các giá trị qua lại trong bộ nhớ trước khi xác thực chúng, hoặc khi bạn muốn mô hình hóa tác động của một vài thao tác `mov`/`xor`/`add` mà không cần chạy toàn bộ chương trình.
 
-## Incremental solving is great for branch triage
+## Giải bài toán tăng dần rất hữu ích để phân loại nhánh
 
-When you already extracted the base constraints, use `push()` / `pop()` (or assumptions) to test alternative branches without rebuilding the solver every time:<sup>[[3]](#references)</sup>
+Khi đã trích xuất các ràng buộc cơ sở, hãy dùng `push()` / `pop()` (hoặc assumptions) để kiểm tra các nhánh thay thế mà không phải dựng lại solver mỗi lần:<sup>[[3]](#references)</sup>
 
 ```python
 from z3 import *
@@ -205,11 +205,11 @@ print("branch 2:", s.check())
 s.pop()
 ```
 
-This is useful when replaying path conditions recovered from a decompiler, or when you want to quickly identify which comparison is making the model `unsat`.
+Điều này hữu ích khi phát lại các điều kiện đường đi được khôi phục từ decompiler hoặc khi bạn muốn nhanh chóng xác định phép so sánh nào khiến model `unsat`.
 
-## Optimize for nicer payloads
+## Tối ưu để có payload dễ dùng hơn
 
-Once a model is satisfiable, `Optimize()` can help you get a more usable solution: for example, prefer printable bytes, minimize a checksum component, or maximize some structure that makes the recovered password easier to type or copy.<sup>[[3]](#references)</sup>
+Khi model đã thỏa mãn, `Optimize()` có thể giúp bạn tìm lời giải hữu dụng hơn: chẳng hạn ưu tiên các byte có thể in được, giảm thiểu một thành phần checksum hoặc tối đa hóa một cấu trúc nào đó để mật khẩu được khôi phục dễ nhập hoặc sao chép hơn.<sup>[[3]](#references)</sup>
 
 ```python
 from z3 import *
@@ -224,9 +224,9 @@ print(o.check())
 print(bytes(o.model()[c].as_long() for c in key))
 ```
 
-## Strings/sequences for format-heavy serials
+## Chuỗi/dãy cho các chuỗi định dạng phức tạp
 
-If the target mainly checks prefixes, suffixes, substrings, or regex-like structure, `String`/`Seq` constraints can be easier than byte-by-byte bit-vectors:<sup>[[3]](#references)</sup>
+Nếu mục tiêu chủ yếu kiểm tra tiền tố, hậu tố, chuỗi con hoặc cấu trúc dạng regex, các ràng buộc `String`/`Seq` có thể dễ dùng hơn bit-vector theo từng byte:<sup>[[3]](#references)</sup>
 
 ```python
 from z3 import *
@@ -239,11 +239,11 @@ s.add(SuffixOf(StringVal("}"), serial))
 s.add(Contains(serial, StringVal("_")))
 ```
 
-However, once the binary starts doing arithmetic, rotations, checksums, or casts over characters, it is usually better to go back to 8-bit bit-vectors.
+Tuy nhiên, khi binary bắt đầu thực hiện các phép toán số học, xoay bit, tính checksum hoặc ép kiểu trên các ký tự, thường sẽ tốt hơn nếu quay lại dùng bit-vector 8-bit.
 
-# Examples
+# Ví dụ
 
-## Sudoku solver
+## Bộ giải Sudoku
 
 ```python
 # 9x9 matrix of integer variables
@@ -295,8 +295,7 @@ else:
 
 ## References
 
-- [1] [Z3Py Guide with Examples (ericpony z3py-tutorial)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
-- [2] [Z3 Guide - Bit-Vectors theory (Microsoft z3guide)](https://microsoft.github.io/z3guide/)
-- [3] [Programming Z3 (Nikolaj Bjørner, Leonardo de Moura, Lev Nachmanson, Christoph Wintersteiger)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
-
+- [1] [Hướng dẫn Z3Py kèm ví dụ (ericpony z3py-tutorial)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
+- [2] [Hướng dẫn Z3 - Lý thuyết Bit-Vector (Microsoft z3guide)](https://microsoft.github.io/z3guide/)
+- [3] [Lập trình Z3 (Nikolaj Bjørner, Leonardo de Moura, Lev Nachmanson, Christoph Wintersteiger)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
 {{#include ../../banners/hacktricks-training.md}}

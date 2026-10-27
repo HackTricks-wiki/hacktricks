@@ -1,13 +1,13 @@
-# Angr - Examples
+# Angr - Ví dụ
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> If the program is using `scanf` to get **several values at once from stdin** you need to generate a state that starts after the **`scanf`**.
+> Nếu chương trình dùng `scanf` để lấy **nhiều giá trị cùng lúc từ stdin**, bạn cần tạo một state bắt đầu sau **`scanf`**.
 
-Codes taken from [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
+Code được lấy từ [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### Input to reach address (indicating the address)
+### Đầu vào để đến địa chỉ (chỉ định địa chỉ)
 
 ```python
 import angr
@@ -42,7 +42,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-### Input to reach address (indicating prints)
+### Đầu vào để đến địa chỉ (hiển thị các câu lệnh in)
 
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
@@ -79,7 +79,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-### Registry values
+### Giá trị Registry
 
 ```python
 # Angr doesn't currently support reading multiple things with scanf (Ex:
@@ -145,7 +145,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-### Stack values
+### Giá trị trên stack
 
 ```python
 # Put bit vectors in th stack to find out the vallue that stack position need to
@@ -209,11 +209,11 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-In this scenario, the input was taken with `scanf("%u %u")` and the value `"1 1"` was given, so the values **`0x00000001`** of the stack come from the **user input**. You can see how this values starts in `$ebp - 8`. Therefore, in the code we have **subtracted 8 bytes to `$esp` (as in that moment `$ebp` and `$esp` had the same value)** and then we have pushed the BVS.
+Trong tình huống này, input được nhập bằng `scanf("%u %u")` với giá trị `"1 1"`, vì vậy các giá trị **`0x00000001`** trên stack đến từ **input của người dùng**. Bạn có thể thấy các giá trị này bắt đầu tại `$ebp - 8`. Do đó, trong code, chúng ta đã **trừ 8 byte khỏi `$esp` (vì tại thời điểm đó `$ebp` và `$esp` có cùng giá trị)** rồi push BVS.
 
-![Put bit vectors in th stack to find out the vallue that stack position need to - have to reach a rogram flow: In this scenario, the input was taken with scanf("%u %u") and the value "1...](<../../../images/image (136).png>)
+![Đặt các vector bit lên stack để tìm giá trị mà vị trí stack cần có để đạt được luồng thực thi của chương trình: Trong tình huống này, input được nhập bằng scanf("%u %u") với giá trị "1...](<../../../images/image (136).png>)
 
-### Static Memory values (Global variables)
+### Giá trị bộ nhớ tĩnh (Biến toàn cục)
 
 ```python
 import angr
@@ -276,7 +276,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-### Dynamic Memory Values (Malloc)
+### Các giá trị bộ nhớ động (Malloc)
 
 ```python
 import angr
@@ -337,7 +337,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-### File Simulation
+### Mô phỏng tệp
 
 ```python
 #In this challenge a password is read from a file and we want to simulate its content
@@ -395,7 +395,7 @@ if __name__ == '__main__':
 ```
 
 > [!TIP]
-> Note that the symbolic file could also contain constant data merged with symbolic data:
+> Lưu ý rằng tệp symbolic cũng có thể chứa dữ liệu hằng được hợp nhất với dữ liệu symbolic:
 >
 > ```python
 >  # Hello world, my name is John.
@@ -418,11 +418,11 @@ if __name__ == '__main__':
 >  # (!)
 > ```
 
-### Applying Constrains
+### Áp dụng các điều kiện ràng buộc
 
 > [!TIP]
-> Sometimes simple human operations like compare 2 words of length 16 **char by char** (loop), **cost** a lot to a **angr** because it needs to generate branches **exponentially** because it generates 1 branch per if: `2^16`\
-> Therefore, it's easier to **ask angr get to a previous point** (where the real difficult part was already done) and **set those constrains manually**.
+> Đôi khi, các thao tác đơn giản của con người như so sánh 2 từ có độ dài 16 **ký tự một lần** (vòng lặp) lại **tốn** rất nhiều chi phí cho **angr**, vì nó cần tạo các nhánh **theo cấp số nhân** do mỗi if tạo ra 1 nhánh: `2^16`\
+> Vì vậy, sẽ dễ hơn nếu **yêu cầu angr đi đến một điểm trước đó** (nơi phần thực sự khó đã được xử lý) rồi **thiết lập các điều kiện ràng buộc đó theo cách thủ công**.
 
 ```python
 # After perform some complex poperations to the input the program checks
@@ -496,15 +496,15 @@ if __name__ == '__main__':
 ```
 
 > [!CAUTION]
-> In some scenarios you can activate **veritesting**, which will merge similar status, in order to save useless branches and find the solution: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> Trong một số tình huống, bạn có thể kích hoạt **veritesting**, tính năng này sẽ hợp nhất các trạng thái tương tự để tránh các nhánh không cần thiết và tìm ra lời giải: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> Another thing you can do in these scenarios is to **hook the function giving angr something it can understand** more easily.
+> Một việc khác bạn có thể làm trong những tình huống này là **hook hàm để cung cấp cho angr thứ mà nó có thể hiểu** dễ dàng hơn.
 
 ### Simulation Managers
 
-Some simulation managers can be more useful than others. In the previous example there was a problem as a lot of useful branches were created. Here, the **veritesting** technique will merge those and will find a solution.\
-This simulation manager can also be activated with: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Một số simulation manager có thể hữu ích hơn những cái khác. Trong ví dụ trước, vấn đề là đã tạo ra nhiều nhánh hữu ích. Ở đây, kỹ thuật **veritesting** sẽ hợp nhất chúng và tìm ra lời giải.\
+Bạn cũng có thể kích hoạt simulation manager này bằng: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 ```python
 import angr
@@ -544,7 +544,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-### Hooking/Bypassing one call to a function
+### Hooking/Bypassing một lần gọi hàm
 
 ```python
 # This level performs the following computations:
@@ -614,7 +614,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-### Hooking a function / Simprocedure
+### Hooking một hàm / Simprocedure
 
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
@@ -700,7 +700,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-### Simulate scanf with several params
+### Mô phỏng scanf với nhiều tham số
 
 ```python
 # This time, the solution involves simply replacing scanf with our own version,
@@ -764,7 +764,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-### Static Binaries
+### Tệp nhị phân tĩnh
 
 ```python
 # This challenge is the exact same as the first challenge, except that it was
@@ -835,6 +835,5 @@ if __name__ == '__main__':
 
 ## References
 
-- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
-
+- [1] [jakespringer/angr_ctf - Kho lưu trữ GitHub](https://github.com/jakespringer/angr_ctf)
 {{#include ../../../banners/hacktricks-training.md}}

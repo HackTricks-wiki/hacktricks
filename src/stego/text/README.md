@@ -1,29 +1,29 @@
-# Text Steganography
+# Steganography văn bản
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Practical path
+## Quy trình thực hành
 
-If plain text behaves unexpectedly, preserve the original evidence, inspect its codepoints, and normalize only a copy.
+Nếu văn bản thuần hoạt động bất thường, hãy giữ nguyên bằng chứng gốc, kiểm tra các điểm mã và chỉ chuẩn hóa một bản sao.
 
-### Technique
+### Kỹ thuật
 
-Text steganography frequently relies on characters that render identically or invisibly:
+Steganography văn bản thường dựa vào các ký tự hiển thị giống nhau hoặc vô hình:
 
-- Homoglyphs: different Unicode codepoints that look alike (for example, Latin `a` and Cyrillic `а`)<sup>[[1]](#references)</sup>
-- Zero-width characters: joiners, non-joiners, and zero-width spaces<sup>[[2]](#references)</sup>
-- Whitespace encodings: spaces versus tabs, trailing-space patterns, and deliberate line-length patterns<sup>[[3]](#references)[[4]](#references)</sup>
+- Homoglyphs: các điểm mã Unicode khác nhau nhưng trông giống nhau (ví dụ: `a` trong bảng chữ cái Latin và `а` trong bảng chữ cái Cyrillic)<sup>[[1]](#references)</sup>
+- Ký tự độ rộng bằng không: ký tự nối, ký tự không nối và dấu cách độ rộng bằng không<sup>[[2]](#references)</sup>
+- Mã hóa khoảng trắng: dấu cách so với tab, mẫu khoảng trắng ở cuối dòng và mẫu độ dài dòng có chủ ý<sup>[[3]](#references)[[4]](#references)</sup>
 
-Additional high-signal cases:
+Các trường hợp khác có tín hiệu rõ:
 
-- Bidirectional controls, which can visually reorder text<sup>[[1]](#references)</sup>
-- Variation selectors and combining characters, which can carry hidden state while leaving the visible text nearly unchanged<sup>[[1]](#references)</sup>
+- Ký tự điều khiển hai chiều, có thể làm thay đổi thứ tự hiển thị của văn bản<sup>[[1]](#references)</sup>
+- Bộ chọn biến thể và ký tự kết hợp, có thể mang trạng thái ẩn trong khi gần như không làm thay đổi văn bản hiển thị<sup>[[1]](#references)</sup>
 
-### Decode helpers
+### Công cụ giải mã
 
-- [Unicode homoglyph and zero-width-character encoder/decoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)<sup>[[2]](#references)</sup>
+- [Công cụ mã hóa/giải mã homoglyph Unicode và ký tự độ rộng bằng không](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)<sup>[[2]](#references)</sup>
 
-### Inspect codepoints
+### Kiểm tra điểm mã
 
 ```bash
 python3 - <<'PY'
@@ -35,21 +35,20 @@ for i,ch in enumerate(s):
 PY
 ```
 
-## CSS `unicode-range` channels
+## Kênh `unicode-range` của CSS
 
-`@font-face` rules can be abused to encode bytes in `unicode-range: U+..` entries. Extract the codepoints, concatenate the hexadecimal values, and decode them:<sup>[[3]](#references)</sup>
+Có thể lạm dụng các quy tắc `@font-face` để mã hóa byte trong các mục `unicode-range: U+..`. Trích xuất các codepoint, nối các giá trị thập lục phân rồi giải mã chúng:<sup>[[3]](#references)</sup>
 
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
 
-If ranges contain multiple values per declaration, split on commas first and normalize (`tr ',+' '\n'`). Python can parse and emit the bytes when the formatting is inconsistent.<sup>[[3]](#references)</sup>
+Nếu các khoảng chứa nhiều giá trị trong mỗi khai báo, trước tiên hãy tách theo dấu phẩy rồi chuẩn hóa (`tr ',+' '\n'`). Python có thể phân tích và xuất các byte khi định dạng không nhất quán.<sup>[[3]](#references)</sup>
 
 ## References
 
-- [1] [Unicode Technical Report #36: Unicode Security Considerations](https://www.unicode.org/reports/tr36/)
-- [2] [Irongeek: Unicode Steganography with Zero-Width Characters and Homoglyphs](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
-- [3] [0xdf: Flagvent 2025 (Medium) — Santa's Wishlist](https://0xdf.gitlab.io/flagvent2025/medium)
-- [4] [Debian manual: `stegsnow` whitespace steganography](https://manpages.debian.org/trixie/stegsnow/stegsnow.1.en.html)
-
+- [1] [Báo cáo kỹ thuật Unicode #36: Các cân nhắc về bảo mật Unicode](https://www.unicode.org/reports/tr36/)
+- [2] [Irongeek: Steganography Unicode bằng ký tự có độ rộng bằng không và homoglyph](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
+- [3] [0xdf: Flagvent 2025 (Medium) — Danh sách mong muốn của Santa](https://0xdf.gitlab.io/flagvent2025/medium)
+- [4] [Hướng dẫn Debian: steganography khoảng trắng với `stegsnow`](https://manpages.debian.org/trixie/stegsnow/stegsnow.1.en.html)
 {{#include ../../banners/hacktricks-training.md}}

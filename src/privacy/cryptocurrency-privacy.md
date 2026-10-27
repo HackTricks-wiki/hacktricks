@@ -1,151 +1,151 @@
-# Cryptocurrency Privacy
+# Quyền riêng tư của tiền mã hóa
 
 {{#include ../banners/hacktricks-training.md}}
 
-Cryptocurrency privacy is a protocol-and-operations question, not a synonym for secrecy or immunity. Public ledgers, exchanges, wallet servers, network peers, merchants and later transactions expose different parts of the graph.
+Quyền riêng tư của tiền mã hóa là vấn đề về giao thức và vận hành, không đồng nghĩa với bí mật hay miễn nhiễm. Sổ cái công khai, sàn giao dịch, máy chủ ví, các peer mạng, người bán và những giao dịch về sau có thể làm lộ các phần khác nhau của đồ thị giao dịch.
 
-Start with the [Anonymous Payment Technique Catalog](anonymous-payment-techniques.md) for the per-technique pros/cons/procedure/detection format. This page expands cryptocurrency-specific mechanics and operational limits.
+Bắt đầu với [Danh mục kỹ thuật thanh toán ẩn danh](anonymous-payment-techniques.md) để xem định dạng ưu/nhược điểm/quy trình/phát hiện cho từng kỹ thuật. Trang này đi sâu hơn vào cơ chế riêng của tiền mã hóa và các giới hạn trong vận hành.
 
 {% hint style="danger" %}
-This chapter is for lawful self-custody and data minimization. Do not use it to launder proceeds, evade sanctions/tax/reporting, transact with prohibited parties, mislead a regulated provider, or operate an unlicensed transmission service. Privacy technology does not change the legal origin or ownership of funds.
+Chương này dành cho việc tự lưu ký hợp pháp và giảm thiểu dữ liệu. Không sử dụng nội dung này để rửa tiền thu được, né tránh lệnh trừng phạt/thuế/nghĩa vụ báo cáo, giao dịch với các bên bị cấm, đánh lừa nhà cung cấp chịu sự quản lý hoặc vận hành dịch vụ chuyển tiền không có giấy phép. Công nghệ bảo vệ quyền riêng tư không thay đổi nguồn gốc hợp pháp hay quyền sở hữu của tiền.
 {% endhint %}
 
-## Threat model by layer
+## Mô hình đe dọa theo từng lớp
 
-| Layer | Observer | Common disclosure |
+| Lớp | Bên quan sát | Thông tin thường bị tiết lộ |
 |---|---|---|
-| Acquisition/off-ramp | Exchange, bank, broker, P2P counterparty | Identity, funding account, destination, device, IP, time |
-| Ledger | Anyone running analytics | Addresses/outputs, amounts and time on transparent chains; protocol-specific metadata elsewhere |
-| Wallet backend | RPC provider, explorer, remote node | Address queries, balances, IP, transaction broadcast |
-| Network | ISP, peers, anonymity-network entry | IP, timing, volume and protocol use |
-| Counterparty | Payer/payee | Invoice/address, delivery, conversation, account and timing |
-| Endpoint | Malware, cloud backup, physical seizure | Seed, keys, labels, history, screenshots and clipboard |
+| Mua vào/rút tiền | Sàn giao dịch, ngân hàng, môi giới, đối tác P2P | Danh tính, tài khoản cấp vốn, đích đến, thiết bị, IP, thời gian |
+| Sổ cái | Bất kỳ ai chạy công cụ phân tích | Địa chỉ/đầu ra, số tiền và thời gian trên các blockchain minh bạch; metadata riêng theo giao thức ở những nơi khác |
+| Backend ví | Nhà cung cấp RPC, trình khám phá blockchain, node từ xa | Truy vấn địa chỉ, số dư, IP, phát tán giao dịch |
+| Mạng | ISP, peer, điểm vào mạng ẩn danh | IP, thời điểm, lưu lượng và việc sử dụng giao thức |
+| Bên giao dịch | Người trả/người nhận | Hóa đơn/địa chỉ, giao hàng, trao đổi, tài khoản và thời điểm |
+| Endpoint | Malware, bản sao lưu đám mây, thu giữ vật lý | Seed, khóa, nhãn, lịch sử, ảnh chụp màn hình và clipboard |
 
-Self-custody can remove a custodian from the control path but does not erase the ledger, acquisition record, network metadata or endpoint evidence.
+Tự lưu ký có thể loại bỏ bên lưu ký khỏi luồng kiểm soát nhưng không xóa sổ cái, hồ sơ mua vào, metadata mạng hay bằng chứng trên endpoint.
 
-## Protocol comparison
+## So sánh giao thức
 
-| Method | Useful privacy property | Important limits |
+| Phương thức | Đặc tính quyền riêng tư hữu ích | Giới hạn quan trọng |
 |---|---|---|
-| Bitcoin on-chain | Self-custody; fresh addresses avoid simple address reuse | Public permanent transaction graph; amount/timing and spending heuristics |
-| Bitcoin PayJoin | Receiver input can break the common-input-ownership heuristic | Both wallets need support; transaction remains public; support is uneven |
-| Bitcoin CoinJoin | Creates ambiguity among coordinated participants | Recognizable patterns, pre/post links, consolidation, policy/legal/provider risk |
-| Lightning | Onion-routed payments are not globally published as ordinary transfers | Channels open/close on-chain; endpoints, peers, probes or custodian may infer data |
-| Monero | Stronger default on-chain confidentiality for receiver, amount and sender set | Exchange, node, timing, endpoint and counterparty links remain |
-| Ethereum/stablecoins | Broad availability and smart-contract interoperability | Public state/actions; RPC metadata; centralized issuers may block/freeze/report |
+| Bitcoin on-chain | Tự lưu ký; địa chỉ mới tránh việc dùng lại địa chỉ đơn giản | Đồ thị giao dịch công khai và tồn tại vĩnh viễn; các heuristic về số tiền/thời điểm và cách chi tiêu |
+| Bitcoin PayJoin | Đầu vào của người nhận có thể phá vỡ heuristic phổ biến cho rằng mọi đầu vào đều thuộc cùng một chủ sở hữu | Cả hai ví cần hỗ trợ; giao dịch vẫn công khai; mức hỗ trợ không đồng đều |
+| Bitcoin CoinJoin | Tạo ra sự mơ hồ giữa những người tham gia phối hợp | Mẫu dễ nhận diện, liên kết trước/sau, hợp nhất, rủi ro về chính sách/pháp lý/nhà cung cấp |
+| Lightning | Các khoản thanh toán được định tuyến onion không được công bố toàn mạng như các giao dịch thông thường | Mở/đóng channel được ghi on-chain; endpoint, peer, hoạt động dò tìm hoặc bên lưu ký có thể suy luận dữ liệu |
+| Monero | Mặc định bảo mật on-chain mạnh hơn đối với người nhận, số tiền và tập hợp người gửi | Liên kết từ sàn giao dịch, node, thời điểm, endpoint và bên giao dịch vẫn tồn tại |
+| Ethereum/stablecoin | Khả năng phổ biến rộng và tương tác với smart contract | Trạng thái/hoạt động công khai; metadata RPC; nhà phát hành tập trung có thể chặn/đóng băng/báo cáo |
 
-## Bitcoin: privacy-preserving baseline
+## Bitcoin: thiết lập cơ bản bảo vệ quyền riêng tư
 
-Bitcoin is pseudonymous, not anonymous. Confirmed transactions are public and durable; address reuse, common-input ownership, change detection and publicly identified addresses can build clusters.<sup>[[1]](#references)</sup>
+Bitcoin là giả danh, không phải ẩn danh. Các giao dịch đã xác nhận đều công khai và tồn tại lâu dài; việc dùng lại địa chỉ, quyền sở hữu đầu vào chung, phát hiện tiền thối lại và các địa chỉ được xác định công khai có thể giúp tạo cụm.<sup>[[1]](#references)</sup>
 
-### Workflow
+### Quy trình
 
-1. **Choose a maintained self-custody wallet.** Download from the official project, verify signatures/hashes when offered, and apply security updates.
-2. **Create the wallet on a trusted endpoint.** Record the recovery seed offline; never place it in email, chat, screenshots or ordinary cloud notes. Test recovery before significant value.
-3. **Keep only operational value hot.** Use suitable offline/hardware custody for longer-term value, with a recovery plan that does not expose the seed to a single fragile location.
-4. **Generate a fresh receive address/invoice for every transaction.** Do not publish a static address when an invoice server or authenticated private delivery is possible.
-5. **Use your own full node when feasible.** A third-party explorer/electrum server can learn queried addresses and IP metadata. Configure only wallet-supported Tor/proxy behavior; Tor hides a network edge, not the blockchain graph.
-6. **Label every UTXO privately** with source, owner, purpose and compliance state. Enable coin control so unrelated identity contexts are not co-spent.
-7. **Preview the transaction:** selected inputs, change destination, amount, fee, counterparty and whether the spend merges compartments. Avoid unnecessary consolidation.
-8. **Keep lawful records separately and encrypted.** Preserve acquisition basis, invoices, authorization and tax/reporting information without publishing the mapping.
-9. **Treat later spending as part of the same privacy decision.** A well-separated receipt can be relinked when its output is co-spent with identified funds.
+1. **Chọn ví tự lưu ký được duy trì cập nhật.** Tải từ dự án chính thức, xác minh chữ ký/hash nếu có và cài đặt các bản cập nhật bảo mật.
+2. **Tạo ví trên endpoint đáng tin cậy.** Ghi seed khôi phục ra phương tiện ngoại tuyến; không bao giờ lưu seed trong email, chat, ảnh chụp màn hình hay ghi chú đám mây thông thường. Thử khôi phục trước khi lưu trữ giá trị đáng kể.
+3. **Chỉ giữ giá trị dùng cho hoạt động thường ngày trong ví nóng.** Dùng hình thức lưu ký ngoại tuyến/phần cứng phù hợp cho giá trị dài hạn, kèm kế hoạch khôi phục không để seed phụ thuộc vào một vị trí dễ gặp sự cố duy nhất.
+4. **Tạo địa chỉ nhận/hóa đơn mới cho mỗi giao dịch.** Không công khai địa chỉ tĩnh nếu có thể dùng máy chủ hóa đơn hoặc phương thức gửi riêng có xác thực.
+5. **Nếu khả thi, hãy dùng full node của riêng bạn.** Trình khám phá bên thứ ba/máy chủ electrum có thể biết các địa chỉ được truy vấn và metadata IP. Chỉ cấu hình hành vi Tor/proxy mà ví hỗ trợ; Tor ẩn một điểm kết nối mạng, không ẩn đồ thị blockchain.
+6. **Gắn nhãn riêng cho từng UTXO** với nguồn, chủ sở hữu, mục đích và trạng thái tuân thủ. Bật coin control để tránh chi tiêu chung các khoản thuộc những ngữ cảnh danh tính không liên quan.
+7. **Xem trước giao dịch:** các đầu vào được chọn, đích đến của tiền thối lại, số tiền, phí, bên giao dịch và liệu giao dịch có gộp các ngăn tách biệt hay không. Tránh hợp nhất không cần thiết.
+8. **Lưu riêng các hồ sơ hợp pháp và mã hóa chúng.** Lưu căn cứ xác định giá vốn, hóa đơn, giấy phép và thông tin thuế/báo cáo mà không công khai mối liên hệ.
+9. **Xem việc chi tiêu về sau là một phần của cùng quyết định bảo vệ quyền riêng tư.** Một khoản nhận được tách biệt tốt vẫn có thể bị liên kết lại khi đầu ra của nó được chi tiêu cùng với tiền đã xác định danh tính.
 
-Bitcoin Core's privacy documentation explains that a full node avoids revealing wallet queries to third-party servers but that transaction broadcast and public history still need analysis.<sup>[[2]](#references)</sup>
+Tài liệu quyền riêng tư của Bitcoin Core giải thích rằng full node tránh tiết lộ các truy vấn ví cho máy chủ bên thứ ba, nhưng việc phát tán giao dịch và lịch sử công khai vẫn cần được phân tích.<sup>[[2]](#references)</sup>
 
 ## PayJoin
 
-PayJoin is a collaborative payment in which the receiver adds an input. This defeats the simplistic assumption that all inputs belong to the sender. BIP 78 describes the original interactive protocol; draft BIP 77 defines an asynchronous v2 design using an encrypted mailbox/OHTTP.<sup>[[3]](#references)</sup>
+PayJoin là hình thức thanh toán phối hợp, trong đó người nhận thêm một đầu vào. Điều này đánh bại giả định đơn giản rằng mọi đầu vào đều thuộc về người gửi. BIP 78 mô tả giao thức tương tác ban đầu; bản nháp BIP 77 định nghĩa thiết kế v2 bất đồng bộ sử dụng hộp thư được mã hóa/OHTTP.<sup>[[3]](#references)</sup>
 
-Safe use:
+Sử dụng an toàn:
 
-1. Confirm that both maintained wallets support the same PayJoin version.
-2. Obtain the PayJoin-capable invoice over an authenticated channel; protect it like any payment request.
-3. Check the original amount and destination, then let the wallet validate the proposal/PSBT, fee contribution and prohibited substitutions.
-4. Confirm the final wallet summary. Do not manually approve an unexpected output, amount or excessive fee.
-5. If negotiation fails, understand whether the wallet safely falls back to an ordinary payment or requires a new invoice.
-6. Retain the private receipt/records required for ownership, accounting and disputes.
+1. Xác nhận cả hai ví được duy trì cập nhật và hỗ trợ cùng một phiên bản PayJoin.
+2. Nhận hóa đơn hỗ trợ PayJoin qua kênh đã xác thực; bảo vệ hóa đơn như mọi yêu cầu thanh toán khác.
+3. Kiểm tra số tiền và đích đến ban đầu, sau đó để ví xác thực đề xuất/PSBT, phần phí đóng góp và các thay đổi bị cấm.
+4. Xác nhận phần tóm tắt giao dịch cuối cùng trong ví. Không phê duyệt thủ công đầu ra, số tiền hay mức phí quá cao nếu không mong đợi.
+5. Nếu quá trình thương lượng thất bại, hãy hiểu ví có tự chuyển an toàn sang thanh toán thông thường hay yêu cầu hóa đơn mới.
+6. Lưu riêng biên nhận/hồ sơ cần thiết cho việc xác nhận quyền sở hữu, kế toán và giải quyết tranh chấp.
 
-PayJoin improves one chain-analysis heuristic; it does not hide the payment from the parties, acquisition platform, endpoints, or public ledger.
+PayJoin cải thiện một heuristic phân tích blockchain; nó không ẩn khoản thanh toán khỏi các bên liên quan, nền tảng mua vào, endpoint hay sổ cái công khai.
 
-## CoinJoin: benefits and limits
+## CoinJoin: lợi ích và giới hạn
 
-CoinJoin coordinates multiple users in one transaction to make input-output mapping less certain. Research on specific historical Wasabi and Samourai designs found highly recognizable transactions and showed that pre/post-mix behavior can substantially narrow anonymity.<sup>[[4]](#references)</sup> That result should not be generalized to every implementation or future version, but it demonstrates why an “anonymity-set” number is not a guarantee.
+CoinJoin phối hợp nhiều người dùng trong một giao dịch để khiến việc ánh xạ đầu vào-đầu ra kém chắc chắn hơn. Nghiên cứu về các thiết kế Wasabi và Samourai cụ thể trong quá khứ phát hiện các giao dịch có mẫu rất dễ nhận diện, đồng thời cho thấy hành vi trước/sau khi trộn có thể thu hẹp đáng kể tính ẩn danh.<sup>[[4]](#references)</sup> Không nên khái quát kết quả đó cho mọi cách triển khai hay phiên bản tương lai, nhưng nó cho thấy con số “tập hợp ẩn danh” không phải là sự đảm bảo.
 
-Before any lawful use:
+Trước khi sử dụng hợp pháp:
 
-- check current local law, sanctions status, exchange/custodian policy and tax/reporting duties;
-- use maintained, non-custodial software obtained from its official project;
-- understand the coordinator model, fees, denial-of-service controls and whether the current service still operates—zkSNACKs ended its coordinator in 2024, although other Wasabi coordinators may exist;
-- preserve source-of-funds and transaction records privately;
-- never accept unknown funds on someone else's behalf or use a custodial “mixer” promising untraceable withdrawals;
-- keep outputs separated by source/context and avoid later consolidation that destroys the intended ambiguity.
+- kiểm tra luật hiện hành tại địa phương, tình trạng trừng phạt, chính sách của sàn/bên lưu ký và nghĩa vụ thuế/báo cáo;
+- sử dụng phần mềm không lưu ký được duy trì cập nhật và tải từ dự án chính thức;
+- tìm hiểu mô hình coordinator, phí, biện pháp kiểm soát từ chối dịch vụ và liệu dịch vụ hiện còn hoạt động hay không—zkSNACKs đã ngừng coordinator của mình vào năm 2024, dù có thể vẫn còn các coordinator Wasabi khác;
+- lưu riêng hồ sơ nguồn tiền và giao dịch;
+- không bao giờ nhận tiền không rõ nguồn gốc thay cho người khác hoặc dùng “mixer” lưu ký hứa hẹn rút tiền không thể truy vết;
+- giữ các đầu ra tách biệt theo nguồn/ngữ cảnh và tránh hợp nhất về sau làm mất đi sự mơ hồ dự định tạo ra.
 
-Legal outcomes are fact- and jurisdiction-specific. The 2025 Samourai guilty pleas concerned knowingly operating an unlicensed money transmitter that moved criminal proceeds; they do not establish that every collaborative transaction or privacy-seeking user is criminal.<sup>[[5]](#references)</sup>
+Kết quả pháp lý phụ thuộc vào tình tiết và khu vực tài phán. Các lời nhận tội của Samourai năm 2025 liên quan đến việc cố ý vận hành dịch vụ chuyển tiền không giấy phép, qua đó chuyển tiền thu được từ hoạt động phạm pháp; điều này không có nghĩa mọi giao dịch phối hợp hay người dùng muốn bảo vệ quyền riêng tư đều phạm tội.<sup>[[5]](#references)</sup>
 
 ## Lightning Network
 
-Lightning's Sphinx onion routing is designed so an intermediate hop learns its predecessor and successor rather than the entire route.<sup>[[6]](#references)</sup> It is not blanket anonymity: channel funding/closure is public, nodes advertise topology, counterparties know endpoints, routing/probing can infer balances or parties, and a custodial wallet sees its user's account activity.
+Định tuyến onion Sphinx của Lightning được thiết kế để mỗi hop trung gian biết peer trước và sau nó, thay vì biết toàn bộ tuyến đường.<sup>[[6]](#references)</sup> Đây không phải là ẩn danh toàn diện: việc cấp vốn/đóng channel là công khai, node quảng bá cấu trúc mạng, các bên giao dịch biết endpoint, hoạt động định tuyến/dò tìm có thể suy luận số dư hoặc các bên, và ví lưu ký biết hoạt động tài khoản của người dùng.
 
-For better privacy:
+Để tăng cường quyền riêng tư:
 
-1. Prefer a maintained non-custodial wallet if intermediary privacy matters; plan channel backup/recovery first.
-2. Use a fresh invoice or offer for each payment. Verify whether the exact wallet supports BOLT 12/route blinding rather than assuming it does.
-3. Avoid publishing unnecessary node aliases, contact details and stable network endpoints.
-4. Connect through a supported privacy network if appropriate, understanding that uptime/timing patterns can still correlate.
-5. Do not infer that an off-chain payment has no records: sender, receiver, peers, watchtowers, liquidity providers and wallet services may retain observations.
+1. Nếu quyền riêng tư trước bên trung gian quan trọng, hãy ưu tiên ví không lưu ký được duy trì cập nhật; lên kế hoạch sao lưu/khôi phục channel trước.
+2. Dùng hóa đơn hoặc offer mới cho mỗi khoản thanh toán. Xác minh ví cụ thể có hỗ trợ BOLT 12/route blinding hay không, đừng mặc định là có.
+3. Tránh công khai alias node, thông tin liên hệ và endpoint mạng ổn định không cần thiết.
+4. Nếu phù hợp, hãy kết nối qua mạng bảo vệ quyền riêng tư được hỗ trợ, đồng thời hiểu rằng các mẫu về thời gian hoạt động/thời điểm vẫn có thể được đối chiếu.
+5. Đừng cho rằng thanh toán off-chain không để lại hồ sơ: người gửi, người nhận, peer, watchtower, nhà cung cấp thanh khoản và dịch vụ ví có thể lưu lại dữ liệu quan sát được.
 
-Published research has demonstrated sender/recipient and channel-balance inference from public data and active probing, though attacks and mitigations evolve.<sup>[[7]](#references)</sup>
+Các nghiên cứu đã công bố chứng minh có thể suy luận người gửi/người nhận và số dư channel từ dữ liệu công khai cùng hoạt động dò tìm chủ động, dù các tấn công và biện pháp giảm thiểu vẫn tiếp tục thay đổi.<sup>[[7]](#references)</sup>
 
 ## Monero
 
-Monero uses one-time stealth addresses for outputs, RingCT to hide amounts, and ring signatures to provide probabilistic sender ambiguity; its current technical specifications document a ring size of 16 (15 decoys).<sup>[[8]](#references)</sup> These are stronger defaults for on-chain confidentiality than transparent ledgers, not magic protection from endpoint or operational mistakes.
+Monero dùng địa chỉ stealth dùng một lần cho đầu ra, RingCT để ẩn số tiền và chữ ký vòng để tạo sự mơ hồ xác suất về người gửi; thông số kỹ thuật hiện tại của dự án ghi nhận kích thước vòng là 16 (15 decoy).<sup>[[8]](#references)</sup> Đây là các mặc định bảo mật on-chain mạnh hơn so với sổ cái minh bạch, chứ không phải biện pháp bảo vệ kỳ diệu trước sai sót ở endpoint hoặc trong vận hành.
 
-### Lawful workflow
+### Quy trình hợp pháp
 
-1. **Acquire lawfully.** A regulated exchange may know the purchase and withdrawal even when later on-chain details are confidential. Keep source, basis and reporting records.
-2. **Install the official maintained wallet** and verify its download according to project instructions. Back up the seed offline and test restoration with a small amount.
-3. **Prefer a local node** for maximum wallet-query privacy. If that is impractical, choose a trusted remote node reachable over an officially supported onion/I2P configuration. A remote node can log IP, requests, timing and transaction IDs; some lightweight designs disclose a view key.
-4. **Use a new subaddress per payer, campaign or invoice.** A payer can correlate repeated use of the same subaddress.<sup>[[9]](#references)</sup>
-5. **Label incoming contexts locally.** Avoid operationally merging separated receipts where a knowledgeable payer could recognize subsequent behavior.
-6. **Protect network metadata.** Follow the official anonymity-network configuration; recognize documented leaks from timestamps, intermittent synchronization, bandwidth shape and stream reuse.<sup>[[10]](#references)</sup>
-7. **Keep compliance/audit data private.** Disclose a view key or transaction proof only deliberately, to the intended auditor/party, and understand exactly what it reveals.
+1. **Mua hợp pháp.** Sàn giao dịch chịu sự quản lý có thể biết giao dịch mua và rút tiền ngay cả khi các chi tiết on-chain về sau được bảo mật. Lưu hồ sơ về nguồn tiền, căn cứ xác định giá vốn và báo cáo.
+2. **Cài đặt ví chính thức được duy trì cập nhật** và xác minh bản tải xuống theo hướng dẫn của dự án. Sao lưu seed ngoại tuyến và thử khôi phục với số tiền nhỏ.
+3. **Ưu tiên node cục bộ** để tối đa hóa quyền riêng tư của các truy vấn ví. Nếu không khả thi, hãy chọn node từ xa đáng tin cậy có thể truy cập qua cấu hình onion/I2P được hỗ trợ chính thức. Node từ xa có thể ghi lại IP, yêu cầu, thời điểm và ID giao dịch; một số thiết kế nhẹ tiết lộ view key.
+4. **Dùng subaddress mới cho mỗi người trả, chiến dịch hoặc hóa đơn.** Người trả có thể liên kết các lần sử dụng lặp lại cùng một subaddress.<sup>[[9]](#references)</sup>
+5. **Gắn nhãn các ngữ cảnh nhận tiền cục bộ.** Tránh gộp các khoản nhận đã tách biệt trong vận hành nếu người trả am hiểu có thể nhận ra hành vi tiếp theo.
+6. **Bảo vệ metadata mạng.** Làm theo cấu hình mạng ẩn danh chính thức; lưu ý các leak đã được ghi nhận từ timestamp, đồng bộ không liên tục, đặc điểm lưu lượng băng thông và việc tái sử dụng luồng kết nối.<sup>[[10]](#references)</sup>
+7. **Giữ riêng dữ liệu tuân thủ/kiểm toán.** Chỉ tiết lộ view key hoặc bằng chứng giao dịch khi có chủ đích, cho đúng kiểm toán viên/bên nhận và sau khi hiểu chính xác thông tin được tiết lộ.
 
-Historical traceability studies include bugs and decoy-selection eras that have since changed; do not apply old success percentages to current transactions. Likewise, FCMP++ remains roadmap work as of this chapter's September 2026 research cutoff, not a deployed protection.<sup>[[11]](#references)</sup>
+Các nghiên cứu truy vết trong quá khứ bao gồm những lỗi và giai đoạn lựa chọn decoy đã thay đổi; không áp dụng tỷ lệ thành công cũ cho giao dịch hiện tại. Tương tự, tính đến mốc nghiên cứu tháng 9 năm 2026 của chương này, FCMP++ vẫn là công việc trong lộ trình, chưa phải biện pháp bảo vệ đã triển khai.<sup>[[11]](#references)</sup>
 
-## Ethereum and stablecoins
+## Ethereum và stablecoin
 
-Ethereum's own privacy material notes that on-chain actions are visible and that wallet/RPC infrastructure adds IP and metadata exposure.<sup>[[12]](#references)</sup> Token transfers, approvals, smart-contract interactions, name services and gas funding can all connect identities.
+Tài liệu quyền riêng tư của Ethereum lưu ý rằng các hành động on-chain đều hiển thị và cơ sở hạ tầng ví/RPC làm lộ thêm IP cùng metadata.<sup>[[12]](#references)</sup> Chuyển token, phê duyệt, tương tác với smart contract, dịch vụ tên miền và cấp vốn gas đều có thể liên kết danh tính.
 
-Centralized stablecoins add issuer control. Current USDC and Tether terms reserve powers to block/freeze addresses or assets and comply with legal/process obligations.<sup>[[13]](#references)</sup> They may be useful payment instruments, but they are poor choices when the requirement is censorship resistance or on-chain anonymity.
+Stablecoin tập trung bổ sung quyền kiểm soát của nhà phát hành. Điều khoản USDC và Tether hiện hành có quy định về quyền chặn/đóng băng địa chỉ hoặc tài sản và tuân thủ các nghĩa vụ pháp lý/thủ tục.<sup>[[13]](#references)</sup> Chúng có thể hữu ích như công cụ thanh toán, nhưng không phù hợp nếu yêu cầu là chống kiểm duyệt hoặc ẩn danh on-chain.
 
-## Compliance boundaries
+## Ranh giới tuân thủ
 
-- FATF recommendations are implemented through national law and change over time; its 2026 update emphasizes VASP licensing/registration and Travel Rule implementation.<sup>[[14]](#references)</sup>
-- In the US, FinCEN distinguishes a person using convertible virtual currency for their own goods/services from a business accepting and transmitting or exchanging it; facts and later rules matter.<sup>[[15]](#references)</sup>
-- The EU Transfer of Funds Regulation requires originator/beneficiary information where a crypto-asset service provider is involved and adds verification rules for certain transfers to/from self-hosted addresses.<sup>[[16]](#references)</sup>
-- Sanctions and tax duties continue to apply. Screen as required, refuse prohibited parties, and maintain records; lists and legal status can change quickly.<sup>[[17]](#references)</sup>
+- Các khuyến nghị của FATF được áp dụng thông qua luật quốc gia và thay đổi theo thời gian; bản cập nhật năm 2026 nhấn mạnh việc cấp phép/đăng ký VASP và triển khai Travel Rule.<sup>[[14]](#references)</sup>
+- Tại Hoa Kỳ, FinCEN phân biệt người dùng tiền ảo chuyển đổi để mua hàng hóa/dịch vụ cho riêng mình với doanh nghiệp chấp nhận và chuyển tiền hoặc trao đổi tiền; tình tiết cụ thể và các quy định ban hành sau đó đều quan trọng.<sup>[[15]](#references)</sup>
+- Quy định Chuyển tiền của EU yêu cầu thông tin người khởi tạo/người thụ hưởng khi có nhà cung cấp dịch vụ tài sản mã hóa tham gia, đồng thời bổ sung quy tắc xác minh cho một số giao dịch đến/từ địa chỉ tự lưu trữ.<sup>[[16]](#references)</sup>
+- Nghĩa vụ về lệnh trừng phạt và thuế vẫn tiếp tục áp dụng. Thực hiện sàng lọc theo yêu cầu, từ chối các bên bị cấm và lưu hồ sơ; danh sách và tình trạng pháp lý có thể thay đổi nhanh chóng.<sup>[[17]](#references)</sup>
 
-Before material value, cross-border activity, privacy-enhancing coordination or business-like exchange/transmission, obtain current professional advice for the relevant jurisdictions.
+Trước khi xử lý giá trị đáng kể, hoạt động xuyên biên giới, phối hợp tăng cường quyền riêng tư hoặc hoạt động trao đổi/chuyển tiền mang tính kinh doanh, hãy xin tư vấn chuyên môn cập nhật cho các khu vực tài phán liên quan.
 
-For Bitcoin Silent Payments, fully shielded Zcash, GNU Taler, federated Chaumian e-cash, and BOLT 12, continue to [Privacy-Preserving Payment Protocols](privacy-preserving-payment-protocols.md).
+Để tìm hiểu Bitcoin Silent Payments, Zcash được che chắn hoàn toàn, GNU Taler, e-cash Chaumian liên kết liên bang và BOLT 12, hãy tiếp tục đến [Các giao thức thanh toán bảo vệ quyền riêng tư](privacy-preserving-payment-protocols.md).
 
 ## References
 
-- [1] [Bitcoin.org — Protect your privacy](https://bitcoin.org/en/protect-your-privacy) and [Bitcoin Developer Guide — Transactions](https://developer.bitcoin.org/devguide/transactions.html)
-- [2] [Bitcoin Core — Privacy features](https://bitcoin.org/en/bitcoin-core/features/privacy) and [Bitcoin.org — Secure your wallet](https://bitcoin.org/en/secure-your-wallet)
-- [3] [BIP 78 — A Simple Payjoin Proposal](https://bips.dev/78/) and [Draft BIP 77 — Async Payjoin](https://github.com/bitcoin/bips/blob/master/bip-0077.md)
-- [4] [Stütz et al. — Adoption and Actual Privacy of Decentralized CoinJoin Implementations in Bitcoin (AFT 2022)](https://arxiv.org/abs/2109.10229) and [Wasabi Wallet — Coin consolidation warning](https://docs.wasabiwallet.io/FAQ/FAQ-UseWasabi.html)
-- [5] [US DOJ — Founders of Samourai Wallet plead guilty (2025)](https://www.justice.gov/usao-sdny/pr/founders-samourai-wallet-cryptocurrency-mixing-service-plead-guilty) and [Wasabi — coordinator status](https://docs.wasabiwallet.io/FAQ/FAQ-Introduction.html)
-- [6] [Lightning BOLT 4 — Onion Routing Protocol](https://github.com/lightning/bolts/blob/master/04-onion-routing.md)
-- [7] [Kappos et al. — An Empirical Analysis of Privacy in the Lightning Network](https://arxiv.org/abs/2003.12470)
-- [8] Monero Project — [Stealth addresses](https://www.getmonero.org/resources/moneropedia/stealthaddress.html), [RingCT](https://www.getmonero.org/resources/moneropedia/ringCT.html), [Ring signatures](https://www.getmonero.org/resources/moneropedia/ringsignatures.html), and [Technical specifications](https://docs.getmonero.org/technical-specs/)
+- [1] [Bitcoin.org — Bảo vệ quyền riêng tư của bạn](https://bitcoin.org/en/protect-your-privacy) and [Bitcoin Developer Guide — Transactions](https://developer.bitcoin.org/devguide/transactions.html)
+- [2] [Bitcoin Core — Tính năng quyền riêng tư](https://bitcoin.org/en/bitcoin-core/features/privacy) and [Bitcoin.org — Secure your wallet](https://bitcoin.org/en/secure-your-wallet)
+- [3] [BIP 78 — Đề xuất Payjoin đơn giản](https://bips.dev/78/) and [Draft BIP 77 — Async Payjoin](https://github.com/bitcoin/bips/blob/master/bip-0077.md)
+- [4] [Stütz và cộng sự — Mức độ chấp nhận và quyền riêng tư thực tế của các cách triển khai CoinJoin phi tập trung trong Bitcoin (AFT 2022)](https://arxiv.org/abs/2109.10229) and [Wasabi Wallet — Coin consolidation warning](https://docs.wasabiwallet.io/FAQ/FAQ-UseWasabi.html)
+- [5] [Bộ Tư pháp Hoa Kỳ — Những người sáng lập Samourai Wallet nhận tội (2025)](https://www.justice.gov/usao-sdny/pr/founders-samourai-wallet-cryptocurrency-mixing-service-plead-guilty) and [Wasabi — coordinator status](https://docs.wasabiwallet.io/FAQ/FAQ-Introduction.html)
+- [6] [Lightning BOLT 4 — Giao thức định tuyến Onion](https://github.com/lightning/bolts/blob/master/04-onion-routing.md)
+- [7] [Kappos và cộng sự — Phân tích thực nghiệm về quyền riêng tư trong Lightning Network](https://arxiv.org/abs/2003.12470)
+- [8] Monero Project — [Địa chỉ stealth](https://www.getmonero.org/resources/moneropedia/stealthaddress.html), [RingCT](https://www.getmonero.org/resources/moneropedia/ringCT.html), [Chữ ký vòng](https://www.getmonero.org/resources/moneropedia/ringsignatures.html) và [Thông số kỹ thuật](https://docs.getmonero.org/technical-specs/)
 - [9] [Monero Docs — Subaddress](https://docs.getmonero.org/public-address/subaddress/)
-- [10] [Monero Docs — Networks](https://docs.getmonero.org/infrastructure/networks/), [Running a node with Tor/I2P](https://docs.getmonero.org/running-node/monerod-tori2p/), and [Monero Project — Anonymity networks](https://github.com/monero-project/monero/blob/master/docs/ANONYMITY_NETWORKS.md)
-- [11] [Hammad and Victor — Exploring the Evolution of Monero's Privacy (2024)](https://arxiv.org/abs/2408.05332) and [Monero Roadmap](https://beta.getmonero.org/resources/roadmap/)
-- [12] [Ethereum.org — Privacy on Ethereum](https://ethereum.org/privacy/ethereum)
-- [13] [Circle — USDC Terms](https://www.circle.com/legal/usdc-terms) and [Tether — Legal](https://tether.to/en/legal/)
-- [14] [FATF — 2026 Targeted Update on Virtual Assets and VASPs](https://www.fatf-gafi.org/en/publications/Fatfrecommendations/targeted-updated-virtualassets-vasps-2026.html)
-- [15] [FinCEN — Application of FinCEN's Regulations to Persons Administering, Exchanging, or Using Virtual Currencies](https://www.fincen.gov/resources/statutes-regulations/guidance/application-fincens-regulations-persons-administering)
-- [16] [Regulation (EU) 2023/1113](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023R1113)
-- [17] [US OFAC — Sanctions Compliance Guidance for the Virtual Currency Industry](https://ofac.treasury.gov/system/files/126/virtual_currency_guidance_brochure.pdf) and [US IRS — Digital asset transaction FAQs](https://www.irs.gov/individuals/international-taxpayers/frequently-asked-questions-on-digital-asset-transactions)
+- [10] [Monero Docs — Mạng](https://docs.getmonero.org/infrastructure/networks/), [Running a node with Tor/I2P](https://docs.getmonero.org/running-node/monerod-tori2p/), and [Monero Project — Anonymity networks](https://github.com/monero-project/monero/blob/master/docs/ANONYMITY_NETWORKS.md)
+- [11] [Hammad và Victor — Khảo sát sự phát triển của quyền riêng tư trong Monero (2024)](https://arxiv.org/abs/2408.05332) and [Monero Roadmap](https://beta.getmonero.org/resources/roadmap/)
+- [12] [Ethereum.org — Quyền riêng tư trên Ethereum](https://ethereum.org/privacy/ethereum)
+- [13] [Circle — Điều khoản USDC](https://www.circle.com/legal/usdc-terms) and [Tether — Legal](https://tether.to/en/legal/)
+- [14] [FATF — Bản cập nhật có mục tiêu năm 2026 về tài sản ảo và VASP](https://www.fatf-gafi.org/en/publications/Fatfrecommendations/targeted-updated-virtualassets-vasps-2026.html)
+- [15] [FinCEN — Áp dụng các quy định của FinCEN đối với người quản lý, trao đổi hoặc sử dụng tiền ảo](https://www.fincen.gov/resources/statutes-regulations/guidance/application-fincens-regulations-persons-administering)
+- [16] [Quy định (EU) 2023/1113](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023R1113)
+- [17] [OFAC Hoa Kỳ — Hướng dẫn tuân thủ lệnh trừng phạt dành cho ngành tiền ảo](https://ofac.treasury.gov/system/files/126/virtual_currency_guidance_brochure.pdf) and [US IRS — Digital asset transaction FAQs](https://www.irs.gov/individuals/international-taxpayers/frequently-asked-questions-on-digital-asset-transactions)
 {{#include ../banners/hacktricks-training.md}}

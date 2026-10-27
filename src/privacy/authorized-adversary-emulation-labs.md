@@ -2,19 +2,19 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-These exercises reproduce **observable architecture**, not unauthorized compromise. Run them on a dedicated Linux lab host with Docker, no sensitive credentials and no route to third-party targets. The names are fixed so teardown is explicit.
+Các bài tập này tái tạo **kiến trúc có thể quan sát**, không phải hành vi xâm nhập trái phép. Hãy chạy chúng trên một máy chủ Linux lab chuyên dụng có Docker, không chứa thông tin xác thực nhạy cảm và không có tuyến kết nối đến mục tiêu bên thứ ba. Tên được cố định để việc dọn dẹp được rõ ràng.
 
 {% hint style="danger" %}
-Do not replace the owned containers, APs, routers, accounts or synthetic transactions below with public proxies, a neighbor's Wi-Fi, a production CDN tenant you do not control, or real illicit funds. Written authorization must cover every system and radio environment.
+Không thay thế các container, AP, router, tài khoản hoặc giao dịch tổng hợp thuộc sở hữu của bạn bên dưới bằng proxy công khai, Wi-Fi của hàng xóm, tenant CDN production mà bạn không kiểm soát hoặc tiền bất hợp pháp thật. Văn bản ủy quyền phải bao gồm mọi hệ thống và môi trường vô tuyến.
 {% endhint %}
 
-## Lab 1: owned ORB and redirector chain
+## Lab 1: Chuỗi ORB và redirector thuộc sở hữu của bạn
 
-**Objective:** show that a target records only the exit while each relay sees adjacent hops. This emulates T1090.003/T1584 structure without compromised devices.
+**Mục tiêu:** cho thấy mục tiêu chỉ ghi nhận điểm thoát, trong khi mỗi relay chỉ thấy các hop liền kề. Cách này mô phỏng cấu trúc T1090.003/T1584 mà không cần thiết bị bị xâm nhập.
 
-**Requirements:** Docker Engine and unused container names beginning `ht-orb-`.
+**Yêu cầu:** Docker Engine và các tên container chưa được sử dụng, bắt đầu bằng `ht-orb-`.
 
-### Build
+### Dựng lab
 
 ```bash
 docker network create ht-orb-entry
@@ -35,7 +35,7 @@ docker run --rm --network ht-orb-entry curlimages/curl:latest \
   -sS http://ht-orb-r1:8080/ >/dev/null
 ```
 
-### Verify the visibility boundaries
+### Xác minh ranh giới hiển thị
 
 ```bash
 docker logs ht-orb-target
@@ -45,27 +45,27 @@ docker inspect -f '{{range .NetworkSettings.Networks}}{{.NetworkID}} {{.IPAddres
   ht-orb-r1 ht-orb-r2 ht-orb-target
 ```
 
-Expected result: Nginx records the `ht-orb-r2` address on `ht-orb-target`, not the one-shot client. Relay logs show connections only from their adjacent network. Docker control-plane inspection still reconstructs the entire path—analogous to provider/controller evidence.
+Kết quả mong đợi: Nginx ghi nhận địa chỉ `ht-orb-r2` trên `ht-orb-target`, không phải địa chỉ của client chỉ gửi một lần. Log của relay chỉ hiển thị các kết nối đến từ mạng liền kề. Việc kiểm tra control plane của Docker vẫn cho phép tái dựng toàn bộ đường đi—tương tự như bằng chứng từ nhà cung cấp/bộ điều khiển.
 
-### Detection experiments
+### Thử nghiệm phát hiện
 
-1. Repeat requests every 60 seconds and graph inter-arrival time and bytes.
-2. Replace `ht-orb-r2` with a new named container/address but keep the same cadence and application request; confirm an IP-only rule loses the chain while behavior still links it.
-3. Capture on the three Docker bridges with `tcpdump` on the lab host and compare timestamps.
-4. Stop `ht-orb-r2`; verify there is no direct fallback from entry to target.
+1. Lặp lại các yêu cầu mỗi 60 giây và lập biểu đồ thời gian giữa các yêu cầu cũng như số byte.
+2. Thay `ht-orb-r2` bằng container/địa chỉ mới có tên khác nhưng giữ nguyên nhịp gửi và yêu cầu ứng dụng; xác nhận quy tắc chỉ dựa trên IP không nhận ra chuỗi kết nối, trong khi hành vi vẫn liên kết được chúng.
+3. Bắt gói tin trên ba Docker bridge bằng `tcpdump` trên máy chủ lab và so sánh dấu thời gian.
+4. Dừng `ht-orb-r2`; xác minh không có đường dự phòng trực tiếp từ entry đến target.
 
-### Teardown
+### Dọn dẹp
 
 ```bash
 docker rm -f ht-orb-r1 ht-orb-r2 ht-orb-target
 docker network rm ht-orb-entry ht-orb-transit ht-orb-target
 ```
 
-## Lab 2: SNI/Host mismatch and redirector logging
+## Lab 2: SNI/Host mismatch và logging của redirector
 
-**Objective:** reproduce the routing primitive behind domain fronting on a private local edge and show where it is visible. No public CDN is involved.
+**Mục tiêu:** tái tạo primitive định tuyến đứng sau domain fronting trên một edge riêng tư, chạy cục bộ và cho thấy nó hiển thị ở đâu. Không sử dụng CDN công khai nào.
 
-### Build a local TLS edge
+### Dựng một TLS edge cục bộ
 
 ```bash
 ht_front_dir="$(mktemp -d)"
@@ -95,7 +95,7 @@ docker run -d --name ht-front-edge --network ht-front-net -p 127.0.0.1:8443:443 
   -v "$ht_front_dir:/etc/nginx/tls:ro" nginx:alpine
 ```
 
-### Send and observe the mismatch
+### Gửi và quan sát sự không khớp
 
 ```bash
 curl -k --resolve front.lab:8443:127.0.0.1 \
@@ -103,19 +103,19 @@ curl -k --resolve front.lab:8443:127.0.0.1 \
 docker logs ht-front-edge
 ```
 
-Expected log fields include `sni=front.lab host=origin.lab`. The client-to-edge packet capture exposes SNI unless ECH is in use; the HTTP Host is encrypted on that link. The terminating edge sees both.
+Các trường log dự kiến gồm `sni=front.lab host=origin.lab`. Bản ghi gói tin từ client đến edge sẽ để lộ SNI, trừ khi đang dùng ECH; HTTP Host được mã hóa trên liên kết đó. Edge đầu cuối thấy cả hai.
 
-Now send a normal request and confirm the policy rejects it:
+Bây giờ gửi một request thông thường và xác nhận rằng policy từ chối request đó:
 
 ```bash
 curl -k --resolve front.lab:8443:127.0.0.1 https://front.lab:8443/
 ```
 
-### Detection assertion
+### Khẳng định phát hiện
 
-Alert on `sni != host` only after normalizing ports/case and checking known reverse-proxy exceptions. Add process and tenant/origin context before assigning severity.
+Chỉ cảnh báo khi `sni != host` sau khi chuẩn hóa port/chữ hoa-thường và kiểm tra các ngoại lệ reverse-proxy đã biết. Bổ sung ngữ cảnh về process và tenant/origin trước khi xác định mức độ nghiêm trọng.
 
-### Teardown
+### Dọn dẹp
 
 ```bash
 docker rm -f ht-front-edge ht-front-target
@@ -125,9 +125,9 @@ rm -rf -- "$ht_front_dir"
 
 ## Lab 3: fast-flux DNS telemetry
 
-**Objective:** generate a safe low-TTL/multi-ASN-like DNS dataset and validate an analytic. The returned RFC 5737 documentation addresses are non-routable for this purpose.
+**Mục tiêu:** tạo một tập dữ liệu DNS an toàn có TTL thấp, tương tự nhiều ASN, và xác thực một analytic. Các địa chỉ tài liệu RFC 5737 được trả về không thể định tuyến và chỉ dùng cho mục đích này.
 
-### Run an authoritative server
+### Chạy một authoritative server
 
 ```bash
 ht_dns_dir="$(mktemp -d)"
@@ -160,13 +160,13 @@ done
 docker logs ht-flux-dns
 ```
 
-Expected result: each answer carries three documentation IPs and a 5-second TTL. Real fast flux also rotates subsets over time; change the zone serial/addresses and restart this disposable server to create multiple epochs.
+Kết quả mong đợi: mỗi câu trả lời chứa ba IP dành cho tài liệu và TTL 5 giây. Fast flux thực sự cũng luân phiên các tập con theo thời gian; hãy thay đổi zone serial/địa chỉ và khởi động lại server dùng một lần này để tạo nhiều epoch.
 
-### Analytic validation
+### Kiểm định phân tích
 
-For a five-minute window, calculate `median(TTL)`, distinct answers, distinct synthetic ASN/geography labels and answer churn. Require at least two suspicious dimensions plus a process/follow-on event. Run the same analytic against a known CDN sample to measure false positives.
+Trong khoảng thời gian năm phút, tính `median(TTL)`, số câu trả lời riêng biệt, số nhãn ASN/địa lý tổng hợp riêng biệt và mức độ biến động câu trả lời. Yêu cầu có ít nhất hai chiều đáng ngờ cùng với một sự kiện tiến trình/sự kiện tiếp diễn. Chạy cùng analytic trên một mẫu CDN đã biết để đo false positive.
 
-### Teardown
+### Dọn dẹp
 
 ```bash
 docker rm -f ht-flux-dns
@@ -175,39 +175,39 @@ rm -rf -- "$ht_dns_dir"
 
 ## Lab 4: nearest-neighbor wireless pivot
 
-**Objective:** reproduce the APT28 boundary mismatch with two owned “organizations.” Because Wi-Fi hardware/driver commands vary, this lab specifies verifiable roles and evidence rather than pretending one `hostapd` command fits every radio.
+**Mục tiêu:** tái hiện sự không khớp ranh giới của APT28 bằng hai “tổ chức” do bạn sở hữu. Vì các lệnh Wi-Fi phụ thuộc vào phần cứng/driver, lab này xác định các vai trò và bằng chứng có thể xác minh thay vì giả định rằng một lệnh `hostapd` phù hợp với mọi radio.
 
-### Equipment
+### Thiết bị
 
-- two APs you own, on isolated lab channels/SSIDs `HT-NEIGHBOR` and `HT-TARGET`;
-- one target service reachable only from `HT-TARGET`;
-- one dual-radio Linux pivot you own, capable of associating to both APs;
-- one remote-control workstation behind `HT-NEIGHBOR`;
-- RADIUS/NAC or AP association logs, DHCP logs and pivot audit/process logs.
+- hai AP do bạn sở hữu, sử dụng các kênh/SSID lab biệt lập `HT-NEIGHBOR` và `HT-TARGET`;
+- một dịch vụ mục tiêu chỉ có thể truy cập từ `HT-TARGET`;
+- một pivot Linux hai radio do bạn sở hữu, có khả năng kết nối với cả hai AP;
+- một workstation điều khiển từ xa nằm sau `HT-NEIGHBOR`;
+- log RADIUS/NAC hoặc log kết nối AP, log DHCP và log kiểm toán/quy trình của pivot.
 
-### Procedure
+### Quy trình
 
-1. Physically isolate or attenuate the setup so neither SSID escapes the authorized area. Confirm with a survey.
-2. Configure `HT-TARGET` with an exercise identity and deliberately omit device-certificate/posture validation for the first run. Record this as the condition under test.
-3. Join the pivot's first interface to `HT-NEIGHBOR` and second interface to `HT-TARGET`. Do **not** enable a general bridge; allow only the target service/port through a host firewall.
-4. From the workstation, open an authenticated tunnel to the pivot and request the target service through it.
-5. Record the pivot process/interface creation, both AP associations, target RADIUS event, DHCP lease and target source address.
-6. Ask the detection team to reconstruct the chain without the controller map.
-7. Enable EAP-TLS/managed-device posture on `HT-TARGET`, remove the pivot's approved target certificate and repeat. Access should fail at admission.
-8. Repeat with a first-seen randomized MAC. Verify the certificate/device decision still works and no rule treats the MAC alone as identity.
+1. Cách ly vật lý hoặc giảm công suất tín hiệu của thiết lập để không SSID nào phát ra ngoài khu vực được cấp phép. Xác nhận bằng khảo sát.
+2. Cấu hình `HT-TARGET` với một danh tính dùng cho bài tập và cố ý bỏ qua bước xác thực chứng chỉ thiết bị/tư thế thiết bị trong lần chạy đầu tiên. Ghi lại đây là điều kiện đang được kiểm thử.
+3. Kết nối interface thứ nhất của pivot với `HT-NEIGHBOR` và interface thứ hai với `HT-TARGET`. **Không** bật bridge tổng quát; chỉ cho phép dịch vụ/cổng mục tiêu đi qua firewall trên host.
+4. Từ workstation, mở một tunnel đã xác thực tới pivot và yêu cầu dịch vụ mục tiêu thông qua tunnel đó.
+5. Ghi lại quy trình/tạo interface trên pivot, kết nối với cả hai AP, sự kiện RADIUS của mục tiêu, DHCP lease và địa chỉ nguồn mà mục tiêu nhìn thấy.
+6. Yêu cầu đội ngũ phát hiện dựng lại chuỗi sự kiện mà không có sơ đồ controller.
+7. Bật EAP-TLS/tư thế thiết bị được quản lý trên `HT-TARGET`, xóa chứng chỉ mục tiêu đã được phê duyệt của pivot rồi chạy lại. Truy cập phải bị từ chối ở bước cho phép kết nối.
+8. Chạy lại với MAC ngẫu nhiên được dùng lần đầu. Xác minh quyết định về chứng chỉ/thiết bị vẫn hoạt động và không có quy tắc nào xem riêng MAC là danh tính.
 
-### Success criteria
+### Tiêu chí thành công
 
-- The target initially sees a local Wi-Fi client rather than the workstation.
-- Joined telemetry identifies one pivot with simultaneous neighbor-control and target-radio paths.
-- Certificate/device-backed admission blocks the second run.
-- No packet reaches a network outside the isolated lab.
+- Ban đầu, mục tiêu thấy một client Wi-Fi cục bộ thay vì workstation.
+- Telemetry đã kết hợp xác định được một pivot đồng thời có đường kết nối tới mạng điều khiển lân cận và radio mục tiêu.
+- Cơ chế cho phép kết nối dựa trên chứng chỉ/thiết bị chặn được lần chạy thứ hai.
+- Không gói tin nào đi tới mạng bên ngoài lab biệt lập.
 
 ## Lab 5: dead-drop resolver sequence
 
-**Objective:** detect a process reading a legitimate-looking object, decoding a pointer and immediately contacting a second service.
+**Mục tiêu:** phát hiện một quy trình đọc một đối tượng trông có vẻ hợp lệ, giải mã một con trỏ rồi lập tức kết nối tới dịch vụ thứ hai.
 
-### Build
+### Thiết lập
 
 ```bash
 docker network create ht-ddr-net
@@ -223,20 +223,20 @@ docker logs ht-ddr-web
 docker logs ht-ddr-c2
 ```
 
-The encoded content is `http://ht-ddr-c2:80/`. A working detection joins the same short-lived process/container reading `/profile.txt`, decoding content and contacting `ht-ddr-c2` within seconds. Hash and preserve the object response.
+Nội dung đã mã hóa là `http://ht-ddr-c2:80/`. Một cơ chế phát hiện hiệu quả liên kết cùng một tiến trình/container tồn tại ngắn hạn đọc `/profile.txt`, giải mã nội dung và liên hệ với `ht-ddr-c2` trong vòng vài giây. Tạo hash và bảo toàn phản hồi của đối tượng.
 
-### Teardown
+### Dọn dẹp
 
 ```bash
 docker rm -f ht-ddr-web ht-ddr-c2
 docker network rm ht-ddr-net
 ```
 
-## Lab 6: synthetic peel-chain and bridge graph
+## Lab 6: chuỗi peel tổng hợp và đồ thị bridge
 
-**Objective:** practice value tracing without real assets, accounts or services.
+**Mục tiêu:** thực hành truy vết giá trị mà không dùng tài sản, tài khoản hoặc dịch vụ thực.
 
-### Create and trace the dataset
+### Tạo và truy vết tập dữ liệu
 
 ```bash
 ht_graph_dir="$(mktemp -d)"
@@ -267,17 +267,17 @@ while frontier:
 PY
 ```
 
-Analysts should identify the peel/change pattern, treat the bridge link as a separately supported inference, calculate the fee/value difference, and mark the exchange as an off-chain evidence request. Change one value/time and document how confidence changes.
+Các nhà phân tích nên xác định pattern peel/change, xem liên kết bridge là một suy luận cần được hỗ trợ riêng, tính toán chênh lệch phí/giá trị và đánh dấu giao dịch là yêu cầu thu thập bằng chứng off-chain. Thay đổi một giá trị/thời điểm và ghi lại sự thay đổi về mức độ tin cậy.
 
-### Teardown
+### Phân tích hậu kiểm
 
 ```bash
 rm -rf -- "$ht_graph_dir"
 ```
 
-## Lab 7: passive traffic-signaling sensor
+## Lab 7: cảm biến báo hiệu lưu lượng thụ động
 
-**Objective:** emulate the network signature of a passive, magic-value-activated implant without creating a shell, persistence or remote access. The listener binds only to loopback and records a benign event.
+**Mục tiêu:** mô phỏng dấu hiệu mạng của một implant thụ động được kích hoạt bằng giá trị ma thuật mà không tạo shell, persistence hoặc remote access. Listener chỉ bind vào loopback và ghi lại một sự kiện vô hại.
 
 ```bash
 ht_signal_dir="$(mktemp -d)"
@@ -309,31 +309,31 @@ cat "$ht_signal_dir/events.log"
 rm -rf -- "$ht_signal_dir"
 ```
 
-Expected result: ordinary traffic produces no application event; only the designated token does. Capture loopback traffic during the run and verify a network sensor can still see both datagrams. Then evaluate host controls that detect an unexpected long-running packet listener or packet-capture filter. Real RedPenguin passive implants inspected traffic on a router and offered dangerous functionality; this lab deliberately does neither.
+Kết quả mong đợi: lưu lượng thông thường không tạo ra sự kiện ứng dụng nào; chỉ token được chỉ định mới tạo sự kiện. Ghi lại lưu lượng loopback trong quá trình chạy và xác minh rằng sensor mạng vẫn có thể thấy cả hai datagram. Sau đó đánh giá các biện pháp kiểm soát trên host có khả năng phát hiện một packet listener chạy lâu bất thường hoặc một bộ lọc packet-capture. Các passive implant RedPenguin thực tế đã kiểm tra lưu lượng trên router và cung cấp chức năng nguy hiểm; lab này cố ý không làm như vậy.
 
-## Exercise report template
+## Mẫu báo cáo bài thực hành
 
-For every lab record:
+Với mỗi lab, hãy ghi lại:
 
-- authorization and isolated scope;
-- hypothesis and ATT&CK technique;
-- topology and observer table;
-- exact start/end time and configuration hashes;
-- expected events per sensor;
-- events actually observed and retention gaps;
-- analytic logic, threshold and false-positive sample;
-- whether the target team reconstructed the path;
-- mitigation retest result; and
-- teardown/recovery evidence.
+- phạm vi được ủy quyền và phạm vi cách ly;
+- giả thuyết và kỹ thuật ATT&CK;
+- bảng topology và observer;
+- thời gian bắt đầu/kết thúc chính xác và hash cấu hình;
+- sự kiện dự kiến theo từng sensor;
+- sự kiện thực tế được quan sát và các khoảng trống lưu trữ;
+- logic phân tích, ngưỡng và mẫu false positive;
+- nhóm phụ trách mục tiêu có tái dựng được đường đi hay không;
+- kết quả kiểm tra lại biện pháp giảm thiểu; và
+- bằng chứng tháo gỡ/khôi phục.
 
-An exercise is incomplete until the detection is rerun after mitigation and every lab resource is removed.
+Bài thực hành chưa hoàn tất cho đến khi detection được chạy lại sau khi áp dụng biện pháp giảm thiểu và mọi tài nguyên của lab đã được gỡ bỏ.
 
 ## References
 
 - [1] [MITRE ATT&CK — Multi-hop Proxy (T1090.003)](https://attack.mitre.org/techniques/T1090/003/)
 - [2] [MITRE ATT&CK — Domain Fronting (T1090.004)](https://attack.mitre.org/techniques/T1090/004/)
 - [3] [MITRE ATT&CK — Fast Flux DNS (T1568.001)](https://attack.mitre.org/techniques/T1568/001/)
-- [4] [Volexity — The Nearest Neighbor Attack](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
+- [4] [Volexity — Cuộc tấn công láng giềng gần nhất](https://www.volexity.com/blog/2024/11/22/the-nearest-neighbor-attack-how-a-russian-apt-weaponized-nearby-wi-fi-networks-for-covert-access/)
 - [5] [MITRE ATT&CK — Dead Drop Resolver (T1102.001)](https://attack.mitre.org/techniques/T1102/001/)
 - [6] [MITRE ATT&CK — Traffic Signaling (T1205)](https://attack.mitre.org/techniques/T1205/)
 {{#include ../banners/hacktricks-training.md}}

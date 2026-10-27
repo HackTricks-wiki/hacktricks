@@ -1,31 +1,31 @@
-# WinDbg automation for targeted instrumentation
+# Tự động hóa WinDbg để đo đạc có mục tiêu
 
 {{#include ../../banners/hacktricks-training.md}}
 
-WinDbg and WinDbgX can run debugger commands at startup, on exceptions, and when breakpoints fire. This lets a fuzzing or reversing session collect state only around an input-driven path instead of stopping manually at every event.<sup>[[1]](#references)</sup>
+WinDbg và WinDbgX có thể chạy các lệnh debugger khi khởi động, khi xảy ra ngoại lệ và khi breakpoint được kích hoạt. Nhờ đó, phiên fuzzing hoặc reversing có thể chỉ thu thập trạng thái quanh một đường dẫn do input điều khiển, thay vì phải dừng thủ công tại mọi sự kiện.<sup>[[1]](#references)</sup>
 
-## Start at a useful exception
+## Bắt đầu tại một ngoại lệ hữu ích
 
-`-c` runs commands at the initial debugger break. Append `;g` to resume after setup. For an unattended WinDbg Classic run, `-logo` writes the command window to a log, `-Q` disables automatic workspace saving, and `-G` ignores the final breakpoint so the session ends when the target exits. WinDbgX also accepts `-c`; its configured Startup commands run afterward.<sup>[[1]](#references)[[7]](#references)</sup>
+`-c` chạy các lệnh tại điểm dừng đầu tiên của debugger. Thêm `;g` để tiếp tục sau khi thiết lập. Với một phiên WinDbg Classic không cần giám sát, `-logo` ghi cửa sổ lệnh vào tệp log, `-Q` tắt tính năng tự động lưu workspace và `-G` bỏ qua breakpoint cuối cùng để phiên kết thúc khi target thoát. WinDbgX cũng chấp nhận `-c`; các lệnh Startup đã cấu hình sẽ chạy sau đó.<sup>[[1]](#references)[[7]](#references)</sup>
 
 ```text
 windbg.exe -c "sxd av;g" -logo C:\logs\triage.txt C:\path\target.exe
 ```
 
-For access violations, **`sxe av` breaks on first chance**, **`sxd av` skips first chance but breaks on unhandled second chance**, and **`sxi av` ignores both chances**. The article's `sxi`/`sxd` descriptions are reversed here: Microsoft documents `sxd` as the second-chance filter and `sxi` as ignore. Use `-c` for a first-chance command and `-c2` for a second-chance command; a first-chance `-c` handler does not become a second-chance handler merely because the filter is `sxd`. Confirm active filters with `sx`.<sup>[[1]](#references)[[2]](#references)</sup>
+Đối với lỗi truy cập, **`sxe av` dừng ở first chance**, **`sxd av` bỏ qua first chance nhưng dừng ở second chance nếu ngoại lệ chưa được xử lý**, còn **`sxi av` bỏ qua cả hai lần**. Mô tả `sxi`/`sxd` trong bài viết bị đảo ngược: Microsoft ghi rõ `sxd` là bộ lọc cho second chance, còn `sxi` là bỏ qua. Dùng `-c` cho lệnh xử lý ở first chance và `-c2` cho lệnh xử lý ở second chance; trình xử lý `-c` ở first chance không trở thành trình xử lý ở second chance chỉ vì bộ lọc là `sxd`. Xác nhận các bộ lọc đang hoạt động bằng `sx`.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```text
 sxd -c2 "r;kv;!analyze -v" av
 sxe -c "lm" ld
 ```
 
-The first command collects registers, a stack trace, and exception analysis only for an unhandled access violation. The second runs `lm` when a module loads. Breakpoint (`bp`), module-load (`ld`), and access-violation (`av`) events have different lifecycles, so do not globally ignore `bp` when relying on debugger breakpoints.<sup>[[1]](#references)[[2]](#references)</sup>
+Lệnh đầu tiên thu thập các thanh ghi, stack trace và phân tích ngoại lệ chỉ khi xảy ra access violation chưa được xử lý. Lệnh thứ hai chạy `lm` khi một module được tải. Các sự kiện breakpoint (`bp`), tải module (`ld`) và access violation (`av`) có vòng đời khác nhau, vì vậy đừng bỏ qua toàn cục `bp` nếu đang dựa vào breakpoint của debugger.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Gate expensive breakpoints with a controlled trigger
+## Kích hoạt breakpoint tốn kém bằng trigger có kiểm soát
 
-Choose a script-visible or otherwise input-controlled function that can be called immediately before the path of interest. Install **action breakpoints** on the allocator, parser, or API calls to inspect. Disable them by ID with `bd`. Install a **trigger breakpoint** whose attached command enables those IDs with `be`, then resumes with `g`; a second controlled trigger can disable them again. Check IDs with `bl` before wiring the trigger, because they depend on breakpoint creation order. This separates cheap control points from expensive tracing and limits changes to the target's timing and heap layout.<sup>[[1]](#references)[[3]](#references)[[4]](#references)</sup>
+Chọn một hàm có thể được script gọi hoặc được kiểm soát bằng input theo cách khác, để gọi ngay trước luồng cần quan sát. Đặt **action breakpoint** tại các lệnh gọi allocator, parser hoặc API cần kiểm tra. Vô hiệu hóa chúng bằng ID với `bd`. Đặt một **trigger breakpoint** có lệnh đính kèm để bật các ID đó bằng `be`, rồi tiếp tục bằng `g`; một trigger có kiểm soát thứ hai có thể vô hiệu hóa chúng lại. Kiểm tra ID bằng `bl` trước khi thiết lập trigger, vì ID phụ thuộc vào thứ tự tạo breakpoint. Cách này tách các điểm điều khiển nhẹ khỏi việc trace tốn kém, đồng thời hạn chế ảnh hưởng đến thời gian chạy và bố cục heap của mục tiêu.<sup>[[1]](#references)[[3]](#references)[[4]](#references)</sup>
 
-After resolving the two symbols, the command pattern is below. Replace the bracketed symbols and the action breakpoint ID returned by `bl`; do not assume it is zero.<sup>[[1]](#references)[[3]](#references)[[4]](#references)</sup>
+Sau khi phân giải hai symbol, mẫu lệnh như bên dưới. Thay các symbol trong ngoặc vuông và ID của action breakpoint do `bl` trả về; đừng cho rằng ID đó là 0.<sup>[[1]](#references)[[3]](#references)[[4]](#references)</sup>
 
 ```text
 bp <action-symbol> "r;g"
@@ -34,11 +34,11 @@ bd <action-id>
 bp <trigger-symbol> "be <action-id>;g"
 ```
 
-Action breakpoint commands can print `@$ip` and `%y` (symbolized address), dump selected arguments or memory, and then continue. If a conditional breakpoint logs only pointers in a selected range, first verify that the range actually covers the test input; a wrong condition silently loses evidence.<sup>[[1]](#references)</sup>
+Các lệnh action breakpoint có thể in `@$ip` và `%y` (địa chỉ đã phân giải symbol), dump các đối số được chọn hoặc bộ nhớ, rồi tiếp tục. Nếu breakpoint có điều kiện chỉ ghi log các con trỏ trong một phạm vi đã chọn, hãy xác minh trước rằng phạm vi đó thực sự bao phủ đầu vào thử nghiệm; điều kiện sai sẽ âm thầm làm mất bằng chứng.<sup>[[1]](#references)</sup>
 
-### Find a trigger with symbols
+### Tìm trigger bằng symbol
 
-Search all loaded modules if the implementation module is unknown. `bm` sets breakpoints on every matching symbol; invoke the script-visible function and inspect which breakpoint fires. For example, the source drives `Math.cos(0)` in the renderer being debugged, not just any browser process.<sup>[[1]](#references)[[5]](#references)</sup>
+Tìm kiếm trong tất cả module đã tải nếu chưa biết module triển khai. `bm` đặt breakpoint trên mọi symbol khớp; hãy gọi hàm có thể truy cập qua script và kiểm tra breakpoint nào được kích hoạt. Ví dụ, mã nguồn gọi `Math.cos(0)` trong renderer đang được debug, chứ không phải bất kỳ tiến trình trình duyệt nào.<sup>[[1]](#references)[[5]](#references)</sup>
 
 ```text
 x *!*math*cos*
@@ -46,28 +46,28 @@ bm *edge*!*math*cos* ".printf \"%y called\n\", @$ip;g"
 g
 ```
 
-Once a hit identifies the exact function, use `lm a <symbol>` to resolve its containing image and `? <symbol> - <module>` to calculate a module-relative offset. WinDbg can display the same short module name for an executable and a DLL, so verify the image path before using the offset in another process. Narrow the wildcard breakpoints to the verified symbol to avoid overhead.<sup>[[1]](#references)</sup>
+Khi một hit xác định được chính xác function, dùng `lm a <symbol>` để tìm image chứa function đó và `? <symbol> - <module>` để tính offset tương đối với module. WinDbg có thể hiển thị cùng một tên module ngắn cho executable và DLL, vì vậy hãy xác minh đường dẫn image trước khi dùng offset trong một process khác. Thu hẹp các wildcard breakpoint thành symbol đã xác minh để tránh overhead.<sup>[[1]](#references)</sup>
 
-### Find a candidate without symbols
+### Tìm ứng viên khi không có symbol
 
-Corelan's Frida-based `corelan_trigscan.py` scans a selected process module for floating-point, SSE, AVX, and trigonometric instruction patterns. It emits WinDbg breakpoint commands in `corelan_trigscan.bps` and smaller numbered `.bps` files. Run it with Python and `frida-tools` against the target **without another debugger attached**; attach WinDbg to the same process/module afterward and load a manageable breakpoint batch.<sup>[[1]](#references)[[6]](#references)</sup>
+`corelan_trigscan.py` dựa trên Frida của Corelan quét một module process đã chọn để tìm các mẫu lệnh dấu phẩy động, SSE, AVX và lượng giác. Công cụ xuất các lệnh breakpoint của WinDbg vào `corelan_trigscan.bps` và các tệp `.bps` được đánh số, nhỏ hơn. Chạy công cụ bằng Python và `frida-tools` trên target **khi không có debugger nào khác được gắn vào**; sau đó attach WinDbg vào cùng process/module và nạp một batch breakpoint có kích thước phù hợp.<sup>[[1]](#references)[[6]](#references)</sup>
 
 ```text
 py -3.9-64 corelan_trigscan.py -p msedge.exe -m msedge.dll --min-density 0.5 --min-relevant 50 --min-total 20 --min-trig 1
 $$><C:\logs\msedge.dll\corelan_trigscan_0001.bps
 ```
 
-For a known module-relative offset, validate that it survives the thresholds before importing all emitted breakpoints:<sup>[[1]](#references)[[6]](#references)</sup>
+Với một offset tương đối với module đã biết, hãy xác thực rằng nó vẫn vượt qua các ngưỡng trước khi nhập tất cả breakpoint được xuất ra:<sup>[[1]](#references)[[6]](#references)</sup>
 
 ```text
 py -3.9-64 corelan_trigscan.py -p msedge.exe -m msedge.dll --min-density 0.15 --min-relevant 8 --min-total 45 --check-offset 00e13dc0 --min-icall 1
 ```
 
-`--min-density` is relevant-instruction density, `--min-relevant` and `--min-total` set instruction-count floors, and `--min-trig` requires strong trig-like signals. If a known function is missed, pass its **module-relative** offset to `--check-offset` to inspect its prologue, density, counts, and indirect calls. A thin wrapper may have low density and no trig instruction. Lower the thresholds and, if searching for wrappers, use the script's actual `--min-icall 1` option (not `--min-ical`); direct callees are analyzed, but indirect targets cannot reliably be followed. Smaller `--splitsize` batches help when many generated breakpoints slow WinDbg. A candidate is not validated until the intended input makes its breakpoint fire.<sup>[[1]](#references)[[6]](#references)</sup>
+`--min-density` là mật độ instruction liên quan, `--min-relevant` và `--min-total` đặt ngưỡng tối thiểu về số lượng instruction, còn `--min-trig` yêu cầu các tín hiệu giống trig mạnh. Nếu bỏ sót một function đã biết, hãy truyền độ lệch tương đối với module của function đó vào `--check-offset` để kiểm tra prologue, mật độ, số lượng và các lời gọi gián tiếp. Một wrapper mỏng có thể có mật độ thấp và không có instruction trig. Hạ các ngưỡng xuống và nếu đang tìm wrapper, hãy dùng tùy chọn `--min-icall 1` thực tế của script (không phải `--min-ical`); các hàm được gọi trực tiếp sẽ được phân tích, nhưng không thể lần theo các target gián tiếp một cách đáng tin cậy. Các batch `--splitsize` nhỏ hơn sẽ hữu ích khi có nhiều breakpoint được tạo khiến WinDbg chạy chậm. Candidate chưa được xác nhận cho đến khi input dự kiến khiến breakpoint của nó được kích hoạt.<sup>[[1]](#references)[[6]](#references)</sup>
 
 ## Small debugger programs and PyKD
 
-Use `.if` when a condition is reliable, `.foreach` to iterate whitespace-delimited output, and `.for` with pseudo-registers to walk memory or structures. `.foreach` does **not** preserve columns: variable-width `lm` output, for example, is a poor input, while `lm 1m` yields one module name per token. Log unfiltered data first if a guessed condition could hide the failing path.<sup>[[1]](#references)</sup>
+Dùng `.if` khi điều kiện đáng tin cậy, `.foreach` để lặp qua output phân tách bằng khoảng trắng và `.for` cùng pseudo-registers để duyệt bộ nhớ hoặc cấu trúc. `.foreach` **không** giữ nguyên các cột: chẳng hạn, output `lm` có độ rộng biến thiên là input không phù hợp, trong khi `lm 1m` tạo ra một tên module trên mỗi token. Trước tiên, hãy log dữ liệu chưa lọc nếu một điều kiện phỏng đoán có thể che khuất đường dẫn gây lỗi.<sup>[[1]](#references)</sup>
 
 ```text
 .foreach (mod { lm 1m }) { .echo ${mod} }
@@ -75,21 +75,21 @@ r $t0 = 0
 .for ( ; @$t0 < 5 ; r $t0 = @$t0 + 1 ) { .printf "i = %d\n", @$t0 }
 ```
 
-Aliases created with `as name value` are textual substitutions, not typed variables. `al` lists them, `ad name` deletes one, and `${name}` forces an unambiguous expansion. Avoid names such as `bp`, `x`, or `r` because an alias can shadow a built-in command. MASM expressions suit pointer arithmetic such as `poi(@$t0)`; `@@c++(...)` can access typed fields when symbols are present, avoiding hard-coded structure offsets.<sup>[[1]](#references)</sup>
+Aliases được tạo bằng `as name value` là các phép thay thế văn bản, không phải biến có kiểu. `al` liệt kê các alias, `ad name` xóa một alias, còn `${name}` buộc mở rộng rõ ràng. Tránh các tên như `bp`, `x` hoặc `r` vì alias có thể che khuất lệnh dựng sẵn. Biểu thức MASM phù hợp với phép tính con trỏ như `poi(@$t0)`; `@@c++(...)` có thể truy cập các trường có kiểu khi có symbol, tránh phải hard-code offset của cấu trúc.<sup>[[1]](#references)</sup>
 
-Put longer command sequences in a command file. `$$><filename` joins lines into a single command block and permits a following semicolon-delimited debugger command. Multiline control structures can still be fragile; keep each `.if` or `.for` statement on one line. The same file can be invoked from `-c` at startup.<sup>[[1]](#references)[[8]](#references)</sup>
+Đặt các chuỗi lệnh dài hơn trong một tệp lệnh. `$$><filename` nối các dòng thành một khối lệnh duy nhất và cho phép thêm một lệnh debugger được phân tách bằng dấu chấm phẩy. Các cấu trúc điều khiển nhiều dòng vẫn có thể không ổn định; hãy viết mỗi câu lệnh `.if` hoặc `.for` trên một dòng. Có thể gọi cùng tệp đó bằng `-c` khi khởi động.<sup>[[1]](#references)[[8]](#references)</sup>
 
-For logic that is awkward in command language, PyKD exposes typed structures, registers, memory, and debugger output to Python. For example, `pykd.typedVar("ntdll!_PEB", pykd.getCurrentProcess())` accesses PEB fields, `pykd.loadBytes(address, size)` reads memory, and `pykd.dbgCommand("lm")` returns debugger output for parsing. Prefer bounded `loadChars`/`loadWChars` over unbounded string reads for possibly unterminated data. PyKD's `disasm(address).asm(instruction)` **writes assembled bytes at that address**, so preserve and restore the original memory if using it to obtain opcodes in a live process.<sup>[[1]](#references)</sup>
+Với những logic khó viết bằng command language, PyKD cung cấp quyền truy cập các cấu trúc có kiểu, thanh ghi, bộ nhớ và đầu ra debugger từ Python. Ví dụ, `pykd.typedVar("ntdll!_PEB", pykd.getCurrentProcess())` truy cập các trường của PEB, `pykd.loadBytes(address, size)` đọc bộ nhớ, còn `pykd.dbgCommand("lm")` trả về đầu ra debugger để phân tích. Ưu tiên `loadChars`/`loadWChars` có giới hạn thay vì đọc chuỗi không giới hạn đối với dữ liệu có thể không kết thúc bằng ký tự kết thúc chuỗi. `disasm(address).asm(instruction)` của PyKD **ghi các byte mã máy tại địa chỉ đó**, vì vậy hãy lưu và khôi phục bộ nhớ ban đầu nếu dùng cách này để lấy opcode trong một tiến trình đang chạy.<sup>[[1]](#references)</sup>
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## References
 
-- [1] [Corelan: Debugging - WinDBG(X) Automation & Scripting - Part 1](https://corelan.be/index.php/2026/04/17/debugging-windbgx-automation-scripting-part-1)
-- [2] [Microsoft: sx, sxd, sxe, sxi, sxn, sxr, sx- (Set Exceptions)](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/sx--sxd--sxe--sxi--sxn--sxr--sx---set-exceptions-)
-- [3] [Microsoft: be (Breakpoint Enable)](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/be--breakpoint-enable-)
-- [4] [Microsoft: bd (Breakpoint Disable)](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/bd--breakpoint-disable-)
-- [5] [Microsoft: bp, bu, bm (Set Breakpoint)](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/bp--bu--bm--set-breakpoint-)
-- [6] [Corelan trigscan source](https://github.com/corelan/blogposts/blob/main/debugging/scripts/frida/corelan_trigscan.py)
-- [7] [Microsoft: WinDbg Command-Line Options](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/windbg-command-line-options)
-- [8] [Microsoft: Run Script File](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/-----------------------a---run-script-file-)
+- [1] [Corelan: Gỡ lỗi - Tự động hóa và viết script trong WinDBG(X) - Phần 1](https://corelan.be/index.php/2026/04/17/debugging-windbgx-automation-scripting-part-1)
+- [2] [Microsoft: sx, sxd, sxe, sxi, sxn, sxr, sx- (Thiết lập ngoại lệ)](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/sx--sxd--sxe--sxi--sxn--sxr--sx---set-exceptions-)
+- [3] [Microsoft: be (Bật breakpoint)](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/be--breakpoint-enable-)
+- [4] [Microsoft: bd (Tắt breakpoint)](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/bd--breakpoint-disable-)
+- [5] [Microsoft: bp, bu, bm (Đặt breakpoint)](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/bp--bu--bm--set-breakpoint-)
+- [6] [Mã nguồn trigscan của Corelan](https://github.com/corelan/blogposts/blob/main/debugging/scripts/frida/corelan_trigscan.py)
+- [7] [Microsoft: Tùy chọn dòng lệnh WinDbg](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/windbg-command-line-options)
+- [8] [Microsoft: Chạy tệp script](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/-----------------------a---run-script-file-)

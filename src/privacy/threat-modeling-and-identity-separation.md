@@ -1,93 +1,93 @@
-# Threat Modeling & Identity Separation
+# Mô hình hóa mối đe dọa & Tách biệt danh tính
 
 {{#include ../banners/hacktricks-training.md}}
 
-The most common anonymity failure is not broken cryptography. It is **linkage**: one identifier, timing pattern, device, account, payment, file, or human habit connects two contexts that were supposed to remain separate.
+Lỗi ẩn danh phổ biến nhất không phải do cryptography bị phá vỡ. Đó là **liên kết**: một định danh, kiểu thời gian, thiết bị, tài khoản, khoản thanh toán, tệp hoặc thói quen của con người kết nối hai bối cảnh vốn cần được giữ tách biệt.
 
-## Build a privacy threat model
+## Xây dựng mô hình mối đe dọa về quyền riêng tư
 
-EFF's six-question security plan is a strong base: what must be protected, from whom, the impact and likelihood of failure, the effort available, and allies who can help.<sup>[[1]](#references)</sup> Make it operational with a small table:
+Kế hoạch bảo mật gồm sáu câu hỏi của EFF là nền tảng vững chắc: cần bảo vệ điều gì, trước ai, hậu quả và khả năng xảy ra sự cố, nguồn lực hiện có và những đồng minh có thể giúp đỡ.<sup>[[1]](#references)</sup> Biến kế hoạch đó thành hành động bằng một bảng nhỏ:
 
-| Asset/action | Observer | Observable data | Correlation route | Control | Residual risk |
+| Tài sản/hành động | Bên quan sát | Dữ liệu có thể quan sát | Cách liên kết | Biện pháp kiểm soát | Rủi ro còn lại |
 |---|---|---|---|---|---|
-| Researching a client | ISP | Destination/timing metadata | Home subscriber record | Tor Browser | Tor use visible; end-to-end correlation |
-| Pseudonymous account | Platform | IP, browser, recovery data | Reused phone/email/photo | Dedicated context and alias | Writing/social graph correlation |
-| Online purchase | Merchant | Account, delivery, tokenized card | Address and account history | Guest checkout, minimal fields, virtual card | Issuer and carrier retain records |
-| Red-team traffic | Target/client | Source IP and behavior | Provider/engagement records | Dedicated authorized egress | Deliberately attributable under escalation |
+| Nghiên cứu về một khách hàng | ISP | Metadata về đích đến/thời điểm | Hồ sơ thuê bao tại nhà | Tor Browser | Việc dùng Tor vẫn hiển thị; tương quan đầu cuối |
+| Tài khoản dùng biệt danh | Nền tảng | IP, trình duyệt, dữ liệu khôi phục | Dùng lại số điện thoại/email/ảnh | Bối cảnh riêng và bí danh | Có thể liên kết qua cách viết/đồ thị xã hội |
+| Mua hàng trực tuyến | Người bán | Tài khoản, giao hàng, thẻ được token hóa | Địa chỉ và lịch sử tài khoản | Thanh toán với tư cách khách, điền ít trường thông tin, thẻ ảo | Tổ chức phát hành và nhà mạng vẫn lưu hồ sơ |
+| Lưu lượng red-team | Mục tiêu/khách hàng | IP nguồn và hành vi | Hồ sơ nhà cung cấp/hoạt động | Egress riêng được ủy quyền | Cố ý có thể quy kết khi leo thang |
 
-Review the table whenever the location, provider, device, counterpart, or consequences change.
+Xem lại bảng mỗi khi địa điểm, nhà cung cấp, thiết bị, bên liên quan hoặc hậu quả thay đổi.
 
-## Draw the linkability graph
+## Vẽ đồ thị liên kết
 
-Treat each identity as a separate node. Add an edge for every shared attribute:
+Coi mỗi danh tính là một nút riêng. Thêm một cạnh cho mỗi thuộc tính được dùng chung:
 
-- email or recovery address;
-- phone number or contact-book upload;
-- username, avatar, photo, bio, or writing/code style;
-- password, passkey-sync account, or recovery question;
-- device, advertising ID, browser profile, cookies, fonts, or extensions;
-- IP address, time zone, language, schedule, or simultaneous online status;
-- bank card, exchange account, wallet cluster, shipping address, or loyalty program;
-- document author fields, EXIF location, printer marks, or cloud-share owner;
-- colleague, group membership, and social graph.
+- email hoặc địa chỉ khôi phục;
+- số điện thoại hoặc dữ liệu tải lên từ danh bạ;
+- tên người dùng, ảnh đại diện, ảnh, tiểu sử hoặc văn phong viết/lập trình;
+- mật khẩu, tài khoản đồng bộ passkey hoặc câu hỏi khôi phục;
+- thiết bị, ID quảng cáo, hồ sơ trình duyệt, cookie, font hoặc tiện ích mở rộng;
+- địa chỉ IP, múi giờ, ngôn ngữ, lịch trình hoặc trạng thái trực tuyến đồng thời;
+- thẻ ngân hàng, tài khoản sàn giao dịch, cụm ví, địa chỉ giao hàng hoặc chương trình khách hàng thân thiết;
+- trường thông tin tác giả trong tài liệu, vị trí EXIF, dấu máy in hoặc chủ sở hữu tệp chia sẻ trên cloud;
+- đồng nghiệp, tư cách thành viên nhóm và đồ thị xã hội.
 
-An edge is not automatically fatal, but it tells you which observer can make the connection. EFF specifically warns that phone numbers, email addresses, and reused photographs can link profiles.<sup>[[2]](#references)</sup>
+Một cạnh không đồng nghĩa với thất bại chắc chắn, nhưng cho bạn biết bên quan sát nào có thể liên kết các danh tính. EFF đặc biệt cảnh báo rằng số điện thoại, địa chỉ email và ảnh được dùng lại có thể liên kết các hồ sơ.<sup>[[2]](#references)</sup>
 
-## Create a compartment step by step
+## Tạo một ngăn cách ly theo từng bước
 
-1. **Name the context and prohibited links.** Example: `client-red-2026`, prohibited from personal email, home browser profiles, personal payment methods, and unrelated clients.
-2. **Choose the isolation boundary.** In increasing strength: separate browser profile → separate OS account → separate VM/qube → dedicated device. A separate tab or private window is not a security boundary.
-3. **Create fresh identifiers inside that boundary.** Use a context-specific email/alias, username, password-manager vault or collection, and authentication keys. Do not add a personal recovery channel if unlinkability from the provider matters.
-4. **Choose one network policy.** Decide whether the context always uses a client VPN, engagement VPS, trusted VPN, or Tor. Enforce fail-closed routing where possible.
-5. **Choose a payment policy.** The payment method must match the observer model; a virtual card may hide the PAN from a merchant but still identifies the customer to the issuer.
-6. **Set data-transfer rules.** Prefer narrowly scoped, deliberate transfers. Treat clipboard, shared folders, USB devices, cloud sync, printers, and screenshots as possible bridges.
-7. **Record creation and teardown dates.** Define which evidence must be retained for contracts/tax/compliance and which transient data should expire.
-8. **Test for links before use.** Inspect account settings, recovery fields, public profile, IP/DNS, browser state, file metadata, and provider dashboards.
+1. **Đặt tên cho bối cảnh và xác định các liên kết bị cấm.** Ví dụ: `client-red-2026`, không liên kết với email cá nhân, hồ sơ trình duyệt tại nhà, phương thức thanh toán cá nhân và các khách hàng không liên quan.
+2. **Chọn ranh giới cách ly.** Theo mức độ cách ly tăng dần: hồ sơ trình duyệt riêng → tài khoản OS riêng → VM/qube riêng → thiết bị chuyên dụng. Tab riêng hoặc cửa sổ riêng tư không phải là ranh giới bảo mật.
+3. **Tạo định danh mới bên trong ranh giới đó.** Dùng email/bí danh, tên người dùng, kho hoặc bộ sưu tập trong password manager và khóa xác thực dành riêng cho bối cảnh. Đừng thêm kênh khôi phục cá nhân nếu cần tránh để nhà cung cấp liên kết danh tính.
+4. **Chọn một chính sách mạng.** Quyết định bối cảnh luôn dùng VPN của khách hàng, VPS phục vụ hoạt động, VPN đáng tin cậy hay Tor. Khi có thể, hãy thực thi định tuyến fail-closed.
+5. **Chọn chính sách thanh toán.** Phương thức thanh toán phải phù hợp với mô hình bên quan sát; thẻ ảo có thể che PAN khỏi người bán nhưng vẫn xác định khách hàng với tổ chức phát hành.
+6. **Đặt quy tắc truyền dữ liệu.** Ưu tiên truyền dữ liệu có chủ đích và giới hạn phạm vi. Coi clipboard, thư mục dùng chung, thiết bị USB, đồng bộ cloud, máy in và ảnh chụp màn hình là những cầu nối tiềm năng.
+7. **Ghi lại ngày tạo và ngày dọn bỏ.** Xác định bằng chứng nào cần được lưu giữ để phục vụ hợp đồng/thuế/tuân thủ và dữ liệu tạm thời nào cần hết hạn.
+8. **Kiểm tra liên kết trước khi sử dụng.** Kiểm tra cài đặt tài khoản, trường khôi phục, hồ sơ công khai, IP/DNS, trạng thái trình duyệt, metadata tệp và dashboard của nhà cung cấp.
 
 {% hint style="warning" %}
-Do not invent identity information where a service or law requires accurate identification. A privacy compartment is about data minimization and separation, not identity fraud or bypassing customer due diligence.
+Đừng bịa thông tin danh tính khi dịch vụ hoặc luật yêu cầu xác minh danh tính chính xác. Ngăn cách quyền riêng tư nhằm giảm thiểu và tách biệt dữ liệu, không phải gian lận danh tính hay né tránh thẩm định khách hàng.
 {% endhint %}
 
-## Endpoint and account baseline
+## Nền tảng cho endpoint và tài khoản
 
-- Use supported hardware and promptly install OS, browser, wallet, and firmware updates.
-- Enable device encryption and use a strong device passcode. Encryption at rest helps when a powered-off device is lost or seized, but not while malware or an unlocked session can read data.<sup>[[3]](#references)</sup>
-- Use unique, randomly generated passwords in a password manager.
-- Prefer phishing-resistant authentication such as WebAuthn/passkeys or hardware security keys where the threat model permits their recovery/sync model. NIST notes that manually entered OTPs are not phishing-resistant because an impostor can relay them.<sup>[[4]](#references)</sup>
-- Keep recovery codes offline and separated from the endpoint. Review whether a synced passkey account joins identities that should remain separate.
-- Disable unnecessary location, contacts, microphone, camera, Bluetooth, advertising-ID, and background permissions.
-- Do not mix personal cloud sync, browser sync, password-manager accounts, or app stores into a high-separation context.
+- Dùng phần cứng còn được hỗ trợ và nhanh chóng cài đặt các bản cập nhật OS, trình duyệt, wallet và firmware.
+- Bật mã hóa thiết bị và dùng mật mã thiết bị mạnh. Mã hóa dữ liệu lưu trữ giúp bảo vệ khi thiết bị đã tắt nguồn bị mất hoặc bị thu giữ, nhưng không có tác dụng khi malware hoặc phiên đã mở khóa có thể đọc dữ liệu.<sup>[[3]](#references)</sup>
+- Dùng mật khẩu duy nhất, được tạo ngẫu nhiên trong password manager.
+- Ưu tiên phương thức xác thực chống phishing như WebAuthn/passkey hoặc khóa bảo mật phần cứng nếu mô hình mối đe dọa cho phép dùng mô hình khôi phục/đồng bộ của chúng. NIST lưu ý OTP được nhập thủ công không chống phishing vì kẻ mạo danh có thể chuyển tiếp mã đó.<sup>[[4]](#references)</sup>
+- Giữ mã khôi phục ngoại tuyến và tách biệt khỏi endpoint. Xem xét liệu tài khoản đồng bộ passkey có liên kết những danh tính cần được giữ tách biệt hay không.
+- Tắt các quyền không cần thiết về vị trí, danh bạ, microphone, camera, Bluetooth, ID quảng cáo và chạy nền.
+- Không dùng chung đồng bộ cloud cá nhân, đồng bộ trình duyệt, tài khoản password manager hoặc cửa hàng ứng dụng trong bối cảnh cần mức độ tách biệt cao.
 
-## Browser privacy
+## Quyền riêng tư trên trình duyệt
 
-Browser fingerprinting uses observable configuration, device, environment, and behavior to identify or correlate a user. Clearing cookies or changing IP addresses does not reliably defeat it, and the W3C considers complete technical elimination by widely deployed means implausible.<sup>[[5]](#references)</sup>
+Fingerprinting trình duyệt sử dụng cấu hình, thiết bị, môi trường và hành vi có thể quan sát được để nhận diện hoặc liên kết người dùng. Xóa cookie hoặc đổi địa chỉ IP không thể đánh bại cách này một cách đáng tin cậy, và W3C cho rằng việc loại bỏ hoàn toàn bằng các phương tiện kỹ thuật được triển khai rộng rãi là khó khả thi.<sup>[[5]](#references)</sup>
 
-For ordinary privacy:
+Để có quyền riêng tư thông thường:
 
-1. Use a maintained browser with HTTPS-only mode and strong tracking protection.
-2. Block third-party tracking and partition state where supported.
-3. Use separate browser profiles for genuinely separate contexts.
-4. Disable unneeded permissions and clear site data on a defined schedule.
-5. Avoid logging into identity-rich accounts while doing unrelated sensitive research.
+1. Dùng trình duyệt được duy trì cập nhật, có chế độ chỉ HTTPS và khả năng bảo vệ chống theo dõi mạnh.
+2. Chặn theo dõi của bên thứ ba và phân vùng trạng thái khi được hỗ trợ.
+3. Dùng các hồ sơ trình duyệt riêng cho những bối cảnh thực sự tách biệt.
+4. Tắt các quyền không cần thiết và xóa dữ liệu trang web theo lịch xác định.
+5. Tránh đăng nhập vào tài khoản chứa nhiều thông tin định danh khi thực hiện nghiên cứu nhạy cảm không liên quan.
 
-For web anonymity, use **Tor Browser in its standard configuration**. Do not proxy a normal browser through Tor: Tor Project warns that ordinary browsers can leak through DNS/WebRTC, persistent state, fonts, plugins, and fingerprint differences.<sup>[[6]](#references)</sup> Avoid extra extensions, unusual window sizes, custom fonts, and preferences that make the browser stand out.<sup>[[7]](#references)</sup>
+Để ẩn danh trên web, hãy dùng **Tor Browser với cấu hình tiêu chuẩn**. Đừng chuyển tiếp lưu lượng của trình duyệt thông thường qua Tor: Tor Project cảnh báo rằng trình duyệt thông thường có thể làm lộ dữ liệu qua DNS/WebRTC, trạng thái lưu trữ lâu dài, font, plugin và khác biệt về fingerprint.<sup>[[6]](#references)</sup> Tránh dùng tiện ích mở rộng bổ sung, kích thước cửa sổ khác thường, font tùy chỉnh và các tùy chọn khiến trình duyệt trở nên khác biệt.<sup>[[7]](#references)</sup>
 
-## Communications and metadata
+## Liên lạc và metadata
 
-Metadata includes sender, recipient, time, location, and other context even when message content is encrypted.<sup>[[8]](#references)</sup>
+Metadata bao gồm người gửi, người nhận, thời gian, vị trí và các thông tin ngữ cảnh khác, ngay cả khi nội dung tin nhắn được mã hóa.<sup>[[8]](#references)</sup>
 
-- Prefer end-to-end-encrypted tools with minimized server-side metadata and open protocols/clients where practical.
-- Verify sensitive contacts using an independent channel or in person. Signal safety numbers are designed for this check.<sup>[[9]](#references)</sup>
-- Signal usernames can initiate contact without sharing a phone number, but a phone number is still required to register; configure phone-number visibility/discoverability deliberately.<sup>[[9]](#references)</sup>
-- Disappearing messages reduce retained copies; recipients can still photograph, copy, forward, or archive content.
-- Email normally exposes routing metadata. Even privacy-focused providers cannot make a message end-to-end encrypted when the other side uses ordinary email unless both parties use a compatible E2EE method. Proton, for example, documents that ordinary mail to other providers uses TLS and remains readable by the receiving provider.<sup>[[10]](#references)</sup>
-- Separate address books and do not upload personal contacts to a pseudonymous account.
+- Khi khả thi, hãy ưu tiên các công cụ mã hóa đầu cuối có metadata phía máy chủ được tối thiểu hóa và giao thức/ứng dụng khách mã nguồn mở.
+- Xác minh danh tính các liên hệ nhạy cảm qua một kênh độc lập hoặc gặp trực tiếp. Mã an toàn Signal được thiết kế để phục vụ việc kiểm tra này.<sup>[[9]](#references)</sup>
+- Tên người dùng Signal cho phép bắt đầu liên lạc mà không cần chia sẻ số điện thoại, nhưng vẫn cần số điện thoại để đăng ký; hãy chủ động cấu hình khả năng hiển thị/tìm kiếm bằng số điện thoại.<sup>[[9]](#references)</sup>
+- Tin nhắn tự biến mất giúp giảm số bản sao được lưu giữ; người nhận vẫn có thể chụp ảnh, sao chép, chuyển tiếp hoặc lưu trữ nội dung.
+- Email thường để lộ metadata định tuyến. Ngay cả nhà cung cấp chú trọng quyền riêng tư cũng không thể mã hóa đầu cuối một tin nhắn nếu bên kia dùng email thông thường, trừ khi cả hai bên dùng phương thức E2EE tương thích. Ví dụ, Proton ghi rõ rằng thư thông thường gửi đến nhà cung cấp khác sử dụng TLS và vẫn có thể được nhà cung cấp nhận đọc.<sup>[[10]](#references)</sup>
+- Tách riêng sổ địa chỉ và không tải danh bạ cá nhân lên tài khoản dùng biệt danh.
 
-## Files, photos and authorship
+## Tệp, ảnh và quyền tác giả
 
-Tails warns that photographs can contain camera and location data and office documents can contain author and creation-time fields.<sup>[[11]](#references)</sup>
+Tails cảnh báo rằng ảnh có thể chứa dữ liệu máy ảnh và vị trí, còn tài liệu văn phòng có thể chứa trường thông tin tác giả và thời gian tạo.<sup>[[11]](#references)</sup>
 
-Before sharing:
+Trước khi chia sẻ:
 
 ```bash
 # Inspect recursively; do not assume the extension tells the whole story
@@ -97,48 +97,48 @@ exiftool -a -u -g1 path/to/file
 exiftool -all= -o cleaned-file path/to/file
 ```
 
-Then reopen the cleaned copy in an isolated viewer and check:
+Sau đó mở lại bản đã làm sạch trong một trình xem biệt lập và kiểm tra:
 
-- document properties, comments, tracked changes, hidden sheets/slides, thumbnails and attachments;
-- EXIF/XMP/IPTC, GPS, timestamps, device/software names and unique IDs;
-- visible reflections, landmarks, screen contents, voices, faces and background sounds;
-- filename, archive paths, cloud-share owner, signing certificate and revision history.
+- thuộc tính tài liệu, bình luận, nội dung đã theo dõi thay đổi, trang tính/trang chiếu ẩn, hình thu nhỏ và tệp đính kèm;
+- EXIF/XMP/IPTC, GPS, dấu thời gian, tên thiết bị/phần mềm và ID duy nhất;
+- hình phản chiếu, địa danh, nội dung màn hình, giọng nói, khuôn mặt và âm thanh nền hiển thị hoặc nghe được;
+- tên tệp, đường dẫn trong kho lưu trữ, chủ sở hữu liên kết chia sẻ trên cloud, chứng chỉ ký và lịch sử phiên bản.
 
-Sanitization can damage evidence or authenticity. Preserve an encrypted original when chain of custody or later verification matters. Stylometry and coding style may also link authorship; metadata removal does not change human style.
+Việc khử dữ liệu có thể làm hỏng bằng chứng hoặc tính xác thực. Hãy giữ bản gốc được mã hóa nếu cần bảo toàn chuỗi quản lý chứng cứ hoặc xác minh sau này. Phong cách viết và phong cách lập trình cũng có thể liên kết tác giả; xóa metadata không làm thay đổi phong cách của con người.
 
-## Common failure patterns
+## Các kiểu lỗi thường gặp
 
-- Logging into a personal account through an “anonymous” connection.
-- Reusing a recovery phone, avatar, username, public key, wallet, or donation address.
-- Operating two identities at the same time from correlated contexts.
-- Copying text/files through a personal cloud clipboard or shared folder.
-- Installing distinctive Tor Browser extensions or changing many defaults.
-- Trusting a “no logs” claim without understanding what is logged, for how long, and by which subcontractors.
-- Assuming a secondary phone is anonymous while it travels alongside a personal phone. EFF notes that cellular location and co-travel can correlate the devices.<sup>[[3]](#references)</sup>
-- Treating encryption as deletion; endpoints and recipients may retain plaintext.
+- Đăng nhập vào tài khoản cá nhân qua một kết nối “ẩn danh”.
+- Dùng lại số điện thoại khôi phục, avatar, tên người dùng, khóa công khai, ví hoặc địa chỉ quyên góp.
+- Vận hành đồng thời hai danh tính trong những bối cảnh có thể liên kết với nhau.
+- Sao chép văn bản/tệp qua clipboard cloud cá nhân hoặc thư mục dùng chung.
+- Cài các extension Tor Browser khác biệt hoặc thay đổi nhiều thiết lập mặc định.
+- Tin vào tuyên bố “không ghi log” mà không hiểu những gì được ghi lại, trong bao lâu và bởi những nhà thầu phụ nào.
+- Cho rằng điện thoại phụ là ẩn danh khi nó di chuyển cùng điện thoại cá nhân. EFF lưu ý rằng vị trí di động và việc di chuyển cùng nhau có thể liên kết các thiết bị.<sup>[[3]](#references)</sup>
+- Coi mã hóa là xóa dữ liệu; thiết bị đầu cuối và người nhận có thể vẫn giữ bản rõ.
 
-## Verification checklist
+## Danh sách kiểm tra xác minh
 
-- [ ] The context has no personal recovery address, phone, sync account, or reused media unless intentionally accepted.
-- [ ] The intended network path is active and fails closed.
-- [ ] Browser/device time zone, locale, extensions, and permissions match the plan.
-- [ ] No personal accounts are open in the compartment.
-- [ ] Files have been inspected and sanitized; originals are handled separately.
-- [ ] Contacts are authenticated through a second channel.
-- [ ] The provider-visible metadata and retention period are understood.
-- [ ] Teardown, evidence retention, and account-recovery procedures are documented.
+- [ ] Bối cảnh không có địa chỉ khôi phục cá nhân, số điện thoại, tài khoản đồng bộ hoặc nội dung đa phương tiện được dùng lại, trừ khi đã chủ động chấp nhận.
+- [ ] Đường truyền mạng dự kiến đang hoạt động và hệ thống ngắt an toàn khi có lỗi.
+- [ ] Múi giờ, ngôn ngữ, extension và quyền của trình duyệt/thiết bị phù hợp với kế hoạch.
+- [ ] Không có tài khoản cá nhân nào đang mở trong môi trường biệt lập.
+- [ ] Các tệp đã được kiểm tra và khử dữ liệu; bản gốc được xử lý riêng.
+- [ ] Danh tính của các liên hệ đã được xác thực qua kênh thứ hai.
+- [ ] Đã hiểu rõ metadata mà nhà cung cấp có thể thấy và thời hạn lưu giữ.
+- [ ] Đã ghi lại quy trình dọn dẹp, lưu giữ bằng chứng và khôi phục tài khoản.
 
 ## References
 
-- [1] [EFF Surveillance Self-Defense — Your Security Plan](https://ssd.eff.org/module/your-security-plan)
-- [2] [EFF Surveillance Self-Defense — Protecting Yourself on Social Networks](https://ssd.eff.org/module/protecting-yourself-social-networks)
-- [3] [EFF Surveillance Self-Defense — Attending a Protest](https://ssd.eff.org/module/attending-protest)
-- [4] [NIST SP 800-63B-4 — Authentication and Authenticator Management](https://pages.nist.gov/800-63-4/sp800-63b.html)
-- [5] [W3C — Mitigating Browser Fingerprinting in Web Specifications](https://www.w3.org/TR/fingerprinting-guidance/)
-- [6] [Tor Project — Using Tor with other browsers](https://support.torproject.org/tor-browser/security/using-tor-with-other-browsers/)
-- [7] [Tor Project — Plugins and add-ons in Tor Browser](https://support.torproject.org/tor-browser/features/plugins/)
-- [8] [EFF Surveillance Self-Defense — Why Communication Metadata Matters](https://ssd.eff.org/module/why-metadata-matters)
-- [9] [Signal — Phone Number Privacy and Usernames: Deeper Dive](https://support.signal.org/hc/en-us/articles/6829998083994-Phone-Number-Privacy-and-Usernames-Deeper-Dive)
-- [10] [Proton — What is encrypted within Proton Mail?](https://proton.me/support/what-is-encrypted-within-protonmail)
-- [11] [Tails — Warnings: Tails is safe but not magic](https://tails.net/doc/about/warnings/index.en.html)
+- [1] [EFF Surveillance Self-Defense — Kế hoạch bảo mật của bạn](https://ssd.eff.org/module/your-security-plan)
+- [2] [EFF Surveillance Self-Defense — Bảo vệ bản thân trên mạng xã hội](https://ssd.eff.org/module/protecting-yourself-social-networks)
+- [3] [EFF Surveillance Self-Defense — Tham gia biểu tình](https://ssd.eff.org/module/attending-protest)
+- [4] [NIST SP 800-63B-4 — Xác thực và quản lý phương thức xác thực](https://pages.nist.gov/800-63-4/sp800-63b.html)
+- [5] [W3C — Giảm thiểu việc lấy dấu vân tay trình duyệt trong các đặc tả web](https://www.w3.org/TR/fingerprinting-guidance/)
+- [6] [Tor Project — Sử dụng Tor với các trình duyệt khác](https://support.torproject.org/tor-browser/security/using-tor-with-other-browsers/)
+- [7] [Tor Project — Plugin và tiện ích bổ sung trong Tor Browser](https://support.torproject.org/tor-browser/features/plugins/)
+- [8] [EFF Surveillance Self-Defense — Vì sao metadata liên lạc lại quan trọng](https://ssd.eff.org/module/why-metadata-matters)
+- [9] [Signal — Quyền riêng tư số điện thoại và tên người dùng: Tìm hiểu sâu hơn](https://support.signal.org/hc/en-us/articles/6829998083994-Phone-Number-Privacy-and-Usernames-Deeper-Dive)
+- [10] [Proton — Nội dung nào trong Proton Mail được mã hóa?](https://proton.me/support/what-is-encrypted-within-protonmail)
+- [11] [Tails — Cảnh báo: Tails an toàn nhưng không phải phép màu](https://tails.net/doc/about/warnings/index.en.html)
 {{#include ../banners/hacktricks-training.md}}

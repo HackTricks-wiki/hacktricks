@@ -1,61 +1,61 @@
-# Authorized Red-Team Infrastructure
+# Hạ tầng Red-Team được ủy quyền
 
 {{#include ../banners/hacktricks-training.md}}
 
-For durable on-site devices, use the [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md) design and suspected-discovery runbook.
+Với các thiết bị tại chỗ cần hoạt động lâu dài, hãy dùng thiết kế [Capture-Resilient Authorized Field Nodes](capture-resilient-authorized-field-nodes.md) và runbook xử lý khi nghi ngờ bị phát hiện.
 
-For a professional red team, the goal is **controlled attribution**, not immunity from accountability. The target should not trivially see an operator's home IP or personal accounts, while the engagement owner must be able to identify the source, stop the operation, handle abuse reports, preserve evidence, and prove authorization.
+Với một red team chuyên nghiệp, mục tiêu là **quy kết có kiểm soát**, không phải miễn trừ trách nhiệm. Mục tiêu không nên dễ dàng nhìn thấy IP mạng nhà hoặc tài khoản cá nhân của operator, trong khi người phụ trách engagement phải có khả năng xác định nguồn, dừng hoạt động, xử lý báo cáo lạm dụng, bảo toàn bằng chứng và chứng minh đã được ủy quyền.
 
-This page is the deployment baseline for a lawful engagement. For the adversary tradecraft it is meant to emulate—including compromised ORBs, residential relays, fronting, dead drops and nearby wireless pivots—start with [Offensive Infrastructure and Attribution Evasion](offensive-infrastructure-and-attribution-evasion.md) and [Government and APT Case Studies](government-and-apt-case-studies.md), then reproduce the required telemetry in the [authorized labs](authorized-adversary-emulation-labs.md).
+Trang này là cấu hình triển khai cơ sở cho một engagement hợp pháp. Để tìm hiểu tradecraft của đối thủ mà hoạt động này mô phỏng—bao gồm ORB bị xâm nhập, relay dân dụng, fronting, dead drop và pivot qua mạng không dây ở gần—hãy bắt đầu với [Offensive Infrastructure and Attribution Evasion](offensive-infrastructure-and-attribution-evasion.md) và [Government and APT Case Studies](government-and-apt-case-studies.md), sau đó tái tạo telemetry cần thiết trong [authorized labs](authorized-adversary-emulation-labs.md).
 
-NIST defines rules of engagement (ROE) as pre-established constraints that grant authority for defined testing activities.<sup>[[1]](#references)</sup> Privacy architecture cannot expand that authority.
+NIST định nghĩa quy tắc tham gia (ROE) là các giới hạn được thiết lập trước, cấp quyền thực hiện những hoạt động kiểm thử đã xác định.<sup>[[1]](#references)</sup> Kiến trúc quyền riêng tư không thể mở rộng phạm vi quyền đó.
 
-## Choose an egress pattern
+## Chọn mô hình egress
 
-| Pattern | Best use | Target sees | Provider/local observer sees | Accountability |
+| Mô hình | Phù hợp nhất cho | Mục tiêu nhìn thấy | Nhà cung cấp/người quan sát tại chỗ nhìn thấy | Trách nhiệm giải trình |
 |---|---|---|---|---|
-| Client-provided VPN/jump host | Most assessments | Client address range | Client identity and operator access | Strongest |
-| Red-team organization bastion | Repeatable controlled egress | Organization range | Hosting provider and organization | Strong |
-| Engagement-specific VPS | Isolate clients/campaigns | VPS address | Host account, billing, control-plane and access logs | Strong if documented |
-| Approved commercial VPN | Research/scanning permitted by provider and ROE | Shared/dedicated VPN egress | VPN account and source connection | Medium |
-| Tor Browser | Web research needing destination unlinkability | Tor exit | Local network sees Tor/bridge; destination sees Tor | Poor fit for allowlisted source attribution |
-| Client-approved on-site drop | Internal simulation | On-site device/address | Site network and remote tunnel provider | Strong if inventoried |
-| Lawful guest Wi-Fi | Low-risk administrative/research use | Venue public IP or tunnel egress | Venue, ISP, VPN/Tor | Weak and physically observable |
+| VPN/jump host do client cung cấp | Hầu hết các đợt đánh giá | Dải địa chỉ của client | Danh tính client và quyền truy cập của operator | Cao nhất |
+| Bastion của tổ chức red team | Egress có kiểm soát, có thể lặp lại | Dải địa chỉ của tổ chức | Nhà cung cấp hosting và tổ chức | Cao |
+| VPS dành riêng cho engagement | Cô lập client/campaign | Địa chỉ VPS | Tài khoản hosting, thanh toán, control plane và nhật ký truy cập | Cao nếu được ghi nhận |
+| VPN thương mại được phê duyệt | Nghiên cứu/quét được nhà cung cấp và ROE cho phép | Egress VPN dùng chung/dành riêng | Tài khoản VPN và kết nối nguồn | Trung bình |
+| Tor Browser | Nghiên cứu web cần tránh liên kết hoạt động với đích | Tor exit | Mạng cục bộ thấy Tor/bridge; đích thấy Tor | Không phù hợp để quy kết nguồn trong allowlist |
+| Drop tại chỗ được client phê duyệt | Mô phỏng nội bộ | Thiết bị/địa chỉ tại chỗ | Mạng tại cơ sở và nhà cung cấp tunnel từ xa | Cao nếu được kiểm kê |
+| Wi-Fi khách được phép | Sử dụng quản trị/nghiên cứu rủi ro thấp | IP công cộng của địa điểm hoặc egress tunnel | Địa điểm, ISP, VPN/Tor | Thấp và dễ bị quan sát trực tiếp |
 
-For most work, a client-provided or organization-controlled fixed egress is safer and faster than consumer anonymity services. It also lets defenders allowlist, monitor, or deliberately **not** allowlist known source ranges according to the exercise design.
+Với hầu hết công việc, egress cố định do client cung cấp hoặc tổ chức kiểm soát an toàn và nhanh hơn các dịch vụ ẩn danh dành cho người tiêu dùng. Cách này cũng cho phép đội phòng thủ allowlist, giám sát hoặc cố ý **không** allowlist các dải nguồn đã biết, tùy theo thiết kế bài tập.
 
-## ROE infrastructure annex
+## Phụ lục hạ tầng ROE
 
-Record before deployment:
+Ghi lại trước khi triển khai:
 
-- legal entities granting and receiving authorization;
-- exact targets and explicit exclusions;
-- start/end times, time zone, and permitted techniques;
-- source IPs, autonomous-system/provider names, domains, redirectors, mail infrastructure, and on-site device identifiers;
-- whether phishing, C2, credential capture, wireless testing, physical access, denial-of-service, persistence, or third-party services are permitted;
-- client and provider approvals, including any pre-notification reference;
-- emergency stop phrase, 24/7 client and provider abuse contacts, and maximum response time;
-- data classes that may be collected, encryption, access, retention, and deletion;
-- evidence and logging requirements, including who holds the mapping from public infrastructure to operator;
-- teardown, domain expiration, certificate revocation, credential rotation, device recovery, and final attestation.
+- pháp nhân cấp và nhận ủy quyền;
+- mục tiêu chính xác và các phạm vi loại trừ rõ ràng;
+- thời gian bắt đầu/kết thúc, múi giờ và kỹ thuật được phép;
+- IP nguồn, tên autonomous system/nhà cung cấp, domain, redirector, hạ tầng email và mã định danh thiết bị tại chỗ;
+- có cho phép phishing, C2, thu thập credential, kiểm thử không dây, truy cập vật lý, denial-of-service, persistence hoặc sử dụng dịch vụ bên thứ ba hay không;
+- phê duyệt của client và nhà cung cấp, bao gồm mọi mã tham chiếu thông báo trước;
+- cụm từ dừng khẩn cấp, thông tin liên hệ 24/7 của client và bộ phận xử lý lạm dụng của nhà cung cấp, cùng thời gian phản hồi tối đa;
+- loại dữ liệu có thể thu thập, mã hóa, quyền truy cập, thời gian lưu giữ và xóa dữ liệu;
+- yêu cầu về bằng chứng và logging, bao gồm người nắm giữ bảng ánh xạ từ hạ tầng công khai đến operator;
+- tháo dỡ, hết hạn domain, thu hồi certificate, xoay vòng credential, thu hồi thiết bị và xác nhận hoàn tất cuối cùng.
 
-Verify that public IPs and domains are actually controlled by the authorizing party or explicitly included in scope. NIST SP 800-115 recommends confirming public target addresses are under the organization's purview before testing.<sup>[[2]](#references)</sup>
+Xác minh IP công khai và domain thực sự do bên ủy quyền kiểm soát hoặc được nêu rõ trong phạm vi. NIST SP 800-115 khuyến nghị xác nhận địa chỉ mục tiêu công khai thuộc quyền quản lý của tổ chức trước khi kiểm thử.<sup>[[2]](#references)</sup>
 
-## Engagement-specific fast egress
+## Egress nhanh dành riêng cho engagement
 
-### Build workflow
+### Quy trình xây dựng
 
-1. **Create an engagement account/project** under the red-team organization using accurate billing and ownership details. Separate roles, API keys, budgets, and audit logs from other clients.
-2. **Check every provider policy.** Cloud, VPS, CDN, domain, email, and VPN providers have different rules. AWS, for example, permits specified assessments but requires prior approval for hosted C2/covert simulations and prohibits listed activities.<sup>[[3]](#references)</sup>
-3. **Allocate fixed egress addresses** and put them in the ROE annex. Avoid rapid IP/resource cycling; it complicates incident response and may violate provider policy.
-4. **Harden management:** key-only SSH or an identity-aware management plane, phishing-resistant MFA, separate admin network, least privilege, patched images, no public admin ports, and encrypted secret storage.
-5. **Create a full-tunnel path** from the operator endpoint to the bastion. Route DNS and IPv6 deliberately and enforce a firewall deny when the tunnel is down.
-6. **Restrict outbound destinations and ports** to the authorized scope when feasible. Rate-limit scanners and put irreversible/destructive techniques behind a separate approval gate.
-7. **Log for accountability, not surveillance:** operator authentication, configuration changes, start/stop, source address, scoped destination, and tool/job identifiers. Avoid payload/credential capture unless required by the exercise and protected by the data plan.
-8. **Validate through a controlled endpoint** owned by the organization: observed IPv4/IPv6, DNS path, reverse DNS, clock, source-port behavior, failure/reconnect, and provider abuse contact.
-9. **Share the attribution map securely** with the exercise controller or an agreed escrow contact. Do not publish it to the target team if blind detection is part of the test.
+1. **Tạo tài khoản/project dành cho engagement** thuộc tổ chức red team, sử dụng thông tin thanh toán và sở hữu chính xác. Tách riêng vai trò, API key, ngân sách và audit log khỏi các client khác.
+2. **Kiểm tra chính sách của từng nhà cung cấp.** Nhà cung cấp cloud, VPS, CDN, domain, email và VPN có các quy định khác nhau. Ví dụ, AWS cho phép một số hoạt động đánh giá nhất định nhưng yêu cầu phê duyệt trước đối với C2 được host/mô phỏng covert, đồng thời cấm các hoạt động được liệt kê.<sup>[[3]](#references)</sup>
+3. **Cấp phát địa chỉ egress cố định** và ghi vào phụ lục ROE. Tránh luân chuyển IP/tài nguyên liên tục; việc này gây phức tạp cho ứng phó sự cố và có thể vi phạm chính sách của nhà cung cấp.
+4. **Gia cố hệ thống quản lý:** SSH chỉ dùng key hoặc management plane nhận biết danh tính, MFA chống phishing, mạng admin riêng, quyền tối thiểu, image đã vá, không mở cổng admin công khai và lưu trữ secret được mã hóa.
+5. **Thiết lập đường truyền full-tunnel** từ endpoint của operator đến bastion. Định tuyến DNS và IPv6 có chủ đích, đồng thời áp dụng firewall deny khi tunnel bị ngắt.
+6. **Giới hạn đích và cổng outbound** theo phạm vi được ủy quyền khi khả thi. Giới hạn tốc độ scanner và yêu cầu phê duyệt riêng trước khi thực hiện kỹ thuật không thể đảo ngược/phá hoại.
+7. **Logging để giải trình, không phải giám sát:** xác thực operator, thay đổi cấu hình, thời điểm bắt đầu/dừng, địa chỉ nguồn, đích trong phạm vi và mã định danh công cụ/job. Tránh thu thập payload/credential trừ khi bài tập yêu cầu và kế hoạch dữ liệu có biện pháp bảo vệ.
+8. **Xác thực qua endpoint có kiểm soát** do tổ chức sở hữu: IPv4/IPv6 được quan sát, đường đi DNS, reverse DNS, đồng hồ, hành vi source-port, lỗi/kết nối lại và thông tin liên hệ xử lý lạm dụng của nhà cung cấp.
+9. **Chia sẻ bảng ánh xạ quy kết một cách bảo mật** với người điều phối bài tập hoặc đầu mối escrow đã thống nhất. Không công bố bảng này cho đội mục tiêu nếu bài kiểm thử có bao gồm phát hiện mù.
 
-### Architecture
+### Kiến trúc
 
 ```text
 dedicated operator context
@@ -69,83 +69,83 @@ engagement bastion / fixed egress ---- management + audit plane
    authorized targets
 ```
 
-A VPS is pseudonymous only to the destination. The host can have contact, billing, identity, source-IP, API, device, location, and usage records; customer-visible AWS CloudTrail history alone can expose management activity.<sup>[[4]](#references)</sup> Paying for hosting with cryptocurrency does not erase those records.
+Một VPS chỉ ẩn danh tính với đích đến. Nhà cung cấp có thể lưu hồ sơ liên hệ, thanh toán, danh tính, IP nguồn, API, thiết bị, vị trí và mức sử dụng; riêng lịch sử AWS CloudTrail mà khách hàng xem được cũng có thể tiết lộ hoạt động quản lý.<sup>[[4]](#references)</sup> Thanh toán dịch vụ hosting bằng cryptocurrency không xóa được những hồ sơ đó.
 
-## Domains and certificates
+## Tên miền và chứng chỉ
 
-- Use an engagement-specific registrar account owned by the organization.
-- Enable registrar lock, DNSSEC where supported, MFA/security keys, and auto-renew only for the approved period.
-- Use registration privacy to reduce public exposure, not to misrepresent registrant information. ICANN policy requires registrars to collect registration data even when public display is redacted or proxied.<sup>[[5]](#references)</sup>
-- Avoid names that unlawfully impersonate unrelated parties. Typosquatting/lookalike domains require explicit client and provider approval.
-- Inventory DNS, certificates, CDN/redirector configuration, and third-party analytics that could leak operators or clients.
-- At teardown, remove records, revoke certificates/tokens, preserve agreed evidence, and decide whether the domain should be defensively retained.
+- Dùng tài khoản registrar dành riêng cho từng engagement, thuộc sở hữu của tổ chức.
+- Bật registrar lock, DNSSEC nếu được hỗ trợ, MFA/security keys và chỉ bật tự động gia hạn trong khoảng thời gian đã phê duyệt.
+- Dùng dịch vụ bảo mật thông tin đăng ký để giảm khả năng hiển thị công khai, không dùng để khai báo sai thông tin người đăng ký. Chính sách ICANN yêu cầu registrar thu thập dữ liệu đăng ký ngay cả khi thông tin hiển thị công khai bị ẩn hoặc được proxy.<sup>[[5]](#references)</sup>
+- Tránh các tên miền mạo danh trái phép bên không liên quan. Typosquatting/tên miền trông giống cần có sự chấp thuận rõ ràng của khách hàng và nhà cung cấp.
+- Kiểm kê DNS, chứng chỉ, cấu hình CDN/redirector và analytics của bên thứ ba có thể làm leak thông tin về operator hoặc khách hàng.
+- Khi teardown, xóa các bản ghi, thu hồi chứng chỉ/token, lưu giữ bằng chứng theo thỏa thuận và quyết định có nên giữ tên miền để phòng vệ hay không.
 
-## Authorized on-site drop nodes
+## Thiết bị drop node tại chỗ được ủy quyền
 
-A Raspberry Pi or similar appliance is acceptable only when the property/network owner and client explicitly authorize its exact placement and behavior. A safe plan:
+Chỉ được dùng Raspberry Pi hoặc thiết bị tương tự khi chủ sở hữu địa điểm/mạng và khách hàng cho phép rõ ràng vị trí lắp đặt và cách thức hoạt động cụ thể. Kế hoạch an toàn:
 
-1. Record device serial, MAC/private-MAC policy, photo, owner, exact approved location, power source, retrieval deadline, and tamper contact.
-2. Use a minimal signed image, encrypted secrets, read-only or recoverable storage, host firewall, automatic security updates where practical, and no default credentials.
-3. Configure outbound-only communication to a named engagement endpoint. Do not expose an unauthenticated listener.
-4. Allowlist destinations and capabilities. Packet capture, credential collection, wireless impersonation, and lateral movement must each be explicitly authorized.
-5. Use mutual authentication, short-lived keys, remote kill, health reporting, and bandwidth limits.
-6. Ensure loss/theft does not reveal reusable credentials or client data.
-7. Put retrieval and secure wipe/decommission in the calendar; obtain a signed recovery record.
+1. Ghi lại số serial thiết bị, MAC/chính sách private MAC, ảnh, chủ sở hữu, vị trí chính xác đã được duyệt, nguồn điện, hạn chót thu hồi và thông tin liên hệ khi thiết bị bị can thiệp.
+2. Dùng image tối giản có chữ ký, secrets được mã hóa, bộ nhớ chỉ đọc hoặc có thể khôi phục, host firewall, tự động cập nhật bảo mật nếu khả thi và không dùng thông tin đăng nhập mặc định.
+3. Cấu hình chỉ giao tiếp outbound đến endpoint cụ thể của engagement. Không mở listener không xác thực.
+4. Allowlist các đích đến và khả năng. Packet capture, thu thập thông tin đăng nhập, giả mạo mạng không dây và lateral movement đều phải được cho phép rõ ràng.
+5. Dùng xác thực hai chiều, khóa có thời hạn ngắn, remote kill, báo cáo tình trạng và giới hạn băng thông.
+6. Đảm bảo việc mất hoặc bị trộm thiết bị không làm lộ thông tin đăng nhập có thể tái sử dụng hoặc dữ liệu khách hàng.
+7. Lên lịch thu hồi và secure wipe/ngừng hoạt động; lấy biên bản thu hồi có chữ ký.
 
-Do not hide hardware at a café, hotel, shared office, neighbor's property, or public venue without the owner/operator's written permission.
+Không giấu thiết bị tại quán cà phê, khách sạn, văn phòng dùng chung, nhà hàng xóm hoặc địa điểm công cộng nếu không có sự cho phép bằng văn bản của chủ sở hữu/đơn vị vận hành.
 
-## Guest networks and travel routers
+## Mạng khách và travel router
 
-If an authorized scenario requires guest access:
+Nếu kịch bản được ủy quyền yêu cầu truy cập mạng khách:
 
-- verify the SSID and acceptable-use policy with the venue/client;
-- use an organization-owned travel router or low-trust bridge device to isolate the privileged workstation;
-- complete captive portals outside the privileged workstation;
-- start the approved tunnel before assessment traffic;
-- confirm tethered devices actually use that tunnel;
-- assume the venue can correlate radio association, portal, physical presence, and camera/payment records;
-- never bypass access control, clone another device, attack Wi-Fi, or leave equipment behind.
+- xác minh SSID và chính sách sử dụng được chấp nhận với địa điểm/khách hàng;
+- dùng travel router thuộc sở hữu tổ chức hoặc thiết bị bridge có độ tin cậy thấp để cô lập workstation có đặc quyền;
+- hoàn tất captive portal bên ngoài workstation có đặc quyền;
+- khởi chạy tunnel đã được phê duyệt trước khi có lưu lượng assessment;
+- xác nhận các thiết bị tether thực sự sử dụng tunnel đó;
+- giả định địa điểm có thể đối chiếu kết nối vô tuyến, portal, sự hiện diện tại chỗ và hồ sơ camera/thanh toán;
+- không bao giờ vượt qua kiểm soát truy cập, sao chép thiết bị khác, tấn công Wi-Fi hoặc bỏ lại thiết bị.
 
-## Operational separation
+## Tách biệt hoạt động
 
-- One client/engagement per endpoint compartment, cloud project, secrets set, domain group, redirector set, and evidence store.
-- No personal email, browser sync, phone number, cloud drive, SSH/GPG key, code-signing identity, or payment reimbursement outside approved organization systems.
-- Do not reuse distinctive payload configuration, callback paths, certificates, or public repositories across clients unless the exercise design accepts fingerprinting.
-- Give infrastructure a kill date and budget alert. Orphaned systems become risk to both client and Internet.
-- Preserve enough internal attribution to investigate accidents. “No logs” is usually incompatible with professional evidence and safety obligations.
+- Mỗi khách hàng/engagement dùng một endpoint compartment, cloud project, bộ secrets, nhóm tên miền, nhóm redirector và kho bằng chứng riêng.
+- Không dùng email cá nhân, browser sync, số điện thoại, cloud drive, SSH/GPG key, danh tính ký code hoặc khoản hoàn trả thanh toán ngoài các hệ thống tổ chức đã được phê duyệt.
+- Không tái sử dụng cấu hình payload đặc trưng, callback path, chứng chỉ hoặc public repository giữa các khách hàng, trừ khi thiết kế bài tập chấp nhận việc bị fingerprint.
+- Đặt ngày kill và cảnh báo ngân sách cho hạ tầng. Hệ thống bị bỏ quên sẽ trở thành rủi ro cho cả khách hàng lẫn Internet.
+- Lưu đủ thông tin quy kết nội bộ để điều tra sự cố. “Không có log” thường không tương thích với nghĩa vụ chuyên môn về bằng chứng và an toàn.
 
-## Blind to defenders, attributable to the controller
+## Ẩn với đội phòng thủ, nhưng có thể quy trách nhiệm cho bên kiểm soát
 
-When the exercise objective is to measure detection rather than test an allowlist, the target SOC can remain blind without making the operation unaccountable:
+Khi mục tiêu bài tập là đánh giá khả năng phát hiện thay vì kiểm tra allowlist, SOC mục tiêu có thể không được biết trước mà hoạt động vẫn có thể truy trách nhiệm:
 
-1. The exercise controller approves every public source, domain, certificate and on-site device but withholds the list from the SOC.
-2. The controller stores the source-to-engagement/operator map in a separate encrypted vault with two-person emergency access.
-3. Each operator job receives a signed manifest containing scope, time window, source compartment and irreversible job identifier. The target never needs to see the manifest during normal operation.
-4. Bastion audit events are chained or sent append-only to controller storage so an operator cannot silently rewrite attribution after an incident.
-5. A 24/7 provider-abuse contact holds a verification phrase/reference that confirms authorization without disclosing the client publicly.
-6. Every path implements an out-of-band stop channel that does not depend on the assessment C2, target network or one operator's account.
-7. Before live testing, send benign canaries from every source. Confirm the controller can resolve and stop them within the ROE response time.
-8. After the exercise, compare SOC telemetry with the controller ledger, disclose the source list, and explain missed/incorrect detections.
+1. Controller của bài tập phê duyệt mọi public source, tên miền, chứng chỉ và thiết bị tại chỗ nhưng không cung cấp danh sách đó cho SOC.
+2. Controller lưu bản ánh xạ source-to-engagement/operator trong một vault mã hóa riêng, có cơ chế truy cập khẩn cấp cần hai người.
+3. Mỗi operator nhận một manifest có chữ ký, ghi rõ scope, time window, source compartment và job identifier không thể thay đổi. Trong hoạt động bình thường, mục tiêu không cần xem manifest.
+4. Audit event trên bastion được liên kết theo chuỗi hoặc gửi theo chế độ chỉ ghi thêm vào kho lưu trữ của controller để operator không thể âm thầm sửa thông tin quy kết sau sự cố.
+5. Đầu mối xử lý lạm dụng của nhà cung cấp hoạt động 24/7, lưu một verification phrase/reference để xác nhận đã được ủy quyền mà không công khai khách hàng.
+6. Mọi đường dẫn đều có kênh dừng ngoài băng tần, không phụ thuộc vào assessment C2, mạng mục tiêu hay tài khoản của một operator.
+7. Trước khi kiểm thử thật, gửi canary vô hại từ mọi nguồn. Xác nhận controller có thể xác định và dừng chúng trong thời gian phản hồi ROE.
+8. Sau bài tập, đối chiếu telemetry của SOC với sổ ghi nhận của controller, công bố danh sách nguồn và giải thích các trường hợp phát hiện bị bỏ sót hoặc không chính xác.
 
-Do not add anti-forensics, log destruction, compromised relays or false subscriber identities. Those defeat accountable testing rather than improve it.
+Không thêm anti-forensics, hủy log, relay bị xâm nhập hoặc danh tính thuê bao giả. Những việc đó phá vỡ khả năng kiểm thử có trách nhiệm thay vì cải thiện nó.
 
-## Teardown checklist
+## Danh sách kiểm tra teardown
 
-- [ ] Exercise controller confirms stop.
-- [ ] C2, tunnels, redirectors, mail, VPN, and scheduled jobs are disabled.
-- [ ] On-site devices are physically recovered and reconciled.
-- [ ] Tokens, API keys, SSH keys, certificates, and captured credentials are revoked/rotated.
-- [ ] DNS and cloud resources are removed or transferred for defensive retention.
-- [ ] Client data is returned, retained, or destroyed according to the contract.
-- [ ] Required financial, audit, and authorization records remain encrypted and access-controlled.
-- [ ] Provider abuse cases are closed and the client receives final source indicators.
-- [ ] A second operator verifies that no infrastructure remains active.
+- [ ] Controller của bài tập xác nhận đã dừng.
+- [ ] C2, tunnel, redirector, mail, VPN và scheduled job đã bị vô hiệu hóa.
+- [ ] Thiết bị tại chỗ đã được thu hồi thực tế và đối soát.
+- [ ] Token, API key, SSH key, chứng chỉ và thông tin đăng nhập thu thập được đã bị thu hồi/đổi.
+- [ ] DNS và tài nguyên cloud đã bị xóa hoặc chuyển giao để lưu giữ phòng vệ.
+- [ ] Dữ liệu khách hàng đã được hoàn trả, lưu giữ hoặc hủy theo hợp đồng.
+- [ ] Hồ sơ tài chính, audit và ủy quyền bắt buộc vẫn được mã hóa và kiểm soát truy cập.
+- [ ] Các vụ việc lạm dụng với nhà cung cấp đã được đóng và khách hàng nhận được các source indicator cuối cùng.
+- [ ] Operator thứ hai xác minh không còn hạ tầng nào hoạt động.
 
 ## References
 
-- [1] [NIST CSRC — Rules of Engagement](https://csrc.nist.gov/glossary/term/Rules_of_Engagement)
-- [2] [NIST SP 800-115 — Technical Guide to Information Security Testing and Assessment](https://csrc.nist.gov/pubs/sp/800/115/final)
-- [3] [AWS — Customer Support Policy for Penetration Testing](https://aws.amazon.com/security/penetration-testing/)
-- [4] [AWS — Privacy Notice](https://aws.amazon.com/privacy/) and [CloudTrail Event History](https://docs.aws.amazon.com/awscloudtrail/latest/userguide/view-cloudtrail-events.html)
-- [5] [ICANN — Registration Data Policy](https://www.icann.org/en/contracted-parties/consensus-policies/registration-data-policy)
+- [1] [NIST CSRC — Quy tắc tham gia](https://csrc.nist.gov/glossary/term/Rules_of_Engagement)
+- [2] [NIST SP 800-115 — Hướng dẫn kỹ thuật về kiểm thử và đánh giá an toàn thông tin](https://csrc.nist.gov/pubs/sp/800/115/final)
+- [3] [AWS — Chính sách hỗ trợ khách hàng đối với kiểm thử xâm nhập](https://aws.amazon.com/security/penetration-testing/)
+- [4] [AWS — Thông báo về quyền riêng tư](https://aws.amazon.com/privacy/) and [CloudTrail Event History](https://docs.aws.amazon.com/awscloudtrail/latest/userguide/view-cloudtrail-events.html)
+- [5] [ICANN — Chính sách dữ liệu đăng ký](https://www.icann.org/en/contracted-parties/consensus-policies/registration-data-policy)
 {{#include ../banners/hacktricks-training.md}}
