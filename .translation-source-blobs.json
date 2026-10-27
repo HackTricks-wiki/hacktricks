@@ -2,7 +2,7 @@
   "schema": 1,
   "sources": {
     "src/AI/AI-A2A-Protocol.md": "d2ee215477ea7812033f1908970558de76a3f771",
-    "src/AI/AI-Agent-Security-Methodology.md": "5e361ef25b234ece5c59cbbc6e366106e163601e",
+    "src/AI/AI-Agent-Security-Methodology.md": "7010b9679a0677b3e28646507c5e36153c9ea6a8",
     "src/AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md": "e088d1d16edcd920fb697d875d02972fd2d4af9b",
     "src/AI/AI-Assisted-Source-Review-and-Vulnerability-Validation.md": "cd35f8a69d7dc95c9b5920b0e2edfcd3a42d8c7a",
     "src/AI/AI-Burp-MCP.md": "708016ab1f2f3de704b20cfc95c5a5f0db6cc166",
@@ -527,7 +527,7 @@
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-tcc/macos-tcc-payloads.md": "18935acea3c84a1c17f9aa0723e1f20be7c81f03",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-users.md": "3f583cb9f8aa216f3b7d4a99fa7b280537175512",
     "src/macos-hardening/macos-useful-commands.md": "740f8c9195f76e6d714821f1789d10c00c369da6",
-    "src/mobile-pentesting/android-app-pentesting/README.md": "7912bcff88c850cfd44c765fecb47ac80de3ca6f",
+    "src/mobile-pentesting/android-app-pentesting/README.md": "dceec64514d8502793de11cc3f89d1d8be93a3de",
     "src/mobile-pentesting/android-app-pentesting/abusing-android-media-pipelines-image-parsers.md": "e25eda4f442f0f998609eef1c5a43b86d12ff0ee",
     "src/mobile-pentesting/android-app-pentesting/accessibility-services-abuse.md": "0d041b8922b611dca6457bcdeb821c53adacc43b",
     "src/mobile-pentesting/android-app-pentesting/adb-commands.md": "4c2f45ebf562f85d875a79af7b31cf4df488dfe8",
