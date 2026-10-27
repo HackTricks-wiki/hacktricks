@@ -107,6 +107,7 @@ jobs:
             src/images/arte-sponsor-v1.webp \
             /tmp/immutable-images/
           cp theme/discount.js /tmp/discount.js
+          cp theme/index.hbs /tmp/index.hbs
           cp scripts/seo_postprocess.py /tmp/seo_postprocess.py
 
       - name: Run get_and_save_refs.py
@@ -212,6 +213,14 @@ jobs:
         run: |
           git checkout "$BRANCH"
           git pull
+          if [ "$BRANCH" = vi ]; then
+            cp /tmp/index.hbs theme/index.hbs
+            git add theme/index.hbs
+            if ! git diff --cached --quiet; then
+              git commit -m "Sync Vietnamese language menu"
+              git push origin "$BRANCH"
+            fi
+          fi
           MDBOOK_BOOK__LANGUAGE=$BRANCH mdbook build || (echo "Error logs" && cat hacktricks-preprocessor-error.log && echo "" && echo "" && echo "Debug logs" && (cat hacktricks-preprocessor.log | tail -n 20) && exit 1)
           cp /tmp/immutable-images/* ./book/images/
           cp /tmp/discount.js ./book/discount.js
