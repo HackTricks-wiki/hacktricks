@@ -2,23 +2,23 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Overview
+## Tổng quan
 
-**seccomp** is the mechanism that lets the kernel apply a filter to the syscalls a process may invoke. In containerized environments, seccomp is normally used in filter mode so that the process is not simply marked "restricted" in a vague sense, but is instead subject to a concrete syscall policy. This matters because many container breakouts require reaching very specific kernel interfaces. If the process cannot successfully invoke the relevant syscalls, a large class of attacks disappears before any namespace or capability nuance even becomes relevant.
+**seccomp** là cơ chế cho phép kernel áp dụng bộ lọc lên các syscall mà một process có thể gọi. Trong môi trường container, seccomp thường được dùng ở chế độ lọc để process không chỉ bị đánh dấu là “bị hạn chế” một cách mơ hồ, mà phải tuân theo một chính sách syscall cụ thể. Điều này rất quan trọng vì nhiều vụ thoát khỏi container cần truy cập đến những giao diện kernel rất cụ thể. Nếu process không thể gọi thành công các syscall liên quan, một nhóm lớn các cuộc tấn công sẽ bị ngăn chặn trước khi cần xét đến các chi tiết về namespace hay capability.
 
-The key mental model is simple: namespaces decide **what the process can see**, capabilities decide **which privileged actions the process is nominally allowed to attempt**, and seccomp decides **whether the kernel will even accept the syscall entry point for the attempted action**. This is why seccomp frequently prevents attacks that would otherwise look possible based on capabilities alone.
+Mô hình tư duy cốt lõi rất đơn giản: namespace quyết định **process có thể nhìn thấy những gì**, capability quyết định **những hành động đặc quyền nào process được phép thử thực hiện**, còn seccomp quyết định **kernel có chấp nhận điểm vào syscall cho hành động được thử hay không**. Đây là lý do seccomp thường ngăn chặn các cuộc tấn công vốn có vẻ khả thi nếu chỉ xét đến capability.
 
-## Security Impact
+## Tác động bảo mật
 
-A lot of dangerous kernel surface is reachable only through a relatively small set of syscalls. Examples that repeatedly matter in container hardening include `mount`, `unshare`, `clone` or `clone3` with particular flags, `bpf`, `ptrace`, `keyctl`, and `perf_event_open`. An attacker who can reach those syscalls may be able to create new namespaces, manipulate kernel subsystems, or interact with attack surface that a normal application container does not need at all.
+Nhiều bề mặt tấn công nguy hiểm của kernel chỉ có thể truy cập thông qua một số lượng tương đối nhỏ syscall. Các ví dụ thường quan trọng trong việc tăng cường bảo mật container gồm `mount`, `unshare`, `clone` hoặc `clone3` với các flag cụ thể, `bpf`, `ptrace`, `keyctl` và `perf_event_open`. Kẻ tấn công có thể gọi các syscall đó có khả năng tạo namespace mới, thao túng các subsystem của kernel hoặc tương tác với bề mặt tấn công mà một container ứng dụng thông thường hoàn toàn không cần đến.
 
-This is why default runtime seccomp profiles are so important. They are not merely "extra defense". In many environments they are the difference between a container that can exercise a broad portion of kernel functionality and one that is constrained to a syscall surface closer to what the application genuinely needs.
+Đây là lý do các profile seccomp mặc định của runtime rất quan trọng. Chúng không chỉ là “lớp bảo vệ bổ sung”. Trong nhiều môi trường, chúng tạo nên sự khác biệt giữa một container có thể sử dụng phần lớn chức năng của kernel và một container bị giới hạn trong phạm vi syscall gần với nhu cầu thực sự của ứng dụng hơn.
 
-## Modes And Filter Construction
+## Các chế độ và cách xây dựng bộ lọc
 
-seccomp historically had a strict mode in which only a tiny syscall set remained available, but the mode relevant to modern container runtimes is seccomp filter mode, often called **seccomp-bpf**. In this model, the kernel evaluates a filter program that decides whether a syscall should be allowed, denied with an errno, trapped, logged, or kill the process.<sup>[[1]](#references)</sup> Container runtimes use this mechanism because it is expressive enough to block broad classes of dangerous syscalls while still allowing normal application behavior.
+seccomp từng có chế độ nghiêm ngặt, trong đó chỉ còn một tập syscall rất nhỏ khả dụng, nhưng chế độ liên quan đến các runtime container hiện đại là chế độ lọc seccomp, thường được gọi là **seccomp-bpf**. Theo mô hình này, kernel đánh giá một chương trình bộ lọc để quyết định syscall sẽ được cho phép, bị từ chối kèm errno, bị chặn lại, được ghi log hay khiến process bị kết thúc.<sup>[[1]](#references)</sup> Các runtime container sử dụng cơ chế này vì nó đủ linh hoạt để chặn các nhóm syscall nguy hiểm trên diện rộng mà vẫn cho phép ứng dụng hoạt động bình thường.
 
-Two low-level examples are useful because they make the mechanism concrete rather than magical. Strict mode demonstrates the old "only a minimal syscall set survives" model:
+Hai ví dụ cấp thấp sau đây rất hữu ích vì chúng giúp cơ chế này trở nên cụ thể, thay vì có vẻ như một điều kỳ bí. Chế độ nghiêm ngặt minh họa mô hình cũ: “chỉ một tập syscall tối thiểu còn hoạt động”:
 
 ```c
 #include <fcntl.h>
@@ -37,9 +37,9 @@ int main(void) {
 }
 ```
 
-The final `open` causes the process to be killed because it is not part of strict mode's minimal set.
+Lệnh `open` cuối cùng khiến tiến trình bị kill vì nó không thuộc tập tối thiểu của strict mode.
 
-A libseccomp filter example shows the modern policy model more clearly:
+Ví dụ về bộ lọc libseccomp cho thấy mô hình chính sách hiện đại rõ hơn:
 
 ```c
 #include <errno.h>
@@ -63,41 +63,41 @@ int main(void) {
 }
 ```
 
-This style of policy is what most readers should picture when they think about runtime seccomp profiles.
+Đây là kiểu policy mà hầu hết độc giả nên hình dung khi nghĩ đến các seccomp profile lúc runtime.
 
-## Lab
+## Phòng thực hành
 
-A simple way to confirm that seccomp is active in a container is:
+Một cách đơn giản để xác nhận seccomp đang hoạt động trong container là:
 
 ```bash
 docker run --rm debian:stable-slim sh -c 'grep Seccomp /proc/self/status'
 docker run --rm --security-opt seccomp=unconfined debian:stable-slim sh -c 'grep Seccomp /proc/self/status'
 ```
 
-You can also try an operation that default profiles commonly restrict:
+Bạn cũng có thể thử một thao tác mà các profile mặc định thường hạn chế:
 
 ```bash
 docker run --rm debian:stable-slim sh -c 'apt-get update >/dev/null 2>&1 && apt-get install -y util-linux >/dev/null 2>&1 && unshare -Ur true'
 ```
 
-If the container is running under a normal default seccomp profile, `unshare`-style operations are often blocked. This is a useful demonstration because it shows that even if the userspace tool exists inside the image, the kernel path it needs may still be unavailable.
-If the container is running under a normal default seccomp profile, `unshare`-style operations are often blocked even when the userspace tool exists inside the image.
+Nếu container đang chạy với seccomp profile mặc định thông thường, các thao tác kiểu `unshare` thường bị chặn. Đây là một minh họa hữu ích vì nó cho thấy dù công cụ userspace có trong image, đường dẫn kernel mà công cụ cần vẫn có thể không khả dụng.
+Nếu container đang chạy với seccomp profile mặc định thông thường, các thao tác kiểu `unshare` thường bị chặn, ngay cả khi công cụ userspace có trong image.
 
-To inspect the process status more generally, run:
+Để kiểm tra trạng thái tiến trình tổng quát hơn, hãy chạy:
 
 ```bash
 grep -E 'Seccomp|NoNewPrivs' /proc/self/status
 ```
 
-## Runtime Usage
+## Cách sử dụng khi chạy
 
-Docker supports both default and custom seccomp profiles and allows administrators to disable them with `--security-opt seccomp=unconfined`.<sup>[[2]](#references)</sup> Podman has similar support and often pairs seccomp with rootless execution in a very sensible default posture. Kubernetes exposes seccomp through workload configuration, where `RuntimeDefault` is usually the sane baseline and `Unconfined` should be treated as an exception requiring justification rather than as a convenience toggle.<sup>[[3]](#references)</sup>
+Docker hỗ trợ cả seccomp profile mặc định lẫn tùy chỉnh, đồng thời cho phép quản trị viên tắt chúng bằng `--security-opt seccomp=unconfined`.<sup>[[2]](#references)</sup> Podman có hỗ trợ tương tự và thường kết hợp seccomp với chế độ chạy rootless, tạo nên cấu hình mặc định rất hợp lý. Kubernetes cung cấp seccomp thông qua cấu hình workload, trong đó `RuntimeDefault` thường là cơ sở hợp lý, còn `Unconfined` nên được xem là ngoại lệ cần có lý do chính đáng thay vì một tùy chọn bật/tắt cho tiện.<sup>[[3]](#references)</sup>
 
-In containerd and CRI-O based environments, the exact path is more layered, but the principle is the same: the higher-level engine or orchestrator decides what should happen, and the runtime eventually installs the resulting seccomp policy for the container process. The outcome still depends on the final runtime configuration that reaches the kernel.
+Trong các môi trường dựa trên containerd và CRI-O, quy trình cụ thể có nhiều lớp hơn, nhưng nguyên tắc vẫn như nhau: engine hoặc trình điều phối cấp cao hơn quyết định điều gì cần được thực hiện, rồi runtime cuối cùng cài đặt chính sách seccomp tương ứng cho tiến trình container. Kết quả vẫn phụ thuộc vào cấu hình runtime cuối cùng được áp dụng cho kernel.
 
-### Custom Policy Example
+### Ví dụ về chính sách tùy chỉnh
 
-Docker and similar engines can load a custom seccomp profile from JSON. A minimal example that denies `chmod` while allowing everything else looks like this:
+Docker và các engine tương tự có thể tải seccomp profile tùy chỉnh từ JSON. Ví dụ tối giản sau đây chặn `chmod` nhưng cho phép mọi thứ khác:
 
 ```json
 {
@@ -111,25 +111,25 @@ Docker and similar engines can load a custom seccomp profile from JSON. A minima
 }
 ```
 
-Applied with:
+Được áp dụng với:
 
 ```bash
 docker run --rm -it --security-opt seccomp=/path/to/profile.json busybox chmod 400 /etc/hosts
 ```
 
-The command fails with `Operation not permitted`, demonstrating that the restriction comes from the syscall policy rather than from ordinary file permissions alone. In real hardening, allowlists are generally stronger than permissive defaults with a small blacklist.
+Lệnh thất bại với `Operation not permitted`, cho thấy hạn chế này đến từ chính sách syscall chứ không chỉ từ quyền truy cập tệp thông thường. Khi hardening thực tế, allowlist thường mạnh hơn các thiết lập mặc định dễ dãi kèm một blacklist nhỏ.
 
-## Misconfigurations
+## Cấu hình sai
 
-The bluntest mistake is to set seccomp to **unconfined** because an application failed under the default policy. This is common during troubleshooting and very dangerous as a permanent fix. Once the filter is gone, many syscall-based breakout primitives become reachable again, especially when powerful capabilities or host namespace sharing are also present.
+Sai lầm nghiêm trọng nhất là đặt seccomp thành **unconfined** vì ứng dụng gặp lỗi khi dùng chính sách mặc định. Điều này thường xảy ra trong quá trình khắc phục sự cố và rất nguy hiểm nếu trở thành giải pháp lâu dài. Khi filter bị gỡ bỏ, nhiều primitive thoát container dựa trên syscall lại có thể được sử dụng, đặc biệt khi container còn có các capability mạnh hoặc chia sẻ namespace với host.
 
-Another frequent problem is the use of a **custom permissive profile** that was copied from some blog or internal workaround without being reviewed carefully. Teams sometimes retain almost all dangerous syscalls simply because the profile was built around "stop the app from breaking" rather than "grant only what the app actually needs". A third misconception is to assume seccomp is less important for non-root containers. In reality, plenty of kernel attack surface remains relevant even when the process is not UID 0.
+Một vấn đề phổ biến khác là dùng **custom permissive profile** được sao chép từ một blog hoặc giải pháp tình thế nội bộ mà không được rà soát kỹ. Đôi khi các nhóm vẫn giữ lại gần như mọi syscall nguy hiểm chỉ vì profile được xây dựng theo hướng “đừng để ứng dụng gặp lỗi” thay vì “chỉ cấp những gì ứng dụng thực sự cần”. Một quan niệm sai lầm nữa là cho rằng seccomp kém quan trọng hơn đối với container không chạy dưới quyền root. Trên thực tế, vẫn còn rất nhiều bề mặt tấn công của kernel liên quan, ngay cả khi process không có UID 0.
 
-## Abuse
+## Lạm dụng
 
-If seccomp is absent or badly weakened, an attacker may be able to invoke namespace-creation syscalls, expand the reachable kernel attack surface through `bpf` or `perf_event_open`, abuse `keyctl`, or combine those syscall paths with dangerous capabilities such as `CAP_SYS_ADMIN`. In many real attacks, seccomp is not the only missing control, but its absence shortens the exploit path dramatically because it removes one of the few defenses that can stop a risky syscall before the rest of the privilege model even comes into play.
+Nếu seccomp không được bật hoặc bị làm suy yếu nghiêm trọng, attacker có thể gọi các syscall tạo namespace, mở rộng bề mặt tấn công kernel có thể tiếp cận thông qua `bpf` hoặc `perf_event_open`, lạm dụng `keyctl`, hoặc kết hợp các đường dẫn syscall này với những capability nguy hiểm như `CAP_SYS_ADMIN`. Trong nhiều cuộc tấn công thực tế, seccomp không phải là biện pháp kiểm soát duy nhất bị thiếu, nhưng việc thiếu nó rút ngắn đáng kể đường khai thác vì loại bỏ một trong số ít lớp phòng thủ có thể chặn syscall rủi ro trước khi phần còn lại của mô hình phân quyền phát huy tác dụng.
 
-The most useful practical test is to try the exact syscall families that default profiles usually block. If they suddenly work, the container posture has changed a lot:
+Cách kiểm tra thực tế hữu ích nhất là thử chính xác các nhóm syscall mà profile mặc định thường chặn. Nếu chúng đột nhiên hoạt động, trạng thái bảo mật của container đã thay đổi đáng kể:
 
 ```bash
 grep Seccomp /proc/self/status
@@ -137,7 +137,7 @@ unshare -Ur true 2>/dev/null && echo "unshare works"
 unshare -m true 2>/dev/null && echo "mount namespace creation works"
 ```
 
-If `CAP_SYS_ADMIN` or another strong capability is present, test whether seccomp is the only missing barrier before mount-based abuse:
+Nếu có `CAP_SYS_ADMIN` hoặc capability mạnh khác, hãy kiểm tra xem seccomp có phải là rào cản duy nhất còn thiếu trước khi lạm dụng mount hay không:
 
 ```bash
 capsh --print | grep cap_sys_admin
@@ -146,18 +146,18 @@ mount -t tmpfs tmpfs /tmp/m 2>/dev/null && echo "tmpfs mount works"
 mount -t proc proc /tmp/m 2>/dev/null && echo "proc mount works"
 ```
 
-On some targets, the immediate value is not full escape but information gathering and kernel attack-surface expansion. These commands help determine whether especially sensitive syscall paths are reachable:
+Trên một số mục tiêu, lợi ích trước mắt không phải là escape hoàn toàn mà là thu thập thông tin và mở rộng attack surface của kernel. Các lệnh này giúp xác định liệu có thể truy cập các đường dẫn syscall đặc biệt nhạy cảm hay không:
 
 ```bash
 which unshare nsenter strace 2>/dev/null
 strace -e bpf,perf_event_open,keyctl true 2>&1 | tail
 ```
 
-If seccomp is absent and the container is also privileged in other ways, that is when it makes sense to pivot into the more specific breakout techniques already documented in the legacy container-escape pages.
+Nếu seccomp không được bật và container cũng có các đặc quyền khác, lúc đó bạn nên chuyển sang các kỹ thuật breakout cụ thể hơn đã được ghi lại trong các trang cũ về container escape.
 
-### Full Example: seccomp Was The Only Thing Blocking `unshare`
+### Ví dụ đầy đủ: seccomp là thứ duy nhất ngăn `unshare`
 
-On many targets, the practical effect of removing seccomp is that namespace-creation or mount syscalls suddenly start working. If the container also has `CAP_SYS_ADMIN`, the following sequence may become possible:
+Trên nhiều mục tiêu, việc gỡ bỏ seccomp có thể khiến các syscall tạo namespace hoặc mount đột nhiên hoạt động. Nếu container cũng có `CAP_SYS_ADMIN`, chuỗi thao tác sau có thể thực hiện được:
 
 ```bash
 grep Seccomp /proc/self/status
@@ -171,11 +171,11 @@ unshare -m sh -c '
 '
 ```
 
-By itself this is not yet a host escape, but it demonstrates that seccomp was the barrier preventing mount-related exploitation.
+Tự nó chưa phải là một vụ thoát khỏi host, nhưng nó cho thấy seccomp chính là rào cản ngăn chặn việc khai thác liên quan đến mount.
 
-### Full Example: seccomp Disabled + cgroup v1 `release_agent`
+### Ví dụ đầy đủ: Tắt seccomp + `release_agent` của cgroup v1
 
-If seccomp is disabled and the container can mount cgroup v1 hierarchies, the `release_agent` technique from the cgroups section becomes reachable:
+Nếu seccomp bị tắt và container có thể mount các hierarchy của cgroup v1, kỹ thuật `release_agent` trong phần cgroups sẽ khả thi:
 
 ```bash
 grep Seccomp /proc/self/status
@@ -190,11 +190,11 @@ unshare -UrCm sh -c '
 '
 ```
 
-This is not a seccomp-only exploit. The point is that once seccomp is unconfined, syscall-heavy breakout chains that were previously blocked may start working exactly as written.
+Đây không phải là exploit chỉ nhắm vào seccomp. Điểm mấu chốt là khi seccomp không còn giới hạn, các chuỗi breakout dùng nhiều syscall vốn bị chặn trước đây có thể bắt đầu hoạt động đúng như mô tả.
 
-## Checks
+## Kiểm tra
 
-The purpose of these checks is to establish whether seccomp is active at all, whether `no_new_privs` accompanies it, and whether the runtime configuration shows seccomp being disabled explicitly.
+Mục đích của các bước kiểm tra này là xác định seccomp có đang được kích hoạt hay không, `no_new_privs` có đi kèm hay không, và cấu hình runtime có cho thấy seccomp bị tắt một cách rõ ràng hay không.
 
 ```bash
 grep Seccomp /proc/self/status                               # Current seccomp mode from the kernel
@@ -202,29 +202,28 @@ cat /proc/self/status | grep NoNewPrivs                      # Whether exec-time
 docker inspect <container> | jq '.[0].HostConfig.SecurityOpt'   # Runtime security options, including seccomp overrides
 ```
 
-What is interesting here:
+Điều đáng chú ý ở đây:
 
-- A non-zero `Seccomp` value means filtering is active; `0` usually means no seccomp protection.
-- If the runtime security options include `seccomp=unconfined`, the workload has lost one of its most useful syscall-level defenses.
-- `NoNewPrivs` is not seccomp itself, but seeing both together usually indicates a more careful hardening posture than seeing neither.
+- Giá trị `Seccomp` khác 0 nghĩa là tính năng lọc đang hoạt động; `0` thường có nghĩa là không có biện pháp bảo vệ seccomp.
+- Nếu các tùy chọn bảo mật của runtime có `seccomp=unconfined`, workload đã mất đi một trong những biện pháp phòng thủ ở cấp syscall hữu ích nhất.
+- `NoNewPrivs` không phải bản thân seccomp, nhưng khi thấy cả hai cùng lúc thường cho thấy cấu hình hardening được cân nhắc kỹ hơn so với khi không có cả hai.
 
-If a container already has suspicious mounts, broad capabilities, or shared host namespaces, and seccomp is also unconfined, that combination should be treated as a major escalation signal. The container may still not be trivially breakable, but the number of kernel entry points available to the attacker has increased sharply.
+Nếu một container đã có các mount đáng ngờ, capabilities quá rộng hoặc dùng chung namespace của host, đồng thời seccomp cũng ở trạng thái unconfined, thì nên xem tổ hợp này là một tín hiệu leo thang nghiêm trọng. Container có thể vẫn không dễ bị phá vỡ, nhưng số điểm vào kernel mà attacker có thể truy cập đã tăng mạnh.
 
-## Runtime Defaults
+## Mặc định của runtime
 
-| Runtime / platform | Default state | Default behavior | Common manual weakening |
+| Runtime / nền tảng | Trạng thái mặc định | Hành vi mặc định | Cách làm suy yếu thường gặp |
 | --- | --- | --- | --- |
-| Docker Engine | Usually enabled by default | Uses Docker's built-in default seccomp profile unless overridden | `--security-opt seccomp=unconfined`, `--security-opt seccomp=/path/profile.json`, `--privileged` |
-| Podman | Usually enabled by default | Applies the runtime default seccomp profile unless overridden | `--security-opt seccomp=unconfined`, `--security-opt seccomp=profile.json`, `--seccomp-policy=image`, `--privileged` |
-| Kubernetes | **Not guaranteed by default** | If `securityContext.seccompProfile` is unset, the default is `Unconfined` unless the kubelet enables `--seccomp-default`; `RuntimeDefault` or `Localhost` must otherwise be set explicitly | `securityContext.seccompProfile.type: Unconfined`, leaving seccomp unset on clusters without `seccompDefault`, `privileged: true` |
-| containerd / CRI-O under Kubernetes | Follows Kubernetes node and Pod settings | Runtime profile is used when Kubernetes asks for `RuntimeDefault` or when kubelet seccomp defaulting is enabled | Same as Kubernetes row; direct CRI/OCI configuration can also omit seccomp entirely |
+| Docker Engine | Thường được bật theo mặc định | Sử dụng seccomp profile mặc định tích hợp của Docker, trừ khi được ghi đè | `--security-opt seccomp=unconfined`, `--security-opt seccomp=/path/profile.json`, `--privileged` |
+| Podman | Thường được bật theo mặc định | Áp dụng seccomp profile mặc định của runtime, trừ khi được ghi đè | `--security-opt seccomp=unconfined`, `--security-opt seccomp=profile.json`, `--seccomp-policy=image`, `--privileged` |
+| Kubernetes | **Không được đảm bảo theo mặc định** | Nếu không đặt `securityContext.seccompProfile`, mặc định là `Unconfined`, trừ khi kubelet bật `--seccomp-default`; nếu không, phải đặt rõ `RuntimeDefault` hoặc `Localhost` | `securityContext.seccompProfile.type: Unconfined`, không đặt seccomp trên các cluster không bật `seccompDefault`, `privileged: true` |
+| containerd / CRI-O trên Kubernetes | Tuân theo cài đặt của node và Pod trong Kubernetes | Profile của runtime được sử dụng khi Kubernetes yêu cầu `RuntimeDefault` hoặc khi bật cơ chế đặt mặc định seccomp của kubelet | Tương tự hàng Kubernetes; cấu hình CRI/OCI trực tiếp cũng có thể bỏ hẳn seccomp |
 
-The Kubernetes behavior is the one that most often surprises operators. In many clusters, seccomp is still absent unless the Pod requests it or the kubelet is configured to default to `RuntimeDefault`.<sup>[[3]](#references)</sup>
+Hành vi của Kubernetes là điều thường khiến các operator bất ngờ nhất. Ở nhiều cluster, seccomp vẫn chưa được áp dụng trừ khi Pod yêu cầu hoặc kubelet được cấu hình để mặc định dùng `RuntimeDefault`.<sup>[[3]](#references)</sup>
 
 ## References
 
-- [1] [Linux kernel documentation: Seccomp BPF (SECure COMPuting with filters)](https://docs.kernel.org/userspace-api/seccomp_filter.html)
-- [2] [Docker Docs: Seccomp security profiles for Docker](https://docs.docker.com/engine/security/seccomp/)
-- [3] [Kubernetes Docs: Restrict a Container's Syscalls with seccomp](https://kubernetes.io/docs/tutorials/security/seccomp/)
-
+- [1] [Tài liệu kernel Linux: Seccomp BPF (SECure COMPuting with filters)](https://docs.kernel.org/userspace-api/seccomp_filter.html)
+- [2] [Tài liệu Docker: Seccomp security profile cho Docker](https://docs.docker.com/engine/security/seccomp/)
+- [3] [Tài liệu Kubernetes: Hạn chế syscall của container bằng seccomp](https://kubernetes.io/docs/tutorials/security/seccomp/)
 {{#include ../../../../banners/hacktricks-training.md}}

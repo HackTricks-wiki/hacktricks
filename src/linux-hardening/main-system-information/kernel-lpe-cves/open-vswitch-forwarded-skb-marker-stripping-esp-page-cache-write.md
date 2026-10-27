@@ -1,44 +1,44 @@
-# Open vSwitch forwarded-skb marker stripping to ESP page-cache writes
+# Open vSwitch loại bỏ marker của skb được chuyển tiếp, dẫn đến ghi vào page-cache qua ESP
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-A useful Linux kernel exploitation pattern is to **launder ownership metadata from an skb without removing its foreign fragments**, then route that skb to a consumer that writes in place. In the Open vSwitch (OVS) case, a failed userspace upcall clears `SKBFL_SHARED_FRAG` from a still-live `MSG_ZEROCOPY` skb; ESP subsequently decrypts directly over a read-only file's page-cache folio. This provides a deterministic local page-cache write and has been tracked through CVE-2026-90049, CVE-2026-89487, and CVE-2026-80977.<sup>[[1]](#references)[[2]](#references)</sup>
+Một kỹ thuật khai thác kernel Linux hữu ích là **loại bỏ metadata về quyền sở hữu khỏi skb mà không xóa các fragment ngoại lai của nó**, rồi chuyển skb đó đến một thành phần ghi dữ liệu trực tiếp. Trong trường hợp Open vSwitch (OVS), một lần upcall lên userspace thất bại sẽ xóa `SKBFL_SHARED_FRAG` khỏi skb `MSG_ZEROCOPY` vẫn còn hoạt động; sau đó, ESP giải mã trực tiếp lên folio page-cache của một file chỉ đọc. Cách này cho phép ghi cục bộ có thể dự đoán vào page-cache và đã được theo dõi qua các CVE-2026-90049, CVE-2026-89487 và CVE-2026-80977.<sup>[[1]](#references)[[2]](#references)</sup>
 
-This is a Copy Fail/Dirty Frag-class issue rather than classic memory corruption: no race or address disclosure is required, the file need only be readable, and the changed bytes exist in the page cache rather than on disk.<sup>[[2]](#references)[[3]](#references)</sup>
+Đây là vấn đề thuộc nhóm Copy Fail/Dirty Frag, không phải lỗi hỏng bộ nhớ kiểu cổ điển: không cần race hay lộ địa chỉ, chỉ cần file có thể đọc được, và các byte bị thay đổi nằm trong page-cache chứ không phải trên đĩa.<sup>[[2]](#references)[[3]](#references)</sup>
 
-## Security invariant: foreign fragments must remain marked
+## Bất biến bảo mật: các fragment ngoại lai phải luôn được đánh dấu
 
-`SKBFL_SHARED_FRAG` tells in-place consumers that an skb fragment may refer to storage they do not privately own. The ESP fast path in `esp_input()` may decrypt a nonlinear, uncloned skb in place only when `skb_has_shared_frag()` is false; otherwise `skb_cow_data()` first creates private storage. This consumer-side check was added after Dirty Frag.<sup>[[5]](#references)</sup>
+`SKBFL_SHARED_FRAG` báo cho các thành phần ghi trực tiếp rằng một fragment của skb có thể tham chiếu đến vùng lưu trữ mà chúng không sở hữu riêng. Fast path ESP trong `esp_input()` chỉ có thể giải mã tại chỗ một skb phi tuyến tính, chưa được clone nếu `skb_has_shared_frag()` trả về false; nếu không, `skb_cow_data()` sẽ tạo vùng lưu trữ riêng trước. Kiểm tra phía consumer này được bổ sung sau Dirty Frag.<sup>[[5]](#references)</sup>
 
-The invariant therefore has two independent parts:<sup>[[2]](#references)[[4]](#references)[[5]](#references)</sup>
+Do đó, bất biến này gồm hai phần độc lập:<sup>[[2]](#references)[[4]](#references)[[5]](#references)</sup>
 
-1. In-place writers must test `SKBFL_SHARED_FRAG` and copy shared data before mutation.
-2. Every clone, coalesce, transfer, or forwarding path must preserve the marker for as long as the foreign page remains attached.
+1. Các thành phần ghi trực tiếp phải kiểm tra `SKBFL_SHARED_FRAG` và sao chép dữ liệu dùng chung trước khi sửa đổi.
+2. Mọi đường dẫn clone, coalesce, chuyển giao hoặc chuyển tiếp phải giữ nguyên marker chừng nào page ngoại lai vẫn còn được gắn vào skb.
 
-Fragnesia violated the second rule while moving fragment descriptors in `skb_try_coalesce()`. The OVS path is subtly different: it does not transfer the fragment at all; it clears the marker **in place on the original skb and then continues forwarding it**.<sup>[[2]](#references)[[4]](#references)</sup>
+Fragnesia vi phạm quy tắc thứ hai khi di chuyển các fragment descriptor trong `skb_try_coalesce()`. Đường dẫn OVS có khác biệt tinh vi: nó không chuyển fragment đi; thay vào đó, nó xóa marker **ngay trên skb gốc rồi tiếp tục chuyển tiếp skb đó**.<sup>[[2]](#references)[[4]](#references)</sup>
 
-## Unprivileged OVS reachability
+## Khả năng tiếp cận OVS không cần đặc quyền
 
-OVS's kernel datapath is controlled through generic-netlink families such as `ovs_datapath`, `ovs_vport`, `ovs_flow`, and `ovs_packet`. Its mutating operations use namespace-aware `GENL_UNS_ADMIN_PERM`, so a process running under `unshare -Urn` obtains the `CAP_NET_ADMIN` needed to create a datapath, attach a veth, and install flow actions inside its own network namespace. Resolving the OVS family may also autoload `openvswitch.ko`; host `CAP_SYS_MODULE`, `ovs-vsctl`, and `ovs-vswitchd` are not required for this attack surface.<sup>[[2]](#references)[[7]](#references)</sup>
+Datapath kernel của OVS được điều khiển thông qua các họ generic-netlink như `ovs_datapath`, `ovs_vport`, `ovs_flow` và `ovs_packet`. Các thao tác làm thay đổi trạng thái sử dụng `GENL_UNS_ADMIN_PERM` có xét đến namespace, nên một tiến trình chạy trong `unshare -Urn` sẽ có `CAP_NET_ADMIN` cần thiết để tạo datapath, gắn một veth và cài đặt các flow action bên trong network namespace của chính nó. Việc phân giải họ OVS cũng có thể tự động nạp `openvswitch.ko`; cuộc tấn công này không yêu cầu `CAP_SYS_MODULE` trên host, `ovs-vsctl` hay `ovs-vswitchd`.<sup>[[2]](#references)[[7]](#references)</sup>
 
-The important distinction is between two upcall types:<sup>[[2]](#references)[[7]](#references)</sup>
+Điểm khác biệt quan trọng nằm ở hai loại upcall:<sup>[[2]](#references)[[7]](#references)</sup>
 
-- A **flow miss** sends the packet to `ovs-vswitchd`; if the upcall fails, the packet is normally dropped.
-- An explicit `OVS_ACTION_ATTR_USERSPACE` action sends a borrowed copy to a selected port ID, then executes later actions on the original skb.
+- **Flow miss** gửi packet đến `ovs-vswitchd`; nếu upcall thất bại, packet thường bị drop.
+- Action `OVS_ACTION_ATTR_USERSPACE` tường minh gửi một bản sao được mượn đến port ID được chọn, rồi thực thi các action tiếp theo trên skb gốc.
 
-An attacker can therefore install a flow shaped like:<sup>[[1]](#references)[[2]](#references)</sup>
+Do đó, kẻ tấn công có thể cài đặt một flow có cấu trúc như sau:<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```text
 in_port(1),ipv4 -> USERSPACE(pid=<unbound-portid>), OUTPUT(0)
 ```
 
-No listener owns the selected port ID, making the userspace action fail predictably, while the following `OUTPUT` action keeps the original packet alive.<sup>[[1]](#references)[[2]](#references)</sup>
+Không có listener nào sở hữu port ID đã chọn, khiến hành động userspace thất bại một cách có thể dự đoán, trong khi hành động `OUTPUT` tiếp theo giữ cho packet ban đầu vẫn tồn tại.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Root cause: `skb_tx_error()` on a packet that survives
+## Nguyên nhân gốc: `skb_tx_error()` trên một packet vẫn tồn tại
 
-The vulnerable OVS upcall error path calls `skb_tx_error(skb)`. That helper was designed for a failed transmit where the skb is freed afterward; it completes zerocopy bookkeeping through `skb_zcopy_clear()`, whose flag mask historically also removed `SKBFL_SHARED_FRAG`. OVS ignored the userspace-action error and continued its action list, violating the helper's lifetime contract.<sup>[[1]](#references)[[2]](#references)</sup>
+Đường dẫn lỗi upcall OVS dễ bị tấn công gọi `skb_tx_error(skb)`. Helper đó được thiết kế cho trường hợp truyền tải thất bại, sau đó skb được giải phóng; nó hoàn tất việc quản lý zerocopy thông qua `skb_zcopy_clear()`, mà theo lịch sử, mask cờ của hàm này cũng xóa `SKBFL_SHARED_FRAG`. OVS bỏ qua lỗi của userspace action và tiếp tục danh sách action, vi phạm hợp đồng về vòng đời của helper.<sup>[[1]](#references)[[2]](#references)</sup>
 
-The exploitable state transition is:<sup>[[2]](#references)</sup>
+Chuyển đổi trạng thái có thể khai thác là:<sup>[[2]](#references)</sup>
 
 ```text
 before failed upcall: flags=0xb, nr_frags=1, page-cache folio attached
@@ -47,20 +47,20 @@ after failed upcall:  flags=0x0, nr_frags=1, same folio still attached
 OUTPUT:               unmarked skb continues to local ESP input
 ```
 
-This only works when `skb_zcopy()` finds zerocopy state. A fragment carrying only `SKBFL_SHARED_FRAG` is insufficient; `MSG_ZEROCOPY` is useful because it creates `SKBFL_ZEROCOPY_ENABLE | SKBFL_SHARED_FRAG` and also sets `SKBFL_DONT_ORPHAN`. The latter makes `skb_orphan_frags()` skip replacement of the foreign pages during the OVS userspace copy.<sup>[[2]](#references)[[3]](#references)</sup>
+Điều này chỉ hoạt động khi `skb_zcopy()` tìm thấy trạng thái zerocopy. Một fragment chỉ mang `SKBFL_SHARED_FRAG` là chưa đủ; `MSG_ZEROCOPY` hữu ích vì nó tạo `SKBFL_ZEROCOPY_ENABLE | SKBFL_SHARED_FRAG` và cũng đặt `SKBFL_DONT_ORPHAN`. Cờ sau khiến `skb_orphan_frags()` bỏ qua việc thay thế các page ngoại lai trong quá trình OVS sao chép dữ liệu sang userspace.<sup>[[2]](#references)[[3]](#references)</sup>
 
-## Building the write primitive
+## Xây dựng primitive ghi
 
-The end-to-end trigger has the following components.<sup>[[2]](#references)[[3]](#references)</sup>
+Trigger đầu-cuối bao gồm các thành phần sau.<sup>[[2]](#references)[[3]](#references)</sup>
 
-1. Enter private user and network namespaces with `unshare -Urn`.
-2. Map a readable target file with `PROT_READ | MAP_SHARED`.
-3. Use a separate sender netns and a veth pair; local loopback would copy the borrowed pages and destroy the primitive.
-4. Build an OVS datapath and the failing `USERSPACE`-then-`OUTPUT` flow.
-5. Install a transport-mode ESP-in-UDP XFRM state using `rfc4106(gcm(aes))` and UDP port 4500.
-6. Send one `MSG_ZEROCOPY` datagram with an iovec shaped as `[ESP header | mapped file bytes | invalid ICV]`.
+1. Vào các user namespace và network namespace riêng bằng `unshare -Urn`.
+2. Map một tệp đích có thể đọc bằng `PROT_READ | MAP_SHARED`.
+3. Dùng một sender netns riêng và một cặp veth; loopback cục bộ sẽ sao chép các page mượn và phá hủy primitive này.
+4. Tạo một OVS datapath cùng flow `USERSPACE`-rồi-`OUTPUT` gây lỗi.
+5. Cài đặt trạng thái XFRM ESP-in-UDP ở transport mode bằng `rfc4106(gcm(aes))` và cổng UDP 4500.
+6. Gửi một datagram `MSG_ZEROCOPY` với iovec có cấu trúc `[ESP header | mapped file bytes | invalid ICV]`.
 
-The XFRM state uses 20 bytes of AES-128-GCM keying material: 16 bytes of AES key followed by the four-byte RFC 4106 salt. For a chosen eight-byte explicit IV, payload confidentiality starts with the counter block `salt || IV || be32(2)`; counter value 1 masks the authentication result instead.<sup>[[2]](#references)[[6]](#references)</sup>
+Trạng thái XFRM sử dụng 20 byte vật liệu khóa AES-128-GCM: 16 byte khóa AES, theo sau là salt RFC 4106 gồm bốn byte. Với một IV tường minh dài tám byte được chọn trước, tính bảo mật của payload bắt đầu bằng khối bộ đếm `salt || IV || be32(2)`; giá trị bộ đếm 1 thay vào đó sẽ che kết quả xác thực.<sup>[[2]](#references)[[6]](#references)</sup>
 
 ```bash
 ip xfrm state add src 10.99.99.1 dst 10.99.99.2 proto esp \
@@ -70,11 +70,11 @@ ip xfrm state add src 10.99.99.1 dst 10.99.99.2 proto esp \
   encap espinudp 4500 4500 0.0.0.0
 ```
 
-Once OVS strips the marker, ESP takes its no-copy path and performs `plaintext = ciphertext XOR keystream` over the file-backed fragment. Authentication is checked **after** this transform, so an all-zero invalid ICV makes the packet fail with `-EBADMSG` only after the page-cache bytes have already changed.<sup>[[2]](#references)</sup>
+Sau khi OVS loại bỏ marker, ESP đi theo nhánh no-copy và thực hiện `plaintext = ciphertext XOR keystream` trên fragment được hỗ trợ bởi file. Việc xác thực được kiểm tra **sau** phép biến đổi này, vì vậy ICV không hợp lệ gồm toàn số 0 khiến packet thất bại với `-EBADMSG` chỉ sau khi các byte trong page cache đã bị thay đổi.<sup>[[2]](#references)</sup>
 
-### Converting GCM into chosen bytes
+### Chuyển GCM thành các byte tùy chọn
 
-For current byte `C` and desired byte `P`, the first payload keystream byte must be `C XOR P`. With the AES key and salt fixed, sweep a 16-bit suffix of the explicit IV and precompute one suffix for each possible first keystream byte:<sup>[[2]](#references)[[3]](#references)[[6]](#references)</sup>
+Với byte hiện tại `C` và byte mong muốn `P`, byte đầu tiên của keystream payload phải là `C XOR P`. Khi AES key và salt được cố định, hãy quét một hậu tố 16-bit của explicit IV và tính trước một hậu tố cho mỗi byte keystream đầu tiên có thể có:<sup>[[2]](#references)[[3]](#references)[[6]](#references)</sup>
 
 ```text
 for n in 0..0xffff:
@@ -83,17 +83,17 @@ for n in 0..0xffff:
     first_suffix_for[k0] ??= n
 ```
 
-The public implementation limits ciphertext to 32 bytes and advances the file fragment by one byte for each packet. The chosen first byte overwrites the previous packet's first collateral byte; `pread()` refreshes `C` before every packet, equal bytes are skipped, and the final packet is shortened so writes do not pass the requested range. Thus a 256-entry lookup table turns the primitive into a byte-granular chosen-content page-cache write at roughly one packet per differing byte.<sup>[[2]](#references)[[3]](#references)</sup>
+Bản triển khai công khai giới hạn ciphertext ở 32 byte và dịch fragment của file đi một byte cho mỗi packet. Byte đầu tiên đã chọn sẽ ghi đè byte collateral đầu tiên của packet trước; `pread()` làm mới `C` trước mỗi packet, các byte trùng nhau sẽ được bỏ qua, và packet cuối được rút ngắn để thao tác ghi không vượt quá phạm vi yêu cầu. Vì vậy, bảng tra cứu 256 phần tử biến primitive này thành thao tác ghi page cache theo từng byte với nội dung tùy chọn, chỉ cần khoảng một packet cho mỗi byte khác nhau.<sup>[[2]](#references)[[3]](#references)</sup>
 
-## Page-cache write to root
+## Ghi page cache để chiếm quyền root
 
-A practical target is an existing setuid-root executable. The PoC replaces the first 160 bytes with a complete static ELF containing one fixed-address read/execute `PT_LOAD`, no `PT_INTERP`, and code that calls `setuid(0)` before `execve("/bin/sh", ...)`. This avoids assumptions about the original binary's entry point, PIE layout, dynamic loader, or relocations.<sup>[[2]](#references)[[3]](#references)</sup>
+Một mục tiêu thực tế là một executable setuid-root có sẵn. PoC thay thế 160 byte đầu tiên bằng một ELF tĩnh hoàn chỉnh, chứa một `PT_LOAD` có địa chỉ cố định với quyền đọc/thực thi, không có `PT_INTERP`, và mã gọi `setuid(0)` trước khi gọi `execve("/bin/sh", ...)`. Cách này tránh phải dựa vào entry point, bố cục PIE, dynamic loader hoặc relocations của binary ban đầu.<sup>[[2]](#references)[[3]](#references)</sup>
 
-The modification is visible across user namespaces because the page cache is not namespaced. The altered folio is not marked dirty, so it is not written back; execute the target while resident, then discard the temporary corruption with `posix_fadvise(..., POSIX_FADV_DONTNEED)` so later reads reload the original disk contents.<sup>[[2]](#references)[[3]](#references)</sup>
+Thay đổi này hiển thị trên mọi user namespace vì page cache không được namespace hóa. Folio đã bị thay đổi không được đánh dấu dirty, nên sẽ không được ghi ngược ra đĩa; hãy thực thi mục tiêu khi nó còn trong bộ nhớ, sau đó loại bỏ phần dữ liệu tạm thời bị làm hỏng bằng `posix_fadvise(..., POSIX_FADV_DONTNEED)` để các lần đọc sau nạp lại nội dung ban đầu trên đĩa.<sup>[[2]](#references)[[3]](#references)</sup>
 
-## Exposure checks and mitigation
+## Kiểm tra mức độ phơi nhiễm và giảm thiểu
 
-Check the actual vendor kernel first. Relevant exposure gates are unprivileged user namespaces, OVS availability or residency, and an available ESP implementation.<sup>[[1]](#references)[[2]](#references)</sup>
+Trước tiên, hãy kiểm tra kernel thực tế của nhà cung cấp. Các điều kiện liên quan đến mức độ phơi nhiễm gồm user namespace không đặc quyền, OVS khả dụng hoặc đang hoạt động, và có triển khai ESP khả dụng.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```bash
 unshare -Urn true 2>/dev/null && echo 'user+net namespaces available'
@@ -104,9 +104,9 @@ modprobe -n -v openvswitch esp4 esp6 2>/dev/null
 modinfo esp4 esp6 2>/dev/null | grep -E '^(name|alias):'
 ```
 
-Upgrade to a kernel carrying the complete fix series; the final repair covers the recirculation path and avoids mutating shared `skb_shinfo()` state, while also closing a related strip in `skb_zerocopy()`.<sup>[[1]](#references)[[2]](#references)</sup>
+Nâng cấp lên kernel có đầy đủ chuỗi bản sửa; bản sửa cuối cùng khắc phục đường recirculation và tránh sửa đổi trạng thái `skb_shinfo()` dùng chung, đồng thời xử lý một lỗi strip liên quan trong `skb_zerocopy()`.<sup>[[1]](#references)[[2]](#references)</sup>
 
-If OVS is unused, prevent both alias and by-name loading with a modprobe `install` rule rather than relying only on `blacklist`. If the host does not terminate IPsec and ESP is modular, the same control can remove the decrypt sink.<sup>[[2]](#references)</sup>
+Nếu không dùng OVS, hãy ngăn việc tải module cả bằng alias lẫn theo tên bằng quy tắc `install` của modprobe, thay vì chỉ dựa vào `blacklist`. Nếu máy chủ không kết thúc IPsec và ESP là module, biện pháp tương tự có thể loại bỏ decrypt sink.<sup>[[2]](#references)</sup>
 
 ```conf
 # /etc/modprobe.d/disable-unused-network-surfaces.conf
@@ -115,22 +115,21 @@ install esp4 /bin/false
 install esp6 /bin/false
 ```
 
-These rules do not help when a module is already loaded or the feature is built into the kernel. Disabling unprivileged user namespaces also removes the namespace capability source but can break browsers, Flatpak, Podman, and other sandboxing/container workloads.<sup>[[2]](#references)</sup>
+Các quy tắc này không có tác dụng khi module đã được tải hoặc tính năng được tích hợp sẵn vào kernel. Việc tắt unprivileged user namespaces cũng loại bỏ nguồn cấp namespace capability, nhưng có thể làm hỏng trình duyệt, Flatpak, Podman và các workload sandbox/container khác.<sup>[[2]](#references)</sup>
 
 ## Review lessons
 
-When auditing zero-copy networking, do not limit the search to helpers that copy or move fragments. Also identify error/completion helpers that clear grouped flags, then verify that every caller obeys the documented skb lifetime contract. A page-ownership bit grouped with zerocopy lifecycle bits is security-sensitive even when the clearing code never directly accesses a fragment.<sup>[[1]](#references)[[2]](#references)</sup>
+Khi audit mạng zero-copy, đừng chỉ tìm các helper sao chép hoặc di chuyển fragment. Hãy xác định cả các helper xử lý lỗi/hoàn tất có xóa các cờ được nhóm chung hay không, rồi xác minh rằng mọi caller đều tuân thủ hợp đồng về vòng đời skb đã được tài liệu hóa. Một bit biểu thị quyền sở hữu page được nhóm với các bit vòng đời zerocopy là yếu tố nhạy cảm về bảo mật, ngay cả khi đoạn mã xóa bit không trực tiếp truy cập fragment nào.<sup>[[1]](#references)[[2]](#references)</sup>
 
-A robust fix must cover all routes by which the skb can survive—including action continuation and recirculation—and must account for clones sharing `skb_shinfo()`. On the consumer side, authentication failure does not undo plaintext writes already performed by an in-place AEAD transform, so foreign-storage checks must happen before decryption begins.<sup>[[1]](#references)[[2]](#references)</sup>
+Một bản sửa lỗi vững chắc phải bao quát mọi đường đi khiến skb có thể tồn tại—bao gồm cả action continuation và recirculation—đồng thời tính đến các clone dùng chung `skb_shinfo()`. Ở phía consumer, lỗi xác thực không hoàn tác các lần ghi plaintext đã được thực hiện bởi phép biến đổi AEAD tại chỗ, vì vậy cần kiểm tra foreign-storage trước khi bắt đầu giải mã.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## References
 
-- [1] [Doyensec netdev fix series: net: don't strip zerocopy frag markers from a forwarded skb](https://lore.kernel.org/netdev/4B5CCA6E-2C49-4F86-8C4E-E1BE15C16C0A@doyensec.com/T/#t)
-- [2] [Doyensec: Open vSwitch Forwarded-SKB Marker Stripping Enables Deterministic ESP Page-Cache LPE](https://blog.doyensec.com/2026/09/17/ovs.html)
-- [3] [Doyensec `ovs-pagecache-write` proof of concept](https://github.com/doyensec/ovs-pagecache-write)
-- [4] [Linux fix for the original Fragnesia coalescing path (`f84eca581739`)](https://github.com/torvalds/linux/commit/f84eca5817390257cef78013d0112481c503b4a3)
-- [5] [Linux ESP consumer-side shared-fragment check (`f4c50a4034e6`)](https://github.com/torvalds/linux/commit/f4c50a4034e6)
-- [6] [RFC 4106: The Use of Galois/Counter Mode (GCM) in IPsec ESP](https://datatracker.ietf.org/doc/html/rfc4106)
-- [7] [Open vSwitch kernel datapath documentation](https://docs.openvswitch.org/en/latest/topics/datapath/)
-
+- [1] [Loạt bản sửa lỗi netdev của Doyensec: net: không xóa dấu frag zerocopy khỏi skb được forward](https://lore.kernel.org/netdev/4B5CCA6E-2C49-4F86-8C4E-E1BE15C16C0A@doyensec.com/T/#t)
+- [2] [Doyensec: Việc xóa dấu Forwarded-SKB trong Open vSwitch cho phép LPE page-cache ESP có thể tái hiện một cách xác định](https://blog.doyensec.com/2026/09/17/ovs.html)
+- [3] [Proof of concept `ovs-pagecache-write` của Doyensec](https://github.com/doyensec/ovs-pagecache-write)
+- [4] [Bản sửa lỗi Linux cho đường coalescing Fragnesia ban đầu (`f84eca581739`)](https://github.com/torvalds/linux/commit/f84eca5817390257cef78013d0112481c503b4a3)
+- [5] [Kiểm tra shared-fragment phía consumer ESP trong Linux (`f4c50a4034e6`)](https://github.com/torvalds/linux/commit/f4c50a4034e6)
+- [6] [RFC 4106: Việc sử dụng Galois/Counter Mode (GCM) trong IPsec ESP](https://datatracker.ietf.org/doc/html/rfc4106)
+- [7] [Tài liệu kernel datapath của Open vSwitch](https://docs.openvswitch.org/en/latest/topics/datapath/)
 {{#include ../../../banners/hacktricks-training.md}}

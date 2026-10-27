@@ -2,71 +2,71 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-`no_new_privs` is a kernel hardening feature that prevents a process from gaining more privilege across `execve()`. In practical terms, once the flag is set, executing a setuid binary, a setgid binary, or a file with Linux file capabilities does not grant extra privilege beyond what the process already had. In containerized environments, this is important because many privilege-escalation chains rely on finding an executable inside the image that changes privilege when launched.
+`no_new_privs` là một tính năng hardening của kernel, ngăn process có thêm privilege khi gọi `execve()`. Trên thực tế, khi flag này được bật, việc thực thi một binary setuid, binary setgid hoặc file có Linux file capabilities sẽ không cấp thêm privilege nào ngoài những gì process đã có. Trong môi trường container, điều này rất quan trọng vì nhiều chuỗi privilege-escalation dựa vào việc tìm một executable bên trong image có thể thay đổi privilege khi được khởi chạy.
 
-From a defensive point of view, `no_new_privs` is not a substitute for namespaces, seccomp, or capability dropping. It is a reinforcement layer. It blocks a specific class of follow-up escalation after code execution has already been obtained. That makes it particularly valuable in environments where images contain helper binaries, package-manager artifacts, or legacy tools that would otherwise be dangerous when combined with partial compromise.
+Từ góc độ phòng thủ, `no_new_privs` không thay thế namespaces, seccomp hay việc loại bỏ capabilities. Đây là một lớp gia cố bổ sung. Nó chặn một nhóm cụ thể các bước leo thang tiếp theo sau khi đã có code execution. Điều này đặc biệt hữu ích trong những môi trường có image chứa helper binary, artifact của package manager hoặc công cụ cũ vốn sẽ nguy hiểm nếu kết hợp với một phần hệ thống bị xâm nhập.
 
-## Operation
+## Cách hoạt động
 
-The kernel flag behind this behavior is `PR_SET_NO_NEW_PRIVS`. Once it is set for a process, later `execve()` calls cannot increase privilege. The important detail is that the process can still run binaries; it simply cannot use those binaries to cross a privilege boundary that the kernel would otherwise honor.<sup>[[1]](#references)</sup>
+Flag của kernel đứng sau hành vi này là `PR_SET_NO_NEW_PRIVS`. Khi được bật cho một process, các lần gọi `execve()` sau đó không thể làm tăng privilege. Điểm quan trọng là process vẫn có thể chạy binary; chỉ là nó không thể dùng những binary đó để vượt qua ranh giới privilege mà kernel vốn sẽ cho phép.<sup>[[1]](#references)</sup>
 
-The kernel behavior is also **inherited and irreversible**: once a task sets `no_new_privs`, the bit is inherited across `fork()`, `clone()`, and `execve()`, and cannot be unset later.<sup>[[1]](#references)</sup> This is useful in assessments because a single `NoNewPrivs: 1` on the container process usually means descendants should also stay in that mode unless you are looking at a completely different process tree.
+Hành vi của kernel cũng **được kế thừa và không thể đảo ngược**: khi một task bật `no_new_privs`, bit này được kế thừa qua `fork()`, `clone()` và `execve()`, đồng thời không thể bị tắt về sau.<sup>[[1]](#references)</sup> Điều này hữu ích khi đánh giá bảo mật vì một giá trị `NoNewPrivs: 1` trên process của container thường có nghĩa là các process con cũng phải giữ trạng thái đó, trừ khi bạn đang xem xét một cây process hoàn toàn khác.
 
-In Kubernetes-oriented environments, `allowPrivilegeEscalation: false` maps to this behavior for the container process.<sup>[[2]](#references)</sup> In Docker and Podman style runtimes, the equivalent is usually enabled explicitly through a security option. At the OCI layer, the same concept appears as `process.noNewPrivileges`.
+Trong các môi trường hướng đến Kubernetes, `allowPrivilegeEscalation: false` ánh xạ tới hành vi này cho process của container.<sup>[[2]](#references)</sup> Trong các runtime kiểu Docker và Podman, tùy chọn tương đương thường được bật rõ ràng thông qua một tùy chọn bảo mật. Ở tầng OCI, cùng khái niệm này xuất hiện dưới dạng `process.noNewPrivileges`.
 
-## Important Nuances
+## Các điểm cần lưu ý
 
-`no_new_privs` blocks **exec-time** privilege gain, not every privilege change.<sup>[[1]](#references)</sup> In particular:
+`no_new_privs` chặn việc tăng privilege **khi thực thi**, chứ không chặn mọi thay đổi privilege.<sup>[[1]](#references)</sup> Cụ thể:
 
-- setuid and setgid transitions stop working across `execve()`
-- file capabilities do not add to the permitted set on `execve()`
-- LSMs such as AppArmor or SELinux do not relax constraints after `execve()`
-- already-held privilege is still already-held privilege
+- các chuyển đổi setuid và setgid không còn hoạt động qua `execve()`
+- file capabilities không được thêm vào permitted set khi gọi `execve()`
+- các LSM như AppArmor hoặc SELinux không nới lỏng các ràng buộc sau `execve()`
+- privilege đã có vẫn được giữ nguyên
 
-That last point matters operationally. If the process already runs as root, already has a dangerous capability, or already has access to a powerful runtime API or writable host mount, setting `no_new_privs` does not neutralize those exposures. It only removes one common **next step** in a privilege-escalation chain.
+Điểm cuối này quan trọng trong thực tế. Nếu process đã chạy với quyền root, đã có một capability nguy hiểm, hoặc đã truy cập được API runtime mạnh hay mount host có thể ghi, thì bật `no_new_privs` không vô hiệu hóa những rủi ro đó. Nó chỉ loại bỏ một **bước tiếp theo** phổ biến trong chuỗi privilege-escalation.
 
-Also note that the flag does not block privilege changes that do not depend on `execve()`.<sup>[[1]](#references)</sup> For example, a task that is already privileged enough may still call `setuid(2)` directly or receive a privileged file descriptor over a Unix socket. This is why `no_new_privs` should be read together with [seccomp](seccomp.md), capability sets, and namespace exposure instead of as a standalone answer.
+Cũng cần lưu ý flag này không chặn những thay đổi privilege không phụ thuộc vào `execve()`.<sup>[[1]](#references)</sup> Ví dụ, một task đã có đủ privilege vẫn có thể gọi trực tiếp `setuid(2)` hoặc nhận một file descriptor có privilege qua Unix socket. Vì vậy, nên xem xét `no_new_privs` cùng với [seccomp](seccomp.md), các capability set và mức độ tiếp xúc của namespace, thay vì coi đây là giải pháp độc lập.
 
-## Lab
+## Thực hành
 
-Inspect the current process state:
+Kiểm tra trạng thái của process hiện tại:
 
 ```bash
 grep NoNewPrivs /proc/self/status
 ```
 
-Compare that with a container where the runtime enables the flag:
+So sánh điều đó với một container mà runtime bật flag:
 
 ```bash
 docker run --rm --security-opt no-new-privileges:true debian:stable-slim sh -c 'grep NoNewPrivs /proc/self/status'
 ```
 
-On a hardened workload, the result should show `NoNewPrivs: 1`.
+Trên workload đã được harden, kết quả sẽ hiển thị `NoNewPrivs: 1`.
 
-You can also demonstrate the actual effect against a setuid binary:
+Bạn cũng có thể minh họa tác động thực tế bằng một binary setuid:
 
 ```bash
 docker run --rm debian:stable-slim sh -c 'apt-get update >/dev/null 2>&1 && apt-get install -y passwd >/dev/null 2>&1 && grep NoNewPrivs /proc/self/status && /bin/su -c id 2>/dev/null'
 docker run --rm --security-opt no-new-privileges:true debian:stable-slim sh -c 'apt-get update >/dev/null 2>&1 && apt-get install -y passwd >/dev/null 2>&1 && grep NoNewPrivs /proc/self/status && /bin/su -c id 2>/dev/null'
 ```
 
-The point of the comparison is not that `su` is universally exploitable. It is that the same image can behave very differently depending on whether `execve()` is still allowed to cross a privilege boundary.
+Mục đích của phép so sánh không phải là `su` luôn có thể bị khai thác. Mà là cùng một image có thể hoạt động rất khác nhau, tùy thuộc vào việc `execve()` còn được phép vượt qua ranh giới đặc quyền hay không.
 
-## Security Impact
+## Tác động bảo mật
 
-If `no_new_privs` is absent, a foothold inside the container may still be upgraded through setuid helpers or binaries with file capabilities. If it is present, those post-exec privilege changes are cut off. The effect is especially relevant in broad base images that ship many utilities the application never needed in the first place.
+Nếu không có `no_new_privs`, foothold bên trong container vẫn có thể được nâng cấp đặc quyền thông qua các helper setuid hoặc binary có file capabilities. Nếu được bật, các thay đổi đặc quyền sau khi thực thi sẽ bị chặn. Tác động này đặc biệt đáng chú ý trong các base image lớn có nhiều tiện ích mà ứng dụng vốn không cần đến.
 
-There is also an important seccomp interaction. Unprivileged tasks generally need `no_new_privs` set before they can install a seccomp filter in filter mode.<sup>[[1]](#references)</sup> This is one reason hardened containers often show both `Seccomp` and `NoNewPrivs` enabled together. From an attacker perspective, seeing both usually means the environment was configured deliberately rather than accidentally.
+Ngoài ra, còn có một tương tác quan trọng với seccomp. Các tác vụ không có đặc quyền thường cần bật `no_new_privs` trước khi có thể cài đặt seccomp filter ở chế độ filter.<sup>[[1]](#references)</sup> Đây là một lý do khiến các container được harden thường bật cả `Seccomp` lẫn `NoNewPrivs`. Từ góc nhìn của attacker, việc thấy cả hai thường có nghĩa là môi trường được cấu hình có chủ đích chứ không phải vô tình.
 
-## Misconfigurations
+## Cấu hình sai
 
-The most common problem is simply not enabling the control in environments where it would be compatible. In Kubernetes, leaving `allowPrivilegeEscalation` enabled is often the default operational mistake. In Docker and Podman, omitting the relevant security option has the same effect. Another recurring failure mode is assuming that because a container is "not privileged", exec-time privilege transitions are automatically irrelevant.
+Vấn đề phổ biến nhất đơn giản là không bật cơ chế bảo vệ này trong những môi trường tương thích. Trong Kubernetes, để `allowPrivilegeEscalation` ở trạng thái bật là một lỗi vận hành mặc định thường gặp. Trong Docker và Podman, việc bỏ qua tùy chọn bảo mật liên quan cũng gây ra kết quả tương tự. Một lỗi thường gặp khác là cho rằng vì container “không có đặc quyền”, nên các chuyển đổi đặc quyền khi thực thi đương nhiên không còn liên quan.
 
-A more subtle Kubernetes pitfall is that `allowPrivilegeEscalation: false` is **not** honored the way people expect when the container is `privileged` or when it has `CAP_SYS_ADMIN`. The Kubernetes API documents that `allowPrivilegeEscalation` is effectively always true in those cases.<sup>[[2]](#references)</sup> In practice, this means the field should be treated as one signal in the final posture, not as a guarantee that the runtime ended up with `NoNewPrivs: 1`.
+Một cạm bẫy Kubernetes tinh vi hơn là `allowPrivilegeEscalation: false` **không** được áp dụng như mọi người mong đợi khi container ở trạng thái `privileged` hoặc có `CAP_SYS_ADMIN`. Tài liệu Kubernetes nêu rõ rằng `allowPrivilegeEscalation` trên thực tế luôn là true trong những trường hợp đó.<sup>[[2]](#references)</sup> Trên thực tế, điều này có nghĩa là nên xem trường này như một tín hiệu về cấu hình bảo mật cuối cùng, chứ không phải bảo đảm rằng runtime đã thiết lập `NoNewPrivs: 1`.
 
-## Abuse
+## Lạm dụng
 
-If `no_new_privs` is not set, the first question is whether the image contains binaries that can still raise privilege:
+Nếu `no_new_privs` chưa được bật, câu hỏi đầu tiên là liệu image có chứa các binary vẫn có thể nâng đặc quyền hay không:
 
 ```bash
 grep NoNewPrivs /proc/self/status
@@ -74,15 +74,15 @@ find / -perm -4000 -type f 2>/dev/null | head -n 50
 getcap -r / 2>/dev/null | head -n 50
 ```
 
-Interesting results include:
+Kết quả đáng chú ý bao gồm:
 
 - `NoNewPrivs: 0`
-- setuid helpers such as `su`, `mount`, `passwd`, or distribution-specific admin tools
-- binaries with file capabilities that grant network or filesystem privileges
+- các helper setuid như `su`, `mount`, `passwd` hoặc công cụ quản trị dành riêng cho từng bản phân phối
+- các binary có file capabilities cấp quyền mạng hoặc hệ thống tệp
 
-In a real assessment, these findings do not prove a working escalation by themselves, but they identify exactly the binaries worth testing next.
+Trong một assessment thực tế, những phát hiện này không tự chứng minh được khả năng leo thang đặc quyền, nhưng chúng xác định chính xác các binary đáng để kiểm tra tiếp.
 
-In Kubernetes, also verify that the YAML intent matches the kernel reality:
+Trong Kubernetes, hãy xác minh thêm rằng cấu hình YAML phản ánh đúng trạng thái thực tế của kernel:
 
 ```bash
 NS=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace 2>/dev/null)
@@ -91,15 +91,15 @@ grep -E 'NoNewPrivs|Seccomp' /proc/self/status
 capsh --print 2>/dev/null | grep cap_sys_admin
 ```
 
-Interesting combinations include:
+Các tổ hợp đáng chú ý gồm:
 
-- `allowPrivilegeEscalation: false` in the Pod spec but `NoNewPrivs: 0` in the container
-- `cap_sys_admin` present, which makes the Kubernetes field far less trustworthy
-- `Seccomp: 0` and `NoNewPrivs: 0`, which usually indicates a broadly weakened runtime posture rather than a single isolated mistake
+- `allowPrivilegeEscalation: false` trong Pod spec nhưng `NoNewPrivs: 0` trong container
+- Có `cap_sys_admin`, khiến trường Kubernetes kém đáng tin cậy hơn nhiều
+- `Seccomp: 0` và `NoNewPrivs: 0`, thường cho thấy cấu hình bảo mật runtime bị suy yếu trên diện rộng, thay vì chỉ có một lỗi riêng lẻ
 
-### Full Example: In-Container Privilege Escalation Through setuid
+### Ví dụ đầy đủ: Leo thang đặc quyền trong container thông qua setuid
 
-This control usually prevents **in-container privilege escalation** rather than host escape directly. If `NoNewPrivs` is `0` and a setuid helper exists, test it explicitly:
+Kiểm soát này thường ngăn **leo thang đặc quyền trong container**, chứ không trực tiếp ngăn thoát ra host. Nếu `NoNewPrivs` là `0` và có một chương trình trợ giúp setuid, hãy kiểm tra cụ thể:
 
 ```bash
 grep NoNewPrivs /proc/self/status
@@ -107,17 +107,17 @@ find / -perm -4000 -type f 2>/dev/null | head -n 20
 /usr/bin/passwd -S root 2>/dev/null
 ```
 
-If a known setuid binary is present and functional, try launching it in a way that preserves the privilege transition:
+Nếu có một binary setuid đã biết và hoạt động, hãy thử khởi chạy nó theo cách duy trì quá trình chuyển đổi đặc quyền:
 
 ```bash
 /bin/su -c id 2>/dev/null
 ```
 
-This does not by itself escape the container, but it can convert a low-privilege foothold inside the container into container-root, which often becomes the prerequisite for later host escape through mounts, runtime sockets, or kernel-facing interfaces.
+Bản thân điều này không giúp thoát khỏi container, nhưng có thể biến foothold có đặc quyền thấp bên trong container thành quyền root trong container. Đây thường là điều kiện tiên quyết để thoát khỏi host về sau thông qua các mount, runtime socket hoặc giao diện tương tác với kernel.
 
-## Checks
+## Kiểm tra
 
-The goal of these checks is to establish whether exec-time privilege gain is blocked and whether the image still contains helpers that would matter if it is not.
+Mục tiêu của các bước kiểm tra này là xác định liệu việc nâng quyền tại thời điểm thực thi có bị chặn hay không, và liệu image vẫn chứa các helper có thể hữu ích nếu không bị chặn.
 
 ```bash
 grep NoNewPrivs /proc/self/status      # Whether exec-time privilege gain is blocked
@@ -129,28 +129,27 @@ docker inspect <container> | jq '.[0].HostConfig.SecurityOpt' 2>/dev/null   # Do
 kubectl get pod <pod> -n <ns> -o jsonpath='{.spec.containers[*].securityContext.allowPrivilegeEscalation}{"\n"}' 2>/dev/null
 ```
 
-What is interesting here:
+Điều gì đáng chú ý ở đây:
 
-- `NoNewPrivs: 1` is usually the safer result.
-- `NoNewPrivs: 0` means setuid and file-cap based escalation paths remain relevant.
-- `NoNewPrivs: 1` plus `Seccomp: 2` is a common sign of a more intentional hardening posture.
-- A Kubernetes manifest that says `allowPrivilegeEscalation: false` is useful, but the kernel status is the ground truth.
-- A minimal image with few or no setuid/file-cap binaries gives an attacker fewer post-exploitation options even when `no_new_privs` is missing.
+- `NoNewPrivs: 1` thường là kết quả an toàn hơn.
+- `NoNewPrivs: 0` nghĩa là các đường leo thang đặc quyền dựa trên setuid và file-cap vẫn cần được xem xét.
+- `NoNewPrivs: 1` cùng với `Seccomp: 2` thường là dấu hiệu cho thấy cấu hình hardening được chủ động thiết lập hơn.
+- Manifest Kubernetes có `allowPrivilegeEscalation: false` là hữu ích, nhưng trạng thái kernel mới là thực tế chính xác.
+- Image tối giản, có ít hoặc không có binary setuid/file-cap, khiến kẻ tấn công có ít lựa chọn hậu khai thác hơn ngay cả khi thiếu `no_new_privs`.
 
-## Runtime Defaults
+## Mặc định của runtime
 
-| Runtime / platform | Default state | Default behavior | Common manual weakening |
+| Runtime / nền tảng | Trạng thái mặc định | Hành vi mặc định | Cách thường dùng để nới lỏng thủ công |
 | --- | --- | --- | --- |
-| Docker Engine | Not enabled by default | Enabled explicitly with `--security-opt no-new-privileges=true`; daemon-wide default also exists via `dockerd --no-new-privileges` | omitting the flag, `--privileged` |
-| Podman | Not enabled by default | Enabled explicitly with `--security-opt no-new-privileges` or equivalent security configuration | omitting the option, `--privileged` |
-| Kubernetes | Controlled by workload policy | `allowPrivilegeEscalation: false` requests the effect, but `privileged: true` and `CAP_SYS_ADMIN` keep it effectively true | `allowPrivilegeEscalation: true`, `privileged: true`, adding `CAP_SYS_ADMIN` |
-| containerd / CRI-O under Kubernetes | Follows Kubernetes workload settings / OCI `process.noNewPrivileges` | Usually inherited from the Pod security context and translated into OCI runtime config | same as Kubernetes row |
+| Docker Engine | Không được bật theo mặc định | Bật tường minh bằng `--security-opt no-new-privileges=true`; cũng có thiết lập mặc định trên toàn daemon qua `dockerd --no-new-privileges` | bỏ qua flag, `--privileged` |
+| Podman | Không được bật theo mặc định | Bật tường minh bằng `--security-opt no-new-privileges` hoặc cấu hình bảo mật tương đương | bỏ qua tùy chọn, `--privileged` |
+| Kubernetes | Được kiểm soát bởi chính sách workload | `allowPrivilegeEscalation: false` yêu cầu hiệu lực này, nhưng `privileged: true` và `CAP_SYS_ADMIN` khiến nó vẫn được bật trên thực tế | `allowPrivilegeEscalation: true`, `privileged: true`, thêm `CAP_SYS_ADMIN` |
+| containerd / CRI-O dưới Kubernetes | Tuân theo thiết lập workload của Kubernetes / `process.noNewPrivileges` của OCI | Thường được kế thừa từ security context của Pod và chuyển thành cấu hình runtime OCI | tương tự hàng Kubernetes |
 
-This protection is often absent simply because nobody turned it on, not because the runtime lacks support for it.
+Biện pháp bảo vệ này thường vắng mặt chỉ vì chưa ai bật nó, chứ không phải vì runtime không hỗ trợ.
 
 ## References
 
-- [1] [Linux kernel documentation: No New Privileges Flag](https://docs.kernel.org/userspace-api/no_new_privs.html)
-- [2] [Kubernetes: Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
-
+- [1] [Tài liệu kernel Linux: Cờ No New Privileges](https://docs.kernel.org/userspace-api/no_new_privs.html)
+- [2] [Kubernetes: Cấu hình Security Context cho Pod hoặc Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
 {{#include ../../../../banners/hacktricks-training.md}}

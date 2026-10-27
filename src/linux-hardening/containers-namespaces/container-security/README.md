@@ -1,46 +1,46 @@
-# Container Security
+# Bảo mật Container
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## What A Container Actually Is
+## Container Thực Chất Là Gì
 
-A practical way to define a container is this: a container is a **regular Linux process tree** that has been started under a specific OCI-style configuration so that it sees a controlled filesystem, a controlled set of kernel resources, and a restricted privilege model. The process may believe it is PID 1, may believe it has its own network stack, may believe it owns its own hostname and IPC resources, and may even run as root inside its own user namespace. But under the hood it is still a host process that the kernel schedules like any other.
+Một cách thực tế để định nghĩa container là: container là một **cây tiến trình Linux thông thường** được khởi chạy theo một cấu hình kiểu OCI cụ thể, để nó nhìn thấy một hệ thống tệp được kiểm soát, một tập tài nguyên kernel được kiểm soát và một mô hình đặc quyền bị hạn chế. Tiến trình có thể nghĩ rằng nó là PID 1, có thể nghĩ rằng nó có network stack riêng, có thể nghĩ rằng nó sở hữu hostname và tài nguyên IPC riêng, thậm chí có thể chạy với quyền root bên trong user namespace riêng. Nhưng bên dưới, nó vẫn là một tiến trình trên host được kernel lập lịch như mọi tiến trình khác.
 
-This is why container security is really the study of how that illusion is constructed and how it fails. If the mount namespace is weak, the process may see the host filesystem. If the user namespace is absent or disabled, root inside the container may map too closely to root on the host. If seccomp is unconfined and the capability set is too broad, the process may reach syscalls and privileged kernel features that should have stayed out of reach. If the runtime socket is mounted inside the container, the container may not need a kernel breakout at all because it can simply ask the runtime to launch a more powerful sibling container or mount the host root filesystem directly.
+Đây là lý do bảo mật container thực chất là nghiên cứu cách tạo ra ảo giác đó và cách nó thất bại. Nếu mount namespace yếu, tiến trình có thể nhìn thấy hệ thống tệp của host. Nếu user namespace không tồn tại hoặc bị vô hiệu hóa, root bên trong container có thể được ánh xạ quá sát với root trên host. Nếu seccomp không bị giới hạn và tập capability quá rộng, tiến trình có thể gọi các syscall và truy cập những tính năng kernel đặc quyền vốn không nên nằm trong tầm với. Nếu runtime socket được mount bên trong container, container có thể không cần kernel breakout vì chỉ cần yêu cầu runtime khởi chạy một container ngang hàng có nhiều quyền hơn hoặc mount trực tiếp hệ thống tệp gốc của host.
 
-## How Containers Differ From Virtual Machines
+## Container Khác Máy Ảo Như Thế Nào
 
-A VM normally carries its own kernel and hardware abstraction boundary. That means the guest kernel can crash, panic, or be exploited without automatically implying direct control of the host kernel. In containers, the workload does not get a separate kernel. Instead, it gets a carefully filtered and namespaced view of the same kernel that the host uses. As a result, containers are usually lighter, faster to start, easier to pack densely on a machine, and better suited to short-lived application deployment. The price is that the isolation boundary depends much more directly on correct host and runtime configuration.
+Thông thường, VM có kernel và ranh giới trừu tượng hóa phần cứng riêng. Điều đó có nghĩa là guest kernel có thể gặp sự cố, panic hoặc bị khai thác mà không đồng nghĩa với việc kernel của host bị kiểm soát trực tiếp. Container không có kernel riêng cho workload. Thay vào đó, nó nhận được một chế độ xem của cùng kernel mà host sử dụng, được lọc và phân tách bằng namespace một cách cẩn thận. Vì vậy, container thường nhẹ hơn, khởi động nhanh hơn, dễ đóng gói dày đặc trên một máy hơn và phù hợp hơn với việc triển khai ứng dụng ngắn hạn. Đổi lại, ranh giới cô lập phụ thuộc trực tiếp hơn nhiều vào việc cấu hình host và runtime có chính xác hay không.
 
-This does not mean containers are "insecure" and VMs are "secure". It means the security model is different. A well-configured container stack with rootless execution, user namespaces, default seccomp, a strict capability set, no host namespace sharing, and strong SELinux or AppArmor enforcement can be very robust. Conversely, a container started with `--privileged`, host PID/network sharing, the Docker socket mounted inside it, and a writable bind mount of `/` is functionally much closer to host root access than to a safely isolated application sandbox. The difference comes from the layers that were enabled or disabled.
+Điều này không có nghĩa container là "không an toàn" còn VM thì "an toàn". Mô hình bảo mật của chúng khác nhau. Một stack container được cấu hình tốt với thực thi rootless, user namespace, seccomp mặc định, tập capability nghiêm ngặt, không chia sẻ namespace của host và cơ chế thực thi SELinux hoặc AppArmor mạnh có thể rất vững chắc. Ngược lại, một container được khởi chạy với `--privileged`, chia sẻ PID/network của host, mount Docker socket bên trong và có bind mount `/` cho phép ghi, về mặt chức năng sẽ gần với quyền truy cập root trên host hơn là một sandbox ứng dụng được cô lập an toàn. Sự khác biệt nằm ở các lớp được bật hoặc tắt.
 
-There is also a middle ground that readers should understand because it appears more and more often in real environments. **Sandboxed container runtimes** such as **gVisor** and **Kata Containers** intentionally harden the boundary beyond a classic `runc` container. gVisor places a userspace kernel layer between the workload and many host kernel interfaces, while Kata launches the workload inside a lightweight virtual machine. These are still used through container ecosystems and orchestration workflows, but their security properties differ from plain OCI runtimes and should not be mentally grouped with "normal Docker containers" as if everything behaved the same way.
+Ngoài ra còn có một lựa chọn trung gian mà người đọc nên hiểu, vì nó ngày càng phổ biến trong môi trường thực tế. **Sandboxed container runtime** như **gVisor** và **Kata Containers** cố ý tăng cường ranh giới bảo vệ hơn so với container `runc` thông thường. gVisor đặt một lớp kernel userspace giữa workload và nhiều giao diện kernel của host, trong khi Kata khởi chạy workload bên trong một máy ảo nhẹ. Chúng vẫn được sử dụng thông qua hệ sinh thái container và quy trình điều phối, nhưng đặc tính bảo mật khác với runtime OCI thuần túy; không nên gộp chúng vào nhóm "Docker container thông thường" như thể mọi thứ hoạt động giống nhau.
 
-## The Container Stack: Several Layers, Not One
+## Stack Container: Nhiều Lớp, Không Phải Một
 
-When someone says "this container is insecure", the useful follow-up question is: **which layer made it insecure?** A containerized workload is usually the result of several components working together.
+Khi ai đó nói "container này không an toàn", câu hỏi tiếp theo hữu ích là: **lớp nào khiến nó không an toàn?** Một workload chạy trong container thường là kết quả phối hợp của nhiều thành phần.
 
-At the top, there is often an **image build layer** such as BuildKit, Buildah, or Kaniko, which creates the OCI image and metadata. Above the low-level runtime, there may be an **engine or manager** such as Docker Engine, Podman, containerd, CRI-O, Incus, or systemd-nspawn. In cluster environments, there may also be an **orchestrator** such as Kubernetes deciding the requested security posture through workload configuration. Finally, the **kernel** is what actually enforces namespaces, cgroups, seccomp, and MAC policy.
+Ở tầng trên cùng thường có **lớp build image** như BuildKit, Buildah hoặc Kaniko, chịu trách nhiệm tạo image OCI và metadata. Phía trên runtime cấp thấp có thể có **engine hoặc trình quản lý** như Docker Engine, Podman, containerd, CRI-O, Incus hoặc systemd-nspawn. Trong môi trường cluster, cũng có thể có **orchestrator** như Kubernetes quyết định trạng thái bảo mật được yêu cầu thông qua cấu hình workload. Cuối cùng, **kernel** là thành phần thực thi namespaces, cgroups, seccomp và chính sách MAC.
 
-This layered model is important for understanding defaults. A restriction may be requested by Kubernetes, translated through CRI by containerd or CRI-O, converted into an OCI spec by the runtime wrapper, and only then enforced by `runc`, `crun`, `runsc`, or another runtime against the kernel. When defaults differ between environments, it is often because one of these layers changed the final configuration. The same mechanism may therefore appear in Docker or Podman as a CLI flag, in Kubernetes as a Pod or `securityContext` field, and in lower-level runtime stacks as OCI configuration generated for the workload. For that reason, CLI examples in this section should be read as **runtime-specific syntax for a general container concept**, not as universal flags supported by every tool.
+Mô hình nhiều lớp này rất quan trọng để hiểu các cấu hình mặc định. Một giới hạn có thể được yêu cầu bởi Kubernetes, được containerd hoặc CRI-O chuyển đổi thông qua CRI, được wrapper runtime chuyển thành OCI spec, rồi mới được `runc`, `crun`, `runsc` hoặc runtime khác thực thi trên kernel. Khi cấu hình mặc định khác nhau giữa các môi trường, thường là do một trong các lớp này đã thay đổi cấu hình cuối cùng. Vì vậy, cùng một cơ chế có thể xuất hiện dưới dạng cờ CLI trong Docker hoặc Podman, trường Pod hoặc `securityContext` trong Kubernetes, và cấu hình OCI được tạo cho workload trong stack runtime cấp thấp hơn. Do đó, các ví dụ CLI trong phần này nên được hiểu là **cú pháp riêng của runtime cho một khái niệm container tổng quát**, chứ không phải cờ dùng chung được mọi công cụ hỗ trợ.
 
-## The Real Container Security Boundary
+## Ranh Giới Bảo Mật Thực Sự Của Container
 
-In practice, container security comes from **overlapping controls**, not from a single perfect control. Namespaces isolate visibility. cgroups govern and limit resource usage. Capabilities reduce what a privileged-looking process may actually do. seccomp blocks dangerous syscalls before they reach the kernel. AppArmor and SELinux add Mandatory Access Control on top of normal DAC checks. `no_new_privs`, masked procfs paths, and read-only system paths make common privilege and proc/sys abuse chains harder. The runtime itself also matters because it decides how mounts, sockets, labels, and namespace joins are created.
+Trên thực tế, bảo mật container đến từ **các biện pháp kiểm soát chồng lớp**, chứ không phải một biện pháp hoàn hảo duy nhất. Namespace cô lập những gì có thể nhìn thấy. cgroups quản lý và giới hạn mức sử dụng tài nguyên. Capability hạn chế những gì một tiến trình trông có vẻ đặc quyền thực sự có thể làm. seccomp chặn syscall nguy hiểm trước khi chúng đến kernel. AppArmor và SELinux bổ sung Mandatory Access Control bên trên các kiểm tra DAC thông thường. `no_new_privs`, các đường dẫn procfs bị che và đường dẫn hệ thống chỉ đọc khiến những chuỗi lạm dụng quyền và proc/sys phổ biến khó thực hiện hơn. Bản thân runtime cũng quan trọng vì nó quyết định cách tạo mount, socket, nhãn và việc tham gia namespace.
 
-That is why a lot of container security documentation seems repetitive. The same escape chain often depends on multiple mechanisms at once. For example, a writable host bind mount is bad, but it becomes far worse if the container also runs as real root on the host, has `CAP_SYS_ADMIN`, is unconfined by seccomp, and is not restricted by SELinux or AppArmor. Likewise, host PID sharing is a serious exposure, but it becomes dramatically more useful to an attacker when it is combined with `CAP_SYS_PTRACE`, weak procfs protections, or namespace-entry tools such as `nsenter`. The right way to document the topic is therefore not by repeating the same attack on every page, but by explaining what each layer contributes to the final boundary.
+Đó là lý do nhiều tài liệu về bảo mật container có vẻ lặp lại. Cùng một chuỗi escape thường phụ thuộc đồng thời vào nhiều cơ chế. Ví dụ, bind mount host cho phép ghi vốn đã nguy hiểm, nhưng sẽ nguy hiểm hơn nhiều nếu container cũng chạy với quyền root thực sự trên host, có `CAP_SYS_ADMIN`, không bị seccomp giới hạn và không bị SELinux hoặc AppArmor hạn chế. Tương tự, chia sẻ PID của host là một rủi ro nghiêm trọng, nhưng trở nên hữu ích hơn đáng kể đối với kẻ tấn công khi kết hợp với `CAP_SYS_PTRACE`, cơ chế bảo vệ procfs yếu hoặc công cụ vào namespace như `nsenter`. Vì vậy, cách phù hợp để ghi chép chủ đề này không phải là lặp lại cùng một cuộc tấn công trên mọi trang, mà là giải thích từng lớp đóng góp gì vào ranh giới bảo vệ cuối cùng.
 
-## How To Read This Section
+## Cách Đọc Phần Này
 
-The section is organized from the most general concepts to the most specific ones.
+Phần này được sắp xếp từ các khái niệm tổng quát nhất đến các khái niệm cụ thể nhất.
 
-Start with the runtime and ecosystem overview:
+Bắt đầu với phần tổng quan về runtime và hệ sinh thái:
 
 {{#ref}}
 runtimes-and-engines.md
 {{#endref}}
 
-Then review the control planes and supply-chain surfaces that frequently decide whether an attacker even needs a kernel escape:
+Sau đó xem xét các control plane và bề mặt supply chain thường quyết định liệu kẻ tấn công có cần kernel escape hay không:
 
 {{#ref}}
 runtime-api-and-daemon-exposure.md
@@ -58,19 +58,19 @@ image-security-and-secrets.md
 assessment-and-hardening.md
 {{#endref}}
 
-Then move into the protection model:
+Tiếp theo, tìm hiểu mô hình bảo vệ:
 
 {{#ref}}
 protections/
 {{#endref}}
 
-The namespace pages explain the kernel isolation primitives individually:
+Các trang về namespace giải thích riêng từng cơ chế cô lập của kernel:
 
 {{#ref}}
 protections/namespaces/
 {{#endref}}
 
-The pages on cgroups, capabilities, seccomp, AppArmor, SELinux, `no_new_privs`, masked paths, and read-only system paths explain the mechanisms that are usually layered on top of namespaces:
+Các trang về cgroups, capabilities, seccomp, AppArmor, SELinux, `no_new_privs`, đường dẫn bị che và đường dẫn hệ thống chỉ đọc giải thích những cơ chế thường được xếp thêm bên trên namespace:
 
 {{#ref}}
 protections/cgroups.md
@@ -116,14 +116,14 @@ privileged-containers.md
 sensitive-host-mounts.md
 {{#endref}}
 
-## A Good First Enumeration Mindset
+## Tư Duy Khảo Sát Ban Đầu Hiệu Quả
 
-When assessing a containerized target, it is much more useful to ask a small set of precise technical questions than to immediately jump to famous escape PoCs. First, identify the **stack**: Docker, Podman, containerd, CRI-O, Incus/LXC, systemd-nspawn, Apptainer, or something more specialized. Then identify the **runtime**: `runc`, `crun`, `runsc`, `kata-runtime`, or another OCI-compatible implementation. After that, check whether the environment is **rootful or rootless**, whether **user namespaces** are active, whether any **host namespaces** are shared, what **capabilities** remain, whether **seccomp** is enabled, whether a **MAC policy** is actually enforcing, whether **dangerous mounts or sockets** are present, and whether the process can interact with the container runtime API.
+Khi đánh giá mục tiêu chạy trong container, việc đặt một nhóm câu hỏi kỹ thuật chính xác sẽ hữu ích hơn nhiều so với việc lập tức tìm đến các PoC escape nổi tiếng. Trước tiên, hãy xác định **stack**: Docker, Podman, containerd, CRI-O, Incus/LXC, systemd-nspawn, Apptainer hay một nền tảng chuyên biệt khác. Sau đó xác định **runtime**: `runc`, `crun`, `runsc`, `kata-runtime` hay một triển khai tương thích OCI khác. Tiếp theo, kiểm tra môi trường là **rootful hay rootless**, **user namespace** có hoạt động hay không, có chia sẻ **namespace của host** nào không, còn lại những **capability** nào, **seccomp** có được bật không, **chính sách MAC** có thực sự được thực thi không, có **mount hoặc socket nguy hiểm** nào không, và tiến trình có thể tương tác với API của container runtime hay không.
 
-Those answers tell you far more about the real security posture than the base image name ever will. In many assessments, you can predict the likely breakout family before reading a single application file just by understanding the final container configuration.
+Những câu trả lời đó cho bạn biết về trạng thái bảo mật thực tế nhiều hơn tên image nền tảng. Trong nhiều lần đánh giá, chỉ cần hiểu cấu hình cuối cùng của container là bạn có thể dự đoán nhóm breakout có khả năng xảy ra trước cả khi đọc một tệp ứng dụng nào.
 
-## Coverage
+## Phạm Vi
 
-This section covers the old Docker-focused material under container-oriented organization: runtime and daemon exposure, authorization plugins, image trust and build secrets, sensitive host mounts, distroless workloads, privileged containers, and the kernel protections normally layered around container execution.
+Phần này sắp xếp lại nội dung cũ tập trung vào Docker theo hướng lấy container làm trọng tâm: lộ diện runtime và daemon, plugin ủy quyền, độ tin cậy của image và build secret, mount host nhạy cảm, workload distroless, container đặc quyền và các biện pháp bảo vệ kernel thường được xếp lớp quanh quá trình thực thi container.
 
 {{#include ../../../banners/hacktricks-training.md}}

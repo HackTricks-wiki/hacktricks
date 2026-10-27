@@ -1,24 +1,24 @@
-# PID Namespace
+# Không gian tên PID
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-## Overview
+## Tổng quan
 
-The PID namespace controls how processes are numbered and which processes are visible. This is why a container can have its own PID 1 even though it is not a real machine. Inside the namespace, the workload sees what appears to be a local process tree. Outside the namespace, the host still sees the real host PIDs and the full process landscape.<sup>[[3]](#references)</sup>
+Không gian tên PID kiểm soát cách đánh số tiến trình và những tiến trình nào có thể được nhìn thấy. Vì vậy, một container có thể có PID 1 riêng dù nó không phải là một máy thật. Bên trong không gian tên, workload thấy một cây tiến trình có vẻ như của cục bộ. Bên ngoài không gian tên, host vẫn thấy các PID thực của host và toàn bộ tiến trình.<sup>[[3]](#references)</sup>
 
-From a security point of view, the PID namespace matters because process visibility is valuable. Once a workload can see host processes, it may be able to observe service names, command-line arguments, secrets passed in process arguments, environment-derived state through `/proc`, and potential namespace-entry targets. If it can do more than just see those processes, for example by sending signals or using ptrace under the right conditions, the problem becomes much more serious.
+Từ góc độ bảo mật, không gian tên PID quan trọng vì khả năng quan sát tiến trình có giá trị. Khi workload có thể thấy các tiến trình của host, nó có thể quan sát tên dịch vụ, đối số dòng lệnh, bí mật được truyền trong đối số tiến trình, trạng thái bắt nguồn từ môi trường thông qua `/proc` và các mục tiêu tiềm năng để gia nhập không gian tên. Nếu workload có thể làm nhiều hơn việc chỉ thấy các tiến trình đó, chẳng hạn gửi tín hiệu hoặc dùng ptrace khi đáp ứng các điều kiện thích hợp, vấn đề sẽ nghiêm trọng hơn nhiều.
 
-## Operation
+## Hoạt động
 
-A new PID namespace starts with its own internal process numbering. The first process created inside it becomes PID 1 from the namespace's point of view, which also means it gets special init-like semantics for orphaned children and signal behavior. This explains a lot of container oddities around init processes, zombie reaping, and why tiny init wrappers are sometimes used in containers.<sup>[[3]](#references)</sup>
+Một không gian tên PID mới bắt đầu với cách đánh số tiến trình nội bộ riêng. Tiến trình đầu tiên được tạo bên trong sẽ trở thành PID 1 theo góc nhìn của không gian tên đó; điều này cũng đồng nghĩa nó có các ngữ nghĩa đặc biệt giống init đối với tiến trình con mồ côi và cách xử lý tín hiệu. Điều này giải thích nhiều hiện tượng bất thường của container liên quan đến tiến trình init, việc thu gom tiến trình zombie và lý do đôi khi container sử dụng các trình bao bọc init nhỏ gọn.<sup>[[3]](#references)</sup>
 
-PID namespaces form a hierarchy. A process in an ancestor namespace can address descendants using the PID assigned in that ancestor, but a descendant cannot address ancestor-only tasks through ordinary PID-based syscalls or `setns()` upward into an ancestor PID namespace. An ancestor-owned procfs deliberately exposed to the descendant can still leak the ancestor's process view. Also, joining a PID namespace with `setns()` changes the namespace for **future children**, not the caller itself; tools therefore fork after joining. A procfs mount retains the PID view of the process that mounted it, which is why creating a fresh procfs after `unshare(CLONE_NEWPID)` is security-relevant and not only cosmetic.<sup>[[3]](#references)</sup>
+Không gian tên PID tạo thành một cấu trúc phân cấp. Một tiến trình trong không gian tên tổ tiên có thể truy cập các tiến trình thuộc không gian tên hậu duệ bằng PID được gán trong không gian tên tổ tiên đó, nhưng tiến trình thuộc không gian tên hậu duệ không thể truy cập các tiến trình chỉ thuộc không gian tên tổ tiên bằng các syscall thông thường dựa trên PID hoặc dùng `setns()` để đi lên không gian tên PID tổ tiên. Một procfs do tổ tiên sở hữu nhưng được cố ý hiển thị cho tiến trình hậu duệ vẫn có thể làm lộ góc nhìn tiến trình của tổ tiên. Ngoài ra, tham gia một không gian tên PID bằng `setns()` chỉ thay đổi không gian tên áp dụng cho **các tiến trình con được tạo sau đó**, chứ không thay đổi không gian tên của chính tiến trình gọi; vì vậy, các công cụ sẽ fork sau khi tham gia. Một mount procfs giữ nguyên góc nhìn PID của tiến trình đã mount nó, vì thế việc tạo procfs mới sau `unshare(CLONE_NEWPID)` có ý nghĩa về bảo mật, không chỉ là vấn đề hình thức.<sup>[[3]](#references)</sup>
 
-The important security lesson is that a process may look isolated because it sees only its own PID tree, but that isolation can be deliberately removed. Docker exposes this through `--pid=host`, while Kubernetes does it through `hostPID: true`. Once the container joins the host PID namespace, the workload sees host processes directly, and many later attack paths become much more realistic.
+Bài học bảo mật quan trọng là một tiến trình có thể trông như được cô lập vì chỉ thấy cây PID của chính nó, nhưng sự cô lập đó có thể bị loại bỏ một cách có chủ đích. Docker cung cấp khả năng này thông qua `--pid=host`, còn Kubernetes thực hiện điều đó bằng `hostPID: true`. Khi container tham gia không gian tên PID của host, workload sẽ thấy trực tiếp các tiến trình của host, khiến nhiều hướng tấn công tiếp theo trở nên thực tế hơn nhiều.
 
 ## Lab
 
-To create a PID namespace manually:
+Để tạo không gian tên PID theo cách thủ công:
 
 ```bash
 sudo unshare --pid --fork --mount-proc bash
@@ -26,34 +26,34 @@ ps -ef
 echo $$
 ```
 
-The shell now sees a private process view. The `--mount-proc` flag is important because it mounts a procfs instance that matches the new PID namespace, making the process list coherent from inside.<sup>[[3]](#references)</sup>
+Shell giờ thấy một chế độ xem tiến trình riêng tư. Flag `--mount-proc` rất quan trọng vì nó mount một instance procfs khớp với PID namespace mới, giúp danh sách tiến trình bên trong nhất quán.<sup>[[3]](#references)</sup>
 
-To compare container behavior:
+Để so sánh hành vi của container:
 
 ```bash
 docker run --rm debian:stable-slim ps -ef
 docker run --rm --pid=host debian:stable-slim ps -ef | head
 ```
 
-The difference is immediate and easy to understand, which is why this is a good first lab for readers.
+Sự khác biệt này rõ ràng ngay lập tức và dễ hiểu, vì vậy đây là lab đầu tiên phù hợp cho độc giả.
 
-## Runtime Usage
+## Cách sử dụng trong Runtime
 
-Normal containers in Docker, Podman, containerd, and CRI-O get their own PID namespace. Kubernetes containers normally have separate PID views; `shareProcessNamespace: true` deliberately creates one Pod-wide view.<sup>[[4]](#references)</sup> By contrast, `hostPID: true` selects the node's PID namespace. LXC/Incus environments rely on the same kernel primitive, though system-container use cases may expose more complicated process trees and encourage more debugging shortcuts.
+Các container thông thường trong Docker, Podman, containerd và CRI-O có PID namespace riêng. Các container Kubernetes thường có góc nhìn PID riêng; `shareProcessNamespace: true` chủ động tạo một góc nhìn chung cho toàn Pod.<sup>[[4]](#references)</sup> Ngược lại, `hostPID: true` chọn PID namespace của node. Các môi trường LXC/Incus dựa trên cùng một primitive của kernel, dù các trường hợp sử dụng system container có thể làm lộ ra cây tiến trình phức tạp hơn và khuyến khích dùng nhiều lối tắt để debug hơn.
 
-The same rule applies everywhere: if the runtime chose not to isolate the PID namespace, that is a deliberate reduction in the container boundary.
+Quy tắc này áp dụng ở mọi nơi: nếu runtime chọn không cô lập PID namespace, đó là sự giảm thiểu có chủ ý đối với ranh giới container.
 
-## Misconfigurations
+## Cấu hình sai
 
-The canonical misconfiguration is host PID sharing. Teams often justify it for debugging, monitoring, or service-management convenience, but it should always be treated as a meaningful security exception. Even if the container has no immediate write primitive over host processes, visibility alone can reveal a lot about the system. Once capabilities such as `CAP_SYS_PTRACE` or useful procfs access are added, the risk expands significantly.
+Cấu hình sai điển hình là chia sẻ PID của host. Các nhóm thường biện minh cho việc này bằng nhu cầu debug, giám sát hoặc quản lý dịch vụ, nhưng luôn phải xem đây là một ngoại lệ bảo mật đáng kể. Ngay cả khi container không có primitive ghi trực tiếp lên các tiến trình của host, chỉ riêng khả năng quan sát cũng có thể tiết lộ nhiều thông tin về hệ thống. Khi bổ sung các capability như `CAP_SYS_PTRACE` hoặc quyền truy cập procfs hữu ích, rủi ro sẽ tăng đáng kể.
 
-Another mistake is assuming that because the workload cannot kill or ptrace host processes by default, host PID sharing is therefore harmless. That conclusion ignores the value of enumeration, the availability of namespace-entry targets, and the way PID visibility combines with other weakened controls.
+Một sai lầm khác là cho rằng việc chia sẻ PID của host vô hại vì workload mặc định không thể kill hoặc ptrace các tiến trình của host. Kết luận đó bỏ qua giá trị của việc liệt kê, sự sẵn có của các mục tiêu để vào namespace, và cách khả năng quan sát PID kết hợp với những biện pháp kiểm soát khác bị suy yếu.
 
-### Kubernetes Pod-wide process sharing
+### Chia sẻ tiến trình trong toàn Pod của Kubernetes
 
-`shareProcessNamespace: true` is different from `hostPID`: it exposes the processes of the **other containers in the same Pod**, not node processes. A compromised sidecar or debug container can then enumerate sibling command lines and environment data subject to procfs access checks, send signals when credentials allow it, and traverse a sibling's filesystem through `/proc/<pid>/root`. Kubernetes explicitly warns that command-line/environment secrets and container filesystems are then protected only by the applicable Unix permissions.<sup>[[4]](#references)</sup>
+`shareProcessNamespace: true` khác với `hostPID`: tùy chọn này làm lộ tiến trình của **các container khác trong cùng Pod**, chứ không phải tiến trình của node. Khi đó, sidecar hoặc debug container bị xâm nhập có thể liệt kê command line và dữ liệu môi trường của các container cùng Pod, tùy theo các kiểm tra quyền truy cập procfs; gửi signal khi credential cho phép; và duyệt filesystem của container cùng Pod thông qua `/proc/<pid>/root`. Kubernetes nêu rõ rằng khi đó, command line, secret trong biến môi trường và filesystem của container chỉ được bảo vệ bằng các quyền Unix áp dụng tương ứng.<sup>[[4]](#references)</sup>
 
-Useful cluster-side review:
+Các mục cần rà soát ở phía cluster:
 
 ```bash
 kubectl get pods -A -o json | jq -r '
@@ -63,7 +63,7 @@ kubectl get pods -A -o json | jq -r '
    (.spec.hostPID // false),(.spec.shareProcessNamespace // false)] | @tsv'
 ```
 
-From a compromised container in a Pod-wide PID namespace, first test actual access instead of assuming visibility equals readability:<sup>[[4]](#references)</sup>
+Từ một container bị xâm nhập trong PID namespace dùng chung toàn Pod, trước tiên hãy kiểm tra quyền truy cập thực tế thay vì cho rằng nhìn thấy đồng nghĩa với đọc được:<sup>[[4]](#references)</sup>
 
 ```bash
 victim=$(ps -eo pid,args | awk '/[n]ginx|[j]ava|[p]ython/{print $1; exit}')
@@ -73,11 +73,11 @@ tr '\0' '\n' < "/proc/$victim/environ" 2>/dev/null | sed -n '1,20p'
 find "/proc/$victim/root/run/secrets" -maxdepth 2 -type f -ls 2>/dev/null
 ```
 
-## Abuse
+## Lạm dụng
 
-If the host PID namespace is shared, an attacker may inspect host processes, harvest process arguments, identify interesting services, locate candidate PIDs for `nsenter`, or combine process visibility with ptrace-related privilege to interfere with host or neighboring workloads. In some cases, simply seeing the right long-running process is enough to reshape the rest of the attack plan.
+Nếu dùng chung host PID namespace, kẻ tấn công có thể kiểm tra các tiến trình trên host, thu thập đối số của tiến trình, xác định các dịch vụ đáng chú ý, tìm các PID tiềm năng cho `nsenter`, hoặc kết hợp khả năng xem tiến trình với quyền liên quan đến ptrace để can thiệp vào workload trên host hoặc workload lân cận. Trong một số trường hợp, chỉ cần nhìn thấy đúng tiến trình chạy lâu dài là đủ để định hình lại phần còn lại của kế hoạch tấn công.
 
-The first practical step is always to confirm that host processes are really visible:
+Bước thực tế đầu tiên luôn là xác nhận rằng các tiến trình trên host thực sự hiển thị:
 
 ```bash
 readlink /proc/self/ns/pid
@@ -85,7 +85,7 @@ ps -ef | head -n 50
 ls /proc | grep '^[0-9]' | head -n 20
 ```
 
-Once host PIDs are visible, process arguments and namespace-entry targets often become the most useful information source:
+Khi PID của host hiển thị được, tham số tiến trình và các mục tiêu để vào namespace thường trở thành nguồn thông tin hữu ích nhất:
 
 ```bash
 for p in 1 $(pgrep -n systemd 2>/dev/null) $(pgrep -n dockerd 2>/dev/null); do
@@ -94,16 +94,16 @@ for p in 1 $(pgrep -n systemd 2>/dev/null) $(pgrep -n dockerd 2>/dev/null); do
 done
 ```
 
-If `nsenter` is available and enough privilege exists, test whether a visible host process can be used as a namespace bridge:
+Nếu có `nsenter` và đủ quyền, hãy kiểm tra xem có thể dùng một tiến trình trên host nhìn thấy được làm cầu nối namespace hay không:
 
 ```bash
 which nsenter
 nsenter -t 1 -m -u -n -i -p sh 2>/dev/null || echo "nsenter blocked"
 ```
 
-Even when entry is blocked, host PID sharing is already valuable because it reveals service layout, runtime components, and candidate privileged processes to target next. PID visibility alone does **not** grant permission to signal, trace, read sensitive `/proc/<pid>` entries, or join the target's other namespaces; credentials, dumpability, capabilities in the target namespace's owning user namespace, Yama/LSM policy, and seccomp still matter.<sup>[[3]](#references)</sup> See [CAP_SYS_PTRACE](../../../../interesting-files-permissions/linux-capabilities.md#cap_sys_ptrace) for process-injection examples.
+Ngay cả khi việc xâm nhập bị chặn, chia sẻ PID của host vẫn có giá trị vì nó tiết lộ cách bố trí dịch vụ, các thành phần runtime và những tiến trình có đặc quyền tiềm năng để nhắm tới tiếp theo. Chỉ nhìn thấy PID **không** cấp quyền gửi signal, trace, đọc các mục nhạy cảm trong `/proc/<pid>` hoặc tham gia các namespace khác của mục tiêu; credentials, dumpability, capabilities trong user namespace sở hữu namespace của mục tiêu, chính sách Yama/LSM và seccomp vẫn có ý nghĩa.<sup>[[3]](#references)</sup> Xem [CAP_SYS_PTRACE](../../../../interesting-files-permissions/linux-capabilities.md#cap_sys_ptrace) để biết các ví dụ về process injection.
 
-Host PID visibility also makes file-descriptor abuse more realistic. If a privileged host process or neighboring workload has a sensitive file or socket open, the attacker may be able to inspect `/proc/<pid>/fd/` and access the underlying object depending on ptrace-style checks, ownership, procfs mount options, the object type, and the target service model. Merely seeing an FD symlink does not mean it can be opened, and a socket cannot be duplicated just by opening its `/proc/<pid>/fd/N` symlink. For the distinct `pidfd_getfd()` primitive and its authorization checks, see [Linux ptrace exit-race pidfd FD theft](../../../../main-system-information/kernel-lpe-cves/linux-ptrace-exit-race-pidfd_getfd-fd-theft.md).<sup>[[3]](#references)</sup>
+Khả năng nhìn thấy PID của host cũng khiến việc lạm dụng file descriptor thực tế hơn. Nếu một tiến trình host có đặc quyền hoặc workload lân cận đang mở một file hay socket nhạy cảm, kẻ tấn công có thể kiểm tra `/proc/<pid>/fd/` và truy cập đối tượng bên dưới, tùy thuộc vào các kiểm tra kiểu ptrace, quyền sở hữu, tùy chọn mount procfs, loại đối tượng và mô hình dịch vụ mục tiêu. Chỉ nhìn thấy symlink FD không có nghĩa là có thể mở nó; socket cũng không thể được nhân bản chỉ bằng cách mở symlink `/proc/<pid>/fd/N` của nó. Để tìm hiểu primitive `pidfd_getfd()` riêng biệt và các bước kiểm tra quyền của nó, xem [Linux ptrace exit-race pidfd FD theft](../../../../main-system-information/kernel-lpe-cves/linux-ptrace-exit-race-pidfd_getfd-fd-theft.md).<sup>[[3]](#references)</sup>
 
 ```bash
 for fd_dir in /proc/[0-9]*/fd; do
@@ -112,11 +112,11 @@ done
 grep " /proc " /proc/mounts
 ```
 
-These commands are useful because they answer whether `hidepid=1` or `hidepid=2` is reducing cross-process visibility and whether obviously interesting descriptors such as open secret files, logs, or Unix sockets are visible at all.
+Các lệnh này hữu ích vì chúng cho biết liệu `hidepid=1` hoặc `hidepid=2` có làm giảm khả năng quan sát giữa các process hay không, và liệu các file descriptor đáng chú ý như file bí mật đang mở, log hoặc Unix socket có hiển thị hay không.
 
-### Full Example: host PID + `nsenter`
+### Ví dụ đầy đủ: PID của host + `nsenter`
 
-Host PID sharing becomes a direct host escape when the process also has enough privilege to join the host namespaces:
+Việc chia sẻ PID của host trở thành một cách thoát khỏi host trực tiếp khi process cũng có đủ đặc quyền để tham gia các namespace của host:
 
 ```bash
 ps -ef | head -n 50
@@ -124,49 +124,49 @@ capsh --print | grep cap_sys_admin
 nsenter -t 1 -m -u -n -i -p /bin/bash
 ```
 
-If the command succeeds, the container process is now executing in the host mount, UTS, network, IPC, and PID namespaces. The impact is immediate host compromise.
+Nếu lệnh thành công, tiến trình container hiện đang chạy trong các namespace mount, UTS, network, IPC và PID của host. Tác động là host bị compromise ngay lập tức.
 
-Even when `nsenter` itself is missing, the same result may be achievable through the host binary if the host filesystem is mounted:
+Ngay cả khi thiếu `nsenter`, vẫn có thể đạt được kết quả tương tự thông qua binary của host nếu filesystem của host được mount:
 
 ```bash
 /host/usr/bin/nsenter -t 1 -m -u -n -i -p /host/bin/bash 2>/dev/null
 ```
 
-### Recent Runtime Notes
+### Ghi chú runtime gần đây
 
-Some PID-namespace-relevant attacks are not traditional `hostPID: true` misconfigurations, but runtime implementation bugs around how procfs protections are applied during container setup.
+Một số cuộc tấn công liên quan đến PID namespace không xuất phát từ cấu hình sai truyền thống `hostPID: true`, mà từ lỗi trong quá trình triển khai runtime liên quan đến cách áp dụng các biện pháp bảo vệ procfs khi thiết lập container.
 
-#### `maskedPaths` race to host procfs
+#### Race condition `maskedPaths` dẫn đến host procfs
 
-In vulnerable `runc` versions, attackers able to control the container image or `runc exec` workload could race the masking phase by replacing container-side `/dev/null` with a symlink to a sensitive procfs path such as `/proc/sys/kernel/core_pattern`. If the race succeeded, the masked-path bind mount could land on the wrong target and expose host-global procfs knobs to the new container.<sup>[[1]](#references)</sup>
+Trong các phiên bản `runc` dễ bị tấn công, kẻ tấn công có thể kiểm soát container image hoặc workload `runc exec` và tạo race condition trong giai đoạn masking bằng cách thay `/dev/null` phía container bằng symlink trỏ đến một đường dẫn procfs nhạy cảm, chẳng hạn như `/proc/sys/kernel/core_pattern`. Nếu race condition thành công, bind mount của masked path có thể gắn nhầm vào đích khác và để lộ các thiết lập procfs toàn cục của host cho container mới.<sup>[[1]](#references)</sup>
 
-Useful review command:
+Lệnh hữu ích để rà soát:
 
 ```bash
 jq '.linux.maskedPaths' config.json 2>/dev/null
 ```
 
-This is important because the eventual impact may be the same as a direct procfs exposure: writable `core_pattern` or `sysrq-trigger`, followed by host code execution or denial of service. The dedicated [masked paths](../masked-paths.md) and [sensitive host mounts](../../sensitive-host-mounts.md) pages cover the general procfs attack surface without duplicating it here.
+Điều này quan trọng vì tác động cuối cùng có thể giống như khi procfs bị lộ trực tiếp: `core_pattern` hoặc `sysrq-trigger` có quyền ghi, dẫn đến thực thi mã trên host hoặc từ chối dịch vụ. Các trang chuyên biệt về [masked paths](../masked-paths.md) và [sensitive host mounts](../../sensitive-host-mounts.md) đề cập đến bề mặt tấn công procfs nói chung mà không lặp lại nội dung ở đây.
 
-#### Namespace injection with `insject`
+#### Chèn namespace bằng `insject`
 
-Namespace injection tools such as `insject` show that PID-namespace interaction does not always require pre-entering the target namespace before process creation. A helper can attach later, use `setns()`, and execute while preserving visibility into the target PID space:<sup>[[2]](#references)</sup>
+Các công cụ chèn namespace như `insject` cho thấy việc tương tác với PID namespace không phải lúc nào cũng đòi hỏi phải vào namespace mục tiêu trước khi tạo tiến trình. Một helper có thể gắn vào sau, dùng `setns()` và thực thi trong khi vẫn duy trì khả năng quan sát không gian PID mục tiêu:<sup>[[2]](#references)</sup>
 
 ```bash
 sudo insject -S -p $(pidof containerd-shim) -- bash -lc 'readlink /proc/self/ns/pid && ps -ef'
 ```
 
-This kind of technique matters mainly for advanced debugging, offensive tooling, and post-exploitation workflows where namespace context must be joined after the runtime has already initialized the workload.
+Loại kỹ thuật này chủ yếu quan trọng trong các quy trình debug nâng cao, công cụ offensive và post-exploitation, nơi cần tham gia vào namespace context sau khi runtime đã khởi chạy workload.
 
-### Related FD Abuse Patterns
+### Các mẫu lạm dụng FD liên quan
 
-Two patterns are worth calling out explicitly when host PIDs are visible. First, a privileged process may keep a sensitive file descriptor open across `execve()` because it was not marked `O_CLOEXEC`. Second, services may pass file descriptors over Unix sockets through `SCM_RIGHTS`. In both cases the interesting object is not the pathname anymore, but the already-open handle that a lower-privilege process may inherit or receive.
+Có hai mẫu cần nêu rõ khi host PIDs hiển thị. Thứ nhất, một process có đặc quyền có thể giữ một file descriptor nhạy cảm mở qua `execve()` vì nó không được đánh dấu `O_CLOEXEC`. Thứ hai, các dịch vụ có thể truyền file descriptor qua Unix socket bằng `SCM_RIGHTS`. Trong cả hai trường hợp, đối tượng đáng chú ý không còn là pathname mà là handle đã mở, thứ mà process có đặc quyền thấp hơn có thể kế thừa hoặc nhận được.
 
-This matters in container work because the handle may point to `docker.sock`, a privileged log, a host secret file, or another high-value object even when the path itself is not directly reachable from the container filesystem.
+Điều này quan trọng khi làm việc với container vì handle có thể trỏ đến `docker.sock`, một log có đặc quyền, một file bí mật trên host hoặc một đối tượng giá trị cao khác, ngay cả khi không thể truy cập trực tiếp đường dẫn đó từ filesystem của container.
 
 ## Checks
 
-The purpose of these commands is to determine whether the process has a private PID view or whether it can already enumerate a much broader process landscape.
+Mục đích của các lệnh này là xác định xem process có PID view riêng hay đã có thể liệt kê một phạm vi process rộng hơn nhiều.
 
 ```bash
 readlink /proc/self/ns/{pid,pid_for_children,user,mnt}
@@ -177,22 +177,20 @@ cat /proc/sys/kernel/yama/ptrace_scope 2>/dev/null
 capsh --print 2>/dev/null | grep -E 'Current:|Bounding'
 ```
 
-What is interesting here:<sup>[[3]](#references)</sup>
+Điều gì đáng chú ý ở đây:<sup>[[3]](#references)</sup>
 
-- If the process list contains obvious host services, host PID sharing is probably already in effect.
-- Seeing only a tiny container-local tree is the normal baseline; seeing `systemd`, `dockerd`, or unrelated daemons is not.
-- `NSpid` can expose the PID mapping across nested namespaces. The leftmost value is relative to the PID namespace associated with the procfs mount, followed by values for successively nested namespaces.
-- `readlink /proc/self/ns/pid` by itself cannot prove `hostPID`: an isolated container also has a valid PID-namespace inode. Correlate it with the process list, procfs mount, runtime configuration, and a host-side namespace inode when available.
-- Once host PIDs are visible, even read-only process information becomes useful reconnaissance.
+- Nếu danh sách tiến trình có các dịch vụ của host rõ ràng, khả năng cao host PID sharing đã được bật.
+- Chỉ thấy một cây tiến trình nhỏ trong container là trạng thái mặc định bình thường; thấy `systemd`, `dockerd` hoặc các daemon không liên quan thì không.
+- `NSpid` có thể cho thấy ánh xạ PID qua các namespace lồng nhau. Giá trị ngoài cùng bên trái tương ứng với PID namespace gắn với lần mount procfs, tiếp theo là các giá trị trong những namespace lồng nhau lần lượt.
+- Chỉ riêng `readlink /proc/self/ns/pid` không thể chứng minh `hostPID`: container bị cô lập cũng có inode PID namespace hợp lệ. Hãy đối chiếu với danh sách tiến trình, mount procfs, cấu hình runtime và inode namespace phía host nếu có.
+- Khi PID của host hiển thị, ngay cả thông tin tiến trình chỉ đọc cũng hữu ích cho việc do thám.
 
-If you discover a container running with host PID sharing, do not treat it as a cosmetic difference. It is a major change in what the workload can observe and potentially affect.
-
-
+Nếu phát hiện container đang chạy với host PID sharing, đừng xem đây chỉ là khác biệt về hình thức. Điều này làm thay đổi đáng kể những gì workload có thể quan sát và có khả năng tác động đến.
 
 ## References
 
-- [1] [runc security advisory: container escape via "masked path" abuse due to mount race conditions (CVE-2025-31133)](https://github.com/opencontainers/runc/security/advisories/GHSA-9493-h29p-rfm2)
-- [2] [Tool Release – insject: A Linux Namespace Injector](https://www.nccgroup.com/research-blog/tool-release-insject-a-linux-namespace-injector/)
-- [3] [Linux man-pages 6.19 book](https://www.kernel.org/pub/linux/docs/man-pages/book/man-pages-6.19.pdf)
-- [4] [Share Process Namespace between Containers in a Pod](https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/)
+- [1] [Khuyến cáo bảo mật runc: thoát container thông qua việc lạm dụng "masked path" do điều kiện tranh chấp khi mount (CVE-2025-31133)](https://github.com/opencontainers/runc/security/advisories/GHSA-9493-h29p-rfm2)
+- [2] [Phát hành công cụ – insject: Công cụ đưa vào Linux Namespace](https://www.nccgroup.com/research-blog/tool-release-insject-a-linux-namespace-injector/)
+- [3] [Sách Linux man-pages 6.19](https://www.kernel.org/pub/linux/docs/man-pages/book/man-pages-6.19.pdf)
+- [4] [Chia sẻ Process Namespace giữa các Container trong một Pod](https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/)
 {{#include ../../../../../banners/hacktricks-training.md}}

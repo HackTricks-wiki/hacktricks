@@ -1,15 +1,15 @@
-# Interesting Files and Permissions
+# Tệp và quyền truy cập đáng chú ý
 
 {{#include ../../banners/hacktricks-training.md}}
 
-File ownership, write access, mount options, and executable privileges can change a local user's effective reach. Begin by identifying the target file or execution path, then use the relevant page:
+Quyền sở hữu tệp, quyền ghi, tùy chọn mount và đặc quyền thực thi có thể thay đổi phạm vi truy cập thực tế của người dùng cục bộ. Hãy bắt đầu bằng cách xác định tệp hoặc đường dẫn thực thi mục tiêu, sau đó xem trang phù hợp:
 
-- [SUID, SGID, ACLs, and sensitive files](suid-sgid-and-acl-triage.md) gives a starting workflow for executable privileges and hidden access grants.
-- [Arbitrary file write to root](write-to-root.md) describes how writes to privileged paths can be turned into escalation.
-- [Linux capabilities](linux-capabilities.md) explains per-process and per-file capabilities.
-- [SUID shared library and linker abuse](suid-shared-library-and-linker-abuse.md) covers dynamic loading around privileged binaries.
-- [`ld.so` privilege escalation example](ld.so.conf-example.md) follows a linker configuration case.
-- [NFS `no_root_squash` and `no_all_squash` misconfiguration](nfs-no_root_squash-misconfiguration-pe.md) covers remote filesystem identity mapping.
-- [Wildcard spare tricks](wildcards-spare-tricks.md) covers argument expansion in privileged commands.
-- [SELinux](selinux.md) explains policy enforcement and relevant investigation steps.
+- [SUID, SGID, ACL và tệp nhạy cảm](suid-sgid-and-acl-triage.md) cung cấp quy trình khởi đầu để kiểm tra đặc quyền thực thi và các quyền truy cập ẩn.
+- [Ghi tùy ý vào tệp của root](write-to-root.md) mô tả cách biến quyền ghi vào các đường dẫn đặc quyền thành cơ hội leo thang đặc quyền.
+- [Linux capabilities](linux-capabilities.md) giải thích capabilities theo tiến trình và theo tệp.
+- [Lạm dụng thư viện dùng chung và linker với SUID](suid-shared-library-and-linker-abuse.md) đề cập đến việc tải động xung quanh các binary đặc quyền.
+- [Ví dụ leo thang đặc quyền qua `ld.so`](ld.so.conf-example.md) trình bày một trường hợp liên quan đến cấu hình linker.
+- [Cấu hình sai NFS `no_root_squash` và `no_all_squash`](nfs-no_root_squash-misconfiguration-pe.md) đề cập đến ánh xạ danh tính trên hệ thống tệp từ xa.
+- [Mẹo khai thác wildcard spare](wildcards-spare-tricks.md) đề cập đến việc mở rộng đối số trong các lệnh đặc quyền.
+- [SELinux](selinux.md) giải thích việc thực thi chính sách và các bước điều tra liên quan.
 {{#include ../../banners/hacktricks-training.md}}

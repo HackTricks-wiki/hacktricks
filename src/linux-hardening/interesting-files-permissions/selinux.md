@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-SELinux is a **label-based Mandatory Access Control (MAC)** system. In practice, this means that even if DAC permissions, groups, or Linux capabilities look enough for an action, the kernel can still deny it because the **source context** is not allowed to access the **target context** with the requested class/permission.<sup>[[1]](#references)</sup>
+SELinux là hệ thống **Mandatory Access Control (MAC)** dựa trên nhãn. Trên thực tế, điều này có nghĩa là ngay cả khi các quyền DAC, group hoặc Linux capabilities có vẻ đủ để thực hiện một hành động, kernel vẫn có thể từ chối hành động đó vì **source context** không được phép truy cập **target context** với class/permission được yêu cầu.<sup>[[1]](#references)</sup>
 
-A context usually looks like:<sup>[[1]](#references)</sup>
+Một context thường có dạng:<sup>[[1]](#references)</sup>
 
 ```text
 user:role:type:level
@@ -12,15 +12,15 @@ system_u:system_r:httpd_t:s0
 unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
 ```
 
-From a privesc perspective, the `type` (domain for processes, type for objects) is usually the most important field:<sup>[[1]](#references)</sup>
+Từ góc độ privesc, `type` (domain đối với process, type đối với object) thường là trường quan trọng nhất:<sup>[[1]](#references)</sup>
 
-- A process runs in a **domain** such as `unconfined_t`, `staff_t`, `httpd_t`, `container_t`, `sysadm_t`
-- Files and sockets have a **type** such as `admin_home_t`, `shadow_t`, `httpd_sys_rw_content_t`, `container_file_t`
-- Policy decides whether one domain can read/write/execute/transition to the other
+- Một process chạy trong **domain** như `unconfined_t`, `staff_t`, `httpd_t`, `container_t`, `sysadm_t`
+- File và socket có một **type** như `admin_home_t`, `shadow_t`, `httpd_sys_rw_content_t`, `container_file_t`
+- Policy quyết định một domain có thể đọc/ghi/thực thi/chuyển sang domain kia hay không
 
-## Fast Enumeration
+## Liệt kê nhanh
 
-If SELinux is enabled, enumerate it early because it can explain why common Linux privesc paths fail or why a privileged wrapper around a "harmless" SELinux tool is actually critical:<sup>[[1]](#references)</sup>
+Nếu SELinux được bật, hãy liệt kê sớm vì nó có thể giải thích tại sao các đường dẫn privesc Linux phổ biến không hoạt động hoặc tại sao một wrapper đặc quyền bao quanh một công cụ SELinux “vô hại” lại thực sự rất quan trọng:<sup>[[1]](#references)</sup>
 
 ```bash
 getenforce
@@ -31,7 +31,7 @@ cat /proc/self/attr/current
 ls -Zd / /root /home /tmp /etc /var/www 2>/dev/null
 ```
 
-Useful follow-up checks:<sup>[[1]](#references)[[3]](#references)[[4]](#references)[[7]](#references)[[12]](#references)</sup>
+Các bước kiểm tra tiếp theo hữu ích:<sup>[[1]](#references)[[3]](#references)[[4]](#references)[[7]](#references)[[12]](#references)</sup>
 
 ```bash
 # Installed policy modules and local customizations
@@ -49,21 +49,21 @@ matchpathcon -V /path/of/interest 2>/dev/null
 restorecon -n -v /path/of/interest 2>/dev/null
 ```
 
-Interesting findings:<sup>[[1]](#references)[[3]](#references)[[7]](#references)[[19]](#references)</sup>
+Các phát hiện đáng chú ý:<sup>[[1]](#references)[[3]](#references)[[7]](#references)[[19]](#references)</sup>
 
-- `Disabled` or `Permissive` mode removes most of the value of SELinux as a boundary.
-- `unconfined_t` usually means SELinux is present but not meaningfully constraining that process.
-- `default_t`, `file_t`, or obviously wrong labels on custom paths often indicate mislabeling or incomplete deployment.
-- Local overrides in `file_contexts.local` take precedence over policy defaults, so review them carefully.
+- Chế độ `Disabled` hoặc `Permissive` làm mất phần lớn giá trị của SELinux trong vai trò ranh giới bảo vệ.
+- `unconfined_t` thường có nghĩa là SELinux đang hoạt động nhưng không thực sự hạn chế tiến trình đó.
+- `default_t`, `file_t` hoặc nhãn rõ ràng không phù hợp trên các đường dẫn tùy chỉnh thường cho thấy việc gán nhãn sai hoặc triển khai chưa hoàn chỉnh.
+- Các ghi đè cục bộ trong `file_contexts.local` được ưu tiên hơn các mặc định của policy, vì vậy hãy kiểm tra kỹ chúng.
 
-## Policy Analysis
+## Phân tích policy
 
-SELinux is much easier to attack or bypass when you can answer two questions:
+SELinux dễ bị tấn công hoặc bypass hơn nhiều khi bạn có thể trả lời hai câu hỏi:
 
-1. **What can my current domain access?**
-2. **What domains can I transition into?**
+1. **Domain hiện tại của tôi có thể truy cập những gì?**
+2. **Tôi có thể chuyển sang những domain nào?**
 
-The most useful tools for this are `sepolicy` and **SETools** (`seinfo`, `sesearch`, `sedta`):<sup>[[2]](#references)[[9]](#references)</sup>
+Các công cụ hữu ích nhất cho việc này là `sepolicy` và **SETools** (`seinfo`, `sesearch`, `sedta`):<sup>[[2]](#references)[[9]](#references)</sup>
 
 ```bash
 # Transition graph from the current domain
@@ -78,20 +78,20 @@ seinfo -t 2>/dev/null | head
 seinfo -r 2>/dev/null | head
 ```
 
-This is especially useful when a host uses **confined users** rather than mapping everyone to `unconfined_u`. In that case, look for:<sup>[[3]](#references)</sup>
+Điều này đặc biệt hữu ích khi host sử dụng **confined users** thay vì ánh xạ mọi người dùng sang `unconfined_u`. Trong trường hợp đó, hãy tìm:<sup>[[3]](#references)</sup>
 
-- user mappings via `semanage login -l`
-- allowed roles via `semanage user -l`
-- reachable admin domains such as `sysadm_t`, `secadm_t`, `webadm_t`
-- `sudoers` entries using `ROLE=` or `TYPE=`
+- ánh xạ người dùng qua `semanage login -l`
+- các role được phép qua `semanage user -l`
+- các admin domain có thể truy cập như `sysadm_t`, `secadm_t`, `webadm_t`
+- các mục `sudoers` sử dụng `ROLE=` hoặc `TYPE=`
 
-If `sudo -l` contains entries like this, SELinux is part of the privilege boundary:<sup>[[3]](#references)</sup>
+Nếu `sudo -l` có các mục như sau, SELinux là một phần của ranh giới đặc quyền:<sup>[[3]](#references)</sup>
 
 ```text
 linux_user ALL=(ALL) ROLE=webadm_r TYPE=webadm_t /bin/bash
 ```
 
-Also check whether `newrole` is available:<sup>[[3]](#references)[[10]](#references)[[11]](#references)</sup>
+Đồng thời kiểm tra xem `newrole` có khả dụng hay không:<sup>[[3]](#references)[[10]](#references)[[11]](#references)</sup>
 
 ```bash
 sudo -l
@@ -99,13 +99,13 @@ which newrole runcon
 newrole -V 2>/dev/null
 ```
 
-`runcon` and `newrole` are not automatically exploitable, but if a privileged wrapper or a `sudoers` rule lets you select a better role/type, they become high-value escalation primitives.<sup>[[3]](#references)[[10]](#references)[[11]](#references)</sup>
+`runcon` và `newrole` không tự động có thể bị khai thác, nhưng nếu một wrapper có đặc quyền hoặc quy tắc `sudoers` cho phép bạn chọn role/type phù hợp hơn, chúng sẽ trở thành các primitive leo thang đặc quyền có giá trị cao.<sup>[[3]](#references)[[10]](#references)[[11]](#references)</sup>
 
-### Audit writable transition entrypoints
+### Kiểm tra các entrypoint chuyển tiếp có thể ghi
 
-A transition graph is only a policy lead. To turn it into an attack path, identify the executable type that enters a more useful domain, then check whether you can modify an executable with that label or replace it through its parent directory.<sup>[[9]](#references)[[20]](#references)</sup> An automatic `execve` transition needs an applicable `type_transition` rule, source-domain execute access, target-domain `entrypoint` access, and permission to transition between the domains.<sup>[[20]](#references)</sup> The target domain may gain SELinux access, but execution does not itself change the Linux UID; check [SUID/SGID and ACLs](suid-sgid-and-acl-triage.md) separately.<sup>[[20]](#references)[[21]](#references)</sup>
+Đồ thị chuyển tiếp chỉ là manh mối về policy. Để biến nó thành một đường tấn công, hãy xác định type của executable đưa bạn vào một domain hữu ích hơn, rồi kiểm tra xem bạn có thể sửa executable mang label đó hoặc thay thế nó thông qua thư mục cha hay không.<sup>[[9]](#references)[[20]](#references)</sup> Một chuyển tiếp `execve` tự động cần có quy tắc `type_transition` phù hợp, quyền execute của domain nguồn, quyền `entrypoint` của domain đích và quyền chuyển tiếp giữa các domain.<sup>[[20]](#references)</sup> Domain đích có thể được cấp quyền truy cập SELinux, nhưng việc thực thi tự nó không thay đổi Linux UID; hãy kiểm tra riêng [SUID/SGID và ACL](suid-sgid-and-acl-triage.md).<sup>[[20]](#references)[[21]](#references)</sup>
 
-Use the reported entrypoint type to check the underlying rules, then inspect the path and its parent for write access.<sup>[[9]](#references)[[20]](#references)[[22]](#references)</sup>
+Dùng type entrypoint được báo cáo để kiểm tra các quy tắc liên quan, sau đó kiểm tra đường dẫn và thư mục cha để xác định quyền ghi.<sup>[[9]](#references)[[20]](#references)[[22]](#references)</sup>
 
 ```bash
 src=$(id -Z | cut -d: -f3)
@@ -123,19 +123,19 @@ getfacl -p /path/to/entrypoint
 getfacl -p /path/to
 ```
 
-Correlate the entrypoint type with an actual executable path. Inspect DAC, ACLs, SELinux write permission on the file or parent directory, the file label, and any conditional boolean before treating a policy edge as reachable.<sup>[[20]](#references)[[22]](#references)</sup> If a path is replaced rather than edited in place, verify the new inode's context: filesystem labels are stored as extended attributes, and the replacement may not keep the entrypoint type.<sup>[[21]](#references)</sup> SELinux-aware programs can request a transition with `setexeccon`, so an absent automatic `type_transition` rule does not rule out every transition.<sup>[[20]](#references)</sup>
+Đối chiếu loại entrypoint với đường dẫn thực tế của tệp thực thi. Kiểm tra DAC, ACL, quyền ghi SELinux trên tệp hoặc thư mục cha, nhãn của tệp và mọi boolean có điều kiện trước khi coi một policy edge là có thể tiếp cận.<sup>[[20]](#references)[[22]](#references)</sup> Nếu đường dẫn bị thay thế thay vì chỉnh sửa tại chỗ, hãy xác minh context của inode mới: nhãn hệ thống tệp được lưu dưới dạng extended attributes, và bản thay thế có thể không giữ loại entrypoint.<sup>[[21]](#references)</sup> Các chương trình nhận biết SELinux có thể yêu cầu chuyển đổi bằng `setexeccon`, vì vậy việc không có quy tắc `type_transition` tự động không loại trừ mọi khả năng chuyển đổi.<sup>[[20]](#references)</sup>
 
-## Files, Relabeling, and High-Value Misconfigurations
+## Tệp, gán lại nhãn và các cấu hình sai có giá trị cao
 
-The most important operational difference between common SELinux tools is:<sup>[[1]](#references)[[6]](#references)[[7]](#references)[[8]](#references)</sup>
+Khác biệt quan trọng nhất về mặt vận hành giữa các công cụ SELinux phổ biến là:<sup>[[1]](#references)[[6]](#references)[[7]](#references)[[8]](#references)</sup>
 
-- `chcon`: temporary label change on a specific path
-- `semanage fcontext`: persistent path-to-label rule
-- `restorecon` / `setfiles`: apply the policy/default label again
+- `chcon`: thay đổi nhãn tạm thời trên một đường dẫn cụ thể
+- `semanage fcontext`: quy tắc đường dẫn-sang-nhãn bền vững
+- `restorecon` / `setfiles`: áp dụng lại nhãn theo policy/mặc định
 
-This matters a lot during privesc because **relabeling is not just cosmetic**. It can turn a file from "blocked by policy" into "readable/executable by a privileged confined service".<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
+Điều này rất quan trọng trong quá trình privesc vì **gán lại nhãn không chỉ là thay đổi hình thức**. Nó có thể biến một tệp từ trạng thái "bị policy chặn" thành "có thể đọc/thực thi bởi một dịch vụ bị giới hạn với đặc quyền cao".<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
 
-Check for local relabel rules and relabel drift:<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
+Kiểm tra các quy tắc gán lại nhãn cục bộ và tình trạng sai lệch nhãn:<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
 
 ```bash
 grep -R . /etc/selinux/*/contexts/files/file_contexts.local 2>/dev/null
@@ -143,7 +143,7 @@ restorecon -nvr / 2>/dev/null | head -n 50
 matchpathcon -V /etc/passwd /etc/shadow /usr/local/bin/* 2>/dev/null
 ```
 
-One subtle but useful detail: plain `restorecon` does **not always fully revert a suspicious label**. If the target type is in `customizable_types`, you may need `-F` to force a full reset. From an offensive perspective, this explains why an unusual `chcon` can sometimes survive a casual "we already ran restorecon" cleanup.<sup>[[8]](#references)</sup>
+Một chi tiết tinh tế nhưng hữu ích: `restorecon` thông thường **không phải lúc nào cũng khôi phục hoàn toàn nhãn đáng ngờ**. Nếu type đích nằm trong `customizable_types`, bạn có thể cần dùng `-F` để buộc đặt lại hoàn toàn. Từ góc độ tấn công, điều này giải thích vì sao một lệnh `chcon` bất thường đôi khi vẫn tồn tại sau khi dọn dẹp kiểu qua loa với câu “chúng ta đã chạy restorecon rồi”.<sup>[[8]](#references)</sup>
 
 ```bash
 grep -R . /etc/selinux/*/contexts/customizable_types 2>/dev/null | head
@@ -151,32 +151,32 @@ restorecon -n -v /path/of/interest 2>/dev/null
 restorecon -F -v /path/of/interest 2>/dev/null
 ```
 
-High-value commands to hunt in `sudo -l`, root wrappers, automation scripts, or file capabilities:<sup>[[1]](#references)[[4]](#references)[[5]](#references)[[12]](#references)[[13]](#references)[[14]](#references)</sup>
+Các lệnh có giá trị cao cần tìm trong `sudo -l`, root wrappers, script tự động hóa hoặc capabilities của tệp:<sup>[[1]](#references)[[4]](#references)[[5]](#references)[[12]](#references)[[13]](#references)[[14]](#references)</sup>
 
 ```bash
 which semanage restorecon chcon setfiles semodule audit2allow runcon newrole setsebool load_policy 2>/dev/null
 getcap -r / 2>/dev/null | grep -E 'cap_mac_admin|cap_mac_override'
 ```
 
-If either MAC capability shows up, cross-check the [Linux capabilities page](linux-capabilities.md) as well; the Linux capabilities documentation describes `cap_mac_admin` and `cap_mac_override` as Smack-specific, so do not assume that their names alone bypass SELinux.<sup>[[5]](#references)</sup>
+Nếu xuất hiện một trong hai capability MAC, hãy đối chiếu thêm với [trang Linux capabilities](linux-capabilities.md); tài liệu Linux capabilities mô tả `cap_mac_admin` và `cap_mac_override` là các capability dành riêng cho Smack, vì vậy đừng cho rằng chỉ dựa vào tên của chúng là có thể bypass SELinux.<sup>[[5]](#references)</sup>
 
-Especially interesting:<sup>[[1]](#references)[[4]](#references)[[7]](#references)[[8]](#references)[[12]](#references)[[13]](#references)</sup>
+Đặc biệt đáng chú ý:<sup>[[1]](#references)[[4]](#references)[[7]](#references)[[8]](#references)[[12]](#references)[[13]](#references)</sup>
 
-- `semanage fcontext`: persistently changes what label a path should receive
-- `restorecon` / `setfiles`: reapplies those changes at scale
-- `semodule -i`: loads a custom policy module
-- `semanage permissive -a <domain_t>`: makes one domain permissive without flipping the whole host
-- `setsebool -P`: permanently changes policy booleans
-- `load_policy`: reloads the active policy
+- `semanage fcontext`: thay đổi lâu dài label mà một đường dẫn sẽ nhận
+- `restorecon` / `setfiles`: áp dụng lại các thay đổi đó trên quy mô lớn
+- `semodule -i`: tải một policy module tùy chỉnh
+- `semanage permissive -a <domain_t>`: chuyển một domain sang chế độ permissive mà không chuyển toàn bộ host sang chế độ này
+- `setsebool -P`: thay đổi lâu dài các policy boolean
+- `load_policy`: tải lại policy đang hoạt động
 
-These are often **helper primitives**, not standalone root exploits. Their value is that they let you:<sup>[[1]](#references)[[4]](#references)[[7]](#references)[[8]](#references)[[12]](#references)[[13]](#references)[[14]](#references)</sup>
+Đây thường là các **primitive hỗ trợ**, không phải root exploit độc lập. Giá trị của chúng nằm ở chỗ cho phép bạn:<sup>[[1]](#references)[[4]](#references)[[7]](#references)[[8]](#references)[[12]](#references)[[13]](#references)[[14]](#references)</sup>
 
-- make a target domain permissive
-- broaden access between your domain and a protected type
-- relabel attacker-controlled files so a privileged service can read or execute them
-- weaken a confined service enough that an existing local bug becomes exploitable
+- chuyển domain mục tiêu sang chế độ permissive
+- mở rộng quyền truy cập giữa domain của bạn và một type được bảo vệ
+- đổi label các file do attacker kiểm soát để một service có đặc quyền có thể đọc hoặc thực thi chúng
+- làm suy yếu một service bị giới hạn đủ để khai thác một lỗi cục bộ hiện có
 
-Example checks:<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
+Các bước kiểm tra mẫu:<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
 
 ```bash
 # If sudo exposes semanage/restorecon, think in terms of policy abuse
@@ -187,18 +187,18 @@ semanage fcontext -C -l 2>/dev/null
 restorecon -n -v /usr/local/bin /opt /srv /var/www 2>/dev/null
 ```
 
-If you can load a policy module as root, you usually control the SELinux boundary:<sup>[[1]](#references)[[4]](#references)[[14]](#references)</sup>
+Nếu bạn có thể nạp một mô-đun policy với quyền root, bạn thường kiểm soát được ranh giới SELinux:<sup>[[1]](#references)[[4]](#references)[[14]](#references)</sup>
 
 ```bash
 ausearch -m AVC,USER_AVC -ts recent 2>/dev/null | audit2allow -M localfix
 sudo semodule -i localfix.pp
 ```
 
-That is why `audit2allow`, `semodule`, and `semanage permissive` should be treated as sensitive admin surfaces during post-exploitation. They can silently convert a blocked chain into a working one without changing classic UNIX permissions.<sup>[[1]](#references)[[4]](#references)[[12]](#references)[[14]](#references)</sup>
+Đó là lý do `audit2allow`, `semodule` và `semanage permissive` nên được xem là các bề mặt quản trị nhạy cảm trong quá trình post-exploitation. Chúng có thể âm thầm biến một chuỗi bị chặn thành chuỗi hoạt động được mà không thay đổi quyền UNIX cổ điển.<sup>[[1]](#references)[[4]](#references)[[12]](#references)[[14]](#references)</sup>
 
 ## Hidden Denials and Module Extraction
 
-A very common offensive frustration is a chain that fails with a bland `EACCES` while the expected AVC denial never appears. `dontaudit` rules may be hiding the exact permission you need. If you can run `semodule` through `sudo` or another privileged wrapper, temporarily disabling `dontaudit` can turn a silent failure into a precise policy clue:<sup>[[4]](#references)[[15]](#references)</sup>
+Một vấn đề rất thường gặp trong các hoạt động tấn công là một chuỗi thất bại với lỗi `EACCES` chung chung, trong khi thông báo AVC denial mong đợi lại không xuất hiện. Các quy tắc `dontaudit` có thể đang che giấu chính xác quyền bạn cần. Nếu có thể chạy `semodule` thông qua `sudo` hoặc một wrapper có đặc quyền khác, tạm thời vô hiệu hóa `dontaudit` có thể biến một lỗi im lặng thành manh mối chính sách rõ ràng:<sup>[[4]](#references)[[15]](#references)</sup>
 
 ```bash
 # Rebuild policy without dontaudit rules, trigger the action again, then inspect AVCs
@@ -211,29 +211,29 @@ semodule -lfull 2>/dev/null
 semodule -E --cil <module_name> 2>/dev/null
 ```
 
-This is also useful for reviewing what local admins already changed. A small custom module or one-domain permissive rule is often the reason a target service behaves much more loosely than the base policy would suggest.<sup>[[1]](#references)[[4]](#references)[[12]](#references)</sup>
+Điều này cũng hữu ích khi xem xét những thay đổi mà quản trị viên cục bộ đã thực hiện. Một module tùy chỉnh nhỏ hoặc một quy tắc permissive áp dụng cho một domain thường là lý do khiến dịch vụ mục tiêu hoạt động lỏng lẻo hơn nhiều so với những gì policy cơ sở gợi ý.<sup>[[1]](#references)[[4]](#references)[[12]](#references)</sup>
 
-## Audit Clues
+## Dấu hiệu kiểm tra
 
-AVC denials are often offensive signal, not just defensive noise. They tell you:<sup>[[1]](#references)[[15]](#references)</sup>
+Các lệnh từ chối AVC thường là tín hiệu hữu ích cho tấn công, chứ không chỉ là nhiễu phòng thủ. Chúng cho bạn biết:<sup>[[1]](#references)[[15]](#references)</sup>
 
-- which target object/type you hit
-- which permission was denied
-- which domain you currently control
-- whether a small policy change would make the chain work
+- bạn đã tác động đến object/type mục tiêu nào
+- permission nào bị từ chối
+- hiện tại bạn kiểm soát domain nào
+- liệu một thay đổi nhỏ trong policy có giúp chuỗi tấn công hoạt động hay không
 
 ```bash
 ausearch -m AVC,USER_AVC,SELINUX_ERR -ts recent 2>/dev/null
 journalctl -t setroubleshoot --no-pager 2>/dev/null | tail -n 50
 ```
 
-If a local exploit or persistence attempt keeps failing with `EACCES` or strange "permission denied" errors despite root-looking DAC permissions, SELinux is usually worth checking before discarding the vector.<sup>[[1]](#references)</sup>
+Nếu một local exploit hoặc nỗ lực persistence liên tục thất bại với `EACCES` hoặc các lỗi "permission denied" khó hiểu dù quyền DAC trông như của root, bạn nên kiểm tra SELinux trước khi loại bỏ vector này.<sup>[[1]](#references)</sup>
 
-## SELinux Users
+## Người dùng SELinux
 
-There are SELinux users in addition to regular Linux users. Each Linux user is mapped to an SELinux user as part of the policy, which lets the system impose different allowed roles and domains on different accounts.<sup>[[3]](#references)</sup>
+Ngoài người dùng Linux thông thường còn có người dùng SELinux. Theo policy, mỗi người dùng Linux được ánh xạ tới một người dùng SELinux, cho phép hệ thống áp dụng các role và domain được phép khác nhau cho từng tài khoản.<sup>[[3]](#references)</sup>
 
-Quick checks:<sup>[[3]](#references)</sup>
+Kiểm tra nhanh:<sup>[[3]](#references)</sup>
 
 ```bash
 id -Z
@@ -243,13 +243,13 @@ sudo -l 2>/dev/null
 grep -R "ROLE=\|TYPE=" /etc/sudoers /etc/sudoers.d 2>/dev/null
 ```
 
-On many mainstream systems, users are mapped to `unconfined_u`, which reduces the practical impact of user confinement. On hardened deployments, however, confined users can make `sudo`, `su`, `newrole`, and `runcon` much more interesting because **the escalation path may depend on entering a better SELinux role/type, not only on becoming UID 0**. Also remember that some confined users cannot invoke `sudo`/`su` at all unless policy explicitly allows the underlying setuid transition, so a host using `staff_u` + `sysadm_r` can turn a seemingly minor `sudo ROLE=` / `TYPE=` rule into the real privilege boundary.<sup>[[3]](#references)</sup>
+Trên nhiều hệ thống phổ biến, người dùng được ánh xạ tới `unconfined_u`, làm giảm tác động thực tế của việc giới hạn người dùng. Tuy nhiên, trên các bản triển khai được harden, người dùng bị giới hạn có thể khiến `sudo`, `su`, `newrole` và `runcon` trở nên đáng chú ý hơn nhiều, vì **đường dẫn leo thang đặc quyền có thể phụ thuộc vào việc chuyển sang SELinux role/type có quyền cao hơn, chứ không chỉ trở thành UID 0**. Cũng cần nhớ rằng một số người dùng bị giới hạn không thể gọi `sudo`/`su` nếu policy không cho phép rõ ràng quá trình chuyển tiếp setuid bên dưới, vì vậy một host dùng `staff_u` + `sysadm_r` có thể biến một quy tắc `sudo ROLE=` / `TYPE=` tưởng như nhỏ thành ranh giới đặc quyền thực sự.<sup>[[3]](#references)</sup>
 
-## SELinux in Containers
+## SELinux trong Containers
 
-Container runtimes commonly launch workloads in a confined domain such as `container_t` and label container content as `container_file_t`. If a container process escapes but still runs with the container label, host writes may still fail because the label boundary stayed intact.<sup>[[1]](#references)[[17]](#references)</sup>
+Các container runtime thường khởi chạy workload trong một domain bị giới hạn như `container_t` và gắn nhãn nội dung container là `container_file_t`. Nếu một process trong container thoát ra nhưng vẫn chạy với nhãn container, thao tác ghi lên host vẫn có thể thất bại vì ranh giới nhãn vẫn được giữ nguyên.<sup>[[1]](#references)[[17]](#references)</sup>
 
-Quick example:<sup>[[16]](#references)[[18]](#references)</sup>
+Ví dụ nhanh:<sup>[[16]](#references)[[18]](#references)</sup>
 
 ```shell
 $ podman run -d fedora sleep 100
@@ -259,15 +259,15 @@ LABEL
 system_u:system_r:container_t:s0:c647,c780
 ```
 
-The `c647,c780` part is not decoration. In many container deployments, runtimes dynamically assign MCS categories so that two processes running as `container_t` are still separated from each other. If an escape lands you in a host namespace but keeps the original category set, category mismatches can still explain why some host paths remain unreadable or unwritable.<sup>[[17]](#references)</sup>
+Phần `c647,c780` không phải để trang trí. Trong nhiều triển khai container, runtime tự động gán các category MCS để hai tiến trình chạy dưới dạng `container_t` vẫn được cách ly với nhau. Nếu một cuộc escape đưa bạn vào host namespace nhưng vẫn giữ nguyên tập category ban đầu, sự không khớp category vẫn có thể giải thích vì sao một số đường dẫn trên host vẫn không đọc hoặc ghi được.<sup>[[17]](#references)</sup>
 
-Modern container operations worth noting:<sup>[[16]](#references)[[17]](#references)</sup>
+Các thao tác container hiện đại đáng lưu ý:<sup>[[16]](#references)[[17]](#references)</sup>
 
-- `--security-opt label=disable` turns off SELinux label separation for the container
-- bind mounts with `:z` / `:Z` trigger relabeling of the host path for shared/private container use
-- broad relabeling of host content can become a security issue on its own
+- `--security-opt label=disable` tắt tính năng cách ly bằng SELinux label cho container
+- bind mount với `:z` / `:Z` kích hoạt việc gán lại label cho đường dẫn trên host để dùng chung/riêng với container
+- việc gán lại label trên diện rộng cho nội dung host có thể tự nó trở thành vấn đề bảo mật
 
-This page keeps the container content short to avoid duplication. For the container-specific abuse cases and runtime examples, check:
+Trang này trình bày ngắn gọn phần nội dung về container để tránh trùng lặp. Để xem các trường hợp lạm dụng và ví dụ runtime dành riêng cho container, hãy tham khảo:
 
 {{#ref}}
 ../containers-namespaces/container-security/protections/selinux.md
@@ -277,26 +277,26 @@ This page keeps the container content short to avoid duplication. For the contai
 
 ## References
 
-- [1] [Red Hat docs: Using SELinux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/using_selinux/index)
-- [2] [SETools: Policy analysis tools for SELinux](https://github.com/SELinuxProject/setools)
-- [3] [Managing confined and unconfined users - RHEL 9 docs](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_selinux/managing-confined-and-unconfined-users_using-selinux)
-- [4] [semodule(8) - Linux manual page](https://man7.org/linux/man-pages/man8/semodule.8.html)
-- [5] [capabilities(7) - Linux manual page](https://man7.org/linux/man-pages/man7/capabilities.7.html)
-- [6] [chcon(1) - Linux manual page](https://man7.org/linux/man-pages/man1/chcon.1.html)
-- [7] [semanage-fcontext(8) - Linux manual page](https://man7.org/linux/man-pages/man8/semanage-fcontext.8.html)
-- [8] [restorecon(8) - Linux manual page](https://man7.org/linux/man-pages/man8/restorecon.8.html)
-- [9] [sepolicy-transition(8) - Linux manual page](https://man7.org/linux/man-pages/man8/sepolicy-transition.8.html)
-- [10] [runcon(1) - Linux manual page](https://man7.org/linux/man-pages/man1/runcon.1.html)
-- [11] [newrole(1) - Linux manual page](https://man7.org/linux/man-pages/man1/newrole.1.html)
-- [12] [semanage-permissive(8) - Linux manual page](https://man7.org/linux/man-pages/man8/semanage-permissive.8.html)
-- [13] [setsebool(8) - Linux manual page](https://man7.org/linux/man-pages/man8/setsebool.8.html)
-- [14] [audit2allow(1) - Linux manual page](https://man7.org/linux/man-pages/man1/audit2allow.1.html)
-- [15] [ausearch(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ausearch.8.html)
-- [16] [Podman run documentation](https://docs.podman.io/en/latest/markdown/podman-run.1.html)
-- [17] [Why you should be using Multi-Category Security for your Linux containers](https://www.redhat.com/en/blog/why-you-should-be-using-multi-category-security-your-linux-containers)
-- [18] [Podman top documentation](https://docs.podman.io/en/latest/markdown/podman-top.1.html)
-- [19] [selinux(8) - Linux manual page](https://man7.org/linux/man-pages/man8/selinux.8.html)
-- [20] [SELinux Notebook: Domain and Object Transitions](https://github.com/SELinuxProject/selinux-notebook/blob/main/src/domain_object_transitions.md)
-- [21] [Red Hat Enterprise Linux 10: Using SELinux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html-single/using_selinux/using_selinux)
-- [22] [SETools sesearch(1) manual](https://manpages.debian.org/testing/setools/sesearch.1.en.html)
+- [1] [Tài liệu Red Hat: Sử dụng SELinux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/using_selinux/index)
+- [2] [SETools: Công cụ phân tích policy cho SELinux](https://github.com/SELinuxProject/setools)
+- [3] [Quản lý người dùng bị giới hạn và không bị giới hạn - Tài liệu RHEL 9](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_selinux/managing-confined-and-unconfined-users_using-selinux)
+- [4] [semodule(8) - Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man8/semodule.8.html)
+- [5] [capabilities(7) - Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man7/capabilities.7.html)
+- [6] [chcon(1) - Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man1/chcon.1.html)
+- [7] [semanage-fcontext(8) - Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man8/semanage-fcontext.8.html)
+- [8] [restorecon(8) - Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man8/restorecon.8.html)
+- [9] [sepolicy-transition(8) - Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man8/sepolicy-transition.8.html)
+- [10] [runcon(1) - Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man1/runcon.1.html)
+- [11] [newrole(1) - Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man1/newrole.1.html)
+- [12] [semanage-permissive(8) - Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man8/semanage-permissive.8.html)
+- [13] [setsebool(8) - Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man8/setsebool.8.html)
+- [14] [audit2allow(1) - Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man1/audit2allow.1.html)
+- [15] [ausearch(8) - Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man8/ausearch.8.html)
+- [16] [Tài liệu chạy Podman](https://docs.podman.io/en/latest/markdown/podman-run.1.html)
+- [17] [Vì sao bạn nên dùng Multi-Category Security cho container Linux](https://www.redhat.com/en/blog/why-you-should-be-using-multi-category-security-your-linux-containers)
+- [18] [Tài liệu podman top](https://docs.podman.io/en/latest/markdown/podman-top.1.html)
+- [19] [selinux(8) - Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man8/selinux.8.html)
+- [20] [Sổ tay SELinux: Chuyển đổi domain và object](https://github.com/SELinuxProject/selinux-notebook/blob/main/src/domain_object_transitions.md)
+- [21] [Red Hat Enterprise Linux 10: Sử dụng SELinux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html-single/using_selinux/using_selinux)
+- [22] [Tài liệu hướng dẫn SETools sesearch(1)](https://manpages.debian.org/testing/setools/sesearch.1.en.html)
 {{#include ../../banners/hacktricks-training.md}}

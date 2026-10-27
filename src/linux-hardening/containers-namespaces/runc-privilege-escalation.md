@@ -1,10 +1,10 @@
-# RunC Privilege Escalation
+# Leo thang đặc quyền RunC
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic information
+## Thông tin cơ bản
 
-If you want to learn more about **runc** check the following page:
+Nếu bạn muốn tìm hiểu thêm về **runc**, hãy xem trang sau:
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
@@ -12,7 +12,7 @@ If you want to learn more about **runc** check the following page:
 
 ## PE
 
-If `runc` is available to a rootful process on the host, you can use an OCI bundle whose mount configuration recursively bind-mounts the host's `/` at `/` inside the container, exposing the host filesystem in that mount namespace.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+Nếu `runc` khả dụng với một tiến trình chạy bằng quyền root trên host, bạn có thể dùng một OCI bundle có cấu hình mount bind-mount đệ quy `/` của host vào `/` bên trong container, qua đó để lộ hệ thống tệp của host trong mount namespace đó.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
 ```bash
 runc -help #Get help and see if runc is intalled
@@ -39,18 +39,17 @@ runc run demo
 ```
 
 > [!CAUTION]
-> The documented `runc run` workflow is rootful: runc's own examples label it "run as root." An unprivileged user needs a rootless configuration such as `runc spec --rootless`, and runc documents that user namespaces must be enabled for that mode.<sup>[[1]](#references)</sup>
+> Quy trình `runc run` được tài liệu hướng dẫn là rootful: các ví dụ của chính runc ghi rõ là “run as root.” Người dùng không đặc quyền cần cấu hình rootless, chẳng hạn `runc spec --rootless`; runc cũng ghi rõ rằng phải bật user namespaces để dùng chế độ này.<sup>[[1]](#references)</sup>
 
-## Privileged wrappers and runtime versions
+## Wrapper đặc quyền và phiên bản runtime
 
-A privileged wrapper that accepts a caller-controlled OCI bundle can expose host files if it permits unsafe bind mounts. Check whether the wrapper resolves traversal and symlinks before validating mount sources and destinations, and whether it constrains `process.cwd`. A sudo rule or a writable `config.json` alone does not prove that the wrapper will accept the bundle or run it with host privileges.
+Một wrapper đặc quyền chấp nhận OCI bundle do người gọi kiểm soát có thể làm lộ các tệp trên host nếu cho phép bind mount không an toàn. Hãy kiểm tra xem wrapper có xử lý traversal và symlink trước khi xác thực nguồn và đích mount hay không, đồng thời xem wrapper có giới hạn `process.cwd` hay không. Chỉ riêng quy tắc sudo hoặc `config.json` có quyền ghi không chứng minh được rằng wrapper sẽ chấp nhận bundle hoặc chạy nó với đặc quyền host.
 
-Separately, [CVE-2024-21626](https://github.com/opencontainers/runc/security/advisories/GHSA-xr7r-f8xq-vfvv) affected upstream `runc` versions from `1.0.0-rc93` through `1.1.11`; `1.1.12` contains the upstream fix. Leaked file descriptors and insufficient working-directory validation could place a container process outside its root during certain `runc run` or `runc exec` workflows. File-descriptor numbers depend on the invocation, and a version string does not establish exploitability when a vendor has backported fixes or the caller cannot influence a privileged runtime invocation.
+Riêng [CVE-2024-21626](https://github.com/opencontainers/runc/security/advisories/GHSA-xr7r-f8xq-vfvv) ảnh hưởng đến các phiên bản `runc` upstream từ `1.0.0-rc93` đến `1.1.11`; `1.1.12` có bản vá upstream. File descriptor bị leak và việc xác thực thư mục làm việc không đầy đủ có thể khiến tiến trình container nằm ngoài root của nó trong một số quy trình `runc run` hoặc `runc exec`. Số file descriptor phụ thuộc vào cách gọi, và chuỗi phiên bản không đủ để xác định khả năng khai thác nếu nhà cung cấp đã backport bản vá hoặc người gọi không thể kiểm soát một lần gọi runtime có đặc quyền.
 
 ## References
 
-- [1] [runc: CLI tool for spawning and running containers](https://github.com/opencontainers/runc#using-runc)
-- [2] [OCI Runtime Specification: Mounts](https://github.com/opencontainers/runtime-spec/blob/main/config.md#mounts)
-- [3] [Shared Subtrees](https://docs.kernel.org/filesystems/sharedsubtree.html)
-
+- [1] [runc: Công cụ CLI để tạo và chạy container](https://github.com/opencontainers/runc#using-runc)
+- [2] [Đặc tả OCI Runtime: Mounts](https://github.com/opencontainers/runtime-spec/blob/main/config.md#mounts)
+- [3] [Cây con dùng chung](https://docs.kernel.org/filesystems/sharedsubtree.html)
 {{#include ../../banners/hacktricks-training.md}}

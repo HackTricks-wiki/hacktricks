@@ -2,43 +2,42 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Introduction
+## Giới thiệu
 
-For background on iButton technology, see:
+Để tìm hiểu thông tin cơ bản về công nghệ iButton, xem:
 
 {{#ref}}
 ../ibutton.md
 {{#endref}}
 
-## Design
+## Thiết kế
 
-In the following image, the **blue** area shows how to place a physical iButton against the Flipper Zero's contacts for reading. The **green** area shows which contacts should touch a reader during emulation.<sup>[[1]](#references)</sup>
+Trong hình bên dưới, vùng **màu xanh dương** minh họa cách đặt iButton vật lý lên các tiếp điểm của Flipper Zero để đọc. Vùng **màu xanh lá** minh họa các tiếp điểm cần chạm vào đầu đọc khi mô phỏng.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
-## Actions
+## Thao tác
 
-### Read
+### Đọc
 
-In Read mode, the Flipper Zero waits for a key to touch its contacts, detects the protocol, and displays the protocol above the key ID. The built-in application supports Dallas, Cyfral, and Metakom access-control keys.<sup>[[2]](#references)</sup>
+Ở chế độ Đọc, Flipper Zero chờ khóa chạm vào các tiếp điểm, phát hiện giao thức và hiển thị giao thức phía trên ID khóa. Ứng dụng tích hợp hỗ trợ các khóa kiểm soát truy cập dùng giao thức Dallas, Cyfral và Metakom.<sup>[[2]](#references)</sup>
 
-### Add manually
+### Thêm thủ công
 
-You can manually enter key data for the Dallas, Cyfral, and Metakom protocols.<sup>[[2]](#references)</sup>
+Bạn có thể nhập thủ công dữ liệu khóa cho các giao thức Dallas, Cyfral và Metakom.<sup>[[2]](#references)</sup>
 
-### Emulate
+### Mô phỏng
 
-You can emulate a saved key, whether it was read from a physical key or entered manually.<sup>[[2]](#references)</sup>
+Bạn có thể mô phỏng khóa đã lưu, dù khóa đó được đọc từ khóa vật lý hay được nhập thủ công.<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> If the built-in contacts cannot reach the reader, connect the data and ground contacts through the GPIO pins.<sup>[[2]](#references)</sup>
+> Nếu các tiếp điểm tích hợp không chạm tới được đầu đọc, hãy nối các tiếp điểm data và ground thông qua các chân GPIO.<sup>[[2]](#references)</sup>
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
 ## References
 
-- [1] [Taming iButton Keys with Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
-- [2] [Flipper Zero documentation - Reading iButton keys](https://docs.flipper.net/zero/ibutton/read)
-
+- [1] [Kiểm soát khóa iButton bằng Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
+- [2] [Tài liệu Flipper Zero - Đọc khóa iButton](https://docs.flipper.net/zero/ibutton/read)
 {{#include ../../../banners/hacktricks-training.md}}
 

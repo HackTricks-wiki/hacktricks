@@ -2,22 +2,21 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Flipper Zero is a portable hardware multitool that supports the following capabilities:<sup>[[1]](#references)</sup>
+Flipper Zero là một thiết bị đa năng phần cứng di động hỗ trợ các khả năng sau:<sup>[[1]](#references)</sup>
 
-- **Receive, capture, and replay supported radio signals:** [**Sub-GHz**](fz-sub-ghz.md)
-- **Read, capture, and emulate supported NFC cards:** [**NFC**](fz-nfc.md)
-- **Read, capture, and emulate supported 125 kHz tags:** [**125 kHz RFID**](fz-125khz-rfid.md)
-- **Read, capture, and transmit infrared signals:** [**Infrared**](fz-infrared.md)
-- **Read, capture, and emulate supported iButtons:** [**iButton**](../ibutton.md)
-- **Act as a BadUSB device**
-- **Act as a U2F security key**
-- **Run applications and games such as Snake**
+- **Nhận, thu và phát lại các tín hiệu radio được hỗ trợ:** [**Sub-GHz**](fz-sub-ghz.md)
+- **Đọc, thu và mô phỏng các thẻ NFC được hỗ trợ:** [**NFC**](fz-nfc.md)
+- **Đọc, thu và mô phỏng các thẻ 125 kHz được hỗ trợ:** [**125 kHz RFID**](fz-125khz-rfid.md)
+- **Đọc, thu và truyền tín hiệu hồng ngoại:** [**Hồng ngoại**](fz-infrared.md)
+- **Đọc, thu và mô phỏng các iButton được hỗ trợ:** [**iButton**](../ibutton.md)
+- **Hoạt động như một thiết bị BadUSB**
+- **Hoạt động như một khóa bảo mật U2F**
+- **Chạy ứng dụng và trò chơi như Snake**
 
-For community-maintained firmware, applications, databases, and other resources, see the Awesome Flipper Zero collection.<sup>[[2]](#references)</sup>
+Để tìm firmware, ứng dụng, cơ sở dữ liệu và các tài nguyên khác do cộng đồng duy trì, hãy xem bộ sưu tập Awesome Flipper Zero.<sup>[[2]](#references)</sup>
 
 ## References
 
-- [1] [Flipper Zero - Official Product Overview](https://flipper.net/)
+- [1] [Flipper Zero - Tổng quan sản phẩm chính thức](https://flipper.net/)
 - [2] [GitHub - Awesome Flipper Zero](https://github.com/djsime1/awesome-flipperzero)
-
 {{#include ../../../banners/hacktricks-training.md}}

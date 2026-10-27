@@ -2,17 +2,17 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Context
+## Bối cảnh
 
-Linux normally executes programs from executable files stored on disk or in memory. It can identify an executable by pathname or file descriptor, so a normal filesystem pathname is not always required.<sup>[[2]](#references)</sup>
+Linux thường thực thi chương trình từ các tệp thực thi được lưu trên đĩa hoặc trong bộ nhớ. Hệ thống có thể nhận diện tệp thực thi bằng pathname hoặc file descriptor, vì vậy không phải lúc nào cũng cần pathname thông thường trong filesystem.<sup>[[2]](#references)</sup>
 
-DDexec / EverythingExec uses the memory of an **already running process**. The [Linux Fileless Execution](../../../post-exploitation/linux-fileless-execution.md) page covers anonymous-file execution and related detection and forensic collection; the [Memory Bypasses overview](index.html#memory-bypasses) also links MemExec and Memdlopen.<sup>[[1]](#references)</sup>
+DDexec / EverythingExec sử dụng bộ nhớ của một **process đang chạy**. Trang [Linux Fileless Execution](../../../post-exploitation/linux-fileless-execution.md) trình bày việc thực thi từ tệp ẩn danh cùng các phương pháp phát hiện và thu thập dữ liệu pháp chứng liên quan; [tổng quan về Memory Bypasses](index.html#memory-bypasses) cũng liên kết đến MemExec và Memdlopen.<sup>[[1]](#references)</sup>
 
-This technique allows you to **bypass common protection techniques such as read-only, noexec, file-name whitelisting, hash whitelisting**.<sup>[[1]](#references)</sup>
+Kỹ thuật này cho phép bạn **vượt qua các kỹ thuật bảo vệ phổ biến như read-only, noexec, whitelist tên tệp và whitelist hash**.<sup>[[1]](#references)</sup>
 
-## Dependencies
+## Phụ thuộc
 
-The final script depends on the following tools to work, they need to be accessible in the system you are attacking (by default you will find all of them everywhere):
+Script cuối cùng cần các công cụ sau để hoạt động; chúng phải có thể truy cập được trên hệ thống bạn đang tấn công (theo mặc định, bạn sẽ tìm thấy tất cả các công cụ này ở mọi nơi):
 
 ```
 dd
@@ -28,44 +28,44 @@ tr
 base64
 ```
 
-## The technique
+## Kỹ thuật
 
-If you are able to modify arbitrarily the memory of a process then you can take over it. This can be used to hijack an already existing process and replace it with another program. We can achieve this either by using the `ptrace()` syscall (which requires you to have the ability to execute syscalls or to have gdb available on the system) or, more interestingly, writing to `/proc/$pid/mem`.<sup>[[1]](#references)</sup>
+Nếu có thể tùy ý sửa đổi bộ nhớ của một tiến trình, bạn có thể chiếm quyền kiểm soát nó. Việc này có thể được dùng để chiếm quyền điều khiển một tiến trình đang chạy và thay thế nó bằng một chương trình khác. Ta có thể thực hiện việc này bằng syscall `ptrace()` (đòi hỏi bạn có khả năng thực thi syscall hoặc có sẵn gdb trên hệ thống) hoặc, thú vị hơn, bằng cách ghi vào `/proc/$pid/mem`.<sup>[[1]](#references)</sup>
 
-The file `/proc/$pid/mem` is a one-to-one mapping of the entire address space of a process (_e. g._ from `0x0000000000000000` to `0x7ffffffffffff000` in x86-64). This means that reading from or writing to this file at an offset `x` is the same as reading from or modifying the contents at the virtual address `x`.
+Tệp `/proc/$pid/mem` ánh xạ một-một toàn bộ không gian địa chỉ của một tiến trình (_ví dụ_, từ `0x0000000000000000` đến `0x7ffffffffffff000` trên x86-64). Điều này có nghĩa là việc đọc hoặc ghi vào tệp này tại offset `x` tương đương với việc đọc hoặc sửa đổi nội dung tại địa chỉ ảo `x`.
 
-Now, we have four basic problems to face:
+Hiện tại, ta cần giải quyết bốn vấn đề cơ bản:
 
-- In general, only root and the program owner of the file may modify it.
+- Nói chung, chỉ root và chủ sở hữu chương trình mới có thể sửa đổi tệp này.
 - ASLR.
-- If we try to read or write to an address not mapped in the address space of the program we will get an I/O error.
+- Nếu cố đọc hoặc ghi vào một địa chỉ không được ánh xạ trong không gian địa chỉ của chương trình, ta sẽ gặp lỗi I/O.
 
-This problems have solutions that, although they are not perfect, are good:
+Có các giải pháp cho những vấn đề này. Tuy không hoàn hảo, nhưng chúng vẫn hữu ích:
 
-- Most shell interpreters allow the creation of file descriptors that will then be inherited by child processes. We can create a fd pointing to the `mem` file of the sell with write permissions... so child processes that use that fd will be able to modify the shell's memory.
-- ASLR isn't even a problem, we can check the shell's `maps` file or any other from the procfs in order to gain information about the address space of the process.
-- So we need to `lseek()` over the file. From the shell this cannot be done unless using the infamous `dd`.
+- Hầu hết trình thông dịch shell đều cho phép tạo các file descriptor, sau đó được các tiến trình con kế thừa. Ta có thể tạo một fd trỏ đến tệp `mem` của shell với quyền ghi... nhờ đó, các tiến trình con sử dụng fd này có thể sửa đổi bộ nhớ của shell.
+- ASLR thậm chí không phải là vấn đề; ta có thể kiểm tra tệp `maps` của shell hoặc bất kỳ tệp nào khác trong procfs để lấy thông tin về không gian địa chỉ của tiến trình.
+- Vì vậy, ta cần dùng `lseek()` để di chuyển vị trí trong tệp. Không thể thực hiện việc này từ shell nếu không dùng `dd` khét tiếng.
 
-### In more detail
+### Chi tiết hơn
 
-The steps are relatively easy and do not require any kind of expertise to understand them:<sup>[[1]](#references)</sup>
+Các bước tương đối đơn giản và không đòi hỏi chuyên môn để hiểu:<sup>[[1]](#references)</sup>
 
-- Parse the binary we want to run and the loader to find out what mappings they need. Then craft a "shell"code that will perform, broadly speaking, the same steps that the kernel does upon each call to `execve()`:
-  - Create said mappings.
-  - Read the binaries into them.
-  - Set up permissions.
-  - Finally initialize the stack with the arguments for the program and place the auxiliary vector (needed by the loader).
-  - Jump into the loader and let it do the rest (load libraries needed by the program).
-- Obtain from the `syscall` file the address to which the process will return after the syscall it is executing.
-- Overwrite that place, which will be executable, with our shellcode (through `mem` we can modify unwritable pages).
-- Pass the program we want to run to the stdin of the process (will be `read()` by said "shell"code).
-- At this point it is up to the loader to load the necessary libraries for our program and jump into it.
+- Phân tích binary mà ta muốn chạy và loader để xác định các ánh xạ mà chúng cần. Sau đó tạo một "shell"code thực hiện, nói khái quát, các bước tương tự như kernel thực hiện mỗi khi gọi `execve()`:
+  - Tạo các ánh xạ đó.
+  - Đọc các binary vào những ánh xạ này.
+  - Thiết lập quyền.
+  - Cuối cùng, khởi tạo stack với các đối số cho chương trình và đặt auxiliary vector (cần thiết cho loader).
+  - Nhảy vào loader và để nó xử lý phần còn lại (nạp các thư viện mà chương trình cần).
+- Lấy từ tệp `syscall` địa chỉ mà tiến trình sẽ quay lại sau syscall đang thực thi.
+- Ghi đè vị trí đó bằng shellcode của ta; vị trí này có quyền thực thi (thông qua `mem`, ta có thể sửa đổi các trang không có quyền ghi).
+- Truyền chương trình ta muốn chạy vào stdin của tiến trình (sẽ được "shell"code đó `read()`).
+- Lúc này, loader sẽ nạp các thư viện cần thiết cho chương trình và nhảy vào chương trình đó.
 
-**Check out the tool in** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec).<sup>[[1]](#references)</sup>
+**Xem công cụ tại** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec).<sup>[[1]](#references)</sup>
 
 ## EverythingExec
 
-There are several alternatives to `dd`, one of which, `tail`, is currently the default program used to `lseek()` through the `mem` file (which was the sole purpose for using `dd`). Said alternatives are:<sup>[[1]](#references)</sup>
+Có một số lựa chọn thay thế cho `dd`; một trong số đó là `tail`, hiện là chương trình mặc định dùng để `lseek()` trong tệp `mem` (đây vốn là mục đích duy nhất khi dùng `dd`). Các lựa chọn thay thế đó là:<sup>[[1]](#references)</sup>
 
 ```bash
 tail
@@ -74,23 +74,22 @@ cmp
 xxd
 ```
 
-Setting the variable `SEEKER` you may change the seeker used, _e. g._:
+Bằng cách thiết lập biến `SEEKER`, bạn có thể thay đổi seeker được sử dụng, _ví dụ_:
 
 ```bash
 SEEKER=cmp bash ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
 
-If you find another valid seeker not implemented in the script you may still use it setting the `SEEKER_ARGS` variable:
+Nếu tìm thấy một seeker hợp lệ khác chưa được triển khai trong script, bạn vẫn có thể sử dụng nó bằng cách đặt biến `SEEKER_ARGS`:
 
 ```bash
 SEEKER=xxd SEEKER_ARGS='-s $offset' zsh ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
 
-Block this, EDRs.
+Chặn cái này đi, EDR.
 
 ## References
 
-- [1] [DDexec: A technique to run binaries filelessly and stealthily on Linux](https://github.com/arget13/DDexec)
-- [2] [execveat(2) — Linux manual page](https://manpages.debian.org/trixie/manpages-dev/execveat.2.en.html)
-
+- [1] [DDexec: Kỹ thuật chạy file binary không cần tệp và một cách kín đáo trên Linux](https://github.com/arget13/DDexec)
+- [2] [execveat(2) — trang hướng dẫn sử dụng Linux](https://manpages.debian.org/trixie/manpages-dev/execveat.2.en.html)
 {{#include ../../../../banners/hacktricks-training.md}}

@@ -1,14 +1,14 @@
-# Masked Paths
+# Đường dẫn bị che
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Masked paths are runtime protections that hide especially sensitive kernel-facing filesystem locations from the container by bind-mounting over them or otherwise making them inaccessible. The OCI runtime specification defines `maskedPaths` as absolute paths that must not be readable inside the container. <sup>[[1]](#references)</sup>
+Đường dẫn bị che là các biện pháp bảo vệ trong thời gian chạy, ẩn những vị trí nhạy cảm đặc biệt trên hệ thống tệp giao tiếp với kernel khỏi container bằng cách bind-mount đè lên chúng hoặc khiến chúng không thể truy cập theo cách khác. Đặc tả OCI runtime định nghĩa `maskedPaths` là các đường dẫn tuyệt đối không thể đọc được bên trong container. <sup>[[1]](#references)</sup>
 
-This matters because many container escapes and host-impacting tricks start by reading or writing special files under `/proc` or `/sys`. If those locations are masked, the attacker loses direct access to a useful part of the kernel control surface even after gaining code execution inside the container.
+Điều này quan trọng vì nhiều kỹ thuật container escape và gây ảnh hưởng đến host bắt đầu bằng việc đọc hoặc ghi các tệp đặc biệt trong `/proc` hoặc `/sys`. Nếu những vị trí đó bị che, kẻ tấn công sẽ mất quyền truy cập trực tiếp vào một phần hữu ích của bề mặt điều khiển kernel, ngay cả sau khi thực thi được mã bên trong container.
 
-## Operation
+## Hoạt động
 
-Runtimes commonly mask selected paths such as:
+Các runtime thường che một số đường dẫn như:
 
 - `/proc/kcore`
 - `/proc/keys`
@@ -17,36 +17,36 @@ Runtimes commonly mask selected paths such as:
 - `/proc/sched_debug`
 - `/sys/firmware`
 
-The exact list depends on the runtime and host configuration. The important property is that the path becomes inaccessible or replaced from the container's point of view even though it still exists on the host.
+Danh sách cụ thể phụ thuộc vào runtime và cấu hình host. Điều quan trọng là đường dẫn đó trở nên không thể truy cập hoặc bị thay thế theo góc nhìn của container, dù nó vẫn tồn tại trên host.
 
 ## Lab
 
-Inspect the masked-path configuration exposed by Docker:
+Kiểm tra cấu hình đường dẫn bị che mà Docker cung cấp:
 
 ```bash
 docker inspect <container> | jq '.[0].HostConfig.MaskedPaths'
 ```
 
-Inspect the actual mount behavior inside the workload:
+Kiểm tra hành vi mount thực tế bên trong workload:
 
 ```bash
 mount | grep -E '/proc|/sys'
 ls -ld /proc/kcore /proc/keys /sys/firmware 2>/dev/null
 ```
 
-A listed path is not necessarily readable: runc can mask a file with a `/dev/null` bind mount and a directory with a read-only empty tmpfs. Check the exact mountpoint, not just whether `ls` succeeds. <sup>[[4]](#references)</sup>
+Một đường dẫn được liệt kê không nhất thiết có thể đọc được: runc có thể che một tệp bằng bind mount `/dev/null` và một thư mục bằng tmpfs rỗng chỉ đọc. Kiểm tra chính xác điểm mount, không chỉ kiểm tra xem `ls` có chạy thành công hay không. <sup>[[4]](#references)</sup>
 
 ## Security Impact
 
-Masking does not create the main isolation boundary, but it removes several high-value post-exploitation targets. Without masking, a compromised container may be able to inspect kernel state, read sensitive process or keying information, or interact with procfs/sysfs objects that should never have been visible to the application.
+Việc che đường dẫn không tạo ra ranh giới cô lập chính, nhưng loại bỏ một số mục tiêu có giá trị cao sau khi khai thác. Nếu không che, container bị xâm nhập có thể kiểm tra trạng thái kernel, đọc thông tin nhạy cảm về tiến trình hoặc khóa, hoặc tương tác với các đối tượng procfs/sysfs vốn không bao giờ được phép hiển thị cho ứng dụng.
 
 ## Misconfigurations
 
-The main mistake is unmasking broad classes of paths for convenience or debugging. In Podman this may appear as `--security-opt unmask=ALL` or targeted unmasking. <sup>[[2]](#references)</sup> In Kubernetes, overly broad proc exposure may appear through `procMount: Unmasked`; current Kubernetes requires `spec.hostUsers: false` (a user namespace) for this setting, whereas versions 1.12–1.29 did not enforce that requirement. <sup>[[3]](#references)</sup> Another serious problem is exposing host `/proc` or `/sys` through a bind mount, which bypasses the idea of a reduced container view entirely.
+Sai lầm chính là bỏ che các nhóm đường dẫn rộng để thuận tiện hoặc gỡ lỗi. Trong Podman, điều này có thể xuất hiện dưới dạng `--security-opt unmask=ALL` hoặc bỏ che một số đường dẫn cụ thể. <sup>[[2]](#references)</sup> Trong Kubernetes, việc để lộ proc quá rộng có thể xuất hiện qua `procMount: Unmasked`; Kubernetes hiện tại yêu cầu `spec.hostUsers: false` (user namespace) cho thiết lập này, trong khi các phiên bản 1.12–1.29 không thực thi yêu cầu đó. <sup>[[3]](#references)</sup> Một vấn đề nghiêm trọng khác là để lộ `/proc` hoặc `/sys` của host thông qua bind mount, điều này hoàn toàn vô hiệu hóa ý tưởng về một chế độ xem container bị thu hẹp.
 
 ## Abuse
 
-If masking is weak or absent, start by identifying which sensitive procfs/sysfs paths are directly reachable:
+Nếu việc che đường dẫn yếu hoặc không có, hãy bắt đầu bằng cách xác định những đường dẫn procfs/sysfs nhạy cảm nào có thể truy cập trực tiếp:
 
 ```bash
 for p in /proc/kcore /proc/keys /proc/timer_list /sys/firmware; do
@@ -56,7 +56,7 @@ done
 mount | grep -E '/proc|/sys'  # Review the wider procfs/sysfs layout
 ```
 
-If a supposedly masked path is accessible, inspect it carefully:
+Nếu một đường dẫn được cho là đã bị mask vẫn có thể truy cập, hãy kiểm tra kỹ:
 
 ```bash
 head -n 20 /proc/timer_list 2>/dev/null   # Scheduler / timer internals, useful for host fingerprinting and confirming kernel data exposure
@@ -66,29 +66,29 @@ zcat /proc/config.gz 2>/dev/null | head   # Kernel build configuration; useful t
 head -n 50 /proc/sched_debug 2>/dev/null  # Scheduler and process metadata; may reveal host tasks and cgroup relationships
 ```
 
-What these commands can reveal:
+Những gì các lệnh này có thể tiết lộ:
 
-- `/proc/timer_list` can expose host timer and scheduler data. This is mostly a reconnaissance primitive, but it confirms that the container can read kernel-facing information that is normally hidden.
-- `/proc/keys` lists metadata only for keys the reader has **view** permission for, subject to LSM checks. It can reveal key types and descriptions, but does not dump key payloads. <sup>[[6]](#references)</sup>
-- `/sys/firmware` helps identify boot mode, firmware interfaces, and platform details that are useful for host fingerprinting and for understanding whether the workload is seeing host-level state.
-- `/proc/config.gz` may reveal the running kernel configuration, which is valuable for matching public kernel exploit prerequisites or understanding why a specific feature is reachable.
-- `/proc/sched_debug` exposes scheduler state and often bypasses the intuitive expectation that the PID namespace should hide unrelated process information completely.
+- `/proc/timer_list` có thể để lộ dữ liệu về timer và bộ lập lịch của host. Đây chủ yếu là một primitive trinh sát, nhưng xác nhận rằng container có thể đọc thông tin hướng kernel vốn thường bị ẩn.
+- `/proc/keys` chỉ liệt kê metadata của các key mà người đọc có quyền **view**, tùy thuộc vào các kiểm tra LSM. Nó có thể tiết lộ loại và mô tả của key, nhưng không dump payload của key. <sup>[[6]](#references)</sup>
+- `/sys/firmware` giúp xác định chế độ khởi động, giao diện firmware và thông tin nền tảng hữu ích cho việc fingerprint host cũng như tìm hiểu workload có đang thấy trạng thái cấp host hay không.
+- `/proc/config.gz` có thể tiết lộ cấu hình kernel đang chạy, hữu ích để đối chiếu các điều kiện tiên quyết của public kernel exploit hoặc tìm hiểu vì sao một tính năng cụ thể có thể truy cập được.
+- `/proc/sched_debug` để lộ trạng thái bộ lập lịch và thường đi ngược kỳ vọng trực quan rằng PID namespace sẽ ẩn hoàn toàn thông tin về các process không liên quan.
 
-Interesting results include direct reads from those files, evidence that the data belongs to the host rather than to a constrained container view, or access to other procfs/sysfs locations that are commonly masked by default.
+Các kết quả đáng chú ý gồm đọc trực tiếp những file đó, bằng chứng cho thấy dữ liệu thuộc về host chứ không phải góc nhìn bị giới hạn của container, hoặc truy cập được các vị trí procfs/sysfs khác thường bị mask theo mặc định.
 
-### Mask-source race during container startup
+### Race ở nguồn mask trong lúc khởi động container
 
-In vulnerable runc implementations, file masks depend on the container's `/dev/null` inode. An attacker who can arrange concurrent containers with shared mounts, including parallel BuildKit steps, can race startup and remove `/dev/null` before runc binds it over masked procfs files. The runtime then treats the missing **source** as if a mask destination were absent and silently skips those file masks. The failure depends on a race during runtime setup; removing `/dev/null` after startup does not undo an already installed mask. <sup>[[4]](#references)</sup>
+Trong các bản runc dễ bị lỗi, file mask phụ thuộc vào inode của `/dev/null` trong container. Kẻ tấn công có thể tạo ra các container chạy đồng thời với các mount dùng chung, bao gồm những bước BuildKit chạy song song, rồi race để xóa `/dev/null` trước khi runc bind nó lên các file procfs cần mask. Khi đó, runtime coi **source** bị thiếu như thể đích mask không tồn tại và âm thầm bỏ qua các file mask đó. Lỗi này phụ thuộc vào race trong lúc runtime thiết lập; xóa `/dev/null` sau khi khởi động sẽ không gỡ bỏ mask đã được cài đặt. <sup>[[4]](#references)</sup>
 
-After a controlled test, compare the requested mask list with exact mountpoints inside the new container. <sup>[[4]](#references)</sup> `findmnt -M` checks the named mountpoint rather than falling back to a parent mount; if `findmnt` is absent, inspect `/proc/self/mountinfo`. <sup>[[5]](#references)</sup> An `ls` success or an empty `cat` cannot prove the mask is absent. <sup>[[4]](#references)</sup>
+Sau khi kiểm thử có kiểm soát, hãy so sánh danh sách mask được yêu cầu với các mountpoint chính xác bên trong container mới. <sup>[[4]](#references)</sup> `findmnt -M` kiểm tra mountpoint được chỉ định thay vì chuyển sang mount cha; nếu không có `findmnt`, hãy kiểm tra `/proc/self/mountinfo`. <sup>[[5]](#references)</sup> Lệnh `ls` chạy thành công hoặc `cat` trả về rỗng không thể chứng minh rằng mask đã bị bỏ qua. <sup>[[4]](#references)</sup>
 
-Use the [checks below](#checks) to compare the requested masks with exact mounts in the new container.
+Dùng [các bước kiểm tra bên dưới](#checks) để so sánh những mask được yêu cầu với các mount chính xác trong container mới.
 
-A skipped file mask may expose procfs data if normal permissions and LSM policy allow it. It does **not** by itself make `/proc/sys` writable: that is a separate [read-only-path](read-only-paths.md) control. The distinct `/dev/null` symlink substitution that can redirect a bind mount to a writable procfs target is covered under the [PID-namespace runtime race](namespaces/pid-namespace.md#maskedpaths-race-to-host-procfs). <sup>[[4]](#references)</sup>
+File mask bị bỏ qua có thể làm lộ dữ liệu procfs nếu quyền thông thường và chính sách LSM cho phép. Điều đó **không** tự khiến `/proc/sys` có thể ghi được: đây là một kiểm soát [read-only-path](read-only-paths.md) riêng biệt. Việc thay thế symlink `/dev/null` riêng biệt, có thể chuyển hướng bind mount đến một đích procfs có thể ghi, được đề cập trong mục [race runtime của PID namespace](namespaces/pid-namespace.md#maskedpaths-race-to-host-procfs). <sup>[[4]](#references)</sup>
 
 ## Checks
 
-The point of these checks is to determine which paths the runtime intentionally hid and whether the current workload still sees a reduced kernel-facing filesystem.
+Mục đích của các bước kiểm tra này là xác định những path nào đã được runtime chủ động ẩn và liệu workload hiện tại vẫn đang thấy một filesystem hướng kernel bị thu hẹp hay không.
 
 ```bash
 docker inspect <container> | jq '.[0].HostConfig.MaskedPaths'   # Runtime-declared masked paths
@@ -99,32 +99,31 @@ for p in /proc/kcore /proc/keys /proc/timer_list /sys/firmware; do
 done
 ```
 
-Use an exact-mount check because a masked file can still exist and a read can return an empty result from `/dev/null`. An absent mountpoint is a finding to investigate, not proof of readable host data by itself. <sup>[[4]](#references)[[5]](#references)</sup>
+Sử dụng kiểm tra mount chính xác vì file bị che vẫn có thể tồn tại và thao tác đọc có thể trả về kết quả rỗng từ `/dev/null`. Mountpoint không tồn tại là dấu hiệu cần điều tra, chứ tự nó không chứng minh rằng có thể đọc dữ liệu trên host. <sup>[[4]](#references)[[5]](#references)</sup>
 
-What is interesting here:
+Điểm đáng chú ý ở đây:
 
-- A long masked-path list is normal in hardened runtimes.
-- Missing masking on sensitive procfs entries deserves closer inspection.
-- If a sensitive path is accessible and the container also has strong capabilities or broad mounts, the exposure matters more.
+- Danh sách đường dẫn bị che dài là điều bình thường trong các runtime được hardening.
+- Việc thiếu che chắn ở các mục procfs nhạy cảm cần được kiểm tra kỹ hơn.
+- Nếu có thể truy cập một đường dẫn nhạy cảm và container cũng có capabilities mạnh hoặc mount rộng, mức độ lộ dữ liệu sẽ đáng lo ngại hơn.
 
 ## Runtime Defaults
 
-| Runtime / platform | Default state | Default behavior | Common manual weakening |
+| Runtime / platform | Trạng thái mặc định | Hành vi mặc định | Cách làm suy yếu thường gặp |
 | --- | --- | --- | --- |
-| Docker Engine | Enabled by default | Docker defines a default masked path list | exposing host proc/sys mounts, `--privileged` |
-| Podman | Enabled by default | Podman applies default masked paths unless unmasked manually | `--security-opt unmask=ALL`, targeted unmasking, `--privileged` |
-| Kubernetes | Inherits runtime defaults | Uses the underlying runtime's masking behavior unless Pod settings weaken proc exposure | `procMount: Unmasked` (requires `hostUsers: false` on current releases), privileged workload patterns, broad host mounts |
-| containerd / CRI-O under Kubernetes | Runtime default | Usually applies OCI/runtime masked paths unless overridden | direct runtime config changes, same Kubernetes weakening paths |
+| Docker Engine | Mặc định được bật | Docker xác định danh sách đường dẫn bị che mặc định | cho phép truy cập các mount host proc/sys, `--privileged` |
+| Podman | Mặc định được bật | Podman áp dụng các đường dẫn bị che mặc định, trừ khi được bỏ che thủ công | `--security-opt unmask=ALL`, bỏ che có chọn lọc, `--privileged` |
+| Kubernetes | Kế thừa mặc định của runtime | Sử dụng hành vi che chắn của runtime bên dưới, trừ khi cấu hình Pod làm suy yếu việc bảo vệ proc | `procMount: Unmasked` (các phiên bản hiện tại yêu cầu `hostUsers: false`), cấu hình workload privileged, mount host rộng |
+| containerd / CRI-O under Kubernetes | Mặc định của runtime | Thường áp dụng các đường dẫn bị che theo OCI/runtime, trừ khi bị ghi đè | thay đổi trực tiếp cấu hình runtime, các cách làm suy yếu tương tự trong Kubernetes |
 
-Masked paths are usually present by default. The main operational problem is not absence from the runtime, but deliberate unmasking or host bind mounts that negate the protection.
+Các đường dẫn bị che thường được thiết lập mặc định. Vấn đề vận hành chính không phải là runtime không có chúng, mà là việc chủ động bỏ che hoặc sử dụng bind mount từ host làm vô hiệu hóa biện pháp bảo vệ.
 
 ## References
 
-- [1] [Open Container Initiative - Linux container configuration: Masked Paths](https://github.com/opencontainers/runtime-spec/blob/main/config-linux.md#masked-paths)
-- [2] [Podman documentation - `podman run` security options](https://docs.podman.io/en/latest/markdown/podman-run.1.html#security-opt-option)
-- [3] [Kubernetes Documentation - ProcMount](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-proc-mount-type-for-a-container)
-- [4] [runc advisory: masked-path mount source race](https://github.com/opencontainers/runc/security/advisories/GHSA-9493-h29p-rfm2)
-- [5] [findmnt(8) manual](https://man7.org/linux/man-pages/man8/findmnt.8.html)
-- [6] [keyrings(7) manual](https://man7.org/linux/man-pages/man7/keyrings.7.html)
-
+- [1] [Open Container Initiative - Cấu hình container Linux: Đường dẫn bị che](https://github.com/opencontainers/runtime-spec/blob/main/config-linux.md#masked-paths)
+- [2] [Tài liệu Podman - Tùy chọn bảo mật `podman run`](https://docs.podman.io/en/latest/markdown/podman-run.1.html#security-opt-option)
+- [3] [Tài liệu Kubernetes - ProcMount](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-proc-mount-type-for-a-container)
+- [4] [Thông báo bảo mật runc: race ở nguồn mount của đường dẫn bị che](https://github.com/opencontainers/runc/security/advisories/GHSA-9493-h29p-rfm2)
+- [5] [Tài liệu hướng dẫn findmnt(8)](https://man7.org/linux/man-pages/man8/findmnt.8.html)
+- [6] [Tài liệu hướng dẫn keyrings(7)](https://man7.org/linux/man-pages/man7/keyrings.7.html)
 {{#include ../../../../banners/hacktricks-training.md}}

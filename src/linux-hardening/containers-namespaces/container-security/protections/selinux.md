@@ -2,28 +2,28 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Overview
+## Tổng quan
 
-SELinux is a **label-based Mandatory Access Control** system. Every relevant process and object may carry a security context, and policy decides which domains may interact with which types and in what way. In containerized environments, this usually means that the runtime launches the container process under a confined container domain and labels the container content with corresponding types. If the policy is working properly, the process may be able to read and write the things its label is expected to touch while being denied access to other host content, even if that content becomes visible through a mount.
+SELinux là một hệ thống **Kiểm soát truy cập bắt buộc dựa trên nhãn**. Mỗi tiến trình và đối tượng liên quan có thể mang một ngữ cảnh bảo mật, còn policy quyết định những domain nào có thể tương tác với những type nào và theo cách nào. Trong môi trường container, điều này thường có nghĩa là runtime khởi chạy tiến trình container trong một domain container bị giới hạn và gắn nhãn nội dung container bằng các type tương ứng. Nếu policy hoạt động đúng, tiến trình có thể đọc và ghi những thứ mà nhãn của nó được cho phép truy cập, đồng thời bị từ chối quyền truy cập vào nội dung khác trên host, ngay cả khi nội dung đó hiển thị thông qua một mount.
 
-This is one of the most powerful host-side protections available in mainstream Linux container deployments. It is especially important on Fedora, RHEL, CentOS Stream, OpenShift, and other SELinux-centric ecosystems. In those environments, a reviewer who ignores SELinux will often misunderstand why an obvious-looking path to host compromise is actually blocked.
+Đây là một trong những cơ chế bảo vệ mạnh nhất ở phía host trong các triển khai container Linux phổ biến. Cơ chế này đặc biệt quan trọng trên Fedora, RHEL, CentOS Stream, OpenShift và các hệ sinh thái khác lấy SELinux làm trọng tâm. Trong những môi trường đó, người đánh giá bỏ qua SELinux thường sẽ hiểu sai lý do một đường dẫn rõ ràng dẫn đến việc xâm phạm host lại thực sự bị chặn.
 
-## AppArmor Vs SELinux
+## AppArmor và SELinux
 
-The easiest high-level difference is that AppArmor is path-based while SELinux is **label-based**. That has big consequences for container security. A path-based policy may behave differently if the same host content becomes visible under an unexpected mount path. A label-based policy instead asks what the object's label is and what the process domain may do to it. This does not make SELinux simple, but it does make it robust against a class of path-trick assumptions that defenders sometimes accidentally make in AppArmor-based systems.
+Khác biệt tổng quan dễ hiểu nhất là AppArmor dựa trên path, còn SELinux **dựa trên nhãn**. Điều này ảnh hưởng lớn đến bảo mật container. Policy dựa trên path có thể hoạt động khác đi nếu cùng nội dung trên host hiển thị dưới một đường dẫn mount không như dự kiến. Ngược lại, policy dựa trên nhãn sẽ xét nhãn của đối tượng và những gì domain của tiến trình được phép làm với đối tượng đó. Điều này không khiến SELinux trở nên đơn giản, nhưng giúp hệ thống chống lại một nhóm giả định về thủ thuật path mà đôi khi người phòng thủ vô tình mắc phải trên các hệ thống dùng AppArmor.
 
-Because the model is label-oriented, container volume handling and relabeling decisions are security-critical. If the runtime or operator changes labels too broadly to "make mounts work", the policy boundary that was supposed to contain the workload may become much weaker than intended.
+Vì mô hình này dựa trên nhãn, cách xử lý volume container và các quyết định gắn lại nhãn có ý nghĩa then chốt đối với bảo mật. Nếu runtime hoặc operator thay đổi nhãn quá rộng để “mount hoạt động”, ranh giới policy vốn được thiết kế để cô lập workload có thể yếu đi nhiều hơn dự kiến.
 
 ## Lab
 
-To see whether SELinux is active on the host:
+Để kiểm tra SELinux có đang hoạt động trên host hay không:
 
 ```bash
 getenforce 2>/dev/null
 sestatus 2>/dev/null
 ```
 
-To inspect existing labels on the host:
+Để kiểm tra các nhãn hiện có trên host:
 
 ```bash
 ps -eZ | head
@@ -31,26 +31,26 @@ ls -Zd /var/lib/containers 2>/dev/null
 ls -Zd /var/lib/docker 2>/dev/null
 ```
 
-To compare a normal run with one where labeling is disabled:
+Để so sánh một lần chạy bình thường với một lần chạy đã tắt cơ chế gán nhãn:
 
 ```bash
 podman run --rm fedora cat /proc/self/attr/current
 podman run --rm --security-opt label=disable fedora cat /proc/self/attr/current
 ```
 
-On an SELinux-enabled host, this is a very practical demonstration because it shows the difference between a workload running under the expected container domain and one that has been stripped of that enforcement layer.
+Trên host bật SELinux, đây là một minh họa rất thực tế vì nó cho thấy sự khác biệt giữa workload chạy trong domain container như dự kiến và workload đã bị gỡ bỏ lớp thực thi đó.
 
-## Runtime Usage
+## Cách sử dụng trong runtime
 
-Podman is particularly well aligned with SELinux on systems where SELinux is part of the platform default. Rootless Podman plus SELinux is one of the strongest mainstream container baselines because the process is already unprivileged on the host side and is still confined by MAC policy. Docker can also use SELinux where supported, although administrators sometimes disable it to work around volume-labeling friction. CRI-O and OpenShift rely heavily on SELinux as part of their container isolation story. Kubernetes can expose SELinux-related settings too, but their value obviously depends on whether the node OS actually supports and enforces SELinux.<sup>[[2]](#references)</sup>
+Podman đặc biệt tương thích với SELinux trên các hệ thống có SELinux làm mặc định nền tảng. Rootless Podman kết hợp với SELinux là một trong những cấu hình nền bảo mật container phổ biến mạnh nhất, vì tiến trình vốn đã không có đặc quyền ở phía host và vẫn bị giới hạn bởi chính sách MAC. Docker cũng có thể sử dụng SELinux nếu được hỗ trợ, dù đôi khi quản trị viên vô hiệu hóa nó để khắc phục những vướng mắc khi gắn nhãn volume. CRI-O và OpenShift phụ thuộc nhiều vào SELinux như một phần trong cơ chế cô lập container. Kubernetes cũng có thể cung cấp các thiết lập liên quan đến SELinux, nhưng hiệu quả của chúng rõ ràng phụ thuộc vào việc hệ điều hành của node có hỗ trợ và thực thi SELinux hay không.<sup>[[2]](#references)</sup>
 
-The recurring lesson is that SELinux is not an optional garnish. In the ecosystems that are built around it, it is part of the expected security boundary. For host-side policy enumeration, transition analysis, and abuse of SELinux administration tools, see the [general SELinux page](../../../interesting-files-permissions/selinux.md).
+Bài học xuyên suốt là SELinux không phải một thứ trang trí tùy chọn. Trong các hệ sinh thái được xây dựng xoay quanh nó, SELinux là một phần của ranh giới bảo mật được kỳ vọng. Để tìm hiểu về việc liệt kê chính sách phía host, phân tích chuyển đổi và lạm dụng các công cụ quản trị SELinux, xem [trang SELinux tổng quát](../../../interesting-files-permissions/selinux.md).
 
-## MCS Categories and Volume Relabeling
+## Danh mục MCS và gán lại nhãn volume
 
-Container isolation is normally a combination of **type enforcement** and **Multi-Category Security (MCS)**. Two processes may both run as `container_t`, but receive different levels such as `s0:c123,c456` and `s0:c321,c654`. Private container content is labeled `container_file_t` with the matching categories, so merely reaching another container's path is not enough to access it. Runtimes normally allocate the category pair; manually reusing a level deliberately collapses this per-container separation.<sup>[[3]](#references)</sup>
+Cơ chế cô lập container thường là sự kết hợp giữa **thực thi theo kiểu** và **Multi-Category Security (MCS)**. Hai tiến trình có thể cùng chạy dưới dạng `container_t`, nhưng được gán các mức khác nhau như `s0:c123,c456` và `s0:c321,c654`. Nội dung riêng tư của container được gán nhãn `container_file_t` cùng với các danh mục tương ứng, vì vậy chỉ tiếp cận được đường dẫn của container khác thì vẫn chưa đủ để truy cập nội dung đó. Runtime thường tự cấp cặp danh mục; việc chủ động dùng lại một mức sẽ làm mất sự phân tách riêng cho từng container.<sup>[[3]](#references)</sup>
 
-Compare the process and mount labels instead of checking only the type:<sup>[[3]](#references)</sup>
+Hãy so sánh nhãn tiến trình và nhãn mount thay vì chỉ kiểm tra kiểu:<sup>[[3]](#references)</sup>
 
 ```bash
 podman inspect --format 'process={{.ProcessLabel}} mount={{.MountLabel}}' <container>
@@ -59,34 +59,34 @@ ps -eZ | grep -E 'container_t|spc_t'
 ls -Zd /path/to/bind-mount
 ```
 
-Bind-mount suffixes change host inode labels and therefore change the security boundary, not just mount metadata:<sup>[[3]](#references)</sup>
+Các hậu tố bind-mount thay đổi nhãn inode trên host, do đó thay đổi ranh giới bảo mật chứ không chỉ siêu dữ liệu mount:<sup>[[3]](#references)</sup>
 
-- `:Z` applies a private label with the container's MCS categories. It is appropriate for a volume owned by one container or Pod.
-- `:z` applies a shared label so other confined containers can use the content too (subject to DAC permissions). Using it for secrets or tenant-specific data removes the MCS isolation that would otherwise separate containers.
-- Relabeling is recursive. Applying either option to broad host trees such as `/`, `/etc`, `/usr`, or an entire home tree can both expose content to the selected container and stop host services whose expected labels were replaced.
+- `:Z` áp dụng nhãn riêng tư với các danh mục MCS của container. Phù hợp với volume chỉ thuộc về một container hoặc Pod.
+- `:z` áp dụng nhãn dùng chung để các container bị giới hạn khác cũng có thể sử dụng nội dung (phụ thuộc vào quyền DAC). Dùng tùy chọn này cho secret hoặc dữ liệu dành riêng cho từng tenant sẽ loại bỏ cơ chế cô lập MCS vốn phân tách các container.
+- Việc gán lại nhãn được thực hiện đệ quy. Áp dụng một trong hai tùy chọn này cho các cây thư mục host rộng như `/`, `/etc`, `/usr` hoặc toàn bộ thư mục home có thể vừa làm lộ nội dung cho container được chọn, vừa khiến các dịch vụ host ngừng hoạt động do nhãn dự kiến của chúng bị thay thế.
 
-Manual level reuse is easy to spot in command lines and manifests. The following two containers intentionally receive the same MCS level and can therefore use content labeled for that level:<sup>[[3]](#references)</sup>
+Có thể dễ dàng nhận ra việc tái sử dụng level thủ công trong dòng lệnh và manifest. Hai container sau đây được chủ ý gán cùng một MCS level, do đó chúng có thể sử dụng nội dung được gắn nhãn cho level đó:<sup>[[3]](#references)</sup>
 
 ```bash
 podman run --security-opt label=level:s0:c100,c200 ...
 podman run --security-opt label=level:s0:c100,c200 ...
 ```
 
-Also distinguish `label=nested` from `label=disable`: the former exposes SELinux operations inside the container and permits label changes only where policy allows, while the latter removes label separation for that workload. Both deserve review, but they are not equivalent.<sup>[[3]](#references)</sup>
+Cũng cần phân biệt `label=nested` với `label=disable`: tùy chọn thứ nhất cho phép thực hiện các thao tác SELinux bên trong container và chỉ cho phép thay đổi nhãn ở những nơi policy cho phép, còn tùy chọn thứ hai loại bỏ sự phân tách bằng nhãn đối với workload đó. Cả hai đều cần được rà soát, nhưng không tương đương nhau.<sup>[[3]](#references)</sup>
 
-## Misconfigurations
+## Cấu hình sai
 
-The classic mistake is `label=disable`. Operationally, this often happens because a volume mount was denied and the quickest short-term answer was to remove SELinux from the equation instead of fixing the labeling model.<sup>[[1]](#references)</sup> Another common mistake is incorrect relabeling of host content. Broad relabel operations may make the application work, but they can also expand what the container is allowed to touch far beyond what was originally intended.
+Sai lầm kinh điển là dùng `label=disable`. Trên thực tế, việc này thường xảy ra vì một lần mount volume bị từ chối, và giải pháp nhanh nhất trước mắt là loại bỏ SELinux khỏi phương trình thay vì sửa mô hình gán nhãn.<sup>[[1]](#references)</sup> Một lỗi phổ biến khác là gán nhãn lại nội dung trên host không chính xác. Các thao tác gán nhãn lại trên diện rộng có thể giúp ứng dụng hoạt động, nhưng cũng có thể mở rộng đáng kể phạm vi dữ liệu container được phép truy cập so với dự định ban đầu.
 
-It is also important not to confuse **installed** SELinux with **effective** SELinux. A host may support SELinux and still be in permissive mode, or the runtime may not be launching the workload under the expected domain. In those cases the protection is much weaker than the documentation might suggest.
+Điều quan trọng nữa là không nhầm lẫn giữa SELinux **được cài đặt** và SELinux **đang có hiệu lực**. Host có thể hỗ trợ SELinux nhưng vẫn đang ở chế độ permissive, hoặc runtime có thể không chạy workload trong domain dự kiến. Trong những trường hợp đó, mức độ bảo vệ yếu hơn nhiều so với những gì tài liệu mô tả.
 
-## Abuse
+## Lạm dụng
 
-When SELinux is absent, permissive, or broadly disabled for the workload, host-mounted paths become much easier to abuse. The same bind mount that would otherwise have been constrained by labels may become a direct avenue to host data or host modification. This is especially relevant when combined with writable volume mounts, container runtime directories, or operational shortcuts that exposed sensitive host paths for convenience.
+Khi SELinux không có, ở chế độ permissive hoặc bị vô hiệu hóa trên diện rộng đối với workload, các đường dẫn được mount từ host sẽ dễ bị lạm dụng hơn nhiều. Bind mount vốn sẽ bị giới hạn bằng nhãn có thể trở thành lối truy cập trực tiếp vào dữ liệu trên host hoặc để sửa đổi host. Điều này đặc biệt đáng lưu ý khi kết hợp với các volume mount có quyền ghi, thư mục của container runtime hoặc những giải pháp tạm thời trong vận hành khiến các đường dẫn nhạy cảm trên host bị lộ ra để tiện sử dụng.
 
-SELinux often explains why a generic breakout writeup works immediately on one host but fails repeatedly on another even though the runtime flags look similar. The missing ingredient is frequently not a namespace or a capability at all, but a label boundary that stayed intact.
+SELinux thường giải thích vì sao một bài hướng dẫn breakout chung có thể hoạt động ngay trên host này nhưng liên tục thất bại trên host khác, dù các cờ runtime trông tương tự nhau. Yếu tố còn thiếu thường không phải namespace hay capability, mà là ranh giới nhãn vẫn còn nguyên vẹn.
 
-The fastest practical check is to compare the active context and then probe mounted host paths or runtime directories that would normally be label-confined:
+Cách kiểm tra thực tế nhanh nhất là đối chiếu context đang hoạt động, sau đó thăm dò các đường dẫn được mount từ host hoặc các thư mục runtime vốn thường bị giới hạn bằng nhãn:
 
 ```bash
 getenforce 2>/dev/null
@@ -95,7 +95,7 @@ find / -maxdepth 3 -name '*.sock' 2>/dev/null | grep -E 'docker|containerd|crio'
 find /host -maxdepth 2 -ls 2>/dev/null | head
 ```
 
-If a host bind mount is present and SELinux labeling has been disabled or weakened, information disclosure often comes first:
+Nếu có host bind mount và SELinux labeling bị vô hiệu hóa hoặc làm suy yếu, information disclosure thường xảy ra đầu tiên:
 
 ```bash
 ls -la /host/etc 2>/dev/null | head
@@ -103,25 +103,25 @@ cat /host/etc/passwd 2>/dev/null | head
 cat /host/etc/shadow 2>/dev/null | head
 ```
 
-If the mount is writable and the container is effectively host-root from the kernel's point of view, the next step is to test controlled host modification rather than guessing:
+Nếu mount có quyền ghi và từ góc độ kernel, container thực chất có quyền root trên host, bước tiếp theo là thử sửa đổi host có kiểm soát thay vì đoán mò:
 
 ```bash
 touch /host/tmp/selinux_test 2>/dev/null && echo "host write works"
 ls -l /host/tmp/selinux_test 2>/dev/null
 ```
 
-On SELinux-capable hosts, losing labels around runtime state directories can also expose direct privilege-escalation paths:
+Trên các host hỗ trợ SELinux, việc mất nhãn ở các thư mục trạng thái runtime cũng có thể làm lộ các đường dẫn leo thang đặc quyền trực tiếp:
 
 ```bash
 find /host/var/run /host/run -maxdepth 2 -name '*.sock' 2>/dev/null
 find /host/var/lib -maxdepth 3 \( -name docker -o -name containers -o -name containerd \) 2>/dev/null
 ```
 
-These commands do not replace a full escape chain, but they make it clear very quickly whether SELinux is what was preventing host data access or host-side file modification.
+Các lệnh này không thay thế cho một chuỗi escape hoàn chỉnh, nhưng giúp xác định rất nhanh liệu SELinux có phải là thứ ngăn truy cập dữ liệu trên host hoặc sửa đổi tệp phía host hay không.
 
-### Full Example: SELinux Disabled + Writable Host Mount
+### Ví dụ đầy đủ: SELinux bị vô hiệu hóa + mount host có quyền ghi
 
-If SELinux labeling is disabled and the host filesystem is mounted writable at `/host`, a full host escape becomes a normal bind-mount abuse case:
+Nếu tính năng gắn nhãn SELinux bị vô hiệu hóa và filesystem trên host được mount với quyền ghi tại `/host`, việc escape hoàn toàn ra host trở thành một trường hợp lạm dụng bind mount thông thường:
 
 ```bash
 getenforce 2>/dev/null
@@ -130,7 +130,7 @@ touch /host/tmp/selinux_escape_test
 chroot /host /bin/bash 2>/dev/null || /host/bin/bash -p
 ```
 
-If the `chroot` succeeds, the container process is now operating from the host filesystem:
+Nếu `chroot` thành công, tiến trình container hiện đang hoạt động từ hệ thống tệp của host:
 
 ```bash
 id
@@ -138,9 +138,9 @@ hostname
 cat /etc/passwd | tail
 ```
 
-### Full Example: SELinux Disabled + Runtime Directory
+### Ví dụ đầy đủ: SELinux bị vô hiệu hóa + Thư mục runtime
 
-If the workload can reach a runtime socket once labels are disabled, the escape can be delegated to the runtime:
+Nếu workload có thể truy cập socket runtime sau khi các nhãn bị vô hiệu hóa, có thể giao việc thoát khỏi container cho runtime:
 
 ```bash
 find /host/var/run /host/run -maxdepth 2 -name '*.sock' 2>/dev/null
@@ -148,11 +148,11 @@ docker -H unix:///host/var/run/docker.sock run --rm -it -v /:/mnt ubuntu chroot 
 ctr --address /host/run/containerd/containerd.sock images ls 2>/dev/null
 ```
 
-The relevant observation is that SELinux often was the control preventing exactly this kind of host-path or runtime-state access.
+Điều đáng chú ý là SELinux thường chính là cơ chế kiểm soát ngăn chặn kiểu truy cập vào đường dẫn trên host hoặc trạng thái runtime này.
 
-## Checks
+## Kiểm tra
 
-The goal of the SELinux checks is to confirm that SELinux is enabled, identify the current security context, and see whether the files or paths you care about are actually label-confined.
+Mục tiêu của các bước kiểm tra SELinux là xác nhận SELinux đang được bật, xác định security context hiện tại và xem các tệp hoặc đường dẫn bạn quan tâm có thực sự bị giới hạn bằng nhãn hay không.
 
 ```bash
 getenforce                              # Enforcing / Permissive / Disabled
@@ -161,30 +161,30 @@ ls -Z /path/of/interest                 # File or directory labels on sensitive 
 cat /proc/self/attr/current             # Current process security context
 ```
 
-What is interesting here:
+Điều đáng chú ý ở đây:
 
-- `getenforce` should ideally return `Enforcing`; `Permissive` or `Disabled` changes the meaning of the whole SELinux section.
-- If the current process context looks unexpected or too broad, the workload may not be running under the intended container policy.
-- If host-mounted files or runtime directories have labels that the process can access too freely, bind mounts become much more dangerous.
+- `getenforce` lý tưởng nhất nên trả về `Enforcing`; `Permissive` hoặc `Disabled` sẽ làm thay đổi ý nghĩa của toàn bộ phần SELinux.
+- Nếu context của process hiện tại trông bất thường hoặc quá rộng, workload có thể không chạy theo policy container dự kiến.
+- Nếu các file được mount từ host hoặc các thư mục runtime có label cho phép process truy cập quá tự do, bind mount sẽ trở nên nguy hiểm hơn nhiều.
 
-When reviewing a container on an SELinux-capable platform, do not treat labeling as a secondary detail. In many cases it is one of the main reasons the host is not already compromised.
+Khi xem xét container trên nền tảng hỗ trợ SELinux, đừng coi việc gán label là chi tiết thứ yếu. Trong nhiều trường hợp, đây là một trong những lý do chính khiến host chưa bị compromise.
 
-## Runtime Defaults
+## Mặc định của Runtime
 
-| Runtime / platform | Default state | Default behavior | Common manual weakening |
+| Runtime / nền tảng | Trạng thái mặc định | Hành vi mặc định | Cách nới lỏng phổ biến theo cách thủ công |
 | --- | --- | --- | --- |
-| Docker Engine | Host-dependent | SELinux separation is available on SELinux-enabled hosts, but the exact behavior depends on host/daemon configuration | `--security-opt label=disable`, broad relabeling of bind mounts, `--privileged` |
-| Podman | Commonly enabled on SELinux hosts | SELinux separation is a normal part of Podman on SELinux systems unless disabled | `--security-opt label=disable`, `label=false` in `containers.conf`, `--privileged` |
-| Kubernetes | Runtime-assigned on SELinux nodes; explicitly configurable | The runtime can allocate a unique label when the Pod does not set one. Explicit `securityContext.seLinuxOptions` controls the Pod/volume label; on Kubernetes 1.37, eligible volumes use SELinux mount labeling by default | duplicated MCS levels, permissive/disabled nodes, broad privileged workloads, indiscriminate `seLinuxChangePolicy: Recursive` <sup>[[2]](#references)[[4]](#references)</sup> |
-| CRI-O / OpenShift style deployments | Commonly relied on heavily | SELinux is often a core part of the node isolation model in these environments | custom policies that over-broaden access, disabling labeling for compatibility |
+| Docker Engine | Phụ thuộc vào host | Có thể tách biệt bằng SELinux trên các host bật SELinux, nhưng hành vi cụ thể phụ thuộc vào cấu hình host/daemon | `--security-opt label=disable`, gán lại label trên diện rộng cho bind mount, `--privileged` |
+| Podman | Thường được bật trên các host SELinux | Tách biệt bằng SELinux là tính năng thông thường của Podman trên các hệ thống SELinux, trừ khi bị tắt | `--security-opt label=disable`, `label=false` trong `containers.conf`, `--privileged` |
+| Kubernetes | Runtime gán trên các node SELinux; có thể cấu hình rõ ràng | Runtime có thể cấp label riêng khi Pod không đặt label. `securityContext.seLinuxOptions` được cấu hình tường minh sẽ kiểm soát label của Pod/volume; trên Kubernetes 1.37, các volume đủ điều kiện mặc định sử dụng SELinux mount labeling | MCS level bị trùng lặp, node ở chế độ permissive/disabled, workload đặc quyền trên diện rộng, áp dụng `seLinuxChangePolicy: Recursive` bừa bãi <sup>[[2]](#references)[[4]](#references)</sup> |
+| Các triển khai kiểu CRI-O / OpenShift | Thường được dựa vào rất nhiều | SELinux thường là phần cốt lõi của mô hình cô lập node trong các môi trường này | Policy tùy chỉnh mở rộng quyền truy cập quá mức, tắt labeling để tương thích |
 
-SELinux defaults are more distribution-dependent than seccomp defaults. On Fedora/RHEL/OpenShift-style systems, SELinux is often central to the isolation model. On non-SELinux systems, it is simply absent.
+Mặc định của SELinux phụ thuộc vào bản phân phối nhiều hơn so với mặc định của seccomp. Trên các hệ thống kiểu Fedora/RHEL/OpenShift, SELinux thường là phần cốt lõi của mô hình cô lập. Trên các hệ thống không có SELinux, tính năng này đơn giản là không tồn tại.
 
-## Kubernetes 1.37 Volume Labeling
+## Gán Label Volume trên Kubernetes 1.37
 
-Kubernetes 1.37 made `SELinuxMount` stable and enabled it by default. For an eligible PVC, a Pod with `seLinuxOptions`, and a CSI driver advertising `.spec.seLinuxMount: true`, kubelet uses `-o context=<label>` instead of asking the runtime to recursively relabel every inode. Unsupported drivers and volume types still use the recursive path. This avoids a large relabel walk and also avoids changing the persistent labels of every file merely to expose the volume to a Pod.<sup>[[2]](#references)[[4]](#references)</sup>
+Kubernetes 1.37 đưa `SELinuxMount` lên trạng thái stable và bật tính năng này theo mặc định. Với PVC đủ điều kiện, Pod có `seLinuxOptions` và CSI driver khai báo `.spec.seLinuxMount: true`, kubelet sử dụng `-o context=<label>` thay vì yêu cầu runtime gán lại label đệ quy cho mọi inode. Các driver và loại volume không được hỗ trợ vẫn dùng phương thức đệ quy. Cách này tránh phải duyệt để gán lại label trên diện rộng, đồng thời tránh thay đổi label persistent của mọi file chỉ để cung cấp volume cho Pod.<sup>[[2]](#references)[[4]](#references)</sup>
 
-A mount can carry only one such context. Consequently, Pods with **different SELinux labels** that use the same eligible volume on the same node no longer coexist under the default `MountOption` behavior: one remains in `ContainerCreating` with a `conflicting SELinux labels of volume` error. Treat this as both an availability issue and a useful indication that workloads were implicitly sharing storage across MCS boundaries. If that sharing is intentional—for example, a privileged `spc_t` Pod and a confined Pod using the same volume—the per-Pod compatibility escape hatch is `seLinuxChangePolicy: Recursive`; do not apply it cluster-wide without understanding which paths the runtime will relabel.<sup>[[2]](#references)[[4]](#references)</sup>
+Một mount chỉ có thể mang một context như vậy. Do đó, theo hành vi `MountOption` mặc định, các Pod có **SELinux label khác nhau** dùng chung một volume đủ điều kiện trên cùng node sẽ không thể cùng hoạt động: một Pod sẽ vẫn ở trạng thái `ContainerCreating` với lỗi `conflicting SELinux labels of volume`. Hãy xem đây vừa là vấn đề về tính sẵn sàng, vừa là dấu hiệu hữu ích cho thấy các workload đã ngầm chia sẻ storage qua các ranh giới MCS. Nếu việc chia sẻ đó là có chủ ý — ví dụ, một Pod đặc quyền `spc_t` và một Pod bị giới hạn cùng dùng một volume — tùy chọn bỏ qua để đảm bảo tương thích ở cấp Pod là `seLinuxChangePolicy: Recursive`; đừng áp dụng tùy chọn này trên toàn cluster nếu chưa hiểu runtime sẽ gán lại label cho những đường dẫn nào.<sup>[[2]](#references)[[4]](#references)</sup>
 
 ```yaml
 spec:
@@ -194,7 +194,7 @@ spec:
     seLinuxChangePolicy: Recursive
 ```
 
-Useful cluster-side checks:<sup>[[2]](#references)</sup>
+Các bước kiểm tra hữu ích từ phía cluster:<sup>[[2]](#references)</sup>
 
 ```bash
 # Drivers that opt in to -o context= volume mounts
@@ -214,13 +214,12 @@ kubectl get events -A --sort-by=.lastTimestamp |
   grep -Ei 'SELinux|conflicting SELinux labels'
 ```
 
-The optional kube-controller-manager `selinux-warning-controller` detects Pods that share a volume with incompatible labels and exposes the `selinux_warning_controller_selinux_volume_conflict` metric. Enable and review it before upgrades or before changing volume-label behavior; it helps distinguish a genuine policy conflict from an ordinary CSI or filesystem failure.<sup>[[2]](#references)</sup>
+Bộ điều khiển `selinux-warning-controller` tùy chọn của kube-controller-manager phát hiện các Pod dùng chung volume nhưng có nhãn không tương thích và cung cấp metric `selinux_warning_controller_selinux_volume_conflict`. Hãy bật và kiểm tra bộ điều khiển này trước khi nâng cấp hoặc thay đổi cách gán nhãn volume; nó giúp phân biệt xung đột policy thực sự với lỗi CSI hoặc hệ thống tệp thông thường.<sup>[[2]](#references)</sup>
 
 ## References
 
-- [1] [Podman Documentation: --security-opt=option (label=disable)](https://docs.podman.io/en/v4.6.0/markdown/options/security-opt.html)
-- [2] [Kubernetes: Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
-- [3] [Podman run documentation: SELinux labels and volume relabeling](https://docs.podman.io/en/latest/markdown/podman-run.1.html)
-- [4] [Kubernetes v1.37 release: SELinuxMount and SELinuxChangePolicy](https://kubernetes.io/blog/2026/08/26/kubernetes-v1-37-release/)
-
+- [1] [Tài liệu Podman: --security-opt=option (label=disable)](https://docs.podman.io/en/v4.6.0/markdown/options/security-opt.html)
+- [2] [Kubernetes: Cấu hình Security Context cho Pod hoặc Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [3] [Tài liệu lệnh podman run: Nhãn SELinux và gán lại nhãn volume](https://docs.podman.io/en/latest/markdown/podman-run.1.html)
+- [4] [Bản phát hành Kubernetes v1.37: SELinuxMount và SELinuxChangePolicy](https://kubernetes.io/blog/2026/08/26/kubernetes-v1-37-release/)
 {{#include ../../../../banners/hacktricks-training.md}}

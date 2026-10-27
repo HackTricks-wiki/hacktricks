@@ -1,34 +1,34 @@
-# Runtime Authorization Plugins
+# Plugin Ủy quyền Runtime
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Overview
+## Tổng quan
 
-Runtime authorization plugins are an extra policy layer that decides whether a caller may perform a given daemon action. Docker is the classic example. By default, anyone who can talk to the Docker daemon effectively has broad control over it. Authorization plugins try to narrow that model by examining the authenticated user and the requested API operation, then allowing or denying the request according to policy.
+Plugin ủy quyền Runtime là một lớp chính sách bổ sung quyết định liệu một caller có thể thực hiện một hành động nhất định trên daemon hay không. Docker là ví dụ điển hình. Theo mặc định, bất kỳ ai có thể giao tiếp với Docker daemon đều có quyền kiểm soát rộng đối với daemon này. Plugin ủy quyền cố gắng giới hạn mô hình đó bằng cách kiểm tra người dùng đã xác thực và thao tác API được yêu cầu, sau đó cho phép hoặc từ chối yêu cầu theo chính sách.
 
-This topic deserves its own page because it changes the exploitation model when an attacker already has access to a Docker API or to a user in the `docker` group. In such environments the question is no longer only "can I reach the daemon?" but also "is the daemon fenced by an authorization layer, and if so, can that layer be bypassed through unhandled endpoints, weak JSON parsing, or plugin-management permissions?"
+Chủ đề này cần có trang riêng vì nó làm thay đổi mô hình khai thác khi attacker đã có quyền truy cập vào Docker API hoặc là người dùng thuộc nhóm `docker`. Trong những môi trường như vậy, câu hỏi không chỉ còn là "tôi có thể truy cập daemon không?" mà còn là "daemon có được bảo vệ bởi một lớp ủy quyền không, và nếu có thì có thể bypass lớp đó qua các endpoint chưa được xử lý, phân tích JSON yếu hoặc quyền quản lý plugin không?"
 
-## Operation
+## Cách hoạt động
 
-When a request reaches the Docker daemon, the authorization subsystem can pass the request context to one or more installed plugins. The plugin sees the authenticated user identity, the request details, selected headers, and parts of the request or response body when the content type is suitable. Multiple plugins can be chained, and access is granted only if all plugins allow the request.
+Khi một yêu cầu đến Docker daemon, hệ thống ủy quyền có thể chuyển ngữ cảnh yêu cầu đến một hoặc nhiều plugin đã cài đặt. Plugin nhận diện danh tính người dùng đã xác thực, thông tin chi tiết của yêu cầu, các header được chọn và một phần nội dung request hoặc response khi content type phù hợp. Có thể xâu chuỗi nhiều plugin, và quyền truy cập chỉ được cấp nếu tất cả plugin đều cho phép yêu cầu.
 
-This model sounds strong, but its safety depends entirely on how completely the policy author understood the API. A plugin that blocks `docker run --privileged` but ignores `docker exec`, misses alternate JSON keys such as top-level `Binds`, or allows plugin administration may create a false sense of restriction while still leaving direct privilege-escalation paths open.
+Mô hình này nghe có vẻ vững chắc, nhưng độ an toàn hoàn toàn phụ thuộc vào mức độ đầy đủ trong hiểu biết của người viết chính sách về API. Một plugin chặn `docker run --privileged` nhưng bỏ qua `docker exec`, bỏ sót các khóa JSON thay thế như `Binds` ở cấp cao nhất hoặc cho phép quản trị plugin có thể tạo cảm giác hạn chế sai lệch, trong khi vẫn để ngỏ các đường dẫn leo thang đặc quyền trực tiếp.
 
-## Common Plugin Targets
+## Các mục tiêu plugin phổ biến
 
-Important areas for policy review are:
+Các khu vực quan trọng cần rà soát chính sách gồm:
 
-- container creation endpoints
-- `HostConfig` fields such as `Binds`, `Mounts`, `Privileged`, `CapAdd`, `PidMode`, and namespace-sharing options
-- `docker exec` behavior
-- plugin management endpoints
-- any endpoint that can indirectly trigger runtime actions outside the intended policy model
+- các endpoint tạo container
+- các trường `HostConfig` như `Binds`, `Mounts`, `Privileged`, `CapAdd`, `PidMode` và các tùy chọn chia sẻ namespace
+- hành vi của `docker exec`
+- các endpoint quản lý plugin
+- mọi endpoint có thể gián tiếp kích hoạt hành động runtime nằm ngoài mô hình chính sách dự kiến
 
-Historically, examples such as Twistlock's `authz` plugin and simple educational plugins such as `authobot` made this model easy to study because their policy files and code paths showed how endpoint-to-action mapping was actually implemented. For assessment work, the important lesson is that the policy author must understand the full API surface rather than only the most visible CLI commands.
+Trong lịch sử, các ví dụ như plugin `authz` của Twistlock và các plugin mang tính giáo dục đơn giản như `authobot` giúp việc nghiên cứu mô hình này trở nên dễ dàng, vì các tệp chính sách và luồng xử lý trong mã cho thấy cách ánh xạ endpoint sang hành động được triển khai trên thực tế. Khi đánh giá, bài học quan trọng là người viết chính sách phải hiểu toàn bộ bề mặt API, không chỉ các lệnh CLI dễ thấy nhất.
 
-## Abuse
+## Lạm dụng
 
-The first goal is to learn what is actually blocked. If the daemon denies an action, the error often leaks the plugin name, which helps identify the control in use:
+Mục tiêu đầu tiên là tìm hiểu chính xác những gì bị chặn. Nếu daemon từ chối một hành động, lỗi thường leaks tên plugin, giúp xác định biện pháp kiểm soát đang được sử dụng:
 
 ```bash
 docker ps
@@ -36,9 +36,9 @@ docker run --rm -it --privileged ubuntu:24.04 bash
 docker plugin ls
 ```
 
-If you need broader endpoint profiling, tools such as `docker_auth_profiler` are useful because they automate the otherwise repetitive task of checking which API routes and JSON structures are really permitted by the plugin.
+Nếu cần lập hồ sơ endpoint rộng hơn, các công cụ như `docker_auth_profiler` rất hữu ích vì chúng tự động hóa việc kiểm tra vốn lặp đi lặp lại nhằm xác định chính xác những API route và cấu trúc JSON nào được plugin cho phép.
 
-If the environment uses a custom plugin and you can interact with the API, enumerate which object fields are really filtered:
+Nếu môi trường sử dụng plugin tùy chỉnh và bạn có thể tương tác với API, hãy liệt kê những trường đối tượng nào thực sự bị lọc:
 
 ```bash
 docker version
@@ -47,11 +47,11 @@ curl --unix-socket /var/run/docker.sock http:/version
 curl --unix-socket /var/run/docker.sock http:/v1.41/containers/json
 ```
 
-These checks matter because many authorization failures are field-specific rather than concept-specific. A plugin may reject a CLI pattern without fully blocking the equivalent API structure.
+Các kiểm tra này quan trọng vì nhiều lỗi ủy quyền liên quan đến từng trường cụ thể, chứ không phải đến khái niệm. Plugin có thể từ chối một mẫu CLI nhưng không chặn hoàn toàn cấu trúc API tương đương.
 
-### Full Example: `docker exec` Adds Privilege After Container Creation
+### Ví dụ đầy đủ: `docker exec` thêm quyền sau khi tạo container
 
-A policy that blocks privileged container creation but allows unconfined container creation plus `docker exec` may still be bypassed:
+Một policy chặn việc tạo container ở chế độ privileged nhưng cho phép tạo container unconfined kết hợp với `docker exec` vẫn có thể bị bypass:
 
 ```bash
 docker run -d --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu:24.04 sleep infinity
@@ -59,15 +59,15 @@ docker ps
 docker exec -it --privileged <container_id> bash
 ```
 
-If the daemon accepts the second step, the user has recovered a privileged interactive process inside a container the policy author believed was constrained.
+Nếu daemon chấp nhận bước thứ hai, người dùng đã khôi phục được một tiến trình tương tác có đặc quyền bên trong container mà tác giả policy tin rằng đã bị giới hạn.
 
-A restricted `sudo` rule can expose the same route even when the caller cannot access the Docker socket directly. For example, a root-capable `/usr/bin/docker exec *` grant may let the caller supply Docker's `--privileged` and `--user root` options. A running container is still required; on some Linux hosts its ID is visible in a `containerd-shim` process command line when `docker ps` is denied. Treat the rule as a review lead: confirm the effective sudo policy, the daemon's authorization controls, user namespaces, and whether the resulting process can reach a host device or writable host mount. Docker documents the exec options in its [CLI reference](https://docs.docker.com/reference/cli/docker/container/exec/).
+Một quy tắc `sudo` bị hạn chế cũng có thể mở ra cùng con đường này, ngay cả khi caller không thể truy cập trực tiếp Docker socket. Ví dụ, quyền chạy `/usr/bin/docker exec *` với quyền root có thể cho phép caller cung cấp các tùy chọn `--privileged` và `--user root` của Docker. Vẫn cần có một container đang chạy; trên một số máy chủ Linux, ID của nó hiển thị trong dòng lệnh của tiến trình `containerd-shim` khi lệnh `docker ps` bị từ chối. Hãy xem quy tắc này là một đầu mối cần kiểm tra: xác nhận policy sudo có hiệu lực, các biện pháp kiểm soát authorization của daemon, user namespace và liệu tiến trình được tạo ra có thể truy cập thiết bị trên host hoặc mount trên host có quyền ghi hay không. Docker mô tả các tùy chọn exec trong [tài liệu tham chiếu CLI](https://docs.docker.com/reference/cli/docker/container/exec/).
 
-A root-run wrapper that accepts a caller-chosen Compose file needs to validate the entire [Compose service model](https://docs.docker.com/reference/compose-file/services/), not just reject `privileged: true` and require `:ro` on bind mounts. Review `cap_add`, `security_opt`, devices, namespaces, build inputs, and every supported volume syntax. A read-only bind mount may still become writable from inside a container with suitable capabilities and relaxed security confinement, depending on daemon and kernel policy. Prefix-only host-path allowlists and symlink checks on the final path component also need review. A sudo rule and a literal `docker-compose up` call identify a candidate; the wrapper's effective validation and runtime daemon restrictions determine whether it is exploitable.
+Một wrapper chạy bằng quyền root nhưng chấp nhận file Compose do caller chọn cần xác thực toàn bộ [mô hình service của Compose](https://docs.docker.com/reference/compose-file/services/), chứ không chỉ từ chối `privileged: true` và yêu cầu `:ro` trên các bind mount. Hãy kiểm tra `cap_add`, `security_opt`, thiết bị, namespace, đầu vào build và mọi cú pháp volume được hỗ trợ. Tùy theo policy của daemon và kernel, bind mount chỉ đọc vẫn có thể trở thành có quyền ghi từ bên trong container nếu container có capability phù hợp và các biện pháp cô lập bảo mật được nới lỏng. Các allowlist đường dẫn host chỉ kiểm tra tiền tố và việc kiểm tra symlink ở thành phần cuối của đường dẫn cũng cần được xem xét. Một quy tắc sudo và lời gọi `docker-compose up` nguyên văn chỉ giúp xác định một trường hợp tiềm năng; khả năng khai thác phụ thuộc vào việc xác thực thực tế của wrapper và các hạn chế của daemon khi chạy.
 
-### Full Example: Bind Mount Through Raw API
+### Ví dụ đầy đủ: Bind Mount Qua API Thô
 
-Some broken policies inspect only one JSON shape. If the root filesystem bind mount is not blocked consistently, the host can still be mounted:
+Một số policy lỗi chỉ kiểm tra một dạng JSON duy nhất. Nếu bind mount của root filesystem không bị chặn một cách nhất quán, host vẫn có thể được mount:
 
 ```bash
 docker version
@@ -79,7 +79,7 @@ docker start <container_id>
 docker exec -it <container_id> chroot /host /bin/bash
 ```
 
-The same idea may also appear under `HostConfig`:
+Ý tưởng tương tự cũng có thể xuất hiện trong `HostConfig`:
 
 ```bash
 curl --unix-socket /var/run/docker.sock \
@@ -88,11 +88,11 @@ curl --unix-socket /var/run/docker.sock \
   http:/v1.41/containers/create
 ```
 
-The impact is a full host filesystem escape. The interesting detail is that the bypass comes from incomplete policy coverage rather than from a kernel bug.
+Tác động là thoát hoàn toàn khỏi filesystem của host. Chi tiết đáng chú ý là bypass xuất phát từ việc policy bao phủ chưa đầy đủ, chứ không phải từ lỗi kernel.
 
-### Full Example: Unchecked Capability Attribute
+### Ví dụ đầy đủ: Thuộc tính Capability không được kiểm tra
 
-If the policy forgets to filter a capability-related attribute, the attacker may create a container that regains a dangerous capability:
+Nếu policy quên lọc một thuộc tính liên quan đến capability, attacker có thể tạo một container lấy lại được capability nguy hiểm:
 
 ```bash
 curl --unix-socket /var/run/docker.sock \
@@ -104,11 +104,11 @@ docker exec -it <container_id> bash
 capsh --print
 ```
 
-Once `CAP_SYS_ADMIN` or a similarly strong capability is present, many breakout techniques described in [capabilities.md](protections/capabilities.md) and [privileged-containers.md](privileged-containers.md) become reachable.
+Khi có `CAP_SYS_ADMIN` hoặc một capability mạnh tương tự, có thể thực hiện nhiều kỹ thuật breakout được mô tả trong [capabilities.md](protections/capabilities.md) và [privileged-containers.md](privileged-containers.md).
 
-### Full Example: Disabling The Plugin
+### Ví dụ đầy đủ: Tắt plugin
 
-If plugin-management operations are allowed, the cleanest bypass may be to turn the control off entirely:
+Nếu được phép thực hiện các thao tác quản lý plugin, cách bypass gọn nhất có thể là tắt hẳn cơ chế kiểm soát này:
 
 ```bash
 docker plugin ls
@@ -117,11 +117,11 @@ docker run --rm -it --privileged -v /:/host ubuntu:24.04 chroot /host /bin/bash
 docker plugin enable <plugin_name>
 ```
 
-This is a policy failure at the control-plane level. The authorization layer exists, but the user it was supposed to restrict still retains permission to disable it.
+Đây là lỗi chính sách ở cấp control-plane. Lớp authorization tồn tại, nhưng người dùng mà nó được cho là sẽ hạn chế vẫn có quyền vô hiệu hóa lớp này.
 
-## Checks
+## Kiểm tra
 
-These commands are aimed at identifying whether a policy layer exists and whether it seems to be complete or superficial.
+Các lệnh này nhằm xác định xem có lớp chính sách hay không, và liệu lớp đó có vẻ hoàn chỉnh hay chỉ mang tính hình thức.
 
 ```bash
 docker plugin ls
@@ -130,19 +130,19 @@ docker run --rm -it --privileged ubuntu:24.04 bash
 curl --unix-socket /var/run/docker.sock http:/v1.41/plugins 2>/dev/null
 ```
 
-What is interesting here:
+Điều gì đáng chú ý ở đây:
 
-- Denial messages that include a plugin name confirm an authorization layer and often reveal the exact implementation.
-- A plugin list visible to the attacker may be enough to discover whether disable or reconfigure operations are possible.
-- A policy that blocks only obvious CLI actions but not raw API requests should be treated as bypassable until proven otherwise.
+- Thông báo từ chối có tên plugin xác nhận có lớp phân quyền và thường tiết lộ chính xác cách triển khai.
+- Danh sách plugin mà attacker nhìn thấy có thể đủ để xác định liệu có thể thực hiện các thao tác vô hiệu hóa hoặc cấu hình lại hay không.
+- Một policy chỉ chặn các thao tác CLI hiển nhiên nhưng không chặn các yêu cầu API thô thì nên được xem là có thể bypass cho đến khi chứng minh được điều ngược lại.
 
-## Runtime Defaults
+## Mặc định của Runtime
 
-| Runtime / platform | Default state | Default behavior | Common manual weakening |
+| Runtime / nền tảng | Trạng thái mặc định | Hành vi mặc định | Các cách làm suy yếu phổ biến |
 | --- | --- | --- | --- |
-| Docker Engine | Not enabled by default | Daemon access is effectively all-or-nothing unless an authorization plugin is configured | incomplete plugin policy, blacklists instead of allowlists, allowing plugin management, field-level blind spots |
-| Podman | Not a common direct equivalent | Podman typically relies more on Unix permissions, rootless execution, and API exposure decisions than on Docker-style authz plugins | exposing a rootful Podman API broadly, weak socket permissions |
-| containerd / CRI-O | Different control model | These runtimes usually rely on socket permissions, node trust boundaries, and higher-layer orchestrator controls rather than Docker authz plugins | mounting the socket into workloads, weak node-local trust assumptions |
-| Kubernetes | Uses authn/authz at the API-server and kubelet layers, not Docker authz plugins | Cluster RBAC and admission controls are the main policy layer | overbroad RBAC, weak admission policy, exposing kubelet or runtime APIs directly |
+| Docker Engine | Không được bật theo mặc định | Quyền truy cập daemon về cơ bản là được toàn quyền hoặc không có quyền nào, trừ khi đã cấu hình authorization plugin | policy plugin không đầy đủ, dùng blacklist thay vì allowlist, cho phép quản lý plugin, điểm mù ở cấp trường |
+| Podman | Không có giải pháp tương đương trực tiếp phổ biến | Podman thường dựa nhiều hơn vào quyền Unix, thực thi rootless và các quyết định về việc để lộ API thay vì authz plugin kiểu Docker | để lộ rộng rãi API Podman chạy root, quyền socket yếu |
+| containerd / CRI-O | Mô hình kiểm soát khác | Các runtime này thường dựa vào quyền socket, ranh giới tin cậy của node và các biện pháp kiểm soát ở tầng orchestrator cao hơn thay vì Docker authz plugin | mount socket vào workload, các giả định tin cậy cục bộ trên node yếu |
+| Kubernetes | Sử dụng authn/authz ở các tầng API-server và kubelet, không dùng Docker authz plugin | RBAC của cluster và các biện pháp kiểm soát admission là tầng policy chính | RBAC quá rộng, policy admission yếu, để lộ trực tiếp API kubelet hoặc runtime |
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,20 +1,20 @@
-# Image Security, Signing, And Secrets
+# Bảo mật Image, ký và secrets
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Overview
+## Tổng quan
 
-Container security starts before the workload is launched. The image determines which binaries, interpreters, libraries, startup scripts, and embedded configuration reach production. If the image is backdoored, stale, or built with secrets baked into it, the runtime hardening that follows is already operating on a compromised artifact. <sup>[[1]](#references)</sup>
+Bảo mật container bắt đầu trước khi workload được khởi chạy. Image quyết định những binary, trình thông dịch, thư viện, script khởi động và cấu hình nhúng nào sẽ được đưa vào production. Nếu image bị cài backdoor, lỗi thời hoặc được build với secrets nhúng sẵn, thì các biện pháp hardening ở runtime sau đó đã phải hoạt động trên một artifact bị xâm phạm. <sup>[[1]](#references)</sup>
 
-This is why image provenance, vulnerability scanning, signature verification, and secret handling belong in the same conversation as namespaces and seccomp. They protect a different phase of the lifecycle, but failures here often define the attack surface the runtime later has to contain.
+Đó là lý do provenance của image, quét lỗ hổng, xác minh chữ ký và xử lý secrets cần được xem xét cùng với namespaces và seccomp. Chúng bảo vệ một giai đoạn khác trong vòng đời, nhưng các lỗi ở đây thường xác định attack surface mà runtime sau đó phải hạn chế.
 
-## Image Registries And Trust
+## Registry Image Và Mức Độ Tin Cậy
 
-Images may come from public registries such as Docker Hub or from private registries operated by an organization. The security question is not simply where the image lives, but whether the team can establish provenance and integrity. Pulling unsigned or poorly tracked images from public sources increases the risk of malicious or tampered content entering production. Even internally hosted registries need clear ownership, review, and trust policy.
+Image có thể đến từ các registry công khai như Docker Hub hoặc từ registry riêng do một tổ chức vận hành. Câu hỏi về bảo mật không chỉ đơn giản là image được lưu ở đâu, mà là nhóm có thể xác định provenance và tính toàn vẹn của image hay không. Việc kéo các image chưa được ký hoặc không được theo dõi chặt chẽ từ các nguồn công khai làm tăng nguy cơ nội dung độc hại hoặc bị sửa đổi lọt vào production. Ngay cả registry nội bộ cũng cần có quyền sở hữu, quy trình xem xét và chính sách tin cậy rõ ràng.
 
-Docker Content Trust historically used Notary and TUF concepts to require signed images. Docker is retiring that implementation, so new deployments should use a current signing and verification workflow instead of starting a new DCT deployment. The enduring lesson remains useful: image identity and integrity should be verifiable rather than assumed. <sup>[[2]](#references)</sup>
+Trước đây, Docker Content Trust sử dụng các khái niệm Notary và TUF để yêu cầu image được ký. Docker đang ngừng triển khai này, vì vậy các môi trường triển khai mới nên dùng quy trình ký và xác minh hiện hành thay vì bắt đầu triển khai DCT mới. Bài học lâu dài vẫn hữu ích: cần xác minh được danh tính và tính toàn vẹn của image, thay vì mặc định tin tưởng. <sup>[[2]](#references)</sup>
 
-Example historical Docker Content Trust workflow:
+Ví dụ về quy trình Docker Content Trust trước đây:
 
 ```bash
 export DOCKER_CONTENT_TRUST=1
@@ -22,13 +22,13 @@ docker pull nginx:latest
 tar -zcvf private_keys_backup.tar.gz ~/.docker/trust/private
 ```
 
-The point of the example is not that every team must still use the same tooling, but that signing and key management are operational tasks, not abstract theory.
+Mục đích của ví dụ không phải là mọi nhóm đều phải tiếp tục sử dụng cùng một bộ công cụ, mà là việc ký và quản lý khóa là những công việc vận hành, không phải lý thuyết trừu tượng.
 
-## Vulnerability Scanning
+## Quét lỗ hổng
 
-Image scanning helps answer two different questions. First, does the image contain known vulnerable packages or libraries? Second, does the image carry unnecessary software that expands the attack surface? An image full of debugging tools, shells, interpreters, and stale packages is both easier to exploit and harder to reason about. <sup>[[3]](#references)</sup>
+Quét image giúp trả lời hai câu hỏi khác nhau. Thứ nhất, image có chứa các package hoặc thư viện đã biết là có lỗ hổng không? Thứ hai, image có mang theo phần mềm không cần thiết làm mở rộng bề mặt tấn công không? Một image chứa đầy công cụ gỡ lỗi, shell, trình thông dịch và package lỗi thời vừa dễ bị khai thác hơn, vừa khó đánh giá hơn. <sup>[[3]](#references)</sup>
 
-Examples of commonly used scanners include:
+Một số công cụ quét thường được sử dụng gồm:
 
 ```bash
 docker scan hello-world
@@ -37,26 +37,26 @@ snyk container test nginx:latest --severity-threshold=high
 clair-scanner -w example-alpine.yaml --ip YOUR_LOCAL_IP alpine:3.5
 ```
 
-Results from these tools should be interpreted carefully. A vulnerability in an unused package is not identical in risk to an exposed RCE path, but both are still relevant to hardening decisions.
+Kết quả từ các công cụ này cần được diễn giải cẩn thận. Lỗ hổng trong một package không được sử dụng không có mức độ rủi ro giống với một đường dẫn RCE bị lộ, nhưng cả hai vẫn cần được cân nhắc khi đưa ra quyết định hardening.
 
-## Build-Time Secrets
+## Secrets trong quá trình build
 
-One of the oldest mistakes in container build pipelines is embedding secrets directly into the image or passing them through build arguments or environment variables. Depending on the mechanism, those values may persist in image metadata or recoverable layers, appear in build logs, or become visible through inspection commands such as `docker inspect`. Build-time secrets should be mounted ephemerally during the build rather than copied into the image filesystem. <sup>[[4]](#references)</sup>
+Một trong những sai lầm lâu đời nhất trong các build pipeline của container là nhúng secrets trực tiếp vào image hoặc truyền chúng qua build arguments hay environment variables. Tùy thuộc vào cơ chế, những giá trị đó có thể tồn tại trong metadata của image hoặc các layer có thể khôi phục, xuất hiện trong build logs hoặc bị lộ qua các lệnh kiểm tra như `docker inspect`. Secrets trong quá trình build nên được mount tạm thời trong lúc build thay vì được sao chép vào filesystem của image. <sup>[[4]](#references)</sup>
 
-BuildKit improved this model by allowing dedicated build-time secret handling. Instead of writing a secret into a layer, the build step can consume it transiently:
+BuildKit cải thiện mô hình này bằng cách cho phép xử lý secrets chuyên dụng trong quá trình build. Thay vì ghi secret vào một layer, bước build có thể sử dụng nó tạm thời:
 
 ```bash
 export DOCKER_BUILDKIT=1
 docker build --secret id=my_key,src=path/to/my_secret_file .
 ```
 
-This matters because image layers are durable artifacts. Once a secret enters a committed layer, later deleting the file in another layer does not truly remove the original disclosure from the image history.
+Điều này quan trọng vì các layer của image là những artifact tồn tại lâu dài. Khi một secret đã được đưa vào một layer đã commit, việc xóa tệp đó ở một layer khác về sau không thực sự loại bỏ thông tin bị lộ ban đầu khỏi lịch sử image.
 
-## Runtime Secrets
+## Secrets khi chạy
 
-Secrets needed by a running workload should also avoid ad hoc patterns such as plain environment variables whenever possible. Volumes, dedicated secret-management integrations, Docker secrets, and Kubernetes Secrets are common mechanisms. None of these removes all risk, especially if the attacker already has code execution in the workload, but they are still preferable to storing credentials permanently in the image or exposing them casually through inspection tooling. <sup>[[5]](#references)</sup>
+Các secret cần thiết cho workload đang chạy cũng nên tránh những cách làm tùy tiện như dùng biến môi trường thuần bất cứ khi nào có thể. Volume, các tích hợp quản lý secret chuyên dụng, Docker secrets và Kubernetes Secrets là những cơ chế phổ biến. Không cơ chế nào loại bỏ mọi rủi ro, đặc biệt nếu attacker đã thực thi được mã trong workload, nhưng chúng vẫn tốt hơn việc lưu thông tin xác thực vĩnh viễn trong image hoặc để lộ chúng một cách dễ dãi qua các công cụ kiểm tra. <sup>[[5]](#references)</sup>
 
-A simple Docker Compose style secret declaration looks like:
+Một khai báo secret theo kiểu Docker Compose đơn giản trông như sau:
 
 ```yaml
 version: "3.7"
@@ -71,11 +71,11 @@ secrets:
     file: ./my_secret_file.txt
 ```
 
-In Kubernetes, Secret objects, projected volumes, service-account tokens, and cloud workload identities create a broader and more powerful model, but they also create more opportunities for accidental exposure through host mounts, broad RBAC, or weak Pod design.
+Trong Kubernetes, các đối tượng Secret, volume được chiếu, token service account và danh tính workload trên cloud tạo nên một mô hình rộng hơn và mạnh mẽ hơn, nhưng chúng cũng tạo thêm nhiều cơ hội vô tình để lộ thông tin qua các mount trên host, RBAC quá rộng hoặc thiết kế Pod yếu.
 
-## Abuse
+## Lạm dụng
 
-When reviewing a target, the aim is to discover whether secrets were baked into the image, leaked into layers, or mounted into predictable runtime locations:
+Khi đánh giá mục tiêu, mục đích là xác định liệu secret có được đóng gói sẵn trong image, bị rò rỉ vào các layer hay được mount vào những vị trí runtime dễ đoán hay không:
 
 ```bash
 env | grep -iE 'secret|token|key|passwd|password'
@@ -83,11 +83,11 @@ find / -maxdepth 4 \( -iname '*.env' -o -iname '*secret*' -o -iname '*token*' \)
 grep -RniE 'secret|token|apikey|password' /app /srv /usr/src 2>/dev/null | head -n 100
 ```
 
-These commands help distinguish between three different problems: application configuration leaks, image-layer leaks, and runtime-injected secret files. If a secret appears under `/run/secrets`, a projected volume, or a cloud identity token path, the next step is to understand whether it grants access only to the current workload or to a much larger control plane.
+Các lệnh này giúp phân biệt ba vấn đề khác nhau: leak trong cấu hình ứng dụng, leak ở image layer và các tệp secret được inject lúc runtime. Nếu một secret xuất hiện trong `/run/secrets`, một projected volume hoặc đường dẫn cloud identity token, bước tiếp theo là tìm hiểu liệu nó chỉ cấp quyền truy cập cho workload hiện tại hay cho một control plane lớn hơn nhiều.
 
-### Full Example: Embedded Secret In Image Filesystem
+### Ví dụ đầy đủ: Secret được nhúng trong filesystem của image
 
-If a build pipeline copied `.env` files or credentials into the final image, post-exploitation becomes simple:
+Nếu một build pipeline sao chép các tệp `.env` hoặc thông tin xác thực vào image cuối cùng, post-exploitation sẽ trở nên đơn giản:
 
 ```bash
 find / -type f -iname '*.env*' 2>/dev/null
@@ -95,11 +95,11 @@ cat /usr/src/app/.env 2>/dev/null
 grep -iE 'secret|token|jwt|password' /usr/src/app/.env 2>/dev/null
 ```
 
-The impact depends on the application, but embedded signing keys, JWT secrets, or cloud credentials can easily turn container compromise into API compromise, lateral movement, or forgery of trusted application tokens.
+Tác động phụ thuộc vào ứng dụng, nhưng các signing key, JWT secret hoặc thông tin xác thực cloud được nhúng trong đó có thể dễ dàng biến việc xâm phạm container thành xâm phạm API, di chuyển ngang hoặc giả mạo token ứng dụng được tin cậy.
 
 ### Full Example: Build-Time Secret Leakage Check
 
-If the concern is that the image history captured a secret-bearing layer:
+Nếu mối lo ngại là lịch sử image đã ghi lại một layer chứa secret:
 
 ```bash
 docker history --no-trunc <image>
@@ -107,11 +107,11 @@ docker save <image> -o /tmp/image.tar
 tar -tf /tmp/image.tar | head
 ```
 
-This kind of review is useful because a secret may have been deleted from the final filesystem view while still remaining in an earlier layer or in build metadata.
+Loại rà soát này hữu ích vì secret có thể đã bị xóa khỏi chế độ xem filesystem cuối cùng nhưng vẫn còn trong một layer trước đó hoặc metadata build.
 
 ## Checks
 
-These checks are intended to establish whether the image and secret-handling pipeline are likely to have increased the attack surface before runtime.
+Các kiểm tra này nhằm xác định liệu image và quy trình xử lý secret có khả năng làm tăng attack surface trước khi chạy hay không.
 
 ```bash
 docker history --no-trunc <image> 2>/dev/null
@@ -120,27 +120,26 @@ find /run /var/run /var/lib/kubelet -type f -iname '*token*' 2>/dev/null | head 
 grep -RniE 'secret|token|apikey|password' /etc /app /srv /usr/src 2>/dev/null | head -n 100
 ```
 
-What is interesting here:
+Điều gì đáng chú ý ở đây:
 
-- A suspicious build history may reveal copied credentials, SSH material, or unsafe build steps.
-- Secrets under projected volume paths may lead to cluster or cloud access, not just local application access.
-- Large numbers of configuration files with plaintext credentials usually indicate that the image or deployment model is carrying more trust material than necessary.
+- Lịch sử build đáng ngờ có thể làm lộ thông tin xác thực đã sao chép, dữ liệu SSH hoặc các bước build không an toàn.
+- Secrets trong các đường dẫn volume được chiếu có thể dẫn đến quyền truy cập cluster hoặc cloud, chứ không chỉ quyền truy cập ứng dụng cục bộ.
+- Số lượng lớn file cấu hình chứa thông tin xác thực dạng plaintext thường cho thấy image hoặc mô hình triển khai đang mang theo nhiều dữ liệu tin cậy hơn mức cần thiết.
 
-## Runtime Defaults
+## Mặc định khi chạy
 
-| Runtime / platform | Default state | Default behavior | Common manual weakening |
+| Runtime / nền tảng | Trạng thái mặc định | Hành vi mặc định | Cách làm suy yếu phổ biến |
 | --- | --- | --- | --- |
-| Docker / BuildKit | Supports secure build-time secret mounts, but not automatically | Secrets can be mounted ephemerally during `build`; image signing and scanning require explicit workflow choices | copying secrets into the image, passing secrets by `ARG` or `ENV`, disabling provenance checks |
-| Podman / Buildah | Supports OCI-native builds and secret-aware workflows | Strong build workflows are available, but operators must still choose them intentionally | embedding secrets in Containerfiles, broad build contexts, permissive bind mounts during builds |
-| Kubernetes | Native Secret objects and projected volumes | Runtime secret delivery is first-class, but exposure depends on RBAC, pod design, and host mounts | overbroad Secret mounts, service-account token misuse, `hostPath` access to kubelet-managed volumes |
-| Registries | Integrity is optional unless enforced | Public and private registries both depend on policy, signing, and admission decisions | pulling unsigned images freely, weak admission control, poor key management |
+| Docker / BuildKit | Hỗ trợ mount secret an toàn trong quá trình build, nhưng không tự động bật | Secrets có thể được mount tạm thời trong quá trình `build`; việc ký image và quét cần được lựa chọn rõ ràng trong workflow | sao chép secrets vào image, truyền secrets bằng `ARG` hoặc `ENV`, tắt kiểm tra provenance |
+| Podman / Buildah | Hỗ trợ các bản build gốc OCI và workflow nhận biết secret | Có sẵn các workflow build mạnh mẽ, nhưng operator vẫn phải chủ động chọn chúng | nhúng secrets vào Containerfile, dùng build context quá rộng, dùng bind mount với quyền quá thoáng trong quá trình build |
+| Kubernetes | Các đối tượng Secret gốc và volume được chiếu | Phân phối secret lúc chạy là tính năng cốt lõi, nhưng mức độ lộ phụ thuộc vào RBAC, thiết kế pod và mount từ host | mount Secret quá rộng, sử dụng sai token service account, truy cập `hostPath` vào các volume do kubelet quản lý |
+| Registry | Tính toàn vẹn là tùy chọn trừ khi được thực thi | Cả registry công khai lẫn riêng tư đều phụ thuộc vào chính sách, việc ký và quyết định admission | tự do pull image chưa được ký, kiểm soát admission yếu, quản lý khóa kém |
 
 ## References
 
-- [1] [Open Container Initiative Image Format Specification](https://github.com/opencontainers/image-spec/blob/main/spec.md)
-- [2] [Docker Docs - Content trust in Docker](https://docs.docker.com/engine/security/trust/)
-- [3] [Docker Docs - Docker Scout](https://docs.docker.com/scout/)
-- [4] [Docker Docs - Build secrets](https://docs.docker.com/build/building/secrets/)
-- [5] [Kubernetes Documentation - Secrets](https://kubernetes.io/docs/concepts/configuration/secret/)
-
+- [1] [Đặc tả định dạng Image của Open Container Initiative](https://github.com/opencontainers/image-spec/blob/main/spec.md)
+- [2] [Tài liệu Docker - Content trust trong Docker](https://docs.docker.com/engine/security/trust/)
+- [3] [Tài liệu Docker - Docker Scout](https://docs.docker.com/scout/)
+- [4] [Tài liệu Docker - Build secrets](https://docs.docker.com/build/building/secrets/)
+- [5] [Tài liệu Kubernetes - Secrets](https://kubernetes.io/docs/concepts/configuration/secret/)
 {{#include ../../../banners/hacktricks-training.md}}

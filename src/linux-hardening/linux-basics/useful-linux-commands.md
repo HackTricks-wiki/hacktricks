@@ -1,8 +1,8 @@
-# Useful Linux Commands
+# Các lệnh Linux hữu ích
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Common Bash
+## Bash phổ biến
 
 ```bash
 #Exfiltration using Base64
@@ -131,7 +131,7 @@ sudo chattr -i file.txt #Remove the bit so you can delete it
 7z l file.zip
 ```
 
-## Bash for Windows
+## Bash cho Windows
 
 ```bash
 #Base64 for Windows
@@ -266,7 +266,7 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
 
-## Nmap search help
+## Trợ giúp tìm kiếm Nmap
 
 ```bash
 #Nmap scripts ((default or version) and smb))
@@ -315,9 +315,9 @@ iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
 
-## eBPF Telemetry & Rootkit Hunting
+## Telemetry eBPF & săn tìm rootkit
 
-Rootkit research has demonstrated both eBPF-based implants such as TripleCross and BPF-based backdoors such as BPFDoor variants. Treat unexpected BPF programs, attachments, or maps as investigation leads rather than proof of compromise.<sup>[[3]](#references)[[4]](#references)</sup> Baseline authorized systems with `bpftool` or `eBPFmon`: `bpftool` can enumerate programs and maps, dump program instructions, and query supported features, while eBPFmon presents that information in a TUI.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+Nghiên cứu về rootkit đã ghi nhận các implant dựa trên eBPF như TripleCross và các backdoor dựa trên BPF như các biến thể BPFDoor. Hãy xem các chương trình, điểm gắn kết hoặc map BPF bất ngờ là manh mối cần điều tra, chứ không phải bằng chứng hệ thống đã bị xâm nhập.<sup>[[3]](#references)[[4]](#references)</sup> Hãy lập baseline cho các hệ thống được phép bằng `bpftool` hoặc `eBPFmon`: `bpftool` có thể liệt kê chương trình và map, xuất hướng dẫn của chương trình, cũng như truy vấn các tính năng được hỗ trợ; còn eBPFmon hiển thị thông tin đó trong giao diện TUI.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
@@ -337,11 +337,11 @@ sudo bpftool feature probe | less
 sudo ebpfmon
 ```
 
-Correlate the `bpftool` output with expected NIC/cgroup attachments; a sudden `xdp` or `kprobe` program owned by an unapproved PID is an investigation lead, not conclusive proof of an injected payload.<sup>[[5]](#references)[[6]](#references)</sup>
+Đối chiếu đầu ra của `bpftool` với các attachment NIC/cgroup dự kiến; một chương trình `xdp` hoặc `kprobe` bất ngờ do PID chưa được phê duyệt sở hữu là đầu mối cần điều tra, không phải bằng chứng xác thực về payload bị chèn.<sup>[[5]](#references)[[6]](#references)</sup>
 
-## Journald Incident Triage
+## Phân loại sự cố Journald
 
-`journalctl` reads structured entries from `systemd-journald` and supports filtering by boot, priority, unit, UID, and relative time. Combine those filters with JSON output when you need to preserve or compare evidence; filtering alone does not prove that logs were not tampered with.<sup>[[2]](#references)[[7]](#references)</sup>
+`journalctl` đọc các mục có cấu trúc từ `systemd-journald` và hỗ trợ lọc theo boot, mức độ ưu tiên, unit, UID và thời gian tương đối. Hãy kết hợp các bộ lọc đó với đầu ra JSON khi cần lưu giữ hoặc so sánh bằng chứng; chỉ lọc thôi không chứng minh được rằng log không bị sửa đổi.<sup>[[2]](#references)[[7]](#references)</sup>
 
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
@@ -354,16 +354,15 @@ sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking e
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
 
-Add `--grep 'Invalid user' --case-sensitive` or `-k` (kernel messages only) when you need tighter filters, and remember `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, and `_TRANSPORT` selectors can be combined for targeted hunts.<sup>[[7]](#references)</sup>
+Thêm `--grep 'Invalid user' --case-sensitive` hoặc `-k` (chỉ thông báo kernel) khi cần bộ lọc chặt hơn, và hãy nhớ có thể kết hợp các selector `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` và `_TRANSPORT` để tìm kiếm có mục tiêu.<sup>[[7]](#references)</sup>
 
 ## References
 
-- [1] [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [2] [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon: Công cụ mới để khám phá và tương tác với các ứng dụng eBPF](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [Cách sử dụng lệnh journalctl để xem log Linux](https://www.hostinger.com/tutorials/journalctl-command)
 - [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
-- [4] [Rapid7 Labs: BPFdoor in Telecom Networks](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
-- [5] [BPF Documentation — The Linux Kernel documentation](https://docs.kernel.org/bpf/)
+- [4] [Rapid7 Labs: BPFdoor trong các mạng viễn thông](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
+- [5] [Tài liệu BPF — Tài liệu Linux Kernel](https://docs.kernel.org/bpf/)
 - [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
-- [7] [journalctl(1) — Linux manual page](https://man7.org/linux/man-pages/man1/journalctl.1.html)
-
+- [7] [journalctl(1) — Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man1/journalctl.1.html)
 {{#include ../../banners/hacktricks-training.md}}

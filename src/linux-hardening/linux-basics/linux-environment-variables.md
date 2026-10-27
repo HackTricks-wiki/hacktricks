@@ -1,29 +1,29 @@
-# Linux Environment Variables
+# Biến môi trường Linux
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Global variables
+## Biến toàn cục
 
-The global variables **will be** inherited by **child processes**.
+Các biến toàn cục **sẽ được** **các tiến trình con** kế thừa.
 
-You can create a global variable for your current session doing:
+Bạn có thể tạo một biến toàn cục cho phiên hiện tại bằng cách:
 
 ```bash
 export MYGLOBAL="hello world"
 echo $MYGLOBAL #Prints: hello world
 ```
 
-This variable will be accessible by your current sessions and its child processes.
+Biến này sẽ khả dụng trong các phiên hiện tại và các tiến trình con của chúng.
 
-You can **remove** a variable doing:
+Bạn có thể **xóa** một biến bằng cách thực hiện:
 
 ```bash
 unset MYGLOBAL
 ```
 
-## Local variables
+## Biến cục bộ
 
-The **local variables** can only be **accessed** by the **current shell/script**.
+**Biến cục bộ** chỉ có thể được **truy cập** bởi **shell/script hiện tại**.
 
 ```bash
 LOCAL="my local"
@@ -31,7 +31,7 @@ echo $LOCAL
 unset LOCAL
 ```
 
-## List current variables
+## Liệt kê các biến hiện tại
 
 ```bash
 set
@@ -41,44 +41,44 @@ cat /proc/$$/environ
 cat /proc/`python -c "import os; print(os.getppid())"`/environ
 ```
 
-The contents of `/proc/*/environ` are **NUL-separated**, so these variants are usually easier to read:
+Nội dung của `/proc/*/environ` được **phân tách bằng NUL**, vì vậy các biến thể sau thường dễ đọc hơn:
 
 ```bash
 tr '\0' '\n' </proc/$$/environ | sort -u
 tr '\0' '\n' </proc/<PID>/environ | sort -u
 ```
 
-If you are looking for **credentials** or **interesting service configuration** inside inherited environments, also check [Linux Post Exploitation](../post-exploitation/README.md).
+Nếu bạn đang tìm **thông tin xác thực** hoặc **cấu hình dịch vụ đáng chú ý** trong các môi trường được kế thừa, hãy xem thêm [Linux Post Exploitation](../post-exploitation/README.md).
 
-## Common variables
+## Các biến phổ biến
 
-From: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/).<sup>[[5]](#references)</sup>
+Nguồn: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/).<sup>[[5]](#references)</sup>
 
-- **DISPLAY** – the display used by **X**. This variable is usually set to **:0.0**, which means the first display on the current computer.
-- **EDITOR** – the user’s preferred text editor.
-- **HISTFILESIZE** – the maximum number of lines contained in the history file.
-- **HISTSIZE** – Number of lines added to the history file when the user finish his session
-- **HOME** – your home directory.
-- **HOSTNAME** – the hostname of the computer.
-- **LANG** – your current language.
-- **MAIL** – the location of the user’s mail spool. Usually **/var/spool/mail/USER**.
-- **MANPATH** – the list of directories to search for manual pages.
-- **OSTYPE** – the type of operating system.
-- **PS1** – the default prompt in bash.
-- **PATH** – stores the path of all the directories which holds binary files you want to execute just by specifying the name of the file and not by relative or absolute path.
-- **PWD** – the current working directory.
-- **SHELL** – the path to the current command shell (for example, **/bin/bash**).
-- **TERM** – the current terminal type (for example, **xterm**).
-- **TZ** – your time zone.
-- **USER** – your current username.
+- **DISPLAY** – màn hình được **X** sử dụng. Biến này thường được đặt thành **:0.0**, nghĩa là màn hình đầu tiên trên máy tính hiện tại.
+- **EDITOR** – trình soạn thảo văn bản mà người dùng ưu tiên.
+- **HISTFILESIZE** – số dòng tối đa có trong file history.
+- **HISTSIZE** – số dòng được thêm vào file history khi người dùng kết thúc phiên làm việc.
+- **HOME** – thư mục home của bạn.
+- **HOSTNAME** – hostname của máy tính.
+- **LANG** – ngôn ngữ hiện tại của bạn.
+- **MAIL** – vị trí lưu trữ thư của người dùng. Thường là **/var/spool/mail/USER**.
+- **MANPATH** – danh sách các thư mục cần tìm trang hướng dẫn.
+- **OSTYPE** – loại hệ điều hành.
+- **PS1** – dấu nhắc mặc định trong bash.
+- **PATH** – lưu đường dẫn đến tất cả thư mục chứa các tệp nhị phân mà bạn muốn thực thi chỉ bằng cách chỉ định tên tệp, thay vì dùng đường dẫn tương đối hoặc tuyệt đối.
+- **PWD** – thư mục làm việc hiện tại.
+- **SHELL** – đường dẫn đến shell lệnh hiện tại (ví dụ: **/bin/bash**).
+- **TERM** – loại terminal hiện tại (ví dụ: **xterm**).
+- **TZ** – múi giờ của bạn.
+- **USER** – tên người dùng hiện tại của bạn.
 
-## Interesting variables for hacking
+## Các biến thú vị cho hacking
 
-Not every variable is equally useful. From an offensive perspective, prioritize variables that change **search paths**, **startup files**, **dynamic linker behavior**, or **audit/logging**.
+Không phải biến nào cũng hữu ích như nhau. Từ góc độ tấn công, hãy ưu tiên các biến làm thay đổi **đường dẫn tìm kiếm**, **tệp khởi động**, **hành vi của dynamic linker** hoặc **kiểm toán/ghi nhật ký**.
 
 ### **HISTFILESIZE**
 
-Change the **value of this variable to 0**, so when you **end your session** the **history file** (\~/.bash_history) will be **truncated to 0 lines**.
+**Đổi giá trị của biến này thành 0** để khi bạn **kết thúc phiên làm việc**, **file history** (\~/.bash_history) sẽ bị **cắt còn 0 dòng**.
 
 ```bash
 export HISTFILESIZE=0
@@ -86,7 +86,7 @@ export HISTFILESIZE=0
 
 ### **HISTSIZE**
 
-Change the **value of this variable to 0**, so commands are **not kept in the in-memory history** and won't be written back to the **history file** (\~/.bash_history).
+Thay đổi **giá trị của biến này thành 0** để các lệnh **không được lưu trong lịch sử trong bộ nhớ** và không được ghi lại vào **tệp lịch sử** (\~/.bash_history).
 
 ```bash
 export HISTSIZE=0
@@ -94,7 +94,7 @@ export HISTSIZE=0
 
 ### **HISTCONTROL**
 
-If the **value of this variable is set to `ignorespace` or `ignoreboth`**, any command prepended with an extra space will not be saved in the history.
+Nếu **giá trị của biến này được đặt thành `ignorespace` hoặc `ignoreboth`**, mọi lệnh có thêm dấu cách ở đầu sẽ không được lưu vào lịch sử.
 
 ```bash
 export HISTCONTROL=ignorespace
@@ -107,7 +107,7 @@ $  echo "not to save"
 
 ### **HISTFILE**
 
-Point the **history file** to **`/dev/null`** or unset it completely. This is usually more reliable than only changing the history size.
+Trỏ **tệp lịch sử** đến **`/dev/null`** hoặc bỏ đặt biến này hoàn toàn. Cách này thường đáng tin cậy hơn việc chỉ thay đổi kích thước lịch sử.
 
 ```bash
 export HISTFILE=/dev/null
@@ -116,7 +116,7 @@ unset HISTFILE
 
 ### http_proxy & https_proxy
 
-The processes will use the **proxy** declared here to connect to internet through **http or https**.
+Các tiến trình sẽ sử dụng **proxy** được khai báo ở đây để kết nối internet qua **http hoặc https**.
 
 ```bash
 export http_proxy="http://10.10.10.10:8080"
@@ -125,19 +125,19 @@ export https_proxy="http://10.10.10.10:8080"
 
 ### all_proxy & no_proxy
 
-- `all_proxy`: default proxy for tools/protocols that honor it.
-- `no_proxy`: bypass list (hosts/domains/CIDRs) that should connect directly.
+- `all_proxy`: proxy mặc định cho các công cụ/giao thức hỗ trợ biến này.
+- `no_proxy`: danh sách bypass (host/domain/CIDR) cần kết nối trực tiếp.
 
 ```bash
 export all_proxy="socks5h://10.10.10.10:1080"
 export no_proxy="localhost,127.0.0.1,.corp.local,10.0.0.0/8"
 ```
 
-Both lowercase and uppercase variants may be used depending on the tool (`http_proxy`/`HTTP_PROXY`, `no_proxy`/`NO_PROXY`).
+Có thể sử dụng dạng viết thường hoặc viết hoa, tùy theo công cụ (`http_proxy`/`HTTP_PROXY`, `no_proxy`/`NO_PROXY`).
 
 ### SSL_CERT_FILE & SSL_CERT_DIR
 
-The processes will trust the certificates indicated in **these env variables**. This is useful to make tools such as **`curl`**, **`git`**, Python HTTP clients, or package managers trust a CA controlled by the attacker (for example, to make an interception proxy look legitimate).
+Các tiến trình sẽ tin cậy những chứng chỉ được chỉ định trong **các biến môi trường này**. Điều này hữu ích để khiến các công cụ như **`curl`**, **`git`**, các HTTP client của Python hoặc trình quản lý gói tin cậy một CA do kẻ tấn công kiểm soát (ví dụ: khiến một proxy chặn bắt trông có vẻ hợp pháp).
 
 ```bash
 export SSL_CERT_FILE=/path/to/ca-bundle.pem
@@ -146,7 +146,7 @@ export SSL_CERT_DIR=/path/to/ca-certificates
 
 ### **PATH**
 
-If a privileged wrapper/script executes commands **without absolute paths**, the **first attacker-controlled directory** in `PATH` wins. This is the primitive behind many **PATH hijacks** in `sudo`, cron jobs, shell wrappers, and custom SUID helpers. Look for `env_keep+=PATH`, weak `secure_path`, or wrappers that call `tar`, `service`, `cp`, `python`, etc. by name.
+Nếu một wrapper/script có đặc quyền thực thi lệnh **mà không dùng đường dẫn tuyệt đối**, thì **thư mục đầu tiên do kẻ tấn công kiểm soát** trong `PATH` sẽ được ưu tiên. Đây là nguyên lý đứng sau nhiều vụ **chiếm quyền PATH** trong `sudo`, cron job, shell wrapper và các helper SUID tùy chỉnh. Hãy tìm `env_keep+=PATH`, `secure_path` yếu hoặc các wrapper gọi `tar`, `service`, `cp`, `python`, v.v. theo tên.
 
 ```bash
 mkdir -p /dev/shm/bin
@@ -159,11 +159,11 @@ chmod +x /dev/shm/bin/tar
 PATH=/dev/shm/bin:$PATH vulnerable-wrapper
 ```
 
-For full privilege-escalation chains abusing `PATH`, check [Linux Privilege Escalation](linux-privilege-escalation/README.md).
+For các chuỗi leo thang đặc quyền đầy đủ lợi dụng `PATH`, xem [Linux Privilege Escalation](linux-privilege-escalation/README.md).
 
 ### **HOME & XDG_CONFIG_HOME**
 
-`HOME` is not only a directory reference: many tools automatically load **dotfiles**, **plugins**, and **per-user configuration** from `$HOME` or `$XDG_CONFIG_HOME`. If a privileged workflow preserves these values, **config injection** may be easier than binary hijacking.
+`HOME` không chỉ là tham chiếu đến thư mục: nhiều công cụ tự động tải **dotfiles**, **plugins** và **cấu hình theo người dùng** từ `$HOME` hoặc `$XDG_CONFIG_HOME`. Nếu một quy trình có đặc quyền giữ nguyên các giá trị này, **config injection** có thể dễ thực hiện hơn so với chiếm quyền điều khiển binary.
 
 ```bash
 export HOME=/dev/shm/fakehome
@@ -171,17 +171,17 @@ export XDG_CONFIG_HOME=/dev/shm/fakehome/.config
 mkdir -p "$XDG_CONFIG_HOME"
 ```
 
-Interesting targets include `.gitconfig`, `.wgetrc`, `.curlrc`, `.inputrc`, `.pythonrc.py`, and tool-specific files such as `.terraformrc`.
+Các mục tiêu đáng chú ý gồm `.gitconfig`, `.wgetrc`, `.curlrc`, `.inputrc`, `.pythonrc.py` và các tệp dành riêng cho công cụ như `.terraformrc`.
 
 ### **LD_PRELOAD, LD_LIBRARY_PATH & LD_AUDIT**
 
-These variables influence the **dynamic linker**:
+Các biến này ảnh hưởng đến **bộ liên kết động**:
 
-- `LD_PRELOAD`: force extra shared objects to be loaded first.
-- `LD_LIBRARY_PATH`: prepend library search directories.
-- `LD_AUDIT`: load auditor libraries that observe library loading and symbol resolution.
+- `LD_PRELOAD`: buộc tải các shared object bổ sung trước tiên.
+- `LD_LIBRARY_PATH`: thêm các thư mục tìm kiếm thư viện vào đầu danh sách.
+- `LD_AUDIT`: tải các thư viện auditor để theo dõi quá trình tải thư viện và phân giải symbol.
 
-They are extremely valuable for **hooking**, **instrumentation**, and **privilege escalation** if a privileged command preserves them. In **secure-execution** mode (`AT_SECURE`, e.g. setuid/setgid/capabilities), the loader strips or restricts many of these variables. However, parser bugs in that early loader stage are still high-impact because they run **before** the target program.<sup>[[2]](#references)</sup>
+Chúng cực kỳ hữu ích cho **hooking**, **instrumentation** và **privilege escalation** nếu một lệnh có đặc quyền giữ lại chúng. Trong chế độ **thực thi an toàn** (`AT_SECURE`, ví dụ setuid/setgid/capabilities), loader loại bỏ hoặc hạn chế nhiều biến trong số này. Tuy nhiên, lỗi parser trong giai đoạn loader ban đầu vẫn có thể gây tác động nghiêm trọng vì chúng chạy **trước** chương trình đích.<sup>[[2]](#references)</sup>
 
 ```bash
 env | grep -E '^LD_'
@@ -192,9 +192,9 @@ ldso=$(ls /lib64/ld-linux-*.so.* /lib/*-linux-gnu/ld-linux-*.so.* 2>/dev/null | 
 
 ### **GLIBC_TUNABLES**
 
-`GLIBC_TUNABLES` changes early glibc behavior (for example, allocator tunables) and is very handy in exploit labs. It also matters from a security perspective because the **dynamic loader parses it very early**. The 2023 **Looney Tunables** bug was a good reminder that a single environment variable parsed in the loader can become a **local privilege-escalation primitive** against SUID programs.<sup>[[6]](#references)</sup>
+`GLIBC_TUNABLES` thay đổi hành vi ban đầu của glibc (ví dụ: các tunable của allocator) và rất hữu ích trong các lab exploit. Biến này cũng quan trọng từ góc độ bảo mật vì **dynamic loader phân tích nó từ rất sớm**. Lỗ hổng **Looney Tunables** năm 2023 là lời nhắc hữu ích rằng một biến môi trường được phân tích trong loader có thể trở thành **primitive leo thang đặc quyền cục bộ** nhắm vào các chương trình SUID.<sup>[[6]](#references)</sup>
 
-For CVE-2023-4911, compare the **installed distribution package release** with its vendor's fixed release and verify the loader actually used for new processes. An upstream version string alone is unreliable: Debian backported the affected parser into its 2.31 package, while distributions backported fixes without changing the upstream number. A practical privilege transition also needs an executable privileged target whose identity change is not blocked by `NoNewPrivs`, a `nosuid` mount, or another mitigation. Avoid running a malformed `GLIBC_TUNABLES` crash probe during passive enumeration. See the [Ubuntu tracker](https://ubuntu.com/security/CVE-2023-4911), [Debian tracker](https://security-tracker.debian.org/tracker/CVE-2023-4911), and [Red Hat advisory](https://access.redhat.com/security/cve/cve-2023-4911) for release-specific applicability; Ubuntu's [security notice](https://ubuntu.com/security/notices/USN-6409-1) also calls for a reboot after updating.
+Với CVE-2023-4911, hãy so sánh **phiên bản gói của bản phân phối đã cài đặt** với phiên bản đã được nhà cung cấp sửa lỗi, đồng thời xác minh loader thực sự được dùng cho các tiến trình mới. Chỉ dựa vào chuỗi phiên bản upstream là không đáng tin cậy: Debian đã backport parser bị ảnh hưởng vào gói 2.31, trong khi các bản phân phối khác backport bản sửa lỗi mà không thay đổi số phiên bản upstream. Để chuyển đổi đặc quyền trên thực tế, cũng cần có một tệp thực thi đích có đặc quyền mà việc thay đổi danh tính không bị `NoNewPrivs`, một phân vùng mount `nosuid` hoặc biện pháp giảm thiểu khác ngăn chặn. Tránh chạy phép thử gây crash bằng `GLIBC_TUNABLES` sai định dạng trong quá trình dò tìm thụ động. Xem [trình theo dõi của Ubuntu](https://ubuntu.com/security/CVE-2023-4911), [trình theo dõi của Debian](https://security-tracker.debian.org/tracker/CVE-2023-4911) và [thông báo bảo mật của Red Hat](https://access.redhat.com/security/cve/cve-2023-4911) để biết mức độ ảnh hưởng theo từng bản phát hành; [thông báo bảo mật](https://ubuntu.com/security/notices/USN-6409-1) của Ubuntu cũng yêu cầu khởi động lại sau khi cập nhật.
 
 ```bash
 GLIBC_TUNABLES=glibc.malloc.tcache_count=0 ./binary
@@ -202,7 +202,7 @@ GLIBC_TUNABLES=glibc.malloc.tcache_count=0 ./binary
 
 ### **BASH_ENV & ENV**
 
-If **Bash** is started **non-interactively**, it checks `BASH_ENV` and sources that file before running the target script. When Bash is invoked as `sh`, or in POSIX-style interactive mode, `ENV` may also be consulted. This is a classic way to turn a shell wrapper into code execution if the environment is attacker-controlled.
+Nếu **Bash** được khởi chạy ở chế độ **không tương tác**, nó kiểm tra `BASH_ENV` và nạp tệp đó trước khi chạy script đích. Khi Bash được gọi dưới tên `sh`, hoặc ở chế độ tương tác kiểu POSIX, nó cũng có thể kiểm tra `ENV`. Đây là cách kinh điển để biến một shell wrapper thành cơ chế thực thi mã nếu kẻ tấn công kiểm soát được môi trường.
 
 ```bash
 cat > /tmp/pre.sh <<'EOF'
@@ -211,11 +211,11 @@ EOF
 BASH_ENV=/tmp/pre.sh bash -c 'echo target'
 ```
 
-Bash ignores these startup files when the **real/effective IDs differ**; `-p` preserves the effective ID but does not enable those startup files, so the exact behavior depends on how the wrapper invokes the shell. Be careful with privileged wrappers that call `setuid()`/`setgid()` **before** launching Bash: once the IDs match again, Bash may trust `BASH_ENV`, `ENV`, and related shell state that would otherwise be ignored.<sup>[[1]](#references)</sup>
+Bash bỏ qua các tệp khởi động này khi **ID thực/hiệu lực khác nhau**; `-p` giữ nguyên ID hiệu lực nhưng không bật các tệp khởi động đó, vì vậy hành vi chính xác phụ thuộc vào cách wrapper gọi shell. Hãy cẩn thận với các wrapper có đặc quyền gọi `setuid()`/`setgid()` **trước khi** khởi chạy Bash: khi các ID khớp lại, Bash có thể tin cậy `BASH_ENV`, `ENV` và trạng thái shell liên quan mà bình thường sẽ bị bỏ qua.<sup>[[1]](#references)</sup>
 
 ### **PS4 + SHELLOPTS (xtrace)**
 
-When Bash runs with **xtrace** enabled it expands `PS4` and prints it before every traced command. `PS4` is expanded like a prompt, so a **command substitution** inside it is executed. Crucially, xtrace itself can be turned on purely from the environment by exporting `SHELLOPTS=xtrace` — no `-x` on the command line is needed — so any Bash script the victim runs becomes code execution.<sup>[[7]](#references)</sup>
+Khi Bash chạy với **xtrace** được bật, nó mở rộng `PS4` và in giá trị này trước mỗi lệnh được theo dõi. `PS4` được mở rộng như một prompt, vì vậy một **command substitution** bên trong nó sẽ được thực thi. Điều quan trọng là có thể bật xtrace chỉ bằng cách xuất `SHELLOPTS=xtrace` từ môi trường — không cần `-x` trên dòng lệnh — nên bất kỳ script Bash nào nạn nhân chạy đều có thể dẫn đến thực thi mã.<sup>[[7]](#references)</sup>
 
 ```bash
 echo 'echo target' > /tmp/victim.sh
@@ -228,19 +228,19 @@ cat /tmp/ps4-executed
 PS4='$(touch /tmp/ps4-x)' bash -x /tmp/victim.sh
 ```
 
-`PS4` does nothing until xtrace is active (`SHELLOPTS=xtrace`, `set -x` or `bash -x`), and Bash drops `SHELLOPTS` in privileged/setuid contexts just like `BASH_ENV`.
+`PS4` không có tác dụng cho đến khi xtrace được bật (`SHELLOPTS=xtrace`, `set -x` hoặc `bash -x`), và Bash loại bỏ `SHELLOPTS` trong các ngữ cảnh privileged/setuid giống như `BASH_ENV`.
 
 ### **PYTHONPATH, PYTHONHOME, PYTHONSTARTUP, PYTHONINSPECT & PYTHONBREAKPOINT**
 
-These variables change how Python starts:
+Các biến này thay đổi cách Python khởi động:
 
-- `PYTHONPATH`: prepend import search paths.
-- `PYTHONHOME`: relocate the standard library tree.
-- `PYTHONSTARTUP`: execute a file before the interactive prompt.
-- `PYTHONINSPECT=1`: drop into interactive mode after a script finishes.
-- `PYTHONBREAKPOINT`: `package.module.callable` invoked (and its module imported) when the code reaches `breakpoint()`.<sup>[[8]](#references)</sup>
+- `PYTHONPATH`: thêm các đường dẫn tìm kiếm import vào đầu danh sách.
+- `PYTHONHOME`: thay đổi vị trí cây thư viện chuẩn.
+- `PYTHONSTARTUP`: thực thi một tệp trước dấu nhắc tương tác.
+- `PYTHONINSPECT=1`: chuyển sang chế độ tương tác sau khi tập lệnh kết thúc.
+- `PYTHONBREAKPOINT`: gọi `package.module.callable` (và import module của nó) khi mã chạy đến `breakpoint()`.<sup>[[8]](#references)</sup>
 
-They are useful against maintenance scripts, debuggers, shells, and wrappers that call Python with a controllable environment. `python -E` and `python -I` ignore all `PYTHON*` variables.
+Chúng hữu ích khi nhắm vào các tập lệnh bảo trì, trình gỡ lỗi, shell và wrapper gọi Python với môi trường có thể kiểm soát. `python -E` và `python -I` bỏ qua mọi biến `PYTHON*`.
 
 ```bash
 mkdir -p /tmp/pylib
@@ -253,20 +253,20 @@ printf 'import sys\nbreakpoint(*sys.argv[1:])\n' > /tmp/bp.py
 PYTHONBREAKPOINT='os.system' python3 /tmp/bp.py 'id'   # requires the code to hit breakpoint()
 ```
 
-A recent real-world example was the 2024 **needrestart** LPE on Ubuntu/Debian systems: the root-owned scanner copied an unprivileged process's `PYTHONPATH` from `/proc/<PID>/environ` and then executed Python. The published exploit planted `importlib/__init__.so` in the attacker-controlled path so Python executed attacker code during its own initialization, before the helper's hard-coded script even mattered.<sup>[[3]](#references)</sup>
+Một ví dụ thực tế gần đây là lỗ hổng LPE của **needrestart** năm 2024 trên các hệ thống Ubuntu/Debian: trình quét thuộc sở hữu root sao chép `PYTHONPATH` của một tiến trình không có đặc quyền từ `/proc/<PID>/environ`, rồi thực thi Python. Exploit được công bố đã đặt `importlib/__init__.so` trong đường dẫn do kẻ tấn công kiểm soát, khiến Python thực thi mã của kẻ tấn công trong quá trình khởi tạo, trước khi script được chỉ định cứng trong helper có tác dụng.<sup>[[3]](#references)</sup>
 
 ### **PERL5OPT & PERL5LIB**
 
-Perl has equally useful startup variables:
+Perl có các biến khởi động hữu ích tương tự:
 
-- `PERL5LIB`: prepend library directories.
-- `PERL5OPT`: inject switches as if they were on every `perl` command line.
+- `PERL5LIB`: thêm các thư mục thư viện vào đầu danh sách.
+- `PERL5OPT`: chèn các switch như thể chúng có mặt trên mọi dòng lệnh `perl`.
 
-This can force **automatic module loading** or change interpreter behavior before the target script does anything interesting. Perl ignores these variables in **taint / setuid / setgid** contexts, but they still matter a lot for normal root-run wrappers, CI jobs, installers, and custom sudoers rules.
+Các biến này có thể buộc **tự động tải module** hoặc thay đổi hành vi của trình thông dịch trước khi script đích thực hiện bất kỳ thao tác đáng chú ý nào. Perl bỏ qua các biến này trong ngữ cảnh **taint / setuid / setgid**, nhưng chúng vẫn rất đáng lưu ý với các wrapper chạy bằng root thông thường, tác vụ CI, trình cài đặt và quy tắc sudoers tùy chỉnh.
 
-If a sudo rule allows environment overrides and its privileged command eventually launches Perl, also review `PERL5DB`. Perl documents that `PERL5OPT=-d` starts the debugger and that `PERL5DB` supplies debugger initialization code when Perl starts with a bare `-d` switch. Unsetting only `PERL5LIB` and `PERLLIB` does not remove this path. The variables must survive sudo and the wrapper, and the Perl process must not ignore them through taint or set-ID handling; inspect the exact rule and execution chain without running the privileged helper during enumeration. See [perlrun's environment-variable reference](https://perldoc.perl.org/perlrun#ENVIRONMENT).
+Nếu quy tắc sudo cho phép ghi đè môi trường và lệnh có đặc quyền của nó cuối cùng khởi chạy Perl, hãy kiểm tra cả `PERL5DB`. Tài liệu Perl nêu rằng `PERL5OPT=-d` khởi chạy trình gỡ lỗi và `PERL5DB` cung cấp mã khởi tạo trình gỡ lỗi khi Perl khởi động với switch `-d` độc lập. Chỉ bỏ đặt `PERL5LIB` và `PERLLIB` không loại bỏ được đường dẫn này. Các biến phải được giữ lại qua sudo và wrapper, đồng thời tiến trình Perl không được bỏ qua chúng do xử lý taint hoặc set-ID; hãy kiểm tra chính xác quy tắc và chuỗi thực thi mà không chạy helper có đặc quyền trong quá trình liệt kê. Xem [tài liệu tham khảo về biến môi trường của perlrun](https://perldoc.perl.org/perlrun#ENVIRONMENT).
 
-Perl's built-in [`@INC` search path](https://perldoc.perl.org/perlvar#@INC) is another module trust boundary even without preserved environment variables. For a privileged Perl process, correlate an actual `use` or `require` statement with the resolved module name, search order, and a lower-privileged user's ability to create or replace that module under a searched directory. A writable library directory alone does not establish that the privileged process will load code from it.
+Đường dẫn tìm kiếm [`@INC` tích hợp sẵn của Perl](https://perldoc.perl.org/perlvar#@INC) cũng là một ranh giới tin cậy của module, ngay cả khi không có biến môi trường nào được giữ lại. Với một tiến trình Perl có đặc quyền, hãy đối chiếu câu lệnh `use` hoặc `require` thực tế với tên module được phân giải, thứ tự tìm kiếm và khả năng của người dùng ít đặc quyền hơn trong việc tạo hoặc thay thế module đó bên dưới một thư mục được tìm kiếm. Chỉ riêng việc một thư mục thư viện có quyền ghi không chứng minh rằng tiến trình có đặc quyền sẽ tải mã từ đó.
 
 ```bash
 mkdir -p /tmp/perllib
@@ -280,12 +280,12 @@ PERL5LIB=/tmp/perllib PERL5OPT=-MHT perl -e 'print "target\n"'
 
 ### **NODE_OPTIONS**
 
-`NODE_OPTIONS` prepends **Node.js CLI flags** to every `node` process that inherits the environment. This makes it useful against wrappers, CI jobs, Electron helpers, and sudo rules that eventually invoke Node. The most interesting flags offensively are usually:
+`NODE_OPTIONS` thêm **Node.js CLI flags** vào trước mọi tiến trình `node` kế thừa môi trường. Điều này khiến nó hữu ích khi nhắm vào các wrapper, CI job, helper của Electron và quy tắc sudo mà cuối cùng gọi Node. Các flag thú vị nhất khi khai thác thường là:
 
-- `--require <file>`: preload a CommonJS file before the target script.
-- `--import <module>`: preload an ES module before the target script.
+- `--require <file>`: nạp trước một file CommonJS trước khi chạy script đích.
+- `--import <module>`: nạp trước một ES module trước khi chạy script đích.
 
-Node rejects some dangerous flags in `NODE_OPTIONS`, but `--require` and `--import` are explicitly allowed and are processed **before** the regular command-line arguments.<sup>[[4]](#references)</sup>
+Node từ chối một số flag nguy hiểm trong `NODE_OPTIONS`, nhưng `--require` và `--import` được cho phép rõ ràng và được xử lý **trước** các đối số dòng lệnh thông thường.<sup>[[4]](#references)</sup>
 
 ```bash
 cat > /tmp/preload.js <<'EOF'
@@ -294,9 +294,9 @@ EOF
 NODE_OPTIONS='--require /tmp/preload.js' node -e 'console.log("target")'
 ```
 
-#### Fileless preload with a `data:` URL
+#### Preload không cần tệp bằng URL `data:`
 
-When you can set `NODE_OPTIONS` but **cannot write a file** on the target (read-only filesystem, restricted API, serverless runtime, etc.), `--import` accepts a `data:text/javascript,` URL, so the whole payload travels inside the environment variable itself. The JavaScript must be **fully URL-encoded** — Node parses the value as a URL, so any raw space (or other unencoded char) truncates the payload and throws a `SyntaxError`. This works on Node 20.6+ where `--import` is on the `NODE_OPTIONS` allowlist.<sup>[[4]](#references)</sup>
+Khi có thể đặt `NODE_OPTIONS` nhưng **không thể ghi tệp** trên mục tiêu (hệ thống tệp chỉ đọc, API bị hạn chế, môi trường serverless, v.v.), `--import` chấp nhận URL `data:text/javascript,`, vì vậy toàn bộ payload nằm ngay trong biến môi trường. JavaScript phải được **mã hóa URL hoàn toàn** — Node phân tích giá trị này dưới dạng URL, nên bất kỳ dấu cách thô nào (hoặc ký tự chưa mã hóa khác) cũng sẽ làm payload bị cắt cụt và gây ra `SyntaxError`. Cách này hoạt động trên Node 20.6 trở lên, nơi `--import` nằm trong danh sách cho phép của `NODE_OPTIONS`.<sup>[[4]](#references)</sup>
 
 ```bash
 # fileless proof of execution (note: no raw spaces in the data URL)
@@ -313,16 +313,16 @@ NODE_OPTIONS="$PAYLOAD" node -e 'console.log("target")'
 ```
 
 > [!TIP]
-> This is a common way to turn `NODE_OPTIONS` control into RCE on **managed cloud runtimes** whose functions run Node. For example, an attacker who can only change a Lambda's configuration (`lambda:UpdateFunctionConfiguration`, no `iam:PassRole`, no code update) can inject `NODE_OPTIONS=--import data:text/javascript,<payload>` to run code inside the function and steal its execution-role credentials. The injected module runs **before** the handler, which still executes normally afterwards.
+> Đây là cách phổ biến để biến quyền kiểm soát `NODE_OPTIONS` thành RCE trên **các môi trường cloud được quản lý** chạy hàm Node. Ví dụ, kẻ tấn công chỉ có thể thay đổi cấu hình của Lambda (`lambda:UpdateFunctionConfiguration`, không có `iam:PassRole` và không thể cập nhật code) có thể chèn `NODE_OPTIONS=--import data:text/javascript,<payload>` để chạy code bên trong hàm và đánh cắp thông tin xác thực của execution role. Module được chèn chạy **trước** handler, sau đó handler vẫn thực thi bình thường.
 
-For remote gadget chains that set `NODE_OPTIONS` indirectly (for example, prototype-pollution to RCE), check [this other page](../../pentesting-web/deserialization/nodejs-proto-prototype-pollution/prototype-pollution-to-rce.md).
+Để xem các chuỗi gadget từ xa thiết lập `NODE_OPTIONS` gián tiếp (ví dụ, dùng prototype-pollution để đạt RCE), hãy xem [trang khác này](../../pentesting-web/deserialization/nodejs-proto-prototype-pollution/prototype-pollution-to-rce.md).
 
 ### **RUBYLIB & RUBYOPT**
 
-Ruby offers the same class of startup abuse:
+Ruby có cùng kiểu lạm dụng lúc khởi động:
 
-- `RUBYLIB`: prepend directories to Ruby's load path.
-- `RUBYOPT`: inject command-line options such as `-r` into every `ruby` invocation.
+- `RUBYLIB`: thêm các thư mục vào đầu load path của Ruby.
+- `RUBYOPT`: chèn các tùy chọn dòng lệnh như `-r` vào mọi lần gọi `ruby`.
 
 ```bash
 mkdir -p /tmp/rubylib
@@ -330,11 +330,11 @@ printf 'warn "[+] RUBYOPT preload reached"\n' > /tmp/rubylib/ht.rb
 RUBYLIB=/tmp/rubylib RUBYOPT='-rht' ruby -e 'puts :target'
 ```
 
-The 2024 **needrestart** vulnerabilities showed that this is not just a lab trick: the same root-owned helper that was vulnerable to `PYTHONPATH` abuse could also be coerced into running Ruby with an attacker-controlled `RUBYLIB`, loading `enc/encdb.so` from an attacker directory.<sup>[[3]](#references)</sup>
+Các lỗ hổng **needrestart** năm 2024 cho thấy đây không chỉ là một thủ thuật trong lab: cùng một helper do root sở hữu, vốn dễ bị khai thác bằng `PYTHONPATH`, cũng có thể bị ép chạy Ruby với `RUBYLIB` do attacker kiểm soát, rồi tải `enc/encdb.so` từ thư mục của attacker.<sup>[[3]](#references)</sup>
 
 ### **VIMINIT & EXINIT**
 
-Vim/Neovim execute the Ex commands contained in `VIMINIT` (or its `EXINIT` fallback) during a normal startup. Ex commands include `:!cmd` and `:call system(...)`, so controlling the variable yields code execution whenever a victim opens Vim (a root `sudo vim`, `crontab -e`, `visudo`, `git`/`less` spawning `$EDITOR`, etc.).<sup>[[9]](#references)</sup>
+Vim/Neovim thực thi các lệnh Ex trong `VIMINIT` (hoặc biến dự phòng `EXINIT`) khi khởi động bình thường. Lệnh Ex bao gồm `:!cmd` và `:call system(...)`, vì vậy kiểm soát biến này sẽ cho phép thực thi mã mỗi khi nạn nhân mở Vim (chẳng hạn `sudo vim` chạy với quyền root, `crontab -e`, `visudo`, hoặc `git`/`less` gọi `$EDITOR`).<sup>[[9]](#references)</sup>
 
 ```bash
 echo hi > /tmp/victim.txt
@@ -342,16 +342,16 @@ printf ':qa!\n' | VIMINIT='silent! !touch /tmp/vim-executed' vim /tmp/victim.txt
 test -e /tmp/vim-executed && echo 'VIMINIT executed'
 ```
 
-Batch mode (`vim -es`/`-Es`) skips these variables, but a normal interactive startup runs them.
+Batch mode (`vim -es`/`-Es`) bỏ qua các biến này, nhưng khi khởi động bình thường ở chế độ tương tác, chúng sẽ được chạy.
 
 ### **PowerShell (pwsh): PSModulePath, DOTNET_STARTUP_HOOKS & CLR profiler**
 
-PowerShell Core (`pwsh`) runs on Linux/macOS (and Windows) and is a **.NET application**, so several environment variables turn any `pwsh` invocation with an inherited environment into code execution — useful against cron/systemd jobs, CI runners and privileged wrappers that shell out to `pwsh`.
+PowerShell Core (`pwsh`) chạy trên Linux/macOS (và Windows) và là một **ứng dụng .NET**, vì vậy một số biến môi trường có thể khiến mọi lần gọi `pwsh` với môi trường được kế thừa đều thực thi code — hữu ích khi nhắm vào các job cron/systemd, CI runner và wrapper có đặc quyền gọi `pwsh` thông qua shell.
 
-- `PSModulePath`: PowerShell recursively searches every directory in this list for `.psd1`/`.psm1` modules and **auto-loads** one the first time a command it exports is referenced. Prepend a directory and your module's top-level code runs at import time; because resolution is *Alias → Function → Cmdlet*, an exported function can even shadow a built-in cmdlet the victim calls.<sup>[[10]](#references)</sup>
-- `XDG_CONFIG_HOME`: relocates `powershell/Microsoft.PowerShell_profile.ps1`, executed at startup (unless `-NoProfile`).
-- `DOTNET_STARTUP_HOOKS`: managed assembly whose `StartupHook.Initialize()` runs before `Main` (shared by every .NET app).
-- `CORECLR_ENABLE_PROFILING=1` + `CORECLR_PROFILER={guid}` + `CORECLR_PROFILER_PATH=/path/evil.so`: the CLR profiling API loads an attacker library into the process at startup (path vars beat the registry; `DOTNET_*` is the newer alias). On Windows PowerShell 5.1 (.NET Framework) use `COR_ENABLE_PROFILING`/`COR_PROFILER`/`COR_PROFILER_PATH`. MITRE ATT&CK T1574.012.<sup>[[11]](#references)</sup>
+- `PSModulePath`: PowerShell tìm kiếm đệ quy trong mọi thư mục thuộc danh sách này để tìm module `.psd1`/`.psm1` và **tự động tải** một module khi lần đầu có lệnh do module đó xuất được tham chiếu. Thêm một thư mục vào đầu danh sách sẽ khiến code cấp cao nhất trong module của bạn chạy khi import; vì thứ tự phân giải là *Alias → Function → Cmdlet*, một function được export thậm chí có thể ghi đè cmdlet tích hợp mà nạn nhân gọi.<sup>[[10]](#references)</sup>
+- `XDG_CONFIG_HOME`: chuyển vị trí của `powershell/Microsoft.PowerShell_profile.ps1`, file được thực thi khi khởi động (trừ khi dùng `-NoProfile`).
+- `DOTNET_STARTUP_HOOKS`: assembly được quản lý có `StartupHook.Initialize()` chạy trước `Main` (được mọi ứng dụng .NET dùng chung).
+- `CORECLR_ENABLE_PROFILING=1` + `CORECLR_PROFILER={guid}` + `CORECLR_PROFILER_PATH=/path/evil.so`: API profiling của CLR tải thư viện của attacker vào process khi khởi động (các biến path được ưu tiên hơn registry; `DOTNET_*` là alias mới hơn). Trên Windows PowerShell 5.1 (.NET Framework), hãy dùng `COR_ENABLE_PROFILING`/`COR_PROFILER`/`COR_PROFILER_PATH`. MITRE ATT&CK T1574.012.<sup>[[11]](#references)</sup>
 
 ```bash
 # PSModulePath module auto-load hijack
@@ -362,7 +362,7 @@ PSModulePath="/tmp/evil:$PSModulePath" pwsh -Command 'Invoke-Report'
 test -e /tmp/ps-mod-exec && echo 'PSModulePath auto-load executed'
 ```
 
-On Windows, `PSExecutionPolicyPreference=Bypass` additionally removes the "unsigned scripts blocked" guardrail so a planted profile/module actually runs. See the dedicated page for full PoCs:
+Trên Windows, `PSExecutionPolicyPreference=Bypass` còn gỡ bỏ rào chắn "chặn script chưa ký", khiến profile/module được cài vào thực sự chạy. Xem trang chuyên biệt để biết các PoC đầy đủ:
 
 {{#ref}}
 ../../macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-powershell-applications-injection.md
@@ -370,11 +370,11 @@ On Windows, `PSExecutionPolicyPreference=Bypass` additionally removes the "unsig
 
 ### **PAGER, MANPAGER, GIT_PAGER, GIT_EDITOR & LESSOPEN**
 
-Some tools do not just read a path from the environment; they pass the value to a **shell**, an **editor**, or an **input preprocessor**. This makes the following variables especially interesting when a privileged wrapper runs `git`, `man`, `less`, or similar text viewers:
+Một số công cụ không chỉ đọc một đường dẫn từ môi trường; chúng truyền giá trị cho **shell**, **editor** hoặc **bộ tiền xử lý đầu vào**. Điều này khiến các biến sau đặc biệt đáng chú ý khi một wrapper có đặc quyền chạy `git`, `man`, `less` hoặc các trình xem văn bản tương tự:
 
-- `PAGER`, `MANPAGER`, `GIT_PAGER`: choose the pager command.
-- `GIT_EDITOR`, `VISUAL`, `EDITOR`: choose the editor command, often with arguments.
-- `LESSOPEN`, `LESSCLOSE`: define pre/post-processors that run when `less` opens a file.
+- `PAGER`, `MANPAGER`, `GIT_PAGER`: chọn lệnh pager.
+- `GIT_EDITOR`, `VISUAL`, `EDITOR`: chọn lệnh editor, thường kèm đối số.
+- `LESSOPEN`, `LESSCLOSE`: xác định các bộ tiền/hậu xử lý chạy khi `less` mở một tệp.
 
 ```bash
 PAGER='sh -c "exec sh 0<&1 1>&1"' man man
@@ -388,7 +388,7 @@ chmod +x /tmp/lesspipe.sh
 LESSOPEN='|/tmp/lesspipe.sh %s' less /etc/hosts
 ```
 
-Git also supports **env-only config injection** without touching disk via `GIT_CONFIG_COUNT`, `GIT_CONFIG_KEY_<n>`, and `GIT_CONFIG_VALUE_<n>`:
+Git cũng hỗ trợ **chèn cấu hình chỉ qua biến môi trường** mà không cần ghi vào đĩa, thông qua `GIT_CONFIG_COUNT`, `GIT_CONFIG_KEY_<n>` và `GIT_CONFIG_VALUE_<n>`:
 
 ```bash
 GIT_CONFIG_COUNT=1 \
@@ -397,42 +397,41 @@ GIT_CONFIG_VALUE_0='sh -c "exec sh 0<&1 1>&1"' \
 git -p help
 ```
 
-From a post-exploitation perspective, also remember that inherited environments often contain **credentials**, **proxy settings**, **service tokens**, or **cloud keys**. Check [Linux Post Exploitation](../post-exploitation/README.md) for `/proc/<PID>/environ` and `systemd` `Environment=` hunting.
+Từ góc độ post-exploitation, cũng cần nhớ rằng môi trường được kế thừa thường chứa **credentials**, **proxy settings**, **service tokens** hoặc **cloud keys**. Xem [Linux Post Exploitation](../post-exploitation/README.md) để tìm kiếm `/proc/<PID>/environ` và `Environment=` của `systemd`.
 
 ### PS1
 
-Change how your prompt looks.
+Thay đổi giao diện của prompt.
 
-[**This is an example**](https://gist.github.com/carlospolop/43f7cd50f3deea972439af3222b68808)
+[**Đây là một ví dụ**](https://gist.github.com/carlospolop/43f7cd50f3deea972439af3222b68808)
 
 Root:
 
-![PERL5OPT & PERL5LIB - PS1: This is an example](<../images/image (897).png>)
+![PERL5OPT & PERL5LIB - PS1: Đây là một ví dụ](<../images/image (897).png>)
 
-Regular user:
+Người dùng thông thường:
 
-![PERL5OPT & PERL5LIB - PS1: One, two and three backgrounded jobs](<../images/image (740).png>)
+![PERL5OPT & PERL5LIB - PS1: Một, hai và ba công việc chạy nền](<../images/image (740).png>)
 
-One, two and three backgrounded jobs:
+Một, hai và ba công việc chạy nền:
 
-![PERL5OPT & PERL5LIB - PS1: One, two and three backgrounded jobs](<../images/image (145).png>)
+![PERL5OPT & PERL5LIB - PS1: Một, hai và ba công việc chạy nền](<../images/image (145).png>)
 
-One background job, one stopped and last command didn't finish correctly:
+Một công việc chạy nền, một công việc bị tạm dừng và lệnh cuối cùng không hoàn tất chính xác:
 
-![PERL5OPT & PERL5LIB - PS1: One background job, one stopped and last command didn't finish correctly](<../images/image (715).png>)
+![PERL5OPT & PERL5LIB - PS1: Một công việc chạy nền, một công việc bị tạm dừng và lệnh cuối cùng không hoàn tất chính xác](<../images/image (715).png>)
 
 ## References
 
-- [1] [GNU Bash Manual - Bash Startup Files](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html)
-- [2] [ld.so(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ld.so.8.html)
-- [3] [Qualys - LPEs in needrestart](https://www.qualys.com/2024/11/19/needrestart/needrestart.txt)
-- [4] [Node.js CLI documentation - `NODE_OPTIONS`](https://nodejs.org/api/cli.html)
-- [5] [Common environment variables - Geek University](https://geek-university.com/linux/common-environment-variables/)
-- [6] [CVE-2023-4911: Looney Tunables - Local Privilege Escalation in the glibc's ld.so - Qualys](https://blog.qualys.com/vulnerabilities-threat-research/2023/10/03/cve-2023-4911-looney-tunables-local-privilege-escalation-in-the-glibcs-ld-so)
-- [7] [GNU Bash Manual - Bash Variables (`PS4`) & The Set Builtin (`xtrace`/`SHELLOPTS`)](https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html)
-- [8] [PEP 553 - Built-in breakpoint() and PYTHONBREAKPOINT](https://peps.python.org/pep-0553/)
-- [9] [Vim documentation - starting.txt (`VIMINIT`, `EXINIT`)](https://vimhelp.org/starting.txt.html#initialization)
-- [10] [about_PSModulePath & PowerShell module auto-loading](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_psmodulepath)
-- [11] [.NET debugging & profiling config settings (`CORECLR_`/`DOTNET_`/`COR_` profiler variables)](https://learn.microsoft.com/en-us/dotnet/core/runtime-config/debugging-profiling)
-
+- [1] [Sổ tay GNU Bash - Tệp khởi động Bash](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html)
+- [2] [ld.so(8) - Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man8/ld.so.8.html)
+- [3] [Qualys - LPE trong needrestart](https://www.qualys.com/2024/11/19/needrestart/needrestart.txt)
+- [4] [Tài liệu CLI Node.js - `NODE_OPTIONS`](https://nodejs.org/api/cli.html)
+- [5] [Các biến môi trường phổ biến - Geek University](https://geek-university.com/linux/common-environment-variables/)
+- [6] [CVE-2023-4911: Looney Tunables - Leo thang đặc quyền cục bộ trong ld.so của glibc - Qualys](https://blog.qualys.com/vulnerabilities-threat-research/2023/10/03/cve-2023-4911-looney-tunables-local-privilege-escalation-in-the-glibcs-ld-so)
+- [7] [Sổ tay GNU Bash - Các biến Bash (`PS4`) và lệnh dựng sẵn Set (`xtrace`/`SHELLOPTS`)](https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html)
+- [8] [PEP 553 - breakpoint() tích hợp sẵn và PYTHONBREAKPOINT](https://peps.python.org/pep-0553/)
+- [9] [Tài liệu Vim - starting.txt (`VIMINIT`, `EXINIT`)](https://vimhelp.org/starting.txt.html#initialization)
+- [10] [about_PSModulePath và tự động tải module PowerShell](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_psmodulepath)
+- [11] [Cài đặt cấu hình gỡ lỗi và lập hồ sơ .NET (các biến profiler `CORECLR_`/`DOTNET_`/`COR_`)](https://learn.microsoft.com/en-us/dotnet/core/runtime-config/debugging-profiling)
 {{#include ../../banners/hacktricks-training.md}}

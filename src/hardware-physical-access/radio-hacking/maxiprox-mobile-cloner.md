@@ -1,84 +1,83 @@
-# Building a Portable HID MaxiProx 125 kHz Mobile Cloner
+# Xây dựng thiết bị clone thẻ HID MaxiProx 125 kHz di động
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Goal
-Turn a mains-powered HID MaxiProx 5375 long-range 125 kHz reader into a field-deployable, battery-powered badge cloner that silently harvests proximity cards during physical-security assessments.
+## Mục tiêu
+Chuyển đổi đầu đọc tầm xa HID MaxiProx 5375 dùng nguồn điện lưới, hoạt động ở tần số 125 kHz, thành thiết bị clone thẻ dùng pin, có thể mang đi hiện trường và âm thầm thu thập thẻ proximity trong các đợt đánh giá an ninh vật lý.
 
-The conversion covered here is based on TrustedSec’s “Let’s Clone a Cloner – Part 3: Putting It All Together” research series and combines mechanical, electrical and RF considerations so the final device can be thrown in a backpack and immediately used on site.<sup>[[1]](#references)</sup>
+Quy trình chuyển đổi này dựa trên loạt nghiên cứu “Let’s Clone a Cloner – Part 3: Putting It All Together” của TrustedSec, kết hợp các yếu tố cơ khí, điện và RF để tạo ra thiết bị có thể bỏ vào ba lô và sử dụng ngay tại hiện trường.<sup>[[1]](#references)</sup>
 
 > [!warning]
-> Manipulating mains-powered equipment and Lithium-ion power-banks can be dangerous.  Verify every connection **before** energising the circuit and keep the antennas, coax and ground planes exactly as they were in the factory design to avoid detuning the reader.
+> Thao tác với thiết bị dùng điện lưới và pin dự phòng Lithium-ion có thể nguy hiểm. Hãy kiểm tra mọi kết nối **trước khi** cấp điện cho mạch, đồng thời giữ nguyên vị trí ăng-ten, cáp đồng trục và mặt phẳng nối đất như thiết kế ban đầu để tránh làm lệch tần số cộng hưởng của đầu đọc.
 
-## Bill of Materials (BOM)
+## Danh mục vật tư (BOM)
 
-* HID MaxiProx 5375 reader (or any 12 V HID Prox® long-range reader)
-* ESP RFID Tool v2.2 (ESP32-based Wiegand sniffer/logger)
-* USB-PD (Power-Delivery) trigger module able to negotiate 12 V @ ≥3 A
-* 100 W USB-C power-bank (outputs 12 V PD profile)
-* 26 AWG silicone-insulated hook-up wire – red/white
-* Panel-mount SPST toggle switch (for beeper kill-switch)
-* NKK AT4072 switch-guard / accident-proof cap
-* Soldering iron, solder wick & desolder pump
-* ABS-rated hand tools: coping-saw, utility-knife, flat & half-round files
-* Drill bits 1/16″ (1.5 mm) and 1/8″ (3 mm)
-* 3 M VHB double-sided tape & Zip-ties
+* Đầu đọc HID MaxiProx 5375 (hoặc bất kỳ đầu đọc tầm xa HID Prox® 12 V nào)
+* ESP RFID Tool v2.2 (thiết bị dò/ghi log Wiegand dùng ESP32)
+* Module kích hoạt USB-PD (Power-Delivery) có thể thương lượng 12 V @ ≥3 A
+* Pin dự phòng USB-C 100 W (có cấu hình đầu ra 12 V PD)
+* Dây đấu nối lõi đồng 26 AWG, cách điện silicone – đỏ/trắng
+* Công tắc gạt SPST lắp trên bảng điều khiển (dùng làm công tắc ngắt còi)
+* Nắp bảo vệ công tắc NKK AT4072 / nắp chống kích hoạt nhầm
+* Mỏ hàn, dây hút thiếc và bơm hút thiếc
+* Dụng cụ cầm tay phù hợp với ABS: cưa lọng, dao rọc, giũa phẳng và giũa bán nguyệt
+* Mũi khoan 1/16″ (1.5 mm) và 1/8″ (3 mm)
+* Băng keo hai mặt 3 M VHB và dây rút
 
-## 1. Power Sub-System
+## 1. Phân hệ nguồn
 
-1. Desolder and remove the factory buck-converter daughter-board used to generate 5 V for the logic PCB.
-2. Mount a USB-PD trigger next to the ESP RFID Tool and route the trigger’s USB-C receptacle to the outside of the enclosure.
-3. The PD trigger negotiates 12 V from the power-bank and feeds it directly to the MaxiProx (the reader natively expects 10–14 V).  A secondary 5 V rail is taken from the ESP board to power any accessories.
-4. The 100 W battery pack is positioned flush against the internal standoff so there are **no** power cables draped across the ferrite antenna, preserving RF performance.
+1. Tháo hàn và gỡ bo mạch buck-converter gốc dùng để tạo nguồn 5 V cho PCB logic.
+2. Lắp module kích hoạt USB-PD cạnh ESP RFID Tool và đưa cổng USB-C của module ra bên ngoài vỏ.
+3. Module PD thương lượng nguồn 12 V từ pin dự phòng và cấp trực tiếp cho MaxiProx (đầu đọc vốn yêu cầu 10–14 V). Một đường nguồn 5 V phụ được lấy từ bo mạch ESP để cấp điện cho các phụ kiện.
+4. Đặt pin 100 W sát khít với trụ đỡ bên trong để **không có** dây nguồn nào vắt qua ăng-ten ferrite, nhờ đó duy trì hiệu suất RF.
 
-## 2. Beeper Kill-Switch – Silent Operation
+## 2. Công tắc ngắt còi – Vận hành im lặng
 
-1. Locate the two speaker pads on the MaxiProx logic board.
-2. Wick *both* pads clean, then re-solder only the **negative** pad.
-3. Solder 26 AWG wires (white = negative, red = positive) to the beeper pads and route them through a newly cut slot to a panel-mount SPST switch.
-4. When the switch is open the beeper circuit is broken and the reader operates in complete silence – ideal for covert badge harvesting.
-5. Fit an NKK AT4072 spring-loaded safety cap over the toggle.  Carefully enlarge the bore with a coping-saw / file until it snaps over the switch body.  The guard prevents accidental activation inside a backpack.
+1. Xác định hai điểm hàn của loa trên bo mạch logic MaxiProx.
+2. Dùng dây hút thiếc làm sạch *cả hai* điểm hàn, sau đó chỉ hàn lại điểm **âm**.
+3. Hàn dây 26 AWG (trắng = âm, đỏ = dương) vào các điểm hàn của còi và luồn dây qua một khe mới cắt đến công tắc SPST lắp trên bảng điều khiển.
+4. Khi công tắc mở, mạch còi bị ngắt và đầu đọc hoạt động hoàn toàn im lặng – phù hợp để bí mật thu thập thẻ.
+5. Lắp nắp an toàn có lò xo NKK AT4072 lên công tắc gạt. Cẩn thận mở rộng lỗ bằng cưa lọng/giũa cho đến khi nắp bật khớp vào thân công tắc. Nắp bảo vệ ngăn công tắc vô tình bật bên trong ba lô.
 
-## 3. Enclosure & Mechanical Work
+## 3. Vỏ thiết bị và gia công cơ khí
 
-• Use flush cutters then a knife & file to *remove* the internal ABS “bump-out” so the large USB-C battery sits flat on the standoff.
-• Carve two parallel channels in the enclosure wall for the USB-C cable; this locks the battery in place and eliminates movement/vibration.
-• Create a rectangular aperture for the battery’s **power** button:
-  1. Tape a paper stencil over the location.
-  2. Drill 1/16″ pilot holes in all four corners.
-  3. Enlarge with a 1/8″ bit.
-  4. Join the holes with a coping saw; finish the edges with a file.  
-  ✱  A rotary Dremel was *avoided* – the high-speed bit melts thick ABS and leaves an ugly edge.
+• Dùng kìm cắt sát, sau đó dùng dao và giũa để *loại bỏ* phần “lồi” ABS bên trong, giúp pin USB-C cỡ lớn nằm phẳng trên trụ đỡ.
+• Tạo hai rãnh song song trên thành vỏ để luồn cáp USB-C; cách này cố định pin và loại bỏ tình trạng xê dịch/rung.
+• Tạo một lỗ chữ nhật cho nút **nguồn** của pin:
+  1. Dán một khuôn giấy lên vị trí cần cắt.
+  2. Khoan lỗ dẫn hướng 1/16″ ở cả bốn góc.
+  3. Mở rộng bằng mũi khoan 1/8″.
+  4. Nối các lỗ bằng cưa lọng; dùng giũa hoàn thiện các cạnh.  
+  ✱  *Không dùng* Dremel quay – mũi khoan tốc độ cao làm chảy lớp ABS dày và để lại cạnh xấu.
 
-## 4. Final Assembly
+## 4. Lắp ráp hoàn thiện
 
-1. Re-install the MaxiProx logic board and re-solder the SMA pigtail to the reader’s PCB ground pad.
-2. Mount the ESP RFID Tool and USB-PD trigger using 3 M VHB.
-3. Dress all wiring with zip-ties, keeping power leads **far** from the antenna loop.
-4. Tighten the enclosure screws until the battery is lightly compressed; the internal friction prevents the pack from shifting when the device recoils after every card read.
+1. Lắp lại bo mạch logic MaxiProx và hàn lại dây SMA vào điểm nối đất trên PCB của đầu đọc.
+2. Dùng băng keo 3 M VHB để lắp ESP RFID Tool và module kích hoạt USB-PD.
+3. Bó gọn toàn bộ dây bằng dây rút, giữ dây nguồn **cách xa** vòng ăng-ten.
+4. Siết vít vỏ cho đến khi pin bị nén nhẹ; lực ma sát bên trong giúp pin không xê dịch khi thiết bị giật lùi sau mỗi lần đọc thẻ.
 
-## 5. Range & Shielding Tests
+## 5. Kiểm tra tầm đọc và khả năng chắn sóng
 
-* Using a 125 kHz **Pupa** test card the portable cloner achieved consistent reads at **≈ 8 cm** in free-air – identical to mains-powered operation.<sup>[[1]](#references)</sup>
-* Placing the reader inside a thin-walled metal cash box (to simulate a bank lobby desk) reduced range to ≤ 2 cm, confirming that substantial metal enclosures act as effective RF shields.<sup>[[1]](#references)</sup>
+* Với thẻ thử nghiệm **Pupa** 125 kHz, thiết bị clone di động đọc ổn định ở khoảng cách **≈ 8 cm** trong không gian thoáng – giống hệt khi dùng nguồn điện lưới.<sup>[[1]](#references)</sup>
+* Đặt đầu đọc trong hộp đựng tiền bằng kim loại thành mỏng (mô phỏng bàn ở sảnh ngân hàng) làm giảm tầm đọc xuống ≤ 2 cm, xác nhận rằng các vỏ kim loại lớn có tác dụng chắn RF hiệu quả.<sup>[[1]](#references)</sup>
 
-## Usage Workflow
+## Quy trình sử dụng
 
-1. Charge the USB-C battery, connect it, and flip the main power switch.
-2. (Optional) Open the beeper guard and enable audible feedback when bench-testing; lock it down before covert field use.
-3. Walk past the target badge holder – the MaxiProx will energise the card and the ESP RFID Tool captures the Wiegand stream.
-4. Dump captured credentials over Wi-Fi or USB-UART and replay/clone as required.
+1. Sạc pin USB-C, kết nối pin và bật công tắc nguồn chính.
+2. (Tùy chọn) Mở nắp bảo vệ còi và bật phản hồi âm thanh khi kiểm tra trên bàn; khóa nắp lại trước khi sử dụng bí mật tại hiện trường.
+3. Đi ngang qua người đang mang thẻ mục tiêu – MaxiProx sẽ kích hoạt thẻ và ESP RFID Tool sẽ ghi lại luồng Wiegand.
+4. Trích xuất thông tin xác thực đã ghi qua Wi-Fi hoặc USB-UART rồi replay/clone khi cần.
 
-## Troubleshooting
+## Khắc phục sự cố
 
-| Symptom | Likely Cause | Fix |
+| Triệu chứng | Nguyên nhân có thể | Cách khắc phục |
 |---------|--------------|------|
-| Reader reboots when card presented | PD trigger negotiated 9 V not 12 V | Verify trigger jumpers / try higher-power USB-C cable |
-| No read range | Battery or wiring sitting *on top* of the antenna | Re-route cables & keep 2 cm clearance around the ferrite loop |
-| Beeper still chirps | Switch wired on positive lead instead of negative | Move kill-switch to break the **negative** speaker trace |
+| Đầu đọc khởi động lại khi đưa thẻ đến gần | Module kích hoạt PD thương lượng 9 V thay vì 12 V | Kiểm tra jumper trên module / thử cáp USB-C công suất cao hơn |
+| Không có tầm đọc | Pin hoặc dây nằm *trên* ăng-ten | Đi lại dây và giữ khoảng cách 2 cm quanh vòng ferrite |
+| Còi vẫn kêu | Công tắc được mắc vào dây dương thay vì dây âm | Chuyển công tắc ngắt sang ngắt đường **âm** của loa |
 
 ## References
 
-- [1] [Let’s Clone a Cloner – Part 3 (TrustedSec)](https://trustedsec.com/blog/lets-clone-a-cloner-part-3-putting-it-all-together)
-
+- [1] [Clone một thiết bị clone – Phần 3 (TrustedSec)](https://trustedsec.com/blog/lets-clone-a-cloner-part-3-putting-it-all-together)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,52 +1,51 @@
-# FZ - 125kHz RFID
+# FZ - RFID 125kHz
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro
+## Giới thiệu
 
-For background on how 125 kHz tags work, see:
+Để tìm hiểu về cách hoạt động của thẻ 125 kHz, xem:
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-The [low-frequency RFID introduction](../pentesting-rfid.md#low-frequency-rfid-tags-125khz) explains the common tag families and their data formats.
+[Phần giới thiệu về RFID tần số thấp](../pentesting-rfid.md#low-frequency-rfid-tags-125khz) giải thích các họ thẻ phổ biến và định dạng dữ liệu của chúng.
 
-## Actions
+## Thao tác
 
-### Read
+### Đọc
 
-Use **Read** to capture the tag data. After a successful read, Flipper Zero can emulate the saved tag.<sup>[[1]](#references)</sup>
+Dùng **Read** để thu thập dữ liệu thẻ. Sau khi đọc thành công, Flipper Zero có thể mô phỏng thẻ đã lưu.<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> Some intercom readers attempt to detect writable duplicate tags by issuing a write command before reading. A Flipper Zero emulation does not expose writable tag memory in the same way.<sup>[[1]](#references)</sup>
+> Một số đầu đọc intercom thử phát hiện thẻ sao chép có thể ghi được bằng cách gửi lệnh ghi trước khi đọc. Flipper Zero không mô phỏng bộ nhớ có thể ghi của thẻ theo cách tương tự.<sup>[[1]](#references)</sup>
 
-### Add manually
+### Thêm thủ công
 
-You can manually enter tag data in Flipper Zero, save it, and then emulate it.<sup>[[1]](#references)</sup>
+Bạn có thể nhập dữ liệu thẻ vào Flipper Zero theo cách thủ công, lưu lại rồi mô phỏng thẻ đó.<sup>[[1]](#references)</sup>
 
-#### IDs on cards
+#### ID trên thẻ
 
-Sometimes a card has all or part of its ID printed on its exterior.
+Đôi khi, toàn bộ hoặc một phần ID của thẻ được in ở mặt ngoài.
 
 - **EM Marin**
 
-For example, the pictured EM-Marin card exposes the last three of its five ID bytes. If the tag cannot be read, the two missing bytes may be brute-forced.
+Ví dụ, thẻ EM-Marin trong hình hiển thị ba byte cuối trong tổng số năm byte ID. Nếu không đọc được thẻ, có thể brute-force hai byte còn thiếu.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
 - **HID**
 
-Similarly, the pictured HID card prints only two of the three ID bytes.
+Tương tự, thẻ HID trong hình chỉ in hai trong ba byte ID.
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
-### Emulate/Write
+### Mô phỏng/Ghi
 
-After reading a tag or entering its ID manually, Flipper Zero can emulate the saved credential. For supported writable tags, it can also write the saved data to a compatible card.<sup>[[1]](#references)</sup>
+Sau khi đọc thẻ hoặc nhập ID theo cách thủ công, Flipper Zero có thể mô phỏng thông tin xác thực đã lưu. Với các thẻ có thể ghi được hỗ trợ, thiết bị cũng có thể ghi dữ liệu đã lưu lên thẻ tương thích.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Flipper Zero: Diving into RFID Protocols](https://blog.flipperzero.one/rfid/)
-
+- [1] [Flipper Zero: Tìm hiểu sâu về các giao thức RFID](https://blog.flipperzero.one/rfid/)
 {{#include ../../../banners/hacktricks-training.md}}

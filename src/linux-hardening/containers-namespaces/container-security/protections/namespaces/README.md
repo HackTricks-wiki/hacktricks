@@ -2,33 +2,33 @@
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-Namespaces are the kernel feature that makes a container feel like "its own machine" even though it is really just a host process tree. They do not create a new kernel and they do not virtualize everything, but they do let the kernel present different views of selected resources to different groups of processes. That is the core of the container illusion: the workload sees a filesystem, process table, network stack, hostname, IPC resources, and user/group identity model that appear local, even though the underlying system is shared. <sup>[[1]](#references)</sup>
+Namespaces là tính năng của kernel giúp container tạo cảm giác như đang chạy trên “máy riêng”, dù thực chất nó chỉ là một cây tiến trình trên host. Chúng không tạo kernel mới và cũng không ảo hóa mọi thứ, nhưng cho phép kernel hiển thị các góc nhìn khác nhau về những tài nguyên được chọn cho các nhóm tiến trình khác nhau. Đây là cốt lõi của ảo giác container: workload thấy một filesystem, bảng tiến trình, network stack, hostname, tài nguyên IPC và mô hình định danh user/group có vẻ như thuộc về môi trường cục bộ, dù hệ thống bên dưới được chia sẻ. <sup>[[1]](#references)</sup>
 
-This is why namespaces are the first concept most people encounter when they learn how containers work. At the same time, they are one of the most commonly misunderstood concepts because readers often assume that "has namespaces" means "is safely isolated". In reality, a namespace only isolates the specific class of resources it was designed for. A process can have a private PID namespace and still be dangerous because it has a writable host bind mount. It can have a private network namespace and still be dangerous because it retains `CAP_SYS_ADMIN` and runs without seccomp. Namespaces are foundational, but they are only one layer in the final boundary.
+Đây là lý do namespaces là khái niệm đầu tiên mà hầu hết mọi người gặp khi tìm hiểu cách container hoạt động. Đồng thời, đây cũng là một trong những khái niệm thường bị hiểu sai nhất, vì người đọc thường cho rằng “có namespaces” đồng nghĩa với “được cô lập an toàn”. Trên thực tế, một namespace chỉ cô lập đúng loại tài nguyên mà nó được thiết kế để xử lý. Một tiến trình có thể nằm trong PID namespace riêng nhưng vẫn nguy hiểm vì có bind mount của host cho phép ghi. Nó có thể nằm trong network namespace riêng nhưng vẫn nguy hiểm vì giữ `CAP_SYS_ADMIN` và chạy mà không có seccomp. Namespaces là nền tảng, nhưng chỉ là một lớp trong ranh giới bảo vệ cuối cùng.
 
-## Namespace Types
+## Các loại Namespace
 
-Linux containers commonly rely on several namespace types at the same time. The **mount namespace** gives the process a separate mount table and therefore a controlled filesystem view. The **PID namespace** changes process visibility and numbering so the workload sees its own process tree. The **network namespace** isolates interfaces, routes, sockets, and firewall state. The **IPC namespace** isolates SysV IPC and POSIX message queues. The **UTS namespace** isolates hostname and NIS domain name. The **user namespace** remaps user and group IDs so that root inside the container does not necessarily mean root on the host. The **cgroup namespace** virtualizes the visible cgroup hierarchy, and the **time namespace** virtualizes selected clocks in newer kernels. <sup>[[1]](#references)</sup> <sup>[[2]](#references)</sup>
+Linux container thường dựa vào nhiều loại namespace cùng lúc. **Mount namespace** cung cấp cho tiến trình một bảng mount riêng, từ đó kiểm soát góc nhìn filesystem. **PID namespace** thay đổi khả năng hiển thị và cách đánh số tiến trình để workload thấy cây tiến trình của riêng nó. **Network namespace** cô lập các interface, route, socket và trạng thái firewall. **IPC namespace** cô lập SysV IPC và hàng đợi thông điệp POSIX. **UTS namespace** cô lập hostname và tên miền NIS. **User namespace** ánh xạ lại user ID và group ID để root bên trong container không nhất thiết là root trên host. **Cgroup namespace** ảo hóa hệ thống phân cấp cgroup hiển thị, còn **time namespace** ảo hóa một số clock được chọn trong các kernel mới hơn. <sup>[[1]](#references)</sup> <sup>[[2]](#references)</sup>
 
-Each of these namespaces solves a different problem. This is why practical container security analysis often comes down to checking **which namespaces are isolated** and **which ones have been deliberately shared with the host**.
+Mỗi namespace trong số này giải quyết một vấn đề khác nhau. Vì vậy, việc phân tích bảo mật container trong thực tế thường tập trung vào việc kiểm tra **những namespace nào được cô lập** và **những namespace nào được chủ ý chia sẻ với host**.
 
-## Host Namespace Sharing
+## Chia sẻ Namespace của Host
 
-Many container breakouts do not begin with a kernel vulnerability. They begin with an operator deliberately weakening the isolation model. The examples `--pid=host`, `--network=host`, and `--userns=host` are **Docker/Podman-style CLI flags** used here as concrete examples of host namespace sharing. Other runtimes express the same idea differently. In Kubernetes the equivalents usually appear as Pod settings such as `hostPID: true`, `hostNetwork: true`, or `hostIPC: true`. In lower-level runtime stacks such as containerd or CRI-O, the same behavior is often reached through the generated OCI runtime configuration rather than through a user-facing flag with the same name. In all of these cases, the result is similar: the workload no longer receives the default isolated namespace view. <sup>[[2]](#references)</sup> <sup>[[3]](#references)</sup>
+Nhiều vụ container breakout không bắt đầu từ lỗ hổng kernel. Chúng bắt đầu khi operator chủ ý làm suy yếu mô hình cô lập. Các ví dụ `--pid=host`, `--network=host` và `--userns=host` là **các cờ CLI kiểu Docker/Podman** được dùng ở đây làm ví dụ cụ thể về việc chia sẻ namespace của host. Các runtime khác thể hiện cùng ý tưởng theo cách khác. Trong Kubernetes, các thiết lập tương đương thường xuất hiện dưới dạng cài đặt Pod như `hostPID: true`, `hostNetwork: true` hoặc `hostIPC: true`. Trong các runtime stack cấp thấp hơn như containerd hoặc CRI-O, hành vi tương tự thường được thiết lập thông qua cấu hình runtime OCI được tạo ra, thay vì một cờ giao diện người dùng có cùng tên. Trong tất cả các trường hợp này, kết quả tương tự nhau: workload không còn nhận được góc nhìn namespace cô lập mặc định. <sup>[[2]](#references)</sup> <sup>[[3]](#references)</sup>
 
-This is why namespace reviews should never stop at "the process is in some namespace". The important question is whether the namespace is private to the container, shared with sibling containers, or joined directly to the host. In Kubernetes the same idea appears with flags such as `hostPID`, `hostNetwork`, and `hostIPC`. The names change between platforms, but the risk pattern is the same: a shared host namespace makes the container's remaining privileges and reachable host state much more meaningful.
+Đây là lý do việc rà soát namespace không nên dừng lại ở kết luận “tiến trình nằm trong một namespace nào đó”. Câu hỏi quan trọng là namespace đó chỉ dành riêng cho container, được chia sẻ với các container cùng nhóm, hay được kết nối trực tiếp với host. Trong Kubernetes, ý tưởng tương tự được thể hiện qua các cờ như `hostPID`, `hostNetwork` và `hostIPC`. Tên gọi thay đổi tùy nền tảng, nhưng kiểu rủi ro vẫn giống nhau: namespace dùng chung với host khiến các đặc quyền còn lại của container và trạng thái host mà nó có thể truy cập trở nên đáng kể hơn nhiều.
 
-## Inspection
+## Kiểm tra
 
-The simplest overview is:
+Tổng quan đơn giản nhất là:
 
 ```bash
 ls -l /proc/self/ns
 ```
 
-Each entry is a symbolic link with an inode-like identifier. If two processes point to the same namespace identifier, they are in the same namespace of that type. That makes `/proc` a very useful place to compare the current process with other interesting processes on the machine.
+Mỗi mục là một symbolic link có mã định danh tương tự inode. Nếu hai process trỏ đến cùng một mã định danh namespace, chúng nằm trong cùng một namespace thuộc loại đó. Vì vậy, `/proc` là nơi rất hữu ích để so sánh process hiện tại với các process đáng chú ý khác trên máy.
 
-These quick commands are often enough to start:
+Các lệnh nhanh sau đây thường đủ để bắt đầu:
 
 ```bash
 readlink /proc/self/ns/mnt
@@ -37,11 +37,11 @@ readlink /proc/self/ns/net
 readlink /proc/1/ns/mnt
 ```
 
-From there, the next step is to compare the container process with host or neighboring processes and determine whether a namespace is actually private or not.
+Từ đó, bước tiếp theo là so sánh tiến trình trong container với các tiến trình trên host hoặc lân cận, rồi xác định namespace có thực sự riêng tư hay không.
 
-### Enumerating Namespace Instances From The Host
+### Liệt kê các phiên bản namespace từ host
 
-When you already have host access and want to understand how many distinct namespaces of a given type exist, `/proc` gives a quick inventory:
+Khi đã có quyền truy cập host và muốn biết có bao nhiêu namespace riêng biệt thuộc một loại nhất định, `/proc` cung cấp danh sách nhanh:
 
 ```bash
 sudo find /proc -maxdepth 3 -type l -name mnt    -exec readlink {} \; 2>/dev/null | sort -u
@@ -54,17 +54,17 @@ sudo find /proc -maxdepth 3 -type l -name cgroup -exec readlink {} \; 2>/dev/nul
 sudo find /proc -maxdepth 3 -type l -name time   -exec readlink {} \; 2>/dev/null | sort -u
 ```
 
-If you want to find which processes belong to one specific namespace identifier, switch from `readlink` to `ls -l` and grep for the target namespace number:
+Nếu muốn tìm các tiến trình thuộc về một mã định danh namespace cụ thể, hãy thay `readlink` bằng `ls -l` rồi grep theo số namespace mục tiêu:
 
 ```bash
 sudo find /proc -maxdepth 3 -type l -name mnt -exec ls -l {} \; 2>/dev/null | grep <ns-number>
 ```
 
-These commands are useful because they let you answer whether a host is running one isolated workload, many isolated workloads, or a mixture of shared and private namespace instances.
+Các lệnh này hữu ích vì chúng giúp bạn xác định liệu host đang chạy một workload được cô lập, nhiều workload được cô lập hay kết hợp các instance namespace dùng chung và riêng tư.
 
-### Entering A Target Namespace
+### Vào Namespace Mục Tiêu
 
-When the caller has sufficient privilege, `nsenter` is the standard way to join another process's namespace:
+Khi caller có đủ quyền, `nsenter` là cách tiêu chuẩn để tham gia namespace của một tiến trình khác:
 
 ```bash
 nsenter -m TARGET_PID --pid /bin/bash   # mount
@@ -77,11 +77,11 @@ nsenter -C TARGET_PID --pid /bin/bash   # cgroup
 nsenter -T TARGET_PID --pid /bin/bash   # time
 ```
 
-The point of listing these forms together is not that every assessment needs all of them, but that namespace-specific post-exploitation often becomes much easier once the operator knows the exact entry syntax instead of remembering only the all-namespaces form.
+Mục đích của việc liệt kê các dạng này cùng nhau không phải là mọi đợt đánh giá đều cần tất cả, mà là hoạt động post-exploitation theo namespace thường dễ hơn nhiều khi operator biết chính xác cú pháp để tham gia namespace, thay vì chỉ nhớ dạng dùng cho tất cả namespace.
 
-## Pages
+## Các trang
 
-The following pages explain each namespace in more detail:
+Các trang sau giải thích chi tiết hơn về từng namespace:
 
 {{#ref}}
 mount-namespace.md
@@ -115,23 +115,22 @@ cgroup-namespace.md
 time-namespace.md
 {{#endref}}
 
-As you read them, keep two ideas in mind. First, each namespace isolates only one kind of view. Second, a private namespace is useful only if the rest of the privilege model still makes that isolation meaningful.
+Khi đọc các trang này, hãy ghi nhớ hai ý. Thứ nhất, mỗi namespace chỉ cô lập một kiểu góc nhìn. Thứ hai, namespace riêng chỉ hữu ích nếu phần còn lại của mô hình đặc quyền vẫn khiến sự cô lập đó có ý nghĩa.
 
-## Runtime Defaults
+## Mặc định của runtime
 
-| Runtime / platform | Default namespace posture | Common manual weakening |
+| Runtime / nền tảng | Cấu hình namespace mặc định | Cách phổ biến để nới lỏng thủ công |
 | --- | --- | --- |
-| Docker Engine | New mount, PID, network, IPC, and UTS namespaces by default; user namespaces are available but not enabled by default in standard rootful setups | `--pid=host`, `--network=host`, `--ipc=host`, `--uts=host`, `--userns=host`, `--cgroupns=host`, `--privileged` |
-| Podman | New namespaces by default; rootless Podman automatically uses a user namespace; cgroup namespace defaults depend on cgroup version | `--pid=host`, `--network=host`, `--ipc=host`, `--uts=host`, `--userns=host`, `--cgroupns=host`, `--privileged` |
-| Kubernetes | Pods do **not** share host PID, network, or IPC by default; Pod networking is private to the Pod, not to each individual container; user namespaces are opt-in via `spec.hostUsers: false` on supported clusters | `hostPID: true`, `hostNetwork: true`, `hostIPC: true`, `spec.hostUsers: true` / omitting user-namespace opt-in, privileged workload settings |
-| containerd / CRI-O under Kubernetes | Usually follow Kubernetes Pod defaults | same as Kubernetes row; direct CRI/OCI specs can also request host namespace joins |
+| Docker Engine | Mặc định tạo namespace mount, PID, network, IPC và UTS mới; có hỗ trợ user namespace nhưng không bật mặc định trong các cấu hình rootful tiêu chuẩn | `--pid=host`, `--network=host`, `--ipc=host`, `--uts=host`, `--userns=host`, `--cgroupns=host`, `--privileged` |
+| Podman | Mặc định tạo namespace mới; Podman rootless tự động dùng user namespace; mặc định của cgroup namespace tùy thuộc vào phiên bản cgroup | `--pid=host`, `--network=host`, `--ipc=host`, `--uts=host`, `--userns=host`, `--cgroupns=host`, `--privileged` |
+| Kubernetes | Mặc định, các Pod **không** dùng chung PID, network hoặc IPC của host; network của Pod là riêng cho Pod, không riêng cho từng container; user namespace phải được bật rõ ràng bằng `spec.hostUsers: false` trên các cluster được hỗ trợ | `hostPID: true`, `hostNetwork: true`, `hostIPC: true`, `spec.hostUsers: true` / không bật user namespace, thiết lập workload privileged |
+| containerd / CRI-O trên Kubernetes | Thường tuân theo mặc định của Kubernetes Pod | như hàng Kubernetes; các đặc tả CRI/OCI trực tiếp cũng có thể yêu cầu tham gia namespace của host |
 
-The main portability rule is simple: the **concept** of host namespace sharing is common across runtimes, but the **syntax** is runtime-specific.
+Quy tắc chính để đảm bảo tính di động rất đơn giản: **khái niệm** chia sẻ namespace của host là phổ biến giữa các runtime, nhưng **cú pháp** thì tùy runtime.
 
 ## References
 
-- [1] [namespaces(7) - Linux manual page](https://man7.org/linux/man-pages/man7/namespaces.7.html)
-- [2] [Open Container Initiative - Linux container namespaces](https://github.com/opencontainers/runtime-spec/blob/main/config-linux.md#namespaces)
-- [3] [Kubernetes API Reference - PodSpec host namespaces](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#PodSpec)
-
+- [1] [namespaces(7) - trang hướng dẫn Linux](https://man7.org/linux/man-pages/man7/namespaces.7.html)
+- [2] [Open Container Initiative - namespace container Linux](https://github.com/opencontainers/runtime-spec/blob/main/config-linux.md#namespaces)
+- [3] [Tài liệu tham khảo API Kubernetes - namespace host của PodSpec](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#PodSpec)
 {{#include ../../../../../banners/hacktricks-training.md}}

