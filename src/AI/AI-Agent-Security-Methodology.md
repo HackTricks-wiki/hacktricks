@@ -62,6 +62,22 @@ Test the boundary by comparing a direct request the parent refuses with the same
 
 Inspect the child's actual tool calls and effective tool allowlist, not just the parent's final answer; confirm whether the child accessed files the parent would not.<sup>[[4]](#references)</sup> This is a guardrail inheritance failure, not proof of a [Python sandbox](../generic-methodologies-and-resources/python/bypass-python-sandboxes/) or container escape.<sup>[[3]](#references)[[4]](#references)</sup>
 
+### Mobile GUI agents: screen instructions and action rebinding
+
+A phone GUI agent may send each screenshot to a cloud model before choosing the next cross-app action. To test **indirect visual injection**, place attacker-controlled text in an SMS, email, or page that the agent will inspect during an authorized task. Compare a direct task prompt with the same instruction visible only in the screenshot, then inspect the next action and any high-risk-operation decision. In the assessed assistant, client-side `checkPrompt` screened direct task text but did not apply equivalent filtering to screenshot content. This is a mobile, cross-app variant of [agentic-browser screenshot injection](../generic-methodologies-and-resources/phishing-methodology/ai-agent-mode-phishing-abusing-hosted-agent-browsers.md), not a way to bypass Android component authentication.<sup>[[9]](#references)</sup>
+
+A useful side-effect test is an attacker-controlled form that asks the agent to fill sensitive fields and then requests a human click on “upload,” while the page submits the populated fields as soon as they change. The human handoff does not protect data already sent by page code. The same report proposes arithmetic transformation of an SMS code before filling it to evade literal-value checks; treat this as a test pattern, not evidence that every model will disclose codes or complete a banking flow.<sup>[[9]](#references)</sup>
+
+**GUI TOCTOU / action rebinding** is a separate failure mode: the agent plans an input from a screen observed at `t0`, but the foreground UI changes before the input is injected at `t1`.<sup>[[8]](#references)</sup> A later screenshot at `t2` cannot undo an action already committed.<sup>[[9]](#references)</sup> In an authorized Android test, the reusable workflow is:<sup>[[8]](#references)</sup>
+
+1. Profile the target control's screen coordinates and render a benign control at the same location in a controlled app.
+2. Keep that carrier visible until the agent observes it, then trigger a normal foreground transition during its observation-to-action gap.
+3. Check whether the planned tap lands on the new app's control and verify the resulting state in the target app, rather than relying on the agent's narration.
+
+The original action-rebinding study demonstrates this with an app holding no dangerous permissions; it also describes repeating the transition through the agent's task-recovery loop for multistep flows.<sup>[[8]](#references)</sup>
+
+Do **not** assume the primitive works unchanged against every assistant. In the Doubao assessment, `OpClickUI` skipped clicks if the top-level Activity changed and compared screenshots when `OpOpenApp` appeared in the preceding three steps. Single taps, long presses, and double taps therefore offered little reliable attacker-controlled timing. `OpTypeText`, `OpSwipeUI`, and `OpScrollWheelAction` lacked those equivalent guards, but the report assessed their practical impact as more limited.<sup>[[9]](#references)</sup>
+
 ## Execution: prove real impact
 
 There are two distinct routes from influence to impact:<sup>[[2]](#references)</sup>
@@ -117,5 +133,7 @@ For A2A agent cards, task flows and their attack surface, check [A2A Protocol Se
 - [5] [LangChain TypeSafe Auto Mode middleware source](https://github.com/langchain-ai/langchain/blob/master/libs/partners/typesafe/langchain_typesafe/experimental/middleware/auto_mode.py)
 - [6] [TypeSafe AI Jev model jaggedness: adversarial content](https://docs.typesafe.ai/model-jaggedness/jev-1.13#adversarial-content)
 - [7] [Jev as a judge: How counterfeit policy steers Jev](https://securitylabs.datadoghq.com/articles/jev-as-a-judge-how-counterfeit-policy-steers-jev/)
+- [8] [Zero-Permission Manipulation: Can We Trust Large Multimodal Model Powered GUI Agents?](https://arxiv.org/html/2601.12349v1)
+- [9] [Security Analysis of Doubao Phone Assistant: Indirect Prompt Injection and GUI TOCTOU](https://darknavy.org/blog/security_analysis_of_doubao_phone)
 
 {{#include ../banners/hacktricks-training.md}}
