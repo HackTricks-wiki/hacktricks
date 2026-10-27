@@ -1,16 +1,16 @@
-# Burp MCP: revisión del tráfico asistida por LLM
+# Burp MCP: revisión de tráfico asistida por LLM
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Descripción general
+## Visión general
 
-La extensión **MCP Server** de Burp puede exponer el tráfico HTTP(S) interceptado a clientes LLM compatibles con MCP para que puedan **analizar solicitudes/respuestas reales** y detectar vulnerabilidades y redactar informes. Mantén Burp como fuente de verdad: usa análisis pasivo o repeticiones deliberadas de una sola variable en lugar de escaneos a ciegas.<sup>[[8]](#references)</sup>
+La extensión **MCP Server** de Burp puede exponer el tráfico HTTP(S) interceptado a clientes LLM compatibles con MCP para que puedan **razonar sobre solicitudes/respuestas reales** y detectar vulnerabilidades y redactar informes. Mantén Burp como fuente de verdad: utiliza análisis pasivo o repeticiones deliberadas de una sola variable en lugar de escaneos a ciegas.<sup>[[8]](#references)</sup>
 
 ## Arquitectura
 
 - **Burp MCP Server (BApp)** escucha en `127.0.0.1:9876` de forma predeterminada y expone el tráfico interceptado mediante MCP.<sup>[[1]](#references)[[2]](#references)[[7]](#references)</sup>
-- **MCP proxy JAR** conecta stdio (del lado del cliente) con el endpoint MCP SSE de Burp.
-- **Proxy inverso local opcional** (Caddy) normaliza los encabezados para las comprobaciones estrictas del handshake MCP.
+- **MCP proxy JAR** conecta stdio (lado del cliente) con el endpoint MCP SSE de Burp.
+- **Proxy inverso local opcional** (Caddy) normaliza los encabezados para las comprobaciones estrictas del handshake de MCP.
 - **Clientes/backends**: Codex CLI (cloud), Gemini CLI (cloud) u Ollama (local).
 
 ## Configuración
@@ -25,7 +25,7 @@ En la pestaña MCP Server, haz clic en **Extract server proxy jar** y guarda `mc
 
 ### 3) Configurar un cliente MCP (ejemplo con Codex)
 
-Indica al cliente que use el proxy JAR y el endpoint SSE directo de Burp. El proxy incluido conecta stdio con SSE; no reemplaza el listener de Burp.<sup>[[7]](#references)</sup>
+Indica al cliente la ubicación del proxy JAR y el endpoint SSE directo de Burp. El proxy incluido conecta stdio con SSE; no reemplaza el listener de Burp.<sup>[[7]](#references)</sup>
 
 ```toml
 # ~/.codex/config.toml
@@ -72,7 +72,7 @@ reverse_proxy 127.0.0.1:9876 {
 EOF
 ```
 
-Inicia el proxy y el cliente, y cambia el `--sse-url` configurado a `http://127.0.0.1:19876` únicamente mientras uses este listener de Caddy:<sup>[[1]](#references)[[3]](#references)</sup>
+Inicia el proxy y el cliente, y cambia el `--sse-url` configurado a `http://127.0.0.1:19876` solo mientras uses este listener de Caddy:<sup>[[1]](#references)[[3]](#references)</sup>
 
 ```bash
 caddy run --config ~/burp-mcp/Caddyfile &
@@ -81,7 +81,7 @@ codex
 
 ### 5) Emparejar el estado del navegador con la evidencia del proxy (Playwright MCP)
 
-Registra Playwright MCP para que su navegador use el proxy de Burp. Esto permite que el agente correlacione el estado del DOM y la accesibilidad renderizados con el historial HTTP exacto que los produjo.<sup>[[6]](#references)[[8]](#references)</sup>
+Configura Playwright MCP para que su navegador use el proxy de Burp. Esto permite que el agente correlacione el estado renderizado del DOM y de accesibilidad con el historial HTTP exacto que lo produjo.<sup>[[6]](#references)[[8]](#references)</sup>
 
 ```bash
 codex mcp add playwright -- npx -y @playwright/mcp@latest \
@@ -89,11 +89,11 @@ codex mcp add playwright -- npx -y @playwright/mcp@latest \
   --ignore-https-errors
 ```
 
-Adapta la dirección del listener, reinicia Codex y usa `/mcp` para verificar ambas integraciones. El ejemplo desactiva los errores de certificado del navegador para que la interceptación HTTPS no se bloquee por el certificado generado localmente por Burp.<sup>[[6]](#references)[[8]](#references)</sup>
+Adapta la dirección del listener, reinicia Codex y usa `/mcp` para verificar ambas integraciones. El ejemplo desactiva los errores de certificado del navegador para que la interceptación HTTPS no quede bloqueada por el certificado generado localmente por Burp.<sup>[[6]](#references)[[8]](#references)</sup>
 
 ## Automatización del navegador compatible con proxy (OpenBurp)
 
-La conexión MCP de Burp y la ruta del navegador interceptado son flujos de datos independientes. El servicio MCP expone las herramientas de Burp en `127.0.0.1:9876`, mientras que una instancia dedicada de Chromium envía su tráfico HTTP(S) a través del proxy de Burp en `127.0.0.1:8080`. Por tanto, las solicitudes generadas directamente por una herramienta MCP pueden no aparecer en **Proxy > HTTP history**; usa el navegador con proxy siempre que la solicitud o respuesta deba poder observarse, editarse o conservarse como evidencia.<sup>[[2]](#references)[[9]](#references)</sup>
+La conexión de Burp MCP y la ruta del navegador interceptado son flujos de datos independientes. El servicio MCP expone las herramientas de Burp en `127.0.0.1:9876`, mientras que una instancia dedicada de Chromium envía su tráfico HTTP(S) a través del proxy de Burp en `127.0.0.1:8080`. Por lo tanto, las solicitudes generadas directamente por una herramienta MCP pueden no aparecer en **Proxy > HTTP history**; usa el navegador con proxy siempre que sea necesario observar, editar o conservar como evidencia la solicitud o respuesta.<sup>[[2]](#references)[[9]](#references)</sup>
 
 Un cliente compatible con SSE puede registrar Burp directamente. En cambio, un cliente que solo admite stdio puede iniciar el JAR del proxy de PortSwigger. En ambos casos, registra un segundo MCP de control del navegador y configúralo para que use el Chromium integrado de Burp (`BURP_CHROMIUM` es una ruta a un ejecutable local):<sup>[[9]](#references)</sup>
 
@@ -112,7 +112,7 @@ codex mcp add burp-browser -- npx -y @playwright/mcp@latest \
   --ignore-https-errors --isolated
 ```
 
-La flag TLS-bypass tolera los certificados generados por el proxy de interceptación, mientras que `--isolated` impide que la evaluación reutilice el perfil normal del navegador del operador. El aislamiento protege el estado del perfil, pero **no es un sandbox de seguridad**: el controlador aún puede acceder a las sesiones autenticadas abiertas en ese navegador de prueba, y Burp MCP puede exponer solicitudes, respuestas y configuración sensibles.<sup>[[9]](#references)</sup>
+La flag de bypass de TLS acepta certificados generados por el proxy de interceptación, mientras que `--isolated` evita que la evaluación reutilice el perfil habitual del navegador del operador. El aislamiento protege el estado del perfil, pero **no es un sandbox de seguridad**: el controlador aún puede acceder a las sesiones autenticadas abiertas en ese navegador de pruebas, y Burp MCP puede exponer solicitudes, respuestas y configuración sensibles.<sup>[[9]](#references)</sup>
 
 Prueba el listener SSE de forma independiente antes de depurar el puente del cliente:<sup>[[9]](#references)</sup>
 
@@ -120,9 +120,9 @@ Prueba el listener SSE de forma independiente antes de depurar el puente del cli
 curl -i --max-time 3 http://127.0.0.1:9876/
 ```
 
-Un listener activo devuelve `Content-Type: text/event-stream`. Es normal que se produzca un timeout después de los encabezados, ya que una secuencia SSE permanece abierta para recibir eventos futuros. Si el cliente sigue fallando, confirma la ruta configurada en la extensión: PortSwigger indica que el endpoint puede ser la ruta raíz o `/sse`, según el cliente y la configuración de la extensión.<sup>[[9]](#references)[[7]](#references)</sup>
+Un listener en buen estado devuelve `Content-Type: text/event-stream`. Es normal que se agote el tiempo de espera después de los encabezados, porque un flujo SSE permanece abierto para recibir eventos futuros. Si el cliente sigue fallando, confirma la ruta configurada de la extensión: PortSwigger señala que el endpoint puede ser la ruta raíz o `/sse`, según el cliente y la configuración de la extensión.<sup>[[9]](#references)[[7]](#references)</sup>
 
-## Uso de distintos clientes
+## Using different clients
 
 ### Codex CLI
 
@@ -131,7 +131,7 @@ Un listener activo devuelve `Content-Type: text/event-stream`. Es normal que se 
 
 ### Gemini CLI
 
-El repositorio **burp-mcp-agents** proporciona helpers de lanzamiento:<sup>[[4]](#references)</sup>
+El repo **burp-mcp-agents** proporciona helpers para iniciar el programa:<sup>[[4]](#references)</sup>
 
 ```bash
 source /path/to/burp-mcp-agents/gemini-cli/burpgemini.sh
@@ -153,20 +153,20 @@ Ejemplos de modelos locales y necesidades aproximadas de VRAM:
 - `gpt-oss:20b` (~20GB VRAM)
 - `llama3.1:70b` (48GB+ VRAM)
 
-## Reproducción y validación basadas en evidencia
+## Reproducción y validación basadas en evidencias
 
-No permitas que el agente trate una explicación plausible o una respuesta intermedia como prueba. Usa solicitudes y respuestas de Burp, así como el estado del navegador observado de forma independiente, para que cada prueba pueda refutarse.<sup>[[8]](#references)</sup>
+No permitas que el agente trate una explicación plausible o una respuesta intermedia como prueba. Usa las solicitudes/respuestas de Burp y el estado del navegador observado de forma independiente para que cada prueba pueda refutarse.<sup>[[8]](#references)</sup>
 
 1. Guarda un par de solicitud/respuesta de referencia e identifica el componente exacto controlado por el atacante.
 2. Para comparar autorizaciones, captura el mismo flujo de trabajo de forma independiente con ambas cuentas antes de modificar identificadores, cookies o tokens.
-3. Antes de reproducir una modificación, registra la hipótesis, la ubicación de la evidencia, la señal esperada y el resultado que la refutaría.
+3. Antes de reproducir una mutación, registra la hipótesis, la ubicación de la evidencia, la señal esperada y el resultado que la refutaría.
 4. Modifica un componente a la vez, conserva el par resultante y etiqueta por separado las observaciones directas y las inferencias.
-5. Registra cada candidato como `open`, `blocked`, `rejected` o `confirmed`; vuelve a examinarlo solo cuando nueva evidencia cambie el mecanismo o un requisito previo.
-6. Confirma el control del atacante, la accesibilidad, la repetibilidad, la elusión de restricciones, el impacto y el estado final de la aplicación. Una redirección o una llamada exitosa a una herramienta no son pruebas si el cambio de estado alegado ocurre en una etapa posterior.
+5. Registra cada candidato como `open`, `blocked`, `rejected` o `confirmed`; vuelve a revisarlo solo cuando nueva evidencia cambie el mecanismo o un prerrequisito.
+6. Confirma el control del atacante, la accesibilidad, la repetibilidad, la elusión de restricciones, el impacto y el estado final de la aplicación. Una redirección o una llamada exitosa a una herramienta no son prueba si el cambio de estado alegado ocurre posteriormente.
 
-Mantén los detalles de explotación en la página de la técnica pertinente. Por ejemplo, los candidatos relacionados con mensajes del navegador corresponden a [PostMessage Vulnerabilities](../pentesting-web/postmessage-vulnerabilities/README.md), mientras que el comportamiento de selección de claves de tokens corresponde a [JWT Vulnerabilities](../pentesting-web/hacking-jwt-json-web-tokens.md).<sup>[[8]](#references)</sup>
+Mantén los detalles de explotación en la página de la técnica correspondiente. Por ejemplo, los candidatos relacionados con mensajes del navegador pertenecen a [PostMessage Vulnerabilities](../pentesting-web/postmessage-vulnerabilities/README.md), mientras que el comportamiento de selección de claves de tokens pertenece a [JWT Vulnerabilities](../pentesting-web/hacking-jwt-json-web-tokens.md).<sup>[[8]](#references)</sup>
 
-Un registro compacto de hipótesis evita que agentes paralelos repitan la misma línea de investigación tentadora:<sup>[[8]](#references)</sup>
+Un registro compacto de hipótesis evita que los agentes en paralelo repitan la misma línea de investigación tentadora:<sup>[[8]](#references)</sup>
 
 ```yaml
 status: open
@@ -177,32 +177,42 @@ expected_signal: "user B's object is returned"
 falsifier: "server rejects it or returns only user A's object"
 ```
 
+## Clasificación inicial de tramas WebSocket con Burp MCP
+
+La extensión oficial expone `get_proxy_websocket_history_regex` para búsquedas paginadas de solo lectura en el historial de WebSocket de Burp. Acepta `regex`, `count` y `offset`; a diferencia de `send_http1_request`, no envía una trama WebSocket. Burp registra los mensajes en ambas direcciones incluso cuando Intercept está desactivado, así que filtra el historial antes de pasarle al modelo un conjunto pequeño de tramas relevantes.<sup>[[10]](#references)[[12]](#references)[[13]](#references)</sup>
+
+1. Realiza la misma acción basada en WebSocket desde el navegador con proxy de Burp, usando dos cuentas de prueba autenticadas de forma independiente. Mantén juntos cada handshake de actualización y sus cookies, el ID de conexión, la dirección de la trama y las tramas de respuesta; un evento del servidor en la conexión de la primera cuenta no demuestra que la segunda cuenta lo haya recibido.
+2. Busca con `get_proxy_websocket_history_regex` usando una expresión acotada, como `(?i)(subscribe|room|tenant|objectId)`, `count: 20` y `offset: 0`. Avanza `offset` para inspeccionar coincidencias posteriores. Compara el identificador de objeto o tema de la trama saliente con la respuesta en esa **misma conexión**.
+3. En **Proxy > WebSockets history**, envía la trama saliente candidata a Repeater. Asígnala a la conexión abierta correspondiente o vuelve a conectarte usando el handshake de la segunda cuenta. Cambia únicamente el identificador de objeto o tema y compara los mensajes resultantes del servidor y el estado de la aplicación con ambas líneas base. La herramienta de historial de MCP no puede realizar esta repetición; WebSocket Repeater permite editar, reenviar y volver a conectar tramas.
+
+Para pruebas específicas del protocolo, como cross-site WebSocket hijacking y la autorización de temas del broker, consulta [WebSocket Attacks](../pentesting-web/websocket-attacks.md). No consideres que una actualización aceptada o un eco del lado del cliente demuestran que la suscripción protegida se haya realizado correctamente.
+
 ## Validación out-of-band dirigida con Burp MCP
 
-Burp Suite Professional expone `generate_collaborator_payload` y `get_collaborator_interactions` mediante la extensión oficial de MCP. Combínalos con `get_proxy_http_history_regex` y una única repetición con `send_http1_request` para probar una posible solicitud de URL del lado del servidor sin escanear todo el objetivo. Es posible que Burp requiera aprobación por separado para leer el historial y enviar una solicitud.<sup>[[2]](#references)[[10]](#references)</sup>
+Burp Suite Professional expone `generate_collaborator_payload` y `get_collaborator_interactions` a través de la extensión oficial de MCP. Combínalas con `get_proxy_http_history_regex` y una única repetición con `send_http1_request` para probar una sospecha de búsqueda de URL del lado del servidor sin escanear todo el objetivo. Burp puede requerir aprobaciones independientes para leer el historial y enviar una solicitud.<sup>[[2]](#references)[[10]](#references)</sup>
 
 1. Filtra el historial para encontrar una solicitud candidata que contenga una URL, por ejemplo, una que incluya `url=`, `webhook` o `callback`. Guarda la solicitud y la respuesta originales. La herramienta de historial acepta `regex`, `count` y `offset`; pagina los resultados en lugar de pedirle al modelo que inspeccione todas las entradas.<sup>[[10]](#references)</sup>
-2. Genera un payload nuevo de Collaborator y conserva el **ID del payload** que devuelve. Repite la solicitud capturada al mismo host y puerto, cambiando únicamente la URL candidata por una URL HTTPS bajo ese dominio del payload. Para `send_http1_request`, pasa la solicitud HTTP/1.1 completa como `content`, junto con `targetHostname`, `targetPort` y `usesHttps`; los campos de destino identifican la **aplicación**, no el host de Collaborator.<sup>[[10]](#references)</sup>
-3. Consulta periódicamente `get_collaborator_interactions` con ese ID del payload y correlaciona la hora de la interacción con la repetición. Una interacción HTTP confirma que se realizó una solicitud, mientras que una interacción DNS solo muestra que se resolvió el dominio, no que se completara una solicitud HTTP. Revisa el origen de la interacción y los encabezados de la solicitud para distinguir el tráfico saliente del servidor de la carga desde el navegador; luego repite la prueba con un payload nuevo para descartar tráfico no relacionado.<sup>[[10]](#references)[[11]](#references)</sup>
+2. Genera un payload de Collaborator nuevo y conserva el **ID del payload** devuelto. Repite la solicitud capturada al mismo host y puerto, cambiando únicamente la URL candidata por una URL HTTPS del dominio de ese payload. Para `send_http1_request`, pasa la solicitud HTTP/1.1 completa como `content`, junto con `targetHostname`, `targetPort` y `usesHttps`; los campos de destino identifican la **aplicación**, no el host de Collaborator.<sup>[[10]](#references)</sup>
+3. Consulta `get_collaborator_interactions` con ese ID de payload y correlaciona la hora de la interacción con la repetición. Una interacción HTTP respalda que se realizó una búsqueda, mientras que solo DNS muestra una resolución, pero no una solicitud HTTP completada. Comprueba el origen de la interacción y los encabezados de la solicitud para distinguir la salida del servidor de la carga en el navegador; luego repite la prueba con un payload nuevo para descartar tráfico no relacionado.<sup>[[10]](#references)[[11]](#references)</sup>
 
-La herramienta de solicitudes de MCP devuelve directamente la respuesta y no necesariamente la añade al **Proxy > HTTP history**. Conserva el resultado de la solicitud y la respuesta, o usa el navegador con proxy o Repeater para obtener una evidencia respaldada por el historial. Para seleccionar payloads de SSRF y realizar pruebas posteriores, consulta el [capítulo de SSRF](../pentesting-web/ssrf-server-side-request-forgery/) en lugar de considerar una callback out-of-band como prueba de impacto en la red interna. Para probar el propio servidor MCP, consulta [pruebas de servidores MCP](AI-MCP-Servers.md#remote-mcp-server-testing-workflow).<sup>[[7]](#references)[[11]](#references)</sup>
+La herramienta de solicitudes de MCP devuelve directamente la respuesta y no necesariamente la añade a **Proxy > HTTP history**. Conserva el resultado de la solicitud/respuesta o utiliza el navegador con proxy o Repeater para obtener un artefacto respaldado por el historial. Para seleccionar payloads SSRF y realizar pruebas posteriores, consulta el [capítulo de SSRF](../pentesting-web/ssrf-server-side-request-forgery/) en lugar de considerar una callback out-of-band como prueba de impacto en la red interna. Para probar el propio servidor MCP, consulta [pruebas del servidor MCP](AI-MCP-Servers.md#remote-mcp-server-testing-workflow).<sup>[[7]](#references)[[11]](#references)</sup>
 
-## Conjunto de prompts para la revisión pasiva
+## Paquete de prompts para revisión pasiva
 
-El repo **burp-mcp-agents** incluye plantillas de prompts para el análisis de tráfico de Burp basado en evidencias:<sup>[[4]](#references)</sup>
+El repositorio **burp-mcp-agents** incluye plantillas de prompts para el análisis del tráfico de Burp basado en evidencias:<sup>[[4]](#references)</sup>
 
 - `passive_hunter.md`: detección pasiva amplia de vulnerabilidades.
-- `idor_hunter.md`: discrepancias de IDOR/BOLA/objetos/tenants y autenticación.
+- `idor_hunter.md`: IDOR/BOLA, desviaciones de objeto/tenant y discrepancias de autenticación.
 - `auth_flow_mapper.md`: compara rutas autenticadas y no autenticadas.
-- `ssrf_redirect_hunter.md`: candidatos a SSRF/open redirect a partir de parámetros de obtención de URL y cadenas de redirección.
+- `ssrf_redirect_hunter.md`: candidatos a SSRF/open redirect en parámetros de búsqueda de URL y cadenas de redirección.
 - `logic_flaw_hunter.md`: fallos lógicos de varios pasos.
-- `session_scope_hunter.md`: uso indebido del alcance/audiencia de tokens.
-- `rate_limit_abuse_hunter.md`: brechas de limitación de solicitudes/abuso.
+- `session_scope_hunter.md`: uso indebido de audiencia/alcance de tokens.
+- `rate_limit_abuse_hunter.md`: deficiencias de limitación de tasa y abuso.
 - `report_writer.md`: informes centrados en evidencias.
 
-## Etiquetado opcional para atribución
+## Etiquetado opcional de atribución
 
-Para etiquetar el tráfico de Burp/LLM en los logs, añade una reescritura de encabezado (proxy o Burp Match/Replace):<sup>[[1]](#references)</sup>
+Para etiquetar el tráfico de Burp/LLM en los registros, añade una reescritura de encabezado (proxy o Burp Match/Replace):<sup>[[1]](#references)</sup>
 
 ```text
 Match:   ^User-Agent: (.*)$
@@ -213,7 +223,7 @@ Replace: User-Agent: $1 BugBounty-Username
 
 - Prefiere **modelos locales** cuando el tráfico contiene datos sensibles.
 - Comparte solo la evidencia mínima necesaria para un hallazgo.
-- Considera Burp la fuente de verdad; usa el modelo para **análisis e informes**, no para escanear.
+- Mantén Burp como fuente de verdad; usa el modelo para **análisis e informes**, no para escanear.
 
 ## Burp AI Agent (triage asistido por IA + herramientas MCP)
 
@@ -222,12 +232,12 @@ Replace: User-Agent: $1 BugBounty-Username
 - **Triage desde el menú contextual**: captura tráfico mediante Proxy, abre **Proxy > HTTP History**, haz clic derecho en una solicitud → **Extensions > Burp AI Agent > Analyze this request** para iniciar un chat de IA asociado a esa solicitud/respuesta.
 - **Backends** (seleccionables por perfil):
   - HTTP local: **Ollama**, **LM Studio**.
-  - HTTP remoto: endpoint **compatible con OpenAI** (URL base + nombre del modelo).
+  - HTTP remoto: endpoint compatible con **OpenAI** (URL base + nombre del modelo).
   - CLI en la nube: **Gemini CLI** (`gemini auth login`), **Claude CLI** (`export ANTHROPIC_API_KEY=...` o `claude login`), **Codex CLI** (`export OPENAI_API_KEY=...`), **OpenCode CLI** (inicio de sesión específico del proveedor).
-- **Perfiles del agente**: las plantillas de prompts se instalan automáticamente en `~/.burp-ai-agent/AGENTS/`; coloca archivos `*.md` adicionales ahí para agregar comportamientos personalizados de análisis/escaneo.
+- **Perfiles de agente**: las plantillas de instrucciones se instalan automáticamente en `~/.burp-ai-agent/AGENTS/`; añade allí archivos `*.md` para incorporar comportamientos personalizados de análisis/escaneo.
 - **Servidor MCP**: actívalo en **Settings > MCP Server** para exponer operaciones de Burp a cualquier cliente MCP (más de 53 herramientas). Claude Desktop puede conectarse al servidor editando `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o `%APPDATA%\Claude\claude_desktop_config.json` (Windows).
-- **Controles de privacidad**: STRICT / BALANCED / OFF redactan datos sensibles de las solicitudes antes de enviarlos a modelos remotos; prefiere backends locales cuando manejes secretos.
-- **Registro de auditoría**: registros JSONL con hash SHA-256 de integridad por entrada para una trazabilidad de las acciones de IA/MCP que evidencie manipulaciones.
+- **Controles de privacidad**: STRICT / BALANCED / OFF redactan datos sensibles de las solicitudes antes de enviarlos a modelos remotos; prefiere backends locales al manejar secretos.
+- **Registro de auditoría**: registros JSONL con hashes SHA-256 de integridad por entrada para proporcionar trazabilidad de las acciones de IA/MCP con evidencia de manipulación.
 - **Compilación/carga**: descarga el JAR de la versión o compílalo con Java 21:
 
 ```bash
@@ -243,15 +253,17 @@ Precauciones operativas: los backends en la nube pueden exfiltrar cookies de ses
 
 ## References
 
-- [1] [Integración de Burp MCP + Codex CLI y solución para el handshake de Caddy](https://pentestbook.six2dez.com/others/burp)
+- [1] [Integración de Burp MCP + Codex CLI y solución al handshake de Caddy](https://pentestbook.six2dez.com/others/burp)
 - [2] [BApp de Burp MCP Server](https://portswigger.net/bappstore/9952290f04ed4f628e624d0aa9dccebc)
 - [3] [Problema de validación estricta de Origin/header en PortSwigger MCP server](https://github.com/PortSwigger/mcp-server/issues/34)
-- [4] [Agentes de Burp MCP (workflows, launchers, paquete de prompts)](https://github.com/six2dez/burp-mcp-agents)
+- [4] [Agentes de Burp MCP (flujos de trabajo, launchers, paquete de prompts)](https://github.com/six2dez/burp-mcp-agents)
 - [5] [Agente de Burp AI](https://github.com/six2dez/burp-ai-agent)
-- [6] [MCP de Microsoft Playwright](https://github.com/microsoft/playwright-mcp)
+- [6] [Playwright MCP de Microsoft](https://github.com/microsoft/playwright-mcp)
 - [7] [PortSwigger Burp Suite MCP Server](https://github.com/PortSwigger/mcp-server)
 - [8] [Cómo usar Codex para investigar Bug Bounty: explorar ampliamente, validar rigurosamente](https://www.yeswehack.com/learn-bug-bounty/llm-series-codex)
 - [9] [OpenBurp: orquestación de Burp Suite para Claude Code y Codex](https://github.com/luispacheco22/OpenBurp)
-- [10] [Implementaciones y parámetros de las herramientas de PortSwigger MCP Server](https://github.com/PortSwigger/mcp-server/blob/main/src/main/kotlin/net/portswigger/mcp/tools/Tools.kt)
-- [11] [PortSwigger Web Security Academy - Vulnerabilidades SSRF ciegas](https://portswigger.net/web-security/ssrf/blind)
+- [10] [Implementaciones de herramientas y parámetros de PortSwigger MCP Server](https://github.com/PortSwigger/mcp-server/blob/main/src/main/kotlin/net/portswigger/mcp/tools/Tools.kt)
+- [11] [PortSwigger Web Security Academy - Vulnerabilidades Blind SSRF](https://portswigger.net/web-security/ssrf/blind)
+- [12] [PortSwigger - Historial de WebSockets](https://portswigger.net/burp/documentation/desktop/tools/proxy/websockets-history)
+- [13] [PortSwigger - Trabajar con mensajes WebSocket en Burp Repeater](https://portswigger.net/burp/documentation/desktop/tools/repeater/websocket-messages)
 {{#include ../banners/hacktricks-training.md}}
