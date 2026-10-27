@@ -1,36 +1,36 @@
-# External Recon Methodology
+# Phương pháp Recon bên ngoài
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Assets discoveries
+## Khám phá tài sản
 
-> So you were said that everything belonging to some company is inside the scope, and you want to figure out what this company actually owns.
+> Bạn được thông báo rằng mọi thứ thuộc về một công ty đều nằm trong phạm vi, và bạn muốn tìm hiểu công ty này thực sự sở hữu những gì.
 
-The goal of this phase is to obtain all the **companies owned by the main company** and then all the **assets** of these companies. To do so, we are going to:<sup>[[1]](#references)</sup>
+Mục tiêu của giai đoạn này là tìm tất cả **các công ty thuộc sở hữu của công ty chính**, rồi tìm tất cả **tài sản** của những công ty này. Để làm vậy, chúng ta sẽ:<sup>[[1]](#references)</sup>
 
-1. Find the acquisitions of the main company, this will give us the companies inside the scope.
-2. Find the ASN (if any) of each company, this will give us the IP ranges owned by each company
-3. Use reverse whois lookups to search for other entries (organisation names, domains...) related to the first one (this can be done recursively)
-4. Use other techniques like shodan `org`and `ssl`filters to search for other assets (the `ssl` trick can be done recursively).
+1. Tìm các thương vụ mua lại của công ty chính để xác định những công ty nằm trong phạm vi.
+2. Tìm ASN (nếu có) của từng công ty để xác định các dải IP mà công ty đó sở hữu.
+3. Dùng reverse whois để tìm các mục khác (tên tổ chức, domain...) có liên quan đến mục đầu tiên (có thể thực hiện đệ quy).
+4. Dùng các kỹ thuật khác như bộ lọc `org`và `ssl` của shodan để tìm các tài sản khác (có thể thực hiện đệ quy với thủ thuật `ssl`).
 
-### **Acquisitions**
+### **Thương vụ mua lại**
 
-First of all, we need to know which **other companies are owned by the main company**.\
-One option is to visit [https://www.crunchbase.com/](https://www.crunchbase.com), **search** for the **main company**, and **click** on "**acquisitions**". There you will see other companies acquired by the main one.\
-Other option is to visit the **Wikipedia** page of the main company and search for **acquisitions**.\
-For public companies, check **SEC/EDGAR filings**, **investor relations** pages, or local corporate registries (e.g., **Companies House** in the UK).\
-For global corporate trees and subsidiaries, try **OpenCorporates** ([https://opencorporates.com/](https://opencorporates.com/)) and the **GLEIF LEI** database ([https://www.gleif.org/](https://www.gleif.org/)).
+Trước tiên, chúng ta cần biết **những công ty nào khác thuộc sở hữu của công ty chính**.\
+Một cách là truy cập [https://www.crunchbase.com/](https://www.crunchbase.com), **tìm kiếm** **công ty chính**, rồi **nhấp** vào "**acquisitions**". Tại đó, bạn sẽ thấy các công ty khác được công ty chính mua lại.\
+Một cách khác là truy cập trang **Wikipedia** của công ty chính và tìm mục **acquisitions**.\
+Đối với các công ty đại chúng, hãy kiểm tra hồ sơ **SEC/EDGAR**, các trang **quan hệ nhà đầu tư** hoặc sổ đăng ký doanh nghiệp tại địa phương (ví dụ: **Companies House** ở UK).\
+Để tìm sơ đồ tập đoàn toàn cầu và các công ty con, hãy thử **OpenCorporates** ([https://opencorporates.com/](https://opencorporates.com/)) và cơ sở dữ liệu **GLEIF LEI** ([https://www.gleif.org/](https://www.gleif.org/)).
 
-> Ok, at this point you should know all the companies inside the scope. Lets figure out how to find their assets.
+> Được rồi, đến đây bạn đã biết tất cả các công ty nằm trong phạm vi. Hãy tìm hiểu cách xác định tài sản của họ.
 
-### **ASNs**
+### **ASN**
 
-An autonomous system number (**ASN**) is a **unique number** assigned to an **autonomous system** (AS) by the **Internet Assigned Numbers Authority (IANA)**.\
-An **AS** consists of **blocks** of **IP addresses** which have a distinctly defined policy for accessing external networks and are administered by a single organisation but may be made up of several operators.
+Số hiệu hệ thống tự trị (**ASN**) là một **số duy nhất** được **Internet Assigned Numbers Authority (IANA)** cấp cho một **hệ thống tự trị** (AS).\
+Một **AS** gồm các **khối** **địa chỉ IP** có chính sách được xác định rõ ràng về việc truy cập các mạng bên ngoài, do một tổ chức duy nhất quản lý nhưng có thể bao gồm nhiều nhà khai thác.
 
-It's interesting to find if the **company have assigned any ASN** to find its **IP ranges.** It will be interested to perform a **vulnerability test** against all the **hosts** inside the **scope** and **look for domains** inside these IPs.\
-You can **search** by company **name**, by **IP** or by **domain** in [**https://bgp.he.net/**](https://bgp.he.net) **or** [**https://ipinfo.io/**](https://ipinfo.io/).\
-**Depending on the region of the company this links could be useful to gather more data:** [**AFRINIC**](https://www.afrinic.net) **(Africa),** [**Arin**](https://www.arin.net/about/welcome/region/)**(North America),** [**APNIC**](https://www.apnic.net) **(Asia),** [**LACNIC**](https://www.lacnic.net) **(Latin America),** [**RIPE NCC**](https://www.ripe.net) **(Europe). Anyway, probably all the** useful information **(IP ranges and Whois)** appears already in the first link.
+Bạn nên kiểm tra xem **công ty có được cấp ASN nào không** để tìm các **dải IP** của công ty. Việc thực hiện **kiểm tra lỗ hổng** trên tất cả **host** trong **phạm vi** và **tìm domain** trong các IP này cũng rất hữu ích.\
+Bạn có thể **tìm kiếm** theo **tên** công ty, **IP** hoặc **domain** trên [**https://bgp.he.net/**](https://bgp.he.net) **hoặc** [**https://ipinfo.io/**](https://ipinfo.io/).\
+**Tùy thuộc vào khu vực của công ty, các liên kết này có thể hữu ích để thu thập thêm dữ liệu:** [**AFRINIC**](https://www.afrinic.net) **(Châu Phi),** [**Arin**](https://www.arin.net/about/welcome/region/)**(Bắc Mỹ),** [**APNIC**](https://www.apnic.net) **(Châu Á),** [**LACNIC**](https://www.lacnic.net) **(Mỹ Latinh),** [**RIPE NCC**](https://www.ripe.net) **(Châu Âu). Dù vậy, có lẽ mọi thông tin hữu ích** (dải IP và Whois) **đều đã có trong liên kết đầu tiên.**
 
 ```bash
 #You can try "automate" this with amass, but it's not very recommended
@@ -38,8 +38,7 @@ amass intel -org tesla
 amass intel -asn 8911,50313,394161
 ```
 
-Also, [**BBOT**](https://github.com/blacklanternsecurity/bbot)**'s** 
- enumeration automatically aggregates and summarizes ASNs at the end of the scan.
+Ngoài ra, quá trình enumeration của [**BBOT**](https://github.com/blacklanternsecurity/bbot) tự động tổng hợp và tóm tắt các ASN ở cuối lượt quét.
 
 ```bash
 bbot -t tesla.com -f subdomain-enum
@@ -58,25 +57,25 @@ bbot -t tesla.com -f subdomain-enum
 
 ```
 
-You can also find an organisation's IP ranges using [ASNLookup](https://asnlookup.com/), which has a limited free API tier.
+Bạn cũng có thể tìm các dải IP của một tổ chức bằng [ASNLookup](https://asnlookup.com/), dịch vụ có gói API miễn phí với giới hạn sử dụng.
 
-### **Looking for vulnerabilities**
+### **Tìm lỗ hổng**
 
-At this point we know **all the assets inside the scope**, so if you are allowed you could launch some **vulnerability scanner** (Nessus, OpenVAS, [**Nuclei**](https://github.com/projectdiscovery/nuclei)) over all the hosts.\
-Also, you could launch some [**port scans**](../pentesting-network/index.html#discovering-hosts-from-the-outside) **or use services like** Shodan, Censys, or ZoomEye **to find** open ports **and depending on what you find you should** take a look in this book to how to pentest several possible services running.\
-**Also, It could be worth it to mention that you can also prepare some** default username **and** passwords **lists and try to** bruteforce services with [https://github.com/x90skysn3k/brutespray](https://github.com/x90skysn3k/brutespray).
+Ở thời điểm này, chúng ta đã biết **tất cả tài sản trong phạm vi**, vì vậy nếu được phép, bạn có thể chạy một số **vulnerability scanner** (Nessus, OpenVAS, [**Nuclei**](https://github.com/projectdiscovery/nuclei)) trên tất cả các host.\
+Ngoài ra, bạn có thể chạy một số [**port scan**](../pentesting-network/index.html#discovering-hosts-from-the-outside) **hoặc sử dụng các dịch vụ như** Shodan, Censys hay ZoomEye **để tìm** các port **đang mở. Tùy vào kết quả tìm được, bạn nên** xem trong cuốn sách này cách pentest các dịch vụ có thể đang chạy.\
+**Cũng cần lưu ý rằng bạn có thể chuẩn bị một số danh sách** username **và** mật khẩu **mặc định rồi thử** bruteforce các dịch vụ bằng [https://github.com/x90skysn3k/brutespray](https://github.com/x90skysn3k/brutespray).
 
 ## Domains
 
-> We know all the companies inside the scope and their assets, it's time to find the domains inside the scope.
+> Chúng ta đã biết tất cả công ty trong phạm vi và tài sản của họ, giờ là lúc tìm các domain trong phạm vi.
 
-_Please, note that in the following purposed techniques you can also find subdomains and that information shouldn't be underrated._
+_Lưu ý rằng các kỹ thuật được đề xuất dưới đây cũng có thể giúp tìm ra subdomain, và không nên xem nhẹ thông tin đó._
 
-First of all you should look for the **main domain**(s) of each company. For example, for _Tesla Inc._ is going to be _tesla.com_.
+Trước tiên, bạn nên tìm **domain chính** của từng công ty. Ví dụ, domain chính của _Tesla Inc._ là _tesla.com_.
 
 ### **Reverse DNS**
 
-As you have found all the IP ranges of the domains you could try to perform **reverse dns lookups** on those **IPs to find more domains inside the scope**. Try to use some dns server of the victim or some well-known dns server (1.1.1.1, 8.8.8.8)
+Vì bạn đã tìm được tất cả các dải IP của domain, bạn có thể thử thực hiện **reverse DNS lookup** trên những **IP đó để tìm thêm domain trong phạm vi**. Hãy thử dùng DNS server của nạn nhân hoặc một DNS server phổ biến (1.1.1.1, 8.8.8.8)
 
 ```bash
 dnsrecon -r <DNS Range> -n <IP_DNS>   #DNS reverse of all of the addresses
@@ -85,68 +84,68 @@ dnsrecon -r 157.240.221.35/24 -n 1.1.1.1 #Using cloudflares dns
 dnsrecon -r 157.240.221.35/24 -n 8.8.8.8 #Using google dns
 ```
 
-For this to work, the administrator has to enable manually the PTR.\
-You can also use [SecurityTrails](https://securitytrails.com/) for this information, although historical DNS data requires a paid plan.\
-For large ranges, tools like [**massdns**](https://github.com/blechschmidt/massdns) and [**dnsx**](https://github.com/projectdiscovery/dnsx) are useful to automate reverse lookups and enrichment.
+Để cách này hoạt động, quản trị viên phải bật PTR thủ công.\
+Bạn cũng có thể dùng [SecurityTrails](https://securitytrails.com/) để lấy thông tin này, mặc dù cần gói trả phí để truy cập dữ liệu DNS lịch sử.\
+Với các dải lớn, những công cụ như [**massdns**](https://github.com/blechschmidt/massdns) và [**dnsx**](https://github.com/projectdiscovery/dnsx) rất hữu ích để tự động hóa việc tra cứu ngược và bổ sung thông tin.
 
 ### **Reverse Whois (loop)**
 
-Inside a **whois** you can find a lot of interesting **information** like **organisation name**, **address**, **emails**, phone numbers... But which is even more interesting is that you can find **more assets related to the company** if you perform **reverse whois lookups by any of those fields** (for example other whois registries where the same email appears).\
-You can use online tools like:
+Trong một bản ghi **whois**, bạn có thể tìm thấy nhiều **thông tin** thú vị như **tên tổ chức**, **địa chỉ**, **email**, số điện thoại... Nhưng thú vị hơn nữa là bạn có thể tìm thấy **thêm tài sản liên quan đến công ty** bằng cách **tra cứu reverse whois theo bất kỳ trường nào trong số đó** (ví dụ: các bản ghi whois khác có cùng địa chỉ email).\
+Bạn có thể dùng các công cụ trực tuyến như:
 
-- [https://ip.thc.org/](https://ip.thc.org/) - **Free** (Web and API)
-- [https://viewdns.info/reversewhois/](https://viewdns.info/reversewhois/) - **Free**
-- [https://www.reversewhois.io/](https://www.reversewhois.io) - **Free**
-- [https://www.whoxy.com/](https://www.whoxy.com) - **Free** web interface; paid API.
-- [https://reversewhois.domaintools.com/](https://reversewhois.domaintools.com) - Paid
-- [https://drs.whoisxmlapi.com/reverse-whois-search](https://drs.whoisxmlapi.com/reverse-whois-search) - Not Free (only **100 free** searches)
-- [https://www.domainiq.com/](https://www.domainiq.com) - Not Free
-- [https://securitytrails.com/](https://securitytrails.com/) - Limited free API access for current DNS/subdomains; historical and reverse lookups require a paid plan.
-- [https://whoisfreaks.com/](https://whoisfreaks.com/) - 500 free API credits on signup; paid afterward.
+- [https://ip.thc.org/](https://ip.thc.org/) - **Miễn phí** (Web và API)
+- [https://viewdns.info/reversewhois/](https://viewdns.info/reversewhois/) - **Miễn phí**
+- [https://www.reversewhois.io/](https://www.reversewhois.io) - **Miễn phí**
+- [https://www.whoxy.com/](https://www.whoxy.com) - giao diện web **miễn phí**; API trả phí.
+- [https://reversewhois.domaintools.com/](https://reversewhois.domaintools.com) - Trả phí
+- [https://drs.whoisxmlapi.com/reverse-whois-search](https://drs.whoisxmlapi.com/reverse-whois-search) - Không miễn phí (chỉ có **100 lượt tìm kiếm miễn phí**)
+- [https://www.domainiq.com/](https://www.domainiq.com) - Không miễn phí
+- [https://securitytrails.com/](https://securitytrails.com/) - Quyền truy cập API miễn phí có giới hạn cho DNS/subdomain hiện tại; cần gói trả phí để tra cứu dữ liệu lịch sử và reverse lookup.
+- [https://whoisfreaks.com/](https://whoisfreaks.com/) - Có 500 credit API miễn phí khi đăng ký; sau đó tính phí.
 
-You can automate this task using [**DomLink** ](https://github.com/vysecurity/DomLink)(requires a whoxy API key).\
-You can also perform some automatic reverse whois discovery with [amass](https://github.com/owasp-amass/amass): `amass intel -d tesla.com -whois`
+Bạn có thể tự động hóa tác vụ này bằng [**DomLink** ](https://github.com/vysecurity/DomLink)(cần khóa API whoxy).\
+Bạn cũng có thể tự động khám phá một số kết quả reverse whois bằng [amass](https://github.com/owasp-amass/amass): `amass intel -d tesla.com -whois`
 
-**Note that you can use this technique to discover more domain names every time you find a new domain.**
+**Lưu ý rằng bạn có thể dùng kỹ thuật này để khám phá thêm tên miền mỗi khi tìm thấy một tên miền mới.**
 
 ### **Trackers**
 
-If find the **same ID of the same tracker** in 2 different pages you can suppose that **both pages** are **managed by the same team**.\
-For example, if you see the same **Google Analytics ID** or the same **Adsense ID** on several pages.
+Nếu tìm thấy **cùng ID của cùng một tracker** trên 2 trang khác nhau, bạn có thể cho rằng **cả hai trang** đều **do cùng một nhóm quản lý**.\
+Ví dụ: nếu bạn thấy cùng một **Google Analytics ID** hoặc **Adsense ID** trên nhiều trang.
 
-There are some pages and tools that let you search by these trackers and more:
+Có một số trang và công cụ cho phép bạn tìm kiếm theo các tracker này và nhiều thông tin khác:
 
 - [**Udon**](https://github.com/dhn/udon)
 - [**BuiltWith**](https://builtwith.com)
 - [**Publicwww**](https://publicwww.com)
 - [**SpyOnWeb**](https://spyonweb.net/)
-- [**StackScan**](https://www.stackscan.com) - **Paid** web and API service ([pricing](https://www.stackscan.com/pricing)); no free plan is currently advertised. Pivot on any served asset, not just tracker IDs: a script path, a self-hosted bundle name, or the host an asset loads from, returning every site carrying it
+- [**StackScan**](https://www.stackscan.com) - Dịch vụ web và API **trả phí** ([bảng giá](https://www.stackscan.com/pricing)); hiện không quảng bá gói miễn phí nào. Hãy pivot theo bất kỳ asset nào được cung cấp, không chỉ ID tracker: đường dẫn script, tên bundle tự host hoặc host mà asset được tải từ đó; kết quả trả về mọi trang web có chứa asset đó
 
-The API returns the stack for a single domain, which is useful for confirming a candidate asset belongs to the same estate:
+API trả về stack của một tên miền, hữu ích để xác nhận một asset tiềm năng thuộc cùng một hệ thống:
 
 ```bash
 curl -H "Authorization: Bearer $TOKEN" -H "X-Tenant-Id: $WORKSPACE" \
   "https://api.stackscan.com/v1/tech-lookup/domains/lookup?domain=tesla.com"
 ```
 
-Returns each detected technology with its category. Asset pivoting is currently web only, the API covers per-domain lookup.
+Trả về từng công nghệ được phát hiện cùng với danh mục của nó. Hiện tại, Asset pivoting chỉ hỗ trợ web; API hỗ trợ tra cứu theo từng domain.
 
 ### **Favicon**
 
-Did you know that we can find related domains and subdomains to our target by looking for the same favicon icon hash? This is exactly what [favihash.py](https://github.com/m4ll0k/BBTz/blob/master/favihash.py) tool made by [@m4ll0k2](https://twitter.com/m4ll0k2) does. Here’s how to use it:
+Bạn có biết rằng chúng ta có thể tìm các domain và subdomain liên quan đến mục tiêu bằng cách tìm những domain có cùng hash của biểu tượng favicon không? Đây chính là chức năng của công cụ [favihash.py](https://github.com/m4ll0k/BBTz/blob/master/favihash.py) do [@m4ll0k2](https://twitter.com/m4ll0k2) tạo ra. Sau đây là cách sử dụng:
 
 ```bash
 cat my_targets.txt | xargs -I %% bash -c 'echo "http://%%/favicon.ico"' > targets.txt
 python3 favihash.py -f https://target/favicon.ico -t targets.txt -s
 ```
 
-![Favihash results used to discover domains sharing a favicon hash](https://www.infosecmatter.com/wp-content/uploads/2020/07/favihash.jpg)
+![Kết quả Favihash được dùng để tìm các domain có chung favicon hash](https://www.infosecmatter.com/wp-content/uploads/2020/07/favihash.jpg)
 
-Simply said, favihash will allow us to discover domains that have the same favicon icon hash as our target.
+Nói đơn giản, favihash cho phép chúng ta tìm các domain có favicon icon hash giống với mục tiêu.
 
-![favihash output used to discover domains with the same favicon hash](https://www.infosecmatter.com/wp-content/uploads/2020/07/favihash.jpg)<sup>[[11]](#references)</sup>
+![Đầu ra của favihash được dùng để tìm các domain có cùng favicon hash](https://www.infosecmatter.com/wp-content/uploads/2020/07/favihash.jpg)<sup>[[11]](#references)</sup>
 
-Use a known favicon hash as a Shodan or FOFA pivot to find other exposed instances of the same technology.<sup>[[5]](#references)</sup>
+Dùng favicon hash đã biết làm pivot trên Shodan hoặc FOFA để tìm các instance khác của cùng công nghệ đang lộ ra bên ngoài.<sup>[[5]](#references)</sup>
 
 ```bash
 shodan search org:"Target" http.favicon.hash:116323821 --fields ip_str,port --separator " " | awk '{print $1":"$2}'
@@ -154,7 +153,7 @@ shodan search org:"Target" http.favicon.hash:116323821 --fields ip_str,port --se
 icon_hash="116323821"
 ```
 
-This is how you can **calculate the favicon hash** of a web (MMH3 over the **base64-encoded** favicon bytes):
+Đây là cách bạn có thể **tính hash favicon** của một website (MMH3 trên các byte favicon được **mã hóa base64**):
 
 ```python
 import mmh3
@@ -169,92 +168,92 @@ def fav_hash(url):
     return fhash
 ```
 
-You can also get favicon hashes at scale with [**httpx**](https://github.com/projectdiscovery/httpx) (`httpx -l targets.txt -favicon`) and then pivot in Shodan/Censys.
+Bạn cũng có thể thu thập hash favicon ở quy mô lớn bằng [**httpx**](https://github.com/projectdiscovery/httpx) (`httpx -l targets.txt -favicon`), rồi pivot trong Shodan/Censys.
 
-Treat favicon fingerprints as leads and validate them with surrounding signals.<sup>[[3]](#references)[[4]](#references)</sup>
+Hãy xem dấu vân tay favicon là manh mối và xác thực chúng bằng các tín hiệu xung quanh.<sup>[[3]](#references)[[4]](#references)</sup>
 
-- **Treat the hash as an indicator, not proof**: MMH3 is compact; collisions, reused icons, and deliberate spoofing are possible.
-- **Probe more than** `/favicon.ico`: inspect framework/build paths, manifest files, `browserconfig.xml`, `site.webmanifest`, `apple-touch-icon*`, inline data URLs, and HTML `<link rel="icon">` tags.
-- **Static assets may remain reachable behind WAF/SSO/IdP controls**: request the icon directly and review `ETag`, `Last-Modified`, redirects, and cache headers.
-- **Validate matches with surrounding signals**: compare the title, HTML/body hash, headers, TLS certificate subjects/SANs, product components, and exposed ports.
-- **Cluster by HTML/body hash**: a consistent template strengthens the fingerprint; mixed templates suggest a generic or shared icon.
-- **Treat a hash appearing across unrelated signatures, ports, and products as a potential honeypot or placeholder.**
-- **On ambiguous targets, compare a real page with a nonexistent path** such as `/_favicon_probe_<8-hex>`; matching hosting or parking responses may explain the shared icon.
-- **Bootstrap triage from Nuclei detection rules or public datasets** that map favicon hashes to products and CPEs.
-- **Remember the IP-centric coverage gap**: CDN-fronted, SNI-routed, anycast, and domain-only surfaces may be missing from Shodan-like datasets.
+- **Xem hash là chỉ báo, không phải bằng chứng**: MMH3 gọn nhẹ; có thể xảy ra va chạm, dùng lại icon và giả mạo có chủ đích.
+- **Kiểm tra nhiều đường dẫn hơn** `/favicon.ico`: xem các đường dẫn framework/build, tệp manifest, `browserconfig.xml`, `site.webmanifest`, `apple-touch-icon*`, data URL nội tuyến và thẻ HTML `<link rel="icon">`.
+- **Các tài nguyên tĩnh có thể vẫn truy cập được khi bị kiểm soát bởi WAF/SSO/IdP**: yêu cầu trực tiếp icon và xem xét `ETag`, `Last-Modified`, redirect và header cache.
+- **Xác thực kết quả khớp bằng các tín hiệu xung quanh**: so sánh title, hash HTML/body, header, subject/SAN của chứng chỉ TLS, thành phần sản phẩm và port đang mở.
+- **Phân cụm theo hash HTML/body**: template nhất quán giúp củng cố dấu vân tay; template không đồng nhất có thể cho thấy icon chung hoặc dùng chung.
+- **Xem hash xuất hiện trên các chữ ký, port và sản phẩm không liên quan là dấu hiệu của honeypot hoặc placeholder tiềm năng.**
+- **Với các mục tiêu chưa rõ ràng, hãy so sánh một trang thực với một đường dẫn không tồn tại**, chẳng hạn `/_favicon_probe_<8-hex>`; phản hồi giống nhau từ hosting hoặc trang đỗ tên miền có thể lý giải việc dùng chung icon.
+- **Bắt đầu phân loại bằng các quy tắc phát hiện của Nuclei hoặc tập dữ liệu công khai** ánh xạ hash favicon sang sản phẩm và CPE.
+- **Lưu ý khoảng trống về phạm vi bao phủ lấy IP làm trung tâm**: các bề mặt dùng CDN, định tuyến SNI, anycast và chỉ có domain có thể không xuất hiện trong các tập dữ liệu kiểu Shodan.
 
-### **Copyright / Uniq string**
+### **Bản quyền / Chuỗi duy nhất**
 
-Search inside the web pages **strings that could be shared across different webs in the same organisation**. The **copyright string** could be a good example. Then search for that string in **google**, in other **browsers** or even in **shodan**: `shodan search http.html:"Copyright string"`
+Tìm trong các trang web **những chuỗi có thể được chia sẻ giữa các website trong cùng một tổ chức**. **Chuỗi bản quyền** có thể là một ví dụ hữu ích. Sau đó tìm chuỗi đó trên **Google**, trong các **trình duyệt** khác hoặc thậm chí trên **Shodan**: `shodan search http.html:"Copyright string"`
 
-### **CRT Time**
+### **Thời gian CRT**
 
-It's common to have a cron job such as
+Thông thường có một cron job như sau
 
 ```bash
 # /etc/crontab
 37 13 */10 * * certbot renew --post-hook "systemctl reload nginx"
 ```
 
-to renew all certificates on a server at the same time. Correlating certificate timestamps or certificate-transparency log positions can reveal related domains.<sup>[[6]](#references)</sup>
+để gia hạn tất cả chứng chỉ trên máy chủ cùng lúc. Đối chiếu dấu thời gian của chứng chỉ hoặc vị trí trong nhật ký certificate transparency có thể tiết lộ các domain có liên quan.<sup>[[6]](#references)</sup>
 
-Also use **certificate transparency** logs directly:
+Ngoài ra, hãy sử dụng trực tiếp các nhật ký **certificate transparency**:
 
 - [https://crt.sh/](https://crt.sh/)
 - [https://sslmate.com/certspotter/](https://sslmate.com/certspotter/)
 - [https://search.censys.io/](https://search.censys.io/)
 - [https://chaos.projectdiscovery.io/](https://chaos.projectdiscovery.io/) + [**chaos-client**](https://github.com/projectdiscovery/chaos-client)
 
-### Mail DMARC information
+### Thông tin DMARC của email
 
-You can use a web such as [https://dmarc.live/info/google.com](https://dmarc.live/info/google.com) or a tool such as [https://github.com/Tedixx/dmarc-subdomains](https://github.com/Tedixx/dmarc-subdomains) to find **domains and subdomain sharing the same dmarc information**.\
-Another useful service is [**dmarcian**](https://dmarcian.com/).
+Bạn có thể dùng một trang web như [https://dmarc.live/info/google.com](https://dmarc.live/info/google.com) hoặc một công cụ như [https://github.com/Tedixx/dmarc-subdomains](https://github.com/Tedixx/dmarc-subdomains) để tìm **các domain và subdomain dùng chung thông tin DMARC**.\
+Một dịch vụ hữu ích khác là [**dmarcian**](https://dmarcian.com/).
 
 ### **Passive Takeover**
 
-An abandoned A record can become reachable when a cloud provider reassigns an IP. The referenced research demonstrates an opportunistic workflow that provisions an instance and correlates its address with passive DNS data; test takeover scenarios only within the authorized scope.<sup>[[7]](#references)</sup>
+Một bản ghi A bị bỏ quên có thể truy cập được khi nhà cung cấp cloud cấp lại một IP. Nghiên cứu được dẫn chứng mô tả quy trình chủ động tận dụng cơ hội bằng cách tạo một instance rồi đối chiếu địa chỉ của instance đó với dữ liệu passive DNS; chỉ kiểm thử các tình huống takeover trong phạm vi được cho phép.<sup>[[7]](#references)</sup>
 
-### **Other ways**
+### **Các cách khác**
 
-Repeat the applicable discovery pivots whenever you find a new domain: each result can expose additional certificate names, passive-DNS relationships, favicon matches, and organization identifiers that were not visible from the original seed.<sup>[[9]](#references)[[10]](#references)</sup>
+Lặp lại các bước khám phá phù hợp mỗi khi tìm thấy domain mới: mỗi kết quả có thể tiết lộ thêm tên trong chứng chỉ, mối liên hệ qua passive DNS, kết quả favicon trùng khớp và mã định danh tổ chức mà domain ban đầu chưa cho thấy.<sup>[[9]](#references)[[10]](#references)</sup>
 
 **Shodan**
 
-As you already know the name of the organisation owning the IP space. You can search by that data in shodan using: `org:"Tesla, Inc."` Check the found hosts for new unexpected domains in the TLS certificate.
+Như bạn đã biết tên tổ chức sở hữu dải IP. Bạn có thể tìm kiếm dữ liệu đó trên shodan bằng: `org:"Tesla, Inc."` Kiểm tra các host tìm được để phát hiện domain mới bất ngờ trong chứng chỉ TLS.
 
-You could access the **TLS certificate** of the main web page, obtain the **Organisation name** and then search for that name inside the **TLS certificates** of all the web pages known by **shodan** with the filter : `ssl:"Tesla Motors"` or use a tool like [**sslsearch**](https://github.com/HarshVaragiya/sslsearch).
+Bạn có thể truy cập **chứng chỉ TLS** của trang web chính, lấy **tên Organisation**, rồi tìm tên đó trong **chứng chỉ TLS** của tất cả các trang web mà **shodan** biết bằng bộ lọc: `ssl:"Tesla Motors"` hoặc dùng một công cụ như [**sslsearch**](https://github.com/HarshVaragiya/sslsearch).
 
 **Assetfinder**
 
-[**Assetfinder** ](https://github.com/tomnomnom/assetfinder)is a tool that looks for **domains related** with a main domain and **subdomains** of them, pretty amazing.
+[**Assetfinder** ](https://github.com/tomnomnom/assetfinder) là một công cụ tìm **các domain liên quan** đến một domain chính và **subdomain** của chúng, rất tuyệt vời.
 
-**Passive DNS / Historical DNS**
+**Passive DNS / DNS lịch sử**
 
-Passive DNS data is great to find **old and forgotten records** that still resolve or that can be taken over. Look at:
+Dữ liệu Passive DNS rất hữu ích để tìm **các bản ghi cũ và bị bỏ quên** vẫn phân giải được hoặc có thể bị takeover. Hãy xem:
 
 - [https://securitytrails.com/](https://securitytrails.com/)
 - [https://www.domaintools.com/platform](https://www.domaintools.com/platform)
 - [https://docs.domaintools.com/dnsdb/](https://docs.domaintools.com/dnsdb/)
 
-### **Looking for vulnerabilities**
+### **Tìm lỗ hổng**
 
-Check for some [domain takeover](../../pentesting-web/domain-subdomain-takeover.md#domain-takeover). Maybe some company is **using some a domain** but they **lost the ownership**. Just register it (if cheap enough) and let know the company.
+Kiểm tra xem có [domain takeover](../../pentesting-web/domain-subdomain-takeover.md#domain-takeover) nào không. Có thể một công ty **đang sử dụng một domain** nhưng **đã mất quyền sở hữu**. Hãy đăng ký domain đó (nếu đủ rẻ) rồi thông báo cho công ty.
 
-If you find any **domain with an IP different** from the ones you already found in the assets discovery, you should perform a **basic vulnerability scan** (using Nessus or OpenVAS) and some [**port scan**](../pentesting-network/index.html#discovering-hosts-from-the-outside) with **nmap/masscan/shodan**. Depending on which services are running you can find in **this book some tricks to "attack" them**.\
-_Note that sometimes the domain is hosted inside an IP that is not controlled by the client, so it's not in the scope, be careful._
+Nếu tìm thấy bất kỳ **domain nào có IP khác** với những IP đã phát hiện trong quá trình tìm kiếm tài sản, bạn nên thực hiện **quét lỗ hổng cơ bản** (bằng Nessus hoặc OpenVAS) và [**quét cổng**](../pentesting-network/index.html#discovering-hosts-from-the-outside) bằng **nmap/masscan/shodan**. Tùy vào các dịch vụ đang chạy, bạn có thể tìm thấy trong **cuốn sách này một số thủ thuật để "tấn công" chúng**.\
+_Lưu ý rằng đôi khi domain được host trên một IP không do khách hàng kiểm soát, nên không thuộc phạm vi; hãy cẩn thận._
 
-## Subdomains
+## Subdomain
 
-> We know all the companies inside the scope, all the assets of each company and all the domains related to the companies.
+> Chúng ta đã biết tất cả công ty trong phạm vi, toàn bộ tài sản của từng công ty và tất cả domain có liên quan đến các công ty đó.
 
-It's time to find all the possible subdomains of each found domain.
+Đã đến lúc tìm tất cả subdomain có thể có của từng domain đã tìm thấy.
 
 > [!TIP]
-> Note that some of the tools and techniques to find domains can also help to find subdomains
+> Lưu ý rằng một số công cụ và kỹ thuật tìm domain cũng có thể giúp tìm subdomain
 
 ### **DNS**
 
-Let's try to get **subdomains** from the **DNS** records. We should also try for **Zone Transfer** (If vulnerable, you should report it).
+Hãy thử tìm **subdomain** từ các bản ghi **DNS**. Chúng ta cũng nên thử **Zone Transfer** (nếu dễ bị tấn công, hãy báo cáo).
 
 ```bash
 dnsrecon -a -d tesla.com
@@ -262,9 +261,9 @@ dnsrecon -a -d tesla.com
 
 ### **OSINT**
 
-For APIs and platforms covering infrastructure, reputation, breach records, and enrichment beyond subdomain discovery, see the [Reconnaissance and Threat-Intelligence APIs catalog](reconnaissance-and-threat-intelligence-apis.md).
+Để tìm các API và nền tảng cung cấp thông tin về hạ tầng, danh tiếng, hồ sơ rò rỉ và enrichment ngoài việc tìm kiếm subdomain, xem [catalog API Reconnaissance và Threat-Intelligence](reconnaissance-and-threat-intelligence-apis.md).
 
-The fastest way to obtain a lot of subdomains is search in external sources. The most used **tools** are the following ones (for better results configure the API keys):
+Cách nhanh nhất để thu thập nhiều subdomain là tìm kiếm trong các nguồn bên ngoài. Dưới đây là những **tools** được sử dụng nhiều nhất (để có kết quả tốt hơn, hãy cấu hình API keys):
 
 
 - [**BBOT**](https://github.com/blacklanternsecurity/bbot)
@@ -332,21 +331,21 @@ vita -d tesla.com
 theHarvester -d tesla.com -b "anubis, baidu, bing, binaryedge, bingapi, bufferoverun, censys, certspotter, crtsh, dnsdumpster, duckduckgo, fullhunt, github-code, google, hackertarget, hunter, intelx, linkedin, linkedin_links, n45ht, omnisint, otx, pentesttools, projectdiscovery, qwant, rapiddns, rocketreach, securityTrails, spyse, sublist3r, threatcrowd, threatminer, trello, twitter, urlscan, virustotal, yahoo, zoomeye"
 ```
 
-There are **other interesting tools/APIs** that even if not directly specialised in finding subdomains could be useful to find subdomains, like:
+Có **những công cụ/API thú vị khác** tuy không chuyên trực tiếp tìm subdomain nhưng vẫn có thể hữu ích để tìm subdomain, chẳng hạn:
 
-- [**IP.THC.ORG**](https://ip.thc.org) free API
+- [**IP.THC.ORG**](https://ip.thc.org) API miễn phí
 
 ```bash
 curl https://ip.thc.org/tesla.com
 ```
 
-- [**AnubisDB free API**](https://github.com/jonluca/Anubis-DB)
+- [**API miễn phí AnubisDB**](https://github.com/jonluca/Anubis-DB)
 
 ```bash
 curl https://anubisdb.com/anubis/subdomains/tesla.com | jq -r ".[]"
 ```
 
-- [**RapidDNS**](https://rapiddns.io) free API
+- [**RapidDNS**](https://rapiddns.io) API miễn phí
 
 ```bash
 # Get Domains from rapiddns free API
@@ -370,14 +369,14 @@ crt(){
 crt tesla.com
 ```
 
-- [**gau**](https://github.com/lc/gau)**:** fetches known URLs from AlienVault's Open Threat Exchange, the Wayback Machine, and Common Crawl for any given domain.
+- [**gau**](https://github.com/lc/gau)**:** lấy các URL đã biết từ AlienVault's Open Threat Exchange, Wayback Machine và Common Crawl cho bất kỳ domain nào.
 
 ```bash
 # Get subdomains from GAUs found URLs
 gau --subs tesla.com | cut -d "/" -f 3 | sort -u
 ```
 
-- [**SubDomainizer**](https://github.com/nsonaniya2010/SubDomainizer) **&** [**subscraper**](https://github.com/Cillian-Collins/subscraper): They scrap the web looking for JS files and extract subdomains from there.
+- [**SubDomainizer**](https://github.com/nsonaniya2010/SubDomainizer) **&** [**subscraper**](https://github.com/Cillian-Collins/subscraper): Chúng quét web để tìm các tệp JS và trích xuất subdomain từ đó.
 
 ```bash
 # Get only subdomains from SubDomainizer
@@ -396,7 +395,7 @@ shodan domain <domain>
 shodan search "http.html:help.domain.com"
 ```
 
-- [**Censys subdomain finder**](https://github.com/christophetd/censys-subdomain-finder)
+- [**Công cụ tìm subdomain của Censys**](https://github.com/christophetd/censys-subdomain-finder)
 
 ```bash
 export CENSYS_API_ID=...
@@ -410,19 +409,19 @@ python3 censys-subdomain-finder.py tesla.com
 python3 DomainTrail.py -d example.com
 ```
 
-- [**SecurityTrails**](https://securitytrails.com/) offers limited free API access for current DNS and subdomain data; historical DNS/IP data requires a paid plan.
+- [**SecurityTrails**](https://securitytrails.com/) cung cấp quyền truy cập API miễn phí có giới hạn để xem dữ liệu DNS và subdomain hiện tại; dữ liệu DNS/IP lịch sử yêu cầu gói trả phí.
 - [**chaos.projectdiscovery.io**](https://chaos.projectdiscovery.io/#/)
 - [**activedns.net**](https://activedns.net/)
 
-This project offers for **free all the subdomains related to bug-bounty programs**. You can access this data also using [chaospy](https://github.com/Moaaz-0x/chaospy) or even access the scope used by this project [https://github.com/projectdiscovery/public-bugbounty-programs](https://github.com/projectdiscovery/public-bugbounty-programs)
+Dự án này cung cấp **miễn phí tất cả subdomain liên quan đến các chương trình bug-bounty**. Bạn cũng có thể truy cập dữ liệu này bằng [chaospy](https://github.com/Moaaz-0x/chaospy), hoặc xem scope mà dự án này sử dụng tại [https://github.com/projectdiscovery/public-bugbounty-programs](https://github.com/projectdiscovery/public-bugbounty-programs)
 
-You can find a **comparison** of many of these tools here: [https://blog.blacklanternsecurity.com/p/subdomain-enumeration-tool-face-off](https://blog.blacklanternsecurity.com/p/subdomain-enumeration-tool-face-off)
+Bạn có thể xem phần **so sánh** nhiều công cụ này tại đây: [https://blog.blacklanternsecurity.com/p/subdomain-enumeration-tool-face-off](https://blog.blacklanternsecurity.com/p/subdomain-enumeration-tool-face-off)
 
 ### **DNS Brute force**
 
-Let's try to find new **subdomains** brute-forcing DNS servers using possible subdomain names.
+Hãy thử tìm các **subdomain** mới bằng cách brute-force DNS server với những tên subdomain có thể có.
 
-For this action you will need some **common subdomains wordlists like**:
+Để thực hiện việc này, bạn sẽ cần một số **wordlist chứa các subdomain phổ biến như**:
 
 - [https://gist.github.com/jhaddix/86a06c5dc309d08580a018c66354a056](https://gist.github.com/jhaddix/86a06c5dc309d08580a018c66354a056)
 - [https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt](https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt)
@@ -430,11 +429,11 @@ For this action you will need some **common subdomains wordlists like**:
 - [https://github.com/pentester-io/commonspeak](https://github.com/pentester-io/commonspeak)
 - [https://github.com/danielmiessler/SecLists/tree/master/Discovery/DNS](https://github.com/danielmiessler/SecLists/tree/master/Discovery/DNS)
 
-And also IPs of good DNS resolvers. In order to generate a list of trusted DNS resolvers, you can download the resolvers from [https://www.wirewiki.com/dns-servers/all.txt](https://www.wirewiki.com/dns-servers/all.txt) and use [**dnsvalidator**](https://github.com/vortexau/dnsvalidator) to filter them. Or you could use: [https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt](https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt)
+Bạn cũng cần IP của các DNS resolver tốt. Để tạo danh sách DNS resolver đáng tin cậy, bạn có thể tải các resolver từ [https://www.wirewiki.com/dns-servers/all.txt](https://www.wirewiki.com/dns-servers/all.txt), rồi dùng [**dnsvalidator**](https://github.com/vortexau/dnsvalidator) để lọc. Hoặc bạn có thể dùng: [https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt](https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt)
 
-The most recommended tools for DNS brute-force are:
+Các công cụ được khuyên dùng nhất để DNS brute-force là:
 
-- [**massdns**](https://github.com/blechschmidt/massdns): This was the first tool that performed an effective DNS brute-force. It's very fast however it's prone to false positives.
+- [**massdns**](https://github.com/blechschmidt/massdns): Đây là công cụ đầu tiên thực hiện DNS brute-force hiệu quả. Công cụ này rất nhanh, nhưng dễ tạo ra kết quả dương tính giả.
 
 ```bash
 sed 's/$/.domain.com/' subdomains.txt > bf-subdomains.txt
@@ -442,73 +441,73 @@ sed 's/$/.domain.com/' subdomains.txt > bf-subdomains.txt
 grep -E "tesla.com. [0-9]+ IN A .+" /tmp/results.txt
 ```
 
-- [**gobuster**](https://github.com/OJ/gobuster): This one I think just uses 1 resolver
+- [**gobuster**](https://github.com/OJ/gobuster): Cái này tôi nghĩ chỉ dùng 1 resolver.
 
 ```
 gobuster dns -d mysite.com -t 50 -w subdomains.txt
 ```
 
-- [**shuffledns**](https://github.com/projectdiscovery/shuffledns) is a wrapper around `massdns`, written in go, that allows you to enumerate valid subdomains using active bruteforce, as well as resolve subdomains with wildcard handling and easy input-output support.
+- [**shuffledns**](https://github.com/projectdiscovery/shuffledns) là một wrapper cho `massdns`, được viết bằng Go, cho phép bạn liệt kê các subdomain hợp lệ bằng active bruteforce, cũng như phân giải subdomain với xử lý wildcard và hỗ trợ input-output dễ dàng.
 
 ```
 shuffledns -d example.com -list example-subdomains.txt -r resolvers.txt
 ```
 
-- [**puredns**](https://github.com/d3mondev/puredns): It also uses `massdns`.
+- [**puredns**](https://github.com/d3mondev/puredns): Nó cũng sử dụng `massdns`.
 
 ```
 puredns bruteforce all.txt domain.com
 ```
 
-- [**aiodnsbrute**](https://github.com/blark/aiodnsbrute) uses asyncio to brute force domain names asynchronously.
+- [**aiodnsbrute**](https://github.com/blark/aiodnsbrute) sử dụng asyncio để brute force tên miền bất đồng bộ.
 
 ```
 aiodnsbrute -r resolvers -w wordlist.txt -vv -t 1024 domain.com
 ```
 
-### Second DNS Brute-Force Round
+### Vòng brute-force DNS thứ hai
 
-After having found subdomains using open sources and brute-forcing, you could generate alterations of the subdomains found to try to find even more. Several tools are useful for this purpose:
+Sau khi tìm thấy các subdomain bằng nguồn mở và brute-force, bạn có thể tạo các biến thể từ những subdomain đã tìm thấy để thử tìm thêm nữa. Một số công cụ hữu ích cho mục đích này:
 
-- [**dnsgen**](https://github.com/AlephNullSK/dnsgen)**:** Given the domains and subdomains generate permutations.
+- [**dnsgen**](https://github.com/AlephNullSK/dnsgen)**:** Tạo các hoán vị dựa trên các domain và subdomain được cung cấp.
 
 ```bash
 cat subdomains.txt | dnsgen -
 ```
 
-- [**goaltdns**](https://github.com/subfinder/goaltdns): Given the domains and subdomains generate permutations.
-  - You can get goaltdns permutations **wordlist** in [**here**](https://github.com/subfinder/goaltdns/blob/master/words.txt).
+- [**goaltdns**](https://github.com/subfinder/goaltdns): Tạo các permutation từ các domain và subdomain.
+  - Bạn có thể lấy **wordlist** permutation của goaltdns [**tại đây**](https://github.com/subfinder/goaltdns/blob/master/words.txt).
 
 ```bash
 goaltdns -l subdomains.txt -w /tmp/words-permutations.txt -o /tmp/final-words-s3.txt
 ```
 
-- [**gotator**](https://github.com/Josue87/gotator)**:** Given the domains and subdomains generate permutations. If not permutations file is indicated gotator will use its own one.
+- [**gotator**](https://github.com/Josue87/gotator)**:** Tạo các hoán vị dựa trên tên miền và tên miền phụ. Nếu không chỉ định tệp hoán vị, gotator sẽ sử dụng tệp của riêng nó.
 
 ```
 gotator -sub subdomains.txt -silent [-perm /tmp/words-permutations.txt]
 ```
 
-- [**altdns**](https://github.com/infosec-au/altdns): Apart from generating subdomains permutations, it can also try to resolve them (but it's better to use the previous commented tools).
-  - You can get altdns permutations **wordlist** in [**here**](https://github.com/infosec-au/altdns/blob/master/words.txt).
+- [**altdns**](https://github.com/infosec-au/altdns): Ngoài tạo các hoán vị subdomain, công cụ này còn có thể thử phân giải chúng (nhưng tốt hơn nên dùng các công cụ đã đề cập trước đó).
+  - Bạn có thể tải **wordlist** các hoán vị của altdns [**tại đây**](https://github.com/infosec-au/altdns/blob/master/words.txt).
 
 ```
 altdns -i subdomains.txt -w /tmp/words-permutations.txt -o /tmp/asd3
 ```
 
-- [**dmut**](https://github.com/bp0lr/dmut): Another tool to perform permutations, mutations and alteration of subdomains. This tool will brute force the result (it doesn't support dns wild card).
-  - You can get dmut permutations wordlist in [**here**](https://raw.githubusercontent.com/bp0lr/dmut/main/words.txt).
+- [**dmut**](https://github.com/bp0lr/dmut): Một công cụ khác để tạo hoán vị, biến đổi và chỉnh sửa subdomain. Công cụ này sẽ brute force kết quả (không hỗ trợ DNS wildcard).
+  - Bạn có thể tải wordlist các hoán vị của dmut [**tại đây**](https://raw.githubusercontent.com/bp0lr/dmut/main/words.txt).
 
 ```bash
 cat subdomains.txt | dmut -d /tmp/words-permutations.txt -w 100 \
     --dns-errorLimit 10 --use-pb --verbose -s /tmp/resolvers-trusted.txt
 ```
 
-- [**alterx**](https://github.com/projectdiscovery/alterx)**:** Based on a domain it **generates new potential subdomains names** based on indicated patterns to try to discover more subdomains.
+- [**alterx**](https://github.com/projectdiscovery/alterx)**:** Dựa trên một domain, công cụ **tạo tên các subdomain tiềm năng mới** theo các pattern được chỉ định để thử tìm thêm subdomain.
 
-#### Smart permutations generation
+#### Tạo permutation thông minh
 
-- [**regulator**](https://github.com/cramppet/regulator): Learns regex-like patterns from discovered subdomains and generates candidate names to resolve.<sup>[[8]](#references)</sup>
+- [**regulator**](https://github.com/cramppet/regulator): Học các pattern dạng regex từ những subdomain đã tìm thấy và tạo các tên ứng viên để phân giải.<sup>[[8]](#references)</sup>
 
 ```bash
 python3 main.py adobe.com adobe adobe.rules
@@ -516,29 +515,29 @@ make_brute_list.sh adobe.rules adobe.brute
 puredns resolve adobe.brute --write adobe.valid
 ```
 
-- [**subzuf**](https://github.com/elceef/subzuf)**:** _subzuf_ is a subdomain brute-force fuzzer coupled with an immensly simple but effective DNS reponse-guided algorithm. It utilizes a provided set of input data, like a tailored wordlist or historical DNS/TLS records, to accurately synthesize more corresponding domain names and expand them even further in a loop based on information gathered during DNS scan.
+- [**subzuf**](https://github.com/elceef/subzuf)**:** _subzuf_ là một công cụ fuzzing brute-force subdomain kết hợp với thuật toán định hướng theo phản hồi DNS cực kỳ đơn giản nhưng hiệu quả. Công cụ sử dụng một tập dữ liệu đầu vào được cung cấp, chẳng hạn như wordlist được tùy chỉnh hoặc bản ghi DNS/TLS lịch sử, để tạo chính xác thêm các tên miền tương ứng và tiếp tục mở rộng chúng theo vòng lặp dựa trên thông tin thu thập được trong quá trình quét DNS.
 
 ```
 echo www | subzuf facebook.com
 ```
 
-### **Subdomain Discovery Workflow**
+### **Quy trình khám phá subdomain**
 
-Trickest workflow examples combine OSINT, DNS brute force, and permutation stages for repeatable subdomain enumeration.<sup>[[9]](#references)[[10]](#references)</sup>
+Các ví dụ workflow của Trickest kết hợp OSINT, DNS brute force và các giai đoạn permutation để thực hiện enumeration subdomain có thể lặp lại.<sup>[[9]](#references)[[10]](#references)</sup>
 
 ### **VHosts / Virtual Hosts**
 
-If you found an IP address containing **one or several web pages** belonging to subdomains, you could try to **find other subdomains with webs in that IP** by looking in **OSINT sources** for domains in an IP or by **brute-forcing VHost domain names in that IP**.
+Nếu tìm thấy một địa chỉ IP chứa **một hoặc nhiều trang web** thuộc về các subdomain, bạn có thể thử **tìm các subdomain khác có website trên IP đó** bằng cách tìm domain trên IP trong **các nguồn OSINT** hoặc **brute force tên domain VHost trên IP đó**.
 
 #### OSINT
 
-You can find some **VHosts in IPs using** [**HostHunter**](https://github.com/SpiderLabs/HostHunter) **or other APIs**.
+Bạn có thể tìm một số **VHost trên IP bằng** [**HostHunter**](https://github.com/SpiderLabs/HostHunter) **hoặc các API khác**.
 
 **Brute Force**
 
-If you suspect that some subdomain can be hidden in a web server you could try to brute force it:
+Nếu nghi ngờ có subdomain bị ẩn trong web server, bạn có thể thử brute force:
 
-For name-based vhosts, fuzz the `Host` header and use ffuf's auto-calibration to filter the default response.<sup>[[2]](#references)</sup>
+Với vhost dựa trên tên, hãy fuzz header `Host` và dùng tính năng auto-calibration của ffuf để lọc phản hồi mặc định.<sup>[[2]](#references)</sup>
 
 ```bash
 ffuf -u http://10.10.10.10 -H "Host: FUZZ.example.com" \
@@ -560,201 +559,200 @@ VHostScan -t example.com
 ```
 
 > [!TIP]
-> With this technique you may even be able to access internal/hidden endpoints.
+> Với kỹ thuật này, bạn thậm chí có thể truy cập các endpoint nội bộ/ẩn.
 
 ### **CORS Brute Force**
 
-Sometimes you will find pages that only return the header _**Access-Control-Allow-Origin**_ when a valid domain/subdomain is set in the _**Origin**_ header. In these scenarios, you can abuse this behaviour to **discover** new **subdomains**.
+Đôi khi, bạn sẽ tìm thấy các trang chỉ trả về header _**Access-Control-Allow-Origin**_ khi một domain/subdomain hợp lệ được đặt trong header _**Origin**_. Trong những trường hợp này, bạn có thể lợi dụng hành vi này để **khám phá** các **subdomain** mới.
 
 ```bash
 ffuf -w subdomains-top1million-5000.txt -u http://10.10.10.208 -H 'Origin: http://FUZZ.crossfit.htb' -mr "Access-Control-Allow-Origin" -ignore-body
 ```
 
-### **Buckets Brute Force**
+### **Brute Force bucket**
 
-While looking for **subdomains** keep an eye to see if it is **pointing** to any type of **bucket**, and in that case [**check the permissions**](../../network-services-pentesting/pentesting-web/buckets/index.html)**.**\
-Also, as at this point you will know all the domains inside the scope, try to [**brute force possible bucket names and check the permissions**](../../network-services-pentesting/pentesting-web/buckets/index.html).
+Khi tìm **subdomains**, hãy để ý xem chúng có **trỏ** đến loại **bucket** nào không; nếu có, hãy [**kiểm tra quyền**](../../network-services-pentesting/pentesting-web/buckets/index.html)**.**\
+Ngoài ra, vì lúc này bạn đã biết tất cả domain trong phạm vi, hãy thử [**brute force các tên bucket có thể có và kiểm tra quyền**](../../network-services-pentesting/pentesting-web/buckets/index.html).
 
-### **Monitorization**
+### **Giám sát**
 
-You can **monitor** if **new subdomains** of a domain are created by monitoring the **Certificate Transparency** Logs [**sublert** ](https://github.com/yassineaboukir/sublert/blob/master/sublert.py)does.
+Bạn có thể **giám sát** việc có **subdomain mới** được tạo cho một domain hay không bằng cách theo dõi các log **Certificate Transparency**, như [**sublert** ](https://github.com/yassineaboukir/sublert/blob/master/sublert.py) thực hiện.
 
-### **Looking for vulnerabilities**
+### **Tìm lỗ hổng**
 
-Check for possible [**subdomain takeovers**](../../pentesting-web/domain-subdomain-takeover.md#subdomain-takeover).\
-If the **subdomain** is pointing to some **S3 bucket**, [**check the permissions**](../../network-services-pentesting/pentesting-web/buckets/index.html).
+Kiểm tra khả năng [**chiếm quyền subdomain**](../../pentesting-web/domain-subdomain-takeover.md#subdomain-takeover).\
+Nếu **subdomain** trỏ đến một **S3 bucket**, hãy [**kiểm tra quyền**](../../network-services-pentesting/pentesting-web/buckets/index.html).
 
-If you find any **subdomain with an IP different** from the ones you already found in the assets discovery, you should perform a **basic vulnerability scan** (using Nessus or OpenVAS) and some [**port scan**](../pentesting-network/index.html#discovering-hosts-from-the-outside) with **nmap/masscan/shodan**. Depending on which services are running you can find in **this book some tricks to "attack" them**.\
-_Note that sometimes the subdomain is hosted inside an IP that is not controlled by the client, so it's not in the scope, be careful._
+Nếu bạn tìm thấy **subdomain có IP khác** với những IP đã tìm thấy khi khám phá tài sản, hãy thực hiện **quét lỗ hổng cơ bản** (bằng Nessus hoặc OpenVAS) và [**quét port**](../pentesting-network/index.html#discovering-hosts-from-the-outside) bằng **nmap/masscan/shodan**. Tùy vào các dịch vụ đang chạy, bạn có thể tìm thấy **một số thủ thuật để "tấn công" chúng trong cuốn sách này**.\
+_Lưu ý rằng đôi khi subdomain được host trên một IP không do khách hàng kiểm soát, nên IP đó nằm ngoài phạm vi. Hãy cẩn thận._
 
 ## IPs
 
-In the initial steps you might have **found some IP ranges, domains and subdomains**.\
-It’s time to **recollect all the IPs from those ranges** and for the **domains/subdomains (DNS queries).**
+Trong các bước ban đầu, có thể bạn đã **tìm thấy một số dải IP, domain và subdomain**.\
+Đã đến lúc **thu thập tất cả IP từ những dải đó** và **các domain/subdomain (thông qua truy vấn DNS).**
 
-Using services such as the following, you can also find **previous IPs used by domains and subdomains**. These IPs might still be owned by the client (and might allow you to find [**CloudFlare bypasses**](../../network-services-pentesting/pentesting-web/uncovering-cloudflare.md))
+Bạn cũng có thể tìm **các IP trước đây từng được domain và subdomain sử dụng** bằng những dịch vụ như sau. Khách hàng có thể vẫn sở hữu các IP này (và chúng có thể giúp bạn tìm ra các trường hợp [**bypass CloudFlare**](../../network-services-pentesting/pentesting-web/uncovering-cloudflare.md)).
 
-- [**SecurityTrails**](https://securitytrails.com/) (historical DNS/IP data requires a paid plan)
+- [**SecurityTrails**](https://securitytrails.com/) (dữ liệu DNS/IP lịch sử yêu cầu gói trả phí)
 
-You can also check for domains pointing a specific IP address using the tool [**hakip2host**](https://github.com/hakluke/hakip2host)
+Bạn cũng có thể tìm các domain trỏ đến một địa chỉ IP cụ thể bằng công cụ [**hakip2host**](https://github.com/hakluke/hakip2host)
 
-### **Looking for vulnerabilities**
+### **Tìm lỗ hổng**
 
-**Port scan all the IPs that doesn’t belong to CDNs** (as you highly probably won’t find anything interested in there). In the running services discovered you might be **able to find vulnerabilities**.
+**Quét port tất cả IP không thuộc CDN** (vì nhiều khả năng bạn sẽ không tìm thấy gì thú vị ở đó). Bạn có thể **tìm thấy lỗ hổng** trong các dịch vụ đang chạy.
 
-**Find a** [**guide**](../pentesting-network/index.html) **about how to scan hosts.**
+**Tìm một** [**hướng dẫn**](../pentesting-network/index.html) **về cách quét host.**
 
-## Web servers hunting
+## Săn tìm web server
 
-> We have found all the companies and their assets and we know IP ranges, domains and subdomains inside the scope. It's time to search for web servers.
+> Chúng ta đã tìm thấy tất cả công ty và tài sản của họ, đồng thời biết các dải IP, domain và subdomain trong phạm vi. Đã đến lúc tìm kiếm web server.
 
-In the previous steps you have probably already performed some **recon of the IPs and domains discovered**, so you may have **already found all the possible web servers**. However, if you haven't we are now going to see some **fast tricks to search for web servers** inside the scope.
+Trong các bước trước, có thể bạn đã thực hiện một số hoạt động **recon các IP và domain đã phát hiện**, nên có thể bạn đã **tìm thấy tất cả web server có thể có**. Tuy nhiên, nếu chưa, chúng ta sẽ xem một số **thủ thuật nhanh để tìm web server** trong phạm vi.
 
-Please, note that this will be **oriented for web apps discovery**, so you should **perform the vulnerability** and **port scanning** also (**if allowed** by the scope).
+Xin lưu ý rằng nội dung này **tập trung vào việc khám phá web app**, vì vậy bạn cũng nên **thực hiện quét lỗ hổng** và **quét port** (**nếu phạm vi cho phép**).
 
-A **fast method** to discover **ports open** related to **web** servers using [**masscan** can be found here](../pentesting-network/index.html#http-port-discovery).\
-Another friendly tool to look for web servers is [**httprobe**](https://github.com/tomnomnom/httprobe)**,** [**fprobe**](https://github.com/theblackturtle/fprobe) and [**httpx**](https://github.com/projectdiscovery/httpx). You just pass a list of domains and it will try to connect to port 80 (http) and 443 (https). Additionally, you can indicate to try other ports:
+Bạn có thể tìm thấy [**phương pháp nhanh** để phát hiện các **port đang mở** liên quan đến web server bằng [**masscan** ở đây](../pentesting-network/index.html#http-port-discovery).\
+Một công cụ dễ dùng khác để tìm web server là [**httprobe**](https://github.com/tomnomnom/httprobe)**,** [**fprobe**](https://github.com/theblackturtle/fprobe) và [**httpx**](https://github.com/projectdiscovery/httpx). Bạn chỉ cần đưa vào danh sách domain, các công cụ này sẽ thử kết nối đến port 80 (http) và 443 (https). Ngoài ra, bạn có thể chỉ định thử các port khác:
 
 ```bash
 cat /tmp/domains.txt | httprobe #Test all domains inside the file for port 80 and 443
 cat /tmp/domains.txt | httprobe -p http:8080 -p https:8443 #Check port 80, 443 and 8080 and 8443
 ```
 
-### **Screenshots**
+### **Ảnh chụp màn hình**
 
-Now that you have discovered **all the web servers** present in the scope (among the **IPs** of the company and all the **domains** and **subdomains**) you probably **don't know where to start**. So, let's make it simple and start just taking screenshots of all of them. Just by **taking a look** at the **main page** you can find **weird** endpoints that are more **prone** to be **vulnerable**.
+Giờ đây, khi đã phát hiện **tất cả web server** trong phạm vi (bao gồm các **IP** của công ty và mọi **domain** cũng như **subdomain**), có lẽ bạn **chưa biết nên bắt đầu từ đâu**. Vậy hãy đơn giản hóa mọi thứ và bắt đầu bằng việc chụp ảnh màn hình tất cả chúng. Chỉ cần **xem qua** **trang chính**, bạn có thể tìm thấy các endpoint **lạ** có khả năng **dễ bị tổn thương** hơn.
 
-To perform the proposed idea you can use [**EyeWitness**](https://github.com/RedSiege/EyeWitness), [**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot), [**Aquatone**](https://github.com/michenriksen/aquatone), [**Shutter**](https://shutter-project.org/downloads/third-party-packages/), [**Gowitness**](https://github.com/sensepost/gowitness) or [**webscreenshot**](https://github.com/maaaaz/webscreenshot)**.**
+Để thực hiện ý tưởng này, bạn có thể dùng [**EyeWitness**](https://github.com/RedSiege/EyeWitness), [**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot), [**Aquatone**](https://github.com/michenriksen/aquatone), [**Shutter**](https://shutter-project.org/downloads/third-party-packages/), [**Gowitness**](https://github.com/sensepost/gowitness) hoặc [**webscreenshot**](https://github.com/maaaaz/webscreenshot)**.**
 
-Moreover, you could then use [**eyeballer**](https://github.com/BishopFox/eyeballer) to run over all the **screenshots** to tell you **what's likely to contain vulnerabilities**, and what isn't.
+Ngoài ra, bạn có thể dùng [**eyeballer**](https://github.com/BishopFox/eyeballer) để quét tất cả **ảnh chụp màn hình**, xác định nội dung nào **có khả năng chứa lỗ hổng** và nội dung nào thì không.
 
-## Public Cloud Assets
+## Tài sản Public Cloud
 
-In order to find potential cloud assets belonging to a company you should **start with a list of keywords that identify that company**. For example, a crypto for a crypto company you might use words such as: `"crypto", "wallet", "dao", "<domain_name>", <"subdomain_names">`.
+Để tìm các tài sản cloud tiềm năng thuộc về một công ty, bạn nên **bắt đầu bằng danh sách từ khóa nhận diện công ty đó**. Ví dụ, với một công ty crypto, bạn có thể dùng các từ như: `"crypto", "wallet", "dao", "<domain_name>", <"subdomain_names">`.
 
-You will also need wordlists of **common words used in buckets**:
+Bạn cũng sẽ cần wordlist gồm các **từ phổ biến thường dùng trong tên bucket**:
 
 - [https://raw.githubusercontent.com/cujanovic/goaltdns/master/words.txt](https://raw.githubusercontent.com/cujanovic/goaltdns/master/words.txt)
 - [https://raw.githubusercontent.com/infosec-au/altdns/master/words.txt](https://raw.githubusercontent.com/infosec-au/altdns/master/words.txt)
 - [https://raw.githubusercontent.com/jordanpotti/AWSBucketDump/master/BucketNames.txt](https://raw.githubusercontent.com/jordanpotti/AWSBucketDump/master/BucketNames.txt)
 
-Then, with those words you should generate **permutations** (check the [**Second Round DNS Brute-Force**](#second-dns-bruteforce-round) for more info).
+Sau đó, dùng những từ này để tạo **các hoán vị** (xem [**Vòng brute-force DNS thứ hai**](#second-dns-bruteforce-round) để biết thêm thông tin).
 
-With the resulting wordlists you could use tools such as [**cloud_enum**](https://github.com/initstring/cloud_enum)**,** [**CloudScraper**](https://github.com/jordanpotti/CloudScraper)**,** [**cloudlist**](https://github.com/projectdiscovery/cloudlist) **or** [**S3Scanner**](https://github.com/sa7mon/S3Scanner)**.**
+Với các wordlist thu được, bạn có thể dùng những công cụ như [**cloud_enum**](https://github.com/initstring/cloud_enum)**,** [**CloudScraper**](https://github.com/jordanpotti/CloudScraper)**,** [**cloudlist**](https://github.com/projectdiscovery/cloudlist) **hoặc** [**S3Scanner**](https://github.com/sa7mon/S3Scanner)**.**
 
-Remember that when looking for Cloud Assets you should l**ook for more than just buckets in AWS**.
+Hãy nhớ rằng khi tìm kiếm Cloud Assets, bạn nên **tìm nhiều thứ hơn là chỉ các bucket trên AWS**.
 
-### **Looking for vulnerabilities**
+### **Tìm lỗ hổng**
 
-If you find things such as **open buckets or cloud functions exposed** you should **access them** and try to see what they offer you and if you can abuse them.
+Nếu tìm thấy những thứ như **bucket mở hoặc cloud function bị lộ**, bạn nên **truy cập chúng**, xem chúng cung cấp những gì và liệu bạn có thể khai thác chúng hay không.
 
-## Emails
+## Email
 
-With the **domains** and **subdomains** inside the scope you basically have all what you **need to start searching for emails**. These are the **APIs** and **tools** that have worked the best for me to find emails of a company:
+Với các **domain** và **subdomain** trong phạm vi, về cơ bản bạn đã có đủ mọi thứ **cần thiết để bắt đầu tìm email**. Đây là những **API** và **công cụ** hiệu quả nhất mà tôi từng dùng để tìm email của một công ty:
 
-- [**theHarvester**](https://github.com/laramies/theHarvester) - with APIs
-- API of [**https://hunter.io/**](https://hunter.io/) (free version)
-- API of [**https://app.snov.io/**](https://app.snov.io/) (free version)
-- API of [**https://minelead.io/**](https://minelead.io/) (free version)
+- [**theHarvester**](https://github.com/laramies/theHarvester) - dùng API
+- API của [**https://hunter.io/**](https://hunter.io/) (bản miễn phí)
+- API của [**https://app.snov.io/**](https://app.snov.io/) (bản miễn phí)
+- API của [**https://minelead.io/**](https://minelead.io/) (bản miễn phí)
 
-### **Looking for vulnerabilities**
+### **Tìm lỗ hổng**
 
-Emails will come handy later to **brute-force web logins and auth services** (such as SSH). Also, they are needed for **phishings**. Moreover, these APIs will give you even more **info about the person** behind the email, which is useful for the phishing campaign.
+Email sẽ hữu ích về sau để **brute-force đăng nhập web và các dịch vụ xác thực** (chẳng hạn như SSH). Chúng cũng cần thiết cho **phishing**. Ngoài ra, các API này sẽ cung cấp thêm **thông tin về người đứng sau email**, hữu ích cho chiến dịch phishing.
 
-## Credential Leaks
+## Credential Leak
 
-With the **domains,** **subdomains**, and **emails** you can start looking for credentials leaked in the past belonging to those emails:
+Với các **domain,** **subdomain** và **email**, bạn có thể bắt đầu tìm credential bị leak trước đây liên quan đến những email đó:
 
 - [https://leak-lookup.com](https://leak-lookup.com/account/login)
 - [https://www.dehashed.com/](https://www.dehashed.com/)
 
-### **Looking for vulnerabilities**
+### **Tìm lỗ hổng**
 
-If you find **valid leaked** credentials, this is a very easy win.
+Nếu tìm thấy credential **bị leak còn hợp lệ**, đây là một chiến thắng rất dễ dàng.
 
-## Secrets Leaks
+## Secrets Leak
 
-Credential leaks are related to hacks of companies where **sensitive information was leaked and sold**. However, companies might be affected for **other leaks** whose info isn't in those databases:
+Credential leak liên quan đến các vụ hack công ty, trong đó **thông tin nhạy cảm bị leak và đem bán**. Tuy nhiên, công ty cũng có thể bị ảnh hưởng bởi **các leak khác** mà thông tin không có trong những cơ sở dữ liệu đó:
 
-### Github Leaks
+### Github Leak
 
-Credentials and APIs might be leaked in the **public repositories** of the **company** or of the **users** working by that github company.\
-You can use the **tool** [**Leakos**](https://github.com/carlospolop/Leakos) to **download** all the **public repos** of an **organization** and of its **developers** and run [**gitleaks**](https://github.com/gitleaks/gitleaks) over them automatically.
+Credential và API có thể bị leak trong **repository công khai** của **công ty** hoặc của **người dùng** làm việc tại công ty github đó.\
+Bạn có thể dùng **công cụ** [**Leakos**](https://github.com/carlospolop/Leakos) để **tải xuống** tất cả **repo công khai** của một **tổ chức** và các **developer** của tổ chức đó, rồi tự động chạy [**gitleaks**](https://github.com/gitleaks/gitleaks) trên chúng.
 
-**Leakos** can also be used to run **gitleaks** agains all the **text** provided **URLs passed** to it as sometimes **web pages also contains secrets**.
+**Leakos** cũng có thể dùng để chạy **gitleaks** trên tất cả **văn bản** được cung cấp cho nó dưới dạng **URL**, vì đôi khi **trang web cũng chứa secret**.
 
 #### Github Dorks
 
-Check the [GitHub dorks and leaks page](github-leaked-secrets.md) for potential **GitHub dorks** to search in the organization.
+Xem trang [GitHub dorks and leaks](github-leaked-secrets.md) để tìm các **GitHub dork** tiềm năng trong tổ chức.
 
-### Pastes Leaks
+### Paste Leak
 
-Sometimes attackers or just workers will **publish company content in a paste site**. This might or might not contain **sensitive information**, but it's very interesting to search for it.\
-You can use the tool [**Pastos**](https://github.com/carlospolop/Pastos) to search in more that 80 paste sites at the same time.
+Đôi khi kẻ tấn công hoặc nhân viên sẽ **đăng nội dung công ty lên một trang paste**. Nội dung đó có thể chứa hoặc không chứa **thông tin nhạy cảm**, nhưng vẫn rất đáng để tìm kiếm.\
+Bạn có thể dùng công cụ [**Pastos**](https://github.com/carlospolop/Pastos) để tìm kiếm cùng lúc trên hơn 80 trang paste.
 
-### Google Dorks
+### Google Dork
 
-Old but gold google dorks are always useful to find **exposed information that shouldn't be there**. The only problem is that the [**google-hacking-database**](https://www.exploit-db.com/google-hacking-database) contains several **thousands** of possible queries that you cannot run manually. So, you can get your favourite 10 ones or you could use a **tool such as** [**Gorks**](https://github.com/carlospolop/Gorks) **to run them all**.
+Google dork đã cũ nhưng vẫn hữu ích để tìm **thông tin bị lộ mà lẽ ra không nên xuất hiện ở đó**. Vấn đề duy nhất là [**google-hacking-database**](https://www.exploit-db.com/google-hacking-database) chứa hàng **nghìn** truy vấn tiềm năng mà bạn không thể chạy thủ công. Vì vậy, bạn có thể chọn 10 truy vấn yêu thích hoặc dùng **một công cụ như** [**Gorks**](https://github.com/carlospolop/Gorks) **để chạy tất cả**.
 
-_Note that the tools that expect to run all the database using the regular Google browser will never end as google will block you very very soon._
+_Lưu ý rằng các công cụ cố chạy toàn bộ database bằng trình duyệt Google thông thường sẽ không bao giờ chạy xong, vì Google sẽ chặn bạn rất sớm._
 
-### **Looking for vulnerabilities**
+### **Tìm lỗ hổng**
 
-If you find **valid leaked** credentials or API tokens, this is a very easy win.
+Nếu tìm thấy credential hoặc API token **bị leak còn hợp lệ**, đây là một chiến thắng rất dễ dàng.
 
-## Public Code Vulnerabilities
+## Lỗ hổng trong mã nguồn công khai
 
-If you found that the company has **open-source code** you can **analyse** it and search for **vulnerabilities** on it.
+Nếu phát hiện công ty có **mã nguồn mở**, bạn có thể **phân tích** và tìm **lỗ hổng** trong đó.
 
-**Depending on the language** there are different **tools** you can use; see the [source-code review tools](../../network-services-pentesting/pentesting-web/code-review-tools.md) list.
+**Tùy vào ngôn ngữ**, bạn có thể dùng các **công cụ** khác nhau; xem danh sách [công cụ review mã nguồn](../../network-services-pentesting/pentesting-web/code-review-tools.md).
 
-There are also free services that allow you to **scan public repositories**, such as:
+Ngoài ra còn có các dịch vụ miễn phí cho phép bạn **quét repository công khai**, chẳng hạn như:
 
 - [**Snyk**](https://app.snyk.io/)
 
-## [**Pentesting Web Methodology**](../../network-services-pentesting/pentesting-web/index.html)
+## [**Phương pháp Pentesting Web**](../../network-services-pentesting/pentesting-web/index.html)
 
-The **majority of the vulnerabilities** found by bug hunters resides inside **web applications**, so at this point I would like to talk about a **web application testing methodology**, and you can [**find this information here**](../../network-services-pentesting/pentesting-web/index.html).
+**Phần lớn lỗ hổng** mà bug hunter phát hiện nằm trong **ứng dụng web**, vì vậy đến đây tôi muốn trình bày về **phương pháp kiểm thử ứng dụng web**; bạn có thể [**xem thông tin này tại đây**](../../network-services-pentesting/pentesting-web/index.html).
 
-I also want to do a special mention to the section [**Web Automated Scanners open source tools**](../../network-services-pentesting/pentesting-web/index.html#automatic-scanners), as, if you shouldn't expect them to find you very sensitive vulnerabilities, they come handy to implement them on **workflows to have some initial web information.**
+Tôi cũng muốn đặc biệt nhắc đến mục [**Công cụ mã nguồn mở cho Web Automated Scanners**](../../network-services-pentesting/pentesting-web/index.html#automatic-scanners), vì dù không nên kỳ vọng chúng tìm ra các lỗ hổng rất nghiêm trọng, chúng vẫn hữu ích khi tích hợp vào **workflow để thu thập một số thông tin web ban đầu.**
 
-## Recapitulation
+## Tổng kết
 
-> Congratulations! At this point you have already perform **all the basic enumeration**. Yes, it's basic because a lot more enumeration can be done (will see more tricks later).
+> Chúc mừng! Đến đây bạn đã hoàn thành **toàn bộ quá trình enumeration cơ bản**. Đúng vậy, đây chỉ là mức cơ bản vì còn có thể thực hiện nhiều enumeration hơn nữa (sẽ xem thêm các thủ thuật ở phần sau).
 
-So you have already:
+Vậy là bạn đã:
 
-1. Found all the **companies** inside the scope
-2. Found all the **assets** belonging to the companies (and perform some vuln scan if in scope)
-3. Found all the **domains** belonging to the companies
-4. Found all the **subdomains** of the domains (any subdomain takeover?)
-5. Found all the **IPs** (from and **not from CDNs**) inside the scope.
-6. Found all the **web servers** and took a **screenshot** of them (anything weird worth a deeper look?)
-7. Found all the **potential public cloud assets** belonging to the company.
-8. **Emails**, **credentials leaks**, and **secret leaks** that could give you a **big win very easily**.
-9. **Pentesting all the webs you found**
+1. Tìm thấy tất cả **công ty** trong phạm vi
+2. Tìm thấy tất cả **tài sản** thuộc về các công ty (và thực hiện một số vuln scan nếu nằm trong phạm vi)
+3. Tìm thấy tất cả **domain** thuộc về các công ty
+4. Tìm thấy tất cả **subdomain** của các domain (có subdomain takeover nào không?)
+5. Tìm thấy tất cả **IP** (từ **CDN** và **không từ CDN**) trong phạm vi.
+6. Tìm thấy tất cả **web server** và chụp **ảnh màn hình** của chúng (có gì lạ đáng để xem kỹ hơn không?)
+7. Tìm thấy tất cả **tài sản public cloud tiềm năng** thuộc về công ty.
+8. **Email**, **credential leak** và **secret leak** có thể giúp bạn **dễ dàng giành được chiến thắng lớn**.
+9. **Pentesting tất cả website đã tìm thấy**
 
-## **Full Recon Automatic Tools**
+## **Công cụ Recon tự động toàn diện**
 
-There are several tools out there that will perform part of the proposed actions against a given scope.
+Có một số công cụ có thể thực hiện một phần các thao tác được đề xuất trên một phạm vi nhất định.
 
 - [**https://github.com/yogeshojha/rengine**](https://github.com/yogeshojha/rengine)
 - [**https://github.com/j3ssie/Osmedeus**](https://github.com/j3ssie/Osmedeus)
 - [**https://github.com/six2dez/reconftw**](https://github.com/six2dez/reconftw)
-- [**https://github.com/hackerspider1/EchoPwn**](https://github.com/hackerspider1/EchoPwn) - A little old and not updated
+- [**https://github.com/hackerspider1/EchoPwn**](https://github.com/hackerspider1/EchoPwn) - Hơi cũ và không được cập nhật
 
 ## References
 
-- [1] [Jason Haddix – The Bug Hunter's Methodology v4.0: Recon Edition](https://www.youtube.com/watch?v=p4JgIu1mceI)
+- [1] [Jason Haddix – Phương pháp của Bug Hunter v4.0: Phiên bản Recon](https://www.youtube.com/watch?v=p4JgIu1mceI)
 - [2] [0xdf – HTB: Guardian](https://0xdf.gitlab.io/2026/02/28/htb-guardian.html)
-- [3] [Aaron Ringo (Bishop Fox) – On Favicons: From Browser Icons to Attack Surface Intelligence](https://bishopfox.com/blog/on-favicons-from-browser-icons-to-attack-surface-intelligence)
+- [3] [Aaron Ringo (Bishop Fox) – Về favicon: Từ biểu tượng trình duyệt đến thông tin tình báo về bề mặt tấn công](https://bishopfox.com/blog/on-favicons-from-browser-icons-to-attack-surface-intelligence)
 - [4] [BishopFox/Favicons](https://github.com/BishopFox/Favicons)
-- [5] [Devansh Batham (@Asm0d3us) – Weaponizing favicon.ico for BugBounties, OSINT and what not](https://medium.com/@Asm0d3us/weaponizing-favicon-ico-for-bugbounties-osint-and-what-not-ace3c214e139)
-- [6] [Arseniy Sharoglazov – Discovering Domains via a Time-Correlation Attack on Certificate Transparency](https://swarm.ptsecurity.com/discovering-domains-via-a-time-correlation-attack)
-- [7] [Kieran Miyamoto (kmsec.uk) – Passive Takeover: Uncovering (and Emulating) an Expensive Subdomain Takeover Campaign](https://kmsec.uk/blog/passive-takeover/)
-- [8] [cramppet – Regulator: A Unique Method of Subdomain Enumeration](https://cramppet.github.io/regulator/index.html)
-- [9] [Carlos Polop – Full Subdomain Discovery Workflow, Part 1](https://trickest.com/blog/full-subdomain-discovery-using-workflow/)
-- [10] [Carlos Polop – Full Subdomain Brute Force Discovery Using Automated Trickest Workflow, Part 2](https://trickest.com/blog/full-subdomain-brute-force-discovery-using-workflow/)
-- [11] [InfoSecMatter – favihash output screenshot](https://www.infosecmatter.com/wp-content/uploads/2020/07/favihash.jpg)
-
+- [5] [Devansh Batham (@Asm0d3us) – Vũ khí hóa favicon.ico cho BugBounties, OSINT và nhiều mục đích khác](https://medium.com/@Asm0d3us/weaponizing-favicon-ico-for-bugbounties-osint-and-what-not-ace3c214e139)
+- [6] [Arseniy Sharoglazov – Khám phá domain thông qua tấn công tương quan thời gian trên Certificate Transparency](https://swarm.ptsecurity.com/discovering-domains-via-a-time-correlation-attack)
+- [7] [Kieran Miyamoto (kmsec.uk) – Passive Takeover: Phát hiện (và mô phỏng) một chiến dịch subdomain takeover tốn kém](https://kmsec.uk/blog/passive-takeover/)
+- [8] [cramppet – Regulator: Phương pháp độc đáo để enumeration subdomain](https://cramppet.github.io/regulator/index.html)
+- [9] [Carlos Polop – Quy trình khám phá subdomain toàn diện, Phần 1](https://trickest.com/blog/full-subdomain-discovery-using-workflow/)
+- [10] [Carlos Polop – Khám phá subdomain bằng brute-force tự động với Trickest Workflow, Phần 2](https://trickest.com/blog/full-subdomain-brute-force-discovery-using-workflow/)
+- [11] [InfoSecMatter – Ảnh chụp màn hình đầu ra favihash](https://www.infosecmatter.com/wp-content/uploads/2020/07/favihash.jpg)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,22 +1,22 @@
-# File/Data Carving & Recovery Tools
+# Công cụ Carving và khôi phục file/dữ liệu
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Carving & Recovery tools
+## Công cụ Carving và khôi phục
 
-Always carve a **verified copy**, not the original device. See [Image Acquisition & Mount](../image-acquisition-and-mount.md) for read-only acquisition and hashing workflows.
+Luôn thực hiện carving trên **bản sao đã xác minh**, không phải thiết bị gốc. Xem [Image Acquisition & Mount](../image-acquisition-and-mount.md) để biết quy trình thu thập chỉ đọc và tạo hash.
 
-More tools in [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
+Xem thêm công cụ tại [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
 
 ### Autopsy
 
-The most common tool used in forensics to extract files from images is [**Autopsy**](https://www.autopsy.com/download/). Download it, install it and make it ingest the file to find "hidden" files. Note that Autopsy is built to support disk images and other kinds of images, but not simple files.
+Công cụ phổ biến nhất được dùng trong pháp chứng để trích xuất file từ image là [**Autopsy**](https://www.autopsy.com/download/). Tải xuống, cài đặt và yêu cầu công cụ quét file để tìm các file "ẩn". Lưu ý rằng Autopsy được xây dựng để hỗ trợ disk image và các loại image khác, nhưng không hỗ trợ các file thông thường.
 
 ### Binwalk <a href="#binwalk" id="binwalk"></a>
 
-**Binwalk** is a tool for analyzing binary files to find embedded content. **Binwalk v3** is a Rust rewrite with automatic extraction (`-e`), raw carving of known and unknown objects (`-c`), recursive/Matryoshka scanning (`-M`) and configurable worker threads. The project recommends its Docker build when all external extractors are required; `cargo install binwalk` installs the Rust CLI but not those external dependencies.<sup>[[11]](#references)</sup>
+**Binwalk** là công cụ phân tích file nhị phân để tìm nội dung được nhúng. **Binwalk v3** là phiên bản viết lại bằng Rust, có khả năng tự động trích xuất (`-e`), carving thô các đối tượng đã biết và chưa biết (`-c`), quét đệ quy/Matryoshka (`-M`) và cấu hình số luồng worker. Dự án khuyến nghị dùng bản Docker khi cần tất cả extractor bên ngoài; `cargo install binwalk` cài CLI Rust nhưng không cài các dependency bên ngoài đó.<sup>[[11]](#references)</sup>
 
-**Useful v3 commands**:
+**Các lệnh v3 hữu ích**:
 
 ```bash
 cargo install binwalk                 # CLI only; install extractors separately
@@ -27,13 +27,13 @@ binwalk -Me -d extracted firmware.bin # Extract and recursively scan results
 binwalk -e -l results.json firmware.bin
 ```
 
-The legacy v2 `--dd='.*'` recipe is **not** the v3 equivalent of `-c`; first check `binwalk --version` when following old CTF/write-up commands.<sup>[[11]](#references)</sup>
+Recipe cũ `--dd='.*'` của v2 **không** tương đương với `-c` của v3; hãy kiểm tra `binwalk --version` trước khi chạy các lệnh từ CTF/write-up cũ.<sup>[[11]](#references)</sup>
 
-⚠️  **Security note** – Versions **2.1.2b through 2.3.3** are affected by a **Path Traversal** vulnerability (CVE-2022-4510); the advisory lists no patched pip version. Avoid extracting untrusted samples with affected releases, or isolate the tool with a container/non-privileged UID.<sup>[[4]](#references)</sup>
+⚠️  **Lưu ý bảo mật** – Các phiên bản từ **2.1.2b đến 2.3.3** bị ảnh hưởng bởi lỗ hổng **Path Traversal** (CVE-2022-4510); advisory không liệt kê phiên bản pip nào đã vá lỗi. Tránh giải nén các mẫu không đáng tin cậy bằng những bản phát hành bị ảnh hưởng, hoặc cô lập công cụ bằng container/UID không có đặc quyền.<sup>[[4]](#references)</sup>
 
 ### Foremost
 
-Another common tool to find hidden files is **foremost**. You can find the configuration file of foremost in `/etc/foremost.conf`. If you just want to search for some specific files uncomment them. If you don't uncomment anything foremost will search for its default configured file types.
+Một công cụ phổ biến khác để tìm các tệp ẩn là **foremost**. Bạn có thể tìm tệp cấu hình của foremost tại `/etc/foremost.conf`. Nếu chỉ muốn tìm một số loại tệp cụ thể, hãy bỏ chú thích các mục tương ứng. Nếu không bỏ chú thích mục nào, foremost sẽ tìm kiếm các loại tệp được cấu hình mặc định.
 
 ```bash
 sudo apt-get install foremost
@@ -43,7 +43,7 @@ foremost -v -i file.img -o output
 
 ### **Scalpel**
 
-**Scalpel** is another tool that can be used to find and extract **files embedded in a file**. In this case, you will need to uncomment from the configuration file (_/etc/scalpel/scalpel.conf_) the file types you want it to extract.
+**Scalpel** là một công cụ khác có thể dùng để tìm và trích xuất **các tệp được nhúng trong một tệp**. Trong trường hợp này, bạn cần bỏ dấu chú thích trong tệp cấu hình (_/etc/scalpel/scalpel.conf_) ở các loại tệp mà bạn muốn trích xuất.
 
 ```bash
 sudo apt-get install scalpel
@@ -52,11 +52,11 @@ scalpel file.img -o output
 
 ### Bulk Extractor 2.x   
 
-This tool comes inside kali but you can find it here: <https://github.com/simsong/bulk_extractor>
+Công cụ này có sẵn trong kali, nhưng bạn có thể tìm thấy tại đây: <https://github.com/simsong/bulk_extractor>
 
-Bulk Extractor can scan an evidence image and carve **pcap fragments**, **network artefacts (URLs, domains, IPs, MACs, e-mails)** and many other objects **in parallel using multiple scanners**.
+Bulk Extractor có thể quét ảnh chứng cứ và carve **các mảnh pcap**, **các tạo tác mạng (URL, domain, IP, MAC, e-mail)** cùng nhiều đối tượng khác **song song bằng nhiều scanner**.
 
-The v2.1.1 release documents an Autotools build and the `-S jpeg_carve_mode=2` setting for carving all contiguous JPEGs.<sup>[[2]](#references)</sup>
+Bản phát hành v2.1.1 ghi lại cách build bằng Autotools và thiết lập `-S jpeg_carve_mode=2` để carve tất cả các ảnh JPEG liền kề.<sup>[[2]](#references)</sup>
 
 ```bash
 # Build from source – v2.1.1 (April 2024) requires C++17
@@ -71,19 +71,19 @@ sudo make install
 bulk_extractor -o out_folder -S jpeg_carve_mode=2 /evidence/disk.img
 ```
 
-The bundled `bulk_diff.py` compares two bulk_extractor runs, while `bulk_extractor_reader.py` reads the report and feature files.<sup>[[3]](#references)</sup>
+The đi kèm `bulk_diff.py` so sánh hai lần chạy `bulk_extractor`, trong khi `bulk_extractor_reader.py` đọc các tệp báo cáo và đặc trưng.<sup>[[3]](#references)</sup>
 
 ### PhotoRec
 
-You can find it in <https://www.cgsecurity.org/wiki/TestDisk_Download>
+Bạn có thể tìm thấy công cụ này tại <https://www.cgsecurity.org/wiki/TestDisk_Download>
 
-It comes with GUI and CLI versions. You can select the **file-types** you want PhotoRec to search for.
+Công cụ này có phiên bản GUI và CLI. Bạn có thể chọn **các loại tệp** mà PhotoRec cần tìm.
 
-![Run every scanner, carve JPEGs aggressively and generate a bodyfile - PhotoRec: It comes with GUI and CLI versions. You can select the file-types you want PhotoRec to search for](<../../../images/image (242).png>)
+![Chạy mọi scanner, carve JPEG thật mạnh và tạo bodyfile - PhotoRec: Công cụ này có phiên bản GUI và CLI. Bạn có thể chọn các loại tệp mà PhotoRec cần tìm](<../../../images/image (242).png>)
 
-### The Sleuth Kit `tsk_recover` (metadata-first)
+### The Sleuth Kit `tsk_recover` (khôi phục ưu tiên metadata)
 
-Before raw signature carving, try filesystem-aware recovery when the volume metadata is still parseable. `tsk_recover` exports only unallocated files by default; `-a` selects allocated files and `-e` exports both. For a whole-disk image, pass the partition's **start sector** from `mmls` to `-o` (do not convert it to bytes). If the input is already a partition image, omit `-o`.<sup>[[12]](#references)</sup>
+Trước khi carve chữ ký thô, hãy thử khôi phục có xét đến hệ thống tệp khi metadata của volume vẫn có thể phân tích được. Theo mặc định, `tsk_recover` chỉ xuất các tệp chưa được cấp phát; `-a` chọn các tệp đã được cấp phát, còn `-e` xuất cả hai loại. Với ảnh toàn bộ đĩa, hãy truyền **sector bắt đầu** của phân vùng lấy từ `mmls` cho `-o` (không chuyển đổi sang byte). Nếu đầu vào đã là ảnh phân vùng, hãy bỏ qua `-o`.<sup>[[12]](#references)</sup>
 
 ```bash
 sudo apt install sleuthkit
@@ -93,11 +93,11 @@ tsk_recover -o 2048 disk.img recovered-deleted/
 tsk_recover -e -o 2048 disk.img recovered-all/
 ```
 
-This pass can preserve filesystem-derived names and paths that header/footer carving cannot; run Foremost, Scalpel or PhotoRec afterwards for entries whose metadata is missing or unusable.<sup>[[12]](#references)</sup>
+Lượt xử lý này có thể giữ lại tên và đường dẫn lấy từ filesystem mà phương pháp carving header/footer không thể giữ; sau đó chạy Foremost, Scalpel hoặc PhotoRec cho các mục bị thiếu hoặc có metadata không sử dụng được.<sup>[[12]](#references)</sup>
 
-### ddrescue + ddrescueview (imaging failing drives)
+### ddrescue + ddrescueview (tạo image cho ổ đĩa đang bị lỗi)
 
-When a physical drive is unstable, it is best practice to **image it first** and only run carving tools against the image.  `ddrescue` (GNU project) focuses on reliably copying bad disks while keeping a log of unreadable sectors.
+Khi ổ đĩa vật lý không ổn định, cách làm tốt nhất là **tạo image trước** rồi chỉ chạy các công cụ carving trên image đó. `ddrescue` (dự án GNU) tập trung vào việc sao chép các đĩa bị lỗi một cách đáng tin cậy, đồng thời lưu nhật ký các sector không thể đọc được.
 
 ```bash
 sudo apt install gddrescue ddrescueview   # On Debian-based systems
@@ -110,11 +110,11 @@ sudo ddrescue -d -r3 /dev/sdX suspect.img suspect.log
  ddrescueview suspect.log
 ```
 
-The **`--cluster-size`** option controls how many sectors are copied at a time; smaller values can help with slow drives.<sup>[[7]](#references)</sup>
+Tùy chọn **`--cluster-size`** kiểm soát số sector được sao chép mỗi lần; giá trị nhỏ hơn có thể hữu ích với các ổ đĩa chậm.<sup>[[7]](#references)</sup>
 
-### Extundelete / Ext4magic (EXT 3/4 undelete)
+### Extundelete / Ext4magic (khôi phục file đã xóa trên EXT 3/4)
 
-If the source file system is Linux EXT-based you may be able to recover recently deleted files **without full carving**; these journal-based tools work on an unmounted filesystem or a read-only image.<sup>[[8]](#references)[[9]](#references)</sup>
+Nếu hệ thống tệp nguồn dựa trên Linux EXT, bạn có thể khôi phục các file mới bị xóa **mà không cần carving toàn bộ**; các công cụ dựa trên journal này hoạt động trên hệ thống tệp đã unmount hoặc image chỉ đọc.<sup>[[8]](#references)[[9]](#references)</sup>
 
 ```bash
 # Attempt journal-based undelete (metadata must still be present)
@@ -124,48 +124,48 @@ extundelete disk.img --restore-all
 ext4magic disk.img -M -d ./recovered
 ```
 
-> **Compatibility note** – ext4magic is abandoned; its project page warns that current filesystems are no longer compatible with it.<sup>[[10]](#references)</sup>
+> **Lưu ý về khả năng tương thích** – ext4magic đã bị bỏ rơi; trang dự án cảnh báo rằng các hệ thống tệp hiện tại không còn tương thích với công cụ này.<sup>[[10]](#references)</sup>
 
-> 🛈 If the file system was mounted after deletion, the data blocks may have already been reused – in that case proper carving (Foremost/Scalpel) is still required.
+> 🛈 Nếu hệ thống tệp đã được mount sau khi xóa, các khối dữ liệu có thể đã được sử dụng lại – trong trường hợp đó, vẫn cần thực hiện carving đúng cách (Foremost/Scalpel).
 
 ### binvis
 
-Check the [code](https://code.google.com/archive/p/binvis/) and the [web page tool](https://binvis.io/#/).
+Xem [mã nguồn](https://code.google.com/archive/p/binvis/) và [công cụ trên trang web](https://binvis.io/#/).
 
-#### Features of BinVis
+#### Các tính năng của BinVis
 
-- Visual and active **structure viewer**
-- Multiple plots for different focus points
-- Focusing on portions of a sample
-- **Seeing stings and resources**, in PE or ELF executables e. g.
-- Getting **patterns** for cryptanalysis on files
-- **Spotting** packer or encoder algorithms
-- **Identify** Steganography by patterns
-- **Visual** binary-diffing
+- **Trình xem cấu trúc** trực quan và tương tác
+- Nhiều biểu đồ tập trung vào các điểm khác nhau
+- Tập trung vào các phần của mẫu
+- **Xem các chuỗi và tài nguyên**, ví dụ trong tệp thực thi PE hoặc ELF
+- Tìm **mẫu** để cryptanalysis trên các tệp
+- **Phát hiện** thuật toán packer hoặc encoder
+- **Nhận diện** Steganography qua các mẫu
+- **So sánh khác biệt** nhị phân trực quan
 
-BinVis is a great **start-point to get familiar with an unknown target** in a black-boxing scenario.
+BinVis là một điểm khởi đầu tuyệt vời để làm quen với một mục tiêu chưa biết trong kịch bản black-box.
 
-## Specific Data Carving Tools
+## Công cụ Data Carving chuyên dụng
 
 ### FindAES
 
-Searches for AES keys by searching for their key schedules. Able to find 128. 192, and 256 bit keys, such as those used by TrueCrypt and BitLocker.
+Tìm kiếm các khóa AES bằng cách tìm kiếm key schedule của chúng. Có thể tìm các khóa 128, 192 và 256 bit, chẳng hạn như các khóa được TrueCrypt và BitLocker sử dụng.
 
-Download [here](https://sourceforge.net/projects/findaes/).
+Tải xuống [tại đây](https://sourceforge.net/projects/findaes/).
 
-### YARA-X (triaging carved artefacts)
+### YARA-X (phân loại sơ bộ các artefact đã carve)
 
-[YARA-X](https://github.com/VirusTotal/yara-x) is a Rust rewrite of YARA introduced in 2024; VirusTotal reports that some regular-expression and complex-loop rules can run significantly faster.<sup>[[5]](#references)</sup> Its CLI is named `yr`, and the `scan` command supports recursive scans, a thread count, and metadata output.<sup>[[6]](#references)</sup>
+[YARA-X](https://github.com/VirusTotal/yara-x) là bản viết lại YARA bằng Rust, được giới thiệu vào năm 2024; VirusTotal cho biết một số quy tắc biểu thức chính quy và vòng lặp phức tạp có thể chạy nhanh hơn đáng kể.<sup>[[5]](#references)</sup> CLI của công cụ có tên `yr`, và lệnh `scan` hỗ trợ quét đệ quy, chỉ định số luồng và xuất metadata.<sup>[[6]](#references)</sup>
 
 ```bash
 # Scan every carved object produced by bulk_extractor
 yr scan --recursive --threads 8 --print-meta rules/index.yar out_folder/
 ```
 
-## Complementary tools
+## Công cụ bổ trợ
 
-You can use [**viu** ](https://github.com/atanunq/viu)to see images from the terminal.  \
-You can use the linux command line tool **pdftotext** to transform a pdf into text and read it.
+Bạn có thể dùng [**viu** ](https://github.com/atanunq/viu)để xem hình ảnh từ terminal.  \
+Bạn có thể dùng công cụ dòng lệnh **pdftotext** trên Linux để chuyển PDF thành văn bản và đọc.
 
 
 
@@ -173,16 +173,16 @@ You can use the linux command line tool **pdftotext** to transform a pdf into te
 
 ## References
 
-- [1] [Autopsy 4.21 release notes](https://github.com/sleuthkit/autopsy/releases/tag/autopsy-4.21.0)
-- [2] [bulk_extractor v2.1.1 README](https://github.com/simsong/bulk_extractor/blob/v2.1.1/README.md)
-- [3] [bulk_extractor Python tools README](https://raw.githubusercontent.com/simsong/bulk_extractor/v2.1.1/python/README.txt)
-- [4] [Path traversal in binwalk (CVE-2022-4510) - GitHub Advisory Database](https://github.com/advisories/GHSA-3cm8-v4mc-gppg)
-- [5] [YARA is dead, long live YARA-X - VirusTotal Blog](https://blog.virustotal.com/2024/05/yara-is-dead-long-live-yara-x.html)
-- [6] [YARA-X CLI commands](https://virustotal.github.io/yara-x/docs/cli/commands/)
-- [7] [GNU ddrescue manual](https://www.gnu.org/software/ddrescue/manual/ddrescue_manual.html)
+- [1] [Ghi chú phát hành Autopsy 4.21](https://github.com/sleuthkit/autopsy/releases/tag/autopsy-4.21.0)
+- [2] [README của bulk_extractor v2.1.1](https://github.com/simsong/bulk_extractor/blob/v2.1.1/README.md)
+- [3] [README của các công cụ Python cho bulk_extractor](https://raw.githubusercontent.com/simsong/bulk_extractor/v2.1.1/python/README.txt)
+- [4] [Path traversal trong binwalk (CVE-2022-4510) - Cơ sở dữ liệu tư vấn bảo mật GitHub](https://github.com/advisories/GHSA-3cm8-v4mc-gppg)
+- [5] [YARA đã chết, YARA-X muôn năm - Blog VirusTotal](https://blog.virustotal.com/2024/05/yara-is-dead-long-live-yara-x.html)
+- [6] [Các lệnh CLI của YARA-X](https://virustotal.github.io/yara-x/docs/cli/commands/)
+- [7] [Hướng dẫn sử dụng GNU ddrescue](https://www.gnu.org/software/ddrescue/manual/ddrescue_manual.html)
 - [8] [extundelete](https://extundelete.sourceforge.net/)
-- [9] [ext4magic manual](https://ext4magic.sourceforge.net/manpage_en.html)
-- [10] [ext4magic project status](https://sourceforge.net/projects/ext4magic/)
-- [11] [Binwalk v3 README](https://github.com/ReFirmLabs/binwalk/blob/master/README.md)
-- [12] [The Sleuth Kit: tsk_recover manual](https://sleuthkit.org/sleuthkit/man/tsk_recover.html)
+- [9] [Hướng dẫn sử dụng ext4magic](https://ext4magic.sourceforge.net/manpage_en.html)
+- [10] [Trạng thái dự án ext4magic](https://sourceforge.net/projects/ext4magic/)
+- [11] [README của Binwalk v3](https://github.com/ReFirmLabs/binwalk/blob/master/README.md)
+- [12] [The Sleuth Kit: hướng dẫn sử dụng tsk_recover](https://sleuthkit.org/sleuthkit/man/tsk_recover.html)
 {{#include ../../../banners/hacktricks-training.md}}

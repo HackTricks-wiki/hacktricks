@@ -1,26 +1,26 @@
-# Archive Extraction Path Traversal ("Zip-Slip")
+# Path Traversal khi giải nén archive ("Zip-Slip")
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Overview
+## Tổng quan
 
-Many archive formats (ZIP, RAR, TAR, 7-ZIP, etc.) allow each entry to carry its own **internal path**. When an extraction utility blindly honours that path, a crafted filename containing `..` or an **absolute path** (e.g. `C:\Windows\System32\`) will be written outside of the user-chosen directory.  
-This class of vulnerability is widely known as *Zip-Slip* or **archive extraction path traversal**.<sup>[[6]](#references)</sup>
+Nhiều định dạng archive (ZIP, RAR, TAR, 7-ZIP, v.v.) cho phép mỗi mục chứa **đường dẫn nội bộ** riêng. Khi tiện ích giải nén tuân theo đường dẫn đó một cách mù quáng, một tên tệp được tạo thủ công có chứa `..` hoặc **đường dẫn tuyệt đối** (ví dụ: `C:\Windows\System32\`) sẽ được ghi ra ngoài thư mục do người dùng chọn.  
+Loại lỗ hổng này thường được gọi là *Zip-Slip* hoặc **archive extraction path traversal**.<sup>[[6]](#references)</sup>
 
-Consequences range from overwriting arbitrary files to directly achieving **remote code execution (RCE)** by dropping a payload in an **auto-run** location such as the Windows *Startup* folder.
+Hậu quả có thể từ ghi đè các tệp tùy ý đến trực tiếp đạt được **remote code execution (RCE)** bằng cách thả payload vào vị trí **tự động chạy**, chẳng hạn như thư mục *Startup* của Windows.
 
-## Root Cause
+## Nguyên nhân gốc rễ
 
-1. Attacker creates an archive where one or more file headers contain:
-   * Relative traversal sequences (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
-   * Absolute paths (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
-   * Or crafted **symlinks** that resolve outside the target dir (common in ZIP/TAR on *nix*). 
-2. Victim extracts the archive with a vulnerable tool that trusts the embedded path (or follows symlinks) instead of sanitising it or forcing extraction beneath the chosen directory.
-3. The file is written in the attacker-controlled location and executed/loaded next time the system or user triggers that path.
+1. Attacker tạo một archive trong đó một hoặc nhiều header tệp chứa:
+   * Các chuỗi traversal tương đối (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
+   * Đường dẫn tuyệt đối (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
+   * Hoặc **symlink** được tạo thủ công để trỏ ra ngoài thư mục đích (thường gặp trong ZIP/TAR trên *nix*). 
+2. Victim giải nén archive bằng một công cụ có lỗ hổng, công cụ này tin cậy đường dẫn được nhúng (hoặc đi theo symlink) thay vì làm sạch đường dẫn hoặc buộc giải nén bên trong thư mục đã chọn.
+3. Tệp được ghi vào vị trí do attacker kiểm soát và được thực thi/tải vào lần tiếp theo hệ thống hoặc người dùng kích hoạt đường dẫn đó.
 
-### .NET `Path.Combine` + `ZipArchive` traversal
+### Path traversal với .NET `Path.Combine` + `ZipArchive`
 
-A common .NET anti-pattern is combining the intended destination with **user-controlled** `ZipArchiveEntry.FullName` and extracting without path normalisation:<sup>[[4]](#references)[[8]](#references)</sup>
+Một anti-pattern phổ biến trong .NET là kết hợp đích dự kiến với `ZipArchiveEntry.FullName` do **người dùng kiểm soát**, rồi giải nén mà không chuẩn hóa đường dẫn:<sup>[[4]](#references)[[8]](#references)</sup>
 
 ```csharp
 using (var zip = ZipFile.OpenRead(zipPath))
@@ -33,8 +33,8 @@ using (var zip = ZipFile.OpenRead(zipPath))
 }
 ```
 
-- If `entry.FullName` starts with `..\\` it traverses; if it is an **absolute path** the left-hand component is discarded entirely, yielding an **arbitrary file write** as the extraction identity.
-- Proof-of-concept archive to write into a sibling `app` directory watched by a scheduled scanner:
+- Nếu `entry.FullName` bắt đầu bằng `..\\` thì nó vượt ra ngoài thư mục; nếu đó là **đường dẫn tuyệt đối**, thành phần bên trái sẽ bị loại bỏ hoàn toàn, dẫn đến **ghi tệp tùy ý** theo danh tính của mục được giải nén.
+- Archive proof-of-concept để ghi vào thư mục `app` nằm cùng cấp, được một scanner theo lịch giám sát:
 
 ```python
 import zipfile
@@ -42,11 +42,11 @@ with zipfile.ZipFile("slip.zip", "w") as z:
     z.writestr("../app/0xdf.txt", "ABCD")
 ```
 
-Dropping that ZIP into the monitored inbox results in `C:\samples\app\0xdf.txt`, proving traversal outside `C:\samples\queue\` and enabling follow-on primitives (e.g., DLL hijacks).
+Thả ZIP đó vào inbox được giám sát sẽ tạo ra `C:\samples\app\0xdf.txt`, chứng minh có thể traversal ra ngoài `C:\samples\queue\` và mở đường cho các primitive tiếp theo (ví dụ: DLL hijacks).
 
-### User-controlled extraction root
+### Root giải nén do người dùng kiểm soát
 
-Also test the **directory passed to the extractor**, not only archive member names. An application may derive that directory from a title, project name or other request field. A value such as `../../../../app/module` can move the extraction root outside the upload area before the extractor processes any members. In that case even an archive containing only the safe basename `api.py` can overwrite application code.<sup>[[14]](#references)[[15]](#references)</sup>
+Ngoài tên member trong archive, hãy kiểm tra cả **thư mục được truyền cho extractor**. Ứng dụng có thể lấy thư mục đó từ tiêu đề, tên project hoặc trường khác trong request. Giá trị như `../../../../app/module` có thể đưa root giải nén ra ngoài khu vực upload trước khi extractor xử lý bất kỳ member nào. Trong trường hợp đó, ngay cả archive chỉ chứa basename an toàn `api.py` cũng có thể ghi đè mã ứng dụng.<sup>[[14]](#references)[[15]](#references)</sup>
 
 ```python
 # Vulnerable pattern: the ZIP entries themselves need no ../ components.
@@ -54,7 +54,7 @@ extract_root = os.path.join(site_root, "public", "files", user_title)
 archive.extractall(extract_root)
 ```
 
-This is a separate containment boundary from classic Zip-Slip. Validate both the resolved extraction root and every resolved member path. A root check can use path components instead of a string prefix:<sup>[[14]](#references)</sup>
+Đây là ranh giới cô lập riêng, khác với Zip-Slip cổ điển. Hãy xác thực cả thư mục gốc giải nén sau khi phân giải và mọi đường dẫn thành viên sau khi phân giải. Có thể kiểm tra thư mục gốc bằng các thành phần đường dẫn thay vì tiền tố chuỗi:<sup>[[14]](#references)</sup>
 
 ```python
 base = Path(site_root, "public", "files").resolve()
@@ -63,53 +63,53 @@ if not dest.is_relative_to(base):
     raise ValueError("extraction root escapes its base")
 ```
 
-For a safe test, upload a valid archive containing one canary file and place traversal sequences in each field that may select its extraction directory. Monitor both the intended directory and a disposable outside path. If the destination can reach an imported module, overwriting it can become code execution when workers reload; an HTTP 500 or connection reset during that reload does not prove that the write failed.<sup>[[14]](#references)[[15]](#references)</sup> See also the broader [file upload methodology](../pentesting-web/file-upload/).
+Để kiểm tra an toàn, hãy tải lên một archive hợp lệ có chứa một canary file và đặt các chuỗi traversal vào từng trường có thể chọn thư mục giải nén. Theo dõi cả thư mục đích dự kiến lẫn một đường dẫn bên ngoài dùng một lần. Nếu đích có thể truy cập một module đã được import, việc ghi đè module đó có thể dẫn đến code execution khi worker tải lại module; HTTP 500 hoặc kết nối bị reset trong quá trình tải lại không chứng minh rằng thao tác ghi đã thất bại.<sup>[[14]](#references)[[15]](#references)</sup> Xem thêm [phương pháp kiểm thử file upload](../pentesting-web/file-upload/).
 
-## Advanced Archive-Breakout Primitives
+## Các kỹ thuật nâng cao để thoát khỏi thư mục giải nén
 
-Treat extraction as a sequence of filesystem mutations, not as independent filename checks. An entry that is safe when parsed can become unsafe after an earlier member creates or replaces a link; the same issue appears when an extractor caches a directory as safe and later changes its type.<sup>[[11]](#references)</sup>
+Hãy xem việc giải nén là một chuỗi thao tác thay đổi filesystem, không phải các bước kiểm tra tên file độc lập. Một entry có thể an toàn khi được phân tích nhưng trở nên không an toàn sau khi một member trước đó tạo hoặc thay thế một link; vấn đề tương tự cũng xảy ra khi extractor lưu cache một thư mục là an toàn rồi sau đó thay đổi loại của thư mục đó.<sup>[[11]](#references)</sup>
 
-### Link pivots and entry collisions
+### Chuyển hướng qua link và xung đột entry
 
-* **Symlink write-through**: create `pivot -> /tmp`, then extract a regular member as `pivot/PWNED.txt`. If the extractor follows the first member while materialising the second, the write escapes without `..` in the second name.
-* **Directory-cache/TOCTOU collision**: emit directory `d/sub/`, replace `d/sub` with a symlink to `/tmp`, then emit `d/sub/PWNED.txt`. This targets extractors that validate or cache the directory once and do not re-check it before the final write.
-* **Hardlink read/overwrite**: TAR and RAR can represent hardlinks. A hardlink to an existing host file may expose its contents if a later component serves the extracted name; a colliding regular entry can instead overwrite the linked inode. This is limited by same-filesystem and OS hardlink-permission rules.
-* **Pre-existing or cross-archive pivot**: retry with a non-empty destination. One archive can plant a link and a later extraction can write through it even if each archive passes a stateless header-name check.<sup>[[11]](#references)</sup>
+* **Ghi xuyên qua symlink**: tạo `pivot -> /tmp`, rồi giải nén một member thông thường thành `pivot/PWNED.txt`. Nếu extractor đi theo member đầu tiên khi tạo member thứ hai, thao tác ghi sẽ thoát khỏi thư mục mà không cần `..` trong tên thứ hai.
+* **Xung đột cache thư mục/TOCTOU**: tạo thư mục `d/sub/`, thay `d/sub` bằng symlink trỏ đến `/tmp`, rồi tạo `d/sub/PWNED.txt`. Cách này nhắm đến các extractor chỉ xác thực hoặc lưu cache thư mục một lần và không kiểm tra lại trước khi ghi file cuối cùng.
+* **Đọc/ghi đè qua hardlink**: TAR và RAR có thể biểu diễn hardlink. Hardlink trỏ đến một file có sẵn trên host có thể làm lộ nội dung nếu một thành phần sau đó phục vụ tên đã giải nén; một entry thông thường bị xung đột có thể thay vào đó ghi đè inode được liên kết. Cách này bị giới hạn bởi quy tắc cùng filesystem và quyền tạo hardlink của hệ điều hành.
+* **Chuyển hướng qua link có sẵn hoặc giữa các archive**: thử lại với thư mục đích không rỗng. Một archive có thể tạo link, rồi lần giải nén sau ghi xuyên qua link đó, ngay cả khi mỗi archive đều vượt qua bước kiểm tra tên trong header không lưu trạng thái.<sup>[[11]](#references)</sup>
 
-### Filesystem-equivalence collisions
+### Xung đột do quy tắc tương đương của filesystem
 
-Compare names using the semantics of the filesystem that will receive them. Useful differential cases include `LINK` versus `link` on case-insensitive filesystems, NFC versus NFD Unicode spellings, compatibility-equivalent names such as `ﬁle` versus `file`, duplicate members that change a path from directory to symlink, and backslashes interpreted as separators only on Windows. Also test ADS-bearing names on NTFS. These cases can make the validator see two paths while the filesystem resolves one.<sup>[[5]](#references)[[11]](#references)</sup>
+So sánh tên theo ngữ nghĩa của filesystem sẽ nhận các tên đó. Các trường hợp khác biệt hữu ích gồm `LINK` và `link` trên filesystem không phân biệt chữ hoa chữ thường, cách viết Unicode NFC và NFD, các tên tương đương theo quy tắc tương thích như `ﬁle` và `file`, các member trùng lặp làm thay đổi đường dẫn từ thư mục thành symlink, và dấu gạch chéo ngược chỉ được hiểu là dấu phân cách trên Windows. Cũng hãy kiểm tra tên có ADS trên NTFS. Những trường hợp này có thể khiến validator thấy hai đường dẫn trong khi filesystem chỉ phân giải thành một.<sup>[[5]](#references)[[11]](#references)</sup>
 
-A compact corpus should therefore test ordered combinations of **directory → symlink → child**, **symlink → colliding regular file**, **hardlink → colliding regular file**, mixed `/` and `\`, absolute/rooted names, and compressed wrappers such as `.tar.gz`. Run it only in a disposable VM/container and watch both the destination and the intended outside canary path.<sup>[[11]](#references)</sup>
+Vì vậy, một bộ mẫu kiểm thử gọn nên kiểm tra các tổ hợp có thứ tự gồm **directory → symlink → child**, **symlink → file thông thường bị xung đột**, **hardlink → file thông thường bị xung đột**, dấu `/` và `\` trộn lẫn, tên tuyệt đối/có gốc, và các wrapper nén như `.tar.gz`. Chỉ chạy bộ kiểm thử trong VM/container dùng một lần và theo dõi cả thư mục đích lẫn đường dẫn canary bên ngoài dự kiến.<sup>[[11]](#references)</sup>
 
-ZIP-specific structural ambiguity can make a pre-scan and the real extractor observe different entry names or trees. See [Local-header vs central-directory parser confusion](../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md#local-header-vs-central-directory-parser-confusion) rather than trusting the output of only one ZIP library.
+Sự nhập nhằng về cấu trúc chỉ có ở ZIP có thể khiến bước quét trước và extractor thực tế nhìn thấy các tên entry hoặc cây thư mục khác nhau. Xem [Sự nhầm lẫn giữa parser local-header và central-directory](../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md#local-header-vs-central-directory-parser-confusion) thay vì chỉ tin vào kết quả của một thư viện ZIP duy nhất.
 
-## Real-World Example – WinRAR ≤ 7.12 (CVE-2025-8088)
+## Ví dụ thực tế – WinRAR ≤ 7.12 (CVE-2025-8088)
 
-WinRAR for Windows and its Windows RAR/UnRAR components failed to validate filenames during extraction. The flaw used NTFS alternate data streams (ADS) to bypass the selected extraction path and write files to unintended locations.<sup>[[5]](#references)</sup>
-A malicious RAR archive containing an entry such as:
+WinRAR cho Windows và các thành phần RAR/UnRAR trên Windows không xác thực tên file trong quá trình giải nén. Lỗ hổng này dùng alternate data streams (ADS) của NTFS để vượt qua đường dẫn giải nén đã chọn và ghi file vào các vị trí ngoài dự kiến.<sup>[[5]](#references)</sup>
+Một archive RAR độc hại chứa entry như:
 
 ```text
 ..\..\..\Users\victim\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\payload.lnk
 ```
 
-would end up **outside** the selected output directory and inside the user’s *Startup* folder. ESET observed malicious LNK files being unpacked there and executed at user logon, providing persistence and a path to RCE.<sup>[[5]](#references)</sup>
+sẽ nằm **bên ngoài** thư mục đầu ra đã chọn và bên trong thư mục *Startup* của người dùng. ESET phát hiện các tệp LNK độc hại được giải nén vào đó và thực thi khi người dùng đăng nhập, tạo cơ chế duy trì quyền truy cập và con đường dẫn đến RCE.<sup>[[5]](#references)</sup>
 
-### Crafting a PoC Archive (Linux/Mac)
+### Tạo Archive PoC (Linux/Mac)
 
-Because CVE-2025-8088 uses a traversal path in an ADS name, use a purpose-built generator to create the RAR, then test extraction only in an isolated lab with a vulnerable WinRAR build.<sup>[[5]](#references)</sup>
+Vì CVE-2025-8088 sử dụng đường dẫn traversal trong tên ADS, hãy dùng trình tạo chuyên dụng để tạo RAR, sau đó chỉ thử giải nén trong một phòng lab cô lập với bản WinRAR dễ bị tấn công.<sup>[[5]](#references)</sup>
 
-### Observed Exploitation in the Wild
+### Khai thác được ghi nhận ngoài thực tế
 
-ESET reported RomCom (Storm-0978/UNC2596) spear-phishing campaigns that attached RAR archives abusing CVE-2025-8088 to deploy customised backdoors and facilitate ransomware operations.<sup>[[5]](#references)</sup>
+ESET báo cáo các chiến dịch spear-phishing của RomCom (Storm-0978/UNC2596), trong đó các archive RAR đính kèm khai thác CVE-2025-8088 để triển khai backdoor tùy chỉnh và hỗ trợ các hoạt động ransomware.<sup>[[5]](#references)</sup>
 
-## Newer Cases (2024–2026)
+## Các trường hợp mới hơn (2024–2026)
 
 ### 7-Zip ZIP symlink traversal → RCE (CVE-2025-11001 / ZDI-25-949)
-* **Bug**: ZIP entries that are **symbolic links** were dereferenced during extraction, letting attackers escape the destination directory and overwrite arbitrary paths. User interaction is just *opening/extracting* the archive.<sup>[[1]](#references)</sup>
-* **Affected**: 7-Zip builds before **25.00**. The symbolic-link processing flaw was fixed in **25.00** (July 2025) and later.<sup>[[1]](#references)[[10]](#references)</sup>
-* **Impact path**: Overwrite `Start Menu/Programs/Startup` or service-run locations → code runs at next logon or service restart.
-* **Quick symlink-handling fixture (Linux)**:
+* **Lỗi**: Các mục ZIP là **symbolic link** bị tham chiếu theo đích trong quá trình giải nén, cho phép kẻ tấn công thoát khỏi thư mục đích và ghi đè các đường dẫn tùy ý. Tương tác của người dùng chỉ là *mở/giải nén* archive.<sup>[[1]](#references)</sup>
+* **Bị ảnh hưởng**: Các bản dựng 7-Zip trước **25.00**. Lỗi xử lý symbolic link đã được khắc phục trong **25.00** (tháng 7 năm 2025) và các bản sau.<sup>[[1]](#references)[[10]](#references)</sup>
+* **Đường dẫn tác động**: Ghi đè `Start Menu/Programs/Startup` hoặc các vị trí chạy dịch vụ → mã chạy vào lần đăng nhập tiếp theo hoặc khi dịch vụ khởi động lại.
+* **Fixture xử lý symlink nhanh (Linux)**:
   ```bash
   mkdir -p /tmp/archive-slip-test /tmp/archive-slip-outside
   ln -s /tmp/archive-slip-outside /tmp/archive-slip-test/evil
@@ -117,13 +117,13 @@ ESET reported RomCom (Storm-0978/UNC2596) spear-phishing campaigns that attached
   zip -y exploit.zip evil   # -y preserves symlinks
   7z x exploit.zip -o/tmp/archive-slip-target
   ```
-  This archive contains a symlink entry pointing outside the extraction directory; use a disposable target and verify that the extractor does not follow it. A write-through test also needs a regular-file entry beneath the symlink.
+  Archive này chứa một mục symlink trỏ ra ngoài thư mục giải nén; hãy dùng một đích dùng một lần và xác minh rằng extractor không đi theo symlink đó. Bài kiểm tra write-through cũng cần một mục regular-file nằm bên dưới symlink.
 
 ### Go mholt/archiver `Unarchive()` symlink collision (CVE-2025-3445)
-* **Bug**: `archiver.Unarchive()` can extract a ZIP symlink and then dereference it when a later regular member has the same name, turning an apparently in-root write into an out-of-root write.<sup>[[2]](#references)</sup>
-* **Affected**: `github.com/mholt/archiver` ≤ 3.5.1 (project now deprecated).<sup>[[2]](#references)</sup>
-* **Fix**: Switch to `mholt/archives` ≥ 0.1.0 or reject links and re-resolve every destination immediately before opening it.<sup>[[2]](#references)</sup>
-* **Minimal collision generator** (then call `archiver.Unarchive("exploit.zip", "/tmp/safe")`):<sup>[[2]](#references)</sup>
+* **Lỗi**: `archiver.Unarchive()` có thể giải nén một symlink trong ZIP, rồi dereference symlink đó khi một member regular tiếp theo có cùng tên, biến một thao tác ghi có vẻ nằm trong thư mục gốc thành thao tác ghi ra ngoài thư mục gốc.<sup>[[2]](#references)</sup>
+* **Bị ảnh hưởng**: `github.com/mholt/archiver` ≤ 3.5.1 (dự án hiện đã deprecated).<sup>[[2]](#references)</sup>
+* **Khắc phục**: Chuyển sang `mholt/archives` ≥ 0.1.0 hoặc từ chối các link và phân giải lại từng đích ngay trước khi mở.<sup>[[2]](#references)</sup>
+* **Trình tạo collision tối giản** (sau đó gọi `archiver.Unarchive("exploit.zip", "/tmp/safe")`):<sup>[[2]](#references)</sup>
   ```python
   import zipfile
 
@@ -135,15 +135,15 @@ ESET reported RomCom (Storm-0978/UNC2596) spear-phishing campaigns that attached
       z.writestr("./x", b"owned\n")
   ```
 
-### CPython filtered TAR extraction bypass (CVE-2026-11940)
+### Bypass bộ lọc giải nén TAR của CPython (CVE-2026-11940)
 
-Even `tarfile.extractall(filter="data")` and `filter="tar"` have had link-order bypasses. In this case, a hardlink referenced a symlink archived at a deeper path; fallback extraction validated the relative symlink at that deep location but recreated it at the hardlink's shallower location, where the same relative target escaped. This is a useful general test: make validation and materialisation disagree about the base directory or final member type.<sup>[[12]](#references)</sup>
+Ngay cả `tarfile.extractall(filter="data")` và `filter="tar"` cũng từng có lỗ hổng bypass thứ tự link. Trong trường hợp này, một hardlink tham chiếu đến một symlink được lưu trữ ở đường dẫn sâu hơn; quá trình giải nén dự phòng xác thực symlink tương đối tại vị trí sâu đó nhưng tạo lại nó ở vị trí nông hơn của hardlink, nơi cùng target tương đối có thể thoát ra ngoài. Đây là một bài kiểm tra tổng quát hữu ích: khiến quá trình xác thực và tạo đối tượng không thống nhất về thư mục cơ sở hoặc kiểu member cuối cùng.<sup>[[12]](#references)</sup>
 
-### Node `tar` hardlink target escape through a symlink chain (GHSA-83g3-92jg-28cx)
+### Hardlink của Node `tar` thoát khỏi target qua chuỗi symlink (GHSA-83g3-92jg-28cx)
 
-The Node.js `tar` package's `tar.extract()` accepted a hardlink whose target looked lexically contained but resolved outside the extraction root through two earlier symlinks. The attack works with the default extraction options: destination-parent checks covered the hardlink's in-root name, while the hardlink target was passed to the filesystem without resolving the complete chain for containment. `tar` ≤ 7.5.7 is affected; 7.5.8 patches the issue.<sup>[[13]](#references)</sup>
+Package `tar` của Node.js chấp nhận `tar.extract()` với một hardlink có target trông như nằm trong phạm vi xét theo cú pháp đường dẫn, nhưng thực tế lại phân giải ra ngoài thư mục gốc giải nén thông qua hai symlink được tạo trước đó. Cuộc tấn công hoạt động với các tùy chọn giải nén mặc định: việc kiểm tra thư mục cha của đích chỉ áp dụng cho tên hardlink nằm trong thư mục gốc, còn target của hardlink được chuyển cho filesystem mà không phân giải toàn bộ chuỗi để kiểm tra xem nó có nằm trong phạm vi hay không. `tar` ≤ 7.5.7 bị ảnh hưởng; phiên bản 7.5.8 đã vá lỗi này.<sup>[[13]](#references)</sup>
 
-The important test fixture is the **ordered relationship** between members, not these literal names:<sup>[[13]](#references)</sup>
+Fixture kiểm thử quan trọng là **mối quan hệ có thứ tự** giữa các member, không phải những tên cụ thể này:<sup>[[13]](#references)</sup>
 
 ```text
 a/b/c/up     -> ../..                          (symlink)
@@ -151,11 +151,11 @@ a/b/escape   -> c/up/../..                     (symlink)
 exfil        => a/b/escape/<path-from-parent>  (hardlink)
 ```
 
-If extraction succeeds, `exfil` remains visibly inside the output tree but shares an inode with the chosen outside file; reading it leaks that file and writing it modifies the original. This bypass illustrates why checking only the final pathname, stripping absolute prefixes, or blocking `..` in the hardlink header is insufficient: validate link targets after applying all previously extracted filesystem state.<sup>[[13]](#references)</sup>
+Nếu giải nén thành công, `exfil` vẫn hiển thị bên trong cây đầu ra nhưng dùng chung inode với tệp bên ngoài được chọn; đọc nó sẽ làm lộ nội dung tệp đó, còn ghi vào nó sẽ sửa đổi tệp gốc. Bypass này cho thấy vì sao chỉ kiểm tra pathname cuối cùng, loại bỏ tiền tố tuyệt đối hoặc chặn `..` trong header hardlink là chưa đủ: hãy xác thực các đích liên kết sau khi áp dụng toàn bộ trạng thái filesystem đã được giải nén trước đó.<sup>[[13]](#references)</sup>
 
 ## Detection Tips
 
-* **Static inspection** – List both member names and link targets. Flag `../`, `..\\`, absolute/rooted paths, symlinks, hardlinks, special files, duplicate names, type changes, and case/Unicode-equivalent collisions. Preserve entry order during review because the exploit may depend on earlier members.<sup>[[11]](#references)</sup>
+* **Kiểm tra tĩnh** – Liệt kê cả tên member lẫn đích liên kết. Đánh dấu `../`, `..\\`, đường dẫn tuyệt đối/có gốc, symlink, hardlink, tệp đặc biệt, tên trùng lặp, thay đổi kiểu và các trường hợp trùng lặp tương đương về chữ hoa/thường hoặc Unicode. Giữ nguyên thứ tự entry khi rà soát vì exploit có thể phụ thuộc vào các member trước đó.<sup>[[11]](#references)</sup>
 
   ```bash
   bsdtar -tvf suspect.tar       # ordered TAR members, types and link targets
@@ -163,24 +163,24 @@ If extraction succeeds, `exfil` remains visibly inside the output tree but share
   zipinfo -v suspect.zip        # ZIP central-directory metadata and offsets
   ```
 
-* **Canonicalisation** – Ensure the resolved parent plus final basename remains beneath the resolved destination (compare path components, not a raw string prefix). Re-check after every preceding member; a one-time `realpath(join(dest, name))` test is vulnerable to link replacement and may fail for a not-yet-created leaf.<sup>[[3]](#references)[[11]](#references)</sup>
-* **Sandbox extraction** – Decompress into a fresh, disposable directory using an extractor with path/symlink checks (for example, bsdtar's default secure checks or 7-Zip ≥ 25.00), then verify the resulting tree contains no outward links. Isolation must prevent an already-triggered escape from reaching host paths.<sup>[[1]](#references)[[9]](#references)</sup>
-* **Downstream reads matter** – A surviving symlink or hardlink can become an arbitrary-file-read primitive when a previewer, CDN, file browser, or package pipeline later opens or serves the extracted name, even if extraction itself created no outside file.<sup>[[11]](#references)</sup>
-* **Endpoint monitoring** – Alert on new executables written to `Startup`/`Run`/`cron` locations shortly after an archive is opened by WinRAR/7-Zip/etc.
+* **Canonicalisation** – Đảm bảo parent đã phân giải cùng basename cuối vẫn nằm bên dưới destination đã phân giải (so sánh các thành phần của path, không dùng tiền tố chuỗi thô). Kiểm tra lại sau mỗi member đứng trước; kiểm tra `realpath(join(dest, name))` một lần duy nhất dễ bị thay thế link và có thể thất bại khi leaf chưa được tạo.<sup>[[3]](#references)[[11]](#references)</sup>
+* **Trích xuất trong sandbox** – Giải nén vào một thư mục mới, có thể hủy, bằng extractor có kiểm tra path/symlink (ví dụ: các kiểm tra bảo mật mặc định của bsdtar hoặc 7-Zip ≥ 25.00), sau đó xác minh cây thư mục không chứa link trỏ ra ngoài. Việc cô lập phải ngăn một vụ thoát sandbox đã bị kích hoạt tiếp cận được các path trên host.<sup>[[1]](#references)[[9]](#references)</sup>
+* **Các thao tác đọc về sau cũng quan trọng** – Một symlink hoặc hardlink còn sót lại có thể trở thành primitive đọc file tùy ý khi previewer, CDN, trình duyệt file hoặc pipeline package về sau mở hoặc phục vụ tên đã giải nén, ngay cả khi bản thân quá trình giải nén không tạo file bên ngoài.<sup>[[11]](#references)</sup>
+* **Giám sát endpoint** – Cảnh báo khi có executable mới được ghi vào các vị trí `Startup`/`Run`/`cron` ngay sau khi WinRAR/7-Zip/v.v. mở archive.
 
-## Mitigation & Hardening
+## Giảm thiểu & Gia cố
 
-1. **Update the extractor** – WinRAR 7.13+, 7-Zip 25.00+, and Node `tar` 7.5.8+ contain fixes for the cited path/symlink/link-target issues.<sup>[[1]](#references)[[5]](#references)[[13]](#references)</sup>
-2. Extract archives with “**Do not extract paths**” / “**Ignore paths**” when possible. For untrusted input, reject symbolic links, hardlinks, devices and FIFOs unless the application explicitly needs them.<sup>[[9]](#references)[[11]](#references)</sup>
-3. Extract into a **new empty directory**. Do not merge untrusted members into a tree containing attacker-replaceable paths, and do not reuse a directory planted by an earlier archive.<sup>[[11]](#references)</sup>
-4. On Unix, drop privileges and isolate the destination in a **chroot/mount namespace**; on Windows, use **AppContainer** or a sandbox. A post-extraction scan alone is insufficient because an escaped write occurs before the scan.<sup>[[11]](#references)</sup>
-5. In custom code, apply the target OS's separator/case/Unicode rules and validate both the member and link target. Resolve and open the destination without following links; do not separate a containment check from a later create/replace operation. The validator must use the exact same base and link-emulation semantics as the write path.<sup>[[11]](#references)[[12]](#references)</sup>
+1. **Cập nhật extractor** – WinRAR 7.13+, 7-Zip 25.00+ và Node `tar` 7.5.8+ đã có các bản sửa cho những vấn đề về path/symlink/link-target được trích dẫn.<sup>[[1]](#references)[[5]](#references)[[13]](#references)</sup>
+2. Giải nén archive với tùy chọn “**Do not extract paths**” / “**Ignore paths**” khi có thể. Với đầu vào không đáng tin cậy, hãy từ chối symbolic link, hardlink, device và FIFO trừ khi ứng dụng cần dùng chúng một cách rõ ràng.<sup>[[9]](#references)[[11]](#references)</sup>
+3. Giải nén vào **thư mục mới, trống**. Không gộp các member không đáng tin cậy vào cây thư mục có chứa path mà attacker có thể thay thế, và không tái sử dụng thư mục đã được cài sẵn bởi archive trước đó.<sup>[[11]](#references)</sup>
+4. Trên Unix, hạ quyền và cô lập destination trong **chroot/mount namespace**; trên Windows, dùng **AppContainer** hoặc sandbox. Chỉ quét sau khi giải nén là không đủ vì thao tác ghi thoát khỏi vùng giới hạn xảy ra trước khi quét.<sup>[[11]](#references)</sup>
+5. Trong code tùy chỉnh, áp dụng quy tắc separator/case/Unicode của OS đích và xác thực cả member lẫn link target. Phân giải và mở destination mà không đi theo link; không tách bước kiểm tra containment khỏi thao tác tạo/thay thế sau đó. Validator phải dùng chính xác cùng base và ngữ nghĩa giả lập link như đường dẫn ghi file.<sup>[[11]](#references)[[12]](#references)</sup>
 
-## Additional Affected / Historical Cases
+## Các trường hợp bị ảnh hưởng khác / trong quá khứ
 
-* 2018 – Massive *Zip-Slip* advisory by Snyk affecting many Java/Go/JS libraries.<sup>[[6]](#references)</sup>
-* 2025 – HashiCorp `go-slug` (CVE-2025-0377) TAR extraction traversal in slugs (fixed in v0.16.3).<sup>[[7]](#references)</sup>
-* Any custom extraction logic that validates header strings but not link targets and the final filesystem path used for each write.<sup>[[11]](#references)[[12]](#references)</sup>
+* 2018 – Snyk đưa ra cảnh báo *Zip-Slip* quy mô lớn, ảnh hưởng đến nhiều thư viện Java/Go/JS.<sup>[[6]](#references)</sup>
+* 2025 – HashiCorp `go-slug` (CVE-2025-0377) có lỗi path traversal khi giải nén TAR trong slug (đã sửa ở v0.16.3).<sup>[[7]](#references)</sup>
+* Mọi logic giải nén tùy chỉnh chỉ xác thực chuỗi trong header mà không xác thực link target và path cuối cùng trên filesystem được dùng cho mỗi thao tác ghi.<sup>[[11]](#references)[[12]](#references)</sup>
 
 
 
@@ -188,19 +188,19 @@ If extraction succeeds, `exfil` remains visibly inside the output tree but share
 
 ## References
 
-- [1] [Trend Micro ZDI-25-949 – 7-Zip symlink ZIP traversal (CVE-2025-11001)](https://www.zerodayinitiative.com/advisories/ZDI-25-949/)
-- [2] [JFrog Research – mholt/archiver Zip-Slip (CVE-2025-3445)](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
-- [3] [Meziantou – Prevent Zip Slip in .NET](https://www.meziantou.net/prevent-zip-slip-in-dotnet.htm)
-- [4] [0xdf – HTB Bruno ZipSlip → DLL hijack chain](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
-- [5] [ESET Research – Update WinRAR tools now: RomCom and others exploiting zero-day vulnerability (CVE-2025-8088)](https://www.welivesecurity.com/en/eset-research/update-winrar-tools-now-romcom-and-others-exploiting-zero-day-vulnerability/)
-- [6] [Snyk – Public Disclosure of a Critical Arbitrary File Overwrite Vulnerability: Zip Slip](https://snyk.io/blog/zip-slip-vulnerability/)
-- [7] [HashiCorp – HCSEC-2025-01: go-slug Vulnerable to Zip Slip Attack (CVE-2025-0377)](https://discuss.hashicorp.com/t/hcsec-2025-01-hashicorp-go-slug-vulnerable-to-zip-slip-attack/72719)
-- [8] [Microsoft Learn – Path.Combine Method](https://learn.microsoft.com/en-us/dotnet/api/system.io.path.combine?view=net-7.0)
-- [9] [libarchive – bsdtar secure extraction flags](https://github.com/libarchive/libarchive/blob/master/tar/bsdtar.c)
-- [10] [NHS England Digital – Proof-of-Concept Exploit Reported for CVE-2025-11001 in 7-Zip](https://digital.nhs.uk/cyber-alerts/2025/cc-4719)
-- [11] [Joshua Rogers – Hacking fun with zip-slips, tar-slips, symlinks, hardlinks, collisions, and more](https://joshua.hu/tarslip-zipslip-symlink-hardlink-generator)
-- [12] [Python Security Announce – CVE-2026-11940 tarfile extraction filter bypass](https://mail.python.org/archives/list/security-announce@python.org/thread/LD6QIISNQFQYOIEPJNEUIPV7S3V76FZH/)
-- [13] [GitHub Security Advisory – node-tar hardlink target escape through symlink chain](https://github.com/isaacs/node-tar/security/advisories/GHSA-83g3-92jg-28cx)
-- [14] [Rhino Security Labs CVE PoC – user-controlled SCORM extraction root](https://raw.githubusercontent.com/RhinoSecurityLabs/CVEs/master/CVE-2026-39405/README.md)
-- [15] [Rhino Security Labs – Multiple Vulnerabilities in Frappe LMS Leading to Remote Code Execution](https://rhinosecuritylabs.com/research/multiple-vulnerabilities-in-frappe-lms-leading-to-remote-code-execution/)
+- [1] [Trend Micro ZDI-25-949 – Lỗi ZIP path traversal qua symlink của 7-Zip (CVE-2025-11001)](https://www.zerodayinitiative.com/advisories/ZDI-25-949/)
+- [2] [Nghiên cứu của JFrog – Zip-Slip trong mholt/archiver (CVE-2025-3445)](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
+- [3] [Meziantou – Ngăn Zip Slip trong .NET](https://www.meziantou.net/prevent-zip-slip-in-dotnet.htm)
+- [4] [0xdf – Chuỗi HTB Bruno ZipSlip → DLL hijack](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
+- [5] [Nghiên cứu của ESET – Cập nhật công cụ WinRAR ngay: RomCom và các nhóm khác đang khai thác lỗ hổng zero-day (CVE-2025-8088)](https://www.welivesecurity.com/en/eset-research/update-winrar-tools-now-romcom-and-others-exploiting-zero-day-vulnerability/)
+- [6] [Snyk – Công bố công khai lỗ hổng ghi đè file tùy ý nghiêm trọng: Zip Slip](https://snyk.io/blog/zip-slip-vulnerability/)
+- [7] [HashiCorp – HCSEC-2025-01: go-slug dễ bị tấn công Zip Slip (CVE-2025-0377)](https://discuss.hashicorp.com/t/hcsec-2025-01-hashicorp-go-slug-vulnerable-to-zip-slip-attack/72719)
+- [8] [Microsoft Learn – Phương thức Path.Combine](https://learn.microsoft.com/en-us/dotnet/api/system.io.path.combine?view=net-7.0)
+- [9] [libarchive – Các cờ giải nén an toàn của bsdtar](https://github.com/libarchive/libarchive/blob/master/tar/bsdtar.c)
+- [10] [NHS England Digital – Báo cáo khai thác Proof-of-Concept cho CVE-2025-11001 trong 7-Zip](https://digital.nhs.uk/cyber-alerts/2025/cc-4719)
+- [11] [Joshua Rogers – Vọc vui với zip-slip, tar-slip, symlink, hardlink, collision và nhiều thứ khác](https://joshua.hu/tarslip-zipslip-symlink-hardlink-generator)
+- [12] [Python Security Announce – Bypass bộ lọc giải nén tarfile CVE-2026-11940](https://mail.python.org/archives/list/security-announce@python.org/thread/LD6QIISNQFQYOIEPJNEUIPV7S3V76FZH/)
+- [13] [GitHub Security Advisory – node-tar: thoát khỏi hardlink target qua chuỗi symlink](https://github.com/isaacs/node-tar/security/advisories/GHSA-83g3-92jg-28cx)
+- [14] [PoC CVE của Rhino Security Labs – root giải nén SCORM do người dùng kiểm soát](https://raw.githubusercontent.com/RhinoSecurityLabs/CVEs/master/CVE-2026-39405/README.md)
+- [15] [Rhino Security Labs – Nhiều lỗ hổng trong Frappe LMS dẫn đến Remote Code Execution](https://rhinosecuritylabs.com/research/multiple-vulnerabilities-in-frappe-lms-leading-to-remote-code-execution/)
 {{#include ../banners/hacktricks-training.md}}

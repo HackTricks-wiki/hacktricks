@@ -1,109 +1,108 @@
-# Value-Centric Web3 Red Teaming (MITRE AADAPT)
+# Red Teaming Web3 lấy giá trị làm trọng tâm (MITRE AADAPT)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-The MITRE Adversarial Actions in Digital Asset Payment Techniques (AADAPT) framework categorizes adversarial actions and techniques targeting digital asset systems.<sup>[[1]](#references)</sup> Treat it as a **threat-modeling backbone**: enumerate every component that can mint, price, authorize, or route assets, map those touchpoints to AADAPT techniques, and then drive red-team scenarios that measure whether the environment can resist irreversible economic loss.
+Framework MITRE Adversarial Actions in Digital Asset Payment Techniques (AADAPT) phân loại các hành động và kỹ thuật đối kháng nhắm vào hệ thống tài sản số.<sup>[[1]](#references)</sup> Hãy xem framework này là **khung xương sống cho threat modeling**: liệt kê mọi thành phần có thể phát hành, định giá, cấp quyền hoặc định tuyến tài sản, ánh xạ các điểm tiếp xúc đó với kỹ thuật AADAPT, rồi xây dựng các kịch bản red-team để đánh giá khả năng chống chịu của môi trường trước tổn thất kinh tế không thể đảo ngược.
 
-## 1. Inventory value-bearing components
-Build a map of everything that can influence value state, even if it is off-chain.<sup>[[2]](#references)</sup>
+## 1. Kiểm kê các thành phần nắm giữ giá trị
+Lập bản đồ mọi thứ có thể ảnh hưởng đến trạng thái giá trị, kể cả khi nằm ngoài chuỗi.<sup>[[2]](#references)</sup>
 
-- **Custodial signing services** (HSM/KMS clusters, Vault/KMaaS, signing APIs used by bots or back-office jobs). Capture key IDs, policies, automation identities, and approval workflows.
-- **Admin & upgrade paths** for contracts (proxy admins, governance timelocks, emergency pause keys, parameter registries). Include who/what can call them, and under which quorum or delay.
-- **On-chain protocol logic** handling lending, AMMs, vaults, staking, bridges, or settlement rails. Document the invariants they assume (oracle prices, collateral ratios, rebalance cadence…).
-- **Off-chain automation** that builds transactions (market-making bots, CI/CD pipelines, cron jobs, serverless functions). These often hold API keys or service principals that can request signatures.
-- **Oracles & data feeds** (aggregator composition, quorum, deviation thresholds, update cadence). Note every upstream relied on by automated risk logic.
-- **Bridges and cross-chain routers** (lock/mint contracts, relayers, settlement jobs) tying chains or custodial stacks together.
+- **Dịch vụ ký lưu ký** (cụm HSM/KMS, Vault/KMaaS, API ký được bot hoặc tác vụ back-office sử dụng). Ghi lại ID khóa, chính sách, danh tính tự động hóa và quy trình phê duyệt.
+- **Đường dẫn quản trị và nâng cấp** cho contract (proxy admin, governance timelock, khóa tạm dừng khẩn cấp, registry tham số). Ghi rõ ai/cái gì có thể gọi chúng, và cần quorum hoặc độ trễ nào.
+- **Logic protocol on-chain** xử lý lending, AMM, vault, staking, bridge hoặc đường ray thanh toán. Ghi lại các bất biến mà chúng giả định (giá oracle, tỷ lệ tài sản thế chấp, tần suất tái cân bằng…).
+- **Tự động hóa off-chain** tạo giao dịch (bot tạo lập thị trường, pipeline CI/CD, cron job, hàm serverless). Các thành phần này thường nắm API key hoặc service principal có thể yêu cầu chữ ký.
+- **Oracle và data feed** (cấu thành aggregator, quorum, ngưỡng độ lệch, tần suất cập nhật). Ghi chú mọi upstream mà logic rủi ro tự động phụ thuộc vào.
+- **Bridge và bộ định tuyến cross-chain** (contract lock/mint, relayer, tác vụ thanh toán) kết nối các chain hoặc hệ thống lưu ký.
 
-Deliverable: a value-flow diagram showing how assets move, who authorizes movement, and which external signals influence business logic.
+Sản phẩm bàn giao: sơ đồ luồng giá trị thể hiện cách tài sản di chuyển, ai cấp quyền di chuyển và tín hiệu bên ngoài nào ảnh hưởng đến logic nghiệp vụ.
 
-## 2. Map components to AADAPT behaviors
-Translate the AADAPT taxonomy into concrete attack candidates per component.<sup>[[2]](#references)</sup>
+## 2. Ánh xạ thành phần với hành vi AADAPT
+Chuyển taxonomy AADAPT thành các hướng tấn công cụ thể cho từng thành phần.<sup>[[2]](#references)</sup>
 
-| Component | Primary AADAPT focus |
+| Thành phần | Trọng tâm AADAPT chính |
 | --- | --- |
-| Signing/KMS estates | Credential theft, policy bypass, signing-abuse, governance takeover |
-| Oracles/feeds | Input poisoning, aggregation manipulation, deviation-threshold evasion |
-| On-chain protocols | Flash-loan economic manipulation, invariant breaking, parameter reconfiguration |
-| Automation pipelines | Compromised bot/CI identities, batch replay, unauthorized deployment |
-| Bridges/routers | Cross-chain evasion, rapid hop laundering, settlement desynchronization |
+| Hệ thống ký/KMS | Đánh cắp thông tin xác thực, vượt qua chính sách, lạm dụng ký, chiếm quyền governance |
+| Oracle/feed | Đầu độc dữ liệu đầu vào, thao túng tổng hợp, né ngưỡng độ lệch |
+| Protocol on-chain | Thao túng kinh tế bằng flash loan, phá vỡ bất biến, cấu hình lại tham số |
+| Pipeline tự động hóa | Danh tính bot/CI bị xâm phạm, phát lại theo lô, triển khai trái phép |
+| Bridge/bộ định tuyến | Né tránh cross-chain, rửa tiền qua nhiều bước nhanh chóng, mất đồng bộ thanh toán |
 
-This mapping ensures you test not just the contracts, but every identity/automation that can indirectly steer value.
+Việc ánh xạ này đảm bảo bạn kiểm thử không chỉ contract, mà cả mọi danh tính/tự động hóa có thể gián tiếp điều hướng giá trị.
 
-## 3. Prioritize by attacker feasibility vs. business impact
+## 3. Ưu tiên theo tính khả thi đối với kẻ tấn công và tác động kinh doanh
 
-1. **Operational weaknesses**: exposed CI credentials, over-privileged IAM roles, misconfigured KMS policies, automation accounts that can request arbitrary signatures, public buckets with bridge configs, etc.
-2. **Value-specific weaknesses**: fragile oracle parameters, upgradable contracts without multi-party approvals, flash-loan sensitive liquidity, governance actions that bypass timelocks.
+1. **Điểm yếu vận hành**: thông tin xác thực CI bị lộ, IAM role quá nhiều quyền, chính sách KMS cấu hình sai, tài khoản tự động hóa có thể yêu cầu chữ ký tùy ý, bucket công khai chứa cấu hình bridge, v.v.
+2. **Điểm yếu đặc thù giá trị**: tham số oracle mong manh, contract có thể nâng cấp nhưng không yêu cầu phê duyệt nhiều bên, thanh khoản nhạy cảm với flash loan, hành động governance bỏ qua timelock.
 
-Work the queue like an adversary: start with the operational footholds that could succeed today, then progress into deep protocol/economic manipulation paths.<sup>[[2]](#references)</sup>
+Xử lý danh sách như một đối thủ: bắt đầu từ các điểm xâm nhập vận hành có thể thành công ngay hôm nay, rồi chuyển sang các đường thao túng kinh tế/protocol chuyên sâu.<sup>[[2]](#references)</sup>
 
-## 4. Execute in controlled, production-realistic environments
-- **Forked mainnets / isolated testnets**: replicate bytecode, storage, and liquidity so flash-loan paths, oracle drifts, and bridge flows run end-to-end without touching real funds.<sup>[[2]](#references)</sup>
-- **Blast-radius planning**: define circuit breakers, pausable modules, rollback runbooks, and test-only admin keys before detonating a scenario.
-- **Stakeholder coordination**: notify custodians, oracle operators, bridge partners, and compliance so their monitoring teams expect the traffic.
-- **Legal sign-off**: document scope, authorization, and stop conditions when simulations could cross regulated rails.
+## 4. Thực thi trong môi trường được kiểm soát, sát thực tế production
+- **Mainnet fork/testnet cô lập**: tái tạo bytecode, storage và thanh khoản để các đường flash loan, biến động oracle và luồng bridge có thể chạy từ đầu đến cuối mà không động đến tiền thật.<sup>[[2]](#references)</sup>
+- **Lập kế hoạch phạm vi ảnh hưởng**: xác định circuit breaker, module có thể tạm dừng, runbook rollback và admin key chỉ dùng để kiểm thử trước khi kích hoạt kịch bản.
+- **Phối hợp với các bên liên quan**: thông báo cho đơn vị lưu ký, đơn vị vận hành oracle, đối tác bridge và bộ phận compliance để đội giám sát của họ dự liệu lưu lượng.
+- **Phê duyệt pháp lý**: ghi lại phạm vi, sự cho phép và điều kiện dừng khi mô phỏng có thể chạm đến các đường ray chịu quản lý.
 
-## 5. Telemetry aligned with AADAPT techniques
-Instrument telemetry streams so every scenario produces actionable detection data.<sup>[[2]](#references)</sup>
+## 5. Telemetry phù hợp với kỹ thuật AADAPT
+Thiết lập các luồng telemetry để mỗi kịch bản tạo ra dữ liệu phát hiện có thể hành động.<sup>[[2]](#references)</sup>
 
-- **Chain-level traces**: full call graphs, gas usage, transaction nonces, block timestamps—to reconstruct flash-loan bundles, reentrancy-like structures, and cross-contract hops.
-- **Application/API logs**: tie each on-chain tx back to a human or automation identity (session ID, OAuth client, API key, CI job ID) with IPs and auth methods.
-- **KMS/HSM logs**: key ID, caller principal, policy result, destination address, and reason codes for every signature. Baseline change windows and high-risk operations.
-- **Oracle/feed metadata**: per-update data source composition, reported value, deviation from rolling averages, thresholds triggered, and failover paths exercised.
-- **Bridge/swap traces**: correlate lock/mint/unlock events across chains with correlation IDs, chain IDs, relayer identity, and hop timing.
-- **Anomaly markers**: derived metrics such as slippage spikes, abnormal collateralization ratios, unusual gas density, or cross-chain velocity.
+- **Trace cấp chain**: toàn bộ call graph, lượng gas sử dụng, nonce giao dịch, timestamp của block—để tái dựng các bundle flash loan, cấu trúc giống reentrancy và các bước nhảy giữa contract.
+- **Log ứng dụng/API**: liên kết mỗi giao dịch on-chain với danh tính người dùng hoặc tự động hóa (session ID, OAuth client, API key, CI job ID), kèm IP và phương thức xác thực.
+- **Log KMS/HSM**: key ID, caller principal, kết quả chính sách, địa chỉ đích và mã lý do cho mỗi chữ ký. Thiết lập baseline cho khung thời gian thay đổi và thao tác rủi ro cao.
+- **Metadata oracle/feed**: thành phần nguồn dữ liệu theo từng lần cập nhật, giá trị được báo cáo, độ lệch so với trung bình trượt, ngưỡng được kích hoạt và các đường chuyển đổi dự phòng đã sử dụng.
+- **Trace bridge/swap**: liên kết các sự kiện lock/mint/unlock giữa các chain bằng correlation ID, chain ID, danh tính relayer và thời gian giữa các bước.
+- **Dấu hiệu bất thường**: các chỉ số suy ra như đột biến slippage, tỷ lệ tài sản thế chấp bất thường, mật độ gas khác thường hoặc tốc độ di chuyển cross-chain.
 
-Tag everything with scenario IDs or synthetic user IDs so analysts can align observables with the AADAPT technique being exercised.
+Gắn scenario ID hoặc synthetic user ID cho mọi thứ để analyst có thể đối chiếu dữ liệu quan sát với kỹ thuật AADAPT đang được kiểm thử.
 
-## 6. Purple-team loop & maturity metrics
-1. Run the scenario in the controlled environment and capture detections (alerts, dashboards, responders paged).<sup>[[2]](#references)</sup>
-2. Map each step to the specific AADAPT techniques plus the observables produced in chain/app/KMS/oracle/bridge planes.
-3. Formulate and deploy detection hypotheses (threshold rules, correlation searches, invariant checks).
-4. Re-run until mean time to detect (MTTD) and mean time to contain (MTTC) meet business tolerances and playbooks reliably halt the value loss.
+## 6. Vòng lặp purple-team và chỉ số trưởng thành
+1. Chạy kịch bản trong môi trường được kiểm soát và thu thập kết quả phát hiện (cảnh báo, dashboard, thông báo đến responder).<sup>[[2]](#references)</sup>
+2. Ánh xạ từng bước với kỹ thuật AADAPT cụ thể cùng dữ liệu quan sát được trong các lớp chain/app/KMS/oracle/bridge.
+3. Xây dựng và triển khai giả thuyết phát hiện (quy tắc ngưỡng, truy vấn tương quan, kiểm tra bất biến).
+4. Chạy lại cho đến khi mean time to detect (MTTD) và mean time to contain (MTTC) đáp ứng ngưỡng chấp nhận của doanh nghiệp, đồng thời playbook có thể ngăn thất thoát giá trị một cách đáng tin cậy.
 
-Track program maturity on three axes:<sup>[[2]](#references)</sup>
-- **Visibility**: every critical value path has telemetry in each plane.
-- **Coverage**: proportion of prioritized AADAPT techniques exercised end-to-end.
-- **Response**: ability to pause contracts, revoke keys, or freeze flows before irreversible loss.
+Theo dõi mức độ trưởng thành của chương trình trên ba trục:<sup>[[2]](#references)</sup>
+- **Khả năng quan sát**: mọi đường dẫn giá trị quan trọng đều có telemetry ở từng lớp.
+- **Độ bao phủ**: tỷ lệ các kỹ thuật AADAPT được ưu tiên đã kiểm thử từ đầu đến cuối.
+- **Khả năng ứng phó**: khả năng tạm dừng contract, thu hồi key hoặc đóng băng luồng trước khi xảy ra tổn thất không thể đảo ngược.
 
-Typical milestones: (1) completed value inventory + AADAPT mapping, (2) first end-to-end scenario with detections implemented, (3) quarterly purple-team cycles expanding coverage and driving down MTTD/MTTC.<sup>[[2]](#references)</sup>
+Các mốc điển hình: (1) hoàn tất kiểm kê giá trị và ánh xạ AADAPT, (2) kịch bản đầu tiên từ đầu đến cuối có phát hiện được triển khai, (3) các chu kỳ purple-team hàng quý mở rộng độ bao phủ và giảm MTTD/MTTC.<sup>[[2]](#references)</sup>
 
-## 7. Scenario templates
-Use these repeatable blueprints to design simulations that map directly to AADAPT behaviors.<sup>[[2]](#references)</sup>
+## 7. Mẫu kịch bản
+Dùng các bản thiết kế có thể lặp lại này để xây dựng mô phỏng ánh xạ trực tiếp với hành vi AADAPT.<sup>[[2]](#references)</sup>
 
-### Scenario A – Flash-loan economic manipulation
-- **Objective**: borrow transient capital inside one transaction to distort AMM prices/liquidity and trigger mispriced borrows, liquidations, or mints before repaying.
-- **Execution**:
-  1. Fork the target chain and seed pools with production-like liquidity.
-  2. Borrow large notional via flash loan.
-  3. Perform calibrated swaps to cross price/threshold boundaries relied on by lending, vault, or derivative logic.
-  4. Invoke the victim contract immediately after the distortion (borrow, liquidate, mint) and repay the flash loan.
-- **Measurement**: Did the invariant violation succeed? Were slippage/price-deviation monitors, circuit breakers, or governance pause hooks triggered? How long until analytics flagged the abnormal gas/call graph pattern?
+### Kịch bản A – Thao túng kinh tế bằng flash loan
+- **Mục tiêu**: vay vốn ngắn hạn trong một giao dịch để làm sai lệch giá/thanh khoản AMM và kích hoạt borrow, liquidation hoặc mint sai định giá trước khi hoàn trả.
+- **Thực thi**:
+  1. Fork chain mục tiêu và cấp thanh khoản gần với production cho các pool.
+  2. Vay một khoản danh nghĩa lớn qua flash loan.
+  3. Thực hiện các swap được hiệu chỉnh để vượt qua các ranh giới giá/ngưỡng mà logic lending, vault hoặc phái sinh phụ thuộc vào.
+  4. Gọi contract mục tiêu ngay sau khi tạo sai lệch (borrow, liquidate, mint), rồi hoàn trả flash loan.
+- **Đo lường**: Vi phạm bất biến có thành công không? Các bộ giám sát slippage/độ lệch giá, circuit breaker hoặc hook tạm dừng governance có được kích hoạt không? Mất bao lâu để analytics phát hiện mẫu gas/call graph bất thường?
 
-### Scenario B – Oracle/data-feed poisoning
-- **Objective**: determine whether manipulated feeds can trigger destructive automated actions (mass liquidations, incorrect settlements).
-- **Execution**:
-  1. In the fork/testnet, deploy a malicious feed or adjust aggregator weights/quorum/update cadence beyond tolerated deviation.
-  2. Let dependent contracts consume the poisoned values and execute their standard logic.
-- **Measurement**: Feed-level out-of-band alerts, fallback oracle activation, min/max bound enforcement, and latency between anomaly onset and operator response.
+### Kịch bản B – Đầu độc oracle/data feed
+- **Mục tiêu**: xác định liệu feed bị thao túng có thể kích hoạt các hành động tự động gây thiệt hại (thanh lý hàng loạt, thanh toán sai) hay không.
+- **Thực thi**:
+  1. Trong fork/testnet, triển khai feed độc hại hoặc điều chỉnh trọng số aggregator/quorum/tần suất cập nhật vượt quá độ lệch cho phép.
+  2. Để các contract phụ thuộc tiêu thụ giá trị bị đầu độc và chạy logic thông thường.
+- **Đo lường**: Cảnh báo ngoài ngưỡng ở cấp feed, kích hoạt oracle dự phòng, thực thi giới hạn min/max và độ trễ từ lúc bất thường bắt đầu đến khi operator phản ứng.
 
-### Scenario C – Credential/signing abuse
-- **Objective**: test whether compromising a single signer or automation identity enables unauthorized upgrades, parameter changes, or treasury drains.
-- **Execution**:
-  1. Enumerate identities with sensitive signing rights (operators, CI tokens, service accounts invoking KMS/HSM, multisig participants).
-  2. Simulate compromise (re-use their credentials/keys within the lab scope).
-  3. Attempt privileged actions: upgrade proxies, change risk parameters, mint/pause assets, or trigger governance proposals.
-- **Measurement**: Do KMS/HSM logs raise anomaly alerts (time-of-day, destination drift, burst of high-risk operations)? Can policies or multisig thresholds prevent unilateral abuse? Are throttles/rate limits or additional approvals enforced?
+### Kịch bản C – Lạm dụng thông tin xác thực/chữ ký
+- **Mục tiêu**: kiểm thử xem việc xâm phạm một signer hoặc danh tính tự động hóa có cho phép nâng cấp, thay đổi tham số trái phép hoặc rút cạn treasury hay không.
+- **Thực thi**:
+  1. Liệt kê các danh tính có quyền ký nhạy cảm (operator, CI token, service account gọi KMS/HSM, thành viên multisig).
+  2. Mô phỏng việc xâm phạm (sử dụng lại thông tin xác thực/key của họ trong phạm vi lab).
+  3. Thử các hành động có đặc quyền: nâng cấp proxy, thay đổi tham số rủi ro, mint/tạm dừng tài sản hoặc kích hoạt đề xuất governance.
+- **Đo lường**: Log KMS/HSM có tạo cảnh báo bất thường không (thời điểm trong ngày, thay đổi địa chỉ đích, đột biến thao tác rủi ro cao)? Chính sách hoặc ngưỡng multisig có ngăn được việc lạm dụng đơn phương không? Có áp dụng throttling/rate limit hoặc phê duyệt bổ sung không?
 
-### Scenario D – Cross-chain evasion & traceability gaps
-- **Objective**: evaluate how well defenders can trace and interdict assets rapidly laundered across bridges, DEX routers, and privacy hops.
-- **Execution**:
-  1. Chain together lock/mint operations across common bridges, interleave swaps/mixers on each hop, and maintain per-hop correlation IDs.
-  2. Accelerate transfers to stress monitoring latency (multi-hop within minutes/blocks).
-- **Measurement**: Time to correlate events across telemetry + commercial chain analytics, completeness of the reconstructed path, ability to identify choke points for freezing in a real incident, and alert fidelity for abnormal cross-chain velocity/value.
+### Kịch bản D – Né tránh cross-chain và khoảng trống truy vết
+- **Mục tiêu**: đánh giá khả năng truy vết và ngăn chặn tài sản được rửa nhanh qua bridge, DEX router và các bước chuyển qua dịch vụ bảo mật của đội phòng thủ.
+- **Thực thi**:
+  1. Nối tiếp các thao tác lock/mint qua những bridge phổ biến, xen kẽ swap/mixer trên mỗi chặng và duy trì correlation ID cho từng chặng.
+  2. Tăng tốc độ chuyển để gây áp lực lên độ trễ giám sát (nhiều bước chuyển trong vài phút/block).
+- **Đo lường**: Thời gian tương quan sự kiện giữa telemetry và phân tích chain thương mại, mức độ đầy đủ của đường đi được tái dựng, khả năng xác định điểm nghẽn để đóng băng trong sự cố thực tế, và độ chính xác của cảnh báo về tốc độ/giá trị cross-chain bất thường.
 
 ## References
 
-- [1] [AADAPT(TM) Cyber Threat Framework for Digital Assets (MITRE)](https://www.mitre.org/sites/default/files/2025-05/PR-25-1118-aadpt-cyber-threat-framework-for-digital-assets.pdf)
-- [2] [MITRE AADAPT Framework as a Red Team Roadmap (Bishop Fox)](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
-
+- [1] [Framework MITRE AADAPT(TM) về mối đe dọa mạng đối với tài sản số](https://www.mitre.org/sites/default/files/2025-05/PR-25-1118-aadpt-cyber-threat-framework-for-digital-assets.pdf)
+- [2] [Framework MITRE AADAPT như lộ trình Red Team](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
 {{#include ../../banners/hacktricks-training.md}}

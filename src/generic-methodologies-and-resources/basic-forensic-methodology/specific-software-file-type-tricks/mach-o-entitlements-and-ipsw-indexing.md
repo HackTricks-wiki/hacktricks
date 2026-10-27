@@ -1,21 +1,21 @@
-# Mach-O Entitlements Extraction & IPSW Indexing
+# Trích xuất Entitlements từ Mach-O & lập chỉ mục IPSW
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Overview
+## Tổng quan
 
-This page covers how to extract entitlements from Mach-O binaries programmatically by walking LC_CODE_SIGNATURE and parsing the code signing SuperBlob, and how to scale this across Apple IPSW firmwares by mounting and indexing their contents for forensic search/diff.
+Trang này trình bày cách trích xuất entitlements từ các tệp nhị phân Mach-O bằng lập trình: duyệt qua LC_CODE_SIGNATURE và phân tích code signing SuperBlob. Trang cũng hướng dẫn mở rộng quy trình này cho các firmware IPSW của Apple bằng cách mount và lập chỉ mục nội dung để phục vụ tìm kiếm/đối chiếu pháp chứng.
 
-If you need a refresher on Mach-O format and code signing, see also: macOS code signing and SuperBlob internals.
-- Check macOS code signing details (SuperBlob, Code Directory, special slots): [macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
-- Check general Mach-O structures/load commands: [Universal binaries & Mach-O Format](../../../macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)
+Nếu cần ôn lại định dạng Mach-O và code signing, hãy xem thêm: macOS code signing và cấu trúc bên trong SuperBlob.
+- Xem chi tiết về macOS code signing (SuperBlob, Code Directory, special slots): [Code signing trên macOS](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
+- Xem các cấu trúc Mach-O và load command tổng quát: [Universal binaries & định dạng Mach-O](../../../macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)
 
 
-## Entitlements in Mach-O: where they live
+## Entitlements trong Mach-O: chúng nằm ở đâu
 
-Entitlements are stored inside the code signature data referenced by the LC_CODE_SIGNATURE load command and placed in the __LINKEDIT segment. The signature is a CS_SuperBlob containing multiple blobs (code directory, requirements, entitlements, CMS, etc.). The entitlements blob is a CS_GenericBlob whose data is a serialized property list mapping entitlement keys to values; parsers should accept both XML and binary plist encodings.<sup>[[1]](#references)[[6]](#references)</sup>
+Entitlements được lưu trong dữ liệu chữ ký mã được tham chiếu bởi load command LC_CODE_SIGNATURE và đặt trong segment __LINKEDIT. Chữ ký là một CS_SuperBlob chứa nhiều blob (code directory, requirements, entitlements, CMS, v.v.). Blob entitlements là một CS_GenericBlob có dữ liệu là property list được tuần tự hóa, ánh xạ các khóa entitlement với giá trị; parser cần chấp nhận cả định dạng XML và binary plist.<sup>[[1]](#references)[[6]](#references)</sup>
 
-Key structures (from xnu):<sup>[[6]](#references)[[7]](#references)</sup>
+Các cấu trúc chính (từ xnu):<sup>[[6]](#references)[[7]](#references)</sup>
 
 ```c
 /* mach-o/loader.h */
@@ -63,32 +63,32 @@ typedef struct __SC_GenericBlob {
 } CS_GenericBlob;
 ```
 
-Important constants from the Apple headers include:<sup>[[6]](#references)[[7]](#references)</sup>
+Các hằng số quan trọng trong header của Apple gồm:<sup>[[6]](#references)[[7]](#references)</sup>
 - LC_CODE_SIGNATURE cmd = 0x1d
 - CS SuperBlob magic = 0xfade0cc0
-- Entitlements index slot (`CSSLOT_ENTITLEMENTS`) = 5; the blob at that slot has magic `CSMAGIC_EMBEDDED_ENTITLEMENTS` = 0xfade7171
-- DER entitlements use slot `CSSLOT_DER_ENTITLEMENTS` = 7 and blob magic `CSMAGIC_EMBEDDED_DER_ENTITLEMENTS` = 0xfade7172
+- Entitlements index slot (`CSSLOT_ENTITLEMENTS`) = 5; blob ở slot đó có magic `CSMAGIC_EMBEDDED_ENTITLEMENTS` = 0xfade7171
+- DER entitlements dùng slot `CSSLOT_DER_ENTITLEMENTS` = 7 và blob magic `CSMAGIC_EMBEDDED_DER_ENTITLEMENTS` = 0xfade7172
 
-Note: Multi-arch (fat) binaries contain multiple Mach-O slices. You must pick the slice for the architecture you want to inspect and then walk its load commands.
-
-
-## Extraction steps (generic, lossless-enough)
-
-1) Parse Mach-O header; iterate ncmds worth of load_command records.
-2) Locate LC_CODE_SIGNATURE; read linkedit_data_command.dataoff/datasize to map the Code Signing SuperBlob placed in __LINKEDIT.
-3) Validate CS_SuperBlob.magic == 0xfade0cc0; iterate count entries of CS_BlobIndex.
-4) Locate `index.type == CSSLOT_ENTITLEMENTS` (5), then verify that the pointed `CS_GenericBlob` has magic `CSMAGIC_EMBEDDED_ENTITLEMENTS` (0xfade7171). Parse its data as a property list to obtain the key/value entitlements.<sup>[[1]](#references)[[6]](#references)</sup>
-
-Implementation notes:
-- Code signature structures use big-endian fields; swap byte order when parsing on little-endian hosts.
-- The entitlements `GenericBlob` contains a serialized plist; standard plist libraries can handle its XML or binary representation.
-- Some iOS binaries may carry DER entitlements; XNU exposes a separate DER blob type, and entitlement representations or slots can differ across platforms and versions, so cross-check standard and DER entitlements as needed.<sup>[[6]](#references)</sup>
-- For fat binaries, use the fat headers (FAT_MAGIC/FAT_MAGIC_64) to locate the correct slice and offset before walking Mach-O load commands.
+Lưu ý: Các binary đa kiến trúc (fat) chứa nhiều Mach-O slice. Bạn phải chọn slice tương ứng với kiến trúc muốn kiểm tra, sau đó duyệt qua các load command của nó.
 
 
-## Minimal parsing outline (Python)
+## Các bước trích xuất (tổng quát, bảo toàn dữ liệu ở mức đủ dùng)
 
-The following is a compact outline showing the control flow to find and decode entitlements. It intentionally omits robust bounds checks and full fat binary support for brevity.<sup>[[6]](#references)[[7]](#references)</sup>
+1) Phân tích Mach-O header; duyệt qua số bản ghi load_command theo ncmds.
+2) Tìm LC_CODE_SIGNATURE; đọc linkedit_data_command.dataoff/datasize để ánh xạ Code Signing SuperBlob nằm trong __LINKEDIT.
+3) Xác thực CS_SuperBlob.magic == 0xfade0cc0; duyệt qua các mục count của CS_BlobIndex.
+4) Tìm `index.type == CSSLOT_ENTITLEMENTS` (5), sau đó xác minh rằng `CS_GenericBlob` được trỏ đến có magic `CSMAGIC_EMBEDDED_ENTITLEMENTS` (0xfade7171). Phân tích dữ liệu của blob này dưới dạng property list để lấy các entitlement dạng key/value.<sup>[[1]](#references)[[6]](#references)</sup>
+
+Lưu ý khi triển khai:
+- Các cấu trúc code signature dùng trường big-endian; hãy hoán đổi thứ tự byte khi phân tích trên host little-endian.
+- `GenericBlob` của entitlements chứa plist đã được tuần tự hóa; các thư viện plist tiêu chuẩn có thể xử lý định dạng XML hoặc binary.
+- Một số binary iOS có thể chứa DER entitlements; XNU cung cấp một kiểu DER blob riêng, và cách biểu diễn hoặc slot của entitlement có thể khác nhau tùy nền tảng và phiên bản, vì vậy hãy đối chiếu entitlements tiêu chuẩn với DER khi cần.<sup>[[6]](#references)</sup>
+- Với các binary fat, hãy dùng fat header (FAT_MAGIC/FAT_MAGIC_64) để tìm đúng slice và offset trước khi duyệt qua các load command của Mach-O.
+
+
+## Phác thảo phân tích tối giản (Python)
+
+Sau đây là phác thảo ngắn gọn về luồng điều khiển để tìm và giải mã entitlements. Để ngắn gọn, phác thảo cố ý lược bỏ việc kiểm tra giới hạn dữ liệu toàn diện và hỗ trợ đầy đủ binary fat.<sup>[[6]](#references)[[7]](#references)</sup>
 
 ```python
 import plistlib, struct
@@ -145,27 +145,27 @@ def parse_entitlements(macho_bytes):
     return None
 ```
 
-Usage tips:
-- To handle fat binaries, first read struct fat_header/fat_arch, choose the desired architecture slice, then pass the subrange to parse_entitlements.
-- On macOS you can validate results with: codesign -d --entitlements :- /path/to/binary
+Mẹo sử dụng:
+- Để xử lý fat binaries, trước tiên hãy đọc struct fat_header/fat_arch, chọn slice kiến trúc mong muốn, rồi truyền khoảng con đó vào parse_entitlements.
+- Trên macOS, bạn có thể xác thực kết quả bằng: codesign -d --entitlements :- /path/to/binary
 
 
-## Example findings
+## Các phát hiện mẫu
 
-The source article shows these entitlements in the macOS 14.0 `launchd` binary:<sup>[[1]](#references)</sup>
+Bài viết nguồn cho thấy các entitlement này trong binary `launchd` của macOS 14.0:<sup>[[1]](#references)</sup>
 - com.apple.security.network.server = true
 - com.apple.rootless.storage.early_boot_mount = true
 - com.apple.private.kernel.system-override = true
 - com.apple.private.pmap.load-trust-cache = ["cryptex1.boot.os", "cryptex1.boot.app", "cryptex1.safari-downlevel"]
 
-Searching these at scale across firmware images is extremely valuable for attack surface mapping and diffing across releases/devices.
+Tìm kiếm các entitlement này trên quy mô lớn trong các firmware image rất hữu ích cho việc lập bản đồ attack surface và so sánh khác biệt giữa các bản phát hành/thiết bị.
 
 
-## Scaling across IPSWs (mounting and indexing)
+## Mở rộng quy mô trên nhiều IPSW (mount và lập chỉ mục)
 
-To enumerate executables and extract entitlements at scale without storing full images:<sup>[[1]](#references)</sup>
+Để liệt kê các executable và trích xuất entitlement trên quy mô lớn mà không lưu trữ toàn bộ image:<sup>[[1]](#references)</sup>
 
-- Use the ipsw tool by @blacktop to download and mount firmware filesystems. Mounting leverages apfs-fuse, so you can traverse APFS volumes without full extraction.<sup>[[1]](#references)[[3]](#references)</sup>
+- Dùng công cụ ipsw của @blacktop để tải xuống và mount các filesystem firmware. Việc mount sử dụng apfs-fuse, nhờ đó bạn có thể duyệt các volume APFS mà không cần giải nén toàn bộ.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ```bash
 # Download latest IPSW for iPhone11,2 (iPhone XS)
@@ -175,12 +175,12 @@ ipsw download ipsw -y --device iPhone11,2 --latest
 ipsw mount fs <IPSW_FILE>
 ```
 
-- Walk mounted volumes to locate Mach-O files (check magic and/or use file/otool), then parse entitlements and imported frameworks.
-- Persist a normalized view into a relational database to avoid linear growth across thousands of IPSWs:
+- Duyệt qua các volume đã mount để tìm file Mach-O (kiểm tra magic và/hoặc dùng file/otool), sau đó phân tích entitlements và các framework được import.
+- Lưu một dạng biểu diễn đã chuẩn hóa vào cơ sở dữ liệu quan hệ để tránh tăng trưởng tuyến tính khi xử lý hàng nghìn IPSW:
   - executables, operating_system_versions, entitlements, frameworks
-  - many-to-many: executable↔OS version, executable↔entitlement, executable↔framework
+  - quan hệ nhiều-nhiều: executable↔OS version, executable↔entitlement, executable↔framework
 
-Example query to list all OS versions containing a given executable name (adapted from appledb_rs):<sup>[[1]](#references)</sup>
+Ví dụ truy vấn liệt kê tất cả phiên bản OS có chứa một executable với tên cho trước (được điều chỉnh từ appledb_rs):<sup>[[1]](#references)</sup>
 
 ```sql
 SELECT osv.version AS "Versions"
@@ -191,35 +191,34 @@ LEFT JOIN executable e ON e.id = eosv.executable_id
 WHERE e.name = 'launchd';
 ```
 
-Notes on DB portability (if you implement your own indexer):<sup>[[1]](#references)</sup>
-- Use an ORM/abstraction (e.g., SeaORM) to keep code DB-agnostic (SQLite/PostgreSQL).
-- SQLite permits `AUTOINCREMENT` only on an `INTEGER PRIMARY KEY`; that key aliases a signed 64-bit ROWID, although SQLite may use smaller integer widths on disk. If SeaORM-generated Rust entities need i64 IDs, generate entities as i32 and convert types at the boundary.<sup>[[1]](#references)[[8]](#references)[[9]](#references)</sup>
+Ghi chú về tính khả chuyển của DB (nếu bạn tự triển khai indexer):<sup>[[1]](#references)</sup>
+- Dùng ORM/lớp trừu tượng (ví dụ: SeaORM) để code không phụ thuộc DB (SQLite/PostgreSQL).
+- SQLite chỉ cho phép `AUTOINCREMENT` trên `INTEGER PRIMARY KEY`; khóa này là bí danh của ROWID 64-bit có dấu, dù SQLite có thể dùng độ rộng số nguyên nhỏ hơn trên đĩa. Nếu các Rust entity do SeaORM tạo cần ID kiểu i64, hãy tạo entity với kiểu i32 rồi chuyển đổi kiểu tại ranh giới.<sup>[[1]](#references)[[8]](#references)[[9]](#references)</sup>
 
 
-## Open-source tooling and references for entitlement hunting
+## Công cụ mã nguồn mở và tài liệu tham khảo để tìm kiếm entitlement
 
-- Firmware mount/download: https://github.com/blacktop/ipsw.<sup>[[3]](#references)</sup>
-- Entitlement databases and references:
-  - Jonathan Levin’s entitlement DB: https://newosxbook.com/ent.php.<sup>[[4]](#references)</sup>
+- Mount/tải firmware: https://github.com/blacktop/ipsw.<sup>[[3]](#references)</sup>
+- Cơ sở dữ liệu entitlement và tài liệu tham khảo:
+  - Cơ sở dữ liệu entitlement của Jonathan Levin: https://newosxbook.com/ent.php.<sup>[[4]](#references)</sup>
   - entdb: https://github.com/ChiChou/entdb.<sup>[[5]](#references)</sup>
-- Large-scale indexer (Rust, self-hosted Web UI + OpenAPI): https://github.com/synacktiv/appledb_rs.<sup>[[2]](#references)</sup>
-- Apple headers for structures and constants:
-  - loader.h (Mach-O headers, load commands)
+- Indexer quy mô lớn (Rust, Web UI tự host + OpenAPI): https://github.com/synacktiv/appledb_rs.<sup>[[2]](#references)</sup>
+- Header của Apple cho các cấu trúc và hằng số:
+  - loader.h (header Mach-O, load command)
   - cs_blobs.h (SuperBlob, GenericBlob, CodeDirectory)
 
-For more on code signing internals (Code Directory, special slots, DER entitlements), see: [macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
+Để tìm hiểu thêm về các thành phần bên trong của code signing (Code Directory, special slot, DER entitlement), xem: [macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
 
 
 ## References
 
-- [1] [Corentin Liaud (Synacktiv), appledb_rs: a research support tool for Apple platforms](https://www.synacktiv.com/publications/appledbrs-un-outil-daide-a-la-recherche-sur-plateformes-apple.html)
+- [1] [Corentin Liaud (Synacktiv), appledb_rs: công cụ hỗ trợ nghiên cứu các nền tảng Apple](https://www.synacktiv.com/publications/appledbrs-un-outil-daide-a-la-recherche-sur-plateformes-apple.html)
 - [2] [synacktiv/appledb_rs](https://github.com/synacktiv/appledb_rs)
 - [3] [blacktop/ipsw](https://github.com/blacktop/ipsw)
-- [4] [Jonathan Levin’s entitlement DB](https://newosxbook.com/ent.php)
+- [4] [Cơ sở dữ liệu entitlement của Jonathan Levin](https://newosxbook.com/ent.php)
 - [5] [ChiChou/entdb](https://github.com/ChiChou/entdb)
 - [6] [XNU cs_blobs.h](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
 - [7] [XNU mach-o/loader.h](https://github.com/apple-oss-distributions/xnu/blob/main/EXTERNAL_HEADERS/mach-o/loader.h)
-- [8] [SQLite Datatypes](https://sqlite.org/datatype3.html)
-- [9] [SQLite Autoincrement](https://sqlite.org/autoinc.html)
-
+- [8] [Kiểu dữ liệu SQLite](https://sqlite.org/datatype3.html)
+- [9] [Tự động tăng trong SQLite](https://sqlite.org/autoinc.html)
 {{#include ../../../banners/hacktricks-training.md}}

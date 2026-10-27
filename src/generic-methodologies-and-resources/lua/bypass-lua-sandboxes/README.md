@@ -1,18 +1,18 @@
-# Bypass Lua sandboxes (embedded VMs, game clients)
+# Bypass Lua sandboxes (VM nhúng, game client)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-This page collects practical techniques to enumerate and break out of Lua "sandboxes" embedded in applications (notably game clients, plugins, or in-app scripting engines). Many engines expose a restricted Lua environment, but leave powerful globals reachable that enable arbitrary command execution or even native memory corruption when bytecode loaders are exposed.
+Trang này tổng hợp các kỹ thuật thực tế để liệt kê và thoát khỏi các "sandbox" Lua được nhúng trong ứng dụng (đặc biệt là game client, plugin hoặc engine scripting trong ứng dụng). Nhiều engine cung cấp môi trường Lua bị hạn chế, nhưng vẫn để lộ các global mạnh, cho phép thực thi lệnh tùy ý hoặc thậm chí gây lỗi bộ nhớ native khi có thể truy cập bộ nạp bytecode.
 
-Key ideas:
-- Treat the VM as an unknown environment: enumerate _G and discover what dangerous primitives are reachable.
-- When stdout/print is blocked, abuse any in-VM UI/IPC channel as an output sink to observe results.
-- If io/os is exposed, you often have direct command execution (io.popen, os.execute).
-- If load/loadstring/loadfile are exposed, executing crafted Lua bytecode can subvert memory safety in some versions (≤5.1 verifiers are bypassable; 5.2 removed verifier), enabling advanced exploitation.
+Ý chính:
+- Xem VM là một môi trường chưa biết: liệt kê _G và tìm các primitive nguy hiểm có thể truy cập.
+- Khi stdout/print bị chặn, hãy lạm dụng bất kỳ kênh UI/IPC nào trong VM làm nơi xuất dữ liệu để quan sát kết quả.
+- Nếu io/os bị lộ, bạn thường có thể thực thi lệnh trực tiếp (io.popen, os.execute).
+- Nếu load/loadstring/loadfile bị lộ, thực thi bytecode Lua được tạo thủ công có thể phá vỡ an toàn bộ nhớ ở một số phiên bản (verifier ≤5.1 có thể bị bypass; verifier bị loại bỏ từ 5.2), cho phép khai thác nâng cao.
 
-## Enumerate the sandboxed environment
+## Liệt kê môi trường sandbox
 
-- Dump the global environment to inventory reachable tables/functions:
+- Dump môi trường global để kiểm kê các bảng/hàm có thể truy cập:
 
 ```lua
 -- Minimal _G dumper for any Lua sandbox with some output primitive `out`
@@ -24,7 +24,7 @@ local function dump_globals(out)
 end
 ```
 
-- If no print() is available, repurpose in-VM channels. Example from an MMO housing script VM where chat output only works after a sound call; the following builds a reliable output function:<sup>[[1]](#references)</sup>
+- Nếu không có print(), hãy tận dụng lại các kênh trong VM. Ví dụ từ VM script nhà ở của một MMO, nơi chỉ có thể xuất nội dung chat sau khi gọi âm thanh; đoạn sau tạo một hàm xuất nội dung đáng tin cậy:<sup>[[1]](#references)</sup>
 
 ```lua
 -- Build an output channel using in-game primitives
@@ -43,11 +43,11 @@ function OnMenu(menuNum)
 end
 ```
 
-Generalize this pattern for your target: any textbox, toast, logger, or UI callback that accepts strings can act as stdout for reconnaissance.
+Khái quát hóa mẫu này cho mục tiêu của bạn: mọi textbox, toast, logger hoặc UI callback chấp nhận chuỗi đều có thể đóng vai trò stdout để trinh sát.
 
-## Direct command execution if io/os is exposed
+## Thực thi lệnh trực tiếp nếu io/os được expose
 
-If the sandbox still exposes the standard libraries io or os, you likely have immediate command execution:
+Nếu sandbox vẫn expose các thư viện chuẩn io hoặc os, bạn có thể thực thi lệnh ngay lập tức:
 
 ```lua
 -- Windows example
@@ -58,14 +58,14 @@ os.execute("/usr/bin/id")
 io.popen("/bin/sh -c 'id'")
 ```
 
-Notes:
+Ghi chú:
 
-- Execution happens inside the client process; many anti-cheat/antidebug layers that block external debuggers won’t prevent in-VM process creation.
-- Also check: package.loadlib (arbitrary DLL/.so loading), require with native modules, LuaJIT's ffi (if present), and the debug library (can raise privileges inside the VM).
+- Việc thực thi diễn ra bên trong tiến trình client; nhiều lớp anti-cheat/antidebug chặn debugger bên ngoài sẽ không ngăn được việc tạo tiến trình trong VM.
+- Ngoài ra, hãy kiểm tra: package.loadlib (nạp DLL/.so tùy ý), require với native modules, ffi của LuaJIT (nếu có) và debug library (có thể nâng quyền bên trong VM).
 
-## Zero-click triggers via auto-run callbacks
+## Trigger zero-click qua callback auto-run
 
-If the host application pushes scripts to clients and the VM exposes auto-run hooks (e.g., OnInit/OnLoad/OnEnter), place your payload there for drive-by compromise as soon as the script loads:<sup>[[1]](#references)</sup>
+Nếu ứng dụng host đẩy script đến client và VM cung cấp các hook auto-run (ví dụ: OnInit/OnLoad/OnEnter), hãy đặt payload tại đó để xâm nhập drive-by ngay khi script được nạp:<sup>[[1]](#references)</sup>
 
 ```lua
 function OnInit()
@@ -73,20 +73,20 @@ function OnInit()
 end
 ```
 
-Any equivalent callback (OnLoad, OnEnter, etc.) generalizes this technique when scripts are transmitted and executed on the client automatically.
+Mọi callback tương đương (OnLoad, OnEnter, v.v.) đều khái quát hóa kỹ thuật này khi script được truyền đến và tự động thực thi trên client.
 
-## Dangerous primitives to hunt during recon
+## Các primitive nguy hiểm cần tìm trong quá trình recon
 
-During _G enumeration, specifically look for:
-- io, os: io.popen, os.execute, file I/O, env access.
-- load, loadstring, loadfile, dofile: execute source or bytecode; supports loading untrusted bytecode.
-- package, package.loadlib, require: dynamic library loading and module surface.
-- debug: setfenv/getfenv (≤5.1), getupvalue/setupvalue, getinfo, and hooks.
-- LuaJIT-only: ffi.cdef, ffi.load to call native code directly.
+Khi liệt kê _G, hãy đặc biệt tìm:
+- io, os: io.popen, os.execute, file I/O, truy cập env.
+- load, loadstring, loadfile, dofile: thực thi source hoặc bytecode; hỗ trợ tải bytecode không đáng tin cậy.
+- package, package.loadlib, require: tải thư viện động và bề mặt module.
+- debug: setfenv/getfenv (≤5.1), getupvalue/setupvalue, getinfo và hooks.
+- Chỉ có trong LuaJIT: ffi.cdef, ffi.load để gọi trực tiếp native code.
 
-Minimal usage examples (if reachable):
+Ví dụ sử dụng tối thiểu (nếu có thể truy cập):
 
-Lua's loader API changed across versions: in Lua 5.1, `load` reads from a reader function and `loadstring` reads from a string; Lua 5.2's `load` accepts either a string or a reader function, and `loadstring` is deprecated as its equivalent.<sup>[[5]](#references)[[6]](#references)</sup>
+API loader của Lua đã thay đổi qua các phiên bản: trong Lua 5.1, `load` đọc từ một hàm reader còn `loadstring` đọc từ một string; `load` của Lua 5.2 chấp nhận string hoặc hàm reader, còn `loadstring` đã bị deprecated vì có hàm tương đương là `load`.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ```lua
 -- Lua 5.2+ source loader; Lua 5.1 use loadstring("return 1+1")
@@ -103,28 +103,27 @@ local mylib = package.loadlib("./libfoo.so", "luaopen_foo")
 local foo = mylib()
 ```
 
-## Optional escalation: abusing Lua bytecode loaders
+## Escalation tùy chọn: lạm dụng Lua bytecode loaders
 
-When load/loadstring/loadfile are reachable but io/os are restricted, execution of crafted Lua bytecode can lead to memory disclosure and corruption primitives. Key facts:
-- Lua ≤ 5.1 shipped a bytecode verifier that has known bypasses.<sup>[[4]](#references)</sup>
-- Lua 5.2 removed the verifier entirely (official stance: applications should just reject precompiled chunks), widening the attack surface if bytecode loading is not prohibited.<sup>[[2]](#references)[[3]](#references)</sup>
-- Workflows typically: leak pointers via in-VM output, craft bytecode to create type confusions (e.g., around FORLOOP or other opcodes), then pivot to arbitrary read/write or native code execution.<sup>[[2]](#references)[[4]](#references)</sup>
+Khi có thể truy cập load/loadstring/loadfile nhưng io/os bị hạn chế, việc thực thi Lua bytecode được tạo thủ công có thể dẫn đến các primitive tiết lộ và làm hỏng bộ nhớ. Các điểm chính:
+- Lua ≤ 5.1 được phát hành kèm một bytecode verifier có các cách bypass đã biết.<sup>[[4]](#references)</sup>
+- Lua 5.2 đã loại bỏ hoàn toàn verifier (quan điểm chính thức: ứng dụng nên từ chối các chunk đã biên dịch sẵn), làm mở rộng bề mặt tấn công nếu không cấm tải bytecode.<sup>[[2]](#references)[[3]](#references)</sup>
+- Quy trình thường là: leak con trỏ thông qua đầu ra trong VM, tạo bytecode gây nhầm lẫn kiểu (ví dụ quanh FORLOOP hoặc các opcode khác), rồi chuyển sang primitive đọc/ghi tùy ý hoặc thực thi mã native.<sup>[[2]](#references)[[4]](#references)</sup>
 
-This path is engine/version-specific and requires RE. See references for deep dives, exploitation primitives, and example gadgetry in games.
+Hướng này phụ thuộc vào engine/phiên bản và đòi hỏi RE. Xem các tài liệu tham khảo để tìm hiểu sâu về các primitive khai thác và gadget mẫu trong game.
 
-## Detection and hardening notes (for defenders)
+## Ghi chú về phát hiện và gia cố (dành cho người phòng thủ)
 
-- Server side: reject or rewrite user scripts; allowlist safe APIs; strip or bind-empty io, os, load/loadstring/loadfile/dofile, package.loadlib, debug, ffi.
-- Client side: run Lua with a minimal _ENV, forbid bytecode loading, reintroduce a strict bytecode verifier or signature checks, and block process creation from the client process.
-- Telemetry: alert on gameclient → child process creation shortly after script load; correlate with UI/chat/script events.
+- Phía server: từ chối hoặc viết lại script của người dùng; allowlist các API an toàn; loại bỏ hoặc bind rỗng io, os, load/loadstring/loadfile/dofile, package.loadlib, debug, ffi.
+- Phía client: chạy Lua với _ENV tối giản, cấm tải bytecode, bổ sung lại bytecode verifier nghiêm ngặt hoặc kiểm tra chữ ký, và chặn việc tạo tiến trình từ tiến trình client.
+- Telemetry: cảnh báo khi gameclient tạo tiến trình con ngay sau khi tải script; đối chiếu với các sự kiện UI/chat/script.
 
 ## References
 
-- [1] [This House is Haunted: a decade old RCE in the AION client (housing Lua VM)](https://appsec.space/posts/aion-housing-exploit/)
-- [2] [Bytecode Breakdown: Unraveling Factorio's Lua Security Flaws](https://memorycorruption.net/posts/rce-lua-factorio/)
-- [3] [lua-l (2009): Discussion on dropping the bytecode verifier](https://web.archive.org/web/20230308193701/https://lua-users.org/lists/lua-l/2009-03/msg00039.html)
-- [4] [Exploiting Lua 5.1 bytecode (gist with verifier bypasses/notes)](https://gist.github.com/ulidtko/51b8671260db79da64d193e41d7e7d16)
-- [5] [Lua 5.1 Reference Manual](https://www.lua.org/manual/5.1/manual.html#pdf-loadstring)
-- [6] [Lua 5.2 Reference Manual](https://www.lua.org/manual/5.2/manual.html#pdf-load)
-
+- [1] [Ngôi nhà này bị ma ám: RCE đã tồn tại cả thập kỷ trong client AION (chứa Lua VM cho nhà ở trong game)](https://appsec.space/posts/aion-housing-exploit/)
+- [2] [Phân tích bytecode: Làm sáng tỏ các lỗ hổng bảo mật Lua của Factorio](https://memorycorruption.net/posts/rce-lua-factorio/)
+- [3] [lua-l (2009): Thảo luận về việc loại bỏ bytecode verifier](https://web.archive.org/web/20230308193701/https://lua-users.org/lists/lua-l/2009-03/msg00039.html)
+- [4] [Khai thác Lua 5.1 bytecode (gist về các cách bypass verifier/ghi chú)](https://gist.github.com/ulidtko/51b8671260db79da64d193e41d7e7d16)
+- [5] [Tài liệu tham khảo Lua 5.1](https://www.lua.org/manual/5.1/manual.html#pdf-loadstring)
+- [6] [Tài liệu tham khảo Lua 5.2](https://www.lua.org/manual/5.2/manual.html#pdf-load)
 {{#include ../../../banners/hacktricks-training.md}}

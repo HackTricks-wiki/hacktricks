@@ -1,14 +1,14 @@
-# PNG Tricks
+# Mẹo về PNG
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**PNG files** are very common in **CTFs**, **incident response**, and **malware staging** because they are **lossless**, **chunk-based**, and many tools will happily render them even when they contain **extra metadata**, **appended payloads**, or **partially corrupted chunks**.
+**Tệp PNG** rất phổ biến trong **CTF**, **ứng phó sự cố** và **triển khai malware** vì chúng **không mất dữ liệu**, **dựa trên chunk** và nhiều công cụ vẫn có thể hiển thị chúng dù chứa **metadata bổ sung**, **payload được nối thêm** hoặc **chunk bị hỏng một phần**.
 
-Treat a PNG as a **container**, not just as an image.
+Hãy xem PNG là một **container**, không chỉ là một hình ảnh.
 
-## Quick triage
+## Kiểm tra nhanh
 
-Start with container-level checks before jumping into LSB stego. For the bit-plane/LSB workflow, check [the dedicated image stego page](../../../stego/images/).
+Hãy bắt đầu bằng các bước kiểm tra ở cấp container trước khi chuyển sang stego LSB. Để thực hiện quy trình bit-plane/LSB, hãy xem [trang chuyên về stego hình ảnh](../../../stego/images/).
 
 ```bash
 file suspect.png
@@ -18,30 +18,30 @@ strings -n 6 suspect.png | head
 binwalk -eM suspect.png
 ```
 
-Useful things to look for:
+Những thứ hữu ích cần tìm:
 
-- **Unexpected ancillary chunks** such as `tEXt`, `zTXt`, `iTXt`, `eXIf`, or `iCCP`
-- **CRC errors** or malformed chunk lengths
-- **Additional data after `IEND`**
-- **Multiple `IEND` markers** or recoverable `IDAT` fragments after the formal end of the file
-- A file that is a valid PNG **and** also looks like a ZIP/PDF/script when carved
+- **Các chunk phụ bất thường** như `tEXt`, `zTXt`, `iTXt`, `eXIf` hoặc `iCCP`
+- **Lỗi CRC** hoặc độ dài chunk không hợp lệ
+- **Dữ liệu bổ sung sau `IEND`**
+- **Nhiều marker `IEND`** hoặc các mảnh `IDAT` có thể khôi phục nằm sau điểm kết thúc chính thức của tệp
+- Tệp vừa là PNG hợp lệ **vừa** trông giống ZIP/PDF/script khi carve
 
-Remember the minimum valid structure is usually:
+Hãy nhớ cấu trúc hợp lệ tối thiểu thường là:
 
-- `IHDR` (must be first)
-- `IDAT` (one or more consecutive chunks)
-- `IEND` (must be last)
+- `IHDR` (phải đứng đầu)
+- `IDAT` (một hoặc nhiều chunk liên tiếp)
+- `IEND` (phải đứng cuối)
 
-## Trailing data after `IEND`
+## Dữ liệu dư sau `IEND`
 
-One of the highest-signal PNG artefacts is **data appended after the final `IEND` chunk**. Many decoders ignore it, which makes it useful for:
+Một trong những dấu hiệu PNG có giá trị cao nhất là **dữ liệu được nối thêm sau chunk `IEND` cuối cùng**. Nhiều decoder bỏ qua phần này, khiến nó hữu ích cho:
 
-- **Simple stego / hidden payloads**
+- **Stego đơn giản / payload ẩn**
 - **PNG polyglots**
 - **Malware staging**
-- **Recovering older image data** from buggy editors
+- **Khôi phục dữ liệu ảnh cũ** từ các trình chỉnh sửa bị lỗi
 
-Quick detection:
+Phát hiện nhanh:
 
 ```bash
 pngcheck -v suspect.png
@@ -54,22 +54,22 @@ grep -aboa $'IEND\xAE\x42\x60\x82' suspect.png
 # More than one hit is suspicious
 ```
 
-A byte search for `IEND` is only a hint: the same bytes can occur in chunk data or in a forged trailer. To carve reliably, walk the length-prefixed chunks from the PNG signature and stop at the first structural `IEND`; the [chunk walker below](#extract-ancillary-chunk-payloads) also saves the trailer.<sup>[[6]](#references)</sup>
+Tìm kiếm byte `IEND` chỉ là một gợi ý: các byte tương tự có thể xuất hiện trong dữ liệu chunk hoặc trong phần trailer giả mạo. Để carve đáng tin cậy, hãy duyệt các chunk có tiền tố độ dài, bắt đầu từ chữ ký PNG và dừng tại `IEND` cấu trúc đầu tiên; [trình duyệt chunk bên dưới](#extract-ancillary-chunk-payloads) cũng lưu phần trailer.<sup>[[6]](#references)</sup>
 
-Also try generic archive parsers directly against the PNG or the carved trailer:
+Ngoài ra, hãy thử trực tiếp các trình phân tích cú pháp archive thông dụng trên PNG hoặc phần trailer đã carve:
 
 ```bash
 7z l suspect.png
 unzip -l suspect.png
 ```
 
-## Acropalypse-style recovery of cropped/redacted screenshots
+## Khôi phục kiểu Acropalypse từ ảnh chụp màn hình đã cắt/che
 
-A very practical recent PNG forensic trick is checking whether a screenshot editor **overwrote** a PNG without **truncating** the old file first. In those cases, bytes from the **previous image** can remain after `IEND`, and sometimes extra `IDAT` data can be partially reconstructed.
+Một thủ thuật pháp chứng PNG gần đây rất thiết thực là kiểm tra xem trình chỉnh sửa ảnh chụp màn hình có **ghi đè** lên tệp PNG mà không **cắt ngắn** tệp cũ trước hay không. Trong những trường hợp đó, byte từ **ảnh trước đó** có thể còn lại sau `IEND`, và đôi khi có thể khôi phục một phần dữ liệu `IDAT` bổ sung.
 
-This became well known with **aCropalypse** (Google Pixel Markup) and the related **Windows Snipping Tool** issue.<sup>[[3]](#references)</sup> In practice, if a "cropped" or "redacted" PNG still contains old trailing data, you may be able to recover part of the original screenshot.<sup>[[1]](#references)</sup>
+Vấn đề này được biết đến rộng rãi qua **aCropalypse** (Google Pixel Markup) và sự cố liên quan đến **Windows Snipping Tool**.<sup>[[3]](#references)</sup> Trên thực tế, nếu tệp PNG đã "cắt" hoặc "che" vẫn chứa dữ liệu cũ ở cuối tệp, bạn có thể khôi phục một phần ảnh chụp màn hình ban đầu.<sup>[[1]](#references)</sup>
 
-Practical workflow:
+Quy trình thực tế:
 
 ```bash
 pngcheck -v screenshot.png
@@ -78,45 +78,45 @@ grep -aboa 'IDAT' screenshot.png
 grep -aboa $'IEND\xAE\x42\x60\x82' screenshot.png
 ```
 
-Signs that strongly justify deeper analysis:
+Các dấu hiệu đủ mạnh để cần phân tích sâu hơn:
 
-- `pngcheck` reports **additional data after `IEND`**
-- You find **more than one `IEND`**
-- You find **extra `IDAT` chunks** after the apparent end of the image
-- The screenshot came from a device/editor known to have been affected
+- `pngcheck` báo cáo **có dữ liệu bổ sung sau `IEND`**
+- Bạn tìm thấy **nhiều hơn một `IEND`**
+- Bạn tìm thấy **các chunk `IDAT` bổ sung** sau phần cuối có vẻ là của ảnh
+- Ảnh chụp màn hình được tạo từ một thiết bị/trình chỉnh sửa được biết là đã bị ảnh hưởng
 
-If this happens, feed the file to an **aCropalypse recovery tool** before treating the redaction as trustworthy.
+Nếu gặp trường hợp này, hãy đưa tệp vào **công cụ khôi phục aCropalypse** trước khi tin rằng phần che đã an toàn.
 
-## Chunk abuse that matters in practice
+## Lạm dụng chunk có ý nghĩa trong thực tế
 
-The most interesting PNG chunks for investigations are usually not the obvious image ones, but the chunks that can carry **text**, **metadata**, or **payload bytes**:
+Các chunk PNG thú vị nhất trong quá trình điều tra thường không phải là những chunk hình ảnh hiển nhiên, mà là các chunk có thể chứa **văn bản**, **metadata** hoặc **byte payload**:
 
-- `tEXt` / `zTXt` / `iTXt` – text metadata and compressed text
-- `eXIf` – EXIF data inside PNG
-- `iCCP` – embedded ICC profile
-- `PLTE` – palette data in indexed images, but also useful in payload-smuggling scenarios.<sup>[[2]](#references)</sup>
+- `tEXt` / `zTXt` / `iTXt` – metadata văn bản và văn bản đã nén
+- `eXIf` – dữ liệu EXIF bên trong PNG
+- `iCCP` – profile ICC được nhúng
+- `PLTE` – dữ liệu bảng màu trong ảnh dùng indexed color, nhưng cũng hữu ích trong các tình huống giấu payload.<sup>[[2]](#references)</sup>
 
-Dump them with:
+Dump chúng bằng:
 
 ```bash
 pngcheck -vp suspect.png
 exiftool -a -u -g1 suspect.png
 ```
 
-For offensive payload persistence inside PNG chunks (for example **PLTE**, **IDAT**, or **tEXt** tricks that survive some PHP image transformations), check the more detailed upload-focused notes here:<sup>[[2]](#references)</sup>
+Để duy trì payload tấn công bên trong các chunk PNG (ví dụ: các thủ thuật **PLTE**, **IDAT** hoặc **tEXt** vẫn tồn tại sau một số biến đổi hình ảnh bằng PHP), hãy xem ghi chú chi tiết hơn tập trung vào upload tại đây:<sup>[[2]](#references)</sup>
 
 {{#ref}}
 ../../../pentesting-web/file-upload/README.md
 {{#endref}}
 
-## Extract ancillary chunk payloads
+## Trích xuất payload từ các chunk phụ trợ
 
-An attacker can place arbitrary bytes in an **unknown ancillary chunk before `IEND`**. Ordinary PNG decoders can ignore an unknown ancillary chunk, while a script that fetches the image as bytes can read and use the payload; opening the PNG alone does not execute it.<sup>[[4]](#references)[[6]](#references)</sup> The original research demonstrated a compressed and encrypted custom chunk.<sup>[[4]](#references)</sup> A later browser example used the extracted bytes to supply HTML or a download.<sup>[[5]](#references)</sup>
+Kẻ tấn công có thể đặt các byte tùy ý vào một **chunk phụ trợ không xác định trước `IEND`**. Các bộ giải mã PNG thông thường có thể bỏ qua chunk phụ trợ không xác định, trong khi một script lấy ảnh dưới dạng byte có thể đọc và sử dụng payload; chỉ mở PNG sẽ không thực thi payload đó.<sup>[[4]](#references)[[6]](#references)</sup> Nghiên cứu ban đầu trình diễn một chunk tùy chỉnh được nén và mã hóa.<sup>[[4]](#references)</sup> Một ví dụ trên trình duyệt sau đó dùng các byte đã trích xuất để cung cấp HTML hoặc một tệp tải xuống.<sup>[[5]](#references)</sup>
 
-A lowercase first chunk-type letter means *ancillary*; a lowercase second letter means *private*. For example, `paMP` is private, whereas `pAMP` uses the public namespace even though the latter was invented for the demonstration.<sup>[[4]](#references)[[6]](#references)</sup> A chunk is `length (4 bytes, big-endian) | type (4 bytes) | data | CRC (4 bytes)`; CRC covers type and data. Parse this structure rather than grepping for a type name inside compressed `IDAT` data. The following walker validates bounds and CRCs, exports ancillary payloads as raw bytes, and writes any bytes after the structural `IEND` to `png-trailer.bin`.<sup>[[6]](#references)</sup>
+Chữ cái đầu tiên viết thường trong tên chunk biểu thị *phụ trợ*; chữ cái thứ hai viết thường biểu thị *riêng tư*. Ví dụ: `paMP` là riêng tư, còn `pAMP` dùng không gian tên công khai dù tên sau được tạo ra cho phần trình diễn.<sup>[[4]](#references)[[6]](#references)</sup> Một chunk có cấu trúc `length (4 bytes, big-endian) | type (4 bytes) | data | CRC (4 bytes)`; CRC bao gồm type và data. Hãy phân tích cấu trúc này thay vì tìm tên type trong dữ liệu `IDAT` đã nén. Trình duyệt chunk sau đây xác thực giới hạn và CRC, xuất payload của các chunk phụ trợ dưới dạng byte thô, đồng thời ghi mọi byte nằm sau `IEND` theo cấu trúc vào `png-trailer.bin`.<sup>[[6]](#references)</sup>
 
 <details>
-<summary>Carve ancillary chunks and the PNG trailer</summary>
+<summary>Trích xuất các chunk phụ trợ và phần cuối PNG</summary>
 
 ```bash
 python3 - suspect.png <<'PY'
@@ -155,32 +155,32 @@ for f in chunk-*.bin png-trailer.bin; do [ -f "$f" ] && file "$f"; done
 
 </details>
 
-Inspect carved bytes with `file`, `strings`, or `binwalk`; decompress only if the carrier is actually compressed.<sup>[[4]](#references)</sup> Re-encoding may strip the carrier, so compare the uploaded and retrieved bytes before relying on it.<sup>[[2]](#references)[[6]](#references)</sup>
+Kiểm tra các byte được trích xuất bằng `file`, `strings` hoặc `binwalk`; chỉ giải nén nếu dữ liệu mang thực sự được nén.<sup>[[4]](#references)</sup> Mã hóa lại có thể loại bỏ dữ liệu mang, vì vậy hãy so sánh byte của dữ liệu đã tải lên và dữ liệu nhận lại trước khi dựa vào nó.<sup>[[2]](#references)[[6]](#references)</sup>
 
-## Corrupted PNG repair
+## Sửa PNG bị hỏng
 
-For checking integrity and locating the exact broken area, **pngcheck** remains one of the best first tools:
+Để kiểm tra tính toàn vẹn và xác định chính xác vùng bị hỏng, **pngcheck** vẫn là một trong những công cụ đầu tiên tốt nhất:
 
 - [pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)
 
-If the file is damaged rather than intentionally malicious, **PCRT** can be useful in CTFs and lab work for fixing common issues such as bad headers, wrong IHDR values, CRC problems, or malformed chunk layouts.
+Nếu tệp bị hỏng chứ không phải cố ý chứa mã độc, **PCRT** có thể hữu ích trong CTF và môi trường lab để sửa các vấn đề thường gặp như header sai, giá trị IHDR không đúng, lỗi CRC hoặc bố cục chunk sai định dạng.
 
-If your goal is to **sanitize** a PNG that contains suspicious trailer data while preserving the visible image, ExifTool can explicitly remove the trailer:
+Nếu mục tiêu của bạn là **làm sạch** một PNG chứa dữ liệu trailer đáng ngờ nhưng vẫn giữ nguyên hình ảnh hiển thị, ExifTool có thể xóa rõ ràng phần trailer:
 
 ```bash
 exiftool -Trailer:All= -overwrite_original suspect.png
 ```
 
-For sensitive evidence, always work on a **copy** and keep hashes of the original before attempting repairs.
+Với bằng chứng nhạy cảm, luôn làm việc trên **bản sao** và lưu lại giá trị hash của bản gốc trước khi thử sửa chữa.
 
 
 
 ## References
 
-- [1] [Exploiting aCropalypse: Recovering Truncated PNGs](https://www.da.vidbuchanan.co.uk/blog/exploiting-acropalypse.html)
-- [2] [Persistent PHP payloads in PNGs: How to inject PHP code in an image – and keep it there](https://www.synacktiv.com/en/publications/persistent-php-payloads-in-pngs-how-to-inject-php-code-in-an-image-and-keep-it-there)
+- [1] [Khai thác aCropalypse: Khôi phục các tệp PNG bị cắt cụt](https://www.da.vidbuchanan.co.uk/blog/exploiting-acropalypse.html)
+- [2] [Payload PHP tồn tại dai dẳng trong PNG: Cách chèn mã PHP vào ảnh và giữ nguyên mã trong đó](https://www.synacktiv.com/en/publications/persistent-php-payloads-in-pngs-how-to-inject-php-code-in-an-image-and-keep-it-there)
 - [3] [NVD - CVE-2023-28303](https://nvd.nist.gov/vuln/detail/CVE-2023-28303)
-- [4] [Ancillary chunks are a perfect place to stock away sensitive info](https://ignifexlabs.com/blog/hiding-data-in-png-ancillary-chunks.html)
-- [5] [Using valid ancillary chunks to smuggle data to an endpoint](https://ignifexlabs.com/blog/png-data-smuggling.html)
-- [6] [Portable Network Graphics (PNG) Specification (Third Edition)](https://www.w3.org/TR/png-3/)
+- [4] [Các chunk phụ trợ là nơi hoàn hảo để lưu trữ thông tin nhạy cảm](https://ignifexlabs.com/blog/hiding-data-in-png-ancillary-chunks.html)
+- [5] [Sử dụng các chunk phụ trợ hợp lệ để tuồn dữ liệu đến một endpoint](https://ignifexlabs.com/blog/png-data-smuggling.html)
+- [6] [Đặc tả Portable Network Graphics (PNG) (Ấn bản thứ ba)](https://www.w3.org/TR/png-3/)
 {{#include ../../../banners/hacktricks-training.md}}

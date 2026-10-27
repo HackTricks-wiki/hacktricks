@@ -1,95 +1,95 @@
-# USB Keystrokes
+# Phím nhấn USB
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-If you have a pcap containing the communication via USB of a keyboard like the following one:
+Nếu bạn có một pcap chứa dữ liệu giao tiếp qua USB của bàn phím như sau:
 
-![USB Keystrokes: If you have a pcap containing the communication via USB of a keyboard like the following one](<../../../images/image (962).png>)
+![Phím nhấn USB: Nếu bạn có một pcap chứa dữ liệu giao tiếp qua USB của bàn phím như sau](<../../../images/image (962).png>)
 
-For a keyboard using the HID **boot protocol**, each Interrupt IN report has a fixed 8-byte layout: one modifier byte, one reserved byte, and six keycode bytes. The host compares successive reports and maps keycodes to HID usages to reconstruct key events.<sup>[[8]](#references)</sup>
+Với bàn phím sử dụng **boot protocol** của HID, mỗi báo cáo Interrupt IN có bố cục cố định gồm 8 byte: một byte phím bổ trợ, một byte dự trữ và sáu byte mã phím. Máy chủ so sánh các báo cáo liên tiếp và ánh xạ mã phím sang các HID usage để dựng lại sự kiện nhấn phím.<sup>[[8]](#references)</sup>
 
-## USB HID report basics
+## Cơ bản về báo cáo USB HID
 
-The standard boot keyboard input report is structured as follows.<sup>[[8]](#references)[[9]](#references)</sup>
+Báo cáo đầu vào chuẩn của bàn phím boot có cấu trúc như sau.<sup>[[8]](#references)[[9]](#references)</sup>
 
-| Byte | Meaning |
+| Byte | Ý nghĩa |
 | --- | --- |
-| 0 | Modifier bitmap (`0x02` = Left Shift, `0x20` = Right Shift, `0x40` = Right Alt, etc.). Multiple bits can be set simultaneously. |
-| 1 | Reserved byte; unused reports should normally set it to zero. OEM or system-specific use is not portable. |
-| 2-7 | Up to six concurrent keycodes in USB usage ID format (`0x04 = a`, `0x1E = 1`). `0x00` means "no key". | 
+| 0 | Bitmap phím bổ trợ (`0x02` = Shift trái, `0x20` = Shift phải, `0x40` = Alt phải, v.v.). Có thể bật nhiều bit cùng lúc. |
+| 1 | Byte dự trữ; thông thường, các báo cáo không sử dụng byte này nên đặt giá trị bằng 0. Cách sử dụng riêng của OEM hoặc hệ thống không có tính di động. |
+| 2-7 | Tối đa sáu mã phím đồng thời theo định dạng USB usage ID (`0x04 = a`, `0x1E = 1`). `0x00` nghĩa là "không có phím". |
 
-In the boot layout, usage ID `0x01` (`Keyboard ErrorRollOver`) is reported in all key slots when more than six non-modifier keys are pressed; it can also signal an unrecognizable combination.<sup>[[8]](#references)[[9]](#references)</sup> Understanding this layout helps when you only have the raw `usb.capdata` bytes.
+Trong bố cục boot, usage ID `0x01` (`Keyboard ErrorRollOver`) được báo cáo trong tất cả các ô phím khi nhấn hơn sáu phím không phải phím bổ trợ; nó cũng có thể báo hiệu một tổ hợp không thể nhận dạng được.<sup>[[8]](#references)[[9]](#references)</sup> Hiểu bố cục này sẽ hữu ích khi bạn chỉ có các byte `usb.capdata` thô.
 
-## Extracting HID data from a PCAP
+## Trích xuất dữ liệu HID từ PCAP
 
-### Identify the keyboard interface first
+### Trước tiên, xác định giao diện bàn phím
 
-On busy captures, identify the HID keyboard before dumping any reports. A reliable starting point is the interface descriptor response:<sup>[[3]](#references)[[8]](#references)</sup>
+Trong các bản capture có nhiều lưu lượng, hãy xác định bàn phím HID trước khi trích xuất các báo cáo. Điểm bắt đầu đáng tin cậy là phản hồi bộ mô tả giao diện:<sup>[[3]](#references)[[8]](#references)</sup>
 
 ```text
 usb.transfer_type == 0x02 && usb.endpoint_address.direction == 1 && usb.bDescriptorType == 4 && usb.bInterfaceClass == 3
 ```
 
-The HID class defines these interface values:<sup>[[8]](#references)</sup>
+Lớp HID định nghĩa các giá trị giao diện sau:<sup>[[8]](#references)</sup>
 
-- `subclass == 1` is the Boot Interface Subclass; with `protocol == 1` it identifies a boot keyboard
-- `protocol == 2` identifies a boot mouse
-- `protocol == 0` means no boot protocol; inspect the HID report descriptor instead of assuming an 8-byte layout
+- `subclass == 1` là Boot Interface Subclass; với `protocol == 1`, giá trị này xác định bàn phím boot
+- `protocol == 2` xác định chuột boot
+- `protocol == 0` nghĩa là không có boot protocol; hãy kiểm tra HID report descriptor thay vì mặc định cho rằng bố cục dài 8 byte
 
-Once the interface is known, pin your filters to `usb.bus_id`, `usb.device_address`, and if possible `usb.bInterfaceNumber` before exporting anything.
+Sau khi xác định được giao diện, hãy cố định bộ lọc theo `usb.bus_id`, `usb.device_address` và, nếu có thể, `usb.bInterfaceNumber` trước khi xuất dữ liệu.
 
-### Wireshark workflow
+### Quy trình Wireshark
 
-1. **Isolate the device**: filter on interrupt IN traffic from the keyboard, e.g. `usb.transfer_type == 0x01 && usb.endpoint_address.direction == 1 && usb.device_address == 3`.
-2. **Add useful columns**: right-click the `Leftover Capture Data` field (`usb.capdata`) and your preferred `usbhid.*` fields (e.g. `usbhid.boot_report.keyboard.keycode_1`) to follow keystrokes without opening every frame.<sup>[[11]](#references)</sup>
-3. **Hide empty reports**: apply `!(usb.capdata == 00:00:00:00:00:00:00:00)` to drop idle frames.
-4. **Export for post-processing**: `File -> Export Packet Dissections -> As CSV`, include `frame.number`, `usb.src`, `usb.capdata`, and decoded modifier fields such as `usbhid.boot_report.keyboard.modifier.left_shift` and `usbhid.boot_report.keyboard.modifier.right_alt` to script the reconstruction later.<sup>[[10]](#references)[[11]](#references)</sup>
+1. **Cô lập thiết bị**: lọc lưu lượng interrupt IN từ bàn phím, ví dụ: `usb.transfer_type == 0x01 && usb.endpoint_address.direction == 1 && usb.device_address == 3`.
+2. **Thêm các cột hữu ích**: nhấp chuột phải vào trường `Leftover Capture Data` (`usb.capdata`) và các trường `usbhid.*` bạn muốn dùng (ví dụ: `usbhid.boot_report.keyboard.keycode_1`) để theo dõi thao tác gõ phím mà không cần mở từng frame.<sup>[[11]](#references)</sup>
+3. **Ẩn các report rỗng**: áp dụng `!(usb.capdata == 00:00:00:00:00:00:00:00)` để loại bỏ các frame nhàn rỗi.
+4. **Xuất dữ liệu để xử lý hậu kỳ**: `File -> Export Packet Dissections -> As CSV`, bao gồm `frame.number`, `usb.src`, `usb.capdata` và các trường modifier đã giải mã như `usbhid.boot_report.keyboard.modifier.left_shift` và `usbhid.boot_report.keyboard.modifier.right_alt` để viết script khôi phục dữ liệu sau đó.<sup>[[10]](#references)[[11]](#references)</sup>
 
-### Command-line workflow
+### Quy trình dòng lệnh
 
-The classic extraction pattern—dump `usb.capdata`, drop idle reports, and map usage IDs—appears in the original 2017 analysis and its walkthrough.<sup>[[1]](#references)[[2]](#references)</sup>
+Mẫu trích xuất kinh điển—kết xuất `usb.capdata`, loại bỏ các report nhàn rỗi và ánh xạ usage ID—xuất hiện trong bài phân tích gốc năm 2017 và hướng dẫn thực hành của bài này.<sup>[[1]](#references)[[2]](#references)</sup>
 
-The `ctf-usb-keyboard-parser` repository automates the classic tshark + sed pipeline:<sup>[[5]](#references)</sup>
+Repository `ctf-usb-keyboard-parser` tự động hóa quy trình tshark + sed kinh điển:<sup>[[5]](#references)</sup>
 
 ```bash
 tshark -r ./usb.pcap -Y 'usb.capdata && usb.data_len == 8' -T fields -e usb.capdata | sed 's/../:&/g2' > keystrokes.txt
 python3 usbkeyboard.py ./keystrokes.txt
 ```
 
-On newer captures, prefer Wireshark's decoded `usbhid.data` field and fall back to `usb.capdata`; write one payload per report to a per-device file:<sup>[[7]](#references)[[10]](#references)[[11]](#references)</sup>
+Trong các bản capture mới hơn, hãy ưu tiên trường `usbhid.data` đã được Wireshark giải mã và dùng `usb.capdata` làm phương án dự phòng; ghi mỗi payload vào một file riêng cho từng thiết bị:<sup>[[7]](#references)[[10]](#references)[[11]](#references)</sup>
 
 ```bash
 tshark -r usb.pcapng -Y "usb.capdata || usbhid.data" -T fields -E separator=$'\t' -e usb.src -e usb.capdata -e usbhid.data | \
   awk -F '\t' '{ payload = ($3 != "" ? $3 : $2); if (payload != "") print payload > "usbdata-" $1 ".txt" }'
 ```
 
-Those per-device files can be fed to a decoder after normalizing the hex format it expects. If the capture came from BLE keyboards tunneled over GATT, filter on `btatt.value && frame.len == 20` and dump the hex payloads before decoding.<sup>[[7]](#references)</sup>
+Các tệp riêng cho từng thiết bị có thể được đưa vào decoder sau khi chuẩn hóa định dạng hex mà nó yêu cầu. Nếu bản capture đến từ bàn phím BLE được tunnel qua GATT, hãy lọc bằng `btatt.value && frame.len == 20` và dump payload hex trước khi decode.<sup>[[7]](#references)</sup>
 
-### When the report is not the classic 8-byte boot report
+### Khi report không phải là boot report 8 byte cổ điển
 
-A non-boot interface or a report ID can change the payload layout, so do not assume every keyboard report matches `modifier,reserved,key1..key6`.<sup>[[8]](#references)[[11]](#references)</sup>
+Một interface không phải boot hoặc report ID có thể làm thay đổi bố cục payload, vì vậy đừng cho rằng mọi keyboard report đều khớp với `modifier,reserved,key1..key6`.<sup>[[8]](#references)[[11]](#references)</sup>
 
-- Prefer `usbhid.data` over `usb.capdata` when Wireshark has already parsed the HID layer.
-- If every line starts with a constant prefix or report ID, strip it with an offset-aware decoder rather than assuming byte 0 is always the modifier.<sup>[[7]](#references)</sup>
-- Some USBPcap exports omit the reserved byte, so decoders that support `--no-reserved` or a custom offset save time.<sup>[[7]](#references)</sup>
-- If the HID report descriptor or BLE HOGP report map is present in the capture, use it to recover the actual field layout before writing a parser.
+- Ưu tiên `usbhid.data` thay cho `usb.capdata` khi Wireshark đã parse lớp HID.
+- Nếu mỗi dòng đều bắt đầu bằng một tiền tố cố định hoặc report ID, hãy loại bỏ nó bằng decoder có xét đến offset thay vì giả định byte 0 luôn là modifier.<sup>[[7]](#references)</sup>
+- Một số bản xuất USBPcap bỏ qua byte reserved, vì vậy decoder hỗ trợ `--no-reserved` hoặc offset tùy chỉnh sẽ giúp tiết kiệm thời gian.<sup>[[7]](#references)</sup>
+- Nếu capture có HID report descriptor hoặc BLE HOGP report map, hãy dùng nó để khôi phục bố cục trường thực tế trước khi viết parser.
 
-## Automating the decoding
+## Tự động hóa việc decode
 
-- **ctf-usb-keyboard-parser** remains handy for quick CTF challenges and already ships in the repository.<sup>[[5]](#references)</sup>
-- **CTF-Usb_Keyboard_Parser** (`main.py`) parses both `pcap` and `pcapng` files natively, understands `LinkTypeUsbLinuxMmapped`/`LinkTypeUsbPcap`, and does not require tshark or another external dependency, so it is suitable for isolated sandboxes.<sup>[[6]](#references)</sup>
-- **USB-HID-decoders** adds keyboard, mouse, and tablet visualizers. You can either run the `extract_hid_data.sh` helper (tshark backend) or `extract_hid_data.py` (scapy backend) and then feed the resulting text file to the decoder or replay modules to watch the keystrokes unfold.<sup>[[7]](#references)</sup>
+- **ctf-usb-keyboard-parser** vẫn hữu ích cho các thử thách CTF nhanh và đã có sẵn trong repository.<sup>[[5]](#references)</sup>
+- **CTF-Usb_Keyboard_Parser** (`main.py`) parse trực tiếp cả tệp `pcap` lẫn `pcapng`, hiểu `LinkTypeUsbLinuxMmapped`/`LinkTypeUsbPcap` và không cần tshark hay dependency bên ngoài nào khác, nên phù hợp với các sandbox cô lập.<sup>[[6]](#references)</sup>
+- **USB-HID-decoders** bổ sung trình trực quan hóa bàn phím, chuột và bảng vẽ. Bạn có thể chạy helper `extract_hid_data.sh` (backend tshark) hoặc `extract_hid_data.py` (backend scapy), sau đó đưa tệp văn bản kết quả vào decoder hoặc các module phát lại để xem các lần nhấn phím diễn ra.<sup>[[7]](#references)</sup>
 
-### Stateful decoding matters
+### Giải mã có trạng thái rất quan trọng
 
-USB boot keyboards send reports at the idle rate even when there is no new key event, so captures may contain repeated reports before the release event. A practical decoder should:<sup>[[3]](#references)[[8]](#references)</sup>
+Bàn phím USB boot gửi report theo tốc độ idle ngay cả khi không có sự kiện phím mới, vì vậy capture có thể chứa các report lặp lại trước sự kiện nhả phím. Một decoder thực tế nên:<sup>[[3]](#references)[[8]](#references)</sup>
 
-- emit only newly pressed keycodes compared to the previous report
-- keep modifier state (`Shift`, `Ctrl`, `AltGr`) from byte 0 or parsed fields such as `usbhid.boot_report.keyboard.modifier.left_shift` and `usbhid.boot_report.keyboard.modifier.right_alt`
-- track toggle keys such as `Caps Lock`, because uppercase output is not controlled by Shift alone
-- remember that HID usage IDs are layout-agnostic: `0x1d` is the physical `z`/`y` key position depending on the host keyboard layout.<sup>[[9]](#references)</sup>
+- chỉ xuất các keycode mới được nhấn so với report trước đó
+- duy trì trạng thái modifier (`Shift`, `Ctrl`, `AltGr`) từ byte 0 hoặc các trường đã parse như `usbhid.boot_report.keyboard.modifier.left_shift` và `usbhid.boot_report.keyboard.modifier.right_alt`
+- theo dõi các phím chuyển trạng thái như `Caps Lock`, vì chỉ riêng Shift không quyết định chữ hoa
+- nhớ rằng HID usage ID không phụ thuộc bố cục: `0x1d` tương ứng với vị trí phím vật lý `z`/`y`, tùy theo bố cục bàn phím của máy chủ.<sup>[[9]](#references)</sup>
 
-## Quick Python decoder
+## Decoder Python nhanh
 
 ```python
 #!/usr/bin/env python3
@@ -120,28 +120,27 @@ for raw in sys.stdin:
     prev = current
 ```
 
-Feed it with the plain hex lines dumped earlier to get an instant rough reconstruction without pulling a full parser into the environment. For non-US layouts this still reconstructs the physical key position, not necessarily the final glyph shown on the victim host.
+Dùng các dòng hex thuần đã dump trước đó làm đầu vào để dựng lại sơ bộ ngay lập tức mà không cần đưa toàn bộ parser vào môi trường. Với layout không phải US, cách này vẫn dựng lại vị trí phím vật lý, nhưng không nhất thiết là ký tự cuối cùng hiển thị trên máy của nạn nhân.
 
-## Troubleshooting tips
+## Mẹo khắc phục sự cố
 
-- If Wireshark does not populate `usbhid.*` fields, the HID report descriptor was probably not captured. Replug the keyboard while capturing or fall back to raw `usb.capdata`.
-- On Linux software captures, `usbmon` is the normal source; on Windows, Wireshark depends on the **USBPcap** extcap to see raw USB URBs at all.<sup>[[4]](#references)</sup>
-- If the keyboard was attached through a hub or dock, confirm the interface descriptor first and then decode only that device/interface pair. Composite HID captures frequently mix keyboard and mouse reports.
-- Windows captures require the **USBPcap** extcap interface; make sure it survived Wireshark upgrades, as missing extcaps leave you with empty device lists.<sup>[[4]](#references)</sup>
-- Always correlate the bus, device, and interface tuple (`usb.bus_id`, `usb.device_address`, `usb.bInterfaceNumber`; e.g. `1.9.1`) before decoding anything — mixing multiple keyboards or storage devices leads to nonsense keystrokes.<sup>[[10]](#references)</sup>
+- Nếu Wireshark không điền các trường `usbhid.*`, có thể descriptor báo cáo HID đã không được capture. Hãy rút rồi cắm lại bàn phím trong khi capture hoặc chuyển sang dùng `usb.capdata` thô.
+- Trên Linux, nguồn capture bằng phần mềm thường dùng là `usbmon`; trên Windows, Wireshark cần extcap **USBPcap** để có thể thấy các USB URB thô.<sup>[[4]](#references)</sup>
+- Nếu bàn phím được kết nối qua hub hoặc dock, trước tiên hãy xác nhận descriptor giao diện, sau đó chỉ giải mã cặp thiết bị/giao diện đó. Các bản capture HID tổng hợp thường trộn lẫn báo cáo bàn phím và chuột.
+- Bản capture trên Windows cần giao diện extcap **USBPcap**; hãy đảm bảo giao diện này vẫn còn sau khi nâng cấp Wireshark, vì thiếu extcap sẽ khiến danh sách thiết bị trống.<sup>[[4]](#references)</sup>
+- Luôn đối chiếu bộ ba bus, thiết bị và giao diện (`usb.bus_id`, `usb.device_address`, `usb.bInterfaceNumber`; ví dụ `1.9.1`) trước khi giải mã — nhầm lẫn giữa nhiều bàn phím hoặc thiết bị lưu trữ sẽ tạo ra các phím bấm vô nghĩa.<sup>[[10]](#references)</sup>
 
 ## References
 
-- [1] [HackIT CTF 2017 Writeup: foren100](https://0xd13a.github.io/ctfs/hackit2017/foren100/)
-- [2] [USB Keyboard packet capture analysis](https://naykisec.github.io/USB-Keyboard-packet-capture-analysis/)
-- [3] [ACSC Quals 2023 - pcap 1, 2 write-up](https://hackmd.io/@t510599/acsc-2023-quals-pcap)
-- [4] [Wireshark USB capture setup](https://wiki.wireshark.org/CaptureSetup/USB)
+- [1] [Bài viết về HackIT CTF 2017: foren100](https://0xd13a.github.io/ctfs/hackit2017/foren100/)
+- [2] [Phân tích bản capture gói tin bàn phím USB](https://naykisec.github.io/USB-Keyboard-packet-capture-analysis/)
+- [3] [Bài giải ACSC Quals 2023 - pcap 1, 2](https://hackmd.io/@t510599/acsc-2023-quals-pcap)
+- [4] [Thiết lập capture USB trong Wireshark](https://wiki.wireshark.org/CaptureSetup/USB)
 - [5] [ctf-usb-keyboard-parser](https://github.com/TeamRocketIst/ctf-usb-keyboard-parser)
 - [6] [CTF-Usb_Keyboard_Parser](https://github.com/5h4rrk/CTF-Usb_Keyboard_Parser)
-- [7] [USB-HID-decoders](https://github.com/Nissen96/USB-HID-decoders)
-- [8] [Device Class Definition for Human Interface Devices (HID) 1.11](https://www.usb.org/sites/default/files/documents/hid1_11.pdf)
-- [9] [HID Usage Tables 1.2](https://usb.org/sites/default/files/hut1_2.pdf)
-- [10] [Wireshark Display Filter Reference: USB](https://www.wireshark.org/docs/dfref/u/usb.html)
-- [11] [Wireshark Display Filter Reference: USB HID](https://www.wireshark.org/docs/dfref/u/usbhid.html)
-
+- [7] [Bộ giải mã USB-HID](https://github.com/Nissen96/USB-HID-decoders)
+- [8] [Định nghĩa lớp thiết bị cho thiết bị giao diện người dùng (HID) 1.11](https://www.usb.org/sites/default/files/documents/hid1_11.pdf)
+- [9] [Bảng mã sử dụng HID 1.2](https://usb.org/sites/default/files/hut1_2.pdf)
+- [10] [Tham chiếu bộ lọc hiển thị Wireshark: USB](https://www.wireshark.org/docs/dfref/u/usb.html)
+- [11] [Tham chiếu bộ lọc hiển thị Wireshark: USB HID](https://www.wireshark.org/docs/dfref/u/usbhid.html)
 {{#include ../../../banners/hacktricks-training.md}}

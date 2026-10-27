@@ -1,64 +1,64 @@
-# Discord Cache Forensics (Chromium Disk Cache)
+# Pháp y bộ nhớ đệm Discord (Disk Cache Chromium)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-This page summarizes how to triage Discord Desktop cache artifacts for locally cached media, webhook endpoints, and activity correlation. Discord's desktop client uses Electron, and Electron stores session data such as the disk cache under `sessionData`.<sup>[[3]](#references)[[4]](#references)</sup>
+Trang này tóm tắt cách phân loại sơ bộ các hiện vật trong bộ nhớ đệm của Discord Desktop để tìm media được lưu cục bộ, webhook endpoint và tương quan hoạt động. Discord Desktop sử dụng Electron, và Electron lưu dữ liệu phiên như disk cache trong `sessionData`.<sup>[[3]](#references)[[4]](#references)</sup>
 
-## Where to look (Windows/macOS/Linux)
+## Tìm ở đâu (Windows/macOS/Linux)
 
 - Windows: `%AppData%\discord\Cache\Cache_Data`
 - macOS: `~/Library/Application Support/discord/Cache/Cache_Data`
 - Linux: `~/.config/discord/Cache/Cache_Data`
 
-These are the default paths used by the referenced parser; Electron allows an application to override `sessionData`, so confirm the actual profile path during acquisition.<sup>[[2]](#references)[[4]](#references)</sup>
+Đây là các đường dẫn mặc định mà parser được tham chiếu sử dụng; Electron cho phép ứng dụng ghi đè `sessionData`, vì vậy hãy xác nhận đường dẫn profile thực tế trong quá trình thu thập dữ liệu.<sup>[[2]](#references)[[4]](#references)</sup>
 
-The `index` + `data_#` + `f_######` layout matches Chromium's blockfile disk-cache backend; do not label it Simple Cache without verifying the backend, because Chromium documents distinct cache implementations.<sup>[[5]](#references)</sup>
+Cấu trúc `index` + `data_#` + `f_######` khớp với backend disk-cache blockfile của Chromium; đừng gắn nhãn là Simple Cache nếu chưa xác minh backend, vì Chromium ghi nhận các triển khai cache khác nhau.<sup>[[5]](#references)</sup>
 
-Key on-disk structures inside `Cache_Data`:
-- `index`: Blockfile cache index used to locate entries.
-- `data_#`: Fixed-size block files that can contain cache metadata, HTTP headers, and response data.
-- `f_######`: Separate files used for data larger than the block-file limit; these files contain the stored data without the block-file headers.
+Các cấu trúc chính trên đĩa bên trong `Cache_Data`:
+- `index`: Chỉ mục cache Blockfile dùng để định vị các mục.
+- `data_#`: Các tệp block có kích thước cố định, có thể chứa metadata cache, HTTP header và dữ liệu phản hồi.
+- `f_######`: Các tệp riêng biệt dùng cho dữ liệu lớn hơn giới hạn của block-file; những tệp này chứa dữ liệu đã lưu mà không có header block-file.
 
-Deleting messages, channels, or servers does not guarantee removal of bytes already cached locally, but Chromium may evict or recreate cache files at any time. Treat surviving artifacts as opportunistic evidence, and use file modification times only as rough local-write signals that must be correlated with other telemetry.<sup>[[5]](#references)[[6]](#references)</sup>
+Việc xóa tin nhắn, kênh hoặc máy chủ không đảm bảo các byte đã được lưu cục bộ trong cache cũng bị xóa, nhưng Chromium có thể loại bỏ hoặc tạo lại các tệp cache bất cứ lúc nào. Hãy xem các hiện vật còn sót lại là bằng chứng có thể tận dụng, và chỉ dùng thời gian sửa đổi tệp như dấu hiệu gần đúng về thời điểm ghi cục bộ, cần được đối chiếu với dữ liệu đo từ xa khác.<sup>[[5]](#references)[[6]](#references)</sup>
 
-## What can be recovered
+## Có thể khôi phục những gì
 
-Depending on what was fetched and not yet evicted, triage may recover cached attachments, media, URLs, and file hashes; the cache alone does not prove that an item was exfiltrated.<sup>[[1]](#references)[[2]](#references)[[5]](#references)</sup>
+Tùy vào dữ liệu đã được tải xuống và chưa bị loại bỏ, quá trình phân loại sơ bộ có thể khôi phục tệp đính kèm, media, URL và hash tệp trong cache; riêng cache không chứng minh được một mục đã bị exfiltrate.<sup>[[1]](#references)[[2]](#references)[[5]](#references)</sup>
 
-- Attachments and thumbnails referenced by Discord CDN URLs.
-- Images, GIFs, and videos (for example, `.jpg`, `.png`, `.gif`, `.webp`, `.mp4`, and `.webm`).
-- Webhook URLs such as `https://discord.com/api/webhooks/...`.<sup>[[2]](#references)[[7]](#references)</sup>
-- Discord API calls such as `https://discord.com/api/vX/...`.<sup>[[2]](#references)</sup>
-- SHA-256 hashes of recovered media for comparison with known datasets or intelligence feeds.<sup>[[1]](#references)[[2]](#references)</sup>
+- Tệp đính kèm và thumbnail được tham chiếu bằng URL CDN của Discord.
+- Hình ảnh, GIF và video (ví dụ: `.jpg`, `.png`, `.gif`, `.webp`, `.mp4` và `.webm`).
+- URL webhook như `https://discord.com/api/webhooks/...`.<sup>[[2]](#references)[[7]](#references)</sup>
+- API call của Discord như `https://discord.com/api/vX/...`.<sup>[[2]](#references)</sup>
+- SHA-256 hash của media đã khôi phục để so sánh với các tập dữ liệu hoặc nguồn thông tin tình báo đã biết.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Quick triage (manual)
+## Phân loại sơ bộ nhanh (thủ công)
 
-- Grep cache for high-signal artifacts. These patterns mirror the referenced parser's URL expressions and are triage filters, not exhaustive indicators.<sup>[[2]](#references)</sup>
-  - Webhook endpoints:
+- Grep cache để tìm các hiện vật có tín hiệu mạnh. Những mẫu này mô phỏng biểu thức URL của parser được tham chiếu, chỉ dùng làm bộ lọc phân loại sơ bộ chứ không phải chỉ dấu đầy đủ.<sup>[[2]](#references)</sup>
+  - Webhook endpoint:
     - Windows: findstr /S /I /C:"https://discord.com/api/webhooks/" "%AppData%\discord\Cache\Cache_Data\*"
     - Linux/macOS: strings -a Cache_Data/* | grep -i "https://discord.com/api/webhooks/"
-  - Attachment/CDN URLs:
+  - URL tệp đính kèm/CDN:
     - strings -a Cache_Data/* | grep -Ei "https://(cdn|media)\.discordapp\.com/attachments/"
-  - Discord API calls:
+  - API call của Discord:
     - strings -a Cache_Data/* | grep -Ei "https://discord(app)?\.com/api/v[0-9]+/"
-- Sort cached entries by modified time to build a rough sequence; mtime is a filesystem signal and does not by itself establish when a Discord object was fetched or sent.<sup>[[2]](#references)[[5]](#references)[[6]](#references)</sup>
+- Sắp xếp các mục trong cache theo thời gian sửa đổi để dựng trình tự gần đúng; mtime là tín hiệu từ hệ thống tệp và tự nó không xác định được thời điểm một đối tượng Discord được tải xuống hoặc gửi đi.<sup>[[2]](#references)[[5]](#references)[[6]](#references)</sup>
   - Windows PowerShell: Get-ChildItem "$env:AppData\discord\Cache\Cache_Data" -File -Recurse | Sort-Object LastWriteTime | Select-Object LastWriteTime, FullName
 
-## Parsing f_* entries (HTTP body + headers)
+## Phân tích mục f_* (HTTP body + header)
 
-In the blockfile layout, `f_######` files are separate data streams and are not guaranteed to begin with a complete HTTP response. If an acquired file does contain serialized HTTP headers followed by `\r\n\r\n`, split at the first delimiter and inspect:<sup>[[2]](#references)[[5]](#references)</sup>
-- Content-Type: To infer media type
-- Content-Location or X-Original-URL: Original remote URL for preview/correlation
-- Content-Encoding: May be gzip/deflate/br (Brotli).
+Trong cấu trúc blockfile, các tệp `f_######` là các luồng dữ liệu riêng biệt và không đảm bảo bắt đầu bằng một HTTP response hoàn chỉnh. Nếu tệp được thu thập có chứa HTTP header đã tuần tự hóa, theo sau là `\r\n\r\n`, hãy tách tại dấu phân cách đầu tiên rồi kiểm tra:<sup>[[2]](#references)[[5]](#references)</sup>
+- Content-Type: Dùng để suy luận loại media
+- Content-Location hoặc X-Original-URL: URL từ xa ban đầu để xem trước/đối chiếu
+- Content-Encoding: Có thể là gzip/deflate/br (Brotli).
 
-Media can then be extracted by splitting headers from the body and optionally decompressing according to `Content-Encoding`; the referenced parser handles Brotli, gzip, and deflate. Magic-byte sniffing is useful when `Content-Type` is absent, but remains a heuristic.<sup>[[2]](#references)</sup>
+Sau đó có thể trích xuất media bằng cách tách header khỏi body và tùy chọn giải nén theo `Content-Encoding`; parser được tham chiếu xử lý Brotli, gzip và deflate. Nhận diện bằng magic byte hữu ích khi không có `Content-Type`, nhưng đây vẫn chỉ là phương pháp heuristic.<sup>[[2]](#references)</sup>
 
-## Automated DFIR: Discord Forensic Suite (CLI/GUI)
+## DFIR tự động: Discord Forensic Suite (CLI/GUI)
 
 - Repo: [Discord Forensic Suite](https://github.com/jwdfir/discord_cache_parser).<sup>[[1]](#references)</sup>
-- Function: Recursively scans Discord's cache folder, finds webhook/API/attachment URLs, parses `f_*` bodies, optionally carves media, and outputs HTML and CSV reports plus an optional chronological timeline with SHA-256 hashes.<sup>[[1]](#references)[[2]](#references)</sup>
+- Chức năng: Quét đệ quy thư mục cache của Discord, tìm URL webhook/API/tệp đính kèm, phân tích body `f_*`, tùy chọn trích xuất media và xuất báo cáo HTML, CSV cùng timeline theo trình tự thời gian (không bắt buộc) có SHA-256 hash.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Example CLI usage:
+Ví dụ sử dụng CLI:
 
 ```powershell
 # Acquire a copy of the cache for offline parsing, then run on Windows:
@@ -73,29 +73,28 @@ python discord_forensic_suite_cli `
   --verbose
 ```
 
-The CLI defines these options and output names:<sup>[[2]](#references)</sup>
-- --cache: Path to the Discord Cache_Data directory
+CLI định nghĩa các tùy chọn và tên đầu ra sau:<sup>[[2]](#references)</sup>
+- --cache: Đường dẫn đến thư mục Discord Cache_Data
 - --format html|csv|both
-- --timeline: Emit ordered CSV timeline (by modified time)
-- --extra: Also scan sibling Code Cache and GPUCache
-- --carve: Carve media from raw cache bytes using recognized media signatures (images/video)
-- Output: `<output>.html`, `<output>.csv`, optional `<output>_timeline.csv`, and an `<output>_media` folder with extracted or carved files.
+- --timeline: Tạo timeline CSV theo thứ tự (dựa trên thời gian sửa đổi)
+- --extra: Quét thêm Code Cache và GPUCache cùng cấp
+- --carve: Trích xuất media từ byte cache thô bằng các signature media đã nhận diện (ảnh/video)
+- Output: `<output>.html`, `<output>.csv`, tùy chọn `<output>_timeline.csv` và thư mục `<output>_media` chứa các tệp đã trích xuất hoặc carve.
 
-## Analyst tips
+## Mẹo cho chuyên viên phân tích
 
-- Correlate the modified time (mtime) of `f_*` and `data_*` files with user or attacker activity windows and independent telemetry; mtime is not a definitive event timestamp.<sup>[[2]](#references)[[5]](#references)[[6]](#references)</sup>
-- Hash recovered media (SHA-256) and compare against known-bad or exfiltration datasets.<sup>[[1]](#references)[[2]](#references)</sup>
-- Treat extracted webhook URLs as credentials. Do not invoke them merely to test liveness; preserve them securely, coordinate revocation or rotation, and use related network telemetry for retro-hunting.<sup>[[7]](#references)</sup>
-- Server-side deletion does not guarantee that local cached bytes have been destroyed. If acquisition is possible, collect the entire `Cache` directory and related sibling caches (`Code Cache`, `GPUCache`) before eviction or cache recreation.<sup>[[2]](#references)[[5]](#references)[[6]](#references)</sup>
+- Đối chiếu thời gian sửa đổi (mtime) của các tệp `f_*` và `data_*` với khoảng thời gian hoạt động của người dùng hoặc attacker và dữ liệu đo từ xa độc lập; mtime không phải dấu thời gian sự kiện mang tính kết luận.<sup>[[2]](#references)[[5]](#references)[[6]](#references)</sup>
+- Hash media khôi phục được (SHA-256) và so sánh với các bộ dữ liệu đã biết là độc hại hoặc dùng cho exfiltration.<sup>[[1]](#references)[[2]](#references)</sup>
+- Xem các URL webhook đã trích xuất như thông tin xác thực. Không gọi chúng chỉ để kiểm tra xem chúng còn hoạt động hay không; hãy bảo quản an toàn, phối hợp thu hồi hoặc xoay vòng và dùng dữ liệu đo từ xa mạng liên quan để retro-hunting.<sup>[[7]](#references)</sup>
+- Xóa ở phía server không đảm bảo byte được lưu trong cache cục bộ đã bị xóa. Nếu có thể thu thập, hãy lấy toàn bộ thư mục `Cache` và các cache cùng cấp liên quan (`Code Cache`, `GPUCache`) trước khi chúng bị xóa hoặc cache được tạo lại.<sup>[[2]](#references)[[5]](#references)[[6]](#references)</sup>
 
 ## References
 
-- [1] [Discord Forensic Suite (CLI/GUI)](https://github.com/jwdfir/discord_cache_parser)
-- [2] [Discord Forensic Suite CLI](https://raw.githubusercontent.com/jwdfir/discord_cache_parser/refs/heads/main/discord_forensic_suite_cli)
-- [3] [How Discord Seamlessly Upgraded Millions of Users to 64-Bit Architecture](https://discord.com/blog/how-discord-seamlessly-upgraded-millions-of-users-to-64-bit-architecture)
+- [1] [Bộ công cụ pháp chứng Discord (CLI/GUI)](https://github.com/jwdfir/discord_cache_parser)
+- [2] [CLI của Bộ công cụ pháp chứng Discord](https://raw.githubusercontent.com/jwdfir/discord_cache_parser/refs/heads/main/discord_forensic_suite_cli)
+- [3] [Cách Discord nâng cấp liền mạch hàng triệu người dùng lên kiến trúc 64-bit](https://discord.com/blog/how-discord-seamlessly-upgraded-millions-of-users-to-64-bit-architecture)
 - [4] [app | Electron](https://www.electronjs.org/docs/latest/api/app)
 - [5] [Disk Cache](https://www.chromium.org/developers/design-documents/network-stack/disk-cache/)
-- [6] [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
-- [7] [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
-
+- [6] [Discord làm C2 và bằng chứng cache còn sót lại](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [7] [Discord Webhooks – Thực thi Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
 {{#include ../../../banners/hacktricks-training.md}}

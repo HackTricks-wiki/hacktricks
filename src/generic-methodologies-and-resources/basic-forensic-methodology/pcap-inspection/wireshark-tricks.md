@@ -1,90 +1,90 @@
-# Wireshark tricks
+# Mẹo Wireshark
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Improve your Wireshark skills
+## Nâng cao kỹ năng Wireshark
 
-### Tutorials
+### Hướng dẫn
 
-The following tutorials are amazing to learn some cool basic tricks:
+Các hướng dẫn sau rất hữu ích để học một số mẹo cơ bản thú vị:
 
 - [https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/](https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/](https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/](https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/](https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/)
 
-### Analysed Information
+### Thông tin đã phân tích
 
-**Expert Information**
+**Thông tin chuyên sâu**
 
-Clicking on _**Analyze** --> **Expert Information**_ you will have an **overview** of what is happening in the packets **analyzed**:
+Nhấp vào _**Analyze** --> **Expert Information**_ để xem **tổng quan** về những gì đang diễn ra trong các gói tin **được phân tích**:
 
-![Tutorials - Analysed Information: Clicking on Analyze -- Expert Information you will have an overview of what is happening in the packets analyzed](<../../../images/image (256).png>)
+![Hướng dẫn - Thông tin đã phân tích: Nhấp vào Analyze -- Expert Information để xem tổng quan về những gì đang diễn ra trong các gói tin được phân tích](<../../../images/image (256).png>)
 
-**Resolved Addresses**
+**Địa chỉ đã phân giải**
 
-Under _**Statistics --> Resolved Addresses**_ you can find several **information** that was "**resolved**" by wireshark like port/transport to protocol, MAC to the manufacturer, etc. It is interesting to know what is implicated in the communication.
+Trong mục _**Statistics --> Resolved Addresses**_, bạn có thể tìm thấy nhiều **thông tin** được Wireshark "**phân giải**", chẳng hạn như cổng/giao thức truyền tải sang giao thức, MAC sang nhà sản xuất, v.v. Những thông tin này giúp xác định các thành phần liên quan đến giao tiếp.
 
-![Tutorials - Analysed Information: Under Statistics -- Resolved Addresses you can find several information that was " resolved " by wireshark like port/transport to protocol, MAC to the...](<../../../images/image (893).png>)
+![Hướng dẫn - Thông tin đã phân tích: Trong mục Statistics -- Resolved Addresses, bạn có thể tìm thấy nhiều thông tin được Wireshark " phân giải ", chẳng hạn như cổng/giao thức truyền tải sang giao thức, MAC sang...](<../../../images/image (893).png>)
 
-**Protocol Hierarchy**
+**Phân cấp giao thức**
 
-Under _**Statistics --> Protocol Hierarchy**_ you can find the **protocols** **involved** in the communication and data about them.
+Trong mục _**Statistics --> Protocol Hierarchy**_, bạn có thể xem các **giao thức** **tham gia** vào giao tiếp cùng dữ liệu về chúng.
 
-![Tutorials - Analysed Information: Under Statistics -- Protocol Hierarchy you can find the protocols involved in the communication and data about them](<../../../images/image (586).png>)
+![Hướng dẫn - Thông tin đã phân tích: Trong mục Statistics -- Protocol Hierarchy, bạn có thể xem các giao thức tham gia vào giao tiếp cùng dữ liệu về chúng](<../../../images/image (586).png>)
 
-**Conversations**
+**Các cuộc hội thoại**
 
-Under _**Statistics --> Conversations**_ you can find a **summary of the conversations** in the communication and data about them.
+Trong mục _**Statistics --> Conversations**_, bạn có thể xem **tóm tắt các cuộc hội thoại** trong giao tiếp cùng dữ liệu về chúng.
 
-![Tutorials - Analysed Information: Under Statistics -- Conversations you can find a summary of the conversations in the communication and data about them](<../../../images/image (453).png>)
+![Hướng dẫn - Thông tin đã phân tích: Trong mục Statistics -- Conversations, bạn có thể xem tóm tắt các cuộc hội thoại trong giao tiếp cùng dữ liệu về chúng](<../../../images/image (453).png>)
 
-**Endpoints**
+**Các endpoint**
 
-Under _**Statistics --> Endpoints**_ you can find a **summary of the endpoints** in the communication and data about each of them.
+Trong mục _**Statistics --> Endpoints**_, bạn có thể xem **tóm tắt các endpoint** trong giao tiếp cùng dữ liệu về từng endpoint.
 
-![Tutorials - Analysed Information: Under Statistics -- Endpoints you can find a summary of the endpoints in the communication and data about each of them](<../../../images/image (896).png>)
+![Hướng dẫn - Thông tin đã phân tích: Trong mục Statistics -- Endpoints, bạn có thể xem tóm tắt các endpoint trong giao tiếp cùng dữ liệu về từng endpoint](<../../../images/image (896).png>)
 
-**DNS info**
+**Thông tin DNS**
 
-Under _**Statistics --> DNS**_ you can find statistics about the DNS request captured.
+Trong mục _**Statistics --> DNS**_, bạn có thể xem thống kê về các yêu cầu DNS được ghi lại.
 
-![Tutorials - Analysed Information: Under Statistics -- DNS you can find statistics about the DNS request captured](<../../../images/image (1063).png>)
+![Hướng dẫn - Thông tin đã phân tích: Trong mục Statistics -- DNS, bạn có thể xem thống kê về các yêu cầu DNS được ghi lại](<../../../images/image (1063).png>)
 
-**I/O Graph**
+**Biểu đồ I/O**
 
-Under _**Statistics --> I/O Graph**_ you can find a **graph of the communication.**
+Trong mục _**Statistics --> I/O Graph**_, bạn có thể xem **biểu đồ giao tiếp.**
 
-![Tutorials - Analysed Information: Under Statistics -- I/O Graph you can find a graph of the communication](<../../../images/image (992).png>)
+![Hướng dẫn - Thông tin đã phân tích: Trong mục Statistics -- I/O Graph, bạn có thể xem biểu đồ giao tiếp](<../../../images/image (992).png>)
 
-### Filters
+### Bộ lọc
 
-Here you can find wireshark filter depending on the protocol: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
-In current Wireshark use `tls.*` instead of the old `ssl.*` filter names.<sup>[[1]](#references)</sup>\
-Other interesting filters:
+Tại đây, bạn có thể tìm bộ lọc Wireshark theo giao thức: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
+Trong các phiên bản Wireshark hiện tại, hãy dùng `tls.*` thay cho tên bộ lọc cũ `ssl.*`.<sup>[[1]](#references)</sup>\
+Một số bộ lọc hữu ích khác:
 
 - `(http.request or tls.handshake.type == 1) and !(udp.port eq 1900)`
-  - HTTP and initial HTTPS traffic
+  - Lưu lượng HTTP và HTTPS ban đầu
 - `(http.request or tls.handshake.type == 1 or tcp.flags eq 0x0002) and !(udp.port eq 1900)`
-  - HTTP and initial HTTPS traffic + TCP SYN
+  - Lưu lượng HTTP và HTTPS ban đầu + TCP SYN
 - `(http.request or tls.handshake.type == 1 or tcp.flags eq 0x0002 or dns) and !(udp.port eq 1900)`
-  - HTTP and initial HTTPS traffic + TCP SYN + DNS requests
+  - Lưu lượng HTTP và HTTPS ban đầu + TCP SYN + yêu cầu DNS
 - `tls.handshake.extensions_server_name contains "example.com"`
-  - Pivot on the SNI sent in the ClientHello even when you cannot decrypt the payload
+  - Lọc theo SNI được gửi trong ClientHello, ngay cả khi bạn không thể giải mã payload
 - `tls.handshake.extensions_alpn_str == "h2" or tls.handshake.extensions_alpn_str == "h3"`
-  - Split classic HTTPS, HTTP/2 and HTTP/3 capable sessions quickly
+  - Nhanh chóng tách các phiên HTTPS thông thường, HTTP/2 và các phiên hỗ trợ HTTP/3
 - `quic or http3`
-  - Find modern UDP/443 traffic that will be missed if you only review TCP conversations
+  - Tìm lưu lượng UDP/443 hiện đại có thể bị bỏ sót nếu bạn chỉ xem các cuộc hội thoại TCP
 
-### Search
+### Tìm kiếm
 
-If you want to **search** for **content** inside the **packets** of the sessions press _CTRL+f_. You can add new layers to the main information bar (No., Time, Source, etc.) by pressing the right button and then the edit column.
+Để **tìm kiếm** **nội dung** bên trong các **gói tin** của phiên, nhấn _CTRL+f_. Bạn có thể thêm các cột mới vào thanh thông tin chính (No., Time, Source, v.v.) bằng cách nhấp chuột phải rồi chọn chỉnh sửa cột.
 
-### Following multiplexed streams
+### Theo dõi các luồng được ghép kênh
 
-Wireshark can follow `TLS`, `HTTP/2`, and `QUIC` streams directly. Its HTTP/2 and QUIC dialogs expose connection and substream selectors, which helps isolate multiplexed streams that share the same lower-level connection.<sup>[[4]](#references)</sup>
+Wireshark có thể theo dõi trực tiếp các luồng `TLS`, `HTTP/2` và `QUIC`. Hộp thoại HTTP/2 và QUIC có bộ chọn kết nối và luồng con, giúp cô lập các luồng được ghép kênh dùng chung một kết nối ở tầng thấp hơn.<sup>[[4]](#references)</sup>
 
-With session keys available, first identify the request's stream ID, then follow that substream instead of the whole TCP or UDP conversation. The `0,1` example selects HTTP/2 stream ID 1 on TCP stream 0; for QUIC use `follow,quic,utf-8,<connection-number>,<stream-id>`. Following only a five-tuple can mix independent requests or miss a QUIC connection after migration.<sup>[[6]](#references)[[7]](#references)[[9]](#references)</sup>
+Khi có khóa phiên, trước tiên hãy xác định stream ID của yêu cầu, sau đó theo dõi luồng con đó thay vì toàn bộ cuộc hội thoại TCP hoặc UDP. Ví dụ `0,1` chọn stream ID 1 của HTTP/2 trên TCP stream 0; với QUIC, dùng `follow,quic,utf-8,<connection-number>,<stream-id>`. Chỉ theo dõi bộ năm giá trị có thể khiến các yêu cầu độc lập bị trộn lẫn hoặc bỏ sót kết nối QUIC sau khi di chuyển.<sup>[[6]](#references)[[7]](#references)[[9]](#references)</sup>
 
 ```bash
 tshark -r capture.pcapng -o tls.keylog_file:keys.log \
@@ -96,28 +96,28 @@ tshark -r capture.pcapng -o tls.keylog_file:keys.log \
   -q -z 'follow,http2,utf-8,0,1'
 ```
 
-### Free pcap labs
+### Phòng lab pcap miễn phí
 
-**Practice with the free challenges of:** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
+**Thực hành với các thử thách miễn phí tại:** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
 
-## Identifying Domains
+## Xác định Domain
 
-You can add a column that shows the Host HTTP header:
+Bạn có thể thêm một cột hiển thị HTTP Host header:
 
-![Free pcap labs - Identifying Domains: You can add a column that shows the Host HTTP header](<../../../images/image (639).png>)
+![Phòng lab pcap miễn phí - Xác định Domain: Bạn có thể thêm một cột hiển thị HTTP Host header](<../../../images/image (639).png>)
 
-And a column that add the Server name from an initiating HTTPS connection (**tls.handshake.type == 1**):
+Và một cột hiển thị tên máy chủ từ kết nối HTTPS khởi tạo (**tls.handshake.type == 1**):
 
-![Free pcap labs - Identifying Domains: And a column that add the Server name from an initiating HTTPS connection ( tls.handshake.type == 1 )](<../../../images/image (408) (1).png>)
+![Phòng lab pcap miễn phí - Xác định Domain: Và một cột hiển thị tên máy chủ từ kết nối HTTPS khởi tạo ( tls.handshake.type == 1 )](<../../../images/image (408) (1).png>)
 
-If the capture is mostly encrypted, adding these fields as columns will speed up triage a lot:
+Nếu phần lớn dữ liệu trong capture đã được mã hóa, việc thêm các trường này làm cột sẽ giúp tăng tốc quá trình triage đáng kể:
 
 - `tls.handshake.extensions_server_name`
 - `tls.handshake.extensions_alpn_str`
 - `tls.handshake.ja3`
 - `tls.handshake.ja4` (Wireshark 4.2+)
 
-This lets you cluster sessions by hostname, ALPN (`http/1.1`, `h2`, `h3`, etc.) and client fingerprint even when the payload itself stays encrypted. For decrypted HTTP/2 and HTTP/3 captures, it is also useful to add `http2.header.value` or `http3.headers.header.value` as columns and pivot on paths, authorities and other interesting metadata.<sup>[[2]](#references)[[5]](#references)[[6]](#references)[[7]](#references)</sup>
+Cách này cho phép bạn gom nhóm các phiên theo hostname, ALPN (`http/1.1`, `h2`, `h3`, v.v.) và fingerprint của client, ngay cả khi payload vẫn được mã hóa. Với các capture HTTP/2 và HTTP/3 đã giải mã, bạn cũng nên thêm `http2.header.value` hoặc `http3.headers.header.value` làm cột, rồi phân tích theo path, authority và các metadata đáng chú ý khác.<sup>[[2]](#references)[[5]](#references)[[6]](#references)[[7]](#references)</sup>
 
 ```bash
 tshark -r capture.pcapng -Y "tls.handshake.type == 1" -T fields \
@@ -127,9 +127,9 @@ tshark -r capture.pcapng -Y "tls.handshake.type == 1" -T fields \
   -e tls.handshake.ja3 -e tls.handshake.ja4
 ```
 
-### ECH: do not mistake the outer SNI for the origin
+### ECH: đừng nhầm SNI bên ngoài với máy chủ gốc
 
-Encrypted ClientHello (ECH) can place a public cover name in the visible outer SNI while encrypting the inner name. Therefore, an SNI-only domain inventory can attribute ECH traffic to the wrong origin. The ECH extension alone is not proof that ECH succeeded: clients can send a GREASE ECH extension. On Wireshark 4.2+, find outer ECH offers with the following filter and treat the reported SNI as a cover candidate, not the requested site.<sup>[[5]](#references)[[8]](#references)</sup>
+Encrypted ClientHello (ECH) có thể đặt một tên che phủ công khai trong SNI bên ngoài hiển thị được, đồng thời mã hóa tên bên trong. Vì vậy, danh mục miền chỉ dựa trên SNI có thể quy lưu lượng ECH cho sai máy chủ gốc. Chỉ riêng extension ECH không chứng minh ECH đã hoạt động thành công: client có thể gửi extension GREASE ECH. Trên Wireshark 4.2+, hãy tìm các đề nghị ECH bên ngoài bằng bộ lọc sau và xem SNI được báo cáo là tên che phủ tiềm năng, không phải trang web được yêu cầu.<sup>[[5]](#references)[[8]](#references)</sup>
 
 ```bash
 tshark -r capture.pcapng \
@@ -138,7 +138,7 @@ tshark -r capture.pcapng \
   -e tls.handshake.extensions_server_name -e tls.ech.config_id
 ```
 
-If you have the matching client session keys, inspect the decrypted HTTP authority/Host instead of inferring the origin from outer SNI. Without the keys, check other captured origin evidence, such as plaintext DNS, but do not equate the outer SNI with the hidden name.<sup>[[1]](#references)[[6]](#references)[[7]](#references)[[8]](#references)</sup>
+Nếu có các khóa phiên client tương ứng, hãy kiểm tra HTTP authority/Host đã giải mã thay vì suy đoán origin từ SNI bên ngoài. Nếu không có khóa, hãy kiểm tra bằng chứng khác về origin được ghi lại, chẳng hạn DNS dạng plaintext, nhưng đừng xem SNI bên ngoài là tên bị ẩn.<sup>[[1]](#references)[[6]](#references)[[7]](#references)[[8]](#references)</sup>
 
 ```bash
 tshark -r capture.pcapng -o tls.keylog_file:keys.log \
@@ -147,55 +147,55 @@ tshark -r capture.pcapng -o tls.keylog_file:keys.log \
   -e http2.headers.authority -e http3.headers.authority
 ```
 
-## Identifying local hostnames
+## Nhận diện hostname cục bộ
 
-### From DHCP
+### Từ DHCP
 
-In current Wireshark instead of `bootp` you need to search for `DHCP`
+Trong Wireshark hiện tại, thay vì `bootp`, bạn cần tìm kiếm `DHCP`
 
-![Identifying local hostnames - From DHCP: In current Wireshark instead of bootp you need to search for DHCP](<../../../images/image (1013).png>)
+![Nhận diện hostname cục bộ - Từ DHCP: Trong Wireshark hiện tại, thay vì bootp, bạn cần tìm kiếm DHCP](<../../../images/image (1013).png>)
 
-### From NBNS
+### Từ NBNS
 
-![From DHCP - From NBNS: In current Wireshark instead of bootp you need to search for DHCP](<../../../images/image (1003).png>)
+![Từ DHCP - Từ NBNS: Trong Wireshark hiện tại, thay vì bootp, bạn cần tìm kiếm DHCP](<../../../images/image (1003).png>)
 
-## Decrypting TLS
+## Giải mã TLS
 
-Wi-Fi link-layer decryption is separate from TLS session decryption; see [Wi-Fi PCAP analysis](wifi-pcap-analysis.md) for its key and handshake prerequisites.
+Giải mã Wi-Fi ở tầng liên kết là quy trình riêng, không liên quan đến giải mã phiên TLS; xem [Phân tích Wi-Fi PCAP](wifi-pcap-analysis.md) để biết các yêu cầu về khóa và handshake.
 
-### Decrypting https traffic with server private key
+### Giải mã lưu lượng https bằng private key của server
 
 _edit > preferences > protocols > tls >_
 
-![Decrypting TLS - Decrypting https traffic with server private key: Decrypting https traffic with server private key](<../../../images/image (1103).png>)
+![Giải mã TLS - Giải mã lưu lượng https bằng private key của server: Giải mã lưu lượng https bằng private key của server](<../../../images/image (1103).png>)
 
-Press _Edit_ and add all the data of the server and the private key (_IP, Port, Protocol, Key file and password_)
+Nhấn _Edit_ và thêm toàn bộ dữ liệu của server cùng private key (_IP, Port, Protocol, Key file và password_)
 
-This method only works in a limited number of cases. For current TLS 1.3 / ECDHE traffic, the session key log method below is usually the practical option.<sup>[[1]](#references)</sup>
+Phương pháp này chỉ hoạt động trong một số trường hợp hạn chế. Với lưu lượng TLS 1.3 / ECDHE hiện nay, phương pháp ghi nhật ký session key bên dưới thường là lựa chọn thiết thực hơn.<sup>[[1]](#references)</sup>
 
-### Decrypting https traffic with symmetric session keys
+### Giải mã lưu lượng https bằng symmetric session key
 
-Both Firefox and Chrome have the capability to log TLS session keys, which can be used with Wireshark to decrypt TLS traffic. This allows for in-depth analysis of secure communications. More details on how to perform this decryption can be found in a guide at [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/).<sup>[[3]](#references)</sup> This is also the normal route for decrypting modern TLS 1.3 and QUIC/HTTP/3 captures.<sup>[[2]](#references)</sup>
+Cả Firefox và Chrome đều có khả năng ghi nhật ký TLS session key, có thể dùng với Wireshark để giải mã lưu lượng TLS. Điều này cho phép phân tích chuyên sâu các giao tiếp bảo mật. Hướng dẫn về cách thực hiện giải mã này có tại [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/).<sup>[[3]](#references)</sup> Đây cũng là cách thông dụng để giải mã các capture TLS 1.3 và QUIC/HTTP/3 hiện đại.<sup>[[2]](#references)</sup>
 
-To detect this search inside the environment for the variable `SSLKEYLOGFILE`
+Để phát hiện điều này, hãy tìm biến `SSLKEYLOGFILE` trong môi trường
 
-A file of shared keys will look like this:
+Tệp chứa các khóa dùng chung sẽ có dạng như sau:
 
-![Decrypting https traffic with server private key - Decrypting https traffic with symmetric session keys: A file of shared keys will look like this](<../../../images/image (820).png>)
+![Giải mã lưu lượng https bằng private key của server - Giải mã lưu lượng https bằng symmetric session key: Tệp chứa các khóa dùng chung sẽ có dạng như sau](<../../../images/image (820).png>)
 
-If the capture is `pcapng`, check whether it already contains embedded decryption secrets before hunting the host filesystem:<sup>[[1]](#references)</sup>
+Nếu capture ở định dạng `pcapng`, hãy kiểm tra xem nó đã chứa sẵn các bí mật giải mã được nhúng hay chưa trước khi tìm kiếm trong filesystem của host:<sup>[[1]](#references)</sup>
 
 ```bash
 editcap --extract-secrets capture.pcapng tls-secrets.txt
 ```
 
-To import this in wireshark go to \_edit > preferences > protocols > tls > and import it in (Pre)-Master-Secret log filename:
+Để nhập nội dung này vào Wireshark, hãy vào _Chỉnh sửa > Tùy chọn > Giao thức > TLS > rồi nhập tệp vào mục Tên tệp nhật ký (Pre)-Master-Secret:
 
-![Decrypting https traffic with server private key - Decrypting https traffic with symmetric session keys: editcap --extract-secrets capture.pcapng tls-secrets.txt](<../../../images/image (989).png>)
+![Giải mã lưu lượng https bằng khóa riêng của máy chủ - Giải mã lưu lượng https bằng khóa phiên đối xứng: editcap --extract-secrets capture.pcapng tls-secrets.txt](<../../../images/image (989).png>)
 
-## ADB communication
+## Giao tiếp ADB
 
-Extract an APK from an ADB communication where the APK was sent:
+Trích xuất APK từ phiên giao tiếp ADB đã gửi APK:
 
 ```python
 from scapy.all import *
@@ -226,14 +226,13 @@ f.close()
 
 ## References
 
-- [1] [Wireshark TLS wiki](https://wiki.wireshark.org/TLS)
-- [2] [Decrypting and parsing HTTP/3 traffic in Wireshark](https://blog.elmo.sg/posts/parsing-decrypted-quic-traffic-in-wireshark/)
-- [3] [Decrypting TLS Browser Traffic With Wireshark – The Easy Way!](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)
-- [4] [Following Protocol Streams](https://www.wireshark.org/docs/wsug_html_chunked/ChAdvFollowStreamSection.html)
-- [5] [Display Filter Reference: Transport Layer Security](https://www.wireshark.org/docs/dfref/t/tls.html)
-- [6] [Display Filter Reference: HyperText Transfer Protocol 2](https://www.wireshark.org/docs/dfref/h/http2.html)
-- [7] [Display Filter Reference: Hypertext Transfer Protocol Version 3](https://www.wireshark.org/docs/dfref/h/http3.html)
+- [1] [Wiki TLS của Wireshark](https://wiki.wireshark.org/TLS)
+- [2] [Giải mã và phân tích lưu lượng HTTP/3 trong Wireshark](https://blog.elmo.sg/posts/parsing-decrypted-quic-traffic-in-wireshark/)
+- [3] [Giải mã lưu lượng trình duyệt TLS bằng Wireshark – Cách dễ dàng!](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)
+- [4] [Theo dõi các luồng giao thức](https://www.wireshark.org/docs/wsug_html_chunked/ChAdvFollowStreamSection.html)
+- [5] [Tham chiếu bộ lọc hiển thị: Transport Layer Security](https://www.wireshark.org/docs/dfref/t/tls.html)
+- [6] [Tham chiếu bộ lọc hiển thị: HyperText Transfer Protocol 2](https://www.wireshark.org/docs/dfref/h/http2.html)
+- [7] [Tham chiếu bộ lọc hiển thị: Hypertext Transfer Protocol Version 3](https://www.wireshark.org/docs/dfref/h/http3.html)
 - [8] [RFC 9849: TLS Encrypted Client Hello](https://www.rfc-editor.org/rfc/rfc9849.html)
-- [9] [TShark manual](https://www.wireshark.org/docs/man-pages/tshark.html)
-
+- [9] [Hướng dẫn sử dụng TShark](https://www.wireshark.org/docs/man-pages/tshark.html)
 {{#include ../../../banners/hacktricks-training.md}}

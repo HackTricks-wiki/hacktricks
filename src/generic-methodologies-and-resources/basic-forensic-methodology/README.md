@@ -1,98 +1,85 @@
-# Basic Forensic Methodology
+# Phương pháp pháp chứng cơ bản
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Creating and Mounting an Image
-
+## Tạo và gắn kết ảnh
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## Malware Analysis
+## Phân tích Malware
 
-This **isn't necessary the first step to perform once you have the image**. But you can use this malware analysis techniques independently if you have a file, a file-system image, memory image, pcap... so it's good to **keep these actions in mind**:
-
+Đây **không nhất thiết là bước đầu tiên cần thực hiện sau khi có ảnh**. Tuy nhiên, bạn có thể áp dụng độc lập các kỹ thuật phân tích malware này nếu có một tệp, ảnh hệ thống tệp, ảnh bộ nhớ, pcap... vì vậy hãy **ghi nhớ những thao tác này**:
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Inspecting an Image
+## Kiểm tra ảnh
 
-if you are given a **forensic image** of a device you can start **analyzing the partitions, file-system** used and **recovering** potentially **interesting files** (even deleted ones). Learn how in:
-
+nếu được cung cấp **ảnh pháp chứng** của một thiết bị, bạn có thể bắt đầu **phân tích các phân vùng, hệ thống tệp** được sử dụng và **khôi phục** các **tệp có khả năng thú vị** (kể cả tệp đã xóa). Tìm hiểu cách thực hiện tại:
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Depending on the used OSs and even platform different interesting artifacts should be searched:
-
+Tùy vào hệ điều hành và thậm chí nền tảng được sử dụng, cần tìm kiếm các artifact đáng chú ý khác nhau:
 
 {{#ref}}
 windows-forensics/
 {{#endref}}
 
-
 {{#ref}}
 linux-forensics.md
 {{#endref}}
-
 
 {{#ref}}
 docker-forensics.md
 {{#endref}}
 
-
 {{#ref}}
 ios-backup-forensics.md
 {{#endref}}
 
-For a locked Android device, acquisition paths, and memory imaging, see [Android forensics](android-forensics.md).
+Để biết về thiết bị Android bị khóa, các phương thức thu thập dữ liệu và tạo ảnh bộ nhớ, xem [Android forensics](android-forensics.md).
 
-## Deep inspection of specific file-types and Software
+## Kiểm tra chuyên sâu các loại tệp và phần mềm cụ thể
 
-If you have very **suspicious** **file**, then **depending on the file-type and software** that created it several **tricks** may be useful.\
-Read the following page to learn some interesting tricks:
-
+Nếu bạn có một **tệp** rất **đáng ngờ**, thì tùy thuộc vào **loại tệp và phần mềm** tạo ra nó, một số **thủ thuật** có thể hữu ích.\
+Đọc trang sau để tìm hiểu một số thủ thuật thú vị:
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-I want to do a special mention to the page:
-
+Tôi muốn đặc biệt nhắc đến trang:
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Memory Dump Inspection
-
+## Kiểm tra Memory Dump
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Pcap Inspection
-
+## Kiểm tra Pcap
 
 {{#ref}}
 pcap-inspection/
 {{#endref}}
 
-## **Anti-Forensic Techniques**
+## **Kỹ thuật chống pháp chứng**
 
-Keep in mind the possible use of anti-forensic techniques:
-
+Hãy lưu ý đến khả năng các kỹ thuật chống pháp chứng đã được sử dụng:
 
 {{#ref}}
 anti-forensic-techniques.md
 {{#endref}}
 
-## Threat Hunting
-
+## Săn tìm mối đe dọa
 
 {{#ref}}
 file-integrity-monitoring.md

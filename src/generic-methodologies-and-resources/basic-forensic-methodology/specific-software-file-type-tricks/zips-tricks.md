@@ -1,38 +1,38 @@
-# ZIPs tricks
+# Các thủ thuật với ZIP
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Command-line tools** for managing **zip files** are essential for diagnosing, repairing, and cracking zip files. Here are some key utilities:<sup>[[1]](#references)</sup>
+**Các công cụ dòng lệnh** để quản lý **tệp zip** rất cần thiết khi chẩn đoán, sửa chữa và bẻ khóa tệp zip. Dưới đây là một số tiện ích quan trọng:<sup>[[1]](#references)</sup>
 
-- **`unzip`**: Reveals why a zip file may not decompress.
-- **`zipdetails -v`**: Offers detailed analysis of zip file format fields.<sup>[[3]](#references)</sup>
-- **`zipinfo`**: Lists contents of a zip file without extracting them.
-- **`zip -F input.zip --out output.zip`** and **`zip -FF input.zip --out output.zip`**: Try to repair corrupted zip files.
-- **[fcrackzip](https://github.com/hyc/fcrackzip)**: A tool for brute-force cracking of zip passwords, effective for passwords up to around 7 characters.
+- **`unzip`**: Cho biết lý do tệp zip có thể không giải nén được.
+- **`zipdetails -v`**: Cung cấp phân tích chi tiết các trường trong định dạng tệp zip.<sup>[[3]](#references)</sup>
+- **`zipinfo`**: Liệt kê nội dung tệp zip mà không giải nén.
+- **`zip -F input.zip --out output.zip`** và **`zip -FF input.zip --out output.zip`**: Thử sửa các tệp zip bị hỏng.
+- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Công cụ brute-force để bẻ khóa mật khẩu zip, hiệu quả với mật khẩu dài tối đa khoảng 7 ký tự.
 
-The [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) provides comprehensive details on the structure and standards of zip files.<sup>[[4]](#references)</sup>
+[Đặc tả định dạng tệp Zip](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) cung cấp thông tin toàn diện về cấu trúc và tiêu chuẩn của tệp zip.<sup>[[4]](#references)</sup>
 
-It's crucial to note that traditional password-protected ZIP files generally leave filenames and file sizes visible, unlike header-encryption modes supported by RAR and 7z. Furthermore, ZIP files encrypted with the older ZipCrypto method are vulnerable to a **plaintext attack** if an unencrypted copy of a compressed file is available.<sup>[[1]](#references)</sup> This attack leverages the known content to crack the ZIP's password, as explained in [this academic paper](https://math.ucr.edu/~mike/zipattacks.pdf) and illustrated in [this Hack This Site walk-through](https://www.hackthissite.org/articles/read/793).<sup>[[11]](#references)[[12]](#references)</sup> However, the ZipCrypto known-plaintext attack does not apply to entries secured with **AES-256** encryption.<sup>[[1]](#references)</sup>
+Cần lưu ý rằng các tệp ZIP được bảo vệ bằng mật khẩu theo cách truyền thống thường để lộ tên tệp và kích thước tệp, không giống các chế độ mã hóa header được RAR và 7z hỗ trợ. Ngoài ra, các tệp ZIP được mã hóa bằng phương pháp ZipCrypto cũ dễ bị **plaintext attack** nếu có bản sao không mã hóa của một tệp đã nén.<sup>[[1]](#references)</sup> Cuộc tấn công này tận dụng nội dung đã biết để bẻ khóa mật khẩu ZIP, như được giải thích trong [bài báo học thuật này](https://math.ucr.edu/~mike/zipattacks.pdf) và minh họa trong [hướng dẫn thực hành này trên Hack This Site](https://www.hackthissite.org/articles/read/793).<sup>[[11]](#references)[[12]](#references)</sup> Tuy nhiên, cuộc tấn công ZipCrypto known-plaintext không áp dụng cho các mục được bảo vệ bằng mã hóa **AES-256**.<sup>[[1]](#references)</sup>
 
 ---
 
-## Anti-reversing tricks in APKs using manipulated ZIP headers
+## Thủ thuật chống reverse-engineering trong APK bằng cách thao túng ZIP header
 
-Modern Android malware droppers use malformed ZIP metadata to break static tools (jadx/apktool/unzip) while keeping the APK installable on-device. The most common tricks are:<sup>[[2]](#references)</sup>
+Các malware dropper Android hiện đại sử dụng metadata ZIP sai định dạng để khiến các công cụ phân tích tĩnh (jadx/apktool/unzip) gặp lỗi, trong khi APK vẫn có thể cài đặt trên thiết bị. Các thủ thuật phổ biến nhất là:<sup>[[2]](#references)</sup>
 
-- Fake encryption by setting the ZIP General Purpose Bit Flag (GPBF) bit 0
-- Abusing large/custom Extra fields to confuse parsers
-- File/directory name collisions to hide real artifacts (e.g., a directory named `classes.dex/` next to the real `classes.dex`)
+- Giả lập mã hóa bằng cách đặt bit 0 của ZIP General Purpose Bit Flag (GPBF)
+- Lạm dụng các trường Extra lớn/tùy chỉnh để gây nhầm lẫn cho parser
+- Tạo tên tệp/thư mục trùng nhau để che giấu các artifact thực (ví dụ: một thư mục tên `classes.dex/` nằm cạnh tệp `classes.dex` thật)
 
-### 1) Fake encryption (GPBF bit 0 set) without real crypto
+### 1) Giả lập mã hóa (đặt bit 0 của GPBF) mà không dùng mã hóa thực sự
 
-Symptoms:
-- `jadx-gui` fails with errors like:
+Triệu chứng:
+- `jadx-gui` gặp lỗi như sau:
   
   ```
   java.util.zip.ZipException: invalid CEN header (encrypted entry)
   ```
-- `unzip` prompts for a password for core APK files even though a valid APK cannot have encrypted `classes*.dex`, `resources.arsc`, or `AndroidManifest.xml`:
+- `unzip` yêu cầu mật khẩu đối với các tệp APK cốt lõi, mặc dù một APK hợp lệ không thể có các tệp `classes*.dex`, `resources.arsc` hoặc `AndroidManifest.xml` được mã hóa:
   
   ```bash
   unzip sample.apk
@@ -43,13 +43,13 @@ Symptoms:
     skipping: classes2.dex                          incorrect password
   ```
 
-Detection with zipdetails:
+Phát hiện bằng zipdetails:
 
 ```bash
 zipdetails -v sample.apk | less
 ```
 
-Look at the General Purpose Bit Flag for local and central headers. A telltale value is bit 0 set (Encryption) even for core entries:
+Kiểm tra General Purpose Bit Flag trong các local header và central header. Giá trị đáng chú ý là bit 0 được bật (Encryption), kể cả với các mục cốt lõi:
 
 ```
 Extract Zip Spec      2D '4.5'
@@ -60,12 +60,12 @@ General Purpose Flag  0A09
   [Bit 11]  1 'Language Encoding'
 ```
 
-Heuristic: If an APK installs and runs on-device but core entries appear "encrypted" to tools, the GPBF was tampered with.
+Heuristic: Nếu APK cài đặt và chạy trên thiết bị nhưng các entry cốt lõi hiển thị là “encrypted” trong các công cụ, thì GPBF đã bị can thiệp.
 
-Fix by clearing GPBF bit 0 in both Local File Headers (LFH) and Central Directory (CD) entries. Minimal byte-patcher:
+Khắc phục bằng cách xóa bit 0 của GPBF trong cả Local File Headers (LFH) và các entry Central Directory (CD). Bản vá byte tối giản:
 
 <details>
-<summary>Minimal GPBF bit-clear patcher</summary>
+<summary>Bản vá tối giản để xóa bit GPBF</summary>
 
 ```python
 # gpbf_clear.py – clear encryption bit (bit 0) in ZIP local+central headers
@@ -100,32 +100,32 @@ if __name__ == '__main__':
 
 </details>
 
-Usage:
+Cách sử dụng:
 
 ```bash
 python3 gpbf_clear.py obfuscated.apk normalized.apk
 zipdetails -v normalized.apk | grep -A2 "General Purpose Flag"
 ```
 
-You should now see `General Purpose Flag  0000` on core entries and tools will parse the APK again.
+Giờ bạn sẽ thấy `General Purpose Flag  0000` trong các mục core và các công cụ sẽ phân tích APK lại.
 
-### 2) Large/custom Extra fields to break parsers
+### 2) Các trường Extra lớn/tùy chỉnh để làm lỗi parser
 
-Attackers stuff oversized Extra fields and odd IDs into headers to trip decompilers. In the wild you may see custom markers (e.g., strings like `JADXBLOCK`) embedded there.
+Kẻ tấn công nhồi các trường Extra quá lớn và ID bất thường vào header để khiến decompiler gặp lỗi. Trong thực tế, bạn có thể thấy các dấu hiệu tùy chỉnh (ví dụ: chuỗi như `JADXBLOCK`) được nhúng ở đó.
 
-Inspection:
+Kiểm tra:
 
 ```bash
 zipdetails -v sample.apk | sed -n '/Extra ID/,+4p' | head -n 50
 ```
 
-Examples observed: unknown IDs like `0xCAFE` ("Java Executable") or `0x414A` ("JA:") carrying large payloads.<sup>[[2]](#references)</sup>
+Các ví dụ đã ghi nhận: các ID không xác định như `0xCAFE` ("Java Executable") hoặc `0x414A` ("JA:") chứa payload lớn.<sup>[[2]](#references)</sup>
 
-DFIR heuristics:
-- Alert when Extra fields are unusually large on core entries (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`).
-- Treat unknown Extra IDs on those entries as suspicious.
+Heuristic DFIR:
+- Cảnh báo khi các trường Extra lớn bất thường trên các mục cốt lõi (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`).
+- Coi các ID Extra không xác định trên những mục đó là đáng ngờ.
 
-Practical mitigation: rebuilding the archive (e.g., re-zipping extracted files) strips malicious Extra fields. If tools refuse to extract due to fake encryption, first clear GPBF bit 0 as above, then repackage:
+Biện pháp giảm thiểu thực tế: dựng lại archive (ví dụ: nén lại các tệp đã giải nén) sẽ loại bỏ các trường Extra độc hại. Nếu công cụ từ chối giải nén do mã hóa giả, trước tiên hãy xóa bit 0 của GPBF như trên, rồi đóng gói lại:
 
 ```bash
 mkdir /tmp/apk
@@ -133,11 +133,11 @@ unzip -qq normalized.apk -d /tmp/apk
 (cd /tmp/apk && zip -qr ../clean.apk .)
 ```
 
-### 3) File/Directory name collisions (hiding real artifacts)
+### 3) Xung đột tên file/thư mục (che giấu artifact thật)
 
-A ZIP can contain both a file `X` and a directory `X/`. Some extractors and decompilers get confused and may overlay or hide the real file with a directory entry. This has been observed with entries colliding with core APK names like `classes.dex`.
+Một ZIP có thể chứa cả file `X` và thư mục `X/`. Một số trình giải nén và decompiler bị nhầm lẫn, khiến mục thư mục ghi đè hoặc che khuất file thật. Tình trạng này đã được ghi nhận với các mục trùng tên với những tên APK cốt lõi như `classes.dex`.
 
-Triage and safe extraction:
+Phân loại và giải nén an toàn:
 
 ```bash
 # List potential collisions (names that differ only by trailing slash)
@@ -150,7 +150,7 @@ unzip normalized.apk -d outdir
 # new name: unk_classes.dex
 ```
 
-Programmatic detection post-fix:
+Phát hiện bằng lập trình sau khi khắc phục:
 
 ```python
 from zipfile import ZipFile
@@ -169,20 +169,20 @@ for base, variants in collisions.items():
         print('COLLISION', base, '->', variants)
 ```
 
-Blue-team detection ideas:
-- Flag APKs whose local headers mark encryption (GPBF bit 0 = 1) yet install/run.
-- Flag large/unknown Extra fields on core entries (look for markers like `JADXBLOCK`).
-- Flag path-collisions (`X` and `X/`) specifically for `AndroidManifest.xml`, `resources.arsc`, `classes*.dex`.
+Ý tưởng phát hiện của Blue-team:
+- Đánh dấu các APK có local header ghi nhận mã hóa (GPBF bit 0 = 1) nhưng vẫn cài đặt/chạy được.
+- Đánh dấu các Extra field lớn/không xác định trên các entry cốt lõi (tìm các marker như `JADXBLOCK`).
+- Đánh dấu các đường dẫn bị trùng lặp (`X` và `X/`), cụ thể là `AndroidManifest.xml`, `resources.arsc`, `classes*.dex`.
 
 ---
 
-## Other malicious ZIP tricks (2024–2026)
+## Các thủ thuật ZIP độc hại khác (2024–2026)
 
-### Concatenated central directories (multi-EOCD evasion)
+### Central directory nối tiếp (né tránh bằng nhiều EOCD)
 
-In a 2024 phishing campaign, attackers shipped a single blob that was actually **two ZIP files concatenated**. Each had its own End of Central Directory (EOCD) record and central directory. Different extractors parsed different directories (7-Zip read the first, while WinRAR read the last), letting attackers hide payloads that only some tools showed; scanners that inspect only one directory can miss the other archive.<sup>[[5]](#references)[[6]](#references)</sup>
+Trong một chiến dịch phishing năm 2024, kẻ tấn công gửi một blob duy nhất thực chất là **hai tệp ZIP được nối với nhau**. Mỗi tệp có bản ghi End of Central Directory (EOCD) và central directory riêng. Các công cụ giải nén khác nhau phân tích các directory khác nhau (7-Zip đọc directory đầu tiên, trong khi WinRAR đọc directory cuối cùng), giúp kẻ tấn công ẩn payload mà chỉ một số công cụ hiển thị; các scanner chỉ kiểm tra một directory có thể bỏ sót archive còn lại.<sup>[[5]](#references)[[6]](#references)</sup>
 
-**Triage commands**
+**Lệnh phân loại sơ bộ**
 
 ```bash
 # Count EOCD signatures
@@ -191,7 +191,7 @@ binwalk -R "PK\x05\x06" suspect.zip
 zipdetails --scan -v suspect.zip | grep -ni -A2 "end central"
 ```
 
-If more than one EOCD appears or there are "data after payload" warnings, split the blob and inspect each part:
+Nếu xuất hiện nhiều EOCD hoặc có cảnh báo "data after payload", hãy tách blob và kiểm tra từng phần:
 
 ```bash
 # Recover the second archive from its first local-file-header offset.
@@ -202,11 +202,11 @@ dd if=suspect.zip bs=1 skip="$OFF" of=tail.zip
 7z l tail.zip   # list hidden content
 ```
 
-### Quoted-overlap / overlapping-entry bombs (non-recursive)
+### Bom ZIP Quoted-overlap / overlapping-entry (không đệ quy)
 
-Quoted-overlap ZIP bombs build a tiny **kernel** (a highly compressed DEFLATE block) and reuse it across overlapping entries. Full-overlap variants point multiple central-directory entries at one local header, while quoted-overlap variants quote local headers inside DEFLATE streams; the published construction achieves more than 28M:1 without nested archives.<sup>[[7]](#references)</sup>
+Bom ZIP Quoted-overlap tạo một **kernel** nhỏ (khối DEFLATE được nén mạnh) và tái sử dụng nó giữa các entry chồng lấn. Biến thể Full-overlap trỏ nhiều entry trong central directory đến cùng một local header, còn biến thể Quoted-overlap đặt local header bên trong các luồng DEFLATE; cấu trúc được công bố đạt tỷ lệ hơn 28M:1 mà không cần archive lồng nhau.<sup>[[7]](#references)</sup>
 
-**Quick detection (duplicate LFH offsets)**
+**Phát hiện nhanh (offset LFH trùng lặp)**
 
 ```python
 # detect full-overlap variants by identical relative offsets
@@ -223,23 +223,23 @@ while True:
     seen.add(rel); off = i+4
 ```
 
-**Handling**
-- Perform a dry-run walk: `zipdetails -v file.zip | grep -n "Local Header Offset"` and compare referenced local-header offsets and compressed-data ranges; duplicate offsets flag full-overlap variants.<sup>[[7]](#references)[[8]](#references)</sup>
-- Cap accepted total uncompressed size and entry count before extraction with a parser; `zipinfo -t file.zip` reports totals but does not enforce a safety limit.<sup>[[8]](#references)</sup>
-- When you must extract, do it inside a cgroup/VM with CPU and disk limits (avoid unbounded inflation crashes).<sup>[[8]](#references)</sup>
+**Xử lý**
+- Thực hiện kiểm tra thử: `zipdetails -v file.zip | grep -n "Local Header Offset"` rồi so sánh các offset local-header được tham chiếu và các phạm vi dữ liệu đã nén; offset trùng lặp cho thấy các biến thể chồng lấp hoàn toàn.<sup>[[7]](#references)[[8]](#references)</sup>
+- Dùng parser giới hạn tổng kích thước sau giải nén và số lượng entry được chấp nhận trước khi giải nén; `zipinfo -t file.zip` báo cáo tổng số nhưng không thực thi giới hạn an toàn.<sup>[[8]](#references)</sup>
+- Khi cần giải nén, hãy thực hiện bên trong cgroup/VM có giới hạn CPU và dung lượng ổ đĩa (tránh sự cố do giải nén không giới hạn).<sup>[[8]](#references)</sup>
 
 ---
 
-### Local-header vs central-directory parser confusion
+### Nhầm lẫn giữa parser local-header và central-directory
 
-Recent differential-parser research showed that ZIP ambiguity is still exploitable in modern toolchains. The main idea is simple: some software trusts the **Local File Header (LFH)** while others trust the **Central Directory (CD)**, so one archive can present different filenames, paths, comments, offsets, or entry sets to different tools.<sup>[[9]](#references)</sup>
+Nghiên cứu parser vi sai gần đây cho thấy sự mơ hồ của ZIP vẫn có thể bị khai thác trong các bộ công cụ hiện đại. Ý tưởng chính rất đơn giản: một số phần mềm tin vào **Local File Header (LFH)**, trong khi phần mềm khác tin vào **Central Directory (CD)**, vì vậy một archive có thể hiển thị tên tệp, đường dẫn, chú thích, offset hoặc tập entry khác nhau với các công cụ khác nhau.<sup>[[9]](#references)</sup>
 
-Practical offensive uses:
-- Make an upload filter, AV pre-scan, or package validator see a benign file in the CD while the extractor honors a different LFH name/path.
-- Abuse duplicate names, entries present only in one structure, or ambiguous Unicode path metadata (for example, Info-ZIP Unicode Path Extra Field `0x7075`) so different parsers reconstruct different trees.
-- Combine this with path traversal to turn a "harmless" archive view into a write-primitive during extraction. For the extraction side, see [Archive Extraction Path Traversal](../../../generic-hacking/archive-extraction-path-traversal.md).
+Các ứng dụng tấn công thực tế:
+- Khiến bộ lọc upload, bước quét trước của AV hoặc trình xác thực package nhìn thấy một tệp lành tính trong CD, trong khi trình giải nén xử lý tên/đường dẫn LFH khác.
+- Khai thác tên trùng lặp, entry chỉ xuất hiện trong một cấu trúc hoặc metadata đường dẫn Unicode không rõ ràng (ví dụ: Info-ZIP Unicode Path Extra Field `0x7075`) để các parser khác nhau dựng lại các cây thư mục khác nhau.
+- Kết hợp kỹ thuật này với path traversal để biến một chế độ xem archive "vô hại" thành primitive ghi trong quá trình giải nén. Xem [Archive Extraction Path Traversal](../../../generic-hacking/archive-extraction-path-traversal.md) để biết về phía giải nén.
 
-DFIR triage:
+Phân loại DFIR:
 
 ```python
 # compare Central Directory names against the referenced Local File Header names
@@ -261,7 +261,7 @@ while (i := b.find(b'PK\x01\x02', i)) != -1:
     i += 4
 ```
 
-Complement it with:
+Bổ sung thêm:
 
 ```bash
 zipdetails -v suspect.zip | less
@@ -269,11 +269,11 @@ zipinfo -v suspect.zip | grep -E "file name|offset|comment"
 ```
 
 Heuristics:
-- For security-sensitive ingestion, reject or isolate archives with mismatched LFH/CD names, duplicate filenames, multiple EOCD records, or trailing bytes after the final EOCD.<sup>[[9]](#references)[[10]](#references)</sup>
-- Treat ZIPs using unusual Unicode-path extra fields or inconsistent comments as suspicious if different tools disagree on the extracted tree.<sup>[[4]](#references)[[9]](#references)</sup>
-- If analysis matters more than preserving the original bytes, repackage the archive with a strict parser after extraction in a sandbox and compare the resulting file list to the original metadata.
+- Với hoạt động tiếp nhận dữ liệu nhạy cảm về bảo mật, hãy từ chối hoặc cách ly các archive có tên LFH/CD không khớp, tên tệp trùng lặp, nhiều bản ghi EOCD hoặc byte thừa sau EOCD cuối cùng.<sup>[[9]](#references)[[10]](#references)</sup>
+- Hãy xem ZIP sử dụng các trường extra đường dẫn Unicode bất thường hoặc comment không nhất quán là đáng ngờ nếu các công cụ khác nhau cho kết quả cây tệp được giải nén khác nhau.<sup>[[4]](#references)[[9]](#references)</sup>
+- Nếu việc phân tích quan trọng hơn việc giữ nguyên byte gốc, hãy đóng gói lại archive bằng strict parser sau khi giải nén trong sandbox, rồi so sánh danh sách tệp thu được với metadata gốc.
 
-This matters beyond package ecosystems: the same ambiguity class can hide payloads from mail gateways, static scanners, and custom ingestion pipelines that "peek" at ZIP contents before a different extractor handles the archive.<sup>[[9]](#references)</sup>
+Điều này không chỉ quan trọng với các hệ sinh thái package: cùng một kiểu nhập nhằng có thể che giấu payload khỏi mail gateway, static scanner và các pipeline tiếp nhận dữ liệu tùy chỉnh vốn “peek” nội dung ZIP trước khi một extractor khác xử lý archive.<sup>[[9]](#references)</sup>
 
 ---
 
@@ -281,17 +281,16 @@ This matters beyond package ecosystems: the same ambiguity class can hide payloa
 
 ## References
 
-- [1] [CTF Forensics Field Guide (Mike's Blog, CTF category)](https://michael-myers.github.io/blog/categories/ctf/)
-- [2] [GodFather – Part 1 – A multistage dropper (APK ZIP anti-reversing)](https://shindan.io/blog/godfather-part-1-a-multistage-dropper)
-- [3] [zipdetails (IO::Compress script)](https://metacpan.org/dist/IO-Compress/view/bin/zipdetails)
-- [4] [ZIP File Format Specification (PKWARE APPNOTE.TXT)](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)
-- [5] [Flexible Structure of Zip Archives Exploited to Hide Malware Undetected (Perception Point)](https://perception-point.io/news/flexible-structure-of-zip-archives-exploited-to-hide-malware-undetected/)
-- [6] [Hackers bury malware in new ZIP file attack — concatenated ZIP central directories](https://www.tomshardware.com/tech-industry/cyber-security/hackers-bury-malware-in-new-zip-file-attack-combining-multiple-zips-into-one-bypasses-antivirus-protections)
-- [7] [A better zip bomb (David Fifield, USENIX WOOT 2019)](https://www.usenix.org/system/files/woot19-paper_fifield_0.pdf)
-- [8] [Understanding Zip Bombs: overlapping/quoted-overlap kernel construction](https://ubos.tech/news/understanding-zip-bombs-construction-risks-and-mitigation-2/)
-- [9] [My ZIP isn't your ZIP: Identifying and Exploiting Semantic Gaps Between ZIP Parsers (USENIX Security 2025)](https://www.usenix.org/conference/usenixsecurity25/presentation/you)
-- [10] [Preventing ZIP parser confusion attacks on Python package installers](https://blog.pypi.org/posts/2025-08-07-wheel-archive-confusion-attacks/)
-- [11] [ZIP Attacks with Reduced Known Plaintext (Michael Stay, AccessData Corporation)](https://math.ucr.edu/~mike/zipattacks.pdf)
-- [12] [Hack This Site: Realistic Web Mission, Level 15 (known-plaintext ZIP attack)](https://www.hackthissite.org/articles/read/793)
-
+- [1] [Hướng dẫn thực địa về CTF Forensics (Blog của Mike, danh mục CTF)](https://michael-myers.github.io/blog/categories/ctf/)
+- [2] [GodFather – Phần 1 – Dropper nhiều giai đoạn (APK ZIP anti-reversing)](https://shindan.io/blog/godfather-part-1-a-multistage-dropper)
+- [3] [zipdetails (script IO::Compress)](https://metacpan.org/dist/IO-Compress/view/bin/zipdetails)
+- [4] [Đặc tả định dạng tệp ZIP (PKWARE APPNOTE.TXT)](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)
+- [5] [Cấu trúc linh hoạt của ZIP archive bị khai thác để ẩn malware mà không bị phát hiện (Perception Point)](https://perception-point.io/news/flexible-structure-of-zip-archives-exploited-to-hide-malware-undetected/)
+- [6] [Hacker giấu malware trong cuộc tấn công ZIP mới — nối các central directory của ZIP](https://www.tomshardware.com/tech-industry/cyber-security/hackers-bury-malware-in-new-zip-file-attack-combining-multiple-zips-into-one-bypasses-antivirus-protections)
+- [7] [Một zip bomb tốt hơn (David Fifield, USENIX WOOT 2019)](https://www.usenix.org/system/files/woot19-paper_fifield_0.pdf)
+- [8] [Tìm hiểu về Zip Bomb: cấu trúc kernel chồng lấn/chồng lấn được trích dẫn](https://ubos.tech/news/understanding-zip-bombs-construction-risks-and-mitigation-2/)
+- [9] [ZIP của tôi không phải ZIP của bạn: Nhận diện và khai thác khoảng cách ngữ nghĩa giữa các ZIP parser (USENIX Security 2025)](https://www.usenix.org/conference/usenixsecurity25/presentation/you)
+- [10] [Ngăn chặn các cuộc tấn công gây nhầm lẫn ZIP parser trong trình cài đặt package Python](https://blog.pypi.org/posts/2025-08-07-wheel-archive-confusion-attacks/)
+- [11] [Tấn công ZIP với lượng plaintext đã biết ít hơn (Michael Stay, AccessData Corporation)](https://math.ucr.edu/~mike/zipattacks.pdf)
+- [12] [Hack This Site: Nhiệm vụ web thực tế, Cấp độ 15 (tấn công ZIP với plaintext đã biết)](https://www.hackthissite.org/articles/read/793)
 {{#include ../../../banners/hacktricks-training.md}}

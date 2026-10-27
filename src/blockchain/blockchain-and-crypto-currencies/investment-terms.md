@@ -1,73 +1,72 @@
-# Investment Terms
+# Các thuật ngữ đầu tư
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Spot
+## Giao dịch giao ngay
 
-Spot trading exchanges an asset for immediate delivery. A limit order specifies the quantity and limit price; it executes only when the market can satisfy that price or better. A market order instead seeks prompt execution at the best prices then available and can experience slippage.<sup>[[4]](#references)</sup>
+Giao dịch giao ngay là việc trao đổi tài sản để nhận ngay. Lệnh giới hạn chỉ định số lượng và giá giới hạn; lệnh chỉ được khớp khi thị trường có thể đáp ứng mức giá đó hoặc tốt hơn. Lệnh thị trường hướng đến việc khớp lệnh nhanh ở mức giá tốt nhất hiện có và có thể gặp hiện tượng trượt giá.<sup>[[4]](#references)</sup>
 
-A stop-limit order has a stop price that activates a limit order. It can constrain the execution price, but it does not guarantee execution if the market moves through the limit.<sup>[[4]](#references)</sup>
+Lệnh dừng-giới hạn có giá dừng để kích hoạt lệnh giới hạn. Lệnh này có thể giới hạn giá khớp, nhưng không đảm bảo được khớp nếu thị trường vượt qua mức giá giới hạn.<sup>[[4]](#references)</sup>
 
-## Futures
+## Hợp đồng tương lai
 
-A futures contract is a standardized agreement to buy or sell a specified commodity or financial instrument at a future date. For example, two parties could agree on a price of $70,000 for one bitcoin with settlement in six months.<sup>[[1]](#references)</sup>
+Hợp đồng tương lai là thỏa thuận tiêu chuẩn hóa về việc mua hoặc bán một loại hàng hóa hoặc công cụ tài chính xác định vào một ngày trong tương lai. Ví dụ, hai bên có thể thỏa thuận mức giá $70,000 cho một bitcoin, với ngày thanh toán sau sáu tháng.<sup>[[1]](#references)</sup>
 
-If the settlement price is $80,000, the long side gains and the short side loses relative to the $70,000 contract price. If it is $60,000, the direction is reversed. Actual exchange-traded futures are marked to market and usually closed or rolled before expiration, so this is a simplified illustration.<sup>[[2]](#references)</sup>
+Nếu giá thanh toán là $80,000, bên mua được lời và bên bán chịu lỗ so với giá hợp đồng $70,000. Nếu giá là $60,000, chiều hướng sẽ ngược lại. Hợp đồng tương lai giao dịch trên sàn thực tế được định giá theo thị trường và thường được đóng hoặc chuyển kỳ trước khi đáo hạn, nên đây chỉ là ví dụ đơn giản hóa.<sup>[[2]](#references)</sup>
 
-Producers and consumers use futures to hedge price risk; other participants use them to seek profit or provide liquidity.<sup>[[1]](#references)</sup>
+Nhà sản xuất và người tiêu dùng sử dụng hợp đồng tương lai để phòng ngừa rủi ro giá; những người tham gia khác dùng chúng để tìm kiếm lợi nhuận hoặc cung cấp thanh khoản.<sup>[[1]](#references)</sup>
 
-- A **long position** generally profits when the contract price rises.
-- A **short position** generally profits when the contract price falls.<sup>[[2]](#references)</sup>
+- **Vị thế mua** thường có lời khi giá hợp đồng tăng.
+- **Vị thế bán** thường có lời khi giá hợp đồng giảm.<sup>[[2]](#references)</sup>
 
-### Hedging With Futures
+### Phòng ngừa rủi ro bằng hợp đồng tương lai
 
-If a fund manager expects a portfolio to fall, they might short a sufficiently correlated stock-index futures contract. Gains on the short hedge can offset some portfolio losses; basis risk means the offset is rarely exact. A bitcoin future would hedge bitcoin exposure, not automatically a stock portfolio.
+Nếu nhà quản lý quỹ dự đoán danh mục đầu tư sẽ giảm giá, họ có thể bán khống một hợp đồng tương lai chỉ số chứng khoán có mức tương quan đủ cao. Khoản lời từ vị thế bán khống dùng để phòng ngừa có thể bù đắp một phần khoản lỗ của danh mục; rủi ro cơ sở khiến khoản bù đắp hiếm khi chính xác tuyệt đối. Hợp đồng tương lai bitcoin sẽ phòng ngừa mức độ tiếp xúc với bitcoin, chứ không tự động phòng ngừa danh mục cổ phiếu.
 
-If the hedged market falls, the short futures position may gain while the holdings lose value. If it rises, the holdings may gain while the hedge loses. Hedging reduces selected risk rather than creating a guaranteed profit.<sup>[[1]](#references)</sup>
+Nếu thị trường được phòng ngừa giảm, vị thế bán hợp đồng tương lai có thể sinh lời trong khi giá trị các tài sản nắm giữ giảm. Nếu thị trường tăng, các tài sản nắm giữ có thể tăng giá trong khi vị thế phòng ngừa chịu lỗ. Phòng ngừa rủi ro giúp giảm một số rủi ro nhất định, chứ không tạo ra lợi nhuận được đảm bảo.<sup>[[1]](#references)</sup>
 
-### Perpetual Futures
+### Hợp đồng tương lai vĩnh cửu
 
-Perpetual contracts are derivatives without a fixed expiration date. Crypto venues commonly use periodic funding payments to help keep their price near the underlying spot price; terms differ by venue.<sup>[[3]](#references)</sup>
+Hợp đồng vĩnh cửu là công cụ phái sinh không có ngày đáo hạn cố định. Các nền tảng giao dịch crypto thường sử dụng các khoản thanh toán funding định kỳ để giúp giá hợp đồng duy trì gần với giá giao ngay của tài sản cơ sở; điều khoản khác nhau tùy nền tảng.<sup>[[3]](#references)</sup>
 
-Profit and loss changes as the mark price moves. A 1% price move produces approximately a 1% move on the position's notional value before fees and funding, but leverage can make that a much larger percentage of posted collateral.
+Lãi và lỗ thay đổi khi giá đánh dấu biến động. Mức biến động giá 1% tạo ra mức biến động xấp xỉ 1% trên giá trị danh nghĩa của vị thế, chưa tính phí và funding, nhưng đòn bẩy có thể khiến tỷ lệ này lớn hơn nhiều so với số tài sản thế chấp đã nộp.
 
-### Futures with Leverage
+### Hợp đồng tương lai có đòn bẩy
 
-**Leverage** allows a trader to control a larger notional position with a smaller margin deposit. Losses are not always limited to the initial margin: liquidation, gaps, fees, and venue rules can produce additional losses.<sup>[[3]](#references)</sup>
+**Đòn bẩy** cho phép nhà giao dịch kiểm soát vị thế có giá trị danh nghĩa lớn hơn với khoản ký quỹ nhỏ hơn. Khoản lỗ không phải lúc nào cũng giới hạn ở mức ký quỹ ban đầu: thanh lý, biến động giá đột ngột, phí và quy định của nền tảng có thể dẫn đến khoản lỗ lớn hơn.<sup>[[3]](#references)</sup>
 
-For example, $100 of margin at 50x leverage controls a $5,000 position. Ignoring fees, funding, and liquidation mechanics, a favorable 1% move produces a $50 gain (50% of the initial margin), while an adverse 1% move produces a $50 loss. An adverse 2% move corresponds to $100, although a venue will normally liquidate the position before all margin is exhausted.
+Ví dụ, $100 tiền ký quỹ với đòn bẩy 50x cho phép kiểm soát một vị thế trị giá $5,000. Bỏ qua phí, funding và cơ chế thanh lý, mức biến động có lợi 1% tạo ra khoản lời $50 (bằng 50% mức ký quỹ ban đầu), còn mức biến động bất lợi 1% tạo ra khoản lỗ $50. Mức biến động bất lợi 2% tương đương $100, nhưng nền tảng thường sẽ thanh lý vị thế trước khi toàn bộ tiền ký quỹ bị mất.
 
-Leverage magnifies both gains and losses and makes liquidation possible after a comparatively small adverse move.
+Đòn bẩy khuếch đại cả lợi nhuận lẫn thua lỗ và khiến vị thế có thể bị thanh lý sau một biến động bất lợi tương đối nhỏ.
 
-## Differences Between Futures and Options
+## Sự khác nhau giữa hợp đồng tương lai và quyền chọn
 
-An option buyer receives a right, not an obligation, to exercise under the contract terms. The option writer has the corresponding obligation if the buyer exercises. The buyer pays the writer a premium for that right.<sup>[[4]](#references)</sup>
+Người mua quyền chọn có quyền, chứ không có nghĩa vụ, thực hiện giao dịch theo các điều khoản hợp đồng. Người bán quyền chọn có nghĩa vụ tương ứng nếu người mua thực hiện quyền. Người mua trả cho người bán một khoản phí quyền chọn để có quyền đó.<sup>[[4]](#references)</sup>
 
-### 1. **Obligation vs. Right:**
+### 1. **Nghĩa vụ và quyền:**
 
-* **Futures:** When you buy or sell a futures contract, you're entering a **binding agreement** to buy or sell an asset at a specific price on a future date. Both the buyer and the seller are **obligated** to fulfill the contract at expiration (unless the contract is closed before then).
-* **Options:** With options, you have the **right, but not the obligation**, to buy (in the case of a **call option**) or sell (in the case of a **put option**) an asset at a specific price before or at a certain expiration date. The **buyer** has the option to execute, while the **seller** is obligated to fulfill the trade if the buyer decides to exercise the option.
+* **Hợp đồng tương lai:** Khi mua hoặc bán hợp đồng tương lai, bạn tham gia vào **thỏa thuận có tính ràng buộc** để mua hoặc bán tài sản ở một mức giá cụ thể vào một ngày trong tương lai. Cả người mua lẫn người bán đều **có nghĩa vụ** thực hiện hợp đồng khi đáo hạn (trừ khi hợp đồng được đóng trước thời điểm đó).
+* **Quyền chọn:** Với quyền chọn, bạn có **quyền nhưng không có nghĩa vụ** mua (đối với **quyền chọn mua**) hoặc bán (đối với **quyền chọn bán**) tài sản ở một mức giá cụ thể, trước hoặc vào một ngày đáo hạn nhất định. **Người mua** có quyền thực hiện giao dịch, còn **người bán** có nghĩa vụ thực hiện giao dịch nếu người mua quyết định thực hiện quyền chọn.
 
-### 2. **Risk:**
+### 2. **Rủi ro:**
 
-* **Futures:** Both sides can suffer substantial losses. Whether loss is mathematically unlimited depends on the position and underlying asset: a short position may have unbounded theoretical loss, while a long position cannot lose more than the notional value if the underlying cannot fall below zero.
-* **Options:** A buyer who does not write another option generally risks the premium paid. A naked call writer may face theoretically unlimited loss; other option-writing strategies have different bounded or unbounded risk profiles.
+* **Hợp đồng tương lai:** Cả hai bên đều có thể chịu khoản lỗ đáng kể. Việc khoản lỗ có giới hạn về mặt toán học hay không phụ thuộc vào vị thế và tài sản cơ sở: vị thế bán có thể có khoản lỗ lý thuyết không giới hạn, trong khi vị thế mua không thể lỗ nhiều hơn giá trị danh nghĩa nếu giá tài sản cơ sở không thể xuống dưới 0.
+* **Quyền chọn:** Người mua không bán thêm quyền chọn thường chỉ chịu rủi ro mất khoản phí đã trả. Người bán quyền chọn mua không được bảo đảm có thể phải chịu khoản lỗ lý thuyết không giới hạn; các chiến lược bán quyền chọn khác có mức rủi ro hữu hạn hoặc không giới hạn tùy trường hợp.
 
-### 3. **Cost:**
+### 3. **Chi phí:**
 
-* **Futures:** There is no upfront cost beyond the margin required to hold the position, as the buyer and seller are both obligated to complete the trade.
-* **Options:** The buyer must pay an **option premium** upfront for the right to exercise the option. This premium is essentially the cost of the option.
+* **Hợp đồng tương lai:** Không có chi phí trả trước ngoài khoản ký quỹ cần thiết để duy trì vị thế, vì cả người mua lẫn người bán đều có nghĩa vụ hoàn tất giao dịch.
+* **Quyền chọn:** Người mua phải trả trước **phí quyền chọn** để có quyền thực hiện quyền chọn. Khoản phí này về cơ bản là chi phí của quyền chọn.
 
-### 4. **Profit Potential:**
+### 4. **Tiềm năng lợi nhuận:**
 
-* **Futures:** The profit or loss is based on the difference between the market price at expiration and the agreed-upon price in the contract.
-* **Options:** The buyer profits when the market moves favorably beyond the strike price by more than the premium paid. The seller profits by keeping the premium if the option is not exercised.
+* **Hợp đồng tương lai:** Lãi hoặc lỗ dựa trên chênh lệch giữa giá thị trường khi đáo hạn và mức giá đã thỏa thuận trong hợp đồng.
+* **Quyền chọn:** Người mua có lời khi thị trường biến động theo hướng có lợi, vượt qua giá thực hiện một mức lớn hơn khoản phí đã trả. Người bán có lời khi giữ được khoản phí nếu quyền chọn không được thực hiện.
 
 ## References
 
-- [1] [CFTC - The economic purpose of futures markets](https://www.cftc.gov/LearnAndProtect/EducationCenter/economicpurpose)
-- [2] [CFTC - Futures Market Basics](https://www.cftc.gov/LearnAndProtect/EducationCenter/FuturesMarketBasics/index2.htm)
-- [3] [CFTC - Understand the risks of virtual-currency trading](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/understand_risks_of_virtual_currency.html)
-- [4] [CFTC Glossary - Option, premium, and exercise](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/CFTCGlossary/index.htm)
-
+- [1] [CFTC - Mục đích kinh tế của thị trường hợp đồng tương lai](https://www.cftc.gov/LearnAndProtect/EducationCenter/economicpurpose)
+- [2] [CFTC - Những điều cơ bản về thị trường hợp đồng tương lai](https://www.cftc.gov/LearnAndProtect/EducationCenter/FuturesMarketBasics/index2.htm)
+- [3] [CFTC - Hiểu các rủi ro khi giao dịch tiền ảo](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/understand_risks_of_virtual_currency.html)
+- [4] [Bảng thuật ngữ CFTC - Quyền chọn, phí quyền chọn và thực hiện quyền](https://www.cftc.gov/LearnAndProtect/AdvisoriesAndArticles/CFTCGlossary/index.htm)
 {{#include ../../banners/hacktricks-training.md}}

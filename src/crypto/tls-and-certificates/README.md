@@ -1,38 +1,38 @@
-# TLS and Certificates
+# TLS và chứng chỉ
 
 {{#include ../../banners/hacktricks-training.md}}
 
-This section covers X.509 inspection, encodings, conversions, and security-relevant validation mistakes.
+Phần này trình bày cách kiểm tra X.509, các kiểu mã hóa, chuyển đổi và những lỗi xác thực liên quan đến bảo mật.
 
-## X.509 Parsing
+## Phân tích X.509
 
-OpenSSL can print a certificate's decoded fields, while `asn1parse` shows the underlying ASN.1 structure.<sup>[[1]](#references)[[2]](#references)</sup>
+OpenSSL có thể in các trường đã giải mã của chứng chỉ, trong khi `asn1parse` hiển thị cấu trúc ASN.1 bên dưới.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```bash
 openssl x509 -in cert.pem -noout -text
 openssl asn1parse -in cert.pem
 ```
 
-Review at least:
+Kiểm tra ít nhất:
 
-- the subject, issuer, and Subject Alternative Name (SAN);
-- key usage and extended key usage;
-- basic constraints and path-length constraints;
-- the `notBefore` and `notAfter` validity times;
-- the public-key parameters and signature algorithm.
+- subject, issuer và Subject Alternative Name (SAN);
+- key usage và extended key usage;
+- basic constraints và path-length constraints;
+- thời hạn hiệu lực `notBefore` và `notAfter`;
+- các tham số public key và thuật toán chữ ký.
 
-Legacy signatures such as MD5- or SHA-1-based certificate signatures are particularly important findings, although the exact acceptance and impact depend on the validator and trust context.<sup>[[3]](#references)</sup>
+Các chữ ký cũ như chữ ký chứng chỉ dựa trên MD5 hoặc SHA-1 đặc biệt đáng lưu ý, dù việc chấp nhận và mức độ ảnh hưởng cụ thể phụ thuộc vào bộ xác thực và ngữ cảnh tin cậy.<sup>[[3]](#references)</sup>
 
-RFC 5280 defines the Internet X.509 profile and the processing rules for extensions such as SAN, key usage, name constraints, and basic constraints.<sup>[[3]](#references)</sup>
+RFC 5280 định nghĩa hồ sơ Internet X.509 và các quy tắc xử lý những extension như SAN, key usage, name constraints và basic constraints.<sup>[[3]](#references)</sup>
 
-## Encodings and Containers
+## Mã hóa và Container
 
-- **PEM-style textual encoding:** Base64 data between `BEGIN` and `END` boundaries.
-- **DER:** the binary Distinguished Encoding Rules representation.
-- **PKCS#7/CMS (`.p7b`):** commonly carries certificates and a certificate chain, but not private keys.
-- **PKCS#12 (`.p12` or `.pfx`):** can carry private keys, certificates, and supporting certificates.
+- **Mã hóa dạng văn bản kiểu PEM:** dữ liệu Base64 nằm giữa các ranh giới `BEGIN` và `END`.
+- **DER:** biểu diễn nhị phân theo Distinguished Encoding Rules.
+- **PKCS#7/CMS (`.p7b`):** thường chứa chứng chỉ và chuỗi chứng chỉ, nhưng không chứa private key.
+- **PKCS#12 (`.p12` hoặc `.pfx`):** có thể chứa private key, chứng chỉ và các chứng chỉ hỗ trợ.
 
-RFC 7468 specifies the textual encodings used for PKIX, PKCS, and CMS structures; OpenSSL's `pkcs12` command creates and parses PKCS#12 files.<sup>[[4]](#references)[[5]](#references)</sup>
+RFC 7468 quy định các dạng mã hóa văn bản được dùng cho cấu trúc PKIX, PKCS và CMS; lệnh `pkcs12` của OpenSSL tạo và phân tích các tệp PKCS#12.<sup>[[4]](#references)[[5]](#references)</sup>
 
 ```bash
 openssl x509 -in cert.cer -outform PEM -out cert.pem
@@ -40,31 +40,30 @@ openssl x509 -in cert.pem -outform DER -out cert.der
 openssl pkcs12 -in file.pfx -out out.pem
 ```
 
-Treat `out.pem` as sensitive: unless options such as `-nokeys` are used, the output may contain private-key material.<sup>[[5]](#references)</sup>
+Coi `out.pem` là dữ liệu nhạy cảm: trừ khi dùng các tùy chọn như `-nokeys`, đầu ra có thể chứa thông tin khóa riêng tư.<sup>[[5]](#references)</sup>
 
-## Security Review Checklist
+## Danh sách kiểm tra đánh giá bảo mật
 
-Apply the certificate-processing requirements in RFC 5280 when reviewing a validator or trust decision.<sup>[[3]](#references)</sup>
+Áp dụng các yêu cầu xử lý chứng chỉ trong RFC 5280 khi đánh giá bộ xác thực hoặc quyết định tin cậy.<sup>[[3]](#references)</sup>
 
-- Verify the complete chain to an explicitly trusted anchor; do not trust user-supplied roots implicitly.
-- Confirm the hostname or service identity against SAN values.<sup>[[8]](#references)</sup>
-- Enforce basic constraints, name constraints, key usage, and extended key usage.
-- Reject expired or not-yet-valid certificates and disallowed key or signature algorithms.
-- Bind client-certificate identities to the correct application account and authorization context.
+- Xác minh toàn bộ chuỗi chứng chỉ đến một trust anchor được tin cậy rõ ràng; không mặc nhiên tin cậy các root do người dùng cung cấp.
+- Xác nhận hostname hoặc danh tính dịch vụ khớp với các giá trị SAN.<sup>[[8]](#references)</sup>
+- Thực thi các ràng buộc cơ bản, ràng buộc tên, key usage và extended key usage.
+- Từ chối chứng chỉ đã hết hạn hoặc chưa có hiệu lực, cũng như các thuật toán khóa hoặc chữ ký không được phép.
+- Liên kết danh tính trong chứng chỉ máy khách với đúng tài khoản ứng dụng và ngữ cảnh phân quyền.
 
-## Certificate Transparency Logs
+## Nhật ký Certificate Transparency
 
-Certificate Transparency provides publicly auditable logs of issued certificates.<sup>[[6]](#references)</sup> Search a domain with crt.sh during authorized asset discovery.<sup>[[7]](#references)</sup>
+Certificate Transparency cung cấp các nhật ký công khai có thể kiểm tra về những chứng chỉ đã được cấp.<sup>[[6]](#references)</sup> Tìm kiếm miền bằng crt.sh trong quá trình phát hiện tài sản được ủy quyền.<sup>[[7]](#references)</sup>
 
 ## References
 
-- [1] [OpenSSL documentation - `openssl-x509`](https://docs.openssl.org/master/man1/openssl-x509/)
-- [2] [OpenSSL documentation - `openssl-asn1parse`](https://docs.openssl.org/master/man1/openssl-asn1parse/)
-- [3] [RFC 5280 - Internet X.509 Public Key Infrastructure Certificate and CRL Profile](https://www.rfc-editor.org/rfc/rfc5280)
-- [4] [RFC 7468 - Textual Encodings of PKIX, PKCS, and CMS Structures](https://www.rfc-editor.org/rfc/rfc7468)
-- [5] [OpenSSL documentation - `openssl-pkcs12`](https://docs.openssl.org/master/man1/openssl-pkcs12/)
-- [6] [RFC 9162 - Certificate Transparency Version 2.0](https://www.rfc-editor.org/rfc/rfc9162)
-- [7] [crt.sh - Certificate Search](https://crt.sh/)
-- [8] [RFC 9525 - Service Identity in TLS](https://www.rfc-editor.org/rfc/rfc9525)
-
+- [1] [Tài liệu OpenSSL - `openssl-x509`](https://docs.openssl.org/master/man1/openssl-x509/)
+- [2] [Tài liệu OpenSSL - `openssl-asn1parse`](https://docs.openssl.org/master/man1/openssl-asn1parse/)
+- [3] [RFC 5280 - Hồ sơ chứng chỉ và CRL của hạ tầng khóa công khai Internet X.509](https://www.rfc-editor.org/rfc/rfc5280)
+- [4] [RFC 7468 - Mã hóa văn bản của các cấu trúc PKIX, PKCS và CMS](https://www.rfc-editor.org/rfc/rfc7468)
+- [5] [Tài liệu OpenSSL - `openssl-pkcs12`](https://docs.openssl.org/master/man1/openssl-pkcs12/)
+- [6] [RFC 9162 - Certificate Transparency phiên bản 2.0](https://www.rfc-editor.org/rfc/rfc9162)
+- [7] [crt.sh - Tìm kiếm chứng chỉ](https://crt.sh/)
+- [8] [RFC 9525 - Danh tính dịch vụ trong TLS](https://www.rfc-editor.org/rfc/rfc9525)
 {{#include ../../banners/hacktricks-training.md}}

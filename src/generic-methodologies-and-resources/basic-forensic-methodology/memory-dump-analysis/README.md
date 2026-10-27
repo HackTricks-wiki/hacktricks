@@ -1,42 +1,41 @@
-# Memory dump analysis
+# Phân tích memory dump
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Start
+## Bắt đầu
 
-Start **searching** for **malware** inside the pcap. Use the **tools** mentioned in [**Malware Analysis**](../malware-analysis.md).
+Bắt đầu **tìm kiếm** **malware** trong pcap. Sử dụng các **công cụ** được đề cập trong [**Phân tích malware**](../malware-analysis.md).
 
 ## [Volatility](volatility-cheatsheet.md)
 
-**Volatility is an open-source framework for memory dump analysis**. This Python tool analyzes dumps from external sources or VMware VMs, identifying data like processes and passwords based on the dump's OS profile. It's extensible with plugins, making it highly versatile for forensic investigations.<sup>[[1]](#references)[[2]](#references)</sup>
+**Volatility là framework mã nguồn mở để phân tích memory dump**. Công cụ Python này phân tích các dump từ nguồn bên ngoài hoặc máy ảo VMware, xác định dữ liệu như tiến trình và mật khẩu dựa trên profile hệ điều hành của dump. Công cụ có thể mở rộng bằng plugin, nên rất linh hoạt cho các cuộc điều tra pháp chứng.<sup>[[1]](#references)[[2]](#references)</sup>
 
-[**Find here a cheatsheet**](volatility-cheatsheet.md)
+[**Xem cheatsheet tại đây**](volatility-cheatsheet.md)
 
-## Mini dump crash report
+## Báo cáo crash minidump
 
-When the dump is small (just some KB, maybe a few MB), it may be a mini dump crash report rather than a full memory dump.<sup>[[3]](#references)</sup>
+Khi dump có kích thước nhỏ (chỉ vài KB, có thể vài MB), đó có thể là báo cáo crash minidump thay vì memory dump đầy đủ.<sup>[[3]](#references)</sup>
 
-![Volatility - Mini dump crash report: A small dump file identified as a Mini DuMP crash report](<../../../images/image (532).png>)
+![Volatility - Báo cáo crash minidump: Một tệp dump nhỏ được xác định là báo cáo crash Mini DuMP](<../../../images/image (532).png>)
 
-If you have Visual Studio installed, you can open this file to view basic information such as the process name, architecture, exception details, and loaded modules:<sup>[[4]](#references)</sup>
+Nếu đã cài Visual Studio, bạn có thể mở tệp này để xem thông tin cơ bản như tên tiến trình, kiến trúc, thông tin ngoại lệ và các module đã tải:<sup>[[4]](#references)</sup>
 
-![Volatility - Mini dump crash report: If you have Visual Studio installed, you can open this file and bind some basic information like process name, architecture, exception info and...](<../../../images/image (263).png>)
+![Volatility - Báo cáo crash minidump: Nếu đã cài Visual Studio, bạn có thể mở tệp này và xem một số thông tin cơ bản như tên tiến trình, kiến trúc, thông tin ngoại lệ và...](<../../../images/image (263).png>)
 
-You can also inspect the exception and view the module's disassembly.<sup>[[4]](#references)</sup>
+Bạn cũng có thể kiểm tra ngoại lệ và xem disassembly của module.<sup>[[4]](#references)</sup>
 
-![Visual Studio minidump Actions panel with options to debug natively and set symbol paths](<../../../images/image (142).png>)
+![Bảng Actions của minidump trong Visual Studio với các tùy chọn debug native và thiết lập đường dẫn symbol](<../../../images/image (142).png>)
 
-![Visual Studio disassembly of instructions from the minidump exception](<../../../images/image (610).png>)
+![Disassembly các lệnh từ ngoại lệ minidump trong Visual Studio](<../../../images/image (610).png>)
 
-Anyway, Visual Studio isn't the best tool to perform an analysis of the depth of the dump.
+Dù vậy, Visual Studio không phải là công cụ tốt nhất để phân tích dump chuyên sâu.
 
-You should **open** it using **IDA** or **Radare** to inspection it in **depth**.
+Bạn nên **mở** tệp bằng **IDA** hoặc **Radare** để kiểm tra **chuyên sâu**.
 
 ## References
 
-- [1] [Volatility Framework](https://github.com/volatilityfoundation/volatility)
-- [2] [Volatility Usage](https://github.com/volatilityfoundation/volatility/wiki/volatility-usage)
-- [3] [Minidump Files](https://learn.microsoft.com/en-us/windows/win32/debug/minidump-files)
-- [4] [Use dump files in the Visual Studio debugger](https://learn.microsoft.com/en-us/visualstudio/debugger/using-dump-files?view=visualstudio)
-
+- [1] [Framework Volatility](https://github.com/volatilityfoundation/volatility)
+- [2] [Cách sử dụng Volatility](https://github.com/volatilityfoundation/volatility/wiki/volatility-usage)
+- [3] [Tệp Minidump](https://learn.microsoft.com/en-us/windows/win32/debug/minidump-files)
+- [4] [Sử dụng tệp dump trong trình debug của Visual Studio](https://learn.microsoft.com/en-us/visualstudio/debugger/using-dump-files?view=visualstudio)
 {{#include ../../../banners/hacktricks-training.md}}

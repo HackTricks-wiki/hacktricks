@@ -1,57 +1,57 @@
-# Browser Artifacts
+# Dấu vết trình duyệt
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Browsers Artifacts <a href="#id-3def" id="id-3def"></a>
+## Dấu vết trình duyệt <a href="#id-3def" id="id-3def"></a>
 
-Browser artifacts include various types of data stored by web browsers, such as navigation history, bookmarks, and cache data. These artifacts are kept in specific folders within the operating system, differing in location and name across browsers, yet generally storing similar data types.
+Dấu vết trình duyệt bao gồm nhiều loại dữ liệu được trình duyệt web lưu trữ, chẳng hạn như lịch sử duyệt web, dấu trang và dữ liệu cache. Những dấu vết này được lưu trong các thư mục cụ thể của hệ điều hành. Vị trí và tên thư mục khác nhau tùy theo trình duyệt, nhưng nhìn chung chúng lưu trữ các loại dữ liệu tương tự nhau.
 
-Here's a summary of the most common browser artifacts:
+Dưới đây là tóm tắt về các dấu vết trình duyệt phổ biến nhất:
 
-- **Navigation History**: Tracks user visits to websites, useful for identifying visits to malicious sites.
-- **Autocomplete Data**: Suggestions based on frequent searches, offering insights when combined with navigation history.
-- **Bookmarks**: Sites saved by the user for quick access.
-- **Extensions and Add-ons**: Browser extensions or add-ons installed by the user.
-- **Cache**: Stores web content (e.g., images, JavaScript files) to improve website loading times, valuable for forensic analysis.
-- **Logins**: Stored login credentials.
-- **Favicons**: Icons associated with websites, appearing in tabs and bookmarks, useful for additional information on user visits.
-- **Browser Sessions**: Data related to open browser sessions.
-- **Downloads**: Records of files downloaded through the browser.
-- **Form Data**: Information entered in web forms, saved for future autofill suggestions.
-- **Thumbnails**: Preview images of websites.
-- **Custom Dictionary.txt**: Words added by the user to the browser's dictionary.
+- **Lịch sử duyệt web**: Theo dõi những trang web người dùng đã truy cập, hữu ích để xác định việc truy cập các trang web độc hại.
+- **Dữ liệu tự động hoàn tất**: Các đề xuất dựa trên những nội dung tìm kiếm thường xuyên, cung cấp thông tin chuyên sâu khi kết hợp với lịch sử duyệt web.
+- **Dấu trang**: Các trang web được người dùng lưu để truy cập nhanh.
+- **Tiện ích mở rộng và tiện ích bổ sung**: Các tiện ích mở rộng hoặc tiện ích bổ sung do người dùng cài đặt.
+- **Cache**: Lưu trữ nội dung web (ví dụ: hình ảnh, tệp JavaScript) để cải thiện thời gian tải trang web; hữu ích cho phân tích pháp chứng.
+- **Thông tin đăng nhập**: Thông tin đăng nhập được lưu trữ.
+- **Favicon**: Biểu tượng gắn với các trang web, hiển thị trên tab và dấu trang, hữu ích để tìm hiểu thêm về các trang người dùng đã truy cập.
+- **Phiên trình duyệt**: Dữ liệu liên quan đến các phiên trình duyệt đang mở.
+- **Tệp đã tải xuống**: Bản ghi các tệp được tải xuống qua trình duyệt.
+- **Dữ liệu biểu mẫu**: Thông tin được nhập vào biểu mẫu web và lưu lại để đưa ra đề xuất tự động điền sau này.
+- **Hình thu nhỏ**: Hình ảnh xem trước của các trang web.
+- **Custom Dictionary.txt**: Các từ do người dùng thêm vào từ điển của trình duyệt.
 
 ## Firefox
 
-Firefox organizes user data within profiles, stored in specific locations based on the operating system:<sup>[[1]](#references)</sup>
+Firefox sắp xếp dữ liệu người dùng trong các profile, được lưu ở những vị trí cụ thể tùy theo hệ điều hành:<sup>[[1]](#references)</sup>
 
 - **Linux**: `~/.mozilla/firefox/`
 - **MacOS**: `/Users/$USER/Library/Application Support/Firefox/Profiles/`
 - **Windows**: `%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles\`
 
-A `profiles.ini` file within these directories lists the user profiles. Each profile's data is stored in a folder named in the `Path` variable within `profiles.ini`, located in the same directory as `profiles.ini` itself. If a profile's folder is missing, it may have been deleted.
+Tệp `profiles.ini` trong các thư mục này liệt kê các profile người dùng. Dữ liệu của mỗi profile được lưu trong một thư mục có tên được chỉ định trong biến `Path` của `profiles.ini`, nằm cùng thư mục với chính tệp `profiles.ini`. Nếu thiếu thư mục của một profile, có thể profile đó đã bị xóa.
 
-Within each profile folder, you can find several important files:<sup>[[1]](#references)</sup>
+Trong mỗi thư mục profile, bạn có thể tìm thấy một số tệp quan trọng:<sup>[[1]](#references)</sup>
 
-- **places.sqlite**: Stores history, bookmarks, and downloads. Tools like [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) on Windows can access the history data.
-  - Use specific SQL queries to extract history and downloads information.
-- **bookmarkbackups**: Contains backups of bookmarks.
-- **formhistory.sqlite**: Stores web form data.
-- **handlers.json**: Manages protocol handlers.
-- **persdict.dat**: Custom dictionary words.
-- **addons.json** and **extensions.sqlite**: Information on installed add-ons and extensions.
-- **cookies.sqlite**: Cookie storage, with [MZCookiesView](https://www.nirsoft.net/utils/mzcv.html) available for inspection on Windows.
-- **cache2/entries** or **startupCache**: Cache data, accessible through tools like [MozillaCacheView](https://www.nirsoft.net/utils/mozilla_cache_viewer.html).
-- **favicons.sqlite**: Stores favicons.
-- **prefs.js**: User settings and preferences.
-- **downloads.sqlite**: Older downloads database, now integrated into places.sqlite.
-- **thumbnails**: Website thumbnails.
-- **logins.json**: Encrypted login information.
-- **key4.db** or **key3.db**: Stores encryption keys for securing sensitive information.
+- **places.sqlite**: Lưu trữ lịch sử duyệt web, dấu trang và nội dung tải xuống. Các công cụ như [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) trên Windows có thể truy cập dữ liệu lịch sử.
+  - Sử dụng các truy vấn SQL cụ thể để trích xuất thông tin lịch sử duyệt web và nội dung tải xuống.
+- **bookmarkbackups**: Chứa các bản sao lưu dấu trang.
+- **formhistory.sqlite**: Lưu trữ dữ liệu biểu mẫu web.
+- **handlers.json**: Quản lý trình xử lý giao thức.
+- **persdict.dat**: Các từ trong từ điển tùy chỉnh.
+- **addons.json** và **extensions.sqlite**: Thông tin về các tiện ích bổ sung và tiện ích mở rộng đã cài đặt.
+- **cookies.sqlite**: Lưu trữ cookie; có thể dùng [MZCookiesView](https://www.nirsoft.net/utils/mzcv.html) để kiểm tra trên Windows.
+- **cache2/entries** hoặc **startupCache**: Dữ liệu cache, có thể truy cập bằng các công cụ như [MozillaCacheView](https://www.nirsoft.net/utils/mozilla_cache_viewer.html).
+- **favicons.sqlite**: Lưu trữ favicon.
+- **prefs.js**: Cài đặt và tùy chọn của người dùng.
+- **downloads.sqlite**: Cơ sở dữ liệu lưu nội dung tải xuống phiên bản cũ, hiện đã được tích hợp vào places.sqlite.
+- **thumbnails**: Hình thu nhỏ của trang web.
+- **logins.json**: Thông tin đăng nhập được mã hóa.
+- **key4.db** hoặc **key3.db**: Lưu trữ khóa mã hóa dùng để bảo vệ thông tin nhạy cảm.
 
-Additionally, checking the browser’s anti-phishing settings can be done by searching for `browser.safebrowsing` entries in `prefs.js`, indicating whether safe browsing features are enabled or disabled.<sup>[[2]](#references)</sup>
+Ngoài ra, có thể kiểm tra cài đặt chống phishing của trình duyệt bằng cách tìm các mục `browser.safebrowsing` trong `prefs.js`; các mục này cho biết tính năng duyệt web an toàn đang được bật hay tắt.<sup>[[2]](#references)</sup>
 
-To decrypt saved logins from an accessible profile, the [Firefox Primary Password](https://support.mozilla.org/en-US/kb/use-primary-password-protect-stored-logins), if configured, must be supplied or recovered separately; the profile does not reveal that password. Confirm that any recovered login authenticates to its web account. Unix root access requires separate proof that the credential is also accepted by Unix authentication for root. You can review saved logins with [firefox_decrypt](https://github.com/unode/firefox_decrypt). The following example tests candidate Primary Passwords from a password file:
+Để giải mã thông tin đăng nhập đã lưu từ một profile có thể truy cập, cần cung cấp Primary Password của [Firefox](https://support.mozilla.org/en-US/kb/use-primary-password-protect-stored-logins), nếu đã được thiết lập, hoặc khôi phục mật khẩu này riêng; profile không tiết lộ mật khẩu đó. Hãy xác nhận rằng mọi thông tin đăng nhập khôi phục được đều đăng nhập thành công vào tài khoản web tương ứng. Quyền truy cập Unix root cần có bằng chứng riêng cho thấy thông tin xác thực đó cũng được hệ thống xác thực Unix chấp nhận cho root. Bạn có thể xem thông tin đăng nhập đã lưu bằng [firefox_decrypt](https://github.com/unode/firefox_decrypt). Ví dụ sau đây kiểm tra các mật khẩu Primary Password tiềm năng từ một tệp mật khẩu:
 
 ```bash:brute.sh
 #!/bin/bash
@@ -64,75 +64,75 @@ while read pass; do
 done < $passfile
 ```
 
-![Browsers Artifacts - Firefox: echo "$pass" | python firefox decrypt.py](<../../../images/image (692).png>)
+![Dấu vết trình duyệt - Firefox: echo "$pass" | python firefox decrypt.py](<../../../images/image (692).png>)
 
 ## Google Chrome
 
-Google Chrome stores user profiles in specific locations based on the operating system:<sup>[[1]](#references)</sup>
+Google Chrome lưu trữ hồ sơ người dùng tại các vị trí cụ thể tùy theo hệ điều hành:<sup>[[1]](#references)</sup>
 
 - **Linux**: `~/.config/google-chrome/`
 - **Windows**: `C:\Users\XXX\AppData\Local\Google\Chrome\User Data\`
 - **MacOS**: `/Users/$USER/Library/Application Support/Google/Chrome/`
 
-Within these directories, most user data can be found in the **Default/** or **ChromeDefaultData/** folders. The following files hold significant data:<sup>[[1]](#references)</sup>
+Trong các thư mục này, hầu hết dữ liệu người dùng nằm trong các thư mục **Default/** hoặc **ChromeDefaultData/**. Những tệp sau chứa dữ liệu quan trọng:<sup>[[1]](#references)</sup>
 
-- **History**: Contains URLs, downloads, and search keywords. On Windows, [ChromeHistoryView](https://www.nirsoft.net/utils/chrome_history_view.html) can be used to read the history. The "Transition Type" column has various meanings, including user clicks on links, typed URLs, form submissions, and page reloads.
-- **Cookies**: Stores cookies. For inspection, [ChromeCookiesView](https://www.nirsoft.net/utils/chrome_cookies_view.html) is available.
-- **Cache**: Holds cached data. To inspect, Windows users can utilize [ChromeCacheView](https://www.nirsoft.net/utils/chrome_cache_view.html).
+- **History**: Chứa URL, nội dung tải xuống và từ khóa tìm kiếm. Trên Windows, có thể dùng [ChromeHistoryView](https://www.nirsoft.net/utils/chrome_history_view.html) để đọc lịch sử. Cột "Transition Type" có nhiều ý nghĩa khác nhau, bao gồm người dùng nhấp vào liên kết, nhập URL, gửi biểu mẫu và tải lại trang.
+- **Cookies**: Lưu trữ cookie. Có thể dùng [ChromeCookiesView](https://www.nirsoft.net/utils/chrome_cookies_view.html) để kiểm tra.
+- **Cache**: Chứa dữ liệu được lưu trong cache. Người dùng Windows có thể dùng [ChromeCacheView](https://www.nirsoft.net/utils/chrome_cache_view.html) để kiểm tra.
 
-  Electron-based desktop apps (e.g., Discord) also use Chromium Simple Cache and leave rich on-disk artifacts. See:
+  Các ứng dụng desktop dựa trên Electron (ví dụ: Discord) cũng sử dụng Chromium Simple Cache và để lại nhiều dấu vết trên đĩa. Xem:
 
   {{#ref}}
   discord-cache-forensics.md
   {{#endref}}
-- **Bookmarks**: User bookmarks.
-- **Web Data**: Contains form history.
-- **Favicons**: Stores website favicons.
-- **Login Data**: Includes login credentials like usernames and passwords.
-- **Current Session**/**Current Tabs**: Data about the current browsing session and open tabs.
-- **Last Session**/**Last Tabs**: Information about the sites active during the last session before Chrome was closed.
-- **Extensions**: Directories for browser extensions and addons.
-- **Thumbnails**: Stores website thumbnails.
-- **Preferences**: A file rich in information, including settings for plugins, extensions, pop-ups, notifications, and more.
-- **Browser’s built-in anti-phishing**: To check if anti-phishing and malware protection are enabled, run `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`. Look for `{"enabled: true,"}` in the output.<sup>[[2]](#references)</sup>
+- **Bookmarks**: Dấu trang của người dùng.
+- **Web Data**: Chứa lịch sử biểu mẫu.
+- **Favicons**: Lưu favicon của trang web.
+- **Login Data**: Chứa thông tin đăng nhập như tên người dùng và mật khẩu.
+- **Current Session**/**Current Tabs**: Dữ liệu về phiên duyệt web hiện tại và các tab đang mở.
+- **Last Session**/**Last Tabs**: Thông tin về các trang web đang hoạt động trong phiên cuối cùng trước khi Chrome đóng.
+- **Extensions**: Các thư mục chứa tiện ích mở rộng và addon của trình duyệt.
+- **Thumbnails**: Lưu hình thu nhỏ của trang web.
+- **Preferences**: Tệp chứa nhiều thông tin, bao gồm cài đặt plugin, tiện ích mở rộng, cửa sổ bật lên, thông báo và nhiều nội dung khác.
+- **Browser’s built-in anti-phishing**: Để kiểm tra tính năng chống phishing và bảo vệ khỏi malware có được bật hay không, chạy `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`. Tìm `{"enabled: true,"}` trong kết quả.<sup>[[2]](#references)</sup>
 
-A Chromium profile's `Local Extension Settings/<extension-id>/` directory may hold extension-local state, including password-manager key material. For example, [Passbolt says its encrypted private key is held in browser extension local storage](https://www.passbolt.com/docs/user/faq/why-a-browser-extension/), and its [Chrome extension ID](https://chromewebstore.google.com/detail/passbolt-open-source-pass/didegimhafipceonhjepacocaffmoppf) identifies the relevant directory. Directory presence alone neither proves a key is present nor unlocks a vault: the user must have access to the profile data, a usable private key and passphrase, and an authorized recovery/authentication path to the server. A vault item containing an operating-system account password requires separate account-reuse verification. Routine enumeration should report only the storage path, without dumping its LevelDB files or secret values.
+Thư mục `Local Extension Settings/<extension-id>/` trong hồ sơ Chromium có thể chứa trạng thái riêng của tiện ích mở rộng, bao gồm dữ liệu khóa của password manager. Ví dụ, [Passbolt cho biết khóa riêng tư được mã hóa của họ được lưu trong bộ nhớ cục bộ của tiện ích mở rộng trình duyệt](https://www.passbolt.com/docs/user/faq/why-a-browser-extension/), và [Chrome extension ID](https://chromewebstore.google.com/detail/passbolt-open-source-pass/didegimhafipceonhjepacocaffmoppf) xác định thư mục tương ứng. Chỉ riêng sự hiện diện của thư mục không chứng minh rằng có khóa bên trong, cũng không mở khóa vault: người dùng cần có quyền truy cập vào dữ liệu hồ sơ, khóa riêng tư và passphrase có thể sử dụng, cùng một quy trình khôi phục/xác thực được máy chủ cho phép. Mục vault chứa mật khẩu tài khoản hệ điều hành cần được xác minh riêng để biết mật khẩu đó có được tái sử dụng cho tài khoản hay không. Hoạt động enumeration thông thường chỉ nên báo cáo đường dẫn lưu trữ, không trích xuất các tệp LevelDB hoặc giá trị bí mật.
 
-## **SQLite DB Data Recovery**
+## **Khôi phục dữ liệu DB SQLite**
 
-As you can observe in the previous sections, both Chrome and Firefox use **SQLite** databases to store the data. It's possible to **recover deleted entries using the tool** [**sqlparse**](https://github.com/padfoot999/sqlparse) **or** [**sqlparse_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases).
+Như đã thấy ở các phần trước, cả Chrome và Firefox đều dùng cơ sở dữ liệu **SQLite** để lưu dữ liệu. Có thể **khôi phục các bản ghi đã xóa bằng công cụ** [**sqlparse**](https://github.com/padfoot999/sqlparse) **hoặc** [**sqlparse_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases).
 
 ## **Internet Explorer 11**
 
-Internet Explorer 11 manages its data and metadata across various locations, aiding in separating stored information and its corresponding details for easy access and management.
+Internet Explorer 11 quản lý dữ liệu và metadata ở nhiều vị trí khác nhau, giúp tách riêng thông tin được lưu trữ và các chi tiết tương ứng để dễ dàng truy cập và quản lý.
 
-### Metadata Storage
+### Lưu trữ metadata
 
-Metadata for Internet Explorer is stored in `%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data` (with VX being V01, V16, or V24). Accompanying this, the `V01.log` file might show modification time discrepancies with `WebcacheVX.data`, indicating a need for repair using `esentutl /r V01 /d`. This metadata, housed in an ESE database, can be recovered and inspected using tools like photorec and [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html), respectively. Within the **Containers** table, one can discern the specific tables or containers where each data segment is stored, including cache details for other Microsoft tools such as Skype.
+Metadata của Internet Explorer được lưu tại `%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data` (trong đó VX là V01, V16 hoặc V24). Tệp `V01.log` đi kèm có thể có thời gian chỉnh sửa không khớp với `WebcacheVX.data`, cho thấy cần sửa bằng lệnh `esentutl /r V01 /d`. Metadata này nằm trong cơ sở dữ liệu ESE, có thể được khôi phục và kiểm tra lần lượt bằng các công cụ như photorec và [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html). Trong bảng **Containers**, có thể xác định các bảng hoặc vùng chứa cụ thể lưu từng phân đoạn dữ liệu, bao gồm cả chi tiết cache của các công cụ Microsoft khác như Skype.
 
-### Cache Inspection
+### Kiểm tra cache
 
-The [IECacheView](https://www.nirsoft.net/utils/ie_cache_viewer.html) tool allows for cache inspection, requiring the cache data extraction folder location. Metadata for cache includes filename, directory, access count, URL origin, and timestamps indicating cache creation, access, modification, and expiry times.
+Công cụ [IECacheView](https://www.nirsoft.net/utils/ie_cache_viewer.html) cho phép kiểm tra cache; cần cung cấp vị trí thư mục chứa dữ liệu cache đã trích xuất. Metadata của cache bao gồm tên tệp, thư mục, số lần truy cập, URL nguồn và dấu thời gian cho biết thời điểm tạo, truy cập, chỉnh sửa và hết hạn của cache.
 
-### Cookies Management
+### Quản lý cookie
 
-Cookies can be explored using [IECookiesView](https://www.nirsoft.net/utils/iecookies.html), with metadata encompassing names, URLs, access counts, and various time-related details. Persistent cookies are stored in `%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies`, with session cookies residing in memory.
+Có thể xem cookie bằng [IECookiesView](https://www.nirsoft.net/utils/iecookies.html). Metadata bao gồm tên, URL, số lần truy cập và nhiều thông tin thời gian khác. Cookie lâu dài được lưu tại `%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies`, còn cookie phiên nằm trong bộ nhớ.
 
-### Download Details
+### Chi tiết nội dung tải xuống
 
-Downloads metadata is accessible via [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html), with specific containers holding data like URL, file type, and download location. Physical files can be found under `%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory`.
+Có thể truy cập metadata tải xuống bằng [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html); các vùng chứa cụ thể lưu dữ liệu như URL, loại tệp và vị trí tải xuống. Các tệp thực tế có thể được tìm thấy tại `%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory`.
 
-### Browsing History
+### Lịch sử duyệt web
 
-To review browsing history, [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) can be used, requiring the location of extracted history files and configuration for Internet Explorer. Metadata here includes modification and access times, along with access counts. History files are located in `%userprofile%\Appdata\Local\Microsoft\Windows\History`.
+Để xem lại lịch sử duyệt web, có thể dùng [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html); cần cung cấp vị trí các tệp lịch sử đã trích xuất và cấu hình cho Internet Explorer. Metadata bao gồm thời gian chỉnh sửa và truy cập, cùng số lần truy cập. Các tệp lịch sử nằm tại `%userprofile%\Appdata\Local\Microsoft\Windows\History`.
 
-### Typed URLs
+### URL đã nhập
 
-Typed URLs and their usage timings are stored within the registry under `NTUSER.DAT` at `Software\Microsoft\InternetExplorer\TypedURLs` and `Software\Microsoft\InternetExplorer\TypedURLsTime`, tracking the last 50 URLs entered by the user and their last input times.
+URL đã nhập và thời điểm sử dụng được lưu trong registry thuộc `NTUSER.DAT`, tại `Software\Microsoft\InternetExplorer\TypedURLs` và `Software\Microsoft\InternetExplorer\TypedURLsTime`. Các mục này theo dõi 50 URL gần nhất do người dùng nhập và thời điểm nhập gần nhất của từng URL.
 
 ## Microsoft Edge
 
-Microsoft Edge stores user data in `%userprofile%\Appdata\Local\Packages`. The paths for various data types are:<sup>[[1]](#references)</sup>
+Microsoft Edge lưu dữ liệu người dùng tại `%userprofile%\Appdata\Local\Packages`. Đường dẫn của các loại dữ liệu khác nhau như sau:<sup>[[1]](#references)</sup>
 
 - **Profile Path**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC`
 - **History, Cookies, and Downloads**: `C:\Users\XX\AppData\Local\Microsoft\Windows\WebCache\WebCacheV01.dat`
@@ -142,29 +142,28 @@ Microsoft Edge stores user data in `%userprofile%\Appdata\Local\Packages`. The p
 
 ## Safari
 
-Safari data is stored at `/Users/$User/Library/Safari`. Key files include:<sup>[[3]](#references)</sup>
+Dữ liệu Safari được lưu tại `/Users/$User/Library/Safari`. Các tệp quan trọng gồm:<sup>[[3]](#references)</sup>
 
-- **History.db**: Contains `history_visits` and `history_items` tables with URLs and visit timestamps. Use `sqlite3` to query.
-- **Downloads.plist**: Information about downloaded files.
-- **Bookmarks.plist**: Stores bookmarked URLs.
-- **TopSites.plist**: Most frequently visited sites.
-- **Extensions.plist**: List of Safari browser extensions. Use `plutil` or `pluginkit` to retrieve.
-- **UserNotificationPermissions.plist**: Domains permitted to push notifications. Use `plutil` to parse.
-- **LastSession.plist**: Tabs from the last session. Use `plutil` to parse.
-- **Browser’s built-in anti-phishing**: Check using `defaults read com.apple.Safari WarnAboutFraudulentWebsites`. A response of 1 indicates the feature is active.<sup>[[2]](#references)</sup>
+- **History.db**: Chứa các bảng `history_visits` và `history_items` với URL và dấu thời gian truy cập. Dùng `sqlite3` để truy vấn.
+- **Downloads.plist**: Thông tin về các tệp đã tải xuống.
+- **Bookmarks.plist**: Lưu URL đã đánh dấu.
+- **TopSites.plist**: Các trang được truy cập thường xuyên nhất.
+- **Extensions.plist**: Danh sách tiện ích mở rộng của trình duyệt Safari. Dùng `plutil` hoặc `pluginkit` để truy xuất.
+- **UserNotificationPermissions.plist**: Các domain được phép gửi thông báo đẩy. Dùng `plutil` để phân tích.
+- **LastSession.plist**: Các tab từ phiên gần nhất. Dùng `plutil` để phân tích.
+- **Browser’s built-in anti-phishing**: Kiểm tra bằng lệnh `defaults read com.apple.Safari WarnAboutFraudulentWebsites`. Kết quả 1 cho biết tính năng đang hoạt động.<sup>[[2]](#references)</sup>
 
 ## Opera
 
-Opera's data resides in `/Users/$USER/Library/Application Support/com.operasoftware.Opera` and shares Chrome's format for history and downloads.
+Dữ liệu của Opera nằm tại `/Users/$USER/Library/Application Support/com.operasoftware.Opera` và sử dụng định dạng giống Chrome cho lịch sử và nội dung tải xuống.
 
-- **Browser’s built-in anti-phishing**: Verify by checking if `fraud_protection_enabled` in the Preferences file is set to `true` using `grep`.<sup>[[2]](#references)</sup>
+- **Browser’s built-in anti-phishing**: Xác minh bằng cách dùng `grep` kiểm tra xem `fraud_protection_enabled` trong tệp Preferences có được đặt thành `true` hay không.<sup>[[2]](#references)</sup>
 
-These paths and commands are crucial for accessing and understanding the browsing data stored by different web browsers.
+Các đường dẫn và lệnh này rất quan trọng để truy cập và hiểu dữ liệu duyệt web được lưu bởi các trình duyệt khác nhau.
 
 ## References
 
-- [1] [Web Browsers Forensics: A Guide On Doing Web Browsers Forensic Analysis](https://nasbench.medium.com/web-browsers-forensics-7e99940c579a)
-- [2] [macOS Incident Response | Part 3: System Manipulation](https://www.sentinelone.com/labs/macos-incident-response-part-3-system-manipulation/)
-- [3] [OS X Incident Response: Scripting and Analysis by Jaron Bradley](https://books.google.com/books?id=jfMqCgAAQBAJ\&pg=PA128\&lpg=PA128\&dq=%22This+file)
-
+- [1] [Pháp y trình duyệt web: Hướng dẫn thực hiện phân tích pháp y trình duyệt web](https://nasbench.medium.com/web-browsers-forensics-7e99940c579a)
+- [2] [Ứng phó sự cố macOS | Phần 3: Thao túng hệ thống](https://www.sentinelone.com/labs/macos-incident-response-part-3-system-manipulation/)
+- [3] [Ứng phó sự cố OS X: Lập trình kịch bản và phân tích, của Jaron Bradley](https://books.google.com/books?id=jfMqCgAAQBAJ\&pg=PA128\&lpg=PA128\&dq=%22This+file)
 {{#include ../../../banners/hacktricks-training.md}}

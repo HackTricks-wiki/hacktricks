@@ -1,19 +1,19 @@
-# Linux Forensics
+# Điều tra pháp chứng Linux
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Initial Information Gathering
+## Thu thập thông tin ban đầu
 
-### Basic Information
+### Thông tin cơ bản
 
-First of all, it's recommended to have some **USB** with **good known binaries and libraries on it** (you can just get ubuntu and copy the folders _/bin_, _/sbin_, _/lib,_ and _/lib64_), then mount the USB, and modify the env variables to use those binaries:
+Trước tiên, bạn nên chuẩn bị một **USB** chứa **các binary và thư viện đáng tin cậy** (bạn có thể tải Ubuntu rồi sao chép các thư mục _/bin_, _/sbin_, _/lib,_ và _/lib64_), sau đó gắn USB và chỉnh sửa các biến môi trường để sử dụng những binary đó:
 
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
 ```
 
-Once you have configured the system to use good and known binaries you can start **extracting some basic information**:
+Sau khi đã cấu hình hệ thống để sử dụng các binary tốt và đã biết, bạn có thể bắt đầu **trích xuất một số thông tin cơ bản**:
 
 ```bash
 date #Date and time (Clock may be skewed, Might be at a different timezone)
@@ -33,48 +33,48 @@ cat /etc/shadow #Unexpected data?
 find /directory -type f -mtime -1 -print #Find modified files during the last minute in the directory
 ```
 
-#### Suspicious information
+#### Thông tin đáng ngờ
 
-While obtaining the basic information you should check for weird things like:
+Khi thu thập thông tin cơ bản, bạn nên kiểm tra những điểm bất thường như:
 
-- **Root processes** usually run with low PIDS, so if you find a root process with a big PID you may suspect
-- Check **registered logins** of users without a shell inside `/etc/passwd`
-- Check for **password hashes** inside `/etc/shadow` for users without a shell
+- Các tiến trình **root** thường chạy với PID thấp, vì vậy nếu bạn phát hiện một tiến trình root có PID lớn, bạn có thể nghi ngờ
+- Kiểm tra **các tài khoản đăng nhập đã đăng ký** của người dùng không có shell trong `/etc/passwd`
+- Kiểm tra **password hash** trong `/etc/shadow` của người dùng không có shell
 
 ### Memory Dump
 
-To obtain the memory of the running system, it's recommended to use [**LiME**](https://github.com/504ensicsLabs/LiME).\
-To **compile** it, you need to use the **same kernel** that the victim machine is using.
+Để lấy bộ nhớ của hệ thống đang chạy, bạn nên sử dụng [**LiME**](https://github.com/504ensicsLabs/LiME).\
+Để **biên dịch** nó, bạn cần sử dụng **cùng kernel** mà máy nạn nhân đang chạy.
 
 > [!TIP]
-> Remember that you **cannot install LiME or any other thing** in the victim machine as it will make several changes to it
+> Hãy nhớ rằng bạn **không thể cài đặt LiME hay bất kỳ thứ gì khác** trên máy nạn nhân vì điều đó sẽ tạo ra nhiều thay đổi trên máy
 
-So, if you have an identical version of Ubuntu you can use `apt-get install lime-forensics-dkms`\
-In other cases, you need to download [**LiME**](https://github.com/504ensicsLabs/LiME) from github and compile it with correct kernel headers. To **obtain the exact kernel headers** of the victim machine, you can just **copy the directory** `/lib/modules/<kernel version>` to your machine, and then **compile** LiME using them:
+Vì vậy, nếu có một phiên bản Ubuntu giống hệt, bạn có thể dùng `apt-get install lime-forensics-dkms`\
+Trong các trường hợp khác, bạn cần tải [**LiME**](https://github.com/504ensicsLabs/LiME) từ github và biên dịch nó với kernel header phù hợp. Để **lấy chính xác kernel header** của máy nạn nhân, bạn chỉ cần **sao chép thư mục** `/lib/modules/<kernel version>` sang máy của mình, rồi **biên dịch** LiME bằng các header đó:
 
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
 sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
 ```
 
-LiME supports 3 **formats**:
+LiME hỗ trợ 3 **định dạng**:
 
-- Raw (every segment concatenated together)
-- Padded (same as raw, but with zeroes in right bits)
-- Lime (recommended format with metadata
+- Raw (mọi phân đoạn được nối lại với nhau)
+- Padded (giống raw, nhưng có thêm các số 0 ở các bit bên phải)
+- Lime (định dạng được khuyến nghị, có metadata)
 
-LiME can also be used to **send the dump via network** instead of storing it on the system using something like: `path=tcp:4444`
+LiME cũng có thể được dùng để **gửi bản dump qua mạng** thay vì lưu trên hệ thống bằng cách dùng thứ gì đó như: `path=tcp:4444`
 
-### Disk Imaging
+### Tạo ảnh đĩa
 
-#### Shutting down
+#### Tắt máy
 
-First of all, you will need to **shut down the system**. This isn't always an option as some times system will be a production server that the company cannot afford to shut down.\
-There are **2 ways** of shutting down the system, a **normal shutdown** and a **"plug the plug" shutdown**. The first one will allow the **processes to terminate as usual** and the **filesystem** to be **synchronized**, but it will also allow the possible **malware** to **destroy evidence**. The "pull the plug" approach may carry **some information loss** (not much of the info is going to be lost as we already took an image of the memory ) and the **malware won't have any opportunity** to do anything about it. Therefore, if you **suspect** that there may be a **malware**, just execute the **`sync`** **command** on the system and pull the plug.
+Trước tiên, bạn cần **tắt hệ thống**. Không phải lúc nào đây cũng là một lựa chọn vì đôi khi hệ thống là máy chủ production mà công ty không thể tắt.\
+Có **2 cách** để tắt hệ thống: **tắt máy bình thường** và **rút nguồn**. Cách thứ nhất cho phép các **process** **kết thúc như thường lệ** và **hệ thống tệp** được **đồng bộ**, nhưng cũng có thể tạo cơ hội cho **malware** **hủy hoại bằng chứng**. Cách **rút nguồn** có thể gây **mất một ít thông tin** (không nhiều thông tin bị mất vì chúng ta đã tạo ảnh bộ nhớ) và **malware sẽ không có cơ hội** làm gì cả. Vì vậy, nếu bạn **nghi ngờ** có thể có **malware**, chỉ cần chạy **lệnh** **`sync`** trên hệ thống rồi rút nguồn.
 
-#### Taking an image of the disk
+#### Tạo ảnh đĩa
 
-It's important to note that **before connecting your computer to anything related to the case**, you need to be sure that it's going to be **mounted as read only** to avoid modifying any information.
+Lưu ý rằng **trước khi kết nối máy tính của bạn với bất cứ thứ gì liên quan đến vụ việc**, bạn cần đảm bảo máy sẽ được **mount ở chế độ chỉ đọc** để tránh sửa đổi bất kỳ thông tin nào.
 
 ```bash
 #Create a raw copy of the disk
@@ -85,9 +85,9 @@ dcfldd if=<subject device> of=<image file> bs=512 hash=<algorithm> hashwindow=<c
 dcfldd if=/dev/sdc of=/media/usb/pc.image hash=sha256 hashwindow=1M hashlog=/media/usb/pc.hashes
 ```
 
-### Disk Image pre-analysis
+### Phân tích sơ bộ ảnh đĩa
 
-Imaging a disk image with no more data.
+Tạo ảnh đĩa mà không có thêm dữ liệu.
 
 ```bash
 #Find out if it's a disk image using "file" command
@@ -142,32 +142,32 @@ icat -i raw -f ext4 disk.img 16
 ThisisTheMasterSecret
 ```
 
-## Search for known Malware
+## Tìm kiếm Malware đã biết
 
-### Modified System Files
+### Tệp hệ thống bị sửa đổi
 
-Linux offers tools for ensuring the integrity of system components, crucial for spotting potentially problematic files.<sup>[[1]](#references)</sup>
+Linux cung cấp các công cụ để đảm bảo tính toàn vẹn của các thành phần hệ thống, rất cần thiết để phát hiện những tệp có khả năng gây ra vấn đề.<sup>[[1]](#references)</sup>
 
-- **RedHat-based systems**: Use `rpm -Va` for a comprehensive check.
-- **Debian-based systems**: `dpkg --verify` for initial verification, followed by `debsums | grep -v "OK$"` (after installing `debsums` with `apt-get install debsums`) to identify any issues.
+- **Các hệ thống dựa trên RedHat**: Dùng `rpm -Va` để kiểm tra toàn diện.
+- **Các hệ thống dựa trên Debian**: Dùng `dpkg --verify` để xác minh ban đầu, sau đó chạy `debsums | grep -v "OK$"` (sau khi cài đặt `debsums` bằng `apt-get install debsums`) để xác định các vấn đề.
 
-### Malware/Rootkit Detectors
+### Công cụ phát hiện Malware/Rootkit
 
-Read the following page to learn about tools that can be useful to find malware:
+Đọc trang sau để tìm hiểu về các công cụ có thể hữu ích trong việc tìm malware:
 
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Search installed programs
+## Tìm kiếm các chương trình đã cài đặt
 
-To effectively search for installed programs on both Debian and RedHat systems, consider leveraging system logs and databases alongside manual checks in common directories.<sup>[[1]](#references)</sup>
+Để tìm kiếm hiệu quả các chương trình đã cài đặt trên cả hệ thống Debian và RedHat, hãy cân nhắc tận dụng nhật ký hệ thống và cơ sở dữ liệu, đồng thời kiểm tra thủ công các thư mục phổ biến.<sup>[[1]](#references)</sup>
 
-- For Debian, inspect _**`/var/lib/dpkg/status`**_ and _**`/var/log/dpkg.log`**_ to fetch details about package installations, using `grep` to filter for specific information.
-- RedHat users can query the RPM database with `rpm -qa --root=/mntpath/var/lib/rpm` to list installed packages.
+- Với Debian, kiểm tra _**`/var/lib/dpkg/status`**_ và _**`/var/log/dpkg.log`**_ để lấy thông tin chi tiết về các gói đã cài đặt, dùng `grep` để lọc thông tin cụ thể.
+- Người dùng RedHat có thể truy vấn cơ sở dữ liệu RPM bằng `rpm -qa --root=/mntpath/var/lib/rpm` để liệt kê các gói đã cài đặt.
 
-To uncover software installed manually or outside of these package managers, explore directories like _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_, and _**`/sbin`**_. Combine directory listings with system-specific commands to identify executables not associated with known packages, enhancing your search for all installed programs.
+Để tìm phần mềm được cài đặt thủ công hoặc bên ngoài các trình quản lý gói này, hãy kiểm tra các thư mục như _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_ và _**`/sbin`**_. Kết hợp liệt kê thư mục với các lệnh dành riêng cho hệ thống để xác định những tệp thực thi không liên kết với các gói đã biết, từ đó mở rộng phạm vi tìm kiếm tất cả chương trình đã cài đặt.
 
 ```bash
 # Debian package and log details
@@ -185,9 +185,9 @@ find /sbin/ –exec rpm -qf {} \; | grep "is not"
 find / -type f -executable | grep <something>
 ```
 
-## Recover Deleted Running Binaries
+## Khôi phục các binary đang chạy đã bị xóa
 
-Imagine a process that was executed from /tmp/exec and then deleted. It's possible to extract it
+Hãy tưởng tượng một tiến trình được chạy từ /tmp/exec rồi bị xóa. Có thể trích xuất nó.
 
 ```bash
 cd /proc/3746/ #PID with the exec file deleted
@@ -195,37 +195,37 @@ head -1 maps #Get address of the file. It was 08048000-08049000
 dd if=mem bs=1 skip=08048000 count=1000 of=/tmp/exec2 #Recorver it
 ```
 
-## Syscall Trace Triage with SQLite and FTS5
+## Phân loại dấu vết syscall bằng SQLite và FTS5
 
-When a process is still running or can be re-executed in a lab, **`strace`** can provide a fast behavioral trace without needing kernel modules or full EDR telemetry. For large traces, avoid reading the raw log directly or pasting it into an LLM: store it in a **SQLite** database and query only the minimal subset you need.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
+Khi một process vẫn đang chạy hoặc có thể được thực thi lại trong lab, **`strace`** có thể nhanh chóng ghi lại hành vi mà không cần kernel module hoặc telemetry EDR đầy đủ. Với các trace lớn, tránh đọc trực tiếp raw log hoặc dán nó vào LLM: hãy lưu log vào cơ sở dữ liệu **SQLite** và chỉ truy vấn tập dữ liệu tối thiểu cần thiết.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
 
 > [!WARNING]
-> Attaching `strace` changes process timing and may affect race conditions or other fragile bugs. Prefer reproducing on a copy/lab system when possible.
+> Gắn `strace` sẽ làm thay đổi thời gian chạy của process và có thể ảnh hưởng đến các điều kiện tranh chấp hoặc những bug khó tái hiện khác. Khi có thể, hãy ưu tiên tái hiện trên hệ thống lab/bản sao.
 
-### Capture
+### Thu thập
 
-For a new process:
+Đối với một process mới:
 
 ```bash
 strace -ff -ttt -yy -s 4096 -o /tmp/trace.log <command>
 ```
 
-For a live process:
+Đối với một tiến trình đang chạy:
 
 ```bash
 strace -ff -ttt -yy -s 4096 -o /tmp/trace.log -p <PID>
 ```
 
-Useful options:
+Các tùy chọn hữu ích:
 
-- `-ff`: follow forks/threads and keep per-process outputs
-- `-ttt`: epoch timestamps for easy timeline correlation
-- `-yy`: resolve file descriptors to backing paths/sockets when possible
-- `-s 4096`: keep long path and buffer arguments from being truncated
+- `-ff`: theo dõi fork/thread và lưu đầu ra riêng cho từng tiến trình
+- `-ttt`: dấu thời gian Unix để dễ đối chiếu dòng thời gian
+- `-yy`: phân giải file descriptor thành đường dẫn/socket tương ứng khi có thể
+- `-s 4096`: giữ nguyên các đối số đường dẫn và bộ đệm dài, tránh bị cắt ngắn
 
-### Normalize
+### Chuẩn hóa
 
-A practical schema is one row per syscall and one row per argument:
+Một schema thực tế gồm một hàng cho mỗi lời gọi hệ thống và một hàng cho mỗi đối số:
 
 ```sql
 CREATE TABLE syscalls (
@@ -246,11 +246,11 @@ CREATE TABLE syscall_args (
 );
 ```
 
-This avoids trying to flatten heterogeneous syscall lines into a single wide table and keeps joins predictable during triage.
+Điều này giúp tránh việc cố gắng dồn các dòng syscall không đồng nhất vào một bảng rộng duy nhất và giữ cho các phép join dễ dự đoán trong quá trình phân loại.
 
-### Index text-heavy arguments with FTS5
+### Lập chỉ mục các đối số nhiều văn bản bằng FTS5
 
-Naive path hunting with `LIKE "%...%"` becomes very slow on large traces. Create an FTS5 index for argument text and search that instead:
+Việc tìm kiếm đường dẫn theo cách ngây thơ bằng `LIKE "%...%"` trở nên rất chậm trên các trace lớn. Hãy tạo chỉ mục FTS5 cho văn bản đối số rồi tìm kiếm trên đó:
 
 ```sql
 CREATE VIRTUAL TABLE syscall_args_fts
@@ -260,7 +260,7 @@ INSERT INTO syscall_args_fts(rowid, raw)
 SELECT id, raw FROM syscall_args;
 ```
 
-Example: recover file activity under `/tmp` without scanning every row:
+Ví dụ: khôi phục hoạt động tệp trong `/tmp` mà không cần quét từng hàng:
 
 ```sql
 SELECT s.timestamp, s.pid, s.name, a.position, a.raw
@@ -272,30 +272,30 @@ WHERE syscall_args_fts MATCH 'tmp'
 ORDER BY s.timestamp;
 ```
 
-### High-signal investigations
+### Điều tra có tín hiệu cao
 
-- **PATH hijacking / fake sudo**: search for writes and `chmod`/`rename` activity under `~/.local/bin/`, then correlate with later `execve` of privileged-looking names such as `sudo`.
-- **TOCTOU on temporary files**: pivot on the same `/tmp/...` path across `stat`, `access`, `openat`, `rename`, `unlink`, `link`, `symlink`, and `execve` to identify check/use gaps.
-- **Crash root cause**: correlate `mmap` of a file with writes or truncation of the same inode/path by another process, then inspect the signal/exit sequence for `SIGBUS`.
-- **Network destination recovery**: filter `connect`, `sendto`, `sendmsg`, `recvfrom`, and socket-related arguments to extract peer IPs and ports.
+- **Chiếm quyền PATH / sudo giả**: tìm các thao tác ghi và `chmod`/`rename` trong `~/.local/bin/`, sau đó đối chiếu với các lần `execve` sau đó của những tên có vẻ đặc quyền như `sudo`.
+- **TOCTOU trên tệp tạm thời**: lần theo cùng một đường dẫn `/tmp/...` qua `stat`, `access`, `openat`, `rename`, `unlink`, `link`, `symlink` và `execve` để xác định khoảng trống giữa kiểm tra và sử dụng.
+- **Nguyên nhân gốc của sự cố crash**: đối chiếu thao tác `mmap` một tệp với việc một tiến trình khác ghi hoặc cắt ngắn cùng inode/đường dẫn, sau đó kiểm tra chuỗi signal/exit để xác định `SIGBUS`.
+- **Khôi phục đích mạng**: lọc `connect`, `sendto`, `sendmsg`, `recvfrom` và các đối số liên quan đến socket để trích xuất IP và port của máy ngang hàng.
 
-### LLM-assisted trace analysis
+### Phân tích trace với sự hỗ trợ của LLM
 
-If you want an LLM to assist, expose a **read-only** SQLite handle and give it the full schema. Let it issue raw SQL instead of wrapping the database behind narrow helper functions. This usually works better for joins, temporal correlation, and FTS lookups.
+Nếu muốn LLM hỗ trợ, hãy cung cấp một kết nối SQLite **chỉ đọc** và toàn bộ schema. Cho phép nó chạy SQL thô thay vì bọc database sau các hàm trợ giúp hạn chế. Cách này thường hiệu quả hơn với các truy vấn join, đối chiếu theo thời gian và tra cứu FTS.
 
-Practical rules:
+Quy tắc thực tế:
 
-- Keep the database read-only, for example with `sqlite3 'file:trace.db?mode=ro'`.
-- Give the model examples of valid `JOIN` and `FTS5 MATCH` queries.
-- Do **not** paste raw multi-GB `strace` logs into the prompt.
-- Ask focused questions such as:
-  - "List persistent files written by this program."
-  - "Did it create or replace executables in user-controlled PATH directories?"
-  - "Explain why this trace ends in SIGBUS."
+- Giữ database ở chế độ chỉ đọc, ví dụ dùng `sqlite3 'file:trace.db?mode=ro'`.
+- Cung cấp cho model các ví dụ về truy vấn `JOIN` và `FTS5 MATCH` hợp lệ.
+- **Không** dán các log `strace` thô nhiều GB vào prompt.
+- Đặt các câu hỏi tập trung như:
+  - "Liệt kê các tệp bền vững do chương trình này ghi."
+  - "Chương trình có tạo hoặc thay thế các tệp thực thi trong các thư mục PATH do người dùng kiểm soát không?"
+  - "Giải thích vì sao trace này kết thúc bằng SIGBUS."
 
-## Inspect Autostart locations
+## Kiểm tra các vị trí tự khởi động
 
-### Scheduled Tasks
+### Tác vụ theo lịch trình
 
 ```bash
 cat /var/spool/cron/crontabs/*  \
@@ -311,8 +311,8 @@ cat /var/spool/cron/crontabs/*  \
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
 
-#### Hunt: Cron/Anacron abuse via 0anacron and suspicious stubs
-Attackers often edit the 0anacron stub present under each /etc/cron.*/ directory to ensure periodic execution.<sup>[[4]](#references)</sup>
+#### Truy tìm: Lạm dụng Cron/Anacron qua stub 0anacron và các stub đáng ngờ
+Kẻ tấn công thường chỉnh sửa stub 0anacron trong từng thư mục /etc/cron.*/ để đảm bảo thực thi định kỳ.<sup>[[4]](#references)</sup>
 
 ```bash
 # List 0anacron files and their timestamps/sizes
@@ -322,8 +322,8 @@ for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron
 grep -R --line-number -E 'curl|wget|/bin/sh|python|bash -c' /etc/cron.*/* 2>/dev/null
 ```
 
-#### Hunt: SSH hardening rollback and backdoor shells
-Changes to sshd_config and system account shells are common post‑exploitation to preserve access.<sup>[[4]](#references)</sup>
+#### Săn tìm: rollback hardening SSH và backdoor shells
+Các thay đổi đối với sshd_config và shell của tài khoản hệ thống thường được thực hiện trong giai đoạn post-exploitation nhằm duy trì quyền truy cập.<sup>[[4]](#references)</sup>
 
 ```bash
 # Root login enablement (flag "yes" or lax values)
@@ -333,33 +333,33 @@ grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
 awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
 ```
 
-#### Hunt: Cloud C2 markers (Dropbox/Cloudflare Tunnel)
-- Dropbox API beacons typically use api.dropboxapi.com or content.dropboxapi.com over HTTPS with Authorization: Bearer tokens.
-  - Hunt in proxy/Zeek/NetFlow for unexpected Dropbox egress from servers.
-- Cloudflare Tunnel (`cloudflared`) provides backup C2 over outbound 443.<sup>[[4]](#references)</sup>
+#### Săn tìm: Dấu hiệu Cloud C2 (Dropbox/Cloudflare Tunnel)
+- Beacon Dropbox API thường sử dụng api.dropboxapi.com hoặc content.dropboxapi.com qua HTTPS với token Authorization: Bearer.
+  - Tìm trong proxy/Zeek/NetFlow các kết nối Dropbox outbound bất thường từ máy chủ.
+- Cloudflare Tunnel (`cloudflared`) cung cấp C2 dự phòng qua cổng 443 outbound.<sup>[[4]](#references)</sup>
 
 ```bash
 ps aux | grep -E '[c]loudflared|trycloudflare'
 systemctl list-units | grep -i cloudflared
 ```
 
-### Services
+### Dịch vụ
 
-Paths where a malware could be installed as a service:
+Các đường dẫn nơi có thể cài đặt mã độc dưới dạng dịch vụ:
 
-- **/etc/inittab**: Calls initialization scripts like rc.sysinit, directing further to startup scripts.
-- **/etc/rc.d/** and **/etc/rc.boot/**: Contain scripts for service startup, the latter being found in older Linux versions.
-- **/etc/init.d/**: Used in certain Linux versions like Debian for storing startup scripts.
-- Services may also be activated via **/etc/inetd.conf** or **/etc/xinetd/**, depending on the Linux variant.
-- **/etc/systemd/system**: A directory for system and service manager scripts.
-- **/etc/systemd/system/multi-user.target.wants/**: Contains links to services that should be started in a multi-user runlevel.
-- **/usr/local/etc/rc.d/**: For custom or third-party services.
-- **\~/.config/autostart/**: For user-specific automatic startup applications, which can be a hiding spot for user-targeted malware.
-- **/lib/systemd/system/**: System-wide default unit files provided by installed packages.
+- **/etc/inittab**: Gọi các script khởi tạo như rc.sysinit, từ đó chuyển tiếp đến các script khởi động.
+- **/etc/rc.d/** và **/etc/rc.boot/**: Chứa các script khởi động dịch vụ; thư mục sau thường có trong các phiên bản Linux cũ.
+- **/etc/init.d/**: Được dùng trong một số phiên bản Linux như Debian để lưu các script khởi động.
+- Dịch vụ cũng có thể được kích hoạt thông qua **/etc/inetd.conf** hoặc **/etc/xinetd/**, tùy biến thể Linux.
+- **/etc/systemd/system**: Thư mục chứa các script dành cho trình quản lý hệ thống và dịch vụ.
+- **/etc/systemd/system/multi-user.target.wants/**: Chứa các liên kết đến những dịch vụ cần khởi động trong runlevel nhiều người dùng.
+- **/usr/local/etc/rc.d/**: Dành cho các dịch vụ tùy chỉnh hoặc của bên thứ ba.
+- **\~/.config/autostart/**: Dành cho các ứng dụng tự khởi động theo từng người dùng; đây có thể là nơi ẩn mã độc nhắm vào người dùng.
+- **/lib/systemd/system/**: Chứa các tệp unit mặc định trên toàn hệ thống do các gói đã cài đặt cung cấp.
 
-#### Hunt: systemd timers and transient units
+#### Săn tìm: systemd timers và transient units
 
-Systemd persistence is not limited to `.service` files. Investigate `.timer` units, user-level units, and **transient units** created at runtime.
+Cơ chế duy trì hiện diện của systemd không chỉ giới hạn ở các tệp `.service`. Hãy kiểm tra các unit `.timer`, unit cấp người dùng và **transient units** được tạo trong thời gian chạy.
 
 ```bash
 # Enumerate timers and inspect referenced services
@@ -379,50 +379,50 @@ journalctl -u <name>.service
 journalctl _SYSTEMD_UNIT=<name>.service
 ```
 
-Transient units are easy to miss because `/run/systemd/transient/` is **non-persistent**. If you are collecting a live image, grab it before shutdown.
+Các transient unit rất dễ bị bỏ sót vì `/run/systemd/transient/` **không được lưu bền vững**. Nếu đang thu thập live image, hãy lấy nó trước khi tắt máy.
 
 ### Kernel Modules
 
-Linux kernel modules, often utilized by malware as rootkit components, are loaded at system boot. The directories and files critical for these modules include:
+Các kernel module của Linux, thường được malware sử dụng làm thành phần rootkit, được tải khi hệ thống khởi động. Các thư mục và tệp quan trọng đối với những module này bao gồm:
 
-- **/lib/modules/$(uname -r)**: Holds modules for the running kernel version.
-- **/etc/modprobe.d**: Contains configuration files to control module loading.
-- **/etc/modprobe** and **/etc/modprobe.conf**: Files for global module settings.
+- **/lib/modules/$(uname -r)**: Chứa các module dành cho phiên bản kernel đang chạy.
+- **/etc/modprobe.d**: Chứa các tệp cấu hình để kiểm soát việc tải module.
+- **/etc/modprobe** và **/etc/modprobe.conf**: Các tệp thiết lập module trên toàn cục.
 
-### Other Autostart Locations
+### Các vị trí tự khởi chạy khác
 
-Linux employs various files for automatically executing programs upon user login, potentially harboring malware:
+Linux sử dụng nhiều tệp khác nhau để tự động chạy chương trình khi người dùng đăng nhập; các tệp này có thể chứa malware:
 
-- **/etc/profile.d/**\*, **/etc/profile**, and **/etc/bash.bashrc**: Executed for any user login.
-- **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile**, and **\~/.config/autostart**: User-specific files that run upon their login.
-- **/etc/rc.local**: Runs after all system services have started, marking the end of the transition to a multiuser environment.
+- **/etc/profile.d/**\*, **/etc/profile**, và **/etc/bash.bashrc**: Được thực thi khi bất kỳ người dùng nào đăng nhập.
+- **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile**, và **\~/.config/autostart**: Các tệp riêng của người dùng, chạy khi họ đăng nhập.
+- **/etc/rc.local**: Chạy sau khi tất cả dịch vụ hệ thống đã khởi động, đánh dấu thời điểm kết thúc quá trình chuyển sang môi trường nhiều người dùng.
 
-## Examine Logs
+## Kiểm tra log
 
-Linux systems track user activities and system events through various log files. These logs are pivotal for identifying unauthorized access, malware infections, and other security incidents.<sup>[[2]](#references)</sup> Key log files include:
+Hệ thống Linux theo dõi hoạt động của người dùng và các sự kiện hệ thống thông qua nhiều tệp log. Những log này có vai trò then chốt trong việc phát hiện truy cập trái phép, nhiễm malware và các sự cố bảo mật khác.<sup>[[2]](#references)</sup> Các tệp log quan trọng gồm:
 
-- **/var/log/syslog** (Debian) or **/var/log/messages** (RedHat): Capture system-wide messages and activities.
-- **/var/log/auth.log** (Debian) or **/var/log/secure** (RedHat): Record authentication attempts, successful and failed logins.
-  - Use `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log` to filter relevant authentication events.
-- **/var/log/boot.log**: Contains system startup messages.
-- **/var/log/maillog** or **/var/log/mail.log**: Logs email server activities, useful for tracking email-related services.
-- **/var/log/kern.log**: Stores kernel messages, including errors and warnings.
-- **/var/log/dmesg**: Holds device driver messages.
-- **/var/log/faillog**: Records failed login attempts, aiding in security breach investigations.
-- **/var/log/cron**: Logs cron job executions.
-- **/var/log/daemon.log**: Tracks background service activities.
-- **/var/log/btmp**: Documents failed login attempts.
-- **/var/log/httpd/**: Contains Apache HTTPD error and access logs.
-- **/var/log/mysqld.log** or **/var/log/mysql.log**: Logs MySQL database activities.
-- **/var/log/xferlog**: Records FTP file transfers.
-- **/var/log/**: Always check for unexpected logs here.
+- **/var/log/syslog** (Debian) hoặc **/var/log/messages** (RedHat): Ghi lại thông báo và hoạt động trên toàn hệ thống.
+- **/var/log/auth.log** (Debian) hoặc **/var/log/secure** (RedHat): Ghi lại các lần xác thực, bao gồm đăng nhập thành công và thất bại.
+  - Dùng `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log` để lọc các sự kiện xác thực liên quan.
+- **/var/log/boot.log**: Chứa các thông báo khi hệ thống khởi động.
+- **/var/log/maillog** hoặc **/var/log/mail.log**: Ghi lại hoạt động của máy chủ email, hữu ích để theo dõi các dịch vụ liên quan đến email.
+- **/var/log/kern.log**: Lưu thông báo của kernel, bao gồm lỗi và cảnh báo.
+- **/var/log/dmesg**: Chứa thông báo của trình điều khiển thiết bị.
+- **/var/log/faillog**: Ghi lại các lần đăng nhập thất bại, hỗ trợ điều tra vi phạm bảo mật.
+- **/var/log/cron**: Ghi lại việc thực thi các cron job.
+- **/var/log/daemon.log**: Theo dõi hoạt động của các dịch vụ chạy nền.
+- **/var/log/btmp**: Ghi lại các lần đăng nhập thất bại.
+- **/var/log/httpd/**: Chứa log lỗi và truy cập của Apache HTTPD.
+- **/var/log/mysqld.log** hoặc **/var/log/mysql.log**: Ghi lại hoạt động của cơ sở dữ liệu MySQL.
+- **/var/log/xferlog**: Ghi lại các lần truyền tệp FTP.
+- **/var/log/**: Luôn kiểm tra xem có log bất thường ở đây không.
 
 > [!TIP]
-> Linux system logs and audit subsystems may be disabled or deleted in an intrusion or malware incident. Because logs on Linux systems generally contain some of the most useful information about malicious activities, intruders routinely delete them. Therefore, when examining available log files, it is important to look for gaps or out of order entries that might be an indication of deletion or tampering.
+> Log hệ thống Linux và các hệ thống con kiểm tra có thể bị vô hiệu hóa hoặc xóa trong sự cố xâm nhập hay malware. Vì log trên hệ thống Linux thường chứa một số thông tin hữu ích nhất về hoạt động độc hại, kẻ xâm nhập thường xuyên xóa chúng. Do đó, khi kiểm tra các tệp log hiện có, điều quan trọng là tìm các khoảng trống hoặc mục không đúng thứ tự, vì chúng có thể cho thấy log đã bị xóa hoặc can thiệp.
 
-### Journald triage (`journalctl`)
+### Phân loại ban đầu Journald (`journalctl`)
 
-On modern Linux hosts, the **systemd journal** is usually the highest-value source for **service execution**, **auth events**, **package operations**, and **kernel/user-space messages**. During live response, try to preserve both the **persistent** journal (`/var/log/journal/`) and the **runtime** journal (`/run/log/journal/`) because short-lived attacker activity may only exist in the latter.<sup>[[5]](#references)</sup>
+Trên các máy Linux hiện đại, **systemd journal** thường là nguồn thông tin có giá trị nhất về **việc thực thi dịch vụ**, **sự kiện xác thực**, **hoạt động gói phần mềm** và **thông báo từ kernel/không gian người dùng**. Khi ứng phó trực tiếp, hãy cố gắng lưu giữ cả journal **bền vững** (`/var/log/journal/`) lẫn journal **thời gian chạy** (`/run/log/journal/`), vì hoạt động ngắn hạn của kẻ tấn công có thể chỉ tồn tại trong journal sau.<sup>[[5]](#references)</sup>
 
 ```bash
 # List available boots and pivot around the suspicious one
@@ -444,11 +444,11 @@ journalctl _UID=0
 journalctl _EXE=/usr/sbin/useradd
 ```
 
-Useful journal fields for triage include `_SYSTEMD_UNIT`, `_EXE`, `_COMM`, `_CMDLINE`, `_UID`, `_GID`, `_PID`, `_BOOT_ID`, and `MESSAGE`. If journald was configured without persistent storage, expect only recent data under `/run/log/journal/`.
+Các trường journal hữu ích cho việc triage bao gồm `_SYSTEMD_UNIT`, `_EXE`, `_COMM`, `_CMDLINE`, `_UID`, `_GID`, `_PID`, `_BOOT_ID` và `MESSAGE`. Nếu journald được cấu hình không dùng bộ nhớ lưu trữ lâu dài, chỉ nên kỳ vọng tìm thấy dữ liệu gần đây trong `/run/log/journal/`.
 
-### Audit framework triage (`auditd`)
+### Triage framework audit (`auditd`)
 
-If `auditd` is enabled, prefer it whenever you need **process attribution** for file changes, command execution, login activity, or package installation.<sup>[[6]](#references)</sup>
+Nếu `auditd` được bật, hãy ưu tiên dùng nó khi cần **quy kết tiến trình** cho các thay đổi tệp, thực thi lệnh, hoạt động đăng nhập hoặc cài đặt gói.<sup>[[6]](#references)</sup>
 
 ```bash
 # Fast summaries
@@ -465,14 +465,14 @@ ausearch --start today -m SERVICE_START,SERVICE_STOP -i
 ausearch -m SOFTWARE_UPDATE -i
 ```
 
-When rules were deployed with keys, pivot from them instead of grepping raw logs:
+Khi các rule được triển khai kèm theo key, hãy pivot từ chúng thay vì grep trực tiếp log thô:
 
 ```bash
 ausearch --start this-week -k <rule_key> --raw | aureport --file --summary -i
 ausearch --start this-week -k <rule_key> --raw | aureport --user --summary -i
 ```
 
-**Linux maintains a command history for each user**, stored in:
+**Linux duy trì lịch sử lệnh cho từng người dùng**, được lưu tại:
 
 - \~/.bash_history
 - \~/.zsh_history
@@ -480,41 +480,41 @@ ausearch --start this-week -k <rule_key> --raw | aureport --user --summary -i
 - \~/.python_history
 - \~/.\*\_history
 
-Moreover, the `last -Faiwx` command provides a list of user logins. Check it for unknown or unexpected logins.
+Ngoài ra, lệnh `last -Faiwx` cung cấp danh sách các lần đăng nhập của người dùng. Hãy kiểm tra danh sách này để tìm các lần đăng nhập không xác định hoặc bất thường.
 
-Check files that can grant extra rprivileges:
+Kiểm tra các tệp có thể cấp thêm quyền:
 
-- Review `/etc/sudoers` for unanticipated user privileges that may have been granted.
-- Review `/etc/sudoers.d/` for unanticipated user privileges that may have been granted.
-- Examine `/etc/groups` to identify any unusual group memberships or permissions.
-- Examine `/etc/passwd` to identify any unusual group memberships or permissions.
+- Xem lại `/etc/sudoers` để tìm các quyền người dùng bất thường có thể đã được cấp.
+- Xem lại `/etc/sudoers.d/` để tìm các quyền người dùng bất thường có thể đã được cấp.
+- Kiểm tra `/etc/groups` để xác định các thành viên nhóm hoặc quyền bất thường.
+- Kiểm tra `/etc/passwd` để xác định các thành viên nhóm hoặc quyền bất thường.
 
-Some apps alse generates its own logs:
+Một số ứng dụng cũng tạo nhật ký riêng:
 
-- **SSH**: Examine _\~/.ssh/authorized_keys_ and _\~/.ssh/known_hosts_ for unauthorized remote connections.
-- **Gnome Desktop**: Look into _\~/.recently-used.xbel_ for recently accessed files via Gnome applications.
-- **Firefox/Chrome**: Check browser history and downloads in _\~/.mozilla/firefox_ or _\~/.config/google-chrome_ for suspicious activities.
-- **VIM**: Review _\~/.viminfo_ for usage details, such as accessed file paths and search history.
-- **Open Office**: Check for recent document access that may indicate compromised files.
-- **FTP/SFTP**: Review logs in _\~/.ftp_history_ or _\~/.sftp_history_ for file transfers that might be unauthorized.
-- **MySQL**: Investigate _\~/.mysql_history_ for executed MySQL queries, potentially revealing unauthorized database activities.
-- **Less**: Analyze _\~/.lesshst_ for usage history, including viewed files and commands executed.
-- **Git**: Examine _\~/.gitconfig_ and project _.git/logs_ for changes to repositories.
+- **SSH**: Kiểm tra _\~/.ssh/authorized_keys_ và _\~/.ssh/known_hosts_ để tìm các kết nối từ xa trái phép.
+- **Gnome Desktop**: Kiểm tra _\~/.recently-used.xbel_ để xem các tệp được truy cập gần đây qua ứng dụng Gnome.
+- **Firefox/Chrome**: Kiểm tra lịch sử trình duyệt và các tệp tải xuống trong _\~/.mozilla/firefox_ hoặc _\~/.config/google-chrome_ để tìm hoạt động đáng ngờ.
+- **VIM**: Xem lại _\~/.viminfo_ để biết chi tiết sử dụng, chẳng hạn như đường dẫn tệp đã truy cập và lịch sử tìm kiếm.
+- **Open Office**: Kiểm tra các tài liệu được truy cập gần đây để tìm dấu hiệu cho thấy tệp đã bị xâm phạm.
+- **FTP/SFTP**: Xem lại nhật ký trong _\~/.ftp_history_ hoặc _\~/.sftp_history_ để tìm các lần truyền tệp có thể trái phép.
+- **MySQL**: Kiểm tra _\~/.mysql_history_ để xem các truy vấn MySQL đã thực thi, có thể tiết lộ hoạt động cơ sở dữ liệu trái phép.
+- **Less**: Phân tích _\~/.lesshst_ để xem lịch sử sử dụng, bao gồm các tệp đã xem và lệnh đã thực thi.
+- **Git**: Kiểm tra _\~/.gitconfig_ và _.git/logs_ của dự án để tìm các thay đổi đối với repository.
 
-### USB Logs
+### Nhật ký USB
 
-[**usbrip**](https://github.com/snovvcrash/usbrip) is a small piece of software written in pure Python 3 which parses Linux log files (`/var/log/syslog*` or `/var/log/messages*` depending on the distro) for constructing USB event history tables.
+[**usbrip**](https://github.com/snovvcrash/usbrip) là một phần mềm nhỏ được viết hoàn toàn bằng Python 3, phân tích các tệp nhật ký Linux (`/var/log/syslog*` hoặc `/var/log/messages*`, tùy theo distro) để tạo bảng lịch sử sự kiện USB.
 
-It is interesting to **know all the USBs that have been used** and it will be more useful if you have an authorized list of USBs to find "violation events" (the use of USBs that aren't inside that list).
+Việc **biết tất cả USB đã được sử dụng** là rất hữu ích; sẽ càng hữu ích hơn nếu bạn có danh sách USB được phép để tìm các “sự kiện vi phạm” (việc sử dụng USB không có trong danh sách đó).
 
-### Installation
+### Cài đặt
 
 ```bash
 pip3 install usbrip
 usbrip ids download #Download USB ID database
 ```
 
-### Examples
+### Ví dụ
 
 ```bash
 usbrip events history #Get USB history of your curent linux machine
@@ -524,30 +524,30 @@ usbrip ids download #Downlaod database
 usbrip ids search --pid 0002 --vid 0e0f #Search for pid AND vid
 ```
 
-More examples and info inside the github: [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
+Thêm ví dụ và thông tin tại GitHub: [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
 
-## Review User Accounts and Logon Activities
+## Kiểm tra tài khoản người dùng và hoạt động đăng nhập
 
-Examine the _**/etc/passwd**_, _**/etc/shadow**_ and **security logs** for unusual names or accounts created and or used in close proximity to known unauthorized events. Also, check possible sudo brute-force attacks.\
-Moreover, check files like _**/etc/sudoers**_ and _**/etc/groups**_ for unexpected privileges given to users.\
-Finally, look for accounts with **no passwords** or **easily guessed** passwords.<sup>[[1]](#references)</sup>
+Kiểm tra _**/etc/passwd**_, _**/etc/shadow**_ và **nhật ký bảo mật** để tìm tên hoặc tài khoản bất thường được tạo và/hoặc sử dụng gần thời điểm xảy ra các sự kiện trái phép đã biết. Ngoài ra, hãy kiểm tra các cuộc tấn công brute-force sudo.\
+Đồng thời, kiểm tra các tệp như _**/etc/sudoers**_ và _**/etc/groups**_ để tìm các quyền không mong muốn được cấp cho người dùng.\
+Cuối cùng, hãy tìm các tài khoản **không có mật khẩu** hoặc có mật khẩu **dễ đoán**.<sup>[[1]](#references)</sup>
 
-## Examine File System
+## Kiểm tra hệ thống tệp
 
-### Analyzing File System Structures in Malware Investigation
+### Phân tích cấu trúc hệ thống tệp trong điều tra malware
 
-When investigating malware incidents, the structure of the file system is a crucial source of information, revealing both the sequence of events and the malware's content. However, malware authors are developing techniques to hinder this analysis, such as modifying file timestamps or avoiding the file system for data storage.<sup>[[1]](#references)</sup>
+Khi điều tra các sự cố malware, cấu trúc hệ thống tệp là một nguồn thông tin quan trọng, giúp tiết lộ cả trình tự sự kiện lẫn nội dung của malware. Tuy nhiên, các tác giả malware đang phát triển những kỹ thuật cản trở việc phân tích này, chẳng hạn như sửa đổi dấu thời gian của tệp hoặc tránh sử dụng hệ thống tệp để lưu trữ dữ liệu.<sup>[[1]](#references)</sup>
 
-To counter these anti-forensic methods, it's essential to:
+Để đối phó với các phương pháp anti-forensic này, cần:
 
-- **Conduct a thorough timeline analysis** using tools like **Autopsy** for visualizing event timelines or **Sleuth Kit's** `mactime` for detailed timeline data.
-- **Investigate unexpected scripts** in the system's $PATH, which might include shell or PHP scripts used by attackers.
-- **Examine `/dev` for atypical files**, as it traditionally contains special files, but may house malware-related files.
-- **Search for hidden files or directories** with names like ".. " (dot dot space) or "..^G" (dot dot control-G), which could conceal malicious content.
-- **Identify setuid root files** using the command: `find / -user root -perm -04000 -print` This finds files with elevated permissions, which could be abused by attackers.
-- **Review deletion timestamps** in inode tables to spot mass file deletions, possibly indicating the presence of rootkits or trojans.
-- **Inspect consecutive inodes** for nearby malicious files after identifying one, as they may have been placed together.
-- **Check common binary directories** (_/bin_, _/sbin_) for recently modified files, as these could be altered by malware.
+- **Tiến hành phân tích dòng thời gian kỹ lưỡng** bằng các công cụ như **Autopsy** để trực quan hóa dòng thời gian sự kiện hoặc `mactime` của **Sleuth Kit** để lấy dữ liệu dòng thời gian chi tiết.
+- **Điều tra các script bất thường** trong $PATH của hệ thống, có thể bao gồm script shell hoặc PHP do kẻ tấn công sử dụng.
+- **Kiểm tra `/dev` để tìm các tệp bất thường**; thư mục này thường chứa các tệp đặc biệt, nhưng cũng có thể chứa các tệp liên quan đến malware.
+- **Tìm các tệp hoặc thư mục ẩn** có tên như ".. " (dot dot space) hoặc "..^G" (dot dot control-G), có thể được dùng để che giấu nội dung độc hại.
+- **Xác định các tệp setuid root** bằng lệnh: `find / -user root -perm -04000 -print` Lệnh này tìm các tệp có quyền cao, có thể bị kẻ tấn công lạm dụng.
+- **Kiểm tra dấu thời gian xóa** trong các bảng inode để phát hiện việc xóa hàng loạt tệp, có thể cho thấy sự hiện diện của rootkit hoặc trojan.
+- **Kiểm tra các inode liên tiếp** để tìm những tệp độc hại nằm gần đó sau khi xác định được một tệp, vì chúng có thể đã được đặt cạnh nhau.
+- **Kiểm tra các thư mục chứa binary phổ biến** (_/bin_, _/sbin_) để tìm các tệp mới được sửa đổi, vì malware có thể đã thay đổi chúng.
 
 ````bash
 # List recent files in a directory:
@@ -558,11 +558,11 @@ ls -lai /bin | sort -n```
 ````
 
 > [!TIP]
-> Note that an **attacker** can **modify** the **time** to make **files appear** **legitimate**, but he **cannot** modify the **inode**. If you find that a **file** indicates that it was created and modified at the **same time** as the rest of the files in the same folder, but the **inode** is **unexpectedly bigger**, then the **timestamps of that file were modified**.
+> Lưu ý rằng **kẻ tấn công** có thể **thay đổi** **thời gian** để khiến **các tệp trông có vẻ** **hợp pháp**, nhưng không thể thay đổi **inode**. Nếu bạn thấy một **tệp** cho biết nó được tạo và chỉnh sửa **cùng thời điểm** với các tệp còn lại trong cùng thư mục, nhưng **inode** lại **lớn hơn bất thường**, thì **dấu thời gian của tệp đó đã bị thay đổi**.
 
-### Inode-focused quick triage
+### Phân loại nhanh tập trung vào inode
 
-If you suspect anti-forensics, run these inode-focused checks early:
+Nếu nghi ngờ có anti-forensics, hãy sớm chạy các bước kiểm tra tập trung vào inode sau:
 
 ```bash
 # Filesystem inode pressure (possible inode exhaustion DoS)
@@ -576,20 +576,20 @@ lsof +L1
 lsof | grep '(deleted)'
 ```
 
-When a suspicious inode is on an EXT filesystem image/device, inspect inode metadata directly:
+Khi một inode đáng ngờ nằm trên image/thiết bị của hệ thống tệp EXT, hãy kiểm tra trực tiếp metadata của inode:
 
 ```bash
 sudo debugfs -R "stat <inode_number>" /dev/sdX
 ```
 
-Useful fields:
-- **Links**: if `0`, no directory entry currently references the inode.
-- **dtime**: deletion timestamp set when the inode was unlinked.
-- **ctime/mtime**: helps correlate metadata/content changes with incident timeline.
+Các trường hữu ích:
+- **Links**: nếu là `0`, hiện không có mục thư mục nào tham chiếu đến inode.
+- **dtime**: dấu thời gian xóa được đặt khi inode bị gỡ liên kết.
+- **ctime/mtime**: giúp đối chiếu các thay đổi về metadata/nội dung với dòng thời gian của sự cố.
 
-### Capabilities, xattrs, and preload-based userland rootkits
+### Capabilities, xattrs và rootkit userland dựa trên preload
 
-Modern Linux persistence often avoids obvious `setuid` binaries and instead abuses **file capabilities**, **extended attributes**, and the dynamic loader.
+Cơ chế duy trì truy cập trên Linux hiện đại thường tránh các binary `setuid` dễ nhận thấy, thay vào đó lạm dụng **file capabilities**, **extended attributes** và dynamic loader.
 
 ```bash
 # Enumerate file capabilities (think cap_setuid, cap_sys_admin, cap_dac_override)
@@ -607,53 +607,52 @@ ls -lah /lib /lib64 /usr/lib /usr/lib64 /usr/local/lib 2>/dev/null | grep -E '\\
 ldd /bin/ls
 ```
 
-Pay special attention to libraries referenced from **writable** paths such as `/tmp`, `/dev/shm`, `/var/tmp`, or odd locations under `/usr/local/lib`. Also check for capability-bearing binaries outside normal package ownership and correlate them with package verification results (`rpm -Va`, `dpkg --verify`, `debsums`).
+Đặc biệt chú ý đến các thư viện được tham chiếu từ những đường dẫn **có quyền ghi** như `/tmp`, `/dev/shm`, `/var/tmp` hoặc các vị trí bất thường trong `/usr/local/lib`. Đồng thời kiểm tra các binary có capability nằm ngoài phạm vi quản lý gói thông thường và đối chiếu chúng với kết quả xác minh gói (`rpm -Va`, `dpkg --verify`, `debsums`).
 
-## Compare files of different filesystem versions
+## So sánh các phiên bản filesystem
 
-### Filesystem Version Comparison Summary
+### Tóm tắt so sánh phiên bản filesystem
 
-To compare filesystem versions and pinpoint changes, we use simplified `git diff` commands:<sup>[[3]](#references)</sup>
+Để so sánh các phiên bản filesystem và xác định những thay đổi, chúng ta dùng các lệnh `git diff` đơn giản hóa:<sup>[[3]](#references)</sup>
 
-- **To find new files**, compare two directories:
+- **Để tìm các file mới**, hãy so sánh hai thư mục:
 
 ```bash
 git diff --no-index --diff-filter=A path/to/old_version/ path/to/new_version/
 ```
 
-- **For modified content**, list changes while ignoring specific lines:
+- **Đối với nội dung đã chỉnh sửa**, hãy liệt kê các thay đổi và bỏ qua những dòng cụ thể:
 
 ```bash
 git diff --no-index --diff-filter=M path/to/old_version/ path/to/new_version/ | grep -E "^\+" | grep -v "Installed-Time"
 ```
 
-- **To detect deleted files**:
+- **Để phát hiện các tệp đã bị xóa**:
 
 ```bash
 git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 ```
 
-- **Filter options** (`--diff-filter`) help narrow down to specific changes like added (`A`), deleted (`D`), or modified (`M`) files.
-  - `A`: Added files
-  - `C`: Copied files
-  - `D`: Deleted files
-  - `M`: Modified files
-  - `R`: Renamed files
-  - `T`: Type changes (e.g., file to symlink)
-  - `U`: Unmerged files
-  - `X`: Unknown files
-  - `B`: Broken files
+- **Tùy chọn lọc** (`--diff-filter`) giúp thu hẹp kết quả vào các thay đổi cụ thể như tệp được thêm (`A`), bị xóa (`D`) hoặc được sửa đổi (`M`).
+  - `A`: Tệp được thêm
+  - `C`: Tệp được sao chép
+  - `D`: Tệp bị xóa
+  - `M`: Tệp được sửa đổi
+  - `R`: Tệp được đổi tên
+  - `T`: Thay đổi loại (ví dụ: tệp thành symlink)
+  - `U`: Tệp chưa được hợp nhất
+  - `X`: Tệp không xác định
+  - `B`: Tệp bị hỏng
 
 ## References
 
-- [1] [Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides – Chapter 3](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
-- [2] [Linux Logs Explained](https://www.plesk.com/blog/featured/linux-logs-explained/)
-- [3] [git diff Documentation – --diff-filter option](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
-- [4] [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
-- [5] [Forensic Analysis of Linux Journals](https://stuxnet999.github.io/dfir/linux-journal-forensics/)
-- [6] [Red Hat Enterprise Linux 9 - Auditing the system](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/auditing-the-system_security-hardening)
-- [7] [Say hi to Pike!](https://www.synacktiv.com/en/publications/say-hi-to-pike.html)
+- [1] [Cẩm nang thực địa về điều tra pháp chứng malware trên hệ thống Linux: Cẩm nang thực địa về điều tra pháp chứng kỹ thuật số – Chương 3](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
+- [2] [Giải thích về log Linux](https://www.plesk.com/blog/featured/linux-logs-explained/)
+- [3] [Tài liệu git diff – tùy chọn --diff-filter](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
+- [4] [Red Canary – Vá lỗi để duy trì quyền truy cập: Cách malware DripDropper trên Linux di chuyển trong cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [5] [Phân tích pháp chứng nhật ký Linux](https://stuxnet999.github.io/dfir/linux-journal-forensics/)
+- [6] [Red Hat Enterprise Linux 9 - Kiểm tra hệ thống](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/auditing-the-system_security-hardening)
+- [7] [Chào Pike!](https://www.synacktiv.com/en/publications/say-hi-to-pike.html)
 - [8] [strace](https://strace.io/)
-- [9] [SQLite FTS5 Extension](https://www.sqlite.org/fts5.html)
-
+- [9] [Tiện ích mở rộng SQLite FTS5](https://www.sqlite.org/fts5.html)
 {{#include ../../banners/hacktricks-training.md}}

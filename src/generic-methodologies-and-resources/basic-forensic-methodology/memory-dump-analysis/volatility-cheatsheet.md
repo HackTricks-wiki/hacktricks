@@ -1,8 +1,8 @@
-# Volatility - CheatSheet
+# Volatility - Bảng tra cứu
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-If you need a tool that automates memory analysis with different scan levels and runs multiple Volatility3 plugins in parallel, you can use autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+Nếu bạn cần một công cụ tự động hóa việc phân tích bộ nhớ với nhiều cấp độ quét khác nhau và chạy song song nhiều plugin Volatility3, bạn có thể dùng autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
 
 ```bash
 # Full scan (runs all plugins)
@@ -16,13 +16,13 @@ python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
 
 ```
 
-If you want something **fast and crazy** that will launch several Volatility plugins on parallel you can use: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+Nếu bạn muốn một công cụ **nhanh và điên rồ** có thể chạy song song nhiều plugin Volatility, bạn có thể dùng: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
 
-## Installation
+## Cài đặt
 
 ### volatility3
 
@@ -57,19 +57,19 @@ python setup.py install
 
 ## Volatility Commands
 
-Access the official doc in [Volatility command reference](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)
+Truy cập tài liệu chính thức tại [Volatility command reference](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)
 
-### A note on “list” vs. “scan” plugins
+### Lưu ý về plugin “list” và “scan”
 
-`list` plugins walk kernel-maintained structures, so they are fast but may miss objects that malware unlinks. `scan` plugins such as `psscan` search memory for object signatures; they can recover terminated or unlinked processes, but are slower and can produce false positives when residual structures are damaged.<sup>[[8]](#references)</sup>
+Plugin `list` duyệt các cấu trúc do kernel duy trì nên chạy nhanh, nhưng có thể bỏ sót các đối tượng bị malware gỡ liên kết. Plugin `scan` như `psscan` tìm kiếm chữ ký đối tượng trong bộ nhớ; chúng có thể khôi phục các tiến trình đã kết thúc hoặc bị gỡ liên kết, nhưng chạy chậm hơn và có thể tạo kết quả dương tính giả khi các cấu trúc còn sót lại bị hỏng.<sup>[[8]](#references)</sup>
 
 ## OS Profiles
 
 ### Volatility3
 
-Volatility 3 requires symbol tables for the target operating system. The project README lists Windows, Mac, and Linux packs; place them in `volatility3/symbols` or in a `symbols` directory beside the executable. Windows symbols that are missing may be fetched and generated automatically, while Mac and Linux tables may need to be produced separately.<sup>[[9]](#references)</sup>
+Volatility 3 yêu cầu các bảng symbol cho hệ điều hành mục tiêu. README của dự án liệt kê các gói cho Windows, Mac và Linux; đặt chúng trong `volatility3/symbols` hoặc trong thư mục `symbols` nằm cạnh tệp thực thi. Các symbol Windows còn thiếu có thể được tải về và tạo tự động, trong khi các bảng cho Mac và Linux có thể cần được tạo riêng.<sup>[[9]](#references)</sup>
 
-Symbol table packs for the various operating systems are available for **download** at:
+Các gói bảng symbol cho nhiều hệ điều hành có thể **tải xuống** tại:
 
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip)
@@ -79,13 +79,13 @@ Symbol table packs for the various operating systems are available for **downloa
 
 #### External Profile
 
-You can get the list of supported profiles doing:
+Bạn có thể lấy danh sách các profile được hỗ trợ bằng cách chạy:
 
 ```bash
 ./volatility_2.6_lin64_standalone --info | grep "Profile"
 ```
 
-If you want to use a **new profile you have downloaded** (for example a linux one) you need to create somewhere the following folder structure: _plugins/overlays/linux_ and put inside this folder the zip file containing the profile. Then, get the number of the profiles using:
+Nếu muốn sử dụng một **profile mới mà bạn đã tải xuống** (ví dụ profile Linux), bạn cần tạo cấu trúc thư mục sau ở một vị trí nào đó: _plugins/overlays/linux và đặt tệp zip chứa profile vào thư mục này. Sau đó, lấy danh sách các profile bằng cách dùng:
 
 ```bash
 ./vol --plugins=/home/kali/Desktop/ctfs/final/plugins --info
@@ -99,26 +99,26 @@ VistaSP0x64                                   - A Profile for Windows Vista SP0 
 VistaSP0x86                                   - A Profile for Windows Vista SP0 x86
 ```
 
-You can **download Linux and Mac profiles** from [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles)
+Bạn có thể **tải xuống các profile Linux và Mac** từ [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles)
 
-In the previous chunk you can see that the profile is called `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64`, and you can use it to execute something like:
+Trong chunk trước, bạn có thể thấy profile có tên là `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64`, và bạn có thể dùng nó để thực thi một lệnh như sau:
 
 ```bash
 ./vol -f file.dmp --plugins=. --profile=LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 linux_netscan
 ```
 
-#### Discover Profile
+#### Khám phá Profile
 
 ```
 volatility imageinfo -f file.dmp
 volatility kdbgscan -f file.dmp
 ```
 
-#### **Differences between imageinfo and kdbgscan**
+#### **Sự khác biệt giữa imageinfo và kdbgscan**
 
-[Andrea Fortuna's image-identification notes](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/) explain that `imageinfo` produces profile suggestions, while `kdbgscan` scans for KDBG signatures and applies sanity checks to identify candidate profiles and KDBG addresses. Its output depends in part on whether Volatility can locate a DTB, so pass a known or suggested profile when running it.<sup>[[1]](#references)</sup>
+[Ghi chú về nhận dạng image của Andrea Fortuna](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/) giải thích rằng `imageinfo` đưa ra các profile được đề xuất, trong khi `kdbgscan` quét các chữ ký KDBG và thực hiện kiểm tra tính hợp lý để xác định các profile tiềm năng cùng địa chỉ KDBG. Kết quả của nó phụ thuộc một phần vào việc Volatility có tìm được DTB hay không, vì vậy hãy truyền vào một profile đã biết hoặc được đề xuất khi chạy lệnh này.<sup>[[1]](#references)</sup>
 
-When multiple candidates are returned, compare their process and module counts: a candidate with zero processes or modules is less credible than one with populated lists. Treat this as a sanity check rather than proof that a profile is correct.<sup>[[1]](#references)</sup>
+Khi có nhiều ứng viên được trả về, hãy so sánh số lượng process và module của chúng: ứng viên không có process hoặc module nào kém đáng tin hơn ứng viên có danh sách tương ứng. Hãy xem đây là bước kiểm tra tính hợp lý, không phải bằng chứng xác nhận profile là chính xác.<sup>[[1]](#references)</sup>
 
 ```bash
 # GOOD
@@ -134,20 +134,20 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 
 #### KDBG
 
-`KdDebuggerDataBlock`, known to Volatility as KDBG, is a `_KDDEBUGGER_DATA64` structure that includes `PsActiveProcessHead`, the head of the process list used for process enumeration.<sup>[[2]](#references)</sup>
+`KdDebuggerDataBlock`, được Volatility biết đến với tên KDBG, là cấu trúc `_KDDEBUGGER_DATA64` bao gồm `PsActiveProcessHead`, nút đầu của danh sách tiến trình được dùng để liệt kê tiến trình.<sup>[[2]](#references)</sup>
 
-## OS Information
+## Thông tin hệ điều hành
 
 ```bash
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
 ```
 
-The plugin `banners.Banners` can be used in **vol3 to try to find linux banners** in the dump.
+Plugin `banners.Banners` có thể được dùng trong **vol3 để thử tìm linux banners** trong dump.
 
-## Hashes/Passwords
+## Hashes/Mật khẩu
 
-Extract SAM hashes, [domain cached credentials](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) and [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets).
+Trích xuất hash SAM, [thông tin xác thực được cache của domain](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) và [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets).
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -173,18 +173,18 @@ volatility --profile=Win7SP1x86_23418 lsadump -f file.dmp #Grab lsa secrets
 
 ## Memory Dump
 
-The memory dump of a process will **extract everything** of the current status of the process. The **procdump** module will only **extract** the **code**.
+Memory dump của một process sẽ **trích xuất mọi thứ** về trạng thái hiện tại của process. Module **procdump** chỉ **trích xuất** **code**.
 
 ```
 volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
 
-## Processes
+## Tiến trình
 
-### List processes
+### Liệt kê tiến trình
 
-Try to find **suspicious** processes (by name) or **unexpected** child **processes** (for example a cmd.exe as a child of iexplorer.exe).\
-It could be interesting to **compare** the result of pslist with the one of psscan to identify hidden processes.
+Cố gắng tìm các tiến trình **đáng ngờ** (theo tên) hoặc các **tiến trình** con **không mong đợi** (ví dụ: cmd.exe là tiến trình con của iexplorer.exe).\
+Có thể hữu ích khi **so sánh** kết quả của pslist với psscan để xác định các tiến trình ẩn.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -229,9 +229,9 @@ volatility --profile=Win7SP1x86_23418 procdump --pid=3152 -n --dump-dir=. -f fil
 {{#endtab}}
 {{#endtabs}}
 
-### Command line
+### Dòng lệnh
 
-Anything suspicious was executed?
+Có lệnh nào đáng ngờ được thực thi không?
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -252,11 +252,11 @@ volatility --profile=PROFILE consoles -f file.dmp #command history by scanning f
 {{#endtab}}
 {{#endtabs}}
 
-Commands executed in `cmd.exe` are managed by **`conhost.exe`** (or `csrss.exe` on systems before Windows 7). This means that if **`cmd.exe`** is terminated by an attacker before a memory dump is obtained, it's still possible to recover the session's command history from the memory of **`conhost.exe`**. To do this, if unusual activity is detected within the console's modules, the memory of the associated **`conhost.exe`** process should be dumped. Then, by searching for **strings** within this dump, command lines used in the session can potentially be extracted.
+Các lệnh được thực thi trong `cmd.exe` do **`conhost.exe`** quản lý (hoặc **`csrss.exe`** trên các hệ thống trước Windows 7). Điều này có nghĩa là nếu kẻ tấn công chấm dứt **`cmd.exe`** trước khi thu thập memory dump, vẫn có thể khôi phục lịch sử lệnh của phiên từ bộ nhớ của **`conhost.exe`**. Để thực hiện việc này, nếu phát hiện hoạt động bất thường trong các module của console, cần dump bộ nhớ của tiến trình **`conhost.exe`** tương ứng. Sau đó, bằng cách tìm kiếm **strings** trong dump này, có thể trích xuất các dòng lệnh đã sử dụng trong phiên.
 
-### Environment
+### Môi trường
 
-Get the env variables of each running process. There could be some interesting values.
+Lấy các biến môi trường của từng tiến trình đang chạy. Có thể có một số giá trị đáng chú ý.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -278,10 +278,10 @@ volatility --profile=PROFILE -f file.dmp linux_psenv [-p <pid>] #Get env of proc
 {{#endtab}}
 {{#endtabs}}
 
-### Token privileges
+### Đặc quyền của token
 
-Check for privileges tokens in unexpected services.\
-It could be interesting to list the processes using some privileged token.
+Kiểm tra các token đặc quyền trong những dịch vụ bất thường.\
+Có thể hữu ích nếu liệt kê các tiến trình đang sử dụng token đặc quyền.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -309,8 +309,8 @@ volatility --profile=Win7SP1x86_23418 privs -f file.dmp | grep "SeImpersonatePri
 
 ### SIDs
 
-Check each SSID owned by a process.\
-It could be interesting to list the processes using a privileges SID (and the processes using some service SID).
+Kiểm tra từng SSID thuộc sở hữu của một tiến trình.\
+Có thể hữu ích khi liệt kê các tiến trình sử dụng SID đặc quyền (và các tiến trình sử dụng một số service SID).
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -334,7 +334,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 
 ### Handles
 
-Useful to know to which other files, keys, threads, processes... a **process has a handle** for (has opened)
+Hữu ích để biết một **process có handle** (đã mở) tới những file, key, thread, process... nào khác
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -376,9 +376,9 @@ volatility --profile=Win7SP1x86_23418 dlldump --pid=3152 --dump-dir=. -f file.dm
 {{#endtab}}
 {{#endtabs}}
 
-### Strings per processes
+### Strings theo từng process
 
-Volatility allows us to check which process a string belongs to.
+Volatility cho phép chúng ta kiểm tra một string thuộc về process nào.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -403,7 +403,7 @@ strings 3532.dmp > strings_file
 {{#endtab}}
 {{#endtabs}}
 
-It also allows to search for strings inside a process using the yarascan module:
+Nó cũng cho phép tìm kiếm chuỗi bên trong một tiến trình bằng module yarascan:
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -426,7 +426,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 
 ### UserAssist
 
-`UserAssist` registry values record programs launched through Windows Explorer, including execution counts and last-run timestamps; command-line launches are not recorded in these keys.<sup>[[3]](#references)</sup>
+Các giá trị registry `UserAssist` ghi lại những chương trình được khởi chạy thông qua Windows Explorer, bao gồm số lần thực thi và dấu thời gian chạy lần cuối; các lần khởi chạy bằng dòng lệnh không được ghi lại trong những khóa này.<sup>[[3]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -446,7 +446,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp userassist
 {{#endtab}}
 {{#endtabs}}
 
-## Services
+## Dịch vụ
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -470,7 +470,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp
 {{#endtab}}
 {{#endtabs}}
 
-## Network
+## Mạng
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -502,9 +502,9 @@ volatility --profile=SomeLinux -f file.dmp linux_route_cache
 {{#endtab}}
 {{#endtabs}}
 
-## Registry hive
+## Hive Registry
 
-### Print available hives
+### In các hive khả dụng
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -526,7 +526,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp printkey #List roots and get i
 {{#endtab}}
 {{#endtabs}}
 
-### Get a value
+### Lấy một giá trị
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -548,7 +548,7 @@ volatility -f file.dmp --profile=Win7SP1x86 printkey -o 0x9670e9d0 -K 'Software\
 {{#endtab}}
 {{#endtabs}}
 
-### Dump
+### Bản dump
 
 ```bash
 #Dump a hive
@@ -557,9 +557,9 @@ volatility --profile=Win7SP1x86_23418 hivedump -o 0x9aad6148 -f file.dmp #Offset
 volatility --profile=Win7SP1x86_23418 hivedump -f file.dmp
 ```
 
-## Filesystem
+## Hệ thống tệp
 
-### Mount
+### Gắn kết
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -580,7 +580,7 @@ volatility --profile=SomeLinux -f file.dmp linux_recover_filesystem #Dump the en
 {{#endtab}}
 {{#endtabs}}
 
-### Scan/dump
+### Quét/dump
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -607,7 +607,7 @@ volatility --profile=SomeLinux -f file.dmp linux_find_file -i 0xINODENUMBER -O /
 {{#endtab}}
 {{#endtabs}}
 
-### Master File Table
+### Bảng tệp chính
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -627,9 +627,9 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {{#endtab}}
 {{#endtabs}}
 
-On NTFS, the MFT has at least one entry per file on the volume, including itself. File metadata and contents are stored in MFT entries or in locations those entries describe; see the [Microsoft documentation](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table).<sup>[[4]](#references)</sup>
+Trên NTFS, MFT có ít nhất một mục cho mỗi tệp trên ổ đĩa, bao gồm cả chính nó. Metadata và nội dung của tệp được lưu trong các mục MFT hoặc tại những vị trí mà các mục đó mô tả; xem [tài liệu của Microsoft](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table).<sup>[[4]](#references)</sup>
 
-### SSL Keys/Certs
+### Khóa/chứng chỉ SSL
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -652,7 +652,7 @@ volatility --profile=Win7SP1x86_23418 dumpcerts --dump-dir=. -f file.dmp
 {{#endtab}}
 {{#endtabs}}
 
-## Malware
+## Phần mềm độc hại
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -694,10 +694,10 @@ volatility --profile=SomeLinux -f file.dmp linux_keyboard_notifiers #Keyloggers
 {{#endtab}}
 {{#endtabs}}
 
-### Scanning with yara
+### Quét bằng yara
 
-Use this script to download and merge all the yara malware rules from github: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
-Create the _**rules**_ directory and execute it. This will create a file called _**malware_rules.yar**_ which contains all the yara rules for malware.
+Dùng script này để tải xuống và hợp nhất tất cả các quy tắc yara về malware từ github: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
+Tạo thư mục _**rules**_ rồi chạy script. Thao tác này sẽ tạo một tệp có tên _**malware_rules.yar**_ chứa tất cả các quy tắc yara về malware.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -726,11 +726,11 @@ volatility --profile=Win7SP1x86_23418 yarascan -y malware_rules.yar -f ch2.dmp |
 {{#endtab}}
 {{#endtabs}}
 
-## MISC
+## KHÁC
 
-### External plugins
+### Plugin bên ngoài
 
-If you want to use external plugins make sure that the folders related to the plugins are the first parameter used.
+Nếu muốn sử dụng plugin bên ngoài, hãy đảm bảo các thư mục liên quan đến plugin được dùng làm tham số đầu tiên.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -752,7 +752,7 @@ If you want to use external plugins make sure that the folders related to the pl
 
 #### Autoruns
 
-Download it from [https://github.com/tomchop/volatility-autoruns](https://github.com/tomchop/volatility-autoruns)
+Tải xuống tại [https://github.com/tomchop/volatility-autoruns](https://github.com/tomchop/volatility-autoruns)
 
 ```
  volatility --plugins=volatility-autoruns/ --profile=WinXPSP2x86 -f file.dmp autoruns
@@ -779,7 +779,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp handles -p <PID> -t mutant
 {{#endtab}}
 {{#endtabs}}
 
-### Symlinks
+### Liên kết tượng trưng
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -801,7 +801,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 
 ### Bash
 
-It's possible to **read from memory the bash history.** You could also dump the _.bash_history_ file, but it was disabled you will be glad you can use this volatility module
+Có thể **đọc lịch sử bash từ bộ nhớ.** Bạn cũng có thể trích xuất tệp _.bash_history_, nhưng nếu tính năng này bị tắt thì bạn sẽ mừng vì có thể dùng module volatility này
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -821,7 +821,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp linux_bash
 {{#endtab}}
 {{#endtabs}}
 
-### TimeLine
+### Dòng thời gian
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -841,7 +841,7 @@ volatility --profile=Win7SP1x86_23418 -f timeliner
 {{#endtab}}
 {{#endtabs}}
 
-### Drivers
+### Trình điều khiển
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -861,52 +861,51 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp driverscan
 {{#endtab}}
 {{#endtabs}}
 
-### Get clipboard
+### Lấy clipboard
 
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 clipboard -f file.dmp
 ```
 
-### Get IE history
+### Lấy lịch sử IE
 
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 iehistory -f file.dmp
 ```
 
-### Get notepad text
+### Lấy văn bản từ Notepad
 
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 notepad -f file.dmp
 ```
 
-### Screenshot
+### Ảnh chụp màn hình
 
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```
 
-### Master Boot Record (MBR)
+### Bản ghi khởi động chính (MBR)
 
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
 
-On BIOS-based systems, the MBR at sector 0 contains master boot code and the partition table. Microsoft documents that `bootsect /mbr` updates the code without changing that table.<sup>[[7]](#references)</sup>
+Trên các hệ thống dựa trên BIOS, MBR ở sector 0 chứa mã khởi động chính và bảng phân vùng. Microsoft ghi rõ rằng `bootsect /mbr` cập nhật mã mà không thay đổi bảng đó.<sup>[[7]](#references)</sup>
 
 ## References
 
-- [1] [Volatility, my own cheatsheet (Part 1): Image Identification](https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)
-- [2] [Finding the Kernel Debugger Block](https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html)
-- [3] [Windows UserAssist Keys](https://www.aldeid.com/wiki/Windows-userassist-keys)
-- [4] [Master File Table (Local File Systems) - Win32 apps](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
-- [5] [UEFI-based PC, protective MBR: what is it? - Microsoft Community](https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa)
-- [6] [Tutorial: Volatility plugins for malware analysis](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
-- [7] [Bootsect Command-Line Options](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/bootsect-command-line-options?view=windows-11)
-- [8] [Tutorial - Volatility plugins & malware analysis](https://tomchop.me/posts/volatility-plugin-malware-analysis/)
-- [9] [Volatility 3 README](https://github.com/volatilityfoundation/volatility3/blob/develop/README.md)
-
+- [1] [Volatility, ghi chú nhanh của tôi (Phần 1): Nhận dạng ảnh](https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)
+- [2] [Tìm Kernel Debugger Block](https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html)
+- [3] [Các khóa UserAssist của Windows](https://www.aldeid.com/wiki/Windows-userassist-keys)
+- [4] [Master File Table (hệ thống tệp cục bộ) - ứng dụng Win32](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
+- [5] [PC dựa trên UEFI, protective MBR: đó là gì? - Microsoft Community](https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa)
+- [6] [Hướng dẫn: Các plugin Volatility dùng để phân tích malware](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
+- [7] [Các tùy chọn dòng lệnh Bootsect](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/bootsect-command-line-options?view=windows-11)
+- [8] [Hướng dẫn - Các plugin Volatility và phân tích malware](https://tomchop.me/posts/volatility-plugin-malware-analysis/)
+- [9] [README của Volatility 3](https://github.com/volatilityfoundation/volatility3/blob/develop/README.md)
 {{#include ../../../banners/hacktricks-training.md}}

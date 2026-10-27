@@ -1,36 +1,36 @@
-# Desobfuscation Techniques for VBS Files
+# Kỹ thuật gỡ rối tệp VBS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Some things that could be useful to debug/deobfuscate a malicious VBS file:
+Một số cách có thể hữu ích để gỡ lỗi/gỡ rối một tệp VBS độc hại:
 
 ## echo
 
-`WScript.Echo` can be used for diagnostic output; under `cscript.exe`, it is written to the console.<sup>[[1]](#references)</sup>
+`WScript.Echo` có thể được dùng để xuất thông tin chẩn đoán; khi chạy bằng `cscript.exe`, nội dung sẽ được ghi ra console.<sup>[[1]](#references)</sup>
 
 ```bash
 Wscript.Echo "Like this?"
 ```
 
-## Comments
+## Chú thích
 
-A single apostrophe starts a VBScript comment.<sup>[[2]](#references)</sup>
+Một dấu nháy đơn bắt đầu chú thích trong VBScript.<sup>[[2]](#references)</sup>
 
 ```bash
 ' this is a comment
 ```
 
-## Test
+## Kiểm tra
 
-Run the VBS file in the command-line host with:<sup>[[3]](#references)</sup>
+Chạy tệp VBS trong command-line host bằng:<sup>[[3]](#references)</sup>
 
 ```bash
 cscript.exe file.vbs
 ```
 
-## Write data to a file
+## Ghi dữ liệu vào tệp
 
-This helper is adapted from a Stack Overflow answer and uses a `FileSystemObject` text stream. `CreateTextFile` returns a `TextStream`, and `Write`/`Close` operate on text data; treat it as a text-writing example rather than a general binary-safe writer.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
+Hàm trợ giúp này được điều chỉnh từ một câu trả lời trên Stack Overflow và sử dụng luồng văn bản `FileSystemObject`. `CreateTextFile` trả về một `TextStream`, còn `Write`/`Close` thao tác trên dữ liệu văn bản; hãy xem đây là ví dụ ghi văn bản, không phải trình ghi nhị phân an toàn tổng quát.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 
 ```js
 Function writeBinary(strBinary, strPath)
@@ -59,11 +59,10 @@ End Function
 
 ## References
 
-- [1] [Running a Visual Basic Scripting Edition Query (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/indexsrv/running-a-visual-basic-scripting-edition-query)
-- [2] [Working with Scripting Languages (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/iis/6.0-sdk/ms525153%28v%3Dvs.90%29)
+- [1] [Chạy truy vấn Visual Basic Scripting Edition (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/indexsrv/running-a-visual-basic-scripting-edition-query)
+- [2] [Làm việc với ngôn ngữ scripting (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/iis/6.0-sdk/ms525153%28v%3Dvs.90%29)
 - [3] [cscript (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/cscript)
-- [4] [Read and write binary file in VBScript (Stack Overflow)](https://stackoverflow.com/questions/6060529/read-and-write-binary-file-in-vbscript/6087783)
-- [5] [CreateTextFile method (Microsoft Learn)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/createtextfile-method)
-- [6] [TextStream object (Microsoft Learn)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/textstream-object)
-
+- [4] [Đọc và ghi tệp nhị phân trong VBScript (Stack Overflow)](https://stackoverflow.com/questions/6060529/read-and-write-binary-file-in-vbscript/6087783)
+- [5] [Phương thức CreateTextFile (Microsoft Learn)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/createtextfile-method)
+- [6] [Đối tượng TextStream (Microsoft Learn)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/textstream-object)
 {{#include ../../../banners/hacktricks-training.md}}

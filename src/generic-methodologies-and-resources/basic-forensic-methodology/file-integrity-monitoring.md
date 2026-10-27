@@ -1,49 +1,49 @@
-# File Integrity Monitoring
+# Giám sát tính toàn vẹn tệp
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Baseline
+## Đường cơ sở
 
-A baseline consists of taking a snapshot of certain parts of a system to **compare it with a future status to highlight changes**.
+Đường cơ sở là ảnh chụp nhanh một số phần nhất định của hệ thống để **so sánh với trạng thái trong tương lai và làm nổi bật các thay đổi**.
 
-For example, you can calculate and store the hash of each file of the filesystem to be able to find out which files were modified.\
-This can also be done with the user accounts created, processes running, services running and any other thing that shouldn't change much, or at all.
+Ví dụ: bạn có thể tính toán và lưu hash của từng tệp trong hệ thống tệp để xác định những tệp đã bị sửa đổi.\
+Cách này cũng có thể áp dụng cho tài khoản người dùng đã tạo, tiến trình đang chạy, dịch vụ đang chạy và bất kỳ thành phần nào khác không nên thay đổi nhiều, hoặc không nên thay đổi chút nào.
 
-A **useful baseline** usually stores more than just a digest: permissions, owner, group, timestamps, inode, symlink target, ACLs, and selected extended attributes are also worth tracking.<sup>[[4]](#references)</sup> From an attacker-hunting perspective, this helps detect **permission-only tampering**, **atomic file replacement**, and **persistence via modified service/unit files** even when the content hash is not the first thing that changes.
+Một **đường cơ sở hữu ích** thường lưu nhiều thông tin hơn chỉ một giá trị digest: quyền truy cập, chủ sở hữu, nhóm, dấu thời gian, inode, đích symlink, ACL và các thuộc tính mở rộng được chọn cũng đáng được theo dõi.<sup>[[4]](#references)</sup> Từ góc độ truy tìm kẻ tấn công, việc này giúp phát hiện **can thiệp chỉ thay đổi quyền**, **thay thế tệp nguyên tử** và **duy trì quyền truy cập thông qua việc sửa đổi tệp service/unit**, ngay cả khi hash nội dung không phải là thứ thay đổi đầu tiên.
 
-### File Integrity Monitoring
+### Giám sát tính toàn vẹn tệp
 
-File Integrity Monitoring (FIM) is a critical security technique that protects IT environments and data by tracking changes in files. It usually combines:<sup>[[1]](#references)[[3]](#references)</sup>
+Giám sát tính toàn vẹn tệp (FIM) là một kỹ thuật bảo mật quan trọng, giúp bảo vệ môi trường CNTT và dữ liệu bằng cách theo dõi các thay đổi trong tệp. Kỹ thuật này thường kết hợp:<sup>[[1]](#references)[[3]](#references)</sup>
 
-1. **Baseline comparison:** Store metadata and cryptographic checksums (prefer `SHA-256` or better) for future comparisons.
-2. **Real-time notifications:** Subscribe to OS-native file events to know **which file changed, when, and ideally which process/user touched it**.
-3. **Periodic re-scan:** Rebuild confidence after reboots, dropped events, agent outages, or deliberate anti-forensic activity.
+1. **So sánh với đường cơ sở:** Lưu siêu dữ liệu và checksum mật mã (ưu tiên `SHA-256` trở lên) để so sánh trong tương lai.
+2. **Thông báo theo thời gian thực:** Đăng ký nhận sự kiện tệp gốc của hệ điều hành để biết **tệp nào đã thay đổi, khi nào và lý tưởng nhất là tiến trình/người dùng nào đã tác động đến tệp đó**.
+3. **Quét định kỳ:** Khôi phục độ tin cậy sau khi khởi động lại, bỏ lỡ sự kiện, agent ngừng hoạt động hoặc có hoạt động chống điều tra số có chủ đích.
 
-For threat hunting, FIM is usually more useful when focused on **high-value paths** such as:
+Để truy tìm mối đe dọa, FIM thường hữu ích hơn khi tập trung vào **các đường dẫn có giá trị cao**, chẳng hạn như:
 
 - `/etc`, `/boot`, `/usr/local/bin`, `/usr/local/sbin`
-- `systemd` units, cron locations, SSH material, PAM modules, web roots
-- Windows persistence locations, service binaries, scheduled task files, startup folders
-- Container writable layers and bind-mounted secrets/configuration
+- Các unit `systemd`, vị trí lưu cron, nội dung SSH, module PAM, web root
+- Vị trí duy trì quyền truy cập trên Windows, binary dịch vụ, tệp tác vụ đã lên lịch, thư mục startup
+- Các lớp ghi được của container và secret/cấu hình được bind-mount
 
-## Real-Time Backends & Blind Spots
+## Backend thời gian thực và điểm mù
 
 ### Linux
 
-The collection backend matters:<sup>[[2]](#references)[[9]](#references)</sup>
+Backend thu thập sự kiện rất quan trọng:<sup>[[2]](#references)[[9]](#references)</sup>
 
-- **`inotify` / `fsnotify`**: easy and common, but watch limits can be exhausted and some edge cases are missed.
-- **`auditd` / audit framework**: better when you need **who changed the file** (login UID, process ID, and process name).
-- **`eBPF` / `kprobes`**: newer options used by modern FIM stacks to enrich events and reduce some of the operational pain of plain `inotify` deployments.
+- **`inotify` / `fsnotify`**: dễ dùng và phổ biến, nhưng có thể cạn giới hạn theo dõi và bỏ sót một số trường hợp đặc biệt.
+- **`auditd` / audit framework**: phù hợp hơn khi cần biết **ai đã thay đổi tệp** (UID đăng nhập, ID tiến trình và tên tiến trình).
+- **`eBPF` / `kprobes`**: các lựa chọn mới hơn được các giải pháp FIM hiện đại sử dụng để bổ sung thông tin cho sự kiện và giảm bớt một số khó khăn vận hành của các triển khai chỉ dùng `inotify`.
 
-Some practical gotchas:<sup>[[1]](#references)[[5]](#references)</sup>
+Một số vấn đề thực tế cần lưu ý:<sup>[[1]](#references)[[5]](#references)</sup>
 
-- If a program **replaces** a file with `write temp -> rename`, watching the file itself may stop being useful. **Watch the parent directory**, not only the file.
-- `inotify`-based collectors can miss or degrade on **huge directory trees**, **hard-link activity**, or after a **watched file is deleted**.
-- Very large recursive watch sets can silently fail if `fs.inotify.max_user_watches`, `max_user_instances`, or `max_queued_events` are too low.
-- For `inotify`-based monitoring, network filesystems are a blind spot because remote changes are not reported.
+- Nếu một chương trình **thay thế** tệp bằng cách thực hiện `write temp -> rename`, việc theo dõi chính tệp đó có thể không còn hữu ích. **Hãy theo dõi thư mục cha**, không chỉ riêng tệp.
+- Các bộ thu thập dựa trên `inotify` có thể bỏ lỡ sự kiện hoặc hoạt động kém với **cây thư mục khổng lồ**, **hoạt động hard link** hoặc sau khi **tệp đang được theo dõi bị xóa**.
+- Các tập hợp theo dõi đệ quy rất lớn có thể âm thầm gặp lỗi nếu `fs.inotify.max_user_watches`, `max_user_instances` hoặc `max_queued_events` có giá trị quá thấp.
+- Với hoạt động giám sát dựa trên `inotify`, hệ thống tệp mạng là một điểm mù vì các thay đổi từ xa không được báo cáo.
 
-Example baseline + verification with AIDE:<sup>[[4]](#references)</sup>
+Ví dụ về tạo đường cơ sở + xác minh bằng AIDE:<sup>[[4]](#references)</sup>
 
 ```bash
 aide --init
@@ -51,7 +51,7 @@ mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
 aide --check
 ```
 
-Example `osquery` FIM configuration focused on attacker persistence paths:<sup>[[1]](#references)</sup>
+Ví dụ về cấu hình FIM của `osquery` tập trung vào các đường dẫn persistence của kẻ tấn công:<sup>[[1]](#references)</sup>
 
 ```json
 {
@@ -70,26 +70,26 @@ Example `osquery` FIM configuration focused on attacker persistence paths:<sup>[
 }
 ```
 
-If you need **process attribution** instead of only path-level changes, prefer audit-backed telemetry such as `osquery` `process_file_events` or Wazuh `whodata` mode.<sup>[[1]](#references)[[3]](#references)[[9]](#references)</sup>
+Nếu cần **quy kết theo tiến trình** thay vì chỉ theo thay đổi ở cấp đường dẫn, hãy ưu tiên telemetry có hỗ trợ audit như `osquery` `process_file_events` hoặc chế độ `whodata` của Wazuh.<sup>[[1]](#references)[[3]](#references)[[9]](#references)</sup>
 
-#### `io_uring`: syscall telemetry is not FIM
+#### `io_uring`: telemetry syscall không phải là FIM
 
-On modern Linux, watching `openat(2)`, `write(2)`, or other syscall entry points is **not equivalent to monitoring the resulting filesystem operation**. The 2025 **Curing** proof of concept queued file and network requests through `io_uring`, so products or policies attached only to the corresponding per-operation syscall entries lost process telemetry. In the same tests, a path-scoped FIM component still observed file modifications, showing that this is a **hook-placement blind spot**, not a permission bypass or a way to defeat every FIM backend.<sup>[[10]](#references)</sup>
+Trên Linux hiện đại, theo dõi `openat(2)`, `write(2)` hoặc các điểm vào syscall khác **không tương đương với việc giám sát thao tác hệ thống tệp thực tế**. Proof of concept **Curing** năm 2025 xếp hàng các yêu cầu về tệp và mạng thông qua `io_uring`, khiến các sản phẩm hoặc chính sách chỉ gắn với những điểm vào syscall tương ứng cho từng thao tác bị mất telemetry tiến trình. Trong cùng các thử nghiệm, một thành phần FIM giới hạn theo đường dẫn vẫn phát hiện được các sửa đổi tệp, cho thấy đây là **điểm mù do vị trí hook**, không phải cách vượt qua quyền hạn hay đánh bại mọi backend FIM.<sup>[[10]](#references)</sup>
 
-When validating a sensor, modify the same canary through several paths: normal `write`, `mmap` + `msync`, `truncate`, `sendfile`/`copy_file_range`, atomic replacement, and `io_uring`. Check not only that the final hash drift is found, but also whether the event preserves the responsible process, container/cgroup, namespace-visible path, inode, and rename pair. A missing real-time event followed by a periodic-scan mismatch must be treated as **telemetry loss**, not as a routine unexplained change.<sup>[[10]](#references)[[11]](#references)</sup>
+Khi xác thực một sensor, hãy sửa đổi cùng một canary theo nhiều cách: `write` thông thường, `mmap` + `msync`, `truncate`, `sendfile`/`copy_file_range`, thay thế nguyên tử và `io_uring`. Không chỉ kiểm tra xem có phát hiện được sự thay đổi hash cuối cùng hay không, mà còn kiểm tra xem sự kiện có giữ lại thông tin về tiến trình chịu trách nhiệm, container/cgroup, đường dẫn hiển thị trong namespace, inode và cặp thao tác đổi tên hay không. Một sự kiện thời gian thực bị thiếu, sau đó là sai lệch được phát hiện trong lần quét định kỳ, phải được xem là **mất telemetry**, không phải một thay đổi thông thường chưa rõ nguyên nhân.<sup>[[10]](#references)[[11]](#references)</sup>
 
-For eBPF-based monitoring, prefer common kernel enforcement points over a list of syscall-entry probes. For example, Tetragon's file-access policy uses `security_file_permission` to cover ordinary I/O, `sendfile`, `copy_file_range`, AIO, and `io_uring`; it separately covers memory mappings with `security_mmap_file` and size changes with `security_path_truncate`. This also illustrates why one hook is rarely complete coverage.<sup>[[11]](#references)</sup>
+Đối với hoạt động giám sát dựa trên eBPF, hãy ưu tiên các điểm thực thi phổ biến trong kernel thay vì một danh sách các probe tại điểm vào syscall. Ví dụ, chính sách truy cập tệp của Tetragon sử dụng `security_file_permission` để bao quát I/O thông thường, `sendfile`, `copy_file_range`, AIO và `io_uring`; chính sách này cũng bao quát riêng các ánh xạ bộ nhớ bằng `security_mmap_file` và các thay đổi kích thước bằng `security_path_truncate`. Điều này cũng cho thấy vì sao hiếm khi chỉ một hook có thể bao quát đầy đủ.<sup>[[11]](#references)</sup>
 
 ### Windows
 
-On Windows, FIM is stronger when you combine **change journals** with **high-signal process/file telemetry**:<sup>[[6]](#references)[[7]](#references)</sup>
+Trên Windows, FIM hiệu quả hơn khi kết hợp **change journal** với **telemetry tiến trình/tệp có tín hiệu cao**:<sup>[[6]](#references)[[7]](#references)</sup>
 
-- **NTFS USN Journal** gives a persistent per-volume log of file changes.
-- **Sysmon Event ID 11** is useful for file creation/overwrite.
-- **Sysmon Event ID 2** helps detect **timestomping**.
-- **Sysmon Event ID 15** is useful for **named alternate data streams (ADS)** such as `Zone.Identifier` or hidden payload streams.
+- **NTFS USN Journal** cung cấp nhật ký thay đổi tệp liên tục theo từng volume.
+- **Sysmon Event ID 11** hữu ích để phát hiện việc tạo/ghi đè tệp.
+- **Sysmon Event ID 2** hỗ trợ phát hiện **timestomping**.
+- **Sysmon Event ID 15** hữu ích để phát hiện **alternate data stream (ADS) có tên**, chẳng hạn như `Zone.Identifier` hoặc các luồng payload ẩn.
 
-Quick USN triage examples:<sup>[[7]](#references)</sup>
+Ví dụ triage USN nhanh:<sup>[[7]](#references)</sup>
 
 ```cmd
 fsutil usn queryjournal C:
@@ -97,22 +97,22 @@ fsutil usn readjournal C:
 fsutil usn readdata C:\Windows\Temp\sample.bin
 ```
 
-For deeper anti-forensic ideas around **timestamp manipulation**, **ADS abuse**, and **USN tampering**, check [Anti-Forensic Techniques](anti-forensic-techniques.md).
+Để tìm hiểu sâu hơn về các ý tưởng anti-forensic liên quan đến **thao túng timestamp**, **lạm dụng ADS** và **can thiệp USN**, hãy xem [Anti-Forensic Techniques](anti-forensic-techniques.md).
 
 ### Containers
 
-Container FIM frequently misses the real write path. With Docker `overlay2`, the container filesystem combines read-only image `lowerdir` layers with a writable **upper layer** (`upperdir`/`diff`), and writes to image files are copied up into that upper layer.<sup>[[8]](#references)</sup> Therefore:
+FIM trong container thường bỏ sót đường dẫn ghi thực tế. Với Docker `overlay2`, filesystem của container kết hợp các layer `lowerdir` chỉ đọc của image với một **upper layer** có thể ghi (`upperdir`/`diff`), và các thao tác ghi vào file của image sẽ được copy lên upper layer đó.<sup>[[8]](#references)</sup> Do đó:
 
-- Monitoring only paths from **inside** a short-lived container may miss changes after the container is recreated.
-- Monitoring the **host path** that backs the writable layer or the relevant bind-mounted volume is often more useful.
-- FIM on image layers is different from FIM on the running container filesystem.
+- Chỉ giám sát các đường dẫn **bên trong** một container tồn tại ngắn hạn có thể bỏ sót thay đổi sau khi container được tạo lại.
+- Giám sát **đường dẫn trên host** làm nền cho layer có thể ghi hoặc volume được bind mount liên quan thường hữu ích hơn.
+- FIM trên các layer của image khác với FIM trên filesystem của container đang chạy.
 
-## Attacker-Oriented Hunting Notes
+## Ghi chú săn tìm hướng đến kẻ tấn công
 
-- Track **service definitions** and **task schedulers** as carefully as binaries. Attackers often get persistence by modifying a unit file, cron entry, or task XML rather than patching `/bin/sshd`.
-- A content hash alone is insufficient. Many compromises first show up as **owner/mode/xattr/ACL drift**.
-- If you suspect a mature intrusion, do both: **real-time FIM** for fresh activity and a **cold baseline comparison** from trusted media.
-- If the attacker has root or kernel execution, treat the FIM agent and its database as untrusted. Store logs and baselines remotely or on read-only media whenever possible.<sup>[[4]](#references)</sup>
+- Theo dõi **định nghĩa dịch vụ** và **bộ lập lịch tác vụ** cẩn thận như các binary. Kẻ tấn công thường duy trì persistence bằng cách sửa unit file, cron entry hoặc task XML thay vì vá `/bin/sshd`.
+- Chỉ dùng content hash là chưa đủ. Nhiều vụ xâm nhập lần đầu biểu hiện qua **sự sai lệch owner/mode/xattr/ACL**.
+- Nếu nghi ngờ có một vụ xâm nhập tinh vi, hãy làm cả hai việc: dùng **FIM thời gian thực** để phát hiện hoạt động mới và **so sánh baseline ngoại tuyến** từ phương tiện đáng tin cậy.
+- Nếu kẻ tấn công có quyền root hoặc thực thi trong kernel, hãy coi agent FIM và database của nó là không đáng tin cậy. Khi có thể, hãy lưu log và baseline từ xa hoặc trên phương tiện chỉ đọc.<sup>[[4]](#references)</sup>
 
 ## Tools
 
@@ -124,16 +124,15 @@ Container FIM frequently misses the real write path. With Docker `overlay2`, the
 
 ## References
 
-- [1] [File Integrity Monitoring with osquery](https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/)
-- [2] [Tracing Linux: A file integrity monitoring use case (Elastic)](https://www.elastic.co/blog/tracing-linux-file-integrity-monitoring-use-case)
-- [3] [Wazuh File Integrity Monitoring (Syscheck and whodata mode)](https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html)
-- [4] [AIDE Manual Version 0.16.2](https://aide.github.io/doc/)
-- [5] [inotify(7) Linux manual page](https://man7.org/linux/man-pages/man7/inotify.7.html)
+- [1] [Giám sát tính toàn vẹn file bằng osquery](https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/)
+- [2] [Tracing Linux: Trường hợp sử dụng giám sát tính toàn vẹn file (Elastic)](https://www.elastic.co/blog/tracing-linux-file-integrity-monitoring-use-case)
+- [3] [Giám sát tính toàn vẹn file của Wazuh (Syscheck và chế độ whodata)](https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html)
+- [4] [Hướng dẫn sử dụng AIDE phiên bản 0.16.2](https://aide.github.io/doc/)
+- [5] [Trang hướng dẫn Linux inotify(7)](https://man7.org/linux/man-pages/man7/inotify.7.html)
 - [6] [Sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
 - [7] [fsutil usn](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/fsutil-usn)
-- [8] [OverlayFS storage driver](https://docs.docker.com/engine/storage/drivers/overlayfs-driver/)
-- [9] [Wazuh FIM advanced settings](https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/advanced-settings.html)
-- [10] [io_uring Rootkit Bypasses Linux Security Tools (ARMO)](https://www.armosec.io/blog/io_uring-rootkit-bypasses-linux-security/)
-- [11] [Filename access: covering synchronous, asynchronous, mapped, and truncation paths (Tetragon)](https://tetragon.io/docs/use-cases/filename-access/)
-
+- [8] [Trình điều khiển lưu trữ OverlayFS](https://docs.docker.com/engine/storage/drivers/overlayfs-driver/)
+- [9] [Cài đặt nâng cao Wazuh FIM](https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/advanced-settings.html)
+- [10] [Rootkit io_uring vượt qua các công cụ bảo mật Linux (ARMO)](https://www.armosec.io/blog/io_uring-rootkit-bypasses-linux-security/)
+- [11] [Truy cập filename: bao quát các đường dẫn đồng bộ, bất đồng bộ, ánh xạ và cắt ngắn (Tetragon)](https://tetragon.io/docs/use-cases/filename-access/)
 {{#include ../../banners/hacktricks-training.md}}

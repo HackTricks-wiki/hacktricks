@@ -1,8 +1,8 @@
-# Specific Software/File Type Tricks
+# Thủ thuật cho phần mềm/loại tệp cụ thể
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Here you can find interesting tricks for specific file-types and/or software:
+Tại đây, bạn có thể tìm thấy các thủ thuật hữu ích dành cho một số loại tệp và/hoặc phần mềm cụ thể:
 
 
 {{#ref}}

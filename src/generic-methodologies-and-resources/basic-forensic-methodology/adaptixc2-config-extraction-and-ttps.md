@@ -1,37 +1,37 @@
-# AdaptixC2 Configuration Extraction and TTPs
+# Trích xuất cấu hình và TTP của AdaptixC2
 
 {{#include ../../banners/hacktricks-training.md}}
 
-AdaptixC2 is a modular, open‑source post‑exploitation/C2 framework with Windows x86/x64 beacons (EXE/DLL/service EXE/raw shellcode) and BOF support.<sup>[[1]](#references)</sup> This page documents:
-- How its RC4‑packed configuration is embedded and how to extract it from beacons
-- Network/profile indicators for HTTP/SMB/TCP listeners
-- Common loader and persistence TTPs observed in the wild, with links to relevant Windows technique pages
+AdaptixC2 là framework post-exploitation/C2 mã nguồn mở, có tính mô-đun, với beacon Windows x86/x64 (EXE/DLL/service EXE/raw shellcode) và hỗ trợ BOF.<sup>[[1]](#references)</sup> Trang này trình bày:
+- Cách cấu hình được đóng gói bằng RC4 và nhúng vào beacon, cũng như cách trích xuất cấu hình đó
+- Các dấu hiệu mạng/profile của listener HTTP/SMB/TCP
+- Các TTP loader và persistence phổ biến được quan sát ngoài thực tế, kèm liên kết đến những trang kỹ thuật Windows liên quan
 
-Recent upstream releases also ship DNS/DoH beacon listeners and the separate Gopher agent/listener family, so modern Adaptix infrastructure may expose more than the original HTTP/SMB/TCP surfaces even when a specific sample still uses the classic beacon agent.<sup>[[2]](#references)</sup>
+Các bản phát hành upstream gần đây cũng có listener beacon DNS/DoH và họ agent/listener Gopher riêng biệt. Vì vậy, hạ tầng Adaptix hiện đại có thể để lộ nhiều hơn các bề mặt HTTP/SMB/TCP ban đầu, ngay cả khi một mẫu cụ thể vẫn dùng beacon agent cổ điển.<sup>[[2]](#references)</sup>
 
-## Beacon profiles and fields
+## Profile và trường của beacon
 
-AdaptixC2 supports three primary beacon types:<sup>[[1]](#references)</sup>
-- BEACON_HTTP: web C2 with configurable servers/ports/SSL, method, URI, headers, user‑agent, and a custom parameter name
-- BEACON_SMB: named‑pipe peer‑to‑peer C2 (intranet)
-- BEACON_TCP: direct sockets, optionally with a prepended marker to obfuscate protocol start
+AdaptixC2 hỗ trợ ba loại beacon chính:<sup>[[1]](#references)</sup>
+- BEACON_HTTP: C2 qua web với máy chủ/cổng/SSL, method, URI, header, user-agent và tên parameter tùy chỉnh có thể cấu hình
+- BEACON_SMB: C2 ngang hàng qua named-pipe (intranet)
+- BEACON_TCP: socket trực tiếp, có thể thêm marker ở đầu để làm nhiễu phần bắt đầu của giao thức
 
-These are the beacon layouts publicly documented in early Adaptix analyses and they are still the most common starting point for sample-side extraction.<sup>[[1]](#references)</sup> However, current upstream builds also ship `BeaconDNS` and Gopher extenders on the server side, so do not assume every live Adaptix deployment exposes only HTTP/SMB/TCP infrastructure.<sup>[[2]](#references)</sup>
+Đây là các bố cục beacon được ghi nhận công khai trong những phân tích Adaptix ban đầu và vẫn là điểm khởi đầu phổ biến nhất khi trích xuất từ phía mẫu.<sup>[[1]](#references)</sup> Tuy nhiên, các bản build upstream hiện tại cũng có extenders `BeaconDNS` và Gopher ở phía server, vì vậy không nên cho rằng mọi triển khai Adaptix đang hoạt động chỉ để lộ hạ tầng HTTP/SMB/TCP.<sup>[[2]](#references)</sup>
 
-Typical profile fields observed in HTTP beacon configs (after decryption):<sup>[[1]](#references)</sup>
+Các trường profile thường thấy trong cấu hình HTTP beacon (sau khi giải mã):<sup>[[1]](#references)</sup>
 - agent_type (u32)
 - use_ssl (bool)
 - servers_count (u32), servers (array of strings), ports (array of u32)
 - http_method, uri, parameter, user_agent, http_headers (length‑prefixed strings)
-- ans_pre_size (u32), ans_size (u32) – used to parse response sizes
+- ans_pre_size (u32), ans_size (u32) – dùng để phân tích kích thước response
 - kill_date (u32), working_time (u32)
 - sleep_delay (u32), jitter_delay (u32)
 - listener_type (u32)
 - download_chunk_size (u32)
 
-Recent BeaconHTTP builds also support operator-selected rotation across multiple URIs, user-agents, Host headers, and servers, with sequential or random selection.<sup>[[2]](#references)</sup> From a hunting perspective this means a single infected host may fan out across several callback paths and header combinations without leaving the classic RC4-packed beacon family.
+Các bản build BeaconHTTP gần đây cũng hỗ trợ operator chọn cách xoay vòng qua nhiều URI, user-agent, Host header và server, theo thứ tự tuần tự hoặc ngẫu nhiên.<sup>[[2]](#references)</sup> Từ góc độ hunting, điều này có nghĩa là một host bị nhiễm có thể phân tán callback qua nhiều đường dẫn và tổ hợp header mà không rời khỏi họ beacon cổ điển được đóng gói bằng RC4.
 
-Example default HTTP profile (from a beacon build):<sup>[[1]](#references)</sup>
+Ví dụ profile HTTP mặc định (từ một bản build beacon):<sup>[[1]](#references)</sup>
 
 ```json
 {
@@ -56,7 +56,7 @@ Example default HTTP profile (from a beacon build):<sup>[[1]](#references)</sup>
 }
 ```
 
-Observed malicious HTTP profile (real attack):<sup>[[1]](#references)</sup>
+Hồ sơ HTTP độc hại được quan sát (cuộc tấn công thực tế):<sup>[[1]](#references)</sup>
 
 ```json
 {
@@ -81,14 +81,14 @@ Observed malicious HTTP profile (real attack):<sup>[[1]](#references)</sup>
 }
 ```
 
-## Encrypted configuration packing and load path
+## Đóng gói cấu hình mã hóa và quy trình tải
 
-When the operator clicks Create in the builder, AdaptixC2 embeds the encrypted profile as a tail blob in the beacon. The format is:<sup>[[1]](#references)</sup>
-- 4 bytes: configuration size (uint32, little‑endian)
-- N bytes: RC4‑encrypted configuration data
-- 16 bytes: RC4 key
+Khi operator nhấp vào Create trong builder, AdaptixC2 nhúng profile đã mã hóa dưới dạng blob ở cuối beacon. Định dạng là:<sup>[[1]](#references)</sup>
+- 4 byte: kích thước cấu hình (uint32, little‑endian)
+- N byte: dữ liệu cấu hình được mã hóa bằng RC4
+- 16 byte: khóa RC4
 
-The beacon loader copies the 16‑byte key from the end and RC4‑decrypts the N‑byte block in place:<sup>[[1]](#references)</sup>
+Loader của beacon sao chép khóa 16 byte từ cuối và giải mã RC4 khối N byte ngay tại chỗ:<sup>[[1]](#references)</sup>
 
 ```c
 ULONG profileSize = packer->Unpack32();
@@ -97,23 +97,23 @@ memcpy(this->encrypt_key, packer->data() + 4 + profileSize, 16);
 DecryptRC4(packer->data()+4, profileSize, this->encrypt_key, 16);
 ```
 
-Practical implications:<sup>[[1]](#references)</sup>
-- The entire structure often lives inside the PE .rdata section.
-- Extraction is deterministic: read size, read ciphertext of that size, read the 16‑byte key placed immediately after, then RC4‑decrypt.
+Các hệ quả thực tế:<sup>[[1]](#references)</sup>
+- Toàn bộ cấu trúc thường nằm trong phần PE .rdata.
+- Quá trình trích xuất có tính xác định: đọc kích thước, đọc ciphertext có kích thước đó, đọc khóa 16 byte nằm ngay sau, rồi giải mã RC4.
 
-## Configuration extraction workflow (defenders)
+## Quy trình trích xuất cấu hình (dành cho bên phòng thủ)
 
-Write an extractor that mimics the beacon logic:<sup>[[1]](#references)</sup>
-1) Locate the blob inside the PE (commonly .rdata). A pragmatic approach is to scan .rdata for a plausible [size|ciphertext|16‑byte key] layout and attempt RC4.
-2) Read first 4 bytes → size (uint32 LE).
-3) Read next N=size bytes → ciphertext.
-4) Read final 16 bytes → RC4 key.
-5) RC4‑decrypt the ciphertext. Then parse the plain profile as:
-   - u32/boolean scalars as noted above
-   - length‑prefixed strings (u32 length followed by bytes; trailing NUL can be present)
-   - arrays: servers_count followed by that many [string, u32 port] pairs
+Viết một công cụ trích xuất mô phỏng logic của beacon:<sup>[[1]](#references)</sup>
+1) Tìm blob bên trong PE (thường nằm trong .rdata). Cách tiếp cận thực tế là quét .rdata để tìm bố cục [size|ciphertext|khóa 16 byte] có vẻ hợp lý rồi thử RC4.
+2) Đọc 4 byte đầu tiên → size (uint32 LE).
+3) Đọc N=size byte tiếp theo → ciphertext.
+4) Đọc 16 byte cuối → khóa RC4.
+5) Giải mã ciphertext bằng RC4. Sau đó phân tích profile thuần văn bản như sau:
+   - các giá trị vô hướng u32/boolean như đã lưu ý ở trên
+   - các chuỗi có tiền tố độ dài (độ dài u32 theo sau bởi các byte; có thể có NUL ở cuối)
+   - mảng: servers_count theo sau bởi số cặp [string, u32 port] tương ứng
 
-Minimal Python proof‑of‑concept (standalone, no external deps) that works with a pre‑extracted blob:
+Proof-of-concept Python tối giản, độc lập (không cần thư viện bên ngoài), hoạt động với blob đã trích xuất:
 
 ```python
 import struct
@@ -181,79 +181,79 @@ def parse_http_cfg(plain: bytes) -> dict:
 # cfg  = parse_http_cfg(pt)
 ```
 
-Tips:
-- When automating, use a PE parser to read .rdata then apply a sliding window: for each offset o, try size = u32(.rdata[o:o+4]), ct = .rdata[o+4:o+4+size], candidate key = next 16 bytes; RC4‑decrypt and check that string fields decode as UTF‑8 and lengths are sane.
-- Parse SMB/TCP profiles by following the same length‑prefixed conventions.
+Mẹo:
+- Khi tự động hóa, hãy dùng PE parser để đọc .rdata rồi áp dụng cửa sổ trượt: với mỗi offset o, thử size = u32(.rdata[o:o+4]), ct = .rdata[o+4:o+4+size], key ứng viên = 16 byte tiếp theo; giải mã RC4 rồi kiểm tra các trường chuỗi có giải mã thành UTF-8 và độ dài có hợp lý không.
+- Phân tích profile SMB/TCP bằng cách tuân theo cùng quy ước tiền tố độ dài.
 
-## Custom listener profiles: don't hard-code only the classic HTTP schema
+## Profile listener tùy chỉnh: đừng chỉ hard-code schema HTTP cổ điển
 
-The outer packing format (`u32 size | RC4 ciphertext | 16-byte key`) is reusable, so actor-customized listeners can keep the same extraction workflow while changing the decrypted field layout completely.
+Định dạng đóng gói bên ngoài (`u32 size | RC4 ciphertext | 16-byte key`) có thể tái sử dụng, vì vậy các listener được actor tùy chỉnh có thể dùng cùng quy trình trích xuất nhưng thay đổi hoàn toàn bố cục trường sau giải mã.
 
-A good recent example is the March 2026 Tropic Trooper campaign, where the extracted Adaptix beacon did not contain a standard HTTP/TCP profile. Instead, the decrypted blob stored GitHub transport parameters such as:<sup>[[5]](#references)</sup>
+Một ví dụ gần đây đáng chú ý là chiến dịch Tropic Trooper vào tháng 3 năm 2026, trong đó Adaptix beacon được trích xuất không chứa profile HTTP/TCP tiêu chuẩn. Thay vào đó, blob đã giải mã lưu các tham số truyền tải GitHub như sau:<sup>[[5]](#references)</sup>
 - `repo_owner`
 - `repo_name`
-- `api_host` (for example `api.github.com`)
+- `api_host` (ví dụ `api.github.com`)
 - `auth_token`
 - `issues_api_path`
 - `kill_date` / `working_time` / `sleep_delay` / `jitter`
 
-Practical parser strategy:
-- First detect the outer RC4 blob exactly as usual.
-- After decryption, branch on sentinel strings and field sanity rather than immediately forcing the HTTP parser.
-- Good sentinels include `api.github.com`, `/issues?state=open`, HTTP verbs/URIs, named-pipe-style strings, or obviously valid server/port arrays.
-- If the HTTP parser fails but the plaintext contains coherent length-prefixed UTF-8 strings, keep the sample and attempt alternative schemas instead of discarding it as a false positive.
+Chiến lược parser thực tế:
+- Trước tiên, phát hiện blob RC4 bên ngoài như thường lệ.
+- Sau khi giải mã, hãy phân nhánh dựa trên các chuỗi sentinel và tính hợp lý của trường, thay vì lập tức ép dữ liệu vào HTTP parser.
+- Các sentinel hữu ích gồm `api.github.com`, `/issues?state=open`, HTTP verb/URI, chuỗi dạng named pipe hoặc mảng server/port có vẻ hợp lệ.
+- Nếu HTTP parser thất bại nhưng plaintext chứa các chuỗi UTF-8 có tiền tố độ dài nhất quán, hãy giữ lại mẫu và thử các schema thay thế thay vì loại bỏ vì cho là false positive.
 
-In that campaign the custom listener used GitHub issues as the C2 transport, and the beacon queried `ipinfo.io` to learn its external IP because the GitHub API does not directly reveal the victim source address to the operator.<sup>[[5]](#references)</sup>
+Trong chiến dịch đó, listener tùy chỉnh dùng GitHub issues làm C2 transport, còn beacon truy vấn `ipinfo.io` để tìm IP bên ngoài của nó, vì GitHub API không trực tiếp tiết lộ địa chỉ nguồn của nạn nhân cho operator.<sup>[[5]](#references)</sup>
 
-## Network fingerprinting and hunting
+## Fingerprinting mạng và săn tìm
 
 HTTP:<sup>[[1]](#references)</sup>
-- Common: POST to operator‑selected URIs (e.g., /uri.php, /endpoint/api)
-- Custom header parameter used for beacon ID (e.g., X‑Beacon‑Id, X‑App‑Id)
-- User‑agents mimicking Firefox 20 or contemporary Chrome builds
-- Polling cadence visible via sleep_delay/jitter_delay
-- Newer builds can rotate URIs, user-agents, Host headers, and servers across callbacks, so cluster on uncommon header names, response-size patterns, TLS reuse, and timing instead of assuming a single path/UA pair.<sup>[[2]](#references)</sup>
+- Thường gặp: POST đến URI do operator chọn (ví dụ /uri.php, /endpoint/api)
+- Tham số header tùy chỉnh được dùng làm beacon ID (ví dụ X‑Beacon‑Id, X‑App‑Id)
+- User-agent giả dạng Firefox 20 hoặc các bản Chrome đương thời
+- Nhịp polling thể hiện qua sleep_delay/jitter_delay
+- Các bản dựng mới hơn có thể luân phiên URI, user-agent, Host header và server giữa các callback, vì vậy hãy gom cụm dựa trên tên header hiếm gặp, mẫu kích thước phản hồi, việc tái sử dụng TLS và thời gian, thay vì giả định chỉ có một cặp path/UA.<sup>[[2]](#references)</sup>
 
 SMB/TCP:<sup>[[1]](#references)</sup>
-- SMB named‑pipe listeners for intranet C2 where web egress is constrained
-- TCP beacons may prepend a few bytes before traffic to obfuscate protocol start
+- Listener named pipe SMB cho C2 intranet khi web egress bị hạn chế
+- TCP beacon có thể thêm vài byte vào trước traffic để làm mờ điểm bắt đầu của protocol
 
-Current upstream teamserver defaults
-- `profile.yaml` currently ships with teamserver `0.0.0.0:4321`, endpoint `/endpoint`, certificate/key filenames `server.rsa.crt` and `server.rsa.key`, and extenders for HTTP, SMB, TCP, DNS, Beacon agent, and Gopher.<sup>[[2]](#references)</sup>
-- On unmatched routes, the default error handler returns `Server: AdaptixC2` and `Adaptix-Version: v1.2`.<sup>[[4]](#references)</sup>
-- The stock 404 body contains `AdaptixC2 404` and `You need to enter the correct connection details`.<sup>[[4]](#references)</sup>
-- Internet-wide scans in 2026 found many exposed teamservers on `4321` and many beacon listeners on `43211`, so both ports are useful seed pivots but should not be treated as exhaustive.<sup>[[4]](#references)</sup>
+Mặc định teamserver upstream hiện tại
+- `profile.yaml` hiện được đóng gói với teamserver `0.0.0.0:4321`, endpoint `/endpoint`, tên file certificate/key `server.rsa.crt` và `server.rsa.key`, cùng các extender cho HTTP, SMB, TCP, DNS, Beacon agent và Gopher.<sup>[[2]](#references)</sup>
+- Với các route không khớp, error handler mặc định trả về `Server: AdaptixC2` và `Adaptix-Version: v1.2`.<sup>[[4]](#references)</sup>
+- Nội dung 404 mặc định chứa `AdaptixC2 404` và `You need to enter the correct connection details`.<sup>[[4]](#references)</sup>
+- Các đợt quét trên Internet diện rộng năm 2026 phát hiện nhiều teamserver lộ ra trên cổng `4321` và nhiều beacon listener trên `43211`; do đó, cả hai cổng đều hữu ích làm điểm pivot ban đầu nhưng không nên coi là đầy đủ.<sup>[[4]](#references)</sup>
 
-DNS/DoH listener fingerprints:<sup>[[4]](#references)</sup>
-- The current BeaconDNS extender answers authoritatively (`AA=true`)
-- Queries that do not match the beacon protocol shape — notably names with fewer than 5 labels before the configured domain — are commonly answered with `TXT "OK"`
-- If the configured base TTL is left at zero, the listener uses a 10-second base and adds up to 59 seconds of jitter
-- This makes short-label active probes useful when no HTTP listener is exposed
+Dấu hiệu nhận diện listener DNS/DoH:<sup>[[4]](#references)</sup>
+- Extender BeaconDNS hiện tại trả lời có thẩm quyền (`AA=true`)
+- Các truy vấn không khớp với cấu trúc protocol beacon — đáng chú ý là tên có ít hơn 5 nhãn trước domain được cấu hình — thường được trả lời bằng `TXT "OK"`
+- Nếu TTL cơ sở được cấu hình là 0, listener sẽ dùng giá trị cơ sở 10 giây và cộng thêm jitter tối đa 59 giây
+- Vì vậy, các probe chủ động dùng nhãn ngắn rất hữu ích khi không có HTTP listener nào lộ ra
 
-## Loader and persistence TTPs seen in incidents
+## TTP loader và persistence được ghi nhận trong các sự cố
 
-In‑memory PowerShell loaders:<sup>[[1]](#references)</sup>
-- Download Base64/XOR payloads (Invoke‑RestMethod / WebClient).<sup>[[9]](#references)</sup>
-- Allocate unmanaged memory, copy shellcode, switch protection to 0x40 (PAGE_EXECUTE_READWRITE) via VirtualProtect.<sup>[[7]](#references)</sup>
-- Execute via .NET dynamic invocation: Marshal.GetDelegateForFunctionPointer + delegate.Invoke().<sup>[[6]](#references)</sup>
+Loader PowerShell chạy trong bộ nhớ:<sup>[[1]](#references)</sup>
+- Tải payload Base64/XOR (Invoke‑RestMethod / WebClient).<sup>[[9]](#references)</sup>
+- Cấp phát bộ nhớ unmanaged, sao chép shellcode, đổi protection thành 0x40 (PAGE_EXECUTE_READWRITE) qua VirtualProtect.<sup>[[7]](#references)</sup>
+- Thực thi qua dynamic invocation của .NET: Marshal.GetDelegateForFunctionPointer + delegate.Invoke().<sup>[[6]](#references)</sup>
 
-Trojanized signed software / staged shellcode loaders:<sup>[[5]](#references)</sup>
-- A 2026 Tropic Trooper chain used a trojanized SumatraPDF executable (TOSHIS loader) that redirected `_security_init_cookie` into malicious code instead of patching the PE entry point
-- The loader resolved APIs via Adler-32 hashing, downloaded a decoy PDF, fetched second-stage shellcode, decrypted it with AES-128-CBC through WinCrypt (`CryptDeriveKey` from a hardcoded seed), and reflectively executed an Adaptix beacon in memory
-- Persistence later moved to scheduled tasks with benign-looking names such as `\MSDNSvc` or `\MicrosoftUDN`, configured to re-launch the agent roughly every two hours
+Phần mềm có chữ ký bị trojan hóa / loader shellcode theo giai đoạn:<sup>[[5]](#references)</sup>
+- Một chuỗi tấn công Tropic Trooper năm 2026 dùng executable SumatraPDF bị trojan hóa (loader TOSHIS), chuyển hướng `_security_init_cookie` sang mã độc thay vì vá PE entry point
+- Loader phân giải API bằng hashing Adler-32, tải một PDF mồi, lấy shellcode giai đoạn hai, giải mã bằng AES-128-CBC qua WinCrypt (`CryptDeriveKey` từ seed hard-code), rồi thực thi phản chiếu Adaptix beacon trong bộ nhớ
+- Sau đó, persistence chuyển sang scheduled task với các tên trông vô hại như `\MSDNSvc` hoặc `\MicrosoftUDN`, được cấu hình để khởi chạy lại agent khoảng hai giờ một lần
 
-Check these pages for in‑memory execution and AMSI/ETW considerations:
+Tham khảo các trang này về thực thi trong bộ nhớ và các lưu ý về AMSI/ETW:
 
 {{#ref}}
 ../../windows-hardening/av-bypass.md
 {{#endref}}
 
-Persistence mechanisms observed:<sup>[[1]](#references)</sup>
-- Startup folder shortcut (.lnk) to re‑launch a loader at logon
-- Registry Run keys (HKCU/HKLM ...\CurrentVersion\Run), often with benign‑sounding names like "Updater" to start loader.ps1.<sup>[[10]](#references)</sup>
-- DLL search‑order hijack by dropping msimg32.dll under %APPDATA%\Microsoft\Windows\Templates for susceptible processes
+Các cơ chế persistence được ghi nhận:<sup>[[1]](#references)</sup>
+- Shortcut trong Startup folder (.lnk) để khởi chạy lại loader khi đăng nhập
+- Registry Run key (HKCU/HKLM ...\CurrentVersion\Run), thường dùng tên nghe có vẻ vô hại như "Updater" để chạy loader.ps1.<sup>[[10]](#references)</sup>
+- DLL search-order hijack bằng cách đặt msimg32.dll trong %APPDATA%\Microsoft\Windows\Templates cho các process dễ bị ảnh hưởng
 
-Technique deep‑dives and checks:
+Các phân tích chuyên sâu và bước kiểm tra kỹ thuật:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/privilege-escalation-with-autorun-binaries.md
@@ -263,39 +263,38 @@ Technique deep‑dives and checks:
 ../../windows-hardening/windows-local-privilege-escalation/dll-hijacking/README.md
 {{#endref}}
 
-Hunting ideas
-- PowerShell spawning RW→RX transitions: VirtualProtect to PAGE_EXECUTE_READWRITE inside powershell.exe.<sup>[[8]](#references)</sup>
-- Dynamic invocation patterns (GetDelegateForFunctionPointer)
-- Unmatched HTTPS 404s with `Server: AdaptixC2`, `Adaptix-Version`, `AdaptixC2 404`, or `You need to enter the correct connection details`.<sup>[[4]](#references)</sup>
-- DNS responses with `AA=true` and `TXT "OK"` for short queries under suspect domains.<sup>[[4]](#references)</sup>
-- GitHub API traffic to `/repos/<owner>/<repo>/issues` followed by `ipinfo.io` lookups from the same loader/beacon chain.<sup>[[5]](#references)</sup>
-- Startup .lnk under user or common Startup folders.<sup>[[1]](#references)</sup>
-- Suspicious Run keys (e.g., "Updater"), and loader names like update.ps1/loader.ps1.<sup>[[1]](#references)</sup>
-- Trojanized PE samples that redirect `_security_init_cookie` into downloader code before showing a decoy document.<sup>[[5]](#references)</sup>
-- User‑writable DLL paths under %APPDATA%\Microsoft\Windows\Templates containing msimg32.dll.<sup>[[1]](#references)</sup>
+Ý tưởng săn tìm
+- PowerShell tạo các chuyển đổi RW→RX: VirtualProtect thành PAGE_EXECUTE_READWRITE bên trong powershell.exe.<sup>[[8]](#references)</sup>
+- Các mẫu dynamic invocation (GetDelegateForFunctionPointer)
+- Phản hồi HTTPS 404 không khớp có `Server: AdaptixC2`, `Adaptix-Version`, `AdaptixC2 404` hoặc `You need to enter the correct connection details`.<sup>[[4]](#references)</sup>
+- Phản hồi DNS có `AA=true` và `TXT "OK"` cho các truy vấn ngắn dưới những domain đáng ngờ.<sup>[[4]](#references)</sup>
+- Traffic GitHub API đến `/repos/<owner>/<repo>/issues`, sau đó là các truy vấn `ipinfo.io` từ cùng chuỗi loader/beacon.<sup>[[5]](#references)</sup>
+- Startup .lnk trong thư mục Startup của người dùng hoặc thư mục Startup chung.<sup>[[1]](#references)</sup>
+- Run key đáng ngờ (ví dụ "Updater") và tên loader như update.ps1/loader.ps1.<sup>[[1]](#references)</sup>
+- Mẫu PE bị trojan hóa chuyển hướng `_security_init_cookie` sang mã downloader trước khi hiển thị tài liệu mồi.<sup>[[5]](#references)</sup>
+- Đường dẫn DLL có thể ghi bởi người dùng trong %APPDATA%\Microsoft\Windows\Templates chứa msimg32.dll.<sup>[[1]](#references)</sup>
 
-## Notes on OpSec fields
+## Ghi chú về các trường OpSec
 
-- KillDate: timestamp after which the agent self‑expires.<sup>[[1]](#references)</sup>
-- WorkingTime: hours when the agent should be active to blend with business activity.<sup>[[1]](#references)</sup>
+- KillDate: dấu thời gian sau đó agent sẽ tự hết hạn.<sup>[[1]](#references)</sup>
+- WorkingTime: khung giờ agent nên hoạt động để hòa vào hoạt động công việc.<sup>[[1]](#references)</sup>
 
-These fields can be used for clustering and to explain observed quiet periods.
+Các trường này có thể được dùng để gom cụm và giải thích những khoảng thời gian không hoạt động.
 
-## YARA and static leads
+## YARA và dấu hiệu tĩnh
 
-Unit 42 published basic YARA for beacons (C/C++ and Go) and loader API‑hashing constants.<sup>[[1]](#references)</sup> Consider complementing with rules that look for the [size|ciphertext|16‑byte‑key] layout near PE .rdata end, the default HTTP profile strings, and newer server/listener markers such as `AdaptixC2 404`, `You need to enter the correct connection details.`, `Adaptix-Version`, `server.rsa.crt`, `server.rsa.key`, `api.github.com`, `/issues?state=open`, and `ipinfo.io`.<sup>[[4]](#references)[[5]](#references)</sup>
+Unit 42 đã công bố YARA cơ bản cho beacon (C/C++ và Go) và các hằng số API-hashing của loader.<sup>[[1]](#references)</sup> Hãy cân nhắc bổ sung các rule tìm bố cục [size|ciphertext|16-byte-key] gần cuối PE .rdata, các chuỗi profile HTTP mặc định và những dấu hiệu server/listener mới hơn như `AdaptixC2 404`, `You need to enter the correct connection details.`, `Adaptix-Version`, `server.rsa.crt`, `server.rsa.key`, `api.github.com`, `/issues?state=open` và `ipinfo.io`.<sup>[[4]](#references)[[5]](#references)</sup>
 
 ## References
 
-- [1] [AdaptixC2: A New Open-Source Framework Leveraged in Real-World Attacks (Unit 42)](https://unit42.paloaltonetworks.com/adaptixc2-post-exploitation-framework/)
+- [1] [AdaptixC2: Một framework mã nguồn mở mới được tận dụng trong các cuộc tấn công ngoài thực tế (Unit 42)](https://unit42.paloaltonetworks.com/adaptixc2-post-exploitation-framework/)
 - [2] [AdaptixC2 GitHub](https://github.com/Adaptix-Framework/AdaptixC2)
-- [3] [Adaptix Framework Docs](https://adaptix-framework.gitbook.io/adaptix-framework)
-- [4] [AdaptixC2: Fingerprinting an Open-Source C2 Framework at Scale (Censys)](https://censys.com/blog/adaptixc2-open-source-c2-framework/)
-- [5] [Tropic Trooper Pivots to AdaptixC2 and Custom Beacon Listener (Zscaler ThreatLabz)](https://www.zscaler.com/blogs/security-research/tropic-trooper-pivots-adaptixc2-and-custom-beacon-listener)
-- [6] [Marshal.GetDelegateForFunctionPointer – Microsoft Docs](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal.getdelegateforfunctionpointer)
-- [7] [VirtualProtect – Microsoft Docs](https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualprotect)
-- [8] [Memory protection constants – Microsoft Docs](https://learn.microsoft.com/en-us/windows/win32/memory/memory-protection-constants)
+- [3] [Tài liệu Adaptix Framework](https://adaptix-framework.gitbook.io/adaptix-framework)
+- [4] [AdaptixC2: Fingerprinting một framework C2 mã nguồn mở trên quy mô lớn (Censys)](https://censys.com/blog/adaptixc2-open-source-c2-framework/)
+- [5] [Tropic Trooper chuyển hướng sang AdaptixC2 và custom beacon listener (Zscaler ThreatLabz)](https://www.zscaler.com/blogs/security-research/tropic-trooper-pivots-adaptixc2-and-custom-beacon-listener)
+- [6] [Marshal.GetDelegateForFunctionPointer – Tài liệu Microsoft](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal.getdelegateforfunctionpointer)
+- [7] [VirtualProtect – Tài liệu Microsoft](https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualprotect)
+- [8] [Các hằng số memory protection – Tài liệu Microsoft](https://learn.microsoft.com/en-us/windows/win32/memory/memory-protection-constants)
 - [9] [Invoke-RestMethod – PowerShell](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-restmethod)
 - [10] [MITRE ATT&CK T1547.001 – Registry Run Keys/Startup Folder](https://attack.mitre.org/techniques/T1547/001/)
-
 {{#include ../../banners/hacktricks-training.md}}

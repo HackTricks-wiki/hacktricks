@@ -1,60 +1,60 @@
-# Crypto
+# Mật mã học
 
 {{#include ../banners/hacktricks-training.md}}
 
-This section focuses on practical cryptography for security testing and CTFs: recognizing common patterns, selecting suitable tools, and applying known attacks.
+Phần này tập trung vào mật mã học thực tiễn dùng trong kiểm thử bảo mật và CTF: nhận diện các mẫu phổ biến, chọn công cụ phù hợp và áp dụng những tấn công đã biết.
 
-For techniques that hide data inside files, see the **Stego** section.
+Để tìm hiểu các kỹ thuật ẩn dữ liệu bên trong tệp, xem phần **Stego**.
 
-## How to use this section
+## Cách sử dụng phần này
 
-Start by identifying the primitive and its parameters. Then determine what the attacker controls or observes, such as an oracle, a leaked value, or nonce reuse, before selecting an attack.
+Bắt đầu bằng cách xác định primitive và các tham số của nó. Sau đó, xác định những gì kẻ tấn công kiểm soát hoặc quan sát được, chẳng hạn như một oracle, một giá trị bị leak hoặc việc tái sử dụng nonce, trước khi chọn tấn công.
 
-### CTF workflow
+### Quy trình CTF
 
 {{#ref}}
 ctf-workflow/README.md
 {{#endref}}
 
-### Symmetric cryptography
+### Mật mã khóa đối xứng
 
 {{#ref}}
 symmetric/README.md
 {{#endref}}
 
-### Hashes, MACs, and KDFs
+### Hash, MAC và KDF
 
 {{#ref}}
 hashes/README.md
 {{#endref}}
 
-### Public-key cryptography
+### Mật mã khóa công khai
 
 {{#ref}}
 public-key/README.md
 {{#endref}}
 
-### TLS and certificates
+### TLS và chứng chỉ
 
 {{#ref}}
 tls-and-certificates/README.md
 {{#endref}}
 
-### Cryptography in malware
+### Mật mã học trong malware
 
 {{#ref}}
 crypto-in-malware/README.md
 {{#endref}}
 
-### Miscellaneous
+### Linh tinh
 
 {{#ref}}
 ctf-misc/README.md
 {{#endref}}
 
-## Quick setup
+## Thiết lập nhanh
 
-Create an isolated Python environment and install commonly used packages. PyCryptodome's documentation recommends installing `pycryptodome` with `pip`; SageMath provides separate installation guidance for each supported platform.<sup>[[1]](#references)[[2]](#references)</sup>
+Tạo môi trường Python cô lập và cài đặt các package thường dùng. Tài liệu PyCryptodome khuyến nghị cài đặt `pycryptodome` bằng `pip`; SageMath có hướng dẫn cài đặt riêng cho từng nền tảng được hỗ trợ.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```bash
 python3 -m venv .venv
@@ -62,11 +62,10 @@ source .venv/bin/activate
 python -m pip install pycryptodome gmpy2 sympy pwntools
 ```
 
-SageMath is often useful for algebraic, lattice, RSA, and elliptic-curve calculations.<sup>[[2]](#references)</sup>
+SageMath thường hữu ích cho các phép tính đại số, lattice, RSA và đường cong elliptic.<sup>[[2]](#references)</sup>
 
 ## References
 
-- [1] [PyCryptodome documentation - Installation](https://www.pycryptodome.org/src/installation)
-- [2] [SageMath documentation - Installation guide](https://doc.sagemath.org/html/en/installation/)
-
+- [1] [Tài liệu PyCryptodome - Cài đặt](https://www.pycryptodome.org/src/installation)
+- [2] [Tài liệu SageMath - Hướng dẫn cài đặt](https://doc.sagemath.org/html/en/installation/)
 {{#include ../banners/hacktricks-training.md}}

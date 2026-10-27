@@ -2,43 +2,43 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### Tools to find secrets in git repos and file system
+### Công cụ tìm secrets trong git repos và hệ thống tệp
 
 - [TruffleHog](https://github.com/dxa4481/truffleHog)
 - [Gitleaks](https://github.com/gitleaks/gitleaks)
-- [Nosey Parker](https://github.com/praetorian-inc/noseyparker) (archived; replaced by [Titus](https://github.com/praetorian-inc/titus))
+- [Nosey Parker](https://github.com/praetorian-inc/noseyparker) (đã lưu trữ; được thay thế bằng [Titus](https://github.com/praetorian-inc/titus))
 - [ggshield](https://github.com/GitGuardian/ggshield)
 - [RExpository](https://github.com/JaimePolop/RExpository)
 - [detect-secrets](https://github.com/Yelp/detect-secrets)
 - [gitGraber](https://github.com/hisxo/gitGraber)
-- [shhgit](https://github.com/eth0izzle/shhgit) (unmaintained)
+- [shhgit](https://github.com/eth0izzle/shhgit) (không còn được duy trì)
 - [github-dorks](https://github.com/techgaun/github-dorks)
-- [gitrob](https://github.com/michenriksen/gitrob) (archived)
-- [git-all-secrets](https://github.com/anshumanbh/git-all-secrets) (archived)
+- [gitrob](https://github.com/michenriksen/gitrob) (đã lưu trữ)
+- [git-all-secrets](https://github.com/anshumanbh/git-all-secrets) (đã lưu trữ)
 - [git-secrets](https://github.com/awslabs/git-secrets)
 - [gittyleaks](https://github.com/kootenpv/gittyleaks)
 - [GitDorker](https://github.com/obheda12/GitDorker)
 
-> Notes
-> - TruffleHog v3 can verify many credentials live and scan GitHub orgs, issues/PRs, gists, and wikis. Example: `trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)[[13]](#references)</sup>
-> - Gitleaks scans Git repositories, directories, and archives. Use `gitleaks git -v --log-opts="--all" <repo>` for history, `gitleaks dir -v <path>` for directories, and `--max-archive-depth 1` to inspect archives.<sup>[[6]](#references)</sup>
-> - Nosey Parker is archived and replaced by Titus. Existing installations still support `noseyparker scan --datastore np.db <path|repo>` followed by `noseyparker report --datastore np.db`.<sup>[[7]](#references)[[8]](#references)</sup>
-> - ggshield (GitGuardian CLI) scans files, repositories, and Docker images and integrates with local or CI workflows: `ggshield secret scan repo <path-or-url>`.<sup>[[9]](#references)</sup>
+> Ghi chú
+> - TruffleHog v3 có thể xác minh trực tiếp nhiều thông tin xác thực và quét GitHub orgs, issues/PRs, gists và wikis. Ví dụ: `trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)[[13]](#references)</sup>
+> - Gitleaks quét Git repositories, thư mục và archive. Dùng `gitleaks git -v --log-opts="--all" <repo>` để quét lịch sử, `gitleaks dir -v <path>` để quét thư mục và `--max-archive-depth 1` để kiểm tra archive.<sup>[[6]](#references)</sup>
+> - Nosey Parker đã được lưu trữ và thay thế bằng Titus. Các bản cài đặt hiện có vẫn hỗ trợ `noseyparker scan --datastore np.db <path|repo>`, sau đó chạy `noseyparker report --datastore np.db`.<sup>[[7]](#references)[[8]](#references)</sup>
+> - ggshield (GitGuardian CLI) quét files, repositories và Docker images, đồng thời tích hợp với quy trình local hoặc CI: `ggshield secret scan repo <path-or-url>`.<sup>[[9]](#references)</sup>
 
-### Where secrets commonly leak in GitHub
+### Những nơi secrets thường bị leak trên GitHub
 
-- GitHub Code Search indexes the default branch only; inspect non-default branches directly or clone them.<sup>[[4]](#references)</sup>
-- Full git history and other branches/tags (clone and scan with gitleaks/trufflehog; GitHub search covers only indexed content).<sup>[[4]](#references)[[6]](#references)</sup>
-- Issues, pull requests, comments, and descriptions (TruffleHog's GitHub source supports these via flags such as `--issue-comments` and `--pr-comments`).<sup>[[2]](#references)</sup>
-- Actions workflow logs and artifacts (read access allows them to be viewed or downloaded, and secret redaction is not guaranteed).<sup>[[11]](#references)[[12]](#references)</sup>
-- Wikis and release assets.
-- Gists (search with tooling or the UI; some tools can include gists).<sup>[[2]](#references)[[13]](#references)</sup>
+- GitHub Code Search chỉ lập chỉ mục default branch; hãy kiểm tra trực tiếp các branch không phải mặc định hoặc clone chúng.<sup>[[4]](#references)</sup>
+- Toàn bộ git history và các branch/tag khác (clone và quét bằng gitleaks/trufflehog; GitHub search chỉ bao phủ nội dung đã được lập chỉ mục).<sup>[[4]](#references)[[6]](#references)</sup>
+- Issues, pull requests, comments và descriptions (GitHub source của TruffleHog hỗ trợ các mục này thông qua những flags như `--issue-comments` và `--pr-comments`).<sup>[[2]](#references)</sup>
+- Logs và artifacts của Actions workflow (quyền đọc cho phép xem hoặc tải xuống, và việc che giấu secrets không được đảm bảo).<sup>[[11]](#references)[[12]](#references)</sup>
+- Wikis và release assets.
+- Gists (tìm bằng công cụ hoặc giao diện; một số công cụ có thể bao gồm gists).<sup>[[2]](#references)[[13]](#references)</sup>
 
-> Gotchas
-> - GitHub's Code Search UI supports regex, while the REST/API path (including `gh search code`) uses the legacy engine and does not expose regex features. Prefer the UI for regex queries.<sup>[[3]](#references)[[5]](#references)</sup>
-> - GitHub search excludes files above its documented size limit and is not exhaustive. To be thorough, clone and scan locally with a secrets scanner.<sup>[[4]](#references)</sup>
+> Điểm cần lưu ý
+> - Giao diện Code Search của GitHub hỗ trợ regex, trong khi REST/API (bao gồm `gh search code`) dùng engine cũ và không cung cấp tính năng regex. Ưu tiên dùng giao diện khi truy vấn regex.<sup>[[3]](#references)[[5]](#references)</sup>
+> - GitHub search loại trừ các files vượt quá giới hạn kích thước được công bố và không tìm kiếm đầy đủ mọi nội dung. Để kiểm tra kỹ, hãy clone và quét cục bộ bằng công cụ quét secrets.<sup>[[4]](#references)</sup>
 
-### Programmatic org-wide scanning
+### Quét toàn org theo cách lập trình
 
 - TruffleHog (GitHub source).<sup>[[2]](#references)[[13]](#references)</sup>
 ```bash
@@ -46,7 +46,7 @@ export GITHUB_TOKEN=<token>
 trufflehog github --org Target --results=verified \
   --include-wikis --issue-comments --pr-comments --gist-comments
 ```
-- Gitleaks over all org repos (clone shallow and scan with `gitleaks dir`).<sup>[[6]](#references)</sup>
+- Chạy Gitleaks trên tất cả repo của org (clone shallow và quét bằng `gitleaks dir`).<sup>[[6]](#references)</sup>
 ```bash
 gh repo list Target --limit 1000 --json nameWithOwner,url \
 | jq -r '.[].url' | while read -r r; do
@@ -54,12 +54,12 @@ gh repo list Target --limit 1000 --json nameWithOwner,url \
   gitleaks dir -v "$tmp" || true; rm -rf "$tmp";
 done
 ```
-- Nosey Parker over a mono checkout (for existing installations).<sup>[[7]](#references)</sup>
+- Chạy Nosey Parker trên một mono checkout (đối với các bản cài đặt hiện có).<sup>[[7]](#references)</sup>
 ```bash
 # after cloning many repos beneath ./org
 noseyparker scan --datastore np.db org/ && noseyparker report --datastore np.db
 ```
-- ggshield quick scans.<sup>[[9]](#references)</sup>
+- Quét nhanh bằng ggshield.<sup>[[9]](#references)</sup>
 ```bash
 # current working tree
 ggshield secret scan path -r .
@@ -67,13 +67,13 @@ ggshield secret scan path -r .
 ggshield secret scan repo <path-or-url>
 ```
 
-> Tip: For git history, prefer scanners that parse `git log -p --all` to catch removed secrets.<sup>[[6]](#references)</sup>
+> Mẹo: Với lịch sử git, nên ưu tiên các scanner phân tích `git log -p --all` để phát hiện secret đã bị xóa.<sup>[[6]](#references)</sup>
 
-### Updated dorks for modern tokens
+### Dorks được cập nhật cho token hiện đại
 
-- GitHub tokens: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`.<sup>[[10]](#references)</sup>
-- Slack tokens: `xoxb-` `xoxp-` `xoxa-` `xoxs-` `xoxc-` `xoxe-`
-- Cloud and general:
+- Token GitHub: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`.<sup>[[10]](#references)</sup>
+- Token Slack: `xoxb-` `xoxp-` `xoxa-` `xoxs-` `xoxc-` `xoxe-`
+- Cloud và thông tin chung:
   - `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` `aws_session_token`
   - `GOOGLE_API_KEY` `AZURE_TENANT_ID` `AZURE_CLIENT_SECRET`
   - `OPENAI_API_KEY` `ANTHROPIC_API_KEY`
@@ -354,22 +354,21 @@ AWS SECRET
 "private" extension:pgp
 ```
 
-For additional code-search workflows, see [Wide Source Code Search](wide-source-code-search.md).
+Để xem thêm các quy trình tìm kiếm code, hãy xem [Wide Source Code Search](wide-source-code-search.md).
 
 ## References
 
-- [1] [Keeping secrets out of public repositories (GitHub Blog, Feb 29, 2024)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
-- [2] [TruffleHog v3 – Find, verify, and analyze leaked credentials](https://github.com/trufflesecurity/trufflehog)
-- [3] [Understanding GitHub Code Search syntax](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
-- [4] [Searching code (legacy)](https://docs.github.com/en/search-github/searching-on-github/searching-code)
+- [1] [Giữ bí mật không xuất hiện trong các repository công khai (GitHub Blog, 29 tháng 2, 2024)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
+- [2] [TruffleHog v3 – Tìm, xác minh và phân tích leaked credentials](https://github.com/trufflesecurity/trufflehog)
+- [3] [Tìm hiểu cú pháp GitHub Code Search](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
+- [4] [Tìm kiếm code (phiên bản cũ)](https://docs.github.com/en/search-github/searching-on-github/searching-code)
 - [5] [gh search code](https://cli.github.com/manual/gh_search_code)
-- [6] [Gitleaks README](https://github.com/gitleaks/gitleaks/blob/master/README.md)
-- [7] [Nosey Parker README](https://github.com/praetorian-inc/noseyparker#readme)
-- [8] [Titus README](https://github.com/praetorian-inc/titus#readme)
-- [9] [ggshield README](https://github.com/GitGuardian/ggshield#readme)
-- [10] [Secrets reference (GitHub Actions)](https://docs.github.com/en/actions/reference/security/secrets)
+- [6] [README của Gitleaks](https://github.com/gitleaks/gitleaks/blob/master/README.md)
+- [7] [README của Nosey Parker](https://github.com/praetorian-inc/noseyparker#readme)
+- [8] [README của Titus](https://github.com/praetorian-inc/titus#readme)
+- [9] [README của ggshield](https://github.com/GitGuardian/ggshield#readme)
+- [10] [Tài liệu tham khảo về secrets (GitHub Actions)](https://docs.github.com/en/actions/reference/security/secrets)
 - [11] [Secrets (GitHub Actions)](https://docs.github.com/en/actions/concepts/security/secrets)
-- [12] [Using workflow run logs (GitHub Actions)](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-workflow-run-logs)
-- [13] [TruffleHog GitHub source](https://github.com/trufflesecurity/trufflehog/blob/main/main.go)
-
+- [12] [Sử dụng nhật ký chạy workflow (GitHub Actions)](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-workflow-run-logs)
+- [13] [Mã nguồn TruffleHog trên GitHub](https://github.com/trufflesecurity/trufflehog/blob/main/main.go)
 {{#include ../../banners/hacktricks-training.md}}

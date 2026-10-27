@@ -1,4 +1,4 @@
-# Suricata & Iptables cheatsheet
+# Bảng mẹo Suricata & Iptables
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,15 +6,15 @@
 
 ### Chains
 
-In iptables, each chain is a sequential list of packet-matching rules. The default `filter` table has the built-in `INPUT`, `FORWARD`, and `OUTPUT` chains; other tables, such as `nat`, may be available depending on kernel configuration and loaded modules.<sup>[[1]](#references)</sup>
+Trong iptables, mỗi chain là một danh sách tuần tự các quy tắc khớp gói tin. Bảng `filter` mặc định có các chain tích hợp `INPUT`, `FORWARD` và `OUTPUT`; các bảng khác, chẳng hạn như `nat`, có thể khả dụng tùy thuộc vào cấu hình kernel và các module đã tải.<sup>[[1]](#references)</sup>
 
-- **Input Chain**: Utilized for managing the behavior of incoming connections.
-- **Forward Chain**: Employed for handling incoming connections that are not destined for the local system. This is typical for devices acting as routers, where the data received is meant to be forwarded to another destination. This chain is relevant primarily when the system is involved in routing, NATing, or similar activities.
-- **Output Chain**: Dedicated to the regulation of outgoing connections.
+- **Chuỗi Input**: Được sử dụng để quản lý cách xử lý các kết nối đến.
+- **Chuỗi Forward**: Được sử dụng để xử lý các kết nối đến không hướng đến hệ thống cục bộ. Trường hợp này thường gặp ở các thiết bị hoạt động như router, nơi dữ liệu nhận được cần được chuyển tiếp đến một đích khác. Chain này chủ yếu liên quan khi hệ thống thực hiện routing, NAT hoặc các hoạt động tương tự.
+- **Chuỗi Output**: Dùng để điều tiết các kết nối đi.
 
-These chains ensure the orderly processing of network traffic, allowing for the specification of detailed rules governing the flow of data into, through, and out of a system.
+Các chain này đảm bảo lưu lượng mạng được xử lý theo trình tự, cho phép xác định các quy tắc chi tiết chi phối luồng dữ liệu đi vào, đi qua và đi ra khỏi hệ thống.
 
-The string-match examples use the standard `string` match; matching is case-sensitive unless `--icase` is supplied, and `--algo` selects the BM or KMP search strategy.<sup>[[2]](#references)</sup>
+Các ví dụ khớp chuỗi sử dụng kiểu khớp `string` tiêu chuẩn; việc khớp phân biệt chữ hoa chữ thường trừ khi có `--icase`, còn `--algo` chọn chiến lược tìm kiếm BM hoặc KMP.<sup>[[2]](#references)</sup>
 
 ```bash
 # Delete all rules
@@ -55,9 +55,9 @@ iptables-restore < /etc/sysconfig/iptables
 
 ## Suricata
 
-### Install & Config
+### Cài đặt & Cấu hình
 
-Package commands below are distribution- and release-specific; the official installation guide documents the Ubuntu PPA, Debian backports, RPM packages, and systemd service management.<sup>[[3]](#references)</sup>
+Các lệnh cài đặt gói bên dưới tùy thuộc vào bản phân phối và phiên bản; hướng dẫn cài đặt chính thức có tài liệu về Ubuntu PPA, Debian backports, các gói RPM và cách quản lý dịch vụ systemd.<sup>[[3]](#references)</sup>
 
 ```bash
 # Package installation details vary by distribution and release; see References.
@@ -122,76 +122,76 @@ Type=simple
 systemctl daemon-reload
 ```
 
-The `suricata-update` sequence follows Suricata's documented workflow for fetching, listing, enabling, and loading rule sources.<sup>[[4]](#references)</sup> The `suricatasc` command above is a documented non-blocking Unix-socket rule-reload method.<sup>[[8]](#references)</sup> The NFQUEUE rules send local input/output traffic to Suricata, while `-q 0` selects queue 0 for inline processing.<sup>[[7]](#references)</sup>
+Chuỗi `suricata-update` tuân theo quy trình được Suricata tài liệu hóa để tải, liệt kê, bật và nạp các nguồn rule.<sup>[[4]](#references)</sup> Lệnh `suricatasc` ở trên là phương thức tải lại rule qua Unix socket không chặn đã được tài liệu hóa.<sup>[[8]](#references)</sup> Các rule NFQUEUE chuyển lưu lượng đầu vào/đầu ra cục bộ đến Suricata, trong khi `-q 0` chọn queue 0 để xử lý inline.<sup>[[7]](#references)</sup>
 
-### Rules Definitions
+### Định nghĩa Rules
 
-A Suricata rule/signature has three parts.<sup>[[5]](#references)</sup>
+Một rule/signature của Suricata có ba phần.<sup>[[5]](#references)</sup>
 
-- The **action** specifies what happens when the signature matches.
-- The **header** selects the protocol, IP addresses, ports, and direction.
-- The **rule options** define the match-specific details.
+- **Action** chỉ định điều gì xảy ra khi signature khớp.
+- **Header** chọn protocol, địa chỉ IP, port và hướng.
+- **Rule options** xác định các chi tiết cụ thể của điều kiện khớp.
 
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
 
-#### **Valid actions are**
+#### **Các hành động hợp lệ**
 
-- alert - generate an alert
-- pass - stop further inspection of the packet
-- **drop** - drop packet and generate alert
-- **reject** - send RST/ICMP unreachable error to the sender of the matching packet.
-- rejectsrc - same as just _reject_
-- rejectdst - send RST/ICMP error packet to the receiver of the matching packet.
-- rejectboth - send RST/ICMP error packets to both sides of the conversation.
+- alert - tạo cảnh báo
+- pass - dừng kiểm tra gói tin
+- **drop** - loại bỏ gói tin và tạo cảnh báo
+- **reject** - gửi lỗi RST/ICMP unreachable đến bên gửi gói tin khớp.
+- rejectsrc - giống như _reject_
+- rejectdst - gửi gói tin lỗi RST/ICMP đến bên nhận gói tin khớp.
+- rejectboth - gửi gói tin lỗi RST/ICMP đến cả hai bên của cuộc giao tiếp.
 
-#### **Protocols**
+#### **Giao thức**
 
-- tcp (for tcp-traffic)
+- tcp (dành cho lưu lượng tcp)
 - udp
 - icmp
-- ip (ip stands for ‘all’ or ‘any’)
-- _layer7 protocols_: http, ftp, tls, smb, dns, ssh, and others.<sup>[[5]](#references)</sup>
+- ip (ip có nghĩa là ‘tất cả’ hoặc ‘bất kỳ’)
+- _giao thức layer7_: http, ftp, tls, smb, dns, ssh và các giao thức khác.<sup>[[5]](#references)</sup>
 
-#### Source and Destination Addresses
+#### Địa chỉ nguồn và đích
 
-Suricata supports IP ranges, negation, and grouped address lists.<sup>[[5]](#references)</sup>
+Suricata hỗ trợ dải IP, phủ định và danh sách địa chỉ được nhóm.<sup>[[5]](#references)</sup>
 
-| Example                       | Meaning                                  |
-| ----------------------------- | ---------------------------------------- |
-| ! 1.1.1.1                     | Every IP address but 1.1.1.1             |
-| !\[1.1.1.1, 1.1.1.2]          | Every IP address but 1.1.1.1 and 1.1.1.2 |
-| $HOME_NET                     | Your setting of HOME_NET in yaml         |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET and not HOME_NET            |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 except for 10.0.0.5          |
+| Ví dụ                         | Ý nghĩa                                   |
+| ----------------------------- | ----------------------------------------- |
+| ! 1.1.1.1                    | Mọi địa chỉ IP ngoại trừ 1.1.1.1          |
+| !\[1.1.1.1, 1.1.1.2]          | Mọi địa chỉ IP ngoại trừ 1.1.1.1 và 1.1.1.2 |
+| $HOME_NET                     | Giá trị HOME_NET bạn thiết lập trong yaml |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET nhưng không phải HOME_NET    |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 ngoại trừ 10.0.0.5            |
 
-#### Source and Destination Ports
+#### Cổng nguồn và đích
 
-Suricata supports port ranges, negation, and lists of ports.<sup>[[5]](#references)</sup>
+Suricata hỗ trợ dải cổng, phủ định và danh sách cổng.<sup>[[5]](#references)</sup>
 
-| Example         | Meaning                                |
-| --------------- | -------------------------------------- |
-| any             | any address                            |
-| \[80, 81, 82]   | port 80, 81 and 82                     |
-| \[80: 82]       | Range from 80 till 82                  |
-| \[1024: ]       | From 1024 till the highest port-number |
-| !80             | Every port but 80                      |
-| \[80:100,!99]   | Range from 80 till 100 but 99 excluded |
-| \[1:80,!\[2,4]] | Range from 1-80, except ports 2 and 4  |
+| Ví dụ           | Ý nghĩa                                      |
+| --------------- | -------------------------------------------- |
+| any             | bất kỳ địa chỉ nào                           |
+| \[80, 81, 82]   | cổng 80, 81 và 82                            |
+| \[80: 82]       | Dải từ 80 đến 82                             |
+| \[1024: ]       | Từ 1024 đến số cổng cao nhất                 |
+| !80             | Mọi cổng ngoại trừ 80                        |
+| \[80:100,!99]   | Dải từ 80 đến 100 nhưng loại trừ 99          |
+| \[1:80,!\[2,4]] | Dải từ 1-80, ngoại trừ các cổng 2 và 4       |
 
-#### Direction
+#### Hướng
 
-Suricata rules can specify the communication direction being evaluated.<sup>[[5]](#references)</sup>
+Quy tắc Suricata có thể chỉ định hướng giao tiếp được đánh giá.<sup>[[5]](#references)</sup>
 
 ```
 source -> destination
 source <> destination  (both directions)
 ```
 
-#### Keywords
+#### Từ khóa
 
-The examples below use Suricata's rule keywords, including metadata, IP, ICMP, payload, and application-layer options; the official rule documentation catalogs these families and their syntax.<sup>[[6]](#references)[[9]](#references)</sup>
+Các ví dụ dưới đây sử dụng các từ khóa rule của Suricata, bao gồm metadata, IP, ICMP, payload và các tùy chọn application layer; tài liệu rule chính thức liệt kê các nhóm này cùng cú pháp của chúng.<sup>[[6]](#references)[[9]](#references)</sup>
 
 ```bash
 # Meta Keywords
@@ -237,14 +237,13 @@ drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 
 ## References
 
-- [1] [iptables(8) — Linux manual page](https://man7.org/linux/man-pages/man8/iptables.8.html)
-- [2] [iptables-extensions(8) — Linux manual page](https://man7.org/linux/man-pages/man8/iptables-extensions.8.html)
-- [3] [3. Installation — Suricata 7.0.14 documentation](https://docs.suricata.io/en/suricata-7.0.14/install.html)
-- [4] [9.1. Rule Management with Suricata-Update — Suricata 8.0.1 documentation](https://docs.suricata.io/en/suricata-8.0.1/rule-management/suricata-update.html)
-- [5] [8.1. Rules Format — Suricata 8.0.3 documentation](https://docs.suricata.io/en/suricata-8.0.3/rules/intro.html)
-- [6] [8.7. Payload Keywords — Suricata 8.0.3 documentation](https://docs.suricata.io/en/suricata-8.0.3/rules/payload-keywords.html)
-- [7] [15. Setting up IPS/inline for Linux — Suricata 7.0.15 documentation](https://docs.suricata.io/en/suricata-7.0.15/setting-up-ipsinline-for-linux.html)
-- [8] [9.3. Rule Reloads — Suricata 7.0.14 documentation](https://docs.suricata.io/en/suricata-7.0.14/rule-management/rule-reload.html)
-- [9] [8. Suricata Rules — Suricata 8.0.3 documentation](https://docs.suricata.io/en/suricata-8.0.3/rules/index.html)
-
+- [1] [iptables(8) — trang hướng dẫn Linux](https://man7.org/linux/man-pages/man8/iptables.8.html)
+- [2] [iptables-extensions(8) — trang hướng dẫn Linux](https://man7.org/linux/man-pages/man8/iptables-extensions.8.html)
+- [3] [3. Cài đặt — tài liệu Suricata 7.0.14](https://docs.suricata.io/en/suricata-7.0.14/install.html)
+- [4] [9.1. Quản lý quy tắc bằng Suricata-Update — tài liệu Suricata 8.0.1](https://docs.suricata.io/en/suricata-8.0.1/rule-management/suricata-update.html)
+- [5] [8.1. Định dạng quy tắc — tài liệu Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/intro.html)
+- [6] [8.7. Từ khóa Payload — tài liệu Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/payload-keywords.html)
+- [7] [15. Thiết lập IPS/inline cho Linux — tài liệu Suricata 7.0.15](https://docs.suricata.io/en/suricata-7.0.15/setting-up-ipsinline-for-linux.html)
+- [8] [9.3. Tải lại quy tắc — tài liệu Suricata 7.0.14](https://docs.suricata.io/en/suricata-7.0.14/rule-management/rule-reload.html)
+- [9] [8. Quy tắc Suricata — tài liệu Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/index.html)
 {{#include ../../../banners/hacktricks-training.md}}

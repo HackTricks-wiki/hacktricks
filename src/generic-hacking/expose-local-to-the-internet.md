@@ -1,14 +1,14 @@
-# Expose local to the internet
+# Phơi dịch vụ local ra internet
 
 {{#include ../banners/hacktricks-training.md}}
 
-**The goal of this page is to propose alternatives that allow AT LEAST to expose local raw TCP ports and local webs (HTTP) to the internet WITHOUT needing to install anything in the other server (only in local if needed).**
+**Mục tiêu của trang này là đề xuất các giải pháp thay thế cho phép ít nhất phơi các cổng TCP thô và website local (HTTP) ra internet mà KHÔNG cần cài đặt gì trên server còn lại (chỉ cần cài trên máy local nếu cần).**
 
-For forwarding between hosts rather than publishing a service through a public relay, see [Tunneling and Port Forwarding](tunneling-and-port-forwarding.md).
+Để chuyển tiếp giữa các host thay vì xuất bản dịch vụ thông qua relay công khai, xem [Tunneling và chuyển tiếp cổng](tunneling-and-port-forwarding.md).
 
 ## **Serveo**
 
-Serveo's documentation describes SSH forwarding for HTTP endpoints and private/public TCP forwarding. Port `0` requests a random public TCP port even for anonymous sessions, but those sessions have short time and connection limits; requesting a chosen public TCP port requires a paid account.<sup>[[1]](#references)</sup>
+Tài liệu của Serveo mô tả tính năng chuyển tiếp SSH cho các endpoint HTTP và chuyển tiếp TCP riêng tư/công khai. Cổng `0` sẽ yêu cầu một cổng TCP công khai ngẫu nhiên, kể cả với các phiên ẩn danh, nhưng những phiên này bị giới hạn về thời gian và số kết nối; để yêu cầu một cổng TCP công khai cụ thể, cần có tài khoản trả phí.<sup>[[1]](#references)</sup>
 
 ```bash
 # Get a random port from serveo.net to expose local port 4444
@@ -20,7 +20,7 @@ ssh -R 80:localhost:3000 serveo.net
 
 ## SocketXP
 
-SocketXP's getting-started guide documents `socketxp connect tcp://localhost:22` and `socketxp connect http://localhost:8080` for TCP and HTTP tunnels; the agent is authenticated with a portal token first.<sup>[[2]](#references)</sup>
+Hướng dẫn bắt đầu của SocketXP giới thiệu `socketxp connect tcp://localhost:22` và `socketxp connect http://localhost:8080` để tạo tunnel TCP và HTTP; trước tiên, agent được xác thực bằng portal token.<sup>[[2]](#references)</sup>
 
 ```bash
 # Expose tcp port 22
@@ -32,7 +32,7 @@ socketxp connect http://localhost:8080
 
 ## Ngrok
 
-ngrok's CLI documents HTTP and TCP tunnels. TCP endpoints require a reserved TCP address on the account; the free tier also requires a valid payment method, which the FAQ says is not charged.<sup>[[3]](#references)[[4]](#references)</sup>
+CLI của ngrok hỗ trợ tunnel HTTP và TCP. Endpoint TCP yêu cầu tài khoản có địa chỉ TCP được đặt trước; gói miễn phí cũng yêu cầu phương thức thanh toán hợp lệ, nhưng theo FAQ thì phương thức này không bị tính phí.<sup>[[3]](#references)[[4]](#references)</sup>
 
 ```bash
 # Expose a local web service on port 8000
@@ -44,7 +44,7 @@ ngrok tcp 9000
 
 ## Telebit
 
-The legacy Telebit.js CLI help documents `telebit http <port>` for HTTPS forwarding and `telebit tcp <local> [remote]` for raw TCP; availability depends on the deployment and relay.<sup>[[5]](#references)</sup>
+Tài liệu trợ giúp CLI cũ của Telebit.js hướng dẫn dùng `telebit http <port>` để chuyển tiếp HTTPS và `telebit tcp <local> [remote]` cho TCP thô; khả năng sử dụng tùy thuộc vào deployment và relay.<sup>[[5]](#references)</sup>
 
 ```bash
 # Expose web in 3000
@@ -56,7 +56,7 @@ The legacy Telebit.js CLI help documents `telebit http <port>` for HTTPS forward
 
 ## LocalXpose
 
-LocalXpose's current site documents `loclx tunnel http --to 3000`, lists HTTP/TLS/TCP/UDP support, and says the free plan covers personal/light commercial use while TCP tunneling is a paid-plan capability.<sup>[[6]](#references)[[7]](#references)</sup>
+Trang web hiện tại của LocalXpose hướng dẫn dùng `loclx tunnel http --to 3000`, liệt kê hỗ trợ HTTP/TLS/TCP/UDP và cho biết gói miễn phí dành cho mục đích sử dụng cá nhân/kinh doanh thương mại quy mô nhỏ, trong khi tunneling TCP là tính năng thuộc gói trả phí.<sup>[[6]](#references)[[7]](#references)</sup>
 
 ```bash
 # Expose a local web service on port 8989
@@ -68,7 +68,7 @@ loclx tunnel tcp --to 4545
 
 ## Expose
 
-Expose documents `expose share` for HTTP/HTTPS local URLs and a PRO-only `expose share-port` command for TCP ports.<sup>[[8]](#references)[[9]](#references)</sup>
+Expose có tài liệu về `expose share` cho các URL HTTP/HTTPS cục bộ và lệnh `expose share-port` chỉ dành cho PRO để mở các cổng TCP.<sup>[[8]](#references)[[9]](#references)</sup>
 
 ```bash
 # Expose a local HTTP service on port 3000
@@ -80,7 +80,7 @@ Expose documents `expose share` for HTTP/HTTPS local URLs and a PRO-only `expose
 
 ## Localtunnel
 
-The official localtunnel repository describes exposing localhost for testing and documents the NPX command below.<sup>[[10]](#references)</sup>
+Repository chính thức của localtunnel mô tả cách đưa localhost ra ngoài để kiểm thử và ghi lại lệnh NPX bên dưới.<sup>[[10]](#references)</sup>
 
 ```bash
 # Expose web in port 8000
@@ -89,9 +89,9 @@ npx localtunnel --port 8000
 
 ## Cloudflare Tunnel (cloudflared)
 
-Cloudflare's current docs show unauthenticated "Quick" tunnels for local development, and the product overview lists HTTP, HTTPS, TCP, SSH, and RDP among supported published protocols.<sup>[[11]](#references)[[12]](#references)</sup> Unlike HTTP(S), published TCP, SSH, and RDP routes are not directly accessible with a stock client: Cloudflare requires `cloudflared` on the connecting client, so these routes do not meet this page's no-client-install requirement for raw TCP.<sup>[[24]](#references)</sup>
+Tài liệu hiện tại của Cloudflare giới thiệu các tunnel "Quick" không cần xác thực để phát triển cục bộ, và phần tổng quan sản phẩm liệt kê HTTP, HTTPS, TCP, SSH và RDP trong số các giao thức được hỗ trợ khi publish.<sup>[[11]](#references)[[12]](#references)</sup> Không giống HTTP(S), các route TCP, SSH và RDP đã publish không thể truy cập trực tiếp bằng client thông thường: Cloudflare yêu cầu `cloudflared` trên client kết nối, vì vậy các route này không đáp ứng yêu cầu của trang này là không cần cài client để dùng raw TCP.<sup>[[24]](#references)</sup>
 
-For a locally managed named tunnel, Cloudflare documents the `tunnel login`, `create`, `route dns`, and `--config ... run ...` workflow.<sup>[[13]](#references)[[14]](#references)[[17]](#references)</sup>
+Đối với named tunnel được quản lý cục bộ, Cloudflare hướng dẫn quy trình `tunnel login`, `create`, `route dns` và `--config ... run ...`.<sup>[[13]](#references)[[14]](#references)[[17]](#references)</sup>
 
 ```bash
 # Quick Tunnel exposing localhost:8080 (random trycloudflare subdomain)
@@ -104,11 +104,11 @@ cloudflared tunnel route dns my-tunnel app.example.com
 cloudflared tunnel --config tunnel.yml run my-tunnel
 ```
 
-Named tunnels can define multiple ingress rules in YAML; Cloudflare Access policies can control access to published applications, and Cloudflare documents service and Docker deployment paths for running connectors. Quick Tunnels are anonymous, temporary testing tunnels with a 200-concurrent-request limit and no Server-Sent Events (SSE) support.<sup>[[11]](#references)[[15]](#references)[[16]](#references)[[17]](#references)</sup>
+Named tunnels có thể định nghĩa nhiều quy tắc ingress trong YAML; các chính sách Cloudflare Access có thể kiểm soát quyền truy cập vào các ứng dụng được công bố, và Cloudflare tài liệu hóa các phương thức triển khai dịch vụ và Docker để chạy connector. Quick Tunnels là các tunnel thử nghiệm tạm thời, ẩn danh, giới hạn 200 yêu cầu đồng thời và không hỗ trợ Server-Sent Events (SSE).<sup>[[11]](#references)[[15]](#references)[[16]](#references)[[17]](#references)</sup>
 
 ## Tailscale Funnel / Serve
 
-Tailscale's current CLI uses Serve for tailnet-only sharing and Funnel for public sharing. The commands support HTTP/HTTPS reverse-proxy targets and TCP forwarding; Funnel's raw TCP mode is limited to ports 443, 8443, and 10000.<sup>[[18]](#references)[[19]](#references)</sup>
+CLI hiện tại của Tailscale dùng Serve để chia sẻ chỉ trong tailnet và Funnel để chia sẻ công khai. Các lệnh hỗ trợ đích reverse-proxy HTTP/HTTPS và chuyển tiếp TCP; chế độ TCP thô của Funnel chỉ giới hạn ở các cổng 443, 8443 và 10000.<sup>[[18]](#references)[[19]](#references)</sup>
 
 ```bash
 # Share localhost:3000 within the tailnet
@@ -121,14 +121,14 @@ sudo tailscale funnel --https=443 localhost:3000
 sudo tailscale funnel --tcp=10000 tcp://localhost:22
 ```
 
-Use `--bg` to persist the configuration without keeping a foreground process, and use `tailscale funnel status` to audit what services are reachable from the public internet. For HTTPS Funnel targets, Tailscale documents TLS termination on the local node before forwarding the request to the local service.<sup>[[18]](#references)[[19]](#references)</sup>
+Dùng `--bg` để lưu cấu hình mà không cần giữ tiến trình chạy ở foreground, và dùng `tailscale funnel status` để kiểm tra các dịch vụ có thể truy cập từ internet công cộng. Với các đích HTTPS Funnel, Tailscale ghi rõ rằng TLS được kết thúc trên node cục bộ trước khi yêu cầu được chuyển tiếp đến dịch vụ cục bộ.<sup>[[18]](#references)[[19]](#references)</sup>
 
 ## Fast Reverse Proxy (frp)
 
-`frp` is a self-hosted option where you control the rendezvous server (`frps`) and the client (`frpc`); its documentation covers forwarding local services behind NAT or a firewall with deterministic remote ports/domains.<sup>[[20]](#references)</sup>
+`frp` là một tùy chọn tự host, cho phép bạn kiểm soát máy chủ rendezvous (`frps`) và client (`frpc`); tài liệu của công cụ này hướng dẫn cách chuyển tiếp các dịch vụ cục bộ nằm sau NAT hoặc firewall bằng các cổng/tên miền từ xa có thể xác định trước.<sup>[[20]](#references)</sup>
 
 <details>
-<summary>Sample frps/frpc configuration</summary>
+<summary>Cấu hình frps/frpc mẫu</summary>
 
 ```bash
 # Server: start frps with its server configuration
@@ -157,48 +157,47 @@ EOF
 
 </details>
 
-The current project documentation includes QUIC transport, token/OIDC authentication, bandwidth limits, health checks, and Go-template range mappings—consult the release matching your deployment before using any of those options.<sup>[[20]](#references)</sup>
+Tài liệu dự án hiện tại bao gồm truyền tải QUIC, xác thực token/OIDC, giới hạn băng thông, kiểm tra tình trạng hoạt động và ánh xạ range trong Go-template — hãy tham khảo phiên bản tương ứng với bản triển khai của bạn trước khi sử dụng bất kỳ tùy chọn nào trong số này.<sup>[[20]](#references)</sup>
 
 ## Pinggy (SSH-based)
 
-Pinggy documents SSH reverse forwarding over port 443, so it can work in networks where outbound SSH on port 22 is blocked. Its free plan times out after 60 minutes and uses a new URL after reconnecting, while Pro adds persistent tunnels and custom domains.<sup>[[21]](#references)[[22]](#references)</sup>
+Pinggy mô tả cách chuyển tiếp ngược SSH qua cổng 443, nên có thể hoạt động trong các mạng chặn SSH đi ra trên cổng 22. Gói miễn phí hết thời hạn sau 60 phút và dùng URL mới khi kết nối lại, trong khi gói Pro bổ sung tunnel cố định và tên miền tùy chỉnh.<sup>[[21]](#references)[[22]](#references)</sup>
 
 ```bash
 # Random subdomain exposing localhost:3000 via SSH reverse tunnel
 ssh -p 443 -R0:localhost:3000 qr@free.pinggy.io
 ```
 
-You can request custom domains and persistent tunnels on Pro.<sup>[[22]](#references)</sup> You can recycle temporary tunnels automatically by wrapping the command in a loop.
+Bạn có thể yêu cầu domain tùy chỉnh và tunnel duy trì trên Pro.<sup>[[22]](#references)</sup> Bạn có thể tự động tạo lại các tunnel tạm thời bằng cách đặt lệnh trong một vòng lặp.
 
-## Threat intel & OPSEC notes
+## Ghi chú về tình báo mối đe dọa và OPSEC
 
-Adversaries have abused ephemeral tunneling, including Cloudflare's unauthenticated `trycloudflare.com` endpoints, to deliver Remote Access Trojans through temporary infrastructure. Proofpoint reported activity first observed in February 2024 involving Xworm, AsyncRAT, VenomRAT, GuLoader, and Remcos, and noted that temporary tunnels complicate defenses relying on static blocklists.<sup>[[23]](#references)</sup> Consider rotating tunnels and domains proactively, and monitor for telltale external DNS lookups to the tunneler you are using so you can spot blue-team detection or infrastructure blocking attempts early.
+Các đối thủ đã lạm dụng tunnel tạm thời, bao gồm cả các endpoint `trycloudflare.com` không yêu cầu xác thực của Cloudflare, để phát tán Remote Access Trojan thông qua cơ sở hạ tầng tạm thời. Proofpoint báo cáo hoạt động được ghi nhận lần đầu vào tháng 2 năm 2024, liên quan đến Xworm, AsyncRAT, VenomRAT, GuLoader và Remcos; đồng thời lưu ý rằng tunnel tạm thời gây khó khăn cho các biện pháp phòng thủ dựa vào blocklist tĩnh.<sup>[[23]](#references)</sup> Hãy chủ động xoay vòng tunnel và domain, đồng thời theo dõi các truy vấn DNS bên ngoài đặc trưng đến tunneler bạn đang dùng để sớm phát hiện hoạt động phát hiện của blue team hoặc nỗ lực chặn cơ sở hạ tầng.
 
 ## References
 
-- [1] [Serveo Documentation](https://serveo.net/docs/)
-- [2] [SocketXP Documentation - Getting Started](https://docs.socketxp.com/guide/getting-started/getting-started/)
-- [3] [ngrok Agent Command Line Interface](https://ngrok.com/docs/agent/cli)
-- [4] [ngrok FAQ](https://ngrok.com/docs/faq)
-- [5] [Telebit.js legacy CLI help](https://git.rootprojects.org/root/telebit.js/src/commit/4aaa87fd6ca5a8b149ce4a5f9d7b22ee5052f5d7/lib/en-us.toml)
+- [1] [Tài liệu Serveo](https://serveo.net/docs/)
+- [2] [Tài liệu SocketXP - Bắt đầu](https://docs.socketxp.com/guide/getting-started/getting-started/)
+- [3] [Giao diện dòng lệnh ngrok Agent](https://ngrok.com/docs/agent/cli)
+- [4] [Câu hỏi thường gặp về ngrok](https://ngrok.com/docs/faq)
+- [5] [Trợ giúp CLI phiên bản cũ của Telebit.js](https://git.rootprojects.org/root/telebit.js/src/commit/4aaa87fd6ca5a8b149ce4a5f9d7b22ee5052f5d7/lib/en-us.toml)
 - [6] [LocalXpose](https://localxpose.io/)
-- [7] [LocalXpose Documentation](https://localxpose.gitbook.io/docs)
-- [8] [Expose - Sharing sites](https://expose.dev/docs/client/sharing)
-- [9] [Expose - Sharing TCP ports](https://github.com/exposedev/expose/blob/master/docs/client/sharing-tcp-ports.md)
-- [10] [localtunnel/localtunnel repository](https://github.com/localtunnel/localtunnel)
-- [11] [Cloudflare Docs - Set up Cloudflare Tunnel](https://developers.cloudflare.com/tunnel/setup/)
-- [12] [Cloudflare Tunnel overview](https://developers.cloudflare.com/tunnel/)
-- [13] [Cloudflare Docs - Useful tunnel commands](https://developers.cloudflare.com/tunnel/advanced/local-management/tunnel-useful-commands/)
-- [14] [Cloudflare Docs - Routing](https://developers.cloudflare.com/tunnel/routing/)
-- [15] [Cloudflare Docs - Configuration file](https://developers.cloudflare.com/tunnel/advanced/local-management/configuration-file/)
-- [16] [Cloudflare Access policies](https://developers.cloudflare.com/cloudflare-one/access-controls/policies/)
-- [17] [Cloudflare Docs - Run parameters](https://developers.cloudflare.com/tunnel/advanced/run-parameters/)
-- [18] [Tailscale Serve command](https://tailscale.com/docs/reference/tailscale-cli/serve)
-- [19] [Tailscale Funnel command](https://tailscale.com/docs/reference/tailscale-cli/funnel)
-- [20] [fatedier/frp - Fast Reverse Proxy repository](https://github.com/fatedier/frp)
-- [21] [Pinggy Documentation - Usage](https://pinggy.io/docs/usages/)
-- [22] [Pinggy - Simple Localhost Tunnels](https://pinggy.io/)
-- [23] [Proofpoint - Threat Actor Abuses Cloudflare Tunnels to Deliver RATs](https://www.proofpoint.com/uk/blog/threat-insight/threat-actor-abuses-cloudflare-tunnels-deliver-rats)
-- [24] [Cloudflare Docs - Tunnel routing and supported protocols](https://developers.cloudflare.com/tunnel/concepts/routing/)
-
+- [7] [Tài liệu LocalXpose](https://localxpose.gitbook.io/docs)
+- [8] [Expose - Chia sẻ website](https://expose.dev/docs/client/sharing)
+- [9] [Expose - Chia sẻ cổng TCP](https://github.com/exposedev/expose/blob/master/docs/client/sharing-tcp-ports.md)
+- [10] [Kho lưu trữ localtunnel/localtunnel](https://github.com/localtunnel/localtunnel)
+- [11] [Tài liệu Cloudflare - Thiết lập Cloudflare Tunnel](https://developers.cloudflare.com/tunnel/setup/)
+- [12] [Tổng quan về Cloudflare Tunnel](https://developers.cloudflare.com/tunnel/)
+- [13] [Tài liệu Cloudflare - Các lệnh tunnel hữu ích](https://developers.cloudflare.com/tunnel/advanced/local-management/tunnel-useful-commands/)
+- [14] [Tài liệu Cloudflare - Định tuyến](https://developers.cloudflare.com/tunnel/routing/)
+- [15] [Tài liệu Cloudflare - Tệp cấu hình](https://developers.cloudflare.com/tunnel/advanced/local-management/configuration-file/)
+- [16] [Chính sách Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/access-controls/policies/)
+- [17] [Tài liệu Cloudflare - Tham số chạy](https://developers.cloudflare.com/tunnel/advanced/run-parameters/)
+- [18] [Lệnh Tailscale Serve](https://tailscale.com/docs/reference/tailscale-cli/serve)
+- [19] [Lệnh Tailscale Funnel](https://tailscale.com/docs/reference/tailscale-cli/funnel)
+- [20] [fatedier/frp - Kho lưu trữ Fast Reverse Proxy](https://github.com/fatedier/frp)
+- [21] [Tài liệu Pinggy - Cách sử dụng](https://pinggy.io/docs/usages/)
+- [22] [Pinggy - Tunnel localhost đơn giản](https://pinggy.io/)
+- [23] [Proofpoint - Tác nhân đe dọa lạm dụng Cloudflare Tunnels để phát tán RAT](https://www.proofpoint.com/uk/blog/threat-insight/threat-actor-abuses-cloudflare-tunnels-deliver-rats)
+- [24] [Tài liệu Cloudflare - Định tuyến tunnel và các giao thức được hỗ trợ](https://developers.cloudflare.com/tunnel/concepts/routing/)
 {{#include ../banners/hacktricks-training.md}}

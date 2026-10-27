@@ -1,27 +1,27 @@
-# Pcap Inspection
+# Kiểm tra Pcap
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> **PCAP** and **PCAPNG** are distinct capture formats; **PCAPNG is a flexible, extensible successor to PCAP**, but support varies across tools. If a tool cannot read PCAPNG, convert it to PCAP with Wireshark or another compatible tool.<sup>[[1]](#references)[[18]](#references)</sup>
+> **PCAP** và **PCAPNG** là hai định dạng capture khác nhau; **PCAPNG là phiên bản kế nhiệm linh hoạt, có thể mở rộng của PCAP**, nhưng mức độ hỗ trợ tùy thuộc vào từng công cụ. Nếu công cụ không đọc được PCAPNG, hãy chuyển đổi sang PCAP bằng Wireshark hoặc một công cụ tương thích khác.<sup>[[1]](#references)[[18]](#references)</sup>
 
-## Online tools for pcaps
+## Công cụ trực tuyến dành cho pcap
 
-- If the header of your pcap is **broken** you should try to **fix** it using: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php).<sup>[[2]](#references)</sup>
-- Extract **information** and search for **malware** inside a pcap in [**PacketTotal**](https://packettotal.com).<sup>[[19]](#references)</sup>
-- Search for **malicious activity** using [**www.virustotal.com**](https://www.virustotal.com) and [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com).<sup>[[3]](#references)[[4]](#references)</sup>
-- **Full pcap analysis from the browser in** [**https://apackets.com/**](https://apackets.com/).<sup>[[5]](#references)</sup>
+- Nếu header của pcap bị **hỏng**, bạn nên thử **sửa** bằng: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php).<sup>[[2]](#references)</sup>
+- Trích xuất **thông tin** và tìm kiếm **malware** bên trong pcap bằng [**PacketTotal**](https://packettotal.com).<sup>[[19]](#references)</sup>
+- Tìm kiếm **hoạt động độc hại** bằng [**www.virustotal.com**](https://www.virustotal.com) và [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com).<sup>[[3]](#references)[[4]](#references)</sup>
+- **Phân tích pcap đầy đủ ngay trên trình duyệt bằng** [**https://apackets.com/**](https://apackets.com/).<sup>[[5]](#references)</sup>
 
-## Extract Information
+## Trích xuất thông tin
 
-The following tools are useful to extract statistics, files, etc.
+Các công cụ sau hữu ích để trích xuất thống kê, tệp, v.v.
 
 ### Wireshark
 
 > [!TIP]
-> **If you are going to analyze a PCAP you basically must to know how to use Wireshark**
+> **Nếu bạn định phân tích PCAP thì về cơ bản, bạn phải biết cách sử dụng Wireshark**
 
-You can find some Wireshark tricks in:
+Bạn có thể tìm thấy một số thủ thuật Wireshark tại:
 
 
 {{#ref}}
@@ -30,13 +30,13 @@ wireshark-tricks.md
 
 ### [**https://apackets.com/**](https://apackets.com/)
 
-Pcap analysis from the browser.<sup>[[5]](#references)</sup>
+Phân tích Pcap ngay trên trình duyệt.<sup>[[5]](#references)</sup>
 
 ### Xplico Framework
 
-[**Xplico**](https://github.com/xplico/xplico) is a Unix-like network-forensics tool that decodes PCAP files and can extract email over POP/IMAP/SMTP, HTTP contents, SIP VoIP calls, FTP data, and TFTP data.<sup>[[6]](#references)</sup>
+[**Xplico**](https://github.com/xplico/xplico) là một công cụ điều tra pháp chứng mạng dành cho Unix-like, có thể giải mã tệp PCAP và trích xuất email qua POP/IMAP/SMTP, nội dung HTTP, cuộc gọi SIP VoIP, dữ liệu FTP và dữ liệu TFTP.<sup>[[6]](#references)</sup>
 
-**Install**
+**Cài đặt**
 
 ```bash
 sudo bash -c 'echo "deb http://repo.xplico.org/ $(lsb_release -s -c) main" /etc/apt/sources.list'
@@ -45,33 +45,33 @@ sudo apt-get update
 sudo apt-get install xplico
 ```
 
-**Run**
+**Chạy**
 
 ```
 /etc/init.d/apache2 restart
 /etc/init.d/xplico start
 ```
 
-Access to _**127.0.0.1:9876**_ with credentials _**xplico:xplico**_
+Truy cập _**127.0.0.1:9876**_ bằng thông tin đăng nhập _**xplico:xplico**_
 
-Then create a **new case**, create a **new session** inside the case and **upload the pcap** file.
+Sau đó tạo **case mới**, tạo **session mới** bên trong case và **upload** file **pcap**.
 
 ### NetworkMiner
 
-Like Xplico, [**NetworkMiner**](https://www.netresec.com/?page=NetworkMiner) parses PCAP traffic to extract artifacts such as files, images, email, and passwords, and it aggregates host information; its free edition is primarily for Windows.<sup>[[7]](#references)</sup>
+Giống như Xplico, [**NetworkMiner**](https://www.netresec.com/?page=NetworkMiner) phân tích lưu lượng PCAP để trích xuất các artifact như file, hình ảnh, email và mật khẩu, đồng thời tổng hợp thông tin về host; phiên bản miễn phí chủ yếu dành cho Windows.<sup>[[7]](#references)</sup>
 
 ### NetWitness Investigator
 
-You can download [**NetWitness Investigator from here**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(It works in Windows)**.\
-The vendor describes the freeware as an interactive network-session analysis tool for malicious-activity triage and currently presents access through a contact form.<sup>[[8]](#references)</sup>
+Bạn có thể tải [**NetWitness Investigator tại đây**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(Công cụ chạy trên Windows)**.\
+Nhà cung cấp mô tả phiên bản miễn phí là công cụ phân tích phiên mạng tương tác, dùng để sàng lọc hoạt động độc hại và hiện cung cấp quyền truy cập qua biểu mẫu liên hệ.<sup>[[8]](#references)</sup>
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
-BruteShark's documented modules can parse credentials from HTTP, FTP, Telnet, IMAP, and SMTP, export Kerberos, NTLM, CRAM-MD5, and HTTP-Digest authentication hashes for Hashcat, map network nodes and users, extract DNS queries, rebuild TCP/UDP sessions, and carve files.<sup>[[9]](#references)</sup>
+Các module được ghi tài liệu của BruteShark có thể phân tích thông tin xác thực từ HTTP, FTP, Telnet, IMAP và SMTP; xuất hash xác thực Kerberos, NTLM, CRAM-MD5 và HTTP-Digest cho Hashcat; lập bản đồ các node và user trong mạng; trích xuất truy vấn DNS; dựng lại các session TCP/UDP; và trích xuất file.<sup>[[9]](#references)</sup>
 
 ### Capinfos
 
-Wireshark's `capinfos` prints a long report for a capture file by default.<sup>[[10]](#references)</sup>
+Theo mặc định, `capinfos` của Wireshark in báo cáo dài về một file capture.<sup>[[10]](#references)</sup>
 
 ```
 capinfos capture.pcap
@@ -79,7 +79,7 @@ capinfos capture.pcap
 
 ### Ngrep
 
-`ngrep` searches packet payloads with regular expressions and accepts BPF filters; `-I` reads a pcap-compatible capture file.<sup>[[11]](#references)</sup> The example combines those features to search for an HTTP request in selected traffic.
+`ngrep` tìm kiếm payload của packet bằng biểu thức chính quy và chấp nhận bộ lọc BPF; `-I` đọc tệp capture tương thích với pcap.<sup>[[11]](#references)</sup> Ví dụ kết hợp các tính năng này để tìm kiếm một HTTP request trong lưu lượng được chọn.
 
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
@@ -87,22 +87,22 @@ ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.
 
 ### Carving
 
-Using common carving techniques can be useful to extract files and information from the pcap:
+Sử dụng các kỹ thuật carving phổ biến có thể hữu ích để trích xuất tệp và thông tin từ pcap:
 
 
 {{#ref}}
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Capturing credentials
+### Thu thập thông tin xác thực
 
-You can use [PCredz](https://github.com/lgandx/PCredz) to parse credentials from a stored PCAP file or a live interface.<sup>[[12]](#references)</sup>
+Bạn có thể dùng [PCredz](https://github.com/lgandx/PCredz) để phân tích thông tin xác thực từ tệp PCAP đã lưu hoặc một interface trực tiếp.<sup>[[12]](#references)</sup>
 
-## Check Exploits/Malware
+## Kiểm tra Exploits/Malware
 
 ### Suricata
 
-**Install and setup**
+**Cài đặt và thiết lập**
 
 ```
 apt-get install suricata
@@ -111,9 +111,9 @@ echo "url = http://rules.emergingthreats.net/open/suricata/emerging.rules.tar.gz
 oinkmaster -C /etc/oinkmaster.conf -o /etc/suricata/rules
 ```
 
-**Check pcap**
+**Kiểm tra pcap**
 
-Suricata's `-r` option replays a PCAP in offline mode; in this example, `-k none` disables checksum checks, `-v` increases logging, and `-l` selects the log directory.<sup>[[13]](#references)</sup>
+Tùy chọn `-r` của Suricata phát lại PCAP ở chế độ offline; trong ví dụ này, `-k none` tắt kiểm tra checksum, `-v` tăng mức ghi log và `-l` chọn thư mục log.<sup>[[13]](#references)</sup>
 
 ```
 suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
@@ -121,11 +121,11 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 ### YaraPcap
 
-[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) processes HTTP streams from PCAP files, optionally decompresses gzip streams, scans extracted files with YARA, writes `report.txt`, and can save matching files to a directory.<sup>[[14]](#references)</sup>
+[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) xử lý các luồng HTTP từ tệp PCAP, tùy chọn giải nén các luồng gzip, quét các tệp được trích xuất bằng YARA, ghi `report.txt` và có thể lưu các tệp khớp vào một thư mục.<sup>[[14]](#references)</sup>
 
-### Malware Analysis
+### Phân tích Malware
 
-Check if you can find any fingerprint of a known malware:
+Kiểm tra xem bạn có thể tìm thấy dấu hiệu nhận dạng nào của malware đã biết không:
 
 
 {{#ref}}
@@ -134,13 +134,13 @@ Check if you can find any fingerprint of a known malware:
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) is a passive, open-source network traffic analyzer used as a Network Security Monitor (NSM) and for broader traffic analysis, including performance measurement and troubleshooting.<sup>[[15]](#references)</sup>
+> [Zeek](https://docs.zeek.org/en/master/about.html) là công cụ phân tích lưu lượng mạng thụ động, mã nguồn mở, được dùng làm Network Security Monitor (NSM) và để phân tích lưu lượng ở phạm vi rộng hơn, bao gồm đo lường hiệu suất và khắc phục sự cố.<sup>[[15]](#references)</sup>
 
-Zeek generates structured logs rather than PCAP files, so use log-analysis tools such as `zeek-cut` to inspect those logs.<sup>[[15]](#references)[[16]](#references)</sup>
+Zeek tạo ra các log có cấu trúc thay vì tệp PCAP, vì vậy hãy dùng các công cụ phân tích log như `zeek-cut` để kiểm tra các log đó.<sup>[[15]](#references)[[16]](#references)</sup>
 
-### Connections Info
+### Thông tin kết nối
 
-The examples below use `zeek-cut` to select named fields from TSV logs, then standard Unix tools to rank and count connections; RITA can also ingest Zeek logs for long-connection, beaconing, and DNS-tunneling analysis.<sup>[[16]](#references)[[17]](#references)</sup>
+Các ví dụ bên dưới dùng `zeek-cut` để chọn các trường có tên từ log TSV, sau đó dùng các công cụ Unix tiêu chuẩn để xếp hạng và đếm kết nối; RITA cũng có thể nhập log Zeek để phân tích kết nối kéo dài, beaconing và DNS tunneling.<sup>[[16]](#references)[[17]](#references)</sup>
 
 ```bash
 #Get info about longest connections (add "grep udp" to see only udp traffic)
@@ -192,7 +192,7 @@ Score,Source IP,Destination IP,Connections,Avg Bytes,Intvl Range,Size Range,Top 
 0.838,10.55.200.10,205.251.194.64,210,69,29398,4,300,70,109,205,0,0,0,0
 ```
 
-### DNS info
+### Thông tin DNS
 
 ```bash
 #Get info about each DNS request performed
@@ -211,7 +211,7 @@ cat dns.log | zeek-cut qtype_name | sort | uniq -c | sort -nr
 rita show-exploded-dns -H --limit 10 zeek_logs
 ```
 
-## Other pcap analysis tricks
+## Các thủ thuật phân tích pcap khác
 
 
 {{#ref}}
@@ -230,24 +230,23 @@ usb-keystrokes.md
 
 ## References
 
-- [1] [Wireshark User's Guide: Open Capture Files](https://www.wireshark.org/docs/wsug_html_chunked/ChIOOpenSection.html)
-- [2] [pcapfix - online pcap / pcapng repair service](https://f00l.de/hacking/pcapfix.php)
-- [3] [VirusTotal API v3 Overview](https://docs.virustotal.com/reference/overview)
+- [1] [Hướng dẫn người dùng Wireshark: Mở tệp capture](https://www.wireshark.org/docs/wsug_html_chunked/ChIOOpenSection.html)
+- [2] [pcapfix - dịch vụ sửa chữa pcap / pcapng trực tuyến](https://f00l.de/hacking/pcapfix.php)
+- [3] [Tổng quan về VirusTotal API v3](https://docs.virustotal.com/reference/overview)
 - [4] [Hybrid Analysis](https://www.hybrid-analysis.com/)
 - [5] [A-Packets PCAP Analyzer](https://apackets.com/)
-- [6] [Xplico - About](https://www.xplico.org/about)
+- [6] [Xplico - Giới thiệu](https://www.xplico.org/about)
 - [7] [NetworkMiner](https://www.netresec.com/?page=NetworkMiner)
-- [8] [NetWitness Investigator Freeware](https://www.netwitness.com/contact-us/netwitness-investigator-freeware/)
-- [9] [BruteShark repository](https://github.com/odedshimon/BruteShark)
-- [10] [Wireshark `capinfos` manual](https://www.wireshark.org/docs/man-pages/capinfos.html)
-- [11] [ngrep documentation](https://ngrep.sourceforge.net/usage.html)
-- [12] [PCredz repository](https://github.com/lgandx/PCredz)
-- [13] [Suricata command-line options](https://docs.suricata.io/en/latest/command-line-options.html)
-- [14] [YaraPcap repository](https://github.com/kevthehermit/YaraPcap)
-- [15] [What Is Zeek?](https://docs.zeek.org/en/master/about/what.html)
-- [16] [Zeek logs tutorial](https://docs.zeek.org/en/master/tutorial/logs.html)
-- [17] [RITA repository](https://github.com/activecm/rita)
-- [18] [Wireshark `editcap` documentation](https://www.wireshark.org/docs/wsug_html_chunked/AppToolseditcap.html)
-- [19] [PacketTotal Upload API announcement](https://medium.com/packettotal/the-packettotal-upload-api-26f48e53f0ee)
-
+- [8] [NetWitness Investigator bản miễn phí](https://www.netwitness.com/contact-us/netwitness-investigator-freeware/)
+- [9] [Kho lưu trữ BruteShark](https://github.com/odedshimon/BruteShark)
+- [10] [Tài liệu hướng dẫn `capinfos` của Wireshark](https://www.wireshark.org/docs/man-pages/capinfos.html)
+- [11] [Tài liệu ngrep](https://ngrep.sourceforge.net/usage.html)
+- [12] [Kho lưu trữ PCredz](https://github.com/lgandx/PCredz)
+- [13] [Các tùy chọn dòng lệnh Suricata](https://docs.suricata.io/en/latest/command-line-options.html)
+- [14] [Kho lưu trữ YaraPcap](https://github.com/kevthehermit/YaraPcap)
+- [15] [Zeek là gì?](https://docs.zeek.org/en/master/about/what.html)
+- [16] [Hướng dẫn về log Zeek](https://docs.zeek.org/en/master/tutorial/logs.html)
+- [17] [Kho lưu trữ RITA](https://github.com/activecm/rita)
+- [18] [Tài liệu về `editcap` của Wireshark](https://www.wireshark.org/docs/wsug_html_chunked/AppToolseditcap.html)
+- [19] [Thông báo về PacketTotal Upload API](https://medium.com/packettotal/the-packettotal-upload-api-26f48e53f0ee)
 {{#include ../../../banners/hacktricks-training.md}}

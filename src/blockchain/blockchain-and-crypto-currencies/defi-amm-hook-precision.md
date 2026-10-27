@@ -1,53 +1,53 @@
-# DeFi/AMM Exploitation: Uniswap v4 Hook Precision/Rounding Abuse
+# Khai thác DeFi/AMM: Lạm dụng độ chính xác/làm tròn của Hook Uniswap v4
 
 {{#include ../../banners/hacktricks-training.md}}
 
-This page documents a class of DeFi/AMM exploitation techniques against Uniswap v4–style DEXes that extend core math with custom hooks. A Bunni V2 incident illustrates a related failure: a rounding-direction bug in withdrawal accounting understated active liquidity, and a later swap exposed that underestimation in a profitable sandwich.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+Trang này ghi lại một nhóm kỹ thuật khai thác DeFi/AMM nhằm vào các DEX kiểu Uniswap v4, mở rộng phép toán cốt lõi bằng các hook tùy chỉnh. Sự cố Bunni V2 minh họa một lỗi tương tự: lỗi hướng làm tròn trong cách tính toán rút tiền đã tính thấp hơn thanh khoản đang hoạt động; sau đó, một swap làm lộ phần tính thiếu này trong một sandwich có lợi.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
-Key idea: if a hook implements additional accounting that depends on fixed‑point math, tick rounding, and threshold logic, an attacker can craft exact‑input swaps that cross specific thresholds so that rounding discrepancies accumulate in their favor. Repeating the pattern and then withdrawing the inflated balance realizes profit, often financed with a flash loan.
+Ý tưởng chính: nếu một hook thực hiện kế toán bổ sung dựa trên phép toán fixed-point, làm tròn tick và logic ngưỡng, kẻ tấn công có thể tạo các swap exact-input vượt qua những ngưỡng cụ thể, khiến sai lệch làm tròn tích lũy theo hướng có lợi cho họ. Lặp lại mẫu này rồi rút số dư đã bị thổi phồng sẽ hiện thực hóa lợi nhuận, thường được tài trợ bằng flash loan.
 
-## Background: Uniswap v4 hooks and swap flow
+## Bối cảnh: hook Uniswap v4 và luồng swap
 
-- Hooks are contracts that the PoolManager calls at specific lifecycle points (e.g., beforeSwap/afterSwap, beforeAddLiquidity/afterAddLiquidity, beforeRemoveLiquidity/afterRemoveLiquidity, beforeInitialize/afterInitialize, beforeDonate/afterDonate).<sup>[[4]](#references)</sup>
-- Pools are initialized with a PoolKey including the hook contract. A non-zero hook address enables the callbacks selected for that pool.<sup>[[4]](#references)[[14]](#references)</sup>
-- Hooks can return **custom deltas** that modify the final balance changes of a swap or liquidity action (custom accounting). Those deltas are settled as net balances at the end of the call, so any rounding error inside hook math accumulates before settlement.<sup>[[4]](#references)</sup>
-- Core math uses fixed-point formats such as Q64.96 for sqrtPriceX96 and tick arithmetic with 1.0001^tick. Any custom math layered on top must carefully match rounding semantics to avoid invariant drift.<sup>[[12]](#references)[[13]](#references)</sup>
-- Swaps can be exactInput or exactOutput. In v3/v4, price moves along ticks; crossing a tick boundary may activate/deactivate range liquidity. Hooks may implement extra logic on threshold/tick crossings.<sup>[[9]](#references)[[11]](#references)</sup>
+- Hook là các contract mà PoolManager gọi tại những điểm cụ thể trong vòng đời (ví dụ: beforeSwap/afterSwap, beforeAddLiquidity/afterAddLiquidity, beforeRemoveLiquidity/afterRemoveLiquidity, beforeInitialize/afterInitialize, beforeDonate/afterDonate).<sup>[[4]](#references)</sup>
+- Pool được khởi tạo với một PoolKey bao gồm contract hook. Địa chỉ hook khác 0 sẽ kích hoạt các callback được chọn cho pool đó.<sup>[[4]](#references)[[14]](#references)</sup>
+- Hook có thể trả về **custom delta** để sửa đổi các thay đổi số dư cuối cùng của một swap hoặc hành động thanh khoản (custom accounting). Các delta này được thanh toán dưới dạng số dư ròng khi kết thúc lời gọi, nên mọi lỗi làm tròn trong phép toán của hook sẽ tích lũy trước khi thanh toán.<sup>[[4]](#references)</sup>
+- Phép toán cốt lõi sử dụng các định dạng fixed-point như Q64.96 cho sqrtPriceX96 và phép tính tick với 1.0001^tick. Mọi phép toán tùy chỉnh được xây dựng trên đó phải khớp chính xác quy tắc làm tròn để tránh làm sai lệch bất biến.<sup>[[12]](#references)[[13]](#references)</sup>
+- Swap có thể là exactInput hoặc exactOutput. Trong v3/v4, giá di chuyển theo các tick; vượt qua ranh giới tick có thể kích hoạt/vô hiệu hóa thanh khoản trong range. Hook có thể triển khai logic bổ sung khi vượt ngưỡng/tick.<sup>[[9]](#references)[[11]](#references)</sup>
 
-## Vulnerability archetype: threshold‑crossing precision/rounding drift
+## Dạng lỗ hổng: sai lệch độ chính xác/làm tròn khi vượt ngưỡng
 
-A typical vulnerable pattern in custom hooks:
+Một mẫu dễ bị tấn công thường gặp trong hook tùy chỉnh:
 
-1. The hook computes per‑swap liquidity or balance deltas using integer division, mulDiv, or fixed‑point conversions (e.g., token ↔ liquidity using sqrtPrice and tick ranges).
-2. Threshold logic (e.g., rebalancing, stepwise redistribution, or per‑range activation) is triggered when a swap size or price movement crosses an internal boundary.
-3. Rounding is applied inconsistently (e.g., truncation toward zero, floor versus ceil) between the forward calculation and the settlement path. Small discrepancies don’t cancel and instead credit the caller.
-4. Exact‑input swaps, precisely sized to straddle those boundaries, repeatedly harvest the positive rounding remainder. The attacker later withdraws the accumulated credit.
+1. Hook tính các delta thanh khoản hoặc số dư cho mỗi swap bằng phép chia số nguyên, mulDiv hoặc chuyển đổi fixed-point (ví dụ: chuyển token ↔ thanh khoản bằng sqrtPrice và các khoảng tick).
+2. Logic ngưỡng (ví dụ: cân bằng lại, phân phối lại theo bước hoặc kích hoạt theo từng range) được kích hoạt khi quy mô swap hoặc biến động giá vượt qua một ranh giới nội bộ.
+3. Làm tròn được áp dụng không nhất quán (ví dụ: cắt về 0, floor so với ceil) giữa phép tính xuôi và luồng thanh toán. Sai lệch nhỏ không triệt tiêu nhau mà thay vào đó ghi có cho người gọi.
+4. Các swap exact-input được định cỡ chính xác để vượt qua những ranh giới đó liên tục thu về phần dư làm tròn dương. Sau đó, kẻ tấn công rút khoản ghi có tích lũy.
 
-Attack preconditions
-- A pool using a custom v4 hook that performs additional math on each swap (e.g., an LDF/rebalancer). 
-- At least one execution path where rounding benefits the swap initiator across threshold crossings.
-- Ability to repeat many swaps atomically (flash loans are ideal to supply temporary float and amortize gas). 
+Điều kiện tiên quyết của cuộc tấn công
+- Pool sử dụng hook v4 tùy chỉnh thực hiện phép toán bổ sung cho mỗi swap (ví dụ: LDF/rebalancer).
+- Có ít nhất một luồng thực thi mà việc làm tròn có lợi cho bên khởi tạo swap khi vượt qua các ngưỡng.
+- Có thể lặp lại nhiều swap một cách nguyên tử (flash loan là lựa chọn lý tưởng để cung cấp vốn tạm thời và phân bổ chi phí gas). 
 
-## Practical attack methodology
+## Phương pháp tấn công thực tế
 
-1) Identify candidate pools with hooks
-- Enumerate v4 pools and check PoolKey.hooks != address(0).
-- Inspect hook bytecode/ABI for callbacks: beforeSwap/afterSwap and any custom rebalancing methods.
-- Look for math that: divides by liquidity, converts between token amounts and liquidity, or aggregates BalanceDelta with rounding.
+1) Xác định các pool tiềm năng có hook
+- Liệt kê các pool v4 và kiểm tra PoolKey.hooks != address(0).
+- Kiểm tra bytecode/ABI của hook để tìm callback: beforeSwap/afterSwap và các phương thức cân bằng lại tùy chỉnh.
+- Tìm các phép toán có đặc điểm: chia cho thanh khoản, chuyển đổi giữa lượng token và thanh khoản, hoặc tổng hợp BalanceDelta có làm tròn.
 
-2) Model the hook’s math and thresholds
-- Recreate the hook’s liquidity/redistribution formula: inputs typically include sqrtPriceX96, tickLower/Upper, currentTick, fee tier, and net liquidity.
-- Map threshold/step functions: ticks, bucket boundaries, or LDF breakpoints. Determine which side of each boundary the delta is rounded on.
-- Identify where conversions cast between uint256/int256, use SafeCast, or rely on mulDiv with implicit floor.
+2) Mô hình hóa phép toán và ngưỡng của hook
+- Tái tạo công thức thanh khoản/phân phối lại của hook: đầu vào thường bao gồm sqrtPriceX96, tickLower/Upper, currentTick, fee tier và thanh khoản ròng.
+- Xác định các hàm ngưỡng/bước: tick, ranh giới bucket hoặc điểm gãy LDF. Xác định delta được làm tròn theo hướng nào ở mỗi phía của ranh giới.
+- Xác định nơi chuyển đổi kiểu giữa uint256/int256, sử dụng SafeCast hoặc dựa vào mulDiv với phép làm tròn floor ngầm định.
 
-3) Calibrate exact‑input swaps to cross boundaries
-- Use Foundry/Hardhat simulations to compute the minimal Δin needed to move price just across a boundary and trigger the hook’s branch.
-- Verify that afterSwap settlement credits the caller more than the cost, leaving a positive BalanceDelta or credit in the hook’s accounting.
-- Repeat swaps to accumulate credit; then call the hook’s withdrawal/settlement path.
+3) Hiệu chỉnh swap exact-input để vượt qua ranh giới
+- Dùng mô phỏng Foundry/Hardhat để tính Δin tối thiểu cần thiết nhằm đẩy giá vừa vượt qua một ranh giới và kích hoạt nhánh của hook.
+- Xác minh rằng sauSwap, quá trình thanh toán ghi có cho người gọi nhiều hơn chi phí, để lại BalanceDelta dương hoặc khoản ghi có trong phần kế toán của hook.
+- Lặp lại các swap để tích lũy khoản ghi có; sau đó gọi luồng rút tiền/thanh toán của hook.
 
-In v4, the swap loop must run from a PoolManager unlock callback; negative `amountSpecified` denotes exact input, and `sqrtPriceLimitX96` must be strictly inside the valid range. A zero price limit reverts, so the pseudocode below uses the lower bound for a zero-for-one swap.<sup>[[9]](#references)[[10]](#references)[[11]](#references)</sup>
+Trong v4, vòng lặp swap phải chạy từ callback mở khóa của PoolManager; `amountSpecified` âm biểu thị exact input, và `sqrtPriceLimitX96` phải nằm строго bên trong phạm vi hợp lệ. Giới hạn giá bằng 0 sẽ revert, vì vậy pseudocode bên dưới dùng cận dưới cho swap zero-for-one.<sup>[[9]](#references)[[10]](#references)[[11]](#references)</sup>
 
-Example Foundry‑style test harness (pseudocode)
+Ví dụ harness kiểm thử kiểu Foundry (pseudocode)
 ```solidity
 function test_precision_rounding_abuse() public {
     // 1) Arrange: set up pool with hook
@@ -82,16 +82,16 @@ function test_precision_rounding_abuse() public {
 }
 ```
 
-Calibrating the exactInput
-- Compute the target with core TickMath: sqrtP_next = sqrtP_current × 1.0001^(Δtick) in real-value terms; the Q64.96 result is rounded by TickMath.<sup>[[13]](#references)</sup>
-- Approximate a token0 (zero-for-one) input using the Q64.96-aware formula: Δx ≈ L × |ΔsqrtP| × 2^96 / (sqrtP_next × sqrtP_current). Match the core routine’s direction-specific rounding.<sup>[[12]](#references)</sup>
-- Adjust Δin by ±1 wei around the boundary to find the branch where the hook rounds in your favor.
+Hiệu chỉnh exactInput
+- Tính mục tiêu bằng TickMath lõi: sqrtP_next = sqrtP_current × 1.0001^(Δtick) theo giá trị thực; kết quả Q64.96 được TickMath làm tròn.<sup>[[13]](#references)</sup>
+- Ước tính lượng đầu vào token0 (zero-for-one) bằng công thức có xét Q64.96: Δx ≈ L × |ΔsqrtP| × 2^96 / (sqrtP_next × sqrtP_current). Khớp với cách làm tròn theo hướng của routine lõi.<sup>[[12]](#references)</sup>
+- Điều chỉnh Δin ±1 wei quanh ngưỡng để tìm nhánh mà hook làm tròn theo hướng có lợi cho bạn.
 
-4) Amplify with flash loans
-- Borrow a large notional (e.g., 3M USDT or 2000 WETH) to run many iterations atomically.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
-- Execute the calibrated swap loop, then withdraw and repay within the flash loan callback.
+4) Khuếch đại bằng flash loan
+- Vay một khoản danh nghĩa lớn (ví dụ: 3M USDT hoặc 2000 WETH) để thực hiện nhiều vòng lặp trong cùng một giao dịch nguyên tử.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+- Thực hiện vòng lặp swap đã hiệu chỉnh, sau đó rút và hoàn trả trong callback của flash loan.
 
-Aave V3 flash loan skeleton
+Khung flash loan Aave V3
 ```solidity
 function executeOperation(
     address[] calldata assets,
@@ -114,46 +114,46 @@ function executeOperation(
 }
 ```
 
-5) Exit and cross‑chain replication
-- If hooks are deployed on multiple chains, repeat the same calibration per chain.
-- In the Bunni incident, flash-loan liquidity and bridge routes differed by chain, so account for those chain-specific constraints when reproducing the analysis.<sup>[[1]](#references)[[2]](#references)</sup>
+5) Thoát và tái hiện xuyên chuỗi
+- Nếu hook được triển khai trên nhiều chain, hãy lặp lại quy trình hiệu chỉnh tương tự cho từng chain.
+- Trong sự cố Bunni, thanh khoản flash-loan và các tuyến bridge khác nhau tùy chain, vì vậy hãy tính đến các ràng buộc riêng của từng chain khi tái hiện phân tích.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Common root causes in hook math
+## Các nguyên nhân gốc phổ biến trong phép tính của hook
 
-- Mixed rounding semantics: mulDiv floors while later paths effectively round up; or conversions between token/liquidity apply different rounding.
-- Tick alignment errors: using unrounded ticks in one path and tick‑spaced rounding in another.
-- BalanceDelta sign/overflow issues when converting between int256 and uint256 during settlement.
-- Precision loss in Q64.96 conversions (sqrtPriceX96) not mirrored in reverse mapping.
-- Accumulation pathways: per‑swap remainders tracked as credits that are withdrawable by the caller instead of being burned/zero‑sum.
+- Ngữ nghĩa làm tròn không nhất quán: mulDiv làm tròn xuống, trong khi các nhánh xử lý sau đó thực tế làm tròn lên; hoặc các phép chuyển đổi giữa token/thanh khoản áp dụng cách làm tròn khác nhau.
+- Lỗi căn chỉnh tick: dùng tick chưa làm tròn ở một nhánh và làm tròn theo khoảng tick ở nhánh khác.
+- Lỗi dấu/tràn BalanceDelta khi chuyển đổi giữa int256 và uint256 trong quá trình thanh toán.
+- Mất độ chính xác khi chuyển đổi Q64.96 (sqrtPriceX96), nhưng không được phản ánh tương ứng trong ánh xạ ngược.
+- Các luồng tích lũy: phần dư theo từng giao dịch swap được ghi nhận thành khoản tín dụng mà caller có thể rút, thay vì bị đốt hoặc được cân bằng tổng bằng 0.
 
-## Custom accounting & delta amplification
+## Kế toán tùy chỉnh & khuếch đại delta
 
-- Uniswap v4 custom accounting lets hooks return deltas that directly adjust what the caller owes/receives. If the hook tracks credits internally, rounding residue can accumulate across many small operations **before** the final settlement happens.<sup>[[4]](#references)</sup>
-- If the hook exposes a compatible withdrawal path, an attacker can alternate `swap → withdraw → swap` within the same PoolManager unlock callback, forcing the hook to recompute deltas on slightly different state while balances remain pending until the unlock settles.<sup>[[4]](#references)[[10]](#references)</sup>
-- When reviewing hooks, always trace how BalanceDelta/HookDelta is produced and settled. A single biased rounding in one branch can become a compounding credit when deltas are repeatedly re‑computed.
+- Cơ chế kế toán tùy chỉnh của Uniswap v4 cho phép hook trả về các delta trực tiếp điều chỉnh khoản caller phải trả/nhận. Nếu hook theo dõi các khoản tín dụng nội bộ, phần dư do làm tròn có thể tích lũy qua nhiều thao tác nhỏ **trước khi** quyết toán cuối cùng diễn ra.<sup>[[4]](#references)</sup>
+- Nếu hook cung cấp một đường rút tương thích, kẻ tấn công có thể luân phiên `swap → withdraw → swap` trong cùng callback unlock của PoolManager, buộc hook tính toán lại delta trên trạng thái hơi khác trong khi số dư vẫn đang chờ cho đến khi unlock được quyết toán.<sup>[[4]](#references)[[10]](#references)</sup>
+- Khi kiểm tra hook, hãy luôn lần theo cách BalanceDelta/HookDelta được tạo ra và quyết toán. Chỉ một phép làm tròn thiên lệch trong một nhánh cũng có thể trở thành khoản tín dụng cộng dồn khi delta liên tục được tính toán lại.
 
-## Defensive guidance
+## Hướng dẫn phòng thủ
 
-- Differential testing: mirror the hook’s math vs a reference implementation using high‑precision rational arithmetic and assert equality or bounded error that is always adversarial (never favorable to caller).
-- Invariant/property tests:
-  - Sum of deltas (tokens, liquidity) across swap paths and hook adjustments must conserve value modulo fees.
-  - No path should create positive net credit for the swap initiator over repeated exactInput iterations.
-  - Threshold/tick boundary tests around ±1 wei inputs for both exactInput/exactOutput.
-- Rounding policy: centralize rounding helpers that always round against the user; eliminate inconsistent casts and implicit floors.
-- Settlement sinks: accumulate unavoidable rounding residue to protocol treasury or burn it; never attribute to msg.sender.
-- Rate‑limits/guardrails: minimum swap sizes for rebalancing triggers; disable rebalances if deltas are sub‑wei; sanity‑check deltas against expected ranges.
-- Review hook callbacks holistically: beforeSwap/afterSwap and before/after liquidity changes should agree on tick alignment and delta rounding.
+- Kiểm thử vi sai: đối chiếu phép tính của hook với một triển khai tham chiếu dùng số học phân số độ chính xác cao, đồng thời xác nhận kết quả bằng nhau hoặc sai số có giới hạn và luôn bất lợi cho caller.
+- Kiểm thử bất biến/thuộc tính:
+  - Tổng delta (token, thanh khoản) trên các luồng swap và các điều chỉnh của hook phải bảo toàn giá trị, ngoại trừ phí.
+  - Không nhánh nào được tạo ra khoản tín dụng ròng dương cho bên khởi tạo swap qua nhiều lần lặp exactInput.
+  - Kiểm thử ngưỡng/ranh giới tick với đầu vào ±1 wei cho cả exactInput/exactOutput.
+- Chính sách làm tròn: tập trung các hàm hỗ trợ làm tròn để luôn làm tròn theo hướng bất lợi cho người dùng; loại bỏ các phép ép kiểu không nhất quán và phép làm tròn xuống ngầm định.
+- Nơi tiếp nhận khoản dư khi quyết toán: chuyển phần dư do làm tròn không thể tránh khỏi vào kho bạc giao thức hoặc đốt; không bao giờ ghi nhận khoản đó cho msg.sender.
+- Giới hạn tốc độ/biện pháp bảo vệ: đặt kích thước swap tối thiểu cho các trigger tái cân bằng; tắt tái cân bằng nếu delta nhỏ hơn một wei; kiểm tra tính hợp lý của delta so với phạm vi dự kiến.
+- Rà soát toàn diện các callback của hook: beforeSwap/afterSwap và các callback trước/sau khi thay đổi thanh khoản phải thống nhất về căn chỉnh tick và cách làm tròn delta.
 
-## Case study: Bunni V2 (2025‑09‑02)
+## Nghiên cứu tình huống: Bunni V2 (2025‑09‑02)
 
-- Protocol: Bunni V2, a Uniswap v4 hook using a Liquidity Density Function (LDF) to compute token density and total-liquidity estimates.<sup>[[1]](#references)[[2]](#references)</sup>
-- Affected pools: USDC/USDT on Ethereum and weETH/ETH on Unichain, totaling about $8.4M.<sup>[[1]](#references)</sup>
-- Step 1 (price push): the attacker flash-borrowed ~3M USDT and swapped to push the tick to ~5000, shrinking the **active** USDC balance down to ~28 wei.<sup>[[1]](#references)</sup>
-- Step 2 (rounding drain): 44 tiny withdrawals exploited floor rounding in `BunniHubLogic::withdraw()` to reduce the active USDC balance from 28 wei to 4 wei (-85.7%) while only a tiny fraction of LP shares was burned. Total liquidity decreased by ~84.4%.<sup>[[1]](#references)[[2]](#references)</sup>
-- Step 3 (liquidity rebound sandwich): a large swap moved the tick to ~839,189 (1 USDC ≈ 2.77e36 USDT). Liquidity estimates flipped and increased by ~16.8%, enabling a sandwich where the attacker swapped back at the inflated price and exited with profit.<sup>[[1]](#references)</sup>
-- Fix identified in the post-mortem: change the idle-balance update to round **up** so repeated micro-withdrawals no longer ratchet the pool’s active balance downward.<sup>[[1]](#references)</sup>
+- Giao thức: Bunni V2, một hook của Uniswap v4 sử dụng Liquidity Density Function (LDF) để tính mật độ token và ước tính tổng thanh khoản.<sup>[[1]](#references)[[2]](#references)</sup>
+- Các pool bị ảnh hưởng: USDC/USDT trên Ethereum và weETH/ETH trên Unichain, tổng cộng khoảng $8.4M.<sup>[[1]](#references)</sup>
+- Bước 1 (đẩy giá): kẻ tấn công flash-borrow ~3M USDT rồi swap để đẩy tick lên ~5000, làm số dư USDC **active** giảm xuống còn ~28 wei.<sup>[[1]](#references)</sup>
+- Bước 2 (rút cạn do làm tròn): 44 lần rút nhỏ khai thác phép làm tròn xuống trong `BunniHubLogic::withdraw()` để giảm số dư USDC active từ 28 wei xuống 4 wei (-85.7%), trong khi chỉ một phần rất nhỏ cổ phần LP bị đốt. Tổng thanh khoản giảm ~84.4%.<sup>[[1]](#references)[[2]](#references)</sup>
+- Bước 3 (sandwich khi thanh khoản phục hồi): một giao dịch swap lớn đẩy tick lên ~839,189 (1 USDC ≈ 2.77e36 USDT). Các ước tính thanh khoản đảo chiều và tăng ~16.8%, tạo điều kiện cho một cuộc tấn công sandwich, trong đó kẻ tấn công swap ngược lại ở mức giá bị thổi phồng rồi thoát ra với lợi nhuận.<sup>[[1]](#references)</sup>
+- Bản sửa được xác định trong báo cáo hậu kiểm: thay đổi cập nhật số dư nhàn rỗi để làm tròn **lên**, nhờ đó các lần rút siêu nhỏ lặp lại không còn liên tục kéo giảm số dư active của pool.<sup>[[1]](#references)</sup>
 
-Simplified vulnerable line (and post‑mortem fix).<sup>[[1]](#references)</sup>
+Dòng mã dễ bị tổn thương đã được đơn giản hóa (và bản sửa trong báo cáo hậu kiểm).<sup>[[1]](#references)</sup>
 ```solidity
 // BunniHubLogic::withdraw() idle balance update (simplified)
 uint256 newBalance = balance - balance.mulDiv(shares, currentTotalSupply);
@@ -161,29 +161,28 @@ uint256 newBalance = balance - balance.mulDiv(shares, currentTotalSupply);
 uint256 newBalance = balance - balance.mulDivUp(shares, currentTotalSupply);
 ```
 
-## Hunting checklist
+## Checklist săn tìm
 
-- Does the pool use a non‑zero hooks address? Which callbacks are enabled?
-- Are there per‑swap redistributions/rebalances using custom math? Any tick/threshold logic?
-- Where are divisions/mulDiv, Q64.96 conversions, or SafeCast used? Are rounding semantics globally consistent?
-- Can you construct Δin that barely crosses a boundary and yields a favorable rounding branch? Test both directions and both exactInput and exactOutput.
-- Does the hook track per‑caller credits or deltas that can be withdrawn later? Ensure residue is neutralized.
+- Pool có sử dụng địa chỉ hooks khác 0 không? Những callback nào được bật?
+- Có phân phối lại/tái cân bằng theo từng swap bằng phép tính tùy chỉnh không? Có logic tick/ngưỡng nào không?
+- Các phép chia/mulDiv, chuyển đổi Q64.96 hoặc SafeCast được dùng ở đâu? Quy tắc làm tròn có nhất quán trên toàn hệ thống không?
+- Bạn có thể tạo Δin vừa đủ vượt qua một ranh giới để nhận được nhánh làm tròn có lợi không? Hãy kiểm tra cả hai chiều và cả exactInput lẫn exactOutput.
+- Hook có theo dõi khoản tín dụng hoặc delta riêng cho từng caller để có thể rút sau này không? Đảm bảo phần dư được triệt tiêu.
 
 ## References
 
-- [1] [Bunni Exploit Post Mortem (Sep 2025)](https://blog.bunni.xyz/posts/exploit-post-mortem/)
-- [2] [Bunni V2 Exploit: Full Hack Analysis](https://www.quillaudits.com/blog/hack-analysis/bunni-v2-exploit)
-- [3] [Bunni V2 Exploit: $8.3M Drained via Liquidity Flaw (summary)](https://quillaudits.medium.com/bunni-v2-exploit-8-3m-drained-50acbdcd9e7b)
-- [4] [Uniswap v4 Core Whitepaper](https://app.uniswap.org/whitepaper-v4.pdf)
-- [5] [Uniswap v4 background (QuillAudits research)](https://www.quillaudits.com/research/uniswap-development)
-- [6] [Liquidity mechanics in Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/liquidity-mechanics-in-uniswap-v4-core)
-- [7] [Swap mechanics in Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/swap-mechanics-in-uniswap-v4-core)
-- [8] [Uniswap v4 Hooks and Security Considerations](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/uniswap-v4-hooks-and-security)
-- [9] [Uniswap v4 core Pool.sol](https://github.com/Uniswap/v4-core/blob/main/src/libraries/Pool.sol)
-- [10] [Uniswap v4 core PoolManager.sol](https://github.com/Uniswap/v4-core/blob/main/src/PoolManager.sol)
-- [11] [Uniswap v4 SwapParams](https://github.com/Uniswap/v4-core/blob/main/src/types/PoolOperation.sol)
-- [12] [Uniswap v4 core SqrtPriceMath.sol](https://github.com/Uniswap/v4-core/blob/main/src/libraries/SqrtPriceMath.sol)
-- [13] [Uniswap v4 core TickMath.sol](https://github.com/Uniswap/v4-core/blob/main/src/libraries/TickMath.sol)
-- [14] [Uniswap v4 PoolKey](https://github.com/Uniswap/v4-core/blob/main/src/types/PoolKey.sol)
-
+- [1] [Báo cáo hậu kiểm về vụ khai thác Bunni (tháng 9 năm 2025)](https://blog.bunni.xyz/posts/exploit-post-mortem/)
+- [2] [Vụ khai thác Bunni V2: Phân tích đầy đủ vụ hack](https://www.quillaudits.com/blog/hack-analysis/bunni-v2-exploit)
+- [3] [Vụ khai thác Bunni V2: Rút cạn 8,3 triệu USD qua lỗi thanh khoản (tóm tắt)](https://quillaudits.medium.com/bunni-v2-exploit-8-3m-drained-50acbdcd9e7b)
+- [4] [Sách trắng Uniswap v4 Core](https://app.uniswap.org/whitepaper-v4.pdf)
+- [5] [Thông tin nền về Uniswap v4 (nghiên cứu của QuillAudits)](https://www.quillaudits.com/research/uniswap-development)
+- [6] [Cơ chế thanh khoản trong Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/liquidity-mechanics-in-uniswap-v4-core)
+- [7] [Cơ chế swap trong Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/swap-mechanics-in-uniswap-v4-core)
+- [8] [Hooks của Uniswap v4 và các cân nhắc về bảo mật](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/uniswap-v4-hooks-and-security)
+- [9] [Pool.sol của Uniswap v4 core](https://github.com/Uniswap/v4-core/blob/main/src/libraries/Pool.sol)
+- [10] [PoolManager.sol của Uniswap v4 core](https://github.com/Uniswap/v4-core/blob/main/src/PoolManager.sol)
+- [11] [SwapParams của Uniswap v4](https://github.com/Uniswap/v4-core/blob/main/src/types/PoolOperation.sol)
+- [12] [SqrtPriceMath.sol của Uniswap v4 core](https://github.com/Uniswap/v4-core/blob/main/src/libraries/SqrtPriceMath.sol)
+- [13] [TickMath.sol của Uniswap v4 core](https://github.com/Uniswap/v4-core/blob/main/src/libraries/TickMath.sol)
+- [14] [PoolKey của Uniswap v4](https://github.com/Uniswap/v4-core/blob/main/src/types/PoolKey.sol)
 {{#include ../../banners/hacktricks-training.md}}

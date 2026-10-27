@@ -1,10 +1,10 @@
-# DNSCat pcap analysis
+# Phân tích pcap DNSCat
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-If you have a PCAP with data being **exfiltrated by DNSCat** (without using encryption), you may be able to recover the exfiltrated content.
+Nếu bạn có PCAP chứa dữ liệu đang được **exfiltrated bằng DNSCat** (không dùng mã hóa), bạn có thể khôi phục nội dung đã exfiltrated.
 
-For the BSidesSF 2017 capture referenced below, the write-up inferred that each decoded query began with 9 bytes of dnscat-specific data before the transferred content. Because dnscat2 defines different packet types and header layouts, verify the relevant framing before applying that offset to other traffic.<sup>[[1]](#references)[[2]](#references)</sup>
+Đối với capture BSidesSF 2017 được nhắc đến bên dưới, bài phân tích suy luận rằng mỗi truy vấn đã giải mã bắt đầu bằng 9 byte dữ liệu riêng của dnscat, trước phần nội dung được truyền đi. Vì dnscat2 định nghĩa nhiều loại gói và bố cục header khác nhau, hãy xác minh cách đóng khung liên quan trước khi áp dụng độ lệch này cho lưu lượng khác.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```python
 from scapy.all import rdpcap, DNSQR, DNSRR
@@ -25,9 +25,9 @@ for p in rdpcap('ch21.pcap'):
 #print(f)
 ```
 
-For more information, see the [BSidesSF 2017 write-up](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap) and the [dnscat2 protocol documentation](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md).
+Để biết thêm thông tin, xem [bài viết BSidesSF 2017](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap) và [tài liệu giao thức dnscat2](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md).
 
-The [DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder) repository provides a Python 3 decoder that extracts streams from a PCAP by filtering DNS queries for a specified domain.<sup>[[3]](#references)</sup>
+Repository [DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder) cung cấp một decoder Python 3 để trích xuất các luồng từ PCAP bằng cách lọc các truy vấn DNS theo một domain được chỉ định.<sup>[[3]](#references)</sup>
 
 ```
 python3 dnscat_decoder.py sample.pcap bad_domain
@@ -35,8 +35,7 @@ python3 dnscat_decoder.py sample.pcap bad_domain
 
 ## References
 
-- [1] [dnscat2 protocol documentation](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
-- [2] [DNSCat2 pcap forensics writeup – BSidesSF 2017 CTF](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
+- [1] [tài liệu giao thức dnscat2](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
+- [2] [bài viết phân tích pháp chứng pcap của DNSCat2 – BSidesSF 2017 CTF](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
 - [3] [DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
-
 {{#include ../../../banners/hacktricks-training.md}}

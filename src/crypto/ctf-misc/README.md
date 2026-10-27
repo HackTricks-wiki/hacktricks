@@ -1,25 +1,24 @@
-# Crypto CTF Misc
+# Misc Crypto CTF
 
 {{#include ../../banners/hacktricks-training.md}}
 
-This section collects techniques that appear in cryptography challenges but do not fit neatly into the other categories.
+Phần này tập hợp các kỹ thuật xuất hiện trong các thử thách cryptography nhưng không phù hợp với các danh mục khác.
 
-## Esoteric languages
+## Ngôn ngữ lập trình kỳ dị
 
-### Technique
+### Kỹ thuật
 
-Use this workflow when a challenge requires running an esoteric-language program and decoding its output.
+Dùng quy trình này khi thử thách yêu cầu chạy chương trình viết bằng một ngôn ngữ lập trình kỳ dị và giải mã đầu ra.
 
-If a challenge gives you code that does not look like a standard language:
+Nếu thử thách cung cấp đoạn code trông không giống một ngôn ngữ phổ biến:
 
-- Identify the language by searching for a distinctive token or instruction sequence.
-- Use an online interpreter or a Docker image.
-- If the output is weird, look for layered encoding/compression after execution.
+- Nhận diện ngôn ngữ bằng cách tìm kiếm một token hoặc chuỗi lệnh đặc trưng.
+- Dùng trình thông dịch trực tuyến hoặc Docker image.
+- Nếu đầu ra có vẻ kỳ lạ, hãy tìm các lớp mã hóa/nén được áp dụng sau khi chạy chương trình.
 
-A useful language index is the Esolang wiki.<sup>[[1]](#references)</sup>
+Esolang wiki là một danh mục ngôn ngữ hữu ích.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Esolang, the esoteric programming languages wiki](https://esolangs.org/wiki/Main_Page)
-
+- [1] [Esolang, wiki về các ngôn ngữ lập trình kỳ dị](https://esolangs.org/wiki/Main_Page)
 {{#include ../../banners/hacktricks-training.md}}

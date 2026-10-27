@@ -1,55 +1,54 @@
-# Wifi Pcap Analysis
+# Phân tích Pcap Wifi
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Check BSSIDs
+## Kiểm tra BSSID
 
-With a Wi-Fi capture open in Wireshark, select _Wireless → WLAN Traffic_ to summarize the wireless networks observed in the capture; each row represents one wireless network.<sup>[[1]](#references)</sup>
+Khi mở bản capture Wi-Fi trong Wireshark, chọn _Wireless → WLAN Traffic_ để tổng hợp các mạng không dây được ghi nhận trong bản capture; mỗi hàng đại diện cho một mạng không dây.<sup>[[1]](#references)</sup>
 
-![Wifi Pcap Analysis - Check BSSIDs: When you receive a capture whose principal traffic is Wifi using WireShark you can start investigating all the SSIDs of the capture with Wireless --...](<../../../images/image (106).png>)
+![Phân tích Pcap Wifi - Kiểm tra BSSID: Khi nhận được một bản capture có lưu lượng chính là Wifi và sử dụng WireShark, bạn có thể bắt đầu kiểm tra tất cả SSID trong bản capture bằng Wireless --...](<../../../images/image (106).png>)
 
-![Wifi Pcap Analysis - Check BSSIDs: When you receive a capture whose principal traffic is Wifi using WireShark you can start investigating all the SSIDs of the capture with Wireless --...](<../../../images/image (492).png>)
+![Phân tích Pcap Wifi - Kiểm tra BSSID: Khi nhận được một bản capture có lưu lượng chính là Wifi và sử dụng WireShark, bạn có thể bắt đầu kiểm tra tất cả SSID trong bản capture bằng Wireless --...](<../../../images/image (492).png>)
 
 ### Brute Force
 
-For WPA/WPA2-PSK captures, `aircrack-ng` requires a usable four-way EAPOL handshake and tests candidate passphrases with a dictionary. Use `-w` to provide the wordlist and `-b` to target the access point's BSSID:<sup>[[2]](#references)</sup>
+Với bản capture WPA/WPA2-PSK, `aircrack-ng` cần một four-way EAPOL handshake có thể sử dụng và thử các passphrase ứng viên bằng từ điển. Dùng `-w` để chỉ định wordlist và `-b` để nhắm mục tiêu BSSID của access point:<sup>[[2]](#references)</sup>
 
 ```bash
 aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 ```
 
-If a candidate matches, Aircrack-ng recovers the pre-shared key; the matching password and SSID can then be configured in Wireshark's 802.11 decryption settings when the capture and security mode support it.<sup>[[2]](#references)[[5]](#references)</sup>
+Nếu một ứng viên khớp, Aircrack-ng sẽ khôi phục pre-shared key; sau đó có thể cấu hình password và SSID khớp trong cài đặt giải mã 802.11 của Wireshark, nếu capture và chế độ bảo mật hỗ trợ.<sup>[[2]](#references)[[5]](#references)</sup>
 
-## Data in Beacons / Side Channel
+## Dữ liệu trong Beacon / Side Channel
 
-If you suspect that **data is being leaked in beacon-side-channel traffic**, start with a display filter such as `wlan contains "NAMEofNETWORK"` or `wlan.ssid == "NAMEofNETWORK"`, then inspect matching frames for suspicious strings. The first form is a broad byte search; the second matches the SSID field.<sup>[[3]](#references)[[4]](#references)</sup>
+Nếu nghi ngờ **dữ liệu đang bị leak trong lưu lượng beacon-side-channel**, hãy bắt đầu bằng display filter như `wlan contains "NAMEofNETWORK"` hoặc `wlan.ssid == "NAMEofNETWORK"`, rồi kiểm tra các frame khớp để tìm chuỗi đáng ngờ. Cách đầu tiên tìm kiếm rộng trên byte; cách thứ hai khớp với trường SSID.<sup>[[3]](#references)[[4]](#references)</sup>
 
-## Find Unknown MAC Addresses in a Wi-Fi Network
+## Tìm địa chỉ MAC không xác định trong mạng Wi-Fi
 
-Wireshark exposes `wlan.ta` as the transmitter address and `wlan.addr` as a hardware/MAC address; display filters can combine these fields with logical operators:<sup>[[3]](#references)[[4]](#references)</sup>
+Wireshark hiển thị `wlan.ta` là địa chỉ transmitter và `wlan.addr` là địa chỉ phần cứng/MAC; display filter có thể kết hợp các trường này bằng toán tử logic:<sup>[[3]](#references)[[4]](#references)</sup>
 
 - `((wlan.ta == e8:de:27:16:70:c9) && !(wlan.fc == 0x8000)) && !(wlan.fc.type_subtype == 0x0005) && !(wlan.fc.type_subtype ==0x0004) && !(wlan.addr==ff:ff:ff:ff:ff:ff) && wlan.fc.type==2`
 
-If you already know **MAC addresses, remove them from the output** by adding checks like `&& !(wlan.addr == 5c:51:88:31:a0:3b)`.
+Nếu đã biết **các địa chỉ MAC, hãy loại chúng khỏi kết quả** bằng cách thêm các điều kiện như `&& !(wlan.addr == 5c:51:88:31:a0:3b)`.
 
-Once you have detected **unknown MAC** addresses communicating inside the network, use a filter such as `wlan.addr == <MAC address> && (ftp || http || ssh || telnet)` to narrow its traffic. The FTP, HTTP, SSH, and Telnet filters are useful only when Wireshark can dissect the corresponding decrypted payload.<sup>[[3]](#references)[[5]](#references)</sup>
+Sau khi phát hiện các địa chỉ **MAC không xác định** đang giao tiếp trong mạng, hãy dùng filter như `wlan.addr == <MAC address> && (ftp || http || ssh || telnet)` để thu hẹp lưu lượng của chúng. Các filter FTP, HTTP, SSH và Telnet chỉ hữu ích khi Wireshark có thể phân tích payload đã giải mã tương ứng.<sup>[[3]](#references)[[5]](#references)</sup>
 
-## Decrypt Traffic
+## Giải mã lưu lượng
 
-To add an 802.11 decryption key in Wireshark, open _Edit → Preferences → Protocols → IEEE 802.11_ and click _Edit_ next to _Decryption Keys_.<sup>[[5]](#references)</sup>
+Để thêm khóa giải mã 802.11 trong Wireshark, mở _Edit → Preferences → Protocols → IEEE 802.11_ rồi nhấp _Edit_ cạnh _Decryption Keys_.<sup>[[5]](#references)</sup>
 
-![Find Unknown MAC Addresses in A Wifi Network - Decrypt Traffic: Once you have detected unknown MAC addresses communicating inside the network you can use filters like the following one:...](<../../../images/image (499).png>)
+![Tìm địa chỉ MAC không xác định trong mạng Wi-Fi - Giải mã lưu lượng: Sau khi phát hiện các địa chỉ MAC không xác định đang giao tiếp trong mạng, bạn có thể dùng các filter như sau:...](<../../../images/image (499).png>)
 
-For WPA/WPA2, Wireshark normally needs the EAPOL four-way handshake and the matching password/SSID; supplying the transient key can avoid the handshake requirement. WPA3 per-connection decryption requires the connection's PMK.<sup>[[5]](#references)</sup>
+Với WPA/WPA2, Wireshark thường cần EAPOL four-way handshake và password/SSID tương ứng; cung cấp transient key có thể giúp không cần handshake. Việc giải mã WPA3 cho từng kết nối yêu cầu PMK của kết nối đó.<sup>[[5]](#references)</sup>
 
-For application-layer TLS decryption after recovering Wi-Fi traffic, see [Wireshark tricks](wireshark-tricks.md#decrypting-tls).
+Để giải mã TLS ở tầng ứng dụng sau khi khôi phục lưu lượng Wi-Fi, xem [mẹo Wireshark](wireshark-tricks.md#decrypting-tls).
 
 ## References
 
-- [1] [Wireshark User's Guide: WLAN Traffic](https://www.wireshark.org/docs/wsug_html_chunked/ChWirelessWLANTraffic.html)
+- [1] [Hướng dẫn sử dụng Wireshark: Lưu lượng WLAN](https://www.wireshark.org/docs/wsug_html_chunked/ChWirelessWLANTraffic.html)
 - [2] [Aircrack-ng](https://www.aircrack-ng.org/doku.php?id=aircrack-ng)
-- [3] [Wireshark User's Guide: Building Display Filter Expressions](https://www.wireshark.org/docs/wsug_html_chunked/ChWorkBuildDisplayFilterSection.html)
-- [4] [Wireshark Display Filter Reference: IEEE 802.11 wireless LAN](https://www.wireshark.org/docs/dfref/w/wlan.html)
-- [5] [Wireshark User's Guide: IEEE 802.11 WLAN Decryption Keys](https://www.wireshark.org/docs/wsug_html_chunked/Ch80211Keys.html)
-
+- [3] [Hướng dẫn sử dụng Wireshark: Tạo biểu thức Display Filter](https://www.wireshark.org/docs/wsug_html_chunked/ChWorkBuildDisplayFilterSection.html)
+- [4] [Tham chiếu Wireshark Display Filter: Mạng LAN không dây IEEE 802.11](https://www.wireshark.org/docs/dfref/w/wlan.html)
+- [5] [Hướng dẫn sử dụng Wireshark: Khóa giải mã WLAN IEEE 802.11](https://www.wireshark.org/docs/wsug_html_chunked/Ch80211Keys.html)
 {{#include ../../../banners/hacktricks-training.md}}

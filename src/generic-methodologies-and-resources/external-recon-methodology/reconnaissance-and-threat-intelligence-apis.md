@@ -1,126 +1,126 @@
-# Reconnaissance and Threat-Intelligence APIs
+# Trinh sát và API tình báo mối đe dọa
 
 {{#include ../../banners/hacktricks-training.md}}
 
-These services support reconnaissance, reputation, breach, or enrichment workflows. Their APIs, quotas, pricing, and permitted uses change frequently; confirm the current vendor documentation and engagement authorization before sending customer identifiers or sensitive data. For the asset-discovery sequence, see the [External Recon Methodology](README.md).
+Các dịch vụ này hỗ trợ quy trình trinh sát, đánh giá uy tín, rò rỉ dữ liệu hoặc làm giàu dữ liệu. API, hạn mức, giá cả và mục đích sử dụng được phép của các dịch vụ thường xuyên thay đổi; hãy xác nhận tài liệu hiện hành của nhà cung cấp và phạm vi ủy quyền của hoạt động trước khi gửi mã định danh khách hàng hoặc dữ liệu nhạy cảm. Để xem trình tự khám phá tài sản, hãy tham khảo [Phương pháp trinh sát bên ngoài](README.md).
 
 ## [Project Honey Pot](https://www.projecthoneypot.org/) <sup>[[1]](#references)</sup>
 
-Query whether an IP address has been associated with suspicious or malicious activity. Access may require an account or API key.
+Tra cứu xem một địa chỉ IP có liên quan đến hoạt động đáng ngờ hoặc độc hại hay không. Có thể cần tài khoản hoặc API key để truy cập.
 
 ## [**BotScout**](https://botscout.com/api.htm) <sup>[[2]](#references)</sup>
 
-Check whether an IP address, username, or email address has been associated with automated account registration or other reported bot activity.
+Kiểm tra xem địa chỉ IP, tên người dùng hoặc địa chỉ email có liên quan đến việc đăng ký tài khoản tự động hay hoạt động bot khác đã được báo cáo hay không.
 
 ## [Hunter](https://hunter.io/) <sup>[[3]](#references)</sup>
 
-Find and verify professional email addresses and domain-related contact patterns. Check the current plan for request limits and permitted uses.
+Tìm và xác minh địa chỉ email công việc cũng như các mẫu liên hệ liên quan đến tên miền. Kiểm tra gói hiện tại để biết giới hạn yêu cầu và mục đích sử dụng được phép.
 
 ## [AlienVault OTX](https://otx.alienvault.com/api) <sup>[[4]](#references)</sup>
 
-Search threat-intelligence indicators and activity associated with IP addresses and domains.
+Tìm kiếm các chỉ báo tình báo mối đe dọa và hoạt động liên quan đến địa chỉ IP và tên miền.
 
 ## [Clearbit](https://dashboard.clearbit.com/) <sup>[[5]](#references)</sup>
 
-Enrich an email address, domain, or company with available business/profile data. Coverage, access, and privacy constraints depend on the current product and plan.
+Làm giàu địa chỉ email, tên miền hoặc công ty bằng dữ liệu doanh nghiệp/hồ sơ hiện có. Phạm vi dữ liệu, quyền truy cập và các giới hạn về quyền riêng tư phụ thuộc vào sản phẩm và gói hiện tại.
 
 ## [BuiltWith](https://builtwith.com/) <sup>[[6]](#references)</sup>
 
-Identify technologies observed on websites and obtain historical or relationship data where the selected plan permits it.
+Nhận diện các công nghệ được quan sát trên website và lấy dữ liệu lịch sử hoặc dữ liệu về mối liên hệ nếu gói đã chọn cho phép.
 
 ## [FraudGuard](https://fraudguard.io/) <sup>[[7]](#references)</sup>
 
-Check whether an IP address is associated with suspicious or malicious activity. Confirm current API plans and limits.
+Kiểm tra xem địa chỉ IP có liên quan đến hoạt động đáng ngờ hoặc độc hại hay không. Xác nhận các gói API và giới hạn hiện tại.
 
 ## [FortiGuard](https://fortiguard.com/) <sup>[[8]](#references)</sup>
 
-Look up FortiGuard categorization and threat intelligence for domains, URLs, or IP addresses. Availability differs by service.
+Tra cứu phân loại và tình báo mối đe dọa của FortiGuard đối với tên miền, URL hoặc địa chỉ IP. Tính khả dụng khác nhau tùy dịch vụ.
 
 ## [SpamCop](https://www.spamcop.net/) <sup>[[9]](#references)</sup>
 
-Check whether an IP address is listed for reported spam activity.
+Kiểm tra xem địa chỉ IP có bị liệt kê do hoạt động spam được báo cáo hay không.
 
 ## [myWOT](https://www.mywot.com/) <sup>[[10]](#references)</sup>
 
-Retrieve a domain's reputation based on the service's community and other signals.
+Lấy thông tin uy tín của tên miền dựa trên cộng đồng của dịch vụ và các tín hiệu khác.
 
 ## [IPinfo](https://ipinfo.io/) <sup>[[11]](#references)</sup>
 
-Obtain geolocation, ASN, organization, and related metadata for an IP address. Check the current plan for quotas.
+Lấy dữ liệu định vị địa lý, ASN, tổ chức và siêu dữ liệu liên quan của một địa chỉ IP. Kiểm tra gói hiện tại để biết hạn mức.
 
 ## [SecurityTrails](https://securitytrails.com/app/account) <sup>[[12]](#references)</sup>
 
-This platform provides DNS and infrastructure intelligence such as historical resolutions, domains associated with IPs or name servers, and related records. Historical DNS may reveal an earlier origin address, but it does not reliably bypass a CDN and must be validated.
+Nền tảng này cung cấp thông tin tình báo DNS và hạ tầng như các kết quả phân giải lịch sử, tên miền liên kết với IP hoặc name server và các bản ghi liên quan. DNS lịch sử có thể tiết lộ địa chỉ origin trước đây, nhưng không thể vượt CDN một cách đáng tin cậy và cần được xác thực.
 
 ## [FullContact](https://www.fullcontact.com/) <sup>[[13]](#references)</sup>
 
-Enrich an email address, domain, or company name with available identity and business attributes. Handle personal data according to authorization and privacy requirements.
+Làm giàu địa chỉ email, tên miền hoặc tên công ty bằng các thuộc tính nhận dạng và doanh nghiệp hiện có. Xử lý dữ liệu cá nhân theo yêu cầu về ủy quyền và quyền riêng tư.
 
-## RiskIQ / Microsoft Defender Threat Intelligence (legacy transition) <sup>[[14]](#references)</sup>
+## RiskIQ / Microsoft Defender Threat Intelligence (chuyển đổi từ dịch vụ cũ) <sup>[[14]](#references)</sup>
 
-RiskIQ's PassiveTotal capabilities transitioned into Microsoft Defender Threat Intelligence. Product access, APIs, and retained functionality have changed, so use Microsoft's current documentation rather than legacy PassiveTotal assumptions.
+Các chức năng PassiveTotal của RiskIQ đã được chuyển sang Microsoft Defender Threat Intelligence. Quyền truy cập sản phẩm, API và chức năng được duy trì đã thay đổi; hãy sử dụng tài liệu hiện hành của Microsoft thay vì dựa vào các giả định cũ về PassiveTotal.
 
 ## [Intelligence X](https://intelx.io/) <sup>[[15]](#references)</sup>
 
-Search domains, IP addresses, email addresses, and indexed historical or leaked data, subject to the service's access controls.
+Tìm kiếm tên miền, địa chỉ IP, địa chỉ email và dữ liệu lịch sử hoặc dữ liệu leak đã được lập chỉ mục, tuân theo các biện pháp kiểm soát truy cập của dịch vụ.
 
 ## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/) <sup>[[16]](#references)</sup>
 
-Search IP addresses and other indicators for threat-intelligence and reputation data.
+Tìm kiếm địa chỉ IP và các chỉ báo khác để lấy dữ liệu tình báo mối đe dọa và uy tín.
 
 ## [GreyNoise](https://viz.greynoise.io/) <sup>[[17]](#references)</sup>
 
-Search IP addresses or ranges for observations of internet scanning and common service activity. Check current trial and community-access terms.
+Tìm kiếm địa chỉ IP hoặc dải IP để xem các quan sát về hoạt động quét internet và hoạt động dịch vụ phổ biến. Kiểm tra các điều khoản dùng thử và quyền truy cập cộng đồng hiện hành.
 
 ## [Shodan](https://www.shodan.io/) <sup>[[18]](#references)</sup>
 
-Retrieve internet-scan and service information for an IP address, host, or search query. API access depends on the account plan.
+Lấy thông tin quét internet và dịch vụ cho địa chỉ IP, host hoặc truy vấn tìm kiếm. Quyền truy cập API phụ thuộc vào gói tài khoản.
 
 ## [Censys](https://censys.io/) <sup>[[19]](#references)</sup>
 
-Search host, certificate, domain, and internet-service datasets; its data model and coverage differ from Shodan's.
+Tìm kiếm các tập dữ liệu về host, certificate, tên miền và dịch vụ internet; mô hình dữ liệu và phạm vi bao phủ khác với Shodan.
 
-## [GrayHatWarfare bucket search](https://buckets.grayhatwarfare.com/) <sup>[[20]](#references)</sup>
+## [Tìm kiếm bucket GrayHatWarfare](https://buckets.grayhatwarfare.com/) <sup>[[20]](#references)</sup>
 
-Search the provider's index of publicly observed cloud-storage objects and buckets by keyword.
+Tìm kiếm trong chỉ mục của nhà cung cấp về các đối tượng và bucket lưu trữ đám mây được quan sát công khai bằng từ khóa.
 
 ## [DeHashed](https://www.dehashed.com/data) <sup>[[21]](#references)</sup>
 
-Search indexed breach data for email addresses, usernames, domains, and related records. Use only with authorization and avoid unnecessary exposure of breach data.
+Tìm kiếm trong dữ liệu breach đã lập chỉ mục theo địa chỉ email, tên người dùng, tên miền và bản ghi liên quan. Chỉ sử dụng khi được ủy quyền và tránh để lộ dữ liệu breach không cần thiết.
 
 ## [psbdmp](https://psbdmp.ws/) <sup>[[22]](#references)</sup>
 
-Search indexed paste content for occurrences of an email address or other term. Verify that the service is still available before integrating it.
+Tìm kiếm nội dung paste đã lập chỉ mục để tìm địa chỉ email hoặc cụm từ khác. Xác minh dịch vụ vẫn khả dụng trước khi tích hợp.
 
 ## [EmailRep](https://emailrep.io/key) <sup>[[23]](#references)</sup>
 
-Retrieve reputation and risk signals for an email address.
+Lấy các tín hiệu uy tín và rủi ro của một địa chỉ email.
 
-## GhostProject (historical) <sup>[[24]](#references)</sup>
+## GhostProject (trước đây) <sup>[[24]](#references)</sup>
 
-Historically advertised searches of leaked email/password data. Treat the service as high-risk third-party handling and verify its availability, legality, and authorization before use.
+Trước đây, dịch vụ này quảng cáo khả năng tìm kiếm dữ liệu email/mật khẩu bị leak. Hãy xem đây là dịch vụ bên thứ ba có rủi ro cao trong việc xử lý dữ liệu và xác minh tính khả dụng, tính hợp pháp cũng như quyền được phép sử dụng trước khi dùng.
 
 ## [BinaryEdge](https://www.binaryedge.io/) <sup>[[25]](#references)</sup>
 
-Obtain internet-scan, exposure, and threat-intelligence data for IP addresses and related assets.
+Lấy dữ liệu quét internet, mức độ lộ diện và tình báo mối đe dọa cho địa chỉ IP và các tài sản liên quan.
 
 ## [Have I Been Pwned](https://haveibeenpwned.com/) <sup>[[26]](#references)</sup>
 
-Check whether an email address or verified domain appears in known breaches. The separate Pwned Passwords service checks password hashes by prefix; it does **not** reveal plaintext passwords.
+Kiểm tra xem địa chỉ email hoặc tên miền đã xác minh có xuất hiện trong các vụ breach đã biết hay không. Dịch vụ Pwned Passwords riêng biệt kiểm tra hash mật khẩu bằng tiền tố; dịch vụ này **không** tiết lộ mật khẩu dạng văn bản thuần.
 
 ### [IP2Location.io](https://www.ip2location.io/) <sup>[[27]](#references)</sup>
 
-Retrieve IP geolocation, data-center, ASN, proxy/VPN, and related enrichment fields. Quotas depend on the current plan.
+Lấy dữ liệu định vị IP, trung tâm dữ liệu, ASN, proxy/VPN và các trường làm giàu liên quan. Hạn mức phụ thuộc vào gói hiện tại.
 
 ### [IPQuery.io](https://www.ipquery.io/) <sup>[[28]](#references)</sup>
-IP geolocation and OSINT-oriented enrichment with selected data points. Check current terms for commercial use.
+Làm giàu dữ liệu định vị IP và OSINT với một số điểm dữ liệu được chọn. Kiểm tra điều khoản hiện tại về mục đích sử dụng thương mại.
 
 
-[DNSDumpster](https://dnsdumpster.com/) provides DNS-reconnaissance results.<sup>[[29]](#references)</sup>
+[DNSDumpster](https://dnsdumpster.com/) cung cấp kết quả trinh sát DNS.<sup>[[29]](#references)</sup>
 
-[Netcraft](https://www.netcraft.com/) provides site, hosting, and internet-infrastructure intelligence.<sup>[[30]](#references)</sup>
+[Netcraft](https://www.netcraft.com/) cung cấp thông tin tình báo về website, hosting và hạ tầng internet.<sup>[[30]](#references)</sup>
 
-[NMMapper](https://www.nmmapper.com/sys/tools/subdomainfinder/) provides an online subdomain-discovery interface.<sup>[[31]](#references)</sup>
+[NMMapper](https://www.nmmapper.com/sys/tools/subdomainfinder/) cung cấp giao diện trực tuyến để khám phá subdomain.<sup>[[31]](#references)</sup>
 
 ## References
 
@@ -147,13 +147,12 @@ IP geolocation and OSINT-oriented enrichment with selected data points. Check cu
 - [21] [DeHashed](https://www.dehashed.com/)
 - [22] [psbdmp](https://psbdmp.ws/)
 - [23] [EmailRep](https://emailrep.io/)
-- [24] [Cornell research — Protocols for Checking Compromised Credentials (includes GhostProject)](https://rist.tech.cornell.edu/papers/c3.pdf)
+- [24] [Nghiên cứu của Cornell — Các giao thức kiểm tra thông tin xác thực bị xâm phạm (bao gồm GhostProject)](https://rist.tech.cornell.edu/papers/c3.pdf)
 - [25] [BinaryEdge](https://www.binaryedge.io/)
 - [26] [Have I Been Pwned API](https://haveibeenpwned.com/API/v3)
 - [27] [IP2Location.io](https://www.ip2location.io/)
 - [28] [IPQuery](https://www.ipquery.io/)
 - [29] [DNSDumpster](https://dnsdumpster.com/)
 - [30] [Netcraft](https://www.netcraft.com/)
-- [31] [NMMapper Subdomain Finder](https://www.nmmapper.com/sys/tools/subdomainfinder/)
-
+- [31] [Trình tìm subdomain NMMapper](https://www.nmmapper.com/sys/tools/subdomainfinder/)
 {{#include ../../banners/hacktricks-training.md}}

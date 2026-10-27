@@ -1,31 +1,31 @@
-# Android Forensics
+# Điều tra pháp chứng Android
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Locked Device
+## Thiết bị bị khóa
 
-Prefer acquisition methods that preserve the device's state and document every action. If the device is locked, available options depend on the model, Android version, patch level, and whether access was configured before seizure. NIST recommends choosing a method according to the device and the authority for the examination.<sup>[[1]](#references)</sup>
+Ưu tiên các phương pháp thu thập dữ liệu giúp giữ nguyên trạng thái thiết bị và ghi lại mọi thao tác. Nếu thiết bị bị khóa, các lựa chọn khả dụng phụ thuộc vào model, phiên bản Android, cấp độ bản vá và việc quyền truy cập đã được thiết lập trước khi thu giữ hay chưa. NIST khuyến nghị chọn phương pháp phù hợp với thiết bị và thẩm quyền tiến hành kiểm tra.<sup>[[1]](#references)</sup>
 
-- Check whether USB debugging was enabled and whether the acquisition workstation is already authorized. ADB access normally requires the user to unlock the device and confirm the workstation's RSA key.<sup>[[3]](#references)</sup>
-- Consider whether biometric access remains available under the applicable legal and procedural rules.
-- A **smudge attack** may reveal a graphical unlock pattern from residue on the screen, although later touches and cleaning reduce its reliability.<sup>[[2]](#references)</sup>
-- Where authorized tooling supports the exact device and software build, it may attempt PIN, password, or pattern recovery or brute force. Hardware-backed credential verification, retry delays, and wipe policies make this highly device-specific, so do not substitute an iPhone technique or result for evidence that an Android device is supported.<sup>[[1]](#references)</sup>
+- Kiểm tra xem USB debugging đã được bật chưa và máy trạm thu thập dữ liệu đã được cấp quyền hay chưa. Để truy cập ADB, thông thường người dùng phải mở khóa thiết bị và xác nhận khóa RSA của máy trạm.<sup>[[3]](#references)</sup>
+- Cân nhắc xem quyền truy cập bằng sinh trắc học có còn khả dụng theo các quy định pháp lý và thủ tục áp dụng hay không.
+- **Smudge attack** có thể giúp xác định hình mở khóa từ vết bẩn còn lại trên màn hình, dù các lần chạm sau đó và việc lau màn hình sẽ làm giảm độ tin cậy của phương pháp này.<sup>[[2]](#references)</sup>
+- Nếu công cụ được cấp phép hỗ trợ chính xác thiết bị và bản dựng phần mềm, công cụ có thể thử khôi phục hoặc brute force PIN, mật khẩu hay hình mở khóa. Cơ chế xác minh thông tin xác thực dựa trên phần cứng, thời gian chờ giữa các lần thử và chính sách xóa dữ liệu khiến phương pháp này phụ thuộc nhiều vào từng thiết bị. Vì vậy, không được lấy kỹ thuật hay kết quả trên iPhone làm bằng chứng rằng thiết bị Android được hỗ trợ.<sup>[[1]](#references)</sup>
 
-## Data acquisition
+## Thu thập dữ liệu
 
-On older devices, a legacy [ADB backup](../../mobile-pentesting/android-app-pentesting/adb-commands.md#legacy-adb-backup) may produce a `.backup` file that Android Backup Extractor can unpack:<sup>[[6]](#references)</sup>
+Trên các thiết bị đời cũ, [ADB backup](../../mobile-pentesting/android-app-pentesting/adb-commands.md#legacy-adb-backup) cũ có thể tạo tệp `.backup` mà Android Backup Extractor có thể giải nén:<sup>[[6]](#references)</sup>
 
 ```bash
 java -jar abe.jar unpack file.backup file.tar
 ```
 
-Do not assume this captures every application. ADB labels the command deprecated, and Android 12 excludes data from apps targeting API level 31 or later unless the app is debuggable.<sup>[[4]](#references)</sup>
+Không nên giả định rằng cách này thu thập được dữ liệu của mọi ứng dụng. ADB đánh dấu lệnh này là deprecated, và Android 12 loại trừ dữ liệu của các ứng dụng nhắm đến API level 31 trở lên, trừ khi ứng dụng có thể debug được.<sup>[[4]](#references)</sup>
 
-### Root or physical debug access
+### Quyền root hoặc quyền truy cập debug vật lý
 
-With root access on a live device, first inventory the partitions and mounts; the commands below do not apply directly to a physical JTAG acquisition. The correct block device is hardware-dependent, so do not assume it is always `mmcblk0`. Image only the verified source to separate storage:<sup>[[1]](#references)</sup>
+Khi có quyền root trên thiết bị đang hoạt động, trước tiên hãy kiểm kê các phân vùng và điểm gắn kết; các lệnh bên dưới không áp dụng trực tiếp cho việc thu thập dữ liệu JTAG vật lý. Thiết bị khối chính xác phụ thuộc vào phần cứng, vì vậy đừng mặc định rằng nó luôn là `mmcblk0`. Chỉ tạo ảnh từ nguồn đã được xác minh sang thiết bị lưu trữ riêng:<sup>[[1]](#references)</sup>
 
-A JTAG acquisition instead uses the device's hardware test-access interface and compatible acquisition equipment to read accessible memory. Pinout, chipset support, device state, and the distinction between volatile and non-volatile targets are device-specific; document the hardware path and use a validated procedure for that model.<sup>[[1]](#references)</sup>
+Thay vào đó, việc thu thập dữ liệu JTAG sử dụng giao diện truy cập kiểm thử phần cứng của thiết bị và thiết bị thu thập dữ liệu tương thích để đọc bộ nhớ có thể truy cập. Sơ đồ chân, khả năng hỗ trợ chipset, trạng thái thiết bị và sự khác biệt giữa mục tiêu lưu trữ khả biến và bất biến phụ thuộc vào từng thiết bị; hãy ghi lại đường kết nối phần cứng và sử dụng quy trình đã được kiểm chứng cho mẫu thiết bị đó.<sup>[[1]](#references)</sup>
 
 ```bash
 cat /proc/partitions
@@ -33,21 +33,21 @@ df /data
 dd if=/dev/block/<verified-device> of=/sdcard/device.img bs=4096
 ```
 
-For example, if the partition inventory confirms that `/dev/block/mmcblk0` is the whole flash device and the destination has sufficient space, the original acquisition command becomes:<sup>[[1]](#references)</sup>
+Ví dụ, nếu danh mục phân vùng xác nhận rằng `/dev/block/mmcblk0` là toàn bộ thiết bị flash và đích có đủ dung lượng, lệnh thu thập dữ liệu ban đầu trở thành:<sup>[[1]](#references)</sup>
 
 ```bash
 dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096
 ```
 
-Here, `df /data` helps associate `/data` with its mounted filesystem; it should not be treated as proof that `mmcblk0` is the correct whole-device source or that `4096` is the only valid `dd` block size.
+Ở đây, `df /data` giúp xác định `/data` thuộc hệ thống tệp nào được gắn kết; không nên xem đây là bằng chứng cho thấy `mmcblk0` là nguồn toàn thiết bị chính xác hoặc `4096` là kích thước khối `dd` hợp lệ duy nhất.
 
-Hash the result and record the exact command, device identifiers, time, and any changes made during acquisition.<sup>[[1]](#references)</sup>
+Tính hash của kết quả và ghi lại chính xác lệnh, mã định danh thiết bị, thời gian và mọi thay đổi được thực hiện trong quá trình thu thập.<sup>[[1]](#references)</sup>
 
-### Memory
+### Bộ nhớ
 
-LiME can acquire physical memory from Linux and some Android devices, but its kernel module must be built for the target kernel and loaded with sufficient privileges. Module signing, kernel lockdown, and modern Android hardening may prevent it from loading.<sup>[[5]](#references)</sup>
+LiME có thể thu thập bộ nhớ vật lý từ Linux và một số thiết bị Android, nhưng module kernel của nó phải được biên dịch cho kernel mục tiêu và tải với đủ quyền. Việc ký module, khóa kernel và các cơ chế hardening hiện đại của Android có thể ngăn module được tải.<sup>[[5]](#references)</sup>
 
-The project's Android workflow pushes the matching module with ADB, forwards a TCP port, loads the module from a root shell, and captures the stream on the examination host:<sup>[[5]](#references)</sup>
+Quy trình Android của dự án đẩy module tương thích bằng ADB, chuyển tiếp một cổng TCP, tải module từ root shell và thu thập luồng dữ liệu trên máy chủ phân tích:<sup>[[5]](#references)</sup>
 
 ```bash
 adb push lime.ko /sdcard/lime.ko
@@ -61,15 +61,14 @@ insmod /sdcard/lime.ko "path=tcp:4444 format=lime"
 nc localhost 4444 > ram.lime
 ```
 
-LiME can instead write to device storage with `path=/sdcard/ram.lime`, but that changes the device's storage and requires enough free space. Record that side effect and hash the acquired image.<sup>[[1]](#references)</sup><sup>[[5]](#references)</sup>
+LiME cũng có thể ghi vào bộ nhớ thiết bị bằng `path=/sdcard/ram.lime`, nhưng việc này làm thay đổi bộ nhớ của thiết bị và cần đủ dung lượng trống. Ghi lại tác động phụ đó và hash image đã thu thập.<sup>[[1]](#references)</sup><sup>[[5]](#references)</sup>
 
 ## References
 
-- [1] [NIST SP 800-101 Rev. 1 - Guidelines on Mobile Device Forensics](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-101r1.pdf)
-- [2] [USENIX WOOT 2010 - Smudge Attacks on Smartphone Touch Screens](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)
+- [1] [NIST SP 800-101 Rev. 1 - Hướng dẫn về pháp chứng thiết bị di động](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-101r1.pdf)
+- [2] [USENIX WOOT 2010 - Tấn công Smudge trên màn hình cảm ứng điện thoại thông minh](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)
 - [3] [Android Developers - Android Debug Bridge](https://developer.android.com/tools/adb)
-- [4] [Android Developers - Android 12 ADB backup restriction](https://developer.android.com/about/versions/12/behavior-changes-12#adb-backup-restrictions)
-- [5] [504ensicsLabs - Linux Memory Extractor (LiME)](https://github.com/504ensicsLabs/LiME)
-- [6] [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/)
-
+- [4] [Android Developers - Hạn chế sao lưu ADB trên Android 12](https://developer.android.com/about/versions/12/behavior-changes-12#adb-backup-restrictions)
+- [5] [504ensicsLabs - Trình trích xuất bộ nhớ Linux (LiME)](https://github.com/504ensicsLabs/LiME)
+- [6] [Trình giải nén bản sao lưu Android](https://sourceforge.net/projects/adbextractor/)
 {{#include ../../banners/hacktricks-training.md}}

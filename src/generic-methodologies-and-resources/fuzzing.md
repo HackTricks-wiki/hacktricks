@@ -1,31 +1,31 @@
-# Fuzzing Methodology
+# Phương pháp Fuzzing
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Mutational Grammar Fuzzing: Coverage vs. Semantics
+## Mutational Grammar Fuzzing: Coverage và Ngữ nghĩa
 
-In **mutational grammar fuzzing**, inputs are mutated while staying **grammar-valid**. In coverage-guided mode, only samples that trigger **new coverage** are saved as corpus seeds. For **language targets** (parsers, interpreters, engines), this can miss bugs that require **semantic/dataflow chains** where the output of one construct becomes the input of another.<sup>[[1]](#references)</sup>
+Trong **mutational grammar fuzzing**, các input được biến đổi nhưng vẫn **hợp lệ theo grammar**. Ở chế độ coverage-guided, chỉ những mẫu tạo ra **coverage mới** mới được lưu làm corpus seed. Với **các mục tiêu ngôn ngữ** (parser, interpreter, engine), cách này có thể bỏ sót những bug đòi hỏi **chuỗi semantic/dataflow**, trong đó đầu ra của một cấu trúc trở thành đầu vào của cấu trúc khác.<sup>[[1]](#references)</sup>
 
-**Failure mode:** the fuzzer finds seeds that individually exercise `document()` and `generate-id()` (or similar primitives), but **does not preserve the chained dataflow**, so the “closer-to-bug” sample is dropped because it doesn’t add coverage. With **3+ dependent steps**, random recombination becomes expensive and coverage feedback does not guide search.<sup>[[1]](#references)</sup>
+**Dạng lỗi:** fuzzer tìm được các seed riêng lẻ kích hoạt `document()` và `generate-id()` (hoặc primitive tương tự), nhưng **không giữ được dataflow nối chuỗi**, nên mẫu “gần bug hơn” bị loại vì không tạo thêm coverage. Khi có **từ 3 bước phụ thuộc trở lên**, việc tái tổ hợp ngẫu nhiên trở nên tốn kém và phản hồi coverage không thể định hướng quá trình tìm kiếm.<sup>[[1]](#references)</sup>
 
-**Implication:** for dependency-heavy grammars, consider **hybridizing mutational and generative phases** or biasing generation toward **function chaining** patterns (not just coverage).<sup>[[1]](#references)</sup>
+**Hàm ý:** với các grammar có nhiều phụ thuộc, hãy cân nhắc **kết hợp các giai đoạn mutational và generative** hoặc ưu tiên tạo các mẫu **function chaining** (không chỉ dựa vào coverage).<sup>[[1]](#references)</sup>
 
-## Corpus Diversity Pitfalls
+## Những cạm bẫy về độ đa dạng của Corpus
 
-Coverage-guided mutation is **greedy**: a new-coverage sample is saved immediately, often retaining large unchanged regions. Over time, corpora become **near-duplicates** with low structural diversity. Aggressive minimization can remove useful context, so a practical compromise is **grammar-aware minimization** that **stops after a minimum token threshold** (reduce noise while keeping enough surrounding structure to remain mutation-friendly).<sup>[[1]](#references)</sup>
+Mutation có hướng dẫn bởi coverage mang tính **tham lam**: mẫu tạo coverage mới được lưu ngay, thường giữ lại nhiều vùng không thay đổi. Theo thời gian, corpus trở thành tập hợp các mẫu **gần trùng lặp**, có độ đa dạng cấu trúc thấp. Việc tối giản quá mạnh có thể loại bỏ ngữ cảnh hữu ích; vì vậy, một giải pháp dung hòa thiết thực là **tối giản có nhận biết grammar**, với điều kiện **dừng khi đạt ngưỡng token tối thiểu** (loại bỏ phần nhiễu nhưng vẫn giữ đủ cấu trúc xung quanh để thuận tiện cho mutation).<sup>[[1]](#references)</sup>
 
-A practical corpus rule for mutational fuzzing is: **prefer a small set of structurally different seeds that maximize coverage** over a large pile of near-duplicates. In practice, this usually means the following.<sup>[[1]](#references)[[3]](#references)</sup>
+Một quy tắc corpus thiết thực cho mutational fuzzing là: **ưu tiên một tập nhỏ các seed khác nhau về cấu trúc nhưng tối đa hóa coverage** hơn là một tập lớn gồm các mẫu gần trùng lặp. Trên thực tế, điều này thường gồm những việc sau.<sup>[[1]](#references)[[3]](#references)</sup>
 
-- Start from **real-world samples** (public corpora, crawling, captured traffic, file sets from the target ecosystem).
-- Distill them with **coverage-based corpus minimization** instead of keeping every valid sample.
-- Keep seeds **small enough** that mutations land on meaningful fields rather than spending most cycles on irrelevant bytes.
-- Re-run corpus minimization after major harness/instrumentation changes, because the “best” corpus changes when reachability changes.
+- Bắt đầu từ **các mẫu thực tế** (corpus công khai, dữ liệu thu thập bằng crawling, traffic đã ghi lại, các tập file từ hệ sinh thái của mục tiêu).
+- Chắt lọc chúng bằng **tối giản corpus dựa trên coverage** thay vì giữ lại mọi mẫu hợp lệ.
+- Giữ seed **đủ nhỏ** để mutation tác động đến các trường có ý nghĩa, thay vì tiêu tốn hầu hết chu kỳ vào các byte không liên quan.
+- Chạy lại quá trình tối giản corpus sau những thay đổi lớn về harness/instrumentation, vì corpus “tốt nhất” sẽ thay đổi khi khả năng reachability thay đổi.
 
-## Comparison-Aware Mutation For Magic Values
+## Mutation Có Nhận Biết Phép So Sánh Đối Với Giá Trị Magic
 
-A common reason fuzzers plateau is not syntax but **hard comparisons**: magic bytes, length checks, enum strings, checksums, or parser dispatch values guarded by `memcmp`, switch tables, or cascaded comparisons. Pure random mutation wastes cycles trying to guess these values byte-by-byte.
+Một lý do phổ biến khiến fuzzer chững lại không phải là cú pháp, mà là **các phép so sánh chặt**: byte magic, kiểm tra độ dài, chuỗi enum, checksum hoặc giá trị điều phối parser được bảo vệ bằng `memcmp`, bảng switch hoặc các phép so sánh nối tiếp. Mutation ngẫu nhiên thuần túy lãng phí chu kỳ để thử đoán các giá trị này từng byte một.
 
-For these targets, use **comparison tracing** (for example AFL++ `CMPLOG` / Redqueen-style workflows) so the fuzzer can observe operands from failed comparisons and bias mutations toward values that satisfy them.<sup>[[3]](#references)</sup>
+Với các mục tiêu này, hãy dùng **comparison tracing** (ví dụ: quy trình kiểu AFL++ `CMPLOG` / Redqueen) để fuzzer có thể quan sát các toán hạng từ những phép so sánh thất bại và ưu tiên mutation hướng đến các giá trị thỏa mãn chúng.<sup>[[3]](#references)</sup>
 
 ```bash
 ./configure --cc=afl-clang-fast
@@ -40,57 +40,57 @@ cp ./target ./target.cmplog
 afl-fuzz -i in -o out -c ./target.cmplog -- ./target.afl @@
 ```
 
-**Practical notes:**
+**Ghi chú thực tiễn:**
 
-- This is especially useful when the target gates deep logic behind **file signatures**, **protocol verbs**, **type tags**, or **version-dependent feature bits**.
-- Pair it with **dictionaries** extracted from real samples, protocol specs, or debug logs. A small dictionary with grammar tokens, chunk names, verbs, and delimiters is often more valuable than a massive generic wordlist.
-- If the target performs many sequential checks, solve the earliest “magic” comparisons first and then minimize the resulting corpus again so later stages start from already-valid prefixes.
+- Cách này đặc biệt hữu ích khi mục tiêu chặn logic chuyên sâu phía sau **chữ ký file**, **protocol verb**, **type tag** hoặc **bit tính năng phụ thuộc phiên bản**.
+- Kết hợp với **dictionary** trích xuất từ mẫu thực tế, đặc tả protocol hoặc debug log. Một dictionary nhỏ gồm token grammar, tên chunk, verb và dấu phân cách thường hữu ích hơn wordlist chung khổng lồ.
+- Nếu mục tiêu thực hiện nhiều bước kiểm tra tuần tự, hãy xử lý các phép so sánh “magic” sớm nhất trước, sau đó tiếp tục tối giản corpus thu được để các giai đoạn sau bắt đầu bằng những prefix đã hợp lệ.
 
-## Fuzzing File APIs That Hide a Filename Language
+## Fuzzing File API Ẩn Ngôn ngữ Filename
 
-A parameter named `filename`, `path`, or `URL` may be an interpreter entry point rather than a literal file lookup. For example, CFITSIO Extended Filename Syntax (EFS) evaluates bracketed selectors, row/pixel expressions, calculated columns, histograms, and transformations before returning the opened object; some forms also create temporary copies. During attack-surface mapping, classify each open/import API as **literal-path** or **interpreted-path**, then fuzz the production entry point that applications actually call.<sup>[[20]](#references)[[22]](#references)</sup>
+Tham số có tên `filename`, `path` hoặc `URL` có thể là điểm vào của một trình thông dịch, chứ không phải thao tác tra cứu file thông thường. Ví dụ, CFITSIO Extended Filename Syntax (EFS) xử lý các selector trong dấu ngoặc vuông, biểu thức hàng/pixel, cột tính toán, histogram và phép biến đổi trước khi trả về object đã mở; một số dạng còn tạo bản sao tạm thời. Khi lập bản đồ attack surface, hãy phân loại từng API open/import là **literal-path** hoặc **interpreted-path**, sau đó fuzz entry point trong môi trường production mà ứng dụng thực sự gọi.<sup>[[20]](#references)[[22]](#references)</sup>
 
-For the resulting SSRF, file-copy, and protocol-handler primitives—and safer literal-path APIs—see [Filename mini-languages as SSRF/file primitives](../pentesting-web/ssrf-server-side-request-forgery/index.html#filename-mini-languages-as-ssrffile-primitives-cfitsio-efs).<sup>[[20]](#references)</sup>
+Để tìm hiểu các primitive SSRF, sao chép file và protocol handler có thể khai thác được, cùng những API literal-path an toàn hơn, xem [Filename mini-languages as SSRF/file primitives](../pentesting-web/ssrf-server-side-request-forgery/index.html#filename-mini-languages-as-ssrffile-primitives-cfitsio-efs).<sup>[[20]](#references)</sup>
 
-### Keep the backing object separate from the fuzzed program
+### Tách object nền khỏi chương trình được fuzz
 
-When the grammar lives in a filename suffix, mutating only the referenced file bytes misses the parser. A small harness can instead read one testcase as a string and pass it to the interpreted open API; the CFITSIO campaign reached most EFS parsers and evaluators by calling `fits_open_file()` in read-only mode. Keep valid backing files available separately so mutations can focus on the selector/expression language rather than continually breaking the base path.<sup>[[22]](#references)</sup>
+Khi grammar nằm trong hậu tố filename, chỉ thay đổi byte của file được tham chiếu sẽ bỏ sót parser. Thay vào đó, một harness nhỏ có thể đọc mỗi testcase dưới dạng chuỗi rồi truyền chuỗi đó cho API open đã được diễn giải; chiến dịch CFITSIO đã tiếp cận phần lớn parser và evaluator của EFS bằng cách gọi `fits_open_file()` ở chế độ chỉ đọc. Hãy duy trì sẵn các file nền hợp lệ riêng biệt để các thay đổi tập trung vào ngôn ngữ selector/expression thay vì liên tục làm hỏng path cơ sở.<sup>[[22]](#references)</sup>
 
-Use seeds that each reach a different grammar family, then derive a compact dictionary from both the specification and lexer/parser source. If coverage plateaus while inputs repeatedly fail in the same syntax-error path, preserve valid prefixes and add delimiters, operators, keywords, function names, and representative field names instead of only increasing random-mutation time.<sup>[[22]](#references)</sup>
+Dùng các seed khác nhau để mỗi seed tiếp cận một nhóm grammar riêng, sau đó tạo một dictionary gọn từ cả đặc tả lẫn mã nguồn lexer/parser. Nếu coverage chững lại trong khi input liên tục thất bại ở cùng một nhánh lỗi cú pháp, hãy giữ lại các prefix hợp lệ và bổ sung dấu phân cách, toán tử, keyword, tên hàm và tên trường tiêu biểu thay vì chỉ tăng thời gian random-mutation.<sup>[[22]](#references)</sup>
 
-Run the harness with the grammar dictionary, for example:<sup>[[3]](#references)[[22]](#references)</sup>
+Chạy harness với grammar dictionary, ví dụ:<sup>[[3]](#references)[[22]](#references)</sup>
 
 ```bash
 afl-fuzz -i filename-seeds -o out -x filename-language.dict -- ./filename-harness @@
 ```
 
-### Contain "read-only" harness side effects
+### Kiểm soát tác dụng phụ của harness “read-only”
 
-A read-only library flag does not guarantee a side-effect-free testcase: the filename language may rewrite the input, create output files, or materialize temporary objects. The CFITSIO campaign initially destroyed seed files and left unexpected files across the filesystem, so cleanup and isolation were required.<sup>[[22]](#references)</sup>
+Cờ thư viện read-only không đảm bảo testcase không gây tác dụng phụ: ngôn ngữ tên tệp có thể ghi đè đầu vào, tạo tệp đầu ra hoặc tạo các đối tượng tạm thời. Chiến dịch CFITSIO ban đầu đã phá hủy các tệp seed và để lại những tệp không mong muốn trên hệ thống tệp, vì vậy cần dọn dẹp và cô lập.<sup>[[22]](#references)</sup>
 
-- Give every worker a disposable working directory and private temporary directory.
-- Expose copies of canonical backing files; never let the target mutate the only corpus copy.
-- Disable network access unless remote backends are the intended target, and constrain writable paths with a container, mount namespace, or equivalent sandbox.
-- Reset the directory after each execution or worker batch and treat unexpected filesystem changes as additional findings.
+- Cấp cho mỗi worker một thư mục làm việc dùng một lần và một thư mục tạm riêng.
+- Chỉ cung cấp bản sao của các tệp nền tảng chuẩn; không bao giờ để target sửa đổi bản duy nhất của corpus.
+- Tắt quyền truy cập mạng trừ khi backend từ xa là mục tiêu dự kiến, đồng thời giới hạn các đường dẫn có thể ghi bằng container, mount namespace hoặc sandbox tương đương.
+- Đặt lại thư mục sau mỗi lần chạy hoặc mỗi batch worker, và xem mọi thay đổi hệ thống tệp bất ngờ là phát hiện bổ sung.
 
-### Crash-to-patch-to-fuzz loop
+### Vòng lặp crash-to-patch-to-fuzz
 
-Cluster crashes before repair so thousands of artifacts do not become thousands of patch tasks. In the CFITSIO assessment, AFLTriage reduced the initial crash set to a few root causes; the resulting advisory shows distinct failures including incorrect destination-size checks, stale pointers after `realloc()`, arithmetic faults, and unsafe parser cleanup paths.<sup>[[21]](#references)[[22]](#references)</sup>
+Phân cụm crash trước khi sửa để hàng nghìn artifact không biến thành hàng nghìn tác vụ vá lỗi. Trong đánh giá CFITSIO, AFLTriage đã rút gọn tập crash ban đầu xuống còn một vài nguyên nhân gốc; advisory sau đó cho thấy các lỗi riêng biệt, bao gồm kiểm tra kích thước đích không chính xác, con trỏ cũ sau `realloc()`, lỗi số học và các đường dọn dẹp parser không an toàn.<sup>[[21]](#references)[[22]](#references)</sup>
 
-1. Minimize a representative input for each cluster and reproduce it under AddressSanitizer.
-2. Record the exact failing access, source location, allocation/free history, and parser state that made the invariant false.
-3. Apply one narrowly scoped candidate patch and rebuild with the same coverage and sanitizer instrumentation.
-4. Replay the original reproducer **and every input in its cluster**; also enable leak detection because a memory-safety fix can break ownership on an error path.
-5. Run functional tests with real files, then resume from the accumulated queue (or re-import that queue if the engine requires a fresh output directory after the binary changes).
-6. Repeat: removing the first shallow crash often lets existing seeds progress into a deeper parser state.
+1. Rút gọn một đầu vào đại diện cho mỗi cụm và tái hiện lỗi bằng AddressSanitizer.
+2. Ghi lại chính xác thao tác truy cập gây lỗi, vị trí trong mã nguồn, lịch sử cấp phát/giải phóng và trạng thái parser khiến bất biến bị vi phạm.
+3. Áp dụng một bản vá ứng viên có phạm vi hẹp và biên dịch lại với cùng cấu hình instrumentation cho coverage và sanitizer.
+4. Chạy lại reproducer ban đầu **và mọi đầu vào trong cụm**; đồng thời bật phát hiện leak vì một bản sửa lỗi an toàn bộ nhớ có thể làm hỏng quyền sở hữu tài nguyên trên đường xử lý lỗi.
+5. Chạy kiểm thử chức năng với tệp thực, rồi tiếp tục từ queue đã tích lũy (hoặc nhập lại queue đó nếu engine yêu cầu thư mục đầu ra mới sau khi thay đổi binary).
+6. Lặp lại: loại bỏ crash nông đầu tiên thường giúp các seed hiện có đi sâu hơn vào parser.
 
-An LLM can accelerate step 2 and draft step 3 when it receives the crashing input, sanitizer report, harness, and relevant source, but its patch remains untrusted. The sanitizer replay and regression gates—not the model's explanation—decide whether the repair is accepted.<sup>[[22]](#references)</sup>
+LLM có thể đẩy nhanh bước 2 và soạn bản nháp cho bước 3 khi được cung cấp đầu vào gây crash, báo cáo sanitizer, harness và mã nguồn liên quan, nhưng bản vá của nó vẫn không đáng tin cậy. Việc chạy lại bằng sanitizer và các cổng kiểm thử hồi quy—chứ không phải lời giải thích của model—mới quyết định bản sửa lỗi có được chấp nhận hay không.<sup>[[22]](#references)</sup>
 
-## Richer Feedback When Edge Coverage Collapses Different Paths
+## Phản hồi phong phú hơn khi Edge Coverage gộp các đường đi khác nhau
 
-Normal edge coverage cannot distinguish two executions that traverse the same helper through different callers or take different branch combinations inside a function. This matters in shared decoders, protocol dispatchers, and interpreter helpers where the **route** to an edge determines the live state. Tracking every calling context naively is also dangerous: the coverage map and queue can explode. Context-sensitive fuzzing research therefore recommends refining only promising contexts rather than treating the entire call graph as context-sensitive.<sup>[[14]](#references)</sup>
+Edge coverage thông thường không thể phân biệt hai lần thực thi đi qua cùng một helper nhưng được gọi từ các caller khác nhau, hoặc có các tổ hợp nhánh khác nhau bên trong một function. Điều này quan trọng trong các decoder dùng chung, bộ điều phối giao thức và helper của interpreter, nơi **đường đi** đến một edge quyết định trạng thái hiện tại. Theo dõi mọi ngữ cảnh gọi một cách ngây thơ cũng rất nguy hiểm: coverage map và queue có thể phình to. Vì vậy, nghiên cứu về fuzzing nhạy theo ngữ cảnh khuyến nghị chỉ tinh chỉnh các ngữ cảnh tiềm năng thay vì áp dụng tính nhạy theo ngữ cảnh cho toàn bộ call graph.<sup>[[14]](#references)</sup>
 
-Recent AFL++ builds provide **Ball-Larus per-function path coverage** in addition to normal edge coverage. It assigns a feature to each acyclic path through a function; loop back-edges are removed, so this feedback distinguishes branch combinations but **not loop iteration counts**. Start with relaxed level `1`, then scope stricter modes to suspicious parser/state-machine code because the number of paths can grow exponentially.<sup>[[13]](#references)</sup>
+Các bản AFL++ gần đây hỗ trợ **Ball-Larus per-function path coverage** bên cạnh edge coverage thông thường. Cơ chế này gán một feature cho mỗi đường đi không chu trình qua một function; các cạnh quay lại của vòng lặp bị loại bỏ, nên phản hồi này phân biệt được các tổ hợp nhánh nhưng **không phân biệt số lần lặp của vòng lặp**. Hãy bắt đầu với level `1` ít nghiêm ngặt, sau đó chỉ áp dụng các chế độ nghiêm ngặt hơn cho mã parser/máy trạng thái đáng ngờ vì số lượng đường đi có thể tăng theo cấp số nhân.<sup>[[13]](#references)</sup>
 
 ```bash
 make clean
@@ -102,7 +102,7 @@ make -j"$(nproc)"
 afl-fuzz -i in -o out -- ./target @@
 ```
 
-For a helper called from many security-relevant sites, LTO mode can combine each function path with its immediate call site:<sup>[[13]](#references)</sup>
+Đối với một helper được gọi từ nhiều vị trí liên quan đến bảo mật, chế độ LTO có thể kết hợp từng đường đi của hàm với vị trí gọi trực tiếp tương ứng:<sup>[[13]](#references)</sup>
 
 ```bash
 make clean
@@ -115,50 +115,50 @@ make -j"$(nproc)"
 afl-fuzz -i in -o out -- ./target @@
 ```
 
-**Campaign guidance:** apply richer feedback conservatively and monitor its coverage-map/queue cost.<sup>[[13]](#references)[[14]](#references)</sup>
+**Hướng dẫn cho campaign:** áp dụng feedback phong phú hơn một cách thận trọng và theo dõi chi phí coverage-map/queue của nó.<sup>[[13]](#references)[[14]](#references)</sup>
 
-- Run an ordinary edge-coverage instance in parallel; richer feedback is useful only if the extra queue/map cost does not destroy executions per second.
-- Use `AFL_LLVM_ALLOWLIST` to restrict path/caller instrumentation when large template-heavy libraries or generic utility code dominate the map.
-- Functions with excessive acyclic paths can be skipped by AFL++; warnings during compilation are evidence that the target needs allowlisting or a less strict level.
-- Caller + path coverage supports only one caller depth. Do not combine it with deeper context stacks.
-- Path IDs can change across LLVM major versions. Keep the toolchain fixed for a campaign and do not synchronize PATH-based corpora as if their feature IDs were stable across builds.
-- This feedback complements `CMPLOG`: comparison tracing solves **what value passes a guard**, whereas path/caller feedback preserves **which route and branch combination reached it**.
+- Chạy song song một instance edge-coverage thông thường; feedback phong phú hơn chỉ hữu ích nếu chi phí map/queue tăng thêm không làm giảm số execution mỗi giây.
+- Dùng `AFL_LLVM_ALLOWLIST` để giới hạn instrumentation theo path/caller khi các thư viện nhiều template hoặc code tiện ích chung chiếm phần lớn map.
+- Có thể bỏ qua các function có quá nhiều đường đi không có chu trình bằng AFL++; các cảnh báo trong quá trình biên dịch cho thấy target cần allowlisting hoặc một level ít nghiêm ngặt hơn.
+- Caller + path coverage chỉ hỗ trợ một độ sâu caller. Không kết hợp nó với các context stack sâu hơn.
+- Path ID có thể thay đổi giữa các phiên bản major của LLVM. Giữ cố định toolchain trong suốt campaign và không đồng bộ các corpus dựa trên PATH như thể feature ID của chúng ổn định giữa các lần build.
+- Feedback này bổ trợ cho `CMPLOG`: comparison tracing giải quyết câu hỏi **giá trị nào vượt qua một guard**, còn feedback path/caller giữ lại thông tin **route và tổ hợp branch nào đã đưa luồng thực thi đến đó**.
 
-## Stateful Fuzzing: Sequences Are Seeds
+## Fuzzing có trạng thái: Sequence là Seed
 
-For **protocols**, **authenticated workflows**, and **multi-stage parsers**, the interesting unit is often not a single blob but a **message sequence**. Concatenating the whole transcript into one file and mutating it blindly is usually inefficient because the fuzzer mutates every step equally, even when only the later message reaches the fragile state.<sup>[[4]](#references)</sup>
+Với **protocol**, **workflow cần xác thực** và **parser nhiều giai đoạn**, đơn vị đáng quan tâm thường không phải một blob riêng lẻ mà là một **message sequence**. Nối toàn bộ transcript vào một file rồi mutate một cách mù quáng thường kém hiệu quả, vì fuzzer mutate mọi bước như nhau, ngay cả khi chỉ message ở giai đoạn sau mới đưa chương trình đến trạng thái dễ phát sinh lỗi.<sup>[[4]](#references)</sup>
 
-A more effective pattern is to treat the **sequence itself as the seed** and use **observable state** (response codes, protocol states, parser phases, returned object types) as additional feedback.<sup>[[4]](#references)</sup>
+Một cách hiệu quả hơn là coi **sequence chính là seed** và dùng **trạng thái có thể quan sát** (mã phản hồi, trạng thái protocol, giai đoạn parser, kiểu object được trả về) làm feedback bổ sung.<sup>[[4]](#references)</sup>
 
-- Keep **valid prefix messages** stable and focus mutations on the **transition-driving** message.
-- Cache identifiers and server-generated values from prior responses when the next step depends on them.
-- Prefer per-message mutation/splicing over mutating the whole serialized transcript as an opaque blob.
-- If the protocol exposes meaningful response codes, use them as a **cheap state oracle** to prioritize sequences that progress deeper.
+- Giữ ổn định các **message prefix hợp lệ** và tập trung mutation vào message **điều khiển chuyển trạng thái**.
+- Cache các identifier và giá trị do server tạo ra từ những phản hồi trước đó khi bước tiếp theo phụ thuộc vào chúng.
+- Ưu tiên mutation/splicing theo từng message thay vì mutate toàn bộ transcript đã serialize như một blob không rõ cấu trúc.
+- Nếu protocol cung cấp các mã phản hồi có ý nghĩa, hãy dùng chúng làm **state oracle** chi phí thấp để ưu tiên các sequence tiến sâu hơn.
 
-This is the same reason authenticated bugs, hidden transitions, or “only-after-handshake” parser bugs are often missed by vanilla file-style fuzzing: the fuzzer must preserve **order, state, and dependencies**, not just structure.<sup>[[4]](#references)</sup>
+Đây cũng là lý do các bug cần xác thực, chuyển trạng thái ẩn hoặc bug parser “chỉ xảy ra sau handshake” thường bị bỏ sót khi fuzzing kiểu file thông thường: fuzzer phải giữ được **thứ tự, trạng thái và các quan hệ phụ thuộc**, chứ không chỉ cấu trúc.<sup>[[4]](#references)</sup>
 
-### Android Binder: multi-client driver fuzzing
+### Android Binder: fuzzing driver nhiều client
 
-High edge coverage can still miss IPC-driver bugs because coverage does not describe **object ownership, reference counts, pending messages, cleanup order, or thread interleavings**. The [Android Binder IPC internals](../binary-exploitation/linux-kernel-exploitation/android-binder-ipc-internals-kernel-vulnerability-research.md) page covers the driver object model; this example focuses on the fuzzer harness. Android Binder is a useful model: reaching both the allocation and free paths is not enough if the fuzzer cannot make multiple processes operate on the same kernel object in the required order.<sup>[[15]](#references)</sup>
+Edge coverage cao vẫn có thể bỏ sót bug trong IPC driver, vì coverage không mô tả **quyền sở hữu object, reference count, message đang chờ, thứ tự cleanup hoặc các interleaving giữa thread**. Trang [Android Binder IPC internals](../binary-exploitation/linux-kernel-exploitation/android-binder-ipc-internals-kernel-vulnerability-research.md) trình bày mô hình object của driver; ví dụ này tập trung vào harness của fuzzer. Android Binder là một mô hình hữu ích: chỉ đi đến cả các path cấp phát và giải phóng là chưa đủ nếu fuzzer không thể khiến nhiều process thao tác lên cùng một kernel object theo đúng thứ tự cần thiết.<sup>[[15]](#references)</sup>
 
-#### Model the protocol, not isolated `ioctl` buffers
+#### Mô hình hóa protocol, không phải các buffer `ioctl` riêng lẻ
 
-Represent a test case as an ordered grammar of **client identity + operation + structured arguments**. The Binder LKL fuzzer uses protobuf and `libprotobuf-mutator`, with one persistent context-manager client and two ordinary clients. A semantic harness then preserves the relationships which blind byte mutation would destroy.<sup>[[15]](#references)</sup>
+Biểu diễn một test case dưới dạng grammar có thứ tự gồm **danh tính client + operation + argument có cấu trúc**. Binder LKL fuzzer dùng protobuf và `libprotobuf-mutator`, với một client context manager tồn tại lâu dài và hai client thông thường. Sau đó, một semantic harness giữ nguyên các mối quan hệ mà byte mutation mù quáng có thể phá hỏng.<sup>[[15]](#references)</sup>
 
-- Cache values returned by earlier operations. For example, `BC_FREE_BUFFER` must reuse a transaction-buffer pointer returned by a previous `ioctl`.
-- Generate valid default replies so synchronous transactions can finish and later operations remain reachable.
-- Reject impossible transitions such as self-transactions or multiple pending transactions to the same target.
-- Keep singleton bootstrap state outside the per-input reset. Binder permits only one `BINDER_SET_CONTEXT_MGR` registration per boot, so repeatedly destroying and recreating that client would make later inputs invalid.
+- Cache các giá trị được trả về từ những operation trước đó. Ví dụ, `BC_FREE_BUFFER` phải dùng lại con trỏ transaction-buffer được trả về từ một `ioctl` trước đó.
+- Tạo các reply mặc định hợp lệ để synchronous transaction có thể hoàn tất và các operation tiếp theo vẫn có thể được thực thi.
+- Từ chối các chuyển trạng thái không hợp lệ, chẳng hạn self-transaction hoặc nhiều transaction đang chờ cùng một target.
+- Giữ trạng thái bootstrap singleton bên ngoài phần reset theo từng input. Binder chỉ cho phép đăng ký `BINDER_SET_CONTEXT_MGR` một lần mỗi lần boot, nên liên tục hủy rồi tạo lại client đó sẽ khiến các input sau không hợp lệ.
 
-A useful lifetime-race template is to make one client transfer an object, start thread or process cleanup, and concurrently make the receiving client release the transaction buffer. In the CVE-2020-0423 example, a `BINDER_TYPE_WEAK_BINDER` transfer followed by `BINDER_THREAD_EXIT` racing with `BC_FREE_BUFFER` could free an embedded `binder_work` while the exiting thread's cleanup path still used it.<sup>[[15]](#references)</sup>
+Một mẫu lifetime-race hữu ích là để một client chuyển một object, bắt đầu cleanup bằng thread hoặc process, đồng thời để client nhận giải phóng transaction buffer. Trong ví dụ CVE-2020-0423, việc chuyển `BINDER_TYPE_WEAK_BINDER`, rồi để `BINDER_THREAD_EXIT` chạy đua với `BC_FREE_BUFFER`, có thể giải phóng một `binder_work` nhúng trong object trong khi path cleanup của thread đang thoát vẫn còn sử dụng nó.<sup>[[15]](#references)</sup>
 
-#### Reintroduce controlled interleavings in a userspace kernel
+#### Tái tạo các interleaving có kiểm soát trong kernel userspace
 
-[Linux Kernel Library (LKL)](https://github.com/lkl/linux) links the real kernel code into a userspace harness and exposes its syscall interface through `lkl_syscall`. This makes protobuf state, coverage, and KASAN easy to coordinate in one process. LKL normally runs a syscall without another kernel thread interrupting it, however. For race campaigns, insert `schedule()` points around selected lock/unlock and lifetime boundaries, then let the harness randomly choose the next client at each yield. Keep these points targeted because each one multiplies the scheduling search space. The randomized scheduler described by the researchers is **not** part of the upstream Binder fuzzer.<sup>[[15]](#references)</sup>
+[Linux Kernel Library (LKL)](https://github.com/lkl/linux) liên kết code kernel thực vào một harness userspace và cung cấp syscall interface thông qua `lkl_syscall`. Nhờ đó, có thể dễ dàng phối hợp protobuf state, coverage và KASAN trong cùng một process. Tuy nhiên, LKL thường chạy một syscall mà không bị kernel thread khác ngắt. Với các campaign race, hãy chèn các điểm `schedule()` quanh những ranh giới lock/unlock và lifetime đã chọn, rồi để harness chọn ngẫu nhiên client tiếp theo tại mỗi lần yield. Giới hạn các điểm này ở những vị trí cần thiết, vì mỗi điểm làm tăng gấp bội không gian tìm kiếm lịch thực thi. Randomized scheduler được các nhà nghiên cứu mô tả **không** thuộc upstream Binder fuzzer.<sup>[[15]](#references)</sup>
 
-#### Build and replay serialized regression seeds
+#### Build và replay các regression seed đã serialize
 
-The upstream harness pins a compatible `libprotobuf-mutator`, enables LKL fuzzing instrumentation and KASAN with `LKL_FUZZING=1`, and enables `CONFIG_MMU` for Binder with `MMU=1`.<sup>[[16]](#references)</sup>
+Harness upstream cố định một phiên bản `libprotobuf-mutator` tương thích, bật instrumentation cho LKL fuzzing và KASAN bằng `LKL_FUZZING=1`, đồng thời bật `CONFIG_MMU` cho Binder bằng `MMU=1`.<sup>[[16]](#references)</sup>
 
 ```bash
 PROTOBUF_MUTATOR_DIR=/tmp/libprotobuf-mutator \
@@ -169,18 +169,18 @@ make -C tools/lkl LKL_FUZZING=1 MMU=1 \
   clean-conf fuzzers -j"$(nproc)"
 ```
 
-After checking out a deliberately vulnerable revision or applying the rollback patches documented upstream, a serialized seed can reproduce the whole multi-client state transition without reconstructing it in an ad-hoc C proof of concept:<sup>[[16]](#references)</sup>
+Sau khi checkout một revision cố ý có lỗ hổng hoặc áp dụng các bản vá rollback được ghi lại ở upstream, một seed được tuần tự hóa có thể tái hiện toàn bộ quá trình chuyển trạng thái nhiều client mà không cần dựng lại nó trong một proof of concept C tùy biến:<sup>[[16]](#references)</sup>
 
 ```bash
 tools/lkl/fuzzers/binder/binder-fuzzer \
   tools/lkl/fuzzers/binder/seeds/CVE-2023-20938
 ```
 
-Treat the resulting KASAN use-after-free as confirmation that the seed reached the vulnerable lifetime path. It does **not** demonstrate the later primitives required for kernel code execution or privilege escalation.<sup>[[16]](#references)</sup>
+Hãy xem KASAN use-after-free thu được là bằng chứng xác nhận seed đã đi vào đường dẫn vòng đời dễ bị lỗi. Điều này **không** chứng minh các primitive tiếp theo cần thiết để thực thi mã trong kernel hoặc leo thang đặc quyền.<sup>[[16]](#references)</sup>
 
-## Single-Machine Diversity Trick (Jackalope-Style)
+## Mẹo tạo tính đa dạng trên một máy (Kiểu Jackalope)
 
-A practical way to hybridize **generative novelty** with **coverage reuse** is to **restart short-lived workers** against a persistent server. Each worker starts from an empty corpus, syncs after `T` seconds, runs another `T` seconds on the combined corpus, syncs again, then exits. This yields **fresh structures each generation** while still leveraging accumulated coverage.<sup>[[1]](#references)[[2]](#references)</sup>
+Một cách thực tế để kết hợp **tính mới do generative tạo ra** với **việc tái sử dụng coverage** là **khởi động lại các worker chạy trong thời gian ngắn** khi kiểm thử một server chạy liên tục. Mỗi worker bắt đầu với corpus trống, sync sau `T` giây, chạy thêm `T` giây trên corpus đã kết hợp, sync lần nữa rồi thoát. Cách này tạo ra **các cấu trúc mới ở mỗi thế hệ**, đồng thời vẫn tận dụng coverage đã tích lũy.<sup>[[1]](#references)[[2]](#references)</sup>
 
 **Server:**
 
@@ -188,10 +188,10 @@ A practical way to hybridize **generative novelty** with **coverage reuse** is t
 /path/to/fuzzer -start_server 127.0.0.1:8337 -out serverout
 ```
 
-**Sequential workers (example loop):**
+**Các worker tuần tự (vòng lặp ví dụ):**
 
 <details>
-<summary>Jackalope worker restart loop</summary>
+<summary>Vòng lặp khởi động lại worker của Jackalope</summary>
 
 ```python
 import subprocess
@@ -222,32 +222,32 @@ while True:
 
 </details>
 
-**Notes:**
+**Ghi chú:**
 
-- `-in empty` forces a **fresh corpus** each generation.
-- `-server_update_interval T` approximates **delayed sync** (novelty first, reuse later).
-- In grammar fuzzing mode, **initial server sync is skipped by default** (no need for `-skip_initial_server_sync`).
-- Optimal `T` is **target-dependent**; switching after the worker has found most “easy” coverage tends to work best.
+- `-in empty` buộc tạo **corpus mới** trong mỗi lần sinh.
+- `-server_update_interval T` mô phỏng **đồng bộ trễ** (ưu tiên novelty trước, tái sử dụng sau).
+- Trong chế độ grammar fuzzing, **mặc định bỏ qua đồng bộ server ban đầu** (không cần `-skip_initial_server_sync`).
+- Giá trị `T` tối ưu **phụ thuộc vào target**; thường hiệu quả nhất khi chuyển đổi sau khi worker đã tìm được phần lớn coverage “dễ”.
 
-## Snapshot Fuzzing For Hard-To-Harness Targets
+## Snapshot Fuzzing Cho Các Target Khó Tạo Harness
 
-When the code you want to test only becomes reachable **after a large setup cost** (booting a VM, completing a login, receiving a packet, parsing a container, initializing a service), a useful alternative is **snapshot fuzzing**: capture the ready process or VM state, inject each test case into the target input path, execute until crash/timeout, and restore the snapshot. This avoids repeating initialization or protocol prefixes and is useful for **network services**, **firmware**, **post-auth attack surfaces**, and **binary-only targets**.<sup>[[9]](#references)[[10]](#references)</sup>
+Khi code bạn muốn kiểm thử chỉ có thể truy cập được **sau một bước thiết lập tốn kém** (khởi động VM, hoàn tất đăng nhập, nhận packet, phân tích container, khởi tạo service), một giải pháp thay thế hữu ích là **snapshot fuzzing**: chụp trạng thái sẵn sàng của process hoặc VM, đưa từng test case vào đường dẫn input của target, thực thi cho đến khi xảy ra crash/timeout, rồi khôi phục snapshot. Cách này tránh phải lặp lại bước khởi tạo hoặc các prefix giao thức, hữu ích cho **network service**, **firmware**, **bề mặt tấn công sau xác thực** và **target chỉ có binary**.<sup>[[9]](#references)[[10]](#references)</sup>
 
-1. Run the target until the interesting state is ready.
-2. Snapshot **memory + registers** at that point.
-3. For every test case, write the mutated input directly into the relevant guest/process buffer.
-4. Execute until crash/timeout/reset.
-5. Restore the snapshot; for VM targets, restore only the **dirty pages** when supported, then repeat.
+1. Chạy target đến khi trạng thái cần kiểm thử sẵn sàng.
+2. Chụp snapshot **memory + registers** tại thời điểm đó.
+3. Với mỗi test case, ghi input đã mutate trực tiếp vào buffer phù hợp trong guest/process.
+4. Thực thi cho đến khi xảy ra crash/timeout/reset.
+5. Khôi phục snapshot; với target VM, chỉ khôi phục **các trang đã bị thay đổi** nếu được hỗ trợ, rồi lặp lại.
 
-Place the snapshot as close as practical to the first expensive parse/dispatch step, such as after a `recv`/`read` or packet-deserialization point, and record the input buffer used by the target. This follows the adaptive-placement principle of moving the snapshot deeper into input processing to avoid repeating work.<sup>[[11]](#references)</sup>
+Đặt snapshot gần nhất có thể với bước parse/dispatch tốn kém đầu tiên, chẳng hạn sau điểm `recv`/`read` hoặc giải tuần tự hóa packet, và ghi lại input buffer mà target sử dụng. Cách này tuân theo nguyên tắc bố trí thích ứng: đưa snapshot sâu hơn vào quy trình xử lý input để tránh lặp lại công việc.<sup>[[11]](#references)</sup>
 
-## Linux Kernel Race Exploration With MAccConc
+## Khảo Sát Race Trong Linux Kernel Với MAccConc
 
-[MAccConc](https://github.com/googleprojectzero/MAccConc) turns timing-sensitive Linux-kernel races into repeatable memory-access schedules. It can automatically enumerate two-context **A-B-A** executions or let an analyst impose order constraints in a terminal UI/GUI. This is experimental research tooling rather than a complete concurrency fuzzer: it currently needs LLVM 23+ and the project's patched kernel, the command-line tools support two test threads, and the proposed userspace fuzzing layer is not implemented.<sup>[[17]](#references)[[18]](#references)</sup>
+[MAccConc](https://github.com/googleprojectzero/MAccConc) biến các race trong Linux kernel nhạy cảm với thời gian thành những lịch truy cập bộ nhớ có thể lặp lại. Công cụ có thể tự động liệt kê các lần thực thi **A-B-A** trong hai context hoặc cho phép analyst đặt các ràng buộc thứ tự trong terminal UI/GUI. Đây là công cụ nghiên cứu thử nghiệm, không phải một concurrency fuzzer hoàn chỉnh: hiện tại, công cụ cần LLVM 23+ và kernel đã được patch của dự án; các công cụ dòng lệnh hỗ trợ hai test thread, còn lớp userspace fuzzing được đề xuất thì chưa được triển khai.<sup>[[17]](#references)[[18]](#references)</sup>
 
-### Collect cross-context communication points
+### Thu thập các điểm giao tiếp giữa các context
 
-Build the instrumented kernel with KASAN outline callbacks and the patched KCOV memory-record support. The project README also recommends disabling sibling-call optimization so call stacks remain usable.<sup>[[17]](#references)[[18]](#references)</sup>
+Build kernel đã instrument với các callback KASAN outline và hỗ trợ ghi nhớ của KCOV đã được patch. README của dự án cũng khuyến nghị tắt sibling-call optimization để call stack vẫn sử dụng được.<sup>[[17]](#references)[[18]](#references)</sup>
 
 ```text
 CONFIG_KASAN=y
@@ -265,27 +265,27 @@ CONFIG_RANDOMIZE_BASE=n
 export KCFLAGS="-fno-optimize-sibling-calls -mllvm -sanitizer-coverage-prune-blocks=false"
 ```
 
-KASAN outline mode (`asan-instrumentation-with-call-threshold=0`) converts instrumented accesses into helper calls. The MAccConc kernel patches disable `asan-opt-same-temp` so consecutive accesses are not merged; disable the `asan-opt-globals` optimization too when global-variable races must be visible. KCOV carries the resulting records to userspace. Compare accesses from different execution contexts and retain pairs whose byte ranges overlap and where at least one side writes; model `kfree()` as a write so lifetime transitions become candidates too.<sup>[[17]](#references)</sup>
+KASAN outline mode (`asan-instrumentation-with-call-threshold=0`) chuyển các truy cập được instrument thành các lời gọi helper. Các bản vá kernel của MAccConc tắt `asan-opt-same-temp` để các truy cập liên tiếp không bị gộp; cũng tắt tối ưu hóa `asan-opt-globals` khi cần thấy các race trên biến toàn cục. KCOV chuyển các bản ghi thu được đến userspace. So sánh các truy cập từ những ngữ cảnh thực thi khác nhau và giữ lại các cặp có phạm vi byte chồng lấp, trong đó ít nhất một phía ghi dữ liệu; mô hình hóa `kfree()` như một thao tác ghi để cả các chuyển đổi vòng đời cũng trở thành ứng viên.<sup>[[17]](#references)</sup>
 
-For work that escapes the initiating task, such as packet processing or RCU callbacks, the subsystem must propagate a KCOV remote-coverage handle. Upstream remote KCOV is opt-in and is not automatically available for arbitrary background work, so missing propagation can make a real interaction invisible.<sup>[[17]](#references)[[19]](#references)</sup>
+Với công việc tiếp diễn ngoài task khởi tạo, chẳng hạn như xử lý packet hoặc callback RCU, subsystem phải truyền tiếp handle remote-coverage của KCOV. Remote KCOV upstream là tùy chọn và không tự động khả dụng cho mọi công việc nền, vì vậy việc không truyền tiếp có thể khiến một tương tác thực sự không được ghi nhận.<sup>[[17]](#references)[[19]](#references)</sup>
 
-### Identify the same dynamic access on every run
+### Xác định cùng một truy cập động ở mỗi lần chạy
 
-Do not replay against a concrete heap address, which may change after each allocation, or only against an instruction address, which is ambiguous inside helpers such as `memcpy()` and `spin_lock()`. MAccConc uses a **count-augmented stack trace**: each frame identifies a callee plus the invocation count within its caller, and the final element identifies the memory-access instruction. SanitizerCoverage function-entry/exit records let userspace reconstruct this dynamic identifier, which remains stable across address changes and unrelated control-flow noise.<sup>[[17]](#references)</sup>
+Không phát lại dựa trên địa chỉ heap cụ thể, vốn có thể thay đổi sau mỗi lần cấp phát, hoặc chỉ dựa trên địa chỉ lệnh, vốn không đủ để phân biệt bên trong các helper như `memcpy()` và `spin_lock()`. MAccConc dùng **stack trace có bộ đếm**: mỗi frame xác định một callee cùng số lần được gọi bên trong caller của nó, còn phần tử cuối cùng xác định lệnh truy cập bộ nhớ. Các bản ghi function-entry/exit của SanitizerCoverage cho phép userspace dựng lại định danh động này; định danh vẫn ổn định khi địa chỉ thay đổi và khi có nhiễu luồng điều khiển không liên quan.<sup>[[17]](#references)</sup>
 
-### Convert candidate pairs into forced schedules
+### Chuyển các cặp ứng viên thành lịch thực thi cưỡng bức
 
-The patched `KCOV_SET_DI` ioctl associates a count-augmented access identifier with a shared-flag action.<sup>[[17]](#references)</sup>
+Ioctl đã được vá `KCOV_SET_DI` liên kết một định danh truy cập có bộ đếm với một thao tác trên shared flag.<sup>[[17]](#references)</sup>
 
-| Action | Semantics |
+| Thao tác | Ngữ nghĩa |
 | --- | --- |
-| `DI_STACK_WAKE_PRE` | Set flag *N* immediately before the selected access. |
-| `DI_STACK_WAIT` | Before the selected access, spin until flag *N* is set or the configured limit expires. |
-| `DI_STACK_WAKE_POST` | Set flag *N* immediately after the selected access. |
+| `DI_STACK_WAKE_PRE` | Đặt flag *N* ngay trước truy cập được chọn. |
+| `DI_STACK_WAIT` | Trước truy cập được chọn, spin cho đến khi flag *N* được đặt hoặc hết giới hạn đã cấu hình. |
+| `DI_STACK_WAKE_POST` | Đặt flag *N* ngay sau truy cập được chọn. |
 
-For a partial **A-happens-before-B** constraint, attach `DI_STACK_WAKE_POST` to A and `DI_STACK_WAIT` to B using the same flag. For a fully specified two-context schedule, start B blocked, then make A wake B and wait at the first transfer point; B performs the inverse operation at the next transfer. The latter acts like deterministic context switching and is what the automatic A-B-A explorer uses.<sup>[[17]](#references)</sup>
+Để tạo ràng buộc **A-happens-before-B** một phần, gắn `DI_STACK_WAKE_POST` với A và `DI_STACK_WAIT` với B bằng cùng một flag. Với lịch thực thi hai ngữ cảnh được xác định hoàn toàn, bắt đầu bằng cách chặn B, sau đó để A đánh thức B và chờ tại điểm chuyển giao đầu tiên; B thực hiện thao tác ngược lại tại lần chuyển giao tiếp theo. Cách thứ hai hoạt động như chuyển đổi ngữ cảnh xác định và được trình khám phá A-B-A tự động sử dụng.<sup>[[17]](#references)</sup>
 
-A minimal campaign is to compile the four-hook test case (`test_setup`, two thread functions, and `test_end`) as a shared library, collect an unconstrained trace, then enumerate A-B-A candidates or add manual constraints around suspicious accesses.<sup>[[18]](#references)</sup>
+Một chiến dịch tối thiểu là biên dịch test case bốn hook (`test_setup`, hai hàm thread và `test_end`) thành shared library, thu thập trace không có ràng buộc, sau đó liệt kê các ứng viên A-B-A hoặc thêm ràng buộc thủ công quanh những truy cập đáng ngờ.<sup>[[18]](#references)</sup>
 
 ```bash
 cc -shared -fPIC -o testcase.so testcase.c
@@ -294,74 +294,74 @@ cc -shared -fPIC -o testcase.so testcase.c
 ./kcov-terminal ./testcase.so
 ```
 
-Interpret timeouts separately from successful reorderings: a requested order may be impossible because a lock or an initialization/publication dependency prevents the second context from reaching its injection point. Also keep KASAN's blind spots in mind: direct stack accesses are usually not hooked unless they might be out of bounds, globals are omitted with the default optimization, and current compilers cannot emit ASAN and TSAN hooks simultaneously. Finally, the prototype loses its KCOV buffer when a guest panics, so preserve an independent crash console/oracle.<sup>[[17]](#references)</sup>
+Diễn giải timeout tách biệt với việc sắp xếp lại thành công: thứ tự được yêu cầu có thể không khả thi vì lock hoặc phụ thuộc khởi tạo/công bố khiến context thứ hai không thể đến điểm injection. Đồng thời, hãy lưu ý các điểm mù của KASAN: truy cập stack trực tiếp thường không được hook trừ khi có khả năng vượt biên, biến global bị bỏ qua với tùy chọn tối ưu hóa mặc định, và các compiler hiện tại không thể đồng thời tạo hook ASAN và TSAN. Cuối cùng, prototype mất buffer KCOV khi guest bị panic, vì vậy hãy duy trì một crash console/oracle độc lập.<sup>[[17]](#references)</sup>
 
-For future concurrency-guided fuzzing, record per-input or per-syscall memory-access summaries, pair operations that would form cross-context communication points, and then explore only those combinations. VM snapshots stabilize global state and addresses; without snapshots, allocation-site metadata can abstract objects across runs. This is a proposed extension, not a feature of the current MAccConc userspace tools.<sup>[[17]](#references)</sup>
+Để hỗ trợ fuzzing có hướng dẫn đồng thời trong tương lai, hãy ghi lại tóm tắt truy cập bộ nhớ theo từng input hoặc syscall, ghép các thao tác có thể tạo thành điểm giao tiếp liên context, rồi chỉ khám phá những tổ hợp đó. VM snapshot giúp ổn định trạng thái global và địa chỉ; nếu không dùng snapshot, metadata vị trí cấp phát có thể trừu tượng hóa các object qua nhiều lần chạy. Đây là một đề xuất mở rộng, không phải tính năng hiện có của các công cụ userspace MAccConc.<sup>[[17]](#references)</sup>
 
-## Harness Introspection: Find Shallow Fuzzers Early
+## Phân tích nội quan Harness: Sớm phát hiện Fuzzer có độ bao phủ nông
 
-When a campaign stalls, the problem is often not the mutator but the **harness**. Use **reachability/coverage introspection** to find functions that are statically reachable from your fuzz target but rarely or never covered dynamically. Those functions usually indicate one of three issues.<sup>[[12]](#references)</sup>
+Khi một chiến dịch bị đình trệ, vấn đề thường không nằm ở mutator mà ở **harness**. Dùng **phân tích nội quan về khả năng tiếp cận/độ bao phủ** để tìm các hàm có thể được gọi về mặt tĩnh từ fuzz target nhưng hiếm khi hoặc không bao giờ được bao phủ khi chạy thực tế. Những hàm đó thường chỉ ra một trong ba vấn đề sau.<sup>[[12]](#references)</sup>
 
-- The harness enters the target too late or too early.
-- The seed corpus is missing a whole feature family.
-- The target really needs a **second harness** instead of one oversized “do everything” harness.
+- Harness đi vào target quá muộn hoặc quá sớm.
+- Seed corpus thiếu hẳn một nhóm tính năng.
+- Target thực sự cần **một harness thứ hai** thay vì một harness “làm mọi thứ” quá cồng kềnh.
 
-If you use OSS-Fuzz / ClusterFuzz-style workflows, Fuzz Introspector can compare static reachability with runtime coverage and generate reports from a timed run or public corpus.<sup>[[12]](#references)</sup>
+Nếu bạn sử dụng quy trình kiểu OSS-Fuzz / ClusterFuzz, Fuzz Introspector có thể so sánh khả năng tiếp cận tĩnh với độ bao phủ khi chạy thực tế và tạo báo cáo từ một lần chạy có giới hạn thời gian hoặc corpus công khai.<sup>[[12]](#references)</sup>
 
 ```bash
 python3 infra/helper.py introspector libdwarf --seconds=30
 python3 infra/helper.py introspector libdwarf --public-corpora
 ```
 
-Use the report to decide whether to add a new harness for an untested parser path, expand the corpus for a specific feature, or split a monolithic harness into smaller entry points.
+Dùng báo cáo để quyết định có nên thêm harness mới cho đường đi của parser chưa được kiểm thử, mở rộng corpus cho một tính năng cụ thể hay tách một harness nguyên khối thành các entry point nhỏ hơn.
 
-## Graph-First Fuzz Target Selection And Mutation Triage
+## Lựa chọn mục tiêu fuzzing ưu tiên đồ thị và phân loại mutation
 
-If you already have **static-analysis findings**, **mutation-testing survivors**, and **coverage reports**, don't triage them as independent lists. Build a **call graph** first, annotate nodes with **cyclomatic complexity**, **entrypoint/untrusted-input reachability**, and any external findings, then ask graph questions.<sup>[[5]](#references)[[6]](#references)</sup>
+Nếu đã có các **phát hiện từ phân tích tĩnh**, **mutation-testing survivors** và **báo cáo coverage**, đừng phân loại chúng thành các danh sách riêng biệt. Trước tiên, hãy xây dựng **call graph**, chú thích các node bằng **độ phức tạp cyclomatic**, **khả năng đi tới từ entrypoint/đầu vào không đáng tin cậy** và mọi phát hiện bên ngoài, sau đó đặt câu hỏi về đồ thị.<sup>[[5]](#references)[[6]](#references)</sup>
 
-- Which high-complexity functions are reachable from untrusted input?
-- Which mutation survivors sit on paths from parsers/handlers to security-critical code?
-- Which functions are architectural choke points with unusually high **blast radius**?
+- Những function có độ phức tạp cao nào có thể được đi tới từ đầu vào không đáng tin cậy?
+- Những mutation survivor nào nằm trên đường đi từ parser/handler đến code trọng yếu về bảo mật?
+- Function nào là điểm nghẽn kiến trúc có **blast radius** lớn bất thường?
 
-This usually surfaces better fuzz targets than "lowest coverage" alone. A parser/decoder with **high complexity** and confirmed **external reachability** is a stronger harness candidate than an isolated internal helper with weak coverage but no attacker-controlled path.
+Cách này thường tìm ra các mục tiêu fuzz tốt hơn so với chỉ chọn nơi có “coverage thấp nhất”. Một parser/decoder có **độ phức tạp cao** và được xác nhận là **có thể tiếp cận từ bên ngoài** là ứng viên harness tốt hơn một helper nội bộ riêng lẻ có coverage yếu nhưng không có đường đi chịu sự kiểm soát của kẻ tấn công.
 
-### Practical triage workflow
+### Quy trình phân loại thực tế
 
-1. Build a **code graph** from the codebase and extract per-function complexity/branch metrics.
-2. Enumerate **entrypoints** that accept attacker-controlled input: request handlers, decoders, importers, protocol parsers, CLI/file readers.
-3. Run **path queries** from those entrypoints to candidate functions to separate reachable attack surface from dead/internal-only code.
-4. Prioritize nodes that combine:
-   - high **cyclomatic complexity**
-   - confirmed **reachability from untrusted input**
-   - high **blast radius** or many downstream dependents
-   - corroborating evidence such as **SARIF** findings, audit notes, or mutation survivors
-5. Write focused harnesses for the best-scoring nodes first, especially **parsers/codecs** such as hex/Base64/IP/message decoders.
+1. Xây dựng **code graph** từ codebase và trích xuất các chỉ số về độ phức tạp/nhánh cho từng function.
+2. Liệt kê các **entrypoint** nhận đầu vào do kẻ tấn công kiểm soát: request handler, decoder, importer, protocol parser, CLI/file reader.
+3. Chạy truy vấn đường đi từ các entrypoint đó đến các function ứng viên để phân biệt bề mặt tấn công có thể tiếp cận với code chết/chỉ dùng nội bộ.
+4. Ưu tiên các node kết hợp:
+   - **độ phức tạp cyclomatic** cao
+   - được xác nhận là **có thể tiếp cận từ đầu vào không đáng tin cậy**
+   - **blast radius** lớn hoặc có nhiều thành phần phụ thuộc phía sau
+   - có bằng chứng hỗ trợ như phát hiện **SARIF**, ghi chú audit hoặc mutation survivor
+5. Trước tiên, viết harness tập trung cho các node có điểm cao nhất, đặc biệt là **parser/codec** như bộ giải mã hex/Base64/IP/message.
 
-### Mutation survivors: equivalent vs actionable
+### Mutation survivor: tương đương hay cần xử lý
 
-Mutation testing often produces a noisy survivor list. Before treating every survivor as a security gap, use the graph to ask:
+Mutation testing thường tạo ra một danh sách survivor nhiều nhiễu. Trước khi xem mọi survivor là lỗ hổng bảo mật, hãy dùng đồ thị để đặt câu hỏi:
 
-- Is the mutated function reachable from an attacker-controlled entrypoint?
-- Are all call paths constrained by stronger invariants than the mutated check?
-- Does the node sit in dead code, formatting-only logic, or in a high-impact arithmetic/parser path?
+- Function bị đột biến có thể được gọi từ một entrypoint do kẻ tấn công kiểm soát không?
+- Có phải mọi đường gọi đều bị ràng buộc bởi các invariant mạnh hơn điều kiện kiểm tra bị đột biến không?
+- Node đó nằm trong code chết, logic chỉ phục vụ định dạng hay đường xử lý số học/parser có tác động lớn?
 
-Survivors that remain unreachable or structurally constrained are often **equivalent mutants**. Survivors that stay **reachable** and touch **boundary conditions**, **overflow/carry paths**, or **security-critical arithmetic/parsing** should be promoted into:
+Các survivor vẫn không thể tiếp cận hoặc bị ràng buộc về cấu trúc thường là **equivalent mutant**. Các survivor vẫn **có thể tiếp cận** và liên quan đến **điều kiện biên**, **đường xử lý overflow/carry** hoặc **số học/phân tích cú pháp trọng yếu về bảo mật** nên được chuyển thành:
 
-- new fuzz harnesses
-- direct property/invariant tests
-- targeted edge-case vectors
+- harness fuzz mới
+- kiểm thử trực tiếp các thuộc tính/invariant
+- bộ vector edge case có mục tiêu
 
-### Correlate external findings onto the graph
+### Ánh xạ các phát hiện bên ngoài lên đồ thị
 
-If your SAST pipeline exports **SARIF**, project findings onto graph nodes by **file + line range** and use the graph to expand the impact.<sup>[[6]](#references)</sup>
+Nếu pipeline SAST xuất ra **SARIF**, hãy ánh xạ các phát hiện lên node của đồ thị theo **file + phạm vi dòng** rồi dùng đồ thị để mở rộng đánh giá tác động.<sup>[[6]](#references)</sup>
 
-- compute the **blast radius** of the flagged function
-- check whether the finding is on any path from an entrypoint
-- cluster nearby findings that collapse into the same choke point
+- tính **blast radius** của function bị gắn cờ
+- kiểm tra xem phát hiện đó có nằm trên đường đi nào từ một entrypoint không
+- nhóm các phát hiện gần nhau nếu chúng cùng hội tụ vào một điểm nghẽn
 
-This is useful when deciding whether to spend fuzzing time on a specific function: a node that is **reachable**, **complex**, and already has **SAST hits** is often a better target than a merely complex node with no attacker path.
+Cách này hữu ích khi quyết định có nên dành thời gian fuzz cho một function cụ thể hay không: một node **có thể tiếp cận**, **phức tạp** và đã có **phát hiện SAST** thường là mục tiêu tốt hơn một node chỉ phức tạp nhưng không có đường đi chịu sự kiểm soát của kẻ tấn công.
 
-Example workflow with Trailmark.<sup>[[6]](#references)</sup>
+Ví dụ quy trình với Trailmark.<sup>[[6]](#references)</sup>
 
 ```bash
 uv pip install trailmark
@@ -377,37 +377,37 @@ engine.complexity_hotspots(10)
 engine.paths_between("handle_request", "parse_ipv6")
 ```
 
-The important methodology is the intersection: **complexity x exposure x impact**. Use the graph to pick fuzz targets with the highest expected security value, then use mutation survivors to decide which boundaries and invariants your harness must stress.<sup>[[5]](#references)</sup>
+Phương pháp luận quan trọng là giao điểm của: **độ phức tạp x mức độ phơi lộ x tác động**. Dùng biểu đồ để chọn các fuzz target có giá trị bảo mật kỳ vọng cao nhất, sau đó dùng các mutation survivor để xác định những ranh giới và bất biến mà harness của bạn cần kiểm thử kỹ.<sup>[[5]](#references)</sup>
 
-## Go Fuzzing With gosentry: Stronger Engine, Typed Inputs, And Differential Checks
+## Fuzzing Go với gosentry: Engine mạnh hơn, đầu vào có kiểu và kiểm tra vi sai
 
-If a Go target already has a native `testing.F` harness, a practical upgrade path is to run the same harness with [gosentry](https://github.com/trailofbits/gosentry), a forked Go toolchain that keeps `go test -fuzz` but swaps the backend to **LibAFL**.<sup>[[7]](#references)[[8]](#references)</sup>
+Nếu target Go đã có harness `testing.F` gốc, một hướng nâng cấp thiết thực là chạy cùng harness đó với [gosentry](https://github.com/trailofbits/gosentry), một Go toolchain được fork, vẫn giữ `go test -fuzz` nhưng thay backend bằng **LibAFL**.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```bash
 ./bin/go test -fuzz=FuzzHarness --focus-on-new-code=false --catch-races=true --catch-leaks=true
 ```
 
-This is useful when the native Go fuzzer stalls on **hard comparisons**, **typed inputs**, or **parser-heavy formats**. The methodology stays the same:
+Điều này hữu ích khi Go fuzzer mặc định bị khựng trước **các phép so sánh khó**, **đầu vào có kiểu**, hoặc **các định dạng nặng về parser**. Phương pháp vẫn như cũ:
 
-- Keep using `f.Add(...)` for seeds and `f.Fuzz(...)` for the callback.
-- Reuse the same harness, but run it with gosentry's `go` binary instead of the stock toolchain.
-- Treat the resulting campaign as a normal coverage-guided run, but with LibAFL scheduling/mutation and better surrounding detectors.
+- Tiếp tục dùng `f.Add(...)` để thêm seed và `f.Fuzz(...)` cho callback.
+- Dùng lại cùng harness, nhưng chạy bằng binary `go` của gosentry thay vì toolchain mặc định.
+- Xem campaign thu được như một lần chạy coverage-guided bình thường, nhưng có scheduling/mutation của LibAFL và các detector hỗ trợ tốt hơn.
 
-### Turn silent failures into fuzz findings
+### Biến lỗi im lặng thành phát hiện từ fuzzing
 
-A recurring problem in Go assessments is that dangerous behaviour often does **not** crash by default. With gosentry, you can promote several classes of “bad but silent” states into findings.<sup>[[7]](#references)[[8]](#references)</sup>
+Một vấn đề thường gặp trong các cuộc đánh giá Go là hành vi nguy hiểm thường **không** gây crash theo mặc định. Với gosentry, bạn có thể biến một số trạng thái “xấu nhưng im lặng” thành phát hiện.<sup>[[7]](#references)[[8]](#references)</sup>
 
-- `--panic-on=pkg.Func,...` to make selected logging/error paths behave like crashes (useful for `log.Fatal`-style code paths that otherwise only log and continue).
-- `--catch-races=true` to replay newly discovered queue entries with the Go race detector.
-- `--catch-leaks=true` to replay new queue entries with `goleak` and stop on goroutine leaks.
-- LibAFL hang handling to keep **infinite loops / very slow inputs** as fuzz findings instead of letting them disappear as timeouts.
-- Built-in arithmetic overflow checks by default, plus optional truncation checks through go-panikint-style instrumentation.
+- `--panic-on=pkg.Func,...` để khiến các đường dẫn logging/error được chọn hoạt động như crash (hữu ích với các đường dẫn kiểu `log.Fatal` vốn chỉ ghi log rồi tiếp tục).
+- `--catch-races=true` để chạy lại các queue entry mới được phát hiện bằng Go race detector.
+- `--catch-leaks=true` để chạy lại các queue entry mới bằng `goleak` và dừng khi phát hiện goroutine leak.
+- Cơ chế xử lý hang của LibAFL để giữ **vòng lặp vô hạn / đầu vào rất chậm** làm phát hiện từ fuzzing, thay vì để chúng biến mất dưới dạng timeout.
+- Mặc định có sẵn kiểm tra tràn số học, cùng các kiểm tra truncation tùy chọn thông qua instrumentation kiểu go-panikint.
 
-This is especially valuable for targets where the security impact is a **panicless parser failure**, a **concurrency bug**, or a **DoS-only hang** rather than memory corruption.
+Điều này đặc biệt hữu ích với các target mà tác động bảo mật là **lỗi parser không gây panic**, **lỗi đồng thời**, hoặc **hang chỉ gây DoS**, thay vì memory corruption.
 
-### Struct-aware fuzzing for typed Go APIs
+### Fuzzing nhận biết struct cho các Go API có kiểu
 
-Native Go fuzzing mainly expects scalars such as `[]byte`, `string`, and numbers. If the code under test consumes typed objects, gosentry can fuzz **composite values** directly (structs, slices, arrays, pointers) while still mutating bytes underneath.<sup>[[7]](#references)[[8]](#references)</sup>
+Go fuzzing mặc định chủ yếu mong đợi các giá trị scalar như `[]byte`, `string` và số. Nếu code được kiểm thử xử lý các object có kiểu, gosentry có thể fuzz trực tiếp **các giá trị tổ hợp** (struct, slice, array, pointer), đồng thời vẫn mutation các byte bên dưới.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```go
 type Input struct {
@@ -424,26 +424,26 @@ func FuzzStructInput(f *testing.F) {
 }
 ```
 
-Use this when building a fake wire format just for fuzzing would hide logic bugs behind harness-only parsing code. For differential or grammar-based campaigns, keep the harness input as a single `[]byte` or `string` and parse inside the callback instead.
+Hãy dùng cách này khi việc tạo một wire format giả chỉ để fuzzing sẽ che giấu lỗi logic sau phần mã parsing chỉ có trong harness. Với các chiến dịch differential hoặc grammar-based, hãy giữ đầu vào của harness dưới dạng một `[]byte` hoặc `string` duy nhất và thực hiện parsing bên trong callback.
 
-### Grammar-based fuzzing for parsers and protocol inputs
+### Grammar-based fuzzing cho parser và đầu vào giao thức
 
-For parsers, formats, and input languages, gosentry can run **Nautilus grammar fuzzing** on top of LibAFL. The grammar is a JSON array of production rules, and the harness should usually take a single `[]byte` or `string` argument.<sup>[[7]](#references)[[8]](#references)</sup>
+Với parser, định dạng và ngôn ngữ đầu vào, gosentry có thể chạy **Nautilus grammar fuzzing** trên LibAFL. Grammar là một mảng JSON gồm các production rule, và harness thường nên nhận một đối số `[]byte` hoặc `string` duy nhất.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```bash
 ./bin/go test -fuzz=FuzzGrammarJSON --use-grammar --grammar=./testdata/JSON.json --focus-on-new-code=false
 ```
 
-Methodology notes:
+Ghi chú về methodology:
 
-- Use grammar mode when byte-level mutations mostly die in early syntax checks.
-- Keep the grammar focused on the **security-relevant subset** of the language/protocol instead of modeling the full specification.
-- Use large boundary values in terminals/nonterminals to stress integer, length, and state-machine edges.
-- Grammar mode keeps inputs grammar-valid, but the target still receives **bytes/strings**, so parsing and semantic checks remain inside the harnessed code.
+- Sử dụng grammar mode khi các phép biến đổi ở cấp byte hầu hết đều bị loại ở bước kiểm tra cú pháp ban đầu.
+- Giữ grammar tập trung vào **tập con liên quan đến bảo mật** của ngôn ngữ/giao thức, thay vì mô hình hóa toàn bộ đặc tả.
+- Dùng các giá trị biên lớn trong terminals/nonterminals để kiểm tra các trường hợp biên về số nguyên, độ dài và state machine.
+- Grammar mode giữ cho input hợp lệ theo grammar, nhưng target vẫn nhận **bytes/strings**, nên việc parse và kiểm tra ngữ nghĩa vẫn diễn ra bên trong code được harness.
 
-### Differential fuzzing: compare implementations, not just crashes
+### Differential fuzzing: so sánh các implementation, không chỉ tìm crash
 
-A strong pattern for Go ecosystems is **grammar-based differential fuzzing**: generate valid structured inputs and feed them to two parsers, clients, or state-transition engines.<sup>[[7]](#references)[[8]](#references)</sup>
+Một phương pháp hiệu quả trong hệ sinh thái Go là **grammar-based differential fuzzing**: tạo input có cấu trúc hợp lệ rồi đưa vào hai parser, client hoặc bộ máy chuyển trạng thái.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```go
 f.Fuzz(func(t *testing.T, data []byte) {
@@ -457,53 +457,53 @@ f.Fuzz(func(t *testing.T, data []byte) {
 })
 ```
 
-Treat the following as findings:
+Hãy xem những trường hợp sau là phát hiện:
 
-- one implementation panics while the other rejects cleanly
-- accepted/rejected input mismatches
-- different parse trees or decoded objects
-- divergent state transitions, nonces, balances, or state roots
+- một implementation panic trong khi implementation còn lại từ chối một cách bình thường
+- đầu vào được chấp nhận/từ chối không khớp nhau
+- parse tree hoặc đối tượng đã giải mã khác nhau
+- state transition, nonce, balance hoặc state root khác nhau
 
-This is a practical way to find **consensus mismatches**, **parser ambiguity**, and **spec-vs-implementation drift** that pure crash fuzzing often misses.
+Đây là cách thực tế để tìm ra **consensus mismatch**, **parser ambiguity** và **spec-vs-implementation drift** mà fuzzing chỉ tìm crash thường bỏ sót.
 
 {{#ref}}
 proof-assistant-formal-verification-security.md
 {{#endref}}
 
-### Reuse the campaign corpus for coverage reporting
+### Tái sử dụng corpus của campaign để tạo báo cáo coverage
 
-After a campaign, replay the saved queue corpus to generate a Go coverage report without manually exporting a separate corpus.<sup>[[7]](#references)[[8]](#references)</sup>
+Sau một campaign, chạy lại corpus queue đã lưu để tạo báo cáo coverage của Go mà không cần xuất corpus riêng theo cách thủ công.<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```bash
 ./bin/go test -fuzz=FuzzHarness --generate-coverage .
 ```
 
-Run the command from the **same package** and with the **same `-fuzz` target** so gosentry resolves the right cached campaign state.
+Chạy lệnh từ **cùng package** và với **cùng target `-fuzz`** để gosentry phân giải đúng trạng thái campaign đã lưu trong cache.
 
 
 
 ## References
 
-- [1] [Mutational grammar fuzzing](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
+- [1] [Fuzzing grammar đột biến](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
 - [2] [Jackalope](https://github.com/googleprojectzero/Jackalope)
-- [3] [AFL++ Fuzzing in Depth](https://aflplus.plus/docs/fuzzing_in_depth/)
-- [4] [AFLNet Five Years Later: On Coverage-Guided Protocol Fuzzing](https://arxiv.org/abs/2412.20324)
-- [5] [Trailmark turns code into graphs](https://blog.trailofbits.com/2026/04/23/trailmark-turns-code-into-graphs/)
+- [3] [Fuzzing AFL++ chuyên sâu](https://aflplus.plus/docs/fuzzing_in_depth/)
+- [4] [AFLNet sau năm năm: Fuzzing giao thức theo hướng dẫn của coverage](https://arxiv.org/abs/2412.20324)
+- [5] [Trailmark biến mã thành đồ thị](https://blog.trailofbits.com/2026/04/23/trailmark-turns-code-into-graphs/)
 - [6] [trailofbits/trailmark](https://github.com/trailofbits/trailmark)
-- [7] [Go fuzzing was missing half the toolkit. We forked the toolchain to fix it.](https://blog.trailofbits.com/2026/05/12/go-fuzzing-was-missing-half-the-toolkit.-we-forked-the-toolchain-to-fix-it./)
+- [7] [Go fuzzing thiếu một nửa bộ công cụ. Chúng tôi fork toolchain để khắc phục.](https://blog.trailofbits.com/2026/05/12/go-fuzzing-was-missing-half-the-toolkit.-we-forked-the-toolchain-to-fix-it./)
 - [8] [trailofbits/gosentry](https://github.com/trailofbits/gosentry)
-- [9] [SNPSFuzzer: A Fast Greybox Fuzzer for Stateful Network Protocols using Snapshots](https://arxiv.org/abs/2202.03643)
-- [10] [No Grammar, No Problem: Towards Fuzzing the Linux Kernel without System-Call Descriptions](https://seclab.bu.edu/papers/FuzzNG-ndss2023.pdf)
-- [11] [Snappy: Efficient Fuzzing with Adaptive and Mutable Snapshots](https://project-theseus.nl/publication/2022/snappy/)
+- [9] [SNPSFuzzer: Greybox fuzzer nhanh cho các giao thức mạng có trạng thái bằng snapshot](https://arxiv.org/abs/2202.03643)
+- [10] [Không có grammar, chẳng sao: Hướng tới fuzzing Linux kernel mà không cần mô tả system call](https://seclab.bu.edu/papers/FuzzNG-ndss2023.pdf)
+- [11] [Snappy: Fuzzing hiệu quả với snapshot thích ứng và có thể thay đổi](https://project-theseus.nl/publication/2022/snappy/)
 - [12] [Fuzz Introspector](https://google.github.io/oss-fuzz/advanced-topics/fuzz-introspector/)
-- [13] [AFL++ LLVM instrumentation: path and caller coverage](https://github.com/AFLplusplus/AFLplusplus/blob/stable/instrumentation/README.llvm.md)
-- [14] [Predictive Context-sensitive Fuzzing](https://www.ndss-symposium.org/ndss-paper/predictive-context-sensitive-fuzzing/)
-- [15] [Android Offensive Security Blog - Binder Fuzzing](https://androidoffsec.withgoogle.com/posts/binder-fuzzing/)
-- [16] [LKL Android Binder fuzzer - build and regression-seed documentation](https://github.com/lkl/linux/blob/master/tools/lkl/fuzzers/binder/README.md)
-- [17] [MAccConc: Exploring Linux Kernel Race Conditions with Controlled Memory-Access Interleavings](https://projectzero.google/2026/09/maccconc-race-condition.html)
+- [13] [Instrumentation LLVM của AFL++: coverage đường dẫn và caller](https://github.com/AFLplusplus/AFLplusplus/blob/stable/instrumentation/README.llvm.md)
+- [14] [Fuzzing nhạy theo ngữ cảnh có tính dự đoán](https://www.ndss-symposium.org/ndss-paper/predictive-context-sensitive-fuzzing/)
+- [15] [Blog Android Offensive Security - Fuzzing Binder](https://androidoffsec.withgoogle.com/posts/binder-fuzzing/)
+- [16] [Fuzzer LKL Android Binder - tài liệu build và seed hồi quy](https://github.com/lkl/linux/blob/master/tools/lkl/fuzzers/binder/README.md)
+- [17] [MAccConc: Khám phá các điều kiện race trong Linux kernel bằng cách kiểm soát đan xen truy cập bộ nhớ](https://projectzero.google/2026/09/maccconc-race-condition.html)
 - [18] [googleprojectzero/MAccConc](https://github.com/googleprojectzero/MAccConc)
-- [19] [KCOV: code coverage for fuzzing](https://docs.kernel.org/dev-tools/kcov.html)
-- [20] [CFITSIO Extended Filename Syntax](https://heasarc.gsfc.nasa.gov/docs/software/fitsio/filters.html)
-- [21] [Doyensec Advisory: CFITSIO Q4 2025](https://www.doyensec.com/resources/Doyensec_Advisory_CFITSIO_Q42025.pdf)
-- [22] [Fuzzing CFITSIO Extended Filename Syntax: 16 Memory-Safety Vulnerabilities and Codex-Assisted Triage](https://blog.doyensec.com/2026/04/20/cfitsio-fuzzing.html)
+- [19] [KCOV: coverage mã cho fuzzing](https://docs.kernel.org/dev-tools/kcov.html)
+- [20] [Cú pháp tên tệp mở rộng CFITSIO](https://heasarc.gsfc.nasa.gov/docs/software/fitsio/filters.html)
+- [21] [Thông báo bảo mật của Doyensec: CFITSIO Q4 2025](https://www.doyensec.com/resources/Doyensec_Advisory_CFITSIO_Q42025.pdf)
+- [22] [Fuzzing cú pháp tên tệp mở rộng CFITSIO: 16 lỗ hổng an toàn bộ nhớ và phân loại hỗ trợ bởi Codex](https://blog.doyensec.com/2026/04/20/cfitsio-fuzzing.html)
 {{#include ../banners/hacktricks-training.md}}

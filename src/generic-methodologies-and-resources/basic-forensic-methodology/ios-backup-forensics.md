@@ -1,25 +1,25 @@
-# iOS Backup Forensics (Messaging‑centric triage)
+# Pháp y bản sao lưu iOS (điều tra tập trung vào ứng dụng nhắn tin)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-This page describes practical steps to reconstruct and analyze iOS backups for signs of 0‑click exploit delivery via messaging app attachments. It focuses on turning Apple’s hashed backup layout into human‑readable paths, then enumerating and scanning attachments across common apps.
+Trang này mô tả các bước thực tế để tái dựng và phân tích bản sao lưu iOS nhằm tìm dấu hiệu phát tán exploit 0-click qua tệp đính kèm trong ứng dụng nhắn tin. Nội dung tập trung vào việc chuyển cấu trúc bản sao lưu đã được Apple băm thành các đường dẫn dễ đọc, sau đó liệt kê và quét tệp đính kèm trên các ứng dụng phổ biến.
 
-Goals:
-- Rebuild readable paths from Manifest.db
-- Enumerate messaging databases (iMessage, WhatsApp, Signal, Telegram, Viber)
-- Resolve attachment paths, extract embedded objects where supported (PDF/Images/Fonts), and feed them to structural detectors
+Mục tiêu:
+- Tái tạo đường dẫn dễ đọc từ Manifest.db
+- Liệt kê cơ sở dữ liệu nhắn tin (iMessage, WhatsApp, Signal, Telegram, Viber)
+- Xác định đường dẫn tệp đính kèm, trích xuất đối tượng nhúng nếu được hỗ trợ (PDF/Images/Fonts) và đưa chúng vào các bộ phát hiện cấu trúc
 
 
-## Reconstructing an iOS backup
+## Tái dựng bản sao lưu iOS
 
-Backups stored under MobileSync use hashed filenames that are not human‑readable. The Manifest.db SQLite database maps each stored object to its logical path.<sup>[[1]](#references)[[2]](#references)</sup>
+Bản sao lưu được lưu trong MobileSync sử dụng tên tệp đã băm, không thể đọc được. Cơ sở dữ liệu SQLite Manifest.db ánh xạ từng đối tượng được lưu trữ tới đường dẫn logic của nó.<sup>[[1]](#references)[[2]](#references)</sup>
 
-High‑level procedure:
-1) Open Manifest.db and read the file records (domain, relativePath, flags, fileID/hash)
-2) Recreate the original folder hierarchy based on domain + relativePath
-3) Copy or hardlink each stored object to its reconstructed path
+Quy trình tổng quan:
+1) Mở Manifest.db và đọc các bản ghi tệp (domain, relativePath, flags, fileID/hash)
+2) Tái tạo cấu trúc thư mục ban đầu dựa trên domain + relativePath
+3) Sao chép hoặc tạo hardlink cho từng đối tượng được lưu trữ tới đường dẫn đã tái tạo
 
-Example workflow with a tool that implements this end‑to‑end (ElegantBouncer):<sup>[[1]](#references)[[2]](#references)</sup>
+Quy trình ví dụ với công cụ triển khai toàn bộ quy trình này (ElegantBouncer):<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```bash
 # Rebuild the backup into a readable folder tree
@@ -28,14 +28,14 @@ $ elegant-bouncer --ios-extract /path/to/backup --output /tmp/reconstructed
 ✓ iOS backup extraction completed successfully!
 ```
 
-Notes:
-- Decrypt encrypted backups before passing them to a reconstruction tool; ElegantBouncer expects a decrypted backup.<sup>[[2]](#references)[[3]](#references)</sup>
-- Preserve original timestamps/ACLs when possible for evidentiary value
+Ghi chú:
+- Giải mã các bản sao lưu được mã hóa trước khi chuyển chúng cho công cụ tái tạo; ElegantBouncer yêu cầu bản sao lưu đã giải mã.<sup>[[2]](#references)[[3]](#references)</sup>
+- Nếu có thể, hãy giữ nguyên dấu thời gian/ACL để bảo toàn giá trị chứng cứ
 
-### Acquiring & decrypting the backup (USB / Finder / libimobiledevice)
+### Thu thập và giải mã bản sao lưu (USB / Finder / libimobiledevice)
 
-- In Finder/Apple Devices/iTunes, enable "Encrypt local backup" and create a new backup; encrypted backups can include saved passwords and Health data that unencrypted backups omit.<sup>[[8]](#references)</sup>
-- Cross‑platform: libimobiledevice 1.4.0 includes fixes for `idevicebackup2`.<sup>[[4]](#references)</sup> Enable encryption interactively, then force a full backup using the documented command ordering, with the target directory last.<sup>[[6]](#references)</sup>
+- Trong Finder/Apple Devices/iTunes, bật "Encrypt local backup" rồi tạo bản sao lưu mới; các bản sao lưu được mã hóa có thể chứa mật khẩu đã lưu và dữ liệu Health mà bản sao lưu không mã hóa bỏ qua.<sup>[[8]](#references)</sup>
+- Đa nền tảng: libimobiledevice 1.4.0 bao gồm các bản sửa lỗi cho `idevicebackup2`.<sup>[[4]](#references)</sup> Bật mã hóa theo cách tương tác, sau đó buộc tạo bản sao lưu đầy đủ bằng thứ tự lệnh được tài liệu hướng dẫn, với thư mục đích ở cuối.<sup>[[6]](#references)</sup>
 
 ```bash
 # Pair, then enable encrypted backups (prompts for the password); keep the target directory last
@@ -46,9 +46,9 @@ $ idevicebackup2 -i encryption on ~/backups/iphone17
 $ idevicebackup2 backup --full ~/backups/iphone17
 ```
 
-### IOC‑driven triage with MVT
+### Phân loại ban đầu dựa trên IOC với MVT
 
-Amnesty’s Mobile Verification Toolkit can extract a key from and decrypt encrypted iTunes/Finder backups, then scan the decrypted backup with a STIX2 IOC file.<sup>[[3]](#references)</sup>
+Mobile Verification Toolkit của Amnesty có thể trích xuất khóa từ các bản sao lưu iTunes/Finder đã mã hóa và giải mã chúng, sau đó quét bản sao lưu đã giải mã bằng tệp IOC STIX2.<sup>[[3]](#references)</sup>
 
 ```bash
 # Optionally extract a reusable key file
@@ -61,11 +61,11 @@ $ mvt-ios decrypt-backup -p '<pwd>' -d /tmp/dec-backup ~/backups/iphone17
 $ mvt-ios check-backup -i indicators.stix2.json -o /tmp/mvt-results /tmp/dec-backup
 ```
 
-With `-o`, JSON results are written under `/tmp/mvt-results/`; IOC matches use a `_detected` suffix and can be correlated with the attachment paths recovered below.<sup>[[3]](#references)</sup>
+Với `-o`, kết quả JSON được ghi vào `/tmp/mvt-results/`; các kết quả khớp IOC có hậu tố `_detected` và có thể được đối chiếu với các đường dẫn tệp đính kèm được khôi phục bên dưới.<sup>[[3]](#references)</sup>
 
-### General artifact parsing (iLEAPP)
+### Phân tích hiện vật tổng quát (iLEAPP)
 
-For timeline/metadata beyond messaging, run iLEAPP against the raw backup folder; its `itunes` input type accepts iTunes/Finder backups and current releases support iOS/iPadOS 11 through current versions.<sup>[[7]](#references)</sup>
+Để xem dòng thời gian/siêu dữ liệu ngoài phần nhắn tin, hãy chạy iLEAPP trên thư mục sao lưu thô; kiểu đầu vào `itunes` chấp nhận bản sao lưu iTunes/Finder và các bản phát hành hiện tại hỗ trợ iOS/iPadOS 11 đến các phiên bản hiện hành.<sup>[[7]](#references)</sup>
 
 ```bash
 $ mkdir -p /tmp/ileapp-report
@@ -73,14 +73,14 @@ $ python3 ileapp.py -t itunes -i /tmp/dec-backup -o /tmp/ileapp-report
 ```
 
 
-## Messaging app attachment enumeration
+## Liệt kê tệp đính kèm trong ứng dụng nhắn tin
 
-After reconstruction, enumerate attachments for popular apps. The exact schema varies by app/version, but the approach is similar: query the messaging database, join messages to attachments, and resolve paths on disk.<sup>[[1]](#references)[[2]](#references)</sup>
+Sau khi tái dựng, hãy liệt kê tệp đính kèm của các ứng dụng phổ biến. Schema chính xác thay đổi tùy ứng dụng/phiên bản, nhưng cách thực hiện tương tự: truy vấn cơ sở dữ liệu nhắn tin, join tin nhắn với tệp đính kèm và xác định đường dẫn trên ổ đĩa.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### iMessage (sms.db)
-Key tables: message, attachment, message_attachment_join (MAJ), chat, chat_message_join (CMJ).<sup>[[2]](#references)</sup>
+Các bảng chính: message, attachment, message_attachment_join (MAJ), chat, chat_message_join (CMJ).<sup>[[2]](#references)</sup>
 
-Example queries:
+Ví dụ truy vấn:
 
 ```sql
 -- List attachments with basic message linkage
@@ -109,10 +109,10 @@ JOIN attachment a ON a.ROWID = maj.attachment_id
 ORDER BY m.date DESC;
 ```
 
-Attachment paths may be absolute or relative to the reconstructed tree under Library/SMS/Attachments.<sup>[[2]](#references)</sup>
+Đường dẫn tệp đính kèm có thể là đường dẫn tuyệt đối hoặc tương đối với cây được tái tạo bên dưới Library/SMS/Attachments.<sup>[[2]](#references)</sup>
 
 ### WhatsApp (ChatStorage.sqlite)
-Common linkage: message table ↔ media/attachment table (naming varies by version). Query media rows to obtain on‑disk paths. Belkasoft identifies `ZMEDIALOCALPATH` in `ZWAMEDIAITEM` as the media-file location; ElegantBouncer’s current implementation joins `ZWAMEDIAITEM.ZMESSAGE` to `ZWAMESSAGE.Z_PK` and prepends `Message/` when resolving a path that begins with `Media/`.<sup>[[9]](#references)[[10]](#references)</sup>
+Liên kết phổ biến: bảng message ↔ bảng media/attachment (tên gọi thay đổi tùy phiên bản). Truy vấn các hàng media để lấy đường dẫn trên đĩa. Belkasoft xác định `ZMEDIALOCALPATH` trong `ZWAMEDIAITEM` là vị trí tệp media; cách triển khai hiện tại của ElegantBouncer kết nối `ZWAMEDIAITEM.ZMESSAGE` với `ZWAMESSAGE.Z_PK` và thêm `Message/` vào trước khi phân giải đường dẫn bắt đầu bằng `Media/`.<sup>[[9]](#references)[[10]](#references)</sup>
 
 ```sql
 SELECT
@@ -126,19 +126,19 @@ WHERE mi.ZMEDIALOCALPATH IS NOT NULL
 ORDER BY m.ZMESSAGEDATE DESC;
 ```
 
-For that ElegantBouncer reconstruction path, a media path beginning with `Media/` resolves under `AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Message/Media/`; Belkasoft’s guide instead documents a `Messages/Media/` path, so inspect the backup before assuming either spelling.<sup>[[9]](#references)[[10]](#references)</sup>
+Với đường dẫn tái dựng của ElegantBouncer đó, đường dẫn media bắt đầu bằng `Media/` sẽ được phân giải bên dưới `AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Message/Media/`; hướng dẫn của Belkasoft lại ghi đường dẫn `Messages/Media/`, vì vậy hãy kiểm tra backup trước khi mặc định một trong hai cách viết.<sup>[[9]](#references)[[10]](#references)</sup>
 
 ### Signal / Telegram / Viber
-- Signal: the message DB is encrypted; however, attachments cached on disk (and thumbnails) are usually scan‑able.<sup>[[2]](#references)</sup>
-- Telegram: inspect the app's media/cache directories; Telegram documented a cache-cleanup bug in iOS app 11.2 on iOS 18.0.1, marked fixed in 11.3, so check for residual files.<sup>[[2]](#references)[[5]](#references)</sup>
-- Viber: Viber.sqlite contains message/attachment tables with on‑disk references.<sup>[[2]](#references)</sup>
+- Signal: DB tin nhắn được mã hóa; tuy nhiên, các tệp đính kèm được lưu trong bộ nhớ đệm trên đĩa (và ảnh thu nhỏ) thường có thể quét được.<sup>[[2]](#references)</sup>
+- Telegram: kiểm tra các thư mục media/cache của ứng dụng; Telegram đã ghi nhận lỗi dọn dẹp cache trong ứng dụng iOS 11.2 trên iOS 18.0.1, được đánh dấu là đã sửa trong phiên bản 11.3, vì vậy hãy kiểm tra các tệp còn sót lại.<sup>[[2]](#references)[[5]](#references)</sup>
+- Viber: Viber.sqlite chứa các bảng tin nhắn/tệp đính kèm với tham chiếu đến tệp trên đĩa.<sup>[[2]](#references)</sup>
 
-Tip: even when metadata is encrypted, scanning the media/cache directories still surfaces malicious objects.<sup>[[2]](#references)</sup>
+Mẹo: ngay cả khi metadata được mã hóa, việc quét các thư mục media/cache vẫn có thể phát hiện các đối tượng độc hại.<sup>[[2]](#references)</sup>
 
 
-## Scanning attachments for structural exploits
+## Quét tệp đính kèm để tìm lỗi khai thác cấu trúc
 
-Once you have attachment paths, feed them into structural detectors that validate file‑format invariants instead of signatures. Example with ElegantBouncer:<sup>[[1]](#references)[[2]](#references)</sup>
+Khi đã có đường dẫn tệp đính kèm, hãy đưa chúng vào các công cụ phát hiện cấu trúc để kiểm tra các bất biến của định dạng tệp thay vì chữ ký. Ví dụ với ElegantBouncer:<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```bash
 # Recursively scan only messaging attachments under the reconstructed tree
@@ -148,32 +148,31 @@ $ elegant-bouncer --scan --messaging /tmp/reconstructed
 ✗ THREAT in iMessage: photo.webp → BLASTPASS (VP8L)
 ```
 
-Detections covered by structural rules include:<sup>[[1]](#references)[[2]](#references)</sup>
-- PDF/JBIG2 FORCEDENTRY (CVE‑2021‑30860): impossible JBIG2 dictionary states
-- WebP/VP8L BLASTPASS (CVE‑2023‑4863): oversized Huffman table constructions
-- TrueType TRIANGULATION (CVE‑2023‑41990): undocumented bytecode opcodes
-- DNG/TIFF CVE‑2025‑43300: metadata vs. stream component mismatches
+Các phát hiện được bao quát bởi các quy tắc cấu trúc bao gồm:<sup>[[1]](#references)[[2]](#references)</sup>
+- PDF/JBIG2 FORCEDENTRY (CVE‑2021‑30860): trạng thái từ điển JBIG2 bất khả thi
+- WebP/VP8L BLASTPASS (CVE‑2023‑4863): cấu trúc bảng Huffman quá lớn
+- TrueType TRIANGULATION (CVE‑2023‑41990): opcode bytecode không được tài liệu hóa
+- DNG/TIFF CVE‑2025‑43300: không khớp giữa metadata và thành phần luồng dữ liệu
 
 
-## Validation, caveats, and false positives
+## Xác thực, lưu ý và dương tính giả
 
-- Time conversions: iMessage stores dates in Apple epochs/units on some versions; convert appropriately during reporting.<sup>[[2]](#references)</sup>
-- Schema drift: app SQLite schemas change over time; confirm table/column names per device build
-- Recursive extraction: PDFs may embed JBIG2 streams and fonts; use a parser that can extract and scan inner objects
-- False positives: structural heuristics are conservative but can flag rare malformed yet benign media.<sup>[[1]](#references)[[2]](#references)</sup>
+- Chuyển đổi thời gian: iMessage lưu ngày tháng theo epoch/đơn vị của Apple trên một số phiên bản; hãy chuyển đổi phù hợp khi báo cáo.<sup>[[2]](#references)</sup>
+- Thay đổi schema: schema SQLite của ứng dụng thay đổi theo thời gian; hãy xác nhận tên bảng/cột theo bản dựng của thiết bị
+- Trích xuất đệ quy: PDF có thể nhúng luồng JBIG2 và font; hãy dùng trình phân tích cú pháp có thể trích xuất và quét các đối tượng bên trong
+- Dương tính giả: heuristic cấu trúc được thiết kế thận trọng nhưng vẫn có thể gắn cờ các tệp media hiếm gặp, bị lỗi định dạng nhưng vô hại.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 ## References
 
-- [1] [ELEGANTBOUNCER: When You Can't Get the Samples but Still Need to Catch the Threat](https://www.msuiche.com/posts/elegantbouncer-when-you-cant-get-the-samples-but-still-need-to-catch-the-threat/)
-- [2] [ElegantBouncer project (GitHub)](https://github.com/msuiche/elegant-bouncer)
-- [3] [MVT iOS backup workflow](https://docs.mvt.re/en/latest/ios/backup/check/)
-- [4] [libimobiledevice 1.4.0 release notes](https://libimobiledevice.org/news/2025/10/10/libimobiledevice-1.4.0-release/)
-- [5] [Update 11.2 has broken cache cleanup on iOS 18.0.1 (Telegram Bug Tracker)](https://bugs.telegram.org/c/44361)
-- [6] [idevicebackup2 manual](https://github.com/libimobiledevice/libimobiledevice/blob/master/docs/idevicebackup2.1)
-- [7] [iLEAPP project (GitHub)](https://github.com/abrignoni/iLEAPP)
-- [8] [About encrypted backups on your iPhone, iPad or iPod touch (Apple Support)](https://support.apple.com/en-ie/108353)
-- [9] [iOS WhatsApp Forensics with Belkasoft X](https://belkasoft.com/ios-whatsapp-forensics-with-belkasoft-x)
-- [10] [ElegantBouncer WhatsApp scanner and path resolver](https://github.com/msuiche/elegant-bouncer/blob/main/src/messaging.rs)
-
+- [1] [ELEGANTBOUNCER: Khi bạn không thể lấy mẫu nhưng vẫn cần phát hiện mối đe dọa](https://www.msuiche.com/posts/elegantbouncer-when-you-cant-get-the-samples-but-still-need-to-catch-the-threat/)
+- [2] [Dự án ElegantBouncer (GitHub)](https://github.com/msuiche/elegant-bouncer)
+- [3] [Quy trình MVT kiểm tra bản sao lưu iOS](https://docs.mvt.re/en/latest/ios/backup/check/)
+- [4] [Ghi chú phát hành libimobiledevice 1.4.0](https://libimobiledevice.org/news/2025/10/10/libimobiledevice-1.4.0-release/)
+- [5] [Bản cập nhật 11.2 làm hỏng việc dọn dẹp cache trên iOS 18.0.1 (Trình theo dõi lỗi Telegram)](https://bugs.telegram.org/c/44361)
+- [6] [Hướng dẫn sử dụng idevicebackup2](https://github.com/libimobiledevice/libimobiledevice/blob/master/docs/idevicebackup2.1)
+- [7] [Dự án iLEAPP (GitHub)](https://github.com/abrignoni/iLEAPP)
+- [8] [Giới thiệu về bản sao lưu được mã hóa trên iPhone, iPad hoặc iPod touch (Apple Support)](https://support.apple.com/en-ie/108353)
+- [9] [Phân tích pháp chứng WhatsApp trên iOS bằng Belkasoft X](https://belkasoft.com/ios-whatsapp-forensics-with-belkasoft-x)
+- [10] [Trình quét WhatsApp và trình phân giải đường dẫn ElegantBouncer](https://github.com/msuiche/elegant-bouncer/blob/main/src/messaging.rs)
 {{#include ../../banners/hacktricks-training.md}}

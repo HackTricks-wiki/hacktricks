@@ -1,14 +1,14 @@
-# Mutation Testing for Smart Contracts (slither-mutate, mewt, MuTON)
+# Kiểm thử mutation cho Smart Contract (slither-mutate, mewt, MuTON)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Mutation testing "tests your tests" by systematically introducing small changes (mutants) into contract code and re-running the test suite. If a test fails, the mutant is killed. If the tests still pass, the mutant survives, revealing a blind spot that line/branch coverage cannot detect.
+Kiểm thử mutation “kiểm thử các bài kiểm thử của bạn” bằng cách lần lượt đưa những thay đổi nhỏ (mutant) vào mã contract rồi chạy lại bộ kiểm thử. Nếu một bài kiểm thử thất bại, mutant bị tiêu diệt. Nếu các bài kiểm thử vẫn vượt qua, mutant tồn tại, cho thấy điểm mù mà độ bao phủ dòng/nhánh không thể phát hiện.
 
-Key idea: Coverage shows code was executed; mutation testing shows whether behavior is actually asserted.<sup>[[2]](#references)</sup>
+Ý tưởng chính: Độ bao phủ cho biết mã đã được thực thi; kiểm thử mutation cho biết hành vi có thực sự được kiểm tra hay không.<sup>[[2]](#references)</sup>
 
-## Why coverage can deceive
+## Vì sao độ bao phủ có thể đánh lừa
 
-Consider this simple threshold check:
+Hãy xem xét phép kiểm tra ngưỡng đơn giản sau:
 
 ```solidity
 function verifyMinimumDeposit(uint256 deposit) public returns (bool) {
@@ -20,162 +20,161 @@ function verifyMinimumDeposit(uint256 deposit) public returns (bool) {
 }
 ```
 
-Unit tests that only check a value below and a value above the threshold can reach 100% line/branch coverage while failing to assert the equality boundary (==). A refactor to `deposit >= 2 ether` would still pass such tests, silently breaking protocol logic.<sup>[[2]](#references)</sup>
+Các unit test chỉ kiểm tra một giá trị thấp hơn và một giá trị cao hơn ngưỡng có thể đạt 100% độ bao phủ dòng/nhánh nhưng không xác nhận ranh giới bằng nhau (`==`). Nếu refactor thành `deposit >= 2 ether`, các test như vậy vẫn vượt qua, âm thầm làm sai logic của giao thức.<sup>[[2]](#references)</sup>
 
-Mutation testing exposes this gap by mutating the condition and verifying tests fail.
+Mutation testing phát hiện lỗ hổng này bằng cách thay đổi điều kiện rồi xác minh rằng các test thất bại.
 
-For smart contracts, surviving mutants frequently map to missing checks around:
-- Authorization and role boundaries
-- Accounting/value-transfer invariants
-- Revert conditions and failure paths
-- Boundary conditions (`==`, zero values, empty arrays, max/min values)
+Với smart contract, các mutant còn tồn tại thường chỉ ra những kiểm tra còn thiếu liên quan đến:
+- Quyền hạn và ranh giới vai trò
+- Các bất biến về kế toán/chuyển giá trị
+- Điều kiện revert và các nhánh lỗi
+- Điều kiện biên (`==`, giá trị 0, mảng rỗng, giá trị tối đa/tối thiểu)
 
-## Mutation operators with the highest security signal
+## Các toán tử mutation có tín hiệu bảo mật cao nhất
 
-Useful mutation classes for contract auditing:<sup>[[1]](#references)[[2]](#references)</sup>
-- **High severity**: replace statements with `revert()` to expose unexecuted paths
-- **Medium severity**: comment out lines / remove logic to reveal unverified side effects
-- **Low severity**: subtle operator or constant swaps such as `>=` -> `>` or `+` -> `-`
-- Other common edits: assignment replacement, boolean flips, condition negation, and type changes
+Các lớp mutation hữu ích khi audit contract:<sup>[[1]](#references)[[2]](#references)</sup>
+- **Mức độ nghiêm trọng cao**: thay các câu lệnh bằng `revert()` để phát hiện những nhánh chưa được thực thi
+- **Mức độ nghiêm trọng trung bình**: chú thích các dòng / xóa logic để phát hiện các tác động phụ chưa được xác minh
+- **Mức độ nghiêm trọng thấp**: thay đổi toán tử hoặc hằng số một cách tinh vi, chẳng hạn `>=` -> `>` hoặc `+` -> `-`
+- Các chỉnh sửa phổ biến khác: thay phép gán, đảo giá trị boolean, phủ định điều kiện và thay đổi kiểu dữ liệu
 
-Practical goal: kill all meaningful mutants, and explicitly justify survivors that are irrelevant or semantically equivalent.
+Mục tiêu thực tế: loại bỏ tất cả mutant có ý nghĩa và giải thích rõ những mutant còn tồn tại nhưng không liên quan hoặc tương đương về mặt ngữ nghĩa.
 
-## Why syntax-aware mutation is better than regex
+## Vì sao mutation nhận biết cú pháp tốt hơn regex
 
-Older mutation engines relied on regex or line-oriented rewrites. That works, but it has important limitations:<sup>[[1]](#references)</sup>
-- Multi-line statements are hard to mutate safely
-- Language structure is not understood, so comments/tokens can be targeted badly
-- Generating every possible variant on a weak line wastes large amounts of runtime
+Các công cụ mutation đời cũ dựa vào regex hoặc cách viết lại theo từng dòng. Cách này có hiệu quả nhưng có những hạn chế đáng kể:<sup>[[1]](#references)</sup>
+- Khó mutation các câu lệnh nhiều dòng một cách an toàn
+- Không hiểu cấu trúc ngôn ngữ, nên có thể nhắm sai vào comment/token
+- Việc tạo mọi biến thể có thể có trên một dòng yếu kém sẽ lãng phí rất nhiều thời gian chạy
 
-AST- or Tree-sitter-based tooling improves this by targeting structured nodes instead of raw lines:<sup>[[1]](#references)</sup>
-- **slither-mutate** uses Slither's Solidity AST.<sup>[[4]](#references)</sup>
-- **mewt** uses Tree-sitter as a language-agnostic core.<sup>[[6]](#references)</sup>
-- **MuTON** builds on `mewt` and adds first-class support for TON languages such as FunC, Tolk, and Tact.<sup>[[7]](#references)</sup>
+Các công cụ dựa trên AST hoặc Tree-sitter cải thiện việc này bằng cách nhắm đến các node có cấu trúc thay vì các dòng thô:<sup>[[1]](#references)</sup>
+- **slither-mutate** sử dụng AST Solidity của Slither.<sup>[[4]](#references)</sup>
+- **mewt** sử dụng Tree-sitter làm lõi độc lập với ngôn ngữ.<sup>[[6]](#references)</sup>
+- **MuTON** được xây dựng dựa trên `mewt` và bổ sung hỗ trợ trực tiếp cho các ngôn ngữ TON như FunC, Tolk và Tact.<sup>[[7]](#references)</sup>
 
-This makes multi-line constructs and expression-level mutations much more reliable than regex-only approaches.
+Nhờ vậy, các cấu trúc nhiều dòng và mutation ở cấp biểu thức đáng tin cậy hơn nhiều so với các phương pháp chỉ dùng regex.
 
-## Running mutation testing with slither-mutate
+## Chạy mutation testing với slither-mutate
 
-Requirements: Slither v0.10.2+.
+Yêu cầu: Slither v0.10.2+.
 
-- List options and mutators:
+- Liệt kê tùy chọn và mutator:
 
 ```bash
 slither-mutate --help
 slither-mutate --list-mutators
 ```
 
-- Foundry example (capture results and keep a full log):<sup>[[2]](#references)</sup>
+- Ví dụ Foundry (ghi lại kết quả và lưu nhật ký đầy đủ):<sup>[[2]](#references)</sup>
 
 ```bash
 slither-mutate ./src/contracts --test-cmd="forge test" &> >(tee mutation.results)
 ```
 
-- If you don’t use Foundry, replace `--test-cmd` with how you run tests (e.g., `npx hardhat test`, `npm test`).
+- Nếu không dùng Foundry, hãy thay `--test-cmd` bằng lệnh chạy test của bạn (ví dụ: `npx hardhat test`, `npm test`).
 
-Artifacts are stored in `./mutation_campaign` by default. Uncaught (surviving) mutants are copied there for inspection.<sup>[[5]](#references)</sup>
+Theo mặc định, artifacts được lưu trong `./mutation_campaign`. Các mutant chưa bị bắt (còn tồn tại) sẽ được sao chép vào đó để kiểm tra.<sup>[[5]](#references)</sup>
 
-### Understanding the output
+### Tìm hiểu output
 
-Report lines look like:
+Các dòng báo cáo có dạng:
 
 ```text
 INFO:Slither-Mutate:Mutating contract ContractName
 INFO:Slither-Mutate:[CR] Line 123: 'original line' ==> '//original line' --> UNCAUGHT
 ```
 
-- The tag in brackets is the mutator alias (e.g., `CR` = Comment Replacement).
-- `UNCAUGHT` means tests passed under the mutated behavior → missing assertion.
+- Thẻ trong ngoặc là bí danh của mutator (ví dụ: `CR` = Comment Replacement).
+- `UNCAUGHT` nghĩa là các bài kiểm thử đã vượt qua với hành vi đã bị mutation → thiếu assertion.
 
-## Reducing runtime: prioritize impactful mutants
+## Giảm thời gian chạy: ưu tiên các mutant có ảnh hưởng lớn
 
-Mutation campaigns can take hours or days. Tips to reduce cost:<sup>[[1]](#references)[[2]](#references)</sup>
-- Scope: Start with critical contracts/directories only, then expand.
-- Prioritize mutators: If a high-priority mutant on a line survives (for example `revert()` or comment-out), skip lower-priority variants for that line.
-- Use two-phase campaigns: run focused/fast tests first, then re-test only uncaught mutants with the full suite.
-- Map mutation targets to specific test commands when possible (for example auth code -> auth tests).
-- Restrict campaigns to high/medium severity mutants when time is tight.
-- Parallelize tests if your runner allows it; cache dependencies/builds.
-- Fail-fast: stop early when a change clearly demonstrates an assertion gap.
+Các chiến dịch mutation testing có thể kéo dài hàng giờ hoặc hàng ngày. Mẹo để giảm chi phí:<sup>[[1]](#references)[[2]](#references)</sup>
+- Phạm vi: Chỉ bắt đầu với các contract/thư mục quan trọng, sau đó mở rộng.
+- Ưu tiên mutator: Nếu một mutant ưu tiên cao trên một dòng vẫn còn tồn tại (ví dụ `revert()` hoặc comment-out), hãy bỏ qua các biến thể ưu tiên thấp hơn trên dòng đó.
+- Dùng chiến dịch hai giai đoạn: Trước tiên chạy các bài kiểm thử tập trung/nhanh, sau đó chỉ kiểm thử lại các mutant chưa bị phát hiện bằng toàn bộ bộ kiểm thử.
+- Khi có thể, ánh xạ các mục tiêu mutation vào lệnh kiểm thử cụ thể (ví dụ: mã auth -> các bài kiểm thử auth).
+- Khi không có nhiều thời gian, giới hạn chiến dịch ở các mutant có mức độ nghiêm trọng cao/trung bình.
+- Chạy các bài kiểm thử song song nếu runner hỗ trợ; lưu cache dependency/build.
+- Fail-fast: dừng sớm khi một thay đổi cho thấy rõ có lỗ hổng trong assertion.
 
-The runtime math is brutal: `1000 mutants x 5-minute tests ~= 83 hours`, so campaign design matters as much as the mutator itself.<sup>[[1]](#references)</sup>
+Tính toán thời gian chạy rất khắc nghiệt: `1000 mutants x 5-minute tests ~= 83 hours`, vì vậy thiết kế chiến dịch cũng quan trọng như chính mutator.<sup>[[1]](#references)</sup>
 
-## Persistent campaigns and triage at scale
+## Chiến dịch bền vững và phân loại kết quả ở quy mô lớn
 
-One weakness of older workflows is dumping results only to `stdout`. For long campaigns, this makes pause/resume, filtering, and review harder.<sup>[[1]](#references)</sup>
+Một điểm yếu của các quy trình cũ là chỉ ghi kết quả ra `stdout`. Với các chiến dịch kéo dài, việc tạm dừng/tiếp tục, lọc và xem xét sẽ khó hơn.<sup>[[1]](#references)</sup>
 
-`mewt`/`MuTON` improve this by storing mutants and outcomes in SQLite-backed campaigns. Benefits:<sup>[[1]](#references)</sup>
-- Pause and resume long runs without losing progress
-- Filter only uncaught mutants in a specific file or mutation class
-- Export/translate results to SARIF for review tooling
-- Give AI-assisted triage smaller, filtered result sets instead of raw terminal logs
+`mewt`/`MuTON` cải thiện điều này bằng cách lưu mutant và kết quả vào các chiến dịch dùng SQLite. Lợi ích:<sup>[[1]](#references)</sup>
+- Tạm dừng và tiếp tục các lượt chạy dài mà không mất tiến độ
+- Chỉ lọc các mutant chưa bị phát hiện trong một file hoặc lớp mutation cụ thể
+- Xuất/chuyển đổi kết quả sang SARIF để dùng với các công cụ xem xét
+- Cung cấp cho việc phân loại có AI hỗ trợ các tập kết quả nhỏ hơn, đã lọc, thay vì log thô trên terminal
 
-Persistent results are especially useful when mutation testing becomes part of an audit pipeline instead of a one-off manual review.
+Kết quả được lưu bền vững đặc biệt hữu ích khi mutation testing trở thành một phần của quy trình audit thay vì chỉ là một lần xem xét thủ công.
 
-## Triage workflow for surviving mutants
+## Quy trình phân loại mutant còn tồn tại
 
-1) Inspect the mutated line and behavior.
-   - Reproduce locally by applying the mutated line and running a focused test.
+1) Kiểm tra dòng đã bị mutation và hành vi của nó.
+   - Tái hiện cục bộ bằng cách áp dụng dòng đã bị mutation rồi chạy một bài kiểm thử tập trung.
 
-2) Strengthen tests to assert state, not only return values.
-   - Add equality-boundary checks (e.g., test threshold `==`).
-   - Assert post-conditions: balances, total supply, authorization effects, and emitted events.
+2) Củng cố bài kiểm thử để kiểm tra trạng thái, không chỉ giá trị trả về.
+   - Thêm kiểm tra tại ranh giới bằng nhau (ví dụ: kiểm thử ngưỡng `==`).
+   - Kiểm tra các điều kiện hậu: số dư, tổng nguồn cung, tác động của việc phân quyền và các event được phát ra.
 
-3) Replace overly permissive mocks with realistic behavior.
-   - Ensure mocks enforce transfers, failure paths, and event emissions that occur on-chain.
+3) Thay các mock quá dễ dãi bằng hành vi thực tế.
+   - Đảm bảo mock kiểm tra các giao dịch chuyển, các trường hợp lỗi và việc phát event diễn ra on-chain.
 
-4) Add invariants for fuzz tests.
-   - E.g., conservation of value, non-negative balances, authorization invariants, monotonic supply where applicable.
+4) Thêm invariant cho các bài kiểm thử fuzz.
+   - Ví dụ: bảo toàn giá trị, số dư không âm, invariant về phân quyền, nguồn cung đơn điệu khi phù hợp.
 
-5) Separate true positives from semantic no-ops.
-   - Example: `x > 0` -> `x != 0` is meaningless when `x` is unsigned.
+5) Phân biệt true positive với semantic no-op.
+   - Ví dụ: `x > 0` -> `x != 0` không có ý nghĩa khi `x` là số không dấu.
 
-6) Re-run the campaign until survivors are killed or explicitly justified.
+6) Chạy lại chiến dịch cho đến khi các mutant còn tồn tại bị phát hiện hoặc được giải trình rõ ràng.
 
-## Case study: revealing missing state assertions (Arkis protocol)
+## Nghiên cứu tình huống: phát hiện thiếu assertion về trạng thái (Arkis protocol)
 
-A mutation campaign during an audit of the Arkis DeFi protocol surfaced survivors like:<sup>[[2]](#references)[[3]](#references)</sup>
+Một chiến dịch mutation testing trong quá trình audit giao thức DeFi Arkis đã phát hiện các mutant còn tồn tại như sau:<sup>[[2]](#references)[[3]](#references)</sup>
 
 ```text
 INFO:Slither-Mutate:[CR] Line 33: 'cmdsToExecute.last().value = _cmd.value' ==> '//cmdsToExecute.last().value = _cmd.value' --> UNCAUGHT
 ```
 
-Commenting out the assignment didn’t break the tests, proving missing post-state assertions. Root cause: code trusted a user-controlled `_cmd.value` instead of validating actual token transfers. An attacker could desynchronize expected vs. actual transfers to drain funds. Result: high severity risk to protocol solvency.<sup>[[2]](#references)[[3]](#references)</sup>
+Việc comment out phép gán không làm các bài kiểm thử thất bại, chứng tỏ thiếu các assertion về trạng thái sau. Nguyên nhân gốc: code tin cậy `_cmd.value` do người dùng kiểm soát thay vì xác thực các lần chuyển token thực tế. Kẻ tấn công có thể làm sai lệch các lần chuyển dự kiến so với thực tế để rút cạn tiền. Kết quả: rủi ro nghiêm trọng cao đối với khả năng thanh toán của protocol.<sup>[[2]](#references)[[3]](#references)</sup>
 
-Guidance: Treat survivors that affect value transfers, accounting, or access control as high-risk until killed.
+Hướng dẫn: Coi các mutant còn sống ảnh hưởng đến việc chuyển giá trị, kế toán hoặc kiểm soát truy cập là rủi ro cao cho đến khi chúng bị loại bỏ.
 
-## Do not blindly generate tests to kill every mutant
+## Không nên tạo test một cách mù quáng để loại bỏ mọi mutant
 
-Mutation-driven test generation can backfire if the current implementation is wrong. Example: mutating `priority >= 2` to `priority > 2` changes behavior, but the right fix is not always "write a test for `priority == 2`". That behavior may itself be the bug.<sup>[[1]](#references)</sup>
+Việc tạo test dựa trên mutation có thể phản tác dụng nếu implementation hiện tại sai. Ví dụ: thay `priority >= 2` bằng `priority > 2` làm thay đổi hành vi, nhưng cách sửa đúng không phải lúc nào cũng là “viết test cho `priority == 2`”. Chính hành vi đó có thể là lỗi.<sup>[[1]](#references)</sup>
 
-Safer workflow:
-- Use surviving mutants to identify ambiguous requirements
-- Validate expected behavior from specs, protocol docs, or reviewers
-- Only then encode the behavior as a test/invariant
+Quy trình an toàn hơn:
+- Dùng các mutant còn sống để xác định những yêu cầu còn mơ hồ
+- Xác thực hành vi mong đợi dựa trên spec, tài liệu protocol hoặc ý kiến của reviewer
+- Chỉ sau đó mới mã hóa hành vi thành test/invariant
 
-Otherwise, you risk hard-coding implementation accidents into the test suite and gaining false confidence.
+Nếu không, bạn có nguy cơ biến các sự cố ngẫu nhiên trong implementation thành quy tắc cố định trong bộ test và tạo ra cảm giác an toàn giả.
 
-## Practical checklist
+## Checklist thực tế
 
-- Run a targeted campaign:
+- Chạy một chiến dịch có mục tiêu:
   - `slither-mutate ./src/contracts --test-cmd="forge test"`
-- Prefer syntax-aware mutators (AST/Tree-sitter) over regex-only mutation when available.
-- Triage survivors and write tests/invariants that would fail under the mutated behavior.
-- Assert balances, supply, authorizations, and events.
-- Add boundary tests (`==`, overflows/underflows, zero-address, zero-amount, empty arrays).
-- Replace unrealistic mocks; simulate failure modes.
-- Persist results when the tooling supports it, and filter uncaught mutants before triage.
-- Use two-phase or per-target campaigns to keep runtime manageable.
-- Iterate until all mutants are killed or justified with comments and rationale.
+- Ưu tiên mutator nhận biết cú pháp (AST/Tree-sitter) thay vì chỉ dùng regex, nếu có.
+- Phân loại các mutant còn sống và viết test/invariant có thể thất bại với hành vi đã bị đột biến.
+- Kiểm tra số dư, nguồn cung, quyền hạn và event.
+- Bổ sung test biên (`==`, tràn số/thiếu số, địa chỉ zero, số lượng zero, mảng rỗng).
+- Thay thế các mock thiếu thực tế; mô phỏng các chế độ lỗi.
+- Lưu kết quả nếu tooling hỗ trợ và lọc các mutant chưa được bắt trước khi phân loại.
+- Dùng chiến dịch hai giai đoạn hoặc theo từng mục tiêu để kiểm soát thời gian chạy.
+- Lặp lại cho đến khi mọi mutant bị loại bỏ hoặc được giải trình bằng comment và lý do.
 
 ## References
 
-- [1] [Mutation testing for the agentic era](https://blog.trailofbits.com/2026/04/01/mutation-testing-for-the-agentic-era/)
-- [2] [Use mutation testing to find the bugs your tests don't catch (Trail of Bits)](https://blog.trailofbits.com/2025/09/18/use-mutation-testing-to-find-the-bugs-your-tests-dont-catch/)
-- [3] [Arkis DeFi Prime Brokerage Security Review (Appendix C)](https://github.com/trailofbits/publications/blob/master/reviews/2024-12-arkis-defi-prime-brokerage-securityreview.pdf)
+- [1] [Kiểm thử đột biến cho kỷ nguyên agentic](https://blog.trailofbits.com/2026/04/01/mutation-testing-for-the-agentic-era/)
+- [2] [Dùng kiểm thử đột biến để tìm lỗi mà test của bạn không phát hiện được (Trail of Bits)](https://blog.trailofbits.com/2025/09/18/use-mutation-testing-to-find-the-bugs-your-tests-dont-catch/)
+- [3] [Đánh giá bảo mật Arkis DeFi Prime Brokerage (Phụ lục C)](https://github.com/trailofbits/publications/blob/master/reviews/2024-12-arkis-defi-prime-brokerage-securityreview.pdf)
 - [4] [Slither (GitHub)](https://github.com/crytic/slither)
-- [5] [Slither Mutator documentation](https://github.com/crytic/slither/blob/master/docs/src/tools/Mutator.md)
+- [5] [Tài liệu Slither Mutator](https://github.com/crytic/slither/blob/master/docs/src/tools/Mutator.md)
 - [6] [mewt](https://github.com/trailofbits/mewt)
 - [7] [MuTON](https://github.com/trailofbits/muton)
-
 {{#include ../../banners/hacktricks-training.md}}
