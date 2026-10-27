@@ -78,6 +78,14 @@ If UART RX is ignored (logs only), you can still force an init shell by **editin
 
 This is useful on embedded devices where the bootloader shell is disabled but the env partition is writable via external flash access.
 
+### Disclosing protected code through a Firewall copy task
+
+Some MCUs allow unprotected application code to call a protected-region gateway rather than read protected Flash directly. After obtaining application code execution, inspect each gateway task as a separate memory-transfer primitive. In the Cypherock X1 case, the STM32L4 Firewall call gate accepted a task, an external `data` pointer, a length, and a protected `address`. A write task failed to reject a `data` source pointer into Firewall Code. The caller could not read that code directly, yet the gateway itself could copy it into protected non-volatile storage that a permitted read task exposed.<sup>[[15]](#references)</sup>
+
+To reproduce this class of disclosure, identify a writable protected storage page with a corresponding read task, set the write source to successive protected-code addresses, and read back the staged bytes. Check the storage medium before repeating writes: in this case it was Flash, so a page needed erasing before reuse. The researchers used a routine that erased and restored the valid Secure Data Storage contents, then staged code in the remaining free space rather than overwriting wallet data. This requires code execution on the MCU and a reachable call gate; it is not a direct read bypass from an unauthenticated host.<sup>[[15]](#references)</sup>
+
+The recovered code can expose [firmware-update and boot-integrity trust gaps](firmware-integrity.md#fragmented-update-state-and-writable-integrity-metadata).<sup>[[15]](#references)</sup>
+
 ## Analyzing the firmware
 
 Now that you **have the firmware**, you need to extract information about it to know how to treat it. Different tools you can use for that:
@@ -738,5 +746,6 @@ This turns "encrypted firmware" into a more general problem: **recover the appli
 - [12] [Dell BIOS Passwords: Weak XOR Encryption Allows Recovery from SPI Flash (CVE-2026-40639)](https://mdsec.co.uk/2026/07/dell-bios-passwords-weak-xor-encryption-allows-recovery-from-spi-flash-cve-2026-40639)
 - [13] [R3n5k1/dellpwn - Dell BIOS password recovery tooling](https://github.com/R3n5k1/dellpwn)
 - [14] [VoidStar Security — Brushing Up on Hardware Hacking Part 2](https://voidstarsec.com/blog/brushing-up-part-2)
+- [15] [How And Why We Hacked Cypherock Hardware Wallet: The Full Story](https://www.darknavy.org/blog/how_and_why_we_hacked_cypherock_hardware_wallet_the_full_story/)
 
 {{#include ../../banners/hacktricks-training.md}}

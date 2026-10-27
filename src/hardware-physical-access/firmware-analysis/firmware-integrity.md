@@ -76,6 +76,20 @@ Practical validation flow:
 
 If this works over a remotely reachable transport such as BLE/Wi-Fi, the bug is effectively **unauthenticated OTA firmware replacement**.
 
+## Fragmented update state and writable integrity metadata
+
+An updater may verify a signed firmware header during installation but still boot images using only a stored integrity hash. On the Cypherock X1, the Bootloader invoked separate Firewall tasks to verify the header and place version/size in RAM, store the firmware signature in RAM, verify the written image, and finally hash the image into persistent Primary Bootloader Data. The signature itself was not persisted. These tasks could be called independently rather than enforcing one authenticated upgrade transaction.<sup>[[5]](#references)</sup>
+
+With MCU code execution and Flash write access, the reported attack rewrote the application image, changed the version/size values in Bootloader RAM shared with the Firewall, then called the final metadata task to store the malicious image's hash and restore normal boot state. The normal boot integrity check accepted that hash without rechecking a signature. When reviewing a similar updater, trace **which component can invoke each task**, where verified values live, and whether the boot-time decision authenticates the *same image* whose hash is stored. This is narrower than a checksum-only image format: signature verification existed, but the state transition was not bound to it.<sup>[[5]](#references)</sup>
+
+## Secure-element signatures over untrusted firmware measurements
+
+A secure element does not attest running code merely by signing a hash supplied by that code. In the same wallet, the secure element signed the device serial number and then the XOR of a cloud nonce and a firmware hash provided through the MCU. Compromised firmware could present an expected hash to be signed while running different bytes. The companion client also submitted the firmware version to the cloud, so the verifier's expected-hash comparison still relied on an MCU-origin measurement rather than an independent read of Flash.<sup>[[5]](#references)</sup>
+
+The device-side result was a separate trust boundary: the cloud checked the device, but the device did not authenticate the cloud's verdict. A modified client could report local success to a tampered device. Test the measurement provenance and response authentication separately; a valid secure-element signature and a success screen do not, by themselves, prove that the installed application is authentic.<sup>[[5]](#references)</sup>
+
+For the protected-code disclosure that enabled analysis of this updater, see [Firewall copy-task firmware acquisition](index.html#disclosing-protected-code-through-a-firewall-copy-task).<sup>[[5]](#references)</sup>
+
 ## Turning a trusted USB peripheral into BadUSB via firmware reflashing
 
 When the target device is already trusted by the host over USB, malicious firmware may not need to implement a full new USB stack. A much easier pivot is often to **reuse existing HID support**.<sup>[[1]](#references)</sup>
@@ -126,5 +140,6 @@ Use this to:
 - [2] [firmware-mod-kit](https://github.com/rampageX/firmware-mod-kit)
 - [3] [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit)
 - [4] [Metasploit - How to use `msfvenom`](https://docs.metasploit.com/docs/using-metasploit/basics/how-to-use-msfvenom.html)
+- [5] [How And Why We Hacked Cypherock Hardware Wallet: The Full Story](https://www.darknavy.org/blog/how_and_why_we_hacked_cypherock_hardware_wallet_the_full_story/)
 
 {{#include ../../banners/hacktricks-training.md}}
