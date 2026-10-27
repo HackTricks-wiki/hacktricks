@@ -2,30 +2,30 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Thông tin cơ bản
 
-MIG was created to **simplify the process of Mach IPC** code creation. It basically **generates the needed code** for server and client to communicate with a given definition. Even if the generated code is ugly, a developer will just need to import it and his code will be much simpler than before.<sup>[[1]](#references)</sup>
+MIG được tạo ra để **đơn giản hóa quá trình tạo mã Mach IPC**. Về cơ bản, MIG **tạo mã cần thiết** để server và client giao tiếp dựa trên một định nghĩa cho trước. Dù mã được tạo ra không đẹp, nhà phát triển chỉ cần import mã đó và phần mã của họ sẽ đơn giản hơn nhiều.<sup>[[1]](#references)</sup>
 
-The definition is specified in Interface Definition Language (IDL) using the `.defs` extension.
+Định nghĩa được viết bằng Interface Definition Language (IDL) với phần mở rộng `.defs`.
 
-These definitions have 5 sections:
+Các định nghĩa này có 5 phần:
 
-- **Subsystem declaration**: The keyword subsystem is used to indicate the **name** and the **id**. It's also possible to mark it as **`KernelServer`** if the server should run in the kernel.<sup>[[4]](#references)</sup>
-- **Inclusions and imports**: MIG uses the C-prepocessor, so it's able to use imports. Moreover, it's possible to use `uimport` and `simport` for user or server generated code.
-- **Type declarations**: It's possible to define data types although usually it will import `mach_types.defs` and `std_types.defs`. For custom ones some syntax can be used:
-  - \[i`n/out]tran`: Function that needs to be translated from an incoming or to an outgoing message
-  - `c[user/server]type`: Mapping to another C type.
-  - `destructor`: Call this function when the type is released.
-- **Operations**: These are the definitions of the RPC methods. There are 5 different types:
-  - `routine`: Expects reply
-  - `simpleroutine`: Doesn't expect reply
-  - `procedure`: Expects reply
-  - `simpleprocedure`: Doesn't expect reply
-  - `function`: Expects reply
+- **Khai báo subsystem**: Từ khóa subsystem được dùng để chỉ định **tên** và **id**. Cũng có thể đánh dấu subsystem là **`KernelServer`** nếu server cần chạy trong kernel.<sup>[[4]](#references)</sup>
+- **Các phần bao gồm và import**: MIG sử dụng C-preprocessor nên có thể dùng import. Ngoài ra, có thể dùng `uimport` và `simport` cho mã được tạo ở phía user hoặc server.
+- **Khai báo kiểu**: Có thể định nghĩa các kiểu dữ liệu, dù thông thường sẽ import `mach_types.defs` và `std_types.defs`. Với các kiểu tùy chỉnh, có thể dùng một số cú pháp:
+  - \[i`n/out]tran`: Hàm cần chuyển đổi từ một message đến hoặc sang một message đi
+  - `c[user/server]type`: Ánh xạ sang một kiểu C khác.
+  - `destructor`: Gọi hàm này khi kiểu dữ liệu được giải phóng.
+- **Các thao tác**: Đây là định nghĩa của các phương thức RPC. Có 5 loại:
+  - `routine`: Mong đợi phản hồi
+  - `simpleroutine`: Không mong đợi phản hồi
+  - `procedure`: Mong đợi phản hồi
+  - `simpleprocedure`: Không mong đợi phản hồi
+  - `function`: Mong đợi phản hồi
 
-### Example
+### Ví dụ
 
-Create a definition file, in this case with a very simple function:
+Tạo một tệp định nghĩa, trong trường hợp này là một hàm rất đơn giản:
 
 ```cpp:myipc.defs
 subsystem myipc 500; // Arbitrary name and id
@@ -42,21 +42,21 @@ simpleroutine Subtract(
     n2          :  uint32_t);
 ```
 
-Note that the first **argument is the port to bind** and MIG will **automatically handle the reply port** (unless calling `mig_get_reply_port()` in the client code). Moreover, the **ID of the operations** will be **sequential** starting by the indicated subsystem ID (so if an operation is deprecated it's deleted and `skip` is used to still use its ID).
+Lưu ý rằng **tham số đầu tiên là cổng cần bind** và MIG sẽ **tự động xử lý reply port** (trừ khi gọi `mig_get_reply_port()` trong mã client). Ngoài ra, **ID của các operation** sẽ được đánh số **tuần tự**, bắt đầu từ subsystem ID đã chỉ định (vì vậy, nếu một operation bị deprecated thì operation đó sẽ bị xóa và dùng `skip` để các operation khác vẫn giữ nguyên ID).
 
-Now use MIG to generate the server and client code that will be able to communicate within each other to call the Subtract function:
+Giờ hãy dùng MIG để tạo mã server và client có thể giao tiếp với nhau để gọi hàm Subtract:
 
 ```bash
 mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 ```
 
-Several new files will be created in the current directory.
+Một số tệp mới sẽ được tạo trong thư mục hiện tại.
 
 > [!TIP]
-> You can find a more complex example in your system with: `mdfind mach_port.defs`\
-> And you can compile it from the same folder as the file with: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`<sup>[[2]](#references)</sup>
+> Bạn có thể tìm thấy một ví dụ phức tạp hơn trong hệ thống bằng lệnh: `mdfind mach_port.defs`\
+> Và bạn có thể biên dịch tệp đó từ cùng thư mục với lệnh: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`<sup>[[2]](#references)</sup>
 
-In the files **`myipcServer.c`** and **`myipcServer.h`** you can find the declaration and definition of the struct **`SERVERPREFmyipc_subsystem`**, which basically defines the function to call based on the received message ID (we indicated a starting number of 500):
+Trong các tệp **`myipcServer.c`** và **`myipcServer.h`**, bạn có thể tìm thấy phần khai báo và định nghĩa của struct **`SERVERPREFmyipc_subsystem`**, về cơ bản xác định hàm cần gọi dựa trên message ID nhận được (chúng ta đã chỉ định số bắt đầu là 500):
 
 {{#tabs}}
 {{#tab name="myipcServer.c"}}
@@ -97,7 +97,7 @@ extern const struct SERVERPREFmyipc_subsystem {
 {{#endtab}}
 {{#endtabs}}
 
-Based on the previous struct the function **`myipc_server_routine`** will get the **message ID** and return the proper function to call:
+Dựa trên struct trước đó, hàm **`myipc_server_routine`** sẽ nhận **message ID** và trả về hàm thích hợp để gọi:
 
 ```c
 mig_external mig_routine_t myipc_server_routine
@@ -114,11 +114,11 @@ mig_external mig_routine_t myipc_server_routine
 }
 ```
 
-In this example we have only defined 1 function in the definitions, but if we would have defined more functions, they would have been inside the array of **`SERVERPREFmyipc_subsystem`** and the first one would have been assigned to the ID **500**, the second one to the ID **501**...
+Trong ví dụ này, chúng ta chỉ định nghĩa 1 function trong phần định nghĩa. Nhưng nếu định nghĩa thêm function, chúng sẽ nằm trong array **`SERVERPREFmyipc_subsystem`**, function đầu tiên được gán ID **500**, function thứ hai được gán ID **501**...
 
-If the function was expected to send a **reply** the function `mig_internal kern_return_t __MIG_check__Reply__<name>` would also exist.
+Nếu function được kỳ vọng sẽ gửi **reply**, function `mig_internal kern_return_t __MIG_check__Reply__<name>` cũng sẽ tồn tại.
 
-Actually it's possible to identify this relation in the struct **`subsystem_to_name_map_myipc`** from **`myipcServer.h`** (**`subsystem*to_name_map*\***`** in other files):
+Thực tế, có thể nhận diện mối liên hệ này trong struct **`subsystem_to_name_map_myipc`** từ **`myipcServer.h`** (**`subsystem*to_name_map*\***` trong các file khác):
 
 ```c
 #ifndef subsystem_to_name_map_myipc
@@ -127,7 +127,7 @@ Actually it's possible to identify this relation in the struct **`subsystem_to_n
 #endif
 ```
 
-Finally, another important function to make the server work will be **`myipc_server`**, which is the one that will actually **call the function** related to the received id:<sup>[[3]](#references)</sup>
+Cuối cùng, một hàm quan trọng khác để server hoạt động là **`myipc_server`**. Hàm này sẽ **gọi hàm** liên quan đến id nhận được:<sup>[[3]](#references)</sup>
 
 <pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 	(mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
@@ -161,9 +161,9 @@ Finally, another important function to make the server work will be **`myipc_ser
 }
 </code></pre>
 
-Check the previously highlighted lines accessing the function to call by ID.
+Kiểm tra các dòng được tô sáng ở trên để xem cách truy cập hàm cần gọi theo ID.
 
-The following is the code to create a simple **server** and **client** where the client can call the functions Subtract from the server:
+Dưới đây là code tạo một **server** và **client** đơn giản, trong đó client có thể gọi các hàm Subtract từ server:
 
 {{#tabs}}
 {{#tab name="myipc_server.c"}}
@@ -233,27 +233,27 @@ int main() {
 
 ### The NDR_record
 
-The NDR_record is exported by `libsystem_kernel.dylib`, and it's a struct that allows MIG to **transform data so it's agnostic of the system** it's being used as MIG was thought to be used between different systems (and not only in the same machine).
+NDR_record được `libsystem_kernel.dylib` export; đây là một struct cho phép MIG **chuyển đổi dữ liệu để không phụ thuộc vào hệ thống** đang sử dụng, vì MIG được thiết kế để dùng giữa các hệ thống khác nhau (chứ không chỉ trên cùng một máy).
 
-This is interesting because if `_NDR_record` is found in a binary as a dependency (`jtool2 -S <binary> | grep NDR` or `nm`), it means that the binary is a MIG client or Server.
+Điều này đáng chú ý vì nếu tìm thấy `_NDR_record` trong binary dưới dạng dependency (`jtool2 -S <binary> | grep NDR` hoặc `nm`), điều đó có nghĩa binary là MIG client hoặc server.
 
-Moreover **MIG servers** have the dispatch table in `__DATA.__const` (or in `__CONST.__constdata` in macOS kernel and `__DATA_CONST.__const` in other \*OS kernels). This can be dumped with **`jtool2`**.
+Ngoài ra, **MIG server** có dispatch table trong `__DATA.__const` (hoặc trong `__CONST.__constdata` ở macOS kernel và `__DATA_CONST.__const` ở các kernel \*OS khác). Có thể dump bảng này bằng **`jtool2`**.
 
-And **MIG clients** will use the `__NDR_record` to send with `__mach_msg` to the servers.
+Còn **MIG client** sẽ dùng `__NDR_record` để gửi dữ liệu đến server bằng `__mach_msg`.
 
 ## Binary Analysis
 
 ### jtool
 
-As many binaries now use MIG to expose mach ports, it's interesting to know how to **identify that MIG was used** and the **functions that MIG executes** with each message ID.
+Vì hiện nay nhiều binary dùng MIG để expose mach ports, nên việc biết cách **xác định MIG đã được sử dụng** và **các function mà MIG thực thi với từng message ID** là rất hữu ích.
 
-[**jtool2 / disarm**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#disarm-old-jtool2) can parse MIG information from a Mach-O binary indicating the message ID and identifying the function to execute:
+[**jtool2 / disarm**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#disarm-old-jtool2) có thể phân tích thông tin MIG từ Mach-O binary, cho biết message ID và xác định function cần thực thi:
 
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
 
-Moreover, MIG functions are wrappers around the actual function that gets called. Therefore, by obtaining the disassembly and searching for `BL`, you may be able to find the actual function being called:
+Ngoài ra, các hàm MIG là những wrapper bao quanh hàm thực sự được gọi. Vì vậy, bằng cách lấy disassembly và tìm `BL`, bạn có thể tìm ra hàm thực sự được gọi:
 
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
@@ -261,7 +261,7 @@ jtool2 -d __DATA.__const myipc_server | grep BL
 
 ### Assembly
 
-It was previously mentioned that the function that will take care of **calling the correct function depending on the received message ID** was `myipc_server`. However, you usually won't have the symbols of the binary (no functions names), so it's interesting to **check how it looks like decompiled** as it will always be very similar (the code of this function is independent from the functions exposed):
+Trước đó đã đề cập rằng hàm chịu trách nhiệm **gọi hàm thích hợp dựa trên message ID nhận được** là `myipc_server`. Tuy nhiên, thông thường bạn sẽ không có các symbol của binary (tức là không có tên hàm), vì vậy sẽ hữu ích nếu **xem hàm này trông như thế nào khi được decompile**, vì nó luôn rất giống nhau (code của hàm này không phụ thuộc vào các hàm được expose):
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -309,7 +309,7 @@ It was previously mentioned that the function that will take care of **calling t
 {{#endtab}}
 
 {{#tab name="myipc_server decompiled 2"}}
-This is the same function decompiled in a difefrent Hopper free version:
+Đây là cùng hàm được decompile bằng một phiên bản Hopper miễn phí khác:
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
     r31 = r31 - 0x40;
@@ -385,26 +385,26 @@ This is the same function decompiled in a difefrent Hopper free version:
 {{#endtab}}
 {{#endtabs}}
 
-Actually if you go to the function **`0x100004000`** you will find the array of **`routine_descriptor`** structs. The first element of the struct is the **address** where the **function** is implemented, and the **struct takes 0x28 bytes**, so each 0x28 bytes (starting from byte 0) you can get 8 bytes and that will be the **address of the function** that will be called:
+Thực tế, nếu truy cập hàm **`0x100004000`**, bạn sẽ tìm thấy mảng các struct **`routine_descriptor`**. Phần tử đầu tiên của struct là **địa chỉ** nơi **hàm** được triển khai, và **struct có kích thước 0x28 byte**. Vì vậy, cứ mỗi 0x28 byte (bắt đầu từ byte 0), bạn có thể lấy 8 byte, đó sẽ là **địa chỉ của hàm** được gọi:
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 
 <figure><img src="../../../../images/image (36).png" alt=""><figcaption></figcaption></figure>
 
-This data can be extracted [**using this Hopper script**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py).
+Có thể trích xuất dữ liệu này [**bằng script Hopper này**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py).
 
-For a workflow that seeds and fuzzes stateful MIG message sequences, see [Stateful Mach IPC fuzzing](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#stateful-mach-ipc-fuzzing).
+Để xem quy trình tạo seed và fuzz các chuỗi message MIG có trạng thái, hãy xem [Stateful Mach IPC fuzzing](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#stateful-mach-ipc-fuzzing).
 
 ### Debug
 
-The code generated by MIG also calls `kernel_debug` to generate logs about operations on entry and exit. It is possible to inspect them using **`trace`** or **`kdv`**: `kdv all | grep MIG`
+Code do MIG tạo ra cũng gọi `kernel_debug` để tạo log về các thao tác khi bắt đầu và kết thúc. Có thể kiểm tra các log này bằng **`trace`** hoặc **`kdv`**: `kdv all | grep MIG`
 
 
 
 ## References
 
-- [1] [bootstrap_cmds — `migcom.tproj` (the MIG compiler itself)](https://github.com/apple-oss-distributions/bootstrap_cmds/tree/main/migcom.tproj)
-- [2] [XNU — `osfmk/mach/mach_port.defs` (example MIG subsystem definition)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
-- [3] [XNU — `osfmk/mach/message.h` (Mach message header layout)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
-- [4] [XNU — `osfmk/mach/task.defs` (task subsystem MIG definition)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
+- [1] [bootstrap_cmds — `migcom.tproj` (bản thân trình biên dịch MIG)](https://github.com/apple-oss-distributions/bootstrap_cmds/tree/main/migcom.tproj)
+- [2] [XNU — `osfmk/mach/mach_port.defs` (ví dụ về định nghĩa subsystem MIG)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
+- [3] [XNU — `osfmk/mach/message.h` (bố cục header của Mach message)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
+- [4] [XNU — `osfmk/mach/task.defs` (định nghĩa subsystem MIG của task)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
 {{#include ../../../../banners/hacktricks-training.md}}

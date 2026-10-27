@@ -1,230 +1,230 @@
-# Introduction to ARM64v8
+# Giới thiệu về ARM64v8
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 
-## **Exception Levels - EL (ARM64v8)**
+## **Các mức ngoại lệ - EL (ARM64v8)**
 
-In the Armv8 architecture, Exception Levels (ELs) define the privilege and execution environment. The architecture defines four levels, from EL0 to EL3, although a particular system need not use every level in the way described by a generic example. <sup>[[5]](#references)</sup>
+Trong kiến trúc Armv8, các mức ngoại lệ (EL) xác định đặc quyền và môi trường thực thi. Kiến trúc định nghĩa bốn mức, từ EL0 đến EL3, mặc dù một hệ thống cụ thể không nhất thiết phải sử dụng mọi mức theo cách được mô tả trong ví dụ chung. <sup>[[5]](#references)</sup>
 
-1. **EL0 - User Mode**:
-   - This is the least-privileged level and is used for executing regular application code.
-   - Applications running at EL0 are isolated from each other and from the system software, enhancing security and stability.
-2. **EL1 - Operating System Kernel Mode**:
-   - Most operating system kernels run at this level.
-   - EL1 has more privileges than EL0 and can access system resources, but with some restrictions to ensure system integrity. You go from EL0 to EL1 with the SVC instruction.
-3. **EL2 - Hypervisor Mode**:
-   - This level is used for virtualization. A hypervisor running at EL2 can manage multiple operating systems (each in its own EL1) running on the same physical hardware.
-   - EL2 provides features for isolation and control of the virtualized environments.
-   - So virtual machine applications like Parallels can use the `hypervisor.framework` to interact with EL2 and run virtual machines without needing kernel extensions.
-   - TO move from EL1 to EL2 the `HVC` instruction is used.
-4. **EL3 - Secure Monitor Mode**:
-   - This is the most privileged level and is often used for secure booting and trusted execution environments.
-   - EL3 can manage and control accesses between secure and non-secure states (such as secure boot, trusted OS, etc.).
-   - Software requests a transition to the secure monitor with the `SMC` (Secure Monitor Call) instruction when that interface is implemented.
-   - Older Apple-security material often discussed **Kernel Patch Protection (KPP)** together with privileged monitor-level enforcement. That is useful historical context, but the blanket claims that Apple no longer uses EL3 or that every Apple platform implements KPP at EL3 are not portable across generations. Current Apple documentation instead describes protections such as Kernel Integrity Protection, System Coprocessor Integrity Protection, SPTM, and TXM; verify the SoC and OS version being analyzed. <sup>[[6]](#references)</sup>
+1. **EL0 - Chế độ người dùng**:
+   - Đây là mức có ít đặc quyền nhất, dùng để thực thi mã ứng dụng thông thường.
+   - Các ứng dụng chạy ở EL0 được cô lập với nhau và với phần mềm hệ thống, giúp tăng cường bảo mật và tính ổn định.
+2. **EL1 - Chế độ nhân hệ điều hành**:
+   - Hầu hết nhân hệ điều hành chạy ở mức này.
+   - EL1 có nhiều đặc quyền hơn EL0 và có thể truy cập tài nguyên hệ thống, nhưng vẫn có một số hạn chế nhằm đảm bảo tính toàn vẹn của hệ thống. Có thể chuyển từ EL0 sang EL1 bằng lệnh SVC.
+3. **EL2 - Chế độ hypervisor**:
+   - Mức này được dùng cho ảo hóa. Một hypervisor chạy ở EL2 có thể quản lý nhiều hệ điều hành (mỗi hệ điều hành chạy ở EL1 riêng) trên cùng một phần cứng vật lý.
+   - EL2 cung cấp các tính năng cô lập và kiểm soát môi trường ảo hóa.
+   - Vì vậy, các ứng dụng máy ảo như Parallels có thể sử dụng `hypervisor.framework` để tương tác với EL2 và chạy máy ảo mà không cần kernel extensions.
+   - Để chuyển từ EL1 sang EL2, dùng lệnh `HVC`.
+4. **EL3 - Chế độ Secure Monitor**:
+   - Đây là mức có nhiều đặc quyền nhất, thường được dùng cho secure boot và môi trường thực thi đáng tin cậy.
+   - EL3 có thể quản lý và kiểm soát quyền truy cập giữa trạng thái bảo mật và không bảo mật (chẳng hạn như secure boot, trusted OS, v.v.).
+   - Phần mềm yêu cầu chuyển sang secure monitor bằng lệnh `SMC` (Secure Monitor Call) khi giao diện này được triển khai.
+   - Tài liệu cũ về bảo mật của Apple thường đề cập **Kernel Patch Protection (KPP)** cùng với cơ chế thực thi ở mức monitor có đặc quyền. Đây là bối cảnh lịch sử hữu ích, nhưng các khẳng định chung rằng Apple không còn dùng EL3 hoặc mọi nền tảng Apple đều triển khai KPP ở EL3 không thể áp dụng cho mọi thế hệ. Tài liệu hiện tại của Apple mô tả các cơ chế bảo vệ như Kernel Integrity Protection, System Coprocessor Integrity Protection, SPTM và TXM; hãy xác minh SoC và phiên bản OS đang phân tích. <sup>[[6]](#references)</sup>
 
-The use of these levels allows for a structured and secure way to manage different aspects of the system, from user applications to the most privileged system software. ARMv8's approach to privilege levels helps in effectively isolating different system components, thereby enhancing the security and robustness of the system.
+Việc sử dụng các mức này tạo ra một cách có cấu trúc và an toàn để quản lý các khía cạnh khác nhau của hệ thống, từ ứng dụng người dùng đến phần mềm hệ thống có nhiều đặc quyền nhất. Cách tiếp cận của ARMv8 đối với các mức đặc quyền giúp cô lập hiệu quả các thành phần hệ thống khác nhau, qua đó tăng cường bảo mật và độ tin cậy của hệ thống.
 
 ## **Registers (ARM64v8)**
 
-ARM64 has **31 general-purpose registers**, labeled `x0` through `x30`. Each can store a **64-bit** (8-byte) value. For 32-bit operations, the same registers are addressed as `w0` through `w30`. <sup>[[5]](#references)</sup>
+ARM64 có **31 register đa dụng**, được đặt tên từ `x0` đến `x30`. Mỗi register có thể lưu một giá trị **64-bit** (8 byte). Với các thao tác 32-bit, có thể truy cập cùng các register đó dưới tên `w0` đến `w30`. <sup>[[5]](#references)</sup>
 
-1. **`x0`** to **`x7`** - These are typically used as scratch registers and for passing parameters to subroutines.
-   - **`x0`** also carries the return data of a function
-2. **`x8`** - In the Linux kernel, `x8` is used as the system call number for the `svc` instruction. **In macOS the x16 is the one used!**
-3. **`x9`** to **`x15`** - More temporary registers, often used for local variables.
-4. **`x16`** and **`x17`** - **Intra-procedural Call Registers**. Temporary registers for immediate values. They are also used for indirect function calls and PLT (Procedure Linkage Table) stubs.
-   - **`x16`** is used as the **system call number** for the **`svc`** instruction in **macOS**.
-5. **`x18`** - **Platform register**. It can be used as a general-purpose register, but on some platforms, this register is reserved for platform-specific uses: Pointer to current thread environment block in Windows, or to point to the currently **executing task structure in linux kernel**.
-6. **`x19`** to **`x28`** - These are callee-saved registers. A function must preserve these registers' values for its caller, so they are stored in the stack and recovered before going back to the caller.
-7. **`x29`** - **Frame pointer** to keep track of the stack frame. When a new stack frame is created because a function is called, the **`x29`** register is **stored in the stack** and the **new** frame pointer address is (**`sp`** address) is **stored in this registry**.
-   - This register can also be used as a **general-purpose registry** although it's usually used as reference to **local variables**.
-8. **`x30`** or **`lr`**- **Link register** . It holds the **return address** when a `BL` (Branch with Link) or `BLR` (Branch with Link to Register) instruction is executed by storing the **`pc`** value in this register.
-   - It could also be used like any other register.
-   - If the current function is going to call a new function and therefore overwrite `lr`, it will store it in the stack at the beginning, this is the epilogue (`stp x29, x30 , [sp, #-48]; mov x29, sp` -> Store `fp` and `lr`, generate space and get new `fp`) and recover it at the end, this is the prologue (`ldp x29, x30, [sp], #48; ret` -> Recover `fp` and `lr` and return).
-9. **`sp`** - **Stack pointer**, used to keep track of the top of the stack.
-   - the **`sp`** value should always be kept to at least a **quadword** **alignment** or a alignment exception may occur.
-10. **`pc`** - **Program counter**, which points to the next instruction. This register can only be updates through exception generations, exception returns, and branches. The only ordinary instructions that can read this register are branch with link instructions (BL, BLR) to store the **`pc`** address in **`lr`** (Link Register).
-11. **`xzr`** - **Zero register**. Also called **`wzr`** in it **32**-bit register form. Can be used to get the zero value easily (common operation) or to perform comparisons using **`subs`** like **`subs XZR, Xn, #10`** storing the resulting data nowhere (in **`xzr`**).
+1. **`x0`** đến **`x7`** - Các register này thường được dùng làm scratch register và để truyền tham số cho subroutine.
+   - **`x0`** cũng chứa dữ liệu trả về của hàm.
+2. **`x8`** - Trong Linux kernel, `x8` được dùng làm số system call cho lệnh `svc`. **Trong macOS, register được dùng là x16!**
+3. **`x9`** đến **`x15`** - Các register tạm thời khác, thường dùng cho biến cục bộ.
+4. **`x16`** và **`x17`** - **Intra-procedural Call Registers**. Các register tạm thời dùng cho giá trị tức thời. Chúng cũng được dùng cho các lời gọi hàm gián tiếp và PLT (Procedure Linkage Table) stub.
+   - **`x16`** được dùng làm **số system call** cho lệnh **`svc`** trong **macOS**.
+5. **`x18`** - **Platform register**. Có thể dùng làm register đa dụng, nhưng trên một số nền tảng, register này được dành riêng cho mục đích cụ thể của nền tảng: con trỏ đến thread environment block hiện tại trong Windows, hoặc con trỏ đến **cấu trúc task đang thực thi trong Linux kernel**.
+6. **`x19`** đến **`x28`** - Đây là các callee-saved register. Hàm phải giữ nguyên giá trị của các register này để trả lại cho caller, vì vậy chúng được lưu trên stack và khôi phục trước khi quay lại caller.
+7. **`x29`** - **Frame pointer** dùng để theo dõi stack frame. Khi tạo stack frame mới do một hàm được gọi, register **`x29`** được **lưu trên stack** và địa chỉ frame pointer **mới** (địa chỉ **`sp`**) được **lưu vào register này**.
+   - Register này cũng có thể dùng làm **register đa dụng**, dù thường được dùng làm tham chiếu đến **biến cục bộ**.
+8. **`x30`** hoặc **`lr`** - **Link register**. Register này giữ **địa chỉ trả về** khi thực thi lệnh `BL` (Branch with Link) hoặc `BLR` (Branch with Link to Register), bằng cách lưu giá trị **`pc`** vào register.
+   - Nó cũng có thể được dùng như mọi register khác.
+   - Nếu hàm hiện tại sắp gọi một hàm mới và do đó ghi đè `lr`, nó sẽ lưu `lr` lên stack ở đầu hàm. Đây là epilogue (`stp x29, x30 , [sp, #-48]; mov x29, sp` -> Lưu `fp` và `lr`, cấp phát vùng nhớ và lấy `fp` mới), rồi khôi phục `lr` ở cuối hàm. Đây là prologue (`ldp x29, x30, [sp], #48; ret` -> Khôi phục `fp` và `lr`, rồi quay về).
+9. **`sp`** - **Stack pointer**, dùng để theo dõi đỉnh stack.
+   - Giá trị **`sp`** luôn phải được giữ căn chỉnh tối thiểu theo **quadword**, nếu không có thể xảy ra lỗi căn chỉnh.
+10. **`pc`** - **Program counter**, trỏ đến lệnh tiếp theo. Chỉ có thể cập nhật register này thông qua việc tạo ngoại lệ, trả về từ ngoại lệ và các lệnh branch. Các lệnh thông thường duy nhất có thể đọc register này là các lệnh branch with link (BL, BLR), dùng để lưu địa chỉ **`pc`** vào **`lr`** (Link Register).
+11. **`xzr`** - **Zero register**. Còn được gọi là **`wzr`** ở dạng register **32**-bit. Có thể dùng để lấy giá trị 0 dễ dàng (một thao tác phổ biến) hoặc thực hiện so sánh bằng **`subs`**, chẳng hạn **`subs XZR, Xn, #10`**, trong đó dữ liệu kết quả không được lưu ở đâu (vào **`xzr`**).
 
-The **`Wn`** registers are the **32bit** version of the **`Xn`** register.
+Các register **`Wn`** là phiên bản **32-bit** của register **`Xn`**.
 
 > [!TIP]
-> The registers from X0 - X18 are volatile, which means that their values can be changed by function calls and interrupts. However, the registers from X19 - X28 are non-volatile, meaning their values must be preserved across function calls ("callee saved").
+> Các register từ X0 đến X18 là volatile, nghĩa là lời gọi hàm và interrupt có thể thay đổi giá trị của chúng. Ngược lại, các register từ X19 đến X28 là non-volatile, nghĩa là giá trị của chúng phải được giữ nguyên qua các lời gọi hàm ("callee saved").
 
-### SIMD and Floating-Point Registers
+### Registers SIMD và dấu phẩy động
 
-Moreover, there are another **32 registers of 128bit length** that can be used in optimized single instruction multiple data (SIMD) operations and for performing floating-point arithmetic. These are called the Vn registers although they can also operate in **64**-bit, **32**-bit, **16**-bit and **8**-bit and then they are called **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** and **`Bn`**.
+Ngoài ra còn có **32 register dài 128-bit**, có thể được dùng trong các thao tác single instruction multiple data (SIMD) được tối ưu hóa và để thực hiện phép toán dấu phẩy động. Chúng được gọi là các register Vn, nhưng cũng có thể hoạt động ở các độ rộng **64**-bit, **32**-bit, **16**-bit và **8**-bit; khi đó chúng được gọi là **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** và **`Bn`**.
 
 ### System Registers
 
-**There are hundreds of system registers**, also called special-purpose registers (SPRs), are used for **monitoring** and **controlling** **processors** behaviour.\
-They can only be read or set using the dedicated special instruction **`mrs`** and **`msr`**.
+**Có hàng trăm system register**, còn được gọi là special-purpose register (SPR), dùng để **giám sát** và **điều khiển** hoạt động của **processor**.\
+Chỉ có thể đọc hoặc thiết lập chúng bằng các lệnh đặc biệt chuyên dụng **`mrs`** và **`msr`**.
 
-The special registers **`TPIDR_EL0`** and **`TPIDDR_EL0`** are commonly found when reversing engineering. The `EL0` suffix indicates the **minimal exception** from which the register can be accessed (in this case EL0 is the regular exception (privilege) level regular programs runs with).\
-They are often used to store the **base address of the thread-local storage** region of memory. Usually the first one is readable and writable for programs running in EL0, but the second can be read from EL0 and written from EL1 (like kernel).
+Các register đặc biệt **`TPIDR_EL0`** và **`TPIDDR_EL0`** thường xuất hiện khi reverse engineering. Hậu tố `EL0` cho biết **mức ngoại lệ thấp nhất** có thể truy cập register (trong trường hợp này, EL0 là mức ngoại lệ (đặc quyền) thông thường mà các chương trình bình thường chạy ở đó).\
+Chúng thường được dùng để lưu **địa chỉ cơ sở của vùng bộ nhớ thread-local storage**. Thông thường, chương trình chạy ở EL0 có thể đọc và ghi register đầu tiên, nhưng chỉ có thể đọc register thứ hai từ EL0; việc ghi cần thực hiện từ EL1 (chẳng hạn như kernel).
 
-- `mrs x0, TPIDR_EL0 ; Read TPIDR_EL0 into x0`
-- `msr TPIDR_EL0, X0 ; Write x0 into TPIDR_EL0`
+- `mrs x0, TPIDR_EL0 ; Đọc TPIDR_EL0 vào x0`
+- `msr TPIDR_EL0, X0 ; Ghi x0 vào TPIDR_EL0`
 
 ### **PSTATE**
 
-**PSTATE** contains processor-state fields. On an exception, relevant state is saved in **`SPSR_ELx`**, where `x` identifies the exception level handling the exception, so the state can be restored on return.\
-These are the accessible fields:
+**PSTATE** chứa các trường trạng thái processor. Khi xảy ra ngoại lệ, trạng thái liên quan được lưu vào **`SPSR_ELx`**, trong đó `x` xác định mức ngoại lệ xử lý ngoại lệ đó, để có thể khôi phục trạng thái khi quay về.\
+Các trường có thể truy cập gồm:
 
 <figure><img src="../../../images/image (1196).png" alt=""><figcaption></figcaption></figure>
 
-- The **`N`**, **`Z`**, **`C`** and **`V`** condition flags:
-  - **`N`** means the operation yielded a negative result
-  - **`Z`** means the operation yielded zero
-  - **`C`** means the operation carried
-  - **`V`** means the operation yielded a signed overflow:
-    - The sum of two positive numbers yields a negative result.
-    - The sum of two negative numbers yields a positive result.
-    - In subtraction, when a large negative number is subtracted from a smaller positive number (or vice versa), and the result cannot be represented within the range of the given bit size.
-    - Obviously the processor doesn't now the operation is signed or not, so it will check C and V in the operations and indicate of a carry occurred in case it was signed or unsigned.
+- Các cờ điều kiện **`N`**, **`Z`**, **`C`** và **`V`**:
+  - **`N`** nghĩa là thao tác cho ra kết quả âm.
+  - **`Z`** nghĩa là thao tác cho ra kết quả bằng 0.
+  - **`C`** nghĩa là thao tác tạo ra carry.
+  - **`V`** nghĩa là thao tác tạo ra signed overflow:
+    - Tổng của hai số dương cho ra kết quả âm.
+    - Tổng của hai số âm cho ra kết quả dương.
+    - Trong phép trừ, khi lấy một số âm lớn trừ một số dương nhỏ hơn (hoặc ngược lại) và kết quả không thể biểu diễn trong phạm vi của độ rộng bit đã cho.
+    - Rõ ràng processor không biết thao tác là signed hay unsigned, vì vậy nó sẽ kiểm tra C và V trong các thao tác và cho biết có carry xảy ra hay không, trong trường hợp phép toán là signed hoặc unsigned.
 
 > [!WARNING]
-> Not all the instructions update these flags. Some like **`CMP`** or **`TST`** do, and others that have an s suffix like **`ADDS`** also do it.
+> Không phải mọi lệnh đều cập nhật các cờ này. Một số lệnh như **`CMP`** hoặc **`TST`** có cập nhật cờ; các lệnh khác có hậu tố s, chẳng hạn **`ADDS`**, cũng vậy.
 
-- The current **register width (`nRW`) flag**: If the flag holds the value 0, the program will run in the AArch64 execution state once resumed.
-- The current **Exception Level** (**`EL`**): A regular program running in EL0 will have the value 0
-- The **single stepping** flag (**`SS`**): Used by debuggers to single step by setting the SS flag to 1 inside **`SPSR_ELx`** through an exception. The program will run a step and issue a single step exception.
-- The **illegal exception** state flag (**`IL`**): It's used to mark when a privileged software performs an invalid exception level transfer, this flag is set to 1 and the processor triggers an illegal state exception.
-- The **`DAIF`** flags: These flags allow a privileged program to selectively mask certain external exceptions.
-  - If **`A`** is 1 it means **asynchronous aborts** will be triggered. The **`I`** configures to respond to external hardware **Interrupts Requests** (IRQs). and the F is related to **Fast Interrupt Requests** (FIRs).
-- The **stack pointer select** flags (**`SPS`**): Privileged programs running in EL1 and above can swap between using their own stack pointer register and the user-model one (e.g. between `SP_EL1` and `EL0`). This switching is performed by writing to the **`SPSel`** special register. This cannot be done from EL0.
+- Cờ **độ rộng register hiện tại (`nRW`)**: Nếu cờ có giá trị 0, chương trình sẽ chạy ở trạng thái thực thi AArch64 sau khi được tiếp tục.
+- **Mức ngoại lệ hiện tại** (**`EL`**): Một chương trình thông thường chạy ở EL0 sẽ có giá trị 0.
+- Cờ **single stepping** (**`SS`**): Debugger dùng cờ này để thực hiện từng bước bằng cách đặt SS thành 1 trong **`SPSR_ELx`** thông qua một ngoại lệ. Chương trình sẽ chạy một bước rồi phát sinh ngoại lệ single step.
+- Cờ trạng thái **ngoại lệ không hợp lệ** (**`IL`**): Cờ này dùng để đánh dấu khi phần mềm có đặc quyền thực hiện một lần chuyển mức ngoại lệ không hợp lệ; cờ được đặt thành 1 và processor kích hoạt ngoại lệ trạng thái không hợp lệ.
+- Các cờ **`DAIF`**: Các cờ này cho phép chương trình có đặc quyền chọn lọc việc mask một số ngoại lệ bên ngoài.
+  - Nếu **`A`** bằng 1, các **asynchronous abort** sẽ được kích hoạt. **`I`** cấu hình phản hồi với **Interrupt Request** (IRQ) từ phần cứng bên ngoài. **`F`** liên quan đến **Fast Interrupt Request** (FIR).
+- Các cờ **chọn stack pointer** (**`SPS`**): Phần mềm có đặc quyền chạy ở EL1 trở lên có thể chuyển đổi giữa stack pointer riêng và stack pointer của user model (ví dụ giữa `SP_EL1` và `EL0`). Việc chuyển đổi này được thực hiện bằng cách ghi vào system register **`SPSel`**. EL0 không thể thực hiện thao tác này.
 
 ## **Calling Convention (ARM64v8)**
 
-The ARM64 calling convention specifies that the **first eight parameters** to a function are passed in registers **`x0` through `x7`**. **Additional** parameters are passed on the **stack**. The **return** value is passed back in register **`x0`**, or in **`x1`** as well **if its 128 bits long**. The **`x19`** to **`x30`** and **`sp`** registers must be **preserved** across function calls.
+Calling convention của ARM64 quy định **tám tham số đầu tiên** của một hàm được truyền qua các register **`x0` đến `x7`**. Các tham số **còn lại** được truyền qua **stack**. Giá trị **trả về** được truyền trong register **`x0`**, hoặc cả **`x1`** nếu giá trị dài 128 bit. Các register **`x19`** đến **`x30`** và **`sp`** phải được **giữ nguyên** qua các lời gọi hàm.
 
-When reading a function in assembly, look for the **function prologue and epilogue**. The **prologue** usually involves **saving the frame pointer (`x29`)**, **setting** up a **new frame pointer**, and a**llocating stack space**. The **epilogue** usually involves **restoring the saved frame pointer** and **returning** from the function.
+Khi đọc một hàm trong assembly, hãy tìm **function prologue và epilogue**. **Prologue** thường bao gồm việc **lưu frame pointer (`x29`)**, **thiết lập** frame pointer **mới** và **cấp phát vùng nhớ trên stack**. **Epilogue** thường bao gồm việc **khôi phục frame pointer đã lưu** và **quay về** từ hàm.
 
-### Calling Convention in Swift
+### Calling Convention trong Swift
 
-Swift have its own **calling convention** that can be found in [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64)
+Swift có **calling convention** riêng, có thể tìm thấy tại [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64)
 
-## **Common Instructions (ARM64v8)**
+## **Các lệnh thường dùng (ARM64v8)**
 
-ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where **`opcode`** is the **operation** to be performed (such as `add`, `sub`, `mov`, etc.), **`dst`** is the **destination** register where the result will be stored, and **`src1`** and **`src2`** are the **source** registers. Immediate values can also be used in place of source registers.
+Các lệnh ARM64 thường có **định dạng `opcode dst, src1, src2`**, trong đó **`opcode`** là **thao tác** cần thực hiện (chẳng hạn `add`, `sub`, `mov`, v.v.), **`dst`** là register **đích** dùng để lưu kết quả, còn **`src1`** và **`src2`** là các register **nguồn**. Có thể dùng giá trị tức thời thay cho register nguồn.
 
-- **`mov`**: **Move** a value from one **register** to another.
-  - Example: `mov x0, x1` — This moves the value from `x1` to `x0`.
-- **`ldr`**: **Load** a value from **memory** into a **register**.
-  - Example: `ldr x0, [x1]` — This loads a value from the memory location pointed to by `x1` into `x0`.
-  - **Offset mode**: An offset affecting the orin pointer is indicated, for example:
-    - `ldr x2, [x1, #8]`, this will load in x2 the value from x1 + 8
-    - `ldr x2, [x0, x1, lsl #2]`, this will load in x2 an object from the array x0, from the position x1 (index) \* 4
-  - **Pre-indexed mode**: This will apply calculations to the origin, get the result and also store the new origin in the origin.
-    - `ldr x2, [x1, #8]!`, this will load `x1 + 8` in `x2` and store in x1 the result of `x1 + 8`
-    - `str lr, [sp, #-4]!`, Store the link register in sp and update the register sp
-  - **Post-index mode**: This is like the previous one but the memory address is accessed and then the offset is calculated and stored.
-    - `ldr x0, [x1], #8`, load `x1` in `x0` and update x1 with `x1 + 8`
-  - **PC-relative addressing**: In this case the address to load is calculated relative to the PC register
-    - `ldr x1, =_start`, This will load the address where the `_start` symbol starts in x1 related to the current PC.
-- **`str`**: **Store** a value from a **register** into **memory**.
-  - Example: `str x0, [x1]` — This stores the value in `x0` into the memory location pointed to by `x1`.
-- **`ldp`**: **Load Pair of Registers**. This instruction **loads two registers** from **consecutive memory** locations. The memory address is typically formed by adding an offset to the value in another register.
-  - Example: `ldp x0, x1, [x2]` — This loads `x0` and `x1` from the memory locations at `x2` and `x2 + 8`, respectively.
-- **`stp`**: **Store Pair of Registers**. This instruction **stores two registers** to **consecutive memory** locations. The memory address is typically formed by adding an offset to the value in another register.
-  - Example: `stp x0, x1, [sp]` — This stores `x0` and `x1` to the memory locations at `sp` and `sp + 8`, respectively.
-  - `stp x0, x1, [sp, #16]!` — This stores `x0` and `x1` to the memory locations at `sp+16` and `sp + 24`, respectively, and updates `sp` with `sp+16`.
-- **`add`**: **Add** the values of two registers and store the result in a register.
-  - Syntax: add(s) Xn1, Xn2, Xn3 | #imm, \[shift #N | RRX]
-    - Xn1 -> Destination
-    - Xn2 -> Operand 1
-    - Xn3 | #imm -> Operando 2 (register or immediate)
-    - \[shift #N | RRX] -> Perform a shift or call RRX
-  - Example: `add x0, x1, x2` — This adds the values in `x1` and `x2` together and stores the result in `x0`.
-  - `add x5, x5, #1, lsl #12` — This equals to 4096 (a 1 shifter 12 times) -> 1 0000 0000 0000 0000
-  - **`adds`** This perform an `add` and updates the flags
-- **`sub`**: **Subtract** the values of two registers and store the result in a register.
-  - Check **`add`** **syntax**.
-  - Example: `sub x0, x1, x2` — This subtracts the value in `x2` from `x1` and stores the result in `x0`.
-  - **`subs`** This is like sub but updating the flag
-- **`mul`**: **Multiply** the values of **two registers** and store the result in a register.
-  - Example: `mul x0, x1, x2` — This multiplies the values in `x1` and `x2` and stores the result in `x0`.
-- **`div`**: **Divide** the value of one register by another and store the result in a register.
-  - Example: `div x0, x1, x2` — This divides the value in `x1` by `x2` and stores the result in `x0`.
+- **`mov`**: **Di chuyển** một giá trị từ **register** này sang register khác.
+  - Ví dụ: `mov x0, x1` — Lệnh này chuyển giá trị từ `x1` sang `x0`.
+- **`ldr`**: **Nạp** một giá trị từ **bộ nhớ** vào **register**.
+  - Ví dụ: `ldr x0, [x1]` — Lệnh này nạp giá trị từ vị trí bộ nhớ được `x1` trỏ tới vào `x0`.
+  - **Chế độ offset**: Offset ảnh hưởng đến con trỏ gốc được chỉ định, ví dụ:
+    - `ldr x2, [x1, #8]`, lệnh này nạp giá trị từ x1 + 8 vào x2.
+    - `ldr x2, [x0, x1, lsl #2]`, lệnh này nạp vào x2 một phần tử từ mảng x0, tại vị trí x1 (index) \* 4.
+  - **Chế độ pre-indexed**: Thực hiện phép tính trên địa chỉ gốc, lấy kết quả rồi lưu địa chỉ gốc mới vào register chứa địa chỉ gốc.
+    - `ldr x2, [x1, #8]!`, lệnh này nạp `x1 + 8` vào `x2` và lưu kết quả `x1 + 8` vào x1.
+    - `str lr, [sp, #-4]!`, Lưu link register vào sp và cập nhật register sp.
+  - **Chế độ post-index**: Tương tự chế độ trên, nhưng địa chỉ bộ nhớ được truy cập trước, sau đó mới tính offset và lưu kết quả.
+    - `ldr x0, [x1], #8`, nạp `x1` vào `x0` và cập nhật x1 thành `x1 + 8`.
+  - **Định địa chỉ PC-relative**: Trong trường hợp này, địa chỉ cần nạp được tính tương đối với register PC.
+    - `ldr x1, =_start`, Lệnh này nạp vào x1 địa chỉ bắt đầu của symbol `_start`, tính tương đối với PC hiện tại.
+- **`str`**: **Lưu** một giá trị từ **register** vào **bộ nhớ**.
+  - Ví dụ: `str x0, [x1]` — Lệnh này lưu giá trị trong `x0` vào vị trí bộ nhớ được `x1` trỏ tới.
+- **`ldp`**: **Nạp một cặp register**. Lệnh này **nạp hai register** từ các vị trí **bộ nhớ liên tiếp**. Địa chỉ bộ nhớ thường được tạo bằng cách cộng một offset vào giá trị trong register khác.
+  - Ví dụ: `ldp x0, x1, [x2]` — Lệnh này lần lượt nạp `x0` và `x1` từ các vị trí bộ nhớ tại `x2` và `x2 + 8`.
+- **`stp`**: **Lưu một cặp register**. Lệnh này **lưu hai register** vào các vị trí **bộ nhớ liên tiếp**. Địa chỉ bộ nhớ thường được tạo bằng cách cộng một offset vào giá trị trong register khác.
+  - Ví dụ: `stp x0, x1, [sp]` — Lệnh này lưu `x0` và `x1` vào các vị trí bộ nhớ tại `sp` và `sp + 8`.
+  - `stp x0, x1, [sp, #16]!` — Lệnh này lưu `x0` và `x1` vào các vị trí bộ nhớ tại `sp+16` và `sp + 24`, đồng thời cập nhật `sp` thành `sp+16`.
+- **`add`**: **Cộng** giá trị của hai register và lưu kết quả vào một register.
+  - Cú pháp: add(s) Xn1, Xn2, Xn3 | #imm, \[shift #N | RRX]
+    - Xn1 -> Đích
+    - Xn2 -> Toán hạng 1
+    - Xn3 | #imm -> Toán hạng 2 (register hoặc giá trị tức thời)
+    - \[shift #N | RRX] -> Thực hiện phép dịch hoặc gọi RRX
+  - Ví dụ: `add x0, x1, x2` — Lệnh này cộng giá trị trong `x1` và `x2`, rồi lưu kết quả vào `x0`.
+  - `add x5, x5, #1, lsl #12` — Tương đương với 4096 (dịch 1 sang trái 12 lần) -> 1 0000 0000 0000 0000
+  - **`adds`** Thực hiện `add` và cập nhật các cờ.
+- **`sub`**: **Trừ** giá trị của hai register và lưu kết quả vào một register.
+  - Xem **cú pháp** của **`add`**.
+  - Ví dụ: `sub x0, x1, x2` — Lệnh này lấy giá trị trong `x2` trừ khỏi `x1`, rồi lưu kết quả vào `x0`.
+  - **`subs`** Tương tự sub nhưng có cập nhật cờ.
+- **`mul`**: **Nhân** giá trị của **hai register** và lưu kết quả vào một register.
+  - Ví dụ: `mul x0, x1, x2` — Lệnh này nhân giá trị trong `x1` và `x2`, rồi lưu kết quả vào `x0`.
+- **`div`**: **Chia** giá trị của một register cho register khác rồi lưu kết quả vào một register.
+  - Ví dụ: `div x0, x1, x2` — Lệnh này chia giá trị trong `x1` cho `x2`, rồi lưu kết quả vào `x0`.
 - **`lsl`**, **`lsr`**, **`asr`**, **`ror`, `rrx`**:
-  - **Logical shift left**: Add 0s from the end moving the other bits forward (multiply by n-times 2)
-  - **Logical shift right**: Add 1s at the beginning moving the other bits backward (divide by n-times 2 in unsigned)
-  - **Arithmetic shift right**: Like **`lsr`**, but instead of adding 0s if the most significant bit is a 1, **1s are added (**divide by ntimes 2 in signed)
-  - **Rotate right**: Like **`lsr`** but whatever is removed from the right it's appended to the left
-  - **Rotate Right with Extend**: Like **`ror`**, but with the carry flag as the "most significant bit". So the carry flag is moved to the bit 31 and the removed bit to the carry flag.
-- **`bfm`**: **Bit Filed Move**, these operations **copy bits `0...n`** from a value an place them in positions **`m..m+n`**. The **`#s`** specifies the **leftmost bit** position and **`#r`** the **rotate right amount**.
-  - Bitfiled move: `BFM Xd, Xn, #r`
+  - **Dịch logic trái**: Thêm các bit 0 vào cuối, dịch các bit còn lại về phía trước (nhân với 2 lũy thừa n).
+  - **Dịch logic phải**: Thêm các bit 1 ở đầu, dịch các bit còn lại về phía sau (chia cho 2 lũy thừa n với số unsigned).
+  - **Dịch số học phải**: Tương tự **`lsr`**, nhưng thay vì thêm các bit 0, nếu bit có trọng số cao nhất là 1 thì sẽ thêm các bit **1** (chia cho 2 lũy thừa n với số signed).
+  - **Xoay phải**: Tương tự **`lsr`**, nhưng các bit bị đẩy ra bên phải được nối vào bên trái.
+  - **Xoay phải có mở rộng**: Tương tự **`ror`**, nhưng dùng cờ carry làm "bit có trọng số cao nhất". Cờ carry được chuyển đến bit 31 và bit bị đẩy ra được chuyển vào cờ carry.
+- **`bfm`**: **Bit Field Move**, các thao tác này **sao chép các bit `0...n`** từ một giá trị và đặt chúng vào các vị trí **`m..m+n`**. **`#s`** chỉ vị trí **bit ngoài cùng bên trái**, còn **`#r`** chỉ lượng **xoay phải**.
+  - Bitfield move: `BFM Xd, Xn, #r`
   - Signed Bitfield move: `SBFM Xd, Xn, #r, #s`
   - Unsigned Bitfield move: `UBFM Xd, Xn, #r, #s`
-- **Bitfield Extract and Insert:** Copy a bitfield from a register and copies it to another register.
-  - **`BFI X1, X2, #3, #4`** Insert 4 bits from X2 from the 3rd bit of X1
-  - **`BFXIL X1, X2, #3, #4`** Extract from the 3rd bit of X2 four bits and copy them to X1
-  - **`SBFIZ X1, X2, #3, #4`** Sign-extends 4 bits from X2 and inserts them into X1 starting at bit position 3 zeroing the right bits
-  - **`SBFX X1, X2, #3, #4`** Extracts 4 bits starting at bit 3 from X2, sign extends them, and places the result in X1
-  - **`UBFIZ X1, X2, #3, #4`** Zero-extends 4 bits from X2 and inserts them into X1 starting at bit position 3 zeroing the right bits
-  - **`UBFX X1, X2, #3, #4`** Extracts 4 bits starting at bit 3 from X2 and places the zero-extended result in X1.
-- **Sign Extend To X:** Extends the sign (or adds just 0s in the unsigned version) of a value to be able to perform operations with it:
-  - **`SXTB X1, W2`** Extends the sign of a byte **from W2 to X1** (`W2` is half of `X2`) to fill the 64bits
-  - **`SXTH X1, W2`** Extends the sign of a 16bit number **from W2 to X1** to fill the 64bits
-  - **`SXTW X1, W2`** Extends the sign of a byte **from W2 to X1** to fill the 64bits
-  - **`UXTB X1, W2`** Adds 0s (unsigned) to a byte **from W2 to X1** to fill the 64bits
-- **`extr`:** Extracts bits from a specified **pair of registers concatenated**.
-  - Example: `EXTR W3, W2, W1, #3` This will **concat W1+W2** and get **from bit 3 of W2 up to bit 3 of W1** and store it in W3.
-- **`cmp`**: **Compare** two registers and set condition flags. It's an **alias of `subs`** setting the destination register to the zero register. Useful to know if `m == n`.
-  - It supports the **same syntax as `subs`**
-  - Example: `cmp x0, x1` — This compares the values in `x0` and `x1` and sets the condition flags accordingly.
-- **`cmn`**: **Compare negative** operand. In this case it's an **alias of `adds`** and supports the same syntax. Useful to know if `m == -n`.
-- **`ccmp`**: Conditional comparison, it's a comparison that will be performed only if a previous comparison was true and will specifically set nzcv bits.
-  - `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> if x1 != x2 and x3 < x4, jump to func
-    - This is because **`ccmp`** will only be executed if the **previous `cmp` was a `NE`**, if it wasn't the bits `nzcv` will be set to 0 (which won't satisfy the `blt` comparison).
-    - This ca also be used as `ccmn` (same but negative, like `cmp` vs `cmn`).
-- **`tst`**: It checks if any of the values of the comparison are both 1 (it works like and ANDS without storing the result anywhere). It's useful to check a registry with a value and check if any of the bits of the registry indicated in the value is 1.
-  - Example: `tst X1, #7` Check if any of the last 3 bits of X1 is 1
-- **`teq`**: XOR operation discarding the result
-- **`b`**: Unconditional Branch
-  - Example: `b myFunction`
-  - Note that this won't fill the link register with the return address (not suitable for subrutine calls that needs to return back)
-- **`bl`**: **Branch** with link, used to **call** a **subroutine**. Stores the **return address in `x30`**.
-  - Example: `bl myFunction` — This calls the function `myFunction` and stores the return address in `x30`.
-  - Note that this won't fill the link register with the return address (not suitable for subrutine calls that needs to return back)
-- **`blr`**: **Branch** with Link to Register, used to **call** a **subroutine** where the target is **specified** in a **register**. Stores the return address in `x30`. (This is
-  - Example: `blr x1` — This calls the function whose address is contained in `x1` and stores the return address in `x30`.
-- **`ret`**: **Return** from **subroutine**, typically using the address in **`x30`**.
-  - Example: `ret` — This returns from the current subroutine using the return address in `x30`.
-- **`b.<cond>`**: Conditional branches
-  - **`b.eq`**: **Branch if equal**, based on the previous `cmp` instruction.
-    - Example: `b.eq label` — If the previous `cmp` instruction found two equal values, this jumps to `label`.
-  - **`b.ne`**: **Branch if Not Equal**. This instruction checks the condition flags (which were set by a previous comparison instruction), and if the compared values were not equal, it branches to a label or address.
-    - Example: After a `cmp x0, x1` instruction, `b.ne label` — If the values in `x0` and `x1` were not equal, this jumps to `label`.
-- **`cbz`**: **Compare and Branch on Zero**. This instruction compares a register with zero, and if they are equal, it branches to a label or address.
-  - Example: `cbz x0, label` — If the value in `x0` is zero, this jumps to `label`.
-- **`cbnz`**: **Compare and Branch on Non-Zero**. This instruction compares a register with zero, and if they are not equal, it branches to a label or address.
-  - Example: `cbnz x0, label` — If the value in `x0` is non-zero, this jumps to `label`.
-- **`tbnz`**: Test bit and branch on nonzero
-  - Example: `tbnz x0, #8, label`
-- **`tbz`**: Test bit and branch on zero
-  - Example: `tbz x0, #8, label`
-- **Conditional select operations**: These are operations whose behaviour varies depending on the conditional bits.
-  - `csel Xd, Xn, Xm, cond` -> `csel X0, X1, X2, EQ` -> If true, X0 = X1, if false, X0 = X2
-  - `csinc Xd, Xn, Xm, cond` -> If true, Xd = Xn, if false, Xd = Xm + 1
-  - `cinc Xd, Xn, cond` -> If true, Xd = Xn + 1, if false, Xd = Xn
-  - `csinv Xd, Xn, Xm, cond` -> If true, Xd = Xn, if false, Xd = NOT(Xm)
-  - `cinv Xd, Xn, cond` -> If true, Xd = NOT(Xn), if false, Xd = Xn
-  - `csneg Xd, Xn, Xm, cond` -> If true, Xd = Xn, if false, Xd = - Xm
-  - `cneg Xd, Xn, cond` -> If true, Xd = - Xn, if false, Xd = Xn
-  - `cset Xd, Xn, Xm, cond` -> If true, Xd = 1, if false, Xd = 0
-  - `csetm Xd, Xn, Xm, cond` -> If true, Xd = \<all 1>, if false, Xd = 0
-- **`adrp`**: Compute the **page address of a symbol** and store it in a register.
-  - Example: `adrp x0, symbol` — This computes the page address of `symbol` and stores it in `x0`.
-- **`ldrsw`**: **Load** a signed **32-bit** value from memory and **sign-extend it to 64** bits. This is used for common SWITCH cases.
-  - Example: `ldrsw x0, [x1]` — This loads a signed 32-bit value from the memory location pointed to by `x1`, sign-extends it to 64 bits, and stores it in `x0`.
-- **`stur`**: **Store a register value to a memory location**, using an offset from another register.
-  - Example: `stur x0, [x1, #4]` — This stores the value in `x0` into the memory ddress that is 4 bytes greater than the address currently in `x1`.
-- **`svc`** : Make a **system call**. It stands for "Supervisor Call". When the processor executes this instruction, it **switches from user mode to kernel mode** and jumps to a specific location in memory where the **kernel's system call handling** code is located.
+- **Trích xuất và chèn bitfield:** Sao chép một bitfield từ register này sang register khác.
+  - **`BFI X1, X2, #3, #4`** Chèn 4 bit từ X2 vào X1, bắt đầu từ bit thứ 3.
+  - **`BFXIL X1, X2, #3, #4`** Trích xuất 4 bit từ bit thứ 3 của X2 và sao chép chúng vào X1.
+  - **`SBFIZ X1, X2, #3, #4`** Mở rộng dấu 4 bit từ X2 rồi chèn chúng vào X1, bắt đầu tại vị trí bit 3, đồng thời đặt các bit bên phải thành 0.
+  - **`SBFX X1, X2, #3, #4`** Trích xuất 4 bit bắt đầu từ bit 3 của X2, mở rộng dấu rồi đặt kết quả vào X1.
+  - **`UBFIZ X1, X2, #3, #4`** Mở rộng bằng 0 4 bit từ X2 rồi chèn chúng vào X1, bắt đầu tại vị trí bit 3, đồng thời đặt các bit bên phải thành 0.
+  - **`UBFX X1, X2, #3, #4`** Trích xuất 4 bit bắt đầu từ bit 3 của X2 rồi đặt kết quả đã mở rộng bằng 0 vào X1.
+- **Mở rộng dấu sang X:** Mở rộng dấu (hoặc chỉ thêm các bit 0 ở phiên bản unsigned) của một giá trị để có thể thực hiện các phép toán với giá trị đó:
+  - **`SXTB X1, W2`** Mở rộng dấu của một byte **từ W2 sang X1** (`W2` bằng một nửa `X2`) để lấp đầy 64 bit.
+  - **`SXTH X1, W2`** Mở rộng dấu của một số 16-bit **từ W2 sang X1** để lấp đầy 64 bit.
+  - **`SXTW X1, W2`** Mở rộng dấu của một byte **từ W2 sang X1** để lấp đầy 64 bit.
+  - **`UXTB X1, W2`** Thêm các bit 0 (unsigned) vào một byte **từ W2 sang X1** để lấp đầy 64 bit.
+- **`extr`:** Trích xuất các bit từ **một cặp register được nối với nhau**.
+  - Ví dụ: `EXTR W3, W2, W1, #3` Lệnh này sẽ **nối W1+W2**, lấy các bit **từ bit 3 của W2 đến bit 3 của W1** rồi lưu vào W3.
+- **`cmp`**: **So sánh** hai register và thiết lập các cờ điều kiện. Đây là **bí danh của `subs`**, đặt register đích thành zero register. Hữu ích để kiểm tra `m == n`.
+  - Lệnh này hỗ trợ **cùng cú pháp với `subs`**.
+  - Ví dụ: `cmp x0, x1` — Lệnh này so sánh giá trị trong `x0` và `x1`, rồi thiết lập các cờ điều kiện tương ứng.
+- **`cmn`**: **So sánh toán hạng âm**. Đây là **bí danh của `adds`** và có cùng cú pháp. Hữu ích để kiểm tra `m == -n`.
+- **`ccmp`**: So sánh có điều kiện; phép so sánh chỉ được thực hiện nếu phép so sánh trước đó đúng và sẽ thiết lập cụ thể các bit nzcv.
+  - `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> nếu x1 != x2 và x3 < x4 thì nhảy đến func
+    - Lý do là **`ccmp`** chỉ được thực thi nếu **`cmp` trước đó cho kết quả `NE`**; nếu không, các bit `nzcv` sẽ được đặt thành 0 (khi đó phép so sánh `blt` sẽ không thỏa mãn).
+    - Cũng có thể dùng lệnh này dưới dạng `ccmn` (tương tự nhưng là phép toán âm, như `cmp` và `cmn`).
+- **`tst`**: Kiểm tra xem các giá trị được so sánh có bit nào cùng bằng 1 hay không (hoạt động như ANDS nhưng không lưu kết quả ở đâu). Hữu ích để kiểm tra một register với một giá trị nhằm xác định bit nào trong register được chỉ định bởi giá trị đó có bằng 1 hay không.
+  - Ví dụ: `tst X1, #7` Kiểm tra xem 3 bit cuối của X1 có bit nào bằng 1 hay không.
+- **`teq`**: Thực hiện phép XOR và loại bỏ kết quả.
+- **`b`**: Branch vô điều kiện.
+  - Ví dụ: `b myFunction`
+  - Lưu ý rằng lệnh này không lưu địa chỉ trả về vào link register (không phù hợp với lời gọi subroutine cần quay về).
+- **`bl`**: **Branch** có link, dùng để **gọi** một **subroutine**. Lưu **địa chỉ trả về vào `x30`**.
+  - Ví dụ: `bl myFunction` — Lệnh này gọi hàm `myFunction` và lưu địa chỉ trả về vào `x30`.
+  - Lưu ý rằng lệnh này không lưu địa chỉ trả về vào link register (không phù hợp với lời gọi subroutine cần quay về).
+- **`blr`**: **Branch** có Link đến Register, dùng để **gọi** một **subroutine** có địa chỉ đích được **chỉ định** trong một **register**. Lưu địa chỉ trả về vào `x30`. (Đây là
+  - Ví dụ: `blr x1` — Lệnh này gọi hàm có địa chỉ chứa trong `x1` và lưu địa chỉ trả về vào `x30`.
+- **`ret`**: **Quay về** từ **subroutine**, thường dùng địa chỉ trong **`x30`**.
+  - Ví dụ: `ret` — Lệnh này quay về từ subroutine hiện tại bằng địa chỉ trả về trong `x30`.
+- **`b.<cond>`**: Branch có điều kiện.
+  - **`b.eq`**: **Branch nếu bằng nhau**, dựa trên lệnh `cmp` trước đó.
+    - Ví dụ: `b.eq label` — Nếu lệnh `cmp` trước đó xác định hai giá trị bằng nhau, lệnh này sẽ nhảy đến `label`.
+  - **`b.ne`**: **Branch nếu không bằng nhau**. Lệnh này kiểm tra các cờ điều kiện (được thiết lập bởi lệnh so sánh trước đó); nếu các giá trị được so sánh không bằng nhau, lệnh sẽ nhảy đến một label hoặc địa chỉ.
+    - Ví dụ: Sau lệnh `cmp x0, x1`, `b.ne label` — Nếu giá trị trong `x0` và `x1` không bằng nhau, lệnh này sẽ nhảy đến `label`.
+- **`cbz`**: **So sánh và branch nếu bằng 0**. Lệnh này so sánh một register với 0; nếu chúng bằng nhau, lệnh sẽ nhảy đến một label hoặc địa chỉ.
+  - Ví dụ: `cbz x0, label` — Nếu giá trị trong `x0` bằng 0, lệnh này sẽ nhảy đến `label`.
+- **`cbnz`**: **So sánh và branch nếu khác 0**. Lệnh này so sánh một register với 0; nếu chúng không bằng nhau, lệnh sẽ nhảy đến một label hoặc địa chỉ.
+  - Ví dụ: `cbnz x0, label` — Nếu giá trị trong `x0` khác 0, lệnh này sẽ nhảy đến `label`.
+- **`tbnz`**: Kiểm tra bit và branch nếu khác 0.
+  - Ví dụ: `tbnz x0, #8, label`
+- **`tbz`**: Kiểm tra bit và branch nếu bằng 0.
+  - Ví dụ: `tbz x0, #8, label`
+- **Các thao tác conditional select**: Đây là các thao tác có hành vi thay đổi tùy theo các bit điều kiện.
+  - `csel Xd, Xn, Xm, cond` -> `csel X0, X1, X2, EQ` -> Nếu đúng, X0 = X1; nếu sai, X0 = X2
+  - `csinc Xd, Xn, Xm, cond` -> Nếu đúng, Xd = Xn; nếu sai, Xd = Xm + 1
+  - `cinc Xd, Xn, cond` -> Nếu đúng, Xd = Xn + 1; nếu sai, Xd = Xn
+  - `csinv Xd, Xn, Xm, cond` -> Nếu đúng, Xd = Xn; nếu sai, Xd = NOT(Xm)
+  - `cinv Xd, Xn, cond` -> Nếu đúng, Xd = NOT(Xn); nếu sai, Xd = Xn
+  - `csneg Xd, Xn, Xm, cond` -> Nếu đúng, Xd = Xn; nếu sai, Xd = - Xm
+  - `cneg Xd, Xn, cond` -> Nếu đúng, Xd = - Xn; nếu sai, Xd = Xn
+  - `cset Xd, Xn, Xm, cond` -> Nếu đúng, Xd = 1; nếu sai, Xd = 0
+  - `csetm Xd, Xn, Xm, cond` -> Nếu đúng, Xd = \<tất cả bit bằng 1>; nếu sai, Xd = 0
+- **`adrp`**: Tính **địa chỉ trang của một symbol** và lưu vào một register.
+  - Ví dụ: `adrp x0, symbol` — Lệnh này tính địa chỉ trang của `symbol` và lưu vào `x0`.
+- **`ldrsw`**: **Nạp** một giá trị **32-bit** có dấu từ bộ nhớ và **mở rộng dấu thành 64 bit**. Lệnh này thường được dùng trong các trường hợp SWITCH.
+  - Ví dụ: `ldrsw x0, [x1]` — Lệnh này nạp một giá trị 32-bit có dấu từ vị trí bộ nhớ được `x1` trỏ tới, mở rộng dấu thành 64 bit rồi lưu vào `x0`.
+- **`stur`**: **Lưu giá trị của một register vào vị trí bộ nhớ**, sử dụng offset tính từ một register khác.
+  - Ví dụ: `stur x0, [x1, #4]` — Lệnh này lưu giá trị trong `x0` vào địa chỉ bộ nhớ cao hơn địa chỉ hiện tại trong `x1` 4 byte.
+- **`svc`**: Thực hiện **system call**. Tên lệnh là viết tắt của "Supervisor Call". Khi processor thực thi lệnh này, nó **chuyển từ chế độ người dùng sang chế độ kernel** và nhảy đến một vị trí cụ thể trong bộ nhớ, nơi chứa mã **xử lý system call của kernel**.
 
-  - Example:
+  - Ví dụ:
 
     ```armasm
     mov x8, 93  ; Load the system call number for exit (93) into register x8.
@@ -232,44 +232,44 @@ ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where
     svc 0       ; Make the system call.
     ```
 
-### **Function Prologue**
+### **Phần mở đầu hàm**
 
-1. **Save the link register and frame pointer to the stack**:
+1. **Lưu thanh ghi liên kết và con trỏ khung vào ngăn xếp**:
 
 ```armasm
 stp x29, x30, [sp, #-16]!  ; store pair x29 and x30 to the stack and decrement the stack pointer
 ```
 
-2. **Set up the new frame pointer**: `mov x29, sp` (sets up the new frame pointer for the current function)
-3. **Allocate space on the stack for local variables** (if needed): `sub sp, sp, <size>` (where `<size>` is the number of bytes needed)
+2. **Thiết lập con trỏ khung mới**: `mov x29, sp` (thiết lập con trỏ khung mới cho hàm hiện tại)
+3. **Cấp phát chỗ trên stack cho các biến cục bộ** (nếu cần): `sub sp, sp, <size>` (trong đó `<size>` là số byte cần thiết)
 
-### **Function Epilogue**
+### **Phần kết thúc hàm**
 
-1. **Deallocate local variables (if any were allocated)**: `add sp, sp, <size>`
-2. **Restore the link register and frame pointer**:
+1. **Giải phóng chỗ dành cho các biến cục bộ** (nếu đã cấp phát): `add sp, sp, <size>`
+2. **Khôi phục thanh ghi liên kết và con trỏ khung**:
 
 ```armasm
 ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment the stack pointer
 ```
 
-3. **Return**: `ret` (returns control to the caller using the address in the link register)
+3. **Return**: `ret` (trả quyền điều khiển về caller bằng địa chỉ trong thanh ghi liên kết)
 
-## ARM Common Memory Protections
+## Các cơ chế bảo vệ bộ nhớ phổ biến của ARM
 
 {{#ref}}
 ../../../binary-exploitation/ios-exploiting/README.md
 {{#endref}}
 
-## AARCH32 Execution State
+## Trạng thái thực thi AARCH32
 
-Armv8-A support the execution of 32-bit programs. **AArch32** can run in one of **two instruction sets**: **`A32`** and **`T32`** and can switch between them via **`interworking`**.\
-**Privileged** 64-bit programs can schedule the **execution of 32-bit** programs by executing a exception level transfer to the lower privileged 32-bit.\
-Note that the transition from 64-bit to 32-bit occurs with a lower of the exception level (for example a 64-bit program in EL1 triggering a program in EL0). This is done by setting the **bit 4 of** **`SPSR_ELx`** special register **to 1** when the `AArch32` process thread is ready to be executed and the rest of `SPSR_ELx` stores the **`AArch32`** programs CPSR. Then, the privileged process calls the **`ERET`** instruction so the processor transitions to **`AArch32`** entering in A32 or T32 depending on CPSR**.**
+Armv8-A hỗ trợ thực thi các chương trình 32-bit. **AArch32** có thể chạy với một trong **hai tập lệnh**: **`A32`** và **`T32`**, đồng thời có thể chuyển đổi giữa chúng thông qua **`interworking`**.\
+Các chương trình 64-bit **có đặc quyền** có thể lên lịch **thực thi các chương trình 32-bit** bằng cách thực hiện chuyển mức ngoại lệ xuống chương trình 32-bit có đặc quyền thấp hơn.\
+Lưu ý rằng quá trình chuyển từ 64-bit sang 32-bit diễn ra khi mức ngoại lệ giảm xuống (ví dụ: một chương trình 64-bit ở EL1 kích hoạt một chương trình ở EL0). Việc này được thực hiện bằng cách đặt **bit 4 của thanh ghi đặc biệt** **`SPSR_ELx`** thành **1** khi luồng của tiến trình `AArch32` sẵn sàng được thực thi; phần còn lại của `SPSR_ELx` lưu CPSR của chương trình **`AArch32`**. Sau đó, tiến trình có đặc quyền gọi lệnh **`ERET`** để bộ xử lý chuyển sang **`AArch32`**, bắt đầu ở A32 hoặc T32 tùy theo CPSR**.**
 
-The **`interworking`** occurs using the J and T bits of CPSR. `J=0` and `T=0` means **`A32`** and `J=0` and `T=1` means **T32**. This basically traduces on setting the **lowest bit to 1** to indicate the instruction set is T32.\
-This is set during the **interworking branch instructions,** but can also be set directly with other instructions when the PC is set as the destination register. Example:
+**`interworking`** diễn ra bằng cách sử dụng các bit J và T của CPSR. `J=0` và `T=0` tương ứng với **`A32`**, còn `J=0` và `T=1` tương ứng với **T32**. Nói cách khác, đặt **bit thấp nhất thành 1** để cho biết tập lệnh là T32.\
+Việc này được thiết lập trong các **lệnh nhánh interworking**, nhưng cũng có thể được thiết lập trực tiếp bằng các lệnh khác khi PC được đặt làm thanh ghi đích. Ví dụ:
 
-Another example:
+Một ví dụ khác:
 
 ```armasm
 _start:
@@ -284,60 +284,60 @@ _start:
 
 ### Registers
 
-There are 16 32-bit registers (r0-r15). **From r0 to r14** they can be used for **any operation**, however some of them are usually reserved:
+Có 16 thanh ghi 32-bit (r0-r15). **Từ r0 đến r14**, chúng có thể được dùng cho **bất kỳ thao tác nào**, tuy nhiên một số thường được dành riêng:
 
-- **`r15`**: Program counter (always). Contains the address of the next instruction. In A32 current + 8, in T32, current + 4.
+- **`r15`**: Program counter (luôn luôn). Chứa địa chỉ của lệnh tiếp theo. Trong A32 là current + 8, trong T32 là current + 4.
 - **`r11`**: Frame Pointer
 - **`r12`**: Intra-procedural call register
-- **`r13`**: Stack Pointer (Note the stack is always 16-byte aligned)
+- **`r13`**: Stack Pointer (Lưu ý stack luôn được căn chỉnh 16-byte)
 - **`r14`**: Link Register
 
-Moreover, registers are backed up in **`banked registries`**. Which are places that store the registers values allowing to perform **fast context switching** in exception handling and privileged operations to avoid the need to manually save and restore registers every time.\
-This is done by **saving the processor state from the `CPSR` to the `SPSR`** of the processor mode to which the exception is taken. On the exception returns, the **`CPSR`** is restored from the **`SPSR`**.
+Ngoài ra, các thanh ghi được sao lưu trong **`banked registers`**. Đây là những nơi lưu trữ giá trị thanh ghi, cho phép **chuyển đổi ngữ cảnh nhanh** khi xử lý ngoại lệ và thực hiện các thao tác đặc quyền, tránh phải lưu và khôi phục thanh ghi thủ công mỗi lần.\
+Việc này được thực hiện bằng cách **lưu trạng thái bộ xử lý từ `CPSR` vào `SPSR`** của chế độ bộ xử lý nhận ngoại lệ. Khi thoát khỏi ngoại lệ, **`CPSR`** được khôi phục từ **`SPSR`**.
 
 ### CPSR - Current Program Status Register
 
-In AArch32 the CPSR works similar to **`PSTATE`** in AArch64 and is also stored in **`SPSR_ELx`** when a exception is taken to restore later the execution:
+Trong AArch32, CPSR hoạt động tương tự **`PSTATE`** trong AArch64 và cũng được lưu vào **`SPSR_ELx`** khi xảy ra ngoại lệ để khôi phục trạng thái thực thi sau đó:
 
 <figure><img src="../../../images/image (1197).png" alt=""><figcaption></figcaption></figure>
 
-The fields are divided in some groups:
+Các trường được chia thành một số nhóm:
 
-- Application Program Status Register (APSR): Arithmetic flags and accesible from EL0
-- Execution State Registers: Process behaviour (managed by the OS).
+- Application Program Status Register (APSR): Các cờ số học, có thể truy cập từ EL0
+- Execution State Registers: Hành vi của tiến trình (do OS quản lý).
 
 #### Application Program Status Register (APSR)
 
-- The **`N`**, **`Z`**, **`C`**, **`V`** flags (just like in AArch64)
-- The **`Q`** flag: It's set to 1 whenever **integer saturation occurs** during the execution of a specialized saturating arithmetic instruction. Once it's set to **`1`**, it'll maintain the value until it's manually set to 0. Moreover, there isn't any instruction that checks its value implicitly, it must be done reading it manually.
-- **`GE`** (Greater than or equal) Flags: It's used in SIMD (Single Instruction, Multiple Data) operations, such as "parallel add" and "parallel subtract". These operations allow processing multiple data points in a single instruction.
+- Các cờ **`N`**, **`Z`**, **`C`**, **`V`** (giống như trong AArch64)
+- Cờ **`Q`**: Được đặt thành 1 bất cứ khi nào xảy ra **bão hòa số nguyên** trong quá trình thực thi một lệnh số học bão hòa chuyên biệt. Sau khi được đặt thành **`1`**, cờ sẽ giữ nguyên giá trị cho đến khi được đặt thủ công về 0. Ngoài ra, không có lệnh nào kiểm tra giá trị này một cách ngầm định; phải đọc giá trị thủ công.
+- Các cờ **`GE`** (Greater than or equal): Được dùng trong các thao tác SIMD (Single Instruction, Multiple Data), chẳng hạn như "cộng song song" và "trừ song song". Các thao tác này cho phép xử lý nhiều điểm dữ liệu trong một lệnh.
 
-  For example, the **`UADD8`** instruction **adds four pairs of bytes** (from two 32-bit operands) in parallel and stores the results in a 32-bit register. It then **sets the `GE` flags in the `APSR`** based on these results. Each GE flag corresponds to one of the byte additions, indicating if the addition for that byte pair **overflowed**.
+  Ví dụ, lệnh **`UADD8`** **cộng song song bốn cặp byte** (từ hai toán hạng 32-bit) và lưu kết quả vào một thanh ghi 32-bit. Sau đó, lệnh **đặt các cờ `GE` trong `APSR`** dựa trên các kết quả này. Mỗi cờ GE tương ứng với một phép cộng byte, cho biết phép cộng của cặp byte đó có **bị tràn** hay không.
 
-  The **`SEL`** instruction uses these GE flags to perform conditional actions.
+  Lệnh **`SEL`** sử dụng các cờ GE này để thực hiện các thao tác có điều kiện.
 
 #### Execution State Registers
 
-- The **`J`** and **`T`** bits: **`J`** should be 0 and if **`T`** is 0 the instruction set A32 is used, and if it's 1, the T32 is used.
-- **IT Block State Register** (`ITSTATE`): These are the bits from 10-15 and 25-26. They store conditions for instructions inside an **`IT`** prefixed group.
-- **`E`** bit: Indicates the **endianness**.
-- **Mode and Exception Mask Bits** (0-4): They determine the current execution state. The **5th** one indicates if the program runs as 32bit (a 1) or 64bit (a 0). The other 4 represents the **exception mode currently in used** (when a exception occurs and it's being handled). The number set **indicates the current priority** in case another exception is triggered while this is being handled.
+- Các bit **`J`** và **`T`**: **`J`** phải là 0; nếu **`T`** là 0 thì dùng tập lệnh A32, còn nếu là 1 thì dùng T32.
+- IT Block State Register (`ITSTATE`): Đây là các bit từ 10-15 và 25-26. Chúng lưu điều kiện cho các lệnh bên trong một nhóm có tiền tố **`IT`**.
+- Bit **`E`**: Cho biết **endianness**.
+- **Các bit Mode và Exception Mask** (0-4): Chúng xác định trạng thái thực thi hiện tại. Bit thứ **5** cho biết chương trình chạy ở chế độ 32-bit (giá trị 1) hay 64-bit (giá trị 0). Bốn bit còn lại biểu thị **chế độ ngoại lệ hiện đang được sử dụng** (khi ngoại lệ xảy ra và đang được xử lý). Giá trị được đặt **cho biết mức ưu tiên hiện tại** trong trường hợp một ngoại lệ khác được kích hoạt trong khi ngoại lệ này đang được xử lý.
 
 <figure><img src="../../../images/image (1200).png" alt=""><figcaption></figcaption></figure>
 
-- **`AIF`**: Certain exceptions can be disabled using the bits **`A`**, `I`, `F`. If **`A`** is 1 it means **asynchronous aborts** will be triggered. The **`I`** configures to respond to external hardware **Interrupts Requests** (IRQs). and the F is related to **Fast Interrupt Requests** (FIRs).
+- **`AIF`**: Có thể vô hiệu hóa một số ngoại lệ bằng các bit **`A`**, `I`, `F`. Nếu **`A`** là 1, điều đó có nghĩa là các **lỗi hủy bất đồng bộ** sẽ được kích hoạt. **`I`** cấu hình phản hồi với các **yêu cầu ngắt** (IRQ) từ phần cứng bên ngoài. `F` liên quan đến **các yêu cầu ngắt nhanh** (FIR).
 
 ## macOS
 
 ### BSD syscalls
 
-Check out [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master) or run `cat /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/syscall.h`. BSD syscalls will have **x16 > 0**.
+Tham khảo [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master) hoặc chạy `cat /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/syscall.h`. BSD syscalls sẽ có **x16 > 0**.
 
 ### Mach Traps
 
-Check out in [**syscall_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall_sw.c.auto.html) the `mach_trap_table` and in [**mach_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach_traps.h) the prototypes. The mex number of Mach traps is `MACH_TRAP_TABLE_COUNT` = 128. Mach traps will have **x16 < 0**, so you need to call the numbers from the previous list with a **minus**: **`_kernelrpc_mach_vm_allocate_trap`** is **`-10`**.
+Tham khảo `mach_trap_table` trong [**syscall_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall_sw.c.auto.html) và các prototype trong [**mach_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach_traps.h). Số lượng Mach trap tối đa là `MACH_TRAP_TABLE_COUNT` = 128. Mach traps sẽ có **x16 < 0**, vì vậy bạn cần gọi các số trong danh sách trước đó với dấu **trừ**: **`_kernelrpc_mach_vm_allocate_trap`** là **`-10`**.
 
-You can also check **`libsystem_kernel.dylib`** in a disassembler to find how to call these (and BSD) syscalls:
+Bạn cũng có thể kiểm tra **`libsystem_kernel.dylib`** bằng disassembler để tìm cách gọi các syscall này (và BSD):
 
 ```bash
 # macOS
@@ -347,32 +347,32 @@ dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Lib
 dyldex -e libsystem_kernel.dylib /System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64
 ```
 
-Note that **Ida** and **Ghidra** can also decompile **specific dylibs** from the cache just by passing the cache.
+Lưu ý rằng **Ida** và **Ghidra** cũng có thể decompile **các dylib cụ thể** từ cache chỉ bằng cách truyền cache vào.
 
 > [!TIP]
-> Sometimes it's easier to check the **decompiled** code from **`libsystem_kernel.dylib`** **than** checking the **source code** because the code of several syscalls (BSD and Mach) are generated via scripts (check comments in the source code) while in the dylib you can find what is being called.
+> Đôi khi kiểm tra mã đã **decompile** từ **`libsystem_kernel.dylib`** sẽ dễ hơn kiểm tra **source code**, vì mã của một số syscall (BSD và Mach) được tạo bằng script (hãy xem các comment trong source code), còn trong dylib, bạn có thể thấy những gì đang được gọi.
 
 ### machdep calls
 
-XNU supports another type of calls called machine dependent. The numbers of these calls depends on the architecture and neither the calls or numbers are guaranteed to remain constant.
+XNU hỗ trợ một loại call khác gọi là machine dependent. Số hiệu của các call này phụ thuộc vào kiến trúc, và cả các call lẫn số hiệu đều không được đảm bảo sẽ giữ nguyên.
 
 ### comm page
 
-This is a kernel owner memory page that is mapped into the address scape of every users process. It's meant to make the transition from user mode to kernel space faster than using syscalls for kernel services that are used so much the this transition would be vey inneficient.
+Đây là một trang bộ nhớ do kernel sở hữu, được ánh xạ vào không gian địa chỉ của mọi tiến trình người dùng. Mục đích của nó là giúp việc chuyển từ user mode sang kernel space nhanh hơn so với dùng syscall cho các dịch vụ kernel được sử dụng thường xuyên đến mức việc chuyển đổi này sẽ rất kém hiệu quả.
 
-For example the call `gettimeofdate` reads the value of `timeval` directly from the comm page.
+Ví dụ, call `gettimeofdate` đọc trực tiếp giá trị `timeval` từ comm page.
 
 ### objc_msgSend
 
-This function is common in Objective-C and Swift binaries because it dispatches a message to an Objective-C object.
+Hàm này thường xuất hiện trong các binary Objective-C và Swift vì nó gửi một message đến một đối tượng Objective-C.
 
-Parameters ([more info in the docs](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend)):<sup>[[4]](#references)</sup>
+Tham số ([thông tin thêm trong tài liệu](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend)):<sup>[[4]](#references)</sup>
 
-- x0: self -> Pointer to the instance
-- x1: op -> Selector of the method
-- x2... -> Rest of the arguments of the invoked method
+- x0: self -> Con trỏ đến instance
+- x1: op -> Selector của method
+- x2... -> Các argument còn lại của method được gọi
 
-So, if you put breakpoint before the branch to this function, you can easily find what is invoked in lldb with (in this example the object calls an object from `NSConcreteTask` that will run a command):
+Vì vậy, nếu bạn đặt breakpoint trước nhánh gọi đến hàm này, bạn có thể dễ dàng tìm ra lệnh gọi nào được thực hiện trong lldb bằng cách dùng (trong ví dụ này, đối tượng gọi một đối tượng từ `NSConcreteTask`, đối tượng này sẽ chạy một lệnh):
 
 ```bash
 # Right in the line were objc_msgSend will be called
@@ -393,31 +393,31 @@ whoami
 ```
 
 > [!TIP]
-> Setting the env variable **`NSObjCMessageLoggingEnabled=1`** it's possible to log when this function is called in a file like `/tmp/msgSends-pid`.
+> Thiết lập biến môi trường **`NSObjCMessageLoggingEnabled=1`** cho phép ghi log khi hàm này được gọi vào một file như `/tmp/msgSends-pid`.
 >
-> Moreover, setting **`OBJC_HELP=1`** and calling any binary you can see other environment variables you could use to **log** when certain Objc-C actions occurs.
+> Ngoài ra, thiết lập **`OBJC_HELP=1`** rồi gọi bất kỳ binary nào cũng cho phép bạn xem các biến môi trường khác có thể dùng để **ghi log** khi một số hành động Objc-C nhất định xảy ra.
 
-When this function is called, it's needed to find the called method of the indicated instance, for this different searches are made:
+Khi hàm này được gọi, cần tìm method được gọi của instance đã chỉ định. Để thực hiện việc này, ta tiến hành các bước tìm kiếm sau:
 
-- Perform optimistic cache lookup:
-  - If successful, done
-- Acquire runtimeLock (read)
-  - If (realize && !cls->realized) realize class
-  - If (initialize && !cls->initialized) initialize class
-- Try class own cache:
-  - If successful, done
-- Try class method list:
-  - If found, fill cache and done
-- Try superclass cache:
-  - If successful, done
-- Try superclass method list:
-  - If found, fill cache and done
-- If (resolver) try method resolver, and repeat from class lookup
-- If still here (= all else has failed) try forwarder
+- Thử tra cứu cache theo hướng lạc quan:
+  - Nếu thành công thì xong
+- Lấy runtimeLock (read)
+  - Nếu (realize && !cls->realized) thì realize class
+  - Nếu (initialize && !cls->initialized) thì initialize class
+- Thử cache riêng của class:
+  - Nếu thành công thì xong
+- Thử danh sách method của class:
+  - Nếu tìm thấy thì điền vào cache rồi xong
+- Thử cache của superclass:
+  - Nếu thành công thì xong
+- Thử danh sách method của superclass:
+  - Nếu tìm thấy thì điền vào cache rồi xong
+- Nếu có (resolver), thử method resolver rồi lặp lại từ bước tra cứu class
+- Nếu vẫn đến đây (= mọi cách khác đều thất bại), thử forwarder
 
 ### Shellcodes
 
-To compile:
+Để biên dịch:
 
 ```bash
 as -o shell.o shell.s
@@ -427,7 +427,7 @@ ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/Comm
 ld -o shell shell.o -syslibroot $(xcrun -sdk macosx --show-sdk-path) -lSystem
 ```
 
-To extract the bytes:
+Để trích xuất các byte:
 
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/b729f716aaf24cbc8109e0d94681ccb84c0b0c9e/helper/extract.sh
@@ -436,7 +436,7 @@ for c in $(objdump -d "s.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ;
 done
 ```
 
-For newer macOS:
+Đối với macOS mới hơn:
 
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/fc0742e9ebaf67c6a50f4c38d59459596e0a6c5d/helper/extract.sh
@@ -447,7 +447,7 @@ done
 
 <details>
 
-<summary>C code to test the shellcode</summary>
+<summary>Mã C để kiểm tra shellcode</summary>
 
 ```c
 // code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
@@ -499,7 +499,7 @@ int main(int argc, char **argv) {
 
 #### Shell
 
-Taken from [**here**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) and explained.<sup>[[1]](#references)</sup>
+Được lấy từ [**đây**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) và có giải thích.<sup>[[1]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -575,9 +575,9 @@ sh_path: .asciz "/bin/sh"
 {{#endtab}}
 {{#endtabs}}
 
-#### Read with cat
+#### Đọc bằng cat
 
-This example invokes `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`. Register `x1` points to the null-terminated argument vector containing pointers to the two strings.
+Ví dụ này gọi `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`. Thanh ghi `x1` trỏ đến vector đối số kết thúc bằng null, chứa các con trỏ đến hai chuỗi.
 
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
@@ -605,7 +605,7 @@ cat_path: .asciz "/bin/cat"
 passwd_path: .asciz "/etc/passwd"
 ```
 
-#### Invoke command with sh from a fork so the main process is not killed
+#### Gọi lệnh bằng sh từ một fork để tiến trình chính không bị kill
 
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
@@ -653,7 +653,7 @@ touch_command: .asciz "touch /tmp/lalala"
 
 #### Bind shell
 
-Bind shell from [https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s) in **port 4444**<sup>[[2]](#references)</sup>
+Bind shell từ [https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s) trên **port 4444**<sup>[[2]](#references)</sup>
 
 ```armasm
 .section __TEXT,__text
@@ -739,7 +739,7 @@ call_execve:
 
 #### Reverse shell
 
-From [https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s), revshell to **127.0.0.1:4444**<sup>[[3]](#references)</sup>
+Từ [https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s), revshell tới **127.0.0.1:4444**<sup>[[3]](#references)</sup>
 
 ```armasm
 .section __TEXT,__text
@@ -814,7 +814,6 @@ call_execve:
 - [2] [daem0nc0re/macOS_ARM64_Shellcode - bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s)
 - [3] [daem0nc0re/macOS_ARM64_Shellcode - reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s)
 - [4] [Apple Developer - 712 Objc Msgsend](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend)
-- [5] [Arm - Arm Architecture Reference Manual for A-profile architecture](https://developer.arm.com/documentation/ddi0487/latest)
-- [6] [Apple Platform Security - Operating system integrity](https://support.apple.com/guide/security/sec8b776536b/web)
-
+- [5] [Arm - Sổ tay tham chiếu kiến trúc Arm dành cho kiến trúc A-profile](https://developer.arm.com/documentation/ddi0487/latest)
+- [6] [Apple Platform Security - Tính toàn vẹn của hệ điều hành](https://support.apple.com/guide/security/sec8b776536b/web)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,30 +1,30 @@
-# macOS Memory Dumping
+# Dump bộ nhớ macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Memory Artifacts
+## Tạo phẩm bộ nhớ
 
-### Swap Files
+### Tệp hoán đổi
 
-Swap files, such as `/private/var/vm/swapfile0`, serve as **caches when the physical memory is full**. When there's no more room in physical memory, its data is transferred to a swap file and then brought back to physical memory as needed. Multiple swap files might be present, with names like swapfile0, swapfile1, and so on.
+Các tệp hoán đổi, chẳng hạn như `/private/var/vm/swapfile0`, đóng vai trò là **bộ nhớ đệm khi bộ nhớ vật lý đã đầy**. Khi bộ nhớ vật lý không còn chỗ trống, dữ liệu trong đó được chuyển sang tệp hoán đổi rồi được đưa trở lại bộ nhớ vật lý khi cần. Có thể có nhiều tệp hoán đổi, với tên như swapfile0, swapfile1, v.v.
 
-### Hibernate Image
+### Ảnh ngủ đông
 
-The file located at `/private/var/vm/sleepimage` is crucial during **hibernation mode**. **Data from memory is stored in this file when OS X hibernates**. Upon waking the computer, the system retrieves memory data from this file, allowing the user to continue where they left off.
+Tệp nằm tại `/private/var/vm/sleepimage` rất quan trọng trong **chế độ ngủ đông**. **Dữ liệu từ bộ nhớ được lưu vào tệp này khi OS X chuyển sang chế độ ngủ đông**. Khi máy tính hoạt động trở lại, hệ thống lấy dữ liệu bộ nhớ từ tệp này, cho phép người dùng tiếp tục từ nơi họ đã dừng lại.
 
-On modern macOS systems, this file is typically encrypted, making recovery difficult.
+Trên các hệ thống macOS hiện đại, tệp này thường được mã hóa, khiến việc khôi phục trở nên khó khăn.
 
-- To check if encryption is enabled for the sleepimage, the command `sysctl vm.swapusage` can be run. This will show if the file is encrypted.
+- Để kiểm tra xem sleepimage có được mã hóa hay không, có thể chạy lệnh `sysctl vm.swapusage`. Lệnh này sẽ cho biết tệp có được mã hóa hay không.
 
-### Memory Pressure Logs
+### Nhật ký áp lực bộ nhớ
 
-Another memory-related artifact on macOS is the **memory pressure log**. These logs contain information about memory usage and pressure events and can help explain how the system managed memory over time. Legacy releases may store relevant files under `/var/log`; current releases also expose memory-pressure information through the unified log and diagnostic reports.
+Một tạo phẩm khác liên quan đến bộ nhớ trên macOS là **nhật ký áp lực bộ nhớ**. Các nhật ký này chứa thông tin về mức sử dụng bộ nhớ và các sự kiện áp lực bộ nhớ, đồng thời có thể giúp giải thích cách hệ thống quản lý bộ nhớ theo thời gian. Các bản phát hành cũ có thể lưu những tệp liên quan trong `/var/log`; các bản phát hành hiện tại cũng cung cấp thông tin về áp lực bộ nhớ thông qua unified log và báo cáo chẩn đoán.
 
-## Dumping memory with osxpmem
+## Dump bộ nhớ bằng osxpmem
 
-To dump physical memory on supported legacy macOS versions, you can use [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
+Để dump bộ nhớ vật lý trên các phiên bản macOS cũ được hỗ trợ, bạn có thể dùng [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
 
-**Note**: This is mostly a **legacy workflow** now. `osxpmem` depends on loading a kernel extension, the [Rekall](https://github.com/google/rekall) project is archived, the latest release is from **2017**, and the published binary targets **Intel Macs**. On current macOS releases, especially on **Apple Silicon**, kext-based full-RAM acquisition is usually blocked by modern kernel-extension restrictions, SIP, and platform-signing requirements. In practice, on modern systems you will more often end up doing a **process-scoped dump** instead of a whole-RAM image.
+**Lưu ý**: Hiện nay, đây chủ yếu là một **quy trình cũ**. `osxpmem` cần tải một kernel extension; dự án [Rekall](https://github.com/google/rekall) đã bị lưu trữ, bản phát hành mới nhất là từ **2017**, và binary được phát hành nhắm đến **máy Mac dùng Intel**. Trên các bản macOS hiện tại, đặc biệt là trên **Apple Silicon**, việc thu thập toàn bộ RAM bằng kext thường bị chặn bởi các hạn chế hiện đại đối với kernel extension, SIP và yêu cầu ký nền tảng. Trên thực tế, trên các hệ thống hiện đại, bạn thường sẽ phải thực hiện **dump trong phạm vi một process** thay vì tạo ảnh toàn bộ RAM.
 
 ```bash
 #Dump raw format
@@ -34,7 +34,7 @@ sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 sudo osxpmem.app/osxpmem -o /tmp/dump_mem.aff4
 ```
 
-If you find this error: `osxpmem.app/MacPmem.kext failed to load - (libkern/kext) authentication failure (file ownership/permissions); check the system/kernel logs for errors or try kextutil(8)` You can fix it doing:
+Nếu gặp lỗi này: `osxpmem.app/MacPmem.kext failed to load - (libkern/kext) authentication failure (file ownership/permissions); check the system/kernel logs for errors or try kextutil(8)` Bạn có thể khắc phục bằng cách:
 
 ```bash
 sudo cp -r osxpmem.app/MacPmem.kext "/tmp/"
@@ -43,34 +43,34 @@ sudo kextutil "/tmp/MacPmem.kext"
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 ```
 
-**Other errors** might be fixed by **allowing the load of the kext** in "Security & Privacy --> General", just **allow** it.
+**Các lỗi khác** có thể được khắc phục bằng cách **cho phép tải kext** trong "Security & Privacy --> General"; chỉ cần nhấn **Allow**.
 
-You can also use this **oneliner** to download the application, load the kext and dump the memory:
+Bạn cũng có thể dùng **oneliner** này để tải ứng dụng, tải kext và dump bộ nhớ:
 
 ```bash
 sudo su
 cd /tmp; wget https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip; unzip osxpmem-2.1.post4.zip; chown -R root:wheel osxpmem.app/MacPmem.kext; kextload osxpmem.app/MacPmem.kext; osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 ```
 
-## Live process dumping with LLDB
+## Dump bộ nhớ tiến trình đang chạy bằng LLDB
 
-For **recent macOS versions**, the most practical approach is usually to dump the memory of a **specific process** instead of trying to image all physical memory.
+Với **các phiên bản macOS gần đây**, cách thực tế nhất thường là dump bộ nhớ của **một tiến trình cụ thể** thay vì cố gắng tạo ảnh toàn bộ bộ nhớ vật lý.
 
-LLDB can save a Mach-O core file from a live target:
+LLDB có thể lưu tệp core Mach-O từ một tiến trình đang chạy:
 
 ```bash
 sudo lldb --attach-pid <pid>
 (lldb) process save-core /tmp/target.core
 ```
 
-By default this usually creates a **skinny core**. To force LLDB to include all mapped process memory:
+Theo mặc định, thao tác này thường tạo ra một **skinny core**. Để buộc LLDB đưa toàn bộ bộ nhớ đã ánh xạ của tiến trình vào:
 
 ```bash
 sudo lldb --attach-pid <pid>
 (lldb) process save-core /tmp/target-full.core --style full
 ```
 
-Useful follow-up commands before dumping:
+Các lệnh hữu ích cần chạy tiếp trước khi dump:
 
 ```bash
 # Show loaded images and main binary
@@ -83,28 +83,28 @@ Useful follow-up commands before dumping:
 (lldb) memory read --force --outfile /tmp/region.bin --binary <start> <end>
 ```
 
-This is usually enough when the goal is to recover:
+Thông thường, như vậy là đủ khi mục tiêu là thu thập:
 
-- Decrypted configuration blobs
-- In-memory tokens, cookies, or credentials
-- Plaintext secrets that are only protected at rest
-- Decrypted Mach-O pages after unpacking / JIT / runtime patching
+- Các blob cấu hình đã giải mã
+- Token, cookie hoặc thông tin xác thực trong bộ nhớ
+- Các bí mật dạng plaintext chỉ được bảo vệ khi lưu trữ
+- Các trang Mach-O đã giải mã sau khi unpacking / JIT / vá trong runtime
 
-If the target is protected by the **hardened runtime**, or if `taskgated` denies the attach, you typically need one of these conditions:
+Nếu mục tiêu được bảo vệ bởi **hardened runtime**, hoặc `taskgated` từ chối attach, bạn thường cần một trong các điều kiện sau:
 
-- The target carries **`get-task-allow`**
-- Your debugger is signed with the proper **debugger entitlement**
-- You are **root** and the target is a non-hardened third-party process
+- Mục tiêu có **`get-task-allow`**
+- Debugger của bạn được ký với **debugger entitlement** phù hợp
+- Bạn là **root** và mục tiêu là một tiến trình bên thứ ba không dùng hardened runtime
 
-For more background on obtaining a task port and what can be done with it:
+Để biết thêm về cách lấy task port và những gì có thể thực hiện với nó:
 
 {{#ref}}
 ../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md
 {{#endref}}
 
-### Fast pre-attach checks
+### Kiểm tra nhanh trước khi attach
 
-Before spending time on LLDB/Frida, quickly verify whether the target is realistically **dumpable**:
+Trước khi dành thời gian cho LLDB/Frida, hãy nhanh chóng xác minh xem mục tiêu có thực sự **dump được** hay không:
 
 ```bash
 # Check entitlements that commonly decide whether an attach will work
@@ -118,15 +118,15 @@ codesign -dvvv /Applications/Target.app 2>&1 | egrep 'Runtime Version|flags='
 vmmap <pid>
 ```
 
-Operationally, this usually means:
+Về mặt vận hành, điều này thường có nghĩa là:
 
-- A third-party app shipped with **`get-task-allow`** is often directly dumpable with LLDB, and the resulting dump may expose TCC-protected data that the app already accessed.<sup>[[1]](#references)</sup>
-- A **hardened** target without `get-task-allow` will commonly reject attaches, even as `root`, unless you control the relevant debugger entitlements / policy path.
-- Unhardened third-party processes are still the easiest place to use `lldb`, `vmmap`, Frida, or custom `task_for_pid`/`vm_read` readers.
+- Ứng dụng bên thứ ba được phát hành kèm **`get-task-allow`** thường có thể dump trực tiếp bằng LLDB, và dump thu được có thể làm lộ dữ liệu được TCC bảo vệ mà ứng dụng đã truy cập.<sup>[[1]](#references)</sup>
+- Mục tiêu **hardened** không có `get-task-allow` thường sẽ từ chối các lần attach, ngay cả khi chạy với quyền `root`, trừ khi bạn kiểm soát các entitlements của debugger có liên quan / đường dẫn policy.
+- Các tiến trình bên thứ ba không được hardened vẫn là nơi dễ nhất để dùng `lldb`, `vmmap`, Frida hoặc các công cụ đọc `task_for_pid`/`vm_read` tùy chỉnh.
 
-### Hunt dumpable nested helpers
+### Tìm các helper lồng nhau có thể dump
 
-Recent research around notarized macOS apps keeps finding **`get-task-allow` in nested helpers** instead of the main GUI binary. When a top-level app looks hardened, enumerate its **XPC services**, **login items**, **helper tools**, and bundled CLIs before giving up:
+Nghiên cứu gần đây về các ứng dụng macOS đã notarize liên tục phát hiện **`get-task-allow` trong các helper lồng nhau** thay vì binary GUI chính. Khi một ứng dụng cấp cao nhất có vẻ đã được hardened, hãy liệt kê **XPC services**, **login items**, **helper tools** và các CLI đi kèm trước khi bỏ cuộc:
 
 ```bash
 find /Applications/Target.app -type f -perm -111 -print0 | while IFS= read -r -d '' bin; do
@@ -134,19 +134,19 @@ find /Applications/Target.app -type f -perm -111 -print0 | while IFS= read -r -d
 done
 ```
 
-A nested executable with `get-task-allow` is often the easiest place to attach with `lldb`, dump a core, or pull memory with a custom `task_for_pid` client, even when the main app is better hardened.
+Một executable lồng bên trong có `get-task-allow` thường là nơi dễ nhất để attach bằng `lldb`, dump core hoặc lấy memory bằng một client `task_for_pid` tự viết, ngay cả khi app chính được harden tốt hơn.
 
 ## Selective dumps with Frida or userland readers
 
-When a full core is too noisy, dumping only **interesting readable ranges** is often faster. Frida is especially useful because it works well for **targeted extraction** once you can attach to the process.
+Khi core dump đầy nhiễu, chỉ dump các **vùng có thể đọc đáng chú ý** thường nhanh hơn. Frida đặc biệt hữu ích vì hỗ trợ tốt việc **trích xuất có mục tiêu** khi bạn đã có thể attach vào process.
 
-Example approach:
+Cách tiếp cận ví dụ:
 
-1. Enumerate readable/writable ranges
-2. Filter by module, heap, stack, or anonymous memory
-3. Dump only the regions that contain candidate strings, keys, protobufs, plist/XML blobs, or decrypted code/data
+1. Liệt kê các vùng có quyền đọc/ghi
+2. Lọc theo module, heap, stack hoặc memory ẩn danh
+3. Chỉ dump các vùng chứa chuỗi, key, protobuf, blob plist/XML hoặc code/data đã giải mã có khả năng đáng chú ý
 
-Minimal Frida example to dump all readable anonymous ranges:
+Ví dụ Frida tối giản để dump mọi vùng ẩn danh có thể đọc:
 
 ```javascript
 Process.enumerateRanges({ protection: 'rw-', coalesce: true }).forEach(function (range) {
@@ -160,19 +160,19 @@ Process.enumerateRanges({ protection: 'rw-', coalesce: true }).forEach(function 
 });
 ```
 
-This is useful when you want to avoid giant core files and only collect:
+Điều này hữu ích khi bạn muốn tránh tạo các core file khổng lồ và chỉ thu thập:
 
-- App heap chunks containing secrets
-- Anonymous regions created by custom packers or loaders
-- JIT / unpacked code pages after changing protections
+- Các khối heap của ứng dụng chứa bí mật
+- Các vùng ẩn danh được tạo bởi packer hoặc loader tùy chỉnh
+- Các trang mã JIT / đã giải nén sau khi thay đổi quyền truy cập
 
-When the target keeps **allocating / freeing** while you dump, prefer Frida's **`readVolatile()`** primitive over `readByteArray()` for unstable ranges. It is slower, but it avoids killing the target if a page becomes unreadable midway through the read. For larger acquisitions, it can also be cleaner to stream chunks back with `send(..., data)` and compress them on the controller side instead of creating thousands of small files inside the target.
+Khi tiến trình mục tiêu vẫn đang **cấp phát / giải phóng bộ nhớ** trong lúc bạn dump, hãy ưu tiên primitive **`readVolatile()`** của Frida thay cho **`readByteArray()`** khi đọc các vùng không ổn định. Primitive này chậm hơn, nhưng tránh làm tiến trình mục tiêu bị dừng nếu một trang trở nên không thể đọc được giữa chừng. Với các lần thu thập dữ liệu lớn hơn, cũng có thể truyền các khối dữ liệu về bằng `send(..., data)` rồi nén chúng ở phía controller, thay vì tạo hàng nghìn tệp nhỏ bên trong tiến trình mục tiêu.
 
-Older userland tools such as [`readmem`](https://github.com/gdbinit/readmem) also exist, but they are mainly useful as **source references** for direct `task_for_pid`/`vm_read` style dumping and are not well-maintained for modern Apple Silicon workflows.
+Các công cụ userland cũ hơn như [`readmem`](https://github.com/gdbinit/readmem) cũng tồn tại, nhưng chủ yếu hữu ích làm **tài liệu tham khảo mã nguồn** cho kiểu dump trực tiếp bằng `task_for_pid`/`vm_read` và không được duy trì tốt cho các quy trình làm việc hiện đại trên Apple Silicon.
 
-## Heap / VM snapshots with `.memgraph`
+## Ảnh chụp heap / VM với `.memgraph`
 
-If you mainly care about **heap objects**, **allocation provenance**, or a snapshot that can be moved to another machine, a `.memgraph` is often more practical than a giant Mach-O core. The `leaks` tooling can generate one from a live process:<sup>[[2]](#references)</sup>
+Nếu bạn chủ yếu quan tâm đến **các đối tượng heap**, **nguồn gốc cấp phát** hoặc một ảnh chụp có thể chuyển sang máy khác, thì `.memgraph` thường thực tế hơn một Mach-O core khổng lồ. Công cụ `leaks` có thể tạo ảnh chụp từ một tiến trình đang chạy:<sup>[[2]](#references)</sup>
 
 ```bash
 # Capture a memory graph from a live process
@@ -182,7 +182,7 @@ leaks <pid> -outputGraph /tmp/target.memgraph
 leaks <pid> -outputGraph /tmp/target-full.memgraph -fullContent
 ```
 
-Then triage it offline with standard Apple tooling:
+Sau đó phân tích nó ngoại tuyến bằng các công cụ tiêu chuẩn của Apple:
 
 ```bash
 vmmap /tmp/target.memgraph
@@ -191,24 +191,24 @@ stringdups /tmp/target-full.memgraph
 malloc_history /tmp/target.memgraph 0xADDR
 ```
 
-`stringdups` is the main reason to keep a `-fullContent` capture around, because the labels describing memory contents are omitted from a minimal `.memgraph`.
+`stringdups` là lý do chính để giữ lại bản capture `-fullContent`, vì các nhãn mô tả nội dung bộ nhớ bị lược bỏ khỏi `.memgraph` tối giản.
 
-This is especially useful when:
+Điều này đặc biệt hữu ích khi:
 
-- You want a **smaller, shareable snapshot** instead of a full core
-- `MallocStackLogging` was enabled and you want **allocation backtraces**
-- You already know an **interesting heap address** and want to pivot with `malloc_history`
-- You need a quick **VM/heap breakdown** before deciding whether a full dump is worth the noise
+- Bạn muốn một **snapshot nhỏ hơn, dễ chia sẻ** thay vì một core dump đầy đủ
+- `MallocStackLogging` đã được bật và bạn muốn xem **allocation backtraces**
+- Bạn đã biết một **địa chỉ heap đáng chú ý** và muốn lần theo bằng `malloc_history`
+- Bạn cần phân tích nhanh **VM/heap** trước khi quyết định liệu full dump có đáng để tạo thêm nhiễu hay không
 
 ### Differential memgraph triage
 
-If you control the way the target starts, enable **historical allocation logging** before launch so later snapshots preserve useful alloc/free backtraces:
+Nếu bạn kiểm soát cách target khởi chạy, hãy bật **historical allocation logging** trước khi khởi chạy để các snapshot về sau lưu lại những allocation/free backtrace hữu ích:
 
 ```bash
 env MallocStackLoggingNoCompact=1 /path/to/TargetBinary
 ```
 
-Then capture snapshots around the interesting action and diff them offline:
+Sau đó, hãy chụp snapshot trước và sau hành động đáng chú ý rồi so sánh chúng ngoại tuyến:
 
 ```bash
 # Baseline before login / decrypt / unpack
@@ -228,11 +228,11 @@ leaks /tmp/post.memgraph -referenceTree='CFData[50k+]'
 malloc_history /tmp/post.memgraph -callTree -highWaterMark
 ```
 
-This is a practical way to isolate **post-authentication objects**, **large `CFData` buffers**, or **anonymous VM regions** that only appear after a decryption, unpacking, or secret-retrieval stage.
+Đây là cách thực tế để cô lập **các object hậu xác thực**, **các buffer `CFData` lớn** hoặc **các vùng VM ẩn danh** chỉ xuất hiện sau giai đoạn giải mã, giải đóng gói hoặc truy xuất bí mật.
 
-## Swift-heavy targets: `swift-inspect`
+## Mục tiêu sử dụng nhiều Swift: `swift-inspect`
 
-For applications that keep high-value data inside **Swift runtime objects**, `swift-inspect` can be a good complement to LLDB or Frida. Instead of dumping everything first, you can query specific Swift runtime structures from a live process:
+Đối với các ứng dụng lưu dữ liệu giá trị cao bên trong **các object runtime của Swift**, `swift-inspect` có thể bổ trợ hiệu quả cho LLDB hoặc Frida. Thay vì dump mọi thứ trước, bạn có thể truy vấn các cấu trúc runtime cụ thể của Swift từ một process đang chạy:
 
 ```bash
 # Usually available from the Xcode / Swift toolchain
@@ -241,23 +241,22 @@ swift-inspect dump-arrays <pid-or-name>
 swift-inspect dump-concurrency <pid-or-name> # Darwin-only
 ```
 
-This is handy to identify:
+Điều này hữu ích để xác định:
 
-- Large Swift arrays buffering interesting data
-- Metadata allocations that reveal types loaded at runtime
-- Swift concurrency state (`Task`, actor, thread relationships) before doing a more targeted dump
+- Các mảng Swift lớn đang đệm dữ liệu đáng chú ý
+- Các vùng cấp phát metadata tiết lộ những kiểu dữ liệu được tải lúc runtime
+- Trạng thái đồng thời của Swift (`Task`, actor, các mối quan hệ giữa thread) trước khi thực hiện dump có mục tiêu cụ thể hơn
 
-For more object-level runtime triage once you can already inspect the process, check [the dedicated page on objects in memory](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
+Để phân loại nhanh ở cấp đối tượng khi đã có thể kiểm tra process, hãy xem [trang chuyên biệt về các đối tượng trong bộ nhớ](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
 
-## Quick triage notes
+## Ghi chú phân loại nhanh
 
-- `sysctl vm.swapusage` is still a quick way to check **swap usage** and whether swap is **encrypted**.
-- `sleepimage` remains relevant mainly for **hibernate/safe sleep** scenarios, but modern systems commonly protect it, so it should be treated as an **artifact source to check**, not as a reliable acquisition path.
-- On recent macOS releases, **process-level dumping** is generally more realistic than **full physical memory imaging** unless you control boot policy, SIP state, and kext loading.
+- `sysctl vm.swapusage` vẫn là cách nhanh để kiểm tra **mức sử dụng swap** và liệu swap có được **mã hóa** hay không.
+- `sleepimage` vẫn chủ yếu liên quan đến các tình huống **hibernate/safe sleep**, nhưng các hệ thống hiện đại thường bảo vệ nó; vì vậy, nên xem đây là **nguồn artifact cần kiểm tra**, chứ không phải một phương thức thu thập đáng tin cậy.
+- Trên các phiên bản macOS gần đây, **dump ở cấp process** thường khả thi hơn **tạo ảnh toàn bộ bộ nhớ vật lý**, trừ khi bạn kiểm soát chính sách khởi động, trạng thái SIP và việc tải kext.
 
 ## References
 
-- [1] [To Allow or Not to get-task-allow: macOS Security Analysis](https://afine.com/to-allow-or-not-to-get-task-allow-that-is-the-question)
-- [2] [leaks(1) man page](https://keith.github.io/xcode-man-pages/leaks.1.html)
-
+- [1] [Cho phép hay không cho phép get-task-allow: Phân tích bảo mật macOS](https://afine.com/to-allow-or-not-to-get-task-allow-that-is-the-question)
+- [2] [Trang hướng dẫn man của leaks(1)](https://keith.github.io/xcode-man-pages/leaks.1.html)
 {{#include ../../../banners/hacktricks-training.md}}

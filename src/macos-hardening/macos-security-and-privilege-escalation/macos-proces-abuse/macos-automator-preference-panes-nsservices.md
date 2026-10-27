@@ -1,25 +1,25 @@
-# macOS Automator, Preference Panes & NSServices Abuse
+# Lạm dụng macOS Automator, Preference Panes & NSServices
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Automator Actions & Workflows
 
-### Basic Information
+### Thông tin cơ bản
 
-**Automator** is macOS's visual automation tool. It executes **workflows** (`.workflow` bundles) composed of **actions** (`.action` bundles). Automator also powers **Folder Actions**, **Quick Actions**, and **Shortcuts** integration. On modern macOS, workflows can also be **imported into Shortcuts**, so the same malicious logic may show up as a Finder Quick Action, a user service under `~/Library/Services/`, or a shortcut backed by legacy Automator actions.
+**Automator** là công cụ tự động hóa trực quan của macOS. Công cụ này thực thi **workflows** (bundle `.workflow`) gồm các **actions** (bundle `.action`). Automator cũng hỗ trợ tích hợp **Folder Actions**, **Quick Actions** và **Shortcuts**. Trên các phiên bản macOS hiện đại, workflows cũng có thể được **nhập vào Shortcuts**, nên cùng một logic độc hại có thể xuất hiện dưới dạng Finder Quick Action, user service trong `~/Library/Services/` hoặc shortcut được hỗ trợ bởi các Automator action cũ.
 
-Automator actions are **plugins** loaded into the Automator runtime when a workflow executes. They can:
-- Execute arbitrary shell scripts
-- Process files and data
-- Interact with applications via AppleScript
-- Chain together for complex automation
+Automator actions là **plugin** được tải vào Automator runtime khi một workflow chạy. Chúng có thể:
+- Thực thi shell script tùy ý
+- Xử lý file và dữ liệu
+- Tương tác với ứng dụng thông qua AppleScript
+- Kết hợp với nhau để thực hiện các tác vụ tự động hóa phức tạp
 
-### Why This Matters
+### Vì sao điều này quan trọng
 
 > [!WARNING]
-> Automator workflows can be **social-engineered** into execution — they appear as simple document files. A `.workflow` bundle can contain embedded shell commands that execute when the workflow runs. Combined with Folder Actions, they provide **automatic persistence** that triggers on file events. Recent Gatekeeper fixes also showed that **app-bundled Quick Actions** (`Contents/PlugIns/*.workflow`) must be treated as executable content, not harmless data.
+> Kẻ tấn công có thể **dùng kỹ thuật social engineering** để khiến người dùng chạy Automator workflows — chúng trông như các file tài liệu thông thường. Bundle `.workflow` có thể chứa shell command được nhúng và thực thi khi workflow chạy. Khi kết hợp với Folder Actions, chúng tạo ra cơ chế **persistence tự động** được kích hoạt bởi các sự kiện file. Các bản sửa lỗi Gatekeeper gần đây cũng cho thấy **Quick Actions đi kèm ứng dụng** (`Contents/PlugIns/*.workflow`) phải được xem là nội dung có thể thực thi, không phải dữ liệu vô hại.
 
-### Discovery
+### Khám phá
 
 ```bash
 # Find Automator actions installed on the system
@@ -45,9 +45,9 @@ JOIN handlers h ON eh.handler_id = h.id
 WHERE h.handler_type = 'automator_action';"
 ```
 
-### Attack: Social-Engineered Workflow
+### Tấn công: Workflow được thiết kế bằng kỹ thuật social engineering
 
-A `.workflow` bundle looks like a normal document file to most users:
+Một bundle `.workflow` trông giống như một tệp tài liệu thông thường đối với hầu hết người dùng:
 
 ```bash
 # Create a workflow programmatically
@@ -82,9 +82,9 @@ cat > /tmp/Evil.workflow/Contents/document.wflow << 'PLIST'
 PLIST
 ```
 
-### Attack: Folder Action Persistence
+### Tấn công: Duy trì tồn tại bằng Folder Action
 
-Folder Actions automatically execute a workflow when files are added to a monitored folder:
+Folder Actions tự động thực thi một workflow khi tệp được thêm vào thư mục được giám sát:
 
 ```bash
 # Register a Folder Action on ~/Downloads
@@ -105,25 +105,25 @@ end tell'
 ```
 
 > [!CAUTION]
-> Folder Actions persist across reboots and execute silently. A Folder Action on `~/Downloads` means **every downloaded file triggers your payload** — including files from Safari, Chrome, AirDrop, and email attachments. Also note that `System Events` can register Folder Actions that point to scripts outside the default `~/Library/Scripts/Folder Action Scripts` locations, which makes loose-path hunting worthwhile. For related TCC implications, check [the TCC page](../macos-security-protections/macos-tcc/README.md).
+> Folder Actions vẫn tồn tại sau khi khởi động lại và chạy âm thầm. Folder Action trên `~/Downloads` có nghĩa là **mọi tệp được tải xuống đều kích hoạt payload của bạn** — bao gồm các tệp từ Safari, Chrome, AirDrop và tệp đính kèm email. Cũng lưu ý rằng `System Events` có thể đăng ký Folder Actions trỏ đến các script bên ngoài vị trí mặc định `~/Library/Scripts/Folder Action Scripts`, vì vậy việc truy tìm các đường dẫn không nằm trong thư mục mặc định là đáng làm. Để biết các tác động liên quan đến TCC, hãy xem [trang TCC](../macos-security-protections/macos-tcc/README.md).
 
 ---
 
-## Preference Panes
+## Các bảng tùy chọn
 
-### Basic Information
+### Thông tin cơ bản
 
-Preference panes (`.prefPane` bundles) are plugins loaded from **System Settings** (formerly System Preferences). They provide configuration UI panels for system or third-party features. On older systems they were loaded directly by `System Preferences`; on newer releases third-party panes are commonly brokered by a **legacy loader XPC service** started from System Settings.
+Các bảng tùy chọn (bundle `.prefPane`) là plugin được tải bởi **System Settings** (trước đây là System Preferences). Chúng cung cấp các bảng giao diện cấu hình cho các tính năng của hệ thống hoặc bên thứ ba. Trên các hệ thống cũ, chúng được tải trực tiếp bởi `System Preferences`; trên các bản phát hành mới hơn, các bảng của bên thứ ba thường được trung gian xử lý bởi một **dịch vụ XPC loader cũ** được khởi chạy từ System Settings.
 
-### Why This Matters
+### Vì sao điều này quan trọng
 
-- Preference panes execute in a **trusted host process** spawned by System Settings / System Preferences
-- On modern systems that host may be a **`legacyLoader` XPC service**, so the important boundary is still **trusted Apple UI process -> third-party code loading**
-- Third-party preference panes inherit the **host process security context** and user trust attached to that UI
-- Users install preference panes by **double-clicking** them — easy social engineering
-- Once installed, they **persist** and load every time System Settings opens to that panel
+- Các bảng tùy chọn chạy trong một **tiến trình host đáng tin cậy** do System Settings / System Preferences khởi chạy
+- Trên các hệ thống hiện đại, host đó có thể là một **dịch vụ XPC `legacyLoader`**, vì vậy ranh giới quan trọng vẫn là **tiến trình giao diện người dùng Apple đáng tin cậy -> tải mã bên thứ ba**
+- Các bảng tùy chọn của bên thứ ba kế thừa **ngữ cảnh bảo mật của tiến trình host** và mức độ tin cậy của người dùng gắn với giao diện đó
+- Người dùng cài đặt các bảng tùy chọn bằng cách **nhấp đúp** vào chúng — rất dễ bị social engineering
+- Sau khi được cài đặt, chúng **duy trì tồn tại** và được tải mỗi khi System Settings mở đến bảng đó
 
-### Discovery
+### Tìm kiếm
 
 ```bash
 # Find installed preference panes
@@ -149,7 +149,7 @@ WHERE h.handler_type = 'preference_pane';"
 
 ### Attack: Privilege Context Hijacking
 
-A malicious preference pane inherits the **pane host's** security context (historically `System Preferences`, on newer versions often a `legacyLoader` helper launched by `System Settings`):
+Một ngăn tùy chọn độc hại kế thừa ngữ cảnh bảo mật của **tiến trình host của ngăn tùy chọn** (trước đây là `System Preferences`; trên các phiên bản mới hơn thường là helper `legacyLoader` được `System Settings` khởi chạy):
 
 ```objc
 // Preference pane principal class
@@ -172,7 +172,7 @@ A malicious preference pane inherits the **pane host's** security context (histo
 @end
 ```
 
-### Attack: Persistence via Installation
+### Tấn công: Duy trì quyền truy cập thông qua cài đặt
 
 ```bash
 # Install a preference pane (user-level, no admin required)
@@ -187,7 +187,7 @@ sudo cp -r /tmp/Evil.prefPane /Library/PreferencePanes/
 
 ### Attack: UI Phishing
 
-A preference pane can mimic legitimate system UI panels to **phish for credentials**:
+Một preference pane có thể giả mạo các bảng điều khiển UI hệ thống hợp pháp để **phishing nhằm lấy thông tin xác thực**:
 
 ```objc
 // Display a fake authentication dialog
@@ -209,21 +209,21 @@ NSString *password = passwordField.stringValue;
 
 ## NSServices
 
-### Basic Information
+### Thông tin cơ bản
 
-**NSServices** allow applications to provide functionality to other apps through the **Services menu** (right-click → Services). When a user selects text or data and invokes a service, the selected data is **sent to the service provider** for processing.
+**NSServices** cho phép ứng dụng cung cấp chức năng cho các ứng dụng khác thông qua **menu Services** (nhấp chuột phải → Services). Khi người dùng chọn văn bản hoặc dữ liệu và gọi một service, dữ liệu đã chọn sẽ được **gửi đến nhà cung cấp service** để xử lý.
 
-Services are declared in an application's `Info.plist` under the `NSServices` key and registered with the pasteboard server (`pbs`). macOS also keeps a **service cache** and a **restriction policy** that decide which services are visible and whether sandboxed callers should receive an extra warning.
+Các service được khai báo trong `Info.plist` của ứng dụng, bên dưới khóa `NSServices`, và được đăng ký với pasteboard server (`pbs`). macOS cũng duy trì **service cache** và **chính sách hạn chế** để quyết định những service nào hiển thị và liệu các ứng dụng sandbox có nhận thêm cảnh báo hay không.
 
-### Why This Matters
+### Vì sao điều này quan trọng
 
-- Services receive **cross-application data flow** — selected text from any application is sent to the service
-- A malicious service captures data from password managers, email clients, financial apps
-- Services can **return modified data** to the calling application (man-in-the-middle on selection operations)
-- Service names can be crafted to appear legitimate ("Format Text", "Encrypt Selection", "Share")
-- The optional `NSRestricted` flag is security-relevant: a service marked unrestricted may be callable by a sandboxed app without the warning macOS shows for escape-prone services<sup>[[2]](#references)</sup>
+- Services nhận **luồng dữ liệu giữa các ứng dụng** — văn bản được chọn từ bất kỳ ứng dụng nào đều được gửi đến service
+- Một service độc hại có thể thu thập dữ liệu từ trình quản lý mật khẩu, ứng dụng email và ứng dụng tài chính
+- Services có thể **trả dữ liệu đã sửa đổi** về ứng dụng gọi (man-in-the-middle trong các thao tác với vùng chọn)
+- Tên service có thể được tạo để trông hợp pháp ("Format Text", "Encrypt Selection", "Share")
+- Cờ `NSRestricted` không bắt buộc nhưng liên quan đến bảo mật: service được đánh dấu không bị hạn chế có thể được ứng dụng sandbox gọi mà không có cảnh báo mà macOS hiển thị cho các service có nguy cơ thoát sandbox<sup>[[2]](#references)</sup>
 
-### Discovery
+### Khám phá
 
 ```bash
 # List all registered services
@@ -252,7 +252,7 @@ JOIN handlers h ON eh.handler_id = h.id
 WHERE h.handler_type = 'service';"
 ```
 
-### Attack: Data Interception Service
+### Tấn công: Dịch vụ đánh chặn dữ liệu
 
 ```xml
 <!-- Info.plist NSServices declaration -->
@@ -295,9 +295,9 @@ WHERE h.handler_type = 'service';"
 }
 ```
 
-### Attack: Data Modification (Man-in-the-Middle)
+### Tấn công: Sửa đổi dữ liệu (Man-in-the-Middle)
 
-A service can **modify the returned data** while appearing to provide a legitimate function:
+Một service có thể **sửa đổi dữ liệu được trả về** trong khi vẫn có vẻ đang cung cấp một chức năng hợp pháp:
 
 ```objc
 // A "Secure Encrypt" service that actually intercepts and modifies data
@@ -319,20 +319,20 @@ A service can **modify the returned data** while appearing to provide a legitima
 
 ### Restricted Services & Modern Abuse
 
-Apple supports an optional `NSRestricted` boolean per service definition. If it is set, macOS warns sandboxed callers because the service may help them **escape sandbox or privacy boundaries**. From an offensive perspective, this gives two useful audit paths:
+Apple hỗ trợ boolean tùy chọn `NSRestricted` cho từng định nghĩa service. Nếu được đặt, macOS sẽ cảnh báo các caller chạy trong sandbox vì service đó có thể giúp họ **thoát khỏi ranh giới sandbox hoặc quyền riêng tư**. Từ góc độ tấn công, điều này mở ra hai hướng audit hữu ích:
 
-- Look for **third-party services not marked as restricted** even though they proxy Apple Events, file access, or other privileged actions
-- Look for **high-value built-in services** with strong entitlements (for example, services exposed by Script Editor or Finder-backed helpers) and check whether user interaction is enough to turn them into a data-access primitive
+- Tìm các service của bên thứ ba **không được đánh dấu là restricted** dù chúng làm trung gian cho Apple Events, quyền truy cập file hoặc các hành động có đặc quyền khác
+- Tìm các service tích hợp có giá trị cao với entitlement mạnh (ví dụ: service do Script Editor hoặc các helper dựa trên Finder cung cấp) và kiểm tra xem tương tác của người dùng có đủ để biến chúng thành một phương thức truy cập dữ liệu hay không
 
-A good recent example is **CVE-2022-48574**, where the Services mechanism could be abused to reach **TCC-protected user files without the expected confirmation flow**. The bug is fixed, but the technique remains useful for threat modeling: any service that forwards file access or automation requests on behalf of the caller deserves the same scrutiny.<sup>[[2]](#references)</sup>
+Một ví dụ gần đây tiêu biểu là **CVE-2022-48574**, trong đó cơ chế Services có thể bị lạm dụng để truy cập **các file người dùng được TCC bảo vệ mà không cần quy trình xác nhận như mong đợi**. Lỗi đã được khắc phục, nhưng kỹ thuật này vẫn hữu ích cho việc mô hình hóa mối đe dọa: mọi service chuyển tiếp yêu cầu truy cập file hoặc tự động hóa thay mặt caller đều cần được xem xét kỹ lưỡng tương tự.<sup>[[2]](#references)</sup>
 
 ---
 
 ## Recent Security Notes
 
-- **Quick Actions are executable content**: Apple fixed a Gatekeeper bypass in 2024 where an app-bundled Automator Quick Action could run without normal assessment. When auditing apps, inspect `Contents/PlugIns/*.workflow/Contents/document.wflow` exactly like you would inspect helper scripts or login items. See [the Gatekeeper page](../macos-security-protections/macos-gatekeeper.md).<sup>[[1]](#references)</sup>
-- **Shortcuts can inherit legacy Automator behavior**: Apple also added an additional user-consent prompt after third-party shortcuts were found using a **legacy Automator action** to send Apple Events without the expected permission flow. Imported workflows and shortcut bundles should be reviewed for `Run AppleScript`, `Run Shell Script`, and similar bridge actions. See [the TCC page](../macos-security-protections/macos-tcc/README.md).<sup>[[3]](#references)</sup>
-- **Automator is still a live privacy boundary**: Apple shipped another Automator fix in 2025 for access to protected user data. Even if Automator is a legacy surface, treat any workflow runner, Quick Action host, or automation bridge as a current attack surface rather than dead code.<sup>[[4]](#references)</sup>
+- **Quick Actions là nội dung có thể thực thi**: Apple đã khắc phục một lỗi vượt qua Gatekeeper vào năm 2024, trong đó Quick Action của Automator được đóng gói trong ứng dụng có thể chạy mà không qua bước đánh giá thông thường. Khi audit ứng dụng, hãy kiểm tra `Contents/PlugIns/*.workflow/Contents/document.wflow` như cách bạn kiểm tra các script helper hoặc mục đăng nhập. Xem [trang Gatekeeper](../macos-security-protections/macos-gatekeeper.md).<sup>[[1]](#references)</sup>
+- **Shortcuts có thể kế thừa hành vi Automator cũ**: Apple cũng bổ sung lời nhắc xin sự đồng ý của người dùng sau khi phát hiện shortcut của bên thứ ba sử dụng **một action Automator cũ** để gửi Apple Events mà không qua quy trình cấp quyền như mong đợi. Cần xem xét các workflow đã nhập và bundle shortcut để tìm `Run AppleScript`, `Run Shell Script` và các action cầu nối tương tự. Xem [trang TCC](../macos-security-protections/macos-tcc/README.md).<sup>[[3]](#references)</sup>
+- **Automator vẫn là một ranh giới quyền riêng tư đang hoạt động**: Năm 2025, Apple đã phát hành thêm một bản sửa lỗi Automator liên quan đến quyền truy cập dữ liệu người dùng được bảo vệ. Dù Automator là một bề mặt cũ, hãy xem mọi trình chạy workflow, host Quick Action hoặc cầu nối tự động hóa là bề mặt tấn công hiện hữu, không phải mã đã lỗi thời.<sup>[[4]](#references)</sup>
 
 ---
 
@@ -347,7 +347,7 @@ A good recent example is **CVE-2022-48574**, where the Services mechanism could 
 4. Exfiltrate findings
 ```
 
-### Preference Pane → TCC Escalation
+### Ngăn tùy chọn → Leo thang TCC
 
 ```
 1. Distribute malicious prefPane (social engineering)
@@ -357,7 +357,7 @@ A good recent example is **CVE-2022-48574**, where the Services mechanism could 
 5. Access protected data, control other apps, or phish from a trusted Apple UI
 ```
 
-### NSService → Password Manager Theft
+### NSService → Đánh cắp Password Manager
 
 ```
 1. Register a service named "Secure Copy" 
@@ -369,9 +369,8 @@ A good recent example is **CVE-2022-48574**, where the Services mechanism could 
 
 ## References
 
-- [1] [Apple — About the security content of macOS Ventura 13.7, Sonoma 14.7, and Sequoia 15](https://support.apple.com/en-us/121238)
-- [2] [Moonlock — How the NSServices exploit worked on macOS](https://moonlock.com/nsservices-macos)
-- [3] [Apple — About the security content of macOS Sonoma 14.6 (CVE-2024-40834)](https://support.apple.com/en-us/120911)
-- [4] [Apple — About the security content of macOS Sequoia 15.4 (CVE-2025-30460)](https://support.apple.com/en-us/122373)
-
+- [1] [Apple — Giới thiệu về nội dung bảo mật của macOS Ventura 13.7, Sonoma 14.7 và Sequoia 15](https://support.apple.com/en-us/121238)
+- [2] [Moonlock — Cách thức khai thác NSServices hoạt động trên macOS](https://moonlock.com/nsservices-macos)
+- [3] [Apple — Giới thiệu về nội dung bảo mật của macOS Sonoma 14.6 (CVE-2024-40834)](https://support.apple.com/en-us/120911)
+- [4] [Apple — Giới thiệu về nội dung bảo mật của macOS Sequoia 15.4 (CVE-2025-30460)](https://support.apple.com/en-us/122373)
 {{#include ../../../banners/hacktricks-training.md}}

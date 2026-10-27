@@ -9,35 +9,35 @@
 
 ## 1. Thread Hijacking
 
-Initially, the `task_threads()` function is invoked on the task port to obtain a thread list from the remote task. A thread is selected for hijacking. This approach diverges from conventional code-injection methods as creating a new remote thread is prohibited due to the mitigation that blocks `thread_create_running()`.<sup>[[1]](#references)</sup>
+Ban đầu, hàm `task_threads()` được gọi trên task port để lấy danh sách thread từ task từ xa. Một thread được chọn để chiếm quyền điều khiển. Cách tiếp cận này khác với các phương pháp code injection thông thường vì không thể tạo thread từ xa mới do cơ chế giảm thiểu ngăn `thread_create_running()`.<sup>[[1]](#references)</sup>
 
-To control the thread, `thread_suspend()` is called, halting its execution.<sup>[[1]](#references)</sup>
+Để điều khiển thread, `thread_suspend()` được gọi nhằm tạm dừng quá trình thực thi của nó.<sup>[[1]](#references)</sup>
 
-The only operations permitted on the remote thread involve **stopping** and **starting** it and **retrieving**/**modifying** its register values. Remote function calls are initiated by setting registers `x0` to `x7` to the **arguments**, configuring `pc` to target the desired function, and resuming the thread. Ensuring the thread does not crash after the return necessitates detection of the return.<sup>[[1]](#references)</sup>
+Các thao tác duy nhất được phép trên thread từ xa là **dừng**, **khởi chạy**, **lấy** và **sửa đổi** các giá trị thanh ghi của nó. Các lệnh gọi hàm từ xa được khởi chạy bằng cách đặt các thanh ghi `x0` đến `x7` thành các **đối số**, cấu hình `pc` trỏ đến hàm mong muốn, rồi tiếp tục chạy thread. Để đảm bảo thread không bị crash sau khi hàm trả về, cần phát hiện thời điểm hàm trả về.<sup>[[1]](#references)</sup>
 
-One strategy involves registering an **exception handler** for the remote thread using `thread_set_exception_ports()`, setting the `lr` register to an invalid address before the function call. This triggers an exception post-function execution, sending a message to the exception port, enabling state inspection of the thread to recover the return value. Alternatively, as adopted from Ian Beer’s *triple_fetch* exploit, `lr` is set to loop infinitely; the thread’s registers are then continuously monitored until `pc` points to that instruction.<sup>[[1]](#references)</sup>
+Một chiến lược là đăng ký **exception handler** cho thread từ xa bằng `thread_set_exception_ports()`, đồng thời đặt thanh ghi `lr` thành một địa chỉ không hợp lệ trước khi gọi hàm. Điều này kích hoạt một exception sau khi hàm thực thi xong, gửi thông điệp đến exception port, cho phép kiểm tra trạng thái thread để lấy giá trị trả về. Một cách khác, được áp dụng từ exploit *triple_fetch* của Ian Beer, là đặt `lr` để lặp vô hạn; sau đó, các thanh ghi của thread được giám sát liên tục cho đến khi `pc` trỏ đến lệnh đó.<sup>[[1]](#references)</sup>
 
-## 2. Mach ports for communication
+## 2. Mach ports để giao tiếp
 
-The subsequent phase involves establishing Mach ports to facilitate communication with the remote thread. These ports are instrumental in transferring arbitrary send/receive rights between tasks.<sup>[[1]](#references)</sup>
+Giai đoạn tiếp theo là thiết lập Mach ports để hỗ trợ giao tiếp với thread từ xa. Các port này giúp chuyển các quyền send/receive tùy ý giữa các task.<sup>[[1]](#references)</sup>
 
-For bidirectional communication, two Mach receive rights are created: one in the local and the other in the remote task. Subsequently, a send right for each port is transferred to the counterpart task, enabling message exchange.<sup>[[1]](#references)</sup>
+Để giao tiếp hai chiều, hai quyền receive Mach được tạo: một trong task cục bộ và một trong task từ xa. Sau đó, quyền send cho mỗi port được chuyển đến task còn lại để có thể trao đổi thông điệp.<sup>[[1]](#references)</sup>
 
-Focusing on the local port, the receive right is held by the local task. The port is created with `mach_port_allocate()`. The challenge lies in transferring a send right to this port into the remote task.<sup>[[1]](#references)</sup>
+Xét port cục bộ: quyền receive được giữ bởi task cục bộ. Port được tạo bằng `mach_port_allocate()`. Thách thức là chuyển quyền send đến port này vào task từ xa.<sup>[[1]](#references)</sup>
 
-A strategy involves leveraging `thread_set_special_port()` to place a send right to the local port in the remote thread’s `THREAD_KERNEL_PORT`. Then, the remote thread is instructed to call `mach_thread_self()` to retrieve the send right.<sup>[[1]](#references)</sup>
+Một chiến lược là dùng `thread_set_special_port()` để đặt quyền send đến port cục bộ trong `THREAD_KERNEL_PORT` của thread từ xa. Sau đó, yêu cầu thread từ xa gọi `mach_thread_self()` để lấy quyền send.<sup>[[1]](#references)</sup>
 
-For the remote port, the process is essentially reversed. The remote thread is directed to generate a Mach port via `mach_reply_port()` (as `mach_port_allocate()` is unsuitable due to its return mechanism). Upon port creation, `mach_port_insert_right()` is invoked in the remote thread to establish a send right. This right is then stashed in the kernel using `thread_set_special_port()`. Back in the local task, `thread_get_special_port()` is used on the remote thread to acquire a send right to the newly allocated Mach port in the remote task.<sup>[[1]](#references)</sup>
+Với port từ xa, quy trình về cơ bản được đảo ngược. Thread từ xa được yêu cầu tạo Mach port bằng `mach_reply_port()` (vì `mach_port_allocate()` không phù hợp do cách hàm trả về). Sau khi tạo port, `mach_port_insert_right()` được gọi trong thread từ xa để tạo quyền send. Quyền này sau đó được lưu tạm trong kernel bằng `thread_set_special_port()`. Trở lại task cục bộ, `thread_get_special_port()` được gọi trên thread từ xa để lấy quyền send đến Mach port vừa được cấp phát trong task từ xa.<sup>[[1]](#references)</sup>
 
-Completion of these steps results in the establishment of Mach ports, laying the groundwork for bidirectional communication.<sup>[[1]](#references)</sup>
+Hoàn tất các bước này sẽ thiết lập các Mach port, tạo nền tảng cho giao tiếp hai chiều.<sup>[[1]](#references)</sup>
 
-## 3. Basic Memory Read/Write Primitives
+## 3. Các primitive đọc/ghi bộ nhớ cơ bản
 
-In this section, the focus is on utilizing the execute primitive to establish basic memory read/write primitives. These initial steps are crucial for gaining more control over the remote process, though the primitives at this stage won't serve many purposes. Soon, they will be upgraded to more advanced versions.<sup>[[1]](#references)</sup>
+Trong phần này, trọng tâm là sử dụng primitive thực thi để tạo các primitive đọc/ghi bộ nhớ cơ bản. Những bước ban đầu này rất quan trọng để kiểm soát tiến trình từ xa tốt hơn, dù các primitive ở giai đoạn này chưa có nhiều công dụng. Chúng sẽ sớm được nâng cấp thành các phiên bản nâng cao hơn.<sup>[[1]](#references)</sup>
 
-### Memory reading and writing using the execute primitive
+### Đọc và ghi bộ nhớ bằng primitive thực thi
 
-The goal is to perform memory reading and writing using specific functions. For **reading memory**:
+Mục tiêu là đọc và ghi bộ nhớ bằng các hàm cụ thể. Để **đọc bộ nhớ**:
 
 ```c
 uint64_t read_func(uint64_t *address) {
@@ -45,7 +45,7 @@ uint64_t read_func(uint64_t *address) {
 }
 ```
 
-For **writing memory**:
+Để **ghi vào bộ nhớ**:
 
 ```c
 void write_func(uint64_t *address, uint64_t value) {
@@ -53,7 +53,7 @@ void write_func(uint64_t *address, uint64_t value) {
 }
 ```
 
-These functions correspond to the following assembly:
+Các hàm này tương ứng với mã assembly sau:
 
 ```
 _read_func:
@@ -64,11 +64,11 @@ _write_func:
     ret
 ```
 
-### Identifying suitable functions
+### Xác định các hàm phù hợp
 
-A scan of common libraries revealed appropriate candidates for these operations:<sup>[[1]](#references)</sup>
+Quét các thư viện phổ biến cho thấy có những hàm phù hợp để thực hiện các thao tác này:<sup>[[1]](#references)</sup>
 
-1. **Reading memory — `property_getName()`** (libobjc):
+1. **Đọc bộ nhớ — `property_getName()`** (libobjc):
 
 ```c
 const char *property_getName(objc_property_t prop) {
@@ -76,7 +76,7 @@ const char *property_getName(objc_property_t prop) {
 }
 ```
 
-2. **Writing memory — `_xpc_int64_set_value()`** (libxpc):
+2. **Ghi vào bộ nhớ — `_xpc_int64_set_value()`** (libxpc):
 
 ```c
 __xpc_int64_set_value:
@@ -84,70 +84,70 @@ __xpc_int64_set_value:
     ret
 ```
 
-To perform a 64-bit write at an arbitrary address:
+Để thực hiện thao tác ghi 64-bit tại một địa chỉ bất kỳ:
 
 ```c
 _xpc_int64_set_value(address - 0x18, value);
 ```
 
-With these primitives established, the stage is set for creating shared memory, marking a significant progression in controlling the remote process.<sup>[[1]](#references)</sup>
+Khi đã thiết lập các primitive này, bước tiếp theo là tạo shared memory, đánh dấu một bước tiến đáng kể trong việc kiểm soát process từ xa.<sup>[[1]](#references)</sup>
 
-## 4. Shared Memory Setup
+## 4. Thiết lập Shared Memory
 
-The objective is to establish shared memory between local and remote tasks, simplifying data transfer and facilitating the calling of functions with multiple arguments. The approach leverages `libxpc` and its `OS_xpc_shmem` object type, which is built upon Mach memory entries.<sup>[[1]](#references)</sup>
+Mục tiêu là thiết lập shared memory giữa các task cục bộ và từ xa, giúp đơn giản hóa việc truyền dữ liệu và hỗ trợ gọi các function có nhiều tham số. Phương pháp này tận dụng `libxpc` và kiểu object `OS_xpc_shmem`, được xây dựng dựa trên Mach memory entry.<sup>[[1]](#references)</sup>
 
-### Process overview
+### Tổng quan quy trình
 
-1. **Memory allocation**
-   * Allocate memory for sharing using `mach_vm_allocate()`.  
-   * Use `xpc_shmem_create()` to create an `OS_xpc_shmem` object for the allocated region.
-2. **Creating shared memory in the remote process**
-   * Allocate memory for the `OS_xpc_shmem` object in the remote process (`remote_malloc`).  
-   * Copy the local template object; fix-up of the embedded Mach send right at offset `0x18` is still required.
-3. **Correcting the Mach memory entry**
-   * Insert a send right with `thread_set_special_port()` and overwrite the `0x18` field with the remote entry’s name.
-4. **Finalising**
-   * Validate the remote object and map it with a remote call to `xpc_shmem_remote()`.
+1. **Cấp phát bộ nhớ**
+   * Cấp phát bộ nhớ để chia sẻ bằng `mach_vm_allocate()`.  
+   * Dùng `xpc_shmem_create()` để tạo object `OS_xpc_shmem` cho vùng đã cấp phát.
+2. **Tạo shared memory trong process từ xa**
+   * Cấp phát bộ nhớ cho object `OS_xpc_shmem` trong process từ xa (`remote_malloc`).  
+   * Sao chép object mẫu cục bộ; vẫn cần fix-up Mach send right được nhúng tại offset `0x18`.
+3. **Điều chỉnh Mach memory entry**
+   * Thêm một send right bằng `thread_set_special_port()` và ghi đè trường `0x18` bằng tên của entry từ xa.
+4. **Hoàn tất**
+   * Xác thực object từ xa và map nó bằng một lời gọi từ xa tới `xpc_shmem_remote()`.
 
-## 5. Achieving Full Control
+## 5. Đạt được toàn quyền kiểm soát
 
-Once arbitrary execution and a shared-memory back-channel are available you effectively own the target process:<sup>[[1]](#references)</sup>
+Khi đã có khả năng thực thi tùy ý và kênh liên lạc back-channel qua shared memory, về cơ bản bạn nắm quyền kiểm soát process mục tiêu:<sup>[[1]](#references)</sup>
 
-* **Arbitrary memory R/W** — use `memcpy()` between local & shared regions.  
-* **Function calls with > 8 args** — place the extra arguments on the stack following the arm64 calling convention.  
-* **Mach port transfer** — pass rights in Mach messages via the established ports.  
-* **File-descriptor transfer** — leverage fileports (see *triple_fetch*).
+* **Đọc/ghi bộ nhớ tùy ý** — dùng `memcpy()` giữa các vùng cục bộ và shared.  
+* **Gọi function với hơn 8 tham số** — đặt các tham số bổ sung lên stack theo quy ước gọi hàm arm64.  
+* **Chuyển Mach port** — truyền các quyền trong Mach message thông qua các port đã thiết lập.  
+* **Chuyển file descriptor** — tận dụng fileport (xem *triple_fetch*).
 
-All of this is wrapped in the [`threadexec`](https://github.com/bazad/threadexec) library for easy reuse.
+Toàn bộ quy trình này được đóng gói trong thư viện [`threadexec`](https://github.com/bazad/threadexec) để dễ dàng tái sử dụng.
 
 ---
 
-## 6. Apple Silicon (arm64e) Nuances
+## 6. Các điểm cần lưu ý trên Apple Silicon (arm64e)
 
-On Apple Silicon devices (arm64e) **Pointer Authentication Codes (PAC)** protect all return addresses and many function pointers. Thread-hijacking techniques that *reuse existing code* continue to work because the original values in `lr`/`pc` already carry valid PAC signatures. Problems arise when you try to jump to attacker-controlled memory:
+Trên các thiết bị Apple Silicon (arm64e), **Pointer Authentication Codes (PAC)** bảo vệ mọi địa chỉ trả về và nhiều function pointer. Các kỹ thuật chiếm quyền điều khiển thread bằng cách *tái sử dụng code có sẵn* vẫn hoạt động vì các giá trị gốc trong `lr`/`pc` đã có chữ ký PAC hợp lệ. Vấn đề phát sinh khi bạn cố nhảy tới bộ nhớ do attacker kiểm soát:
 
-1. Allocate executable memory inside the target (remote `mach_vm_allocate` + `mprotect(PROT_EXEC)`).
-2. Copy your payload.
-3. Inside the *remote* process sign the pointer:
+1. Cấp phát bộ nhớ có quyền thực thi bên trong target (`mach_vm_allocate` từ xa + `mprotect(PROT_EXEC)`).
+2. Sao chép payload của bạn.
+3. Bên trong process *từ xa*, ký pointer này:
 
 ```c
 uint64_t ptr = (uint64_t)payload;
 ptr = ptrauth_sign_unauthenticated((void*)ptr, ptrauth_key_asia, 0);
 ```
 
-4. Set `pc = ptr` in the hijacked thread state.
+4. Đặt `pc = ptr` trong trạng thái của thread bị chiếm quyền.
 
-Alternatively, stay PAC-compliant by chaining existing gadgets/functions (traditional ROP).
+Ngoài ra, để tuân thủ PAC, hãy nối chuỗi các gadget/function có sẵn (ROP truyền thống).
 
-## 7. Detection & Hardening with EndpointSecurity
+## 7. Phát hiện & Hardening với EndpointSecurity
 
-The **EndpointSecurity (ES)** framework exposes kernel events that allow defenders to observe or block thread-injection attempts:
+Framework **EndpointSecurity (ES)** cung cấp các sự kiện kernel, cho phép bên phòng thủ giám sát hoặc chặn các nỗ lực thread injection:
 
-* `ES_EVENT_TYPE_AUTH_GET_TASK` – fired when a process requests another task’s port (e.g. `task_for_pid()`).
-* `ES_EVENT_TYPE_NOTIFY_REMOTE_THREAD_CREATE` – emitted whenever a thread is created in a *different* task.<sup>[[3]](#references)</sup>
-* `ES_EVENT_TYPE_NOTIFY_THREAD_SET_STATE` (added in macOS 14 Sonoma) – indicates register manipulation of an existing thread.
+* `ES_EVENT_TYPE_AUTH_GET_TASK` – được kích hoạt khi một process yêu cầu port của task khác (ví dụ: `task_for_pid()`).
+* `ES_EVENT_TYPE_NOTIFY_REMOTE_THREAD_CREATE` – được phát ra mỗi khi một thread được tạo trong một task *khác*.<sup>[[3]](#references)</sup>
+* `ES_EVENT_TYPE_NOTIFY_THREAD_SET_STATE` (được thêm vào macOS 14 Sonoma) – cho biết có thao tác chỉnh sửa register của một thread hiện có.
 
-Minimal Swift client that prints remote-thread events:
+Client Swift tối giản in các sự kiện remote-thread:
 
 ```swift
 import EndpointSecurity
@@ -161,7 +161,7 @@ let client = try! ESClient(subscriptions: [.notifyRemoteThreadCreate]) {
 RunLoop.main.run()
 ```
 
-Querying with **osquery** ≥ 5.8:
+Truy vấn bằng **osquery** ≥ 5.8:
 
 ```sql
 SELECT target_pid, source_pid, target_path
@@ -169,23 +169,22 @@ FROM es_process_events
 WHERE event_type = 'REMOTE_THREAD_CREATE';
 ```
 
-### Hardened-runtime considerations
+### Các lưu ý về hardened runtime
 
-Distributing your application **without** the `com.apple.security.get-task-allow` entitlement prevents non-root attackers from obtaining its task-port. System Integrity Protection (SIP) still blocks access to many Apple binaries, but third-party software must opt-out explicitly.
+Phân phối ứng dụng của bạn **mà không có** entitlement `com.apple.security.get-task-allow` sẽ ngăn kẻ tấn công không có quyền root lấy task-port của ứng dụng. System Integrity Protection (SIP) vẫn chặn quyền truy cập vào nhiều binary của Apple, nhưng phần mềm bên thứ ba phải chủ động opt-out.
 
-## 8. Recent Public Tooling (2023-2025)
+## 8. Công cụ công khai gần đây (2023-2025)
 
-| Tool | Year | Remarks |
-|------|------|---------|
-| [`task_vaccine`](https://github.com/rodionovd/task_vaccine) | 2023 | Compact PoC that demonstrates PAC-aware thread hijacking on Ventura/Sonoma<sup>[[2]](#references)</sup> |
-| `remote_thread_es` | 2024 | EndpointSecurity helper used by several EDR vendors to surface `REMOTE_THREAD_CREATE` events |
+| Công cụ | Năm | Ghi chú |
+|------|---------|---------|
+| [`task_vaccine`](https://github.com/rodionovd/task_vaccine) | 2023 | PoC gọn nhẹ minh họa kỹ thuật chiếm quyền điều khiển thread có xét đến PAC trên Ventura/Sonoma<sup>[[2]](#references)</sup> |
+| `remote_thread_es` | 2024 | Công cụ hỗ trợ EndpointSecurity được một số nhà cung cấp EDR sử dụng để phát hiện các sự kiện `REMOTE_THREAD_CREATE` |
 
-> Reading these projects’ source code is useful to understand API changes introduced in macOS 13/14 and to stay compatible across Intel ↔ Apple Silicon.
+> Đọc mã nguồn của các dự án này sẽ giúp hiểu những thay đổi API được giới thiệu trong macOS 13/14 và duy trì khả năng tương thích giữa Intel ↔ Apple Silicon.
 
 ## References
 
-- [1] [Bypassing platform binary restrictions with task_threads() - bazad.github.io](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
+- [1] [Vượt qua các hạn chế đối với platform binary bằng task_threads() - bazad.github.io](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
 - [2] [rodionovd/task_vaccine - GitHub](https://github.com/rodionovd/task_vaccine)
-- [3] [ES_EVENT_TYPE_NOTIFY_REMOTE_THREAD_CREATE - Apple Developer Documentation](https://developer.apple.com/documentation/endpointsecurity/es_event_type_notify_remote_thread_create)
-
+- [3] [ES_EVENT_TYPE_NOTIFY_REMOTE_THREAD_CREATE - Tài liệu dành cho nhà phát triển của Apple](https://developer.apple.com/documentation/endpointsecurity/es_event_type_notify_remote_thread_create)
 {{#include ../../../../banners/hacktricks-training.md}}

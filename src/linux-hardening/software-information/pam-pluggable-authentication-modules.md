@@ -2,16 +2,16 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### Basic Information
+### Thông tin cơ bản
 
-**PAM (Pluggable Authentication Modules)** acts as a security mechanism that **verifies the identity of users attempting to access computer services**, controlling their access based on various criteria. It's akin to a digital gatekeeper, ensuring that only authorized users can engage with specific services while potentially limiting their usage to prevent system overloads.
+**PAM (Pluggable Authentication Modules)** là một cơ chế bảo mật **xác minh danh tính của người dùng đang cố gắng truy cập các dịch vụ máy tính**, kiểm soát quyền truy cập của họ dựa trên nhiều tiêu chí. Cơ chế này giống như một người gác cổng kỹ thuật số, đảm bảo chỉ người dùng được ủy quyền mới có thể sử dụng các dịch vụ cụ thể, đồng thời có thể giới hạn mức sử dụng để tránh hệ thống bị quá tải.
 
-#### Configuration Files
+#### Tệp cấu hình
 
-- **Solaris** supports the legacy central file `/etc/pam.conf`, but current guidance prefers service files under `/etc/pam.d`.<sup>[[10]](#references)</sup>
-- **Linux systems** prefer a directory approach, storing service-specific configurations within `/etc/pam.d`. For instance, the configuration file for the login service is found at `/etc/pam.d/login`.<sup>[[1]](#references)</sup>
+- **Solaris** hỗ trợ tệp trung tâm cũ `/etc/pam.conf`, nhưng hướng dẫn hiện nay khuyến nghị sử dụng các tệp dịch vụ trong `/etc/pam.d`.<sup>[[10]](#references)</sup>
+- **Các hệ thống Linux** ưu tiên cách tổ chức theo thư mục, lưu cấu hình riêng cho từng dịch vụ trong `/etc/pam.d`. Ví dụ, tệp cấu hình cho dịch vụ đăng nhập nằm tại `/etc/pam.d/login`.<sup>[[1]](#references)</sup>
 
-An example of a PAM configuration for the login service might look like this:
+Ví dụ về cấu hình PAM cho dịch vụ đăng nhập có thể như sau:
 
 ```
 auth required /lib/security/pam_securetty.so
@@ -26,55 +26,55 @@ password required /lib/security/pam_pwdb.so use_first_pass
 session required /lib/security/pam_unix_session.so
 ```
 
-#### **PAM Management Realms**
+#### **Các realm quản lý PAM**
 
-These realms, or management groups, include **auth**, **account**, **password**, and **session**, each responsible for different aspects of the authentication and session management process:<sup>[[1]](#references)</sup>
+Các realm, hay nhóm quản lý này, gồm **auth**, **account**, **password** và **session**; mỗi nhóm chịu trách nhiệm cho một khía cạnh khác nhau của quy trình xác thực và quản lý phiên:<sup>[[1]](#references)</sup>
 
-- **Auth**: Validates user identity, often by prompting for a password.
-- **Account**: Handles account verification, checking for conditions like group membership or time-of-day restrictions.
-- **Password**: Manages password updates, including complexity checks or dictionary attacks prevention.
-- **Session**: Manages actions during the start or end of a service session, such as mounting directories or setting resource limits.
+- **Auth**: Xác thực danh tính người dùng, thường bằng cách yêu cầu nhập mật khẩu.
+- **Account**: Xử lý việc xác minh tài khoản, kiểm tra các điều kiện như tư cách thành viên nhóm hoặc giới hạn thời gian trong ngày.
+- **Password**: Quản lý việc cập nhật mật khẩu, bao gồm kiểm tra độ phức tạp hoặc ngăn chặn tấn công từ điển.
+- **Session**: Quản lý các hành động khi bắt đầu hoặc kết thúc phiên dịch vụ, chẳng hạn như mount thư mục hoặc thiết lập giới hạn tài nguyên.
 
-#### **PAM Module Controls**
+#### **Các control của module PAM**
 
-Controls dictate the module's response to success or failure, influencing the overall authentication process. These include:<sup>[[1]](#references)</sup>
+Các control quy định phản hồi của module khi thành công hoặc thất bại, ảnh hưởng đến toàn bộ quy trình xác thực. Các control gồm:<sup>[[1]](#references)</sup>
 
-- **Required**: Failure of a required module results in eventual failure, but only after all subsequent modules are checked.
-- **Requisite**: Immediate termination of the process upon failure.
-- **Sufficient**: If no earlier `required` module failed, success returns immediately and skips the remaining modules in the same management group.
-- **Optional**: Only causes failure if it's the sole module in the stack.
+- **Required**: Module `required` thất bại sẽ dẫn đến thất bại cuối cùng, nhưng chỉ sau khi kiểm tra tất cả module tiếp theo.
+- **Requisite**: Quy trình chấm dứt ngay khi xảy ra lỗi.
+- **Sufficient**: Nếu không có module `required` nào trước đó thất bại, khi thành công thì trả về ngay và bỏ qua các module còn lại trong cùng nhóm quản lý.
+- **Optional**: Chỉ gây thất bại nếu đây là module duy nhất trong stack.
 
-#### Offensive Semantics That Matter
+#### Các ngữ nghĩa tấn công quan trọng
 
-When analyzing or modifying PAM, the **location of an inserted rule** determines which stack sees it:<sup>[[1]](#references)[[13]](#references)</sup>
+Khi phân tích hoặc sửa đổi PAM, **vị trí của quy tắc được chèn** quyết định stack nào áp dụng quy tắc đó:<sup>[[1]](#references)[[13]](#references)</sup>
 
-- `include` and `substack` pull rules from other files, so editing `sshd` might only affect SSH while editing `system-auth`, `common-auth`, or another shared stack affects several services at once.<sup>[[1]](#references)[[13]](#references)</sup>
-- PAM also supports bracketed controls such as `[success=1 default=ignore]`. These can be abused to **skip one or more modules** after a successful custom check instead of visibly replacing `pam_unix.so`.<sup>[[1]](#references)</sup>
-- The `module-path` can be **absolute** (`/usr/lib/security/pam_custom.so`) or **relative** to the default PAM module directory. On modern Linux systems the real directories are often `/lib/security`, `/lib64/security`, `/usr/lib/security`, or multiarch paths like `/usr/lib/x86_64-linux-gnu/security`.<sup>[[1]](#references)[[14]](#references)</sup>
+- `include` và `substack` lấy các quy tắc từ tệp khác, vì vậy sửa `sshd` có thể chỉ ảnh hưởng đến SSH, trong khi sửa `system-auth`, `common-auth` hoặc một stack dùng chung khác có thể ảnh hưởng đến nhiều dịch vụ cùng lúc.<sup>[[1]](#references)[[13]](#references)</sup>
+- PAM cũng hỗ trợ các control đặt trong ngoặc vuông như `[success=1 default=ignore]`. Có thể lạm dụng chúng để **bỏ qua một hoặc nhiều module** sau khi một kiểm tra tùy chỉnh thành công, thay vì thay thế `pam_unix.so` một cách dễ thấy.<sup>[[1]](#references)</sup>
+- `module-path` có thể là đường dẫn **tuyệt đối** (`/usr/lib/security/pam_custom.so`) hoặc đường dẫn **tương đối** với thư mục module PAM mặc định. Trên các hệ thống Linux hiện đại, thư mục thực tế thường là `/lib/security`, `/lib64/security`, `/usr/lib/security` hoặc các đường dẫn multiarch như `/usr/lib/x86_64-linux-gnu/security`.<sup>[[1]](#references)[[14]](#references)</sup>
 
-Quick operator takeaway: always map the **full service graph** before patching. For example, `sshd -> password-auth -> system-auth` on some distros or `sshd -> system-remote-login -> system-login -> system-auth` on others means the same one-line implant may fan out much wider than intended.<sup>[[1]](#references)[[13]](#references)</sup>
+Điểm cần nhớ nhanh cho operator: luôn lập sơ đồ **đầy đủ các luồng dịch vụ** trước khi vá. Ví dụ, `sshd -> password-auth -> system-auth` trên một số distro hoặc `sshd -> system-remote-login -> system-login -> system-auth` trên các distro khác có nghĩa là cùng một implant chỉ gồm một dòng có thể lan rộng hơn nhiều so với dự định.<sup>[[1]](#references)[[13]](#references)</sup>
 
-A custom `auth` module may add an interactive challenge to `sudo` after the account password. Inspect the effective `/etc/pam.d/sudo` stack, included policy, module arguments, and permissions on any referenced local data file before reviewing the challenge manually. A readable challenge word list alone does not bypass the password check or create a sudoers grant. A privileged transition still requires the correct account authentication, completion of every required PAM step, and a root-capable sudo rule; unattended enumeration should not trigger the challenge.
+Một module `auth` tùy chỉnh có thể thêm bước challenge tương tác vào `sudo` sau mật khẩu tài khoản. Trước khi xem xét challenge theo cách thủ công, hãy kiểm tra stack `/etc/pam.d/sudo` thực tế, chính sách được include, tham số module và quyền đối với mọi tệp dữ liệu cục bộ được tham chiếu. Chỉ riêng danh sách từ challenge có thể đọc được không thể bỏ qua bước kiểm tra mật khẩu hoặc tạo quyền sudoers. Việc chuyển sang quyền cao hơn vẫn đòi hỏi xác thực tài khoản chính xác, hoàn tất mọi bước PAM bắt buộc và có quy tắc sudo cho phép chạy với quyền root; không để quá trình enumeration không tương tác kích hoạt challenge.
 
-For the legacy Ubuntu [`pam_motd` ownership flaw (CVE-2010-0832)](https://ubuntu.com/security/cve-2010-0832), review the actual `libpam-modules` build and whether a login service invokes the affected session module. Ubuntu fixed it in **1.1.0-2ubuntu1.1** for 9.10 and **1.1.1-2ubuntu5** for 10.04 LTS; other releases or vendor backports need their own package assessment. The reported path required the caller to replace their home `.cache` with a symlink and then trigger a PAM login, causing the old module to change a protected target's ownership. A `.cache` entry, `pam_motd.so` line, or old kernel version alone does not establish exposure; check home-directory control, effective module version, login reachability, symlink handling, and target permissions without replacing files or starting a login during passive enumeration. See [Ubuntu's security notice](https://ubuntu.com/security/notices/USN-959-1).
+Đối với lỗi quyền sở hữu cũ của Ubuntu trong [`pam_motd` (CVE-2010-0832)](https://ubuntu.com/security/cve-2010-0832), hãy kiểm tra bản build `libpam-modules` thực tế và liệu dịch vụ đăng nhập có gọi module session bị ảnh hưởng hay không. Ubuntu đã sửa lỗi trong **1.1.0-2ubuntu1.1** cho 9.10 và **1.1.1-2ubuntu5** cho 10.04 LTS; các bản phát hành khác hoặc bản backport của nhà cung cấp cần được đánh giá gói riêng. Theo báo cáo, đường khai thác yêu cầu người gọi thay `.cache` trong home của họ bằng một symlink rồi kích hoạt đăng nhập PAM, khiến module cũ thay đổi quyền sở hữu của một mục tiêu được bảo vệ. Chỉ riêng một mục `.cache`, dòng `pam_motd.so` hoặc phiên bản kernel cũ không đủ để xác định hệ thống bị ảnh hưởng; hãy kiểm tra quyền kiểm soát thư mục home, phiên bản module thực tế, khả năng tiếp cận luồng đăng nhập, cách xử lý symlink và quyền của mục tiêu, mà không thay thế tệp hoặc bắt đầu phiên đăng nhập trong quá trình enumeration thụ động. Xem [thông báo bảo mật của Ubuntu](https://ubuntu.com/security/notices/USN-959-1).
 
-#### Example Scenario
+#### Kịch bản ví dụ
 
-In a setup with multiple auth modules, the process follows a strict order. If the `pam_securetty` module finds the login terminal unauthorized, root logins are blocked, yet all modules are still processed due to its "required" status. The `pam_env` sets environment variables, potentially aiding in user experience. The `pam_ldap` and `pam_unix` modules work together to authenticate the user, with `pam_unix` attempting to use a previously supplied password, enhancing efficiency and flexibility in authentication methods.<sup>[[1]](#references)[[13]](#references)[[15]](#references)[[16]](#references)[[17]](#references)</sup>
+Trong một cấu hình có nhiều module auth, quy trình tuân theo một thứ tự nghiêm ngặt. Nếu module `pam_securetty` xác định terminal đăng nhập không được phép, các lần đăng nhập root sẽ bị chặn, nhưng tất cả module vẫn được xử lý do trạng thái "required" của nó. `pam_env` thiết lập các biến môi trường, có thể giúp cải thiện trải nghiệm người dùng. Các module `pam_ldap` và `pam_unix` phối hợp để xác thực người dùng; `pam_unix` thử dùng mật khẩu đã được cung cấp trước đó, giúp tăng hiệu quả và tính linh hoạt của các phương thức xác thực.<sup>[[1]](#references)[[13]](#references)[[15]](#references)[[16]](#references)[[17]](#references)</sup>
 
 
-## `pam_permit` in a service stack
+## `pam_permit` trong stack dịch vụ
 
-`pam_permit.so` returns success for PAM checks. If a lower-privileged user can modify a service's effective PAM policy, inserting it with a control flag that short-circuits the authentication stack can remove the password check for that service. For `sudo`, inspect `/etc/pam.d/sudo` and any included `common-auth` or `system-auth` file before deciding which services are affected. A PAM authentication bypass does **not** grant a new sudoers rule; the user must still be authorized to run the requested command. Check rule order and any earlier `required` failures rather than assuming that a single `sufficient pam_permit.so` line always succeeds.
+`pam_permit.so` trả về thành công cho các bước kiểm tra PAM. Nếu người dùng có quyền thấp hơn có thể sửa chính sách PAM thực tế của một dịch vụ, việc chèn module này cùng một control flag khiến stack xác thực short-circuit có thể loại bỏ bước kiểm tra mật khẩu của dịch vụ đó. Với `sudo`, hãy kiểm tra `/etc/pam.d/sudo` và mọi tệp `common-auth` hoặc `system-auth` được include trước khi xác định những dịch vụ nào bị ảnh hưởng. Bypass xác thực PAM **không** cấp thêm quy tắc sudoers; người dùng vẫn phải được cho phép chạy lệnh được yêu cầu. Hãy kiểm tra thứ tự quy tắc và mọi lỗi `required` xảy ra trước đó, thay vì cho rằng chỉ một dòng `sufficient pam_permit.so` luôn đảm bảo thành công.
 
 ## Backdooring PAM – Hooking `pam_unix.so`
 
-A classic persistence trick in high-value Linux environments is to **swap the legitimate PAM library with a trojanised drop-in**. On a host whose PAM stack loads `pam_unix.so`, SSH or console authentication can invoke its `pam_sm_authenticate()` entry point; a malicious replacement can capture credentials or implement a *magic* password bypass.<sup>[[2]](#references)[[11]](#references)</sup>
+Một thủ thuật persistence kinh điển trong các môi trường Linux có giá trị cao là **thay thư viện PAM hợp pháp bằng một drop-in đã được trojan hóa**. Trên máy chủ có stack PAM tải `pam_unix.so`, xác thực SSH hoặc console có thể gọi entry point `pam_sm_authenticate()` của module này; một bản thay thế độc hại có thể thu thập thông tin xác thực hoặc triển khai cơ chế bypass bằng mật khẩu *magic*.<sup>[[2]](#references)[[11]](#references)</sup>
 
-### Compilation Cheatsheet
-The sketch below uses Linux-PAM's `pam_sm_authenticate()` service entry point and `pam_get_authtok()` to access the authentication token.<sup>[[11]](#references)[[12]](#references)</sup>
+### Cheatsheet biên dịch
+Phác thảo bên dưới sử dụng service entry point `pam_sm_authenticate()` của Linux-PAM và `pam_get_authtok()` để truy cập token xác thực.<sup>[[11]](#references)[[12]](#references)</sup>
 <details>
-<summary>Sample `pam_unix.so` trojan</summary>
+<summary>Mẫu trojan `pam_unix.so`</summary>
 
 ```c
 #define _GNU_SOURCE
@@ -130,7 +130,7 @@ PAM_EXTERN int pam_sm_setcred(pam_handle_t *pamh, int flags, int argc, const cha
 
 </details>
 
-Compile and stealth-replace (the replacement/timestomp pattern is documented by Unit 42). Adjust both the backup path hard-coded in the wrapper and the commands below to the target's actual PAM module directory:<sup>[[2]](#references)</sup>
+Biên dịch và stealth-replace (mẫu thay thế/timestomp được Unit 42 ghi lại). Điều chỉnh cả đường dẫn sao lưu được hard-code trong wrapper lẫn các lệnh bên dưới để khớp với thư mục PAM module thực tế của mục tiêu:<sup>[[2]](#references)</sup>
 ```bash
 gcc -fPIC -shared -o pam_unix.so trojan_pam.c -ldl -lpam
 mv /lib/security/pam_unix.so /lib/security/pam_unix.so.bak
@@ -139,22 +139,22 @@ chmod 644 /lib/security/pam_unix.so     # keep original perms
 touch -r /bin/ls /lib/security/pam_unix.so  # timestomp
 ```
 
-### OpSec Tips
-1. **Atomic overwrite** – write a complete library to a temporary file and rename it into place to avoid leaving a partially written authentication module.
-2. A path such as `/usr/bin/.dbus.log` was observed in Unit 42's AuthDoor analysis, so it is also a useful hunting indicator.<sup>[[2]](#references)</sup>
-3. Preserve the entry points expected by the PAM stack (for example, `pam_sm_authenticate` and `pam_sm_setcred`) so other management operations continue to work.<sup>[[11]](#references)[[18]](#references)</sup>
+### Mẹo OpSec
+1. **Atomic overwrite** – ghi toàn bộ thư viện vào một tệp tạm rồi đổi tên tệp vào vị trí cần thiết để tránh để lại một module xác thực được ghi dở.
+2. Một đường dẫn như `/usr/bin/.dbus.log` đã được ghi nhận trong phân tích AuthDoor của Unit 42, vì vậy đây cũng là một chỉ dấu hữu ích để truy tìm.<sup>[[2]](#references)</sup>
+3. Giữ lại các entry point mà PAM stack mong đợi (ví dụ: `pam_sm_authenticate` và `pam_sm_setcred`) để các thao tác quản lý khác tiếp tục hoạt động.<sup>[[11]](#references)[[18]](#references)</sup>
 
-### Detection
-For package-integrity checks, RPM verifies installed-file metadata, `debsums -s` reports checksum errors, and `dpkg -S` in the triage block queries package ownership; the audit watch syntax records writes and attribute changes to a path.<sup>[[6]](#references)[[7]](#references)[[8]](#references)[[9]](#references)</sup>
-* Compare MD5/SHA256 of `pam_unix.so` against distro package.
-* `rpm -V pam` or `debsums -s libpam-modules` to spot replaced libraries without manual hashing.
-* Check for world-writable or unusual ownership under `/lib/security/`.
-* `auditd` rule: `-w /lib/security/pam_unix.so -p wa -k pam-backdoor`.
-* Grep PAM configs for unexpected modules: `grep -R "pam_[a-z].*\.so" /etc/pam.d/ | grep -v pam_unix`.
+### Phát hiện
+Để kiểm tra tính toàn vẹn của package, RPM xác minh metadata của tệp đã cài đặt, `debsums -s` báo lỗi checksum, còn `dpkg -S` trong khối triage truy vấn quyền sở hữu package; cú pháp audit watch ghi lại các lần ghi và thay đổi thuộc tính trên một đường dẫn.<sup>[[6]](#references)[[7]](#references)[[8]](#references)[[9]](#references)</sup>
+* So sánh MD5/SHA256 của `pam_unix.so` với package của distro.
+* Chạy `rpm -V pam` hoặc `debsums -s libpam-modules` để phát hiện thư viện bị thay thế mà không cần tự tính hash.
+* Kiểm tra các quyền ghi cho mọi người dùng hoặc quyền sở hữu bất thường bên dưới `/lib/security/`.
+* Quy tắc `auditd`: `-w /lib/security/pam_unix.so -p wa -k pam-backdoor`.
+* Grep các cấu hình PAM để tìm module không mong đợi: `grep -R "pam_[a-z].*\.so" /etc/pam.d/ | grep -v pam_unix`.
 
-That `pam_` grep misses custom modules with other `.so` basenames. Review the **active** `auth`, `account`, `password`, and `session` lines in `/etc/pam.d` (and `/etc/pam.conf` where used), including their control flag and any included stack. An unfamiliar module placed as `auth sufficient` before the normal password check merits package-ownership and binary review; [PAM's control syntax](https://man7.org/linux/man-pages/man5/pam.d.5.html) can let success end that part of the stack early. A module name, unusual timestamp, or `nodelay` option alone does not prove a bypass. If behavior suggests a timing leak, inspect the implementation and service reachability first; routine enumeration should not repeatedly submit authentication guesses.
+Lệnh grep `pam_` này bỏ sót các module tùy chỉnh có basename `.so` khác. Kiểm tra các dòng `auth`, `account`, `password` và `session` đang **hoạt động** trong `/etc/pam.d` (và `/etc/pam.conf` nếu được dùng), bao gồm control flag và mọi stack được include. Một module lạ được đặt làm `auth sufficient` trước bước kiểm tra mật khẩu thông thường cần được kiểm tra quyền sở hữu package và binary; [cú pháp control của PAM](https://man7.org/linux/man-pages/man5/pam.d.5.html) có thể khiến thành công kết thúc sớm phần đó của stack. Chỉ riêng tên module, timestamp bất thường hoặc tùy chọn `nodelay` không chứng minh được có bypass. Nếu hành vi cho thấy có timing leak, trước tiên hãy kiểm tra cách triển khai và khả năng truy cập của service; hoạt động liệt kê thông thường không nên liên tục gửi các phỏng đoán thông tin xác thực.
 
-### Quick triage commands (post-compromise or threat hunting)
+### Lệnh triage nhanh (sau khi bị xâm nhập hoặc khi truy tìm mối đe dọa)
 ```bash
 # 1) Spot alien PAM objects
 find /{lib,usr/lib,usr/local/lib}{,64}/security -type f -printf '%p %s %M %u:%g %TY-%Tm-%Td\n' | grep -E 'pam_|libselinux'
@@ -171,27 +171,27 @@ done
 grep -R "pam_.*\.so" /etc/pam.d/ | grep -E 'plg|selinux|custom|exec'
 ```
 
-### Abusing `pam_exec` for persistence
-Instead of replacing `pam_unix.so`, a lighter touch is to append a `pam_exec` line in `/etc/pam.d/sshd` so an invocation that reaches that PAM line runs a helper while leaving the normal stack intact.<sup>[[4]](#references)</sup>
+### Lạm dụng `pam_exec` để duy trì quyền truy cập
+Thay vì thay thế `pam_unix.so`, một cách ít can thiệp hơn là thêm một dòng `pam_exec` vào `/etc/pam.d/sshd` để một lần gọi đi đến dòng PAM đó sẽ chạy một helper, trong khi vẫn giữ nguyên stack thông thường.<sup>[[4]](#references)</sup>
 ```bash
 # Run during the auth phase; expose_authtok sends the token on stdin
 auth optional pam_exec.so quiet expose_authtok /usr/local/bin/.ssh_hook.sh
 ```
-`pam_exec` receives PAM metadata in environment variables such as `PAM_USER`, `PAM_RHOST`, `PAM_SERVICE`, `PAM_TTY`, and `PAM_TYPE`. With `expose_authtok`, the helper can read up to `PAM_MAX_RESP_SIZE` bytes of the password from `stdin` during `auth` or `password` phases. If you want the helper to run with the effective UID instead of the real UID, add `seteuid`.<sup>[[4]](#references)</sup>
+`pam_exec` nhận metadata PAM trong các biến môi trường như `PAM_USER`, `PAM_RHOST`, `PAM_SERVICE`, `PAM_TTY` và `PAM_TYPE`. Với `expose_authtok`, helper có thể đọc tối đa `PAM_MAX_RESP_SIZE` byte của mật khẩu từ `stdin` trong các giai đoạn `auth` hoặc `password`. Nếu muốn helper chạy với effective UID thay vì real UID, hãy thêm `seteuid`.<sup>[[4]](#references)</sup>
 
-Practical notes follow the module types and `type=` filter documented for `pam_exec`:<sup>[[4]](#references)</sup>
+Các lưu ý thực tế dưới đây tuân theo các loại module và bộ lọc `type=` được ghi lại cho `pam_exec`:<sup>[[4]](#references)</sup>
 
-- `session optional pam_exec.so ...` is better for **post-login actions** such as re-opening sockets or spawning a detached daemon.
-- `auth optional pam_exec.so quiet expose_authtok ...` is the usual choice for **credential capture** because it runs before the session opens.
-- `type=session` or `type=auth` can be used to constrain execution to a specific PAM phase and avoid noisy double execution.
+- `session optional pam_exec.so ...` phù hợp hơn cho **các hành động sau đăng nhập**, chẳng hạn mở lại socket hoặc khởi chạy daemon chạy tách biệt.
+- `auth optional pam_exec.so quiet expose_authtok ...` thường được chọn để **thu thập thông tin xác thực** vì nó chạy trước khi session mở.
+- Có thể dùng `type=session` hoặc `type=auth` để giới hạn việc thực thi vào một giai đoạn PAM cụ thể và tránh chạy hai lần không cần thiết.
 
-For privilege review, an absolute `pam_exec.so` helper path that the current user can write is a candidate even when the file is marked append-only (`a`): [the attribute permits appending](https://man7.org/linux/man-pages/man1/chattr.1.html), which may be enough to alter a shell script's later behavior. First confirm that the PAM service and event actually reach that line, the helper and its parent path are trusted, and the command runs under a more privileged identity; [`seteuid` changes which PAM UID is used](https://man7.org/linux/man-pages/man8/pam_exec.8.html). A writable file or `lsattr` result alone does not prove privileged execution.
+Khi rà soát đặc quyền, một đường dẫn tuyệt đối tới helper `pam_exec.so` mà người dùng hiện tại có thể ghi là một ứng viên cần kiểm tra, ngay cả khi tệp được đánh dấu append-only (`a`): [thuộc tính này cho phép ghi nối thêm](https://man7.org/linux/man-pages/man1/chattr.1.html), có thể đủ để thay đổi hành vi về sau của shell script. Trước tiên, hãy xác nhận rằng dịch vụ PAM và sự kiện thực sự đi tới dòng đó, helper cùng đường dẫn thư mục cha là đáng tin cậy, và lệnh chạy dưới một danh tính có đặc quyền cao hơn; [`seteuid` thay đổi PAM UID được sử dụng](https://man7.org/linux/man-pages/man8/pam_exec.8.html). Chỉ riêng tệp có quyền ghi hoặc kết quả `lsattr` không chứng minh được rằng lệnh chạy với đặc quyền cao.
 
-### Surviving distro tooling: `authselect`
+### Duy trì thay đổi qua công cụ của distro: `authselect`
 
-On RHEL and Fedora-family systems that use `authselect`, direct edits to generated files such as `/etc/pam.d/system-auth` or `/etc/pam.d/password-auth` may be **overwritten by `authselect`**. For persistence, operators often patch the active custom profile under `/etc/authselect/custom/<profile>/` and then re-select it.<sup>[[5]](#references)[[19]](#references)</sup>
+Trên các hệ thống thuộc họ RHEL và Fedora sử dụng `authselect`, các chỉnh sửa trực tiếp vào những tệp được tạo như `/etc/pam.d/system-auth` hoặc `/etc/pam.d/password-auth` có thể bị **`authselect` ghi đè**. Để duy trì thay đổi, quản trị viên thường sửa profile tùy chỉnh đang hoạt động trong `/etc/authselect/custom/<profile>/`, rồi chọn lại profile đó.<sup>[[5]](#references)[[19]](#references)</sup>
 
-Typical workflow when you have root:<sup>[[5]](#references)</sup>
+Quy trình thường dùng khi bạn có quyền root:<sup>[[5]](#references)</sup>
 
 ```bash
 # Inspect the active profile first
@@ -204,33 +204,32 @@ find /etc/authselect/custom -maxdepth 2 -type f \( -name 'system-auth' -o -name 
 authselect apply-changes
 ```
 
-This matters for both offense and triage: if `/etc/pam.d/system-auth` contains the banner `Generated by authselect` and `Do not modify this file manually`, then the real persistence point may live under `/etc/authselect/custom/` rather than in `/etc/pam.d/`.<sup>[[5]](#references)</sup>
+Điều này quan trọng cả với offense lẫn triage: nếu `/etc/pam.d/system-auth` chứa banner `Generated by authselect` và `Do not modify this file manually`, thì điểm persistence thực sự có thể nằm trong `/etc/authselect/custom/` thay vì `/etc/pam.d/`.<sup>[[5]](#references)</sup>
 
-### Recent tradecraft seen in the wild
+### Tradecraft gần đây được ghi nhận ngoài thực tế
 
-Recent 2025 reporting on the **Plague** Linux backdoor showed the same core idea taken further: a malicious PAM component with a **static bypass password**, plus cleanup of SSH-related environment variables and shell history (`HISTFILE=/dev/null`) to reduce session traces after login.<sup>[[3]](#references)</sup> That is a useful hunting pattern because the backdoor logic may live in PAM while the stealth artifacts only appear **after** authentication succeeds.
+Các báo cáo gần đây năm 2025 về backdoor Linux **Plague** cho thấy cùng ý tưởng cốt lõi được phát triển thêm: một thành phần PAM độc hại với **mật khẩu bypass tĩnh**, cùng với việc dọn các biến môi trường liên quan đến SSH và lịch sử shell (`HISTFILE=/dev/null`) nhằm giảm dấu vết phiên sau khi đăng nhập.<sup>[[3]](#references)</sup> Đây là một mẫu hữu ích để săn tìm, vì logic của backdoor có thể nằm trong PAM, trong khi các artifact ẩn chỉ xuất hiện **sau khi** xác thực thành công.
 
 
 ## References
 
-- [1] [pam.conf(5) / pam.d(5) - Linux-PAM Manual](https://man7.org/linux/man-pages/man5/pam.d.5.html)
-- [2] [The Covert Operator's Playbook: Infiltration of Global Telecom Networks - Unit 42](https://unit42.paloaltonetworks.com/infiltration-of-global-telecom-networks/)
-- [3] [Nextron Systems - Plague: A Newly Discovered PAM-Based Backdoor for Linux](https://www.nextron-systems.com/2025/08/01/plague-a-newly-discovered-pam-based-backdoor-for-linux/)
-- [4] [pam_exec(8) - Linux-PAM Manual](https://man7.org/linux/man-pages/man8/pam_exec.8.html)
-- [5] [Configuring user authentication using authselect - Red Hat Enterprise Linux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/configuring_authentication_and_authorization_in_rhel/configuring-user-authentication-using-authselect)
+- [1] [pam.conf(5) / pam.d(5) - Tài liệu Linux-PAM](https://man7.org/linux/man-pages/man5/pam.d.5.html)
+- [2] [Sổ tay của Covert Operator: Xâm nhập các mạng viễn thông toàn cầu - Unit 42](https://unit42.paloaltonetworks.com/infiltration-of-global-telecom-networks/)
+- [3] [Nextron Systems - Plague: Backdoor dựa trên PAM mới được phát hiện dành cho Linux](https://www.nextron-systems.com/2025/08/01/plague-a-newly-discovered-pam-based-backdoor-for-linux/)
+- [4] [pam_exec(8) - Tài liệu Linux-PAM](https://man7.org/linux/man-pages/man8/pam_exec.8.html)
+- [5] [Cấu hình xác thực người dùng bằng authselect - Red Hat Enterprise Linux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/configuring_authentication_and_authorization_in_rhel/configuring-user-authentication-using-authselect)
 - [6] [rpm(8) - RPM](https://rpm.org/docs/4.20.x/man/rpm.8)
-- [7] [debsums(1) - Debian Manpages](https://manpages.debian.org/unstable/debsums/debsums.1.en.html)
-- [8] [auditctl(8) - Linux manual page](https://man7.org/linux/man-pages/man8/auditctl.8.html)
-- [9] [dpkg-query(1) - Debian Manpages](https://manpages.debian.org/testing/dpkg/dpkg-query.1.en.html)
-- [10] [Managing Authentication in Oracle Solaris 11.4](https://docs.oracle.com/cd/E37838_01/pdf/E67470.pdf)
-- [11] [pam_sm_authenticate(3) - Linux-PAM Manual](https://man7.org/linux/man-pages/man3/pam_sm_authenticate.3.html)
-- [12] [pam_get_authtok(3) - Linux-PAM Manual](https://man7.org/linux/man-pages/man3/pam_get_authtok.3.html)
-- [13] [System-Level Authentication Guide - Red Hat Enterprise Linux 7](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html-single/system-level_authentication_guide/index)
-- [14] [Ubuntu package file list: libpam-modules/noble/amd64](https://packages.ubuntu.com/noble/amd64/libpam-modules/filelist)
-- [15] [pam_env(8) - Linux-PAM Manual](https://man7.org/linux/man-pages/man8/pam_env.8.html)
-- [16] [pam_unix(8) - Linux-PAM Manual](https://man7.org/linux/man-pages/man8/pam_unix.8.html)
-- [17] [pam_ldap(5) - Debian Manpages](https://manpages.debian.org/testing/libpam-ldap/pam_ldap.5.en.html)
-- [18] [pam_sm_setcred(3) - Linux-PAM Manual](https://man7.org/linux/man-pages/man3/pam_sm_setcred.3.html)
-- [19] [Changes/Make Authselect Mandatory - Fedora Project Wiki](https://fedoraproject.org/wiki/Changes/Make_Authselect_Mandatory)
-
+- [7] [debsums(1) - Trang hướng dẫn Debian](https://manpages.debian.org/unstable/debsums/debsums.1.en.html)
+- [8] [auditctl(8) - Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man8/auditctl.8.html)
+- [9] [dpkg-query(1) - Trang hướng dẫn Debian](https://manpages.debian.org/testing/dpkg/dpkg-query.1.en.html)
+- [10] [Quản lý xác thực trong Oracle Solaris 11.4](https://docs.oracle.com/cd/E37838_01/pdf/E67470.pdf)
+- [11] [pam_sm_authenticate(3) - Tài liệu Linux-PAM](https://man7.org/linux/man-pages/man3/pam_sm_authenticate.3.html)
+- [12] [pam_get_authtok(3) - Tài liệu Linux-PAM](https://man7.org/linux/man-pages/man3/pam_get_authtok.3.html)
+- [13] [Hướng dẫn xác thực cấp hệ thống - Red Hat Enterprise Linux 7](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html-single/system-level_authentication_guide/index)
+- [14] [Danh sách tệp gói Ubuntu: libpam-modules/noble/amd64](https://packages.ubuntu.com/noble/amd64/libpam-modules/filelist)
+- [15] [pam_env(8) - Tài liệu Linux-PAM](https://man7.org/linux/man-pages/man8/pam_env.8.html)
+- [16] [pam_unix(8) - Tài liệu Linux-PAM](https://man7.org/linux/man-pages/man8/pam_unix.8.html)
+- [17] [pam_ldap(5) - Trang hướng dẫn Debian](https://manpages.debian.org/testing/libpam-ldap/pam_ldap.5.en.html)
+- [18] [pam_sm_setcred(3) - Tài liệu Linux-PAM](https://man7.org/linux/man-pages/man3/pam_sm_setcred.3.html)
+- [19] [Thay đổi/Coi Authselect là bắt buộc - Wiki Dự án Fedora](https://fedoraproject.org/wiki/Changes/Make_Authselect_Mandatory)
 {{#include ../../banners/hacktricks-training.md}}

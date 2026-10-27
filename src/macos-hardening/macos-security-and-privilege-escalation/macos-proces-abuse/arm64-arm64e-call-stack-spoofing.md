@@ -1,18 +1,18 @@
-# ARM64/ARM64e Call-Stack Spoofing
+# Giả mạo Call Stack trên ARM64/ARM64e
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Why metadata-driven unwinding can be spoofed
+## Vì sao có thể giả mạo quá trình unwind dựa trên metadata
 
-Some macOS security tooling delegates thread-stack collection to `/usr/sbin/spindump` or otherwise trusts a conventional metadata-driven unwinder. An implant can exploit that trust boundary by placing ABI-correct synthetic records on its stack so a sensitive API appears to have been reached through attacker-selected functions in dyld and loaded Apple frameworks instead of from unbacked implant code. This is telemetry deception, not a change to the executable or its unwind metadata.<sup>[[1]](#references)</sup>
+Một số công cụ bảo mật trên macOS ủy quyền việc thu thập thread stack cho `/usr/sbin/spindump` hoặc tin cậy một unwinder thông thường dựa trên metadata. Implant có thể khai thác ranh giới tin cậy đó bằng cách đặt các bản ghi tổng hợp đúng ABI trên stack, khiến một API nhạy cảm có vẻ như được gọi qua các hàm do kẻ tấn công chọn trong dyld và các framework của Apple đã được tải, thay vì từ mã implant không có bản sao lưu. Đây là hành vi đánh lừa telemetry, không phải thay đổi executable hay metadata unwind của nó.<sup>[[1]](#references)</sup>
 
-See [macOS stackshots and `spindump`](../macos-apps-inspecting-debugging-and-fuzzing/#stackshot--microstackshots) for the collection-side context.
+Xem [macOS stackshots and `spindump`](../macos-apps-inspecting-debugging-and-fuzzing/#stackshot--microstackshots) để biết bối cảnh phía thu thập.
 
-An unwinder does not prove that a compiler-generated prologue created a record. It repeatedly uses the current `PC` to choose a Mach-O recipe, applies that recipe to `SP`, `x29`, `x30`, stack memory and any declared nonvolatile registers, and uses the recovered caller `PC` to select the next recipe. If attacker-controlled memory satisfies every selected recipe, the resulting chain can be structurally valid and symbolizable even though those calls never happened.<sup>[[1]](#references)</sup>
+Unwinder không xác minh rằng một prologue do compiler tạo ra đã tạo bản ghi. Nó liên tục dùng `PC` hiện tại để chọn một recipe Mach-O, áp dụng recipe đó cho `SP`, `x29`, `x30`, bộ nhớ stack và mọi thanh ghi nonvolatile được khai báo, rồi dùng `PC` của caller được khôi phục để chọn recipe tiếp theo. Nếu bộ nhớ do kẻ tấn công kiểm soát đáp ứng mọi recipe được chọn, chuỗi kết quả có thể hợp lệ về cấu trúc và ánh xạ được sang symbol, dù các lời gọi đó chưa từng xảy ra.<sup>[[1]](#references)</sup>
 
-## ARM64 frame state
+## Trạng thái frame ARM64
 
-The [ARM64 assembly overview](../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md) covers the register roles and calling convention. For a conventional frame created with `stp x29, x30, [sp, #-16]!` followed by `mov x29, sp`, the Canonical Frame Address (CFA), representing the caller's entry `SP`, is `FP+0x10`:<sup>[[1]](#references)[[4]](#references)</sup>
+[Tổng quan về assembly ARM64](../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md) trình bày vai trò của các thanh ghi và calling convention. Với một frame thông thường được tạo bằng `stp x29, x30, [sp, #-16]!` rồi đến `mov x29, sp`, Canonical Frame Address (CFA), biểu thị `SP` tại thời điểm caller bắt đầu thực thi, là `FP+0x10`:<sup>[[1]](#references)[[4]](#references)</sup>
 
 ```text
 higher addresses
@@ -24,49 +24,49 @@ FP - 0x10   saved x20 (when declared)
 lower addresses
 ```
 
-Frame records form a linked list through `[FP]`, but blindly following that list is insufficient: leaf functions may be frameless, tail calls may remove logical transitions, and unusual layouts use DWARF CFI. The recipe selected by the current address determines whether the unwinder reads the FP chain at all.<sup>[[1]](#references)[[4]](#references)</sup>
+Các frame record tạo thành một linked list thông qua `[FP]`, nhưng chỉ lần theo danh sách đó là chưa đủ: các hàm lá có thể không có frame, tail call có thể loại bỏ các chuyển tiếp logic, và các layout bất thường sử dụng DWARF CFI. Recipe được chọn theo địa chỉ hiện tại sẽ quyết định unwinder có đọc chuỗi FP hay không.<sup>[[1]](#references)[[4]](#references)</sup>
 
-## Selecting a Mach-O unwind recipe
+## Chọn recipe unwind của Mach-O
 
-Final linked images store compact unwind data in `__TEXT,__unwind_info`. The section header points to a first-level function index; each index range points to a regular (`kind=2`) or compressed (`kind=3`) second-level page. Layouts that compact unwind cannot describe use an FDE and call-frame instructions in `__eh_frame`.<sup>[[1]](#references)[[2]](#references)</sup>
+Các image đã được link cuối cùng lưu dữ liệu compact unwind trong `__TEXT,__unwind_info`. Header của section trỏ đến function index cấp một; mỗi phạm vi index trỏ đến một trang cấp hai dạng thường (`kind=2`) hoặc nén (`kind=3`). Các layout mà compact unwind không thể mô tả sẽ dùng FDE và call-frame instructions trong `__eh_frame`.<sup>[[1]](#references)[[2]](#references)</sup>
 
-For each candidate runtime PC:<sup>[[1]](#references)[[2]](#references)</sup>
+Với mỗi PC runtime cần kiểm tra:<sup>[[1]](#references)[[2]](#references)</sup>
 
-1. Strip or normalize ARM64e PAC bits for lookup only.
-2. Find the loaded Mach-O whose executable `__TEXT` range contains the address.
-3. Calculate `functionOffset = normalizedPC - loadedImageBase` and reject negative results or values above `UINT32_MAX`.
-4. Select the first-level range satisfying `index[i].functionOffset <= functionOffset < index[i+1].functionOffset`.
-5. Parse the referenced second-level page, choose the closest entry whose start does not exceed the offset, and verify the address is below the next entry or first-level range end.
-6. Decode that entry and construct the exact state it describes.
+1. Chỉ loại bỏ hoặc chuẩn hóa các bit PAC của ARM64e để tra cứu.
+2. Tìm Mach-O đã load có phạm vi `__TEXT` thực thi chứa địa chỉ đó.
+3. Tính `functionOffset = normalizedPC - loadedImageBase` và từ chối kết quả âm hoặc lớn hơn `UINT32_MAX`.
+4. Chọn phạm vi cấp một đầu tiên thỏa mãn `index[i].functionOffset <= functionOffset < index[i+1].functionOffset`.
+5. Phân tích trang cấp hai được tham chiếu, chọn entry gần nhất có giá trị bắt đầu không vượt quá offset, rồi xác minh địa chỉ nằm dưới entry kế tiếp hoặc cuối phạm vi cấp một.
+6. Giải mã entry đó và dựng chính xác trạng thái mà nó mô tả.
 
-When an address came from a saved LR, lookup may use `PC-1` so that an address immediately after a call remains in the caller's covered range. This changes recipe selection, not any stack offset.<sup>[[1]](#references)</sup>
+Nếu địa chỉ lấy từ LR đã lưu, có thể tra cứu bằng `PC-1` để địa chỉ ngay sau một lệnh gọi vẫn nằm trong phạm vi được bao phủ của caller. Thao tác này chỉ thay đổi việc chọn recipe, không thay đổi bất kỳ stack offset nào.<sup>[[1]](#references)</sup>
 
-A parser must bounds-check every header and array, require section version `1`, account for the final first-level sentinel, reject a zero second-level-page offset, and distinguish regular from compressed pages. In a regular page, `entryPageOffset` is relative to the start of that page, whereas the first-level page offset is relative to the start of `__unwind_info`.<sup>[[1]](#references)[[2]](#references)</sup>
+Parser phải kiểm tra giới hạn của mọi header và array, yêu cầu section version là `1`, tính đến sentinel cấp một cuối cùng, từ chối offset trang cấp hai bằng 0 và phân biệt trang thường với trang nén. Trong trang thường, `entryPageOffset` được tính tương đối so với đầu trang đó, trong khi offset trang cấp một được tính tương đối so với đầu `__unwind_info`.<sup>[[1]](#references)[[2]](#references)</sup>
 
-The broad mode is `encoding & 0x0F000000`. Current LLVM definitions include the following modes; a parser should not treat every non-DWARF value as a classic frame:<sup>[[1]](#references)[[2]](#references)</sup>
+Mode tổng quát được xác định bởi `encoding & 0x0F000000`. Các định nghĩa LLVM hiện tại bao gồm những mode sau; parser không nên xem mọi giá trị không phải DWARF là frame kiểu cổ điển:<sup>[[1]](#references)[[2]](#references)</sup>
 
-| Mode | Value | Caller recovery |
+| Mode | Value | Khôi phục caller |
 | --- | --- | --- |
-| No compact recipe | `0x00000000` | Stop or use an independent fallback. |
-| Frameless | `0x02000000` | Add the encoded stack size to current `SP`; caller PC is live LR. |
-| DWARF | `0x03000000` | Execute the FDE/CFI identified by the low 24 bits. |
-| Frame | `0x04000000` | Read the conventional `x29` frame record. |
-| arm64e frame with authenticated LR range | `0x05000000` | Handle `UNWIND_ARM64_MODE_FRAME_PAUTH_LR`; its offset field locates `pacibsppc` within the covered range. |
+| Không có compact recipe | `0x00000000` | Dừng hoặc dùng fallback độc lập. |
+| Frameless | `0x02000000` | Cộng stack size đã mã hóa vào `SP` hiện tại; PC của caller là LR đang hoạt động. |
+| DWARF | `0x03000000` | Thực thi FDE/CFI được xác định bởi 24 bit thấp. |
+| Frame | `0x04000000` | Đọc frame record `x29` theo quy ước. |
+| Frame arm64e có phạm vi LR được xác thực | `0x05000000` | Xử lý `UNWIND_ARM64_MODE_FRAME_PAUTH_LR`; trường offset xác định vị trí `pacibsppc` trong phạm vi được bao phủ. |
 
-For frameless mode, `stackSize = ((encoding & 0x00FFF000) >> 12) * 16`. For frame mode, the five low bits declare contiguous saved GPR pairs `x19/x20` through `x27/x28`; bits `0x100-0x800` similarly declare `d8-d15` pairs. Those saved registers may not be necessary to find the next PC, but a believable virtual caller state must satisfy every field the consumer reconstructs.<sup>[[1]](#references)[[2]](#references)</sup>
+Với mode frameless, `stackSize = ((encoding & 0x00FFF000) >> 12) * 16`. Với mode frame, năm bit thấp khai báo các cặp GPR được lưu liên tiếp từ `x19/x20` đến `x27/x28`; các bit `0x100-0x800` cũng khai báo tương tự cho các cặp `d8-d15`. Có thể không cần các register đã lưu đó để tìm PC tiếp theo, nhưng trạng thái caller ảo đáng tin cậy phải đáp ứng mọi trường mà consumer khôi phục.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Constructing synthetic frame-mode records
+## Dựng các frame-mode record tổng hợp
 
-The construction process reverses the unwinder rather than scanning the stack for address-like values:<sup>[[1]](#references)</sup>
+Quy trình dựng đảo ngược hoạt động của unwinder, thay vì quét stack để tìm các giá trị trông giống địa chỉ:<sup>[[1]](#references)</sup>
 
-1. Choose a real executable PC in a currently loaded image.
-2. Decode the recipe covering that precise PC or call-site address.
-3. Allocate a synthetic record with the required alignment and CFA relationship.
-4. Store the next synthetic FP at `[FP]`, that frame's saved caller PC at `[FP+8]`, and every GPR/FPR save declared by the encoding below FP.
-5. Link several records and put the first record in live `x29`.
-6. Arrange live LR and the API return path so unwinding enters the chosen chain while execution can still be restored safely.
+1. Chọn một PC thực thi hợp lệ trong image hiện được load.
+2. Giải mã recipe bao phủ chính xác PC hoặc địa chỉ call-site đó.
+3. Cấp phát một record tổng hợp với alignment và quan hệ CFA phù hợp.
+4. Lưu FP tổng hợp tiếp theo tại `[FP]`, PC caller đã lưu của frame đó tại `[FP+8]`, và mọi GPR/FPR được encoding khai báo là lưu dưới FP.
+5. Liên kết nhiều record và đặt record đầu tiên vào `x29` đang hoạt động.
+6. Sắp xếp LR đang hoạt động và đường đi trả về của API để quá trình unwind đi vào chain đã chọn, đồng thời vẫn có thể khôi phục an toàn trạng thái thực thi.
 
-For example, `0x04000001` means frame mode plus the `x19/x20` pair. The corresponding state transformation and required memory are:<sup>[[1]](#references)[[2]](#references)</sup>
+Ví dụ, `0x04000001` có nghĩa là mode frame cộng với cặp `x19/x20`. Phép biến đổi trạng thái tương ứng và bộ nhớ cần thiết là:<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```text
 [FP - 0x10] = caller x20
@@ -76,11 +76,11 @@ For example, `0x04000001` means frame mode plus the `x19/x20` pair. The correspo
 caller SP    = FP + 0x10
 ```
 
-A legitimate-looking address is therefore not enough. Every recovered PC becomes the key for the next lookup, so a single address whose encoding disagrees with the fabricated layout breaks the chain or causes the consumer to reconstruct inconsistent register state.<sup>[[1]](#references)</sup>
+Do đó, một địa chỉ trông hợp lệ là chưa đủ. Mỗi PC được khôi phục sẽ trở thành khóa cho lần tra cứu tiếp theo, vì vậy chỉ cần một địa chỉ có cách mã hóa không khớp với bố cục giả lập là chuỗi bị đứt hoặc khiến bên tiêu thụ tái dựng trạng thái thanh ghi không nhất quán.<sup>[[1]](#references)</sup>
 
-## ARM64e PAC requirements
+## Yêu cầu PAC của ARM64e
 
-PAC stores a keyed integrity value in otherwise spare pointer bits; it does not encrypt the address. Clang's arm64e return-address schema uses instruction key B and the stack pointer on function entry as the discriminator. For a conventional frame, that entry `SP` is the CFA, so the saved LR at `[FP+8]` is bound to `FP+0x10`.<sup>[[1]](#references)[[3]](#references)</sup>
+PAC lưu trữ một giá trị toàn vẹn có khóa trong các bit con trỏ vốn không được sử dụng; nó không mã hóa địa chỉ. Lược đồ địa chỉ trả về arm64e của Clang sử dụng khóa lệnh B và stack pointer tại thời điểm vào hàm làm giá trị phân biệt. Với một frame thông thường, `SP` tại thời điểm vào hàm là CFA, do đó LR đã lưu tại `[FP+8]` được ràng buộc với `FP+0x10`.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ```text
 modifier = syntheticFP + 0x10
@@ -90,9 +90,9 @@ signedLR = PACIB(rawReturnPC, modifier)
 AUTIB(signedLR, modifier) == rawReturnPC
 ```
 
-Each synthetic LR must be signed independently because moving an already signed LR to a frame with a different CFA changes the discriminator and makes authentication fail. `ptrauth_strip()` is suitable for address normalization and symbol lookup but does **not** establish authenticity; any real return or authenticated indirect branch must use the key and modifier expected at that exact transition.<sup>[[1]](#references)[[3]](#references)</sup>
+Mỗi LR tổng hợp phải được ký độc lập vì chuyển một LR đã ký sang frame có CFA khác sẽ làm thay đổi discriminator và khiến quá trình xác thực thất bại. `ptrauth_strip()` phù hợp để chuẩn hóa địa chỉ và tra cứu symbol nhưng **không** chứng minh tính xác thực; mọi lệnh return thực sự hoặc nhánh gián tiếp có xác thực đều phải dùng key và modifier được mong đợi tại đúng thời điểm chuyển tiếp đó.<sup>[[1]](#references)[[3]](#references)</sup>
 
-A typical non-leaf arm64e function signs LR before storing it and authenticates after restoring the entry SP:<sup>[[1]](#references)[[3]](#references)</sup>
+Một hàm arm64e không phải leaf thường ký LR trước khi lưu và xác thực sau khi khôi phục SP lúc vào hàm:<sup>[[1]](#references)[[3]](#references)</sup>
 
 ```asm
 pacibsp
@@ -103,11 +103,11 @@ ldp x29, x30, [sp], #16
 retab
 ```
 
-## Trampoline and restore bridge
+## Trampoline và restore bridge
 
-Synthetic records only need to satisfy the unwinder; they do not contain a complete execution context. Returning from the sensitive API directly into the fabricated callers would normally crash. The practical design therefore places a gadget frame immediately below the API: the API returns to executable code in a loaded framework, and that gadget branches through a controlled callee-saved register to a restore bridge in the implant.<sup>[[1]](#references)</sup>
+Các bản ghi tổng hợp chỉ cần đáp ứng yêu cầu của unwinder; chúng không chứa đầy đủ execution context. Việc quay về từ API nhạy cảm trực tiếp vào các caller giả lập thường sẽ gây crash. Vì vậy, thiết kế thực tế đặt một gadget frame ngay bên dưới API: API quay về đoạn mã thực thi trong một framework đã được nạp, còn gadget đó nhảy qua một thanh ghi callee-saved được kiểm soát đến restore bridge trong implant.<sup>[[1]](#references)</sup>
 
-A useful gadget preserves LR and transfers through a controlled register, for example an appropriate `br`, `braa` or `brab` sequence. The restore bridge must recover the original `x19-x30` values and `SP` before resuming implant execution. On arm64e, each authenticated return or branch in the API-to-gadget, gadget-to-bridge and bridge-to-implant path requires a pointer signed for the key and discriminator used by that instruction.<sup>[[1]](#references)</sup>
+Một gadget hữu ích sẽ giữ nguyên LR và chuyển luồng qua một thanh ghi được kiểm soát, chẳng hạn chuỗi lệnh `br`, `braa` hoặc `brab` phù hợp. Restore bridge phải khôi phục các giá trị `x19-x30` ban đầu và `SP` trước khi tiếp tục thực thi implant. Trên arm64e, mỗi lệnh return hoặc branch có xác thực trong đường đi từ API đến gadget, gadget đến bridge và bridge đến implant đều cần một pointer được ký bằng key và discriminator mà lệnh đó sử dụng.<sup>[[1]](#references)</sup>
 
 ```text
 implant -> synthetic state -> sensitive API
@@ -122,13 +122,12 @@ implant -> synthetic state -> sensitive API
                            implant
 ```
 
-The result is an important trust-boundary failure for stack-based detections: a chain can contain only mapped, symbolizable Apple-framework PCs and still not represent actual control flow. Unwind output should therefore be corroborated with independent evidence about the thread's executable-memory provenance and the real transitions around the sensitive API rather than treated as an execution trace.<sup>[[1]](#references)</sup>
+Kết quả này cho thấy một lỗi ranh giới tin cậy nghiêm trọng đối với các phương pháp phát hiện dựa trên stack: một chain có thể chỉ chứa các PC đã được map và có thể symbolicate thuộc framework của Apple nhưng vẫn không phản ánh luồng điều khiển thực tế. Vì vậy, cần đối chiếu kết quả unwind với bằng chứng độc lập về nguồn gốc bộ nhớ executable của thread và các chuyển tiếp thực tế xung quanh API nhạy cảm, thay vì xem đó là execution trace.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [MDSec - ARM64 stack internals and obfuscation on Apple Silicon](https://mdsec.co.uk/2026/08/arm64-stack-internals-and-obfuscation-on-apple-silicon/)
-- [2] [LLVM - Mach-O compact unwind encoding definitions](https://github.com/llvm/llvm-project/blob/main/libunwind/include/mach-o/compact_unwind_encoding.h)
+- [1] [MDSec - Nội bộ stack ARM64 và kỹ thuật obfuscation trên Apple Silicon](https://mdsec.co.uk/2026/08/arm64-stack-internals-and-obfuscation-on-apple-silicon/)
+- [2] [LLVM - Định nghĩa mã hóa compact unwind của Mach-O](https://github.com/llvm/llvm-project/blob/main/libunwind/include/mach-o/compact_unwind_encoding.h)
 - [3] [Clang - Pointer Authentication](https://clang.llvm.org/docs/PointerAuthentication.html)
-- [4] [Arm - Procedure Call Standard for the Arm 64-bit Architecture](https://github.com/ARM-software/abi-aa/blob/main/aapcs64/aapcs64.rst)
-
+- [4] [Arm - Chuẩn gọi thủ tục cho kiến trúc Arm 64-bit](https://github.com/ARM-software/abi-aa/blob/main/aapcs64/aapcs64.rst)
 {{#include ../../../banners/hacktricks-training.md}}

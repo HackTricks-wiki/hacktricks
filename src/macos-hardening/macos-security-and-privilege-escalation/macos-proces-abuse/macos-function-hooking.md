@@ -4,9 +4,9 @@
 
 ## Function Interposing
 
-Create a **dylib** with an **`__interpose` (`__DATA___interpose`)** section (or a section flagged with **`S_INTERPOSING`**) containing tuples of **function pointers** that refer to the **original** and the **replacement** functions.
+Tạo một **dylib** có section **`__interpose` (`__DATA___interpose`)** (hoặc một section có cờ **`S_INTERPOSING`**) chứa các tuple gồm **function pointer** trỏ đến các hàm **gốc** và hàm **thay thế**.
 
-Then, **inject** the dylib with **`DYLD_INSERT_LIBRARIES`** (the interposing needs occur before the main app loads). Obviously the [**restrictions** applied to the use of **`DYLD_INSERT_LIBRARIES`** applies here also](macos-library-injection/index.html#check-restrictions).
+Sau đó, **inject** dylib bằng **`DYLD_INSERT_LIBRARIES`** (việc interposing cần diễn ra trước khi ứng dụng chính được tải). Rõ ràng là [các **hạn chế** áp dụng cho việc sử dụng **`DYLD_INSERT_LIBRARIES`** cũng áp dụng ở đây](macos-library-injection/index.html#check-restrictions).
 
 ### Interpose printf
 
@@ -86,15 +86,15 @@ Hello from interpose
 ```
 
 > [!WARNING]
-> The **`DYLD_PRINT_INTERPOSING`** env variable can be used to debug interposing and will print the interpose process.
+> Biến môi trường **`DYLD_PRINT_INTERPOSING`** có thể được dùng để debug interposing và sẽ in ra quy trình interpose.
 
-Also note that **interposing occurs between the process and the loaded libraries**, it doesn't work with the shared library cache.
+Cũng lưu ý rằng **interposing diễn ra giữa process và các thư viện đã load**, nó không hoạt động với shared library cache.
 
 ### Dynamic Interposing
 
-Now it's also possible to interpose a function dynamically using the function **`dyld_dynamic_interpose`**. This allows to **programmatically** interpose a function in **runtime** instead of doing it only from the **beginning**.
+Giờ đây cũng có thể interpose một function một cách linh động bằng function **`dyld_dynamic_interpose`**. Cách này cho phép interpose một function **theo cách lập trình** trong **runtime**, thay vì chỉ thực hiện việc đó từ **đầu**.
 
-It's just needed to indicate the **tuples** of the **function to replace and the replacement** function.
+Chỉ cần chỉ định các **tuple** gồm **function cần thay thế và function thay thế**.
 
 ```c
 struct dyld_interpose_tuple {
@@ -107,12 +107,12 @@ extern void dyld_dynamic_interpose(const struct mach_header* mh,
 
 ### Import Table Rebinding (fishhook-style)
 
-If you already have code execution **inside the process** and want to hook an **imported C function** without relaunching the target, a very common primitive is **symbol rebinding** (popularised by **`fishhook`**).
+Nếu bạn đã thực thi được code **bên trong process** và muốn hook một **hàm C được import** mà không khởi chạy lại target, một primitive rất phổ biến là **symbol rebinding** (được phổ biến bởi **`fishhook`**).
 
-Instead of using the **`__interpose`** section, this technique walks the Mach-O metadata (`__LINKEDIT` -> indirect symbol table -> `__la_symbol_ptr` / `__nl_symbol_ptr`) and **overwrites the import slot** used by the current image. This is very useful to hook functions in an **already-running** process or to hook **just one image** with **`rebind_symbols_image`**.<sup>[[2]](#references)</sup>
+Thay vì sử dụng section **`__interpose`**, kỹ thuật này duyệt metadata Mach-O (`__LINKEDIT` -> indirect symbol table -> `__la_symbol_ptr` / `__nl_symbol_ptr`) và **ghi đè import slot** mà image hiện tại sử dụng. Cách này rất hữu ích để hook các hàm trong một process **đang chạy** hoặc chỉ hook **một image** bằng **`rebind_symbols_image`**.<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> This only affects calls that actually go through an **import pointer**. If the target function is **called directly inside the same image**, there is no imported slot to rewrite, so this technique won't see that call site.
+> Cách này chỉ ảnh hưởng đến những lệnh gọi thực sự đi qua **import pointer**. Nếu hàm mục tiêu được **gọi trực tiếp bên trong cùng image**, thì không có import slot nào để sửa, vì vậy kỹ thuật này sẽ không phát hiện được call site đó.
 
 ```c
 // clang -dynamiclib fishhook_demo.c fishhook.c -o fishhook_demo.dylib
@@ -138,29 +138,29 @@ static void install(void) {
 DYLD_INSERT_LIBRARIES=./fishhook_demo.dylib ./hello
 ```
 
-On recent macOS versions many rebinding targets are no longer in writable **`__DATA`** pages. Rebinders usually need to temporarily make **`__DATA_CONST`** writable before patching the pointer. Moreover, on Apple Silicon / **`arm64e`** you should expect authenticated pointers and extra indirection in **`__AUTH_CONST.__auth_got`**, so a rebinder that only scans the classic lazy/non-lazy symbol pointer sections may miss some call sites.<sup>[[3]](#references)</sup>
+Trên các phiên bản macOS gần đây, nhiều mục tiêu rebinding không còn nằm trong các trang **`__DATA`** có thể ghi. Các rebinder thường cần tạm thời cấp quyền ghi cho **`__DATA_CONST`** trước khi vá pointer. Ngoài ra, trên Apple Silicon / **`arm64e`**, bạn nên dự kiến sẽ gặp các pointer đã xác thực và một lớp gián tiếp bổ sung trong **`__AUTH_CONST.__auth_got`**. Vì vậy, rebinder chỉ quét các section con trỏ symbol lazy/non-lazy kiểu cũ có thể bỏ sót một số call site.<sup>[[3]](#references)</sup>
 
 > [!CAUTION]
-> The **`arm64e`** ABI uses **Pointer Authentication (PAC)** for many function pointers. Blind pointer writes that used to work on Intel can break a call site on Apple Silicon. When writing your own rebinder or inline hooker, be ready to use **`<ptrauth.h>`** helpers such as **`ptrauth_sign_unauthenticated`** or **`ptrauth_auth_and_resign`** and test specifically on **`arm64e`** targets.
+> ABI **`arm64e`** sử dụng **Pointer Authentication (PAC)** cho nhiều function pointer. Việc ghi pointer một cách mù quáng, vốn từng hoạt động trên Intel, có thể làm hỏng call site trên Apple Silicon. Khi tự viết rebinder hoặc inline hooker, hãy sẵn sàng dùng các helper trong **`<ptrauth.h>`** như **`ptrauth_sign_unauthenticated`** hoặc **`ptrauth_auth_and_resign`**, đồng thời kiểm thử cụ thể trên các mục tiêu **`arm64e`**.
 
-For more details about **`__AUTH`**, **`__AUTH_CONST`** and **`__auth_got`**, check [this page](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
+Để biết thêm chi tiết về **`__AUTH`**, **`__AUTH_CONST`** và **`__auth_got`**, hãy xem [trang này](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
 
 ## Method Swizzling
 
-In ObjectiveC this is how a method is called like: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
+Trong ObjectiveC, một method được gọi như sau: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
-It's needed the **object**, the **method** and the **params**. And when a method is called a **msg is sent** using the function **`objc_msgSend`**: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+Cần có **object**, **method** và **params**. Khi một method được gọi, một **msg được gửi** bằng function **`objc_msgSend`**: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
-The object is **`someObject`**, the method is **`@selector(method1p1:p2:)`** and the arguments are **value1**, **value2**.
+Object là **`someObject`**, method là **`@selector(method1p1:p2:)`** và các đối số là **value1**, **value2**.
 
-Following the object structures, it's possible to reach an **array of methods** where the **names** and **pointers** to the method code are **located**.<sup>[[1]](#references)</sup>
+Dựa theo cấu trúc object, có thể truy cập đến **mảng các method**, nơi lưu **tên** và **pointer** đến mã của method.<sup>[[1]](#references)</sup>
 
 > [!CAUTION]
-> Note that because methods and classes are accessed based on their names, this information is stored in the binary, so it's possible to retrieve it with `otool -ov </path/bin>` or [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
+> Lưu ý rằng vì các method và class được truy cập dựa trên tên, thông tin này được lưu trong binary. Do đó, có thể lấy thông tin này bằng `otool -ov </path/bin>` hoặc [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
 
-### Accessing the raw methods
+### Truy cập các method thô
 
-It's possible to access the information of the methods such as name, number of params or address like in the following example:
+Có thể truy cập các thông tin của method như tên, số lượng params hoặc địa chỉ, như trong ví dụ sau:
 
 ```objectivec
 // gcc -framework Foundation test.m -o test
@@ -228,12 +228,12 @@ int main() {
 }
 ```
 
-### Method Swizzling with method_exchangeImplementations
+### Method Swizzling với method_exchangeImplementations
 
-The function **`method_exchangeImplementations`** allows to **change** the **address** of the **implementation** of **one function for the other**.
+Hàm **`method_exchangeImplementations`** cho phép **thay đổi** **địa chỉ** của **implementation** của **một hàm thành địa chỉ của hàm kia**.
 
 > [!CAUTION]
-> So when a function is called what is **executed is the other one**.
+> Vì vậy, khi một hàm được gọi, **hàm kia sẽ được thực thi**.
 
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
@@ -280,15 +280,15 @@ int main(int argc, const char * argv[]) {
 ```
 
 > [!WARNING]
-> In this case if the **implementation code of the legit** method **verifies** the **method** **name** it could **detect** this swizzling and prevent it from running.
+> Trong trường hợp này, nếu **mã triển khai của phương thức hợp lệ** **xác minh** **tên** **phương thức**, nó có thể **phát hiện** việc swizzling này và ngăn không cho nó chạy.
 >
-> The following technique doesn't have this restriction.
+> Kỹ thuật sau đây không bị hạn chế này.
 
-### Method Swizzling with method_setImplementation
+### Method Swizzling với method_setImplementation
 
-The previous format is weird because you are changing the implementation of 2 methods one from the other. Using the function **`method_setImplementation`** you can **change** the **implementation** of a **method for the other one**.
+Cách trước đó khá kỳ lạ vì bạn thay đổi implementation của hai method cho nhau. Dùng hàm **`method_setImplementation`**, bạn có thể **thay đổi** **implementation** của một **method thành implementation của method kia**.
 
-Just remember to **store the address of the implementation of the original one** if you are going to to call it from the new implementation before overwriting it because later it will be much complicated to locate that address.
+Chỉ cần nhớ **lưu địa chỉ implementation của method gốc** nếu bạn định gọi nó từ implementation mới trước khi ghi đè, vì sau đó việc tìm lại địa chỉ đó sẽ phức tạp hơn nhiều.
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -342,17 +342,17 @@ int main(int argc, const char * argv[]) {
 }
 ```
 
-## Hooking Attack Methodology
+## Phương pháp tấn công Hooking
 
-In this page different ways to hook functions were discussed. However, they involved **running code inside the process to attack**.
+Trang này đã thảo luận các cách khác nhau để hook function. Tuy nhiên, các cách này đều yêu cầu **chạy code bên trong process cần tấn công**.
 
-In order to do that the easiest technique to use is to inject a [Dyld via environment variables or hijacking](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). However, I guess this could also be done via [Dylib process injection](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
+Cách dễ nhất để làm việc đó là inject [Dyld thông qua environment variables hoặc hijacking](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Tuy nhiên, tôi cho rằng việc này cũng có thể được thực hiện thông qua [Dylib process injection](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
 
-However, both options are **limited** to **unprotected** binaries/processes. Check each technique to learn more about the limitations.
+Tuy nhiên, cả hai lựa chọn đều **chỉ áp dụng được** cho các binary/process **không được bảo vệ**. Hãy xem từng kỹ thuật để tìm hiểu thêm về các hạn chế.
 
-However, a function hooking attack is very specific, an attacker will do this to **steal sensitive information from inside a process** (if not you would just do a process injection attack). And this sensitive information might be located in user downloaded Apps such as MacPass.
+Tuy nhiên, tấn công function hooking có mục đích rất cụ thể: kẻ tấn công sẽ thực hiện việc này để **đánh cắp thông tin nhạy cảm từ bên trong process** (nếu không thì chỉ cần thực hiện tấn công process injection). Thông tin nhạy cảm này có thể nằm trong các App do người dùng tải xuống, chẳng hạn như MacPass.
 
-So the attacker vector would be to either find a vulnerability or strip the signature of the application, inject the **`DYLD_INSERT_LIBRARIES`** env variable through the Info.plist of the application adding something like:
+Vì vậy, vector tấn công sẽ là tìm một lỗ hổng hoặc gỡ signature của ứng dụng, rồi inject biến môi trường **`DYLD_INSERT_LIBRARIES`** thông qua Info.plist của ứng dụng bằng cách thêm nội dung như sau:
 
 ```xml
 <key>LSEnvironment</key>
@@ -362,18 +362,18 @@ So the attacker vector would be to either find a vulnerability or strip the sign
 </dict>
 ```
 
-and then **re-register** the application:
+và sau đó **đăng ký lại** ứng dụng:
 
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
 
-Add in that library the hooking code to exfiltrate the information: Passwords, messages...
+Thêm vào library đó hooking code để exfiltrate thông tin: Passwords, messages...
 
 > [!CAUTION]
-> Note that in newer versions of macOS if you **strip the signature** of the application binary and it was previously executed, macOS **won't be executing the application** anymore.
+> Lưu ý rằng trong các phiên bản macOS mới hơn, nếu bạn **strip chữ ký** của application binary và ứng dụng đó đã được thực thi trước đó, macOS sẽ **không thực thi ứng dụng đó nữa**.
 
-#### Library example
+#### Ví dụ về library
 
 ```objectivec
 // gcc -dynamiclib -framework Foundation sniff.m -o sniff.dylib
@@ -414,9 +414,8 @@ static void customConstructor(int argc, const char **argv) {
 ## References
 
 - [1] [Method Swizzling - NSHipster](https://nshipster.com/method-swizzling/)
-- [2] [facebook/fishhook: A library that simplifies the process of dynamically rebinding symbols in Mach-O binaries](https://github.com/facebook/fishhook)
-- [3] [Pointer Authentication — Clang Documentation](https://clang.llvm.org/docs/PointerAuthentication.html)
-
+- [2] [facebook/fishhook: Thư viện đơn giản hóa quy trình liên kết lại động các symbol trong tệp nhị phân Mach-O](https://github.com/facebook/fishhook)
+- [3] [Xác thực con trỏ — Tài liệu Clang](https://clang.llvm.org/docs/PointerAuthentication.html)
 {{#include ../../../banners/hacktricks-training.md}}
 
 

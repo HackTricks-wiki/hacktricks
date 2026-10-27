@@ -2,33 +2,33 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Dirty NIB refers to abusing Interface Builder files (.xib/.nib) inside a signed macOS app bundle to execute attacker-controlled logic inside the target process, thereby inheriting its entitlements and TCC permissions. This technique was originally documented by xpn (MDSec) and later generalized and significantly expanded by Sector7, who also covered Apple’s mitigations in macOS 13 Ventura and macOS 14 Sonoma.<sup>[[1]](#references)[[2]](#references)</sup> For background and deep dives, see the references at the end.
+Dirty NIB là kỹ thuật lạm dụng các tệp Interface Builder (.xib/.nib) bên trong bundle ứng dụng macOS đã ký để thực thi logic do kẻ tấn công kiểm soát trong tiến trình mục tiêu, qua đó kế thừa các entitlements và quyền TCC của tiến trình đó. Kỹ thuật này được xpn (MDSec) ghi lại lần đầu, sau đó được Sector7 khái quát hóa và mở rộng đáng kể; Sector7 cũng đề cập đến các biện pháp giảm thiểu của Apple trong macOS 13 Ventura và macOS 14 Sonoma.<sup>[[1]](#references)[[2]](#references)</sup> Để tìm hiểu bối cảnh và chuyên sâu hơn, hãy xem các tài liệu tham khảo ở cuối bài.
 
-> TL;DR
-> • Before macOS 13 Ventura: replacing a bundle’s MainMenu.nib (or another nib loaded at startup) could reliably achieve process injection and often privilege escalation.  
-> • Since macOS 13 (Ventura) and improved in macOS 14 (Sonoma): first‑launch deep verification, bundle protection, Launch Constraints, and the new TCC “App Management” permission largely prevent post‑launch nib tampering by unrelated apps. Attacks may still be feasible in niche cases (e.g., same‑developer tooling modifying own apps, or terminals granted App Management/Full Disk Access by the user).
+> Tóm tắt
+> • Trước macOS 13 Ventura: thay thế MainMenu.nib của bundle (hoặc nib khác được tải khi khởi động) có thể thực hiện process injection một cách đáng tin cậy và thường dẫn đến privilege escalation.  
+> • Từ macOS 13 (Ventura), và được cải thiện trong macOS 14 (Sonoma): xác minh sâu khi khởi chạy lần đầu, bảo vệ bundle, Launch Constraints và quyền TCC “App Management” mới phần lớn ngăn các ứng dụng không liên quan sửa đổi nib sau khi ứng dụng đã khởi chạy. Tấn công vẫn có thể khả thi trong một số trường hợp đặc biệt (ví dụ: công cụ của cùng nhà phát triển sửa đổi ứng dụng của chính họ, hoặc người dùng cấp quyền App Management/Full Disk Access cho terminal).
 
-## What are NIB/XIB files
+## Tệp NIB/XIB là gì
 
-Nib (short for NeXT Interface Builder) files are serialized UI object graphs used by AppKit apps. Modern Xcode stores editable XML .xib files which are compiled into .nib at build time. A typical app loads its main UI via `NSApplicationMain()` which reads the `NSMainNibFile` key from the app’s Info.plist and instantiates the object graph at runtime.
+Tệp nib (viết tắt của NeXT Interface Builder) là các đồ thị đối tượng UI được tuần tự hóa, dùng trong các ứng dụng AppKit. Xcode hiện đại lưu các tệp .xib có thể chỉnh sửa dưới dạng XML, sau đó biên dịch thành .nib khi build. Một ứng dụng điển hình tải UI chính thông qua `NSApplicationMain()`, hàm này đọc khóa `NSMainNibFile` từ Info.plist của ứng dụng và khởi tạo đồ thị đối tượng lúc chạy.
 
-Key points that enable the attack:
-- NIB loading instantiates arbitrary Objective‑C classes without requiring them to conform to NSSecureCoding (Apple’s nib loader falls back to `init`/`initWithFrame:` when `initWithCoder:` is not available).
-- Cocoa Bindings can be abused to call methods as nibs are instantiated, including chained calls that require no user interaction.
+Các điểm chính tạo điều kiện cho cuộc tấn công:
+- Quá trình tải NIB khởi tạo các lớp Objective-C tùy ý mà không yêu cầu chúng tuân thủ NSSecureCoding (trình tải nib của Apple sẽ dùng `init`/`initWithFrame:` nếu không có `initWithCoder:`).
+- Có thể lạm dụng Cocoa Bindings để gọi các phương thức khi nib được khởi tạo, bao gồm cả các chuỗi gọi không cần người dùng tương tác.
 
 
-## Dirty NIB injection process (attacker view)
+## Quy trình Dirty NIB injection (góc nhìn của kẻ tấn công)
 
-The classic pre‑Ventura flow:
-1) Create a malicious .xib
-- Add an `NSAppleScript` object (or other “gadget” classes such as `NSTask`).
-- Add an `NSTextField` whose title contains the payload (e.g., AppleScript or command arguments).
-- Add one or more `NSMenuItem` objects wired via bindings to call methods on the target object.
+Quy trình kinh điển trước Ventura:
+1) Tạo một .xib độc hại
+- Thêm một đối tượng `NSAppleScript` (hoặc các lớp “gadget” khác như `NSTask`).
+- Thêm một `NSTextField` có title chứa payload (ví dụ: AppleScript hoặc tham số lệnh).
+- Thêm một hoặc nhiều đối tượng `NSMenuItem`, liên kết chúng qua bindings để gọi phương thức trên đối tượng mục tiêu.
 
-2) Auto‑trigger without user clicks
-- Use bindings to set a menu item’s target/selector and then invoke the private `_corePerformAction` method so the action fires automatically when the nib loads. This removes the need for a user to click a button.
+2) Tự động kích hoạt mà không cần nhấp chuột
+- Dùng bindings để đặt target/selector của một mục menu, sau đó gọi phương thức riêng `_corePerformAction` để hành động tự động chạy khi nib được tải. Nhờ vậy, người dùng không cần nhấp vào nút.
 
-Minimal example of an auto‑trigger chain inside a .xib (abridged for clarity):
+Ví dụ tối giản về chuỗi tự động kích hoạt bên trong .xib (đã lược bớt cho dễ hiểu):
 ```xml
 <objects>
   <customObject id="A1" customClass="NSAppleScript"/>
@@ -53,90 +53,90 @@ Minimal example of an auto‑trigger chain inside a .xib (abridged for clarity):
   <menuItem id="T2"><connections><binding keyPath="_corePerformAction" destination="C2"/></connections></menuItem>
 </objects>
 ```
-This achieves arbitrary AppleScript execution in the target process upon nib load.<sup>[[1]](#references)</sup> Advanced chains can:
-- Instantiate arbitrary AppKit classes (e.g., `NSTask`) and call zero‑argument methods like `-launch`.
-- Call arbitrary selectors with object arguments via the binding trick above.
-- Load AppleScriptObjC.framework to bridge into Objective‑C and even call selected C APIs.
-- On older systems that still include Python.framework, bridge into Python and then use `ctypes` to call arbitrary C functions (Sector7’s research).<sup>[[2]](#references)</sup>
+Điều này cho phép thực thi AppleScript tùy ý trong tiến trình mục tiêu khi nib được tải.<sup>[[1]](#references)</sup> Các chuỗi khai thác nâng cao có thể:
+- Khởi tạo các lớp AppKit tùy ý (ví dụ: `NSTask`) và gọi các phương thức không có tham số như `-launch`.
+- Gọi các selector tùy ý với đối số object thông qua thủ thuật binding ở trên.
+- Tải AppleScriptObjC.framework để kết nối với Objective‑C, thậm chí gọi một số C API được chọn.
+- Trên các hệ thống cũ vẫn có Python.framework, kết nối với Python rồi dùng `ctypes` để gọi các hàm C tùy ý (nghiên cứu của Sector7).<sup>[[2]](#references)</sup>
 
-3) Replace the app’s nib
-- Copy target.app to a writable location, replace e.g., `Contents/Resources/MainMenu.nib` with the malicious nib, and run target.app. Pre‑Ventura, after a one‑time Gatekeeper assessment, subsequent launches only performed shallow signature checks, so non‑executable resources (like .nib) weren’t re‑validated.
+3) Thay nib của ứng dụng
+- Sao chép target.app đến một vị trí có thể ghi, thay thế, chẳng hạn, `Contents/Resources/MainMenu.nib` bằng nib độc hại rồi chạy target.app. Trước Ventura, sau lần đánh giá Gatekeeper đầu tiên, các lần khởi chạy tiếp theo chỉ thực hiện kiểm tra chữ ký sơ lược, nên các tài nguyên không thực thi (như .nib) không được xác thực lại.
 
-Example AppleScript payload for a visible test:
+Ví dụ payload AppleScript để kiểm tra hiển thị:
 ```applescript
 set theDialogText to "PWND"
 display dialog theDialogText
 ```
 
 
-## Modern macOS protections (Ventura/Monterey/Sonoma/Sequoia)
+## Các biện pháp bảo vệ hiện đại của macOS (Ventura/Monterey/Sonoma/Sequoia)
 
-Apple introduced several systemic mitigations that dramatically reduce the viability of Dirty NIB in modern macOS:<sup>[[2]](#references)</sup>
-- First‑launch deep verification and bundle protection (macOS 13 Ventura)
-  - On first run of any app (quarantined or not), a deep signature check covers all bundle resources. Afterwards, the bundle becomes protected: only apps from the same developer (or explicitly allowed by the app) may modify its contents. Other apps require the new TCC “App Management” permission to write into another app’s bundle.
+Apple đã giới thiệu một số biện pháp giảm thiểu mang tính hệ thống, giúp giảm đáng kể tính khả thi của Dirty NIB trên macOS hiện đại:<sup>[[2]](#references)</sup>
+- Xác minh sâu lần chạy đầu tiên và bảo vệ bundle (macOS 13 Ventura)
+  - Trong lần chạy đầu tiên của bất kỳ ứng dụng nào (có hoặc không bị quarantine), hệ thống kiểm tra chữ ký sâu trên tất cả tài nguyên của bundle. Sau đó, bundle được bảo vệ: chỉ các ứng dụng từ cùng nhà phát triển (hoặc được ứng dụng cho phép rõ ràng) mới có thể sửa nội dung của nó. Các ứng dụng khác cần quyền TCC “App Management” mới để ghi vào bundle của ứng dụng khác.
 - Launch Constraints (macOS 13 Ventura)
-  - System/Apple‑bundled apps can’t be copied elsewhere and launched; this kills the “copy to /tmp, patch, run” approach for OS apps.
-- Improvements in macOS 14 Sonoma
-  - Apple hardened App Management and fixed known bypasses (e.g., CVE‑2023‑40450) noted by Sector7. Python.framework was removed earlier (macOS 12.3), breaking some privilege‑escalation chains.
-- Gatekeeper/Quarantine changes
-  - For a broader discussion of Gatekeeper, provenance, and assessment changes that impacted this technique, see the page referenced below.
+  - Không thể sao chép các ứng dụng đi kèm với hệ thống/Apple sang vị trí khác rồi khởi chạy; điều này vô hiệu hóa cách làm “sao chép vào /tmp, vá, chạy” đối với các ứng dụng OS.
+- Các cải tiến trong macOS 14 Sonoma
+  - Apple tăng cường bảo vệ App Management và khắc phục các lỗ hổng bypass đã biết (ví dụ: CVE‑2023‑40450) được Sector7 ghi nhận. Python.framework đã bị loại bỏ trước đó (macOS 12.3), phá vỡ một số chuỗi leo thang đặc quyền.
+- Các thay đổi của Gatekeeper/Quarantine
+  - Để tìm hiểu thêm về Gatekeeper, provenance và những thay đổi trong quá trình đánh giá đã ảnh hưởng đến kỹ thuật này, xem trang được tham chiếu bên dưới.
 
-> Practical implication
-> • On Ventura+ you generally cannot modify a third‑party app’s .nib unless your process has App Management or is signed by the same Team ID as the target (e.g., developer tooling).  
-> • Granting App Management or Full Disk Access to shells/terminals effectively re‑opens this attack surface for anything that can execute code inside that terminal’s context.
-
-
-### Addressing Launch Constraints
-
-Launch Constraints block running many Apple apps from non‑default locations beginning with Ventura. If you were relying on pre‑Ventura workflows like copying an Apple app to a temp directory, modifying `MainMenu.nib`, and launching it, expect that to fail on >= 13.0.
+> Ý nghĩa thực tế
+> • Trên Ventura trở lên, nhìn chung bạn không thể sửa đổi tệp .nib của ứng dụng bên thứ ba, trừ khi tiến trình của bạn có quyền App Management hoặc được ký bằng cùng Team ID với ứng dụng mục tiêu (ví dụ: công cụ dành cho nhà phát triển).  
+> • Cấp quyền App Management hoặc Full Disk Access cho shell/terminal về cơ bản sẽ mở lại bề mặt tấn công này đối với mọi thứ có thể thực thi mã trong ngữ cảnh của terminal đó.
 
 
-## Enumerating targets and nibs (useful for research / legacy systems)
+### Xử lý Launch Constraints
 
-- Locate apps whose UI is nib‑driven:
+Launch Constraints chặn việc chạy nhiều ứng dụng Apple từ các vị trí không mặc định, bắt đầu từ Ventura. Nếu bạn dựa vào các quy trình trước Ventura như sao chép ứng dụng Apple vào thư mục tạm, sửa đổi `MainMenu.nib` rồi khởi chạy ứng dụng đó, dự kiến cách này sẽ thất bại trên phiên bản >= 13.0.
+
+
+## Liệt kê các mục tiêu và nib (hữu ích cho nghiên cứu / hệ thống cũ)
+
+- Tìm các ứng dụng có giao diện người dùng dựa trên nib:
 ```bash
 find /Applications -maxdepth 2 -name Info.plist -exec sh -c \
   'for p; do if /usr/libexec/PlistBuddy -c "Print :NSMainNibFile" "$p" >/dev/null 2>&1; \
    then echo "[+] $(dirname "$p") uses NSMainNibFile=$( /usr/libexec/PlistBuddy -c "Print :NSMainNibFile" "$p" )"; fi; done' sh {} +
 ```
-- Find candidate nib resources inside a bundle:
+- Tìm các tài nguyên nib tiềm năng bên trong một bundle:
 ```bash
 find target.app -type f \( -name "*.nib" -o -name "*.xib" \) -print
 ```
-- Validate code signatures deeply (will fail if you tampered with resources and didn’t re‑sign):
+- Xác thực chữ ký mã một cách kỹ lưỡng (sẽ thất bại nếu bạn đã can thiệp vào tài nguyên mà không ký lại):
 ```bash
 codesign --verify --deep --strict --verbose=4 target.app
 ```
 
-> Note: On modern macOS you will also be blocked by bundle protection/TCC when trying to write into another app’s bundle without proper authorization.
+> Lưu ý: Trên macOS hiện đại, bạn cũng sẽ bị bundle protection/TCC chặn khi cố ghi vào bundle của ứng dụng khác mà không có quyền phù hợp.
 
 
-## Detection and DFIR tips
+## Mẹo phát hiện và DFIR
 
-- File integrity monitoring on bundle resources
-  - Watch for mtime/ctime changes to `Contents/Resources/*.nib` and other non‑executable resources in installed apps.
-- Unified logs and process behavior
-  - Monitor for unexpected AppleScript execution inside GUI apps and for processes loading AppleScriptObjC or Python.framework. Example:
+- Giám sát tính toàn vẹn tệp của tài nguyên trong bundle
+  - Theo dõi các thay đổi mtime/ctime đối với `Contents/Resources/*.nib` và các tài nguyên không thực thi khác trong ứng dụng đã cài đặt.
+- Unified logs và hành vi tiến trình
+  - Theo dõi việc thực thi AppleScript bất ngờ bên trong các ứng dụng GUI và các tiến trình tải AppleScriptObjC hoặc Python.framework. Ví dụ:
     ```bash
     log stream --info --predicate 'processImagePath CONTAINS[cd] ".app/Contents/MacOS/" AND (eventMessage CONTAINS[cd] "AppleScript" OR eventMessage CONTAINS[cd] "loadAppleScriptObjectiveCScripts")'
     ```
-- Proactive assessments
-  - Periodically run `codesign --verify --deep` across critical apps to ensure resources remain intact.
-- Privilege context
-  - Audit who/what has TCC “App Management” or Full Disk Access (especially terminals and management agents). Removing these from general‑purpose shells prevents trivially re‑enabling Dirty NIB‑style tampering.
+- Đánh giá chủ động
+  - Định kỳ chạy `codesign --verify --deep` trên các ứng dụng quan trọng để đảm bảo tài nguyên vẫn nguyên vẹn.
+- Bối cảnh quyền hạn
+  - Kiểm tra những ai/cái gì có TCC “App Management” hoặc Full Disk Access (đặc biệt là terminal và agent quản lý). Gỡ các quyền này khỏi shell đa dụng để ngăn việc bật lại hành vi giả mạo kiểu Dirty NIB một cách dễ dàng.
 
 
-## Defensive hardening (developers and defenders)
+## Tăng cường phòng thủ (nhà phát triển và người phòng thủ)
 
-- Prefer programmatic UI or limit what’s instantiated from nibs. Avoid including powerful classes (e.g., `NSTask`) in nib graphs and avoid bindings that indirectly invoke selectors on arbitrary objects.
-- Adopt the hardened runtime with Library Validation (already standard for modern apps). While this doesn’t stop nib injection by itself, it blocks easy native code loading and forces attackers into scripting‑only payloads.
-- Do not request or depend on broad App Management permissions in general‑purpose tools. If MDM requires App Management, segregate that context from user‑driven shells.
-- Regularly verify your app bundle’s integrity and make your update mechanisms self‑heal bundle resources.
+- Ưu tiên UI được tạo theo cách lập trình hoặc giới hạn những gì được khởi tạo từ nib. Tránh đưa các class mạnh (ví dụ: `NSTask`) vào đồ thị nib và tránh các binding gián tiếp gọi selector trên những object tùy ý.
+- Áp dụng hardened runtime với Library Validation (đã là tiêu chuẩn cho các ứng dụng hiện đại). Dù cách này không tự ngăn được việc chèn nib, nó chặn việc tải mã native dễ dàng và buộc kẻ tấn công phải dùng payload chỉ chạy bằng script.
+- Không yêu cầu hoặc phụ thuộc vào quyền App Management rộng trong các công cụ đa dụng. Nếu MDM cần App Management, hãy tách biệt ngữ cảnh đó khỏi các shell do người dùng điều khiển.
+- Thường xuyên xác minh tính toàn vẹn của app bundle và đảm bảo cơ chế cập nhật có thể tự khôi phục tài nguyên trong bundle.
 
 
-## Related reading in HackTricks
+## Nội dung liên quan trong HackTricks
 
-Learn more about Gatekeeper, quarantine and provenance changes that affect this technique:
+Tìm hiểu thêm về Gatekeeper, quarantine và các thay đổi về provenance ảnh hưởng đến kỹ thuật này:
 
 {{#ref}}
 ../macos-security-protections/macos-gatekeeper.md
@@ -145,7 +145,6 @@ Learn more about Gatekeeper, quarantine and provenance changes that affect this 
 
 ## References
 
-- [1] [xpn – DirtyNIB (original write‑up with Pages example)](https://blog.xpnsec.com/dirtynib/)
-- [2] [Sector7 – Bringing process injection into view(s): exploiting all macOS apps using nib files (April 5, 2024)](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)
-
+- [1] [xpn – DirtyNIB (bài viết gốc với ví dụ về Pages)](https://blog.xpnsec.com/dirtynib/)
+- [2] [Sector7 – Đưa process injection vào tầm nhìn: khai thác mọi ứng dụng macOS bằng nib file (ngày 5 tháng 4 năm 2024)](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)
 {{#include ../../../banners/hacktricks-training.md}}

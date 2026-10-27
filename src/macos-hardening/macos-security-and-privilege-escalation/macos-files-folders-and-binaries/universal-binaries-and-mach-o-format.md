@@ -1,12 +1,12 @@
-# macOS Universal binaries & Mach-O Format
+# Binary universal macOS & định dạng Mach-O
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Thông tin cơ bản
 
-macOS uses the **Mach-O** executable format. A **universal**, or fat, binary contains multiple architecture-specific Mach-O slices in one file. Apple's open-source `fat.h` and `loader.h` headers define the structures and constants described on this page. <sup>[[5]](#references)</sup>
+macOS sử dụng định dạng executable **Mach-O**. Một binary **universal**, hay binary fat, chứa nhiều slice Mach-O dành riêng cho từng kiến trúc trong cùng một file. Các header mã nguồn mở `fat.h` và `loader.h` của Apple định nghĩa các cấu trúc và hằng số được mô tả trên trang này. <sup>[[5]](#references)</sup>
 
-A Mach-O image is composed of:
+Một Mach-O image gồm:
 
 - Header
 - Load Commands
@@ -16,7 +16,7 @@ A Mach-O image is composed of:
 
 ## Fat Header
 
-Search for the file with: `mdfind fat.h | grep -i mach-o | grep -E "fat.h$"`
+Tìm file bằng lệnh: `mdfind fat.h | grep -i mach-o | grep -E "fat.h$"`
 
 <pre class="language-c"><code class="lang-c"><strong>#define FAT_MAGIC	0xcafebabe
 </strong><strong>#define FAT_CIGAM	0xbebafeca	/* NXSwapLong(FAT_MAGIC) */
@@ -35,9 +35,9 @@ struct fat_arch {
 };
 </code></pre>
 
-The header has the **magic** bytes followed by the **number** of **archs** the file **contains** (`nfat_arch`) and each arch will have a `fat_arch` struct.
+Header có các byte **magic**, theo sau là **số lượng** **kiến trúc** mà file **chứa** (`nfat_arch`); mỗi kiến trúc sẽ có một struct `fat_arch`.
 
-Check it with:
+Kiểm tra bằng lệnh:
 
 <pre class="language-shell-session"><code class="lang-shell-session">% file /bin/ls
 /bin/ls: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64e:Mach-O 64-bit executable arm64e]
@@ -64,14 +64,14 @@ fat_magic FAT_MAGIC
 </strong>    align 2^14 (16384)
 </code></pre>
 
-or using the [Mach-O View](https://sourceforge.net/projects/machoview/) tool:
+hoặc dùng công cụ [Mach-O View](https://sourceforge.net/projects/machoview/):
 
 <figure><img src="../../../images/image (1094).png" alt=""><figcaption></figcaption></figure>
 
-As you may be thinking usually a universal binary compiled for 2 architectures **doubles the size** of one compiled for just 1 arch.
+Như bạn có thể đoán, binary universal được biên dịch cho 2 kiến trúc thường có **kích thước gấp đôi** binary chỉ được biên dịch cho 1 kiến trúc.
 
 > [!TIP]
-> When triaging malware or suspicious apps, don't stop after `file` reports the "best" architecture. A universal binary can hide different imports, load commands or compiler metadata in each slice, so enumerate **all** the slices first and then inspect them independently:
+> Khi phân loại malware hoặc ứng dụng đáng ngờ, đừng dừng lại sau khi `file` báo kiến trúc "phù hợp nhất". Binary universal có thể ẩn các imports, load commands hoặc metadata của compiler khác nhau trong từng slice; vì vậy, trước tiên hãy liệt kê **tất cả** các slice, sau đó kiểm tra từng slice riêng biệt:
 
 ```bash
 BIN=/path/to/bin
@@ -83,11 +83,11 @@ for A in $(lipo -archs "$BIN"); do
 done
 ```
 
-Recent macOS SDKs also expose helpers such as `macho_for_each_slice()` and `macho_best_slice()` in `<mach-o/utils.h>`. The latter is handy to emulate what dyld/kernel would load, but scanners should still iterate every slice to avoid missing arch-specific content.<sup>[[1]](#references)</sup>
+Các macOS SDK gần đây cũng cung cấp các helper như `macho_for_each_slice()` và `macho_best_slice()` trong `<mach-o/utils.h>`. Hàm thứ hai hữu ích để mô phỏng những gì dyld/kernel sẽ tải, nhưng các scanner vẫn nên duyệt qua mọi slice để tránh bỏ sót nội dung đặc thù theo kiến trúc.<sup>[[1]](#references)</sup>
 
-## **Mach-O Header**
+## **Header Mach-O**
 
-The header contains basic information about the file, such as magic bytes to identify it as a Mach-O file and information about the target architecture. You can find it in: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
+Header chứa thông tin cơ bản về tệp, chẳng hạn như các byte magic để nhận diện đây là tệp Mach-O và thông tin về kiến trúc đích. Bạn có thể tìm thấy nó bằng lệnh: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
 
 ```c
 #define	MH_MAGIC	0xfeedface	/* the mach magic number */
@@ -116,20 +116,20 @@ struct mach_header_64 {
 };
 ```
 
-### Mach-O File Types
+### Các loại tệp Mach-O
 
-There are different file types, you can find them defined in the [**source code for example here**](https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL_HEADERS/mach-o/loader.h). The most important ones are:
+Có nhiều loại tệp khác nhau, bạn có thể tìm thấy chúng được định nghĩa trong [**mã nguồn, ví dụ tại đây**](https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL_HEADERS/mach-o/loader.h). Các loại quan trọng nhất là:
 
-- `MH_OBJECT`: Relocatable object file (intermediate products of compilation, not executables yet).
-- `MH_EXECUTE`: Executable files.
-- `MH_FVMLIB`: Fixed VM library file.
-- `MH_CORE`: Code Dumps
-- `MH_PRELOAD`: Preloaded executable file (no longer supported in XNU)
-- `MH_DYLIB`: Dynamic Libraries
-- `MH_DYLINKER`: Dynamic Linker
-- `MH_BUNDLE`: "Plugin files". Generated using -bundle in gcc and explicitly loaded by `NSBundle` or `dlopen`.
-- `MH_DYSM`: Companion `.dSym` file (file with symbols for debugging).
-- `MH_KEXT_BUNDLE`: Kernel Extensions.
+- `MH_OBJECT`: Tệp object có thể tái định vị (sản phẩm trung gian của quá trình biên dịch, chưa phải tệp thực thi).
+- `MH_EXECUTE`: Tệp thực thi.
+- `MH_FVMLIB`: Tệp thư viện VM cố định.
+- `MH_CORE`: Bản dump mã.
+- `MH_PRELOAD`: Tệp thực thi được tải trước (không còn được XNU hỗ trợ).
+- `MH_DYLIB`: Thư viện động.
+- `MH_DYLINKER`: Trình liên kết động.
+- `MH_BUNDLE`: "Tệp plugin". Được tạo bằng tùy chọn -bundle trong gcc và được tải rõ ràng bằng `NSBundle` hoặc `dlopen`.
+- `MH_DYSM`: Tệp `.dSym` đi kèm (tệp chứa các symbol dùng để debug).
+- `MH_KEXT_BUNDLE`: Kernel Extension.
 
 ```bash
 # Checking the mac header of a binary
@@ -139,34 +139,34 @@ Mach header
 MH_MAGIC_64    ARM64          E USR00     EXECUTE    19       1728   NOUNDEFS DYLDLINK TWOLEVEL PIE
 ```
 
-Or using [Mach-O View](https://sourceforge.net/projects/machoview/):
+Hoặc sử dụng [Mach-O View](https://sourceforge.net/projects/machoview/):
 
 <figure><img src="../../../images/image (1133).png" alt=""><figcaption></figcaption></figure>
 
-## **Mach-O Flags**
+## **Cờ Mach-O**
 
-The source code also defines several flags useful for loading libraries:
+Mã nguồn cũng định nghĩa một số cờ hữu ích cho việc tải thư viện:
 
-- `MH_NOUNDEFS`: No undefined references (fully linked)
-- `MH_DYLDLINK`: Dyld linking
-- `MH_PREBOUND`: Dynamic references prebound.
-- `MH_SPLIT_SEGS`: File splits r/o and r/w segments.
-- `MH_WEAK_DEFINES`: Binary has weak defined symbols
-- `MH_BINDS_TO_WEAK`: Binary uses weak symbols
-- `MH_ALLOW_STACK_EXECUTION`: Make the stack executable
-- `MH_NO_REEXPORTED_DYLIBS`: Library not LC_REEXPORT commands
-- `MH_PIE`: Position Independent Executable
-- `MH_HAS_TLV_DESCRIPTORS`: There is a section with thread local variables
-- `MH_NO_HEAP_EXECUTION`: No execution for heap/data pages
-- `MH_HAS_OBJC`: Binary has oBject-C sections
-- `MH_SIM_SUPPORT`: Simulator support
-- `MH_DYLIB_IN_CACHE`: Used on dylibs/frameworks in shared library cache.
+- `MH_NOUNDEFS`: Không có tham chiếu chưa được định nghĩa (liên kết hoàn chỉnh)
+- `MH_DYLDLINK`: Liên kết bằng Dyld
+- `MH_PREBOUND`: Các tham chiếu động được liên kết trước.
+- `MH_SPLIT_SEGS`: Tệp chia các segment chỉ đọc và đọc/ghi.
+- `MH_WEAK_DEFINES`: Binary có các symbol được định nghĩa yếu
+- `MH_BINDS_TO_WEAK`: Binary sử dụng các symbol yếu
+- `MH_ALLOW_STACK_EXECUTION`: Cho phép stack thực thi
+- `MH_NO_REEXPORTED_DYLIBS`: Thư viện không có lệnh LC_REEXPORT
+- `MH_PIE`: Executable độc lập vị trí
+- `MH_HAS_TLV_DESCRIPTORS`: Có một section chứa các biến cục bộ của thread
+- `MH_NO_HEAP_EXECUTION`: Không thực thi các trang heap/data
+- `MH_HAS_OBJC`: Binary có các section Objective-C
+- `MH_SIM_SUPPORT`: Hỗ trợ trình mô phỏng
+- `MH_DYLIB_IN_CACHE`: Được dùng cho dylib/framework trong shared library cache.
 
-## **Mach-O Load commands**
+## **Các lệnh tải Mach-O**
 
-The **file's layout in memory** is specified here, detailing the **symbol table's location**, the context of the main thread at execution start, and the required **shared libraries**. Instructions are provided to the dynamic loader **(dyld)** on the binary's loading process into memory.
+**Bố cục của tệp trong bộ nhớ** được chỉ định tại đây, nêu rõ **vị trí của bảng symbol**, ngữ cảnh của main thread khi bắt đầu thực thi và các **shared library** cần thiết. Các chỉ dẫn được cung cấp cho dynamic loader **(dyld)** về quy trình tải binary vào bộ nhớ.
 
-The uses the **load_command** structure, defined in the mentioned **`loader.h`**:
+Nó sử dụng cấu trúc **load_command**, được định nghĩa trong **`loader.h`** đã đề cập:
 
 ```objectivec
 struct load_command {
@@ -175,20 +175,20 @@ struct load_command {
 };
 ```
 
-There are about **50 different types of load commands** that the system handles differently. The most common ones are: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB`, and `LC_CODE_SIGNATURE`.
+There are about **50 loại load command khác nhau** được hệ thống xử lý theo những cách khác nhau. Các loại phổ biến nhất là: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB` và `LC_CODE_SIGNATURE`.
 
 ### **LC_SEGMENT/LC_SEGMENT_64**
 
 > [!TIP]
-> Basically, this type of Load Command define **how to load the \_\_TEXT** (executable code) **and \_\_DATA** (data for the process) **segments** according to the **offsets indicated in the Data section** when the binary is executed.
+> Về cơ bản, loại Load Command này xác định **cách tải các segment \_\_TEXT** (mã thực thi) **và \_\_DATA** (dữ liệu của process) **theo các offset được chỉ định trong phần Data** khi binary được thực thi.
 
-These commands **define segments** that are **mapped** into the **virtual memory space** of a process when it is executed.
+Các lệnh này **xác định những segment** được **ánh xạ** vào **không gian bộ nhớ ảo** của một process khi process đó được thực thi.
 
-There are **different types** of segments, such as the **\_\_TEXT** segment, which holds the executable code of a program, and the **\_\_DATA** segment, which contains data used by the process. These **segments are located in the data section** of the Mach-O file.
+Có **nhiều loại** segment khác nhau, chẳng hạn như segment **\_\_TEXT**, chứa mã thực thi của chương trình, và segment **\_\_DATA**, chứa dữ liệu mà process sử dụng. Các **segment này nằm trong phần data** của file Mach-O.
 
-**Each segment** can be further **divided** into multiple **sections**. The **load command structure** contains **information** about **these sections** within the respective segment.
+**Mỗi segment** có thể được **chia nhỏ** thành nhiều **section**. **Cấu trúc load command** chứa **thông tin** về **các section này** bên trong segment tương ứng.
 
-In the header first you find the **segment header**:
+Trong header, trước tiên bạn sẽ thấy **segment header**:
 
 <pre class="language-c"><code class="lang-c">struct segment_command_64 { /* for 64-bit architectures */
 	uint32_t	cmd;		/* LC_SEGMENT_64 */
@@ -205,11 +205,11 @@ In the header first you find the **segment header**:
 };
 </code></pre>
 
-Example of segment header:
+Ví dụ về segment header:
 
 <figure><img src="../../../images/image (1126).png" alt=""><figcaption></figcaption></figure>
 
-This header defines the **number of sections whose headers appear after** it:
+Header này xác định **số lượng section có header xuất hiện ngay sau nó**:
 
 ```c
 struct section_64 { /* for 64-bit architectures */
@@ -228,65 +228,65 @@ struct section_64 { /* for 64-bit architectures */
 };
 ```
 
-Example of **section header**:
+Ví dụ về **header của section**:
 
 <figure><img src="../../../images/image (1108).png" alt=""><figcaption></figcaption></figure>
 
-If you **add** the **section offset** (0x37DC) + the **offset** where the **arch starts**, in this case `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
+Nếu bạn **cộng** **offset của section** (0x37DC) với **offset** nơi **arch bắt đầu**, trong trường hợp này là `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
 <figure><img src="../../../images/image (701).png" alt=""><figcaption></figcaption></figure>
 
-It's also possible to get **headers information** from the **command line** with:
+Bạn cũng có thể lấy **thông tin về header** từ **command line** bằng cách:
 
 ```bash
 otool -lv /bin/ls
 ```
 
-Common segments loaded by this cmd:
+Các segment phổ biến được nạp bởi lệnh này:
 
-- **`__PAGEZERO`:** It instructs the kernel to **map** the **address zero** so it **cannot be read from, written to, or executed**. The maxprot and minprot variables in the structure are set to zero to indicate there are **no read-write-execute rights on this page**.
-  - This allocation is important to **mitigate NULL pointer dereference vulnerabilities**. This is because XNU enforces a hard page zero that ensures the first page (only the first) of memory is innaccesible (except in i386). A binary could fulfil this requirements by crafting a small \_\_PAGEZERO (using the `-pagezero_size`) to cover the first 4k and having the rest of 32bit memory accessible in both user and kernel mode.
-- **`__TEXT`**: Contains **executable** **code** with **read** and **execute** permissions (no writable)**.** Common sections of this segment:
-  - `__text`: Compiled binary code
-  - `__const`: Constant data (read only)
-  - `__[c/u/os_log]string`: C, Unicode or os logs string constants
-  - `__stubs` and `__stubs_helper`: Involved during the dynamic library loading process
-  - `__unwind_info`: Stack unwind data.
-  - Note that all this content is signed but also marked as executable (creating more options for exploitation of sections that doesn't necessarily need this privilege, like string dedicated sections).
-- **`__DATA`**: Contains data that is **readable** and **writable** (no executable)**.**
+- **`__PAGEZERO`:** Hướng dẫn kernel **map** **địa chỉ zero** để địa chỉ này **không thể bị đọc, ghi hoặc thực thi**. Các biến maxprot và minprot trong cấu trúc được đặt thành zero để biểu thị rằng **trang này không có quyền đọc-ghi-thực thi**.
+  - Việc cấp phát này rất quan trọng để **giảm thiểu các lỗ hổng NULL pointer dereference**. Lý do là XNU áp dụng hard page zero, đảm bảo trang bộ nhớ đầu tiên (chỉ trang đầu tiên) không thể truy cập được (trừ trên i386). Một binary có thể đáp ứng yêu cầu này bằng cách tạo một \_\_PAGEZERO nhỏ (dùng `-pagezero_size`) để bao phủ 4k đầu tiên, đồng thời cho phép phần còn lại của bộ nhớ 32bit truy cập được ở cả user mode lẫn kernel mode.
+- **`__TEXT`**: Chứa **code** **thực thi được** với quyền **đọc** và **thực thi** (không có quyền ghi)**.** Các section phổ biến của segment này:
+  - `__text`: Code binary đã biên dịch
+  - `__const`: Dữ liệu hằng (chỉ đọc)
+  - `__[c/u/os_log]string`: Các hằng chuỗi C, Unicode hoặc os log
+  - `__stubs` và `__stubs_helper`: Được dùng trong quá trình nạp dynamic library
+  - `__unwind_info`: Dữ liệu unwind của stack.
+  - Lưu ý rằng toàn bộ nội dung này được ký nhưng cũng được đánh dấu là có thể thực thi (tạo thêm nhiều lựa chọn để khai thác các section không nhất thiết cần quyền này, chẳng hạn như các section dành riêng cho chuỗi).
+- **`__DATA`**: Chứa dữ liệu **có thể đọc** và **ghi được** (không thể thực thi)**.**
   - `__got:` Global Offset Table
-  - `__nl_symbol_ptr`: Non lazy (bind at load) symbol pointer
-  - `__la_symbol_ptr`: Lazy (bind on use) symbol pointer
-  - `__const`: Should be read-only data (not really)
-  - `__cfstring`: CoreFoundation strings
-  - `__data`: Global variables (that have been initialized)
-  - `__bss`: Static variables (that have not been initialized)
-  - `__objc_*` (\_\_objc_classlist, \_\_objc_protolist, etc): Information used by the Objective-C runtime
-- **`__DATA_CONST`**: \_\_DATA.\_\_const is not guaranteed to be constant (write permissions), nor are other pointers and the GOT. This section makes `__const`, some initializers and the GOT table (once resolved) **read only** using `mprotect`.
-- **`__AUTH` / `__AUTH_CONST`**: Common in recent Apple Silicon binaries. These segments hold pointers that must be authenticated at load or use time (for example `__auth_got`). If a rebinding, hook or import-patching trick only checks the legacy `__got` / `__la_symbol_ptr` sections, it may miss the real call sites in modern `arm64e` binaries. For more details on these sections check [this page](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
-- **`__LINKEDIT`**: Contains information for the linker (dyld) such as, symbol, string, and relocation table entries. It' a generic container for contents that are neither in `__TEXT` or `__DATA` and its content is decribed in other load commands.
-  - dyld information: Rebase, Non-lazy/lazy/weak binding opcodes and export info
-  - Functions starts: Table of start addresses of functions
-  - Data In Code: Data islands in \_\_text
-  - SYmbol Table: Symbols in binary
-  - Indirect Symbol Table: Pointer/stub symbols
+  - `__nl_symbol_ptr`: Con trỏ symbol không lazy (bind khi nạp)
+  - `__la_symbol_ptr`: Con trỏ symbol lazy (bind khi sử dụng)
+  - `__const`: Đáng lẽ là dữ liệu chỉ đọc (nhưng thực tế không phải vậy)
+  - `__cfstring`: Các chuỗi CoreFoundation
+  - `__data`: Các biến toàn cục (đã được khởi tạo)
+  - `__bss`: Các biến static (chưa được khởi tạo)
+  - `__objc_*` (\_\_objc_classlist, \_\_objc_protolist, v.v.): Thông tin được Objective-C runtime sử dụng
+- **`__DATA_CONST`**: \_\_DATA.\_\_const không được đảm bảo là hằng (có quyền ghi), và các con trỏ khác cùng GOT cũng vậy. Section này dùng `mprotect` để đặt `__const`, một số initializer và bảng GOT (sau khi được phân giải) thành **chỉ đọc**.
+- **`__AUTH` / `__AUTH_CONST`**: Thường gặp trong các binary Apple Silicon gần đây. Các segment này chứa những con trỏ cần được xác thực khi nạp hoặc khi sử dụng (ví dụ `__auth_got`). Nếu một thủ thuật rebinding, hook hoặc import-patching chỉ kiểm tra các section `__got` / `__la_symbol_ptr` cũ, nó có thể bỏ sót các call site thực tế trong binary `arm64e` hiện đại. Để biết thêm chi tiết về các section này, xem [trang này](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
+- **`__LINKEDIT`**: Chứa thông tin dành cho linker (dyld), chẳng hạn như các mục trong bảng symbol, string và relocation. Đây là container tổng quát cho nội dung không nằm trong `__TEXT` hoặc `__DATA`; nội dung của nó được mô tả trong các load command khác.
+  - Thông tin dyld: Các opcode rebase, binding non-lazy/lazy/weak và thông tin export
+  - Function starts: Bảng địa chỉ bắt đầu của các function
+  - Data In Code: Các vùng dữ liệu trong \_\_text
+  - SYmbol Table: Các symbol trong binary
+  - Indirect Symbol Table: Các symbol con trỏ/stub
   - String Table
   - Code Signature
-- **`__OBJC`**: Contains information used by the Objective-C runtime. Though this information might also be found in the \_\_DATA segment, within various in \_\_objc\_\* sections.
-- **`__RESTRICT`**: A segment without content with a single section called **`__restrict`** (also empty) that ensures that when running the binary, it will ignore DYLD environmental variables.
+- **`__OBJC`**: Chứa thông tin được Objective-C runtime sử dụng. Tuy nhiên, thông tin này cũng có thể nằm trong segment \_\_DATA, bên trong nhiều section \_\_objc\_\*.
+- **`__RESTRICT`**: Segment không chứa nội dung, với một section duy nhất tên là **`__restrict`** (cũng trống), đảm bảo rằng khi chạy binary, các biến môi trường DYLD sẽ bị bỏ qua.
 
-As it was possible to see in the code, **segments also support flags** (although they aren't used very much):
+Như có thể thấy trong code, **các segment cũng hỗ trợ flags** (dù chúng không được dùng nhiều):
 
-- `SG_HIGHVM`: Core only (not used)
-- `SG_FVMLIB`: Not used
-- `SG_NORELOC`: Segment has no relocation
-- `SG_PROTECTED_VERSION_1`: Encryption. Used for example by Finder to encrypt text `__TEXT` segment.
+- `SG_HIGHVM`: Chỉ dành cho Core (không được dùng)
+- `SG_FVMLIB`: Không được dùng
+- `SG_NORELOC`: Segment không có relocation
+- `SG_PROTECTED_VERSION_1`: Mã hóa. Ví dụ, Finder dùng flag này để mã hóa segment `__TEXT`.
 
 ### **`LC_UNIXTHREAD/LC_MAIN`**
 
-**`LC_MAIN`** contains the entrypoint in the **entryoff attribute.** At load time, **dyld** simply **adds** this value to the (in-memory) **base of the binary**, then **jumps** to this instruction to start execution of the binary’s code.
+**`LC_MAIN`** chứa entrypoint trong thuộc tính **entryoff**. Khi nạp, **dyld** chỉ cần **cộng** giá trị này với **địa chỉ cơ sở** của binary (trong bộ nhớ), sau đó **nhảy** đến instruction này để bắt đầu thực thi code của binary.
 
-**`LC_UNIXTHREAD`** contains the values the register must have when starting the main thread. This was already deprecated but **`dyld`** still uses it. It's possible to see the vlaues of the registers set by this with:
+**`LC_UNIXTHREAD`** chứa các giá trị mà register phải có khi khởi chạy main thread. Cách này đã bị deprecated, nhưng **`dyld`** vẫn sử dụng. Có thể xem các giá trị register được thiết lập bằng cách dùng lệnh sau:
 
 ```bash
 otool -l /usr/lib/dyld
@@ -319,28 +319,28 @@ Load command 13
 {{#endref}}
 
 
-Contains information about the **code signature of the Macho-O file**. It only contains an **offset** that **points** to the **signature blob**. This is typically at the very end of the file.\
-You can find more information about this section in [**this blog post**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/) and [**this gist**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4).<sup>[[3]](#references)</sup><sup>[[4]](#references)</sup>
+Chứa thông tin về **chữ ký code của file Mach-O**. Nó chỉ chứa một **offset** **trỏ đến** **signature blob**. Thông thường, phần này nằm ở cuối file.\
+Bạn có thể tìm thêm thông tin về section này trong [**bài blog này**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/) và [**gist này**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4).<sup>[[3]](#references)</sup><sup>[[4]](#references)</sup>
 
 ### **`LC_ENCRYPTION_INFO[_64]`**
 
-Support for binary encryption. However, of course, if an attacker manages to compromise the process, he will be able to dump the memory unencrypted.
+Hỗ trợ mã hóa binary. Tuy nhiên, tất nhiên, nếu attacker xâm nhập được process, họ vẫn có thể dump memory ở dạng không mã hóa.
 
 ### **`LC_LOAD_DYLINKER`**
 
-Contains the **path to the dynamic linker executable** that maps shared libraries into the process address space. The **value is always set to `/usr/lib/dyld`**. It’s important to note that in macOS, dylib mapping happens in **user mode**, not in kernel mode.
+Chứa **đường dẫn đến executable dynamic linker**, chương trình ánh xạ shared libraries vào không gian địa chỉ của process. **Giá trị luôn được đặt là `/usr/lib/dyld`**. Cần lưu ý rằng trong macOS, việc ánh xạ dylib diễn ra ở **user mode**, không phải kernel mode.
 
 ### **`LC_IDENT`**
 
-Obsolete but when configured to geenrate dumps on panic, a Mach-O core dump is created and the kernel version is set in the `LC_IDENT` command.
+Đã lỗi thời, nhưng khi được cấu hình để tạo dump khi xảy ra panic, một Mach-O core dump sẽ được tạo và phiên bản kernel được đặt trong command `LC_IDENT`.
 
 ### **`LC_UUID`**
 
-Random UUID. It's useful for anything directly but XNU caches it with the rest of the process info. It can be used in crash reports.
+UUID ngẫu nhiên. Nó không hữu ích trực tiếp cho việc gì, nhưng XNU lưu cache UUID này cùng với phần thông tin còn lại của process. UUID có thể được dùng trong crash report.
 
 ### **`LC_BUILD_VERSION`**
 
-Modern binaries usually carry this command to declare the **target platform**, **minimum OS version**, **SDK version**, and optionally the **tool versions** used to build that slice. From an offensive/reversing perspective this is very useful to fingerprint how a sample was built and to quickly spot weird universal binaries where one slice was compiled with a different SDK or deployment target. Older binaries may still use `LC_VERSION_MIN_*` instead.
+Các binary hiện đại thường có command này để khai báo **platform mục tiêu**, **phiên bản OS tối thiểu**, **phiên bản SDK** và tùy chọn **các phiên bản tool** được dùng để build slice đó. Từ góc độ offensive/reversing, thông tin này rất hữu ích để xác định cách một sample được build và nhanh chóng phát hiện các universal binary bất thường, trong đó một slice được compile bằng SDK hoặc deployment target khác. Các binary cũ hơn có thể vẫn dùng `LC_VERSION_MIN_*`.
 
 ```bash
 vtool -show-build /bin/ls
@@ -349,16 +349,16 @@ otool -l /bin/ls | grep -A 8 LC_BUILD_VERSION
 
 ### **`LC_DYLD_ENVIRONMENT`**
 
-Allows to indicate environment variables to the dyld beforenthe process is executed. This can be vary dangerous as it can allow to execute arbitrary code inside the process so this load command is only used in dyld build with `#define SUPPORT_LC_DYLD_ENVIRONMENT` and further restricts processing only to variables of the form `DYLD_..._PATH` specifying load paths.
+Cho phép chỉ định các biến môi trường cho dyld trước khi tiến trình được thực thi. Điều này có thể rất nguy hiểm vì có thể cho phép thực thi mã tùy ý bên trong tiến trình. Vì vậy, lệnh tải này chỉ được sử dụng trong bản dựng dyld có `#define SUPPORT_LC_DYLD_ENVIRONMENT` và còn giới hạn việc xử lý chỉ ở các biến có dạng `DYLD_..._PATH` chỉ định đường dẫn tải.
 
-### **`LC_DYLD_EXPORTS_TRIE` and `LC_DYLD_CHAINED_FIXUPS`**
+### **`LC_DYLD_EXPORTS_TRIE` và `LC_DYLD_CHAINED_FIXUPS`**
 
-Recent toolchains frequently store export/bind/rebase metadata in these commands instead of relying only on the older `LC_DYLD_INFO[_ONLY]` opcodes. Both are `linkedit_data_command` entries that point into **`__LINKEDIT`**:
+Các toolchain gần đây thường lưu metadata export/bind/rebase trong các lệnh này thay vì chỉ dựa vào các opcode `LC_DYLD_INFO[_ONLY]` cũ hơn. Cả hai đều là các mục `linkedit_data_command` trỏ đến **`__LINKEDIT`**:
 
-- **`LC_DYLD_EXPORTS_TRIE`**: Compact trie with the symbols exported by the image.
-- **`LC_DYLD_CHAINED_FIXUPS`**: Per-segment fixup chains used by dyld to apply rebases and binds. On Apple Silicon this is also where you will encounter many modern authenticated pointer fixups.
+- **`LC_DYLD_EXPORTS_TRIE`**: Trie gọn chứa các symbol được image export.
+- **`LC_DYLD_CHAINED_FIXUPS`**: Các chuỗi fixup theo từng segment, được dyld dùng để áp dụng rebase và bind. Trên Apple Silicon, đây cũng là nơi bạn sẽ gặp nhiều fixup con trỏ có xác thực hiện đại.
 
-This metadata is very handy when reconstructing imports/exports, understanding why an `@rpath`-loaded dependency resolved the way it did, or figuring out why a hook/rebinding attempt failed on a modern `arm64e` target. `dyld_info` can also be used against **cache-only dylib paths** that do not exist as standalone files on disk, which is very handy on modern macOS where many system libraries live only in the shared cache.<sup>[[2]](#references)</sup>
+Metadata này rất hữu ích khi tái dựng imports/exports, tìm hiểu vì sao một dependency được tải bằng `@rpath` lại được phân giải theo cách đó, hoặc xác định lý do một nỗ lực hook/rebinding thất bại trên mục tiêu `arm64e` hiện đại. `dyld_info` cũng có thể được dùng với **các đường dẫn dylib chỉ có trong cache** và không tồn tại dưới dạng tệp độc lập trên ổ đĩa. Điều này rất hữu ích trên macOS hiện đại, nơi nhiều thư viện hệ thống chỉ nằm trong shared cache.<sup>[[2]](#references)</sup>
 
 ```bash
 dyld_info -arch arm64e -exports -fixup_chains -fixup_chain_details /bin/ls
@@ -366,19 +366,19 @@ dyld_info -arch arm64e -exports -fixup_chains -fixup_chain_details /bin/ls
 
 ### **`LC_FILESET_ENTRY`**
 
-This modern load command is mostly relevant when inspecting **kernel collections / kernelcache-style filesets**. Instead of representing a single standalone image, the outer Mach-O acts as a container and each `LC_FILESET_ENTRY` points to an embedded Mach-O with its own path-like **entry id**, VM address and file offset. If you are reversing modern macOS/iOS kernel components, this command is often the bridge between the top-level container and the actual image you want to extract or disassemble.
+Lệnh tải hiện đại này chủ yếu hữu ích khi kiểm tra **kernel collections / kernelcache-style filesets**. Thay vì biểu diễn một image độc lập, Mach-O bên ngoài đóng vai trò như một container và mỗi `LC_FILESET_ENTRY` trỏ đến một Mach-O được nhúng, với **entry id** dạng đường dẫn riêng, địa chỉ VM và offset trong file. Khi reverse các thành phần kernel hiện đại của macOS/iOS, lệnh này thường là cầu nối giữa container cấp cao nhất và image thực tế mà bạn muốn trích xuất hoặc disassemble.
 
 ```bash
 otool -l /System/Library/KernelCollections/BootKernelExtensions.kc | grep -A 6 LC_FILESET_ENTRY
 ```
 
-For practical extraction workflows, check [this other page about macOS kernel extensions and kernelcache](../mac-os-architecture/macos-kernel-extensions.md).
+For practical extraction workflows, xem [trang khác này về macOS kernel extensions và kernelcache](../mac-os-architecture/macos-kernel-extensions.md).
 
 ### **`LC_LOAD_DYLIB`**
 
-This load command describes a **dynamic** **library** dependency which **instructs** the **loader** (dyld) to **load and link said library**. There is a `LC_LOAD_DYLIB` load command **for each library** that the Mach-O binary requires.
+Lệnh tải này mô tả một dependency **thư viện** **động**, **chỉ thị** cho **loader** (dyld) **tải và liên kết thư viện đó**. Có một lệnh tải `LC_LOAD_DYLIB` **cho mỗi thư viện** mà binary Mach-O yêu cầu.
 
-- This load command is a structure of type **`dylib_command`** (which contains a struct dylib, describing the actual dependent dynamic library):
+- Lệnh tải này là một cấu trúc kiểu **`dylib_command`** (chứa một struct dylib, mô tả thư viện động phụ thuộc thực tế):
 
 ```objectivec
 struct dylib_command {
@@ -395,9 +395,9 @@ struct dylib {
 };
 ```
 
-![LC DYLD ENVIRONMENT - LC LOAD DYLIB: uint32 t compatibility version; / library's compatibility vers number /](<../../../images/image (486).png>)
+![LC DYLD ENVIRONMENT - LC LOAD DYLIB: uint32 t phiên bản tương thích; / số phiên bản tương thích của thư viện /](<../../../images/image (486).png>)
 
-You could also get this info from the cli with:
+Bạn cũng có thể lấy thông tin này từ cli bằng lệnh:
 
 ```bash
 otool -L /bin/ls
@@ -407,70 +407,70 @@ otool -L /bin/ls
 	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1319.0.0)
 ```
 
-Some potential malware related libraries are:
+Một số thư viện có thể liên quan đến malware:
 
-- **DiskArbitration**: Monitoring USB drives
-- **AVFoundation:** Capture audio and video
-- **CoreWLAN**: Wifi scans.
-
-> [!TIP]
-> A Mach-O binary can contain one or **more** **constructors**, that will be **executed** **before** the address specified in **LC_MAIN**.\
-> The offsets of any constructors are held in the **\_\_mod_init_func** section of the **\_\_DATA_CONST** segment.
-
-## **Mach-O Data**
-
-At the core of the file lies the data region, which is composed of several segments as defined in the load-commands region. **A variety of data sections can be housed within each segment**, with each section **holding code or data** specific to a type.
+- **DiskArbitration**: Giám sát ổ USB
+- **AVFoundation:** Thu âm thanh và video
+- **CoreWLAN**: Quét Wi-Fi.
 
 > [!TIP]
-> The data is basically the part containing all the **information** that is loaded by the load commands **LC_SEGMENTS_64**
+> Một binary Mach-O có thể chứa một hoặc **nhiều** **constructor**, sẽ được **thực thi** **trước** địa chỉ được chỉ định trong **LC_MAIN**.\
+> Offset của mọi constructor được lưu trong section **\_\_mod_init_func** của segment **\_\_DATA_CONST**.
+
+## **Dữ liệu Mach-O**
+
+Cốt lõi của tệp là vùng dữ liệu, gồm nhiều segment được định nghĩa trong vùng load command. **Mỗi segment có thể chứa nhiều section dữ liệu**, và mỗi section **chứa code hoặc dữ liệu** dành riêng cho một loại.
+
+> [!TIP]
+> Về cơ bản, dữ liệu là phần chứa toàn bộ **thông tin** được load command **LC_SEGMENTS_64** tải vào.
 
 ![https://www.oreilly.com/api/v2/epubs/9781785883378/files/graphics/B05055_02_38.jpg](<../../../images/image (507) (3).png>)
 
-This includes:
+Nội dung này bao gồm:
 
-- **Function table:** Which holds information about the program functions.
-- **Symbol table**: Which contains information about the external function used by the binary
-- It could also contain internal function, variable names as well and more.
+- **Bảng hàm:** Chứa thông tin về các hàm của chương trình.
+- **Bảng symbol**: Chứa thông tin về các hàm bên ngoài được binary sử dụng.
+- Nó cũng có thể chứa tên của các hàm nội bộ, biến, v.v.
 
-To check it you could use the [**Mach-O View**](https://sourceforge.net/projects/machoview/) tool:
+Để kiểm tra, bạn có thể dùng công cụ [**Mach-O View**](https://sourceforge.net/projects/machoview/):
 
 <figure><img src="../../../images/image (1120).png" alt=""><figcaption></figcaption></figure>
 
-Or from the cli:
+Hoặc dùng CLI:
 
 ```bash
 size -m /bin/ls
 ```
 
-### Appended data and reverse-parsed overlays
+### Dữ liệu nối thêm và overlay được phân tích ngược
 
-A loader can keep configuration in appended data instead of a named Mach-O section. A reverse parser then anchors itself on a trailer marker, reads a size stored immediately before it, and uses that value to locate and decrypt the preceding blob. One observed universal loader used this layout for an XOR-encrypted downloader URL:<sup>[[6]](#references)</sup>
+Một loader có thể lưu cấu hình trong dữ liệu nối thêm thay vì trong một section Mach-O có tên. Sau đó, trình phân tích ngược dựa vào một dấu đánh dấu ở cuối, đọc kích thước được lưu ngay trước dấu đó, rồi dùng giá trị này để định vị và giải mã blob đứng trước. Một loader universal được quan sát thấy sử dụng bố cục này cho URL downloader được mã hóa XOR:<sup>[[6]](#references)</sup>
 
 ```text
 [XOR-encrypted URL][8-byte ciphertext length][SONOMAC1]
 ```
 
-When reversing an unfamiliar binary, inspect bytes around recognizable end markers and trace every backward size calculation before assuming that strings or configuration must belong to a load-command section. The marker and XOR key are sample-specific; the reusable technique is the self-describing trailer.
+Khi reverse một binary chưa quen thuộc, hãy kiểm tra các byte xung quanh những dấu kết thúc dễ nhận biết và lần theo mọi phép tính kích thước ngược trước khi cho rằng các chuỗi hoặc cấu hình nhất thiết phải thuộc về một section của load command. Dấu đánh dấu và khóa XOR chỉ dùng cho mẫu cụ thể; kỹ thuật có thể tái sử dụng là trailer tự mô tả.
 
-## Objective-C Common Sections
+## Các section phổ biến của Objective-C
 
-In `__TEXT` segment (r-x):
+Trong segment `__TEXT` (r-x):
 
-- `__objc_classname`: Class names (strings)
-- `__objc_methname`: Method names (strings)
-- `__objc_methtype`: Method types (strings)
+- `__objc_classname`: Tên class (chuỗi)
+- `__objc_methname`: Tên method (chuỗi)
+- `__objc_methtype`: Kiểu method (chuỗi)
 
-In `__DATA` segment (rw-):
+Trong segment `__DATA` (rw-):
 
-- `__objc_classlist`: Pointers to all Objective-C classes
-- `__objc_nlclslist`: Pointers to Non-Lazy Objective-C classes
-- `__objc_catlist`: Pointer to Categories
-- `__objc_nlcatlist`: Pointer to Non-Lazy Categories
-- `__objc_protolist`: Protocols list
-- `__objc_const`: Constant data
+- `__objc_classlist`: Con trỏ đến tất cả class Objective-C
+- `__objc_nlclslist`: Con trỏ đến các class Objective-C Non-Lazy
+- `__objc_catlist`: Con trỏ đến Categories
+- `__objc_nlcatlist`: Con trỏ đến Categories Non-Lazy
+- `__objc_protolist`: Danh sách Protocol
+- `__objc_const`: Dữ liệu hằng
 - `__objc_imageinfo`, `__objc_selrefs`, `objc__protorefs`...
 
-See also: [Reflective Mach-O Loading](../macos-proces-abuse/reflective-mach-o-loading.md#activating-objective-c-metadata).
+Xem thêm: [Reflective Mach-O Loading](../macos-proces-abuse/reflective-mach-o-loading.md#activating-objective-c-metadata).
 
 ## Swift
 
@@ -480,9 +480,9 @@ See also: [Reflective Mach-O Loading](../macos-proces-abuse/reflective-mach-o-lo
 
 ## References
 
-- [1] [Mach-O slices aren't as straightforward as you might think](https://objective-see.org/blog/blog_0x80.html)
-- [2] [dyld_info(1) man page](https://keith.github.io/xcode-man-pages/dyld_info.1.html)
-- [3] [Reading Your Own Entitlements](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/)
+- [1] [Các slice Mach-O không đơn giản như bạn nghĩ](https://objective-see.org/blog/blog_0x80.html)
+- [2] [Trang man dyld_info(1)](https://keith.github.io/xcode-man-pages/dyld_info.1.html)
+- [3] [Đọc Entitlements của chính bạn](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/)
 - [4] [carlospolop/machoreader.py (gist)](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4)
-- [5] [Apple Open Source - Mach-O `fat.h` and `loader.h`](https://github.com/apple-oss-distributions/xnu/tree/main/EXTERNAL_HEADERS/mach-o)
-- [6] [Kaspersky Securelist - A new version of the MacSync macOS stealer targets crypto enthusiasts and developers](https://securelist.com/macsync-new-version/121383/)
+- [5] [Mã nguồn mở Apple - Mach-O `fat.h` và `loader.h`](https://github.com/apple-oss-distributions/xnu/tree/main/EXTERNAL_HEADERS/mach-o)
+- [6] [Kaspersky Securelist - Phiên bản mới của mã độc đánh cắp macOS MacSync nhắm vào những người đam mê tiền mã hóa và nhà phát triển](https://securelist.com/macsync-new-version/121383/)

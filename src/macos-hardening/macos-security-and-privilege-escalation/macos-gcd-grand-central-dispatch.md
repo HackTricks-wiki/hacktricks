@@ -2,94 +2,94 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Thông tin cơ bản
 
-**Grand Central Dispatch (GCD),** also known as **libdispatch** (`libdispatch.dyld`), is available in both macOS and iOS. It's a technology developed by Apple to optimize application support for concurrent (multithreaded) execution on multicore hardware.<sup>[[4]](#references)</sup>
+**Grand Central Dispatch (GCD),** còn được gọi là **libdispatch** (`libdispatch.dyld`), có trên cả macOS và iOS. Đây là công nghệ do Apple phát triển nhằm tối ưu hóa việc hỗ trợ ứng dụng thực thi đồng thời (đa luồng) trên phần cứng đa lõi.<sup>[[4]](#references)</sup>
 
-**GCD** provides and manages **FIFO queues** to which your application can **submit tasks** in the form of **block objects**. Blocks submitted to dispatch queues are **executed on a pool of threads** fully managed by the system. GCD automatically creates threads for executing the tasks in the dispatch queues and schedules those tasks to run on the available cores.<sup>[[1]](#references)</sup>
+**GCD** cung cấp và quản lý **các hàng đợi FIFO**, nơi ứng dụng có thể **gửi các tác vụ** dưới dạng **block object**. Các block được gửi đến dispatch queue sẽ **được thực thi trên một nhóm luồng** do hệ thống quản lý hoàn toàn. GCD tự động tạo luồng để thực thi các tác vụ trong dispatch queue và lên lịch chạy các tác vụ đó trên những lõi khả dụng.<sup>[[1]](#references)</sup>
 
 > [!TIP]
-> In summary, to execute code in **parallel**, processes can send **blocks of code to GCD**, which will take care of their execution. Therefore, processes don't create new threads; **GCD executes the given code with its own pool of threads** (which might increase or decrease as necessary).
+> Tóm lại, để thực thi mã **song song**, các tiến trình có thể gửi **các block mã đến GCD**, nơi sẽ đảm nhiệm việc thực thi chúng. Do đó, các tiến trình không tạo luồng mới; **GCD thực thi mã được cung cấp bằng nhóm luồng của riêng nó** (có thể tăng hoặc giảm khi cần).
 
-This is very helpful to manage parallel execution successfully, greatly reducing the number of threads processes create and optimising the parallel execution. This is ideal for tasks that require **great parallelism** (brute-forcing?) or for tasks that shouldn't block the main thread: For example, the main thread on iOS handles UI interactions, so any other functionality that could make the app hang (searching, accessing a web, reading a file...) is managed this way.
+Điều này rất hữu ích để quản lý hiệu quả việc thực thi song song, giúp giảm đáng kể số lượng luồng mà tiến trình tạo ra và tối ưu hóa hoạt động thực thi song song. Cách này lý tưởng cho các tác vụ cần **mức độ song song cao** (brute-forcing?) hoặc không nên chặn luồng chính. Ví dụ: trên iOS, luồng chính xử lý các tương tác UI, vì vậy những chức năng khác có thể khiến ứng dụng bị treo (tìm kiếm, truy cập web, đọc tệp...) sẽ được quản lý theo cách này.
 
 ### Blocks
 
-A block is a **self contained section of code** (like a function with arguments returning a value) and can also specify bound variables.\
-However, at compiler level blocks doesn't exist, they are `os_object`s. Each of these objects is formed by two structures:
+Một block là **một đoạn mã độc lập** (giống như một hàm có tham số và trả về giá trị) và cũng có thể chỉ định các biến được liên kết.\
+Tuy nhiên, ở cấp trình biên dịch, block không tồn tại dưới dạng đó mà là các `os_object`. Mỗi object này được tạo thành từ hai cấu trúc:
 
 - **block literal**:
-  - It starts by the **`isa`** field, pointing to the block's class:
-    - `NSConcreteGlobalBlock` (blocks from `__DATA.__const`)
-    - `NSConcreteMallocBlock` (blocks in the heap)
-    - `NSConcreateStackBlock` (blocks in stack)
-  - It has **`flags`** (indicating fields present in the block descriptor) and some reserved bytes
-  - The function pointer to call
-  - A pointer to the block descriptor
-  - Block imported variables (if any)
-- **block descriptor**: It's size depends on the data that is present (as indicated in the previous flags)
-  - It has some reserved bytes
-  - The size of it
-  - It'll usually have a pointer to an Objective-C style signature to know how much space is needed for the params (flag `BLOCK_HAS_SIGNATURE`)
-  - If variables are referenced, the block may also contain pointers to copy and dispose helpers. The copy helper transfers retained or otherwise managed captures when the block is copied, and the dispose helper releases that state when the copied block is destroyed.
+  - Bắt đầu bằng trường **`isa`**, trỏ đến lớp của block:
+    - `NSConcreteGlobalBlock` (các block từ `__DATA.__const`)
+    - `NSConcreteMallocBlock` (các block trên heap)
+    - `NSConcreateStackBlock` (các block trên stack)
+  - Có **`flags`** (cho biết những trường nào có trong block descriptor) và một số byte dự trữ
+  - Con trỏ hàm cần gọi
+  - Con trỏ đến block descriptor
+  - Các biến được block import (nếu có)
+- **block descriptor**: Kích thước của nó phụ thuộc vào dữ liệu hiện có (như được chỉ ra trong các flag ở trên)
+  - Có một số byte dự trữ
+  - Kích thước của nó
+  - Thường có một con trỏ đến chữ ký theo kiểu Objective-C để xác định cần bao nhiêu không gian cho các tham số (flag `BLOCK_HAS_SIGNATURE`)
+  - Nếu có tham chiếu đến biến, block cũng có thể chứa con trỏ đến các hàm trợ giúp copy và dispose. Hàm trợ giúp copy chuyển các capture được giữ lại hoặc được quản lý theo cách khác khi block được sao chép; hàm trợ giúp dispose giải phóng trạng thái đó khi block đã sao chép bị hủy.
 
 ### Queues
 
-A dispatch queue is a named object providing FIFO ordering of blocks for executions.<sup>[[3]](#references)</sup>
+Dispatch queue là một object có tên, cung cấp thứ tự FIFO cho các block được thực thi.<sup>[[3]](#references)</sup>
 
-Blocks a set in queues to be executed, and these support 2 modes: `DISPATCH_QUEUE_SERIAL` and `DISPATCH_QUEUE_CONCURRENT`. Of course the **serial** one **won't have race condition** problems as a block won't be executed until the previous one has finished. But **the other type of queue might have it**.
+Các block được đưa vào queue để thực thi; queue hỗ trợ 2 chế độ: `DISPATCH_QUEUE_SERIAL` và `DISPATCH_QUEUE_CONCURRENT`. Dĩ nhiên, loại **serial** sẽ **không gặp vấn đề race condition**, vì một block sẽ không được thực thi cho đến khi block trước đó hoàn tất. Nhưng **loại queue còn lại có thể gặp vấn đề này**.
 
-Default queues:
+Các queue mặc định:
 
-- `.main-thread`: From `dispatch_get_main_queue()`
-- `.libdispatch-manager`: GCD's queue manager
-- `.root.libdispatch-manager`: GCD's queue manager
-- `.root.maintenance-qos`: Lowest priority tasks
+- `.main-thread`: Từ `dispatch_get_main_queue()`
+- `.libdispatch-manager`: Trình quản lý queue của GCD
+- `.root.libdispatch-manager`: Trình quản lý queue của GCD
+- `.root.maintenance-qos`: Các tác vụ có độ ưu tiên thấp nhất
 - `.root.maintenance-qos.overcommit`
-- `.root.background-qos`: Available as `DISPATCH_QUEUE_PRIORITY_BACKGROUND`
+- `.root.background-qos`: Khả dụng dưới dạng `DISPATCH_QUEUE_PRIORITY_BACKGROUND`
 - `.root.background-qos.overcommit`
-- `.root.utility-qos`: Available as `DISPATCH_QUEUE_PRIORITY_NON_INTERACTIVE`
+- `.root.utility-qos`: Khả dụng dưới dạng `DISPATCH_QUEUE_PRIORITY_NON_INTERACTIVE`
 - `.root.utility-qos.overcommit`
-- `.root.default-qos`: Available as `DISPATCH_QUEUE_PRIORITY_DEFAULT`
+- `.root.default-qos`: Khả dụng dưới dạng `DISPATCH_QUEUE_PRIORITY_DEFAULT`
 - `.root.background-qos.overcommit`
-- `.root.user-initiated-qos`: Available as `DISPATCH_QUEUE_PRIORITY_HIGH`
+- `.root.user-initiated-qos`: Khả dụng dưới dạng `DISPATCH_QUEUE_PRIORITY_HIGH`
 - `.root.background-qos.overcommit`
-- `.root.user-interactive-qos`: Highest priority
+- `.root.user-interactive-qos`: Độ ưu tiên cao nhất
 - `.root.background-qos.overcommit`
 
-Notice that it will be the system who decides **which threads handle which queues at each time** (multiple threads might work in the same queue or the same thread might work in different queues at some point)
+Lưu ý rằng hệ thống sẽ quyết định **luồng nào xử lý queue nào vào từng thời điểm** (nhiều luồng có thể cùng xử lý một queue, hoặc cùng một luồng có thể xử lý các queue khác nhau vào một thời điểm nào đó).
 
-#### Attributtes
+#### Thuộc tính
 
-When creating a queue with **`dispatch_queue_create`** the third argument is a `dispatch_queue_attr_t`, which usually is either `DISPATCH_QUEUE_SERIAL` (which is actually NULL) or `DISPATCH_QUEUE_CONCURRENT` which is a pointer to a `dispatch_queue_attr_t` struct which allow to control some parameters of the queue.
+Khi tạo queue bằng **`dispatch_queue_create`**, tham số thứ ba là `dispatch_queue_attr_t`, thường là `DISPATCH_QUEUE_SERIAL` (thực chất là NULL) hoặc `DISPATCH_QUEUE_CONCURRENT`, tức một con trỏ đến cấu trúc `dispatch_queue_attr_t` cho phép kiểm soát một số tham số của queue.
 
 ### Dispatch objects
 
-There are several objects that libdispatch uses, and queues and blocks are only two of them. Older reverse-engineering notes may describe a generic creation path as `dispatch_object_create`; that name is useful when recognizing decompiler output or historical notes, but it is not a public generic constructor in current libdispatch headers. Public code creates each object with its type-specific API, such as `dispatch_queue_create`, `dispatch_group_create`, `dispatch_semaphore_create`, or a `dispatch_source_create` variant. Dispatch sources are documented in the public API and implemented in libdispatch's source tree.<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
+libdispatch sử dụng nhiều loại object; queue và block chỉ là hai trong số đó. Các ghi chú reverse-engineering cũ có thể mô tả một quy trình tạo object chung là `dispatch_object_create`; tên này hữu ích khi nhận diện đầu ra decompiler hoặc ghi chú lịch sử, nhưng không phải là hàm tạo chung công khai trong các header libdispatch hiện nay. Mã công khai tạo từng object bằng API riêng theo loại, chẳng hạn như `dispatch_queue_create`, `dispatch_group_create`, `dispatch_semaphore_create` hoặc một biến thể của `dispatch_source_create`. Dispatch source được mô tả trong API công khai và được triển khai trong cây mã nguồn của libdispatch.<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
 
 - `block`
-- `data`: Data blocks
-- `group`: Group of blocks
-- `io`: Async I/O requests
-- `mach`: Mach ports
-- `mach_msg`: Mach messages
-- `pthread_root_queue`:A queue with a pthread thread pool and not workqueues
+- `data`: Các khối dữ liệu
+- `group`: Nhóm block
+- `io`: Các yêu cầu I/O bất đồng bộ
+- `mach`: Các cổng Mach
+- `mach_msg`: Các thông điệp Mach
+- `pthread_root_queue`: Queue có nhóm luồng pthread, không dùng workqueue
 - `queue`
 - `semaphore`
-- `source`: Event source
+- `source`: Nguồn sự kiện
 
 ## Objective-C
 
-Objective-C provides several functions for submitting a block for concurrent execution:
+Objective-C cung cấp một số hàm để gửi block đi thực thi đồng thời:
 
-- [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Submits a block for asynchronous execution on a dispatch queue and returns immediately.
-- [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Submits a block object for execution and returns after that block finishes executing.
-- [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once): Executes a block object only once for the lifetime of an application.
-- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Submits a work item for execution and returns only after it finishes executing. Unlike [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync), this function respects all attributes of the queue when it executes the block.
+- [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Gửi block để thực thi bất đồng bộ trên dispatch queue và trả về ngay lập tức.
+- [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Gửi block object để thực thi và trả về sau khi block đó thực thi xong.
+- [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once): Chỉ thực thi block object một lần trong suốt vòng đời của ứng dụng.
+- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Gửi work item để thực thi và chỉ trả về sau khi item đó thực thi xong. Khác với [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync), hàm này tuân theo tất cả thuộc tính của queue khi thực thi block.
 
-These functions expect these parameters: [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
+Các hàm này nhận những tham số sau: [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
 
-This is the **struct of a Block**:
+Đây là **cấu trúc của một Block**:
 
 ```c
 struct Block {
@@ -102,7 +102,7 @@ struct Block {
 };
 ```
 
-And this is an example to use **parallelism** with **`dispatch_async`**:
+Và đây là một ví dụ sử dụng **tính song song** với **`dispatch_async`**:
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -136,8 +136,8 @@ int main(int argc, const char * argv[]) {
 
 ## Swift
 
-**`libswiftDispatch`** is a library that provides **Swift bindings** to the Grand Central Dispatch (GCD) framework which is originally written in C.\
-The **`libswiftDispatch`** library wraps the C GCD APIs in a more Swift-friendly interface, making it easier and more intuitive for Swift developers to work with GCD.
+**`libswiftDispatch`** là thư viện cung cấp **các binding Swift** cho framework Grand Central Dispatch (GCD), vốn được viết bằng C.\
+Thư viện **`libswiftDispatch`** bao bọc các API GCD bằng C trong một giao diện thân thiện hơn với Swift, giúp các nhà phát triển Swift làm việc với GCD dễ dàng và trực quan hơn.
 
 - **`DispatchQueue.global().sync{ ... }`**
 - **`DispatchQueue.global().async{ ... }`**
@@ -145,7 +145,7 @@ The **`libswiftDispatch`** library wraps the C GCD APIs in a more Swift-friendly
 - **`async await`**
   - **`var (data, response) = await URLSession.shared.data(from: URL(string: "https://api.example.com/getData"))`**
 
-**Code example**:
+**Ví dụ code**:
 
 ```swift
 import Foundation
@@ -176,7 +176,7 @@ autoreleasepool {
 
 ## Frida
 
-The following Frida script can be used to **hook into several `dispatch`** functions and extract the queue name, the backtrace and the block: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
+Có thể dùng script Frida sau để **hook vào một số hàm `dispatch`** và trích xuất tên hàng đợi, backtrace và block: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
 
 ```bash
 frida -U <prog_name> -l libdispatch.js
@@ -193,9 +193,9 @@ Backtrace:
 
 ## Ghidra
 
-Currently Ghidra doesn't understand neither the ObjectiveC **`dispatch_block_t`** structure, neither the **`swift_dispatch_block`** one.
+Hiện tại Ghidra không hiểu cấu trúc ObjectiveC **`dispatch_block_t`** cũng như cấu trúc **`swift_dispatch_block`**.
 
-So if you want it to understand them, you could just **declare them**:
+Vì vậy, nếu muốn Ghidra hiểu chúng, bạn chỉ cần **khai báo chúng**:
 
 <figure><img src="../../images/image (1160).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -203,26 +203,25 @@ So if you want it to understand them, you could just **declare them**:
 
 <figure><img src="../../images/image (1163).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Then, find a place in the code where they are **used**:
+Sau đó, tìm một vị trí trong code nơi chúng được **sử dụng**:
 
 > [!TIP]
-> Note all of references made to "block" to understand how you could figure out that the struct is being used.
+> Lưu ý tất cả các tham chiếu đến "block" để hiểu cách xác định struct đang được sử dụng.
 
 <figure><img src="../../images/image (1164).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Right click on the variable -> Retype Variable and select in this case **`swift_dispatch_block`**:
+Nhấp chuột phải vào biến -> Retype Variable rồi chọn **`swift_dispatch_block`** trong trường hợp này:
 
 <figure><img src="../../images/image (1165).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Ghidra will automatically rewrite everything:
+Ghidra sẽ tự động viết lại mọi thứ:
 
 <figure><img src="../../images/image (1166).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ## References
 
-- [1] [libdispatch — `src/queue.c` (queue/thread-pool implementation)](https://github.com/apple-oss-distributions/libdispatch/blob/main/src/queue.c)
+- [1] [libdispatch — `src/queue.c` (triển khai hàng đợi/thread-pool)](https://github.com/apple-oss-distributions/libdispatch/blob/main/src/queue.c)
 - [2] [libdispatch — `src/source.c` (dispatch sources)](https://github.com/apple-oss-distributions/libdispatch/blob/main/src/source.c)
-- [3] [libdispatch — `dispatch/queue.h` (public queue API)](https://github.com/apple-oss-distributions/libdispatch/blob/main/dispatch/queue.h)
+- [3] [libdispatch — `dispatch/queue.h` (API hàng đợi công khai)](https://github.com/apple-oss-distributions/libdispatch/blob/main/dispatch/queue.h)
 - [4] [Apple Developer — Dispatch](https://developer.apple.com/documentation/dispatch)
-
 {{#include ../../banners/hacktricks-training.md}}

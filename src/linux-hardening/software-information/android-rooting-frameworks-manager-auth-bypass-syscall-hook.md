@@ -2,84 +2,84 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Rooting frameworks such as KernelSU, APatch and SKRoot patch or hook the Android/Linux kernel and expose privileged functionality to an unprivileged userspace manager app. Magisk is discussed separately below because CVE-2024-48336 involved manager-side code loading rather than this KernelSU syscall path.<sup>[[1]](#references)[[5]](#references)[[13]](#references)</sup>
+Các rooting framework như KernelSU, APatch và SKRoot vá hoặc hook kernel Android/Linux, đồng thời cung cấp chức năng đặc quyền cho ứng dụng manager userspace không có đặc quyền. Magisk được thảo luận riêng bên dưới vì CVE-2024-48336 liên quan đến việc nạp mã phía manager, chứ không phải đường đi syscall của KernelSU.<sup>[[1]](#references)[[5]](#references)[[13]](#references)</sup>
 
-This page abstracts the techniques and pitfalls uncovered in public research (notably Zimperium’s analysis of KernelSU v0.5.7) to help both red and blue teams understand attack surfaces, exploitation primitives, and robust mitigations.<sup>[[1]](#references)</sup>
-
----
-## Architecture pattern: syscall-hooked manager channel
-
-- In KernelSU v0.5.7, a kernel hook on `prctl` receives a magic value, command ID and command-specific arguments from userspace.<sup>[[1]](#references)[[2]](#references)[[11]](#references)</sup>
-- The caller first requests manager status with `CMD_BECOME_MANAGER`. Authorization is command-specific: `CMD_GRANT_ROOT` checks the manager/allowlist state, `CMD_ALLOW_SU` is manager-only, and `CMD_SET_SEPOLICY` is root-only in this version.<sup>[[2]](#references)[[11]](#references)</sup>
-- Other commands query version/configuration or report framework events.<sup>[[2]](#references)</sup>
-- Because any app can invoke this syscall interface, the correctness of manager authentication is critical.<sup>[[1]](#references)[[2]](#references)</sup>
-
-Example (KernelSU design):
-- Hooked syscall: prctl
-- Magic value to divert to KernelSU handler: 0xDEADBEEF
-- Commands include: CMD_BECOME_MANAGER, CMD_GET_VERSION, CMD_ALLOW_SU, CMD_SET_SEPOLICY, CMD_GRANT_ROOT, etc.<sup>[[1]](#references)[[2]](#references)[[11]](#references)</sup>
+Trang này khái quát các kỹ thuật và vấn đề cần lưu ý được phát hiện trong các nghiên cứu công khai (đáng chú ý là phân tích của Zimperium về KernelSU v0.5.7), nhằm giúp cả red team và blue team hiểu bề mặt tấn công, primitive khai thác và các biện pháp giảm thiểu hiệu quả.<sup>[[1]](#references)</sup>
 
 ---
-## KernelSU v0.5.7 authentication flow (as implemented)
+## Mẫu kiến trúc: kênh manager dùng syscall hook
 
-When userspace calls prctl(0xDEADBEEF, CMD_BECOME_MANAGER, data_dir_path, ...), KernelSU verifies:<sup>[[1]](#references)[[2]](#references)[[11]](#references)</sup>
+- Trong KernelSU v0.5.7, một kernel hook trên `prctl` nhận giá trị magic, command ID và các đối số riêng của command từ userspace.<sup>[[1]](#references)[[2]](#references)[[11]](#references)</sup>
+- Caller trước tiên yêu cầu trạng thái manager bằng `CMD_BECOME_MANAGER`. Việc cấp quyền phụ thuộc vào từng command: `CMD_GRANT_ROOT` kiểm tra trạng thái manager/allowlist, `CMD_ALLOW_SU` chỉ dành cho manager, còn `CMD_SET_SEPOLICY` chỉ dành cho root trong phiên bản này.<sup>[[2]](#references)[[11]](#references)</sup>
+- Các command khác truy vấn version/configuration hoặc báo cáo sự kiện framework.<sup>[[2]](#references)</sup>
+- Vì bất kỳ app nào cũng có thể gọi giao diện syscall này, việc xác thực manager chính xác là rất quan trọng.<sup>[[1]](#references)[[2]](#references)</sup>
 
-1) Path prefix check
-- The provided path must start with an expected prefix for the caller UID, e.g. /data/data/<pkg> or /data/user/<id>/<pkg>.
-  - Reference: core_hook.c (v0.5.7) path prefix logic.<sup>[[2]](#references)</sup>
-
-2) Ownership check
-- The path must be owned by the caller UID.
-  - Reference: core_hook.c (v0.5.7) ownership logic.<sup>[[2]](#references)</sup>
-
-3) APK signature check via FD table scan
-- Iterate the calling process’ open file descriptors in increasing descriptor order.
-- For each regular file whose path starts with `/data/app/` and ends with `/base.apk`, require the path to contain the package substring derived from the supplied data-directory path.
-- Verify the signature of the first candidate that passes those path checks.
-- Parse APK v2 signature and verify against the official manager certificate.
-  - References: manager.c (iterating FDs), apk_sign.c (APK v2 verification).<sup>[[3]](#references)[[4]](#references)</sup>
-
-If all checks pass, the kernel caches the manager’s UID temporarily; manager-only commands then accept that UID, while other commands retain their own UID or allowlist checks.<sup>[[2]](#references)[[3]](#references)</sup>
+Ví dụ (thiết kế KernelSU):
+- Syscall được hook: prctl
+- Giá trị magic để chuyển hướng đến handler của KernelSU: 0xDEADBEEF
+- Các command gồm: CMD_BECOME_MANAGER, CMD_GET_VERSION, CMD_ALLOW_SU, CMD_SET_SEPOLICY, CMD_GRANT_ROOT, v.v.<sup>[[1]](#references)[[2]](#references)[[11]](#references)</sup>
 
 ---
-## Vulnerability class: trusting path-derived APK selection
+## Luồng xác thực của KernelSU v0.5.7 (theo cách triển khai)
 
-KernelSU v0.5.7 does not bind the signature result to PackageManager’s installed package identity. In `manager.c`, the package test is only a path substring check (`strstr(cwd, pkg)`); the first candidate that passes that test is then signature-checked. An attacker can therefore place a genuine manager APK under a `/data/app/` path that also contains the attacker’s package name and arrange for it to be selected first.<sup>[[1]](#references)[[3]](#references)[[4]](#references)</sup>
+Khi userspace gọi prctl(0xDEADBEEF, CMD_BECOME_MANAGER, data_dir_path, ...), KernelSU xác minh:<sup>[[1]](#references)[[2]](#references)[[11]](#references)</sup>
 
-This trust-by-indirection lets an unprivileged app impersonate the manager without owning the manager’s signing key.<sup>[[1]](#references)</sup>
+1) Kiểm tra tiền tố đường dẫn
+- Đường dẫn được cung cấp phải bắt đầu bằng tiền tố dự kiến cho UID của caller, ví dụ /data/data/<pkg> hoặc /data/user/<id>/<pkg>.
+  - Tham khảo: logic kiểm tra tiền tố đường dẫn trong core_hook.c (v0.5.7).<sup>[[2]](#references)</sup>
 
-Key properties exploited:<sup>[[1]](#references)[[3]](#references)</sup>
-- The FD scan is ordered by descriptor index and the package check is a path substring test, not a verified package-to-APK identity binding.
-- open() returns the lowest available FD. By closing lower-numbered FDs first, an attacker can control ordering.
-- A bundled manager APK can be placed under `/data/app/` at a path containing the attacker’s package string while retaining the official manager signature.
+2) Kiểm tra quyền sở hữu
+- Đường dẫn phải thuộc sở hữu của UID caller.
+  - Tham khảo: logic kiểm tra quyền sở hữu trong core_hook.c (v0.5.7).<sup>[[2]](#references)</sup>
+
+3) Kiểm tra chữ ký APK thông qua quét bảng FD
+- Duyệt các file descriptor đang mở của process gọi theo thứ tự descriptor tăng dần.
+- Với mỗi file thông thường có đường dẫn bắt đầu bằng `/data/app/` và kết thúc bằng `/base.apk`, yêu cầu đường dẫn phải chứa chuỗi package được lấy từ đường dẫn data directory đã cung cấp.
+- Xác minh chữ ký của candidate đầu tiên thỏa mãn các kiểm tra đường dẫn đó.
+- Phân tích chữ ký APK v2 và xác minh với certificate chính thức của manager.
+  - Tham khảo: manager.c (duyệt FD), apk_sign.c (xác minh APK v2).<sup>[[3]](#references)[[4]](#references)</sup>
+
+Nếu tất cả kiểm tra đều đạt, kernel tạm thời cache UID của manager; sau đó, các command chỉ dành cho manager chấp nhận UID đó, trong khi các command khác vẫn áp dụng kiểm tra UID hoặc allowlist riêng.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ---
-## Attack preconditions
+## Nhóm lỗ hổng: tin cậy việc chọn APK dựa trên đường dẫn
 
-The concrete KernelSU v0.5.7 case requires:<sup>[[1]](#references)[[3]](#references)</sup>
+KernelSU v0.5.7 không liên kết kết quả xác minh chữ ký với danh tính package đã cài đặt trong PackageManager. Trong `manager.c`, kiểm tra package chỉ là kiểm tra chuỗi con trong đường dẫn (`strstr(cwd, pkg)`); candidate đầu tiên vượt qua bước kiểm tra này sẽ được xác minh chữ ký. Do đó, attacker có thể đặt một manager APK chính hãng dưới đường dẫn `/data/app/` cũng chứa tên package của attacker, rồi sắp xếp để APK đó được chọn trước.<sup>[[1]](#references)[[3]](#references)[[4]](#references)</sup>
 
-- The device is already rooted with a vulnerable rooting framework (e.g., KernelSU v0.5.7).
-- The attacker can run arbitrary unprivileged code locally (Android app process).
-- For the v0.5.7 implementation, `current->real_parent` must have UID 0 (the source comment describes this as a zygote direct-child requirement); `manager.c` rejects other parents.<sup>[[3]](#references)</sup>
-- The real manager has not yet authenticated (e.g., right after a reboot). Some frameworks cache the manager UID after success; you must win the race.<sup>[[1]](#references)</sup>
+Kiểu tin cậy thông qua trung gian này cho phép app không có đặc quyền giả mạo manager mà không cần sở hữu signing key của manager.<sup>[[1]](#references)</sup>
+
+Các đặc tính bị khai thác:<sup>[[1]](#references)[[3]](#references)</sup>
+- Việc quét FD theo thứ tự chỉ số descriptor và kiểm tra package bằng chuỗi con trong đường dẫn, chứ không xác minh mối liên kết giữa package và danh tính APK.
+- open() trả về FD khả dụng có số nhỏ nhất. Bằng cách đóng các FD có số thấp trước, attacker có thể kiểm soát thứ tự.
+- Có thể đặt một manager APK đi kèm dưới `/data/app/` tại đường dẫn chứa chuỗi package của attacker mà vẫn giữ chữ ký chính thức của manager.
 
 ---
-## Exploitation outline (KernelSU v0.5.7)
+## Điều kiện khai thác
 
-High-level steps (the cited demo video shows the public proof of concept in operation):<sup>[[1]](#references)[[2]](#references)[[10]](#references)</sup>
-1) Build a valid path to your own app data directory to satisfy prefix and ownership checks.
-2) Place a genuine KernelSU Manager base.apk under `/data/app/` at a path containing your package string, then open it on a lower-numbered FD than your own base.apk.
-3) Invoke prctl(0xDEADBEEF, CMD_BECOME_MANAGER, <your_data_dir>, ...) to pass the checks.
-4) Use `CMD_GRANT_ROOT`, then `CMD_ALLOW_SU` for persistent su; invoke root-only `CMD_SET_SEPOLICY` only after obtaining root and only where supported.
+Trường hợp KernelSU v0.5.7 cụ thể cần:<sup>[[1]](#references)[[3]](#references)</sup>
 
-Practical notes on step 2 (FD ordering):<sup>[[1]](#references)</sup>
-- Identify your process’ FD for your own /data/app/*/base.apk by walking /proc/self/fd symlinks.
-- Close a low FD (e.g., stdin, fd 0) and open the legitimate manager APK first so it occupies fd 0 (or any index lower than your own base.apk fd).
-- Bundle the legitimate manager APK with your app so its path starts with `/data/app/`, ends with `/base.apk`, and contains your package string. For example, a path under your app’s `lib` directory can satisfy these checks.<sup>[[1]](#references)[[3]](#references)</sup>
+- Thiết bị đã được root bằng một rooting framework có lỗ hổng (ví dụ: KernelSU v0.5.7).
+- Attacker có thể chạy tùy ý code không có đặc quyền cục bộ (trong process Android app).
+- Với cách triển khai v0.5.7, `current->real_parent` phải có UID 0 (comment trong source mô tả đây là yêu cầu tiến trình con trực tiếp của zygote); `manager.c` từ chối các parent khác.<sup>[[3]](#references)</sup>
+- Manager thực chưa xác thực (ví dụ: ngay sau khi khởi động lại). Một số framework cache UID của manager sau khi xác thực thành công; cần thắng cuộc đua này.<sup>[[1]](#references)</sup>
 
-Example code snippets (Android/Linux, illustrative only):
+---
+## Phác thảo khai thác (KernelSU v0.5.7)
 
-Enumerate open FDs to locate base.apk entries:
+Các bước ở mức khái quát (video demo được trích dẫn cho thấy proof of concept công khai đang hoạt động):<sup>[[1]](#references)[[2]](#references)[[10]](#references)</sup>
+1) Tạo đường dẫn hợp lệ đến thư mục dữ liệu app của bạn để vượt qua kiểm tra tiền tố và quyền sở hữu.
+2) Đặt một KernelSU Manager base.apk chính hãng dưới `/data/app/` tại đường dẫn chứa chuỗi package của bạn, rồi mở file này bằng FD có số nhỏ hơn FD của base.apk của bạn.
+3) Gọi prctl(0xDEADBEEF, CMD_BECOME_MANAGER, <your_data_dir>, ...) để vượt qua các bước kiểm tra.
+4) Dùng `CMD_GRANT_ROOT`, sau đó dùng `CMD_ALLOW_SU` để duy trì su; chỉ gọi `CMD_SET_SEPOLICY` dành riêng cho root sau khi có quyền root và chỉ khi tính năng đó được hỗ trợ.
+
+Ghi chú thực tế về bước 2 (thứ tự FD):<sup>[[1]](#references)</sup>
+- Xác định FD của process bạn trỏ đến /data/app/*/base.apk bằng cách duyệt các symlink trong /proc/self/fd.
+- Đóng một FD số thấp (ví dụ stdin, fd 0), rồi mở manager APK hợp lệ trước để file này chiếm fd 0 (hoặc bất kỳ chỉ số nào nhỏ hơn FD của base.apk của bạn).
+- Đóng gói manager APK hợp lệ cùng app để đường dẫn của nó bắt đầu bằng `/data/app/`, kết thúc bằng `/base.apk` và chứa chuỗi package của bạn. Ví dụ, một đường dẫn bên trong thư mục `lib` của app có thể đáp ứng các kiểm tra này.<sup>[[1]](#references)[[3]](#references)</sup>
+
+Các đoạn code ví dụ (Android/Linux, chỉ mang tính minh họa):
+
+Liệt kê các FD đang mở để tìm các mục base.apk:
 ```c
 #include <dirent.h>
 #include <stdio.h>
@@ -108,7 +108,7 @@ int find_first_baseapk_fd(char out_path[PATH_MAX]) {
 }
 ```
 
-Force a lower-numbered FD to point at the legitimate manager APK:
+Buộc FD có số nhỏ hơn trỏ đến APK manager hợp lệ:
 ```c
 #include <fcntl.h>
 #include <unistd.h>
@@ -121,7 +121,7 @@ void preopen_legit_manager_lowfd(const char *legit_apk_path) {
 }
 ```
 
-Manager authentication via the KernelSU v0.5.7 `prctl` hook:<sup>[[1]](#references)[[2]](#references)[[11]](#references)</sup>
+Xác thực Manager thông qua hook `prctl` của KernelSU v0.5.7:<sup>[[1]](#references)[[2]](#references)[[11]](#references)</sup>
 ```c
 #include <sys/prctl.h>
 #include <stdint.h>
@@ -139,56 +139,55 @@ int become_manager(const char *my_data_dir) {
 }
 ```
 
-After success, privileged commands (examples):<sup>[[2]](#references)[[11]](#references)</sup>
-- CMD_GRANT_ROOT: promote current process to root
-- CMD_ALLOW_SU: add your package/UID to allowlist for persistent su
-- CMD_SET_SEPOLICY: adjust SELinux policy after obtaining root; KernelSU v0.5.7 checks for UID 0 for this command.<sup>[[2]](#references)</sup>
+Sau khi thành công, các lệnh có đặc quyền (ví dụ):<sup>[[2]](#references)[[11]](#references)</sup>
+- CMD_GRANT_ROOT: nâng tiến trình hiện tại lên quyền root
+- CMD_ALLOW_SU: thêm package/UID của bạn vào allowlist để duy trì quyền su
+- CMD_SET_SEPOLICY: điều chỉnh chính sách SELinux sau khi có quyền root; KernelSU v0.5.7 kiểm tra UID 0 đối với lệnh này.<sup>[[2]](#references)</sup>
 
-Race/persistence tip:
-- Register a BOOT_COMPLETED receiver in AndroidManifest (`RECEIVE_BOOT_COMPLETED`) to start after reboot and attempt authentication before the real manager; the permission authorizes receipt of `ACTION_BOOT_COMPLETED` but does not itself guarantee scheduling priority.<sup>[[1]](#references)[[12]](#references)</sup>
-
----
-## Detection and mitigation guidance
-
-For framework developers:
-- Bind authentication to the caller’s package/UID, not to arbitrary FDs:
-  - Resolve the caller’s package from its UID and verify against the installed package’s signature (via PackageManager) rather than scanning FDs.
-  - If kernel-only, use stable caller identity (task creds) and validate on a stable source of truth managed by init/userspace helper, not process FDs.
-- Avoid path-prefix checks as identity; they are trivially satisfiable by the caller.
-- Use nonce-based challenge–response over the channel and clear any cached manager identity at boot or on key events.
-- Consider binder-based authenticated IPC instead of overloading generic syscalls when feasible.
-
-For defenders/blue team:
-- Detect presence of rooting frameworks and manager processes; monitor for prctl calls with suspicious magic constants (e.g., 0xDEADBEEF) if you have kernel telemetry.<sup>[[1]](#references)[[11]](#references)</sup>
-- On managed fleets, block or alert on boot receivers from untrusted packages that rapidly attempt privileged manager commands post-boot.
-- Ensure devices are updated to patched framework versions; invalidate cached manager IDs on update.
-
-Limitations of the attack:<sup>[[1]](#references)[[2]](#references)</sup>
-- Only affects devices already rooted with a vulnerable framework.
-- Typically requires a reboot/race window before the legitimate manager authenticates (some frameworks cache manager UID until reset).
+Mẹo về race/persistence:
+- Đăng ký receiver BOOT_COMPLETED trong AndroidManifest (`RECEIVE_BOOT_COMPLETED`) để khởi chạy sau khi khởi động lại và thử xác thực trước manager chính thức; quyền này cho phép nhận `ACTION_BOOT_COMPLETED` nhưng không tự đảm bảo được ưu tiên lập lịch.<sup>[[1]](#references)[[12]](#references)</sup>
 
 ---
-## Related notes across frameworks
+## Hướng dẫn phát hiện và giảm thiểu
 
-- Password-based auth (e.g., historical APatch/SKRoot builds) can be weak if passwords are guessable/bruteforceable or validations are buggy.<sup>[[1]](#references)[[6]](#references)[[7]](#references)</sup>
-- Package/signature-based auth (e.g., KernelSU) is stronger in principle but must bind to the actual caller, not path-derived artefacts selected through FD scans.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
-- Magisk: CVE-2024-48336 affected pre-Canary 27007 builds that loaded code from an unverified GMS package, allowing a local app to execute code in the Magisk app and escalate to root without user interaction.<sup>[[8]](#references)[[9]](#references)[[13]](#references)</sup>
+Dành cho nhà phát triển framework:
+- Gắn xác thực với package/UID của caller, không phải với các FD tùy ý:
+  - Tra cứu package của caller từ UID và xác minh chữ ký của package đã cài đặt (thông qua PackageManager), thay vì quét FD.
+  - Nếu chỉ xử lý trong kernel, hãy dùng danh tính ổn định của caller (task creds) và xác thực dựa trên một nguồn dữ liệu đáng tin cậy, ổn định do init/helper ở userspace quản lý, không phải các FD của tiến trình.
+- Không dùng kiểm tra tiền tố đường dẫn làm danh tính; caller có thể dễ dàng thỏa mãn điều kiện này.
+- Dùng challenge–response dựa trên nonce qua kênh và xóa mọi danh tính manager đã lưu trong cache khi khởi động hoặc khi có sự kiện quan trọng.
+- Cân nhắc dùng IPC có xác thực dựa trên binder thay vì tận dụng syscall tổng quát khi khả thi.
+
+Dành cho đội ngũ phòng thủ/blue team:
+- Phát hiện sự hiện diện của rooting framework và tiến trình manager; theo dõi các lệnh gọi prctl có magic constant đáng ngờ (ví dụ: 0xDEADBEEF) nếu bạn có telemetry từ kernel.<sup>[[1]](#references)[[11]](#references)</sup>
+- Trên các nhóm thiết bị được quản lý, hãy chặn hoặc cảnh báo khi receiver khởi động từ package không đáng tin cậy nhanh chóng thử thực thi các lệnh manager có đặc quyền sau khi khởi động.
+- Đảm bảo thiết bị được cập nhật lên phiên bản framework đã vá; vô hiệu hóa các manager ID đã lưu trong cache khi cập nhật.
+
+Hạn chế của cuộc tấn công:<sup>[[1]](#references)[[2]](#references)</sup>
+- Chỉ ảnh hưởng đến thiết bị đã root bằng framework có lỗ hổng.
+- Thường cần khởi động lại/khoảng thời gian race trước khi manager hợp pháp xác thực (một số framework lưu UID của manager trong cache cho đến khi được đặt lại).
+
+---
+## Ghi chú liên quan giữa các framework
+
+- Cơ chế xác thực bằng mật khẩu (ví dụ: các bản dựng APatch/SKRoot trước đây) có thể yếu nếu mật khẩu dễ đoán/có thể brute-force hoặc quá trình xác thực có lỗi.<sup>[[1]](#references)[[6]](#references)[[7]](#references)</sup>
+- Cơ chế xác thực dựa trên package/chữ ký (ví dụ: KernelSU) về nguyên tắc mạnh hơn, nhưng phải gắn với caller thực sự, không phải các artefact suy ra từ đường dẫn được chọn thông qua quét FD.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+- Magisk: CVE-2024-48336 ảnh hưởng đến các bản dựng trước Canary 27007, vốn tải mã từ package GMS chưa được xác minh, cho phép ứng dụng cục bộ thực thi mã trong ứng dụng Magisk và leo thang lên root mà không cần tương tác của người dùng.<sup>[[8]](#references)[[9]](#references)[[13]](#references)</sup>
 
 ---
 ## References
 
-- [1] [Zimperium – The Rooting of All Evil: Security Holes That Could Compromise Your Mobile Device](https://zimperium.com/blog/the-rooting-of-all-evil-security-holes-that-could-compromise-your-mobile-device)
-- [2] [KernelSU v0.5.7 – core_hook.c authentication checks](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/core_hook.c#L149-L205)
-- [3] [KernelSU v0.5.7 – manager.c FD iteration, package check and signature call](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/manager.c#L16-L67)
-- [4] [KernelSU v0.5.7 – apk_sign.c APK v2 verification](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/apk_sign.c#L6-L119)
-- [5] [KernelSU project](https://kernelsu.org/)
+- [1] [Zimperium – Sự thống trị của root: Lỗ hổng bảo mật có thể xâm phạm thiết bị di động của bạn](https://zimperium.com/blog/the-rooting-of-all-evil-security-holes-that-could-compromise-your-mobile-device)
+- [2] [KernelSU v0.5.7 – các kiểm tra xác thực trong core_hook.c](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/core_hook.c#L149-L205)
+- [3] [KernelSU v0.5.7 – duyệt FD, kiểm tra package và lời gọi xác minh chữ ký trong manager.c](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/manager.c#L16-L67)
+- [4] [KernelSU v0.5.7 – xác minh APK v2 trong apk_sign.c](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/apk_sign.c#L6-L119)
+- [5] [Dự án KernelSU](https://kernelsu.org/)
 - [6] [APatch](https://github.com/bmax121/APatch)
 - [7] [SKRoot](https://github.com/abcz316/SKRoot-linuxKernelRoot)
-- [8] [Magisk issue #8279 – Verify GMS is system app](https://github.com/topjohnwu/Magisk/issues/8279)
+- [8] [Vấn đề #8279 của Magisk – Xác minh GMS là ứng dụng hệ thống](https://github.com/topjohnwu/Magisk/issues/8279)
 - [9] [MagiskEoP – CVE-2024-48336](https://github.com/canyie/MagiskEoP)
-- [10] [KSU PoC demo video (Wistia)](https://zimperium-1.wistia.com/medias/ep1dg4t2qg?videoFoam=true)
-- [11] [KernelSU v0.5.7 – ksu.h command identifiers](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/ksu.h#L12-L24)
+- [10] [Video demo KSU PoC (Wistia)](https://zimperium-1.wistia.com/medias/ep1dg4t2qg?videoFoam=true)
+- [11] [KernelSU v0.5.7 – các định danh lệnh trong ksu.h](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/ksu.h#L12-L24)
 - [12] [Android Manifest.permission.RECEIVE_BOOT_COMPLETED](https://developer.android.com/reference/android/Manifest.permission#RECEIVE_BOOT_COMPLETED)
 - [13] [NVD – CVE-2024-48336](https://nvd.nist.gov/vuln/detail/CVE-2024-48336)
-
 {{#include ../../banners/hacktricks-training.md}}

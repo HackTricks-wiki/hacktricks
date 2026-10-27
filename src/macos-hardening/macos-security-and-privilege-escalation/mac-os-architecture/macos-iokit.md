@@ -2,17 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Thông tin cơ bản
 
-The I/O Kit is an open-source, object-oriented **device-driver framework** in the XNU kernel, handles **dynamically loaded device drivers**. It allows modular code to be added to the kernel on-the-fly, supporting diverse hardware.
+I/O Kit là một **framework driver thiết bị** hướng đối tượng, mã nguồn mở trong kernel XNU, xử lý **driver thiết bị được tải động**. Framework này cho phép thêm mã mô-đun vào kernel ngay khi cần, hỗ trợ nhiều loại phần cứng.
 
-IOKit drivers will basically **export functions from the kernel**. These function parameter **types** are **predefined** and are verified. Moreover, similar to XPC, IOKit is just another layer on **top of Mach messages**.
+Các driver IOKit về cơ bản sẽ **export các hàm từ kernel**. **Kiểu** tham số của các hàm này được **định nghĩa trước** và được xác minh. Hơn nữa, tương tự như XPC, IOKit chỉ là một lớp khác **nằm trên các Mach message**.
 
-**IOKit XNU kernel code** is opensourced by Apple in [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Moreover, the user space IOKit components are also opensource [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
+**Mã nguồn IOKit trong kernel XNU** được Apple công khai tại [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Ngoài ra, các thành phần IOKit ở user space cũng có mã nguồn mở tại [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
-However, **no IOKit drivers** are opensource. Anyway, from time to time a release of a driver might come with symbols that makes it easier to debug it. Check how to [**get the driver extensions from the firmware here**](#ipsw)**.**
+Tuy nhiên, **không có driver IOKit nào** có mã nguồn mở. Dù vậy, đôi khi một bản phát hành driver có thể đi kèm symbols giúp việc debug dễ dàng hơn. Xem cách [**lấy các driver extension từ firmware tại đây**](#ipsw)**.**
 
-It's written in **C++**. You can get demangled C++ symbols with:
+IOKit được viết bằng **C++**. Bạn có thể lấy các symbol C++ đã được giải mã tên bằng:
 
 ```bash
 # Get demangled symbols
@@ -25,18 +25,18 @@ IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArguments
 ```
 
 > [!CAUTION]
-> IOKit **exposed functions** could perform **additional security checks** when a client tries to call a function but note that the apps are usually **limited** by the **sandbox** to which IOKit functions they can interact with.
+> Các **hàm được cung cấp** của IOKit có thể thực hiện **các bước kiểm tra bảo mật bổ sung** khi client cố gọi một hàm, nhưng lưu ý rằng các ứng dụng thường bị **sandbox** giới hạn về những hàm IOKit mà chúng có thể tương tác.
 
-## Drivers
+## Trình điều khiển
 
-In macOS they are located in:
+Trong macOS, chúng nằm trong:
 
 - **`/System/Library/Extensions`**
-  - KEXT files built into the OS X operating system.
+  - Các tệp KEXT được tích hợp trong hệ điều hành OS X.
 - **`/Library/Extensions`**
-  - KEXT files installed by 3rd party software
+  - Các tệp KEXT được phần mềm bên thứ ba cài đặt.
 
-In iOS they are located in:
+Trong iOS, chúng nằm trong:
 
 - **`/System/Library/Extensions`**
 
@@ -58,16 +58,16 @@ Index Refs Address            Size       Wired      Name (Version) UUID <Linked 
    10   12 0xffffff8003544000 0x92000    0x92000    com.apple.kec.corecrypto (11.1) F5F1255F-6552-3CF4-A9DB-D60EFDEB4A9A <8 7 6 5 3 1>
 ```
 
-Until the number 9 the listed drivers are **loaded in the address 0**. This means that those aren't real drivers but **part of the kernel and they cannot be unloaded**.
+Cho đến số 9, các driver được liệt kê **được tải ở địa chỉ 0**. Điều này có nghĩa là chúng không phải driver thực sự mà là **một phần của kernel và không thể bị gỡ tải**.
 
-In order to find specific extensions you can use:
+Để tìm các extension cụ thể, bạn có thể dùng:
 
 ```bash
 kextfind -bundle-id com.apple.iokit.IOReportFamily #Search by full bundle-id
 kextfind -bundle-id -substring IOR #Search by substring in bundle-id
 ```
 
-To load and unload kernel extensions do:
+Để tải và gỡ tải các phần mở rộng kernel, hãy dùng:
 
 ```bash
 kextload com.apple.iokit.IOReportFamily
@@ -76,9 +76,9 @@ kextunload com.apple.iokit.IOReportFamily
 
 ## IORegistry
 
-The **IORegistry** is a crucial part of the IOKit framework in macOS and iOS which serves as a database for representing the system's hardware configuration and state. It's a **hierarchical collection of objects that represent all the hardware and drivers** loaded on the system, and their relationships to each other.
+**IORegistry** là một phần quan trọng của framework IOKit trên macOS và iOS, đóng vai trò như một cơ sở dữ liệu biểu diễn cấu hình và trạng thái phần cứng của hệ thống. Đây là **tập hợp phân cấp các đối tượng đại diện cho toàn bộ phần cứng và driver** được tải trên hệ thống, cùng các mối quan hệ giữa chúng.
 
-You can get the IORegistry using the cli **`ioreg`** to inspect it from the console (specially useful for iOS).
+Bạn có thể dùng CLI **`ioreg`** để xem IORegistry từ console (đặc biệt hữu ích trên iOS).
 
 ```bash
 ioreg -l #List all
@@ -86,29 +86,29 @@ ioreg -w 0 #Not cut lines
 ioreg -p <plane> #Check other plane
 ```
 
-You could download **`IORegistryExplorer`** from **Xcode Additional Tools** from [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) and inspect the **macOS IORegistry** through a **graphical** interface.
+Bạn có thể tải **`IORegistryExplorer`** từ **Xcode Additional Tools** tại [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) và kiểm tra **macOS IORegistry** thông qua giao diện **đồ họa**.
 
 <figure><img src="../../../images/image (1167).png" alt="" width="563"><figcaption></figcaption></figure>
 
-In IORegistryExplorer, "planes" are used to organize and display the relationships between different objects in the IORegistry. Each plane represents a specific type of relationship or a particular view of the system's hardware and driver configuration. Here are some of the common planes you might encounter in IORegistryExplorer:
+Trong IORegistryExplorer, "planes" được dùng để sắp xếp và hiển thị mối quan hệ giữa các đối tượng khác nhau trong IORegistry. Mỗi plane đại diện cho một loại mối quan hệ cụ thể hoặc một chế độ xem cụ thể về cấu hình phần cứng và driver của hệ thống. Dưới đây là một số plane phổ biến bạn có thể gặp trong IORegistryExplorer:
 
-1. **IOService Plane**: This is the most general plane, displaying the service objects that represent drivers and nubs (communication channels between drivers). It shows the provider-client relationships between these objects.
-2. **IODeviceTree Plane**: This plane represents the physical connections between devices as they are attached to the system. It is often used to visualize the hierarchy of devices connected via buses like USB or PCI.
-3. **IOPower Plane**: Displays objects and their relationships in terms of power management. It can show which objects are affecting the power state of others, useful for debugging power-related issues.
-4. **IOUSB Plane**: Specifically focused on USB devices and their relationships, showing the hierarchy of USB hubs and connected devices.
-5. **IOAudio Plane**: This plane is for representing audio devices and their relationships within the system.
+1. **IOService Plane**: Đây là plane tổng quát nhất, hiển thị các đối tượng service đại diện cho driver và nub (kênh liên lạc giữa các driver). Plane này cho thấy mối quan hệ provider-client giữa các đối tượng đó.
+2. **IODeviceTree Plane**: Plane này thể hiện các kết nối vật lý giữa các thiết bị khi chúng được kết nối với hệ thống. Nó thường được dùng để trực quan hóa hệ thống phân cấp của các thiết bị kết nối thông qua các bus như USB hoặc PCI.
+3. **IOPower Plane**: Hiển thị các đối tượng và mối quan hệ của chúng liên quan đến quản lý nguồn. Plane này có thể cho thấy đối tượng nào đang ảnh hưởng đến trạng thái nguồn của các đối tượng khác, rất hữu ích khi gỡ lỗi các vấn đề liên quan đến nguồn.
+4. **IOUSB Plane**: Tập trung cụ thể vào các thiết bị USB và mối quan hệ giữa chúng, hiển thị hệ thống phân cấp của các hub USB và thiết bị được kết nối.
+5. **IOAudio Plane**: Plane này dùng để biểu diễn các thiết bị âm thanh và mối quan hệ giữa chúng trong hệ thống.
 6. ...
 
-## Driver Comm Code Example
+## Ví dụ mã giao tiếp với driver
 
-The following code connects to the IOKit service `YourServiceNameHere` and calls selector 0:
+Đoạn mã sau kết nối với dịch vụ IOKit `YourServiceNameHere` và gọi selector 0:
 
-- It first calls **`IOServiceMatching`** and **`IOServiceGetMatchingServices`** to get the service.
-- It then establishes a connection calling **`IOServiceOpen`**.
-- And it finally calls a function with **`IOConnectCallScalarMethod`** indicating the selector 0 (the selector is the number the function you want to call has assigned).
+- Trước tiên, nó gọi **`IOServiceMatching`** và **`IOServiceGetMatchingServices`** để lấy service.
+- Sau đó, nó thiết lập kết nối bằng cách gọi **`IOServiceOpen`**.
+- Cuối cùng, nó gọi một hàm bằng **`IOConnectCallScalarMethod`**, chỉ định selector 0 (selector là số được gán cho hàm bạn muốn gọi).
 
 <details>
-<summary>Example user-space call to a driver selector</summary>
+<summary>Ví dụ lời gọi từ user-space đến selector của driver</summary>
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -167,31 +167,31 @@ int main(int argc, const char * argv[]) {
 
 </details>
 
-There are **other** functions that can be used to call IOKit functions apart of **`IOConnectCallScalarMethod`** like **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**...
+Có **những** hàm khác có thể dùng để gọi các hàm IOKit ngoài **`IOConnectCallScalarMethod`**, chẳng hạn **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**...
 
-## Reversing driver entrypoint
+## Phân tích ngược entrypoint của driver
 
-You could obtain these for example from a [**firmware image (ipsw)**](#ipsw). Then, load it into your favourite decompiler.
+Ví dụ, bạn có thể lấy các hàm này từ một [**firmware image (ipsw)**](#ipsw). Sau đó, tải nó vào decompiler bạn yêu thích.
 
-You could start decompiling the **`externalMethod`** function as this is the driver function that will be receiving the call and calling the correct function:
+Bạn có thể bắt đầu dịch ngược hàm **`externalMethod`**, vì đây là hàm của driver nhận lời gọi và gọi hàm phù hợp:
 
 <figure><img src="../../../images/image (1168).png" alt="" width="315"><figcaption></figcaption></figure>
 
 <figure><img src="../../../images/image (1169).png" alt=""><figcaption></figcaption></figure>
 
-That awful call demagled means:
+Lời gọi tệ hại đã được giải mã tên đó có nghĩa là:
 
 ```cpp
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
 
-Note how in the previous definition the **`self`** param is missed, the good definition would be:
+Lưu ý rằng trong định nghĩa trước đó, tham số **`self`** bị bỏ sót; định nghĩa chính xác sẽ là:
 
 ```cpp
 IOUserClient2022::dispatchExternalMethod(self, unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
 
-Actually, you can find the real definition in [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388):
+Trên thực tế, bạn có thể tìm thấy định nghĩa thực sự tại [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388):
 
 ```cpp
 IOUserClient2022::dispatchExternalMethod(uint32_t selector, IOExternalMethodArgumentsOpaque *arguments,
@@ -199,50 +199,50 @@ IOUserClient2022::dispatchExternalMethod(uint32_t selector, IOExternalMethodArgu
     OSObject * target, void * reference)
 ```
 
-With this info you can rewrite Ctrl+Right -> `Edit function signature` and set the known types:
+Với thông tin này, bạn có thể viết lại Ctrl+Right -> `Edit function signature` và đặt các kiểu đã biết:
 
 <figure><img src="../../../images/image (1174).png" alt=""><figcaption></figcaption></figure>
 
-The new decompiled code will look like:
+Mã decompiled mới sẽ trông như sau:
 
 <figure><img src="../../../images/image (1175).png" alt=""><figcaption></figcaption></figure>
 
-For the next step we need to have defined the **`IOExternalMethodDispatch2022`** struct. It's opensource in [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), you could define it:
+Ở bước tiếp theo, chúng ta cần định nghĩa struct **`IOExternalMethodDispatch2022`**. Struct này là mã nguồn mở tại [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), bạn có thể định nghĩa nó như sau:
 
 <figure><img src="../../../images/image (1170).png" alt=""><figcaption></figcaption></figure>
 
-Now, following the `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray` you can see a lot of data:
+Tiếp theo, tại `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray`, bạn sẽ thấy rất nhiều dữ liệu:
 
 <figure><img src="../../../images/image (1176).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Change the Data Type to **`IOExternalMethodDispatch2022:`**
+Đổi Data Type thành **`IOExternalMethodDispatch2022:`**
 
 <figure><img src="../../../images/image (1177).png" alt="" width="375"><figcaption></figcaption></figure>
 
-after the change:
+Sau khi thay đổi:
 
 <figure><img src="../../../images/image (1179).png" alt="" width="563"><figcaption></figcaption></figure>
 
-And as we now in there we have an **array of 7 elements** (check the final decompiled code), click to create an array of 7 elements:
+Và như bạn có thể thấy, ở đây có **mảng gồm 7 phần tử** (hãy kiểm tra mã decompiled cuối cùng). Hãy nhấp để tạo mảng gồm 7 phần tử:
 
 <figure><img src="../../../images/image (1180).png" alt="" width="563"><figcaption></figcaption></figure>
 
-After the array is created you can see all the exported functions:
+Sau khi tạo mảng, bạn sẽ thấy tất cả các hàm được export:
 
 <figure><img src="../../../images/image (1181).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> If you remember, to **call** an **exported** function from user space we don't need to call the name of the function, but the **selector number**. Here you can see that the selector **0** is the function **`initializeDecoder`**, the selector **1** is **`startDecoder`**, the selector **2** **`initializeEncoder`**...
+> Nếu bạn còn nhớ, để **gọi** một hàm **được export** từ user space, chúng ta không cần gọi tên hàm mà cần dùng **số selector**. Ở đây, bạn có thể thấy selector **0** là hàm **`initializeDecoder`**, selector **1** là **`startDecoder`**, selector **2** là **`initializeEncoder`**...
 
-## Recent IOKit attack surface (2023–2025)
+## Bề mặt tấn công IOKit gần đây (2023–2025)
 
-- **Keystroke capture via IOHIDFamily** – CVE-2024-27799 (14.5) showed a permissive `IOHIDSystem` client could grab HID events even with secure input; ensure `externalMethod` handlers enforce entitlements instead of only the user-client type.<sup>[[2]](#references)</sup>
-- **IOGPUFamily memory corruption** – CVE-2024-44197 and CVE-2025-24257 fixed OOB writes reachable from sandboxed apps that pass malformed variable-length data to GPU user clients; the usual bug is poor bounds around `IOConnectCallStructMethod` arguments.<sup>[[1]](#references)</sup>
-- **Legacy keystroke monitoring** – CVE-2023-42891 (14.2) confirmed HID user clients remain a sandbox-escape vector; fuzz any driver exposing keyboard/event queues.<sup>[[3]](#references)</sup>
+- **Ghi lại thao tác gõ phím qua IOHIDFamily** – CVE-2024-27799 (14.5) cho thấy một client `IOHIDSystem` có quyền hạn lỏng lẻo có thể lấy các sự kiện HID ngay cả khi secure input được bật; hãy đảm bảo các handler `externalMethod` kiểm tra entitlements thay vì chỉ kiểm tra loại user-client.<sup>[[2]](#references)</sup>
+- **Lỗi memory corruption trong IOGPUFamily** – CVE-2024-44197 và CVE-2025-24257 đã khắc phục lỗi ghi OOB có thể bị khai thác từ các ứng dụng sandbox khi chúng gửi dữ liệu có độ dài biến đổi không hợp lệ đến GPU user client; lỗi thường gặp là kiểm tra giới hạn kém đối với các đối số `IOConnectCallStructMethod`.<sup>[[1]](#references)</sup>
+- **Theo dõi thao tác gõ phím kiểu cũ** – CVE-2023-42891 (14.2) xác nhận user client HID vẫn là vector thoát sandbox; hãy fuzz mọi driver cung cấp hàng đợi bàn phím/sự kiện.<sup>[[3]](#references)</sup>
 
-### Quick triage & fuzzing tips
+### Mẹo phân loại nhanh và fuzzing
 
-- Enumerate all external methods for a user client from userland to seed a fuzzer:
+- Liệt kê tất cả external method của một user client từ userland để khởi tạo fuzzer:
 
 ```bash
 # list selectors for a service
@@ -256,15 +256,15 @@ for sel, name in obj.external_methods():
 PY
 ```
 
-- When reversing, pay attention to `IOExternalMethodDispatch2022` counts. A common bug pattern in recent CVEs is inconsistent `structureInputSize`/`structureOutputSize` vs. actual `copyin` length, leading to heap OOB in `IOConnectCallStructMethod`.
-- Sandbox reachability still hinges on entitlements. Before spending time on a target, check if the client is allowed from a third‑party app:
+- Khi reverse, hãy chú ý đến số lượng `IOExternalMethodDispatch2022`. Một mẫu lỗi phổ biến trong các CVE gần đây là `structureInputSize`/`structureOutputSize` không nhất quán với độ dài `copyin` thực tế, dẫn đến heap OOB trong `IOConnectCallStructMethod`.
+- Khả năng truy cập từ sandbox vẫn phụ thuộc vào entitlements. Trước khi dành thời gian cho một mục tiêu, hãy kiểm tra xem client có được phép truy cập từ ứng dụng bên thứ ba hay không:
 
 ```bash
 strings /System/Library/Extensions/IOHIDFamily.kext/Contents/MacOS/IOHIDFamily | \
   grep -E "^com\.apple\.(driver|private)"
 ```
 
-- For GPU/iomfb bugs, passing oversized arrays through `IOConnectCallMethod` is often enough to trigger bad bounds. Minimal harness (selector X) to trigger size confusion:
+- Với các lỗi GPU/iomfb, chỉ cần truyền các mảng quá lớn qua `IOConnectCallMethod` thường đã đủ để kích hoạt lỗi giới hạn. Harness tối giản (selector X) để kích hoạt nhầm lẫn kích thước:
 
 ```c
 uint8_t buf[0x1000];
@@ -274,23 +274,23 @@ IOConnectCallStructMethod(conn, X, buf, sizeof(buf), buf, &outSz);
 
 
 
-## DriverKit — User-Space Drivers
+## DriverKit — Trình điều khiển không gian người dùng
 
-### DriverKit Basics
+### Kiến thức cơ bản về DriverKit
 
-**DriverKit** is Apple's user-space replacement for kernel extensions (kexts), introduced in macOS 10.15. DriverKit binaries (`.dext` bundles) run as user-space processes but communicate directly with the kernel through a privileged IOKit interface.<sup>[[4]](#references)</sup>
+**DriverKit** là giải pháp thay thế kernel extension (kext) trong không gian người dùng của Apple, được giới thiệu trong macOS 10.15. Các binary DriverKit (bundle `.dext`) chạy dưới dạng tiến trình không gian người dùng nhưng giao tiếp trực tiếp với kernel thông qua giao diện IOKit có đặc quyền.<sup>[[4]](#references)</sup>
 
-DriverKit extensions manage hardware:
-- **USB** controllers and devices
-- **Thunderbolt** / PCIe devices
-- **HID** (keyboards, mice, game controllers)
-- **Audio** hardware
-- **Networking** interfaces
-- **Serial** and **Block Storage** devices
+Các extension DriverKit quản lý phần cứng:
+- Bộ điều khiển và thiết bị **USB**
+- Thiết bị **Thunderbolt** / PCIe
+- **HID** (bàn phím, chuột, tay cầm chơi game)
+- Phần cứng **Audio**
+- Giao diện **Networking**
+- Thiết bị **Serial** và **Block Storage**
 
-Unlike kexts (which required SIP-disabled boot or notarization), DriverKit extensions are installed via `SystemExtensions.framework` and only require **one-time user approval**.<sup>[[5]](#references)</sup>
+Không giống kext (yêu cầu khởi động khi SIP bị tắt hoặc phải được notarize), các extension DriverKit được cài đặt thông qua `SystemExtensions.framework` và chỉ cần **người dùng phê duyệt một lần**.<sup>[[5]](#references)</sup>
 
-### Discovery & Enumeration
+### Khám phá và liệt kê
 
 ```bash
 # List all installed system extensions (includes DriverKit)
@@ -312,18 +312,18 @@ codesign -d --entitlements - /path/to/binary.dext/binary 2>&1 | grep driverkit
 # com.apple.developer.driverkit.family.audio       — Audio device
 ```
 
-### Security Implications
+### Ý nghĩa bảo mật
 
 > [!WARNING]
-> DriverKit binaries have a **direct communication channel to the kernel**. Sending malformed messages through this channel can trigger kernel vulnerabilities. Each driver registers specific user-client classes, and malformed `IOConnectCallMethod` calls can cause kernel memory corruption.
+> Các binary DriverKit có **kênh giao tiếp trực tiếp với kernel**. Gửi các message không hợp lệ qua kênh này có thể kích hoạt lỗ hổng kernel. Mỗi driver đăng ký các lớp user-client cụ thể, và các lệnh gọi `IOConnectCallMethod` không hợp lệ có thể gây hỏng bộ nhớ kernel.
 
-**Attack surface:**
-1. **Kernel IOKit message fuzzing** — Each DriverKit user-client exposes selectors callable from user space. Malformed arguments trigger kernel bugs.
-2. **USB device spoofing** — A compromised USB DriverKit binary can present a malicious USB device profile (e.g., emulate a keyboard for HID injection).
-3. **DMA attacks** — PCIe/Thunderbolt DriverKit extensions have potential DMA access to physical memory.
-4. **Persistence** — Once installed as a system extension, DriverKit binaries persist across reboots and app updates.
+**Bề mặt tấn công:**
+1. **Fuzzing message Kernel IOKit** — Mỗi user-client của DriverKit cung cấp các selector có thể được gọi từ user space. Các đối số không hợp lệ có thể kích hoạt lỗi kernel.
+2. **Giả mạo thiết bị USB** — Một binary USB DriverKit bị xâm phạm có thể giả dạng hồ sơ thiết bị USB độc hại (ví dụ: mô phỏng bàn phím để thực hiện HID injection).
+3. **Tấn công DMA** — Các extension DriverKit cho PCIe/Thunderbolt có khả năng truy cập DMA vào bộ nhớ vật lý.
+4. **Persistence** — Sau khi được cài đặt dưới dạng system extension, các binary DriverKit vẫn tồn tại qua các lần khởi động lại và cập nhật ứng dụng.
 
-### DriverKit IOKit User-Client Fuzzing
+### Fuzzing IOKit User-Client của DriverKit
 
 ```bash
 # Enumerate DriverKit user-client classes from entitlements
@@ -353,20 +353,19 @@ kern_return_t kr = IOConnectCallStructMethod(conn, X, buf, sizeof(buf), buf, &ou
 // If the driver doesn't validate structureInputSize, this causes kernel OOB
 ```
 
-### DriverKit CVEs
+### CVE của DriverKit
 
-| CVE | Description |
+| CVE | Mô tả |
 |---|---|
-| CVE-2022-26766 | DriverKit USB stack vulnerability — kernel code execution |
-| CVE-2021-30838 | IOKit user-client type confusion in graphic drivers |
-| CVE-2024-44197 | IOGPUFamily OOB write via malformed DriverKit arguments |
+| CVE-2022-26766 | Lỗ hổng trong ngăn xếp USB của DriverKit — thực thi mã kernel |
+| CVE-2021-30838 | Nhầm lẫn kiểu user-client của IOKit trong các driver đồ họa |
+| CVE-2024-44197 | Ghi OOB trong IOGPUFamily thông qua các đối số DriverKit sai định dạng |
 
 ## References
 
-- [1] [Apple Security Updates – macOS Sequoia 15.1 / Sonoma 14.7.1 (IOGPUFamily)](https://support.apple.com/en-us/121564)
-- [2] [Rapid7 – IOHIDFamily CVE-2024-27799 summary](https://www.rapid7.com/db/vulnerabilities/apple-osx-iohidfamily-cve-2024-27799/)
-- [3] [Apple Security Updates - macOS Sonoma 14.2 (CVE-2023-42891 IOKit)](https://support.apple.com/en-us/120879)
+- [1] [Bản cập nhật bảo mật của Apple – macOS Sequoia 15.1 / Sonoma 14.7.1 (IOGPUFamily)](https://support.apple.com/en-us/121564)
+- [2] [Rapid7 – Tóm tắt IOHIDFamily CVE-2024-27799](https://www.rapid7.com/db/vulnerabilities/apple-osx-iohidfamily-cve-2024-27799/)
+- [3] [Bản cập nhật bảo mật của Apple - macOS Sonoma 14.2 (CVE-2023-42891 IOKit)](https://support.apple.com/en-us/120879)
 - [4] [Apple Developer — DriverKit](https://developer.apple.com/documentation/driverkit)
 - [5] [Apple Developer — System Extensions](https://developer.apple.com/documentation/systemextensions)
-
 {{#include ../../../banners/hacktricks-training.md}}

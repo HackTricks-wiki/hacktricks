@@ -1,48 +1,48 @@
-# macOS Red Teaming
+# Red Teaming trên macOS
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Abusing MDMs
+## Lạm dụng MDM
 
 - JAMF Pro: `jamf checkJSSConnection`
 - Kandji
 
-If you manage to **compromise admin credentials** to access the management platform, you can **potentially compromise all the computers** by distributing your malware in the machines.
+Nếu bạn **chiếm được thông tin đăng nhập admin** để truy cập nền tảng quản lý, bạn có thể **chiếm quyền kiểm soát tất cả máy tính** bằng cách phát tán malware lên các máy đó.
 
-For red teaming in MacOS environments it's highly recommended to have some understanding of how the MDMs work:
+Để red teaming trong môi trường MacOS, bạn nên tìm hiểu cách hoạt động của MDM:
 
 
 {{#ref}}
 macos-mdm/
 {{#endref}}
 
-### Using MDM as a C2
+### Dùng MDM làm C2
 
-A MDM will have permission to install, query or remove profiles, install applications, create local admin accounts, set firmware password, change the FileVault key...
+MDM có quyền cài đặt, truy vấn hoặc xóa profile, cài ứng dụng, tạo tài khoản admin cục bộ, đặt firmware password, thay đổi khóa FileVault...
 
-In order to run your own MDM you need to **your CSR signed by a vendor** which you could try to get with [**https://mdmcert.download/**](https://mdmcert.download/). And to run your own MDM for Apple devices you could use [**MicroMDM**](https://github.com/micromdm/micromdm).
+Để chạy MDM của riêng mình, bạn cần **CSR được vendor ký**. Bạn có thể thử xin chữ ký tại [**https://mdmcert.download/**](https://mdmcert.download/). Để chạy MDM của riêng mình cho các thiết bị Apple, bạn có thể dùng [**MicroMDM**](https://github.com/micromdm/micromdm).
 
-MDM enrollment does **not** automatically make the management server's TLS certificate a trusted CA or grant an app-signing identity. If the server uses a private CA, its root and intermediate certificates must be supplied in the enrollment profile or a separate trust profile. The client identity used for MDM authentication is a different certificate.<sup>[[7]](#references)</sup>
+Việc đăng ký MDM **không** tự động khiến TLS certificate của máy chủ quản lý trở thành CA đáng tin cậy hoặc cấp danh tính ký ứng dụng. Nếu máy chủ dùng private CA, cần cung cấp root và intermediate certificate trong enrollment profile hoặc một trust profile riêng. Client identity dùng để xác thực MDM là một certificate khác.<sup>[[7]](#references)</sup>
 
-A downloaded MDM enrollment profile (`.mobileconfig`) must be opened and approved in **System Settings → General → Device Management**. Merely placing it in a root-installed `.pkg` or Safari-opened ZIP does not silently enroll a current Mac. See [configuration profile behavior](../macos-auto-start-locations.md#configuration-profiles-mobileconfig).<sup>[[8]](#references)</sup>
+Enrollment profile MDM đã tải xuống (`.mobileconfig`) phải được mở và phê duyệt trong **System Settings → General → Device Management**. Chỉ đặt profile này trong `.pkg` được cài đặt với quyền root hoặc trong ZIP được mở bằng Safari sẽ không âm thầm đăng ký một máy Mac hiện hành. Xem [hành vi của configuration profile](../macos-auto-start-locations.md#configuration-profiles-mobileconfig).<sup>[[8]](#references)</sup>
 
-Automated Device Enrollment during Setup Assistant is a separate flow. See [rogue enrollment of another organization's device](macos-mdm/enrolling-devices-in-other-organisations.md) for its different prerequisites.<sup>[[9]](#references)</sup>
+Automated Device Enrollment trong quá trình Setup Assistant là một quy trình riêng. Xem [đăng ký trái phép thiết bị của tổ chức khác](macos-mdm/enrolling-devices-in-other-organisations.md) để biết các điều kiện tiên quyết khác.<sup>[[9]](#references)</sup>
 
-**Mythic agent Orthrus** uses this technique.
+**Mythic agent Orthrus** sử dụng kỹ thuật này.
 
-### Deploying a package through a controlled MDM
+### Triển khai package thông qua MDM được kiểm soát
 
-On a **supervised Mac running macOS 26 or later**, control of the MDM service permits a `com.apple.configuration.package` declaration in the system scope.<sup>[[10]](#references)</sup> The package must have a signature the device can verify, but its app does not need a separate Developer ID signature: Gatekeeper does not check apps installed through device management.<sup>[[11]](#references)</sup> A trusted server TLS certificate alone does not give the operator the private key or signing usage needed for that package signature.<sup>[[11]](#references)[[12]](#references)</sup>
+Trên **máy Mac được giám sát đang chạy macOS 26 trở lên**, quyền kiểm soát dịch vụ MDM cho phép khai báo `com.apple.configuration.package` trong system scope.<sup>[[10]](#references)</sup> Package phải có chữ ký mà thiết bị có thể xác minh, nhưng ứng dụng bên trong không cần chữ ký Developer ID riêng: Gatekeeper không kiểm tra ứng dụng được cài đặt thông qua quản lý thiết bị.<sup>[[11]](#references)</sup> Chỉ có TLS certificate của máy chủ đáng tin cậy không đồng nghĩa với việc operator có private key hoặc quyền sử dụng để ký package đó.<sup>[[11]](#references)[[12]](#references)</sup>
 
-Build a signed test package, compute its digest, and publish both the package and a `ManifestURL` plist over HTTPS. The manifest needs one `software-package` asset with its URL and SHA-256, plus a unique `bundle-identifier` and `bundle-version`.<sup>[[11]](#references)</sup> Then send a package declaration with that manifest URL and `InstallBehavior.Install` set to `Required`; check the `package.list` status item for installation or errors.<sup>[[10]](#references)[[11]](#references)</sup>
+Tạo một package thử nghiệm đã ký, tính digest của nó và đăng package cùng plist `ManifestURL` qua HTTPS. Manifest cần có một asset `software-package` với URL và SHA-256, cùng `bundle-identifier` và `bundle-version` duy nhất.<sup>[[11]](#references)</sup> Sau đó gửi package declaration có URL của manifest và đặt `InstallBehavior.Install` thành `Required`; kiểm tra mục trạng thái `package.list` để biết package đã cài đặt hay có lỗi.<sup>[[10]](#references)[[11]](#references)</sup>
 
 ```bash
 pkgbuild --component ./Test.app --install-location /Applications --sign "Package Signing Certificate" ./Test.pkg
 shasum -a 256 ./Test.pkg
 ```
 
-A minimal required-install declaration, submitted through the MDM service, looks like this (replace the URL and both UUIDs).<sup>[[10]](#references)</sup>
+Một khai báo cài đặt bắt buộc tối thiểu, được gửi qua dịch vụ MDM, trông như sau (thay URL và cả hai UUID).<sup>[[10]](#references)</sup>
 
 ```json
 {
@@ -56,31 +56,31 @@ A minimal required-install declaration, submitted through the MDM service, looks
 }
 ```
 
-### Abusing JAMF PRO
+### Lạm dụng JAMF PRO
 
-JAMF can run **custom scripts** (scripts developed by the sysadmin), **native payloads** (local account creation, set EFI password, file/process monitoring...) and **MDM** (device configurations, device certificates...).<sup>[[5]](#references)</sup>
+JAMF có thể chạy **custom scripts** (script do sysadmin phát triển), **native payloads** (tạo tài khoản cục bộ, đặt mật khẩu EFI, giám sát file/process...) và **MDM** (cấu hình thiết bị, chứng chỉ thiết bị...).<sup>[[5]](#references)</sup>
 
-#### JAMF self-enrolment
+#### Tự đăng ký JAMF
 
-Go to a page such as `https://<company-name>.jamfcloud.com/enroll/` to see if they have **self-enrolment enabled**. If they have it might **ask for credentials to access**.
+Truy cập một trang như `https://<company-name>.jamfcloud.com/enroll/` để kiểm tra xem họ có **bật tính năng tự đăng ký** hay không. Nếu có, trang này có thể **yêu cầu thông tin xác thực để truy cập**.
 
-You could use the script [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) to perform a password spraying attack.
+Bạn có thể dùng script [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) để thực hiện tấn công password spraying.
 
-Moreover, after finding proper credentials you could be able to brute-force other usernames with the next form:
+Ngoài ra, sau khi tìm được thông tin xác thực hợp lệ, bạn có thể brute-force các tên người dùng khác bằng biểu mẫu sau:
 
-![Abusing JAMF PRO - JAMF self-enrolment: Moreover, after finding proper credentials you could be able to brute-force other usernames with the next form](<../../images/image (107).png>)
+![Lạm dụng JAMF PRO - Tự đăng ký JAMF: Ngoài ra, sau khi tìm được thông tin xác thực hợp lệ, bạn có thể brute-force các tên người dùng khác bằng biểu mẫu sau](<../../images/image (107).png>)
 
-#### JAMF device Authentication
+#### Xác thực thiết bị JAMF
 
 <figure><img src="../../images/image (167).png" alt=""><figcaption></figcaption></figure>
 
-The **`jamf`** binary contained the secret to open the keychain which at the time of the discovery was **shared** among everybody and it was: **`jk23ucnq91jfu9aj`**.<sup>[[5]](#references)</sup>\
-Moreover, jamf **persist** as a **LaunchDaemon** in **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
+Binary **`jamf`** chứa bí mật dùng để mở keychain; tại thời điểm phát hiện, bí mật này được **dùng chung** cho mọi người và là: **`jk23ucnq91jfu9aj`**.<sup>[[5]](#references)</sup>\
+Ngoài ra, jamf **duy trì persistence** dưới dạng **LaunchDaemon** tại **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
 
-#### JAMF Device Takeover
+#### Chiếm quyền thiết bị JAMF
 
-The **JSS** (Jamf Software Server) **URL** that **`jamf`** will use is located in **`/Library/Preferences/com.jamfsoftware.jamf.plist`**.\
-This file basically contains the URL:
+**URL** của **JSS** (Jamf Software Server) mà **`jamf`** sẽ sử dụng nằm trong **`/Library/Preferences/com.jamfsoftware.jamf.plist`**.\
+Tệp này về cơ bản chứa URL:
 
 ```bash
 plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
@@ -95,7 +95,7 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 [...]
 ```
 
-So, an attacker could drop a malicious package (`pkg`) that **overwrites this file** when installed setting the **URL to a Mythic C2 listener from a Typhon agent** to now be able to abuse JAMF as C2.
+Vì vậy, kẻ tấn công có thể thả một gói độc hại (`pkg`) để **ghi đè tệp này** khi cài đặt, đặt **URL thành listener Mythic C2 từ một agent Typhon**, qua đó lạm dụng JAMF làm C2.
 
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
@@ -104,28 +104,28 @@ sudo jamf policy -id 0
 # TODO: There is an ID, maybe it's possible to have the real jamf connection and another one to the C2
 ```
 
-#### JAMF Impersonation
+#### Giả mạo JAMF
 
-In order to **impersonate the communication** between a device and JMF you need:
+Để **giả mạo giao tiếp** giữa thiết bị và JMF, bạn cần:
 
-- The **UUID** of the device: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
-- The **JAMF keychain** from: `/Library/Application\ Support/Jamf/JAMF.keychain` which contains the device certificate
+- **UUID** của thiết bị: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
+- **JAMF keychain** tại: `/Library/Application\ Support/Jamf/JAMF.keychain`, chứa chứng chỉ thiết bị
 
-With this information, **create a VM** with the **stolen** Hardware **UUID** and with **SIP disabled**, drop the **JAMF keychain,** **hook** the Jamf **agent** and steal its information.
+Với thông tin này, **tạo một VM** có **UUID phần cứng bị đánh cắp** và **SIP đã tắt**, chép **JAMF keychain** vào đó, **hook** **agent** Jamf và đánh cắp thông tin của nó.
 
-#### Secrets stealing
+#### Đánh cắp secrets
 
 <figure><img src="../../images/image (1025).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
-You could also monitor the location `/Library/Application Support/Jamf/tmp/` for the **custom scripts** admins might want to execute via Jamf as they are **placed here, executed and removed**. These scripts **might contain credentials**.
+Bạn cũng có thể theo dõi thư mục `/Library/Application Support/Jamf/tmp/` để tìm các **custom script** mà quản trị viên có thể muốn chạy thông qua Jamf, vì chúng **được đặt ở đây, thực thi rồi bị xóa**. Những script này **có thể chứa thông tin xác thực**.
 
-However, **credentials** might be passed tho these scripts as **parameters**, so you would need to monitor `ps aux | grep -i jamf` (without even being root).
+Tuy nhiên, **thông tin xác thực** cũng có thể được truyền cho các script này dưới dạng **tham số**, vì vậy bạn cần theo dõi `ps aux | grep -i jamf` (ngay cả khi không phải root).
 
-The script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) can listen for new files being added and new process arguments.
+Script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) có thể lắng nghe các file mới được thêm vào và các đối số tiến trình mới.
 
-### macOS Remote Access
+### Truy cập từ xa macOS
 
-And also about **MacOS** "special" **network** **protocols**:
+Và cả các **protocol** **mạng** "đặc biệt" của **MacOS**:
 
 
 {{#ref}}
@@ -134,7 +134,7 @@ And also about **MacOS** "special" **network** **protocols**:
 
 ## Active Directory
 
-In some occasions you will find that the **MacOS computer is connected to an AD**. In this scenario you should try to **enumerate** the active directory as you are use to it. Find some **help** in the following pages:
+Trong một số trường hợp, bạn sẽ thấy **máy tính MacOS được kết nối với AD**. Trong tình huống này, hãy thử **enumerate** Active Directory như bạn vẫn thường làm. Tìm một số **hướng dẫn** trong các trang sau:
 
 
 {{#ref}}
@@ -151,40 +151,40 @@ In some occasions you will find that the **MacOS computer is connected to an AD*
 ../../network-services-pentesting/pentesting-kerberos-88/
 {{#endref}}
 
-Some **local MacOS tool** that may also help you is `dscl`:
+Một số **công cụ MacOS cục bộ** cũng có thể hữu ích là `dscl`:
 
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
 
-Also there are some tools prepared for MacOS to automatically enumerate the AD and play with kerberos:
+Ngoài ra còn có một số công cụ dành cho MacOS để tự động liệt kê AD và thao tác với kerberos:
 
-- [**Machound**](https://github.com/XMCyber/MacHound): MacHound is an extension to the Bloodhound audting tool allowing collecting and ingesting of Active Directory relationships on MacOS hosts.<sup>[[2]](#references)</sup>
-- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost is an Objective-C project designed to interact with the Heimdal krb5 APIs on macOS. The goal of the project is to enable better security testing around Kerberos on macOS devices using native APIs without requiring any other framework or packages on the target.
-- [**Orchard**](https://github.com/its-a-feature/Orchard): JavaScript for Automation (JXA) tool to do Active Directory enumeration.
+- [**Machound**](https://github.com/XMCyber/MacHound): MacHound là phần mở rộng của công cụ Bloodhound audting, cho phép thu thập và nhập các mối quan hệ Active Directory trên máy chủ MacOS.<sup>[[2]](#references)</sup>
+- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost là một dự án Objective-C được thiết kế để tương tác với các API Heimdal krb5 trên macOS. Mục tiêu của dự án là hỗ trợ kiểm thử bảo mật Kerberos trên thiết bị macOS hiệu quả hơn bằng cách sử dụng API gốc mà không cần bất kỳ framework hoặc package nào khác trên mục tiêu.
+- [**Orchard**](https://github.com/its-a-feature/Orchard): Công cụ JavaScript for Automation (JXA) để liệt kê Active Directory.
 
-### Domain Information
+### Thông tin miền
 
 ```bash
 echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 ```
 
-### Users
+### Người dùng
 
-The three types of MacOS users are:
+Ba loại người dùng trên MacOS là:
 
-- **Local Users** — Managed by the local OpenDirectory service, they aren’t connected in any way to the Active Directory.
-- **Network Users** — Volatile Active Directory users who require a connection to the DC server to authenticate.
-- **Mobile Users** — Active Directory users with a local backup for their credentials and files.
+- **Người dùng cục bộ** — Được quản lý bởi dịch vụ OpenDirectory cục bộ, không kết nối với Active Directory theo bất kỳ cách nào.
+- **Người dùng mạng** — Người dùng Active Directory tạm thời, cần kết nối với máy chủ DC để xác thực.
+- **Người dùng di động** — Người dùng Active Directory có bản sao lưu cục bộ cho thông tin đăng nhập và tệp của họ.
 
-The local information about users and groups is stored in in the folder _/var/db/dslocal/nodes/Default._\
-For example, the info about user called _mark_ is stored in _/var/db/dslocal/nodes/Default/users/mark.plist_ and the info about the group _admin_ is in _/var/db/dslocal/nodes/Default/groups/admin.plist_.
+Thông tin cục bộ về người dùng và nhóm được lưu trong thư mục _/var/db/dslocal/nodes/Default._\
+Ví dụ: thông tin về người dùng có tên _mark_ được lưu trong _/var/db/dslocal/nodes/Default/users/mark.plist_, còn thông tin về nhóm _admin_ nằm trong _/var/db/dslocal/nodes/Default/groups/admin.plist_.
 
-In addition to using the HasSession and AdminTo edges, **MacHound adds three new edges** to the Bloodhound database:<sup>[[2]](#references)</sup>
+Ngoài việc sử dụng các cạnh HasSession và AdminTo, **MacHound bổ sung ba cạnh mới** vào cơ sở dữ liệu Bloodhound:<sup>[[2]](#references)</sup>
 
-- **CanSSH** - entity allowed to SSH to host
-- **CanVNC** - entity allowed to VNC to host
-- **CanAE** - entity allowed to execute AppleEvent scripts on host
+- **CanSSH** - thực thể được phép SSH đến máy chủ
+- **CanVNC** - thực thể được phép VNC đến máy chủ
+- **CanAE** - thực thể được phép thực thi các tập lệnh AppleEvent trên máy chủ
 
 ```bash
 #User enumeration
@@ -208,28 +208,28 @@ dscl "/Active Directory/TEST/All Domains" read "/Groups/[groupname]"
 dsconfigad -show
 ```
 
-More info in [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)<sup>[[3]](#references)[[6]](#references)</sup>
+Thông tin thêm tại [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)<sup>[[3]](#references)[[6]](#references)</sup>
 
-### Computer$ password
+### Mật khẩu Computer$
 
-Get passwords using:
+Lấy mật khẩu bằng cách sử dụng:
 
 ```bash
 bifrost --action askhash --username [name] --password [password] --domain [domain]
 ```
 
-It's possible to access the **`Computer$`** password inside the System keychain.
+Có thể truy cập mật khẩu **`Computer$`** bên trong System keychain.
 
 ### Over-Pass-The-Hash
 
-Get a TGT for an specific user and service:
+Lấy TGT cho một người dùng và dịch vụ cụ thể:
 
 ```bash
 bifrost --action asktgt --username [user] --domain [domain.com] \
        --hash [hash] --enctype [enctype] --keytab [/path/to/keytab]
 ```
 
-Once the TGT is gathered, it's possible to inject it in the current session with:
+Sau khi thu thập TGT, có thể inject nó vào phiên hiện tại bằng:
 
 ```bash
 bifrost --action asktgt --username test_lab_admin \
@@ -244,31 +244,31 @@ bifrost --action asktgs --spn [service] --domain [domain.com] \
        --username [user] --hash [hash] --enctype [enctype]
 ```
 
-With obtained service tickets it's possible to try to access shares in other computers:
+Với các service ticket đã thu được, có thể thử truy cập các share trên máy tính khác:
 
 ```bash
 smbutil view //computer.fqdn
 mount -t smbfs //server/folder /local/mount/point
 ```
 
-## Accessing the Keychain
+## Truy cập Keychain
 
-The Keychain highly probably contains sensitive information that if accessed without generating a prompt could help to move forward a red team exercise:
+Keychain rất có thể chứa thông tin nhạy cảm mà nếu truy cập được mà không tạo lời nhắc, có thể giúp thúc đẩy một bài tập red team:
 
 
 {{#ref}}
 macos-keychain.md
 {{#endref}}
 
-## External Services
+## Dịch vụ bên ngoài
 
-MacOS Red Teaming is different from a regular Windows Red Teaming as usually **MacOS is integrated with several external platforms directly**. A common configuration of MacOS is to access to the computer using **OneLogin synchronised credentials, and accessing several external services** (like github, aws...) via OneLogin.
+MacOS Red Teaming khác với Windows Red Teaming thông thường vì **MacOS thường được tích hợp trực tiếp với một số nền tảng bên ngoài**. Một cấu hình phổ biến của MacOS là truy cập máy tính bằng **thông tin xác thực được đồng bộ qua OneLogin, đồng thời truy cập một số dịch vụ bên ngoài** (như github, aws...) thông qua OneLogin.
 
-## Misc Red Team techniques
+## Các kỹ thuật Red Team khác
 
 ### Safari
 
-When a file is downloaded in Safari, if its a "safe" file, it will be **automatically opened**. So for example, if you **download a zip**, it will be automatically decompressed:<sup>[[1]](#references)</sup>
+Khi tải xuống một tệp trong Safari, nếu đó là tệp "an toàn", tệp sẽ **tự động được mở**. Ví dụ, nếu bạn **tải xuống tệp zip**, tệp sẽ tự động được giải nén:<sup>[[1]](#references)</sup>
 
 <figure><img src="../../images/image (226).png" alt=""><figcaption></figcaption></figure>
 
@@ -276,16 +276,16 @@ When a file is downloaded in Safari, if its a "safe" file, it will be **automati
 
 ## References
 
-- [1] [Gone Apple Pickin': Red Teaming MacOS Environments in 2021 - Cedric Owens (DEF CON 29)](https://www.youtube.com/watch?v=IiMladUbL6E)
-- [2] [Introducing MacHound: A Solution to macOS Active Directory Based Attacks](https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6)
-- [3] [its-a-feature - Domain Enumeration Commands (dscl / net / ldapsearch equivalents)](https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0)
-- [4] [Come to the Dark Side, We Have Apples: Turning macOS Management Evil](https://www.youtube.com/watch?v=pOQOh07eMxY)
-- [5] [OBTS v3.0: "An Attackers Perspective on Jamf Configurations" - Luke Roberts / Calum Hall](https://www.youtube.com/watch?v=ju1IYWUv4ZA)
-- [6] [Active Directory Discovery with a Mac - its-a-feature](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
-- [7] [Apple — Managing certificates for device management services and devices](https://developer.apple.com/documentation/devicemanagement/managing-certificates-for-device-management-services-and-devices)
-- [8] [Apple — Use configuration profiles on Mac](https://support.apple.com/en-gb/guide/mac-help/mh35561/mac)
-- [9] [Apple — Deploying device management enrollment profiles](https://developer.apple.com/documentation/devicemanagement/deploying-device-management-enrollment-profiles)
-- [10] [Apple — Package declaration](https://developer.apple.com/documentation/devicemanagement/package)
-- [11] [Apple — Installing packages](https://developer.apple.com/documentation/devicemanagement/installing-packages)
-- [12] [Apple — Identities](https://developer.apple.com/documentation/security/identities)
+- [1] [Đi hái táo: Red Teaming môi trường MacOS năm 2021 - Cedric Owens (DEF CON 29)](https://www.youtube.com/watch?v=IiMladUbL6E)
+- [2] [Giới thiệu MacHound: Giải pháp cho các cuộc tấn công dựa trên Active Directory trên macOS](https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6)
+- [3] [its-a-feature - Các lệnh liệt kê domain (tương đương dscl / net / ldapsearch)](https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0)
+- [4] [Hãy sang phe bóng tối, chúng tôi có Táo: Biến quản lý macOS thành công cụ xấu](https://www.youtube.com/watch?v=pOQOh07eMxY)
+- [5] [OBTS v3.0: "Góc nhìn của kẻ tấn công về các cấu hình Jamf" - Luke Roberts / Calum Hall](https://www.youtube.com/watch?v=ju1IYWUv4ZA)
+- [6] [Khám phá Active Directory bằng máy Mac - its-a-feature](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
+- [7] [Apple — Quản lý chứng chỉ cho dịch vụ và thiết bị quản lý thiết bị](https://developer.apple.com/documentation/devicemanagement/managing-certificates-for-device-management-services-and-devices)
+- [8] [Apple — Sử dụng configuration profile trên máy Mac](https://support.apple.com/en-gb/guide/mac-help/mh35561/mac)
+- [9] [Apple — Triển khai enrollment profile quản lý thiết bị](https://developer.apple.com/documentation/devicemanagement/deploying-device-management-enrollment-profiles)
+- [10] [Apple — Khai báo package](https://developer.apple.com/documentation/devicemanagement/package)
+- [11] [Apple — Cài đặt package](https://developer.apple.com/documentation/devicemanagement/installing-packages)
+- [12] [Apple — Danh tính](https://developer.apple.com/documentation/security/identities)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,16 +1,16 @@
-# macOS XPC Authorization
+# Ủy quyền XPC trên macOS
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-## XPC Authorization
+## Ủy quyền XPC
 
-Apple also provides another way to authenticate whether the connecting process has **permission to call an exposed XPC method**.<sup>[[2]](#references)</sup>
+Apple cũng cung cấp một cách khác để xác thực liệu tiến trình kết nối có **quyền gọi một phương thức XPC được công khai** hay không.<sup>[[2]](#references)</sup>
 
-When an application needs to **execute actions as a privileged user**, instead of running the app as a privileged user it usually installs as root a HelperTool as an XPC service that could be called from the app to perform those actions. However, the app calling the service should have enough authorization.
+Khi ứng dụng cần **thực thi hành động với quyền của người dùng có đặc quyền**, thay vì chạy ứng dụng với quyền đó, ứng dụng thường cài đặt một HelperTool dưới quyền root dưới dạng dịch vụ XPC để ứng dụng có thể gọi và yêu cầu thực hiện các hành động này. Tuy nhiên, ứng dụng gọi dịch vụ cần có đủ quyền ủy quyền.
 
-### ShouldAcceptNewConnection always YES
+### shouldAcceptNewConnection luôn trả về YES
 
-An example could be found in [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). In `App/AppDelegate.m` it tries to **connect** to the **HelperTool**. And in `HelperTool/HelperTool.m` the function **`shouldAcceptNewConnection`** **won't check** any of the requirements indicated previously. It'll always return YES:<sup>[[1]](#references)</sup>
+Có thể tìm thấy một ví dụ trong [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). Trong `App/AppDelegate.m`, ứng dụng cố gắng **kết nối** với **HelperTool**. Còn trong `HelperTool/HelperTool.m`, hàm **`shouldAcceptNewConnection`** **không kiểm tra** bất kỳ yêu cầu nào đã nêu trước đó. Hàm này luôn trả về YES:<sup>[[1]](#references)</sup>
 
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
@@ -29,19 +29,19 @@ An example could be found in [EvenBetterAuthorizationSample](https://github.com/
 }
 ```
 
-For more information about how to properly configure this check:
+Để biết thêm thông tin về cách cấu hình đúng kiểm tra này:
 
 
 {{#ref}}
 macos-xpc-connecting-process-check/
 {{#endref}}
 
-### Application rights
+### Quyền của ứng dụng
 
-However, there is some **authorization going on when a method from the HelperTool is called**.
+Tuy nhiên, **việc ủy quyền sẽ diễn ra khi một phương thức của HelperTool được gọi**.
 
-The function **`applicationDidFinishLaunching`** from `App/AppDelegate.m` will create an empty authorization reference after the app has started. This should always work.\
-Then, it will try to **add some rights** to that authorization reference calling `setupAuthorizationRights`:
+Hàm **`applicationDidFinishLaunching`** trong `App/AppDelegate.m` sẽ tạo một authorization reference trống sau khi ứng dụng khởi động. Việc này luôn phải thành công.\
+Sau đó, hàm sẽ thử **thêm một số quyền** vào authorization reference đó bằng cách gọi `setupAuthorizationRights`:
 
 ```objectivec
 - (void)applicationDidFinishLaunching:(NSNotification *)note
@@ -67,7 +67,7 @@ Then, it will try to **add some rights** to that authorization reference calling
 }
 ```
 
-The function `setupAuthorizationRights` from `Common/Common.m` will store in the auth database `/var/db/auth.db` the rights of the application. Note how it will only add the rights that aren't yet in the database:
+Hàm `setupAuthorizationRights` trong `Common/Common.m` sẽ lưu các quyền của ứng dụng vào cơ sở dữ liệu auth `/var/db/auth.db`. Lưu ý rằng hàm này chỉ thêm những quyền chưa có trong cơ sở dữ liệu:
 
 ```objectivec
 + (void)setupAuthorizationRights:(AuthorizationRef)authRef
@@ -101,7 +101,7 @@ The function `setupAuthorizationRights` from `Common/Common.m` will store in the
 }
 ```
 
-The function `enumerateRightsUsingBlock` is the one used to get applications permissions, which are defined in `commandInfo`:
+Hàm `enumerateRightsUsingBlock` được dùng để lấy các quyền của ứng dụng, được định nghĩa trong `commandInfo`:
 
 ```objectivec
 static NSString * kCommandKeyAuthRightName    = @"authRightName";
@@ -181,15 +181,15 @@ static NSString * kCommandKeyAuthRightDesc    = @"authRightDescription";
 }
 ```
 
-This means that at the end of this process, the permissions declared inside `commandInfo` will be stored in `/var/db/auth.db`. For **each method** that will **require authentication**, the database contains the **permission name** and **`kCommandKeyAuthRightDefault`**. The latter **indicates who can get this right**.<sup>[[1]](#references)</sup>
+Điều này có nghĩa là khi quá trình này kết thúc, các quyền được khai báo bên trong `commandInfo` sẽ được lưu trong `/var/db/auth.db`. Với **mỗi method** **yêu cầu xác thực**, cơ sở dữ liệu chứa **tên quyền** và **`kCommandKeyAuthRightDefault`**. Giá trị sau cho biết **ai có thể được cấp quyền này**.<sup>[[1]](#references)</sup>
 
-There are different scopes to indicate who can access a right. Some of them are defined in [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (you can find [all of them in here](https://www.dssw.co.uk/reference/authorization-rights/)), but as summary:<sup>[[9]](#references)[[10]](#references)</sup>
+Có nhiều phạm vi khác nhau để xác định ai có thể truy cập một quyền. Một số phạm vi được định nghĩa trong [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (bạn có thể tìm [đầy đủ danh sách tại đây](https://www.dssw.co.uk/reference/authorization-rights/)), tóm tắt như sau:<sup>[[9]](#references)[[10]](#references)</sup>
 
-<table><thead><tr><th width="284.3333333333333">Name</th><th width="165">Value</th><th>Description</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Anyone</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Nobody</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Current user needs to be an admin (inside admin group)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Ask user to authenticate.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Ask user to authenticate. He needs to be an admin (inside admin group)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Specify rules</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Specify some extra comments on the right</td></tr></tbody></table>
+<table><thead><tr><th width="284.3333333333333">Tên</th><th width="165">Giá trị</th><th>Mô tả</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Bất kỳ ai</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Không ai</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Người dùng hiện tại phải là quản trị viên (thuộc nhóm admin)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Yêu cầu người dùng xác thực.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Yêu cầu người dùng xác thực. Người dùng phải là quản trị viên (thuộc nhóm admin)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Chỉ định các quy tắc</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Chỉ định một số chú thích bổ sung về quyền</td></tr></tbody></table>
 
-### Rights Verification
+### Xác minh quyền
 
-In `HelperTool/HelperTool.m` the function **`readLicenseKeyAuthorization`** checks if the caller is authorized to **execute such method** calling the function **`checkAuthorization`**. This function will check the **authData** sent by the calling process has a **correct format** and then will check **what is needed to get the right** to call the specific method. If all goes good the **returned `error` will be `nil`**:
+Trong `HelperTool/HelperTool.m`, hàm **`readLicenseKeyAuthorization`** kiểm tra xem bên gọi có được phép **thực thi method này** hay không bằng cách gọi hàm **`checkAuthorization`**. Hàm này sẽ kiểm tra xem **authData** do tiến trình gọi gửi có **định dạng chính xác** hay không, sau đó kiểm tra **những điều kiện cần thiết để được cấp quyền** gọi method cụ thể. Nếu mọi thứ đều ổn, **`error` được trả về sẽ là `nil`**:
 
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
@@ -239,13 +239,13 @@ In `HelperTool/HelperTool.m` the function **`readLicenseKeyAuthorization`** chec
 }
 ```
 
-To **check the requirements for obtaining the right** to call that method, `authorizationRightForCommand` checks the previously mentioned **`commandInfo`** object. It then calls **`AuthorizationCopyRights`** to check **whether the caller has the rights** to invoke the function (note that the flags allow interaction with the user).<sup>[[1]](#references)[[3]](#references)</sup>
+Để **kiểm tra các yêu cầu nhằm có được quyền** gọi phương thức đó, `authorizationRightForCommand` kiểm tra đối tượng **`commandInfo`** đã đề cập trước đó. Sau đó, nó gọi **`AuthorizationCopyRights`** để kiểm tra **liệu caller có quyền** gọi hàm hay không (lưu ý rằng các flags cho phép tương tác với người dùng).<sup>[[1]](#references)[[3]](#references)</sup>
 
-In this case, to call the function `readLicenseKeyAuthorization` the `kCommandKeyAuthRightDefault` is defined to `@kAuthorizationRuleClassAllow`. So **anyone can call it**.
+Trong trường hợp này, để gọi hàm `readLicenseKeyAuthorization`, `kCommandKeyAuthRightDefault` được định nghĩa là `@kAuthorizationRuleClassAllow`. Vì vậy, **bất kỳ ai cũng có thể gọi hàm này**.
 
-### DB Information
+### Thông tin DB
 
-It was mentioned that this information is stored in `/var/db/auth.db`. You can list all the stored rules with:
+Như đã đề cập, thông tin này được lưu trong `/var/db/auth.db`. Bạn có thể liệt kê tất cả các quy tắc đã lưu bằng:
 
 ```sql
 sudo sqlite3 /var/db/auth.db
@@ -253,27 +253,27 @@ SELECT name FROM rules;
 SELECT name FROM rules WHERE name LIKE '%safari%';
 ```
 
-Then, you can read who can access the right with:
+Sau đó, bạn có thể đọc ai có thể truy cập quyền này bằng:
 
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
 
-### Permissive rights
+### Quyền hạn quá rộng
 
-You can find **all the permissions configurations** [**in here**](https://www.dssw.co.uk/reference/authorization-rights/), but the combinations that won't require user interaction would be:<sup>[[10]](#references)</sup>
+Bạn có thể tìm thấy **tất cả các cấu hình quyền hạn** [**tại đây**](https://www.dssw.co.uk/reference/authorization-rights/), nhưng các tổ hợp không yêu cầu người dùng tương tác sẽ là:<sup>[[10]](#references)</sup>
 
 1. **'authenticate-user': 'false'**
-   - This is the most direct key. If set to `false`, it specifies that a user does not need to provide authentication to gain this right.
-   - This is used in **combination with one of the 2 below or indicating a group** the user must belong to.
+   - Đây là khóa trực tiếp nhất. Nếu được đặt thành `false`, khóa này chỉ định rằng người dùng không cần cung cấp thông tin xác thực để có được quyền này.
+   - Khóa này được dùng **kết hợp với một trong 2 khóa bên dưới hoặc để chỉ định một nhóm** mà người dùng phải thuộc về.
 2. **'allow-root': 'true'**
-   - If a user is operating as the root user (which has elevated permissions), and this key is set to `true`, the root user could potentially gain this right without further authentication. However, typically, getting to a root user status already requires authentication, so this isn't a "no authentication" scenario for most users.
+   - Nếu người dùng đang hoạt động với tư cách root (có quyền hạn nâng cao) và khóa này được đặt thành `true`, người dùng root có thể có được quyền này mà không cần xác thực thêm. Tuy nhiên, việc có được quyền root thường đã yêu cầu xác thực, nên đây không phải là trường hợp "không cần xác thực" đối với hầu hết người dùng.
 3. **'session-owner': 'true'**
-   - If set to `true`, the owner of the session (the currently logged-in user) would automatically get this right. This might bypass additional authentication if the user is already logged in.
+   - Nếu được đặt thành `true`, chủ sở hữu phiên (người dùng hiện đang đăng nhập) sẽ tự động có quyền này. Điều này có thể bỏ qua bước xác thực bổ sung nếu người dùng đã đăng nhập.
 4. **'shared': 'true'**
-   - This key doesn't grant rights without authentication. Instead, if set to `true`, it means that once the right has been authenticated, it can be shared among multiple processes without each one needing to re-authenticate. But the initial granting of the right would still require authentication unless combined with other keys like `'authenticate-user': 'false'`.
+   - Khóa này không cấp quyền khi chưa xác thực. Thay vào đó, nếu được đặt thành `true`, khóa này có nghĩa là sau khi quyền đã được xác thực, quyền đó có thể được chia sẻ giữa nhiều tiến trình mà không cần từng tiến trình xác thực lại. Tuy nhiên, việc cấp quyền ban đầu vẫn cần xác thực, trừ khi được kết hợp với các khóa khác như `'authenticate-user': 'false'`.
 
-You can [**use this script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) to get the interesting rights:
+Bạn có thể [**dùng script này**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) để lấy các quyền đáng chú ý:
 
 ```bash
 Rights with 'authenticate-user': 'false':
@@ -286,52 +286,52 @@ Rights with 'session-owner': 'true':
 authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
 ```
 
-### Authorization Bypass Case Studies
+### Các nghiên cứu tình huống về bypass authorization
 
-- **CVE-2025-65842 – Acustica Audio Aquarius HelperTool**: The privileged Mach service `com.acustica.HelperTool` accepts every connection and its `checkAuthorization:` routine calls `AuthorizationCopyRights(NULL, …)`, so any 32‑byte blob passes. `executeCommand:authorization:withReply:` then feeds attacker-controlled comma‑separated strings into `NSTask` as root, making payloads such as:
+- **CVE-2025-65842 – Acustica Audio Aquarius HelperTool**: Mach service có đặc quyền `com.acustica.HelperTool` chấp nhận mọi kết nối và routine `checkAuthorization:` gọi `AuthorizationCopyRights(NULL, …)`, vì vậy mọi blob 32 byte đều được chấp nhận. Sau đó, `executeCommand:authorization:withReply:` đưa các chuỗi phân tách bằng dấu phẩy do attacker kiểm soát vào `NSTask` với quyền root, cho phép các payload như:
 
 ```bash
 "/bin/sh,-c,cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash"
 ```
 
-trivially create a SUID root shell. Details in [this write-up](https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/).<sup>[[6]](#references)</sup>
-- **CVE-2025-55076 – Plugin Alliance InstallationHelper**: The listener always returns YES and the same NULL `AuthorizationCopyRights` pattern appears in `checkAuthorization:`. Method `exchangeAppWithReply:` concatenates attacker input into a `system()` string twice, so injecting shell metacharacters in `appPath` (e.g. `"/Applications/Test.app";chmod 4755 /tmp/rootbash;`) yields root code execution via the Mach service `com.plugin-alliance.pa-installationhelper`. More info [here](https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/).<sup>[[7]](#references)</sup>
-- **CVE-2024-4395 – Jamf Compliance Editor helper**: Running an audit drops `/Library/LaunchDaemons/com.jamf.complianceeditor.helper.plist`, exposes the Mach service `com.jamf.complianceeditor.helper`, and exports `-executeScriptAt:arguments:then:` without verifying the caller’s `AuthorizationExternalForm` or code signature. A trivial exploit `AuthorizationCreate`s an empty reference, connects with `[[NSXPCConnection alloc] initWithMachServiceName:options:NSXPCConnectionPrivileged]`, and invokes the method to execute arbitrary binaries as root. Full reversing notes (plus PoC) in [Mykola Grymalyuk’s write-up](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html).<sup>[[4]](#references)</sup>
-- **CVE-2025-25251 – FortiClient Mac helper**: FortiClient Mac 7.0.0–7.0.14, 7.2.0–7.2.8 and 7.4.0–7.4.2 accepted crafted XPC messages that reached a privileged helper lacking authorization gates. Because the helper trusted its own privileged `AuthorizationRef`, any local user able to message the service could coerce it into executing arbitrary configuration changes or commands as root. Details in [SentinelOne’s advisory summary](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/).<sup>[[5]](#references)</sup>
+tạo shell root SUID một cách dễ dàng. Chi tiết trong [bài viết này](https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/).<sup>[[6]](#references)</sup>
+- **CVE-2025-55076 – Plugin Alliance InstallationHelper**: Listener luôn trả về YES và mẫu `AuthorizationCopyRights` NULL tương tự xuất hiện trong `checkAuthorization:`. Phương thức `exchangeAppWithReply:` nối dữ liệu đầu vào do attacker kiểm soát vào chuỗi `system()` hai lần, vì vậy chèn các shell metacharacter vào `appPath` (ví dụ: `"/Applications/Test.app";chmod 4755 /tmp/rootbash;`) sẽ dẫn đến thực thi mã với quyền root thông qua Mach service `com.plugin-alliance.pa-installationhelper`. Xem thêm [tại đây](https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/).<sup>[[7]](#references)</sup>
+- **CVE-2024-4395 – Jamf Compliance Editor helper**: Chạy một audit sẽ tạo `/Library/LaunchDaemons/com.jamf.complianceeditor.helper.plist`, mở Mach service `com.jamf.complianceeditor.helper` và export `-executeScriptAt:arguments:then:` mà không xác minh `AuthorizationExternalForm` hoặc code signature của caller. Một exploit đơn giản tạo một reference rỗng bằng `AuthorizationCreate`, kết nối bằng `[[NSXPCConnection alloc] initWithMachServiceName:options:NSXPCConnectionPrivileged]` rồi gọi phương thức này để thực thi các binary tùy ý với quyền root. Xem ghi chú reverse engineering đầy đủ (kèm PoC) trong [bài viết của Mykola Grymalyuk](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html).<sup>[[4]](#references)</sup>
+- **CVE-2025-25251 – FortiClient Mac helper**: FortiClient Mac 7.0.0–7.0.14, 7.2.0–7.2.8 và 7.4.0–7.4.2 chấp nhận các XPC message được tạo thủ công và chuyển đến một helper có đặc quyền nhưng thiếu các bước kiểm tra authorization. Vì helper tin cậy `AuthorizationRef` có đặc quyền của chính nó, bất kỳ local user nào có thể gửi message đến service đều có thể buộc helper thực hiện các thay đổi cấu hình hoặc lệnh tùy ý với quyền root. Xem chi tiết trong [bản tóm tắt tư vấn bảo mật của SentinelOne](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/).<sup>[[5]](#references)</sup>
 
-#### Rapid triage tips
+#### Mẹo phân loại nhanh
 
-- When an app ships both a GUI and helper, diff their code requirements and check whether `shouldAcceptNewConnection` locks the listener with `-setCodeSigningRequirement:` (or validates `SecCodeCopySigningInformation`). Missing checks usually yield CWE-863 scenarios like the Jamf case. A quick peek looks like:
+- Khi một app đi kèm cả GUI lẫn helper, hãy diff code requirement của chúng và kiểm tra xem `shouldAcceptNewConnection` có khóa listener bằng `-setCodeSigningRequirement:` (hoặc xác thực `SecCodeCopySigningInformation`) hay không. Thiếu các bước kiểm tra này thường dẫn đến các tình huống CWE-863 như trường hợp Jamf. Có thể xem nhanh như sau:
 
 ```bash
 codesign --display --requirements - /Applications/Jamf\ Compliance\ Editor.app
 ```
 
-- Compare what the helper *thinks* it is authorizing with what the client supplies. When reversing, break on `AuthorizationCopyRights` and confirm the `AuthorizationRef` originates from `AuthorizationCreateFromExternalForm` (client provided) instead of the helper’s own privileged context, otherwise you likely found a CWE-863 pattern similar to the cases above.
+- So sánh điều mà helper *nghĩ* nó đang cấp quyền với điều client cung cấp. Khi reverse, hãy đặt breakpoint tại `AuthorizationCopyRights` và xác nhận `AuthorizationRef` bắt nguồn từ `AuthorizationCreateFromExternalForm` (do client cung cấp), chứ không phải từ context có đặc quyền của chính helper; nếu không, nhiều khả năng bạn đã tìm thấy một mẫu CWE-863 tương tự các trường hợp ở trên.
 
-## Reversing Authorization
+## Reverse Authorization
 
-### Checking if EvenBetterAuthorization is used
+### Kiểm tra xem có sử dụng EvenBetterAuthorization hay không
 
-If you find the function: **`[HelperTool checkAuthorization:command:]`** it's probably the the process is using the previously mentioned schema for authorization:
+Nếu tìm thấy hàm: **`[HelperTool checkAuthorization:command:]`**, có lẽ process đang sử dụng schema authorization đã đề cập trước đó:
 
 <figure><img src="../../../../../images/image (42).png" alt=""><figcaption></figcaption></figure>
 
-If this function calls APIs such as `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, and `AuthorizationFree`, it is using the [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154) pattern.
+Nếu hàm này gọi các API như `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights` và `AuthorizationFree`, thì nó đang sử dụng mẫu [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
 
-Check the **`/var/db/auth.db`** to see if it's possible to get permissions to call some privileged action without user interaction.
+Kiểm tra **`/var/db/auth.db`** để xem có thể lấy quyền gọi một số hành động đặc quyền mà không cần tương tác với người dùng hay không.
 
-### Protocol Communication
+### Giao tiếp qua Protocol
 
-Then, you need to find the protocol schema in order to be able to establish a communication with the XPC service.
+Tiếp theo, bạn cần tìm schema của protocol để có thể thiết lập giao tiếp với dịch vụ XPC.
 
-The function **`shouldAcceptNewConnection`** indicates the protocol being exported:
+Hàm **`shouldAcceptNewConnection`** cho biết protocol được export:
 
 <figure><img src="../../../../../images/image (44).png" alt=""><figcaption></figcaption></figure>
 
-In this case, we have the same as in EvenBetterAuthorizationSample, [**check this line**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
+Trong trường hợp này, chúng ta có nội dung giống như trong EvenBetterAuthorizationSample, [**xem dòng này**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
 
-Knowing, the name of the used protocol, it's possible to **dump its header definition** with:
+Khi biết tên protocol được sử dụng, có thể **dump định nghĩa header** bằng lệnh:
 
 ```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
@@ -347,13 +347,13 @@ class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 [...]
 ```
 
-Lastly, we just need to know the **name of the exposed Mach Service** in order to stablish a communication with it. There are several ways to find this:
+Cuối cùng, chúng ta chỉ cần biết **tên của Mach Service được expose** để thiết lập giao tiếp với nó. Có một số cách để tìm thông tin này:
 
-- In the **`[HelperTool init]`** where you can see the Mach Service being used:
+- Trong **`[HelperTool init]`**, nơi bạn có thể thấy Mach Service đang được sử dụng:
 
 <figure><img src="../../../../../images/image (41).png" alt=""><figcaption></figcaption></figure>
 
-- In the launchd plist:
+- Trong launchd plist:
 
 ```xml
 cat /Library/LaunchDaemons/com.example.HelperTool.plist
@@ -368,14 +368,14 @@ cat /Library/LaunchDaemons/com.example.HelperTool.plist
 [...]
 ```
 
-### Exploit Example
+### Ví dụ khai thác
 
-In this example is created:
+Trong ví dụ này, các thành phần sau được tạo:
 
-- The definition of the protocol with the functions
-- An empty auth to use to to ask for access
-- A connection to the XPC service
-- A call to the function if the connection was successful
+- Định nghĩa protocol với các hàm
+- Một auth trống để yêu cầu quyền truy cập
+- Kết nối đến dịch vụ XPC
+- Gọi hàm nếu kết nối thành công
 
 ```objectivec
 // gcc -framework Foundation -framework Security expl.m -o expl
@@ -455,21 +455,20 @@ int main(void) {
 }
 ```
 
-## Other XPC privilege helpers abused
+## Các helper XPC khác dùng để leo thang đặc quyền
 
 - [https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)<sup>[[8]](#references)</sup>
 
 ## References
 
-- [1] [Apple Developer — EvenBetterAuthorizationSample](https://developer.apple.com/library/archive/samplecode/EvenBetterAuthorizationSample/Introduction/Intro.html) ([mirror on GitHub](https://github.com/brenwell/EvenBetterAuthorizationSample))
-- [2] [Apple Developer — Authorization Services](https://developer.apple.com/documentation/security/authorization-services)
+- [1] [Apple Developer — Mẫu EvenBetterAuthorizationSample](https://developer.apple.com/library/archive/samplecode/EvenBetterAuthorizationSample/Introduction/Intro.html) ([mirror on GitHub](https://github.com/brenwell/EvenBetterAuthorizationSample))
+- [2] [Apple Developer — Dịch vụ Authorization](https://developer.apple.com/documentation/security/authorization-services)
 - [3] [Apple Developer — `AuthorizationCopyRights`](https://developer.apple.com/documentation/security/authorizationcopyrights(_:_:_:_:_:))
-- [4] [CVE-2024-4395: Jamf Compliance Editor Privilege Escalation](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html)
-- [5] [CVE-2025-25251: FortiClient Mac Privilege Escalation Flaw](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/)
-- [6] [CVE-2025-65842 – Acustica Audio HelperTool XPC Service Local Privilege Escalation in Aquarius Desktop on macOS](https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/)
-- [7] [CVE-2025-55076 – Plugin Alliance InstallationHelper XPC Service Local Privilege Escalation](https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/)
-- [8] [CVE-2019-8805: Apple EndpointSecurity framework Privilege Escalation (SecureLayer7)](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)
-- [9] [Apple Open Source — AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h)
-- [10] [Authorization Rights Reference (dssw.co.uk)](https://www.dssw.co.uk/reference/authorization-rights/)
-
+- [4] [CVE-2024-4395: Leo thang đặc quyền trong Jamf Compliance Editor](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html)
+- [5] [CVE-2025-25251: Lỗ hổng leo thang đặc quyền trong FortiClient Mac](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/)
+- [6] [CVE-2025-65842 – Leo thang đặc quyền cục bộ qua dịch vụ XPC HelperTool của Acustica Audio trong Aquarius Desktop trên macOS](https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/)
+- [7] [CVE-2025-55076 – Leo thang đặc quyền cục bộ qua dịch vụ XPC InstallationHelper của Plugin Alliance](https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/)
+- [8] [CVE-2019-8805: Leo thang đặc quyền trong framework EndpointSecurity của Apple (SecureLayer7)](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)
+- [9] [Mã nguồn mở Apple — AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h)
+- [10] [Tài liệu tham khảo về quyền Authorization (dssw.co.uk)](https://www.dssw.co.uk/reference/authorization-rights/)
 {{#include ../../../../../banners/hacktricks-training.md}}

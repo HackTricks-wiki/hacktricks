@@ -1,12 +1,12 @@
-# Objects in memory
+# Objects trong bộ nhớ
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## CFRuntimeClass
 
-CF* objects come from CoreFoundation, which provides more than 50 classes of objects like `CFString`, `CFNumber` or `CFAllocator`.
+Các object CF* đến từ CoreFoundation, cung cấp hơn 50 class object như `CFString`, `CFNumber` hoặc `CFAllocator`.
 
-All these classes are instances of the class `CFRuntimeClass`, which when called it returns an index to the `__CFRuntimeClassTable`. The CFRuntimeClass is defined in [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html):
+Tất cả các class này đều là instance của class `CFRuntimeClass`. Khi được gọi, class này trả về một chỉ mục trỏ đến `__CFRuntimeClassTable`. CFRuntimeClass được định nghĩa trong [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html):
 
 ```objectivec
 // Some comments were added to the original code
@@ -57,83 +57,83 @@ typedef struct __CFRuntimeClass {
 
 ## Objective-C
 
-### Memory sections used
+### Các section bộ nhớ được sử dụng
 
-Most of the data used by Objective‑C runtime will change during execution, therefore it uses a number of sections from the Mach‑O `__DATA` family of segments in memory. Historically these included:
+Phần lớn dữ liệu được Objective‑C runtime sử dụng sẽ thay đổi trong quá trình thực thi, vì vậy runtime dùng một số section thuộc họ segment Mach‑O `__DATA` trong bộ nhớ. Trước đây, các section này bao gồm:
 
-- `__objc_msgrefs` (`message_ref_t`): Message references
-- `__objc_ivar` (`ivar`): Instance variables
-- `__objc_data` (`...`): Mutable data
-- `__objc_classrefs` (`Class`): Class references
-- `__objc_superrefs` (`Class`): Superclass references
-- `__objc_protorefs` (`protocol_t *`): Protocol references
-- `__objc_selrefs` (`SEL`): Selector references
-- `__objc_const` (`...`): Class r/o data and other (hopefully) constant data
-- `__objc_imageinfo` (`version, flags`): Used during image load: Version currently `0`; Flags specify preoptimized GC support, etc.
-- `__objc_protolist` (`protocol_t *`): Protocol list
-- `__objc_nlcatlist` (`category_t`): Pointer to Non-Lazy Categories defined in this binary
-- `__objc_catlist` (`category_t`): Pointer to Categories defined in this binary
-- `__objc_nlclslist` (`classref_t`): Pointer to Non-Lazy Objective‑C classes defined in this binary
-- `__objc_classlist` (`classref_t`): Pointers to all Objective‑C classes defined in this binary
+- `__objc_msgrefs` (`message_ref_t`): Các tham chiếu message
+- `__objc_ivar` (`ivar`): Các biến instance
+- `__objc_data` (`...`): Dữ liệu có thể thay đổi
+- `__objc_classrefs` (`Class`): Các tham chiếu lớp
+- `__objc_superrefs` (`Class`): Các tham chiếu lớp cha
+- `__objc_protorefs` (`protocol_t *`): Các tham chiếu protocol
+- `__objc_selrefs` (`SEL`): Các tham chiếu selector
+- `__objc_const` (`...`): Dữ liệu chỉ đọc của lớp và dữ liệu khác được cho là hằng số
+- `__objc_imageinfo` (`version, flags`): Được dùng khi nạp image: Phiên bản hiện tại là `0`; Flags chỉ định hỗ trợ GC được tiền tối ưu hóa, v.v.
+- `__objc_protolist` (`protocol_t *`): Danh sách protocol
+- `__objc_nlcatlist` (`category_t`): Con trỏ đến các Category Non-Lazy được định nghĩa trong binary này
+- `__objc_catlist` (`category_t`): Con trỏ đến các Category được định nghĩa trong binary này
+- `__objc_nlclslist` (`classref_t`): Con trỏ đến các lớp Objective‑C Non-Lazy được định nghĩa trong binary này
+- `__objc_classlist` (`classref_t`): Con trỏ đến tất cả các lớp Objective‑C được định nghĩa trong binary này
 
-It also uses a few sections in the `__TEXT` segment to store constants:
+Runtime cũng dùng một vài section trong segment `__TEXT` để lưu các hằng số:
 
-- `__objc_methname` (C‑String): Method names
-- `__objc_classname` (C‑String): Class names
-- `__objc_methtype` (C‑String): Method types
+- `__objc_methname` (C‑String): Tên method
+- `__objc_classname` (C‑String): Tên lớp
+- `__objc_methtype` (C‑String): Kiểu method
 
-Modern macOS/iOS (especially on Apple Silicon) also place Objective‑C/Swift metadata in:
+Các phiên bản macOS/iOS hiện đại (đặc biệt trên Apple Silicon) cũng đặt metadata Objective‑C/Swift trong:
 
-- `__DATA_CONST`: immutable Objective‑C metadata that can be shared read‑only across processes (for example many `__objc_*` lists now live here).
-- `__AUTH` / `__AUTH_CONST`: segments containing pointers that must be authenticated at load or use‑time on arm64e (Pointer Authentication). You will also see `__auth_got` in `__AUTH_CONST` instead of the legacy `__la_symbol_ptr`/`__got` only. When instrumenting or hooking, remember to account for both `__got` and `__auth_got` entries in modern binaries.
+- `__DATA_CONST`: Metadata Objective‑C bất biến, có thể được chia sẻ chỉ đọc giữa các tiến trình (ví dụ, nhiều danh sách `__objc_*` hiện nằm ở đây).
+- `__AUTH` / `__AUTH_CONST`: Các segment chứa con trỏ cần được xác thực khi nạp hoặc sử dụng trên arm64e (Pointer Authentication). Bạn cũng sẽ thấy `__auth_got` trong `__AUTH_CONST`, thay vì chỉ có `__la_symbol_ptr`/`__got` như trước đây. Khi instrument hoặc hooking, hãy nhớ tính đến cả các entry `__got` lẫn `__auth_got` trong các binary hiện đại.
 
-For background on dyld pre‑optimization (e.g., selector uniquing and class/protocol precomputation) and why many of these sections are "already fixed up" when coming from the shared cache, check the Apple `objc-opt` sources and dyld shared cache notes. This affects where and how you can patch metadata at runtime.
+Để tìm hiểu về dyld pre-optimization (ví dụ: selector uniquing và tiền tính toán class/protocol), cũng như lý do nhiều section trong số này “đã được fix up” khi lấy từ shared cache, hãy xem mã nguồn `objc-opt` của Apple và ghi chú về dyld shared cache. Điều này ảnh hưởng đến vị trí và cách bạn có thể patch metadata lúc runtime.
 
 {{#ref}}
 ../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md
 {{#endref}}
 
-### Type Encoding
+### Mã hóa kiểu
 
-Objective‑C uses mangling to encode selector and variable types of simple and complex types:
+Objective‑C dùng mangling để mã hóa kiểu của selector và biến, bao gồm các kiểu đơn giản và phức tạp:
 
-- Primitive types use their first letter of the type `i` for `int`, `c` for `char`, `l` for `long`... and use the capital letter in case it's unsigned (`L` for `unsigned long`).
-- Other data types use other letters or symbols like `q` for `long long`, `b` for bitfields, `B` for booleans, `#` for classes, `@` for `id`, `*` for `char *`, `^` for generic pointers and `?` for undefined.
-- Arrays, structures and unions use `[`, `{` and `(` respectively.
+- Kiểu nguyên thủy dùng chữ cái đầu tiên của tên kiểu: `i` cho `int`, `c` cho `char`, `l` cho `long`... và dùng chữ hoa nếu là kiểu không dấu (`L` cho `unsigned long`).
+- Các kiểu dữ liệu khác dùng những chữ cái hoặc ký hiệu khác, chẳng hạn `q` cho `long long`, `b` cho bitfield, `B` cho boolean, `#` cho class, `@` cho `id`, `*` cho `char *`, `^` cho con trỏ tổng quát và `?` cho kiểu không xác định.
+- Mảng, cấu trúc và union lần lượt dùng `[`, `{` và `(`.
 
-#### Example Method Declaration
+#### Ví dụ khai báo Method
 
 ```objectivec
 - (NSString *)processString:(id)input withOptions:(char *)options andError:(id)error;
 ```
 
-The selector would be `processString:withOptions:andError:`
+Selector sẽ là `processString:withOptions:andError:`
 
-#### Encoded Signature
+#### Chữ ký được mã hóa
 
-- `id` is encoded as `@`
-- `char *` is encoded as `*`
+- `id` được mã hóa thành `@`
+- `char *` được mã hóa thành `*`
 
-The complete type encoding for the method is:
+Mã hóa kiểu đầy đủ của phương thức là:
 
 ```less
 @24@0:8@16*20^@24
 ```
 
-#### Detailed Breakdown
+#### Phân tích chi tiết
 
-1. Return Type (`NSString *`): Encoded as `@` with length 24
-2. `self` (object instance): Encoded as `@`, at offset 0
-3. `_cmd` (selector): Encoded as `:`, at offset 8
-4. First argument (`char * input`): Encoded as `*`, at offset 16
-5. Second argument (`NSDictionary * options`): Encoded as `@`, at offset 20
-6. Third argument (`NSError ** error`): Encoded as `^@`, at offset 24
+1. Kiểu trả về (`NSString *`): Được mã hóa là `@` với độ dài 24
+2. `self` (instance của object): Được mã hóa là `@`, tại offset 0
+3. `_cmd` (selector): Được mã hóa là `:`, tại offset 8
+4. Đối số thứ nhất (`char * input`): Được mã hóa là `*`, tại offset 16
+5. Đối số thứ hai (`NSDictionary * options`): Được mã hóa là `@`, tại offset 20
+6. Đối số thứ ba (`NSError ** error`): Được mã hóa là `^@`, tại offset 24
 
-With the selector + the encoding you can reconstruct the method.
+Với selector và encoding, bạn có thể tái dựng method.
 
-### Classes
+### Các lớp
 
-Classes in Objective‑C are C structs with properties, method pointers, etc. It's possible to find the struct `objc_class` in the [**source code**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html):
+Các lớp trong Objective-C là những struct C có thuộc tính, con trỏ method, v.v. Có thể tìm thấy struct `objc_class` trong [**source code**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html):
 
 ```objectivec
 struct objc_class : objc_object {
@@ -156,9 +156,9 @@ struct objc_class : objc_object {
 [...]
 ```
 
-This class uses some bits of the `isa` field to indicate information about the class.
+Class này sử dụng một số bit trong trường `isa` để biểu thị thông tin về class.
 
-Then, the struct has a pointer to the struct `class_ro_t` stored on disk which contains attributes of the class like its name, base methods, properties and instance variables. During runtime an additional structure `class_rw_t` is used containing pointers which can be altered such as methods, protocols, properties.
+Sau đó, struct này có một con trỏ tới struct `class_ro_t` được lưu trên đĩa, chứa các thuộc tính của class như tên, các phương thức cơ sở, properties và biến instance. Trong runtime, một cấu trúc bổ sung `class_rw_t` được sử dụng, chứa các con trỏ có thể được thay đổi, chẳng hạn như phương thức, protocol và property.
 
 {{#ref}}
 ../macos-basic-objective-c.md
@@ -166,15 +166,15 @@ Then, the struct has a pointer to the struct `class_ro_t` stored on disk which c
 
 ---
 
-## Modern object representations in memory (arm64e, tagged pointers, Swift)
+## Các biểu diễn object hiện đại trong bộ nhớ (arm64e, tagged pointer, Swift)
 
-### Non‑pointer `isa` and Pointer Authentication (arm64e)
+### `isa` không phải con trỏ và Pointer Authentication (arm64e)
 
-On Apple Silicon and recent runtimes the Objective‑C `isa` is not always a raw class pointer. On arm64e it is a packed structure that may also carry a Pointer Authentication Code (PAC). Depending on the platform it may include fields like `nonpointer`, `has_assoc`, `weakly_referenced`, `extra_rc`, and the class pointer itself (shifted or signed). This means blindly dereferencing the first 8 bytes of an Objective‑C object will not always yield a valid `Class` pointer.<sup>[[2]](#references)</sup>
+Trên Apple Silicon và các runtime gần đây, `isa` của Objective‑C không phải lúc nào cũng là con trỏ class thô. Trên arm64e, đây là một cấu trúc đóng gói, cũng có thể chứa Pointer Authentication Code (PAC). Tùy nền tảng, nó có thể bao gồm các trường như `nonpointer`, `has_assoc`, `weakly_referenced`, `extra_rc` và chính con trỏ class (được dịch bit hoặc ký). Điều này có nghĩa là việc dereference mù quáng 8 byte đầu tiên của một object Objective‑C không phải lúc nào cũng trả về một con trỏ `Class` hợp lệ.<sup>[[2]](#references)</sup>
 
-Practical notes when debugging on arm64e:
+Ghi chú thực tế khi debug trên arm64e:
 
-- LLDB will usually strip PAC bits for you when printing Objective‑C objects with `po`, but when working with raw pointers you may need to strip authentication manually:
+- LLDB thường sẽ loại bỏ các bit PAC giúp bạn khi in các object Objective‑C bằng `po`, nhưng khi làm việc với con trỏ thô, bạn có thể cần tự loại bỏ phần xác thực:
   
   ```lldb
   (lldb) expr -l objc++ -- #include <ptrauth.h>
@@ -182,20 +182,20 @@ Practical notes when debugging on arm64e:
   (lldb) expr -l objc++ -O -- (Class)object_getClass((id)raw)
   ```
 
-- Many function/data pointers in Mach‑O will reside in `__AUTH`/`__AUTH_CONST` and require authentication before use. If you are interposing or re‑binding (e.g., fishhook‑style), ensure you also handle `__auth_got` in addition to legacy `__got`.
+- Nhiều con trỏ hàm/dữ liệu trong Mach‑O nằm trong `__AUTH`/`__AUTH_CONST` và cần được xác thực trước khi sử dụng. Nếu bạn đang interpose hoặc re-bind (ví dụ theo kiểu fishhook), hãy đảm bảo xử lý cả `__auth_got` bên cạnh `__got` kiểu cũ.
 
-For a deep dive into language/ABI guarantees and the `<ptrauth.h>` intrinsics available from Clang/LLVM, see the reference in the end of this page.<sup>[[1]](#references)</sup>
+Để tìm hiểu sâu về các bảo đảm của ngôn ngữ/ABI và các intrinsic trong `<ptrauth.h>` có sẵn từ Clang/LLVM, xem tài liệu tham khảo ở cuối trang này.<sup>[[1]](#references)</sup>
 
-### Tagged pointer objects
+### Các object tagged pointer
 
-Some Foundation classes avoid heap allocation by encoding the object’s payload directly in the pointer value (tagged pointers). Detection differs by platform (e.g., the most‑significant bit on arm64, least‑significant on x86_64 macOS). Tagged objects don’t have a regular `isa` stored in memory; the runtime resolves the class from the tag bits.<sup>[[2]](#references)</sup> When inspecting arbitrary `id` values:
+Một số lớp Foundation tránh cấp phát trên heap bằng cách mã hóa trực tiếp payload của object vào giá trị con trỏ (tagged pointer). Cách phát hiện khác nhau tùy nền tảng (ví dụ: bit có trọng số cao nhất trên arm64, bit có trọng số thấp nhất trên macOS x86_64). Các object tagged pointer không có `isa` thông thường được lưu trong bộ nhớ; runtime xác định lớp từ các bit tag.<sup>[[2]](#references)</sup> Khi kiểm tra các giá trị `id` bất kỳ:
 
-- Use runtime APIs instead of poking the `isa` field: `object_getClass(obj)` / `[obj class]`.
-- In LLDB, just `po (id)0xADDR` will print tagged pointer instances correctly because the runtime is consulted to resolve the class.
+- Dùng API runtime thay vì truy cập trực tiếp trường `isa`: `object_getClass(obj)` / `[obj class]`.
+- Trong LLDB, chỉ cần dùng `po (id)0xADDR` để in các instance tagged pointer chính xác, vì runtime được tham vấn để xác định lớp.
 
-### Swift heap objects and metadata
+### Object heap Swift và metadata
 
-Pure Swift classes are also objects with a header pointing to Swift metadata (not Objective‑C `isa`). To introspect live Swift processes without modifying them you can use the Swift toolchain’s `swift-inspect`, which leverages the Remote Mirror library to read runtime metadata:
+Các lớp thuần Swift cũng là object có header trỏ đến metadata Swift (không phải `isa` Objective‑C). Để xem xét các tiến trình Swift đang chạy mà không sửa đổi chúng, bạn có thể dùng `swift-inspect` trong Swift toolchain; công cụ này tận dụng thư viện Remote Mirror để đọc metadata runtime:
 
 ```bash
 # Xcode toolchain (or Swift.org toolchain) provides swift-inspect
@@ -205,22 +205,22 @@ swift-inspect dump-arrays <pid-or-name>
 swift-inspect dump-concurrency <pid-or-name>
 ```
 
-This is very useful to map Swift heap objects and protocol conformances when reversing mixed Swift/ObjC apps.
+Điều này rất hữu ích để lập bản đồ các đối tượng trên heap của Swift và các kiểu tuân thủ protocol khi reverse các ứng dụng kết hợp Swift/ObjC.
 
 ---
 
-## Runtime inspection cheatsheet (LLDB / Frida)
+## Bảng tham khảo nhanh về kiểm tra runtime (LLDB / Frida)
 
 ### LLDB
 
-- Print object or class from a raw pointer:
+- In đối tượng hoặc class từ một con trỏ thô:
 
 ```lldb
 (lldb) expr -l objc++ -O -- (id)0x0000000101234560
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)0x0000000101234560)
 ```
 
-- Inspect Objective‑C class from a pointer to an object method’s `self` in a breakpoint:
+- Kiểm tra lớp Objective-C thông qua con trỏ tới `self` của một phương thức đối tượng tại breakpoint:
 
 ```lldb
 (lldb) br se -n '-[NSFileManager fileExistsAtPath:]'
@@ -230,7 +230,7 @@ This is very useful to map Swift heap objects and protocol conformances when rev
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)$x0)
 ```
 
-- Dump sections that carry Objective‑C metadata (note: many are now in `__DATA_CONST` / `__AUTH_CONST`):
+- Dump các section chứa metadata Objective-C (lưu ý: hiện nay nhiều section nằm trong `__DATA_CONST` / `__AUTH_CONST`):
 
 ```lldb
 (lldb) image dump section --section __DATA_CONST.__objc_classlist
@@ -238,18 +238,18 @@ This is very useful to map Swift heap objects and protocol conformances when rev
 (lldb) image dump section --section __AUTH_CONST.__auth_got
 ```
 
-- Read memory for a known class object to pivot to `class_ro_t` / `class_rw_t` when reversing method lists:
+- Đọc bộ nhớ của một đối tượng class đã biết để chuyển sang `class_ro_t` / `class_rw_t` khi phân tích ngược các danh sách method:
 
 ```lldb
 (lldb) image lookup -r -n _OBJC_CLASS_$_NSFileManager
 (lldb) memory read -fx -s8 0xADDRESS_OF_CLASS_OBJECT
 ```
 
-### Frida (Objective‑C and Swift)
+### Frida (Objective‑C và Swift)
 
-Frida provides high‑level runtime bridges that are very handy to discover and instrument live objects without symbols:
+Frida cung cấp các cầu nối runtime cấp cao, rất hữu ích để phát hiện và instrument các object đang hoạt động mà không cần symbols:
 
-- Enumerate classes and methods, resolve actual class names at runtime, and intercept Objective‑C selectors:
+- Liệt kê các class và method, phân giải tên class thực tế khi runtime, và chặn các Objective‑C selector:
 
 ```js
 if (ObjC.available) {
@@ -269,14 +269,13 @@ if (ObjC.available) {
 }
 ```
 
-- Swift bridge: enumerate Swift types and interact with Swift instances (requires recent Frida; very useful on Apple Silicon targets).
+- Swift bridge: liệt kê các kiểu Swift và tương tác với các instance Swift (yêu cầu Frida phiên bản mới; rất hữu ích trên các mục tiêu Apple Silicon).
 
 ---
 
 ## References
 
 
-- [1] [Clang/LLVM: Pointer Authentication and the ptrauth.h intrinsics (arm64e ABI)](https://clang.llvm.org/docs/PointerAuthentication.html)
-- [2] [Apple Open Source - Objective-C runtime `objc-object.h`](https://github.com/apple-oss-distributions/objc4/blob/main/runtime/objc-object.h)
-
+- [1] [Clang/LLVM: Xác thực con trỏ và các intrinsic của ptrauth.h (arm64e ABI)](https://clang.llvm.org/docs/PointerAuthentication.html)
+- [2] [Mã nguồn mở của Apple - `objc-object.h` của Objective-C runtime](https://github.com/apple-oss-distributions/objc4/blob/main/runtime/objc-object.h)
 {{#include ../../../banners/hacktricks-training.md}}

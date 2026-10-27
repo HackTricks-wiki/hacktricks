@@ -1,12 +1,12 @@
-# Interesting Groups - Linux Privesc
+# Các nhóm đáng chú ý - Linux Privesc
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Sudo/Admin Groups
+## Nhóm Sudo/Admin
 
 ### **PE - Method 1**
 
-**Sometimes**, a system's **/etc/sudoers** policy (or a file included from it) contains entries such as:<sup>[[3]](#references)</sup>
+**Đôi khi**, chính sách **/etc/sudoers** của hệ thống (hoặc một tệp được include từ đó) chứa các mục như sau:<sup>[[3]](#references)</sup>
 
 ```bash
 # Allow members of group sudo to execute any command
@@ -16,45 +16,45 @@
 %admin 	ALL=(ALL:ALL) ALL
 ```
 
-This means that any user matched by either entry may run any command as any target user through `sudo` (subject to the rest of the policy).<sup>[[3]](#references)</sup>
+Điều này có nghĩa là bất kỳ người dùng nào khớp với một trong hai mục nhập đều có thể chạy bất kỳ lệnh nào với tư cách là người dùng đích bất kỳ thông qua `sudo` (tùy thuộc vào các quy định còn lại).<sup>[[3]](#references)</sup>
 
-If this is the case, to **become root you can just execute**:
+Nếu đúng như vậy, để **trở thành root, bạn chỉ cần thực thi**:
 
 ```
 sudo su
 ```
 
-If `sudo -l` permits a constrained `adduser` invocation with only a username, check whether it creates a same-named primary group that does not yet exist. A new account in that group may gain privileges if the effective sudoers policy already grants them to `%group`; verify both the group-creation behavior and the group rule before treating this as an escalation path. Creating an account changes the system, so inspect the policy first.
+Nếu `sudo -l` cho phép chạy `adduser` với giới hạn chỉ nhận tên người dùng, hãy kiểm tra xem lệnh này có tạo nhóm chính trùng tên chưa tồn tại hay không. Tài khoản mới trong nhóm đó có thể có thêm quyền nếu chính sách sudoers hiện hành đã cấp quyền cho `%group`; hãy xác minh cả hành vi tạo nhóm lẫn quy tắc nhóm trước khi xem đây là một hướng leo thang đặc quyền. Việc tạo tài khoản sẽ làm thay đổi hệ thống, vì vậy hãy kiểm tra chính sách trước.
 
 ### PE - Method 2
 
-Find all suid binaries and check if there is the binary **Pkexec**:
+Tìm tất cả các binary suid và kiểm tra xem có binary **Pkexec** hay không:
 
 ```bash
 find / -perm -4000 2>/dev/null
 ```
 
-If **pkexec is a SUID binary**, it can execute a program as another user only when polkit authorizes the requested action; the SUID bit alone does not guarantee root. Check the installed policy and the target session's authorization instead of assuming membership in **sudo** or **admin** is sufficient.<sup>[[4]](#references)[[5]](#references)</sup>
+Nếu **pkexec là một binary SUID**, nó chỉ có thể thực thi chương trình với tư cách người dùng khác khi polkit cấp quyền cho hành động được yêu cầu; chỉ riêng bit SUID không đảm bảo có quyền root. Hãy kiểm tra chính sách đã cài đặt và quyền của phiên mục tiêu, thay vì cho rằng chỉ cần thuộc nhóm **sudo** hoặc **admin** là đủ.<sup>[[4]](#references)[[5]](#references)</sup>
 
-For the separate [CVE-2021-4034](https://www.qualys.com/2022/01/25/cve-2021-4034/pwnkit.txt) path, first verify that `pkexec` is an executable **root-owned SUID** file. An installed binary without that bit is not the local SUID escalation described by the advisory. An upstream version string is only a lead: distributions can [backport the fix into older package versions](https://ubuntu.com/security/CVE-2021-4034), so check the installed vendor package and mitigations before calling it vulnerable.
+Với hướng khai thác riêng [CVE-2021-4034](https://www.qualys.com/2022/01/25/cve-2021-4034/pwnkit.txt), trước tiên hãy xác minh rằng `pkexec` là tệp thực thi **SUID do root sở hữu**. Binary đã cài đặt nhưng không có bit đó không phải là trường hợp leo thang đặc quyền SUID cục bộ được mô tả trong advisory. Chuỗi phiên bản upstream chỉ là manh mối: các bản phân phối có thể [backport bản vá vào các phiên bản gói cũ hơn](https://ubuntu.com/security/CVE-2021-4034), vì vậy hãy kiểm tra gói của nhà cung cấp đã cài đặt và các biện pháp giảm thiểu trước khi kết luận rằng nó dễ bị tấn công.
 
-[CVE-2021-3560](https://securitylab.github.com/advisories/GHSL-2021-074-polkit/) is a different polkit path: a D-Bus authorization race, not a `pkexec` SUID flaw. Review the installed vendor polkit package and whether a reachable privileged D-Bus action can make a useful change; an account-creation route also needs a suitable service such as AccountsService, and any new group's sudo access depends on the effective sudo policy. A reported polkit version or installed service alone is only a candidate, especially where vendors [backport fixes](https://access.redhat.com/security/cve/cve-2021-3560). Passive enumeration should not trigger the race.
+[CVE-2021-3560](https://securitylab.github.com/advisories/GHSL-2021-074-polkit/) là một hướng polkit khác: race condition trong cấp quyền D-Bus, không phải lỗi SUID của `pkexec`. Hãy xem xét gói polkit của nhà cung cấp đã cài đặt và liệu có hành động D-Bus đặc quyền nào có thể truy cập được để thực hiện thay đổi hữu ích hay không; hướng tạo tài khoản cũng cần một dịch vụ phù hợp như AccountsService, và quyền sudo của nhóm mới phụ thuộc vào chính sách sudo có hiệu lực. Chỉ riêng phiên bản polkit được báo cáo hoặc dịch vụ đã cài đặt chưa đủ để xác định khả năng bị tấn công, đặc biệt khi nhà cung cấp có thể [backport bản vá](https://access.redhat.com/security/cve/cve-2021-3560). Việc liệt kê thụ động không nên kích hoạt race condition.
 
-On distributions that still use the older Local Authority backend, inspect its group rules with:
+Trên các bản phân phối vẫn dùng backend Local Authority cũ hơn, hãy kiểm tra các quy tắc nhóm bằng lệnh:
 
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
 
-The relevant group names and defaults vary by distribution; a group is useful here only if the local policy names it.<sup>[[5]](#references)</sup>
+Tên các group liên quan và giá trị mặc định khác nhau tùy theo bản phân phối; group chỉ hữu ích ở đây nếu chính sách cục bộ chỉ định tên group đó.<sup>[[5]](#references)</sup>
 
-To **become root you can execute**:
+Để **trở thành root, bạn có thể thực thi**:
 
 ```bash
 pkexec "/bin/sh" #Authentication is required according to the local policy
 ```
 
-If you try to execute **pkexec** and you get this **error**:
+Nếu bạn thử thực thi **pkexec** và nhận được **lỗi** này:
 
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
@@ -62,9 +62,9 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 Error executing command as another user: Not authorized
 ```
 
-On an SSH session without a registered authentication agent, `pkexec` may fail with this error even when the policy would otherwise allow the action; polkit documents `pkttyagent` as a text authentication agent for non-desktop sessions. The exact behavior is version- and distribution-dependent, so verify the local policy and agent setup. One workaround reported for affected NixOS versions uses **2 different SSH sessions**.<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
+Trong một phiên SSH không có authentication agent đã đăng ký, `pkexec` có thể báo lỗi này ngay cả khi policy cho phép hành động đó; polkit ghi nhận `pkttyagent` là authentication agent dạng văn bản dành cho các phiên không phải desktop. Hành vi cụ thể phụ thuộc vào phiên bản và bản phân phối, vì vậy hãy kiểm tra policy và cấu hình agent trên hệ thống. Một cách khắc phục được báo cáo cho một số phiên bản NixOS bị ảnh hưởng là dùng **2 phiên SSH khác nhau**.<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
 
-An ACL that denies one account access to `su` governs that executable, not every route to an administrator-authorized action. If an administrator credential is independently exposed, review whether a separate action such as starting a transient system service through `systemd-run` is permitted by the effective polkit policy, which identity the authentication agent accepts, and which identity the resulting service would use. [Polkit distinguishes authentication as the session owner from an administrator](https://polkit.pages.freedesktop.org/polkit/polkit.8.html), while [systemd-run can request a transient service from the system manager](https://systemd.io/CONTROL_GROUP_INTERFACE/). A history entry, installed command, or readable policy file alone does not establish authorization or credential validity; passive review should not submit credentials or start a unit.
+ACL từ chối một tài khoản truy cập `su` chỉ áp dụng cho executable đó, chứ không phải mọi con đường để thực hiện một hành động được administrator cho phép. Nếu thông tin xác thực của administrator bị lộ theo một cách độc lập, hãy xem xét liệu policy polkit có hiệu lực có cho phép một hành động riêng biệt như khởi chạy system service tạm thời thông qua `systemd-run` hay không, authentication agent chấp nhận danh tính nào và service được tạo sẽ chạy dưới danh tính nào. [Polkit phân biệt việc xác thực với tư cách chủ sở hữu phiên và với tư cách administrator](https://polkit.pages.freedesktop.org/polkit/polkit.8.html), trong khi [systemd-run có thể yêu cầu system manager tạo một transient service](https://systemd.io/CONTROL_GROUP_INTERFACE/). Chỉ riêng một mục trong history, command đã cài đặt hoặc policy file có thể đọc được không chứng minh rằng hành động được cấp quyền hay thông tin xác thực hợp lệ; việc rà soát thụ động không nên gửi thông tin xác thực hoặc khởi chạy unit.
 
 ```bash:session1
 echo $$ #Step1: Get current PID
@@ -77,43 +77,43 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 #Step 4, you will be asked in this session to authenticate to pkexec
 ```
 
-## Wheel Group
+## Nhóm Wheel
 
-Sometimes a sudoers policy may also contain this entry:
+Đôi khi, chính sách sudoers cũng có thể chứa mục này:
 
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
 
-This means that any user matched by the entry may run any command as any target user through `sudo` (subject to the rest of the policy).<sup>[[3]](#references)</sup>
+Điều này có nghĩa là bất kỳ người dùng nào khớp với mục nhập đều có thể chạy bất kỳ lệnh nào với tư cách bất kỳ người dùng đích nào thông qua `sudo` (tùy thuộc vào các phần còn lại của chính sách).<sup>[[3]](#references)</sup>
 
-If this is the case, to **become root you can just execute**:
+Nếu đúng như vậy, để **trở thành root, bạn chỉ cần thực thi**:
 
 ```
 sudo su
 ```
 
-## Shadow Group
+## Nhóm Shadow
 
-On systems whose permissions grant it, users in the **shadow** group can **read** **/etc/shadow**; verify the actual mode and ACLs on the target:<sup>[[6]](#references)[[7]](#references)</sup>
+Trên các hệ thống có quyền cho phép, người dùng thuộc nhóm **shadow** có thể **đọc** **/etc/shadow**; hãy xác minh mode và ACL thực tế trên mục tiêu:<sup>[[6]](#references)[[7]](#references)</sup>
 
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
 
-So, read the file and try to **crack some hashes**.
+Vì vậy, hãy đọc tệp và thử **crack một số hash**.
 
-Quick lock-state nuance when triaging hashes:
-- Entries with `!` or `*` are generally non-interactive for password logins.
-- `!hash` means the password was locked; the remaining characters represent the password field before it was locked.
-- A field containing `*` is not a valid `crypt(3)` hash and prevents UNIX-password login; do not infer from it whether a password was previously set.
-This is useful for account classification even when direct login is blocked.<sup>[[6]](#references)</sup>
+Lưu ý nhanh về trạng thái khóa khi phân loại hash:
+- Các mục có `!` hoặc `*` thường không thể dùng để đăng nhập bằng mật khẩu theo cách tương tác.
+- `!hash` nghĩa là mật khẩu đã bị khóa; các ký tự còn lại biểu thị trường mật khẩu trước khi bị khóa.
+- Trường chứa `*` không phải là hash `crypt(3)` hợp lệ và ngăn đăng nhập UNIX bằng mật khẩu; không thể suy ra từ đó liệu mật khẩu đã từng được thiết lập hay chưa.
+Thông tin này hữu ích để phân loại tài khoản ngay cả khi không thể đăng nhập trực tiếp.<sup>[[6]](#references)</sup>
 
-## Staff Group
+## Nhóm Staff
 
-**staff**: Allows users to add local modifications to the system (`/usr/local`) without needing root privileges (note that executables in `/usr/local/bin` are in the PATH variable of any user, and they may "override" the executables in `/bin` and `/usr/bin` with the same name). Compare with group "adm", which is more related to monitoring/security.<sup>[[2]](#references)[[7]](#references)</sup>
+**staff**: Cho phép người dùng thêm các sửa đổi cục bộ vào hệ thống (`/usr/local`) mà không cần quyền root (lưu ý rằng các tệp thực thi trong `/usr/local/bin` nằm trong biến PATH của mọi người dùng và có thể “ghi đè” các tệp thực thi cùng tên trong `/bin` và `/usr/bin`). So sánh với nhóm "adm", nhóm này liên quan nhiều hơn đến việc giám sát/bảo mật.<sup>[[2]](#references)[[7]](#references)</sup>
 
-On Debian configurations where `/usr/local/bin` precedes `/usr/bin` in `PATH` (as in the examples below), an unqualified command resolves to the `/usr/local/bin` copy first; confirm the effective `PATH` on the target.
+Trong các cấu hình Debian mà `/usr/local/bin` đứng trước `/usr/bin` trong `PATH` (như trong các ví dụ bên dưới), một lệnh không chỉ định đường dẫn sẽ chạy bản sao trong `/usr/local/bin` trước; hãy xác nhận `PATH` thực tế trên mục tiêu.
 
 ```bash
 $ echo $PATH
@@ -123,9 +123,9 @@ $ echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
 
-If a privileged process resolves an unqualified command through a writable `/usr/local/bin`, replacing that command can execute with the process's privileges; confirm the actual path and trigger before testing.
+Nếu một tiến trình có đặc quyền phân giải lệnh không kèm đường dẫn thông qua `/usr/local/bin` có quyền ghi, việc thay thế lệnh đó có thể khiến mã chạy với các đặc quyền của tiến trình; hãy xác nhận đường dẫn thực tế và điều kiện kích hoạt trước khi kiểm thử.
 
-On Ubuntu systems, `pam_motd` runs executable scripts via `run-parts --lsbsysinit` as root at login; cron jobs may also use `run-parts`, but this is distribution- and configuration-specific.<sup>[[10]](#references)[[11]](#references)</sup>
+Trên hệ thống Ubuntu, `pam_motd` chạy các script thực thi thông qua `run-parts --lsbsysinit` với quyền root khi đăng nhập; các tác vụ cron cũng có thể dùng `run-parts`, nhưng điều này phụ thuộc vào bản phân phối và cấu hình.<sup>[[10]](#references)[[11]](#references)</sup>
 
 ```bash
 $ cat /etc/crontab | grep run-parts
@@ -135,7 +135,7 @@ $ cat /etc/crontab | grep run-parts
 52 6    1 * *   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.monthly; }
 ```
 
-On a new SSH login, `pspy` can help confirm whether this path is actually invoked on the target; it can observe process command lines without root.<sup>[[10]](#references)[[12]](#references)</sup>
+Khi có một lần đăng nhập SSH mới, `pspy` có thể giúp xác nhận liệu đường dẫn này có thực sự được gọi trên mục tiêu hay không; công cụ này có thể quan sát dòng lệnh của các tiến trình mà không cần quyền root.<sup>[[10]](#references)[[12]](#references)</sup>
 
 ```bash
 $ pspy64
@@ -171,11 +171,11 @@ $ ls -la /bin/bash
 $ /bin/bash -p
 ```
 
-## Disk Group
+## Nhóm disk
 
-Membership in the **disk** group may grant raw access to block devices and is often **close to root access**; Debian describes it as mostly equivalent to root, but verify the actual device permissions and storage layout on the target.<sup>[[7]](#references)</sup>
+Thành viên của nhóm **disk** có thể được cấp quyền truy cập thô vào các thiết bị khối và thường **gần tương đương quyền truy cập root**; Debian mô tả quyền này phần lớn tương đương root, nhưng hãy xác minh quyền của thiết bị thực tế và bố cục lưu trữ trên mục tiêu.<sup>[[7]](#references)</sup>
 
-Common device paths include `/dev/sd*`, but NVMe and other storage layouts use different names.
+Các đường dẫn thiết bị phổ biến gồm `/dev/sd*`, nhưng NVMe và các bố cục lưu trữ khác sử dụng tên khác.
 
 ```bash
 df -h #Find where "/" is mounted
@@ -186,23 +186,23 @@ debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
 
-`debugfs` operates on ext2/ext3/ext4 filesystems; paths such as `/root` and `/etc/shadow` above are files inside the opened filesystem, while the second argument to `dump` is an output path on the native filesystem.<sup>[[8]](#references)</sup> For example, this extracts `/tmp/asd1.txt` from the opened filesystem to `/tmp/asd2.txt` on the native filesystem:
+`debugfs` hoạt động trên các hệ thống tệp ext2/ext3/ext4; các đường dẫn như `/root` và `/etc/shadow` ở trên là các tệp bên trong hệ thống tệp đã mở, còn đối số thứ hai của `dump` là đường dẫn đầu ra trên hệ thống tệp gốc.<sup>[[8]](#references)</sup> Ví dụ, lệnh này trích xuất `/tmp/asd1.txt` từ hệ thống tệp đã mở sang `/tmp/asd2.txt` trên hệ thống tệp gốc:
 
 ```bash
 debugfs /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
 
-The `-w` option opens the filesystem read-write, and the `write` command copies a native file into the opened filesystem. Avoid using it on a mounted live filesystem because direct edits can corrupt the filesystem; work from an offline image when possible.<sup>[[8]](#references)</sup>
+Tùy chọn `-w` mở hệ thống tệp ở chế độ đọc-ghi, còn lệnh `write` sao chép một tệp gốc vào hệ thống tệp đã mở. Tránh dùng tùy chọn này trên hệ thống tệp đang được gắn kết và hoạt động, vì chỉnh sửa trực tiếp có thể làm hỏng hệ thống tệp; nếu có thể, hãy thao tác trên ảnh ngoại tuyến.<sup>[[8]](#references)</sup>
 
 ```bash
 debugfs -w /dev/sda1
 debugfs:  write /tmp/asd1.txt /tmp/asd2.txt
 ```
 
-## Video Group
+## Nhóm Video
 
-Using the command `w` you can find **who is logged on the system** and it will show an output like the following one.<sup>[[20]](#references)</sup>
+Dùng lệnh `w`, bạn có thể tìm hiểu **ai đang đăng nhập vào hệ thống**. Lệnh này sẽ hiển thị kết quả như sau.<sup>[[20]](#references)</sup>
 
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
@@ -210,38 +210,38 @@ yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 
-The **tty1** entry identifies the first Linux virtual console; it does not by itself prove that a user is physically present at the machine, especially in containers or other environments.<sup>[[21]](#references)</sup>
+Mục **tty1** xác định virtual console Linux đầu tiên; bản thân mục này không chứng minh rằng có người dùng đang hiện diện trực tiếp tại máy, đặc biệt là trong container hoặc các môi trường khác.<sup>[[21]](#references)</sup>
 
-On systems exposing a readable framebuffer device, membership in the **video** group may grant access to that device. The Linux framebuffer interface documents `/dev/fb0` as a readable memory device that can be copied for a screen snapshot; the `/sys/class/graphics/fb0/virtual_size` path is available only where that fbdev sysfs attribute is present, so check the target first.<sup>[[7]](#references)[[9]](#references)</sup>
+Trên các hệ thống cho phép đọc framebuffer device, thành viên của nhóm **video** có thể được cấp quyền truy cập vào thiết bị đó. Tài liệu về giao diện Linux framebuffer mô tả `/dev/fb0` là thiết bị bộ nhớ có thể đọc, nội dung của thiết bị này có thể được sao chép để chụp ảnh màn hình; đường dẫn `/sys/class/graphics/fb0/virtual_size` chỉ khả dụng khi có thuộc tính fbdev sysfs này, vì vậy hãy kiểm tra hệ thống mục tiêu trước.<sup>[[7]](#references)[[9]](#references)</sup>
 
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
 
-If the installed **GIMP** version exposes a raw-data importer, open **`screen.raw`** with that importer; support and controls vary by version and plug-in.<sup>[[22]](#references)</sup>
+Nếu phiên bản **GIMP** đã cài có trình nhập dữ liệu thô, hãy mở **`screen.raw`** bằng trình nhập đó; khả năng hỗ trợ và các điều khiển có thể khác nhau tùy phiên bản và plug-in.<sup>[[22]](#references)</sup>
 
-![Disk Group - Video Group: To open the raw image you can use GIMP , select the screen.raw file and select as file type Raw image data](<../../../images/image (463).png>)
+![Disk Group - Video Group: Để mở ảnh raw, bạn có thể dùng GIMP, chọn tệp screen.raw và chọn Raw image data làm loại tệp](<../../../images/image (463).png>)
 
-Set the image Width and Height to match the framebuffer geometry; try the available pixel formats/Image Types until the output is legible.<sup>[[9]](#references)</sup>
+Đặt Width và Height của ảnh khớp với hình học framebuffer; thử các định dạng pixel/Image Types hiện có cho đến khi đầu ra dễ đọc.<sup>[[9]](#references)</sup>
 
-![Disk Group - Video Group: Then modify the Width and Height to the ones used on the screen and check different Image Types (and select the one that shows better the screen)](<../../../images/image (317).png>)
+![Disk Group - Video Group: Sau đó thay đổi Width và Height theo kích thước màn hình, rồi thử các Image Types khác nhau (và chọn loại hiển thị màn hình rõ nhất)](<../../../images/image (317).png>)
 
 ## Root Group
 
-Membership in the **root** group does not provide root's UID, but group-writable files owned by `root` can still be interesting when privileged services or libraries consume them. Verify the file's actual permissions and how it is used before treating it as a privilege-escalation path.
+Việc thuộc nhóm **root** không cấp UID của root, nhưng các tệp cho phép nhóm ghi và thuộc sở hữu của `root` vẫn có thể đáng chú ý nếu dịch vụ hoặc thư viện có đặc quyền sử dụng chúng. Hãy xác minh quyền thực tế của tệp và cách tệp được sử dụng trước khi xem đây là một hướng leo thang đặc quyền.
 
-**Check which files root members can modify**:
+**Kiểm tra những tệp mà thành viên nhóm root có thể chỉnh sửa**:
 
 ```bash
 find / -group root -perm -g=w 2>/dev/null
 ```
 
-## Docker Group
+## Nhóm Docker
 
-Membership in the `docker` group grants root-level access to the Docker daemon on standard rootful installs. Because bind mounts are read-write by default, a user who can control that daemon can mount the host's `/` into a container and alter host files; this effectively gives root on the host.<sup>[[13]](#references)[[14]](#references)[[15]](#references)</sup>
+Thành viên của nhóm `docker` được cấp quyền truy cập cấp root vào Docker daemon trên các bản cài đặt rootful tiêu chuẩn. Vì bind mount mặc định có quyền đọc-ghi, người có thể kiểm soát daemon đó có thể mount `/` của host vào container và sửa đổi các tệp trên host; điều này trên thực tế cấp quyền root trên host.<sup>[[13]](#references)[[14]](#references)[[15]](#references)</sup>
 
-Group membership may be out of sync between `/etc/group`, `/etc/gshadow`, and the current process token. If a user is absent from `id -nG` but `newgrp docker` succeeds, check the group shown by `id` in the new shell and test whether the Docker socket is actually writable and serves a rootful daemon. The group name alone does not establish host control. Bound any automated `newgrp` probe so a password prompt cannot stall enumeration.
+Thông tin thành viên nhóm có thể không đồng bộ giữa `/etc/group`, `/etc/gshadow` và token của tiến trình hiện tại. Nếu người dùng không xuất hiện trong `id -nG` nhưng `newgrp docker` chạy thành công, hãy kiểm tra nhóm được hiển thị bởi `id` trong shell mới, đồng thời xác minh liệu socket Docker có thực sự ghi được và có phục vụ một daemon rootful hay không. Chỉ riêng tên nhóm không chứng minh được quyền kiểm soát host. Giới hạn thời gian cho mọi phép thử `newgrp` tự động để lời nhắc mật khẩu không làm việc liệt kê bị đình trệ.
 
 ```bash
 docker image #Get images from the docker service
@@ -255,13 +255,13 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bash
 ```
 
-Finally, if you don't like any of the suggestions of before, or they aren't working for some reason (docker api firewall?) you could always try to **run a privileged container and escape from it** as explained here:
+Cuối cùng, nếu bạn không thích bất kỳ gợi ý nào ở trên hoặc chúng không hiệu quả vì lý do nào đó (ví dụ: firewall của docker API), bạn luôn có thể thử **chạy một container privileged rồi escape khỏi container đó** như giải thích tại đây:
 
 {{#ref}}
 ../../containers-namespaces/container-security/
 {{#endref}}
 
-If you have write permissions over the docker socket read [**this post about how to escalate privileges abusing the docker socket**](../../linux-basics/linux-privilege-escalation/index.html#writable-docker-socket)**.**
+Nếu bạn có quyền ghi vào docker socket, hãy đọc [**bài viết này về cách leo thang đặc quyền bằng cách lạm dụng docker socket**](../../linux-basics/linux-privilege-escalation/index.html#writable-docker-socket)**.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -271,56 +271,55 @@ https://github.com/KrustyHack/docker-privilege-escalation
 https://fosterelli.co/privilege-escalation-via-docker.html
 {{#endref}}
 
-## lxc/lxd Group
+## Nhóm lxc/lxd
 
 {{#ref}}
 lxd-privilege-escalation.md
 {{#endref}}
 
-## Adm Group
+## Nhóm Adm
 
-Usually **members** of the group **`adm`** have permissions to **read log** files located inside _/var/log/_.\
-Therefore, if you have compromised a user inside this group you should definitely take a **look to the logs**.<sup>[[7]](#references)</sup>
+Thông thường, **các thành viên** của nhóm **`adm`** có quyền **đọc các tệp log** trong _/var/log/_.\
+Vì vậy, nếu bạn đã xâm nhập được một người dùng thuộc nhóm này, hãy chắc chắn **kiểm tra các log**.<sup>[[7]](#references)</sup>
 
-## Backup / Operator / lp / Mail groups
+## Nhóm Backup / Operator / lp / Mail
 
-These groups have service- and distribution-specific meanings. Debian documents `backup` for delegated backup/restore, `lp` for printer daemons, and `mail` for `/var/mail`, so check local permissions before treating membership as a privilege path.<sup>[[7]](#references)</sup>
+Các nhóm này có ý nghĩa riêng tùy theo dịch vụ và bản phân phối. Debian ghi nhận `backup` dùng cho việc ủy quyền sao lưu/khôi phục, `lp` dành cho các daemon máy in và `mail` dành cho `/var/mail`, vì vậy hãy kiểm tra quyền cục bộ trước khi xem việc thuộc các nhóm này là một con đường leo thang đặc quyền.<sup>[[7]](#references)</sup>
 
-They are often **credential-discovery** vectors rather than direct root vectors:
-- **backup**: may expose archives with configs, keys, DB dumps, or tokens.
-- **operator**: platform-specific operational access that can leak sensitive runtime data.
-- **lp**: print queues/spools can contain document contents.
-- **mail**: mail spools can expose reset links, OTPs, and internal credentials.
+Chúng thường là các vector **tìm kiếm thông tin xác thực** hơn là vector trực tiếp dẫn đến root:
+- **backup**: có thể làm lộ các bản lưu trữ chứa cấu hình, khóa, bản dump DB hoặc token.
+- **operator**: quyền truy cập vận hành tùy nền tảng, có thể làm lộ dữ liệu nhạy cảm trong thời gian chạy.
+- **lp**: hàng đợi/bộ đệm in có thể chứa nội dung tài liệu.
+- **mail**: các vùng lưu trữ thư có thể làm lộ liên kết đặt lại mật khẩu, OTP và thông tin xác thực nội bộ.
 
-Treat membership here as a high-value data exposure finding and pivot through password/token reuse.
+Hãy xem việc thuộc các nhóm này là một phát hiện có giá trị cao về rò rỉ dữ liệu và pivot bằng cách tái sử dụng mật khẩu/token.
 
-## Auth group
+## Nhóm Auth
 
-On OpenBSD, when S/Key is configured, `/etc/skey` is owned by `root:auth` and access to its records requires group `auth`; YubiKey records are stored in `/var/db/yubikey`.<sup>[[16]](#references)[[17]](#references)</sup> A vulnerable OpenBSD 6.6 configuration with S/Key or YubiKey enabled allowed local users with `auth` privileges to become root; Qualys documents the prerequisite and exploit chain, and the linked PoC implements it.<sup>[[18]](#references)[[19]](#references)</sup>
+Trên OpenBSD, khi S/Key được cấu hình, `/etc/skey` thuộc sở hữu của `root:auth` và cần có nhóm `auth` để truy cập các bản ghi; bản ghi YubiKey được lưu trong `/var/db/yubikey`.<sup>[[16]](#references)[[17]](#references)</sup> Một cấu hình OpenBSD 6.6 dễ bị tổn thương khi bật S/Key hoặc YubiKey cho phép người dùng cục bộ có quyền `auth` trở thành root; Qualys mô tả điều kiện tiên quyết và chuỗi khai thác, còn PoC được liên kết triển khai cách khai thác đó.<sup>[[18]](#references)[[19]](#references)</sup>
 
 ## References
 
-- [1] [pkexec/pkttyagent authentication without a GUI session (NixOS issue #18012)](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)
+- [1] [Xác thực pkexec/pkttyagent không cần phiên GUI (NixOS issue #18012)](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)
 - [2] [SystemGroups - Debian Wiki](https://wiki.debian.org/SystemGroups)
-- [3] [sudoers(5) — sudo — Debian Manpages](https://manpages.debian.org/bookworm/sudo/sudoers.5.en.html)
-- [4] [pkexec — polkit Reference Manual](https://polkit.pages.freedesktop.org/polkit/pkexec.1.html)
-- [5] [polkit — polkit Reference Manual](https://polkit.pages.freedesktop.org/polkit/polkit.8.html)
-- [6] [shadow(5) — Linux manual page](https://man7.org/linux/man-pages/man5/shadow.5.html)
-- [7] [Securing Debian Manual](https://www.debian.org/doc/manuals/securing-debian-manual/securing-debian-manual.en.pdf)
-- [8] [debugfs(8) — Linux manual page](https://www.man7.org/linux/man-pages/man8/debugfs.8.html)
-- [9] [The Frame Buffer Device — The Linux Kernel documentation](https://docs.kernel.org/fb/framebuffer.html)
-- [10] [update-motd(5) — Ubuntu Manpages](https://manpages.ubuntu.com/manpages/resolute/man5/update-motd.5.html)
-- [11] [run-parts(8) — Debian Manpages](https://manpages.debian.org/unstable/debianutils/run-parts.8.en.html)
-- [12] [pspy — unprivileged Linux process snooping](https://github.com/DominicBreuker/pspy)
-- [13] [Docker Engine security](https://docs.docker.com/engine/security/)
-- [14] [Manage Docker as a non-root user](https://docs.docker.com/engine/install/linux-postinstall)
-- [15] [Running containers — Docker Docs](https://docs.docker.com/engine/containers/run/)
-- [16] [skey(5) — OpenBSD manual pages](https://man.openbsd.org/skey.5)
-- [17] [login_yubikey(8) — OpenBSD manual pages](https://man.openbsd.org/login_yubikey.8)
-- [18] [Authentication vulnerabilities in OpenBSD — Qualys Security Advisory](https://www.openwall.com/lists/oss-security/2019/12/04/5)
-- [19] [openbsd-authroot — local exploit PoC](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
-- [20] [w(1) — Linux manual page](https://man7.org/linux/man-pages/man1/w.1.html)
-- [21] [Linux allocated devices (4.x+ version)](https://docs.kernel.org/6.16/admin-guide/devices.html)
-- [22] [Image Import and Export — GIMP Documentation](https://docs.gimp.org/3.0/en/gimp-prefs-import-export.html)
-
+- [3] [sudoers(5) — sudo — Trang hướng dẫn Debian](https://manpages.debian.org/bookworm/sudo/sudoers.5.en.html)
+- [4] [pkexec — Sổ tay tham khảo polkit](https://polkit.pages.freedesktop.org/polkit/pkexec.1.html)
+- [5] [polkit — Sổ tay tham khảo polkit](https://polkit.pages.freedesktop.org/polkit/polkit.8.html)
+- [6] [shadow(5) — Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man5/shadow.5.html)
+- [7] [Sổ tay bảo mật Debian](https://www.debian.org/doc/manuals/securing-debian-manual/securing-debian-manual.en.pdf)
+- [8] [debugfs(8) — Trang hướng dẫn Linux](https://www.man7.org/linux/man-pages/man8/debugfs.8.html)
+- [9] [Thiết bị Frame Buffer — Tài liệu Linux Kernel](https://docs.kernel.org/fb/framebuffer.html)
+- [10] [update-motd(5) — Trang hướng dẫn Ubuntu](https://manpages.ubuntu.com/manpages/resolute/man5/update-motd.5.html)
+- [11] [run-parts(8) — Trang hướng dẫn Debian](https://manpages.debian.org/unstable/debianutils/run-parts.8.en.html)
+- [12] [pspy — theo dõi tiến trình Linux không cần đặc quyền](https://github.com/DominicBreuker/pspy)
+- [13] [Bảo mật Docker Engine](https://docs.docker.com/engine/security/)
+- [14] [Quản lý Docker bằng người dùng không phải root](https://docs.docker.com/engine/install/linux-postinstall)
+- [15] [Chạy container — Tài liệu Docker](https://docs.docker.com/engine/containers/run/)
+- [16] [skey(5) — Trang hướng dẫn OpenBSD](https://man.openbsd.org/skey.5)
+- [17] [login_yubikey(8) — Trang hướng dẫn OpenBSD](https://man.openbsd.org/login_yubikey.8)
+- [18] [Các lỗ hổng xác thực trong OpenBSD — Thông báo bảo mật Qualys](https://www.openwall.com/lists/oss-security/2019/12/04/5)
+- [19] [openbsd-authroot — PoC khai thác cục bộ](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+- [20] [w(1) — Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man1/w.1.html)
+- [21] [Các thiết bị được cấp phát trong Linux (phiên bản 4.x trở lên)](https://docs.kernel.org/6.16/admin-guide/devices.html)
+- [22] [Nhập và xuất hình ảnh — Tài liệu GIMP](https://docs.gimp.org/3.0/en/gimp-prefs-import-export.html)
 {{#include ../../../banners/hacktricks-training.md}}

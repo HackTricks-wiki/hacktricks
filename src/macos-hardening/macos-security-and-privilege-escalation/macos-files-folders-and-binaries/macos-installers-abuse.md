@@ -1,24 +1,24 @@
-# macOS Installers Abuse
+# Lạm dụng trình cài đặt macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Pkg Basic Information
+## Thông tin cơ bản về Pkg
 
-A macOS **installer package** (also known as a `.pkg` file) is a file format used by macOS to **distribute software**. These files are like a **box that contains everything a piece of software** needs to install and run correctly.
+**Gói cài đặt** macOS (còn được gọi là tệp `.pkg`) là định dạng tệp được macOS sử dụng để **phân phối phần mềm**. Những tệp này giống như một **chiếc hộp chứa mọi thứ mà phần mềm cần** để cài đặt và chạy đúng cách.
 
-The package file itself is an archive that holds a **hierarchy of files and directories that will be installed on the target** computer. It can also include **scripts** to perform tasks before and after the installation, like setting up configuration files or cleaning up old versions of the software.
+Bản thân tệp package là một kho lưu trữ chứa **cấu trúc phân cấp các tệp và thư mục sẽ được cài đặt trên máy tính đích**. Tệp cũng có thể bao gồm **script** để thực hiện các tác vụ trước và sau khi cài đặt, chẳng hạn như thiết lập tệp cấu hình hoặc dọn dẹp các phiên bản phần mềm cũ.
 
-### Package Structure
+### Cấu trúc package
 
 <figure><img src="../../../images/Pasted Graphic.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption></figcaption></figure>
 
-- **Distribution (xml)**: Customizations (title, welcome text…) and script/installation checks
-- **PackageInfo (xml)**: Info, install requirements, install location, paths to scripts to run
-- **Bill of materials (bom)**: List of files to install, update or remove with file permissions
-- **Payload (CPIO archive gzip compressed)**: Files to install in the `install-location` from PackageInfo
-- **Scripts (CPIO archive gzip compressed)**: Pre and post install scripts and more resources extracted to a temp directory for execution.
+- **Distribution (xml)**: Tùy chỉnh (tiêu đề, văn bản chào mừng…) và kiểm tra script/cài đặt
+- **PackageInfo (xml)**: Thông tin, yêu cầu cài đặt, vị trí cài đặt, đường dẫn đến các script cần chạy
+- **Bill of materials (bom)**: Danh sách các tệp cần cài đặt, cập nhật hoặc xóa cùng quyền truy cập tệp
+- **Payload (kho lưu trữ CPIO được nén bằng gzip)**: Các tệp cần cài đặt vào `install-location` trong PackageInfo
+- **Scripts (kho lưu trữ CPIO được nén bằng gzip)**: Các script chạy trước và sau khi cài đặt cùng nhiều tài nguyên khác được giải nén vào thư mục tạm để thực thi.
 
-### Decompress
+### Giải nén
 
 ```bash
 # Tool to directly get the files inside a package
@@ -34,11 +34,11 @@ cat Scripts | gzip -dc | cpio -i
 cpio -i < Scripts
 ```
 
-In order to visualize the contents of the installer without decompressing it manually you can also use the free tool [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/).
+Để xem nội dung của trình cài đặt mà không cần tự giải nén, bạn cũng có thể dùng công cụ miễn phí [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/).
 
-### Static triage shortcuts
+### Mẹo phân tích tĩnh nhanh
 
-If the goal is analysis, try to **avoid opening the package with `Installer.app` first**. Some packages can execute code as soon as Installer opens them (for example via `system.run()` or installer plug-ins), so offline extraction is usually the safer starting point.
+Nếu mục tiêu là phân tích, hãy **tránh mở gói bằng `Installer.app` trước**. Một số gói có thể thực thi mã ngay khi Installer mở chúng (chẳng hạn thông qua `system.run()` hoặc plug-in của trình cài đặt), vì vậy bắt đầu bằng cách trích xuất ngoại tuyến thường an toàn hơn.
 
 ```bash
 PKG="Suspicious.pkg"
@@ -58,34 +58,34 @@ xmllint --format "$OUT/Distribution" 2>/dev/null | sed -n '1,200p'
 rg -n 'system\.(run|runOnce)|<script>|launchctl|osascript|curl|chmod 4[0-7]{3}|sudo -u |\$USER|\$HOME|/tmp/|/var/tmp/' "$OUT"
 ```
 
-## DMG Basic Information
+## Thông tin cơ bản về DMG
 
-DMG files, or Apple Disk Images, are a file format used by Apple's macOS for disk images. A DMG file is essentially a **mountable disk image** (it contains its own filesystem) that contains raw block data typically compressed and sometimes encrypted. When you open a DMG file, macOS **mounts it as if it were a physical disk**, allowing you to access its contents.
+Tệp DMG, hay Apple Disk Images, là định dạng tệp được macOS của Apple sử dụng cho ảnh đĩa. Tệp DMG về cơ bản là một **ảnh đĩa có thể mount** (chứa filesystem riêng) với dữ liệu khối thô, thường được nén và đôi khi được mã hóa. Khi mở tệp DMG, macOS **mount tệp như thể đó là một ổ đĩa vật lý**, cho phép bạn truy cập nội dung bên trong.
 
 > [!CAUTION]
-> Note that **`.dmg`** installers support **so many formats** that in the past some of them containing vulnerabilities were abused to obtain **kernel code execution**.
+> Lưu ý rằng trình cài đặt **`.dmg`** hỗ trợ **rất nhiều định dạng**, đến mức trước đây một số định dạng có lỗ hổng đã bị khai thác để đạt được **thực thi mã kernel**.
 
-### Disk Image Structure
+### Cấu trúc ảnh đĩa
 
 <figure><img src="../../../images/image (225).png" alt=""><figcaption></figcaption></figure>
 
-The hierarchy of a DMG file can be different based on the content. However, for application DMGs, it usually follows this structure:
+Cấu trúc phân cấp của tệp DMG có thể khác nhau tùy theo nội dung. Tuy nhiên, DMG dành cho ứng dụng thường có cấu trúc như sau:
 
-- Top Level: This is the root of the disk image. It often contains the application and possibly a link to the Applications folder.
-  - Application (.app): This is the actual application. In macOS, an application is typically a package that contains many individual files and folders that make up the application.
-  - Applications Link: This is a shortcut to the Applications folder in macOS. The purpose of this is to make it easy for you to install the application. You can drag the .app file to this shortcut to install the app.
+- Cấp cao nhất: Đây là thư mục gốc của ảnh đĩa. Thư mục này thường chứa ứng dụng và có thể có liên kết đến thư mục Applications.
+  - Ứng dụng (.app): Đây là ứng dụng thực tế. Trong macOS, ứng dụng thường là một package chứa nhiều tệp và thư mục riêng lẻ cấu thành ứng dụng.
+  - Liên kết Applications: Đây là lối tắt đến thư mục Applications trong macOS. Mục đích là giúp bạn cài đặt ứng dụng dễ dàng hơn. Bạn có thể kéo tệp .app vào lối tắt này để cài đặt ứng dụng.
 
-## Privesc via pkg abuse
+## Privesc qua việc lạm dụng pkg
 
-### Execution from public directories
+### Thực thi từ các thư mục công khai
 
-If a pre- or post-installation script executes a file such as **`/var/tmp/Installerutil`** and an attacker can replace that file, the attacker can escalate privileges when the installer invokes it. The cited talks and walkthrough show variants of this insecure external-script pattern.<sup>[[1]](#references)</sup><sup>[[3]](#references)</sup><sup>[[4]](#references)</sup>
+Nếu script trước hoặc sau khi cài đặt thực thi một tệp như **`/var/tmp/Installerutil`** và kẻ tấn công có thể thay thế tệp đó, kẻ tấn công có thể leo thang đặc quyền khi trình cài đặt gọi tệp này. Các bài nói chuyện và hướng dẫn được trích dẫn trình bày những biến thể của kiểu sử dụng script bên ngoài không an toàn này.<sup>[[1]](#references)</sup><sup>[[3]](#references)</sup><sup>[[4]](#references)</sup>
 
 <figure><img src="../../../images/Pasted Graphic 5.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption><p><a href="https://www.youtube.com/watch?v=kCXhIYtODBg">https://www.youtube.com/watch?v=kCXhIYtODBg</a></p></figcaption></figure>
 
 ### AuthorizationExecuteWithPrivileges
 
-This is a [public function](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) that several installers and updaters will call to **execute something as root**. This function accepts the **path** of the **file** to **execute** as parameter, however, if an attacker could **modify** this file, he will be able to **abuse** its execution with root to **escalate privileges**.
+Đây là một [hàm công khai](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) mà một số trình cài đặt và trình cập nhật gọi để **thực thi nội dung nào đó với quyền root**. Hàm này nhận **đường dẫn** đến **tệp** cần **thực thi** làm tham số. Tuy nhiên, nếu kẻ tấn công có thể **sửa đổi** tệp này, họ sẽ có thể **lạm dụng** việc thực thi tệp với quyền root để **leo thang đặc quyền**.
 
 ```bash
 # Breakpoint in the function to check which file is loaded
@@ -93,15 +93,15 @@ This is a [public function](https://developer.apple.com/documentation/security/1
 # You could also check FS events to find this misconfig
 ```
 
-For more info check this talk: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)<sup>[[8]](#references)</sup>
+Để biết thêm thông tin, hãy xem bài nói chuyện này: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)<sup>[[8]](#references)</sup>
 
-### Environment and shebang abuse
+### Lạm dụng environment và shebang
 
-Modern PackageKit bugs showed that installer scripts are often executed as **trusted root code** while still keeping attacker-controlled context nearby. When auditing vendor packages, pay special attention to:
+Các lỗi hiện đại trong PackageKit cho thấy các script cài đặt thường được thực thi dưới dạng **mã root đáng tin cậy**, trong khi vẫn có ngữ cảnh do attacker kiểm soát ở gần đó. Khi kiểm tra các gói của nhà cung cấp, hãy đặc biệt chú ý đến:
 
-- Shell interpreters such as `#!/bin/zsh` / `#!/bin/bash`
-- Calls like `sudo -u $USER`, `launchctl asuser`, or any logic that trusts `$USER`, `$HOME`, `PATH`, `TMPDIR`, or relative paths
-- Non-shell interpreters that may load user-controlled init files or libraries
+- Các trình thông dịch shell như `#!/bin/zsh` / `#!/bin/bash`
+- Các lệnh như `sudo -u $USER`, `launchctl asuser` hoặc bất kỳ logic nào tin cậy `$USER`, `$HOME`, `PATH`, `TMPDIR` hay các đường dẫn tương đối
+- Các trình thông dịch không phải shell có thể tải các tệp khởi tạo hoặc thư viện do người dùng kiểm soát
 
 ```bash
 pkgutil --expand-full Target.pkg /tmp/target-pkg
@@ -109,18 +109,18 @@ find /tmp/target-pkg -type f \( -name preinstall -o -name postinstall \) -exec s
 rg -n '^#!/bin/(zsh|bash)|sudo -u |launchctl asuser|\$USER|\$HOME|PATH=|/usr/bin/env ' /tmp/target-pkg
 ```
 
-For the 2024 PackageKit root-environment bug (`~/.zshenv` / `~/.bash*` inheritance during user-initiated installs), check [the generic macOS privesc page](../macos-privilege-escalation.md). If the package is **Apple-signed**, the same script bug can become **SIP/TCC-relevant** because `system_installd` may carry `com.apple.rootless.install.heritable`; see [the SIP page](../macos-security-protections/macos-sip.md).<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup>
+Với lỗi môi trường root của PackageKit năm 2024 (kế thừa `~/.zshenv` / `~/.bash*` trong quá trình cài đặt do người dùng khởi chạy), hãy xem [trang macOS privesc tổng quát](../macos-privilege-escalation.md). Nếu package được **Apple ký**, cùng lỗi script này có thể trở nên **liên quan đến SIP/TCC** vì `system_installd` có thể mang `com.apple.rootless.install.heritable`; xem [trang SIP](../macos-security-protections/macos-sip.md).<sup>[[5]](#references)</sup><sup>[[6]](#references)</sup>
 
-### Stateful inputs and implicit callbacks
+### Đầu vào có trạng thái và callback ngầm
 
-Do not restrict the review to obvious command injection. A root `preinstall`/`postinstall` can cross a trust boundary whenever it consumes **state that existed before installation**: predictable files in `/tmp` or `/var/tmp`, an existing user-writable installation tree, configuration files, repository metadata, or a username later passed to `chown`.<sup>[[9]](#references)[[10]](#references)</sup>
+Đừng chỉ giới hạn việc rà soát ở lỗi command injection hiển nhiên. `preinstall`/`postinstall` chạy với quyền root có thể vượt qua ranh giới tin cậy bất cứ khi nào nó sử dụng **trạng thái đã tồn tại trước khi cài đặt**: các file có tên dễ đoán trong `/tmp` hoặc `/var/tmp`, cây cài đặt hiện có mà người dùng có quyền ghi, file cấu hình, metadata của repository hoặc tên người dùng sau đó được truyền cho `chown`.<sup>[[9]](#references)[[10]](#references)</sup>
 
-Two recent Homebrew installer flaws illustrate reusable variants:
+Hai lỗi gần đây trong trình cài đặt Homebrew cho thấy các biến thể có thể tái sử dụng:
 
-- **Attacker-selected ownership:** a package-user override was read from the predictable `/var/tmp/.homebrew_pkg_user.plist` without validating its owner, mode, ACLs, symlink state, or provenance. A low-privileged user could select their own account and a later root `postinstall` would recursively transfer ownership of the Homebrew tree and cache to it. This was a privilege-assignment flaw, not shell injection.<sup>[[9]](#references)</sup>
-- **Tool callbacks from an existing tree:** a root `postinstall` ran `git checkout` inside an installation that was intentionally writable by its normal user. Planting an executable `.git/hooks/post-checkout` therefore converted a later GUI/MDM package upgrade into root code execution. On the Intel path, merging the packaged `.git` directory into the existing repository also preserved attacker-added hooks.<sup>[[10]](#references)</sup>
+- **Quyền sở hữu do kẻ tấn công lựa chọn:** một giá trị ghi đè người dùng package được đọc từ `/var/tmp/.homebrew_pkg_user.plist` có thể dự đoán, nhưng không xác thực chủ sở hữu, mode, ACL, trạng thái symlink hay nguồn gốc. Người dùng có đặc quyền thấp có thể chọn tài khoản của mình, rồi `postinstall` chạy với quyền root sẽ chuyển quyền sở hữu đệ quy cây Homebrew và cache cho tài khoản đó. Đây là lỗi gán đặc quyền, không phải shell injection.<sup>[[9]](#references)</sup>
+- **Callback công cụ từ cây hiện có:** `postinstall` chạy với quyền root thực thi `git checkout` bên trong một bản cài đặt được chủ ý cho phép người dùng thông thường ghi vào. Do đó, việc đặt một file thực thi `.git/hooks/post-checkout` sẽ biến lần nâng cấp package qua GUI/MDM sau đó thành thực thi mã với quyền root. Trên đường xử lý Intel, việc hợp nhất thư mục `.git` trong package vào repository hiện có cũng giữ lại các hook do kẻ tấn công thêm vào.<sup>[[10]](#references)</sup>
 
-The second primitive is easy to model during an authorized test; the trigger occurs only when the vulnerable privileged installer later runs a hook-capable Git operation.<sup>[[10]](#references)</sup>
+Primitive thứ hai dễ mô phỏng trong một bài kiểm thử được ủy quyền; nó chỉ được kích hoạt khi trình cài đặt đặc quyền bị lỗ hổng chạy thao tác Git hỗ trợ hook sau đó.<sup>[[10]](#references)</sup>
 
 ```bash
 repo=/path/to/user-writable/install
@@ -133,7 +133,7 @@ chmod +x "$repo/.git/hooks/post-checkout"
 # Wait for the privileged .pkg install/upgrade; do not invoke it as root just to test.
 ```
 
-Expand nested packages and map every attacker-controlled source to a privileged sink. In addition to direct execution, search for parsers, ownership changes and tools with plug-in/hook mechanisms.<sup>[[9]](#references)[[10]](#references)</sup>
+Mở rộng các gói lồng nhau và ánh xạ mọi nguồn do attacker kiểm soát đến sink có đặc quyền. Ngoài việc thực thi trực tiếp, hãy tìm các bộ phân tích cú pháp, thao tác thay đổi quyền sở hữu và công cụ có cơ chế plug-in/hook.<sup>[[9]](#references)[[10]](#references)</sup>
 
 ```bash
 PKG=Target.pkg
@@ -144,36 +144,36 @@ grep -RniE '(^|[;&|[:space:]])(git|svn|hg|npm|pip|ruby|python)[[:space:]]' "$OUT
 grep -RniE '(checkout|reset|submodule|hooksPath|GIT_(DIR|CONFIG)|PYTHONPATH|RUBYOPT)' "$OUT"
 ```
 
-For hardening, move privileged inputs into a root-owned staging directory and validate each path immediately before use (regular file, expected owner/mode, no unsafe ACL, and no symlink traversal). Avoid recursively changing ownership from an untrusted identity. When Git must run over a pre-existing tree, suppress callbacks explicitly (for example, `git -c core.hooksPath=/dev/null ...`) or replace repository metadata atomically before invoking Git.<sup>[[9]](#references)[[10]](#references)</sup>
+Để hardening, hãy chuyển các đầu vào có đặc quyền vào một thư mục staging do root sở hữu và xác thực từng đường dẫn ngay trước khi sử dụng (tệp thông thường, chủ sở hữu/chế độ quyền như mong đợi, không có ACL không an toàn và không đi qua symlink). Tránh thay đổi quyền sở hữu đệ quy từ một danh tính không đáng tin cậy. Khi Git phải chạy trên một cây thư mục có sẵn, hãy chủ động vô hiệu hóa callback (ví dụ: `git -c core.hooksPath=/dev/null ...`) hoặc thay thế nguyên tử metadata của repository trước khi gọi Git.<sup>[[9]](#references)[[10]](#references)</sup>
 
-### Execution by mounting
+### Thực thi bằng cách mount
 
-If an installer writes to `/tmp/fixedname/bla/bla`, it's possible to **create a mount** over `/tmp/fixedname` with noowners so you could **modify any file during the installation** to abuse the installation process.
+Nếu installer ghi vào `/tmp/fixedname/bla/bla`, có thể **tạo một mount** chồng lên `/tmp/fixedname` với tùy chọn noowners để bạn có thể **sửa bất kỳ tệp nào trong quá trình cài đặt** nhằm lạm dụng quy trình cài đặt.
 
-An example of this is **CVE-2021-26089** which managed to **overwrite a periodic script** to get execution as root. For more information take a look at the talk: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)<sup>[[7]](#references)</sup>
+Một ví dụ là **CVE-2021-26089**, khai thác được để **ghi đè một script chạy định kỳ** và thực thi với quyền root. Để biết thêm thông tin, hãy xem bài nói chuyện: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)<sup>[[7]](#references)</sup>
 
-## pkg as malware
+## pkg dưới dạng malware
 
-### Empty Payload
+### Payload rỗng
 
-It's possible to just generate a **`.pkg`** file with **pre and post-install scripts** without any real payload apart from the malware inside the scripts.<sup>[[2]](#references)</sup>
+Có thể chỉ tạo một tệp **`.pkg`** với các script **pre-install và post-install**, không có payload thực sự nào ngoài malware bên trong các script đó.<sup>[[2]](#references)</sup>
 
-### JS in Distribution xml
+### JS trong Distribution xml
 
-It's possible to add **`<script>`** tags in the **distribution xml** file of the package and that code will get executed and it can **execute commands** using **`system.run`**:
+Có thể thêm thẻ **`<script>`** vào tệp **distribution xml** của package; mã bên trong sẽ được thực thi và có thể **chạy lệnh** bằng **`system.run`**:
 
 <figure><img src="../../../images/image (1043).png" alt=""><figcaption></figcaption></figure>
 
-In distribution packages this usually depends on the top-level `Distribution` file enabling external scripts, for example with `allow-external-scripts="true"`. Therefore reviewing only `preinstall` / `postinstall` is not enough: the **Distribution XML itself** can contain `installation-check` / `volume-check` hooks and direct `system.run()` / `system.runOnce()` execution paths.
+Trong các distribution package, việc này thường phụ thuộc vào việc tệp `Distribution` cấp cao nhất cho phép script bên ngoài, chẳng hạn bằng `allow-external-scripts="true"`. Vì vậy, chỉ xem xét `preinstall` / `postinstall` là chưa đủ: bản thân **Distribution XML** có thể chứa các hook `installation-check` / `volume-check` và đường dẫn thực thi trực tiếp `system.run()` / `system.runOnce()`.
 
 ```bash
 xmllint --format Distribution | sed -n '1,200p'
 rg -n 'allow-external-scripts|system\.(run|runOnce)|installation-check|volume-check|function ' Distribution
 ```
 
-### Backdoored Installer
+### Trình cài đặt bị cài backdoor
 
-Malicious installer using a script and JS code inside dist.xml
+Trình cài đặt độc hại sử dụng script và mã JS bên trong dist.xml
 
 ```bash
 # Package structure
@@ -240,14 +240,14 @@ productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pk
 
 ## References
 
-- [1] [DEF CON 27 - Unpacking Pkgs A Look Inside Macos Installer Packages And Common Security Flaws](https://www.youtube.com/watch?v=iASSG0_zobQ)
-- [2] [OBTS v4.0: "The Wild World of macOS Installers" - Tony Lambert](https://www.youtube.com/watch?v=Eow5uNHtmIg)
-- [3] [DEF CON 27 - Unpacking Pkgs A Look Inside MacOS Installer Packages](https://www.youtube.com/watch?v=kCXhIYtODBg)
-- [4] [RedTeamRecipe – macOS Red Teaming: Exploiting Installer Packages](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
-- [5] [CVE-2024-27822: macOS PackageKit Privilege Escalation](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
-- [6] [Breaking SIP with Apple-signed Packages](https://www.l3harris.com/newsroom/editorial/2024/03/breaking-sip-apple-signed-packages)
-- [7] [OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl](https://www.youtube.com/watch?v=jSYPazD4VcE)
-- [8] [DEF CON 25 - Patrick Wardle - Death By 1000 Installers on macOS and it's all broken!](https://www.youtube.com/watch?v=lTOItyjTTkw)
-- [9] [Homebrew macOS installer trusts a user-controlled package-user plist](https://github.com/Homebrew/brew/security/advisories/GHSA-59v8-x8q4-px5c)
-- [10] [Root code execution via Git hooks in a macOS PKG postinstall](https://github.com/Homebrew/brew/security/advisories/GHSA-6689-q779-c33m)
+- [1] [DEF CON 27 - Giải nén Pkgs: Nhìn bên trong các gói cài đặt macOS và những lỗi bảo mật phổ biến](https://www.youtube.com/watch?v=iASSG0_zobQ)
+- [2] [OBTS v4.0: "Thế giới hoang dã của các bộ cài macOS" - Tony Lambert](https://www.youtube.com/watch?v=Eow5uNHtmIg)
+- [3] [DEF CON 27 - Giải nén Pkgs: Nhìn bên trong các gói cài đặt macOS](https://www.youtube.com/watch?v=kCXhIYtODBg)
+- [4] [RedTeamRecipe – Red Teaming macOS: Khai thác các gói cài đặt](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
+- [5] [CVE-2024-27822: Leo thang đặc quyền trong PackageKit của macOS](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
+- [6] [Phá vỡ SIP bằng các gói do Apple ký](https://www.l3harris.com/newsroom/editorial/2024/03/breaking-sip-apple-signed-packages)
+- [7] [OBTS v4.0: "Núi lỗi" - Csaba Fitzl](https://www.youtube.com/watch?v=jSYPazD4VcE)
+- [8] [DEF CON 25 - Patrick Wardle - Chết bởi 1000 bộ cài trên macOS, và mọi thứ đều hỏng!](https://www.youtube.com/watch?v=lTOItyjTTkw)
+- [9] [Bộ cài macOS của Homebrew tin tưởng plist package-user do người dùng kiểm soát](https://github.com/Homebrew/brew/security/advisories/GHSA-59v8-x8q4-px5c)
+- [10] [Thực thi mã với quyền root thông qua Git hooks trong postinstall của PKG macOS](https://github.com/Homebrew/brew/security/advisories/GHSA-6689-q779-c33m)
 {{#include ../../../banners/hacktricks-training.md}}

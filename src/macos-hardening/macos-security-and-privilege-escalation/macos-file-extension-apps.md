@@ -1,41 +1,41 @@
-# macOS File Extension & URL scheme app handlers
+# Trình xử lý ứng dụng cho phần mở rộng tệp và URL scheme trên macOS
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## LaunchServices Database
+## Cơ sở dữ liệu LaunchServices
 
-This is a database of all the installed applications in macOS that can be queried to get information about each installed application such as supported **URL schemes**, **document types**, **UTIs**, and default handlers.
+Đây là cơ sở dữ liệu chứa tất cả ứng dụng đã cài đặt trên macOS. Có thể truy vấn cơ sở dữ liệu này để lấy thông tin về từng ứng dụng đã cài đặt, chẳng hạn như **URL scheme**, **loại tài liệu**, **UTI** và trình xử lý mặc định.
 
-It's possible to dump this database with:
+Có thể dump cơ sở dữ liệu này bằng lệnh:
 
 ```
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump
 ```
 
-Or using the tool [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
+Hoặc sử dụng công cụ [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-**`/usr/libexec/lsd`** is the brain of the database. It provides **several XPC services** like `.lsd.installation`, `.lsd.open`, `.lsd.openurl`, and more. But it also **requires some entitlements** to applications to be able to use the exposed XPC functionalities, like `.launchservices.changedefaulthandler` or `.launchservices.changeurlschemehandler` to change default apps for MIME types or URL schemes and others.
+**`/usr/libexec/lsd`** là bộ não của cơ sở dữ liệu. Nó cung cấp **nhiều dịch vụ XPC** như `.lsd.installation`, `.lsd.open`, `.lsd.openurl` và các dịch vụ khác. Tuy nhiên, ứng dụng cũng **cần một số entitlements** để sử dụng các chức năng XPC được cung cấp, chẳng hạn như `.launchservices.changedefaulthandler` hoặc `.launchservices.changeurlschemehandler` để thay đổi ứng dụng mặc định cho các loại MIME hoặc URL scheme, cùng các chức năng khác.
 
-**`/System/Library/CoreServices/launchservicesd`** claims the service `com.apple.coreservices.launchservicesd` and can be queried to get information about running applications. It can be queried with the system tool **`/usr/bin/lsappinfo`** or with [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
+**`/System/Library/CoreServices/launchservicesd`** đăng ký dịch vụ `com.apple.coreservices.launchservicesd` và có thể được truy vấn để lấy thông tin về các ứng dụng đang chạy. Có thể truy vấn dịch vụ này bằng công cụ hệ thống **`/usr/bin/lsappinfo`** hoặc bằng [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-From an operator perspective, keep in mind there are usually **two useful views**:
+Ở góc độ vận hành, hãy nhớ rằng thường có **hai góc nhìn hữu ích**:
 
-- The **registration database** managed by LaunchServices / `lsd` (backed by `.csstore` files).
-- The **per-user effective defaults** stored in `~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist` inside the `LSHandlers` array.
+- **Cơ sở dữ liệu đăng ký** do LaunchServices / `lsd` quản lý (được lưu trong các tệp `.csstore`).
+- **Các giá trị mặc định hiệu lực theo từng người dùng** được lưu trong mảng `LSHandlers` của `~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist`.
 
-This distinction matters: an application can be **registered** as able to handle a type or scheme, but the **current default** may still be another bundle ID.
+Sự khác biệt này rất quan trọng: một ứng dụng có thể được **đăng ký** để xử lý một loại hoặc scheme, nhưng **ứng dụng mặc định hiện tại** vẫn có thể là một bundle ID khác.
 
-On recent macOS releases, registration discovery is not limited to `/Applications`: apps in other Spotlight-visible, accessible folders and mounted/shared volumes can enter the registry. Therefore, preserve the `path` and volume information from `lsregister -dump` during triage and do not assume that unregistering an app is durable while the bundle remains discoverable.<sup>[[4]](#references)</sup>
+Trên các phiên bản macOS gần đây, việc phát hiện ứng dụng đã đăng ký không chỉ giới hạn ở `/Applications`: ứng dụng trong các thư mục khác mà Spotlight có thể tìm kiếm và người dùng có thể truy cập, cũng như trên các volume được gắn kết/chia sẻ, đều có thể được đưa vào registry. Vì vậy, khi điều tra, hãy lưu lại thông tin `path` và volume từ `lsregister -dump`, và đừng cho rằng việc hủy đăng ký ứng dụng sẽ có hiệu lực lâu dài khi bundle vẫn còn được phát hiện.<sup>[[4]](#references)</sup>
 
-## File Extension & URL scheme app handlers
+## Trình xử lý ứng dụng cho phần mở rộng tệp và URL scheme
 
-The following line can be useful to find the applications that can open files depending on the extension:
+Dòng lệnh sau có thể hữu ích để tìm các ứng dụng có thể mở tệp dựa trên phần mở rộng:
 
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump | grep -E "path:|bindings:|name:"
 ```
 
-Or use something like [**SwiftDefaultApps**](https://github.com/Lord-Kamina/SwiftDefaultApps):
+Hoặc sử dụng thứ gì đó như [**SwiftDefaultApps**](https://github.com/Lord-Kamina/SwiftDefaultApps):
 
 ```bash
 ./swda getSchemes #Get all the available schemes
@@ -44,7 +44,7 @@ Or use something like [**SwiftDefaultApps**](https://github.com/Lord-Kamina/Swif
 ./swda getHandler --URL ftp #Get ftp handler
 ```
 
-You can also check the extensions supported by an application doing:
+Bạn cũng có thể kiểm tra các phần mở rộng được ứng dụng hỗ trợ bằng cách:
 
 ```bash
 cd /Applications/Safari.app/Contents
@@ -78,15 +78,15 @@ grep -A3 CFBundleTypeExtensions Info.plist  | grep string
 				<string>svg</string>
 ```
 
-## Enumerating effective handlers
+## Liệt kê các trình xử lý đang hoạt động
 
-The most useful file for the **current user's defaults** is usually:
+Tệp hữu ích nhất để xác định **các mặc định của người dùng hiện tại** thường là:
 
 ```bash
 ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist
 ```
 
-To dump **URL scheme** handlers from it:
+Để dump các trình xử lý **URL scheme** từ đó:
 
 ```bash
 plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist |
@@ -94,7 +94,7 @@ plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServi
       {scheme: .LSHandlerURLScheme, handler: (.LSHandlerRoleAll // .LSHandlerRoleViewer // .LSHandlerRoleEditor)}'
 ```
 
-To dump **content-type / UTI** handlers:
+Để dump các trình xử lý **content-type / UTI**:
 
 ```bash
 plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist |
@@ -102,13 +102,13 @@ plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServi
       {uti: .LSHandlerContentType, handler: (.LSHandlerRoleAll // .LSHandlerRoleViewer // .LSHandlerRoleEditor)}'
 ```
 
-To resolve the UTI tree of a sample file:
+Để phân giải cây UTI của một tệp mẫu:
 
 ```bash
 mdls -name kMDItemContentType -name kMDItemContentTypeTree ./sample.pdf
 ```
 
-If you want a friendlier CLI to query or change defaults:
+Nếu bạn muốn dùng CLI thân thiện hơn để truy vấn hoặc thay đổi các giá trị mặc định:
 
 ```bash
 # Classic tool
@@ -124,17 +124,17 @@ dutix targets show ftp
 dutix apps show Safari
 ```
 
-### Per-file `Open With` overrides
+### Ghi đè `Open With` theo từng tệp
 
-Handler resolution also has a **file-specific** layer. Before falling back to the file's UTI and the user's global default, LaunchServices checks the `com.apple.LaunchServices.OpenWith` extended attribute. Finder creates it when **Always Open With** is selected for one file; its value is a binary property list containing an application path, bundle identifier, and version selector.<sup>[[3]](#references)</sup>
+Việc phân giải trình xử lý còn có một lớp **riêng cho từng tệp**. Trước khi dùng UTI của tệp và mặc định toàn cục của người dùng, LaunchServices kiểm tra thuộc tính mở rộng `com.apple.LaunchServices.OpenWith`. Finder tạo thuộc tính này khi chọn **Always Open With** cho một tệp; giá trị của nó là danh sách thuộc tính nhị phân chứa đường dẫn ứng dụng, bundle identifier và bộ chọn phiên bản.<sup>[[3]](#references)</sup>
 
-Inspect and decode it without trusting the filename extension:
+Kiểm tra và giải mã thuộc tính này mà không tin cậy phần mở rộng tên tệp:
 
 ```bash
 xattr -px com.apple.LaunchServices.OpenWith ./suspicious.doc | xxd -r -p | plutil -p -
 ```
 
-This is useful when a single lure opens with an unexpected application even though `duti`, `dutix`, or `LSHandlers` reports a benign global default. For a controlled lab, the exact opaque value can be copied from a file configured through Finder; deleting it restores normal type-based resolution:
+Điều này hữu ích khi một mồi nhử mở bằng ứng dụng ngoài dự kiến, dù `duti`, `dutix` hoặc `LSHandlers` báo cáo giá trị mặc định toàn cục lành tính. Trong môi trường lab có kiểm soát, có thể sao chép chính xác giá trị khó hiểu này từ một tệp được cấu hình qua Finder; xóa giá trị đó sẽ khôi phục cơ chế phân giải thông thường dựa trên loại tệp:
 
 ```bash
 # Clone an existing per-file association
@@ -145,79 +145,79 @@ xattr -wx com.apple.LaunchServices.OpenWith "$value" ./test.doc
 xattr -d com.apple.LaunchServices.OpenWith ./test.doc
 ```
 
-## Interesting Info.plist keys
+## Các key Info.plist đáng chú ý
 
-When triaging an application bundle, these keys matter the most:
+Khi phân loại sơ bộ một application bundle, những key này quan trọng nhất:
 
-- **`CFBundleDocumentTypes`**: document groups the bundle claims it can open.
-- **`LSItemContentTypes`**: the **modern / preferred** way to bind document types to UTIs.
-- **`LSHandlerRank`**: ranking used by LaunchServices (`Owner`, `Default`, `Alternate`, `None`).
-- **`CFBundleURLTypes`** / **`CFBundleURLSchemes`**: custom URI schemes implemented by the app.
-- **`UTExportedTypeDeclarations`**: UTIs the app **owns**.
-- **`UTImportedTypeDeclarations`**: UTIs the app doesn't own but wants the system to recognize.
+- **`CFBundleDocumentTypes`**: các nhóm tài liệu mà bundle khai báo có thể mở.
+- **`LSItemContentTypes`**: cách **hiện đại / được ưu tiên** để liên kết loại tài liệu với UTI.
+- **`LSHandlerRank`**: thứ hạng được LaunchServices sử dụng (`Owner`, `Default`, `Alternate`, `None`).
+- **`CFBundleURLTypes`** / **`CFBundleURLSchemes`**: các URI scheme tùy chỉnh do app triển khai.
+- **`UTExportedTypeDeclarations`**: các UTI mà app **sở hữu**.
+- **`UTImportedTypeDeclarations`**: các UTI mà app không sở hữu nhưng muốn hệ thống nhận diện.
 
-A useful quick triage command is:
+Một lệnh phân loại sơ bộ nhanh hữu ích là:
 
 ```bash
 plutil -p /Applications/Target.app/Contents/Info.plist | \
   rg 'CFBundleDocumentTypes|CFBundleURLTypes|LSItemContentTypes|LSHandlerRank|UTExportedTypeDeclarations|UTImportedTypeDeclarations'
 ```
 
-A subtle but important detail: if **`LSItemContentTypes`** is present, older keys such as **`CFBundleTypeExtensions`**, **`CFBundleTypeMIMETypes`**, and **`CFBundleTypeOSTypes`** are effectively legacy compatibility data. For actual handler resolution, focus on the UTI path first.
+Một chi tiết tinh tế nhưng quan trọng: nếu **`LSItemContentTypes`** có mặt, các khóa cũ như **`CFBundleTypeExtensions`**, **`CFBundleTypeMIMETypes`** và **`CFBundleTypeOSTypes`** về cơ bản chỉ còn là dữ liệu tương thích legacy. Khi phân giải handler thực tế, hãy ưu tiên đường dẫn UTI.
 
 ## Offensive notes
 
-Applications do not need to run before their handler claims become interesting, but **writing a `.app` bundle alone does not guarantee immediate registration**. Finder can register an app when it discovers it, including when a user browses its folder; registration can also occur at boot or login or through an explicit registration call. Check `lsregister -dump` before testing a claim. Registration alone neither launches the app nor makes it the effective default.<sup>[[5]](#references)</sup> For the persistence prerequisites, see [URL Scheme & File-Type Handlers](../macos-auto-start-locations.md#url-scheme--file-type-handlers-launchservices).
+Ứng dụng không cần chạy thì các khai báo handler của chúng mới đáng chú ý, nhưng **chỉ ghi một bundle `.app` không đảm bảo ứng dụng được đăng ký ngay lập tức**. Finder có thể đăng ký ứng dụng khi phát hiện ra nó, kể cả khi người dùng duyệt thư mục chứa ứng dụng; việc đăng ký cũng có thể diễn ra khi khởi động hoặc đăng nhập, hay thông qua một lệnh gọi đăng ký tường minh. Hãy kiểm tra `lsregister -dump` trước khi thử nghiệm khai báo. Việc đăng ký không tự khởi chạy ứng dụng cũng không khiến ứng dụng trở thành mặc định có hiệu lực.<sup>[[5]](#references)</sup> Để biết các điều kiện tiên quyết cho persistence, xem [URL Scheme & File-Type Handlers](../macos-auto-start-locations.md#url-scheme--file-type-handlers-launchservices).
 
-This is useful both for **persistence / hijacking research** and for **initial-access chains**:
+Điều này hữu ích cho cả **nghiên cứu persistence / hijacking** lẫn **các chuỗi initial access**:
 
-- A malicious app can claim a **rare extension** or a **custom UTI** and wait for the victim to open the lure file.
-- A malicious app can register a **custom URL scheme** reachable from a browser, Electron app, office document, chat client, or another helper app.<sup>[[1]](#references)</sup>
-- To separate normal default resolution from testing a particular candidate handler, invoke the scheme through LaunchServices with `open 'targetscheme://host/path?value=test'`, then target a specific registered bundle with `open -b com.vendor.Target 'targetscheme://host/path?value=test'`. This is useful for auditing how the receiving app validates and decodes attacker-controlled URL components.<sup>[[1]](#references)</sup>
-- If you edit an app bundle after building it, you can force LaunchServices to re-parse it with:
+- Ứng dụng độc hại có thể khai báo một **extension hiếm gặp** hoặc một **UTI tùy chỉnh**, rồi chờ nạn nhân mở tệp mồi.
+- Ứng dụng độc hại có thể đăng ký một **URL scheme tùy chỉnh** có thể được gọi từ trình duyệt, ứng dụng Electron, tài liệu office, ứng dụng chat hoặc một ứng dụng helper khác.<sup>[[1]](#references)</sup>
+- Để phân biệt việc phân giải mặc định thông thường với việc kiểm thử một handler cụ thể, hãy gọi scheme thông qua LaunchServices bằng `open 'targetscheme://host/path?value=test'`, sau đó nhắm đến một bundle đã đăng ký cụ thể bằng `open -b com.vendor.Target 'targetscheme://host/path?value=test'`. Cách này hữu ích để kiểm tra cách ứng dụng nhận xác thực và giải mã các thành phần URL do kẻ tấn công kiểm soát.<sup>[[1]](#references)</sup>
+- Nếu bạn chỉnh sửa bundle ứng dụng sau khi tạo, bạn có thể buộc LaunchServices phân tích lại bằng:
 
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -f /tmp/Evil.app
 ```
 
-When testing suspicious bundles, pay special attention to:
+Khi kiểm thử các bundle đáng ngờ, hãy đặc biệt chú ý đến:
 
-- **`LSHandlerRank=Owner`** on uncommon types.
-- **Broad `CFBundleDocumentTypes`** arrays claiming many extensions.
-- **Helper / wrapper apps** whose only interesting behavior is behind a document or URI handler.
-- **Shortcut-like files** (`.webloc`, `.inetloc`, `.fileloc`) that end up dispatching into LaunchServices. For `.fileloc`-style tricks and related Gatekeeper angles, check [this other page](macos-security-protections/macos-fs-tricks/README.md).<sup>[[2]](#references)</sup>
+- **`LSHandlerRank=Owner`** trên các loại tệp ít phổ biến.
+- Các mảng **`CFBundleDocumentTypes`** rộng, khai báo hỗ trợ nhiều phần mở rộng.
+- **Ứng dụng helper / wrapper** mà hành vi đáng chú ý duy nhất nằm sau trình xử lý tài liệu hoặc URI.
+- Các tệp dạng shortcut (`.webloc`, `.inetloc`, `.fileloc`) cuối cùng chuyển tiếp đến LaunchServices. Để xem các thủ thuật kiểu `.fileloc` và những khía cạnh Gatekeeper liên quan, hãy xem [trang khác này](macos-security-protections/macos-fs-tricks/README.md).<sup>[[2]](#references)</sup>
 
-### URL parameters forwarded into downstream options
+### Tham số URL được chuyển tiếp vào các tùy chọn ở bước sau
 
-A browser's external-protocol confirmation only approves opening the handler; it does not make the URL parameters trustworthy. Trace the receiving app's URL parser into any library, media engine, helper process, or file-writing option. Look for a query-key prefix that turns URL fields into downstream option names. Test both literal and percent-encoded separators with a harmless marker in a disposable account.<sup>[[6]](#references)</sup>
+Xác nhận của trình duyệt về giao thức bên ngoài chỉ chấp thuận mở trình xử lý; điều đó không có nghĩa là các tham số URL đáng tin cậy. Theo dõi trình phân tích cú pháp URL của ứng dụng nhận đến thư viện, media engine, tiến trình helper hoặc tùy chọn ghi tệp. Tìm tiền tố khóa truy vấn có thể biến các trường URL thành tên tùy chọn ở bước sau. Kiểm thử cả dấu phân tách dạng ký tự thường lẫn dạng mã hóa phần trăm bằng một marker vô hại trong tài khoản dùng riêng.<sup>[[6]](#references)</sup>
 
-Verify the **final option accepted by the downstream component**, not just the app's initial parsing. One handler allowed prefixed query keys to reach mpv input commands; blocking that option still left a file-write route. Test the reachable option class, not only one known-dangerous key.<sup>[[7]](#references)</sup>
+Xác minh **tùy chọn cuối cùng được thành phần ở bước sau chấp nhận**, không chỉ cách ứng dụng phân tích cú pháp ban đầu. Một trình xử lý cho phép các khóa truy vấn có tiền tố truyền lệnh nhập liệu của mpv; chặn tùy chọn đó vẫn chưa loại bỏ được đường ghi tệp. Hãy kiểm thử lớp tùy chọn có thể tiếp cận, thay vì chỉ kiểm tra một khóa nguy hiểm đã biết.<sup>[[7]](#references)</sup>
 
-### Built-in `applescript://` handler
+### Trình xử lý tích hợp sẵn `applescript://`
 
-The `applescript://com.apple.scripteditor` URL handler accepts `action=new` and a URL-encoded `script` parameter. A browser link can therefore open Script Editor with attacker-controlled AppleScript already in the editor, avoiding a Terminal paste step. This is **not automatic execution**: the browser may ask to open Script Editor, and the user must run the script.<sup>[[8]](#references)</sup>
+Trình xử lý URL `applescript://com.apple.scripteditor` chấp nhận `action=new` và tham số `script` được mã hóa URL. Vì vậy, một liên kết trong trình duyệt có thể mở Script Editor với AppleScript do kẻ tấn công kiểm soát đã nằm sẵn trong trình soạn thảo, bỏ qua bước dán vào Terminal. Đây **không phải là tự động thực thi**: trình duyệt có thể hỏi người dùng có muốn mở Script Editor không, và người dùng phải chạy script.<sup>[[8]](#references)</sup>
 
-Recent macOS versions can add a script-document warning, while XProtect scans AppleScript at execution.<sup>[[8]](#references)[[9]](#references)</sup>
+Các phiên bản macOS gần đây có thể hiển thị cảnh báo về tài liệu script, trong khi XProtect quét AppleScript khi thực thi.<sup>[[8]](#references)[[9]](#references)</sup>
 
-Use a harmless local probe to check the handler and prompts on the macOS release being assessed; it should only populate the editor until **Run** is clicked.<sup>[[8]](#references)</sup>
+Dùng một phép thử cục bộ vô hại để kiểm tra trình xử lý và các lời nhắc trên phiên bản macOS đang được đánh giá; thao tác này chỉ nên điền nội dung vào trình soạn thảo cho đến khi nhấp **Run**.<sup>[[8]](#references)</sup>
 
 ```bash
 open 'applescript://com.apple.scripteditor?action=new&script=display%20dialog%20%22handler%20probe%22'
 ```
 
-If your goal is passive code-execution from merely browsing to a folder or selecting a file, also check the dedicated page for [Quick Look generators](macos-proces-abuse/macos-quicklook-generators.md), as that is a different but closely related file-handler surface.
+Nếu mục tiêu của bạn là thực thi mã thụ động chỉ bằng cách duyệt đến một thư mục hoặc chọn một tệp, hãy xem thêm trang riêng về [Quick Look generators](macos-proces-abuse/macos-quicklook-generators.md), vì đây là một bề mặt xử lý tệp khác nhưng có liên quan chặt chẽ.
 
 
 
 ## References
 
-- [1] [Objective-See - Remote Mac Exploitation Via Custom URL Schemes](https://objective-see.org/blog/blog_0x38.html)
-- [2] [Jamf Threat Labs - Bypassing the Gate: A closer look into Gatekeeper flaws on macOS](https://www.jamf.com/blog/gatekeeper-flaws-on-macos/)
-- [3] [The Eclectic Light Company - How macOS opens a file in the correct app](https://eclecticlight.co/2024/04/10/how-macos-opens-a-file-in-the-correct-app/)
-- [4] [The Eclectic Light Company - Controlling LaunchServices in macOS Sequoia](https://eclecticlight.co/2025/03/27/controlling-launchservices-in-macos-sequoia/)
-- [5] [Apple - Launch Services Concepts](https://developer.apple.com/library/archive/documentation/Carbon/Conceptual/LaunchServicesConcepts/LSCConcepts/LSCConcepts.html)
-- [6] [stackpointer - IINA URL scheme command execution research](https://binary.stackpointer.re/iina-142-url-scheme-command-execution)
-- [7] [IINA - Unsafe handling of mpv options in its URL scheme](https://github.com/iina/iina/security/advisories/GHSA-w5xh-98j7-jp5q)
-- [8] [Jamf Threat Labs - ClickFix technique uses Script Editor instead of Terminal](https://www.jamf.com/blog/clickfix-macos-script-editor-atomic-stealer/)
-- [9] [Apple - Terminal and script protections](https://support.apple.com/en-ie/guide/security/sece3b202c4b/web)
+- [1] [Objective-See - Khai thác Mac từ xa qua custom URL schemes](https://objective-see.org/blog/blog_0x38.html)
+- [2] [Jamf Threat Labs - Vượt qua cổng bảo vệ: Tìm hiểu sâu hơn về các lỗ hổng của Gatekeeper trên macOS](https://www.jamf.com/blog/gatekeeper-flaws-on-macos/)
+- [3] [The Eclectic Light Company - Cách macOS mở tệp bằng ứng dụng phù hợp](https://eclecticlight.co/2024/04/10/how-macos-opens-a-file-in-the-correct-app/)
+- [4] [The Eclectic Light Company - Kiểm soát LaunchServices trong macOS Sequoia](https://eclecticlight.co/2025/03/27/controlling-launchservices-in-macos-sequoia/)
+- [5] [Apple - Các khái niệm về Launch Services](https://developer.apple.com/library/archive/documentation/Carbon/Conceptual/LaunchServicesConcepts/LSCConcepts/LSCConcepts.html)
+- [6] [stackpointer - Nghiên cứu thực thi lệnh qua URL scheme của IINA](https://binary.stackpointer.re/iina-142-url-scheme-command-execution)
+- [7] [IINA - Xử lý không an toàn các tùy chọn mpv trong URL scheme của ứng dụng](https://github.com/iina/iina/security/advisories/GHSA-w5xh-98j7-jp5q)
+- [8] [Jamf Threat Labs - Kỹ thuật ClickFix sử dụng Script Editor thay vì Terminal](https://www.jamf.com/blog/clickfix-macos-script-editor-atomic-stealer/)
+- [9] [Apple - Các biện pháp bảo vệ Terminal và script](https://support.apple.com/en-ie/guide/security/sece3b202c4b/web)
 {{#include ../../banners/hacktricks-training.md}}

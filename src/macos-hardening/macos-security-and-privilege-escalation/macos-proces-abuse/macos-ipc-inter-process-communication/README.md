@@ -1,80 +1,80 @@
-# macOS IPC - Inter Process Communication
+# macOS IPC - Giao tiếp liên tiến trình
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Mach messaging via Ports
+## Nhắn tin Mach qua Ports
 
-### Basic Information
+### Thông tin cơ bản
 
-Mach uses **tasks** as the **smallest unit** for sharing resources, and each task can contain **multiple threads**. These **tasks and threads are mapped 1:1 to POSIX processes and threads**.
+Mach sử dụng **task** làm **đơn vị nhỏ nhất để chia sẻ tài nguyên**, mỗi task có thể chứa **nhiều thread**. Các **task và thread này được ánh xạ 1:1 với process và thread POSIX**.
 
-Communication between tasks occurs via Mach Inter-Process Communication (IPC), utilising one-way communication channels. **Messages are transferred between ports**, which act kind of **message queues** managed by the kernel.
+Việc giao tiếp giữa các task diễn ra qua Mach Inter-Process Communication (IPC), sử dụng các kênh giao tiếp một chiều. **Thông điệp được truyền giữa các port**, hoạt động giống như **message queue** do kernel quản lý.
 
-A **port** is the **basic** element of Mach IPC. It can be used to **send messages and to receive** them.
+**Port** là thành phần **cơ bản** của Mach IPC. Nó có thể được dùng để **gửi và nhận thông điệp**.
 
-Each process has an **IPC table**, in there it's possible to find the **mach ports of the process**. The name of a mach port is actually a number (a pointer to the kernel object).
+Mỗi process có một **bảng IPC**, trong đó có thể tìm thấy **các Mach port của process**. Tên của một Mach port thực chất là một số (con trỏ đến đối tượng kernel).
 
-A process can also send a port name with some rights **to a different task** and the kernel will make this entry in the **IPC table of the other task** appear.
+Một process cũng có thể gửi tên port cùng một số quyền **đến một task khác**, và kernel sẽ tạo mục tương ứng trong **bảng IPC của task đó**.
 
-### Port Rights
+### Quyền Port
 
-Port rights, which define what operations a task can perform, are key to this communication. The possible **port rights** are ([definitions from here](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):<sup>[[1]](#references)</sup>
+Quyền port xác định những thao tác mà một task có thể thực hiện, và là yếu tố then chốt của cơ chế giao tiếp này. Các **quyền port** có thể có gồm ([định nghĩa tại đây](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):<sup>[[1]](#references)</sup>
 
-- **Receive right**, which allows receiving messages sent to the port. Mach ports are MPSC (multiple-producer, single-consumer) queues, which means that there may only ever be **one receive right for each port** in the whole system (unlike with pipes, where multiple processes can all hold file descriptors to the read end of one pipe).
-  - A **task with the Receive** right can receive messages and **create Send rights**, allowing it to send messages. Originally only the **own task has Receive right over its por**t.
-  - If the owner of the Receive right **dies** or kills it, the **send right becomes useless (dead name).**
-- **Send right**, which allows sending messages to the port.
-  - The Send right can be **cloned** so a task owning a Send right can clone the right and **grant it to a third task**.
-  - Note that **port rights** can also be **passed** though Mac messages.
-- **Send-once right**, which allows sending one message to the port and then disappears.
-  - This right **cannot** be **cloned**, but it can be **moved**.
-- **Port set right**, which denotes a _port set_ rather than a single port. Dequeuing a message from a port set dequeues a message from one of the ports it contains. Port sets can be used to listen on several ports simultaneously, a lot like `select`/`poll`/`epoll`/`kqueue` in Unix.
-- **Dead name**, which is not an actual port right, but merely a placeholder. When a port is destroyed, all existing port rights to the port turn into dead names.
+- **Receive right**, cho phép nhận thông điệp gửi đến port. Mach port là các hàng đợi MPSC (multiple-producer, single-consumer), nghĩa là trong toàn hệ thống, mỗi port chỉ có thể có **một Receive right** (khác với pipe, nơi nhiều process có thể cùng giữ file descriptor cho đầu đọc của một pipe).
+  - **Task có Receive right** có thể nhận thông điệp và **tạo Send right**, cho phép nó gửi thông điệp. Ban đầu, chỉ **task sở hữu port mới có Receive right trên port đó**.
+  - Nếu chủ sở hữu Receive right **thoát** hoặc hủy port, **Send right sẽ trở nên vô dụng (dead name)**.
+- **Send right**, cho phép gửi thông điệp đến port.
+  - Send right có thể được **nhân bản**; do đó task sở hữu Send right có thể nhân bản quyền này và **cấp nó cho task thứ ba**.
+  - Lưu ý rằng **quyền port** cũng có thể được **truyền** qua thông điệp Mac.
+- **Send-once right**, cho phép gửi một thông điệp đến port, sau đó quyền này biến mất.
+  - Quyền này **không thể** được **nhân bản**, nhưng có thể được **chuyển giao**.
+- **Port set right**, biểu thị một _port set_ thay vì một port đơn lẻ. Lấy một thông điệp khỏi port set sẽ lấy thông điệp từ một trong các port thuộc tập hợp đó. Có thể dùng port set để lắng nghe đồng thời trên nhiều port, tương tự `select`/`poll`/`epoll`/`kqueue` trong Unix.
+- **Dead name**, không phải là quyền port thực sự mà chỉ là một giá trị giữ chỗ. Khi một port bị hủy, tất cả quyền port hiện có đối với port đó sẽ biến thành dead name.
 
-**Tasks can transfer SEND rights to others**, enabling them to send messages back. **SEND rights can also be cloned, so a task can duplicate and give the right to a third task**. This, combined with an intermediary process known as the **bootstrap server**, allows for effective communication between tasks.
+**Task có thể chuyển SEND right cho task khác**, cho phép task đó gửi thông điệp phản hồi. **SEND right cũng có thể được nhân bản, vì vậy một task có thể sao chép và cấp quyền này cho task thứ ba**. Cơ chế này, kết hợp với một process trung gian gọi là **bootstrap server**, cho phép các task giao tiếp hiệu quả với nhau.
 
 ### File Ports
 
-File ports allow file descriptors to be encapsulated in Mach ports (using Mach port rights). It is possible to create a `fileport` from a given file descriptor with `fileport_makeport` and create a file descriptor from a `fileport` with `fileport_makefd`.
+File port cho phép đóng gói file descriptor trong Mach port (bằng cách sử dụng Mach port rights). Có thể tạo `fileport` từ một file descriptor cho trước bằng `fileport_makeport`, và tạo file descriptor từ `fileport` bằng `fileport_makefd`.
 
-### Establishing a communication
+### Thiết lập giao tiếp
 
-As mentioned previously, it's possible to send rights using Mach messages, however, you **cannot send a right without already having a right** to send a Mach message. So, how is the first communication stablished?
+Như đã đề cập, có thể gửi quyền bằng Mach message; tuy nhiên, bạn **không thể gửi một quyền nếu chưa có quyền gửi Mach message**. Vậy làm thế nào để thiết lập giao tiếp lần đầu?
 
-For this, he **bootstrap server** (**launchd** in mac) is involved, as **everyone can get a SEND right to the bootstrap server**, it's possible to ask it for a right to send a message to another process:
+Trong trường hợp này, **bootstrap server** (**launchd** trên macOS) tham gia vào quá trình. Vì **ai cũng có thể lấy SEND right đến bootstrap server**, ta có thể yêu cầu server cấp quyền gửi thông điệp đến một process khác:
 
-1. Task **A** creates a **new port**, getting the **RECEIVE right** over it.
-2. Task **A**, being the holder of the RECEIVE right, **generates a SEND right for the port**.
-3. Task **A** establishes a **connection** with the **bootstrap server**, and **sends it the SEND right** for the port it generated at the beginning.
-   - Remember that anyone can get a SEND right to the bootstrap server.
-4. Task A sends a `bootstrap_register` message to the bootstrap server to **associate the given port with a name** like `com.apple.taska`
-5. Task **B** interacts with the **bootstrap server** to execute a bootstrap **lookup for the service** name (`bootstrap_lookup`). So the bootstrap server can respond, task B will send it a **SEND right to a port it previously created** inside the lookup message. If the lookup is successful, the **server duplicates the SEND right** received from Task A and **transmits it to Task B**.
-   - Remember that anyone can get a SEND right to the bootstrap server.
-6. With this SEND right, **Task B** is capable of **sending** a **message** **to Task A**.
-7. For a bi-directional communication usually task **B** generates a new port with a **RECEIVE** right and a **SEND** right, and gives the **SEND right to Task A** so it can send messages to TASK B (bi-directional communication).
+1. Task **A** tạo một **port mới** và nhận **RECEIVE right** trên port đó.
+2. Task **A**, với tư cách là bên giữ RECEIVE right, **tạo SEND right cho port**.
+3. Task **A** thiết lập **kết nối** với **bootstrap server** và **gửi cho server SEND right** của port vừa tạo.
+   - Hãy nhớ rằng ai cũng có thể lấy SEND right đến bootstrap server.
+4. Task A gửi thông điệp `bootstrap_register` đến bootstrap server để **liên kết port đã cho với một tên**, chẳng hạn `com.apple.taska`.
+5. Task **B** tương tác với **bootstrap server** để thực hiện bootstrap **lookup tên dịch vụ** (`bootstrap_lookup`). Để bootstrap server có thể phản hồi, task B sẽ gửi cho server **SEND right đến một port mà nó đã tạo trước đó**, bên trong thông điệp lookup. Nếu lookup thành công, **server nhân bản SEND right** nhận được từ Task A và **gửi nó cho Task B**.
+   - Hãy nhớ rằng ai cũng có thể lấy SEND right đến bootstrap server.
+6. Với SEND right này, **Task B** có thể **gửi** **thông điệp** **đến Task A**.
+7. Để giao tiếp hai chiều, thông thường task **B** tạo một port mới với **RECEIVE** và **SEND right**, rồi cấp **SEND right cho Task A** để Task A có thể gửi thông điệp đến TASK B.
 
-The bootstrap server **cannot authenticate** the service name claimed by a task. This means a **task** could potentially **impersonate any system task**, such as falsely **claiming an authorization service name** and then approving every request.
+Bootstrap server **không thể xác thực** tên dịch vụ mà task tự khai báo. Điều này có nghĩa là một **task** có thể **mạo danh bất kỳ task hệ thống nào**, chẳng hạn giả danh một dịch vụ cấp quyền rồi phê duyệt mọi yêu cầu.
 
-Then, Apple stores the **names of system-provided services** in secure configuration files, located in **SIP-protected** directories: `/System/Library/LaunchDaemons` and `/System/Library/LaunchAgents`. Alongside each service name, the **associated binary is also stored**. The bootstrap server, will create and hold a **RECEIVE right for each of these service names**.
+Sau đó, Apple lưu **tên các dịch vụ do hệ thống cung cấp** trong các tệp cấu hình bảo mật nằm trong các thư mục được **SIP bảo vệ**: `/System/Library/LaunchDaemons` và `/System/Library/LaunchAgents`. **Binary tương ứng** cũng được lưu cùng với tên mỗi dịch vụ. Bootstrap server sẽ tạo và giữ một **RECEIVE right cho mỗi tên dịch vụ** này.
 
-For these predefined services, the **lookup process differs slightly**. When a service name is being looked up, launchd starts the service dynamically. The new workflow is as follows:
+Đối với các dịch vụ được xác định trước này, quy trình **lookup có đôi chút khác biệt**. Khi một tên dịch vụ được tra cứu, launchd sẽ khởi chạy dịch vụ theo yêu cầu. Quy trình mới như sau:
 
-- Task **B** initiates a bootstrap **lookup** for a service name.
-- **launchd** checks if the task is running and if it isn’t, **starts** it.
-- Task **A** (the service) performs a **bootstrap check-in** (`bootstrap_check_in()`). Here, the **bootstrap** server creates a SEND right, retains it, and **transfers the RECEIVE right to Task A**.
-- launchd duplicates the **SEND right and sends it to Task B**.
-- Task **B** generates a new port with a **RECEIVE** right and a **SEND** right, and gives the **SEND right to Task A** (the svc) so it can send messages to TASK B (bi-directional communication).
+- Task **B** bắt đầu bootstrap **lookup** một tên dịch vụ.
+- **launchd** kiểm tra xem task có đang chạy hay không; nếu chưa, **khởi chạy** task đó.
+- Task **A** (dịch vụ) thực hiện **bootstrap check-in** (`bootstrap_check_in()`). Tại đây, **bootstrap server** tạo một SEND right, giữ lại quyền đó và **chuyển RECEIVE right cho Task A**.
+- launchd nhân bản **SEND right** và gửi nó cho Task B.
+- Task **B** tạo một port mới với **RECEIVE** và **SEND right**, rồi cấp **SEND right cho Task A** (dịch vụ) để Task A có thể gửi thông điệp đến TASK B (giao tiếp hai chiều).
 
-However, this process only applies to predefined system tasks. Non-system tasks still operate as described originally, which could potentially allow for impersonation.
+Tuy nhiên, quy trình này chỉ áp dụng cho các task hệ thống được xác định trước. Các task không thuộc hệ thống vẫn hoạt động như mô tả ban đầu, điều này có thể dẫn đến việc mạo danh.
 
 > [!CAUTION]
-> Therefore, launchd should never crash or the whole system will crash.
+> Vì vậy, launchd tuyệt đối không được gặp sự cố, nếu không toàn bộ hệ thống sẽ gặp sự cố.
 
-### A Mach Message
+### Một Mach Message
 
-[Find more info here](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)<sup>[[4]](#references)</sup>
+[Tìm thêm thông tin tại đây](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)<sup>[[4]](#references)</sup>
 
-The `mach_msg` function, essentially a system call, is utilized for sending and receiving Mach messages. The function requires the message to be sent as the initial argument. This message must commence with a `mach_msg_header_t` structure, succeeded by the actual message content. The structure is defined as follows:
+Hàm `mach_msg`, về cơ bản là một system call, được dùng để gửi và nhận Mach message. Hàm này yêu cầu thông điệp cần gửi làm đối số đầu tiên. Thông điệp phải bắt đầu bằng cấu trúc `mach_msg_header_t`, theo sau là nội dung thực tế của thông điệp. Cấu trúc này được định nghĩa như sau:
 
 ```c
 typedef struct {
@@ -87,17 +87,17 @@ typedef struct {
 } mach_msg_header_t;
 ```
 
-Processes possessing a _**receive right**_ can receive messages on a Mach port. Conversely, the **senders** are granted a _**send**_ or a _**send-once right**_. The send-once right is exclusively for sending a single message, after which it becomes invalid.<sup>[[11]](#references)</sup>
+Các process sở hữu _**receive right**_ có thể nhận message trên Mach port. Ngược lại, **senders** được cấp _**send**_ hoặc _**send-once right**_. Send-once right chỉ dùng để gửi một message duy nhất, sau đó sẽ mất hiệu lực.<sup>[[11]](#references)</sup>
 
-The initial field **`msgh_bits`** is a bitmap:
+Trường đầu tiên **`msgh_bits`** là một bitmap:
 
-- First bit (most significative) is used to indicate that a message is complex (more on this below)
-- The 3rd and 4th are used by the kernel
-- The **5 least significant bits of the 2nd byte** from can be used for **voucher**: another type of port to send key/value combinations.
-- The **5 least significant bits of the 3rd byte** from can be used for **local port**
-- The **5 least significant bits of the 4th byte** from can be used for **remote port**
+- Bit đầu tiên (có trọng số cao nhất) dùng để cho biết message có phức tạp hay không (sẽ nói thêm bên dưới)
+- Bit thứ 3 và thứ 4 được kernel sử dụng
+- **5 bit ít quan trọng nhất của byte thứ 2** có thể được dùng cho **voucher**: một loại port khác để gửi các cặp key/value.
+- **5 bit ít quan trọng nhất của byte thứ 3** có thể được dùng cho **local port**
+- **5 bit ít quan trọng nhất của byte thứ 4** có thể được dùng cho **remote port**
 
-The types that can be specified in the voucher, local and remote ports are (from [**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):<sup>[[5]](#references)</sup>
+Các loại có thể được chỉ định trong voucher, local port và remote port là (theo [**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):<sup>[[5]](#references)</sup>
 
 ```c
 #define MACH_MSG_TYPE_MOVE_RECEIVE      16      /* Must hold receive right */
@@ -112,32 +112,32 @@ The types that can be specified in the voucher, local and remote ports are (from
 #define MACH_MSG_TYPE_DISPOSE_SEND_ONCE 26      /* must hold sendonce right */
 ```
 
-For example, `MACH_MSG_TYPE_MAKE_SEND_ONCE` can be used to **indicate** that a **send-once** **right** should be derived and transferred for this port. It can also be specified `MACH_PORT_NULL` to prevent the recipient to be able to reply.
+For example, `MACH_MSG_TYPE_MAKE_SEND_ONCE` có thể được dùng để **cho biết** rằng cần tạo và chuyển giao một **send-once right** cho port này. Cũng có thể chỉ định `MACH_PORT_NULL` để ngăn người nhận trả lời.
 
-In order to achieve an easy **bi-directional communication** a process can specify a **mach port** in the mach **message header** called the _reply port_ (**`msgh_local_port`**) where the **receiver** of the message can **send a reply** to this message.
+Để thực hiện **giao tiếp hai chiều** dễ dàng, một process có thể chỉ định một **mach port** trong **message header** của mach, gọi là _reply port_ (**`msgh_local_port`**), nơi **bên nhận** message có thể **gửi phản hồi** cho message này.
 
 > [!TIP]
-> Note that this kind of bi-directional communication is used in XPC messages that expect a replay (`xpc_connection_send_message_with_reply` and `xpc_connection_send_message_with_reply_sync`). But **usually different ports are created** as explained previously to create the bi-directional communication.
+> Lưu ý rằng kiểu giao tiếp hai chiều này được dùng trong các XPC message cần phản hồi (`xpc_connection_send_message_with_reply` và `xpc_connection_send_message_with_reply_sync`). Tuy nhiên, **thông thường các port khác nhau sẽ được tạo** như đã giải thích trước đó để thiết lập giao tiếp hai chiều.
 
-The other fields of the message header are:
+Các trường khác trong message header là:
 
-- `msgh_size`: the size of the entire packet.
-- `msgh_remote_port`: the port on which this message is sent.
+- `msgh_size`: kích thước của toàn bộ packet.
+- `msgh_remote_port`: port mà message này được gửi đến.
 - `msgh_voucher_port`: [mach vouchers](https://robert.sesek.com/2023/6/mach_vouchers.html).
-- `msgh_id`: the ID of this message, which is interpreted by the receiver.
+- `msgh_id`: ID của message này, được bên nhận diễn giải.
 
 > [!CAUTION]
-> Note that **mach messages are sent over a `mach port`**, which is a **single receiver**, **multiple sender** communication channel built into the mach kernel. **Multiple processes** can **send messages** to a mach port, but at any point only **a single process can read** from it.
+> Lưu ý rằng **mach message được gửi qua một `mach port`**, một kênh giao tiếp **một bên nhận, nhiều bên gửi** được tích hợp trong mach kernel. **Nhiều process** có thể **gửi message** đến một mach port, nhưng tại một thời điểm chỉ **một process duy nhất có thể đọc** từ port đó.
 
-Messages are then formed by the **`mach_msg_header_t`** header followed by the **body** and by the **trailer** (if any) and it can grant permission to reply to it. In these cases, the kernel just need to pass the message from one task to the other.
+Sau đó, message được tạo thành từ header **`mach_msg_header_t`**, theo sau là **body** và **trailer** (nếu có); message cũng có thể cấp quyền trả lời. Trong những trường hợp này, kernel chỉ cần chuyển message từ task này sang task khác.
 
-A **trailer** is **information added to the message by the kernel** (cannot be set by the user) which can be requested in message reception with the flags `MACH_RCV_TRAILER_<trailer_opt>` (there is different information that can be requested).
+**Trailer** là **thông tin do kernel thêm vào message** (người dùng không thể thiết lập). Có thể yêu cầu thông tin này khi nhận message bằng các flag `MACH_RCV_TRAILER_<trailer_opt>` (có thể yêu cầu nhiều loại thông tin khác nhau).
 
 #### Complex Messages
 
-However, there are other more **complex** messages, like the ones passing additional port rights or sharing memory, where the kernel also needs to send these objects to the recipient. In this cases the most significant bit of the header `msgh_bits` is set.
+Tuy nhiên, có những message **phức tạp** hơn, chẳng hạn message truyền thêm port right hoặc chia sẻ bộ nhớ, trong đó kernel cũng cần gửi các object này đến bên nhận. Trong những trường hợp này, bit có trọng số cao nhất của header `msgh_bits` được bật.
 
-The possible descriptors to pass are defined in [**`mach/message.h`**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html):<sup>[[5]](#references)</sup>
+Các descriptor có thể truyền được định nghĩa trong [**`mach/message.h`**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html):<sup>[[5]](#references)</sup>
 
 ```c
 #define MACH_MSG_PORT_DESCRIPTOR                0
@@ -156,33 +156,33 @@ typedef struct{
 } mach_msg_type_descriptor_t;
 ```
 
-In 32bits, all the descriptors are 12B and the descriptor type is in the 11th one. In 64 bits, the sizes vary.
+Trong 32-bit, tất cả descriptor đều có kích thước 12B và loại descriptor nằm ở byte thứ 11. Trong 64-bit, kích thước có thể khác nhau.
 
 > [!CAUTION]
-> The kernel will copy the descriptors from one task to the other but first **creating a copy in kernel memory**. This technique, known as "Feng Shui" has been abused in several exploits to make the **kernel copy data in its memory** making a process send descriptors to itself. Then the process can receive the messages (the kernel will free them).
+> Kernel sẽ sao chép các descriptor từ task này sang task khác, nhưng trước tiên **tạo một bản sao trong bộ nhớ kernel**. Kỹ thuật này, được gọi là "Feng Shui", đã bị lạm dụng trong một số exploit để khiến **kernel sao chép dữ liệu vào bộ nhớ của nó** bằng cách buộc một process gửi descriptor cho chính nó. Sau đó, process có thể nhận các message (kernel sẽ giải phóng chúng).
 >
-> It's also possible to **send port rights to a vulnerable process**, and the port rights will just appear in the process (even if he isn't handling them).
+> Cũng có thể **gửi quyền port cho một process dễ bị tổn thương**; các quyền port sẽ xuất hiện ngay trong process đó (ngay cả khi nó không xử lý chúng).
 
-### Mac Ports APIs
+### API Mac Ports
 
-Note that ports are associated to the task namespace, so to create or search for a port, the task namespace is also queried (more in `mach/mach_port.h`):<sup>[[6]](#references)</sup>
+Lưu ý rằng port được liên kết với namespace của task, vì vậy khi tạo hoặc tìm port, namespace của task cũng được truy vấn (xem thêm trong `mach/mach_port.h`):<sup>[[6]](#references)</sup>
 
-- **`mach_port_allocate` | `mach_port_construct`**: **Create** a port.
-  - `mach_port_allocate` can also create a **port set**: receive right over a group of ports. Whenever a message is received it's indicated the port from where it was.
-- `mach_port_allocate_name`: Change the name of the port (by default 32bit integer)
-- `mach_port_names`: Get port names from a target
-- `mach_port_type`: Get rights of a task over a name
-- `mach_port_rename`: Rename a port (like dup2 for FDs)
-- `mach_port_allocate`: Allocate a new RECEIVE, PORT_SET or DEAD_NAME
-- `mach_port_insert_right`: Create a new right in a port where you have RECEIVE
+- **`mach_port_allocate` | `mach_port_construct`**: **Tạo** một port.
+  - `mach_port_allocate` cũng có thể tạo một **port set**: quyền nhận trên một nhóm port. Mỗi khi nhận được message, port gửi message sẽ được chỉ rõ.
+- `mach_port_allocate_name`: Thay đổi tên của port (mặc định là số nguyên 32-bit)
+- `mach_port_names`: Lấy tên port từ một target
+- `mach_port_type`: Lấy các quyền của task đối với một tên
+- `mach_port_rename`: Đổi tên một port (tương tự dup2 đối với FD)
+- `mach_port_allocate`: Cấp phát một RECEIVE, PORT_SET hoặc DEAD_NAME mới
+- `mach_port_insert_right`: Tạo một quyền mới trong port mà bạn có RECEIVE
 - `mach_port_...`
-- **`mach_msg`** | **`mach_msg_overwrite`**: Functions used to **send and receive mach messages**. The overwrite version allows to specify a different buffer for message reception (the other version will just reuse it).
+- **`mach_msg`** | **`mach_msg_overwrite`**: Các hàm dùng để **gửi và nhận Mach message**. Phiên bản overwrite cho phép chỉ định một buffer khác để nhận message (phiên bản còn lại sẽ dùng lại buffer đó).
 
 ### Debug mach_msg
 
-As the functions **`mach_msg`** and **`mach_msg_overwrite`** are the ones used to send a receive messages, setting a breakpoint on them would allow to inspect the sent a received messages.
+Vì các hàm **`mach_msg`** và **`mach_msg_overwrite`** được dùng để gửi và nhận message, đặt breakpoint tại chúng sẽ cho phép kiểm tra các message đã gửi và nhận.
 
-For example start debugging any application you can debug as it will load **`libSystem.B` which will use this function**.
+Ví dụ, hãy bắt đầu debug một ứng dụng bất kỳ mà bạn có thể debug, vì ứng dụng sẽ tải **`libSystem.B`, thư viện sẽ dùng hàm này**.
 
 <pre class="language-armasm"><code class="lang-armasm"><strong>(lldb) b mach_msg
 </strong>Breakpoint 1: where = libsystem_kernel.dylib`mach_msg, address = 0x00000001803f6c20
@@ -211,7 +211,7 @@ Target 0: (SandboxedShellApp) stopped.
     frame #9: 0x0000000181a1d5c8 dyld`invocation function for block in dyld4::Loader::findAndRunAllInitializers(dyld4::RuntimeState&) const::$_0::operator()() const + 168
 </code></pre>
 
-To get the arguments of **`mach_msg`** check the registers. These are the arguments (from [mach/message.h](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
+Để lấy các đối số của **`mach_msg`**, hãy kiểm tra các thanh ghi. Đây là các đối số (từ [mach/message.h](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
 
 ```c
 __WATCHOS_PROHIBITED __TVOS_PROHIBITED
@@ -225,7 +225,7 @@ extern mach_msg_return_t        mach_msg(
 	mach_port_name_t notify);
 ```
 
-Get the values from the registries:
+Lấy các giá trị từ các registry:
 
 ```armasm
 reg read $x0 $x1 $x2 $x3 $x4 $x5 $x6
@@ -238,7 +238,7 @@ reg read $x0 $x1 $x2 $x3 $x4 $x5 $x6
       x6 = 0x0000000000000000 ;mach_port_name_t (notify)
 ```
 
-Inspect the message header checking the first argument:
+Kiểm tra header của thông điệp bằng cách kiểm tra đối số đầu tiên:
 
 ```armasm
 (lldb) x/6w $x0
@@ -253,9 +253,9 @@ Inspect the message header checking the first argument:
 ; 0x40000322 -> mach_msg_id_t (msgh_id)
 ```
 
-That type of `mach_msg_bits_t` is very common to allow a reply.
+Kiểu `mach_msg_bits_t` đó rất phổ biến để cho phép phản hồi.
 
-### Enumerate ports
+### Liệt kê các port
 
 ```bash
 lsmp -p <pid>
@@ -281,21 +281,21 @@ Process (1) : launchd
                   [...]
 ```
 
-The **name** is the default name given to the port (check how it's **increasing** in the first 3 bytes). The **`ipc-object`** is the **obfuscated** unique **identifier** of the port.\
-Note also how the ports with only **`send`** right are **identifying the owner** of it (port name + pid).\
-Also note the use of **`+`** to indicate **other tasks connected to the same port**.
+**name** là tên mặc định được gán cho port (hãy xem cách nó **tăng dần** trong 3 byte đầu tiên). **`ipc-object`** là **identifier** duy nhất đã được **obfuscate** của port.\
+Cũng lưu ý rằng các port chỉ có quyền **`send`** sẽ **xác định chủ sở hữu** của chúng (tên port + pid).\
+Ngoài ra, hãy lưu ý việc dùng **`+`** để biểu thị **các task khác được kết nối với cùng port**.
 
-It's also possible to use [**procesxp**](https://www.newosxbook.com/tools/procexp.html) to see also the **registered service names** (with SIP disabled due to the need of `com.apple.system-task-port`):
+Cũng có thể dùng [**procesxp**](https://www.newosxbook.com/tools/procexp.html) để xem cả **tên các service đã đăng ký** (cần tắt SIP vì cần có `com.apple.system-task-port`):
 
 ```
 procesp 1 ports
 ```
 
-You can install this tool in iOS downloading it from [http://newosxbook.com/tools/binpack64-256.tar.gz](http://newosxbook.com/tools/binpack64-256.tar.gz)
+Bạn có thể cài đặt công cụ này trên iOS bằng cách tải xuống từ [http://newosxbook.com/tools/binpack64-256.tar.gz](http://newosxbook.com/tools/binpack64-256.tar.gz)
 
-### Code example
+### Ví dụ mã
 
-Note how the **sender** **allocates** a port, create a **send right** for the name `org.darlinghq.example` and send it to the **bootstrap server** while the sender asked for the **send right** of that name and used it to **send a message**.<sup>[[1]](#references)</sup>
+Lưu ý cách **bên gửi** **cấp phát** một port, tạo **quyền gửi** cho tên `org.darlinghq.example` và gửi quyền đó đến **bootstrap server**, trong khi bên gửi yêu cầu **quyền gửi** của tên đó và dùng nó để **gửi thông điệp**.<sup>[[1]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="receiver.c"}}
@@ -427,34 +427,34 @@ int main() {
 
 ## Privileged Ports
 
-Some special ports allow a task to **perform certain sensitive actions or access certain sensitive data** when it has **SEND** rights over them. These ports are interesting from an attacker's perspective because of both their capabilities and the ability to **share SEND rights across tasks**.
+Một số port đặc biệt cho phép task **thực hiện một số hành động nhạy cảm hoặc truy cập một số dữ liệu nhạy cảm** khi có quyền **SEND** trên chúng. Các port này đáng chú ý từ góc độ của attacker vì cả những khả năng của chúng lẫn khả năng **chia sẻ quyền SEND giữa các task**.
 
 ### Host Special Ports
 
-These ports are represented by a number.
+Các port này được biểu diễn bằng một số.
 
-**SEND** rights can be obtained by calling **`host_get_special_port`** and **RECEIVE** rights calling **`host_set_special_port`**. However, both calls require the **`host_priv`** port which only root can access. Moreover, in the past root was able to call **`host_set_special_port`** and hijack arbitrary that allowed for example to bypass code signatures by hijacking `HOST_KEXTD_PORT` (SIP now prevents this).
+Có thể lấy quyền **SEND** bằng cách gọi **`host_get_special_port`** và quyền **RECEIVE** bằng cách gọi **`host_set_special_port`**. Tuy nhiên, cả hai lệnh gọi đều cần port **`host_priv`**, chỉ root mới có thể truy cập. Hơn nữa, trước đây root có thể gọi **`host_set_special_port`** và chiếm quyền điều khiển port bất kỳ, chẳng hạn như vượt qua code signature bằng cách chiếm quyền điều khiển `HOST_KEXTD_PORT` (hiện SIP đã ngăn chặn việc này).
 
-These are divided in 2 groups: The **first 7 ports are owned by the kernel** being the 1 `HOST_PORT`, the 2 `HOST_PRIV_PORT` , the 3 `HOST_IO_MASTER_PORT` and the 7 is `HOST_MAX_SPECIAL_KERNEL_PORT`.\
-The ones starting **from** the number **8** are **owned by system daemons** and they can be found declared in [**`host_special_ports.h`**](https://opensource.apple.com/source/xnu/xnu-4570.1.46/osfmk/mach/host_special_ports.h.auto.html).
+Các port này được chia thành 2 nhóm: **7 port đầu tiên do kernel sở hữu**, gồm port 1 `HOST_PORT`, port 2 `HOST_PRIV_PORT`, port 3 `HOST_IO_MASTER_PORT` và port 7 `HOST_MAX_SPECIAL_KERNEL_PORT`.\
+Các port bắt đầu **từ** số **8** trở đi **do system daemon sở hữu** và được khai báo trong [**`host_special_ports.h`**](https://opensource.apple.com/source/xnu/xnu-4570.1.46/osfmk/mach/host_special_ports.h.auto.html).
 
-- **Host port**: If a process has **SEND** privilege over this port he can get **information** about the **system** calling its routines like:
-  - `host_processor_info`: Get processor info
-  - `host_info`: Get host info
-  - `host_virtual_physical_table_info`: Virtual/Physical page table (requires MACH_VMDEBUG)
-  - `host_statistics`: Get host statistics
-  - `mach_memory_info`: Get kernel memory layout
-- **Host Priv port**: A process with **SEND** right over this port can perform **privileged actions** like showing boot data or trying to load a kernel extension. The **process need to be root** to get this permission.
-  - Moreover, in order to call **`kext_request`** API it's needed to have other entitlements **`com.apple.private.kext*`** which are only given to Apple binaries.
-  - Other routines that can be called are:
-    - `host_get_boot_info`: Get `machine_boot_info()`
-    - `host_priv_statistics`: Get privileged statistics
-    - `vm_allocate_cpm`: Allocate Contiguous Physical Memory
-    - `host_processors`: Send right to host processors
-    - `mach_vm_wire`: Make memory resident
-  - As **root** can access this permission, it could call `host_set_[special/exception]_port[s]` to **hijack host special or exception ports**.
+- **Host port**: Nếu một process có quyền **SEND** trên port này, nó có thể lấy **thông tin** về **system** bằng cách gọi các routine như:
+  - `host_processor_info`: Lấy thông tin processor
+  - `host_info`: Lấy thông tin host
+  - `host_virtual_physical_table_info`: Bảng trang Virtual/Physical (cần MACH_VMDEBUG)
+  - `host_statistics`: Lấy thống kê host
+  - `mach_memory_info`: Lấy bố cục bộ nhớ kernel
+- **Host Priv port**: Process có quyền **SEND** trên port này có thể thực hiện **các hành động đặc quyền**, chẳng hạn như hiển thị dữ liệu boot hoặc thử tải kernel extension. **Process cần là root** để có quyền này.
+  - Ngoài ra, để gọi API **`kext_request`**, cần có các entitlement khác **`com.apple.private.kext*`**, vốn chỉ được cấp cho các binary của Apple.
+  - Các routine khác có thể được gọi gồm:
+    - `host_get_boot_info`: Lấy `machine_boot_info()`
+    - `host_priv_statistics`: Lấy thống kê đặc quyền
+    - `vm_allocate_cpm`: Cấp phát Contiguous Physical Memory
+    - `host_processors`: Quyền SEND tới các processor của host
+    - `mach_vm_wire`: Đưa bộ nhớ vào trạng thái resident
+  - Vì **root** có thể truy cập quyền này, root có thể gọi `host_set_[special/exception]_port[s]` để **chiếm quyền điều khiển host special port hoặc exception port**.
 
-It's possible to **see all the host special ports** by running:
+Có thể **xem tất cả host special port** bằng cách chạy:
 
 ```bash
 procexp all ports | grep "HSP"
@@ -462,7 +462,7 @@ procexp all ports | grep "HSP"
 
 ### Task Special Ports
 
-These are ports reserved for well known services. It's possible to get/set them calling `task_[get/set]_special_port`. They can be found in `task_special_ports.h`:
+Đây là các port được dành riêng cho những dịch vụ phổ biến. Có thể lấy/đặt chúng bằng cách gọi `task_[get/set]_special_port`. Có thể tìm thấy chúng trong `task_special_ports.h`:
 
 ```c
 typedef	int	task_special_port_t;
@@ -475,51 +475,51 @@ typedef	int	task_special_port_t;
 #define TASK_PAGED_LEDGER_PORT	6	/* Paged resource ledger for task. */
 ```
 
-From [here](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html):<sup>[[8]](#references)</sup>
+Từ [đây](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html):<sup>[[8]](#references)</sup>
 
-- **TASK_KERNEL_PORT**\[task-self send right]: The port used to control this task. Used to send messages that affect the task. This is the port returned by **mach_task_self (see Task Ports below)**.
-- **TASK_BOOTSTRAP_PORT**\[bootstrap send right]: The task's bootstrap port. Used to send messages requesting return of other system service ports.
-- **TASK_HOST_NAME_PORT**\[host-self send right]: The port used to request information of the containing host. This is the port returned by **mach_host_self**.
-- **TASK_WIRED_LEDGER_PORT**\[ledger send right]: The port naming the source from which this task draws its wired kernel memory.
-- **TASK_PAGED_LEDGER_PORT**\[ledger send right]: The port naming the source from which this task draws its default memory managed memory.
+- **TASK_KERNEL_PORT**\[quyền gửi task-self]: Port dùng để điều khiển task này. Dùng để gửi thông điệp tác động đến task. Đây là port được trả về bởi **mach_task_self (xem Task Ports bên dưới)**.
+- **TASK_BOOTSTRAP_PORT**\[quyền gửi bootstrap]: Bootstrap port của task. Dùng để gửi thông điệp yêu cầu trả về các port của dịch vụ hệ thống khác.
+- **TASK_HOST_NAME_PORT**\[quyền gửi host-self]: Port dùng để yêu cầu thông tin về host chứa task này. Đây là port được trả về bởi **mach_host_self**.
+- **TASK_WIRED_LEDGER_PORT**\[quyền gửi ledger]: Port định danh nguồn cấp phát bộ nhớ kernel wired cho task này.
+- **TASK_PAGED_LEDGER_PORT**\[quyền gửi ledger]: Port định danh nguồn cấp phát bộ nhớ được quản lý mặc định cho task này.
 
 ### Task Ports
 
-Originally Mach didn't have "processes" it had "tasks" which was considered more like a container of threads. When Mach was merged with BSD **each task was correlated with a BSD process**. Therefore every BSD process has the details it needs to be a process and every Mach task also have its inner workings (except for the inexistent pid 0 which is the `kernel_task`).
+Ban đầu Mach không có “process” mà có “task”, được xem như một container chứa các thread. Khi Mach được hợp nhất với BSD, **mỗi task được liên kết với một process BSD**. Vì vậy, mỗi process BSD đều có các chi tiết cần thiết để hoạt động như một process, và mỗi Mach task cũng có các thành phần nội bộ riêng (ngoại trừ pid 0 không tồn tại, tức `kernel_task`).
 
-There are two very interesting functions related to this:<sup>[[7]](#references)</sup>
+Có hai hàm rất đáng chú ý liên quan đến việc này:<sup>[[7]](#references)</sup>
 
-- `task_for_pid(target_task_port, pid, &task_port_of_pid)`: Get a SEND right for the task por of the task related to the specified by the `pid` and give it to the indicated `target_task_port` (which is usually the caller task which has used `mach_task_self()`, but could be a SEND port over a different task.)
-- `pid_for_task(task, &pid)`: Given a SEND right to a task, find to which PID this task is related to.
+- `task_for_pid(target_task_port, pid, &task_port_of_pid)`: Lấy một quyền SEND cho task port của task tương ứng với `pid` được chỉ định rồi cấp quyền đó cho `target_task_port` được chỉ định (thường là task của caller, vốn đã gọi `mach_task_self()`, nhưng cũng có thể là một SEND port trên một task khác).
+- `pid_for_task(task, &pid)`: Với một quyền SEND đến task, tìm PID mà task này liên kết với.
 
-In order to perform actions within the task, the task needed a `SEND` right to itself calling `mach_task_self()` (which uses the `task_self_trap` (28)). With this permission a task can perform several actions like:
+Để thực hiện các hành động bên trong task, task cần có quyền `SEND` đến chính nó bằng cách gọi `mach_task_self()` (hàm này sử dụng `task_self_trap` (28)). Với quyền này, task có thể thực hiện nhiều hành động như:
 
-- `task_threads`: Get SEND right over all task ports of the threads of the task
-- `task_info`: Get info about a task
-- `task_suspend/resume`: Suspend or resume a task
+- `task_threads`: Lấy quyền SEND trên tất cả task port của các thread thuộc task
+- `task_info`: Lấy thông tin về task
+- `task_suspend/resume`: Tạm dừng hoặc tiếp tục task
 - `task_[get/set]_special_port`
-- `thread_create`: Create a thread
-- `task_[get/set]_state`: Control task state
-- and more can be found in [**mach/task.h**](https://github.com/phracker/MacOSX-SDKs/blob/master/MacOSX11.3.sdk/System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/task.h)
+- `thread_create`: Tạo thread
+- `task_[get/set]_state`: Điều khiển trạng thái task
+- và nhiều hàm khác trong [**mach/task.h**](https://github.com/phracker/MacOSX-SDKs/blob/master/MacOSX11.3.sdk/System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/task.h)
 
 > [!CAUTION]
-> Notice that with a SEND right over a task port of a **different task**, it's possible to perform such actions over a different task.
+> Lưu ý rằng khi có quyền SEND trên task port của **một task khác**, bạn có thể thực hiện các hành động này trên task đó.
 
-Moreover, the task port is also the **`vm_map`** port, which allows a caller to **read and manipulate memory** inside a task with functions such as `vm_read()` and `vm_write()`. This means that a task with SEND rights over another task's task port can **inject code into that task**.
+Ngoài ra, task port cũng là port **`vm_map`**, cho phép caller **đọc và thao tác với bộ nhớ** bên trong task thông qua các hàm như `vm_read()` và `vm_write()`. Điều này có nghĩa là task có quyền SEND trên task port của task khác có thể **inject code vào task đó**.
 
-Remember that because the **kernel is also a task**, if someone manages to get a **SEND permissions** over the **`kernel_task`**, it'll be able to make the kernel execute anything (jailbreaks).
+Hãy nhớ rằng **kernel cũng là một task**, nên nếu ai đó lấy được **quyền SEND** trên **`kernel_task`**, họ có thể khiến kernel thực thi bất cứ thứ gì (jailbreak).
 
-- Call `mach_task_self()` to **get the name** for this port for the caller task. This port is only **inherited** across **`exec()`**; a new task created with `fork()` gets a new task port (as a special case, a task also gets a new task port after `exec()`in a suid binary). The only way to spawn a task and get its port is to perform the ["port swap dance"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) while doing a `fork()`.
-- These are the restrictions to access the port (from `macos_task_policy` from the binary `AppleMobileFileIntegrity`):
-  - If the app has **`com.apple.security.get-task-allow` entitlement** processes from the **same user can access the task port** (commonly added by Xcode for debugging). The **notarization** process won't allow it to production releases.
-  - Apps with the **`com.apple.system-task-ports`** entitlement can get the **task port for any** process, except the kernel. In older versions it was called **`task_for_pid-allow`**. This is only granted to Apple applications.
-  - **Root can access task ports** of applications **not** compiled with a **hardened** runtime (and not from Apple).
+- Gọi `mach_task_self()` để **lấy tên** của port này đối với task của caller. Port này chỉ được **kế thừa** qua **`exec()`**; task mới được tạo bằng `fork()` sẽ có task port mới (trường hợp đặc biệt: task cũng nhận task port mới sau `exec()` trong một binary suid). Cách duy nhất để tạo task và lấy port của nó là thực hiện ["port swap dance"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) trong khi gọi `fork()`.
+- Đây là các hạn chế khi truy cập port (từ `macos_task_policy` trong binary `AppleMobileFileIntegrity`):
+  - Nếu app có **entitlement `com.apple.security.get-task-allow`**, các process của **cùng user có thể truy cập task port** (thường được Xcode thêm vào để debug). Quy trình **notarization** sẽ không cho phép entitlement này trong các bản phát hành production.
+  - App có entitlement **`com.apple.system-task-ports`** có thể lấy **task port của bất kỳ** process nào, ngoại trừ kernel. Trong các phiên bản cũ, entitlement này có tên **`task_for_pid-allow`**. Entitlement này chỉ được cấp cho các ứng dụng Apple.
+  - **Root có thể truy cập task port** của các ứng dụng **không** được biên dịch với runtime **hardened** (và không phải ứng dụng của Apple).
 
-**The task name port:** An unprivileged version of the _task port_. It references the task, but does not allow controlling it. The only thing that seems to be available through it is `task_info()`.
+**Task name port:** Phiên bản không có đặc quyền của _task port_. Nó tham chiếu đến task nhưng không cho phép điều khiển task đó. Có vẻ như thao tác duy nhất khả dụng thông qua port này là `task_info()`.
 
 ### Thread Ports
 
-Threads also have associated ports, which are visible from the task calling **`task_threads`** and from the processor with `processor_set_threads`. A SEND right to the thread port allows to use the function from the `thread_act` subsystem, like:
+Các thread cũng có port tương ứng, có thể được xem từ task gọi **`task_threads`** và từ processor thông qua `processor_set_threads`. Quyền SEND trên thread port cho phép sử dụng các hàm trong subsystem `thread_act`, chẳng hạn như:
 
 - `thread_terminate`
 - `thread_[get/set]_state`
@@ -528,11 +528,11 @@ Threads also have associated ports, which are visible from the task calling **`t
 - `thread_info`
 - ...
 
-Any thread can get this port calling to **`mach_thread_sef`**.
+Mọi thread đều có thể lấy port này bằng cách gọi **`mach_thread_sef`**.
 
-### Shellcode Injection in thread via Task port
+### Shellcode Injection vào thread qua Task port
 
-You can grab a shellcode from:
+Bạn có thể lấy shellcode từ:
 
 
 {{#ref}}
@@ -589,7 +589,7 @@ processIdentifier]);
 {{#endtab}}
 {{#endtabs}}
 
-**Compile** the previous program and add the **entitlements** to be able to inject code with the same user (if not you will need to use **sudo**).<sup>[[3]](#references)</sup>
+**Biên dịch** chương trình trước đó và thêm **entitlements** để có thể inject code với cùng người dùng (nếu không, bạn sẽ cần dùng **sudo**).<sup>[[3]](#references)</sup>
 
 <details>
 
@@ -803,17 +803,17 @@ gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 ```
 
 > [!TIP]
-> For this to work on iOS you need the entitlement `dynamic-codesigning` in order to be able to make a writable memory executable.
+> Để cách này hoạt động trên iOS, bạn cần entitlement `dynamic-codesigning` để có thể tạo vùng nhớ vừa có thể ghi vừa có thể thực thi.
 
-### Dylib Injection in thread via Task port
+### Dylib Injection trong thread qua Task port
 
-In macOS **threads** might be manipulated via **Mach** or using **posix `pthread` api**. The thread we generated in the previous injection, was generated using Mach api, so **it's not posix compliant**.
+Trong macOS, **threads** có thể được thao tác thông qua **Mach** hoặc dùng **API `pthread` của posix**. Thread được tạo trong lần injection trước đó sử dụng API Mach, nên **không tương thích với posix**.
 
-It was possible to **inject a simple shellcode** to execute a command because it **didn't need to work with posix** compliant apis, only with Mach. **More complex injections** would need the **thread** to be also **posix compliant**.
+Có thể **inject một shellcode đơn giản** để thực thi lệnh vì nó **không cần hoạt động với các API tương thích posix**, mà chỉ cần Mach. **Các injection phức tạp hơn** sẽ cần **thread** cũng **tương thích với posix**.
 
-Therefore, to **improve the thread** it should call **`pthread_create_from_mach_thread`** which will **create a valid pthread**. Then, this new pthread could **call dlopen** to **load a dylib** from the system, so instead of writing new shellcode to perform different actions it's possible to load custom libraries.<sup>[[2]](#references)</sup>
+Do đó, để **cải thiện thread**, nó nên gọi **`pthread_create_from_mach_thread`** để **tạo một pthread hợp lệ**. Sau đó, pthread mới này có thể **gọi dlopen** để **load một dylib** từ hệ thống. Như vậy, thay vì viết shellcode mới để thực hiện các hành động khác nhau, ta có thể load các thư viện tùy chỉnh.<sup>[[2]](#references)</sup>
 
-You can find **example dylibs** in (for example the one that generates a log and then you can listen to it):
+Bạn có thể tìm thấy **các dylib mẫu** tại đây (ví dụ: dylib tạo log để bạn có thể nghe log):
 
 
 {{#ref}}
@@ -1104,53 +1104,53 @@ gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 
 ### Thread Hijacking via Task port <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
 
-In this technique a thread of the process is hijacked:
+Trong kỹ thuật này, một thread của process bị chiếm quyền điều khiển:
 
 
 {{#ref}}
 macos-thread-injection-via-task-port.md
 {{#endref}}
 
-### Task Port Injection Detection
+### Phát hiện Task Port Injection
 
-When calling `task_for_pid` or `thread_create_*` increments a counter in the struct task from the kernel which can by accessed from user mode calling task_info(task, TASK_EXTMOD_INFO, ...)
+Khi gọi `task_for_pid` hoặc `thread_create_*`, một bộ đếm trong struct task của kernel sẽ tăng. Có thể truy cập bộ đếm này từ user mode bằng cách gọi task_info(task, TASK_EXTMOD_INFO, ...)
 
 ## Exception Ports
 
-When a exception occurs in a thread, this exception is sent to the designated exception port of the thread. If the thread doesn't handle it, then it's sent to the task exception ports. If the task doesn't handle it, then it's sent to the host port which is managed by launchd (where it'll be acknowledge). This is called exception triage.
+Khi xảy ra exception trong một thread, exception đó được gửi đến exception port được chỉ định cho thread. Nếu thread không xử lý, exception sẽ được gửi đến các task exception port. Nếu task không xử lý, exception sẽ được gửi đến host port do launchd quản lý (nơi nó được xác nhận). Quá trình này được gọi là exception triage.
 
-Note that at the end usually if not properly handle the report will end up being handle by the ReportCrash daemon. However, it's possible for another thread in the same task to manage the exception, this is what crash reporting tools like `PLCreashReporter` does.
+Lưu ý rằng cuối cùng, nếu không được xử lý đúng cách, báo cáo thường sẽ được daemon ReportCrash xử lý. Tuy nhiên, một thread khác trong cùng task cũng có thể xử lý exception; đây là cách các công cụ báo cáo crash như `PLCreashReporter` hoạt động.
 
-## Other Objects
+## Các đối tượng khác
 
 ### Clock
 
-Any user can access information about the clock however in order to set the time or modify other settings one has to be root.
+Bất kỳ user nào cũng có thể truy cập thông tin về clock, nhưng cần có quyền root để đặt thời gian hoặc thay đổi các cài đặt khác.
 
-In order to get info its possible to call functions from the `clock` subsystem like: `clock_get_time`, `clock_get_attributtes` or `clock_alarm`\
-In order to modify values the `clock_priv` subsystem can be sued with functions like `clock_set_time` and `clock_set_attributes`
+Để lấy thông tin, có thể gọi các hàm từ subsystem `clock`, chẳng hạn như: `clock_get_time`, `clock_get_attributtes` hoặc `clock_alarm`\
+Để thay đổi giá trị, có thể dùng subsystem `clock_priv` với các hàm như `clock_set_time` và `clock_set_attributes`
 
-### Processors and Processor Set
+### Processors và Processor Set
 
-The processor APIs allow control of a single logical processor through functions such as `processor_start`, `processor_exit`, `processor_info`, and `processor_get_assignment`.
+Các API processor cho phép kiểm soát một logical processor thông qua những hàm như `processor_start`, `processor_exit`, `processor_info` và `processor_get_assignment`.
 
-Moreover, the **processor set** apis provides a way to group multiple processors into a group. It's possible to retrieve the default processor set calling **`processor_set_default`**.\
-These are some interesting APIs to interact with the processor set:
+Ngoài ra, các API **processor set** cung cấp cách nhóm nhiều processor lại với nhau. Có thể lấy processor set mặc định bằng cách gọi **`processor_set_default`**.\
+Dưới đây là một số API đáng chú ý để tương tác với processor set:
 
 - `processor_set_statistics`
-- `processor_set_tasks`: Return an array of send rights to all tasks inside the processor set
-- `processor_set_threads`: Return an array of send rights to all threads inside the processor set
+- `processor_set_tasks`: Trả về một mảng send right đến tất cả task bên trong processor set
+- `processor_set_threads`: Trả về một mảng send right đến tất cả thread bên trong processor set
 - `processor_set_stack_usage`
 - `processor_set_info`
 
-As mentioned in [**this post**](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/), in the past this allowed to bypass the previously mentioned protection to get task ports in other processes to control them by calling **`processor_set_tasks`** and getting a host port on every process.<sup>[[10]](#references)</sup>\
-Nowadays you need root to use that function and this is protected so you will only be able to get these ports on unprotected processes.<sup>[[10]](#references)</sup>
+Như đã đề cập trong [**bài viết này**](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/), trước đây, cách này cho phép vượt qua cơ chế bảo vệ đã đề cập ở trên để lấy task port của các process khác và kiểm soát chúng bằng cách gọi **`processor_set_tasks`**, đồng thời lấy host port trên từng process.<sup>[[10]](#references)</sup>\
+Ngày nay, cần có quyền root để dùng hàm đó. Cơ chế này đã được bảo vệ, vì vậy bạn chỉ có thể lấy các port này trên những process không được bảo vệ.<sup>[[10]](#references)</sup>
 
-You can try it with:
+Bạn có thể thử với:
 
 <details>
 
-<summary><strong>processor_set_tasks code</strong></summary>
+<summary><strong>mã processor_set_tasks</strong></summary>
 
 ````c
 // Main part of the code from https://newosxbook.com/articles/PST2.html
@@ -1255,11 +1255,11 @@ int main(int argc, char *argv[]) {
 
 ## XPC
 
-### Basic Information
+### Thông tin cơ bản
 
-XPC, which stands for XNU (the kernel used by macOS) inter-Process Communication, is a framework for **communication between processes** on macOS and iOS. XPC provides a mechanism for making **safe, asynchronous method calls between different processes** on the system. It's a part of Apple's security paradigm, allowing for the **creation of privilege-separated applications** where each **component** runs with **only the permissions it needs** to do its job, thereby limiting the potential damage from a compromised process.
+XPC, viết tắt của XNU (kernel được macOS sử dụng) inter-Process Communication, là một framework **giao tiếp giữa các process** trên macOS và iOS. XPC cung cấp cơ chế để thực hiện **các lời gọi phương thức an toàn, bất đồng bộ giữa các process khác nhau** trên hệ thống. Đây là một phần trong mô hình bảo mật của Apple, cho phép **tạo các ứng dụng phân tách đặc quyền**, trong đó mỗi **thành phần** chỉ chạy với **các quyền cần thiết** để thực hiện nhiệm vụ, qua đó hạn chế thiệt hại tiềm ẩn từ một process bị xâm nhập.
 
-For more information about how this **communication work** on how it **could be vulnerable** check:
+Để biết thêm thông tin về cách thức **giao tiếp này hoạt động** và cách nó **có thể dễ bị tấn công**, hãy xem:
 
 
 {{#ref}}
@@ -1268,11 +1268,11 @@ macos-xpc/
 
 ## MIG - Mach Interface Generator
 
-MIG was created to **simplify the process of Mach IPC** code creation. This is because a lot of work to program RPC involves the same actions (packing arguments, sending the msg, unpacking the data in the server...).
+MIG được tạo ra để **đơn giản hóa quá trình tạo mã Mach IPC**. Lý do là phần lớn công việc lập trình RPC đều lặp lại những thao tác giống nhau (đóng gói đối số, gửi msg, giải đóng gói dữ liệu ở server...).
 
-MIC basically **generates the needed code** for server and client to communicate with a given definition (in IDL -Interface Definition language-). Even if the generated code is ugly, a developer will just need to import it and his code will be much simpler than before.
+Về cơ bản, MIG **tạo mã cần thiết** để server và client giao tiếp dựa trên một định nghĩa nhất định (bằng IDL -Interface Definition language-). Dù mã được tạo ra không đẹp, developer chỉ cần import mã đó và phần code của họ sẽ đơn giản hơn nhiều.
 
-For more info check:
+Để biết thêm thông tin, hãy xem:
 
 
 {{#ref}}
@@ -1281,20 +1281,20 @@ macos-mig-mach-interface-generator.md
 
 ## MIG handler type confusion -> fake vtable pointer-chain hijack
 
-If a MIG handler **retrieves a C++ object by Mach message-supplied ID** (e.g., from an internal Object Map) and then **assumes a specific concrete type without validating the real dynamic type**, later virtual calls can dispatch through attacker-controlled pointers. In `coreaudiod`’s `com.apple.audio.audiohald` service (CVE-2024-54529), `_XIOContext_Fetch_Workgroup_Port` used the looked-up `HALS_Object` as an `ioct` and executed a vtable call via:<sup>[[9]](#references)</sup>
+Nếu MIG handler **lấy một đối tượng C++ bằng ID do Mach message cung cấp** (ví dụ: từ Object Map nội bộ), rồi **giả định đối tượng đó thuộc một kiểu cụ thể mà không xác thực kiểu động thực tế**, các lời gọi virtual về sau có thể được dispatch thông qua những con trỏ do attacker kiểm soát. Trong service `com.apple.audio.audiohald` của `coreaudiod` (CVE-2024-54529), `_XIOContext_Fetch_Workgroup_Port` dùng `HALS_Object` được tra cứu như một `ioct` và thực thi lời gọi vtable thông qua:<sup>[[9]](#references)</sup>
 
 ```asm
 mov rax, qword ptr [rdi]
 call qword ptr [rax + 0x168]  ; indirect call through vtable slot
 ```
 
-Because `rax` comes from **multiple dereferences**, exploitation needs a structured pointer chain rather than a single overwrite. One working layout:
+Vì `rax` xuất phát từ **nhiều lần dereference**, việc khai thác cần một chuỗi con trỏ có cấu trúc thay vì chỉ ghi đè một lần. Một bố cục hoạt động:
 
-1. In the **confused heap object** (treated as `ioct`), place a **pointer at +0x68** to attacker-controlled memory.
-2. At that controlled memory, place a **pointer at +0x0** to a **fake vtable**.
-3. In the fake vtable, write the **call target at +0x168**, so the handler jumps to attacker-chosen code when dereferencing `[rax+0x168]`.
+1. Trong **đối tượng heap bị nhầm lẫn** (được xử lý như `ioct`), đặt một **con trỏ tại +0x68** trỏ đến vùng nhớ do attacker kiểm soát.
+2. Tại vùng nhớ đó, đặt một **con trỏ tại +0x0** trỏ đến một **fake vtable**.
+3. Trong fake vtable, ghi **địa chỉ đích của lệnh gọi tại +0x168**, để handler nhảy đến đoạn code do attacker chọn khi dereference `[rax+0x168]`.
 
-Conceptually:
+Về mặt khái niệm:
 
 ```
 HALS_Object + 0x68  -> controlled_object
@@ -1302,25 +1302,24 @@ HALS_Object + 0x68  -> controlled_object
 *(fake_vtable + 0x168)     -> RIP target
 ```
 
-### LLDB triage to anchor the gadget
+### Triage bằng LLDB để định vị gadget
 
-1. **Break on the faulting handler** (or `mach_msg`/`dispatch_mig_server`) and trigger the crash to confirm the dispatch chain (`HALB_MIGServer_server -> dispatch_mig_server -> _XIOContext_Fetch_Workgroup_Port`).
-2. In the crash frame, disassemble to capture the **indirect call slot offset** (`call qword ptr [rax + 0x168]`).
-3. Inspect registers/memory to verify where `rdi` (base object) and `rax` (vtable pointer) originate and whether the offsets above are reachable with controlled data.
-4. Use the offset map to heap-shape the **0x68 -> 0x0 -> 0x168** chain and convert the type confusion into a reliable control-flow hijack inside the Mach service.
+1. **Đặt breakpoint tại handler gây lỗi** (hoặc `mach_msg`/`dispatch_mig_server`) rồi kích hoạt crash để xác nhận chuỗi dispatch (`HALB_MIGServer_server -> dispatch_mig_server -> _XIOContext_Fetch_Workgroup_Port`).
+2. Trong frame gây crash, disassemble để ghi lại **offset của vị trí gọi gián tiếp** (`call qword ptr [rax + 0x168]`).
+3. Kiểm tra các register/bộ nhớ để xác minh nguồn gốc của `rdi` (đối tượng cơ sở) và `rax` (con trỏ vtable), đồng thời xem các offset trên có thể truy cập bằng dữ liệu được kiểm soát hay không.
+4. Dùng sơ đồ offset để heap-shape chuỗi **0x68 -> 0x0 -> 0x168** và biến lỗi nhầm kiểu thành một vụ chiếm quyền điều khiển luồng thực thi đáng tin cậy bên trong Mach service.
 
 ## References
 
-- [1] [Mach Ports – Darling Docs](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)
-- [2] [Code injection on macOS – knight.sc](https://knight.sc/malware/2019/03/15/code-injection-on-macos.html)
-- [3] [knightsc/inject.c – dlopen dylib injection into a remote Mach task (Gist)](https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a)
-- [4] [Don't talk all at once: Elevating privileges on macOS by audit token spoofing – Sector 7](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
-- [5] [XNU — `osfmk/mach/message.h` (Mach message structures and flags)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
-- [6] [XNU — `osfmk/mach/mach_port.defs` (port manipulation MIG interface)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
-- [7] [XNU — `osfmk/mach/task.defs` (`task_for_pid`, thread/task port operations)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
-- [8] [task_get_special_port – MIT Darwin XNU manual](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html)
-- [9] [Project Zero – Sound Barrier 2](https://projectzero.google/2026/01/sound-barrier-2.html)
-- [10] [About the processor_set_tasks() access to kernel memory vulnerability – reverse.put.as](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/)
-- [11] [XNU — `osfmk/ipc/ipc_port.h` (port rights and internals)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/ipc/ipc_port.h)
-
+- [1] [Mach Ports – Tài liệu Darling](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)
+- [2] [Chèn mã trên macOS – knight.sc](https://knight.sc/malware/2019/03/15/code-injection-on-macos.html)
+- [3] [knightsc/inject.c – Chèn dylib bằng dlopen vào Mach task từ xa (Gist)](https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a)
+- [4] [Đừng nói cùng lúc: Nâng cao đặc quyền trên macOS bằng cách giả mạo audit token – Sector 7](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
+- [5] [XNU — `osfmk/mach/message.h` (cấu trúc và cờ của Mach message)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
+- [6] [XNU — `osfmk/mach/mach_port.defs` (giao diện MIG để thao tác port)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
+- [7] [XNU — `osfmk/mach/task.defs` (`task_for_pid`, các thao tác với thread/task port)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
+- [8] [task_get_special_port – Sổ tay MIT Darwin XNU](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html)
+- [9] [Project Zero – Rào chắn âm thanh 2](https://projectzero.google/2026/01/sound-barrier-2.html)
+- [10] [Về lỗ hổng truy cập bộ nhớ kernel của processor_set_tasks() – reverse.put.as](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/)
+- [11] [XNU — `osfmk/ipc/ipc_port.h` (các quyền và nội bộ của port)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/ipc/ipc_port.h)
 {{#include ../../../../banners/hacktricks-training.md}}

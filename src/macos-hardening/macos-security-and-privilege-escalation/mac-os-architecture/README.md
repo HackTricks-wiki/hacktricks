@@ -1,121 +1,120 @@
-# macOS Kernel & System Extensions
+# Kernel macOS và System Extensions
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## XNU Kernel
+## Kernel XNU
 
-The **core of macOS is XNU**, which stands for "X is Not Unix". It is a hybrid kernel that combines Mach, BSD components, and the C++ I/O Kit driver framework. Apple publishes the XNU source tree, including the `osfmk`, `bsd`, and `iokit` subsystems. <sup>[[1]](#references)</sup><sup>[[5]](#references)</sup><sup>[[6]](#references)</sup>
+**Lõi của macOS là XNU**, viết tắt của “X is Not Unix”. Đây là kernel lai kết hợp Mach, các thành phần BSD và framework driver C++ I/O Kit. Apple công bố mã nguồn XNU, bao gồm các subsystem `osfmk`, `bsd` và `iokit`. <sup>[[1]](#references)</sup><sup>[[5]](#references)</sup><sup>[[6]](#references)</sup>
 
-From a perspective of a security researcher or a Unix developer, **macOS** can feel quite **similar** to a **FreeBSD** system with an elegant GUI and a host of custom applications. Most applications developed for BSD will compile and run on macOS without needing modifications, as the command-line tools familiar to Unix users are all present in macOS. However, because the XNU kernel incorporates Mach, there are some significant differences between a traditional Unix-like system and macOS, and these differences might cause potential issues or provide unique advantages.
+Từ góc nhìn của nhà nghiên cứu bảo mật hoặc nhà phát triển Unix, **macOS** có thể trông khá **giống** một hệ thống **FreeBSD** với GUI tinh tế và nhiều ứng dụng tùy chỉnh. Hầu hết ứng dụng được phát triển cho BSD sẽ biên dịch và chạy trên macOS mà không cần chỉnh sửa, vì macOS có đầy đủ các công cụ dòng lệnh quen thuộc với người dùng Unix. Tuy nhiên, do kernel XNU tích hợp Mach, macOS có một số khác biệt đáng kể so với hệ thống kiểu Unix truyền thống. Những khác biệt này có thể gây ra vấn đề tiềm ẩn hoặc đem lại lợi thế riêng.
 
-Open-source XNU releases are available from Apple's official distribution repository. <sup>[[1]](#references)</sup>
+Các bản phát hành XNU mã nguồn mở có tại kho phân phối chính thức của Apple. <sup>[[1]](#references)</sup>
 
 ### Mach
 
-Mach is a **microkernel** designed to be **UNIX-compatible**. One of its key design principles was to **minimize** the amount of **code** running in the **kernel** space and instead allow many typical kernel functions, such as file system, networking, and I/O, to **run as user-level tasks**.
+Mach là một **microkernel** được thiết kế để **tương thích với UNIX**. Một trong những nguyên tắc thiết kế then chốt là **giảm thiểu** lượng **code** chạy trong không gian **kernel**, thay vào đó cho phép nhiều chức năng kernel điển hình như hệ thống tệp, mạng và I/O **chạy dưới dạng tác vụ ở cấp người dùng**.
 
-In XNU, Mach is **responsible for many of the critical low-level operations** a kernel typically handles, such as processor scheduling, multitasking, and virtual memory management.
+Trong XNU, Mach **chịu trách nhiệm cho nhiều hoạt động cấp thấp quan trọng** mà kernel thường xử lý, chẳng hạn như lập lịch bộ xử lý, đa nhiệm và quản lý bộ nhớ ảo.
 
 ### BSD
 
-The XNU **kernel** also **incorporates** a significant amount of code derived from the **FreeBSD** project. This code **runs as part of the kernel along with Mach**, in the same address space. However, the FreeBSD code within XNU may differ substantially from the original FreeBSD code because modifications were required to ensure its compatibility with Mach. FreeBSD contributes to many kernel operations including:
+**Kernel** XNU cũng **tích hợp** một lượng đáng kể code bắt nguồn từ dự án **FreeBSD**. Code này **chạy như một phần của kernel cùng với Mach**, trong cùng không gian địa chỉ. Tuy nhiên, code FreeBSD trong XNU có thể khác đáng kể so với code FreeBSD gốc vì cần chỉnh sửa để đảm bảo tương thích với Mach. FreeBSD đóng góp vào nhiều hoạt động kernel, bao gồm:
 
-- Process management
-- Signal handling
-- Basic security mechanisms, including user and group management
-- System call infrastructure
-- TCP/IP stack and sockets
-- Firewall and packet filtering
+- Quản lý tiến trình
+- Xử lý signal
+- Các cơ chế bảo mật cơ bản, bao gồm quản lý user và group
+- Cơ sở hạ tầng system call
+- TCP/IP stack và socket
+- Firewall và lọc gói tin
 
-Understanding the interaction between BSD and Mach can be complex, due to their different conceptual frameworks. For instance, BSD uses processes as its fundamental executing unit, while Mach operates based on threads. This discrepancy is reconciled in XNU by **associating each BSD process with a Mach task** that contains exactly one Mach thread. When BSD's fork() system call is used, the BSD code within the kernel uses Mach functions to create a task and a thread structure.
+Việc hiểu tương tác giữa BSD và Mach có thể phức tạp do hai bên có khung khái niệm khác nhau. Chẳng hạn, BSD dùng tiến trình làm đơn vị thực thi cơ bản, còn Mach hoạt động dựa trên thread. Trong XNU, sự khác biệt này được dung hòa bằng cách **liên kết mỗi tiến trình BSD với một Mach task** chứa chính xác một Mach thread. Khi gọi system call fork() của BSD, code BSD bên trong kernel dùng các hàm Mach để tạo task và cấu trúc thread.
 
-Moreover, **Mach and BSD maintain different security models**: Mach's security model is based on port rights, whereas BSD's model includes process credentials and ownership. Disparities at the boundary between these models have historically produced local privilege-escalation opportunities. User space interacts with these layers through Mach traps and BSD system calls. These elements form the hybrid architecture of the macOS kernel.<sup>[[1]](#references)</sup><sup>[[5]](#references)</sup>
+Ngoài ra, **Mach và BSD duy trì các mô hình bảo mật khác nhau**: mô hình bảo mật của Mach dựa trên quyền port, còn mô hình của BSD bao gồm thông tin xác thực và quyền sở hữu của tiến trình. Khác biệt tại ranh giới giữa hai mô hình này từng tạo ra các cơ hội leo thang đặc quyền cục bộ. Không gian người dùng tương tác với các lớp này thông qua Mach trap và system call BSD. Những thành phần này tạo nên kiến trúc lai của kernel macOS.<sup>[[1]](#references)</sup><sup>[[5]](#references)</sup>
 
-### I/O Kit - Drivers
+### I/O Kit - Driver
 
-I/O Kit is XNU's open-source, object-oriented device-driver framework. Historically, kernel extensions used it to load modular driver code dynamically into the kernel; modern macOS increasingly moves supported drivers to DriverKit user-space extensions instead. I/O Kit also exposes user-client interfaces through which user processes communicate with drivers. The dedicated page covers its registry, matching model, user clients, and attack surface:<sup>[[1]](#references)</sup><sup>[[3]](#references)</sup>
+I/O Kit là framework driver thiết bị hướng đối tượng, mã nguồn mở của XNU. Trước đây, kernel extension dùng framework này để tải động code driver dạng mô-đun vào kernel; các phiên bản macOS hiện đại ngày càng chuyển những driver được hỗ trợ sang extension ở không gian người dùng DriverKit. I/O Kit cũng cung cấp các giao diện user-client để tiến trình người dùng giao tiếp với driver. Trang chuyên biệt trình bày registry, mô hình matching, user client và attack surface của framework:<sup>[[1]](#references)</sup><sup>[[3]](#references)</sup>
 
 
 {{#ref}}
 macos-iokit.md
 {{#endref}}
 
-### Coprocessors And Dedicated Security Hardware
+### Bộ đồng xử lý và phần cứng bảo mật chuyên dụng
 
-Apple silicon and Macs with a T2 chip include a **Secure Enclave**, with its own Boot ROM and AES engine, that supports secure key generation and storage, biometric processing, and the key hierarchy used by data-protection features. Apple platforms also use other coprocessors to move latency-sensitive work away from the main CPU cores and to isolate security-critical functions. Their responsibilities and interfaces vary by model and OS release, so treat low-level firmware and mailbox details as implementation-specific unless they are confirmed for the exact target. <sup>[[2]](#references)</sup>
+Apple silicon và máy Mac có chip T2 bao gồm **Secure Enclave**, với Boot ROM và AES engine riêng, hỗ trợ tạo và lưu trữ khóa an toàn, xử lý sinh trắc học và hệ thống phân cấp khóa được các tính năng bảo vệ dữ liệu sử dụng. Nền tảng Apple cũng dùng các bộ đồng xử lý khác để chuyển những tác vụ nhạy cảm với độ trễ ra khỏi các lõi CPU chính và cô lập các chức năng quan trọng về bảo mật. Nhiệm vụ và giao diện của chúng thay đổi tùy model và phiên bản OS, vì vậy hãy xem chi tiết firmware cấp thấp và mailbox là đặc thù của từng bản triển khai, trừ khi đã xác nhận trên đúng mục tiêu. <sup>[[2]](#references)</sup>
 
-From a security-review perspective, the durable lesson is that the macOS attack surface extends beyond ordinary user processes and the XNU kernel. Drivers, firmware parsers, shared-memory interfaces, and I/O Kit or DriverKit user clients can mediate access to dedicated hardware. Validate the component, hardware generation, and trust boundary before drawing conclusions about exploit impact.
+Khi đánh giá bảo mật, điều quan trọng cần nhớ là attack surface của macOS không chỉ giới hạn ở các tiến trình người dùng thông thường và kernel XNU. Driver, parser firmware, giao diện bộ nhớ dùng chung và user client của I/O Kit hoặc DriverKit có thể trung gian cho việc truy cập phần cứng chuyên dụng. Hãy xác minh thành phần, thế hệ phần cứng và ranh giới tin cậy trước khi kết luận về tác động của một exploit.
 
-The following checklist preserves useful low-level leads while avoiding the assumption that every item applies unchanged to every Mac. Apple documents the Secure Enclave and hardware-security boundary; Asahi Linux and `m1n1` provide reverse-engineering references for Apple-silicon devices and coprocessor communication. <sup>[[2]](#references)</sup><sup>[[7]](#references)</sup><sup>[[8]](#references)</sup>
+Danh sách kiểm tra dưới đây giữ lại các manh mối cấp thấp hữu ích, đồng thời tránh giả định rằng mọi mục đều áp dụng giống nhau cho mọi máy Mac. Apple mô tả Secure Enclave và ranh giới bảo mật phần cứng; Asahi Linux và `m1n1` cung cấp tài liệu tham khảo về reverse engineering cho thiết bị Apple silicon và giao tiếp với bộ đồng xử lý. <sup>[[2]](#references)</sup><sup>[[7]](#references)</sup><sup>[[8]](#references)</sup>
 
-| Component | Architecture and attack-surface leads to validate on the target | Potential impact of a compromise |
+| Thành phần | Kiến trúc và các hướng khảo sát attack surface cần xác thực trên mục tiêu | Tác động tiềm tàng khi bị xâm phạm |
 | --- | --- | --- |
-| **Secure Enclave Processor (SEP)** | Dedicated ARM processor with its own microkernel, Boot ROM, and secure-boot chain. It is commonly described as operating across a secure-world boundary; exact exception-level use is SoC-specific. Review SEP firmware updates, mailbox-facing drivers in macOS, and user-space brokers such as `seputil` and `securityd`. | Exposure of long-term key material, biometric-policy bypass, or weakening of FileVault and Apple Pay protections. |
-| **System Management Controller (SMC)** | Proprietary firmware on a controller outside the application processor's normal ARM exception-level model. macOS reaches its services through platform and I/O Kit drivers. Review USB-C power-delivery input, fan/battery management, sensor interfaces, and firmware-update paths. | Thermal-limit override, power manipulation, false sensor data, denial of service, or firmware/NVRAM persistence. |
-| **T1/T2 security chips** | Separate Apple SoCs that run bridgeOS, with their own ARM execution environments and secure-boot path. They communicate with macOS over device channels commonly described as PCIe/USB-like and mediated by I/O Kit drivers. Review DFU/restore paths, `tccd`-adjacent IPC, bridged media pipelines, and input services. | Secure-boot weakening, SSD-key exposure, camera/microphone-gating abuse, or emulated HID input. |
-| **Display Coprocessor (DCP)** | Reverse engineering describes display firmware executing in an isolated environment, with shared descriptor buffers, DCP service interfaces, and DART IOMMU protection. Look for `DCPAVService`-related interfaces and firmware-image parsers; do not assume a specific exception level without confirming the SoC. | Arbitrary-frame injection, framebuffer disclosure, or display-pipeline denial of service. |
-| **Apple Neural Engine (ANE)** | Dedicated ML cluster rather than a general-purpose ARM core. macOS reaches it through Core ML, compiler services such as `ANECompilerService`, compiled `.ane` models, I/O Kit interfaces, and firmware loaders. | Model or processed audio/vision-data disclosure, inference tampering, or escalation through a parser/driver flaw. |
-| **AGX GPU** | Firmware executes on custom GPU cores with its own scheduler. EL0 applications submit Metal commands and shared buffers through kernel-validated interfaces, including AGX driver/firmware components such as `com.apple.AGXFirmware`. | DMA-backed memory exposure, sandbox escape through a GPU driver, or persistent firmware compromise. |
-| **Apple Video Encoder / media engines** | Reverse-engineered descriptions place media firmware in an isolated, EL1-like execution environment. Codec bitstreams, parameter sets, user-controlled buffers, VideoToolbox, and driver families such as `AppleAVE2` are high-value parser surfaces. | Disclosure of uncompressed frames, DRM bypass, or code execution with access to DMA engines. |
-| **Image Signal Processor (ISP)** | Secure camera-processing firmware is associated with the media-engine cluster while macOS camera drivers run on the application processor. Camera HALs, raw-frame descriptors, ISP configuration queues, I/O Kit interfaces, and firmware updates form the review surface. | Silent raw-camera capture, privacy-indicator bypass, fabricated imagery, or driver/firmware compromise. |
-| **AMX matrix units** | Coprocessor-style matrix units are exposed through architecture-specific instructions usable by generated user and kernel code. Review kernel virtualization of AMX state, context switches, `thread_set_state`, and user-space code generation. | Cross-process tile-register leakage, workload fingerprinting, or escalation through kernel state-management corruption. |
+| **Secure Enclave Processor (SEP)** | Bộ xử lý ARM chuyên dụng với microkernel, Boot ROM và chuỗi secure boot riêng. SEP thường được mô tả là hoạt động qua ranh giới secure-world; việc sử dụng exception level cụ thể tùy SoC. Kiểm tra bản cập nhật firmware SEP, driver trong macOS giao tiếp qua mailbox và các broker ở không gian người dùng như `seputil` và `securityd`. | Lộ vật liệu khóa dài hạn, bypass chính sách sinh trắc học hoặc làm suy yếu cơ chế bảo vệ của FileVault và Apple Pay. |
+| **System Management Controller (SMC)** | Firmware độc quyền trên bộ điều khiển nằm ngoài mô hình ARM exception level thông thường của application processor. macOS truy cập các dịch vụ của SMC qua driver nền tảng và I/O Kit. Kiểm tra đầu vào USB-C power delivery, quản lý quạt/pin, giao diện cảm biến và đường dẫn cập nhật firmware. | Vượt giới hạn nhiệt, thao túng nguồn điện, giả mạo dữ liệu cảm biến, từ chối dịch vụ hoặc duy trì hiện diện qua firmware/NVRAM. |
+| **Chip bảo mật T1/T2** | Các SoC Apple riêng chạy bridgeOS, với môi trường thực thi ARM và đường dẫn secure boot riêng. Chúng giao tiếp với macOS qua các kênh thiết bị thường được mô tả là tương tự PCIe/USB và được trung gian bởi driver I/O Kit. Kiểm tra đường dẫn DFU/restore, IPC liền kề `tccd`, pipeline media được bridge và dịch vụ input. | Làm suy yếu secure boot, lộ khóa SSD, lạm dụng cơ chế khóa camera/micro hoặc giả lập đầu vào HID. |
+| **Display Coprocessor (DCP)** | Theo tài liệu reverse engineering, firmware màn hình chạy trong môi trường cô lập, với buffer descriptor dùng chung, giao diện dịch vụ DCP và cơ chế bảo vệ DART IOMMU. Tìm các giao diện liên quan đến `DCPAVService` và parser ảnh firmware; không giả định exception level cụ thể nếu chưa xác nhận trên SoC. | Chèn khung hình tùy ý, làm lộ framebuffer hoặc gây từ chối dịch vụ pipeline màn hình. |
+| **Apple Neural Engine (ANE)** | Cụm ML chuyên dụng, không phải lõi ARM đa dụng. macOS truy cập ANE qua Core ML, dịch vụ compiler như `ANECompilerService`, model `.ane` đã biên dịch, giao diện I/O Kit và trình tải firmware. | Làm lộ model hoặc dữ liệu âm thanh/hình ảnh đã xử lý, can thiệp suy luận hoặc leo thang qua lỗi parser/driver. |
+| **AGX GPU** | Firmware chạy trên các lõi GPU tùy chỉnh với scheduler riêng. Ứng dụng EL0 gửi lệnh Metal và buffer dùng chung qua các giao diện được kernel xác thực, bao gồm thành phần driver/firmware AGX như `com.apple.AGXFirmware`. | Làm lộ bộ nhớ qua DMA, thoát sandbox qua driver GPU hoặc xâm phạm firmware để duy trì hiện diện. |
+| **Apple Video Encoder / media engine** | Theo các mô tả reverse-engineering, firmware media chạy trong môi trường thực thi cô lập tương tự EL1. Bitstream codec, bộ tham số, buffer do người dùng kiểm soát, VideoToolbox và các họ driver như `AppleAVE2` là những bề mặt parser có giá trị cao. | Làm lộ khung hình chưa nén, bypass DRM hoặc thực thi code có quyền truy cập các DMA engine. |
+| **Image Signal Processor (ISP)** | Firmware xử lý camera an toàn gắn với cụm media engine, trong khi driver camera macOS chạy trên application processor. Camera HAL, descriptor khung hình thô, hàng đợi cấu hình ISP, giao diện I/O Kit và bản cập nhật firmware tạo nên phạm vi đánh giá. | Âm thầm ghi hình thô từ camera, bypass đèn báo quyền riêng tư, tạo hình ảnh giả hoặc xâm phạm driver/firmware. |
+| **AMX matrix unit** | Các matrix unit kiểu đồng xử lý được truy cập qua lệnh đặc thù kiến trúc, có thể được code ở user và kernel đã tạo sử dụng. Kiểm tra cơ chế ảo hóa trạng thái AMX của kernel, chuyển đổi ngữ cảnh, `thread_set_state` và việc tạo code ở không gian người dùng. | Rò rỉ thanh ghi tile giữa các tiến trình, nhận dạng workload hoặc leo thang do hỏng trạng thái kernel. |
 
-These coprocessors participate in the platform's chain of trust. Apple documents separate secure-boot processes for the T2 chip and Secure Enclave, Apple-signed software-update authorization, and integrity protection for coprocessor firmware. Reverse-engineered components may additionally use authenticated mailbox or driver protocols; verify any claimed challenge-response handshake on the exact hardware and firmware rather than assuming one generic mechanism applies everywhere. <sup>[[2]](#references)</sup><sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
+Các bộ đồng xử lý này tham gia vào chuỗi tin cậy của nền tảng. Apple mô tả các quy trình secure boot riêng cho chip T2 và Secure Enclave, cơ chế cấp quyền cho bản cập nhật phần mềm do Apple ký và bảo vệ tính toàn vẹn firmware của bộ đồng xử lý. Các thành phần được reverse-engineer có thể còn dùng giao thức driver hoặc mailbox đã xác thực; hãy xác minh mọi khẳng định về handshake challenge-response trên đúng phần cứng và firmware, thay vì giả định có một cơ chế chung áp dụng ở mọi nơi. <sup>[[2]](#references)</sup><sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
 
-### IPC - Inter Process Communication
+### IPC - Giao tiếp liên tiến trình
 
 {{#ref}}
 ../macos-proces-abuse/macos-ipc-inter-process-communication/
 {{#endref}}
 
-## macOS Kernel Extensions
+## Kernel Extension trên macOS
 
-macOS is **super restrictive to load Kernel Extensions** (.kext) because of the high privileges that code will run with. Actually, by default is virtually impossible (unless a bypass is found).
+macOS **hạn chế nghiêm ngặt việc tải Kernel Extension** (.kext) do mức đặc quyền cao mà code này được cấp khi chạy. Trên thực tế, theo mặc định, việc này gần như bất khả thi (trừ khi tìm được bypass).
 
-In the following page you can also see how to recover the `.kext` that macOS loads inside its **kernelcache**:
+Trang sau cũng hướng dẫn cách khôi phục `.kext` mà macOS tải bên trong **kernelcache**:
 
 {{#ref}}
 macos-kernel-extensions.md
 {{#endref}}
 
-### macOS System Extensions
+### System Extensions trên macOS
 
-macOS provides system extensions and DriverKit so many security, networking, and driver components can run in user space rather than inside the kernel. Apple recommends these mechanisms whenever they cover the required functionality. <sup>[[3]](#references)</sup>
+macOS cung cấp system extension và DriverKit để nhiều thành phần bảo mật, mạng và driver có thể chạy trong không gian người dùng thay vì bên trong kernel. Apple khuyến nghị sử dụng các cơ chế này bất cứ khi nào chúng đáp ứng được chức năng cần thiết. <sup>[[3]](#references)</sup>
 
 {{#ref}}
 macos-system-extensions.md
 {{#endref}}
 
 
-### Cryptexes And Rapid Security Responses
+### Cryptex và Rapid Security Response
 
-A **cryptex** (cryptographically sealed extension) is a sealed disk image that lets Apple deliver and mount selected operating-system content separately from the sealed system volume. Rapid Security Responses used this mechanism to deliver important fixes between full software updates on supported OS versions. Exact cryptex layout, boot integration, and response availability are version-specific, so validate them on the target rather than relying on a single historical layout. <sup>[[4]](#references)</sup><sup>[[9]](#references)</sup>
+**Cryptex** (extension được niêm phong bằng mật mã) là ảnh đĩa được niêm phong, cho phép Apple phân phối và mount riêng một số nội dung hệ điều hành đã chọn, tách khỏi system volume được niêm phong. Rapid Security Response đã sử dụng cơ chế này để phân phối các bản vá quan trọng giữa những lần cập nhật phần mềm đầy đủ trên các phiên bản OS được hỗ trợ. Cấu trúc cryptex, cách tích hợp vào quá trình khởi động và khả năng cung cấp response cụ thể tùy phiên bản; hãy xác thực trên mục tiêu thay vì dựa vào một cấu trúc cũ duy nhất. <sup>[[4]](#references)</sup><sup>[[9]](#references)</sup>
 
-Important implementation details documented for RSR-capable Apple operating systems include:
+Các chi tiết triển khai quan trọng được ghi nhận trên hệ điều hành Apple hỗ trợ RSR bao gồm:
 
-- Frameworks, shared libraries, and applications eligible for Rapid Security Response were moved into optimized, cryptographically sealed cryptex disk images on the Preboot volume.
-- An RSR can patch the cryptex backing image without resealing the entire system volume.
-- Cryptex content is bootstrapped after the kernel; its filesystem seals, measurements, and trust caches are represented in a separate Image4 ticket.
-- At runtime, validated cryptex content is mounted or grafted into the operating-system namespace so applications resolve the cryptex-provided versions. Technical descriptions of the boot process also track manifest and root-hash validation before full system services are available.
-- During RSR installation, the device requests a device-bound Cryptex1 Image4 manifest from Apple's signing service; the existing application-processor boot ticket is not replaced.
-- On macOS, some patched application content, such as Safari components, can become active after relaunching the application rather than after a full reboot.
-- Apple can remove a problematic response, and a user can remove and later reapply an RSR on supported versions.
-- Technical descriptions of early RSR releases refer to the rollback component as an **antipatch**, which reverts cryptex content to the base OS representation.
-- RSR downloads are generally smaller than full OS updates and historically used less restrictive installation prerequisites, such as lower battery thresholds, but those policy details can change.
+- Framework, shared library và ứng dụng đủ điều kiện nhận Rapid Security Response được chuyển vào các ảnh đĩa cryptex đã tối ưu hóa và niêm phong bằng mật mã trên volume Preboot.
+- RSR có thể vá ảnh nền cryptex mà không cần niêm phong lại toàn bộ system volume.
+- Nội dung cryptex được khởi tạo sau kernel; thông tin về filesystem seal, phép đo và trust cache được thể hiện trong một Image4 ticket riêng.
+- Khi chạy, nội dung cryptex đã được xác thực được mount hoặc graft vào namespace của hệ điều hành để ứng dụng phân giải thành các phiên bản do cryptex cung cấp. Các mô tả kỹ thuật về quá trình khởi động cũng theo dõi việc xác thực manifest và root hash trước khi toàn bộ dịch vụ hệ thống khả dụng.
+- Trong quá trình cài đặt RSR, thiết bị yêu cầu manifest Cryptex1 Image4 gắn với thiết bị từ dịch vụ ký của Apple; boot ticket hiện có của application processor không bị thay thế.
+- Trên macOS, một số nội dung ứng dụng đã vá, chẳng hạn như thành phần Safari, có thể được kích hoạt sau khi khởi chạy lại ứng dụng thay vì sau khi khởi động lại toàn bộ máy.
+- Apple có thể gỡ bỏ một response có vấn đề; trên các phiên bản được hỗ trợ, người dùng có thể gỡ và áp dụng lại RSR sau đó.
+- Các mô tả kỹ thuật về những bản RSR đầu tiên gọi thành phần rollback là **antipatch**; thành phần này hoàn nguyên nội dung cryptex về trạng thái thể hiện trong OS nền.
+- Bản tải xuống RSR thường nhỏ hơn bản cập nhật OS đầy đủ và trước đây có các điều kiện cài đặt ít hạn chế hơn, chẳng hạn ngưỡng pin thấp hơn; các chính sách này có thể thay đổi.
 
 
 ## References
 
 - [1] [Apple Open Source - XNU](https://github.com/apple-oss-distributions/xnu)
-- [2] [Apple Platform Security - Hardware security overview](https://support.apple.com/guide/security/hardware-security-overview-secf020d1074/web)
+- [2] [Bảo mật nền tảng Apple - Tổng quan về bảo mật phần cứng](https://support.apple.com/guide/security/hardware-security-overview-secf020d1074/web)
 - [3] [Apple Developer - System Extensions](https://developer.apple.com/documentation/systemextensions)
 - [4] [Apple Support - Rapid Security Responses](https://support.apple.com/en-us/102657)
-- [5] [The Mac Hacker's Handbook](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/)
-- [6] [The Art of Mac Malware, Vol. 1 - Analysis](https://taomm.org/)
-- [7] [Asahi Linux - Apple-silicon platform documentation](https://asahilinux.org/docs/)
-- [8] [Asahi Linux - `m1n1` Apple-silicon experimentation tools](https://github.com/AsahiLinux/m1n1)
-- [9] [Apple Platform Security - Rapid Security Responses in Apple operating systems](https://support.apple.com/guide/security/sec87fc038c2/web)
-- [10] [Apple Platform Security - Secure software updates](https://support.apple.com/guide/security/secure-software-updates-secf683e0b36/web)
-- [11] [Apple Platform Security - Operating system integrity](https://support.apple.com/guide/security/sec8b776536b/web)
-
+- [5] [Cẩm nang hacker Mac](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/)
+- [6] [Nghệ thuật phân tích malware trên Mac, Tập 1](https://taomm.org/)
+- [7] [Asahi Linux - Tài liệu về nền tảng Apple silicon](https://asahilinux.org/docs/)
+- [8] [Asahi Linux - Công cụ thử nghiệm Apple silicon `m1n1`](https://github.com/AsahiLinux/m1n1)
+- [9] [Bảo mật nền tảng Apple - Rapid Security Response trong hệ điều hành Apple](https://support.apple.com/guide/security/sec87fc038c2/web)
+- [10] [Bảo mật nền tảng Apple - Cập nhật phần mềm an toàn](https://support.apple.com/guide/security/secure-software-updates-secf683e0b36/web)
+- [11] [Bảo mật nền tảng Apple - Tính toàn vẹn của hệ điều hành](https://support.apple.com/guide/security/sec8b776536b/web)
 {{#include ../../../banners/hacktricks-training.md}}

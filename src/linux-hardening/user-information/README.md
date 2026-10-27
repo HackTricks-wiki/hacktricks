@@ -1,12 +1,13 @@
-# User Information
+# Thông tin người dùng
 
 {{#include ../../banners/hacktricks-training.md}}
 
-User identity, group membership, and delegated credentials determine which resources a process can reach. Check the effective identity and supplementary groups before investigating the access paths below.
+Danh tính người dùng, thành viên nhóm và thông tin xác thực được ủy quyền quyết định các tài nguyên mà một tiến trình có thể truy cập. Hãy kiểm tra danh tính hiệu lực và các nhóm bổ sung trước khi điều tra những đường dẫn truy cập bên dưới.
 
-- [Users, sessions, and credential artifacts](user-and-session-triage.md) covers account enumeration, active logins, SSH and shell artifacts, and credential stores.
-- [Real, effective, and saved user IDs](euid-ruid-suid.md) explains identity changes around SUID programs and process execution.
-- [Interesting groups for Linux privilege escalation](interesting-groups-linux-pe/README.md) covers group-granted access, including LXD/LXC.
-- [SSH forwarding agent exploitation](ssh-forward-agent-exploitation.md) examines risks from forwarded SSH credentials.
-- [Linux Active Directory](linux-active-directory.md) covers hosts joined to an AD environment.
+- [Người dùng, phiên và tạo tác thông tin xác thực](user-and-session-triage.md) đề cập đến việc liệt kê tài khoản, các phiên đăng nhập đang hoạt động, tạo tác SSH và shell, cùng kho lưu trữ thông tin xác thực.
+- [ID người dùng thực, hiệu lực và đã lưu](euid-ruid-suid.md) giải thích các thay đổi danh tính khi chạy chương trình SUID và thực thi tiến trình.
+- [Các nhóm Linux đáng chú ý để leo thang đặc quyền](interesting-groups-linux-pe/README.md) đề cập đến quyền truy cập được cấp bởi nhóm, bao gồm LXD/LXC.
+- [Khai thác SSH forwarding agent](ssh-forward-agent-exploitation.md) xem xét các rủi ro từ thông tin xác thực SSH được chuyển tiếp.
+- [Linux Active Directory](linux-active-directory.md) đề cập đến các máy chủ đã tham gia môi trường AD.
+
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,31 +4,31 @@
 
 ## Basic Information
 
-XPC is a framework for **communication between processes** on macOS and iOS. It provides mechanisms for making **safe, asynchronous calls between processes**. XPC supports **privilege-separated applications**, where each **component** runs with **only the permissions it needs**, thereby limiting the potential damage from a compromised process.<sup>[[1]](#references)</sup>
+XPC là một framework dùng để **giao tiếp giữa các process** trên macOS và iOS. Framework này cung cấp cơ chế thực hiện **các lệnh gọi an toàn, bất đồng bộ giữa các process**. XPC hỗ trợ **các ứng dụng phân tách đặc quyền**, trong đó mỗi **thành phần** chỉ chạy với **những quyền cần thiết**, qua đó hạn chế thiệt hại tiềm ẩn nếu một process bị xâm phạm.<sup>[[1]](#references)</sup>
 
-XPC uses a form of Inter-Process Communication (IPC), which is a set of methods for different programs running on the same system to send data back and forth.
+XPC sử dụng một dạng Inter-Process Communication (IPC), tức tập hợp các phương thức cho phép những chương trình khác nhau chạy trên cùng hệ thống gửi dữ liệu qua lại.
 
-The primary benefits of XPC include:
+Những lợi ích chính của XPC gồm:
 
-1. **Security**: By separating work into different processes, each process can be granted only the permissions it needs. This means that even if a process is compromised, it has limited ability to do harm.
-2. **Stability**: XPC helps isolate crashes to the component where they occur. If a process crashes, it can be restarted without affecting the rest of the system.
-3. **Performance**: XPC allows for easy concurrency, as different tasks can be run simultaneously in different processes.
+1. **Bảo mật**: Việc chia công việc cho các process khác nhau cho phép chỉ cấp cho mỗi process những quyền cần thiết. Điều này có nghĩa là ngay cả khi một process bị xâm phạm, khả năng gây hại của nó vẫn bị hạn chế.
+2. **Độ ổn định**: XPC giúp cô lập sự cố chỉ trong thành phần xảy ra sự cố. Nếu một process gặp sự cố, nó có thể được khởi động lại mà không ảnh hưởng đến phần còn lại của hệ thống.
+3. **Hiệu năng**: XPC giúp việc chạy đồng thời dễ dàng hơn, vì các tác vụ khác nhau có thể chạy cùng lúc trong những process riêng biệt.
 
-The main **drawback** is that **separating an application into several processes** and making them communicate through XPC adds overhead. On modern systems this overhead is usually small compared with the security and stability benefits.<sup>[[1]](#references)</sup>
+**Nhược điểm** chính là **chia một ứng dụng thành nhiều process** và để chúng giao tiếp qua XPC làm tăng overhead. Trên các hệ thống hiện đại, overhead này thường nhỏ so với lợi ích về bảo mật và độ ổn định.<sup>[[1]](#references)</sup>
 
 ## Application-Specific XPC Services
 
-The XPC components of an application are **inside the application itself**. For example, in Safari you can find them in **`/Applications/Safari.app/Contents/XPCServices`**. They have the extension **`.xpc`** (like **`com.apple.Safari.SandboxBroker.xpc`**) and are **also bundles**, with the main binary and an `Info.plist` inside them. For example: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` and `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`.<sup>[[2]](#references)</sup>
+Các thành phần XPC của một ứng dụng **nằm bên trong chính ứng dụng đó**. Ví dụ, trong Safari, bạn có thể tìm thấy chúng tại **`/Applications/Safari.app/Contents/XPCServices`**. Chúng có phần mở rộng **`.xpc`** (chẳng hạn **`com.apple.Safari.SandboxBroker.xpc`**) và **cũng là các bundle**, bên trong có binary chính và một `Info.plist`. Ví dụ: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` và `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`.<sup>[[2]](#references)</sup>
 
-An **XPC component can have different entitlements and privileges** from other XPC components or the main application binary. One exception is an XPC service configured with **`JoinExistingSession`** set to `true` in its **Info.plist** file. In this case, the XPC service joins the **same security session as the application** that called it.<sup>[[4]](#references)</sup>
+Một **thành phần XPC có thể có entitlements và đặc quyền khác** với các thành phần XPC khác hoặc binary chính của ứng dụng. Một ngoại lệ là XPC service được cấu hình với **`JoinExistingSession`** đặt thành `true` trong tệp **Info.plist**. Trong trường hợp này, XPC service tham gia **cùng security session với ứng dụng** đã gọi nó.<sup>[[4]](#references)</sup>
 
-XPC services are **started** by **launchd** when required and can be **shut down** once their tasks are **complete** to free system resources. **Application-specific XPC components can only be used by their containing application**, thereby reducing the exposure of potential vulnerabilities.<sup>[[2]](#references)</sup>
+Các XPC service được **launch** bởi **launchd** khi cần thiết và có thể được **tắt** sau khi hoàn thành **nhiệm vụ** để giải phóng tài nguyên hệ thống. **Các thành phần XPC dành riêng cho ứng dụng chỉ có thể được ứng dụng chứa chúng sử dụng**, qua đó giảm nguy cơ lộ các lỗ hổng tiềm ẩn.<sup>[[2]](#references)</sup>
 
 ## System-Wide XPC Services
 
-Unlike application-specific services, system-wide XPC services are not restricted to their containing application. They may be reachable by clients from multiple users, depending on the launchd domain and the service's own authorization checks. These launchd-managed Mach services need to be **defined in plist** files located in directories such as **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`**, or **`/Library/LaunchAgents`**.<sup>[[2]](#references)[[3]](#references)</sup>
+Không giống các service dành riêng cho ứng dụng, system-wide XPC service không bị giới hạn trong ứng dụng chứa chúng. Tùy thuộc vào launchd domain và các bước kiểm tra authorization của service, client từ nhiều user có thể truy cập chúng. Các Mach service do launchd quản lý này cần được **khai báo trong các tệp plist** nằm trong những thư mục như **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`** hoặc **`/Library/LaunchAgents`**.<sup>[[2]](#references)[[3]](#references)</sup>
 
-These plist files have a **`MachServices`** key containing the service name and a **`Program`** key containing the path to the binary:
+Các tệp plist này có khóa **`MachServices`** chứa tên service và khóa **`Program`** chứa đường dẫn đến binary:
 
 ```xml
 cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
@@ -64,63 +64,63 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 </plist>
 ```
 
-Services in **`LaunchDaemons`** commonly run as root. Therefore, if an unprivileged process can reach a vulnerable method exposed by one of these services, it may be able to escalate privileges.
+Các dịch vụ trong **`LaunchDaemons`** thường chạy với quyền root. Vì vậy, nếu một tiến trình không có đặc quyền có thể gọi một phương thức dễ bị tấn công do một trong các dịch vụ này cung cấp, nó có thể leo thang đặc quyền.
 
 ## XPC Objects
 
 - **`xpc_object_t`**
 
-XPC request and reply payloads are commonly dictionary objects, which simplify serialization and deserialization. `libxpc.dylib` also declares the data types needed to verify that received data has the expected type. In the C API every object is an `xpc_object_t` (and its type can be checked using `xpc_get_type(object)`).<sup>[[2]](#references)</sup>\
-Moreover, the function `xpc_copy_description(object)` can be used to get a string representation of the object that can be useful for debugging purposes.\
-These objects also have some methods to call like `xpc_<object>_copy`, `xpc_<object>_equal`, `xpc_<object>_hash`, `xpc_<object>_serialize`, `xpc_<object>_deserialize`...
+Payload của yêu cầu và phản hồi XPC thường là các đối tượng dictionary, giúp đơn giản hóa việc serialization và deserialization. `libxpc.dylib` cũng khai báo các kiểu dữ liệu cần thiết để xác minh dữ liệu nhận được có đúng kiểu mong đợi hay không. Trong C API, mọi đối tượng đều là `xpc_object_t` (và có thể kiểm tra kiểu của đối tượng bằng `xpc_get_type(object)`).<sup>[[2]](#references)</sup>\
+Ngoài ra, có thể dùng hàm `xpc_copy_description(object)` để lấy biểu diễn dạng chuỗi của đối tượng, hữu ích cho mục đích debug.\
+Các đối tượng này cũng có một số phương thức như `xpc_<object>_copy`, `xpc_<object>_equal`, `xpc_<object>_hash`, `xpc_<object>_serialize`, `xpc_<object>_deserialize`...
 
-The `xpc_object_t` objects are created by calling an `xpc_<objectType>_create` function, which internally calls `_xpc_base_create(Class, Size)`, indicating the object's class (one of `XPC_TYPE_*`) and size. An extra 40 bytes are added for metadata, so the object data starts at offset 40 bytes.\
-Therefore, the `xpc_<objectType>_t` is kind of a subclass of the `xpc_object_t` which would be a subclass of `os_object_t*`.
+Các đối tượng `xpc_object_t` được tạo bằng cách gọi hàm `xpc_<objectType>_create`, hàm này gọi nội bộ `_xpc_base_create(Class, Size)`, chỉ định class của đối tượng (một trong các `XPC_TYPE_*`) và kích thước. Có thêm 40 byte metadata, nên dữ liệu của đối tượng bắt đầu tại offset 40 byte.\
+Do đó, `xpc_<objectType>_t` có thể xem như một subclass của `xpc_object_t`, vốn là subclass của `os_object_t*`.
 
 > [!WARNING]
-> Note that it should be the developer who uses `xpc_dictionary_[get/set]_<objectType>` to get or set the type and real value of a key.
+> Lưu ý rằng nhà phát triển phải dùng `xpc_dictionary_[get/set]_<objectType>` để lấy hoặc đặt kiểu và giá trị thực của một key.
 
 - **`xpc_pipe`**
 
-A **`xpc_pipe`** is a FIFO pipe that processes can use to communicate (the communication use Mach messages).\
-It's possible to create a XPC server calling `xpc_pipe_create()` or `xpc_pipe_create_from_port()` to create it using a specific Mach port. Then, to receive messages it's possible to call `xpc_pipe_receive` and `xpc_pipe_try_receive`.
+**`xpc_pipe`** là một pipe FIFO mà các tiến trình có thể dùng để giao tiếp (việc giao tiếp sử dụng Mach messages).\
+Có thể tạo XPC server bằng cách gọi `xpc_pipe_create()` hoặc `xpc_pipe_create_from_port()` để tạo pipe bằng một Mach port cụ thể. Sau đó, để nhận message, có thể gọi `xpc_pipe_receive` và `xpc_pipe_try_receive`.
 
-Note that the **`xpc_pipe`** object is a **`xpc_object_t`** with information in its struct about the two Mach ports used and the name (if any). The name, for example, the daemon `secinitd` in its plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist` configures the pipe called `com.apple.secinitd`.
+Lưu ý rằng đối tượng **`xpc_pipe`** là một **`xpc_object_t`** có struct chứa thông tin về hai Mach port được sử dụng và tên (nếu có). Ví dụ, daemon `secinitd` cấu hình pipe có tên `com.apple.secinitd` trong plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist`.
 
-An example of an **`xpc_pipe`** is the **bootstrap pipe** created by **`launchd`**, which makes it possible to share Mach ports.
+Một ví dụ về **`xpc_pipe`** là **bootstrap pipe** do **`launchd`** tạo, cho phép chia sẻ Mach port.
 
 - **`NSXPC*`**
 
-These are high-level Objective-C objects that abstract XPC connections.\
-Moreover, it's easier to debug these objects with DTrace than the previous ones.
+Đây là các đối tượng Objective-C cấp cao giúp trừu tượng hóa các kết nối XPC.\
+Ngoài ra, những đối tượng này dễ debug bằng DTrace hơn các đối tượng trước đó.
 
 - **`GCD Queues`**
 
-XPC uses GCD to pass messages, moreover it generates certain dispatch queues like `xpc.transactionq`, `xpc.io`, `xpc-events.add-listenerq`, `xpc.service-instance`...
+XPC sử dụng GCD để chuyển message; ngoài ra, nó tạo ra một số dispatch queue như `xpc.transactionq`, `xpc.io`, `xpc-events.add-listenerq`, `xpc.service-instance`...
 
 ## XPC Services
 
-These are **bundles with `.xpc`** extension located inside the **`XPCServices`** folder of other projects and in the `Info.plist` they have the `CFBundlePackageType` set to **`XPC!`**.\
-This file has other configuration keys, such as `ServiceType`, which can be Application, User, or System; `_SandboxProfile`, which can define a sandbox; and `_AllowedClients`, which may indicate the entitlements or identity required to contact the service. These and other options configure the service when it is launched.<sup>[[2]](#references)</sup>
+Đây là các **bundle có phần mở rộng `.xpc`** nằm trong thư mục **`XPCServices`** của những project khác; trong `Info.plist`, chúng có `CFBundlePackageType` được đặt thành **`XPC!`**.\
+File này có các key cấu hình khác như `ServiceType`, có thể là Application, User hoặc System; `_SandboxProfile`, có thể xác định sandbox; và `_AllowedClients`, có thể cho biết entitlement hoặc danh tính cần thiết để liên hệ với dịch vụ. Các tùy chọn này cùng những tùy chọn khác cấu hình dịch vụ khi nó được khởi chạy.<sup>[[2]](#references)</sup>
 
 ### Starting a Service
 
-The app attempts to **connect** to an XPC service using `xpc_connection_create_mach_service`; launchd then locates the daemon and starts **`xpcproxy`**. **`xpcproxy`** enforces the configured restrictions and spawns the service with the provided file descriptors and Mach ports.<sup>[[3]](#references)</sup>
+Ứng dụng cố **kết nối** với một XPC service bằng `xpc_connection_create_mach_service`; sau đó launchd tìm daemon và khởi chạy **`xpcproxy`**. **`xpcproxy`** thực thi các hạn chế đã cấu hình và khởi chạy service với các file descriptor cùng Mach port được cung cấp.<sup>[[3]](#references)</sup>
 
-In order to improve the speed of the search of the XPC service, a cache is used.
+Để tăng tốc độ tìm kiếm XPC service, hệ thống sử dụng cache.
 
-It's possible to trace the actions of `xpcproxy` using:
+Có thể theo dõi các hành động của `xpcproxy` bằng:
 
 ```bash
 supraudit S -C -o /tmp/output /dev/auditpipe
 ```
 
-The XPC library uses `kdebug` to log actions by calling `xpc_ktrace_pid0` and `xpc_ktrace_pid1`. The codes it uses are undocumented, so they need to be added to `/usr/share/misc/trace.codes`. They have the prefix `0x29`; for example, `0x29000004` is `XPC_serializer_pack`.\
-The utility `xpcproxy` uses the prefix `0x22`, for example: `0x2200001c: xpcproxy:will_do_preexec`.
+Thư viện XPC dùng `kdebug` để ghi nhật ký các hành động bằng cách gọi `xpc_ktrace_pid0` và `xpc_ktrace_pid1`. Các mã được dùng không có tài liệu, vì vậy cần thêm chúng vào `/usr/share/misc/trace.codes`. Chúng có tiền tố `0x29`; ví dụ: `0x29000004` là `XPC_serializer_pack`.\
+Tiện ích `xpcproxy` dùng tiền tố `0x22`, ví dụ: `0x2200001c: xpcproxy:will_do_preexec`.
 
-## Auditing Application-type XPC helpers
+## Kiểm tra các XPC helper kiểu Application
 
-An `XPCService.ServiceType` of `Application` is a useful starting point when auditing framework-provided helpers: enumerate the bundles, retain the running services, and inspect the helper's identifier and entitlements. Search both `/System/Library/Frameworks` and `/System/Library/PrivateFrameworks`; the exact inventory changes across macOS releases.<sup>[[7]](#references)</sup>
+`XPCService.ServiceType` có giá trị `Application` là điểm khởi đầu hữu ích khi kiểm tra các helper do framework cung cấp: liệt kê các bundle, giữ lại những service đang chạy, rồi kiểm tra identifier và entitlements của helper. Tìm trong cả `/System/Library/Frameworks` và `/System/Library/PrivateFrameworks`; danh sách chính xác thay đổi theo các bản phát hành macOS.<sup>[[7]](#references)</sup>
 
 ```bash
 find /System/Library/Frameworks /System/Library/PrivateFrameworks \
@@ -139,18 +139,18 @@ while IFS= read -r -d '' bundle; do
 done
 ```
 
-### Triage the listener and recover a minimal protocol
+### Phân loại listener và khôi phục giao thức tối giản
 
-Locate `-[<delegate> listener:shouldAcceptNewConnection:]` in the helper. A path that sets `exportedInterface` and `exportedObject`, resumes the connection, and returns `YES`/`1` without checking the peer's audit token, code requirement, or entitlement exposes the RPC interface to any client that can resolve the service. This only proves **reachability**: impact still requires an exported method that performs a privileged operation without adequate per-client/per-method authorization or that unsafely processes attacker-controlled input.<sup>[[7]](#references)</sup>
+Tìm `-[<delegate> listener:shouldAcceptNewConnection:]` trong helper. Nếu một nhánh thiết lập `exportedInterface` và `exportedObject`, resume connection rồi trả về `YES`/`1` mà không kiểm tra audit token, code requirement hoặc entitlement của peer, thì RPC interface sẽ được mở cho mọi client có thể tìm thấy service. Điều này chỉ chứng minh **khả năng truy cập**: để gây tác động, vẫn cần một method được export thực hiện thao tác đặc quyền mà không có cơ chế phân quyền phù hợp cho từng client/từng method, hoặc xử lý không an toàn input do attacker kiểm soát.<sup>[[7]](#references)</sup>
 
-Recover only the selectors needed for testing. Objective-C selector metadata reveals the argument count; argument uses in the decompiler usually refine the types (for example, values passed to `-[EKEvent setStartDate:]` and `setEndDate:` are `NSDate *`), while the indirect invocation at the end of the method reveals the reply-block parameters. A partial local protocol is sufficient for `NSXPCInterface`; reconstructing the complete private protocol is unnecessary.<sup>[[7]](#references)</sup>
+Chỉ khôi phục các selector cần cho việc kiểm thử. Metadata của Objective-C selector cho biết số lượng argument; cách sử dụng các argument trong decompiler thường giúp xác định rõ hơn kiểu dữ liệu (ví dụ: các giá trị truyền vào `-[EKEvent setStartDate:]` và `setEndDate:` là `NSDate *`), còn lời gọi gián tiếp ở cuối method cho biết các parameter của reply block. Một protocol cục bộ chưa đầy đủ là đủ cho `NSXPCInterface`; không cần tái dựng toàn bộ private protocol.<sup>[[7]](#references)</sup>
 
-### Connect with the reconstructed interface
+### Kết nối bằng interface đã tái dựng
 
-For an application XPC service, load any framework that defines required private classes, create the connection with `initWithServiceName:`, assign the reconstructed remote interface, install error/interruption/invalidation handlers, and only then resume it. Keep the run loop alive for asynchronous replies. Re-run the client inside a sandboxed application when testing a sandbox boundary—a successful standalone client is not evidence of a sandbox escape.<sup>[[7]](#references)</sup>
+Với một application XPC service, hãy load framework định nghĩa các private class cần thiết, tạo connection bằng `initWithServiceName:`, gán remote interface đã tái dựng, cài đặt các handler cho lỗi/gián đoạn/vô hiệu hóa, rồi mới resume connection. Giữ run loop hoạt động để nhận các reply bất đồng bộ. Khi kiểm thử ranh giới sandbox, hãy chạy lại client bên trong một ứng dụng được sandbox; standalone client chạy thành công không phải là bằng chứng cho thấy đã thoát sandbox.<sup>[[7]](#references)</sup>
 
 <details>
-<summary>Minimal Objective-C client</summary>
+<summary>Client Objective-C tối giản</summary>
 
 ```objectivec
 @protocol RecoveredProtocol
@@ -173,15 +173,15 @@ id proxy = [c remoteObjectProxyWithErrorHandler:^(NSError *e) { NSLog(@"%@", e);
 [[NSRunLoop currentRunLoop] run];
 ```
 
-Compile with `clang -fblocks -framework Foundation -o xpc_client xpc_client.m`.<sup>[[7]](#references)</sup>
+Biên dịch bằng `clang -fblocks -framework Foundation -o xpc_client xpc_client.m`.<sup>[[7]](#references)</sup>
 
 </details>
 
-### Use secure-coding failures as type oracles
+### Dùng lỗi secure-coding làm type oracle
 
-An `NSCocoaErrorDomain` error such as code `4101` may hide the useful serialization exception. Search the macOS unified log/Console for the service name: the exception identifies both the unexpected class and the classes allowed for that selector argument. For a reply, extend the **client-side** interface allowlist with `setClasses:forSelector:argumentIndex:ofReply:`; with `ofReply:YES`, index `0` means the first parameter of the reply block, not the first method parameter.<sup>[[7]](#references)</sup>
+Lỗi `NSCocoaErrorDomain` như mã `4101` có thể che giấu ngoại lệ serialization hữu ích. Tìm trong unified log/Console của macOS theo tên service: ngoại lệ sẽ xác định cả class không mong muốn lẫn các class được phép cho đối số selector đó. Với phản hồi, hãy mở rộng allowlist interface **phía client** bằng `setClasses:forSelector:argumentIndex:ofReply:`; khi `ofReply:YES`, index `0` là tham số đầu tiên của reply block, không phải tham số đầu tiên của method.<sup>[[7]](#references)</sup>
 
-Configure the interface before assigning it to the connection and calling `[c resume]`:<sup>[[7]](#references)</sup>
+Cấu hình interface trước khi gán nó cho connection và gọi `[c resume]`:<sup>[[7]](#references)</sup>
 
 ```objectivec
 NSXPCInterface *iface = [NSXPCInterface interfaceWithProtocol:@protocol(RecoveredProtocol)];
@@ -198,10 +198,10 @@ if (intentClass) [classes addObject:intentClass];
 c.remoteObjectInterface = iface;
 ```
 
-The reverse case is also useful: if the server rejects a Foundation input and logs a single allowed private class, the log reveals the expected wire type and its framework. Load that framework, inspect the class's methods/properties to refine generic `id` types, and construct the private object dynamically. `NSInvocation` arguments begin at index `2` because indexes `0` and `1` are the hidden `self` and `_cmd` arguments.<sup>[[7]](#references)</sup>
+Trường hợp ngược lại cũng hữu ích: nếu server từ chối một đầu vào Foundation và ghi log một private class được phép duy nhất, log sẽ tiết lộ kiểu dữ liệu trên wire được mong đợi và framework của nó. Nạp framework đó, kiểm tra các method/property của class để xác định cụ thể hơn các kiểu `id` tổng quát, rồi tạo đối tượng private động. Các argument của `NSInvocation` bắt đầu ở index `2` vì index `0` và `1` là các argument `self` và `_cmd` ẩn.<sup>[[7]](#references)</sup>
 
 <details>
-<summary>Construct a private argument with NSInvocation</summary>
+<summary>Tạo argument private bằng NSInvocation</summary>
 
 ```objectivec
 Class cls = NSClassFromString(@"LNStaticDeferredLocalizedString");
@@ -226,28 +226,28 @@ __unsafe_unretained id privateObject = nil;
 
 </details>
 
-For the related workflow against launchd-registered, system-wide Mach services, see:
+Về workflow liên quan đến các Mach service toàn hệ thống được đăng ký với launchd, xem:
 
 {{#ref}}
 ../../macos-xpc-mach-services-abuse.md
 {{#endref}}
 
-## XPC Event Messages
+## Thông điệp sự kiện XPC
 
-Applications can **subscribe** to different event **messages**, enabling them to be **initiated on-demand** when such events happen. The **setup** for these services is done in l**aunchd plist files**, located in the **same directories as the previous ones** and containing an extra **`LaunchEvent`** key.
+Ứng dụng có thể **đăng ký nhận** nhiều **thông điệp** sự kiện khác nhau, cho phép chúng được **khởi chạy theo yêu cầu** khi các sự kiện đó xảy ra. Các dịch vụ này được **thiết lập** trong các **tệp launchd plist**, nằm trong **cùng thư mục với các tệp trước đó** và có thêm khóa **`LaunchEvent`**.
 
-### XPC Connecting Process Check
+### Kiểm tra tiến trình kết nối XPC
 
-When a process tries to call a method through an XPC connection, the **XPC service should check whether that process is allowed to connect**. Here are common verification methods and their pitfalls:
+Khi một tiến trình cố gọi một phương thức thông qua kết nối XPC, **dịch vụ XPC nên kiểm tra xem tiến trình đó có được phép kết nối hay không**. Sau đây là các phương thức xác minh phổ biến và những hạn chế của chúng:
 
 
 {{#ref}}
 macos-xpc-connecting-process-check/
 {{#endref}}
 
-## XPC Authorization
+## Xác thực XPC
 
-Apple also allows apps to **configure authorization rights and how callers obtain them**, so a process with the required rights is **allowed to call a method** exposed by the XPC service:
+Apple cũng cho phép ứng dụng **cấu hình các quyền xác thực và cách bên gọi nhận được chúng**, để một tiến trình có các quyền cần thiết **được phép gọi một phương thức** do dịch vụ XPC cung cấp:
 
 
 {{#ref}}
@@ -256,7 +256,7 @@ macos-xpc-authorization.md
 
 ## XPC Sniffer
 
-To sniff XPC messages, you can use **xpcspy**, which uses **Frida**.<sup>[[5]](#references)</sup>
+Để sniff các thông điệp XPC, bạn có thể dùng **xpcspy**, công cụ sử dụng **Frida**.<sup>[[5]](#references)</sup>
 
 ```bash
 # Install
@@ -269,9 +269,9 @@ xpcspy -U -r -W <bundle-id>
 xpcspy -U <prog-name> -t 'i:com.apple.*' -t 'o:com.apple.*' -r
 ```
 
-Another possible tool is **XPoCe2**.<sup>[[6]](#references)</sup>
+Một công cụ khả thi khác là **XPoCe2**.<sup>[[6]](#references)</sup>
 
-## XPC Communication C Code Example
+## Ví dụ mã C về giao tiếp XPC
 
 {{#tabs}}
 {{#tab name="xpc_server.c"}}
@@ -411,7 +411,7 @@ sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.service.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.service.plist /tmp/xpc_server
 ```
 
-## XPC Communication Objective-C Code Example
+## Ví dụ mã Objective-C về giao tiếp XPC
 
 {{#tabs}}
 {{#tab name="oc_xpc_server.m"}}
@@ -541,7 +541,7 @@ sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist /tmp/oc_xpc_server
 ```
 
-## Client Inside a Dylib
+## Client bên trong một Dylib
 
 ```objectivec
 // gcc -dynamiclib -framework Foundation oc_xpc_client.m -o oc_xpc_client.dylib
@@ -579,14 +579,14 @@ static void customConstructor(int argc, const char **argv)
 
 ## Remote XPC
 
-The functionality provided by `RemoteXPC.framework` (from `libxpc`) allows XPC communication between different hosts.\
-Services that support remote XPC have the `UsesRemoteXPC` key in their plist, as is the case for `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`. Although the service is registered with `launchd`, `UserEventAgent` and its `com.apple.remoted.plugin` and `com.apple.remoteservicediscovery.events.plugin` plugins provide the functionality.
+Chức năng do `RemoteXPC.framework` (từ `libxpc`) cung cấp cho phép giao tiếp XPC giữa các host khác nhau.\
+Các service hỗ trợ Remote XPC có khóa `UsesRemoteXPC` trong plist, như trường hợp của `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`. Mặc dù service được đăng ký với `launchd`, `UserEventAgent` cùng các plugin `com.apple.remoted.plugin` và `com.apple.remoteservicediscovery.events.plugin` cung cấp chức năng này.
 
-Moreover, `RemoteServiceDiscovery.framework` obtains information from `com.apple.remoted.plugin`, exposing functions such as `get_device`, `get_unique_device`, and `connect`.
+Ngoài ra, `RemoteServiceDiscovery.framework` lấy thông tin từ `com.apple.remoted.plugin`, cung cấp các hàm như `get_device`, `get_unique_device` và `connect`.
 
-Once `connect` has returned the service's socket file descriptor, it is possible to use the `remote_xpc_connection_*` class.
+Sau khi `connect` trả về file descriptor của socket của service, ta có thể sử dụng lớp `remote_xpc_connection_*`.
 
-It is possible to get information about remote services with the `/usr/libexec/remotectl` CLI using commands such as:
+Có thể lấy thông tin về các service từ xa bằng CLI `/usr/libexec/remotectl` với các lệnh như:
 
 ```bash
 /usr/libexec/remotectl list # Get bridge devices
@@ -596,17 +596,16 @@ It is possible to get information about remote services with the `/usr/libexec/r
 ...
 ```
 
-Communication between bridgeOS and the host occurs through a dedicated IPv6 interface. `MultiverseSupport.framework` establishes sockets whose file descriptors are used for communication.\
-It is possible to find these communications using `netstat`, `nettop`, or the open-source alternative `netbottom`.
+Việc giao tiếp giữa bridgeOS và host diễn ra thông qua một giao diện IPv6 chuyên dụng. `MultiverseSupport.framework` thiết lập các socket có file descriptor được dùng cho giao tiếp.\
+Có thể tìm các giao tiếp này bằng `netstat`, `nettop` hoặc `netbottom`, một giải pháp thay thế mã nguồn mở.
 
 ## References
 
 - [1] [Apple Developer — XPC](https://developer.apple.com/documentation/xpc)
-- [2] [Apple Developer Archive — Creating XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
+- [2] [Apple Developer Archive — Tạo XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
 - [3] [Apple Developer — `xpc_connection_create_mach_service`](https://developer.apple.com/documentation/xpc/xpc_connection_create_mach_service(_:_:_:))
 - [4] [Apple Developer — `JoinExistingSession`](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession)
 - [5] [hot3eed/xpcspy](https://github.com/hot3eed/xpcspy)
 - [6] [NewOSXBook — XPoCe2](https://newosxbook.com/tools/XPoCe2.html)
-- [7] [Reverse Society - Attacking macOS XPC Helpers: Protocol Reverse Engineering](https://blog.reversesociety.co/blog/2025/how-to-attack-macos-application-xpc-helpers)
-
+- [7] [Reverse Society - Tấn công các XPC Helper trên macOS: Reverse Engineering giao thức](https://blog.reversesociety.co/blog/2025/how-to-attack-macos-application-xpc-helpers)
 {{#include ../../../../../banners/hacktricks-training.md}}

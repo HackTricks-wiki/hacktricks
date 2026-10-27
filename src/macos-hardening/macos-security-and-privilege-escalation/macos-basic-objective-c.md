@@ -5,19 +5,19 @@
 ## Objective-C
 
 > [!CAUTION]
-> Programs written in Objective-C retain runtime metadata when compiled into [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). This metadata includes class names, method names and type encodings, and instance-variable names and types that support Objective-C's dynamic runtime. <sup>[[1]](#references)</sup>
+> Các chương trình được viết bằng Objective-C vẫn giữ lại siêu dữ liệu runtime khi được biên dịch thành [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Siêu dữ liệu này bao gồm tên lớp, tên phương thức và mã hóa kiểu, cùng tên và kiểu của biến instance, hỗ trợ runtime động của Objective-C. <sup>[[1]](#references)</sup>
 
-You can inspect this information using [**class-dump**](https://github.com/nygard/class-dump):
+Bạn có thể kiểm tra thông tin này bằng [**class-dump**](https://github.com/nygard/class-dump):
 
 ```bash
 class-dump Kindle.app
 ```
 
-These names may be obfuscated to make reverse engineering more difficult.
+Các tên này có thể bị làm rối để khiến việc reverse engineering trở nên khó khăn hơn.
 
-## Classes, Methods & Objects
+## Lớp, Phương thức & Đối tượng
 
-### Interface, Properties & Methods
+### Interface, Thuộc tính & Phương thức
 
 ```objectivec
 // Declare the interface of the class
@@ -34,7 +34,7 @@ These names may be obfuscated to make reverse engineering more difficult.
 @end
 ```
 
-### **Class**
+### **Lớp**
 
 ```objectivec
 @implementation MyVehicle
@@ -52,9 +52,9 @@ These names may be obfuscated to make reverse engineering more difficult.
 @end
 ```
 
-### **Object & Call Method**
+### **Đối tượng và phương thức gọi**
 
-To create an instance, **`alloc`** allocates and zero-initializes the object's storage. An **`init`** method then establishes the object's initial state. <sup>[[2]](#references)</sup>
+Để tạo một instance, **`alloc`** cấp phát và khởi tạo bộ nhớ của đối tượng về 0. Sau đó, một phương thức **`init`** thiết lập trạng thái ban đầu của đối tượng. <sup>[[2]](#references)</sup>
 
 ```objectivec
 // Something like this:
@@ -68,9 +68,9 @@ MyVehicle *newVehicle = [MyVehicle new];
 [newVehicle addWheels:4];
 ```
 
-### **Class Methods**
+### **Phương thức lớp**
 
-Class methods are defined with the **plus sign** (+) not the hyphen (-) that is used with instance methods. Like the **NSString** class method **`stringWithString`**:
+Phương thức lớp được định nghĩa bằng **dấu cộng** (+), không phải dấu gạch nối (-) được dùng với phương thức thực thể. Ví dụ như phương thức lớp **`stringWithString`** của lớp **NSString**:
 
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
@@ -78,7 +78,7 @@ Class methods are defined with the **plus sign** (+) not the hyphen (-) that is 
 
 ### Setter & Getter
 
-Properties can be **set** and **read** with dot notation or by calling their accessor methods directly:
+Có thể **đặt** và **đọc** các thuộc tính bằng cú pháp dấu chấm hoặc gọi trực tiếp các phương thức truy cập của chúng:
 
 ```objectivec
 // Set
@@ -90,9 +90,9 @@ NSLog(@"Number of wheels: %i", newVehicle.numberOfWheels);
 NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 ```
 
-### **Instance Variables**
+### **Biến thực thể**
 
-As an alternative to accessor methods, code inside a class can use the instance variable synthesized for a property. By default, its name is the property name prefixed with an underscore:
+Thay vì sử dụng các phương thức truy cập, mã bên trong một class có thể dùng biến thực thể được tổng hợp cho một property. Theo mặc định, tên biến là tên property với dấu gạch dưới đặt phía trước:
 
 ```objectivec
 - (void)makeLongTruck {
@@ -103,9 +103,9 @@ As an alternative to accessor methods, code inside a class can use the instance 
 
 ### Protocols
 
-Protocols declare methods that are independent of a particular class hierarchy. A class that adopts a protocol must implement its required methods. <sup>[[2]](#references)</sup>
+Protocol khai báo các phương thức độc lập với một hệ thống phân cấp lớp cụ thể. Một lớp áp dụng protocol phải triển khai các phương thức bắt buộc của protocol đó. <sup>[[2]](#references)</sup>
 
-Protocol methods are **required** by default; `@required` makes that state explicit, while `@optional` marks the following declarations as optional.
+Các phương thức trong protocol mặc định là **bắt buộc**; `@required` làm rõ trạng thái đó, trong khi `@optional` đánh dấu các khai báo tiếp theo là tùy chọn.
 
 ```objectivec
 @protocol myNewProtocol
@@ -117,7 +117,7 @@ Protocol methods are **required** by default; `@required` makes that state expli
 @end
 ```
 
-### All together
+### Tổng hợp lại
 
 ```objectivec
 // gcc -framework Foundation test_obj.m -o test_obj
@@ -172,7 +172,7 @@ int main(void) {
 }
 ```
 
-### Basic Classes
+### Các lớp cơ bản
 
 #### String
 
@@ -183,13 +183,13 @@ NSString *bookAuthor = [[NSString alloc] initWithCString:"J.D. Salinger" encodin
 NSString *bookPublicationYear = [NSString stringWithCString:"1951" encoding:NSUTF8StringEncoding];
 ```
 
-`NSString` instances are **immutable**, so appending content produces a new string.
+Các instance `NSString` là **bất biến**, nên việc nối thêm nội dung sẽ tạo ra một chuỗi mới.
 
 ```objectivec
 NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published in %@", bookTitle, bookAuthor, bookPublicationYear];
 ```
 
-Or you could also use a **mutable** string class:
+Hoặc bạn cũng có thể sử dụng một lớp chuỗi **có thể thay đổi**:
 
 ```objectivec
 NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "];
@@ -200,7 +200,7 @@ NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "]
 [mutableString appendString:bookPublicationYear];
 ```
 
-#### Number
+#### Số
 
 ```objectivec
 // character literals.
@@ -221,7 +221,7 @@ NSNumber *yesNumber = @YES; // equivalent to [NSNumber numberWithBool:YES]
 NSNumber *noNumber = @NO; // equivalent to [NSNumber numberWithBool:NO]
 ```
 
-#### Array, Sets & Dictionary
+#### Mảng, Tập hợp & Từ điển
 
 ```objectivec
 // Immutable arrays
@@ -271,7 +271,7 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 
 ### Blocks
 
-Blocks are closures that package executable code together with captured state. They can be passed as arguments and stored in collections, making them similar to lambdas in other languages. <sup>[[2]](#references)</sup>
+Blocks là các closure đóng gói mã có thể thực thi cùng với trạng thái được capture. Chúng có thể được truyền làm đối số và lưu trữ trong các collection, nên tương tự như lambda trong những ngôn ngữ khác. <sup>[[2]](#references)</sup>
 
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
@@ -286,7 +286,7 @@ int (^suma)(int, int) = ^(int a, int b){
 NSLog(@"3+4 = %d", suma(3,4));
 ```
 
-It's also possible to **define a block type to be used as a parameter** in functions:
+Cũng có thể **định nghĩa một kiểu block để dùng làm tham số** trong các hàm:
 
 ```objectivec
 // Define the block type
@@ -310,7 +310,7 @@ genericLogger(^{
 });
 ```
 
-### Files
+### Tệp
 
 ```objectivec
 // Manager to manage files
@@ -337,7 +337,7 @@ if ([fileManager removeItemAtPath:@"/path/to/file1.txt" error:nil]) {
 }
 ```
 
-Files can also be managed with `NSURL` objects instead of `NSString` paths. Many Foundation APIs expose corresponding method names using `URL` instead of `Path`, such as `copyItemAtURL:toURL:error:`. Apple recommends URLs for filesystem locations because they provide a more efficient internal representation. <sup>[[3]](#references)</sup>
+Các tệp cũng có thể được quản lý bằng các đối tượng `NSURL` thay vì các đường dẫn `NSString`. Nhiều API của Foundation cung cấp các phương thức tương ứng dùng `URL` thay cho `Path`, chẳng hạn như `copyItemAtURL:toURL:error:`. Apple khuyến nghị dùng URL cho các vị trí trong hệ thống tệp vì chúng có cách biểu diễn nội bộ hiệu quả hơn. <sup>[[3]](#references)</sup>
 
 ```objectivec
 NSURL *sourceURL = [NSURL fileURLWithPath:@"/path/to/file1.txt"];
@@ -350,8 +350,7 @@ if ([fileManager copyItemAtURL:sourceURL toURL:destinationURL error:nil]) {
 
 ## References
 
-- [1] [Apple Developer - Objective-C runtime](https://developer.apple.com/documentation/objectivec/objective-c_runtime)
-- [2] [Apple - Programming with Objective-C](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/)
+- [1] [Apple Developer - môi trường thực thi Objective-C](https://developer.apple.com/documentation/objectivec/objective-c_runtime)
+- [2] [Apple - Lập trình với Objective-C](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/)
 - [3] [Apple Developer - FileManager](https://developer.apple.com/documentation/foundation/filemanager)
-
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,59 +2,59 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Main Keychains
+## Các Keychain chính
 
-- The **User Keychain** (`~/Library/Keychains/login.keychain-db`), which is used to store **user-specific credentials** like application passwords, internet passwords, user-generated certificates, network passwords, and user-generated public/private keys.
-- The **System Keychain** (`/Library/Keychains/System.keychain`), which stores **system-wide credentials** such as WiFi passwords, system root certificates, system private keys, and system application passwords.<sup>[[1]](#references)</sup>
-  - It's possible to find other components like certificates in `/System/Library/Keychains/*`
-- In **iOS** there is only one **Keychain** located in `/private/var/Keychains/`. This folder also contains databases for the `TrustStore`, certificates authorities (`caissuercache`) and OSCP entries (`ocspache`).
-  - Apps will be restricted in the keychain only to their private area based on their application identifier.
+- **User Keychain** (`~/Library/Keychains/login.keychain-db`) được dùng để lưu trữ **thông tin xác thực dành riêng cho người dùng** như mật khẩu ứng dụng, mật khẩu Internet, chứng chỉ do người dùng tạo, mật khẩu mạng và khóa công khai/riêng tư do người dùng tạo.
+- **System Keychain** (`/Library/Keychains/System.keychain`) lưu trữ **thông tin xác thực trên toàn hệ thống** như mật khẩu WiFi, chứng chỉ gốc của hệ thống, khóa riêng tư của hệ thống và mật khẩu ứng dụng hệ thống.<sup>[[1]](#references)</sup>
+  - Có thể tìm thấy các thành phần khác như chứng chỉ trong `/System/Library/Keychains/*`
+- Trong **iOS**, chỉ có một **Keychain** nằm tại `/private/var/Keychains/`. Thư mục này cũng chứa các cơ sở dữ liệu cho `TrustStore`, cơ quan cấp chứng chỉ (`caissuercache`) và các mục OSCP (`ocspache`).
+  - Các ứng dụng chỉ được phép truy cập khu vực riêng của mình trong keychain, dựa trên mã định danh ứng dụng.
 
-### Password Keychain Access
+### Truy cập Keychain bằng mật khẩu
 
-These files, while they do not have inherent protection and can be **downloaded**, are encrypted and require the **user's plaintext password to be decrypted**. A tool like [**Chainbreaker**](https://github.com/n0fate/chainbreaker) could be used for decryption.<sup>[[1]](#references)</sup>
+Các tệp này tuy không có cơ chế bảo vệ sẵn và có thể **được tải xuống**, nhưng đã được mã hóa và cần **mật khẩu dạng văn bản thuần của người dùng để giải mã**. Có thể dùng công cụ như [**Chainbreaker**](https://github.com/n0fate/chainbreaker) để giải mã.<sup>[[1]](#references)</sup>
 
-## Keychain Entries Protections
+## Cơ chế bảo vệ các mục Keychain
 
-### ACLs
+### ACL
 
-Each entry in the keychain is governed by **Access Control Lists (ACLs)** which dictate who can perform various actions on the keychain entry, including:<sup>[[1]](#references)[[2]](#references)</sup>
+Mỗi mục trong keychain được kiểm soát bằng **Access Control Lists (ACL)**, quy định ai có thể thực hiện những hành động nào trên mục đó, bao gồm:<sup>[[1]](#references)[[2]](#references)</sup>
 
-- **`kSecACLAuthorizationExportClear`**: Allows the holder to get the clear text of the secret.
-- **`kSecACLAuthorizationExportWrapped`**: Allows the holder to get the clear text encrypted with another provided password.
-- **`kSecACLAuthorizationAny`**: Allows the holder to perform any action.
+- **`kSecACLAuthorizationExportClear`**: Cho phép người sở hữu lấy được nội dung bí mật ở dạng văn bản thuần.
+- **`kSecACLAuthorizationExportWrapped`**: Cho phép người sở hữu lấy được nội dung bí mật đã mã hóa bằng một mật khẩu khác được cung cấp.
+- **`kSecACLAuthorizationAny`**: Cho phép người sở hữu thực hiện bất kỳ hành động nào.
 
-The ACLs are further accompanied by a **list of trusted applications** that can perform these actions without prompting. This could be:<sup>[[1]](#references)</sup>
+ACL còn đi kèm **danh sách các ứng dụng đáng tin cậy** có thể thực hiện những hành động này mà không cần hỏi. Danh sách có thể là:<sup>[[1]](#references)</sup>
 
-- **N`il`** (no authorization required, **everyone is trusted**)
-- An **empty** list (**nobody** is trusted)
-- **List** of specific **applications**.
+- **N`il`** (không cần xác thực, **mọi người đều đáng tin cậy**)
+- Danh sách **rỗng** (**không ai** được tin cậy)
+- **Danh sách** các **ứng dụng** cụ thể.
 
-Also the entry might contain the key **`kSecACLAuthorizationPartitionID`,** which is used to identify the **teamid, apple,** and **cdhash.**<sup>[[1]](#references)[[2]](#references)</sup>
+Mục này cũng có thể chứa khóa **`kSecACLAuthorizationPartitionID`,** dùng để xác định **teamid, apple** và **cdhash**.<sup>[[1]](#references)[[2]](#references)</sup>
 
-- If the **teamid** is specified, the application must have the **same teamid** to **access the entry** value **without** a **prompt**.
-- If the **apple** is specified, then the app needs to be **signed** by **Apple**.
-- If the **cdhash** is indicated, then **app** must have the specific **cdhash**.
+- Nếu có chỉ định **teamid**, ứng dụng phải có **cùng teamid** để **truy cập** giá trị **mục** mà **không cần** hiển thị **lời nhắc**.
+- Nếu có chỉ định **apple**, ứng dụng phải được **Apple** **ký**.
+- Nếu có chỉ định **cdhash**, **ứng dụng** phải có **cdhash** cụ thể đó.
 
-### Creating a Keychain Entry
+### Tạo mục Keychain
 
-When a **new** **entry** is created using **`Keychain Access.app`**, the following rules apply:<sup>[[1]](#references)</sup>
+Khi tạo **mục** **mới** bằng **`Keychain Access.app`**, các quy tắc sau được áp dụng:<sup>[[1]](#references)</sup>
 
-- All apps can encrypt.
-- **No apps** can export/decrypt (without prompting the user).
-- All apps can see the integrity check.
-- No apps can change ACLs.
-- The **partitionID** is set to **`apple`**.
+- Mọi ứng dụng đều có thể mã hóa.
+- **Không ứng dụng nào** có thể xuất/giải mã (mà không hỏi người dùng).
+- Mọi ứng dụng đều có thể xem thông tin kiểm tra tính toàn vẹn.
+- Không ứng dụng nào có thể thay đổi ACL.
+- **partitionID** được đặt thành **`apple`**.
 
-When an **application creates an entry in the keychain**, the rules are slightly different:<sup>[[1]](#references)</sup>
+Khi **một ứng dụng tạo mục trong keychain**, các quy tắc có đôi chút khác biệt:<sup>[[1]](#references)</sup>
 
-- All apps can encrypt.
-- Only the **creating application** (or any other apps explicitly added) can export/decrypt (without prompting the user).
-- All apps can see the integrity check.
-- No apps can change the ACLs.
-- The **partitionID** is set to **`teamid:[teamID here]`**.
+- Mọi ứng dụng đều có thể mã hóa.
+- Chỉ **ứng dụng tạo mục** (hoặc các ứng dụng khác được thêm rõ ràng) mới có thể xuất/giải mã (mà không hỏi người dùng).
+- Mọi ứng dụng đều có thể xem thông tin kiểm tra tính toàn vẹn.
+- Không ứng dụng nào có thể thay đổi ACL.
+- **partitionID** được đặt thành **`teamid:[teamID here]`**.
 
-## Accessing the Keychain
+## Truy cập Keychain
 
 ### `security`
 
@@ -78,65 +78,65 @@ security set-generic-password-partition-list \
 security dump-keychain ~/Library/Keychains/login.keychain-db
 ```
 
-`-S` sets the item's partition list, while `-k` supplies the current Keychain password required to make that change; the password-taking flag is deprecated.<sup>[[4]](#references)</sup> A successful update does not prove that a later read will be silent: one observed, disabled prototype still triggered a confirmation prompt when it queried the item through `Security.framework`. A matching partition ID is only one part of the ACL and trusted-application checks described above, so verify the actual read path.<sup>[[3]](#references)</sup>
+`-S` đặt danh sách partition của mục, còn `-k` cung cấp mật khẩu Keychain hiện tại cần thiết để thực hiện thay đổi đó; cờ nhận mật khẩu đã bị deprecated.<sup>[[4]](#references)</sup> Cập nhật thành công không chứng minh rằng lần đọc sau sẽ không hiện thông báo: một prototype đã tắt được quan sát thấy vẫn kích hoạt lời nhắc xác nhận khi truy vấn mục thông qua `Security.framework`. Partition ID khớp chỉ là một phần trong các bước kiểm tra ACL và ứng dụng đáng tin cậy đã mô tả ở trên, vì vậy hãy xác minh đường dẫn đọc thực tế.<sup>[[3]](#references)</sup>
 
 ### APIs
 
 > [!TIP]
-> The **keychain enumeration and dumping** of secrets that **won't generate a prompt** can be done with the tool [**LockSmith**](https://github.com/its-a-feature/LockSmith)
+> Có thể dùng công cụ [**LockSmith**](https://github.com/its-a-feature/LockSmith) để **liệt kê và dump Keychain** các secret mà **không tạo lời nhắc**
 >
-> Other API endpoints can be found in [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html) source code.
+> Có thể tìm thấy các endpoint API khác trong mã nguồn [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html).
 
-List and get **info** about each keychain entry using the **Security Framework** or you could also check the Apple's open source cli tool [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** Some API examples:<sup>[[1]](#references)</sup>
+Liệt kê và lấy **thông tin** về từng mục Keychain bằng **Security Framework**, hoặc bạn cũng có thể kiểm tra công cụ CLI mã nguồn mở [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** Một số ví dụ API:<sup>[[1]](#references)</sup>
 
-- The API **`SecItemCopyMatching`** gives info about each entry and there are some attributes you can set when using it:
-  - **`kSecReturnData`**: If true, it will try to decrypt the data (set to false to avoid potential pop-ups)
-  - **`kSecReturnRef`**: Get also reference to keychain item (set to true in case later you see you can decrypt without pop-up)
-  - **`kSecReturnAttributes`**: Get metadata about entries
-  - **`kSecMatchLimit`**: How many results to return
-  - **`kSecClass`**: What kind of keychain entry
+- API **`SecItemCopyMatching`** cung cấp thông tin về từng mục và có một số thuộc tính bạn có thể đặt khi sử dụng:
+  - **`kSecReturnData`**: Nếu là true, API sẽ thử giải mã dữ liệu (đặt thành false để tránh khả năng xuất hiện pop-up)
+  - **`kSecReturnRef`**: Lấy thêm tham chiếu đến mục Keychain (đặt thành true nếu sau này bạn thấy có thể giải mã mà không hiện pop-up)
+  - **`kSecReturnAttributes`**: Lấy metadata về các mục
+  - **`kSecMatchLimit`**: Số lượng kết quả trả về
+  - **`kSecClass`**: Loại mục Keychain
 
-Get **ACLs** of each entry:<sup>[[1]](#references)</sup>
+Lấy **ACL** của từng mục:<sup>[[1]](#references)</sup>
 
-- With the API **`SecAccessCopyACLList`** you can get the **ACL for the keychain item**. It returns a list of ACLs (such as `kSecACLAuthorizationExportClear` and the others previously mentioned), where each entry has:<sup>[[1]](#references)[[2]](#references)</sup>
-  - Description
-  - **Trusted Application List**. This could be:
-    - An app: /Applications/Slack.app
-    - A binary: /usr/libexec/airportd
-    - A group: group://AirPort
+- Dùng API **`SecAccessCopyACLList`** để lấy **ACL của mục Keychain**. API này trả về danh sách ACL (chẳng hạn như `kSecACLAuthorizationExportClear` và các ACL khác đã đề cập trước đó), trong đó mỗi mục có:<sup>[[1]](#references)[[2]](#references)</sup>
+  - Mô tả
+  - **Danh sách ứng dụng đáng tin cậy**. Có thể là:
+    - Một ứng dụng: /Applications/Slack.app
+    - Một binary: /usr/libexec/airportd
+    - Một nhóm: group://AirPort
 
-Export the data:<sup>[[1]](#references)</sup>
+Xuất dữ liệu:<sup>[[1]](#references)</sup>
 
-- The API **`SecKeychainItemCopyContent`** gets the plaintext
-- The API **`SecItemExport`** exports the keys and certificates but might have to set passwords to export the content encrypted
+- API **`SecKeychainItemCopyContent`** lấy dữ liệu plaintext
+- API **`SecItemExport`** xuất key và certificate, nhưng có thể cần đặt mật khẩu để xuất nội dung đã mã hóa
 
-And these are the **requirements** to be able to **export a secret without a prompt**:<sup>[[1]](#references)</sup>
+Và đây là các **điều kiện** để có thể **xuất secret mà không hiện lời nhắc**:<sup>[[1]](#references)</sup>
 
-- If **1+ trusted** apps listed:
-  - Need the appropriate **authorizations** (**`Nil`**, or be **part** of the allowed list of apps in the authorization to access the secret info)
-  - Need code signature to match **PartitionID**
-  - Need code signature to match that of one **trusted app** (or be a member of the right KeychainAccessGroup)
-- If **all applications trusted**:
-  - Need the appropriate **authorizations**
-  - Need code signature to match **PartitionID**
-    - If **no PartitionID**, then this isn't needed
+- Nếu có ít nhất một ứng dụng đáng tin cậy được liệt kê:
+  - Cần có **quyền** phù hợp (**`Nil`**, hoặc nằm trong danh sách ứng dụng được phép trong quyền truy cập thông tin secret)
+  - Chữ ký code cần khớp với **PartitionID**
+  - Chữ ký code cần khớp với chữ ký của một **ứng dụng đáng tin cậy** (hoặc thuộc KeychainAccessGroup phù hợp)
+- Nếu tất cả ứng dụng đều đáng tin cậy:
+  - Cần có **quyền** phù hợp
+  - Chữ ký code cần khớp với **PartitionID**
+    - Nếu không có **PartitionID**, thì không cần điều này
 
 > [!CAUTION]
-> Therefore, if there is **1 application listed**, you need to **inject code in that application**.
+> Vì vậy, nếu có **1 ứng dụng được liệt kê**, bạn cần **inject code vào ứng dụng đó**.
 >
-> If **apple** is indicated in the **partitionID**, you could access it with **`osascript`** so anything that is trusting all applications with apple in the partitionID. **`Python`** could also be used for this.
+> Nếu **apple** được chỉ định trong **partitionID**, bạn có thể truy cập bằng **`osascript`** đối với mọi thứ tin cậy tất cả ứng dụng có apple trong partitionID. Cũng có thể dùng **`Python`**.
 
-### Two additional attributes
+### Hai thuộc tính bổ sung
 
-- **Invisible**: It's a boolean flag to **hide** the entry from the **UI** Keychain app<sup>[[1]](#references)</sup>
-- **General**: It's to store **metadata** (so it's NOT ENCRYPTED)<sup>[[1]](#references)</sup>
-  - Microsoft was storing in plain text all the refresh tokens to access sensitive endpoint.<sup>[[1]](#references)</sup>
+- **Invisible**: Cờ boolean dùng để **ẩn** mục khỏi ứng dụng Keychain trong **UI**<sup>[[1]](#references)</sup>
+- **General**: Dùng để lưu **metadata** (do đó KHÔNG ĐƯỢC MÃ HÓA)<sup>[[1]](#references)</sup>
+  - Microsoft từng lưu dưới dạng plaintext tất cả refresh token dùng để truy cập endpoint nhạy cảm.<sup>[[1]](#references)</sup>
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## References
 
-- [1] [#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas](https://www.youtube.com/watch?v=jKE1ZW33JpY)
+- [1] [#OBTS v5.0: "Mở khóa macOS Keychain" - Cody Thomas](https://www.youtube.com/watch?v=jKE1ZW33JpY)
 - [2] [Apple Developer — kSecACLAuthorizationExportClear](https://developer.apple.com/documentation/security/ksecaclauthorizationexportclear)
-- [3] [Kaspersky Securelist - A new version of the MacSync macOS stealer targets crypto enthusiasts and developers](https://securelist.com/macsync-new-version/121383/)
-- [4] [Apple security(1) man page mirror](https://keith.github.io/xcode-man-pages/security.1.html)
+- [3] [Kaspersky Securelist - Phiên bản mới của trình đánh cắp macOS MacSync nhắm đến những người đam mê tiền mã hóa và nhà phát triển](https://securelist.com/macsync-new-version/121383/)
+- [4] [Bản sao trang man của Apple security(1)](https://keith.github.io/xcode-man-pages/security.1.html)

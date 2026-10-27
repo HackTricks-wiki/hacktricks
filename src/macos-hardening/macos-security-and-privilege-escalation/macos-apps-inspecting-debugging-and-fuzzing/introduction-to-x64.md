@@ -1,75 +1,75 @@
-# Introduction to x64
+# Giới thiệu về x64
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Introduction to x64**
+## **Giới thiệu về x64**
 
-x64, also known as x86-64 or AMD64, is the 64-bit extension of the x86 instruction-set architecture. It remains prevalent in desktop and server computing and is the architecture used by Intel-based Macs; Apple-silicon Macs use arm64 instead. Intel's architecture manuals define the registers, instruction set, and operating modes summarized below. <sup>[[1]](#references)</sup>
+x64, còn được gọi là x86-64 hoặc AMD64, là phần mở rộng 64-bit của kiến trúc tập lệnh x86. Kiến trúc này vẫn phổ biến trong máy tính để bàn và máy chủ, đồng thời được dùng trên các máy Mac chạy bộ xử lý Intel; máy Mac dùng Apple silicon sử dụng arm64. Các tài liệu hướng dẫn kiến trúc của Intel định nghĩa các thanh ghi, tập lệnh và chế độ hoạt động được tóm tắt dưới đây. <sup>[[1]](#references)</sup>
 
-### **Registers**
+### **Thanh ghi**
 
-x64 expands upon the x86 architecture, featuring **16 general-purpose registers** labeled `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi`, and `r8` through `r15`. Each of these can store a **64-bit** (8-byte) value. These registers also have 32-bit, 16-bit, and 8-bit sub-registers for compatibility and specific tasks.
+x64 mở rộng kiến trúc x86, có **16 thanh ghi đa dụng** với tên `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi` và từ `r8` đến `r15`. Mỗi thanh ghi có thể lưu giá trị **64-bit** (8 byte). Các thanh ghi này cũng có thanh ghi con 32-bit, 16-bit và 8-bit để tương thích và phục vụ các tác vụ cụ thể.
 
-1. **`rax`** - Traditionally used for **return values** from functions.
-2. **`rbx`** - Often used as a **base register** for memory operations.
-3. **`rcx`** - Commonly used for **loop counters**.
-4. **`rdx`** - Used in various roles including extended arithmetic operations.
-5. **`rbp`** - **Base pointer** for the stack frame.
-6. **`rsp`** - **Stack pointer**, keeping track of the top of the stack.
-7. **`rsi`** and **`rdi`** - Used for **source** and **destination** indexes in string/memory operations.
-8. **`r8`** to **`r15`** - Additional general-purpose registers introduced in x64.
+1. **`rax`** - Theo truyền thống, được dùng cho **giá trị trả về** từ các hàm.
+2. **`rbx`** - Thường được dùng làm **thanh ghi cơ sở** cho các thao tác bộ nhớ.
+3. **`rcx`** - Thường được dùng làm **bộ đếm vòng lặp**.
+4. **`rdx`** - Được dùng cho nhiều mục đích, bao gồm các phép toán số học mở rộng.
+5. **`rbp`** - **Con trỏ cơ sở** của khung ngăn xếp.
+6. **`rsp`** - **Con trỏ ngăn xếp**, theo dõi vị trí trên cùng của ngăn xếp.
+7. **`rsi`** và **`rdi`** - Được dùng làm chỉ mục **nguồn** và **đích** trong các thao tác chuỗi/bộ nhớ.
+8. **`r8`** đến **`r15`** - Các thanh ghi đa dụng bổ sung được giới thiệu trong x64.
 
-### **Calling Convention**
+### **Quy ước gọi hàm**
 
-The x64 calling convention varies between operating systems. For instance:
+Quy ước gọi hàm x64 khác nhau tùy hệ điều hành. Ví dụ:
 
-- **Windows**: The first **four parameters** are passed in the registers **`rcx`**, **`rdx`**, **`r8`**, and **`r9`**. Further parameters are pushed onto the stack. The return value is in **`rax`**.
-- **System V (commonly used in UNIX-like systems)**: The first **six integer or pointer parameters** are passed in registers **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`**, and **`r9`**. The return value is also in **`rax`**.
+- **Windows**: **Bốn tham số** đầu tiên được truyền qua các thanh ghi **`rcx`**, **`rdx`**, **`r8`** và **`r9`**. Các tham số tiếp theo được đẩy lên ngăn xếp. Giá trị trả về nằm trong **`rax`**.
+- **System V (thường dùng trong các hệ thống kiểu UNIX)**: **Sáu tham số số nguyên hoặc con trỏ** đầu tiên được truyền qua các thanh ghi **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`** và **`r9`**. Giá trị trả về cũng nằm trong **`rax`**.
 
-If the function has more than six inputs, the **rest will be passed on the stack**. **RSP**, the stack pointer, has to be **16 bytes aligned**, which means that the address it points to must be divisible by 16 before any call happens. This means that normally we would need to ensure that RSP is properly aligned in our shellcode before we make a function call. However, in practice, system calls work many times even if this requirement is not met.
+Nếu hàm có hơn sáu đầu vào, **các đầu vào còn lại sẽ được truyền qua ngăn xếp**. **RSP**, con trỏ ngăn xếp, phải được **căn chỉnh theo 16 byte**, nghĩa là địa chỉ mà nó trỏ tới phải chia hết cho 16 trước khi thực hiện bất kỳ lệnh gọi nào. Điều này có nghĩa là thông thường chúng ta cần đảm bảo RSP được căn chỉnh đúng trong shellcode trước khi gọi hàm. Tuy nhiên, trên thực tế, các system call thường vẫn hoạt động ngay cả khi không đáp ứng yêu cầu này.
 
-### Calling Convention in Swift
+### Quy ước gọi hàm trong Swift
 
-Swift have its own **calling convention** that can be found in [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)
+Swift có **quy ước gọi hàm** riêng, có thể xem tại [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)
 
-### **Common Instructions**
+### **Các lệnh phổ biến**
 
-x64 instructions have a rich set, maintaining compatibility with earlier x86 instructions and introducing new ones.
+Tập lệnh x64 rất phong phú, duy trì khả năng tương thích với các lệnh x86 trước đó và bổ sung các lệnh mới.
 
-- **`mov`**: **Move** a value from one **register** or **memory location** to another.
-  - Example: `mov rax, rbx` — Moves the value from `rbx` to `rax`.
-- **`push`** and **`pop`**: Push or pop values to/from the **stack**.
-  - Example: `push rax` — Pushes the value in `rax` onto the stack.
-  - Example: `pop rax` — Pops the top value from the stack into `rax`.
-- **`add`** and **`sub`**: **Addition** and **subtraction** operations.
-  - Example: `add rax, rcx` — Adds the values in `rax` and `rcx` storing the result in `rax`.
-- **`mul`** and **`div`**: **Multiplication** and **division** operations. Note: these have specific behaviors regarding operand usage.
-- **`call`** and **`ret`**: Used to **call** and **return from functions**.
-- **`int`**: Used to trigger a software **interrupt**. E.g., `int 0x80` was used for system calls in 32-bit x86 Linux.
-- **`cmp`**: **Compare** two values and set the CPU's flags based on the result.
-  - Example: `cmp rax, rdx` — Compares `rax` to `rdx`.
-- **`je`, `jne`, `jl`, `jge`, ...**: **Conditional jump** instructions that change control flow based on the results of a previous `cmp` or test.
-  - Example: After a `cmp rax, rdx` instruction, `je label` — Jumps to `label` if `rax` is equal to `rdx`.
-- **`syscall`**: Used for **system calls** in some x64 systems (like modern Unix).
-- **`sysenter`**: An optimized **system call** instruction on some platforms.
+- **`mov`**: **Di chuyển** một giá trị từ **thanh ghi** hoặc **vị trí bộ nhớ** này sang vị trí khác.
+  - Ví dụ: `mov rax, rbx` — Di chuyển giá trị từ `rbx` sang `rax`.
+- **`push`** và **`pop`**: Đẩy giá trị vào hoặc lấy giá trị ra khỏi **ngăn xếp**.
+  - Ví dụ: `push rax` — Đẩy giá trị trong `rax` lên ngăn xếp.
+  - Ví dụ: `pop rax` — Lấy giá trị trên cùng khỏi ngăn xếp và đưa vào `rax`.
+- **`add`** và **`sub`**: Các phép toán **cộng** và **trừ**.
+  - Ví dụ: `add rax, rcx` — Cộng các giá trị trong `rax` và `rcx`, rồi lưu kết quả vào `rax`.
+- **`mul`** và **`div`**: Các phép toán **nhân** và **chia**. Lưu ý: chúng có cách sử dụng toán hạng riêng.
+- **`call`** và **`ret`**: Dùng để **gọi hàm** và **trả về từ hàm**.
+- **`int`**: Dùng để kích hoạt **ngắt** phần mềm. Ví dụ, `int 0x80` được dùng cho system call trong Linux x86 32-bit.
+- **`cmp`**: **So sánh** hai giá trị và thiết lập các cờ của CPU dựa trên kết quả.
+  - Ví dụ: `cmp rax, rdx` — So sánh `rax` với `rdx`.
+- **`je`, `jne`, `jl`, `jge`, ...**: Các lệnh **nhảy có điều kiện**, thay đổi luồng điều khiển dựa trên kết quả của lệnh `cmp` hoặc lệnh kiểm tra trước đó.
+  - Ví dụ: Sau lệnh `cmp rax, rdx`, `je label` — Nhảy đến `label` nếu `rax` bằng `rdx`.
+- **`syscall`**: Dùng cho **system call** trên một số hệ thống x64 (như các hệ thống Unix hiện đại).
+- **`sysenter`**: Lệnh **system call** được tối ưu hóa trên một số nền tảng.
 
-### **Function Prologue**
+### **Phần mở đầu hàm**
 
-1. **Push the old base pointer**: `push rbp` (saves the caller's base pointer)
-2. **Move the current stack pointer to the base pointer**: `mov rbp, rsp` (sets up the new base pointer for the current function)
-3. **Allocate space on the stack for local variables**: `sub rsp, <size>` (where `<size>` is the number of bytes needed)
+1. **Đẩy con trỏ cơ sở cũ lên ngăn xếp**: `push rbp` (lưu con trỏ cơ sở của hàm gọi)
+2. **Chuyển con trỏ ngăn xếp hiện tại sang con trỏ cơ sở**: `mov rbp, rsp` (thiết lập con trỏ cơ sở mới cho hàm hiện tại)
+3. **Cấp phát không gian trên ngăn xếp cho các biến cục bộ**: `sub rsp, <size>` (trong đó `<size>` là số byte cần thiết)
 
-### **Function Epilogue**
+### **Phần kết thúc hàm**
 
-1. **Move the current base pointer to the stack pointer**: `mov rsp, rbp` (deallocate local variables)
-2. **Pop the old base pointer off the stack**: `pop rbp` (restores the caller's base pointer)
-3. **Return**: `ret` (returns control to the caller)
+1. **Chuyển con trỏ cơ sở hiện tại sang con trỏ ngăn xếp**: `mov rsp, rbp` (giải phóng các biến cục bộ)
+2. **Lấy con trỏ cơ sở cũ khỏi ngăn xếp**: `pop rbp` (khôi phục con trỏ cơ sở của hàm gọi)
+3. **Trả về**: `ret` (trả quyền điều khiển về cho hàm gọi)
 
 ## macOS
 
 ### syscalls
 
-There are different classes of syscalls, you can [**find them here**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
+Có nhiều loại syscall khác nhau; bạn có thể [**tìm hiểu tại đây**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
 
 ```c
 #define SYSCALL_CLASS_NONE	0	/* Invalid */
@@ -80,7 +80,7 @@ There are different classes of syscalls, you can [**find them here**](https://op
 #define SYSCALL_CLASS_IPC	5	/* Mach IPC */
 ```
 
-Then, you can find each syscall number [**in this url**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
+Sau đó, bạn có thể tìm số syscall của từng syscall [**tại URL này**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
 
 ```c
 0	AUE_NULL	ALL	{ int nosys(void); }   { indirect syscall }
@@ -99,20 +99,20 @@ Then, you can find each syscall number [**in this url**](https://opensource.appl
 [...]
 ```
 
-So in order to call the `open` syscall (**5**) from the **Unix/BSD class** you need to add it: `0x2000000`
+Vì vậy, để gọi syscall `open` (**5**) từ **Unix/BSD class**, bạn cần cộng thêm `0x2000000`.
 
-So, the syscall number to call open would be `0x2000005`
+Do đó, số syscall để gọi `open` sẽ là `0x2000005`.
 
 ### Shellcodes
 
-To compile:
+Để biên dịch:
 
 ```bash
 nasm -f macho64 shell.asm -o shell.o
 ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
 ```
 
-To extract the bytes:
+Để trích xuất các byte:
 
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/b729f716aaf24cbc8109e0d94681ccb84c0b0c9e/helper/extract.sh
@@ -126,7 +126,7 @@ otool -t shell.o | grep 00 | cut -f2 -d$'\t' | sed 's/ /\\x/g' | sed 's/^/\\x/g'
 
 <details>
 
-<summary>C code to test the shellcode</summary>
+<summary>Mã C để kiểm tra shellcode</summary>
 
 ```c
 // code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
@@ -178,9 +178,9 @@ int main(int argc, char **argv) {
 
 #### Shell
 
-The following minimal examples invoke `execve` using the macOS x86-64 syscall convention:
+Các ví dụ tối giản sau gọi `execve` theo quy ước syscall macOS x86-64:
 
-For the corresponding ARM64 implementation and its original shellcode source, see the [ARM64 basic assembly page](arm64-basic-assembly.md#shell).
+Để xem cách triển khai tương ứng cho ARM64 và mã shellcode gốc, hãy xem [trang assembly cơ bản ARM64](arm64-basic-assembly.md#shell).
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -223,9 +223,9 @@ _main:
 {{#endtab}}
 {{#endtabs}}
 
-#### Read with cat
+#### Đọc bằng cat
 
-The goal is to execute `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, so the second argument (x1) is an array of params (which in memory these means a stack of the addresses).
+Mục tiêu là thực thi `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, vì vậy đối số thứ hai (x1) là một mảng tham số (trong bộ nhớ, tức là một ngăn xếp chứa các địa chỉ).
 
 ```armasm
 bits 64
@@ -258,7 +258,7 @@ cat_path:      db "/bin/cat", 0
 passwd_path:   db "/etc/passwd", 0
 ```
 
-#### Invoke command with sh
+#### Gọi lệnh bằng sh
 
 ```armasm
 bits 64
@@ -300,7 +300,7 @@ touch_command:  db "touch /tmp/lalala", 0
 
 #### Bind shell
 
-Bind shell from [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) in **port 4444**<sup>[[2]](#references)</sup>
+Bind shell from [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) trên **port 4444**<sup>[[2]](#references)</sup>
 
 ```armasm
 section .text
@@ -379,7 +379,7 @@ dup2:
 
 #### Reverse Shell
 
-Reverse shell from [https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html). Reverse shell to **127.0.0.1:4444**<sup>[[3]](#references)</sup>
+Reverse shell từ [https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html). Reverse shell tới **127.0.0.1:4444**<sup>[[3]](#references)</sup>
 
 ```armasm
 section .text
@@ -445,8 +445,7 @@ dup2:
 
 ## References
 
-- [1] [Intel - Intel 64 and IA-32 Architectures Software Developer Manuals](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html)
-- [2] [Packet Storm - macOS TCP 4444 Bind Shell (Null-Free) Shellcode](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html)
-- [3] [Packet Storm - macOS 127.0.0.1:4444 Reverse Shell Shellcode](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html)
-
+- [1] [Intel - Tài liệu hướng dẫn dành cho nhà phát triển phần mềm về kiến trúc Intel 64 và IA-32](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html)
+- [2] [Packet Storm - Shellcode Bind Shell TCP 4444 macOS (không chứa byte null)](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html)
+- [3] [Packet Storm - Shellcode Reverse Shell macOS 127.0.0.1:4444](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html)
 {{#include ../../../banners/hacktricks-training.md}}

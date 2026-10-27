@@ -2,47 +2,47 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Thông tin cơ bản
 
-Chromium-based browsers like Google Chrome, Microsoft Edge, Brave, Arc, Vivaldi, and Opera all consume the same command-line switches, preference files, and DevTools automation interfaces. On macOS, any user with GUI access can terminate an existing browser session and re-open it with arbitrary flags, extensions, or DevTools endpoints that run with the target's entitlements.
+Các trình duyệt dựa trên Chromium như Google Chrome, Microsoft Edge, Brave, Arc, Vivaldi và Opera đều sử dụng chung các command-line switch, tệp tùy chọn và giao diện tự động hóa DevTools. Trên macOS, bất kỳ người dùng nào có quyền truy cập GUI đều có thể chấm dứt phiên trình duyệt đang chạy rồi mở lại với các flag, extension hoặc endpoint DevTools tùy ý, chạy với các entitlement của mục tiêu.
 
-#### Launching Chromium with custom flags on macOS
+#### Khởi chạy Chromium với flag tùy chỉnh trên macOS
 
-macOS keeps a single UI instance per Chromium profile, so instrumentation normally requires force-closing the browser (for example with `osascript -e 'tell application "Google Chrome" to quit'`). Attackers typically relaunch via `open -na "Google Chrome" --args <flags>` so they can inject arguments without modifying the app bundle. Wrapping that command inside a user LaunchAgent (`~/Library/LaunchAgents/*.plist`) or login hook guarantees the tampered browser is respawned after reboot/logoff.
+macOS chỉ duy trì một phiên bản UI cho mỗi Chromium profile, vì vậy việc instrument thường cần force-close trình duyệt (ví dụ: `osascript -e 'tell application "Google Chrome" to quit'`). Kẻ tấn công thường khởi chạy lại bằng `open -na "Google Chrome" --args <flags>` để inject đối số mà không sửa app bundle. Đặt lệnh này bên trong LaunchAgent của người dùng (`~/Library/LaunchAgents/*.plist`) hoặc login hook sẽ đảm bảo trình duyệt đã bị can thiệp được khởi chạy lại sau khi reboot/logoff.
 
-#### `--load-extension` Flag
+#### Flag `--load-extension`
 
-The `--load-extension` flag auto-loads unpacked extensions (comma-separated paths). Pair it with `--disable-extensions-except` to block legitimate extensions while forcing only your payload to run. Malicious extensions can request high-impact permissions such as `debugger`, `webRequest`, and `cookies` to pivot into DevTools protocols, patch CSP headers, downgrade HTTPS, or exfiltrate session material as soon as the browser starts.<sup>[[4]](#references)</sup>
+Flag `--load-extension` tự động tải các extension chưa đóng gói (các đường dẫn phân tách bằng dấu phẩy). Kết hợp flag này với `--disable-extensions-except` để chặn các extension hợp lệ và chỉ cho payload của bạn chạy. Extension độc hại có thể yêu cầu các quyền có tác động lớn như `debugger`, `webRequest` và `cookies` để pivot vào giao thức DevTools, sửa header CSP, hạ cấp HTTPS hoặc exfiltrate dữ liệu phiên ngay khi trình duyệt khởi chạy.<sup>[[4]](#references)</sup>
 
-#### `--remote-debugging-port` / `--remote-debugging-pipe` Flags
+#### Flag `--remote-debugging-port` / `--remote-debugging-pipe`
 
-These switches expose the Chrome DevTools Protocol (CDP) over TCP or a pipe so external tooling can drive the browser. Google observed widespread infostealer abuse of this interface and, beginning with Chrome 136 (March 2025), the switches are ignored for the default profile unless the browser is launched with a non-standard `--user-data-dir`. This enforces App-Bound Encryption on real profiles, but attackers can still spawn a fresh profile, coerce the victim to authenticate inside it (phishing/triage assistance), and harvest cookies, tokens, device trust states, or WebAuthn registrations via CDP.<sup>[[5]](#references)</sup>
+Các switch này cung cấp Chrome DevTools Protocol (CDP) qua TCP hoặc pipe để công cụ bên ngoài điều khiển trình duyệt. Google ghi nhận việc infostealer lạm dụng rộng rãi giao diện này và, bắt đầu từ Chrome 136 (tháng 3 năm 2025), các switch sẽ bị bỏ qua đối với profile mặc định, trừ khi trình duyệt được khởi chạy với `--user-data-dir` không theo mặc định. Điều này thực thi App-Bound Encryption trên các profile thực, nhưng kẻ tấn công vẫn có thể tạo profile mới, dụ nạn nhân xác thực trong profile đó (phishing/hỗ trợ phân loại sự cố), rồi thu thập cookie, token, trạng thái tin cậy thiết bị hoặc đăng ký WebAuthn qua CDP.<sup>[[5]](#references)</sup>
 
-#### `--user-data-dir` Flag
+#### Flag `--user-data-dir`
 
-This flag redirects the entire browser profile (History, Cookies, Login Data, Preference files, etc.) to an attacker-controlled path. It is mandatory when combining modern Chrome builds with `--remote-debugging-port`, and it also keeps the tampered profile isolated so you can drop pre-populated `Preferences` or `Secure Preferences` files that disable security prompts, auto-install extensions, and change default schemes.
+Flag này chuyển toàn bộ browser profile (History, Cookies, Login Data, tệp Preferences, v.v.) sang một đường dẫn do kẻ tấn công kiểm soát. Flag này là bắt buộc khi kết hợp các bản Chrome hiện đại với `--remote-debugging-port`, đồng thời giữ profile đã bị can thiệp tách biệt để bạn có thể thêm sẵn các tệp `Preferences` hoặc `Secure Preferences` nhằm tắt lời nhắc bảo mật, tự động cài extension và thay đổi các scheme mặc định.
 
-#### `--use-fake-ui-for-media-stream` Flag
+#### Flag `--use-fake-ui-for-media-stream`
 
-This switch bypasses the camera/mic permission prompt so any page that calls `getUserMedia` receives access immediately. Combine it with flags such as `--auto-select-desktop-capture-source="Entire Screen"`, `--kiosk`, or CDP `Browser.grantPermissions` commands to silently capture audio/video, desk-share, or satisfy WebRTC permission checks without user interaction.<sup>[[4]](#references)</sup>
+Switch này bỏ qua lời nhắc cấp quyền camera/mic để mọi trang gọi `getUserMedia` đều được cấp quyền ngay lập tức. Kết hợp với các flag như `--auto-select-desktop-capture-source="Entire Screen"`, `--kiosk` hoặc lệnh CDP `Browser.grantPermissions` để âm thầm ghi âm/ghi hình, chia sẻ màn hình hoặc vượt qua kiểm tra quyền WebRTC mà không cần tương tác của người dùng.<sup>[[4]](#references)</sup>
 
-## Delivery & Relaunch Patterns Seen in the Wild
+## Các mô hình phân phối và khởi chạy lại từng được ghi nhận
 
-CDP abuse is commonly a **post-exploitation** stage rather than the initial payload. A recent macOS developer-targeting campaign used a poisoned Xcode **`Run Script` build phase** (`PBXShellScriptBuildPhase`) so code executed only when the victim **built** the project, not when they merely cloned or opened it. After that first execution, the malware also infected other `.xcodeproj` trees, added malicious Git `pre-commit` hooks, and searched ZIP archives for more Xcode projects.<sup>[[3]](#references)</sup>
+Lạm dụng CDP thường là một giai đoạn **post-exploitation**, thay vì payload ban đầu. Một chiến dịch macOS gần đây nhắm vào nhà phát triển đã sử dụng pha build **`Run Script`** bị cài mã độc (`PBXShellScriptBuildPhase`), khiến mã chỉ chạy khi nạn nhân **build** project, chứ không phải khi họ chỉ clone hoặc mở project. Sau lần thực thi đầu tiên đó, malware còn lây nhiễm các cây `.xcodeproj` khác, thêm Git `pre-commit` hook độc hại và tìm kiếm thêm project Xcode trong các kho lưu trữ ZIP.<sup>[[3]](#references)</sup>
 
-For Chromium abuse this matters because the attacker doesn't need to patch the browser binary itself. A short-lived build-phase / `osascript` stager can instead install a **browser wrapper** (LaunchAgent, login item, Dock entry, trojanized app launcher, etc.) that reopens the legitimate browser with attacker-controlled flags every time the user starts it.<sup>[[3]](#references)</sup>
+Điều này quan trọng với việc lạm dụng Chromium vì kẻ tấn công không cần vá chính binary của trình duyệt. Thay vào đó, một stager ngắn hạn trong build phase / `osascript` có thể cài đặt **browser wrapper** (LaunchAgent, login item, mục Dock, trình khởi chạy ứng dụng đã bị cài trojan, v.v.) để mở lại trình duyệt hợp lệ với các flag do kẻ tấn công kiểm soát mỗi khi người dùng khởi chạy trình duyệt.<sup>[[3]](#references)</sup>
 
 > [!TIP]
-> On developer endpoints, inspect `.pbxproj` files, `.git/hooks/pre-commit`, and ZIPs containing `.xcodeproj` for unexpected `curl`, `osascript`, `xxd`, nested `base64`, or Chrome relaunch logic.
+> Trên endpoint của nhà phát triển, hãy kiểm tra các tệp `.pbxproj`, `.git/hooks/pre-commit` và ZIP chứa `.xcodeproj` để tìm `curl`, `osascript`, `xxd`, `base64` lồng nhau hoặc logic khởi chạy lại Chrome bất thường.
 
-## Remote Debugging & DevTools Protocol Abuse
+## Lạm dụng Remote Debugging và DevTools Protocol
 
-Once Chrome is relaunched with a dedicated `--user-data-dir` and `--remote-debugging-port`, you can attach over CDP (e.g., via `chrome-remote-interface`, `puppeteer`, or `playwright`) and script high-privilege workflows:
+Sau khi Chrome được khởi chạy lại với `--user-data-dir` riêng và `--remote-debugging-port`, bạn có thể kết nối qua CDP (ví dụ: bằng `chrome-remote-interface`, `puppeteer` hoặc `playwright`) và tự động hóa các quy trình có đặc quyền cao:
 
-- **Cookie/session theft:** `Network.getAllCookies` and `Storage.getCookies` return HttpOnly values even when App-Bound encryption would normally block filesystem access, because CDP asks the running browser to decrypt them.
-- **Permission tampering:** `Browser.grantPermissions` and `Emulation.setGeolocationOverride` let you bypass camera/mic prompts (especially when combined with `--use-fake-ui-for-media-stream`) or falsify location-based security checks.
-- **Keystroke/script injection:** `Runtime.evaluate` executes arbitrary JavaScript inside the active tab, enabling credential lifting, DOM patching, or injecting persistence beacons that survive navigation.<sup>[[1]](#references)</sup>
-- **Live exfiltration:** `Network.webRequestWillBeSentExtraInfo` and `Fetch.enable` intercept authenticated requests/responses in real time without touching disk artifacts.
+- **Đánh cắp cookie/phiên:** `Network.getAllCookies` và `Storage.getCookies` trả về cả giá trị HttpOnly ngay cả khi App-Bound Encryption thường chặn truy cập hệ thống tệp, vì CDP yêu cầu trình duyệt đang chạy giải mã chúng.
+- **Can thiệp quyền:** `Browser.grantPermissions` và `Emulation.setGeolocationOverride` cho phép bỏ qua lời nhắc camera/mic (đặc biệt khi kết hợp với `--use-fake-ui-for-media-stream`) hoặc giả mạo các kiểm tra bảo mật dựa trên vị trí.
+- **Inject keystroke/script:** `Runtime.evaluate` thực thi JavaScript tùy ý bên trong tab đang hoạt động, cho phép lấy cắp thông tin xác thực, chỉnh sửa DOM hoặc inject beacon duy trì quyền truy cập qua các lần điều hướng.<sup>[[1]](#references)</sup>
+- **Exfiltration trực tiếp:** `Network.webRequestWillBeSentExtraInfo` và `Fetch.enable` chặn các request/response đã xác thực theo thời gian thực mà không cần động đến các artifact trên đĩa.
 
 ```javascript
 import CDP from 'chrome-remote-interface';
@@ -58,17 +58,17 @@ import CDP from 'chrome-remote-interface';
 })();
 ```
 
-Because Chrome 136 blocks CDP on the default profile, copy/pasting the victim's existing `~/Library/Application Support/Google/Chrome` directory to a staging path no longer yields decrypted cookies. Instead, social-engineer the user into authenticating inside the instrumented profile (e.g., "helpful" support session) or capture MFA tokens in transit via CDP-controlled network hooks.<sup>[[5]](#references)</sup>
+Vì Chrome 136 chặn CDP trên profile mặc định, việc sao chép thư mục `~/Library/Application Support/Google/Chrome` hiện có của nạn nhân sang đường dẫn staging không còn giúp lấy cookie đã giải mã. Thay vào đó, hãy dùng social engineering để dụ người dùng xác thực trong profile đã instrument (ví dụ: phiên hỗ trợ “tận tình”) hoặc thu thập token MFA đang truyền qua các network hook do CDP điều khiển.<sup>[[5]](#references)</sup>
 
-### XCSSET-style CDP Backdoor Chain
+### Chuỗi backdoor CDP kiểu XCSSET
 
-A practical malware pattern is:
+Một mô hình malware thực tế là:
 
-1. Restart the userland implant or wrapper each time Chrome is launched.
-2. Spawn the legitimate browser with `--remote-debugging-port=<port>` and, on Chrome 136+, usually a paired non-default `--user-data-dir=<dir>`.
-3. Start a helper that connects to the local CDP WebSocket and registers a pre-document hook with `Page.addScriptToEvaluateOnNewDocument`.<sup>[[2]](#references)</sup>
+1. Khởi động lại implant hoặc wrapper ở userland mỗi khi Chrome được mở.
+2. Chạy trình duyệt hợp pháp với `--remote-debugging-port=<port>` và, trên Chrome 136+, thường đi kèm `--user-data-dir=<dir>` không phải mặc định.
+3. Khởi chạy helper kết nối với CDP WebSocket cục bộ và đăng ký hook chạy trước document bằng `Page.addScriptToEvaluateOnNewDocument`.<sup>[[2]](#references)</sup>
 
-That helper can inject JavaScript **before** site code runs, which is ideal for hooking `window.fetch`, `XMLHttpRequest`, wallet providers, or autofill flows without patching files on disk.<sup>[[3]](#references)</sup>
+Helper đó có thể inject JavaScript **trước khi** mã của trang web chạy; đây là cách lý tưởng để hook `window.fetch`, `XMLHttpRequest`, wallet provider hoặc các luồng autofill mà không cần sửa file trên ổ đĩa.<sup>[[3]](#references)</sup>
 
 ```javascript
 await Page.enable();
@@ -85,17 +85,17 @@ await Page.addScriptToEvaluateOnNewDocument({
 Runtime.consoleAPICalled(({args}) => { /* helper parses __HT__ */ });
 ```
 
-A stronger variant turns the browser into a **host command bridge**: injected JavaScript emits a delimiter-tagged `console.log`, the local helper watches `Runtime.consoleAPICalled`, strips the marker, executes the remainder through the host shell (for example Go's `exec.Command`), and returns stdout/stderr over the attacker's WebSocket. This upgrades tab-level script execution into a mostly fileless reverse shell.<sup>[[3]](#references)</sup>
+Một biến thể mạnh hơn biến browser thành **cầu nối lệnh trên host**: JavaScript được inject phát ra `console.log` có gắn dấu phân cách, helper cục bộ theo dõi `Runtime.consoleAPICalled`, loại bỏ dấu đánh dấu, thực thi phần còn lại thông qua shell trên host (ví dụ `exec.Command` của Go), rồi trả stdout/stderr qua WebSocket của attacker. Cách này nâng cấp việc thực thi script ở cấp tab thành reverse shell hầu như không để lại file.<sup>[[3]](#references)</sup>
 
-## Extension-Based Injection via Debugger API
+## Injection qua Extension bằng Debugger API
 
-The 2023 "Chrowned by an Extension" research demonstrated that a malicious extension using the `chrome.debugger` API can attach to any tab and gain the same DevTools powers as `--remote-debugging-port`.<sup>[[6]](#references)</sup> That breaks the original isolation assumptions (extensions stay in their context) and enables:
+Nghiên cứu năm 2023 "Chrowned by an Extension" cho thấy một extension độc hại sử dụng API `chrome.debugger` có thể attach vào bất kỳ tab nào và có được các quyền DevTools tương tự `--remote-debugging-port`.<sup>[[6]](#references)</sup> Điều này phá vỡ các giả định cách ly ban đầu (extension hoạt động trong context riêng) và cho phép:
 
-- Silent cookie and credential theft with `Network.getAllCookies`/`Fetch.getResponseBody`.
-- Modification of site permissions (camera, microphone, geolocation) and security interstitial bypass, letting phishing pages impersonate Chrome dialogs.
-- On-path tampering of TLS warnings, downloads, or WebAuthn prompts by programmatically driving `Page.handleJavaScriptDialog`, `Page.setDownloadBehavior`, or `Security.handleCertificateError`.
+- Đánh cắp cookie và thông tin đăng nhập một cách âm thầm bằng `Network.getAllCookies`/`Fetch.getResponseBody`.
+- Thay đổi quyền của site (camera, microphone, geolocation) và bypass màn hình cảnh báo bảo mật, cho phép các trang phishing giả mạo hộp thoại của Chrome.
+- Can thiệp trên đường truyền vào cảnh báo TLS, lượt tải xuống hoặc lời nhắc WebAuthn bằng cách điều khiển `Page.handleJavaScriptDialog`, `Page.setDownloadBehavior` hoặc `Security.handleCertificateError` theo chương trình.
 
-Load the extension with `--load-extension`/`--disable-extensions-except` so no user interaction is required. A minimal background script that weaponizes the API looks like this:
+Load extension bằng `--load-extension`/`--disable-extensions-except` để không cần người dùng tương tác. Một background script tối giản weaponize API này như sau:
 
 ```javascript
 chrome.tabs.onUpdated.addListener((tabId, info) => {
@@ -109,14 +109,14 @@ chrome.tabs.onUpdated.addListener((tabId, info) => {
 });
 ```
 
-The extension can also subscribe to `Debugger.paused` events to read JavaScript variables, patch inline scripts, or drop custom breakpoints that survive navigation. Because everything runs inside the user's GUI session, Gatekeeper and TCC are not triggered, making this technique ideal for malware that already achieved execution under the user context.<sup>[[6]](#references)</sup>
+Tiện ích mở rộng cũng có thể đăng ký nhận các sự kiện `Debugger.paused` để đọc các biến JavaScript, vá các script nội tuyến hoặc đặt breakpoint tùy chỉnh vẫn tồn tại sau khi điều hướng. Vì mọi thứ chạy trong phiên GUI của người dùng, Gatekeeper và TCC không được kích hoạt, khiến kỹ thuật này trở nên lý tưởng cho malware đã thực thi được trong ngữ cảnh người dùng.<sup>[[6]](#references)</sup>
 
-## Detection & Hunting
+## Phát hiện & săn tìm
 
-- Alert on Chromium browsers launched with `--remote-debugging-port`, `--remote-debugging-pipe`, or a suspicious `--user-data-dir`, especially when the parent is `bash`, `sh`, `osascript`, `xcodebuild`, or a LaunchAgent helper.
-- Look for short chains where a helper opens a local CDP WebSocket, registers `Page.addScriptToEvaluateOnNewDocument`, and then makes a long-lived outbound WebSocket/HTTPS connection.
-- Hunt for console-to-shell bridges by correlating browser `Runtime.consoleAPICalled` activity with child shells or helper processes executing attacker-supplied commands.
-- On developer Macs, review `.pbxproj` `PBXShellScriptBuildPhase` entries, Git `pre-commit` hooks, Dock/login item relaunchers, and ZIP-contained Xcode projects for browser wrapper installation.
+- Cảnh báo khi trình duyệt Chromium được khởi chạy với `--remote-debugging-port`, `--remote-debugging-pipe` hoặc `--user-data-dir` đáng ngờ, đặc biệt khi tiến trình cha là `bash`, `sh`, `osascript`, `xcodebuild` hoặc một trợ giúp LaunchAgent.
+- Tìm các chuỗi ngắn trong đó một trợ giúp mở WebSocket CDP cục bộ, đăng ký `Page.addScriptToEvaluateOnNewDocument`, rồi tạo kết nối WebSocket/HTTPS đi ra tồn tại lâu dài.
+- Săn tìm các cầu nối từ console đến shell bằng cách đối chiếu hoạt động `Runtime.consoleAPICalled` của trình duyệt với các shell con hoặc tiến trình trợ giúp thực thi lệnh do kẻ tấn công cung cấp.
+- Trên máy Mac dành cho nhà phát triển, kiểm tra các mục `PBXShellScriptBuildPhase` trong `.pbxproj`, hook Git `pre-commit`, trình khởi chạy lại Dock/mục đăng nhập và các dự án Xcode nằm trong ZIP để phát hiện việc cài đặt trình bao bọc trình duyệt.
 
 ```bash
 ps auxww | rg 'Chrome|Brave|Edge.*(--remote-debugging-port|--remote-debugging-pipe|--user-data-dir)'
@@ -125,13 +125,13 @@ find ~/Library/LaunchAgents /Library/LaunchAgents -name '*.plist' -exec plutil -
 rg -n 'PBXShellScriptBuildPhase|curl|osascript|xxd|base64' ~/Code --glob '*.pbxproj'
 ```
 
-### Tools
+### Công cụ
 
-- [https://github.com/breakpointHQ/snoop](https://github.com/breakpointHQ/snoop) - Automates Chromium launches with payload extensions and exposes interactive CDP hooks.
-- [https://github.com/breakpointHQ/VOODOO](https://github.com/breakpointHQ/VOODOO) - Similar tooling focused on traffic interception and browser instrumentation for macOS operators.
-- [https://github.com/cyrus-and/chrome-remote-interface](https://github.com/cyrus-and/chrome-remote-interface) - Node.js library to script Chrome DevTools Protocol dumps (cookies, DOM, permissions) once a `--remote-debugging-port` instance is live.
+- [https://github.com/breakpointHQ/snoop](https://github.com/breakpointHQ/snoop) - Tự động khởi chạy Chromium với các extension chứa payload và cung cấp các hook CDP tương tác.
+- [https://github.com/breakpointHQ/VOODOO](https://github.com/breakpointHQ/VOODOO) - Công cụ tương tự, tập trung vào việc chặn lưu lượng và instrument trình duyệt cho các operator trên macOS.
+- [https://github.com/cyrus-and/chrome-remote-interface](https://github.com/cyrus-and/chrome-remote-interface) - Thư viện Node.js dùng để tạo script lấy dữ liệu từ Chrome DevTools Protocol (cookie, DOM, quyền) khi một instance chạy với `--remote-debugging-port` đang hoạt động.
 
-### Example
+### Ví dụ
 
 ```bash
 # Launch an instrumented Chrome profile listening on CDP and auto-granting media/capture access
@@ -148,15 +148,14 @@ open -na "Google Chrome" --args \
 voodoo intercept -b chrome
 ```
 
-Find more examples in the tools links.
+Tìm thêm ví dụ trong các liên kết công cụ.
 
 ## References
 
-- [1] [Chrome DevTools Protocol - Runtime domain](https://chromedevtools.github.io/devtools-protocol/v8/Runtime/)
-- [2] [Chrome DevTools Protocol - Page domain](https://chromedevtools.github.io/devtools-protocol/tot/Page/)
-- [3] [The Xcode Assassin Returns: A Deep Dive Into the Latest XCSSET Version - Unit 42](https://unit42.paloaltonetworks.com/xcsset-v40-malware-analysis/)
-- [4] [Ron Masas (@RonMasas) on X](https://twitter.com/RonMasas/status/1758106347222995007)
-- [5] [Changes to remote debugging switches to improve security - Chrome for Developers](https://developer.chrome.com/blog/remote-debugging-port)
-- [6] [Chrowned by an Extension: Abusing the Chrome DevTools Protocol through the Debugger API (arXiv:2305.11506)](https://arxiv.org/abs/2305.11506)
-
+- [1] [Chrome DevTools Protocol - miền Runtime](https://chromedevtools.github.io/devtools-protocol/v8/Runtime/)
+- [2] [Chrome DevTools Protocol - miền Page](https://chromedevtools.github.io/devtools-protocol/tot/Page/)
+- [3] [Sát thủ Xcode trở lại: Phân tích chuyên sâu phiên bản XCSSET mới nhất - Unit 42](https://unit42.paloaltonetworks.com/xcsset-v40-malware-analysis/)
+- [4] [Ron Masas (@RonMasas) trên X](https://twitter.com/RonMasas/status/1758106347222995007)
+- [5] [Thay đổi các tùy chọn chuyển đổi gỡ lỗi từ xa để tăng cường bảo mật - Chrome for Developers](https://developer.chrome.com/blog/remote-debugging-port)
+- [6] [Bị một Extension chiếm quyền: Lạm dụng Chrome DevTools Protocol thông qua Debugger API (arXiv:2305.11506)](https://arxiv.org/abs/2305.11506)
 {{#include ../../../banners/hacktricks-training.md}}

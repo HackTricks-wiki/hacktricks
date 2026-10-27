@@ -1,48 +1,48 @@
-# macOS Process Abuse
+# Lạm dụng Process trên macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Processes Basic Information
+## Thông tin cơ bản về Process
 
-A process is an instance of a running executable, however processes doesn't run code, these are threads. Therefore **processes are just containers for running threads** providing the memory, descriptors, ports, permissions...
+Một process là một phiên bản của executable đang chạy, tuy nhiên process không chạy code; các thread mới chạy code. Vì vậy, **process chỉ là container để chạy các thread**, cung cấp bộ nhớ, descriptor, port, quyền...
 
-Traditionally, processes where started within other processes (except PID 1) by calling **`fork`** which would create a exact copy of the current process and then the **child process** would generally call **`execve`** to load the new executable and run it. Then, **`vfork`** was introduced to make this process faster without any memory copying.\
-Then **`posix_spawn`** was introduced combining **`vfork`** and **`execve`** in one call and accepting flags:
+Theo cách truyền thống, process được khởi chạy bên trong các process khác (ngoại trừ PID 1) bằng cách gọi **`fork`**, tạo một bản sao chính xác của process hiện tại; sau đó **child process** thường gọi **`execve`** để tải executable mới và chạy nó. Tiếp đó, **`vfork`** được giới thiệu để tăng tốc quy trình này mà không cần sao chép bộ nhớ.\
+Sau đó, **`posix_spawn`** được giới thiệu, kết hợp **`vfork`** và **`execve`** trong một lần gọi và chấp nhận các flag:
 
-- `POSIX_SPAWN_RESETIDS`: Reset effective ids to real ids
-- `POSIX_SPAWN_SETPGROUP`: Set process group affiliation
-- `POSUX_SPAWN_SETSIGDEF`: Set signal default behaviour
-- `POSIX_SPAWN_SETSIGMASK`: Set signal mask
-- `POSIX_SPAWN_SETEXEC`: Exec in the same process (like `execve` with more options)
-- `POSIX_SPAWN_START_SUSPENDED`: Start suspended
-- `_POSIX_SPAWN_DISABLE_ASLR`: Start without ASLR
-- `_POSIX_SPAWN_NANO_ALLOCATOR:` Use libmalloc's Nano allocator
-- `_POSIX_SPAWN_ALLOW_DATA_EXEC:` Allow `rwx` on data segments
-- `POSIX_SPAWN_CLOEXEC_DEFAULT`: Close all file descriptions on exec(2) by default
-- `_POSIX_SPAWN_HIGH_BITS_ASLR:` Randomize high bits of ASLR slide
+- `POSIX_SPAWN_RESETIDS`: Đặt lại effective id thành real id
+- `POSIX_SPAWN_SETPGROUP`: Đặt nhóm process
+- `POSUX_SPAWN_SETSIGDEF`: Đặt hành vi mặc định của signal
+- `POSIX_SPAWN_SETSIGMASK`: Đặt mặt nạ signal
+- `POSIX_SPAWN_SETEXEC`: Exec trong cùng process (giống `execve` nhưng có thêm tùy chọn)
+- `POSIX_SPAWN_START_SUSPENDED`: Khởi chạy ở trạng thái tạm dừng
+- `_POSIX_SPAWN_DISABLE_ASLR`: Khởi chạy mà không có ASLR
+- `_POSIX_SPAWN_NANO_ALLOCATOR:` Sử dụng Nano allocator của libmalloc
+- `_POSIX_SPAWN_ALLOW_DATA_EXEC:` Cho phép `rwx` trên các segment dữ liệu
+- `POSIX_SPAWN_CLOEXEC_DEFAULT`: Mặc định đóng tất cả file description khi exec(2)
+- `_POSIX_SPAWN_HIGH_BITS_ASLR:` Ngẫu nhiên hóa các bit cao của ASLR slide
 
-Moreover, `posix_spawn` accepts **`posix_spawnattr`** settings that control aspects of the spawned process and **`posix_spawn_file_actions`** entries that modify file descriptors.
+Ngoài ra, `posix_spawn` chấp nhận các thiết lập **`posix_spawnattr`** để kiểm soát các khía cạnh của process được tạo và các mục **`posix_spawn_file_actions`** để sửa đổi file descriptor.
 
-When a process dies it send the **return code to the parent process** (if the parent died, the new parent is PID 1) with the signal `SIGCHLD`. The parent needs to get this value calling `wait4()` or `waitid()` and until that happen the child stays in a zombie state where it's still listed but doesn't consume resources.
+Khi một process kết thúc, nó gửi **return code cho process cha** (nếu process cha đã kết thúc, process cha mới là PID 1) bằng signal `SIGCHLD`. Process cha cần lấy giá trị này bằng cách gọi `wait4()` hoặc `waitid()`; cho đến khi việc đó xảy ra, process con ở trạng thái zombie: vẫn được liệt kê nhưng không tiêu thụ tài nguyên.
 
-### PIDs
+### PID
 
-PIDs, process identifiers, identifies a uniq process. In XNU the **PIDs** are of **64bits** increasing monotonically and **never wrap** (to avoid abuses).
+PID (process identifier) dùng để nhận diện một process duy nhất. Trong XNU, **PID** có độ dài **64 bit**, tăng đơn điệu và **không bao giờ quay vòng** (để tránh bị lạm dụng).
 
-### Process Groups, Sessions & Coalations
+### Nhóm Process, Session và Coalition
 
-**Processes** can be inserted in **groups** to make it easier to handle them. For example, commands in a shell script will be in the same process group so it's possible to **signal them together** using kill for example.\
-It's also possible to **group processes in sessions**. When a process starts a session (`setsid(2)`), the children processes are set inside the session, unless they start their own session.
+Có thể đưa **process** vào **nhóm** để dễ quản lý hơn. Ví dụ, các lệnh trong một shell script sẽ thuộc cùng một nhóm process, do đó có thể **gửi signal đến tất cả cùng lúc**, chẳng hạn dùng kill.\
+Cũng có thể **nhóm các process thành session**. Khi một process khởi tạo session (`setsid(2)`), các process con sẽ thuộc session đó, trừ khi chúng tự khởi tạo session riêng.
 
-Coalition is another waya to group processes in Darwin. A process joining a coalation allows it to access pool resources, sharing a ledger or facing Jetsam. Coalations have different roles: Leader, XPC service, Extension.
+Coalition là một cách khác để nhóm các process trong Darwin. Một process tham gia coalition có thể truy cập tài nguyên của pool, chia sẻ một ledger hoặc chịu sự xử lý của Jetsam. Coalition có các vai trò khác nhau: Leader, XPC service, Extension.
 
-### Credentials & Personae
+### Thông tin xác thực và Persona
 
-Each process with hold **credentials** that **identify its privileges** in the system. Each process will have one primary `uid` and one primary `gid` (although might belong to several groups).\
-It's also possible to change the user and group id if the binary has the `setuid/setgid` bit.\
-There are several functions to **set new uids/gids**.
+Mỗi process đều có **thông tin xác thực** để **xác định các quyền của nó** trong hệ thống. Mỗi process có một `uid` chính và một `gid` chính (mặc dù có thể thuộc nhiều nhóm).\
+Cũng có thể thay đổi user id và group id nếu binary có bit `setuid/setgid`.\
+Có một số hàm để **đặt uid/gid mới**.
 
-The syscall **`persona`** provides an **alternate** set of **credentials**. Adopting a persona assumes its uid, gid and group memberships **at one**. In the [**source code**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) it's possible to find the struct:
+System call **`persona`** cung cấp một bộ **thông tin xác thực** **thay thế**. Khi sử dụng persona, process đồng thời nhận uid, gid và các nhóm thành viên của persona đó. Trong [**source code**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h), có thể tìm thấy struct:
 
 ```c
 struct kpersona_info { uint32_t persona_info_version;
@@ -58,43 +58,43 @@ struct kpersona_info { uint32_t persona_info_version;
 }
 ```
 
-## Threads Basic Information
+## Thông tin cơ bản về luồng
 
-1. **POSIX Threads (pthreads):** macOS supports POSIX threads (`pthreads`), which are part of a standard threading API for C/C++. The implementation of pthreads in macOS is found in `/usr/lib/system/libsystem_pthread.dylib`, which comes from the publicly available `libpthread` project. This library provides the necessary functions to create and manage threads.
-2. **Creating Threads:** The `pthread_create()` function is used to create new threads. Internally, this function calls `bsdthread_create()`, which is a lower-level system call specific to the XNU kernel (the kernel macOS is based on). This system call takes various flags derived from `pthread_attr` (attributes) that specify thread behavior, including scheduling policies and stack size.
-   - **Default Stack Size:** The default stack size for new threads is 512 KB, which is sufficient for typical operations but can be adjusted via thread attributes if more or less space is needed.
-3. **Thread Initialization:** The `__pthread_init()` function is crucial during thread setup, utilizing the `env[]` argument to parse environment variables that can include details about the stack's location and size.
+1. **POSIX Threads (pthreads):** macOS hỗ trợ POSIX threads (`pthreads`), một phần của API luồng tiêu chuẩn cho C/C++. Bản triển khai pthreads trong macOS nằm tại `/usr/lib/system/libsystem_pthread.dylib`, bắt nguồn từ dự án `libpthread` được cung cấp công khai. Thư viện này cung cấp các hàm cần thiết để tạo và quản lý luồng.
+2. **Tạo luồng:** Hàm `pthread_create()` được dùng để tạo luồng mới. Bên trong, hàm này gọi `bsdthread_create()`, một lệnh gọi hệ thống cấp thấp dành riêng cho kernel XNU (kernel làm nền tảng cho macOS). Lệnh gọi hệ thống này nhận nhiều cờ được lấy từ `pthread_attr` (các thuộc tính), dùng để xác định hành vi của luồng, bao gồm chính sách lập lịch và kích thước stack.
+   - **Kích thước stack mặc định:** Kích thước stack mặc định cho luồng mới là 512 KB, đủ cho các hoạt động thông thường nhưng có thể điều chỉnh thông qua các thuộc tính luồng nếu cần thêm hoặc bớt dung lượng.
+3. **Khởi tạo luồng:** Hàm `__pthread_init()` đóng vai trò quan trọng trong quá trình thiết lập luồng, sử dụng đối số `env[]` để phân tích các biến môi trường, có thể chứa thông tin về vị trí và kích thước của stack.
 
-#### Thread Termination in macOS
+#### Kết thúc luồng trong macOS
 
-1. **Exiting Threads:** Threads are typically terminated by calling `pthread_exit()`. This function allows a thread to exit cleanly, performing necessary cleanup and allowing the thread to send a return value back to any joiners.
-2. **Thread Cleanup:** Upon calling `pthread_exit()`, the function `pthread_terminate()` is invoked, which handles the removal of all associated thread structures. It deallocates Mach thread ports (Mach is the communication subsystem in the XNU kernel) and calls `bsdthread_terminate`, a syscall that removes the kernel-level structures associated with the thread.
+1. **Thoát luồng:** Luồng thường được kết thúc bằng cách gọi `pthread_exit()`. Hàm này cho phép luồng thoát một cách an toàn, thực hiện các bước dọn dẹp cần thiết và gửi giá trị trả về cho các luồng đang chờ kết quả.
+2. **Dọn dẹp luồng:** Khi gọi `pthread_exit()`, hàm `pthread_terminate()` sẽ được gọi để xử lý việc loại bỏ tất cả cấu trúc dữ liệu liên quan đến luồng. Hàm này giải phóng các Mach thread port (Mach là hệ thống con giao tiếp trong kernel XNU) và gọi `bsdthread_terminate`, một syscall loại bỏ các cấu trúc ở cấp kernel liên kết với luồng.
 
-#### Synchronization Mechanisms
+#### Cơ chế đồng bộ hóa
 
-To manage access to shared resources and avoid race conditions, macOS provides several synchronization primitives. These are critical in multi-threading environments to ensure data integrity and system stability:
+Để quản lý quyền truy cập vào tài nguyên dùng chung và tránh race condition, macOS cung cấp một số primitive đồng bộ hóa. Chúng rất quan trọng trong môi trường đa luồng, giúp đảm bảo tính toàn vẹn dữ liệu và độ ổn định của hệ thống:
 
-1. **Mutexes:**
-   - **Regular Mutex (Signature: 0x4D555458):** Standard mutex with a memory footprint of 60 bytes (56 bytes for the mutex and 4 bytes for the signature).
-   - **Fast Mutex (Signature: 0x4d55545A):** Similar to a regular mutex but optimized for faster operations, also 60 bytes in size.
-2. **Condition Variables:**
-   - Used for waiting for certain conditions to occur, with a size of 44 bytes (40 bytes plus a 4-byte signature).
-   - **Condition Variable Attributes (Signature: 0x434e4441):** Configuration attributes for condition variables, sized at 12 bytes.
-3. **Once Variable (Signature: 0x4f4e4345):**
-   - Ensures that a piece of initialization code is executed only once. Its size is 12 bytes.
-4. **Read-Write Locks:**
-   - Allows multiple readers or one writer at a time, facilitating efficient access to shared data.
-   - **Read Write Lock (Signature: 0x52574c4b):** Sized at 196 bytes.
-   - **Read Write Lock Attributes (Signature: 0x52574c41):** Attributes for read-write locks, 20 bytes in size.
+1. **Mutex:**
+   - **Mutex thông thường (Signature: 0x4D555458):** Mutex tiêu chuẩn có kích thước bộ nhớ 60 byte (56 byte cho mutex và 4 byte cho signature).
+   - **Fast Mutex (Signature: 0x4d55545A):** Tương tự mutex thông thường nhưng được tối ưu để thao tác nhanh hơn, cũng có kích thước 60 byte.
+2. **Biến điều kiện:**
+   - Dùng để chờ một số điều kiện nhất định xảy ra, có kích thước 44 byte (40 byte cộng thêm signature 4 byte).
+   - **Thuộc tính biến điều kiện (Signature: 0x434e4441):** Các thuộc tính cấu hình cho biến điều kiện, có kích thước 12 byte.
+3. **Biến Once (Signature: 0x4f4e4345):**
+   - Đảm bảo một đoạn mã khởi tạo chỉ được thực thi một lần. Kích thước của biến là 12 byte.
+4. **Read-Write Lock:**
+   - Cho phép nhiều reader hoặc một writer hoạt động cùng lúc, giúp truy cập dữ liệu dùng chung hiệu quả.
+   - **Read Write Lock (Signature: 0x52574c4b):** Có kích thước 196 byte.
+   - **Thuộc tính Read Write Lock (Signature: 0x52574c41):** Các thuộc tính cho read-write lock, có kích thước 20 byte.
 
 > [!TIP]
-> The last 4 bytes of those objects are used to deetct overflows.
+> 4 byte cuối cùng của các đối tượng này được dùng để phát hiện tràn bộ đệm.
 
-### Thread Local Variables (TLV)
+### Biến cục bộ của luồng (TLV)
 
-**Thread Local Variables (TLV)** in the context of Mach-O files (the format for executables in macOS) are used to declare variables that are specific to **each thread** in a multi-threaded application. This ensures that each thread has its own separate instance of a variable, providing a way to avoid conflicts and maintain data integrity without needing explicit synchronization mechanisms like mutexes.
+**Biến cục bộ của luồng (TLV)** trong ngữ cảnh các tệp Mach-O (định dạng tệp thực thi trong macOS) được dùng để khai báo các biến dành riêng cho **từng luồng** trong ứng dụng đa luồng. Điều này đảm bảo mỗi luồng có một bản sao riêng của biến, giúp tránh xung đột và duy trì tính toàn vẹn dữ liệu mà không cần các cơ chế đồng bộ hóa tường minh như mutex.
 
-In C and related languages, you can declare a thread-local variable using the **`__thread`** keyword. Here’s how it works in your example:
+Trong C và các ngôn ngữ liên quan, bạn có thể khai báo biến cục bộ của luồng bằng từ khóa **`__thread`**. Cách hoạt động trong ví dụ của bạn như sau:
 
 ```c
 cCopy code__thread int tlv_var;
@@ -104,52 +104,52 @@ void main (int argc, char **argv){
 }
 ```
 
-This snippet defines `tlv_var` as a thread-local variable. Each thread running this code will have its own `tlv_var`, and changes one thread makes to `tlv_var` will not affect `tlv_var` in another thread.
+Đoạn mã này định nghĩa `tlv_var` là một biến thread-local. Mỗi thread chạy đoạn mã này sẽ có `tlv_var` riêng; những thay đổi mà một thread thực hiện với `tlv_var` sẽ không ảnh hưởng đến `tlv_var` của thread khác.
 
-In the Mach-O binary, the data related to thread local variables is organized into specific sections:
+Trong binary Mach-O, dữ liệu liên quan đến các biến thread-local được sắp xếp vào những section cụ thể:
 
-- **`__DATA.__thread_vars`**: This section contains the metadata about the thread-local variables, like their types and initialization status.
-- **`__DATA.__thread_bss`**: This section is used for thread-local variables that are not explicitly initialized. It's a part of memory set aside for zero-initialized data.
+- **`__DATA.__thread_vars`**: Section này chứa metadata về các biến thread-local, chẳng hạn như kiểu và trạng thái khởi tạo.
+- **`__DATA.__thread_bss`**: Section này dành cho các biến thread-local chưa được khởi tạo tường minh. Đây là một phần bộ nhớ được dành riêng cho dữ liệu được khởi tạo bằng 0.
 
-Mach-O also provides a specific API called **`tlv_atexit`** to manage thread-local variables when a thread exits. This API allows you to **register destructors**—special functions that clean up thread-local data when a thread terminates.
+Mach-O cũng cung cấp API riêng có tên **`tlv_atexit`** để quản lý các biến thread-local khi một thread kết thúc. API này cho phép bạn **đăng ký hàm hủy** — các hàm đặc biệt dùng để dọn dẹp dữ liệu thread-local khi một thread chấm dứt.
 
-### Threading Priorities
+### Ưu tiên của Thread
 
-Understanding thread priorities involves looking at how the operating system decides which threads to run and when. This decision is influenced by the priority level assigned to each thread. In macOS and Unix-like systems, this is handled using concepts like `nice`, `renice`, and Quality of Service (QoS) classes.
+Để hiểu về mức ưu tiên của thread, cần xem xét cách hệ điều hành quyết định thread nào sẽ chạy và vào thời điểm nào. Quyết định này chịu ảnh hưởng bởi mức ưu tiên được gán cho mỗi thread. Trong macOS và các hệ thống tương tự Unix, việc này được xử lý bằng các khái niệm như `nice`, `renice` và các lớp Quality of Service (QoS).
 
-#### Nice and Renice
+#### Nice và Renice
 
 1. **Nice:**
-   - The `nice` value of a process is a number that affects its priority. Every process has a nice value ranging from -20 (the highest priority) to 19 (the lowest priority). The default nice value when a process is created is typically 0.
-   - A lower nice value (closer to -20) makes a process more "selfish," giving it more CPU time compared to other processes with higher nice values.
+   - Giá trị `nice` của một process là một số ảnh hưởng đến mức ưu tiên của nó. Mỗi process có giá trị nice trong khoảng từ -20 (mức ưu tiên cao nhất) đến 19 (mức ưu tiên thấp nhất). Giá trị nice mặc định khi tạo process thường là 0.
+   - Giá trị nice thấp hơn (gần -20 hơn) khiến process “ích kỷ” hơn, giúp nó nhận được nhiều thời gian CPU hơn so với các process có giá trị nice cao hơn.
 2. **Renice:**
-   - `renice` is a command used to change the nice value of an already running process. This can be used to dynamically adjust the priority of processes, either increasing or decreasing their CPU time allocation based on new nice values.
-   - For example, if a process needs more CPU resources temporarily, you might lower its nice value using `renice`.
+   - `renice` là lệnh dùng để thay đổi giá trị nice của một process đang chạy. Lệnh này có thể được dùng để điều chỉnh linh hoạt mức ưu tiên của process, tăng hoặc giảm thời lượng CPU được cấp phát dựa trên giá trị nice mới.
+   - Ví dụ, nếu tạm thời cần thêm tài nguyên CPU cho một process, bạn có thể giảm giá trị nice của nó bằng `renice`.
 
-#### Quality of Service (QoS) Classes
+#### Các lớp Quality of Service (QoS)
 
-QoS classes are a more modern approach to handling thread priorities, particularly in systems like macOS that support **Grand Central Dispatch (GCD)**. QoS classes allow developers to **categorize** work into different levels based on their importance or urgency. macOS manages thread prioritization automatically based on these QoS classes:
+Các lớp QoS là cách tiếp cận hiện đại hơn để xử lý mức ưu tiên của thread, đặc biệt trên các hệ thống như macOS hỗ trợ **Grand Central Dispatch (GCD)**. Các lớp QoS cho phép nhà phát triển **phân loại** công việc thành nhiều mức dựa trên tầm quan trọng hoặc mức độ khẩn cấp. macOS tự động quản lý mức ưu tiên của thread dựa trên các lớp QoS này:
 
 1. **User Interactive:**
-   - This class is for tasks that are currently interacting with the user or require immediate results to provide a good user experience. These tasks are given the highest priority to keep the interface responsive (e.g., animations or event handling).
+   - Lớp này dành cho các tác vụ đang tương tác với người dùng hoặc cần trả về kết quả ngay lập tức để mang lại trải nghiệm tốt. Những tác vụ này được ưu tiên cao nhất để giao diện luôn phản hồi nhanh (ví dụ: hoạt ảnh hoặc xử lý sự kiện).
 2. **User Initiated:**
-   - Tasks that the user initiates and expects immediate results, such as opening a document or clicking a button that requires computations. These are high priority but below user interactive.
+   - Các tác vụ do người dùng khởi chạy và cần có kết quả ngay, chẳng hạn như mở tài liệu hoặc nhấp vào nút cần thực hiện tính toán. Những tác vụ này có mức ưu tiên cao, nhưng thấp hơn User Interactive.
 3. **Utility:**
-   - These tasks are long-running and typically show a progress indicator (e.g., downloading files, importing data). They are lower in priority than user-initiated tasks and do not need to finish immediately.
+   - Đây là các tác vụ chạy lâu và thường hiển thị chỉ báo tiến trình (ví dụ: tải file xuống, nhập dữ liệu). Chúng có mức ưu tiên thấp hơn các tác vụ do người dùng khởi chạy và không cần hoàn tất ngay lập tức.
 4. **Background:**
-   - This class is for tasks that operate in the background and are not visible to the user. These can be tasks like indexing, syncing, or backups. They have the lowest priority and minimal impact on system performance.
+   - Lớp này dành cho các tác vụ chạy nền và không hiển thị với người dùng. Ví dụ: lập chỉ mục, đồng bộ hoặc sao lưu. Chúng có mức ưu tiên thấp nhất và ảnh hưởng tối thiểu đến hiệu năng hệ thống.
 
-Using QoS classes, developers do not need to manage the exact priority numbers but rather focus on the nature of the task, and the system optimizes the CPU resources accordingly.
+Với các lớp QoS, nhà phát triển không cần quản lý các con số ưu tiên cụ thể mà chỉ cần tập trung vào bản chất của tác vụ; hệ thống sẽ tối ưu tài nguyên CPU tương ứng.
 
-Moreover, there are different **thread scheduling policies** that flows to specify a set of scheduling parameters that the scheduler will take into consideration. This can be done using `thread_policy_[set/get]`. This might be useful in race condition attacks.
+Ngoài ra còn có các **chính sách lập lịch thread** khác nhau, cho phép chỉ định một tập hợp tham số lập lịch mà bộ lập lịch sẽ cân nhắc. Có thể thực hiện việc này bằng `thread_policy_[set/get]`. Điều này có thể hữu ích trong các cuộc tấn công race condition.
 
-## macOS Process Abuse
+## Lạm dụng Process trên macOS
 
-macOS provides many mechanisms for **processes to interact, communicate, and share data**. Although these mechanisms are essential to normal system operation, attackers can abuse them for injection, code execution, or data access.
+macOS cung cấp nhiều cơ chế để **các process tương tác, giao tiếp và chia sẻ dữ liệu**. Dù những cơ chế này thiết yếu đối với hoạt động bình thường của hệ thống, attacker có thể lạm dụng chúng để injection, thực thi mã hoặc truy cập dữ liệu.
 
 ### Library Injection
 
-Library Injection is a technique wherein an attacker **forces a process to load a malicious library**. Once injected, the library runs in the context of the target process, providing the attacker with the same permissions and access as the process.
+Library Injection là kỹ thuật trong đó attacker **buộc một process tải một thư viện độc hại**. Sau khi được inject, thư viện chạy trong context của process mục tiêu, giúp attacker có cùng quyền hạn và quyền truy cập như process đó.
 
 
 {{#ref}}
@@ -164,33 +164,33 @@ reflective-mach-o-loading.md
 
 ### Function Hooking
 
-Function Hooking involves **intercepting function calls** or messages within a software code. By hooking functions, an attacker can **modify the behavior** of a process, observe sensitive data, or even gain control over the execution flow.
+Function Hooking là việc **chặn các lời gọi hàm** hoặc thông điệp bên trong mã phần mềm. Bằng cách hook các hàm, attacker có thể **thay đổi hành vi** của process, quan sát dữ liệu nhạy cảm hoặc thậm chí kiểm soát luồng thực thi.
 
 
 {{#ref}}
 macos-function-hooking.md
 {{#endref}}
 
-### ARM64/ARM64e Call-Stack Spoofing
+### Giả mạo Call Stack ARM64/ARM64e
 
-This page covers ARM64 unwind metadata, arm64e PAC constraints, and synthetic call chains.
+Trang này đề cập đến metadata unwind của ARM64, các ràng buộc PAC của arm64e và các chuỗi lời gọi tổng hợp.
 
 {{#ref}}
 arm64-arm64e-call-stack-spoofing.md
 {{#endref}}
 
-### Inter Process Communication
+### Giao tiếp liên process
 
-Inter Process Communication (IPC) refers to different methods by which separate processes **share and exchange data**. While IPC is fundamental for many legitimate applications, it can also be misused to subvert process isolation, leak sensitive information, or perform unauthorized actions.
+Inter Process Communication (IPC) là các phương thức khác nhau để những process riêng biệt **chia sẻ và trao đổi dữ liệu**. Dù IPC là nền tảng của nhiều ứng dụng hợp pháp, nó cũng có thể bị lạm dụng để phá vỡ sự cô lập giữa các process, leak thông tin nhạy cảm hoặc thực hiện các hành động trái phép.
 
 
 {{#ref}}
 macos-ipc-inter-process-communication/
 {{#endref}}
 
-### Electron Applications Injection
+### Injection ứng dụng Electron
 
-Electron applications executed with specific env variables could be vulnerable to process injection:
+Các ứng dụng Electron chạy với một số biến môi trường nhất định có thể dễ bị process injection:
 
 
 {{#ref}}
@@ -199,7 +199,7 @@ macos-electron-applications-injection.md
 
 ### Chromium Injection
 
-It's possible to use the flags `--load-extension` and `--use-fake-ui-for-media-stream` to perform a **man in the browser attack** allowing to steal keystrokes, traffic, cookies, inject scripts in pages...:
+Có thể sử dụng các flag `--load-extension` và `--use-fake-ui-for-media-stream` để thực hiện **man in the browser attack**, cho phép đánh cắp thao tác gõ phím, traffic, cookie, inject script vào trang...:
 
 
 {{#ref}}
@@ -208,16 +208,16 @@ macos-chromium-injection.md
 
 ### Dirty NIB
 
-NIB files **define user interface (UI) elements** and their interactions within an application. However, they can **execute arbitrary commands** and **Gatekeeper doesn't stop** an already executed application from being executed if a **NIB file is modified**. Therefore, they could be used to make arbitrary programs execute arbitrary commands:
+Các file NIB **định nghĩa các thành phần giao diện người dùng (UI)** và cách chúng tương tác trong một ứng dụng. Tuy nhiên, chúng có thể **thực thi các lệnh tùy ý** và **Gatekeeper không ngăn** một ứng dụng đã được thực thi chạy lại nếu **file NIB bị sửa đổi**. Vì vậy, chúng có thể được dùng để khiến các chương trình tùy ý thực thi lệnh tùy ý:
 
 
 {{#ref}}
 macos-dirty-nib.md
 {{#endref}}
 
-### Java Applications Injection
+### Injection ứng dụng Java
 
-It's possible to inject JVM options through **`_JAVA_OPTIONS`**, **`JAVA_TOOL_OPTIONS`**, or **`JDK_JAVA_OPTIONS`** and load a Java or native agent before the application starts.
+Có thể inject tùy chọn JVM thông qua **`_JAVA_OPTIONS`**, **`JAVA_TOOL_OPTIONS`** hoặc **`JDK_JAVA_OPTIONS`**, rồi tải Java agent hoặc native agent trước khi ứng dụng khởi chạy.
 
 
 {{#ref}}
@@ -226,7 +226,7 @@ macos-java-apps-injection.md
 
 ### Node.js Injection
 
-**`NODE_OPTIONS`** preloads attacker JavaScript via `--require` (file) or `--import data:text/javascript,…` (fileless, Node ≥ 20.6); **`NODE_REPL_EXTERNAL_MODULE`** loads a module into an interactive REPL, and **`ELECTRON_RUN_AS_NODE`** re-enables all of this on Electron binaries.
+**`NODE_OPTIONS`** preload JavaScript của attacker qua `--require` (file) hoặc `--import data:text/javascript,…` (không cần file, Node ≥ 20.6); **`NODE_REPL_EXTERNAL_MODULE`** tải một module vào REPL tương tác, còn **`ELECTRON_RUN_AS_NODE`** kích hoạt lại toàn bộ các cơ chế này trên binary Electron.
 
 {{#ref}}
 macos-nodejs-applications-injection.md
@@ -234,7 +234,7 @@ macos-nodejs-applications-injection.md
 
 ### .Net Applications Injection
 
-It's possible to inject code into .NET applications through **`DOTNET_STARTUP_HOOKS`** before `Main`, or by abusing the .NET debugging functionality when its prerequisites are present.
+Có thể inject mã vào ứng dụng .NET thông qua **`DOTNET_STARTUP_HOOKS`** trước `Main`, hoặc lạm dụng chức năng debugging của .NET khi đáp ứng các điều kiện cần thiết.
 
 
 {{#ref}}
@@ -243,21 +243,21 @@ macos-.net-applications-injection.md
 
 ### Shell Injection
 
-Non-interactive Bash reads **`BASH_ENV`**; interactive POSIX shells read **`ENV`**; zsh reads **`$ZDOTDIR/.zshenv`**; and fish reads configuration below **`XDG_CONFIG_HOME`** or **`XDG_DATA_DIRS`**. Each can execute a controlled startup file before the intended command. Bash also runs a command substitution placed in **`PS4`** whenever xtrace is enabled (e.g. inherited **`SHELLOPTS=xtrace`**):
+Bash không tương tác đọc **`BASH_ENV`**; các shell POSIX tương tác đọc **`ENV`**; zsh đọc **`$ZDOTDIR/.zshenv`**; còn fish đọc cấu hình bên dưới **`XDG_CONFIG_HOME`** hoặc **`XDG_DATA_DIRS`**. Mỗi shell đều có thể thực thi một file khởi động do attacker kiểm soát trước khi chạy lệnh dự kiến. Bash cũng chạy command substitution được đặt trong **`PS4`** mỗi khi bật xtrace (ví dụ: kế thừa **`SHELLOPTS=xtrace`**):
 
 {{#ref}}
 macos-bash-applications-injection.md
 {{#endref}}
 
-### Shell stdin command smuggling
+### Lén đưa lệnh qua stdin của Shell
 
-Starting `/bin/zsh -s` makes the shell read a program from standard input. Therefore, a downloader that copies an untrusted structured document into the child's stdin without parsing it first has turned the whole document into shell source. One observed loader fed a public iCalendar file through an anonymous pipe line by line. Calendar metadata failed as commands, but zsh continued until it reached executable lines placed after `DESCRIPTION:`. Those lines downloaded and launched the next application bundle. The carrier's expected content type and trusted hosting did not make this safe; the dangerous boundary was passing its bytes to an interpreter.<sup>[[5]](#references)</sup>
+Khởi chạy `/bin/zsh -s` khiến shell đọc chương trình từ standard input. Vì vậy, nếu một downloader sao chép tài liệu có cấu trúc không đáng tin cậy vào stdin của tiến trình con mà không phân tích trước, toàn bộ tài liệu sẽ trở thành mã nguồn shell. Một loader từng được quan sát đã truyền từng dòng của một file iCalendar công khai qua một pipe ẩn danh. Metadata lịch không chạy được như lệnh, nhưng zsh vẫn tiếp tục cho đến khi gặp các dòng thực thi được đặt sau `DESCRIPTION:`. Những dòng đó tải xuống và khởi chạy bundle ứng dụng tiếp theo. Loại nội dung dự kiến của dữ liệu và việc lưu trữ trên một dịch vụ đáng tin cậy không khiến cách làm này an toàn; ranh giới nguy hiểm nằm ở việc chuyển các byte của nó cho một interpreter.<sup>[[5]](#references)</sup>
 
-Related stages are covered in [Mach-O overlays](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md), [Gatekeeper and quarantine](../macos-security-protections/macos-gatekeeper.md), and [macOS auto-start locations](../../macos-auto-start-locations.md).
+Các giai đoạn liên quan được đề cập trong [Mach-O overlays](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md), [Gatekeeper and quarantine](../macos-security-protections/macos-gatekeeper.md) và [macOS auto-start locations](../../macos-auto-start-locations.md).
 
 ### PHP Injection
 
-**`PHPRC`** or **`PHP_INI_SCAN_DIR`** can load controlled PHP configuration whose **`auto_prepend_file`** executes before the target script.
+**`PHPRC`** hoặc **`PHP_INI_SCAN_DIR`** có thể tải cấu hình PHP do attacker kiểm soát, trong đó **`auto_prepend_file`** thực thi trước script mục tiêu.
 
 {{#ref}}
 macos-php-applications-injection.md
@@ -265,7 +265,7 @@ macos-php-applications-injection.md
 
 ### Lua Injection
 
-The standalone Lua interpreter executes code or an `@file` from **`LUA_INIT`** (or its version-specific variant) before processing the target script.
+Trình thông dịch Lua độc lập thực thi mã hoặc một `@file` từ **`LUA_INIT`** (hoặc biến thể dành riêng cho phiên bản) trước khi xử lý script mục tiêu.
 
 {{#ref}}
 macos-lua-applications-injection.md
@@ -273,7 +273,7 @@ macos-lua-applications-injection.md
 
 ### R Injection
 
-**`R_PROFILE_USER`** and **`R_PROFILE`** redirect startup profiles containing R code. **`R_DEFAULT_PACKAGES`** / **`R_SCRIPT_DEFAULT_PACKAGES`** plus an R library path can instead auto-load an installed package.
+**`R_PROFILE_USER`** và **`R_PROFILE`** chuyển hướng đến các profile khởi động chứa mã R. Ngoài ra, **`R_DEFAULT_PACKAGES`** / **`R_SCRIPT_DEFAULT_PACKAGES`** kết hợp với đường dẫn thư viện R có thể tự động tải một package đã cài đặt.
 
 {{#ref}}
 macos-r-applications-injection.md
@@ -281,7 +281,7 @@ macos-r-applications-injection.md
 
 ### Julia Injection
 
-**`JULIA_DEPOT_PATH`** redirects the depot whose `config/startup.jl` is automatically executed.
+**`JULIA_DEPOT_PATH`** chuyển hướng đến depot có `config/startup.jl` được tự động thực thi.
 
 {{#ref}}
 macos-julia-applications-injection.md
@@ -289,7 +289,7 @@ macos-julia-applications-injection.md
 
 ### Erlang and Elixir Injection
 
-**`ERL_AFLAGS`**, **`ERL_FLAGS`**, or **`ERL_ZFLAGS`** can inject an Erlang VM **`-eval`** expression without requiring a payload file; Elixir workloads commonly start the same VM.
+**`ERL_AFLAGS`**, **`ERL_FLAGS`** hoặc **`ERL_ZFLAGS`** có thể inject biểu thức Erlang VM **`-eval`** mà không cần file payload; các workload Elixir thường khởi chạy cùng VM đó.
 
 {{#ref}}
 macos-erlang-elixir-applications-injection.md
@@ -297,7 +297,7 @@ macos-erlang-elixir-applications-injection.md
 
 ### GNU Octave Injection
 
-**`OCTAVE_SITE_INITFILE`** and **`OCTAVE_VERSION_INITFILE`** redirect Octave startup scripts.
+**`OCTAVE_SITE_INITFILE`** và **`OCTAVE_VERSION_INITFILE`** chuyển hướng đến các script khởi động của Octave.
 
 {{#ref}}
 macos-octave-applications-injection.md
@@ -305,7 +305,7 @@ macos-octave-applications-injection.md
 
 ### PowerShell Injection
 
-`pwsh` is a cross-platform .NET app, so several environment variables give pre-command execution: **`XDG_CONFIG_HOME`** redirects the profile scripts that run at startup, **`PSModulePath`** hijacks module auto-loading (a planted `.psm1` runs at import time and can shadow built-in cmdlets), and the .NET **`CORECLR_PROFILER`**/**`COR_PROFILER`** and **`DOTNET_STARTUP_HOOKS`** variables load attacker code into the process before `Main`.
+`pwsh` là ứng dụng .NET đa nền tảng, vì vậy một số biến môi trường có thể thực thi mã trước lệnh: **`XDG_CONFIG_HOME`** chuyển hướng đến các script profile chạy lúc khởi động, **`PSModulePath`** chiếm quyền tự động tải module (một file `.psm1` được cài cắm sẽ chạy khi import và có thể che khuất các cmdlet tích hợp sẵn), còn các biến .NET **`CORECLR_PROFILER`**/**`COR_PROFILER`** và **`DOTNET_STARTUP_HOOKS`** tải mã của attacker vào process trước `Main`.
 
 {{#ref}}
 macos-powershell-applications-injection.md
@@ -313,7 +313,7 @@ macos-powershell-applications-injection.md
 
 ### Perl Injection
 
-Check different options to make a Perl script execute arbitrary code in:
+Tìm hiểu các tùy chọn khác nhau để khiến một script Perl thực thi mã tùy ý:
 
 
 {{#ref}}
@@ -322,7 +322,7 @@ macos-perl-applications-injection.md
 
 ### Ruby Injection
 
-It's also possible to abuse ruby env variables (**`RUBYOPT`**, **`RUBYLIB`**) to make arbitrary scripts execute arbitrary code:
+Cũng có thể lạm dụng các biến môi trường của Ruby (**`RUBYOPT`**, **`RUBYLIB`**) để khiến các script tùy ý thực thi mã tùy ý:
 
 
 {{#ref}}
@@ -331,9 +331,9 @@ macos-ruby-applications-injection.md
 
 ### Python Injection
 
-The **`PYTHONWARNINGS`** and **`BROWSER`** standard-library chain can execute a command during warning-filter parsing. A file-backed alternative places `sitecustomize.py` on **`PYTHONPATH`** so normal `site` initialization imports it before the target script. **`PYTHONBREAKPOINT`** runs a chosen callable/module when the code reaches `breakpoint()`. Interactive-only variables such as **`PYTHONSTARTUP`** have narrower applicability.
+Chuỗi **`PYTHONWARNINGS`** và **`BROWSER`** thuộc standard library có thể thực thi một lệnh trong quá trình phân tích bộ lọc cảnh báo. Một lựa chọn khác dựa trên file là đặt `sitecustomize.py` trong **`PYTHONPATH`** để quá trình khởi tạo `site` thông thường import file này trước script mục tiêu. **`PYTHONBREAKPOINT`** chạy callable/module được chọn khi mã gọi đến `breakpoint()`. Các biến chỉ dành cho chế độ tương tác như **`PYTHONSTARTUP`** có phạm vi áp dụng hẹp hơn.
 
-Note that executables compiled with **`pyinstaller`** won't use these environmental variables even if they are running using an embedded python.
+Lưu ý rằng các executable được biên dịch bằng **`pyinstaller`** sẽ không sử dụng những biến môi trường này, ngay cả khi chúng đang chạy bằng Python nhúng.
 
 {{#ref}}
 macos-python-applications-injection.md
@@ -341,38 +341,38 @@ macos-python-applications-injection.md
 
 ### Vim/Neovim Injection
 
-**`VIMINIT`** (and its `EXINIT` fallback) are executed as Ex commands on a normal startup, so `:!cmd` / `:call system(...)` yield code execution when a victim opens Vim/Neovim with a controlled environment:
+**`VIMINIT`** (và biến dự phòng `EXINIT`) được thực thi dưới dạng lệnh Ex khi khởi động thông thường, vì vậy `:!cmd` / `:call system(...)` có thể thực thi mã khi nạn nhân mở Vim/Neovim với môi trường do attacker kiểm soát:
 
 {{#ref}}
 macos-vim-applications-injection.md
 {{#endref}}
 
-Separately, Homebrew commonly installs Python below `/opt/homebrew`, where members of the local `admin` group may be able to replace the launcher. That is a writable-binary hijack rather than environment-variable injection; verify ownership and ACLs before treating it as exploitable.
+Ngoài ra, Homebrew thường cài Python bên dưới `/opt/homebrew`, nơi các thành viên trong nhóm `admin` cục bộ có thể thay thế launcher. Đây là một kiểu chiếm quyền binary có thể ghi được, chứ không phải injection qua biến môi trường; hãy xác minh quyền sở hữu và ACL trước khi xem đây là lỗ hổng có thể khai thác.
 
 
-## Detection
+## Phát hiện
 
 ### Shield
 
-[**Shield**](https://github.com/theevilbit/Shield) is an open-source **EndpointSecurity**-based application that detects and blocks process injection. It is a good reference for which signals are observable through Endpoint Security, since it alerts on:<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
+[**Shield**](https://github.com/theevilbit/Shield) là ứng dụng mã nguồn mở dựa trên **EndpointSecurity**, có khả năng phát hiện và chặn process injection. Đây là tài liệu tham khảo hữu ích về những tín hiệu có thể quan sát qua Endpoint Security, vì ứng dụng cảnh báo khi phát hiện:<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
-- **Injection environment variables** on process exec: `DYLD_INSERT_LIBRARIES`, `CFNETWORK_LIBRARY_PATH`, `RAWCAMERA_BUNDLE_PATH` and `ELECTRON_RUN_AS_NODE`.
-- **`task_for_pid`** calls — one process asking for another's task port, which is the prerequisite for injecting into it.
-- **Electron debugging arguments** — `--inspect`, `--inspect-brk` and `--remote-debugging-port`, which start an Electron app in debug mode and let anyone attach and run code in it.<sup>[[3]](#references)</sup>
-- **Symlink/hardlink creation across privilege levels** — the classic "plant a link as a normal user, point it at a privileged location" primitive. Note that **symlinks can be alerted on but not blocked**: EndpointSecurity does not expose the link destination before creation.
+- **Các biến môi trường injection** khi process thực thi: `DYLD_INSERT_LIBRARIES`, `CFNETWORK_LIBRARY_PATH`, `RAWCAMERA_BUNDLE_PATH` và `ELECTRON_RUN_AS_NODE`.
+- Các lệnh gọi **`task_for_pid`** — một process yêu cầu task port của process khác; đây là điều kiện tiên quyết để inject vào process đó.
+- **Các đối số debugging của Electron** — `--inspect`, `--inspect-brk` và `--remote-debugging-port`, dùng để khởi chạy ứng dụng Electron ở chế độ debug, cho phép bất kỳ ai attach vào và chạy mã trong đó.<sup>[[3]](#references)</sup>
+- **Tạo symlink/hardlink giữa các mức quyền** — primitive kinh điển “tạo link với tư cách người dùng thường rồi trỏ link đến một vị trí có đặc quyền”. Lưu ý rằng **có thể cảnh báo về symlink nhưng không thể chặn**: EndpointSecurity không cung cấp đích của link trước khi nó được tạo.
 
-### Calls made by other processes
+### Các lệnh gọi do process khác thực hiện
 
-In [**this blog post**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) you can find how it's possible to use the function **`task_name_for_pid`** to get information about other **processes injecting code in a process** and then getting information about that other process.<sup>[[4]](#references)</sup>
+Trong [**bài blog này**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html), bạn có thể tìm hiểu cách sử dụng hàm **`task_name_for_pid`** để lấy thông tin về các **process đang inject mã vào một process**, rồi lấy thông tin về process kia.<sup>[[4]](#references)</sup>
 
-Note that to call that function you need to be **the same uid** as the one running the process or **root** (and it returns info about the process, not a way to inject code).
+Lưu ý rằng để gọi hàm này, bạn phải có **cùng uid** với uid đang chạy process hoặc là **root** (hàm này trả về thông tin về process, chứ không cung cấp cách inject mã).
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## References
 
-- [1] [Shield — open source macOS process-injection detection (GitHub)](https://github.com/theevilbit/Shield)
-- [2] [Apple Developer — EndpointSecurity framework](https://developer.apple.com/documentation/endpointsecurity)
-- [3] [Metnew - Why Electron apps can't store your secrets confidentially: --inspect option](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
-- [4] [Scott Knight - Detecting task modifications](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html)
-- [5] [Kaspersky Securelist - A new version of the MacSync macOS stealer targets crypto enthusiasts and developers](https://securelist.com/macsync-new-version/121383/)
+- [1] [Shield — phát hiện process injection trên macOS mã nguồn mở (GitHub)](https://github.com/theevilbit/Shield)
+- [2] [Apple Developer — framework EndpointSecurity](https://developer.apple.com/documentation/endpointsecurity)
+- [3] [Metnew - Vì sao ứng dụng Electron không thể lưu giữ bí mật của bạn một cách an toàn: tùy chọn --inspect](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
+- [4] [Scott Knight - Phát hiện các sửa đổi task](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html)
+- [5] [Kaspersky Securelist - Phiên bản mới của malware đánh cắp thông tin MacSync trên macOS nhắm vào những người đam mê tiền mã hóa và nhà phát triển](https://securelist.com/macsync-new-version/121383/)

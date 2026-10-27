@@ -1,43 +1,42 @@
-# macOS Serial Number
+# Số sê-ri macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Thông tin cơ bản
 
-Do not assume that every Mac has a decodable 12-character serial number. Apple's older format encoded manufacturing and configuration information, but Apple began introducing randomized serial numbers with new products in 2021. The randomized format does not expose manufacturing or configuration details.<sup>[[1]](#references)</sup>
+Đừng mặc định rằng mọi máy Mac đều có số sê-ri 12 ký tự có thể giải mã. Định dạng cũ của Apple mã hóa thông tin sản xuất và cấu hình, nhưng Apple bắt đầu giới thiệu số sê-ri ngẫu nhiên trên các sản phẩm mới vào năm 2021. Định dạng ngẫu nhiên không tiết lộ thông tin sản xuất hoặc cấu hình.<sup>[[1]](#references)</sup>
 
-### Legacy 12-character format
+### Định dạng cũ gồm 12 ký tự
 
-For many devices manufactured from 2010 until the randomized transition, the 12-character format can still provide useful inventory clues:<sup>[[3]](#references)</sup>
+Với nhiều thiết bị được sản xuất từ năm 2010 cho đến khi chuyển sang định dạng ngẫu nhiên, định dạng 12 ký tự vẫn có thể cung cấp các manh mối hữu ích để kiểm kê:<sup>[[3]](#references)</sup>
 
-- Characters 1–3 identify the manufacturing location.
-- Characters 4–5 encode the production half-year and week.
-- Characters 6–8 distinguish units produced at the same location and time.
-- Characters 9–12 identify the model or configuration code.
+- Ký tự 1–3 xác định địa điểm sản xuất.
+- Ký tự 4–5 mã hóa nửa năm và tuần sản xuất.
+- Ký tự 6–8 phân biệt các thiết bị được sản xuất tại cùng địa điểm và thời điểm.
+- Ký tự 9–12 xác định mã kiểu máy hoặc cấu hình.
 
-For example, `C02L13ECF8J2` follows this legacy structure. Community-maintained factory mappings include prefixes such as `FC`, `F`, `XA`, `XB`, `QP`, and `G8` for United States locations; `RN` for Mexico; `CK` for Cork; `VM` for a Foxconn location in the Czech Republic; `SG` or `E` for Singapore; `MB` for Malaysia; `PT` or `CY` for Korea; and `EE`, `QT`, or `UV` for Taiwan. Numerous prefixes—including `FK`, `F1`, `F2`, `W8`, `DL`, `DM`, `DN`, `YM`, `7J`, `1C`, `4H`, `WQ`, `F7`, `C0`, `C3`, and `C7`—have been associated with Chinese facilities; `RM` has been associated with refurbished devices.<sup>[[3]](#references)</sup>
+Ví dụ: `C02L13ECF8J2` tuân theo cấu trúc cũ này. Các bảng tra cứu nhà máy do cộng đồng duy trì ghi nhận những tiền tố như `FC`, `F`, `XA`, `XB`, `QP` và `G8` cho các địa điểm tại Hoa Kỳ; `RN` cho Mexico; `CK` cho Cork; `VM` cho một địa điểm của Foxconn tại Cộng hòa Séc; `SG` hoặc `E` cho Singapore; `MB` cho Malaysia; `PT` hoặc `CY` cho Hàn Quốc; và `EE`, `QT` hoặc `UV` cho Đài Loan. Nhiều tiền tố, bao gồm `FK`, `F1`, `F2`, `W8`, `DL`, `DM`, `DN`, `YM`, `7J`, `1C`, `4H`, `WQ`, `F7`, `C0`, `C3` và `C7`, được cho là liên quan đến các cơ sở ở Trung Quốc; `RM` được cho là liên quan đến thiết bị tân trang.<sup>[[3]](#references)</sup>
 
-The fourth-character date codes run from `C` (first half of 2010) through `Z` (second half of 2019), with the sequence reused afterward. For the fifth character, digits `1`–`9` represent weeks 1–9, while letters `C`–`Y` excluding vowels and `S` represent weeks 10–27; add 26 when the fourth character denotes the second half of a year.<sup>[[3]](#references)</sup>
+Mã ngày ở ký tự thứ tư chạy từ `C` (nửa đầu năm 2010) đến `Z` (nửa cuối năm 2019), sau đó chuỗi này được sử dụng lại. Với ký tự thứ năm, các chữ số `1`–`9` đại diện cho tuần 1–9, còn các chữ cái `C`–`Y`, ngoại trừ nguyên âm và `S`, đại diện cho tuần 10–27; cộng thêm 26 nếu ký tự thứ tư biểu thị nửa cuối năm.<sup>[[3]](#references)</sup>
 
-These mappings are useful for legacy triage but are not authoritative proof of origin, age, or authenticity. Confirm the result through Apple's inventory data.
+Các bảng tra cứu này hữu ích khi phân loại sơ bộ thiết bị cũ, nhưng không phải bằng chứng xác thực về nguồn gốc, tuổi đời hoặc tính chính hãng. Hãy xác nhận kết quả bằng dữ liệu kiểm kê của Apple.
 
-For reliable identification, retrieve the serial number from the device and use Apple's coverage or technical-specification lookup instead of trying to infer the model from character positions.<sup>[[2]](#references)</sup>
+Để nhận diện đáng tin cậy, hãy lấy số sê-ri từ thiết bị và dùng công cụ tra cứu phạm vi bảo hành hoặc thông số kỹ thuật của Apple, thay vì suy đoán kiểu máy từ vị trí các ký tự.<sup>[[2]](#references)</sup>
 
-### Retrieve the serial number
+### Lấy số sê-ri
 
-The graphical interface displays it under **Apple menu > About This Mac**.<sup>[[2]](#references)</sup> From a shell, either of the following commands reads the platform serial number:
+Giao diện đồ họa hiển thị số sê-ri trong **menu Apple > Giới thiệu về máy Mac này**.<sup>[[2]](#references)</sup> Từ shell, một trong hai lệnh sau sẽ đọc số sê-ri của nền tảng:
 
 ```bash
 system_profiler SPHardwareDataType | awk -F ': ' '/Serial Number/ {print $2}'
 ioreg -rd1 -c IOPlatformExpertDevice | awk -F '"' '/IOPlatformSerialNumber/ {print $4}'
 ```
 
-Treat a serial number as an identifier, not an authenticator: confirm the device through the relevant Apple or MDM inventory workflow before making enrollment or ownership decisions.
+Hãy xem số sê-ri là mã định danh, không phải thông tin xác thực: xác minh thiết bị qua quy trình kiểm kê Apple hoặc MDM phù hợp trước khi quyết định đăng ký hoặc quyền sở hữu.
 
 ## References
 
-- [1] [MacRumors - Apple begins transition to randomized serial numbers](https://www.macrumors.com/2021/05/05/purple-iphone-12-randomized-serial-number/)
-- [2] [Apple Support - Find your Mac model name and serial number](https://support.apple.com/en-us/102767)
-- [3] [Beetstech - Decode the meaning behind an Apple serial number](https://beetstech.com/blog/decode-meaning-behind-apple-serial-number)
-
+- [1] [MacRumors - Apple bắt đầu chuyển sang số sê-ri ngẫu nhiên](https://www.macrumors.com/2021/05/05/purple-iphone-12-randomized-serial-number/)
+- [2] [Apple Support - Tìm tên kiểu máy và số sê-ri của máy Mac](https://support.apple.com/en-us/102767)
+- [3] [Beetstech - Giải mã ý nghĩa của số sê-ri Apple](https://beetstech.com/blog/decode-meaning-behind-apple-serial-number)
 {{#include ../../../banners/hacktricks-training.md}}

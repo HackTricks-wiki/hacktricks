@@ -2,11 +2,11 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This is a summary of the post [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). Check it for further details!**<sup>[[1]](#references)</sup>
+**Đây là bản tóm tắt bài viết [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). Hãy xem bài viết để biết thêm chi tiết!**<sup>[[1]](#references)</sup>
 
 ## `DOTNET_STARTUP_HOOKS`
 
-.NET Core 3.0 and later support the `DOTNET_STARTUP_HOOKS` environment variable. Each path must identify a managed assembly containing a global `StartupHook` type with a `public static void Initialize()` method. The host loads the assemblies and calls their initializers synchronously before the application's `Main` entry point, giving environment control plus a readable DLL a direct pre-main code-execution primitive.<sup>[[2]](#references)</sup>
+.NET Core 3.0 trở lên hỗ trợ biến môi trường `DOTNET_STARTUP_HOOKS`. Mỗi đường dẫn phải trỏ đến một managed assembly có kiểu `StartupHook` toàn cục với phương thức `public static void Initialize()`. Host tải các assembly này và gọi các hàm khởi tạo một cách đồng bộ trước điểm vào `Main` của ứng dụng, tạo ra một primitive thực thi mã trước `Main` khi kiểm soát được môi trường và có một DLL đọc được.<sup>[[2]](#references)</sup>
 
 ```csharp
 // StartupHook.cs — compile as a class-library assembly.
@@ -30,19 +30,19 @@ DOTNET_STARTUP_HOOKS="$PWD/StartupHookPayload/bin/Release/net8.0/StartupHookPayl
   dotnet /path/to/TargetApplication.dll
 ```
 
-The hook assembly must be compatible with the application's runtime and dependencies. Relative paths containing directory separators are rejected; use an absolute path or an assembly name resolvable from the default load context. Startup hooks are disabled by default in trimmed applications, and custom native hosts may supply runtime properties directly instead of inheriting the environment.<sup>[[2]](#references)</sup>
+Assembly hook phải tương thích với runtime và các dependency của ứng dụng. Các đường dẫn tương đối có chứa dấu phân cách thư mục sẽ bị từ chối; hãy dùng đường dẫn tuyệt đối hoặc tên assembly có thể phân giải từ load context mặc định. Startup hooks bị tắt theo mặc định trong các ứng dụng đã trim, và các native host tùy chỉnh có thể cung cấp trực tiếp các thuộc tính runtime thay vì kế thừa từ môi trường.<sup>[[2]](#references)</sup>
 
-Defensive launchers should clear `DOTNET_STARTUP_HOOKS`, prevent untrusted writes to application and shared assembly paths, and test self-contained and trimmed deployments separately.
+Các launcher phòng thủ nên xóa `DOTNET_STARTUP_HOOKS`, ngăn chặn việc ghi trái phép vào các đường dẫn assembly của ứng dụng và assembly dùng chung, đồng thời kiểm thử riêng các bản triển khai self-contained và đã trim.
 
-## .NET Core Debugging <a href="#net-core-debugging" id="net-core-debugging"></a>
+## Gỡ lỗi .NET Core <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-### **Establishing a Debugging Session** <a href="#net-core-debugging" id="net-core-debugging"></a>
+### **Thiết lập phiên gỡ lỗi** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-The handling of communication between debugger and debuggee in .NET is managed by [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). This component sets up two named pipes per .NET process as seen in [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), which are initiated via [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). These pipes are suffixed with **`-in`** and **`-out`**.
+Việc xử lý giao tiếp giữa debugger và debuggee trong .NET do [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp) quản lý. Thành phần này thiết lập hai named pipe cho mỗi tiến trình .NET như trong [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127); các pipe này được khởi tạo thông qua [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). Tên các pipe này có hậu tố **`-in`** và **`-out`**.
 
-By visiting the user's **`$TMPDIR`**, one can find debugging FIFOs available for debugging .Net applications.
+Truy cập **`$TMPDIR`** của người dùng để tìm các FIFO gỡ lỗi có sẵn cho việc gỡ lỗi ứng dụng .Net.
 
-[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) is responsible for managing communication from a debugger. To initiate a new debugging session, a debugger must send a message via the `out` pipe starting with a `MessageHeader` struct, detailed in the .NET source code:
+[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) chịu trách nhiệm quản lý giao tiếp từ debugger. Để bắt đầu một phiên gỡ lỗi mới, debugger phải gửi một thông điệp qua pipe `out`, bắt đầu bằng một struct `MessageHeader`, được mô tả trong mã nguồn .NET:
 
 ```c
 struct MessageHeader {
@@ -63,7 +63,7 @@ struct MessageHeader {
 }
 ```
 
-To request a new session, this struct is populated as follows, setting the message type to `MT_SessionRequest` and the protocol version to the current version:
+Để yêu cầu một phiên mới, struct này được điền như sau, với loại thông điệp được đặt thành `MT_SessionRequest` và phiên bản giao thức được đặt thành phiên bản hiện tại:
 
 ```c
 static const DWORD kCurrentMajorVersion = 2;
@@ -76,7 +76,7 @@ sSendHeader.TypeSpecificData.VersionInfo.m_dwMinorVersion = kCurrentMinorVersion
 sSendHeader.m_cbDataBlock = sizeof(SessionRequestData);
 ```
 
-This header is then sent over to the target using the `write` syscall, followed by the `sessionRequestData` struct containing a GUID for the session:
+Header này sau đó được gửi đến mục tiêu bằng syscall `write`, tiếp theo là struct `sessionRequestData` chứa GUID của phiên:
 
 ```c
 write(wr, &sSendHeader, sizeof(MessageHeader));
@@ -84,15 +84,15 @@ memset(&sDataBlock.m_sSessionID, 9, sizeof(SessionRequestData));
 write(wr, &sDataBlock, sizeof(SessionRequestData));
 ```
 
-A read operation on the `out` pipe confirms the success or failure of the debugging session establishment:
+Thao tác đọc trên pipe `out` xác nhận việc thiết lập phiên gỡ lỗi thành công hay thất bại:
 
 ```c
 read(rd, &sReceiveHeader, sizeof(MessageHeader));
 ```
 
-## Reading Memory
+## Đọc bộ nhớ
 
-Once a debugging session is established, memory can be read using the [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896) message type. The function readMemory is detailed, performing the necessary steps to send a read request and retrieve the response:
+Sau khi thiết lập phiên gỡ lỗi, có thể đọc bộ nhớ bằng loại thông điệp [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896). Hàm readMemory được trình bày chi tiết, thực hiện các bước cần thiết để gửi yêu cầu đọc và nhận phản hồi:
 
 ```c
 bool readMemory(void *addr, int len, unsigned char **output) {
@@ -106,11 +106,11 @@ return true;
 }
 ```
 
-The complete proof of concept (POC) is available [here](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b).
+Bản proof of concept (POC) đầy đủ có tại [đây](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b).
 
-## Writing Memory
+## Ghi vào bộ nhớ
 
-Similarly, memory can be written using the `writeMemory` function. The process involves setting the message type to `MT_WriteMemory`, specifying the address and length of the data, and then sending the data:
+Tương tự, có thể ghi vào bộ nhớ bằng hàm `writeMemory`. Quy trình gồm đặt loại thông điệp thành `MT_WriteMemory`, chỉ định địa chỉ và độ dài dữ liệu, rồi gửi dữ liệu:
 
 ```c
 bool writeMemory(void *addr, int len, unsigned char *input) {
@@ -124,28 +124,27 @@ return true;
 }
 ```
 
-The associated POC is available [here](https://gist.github.com/xpn/7c3040a7398808747e158a25745380a5).
+POC liên quan có tại [đây](https://gist.github.com/xpn/7c3040a7398808747e158a25745380a5).
 
-## .NET Core Code Execution <a href="#net-core-code-execution" id="net-core-code-execution"></a>
+## Thực thi mã .NET Core <a href="#net-core-code-execution" id="net-core-code-execution"></a>
 
-To execute code, one needs to identify a memory region with rwx permissions, which can be done using vmmap -pages:
+Để thực thi mã, cần xác định một vùng bộ nhớ có quyền rwx. Có thể thực hiện việc này bằng vmmap -pages:
 
 ```bash
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
 ```
 
-Locating a place to overwrite a function pointer is necessary, and in .NET Core, this can be done by targeting the **Dynamic Function Table (DFT)**. This table, detailed in [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), is used by the runtime for JIT compilation helper functions.
+Việc xác định vị trí để ghi đè function pointer là cần thiết. Trong .NET Core, có thể nhắm mục tiêu vào **Dynamic Function Table (DFT)**. Bảng này, được mô tả trong [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), được runtime sử dụng cho các hàm trợ giúp biên dịch JIT.
 
-For x64 systems, signature hunting can be used to find a reference to the symbol `_hlpDynamicFuncTable` in `libcorclr.dll`.
+Trên hệ thống x64, có thể dùng signature hunting để tìm tham chiếu đến ký hiệu `_hlpDynamicFuncTable` trong `libcorclr.dll`.
 
-The `MT_GetDCB` debugger function provides useful information, including the address of a helper function, `m_helperRemoteStartAddr`, indicating the location of `libcorclr.dll` in the process memory. This address is then used to start a search for the DFT and overwrite a function pointer with the shellcode's address.
+Hàm debugger `MT_GetDCB` cung cấp thông tin hữu ích, bao gồm địa chỉ của hàm trợ giúp `m_helperRemoteStartAddr`, cho biết vị trí của `libcorclr.dll` trong bộ nhớ của tiến trình. Sau đó, dùng địa chỉ này để bắt đầu tìm DFT và ghi đè một function pointer bằng địa chỉ của shellcode.
 
-The full POC code for injection into PowerShell is accessible [here](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
+Có thể xem toàn bộ mã POC để injection vào PowerShell [tại đây](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
 
 ## References
 
-- [1] [Adam Chester (xpnsec) - macOS Injection via Third Party Frameworks](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/)
-- [2] [.NET runtime host startup hook design](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md)
-
+- [1] [Adam Chester (xpnsec) - Injection trên macOS qua framework của bên thứ ba](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/)
+- [2] [Thiết kế host startup hook của .NET runtime](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md)
 {{#include ../../../banners/hacktricks-training.md}}

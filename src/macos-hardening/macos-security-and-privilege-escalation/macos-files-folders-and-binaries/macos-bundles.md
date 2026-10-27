@@ -2,63 +2,63 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Thông tin cơ bản
 
-Bundles in macOS serve as containers for a variety of resources including applications, libraries, and other necessary files, making them appear as single objects in Finder, such as the familiar `*.app` files. The most commonly encountered bundle is the `.app` bundle, though other types like `.framework`, `.systemextension`, and `.kext` are also prevalent.
+Các bundle trong macOS đóng vai trò là vùng chứa nhiều tài nguyên, bao gồm ứng dụng, thư viện và các tệp cần thiết khác, giúp chúng hiển thị trong Finder như một đối tượng duy nhất, chẳng hạn các tệp `*.app` quen thuộc. Bundle thường gặp nhất là `.app`, dù các loại khác như `.framework`, `.systemextension` và `.kext` cũng rất phổ biến.
 
-### Essential Components of a Bundle
+### Các thành phần thiết yếu của bundle
 
-Within a bundle, particularly within the `<application>.app/Contents/` directory, a variety of important resources are housed:
+Bên trong bundle, đặc biệt là trong thư mục `<application>.app/Contents/`, có nhiều tài nguyên quan trọng:
 
-- **\_CodeSignature**: This directory stores code-signing details vital for verifying the integrity of the application. You can inspect the code-signing information using commands like:
+- **\_CodeSignature**: Thư mục này lưu trữ thông tin ký mã cần thiết để xác minh tính toàn vẹn của ứng dụng. Bạn có thể kiểm tra thông tin ký mã bằng các lệnh như:
 ```bash
 openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64
 ```
-- **MacOS**: Contains the executable binary of the application that runs upon user interaction.
-- **Resources**: A repository for the application's user interface components including images, documents, and interface descriptions (nib/xib files).
-- **Info.plist**: Acts as the application's main configuration file, crucial for the system to recognize and interact with the application appropriately.
+- **MacOS**: Chứa binary thực thi của ứng dụng, chạy khi người dùng tương tác.
+- **Resources**: Nơi lưu trữ các thành phần giao diện người dùng của ứng dụng, bao gồm hình ảnh, tài liệu và mô tả giao diện (tệp nib/xib).
+- **Info.plist**: Đóng vai trò là tệp cấu hình chính của ứng dụng, rất quan trọng để hệ thống nhận diện và tương tác với ứng dụng một cách phù hợp.
 
-#### Important Keys in Info.plist
+#### Các khóa quan trọng trong Info.plist
 
-The `Info.plist` file is a cornerstone for application configuration, containing keys such as:
+Tệp `Info.plist` là nền tảng trong việc cấu hình ứng dụng, chứa các khóa như:
 
-- **CFBundleExecutable**: Specifies the name of the main executable file located in the `Contents/MacOS` directory.
-- **CFBundleIdentifier**: Provides a global identifier for the application, used extensively by macOS for application management.
-- **LSMinimumSystemVersion**: Indicates the minimum version of macOS required for the application to run.
+- **CFBundleExecutable**: Chỉ định tên của tệp thực thi chính nằm trong thư mục `Contents/MacOS`.
+- **CFBundleIdentifier**: Cung cấp mã định danh toàn cục cho ứng dụng, được macOS sử dụng rộng rãi để quản lý ứng dụng.
+- **LSMinimumSystemVersion**: Cho biết phiên bản macOS tối thiểu cần có để chạy ứng dụng.
 
-### Exploring Bundles
+### Khám phá Bundles
 
-To explore the contents of a bundle, such as `Safari.app`, the following command can be used: `bash ls -lR /Applications/Safari.app/Contents`
+Để khám phá nội dung của một bundle, chẳng hạn như `Safari.app`, có thể dùng lệnh sau: `bash ls -lR /Applications/Safari.app/Contents`
 
-This exploration reveals directories like `_CodeSignature`, `MacOS`, `Resources`, and files like `Info.plist`, each serving a unique purpose from securing the application to defining its user interface and operational parameters.
+Việc khám phá này cho thấy các thư mục như `_CodeSignature`, `MacOS`, `Resources` và các tệp như `Info.plist`. Mỗi thành phần có mục đích riêng, từ bảo vệ ứng dụng đến định nghĩa giao diện người dùng và các tham số vận hành.
 
-#### Additional Bundle Directories
+#### Các thư mục bổ sung trong Bundle
 
-Beyond the common directories, bundles may also include:
+Ngoài các thư mục phổ biến, bundle cũng có thể chứa:
 
-- **Frameworks**: Contains bundled frameworks used by the application. Frameworks are like dylibs with extra resources.
-- **PlugIns**: A directory for plug-ins and extensions that enhance the application's capabilities.
-- **XPCServices**: Holds XPC services used by the application for out-of-process communication.
+- **Frameworks**: Chứa các framework đi kèm mà ứng dụng sử dụng. Framework tương tự dylib nhưng có thêm tài nguyên.
+- **PlugIns**: Thư mục chứa các plug-in và extension giúp tăng cường khả năng của ứng dụng.
+- **XPCServices**: Chứa các dịch vụ XPC mà ứng dụng sử dụng để giao tiếp ngoài tiến trình.
 
-This structure ensures that all necessary components are encapsulated within the bundle, facilitating a modular and secure application environment.
+Cấu trúc này đảm bảo tất cả thành phần cần thiết được đóng gói trong bundle, tạo nên môi trường ứng dụng dạng module và an toàn.
 
-For more detailed information on `Info.plist` keys and their meanings, the Apple developer documentation provides extensive resources: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).<sup>[[3]](#references)</sup>
+Để biết thêm chi tiết về các khóa `Info.plist` và ý nghĩa của chúng, tài liệu dành cho nhà phát triển của Apple cung cấp nhiều thông tin: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).<sup>[[3]](#references)</sup>
 
-## Security Notes & Abuse Vectors
+## Ghi chú bảo mật & vector lạm dụng
 
-- **Gatekeeper / App Translocation**: When a quarantined bundle is first executed, macOS performs a deep signature verification and may run it from a randomized translocated path. Once accepted, later launches only perform shallow checks; resource files in `Resources/`, `PlugIns/`, nibs, etc., were historically unchecked. Since macOS 13 Ventura a deep check is enforced on first run and the new *App Management* TCC permission restricts third‑party processes from modifying other bundles without user consent, but older systems remain vulnerable.
-- **Bundle Identifier collisions**: Multiple embedded targets (PlugIns, helper tools) reusing the same `CFBundleIdentifier` can break signature validation and occasionally enable URL‑scheme hijacking/confusion. Always enumerate sub‑bundles and verify unique IDs.
+- **Gatekeeper / App Translocation**: Khi bundle bị quarantine được thực thi lần đầu, macOS sẽ xác minh chữ ký chuyên sâu và có thể chạy ứng dụng từ một đường dẫn translocation ngẫu nhiên. Sau khi được chấp nhận, những lần khởi chạy sau chỉ thực hiện kiểm tra sơ bộ; các tệp tài nguyên trong `Resources/`, `PlugIns/`, nib, v.v. trước đây không được kiểm tra. Từ macOS 13 Ventura, hệ thống bắt buộc kiểm tra chuyên sâu ở lần chạy đầu tiên và quyền TCC *App Management* mới hạn chế các tiến trình bên thứ ba sửa đổi bundle khác nếu chưa có sự đồng ý của người dùng, nhưng các hệ thống cũ vẫn dễ bị tấn công.
+- **Va chạm Bundle Identifier**: Nhiều target được nhúng (PlugIns, công cụ helper) dùng lại cùng một `CFBundleIdentifier` có thể làm hỏng việc xác thực chữ ký và đôi khi cho phép chiếm quyền/đánh lừa URL scheme. Luôn liệt kê các sub-bundle và xác minh ID là duy nhất.
 
 ## Resource Hijacking (Dirty NIB / NIB Injection)
 
-Before Ventura, swapping UI resources in a signed app could bypass shallow code signing and yield code execution with the app’s entitlements. Current research (2024) shows this still works on pre-Ventura and on unquarantined builds:<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
+Trước Ventura, việc thay thế tài nguyên giao diện trong ứng dụng đã ký có thể vượt qua kiểm tra sơ bộ của code signing và dẫn đến thực thi mã với entitlements của ứng dụng. Nghiên cứu hiện tại (2024) cho thấy cách này vẫn hoạt động trên các hệ thống trước Ventura và các bản build không bị quarantine:<sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
-1. Copy target app to a writable location (e.g., `/tmp/Victim.app`).
-2. Replace `Contents/Resources/MainMenu.nib` (or any nib declared in `NSMainNibFile`) with a malicious one that instantiates `NSAppleScript`, `NSTask`, etc.
-3. Launch app. The malicious nib executes under the victim’s bundle ID and entitlements (TCC grants, microphone/camera, etc.).
-4. Ventura+ mitigates by deep‑verifying the bundle on first launch and requiring *App Management* permission for later modifications, so persistence is harder but initial-launch attacks on older macOS still apply.<sup>[[1]](#references)</sup>
+1. Sao chép ứng dụng mục tiêu vào vị trí có quyền ghi (ví dụ: `/tmp/Victim.app`).
+2. Thay `Contents/Resources/MainMenu.nib` (hoặc bất kỳ nib nào được khai báo trong `NSMainNibFile`) bằng nib độc hại có khởi tạo `NSAppleScript`, `NSTask`, v.v.
+3. Khởi chạy ứng dụng. Nib độc hại chạy dưới bundle ID và entitlements của nạn nhân (quyền TCC, microphone/camera, v.v.).
+4. Ventura trở lên giảm thiểu rủi ro bằng cách xác minh chuyên sâu bundle khi khởi chạy lần đầu và yêu cầu quyền *App Management* đối với các lần sửa đổi sau, khiến việc duy trì persistence khó hơn. Tuy vậy, các cuộc tấn công khi khởi chạy lần đầu trên macOS cũ vẫn có thể xảy ra.<sup>[[1]](#references)</sup>
 
-Minimal malicious nib payload example (compile xib to nib with `ibtool`):
+Ví dụ payload nib độc hại tối giản (biên dịch xib thành nib bằng `ibtool`):
 ```bash
 # create a nib that runs osascript -e 'do shell script "id"'
 # ...build xib in Xcode, then
@@ -67,11 +67,11 @@ cp MainMenu.nib /tmp/Victim.app/Contents/Resources/
 open /tmp/Victim.app
 ```
 
-## Framework / PlugIn / dylib Hijacking inside Bundles
+## Framework / PlugIn / dylib Hijacking bên trong Bundles
 
-Because `@rpath` lookups prefer bundled Frameworks/PlugIns, dropping a malicious library inside `Contents/Frameworks/` or `Contents/PlugIns/` can redirect load order when the main binary is signed without library validation or with weak `LC_RPATH` ordering.
+Vì các lượt tra cứu `@rpath` ưu tiên Frameworks/PlugIns đi kèm bundle, việc thả một thư viện độc hại vào `Contents/Frameworks/` hoặc `Contents/PlugIns/` có thể chuyển hướng thứ tự tải khi binary chính được ký mà không có library validation hoặc có thứ tự `LC_RPATH` yếu.
 
-Typical steps when abusing an unsigned/ad‑hoc bundle:
+Các bước thường gặp khi khai thác bundle unsigned/ad-hoc:
 ```bash
 cp evil.dylib /tmp/Victim.app/Contents/Frameworks/
 install_name_tool -add_rpath @executable_path/../Frameworks /tmp/Victim.app/Contents/MacOS/Victim
@@ -81,11 +81,11 @@ codesign -f -s - --timestamp=none /tmp/Victim.app/Contents/Frameworks/evil.dylib
 codesign -f -s - --deep --timestamp=none /tmp/Victim.app
 open /tmp/Victim.app
 ```
-Notes:
-- Hardened runtime with `com.apple.security.cs.disable-library-validation` absent blocks third‑party dylibs; check entitlements first.
-- XPC services under `Contents/XPCServices/` often load sibling frameworks—patch their binaries similarly for persistence or privilege escalation paths.
+Ghi chú:
+- Hardened runtime không có `com.apple.security.cs.disable-library-validation` sẽ chặn các dylib của bên thứ ba; hãy kiểm tra entitlements trước.
+- Các dịch vụ XPC trong `Contents/XPCServices/` thường tải các framework cùng thư mục — hãy vá các binary của chúng tương tự để tạo persistence hoặc khai thác các đường dẫn privilege escalation.
 
-## Quick Inspection Cheatsheet
+## Cheatsheet kiểm tra nhanh
 
 ```bash
 # list top-level bundle metadata
@@ -104,8 +104,7 @@ otool -L /Applications/App.app/Contents/MacOS/App
 
 ## References
 
-- [1] [Bringing process injection into view(s): exploiting macOS apps using nib files (2024)](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)
-- [2] [Dirty NIB & bundle resource tampering write‑up (2024)](https://karol-mazurek.medium.com/snake-apple-app-bundle-ext-f5c43a3c84c4)
-- [3] [Apple Developer - Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html)
-
+- [1] [Đưa process injection vào tầm nhìn: khai thác ứng dụng macOS bằng nib files (2024)](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)
+- [2] [Bài viết về Dirty NIB và can thiệp tài nguyên bundle (2024)](https://karol-mazurek.medium.com/snake-apple-app-bundle-ext-f5c43a3c84c4)
+- [3] [Apple Developer - Tài liệu tham khảo về khóa Apple Info.plist](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html)
 {{#include ../../../banners/hacktricks-training.md}}

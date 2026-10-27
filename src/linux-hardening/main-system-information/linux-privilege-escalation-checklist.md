@@ -1,166 +1,166 @@
-# Linux Privilege Escalation Checklist
+# Danh sách kiểm tra nâng quyền Linux
 
 {{#include ../../banners/hacktricks-training.md}}
 
-# Checklist - Linux Privilege Escalation
+# Danh sách kiểm tra - Nâng quyền Linux
 
 
 
-### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+### **Công cụ tốt nhất để tìm các vector nâng quyền cục bộ trên Linux:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
-### [System Information](../linux-basics/linux-privilege-escalation/index.html#system-information)
+### [Thông tin hệ thống](../linux-basics/linux-privilege-escalation/index.html#system-information)
 
-- [ ] Get **OS information**
-- [ ] Check the [**PATH**](../linux-basics/linux-privilege-escalation/index.html#path), any **writable folder**?
-- [ ] Check [**env variables**](../linux-basics/linux-privilege-escalation/index.html#env-info), any sensitive detail?
-- [ ] Search for [**kernel exploits**](../linux-basics/linux-privilege-escalation/index.html#kernel-exploits) **using scripts** (DirtyCow?)
-- [ ] Before running a kernel PoC, verify its **actual prerequisites**, not only `uname -r`: architecture, required `CONFIG_*` options/modules, namespace creation and active mitigations. For example, test user/network namespace availability with `unshare -Urn true`; modern netfilter exploits may require `CONFIG_USER_NS`, unprivileged user namespaces and `CONFIG_NF_TABLES`.<sup>[[3]](#references)</sup>
-- [ ] **Check** if the [**sudo version** is vulnerable](../linux-basics/linux-privilege-escalation/index.html#sudo-version)
-- [ ] [**Dmesg** signature verification failed](../linux-basics/linux-privilege-escalation/index.html#dmesg-signature-verification-failed)
-- [ ] Review [**kernel module and module-loading misconfigurations**](kernel-modules-and-modprobe.md#kernel-module-and-module-loading-misconfigurations): `insmod`, `modinfo`, `lsmod`, `dmesg`, signature enforcement and `modules_disabled`.
-- [ ] Check [**kernel.modprobe / modprobe_path abuse paths**](kernel-modules-and-modprobe.md#kernelmodprobe--modprobe_path-abuse-checks) if the helper path can be modified or triggered.
-- [ ] Check [**writable /lib/modules paths**](kernel-modules-and-modprobe.md#writable-libmodules-review), including writable `.ko*` files and `modules.*` metadata.
-- [ ] More system enum ([date, system stats, cpu info, printers](../linux-basics/linux-privilege-escalation/index.html#more-system-enumeration))
-- [ ] [Enumerate more defenses](../linux-basics/linux-privilege-escalation/index.html#enumerate-possible-defenses)
+- [ ] Lấy **thông tin hệ điều hành**
+- [ ] Kiểm tra [**PATH**](../linux-basics/linux-privilege-escalation/index.html#path), có **thư mục nào ghi được** không?
+- [ ] Kiểm tra [**biến môi trường**](../linux-basics/linux-privilege-escalation/index.html#env-info), có thông tin nhạy cảm nào không?
+- [ ] Tìm [**kernel exploit**](../linux-basics/linux-privilege-escalation/index.html#kernel-exploits) **bằng script** (DirtyCow?)
+- [ ] Trước khi chạy kernel PoC, hãy xác minh **các điều kiện tiên quyết thực tế**, không chỉ dựa vào `uname -r`: kiến trúc, các tùy chọn/module `CONFIG_*` bắt buộc, khả năng tạo namespace và các biện pháp giảm thiểu đang hoạt động. Ví dụ: kiểm tra khả năng sử dụng user/network namespace bằng `unshare -Urn true`; các exploit netfilter hiện đại có thể cần `CONFIG_USER_NS`, user namespace không đặc quyền và `CONFIG_NF_TABLES`.<sup>[[3]](#references)</sup>
+- [ ] **Kiểm tra** xem [**phiên bản sudo có lỗ hổng hay không**](../linux-basics/linux-privilege-escalation/index.html#sudo-version)
+- [ ] [**Dmesg** xác minh chữ ký thất bại](../linux-basics/linux-privilege-escalation/index.html#dmesg-signature-verification-failed)
+- [ ] Kiểm tra [**cấu hình sai kernel module và việc tải module**](kernel-modules-and-modprobe.md#kernel-module-and-module-loading-misconfigurations): `insmod`, `modinfo`, `lsmod`, `dmesg`, thực thi chữ ký và `modules_disabled`.
+- [ ] Kiểm tra [**các đường dẫn lạm dụng kernel.modprobe / modprobe_path**](kernel-modules-and-modprobe.md#kernelmodprobe--modprobe_path-abuse-checks) nếu có thể sửa đổi hoặc kích hoạt đường dẫn helper.
+- [ ] Kiểm tra [**các đường dẫn ghi được trong /lib/modules**](kernel-modules-and-modprobe.md#writable-libmodules-review), bao gồm các tệp `.ko*` và metadata `modules.*` ghi được.
+- [ ] Liệt kê thêm thông tin hệ thống ([ngày giờ, thống kê hệ thống, thông tin CPU, máy in](../linux-basics/linux-privilege-escalation/index.html#more-system-enumeration))
+- [ ] [Liệt kê thêm các biện pháp phòng thủ](../linux-basics/linux-privilege-escalation/index.html#enumerate-possible-defenses)
 
-### [Drives](../linux-basics/linux-privilege-escalation/index.html#drives)
+### [Ổ đĩa](../linux-basics/linux-privilege-escalation/index.html#drives)
 
-- [ ] **List mounted** drives
-- [ ] **Any unmounted drive?**
-- [ ] **Any creds in fstab?**
+- [ ] **Liệt kê** các ổ đĩa đã mount
+- [ ] Có ổ đĩa nào **chưa được mount** không?
+- [ ] Có **thông tin đăng nhập trong fstab** không?
 
-### [**Installed Software**](../linux-basics/linux-privilege-escalation/index.html#installed-software)
+### [**Phần mềm đã cài đặt**](../linux-basics/linux-privilege-escalation/index.html#installed-software)
 
-- [ ] **Check for**[ **useful software**](../linux-basics/linux-privilege-escalation/index.html#useful-software) **installed**
-- [ ] **Check for** [**vulnerable software**](../linux-basics/linux-privilege-escalation/index.html#vulnerable-software-installed) **installed**
-- [ ] On Debian/Ubuntu, check whether **needrestart interpreter scanning** is installed/enabled: `dpkg-query -W needrestart 2>/dev/null; grep -R interpscan /etc/needrestart 2>/dev/null`. Vulnerable builds crossed the privilege boundary by reusing attacker-controlled `PYTHONPATH`/`RUBYLIB`, racing `/proc/<pid>/exe`, or scanning attacker-controlled Perl paths when APT or `unattended-upgrades` invoked needrestart as root.<sup>[[4]](#references)</sup>
+- [ ] **Kiểm tra xem có cài đặt** [**phần mềm hữu ích**](../linux-basics/linux-privilege-escalation/index.html#useful-software) **hay không**
+- [ ] **Kiểm tra xem có cài đặt** [**phần mềm dễ bị tấn công**](../linux-basics/linux-privilege-escalation/index.html#vulnerable-software-installed) **hay không**
+- [ ] Trên Debian/Ubuntu, kiểm tra xem đã cài đặt/bật **quét interpreter của needrestart** chưa: `dpkg-query -W needrestart 2>/dev/null; grep -R interpscan /etc/needrestart 2>/dev/null`. Các bản dễ bị tấn công đã vượt qua ranh giới đặc quyền bằng cách tái sử dụng `PYTHONPATH`/`RUBYLIB` do attacker kiểm soát, chạy đua với `/proc/<pid>/exe` hoặc quét các đường dẫn Perl do attacker kiểm soát khi APT hoặc `unattended-upgrades` gọi needrestart với quyền root.<sup>[[4]](#references)</sup>
 
-### [Processes](../linux-basics/linux-privilege-escalation/index.html#processes)
+### [Tiến trình](../linux-basics/linux-privilege-escalation/index.html#processes)
 
-- [ ] Is any **unknown software running**?
-- [ ] Is any software running with **more privileges than it should have**?
-- [ ] Search for **exploits of running processes** (especially the version running).
-- [ ] Can you **modify the binary** of any running process?
-- [ ] **Monitor processes** and check if any interesting process is running frequently.
-- [ ] Can you **read** some interesting **process memory** (where passwords could be saved)?
+- [ ] Có **phần mềm không rõ nguồn gốc nào đang chạy** không?
+- [ ] Có phần mềm nào chạy với **đặc quyền cao hơn mức cần thiết** không?
+- [ ] Tìm **exploit cho các tiến trình đang chạy** (đặc biệt là phiên bản đang chạy).
+- [ ] Bạn có thể **sửa binary** của tiến trình đang chạy nào không?
+- [ ] **Theo dõi tiến trình** và kiểm tra xem có tiến trình đáng chú ý nào chạy thường xuyên không.
+- [ ] Bạn có thể **đọc** bộ nhớ của **tiến trình đáng chú ý** nào không (nơi có thể lưu mật khẩu)?
 
-### [Scheduled/Cron jobs?](../linux-basics/linux-privilege-escalation/index.html#scheduled-jobs)
+### [Tác vụ đã lên lịch/Cron?](../linux-basics/linux-privilege-escalation/index.html#scheduled-jobs)
 
-- [ ] Is the [**PATH** ](../linux-basics/linux-privilege-escalation/index.html#cron-path)being modified by some cron and you can **write** in it?
-- [ ] Any [**wildcard** ](../linux-basics/linux-privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection)in a cron job?
-- [ ] Some [**modifiable script** ](../linux-basics/linux-privilege-escalation/index.html#cron-script-overwriting-and-symlink)is being **executed** or is inside **modifiable folder**?
-- [ ] Have you detected that some **script** could be or are being [**executed** very **frequently**](../linux-basics/linux-privilege-escalation/index.html#frequent-cron-jobs)? (every 1, 2 or 5 minutes)
+- [ ] Có cron nào đang sửa đổi [**PATH** ](../linux-basics/linux-privilege-escalation/index.html#cron-path) và bạn có thể **ghi** vào đó không?
+- [ ] Có [**wildcard** ](../linux-basics/linux-privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection)nào trong tác vụ cron không?
+- [ ] Có [**script có thể sửa đổi** ](../linux-basics/linux-privilege-escalation/index.html#cron-script-overwriting-and-symlink)nào đang được **thực thi** hoặc nằm trong **thư mục có thể sửa đổi** không?
+- [ ] Bạn có phát hiện **script** nào có thể hoặc đang được [**thực thi** rất **thường xuyên**](../linux-basics/linux-privilege-escalation/index.html#frequent-cron-jobs) không? (mỗi 1, 2 hoặc 5 phút)
 
-### [Services](../linux-basics/linux-privilege-escalation/index.html#services)
+### [Dịch vụ](../linux-basics/linux-privilege-escalation/index.html#services)
 
-- [ ] Any **writable .service** file?
-- [ ] Any **writable binary** executed by a **service**?
-- [ ] Any writable **helper, config or environment file referenced by a root unit** (`ExecStartPre=`, `ExecStartPost=`, `EnvironmentFile=`)? Inspect the merged unit with `systemctl cat <unit>` and review [service/socket file abuse](../interesting-files-permissions/write-to-root.md).
-- [ ] Does an on-demand privileged workflow run a helper under a lower-privilege writable directory? Check both the helper and its parent for [root execution of user-modifiable paths](../interesting-files-permissions/write-to-root.md#root-executing-user-writable-scriptsbinaries); short-lived helpers may only appear while the workflow runs.
-- [ ] Any **writable folder in systemd PATH**?
-- [ ] Any **writable systemd unit drop-in** in `/etc/systemd/system/<unit>.d/*.conf` that can override `ExecStart`/`User`?<sup>[[2]](#references)</sup>
+- [ ] Có tệp **.service ghi được** nào không?
+- [ ] Có **binary ghi được** nào được **dịch vụ** thực thi không?
+- [ ] Có **helper, tệp cấu hình hoặc tệp môi trường ghi được nào được root unit tham chiếu** không (`ExecStartPre=`, `ExecStartPost=`, `EnvironmentFile=`)? Kiểm tra unit đã hợp nhất bằng `systemctl cat <unit>` và xem lại [việc lạm dụng tệp service/socket](../interesting-files-permissions/write-to-root.md).
+- [ ] Có workflow đặc quyền theo yêu cầu nào chạy helper trong thư mục cấp thấp hơn mà người dùng có thể ghi không? Kiểm tra cả helper lẫn thư mục cha để tìm [việc thực thi đường dẫn do người dùng sửa đổi với quyền root](../interesting-files-permissions/write-to-root.md#root-executing-user-writable-scriptsbinaries); helper chạy trong thời gian ngắn có thể chỉ xuất hiện khi workflow đang chạy.
+- [ ] Có **thư mục nào trong PATH của systemd ghi được** không?
+- [ ] Có **systemd unit drop-in ghi được** nào trong `/etc/systemd/system/<unit>.d/*.conf` có thể ghi đè `ExecStart`/`User` không?<sup>[[2]](#references)</sup>
 
-### [Timers](../linux-basics/linux-privilege-escalation/index.html#timers)
+### [Timer](../linux-basics/linux-privilege-escalation/index.html#timers)
 
-- [ ] Any **writable timer**?
+- [ ] Có **timer ghi được** nào không?
 
-### [Sockets](../linux-basics/linux-privilege-escalation/index.html#sockets)
+### [Socket](../linux-basics/linux-privilege-escalation/index.html#sockets)
 
-- [ ] Any **writable .socket** file?
-- [ ] Can you **communicate with any socket**?
-- [ ] **HTTP sockets** with interesting info?
-- [ ] Can you access a [**container-runtime or node-agent API**](../containers-namespaces/container-security/runtime-api-and-daemon-exposure.md) such as `docker.sock`, `containerd.sock`, `crio.sock`, `podman.sock`, `buildkitd.sock` or a kubelet endpoint? Test the raw HTTP/gRPC API even when its usual CLI is absent.
+- [ ] Có tệp **.socket ghi được** nào không?
+- [ ] Bạn có thể **giao tiếp với socket nào** không?
+- [ ] Có **HTTP socket** nào chứa thông tin đáng chú ý không?
+- [ ] Bạn có thể truy cập [**API của container runtime hoặc node agent**](../containers-namespaces/container-security/runtime-api-and-daemon-exposure.md) như `docker.sock`, `containerd.sock`, `crio.sock`, `podman.sock`, `buildkitd.sock` hoặc endpoint kubelet không? Hãy kiểm tra API HTTP/gRPC thô ngay cả khi không có CLI thường dùng.
 
 ### [D-Bus](../linux-basics/linux-privilege-escalation/index.html#d-bus)
 
-- [ ] Can you **communicate with any D-Bus**?
+- [ ] Bạn có thể **giao tiếp với D-Bus nào** không?
 
-### [Network](../linux-basics/linux-privilege-escalation/index.html#network)
+### [Mạng](../linux-basics/linux-privilege-escalation/index.html#network)
 
-- [ ] Enumerate the network to know where you are
-- [ ] **Open ports you couldn't access before** getting a shell inside the machine?
-- [ ] Can you **sniff traffic** using `tcpdump`?
+- [ ] Liệt kê mạng để xác định vị trí của bạn
+- [ ] Có **cổng mở nào trước đây bạn không truy cập được** nhưng giờ có thể truy cập sau khi lấy được shell trên máy không?
+- [ ] Bạn có thể **bắt gói tin** bằng `tcpdump` không?
 
-### [Users](../linux-basics/linux-privilege-escalation/index.html#users)
+### [Người dùng](../linux-basics/linux-privilege-escalation/index.html#users)
 
-- [ ] Generic users/groups **enumeration**
-- [ ] Do you have a **very big UID**? Is the **machine** **vulnerable**?
-- [ ] Can you [**escalate privileges thanks to a group**](../user-information/interesting-groups-linux-pe/index.html) you belong to?
-- [ ] **Clipboard** data?
-- [ ] Password Policy?
-- [ ] Try to **use** every **known password** that you have discovered previously to login **with each** possible **user**. Try to login also without a password.
+- [ ] Liệt kê **người dùng/nhóm** thông thường
+- [ ] Bạn có **UID rất lớn** không? **Máy** có **dễ bị tấn công** không?
+- [ ] Bạn có thể [**nâng quyền nhờ một nhóm**](../user-information/interesting-groups-linux-pe/index.html) mà bạn thuộc về không?
+- [ ] Có dữ liệu **clipboard** không?
+- [ ] Chính sách mật khẩu?
+- [ ] Thử **dùng** mọi **mật khẩu đã biết** mà bạn phát hiện trước đó để đăng nhập bằng **từng người dùng** có thể. Cũng thử đăng nhập không cần mật khẩu.
 
-### [Writable PATH](../linux-basics/linux-privilege-escalation/index.html#writable-path-abuses)
+### [PATH ghi được](../linux-basics/linux-privilege-escalation/index.html#writable-path-abuses)
 
-- [ ] If you have **write privileges over some folder in PATH** you may be able to escalate privileges
+- [ ] Nếu bạn có **quyền ghi vào thư mục nào đó trong PATH**, bạn có thể nâng quyền
 
-### [SUDO and SUID commands](../linux-basics/linux-privilege-escalation/index.html#sudo-and-suid)
+### [Lệnh SUDO và SUID](../linux-basics/linux-privilege-escalation/index.html#sudo-and-suid)
 
-- [ ] Can you execute **any command with sudo**? Can you use it to READ, WRITE or EXECUTE anything as root? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] If `sudo -l` allows `sudoedit`, check for **sudoedit argument injection** (CVE-2023-22809) via `SUDO_EDITOR`/`VISUAL`/`EDITOR` to edit arbitrary files on vulnerable versions (`sudo -V` < 1.9.12p2). Example: `SUDO_EDITOR="vim -- /etc/sudoers" sudoedit /etc/hosts`.<sup>[[1]](#references)</sup>
-- [ ] Is any **exploitable SUID binary**? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Are [**sudo** commands **limited** by **path**? can you **bypass** the restrictions](../linux-basics/linux-privilege-escalation/index.html#sudo-execution-bypassing-paths)?
-- [ ] [**Sudo/SUID binary without path indicated**](../linux-basics/linux-privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
-- [ ] [**SUID binary specifying path**](../linux-basics/linux-privilege-escalation/index.html#suid-binary-with-command-path)? Bypass
-- [ ] [**LD_PRELOAD vuln**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#ld_preload-ld_library_path-and-suid)
-- [ ] [**Lack of .so library in SUID binary**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#missing-shared-object-injection) from a writable folder?
-- [ ] [**SUID RPATH/RUNPATH or writable library path**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#rpath-and-runpath)?
-- [ ] [**SUDO tokens available**](../linux-basics/linux-privilege-escalation/index.html#reusing-sudo-tokens)? [**Can you create a SUDO token**](../linux-basics/linux-privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)?
-- [ ] Can you [**read or modify sudoers files**](../linux-basics/linux-privilege-escalation/index.html#etc-sudoers-etc-sudoers-d)?
-- [ ] Can you [**modify /etc/ld.so.conf.d/**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#linker-configuration)?
-- [ ] [**OpenBSD DOAS**](../linux-basics/linux-privilege-escalation/index.html#doas) command
+- [ ] Bạn có thể chạy **lệnh nào bằng sudo** không? Bạn có thể dùng nó để ĐỌC, GHI hoặc THỰC THI bất cứ thứ gì với quyền root không? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] Nếu `sudo -l` cho phép `sudoedit`, hãy kiểm tra **chèn tham số sudoedit** (CVE-2023-22809) thông qua `SUDO_EDITOR`/`VISUAL`/`EDITOR` để sửa các tệp tùy ý trên phiên bản dễ bị tấn công (`sudo -V` < 1.9.12p2). Ví dụ: `SUDO_EDITOR="vim -- /etc/sudoers" sudoedit /etc/hosts`.<sup>[[1]](#references)</sup>
+- [ ] Có **binary SUID nào có thể bị khai thác** không? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] Các lệnh [**sudo** có bị giới hạn theo **đường dẫn** không? Bạn có thể **vượt qua** các hạn chế đó không](../linux-basics/linux-privilege-escalation/index.html#sudo-execution-bypassing-paths)?
+- [ ] [**Lệnh Sudo/binary SUID không chỉ định đường dẫn**](../linux-basics/linux-privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
+- [ ] [**Binary SUID chỉ định đường dẫn**](../linux-basics/linux-privilege-escalation/index.html#suid-binary-with-command-path)? Vượt qua giới hạn
+- [ ] [**Lỗ hổng LD_PRELOAD**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#ld_preload-ld_library_path-and-suid)
+- [ ] Có [**thiếu thư viện .so trong binary SUID**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#missing-shared-object-injection) nằm trong thư mục ghi được không?
+- [ ] Có [**RPATH/RUNPATH của SUID hoặc đường dẫn thư viện ghi được**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#rpath-and-runpath) không?
+- [ ] Có [**SUDO token khả dụng**](../linux-basics/linux-privilege-escalation/index.html#reusing-sudo-tokens) không? [**Bạn có thể tạo SUDO token**](../linux-basics/linux-privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than) không?
+- [ ] Bạn có thể [**đọc hoặc sửa tệp sudoers**](../linux-basics/linux-privilege-escalation/index.html#etc-sudoers-etc-sudoers-d) không?
+- [ ] Bạn có thể [**sửa đổi /etc/ld.so.conf.d/**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#linker-configuration) không?
+- [ ] Lệnh [**OpenBSD DOAS**](../linux-basics/linux-privilege-escalation/index.html#doas)
 
 ### [Capabilities](../linux-basics/linux-privilege-escalation/index.html#capabilities)
 
-- [ ] Has any binary any **unexpected capability**?
+- [ ] Có binary nào sở hữu **capability bất thường** không?
 
-### [ACLs](../linux-basics/linux-privilege-escalation/index.html#acls)
+### [ACL](../linux-basics/linux-privilege-escalation/index.html#acls)
 
-- [ ] Has any file any **unexpected ACL**?
+- [ ] Có tệp nào sở hữu **ACL bất thường** không?
 
-### [Open Shell sessions](../linux-basics/linux-privilege-escalation/index.html#open-shell-sessions)
+### [Phiên shell đang mở](../linux-basics/linux-privilege-escalation/index.html#open-shell-sessions)
 
 - [ ] **screen**
 - [ ] **tmux**
 
 ### [SSH](../linux-basics/linux-privilege-escalation/index.html#ssh)
 
-- [ ] **Debian** [**OpenSSL Predictable PRNG - CVE-2008-0166**](../linux-basics/linux-privilege-escalation/index.html#debian-openssl-predictable-prng-cve-2008-0166)
-- [ ] [**SSH Interesting configuration values**](../linux-basics/linux-privilege-escalation/index.html#ssh-interesting-configuration-values)
+- [ ] **Debian** [**OpenSSL PRNG có thể dự đoán - CVE-2008-0166**](../linux-basics/linux-privilege-escalation/index.html#debian-openssl-predictable-prng-cve-2008-0166)
+- [ ] [**Các giá trị cấu hình SSH đáng chú ý**](../linux-basics/linux-privilege-escalation/index.html#ssh-interesting-configuration-values)
 
-### [Interesting Files](../linux-basics/linux-privilege-escalation/index.html#interesting-files)
+### [Tệp đáng chú ý](../linux-basics/linux-privilege-escalation/index.html#interesting-files)
 
-- [ ] **Profile files** - Read sensitive data? Write to privesc?
-- [ ] **passwd/shadow files** - Read sensitive data? Write to privesc?
-- [ ] **Check commonly interesting folders** for sensitive data
-- [ ] **Weird Location/Owned files,** you may have access to or alter executable files
-- [ ] **Modified** in last mins
-- [ ] **Sqlite DB files**
-- [ ] **Hidden files**
-- [ ] **Script/Binaries in PATH**
-- [ ] **Web files** (passwords?)
-- [ ] **Backups**?
-- [ ] **Known files that contains passwords**: Use **Linpeas** and **LaZagne**
-- [ ] **Generic search**
+- [ ] **Tệp profile** - Có thể đọc dữ liệu nhạy cảm không? Có thể ghi để nâng quyền không?
+- [ ] **Tệp passwd/shadow** - Có thể đọc dữ liệu nhạy cảm không? Có thể ghi để nâng quyền không?
+- [ ] **Kiểm tra các thư mục thường chứa thông tin đáng chú ý** để tìm dữ liệu nhạy cảm
+- [ ] **Tệp ở vị trí lạ/thuộc sở hữu bất thường,** bạn có thể truy cập hoặc sửa đổi các tệp thực thi
+- [ ] Tệp được **sửa đổi** trong vài phút gần đây
+- [ ] **Tệp cơ sở dữ liệu Sqlite**
+- [ ] **Tệp ẩn**
+- [ ] **Script/Binary trong PATH**
+- [ ] **Tệp web** (mật khẩu?)
+- [ ] **Bản sao lưu**?
+- [ ] **Các tệp thường chứa mật khẩu**: Dùng **Linpeas** và **LaZagne**
+- [ ] **Tìm kiếm tổng quát**
 
-### [**Writable Files**](../linux-basics/linux-privilege-escalation/index.html#writable-files)
+### [**Tệp ghi được**](../linux-basics/linux-privilege-escalation/index.html#writable-files)
 
-- [ ] **Modify python library** to execute arbitrary commands?
-- [ ] Can you **modify log files**? **Logtotten** exploit
-- [ ] Can you **modify /etc/sysconfig/network-scripts/**? Centos/Redhat exploit
-- [ ] Can you [**write in ini, int.d, systemd or rc.d files**](../linux-basics/linux-privilege-escalation/index.html#init-init-d-systemd-and-rc-d)?
+- [ ] Có thể **sửa thư viện python** để chạy lệnh tùy ý không?
+- [ ] Bạn có thể **sửa tệp log** không? Exploit **Logtotten**
+- [ ] Bạn có thể **sửa /etc/sysconfig/network-scripts/** không? Exploit Centos/Redhat
+- [ ] Bạn có thể [**ghi vào các tệp ini, int.d, systemd hoặc rc.d**](../linux-basics/linux-privilege-escalation/index.html#init-init-d-systemd-and-rc-d) không?
 
-### [**Other tricks**](../linux-basics/linux-privilege-escalation/index.html#other-tricks)
+### [**Thủ thuật khác**](../linux-basics/linux-privilege-escalation/index.html#other-tricks)
 
-- [ ] Can you [**abuse NFS to escalate privileges**](../linux-basics/linux-privilege-escalation/index.html#nfs-privilege-escalation)?
-- [ ] Do you need to [**escape from a restrictive shell**](../linux-basics/linux-privilege-escalation/index.html#escaping-from-restricted-shells)?
+- [ ] Bạn có thể [**lạm dụng NFS để nâng quyền**](../linux-basics/linux-privilege-escalation/index.html#nfs-privilege-escalation) không?
+- [ ] Bạn có cần [**thoát khỏi shell bị hạn chế**](../linux-basics/linux-privilege-escalation/index.html#escaping-from-restricted-shells) không?
 
 
 
 ## References
 
-- [1] [Sudo advisory: sudoedit arbitrary file edit](https://www.sudo.ws/security/advisories/sudoedit_any/)
-- [2] [Oracle Linux docs: systemd drop-in configuration](https://docs.oracle.com/en/operating-systems/oracle-linux/8/systemd/ModifyingsystemdConfigurationFiles.html)
-- [3] [Notselwyn: CVE-2024-1086 exploit requirements and research](https://github.com/Notselwyn/CVE-2024-1086)
-- [4] [Qualys Security Advisory: LPEs in needrestart](https://www.qualys.com/2024/11/19/needrestart/needrestart.txt)
+- [1] [Khuyến cáo bảo mật của Sudo: sudoedit cho phép sửa tệp tùy ý](https://www.sudo.ws/security/advisories/sudoedit_any/)
+- [2] [Tài liệu Oracle Linux: cấu hình systemd drop-in](https://docs.oracle.com/en/operating-systems/oracle-linux/8/systemd/ModifyingsystemdConfigurationFiles.html)
+- [3] [Notselwyn: yêu cầu và nghiên cứu về exploit CVE-2024-1086](https://github.com/Notselwyn/CVE-2024-1086)
+- [4] [Khuyến cáo bảo mật của Qualys: LPE trong needrestart](https://www.qualys.com/2024/11/19/needrestart/needrestart.txt)
 {{#include ../../banners/hacktricks-training.md}}

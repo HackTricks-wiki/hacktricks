@@ -1,13 +1,13 @@
-# Processes, Crontab, Systemd, and D-Bus
+# Processes, Crontab, Systemd và D-Bus
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Scheduled jobs and interprocess communication can launch code with privileges different from those of the caller. Inspect the owner, command, and writable inputs of a service or job before testing it.
+Các tác vụ được lên lịch và cơ chế giao tiếp giữa các tiến trình có thể chạy mã với quyền khác với quyền của bên gọi. Trước khi kiểm thử một dịch vụ hoặc tác vụ, hãy kiểm tra chủ sở hữu, lệnh và các đầu vào có thể ghi.
 
-- [Process enumeration and service paths](process-enumeration-and-service-paths.md) covers process trees, runtime files, and systemd execution chains.
-- [Cron jobs and systemd timers](cron-and-systemd-timers.md) covers scheduled-task discovery and writable inputs.
-- [D-Bus enumeration and command injection privilege escalation](d-bus-enumeration-and-command-injection-privilege-escalation.md) covers the message bus and privileged service methods.
-- [Payloads to execute](payloads-to-execute.md) collects payloads that can be used when an execution path has been identified.
+- [Liệt kê tiến trình và đường dẫn dịch vụ](process-enumeration-and-service-paths.md) đề cập đến cây tiến trình, tệp thời gian chạy và chuỗi thực thi systemd.
+- [Cron jobs và systemd timers](cron-and-systemd-timers.md) đề cập đến việc tìm kiếm tác vụ được lên lịch và các đầu vào có thể ghi.
+- [Liệt kê D-Bus và leo thang đặc quyền bằng command injection](d-bus-enumeration-and-command-injection-privilege-escalation.md) đề cập đến message bus và các phương thức dịch vụ có đặc quyền.
+- [Payloads cần thực thi](payloads-to-execute.md) tập hợp các payload có thể dùng khi đã xác định được đường dẫn thực thi.
 
-For a wider review of cron jobs and systemd services, use the [Linux privilege escalation checklist](../main-system-information/linux-privilege-escalation-checklist.md).
+Để rà soát toàn diện hơn các cron jobs và dịch vụ systemd, hãy dùng [checklist leo thang đặc quyền trên Linux](../main-system-information/linux-privilege-escalation-checklist.md).
 {{#include ../../banners/hacktricks-training.md}}

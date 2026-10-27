@@ -1,14 +1,14 @@
-# Logstash Privilege Escalation
+# Leo thang đặc quyền Logstash
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Logstash
 
-Logstash is used to **gather, transform, and dispatch logs** through a system known as **pipelines**. These pipelines are made up of **input**, **filter**, and **output** stages.<sup>[[4]](#references)</sup> An interesting aspect arises when Logstash operates on a compromised machine.
+Logstash được dùng để **thu thập, chuyển đổi và phân phối log** thông qua một hệ thống gọi là **pipelines**. Các pipeline này gồm các giai đoạn **input**, **filter** và **output**.<sup>[[4]](#references)</sup> Một khía cạnh đáng chú ý xuất hiện khi Logstash hoạt động trên máy bị xâm nhập.
 
-### Pipeline Configuration
+### Cấu hình Pipeline
 
-On Debian and RPM package installs, pipelines are configured via **/etc/logstash/pipelines.yml**, which lists the locations of the pipeline configurations; other distributions place `pipelines.yml` in the Logstash `path.settings` directory.<sup>[[5]](#references)[[6]](#references)</sup>
+Trên các bản cài đặt bằng gói Debian và RPM, pipeline được cấu hình qua **/etc/logstash/pipelines.yml**, tệp này liệt kê các vị trí lưu cấu hình pipeline; các bản phân phối khác đặt `pipelines.yml` trong thư mục `path.settings` của Logstash.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ```yaml
 # Define your pipelines here. Multiple pipelines can be defined.
@@ -22,16 +22,16 @@ On Debian and RPM package installs, pipelines are configured via **/etc/logstash
   pipeline.workers: 6
 ```
 
-This file reveals where the **.conf** files containing pipeline configurations are located. When using an **Elasticsearch output**, inspect its `user`/`password`, `cloud_auth`, or `api_key` settings; the account's effective privileges depend on Elasticsearch. A `path.config` glob loads every matching file for that pipeline.<sup>[[6]](#references)[[7]](#references)[[11]](#references)</sup>
+Tệp này cho biết vị trí của các tệp **.conf** chứa cấu hình pipeline. Khi sử dụng **Elasticsearch output**, hãy kiểm tra các cài đặt `user`/`password`, `cloud_auth` hoặc `api_key`; quyền hiệu lực của tài khoản phụ thuộc vào Elasticsearch. Một glob `path.config` sẽ tải mọi tệp khớp với pipeline đó.<sup>[[6]](#references)[[7]](#references)[[11]](#references)</sup>
 
-If Logstash is started with `-f <directory>` instead of `pipelines.yml`, `-f` takes precedence and **all files inside that directory are concatenated in lexicographical order and parsed as a single config**.<sup>[[6]](#references)[[7]](#references)</sup> This creates 2 offensive implications:
+Nếu Logstash được khởi chạy với `-f <directory>` thay vì `pipelines.yml`, `-f` được ưu tiên và **mọi tệp trong thư mục đó được nối theo thứ tự từ điển rồi phân tích cú pháp như một cấu hình duy nhất**.<sup>[[6]](#references)[[7]](#references)</sup> Điều này tạo ra 2 hệ quả có thể bị khai thác:
 
-- A dropped file like `000-input.conf` or `zzz-output.conf` can change how the final pipeline is assembled
-- A malformed file can make the combined config fail validation; during reload, Logstash retains the previous pipeline, so validate payloads before relying on auto-reload.<sup>[[1]](#references)</sup>
+- Một tệp được thả vào như `000-input.conf` hoặc `zzz-output.conf` có thể thay đổi cách pipeline cuối cùng được ghép lại
+- Một tệp sai định dạng có thể khiến cấu hình được ghép không vượt qua bước xác thực; khi reload, Logstash giữ lại pipeline trước đó, vì vậy hãy xác thực payload trước khi dựa vào auto-reload.<sup>[[1]](#references)</sup>
 
-### Fast Enumeration on a Compromised Host
+### Liệt kê nhanh trên máy chủ bị xâm nhập
 
-On a box where Logstash is installed, quickly inspect:
+Trên máy có cài Logstash, nhanh chóng kiểm tra:
 
 ```bash
 ps aux | grep -i logstash
@@ -42,7 +42,7 @@ find /etc/logstash /usr/share/logstash -maxdepth 3 -type f \( -name '*.conf' -o 
 rg -n --hidden -S 'password|passwd|api[_-]?key|cloud_auth|ssl_keystore_password|truststore_password|user\s*=>|hosts\s*=>' /etc/logstash /usr/share/logstash 2>/dev/null
 ```
 
-Also check whether the local monitoring API is reachable. By default it binds on **127.0.0.1:9600**, which is usually enough after landing on the host.<sup>[[8]](#references)</sup>
+Đồng thời kiểm tra xem API giám sát cục bộ có thể truy cập được không. Theo mặc định, API lắng nghe trên **127.0.0.1:9600**, thường là đủ sau khi có foothold trên host.<sup>[[8]](#references)</sup>
 
 ```bash
 curl -s http://127.0.0.1:9600/?pretty
@@ -50,27 +50,27 @@ curl -s http://127.0.0.1:9600/_node/pipelines?pretty
 curl -s http://127.0.0.1:9600/_node/stats/pipelines?pretty
 ```
 
-These endpoints expose pipeline IDs and settings, runtime metrics, and config-reload success/failure counters, helping confirm whether a change was accepted.<sup>[[8]](#references)[[17]](#references)[[18]](#references)</sup>
+Các endpoint này hiển thị ID và cài đặt pipeline, chỉ số runtime, cùng bộ đếm thành công/thất bại khi tải lại cấu hình, giúp xác nhận liệu thay đổi có được chấp nhận hay không.<sup>[[8]](#references)[[17]](#references)[[18]](#references)</sup>
 
-If a recovered credential targets **Elasticsearch**, check [this other page about Elasticsearch](../../network-services-pentesting/9200-pentesting-elasticsearch.md).
+Nếu credential thu hồi được nhắm đến **Elasticsearch**, hãy xem [trang khác này về Elasticsearch](../../network-services-pentesting/9200-pentesting-elasticsearch.md).
 
-### File input feeding a dynamic command output
+### File input đưa dữ liệu vào dynamic command output
 
-A pipeline configuration can be read-only to the current user while its [file input](https://www.elastic.co/docs/reference/logstash/plugins/plugins-inputs-file) watches a path the user can write. Follow the loaded pipeline from that input through any [Grok field capture](https://www.elastic.co/docs/reference/logstash/plugins/plugins-filters-grok) to an [exec output](https://www.elastic.co/docs/reference/logstash/plugins/plugins-outputs-exec). The exec output passes its `command` through a shell and substitutes `%{field}` values without sanitizing shell metacharacters. A writable input path is a privilege lead only if the running service has a higher identity, the user's file can actually enter the watched input, the filters and output conditions route its contents into the command field, and that output plugin is installed and active. Check directory search/write permissions, file-input tracking state, and the effective service account separately; do not write a test event or invoke the output during passive enumeration.
+Cấu hình pipeline có thể chỉ đọc đối với người dùng hiện tại, trong khi [file input](https://www.elastic.co/docs/reference/logstash/plugins/plugins-inputs-file) của nó theo dõi một đường dẫn mà người dùng có thể ghi. Theo dõi pipeline đã tải từ input đó qua mọi [Grok field capture](https://www.elastic.co/docs/reference/logstash/plugins/plugins-filters-grok) đến [exec output](https://www.elastic.co/docs/reference/logstash/plugins/plugins-outputs-exec). Exec output truyền `command` qua một shell và thay thế các giá trị `%{field}` mà không lọc các ký tự đặc biệt của shell. Đường dẫn input có thể ghi chỉ là dấu hiệu tiềm năng dẫn đến nâng quyền nếu dịch vụ đang chạy dưới một danh tính có đặc quyền cao hơn, file của người dùng thực sự có thể đi vào input đang được theo dõi, các filter và điều kiện output định tuyến nội dung của file vào trường command, và plugin output đó đã được cài đặt, đang hoạt động. Kiểm tra riêng quyền tìm kiếm/ghi thư mục, trạng thái theo dõi của file input và tài khoản dịch vụ thực tế; không ghi test event hoặc gọi output trong quá trình liệt kê thụ động.
 
 ### Privilege Escalation via Writable Pipelines
 
-To attempt privilege escalation, first identify the user under which the Logstash service is actually running; do not assume it is root or the **logstash** user. Ensure you meet **one** of these criteria:
+Để thử nâng quyền, trước tiên hãy xác định người dùng thực sự đang chạy dịch vụ Logstash; không mặc định đó là root hoặc người dùng **logstash**. Đảm bảo bạn đáp ứng **một** trong các tiêu chí sau:
 
-- Possess **write access** to a pipeline **.conf** file **or**
-- The **/etc/logstash/pipelines.yml** file uses a wildcard, and you can write to the target folder.<sup>[[6]](#references)[[7]](#references)</sup>
+- Có **quyền ghi** vào file pipeline **.conf** **hoặc**
+- File **/etc/logstash/pipelines.yml** sử dụng wildcard và bạn có thể ghi vào thư mục đích.<sup>[[6]](#references)[[7]](#references)</sup>
 
-Additionally, **one** of these conditions must be fulfilled:
+Ngoài ra, phải đáp ứng **một** trong các điều kiện sau:
 
-- Capability to restart the Logstash service **or**
-- The **/etc/logstash/logstash.yml** file has **config.reload.automatic: true** set.<sup>[[1]](#references)[[15]](#references)</sup>
+- Có khả năng khởi động lại dịch vụ Logstash **hoặc**
+- File **/etc/logstash/logstash.yml** được đặt thành **config.reload.automatic: true**.<sup>[[1]](#references)[[15]](#references)</sup>
 
-Given a wildcard in the configuration, creating a file that matches this wildcard allows for command execution.<sup>[[7]](#references)[[9]](#references)</sup> For instance:
+Khi cấu hình có wildcard, tạo một file khớp với wildcard này sẽ cho phép thực thi lệnh.<sup>[[7]](#references)[[9]](#references)</sup> Ví dụ:
 
 ```bash
 input {
@@ -88,15 +88,15 @@ output {
 }
 ```
 
-Here, **interval** determines the execution frequency in seconds. In the given example, the **whoami** command runs every 120 seconds, with its output directed to **/tmp/output.log**.<sup>[[9]](#references)</sup>
+Ở đây, **interval** xác định tần suất thực thi tính bằng giây. Trong ví dụ đã cho, lệnh **whoami** chạy mỗi 120 giây và chuyển đầu ra vào **/tmp/output.log**.<sup>[[9]](#references)</sup>
 
-With **config.reload.automatic: true** in **/etc/logstash/logstash.yml**, Logstash will automatically detect and apply new or modified pipeline configurations without needing a restart.<sup>[[1]](#references)[[15]](#references)</sup> If there's no wildcard, modifications can still be made to existing configurations, but caution is advised to avoid disruptions.
+Với **config.reload.automatic: true** trong **/etc/logstash/logstash.yml**, Logstash sẽ tự động phát hiện và áp dụng các cấu hình pipeline mới hoặc đã chỉnh sửa mà không cần khởi động lại.<sup>[[1]](#references)[[15]](#references)</sup> Nếu không có wildcard, vẫn có thể chỉnh sửa các cấu hình hiện có, nhưng cần thận trọng để tránh gián đoạn.
 
-### More Reliable Pipeline Payloads
+### Payload Pipeline đáng tin cậy hơn
 
-The `exec` input plugin still works in current releases and requires either an `interval` or a `schedule`. It executes by **forking** the Logstash JVM, so if memory is tight your payload may fail with `ENOMEM` instead of silently running.<sup>[[9]](#references)</sup>
+Plugin input `exec` vẫn hoạt động trong các bản phát hành hiện tại và cần có `interval` hoặc `schedule`. Plugin thực thi bằng cách **forking** JVM của Logstash, vì vậy nếu thiếu bộ nhớ, payload có thể thất bại với lỗi `ENOMEM` thay vì chạy âm thầm.<sup>[[9]](#references)</sup>
 
-When the service has sufficient privileges to create a root-owned SUID file, a practical privilege-escalation payload is one that leaves a durable artifact:
+Khi dịch vụ có đủ đặc quyền để tạo tệp SUID do root sở hữu, một payload leo thang đặc quyền thiết thực là payload để lại một artifact tồn tại lâu dài:
 
 ```bash
 input {
@@ -110,24 +110,24 @@ output {
 }
 ```
 
-If you don't have restart rights but can signal the process, Logstash also supports a **SIGHUP**-triggered reload on Unix-like systems:<sup>[[1]](#references)</sup>
+Nếu bạn không có quyền khởi động lại nhưng có thể gửi tín hiệu cho tiến trình, Logstash cũng hỗ trợ tải lại được kích hoạt bằng **SIGHUP** trên các hệ thống kiểu Unix:<sup>[[1]](#references)</sup>
 
 ```bash
 kill -SIGHUP $(pgrep -f logstash)
 ```
 
-Be aware that not every plugin is reload-friendly. For example, the **stdin** input prevents automatic reload, so don't assume `config.reload.automatic` will always pick up your changes.<sup>[[1]](#references)</sup>
+Lưu ý rằng không phải plugin nào cũng hỗ trợ reload. Ví dụ, input **stdin** ngăn việc reload tự động, vì vậy đừng cho rằng `config.reload.automatic` sẽ luôn áp dụng các thay đổi của bạn.<sup>[[1]](#references)</sup>
 
-### Stealing Secrets from Logstash
+### Đánh cắp secrets từ Logstash
 
-Before focusing only on code execution, harvest the data Logstash already has access to:
+Trước khi chỉ tập trung vào code execution, hãy thu thập dữ liệu mà Logstash đã có quyền truy cập:
 
-- Credentials may appear in `elasticsearch {}` outputs, `http_poller` URLs/settings, JDBC inputs, or cloud-related settings; these plugins expose credential fields worth searching for.<sup>[[11]](#references)[[12]](#references)[[13]](#references)</sup>
-- Secure settings may live in **`/etc/logstash/logstash.keystore`** or another `path.settings` directory.<sup>[[5]](#references)[[10]](#references)</sup>
-- The keystore password may be supplied through **`LOGSTASH_KEYSTORE_PASS`**, and RPM/DEB installs source service environment variables from **`/etc/sysconfig/logstash`**.<sup>[[10]](#references)</sup>
-- Environment-variable expansion with `${VAR}` is resolved at Logstash startup, so the service environment is worth inspecting.<sup>[[14]](#references)</sup>
+- Credentials có thể xuất hiện trong các output `elasticsearch {}`, URL/cài đặt của `http_poller`, input JDBC hoặc cài đặt liên quan đến cloud; các plugin này có những trường chứa credential đáng để tìm kiếm.<sup>[[11]](#references)[[12]](#references)[[13]](#references)</sup>
+- Secure settings có thể nằm trong **`/etc/logstash/logstash.keystore`** hoặc một thư mục `path.settings` khác.<sup>[[5]](#references)[[10]](#references)</sup>
+- Mật khẩu keystore có thể được cung cấp qua **`LOGSTASH_KEYSTORE_PASS`**, và các bản cài đặt RPM/DEB lấy biến môi trường của service từ **`/etc/sysconfig/logstash`**.<sup>[[10]](#references)</sup>
+- Việc mở rộng biến môi trường bằng `${VAR}` được thực hiện khi Logstash khởi động, vì vậy nên kiểm tra môi trường của service.<sup>[[14]](#references)</sup>
 
-Useful checks:
+Các kiểm tra hữu ích:
 
 ```bash
 ls -l /etc/logstash /etc/logstash/logstash.keystore 2>/dev/null
@@ -138,19 +138,19 @@ journalctl -u logstash --no-pager 2>/dev/null | tail -n 200
 ls -lah /var/log/logstash 2>/dev/null
 ```
 
-This is also worth checking because **CVE-2023-46672** showed that, under specific circumstances, Logstash recorded sensitive information in its logs, including secrets stored in its keystore and referenced from configuration; review old Logstash logs and `journald` entries if those circumstances may apply.<sup>[[3]](#references)</sup>
+Điều này cũng đáng kiểm tra vì **CVE-2023-46672** cho thấy, trong một số trường hợp cụ thể, Logstash ghi thông tin nhạy cảm vào log, bao gồm cả secret được lưu trong keystore và được tham chiếu từ cấu hình; hãy xem lại log Logstash cũ và các mục `journald` nếu những trường hợp đó có thể áp dụng.<sup>[[3]](#references)</sup>
 
-### Centralized Pipeline Management Abuse
+### Lạm dụng quản lý Pipeline tập trung
 
-In some environments, the host does **not** rely on local `.conf` files at all. If **`xpack.management.enabled: true`** is configured, Logstash can pull centrally managed pipelines from Elasticsearch/Kibana, and after enabling this mode local pipeline configs are no longer the source of truth.<sup>[[2]](#references)</sup>
+Trong một số môi trường, host hoàn toàn **không** dựa vào các tệp `.conf` cục bộ. Nếu cấu hình **`xpack.management.enabled: true`**, Logstash có thể lấy các pipeline được quản lý tập trung từ Elasticsearch/Kibana; sau khi bật chế độ này, cấu hình pipeline cục bộ không còn là nguồn thông tin chính thức.<sup>[[2]](#references)</sup>
 
-That means a different attack path:
+Điều đó tạo ra một hướng tấn công khác:
 
-1. Recover Elastic credentials from local Logstash settings, the keystore, or logs.<sup>[[3]](#references)[[10]](#references)</sup>
-2. Verify whether the account has the **`manage_logstash_pipelines`** cluster privilege.<sup>[[16]](#references)</sup>
-3. Create or replace a centrally managed pipeline so the Logstash host executes your payload on its next poll interval.<sup>[[2]](#references)[[16]](#references)</sup>
+1. Khôi phục thông tin đăng nhập Elastic từ cài đặt Logstash cục bộ, keystore hoặc log.<sup>[[3]](#references)[[10]](#references)</sup>
+2. Xác minh tài khoản có quyền cluster **`manage_logstash_pipelines`** hay không.<sup>[[16]](#references)</sup>
+3. Tạo hoặc thay thế một pipeline được quản lý tập trung để host Logstash thực thi payload của bạn trong lần polling tiếp theo.<sup>[[2]](#references)[[16]](#references)</sup>
 
-The Elasticsearch API used for this feature is:<sup>[[16]](#references)</sup>
+API Elasticsearch được dùng cho tính năng này là:<sup>[[16]](#references)</sup>
 
 ```bash
 curl -X PUT http://ELASTIC:9200/_logstash/pipeline/pwned \
@@ -173,27 +173,26 @@ curl -X PUT http://ELASTIC:9200/_logstash/pipeline/pwned \
   }'
 ```
 
-This is especially useful when local files are read-only but Logstash is already registered to fetch pipelines remotely.<sup>[[2]](#references)[[16]](#references)</sup>
+Điều này đặc biệt hữu ích khi các tệp cục bộ chỉ có quyền đọc nhưng Logstash đã được đăng ký để lấy pipeline từ xa.<sup>[[2]](#references)[[16]](#references)</sup>
 
 ## References
 
-- [1] [Elastic Docs: Reloading the Config File](https://www.elastic.co/guide/en/logstash/8.19/reloading-config.html)
-- [2] [Elastic Docs: Configure Centralized Pipeline Management](https://www.elastic.co/guide/en/logstash/8.19/configuring-centralized-pipelines.html)
-- [3] [Logstash 8.11.1 Security Update (ESA-2023-26) - CVE-2023-46672](https://discuss.elastic.co/t/logstash-8-11-1-security-update-esa-2023-26/347191)
-- [4] [Elastic Docs: Creating a Logstash Pipeline](https://www.elastic.co/docs/reference/logstash/creating-logstash-pipeline)
-- [5] [Elastic Docs: Logstash Directory Layout](https://www.elastic.co/docs/reference/logstash/dir-layout)
-- [6] [Elastic Docs: Multiple Pipelines](https://www.elastic.co/docs/reference/logstash/multiple-pipelines)
-- [7] [Elastic Docs: Running Logstash from the Command Line](https://www.elastic.co/docs/reference/logstash/running-logstash-command-line)
-- [8] [Elastic Docs: Monitoring Logstash with APIs](https://www.elastic.co/docs/reference/logstash/monitoring-logstash)
-- [9] [Elastic Docs: Exec input plugin](https://www.elastic.co/docs/reference/logstash/plugins/plugins-inputs-exec)
-- [10] [Elastic Docs: Secrets keystore for secure settings](https://www.elastic.co/docs/reference/logstash/keystore)
-- [11] [Elastic Docs: Elasticsearch output plugin](https://www.elastic.co/docs/reference/logstash/plugins/plugins-outputs-elasticsearch)
-- [12] [Elastic Docs: Http_poller input plugin](https://www.elastic.co/docs/reference/logstash/plugins/plugins-inputs-http_poller)
-- [13] [Elastic Docs: Jdbc input plugin](https://www.elastic.co/docs/reference/logstash/plugins/plugins-inputs-jdbc)
-- [14] [Elastic Docs: Using environment variables](https://www.elastic.co/docs/reference/logstash/environment-variables)
-- [15] [Elastic Docs: logstash.yml](https://www.elastic.co/docs/reference/logstash/logstash-settings-file)
-- [16] [Elasticsearch API: Create or update a Logstash pipeline](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-logstash-put-pipeline)
-- [17] [Logstash API: Get settings for pipelines](https://www.elastic.co/docs/api/doc/logstash/operation/operation-nodeinfopipelines)
-- [18] [Logstash API: Get statistics for pipelines](https://www.elastic.co/docs/api/doc/logstash/operation/operation-nodestatspipelines)
-
+- [1] [Tài liệu Elastic: Tải lại tệp cấu hình](https://www.elastic.co/guide/en/logstash/8.19/reloading-config.html)
+- [2] [Tài liệu Elastic: Cấu hình quản lý pipeline tập trung](https://www.elastic.co/guide/en/logstash/8.19/configuring-centralized-pipelines.html)
+- [3] [Bản cập nhật bảo mật Logstash 8.11.1 (ESA-2023-26) - CVE-2023-46672](https://discuss.elastic.co/t/logstash-8-11-1-security-update-esa-2023-26/347191)
+- [4] [Tài liệu Elastic: Tạo pipeline Logstash](https://www.elastic.co/docs/reference/logstash/creating-logstash-pipeline)
+- [5] [Tài liệu Elastic: Bố cục thư mục Logstash](https://www.elastic.co/docs/reference/logstash/dir-layout)
+- [6] [Tài liệu Elastic: Nhiều pipeline](https://www.elastic.co/docs/reference/logstash/multiple-pipelines)
+- [7] [Tài liệu Elastic: Chạy Logstash từ dòng lệnh](https://www.elastic.co/docs/reference/logstash/running-logstash-command-line)
+- [8] [Tài liệu Elastic: Giám sát Logstash bằng API](https://www.elastic.co/docs/reference/logstash/monitoring-logstash)
+- [9] [Tài liệu Elastic: Plugin input exec](https://www.elastic.co/docs/reference/logstash/plugins/plugins-inputs-exec)
+- [10] [Tài liệu Elastic: Keystore secrets cho các cài đặt bảo mật](https://www.elastic.co/docs/reference/logstash/keystore)
+- [11] [Tài liệu Elastic: Plugin output Elasticsearch](https://www.elastic.co/docs/reference/logstash/plugins/plugins-outputs-elasticsearch)
+- [12] [Tài liệu Elastic: Plugin input Http_poller](https://www.elastic.co/docs/reference/logstash/plugins/plugins-inputs-http_poller)
+- [13] [Tài liệu Elastic: Plugin input Jdbc](https://www.elastic.co/docs/reference/logstash/plugins/plugins-inputs-jdbc)
+- [14] [Tài liệu Elastic: Sử dụng biến môi trường](https://www.elastic.co/docs/reference/logstash/environment-variables)
+- [15] [Tài liệu Elastic: logstash.yml](https://www.elastic.co/docs/reference/logstash/logstash-settings-file)
+- [16] [API Elasticsearch: Tạo hoặc cập nhật pipeline Logstash](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-logstash-put-pipeline)
+- [17] [API Logstash: Lấy cài đặt cho các pipeline](https://www.elastic.co/docs/api/doc/logstash/operation/operation-nodeinfopipelines)
+- [18] [API Logstash: Lấy thống kê cho các pipeline](https://www.elastic.co/docs/api/doc/logstash/operation/operation-nodestatspipelines)
 {{#include ../../banners/hacktricks-training.md}}
