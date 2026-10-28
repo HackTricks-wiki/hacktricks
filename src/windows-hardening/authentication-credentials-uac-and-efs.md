@@ -31,6 +31,16 @@ Test-AppLockerPolicy -PolicyObject $policy -Path C:\Users\Public\payload.exe -Us
 Get-AppLockerFileInformation -Path C:\Users\Public\payload.exe | Format-List
 ```
 
+Before treating a denied test result as an enforced block, inspect the **effective enforcement mode of that rule collection** and the Application Identity service. `AuditOnly` evaluates rules but still permits execution, while `NotConfigured` is not equivalent to disabled when that collection contains rules.<sup>[[7]](#references)</sup> A stopped `AppIDSvc` prevents AppLocker enforcement.<sup>[[9]](#references)</sup> These checks distinguish an actual bypass from a policy that never blocked the file.
+
+```powershell
+(Get-AppLockerPolicy -Effective).RuleCollections | Select-Object CollectionType, EnforcementMode
+Get-Service AppIDSvc
+Get-AppLockerFileInformation -EventLog -EventType Audited -Statistics
+```
+
+For a controlled execution test, compare the AppLocker event log: **8003/8006** mean the EXE/DLL or script/MSI would have been blocked in audit mode; **8004/8007** mean it was actually blocked. Test the same file type and identity as the intended execution path.<sup>[[8]](#references)</sup>
+
 This registry path contains the configurations and policies applied by AppLocker, providing a way to review the current set of rules enforced on the system:
 
 - `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
@@ -118,7 +128,7 @@ sc query windefend
 
 ## Encrypted File System (EFS)
 
-EFS secures files through encryption, utilizing a **symmetric key** known as the **File Encryption Key (FEK)**. This key is encrypted with the user's **public key** and stored within the encrypted file's $EFS **alternative data stream**. When decryption is needed, the corresponding **private key** of the user's digital certificate is used to decrypt the FEK from the $EFS stream. More details can be found [here](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS secures files through encryption, utilizing a **symmetric key** known as the **File Encryption Key (FEK)**. This key is encrypted with the user's **public key** and stored in the file's NTFS `$EFS` metadata (`$LOGGED_UTILITY_STREAM`), **not** an ordinary `$DATA` alternate data stream.<sup>[[10]](#references)</sup> When decryption is needed, the corresponding **private key** of the user's digital certificate unwraps the FEK. A configured data recovery agent (DRA) has a separate encrypted copy of the FEK in the Data Recovery Field.<sup>[[13]](#references)</sup>
 
 **Decryption scenarios without user initiation** include:
 
@@ -136,12 +146,17 @@ This encryption method allows **transparent access** to encrypted files for the 
 
 ### Check EFS info
 
-Check if a **user** has **used** this **service** checking if this path exists:`C:\users\<username>\appdata\roaming\Microsoft\Protect`
-
-Check **who** has **access** to the file using cipher /c \<file>\
-You can also use `cipher /e` and `cipher /d` inside a folder to **encrypt** and **decrypt** all the files
+Do not infer EFS use from `%APPDATA%\Microsoft\Protect`: it stores DPAPI master keys for many Windows features.<sup>[[19]](#references)</sup> Instead, inspect an encrypted file with `cipher /c "C:\path\file"` to list its user and recovery certificates. `cipher /e` and `cipher /d` encrypt and decrypt files for a principal that has the matching private key.<sup>[[11]](#references)</sup>
 
 ### Decrypting EFS files
+
+If `cipher /c` lists a recovery certificate and you have its **matching DRA private key** in a PFX, import that PFX into the current user's certificate store, then decrypt the file.<sup>[[11]](#references)[[12]](#references)</sup> A newly generated DRA certificate cannot decrypt older files: its public key must already have been included when the file was encrypted. NTFS ACL access or a reset account password alone does not supply the required private key.<sup>[[13]](#references)</sup>
+
+```cmd
+cipher /c "C:\path\file"
+certutil -user -importPFX My recovery.pfx
+cipher /d "C:\path\file"
+```
 
 #### Being Authority System
 
@@ -159,13 +174,15 @@ https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 
 Microsoft developed **Group Managed Service Accounts (gMSA)** to simplify the management of service accounts in IT infrastructures. Unlike traditional service accounts that often have the "**Password never expire**" setting enabled, gMSAs offer a more secure and manageable solution:
 
-- **Automatic Password Management**: gMSAs use a complex, 240-character password that automatically changes according to domain or computer policy. This process is handled by Microsoft's Key Distribution Service (KDC), eliminating the need for manual password updates.
+- **Automatic Password Management**: gMSAs use a complex, 240-byte password that normally rotates every 30 days. Domain controllers derive it using KDS key material, eliminating manual password updates.<sup>[[16]](#references)[[20]](#references)</sup>
 - **Enhanced Security**: These accounts are immune to lockouts and cannot be used for interactive logins, enhancing their security.
 - **Multiple Host Support**: gMSAs can be shared across multiple hosts, making them ideal for services running on multiple servers.
 - **Scheduled Task Capability**: Unlike managed service accounts, gMSAs support running scheduled tasks.
 - **Simplified SPN Management**: The system automatically updates the Service Principal Name (SPN) when there are changes to the computer's sAMaccount details or DNS name, simplifying SPN management.
 
-The passwords for gMSAs are stored in the LDAP property _**msDS-ManagedPassword**_ and are automatically reset every 30 days by Domain Controllers (DCs). This password, an encrypted data blob known as [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), can only be retrieved by authorized administrators and the servers on which the gMSAs are installed, ensuring a secure environment. To access this information, a secured connection such as LDAPS is required, or the connection must be authenticated with 'Sealing & Secure'.
+A domain controller constructs the LDAP attribute _**msDS-ManagedPassword**_ on read from KDS-derived password material; the value is not an independently stored password. It normally changes every 30 days.<sup>[[20]](#references)</sup> The returned [MSDS-MANAGEDPASSWORD_BLOB](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e) is **not an encrypted password**: its `CurrentPassword` field contains the cleartext password.<sup>[[14]](#references)</sup> Access is checked against `msDS-GroupMSAMembership`, so any principal granted retrieval rights is in scope, not just administrators or the service hosts.<sup>[[15]](#references)</sup> The LDAP connection must provide confidentiality, for example through LDAPS or SASL sealing.<sup>[[20]](#references)</sup>
+
+For offline password derivation after KDS root-key exposure, see [Golden gMSA/dMSA](active-directory-methodology/golden-dmsa-gmsa.md).
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../images/asd1.png)<sup>[[3]](#references)</sup>
 
@@ -202,12 +219,9 @@ $ExecutionContext.SessionState.LanguageMode
 
 ### Bypass
 
-```bash
-#Easy bypass
-Powershell -version 2
-```
+`powershell.exe -Version 2` was a legacy downgrade only on hosts with the optional PowerShell 2 engine installed. It is no longer included in updated Windows 11 24H2 or Windows Server 2025; do not treat it as a current CLM bypass.<sup>[[17]](#references)</sup> Under application control, PowerShell runs untrusted code in Constrained Language, while policy-trusted scripts can run in Full Language.<sup>[[18]](#references)</sup>
 
-In current Windows that Bypass won't work but you can use[ **PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
+For older configurations, you can use [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
 **To compile it you may need** **to** _**Add a Reference**_ -> _Browse_ ->_Browse_ -> add `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` and **change the project to .Net4.5**.
 
 #### Direct bypass:
@@ -281,6 +295,7 @@ authentication-credentials-uac-and-efs/uac-user-account-control.md
 
 
 
+
 ## References
 
 - [1] [Bypassing AppLocker and PowerShell constrained language mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)
@@ -289,4 +304,18 @@ authentication-credentials-uac-and-efs/uac-user-account-control.md
 - [4] [15 Ways to Bypass the PowerShell Execution Policy](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
 - [5] [Use the AppLocker Windows PowerShell cmdlets](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/applocker/use-the-applocker-windows-powershell-cmdlets)
 - [6] [Windows LAPS overview](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-overview)
+- [7] [Working with AppLocker rules](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/applocker/working-with-applocker-rules)
+- [8] [Using Event Viewer with AppLocker](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/applocker/using-event-viewer-with-applocker)
+- [9] [AppLocker processes and interactions](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/applocker/applocker-processes-and-interactions)
+- [10] [File streams (local file systems)](https://learn.microsoft.com/en-us/windows/win32/fileio/file-streams)
+- [11] [Cipher command](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/cipher)
+- [12] [Certutil command](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/certutil)
+- [13] [Back up recovery agent EFS private key](https://learn.microsoft.com/en-us/troubleshoot/windows-server/certificates-and-public-key-infrastructure-pki/back-up-recovery-agent-efs-private-key)
+- [14] [MSDS-MANAGEDPASSWORD_BLOB](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e)
+- [15] [ms-DS-GroupMSAMembership attribute](https://learn.microsoft.com/en-us/windows/win32/adschema/a-msds-groupmsamembership)
+- [16] [Secure group managed service accounts](https://learn.microsoft.com/en-us/entra/architecture/service-accounts-group-managed)
+- [17] [Features removed from Windows client](https://learn.microsoft.com/en-us/windows/whats-new/removed-features)
+- [18] [Use App Control to secure PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/security/app-control/application-control)
+- [19] [Event 4693 and DPAPI master keys](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4693)
+- [20] [msDS-ManagedPassword construction](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/9cd2fc5e-7305-4fb8-b233-2a60bc3eec68)
 {{#include ../banners/hacktricks-training.md}}
