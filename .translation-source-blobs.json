@@ -200,7 +200,7 @@
     "src/generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md": "aa5e7ab8a21f38ed66bdae56ed32c04c1bc70f70",
     "src/generic-methodologies-and-resources/basic-forensic-methodology/ios-backup-forensics.md": "86a5ecb25c7da75e314c3a7f200c58e5ce2d0628",
     "src/generic-methodologies-and-resources/basic-forensic-methodology/linux-forensics.md": "ef73efa48828074ab88750e994c23b75ce8dff1c",
-    "src/generic-methodologies-and-resources/basic-forensic-methodology/malware-analysis.md": "5af9d46fc4a650d3ac41bed4741302237659626e",
+    "src/generic-methodologies-and-resources/basic-forensic-methodology/malware-analysis.md": "36cd3eade92009e2a8be59ef4ecea2be85e9688f",
     "src/generic-methodologies-and-resources/basic-forensic-methodology/memory-dump-analysis/README.md": "1ba416636d8a72f4671bba744c567ed0ac830b9c",
     "src/generic-methodologies-and-resources/basic-forensic-methodology/memory-dump-analysis/volatility-cheatsheet.md": "e0980eb53b6b039beb27c44c9abae6fe5e468db9",
     "src/generic-methodologies-and-resources/basic-forensic-methodology/partitions-file-systems-carving/README.md": "ed04bdf8808f0967a30e147ee158563e794af678",
