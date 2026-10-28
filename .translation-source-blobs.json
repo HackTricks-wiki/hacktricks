@@ -881,7 +881,7 @@
     "src/pentesting-web/grpc-web-pentest.md": "12e9cb7e830008df7658426c8a94bf761efe900a",
     "src/pentesting-web/h2c-smuggling.md": "c82737d039282aac845688e277827393829105e8",
     "src/pentesting-web/hacking-jwt-json-web-tokens.md": "53b04282820adf4749c644a680b94a851fc7b57e",
-    "src/pentesting-web/hacking-with-cookies/README.md": "1418ec9349f7e87780bed5b9c231cdb0559b7d34",
+    "src/pentesting-web/hacking-with-cookies/README.md": "2906b5caf1b2f9fbf217173aa0eb440db5302d75",
     "src/pentesting-web/hacking-with-cookies/cookie-bomb.md": "3168213f7843a53579819838b9b9793766974a91",
     "src/pentesting-web/hacking-with-cookies/cookie-jar-overflow.md": "03a87a20301d74cbcc3b0b7e67b32b4318d2a083",
     "src/pentesting-web/hacking-with-cookies/cookie-tossing.md": "4163a60dffbd1de4fa50661d3c9c7fb7d3a2ffd8",
