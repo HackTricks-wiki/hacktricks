@@ -270,9 +270,7 @@ Notes:
 
 #### `ComputerDefaults.exe` trigger for the same `ms-settings` handler
 
-`ComputerDefaults.exe` resolves the same per-user `ms-settings\Shell\Open\command` association as `fodhelper.exe`. After setting the default command and empty `DelegateExecute` value above, use `Start-Process "$env:WINDIR\System32\ComputerDefaults.exe"` as an alternative trigger; do not repeat the registry setup. UACME catalogs this trigger from Windows 10 RS4 (build 17134), so verify it on the target build.<sup>[[3]](#references)[[13]](#references)[[14]](#references)</sup>
-
-This bypass raises a **medium-integrity local administrator** to high integrity under suitable UAC settings; it cannot give a standard user administrator rights.<sup>[[3]](#references)</sup> The analyzed RAT samples had this option disabled, so the report did not demonstrate successful elevation.<sup>[[13]](#references)</sup>
+`ComputerDefaults.exe` resolves the same per-user `ms-settings\Shell\Open\command` association as `fodhelper.exe`.<sup>[[13]](#references)[[14]](#references)</sup> After setting the default command and empty `DelegateExecute` value above, use `Start-Process "$env:WINDIR\System32\ComputerDefaults.exe"` as an alternative trigger; do not repeat the registry setup.<sup>[[13]](#references)[[14]](#references)</sup> The medium-integrity administrator and UAC policy prerequisites in the `fodhelper.exe` notes above still apply.<sup>[[2]](#references)[[3]](#references)</sup> UACME catalogs this trigger from Windows 10 RS4 (build 17134), so verify it on the target build.<sup>[[3]](#references)</sup>
 
 #### CurVer/extension hijack variant (HKCU only)
 
