@@ -360,7 +360,7 @@
     "src/linux-hardening/containers-namespaces/container-security/protections/namespaces/ipc-namespace.md": "cc45fb08dbf63c6b594bfe58e961a46795f13f79",
     "src/linux-hardening/containers-namespaces/container-security/protections/namespaces/mount-namespace.md": "6a9bf959e9f657fcacf085cdaba87068f8a640f2",
     "src/linux-hardening/containers-namespaces/container-security/protections/namespaces/network-namespace.md": "7dc9832a754f987d602c928a6932c1a7b429db61",
-    "src/linux-hardening/containers-namespaces/container-security/protections/namespaces/pid-namespace.md": "9692c3f7376f7f4b3cb8d9e31d8888f35929afa0",
+    "src/linux-hardening/containers-namespaces/container-security/protections/namespaces/pid-namespace.md": "725bb99ab9ee63cdc9ba6208b797bc8b8ec86752",
     "src/linux-hardening/containers-namespaces/container-security/protections/namespaces/time-namespace.md": "07f0fc17d8af142b1f967eba1a54de2b0641c280",
     "src/linux-hardening/containers-namespaces/container-security/protections/namespaces/user-namespace.md": "8565cb1ca55a2bf1dc11f8d58fb7811a540f8686",
     "src/linux-hardening/containers-namespaces/container-security/protections/namespaces/uts-namespace.md": "4297bd3ecec2c4f6450f9c6b70953815889d0d46",
