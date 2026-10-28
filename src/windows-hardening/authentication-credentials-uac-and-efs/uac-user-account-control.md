@@ -268,6 +268,10 @@ Notes:
 - Use the `sysnative` path to start a 64-bit PowerShell from a 32-bit process on 64-bit Windows.
 - Payload can be any command (PowerShell, cmd, or an EXE path). Avoid prompting UIs for stealth.
 
+#### `ComputerDefaults.exe` trigger for the same `ms-settings` handler
+
+`ComputerDefaults.exe` resolves the same per-user `ms-settings\Shell\Open\command` association as `fodhelper.exe`.<sup>[[13]](#references)[[14]](#references)</sup> After setting the default command and empty `DelegateExecute` value above, use `Start-Process "$env:WINDIR\System32\ComputerDefaults.exe"` as an alternative trigger; do not repeat the registry setup.<sup>[[13]](#references)[[14]](#references)</sup> The medium-integrity administrator and UAC policy prerequisites in the `fodhelper.exe` notes above still apply.<sup>[[2]](#references)[[3]](#references)</sup> UACME catalogs this trigger from Windows 10 RS4 (build 17134), so verify it on the target build.<sup>[[3]](#references)</sup>
+
 #### CurVer/extension hijack variant (HKCU only)
 
 Recent samples abusing `fodhelper.exe` avoid `DelegateExecute` and instead **redirect the `ms-settings` ProgID** via the per-user `CurVer` value. The auto-elevated binary still resolves the handler under `HKCU`, so no admin token is needed to plant the keys:<sup>[[5]](#references)</sup>
@@ -420,4 +424,6 @@ logman stop AdminProtectionTrace -ets
 - [10] [Microsoft Learn – Administrator protection](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/administrator-protection/)
 - [11] [Google Project Zero – Calling Local Windows RPC Servers from .NET](https://projectzero.google/2019/12/calling-local-windows-rpc-servers-from.html)
 - [12] [Kaspersky Securelist – HoneyMyte Enhances CoolClient with a Signed Windows Kernel Rootkit](https://securelist.com/honeymyte-coolclient-driver-rootkit/121028)
+- [13] [Group-IB – KGB RAT: A Fully Undetectable Windows Trojan Built to Spy, Steal, and Terrorize](https://www.group-ib.com/blog/kgb-rat-windows-fud-trojan/)
+- [14] [LOLBAS – ComputerDefaults.exe](https://lolbas-project.github.io/lolbas/Binaries/ComputerDefaults/)
 {{#include ../../banners/hacktricks-training.md}}
