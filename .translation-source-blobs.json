@@ -1093,7 +1093,7 @@
     "src/windows-hardening/active-directory-methodology/silver-ticket.md": "5522f049a63cfb292f89b01083e36f8c7542d4d6",
     "src/windows-hardening/active-directory-methodology/skeleton-key.md": "9b849fac23b12b2c1961d203384f6a8a12d6c3ae",
     "src/windows-hardening/active-directory-methodology/unconstrained-delegation.md": "d3900ae6ef1f4f03f34627b43a101d6045c16e67",
-    "src/windows-hardening/authentication-credentials-uac-and-efs.md": "f3a774921fc7649347a4ce50248e0c6e11921b21",
+    "src/windows-hardening/authentication-credentials-uac-and-efs.md": "5371917ebe7562773ef4274ab463398cf2ab4782",
     "src/windows-hardening/authentication-credentials-uac-and-efs/README.md": "4d9ca02b0308cc9025a146813d4b838638dd320e",
     "src/windows-hardening/authentication-credentials-uac-and-efs/uac-user-account-control.md": "fddea96706aa78d40eddc15287123e78bd6faff9",
     "src/windows-hardening/av-bypass.md": "e051bae7229991752cd876335b05f789512efb5a",
