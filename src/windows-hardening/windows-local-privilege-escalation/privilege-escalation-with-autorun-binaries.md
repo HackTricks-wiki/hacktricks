@@ -23,10 +23,12 @@ schtasks /query /fo LIST 2>nul | findstr TaskName
 schtasks /query /fo LIST /v > schtasks.txt; cat schtasks.txt | grep "SYSTEM\|Task To Run" | grep -B 1 SYSTEM
 Get-ScheduledTask | where {$_.TaskPath -notlike "\Microsoft*"} | ft TaskName,TaskPath,State
 
-#Schtask to give admin access
+#Requires an elevated caller to register a task as SYSTEM
 #You can also write that content on a bat file that is being executed by a scheduled task
 schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgroup administrators user /add"
 ```
+
+A task created with `/sc ONLOGON /rl HIGHEST` requests the highest run level **available to its registered principal**; the switch alone neither changes that principal nor bypasses UAC. A low-privilege process cannot register a highest-run-level task or select SYSTEM as its task identity. Treat the example above as an action for an already elevated caller, not a path from a standard user to SYSTEM.<sup>[[8]](#references)[[9]](#references)</sup>
 
 An enabled task that runs as SYSTEM deserves review even when its task definition and action file are protected. [Task Scheduler requires execute permission on the task to run it on demand](https://learn.microsoft.com/en-us/windows/win32/taskschd/security-contexts-for-running-tasks). If a low-privilege user has that permission, inspect the exact action, especially PowerShell scripts that modify Active Directory ACLs or reset account-protection settings. Check the task's `AllowDemandStart` setting and verify the script's inputs and effects; permission to start a fixed task alone does not imply arbitrary code execution.
 
@@ -393,5 +395,7 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 - [5] [How can I add a boot option that starts an alternate shell?](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
 - [6] [Metasploit Wrap-Up 04/03/2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026)
 - [7] [Metasploit PR #21032 – windows/persistence/userinit_mpr_logon_script](https://github.com/rapid7/metasploit-framework/pull/21032)
+- [8] [Microsoft Learn – Security Contexts for Tasks](https://learn.microsoft.com/en-us/windows/win32/taskschd/security-contexts-for-running-tasks)
+- [9] [Group-IB – KGB RAT: A Fully Undetectable Windows Trojan Built to Spy, Steal, and Terrorize](https://www.group-ib.com/blog/kgb-rat-windows-fud-trojan/)
 
 {{#include ../../banners/hacktricks-training.md}}
