@@ -15,7 +15,7 @@ Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 
 ## Zakazani zadaci
 
-**Zadaci** se mogu zakazati da se pokreću **određenom učestalošću**. Koristite sledeće komande da biste videli koje binarne datoteke su zakazane za pokretanje:
+**Zadaci** mogu biti zakazani da se pokreću **određenom učestalošću**. Koristite sledeće komande da biste videli koji su binaries zakazani za pokretanje:
 
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
@@ -23,16 +23,18 @@ schtasks /query /fo LIST 2>nul | findstr TaskName
 schtasks /query /fo LIST /v > schtasks.txt; cat schtasks.txt | grep "SYSTEM\|Task To Run" | grep -B 1 SYSTEM
 Get-ScheduledTask | where {$_.TaskPath -notlike "\Microsoft*"} | ft TaskName,TaskPath,State
 
-#Schtask to give admin access
+#Requires an elevated caller to register a task as SYSTEM
 #You can also write that content on a bat file that is being executed by a scheduled task
 schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgroup administrators user /add"
 ```
 
-Omogućeni zadatak koji se izvršava kao SYSTEM treba proveriti čak i kada su njegova definicija i datoteka radnje zaštićene. [Task Scheduler zahteva dozvolu za izvršavanje zadatka da bi ga pokrenuo na zahtev](https://learn.microsoft.com/en-us/windows/win32/taskschd/security-contexts-for-running-tasks). Ako korisnik sa niskim privilegijama ima tu dozvolu, pregledajte tačnu radnju, naročito PowerShell skripte koje menjaju ACL-ove u Active Directory-ju ili resetuju podešavanja zaštite naloga. Proverite podešavanje `AllowDemandStart` zadatka i verifikujte ulaze i efekte skripte; dozvola za pokretanje fiksnog zadatka sama po sebi ne podrazumeva mogućnost izvršavanja proizvoljnog koda.
+Zadatak kreiran pomoću `/sc ONLOGON /rl HIGHEST` zahteva najviši nivo izvršavanja **dostupan identitetu pod kojim je registrovan**; sama ova opcija ne menja taj identitet niti zaobilazi UAC. Proces sa niskim privilegijama ne može da registruje zadatak sa najvišim nivoom izvršavanja niti da izabere SYSTEM kao identitet zadatka. Tretirajte gornji primer kao radnju koju izvršava već povišen proces, a ne kao put od standardnog korisnika do SYSTEM.<sup>[[8]](#references)</sup>
+
+Omogućen zadatak koji se izvršava kao SYSTEM treba proveriti čak i kada su njegova definicija i datoteka radnje zaštićene. [Planer zadataka zahteva dozvolu za izvršavanje zadatka da bi ga pokrenuo na zahtev](https://learn.microsoft.com/en-us/windows/win32/taskschd/security-contexts-for-running-tasks). Ako korisnik sa niskim privilegijama ima tu dozvolu, pregledajte tačnu radnju, naročito PowerShell skripte koje menjaju ACL-ove u Active Directory-ju ili resetuju postavke zaštite naloga. Proverite postavku `AllowDemandStart` zadatka i utvrdite šta skripta radi i kako obrađuje ulazne podatke; sama dozvola za pokretanje fiksnog zadatka ne podrazumeva izvršavanje proizvoljnog koda.
 
 ## Fascikle
 
-Sve binarne datoteke koje se nalaze u **fasciklama za pokretanje** izvršavaju se pri pokretanju sistema. Uobičajene fascikle za pokretanje navedene su u nastavku, ali fascikla za pokretanje je određena u registru. [Pročitajte ovo da biste saznali gde.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Sve binarne datoteke smeštene u **fasciklama za pokretanje izvršavaju se pri pokretanju**. Uobičajene fascikle za pokretanje navedene su u nastavku, ali je putanja fascikle za pokretanje navedena u registru. [Pročitajte ovo da biste saznali gde.](privilege-escalation-with-autorun-binaries.md#startup-path)
 
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
@@ -43,11 +45,11 @@ Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
 
-Unos u Startup folderu korisnika sa višim privilegijama može da pokrene zaštićenu skriptu koja više puta otvara datoteke iz direktorijuma u koji drugi korisnik može da upisuje. Pre nego što taj direktorijum smatrate mogućim putem za eskalaciju privilegija, proverite **stvarni identitet za prijavljivanje** unosa, ulazni direktorijum skripte i njegove ACL-ove, kao i konkretnu radnju. Konkretno, [`hh.exe` otvara datoteke HTML Help-a (`.chm`)](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/htmlhelp/about-the-html-help-executable-program); skripta koja mu prosleđuje datoteke koje je dostavio pozivalac prelazi granicu poverenja sadržaja čak i ako proverava ime datoteke ili prve bajtove. [HTML Help policies can restrict executable shortcuts](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/htmlhelp/system-policies-for-shortcut-and-winhelp-commands), zato proverite instaliranu politiku i ponašanje dostupnog sadržaja. Sama `.chm` ekstenzija ili potpisni bajtovi ne dokazuju izvršavanje koda sa višim privilegijama. Pregledajte autorun, komandnu liniju procesa i dozvole putanje, bez otvaranja nepouzdane datoteke tokom enumeracije.
+Unos u Startup folderu korisnika sa višim privilegijama može da pokrene zaštićenu skriptu koja više puta otvara datoteke iz direktorijuma u koji drugi korisnik može da upisuje. Pre nego što taj direktorijum smatrate putem za eskalaciju privilegija, proverite **stvarni identitet za prijavljivanje**, ulazni direktorijum skripte i njegove ACL-ove, kao i tačnu radnju. Konkretno, [`hh.exe` otvara kompajlirane HTML Help (`.chm`) datoteke](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/htmlhelp/about-the-html-help-executable-program); skripta koja mu prosleđuje datoteke koje je dostavio pozivalac prelazi granicu poverenja u sadržaj, čak i ako proverava naziv datoteke ili njene prve bajtove. [HTML Help smernice mogu da ograniče izvršne prečice](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/htmlhelp/system-policies-for-shortcut-and-winhelp-commands), zato proverite instaliranu smernicu i ponašanje dostupnog sadržaja. Samo `.chm` ekstenzija ili magični bajtovi ne dokazuju izvršavanje koda sa višim privilegijama. Pregledajte autorun, komandnu liniju procesa i dozvole za putanju, bez otvaranja nepouzdane datoteke tokom enumeracije.
 
-Ista granica sadržaja postoji kada osoba sa višim privilegijama **ručno otvori** `.chm` iz fascikle sa dokumentacijom koju drugi korisnik može da zameni. Proverite tačnu datoteku i dozvole za upis u nadređeni direktorijum, identitet stvarnog preglednika i događaj otvaranja, kao i efektivnu HTML Help politiku. Fascikla u koju može da se upisuje ili zahtev za pregled dokumentacije ne dokazuju da je korisnik sa višim privilegijama otvorio sadržaj koji kontroliše napadač.
+Ista granica poverenja u sadržaj postoji kada osoba sa višim privilegijama **ručno otvori** `.chm` iz fascikle sa dokumentacijom koju drugi korisnik može da zameni. Proverite tačnu datoteku i dozvole za upis u nadređeni direktorijum, stvarni identitet pregledača i događaj otvaranja, kao i efektivnu HTML Help smernicu. Fascikla u koju može da se upisuje ili zahtev za pregled dokumentacije ne dokazuju da je korisnik sa višim privilegijama otvorio sadržaj koji je kontrolisao napadač.
 
-> **NAPOMENA**: Ranjivosti *path traversal* pri raspakivanju arhiva (kao što je ona iskorišćena u WinRAR-u pre verzije 7.13 – CVE-2025-8088) mogu se iskoristiti za **direktno smeštanje payload-a u ove Startup foldere tokom raspakivanja**, što dovodi do izvršavanja koda pri sledećem prijavljivanju korisnika.  Za detaljniji pregled ove tehnike pogledajte:
+> **NAPOMENA**: Ranjivosti *path traversal* pri raspakivanju arhiva (kao što je ona iskorišćena u WinRAR-u pre verzije 7.13 – CVE-2025-8088) mogu da se iskoriste za **postavljanje payloads direktno u ove Startup fascikle tokom raspakivanja**, što dovodi do izvršavanja koda pri sledećem prijavljivanju korisnika. Za detaljan pregled ove tehnike pogledajte:
 
 
 {{#ref}}
@@ -59,11 +61,11 @@ Ista granica sadržaja postoji kada osoba sa višim privilegijama **ručno otvor
 ## Registar
 
 > [!TIP]
-> [Napomena odavde](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): Unos u registru **Wow6432Node** ukazuje na to da koristite 64-bitnu verziju Windows-a. Operativni sistem koristi ovaj ključ da prikaže zaseban prikaz ključa HKEY_LOCAL_MACHINE\SOFTWARE za 32-bitne aplikacije koje rade na 64-bitnim verzijama Windows-a.
+> [Napomena odavde](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): Unos registra **Wow6432Node** ukazuje na to da koristite 64-bitnu verziju sistema Windows. Operativni sistem koristi ovaj ključ da bi prikazao zaseban prikaz ključa HKEY_LOCAL_MACHINE\SOFTWARE za 32-bitne aplikacije koje rade na 64-bitnim verzijama sistema Windows.
 
 ### Pokretanja
 
-**Uobičajeno poznati** AutoRun registar:
+**Uobičajeno poznati** AutoRun unosi u registru:
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -77,7 +79,7 @@ Ista granica sadržaja postoji kada osoba sa višim privilegijama **ručno otvor
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-Ključevi registra poznati kao **Run** i **RunOnce** namenjeni su automatskom pokretanju programa svaki put kada se korisnik prijavi na sistem. Dužina komandne linije dodeljene kao vrednost podataka ključa ograničena je na najviše 260 znakova.<sup>[[2]](#references)</sup>
+Ključevi registra poznati kao **Run** i **RunOnce** namenjeni su automatskom pokretanju programa svaki put kada se korisnik prijavi u sistem. Komandna linija dodeljena kao vrednost podataka ključa ograničena je na najviše 260 znakova.<sup>[[2]](#references)</sup>
 
 **Pokretanja servisa** (mogu da kontrolišu automatsko pokretanje servisa tokom podizanja sistema):
 
@@ -95,17 +97,17 @@ Ključevi registra poznati kao **Run** i **RunOnce** namenjeni su automatskom po
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-U operativnom sistemu Windows Vista i novijim verzijama, ključevi registra **Run** i **RunOnce** ne generišu se automatski. Unosi u ovim ključevima mogu direktno da pokrenu programe ili da ih navedu kao zavisnosti. Na primer, za učitavanje DLL datoteke prilikom prijavljivanja može se koristiti ključ registra **RunOnceEx** zajedno sa ključem „Depend“. Ovo je prikazano dodavanjem unosa u registar za izvršavanje datoteke „C:\temp\evil.dll“ pri pokretanju sistema:<sup>[[2]](#references)</sup>
+U sistemu Windows Vista i novijim verzijama, ključevi registra **Run** i **RunOnce** ne kreiraju se automatski. Unosi u ovim ključevima mogu direktno da pokreću programe ili da ih navedu kao zavisnosti. Na primer, za učitavanje DLL datoteke pri prijavljivanju, može se koristiti ključ registra **RunOnceEx** zajedno sa ključem „Depend“. To se može demonstrirati dodavanjem unosa u registar koji izvršava „C:\temp\evil.dll“ tokom pokretanja sistema:<sup>[[2]](#references)</sup>
 
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 
 > [!TIP]
-> **Exploit 1**: Ako možete da pišete u bilo koji od pomenutih ključeva registry-ja u okviru **HKLM**, možete da eskalirate privilegije kada se drugi korisnik prijavi.
+> **Exploit 1**: Ako možete da pišete u bilo koji od pomenutih registara unutar **HKLM**, možete eskalirati privilegije kada se drugi korisnik prijavi.
 
 > [!TIP]
-> **Exploit 2**: Ako možete da zamenite bilo koju od binarnih datoteka navedenih u bilo kom od ključeva registry-ja u okviru **HKLM**, možete da izmenite tu binarnu datoteku i ubacite backdoor koji će eskalirati privilegije kada se drugi korisnik prijavi.
+> **Exploit 2**: Ako možete da zamenite bilo koju binarnu datoteku navedenu u nekom od registara unutar **HKLM**, možete da izmenite tu binarnu datoteku tako da sadrži backdoor kada se drugi korisnik prijavi i eskalirate privilegije.
 
 ```bash
 #CMD
@@ -170,10 +172,10 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Prečice postavljene u fasciklu **Startup** automatski pokreću usluge ili aplikacije prilikom prijavljivanja korisnika ili ponovnog pokretanja sistema. Lokacija fascikle **Startup** definisana je u registru za opsege **Local Machine** i **Current User**. To znači da će svaka prečica dodata na ove određene lokacije **Startup** obezbediti pokretanje povezane usluge ili programa nakon prijavljivanja ili ponovnog pokretanja, što je jednostavan način za automatsko pokretanje programa.<sup>[[1]](#references)[[2]](#references)</sup>
+Prečice smeštene u fasciklu **Startup** automatski će pokrenuti servise ili aplikacije prilikom prijavljivanja korisnika ili ponovnog pokretanja sistema. Lokacija fascikle **Startup** definisana je u registru za opsege **Local Machine** i **Current User**. To znači da će svaka prečica dodata na navedene lokacije fascikle **Startup** obezbediti pokretanje povezanog servisa ili programa nakon prijavljivanja ili ponovnog pokretanja, što predstavlja jednostavan način za automatsko pokretanje programa.<sup>[[1]](#references)[[2]](#references)</sup>
 
 > [!TIP]
-> Ako možete da prepišete bilo koju fasciklu [Korisničke] Shell Folders u okviru **HKLM**, moći ćete da je usmerite na fasciklu koju kontrolišete i postavite backdoor koji će se izvršiti svaki put kada se korisnik prijavi na sistem, čime se eskaliraju privilegije.
+> Ako možete da zamenite bilo koju fasciklu [User] Shell pod **HKLM**, moći ćete da je usmerite na fasciklu kojom vi upravljate i postavite backdoor koji će se izvršavati svaki put kada se korisnik prijavi na sistem, čime se povećavaju privilegije.
 
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
@@ -191,10 +193,10 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion
 
 - `HKCU\Environment\UserInitMprLogonScript`
 
-Ova vrednost registra za konkretnog korisnika može da upućuje na skriptu ili komandu koja se izvršava kada se taj korisnik prijavi. Uglavnom je primitive za **persistence**, jer se izvršava samo u kontekstu pogođenog korisnika, ali je ipak vredi proveriti tokom post-exploitation aktivnosti i pregleda autoruns stavki.<sup>[[3]](#references)[[6]](#references)[[7]](#references)</sup>
+Ova korisnička vrednost registra može da upućuje na skriptu ili komandu koja se izvršava kada se taj korisnik prijavi. Uglavnom služi kao primitive za **persistence**, jer se izvršava samo u kontekstu pogođenog korisnika, ali je ipak vredi proveriti tokom post-exploitation provera i pregleda autorun stavki.<sup>[[3]](#references)[[6]](#references)[[7]](#references)</sup>
 
 > [!TIP]
-> Ako možete da upišete ovu vrednost za trenutnog korisnika, možete ponovo da pokrenete izvršavanje pri sledećoj interaktivnoj prijavi, bez administratorskih prava. Ako možete da je upišete u hive registra drugog korisnika, možda ćete dobiti izvršavanje koda kada se taj korisnik prijavi.
+> Ako možete da upisujete ovu vrednost za trenutnog korisnika, možete ponovo da pokrenete izvršavanje pri sledećoj interaktivnoj prijavi, bez potrebe za administratorskim pravima. Ako možete da je upišete u hive registra drugog korisnika, možete dobiti izvršavanje koda kada se taj korisnik prijavi.
 
 ```bash
 reg query "HKCU\Environment" /v "UserInitMprLogonScript"
@@ -209,14 +211,14 @@ Remove-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonSc
 Napomene:
 
 - Prednost dajte punim putanjama do `.bat`, `.cmd`, `.ps1` ili drugih launcher datoteka koje su već čitljive ciljnom korisniku.
-- Ovo opstaje nakon odjave/ponovnog pokretanja dok se vrednost ne ukloni.
-- Za razliku od `HKLM\...\Run`, ovo samo po sebi **ne** omogućava povišene privilegije; ovo je postojanost u opsegu korisnika.
+- Ovo ostaje aktivno nakon odjave ili ponovnog pokretanja dok se vrednost ne ukloni.
+- Za razliku od `HKLM\...\Run`, ovo samo po sebi ne dodeljuje povišene privilegije; reč je o per-user persistence.
 
 ### Winlogon ključevi
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-Ključ **Userinit** je obično podešen na **userinit.exe**. Međutim, ako se ovaj ključ izmeni, navedeni izvršni fajl će takođe pokrenuti **Winlogon** prilikom prijavljivanja korisnika. Slično tome, predviđeno je da ključ **Shell** pokazuje na **explorer.exe**, koji je podrazumevana shell aplikacija za Windows.<sup>[[1]](#references)</sup>
+Ključ **Userinit** je obično podešen na **userinit.exe**. Međutim, ako se ovaj ključ izmeni, navedeni izvršni fajl će takođe pokrenuti **Winlogon** prilikom prijave korisnika. Slično tome, očekuje se da ključ **Shell** pokazuje na **explorer.exe**, koji je podrazumevani shell za Windows.<sup>[[1]](#references)</sup>
 
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
@@ -226,9 +228,9 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 ```
 
 > [!TIP]
-> Ako možete da prepišete vrednost u registru ili binarnu datoteku, moći ćete da eskalirate privilegije.
+> Ako možete da prepišete vrednost registra ili binarni fajl, moći ćete da povećate privilegije.
 
-### Podešavanja pravila
+### Podešavanja smernica
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
@@ -244,23 +246,23 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 ### AlternateShell
 
-### Promena komandne linije u Safe Mode režimu
+### Menjanje komandnog prompta u bezbednom režimu
 
-U Windows Registry-ju, pod `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, postoji vrednost **`AlternateShell`** koja je podrazumevano postavljena na `cmd.exe`. To znači da se pri izboru opcije „Safe Mode with Command Prompt“ tokom pokretanja (pritiskom na F8) koristi `cmd.exe`. Međutim, moguće je podesiti računar da se automatski pokreće u ovom režimu, bez potrebe da pritiskate F8 i ručno ga birate.
+U Windows registru, pod `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, postoji vrednost **`AlternateShell`** koja je podrazumevano postavljena na `cmd.exe`. To znači da se pri izboru opcije „Safe Mode with Command Prompt“ tokom pokretanja (pritiskom na F8) koristi `cmd.exe`. Međutim, moguće je podesiti računar tako da se automatski pokrene u ovom režimu, bez potrebe za pritiskom na F8 i ručnim izborom opcije.
 
-Koraci za kreiranje opcije pokretanja koja automatski pokreće sistem u režimu „Safe Mode with Command Prompt“:<sup>[[5]](#references)</sup>
+Koraci za kreiranje opcije pokretanja koja automatski pokreće „Safe Mode with Command Prompt“:<sup>[[5]](#references)</sup>
 
-1. Promenite atribute datoteke `boot.ini` da biste uklonili oznake za read-only, system i hidden: `attrib c:\boot.ini -r -s -h`
+1. Promenite atribute datoteke `boot.ini` da biste uklonili oznake samo za čitanje, sistemske i skrivene datoteke: `attrib c:\boot.ini -r -s -h`
 2. Otvorite `boot.ini` za uređivanje.
-3. Umetnite red poput ovog: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
-4. Sačuvajte izmene u datoteci `boot.ini`.
-5. Vratite originalne atribute datoteke: `attrib c:\boot.ini +r +s +h`
+3. Ubacite red poput ovog: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
+4. Sačuvajte izmene u `boot.ini`.
+5. Vratite prvobitne atribute datoteke: `attrib c:\boot.ini +r +s +h`
 
-- **Exploit 1:** Promena registry ključa **AlternateShell** omogućava podešavanje prilagođene komandne ljuske, što potencijalno može omogućiti neovlašćen pristup.
-- **Exploit 2 (PATH Write Permissions):** Dozvole za upis u bilo koji deo sistemske promenljive **PATH**, naročito pre `C:\Windows\system32`, omogućavaju izvršavanje prilagođenog `cmd.exe`, koji bi mogao da posluži kao backdoor ako se sistem pokrene u Safe Mode režimu.
-- **Exploit 3 (PATH and boot.ini Write Permissions):** Pristup za upis u `boot.ini` omogućava automatsko pokretanje sistema u Safe Mode režimu, čime se olakšava neovlašćen pristup pri sledećem restartovanju.
+- **Exploit 1:** Promena ključa registra **AlternateShell** omogućava podešavanje prilagođene komandne ljuske, što može dovesti do neovlašćenog pristupa.
+- **Exploit 2 (PATH dozvole za pisanje):** Dozvole za pisanje u bilo kom delu sistemske promenljive **PATH**, naročito pre `C:\Windows\system32`, omogućavaju izvršavanje prilagođenog `cmd.exe`, koji bi mogao da posluži kao backdoor ako se sistem pokrene u bezbednom režimu.
+- **Exploit 3 (PATH i boot.ini dozvole za pisanje):** Pristup za pisanje u `boot.ini` omogućava automatsko pokretanje u bezbednom režimu, što olakšava neovlašćen pristup pri sledećem ponovnom pokretanju.
 
-Da biste proverili trenutno podešavanje **AlternateShell**, koristite ove komande:
+Da biste proverili trenutnu postavku **AlternateShell**, koristite ove komande:
 
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
@@ -269,28 +271,28 @@ Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Co
 
 ### Instalirana komponenta
 
-Active Setup je funkcija sistema Windows koja se **pokreće pre nego što se okruženje radne površine u potpunosti učita**. Daje prioritet izvršavanju određenih komandi, koje moraju da se dovrše pre nego što se nastavi prijavljivanje korisnika. Ovaj proces se odvija čak i pre pokretanja drugih stavki pri pokretanju sistema, kao što su one u odeljcima registratora Run ili RunOnce.
+Active Setup je funkcija u Windowsu koja **pokreće proces pre nego što se okruženje radne površine u potpunosti učita**. Ona daje prioritet izvršavanju određenih komandi, koje moraju da se završe pre nego što se nastavi prijavljivanje korisnika. Ovaj proces se odvija čak i pre aktiviranja drugih stavki pri pokretanju, kao što su one u odeljcima Run ili RunOnce registra.
 
-Active Setup se upravlja pomoću sledećih ključeva registratora:
+Active Setup se upravlja pomoću sledećih ključeva registra:
 
 - `HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-U okviru ovih ključeva postoje razni potključevi, od kojih svaki odgovara određenoj komponenti. Vrednosti ključeva od posebnog značaja uključuju:
+U okviru ovih ključeva postoje različiti potključevi, od kojih svaki odgovara određenoj komponenti. Vrednosti ključeva od posebnog značaja obuhvataju:
 
 - **IsInstalled:**
   - `0` označava da se komanda komponente neće izvršiti.
   - `1` znači da će se komanda izvršiti jednom za svakog korisnika; to je podrazumevano ponašanje ako vrednost `IsInstalled` nedostaje.
-- **StubPath:** Definiše komandu koju će izvršiti Active Setup. To može biti bilo koja važeća komandna linija, na primer pokretanje programa `notepad`.
+- **StubPath:** Definiše komandu koju će izvršiti Active Setup. To može biti bilo koja važeća komandna linija, poput pokretanja programa `notepad`.
 
 **Bezbednosni uvidi:**
 
-- Izmena ključa ili upisivanje u njega, kada je **`IsInstalled`** podešen na `"1"` i postoji određeni **`StubPath`**, može dovesti do neovlašćenog izvršavanja komandi, što potencijalno omogućava eskalaciju privilegija.
-- Izmena binarne datoteke na koju upućuje bilo koja vrednost **`StubPath`** takođe može omogućiti eskalaciju privilegija, ako postoje dovoljne dozvole.
+- Izmena ili upisivanje u ključ u kom je **`IsInstalled`** postavljen na `"1"` i definisan određeni **`StubPath`** može dovesti do neovlašćenog izvršavanja komandi, što potencijalno omogućava eskalaciju privilegija.
+- Izmena binarne datoteke na koju upućuje bilo koja vrednost **`StubPath`** takođe može omogućiti eskalaciju privilegija, uz odgovarajuće dozvole.
 
-Za pregled konfiguracija **`StubPath`** u svim komponentama Active Setup-a mogu se koristiti sledeće komande:
+Za pregled konfiguracija **`StubPath`** u Active Setup komponentama mogu se koristiti sledeće komande:
 
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
@@ -307,14 +309,14 @@ Browser Helper Objects (BHO) su DLL moduli koji dodaju dodatne funkcije Microsof
 
 BHO su kompatibilni sa Windows 10 preko Internet Explorer 11, ali nisu podržani u Microsoft Edge-u, podrazumevanom pregledaču u novijim verzijama Windows-a.
 
-Da biste pregledali BHO registrovane na sistemu, možete da proverite sledeće ključeve registra:
+Da biste pregledali BHO registrovane na sistemu, možete da proverite sledeće registry ključeve:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
-Svaki BHO je u registru predstavljen svojim **CLSID**-om, koji služi kao jedinstveni identifikator. Detaljne informacije o svakom CLSID-u mogu se pronaći u okviru `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
+Svaki BHO je u registry-ju predstavljen svojim **CLSID**-om, koji služi kao jedinstveni identifikator. Detaljne informacije o svakom CLSID-u mogu se pronaći pod `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
 
-Za upite o BHO-ovima u registru mogu se koristiti sledeće komande:
+Za upite o BHO u registry-ju mogu se koristiti sledeće komande:
 
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
@@ -326,7 +328,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\B
 - `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 - `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-Imajte na umu da će registar sadržati po jedan novi ključ za svaki dll, a on će biti predstavljen pomoću **CLSID**. Informacije o CLSID-u možete pronaći u `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
+Imajte na umu da će registar sadržati po jedan novi ključ za svaku dll datoteku, a on će biti predstavljen pomoću **CLSID**. Informacije o CLSID-u možete pronaći u `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
 
 ### Drajveri fontova
 
@@ -354,7 +356,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\she
 
 ### COM rukovaoci kontekstnog menija
 
-Explorer rukovaoci kontekstnog menija su shell extensions registrovani pod ključevima kao što su `HKLM\SOFTWARE\Classes\Directory\shellex\ContextMenuHandlers` i `HKLM\SOFTWARE\Classes\Folder\shellex\ContextMenuHandlers`. Podrazumevana vrednost rukovaoca, ili ponekad naziv njegovog ključa, jeste CLSID. Pratite taj CLSID do `HKLM\SOFTWARE\Classes\CLSID\{CLSID}\InprocServer32`; njegova podrazumevana vrednost navodi DLL koji se učitava kada se rukovalac pozove.
+Explorer rukovaoci kontekstnog menija su shell extensions registrovani pod ključevima kao što su `HKLM\SOFTWARE\Classes\Directory\shellex\ContextMenuHandlers` i `HKLM\SOFTWARE\Classes\Folder\shellex\ContextMenuHandlers`. Podrazumevana vrednost rukovaoca, a ponekad i naziv njegovog ključa, jeste CLSID. Pratite taj CLSID do `HKLM\SOFTWARE\Classes\CLSID\{CLSID}\InprocServer32`; njegova podrazumevana vrednost navodi DLL koji se učitava kada se rukovalac pozove.
 
 ```powershell
 reg query "HKLM\SOFTWARE\Classes\Directory\shellex\ContextMenuHandlers" /s
@@ -363,7 +365,7 @@ Get-Acl 'Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{CLSID}\InprocServe
   Select-Object -ExpandProperty Access
 ```
 
-Proverite i 32-bitni i 64-bitni prikaz registra. `HKCR` objedinjuje registracije klasa po korisniku i za ceo računar, pa proverite koji osnovni ključ će proces koristiti. Identitet sa niskim privilegijama koji može da promeni vrednost `InprocServer32` za ceo računar može da preusmeri proces sa višim privilegijama na drugi DLL, ali za eskalaciju je potrebno da taj proces pozove handler. Putanja DLL-a sa dozvolom za upis može predstavljati sličan rizik čak i kada je sama vrednost u registru zaštićena.
+Proverite i 32-bitni i 64-bitni prikaz registra. `HKCR` objedinjuje registracije klasa za korisnika i za ceo računar, zato proverite koji će osnovni ključ proces koristiti. Identitet sa niskim privilegijama koji može da promeni vrednost `InprocServer32` za ceo računar može da preusmeri proces sa većim privilegijama na drugu DLL datoteku, ali za eskalaciju je potrebno da taj proces pozove rukovalac. Putanja do DLL datoteke u koju može da se upisuje može predstavljati sličan rizik čak i kada je sama vrednost registra zaštićena.
 
 ### Image File Execution Options
 
@@ -374,23 +376,24 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 
 ## SysInternals
 
-Imajte na umu da su sve lokacije na kojima možete pronaći autoruns **već pretražene pomoću**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Međutim, za **sveobuhvatniji spisak datoteka koje se automatski izvršavaju** možete koristiti [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) iz systinternals:
+Imajte na umu da su sva mesta na kojima možete pronaći autoruns **već pretražena pomoću**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Međutim, za **sveobuhvatniji spisak datoteka koje se automatski izvršavaju** možete koristiti [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) iz systinternals:
 
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 
-## More
+## Više
 
-**Pronađite još Autoruns stavki poput registara u** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)<sup>[[4]](#references)</sup>
+**Pronađite još registara sličnih Autoruns-u na** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)<sup>[[4]](#references)</sup>
 
 ## References
 
 - [1] [Uobičajeni mehanizmi održavanja postojanosti malvera](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
-- [2] [MITRE ATT&CK T1547.001 – Automatsko pokretanje pri pokretanju sistema ili prijavljivanju: ključevi Run u registru / fascikla Startup](https://attack.mitre.org/techniques/T1547/001/)
-- [3] [MITRE ATT&CK T1037.001 – Skripte za inicijalizaciju pri pokretanju sistema ili prijavljivanju: skripta za prijavljivanje (Windows)](https://attack.mitre.org/techniques/T1037/001/)
-- [4] [Autoruns – kategorije automatskog pokretanja (Rešavanje problema pomoću alata Windows Sysinternals, 2. izdanje)](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
-- [5] [Kako mogu da dodam opciju pokretanja sistema koja pokreće alternativnu ljusku?](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
-- [6] [Metasploit – pregled, 04/03/2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026)
+- [2] [MITRE ATT&CK T1547.001 – Automatsko pokretanje pri podizanju sistema ili prijavljivanju: ključevi Run u registru / fascikla Startup](https://attack.mitre.org/techniques/T1547/001/)
+- [3] [MITRE ATT&CK T1037.001 – Skripte za inicijalizaciju pri podizanju sistema ili prijavljivanju: skripta za prijavljivanje (Windows)](https://attack.mitre.org/techniques/T1037/001/)
+- [4] [Autoruns – Kategorije automatskog pokretanja (Rešavanje problema pomoću alata Windows Sysinternals, 2. izdanje)](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+- [5] [Kako mogu da dodam opciju pokretanja koja pokreće alternativnu ljusku?](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
+- [6] [Metasploit – pregled 04/03/2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026)
 - [7] [Metasploit PR #21032 – windows/persistence/userinit_mpr_logon_script](https://github.com/rapid7/metasploit-framework/pull/21032)
+- [8] [Microsoft Learn – Bezbednosni konteksti za zadatke](https://learn.microsoft.com/en-us/windows/win32/taskschd/security-contexts-for-running-tasks)
 {{#include ../../banners/hacktricks-training.md}}

