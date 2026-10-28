@@ -6,7 +6,7 @@
 
 ## WMIC
 
-**Wmic** kann verwendet werden, um Programme beim **Start** auszuführen. Mit diesem Befehl kannst du anzeigen, welche Binärdateien beim Start ausgeführt werden sollen:
+**Wmic** kann verwendet werden, um Programme beim **Start** auszuführen. Mit folgendem Befehl siehst du, welche Binärdateien beim Start ausgeführt werden:
 
 ```bash
 wmic startup get caption,command 2>nul & ^
@@ -15,7 +15,7 @@ Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 
 ## Geplante Aufgaben
 
-**Aufgaben** können so geplant werden, dass sie mit einer **bestimmten Häufigkeit** ausgeführt werden. Verwende die folgenden Befehle, um zu sehen, welche Binärdateien für die Ausführung geplant sind:
+**Aufgaben** können so geplant werden, dass sie mit einer **bestimmten Häufigkeit** ausgeführt werden. Mit den folgenden Befehlen können Sie sehen, welche Binärdateien zur Ausführung geplant sind:
 
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
@@ -23,16 +23,18 @@ schtasks /query /fo LIST 2>nul | findstr TaskName
 schtasks /query /fo LIST /v > schtasks.txt; cat schtasks.txt | grep "SYSTEM\|Task To Run" | grep -B 1 SYSTEM
 Get-ScheduledTask | where {$_.TaskPath -notlike "\Microsoft*"} | ft TaskName,TaskPath,State
 
-#Schtask to give admin access
+#Requires an elevated caller to register a task as SYSTEM
 #You can also write that content on a bat file that is being executed by a scheduled task
 schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgroup administrators user /add"
 ```
 
-Eine aktivierte Aufgabe, die als SYSTEM ausgeführt wird, sollte überprüft werden, selbst wenn ihre Aufgabendefinition und Aktionsdatei geschützt sind. [Der Task Scheduler benötigt Ausführungsberechtigungen für die Aufgabe, um sie bei Bedarf auszuführen](https://learn.microsoft.com/en-us/windows/win32/taskschd/security-contexts-for-running-tasks). Wenn ein Benutzer mit niedrigen Berechtigungen diese Berechtigung hat, solltest du die genaue Aktion untersuchen, insbesondere PowerShell-Skripte, die Active-Directory-ACLs ändern oder Kontoschutzeinstellungen zurücksetzen. Überprüfe die Einstellung `AllowDemandStart` der Aufgabe und verifiziere die Eingaben und Auswirkungen des Skripts; die Berechtigung, eine festgelegte Aufgabe zu starten, bedeutet allein nicht, dass beliebiger Code ausgeführt werden kann.
+Eine mit `/sc ONLOGON /rl HIGHEST` erstellte Aufgabe fordert die höchste Ausführungsstufe an, **die für ihren registrierten Prinzipal verfügbar ist**; der Schalter allein ändert weder diesen Prinzipal noch umgeht er UAC. Ein Prozess mit niedrigen Privilegien kann keine Aufgabe mit höchster Ausführungsstufe registrieren oder SYSTEM als Aufgabenidentität festlegen. Betrachte das obige Beispiel als Aktion für einen bereits erhöhten aufrufenden Prozess, nicht als Weg von einem Standardbenutzer zu SYSTEM.<sup>[[8]](#references)</sup>
+
+Eine aktivierte Aufgabe, die als SYSTEM ausgeführt wird, sollte überprüft werden, auch wenn ihre Aufgabendefinition und Aktionsdatei geschützt sind. [Task Scheduler erfordert Ausführungsberechtigungen für die Aufgabe, damit sie bei Bedarf gestartet werden kann](https://learn.microsoft.com/en-us/windows/win32/taskschd/security-contexts-for-running-tasks). Wenn ein Benutzer mit niedrigen Privilegien diese Berechtigung hat, überprüfe die genaue Aktion, insbesondere PowerShell-Skripte, die Active Directory-ACLs ändern oder Kontoschutzeinstellungen zurücksetzen. Prüfe die Einstellung `AllowDemandStart` der Aufgabe und verifiziere die Eingaben und Auswirkungen des Skripts; die Berechtigung, eine festgelegte Aufgabe zu starten, bedeutet allein keine beliebige Codeausführung.
 
 ## Ordner
 
-Alle Binärdateien in den **Startup-Ordnern werden beim Start ausgeführt**. Die üblichen Startup-Ordner sind die im Folgenden aufgeführten; der Startup-Ordner wird jedoch in der Registry angegeben. [Hier erfährst du, wo.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Alle Binärdateien in den **Autostartordnern werden beim Systemstart ausgeführt**. Die üblichen Autostartordner sind im Folgenden aufgeführt, aber der Autostartordner wird in der Registry angegeben. [Hier erfährst du, wo.](privilege-escalation-with-autorun-binaries.md#startup-path)
 
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
@@ -43,11 +45,11 @@ Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
 
-Ein Startup-Eintrag eines Benutzers mit höheren Berechtigungen kann ein geschütztes Skript starten, das wiederholt Dateien aus einem Verzeichnis öffnet, in das ein anderer Benutzer schreiben kann. Prüfe den **tatsächlichen Anmeldekontext**, das Eingabeverzeichnis des Skripts und dessen ACLs sowie die genaue Aktion, bevor du das Verzeichnis als möglichen Pfad zur Rechteausweitung einstufst. Insbesondere öffnet [`hh.exe` opens compiled HTML Help (`.chm`) files](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/htmlhelp/about-the-html-help-executable-program) kompilierte HTML-Help-Dateien (`.chm`); ein Skript, das vom Aufrufer bereitgestellte Dateien daran übergibt, überschreitet eine Vertrauensgrenze für Inhalte, selbst wenn es den Dateinamen oder die ersten Bytes prüft. [HTML Help policies can restrict executable shortcuts](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/htmlhelp/system-policies-for-shortcut-and-winhelp-commands), bestätige daher die installierte Richtlinie und das Verhalten mit erreichbaren Inhalten. Eine `.chm`-Erweiterung oder Magic Bytes allein belegen keine Codeausführung mit höheren Berechtigungen. Untersuche den Autorun-Eintrag, die Prozessbefehlszeile und die Pfadberechtigungen, ohne die nicht vertrauenswürdige Datei während der Erfassung zu öffnen.
+Ein Startup-Eintrag eines Benutzers mit höheren Rechten kann ein geschütztes Skript starten, das wiederholt Dateien aus einem Verzeichnis öffnet, in das ein anderer Benutzer schreiben kann. Überprüfe den **tatsächlichen Anmeldekontext**, das Eingabeverzeichnis des Skripts und dessen ACLs sowie die genaue Aktion, bevor du das Verzeichnis als möglichen Pfad zur Rechteausweitung einstufst. Insbesondere öffnet [`hh.exe` kompilierte HTML-Help-Dateien (`.chm`)](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/htmlhelp/about-the-html-help-executable-program); ein Skript, das vom Aufrufer bereitgestellte Dateien an das Programm übergibt, überschreitet eine Content-Trust-Grenze, selbst wenn es den Dateinamen oder die ersten Bytes überprüft. [HTML-Help-Richtlinien können ausführbare Verknüpfungen einschränken](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/htmlhelp/system-policies-for-shortcut-and-winhelp-commands). Prüfe daher die installierte Richtlinie und das Verhalten bei erreichbaren Inhalten. Eine `.chm`-Erweiterung oder Magic Bytes allein belegen keine Codeausführung mit höheren Rechten. Untersuche den Autorun-Eintrag, die Prozessbefehlszeile und die Pfadberechtigungen, ohne die nicht vertrauenswürdige Datei während der Bestandsaufnahme zu öffnen.
 
-Dieselbe Inhaltsgrenze besteht, wenn eine Person mit höheren Berechtigungen manuell eine `.chm`-Datei aus einem Dokumentationsordner öffnet, die ein anderer Benutzer ersetzen kann. Bestätige die konkrete Datei und die Schreibrechte auf das übergeordnete Verzeichnis, die tatsächliche Identität des Viewers und das Öffnungsereignis sowie die geltende HTML-Help-Richtlinie. Ein beschreibbarer Ordner oder die Bitte, Dokumentation zu prüfen, belegt nicht, dass die Person mit der höheren Identität vom Angreifer kontrollierte Inhalte geöffnet hat.
+Dieselbe Content-Grenze besteht, wenn eine Person mit höheren Rechten eine `.chm` aus einem Dokumentationsordner **manuell öffnet**, den ein anderer Benutzer ersetzen kann. Prüfe die Schreibrechte für die genaue Datei und das übergeordnete Verzeichnis, die tatsächliche Identität des Viewers und das Öffnungsereignis sowie die wirksame HTML-Help-Richtlinie. Ein beschreibbarer Ordner oder die Aufforderung, Dokumentation zu prüfen, belegt nicht, dass die Person mit höheren Rechten vom Angreifer kontrollierte Inhalte geöffnet hat.
 
-> **FYI**: Archive-Extraction-Path-Traversal-Schwachstellen (wie die vor WinRAR 7.13 ausgenutzte Schwachstelle – CVE-2025-8088) können dazu verwendet werden, **Payloads während der Dekomprimierung direkt in diesen Startup-Ordnern abzulegen**, was bei der nächsten Benutzeranmeldung zur Codeausführung führt. Eine ausführliche Beschreibung dieser Technik findest du hier:
+> **FYI**: Schwachstellen durch *Path Traversal* bei der Archivextraktion (wie die vor WinRAR 7.13 ausgenutzte Schwachstelle – CVE-2025-8088) können dazu verwendet werden, **Payloads während der Dekomprimierung direkt in diesen Startup-Ordnern abzulegen**, was beim nächsten Benutzer-Logon zur Codeausführung führt. Eine ausführliche Beschreibung dieser Technik findest du hier:
 
 
 {{#ref}}
@@ -56,14 +58,14 @@ Dieselbe Inhaltsgrenze besteht, wenn eine Person mit höheren Berechtigungen man
 
 
 
-## Registrierung
+## Registry
 
 > [!TIP]
-> [Note from here](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): Der Registrierungseintrag **Wow6432Node** zeigt an, dass du eine 64-Bit-Version von Windows verwendest. Das Betriebssystem nutzt diesen Schlüssel, um für 32-Bit-Anwendungen, die auf 64-Bit-Windows-Versionen ausgeführt werden, eine separate Ansicht von HKEY_LOCAL_MACHINE\SOFTWARE bereitzustellen.
+> [Hinweis von hier](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): Der Registry-Eintrag **Wow6432Node** weist darauf hin, dass du eine 64-Bit-Version von Windows verwendest. Das Betriebssystem nutzt diesen Schlüssel, um für 32-Bit-Anwendungen, die unter 64-Bit-Windows laufen, eine separate Ansicht von HKEY_LOCAL_MACHINE\SOFTWARE bereitzustellen.
 
-### Run-Einträge
+### Runs
 
-**Allgemein bekannte** AutoRun-Registrierungsschlüssel:
+**Allgemein bekannte** AutoRun-Registry-Schlüssel:
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -77,9 +79,9 @@ Dieselbe Inhaltsgrenze besteht, wenn eine Person mit höheren Berechtigungen man
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-Registrierungsschlüssel namens **Run** und **RunOnce** sind dafür vorgesehen, Programme automatisch bei jeder Benutzeranmeldung am System auszuführen. Die als Datenwert eines Schlüssels zugewiesene Befehlszeile ist auf höchstens 260 Zeichen begrenzt.<sup>[[2]](#references)</sup>
+Registry-Schlüssel namens **Run** und **RunOnce** sind dafür vorgesehen, bei jeder Anmeldung eines Benutzers am System automatisch Programme auszuführen. Die einer Taste als Datenwert zugewiesene Befehlszeile ist auf höchstens 260 Zeichen begrenzt.<sup>[[2]](#references)</sup>
 
-**Service-Run-Einträge** (können den automatischen Start von Diensten während des Bootvorgangs steuern):
+**Service-Runs** (können den automatischen Start von Services während des Bootvorgangs steuern):
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
@@ -95,17 +97,17 @@ Registrierungsschlüssel namens **Run** und **RunOnce** sind dafür vorgesehen, 
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-Ab Windows Vista werden die Registrierungsschlüssel **Run** und **RunOnce** nicht automatisch erstellt. Einträge in diesen Schlüsseln können Programme entweder direkt starten oder als Abhängigkeiten angeben. Beispielsweise kann man zum Laden einer DLL-Datei bei der Anmeldung den Registrierungsschlüssel **RunOnceEx** zusammen mit einem „Depend“-Schlüssel verwenden. Dies wird demonstriert, indem ein Registrierungseintrag hinzugefügt wird, der beim Systemstart „C:\temp\evil.dll“ ausführt:<sup>[[2]](#references)</sup>
+Unter Windows Vista und späteren Versionen werden die Registry-Schlüssel **Run** und **RunOnce** nicht automatisch erstellt. Einträge in diesen Schlüsseln können Programme entweder direkt starten oder als Abhängigkeiten festlegen. Um beispielsweise beim Logon eine DLL-Datei zu laden, kann man den Registry-Schlüssel **RunOnceEx** zusammen mit einem „Depend“-Schlüssel verwenden. Dies wird demonstriert, indem ein Registry-Eintrag hinzugefügt wird, der beim Systemstart „C:\temp\evil.dll“ ausführt:<sup>[[2]](#references)</sup>
 
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 
 > [!TIP]
-> **Exploit 1**: Wenn du in einen der erwähnten Registry-Schlüssel unter **HKLM** schreiben kannst, kannst du deine Privilegien eskalieren, wenn sich ein anderer Benutzer anmeldet.
+> **Exploit 1**: Wenn du in einen der erwähnten Registry-Schlüssel innerhalb von **HKLM** schreiben kannst, kannst du deine Rechte erweitern, sobald sich ein anderer Benutzer anmeldet.
 
 > [!TIP]
-> **Exploit 2**: Wenn du eine der Binärdateien überschreiben kannst, auf die ein Registry-Schlüssel unter **HKLM** verweist, kannst du diese Binärdatei mit einer Backdoor versehen und deine Privilegien eskalieren, wenn sich ein anderer Benutzer anmeldet.
+> **Exploit 2**: Wenn du eine der Binärdateien überschreiben kannst, auf die in einem der Registry-Schlüssel innerhalb von **HKLM** verwiesen wird, kannst du diese Datei mit einer Backdoor versehen. Sobald sich ein anderer Benutzer anmeldet, kannst du so deine Rechte erweitern.
 
 ```bash
 #CMD
@@ -163,17 +165,17 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\RunOnceEx'
 Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\RunOnceEx'
 ```
 
-### Startpfad
+### Startup-Pfad
 
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Verknüpfungen im Ordner **Autostart** lösen automatisch den Start von Diensten oder Anwendungen bei der Benutzeranmeldung oder beim Neustart des Systems aus. Der Speicherort des Ordners **Autostart** ist für die Bereiche **Local Machine** und **Current User** in der Registry definiert. Das bedeutet, dass jede Verknüpfung, die diesen festgelegten **Autostart**-Speicherorten hinzugefügt wird, dafür sorgt, dass der verknüpfte Dienst oder das Programm nach der Anmeldung oder dem Neustart gestartet wird. Dies ist eine einfache Methode, Programme für die automatische Ausführung einzuplanen.<sup>[[1]](#references)[[2]](#references)</sup>
+Verknüpfungen im **Startup**-Ordner lösen automatisch den Start von Diensten oder Anwendungen bei der Benutzeranmeldung oder beim Neustart des Systems aus. Der Speicherort des **Startup**-Ordners ist für den Bereich **Local Machine** und **Current User** in der Registry festgelegt. Das bedeutet, dass jede Verknüpfung, die an diesen angegebenen **Startup**-Speicherorten hinzugefügt wird, dafür sorgt, dass der verknüpfte Dienst oder das Programm nach der Anmeldung oder dem Neustart gestartet wird. Dies ist eine einfache Methode, um Programme so zu planen, dass sie automatisch ausgeführt werden.<sup>[[1]](#references)[[2]](#references)</sup>
 
 > [!TIP]
-> Wenn du einen beliebigen \[User] Shell Folder unter **HKLM** überschreiben kannst, kannst du ihn auf einen von dir kontrollierten Ordner verweisen lassen und eine Backdoor platzieren, die bei jeder Benutzeranmeldung am System ausgeführt wird und so deine Privilegien erhöht.
+> Wenn du einen beliebigen \[User] Shell Folder unter **HKLM** überschreiben kannst, kannst du ihn auf einen von dir kontrollierten Ordner verweisen lassen und dort eine backdoor platzieren, die jedes Mal ausgeführt wird, wenn sich ein Benutzer am System anmeldet, wodurch deine Berechtigungen erhöht werden.
 
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
@@ -191,10 +193,10 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion
 
 - `HKCU\Environment\UserInitMprLogonScript`
 
-Dieser benutzerspezifische Registry-Wert kann auf ein Skript oder einen Befehl verweisen, der ausgeführt wird, wenn sich der Benutzer anmeldet. Er dient hauptsächlich als **persistence**-Mechanismus, da er nur im Kontext des betroffenen Benutzers ausgeführt wird. Dennoch lohnt es sich, ihn bei Post-Exploitation-Prüfungen und Überprüfungen von Autoruns zu kontrollieren.<sup>[[3]](#references)[[6]](#references)[[7]](#references)</sup>
+Dieser benutzerspezifische Registrierungswert kann auf ein Skript oder einen Befehl verweisen, der ausgeführt wird, wenn sich der Benutzer anmeldet. Er dient hauptsächlich als **persistence**-Primitive, da er nur im Kontext des betroffenen Benutzers ausgeführt wird. Dennoch sollte er bei Post-Exploitation- und Autoruns-Prüfungen berücksichtigt werden.<sup>[[3]](#references)[[6]](#references)[[7]](#references)</sup>
 
 > [!TIP]
-> Wenn du diesen Wert für den aktuellen Benutzer ändern kannst, kannst du die Ausführung bei der nächsten interaktiven Anmeldung erneut auslösen, ohne Administratorrechte zu benötigen. Wenn du ihn im Hive eines anderen Benutzers ändern kannst, erhältst du möglicherweise Codeausführung, wenn sich dieser Benutzer anmeldet.
+> Wenn du diesen Wert für den aktuellen Benutzer ändern kannst, kannst du die Ausführung bei der nächsten interaktiven Anmeldung erneut auslösen, ohne Administratorrechte zu benötigen. Wenn du ihn im Hive eines anderen Benutzers ändern kannst, erhältst du möglicherweise Codeausführung, sobald sich dieser Benutzer anmeldet.
 
 ```bash
 reg query "HKCU\Environment" /v "UserInitMprLogonScript"
@@ -209,14 +211,14 @@ Remove-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonSc
 Hinweise:
 
 - Bevorzuge vollständige Pfade zu `.bat`-, `.cmd`-, `.ps1`- oder anderen Launcher-Dateien, auf die der Zielbenutzer bereits Zugriff hat.
-- Dies bleibt bis zum Entfernen des Werts auch nach dem Abmelden oder einem Neustart bestehen.
-- Anders als `HKLM\...\Run` gewährt dies nicht von selbst erhöhte Rechte; es handelt sich um Persistenz im Benutzerbereich.
+- Dies bleibt bis zum Entfernen des Werts auch nach Abmeldung oder Neustart bestehen.
+- Anders als `HKLM\...\Run` gewährt dies nicht von selbst erhöhte Rechte; es handelt sich um Persistenz im Benutzerkontext.
 
 ### Winlogon-Schlüssel
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-Normalerweise ist der **Userinit**-Schlüssel auf **userinit.exe** gesetzt. Wird dieser Schlüssel jedoch geändert, wird die angegebene ausführbare Datei ebenfalls von **Winlogon** bei der Benutzeranmeldung gestartet. Ebenso sollte der **Shell**-Schlüssel auf **explorer.exe** verweisen, die die Standard-Shell von Windows ist.<sup>[[1]](#references)</sup>
+Normalerweise ist der Schlüssel **Userinit** auf **userinit.exe** gesetzt. Wird dieser Schlüssel jedoch geändert, startet **Winlogon** die angegebene ausführbare Datei ebenfalls bei der Benutzeranmeldung. Ebenso soll der Schlüssel **Shell** auf **explorer.exe** verweisen, der Standardshell von Windows.<sup>[[1]](#references)</sup>
 
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
@@ -226,7 +228,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 ```
 
 > [!TIP]
-> Wenn Sie den Registrierungswert oder die Binärdatei überschreiben können, können Sie Ihre Berechtigungen erhöhen.
+> Wenn Sie den Registrierungswert oder die Binärdatei überschreiben können, können Sie Ihre Rechte ausweiten.
 
 ### Richtlinieneinstellungen
 
@@ -246,21 +248,21 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 ### Ändern der Eingabeaufforderung im abgesicherten Modus
 
-In der Windows-Registrierung unter `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` ist standardmäßig der Wert **`AlternateShell`** auf `cmd.exe` gesetzt. Das bedeutet, dass `cmd.exe` verwendet wird, wenn Sie beim Start „Abgesicherter Modus mit Eingabeaufforderung“ auswählen (indem Sie F8 drücken). Es ist jedoch möglich, Ihren Computer so einzurichten, dass er automatisch in diesem Modus startet, ohne dass Sie F8 drücken und ihn manuell auswählen müssen.
+In der Windows-Registrierung unter `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` ist standardmäßig der Wert **`AlternateShell`** auf `cmd.exe` gesetzt. Das bedeutet, dass `cmd.exe` verwendet wird, wenn du beim Start „Abgesicherter Modus mit Eingabeaufforderung“ auswählst (durch Drücken von F8). Es ist jedoch möglich, den Computer so einzurichten, dass er automatisch in diesem Modus startet, ohne dass du F8 drücken und die Option manuell auswählen musst.
 
-Schritte zum Erstellen einer Startoption, mit der automatisch „Abgesicherter Modus mit Eingabeaufforderung“ gestartet wird:<sup>[[5]](#references)</sup>
+So erstellst du eine Startoption, mit der automatisch „Abgesicherter Modus mit Eingabeaufforderung“ gestartet wird:<sup>[[5]](#references)</sup>
 
-1. Ändern Sie die Attribute der Datei `boot.ini`, um die Kennzeichnungen „schreibgeschützt“, „System“ und „versteckt“ zu entfernen: `attrib c:\boot.ini -r -s -h`
-2. Öffnen Sie `boot.ini` zur Bearbeitung.
-3. Fügen Sie eine Zeile wie diese ein: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
-4. Speichern Sie die Änderungen an `boot.ini`.
-5. Stellen Sie die ursprünglichen Dateiattribute wieder her: `attrib c:\boot.ini +r +s +h`
+1. Ändere die Attribute der Datei `boot.ini`, um die Kennzeichen für schreibgeschützt, System und versteckt zu entfernen: `attrib c:\boot.ini -r -s -h`
+2. Öffne `boot.ini` zum Bearbeiten.
+3. Füge eine Zeile wie diese ein: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
+4. Speichere die Änderungen an `boot.ini`.
+5. Wende die ursprünglichen Dateiattribute erneut an: `attrib c:\boot.ini +r +s +h`
 
-- **Exploit 1:** Durch Ändern des Registrierungsschlüssels **AlternateShell** lässt sich eine benutzerdefinierte Befehlsshell einrichten, was möglicherweise unbefugten Zugriff ermöglicht.
-- **Exploit 2 (PATH-Schreibberechtigungen):** Schreibberechtigungen für einen beliebigen Teil der Systemvariable **PATH**, insbesondere vor `C:\Windows\system32`, ermöglichen die Ausführung einer benutzerdefinierten `cmd.exe`, die bei einem Start im abgesicherten Modus als Backdoor dienen könnte.
-- **Exploit 3 (Schreibberechtigungen für PATH und boot.ini):** Schreibzugriff auf `boot.ini` ermöglicht den automatischen Start im abgesicherten Modus und erleichtert so den unbefugten Zugriff beim nächsten Neustart.
+- **Exploit 1:** Durch Ändern des Registrierungsschlüssels **AlternateShell** lässt sich eine benutzerdefinierte Command Shell einrichten, was potenziell unbefugten Zugriff ermöglicht.
+- **Exploit 2 (PATH-Schreibberechtigungen):** Schreibberechtigungen für einen beliebigen Teil der Systemvariablen **PATH**, insbesondere vor `C:\Windows\system32`, ermöglichen die Ausführung einer benutzerdefinierten `cmd.exe`, die als Backdoor dienen könnte, wenn das System im abgesicherten Modus gestartet wird.
+- **Exploit 3 (PATH- und boot.ini-Schreibberechtigungen):** Schreibzugriff auf `boot.ini` ermöglicht den automatischen Start im abgesicherten Modus und damit unbefugten Zugriff beim nächsten Neustart.
 
-Um die aktuelle Einstellung von **AlternateShell** zu überprüfen, verwenden Sie diese Befehle:
+Verwende die folgenden Befehle, um die aktuelle Einstellung von **AlternateShell** zu überprüfen:
 
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
@@ -269,7 +271,7 @@ Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Co
 
 ### Installierte Komponente
 
-Active Setup ist eine Windows-Funktion, die **ausgeführt wird, bevor die Desktopumgebung vollständig geladen ist**. Sie priorisiert die Ausführung bestimmter Befehle, die abgeschlossen sein müssen, bevor die Benutzeranmeldung fortgesetzt wird. Dieser Prozess findet sogar statt, bevor andere Starteinträge, etwa in den Registrierungsschlüsseln Run oder RunOnce, ausgelöst werden.
+Active Setup ist eine Windows-Funktion, die **gestartet wird, bevor die Desktopumgebung vollständig geladen ist**. Sie priorisiert die Ausführung bestimmter Befehle, die abgeschlossen sein müssen, bevor die Benutzeranmeldung fortgesetzt wird. Dieser Vorgang findet sogar vor dem Auslösen anderer Starteinträge statt, etwa solcher in den Registrierungsschlüsseln Run oder RunOnce.
 
 Active Setup wird über die folgenden Registrierungsschlüssel verwaltet:
 
@@ -278,19 +280,19 @@ Active Setup wird über die folgenden Registrierungsschlüssel verwaltet:
 - `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-Unter diesen Schlüsseln befinden sich verschiedene Unterschlüssel, die jeweils einer bestimmten Komponente entsprechen. Zu den besonders relevanten Schlüsselwerten gehören:
+In diesen Schlüsseln gibt es verschiedene Unterschlüssel, die jeweils einer bestimmten Komponente entsprechen. Besonders relevante Schlüsselwerte sind:
 
 - **IsInstalled:**
-  - `0` bedeutet, dass der Befehl der Komponente nicht ausgeführt wird.
+  - `0` gibt an, dass der Befehl der Komponente nicht ausgeführt wird.
   - `1` bedeutet, dass der Befehl einmal für jeden Benutzer ausgeführt wird. Dies ist das Standardverhalten, wenn der Wert `IsInstalled` fehlt.
-- **StubPath:** Legt den von Active Setup auszuführenden Befehl fest. Dabei kann es sich um eine beliebige gültige Befehlszeile handeln, beispielsweise zum Starten von `notepad`.
+- **StubPath:** Legt den von Active Setup auszuführenden Befehl fest. Dies kann eine beliebige gültige Befehlszeile sein, etwa zum Starten von `notepad`.
 
 **Sicherheitshinweise:**
 
-- Änderungen an oder Schreibzugriffe auf einen Schlüssel, bei dem **`IsInstalled`** auf `"1"` gesetzt ist und ein bestimmter **`StubPath`** vorhanden ist, können zur unautorisierten Befehlsausführung führen und möglicherweise eine Rechteausweitung ermöglichen.
-- Auch das Ändern der Binärdatei, auf die ein beliebiger **`StubPath`**-Wert verweist, könnte bei ausreichenden Berechtigungen eine Rechteausweitung ermöglichen.
+- Das Ändern oder Schreiben in einen Schlüssel, bei dem **`IsInstalled`** auf `"1"` gesetzt ist und ein bestimmter **`StubPath`** angegeben ist, kann zur nicht autorisierten Befehlsausführung führen, möglicherweise auch zur Privilegienerweiterung.
+- Auch das Ändern der in einem beliebigen **`StubPath`**-Wert referenzierten Binärdatei kann bei ausreichenden Berechtigungen eine Privilegienerweiterung ermöglichen.
 
-Um die **`StubPath`**-Konfigurationen der Active-Setup-Komponenten zu überprüfen, können folgende Befehle verwendet werden:
+Mit den folgenden Befehlen lassen sich die **`StubPath`**-Konfigurationen aller Active-Setup-Komponenten überprüfen:
 
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
@@ -301,20 +303,20 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 ### Browser Helper Objects
 
-### Überblick über Browser Helper Objects (BHOs)
+### Übersicht über Browser Helper Objects (BHOs)
 
-Browser Helper Objects (BHOs) sind DLL-Module, die Microsofts Internet Explorer um zusätzliche Funktionen erweitern. Sie werden bei jedem Start in den Internet Explorer und den Windows Explorer geladen. Ihre Ausführung kann jedoch durch Setzen des Schlüssels **NoExplorer** auf 1 blockiert werden, wodurch verhindert wird, dass sie mit Windows-Explorer-Instanzen geladen werden.<sup>[[1]](#references)</sup>
+Browser Helper Objects (BHOs) sind DLL-Module, die Microsoft Internet Explorer zusätzliche Funktionen hinzufügen. Sie werden bei jedem Start in Internet Explorer und Windows Explorer geladen. Ihre Ausführung kann jedoch blockiert werden, indem der Schlüssel **NoExplorer** auf 1 gesetzt wird. Dadurch wird verhindert, dass sie mit Windows-Explorer-Instanzen geladen werden.<sup>[[1]](#references)</sup>
 
-BHOs sind über Internet Explorer 11 mit Windows 10 kompatibel, werden jedoch von Microsoft Edge, dem Standardbrowser in neueren Windows-Versionen, nicht unterstützt.
+BHOs sind über Internet Explorer 11 mit Windows 10 kompatibel, werden aber von Microsoft Edge, dem Standardbrowser in neueren Windows-Versionen, nicht unterstützt.
 
-Um die auf einem System registrierten BHOs zu untersuchen, können Sie die folgenden Registrierungsschlüssel überprüfen:
+Um die auf einem System registrierten BHOs zu untersuchen, kannst du die folgenden Registrierungsschlüssel prüfen:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
-Jedes BHO wird in der Registrierung durch seine **CLSID** dargestellt, die als eindeutiger Bezeichner dient. Detaillierte Informationen zu jeder CLSID finden Sie unter `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
+Jedes BHO wird in der Registrierung durch seine **CLSID** dargestellt, die als eindeutiger Bezeichner dient. Detaillierte Informationen zu jeder CLSID findest du unter `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
 
-Zum Abfragen von BHOs in der Registrierung können diese Befehle verwendet werden:
+Zum Abfragen von BHOs in der Registrierung können folgende Befehle verwendet werden:
 
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
@@ -326,7 +328,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\B
 - `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 - `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-Beachte, dass die Registry für jede DLL einen neuen Registry-Eintrag enthält, der durch die **CLSID** dargestellt wird. Die CLSID-Informationen findest du unter `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
+Beachte, dass die Registry für jede DLL einen neuen Eintrag enthält, der durch die **CLSID** dargestellt wird. Die CLSID-Informationen findest du unter `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
 
 ### Schriftarttreiber
 
@@ -340,7 +342,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 ```
 
-### Öffnen-Befehl
+### Befehl zum Öffnen
 
 - `HKLM\SOFTWARE\Classes\htmlfile\shell\open\command`
 - `HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command`
@@ -354,7 +356,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\she
 
 ### COM-Handler für Kontextmenüs
 
-Explorer-Handler für Kontextmenüs sind Shell-Erweiterungen, die unter Schlüsseln wie `HKLM\SOFTWARE\Classes\Directory\shellex\ContextMenuHandlers` und `HKLM\SOFTWARE\Classes\Folder\shellex\ContextMenuHandlers` registriert sind. Der Standardwert eines Handlers oder manchmal sein Schlüsselname ist eine CLSID. Folgen Sie dieser CLSID zu `HKLM\SOFTWARE\Classes\CLSID\{CLSID}\InprocServer32`; der Standardwert dort gibt die DLL an, die geladen wird, wenn der Handler aufgerufen wird.
+Explorer-Handler für Kontextmenüs sind Shell-Erweiterungen, die unter Schlüsseln wie `HKLM\SOFTWARE\Classes\Directory\shellex\ContextMenuHandlers` und `HKLM\SOFTWARE\Classes\Folder\shellex\ContextMenuHandlers` registriert sind. Der Standardwert eines Handlers oder manchmal sein Schlüsselname ist eine CLSID. Folgen Sie dieser CLSID zu `HKLM\SOFTWARE\Classes\CLSID\{CLSID}\InprocServer32`; der Standardwert dort gibt die DLL an, die beim Aufruf des Handlers geladen wird.
 
 ```powershell
 reg query "HKLM\SOFTWARE\Classes\Directory\shellex\ContextMenuHandlers" /s
@@ -363,7 +365,7 @@ Get-Acl 'Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{CLSID}\InprocServe
   Select-Object -ExpandProperty Access
 ```
 
-Prüfe sowohl die 32-Bit- als auch die 64-Bit-Registry-Ansicht. `HKCR` führt benutzerspezifische und systemweite Klassenregistrierungen zusammen. Prüfe daher, welchen zugrunde liegenden Schlüssel ein Prozess auflöst. Eine Identität mit geringen Berechtigungen, die einen systemweiten `InprocServer32`-Wert ändern kann, könnte einen Prozess mit höheren Berechtigungen zu einer anderen DLL umleiten. Für eine Privilegieneskalation muss dieser Prozess jedoch den Handler aufrufen. Ein beschreibbarer DLL-Pfad kann ein ähnliches Risiko darstellen, selbst wenn der Registry-Wert selbst geschützt ist.
+Prüfe sowohl die 32-Bit- als auch die 64-Bit-Registrierungsansicht. `HKCR` führt benutzerspezifische und systemweite Klassenregistrierungen zusammen. Prüfe daher, welchen zugrunde liegenden Schlüssel ein Prozess auflöst. Eine Identität mit niedrigen Berechtigungen, die einen systemweiten `InprocServer32`-Wert ändern kann, könnte einen Prozess mit höheren Berechtigungen zu einer anderen DLL umleiten. Für eine Rechteausweitung muss dieser Prozess jedoch den Handler aufrufen. Ein beschreibbarer DLL-Pfad kann ein ähnliches Risiko darstellen, selbst wenn der Registrierungswert selbst geschützt ist.
 
 ### Image File Execution Options
 
@@ -374,7 +376,7 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 
 ## SysInternals
 
-Beachte, dass alle Speicherorte, an denen du Autoruns finden kannst, bereits von [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe) durchsucht werden. Für eine **umfassendere Liste automatisch ausgeführter** Dateien kannst du jedoch [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) von Sysinternals verwenden:
+Beachte, dass alle Orte, an denen du Autoruns finden kannst, bereits von [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe) durchsucht werden. Für eine **umfassendere Liste automatisch ausgeführter** Dateien kannst du jedoch [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) von Sysinternals verwenden:
 
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
@@ -382,15 +384,16 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 
 ## Mehr
 
-**Weitere Autoruns wie Registrierungseinträge finden Sie unter** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)<sup>[[4]](#references)</sup>
+**Finde weitere Autoruns wie Registrierungen unter** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)<sup>[[4]](#references)</sup>
 
 ## References
 
-- [1] [Häufige Mechanismen zur Malware-Persistenz](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
-- [2] [MITRE ATT&CK T1547.001 – Autostart-Ausführung beim Booten oder Anmelden: Registry-Run-Keys / Startup-Ordner](https://attack.mitre.org/techniques/T1547/001/)
-- [3] [MITRE ATT&CK T1037.001 – Initialisierungsskripte beim Booten oder Anmelden: Anmeldeskript (Windows)](https://attack.mitre.org/techniques/T1037/001/)
-- [4] [Autoruns – Autostart-Kategorien (Fehlerbehebung mit den Windows-Sysinternals-Tools, 2. Auflage)](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+- [1] [Häufige Malware-Persistenzmechanismen](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
+- [2] [MITRE ATT&CK T1547.001 – Boot or Logon Autostart Execution: Registry Run Keys / Startup Folder](https://attack.mitre.org/techniques/T1547/001/)
+- [3] [MITRE ATT&CK T1037.001 – Boot or Logon Initialization Scripts: Logon Script (Windows)](https://attack.mitre.org/techniques/T1037/001/)
+- [4] [Autoruns – Autostart-Kategorien (Fehlerbehebung mit den Windows Sysinternals Tools, 2. Auflage)](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [5] [Wie kann ich eine Bootoption hinzufügen, die eine alternative Shell startet?](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
-- [6] [Metasploit-Zusammenfassung 04.03.2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026)
+- [6] [Metasploit – Rückblick vom 04.03.2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026)
 - [7] [Metasploit PR #21032 – windows/persistence/userinit_mpr_logon_script](https://github.com/rapid7/metasploit-framework/pull/21032)
+- [8] [Microsoft Learn – Sicherheitskontexte für Tasks](https://learn.microsoft.com/en-us/windows/win32/taskschd/security-contexts-for-running-tasks)
 {{#include ../../banners/hacktricks-training.md}}
