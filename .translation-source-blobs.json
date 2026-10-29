@@ -734,7 +734,7 @@
     "src/network-services-pentesting/pentesting-web/dotnet-soap-wsdl-client-exploitation.md": "257f091e9cd26faba0c134b057d25e544e991302",
     "src/network-services-pentesting/pentesting-web/dotnetnuke-dnn.md": "6ff47ed10f89af70e1d7f550fb9fcb263c368577",
     "src/network-services-pentesting/pentesting-web/drupal/README.md": "74a13b90053d1261348528e88a1fa716164e4b55",
-    "src/network-services-pentesting/pentesting-web/drupal/drupal-rce.md": "afef8a36151b7c7192362ed466e57ce0da89f868",
+    "src/network-services-pentesting/pentesting-web/drupal/drupal-rce.md": "94fe93b8b998493340b693ffa7a51022631908dc",
     "src/network-services-pentesting/pentesting-web/electron-desktop-apps/README.md": "0c37fe807ef7e02b2509ee92c993a687777322f6",
     "src/network-services-pentesting/pentesting-web/electron-desktop-apps/electron-contextisolation-rce-via-electron-internal-code.md": "992126f5680dfe98c383f334ad56090c87926dc2",
     "src/network-services-pentesting/pentesting-web/electron-desktop-apps/electron-contextisolation-rce-via-ipc.md": "94812549011ab0c01f2f5ab04cf7b1d0bcd83c2e",
