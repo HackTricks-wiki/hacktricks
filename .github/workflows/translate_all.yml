@@ -90,6 +90,12 @@ jobs:
           wget -O get_and_save_refs.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/get_and_save_refs.py
           wget -O compare_and_fix_refs.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/compare_and_fix_refs.py
           wget -O translator.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/translator.py
+          # Validate the shared translator used by this run, including tokenizer
+          # initialization, before any paid translation requests are made.
+          for suite in directives batch code_blocks tokenizers; do
+            wget -O "test_translator_${suite}.py" "https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/test_translator_${suite}.py"
+            python "test_translator_${suite}.py" -v
+          done
           cp translation_backlog.py /tmp/translation_backlog.py
           cp mark_unchanged_s3_files.py /tmp/mark_unchanged_s3_files.py
           cp upload_immutable_images.sh /tmp/upload_immutable_images.sh
