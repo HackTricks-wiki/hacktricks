@@ -266,6 +266,8 @@ The hash is encrypted three times:
 
 The **PEK** has the **same value on every domain controller**, but it is **encrypted** inside **NTDS.dit** with the DC-specific **BOOTKEY** from that domain controller's **SYSTEM** hive. Therefore, extracting credentials requires both **NTDS.dit** and **SYSTEM** (`C:\Windows\System32\config\SYSTEM`).
 
+A separate [kernel handle-table redirection technique](../../binary-exploitation/windows-kernel-exploitation/file-handle-table-object-redirection.md) can copy an already-open NTDS file object without VSS, but requires an arbitrary kernel read/write primitive on the domain controller.<sup>[[16]](#references)</sup>
+
 ### Copying NTDS.dit using Ntdsutil
 
 Available since Windows Server 2008.
@@ -561,5 +563,6 @@ This means **hardware binding prevents off-device export but not same-user use o
 - [13] [Telegram FAQ – terminating active sessions](https://telegram.org/faq)
 - [14] [Microsoft Learn: Remote Credential Guard and Restricted Admin](https://learn.microsoft.com/en-us/windows/security/identity-protection/remote-credential-guard)
 - [15] [Microsoft Learn: Credentials Protection and Management](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/credentials-protection-and-management)
+- [16] [S12 DumpNTDS.cpp](https://github.com/S12cybersecurity/HandleRedirect/blob/main/DumpNTDS/DumpNTDS/DumpNTDS.cpp)
 
 {{#include ../../banners/hacktricks-training.md}}
