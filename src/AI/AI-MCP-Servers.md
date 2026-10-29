@@ -96,6 +96,17 @@ Furthermore, [**this blog post**](https://www.cyberark.com/resources/threat-rese
 Recent research shows that this is not a corner case. The ecosystem-wide paper [**Model Context Protocol (MCP) at First Glance**](https://arxiv.org/abs/2506.13538) analyzed 1,899 open-source MCP servers and found **5.5%** with MCP-specific tool-poisoning patterns.<sup>[[6]](#references)</sup> [**MCPTox**](https://ojs.aaai.org/index.php/AAAI/article/view/40895) later evaluated **45 live MCP servers / 353 authentic tools** and achieved tool-poisoning attack-success rates as high as **72.8%** across 20 agent settings.<sup>[[7]](#references)</sup> Follow-up work [**MCP-ITP**](https://arxiv.org/abs/2601.07395) automated **implicit tool poisoning**: the poisoned tool is never called directly, but its metadata still steers the agent into invoking a different high-privilege tool, pushing attack success to **84.2%** on some configurations while dropping malicious-tool detection to **0.3%**.<sup>[[8]](#references)</sup>
 
 
+### Prompt Injection via the server `instructions` field
+
+The `instructions` string a server returns from `initialize` (and from `server/discover` in the 2026-07-28 revision) is free text that the spec says clients can put in the system prompt. It is fully server-controlled, has no length limit, and arrives once at connect time, outside `tools/list`, so per-tool definition pinning does not cover it. A read-only scan of the official registry reported in the advisory thread found it on 5,462 of 8,235 live servers (66%), with the largest at 68,669 characters.
+
+Two practical angles:
+
+- **Buried directives:** a long `instructions` payload can hide a directive far past where a reviewer stops reading, and it changes after approval with nothing to notice it.
+- **Cross-caller cache poisoning:** if a discovery response carries `cacheScope: "public"`, a shared gateway, egress proxy or CDN that keys its cache on the method alone can serve one server's `instructions` to a different caller that never connected to that server.
+
+Defenses: keep `instructions` out of the trusted region of the prompt and label it untrusted, cap its length, never cache a response that carries `instructions` publicly, key caches on server identity and caller, and pin the `instructions` digest at first sight and fail closed on drift. A stdlib Python lab that reproduces all four cases and the controls is in [themsquared/mcp-redteam-lab](https://github.com/themsquared/mcp-redteam-lab) (`./run.sh`, about four seconds) <sup>[[46]](#references)</sup>.
+
 ### Prompt Injection via Indirect Data
 
 Another way to perform prompt injection attacks in clients using MCP servers is by modifying the data the agent will read to make it perform unexpected actions. A good example can be found in [this blog post](https://invariantlabs.ai/blog/mcp-github-vulnerability) where is indicated how the Github MCP server could be uabused by an external attacker just by opening an issue in a public repository.<sup>[[9]](#references)</sup>
@@ -725,6 +736,7 @@ Another suspicious primitive is **native-code preloading**. A skill that sets `L
 - [43] [OS command injection in mcp-remote when connecting to untrusted MCP servers (JFrog Security Research, JFSA-2025-001290844)](https://research.jfrog.com/vulnerabilities/mcp-remote-command-injection-rce-jfsa-2025-001290844/)
 - [44] [When OAuth Becomes a Weapon: Lessons from CVE-2025-6514](https://amlalabs.com/blog/oauth-cve-2025-6514/)
 - [45] [Apex Accelerator: malicious npm packages, LLM and MCP interception](https://www.elastic.co/security-labs/threat-command/apex-accelerator-malicious-npm-packages)
+- [46] [Keeping MCP Server Instructions Out of Your Agent's System Prompt](https://webofmike.com/mcp-discovery-prompt-injection/)
 
 {{#include ../banners/hacktricks-training.md}}
 
