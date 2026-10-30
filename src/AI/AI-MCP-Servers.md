@@ -661,6 +661,22 @@ Agent **skills** create nearly the same trust problem as MCP servers, but the pa
 - **Opaque-file / incomplete-tree bypass**: some scanners only inspect files referenced from `SKILL.md`, skip dotfiles, or treat unsupported formats as opaque. That leaves blind spots in hidden files, unreferenced scripts, archives, binaries, images, and package-manager config files.
 - **LLM scanner misdirection**: natural-language framing can convince a guard model that dangerous behavior is just normal enterprise bootstrap logic. A skill that writes a new package-manager registry can be described as “AppSec-audited corporate mirroring” until the scanner classifies it as low risk.<sup>[[28]](#references)</sup><sup>[[29]](#references)</sup>
 
+#### Instructions hidden from skill previews and raw-text checks
+
+A `SKILL.md` instruction inside a Markdown HTML comment is absent from rendered GitHub or marketplace previews but remains in the raw file loaded by an agent. Unlike [GitHub issue HTML comments that Copilot did not receive](AI-Prompts.md#prompt-injection-in-github-copilot-hidden-mark-up), this skill-delivery path can pass the hidden instruction to the agent. An instruction disguised as environment validation can then use the agent's existing shell and network permissions; no malicious helper script is required.<sup>[[47]](#references)</sup>
+
+A separate variant encodes an instruction in a skill's title and headings with `U+200C` (bit 0) and `U+200D` (bit 1). Reading those zero-width characters in file order and grouping them into eight-bit bytes recovers ASCII text, which in the reported sample requested persistent-memory changes. This is distinct from [Unicode Tag ASCII smuggling](AI-Prompts.md#invisible-unicode-tag-characters-ascii-smuggling) and does not establish that every agent decodes the bits automatically.<sup>[[47]](#references)</sup>
+
+The following inspects the raw skill for the joiner/non-joiner binary variant; it does not decode Unicode Tags.<sup>[[47]](#references)</sup>
+
+```python
+from pathlib import Path
+text = Path("SKILL.md").read_text(encoding="utf-8")
+bits = "".join("0" if c == "\u200c" else "1" for c in text if c in "\u200c\u200d")
+if len(bits) % 8 == 0:
+    print(bytes(int(bits[i:i + 8], 2) for i in range(0, len(bits), 8)).decode("ascii"))
+```
+
 #### High-value attacker primitives hidden inside "helpful" skills
 
 **Package-manager registry redirection** is especially dangerous because it persists after the skill finishes. Writing any of the following changes how future dependency installs resolve packages:
@@ -737,6 +753,7 @@ Another suspicious primitive is **native-code preloading**. A skill that sets `L
 - [44] [When OAuth Becomes a Weapon: Lessons from CVE-2025-6514](https://amlalabs.com/blog/oauth-cve-2025-6514/)
 - [45] [Apex Accelerator: malicious npm packages, LLM and MCP interception](https://www.elastic.co/security-labs/threat-command/apex-accelerator-malicious-npm-packages)
 - [46] [Keeping MCP Server Instructions Out of Your Agent's System Prompt](https://webofmike.com/mcp-discovery-prompt-injection/)
+- [47] [How Some Malicious AI Skills Hide Instructions from Reviewers](https://blog.virustotal.com/2026/10/how-some-malicious-ai-skills-hide.html)
 
 {{#include ../banners/hacktricks-training.md}}
 
