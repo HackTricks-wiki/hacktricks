@@ -661,13 +661,13 @@ Agent **skills** create nearly the same trust problem as MCP servers, but the pa
 - **Opaque-file / incomplete-tree bypass**: some scanners only inspect files referenced from `SKILL.md`, skip dotfiles, or treat unsupported formats as opaque. That leaves blind spots in hidden files, unreferenced scripts, archives, binaries, images, and package-manager config files.
 - **LLM scanner misdirection**: natural-language framing can convince a guard model that dangerous behavior is just normal enterprise bootstrap logic. A skill that writes a new package-manager registry can be described as “AppSec-audited corporate mirroring” until the scanner classifies it as low risk.<sup>[[28]](#references)</sup><sup>[[29]](#references)</sup>
 
-#### Instructions hidden from rendered skill previews
+#### Instructions hidden from skill previews and raw-text checks
 
-A skill can put an instruction inside a Markdown HTML comment (`<!-- ... -->`). GitHub and marketplace previews omit the comment, but an agent that loads the raw `SKILL.md` still receives it. In one observed checklist, the concealed instruction asked the agent to run a remote shell script as an "environment validation" step. This needs no malicious helper script: the instruction inherits whatever shell and network access the agent already has.<sup>[[47]](#references)</sup>
+A `SKILL.md` instruction inside a Markdown HTML comment is absent from rendered GitHub or marketplace previews but remains in the raw file loaded by an agent. Unlike [GitHub issue HTML comments that Copilot did not receive](AI-Prompts.md#prompt-injection-in-github-copilot-hidden-mark-up), this skill-delivery path can pass the hidden instruction to the agent. An instruction disguised as environment validation can then use the agent's existing shell and network permissions; no malicious helper script is required.<sup>[[47]](#references)</sup>
 
-Another observed skill hid an instruction to modify persistent agent memory in zero-width characters embedded in its title and headings. It encoded each bit as `U+200C` (0) or `U+200D` (1); grouping the 888 bits into eight-bit bytes yielded 111 ASCII characters. A separate sample inserted `U+200B` next to ordinary spaces inside a credential-exfiltration instruction. The paragraph looked unchanged, but exact-string checks for phrases such as `API keys` no longer matched the raw text. These are content-obfuscation variants, not evidence that every model decodes them automatically.<sup>[[47]](#references)</sup>
+A separate variant encodes an instruction in a skill's title and headings with `U+200C` (bit 0) and `U+200D` (bit 1). Reading those zero-width characters in file order and grouping them into eight-bit bytes recovers ASCII text, which in the reported sample requested persistent-memory changes. This is distinct from [Unicode Tag ASCII smuggling](AI-Prompts.md#invisible-unicode-tag-characters-ascii-smuggling) and does not establish that every agent decodes the bits automatically.<sup>[[47]](#references)</sup>
 
-To inspect the binary variant in a raw skill, extract only the joiner/non-joiner characters in file order, then regroup them into bytes. For Unicode Tags (`U+E0000`–`U+E007F`) rather than joiners, use the [ASCII-smuggling decoder](AI-Prompts.md#invisible-unicode-tag-characters-ascii-smuggling).<sup>[[47]](#references)</sup>
+The following inspects the raw skill for the joiner/non-joiner binary variant; it does not decode Unicode Tags.<sup>[[47]](#references)</sup>
 
 ```python
 from pathlib import Path
