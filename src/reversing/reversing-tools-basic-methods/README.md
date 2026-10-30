@@ -207,6 +207,23 @@ cheat-engine.md
 
 [**Decompiler Explorer**](https://dogbolt.org/) is a web front-end to a number of decompilers. This web service lets you compare the output of different decompilers on small executables.
 
+## Byte-exact matching decompilation with decomp.anything
+
+When the original compiler and build settings are available, matching decompilation provides a stronger check than readable pseudocode: reconstruct one function in C/C++, compile it with that toolchain, link it at its original address, and compare the resulting instructions byte for byte. An instruction diff guides the next revision; a score of `0` means the bytes match, not that the recovered text is necessarily the original source.<sup>[[25]](#references)[[26]](#references)</sup>
+
+[decomp.anything](https://github.com/giveen/decomp.anything) applies this loop to game binaries and x86/x86-64 PE or ELF programs. Its splitter uses `.pdata`, symbols, exports and calls for PE, or symbols and `.eh_frame` for ELF. Agents claim separate functions and receive assembly, referenced data, callers and previous notes. This is useful when recovering code for a binary audit; a match verifies the compiled function, while an unmatched reconstruction must stay labelled unverified.<sup>[[26]](#references)</sup>
+
+On Linux x86-64 or Windows through WSL 2, install Python 3.12+ and `uv`, then start the local workbench from its repository.<sup>[[26]](#references)</sup> Import the target, select **Decompile it** for a supported PC program, and configure the matching compiler in **Compilers & tools**.<sup>[[26]](#references)</sup> For an existing public decompilation project, the same agent loop writes into its source tree and uses the project's build plus `objdiff` to judge attempts.<sup>[[25]](#references)[[26]](#references)</sup>
+
+```bash
+git clone https://github.com/giveen/decomp.anything.git
+cd decomp.anything
+uv sync
+uv run decomp
+```
+
+For unsupported targets, the workbench falls back to REA procedure analysis. If a matchable target lacks its original compiler, agents can still save reconstructed source, but it remains explicitly unverified rather than counted as a match. See the [REA investigation workflow](#evidence-backed-native-investigation-with-rea) for function and cross-reference analysis.<sup>[[26]](#references)</sup>
+
 ## Evidence-backed native investigation with REA
 
 **REA** exposes Hopper, Ghidra and IDA analysis through CLI and MCP. It requires Node.js 22.x (at least 22.19), 24.x (at least 24.11), or 26+, plus npm. Configure an existing native provider first; check `rea providers --json` and select a provider explicitly when more than one supports the target. Use an observed function name or address from the inventory in place of `0x1000` below.<sup>[[16]](#references)[[18]](#references)</sup>
@@ -742,5 +759,7 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 - [22] [IDA bridge server implementation](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge/blob/main/ID_Server.py)
 - [23] [Ghidra bridge server implementation](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge/blob/main/Ghidra_Server.py)
 - [24] [Oracle - InetSocketAddress(int) binds to the wildcard address](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/net/InetSocketAddress.html)
+- [25] [decomp.wtf README and original matching workflow](https://github.com/i12bp8/decomp.wtf)
+- [26] [decomp.anything README and extended matching workflow](https://github.com/giveen/decomp.anything)
 
 {{#include ../../banners/hacktricks-training.md}}
