@@ -259,17 +259,13 @@ Related stages are covered in [Mach-O overlays](../macos-files-folders-and-binar
 
 **`PHPRC`** or **`PHP_INI_SCAN_DIR`** can load controlled PHP configuration whose **`auto_prepend_file`** executes before the target script.
 
-{{#ref}}
-macos-php-applications-injection.md
-{{#endref}}
+[PHP configuration and `auto_prepend_file` startup injection](macos-interpreter-startup-file-injection.md#php-startup-configuration).
 
 ### Lua Injection
 
 The standalone Lua interpreter executes code or an `@file` from **`LUA_INIT`** (or its version-specific variant) before processing the target script.
 
-{{#ref}}
-macos-lua-applications-injection.md
-{{#endref}}
+[Lua `LUA_INIT` startup injection (file and inline code)](macos-interpreter-startup-file-injection.md#lua-startup-code).
 
 ### R Injection
 
@@ -283,9 +279,7 @@ macos-r-applications-injection.md
 
 **`JULIA_DEPOT_PATH`** redirects the depot whose `config/startup.jl` is automatically executed.
 
-{{#ref}}
-macos-julia-applications-injection.md
-{{#endref}}
+[Julia `JULIA_DEPOT_PATH` and `startup.jl` injection](macos-interpreter-startup-file-injection.md#julia-startup-depot).
 
 ### Erlang and Elixir Injection
 
@@ -299,9 +293,7 @@ macos-erlang-elixir-applications-injection.md
 
 **`OCTAVE_SITE_INITFILE`** and **`OCTAVE_VERSION_INITFILE`** redirect Octave startup scripts.
 
-{{#ref}}
-macos-octave-applications-injection.md
-{{#endref}}
+[GNU Octave startup-file injection](macos-interpreter-startup-file-injection.md#gnu-octave-startup-files).
 
 ### PowerShell Injection
 
