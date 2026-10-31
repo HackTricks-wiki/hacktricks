@@ -34,6 +34,26 @@ printf ':qa!\n' | EXINIT='silent! !touch /tmp/exinit-executed' vim /tmp/victim.t
 ls -la /tmp/exinit-executed
 ```
 
+## Project-local rc with Vim `exrc`
+
+This is a file-backed alternative to `VIMINIT`. If the victim has enabled `set exrc` in their user configuration, Vim also sources `.vimrc` (then `_vimrc` or `.exrc`) from its **working directory**, not merely from the directory of the file being edited. Plant a project-local `.vimrc` and have the victim start Vim from that project. On Unix, Vim applies `secure` restrictions to a local rc owned by someone else, but an archive extracted by the victim normally gives the planted file the victim's ownership and avoids that check.<sup>[[1]](#references)</sup>
+
+This isolated marker shows the startup trigger without modifying real user configuration:<sup>[[1]](#references)</sup>
+
+```bash
+lab=$(mktemp -d)
+mkdir -p "$lab/home" "$lab/project"
+printf 'set exrc\n' > "$lab/home/.vimrc"
+printf 'call writefile(["loaded"], "%s/hit")\n' "$lab" > "$lab/project/.vimrc"
+(cd "$lab/project" && env -u VIMINIT -u EXINIT HOME="$lab/home" vim -c 'qa!' >/dev/null 2>&1)
+test -e "$lab/hit" && echo 'project rc loaded'
+rm -r "$lab"
+```
+
+Neovim is different: current builds require project-local `.nvim.lua`, `.nvimrc`, or `.exrc` to be trusted before execution. Trust is keyed to the file's content hash, so changing an already trusted file requires another trust decision. An attacker who can only place a file in a repository cannot assume silent execution through `exrc`; distinguish this opt-in, trust-gated route from the current-directory Lua `require()` route below.<sup>[[4]](#references)[[5]](#references)</sup>
+
+For a writable **user** vimrc rather than a project-local one, see [macOS Vim startup configuration](../../macos-auto-start-locations.md#vim-startup-configuration).
+
 ## Startup suppression and exploitability
 
 This primitive depends on a **normal startup**. `vim -u NONE` / `nvim -u NONE` skip the environment/user initialization (and plugins), while `-u <file>` uses that file instead. Vim `-es`/`-Es` and Neovim `-es`, `-Es`, or `-l` also skip these initialization steps. Do not mistake `--headless` for a safe mode: a normal Neovim headless startup still processes `VIMINIT`.<sup>[[1]](#references)[[2]](#references)</sup>
@@ -82,7 +102,7 @@ package.cpath = drop_cwd(package.cpath)
 
 - **Neovim** honours both `VIMINIT` and the `EXINIT` fallback, but its normal user configuration is `init.vim` or `init.lua`.<sup>[[2]](#references)</sup>
 - The environment-variable path needs no writable file. Local rc and current-directory module hijacking are separate, file-backed primitives.<sup>[[1]](#references)[[3]](#references)</sup>
-- Project-local configuration is a different surface from modelines. With Vim's `'exrc'` enabled, a local vimrc/exrc owned by another user runs with `'secure'` restrictions; however, extracting an archive normally makes the planted file owned by the victim and defeats that ownership-based protection. Neovim also searches for `.nvim.lua`, `.nvimrc`, or `.exrc` when `'exrc'` is enabled—do not conflate that opt-in mechanism with the `require()` current-directory fallback above.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+- Project-local rc files are distinct from modelines and from the `require()` current-directory fallback above. Vim and Neovim have different checks for them; see the project-local `exrc` workflow above.<sup>[[1]](#references)[[4]](#references)</sup>
 - Editor-selection variables only choose what program is launched; they do not guarantee that `VIMINIT` reaches the final process. Inspect the exact environment and arguments at the Vim/Neovim exec boundary.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Hardening
@@ -99,4 +119,6 @@ package.cpath = drop_cwd(package.cpath)
 - [1] [Vim documentation — `starting.txt` (initialization, `VIMINIT`, `EXINIT`)](https://vimhelp.org/starting.txt.html#initialization)
 - [2] [Neovim documentation — startup and initialization](https://neovim.io/doc/user/starting/)
 - [3] [Neovim issue #38966 — current-directory fallback in `require()`](https://github.com/neovim/neovim/issues/38966)
+- [4] [Neovim options — project-local `exrc` and trust requirement](https://neovim.io/doc/user/options/#%27exrc%27)
+- [5] [Neovim editing — trusted files and `:trust`](https://neovim.io/doc/user/editing/#trust)
 {{#include ../../../banners/hacktricks-training.md}}
