@@ -2,9 +2,10 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-이 치트시트의 일부는 [angr 문서](https://docs.angr.io/_/downloads/en/stable/pdf/)를 기반으로 작성되었습니다.<sup>[[1]](#references)</sup>
+이 치트시트의 일부는 [angr 문서](https://docs.angr.io/_/downloads/en/stable/pdf/)를 기반으로 합니다.<sup>[[1]](#references)</sup>
 
 ## 설치
+
 ```bash
 sudo apt-get install python3-dev libffi-dev build-essential
 python3 -m pip install --user virtualenv
@@ -12,7 +13,9 @@ python3 -m venv ang
 source ang/bin/activate
 pip install angr
 ```
-## 기본 작업
+
+## 기본 동작
+
 ```python
 import angr
 import monkeyhex # this will format numerical results in hexadecimal
@@ -30,9 +33,11 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-## 로드된 데이터 및 메인 객체 정보
+
+## 로드된 객체 및 메인 객체 정보
 
 ### 로드된 데이터
+
 ```python
 #LOADED DATA
 proj.loader #<Loaded true, maps [0x400000:0x5004000]>
@@ -42,20 +47,22 @@ proj.loader.all_objects #All loaded
 proj.loader.shared_objects #Loaded binaries
 """
 OrderedDict([('true', <ELF Object true, maps [0x400000:0x40a377]>),
-('libc.so.6',
-<ELF Object libc-2.31.so, maps [0x500000:0x6c4507]>),
-('ld-linux-x86-64.so.2',
-<ELF Object ld-2.31.so, maps [0x700000:0x72c177]>),
-('extern-address space',
-<ExternObject Object cle##externs, maps [0x800000:0x87ffff]>),
-('cle##tls',
-<ELFTLSObjectV2 Object cle##tls, maps [0x900000:0x91500f]>)])
+             ('libc.so.6',
+              <ELF Object libc-2.31.so, maps [0x500000:0x6c4507]>),
+             ('ld-linux-x86-64.so.2',
+              <ELF Object ld-2.31.so, maps [0x700000:0x72c177]>),
+             ('extern-address space',
+              <ExternObject Object cle##externs, maps [0x800000:0x87ffff]>),
+             ('cle##tls',
+              <ELFTLSObjectV2 Object cle##tls, maps [0x900000:0x91500f]>)])
 """
 proj.loader.all_elf_objects #Get all ELF objects loaded (Linux)
 proj.loader.all_pe_objects #Get all binaries loaded (Windows)
 proj.loader.find_object_containing(0x400000)#Get object loaded in an address "<ELF Object fauxware, maps [0x400000:0x60105f]>"
 ```
+
 ### 주요 객체
+
 ```python
 #Main Object (main binary loaded)
 obj = proj.loader.main_object #<ELF Object true, maps [0x400000:0x60721f]>
@@ -69,7 +76,9 @@ obj.find_section_containing(obj.entry) #Get section by address
 obj.plt['strcmp'] #Get plt address of a funcion (0x400550)
 obj.reverse_plt[0x400550] #Get function from plt address ('strcmp')
 ```
+
 ### 심볼과 재배치
+
 ```python
 strcmp = proj.loader.find_symbol('strcmp') #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 
@@ -86,7 +95,9 @@ main_strcmp.is_export #False
 main_strcmp.is_import #True
 main_strcmp.resolvedby #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 ```
+
 ### 블록
+
 ```python
 #Blocks
 block = proj.factory.block(proj.entry) #Get the block of the entrypoint fo the binary
@@ -94,9 +105,11 @@ block.pp() #Print disassembly of the block
 block.instructions #"0xb" Get number of instructions
 block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x401675, 0x401676, 0x401679, 0x40167d, 0x40167e, 0x40167f, 0x401686, 0x40168d, 0x401694]"
 ```
+
 ## 동적 분석
 
-### Simulation Manager, 상태
+### 시뮬레이션 관리자, 상태
+
 ```python
 #Live States
 #This is useful to modify content in a live analysis
@@ -119,13 +132,15 @@ simgr = proj.factory.simulation_manager(state) #Start
 simgr.step() #Execute one step
 simgr.active[0].regs.rip #Get RIP from the last state
 ```
+
 ### 함수 호출
 
-- `args`를 통해 인수 목록을, `env`를 통해 환경 변수 dictionary를 `entry_state` 및 `full_init_state`에 전달할 수 있습니다. 이러한 구조의 값은 문자열 또는 bitvector일 수 있으며, simulated execution을 위한 인수와 환경으로 state에 직렬화됩니다. 기본 `args`는 빈 목록이므로, 분석 중인 프로그램이 최소한 `argv[0]`을 찾을 것으로 예상된다면 항상 이를 제공해야 합니다!
-- `argc`를 symbolic으로 설정하려면 `entry_state` 및 `full_init_state` constructor에 symbolic bitvector를 `argc`로 전달할 수 있습니다. 단, 이렇게 하는 경우 결과 state에 `argc` 값이 `args`에 전달한 인수 개수보다 클 수 없도록 constraint도 추가해야 합니다.
-- call state를 사용하려면 `.call_state(addr, arg1, arg2, ...)`로 호출해야 합니다. 여기서 `addr`은 호출할 함수의 address이고 `argN`은 해당 함수의 N번째 인수입니다. 인수는 Python 정수, 문자열, 배열 또는 bitvector일 수 있습니다. memory를 할당하고 객체에 대한 pointer를 실제로 전달하려면 `PointerWrapper`로 감싸야 합니다. 예: `angr.PointerWrapper("point to me!")`. 이 API의 결과는 다소 예측하기 어려울 수 있지만, 현재 개선 작업이 진행 중입니다.
+- `args`를 통해 인수 목록을, `env`를 통해 환경 변수 딕셔너리를 `entry_state`와 `full_init_state`에 전달할 수 있습니다. 이러한 구조의 값은 문자열이나 bitvector일 수 있으며, 시뮬레이션된 실행의 인수와 환경 변수로 상태에 직렬화됩니다. 기본 `args`는 빈 목록이므로, 분석 중인 프로그램이 `argv[0]`을 필요로 한다면 항상 이를 제공해야 합니다!
+- `argc`를 symbolic으로 설정하려면 `entry_state`와 `full_init_state` 생성자에 symbolic bitvector를 `argc`로 전달하면 됩니다. 단, 이 경우 결과 상태에 `argc` 값이 `args`에 전달한 인수 개수보다 클 수 없다는 제약 조건도 추가해야 합니다.
+- call state를 사용하려면 `.call_state(addr, arg1, arg2, ...)` 형식으로 호출해야 합니다. 여기서 `addr`은 호출할 함수의 주소이고 `argN`은 해당 함수의 N번째 인수이며, Python 정수, 문자열, 배열 또는 bitvector일 수 있습니다. 메모리를 할당하고 객체에 대한 포인터를 실제로 전달하려면 `angr.PointerWrapper("point to me!")`처럼 `PointerWrapper`로 감싸야 합니다. 이 API의 결과는 다소 예측하기 어려울 수 있지만, 개선 작업을 진행 중입니다.
 
 ### BitVectors
+
 ```python
 #BitVectors
 state = proj.factory.entry_state()
@@ -134,7 +149,9 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-### Symbolic BitVectors 및 제약 조건
+
+### 심볼릭 비트벡터 및 제약 조건
+
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -161,14 +178,16 @@ state.satisfiable() #False
 
 #Solver solutions
 solver.eval(expression) #one possible solution
-solver.eval_one(expression) #solution to the given expression, or throw an error if more than one solution is possible.
+solver.eval_one(expression) # One solution, or raise an error if more than one solution is possible.
 solver.eval_upto(expression, n) #n solutions to the given expression, returning fewer than n if fewer than n are possible.
-solver.eval_atleast(expression, n) #n solutions to the given expression, throwing an error if fewer than n are possible.
-solver.eval_exact(expression, n) #n solutions to the given expression, throwing an error if fewer or more than are possible.
+solver.eval_atleast(expression, n) # n solutions, raising an error if fewer than n are possible.
+solver.eval_exact(expression, n) # n solutions, raising an error unless exactly n are possible.
 solver.min(expression) #minimum possible solution to the given expression.
 solver.max(expression) #maximum possible solution to the given expression.
 ```
+
 ### Hooking
+
 ```python
 >>> stub_func = angr.SIM_PROCEDURES['stubs']['ReturnUnconstrained'] # this is a CLASS
 >>> proj.hook(0x10000, stub_func())  # hook with an instance of the class
@@ -186,12 +205,16 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-또한 첫 번째 인자로 심볼의 이름을 제공하는 `proj.hook_symbol(name, hook)`을 사용하여 심볼이 위치한 주소에 hook을 설정할 수 있습니다<sup>[[1]](#references)</sup>
+
+또한 첫 번째 인수로 심볼 이름을 제공해 `proj.hook_symbol(name, hook)`를 사용하면 해당 심볼이 위치한 주소에 hook을 설정할 수 있습니다<sup>[[1]](#references)</sup>
 
 ## 예제
 
-## 참고 자료
+실용적인 경로 탐색, 입력 모델링, 함수 hook, 입력으로 제어되는 명령 포인터 확인 방법은 [angr examples](angr-examples.md)를 참조하세요.
 
-- [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
 
+
+## References
+
+- [1] [angr 문서](https://docs.angr.io/_/downloads/en/stable/pdf/)
 {{#include ../../../banners/hacktricks-training.md}}
