@@ -500,7 +500,7 @@
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-quicklook-generators.md": "257044fbcb46dd52d1c541f898d213fe36733a70",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-r-applications-injection.md": "68d9e1410a4cc70802e8c7c3b36a7ddb8fef7714",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-ruby-applications-injection.md": "2ac34570a233201809e3faa2e06ec41044f7715f",
-    "src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-vim-applications-injection.md": "66146735fff4af75bf40de4caa6dbeadd5d5685f",
+    "src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-vim-applications-injection.md": "a1741f17b449d25ee43203b6bf1b4d2db7f0cb15",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-xpc-mach-services-abuse.md": "73ed365dec3879d8d59d04a107a85490b006ff4f",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/reflective-mach-o-loading.md": "4d5de5d17966684997634a99c7066e51ec1392e4",
     "src/macos-hardening/macos-security-and-privilege-escalation/macos-protocols.md": "89bdda2992326b6e7212e0cdfdfe94bbf5076a9e",
