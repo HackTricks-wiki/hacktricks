@@ -1,14 +1,15 @@
-# Injection d'applications Vim/Neovim sous macOS
+# Injection d'applications macOS Vim/Neovim
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Présentation
+## Vue d'ensemble
 
-Le propre langage de script de Vim (Vimscript) peut exécuter des **commandes Ex et des commandes shell arbitraires au démarrage** à partir de variables d'environnement. Si un processus plus privilégié (un workflow de maintenance/root, un `sudo vim …`, un éditeur lancé par un autre outil, `crontab -e`, `visudo`, `git`/`less` invoquant un éditeur, …) lance Vim/Neovim avec un environnement contrôlé par l'attaquant, celui-ci obtient une exécution de code dans ce contexte.
+Le langage de script propre à Vim (Vimscript) peut exécuter **des commandes Ex arbitraires et des commandes shell au démarrage** à partir de variables d'environnement. Si un processus plus privilégié (un workflow de maintenance/root, un `sudo vim …`, un éditeur lancé par un autre outil, `crontab -e`, `visudo`, `git`/`less` invoquant un éditeur, …) lance Vim/Neovim avec un environnement contrôlé par l'attaquant, ce dernier obtient l'exécution de code dans ce contexte.
 
 ## `VIMINIT`
 
-Lors de son initialisation, Vim lit et exécute les commandes Ex présentes dans **`VIMINIT`**. Les commandes Ex incluent `:!cmd` (exécuter une commande shell) et `:call system(...)`, ainsi une seule variable permet une exécution arbitraire avant même qu'un fichier ne soit modifié.<sup>[[1]](#references)</sup>
+Lors de l'initialisation, Vim lit et exécute les commandes Ex contenues dans **`VIMINIT`**. Les commandes Ex incluent `:!cmd` (exécuter une commande shell) et `:call system(...)` ; une seule variable suffit donc à obtenir une exécution arbitraire avant même qu'un fichier soit modifié.<sup>[[1]](#references)</sup>
+
 ```bash
 echo "hi" > /tmp/victim.txt
 
@@ -19,28 +20,52 @@ ls -la /tmp/vim-executed
 # Pure Vimscript: write the marker and exit without reading stdin
 VIMINIT='call writefile(["x"], "/tmp/vim-vimscript")|qall!' vim /tmp/victim.txt
 ```
-Le `:qa!` fourni via stdin dans le premier exemple ferme uniquement l’éditeur après l’exécution du payload ; dans un scénario réel, la victime peut ouvrir Vim normalement.
 
-`VIMINIT` est analysé comme **une seule ligne de commande Ex**. Séparez une chaîne de commandes avec `|` (ou un saut de ligne littéral). Il a priorité sur le vimrc de l’utilisateur et sur `EXINIT`, de sorte qu’un payload n’a pas besoin d’un fichier de configuration malveillant et s’exécute avant la configuration utilisateur normale.<sup>[[1]](#references)[[2]](#references)</sup>
+Le `:qa!` transmis sur stdin dans le premier exemple ne ferme l’éditeur qu’après l’exécution du payload ; dans un scénario réel, la victime peut ouvrir Vim normalement.
+
+`VIMINIT` est analysé comme **une seule ligne de commande Ex**. Séparez les commandes en chaîne avec `|` (ou un saut de ligne littéral). Il a priorité sur le vimrc de l’utilisateur et `EXINIT` : un payload n’a donc pas besoin d’un fichier de configuration malveillant et s’exécute avant la configuration normale de l’utilisateur.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## `EXINIT`
 
-Si `VIMINIT` n’est pas défini, Vim (ainsi que les binaires de compatibilité `vi`/`ex`) utilise **`EXINIT`**, qui est exécuté de la même manière. Il s’agit de la variante classique, issue de l’ère de vi, du même primitive.<sup>[[1]](#references)</sup>
+Si `VIMINIT` n’est pas défini, Vim (et les binaires de compatibilité `vi`/`ex`) se rabat sur **`EXINIT`**, qui est exécuté de la même manière. C’est la variante classique, héritée de l’époque de vi, de cette même primitive.<sup>[[1]](#references)</sup>
+
 ```bash
 printf ':qa!\n' | EXINIT='silent! !touch /tmp/exinit-executed' vim /tmp/victim.txt
 ls -la /tmp/exinit-executed
 ```
-## Désactivation du démarrage et exploitabilité
 
-Cette primitive dépend d’un **démarrage normal**. `vim -u NONE` / `nvim -u NONE` ignorent l’initialisation de l’environnement et de l’utilisateur (ainsi que les plugins), tandis que `-u <file>` utilise ce fichier à la place. Vim `-es`/`-Es` et Neovim `-es`, `-Es` ou `-l` ignorent également ces étapes d’initialisation. Ne confondez pas `--headless` avec un mode sécurisé : un démarrage headless normal de Neovim traite toujours `VIMINIT`.<sup>[[1]](#references)[[2]](#references)</sup>
+## Fichier rc local au projet avec Vim `exrc`
 
-Par conséquent, validez la chaîne complète de lancement : la variable doit survivre au wrapper, à la policy `sudo`, au job runner et à la sélection de l’éditeur, et la commande finale ne doit pas forcer `-u NONE`/`NORC` ou le batch mode. Un payload fiable peut se terminer lui-même avec `|qall!`, ce qui facilite également le test des wrappers qui ne fournissent pas de TTY.<sup>[[1]](#references)[[2]](#references)</sup>
+Il s’agit d’une alternative à `VIMINIT` reposant sur un fichier. Si la victime a activé `set exrc` dans sa configuration utilisateur, Vim charge également `.vimrc` (puis `_vimrc` ou `.exrc`) depuis son **répertoire de travail**, et pas seulement depuis le répertoire du fichier en cours d’édition. Placez un `.vimrc` local au projet et faites démarrer Vim par la victime depuis ce projet. Sous Unix, Vim applique les restrictions `secure` à un fichier rc local appartenant à quelqu’un d’autre, mais une archive extraite par la victime attribue normalement le fichier placé à l’utilisateur victime, ce qui évite cette vérification.<sup>[[1]](#references)</sup>
 
-## Détournement de module Lua depuis le répertoire courant de Neovim
+Ce marqueur isolé montre le déclenchement au démarrage sans modifier la configuration réelle de l’utilisateur :<sup>[[1]](#references)</sup>
 
-Une primitive d’injection Neovim distincte affecte les builds dont `package.path`/`package.cpath` Lua contiennent encore des templates de répertoire courant tels que `./?.lua` ou `./?.so`. Démarrer Neovim seul ne suffit pas : une config ou un plugin doit appeler `require("name")`, et aucun loader antérieur ne doit résoudre ce nom. Un déclencheur courant est une **vérification de dépendance optionnelle** telle que `pcall(require, "optional_dep")` ; placer `optional_dep.lua` dans un répertoire de travail contrôlé par l’attaquant l’exécute alors sans activer la fonctionnalité distincte de configuration locale `'exrc'`. Les modules `vim.*` du core et les modules déjà trouvés dans `'runtimepath'` ne peuvent généralement pas être shadowés ; énumérez donc les appels `require()` manquants/optionnels réels plutôt que de deviner les noms.<sup>[[3]](#references)</sup>
+```bash
+lab=$(mktemp -d)
+mkdir -p "$lab/home" "$lab/project"
+printf 'set exrc\n' > "$lab/home/.vimrc"
+printf 'call writefile(["loaded"], "%s/hit")\n' "$lab" > "$lab/project/.vimrc"
+(cd "$lab/project" && env -u VIMINIT -u EXINIT HOME="$lab/home" vim -c 'qa!' >/dev/null 2>&1)
+test -e "$lab/hit" && echo 'project rc loaded'
+rm -r "$lab"
+```
 
-L’exemple suivant reproduit la primitive du loader avec un marqueur inoffensif :<sup>[[3]](#references)</sup>
+Neovim est différent : les versions actuelles exigent que les fichiers locaux au projet `.nvim.lua`, `.nvimrc` ou `.exrc` soient approuvés avant leur exécution. La confiance est associée au hash du contenu du fichier ; modifier un fichier déjà approuvé nécessite donc une nouvelle décision de confiance. Un attaquant qui peut uniquement déposer un fichier dans un dépôt ne peut pas compter sur une exécution silencieuse via `exrc` ; distinguez cette voie facultative, soumise à une approbation, de la voie `require()` Lua du répertoire courant décrite ci-dessous.<sup>[[4]](#references)[[5]](#references)</sup>
+
+Pour un vimrc **utilisateur** modifiable, plutôt qu'un vimrc local au projet, consultez [Configuration de démarrage de Vim sur macOS](../../macos-auto-start-locations.md#vim-startup-configuration).
+
+## Suppression du démarrage et exploitabilité
+
+Cette primitive dépend d'un **démarrage normal**. `vim -u NONE` / `nvim -u NONE` ignorent l'initialisation de l'environnement et de l'utilisateur (ainsi que les plugins), tandis que `-u <file>` utilise ce fichier à la place. Vim `-es`/`-Es` et Neovim `-es`, `-Es` ou `-l` ignorent également ces étapes d'initialisation. Ne confondez pas `--headless` avec un mode sûr : un démarrage normal de Neovim en mode headless traite toujours `VIMINIT`.<sup>[[1]](#references)[[2]](#references)</sup>
+
+Par conséquent, validez toute la chaîne de lancement : la variable doit traverser le wrapper, la politique `sudo`, le lanceur de tâches et la sélection de l'éditeur, et la commande finale ne doit pas imposer `-u NONE`/`NORC` ni le mode batch. Une charge utile fiable peut se terminer elle-même avec `|qall!`, ce qui facilite aussi les tests des wrappers qui ne fournissent pas de TTY.<sup>[[1]](#references)[[2]](#references)</sup>
+
+## Détournement de module Lua du répertoire courant dans Neovim
+
+Une primitive d'injection distincte dans Neovim concerne les versions dont `package.path`/`package.cpath` de Lua contiennent encore des modèles de répertoire courant tels que `./?.lua` ou `./?.so`. Le simple démarrage de Neovim ne suffit pas : une configuration ou un plugin doit appeler `require("name")`, et aucun chargeur précédent ne doit avoir résolu ce nom. Un déclencheur courant est la vérification d'une **dépendance facultative**, telle que `pcall(require, "optional_dep")` ; placer `optional_dep.lua` dans un répertoire de travail contrôlé par l'attaquant permet alors de l'exécuter sans activer la fonctionnalité distincte de configuration locale `'exrc'`. Les modules principaux `vim.*` et les modules déjà trouvés dans `'runtimepath'` ne peuvent généralement pas être masqués ; répertoriez donc les appels `require()` réellement manquants ou facultatifs au lieu de deviner les noms.<sup>[[3]](#references)</sup>
+
+Voici comment reproduire la primitive du chargeur avec un marqueur inoffensif :<sup>[[3]](#references)</sup>
+
 ```bash
 mkdir -p /tmp/nvim-cwd-hijack
 cat > /tmp/nvim-cwd-hijack/optional_dep.lua <<'LUA'
@@ -52,35 +77,40 @@ cd /tmp/nvim-cwd-hijack
 nvim --clean --headless '+lua require("optional_dep")' +qa
 cat /tmp/nvim-cwd-hit
 ```
-Vérifiez la build en cours d’exécution au lieu de vous fier uniquement à une chaîne de version :<sup>[[3]](#references)</sup>
+
+Vérifiez le build en cours plutôt que de vous fier uniquement à une chaîne de version :<sup>[[3]](#references)</sup>
+
 ```bash
 nvim --clean --headless '+lua io.write(package.path)' +qa 2>&1 | tr ';' '\n'
 ```
-Upstream suit la suppression du fallback vers le répertoire courant lors du démarrage normal de l’éditeur, tout en conservant le comportement des scripts Lua (`nvim -l`). Tant que la build installée l’expose encore, placez ceci au **début** de `init.lua` (cela supprime intentionnellement les templates de modules Lua/C relatifs au répertoire courant ; ne l’appliquez donc pas aux workflows qui en ont besoin) :<sup>[[3]](#references)</sup>
+
+Upstream suit la suppression du fallback vers le répertoire courant lors du démarrage normal de l’éditeur, tout en conservant le comportement des scripts Lua (`nvim -l`). Tant que la version installée l’expose encore, placez ceci au **début** de `init.lua` (cela supprime volontairement les modèles de modules Lua/C relatifs au répertoire courant ; ne l’appliquez donc pas aux workflows qui en ont besoin) :<sup>[[3]](#references)</sup>
+
 ```lua
 local function drop_cwd(path)
-local keep = {}
-for entry in path:gmatch("[^;]+") do
-if not entry:match("^%./") then keep[#keep + 1] = entry end
-end
-return table.concat(keep, ";")
+  local keep = {}
+  for entry in path:gmatch("[^;]+") do
+    if not entry:match("^%./") then keep[#keep + 1] = entry end
+  end
+  return table.concat(keep, ";")
 end
 package.path = drop_cwd(package.path)
 package.cpath = drop_cwd(package.cpath)
 ```
-## Notes et réserves
 
-- **Neovim** honore à la fois `VIMINIT` et le fallback `EXINIT`, mais sa configuration utilisateur normale est `init.vim` ou `init.lua`.<sup>[[2]](#references)</sup>
-- Le chemin via les variables d'environnement ne nécessite aucun fichier accessible en écriture. Le détournement du rc local et celui des modules du répertoire courant sont des primitives distinctes, fondées sur des fichiers.<sup>[[1]](#references)[[3]](#references)</sup>
-- La configuration locale au projet est une surface différente des modelines. Avec `'exrc'` activé dans Vim, un vimrc/exrc local appartenant à un autre utilisateur s'exécute avec les restrictions de `'secure'` ; cependant, l'extraction d'une archive rend normalement le fichier injecté appartenant à la victime et neutralise cette protection fondée sur la propriété. Neovim recherche également `.nvim.lua`, `.nvimrc` ou `.exrc` lorsque `'exrc'` est activé — ne confondez pas ce mécanisme opt-in avec le fallback `require()` du répertoire courant mentionné ci-dessus.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
-- Les variables de sélection de l'éditeur indiquent uniquement quel programme est lancé ; elles ne garantissent pas que `VIMINIT` atteigne le processus final. Inspectez l'environnement et les arguments exacts à la limite d'exécution de Vim/Neovim.<sup>[[1]](#references)[[2]](#references)</sup>
+## Notes et précautions
 
-## Renforcement de la sécurité
+- **Neovim** prend en charge `VIMINIT` ainsi que la variable de repli `EXINIT`, mais sa configuration utilisateur habituelle est `init.vim` ou `init.lua`.<sup>[[2]](#references)</sup>
+- Le chemin via variable d’environnement ne nécessite aucun fichier accessible en écriture. Les fichiers rc locaux et le current-directory module hijacking sont des primitives distinctes qui reposent sur des fichiers.<sup>[[1]](#references)[[3]](#references)</sup>
+- Les fichiers rc propres à un projet sont distincts des modelines et de la solution de repli `require()` vers le répertoire courant mentionnée ci-dessus. Vim et Neovim appliquent des vérifications différentes ; voir le workflow `exrc` propre au projet ci-dessus.<sup>[[1]](#references)[[4]](#references)</sup>
+- Les variables de sélection de l’éditeur choisissent uniquement le programme lancé ; elles ne garantissent pas que `VIMINIT` parvienne au processus final. Examinez l’environnement exact et les arguments au point d’exécution de Vim/Neovim.<sup>[[1]](#references)[[2]](#references)</sup>
 
-- Supprimez explicitement les variables avant les lancements privilégiés ou automatisés de l'éditeur : `env -u VIMINIT -u EXINIT /usr/bin/vim -u NONE -- "$file"`. `-u NONE` est important lorsque l'appelant doit ignorer toutes les sources de démarrage utilisateur.<sup>[[1]](#references)[[2]](#references)</sup>
-- Définissez `EDITOR`/`VISUAL` sur des chemins absolus de confiance, évitez d'exécuter des éditeurs interactifs en tant que root avec un environnement utilisateur hérité, et assurez-vous que les wrappers ne peuvent pas restaurer `VIMINIT`/`EXINIT` après l'assainissement.<sup>[[1]](#references)[[2]](#references)</sup>
-- Pour Neovim, mettez à jour vers une build qui supprime les templates de recherche Lua/C du répertoire courant en mode éditeur, ou supprimez-les avant le chargement des plugins. Auditez le code des plugins à la recherche d'appels `pcall(require, ...)` optionnels lors de l'ouverture de repositories non fiables.<sup>[[3]](#references)</sup>
-- Considérez le contrôle de l'environnement de l'éditeur, du répertoire de travail ou de la configuration de démarrage d'une cible comme une primitive potentielle d'exécution de code dans le contexte de sécurité de l'éditeur.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+## Renforcement
+
+- Supprimez explicitement les variables avant de lancer un éditeur avec des privilèges élevés ou de manière automatisée : `env -u VIMINIT -u EXINIT /usr/bin/vim -u NONE -- "$file"`. `-u NONE` est important lorsque l’appelant doit ignorer toutes les sources de démarrage utilisateur.<sup>[[1]](#references)[[2]](#references)</sup>
+- Définissez `EDITOR`/`VISUAL` sur des chemins absolus de confiance, évitez d’exécuter des éditeurs interactifs en tant que root avec un environnement utilisateur hérité, et assurez-vous que les wrappers ne peuvent pas rétablir `VIMINIT`/`EXINIT` après leur suppression.<sup>[[1]](#references)[[2]](#references)</sup>
+- Pour Neovim, mettez à jour vers une version qui supprime les modèles de recherche Lua/C du répertoire courant en mode éditeur, ou supprimez-les avant le chargement des plugins. Auditez le code des plugins pour repérer les appels facultatifs à `pcall(require, ...)` lors de l’ouverture de dépôts non fiables.<sup>[[3]](#references)</sup>
+- Considérez le contrôle de l’environnement de l’éditeur, du répertoire de travail ou de la configuration de démarrage d’une cible comme une primitive potentielle d’exécution de code dans le contexte de sécurité de l’éditeur.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
 
 
@@ -88,5 +118,7 @@ package.cpath = drop_cwd(package.cpath)
 
 - [1] [Documentation de Vim — `starting.txt` (initialisation, `VIMINIT`, `EXINIT`)](https://vimhelp.org/starting.txt.html#initialization)
 - [2] [Documentation de Neovim — démarrage et initialisation](https://neovim.io/doc/user/starting/)
-- [3] [Problème Neovim #38966 — fallback du répertoire courant dans `require()`](https://github.com/neovim/neovim/issues/38966)
+- [3] [Problème Neovim #38966 — solution de repli vers le répertoire courant dans `require()`](https://github.com/neovim/neovim/issues/38966)
+- [4] [Options de Neovim — `exrc` propre au projet et exigence de confiance](https://neovim.io/doc/user/options/#%27exrc%27)
+- [5] [Édition avec Neovim — fichiers de confiance et `:trust`](https://neovim.io/doc/user/editing/#trust)
 {{#include ../../../banners/hacktricks-training.md}}
