@@ -1,30 +1,30 @@
-# Flujo de trabajo de CTF de criptografía
+# Flujo de trabajo de Crypto CTF
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Lista de verificación de triage
+## Lista de verificación para el análisis inicial
 
 1. Identifica qué tienes: codificación, cifrado, hash, firma o MAC.
-2. Determina qué puedes controlar: texto plano/cifrado, IV/nonce, clave, oracle (relleno/error/tiempo), filtración parcial.
-3. Clasifica: simétrica (AES/CTR/GCM), clave pública (RSA/ECC), hash/MAC (SHA/MD5/HMAC), clásica (Vigenère/XOR).
-4. Prueba primero las comprobaciones con mayor probabilidad de éxito: decodificar capas, XOR con texto conocido, reutilización de nonce, uso incorrecto de modos, comportamiento del oracle.
-5. Recurre a métodos avanzados solo cuando sea necesario: retículas (LLL/Coppersmith), SMT/Z3, canales laterales.
+2. Determina qué está bajo tu control: texto plano/cifrado, IV/nonce, clave, oracle (padding/error/tiempo), filtración parcial.
+3. Clasifica: simétrico (AES/CTR/GCM), clave pública (RSA/ECC), hash/MAC (SHA/MD5/HMAC), clásico (Vigenere/XOR).
+4. Aplica primero las comprobaciones con mayor probabilidad de éxito: decodificar capas, XOR con texto plano conocido, reutilización de nonce, uso incorrecto del modo, comportamiento del oracle.
+5. Recurre a métodos avanzados solo cuando sea necesario: lattices (LLL/Coppersmith), SMT/Z3, canales laterales.
 
 ## Recursos y utilidades en línea
 
-Son útiles para identificar y eliminar capas, o cuando necesitas confirmar rápidamente una hipótesis.
+Son útiles cuando la tarea consiste en identificar y eliminar capas, o cuando necesitas confirmar rápidamente una hipótesis.
 
-### Búsquedas de hashes
+### Búsqueda de hashes
 
-- Busca el hash del desafío si se sabe que es sintético/público.
+- Busca el hash de un desafío si se sabe que es sintético/público.
 - CrackStation.<sup>[[1]](#references)</sup>
 - MD5Decrypt.<sup>[[2]](#references)</sup>
-- Búsqueda de hashes.org.<sup>[[3]](#references)</sup>
+- Búsqueda en hashes.org.<sup>[[3]](#references)</sup>
 - OnlineHashCrack.<sup>[[4]](#references)</sup>
 - GPUHash.me.<sup>[[5]](#references)</sup>
 - Hash Toolkit.<sup>[[6]](#references)</sup>
 
-No envíes hashes de contraseñas reales ni material confidencial de desafíos a servicios de búsqueda de terceros. Si te preocupan la divulgación, los términos del servicio o las reglas de la competencia, prefiere un ataque offline con wordlist/reglas.
+No envíes hashes de contraseñas reales ni material confidencial de desafíos a servicios de búsqueda de terceros. Si te preocupa la divulgación, las condiciones del servicio o las reglas de la competencia, prefiere un ataque offline con wordlist/reglas.
 
 ### Herramientas de identificación
 
@@ -46,29 +46,52 @@ No envíes hashes de contraseñas reales ni material confidencial de desafíos a
 
 ### Técnica
 
-Muchos desafíos de criptografía CTF usan transformaciones en capas: codificación base + sustitución simple + compresión. El objetivo es identificar las capas y eliminarlas de forma segura.
+Muchos desafíos de crypto CTF usan transformaciones en capas: codificación en base + sustitución simple + compresión. El objetivo es identificar las capas e ir quitándolas de forma segura.
 
-### Codificaciones: prueba varias bases
+### Codificaciones: prueba muchas bases
 
 Si sospechas que hay codificación en capas (base64 → base32 → …), prueba:
 
 - CyberChef "Magic"
 - `codext` (python-codext): `codext <string>`
 
-Indicadores comunes:
+Indicadores habituales:
 
-- Base64: `A-Za-z0-9+/=` (el relleno `=` es habitual)
-- Base32: `A-Z2-7=` (a menudo tiene mucho relleno `=`)
-- Ascii85/Base85: puntuación densa; a veces está entre `<~ ~>`
+- Base64: `A-Za-z0-9+/=` (el padding `=` es común)
+- Base32: `A-Z2-7=` (a menudo tiene mucho padding `=`)
+- Ascii85/Base85: puntuación densa; a veces está delimitado por `<~ ~>`
 
 ### Sustitución / monoalfabética
 
 - Solucionador de criptogramas de Boxentriq.<sup>[[9]](#references)</sup>
 - quipqiup.<sup>[[14]](#references)</sup>
 
+#### Recuperación mediante texto plano conocido de nombres de archivo Base32 sustituidos
+
+Cuando un nombre de archivo ofuscado usa solo `a-z2-7`, tiene una longitud aproximada de `ceil(8 * byte_length / 5)` caracteres después de quitar un sufijo fijo, y el mismo texto plano produce la misma salida en distintos archivos, prueba **Base32 sin padding seguida de una sustitución fija de símbolos**. Estas pistas por sí solas no son una prueba. Recopila nombres de archivo predecibles y sus textos cifrados, conserva las mayúsculas y minúsculas, codifica cada texto plano con Base32 y alinea los símbolos posición por posición. Cada símbolo repetido del texto plano debe corresponder al mismo símbolo del texto cifrado, y la correspondencia inversa también debe ser única. En un caso de ransomware, `ntuser.ini` y `NTUSER.DAT` proporcionaron esos pares; esto permitió recuperar nombres de archivo, **no el contenido de los archivos ni las claves de cifrado**.<sup>[[28]](#references)</sup>
+
+```python
+import base64
+pairs = [("ntuser.ini", "zsub5mdlekr37dx4"), ("NTUSER.DAT", "4s5l5tul5kr6kv5t")]
+forward, inverse = {}, {}
+for name, ciphertext in pairs:
+    b32 = base64.b32encode(name.encode("ascii")).decode().lower().rstrip("=")
+    assert len(b32) == len(ciphertext)
+    for p, c in zip(b32, ciphertext):
+        assert forward.get(p, c) == c and inverse.get(c, p) == p
+        forward[p], inverse[c] = c, p
+target = "4s5l5tul5kr6kv5t"  # Remove the fixed suffix first
+b32 = "".join(inverse[c] for c in target)
+clear = base64.b32decode(b32.upper() + "=" * (-len(b32) % 8))
+assert "".join(forward[c] for c in b32) == target
+print(clear.decode("ascii"))
+```
+
+Si un objetivo contiene símbolos sin asignar, obtén más pares conocidos o permuta solo las asignaciones de símbolos Base32 no utilizadas. Restaura el relleno hasta alcanzar un límite de ocho caracteres, rechaza el Base32 no válido y los nombres decodificados no imprimibles; luego vuelve a codificar los candidatos restantes y compáralos con el **texto cifrado original completo**. Los bloques de texto cifrado repetidos pueden aportar conjeturas adicionales: en el caso anterior, `3gpng2wv` se volvió a asignar a Base32 `gaydambq`, que se decodifica como cinco ceros ASCII. Un candidato imprimible por sí solo no constituye una prueba única.<sup>[[28]](#references)</sup>
+
 ### Caesar / ROT / Atbash
 
-- Descifrador automático de cifrado Caesar de Nayuki.<sup>[[15]](#references)</sup>
+- Descifrador automático de cifrado César de Nayuki.<sup>[[15]](#references)</sup>
 - Herramienta Atbash de Rumkin.<sup>[[16]](#references)</sup>
 
 ### Vigenère
@@ -91,11 +114,11 @@ AABBB ABBAB ABABA AAAAA ...
 .... --- .-.. -.-. .- .-. .- -.-. --- .-.. .-
 ```
 
-### Runas
+### Runes
 
-Las runas suelen ser alfabetos de sustitución; busca "futhark cipher" y prueba tablas de correspondencia.
+Las runas suelen ser alfabetos de sustitución; busca «futhark cipher» y prueba tablas de correspondencias.
 
-## Compresión en challenges
+## Compresión en desafíos
 
 ### Técnica
 
@@ -134,24 +157,24 @@ PY
 
 ### Técnica
 
-Aparecen con frecuencia porque reflejan errores realistas de desarrolladores o el uso incorrecto de bibliotecas comunes. El objetivo suele ser reconocerlos y aplicar un flujo de trabajo conocido de extracción o reconstrucción.
+Aparecen con frecuencia porque son errores realistas de desarrolladores o bibliotecas comunes usadas incorrectamente. El objetivo suele ser reconocerlas y aplicar un flujo de trabajo conocido de extracción o reconstrucción.
 
 ### Fernet
 
-Pista típica: dos cadenas Base64 (token + clave).
+Pista típica: dos cadenas Base64 (token + key).
 
-- Decodificador/notas: decodificador Fernet de Asecuritysite.<sup>[[18]](#references)</sup>
+- Decoder/notas: Asecuritysite Fernet decoder.<sup>[[18]](#references)</sup>
 - En Python: `from cryptography.fernet import Fernet`
 
 ### Shamir Secret Sharing
 
-Si ves varias shares y se menciona un umbral `t`, probablemente se trate de Shamir.
+Si ves varios shares y se menciona un umbral `t`, probablemente se trate de Shamir.
 
-- Recontructor en línea (solo para shares de CTF no sensibles).<sup>[[19]](#references)</sup>
+- Reconstructor online (solo para shares no sensibles de CTF).<sup>[[19]](#references)</sup>
 
-### Formatos salted de OpenSSL
+### Formatos OpenSSL con salt
 
-A veces los CTF proporcionan salidas de `openssl enc` (el encabezado suele comenzar con `Salted__`).
+A veces los CTF proporcionan salidas de `openssl enc` (el encabezado suele empezar con `Salted__`).
 
 Herramientas auxiliares de fuerza bruta:
 
@@ -169,14 +192,16 @@ Herramientas auxiliares de fuerza bruta:
 Stack práctico para CTF:
 
 - Python más `pycryptodome` para primitivas simétricas y prototipado rápido.<sup>[[25]](#references)</sup>
-- SageMath para aritmética modular, CRT, retículos y trabajo con RSA/ECC.<sup>[[26]](#references)</sup>
+- SageMath para aritmética modular, CRT, retículas y trabajo con RSA/ECC.<sup>[[26]](#references)</sup>
 - Z3 para desafíos basados en restricciones (cuando la criptografía se reduce a restricciones).<sup>[[27]](#references)</sup>
 
-Paquetes de Python recomendados:
+Paquetes de Python sugeridos:
 
 ```bash
 pip install pycryptodome gmpy2 sympy pwntools z3-solver
 ```
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## References
 
@@ -195,10 +220,10 @@ pip install pycryptodome gmpy2 sympy pwntools z3-solver
 - [13] [python-codext](https://github.com/dhondta/python-codext)
 - [14] [quipqiup](https://quipqiup.com/)
 - [15] [Nayuki - Descifrador automático de cifrado César](https://www.nayuki.io/page/automatic-caesar-cipher-breaker-javascript)
-- [16] [Rumkin - cifrado Atbash](https://rumkin.com/tools/cipher/atbash/)
-- [17] [Solucionador de cifrado Vigenère de Guballa](https://www.guballa.de/vigenere-solver)
-- [18] [Asecuritysite - decodificador Fernet](https://asecuritysite.com/encryption/ferdecode)
-- [19] [Recontructor de Shamir secret-sharing](https://christian.gen.co/secrets/)
+- [16] [Rumkin - Cifrado Atbash](https://rumkin.com/tools/cipher/atbash/)
+- [17] [Solucionador Vigenère de Guballa](https://www.guballa.de/vigenere-solver)
+- [18] [Asecuritysite - Decodificador Fernet](https://asecuritysite.com/encryption/ferdecode)
+- [19] [Reconstrucción de compartición de secretos de Shamir](https://christian.gen.co/secrets/)
 - [20] [bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
 - [21] [easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
 - [22] [RsaCtfTool](https://github.com/RsaCtfTool/RsaCtfTool)
@@ -207,4 +232,4 @@ pip install pycryptodome gmpy2 sympy pwntools z3-solver
 - [25] [documentación de PyCryptodome](https://pycryptodome.readthedocs.io/en/latest/)
 - [26] [SageMath](https://www.sagemath.org/)
 - [27] [Z3](https://github.com/Z3Prover/z3)
-{{#include ../../banners/hacktricks-training.md}}
+- [28] [Eye Research – Romper esquemas de cifrado por el método fácil](https://labs.eye.security/breaking-encryption-schemes-the-lazy-way/)
