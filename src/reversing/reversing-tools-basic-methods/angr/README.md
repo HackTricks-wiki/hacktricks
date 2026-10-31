@@ -2,9 +2,10 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ovaj deo cheatsheet-a zasnovan je na [angr dokumentaciji](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
+Deo ovog podsetnika zasniva se na [angr dokumentaciji](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
 
 ## Instalacija
+
 ```bash
 sudo apt-get install python3-dev libffi-dev build-essential
 python3 -m pip install --user virtualenv
@@ -12,7 +13,9 @@ python3 -m venv ang
 source ang/bin/activate
 pip install angr
 ```
+
 ## Osnovne radnje
+
 ```python
 import angr
 import monkeyhex # this will format numerical results in hexadecimal
@@ -30,9 +33,11 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
+
 ## Informacije o učitanom i glavnom objektu
 
 ### Učitani podaci
+
 ```python
 #LOADED DATA
 proj.loader #<Loaded true, maps [0x400000:0x5004000]>
@@ -42,20 +47,22 @@ proj.loader.all_objects #All loaded
 proj.loader.shared_objects #Loaded binaries
 """
 OrderedDict([('true', <ELF Object true, maps [0x400000:0x40a377]>),
-('libc.so.6',
-<ELF Object libc-2.31.so, maps [0x500000:0x6c4507]>),
-('ld-linux-x86-64.so.2',
-<ELF Object ld-2.31.so, maps [0x700000:0x72c177]>),
-('extern-address space',
-<ExternObject Object cle##externs, maps [0x800000:0x87ffff]>),
-('cle##tls',
-<ELFTLSObjectV2 Object cle##tls, maps [0x900000:0x91500f]>)])
+             ('libc.so.6',
+              <ELF Object libc-2.31.so, maps [0x500000:0x6c4507]>),
+             ('ld-linux-x86-64.so.2',
+              <ELF Object ld-2.31.so, maps [0x700000:0x72c177]>),
+             ('extern-address space',
+              <ExternObject Object cle##externs, maps [0x800000:0x87ffff]>),
+             ('cle##tls',
+              <ELFTLSObjectV2 Object cle##tls, maps [0x900000:0x91500f]>)])
 """
 proj.loader.all_elf_objects #Get all ELF objects loaded (Linux)
 proj.loader.all_pe_objects #Get all binaries loaded (Windows)
 proj.loader.find_object_containing(0x400000)#Get object loaded in an address "<ELF Object fauxware, maps [0x400000:0x60105f]>"
 ```
+
 ### Glavni objekat
+
 ```python
 #Main Object (main binary loaded)
 obj = proj.loader.main_object #<ELF Object true, maps [0x400000:0x60721f]>
@@ -69,7 +76,9 @@ obj.find_section_containing(obj.entry) #Get section by address
 obj.plt['strcmp'] #Get plt address of a funcion (0x400550)
 obj.reverse_plt[0x400550] #Get function from plt address ('strcmp')
 ```
+
 ### Simboli i relokacije
+
 ```python
 strcmp = proj.loader.find_symbol('strcmp') #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 
@@ -86,7 +95,9 @@ main_strcmp.is_export #False
 main_strcmp.is_import #True
 main_strcmp.resolvedby #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 ```
+
 ### Blokovi
+
 ```python
 #Blocks
 block = proj.factory.block(proj.entry) #Get the block of the entrypoint fo the binary
@@ -94,9 +105,11 @@ block.pp() #Print disassembly of the block
 block.instructions #"0xb" Get number of instructions
 block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x401675, 0x401676, 0x401679, 0x40167d, 0x40167e, 0x40167f, 0x401686, 0x40168d, 0x401694]"
 ```
+
 ## Dinamička analiza
 
-### Menadžer simulacije, stanja
+### Simulation Manager, stanja
+
 ```python
 #Live States
 #This is useful to modify content in a live analysis
@@ -119,13 +132,15 @@ simgr = proj.factory.simulation_manager(state) #Start
 simgr.step() #Execute one step
 simgr.active[0].regs.rip #Get RIP from the last state
 ```
+
 ### Pozivanje funkcija
 
-- Možete proslediti listu argumenata kroz `args` i rečnik environment variables kroz `env` u `entry_state` i `full_init_state`. Vrednosti u ovim strukturama mogu biti stringovi ili bitvectors i biće serijalizovane u stanje kao argumenti i environment simuliranog izvršavanja. Podrazumevani `args` je prazna lista, pa ako program koji analizirate očekuje da pronađe makar `argv[0]`, uvek bi trebalo da ga navedete!
-- Ako želite da `argc` bude simboličan, možete proslediti simbolički bitvector kao `argc` konstruktorima `entry_state` i `full_init_state`. Ipak, budite pažljivi: ako to uradite, trebalo bi da dodate i constraint dobijenom stanju, tako da vrednost za argc ne može biti veća od broja argumenata prosleđenih kroz `args`.
-- Da biste koristili call state, trebalo bi da ga pozovete sa `.call_state(addr, arg1, arg2, ...)`, gde je `addr` adresa funkcije koju želite da pozovete, a `argN` je N-ti argument te funkcije, bilo kao Python integer, string ili array, ili bitvector. Ako želite da memorija bude alocirana i da zaista prosledite pointer na objekat, trebalo bi da ga umotate u PointerWrapper, npr. `angr.PointerWrapper("point to me!")`. Rezultati ovog API-ja mogu biti pomalo nepredvidivi, ali radimo na tome.
+- Možete proslediti listu argumenata kroz `args` i rečnik promenljivih okruženja kroz `env` u `entry_state` i `full_init_state`. Vrednosti u ovim strukturama mogu biti stringovi ili bitvektori i biće serijalizovane u stanje kao argumenti i okruženje simuliranog izvršavanja. Podrazumevana vrednost za `args` je prazna lista, pa ako program koji analizirate očekuje da pronađe barem `argv[0]`, uvek treba da navedete tu vrednost!
+- Ako želite da `argc` bude simboličan, možete proslediti simbolički bitvektor kao `argc` konstruktorima `entry_state` i `full_init_state`. Ipak, budite pažljivi: ako to uradite, treba da dodate i ograničenje rezultujućem stanju, kojim se obezbeđuje da vaša vrednost za `argc` ne može biti veća od broja argumenata prosleđenih kroz `args`.
+- Da biste koristili call state, pozovite ga pomoću `.call_state(addr, arg1, arg2, ...)`, gde je `addr` adresa funkcije koju želite da pozovete, a `argN` N-ti argument te funkcije — može biti python ceo broj, string ili niz, odnosno bitvektor. Ako želite da alocirate memoriju i zaista prosledite pokazivač na objekat, treba da ga obavijete pomoću `PointerWrapper`, tj. `angr.PointerWrapper("point to me!")`. Rezultati ovog API-ja mogu biti pomalo nepredvidivi, ali radimo na tome.
 
 ### BitVectors
+
 ```python
 #BitVectors
 state = proj.factory.entry_state()
@@ -134,7 +149,9 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
+
 ### Simbolički BitVectors i ograničenja
+
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -161,14 +178,16 @@ state.satisfiable() #False
 
 #Solver solutions
 solver.eval(expression) #one possible solution
-solver.eval_one(expression) #solution to the given expression, or throw an error if more than one solution is possible.
+solver.eval_one(expression) # One solution, or raise an error if more than one solution is possible.
 solver.eval_upto(expression, n) #n solutions to the given expression, returning fewer than n if fewer than n are possible.
-solver.eval_atleast(expression, n) #n solutions to the given expression, throwing an error if fewer than n are possible.
-solver.eval_exact(expression, n) #n solutions to the given expression, throwing an error if fewer or more than are possible.
+solver.eval_atleast(expression, n) # n solutions, raising an error if fewer than n are possible.
+solver.eval_exact(expression, n) # n solutions, raising an error unless exactly n are possible.
 solver.min(expression) #minimum possible solution to the given expression.
 solver.max(expression) #maximum possible solution to the given expression.
 ```
+
 ### Hooking
+
 ```python
 >>> stub_func = angr.SIM_PROCEDURES['stubs']['ReturnUnconstrained'] # this is a CLASS
 >>> proj.hook(0x10000, stub_func())  # hook with an instance of the class
@@ -186,12 +205,16 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-Nadalje, možete koristiti `proj.hook_symbol(name, hook)`, prosleđujući ime simbola kao prvi argument, kako biste postavili hook na adresu na kojoj se simbol nalazi<sup>[[1]](#references)</sup>
+
+Nadalje, možete koristiti `proj.hook_symbol(name, hook)`, tako što ćete kao prvi argument proslediti ime simbola, da biste postavili hook na adresu na kojoj se simbol nalazi<sup>[[1]](#references)</sup>
 
 ## Primeri
 
-## Reference
+Za praktično pronalaženje putanja, modelovanje ulaza, hook-ove funkcija i proveru pokazivača instrukcija kontrolisanih ulazom, pogledajte [angr examples](angr-examples.md).
+
+
+
+## References
 
 - [1] [angr dokumentacija](https://docs.angr.io/_/downloads/en/stable/pdf/)
-
 {{#include ../../../banners/hacktricks-training.md}}
