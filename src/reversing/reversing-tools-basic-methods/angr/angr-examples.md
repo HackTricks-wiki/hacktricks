@@ -3,9 +3,9 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> If the program is using `scanf` to get **several values at once from stdin** you need to generate a state that starts after the **`scanf`**.
+> angr can model multiple `scanf` conversions, but its SimProcedure is incomplete. Try the built-in model first. If it mishandles a specific format, replace that call with a format-specific hook or start after the call and initialize its outputs yourself.<sup>[[2]](#references)[[3]](#references)</sup>
 
-Codes taken from [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
+Codes taken from [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup> See also [angr basics](./) for state, solver, and hook APIs.
 
 ### Input to reach address (indicating the address)
 
@@ -82,9 +82,8 @@ if __name__ == '__main__':
 ### Registry values
 
 ```python
-# Angr doesn't currently support reading multiple things with scanf (Ex:
-# scanf("%u %u).) You will have to tell the simulation engine to begin the
-# program after scanf is called and manually inject the symbols into registers.
+# If a particular scanf format is modeled incorrectly, begin after the call
+# and initialize the values expected by the following instructions.
 
 import angr
 import claripy
@@ -702,9 +701,10 @@ if __name__ == '__main__':
 
 ### Simulate scanf with several params
 
+For an unsupported or inaccurate `scanf("%u %u", ...)` model, a format-specific hook can write both outputs. Return the number of successful conversions so the caller sees a consistent result. This bypasses parsing and does not model EOF or malformed input.<sup>[[2]](#references)[[3]](#references)</sup>
+
 ```python
-# This time, the solution involves simply replacing scanf with our own version,
-# since Angr does not support requesting multiple parameters with scanf.
+# Replace this one known scanf format, not scanf in general.
 
 import angr
 import claripy
@@ -733,6 +733,7 @@ def main(argv):
       # store multiple bitvectors. You can either use a list, tuple, or multiple
       # keys to reference the different bitvectors.
       self.state.globals['solutions'] = (scanf0, scanf1)
+      return 2
 
   scanf_symbol = '__isoc99_scanf'
   project.hook_symbol(scanf_symbol, ReplacementScanf())
@@ -763,6 +764,41 @@ def main(argv):
 if __name__ == '__main__':
   main(sys.argv)
 ```
+
+### Finding input-controlled instruction pointers
+
+When auditing a binary with an input-driven indirect jump or overwritten return address, save states whose instruction pointer has many possible values. An `unconstrained` state is a lead, not proof of exploitability: angr can also create unconstrained values from uninitialized memory or an inaccurate environment. Check whether the *input bytes* can satisfy a jump to a chosen executable address, then replay the resulting bytes in the real program.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
+
+The example assumes a binary with a known `win` symbol and stdin input. Set the input length to the amount the program can read. For PIE, resolve the address using the correct runtime base before replaying; the solver alone does not bypass ASLR or other mitigations.<sup>[[6]](#references)[[7]](#references)</sup>
+
+<details>
+<summary>Check a symbolic stdin input for control-flow redirection</summary>
+
+```python
+import angr
+import claripy
+
+project = angr.Project("./target", auto_load_libs=False)
+win = project.loader.main_object.get_symbol("win").rebased_addr
+input_bytes = claripy.BVS("input", 128 * 8)
+stdin = angr.SimFileStream(name="stdin", content=input_bytes, has_end=True)
+state = project.factory.entry_state(stdin=stdin)
+simgr = project.factory.simgr(state, save_unconstrained=True)
+
+payload = None
+while simgr.active and payload is None:
+    simgr.step()
+    for candidate in simgr.unconstrained:
+        if candidate.satisfiable(extra_constraints=[candidate.regs.ip == win]):
+            candidate.add_constraints(candidate.regs.ip == win)
+            payload = candidate.solver.eval(input_bytes, cast_to=bytes)
+            break
+    simgr.drop(stash="unconstrained")
+
+print(repr(payload) if payload is not None else "No satisfiable jump found")
+```
+
+</details>
 
 ### Static Binaries
 
@@ -833,8 +869,15 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
+
+
 ## References
 
 - [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
-
+- [2] [angr scanf format parser source](https://github.com/angr/angr/blob/master/angr/procedures/stubs/format_parser.py)
+- [3] [angr: Gotchas when using angr](https://docs.angr.io/en/stable/advanced-topics/gotchas.html)
+- [4] [angr: Simulation managers](https://docs.angr.io/en/latest/core-concepts/pathgroups.html)
+- [5] [angr: Simulation and instrumentation](https://docs.angr.io/en/latest/core-concepts/simulation.html)
+- [6] [angr-examples: InsomniHack AEG solver](https://github.com/angr/angr-examples/blob/master/examples/insomnihack_aeg/solve.py)
+- [7] [angr SimOS stdin handling](https://github.com/angr/angr/blob/master/angr/simos/simos.py)
 {{#include ../../../banners/hacktricks-training.md}}

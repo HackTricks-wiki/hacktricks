@@ -210,8 +210,11 @@ Furthermore, you can use `proj.hook_symbol(name, hook)`, providing the name of a
 
 ## Examples
 
+For practical path finding, input modeling, function hooks, and checking input-controlled instruction pointers, see [angr examples](angr-examples.md).
+
+
+
 ## References
 
 - [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
-
 {{#include ../../../banners/hacktricks-training.md}}
