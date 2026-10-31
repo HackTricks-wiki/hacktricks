@@ -2,9 +2,10 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-本 cheatsheet 的部分内容基于 [angr 文档](https://docs.angr.io/_/downloads/en/stable/pdf/)。<sup>[[1]](#references)</sup>
+本速查表的部分内容基于 [angr 文档](https://docs.angr.io/_/downloads/en/stable/pdf/)。<sup>[[1]](#references)</sup>
 
 ## 安装
+
 ```bash
 sudo apt-get install python3-dev libffi-dev build-essential
 python3 -m pip install --user virtualenv
@@ -12,7 +13,9 @@ python3 -m venv ang
 source ang/bin/activate
 pip install angr
 ```
+
 ## 基本操作
+
 ```python
 import angr
 import monkeyhex # this will format numerical results in hexadecimal
@@ -30,9 +33,11 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
+
 ## 已加载对象和主对象信息
 
-### 已加载数据
+### 已加载的数据
+
 ```python
 #LOADED DATA
 proj.loader #<Loaded true, maps [0x400000:0x5004000]>
@@ -42,20 +47,22 @@ proj.loader.all_objects #All loaded
 proj.loader.shared_objects #Loaded binaries
 """
 OrderedDict([('true', <ELF Object true, maps [0x400000:0x40a377]>),
-('libc.so.6',
-<ELF Object libc-2.31.so, maps [0x500000:0x6c4507]>),
-('ld-linux-x86-64.so.2',
-<ELF Object ld-2.31.so, maps [0x700000:0x72c177]>),
-('extern-address space',
-<ExternObject Object cle##externs, maps [0x800000:0x87ffff]>),
-('cle##tls',
-<ELFTLSObjectV2 Object cle##tls, maps [0x900000:0x91500f]>)])
+             ('libc.so.6',
+              <ELF Object libc-2.31.so, maps [0x500000:0x6c4507]>),
+             ('ld-linux-x86-64.so.2',
+              <ELF Object ld-2.31.so, maps [0x700000:0x72c177]>),
+             ('extern-address space',
+              <ExternObject Object cle##externs, maps [0x800000:0x87ffff]>),
+             ('cle##tls',
+              <ELFTLSObjectV2 Object cle##tls, maps [0x900000:0x91500f]>)])
 """
 proj.loader.all_elf_objects #Get all ELF objects loaded (Linux)
 proj.loader.all_pe_objects #Get all binaries loaded (Windows)
 proj.loader.find_object_containing(0x400000)#Get object loaded in an address "<ELF Object fauxware, maps [0x400000:0x60105f]>"
 ```
+
 ### 主要对象
+
 ```python
 #Main Object (main binary loaded)
 obj = proj.loader.main_object #<ELF Object true, maps [0x400000:0x60721f]>
@@ -69,7 +76,9 @@ obj.find_section_containing(obj.entry) #Get section by address
 obj.plt['strcmp'] #Get plt address of a funcion (0x400550)
 obj.reverse_plt[0x400550] #Get function from plt address ('strcmp')
 ```
+
 ### 符号与重定位
+
 ```python
 strcmp = proj.loader.find_symbol('strcmp') #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 
@@ -86,7 +95,9 @@ main_strcmp.is_export #False
 main_strcmp.is_import #True
 main_strcmp.resolvedby #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 ```
-### 代码块
+
+### 基本块
+
 ```python
 #Blocks
 block = proj.factory.block(proj.entry) #Get the block of the entrypoint fo the binary
@@ -94,9 +105,11 @@ block.pp() #Print disassembly of the block
 block.instructions #"0xb" Get number of instructions
 block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x401675, 0x401676, 0x401679, 0x40167d, 0x40167e, 0x40167f, 0x401686, 0x40168d, 0x401694]"
 ```
+
 ## 动态分析
 
-### 仿真管理器、状态
+### Simulation Manager、States
+
 ```python
 #Live States
 #This is useful to modify content in a live analysis
@@ -119,13 +132,15 @@ simgr = proj.factory.simulation_manager(state) #Start
 simgr.step() #Execute one step
 simgr.active[0].regs.rip #Get RIP from the last state
 ```
+
 ### 调用函数
 
-- 你可以通过 `args` 传递参数列表，并通过 `env` 将环境变量字典传入 `entry_state` 和 `full_init_state`。这些结构中的值可以是字符串或位向量，并会作为模拟执行的参数和环境序列化到状态中。默认的 `args` 是空列表，因此如果你分析的程序需要至少找到一个 `argv[0]`，就应始终提供它！
-- 如果你希望 `argc` 具有符号性，可以将符号位向量作为 `argc` 传入 `entry_state` 和 `full_init_state` 构造函数。不过要注意：如果这样做，还应向生成的状态添加一个约束，确保你的 argc 值不大于传入 `args` 的参数数量。
-- 要使用 call state，应通过 `.call_state(addr, arg1, arg2, ...)` 调用它，其中 `addr` 是你要调用的函数地址，`argN` 是该函数的第 N 个参数，可以是 Python 整数、字符串、数组或位向量。如果你希望分配内存并实际传入指向某个对象的指针，则应将其封装在 PointerWrapper 中，即 `angr.PointerWrapper("point to me!")`。此 API 的结果可能有些不可预测，但我们正在改进它。
+- 你可以通过 `args` 传入参数列表，并通过 `env` 将环境变量字典传入 `entry_state` 和 `full_init_state`。这些结构中的值可以是字符串或位向量，并会被序列化到状态中，作为模拟执行的参数和环境变量。默认的 `args` 是空列表，因此，如果你分析的程序至少需要一个 `argv[0]`，务必提供它！
+- 如果你希望 `argc` 是符号值，可以在 `entry_state` 和 `full_init_state` 构造函数中，将一个符号位向量作为 `argc` 传入。不过要注意，这样做时，你还应向生成的状态添加约束，确保 `argc` 的值不会大于传入 `args` 的参数数量。
+- 要使用调用状态，应使用 `.call_state(addr, arg1, arg2, ...)` 调用它，其中 `addr` 是你要调用的函数地址，`argN` 是该函数的第 N 个参数，可以是 Python 整数、字符串、数组或位向量。如果你想分配内存并实际传入对象指针，应将对象包装在 PointerWrapper 中，例如 `angr.PointerWrapper("point to me!")`。这个 API 的结果有时会有些难以预测，不过我们正在改进。
 
 ### 位向量
+
 ```python
 #BitVectors
 state = proj.factory.entry_state()
@@ -134,7 +149,9 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-### 符号化 BitVectors 与约束
+
+### 符号位向量与约束
+
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -161,14 +178,16 @@ state.satisfiable() #False
 
 #Solver solutions
 solver.eval(expression) #one possible solution
-solver.eval_one(expression) #solution to the given expression, or throw an error if more than one solution is possible.
+solver.eval_one(expression) # One solution, or raise an error if more than one solution is possible.
 solver.eval_upto(expression, n) #n solutions to the given expression, returning fewer than n if fewer than n are possible.
-solver.eval_atleast(expression, n) #n solutions to the given expression, throwing an error if fewer than n are possible.
-solver.eval_exact(expression, n) #n solutions to the given expression, throwing an error if fewer or more than are possible.
+solver.eval_atleast(expression, n) # n solutions, raising an error if fewer than n are possible.
+solver.eval_exact(expression, n) # n solutions, raising an error unless exactly n are possible.
 solver.min(expression) #minimum possible solution to the given expression.
 solver.max(expression) #maximum possible solution to the given expression.
 ```
+
 ### Hooking
+
 ```python
 >>> stub_func = angr.SIM_PROCEDURES['stubs']['ReturnUnconstrained'] # this is a CLASS
 >>> proj.hook(0x10000, stub_func())  # hook with an instance of the class
@@ -186,12 +205,16 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-此外，你还可以使用 `proj.hook_symbol(name, hook)`，将符号名称作为第一个参数，从而 hook 符号所在的地址<sup>[[1]](#references)</sup>
+
+此外，你可以使用 `proj.hook_symbol(name, hook)`，将符号名称作为第一个参数，以 hook 符号所在的地址<sup>[[1]](#references)</sup>
 
 ## 示例
 
-## 参考资料
+有关实际路径查找、输入建模、函数 hook，以及检查由输入控制的指令指针，请参阅 [angr 示例](angr-examples.md)。
+
+
+
+## References
 
 - [1] [angr 文档](https://docs.angr.io/_/downloads/en/stable/pdf/)
-
 {{#include ../../../banners/hacktricks-training.md}}
