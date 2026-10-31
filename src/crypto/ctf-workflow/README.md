@@ -66,6 +66,29 @@ Common tells:
 - Boxentriq cryptogram solver.<sup>[[9]](#references)</sup>
 - quipqiup.<sup>[[14]](#references)</sup>
 
+#### Known-plaintext recovery of substituted Base32 filenames
+
+When an obfuscated filename uses only `a-z2-7`, expands to about `ceil(8 * byte_length / 5)` characters after a fixed suffix is removed, and the same plaintext produces the same output across files, test **unpadded Base32 followed by a fixed symbol substitution**. These clues are not proof by themselves. Collect predictable filenames and their ciphertexts, preserve case, Base32-encode each plaintext, and align symbols position by position. Every repeated plaintext symbol must map to the same ciphertext symbol, and the inverse mapping must also be unique. In one ransomware case, `ntuser.ini` and `NTUSER.DAT` provided such pairs; this recovered filenames, **not file contents or encryption keys**.<sup>[[28]](#references)</sup>
+
+```python
+import base64
+pairs = [("ntuser.ini", "zsub5mdlekr37dx4"), ("NTUSER.DAT", "4s5l5tul5kr6kv5t")]
+forward, inverse = {}, {}
+for name, ciphertext in pairs:
+    b32 = base64.b32encode(name.encode("ascii")).decode().lower().rstrip("=")
+    assert len(b32) == len(ciphertext)
+    for p, c in zip(b32, ciphertext):
+        assert forward.get(p, c) == c and inverse.get(c, p) == p
+        forward[p], inverse[c] = c, p
+target = "4s5l5tul5kr6kv5t"  # Remove the fixed suffix first
+b32 = "".join(inverse[c] for c in target)
+clear = base64.b32decode(b32.upper() + "=" * (-len(b32) % 8))
+assert "".join(forward[c] for c in b32) == target
+print(clear.decode("ascii"))
+```
+
+If a target contains unmapped symbols, obtain more known pairs or permute only the unused Base32-symbol mappings. Restore padding to an eight-character boundary, reject invalid Base32 and non-printable decoded names, then re-encode surviving candidates and compare the **entire** original ciphertext. Repeated ciphertext blocks can supply additional guesses: in the case above, `3gpng2wv` mapped back to Base32 `gaydambq`, which decodes to five ASCII zeroes. A printable candidate alone is not a unique proof.<sup>[[28]](#references)</sup>
+
 ### Caesar / ROT / Atbash
 
 - Nayuki automatic Caesar-cipher breaker.<sup>[[15]](#references)</sup>
@@ -207,5 +230,6 @@ pip install pycryptodome gmpy2 sympy pwntools z3-solver
 - [25] [PyCryptodome documentation](https://pycryptodome.readthedocs.io/en/latest/)
 - [26] [SageMath](https://www.sagemath.org/)
 - [27] [Z3](https://github.com/Z3Prover/z3)
+- [28] [Eye Research – Breaking encryption schemes the lazy way](https://labs.eye.security/breaking-encryption-schemes-the-lazy-way/)
 
 {{#include ../../banners/hacktricks-training.md}}
