@@ -2,13 +2,14 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Genel Bakış
+## Overview
 
-Vim'in kendi scripting language'ı (Vimscript), environment variable'lar üzerinden **başlangıçta arbitrary Ex command'ları ve shell command'larını çalıştırabilir**. Daha ayrıcalıklı bir process (maintenance/root workflow'u, bir `sudo vim …`, başka bir tool tarafından başlatılan editor, `crontab -e`, `visudo`, editor çağıran `git`/`less`, …), attacker tarafından etkilenebilen bir environment ile Vim/Neovim başlatırsa attacker bu context içinde code execution elde eder.
+Vim'in kendi scripting language'ı (Vimscript), başlangıçta environment variable'lardan **arbitrary Ex commands ve shell commands** çalıştırabilir. Daha fazla yetkiye sahip bir process (bir maintenance/root workflow, `sudo vim …`, başka bir tool tarafından başlatılan bir editor, `crontab -e`, `visudo`, bir editor çağıran `git`/`less` vb.) saldırganın etkileyebildiği bir environment ile Vim/Neovim başlatırsa, saldırgan bu context'te code execution elde eder.
 
 ## `VIMINIT`
 
-Initialization sırasında Vim, **`VIMINIT`** içindeki Ex command'ları okur ve çalıştırır. Ex command'ları arasında `:!cmd` (bir shell command çalıştırır) ve `:call system(...)` bulunur; bu nedenle tek bir variable, herhangi bir file edit edilmeden önce arbitrary execution sağlar.<sup>[[1]](#references)</sup>
+Başlatma sırasında Vim, **`VIMINIT`** içindeki Ex commands komutlarını okur ve çalıştırır. Ex commands arasında `:!cmd` (bir shell command çalıştırır) ve `:call system(...)` bulunur; dolayısıyla tek bir variable, herhangi bir dosya düzenlenmeden önce arbitrary execution sağlar.<sup>[[1]](#references)</sup>
+
 ```bash
 echo "hi" > /tmp/victim.txt
 
@@ -19,28 +20,52 @@ ls -la /tmp/vim-executed
 # Pure Vimscript: write the marker and exit without reading stdin
 VIMINIT='call writefile(["x"], "/tmp/vim-vimscript")|qall!' vim /tmp/victim.txt
 ```
+
 İlk örnekte stdin üzerinden verilen `:qa!`, yalnızca payload çalıştıktan sonra editörü kapatır; gerçek bir senaryoda kurban Vim'i normal şekilde açabilir.
 
-`VIMINIT`, **tek bir Ex command line** olarak ayrıştırılır. Bir zinciri `|` (veya gerçek bir satır sonu) ile ayırın. Kullanıcının vimrc'si ve `EXINIT` üzerinde önceliğe sahiptir; bu nedenle bir payload'ın malicious bir configuration file'a ihtiyacı yoktur ve normal kullanıcı configuration'ından önce çalışır.<sup>[[1]](#references)[[2]](#references)</sup>
+`VIMINIT`, **tek bir Ex komut satırı** olarak ayrıştırılır. Komut zincirini `|` (veya gerçek bir yeni satır) ile ayırın. Kullanıcının vimrc dosyasına ve `EXINIT`'e göre önceliği vardır; bu nedenle payload kötü amaçlı bir yapılandırma dosyasına ihtiyaç duymaz ve normal kullanıcı yapılandırmasından önce çalışır.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## `EXINIT`
 
-`VIMINIT` ayarlanmamışsa Vim (ve `vi`/`ex` compatibility binaries), aynı şekilde çalıştırılan **`EXINIT`**'e geri döner. Bu, aynı primitive'in klasik vi dönemi varyantıdır.<sup>[[1]](#references)</sup>
+`VIMINIT` ayarlanmamışsa Vim (ve `vi`/`ex` uyumluluk binary'leri) aynı şekilde çalıştırılan **`EXINIT`**'e geri döner. Bu, aynı primitive'in vi döneminden kalma klasik varyantıdır.<sup>[[1]](#references)</sup>
+
 ```bash
 printf ':qa!\n' | EXINIT='silent! !touch /tmp/exinit-executed' vim /tmp/victim.txt
 ls -la /tmp/exinit-executed
 ```
-## Startup bastırma ve exploit edilebilirlik
 
-Bu primitive **normal startup** işlemine bağlıdır. `vim -u NONE` / `nvim -u NONE` environment/user initialization işlemlerini (ve plugins) atlar; `-u <file>` ise bunun yerine belirtilen dosyayı kullanır. Vim `-es`/`-Es` ve Neovim `-es`, `-Es` veya `-l` seçenekleri de bu initialization adımlarını atlar. `--headless` seçeneğini güvenli bir mod sanmayın: normal bir Neovim headless startup işlemi yine de `VIMINIT` değerini işler.<sup>[[1]](#references)[[2]](#references)</sup>
+## Vim `exrc` ile projeye özgü rc
 
-Sonuç olarak, complete launch chain'i doğrulayın: variable wrapper, `sudo` policy, job runner ve editor selection süreçlerinden geçebilmelidir; final command ise `-u NONE`/`NORC` veya batch mode zorlamamalıdır. Güvenilir bir payload, `|qall!` ile kendisini sonlandırabilir; bu, TTY sağlamayan wrapper'ların test edilmesini de kolaylaştırır.<sup>[[1]](#references)[[2]](#references)</sup>
+Bu, `VIMINIT` için dosya tabanlı bir alternatiftir. Kurban kullanıcı yapılandırmasında `set exrc` etkinleştirmişse Vim, `.vimrc` (ardından `_vimrc` veya `.exrc`) dosyasını yalnızca düzenlenen dosyanın bulunduğu dizinden değil, **çalışma dizininden** de yükler. Projeye özgü bir `.vimrc` yerleştirin ve kurbanın Vim'i bu projeden başlatmasını sağlayın. Unix'te Vim, başka birine ait yerel rc dosyasına `secure` kısıtlamaları uygular; ancak kurban tarafından çıkarılan bir arşiv, yerleştirilen dosyanın sahipliğini normalde kurbana verir ve bu denetimi atlatır.<sup>[[1]](#references)</sup>
 
-## Neovim current-directory Lua module hijacking
+Bu yalıtılmış işaretleyici, gerçek kullanıcı yapılandırmasını değiştirmeden başlangıç tetikleyicisini gösterir:<sup>[[1]](#references)</sup>
 
-Ayrı bir Neovim injection primitive'i, Lua `package.path`/`package.cpath` değerlerinde hâlâ `./?.lua` veya `./?.so` gibi current-directory template'lerinin bulunduğu build'leri etkiler. Neovim'i tek başına başlatmak yeterli değildir: bir config veya plugin `require("name")` çağırmalıdır ve daha önce çalışan bir loader bu name'i resolve etmemelidir. Yaygın bir trigger, `pcall(require, "optional_dep")` gibi bir **optional dependency check** işlemidir; `optional_dep.lua` dosyasını attacker-controlled bir working directory içine yerleştirmek, ayrı `'exrc'` local-configuration özelliğini etkinleştirmeden bu dosyanın çalıştırılmasını sağlar. Core `vim.*` modülleri ve `'runtimepath'` üzerinde zaten bulunan modüller genellikle shadow edilemez; bu nedenle name'leri tahmin etmek yerine gerçek missing/optional `require()` çağrılarını enumerate edin.<sup>[[3]](#references)</sup>
+```bash
+lab=$(mktemp -d)
+mkdir -p "$lab/home" "$lab/project"
+printf 'set exrc\n' > "$lab/home/.vimrc"
+printf 'call writefile(["loaded"], "%s/hit")\n' "$lab" > "$lab/project/.vimrc"
+(cd "$lab/project" && env -u VIMINIT -u EXINIT HOME="$lab/home" vim -c 'qa!' >/dev/null 2>&1)
+test -e "$lab/hit" && echo 'project rc loaded'
+rm -r "$lab"
+```
 
-Aşağıdaki örnek, zararsız bir marker ile loader primitive'ini yeniden üretir:<sup>[[3]](#references)</sup>
+Neovim farklıdır: güncel derlemelerde proje dizinindeki `.nvim.lua`, `.nvimrc` veya `.exrc` dosyalarının çalıştırılmadan önce güvenilir olarak işaretlenmesi gerekir. Güven durumu dosyanın içerik hash’ine bağlıdır; bu nedenle daha önce güvenilir olarak işaretlenmiş bir dosyayı değiştirmek yeni bir güven kararı gerektirir. Yalnızca bir depoya dosya yerleştirebilen bir saldırgan, `exrc` üzerinden sessizce kod çalıştırılacağını varsayamaz; bu isteğe bağlı ve güven onayı gerektiren yolu, aşağıdaki geçerli dizin Lua `require()` yolundan ayırın.<sup>[[4]](#references)[[5]](#references)</sup>
+
+Proje dizinindeki bir dosya yerine yazılabilir bir **kullanıcı** vimrc dosyası söz konusuysa, bkz. [macOS Vim başlangıç yapılandırması](../../macos-auto-start-locations.md#vim-startup-configuration).
+
+## Başlangıcın engellenmesi ve exploit edilebilirlik
+
+Bu primitive **normal bir başlangıca** bağlıdır. `vim -u NONE` / `nvim -u NONE`, ortam/kullanıcı başlatma işlemlerini (ve plugin’leri) atlar; `-u <file>` ise bunun yerine belirtilen dosyayı kullanır. Vim `-es`/`-Es` ve Neovim `-es`, `-Es` veya `-l` seçenekleri de bu başlatma adımlarını atlar. `--headless` seçeneğini güvenli mod sanmayın: normal bir Neovim headless başlangıcı yine de `VIMINIT` değişkenini işler.<sup>[[1]](#references)[[2]](#references)</sup>
+
+Bu nedenle başlatma zincirinin tamamını doğrulayın: değişken wrapper, `sudo` politikası, job runner ve editör seçimi boyunca korunmalı; son komut da `-u NONE`/`NORC` veya batch mode seçeneklerini zorlamamalıdır. Güvenilir bir payload, kendini `|qall!` ile sonlandırabilir; bu, TTY sağlamayan wrapper’larla test yapmayı da kolaylaştırır.<sup>[[1]](#references)[[2]](#references)</sup>
+
+## Neovim geçerli dizin Lua modülü hijacking
+
+Ayrı bir Neovim injection primitive’i, Lua `package.path`/`package.cpath` değerlerinde `./?.lua` veya `./?.so` gibi geçerli dizin şablonları bulunan derlemeleri etkiler. Yalnızca Neovim’i başlatmak yeterli değildir: bir config veya plugin `require("name")` çağrısı yapmalı ve daha önce hiçbir loader bu adı çözümlememiş olmalıdır. Yaygın bir tetikleyici, `pcall(require, "optional_dep")` gibi **isteğe bağlı bağımlılık denetimidir**; saldırganın denetimindeki çalışma dizinine `optional_dep.lua` yerleştirmek, ayrı `'exrc'` yerel yapılandırma özelliğini etkinleştirmeden bu dosyayı çalıştırır. Çekirdek `vim.*` modülleri ve `'runtimepath'` üzerinde zaten bulunan modüller genellikle shadow edilemez; bu nedenle isim tahmin etmek yerine gerçekten eksik/isteğe bağlı olan `require()` çağrılarını belirleyin.<sup>[[3]](#references)</sup>
+
+Aşağıdaki örnek, zararsız bir işaretçiyle loader primitive’ini yeniden oluşturur:<sup>[[3]](#references)</sup>
+
 ```bash
 mkdir -p /tmp/nvim-cwd-hijack
 cat > /tmp/nvim-cwd-hijack/optional_dep.lua <<'LUA'
@@ -52,41 +77,48 @@ cd /tmp/nvim-cwd-hijack
 nvim --clean --headless '+lua require("optional_dep")' +qa
 cat /tmp/nvim-cwd-hit
 ```
-Sadece bir sürüm dizesine güvenmek yerine çalışan build'i kontrol edin:<sup>[[3]](#references)</sup>
+
+Yalnızca sürüm dizesine güvenmek yerine çalışan build'i kontrol edin:<sup>[[3]](#references)</sup>
+
 ```bash
 nvim --clean --headless '+lua io.write(package.path)' +qa 2>&1 | tr ';' '\n'
 ```
-Upstream, normal editor startup sırasında current-directory fallback özelliğinin kaldırılmasını takip ederken Lua-script (`nvim -l`) davranışını koruyor. Yüklü build bu özelliği artık sunmayana kadar bunu `init.lua` dosyasının **başına** ekleyin (relative current-directory Lua/C module şablonlarını kasıtlı olarak kaldırır; bu nedenle bunları gerektiren workflow'larda uygulamayın):<sup>[[3]](#references)</sup>
+
+Upstream, normal editor startup sırasında geçerli dizin geri dönüşünün kaldırılmasını izlerken Lua script’i (`nvim -l`) davranışını koruyor. Yüklü derlemede bu özellik kaldırılana kadar bunu `init.lua` dosyasının **başına** ekleyin (göreli geçerli dizin Lua/C modül şablonlarını kasıtlı olarak kaldırır; bu nedenle bunları gerektiren iş akışlarında uygulamayın):<sup>[[3]](#references)</sup>
+
 ```lua
 local function drop_cwd(path)
-local keep = {}
-for entry in path:gmatch("[^;]+") do
-if not entry:match("^%./") then keep[#keep + 1] = entry end
-end
-return table.concat(keep, ";")
+  local keep = {}
+  for entry in path:gmatch("[^;]+") do
+    if not entry:match("^%./") then keep[#keep + 1] = entry end
+  end
+  return table.concat(keep, ";")
 end
 package.path = drop_cwd(package.path)
 package.cpath = drop_cwd(package.cpath)
 ```
-## Notlar ve dikkat edilmesi gerekenler
 
-- **Neovim**, hem `VIMINIT` değişkenini hem de `EXINIT` fallback mekanizmasını dikkate alır; ancak normal kullanıcı yapılandırması `init.vim` veya `init.lua` dosyasıdır.<sup>[[2]](#references)</sup>
-- Environment-variable yolu yazılabilir bir dosya gerektirmez. Yerel rc ve current-directory module hijacking, dosya tabanlı ayrı primitive'lerdir.<sup>[[1]](#references)[[3]](#references)</sup>
-- Proje-yerel yapılandırma, modeline'lerden farklı bir yüzeydir. Vim'de `'exrc'` etkinleştirildiğinde, başka bir kullanıcıya ait yerel vimrc/exrc dosyası `'secure'` kısıtlamalarıyla çalışır; ancak bir archive çıkarıldığında yerleştirilen dosya normalde victim'a ait olur ve ownership tabanlı bu korumayı etkisiz kılar. Neovim ayrıca `'exrc'` etkinleştirildiğinde `.nvim.lua`, `.nvimrc` veya `.exrc` dosyalarını da arar—bu opt-in mekanizmayı yukarıdaki `require()` current-directory fallback mekanizmasıyla karıştırmayın.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
-- Editor-selection değişkenleri yalnızca hangi programın başlatılacağını seçer; `VIMINIT` değişkeninin final process'e ulaşacağını garanti etmez. Vim/Neovim exec boundary'sindeki exact environment ve arguments değerlerini inceleyin.<sup>[[1]](#references)[[2]](#references)</sup>
+## Notlar ve uyarılar
 
-## Hardening
+- **Neovim**, hem `VIMINIT` değişkenini hem de `EXINIT` geri dönüşünü dikkate alır; ancak normal kullanıcı yapılandırma dosyası `init.vim` veya `init.lua`'dır.<sup>[[2]](#references)</sup>
+- Ortam değişkeni yolu, yazılabilir bir dosya gerektirmez. Yerel rc dosyası ve geçerli dizinden modül ele geçirme, dosya tabanlı ayrı yöntemlerdir.<sup>[[1]](#references)[[3]](#references)</sup>
+- Projeye özel rc dosyaları, modeline'lerden ve yukarıdaki `require()` geçerli dizin geri dönüşünden farklıdır. Vim ve Neovim bunlar için farklı denetimler uygular; yukarıdaki projeye özel `exrc` iş akışına bakın.<sup>[[1]](#references)[[4]](#references)</sup>
+- Editör seçimi değişkenleri yalnızca hangi programın başlatılacağını belirler; `VIMINIT` değişkeninin son sürece ulaşacağını garanti etmez. Vim/Neovim `exec` sınırındaki ortamı ve argümanları inceleyin.<sup>[[1]](#references)[[2]](#references)</sup>
 
-- Privileged veya automated editor launch işlemlerinden önce değişkenleri açıkça kaldırın: `env -u VIMINIT -u EXINIT /usr/bin/vim -u NONE -- "$file"`. Caller'ın her user startup source'u yok sayması gerektiğinde `-u NONE` önemlidir.<sup>[[1]](#references)[[2]](#references)</sup>
-- `EDITOR`/`VISUAL` değişkenlerini trusted absolute path'lere ayarlayın, root olarak inherited user environment ile interactive editor çalıştırmaktan kaçının ve wrapper'ların sanitization sonrasında `VIMINIT`/`EXINIT` değişkenlerini geri yükleyememesini sağlayın.<sup>[[1]](#references)[[2]](#references)</sup>
-- Neovim için, editor mode sırasında current-directory Lua/C search template'lerini kaldıran bir build'e güncelleyin veya plugin'leri yüklemeden önce bunları strip edin. Untrusted repository'ler açılırken optional `pcall(require, ...)` çağrıları için plugin code'u audit edin.<sup>[[3]](#references)</sup>
-- Target'ın editor environment'ı, working directory'si veya startup configuration'ı üzerindeki control'ü, editor'ün security context'inde potansiyel bir code-execution primitive'i olarak değerlendirin.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+## Güvenliği sağlamlaştırma
+
+- Yetkili veya otomatik editör başlatmalarından önce değişkenleri açıkça kaldırın: `env -u VIMINIT -u EXINIT /usr/bin/vim -u NONE -- "$file"`. Çağıran tarafın tüm kullanıcı başlangıç kaynaklarını yok sayması gerektiğinde `-u NONE` önemlidir.<sup>[[1]](#references)[[2]](#references)</sup>
+- `EDITOR`/`VISUAL` değişkenlerini güvenilir mutlak yollara ayarlayın, devralınan kullanıcı ortamıyla etkileşimli editörleri root olarak çalıştırmaktan kaçının ve sarmalayıcıların temizleme sonrasında `VIMINIT`/`EXINIT` değişkenlerini yeniden ayarlayamadığından emin olun.<sup>[[1]](#references)[[2]](#references)</sup>
+- Neovim için, editör modundayken geçerli dizin Lua/C arama şablonlarını kaldıran bir derlemeye güncelleyin veya eklentileri yüklemeden önce bu şablonları temizleyin. Güvenilmeyen depolar açılırken isteğe bağlı `pcall(require, ...)` çağrıları için eklenti kodunu denetleyin.<sup>[[3]](#references)</sup>
+- Bir hedefin editör ortamını, çalışma dizinini veya başlangıç yapılandırmasını denetleme olanağını, editörün güvenlik bağlamında potansiyel bir kod yürütme yöntemi olarak değerlendirin.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
 
 
 ## References
 
-- [1] [Vim documentation — `starting.txt` (initialization, `VIMINIT`, `EXINIT`)](https://vimhelp.org/starting.txt.html#initialization)
-- [2] [Neovim documentation — startup and initialization](https://neovim.io/doc/user/starting/)
-- [3] [Neovim issue #38966 — `require()` içinde current-directory fallback](https://github.com/neovim/neovim/issues/38966)
+- [1] [Vim belgeleri — `starting.txt` (başlatma, `VIMINIT`, `EXINIT`)](https://vimhelp.org/starting.txt.html#initialization)
+- [2] [Neovim belgeleri — başlatma ve ilklendirme](https://neovim.io/doc/user/starting/)
+- [3] [Neovim sorunu #38966 — `require()` içinde geçerli dizin geri dönüşü](https://github.com/neovim/neovim/issues/38966)
+- [4] [Neovim seçenekleri — projeye özel `exrc` ve güven gereksinimi](https://neovim.io/doc/user/options/#%27exrc%27)
+- [5] [Neovim düzenleme — güvenilir dosyalar ve `:trust`](https://neovim.io/doc/user/editing/#trust)
 {{#include ../../../banners/hacktricks-training.md}}
