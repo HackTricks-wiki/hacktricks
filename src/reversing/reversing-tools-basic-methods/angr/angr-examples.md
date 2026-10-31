@@ -3,9 +3,9 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Nếu chương trình dùng `scanf` để lấy **nhiều giá trị cùng lúc từ stdin**, bạn cần tạo một state bắt đầu sau **`scanf`**.
+> angr có thể mô hình hóa nhiều chuyển đổi `scanf`, nhưng SimProcedure của nó chưa hoàn chỉnh. Trước tiên, hãy thử model tích hợp sẵn. Nếu model xử lý sai một định dạng cụ thể, hãy thay lời gọi đó bằng hook dành riêng cho định dạng hoặc bắt đầu sau lời gọi và tự khởi tạo các đầu ra của nó.<sup>[[2]](#references)[[3]](#references)</sup>
 
-Code được lấy từ [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
+Các đoạn mã được lấy từ [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup> Xem thêm [angr basics](./) để tìm hiểu về state, solver và các API hook.
 
 ### Đầu vào để đến địa chỉ (chỉ định địa chỉ)
 
@@ -42,7 +42,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-### Đầu vào để đến địa chỉ (hiển thị các câu lệnh in)
+### Đầu vào để đến địa chỉ (cho biết các lệnh in)
 
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
@@ -82,9 +82,8 @@ if __name__ == '__main__':
 ### Giá trị Registry
 
 ```python
-# Angr doesn't currently support reading multiple things with scanf (Ex:
-# scanf("%u %u).) You will have to tell the simulation engine to begin the
-# program after scanf is called and manually inject the symbols into registers.
+# If a particular scanf format is modeled incorrectly, begin after the call
+# and initialize the values expected by the following instructions.
 
 import angr
 import claripy
@@ -209,11 +208,11 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-Trong tình huống này, input được nhập bằng `scanf("%u %u")` với giá trị `"1 1"`, vì vậy các giá trị **`0x00000001`** trên stack đến từ **input của người dùng**. Bạn có thể thấy các giá trị này bắt đầu tại `$ebp - 8`. Do đó, trong code, chúng ta đã **trừ 8 byte khỏi `$esp` (vì tại thời điểm đó `$ebp` và `$esp` có cùng giá trị)** rồi push BVS.
+Trong tình huống này, đầu vào được lấy bằng `scanf("%u %u")` và giá trị `"1 1"` được nhập, vì vậy các giá trị **`0x00000001`** trên stack đến từ **đầu vào của người dùng**. Bạn có thể thấy các giá trị này bắt đầu tại `$ebp - 8`. Do đó, trong code, chúng ta đã **trừ 8 byte khỏi `$esp` (vì tại thời điểm đó `$ebp` và `$esp` có cùng giá trị)** rồi đẩy BVS vào stack.
 
-![Đặt các vector bit lên stack để tìm giá trị mà vị trí stack cần có để đạt được luồng thực thi của chương trình: Trong tình huống này, input được nhập bằng scanf("%u %u") với giá trị "1...](<../../../images/image (136).png>)
+![Đặt các bit vector vào stack để xác định giá trị mà vị trí stack cần có để đạt được luồng thực thi chương trình: Trong tình huống này, đầu vào được lấy bằng scanf("%u %u") và giá trị "1...](<../../../images/image (136).png>)
 
-### Giá trị bộ nhớ tĩnh (Biến toàn cục)
+### Giá trị bộ nhớ tĩnh (biến toàn cục)
 
 ```python
 import angr
@@ -276,7 +275,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-### Các giá trị bộ nhớ động (Malloc)
+### Giá trị bộ nhớ động (Malloc)
 
 ```python
 import angr
@@ -395,7 +394,7 @@ if __name__ == '__main__':
 ```
 
 > [!TIP]
-> Lưu ý rằng tệp symbolic cũng có thể chứa dữ liệu hằng được hợp nhất với dữ liệu symbolic:
+> Lưu ý rằng symbolic file cũng có thể chứa dữ liệu hằng được gộp với dữ liệu symbolic:
 >
 > ```python
 >  # Hello world, my name is John.
@@ -418,11 +417,11 @@ if __name__ == '__main__':
 >  # (!)
 > ```
 
-### Áp dụng các điều kiện ràng buộc
+### Áp dụng các ràng buộc
 
 > [!TIP]
-> Đôi khi, các thao tác đơn giản của con người như so sánh 2 từ có độ dài 16 **ký tự một lần** (vòng lặp) lại **tốn** rất nhiều chi phí cho **angr**, vì nó cần tạo các nhánh **theo cấp số nhân** do mỗi if tạo ra 1 nhánh: `2^16`\
-> Vì vậy, sẽ dễ hơn nếu **yêu cầu angr đi đến một điểm trước đó** (nơi phần thực sự khó đã được xử lý) rồi **thiết lập các điều kiện ràng buộc đó theo cách thủ công**.
+> Đôi khi, những thao tác đơn giản đối với con người như so sánh 2 từ có độ dài 16 ký tự **từng ký tự một** (vòng lặp) lại **tốn** rất nhiều chi phí đối với **angr**, vì nó cần tạo ra số nhánh **theo cấp số nhân** do mỗi câu lệnh if tạo ra 1 nhánh: `2^16`\
+> Vì vậy, sẽ dễ hơn nếu **yêu cầu angr đi đến một điểm trước đó** (nơi phần thực sự khó đã được xử lý) rồi **thiết lập các ràng buộc đó theo cách thủ công**.
 
 ```python
 # After perform some complex poperations to the input the program checks
@@ -496,15 +495,15 @@ if __name__ == '__main__':
 ```
 
 > [!CAUTION]
-> Trong một số tình huống, bạn có thể kích hoạt **veritesting**, tính năng này sẽ hợp nhất các trạng thái tương tự để tránh các nhánh không cần thiết và tìm ra lời giải: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> Trong một số tình huống, bạn có thể kích hoạt **veritesting** để gộp các trạng thái tương tự, nhờ đó loại bỏ những nhánh không cần thiết và tìm ra lời giải: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> Một việc khác bạn có thể làm trong những tình huống này là **hook hàm để cung cấp cho angr thứ mà nó có thể hiểu** dễ dàng hơn.
+> Một cách khác bạn có thể áp dụng trong những tình huống này là **hook hàm để cung cấp cho angr thứ mà nó có thể hiểu** dễ dàng hơn.
 
 ### Simulation Managers
 
-Một số simulation manager có thể hữu ích hơn những cái khác. Trong ví dụ trước, vấn đề là đã tạo ra nhiều nhánh hữu ích. Ở đây, kỹ thuật **veritesting** sẽ hợp nhất chúng và tìm ra lời giải.\
-Bạn cũng có thể kích hoạt simulation manager này bằng: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Một số simulation manager có thể hữu ích hơn những cái khác. Trong ví dụ trước, vấn đề là có quá nhiều nhánh hữu ích được tạo ra. Ở đây, kỹ thuật **veritesting** sẽ gộp chúng lại và tìm ra lời giải.\
+Bạn cũng có thể kích hoạt simulation manager này bằng lệnh: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 ```python
 import angr
@@ -614,7 +613,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-### Hooking một hàm / Simprocedure
+### Hook một hàm / Simprocedure
 
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
@@ -702,9 +701,10 @@ if __name__ == '__main__':
 
 ### Mô phỏng scanf với nhiều tham số
 
+Với mô hình `scanf("%u %u", ...)` không được hỗ trợ hoặc không chính xác, hook dành riêng cho định dạng có thể ghi cả hai đầu ra. Trả về số lần chuyển đổi thành công để bên gọi nhận được kết quả nhất quán. Cách này bỏ qua bước phân tích cú pháp và không mô phỏng EOF hoặc dữ liệu đầu vào không hợp lệ.<sup>[[2]](#references)[[3]](#references)</sup>
+
 ```python
-# This time, the solution involves simply replacing scanf with our own version,
-# since Angr does not support requesting multiple parameters with scanf.
+# Replace this one known scanf format, not scanf in general.
 
 import angr
 import claripy
@@ -733,6 +733,7 @@ def main(argv):
       # store multiple bitvectors. You can either use a list, tuple, or multiple
       # keys to reference the different bitvectors.
       self.state.globals['solutions'] = (scanf0, scanf1)
+      return 2
 
   scanf_symbol = '__isoc99_scanf'
   project.hook_symbol(scanf_symbol, ReplacementScanf())
@@ -764,7 +765,42 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-### Tệp nhị phân tĩnh
+### Tìm con trỏ lệnh được kiểm soát bởi input
+
+Khi kiểm tra một binary có lệnh nhảy gián tiếp nhận input hoặc địa chỉ trả về bị ghi đè, hãy lưu các state có con trỏ lệnh nhận được nhiều giá trị khả dĩ. Một state `unconstrained` là manh mối, không phải bằng chứng có thể khai thác: angr cũng có thể tạo các giá trị không bị ràng buộc từ bộ nhớ chưa khởi tạo hoặc môi trường được mô phỏng không chính xác. Kiểm tra xem *các byte input* có thể khiến chương trình nhảy đến một địa chỉ thực thi đã chọn hay không, rồi chạy lại chương trình thật với các byte đó.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
+
+Ví dụ giả định binary có symbol `win` đã biết và input từ stdin. Đặt độ dài input bằng lượng dữ liệu chương trình có thể đọc. Với PIE, hãy phân giải địa chỉ bằng base runtime chính xác trước khi chạy lại; riêng solver không thể vô hiệu hóa ASLR hay các biện pháp giảm thiểu khác.<sup>[[6]](#references)[[7]](#references)</sup>
+
+<details>
+<summary>Kiểm tra input stdin dạng symbolic để chuyển hướng luồng điều khiển</summary>
+
+```python
+import angr
+import claripy
+
+project = angr.Project("./target", auto_load_libs=False)
+win = project.loader.main_object.get_symbol("win").rebased_addr
+input_bytes = claripy.BVS("input", 128 * 8)
+stdin = angr.SimFileStream(name="stdin", content=input_bytes, has_end=True)
+state = project.factory.entry_state(stdin=stdin)
+simgr = project.factory.simgr(state, save_unconstrained=True)
+
+payload = None
+while simgr.active and payload is None:
+    simgr.step()
+    for candidate in simgr.unconstrained:
+        if candidate.satisfiable(extra_constraints=[candidate.regs.ip == win]):
+            candidate.add_constraints(candidate.regs.ip == win)
+            payload = candidate.solver.eval(input_bytes, cast_to=bytes)
+            break
+    simgr.drop(stash="unconstrained")
+
+print(repr(payload) if payload is not None else "No satisfiable jump found")
+```
+
+</details>
+
+### Binary tĩnh
 
 ```python
 # This challenge is the exact same as the first challenge, except that it was
@@ -833,7 +869,15 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
+
+
 ## References
 
 - [1] [jakespringer/angr_ctf - Kho lưu trữ GitHub](https://github.com/jakespringer/angr_ctf)
+- [2] [Mã nguồn bộ phân tích định dạng scanf của angr](https://github.com/angr/angr/blob/master/angr/procedures/stubs/format_parser.py)
+- [3] [angr: Những điều cần lưu ý khi sử dụng angr](https://docs.angr.io/en/stable/advanced-topics/gotchas.html)
+- [4] [angr: Trình quản lý mô phỏng](https://docs.angr.io/en/latest/core-concepts/pathgroups.html)
+- [5] [angr: Mô phỏng và instrumentation](https://docs.angr.io/en/latest/core-concepts/simulation.html)
+- [6] [angr-examples: Bộ giải InsomniHack AEG](https://github.com/angr/angr-examples/blob/master/examples/insomnihack_aeg/solve.py)
+- [7] [Xử lý stdin của angr SimOS](https://github.com/angr/angr/blob/master/angr/simos/simos.py)
 {{#include ../../../banners/hacktricks-training.md}}

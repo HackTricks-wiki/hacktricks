@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Một phần nội dung trong cheatsheet này dựa trên [tài liệu angr](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
+Một phần của tài liệu tóm tắt này dựa trên [tài liệu angr](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
 
 ## Cài đặt
 
@@ -14,7 +14,7 @@ source ang/bin/activate
 pip install angr
 ```
 
-## Thao tác cơ bản
+## Các thao tác cơ bản
 
 ```python
 import angr
@@ -34,9 +34,9 @@ proj.filename #Get filename "/bin/true"
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
 
-## Thông tin về đối tượng đã tải và đối tượng chính
+## Thông tin về đối tượng được nạp và đối tượng chính
 
-### Dữ liệu đã tải
+### Dữ liệu đã nạp
 
 ```python
 #LOADED DATA
@@ -77,7 +77,7 @@ obj.plt['strcmp'] #Get plt address of a funcion (0x400550)
 obj.reverse_plt[0x400550] #Get function from plt address ('strcmp')
 ```
 
-### Symbol và Relocation
+### Ký hiệu và tái định vị
 
 ```python
 strcmp = proj.loader.find_symbol('strcmp') #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
@@ -108,7 +108,7 @@ block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x4016
 
 ## Phân tích động
 
-### Trình quản lý mô phỏng, trạng thái
+### Simulation Manager, States
 
 ```python
 #Live States
@@ -135,9 +135,9 @@ simgr.active[0].regs.rip #Get RIP from the last state
 
 ### Gọi hàm
 
-- Bạn có thể truyền một danh sách đối số qua `args` và một từ điển biến môi trường qua `env` vào `entry_state` và `full_init_state`. Các giá trị trong những cấu trúc này có thể là chuỗi hoặc bitvector và sẽ được tuần tự hóa vào state dưới dạng đối số và môi trường cho lần thực thi mô phỏng. `args` mặc định là một danh sách rỗng, vì vậy nếu chương trình bạn đang phân tích cần có ít nhất một `argv[0]`, hãy luôn cung cấp giá trị đó!
-- Nếu muốn `argc` có giá trị symbolic, bạn có thể truyền một bitvector symbolic làm `argc` cho các hàm khởi tạo `entry_state` và `full_init_state`. Tuy nhiên, hãy cẩn thận: nếu làm vậy, bạn cũng nên thêm một constraint vào state kết quả để đảm bảo giá trị `argc` không lớn hơn số lượng đối số bạn đã truyền vào `args`.
-- Để sử dụng call state, bạn nên gọi nó bằng `.call_state(addr, arg1, arg2, ...)`, trong đó `addr` là địa chỉ của hàm bạn muốn gọi và `argN` là đối số thứ N của hàm đó, có thể là số nguyên, chuỗi hoặc mảng của Python, hoặc một bitvector. Nếu muốn cấp phát memory và thực sự truyền vào một con trỏ tới một object, bạn nên bọc nó bằng `PointerWrapper`, tức là `angr.PointerWrapper("point to me!")`. Kết quả của API này đôi khi hơi khó đoán, nhưng chúng tôi đang cải thiện điều đó.
+- Bạn có thể truyền một danh sách đối số qua `args` và một dictionary chứa các biến môi trường qua `env` vào `entry_state` và `full_init_state`. Các giá trị trong những cấu trúc này có thể là chuỗi hoặc bitvector, và sẽ được tuần tự hóa vào state dưới dạng đối số và môi trường của quá trình thực thi mô phỏng. `args` mặc định là danh sách rỗng, vì vậy nếu chương trình bạn đang phân tích yêu cầu ít nhất một `argv[0]`, hãy luôn cung cấp giá trị đó!
+- Nếu muốn `argc` có giá trị symbolic, bạn có thể truyền một bitvector symbolic làm `argc` vào các constructor `entry_state` và `full_init_state`. Tuy nhiên, hãy cẩn thận: nếu làm vậy, bạn cũng nên thêm một constraint vào state thu được để giá trị `argc` không lớn hơn số đối số bạn đã truyền vào `args`.
+- Để sử dụng call state, bạn nên gọi `.call_state(addr, arg1, arg2, ...)`, trong đó `addr` là địa chỉ của hàm bạn muốn gọi và `argN` là đối số thứ N của hàm đó, ở dạng số nguyên Python, chuỗi, mảng hoặc bitvector. Nếu muốn cấp phát bộ nhớ và thực sự truyền vào một con trỏ đến đối tượng, bạn nên bọc nó trong `PointerWrapper`, ví dụ: `angr.PointerWrapper("point to me!")`. Kết quả của API này đôi khi hơi khó đoán, nhưng chúng tôi đang cải thiện.
 
 ### BitVectors
 
@@ -150,7 +150,7 @@ bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
 
-### BitVector ký hiệu & các ràng buộc
+### BitVector tượng trưng & các ràng buộc
 
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
@@ -206,11 +206,15 @@ True
 True
 ```
 
-Ngoài ra, bạn có thể dùng `proj.hook_symbol(name, hook)`, cung cấp tên của một symbol làm đối số đầu tiên để hook địa chỉ nơi symbol đó tồn tại<sup>[[1]](#references)</sup>
+Ngoài ra, bạn có thể sử dụng `proj.hook_symbol(name, hook)`, truyền tên của một symbol làm đối số đầu tiên để hook địa chỉ nơi symbol đó nằm<sup>[[1]](#references)</sup>
 
 ## Examples
 
+Để tìm đường đi thực tế, mô hình hóa đầu vào, hook function và kiểm tra các instruction pointer được điều khiển bởi đầu vào, xem [angr examples](angr-examples.md).
+
+
+
 ## References
 
-- [1] [tài liệu angr](https://docs.angr.io/_/downloads/en/stable/pdf/)
+- [1] [Tài liệu angr](https://docs.angr.io/_/downloads/en/stable/pdf/)
 {{#include ../../../banners/hacktricks-training.md}}
