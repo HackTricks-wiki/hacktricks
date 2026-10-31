@@ -1128,6 +1128,7 @@
 - [Windows UAS REPORT LUNS cached-table OOB write](binary-exploitation/windows-kernel-exploitation/uasp-report-luns-cache-size-oob-write.md)
 - [Windows USB MIDI packet-size pool overflow](binary-exploitation/windows-kernel-exploitation/usb-midi-packet-size-pool-overflow.md)
 - [Windows Userland Heap Grooming (x86 NT Heap)](binary-exploitation/windows-userland-heap-grooming.md)
+- [Windows VBS Enclave Pointer Validation and VTL1 Code Reuse](binary-exploitation/windows-vbs-enclave-exploitation.md)
 - [Windows Exploiting (Basic Guide - OSCP lvl)](binary-exploitation/windows-exploiting-basic-guide-oscp-lvl.md)
   - [Windows Kernel Type Confusion to NPFS Arbitrary R/W](binary-exploitation/windows-kernel-type-confusion-to-npfs-arbitrary-rw.md)
 - [Windows Vectored Overloading](binary-exploitation/windows-vectored-overloading.md)
