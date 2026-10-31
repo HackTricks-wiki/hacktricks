@@ -5,6 +5,7 @@
 Частина цієї шпаргалки базується на [документації angr](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
 
 ## Встановлення
+
 ```bash
 sudo apt-get install python3-dev libffi-dev build-essential
 python3 -m pip install --user virtualenv
@@ -12,7 +13,9 @@ python3 -m venv ang
 source ang/bin/activate
 pip install angr
 ```
+
 ## Базові дії
+
 ```python
 import angr
 import monkeyhex # this will format numerical results in hexadecimal
@@ -30,9 +33,11 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-## Інформація про завантажені та головний об'єкт
+
+## Інформація про завантажений і головний об’єкт
 
 ### Завантажені дані
+
 ```python
 #LOADED DATA
 proj.loader #<Loaded true, maps [0x400000:0x5004000]>
@@ -42,20 +47,22 @@ proj.loader.all_objects #All loaded
 proj.loader.shared_objects #Loaded binaries
 """
 OrderedDict([('true', <ELF Object true, maps [0x400000:0x40a377]>),
-('libc.so.6',
-<ELF Object libc-2.31.so, maps [0x500000:0x6c4507]>),
-('ld-linux-x86-64.so.2',
-<ELF Object ld-2.31.so, maps [0x700000:0x72c177]>),
-('extern-address space',
-<ExternObject Object cle##externs, maps [0x800000:0x87ffff]>),
-('cle##tls',
-<ELFTLSObjectV2 Object cle##tls, maps [0x900000:0x91500f]>)])
+             ('libc.so.6',
+              <ELF Object libc-2.31.so, maps [0x500000:0x6c4507]>),
+             ('ld-linux-x86-64.so.2',
+              <ELF Object ld-2.31.so, maps [0x700000:0x72c177]>),
+             ('extern-address space',
+              <ExternObject Object cle##externs, maps [0x800000:0x87ffff]>),
+             ('cle##tls',
+              <ELFTLSObjectV2 Object cle##tls, maps [0x900000:0x91500f]>)])
 """
 proj.loader.all_elf_objects #Get all ELF objects loaded (Linux)
 proj.loader.all_pe_objects #Get all binaries loaded (Windows)
 proj.loader.find_object_containing(0x400000)#Get object loaded in an address "<ELF Object fauxware, maps [0x400000:0x60105f]>"
 ```
+
 ### Основний об'єкт
+
 ```python
 #Main Object (main binary loaded)
 obj = proj.loader.main_object #<ELF Object true, maps [0x400000:0x60721f]>
@@ -69,7 +76,9 @@ obj.find_section_containing(obj.entry) #Get section by address
 obj.plt['strcmp'] #Get plt address of a funcion (0x400550)
 obj.reverse_plt[0x400550] #Get function from plt address ('strcmp')
 ```
+
 ### Символи та релокації
+
 ```python
 strcmp = proj.loader.find_symbol('strcmp') #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 
@@ -86,7 +95,9 @@ main_strcmp.is_export #False
 main_strcmp.is_import #True
 main_strcmp.resolvedby #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 ```
+
 ### Блоки
+
 ```python
 #Blocks
 block = proj.factory.block(proj.entry) #Get the block of the entrypoint fo the binary
@@ -94,9 +105,11 @@ block.pp() #Print disassembly of the block
 block.instructions #"0xb" Get number of instructions
 block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x401675, 0x401676, 0x401679, 0x40167d, 0x40167e, 0x40167f, 0x401686, 0x40168d, 0x401694]"
 ```
+
 ## Динамічний аналіз
 
 ### Менеджер симуляції, стани
+
 ```python
 #Live States
 #This is useful to modify content in a live analysis
@@ -119,13 +132,15 @@ simgr = proj.factory.simulation_manager(state) #Start
 simgr.step() #Execute one step
 simgr.active[0].regs.rip #Get RIP from the last state
 ```
+
 ### Виклик функцій
 
-- Ви можете передати список аргументів через `args` і словник змінних середовища через `env` до `entry_state` та `full_init_state`. Значення в цих структурах можуть бути рядками або bitvectors і будуть серіалізовані у state як аргументи та середовище для змодельованого виконання. Типове значення `args` — порожній список, тому якщо програма, яку ви аналізуєте, очікує наявність щонайменше `argv[0]`, ви завжди повинні його вказувати!
-- Якщо ви хочете, щоб `argc` був symbolic, ви можете передати symbolic bitvector як `argc` до конструкторів `entry_state` і `full_init_state`. Однак будьте обережні: якщо ви це зробите, вам також слід додати constraint до отриманого state, що ваше значення argc не може бути більшим за кількість аргументів, переданих через `args`.
-- Щоб використовувати call state, його слід викликати через `.call_state(addr, arg1, arg2, ...)`, де `addr` — адреса функції, яку ви хочете викликати, а `argN` — N-й аргумент цієї функції: python integer, string або array, або bitvector. Якщо ви хочете виділити пам'ять і фактично передати pointer на об'єкт, його слід обгорнути в PointerWrapper, тобто `angr.PointerWrapper("point to me!")`. Результати цього API можуть бути дещо непередбачуваними, але ми працюємо над цим.
+- Ви можете передати список аргументів через `args` і словник змінних середовища через `env` у `entry_state` та `full_init_state`. Значення в цих структурах можуть бути рядками або бітовими векторами, і їх буде серіалізовано в стан як аргументи та середовище для симульованого виконання. За замовчуванням `args` — порожній список, тож якщо аналізована вами програма очікує принаймні `argv[0]`, завжди передавайте його!
+- Якщо ви хочете, щоб `argc` був символічним, можете передати символічний бітовий вектор як `argc` конструкторам `entry_state` і `full_init_state`. Однак будьте обережні: якщо ви це зробите, також додайте до отриманого стану обмеження, що значення `argc` не може перевищувати кількість аргументів, переданих у `args`.
+- Щоб використати стан виклику, викличте його так: `.call_state(addr, arg1, arg2, ...)`, де `addr` — адреса функції, яку потрібно викликати, а `argN` — N-й аргумент цієї функції: ціле число Python, рядок, масив або бітовий вектор. Якщо потрібно виділити пам’ять і передати вказівник на об’єкт, обгорніть його в PointerWrapper, наприклад: `angr.PointerWrapper("point to me!")`. Результати роботи цього API можуть бути дещо непередбачуваними, але ми над цим працюємо.
 
-### BitVectors
+### Бітові вектори
+
 ```python
 #BitVectors
 state = proj.factory.entry_state()
@@ -134,7 +149,9 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-### Символічні BitVectors та обмеження
+
+### Символьні бітові вектори й обмеження
+
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -161,14 +178,16 @@ state.satisfiable() #False
 
 #Solver solutions
 solver.eval(expression) #one possible solution
-solver.eval_one(expression) #solution to the given expression, or throw an error if more than one solution is possible.
+solver.eval_one(expression) # One solution, or raise an error if more than one solution is possible.
 solver.eval_upto(expression, n) #n solutions to the given expression, returning fewer than n if fewer than n are possible.
-solver.eval_atleast(expression, n) #n solutions to the given expression, throwing an error if fewer than n are possible.
-solver.eval_exact(expression, n) #n solutions to the given expression, throwing an error if fewer or more than are possible.
+solver.eval_atleast(expression, n) # n solutions, raising an error if fewer than n are possible.
+solver.eval_exact(expression, n) # n solutions, raising an error unless exactly n are possible.
 solver.min(expression) #minimum possible solution to the given expression.
 solver.max(expression) #maximum possible solution to the given expression.
 ```
+
 ### Hooking
+
 ```python
 >>> stub_func = angr.SIM_PROCEDURES['stubs']['ReturnUnconstrained'] # this is a CLASS
 >>> proj.hook(0x10000, stub_func())  # hook with an instance of the class
@@ -186,12 +205,16 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-Крім того, ви можете використати `proj.hook_symbol(name, hook)`, передавши ім’я символу як перший аргумент, щоб встановити hook за адресою, де розташований символ<sup>[[1]](#references)</sup>
 
-## Приклади
+Крім того, можна використовувати `proj.hook_symbol(name, hook)`, передавши назву символу першим аргументом, щоб встановити hook за адресою, де розташований символ<sup>[[1]](#references)</sup>
 
-## Посилання
+## Examples
 
-- [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
+Практичні приклади пошуку шляхів, моделювання введених даних, встановлення function hooks і перевірки вказівників інструкцій, контрольованих введеними даними, див. у [прикладах angr](angr-examples.md).
 
+
+
+## References
+
+- [1] [документація angr](https://docs.angr.io/_/downloads/en/stable/pdf/)
 {{#include ../../../banners/hacktricks-training.md}}
