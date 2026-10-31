@@ -1,46 +1,49 @@
-# Angr - Beispiele
+# Angr – Beispiele
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Wenn das Programm `scanf` verwendet, um **mehrere Werte gleichzeitig aus stdin** einzulesen, musst du einen Zustand generieren, der nach dem **`scanf`** beginnt.
+> angr kann mehrere `scanf`-Konvertierungen modellieren, aber seine SimProcedure ist unvollständig. Probiere zuerst das integrierte Modell aus. Wenn es ein bestimmtes Format falsch verarbeitet, ersetze diesen Aufruf durch einen formatspezifischen Hook oder setze nach dem Aufruf an und initialisiere die Ausgaben selbst.<sup>[[2]](#references)[[3]](#references)</sup>
 
-Codes entnommen von [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
+Code aus [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup> Siehe auch [angr-Grundlagen](./) zu State-, Solver- und Hook-APIs.
 
-### Eingabe zum Erreichen einer Adresse (Angabe der Adresse)
+### Eingabe, um eine Adresse zu erreichen (Adresse angeben)
+
 ```python
 import angr
 import sys
 
 def main(argv):
-path_to_binary = argv[1]  # :string
-project = angr.Project(path_to_binary)
+  path_to_binary = argv[1]  # :string
+  project = angr.Project(path_to_binary)
 
-# Start in main()
-initial_state = project.factory.entry_state()
-# Start simulation
-simulation = project.factory.simgr(initial_state)
+  # Start in main()
+  initial_state = project.factory.entry_state()
+  # Start simulation
+  simulation = project.factory.simgr(initial_state)
 
-# Find the way yo reach the good address
-good_address = 0x804867d
+  # Find the way yo reach the good address
+  good_address = 0x804867d
 
-# Avoiding this address
-avoid_address = 0x080485A8
-simulation.explore(find=good_address, avoid=avoid_address)
+  # Avoiding this address
+  avoid_address = 0x080485A8
+  simulation.explore(find=good_address, avoid=avoid_address)
 
-# If found a way to reach the address
-if simulation.found:
-solution_state = simulation.found[0]
+  # If found a way to reach the address
+  if simulation.found:
+    solution_state = simulation.found[0]
 
-# Print the string that Angr wrote to stdin to follow solution_state
-print(solution_state.posix.dumps(sys.stdin.fileno()))
-else:
-raise Exception('Could not find the solution')
+    # Print the string that Angr wrote to stdin to follow solution_state
+    print(solution_state.posix.dumps(sys.stdin.fileno()))
+  else:
+    raise Exception('Could not find the solution')
 
 if __name__ == '__main__':
-main(sys.argv)
+  main(sys.argv)
 ```
-### Input zum Erreichen der Adresse (mit hinweisenden Prints)
+
+### Eingabe zum Erreichen der Adresse (Ausgaben anzeigen)
+
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -49,97 +52,100 @@ import angr
 import sys
 
 def main(argv):
-path_to_binary = argv[1]
-project = angr.Project(path_to_binary)
-initial_state = project.factory.entry_state()
-simulation = project.factory.simgr(initial_state)
+  path_to_binary = argv[1]
+  project = angr.Project(path_to_binary)
+  initial_state = project.factory.entry_state()
+  simulation = project.factory.simgr(initial_state)
 
-def is_successful(state):
-#Successful print
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return b'Good Job.' in stdout_output
+  def is_successful(state):
+    #Successful print
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return b'Good Job.' in stdout_output
 
-def should_abort(state):
-#Avoid this print
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return b'Try again.' in stdout_output
+  def should_abort(state):
+    #Avoid this print
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return b'Try again.' in stdout_output
 
-simulation.explore(find=is_successful, avoid=should_abort)
+  simulation.explore(find=is_successful, avoid=should_abort)
 
-if simulation.found:
-solution_state = simulation.found[0]
-print(solution_state.posix.dumps(sys.stdin.fileno()))
-else:
-raise Exception('Could not find the solution')
+  if simulation.found:
+    solution_state = simulation.found[0]
+    print(solution_state.posix.dumps(sys.stdin.fileno()))
+  else:
+    raise Exception('Could not find the solution')
 
 if __name__ == '__main__':
-main(sys.argv)
+  main(sys.argv)
 ```
+
 ### Registry-Werte
+
 ```python
-# Angr doesn't currently support reading multiple things with scanf (Ex:
-# scanf("%u %u).) You will have to tell the simulation engine to begin the
-# program after scanf is called and manually inject the symbols into registers.
+# If a particular scanf format is modeled incorrectly, begin after the call
+# and initialize the values expected by the following instructions.
 
 import angr
 import claripy
 import sys
 
 def main(argv):
-path_to_binary = argv[1]
-project = angr.Project(path_to_binary)
+  path_to_binary = argv[1]
+  project = angr.Project(path_to_binary)
 
-# Address were you want to indicate the relation BitVector - registries
-start_address = 0x80488d1
-initial_state = project.factory.blank_state(addr=start_address)
+  # Address were you want to indicate the relation BitVector - registries
+  start_address = 0x80488d1
+  initial_state = project.factory.blank_state(addr=start_address)
 
 
-# Create Bit Vectors
-password0_size_in_bits = 32  # :integer
-password0 = claripy.BVS('password0', password0_size_in_bits)
+  # Create Bit Vectors
+  password0_size_in_bits = 32  # :integer
+  password0 = claripy.BVS('password0', password0_size_in_bits)
 
-password1_size_in_bits = 32  # :integer
-password1 = claripy.BVS('password1', password1_size_in_bits)
+  password1_size_in_bits = 32  # :integer
+  password1 = claripy.BVS('password1', password1_size_in_bits)
 
-password2_size_in_bits = 32  # :integer
-password2 = claripy.BVS('password2', password2_size_in_bits)
+  password2_size_in_bits = 32  # :integer
+  password2 = claripy.BVS('password2', password2_size_in_bits)
 
-# Relate its vectors to the register values needed to reach an address
-initial_state.regs.eax = password0
-initial_state.regs.ebx = password1
-initial_state.regs.edx = password2
+  # Relate its vectors to the register values needed to reach an address
+  initial_state.regs.eax = password0
+  initial_state.regs.ebx = password1
+  initial_state.regs.edx = password2
 
-simulation = project.factory.simgr(initial_state)
+  simulation = project.factory.simgr(initial_state)
 
-def is_successful(state):
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return 'Good Job.'.encode() in stdout_output
+  def is_successful(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Good Job.'.encode() in stdout_output
 
-def should_abort(state):
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return 'Try again.'.encode() in stdout_output
+  def should_abort(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Try again.'.encode() in stdout_output
 
-simulation.explore(find=is_successful, avoid=should_abort)
+  simulation.explore(find=is_successful, avoid=should_abort)
 
-if simulation.found:
-solution_state = simulation.found[0]
+  if simulation.found:
+    solution_state = simulation.found[0]
 
-solution0 = solution_state.solver.eval(password0)
-solution1 = solution_state.solver.eval(password1)
-solution2 = solution_state.solver.eval(password2)
+    solution0 = solution_state.solver.eval(password0)
+    solution1 = solution_state.solver.eval(password1)
+    solution2 = solution_state.solver.eval(password2)
 
-# Aggregate and format the solutions you computed above, and then print
-# the full string. Pay attention to the order of the integers, and the
-# expected base (decimal, octal, hexadecimal, etc).
-solution = ' '.join(map('{:x}'.format, [ solution0, solution1, solution2 ]))  # :string
-print(solution)
-else:
-raise Exception('Could not find the solution')
+    # Aggregate and format the solutions you computed above, and then print
+    # the full string. Pay attention to the order of the integers, and the
+    # expected base (decimal, octal, hexadecimal, etc).
+    solution = ' '.join(map('{:x}'.format, [ solution0, solution1, solution2 ]))  # :string
+    print(solution)
+  else:
+    raise Exception('Could not find the solution')
 
 if __name__ == '__main__':
-main(sys.argv)
+  main(sys.argv)
 ```
+
 ### Stack-Werte
+
 ```python
 # Put bit vectors in th stack to find out the vallue that stack position need to
 # have to reach a rogram flow
@@ -149,183 +155,189 @@ import claripy
 import sys
 
 def main(argv):
-path_to_binary = argv[1]
-project = angr.Project(path_to_binary)
+  path_to_binary = argv[1]
+  project = angr.Project(path_to_binary)
 
-# Go to some address after the scanf where values have already being set in the stack
-start_address = 0x8048697
-initial_state = project.factory.blank_state(addr=start_address)
+  # Go to some address after the scanf where values have already being set in the stack
+  start_address = 0x8048697
+  initial_state = project.factory.blank_state(addr=start_address)
 
-# Since we are starting after scanf, we are skipping this stack construction
-# step. To make up for this, we need to construct the stack ourselves. Let us
-# start by initializing ebp in the exact same way the program does.
-initial_state.regs.ebp = initial_state.regs.esp
+  # Since we are starting after scanf, we are skipping this stack construction
+  # step. To make up for this, we need to construct the stack ourselves. Let us
+  # start by initializing ebp in the exact same way the program does.
+  initial_state.regs.ebp = initial_state.regs.esp
 
-# In this case scanf("%u %u") is used, so 2 BVS are going to be needed
-password0 = claripy.BVS('password0', 32)
-password1 = claripy.BVS('password1', 32)
+  # In this case scanf("%u %u") is used, so 2 BVS are going to be needed
+  password0 = claripy.BVS('password0', 32)
+  password1 = claripy.BVS('password1', 32)
 
-# Now, in the address were you have stopped, check were are the scanf values saved
-# Then, substrack form the esp registry the needing padding to get to the
-# part of the stack were the scanf values are being saved and push the BVS
-# (see the image below to understan this -8)
-padding_length_in_bytes = 8  # :integer
-initial_state.regs.esp -= padding_length_in_bytes
+  # Now, in the address were you have stopped, check were are the scanf values saved
+  # Then, substrack form the esp registry the needing padding to get to the
+  # part of the stack were the scanf values are being saved and push the BVS
+  # (see the image below to understan this -8)
+  padding_length_in_bytes = 8  # :integer
+  initial_state.regs.esp -= padding_length_in_bytes
 
-initial_state.stack_push(password0)
-initial_state.stack_push(password1)
+  initial_state.stack_push(password0)
+  initial_state.stack_push(password1)
 
-simulation = project.factory.simgr(initial_state)
+  simulation = project.factory.simgr(initial_state)
 
-def is_successful(state):
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return 'Good Job.'.encode() in stdout_output
+  def is_successful(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Good Job.'.encode() in stdout_output
 
-def should_abort(state):
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return 'Try again.'.encode() in stdout_output
+  def should_abort(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Try again.'.encode() in stdout_output
 
-simulation.explore(find=is_successful, avoid=should_abort)
+  simulation.explore(find=is_successful, avoid=should_abort)
 
-if simulation.found:
-solution_state = simulation.found[0]
+  if simulation.found:
+    solution_state = simulation.found[0]
 
-solution0 = solution_state.solver.eval(password0)
-solution1 = solution_state.solver.eval(password1)
+    solution0 = solution_state.solver.eval(password0)
+    solution1 = solution_state.solver.eval(password1)
 
-solution = ' '.join(map(str, [ solution0, solution1 ]))
-print(solution)
-else:
-raise Exception('Could not find the solution')
+    solution = ' '.join(map(str, [ solution0, solution1 ]))
+    print(solution)
+  else:
+    raise Exception('Could not find the solution')
 
 if __name__ == '__main__':
-main(sys.argv)
+  main(sys.argv)
 ```
-In diesem Szenario wurde die Eingabe mit `scanf("%u %u")` eingelesen und der Wert `"1 1"` angegeben, daher stammen die Werte **`0x00000001`** auf dem Stack von der **Benutzereingabe**. Du kannst sehen, wie diese Werte bei `$ebp - 8` beginnen. Daher haben wir im Code **8 Byte von `$esp` subtrahiert (da `$ebp` und `$esp` zu diesem Zeitpunkt denselben Wert hatten)** und anschließend den BVS gepusht.
 
-![Bit-Vektoren auf den Stack legen, um herauszufinden, welchen Wert diese Stack-Position benötigt, damit ein Programmfluss erreicht wird: In diesem Szenario wurde die Eingabe mit scanf("%u %u") eingelesen und der Wert "1...](<../../../images/image (136).png>)
+In diesem Szenario wurde die Eingabe mit `scanf("%u %u")` eingelesen und der Wert `"1 1"` eingegeben. Daher stammen die Werte **`0x00000001`** auf dem Stack aus der **Benutzereingabe**. Man sieht, wie diese Werte bei `$ebp - 8` beginnen. Daher haben wir im Code **$esp um 8 Bytes verringert (da `$ebp` und `$esp` zu diesem Zeitpunkt denselben Wert hatten)** und anschließend den BVS auf den Stack gelegt.
 
-### Statische Speicherwerte (globale Variablen)
+![Bitvektoren auf dem Stack ablegen, um herauszufinden, welchen Wert die Stackposition haben muss, um einen Programmfluss zu erreichen: In diesem Szenario wurde die Eingabe mit scanf("%u %u") eingelesen und der Wert "1...](<../../../images/image (136).png>)
+
+### Statische Speicherwerte (Globale Variablen)
+
 ```python
 import angr
 import claripy
 import sys
 
 def main(argv):
-path_to_binary = argv[1]
-project = angr.Project(path_to_binary)
+  path_to_binary = argv[1]
+  project = angr.Project(path_to_binary)
 
-# Get an address after scanf, once the input has been saved in memory
-start_address = 0x8048606
-initial_state = project.factory.blank_state(addr=start_address)
+  # Get an address after scanf, once the input has been saved in memory
+  start_address = 0x8048606
+  initial_state = project.factory.blank_state(addr=start_address)
 
-# The binary is calling scanf("%8s %8s %8s %8s").
-# So we need 4 BVS of size 8*8
-password0 = claripy.BVS('password0', 8*8)
-password1 = claripy.BVS('password1', 8*8)
-password2 = claripy.BVS('password2', 8*8)
-password3 = claripy.BVS('password3', 8*8)
+  # The binary is calling scanf("%8s %8s %8s %8s").
+  # So we need 4 BVS of size 8*8
+  password0 = claripy.BVS('password0', 8*8)
+  password1 = claripy.BVS('password1', 8*8)
+  password2 = claripy.BVS('password2', 8*8)
+  password3 = claripy.BVS('password3', 8*8)
 
-# Write the symbolic BVS in the memory positions
-password0_address = 0xa29faa0
-initial_state.memory.store(password0_address, password0)
-password1_address = 0xa29faa8
-initial_state.memory.store(password1_address, password1)
-password2_address = 0xa29fab0
-initial_state.memory.store(password2_address, password2)
-password3_address = 0xa29fab8
-initial_state.memory.store(password3_address, password3)
+  # Write the symbolic BVS in the memory positions
+  password0_address = 0xa29faa0
+  initial_state.memory.store(password0_address, password0)
+  password1_address = 0xa29faa8
+  initial_state.memory.store(password1_address, password1)
+  password2_address = 0xa29fab0
+  initial_state.memory.store(password2_address, password2)
+  password3_address = 0xa29fab8
+  initial_state.memory.store(password3_address, password3)
 
-simulation = project.factory.simgr(initial_state)
+  simulation = project.factory.simgr(initial_state)
 
-def is_successful(state):
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return 'Good Job.'.encode() in stdout_output
+  def is_successful(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Good Job.'.encode() in stdout_output
 
-def should_abort(state):
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return 'Try again.'.encode() in stdout_output
+  def should_abort(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Try again.'.encode() in stdout_output
 
-simulation.explore(find=is_successful, avoid=should_abort)
+  simulation.explore(find=is_successful, avoid=should_abort)
 
-if simulation.found:
-solution_state = simulation.found[0]
+  if simulation.found:
+    solution_state = simulation.found[0]
 
-# Get the values the memory addresses should store
-solution0 = solution_state.solver.eval(password0,cast_to=bytes).decode()
-solution1 = solution_state.solver.eval(password1,cast_to=bytes).decode()
-solution2 = solution_state.solver.eval(password2,cast_to=bytes).decode()
-solution3 = solution_state.solver.eval(password3,cast_to=bytes).decode()
+    # Get the values the memory addresses should store
+    solution0 = solution_state.solver.eval(password0,cast_to=bytes).decode()
+    solution1 = solution_state.solver.eval(password1,cast_to=bytes).decode()
+    solution2 = solution_state.solver.eval(password2,cast_to=bytes).decode()
+    solution3 = solution_state.solver.eval(password3,cast_to=bytes).decode()
 
-solution = ' '.join([ solution0, solution1, solution2, solution3 ])
+    solution = ' '.join([ solution0, solution1, solution2, solution3 ])
 
-print(solution)
-else:
-raise Exception('Could not find the solution')
+    print(solution)
+  else:
+    raise Exception('Could not find the solution')
 
 if __name__ == '__main__':
-main(sys.argv)
+  main(sys.argv)
 ```
+
 ### Dynamische Speicherwerte (Malloc)
+
 ```python
 import angr
 import claripy
 import sys
 
 def main(argv):
-path_to_binary = argv[1]
-project = angr.Project(path_to_binary)
+  path_to_binary = argv[1]
+  project = angr.Project(path_to_binary)
 
-# Get address after scanf
-start_address = 0x804869e
-initial_state = project.factory.blank_state(addr=start_address)
+  # Get address after scanf
+  start_address = 0x804869e
+  initial_state = project.factory.blank_state(addr=start_address)
 
-# The binary is calling scanf("%8s %8s") so 2 BVS are needed.
-password0 = claripy.BVS('password0', 8*8)
-password1 = claripy.BVS('password0', 8*8)
+  # The binary is calling scanf("%8s %8s") so 2 BVS are needed.
+  password0 = claripy.BVS('password0', 8*8)
+  password1 = claripy.BVS('password0', 8*8)
 
-# Find a coupble of addresses that aren't used by the binary (like 0x4444444 & 0x4444454)
-# The address generated by mallosc is going to be saved in some address
-# Then, make that address point to the fake heap addresses were the BVS are going to be saved
-fake_heap_address0 = 0x4444444
-pointer_to_malloc_memory_address0 = 0xa79a118
-initial_state.memory.store(pointer_to_malloc_memory_address0, fake_heap_address0, endness=project.arch.memory_endness)
-fake_heap_address1 = 0x4444454
-pointer_to_malloc_memory_address1 = 0xa79a120
-initial_state.memory.store(pointer_to_malloc_memory_address1, fake_heap_address1, endness=project.arch.memory_endness)
+  # Find a coupble of addresses that aren't used by the binary (like 0x4444444 & 0x4444454)
+  # The address generated by mallosc is going to be saved in some address
+  # Then, make that address point to the fake heap addresses were the BVS are going to be saved
+  fake_heap_address0 = 0x4444444
+  pointer_to_malloc_memory_address0 = 0xa79a118
+  initial_state.memory.store(pointer_to_malloc_memory_address0, fake_heap_address0, endness=project.arch.memory_endness)
+  fake_heap_address1 = 0x4444454
+  pointer_to_malloc_memory_address1 = 0xa79a120
+  initial_state.memory.store(pointer_to_malloc_memory_address1, fake_heap_address1, endness=project.arch.memory_endness)
 
-# Save the VBS in the new fake heap addresses created
-initial_state.memory.store(fake_heap_address0, password0)
-initial_state.memory.store(fake_heap_address1, password1)
+  # Save the VBS in the new fake heap addresses created
+  initial_state.memory.store(fake_heap_address0, password0)
+  initial_state.memory.store(fake_heap_address1, password1)
 
-simulation = project.factory.simgr(initial_state)
+  simulation = project.factory.simgr(initial_state)
 
-def is_successful(state):
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return 'Good Job.'.encode() in stdout_output
+  def is_successful(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Good Job.'.encode() in stdout_output
 
-def should_abort(state):
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return 'Try again.'.encode() in stdout_output
+  def should_abort(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Try again.'.encode() in stdout_output
 
-simulation.explore(find=is_successful, avoid=should_abort)
+  simulation.explore(find=is_successful, avoid=should_abort)
 
-if simulation.found:
-solution_state = simulation.found[0]
+  if simulation.found:
+    solution_state = simulation.found[0]
 
-solution0 = solution_state.solver.eval(password0,cast_to=bytes).decode()
-solution1 = solution_state.solver.eval(password1,cast_to=bytes).decode()
+    solution0 = solution_state.solver.eval(password0,cast_to=bytes).decode()
+    solution1 = solution_state.solver.eval(password1,cast_to=bytes).decode()
 
-solution = ' '.join([ solution0, solution1 ])
+    solution = ' '.join([ solution0, solution1 ])
 
-print(solution)
-else:
-raise Exception('Could not find the solution')
+    print(solution)
+  else:
+    raise Exception('Could not find the solution')
 
 if __name__ == '__main__':
-main(sys.argv)
+  main(sys.argv)
 ```
+
 ### Dateisimulation
+
 ```python
 #In this challenge a password is read from a file and we want to simulate its content
 
@@ -334,54 +346,55 @@ import claripy
 import sys
 
 def main(argv):
-path_to_binary = argv[1]
-project = angr.Project(path_to_binary)
+  path_to_binary = argv[1]
+  project = angr.Project(path_to_binary)
 
-# Get an address just before opening the file with the symbolic content
-# Or at least when the file is not going to suffer more changes before being read
-start_address = 0x80488db
-initial_state = project.factory.blank_state(addr=start_address)
+  # Get an address just before opening the file with the symbolic content
+  # Or at least when the file is not going to suffer more changes before being read
+  start_address = 0x80488db
+  initial_state = project.factory.blank_state(addr=start_address)
 
-# Specify the filena that is going to open
-# Note that in theory, the filename could be symbolic.
-filename = 'WCEXPXBW.txt'
-symbolic_file_size_bytes = 64
+  # Specify the filena that is going to open
+  # Note that in theory, the filename could be symbolic.
+  filename = 'WCEXPXBW.txt'
+  symbolic_file_size_bytes = 64
 
-# Create a bit-vector that will hold the symbolic file content
-password = claripy.BVS('password', symbolic_file_size_bytes * 8)
+  # Create a bit-vector that will hold the symbolic file content
+  password = claripy.BVS('password', symbolic_file_size_bytes * 8)
 
-# Create the simulated file with symbolic content
-password_file = angr.storage.SimFile(filename, content=password)
+  # Create the simulated file with symbolic content
+  password_file = angr.storage.SimFile(filename, content=password)
 
-# Add the symbolic file we created to the symbolic filesystem.
-initial_state.fs.insert(filename, password_file)
+  # Add the symbolic file we created to the symbolic filesystem.
+  initial_state.fs.insert(filename, password_file)
 
-simulation = project.factory.simgr(initial_state)
+  simulation = project.factory.simgr(initial_state)
 
-def is_successful(state):
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return 'Good Job.'.encode() in stdout_output
+  def is_successful(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Good Job.'.encode() in stdout_output
 
-def should_abort(state):
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return 'Try again.'.encode() in stdout_output
+  def should_abort(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Try again.'.encode() in stdout_output
 
-simulation.explore(find=is_successful, avoid=should_abort)
+  simulation.explore(find=is_successful, avoid=should_abort)
 
-if simulation.found:
-solution_state = simulation.found[0]
+  if simulation.found:
+    solution_state = simulation.found[0]
 
-solution = solution_state.solver.eval(password,cast_to=bytes).decode()
+    solution = solution_state.solver.eval(password,cast_to=bytes).decode()
 
-print(solution)
-else:
-raise Exception('Could not find the solution')
+    print(solution)
+  else:
+    raise Exception('Could not find the solution')
 
 if __name__ == '__main__':
-main(sys.argv)
+  main(sys.argv)
 ```
+
 > [!TIP]
-> Beachte, dass die symbolische Datei auch konstante Daten enthalten kann, die mit symbolischen Daten zusammengeführt wurden:
+> Beachte, dass die symbolische Datei auch konstante Daten enthalten könnte, die mit symbolischen Daten zusammengeführt wurden:
 >
 > ```python
 >  # Hello world, my name is John.
@@ -404,11 +417,12 @@ main(sys.argv)
 >  # (!)
 > ```
 
-### Anwenden von Constraints
+### Constraints anwenden
 
 > [!TIP]
-> Manchmal kosten einfache menschliche Operationen, wie der Vergleich zweier Wörter mit einer Länge von 16 **Zeichen für Zeichen** (Schleife), **angr** viel Rechenaufwand, da **angr** exponentiell viele Verzweigungen erzeugen muss, weil es pro if eine Verzweigung erstellt: `2^16`\
-> Daher ist es einfacher, **angr zu einem vorherigen Punkt zurückkehren zu lassen** (an dem der tatsächlich schwierige Teil bereits erledigt wurde) und **diese Constraints manuell festzulegen**.
+> Manchmal kosten einfache menschliche Operationen wie der Vergleich zweier 16 Zeichen langer Wörter **Zeichen für Zeichen** (Schleife) **angr** viel, weil angr **exponentiell** viele Branches generieren muss: einen Branch pro if-Bedingung (`2^16`).\
+> Daher ist es einfacher, **angr anzuweisen, zu einem vorherigen Punkt zu gelangen** (an dem der wirklich schwierige Teil bereits erledigt wurde) und **diese Constraints manuell festzulegen**.
+
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -444,89 +458,93 @@ import claripy
 import sys
 
 def main(argv):
-path_to_binary = argv[1]
-project = angr.Project(path_to_binary)
+  path_to_binary = argv[1]
+  project = angr.Project(path_to_binary)
 
-initial_state = project.factory.entry_state()
+  initial_state = project.factory.entry_state()
 
-simulation = project.factory.simgr(initial_state)
+  simulation = project.factory.simgr(initial_state)
 
-# Get an address to check after the complex function and before the "easy compare" operation
-address_to_check_constraint = 0x8048671
-simulation.explore(find=address_to_check_constraint)
+  # Get an address to check after the complex function and before the "easy compare" operation
+  address_to_check_constraint = 0x8048671
+  simulation.explore(find=address_to_check_constraint)
 
 
-if simulation.found:
-solution_state = simulation.found[0]
+  if simulation.found:
+    solution_state = simulation.found[0]
 
-# Find were the input that is going to be compared is saved in memory
-constrained_parameter_address = 0x804a050
-constrained_parameter_size_bytes = 16
-# Set the bitvector
-constrained_parameter_bitvector = solution_state.memory.load(
-constrained_parameter_address,
-constrained_parameter_size_bytes
-)
+    # Find were the input that is going to be compared is saved in memory
+    constrained_parameter_address = 0x804a050
+    constrained_parameter_size_bytes = 16
+    # Set the bitvector
+    constrained_parameter_bitvector = solution_state.memory.load(
+      constrained_parameter_address,
+      constrained_parameter_size_bytes
+    )
 
-# Indicate angr that this BV at this point needs to be equal to the password
-constrained_parameter_desired_value = 'BWYRUBQCMVSBRGFU'.encode()
-solution_state.add_constraints(constrained_parameter_bitvector == constrained_parameter_desired_value)
+    # Indicate angr that this BV at this point needs to be equal to the password
+    constrained_parameter_desired_value = 'BWYRUBQCMVSBRGFU'.encode()
+    solution_state.add_constraints(constrained_parameter_bitvector == constrained_parameter_desired_value)
 
-print(solution_state.posix.dumps(sys.stdin.fileno()))
-else:
-raise Exception('Could not find the solution')
+    print(solution_state.posix.dumps(sys.stdin.fileno()))
+  else:
+    raise Exception('Could not find the solution')
 
 if __name__ == '__main__':
-main(sys.argv)
+  main(sys.argv)
 ```
+
 > [!CAUTION]
-> In einigen Szenarien kannst du **veritesting** aktivieren, wodurch ähnliche Status zusammengeführt werden, um unnötige Branches zu vermeiden und die Lösung zu finden: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> In einigen Szenarien kannst du **veritesting** aktivieren, das ähnliche Zustände zusammenführt, um unnötige Verzweigungen zu vermeiden und die Lösung zu finden: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> Eine weitere Möglichkeit in diesen Szenarien besteht darin, die **Funktion zu hooken und angr etwas zu geben, das es** leichter verstehen kann.
+> Eine weitere Möglichkeit in diesen Szenarien ist, **die Funktion zu hooken, damit angr etwas erhält, das es leichter verarbeiten kann**.
 
-### Simulation Managers
+### Simulationsmanager
 
-Einige Simulation Managers können nützlicher sein als andere. Im vorherigen Beispiel gab es ein Problem, da viele nützliche Branches erstellt wurden. Hier wird die **veritesting**-Technik diese zusammenführen und eine Lösung finden.\
-Dieser Simulation Manager kann auch mit folgendem aktiviert werden: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Manche Simulationsmanager können nützlicher sein als andere. Im vorherigen Beispiel gab es ein Problem, da viele nützliche Verzweigungen erstellt wurden. Hier führt die Technik **veritesting** diese zusammen und findet eine Lösung.\
+Dieser Simulationsmanager kann auch so aktiviert werden: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+
 ```python
 import angr
 import claripy
 import sys
 
 def main(argv):
-path_to_binary = argv[1]
-project = angr.Project(path_to_binary)
+  path_to_binary = argv[1]
+  project = angr.Project(path_to_binary)
 
-initial_state = project.factory.entry_state()
+  initial_state = project.factory.entry_state()
 
-simulation = project.factory.simgr(initial_state)
-# Set simulation technique
-simulation.use_technique(angr.exploration_techniques.Veritesting())
+  simulation = project.factory.simgr(initial_state)
+  # Set simulation technique
+  simulation.use_technique(angr.exploration_techniques.Veritesting())
 
 
-def is_successful(state):
-stdout_output = state.posix.dumps(sys.stdout.fileno())
+  def is_successful(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
 
-return 'Good Job.'.encode() in stdout_output  # :boolean
+    return 'Good Job.'.encode() in stdout_output  # :boolean
 
-def should_abort(state):
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return 'Try again.'.encode() in stdout_output  # :boolean
+  def should_abort(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Try again.'.encode() in stdout_output  # :boolean
 
-simulation.explore(find=is_successful, avoid=should_abort)
+  simulation.explore(find=is_successful, avoid=should_abort)
 
-if simulation.found:
-solution_state = simulation.found[0]
-print(solution_state.posix.dumps(sys.stdin.fileno()))
-else:
-raise Exception('Could not find the solution')
+  if simulation.found:
+    solution_state = simulation.found[0]
+    print(solution_state.posix.dumps(sys.stdin.fileno()))
+  else:
+    raise Exception('Could not find the solution')
 
 
 if __name__ == '__main__':
-main(sys.argv)
+  main(sys.argv)
 ```
+
 ### Hooking/Bypassing eines Funktionsaufrufs
+
 ```python
 # This level performs the following computations:
 #
@@ -544,57 +562,59 @@ import claripy
 import sys
 
 def main(argv):
-path_to_binary = argv[1]
-project = angr.Project(path_to_binary)
+  path_to_binary = argv[1]
+  project = angr.Project(path_to_binary)
 
-initial_state = project.factory.entry_state()
+  initial_state = project.factory.entry_state()
 
-# Hook the address of the call to hook indicating th length of the instruction (of the call)
-check_equals_called_address = 0x80486b8
-instruction_to_skip_length = 5
-@project.hook(check_equals_called_address, length=instruction_to_skip_length)
-def skip_check_equals_(state):
-#Load the input of the function reading direcly the memory
-user_input_buffer_address = 0x804a054
-user_input_buffer_length = 16
-user_input_string = state.memory.load(
-user_input_buffer_address,
-user_input_buffer_length
-)
+  # Hook the address of the call to hook indicating th length of the instruction (of the call)
+  check_equals_called_address = 0x80486b8
+  instruction_to_skip_length = 5
+  @project.hook(check_equals_called_address, length=instruction_to_skip_length)
+  def skip_check_equals_(state):
+    #Load the input of the function reading direcly the memory
+    user_input_buffer_address = 0x804a054
+    user_input_buffer_length = 16
+    user_input_string = state.memory.load(
+      user_input_buffer_address,
+      user_input_buffer_length
+    )
 
-# Create a symbolic If expression that checks the string loaded from memory
-# return True (1) if not returns False (0) in eax
-check_against_string = 'XKSPZSJKJYQCQXZV'.encode() # :string
+    # Create a symbolic If expression that checks the string loaded from memory
+    # return True (1) if not returns False (0) in eax
+    check_against_string = 'XKSPZSJKJYQCQXZV'.encode() # :string
 
-state.regs.eax = claripy.If(
-user_input_string == check_against_string,
-claripy.BVV(1, 32),
-claripy.BVV(0, 32)
-)
+    state.regs.eax = claripy.If(
+      user_input_string == check_against_string,
+      claripy.BVV(1, 32),
+      claripy.BVV(0, 32)
+    )
 
-simulation = project.factory.simgr(initial_state)
+  simulation = project.factory.simgr(initial_state)
 
-def is_successful(state):
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return 'Good Job.'.encode() in stdout_output
+  def is_successful(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Good Job.'.encode() in stdout_output
 
-def should_abort(state):
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return 'Try again.'.encode() in stdout_output
+  def should_abort(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Try again.'.encode() in stdout_output
 
-simulation.explore(find=is_successful, avoid=should_abort)
+  simulation.explore(find=is_successful, avoid=should_abort)
 
-if simulation.found:
-solution_state = simulation.found[0]
-solution = solution_state.posix.dumps(sys.stdin.fileno()).decode()
-print(solution)
-else:
-raise Exception('Could not find the solution')
+  if simulation.found:
+    solution_state = simulation.found[0]
+    solution = solution_state.posix.dumps(sys.stdin.fileno()).decode()
+    print(solution)
+  else:
+    raise Exception('Could not find the solution')
 
 if __name__ == '__main__':
-main(sys.argv)
+  main(sys.argv)
 ```
+
 ### Hooking einer Funktion / Simprocedure
+
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -603,144 +623,185 @@ import claripy
 import sys
 
 def main(argv):
-path_to_binary = argv[1]
-project = angr.Project(path_to_binary)
+  path_to_binary = argv[1]
+  project = angr.Project(path_to_binary)
 
-initial_state = project.factory.entry_state()
+  initial_state = project.factory.entry_state()
 
-# Define a class and a tun method to hook completelly a function
-class ReplacementCheckEquals(angr.SimProcedure):
-# This C code:
-#
-# int add_if_positive(int a, int b) {
-#   if (a >= 0 && b >= 0) return a + b;
-#   else return 0;
-# }
-#
-# could be simulated with python:
-#
-# class ReplacementAddIfPositive(angr.SimProcedure):
-#   def run(self, a, b):
-#     if a >= 0 and b >=0:
-#       return a + b
-#     else:
-#       return 0
-#
-# run(...) receives the params of the hooked function
-def run(self, to_check, length):
-user_input_buffer_address = to_check
-user_input_buffer_length = length
+  # Define a class and a tun method to hook completelly a function
+  class ReplacementCheckEquals(angr.SimProcedure):
+    # This C code:
+    #
+    # int add_if_positive(int a, int b) {
+    #   if (a >= 0 && b >= 0) return a + b;
+    #   else return 0;
+    # }
+    #
+    # could be simulated with python:
+    #
+    # class ReplacementAddIfPositive(angr.SimProcedure):
+    #   def run(self, a, b):
+    #     if a >= 0 and b >=0:
+    #       return a + b
+    #     else:
+    #       return 0
+    #
+    # run(...) receives the params of the hooked function
+    def run(self, to_check, length):
+      user_input_buffer_address = to_check
+      user_input_buffer_length = length
 
-# Read the data from the memory address given to the function
-user_input_string = self.state.memory.load(
-user_input_buffer_address,
-user_input_buffer_length
-)
+      # Read the data from the memory address given to the function
+      user_input_string = self.state.memory.load(
+        user_input_buffer_address,
+        user_input_buffer_length
+      )
 
-check_against_string = 'WQNDNKKWAWOLXBAC'.encode()
+      check_against_string = 'WQNDNKKWAWOLXBAC'.encode()
 
-# Return 1 if equals to the string, 0 otherways
-return claripy.If(
-user_input_string == check_against_string,
-claripy.BVV(1, 32),
-claripy.BVV(0, 32)
-)
+      # Return 1 if equals to the string, 0 otherways
+      return claripy.If(
+        user_input_string == check_against_string,
+        claripy.BVV(1, 32),
+        claripy.BVV(0, 32)
+      )
 
 
-# Hook the check_equals symbol. Angr automatically looks up the address
-# associated with the symbol. Alternatively, you can use 'hook' instead
-# of 'hook_symbol' and specify the address of the function. To find the
-# correct symbol, disassemble the binary.
-# (!)
-check_equals_symbol = 'check_equals_WQNDNKKWAWOLXBAC' # :string
-project.hook_symbol(check_equals_symbol, ReplacementCheckEquals())
+  # Hook the check_equals symbol. Angr automatically looks up the address
+  # associated with the symbol. Alternatively, you can use 'hook' instead
+  # of 'hook_symbol' and specify the address of the function. To find the
+  # correct symbol, disassemble the binary.
+  # (!)
+  check_equals_symbol = 'check_equals_WQNDNKKWAWOLXBAC' # :string
+  project.hook_symbol(check_equals_symbol, ReplacementCheckEquals())
 
-simulation = project.factory.simgr(initial_state)
+  simulation = project.factory.simgr(initial_state)
 
-def is_successful(state):
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return 'Good Job.'.encode() in stdout_output
+  def is_successful(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Good Job.'.encode() in stdout_output
 
-def should_abort(state):
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return 'Try again.'.encode() in stdout_output
+  def should_abort(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Try again.'.encode() in stdout_output
 
-simulation.explore(find=is_successful, avoid=should_abort)
+  simulation.explore(find=is_successful, avoid=should_abort)
 
-if simulation.found:
-solution_state = simulation.found[0]
+  if simulation.found:
+    solution_state = simulation.found[0]
 
-solution = solution_state.posix.dumps(sys.stdin.fileno()).decode()
-print(solution)
-else:
-raise Exception('Could not find the solution')
+    solution = solution_state.posix.dumps(sys.stdin.fileno()).decode()
+    print(solution)
+  else:
+    raise Exception('Could not find the solution')
 
 if __name__ == '__main__':
-main(sys.argv)
+  main(sys.argv)
 ```
-### scanf mit mehreren Parametern simulieren
+
+### `scanf` mit mehreren Parametern simulieren
+
+Bei einem nicht unterstützten oder ungenauen Modell für `scanf("%u %u", ...)` kann ein formatspezifischer Hook beide Ausgaben schreiben. Gib die Anzahl erfolgreicher Konvertierungen zurück, damit der Aufrufer ein konsistentes Ergebnis erhält. Dies umgeht das Parsen und modelliert weder EOF noch fehlerhafte Eingaben.<sup>[[2]](#references)[[3]](#references)</sup>
+
 ```python
-# This time, the solution involves simply replacing scanf with our own version,
-# since Angr does not support requesting multiple parameters with scanf.
+# Replace this one known scanf format, not scanf in general.
 
 import angr
 import claripy
 import sys
 
 def main(argv):
-path_to_binary = argv[1]
-project = angr.Project(path_to_binary)
+  path_to_binary = argv[1]
+  project = angr.Project(path_to_binary)
 
-initial_state = project.factory.entry_state()
+  initial_state = project.factory.entry_state()
 
-class ReplacementScanf(angr.SimProcedure):
-# The code uses: 'scanf("%u %u", ...)'
-def run(self, format_string, param0, param1):
-scanf0 = claripy.BVS('scanf0', 32)
-scanf1 = claripy.BVS('scanf1', 32)
+  class ReplacementScanf(angr.SimProcedure):
+    # The code uses: 'scanf("%u %u", ...)'
+    def run(self, format_string, param0, param1):
+      scanf0 = claripy.BVS('scanf0', 32)
+      scanf1 = claripy.BVS('scanf1', 32)
 
-# Get the addresses from the params and store the BVS in memory
-scanf0_address = param0
-self.state.memory.store(scanf0_address, scanf0, endness=project.arch.memory_endness)
-scanf1_address = param1
-self.state.memory.store(scanf1_address, scanf1, endness=project.arch.memory_endness)
+      # Get the addresses from the params and store the BVS in memory
+      scanf0_address = param0
+      self.state.memory.store(scanf0_address, scanf0, endness=project.arch.memory_endness)
+      scanf1_address = param1
+      self.state.memory.store(scanf1_address, scanf1, endness=project.arch.memory_endness)
 
-# Now, we want to 'set aside' references to our symbolic values in the
-# globals plugin included by default with a state. You will need to
-# store multiple bitvectors. You can either use a list, tuple, or multiple
-# keys to reference the different bitvectors.
-self.state.globals['solutions'] = (scanf0, scanf1)
+      # Now, we want to 'set aside' references to our symbolic values in the
+      # globals plugin included by default with a state. You will need to
+      # store multiple bitvectors. You can either use a list, tuple, or multiple
+      # keys to reference the different bitvectors.
+      self.state.globals['solutions'] = (scanf0, scanf1)
+      return 2
 
-scanf_symbol = '__isoc99_scanf'
-project.hook_symbol(scanf_symbol, ReplacementScanf())
+  scanf_symbol = '__isoc99_scanf'
+  project.hook_symbol(scanf_symbol, ReplacementScanf())
 
-simulation = project.factory.simgr(initial_state)
+  simulation = project.factory.simgr(initial_state)
 
-def is_successful(state):
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return 'Good Job.'.encode() in stdout_output
+  def is_successful(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Good Job.'.encode() in stdout_output
 
-def should_abort(state):
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return 'Try again.'.encode() in stdout_output
+  def should_abort(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Try again.'.encode() in stdout_output
 
-simulation.explore(find=is_successful, avoid=should_abort)
+  simulation.explore(find=is_successful, avoid=should_abort)
 
-if simulation.found:
-solution_state = simulation.found[0]
+  if simulation.found:
+    solution_state = simulation.found[0]
 
-# Grab whatever you set aside in the globals dict.
-stored_solutions = solution_state.globals['solutions']
-solution = ' '.join(map(str, map(solution_state.solver.eval, stored_solutions)))
+    # Grab whatever you set aside in the globals dict.
+    stored_solutions = solution_state.globals['solutions']
+    solution = ' '.join(map(str, map(solution_state.solver.eval, stored_solutions)))
 
-print(solution)
-else:
-raise Exception('Could not find the solution')
+    print(solution)
+  else:
+    raise Exception('Could not find the solution')
 
 if __name__ == '__main__':
-main(sys.argv)
+  main(sys.argv)
 ```
+
+### Eingabegesteuerte Instruction Pointer finden
+
+Wenn Sie eine Binärdatei mit einem eingabegesteuerten indirekten Sprung oder einer überschriebenen Rücksprungadresse prüfen, speichern Sie Zustände, deren Instruction Pointer viele mögliche Werte hat. Ein `unconstrained`-Zustand ist ein Hinweis, aber kein Beweis für Ausnutzbarkeit: angr kann unconstrained-Werte auch durch nicht initialisierten Speicher oder eine ungenaue Umgebung erzeugen. Prüfen Sie, ob die *Eingabebytes* einen Sprung zu einer ausgewählten ausführbaren Adresse bewirken können, und spielen Sie die resultierenden Bytes anschließend im echten Programm erneut ab.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
+
+Das Beispiel setzt eine Binärdatei mit einem bekannten `win`-Symbol und Eingaben über stdin voraus. Legen Sie die Eingabelänge auf die Anzahl der Bytes fest, die das Programm lesen kann. Bei PIE lösen Sie die Adresse vor dem erneuten Abspielen mit der korrekten Laufzeitbasis auf; der Solver allein umgeht weder ASLR noch andere Schutzmaßnahmen.<sup>[[6]](#references)[[7]](#references)</sup>
+
+<details>
+<summary>Symbolische stdin-Eingabe auf Kontrollflussumleitung prüfen</summary>
+
+```python
+import angr
+import claripy
+
+project = angr.Project("./target", auto_load_libs=False)
+win = project.loader.main_object.get_symbol("win").rebased_addr
+input_bytes = claripy.BVS("input", 128 * 8)
+stdin = angr.SimFileStream(name="stdin", content=input_bytes, has_end=True)
+state = project.factory.entry_state(stdin=stdin)
+simgr = project.factory.simgr(state, save_unconstrained=True)
+
+payload = None
+while simgr.active and payload is None:
+    simgr.step()
+    for candidate in simgr.unconstrained:
+        if candidate.satisfiable(extra_constraints=[candidate.regs.ip == win]):
+            candidate.add_constraints(candidate.regs.ip == win)
+            payload = candidate.solver.eval(input_bytes, cast_to=bytes)
+            break
+    simgr.drop(stash="unconstrained")
+
+print(repr(payload) if payload is not None else "No satisfiable jump found")
+```
+
+</details>
+
 ### Statische Binaries
+
 ```python
 # This challenge is the exact same as the first challenge, except that it was
 # compiled as a static binary. Normally, Angr automatically replaces standard
@@ -774,40 +835,49 @@ import angr
 import sys
 
 def main(argv):
-path_to_binary = argv[1]
-project = angr.Project(path_to_binary)
+  path_to_binary = argv[1]
+  project = angr.Project(path_to_binary)
 
-initial_state = project.factory.entry_state()
+  initial_state = project.factory.entry_state()
 
-#Find the addresses were the lib functions are loaded in the binary
-#For example you could find: call   0x804ed80 <__isoc99_scanf>
-project.hook(0x804ed40, angr.SIM_PROCEDURES['libc']['printf']())
-project.hook(0x804ed80, angr.SIM_PROCEDURES['libc']['scanf']())
-project.hook(0x804f350, angr.SIM_PROCEDURES['libc']['puts']())
-project.hook(0x8048d10, angr.SIM_PROCEDURES['glibc']['__libc_start_main']())
+  #Find the addresses were the lib functions are loaded in the binary
+  #For example you could find: call   0x804ed80 <__isoc99_scanf>
+  project.hook(0x804ed40, angr.SIM_PROCEDURES['libc']['printf']())
+  project.hook(0x804ed80, angr.SIM_PROCEDURES['libc']['scanf']())
+  project.hook(0x804f350, angr.SIM_PROCEDURES['libc']['puts']())
+  project.hook(0x8048d10, angr.SIM_PROCEDURES['glibc']['__libc_start_main']())
 
-simulation = project.factory.simgr(initial_state)
+  simulation = project.factory.simgr(initial_state)
 
-def is_successful(state):
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return 'Good Job.'.encode() in stdout_output  # :boolean
+  def is_successful(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Good Job.'.encode() in stdout_output  # :boolean
 
-def should_abort(state):
-stdout_output = state.posix.dumps(sys.stdout.fileno())
-return 'Try again.'.encode() in stdout_output  # :boolean
+  def should_abort(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Try again.'.encode() in stdout_output  # :boolean
 
-simulation.explore(find=is_successful, avoid=should_abort)
+  simulation.explore(find=is_successful, avoid=should_abort)
 
-if simulation.found:
-solution_state = simulation.found[0]
-print(solution_state.posix.dumps(sys.stdin.fileno()).decode())
-else:
-raise Exception('Could not find the solution')
+  if simulation.found:
+    solution_state = simulation.found[0]
+    print(solution_state.posix.dumps(sys.stdin.fileno()).decode())
+  else:
+    raise Exception('Could not find the solution')
 
 if __name__ == '__main__':
-main(sys.argv)
+  main(sys.argv)
 ```
+
+
+
 ## References
 
 - [1] [jakespringer/angr_ctf - GitHub-Repository](https://github.com/jakespringer/angr_ctf)
+- [2] [angr scanf-Formatparser-Quellcode](https://github.com/angr/angr/blob/master/angr/procedures/stubs/format_parser.py)
+- [3] [angr: Fallstricke bei der Verwendung von angr](https://docs.angr.io/en/stable/advanced-topics/gotchas.html)
+- [4] [angr: Simulationsmanager](https://docs.angr.io/en/latest/core-concepts/pathgroups.html)
+- [5] [angr: Simulation und Instrumentierung](https://docs.angr.io/en/latest/core-concepts/simulation.html)
+- [6] [angr-examples: InsomniHack-AEG-Solver](https://github.com/angr/angr-examples/blob/master/examples/insomnihack_aeg/solve.py)
+- [7] [angr-SimOS-stdin-Behandlung](https://github.com/angr/angr/blob/master/angr/simos/simos.py)
 {{#include ../../../banners/hacktricks-training.md}}
