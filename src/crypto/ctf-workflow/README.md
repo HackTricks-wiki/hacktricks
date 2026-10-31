@@ -201,6 +201,8 @@ Suggested Python packages:
 pip install pycryptodome gmpy2 sympy pwntools z3-solver
 ```
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## References
 
 - [1] [CrackStation](https://crackstation.net/)
@@ -231,5 +233,3 @@ pip install pycryptodome gmpy2 sympy pwntools z3-solver
 - [26] [SageMath](https://www.sagemath.org/)
 - [27] [Z3](https://github.com/Z3Prover/z3)
 - [28] [Eye Research – Breaking encryption schemes the lazy way](https://labs.eye.security/breaking-encryption-schemes-the-lazy-way/)
-
-{{#include ../../banners/hacktricks-training.md}}
