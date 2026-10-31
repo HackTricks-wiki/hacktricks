@@ -2,9 +2,10 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Sehemu ya cheatsheet hii inategemea [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
+Sehemu ya karatasi hii ya muhtasari imejikita kwenye [nyaraka za angr](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
 
-## Installation
+## Usakinishaji
+
 ```bash
 sudo apt-get install python3-dev libffi-dev build-essential
 python3 -m pip install --user virtualenv
@@ -12,7 +13,9 @@ python3 -m venv ang
 source ang/bin/activate
 pip install angr
 ```
+
 ## Vitendo vya Msingi
+
 ```python
 import angr
 import monkeyhex # this will format numerical results in hexadecimal
@@ -30,9 +33,11 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-## Taarifa za objekti iliyopakiwa na kuu
 
-### Data Iliyopakiwa
+## Taarifa kuhusu object iliyopakiwa na object kuu
+
+### Data iliyopakiwa
+
 ```python
 #LOADED DATA
 proj.loader #<Loaded true, maps [0x400000:0x5004000]>
@@ -42,20 +47,22 @@ proj.loader.all_objects #All loaded
 proj.loader.shared_objects #Loaded binaries
 """
 OrderedDict([('true', <ELF Object true, maps [0x400000:0x40a377]>),
-('libc.so.6',
-<ELF Object libc-2.31.so, maps [0x500000:0x6c4507]>),
-('ld-linux-x86-64.so.2',
-<ELF Object ld-2.31.so, maps [0x700000:0x72c177]>),
-('extern-address space',
-<ExternObject Object cle##externs, maps [0x800000:0x87ffff]>),
-('cle##tls',
-<ELFTLSObjectV2 Object cle##tls, maps [0x900000:0x91500f]>)])
+             ('libc.so.6',
+              <ELF Object libc-2.31.so, maps [0x500000:0x6c4507]>),
+             ('ld-linux-x86-64.so.2',
+              <ELF Object ld-2.31.so, maps [0x700000:0x72c177]>),
+             ('extern-address space',
+              <ExternObject Object cle##externs, maps [0x800000:0x87ffff]>),
+             ('cle##tls',
+              <ELFTLSObjectV2 Object cle##tls, maps [0x900000:0x91500f]>)])
 """
 proj.loader.all_elf_objects #Get all ELF objects loaded (Linux)
 proj.loader.all_pe_objects #Get all binaries loaded (Windows)
 proj.loader.find_object_containing(0x400000)#Get object loaded in an address "<ELF Object fauxware, maps [0x400000:0x60105f]>"
 ```
+
 ### Kitu Kikuu
+
 ```python
 #Main Object (main binary loaded)
 obj = proj.loader.main_object #<ELF Object true, maps [0x400000:0x60721f]>
@@ -69,7 +76,9 @@ obj.find_section_containing(obj.entry) #Get section by address
 obj.plt['strcmp'] #Get plt address of a funcion (0x400550)
 obj.reverse_plt[0x400550] #Get function from plt address ('strcmp')
 ```
-### Alama na Relocations
+
+### Alama na Uhamishaji
+
 ```python
 strcmp = proj.loader.find_symbol('strcmp') #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 
@@ -86,7 +95,9 @@ main_strcmp.is_export #False
 main_strcmp.is_import #True
 main_strcmp.resolvedby #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 ```
+
 ### Vitalu
+
 ```python
 #Blocks
 block = proj.factory.block(proj.entry) #Get the block of the entrypoint fo the binary
@@ -94,9 +105,11 @@ block.pp() #Print disassembly of the block
 block.instructions #"0xb" Get number of instructions
 block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x401675, 0x401676, 0x401679, 0x40167d, 0x40167e, 0x40167f, 0x401686, 0x40168d, 0x401694]"
 ```
-## Uchambuzi wa Dynamic
 
-### Simulation Manager, States
+## Uchambuzi wa Kiedy
+
+### Meneja wa Uigaji, Hali
+
 ```python
 #Live States
 #This is useful to modify content in a live analysis
@@ -119,13 +132,15 @@ simgr = proj.factory.simulation_manager(state) #Start
 simgr.step() #Execute one step
 simgr.active[0].regs.rip #Get RIP from the last state
 ```
+
 ### Kuita functions
 
-- Unaweza kupitisha orodha ya arguments kupitia `args` na dictionary ya environment variables kupitia `env` ndani ya `entry_state` na `full_init_state`. Thamani katika miundo hii zinaweza kuwa strings au bitvectors, na zitaserializwa kwenye state kama arguments na environment ya execution inayo-simulate. `args` ya default ni orodha tupu, kwa hiyo ikiwa program unayoichanganua inatarajia kupata angalau `argv[0]`, unapaswa kuiweka kila wakati!
-- Ikiwa ungependa `argc` iwe symbolic, unaweza kupitisha bitvector ya symbolic kama `argc` kwa constructors za `entry_state` na `full_init_state`. Kuwa mwangalifu, hata hivyo: ukifanya hivi, unapaswa pia kuongeza constraint kwenye state inayotokana kwamba thamani yako ya argc haiwezi kuwa kubwa kuliko idadi ya args ulizopitisha kwenye `args`.
-- Ili kutumia call state, unapaswa kuiita kwa `.call_state(addr, arg1, arg2, ...)`, ambapo `addr` ni address ya function unayotaka kuita na `argN` ni argument ya N ya function hiyo, ikiwa ni python integer, string, au array, au bitvector. Ikiwa unataka memory itengewe na upitishe pointer kwa object, unapaswa kuiweka ndani ya PointerWrapper, yaani `angr.PointerWrapper("point to me!")`. Matokeo ya API hii yanaweza kuwa yasiyotabirika kwa kiasi fulani, lakini tunaifanyia kazi.
+- Unaweza kupitisha orodha ya argument kupitia `args` na dictionary ya environment variables kupitia `env` kwenda kwenye `entry_state` na `full_init_state`. Thamani katika miundo hii zinaweza kuwa strings au bitvectors, na zitaserializwa kwenye state kama arguments na environment ya execution inayoigwa. `args` ya default ni orodha tupu, kwa hivyo ikiwa programu unayochanganua inatarajia kupata angalau `argv[0]`, unapaswa kutoa hiyo kila wakati!
+- Ikiwa ungependa `argc` iwe symbolic, unaweza kupitisha bitvector ya symbolic kama `argc` kwa constructors za `entry_state` na `full_init_state`. Hata hivyo, kuwa mwangalifu: ukifanya hivi, unapaswa pia kuongeza constraint kwenye state inayotokana ili thamani yako ya argc isiwe kubwa kuliko idadi ya args ulizopitisha kwenye `args`.
+- Ili kutumia call state, unapaswa kuiita kwa `.call_state(addr, arg1, arg2, ...)`, ambapo `addr` ni address ya function unayotaka kuita na `argN` ni argument ya N ya function hiyo, ikiwa integer ya python, string, au array, au bitvector. Ikiwa ungependa memory igawiwe na upitishe pointer inayoelekeza kwenye object, unapaswa kuifunga ndani ya PointerWrapper, yaani `angr.PointerWrapper("point to me!")`. Matokeo ya API hii yanaweza kutotabirika kidogo, lakini tunalifanyia kazi.
 
 ### BitVectors
+
 ```python
 #BitVectors
 state = proj.factory.entry_state()
@@ -134,7 +149,9 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-### Symbolic BitVectors na Constraints
+
+### BitVectors za Kiishara na Vikwazo
+
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -161,14 +178,16 @@ state.satisfiable() #False
 
 #Solver solutions
 solver.eval(expression) #one possible solution
-solver.eval_one(expression) #solution to the given expression, or throw an error if more than one solution is possible.
+solver.eval_one(expression) # One solution, or raise an error if more than one solution is possible.
 solver.eval_upto(expression, n) #n solutions to the given expression, returning fewer than n if fewer than n are possible.
-solver.eval_atleast(expression, n) #n solutions to the given expression, throwing an error if fewer than n are possible.
-solver.eval_exact(expression, n) #n solutions to the given expression, throwing an error if fewer or more than are possible.
+solver.eval_atleast(expression, n) # n solutions, raising an error if fewer than n are possible.
+solver.eval_exact(expression, n) # n solutions, raising an error unless exactly n are possible.
 solver.min(expression) #minimum possible solution to the given expression.
 solver.max(expression) #maximum possible solution to the given expression.
 ```
+
 ### Hooking
+
 ```python
 >>> stub_func = angr.SIM_PROCEDURES['stubs']['ReturnUnconstrained'] # this is a CLASS
 >>> proj.hook(0x10000, stub_func())  # hook with an instance of the class
@@ -186,12 +205,16 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-Zaidi ya hayo, unaweza kutumia `proj.hook_symbol(name, hook)`, ukitoa jina la symbol kama argument ya kwanza, ili kuweka hook kwenye address ambako symbol hiyo iko<sup>[[1]](#references)</sup>
 
-## Mifano
+Zaidi ya hayo, unaweza kutumia `proj.hook_symbol(name, hook)`, ukiweka jina la symbol kama argument ya kwanza, ili kuweka hook kwenye anwani ilipo symbol<sup>[[1]](#references)</sup>
 
-## Marejeleo
+## Examples
 
-- [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
+Kwa mifano ya vitendo ya kutafuta njia, modeling ya input, function hooks, na kukagua instruction pointers zinazodhibitiwa na input, angalia [angr examples](angr-examples.md).
 
+
+
+## References
+
+- [1] [nyaraka za angr](https://docs.angr.io/_/downloads/en/stable/pdf/)
 {{#include ../../../banners/hacktricks-training.md}}
