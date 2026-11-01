@@ -207,6 +207,22 @@ cheat-engine.md
 
 [**Decompiler Explorer**](https://dogbolt.org/) is a web front-end to a number of decompilers. This web service lets you compare the output of different decompilers on small executables.
 
+### Godot PCK decryption and project recovery
+
+For a distributed Godot game, first locate its PCK in a standalone `.pck`, an appended or embedded executable pack, or an APK's `assets` directory. [gore](https://github.com/figurophobia/gore) can inspect the pack, recover its encryption key, and extract files; full script/resource reconstruction needs GDRE Tools (`gore setup` installs it, or use `--gdre`). The tool targets Godot 4.x PCK formats v2–v4; check its format support before treating a failed recovery as evidence that the pack is unencrypted.<sup>[[25]](#references)</sup>
+
+The key search is **not** an AES-256 keyspace attack. For encrypted directories, the pack exposes the MD5 of the plaintext, plaintext length, IV and AES-256-CFB ciphertext. `gore` tests 32-byte windows of the game executable or neighboring files as candidate keys. It rejects candidates whose first decrypted table block lacks a plausible path-length/path prefix, then decrypts the complete table and checks its MD5. It searches initialized PE/ELF data sections first and falls back to a whole-file scan; `--scan` adds other candidate files. If no embedded key is found, `--wordlist` tries the engine's password-derived key representation as well as zero-padded literal passwords and 64-hex-character keys. Validate recovered output rather than assuming an oracle hit alone proves that every asset decrypted correctly.<sup>[[25]](#references)[[26]](#references)[[27]](#references)[[28]](#references)</sup>
+
+With the game artifact available locally, choose the stage needed for the analysis. `recover` invokes GDRE to reconstruct an openable project, while `extract` only unpacks the raw files. `key` prints a candidate key for use with another tool.<sup>[[25]](#references)[[28]](#references)</sup>
+
+```bash
+gore info game.exe
+gore key game.pck --scan game.exe
+gore extract game.pck -o ./raw
+gore setup
+gore recover game.exe -o ./game_project
+```
+
 ## Evidence-backed native investigation with REA
 
 **REA** exposes Hopper, Ghidra and IDA analysis through CLI and MCP. It requires Node.js 22.x (at least 22.19), 24.x (at least 24.11), or 26+, plus npm. Configure an existing native provider first; check `rea providers --json` and select a provider explicitly when more than one supports the target. Use an observed function name or address from the inventory in place of `0x1000` below.<sup>[[16]](#references)[[18]](#references)</sup>
@@ -742,5 +758,9 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 - [22] [IDA bridge server implementation](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge/blob/main/ID_Server.py)
 - [23] [Ghidra bridge server implementation](https://github.com/oscarsantanaarias/IDA-Ghidra-bridge/blob/main/Ghidra_Server.py)
 - [24] [Oracle - InetSocketAddress(int) binds to the wildcard address](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/net/InetSocketAddress.html)
+- [25] [gore: Godot reverse engineering toolkit](https://github.com/figurophobia/gore)
+- [26] [gore key-recovery implementation](https://github.com/figurophobia/gore/blob/master/src/keyfind.rs)
+- [27] [gore encrypted-blob format](https://github.com/figurophobia/gore/blob/master/src/crypto.rs)
+- [28] [gore command and recovery implementation](https://github.com/figurophobia/gore/blob/master/src/main.rs)
 
 {{#include ../../banners/hacktricks-training.md}}
