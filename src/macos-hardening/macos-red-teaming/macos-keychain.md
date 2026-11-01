@@ -7,18 +7,21 @@
 - The **User Keychain** (`~/Library/Keychains/login.keychain-db`), which is used to store **user-specific credentials** like application passwords, internet passwords, user-generated certificates, network passwords, and user-generated public/private keys.
 - The **System Keychain** (`/Library/Keychains/System.keychain`), which stores **system-wide credentials** such as WiFi passwords, system root certificates, system private keys, and system application passwords.<sup>[[1]](#references)</sup>
   - It's possible to find other components like certificates in `/System/Library/Keychains/*`
+- The per-user **data protection keychain** appears as **Local Items** or **iCloud** in Keychain Access. It is separate from `login.keychain-db` and includes both local-only and synchronizable items; `security` is primarily a file-based-keychain tool, so a short `dump-keychain` result does not rule out credentials here.<sup>[[5]](#references)</sup>
 - In **iOS** there is only one **Keychain** located in `/private/var/Keychains/`. This folder also contains databases for the `TrustStore`, certificates authorities (`caissuercache`) and OSCP entries (`ocspache`).
   - Apps will be restricted in the keychain only to their private area based on their application identifier.
 
 ### Password Keychain Access
 
-These files, while they do not have inherent protection and can be **downloaded**, are encrypted and require the **user's plaintext password to be decrypted**. A tool like [**Chainbreaker**](https://github.com/n0fate/chainbreaker) could be used for decryption.<sup>[[1]](#references)</sup>
+A copied **file-based** keychain is not plaintext. Offline decryption of its protected items needs the keychain password or equivalent key material; [**Chainbreaker**](https://github.com/n0fate/chainbreaker) targets this format.<sup>[[1]](#references)</sup> This is different from a live read in an unlocked user session, where item access controls may allow the read or trigger a prompt without requiring the login password again. The data protection keychain has a different protection and access-group model.<sup>[[5]](#references)</sup>
 
 ## Keychain Entries Protections
 
-### ACLs
+### File-based keychain ACLs
 
-Each entry in the keychain is governed by **Access Control Lists (ACLs)** which dictate who can perform various actions on the keychain entry, including:<sup>[[1]](#references)[[2]](#references)</sup>
+The `SecAccess` ACL and partition-list rules below describe **file-based** keychains. Data protection keychain items instead use code-signing access groups and optional `SecAccessControl` conditions; do not infer their accessibility from a file-based ACL dump.<sup>[[5]](#references)</sup>
+
+Each entry in a file-based keychain is governed by **Access Control Lists (ACLs)** which dictate who can perform various actions on the keychain entry, including:<sup>[[1]](#references)[[2]](#references)</sup>
 
 - **`kSecACLAuthorizationExportClear`**: Allows the holder to get the clear text of the secret.
 - **`kSecACLAuthorizationExportWrapped`**: Allows the holder to get the clear text encrypted with another provided password.
@@ -36,7 +39,7 @@ Also the entry might contain the key **`kSecACLAuthorizationPartitionID`,** whic
 - If the **apple** is specified, then the app needs to be **signed** by **Apple**.
 - If the **cdhash** is indicated, then **app** must have the specific **cdhash**.
 
-### Creating a Keychain Entry
+### Creating a file-based keychain entry
 
 When a **new** **entry** is created using **`Keychain Access.app`**, the following rules apply:<sup>[[1]](#references)</sup>
 
@@ -91,7 +94,7 @@ List and get **info** about each keychain entry using the **Security Framework**
 
 - The API **`SecItemCopyMatching`** gives info about each entry and there are some attributes you can set when using it:
   - **`kSecReturnData`**: If true, it will try to decrypt the data (set to false to avoid potential pop-ups)
-  - **`kSecReturnRef`**: Get also reference to keychain item (set to true in case later you see you can decrypt without pop-up)
+  - **`kSecReturnRef`**: Get an object reference for a key, certificate, or identity; password items do not have this object representation. Use `kSecReturnPersistentRef` to identify a password for a later, targeted query.<sup>[[6]](#references)</sup>
   - **`kSecReturnAttributes`**: Get metadata about entries
   - **`kSecMatchLimit`**: How many results to return
   - **`kSecClass`**: What kind of keychain entry
@@ -132,7 +135,35 @@ And these are the **requirements** to be able to **export a secret without a pro
 - **General**: It's to store **metadata** (so it's NOT ENCRYPTED)<sup>[[1]](#references)</sup>
   - Microsoft was storing in plain text all the refresh tokens to access sensitive endpoint.<sup>[[1]](#references)</sup>
 
-{{#include ../../banners/hacktricks-training.md}}
+### Data protection keychain: enumerate, then query one item
+
+Run `SecItemCopyMatching` from a **signed app in the target user's login context** with `kSecUseDataProtectionKeychain: true`; do not assume `security dump-keychain` or a default SecItem query searched this store. The caller sees only its authorized access groups.<sup>[[5]](#references)</sup>
+
+If testing code runs inside another process, its data protection keychain access follows that host executable's entitlements. Inspect the actual signed entitlements with `codesign -d --entitlements - /path/to/Target.app` and see [macOS code-signing entitlements](../macos-security-and-privilege-escalation/macos-security-protections/macos-dangerous-entitlements.md) for related checks.<sup>[[7]](#references)</sup>
+
+First request **attributes only** for one item class. `kSecAttrSynchronizableAny` includes both local and iCloud-synchronizable matches; omitting it excludes synchronizable items.<sup>[[8]](#references)</sup> `kSecUseAuthenticationUISkip` avoids authentication UI during broad enumeration, at the cost of skipping protected matches.<sup>[[9]](#references)</sup> Repeat with `kSecClassInternetPassword` if needed.
+
+```swift
+import Security
+let query: [String: Any] = [
+    kSecClass as String: kSecClassGenericPassword,
+    kSecUseDataProtectionKeychain as String: true,
+    kSecAttrSynchronizable as String: kSecAttrSynchronizableAny,
+    kSecMatchLimit as String: kSecMatchLimitAll,
+    kSecReturnAttributes as String: true,
+    kSecUseAuthenticationUI as String: kSecUseAuthenticationUISkip
+]
+var result: CFTypeRef?
+let status = SecItemCopyMatching(query as CFDictionary, &result)
+print(status)
+if status == errSecSuccess, let items = result as? [[String: Any]] {
+    for item in items { print(item) }
+}
+```
+
+For a permitted secret read, build a **new**, narrow query for the selected item (for example, class, service and account), set `kSecReturnData: true` and `kSecMatchLimit: kSecMatchLimitOne`, and expect item-specific authentication or an error. Do **not** combine `kSecReturnData` with `kSecMatchLimitAll` for password items.<sup>[[10]](#references)</sup> An `errSecItemNotFound` result can also reflect the wrong store, sync filter, or missing access-group entitlement rather than an absent credential.<sup>[[5]](#references)[[7]](#references)[[8]](#references)</sup>
+
+
 
 ## References
 
@@ -140,3 +171,10 @@ And these are the **requirements** to be able to **export a secret without a pro
 - [2] [Apple Developer — kSecACLAuthorizationExportClear](https://developer.apple.com/documentation/security/ksecaclauthorizationexportclear)
 - [3] [Kaspersky Securelist - A new version of the MacSync macOS stealer targets crypto enthusiasts and developers](https://securelist.com/macsync-new-version/121383/)
 - [4] [Apple security(1) man page mirror](https://keith.github.io/xcode-man-pages/security.1.html)
+- [5] [Apple TN3137 — On Mac keychain APIs and implementations](https://developer.apple.com/documentation/Technotes/tn3137-on-mac-keychains)
+- [6] [Apple Developer Forums — SecItem: Fundamentals](https://developer.apple.com/forums/thread/724023)
+- [7] [Apple Developer Forums — SecItem: Pitfalls and Best Practices](https://developer.apple.com/forums/thread/724013)
+- [8] [Apple Developer — kSecAttrSynchronizable](https://developer.apple.com/documentation/security/ksecattrsynchronizable)
+- [9] [Apple Developer — Accessing Keychain Items with Face ID or Touch ID](https://developer.apple.com/documentation/localauthentication/accessing-keychain-items-with-face-id-or-touch-id)
+- [10] [Apple Developer — SecItemCopyMatching](https://developer.apple.com/documentation/security/secitemcopymatching%28_%3A_%3A%29)
+{{#include ../../banners/hacktricks-training.md}}
