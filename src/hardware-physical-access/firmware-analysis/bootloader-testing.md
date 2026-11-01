@@ -1,10 +1,10 @@
-# Δοκιμές Bootloader
+# Δοκιμές bootloader
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Τα παρακάτω βήματα συνιστώνται για την τροποποίηση των διαμορφώσεων εκκίνησης συσκευών και τον έλεγχο bootloader όπως το U-Boot και οι bootloader κλάσης UEFI. Εστιάστε στην απόκτηση εκτέλεσης κώδικα σε πρώιμο στάδιο, στην αξιολόγηση των προστασιών υπογραφής/rollback και στην κατάχρηση διαδρομών recovery ή network boot.
+Τα παρακάτω βήματα συνιστώνται για την τροποποίηση των ρυθμίσεων εκκίνησης συσκευών και τη δοκιμή bootloader όπως οι U-Boot και UEFI-class loaders. Εστιάστε στην εκτέλεση κώδικα σε πρώιμο στάδιο, στην αξιολόγηση των προστασιών υπογραφής/rollback και στην κατάχρηση των διαδρομών recovery ή network-boot.
 
-Σχετικό: παράκαμψη secure boot του MediaTek μέσω patching του bl2_ext:
+Σχετικά: παράκαμψη secure boot σε MediaTek μέσω patching του bl2_ext:
 
 {{#ref}}
 android-mediatek-secure-boot-bl2_ext-bypass-el3.md
@@ -12,18 +12,18 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 
 ## Γρήγορες νίκες στο U-Boot και κατάχρηση του περιβάλλοντος
 
-1. Πρόσβαση στο κέλυφος του interpreter
-   - Κατά την εκκίνηση, πατήστε ένα γνωστό πλήκτρο διακοπής (συχνά οποιοδήποτε πλήκτρο, 0, space ή έναν ειδικό συνδυασμό πλήκτρων της πλακέτας) πριν εκτελεστεί το `bootcmd`, για να εμφανιστεί το prompt του U-Boot.<sup>[[1]](#references)</sup>
+1. Πρόσβαση στο interpreter shell
+   - Κατά την εκκίνηση, πατήστε ένα γνωστό break key (συχνά οποιοδήποτε πλήκτρο, 0, space ή μια ειδική ακολουθία για τη συγκεκριμένη πλακέτα) πριν εκτελεστεί το `bootcmd`, για να μεταβείτε στο prompt του U-Boot.<sup>[[1]](#references)</sup>
 
-2. Έλεγχος κατάστασης εκκίνησης και μεταβλητών
+2. Έλεγχος της κατάστασης εκκίνησης και των μεταβλητών
    - Χρήσιμες εντολές:
-     - `printenv` (εμφάνιση του περιβάλλοντος)
+     - `printenv` (εμφάνιση του environment)
      - `bdinfo` (πληροφορίες πλακέτας, διευθύνσεις μνήμης)
      - `help bootm; help booti; help bootz` (υποστηριζόμενες μέθοδοι εκκίνησης kernel)
      - `help ext4load; help fatload; help tftpboot` (διαθέσιμοι loaders)
 
-3. Τροποποίηση των ορισμάτων εκκίνησης για να αποκτήσετε root shell
-   - Προσθέστε το `init=/bin/sh`, ώστε ο kernel να ανοίξει ένα shell αντί να εκκινήσει το κανονικό init:
+3. Τροποποίηση των boot arguments για απόκτηση root shell
+   - Προσθέστε το `init=/bin/sh`, ώστε ο kernel να μεταβεί σε shell αντί για το κανονικό init:
      ```
      # printenv
      # setenv bootargs 'console=ttyS0,115200 root=/dev/mtdblock3 rootfstype=<fstype> init=/bin/sh'
@@ -44,31 +44,31 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
      # booti ${loadaddr} - ${fdt_addr_r}
      ```
 
-5. Διατήρηση αλλαγών μέσω environment
-   - Αν η αποθήκευση env δεν προστατεύεται από εγγραφή, μπορείτε να διατηρήσετε τον έλεγχο:
+5. Διατηρήστε τις αλλαγές μέσω του περιβάλλοντος
+   - Αν η αποθήκευση env δεν είναι προστατευμένη από εγγραφή, μπορείτε να διατηρήσετε τον έλεγχο:
      ```
      # setenv bootcmd 'tftpboot ${loadaddr} fit.itb; bootm ${loadaddr}'
      # saveenv
      ```
-   - Ελέγξτε για μεταβλητές όπως `bootcount`, `bootlimit`, `altbootcmd`, `boot_targets` που επηρεάζουν τις διαδρομές εναλλακτικής εκκίνησης. Οι λανθασμένα ρυθμισμένες τιμές μπορεί να επιτρέπουν επανειλημμένη πρόσβαση στο shell.
+   - Ελέγξτε για μεταβλητές όπως `bootcount`, `bootlimit`, `altbootcmd`, `boot_targets` που επηρεάζουν τις διαδρομές fallback. Εσφαλμένες τιμές μπορεί να επιτρέψουν επανειλημμένη πρόσβαση στο shell.
 
-6. Έλεγχος λειτουργιών debugging/μη ασφαλών λειτουργιών
-   - Αναζητήστε: `bootdelay` > 0, απενεργοποιημένο `autoboot`, απεριόριστο `usb start; fatload usb 0:1 ...`, δυνατότητα χρήσης `loady`/`loads` μέσω serial, `env import` από μη έμπιστα μέσα και kernels/ramdisks που φορτώνονται χωρίς ελέγχους υπογραφής.
+6. Έλεγχος χαρακτηριστικών αποσφαλμάτωσης/μη ασφαλών χαρακτηριστικών
+   - Αναζητήστε: `bootdelay` > 0, απενεργοποιημένο `autoboot`, απεριόριστο `usb start; fatload usb 0:1 ...`, δυνατότητα χρήσης `loady`/`loads` μέσω σειριακής σύνδεσης, `env import` από μη έμπιστα μέσα και kernels/ramdisks που φορτώνονται χωρίς ελέγχους υπογραφής.
 
-7. Έλεγχος εικόνων U-Boot/επαλήθευσης
-   - Αν η πλατφόρμα ισχυρίζεται ότι χρησιμοποιεί secure/verified boot με FIT images, δοκιμάστε τόσο unsigned όσο και tampered images:
+7. Δοκιμές εικόνων/επαλήθευσης U-Boot
+   - Αν η πλατφόρμα δηλώνει ότι υποστηρίζει secure/verified boot με εικόνες FIT, δοκιμάστε τόσο ανυπόγραφες όσο και αλλοιωμένες εικόνες:
      ```
      # tftpboot ${loadaddr} fit-unsigned.itb; bootm ${loadaddr}     # should FAIL if FIT sig enforced
      # tftpboot ${loadaddr} fit-signed-badhash.itb; bootm ${loadaddr} # should FAIL
      # tftpboot ${loadaddr} fit-signed.itb; bootm ${loadaddr}        # should only boot if key trusted
      ```
-   - Η απουσία των `CONFIG_FIT_SIGNATURE`/`CONFIG_(SPL_)FIT_SIGNATURE` ή η συμπεριφορά του legacy `verify=n` συχνά επιτρέπει την εκκίνηση αυθαίρετων payloads.
-   - Μην περιορίζεστε σε ένα απλό αποτέλεσμα allow/deny: πρόσφατη έρευνα για το FIT έδειξε ότι η ίδια η διαδρομή επαλήθευσης μπορεί να αποτελεί επιφάνεια επίθεσης pre-auth. Κάντε αρνητικές δοκιμές σε εξωτερικά αποθηκευμένα δεδομένα FIT (`data-offset`, `data-position`, `data-size`), στην επιλογή υπογεγραμμένων διαμορφώσεων, στα `loadables` και στον χειρισμό overlay / `extra-conf`.
-   - Αν έχετε αντίστοιχο source tree, το `test/vboot/vboot_test.sh` είναι ένας γρήγορος τρόπος να αναπαραγάγετε τη συμπεριφορά επαλήθευσης FIT στο U-Boot sandbox πριν δοκιμάσετε πραγματικό hardware.<sup>[[10]](#references)</sup>
+   - Η απουσία των `CONFIG_FIT_SIGNATURE`/`CONFIG_(SPL_)FIT_SIGNATURE` ή η legacy συμπεριφορά `verify=n` συχνά επιτρέπει την εκκίνηση αυθαίρετων payloads.
+   - Μην περιορίζεστε σε ένα απλό αποτέλεσμα allow/deny: πρόσφατη έρευνα για FIT έδειξε ότι η ίδια η διαδρομή επαλήθευσης μπορεί να αποτελεί επιφάνεια επίθεσης pre-auth. Κάντε negative tests σε εξωτερικά αποθηκευμένα δεδομένα FIT (`data-offset`, `data-position`, `data-size`), στην επιλογή signed configuration, στα `loadables` και στη διαχείριση overlay / `extra-conf`.
+   - Αν έχετε αντίστοιχο source tree, το `test/vboot/vboot_test.sh` είναι ένας γρήγορος τρόπος αναπαραγωγής της συμπεριφοράς επαλήθευσης FIT στο U-Boot sandbox, πριν αγγίξετε πραγματικό hardware.<sup>[[10]](#references)</sup>
 
-8. Standard Boot (`bootstd`), `extlinux` και ροές εκκίνησης μέσω script
-   - Σε σύγχρονα builds του U-Boot, το `bootcmd` είναι συχνά απλώς ένα wrapper γύρω από το Standard Boot. Αυτό σημαίνει ότι τα εγγράψιμα μέσα, το PXE ή η SPI flash μπορούν να αποτελέσουν το πραγματικό όριο εμπιστοσύνης, ακόμη κι όταν το ορατό περιβάλλον φαίνεται ακίνδυνο.
-   - Το `extlinux` bootmeth αναζητά το `extlinux/extlinux.conf` στους καταλόγους `/` και `/boot`, ενώ το script bootmeth αναζητά πρώτα το `boot.scr.uimg` και έπειτα το `boot.scr`. Κατά την εκκίνηση μέσω δικτύου, το όνομα του script μπορεί να προέρχεται από το `boot_script_dhcp`.
+8. Standard Boot (`bootstd`), `extlinux` και script bootflows
+   - Σε σύγχρονες εκδόσεις του U-Boot, το `bootcmd` είναι συχνά απλώς ένα wrapper γύρω από το Standard Boot. Αυτό σημαίνει ότι writable media, PXE ή SPI flash μπορεί να αποτελούν το πραγματικό όριο εμπιστοσύνης, ακόμη κι όταν το ορατό environment φαίνεται ακίνδυνο.
+   - Το `extlinux` bootmeth αναζητά το `extlinux/extlinux.conf` κάτω από τα `/` και `/boot`· το script bootmeth αναζητά πρώτα το `boot.scr.uimg` και μετά το `boot.scr`. Κατά το network boot, το όνομα του script μπορεί να προέρχεται από το `boot_script_dhcp`.
    - Χρήσιμες εντολές αρχικής διαλογής:
      ```
      # bootflow scan -l
@@ -77,14 +77,14 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
      # bootmeth list
      # bootmeth order "extlinux script pxe"
      ```
-   - Περιπτώσεις κατάχρησης προς έλεγχο: μέσα USB/SD που ελέγχει ο attacker και βρίσκονται νωρίτερα στο `boot_targets`, εγγράψιμο `/boot/extlinux/extlinux.conf`, rogue TFTP που παρέχει `boot.scr` ή εκτέλεση script μέσω SPI με το `script_offset_f`.
-   - Αν η πλατφόρμα βασίζεται σε FIT verification, βεβαιωθείτε ότι οι configurations είναι signed σε επίπεδο configuration και όχι μόνο ανά image· το `required-mode=all` είναι ισχυρότερο από την αποδοχή οποιουδήποτε μεμονωμένου required key.
+   - Περιπτώσεις κατάχρησης προς έλεγχο: μέσα USB/SD που ελέγχει ο attacker και βρίσκονται νωρίτερα στο `boot_targets`, εγγράψιμο `/boot/extlinux/extlinux.conf`, rogue TFTP που παρέχει `boot.scr` ή εκτέλεση script μέσω SPI με χρήση του `script_offset_f`.
+   - Αν η πλατφόρμα βασίζεται σε FIT verification, βεβαιωθείτε ότι οι configurations είναι υπογεγραμμένες σε επίπεδο configuration και όχι μόνο ανά image· το `required-mode=all` είναι ισχυρότερο από την αποδοχή οποιουδήποτε μεμονωμένου required key.
 
-## Επιφάνεια network-boot (DHCP/PXE) και rogue servers
+## Επιφάνεια network boot (DHCP/PXE) και rogue servers
 
 9. Fuzzing παραμέτρων PXE/DHCP
-   - Ο legacy χειρισμός BOOTP/DHCP του U-Boot είχε προβλήματα memory-safety. Για παράδειγμα, το CVE‑2024‑42040 περιγράφει memory disclosure μέσω ειδικά διαμορφωμένων DHCP responses, τα οποία μπορούν να κάνουν leak bytes από τη μνήμη του U-Boot μέσω δικτύου.<sup>[[4]](#references)</sup> Δοκιμάστε τα code paths DHCP/PXE με υπερβολικά μεγάλες τιμές ή τιμές οριακών περιπτώσεων (bootfile-name της option 67, vendor options, πεδία file/servername) και παρατηρήστε για hangs/leaks.
-   - Ελάχιστο Scapy snippet για stress test των boot parameters κατά το netboot:
+   - Ο παλαιότερος χειρισμός BOOTP/DHCP του U-Boot έχει παρουσιάσει προβλήματα ασφάλειας μνήμης. Για παράδειγμα, το CVE‑2024‑42040 περιγράφει αποκάλυψη μνήμης μέσω ειδικά διαμορφωμένων DHCP responses, που μπορούν να κάνουν leak bytes από τη μνήμη του U-Boot πίσω στο δίκτυο.<sup>[[4]](#references)</sup> Δοκιμάστε τις διαδρομές κώδικα DHCP/PXE με υπερβολικά μεγάλες τιμές ή τιμές στα όρια (option 67 bootfile-name, vendor options, πεδία file/servername) και παρατηρήστε για hangs/leaks.
+   - Ελάχιστο Scapy snippet για την καταπόνηση των παραμέτρων boot κατά το netboot:
      ```python
      from scapy.all import *
      offer = (Ether(dst='ff:ff:ff:ff:ff:ff')/
@@ -99,32 +99,32 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
                             'end']))
      sendp(offer, iface='eth0', loop=1, inter=0.2)
      ```
-   - Ελέγξτε επίσης αν τα πεδία ονόματος αρχείου PXE περνούν στη λογική του shell/loader χωρίς sanitization, όταν συνδέονται με scripts provisioning στην πλευρά του OS.
+   - Ελέγξτε επίσης αν τα πεδία filename του PXE περνούν σε λογική shell/loader χωρίς sanitization, όταν συνδέονται με scripts provisioning στην πλευρά του OS.
 
-10. Testing για command injection σε rogue DHCP server
-   - Ρυθμίστε μια rogue υπηρεσία DHCP/PXE και δοκιμάστε να εισαγάγετε χαρακτήρες στα πεδία filename ή options, ώστε να φτάσουν σε command interpreters σε μεταγενέστερα στάδια της αλυσίδας εκκίνησης. Τα βοηθητικά προγράμματα DHCP του Metasploit, το `dnsmasq` ή προσαρμοσμένα scripts Scapy είναι κατάλληλα. Φροντίστε πρώτα να απομονώσετε το δίκτυο του lab.
+10. Δοκιμές command injection σε rogue DHCP server
+   - Ρυθμίστε μια rogue υπηρεσία DHCP/PXE και δοκιμάστε να εισαγάγετε χαρακτήρες στα πεδία filename ή options, ώστε να φτάσετε σε interpreters εντολών σε μεταγενέστερα στάδια της αλυσίδας boot. Τα auxiliary του Metasploit για DHCP, το `dnsmasq` ή custom scripts με Scapy είναι κατάλληλα. Φροντίστε πρώτα να απομονώσετε το δίκτυο του lab.
 
-## Recovery modes του SoC ROM που παρακάμπτουν την κανονική εκκίνηση
+## Λειτουργίες ανάκτησης SoC ROM που παρακάμπτουν το κανονικό boot
 
-Πολλά SoC εκθέτουν μια λειτουργία "loader" του BootROM, η οποία δέχεται κώδικα μέσω USB/UART ακόμη κι όταν τα flash images είναι μη έγκυρα. Αν δεν έχουν καεί τα secure-boot fuses, αυτό μπορεί να προσφέρει arbitrary code execution σε πολύ πρώιμο στάδιο της αλυσίδας.
+Πολλά SoC διαθέτουν λειτουργία "loader" στο BootROM, η οποία δέχεται κώδικα μέσω USB/UART ακόμη κι όταν τα flash images δεν είναι έγκυρα. Αν δεν έχουν ενεργοποιηθεί τα secure-boot fuses, αυτό μπορεί να προσφέρει arbitrary code execution πολύ νωρίς στην αλυσίδα.
 
 - NXP i.MX (Serial Download Mode)
   - Εργαλεία: `uuu` (mfgtools3) ή `imx-usb-loader`.
-  - Παράδειγμα: `imx-usb-loader u-boot.imx` για να στείλετε και να εκτελέσετε ένα προσαρμοσμένο U-Boot από τη RAM.
+  - Παράδειγμα: `imx-usb-loader u-boot.imx` για να φορτώσετε και να εκτελέσετε ένα custom U-Boot από τη RAM.
 - Allwinner (FEL)
   - Εργαλείο: `sunxi-fel`.
   - Παράδειγμα: `sunxi-fel -v uboot u-boot-sunxi-with-spl.bin` ή `sunxi-fel write 0x4A000000 u-boot-sunxi-with-spl.bin; sunxi-fel exe 0x4A000000`.
 - Rockchip (MaskROM)
   - Εργαλείο: `rkdeveloptool`.
-  - Παράδειγμα: `rkdeveloptool db loader.bin; rkdeveloptool ul u-boot.bin` για να προετοιμάσετε έναν loader και να ανεβάσετε ένα προσαρμοσμένο U-Boot.
+  - Παράδειγμα: `rkdeveloptool db loader.bin; rkdeveloptool ul u-boot.bin` για να φορτώσετε προσωρινά έναν loader και να ανεβάσετε ένα custom U-Boot.
 
-Ελέγξτε αν έχουν καεί τα secure-boot eFuses/OTP της συσκευής. Αν όχι, οι λειτουργίες λήψης του BootROM συχνά παρακάμπτουν κάθε επαλήθευση ανώτερου επιπέδου (U-Boot, kernel, rootfs), εκτελώντας απευθείας το payload πρώτου σταδίου από τη SRAM/DRAM.
+Ελέγξτε αν έχουν καεί τα secure-boot eFuses/OTP της συσκευής. Αν όχι, οι λειτουργίες λήψης του BootROM συχνά παρακάμπτουν κάθε έλεγχο επαλήθευσης ανώτερου επιπέδου (U-Boot, kernel, rootfs), εκτελώντας απευθείας το payload πρώτου σταδίου από SRAM/DRAM.
 
-## Bootloaders UEFI/κλάσης PC: γρήγοροι έλεγχοι
+## Bootloaders UEFI/PC-class: γρήγοροι έλεγχοι
 
-11. Έλεγχος παραποίησης, rollback και εγγραφής κλειδιών στο ESP
-   - Κάντε mount το EFI System Partition (ESP) και ελέγξτε για components του loader: `EFI/Microsoft/Boot/bootmgfw.efi`, `EFI/BOOT/BOOTX64.efi`, `EFI/ubuntu/shimx64.efi`, `grubx64.efi`, διαδρομές λογότυπων κατασκευαστή.
-   - Εξαγάγετε την κατάσταση του Secure Boot και τις βάσεις δεδομένων κλειδιών από το OS, αν είναι δυνατό:
+11. Δοκιμές tampering του ESP, rollback και εγγραφής κλειδιών
+   - Προσαρτήστε το EFI System Partition (ESP) και ελέγξτε για στοιχεία loader: `EFI/Microsoft/Boot/bootmgfw.efi`, `EFI/BOOT/BOOTX64.efi`, `EFI/ubuntu/shimx64.efi`, `grubx64.efi`, διαδρομές λογότυπων κατασκευαστών.
+   - Όποτε είναι δυνατό, κάντε dump την κατάσταση του Secure Boot και τις βάσεις δεδομένων κλειδιών από το OS:
      ```bash
      mokutil --sb-state
      efi-readvar -v PK
@@ -132,64 +132,73 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
      efi-readvar -v db
      efi-readvar -v dbx
      ```
-   - Αν η πλατφόρμα βρίσκεται σε Setup Mode, δέχεται εγγραφή κλειδιών χωρίς έλεγχο ταυτότητας ή αποστέλλεται με δοκιμαστικό/προεπιλεγμένο Platform Key (κλάση PKfail), ένας τοπικός admin ή ένας εισβολέας με φυσική πρόσβαση μπορεί να εγγράψει το δικό του KEK/db και να διατηρήσει την εμφάνιση ότι το Secure Boot είναι «ενεργοποιημένο», ενώ εκκινεί αυθαίρετα EFI binaries.<sup>[[3]](#references)</sup>
-   - Δοκιμάστε εκκίνηση με υποβαθμισμένα ή γνωστά ευάλωτα υπογεγραμμένα boot components, αν οι ανακλήσεις Secure Boot (dbx) δεν είναι ενημερωμένες. Αν η πλατφόρμα εξακολουθεί να εμπιστεύεται παλιά shims/bootmanagers, μπορείτε συχνά να φορτώσετε τον δικό σας kernel ή `grub.cfg` από το ESP για να αποκτήσετε persistence.
+   - Αν η πλατφόρμα βρίσκεται σε Setup Mode, δέχεται εγγραφή κλειδιών χωρίς έλεγχο ταυτότητας ή διαθέτει προεπιλεγμένο/δοκιμαστικό Platform Key (κατηγορία PKfail), ένας τοπικός διαχειριστής ή επιτιθέμενος με φυσική πρόσβαση μπορεί να εγγράψει τα δικά του KEK/db και να διατηρήσει την ένδειξη ότι το Secure Boot είναι «ενεργό», ενώ εκκινεί αυθαίρετα EFI binaries.<sup>[[3]](#references)</sup>
+   - Δοκιμάστε εκκίνηση με παλαιότερα ή γνωστά ευάλωτα υπογεγραμμένα στοιχεία εκκίνησης, αν οι ανακλήσεις Secure Boot (dbx) δεν είναι ενημερωμένες. Αν η πλατφόρμα εξακολουθεί να εμπιστεύεται παλιά shims/bootmanagers, συχνά μπορείτε να φορτώσετε τον δικό σας kernel ή το `grub.cfg` από το ESP για να αποκτήσετε persistence.
+   - Στα Windows, ακόμα και ενημερωμένα συστήματα μπορεί να εξακολουθούν να αποδέχονται ευάλωτους υπογεγραμμένους boot managers, αν ο υπογράφων `Microsoft Windows Production PCA 2011` εξακολουθεί να απουσιάζει από το firmware `dbx`, όπως παρατηρήθηκε με το BlackX.<sup>[[13]](#references)[[14]](#references)</sup> Μια παράκαμψη τύπου Baton Drop μπορεί να εγγράψει ένα MOK του επιτιθέμενου· στη συνέχεια, ένα νόμιμο shim μπορεί να φορτώσει ένα EFI payload υπογεγραμμένο με αυτό το κλειδί σε επόμενες εκκινήσεις.<sup>[[12]](#references)[[13]](#references)</sup> Η μεταγενέστερη ανάκληση του παλιού υπογράφοντος των Windows δεν αφαιρεί το εγγεγραμμένο MOK, επομένως η διαδρομή μέσω shim μπορεί να παραμείνει διαθέσιμη, αν το συγκεκριμένο shim εξακολουθεί να είναι έμπιστο.<sup>[[12]](#references)</sup>
+   - Πριν δοκιμάσετε αυτήν τη διαδρομή υποβάθμισης σε εξουσιοδοτημένο μηχάνημα UEFI, ελέγξτε την **πραγματική κατάσταση ανακλήσεων του firmware**, όχι μόνο το ιστορικό ενημερώσεων των Windows.<sup>[[13]](#references)[[14]](#references)</sup> Η Microsoft παρέχει τον παρακάτω έλεγχο PowerShell, μόνο για ανάγνωση και με αυξημένα δικαιώματα, για τον υπογράφοντα του 2011 στο `dbx`:<sup>[[14]](#references)</sup>
+     ```powershell
+     [System.Text.Encoding]::ASCII.GetString((Get-SecureBootUEFI dbx).Bytes) -match 'Microsoft Windows Production PCA 2011'
+     ```
+     Το `False` αποτελεί μόνο ένδειξη: επιβεβαιώστε το συγκεκριμένο υπογεγραμμένο στοιχείο εκκίνησης και τυχόν άλλες ανακλήσεις σε εργαστήριο με δυνατότητα ανάκτησης.<sup>[[12]](#references)[[14]](#references)</sup> Μια εκκρεμής ενημέρωση μητρώου ή ένα πιστοποιητικό υπογραφής που έχει λήξει δεν ισοδυναμεί με ολοκληρωμένη ανάκληση `dbx`.<sup>[[13]](#references)[[14]](#references)</sup>
 
-12. Έλεγχος ανακλήσεων για παλιά shim / SBAT / dbx
-   - Παλιά shims υπογεγραμμένα από τη Microsoft και forks προμηθευτών μπορούν ακόμη να αποτελέσουν διαδρομή bootkit τύπου BYOVD, αν οι ανακλήσεις είναι παρωχημένες. Σε απομονωμένο lab, τοποθετήστε ένα ιστορικά ευάλωτο shim στο ESP και επιχειρήστε να κάνετε chainload το δικό σας `grubx64.efi` ή kernel.<sup>[[11]](#references)</sup>
-   - Γρήγορη διαλογή:
+12. Έλεγχος ανακλήσεων για παλιές εκδόσεις shim / SBAT / dbx
+   - Παλιές εκδόσεις shim υπογεγραμμένες από τη Microsoft και forks προμηθευτών μπορούν να εξακολουθούν να λειτουργούν ως διαδρομή bootkit τύπου BYOVD, αν οι ανακλήσεις είναι παλιές. Σε απομονωμένο εργαστήριο, τοποθετήστε μια ιστορικά ευάλωτη έκδοση shim στο ESP και επιχειρήστε να αλυσιδώσετε τη φόρτωση του δικού σας `grubx64.efi` ή πυρήνα.<sup>[[11]](#references)</sup>
+   - Γρήγορη αρχική αξιολόγηση:
      ```bash
      sbverify --list shimx64.efi
      objdump -s -j .sbat shimx64.efi | less
      efibootmgr -v
      ```
-   - Αν το shim εξακολουθεί να εκτελείται παρότι βρίσκεται στη λίστα ανάκλησης, το firmware/OS έχει παλιές ενημερώσεις `dbx` ή εμπιστεύεται έναν forked loader που δεν κληρονόμησε ποτέ τις upstream προστασίες SBAT.
+   - Αν το shim εξακολουθεί να εκτελείται παρότι βρίσκεται στη λίστα ανάκλησης, το firmware/OS έχει παρωχημένες ενημερώσεις `dbx` ή εμπιστεύεται έναν forked loader που δεν κληρονόμησε ποτέ τις upstream προστασίες SBAT.
 
-13. Σφάλματα ανάλυσης λογότυπου εκκίνησης (κατηγορία LogoFAIL)
-   - Αρκετά firmware OEM/IBV ήταν ευάλωτα σε σφάλματα ανάλυσης εικόνων στο DXE, κατά την επεξεργασία λογοτύπων εκκίνησης. Αν ένας attacker μπορεί να τοποθετήσει μια ειδικά διαμορφωμένη εικόνα στο ESP, σε διαδρομή συγκεκριμένη για τον κατασκευαστή (π.χ., `\EFI\<vendor>\logo\*.bmp`), και να κάνει επανεκκίνηση, ενδέχεται να είναι δυνατή η εκτέλεση κώδικα στα πρώτα στάδια της εκκίνησης, ακόμη κι αν είναι ενεργό το Secure Boot. Ελέγξτε αν η πλατφόρμα δέχεται λογότυπα που παρέχονται από τον χρήστη και αν αυτές οι διαδρομές είναι εγγράψιμες από το OS.<sup>[[2]](#references)</sup>
+13. Σφάλματα ανάλυσης boot logo (κατηγορία LogoFAIL)
+   - Αρκετά firmware OEM/IBV ήταν ευάλωτα σε σφάλματα ανάλυσης εικόνων στο DXE, κατά την επεξεργασία boot logo. Αν ένας attacker μπορεί να τοποθετήσει μια ειδικά διαμορφωμένη εικόνα στο ESP, σε διαδρομή συγκεκριμένη για τον vendor (π.χ., `\EFI\<vendor>\logo\*.bmp`), και να κάνει επανεκκίνηση, ενδέχεται να είναι δυνατή η εκτέλεση κώδικα κατά την πρώιμη εκκίνηση, ακόμη και με ενεργοποιημένο το Secure Boot. Ελέγξτε αν η πλατφόρμα δέχεται logo που παρέχονται από τον χρήστη και αν αυτές οι διαδρομές είναι εγγράψιμες από το OS.<sup>[[2]](#references)</sup>
 
 
-## Κενά εμπιστοσύνης Android/Qualcomm ABL + GBL (Android 16)
+## Κενά εμπιστοσύνης στο Android/Qualcomm ABL + GBL (Android 16)
 
-Σε συσκευές Android 16 που χρησιμοποιούν το ABL της Qualcomm για τη φόρτωση της **Generic Bootloader Library (GBL)**, ελέγξτε αν το ABL **επικυρώνει** την εφαρμογή UEFI που φορτώνει από το partition `efisp`. Αν το ABL ελέγχει μόνο την **παρουσία** μιας εφαρμογής UEFI και δεν επαληθεύει τις υπογραφές, μια δυνατότητα εγγραφής στο `efisp` μετατρέπεται σε **εκτέλεση unsigned κώδικα πριν από το OS** κατά την εκκίνηση.<sup>[[6]](#references)[[7]](#references)</sup>
+Σε συσκευές Android 16 που χρησιμοποιούν το ABL της Qualcomm για τη φόρτωση της **Generic Bootloader Library (GBL)**, επαληθεύστε αν το ABL **επαληθεύει την αυθεντικότητα** της UEFI app που φορτώνει από το partition `efisp`. Αν το ABL ελέγχει μόνο αν υπάρχει μια UEFI app, χωρίς να επαληθεύει τις υπογραφές της, τότε ένα write primitive στο `efisp` επιτρέπει **εκτέλεση μη υπογεγραμμένου κώδικα πριν από το OS** κατά την εκκίνηση.<sup>[[6]](#references)[[7]](#references)</sup>
 
 Πρακτικοί έλεγχοι και τρόποι κατάχρησης:
 
-- **Δυνατότητα εγγραφής στο efisp**: Χρειάζεστε τρόπο να γράψετε μια προσαρμοσμένη εφαρμογή UEFI στο `efisp` (root/προνομιούχα υπηρεσία, σφάλμα σε εφαρμογή OEM, διαδρομή recovery/fastboot). Χωρίς αυτό, το κενό στη φόρτωση του GBL δεν είναι άμεσα προσβάσιμο.<sup>[[6]](#references)</sup>
-- **Έγχυση ορισμάτων fastboot OEM** (σφάλμα ABL): Ορισμένες εκδόσεις δέχονται επιπλέον tokens στο `fastboot oem set-gpu-preemption` και τα προσθέτουν στη γραμμή εντολών του kernel. Αυτό μπορεί να χρησιμοποιηθεί για να επιβληθεί permissive SELinux, επιτρέποντας εγγραφές σε προστατευμένα partitions:
+- **write primitive στο efisp**: Χρειάζεστε έναν τρόπο να γράψετε μια προσαρμοσμένη UEFI app στο `efisp` (root/προνομιούχα υπηρεσία, σφάλμα σε OEM app, διαδρομή recovery/fastboot). Χωρίς αυτό, το κενό στη φόρτωση του GBL δεν είναι άμεσα προσβάσιμο.<sup>[[6]](#references)</sup>
+- **Εισαγωγή argument στο fastboot OEM** (σφάλμα ABL): Ορισμένα builds δέχονται επιπλέον tokens στο `fastboot oem set-gpu-preemption` και τα προσθέτουν στη γραμμή εντολών του kernel. Αυτό μπορεί να χρησιμοποιηθεί για να επιβληθεί permissive SELinux, επιτρέποντας εγγραφές σε προστατευμένα partitions:
   ```bash
   fastboot oem set-gpu-preemption 0 androidboot.selinux=permissive
   ```
-  Αν η συσκευή έχει διορθωθεί, η εντολή θα πρέπει να απορρίπτει επιπλέον ορίσματα.<sup>[[5]](#references)[[6]](#references)</sup>
-- **Ξεκλείδωμα bootloader μέσω μόνιμων flags**: Ένα payload στο στάδιο εκκίνησης μπορεί να αλλάξει μόνιμα flags ξεκλειδώματος (π.χ., `is_unlocked=1`, `is_unlocked_critical=1`), προσομοιώνοντας το `fastboot oem unlock` χωρίς τους περιορισμούς του OEM server/έγκρισης. Αυτό αλλάζει μόνιμα την κατάσταση μετά την επόμενη επανεκκίνηση.<sup>[[6]](#references)</sup>
+  Αν η συσκευή είναι ενημερωμένη με patch, η εντολή θα πρέπει να απορρίπτει τα επιπλέον ορίσματα.<sup>[[5]](#references)[[6]](#references)</sup>
+- **Ξεκλείδωμα Bootloader μέσω persistent flags**: Ένα payload σε στάδιο boot μπορεί να αλλάξει persistent flags (π.χ. `is_unlocked=1`, `is_unlocked_critical=1`), ώστε να προσομοιώσει την εντολή `fastboot oem unlock` χωρίς ελέγχους OEM server/έγκρισης. Αυτό οδηγεί σε μόνιμη αλλαγή κατάστασης μετά την επόμενη επανεκκίνηση.<sup>[[6]](#references)</sup>
 
 Σημειώσεις άμυνας/διαλογής:
 
-- Επιβεβαιώστε αν το ABL πραγματοποιεί επαλήθευση υπογραφής του payload GBL/UEFI από το `efisp`. Αν όχι, αντιμετωπίστε το `efisp` ως επιφάνεια υψηλού κινδύνου για persistence.
-- Ελέγξτε αν οι handlers fastboot OEM του ABL έχουν τροποποιηθεί ώστε να **επικυρώνουν τον αριθμό ορισμάτων** και να απορρίπτουν επιπλέον tokens.<sup>[[8]](#references)[[9]](#references)</sup>
+- Επιβεβαιώστε αν το ABL εκτελεί επαλήθευση υπογραφής στο GBL/UEFI payload από το `efisp`. Αν όχι, αντιμετωπίστε το `efisp` ως επιφάνεια persistence υψηλού κινδύνου.
+- Ελέγξτε αν έχουν γίνει patch οι fastboot OEM handlers του ABL, ώστε να **επικυρώνουν τον αριθμό των ορισμάτων** και να απορρίπτουν επιπλέον tokens.<sup>[[8]](#references)[[9]](#references)</sup>
 
-## Προειδοποίηση για το hardware
+## Προφυλάξεις για το υλικό
 
-Να είστε προσεκτικοί όταν αλληλεπιδράτε με μνήμη flash SPI/NAND κατά την πρώιμη εκκίνηση (π.χ., γείωση ακίδων για παράκαμψη αναγνώσεων) και να συμβουλεύεστε πάντα το datasheet της flash. Βραχυκυκλώματα σε λάθος χρονική στιγμή μπορούν να καταστρέψουν τη συσκευή ή τον programmer.
+Να είστε προσεκτικοί όταν αλληλεπιδράτε με μνήμη flash SPI/NAND κατά την πρώιμη εκκίνηση (π.χ. γείωση ακίδων για παράκαμψη αναγνώσεων) και να συμβουλεύεστε πάντα το datasheet της flash. Τα βραχυκυκλώματα σε λάθος χρονική στιγμή μπορεί να προκαλέσουν αλλοίωση της συσκευής ή του programmer.
 
 ## Σημειώσεις και πρόσθετες συμβουλές
 
-- Δοκιμάστε `env export -t ${loadaddr}` και `env import -t ${loadaddr}` για να μεταφέρετε blobs περιβάλλοντος μεταξύ RAM και αποθηκευτικού χώρου· ορισμένες πλατφόρμες επιτρέπουν την εισαγωγή env από αφαιρούμενα μέσα χωρίς authentication.
-- Για persistence σε συστήματα που βασίζονται σε Linux και εκκινούν μέσω `extlinux.conf`, συχνά αρκεί να τροποποιήσετε τη γραμμή `APPEND` (για να εισαγάγετε `init=/bin/sh` ή `rd.break`) στο boot partition, όταν δεν εφαρμόζονται έλεγχοι υπογραφής.
-- Αν ο στόχος χρησιμοποιεί ενημερώσεις dual-slot / A/B, εξετάστε τις τεχνικές anti-rollback και slot-desync στην [επισκόπηση ανάλυσης firmware](README.md), ώστε να μην παραβλέψετε κενά εμπιστοσύνης που υπάρχουν μόνο στον updater, έξω από τον ίδιο τον bootloader.
-- Αν το userland παρέχει `fw_printenv/fw_setenv`, επιβεβαιώστε ότι το `/etc/fw_env.config` αντιστοιχεί στον πραγματικό χώρο αποθήκευσης env. Εσφαλμένες μετατοπίσεις επιτρέπουν την ανάγνωση/εγγραφή σε λάθος περιοχή MTD.
+- Δοκιμάστε τις εντολές `env export -t ${loadaddr}` και `env import -t ${loadaddr}` για να μεταφέρετε blobs περιβάλλοντος μεταξύ RAM και αποθηκευτικού χώρου· ορισμένες πλατφόρμες επιτρέπουν την εισαγωγή env από αφαιρούμενα μέσα χωρίς authentication.
+- Για persistence σε συστήματα βασισμένα σε Linux που εκκινούν μέσω `extlinux.conf`, συχνά αρκεί η τροποποίηση της γραμμής `APPEND` (για εισαγωγή των `init=/bin/sh` ή `rd.break`) στο boot partition, όταν δεν εφαρμόζονται έλεγχοι υπογραφής.
+- Αν ο στόχος χρησιμοποιεί ενημερώσεις dual-slot / A/B, εξετάστε τις τεχνικές anti-rollback και slot-desync στην [επισκόπηση ανάλυσης firmware](README.md), ώστε να μην παραβλέψετε κενά εμπιστοσύνης που αφορούν μόνο τον updater και βρίσκονται εκτός του ίδιου του bootloader.
+- Αν το userland παρέχει `fw_printenv/fw_setenv`, επαληθεύστε ότι το `/etc/fw_env.config` αντιστοιχεί στην πραγματική αποθήκευση env. Οι λανθασμένες ρυθμίσεις των offsets μπορεί να οδηγήσουν σε ανάγνωση/εγγραφή σε λάθος περιοχή MTD.
 
 ## References
 
-- [1] [Μεθοδολογία ελέγχου ασφάλειας firmware](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
-- [2] [Εντοπίζοντας το LogoFAIL: Οι κίνδυνοι της ανάλυσης εικόνων κατά την εκκίνηση του συστήματος](https://www.binarly.io/blog/finding-logofail-the-dangers-of-image-parsing-during-system-boot)
+- [1] [Μεθοδολογία δοκιμών ασφάλειας firmware](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
+- [2] [Ανακαλύπτοντας το LogoFAIL: Οι κίνδυνοι της ανάλυσης εικόνων κατά την εκκίνηση του συστήματος](https://www.binarly.io/blog/finding-logofail-the-dangers-of-image-parsing-during-system-boot)
 - [3] [PKfail: Μη έμπιστα κλειδιά πλατφόρμας υπονομεύουν το Secure Boot στο οικοσύστημα UEFI](https://www.binarly.io/blog/pkfail-untrusted-platform-keys-undermine-secure-boot-on-uefi-ecosystem)
-- [4] [Λεπτομέρειες του CVE-2024-42040](https://nvd.nist.gov/vuln/detail/CVE-2024-42040)
+- [4] [Λεπτομέρειες CVE-2024-42040](https://nvd.nist.gov/vuln/detail/CVE-2024-42040)
 - [5] [Preempted: Ξεκλείδωμα Xiaomi μέσω δύο μη εξυγιασμένων συμβολοσειρών](https://bestwing.me/preempted-unlocking-xiaomi-via-two-unsanitized-strings.html)
-- [6] [Exploit του Qualcomm Snapdragon 8 Elite GBL επιτρέπει σε επιτιθέμενους να ξεκλειδώνουν bootloaders](https://www.androidauthority.com/qualcomm-snapdragon-8-elite-gbl-exploit-bootloader-unlock-3648651/)
+- [6] [Το exploit GBL του Qualcomm Snapdragon 8 Elite επιτρέπει σε επιτιθέμενους να ξεκλειδώσουν bootloaders](https://www.androidauthority.com/qualcomm-snapdragon-8-elite-gbl-exploit-bootloader-unlock-3648651/)
 - [7] [Αρχιτεκτονική Generic Bootloader (GBL)](https://source.android.com/docs/core/architecture/bootloader/generic-bootloader)
-- [8] [QcomModulePkg: Διόρθωση της διοχέτευσης μη έμπιστης εισόδου στη γραμμή εντολών του kernel](https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/f09c2fe3d6c42660587460e31be50c18c8c777ab)
+- [8] [QcomModulePkg: Διόρθωση της προώθησης μη έμπιστης εισόδου στη γραμμή εντολών του kernel](https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/f09c2fe3d6c42660587460e31be50c18c8c777ab)
 - [9] [QcomModulePkg: Προσθήκη ελέγχου για την εντολή set-hw-fence-value](https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/78297e8cfe091fc59c42fc33d3490e2008910fe2)
-- [10] [Ακατάλληλο για εκκίνηση: Παράκαμψη της επαλήθευσης υπογραφής FIT του U-Boot](https://www.binarly.io/blog/unfit-to-boot-breaking-u-boots-fit-signature-verification)
-- [11] [Σημείωση ευπάθειας VU#616257 - Bootloaders shim UEFI υπογεγραμμένοι από τη Microsoft είναι ευάλωτοι σε παράκαμψη του Secure Boot](https://kb.cert.org/vuls/id/616257)
+- [10] [Ακατάλληλο για boot: Κατάρριψη της επαλήθευσης υπογραφής FIT του U-Boot](https://www.binarly.io/blog/unfit-to-boot-breaking-u-boots-fit-signature-verification)
+- [11] [Σημείωση ευπάθειας VU#616257 - Bootloaders UEFI shim υπογεγραμμένοι από τη Microsoft, ευάλωτοι σε παράκαμψη του Secure Boot](https://kb.cert.org/vuls/id/616257)
+- [12] [UEFI bootkit BlackLotus: Επιβεβαιώθηκε ο μύθος](https://www.welivesecurity.com/2023/03/01/blacklotus-uefi-bootkit-myth-confirmed/)
+- [13] [BlackX: UEFI bootkit παρόμοιο με το BlackLotus](https://securelist.com/uefi-bootkit-blackx/121539/)
+- [14] [Πώς να διαχειριστείτε τις ανακλήσεις του Windows Boot Manager για αλλαγές στο Secure Boot](https://support.microsoft.com/en-us/servicing/os/windows/2023/03/how-to-manage-the-windows-boot-manager-revocations-for-secure-boot-changes-associated-with-cve-2023)
 {{#include ../../banners/hacktricks-training.md}}
