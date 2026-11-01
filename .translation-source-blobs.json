@@ -438,7 +438,7 @@
     "src/linux-hardening/user-information/user-and-session-triage.md": "ab851e9c62b5b9baaa4a4a1f21dcf1c578907c4e",
     "src/macos-hardening/macos-auto-start-locations.md": "81b3b2cb5de43f4651f8b01eccb2dabf584120a4",
     "src/macos-hardening/macos-red-teaming/README.md": "0bf47b99d188f55c7d00d29f4db424a4b9ec25b0",
-    "src/macos-hardening/macos-red-teaming/macos-keychain.md": "0475f686429f575a321389c55834b9938eab72f2",
+    "src/macos-hardening/macos-red-teaming/macos-keychain.md": "851ecef2a7adcc22de7542d5334d3c7b9ea28c77",
     "src/macos-hardening/macos-red-teaming/macos-mdm/README.md": "7c8f03c4562939c9bc73c47b190a01851e4cdb7a",
     "src/macos-hardening/macos-red-teaming/macos-mdm/enrolling-devices-in-other-organisations.md": "307c4a5c2b535e12ddbdb854293673f655d65be2",
     "src/macos-hardening/macos-red-teaming/macos-mdm/macos-serial-number.md": "bd8caf3a8c774548c7320cab868e1b373e004211",
