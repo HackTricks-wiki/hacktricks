@@ -20,6 +20,7 @@
 - Firmware acquisition, package decryption, updates and early boot → `src/hardware-physical-access/firmware-analysis/README.md`; XFlash Carbonara and Synology PAT/SPK stay under firmware, not Stack Overflow.
 - TODO relocations: Rust → `src/generic-methodologies-and-resources/rust-basics.md`; investment terms → `src/blockchain/blockchain-and-crypto-currencies/investment-terms.md`; cookies → `src/welcome/cookies-policy.md`; recon/reputation/breach APIs → `src/generic-methodologies-and-resources/external-recon-methodology/reconnaissance-and-threat-intelligence-apis.md`.
 - `src/pentesting-web/referer-header-and-referrer-policy.md` owns browser Referer leakage, Referrer-Policy, and injected referrer meta behavior; OAuth retains its specific consequences and links there. `src/pentesting-web/sensitive-information-exfiltration.md` is a route map for private pages across CORS/XSS/dangling markup/clickjacking; its cited Apache case stays there.
+- UTF-16 script and ICO image-width sniffing → `src/pentesting-web/xs-search/README.md#content-sniffing-leaks-utf-16-scripts-and-ico-image-widths`; XSSI, HTTP headers and exfiltration pages link there. Old Sniff Leak URL redirects; both citations remain.
 - XSS exfiltration script → `src/pentesting-web/xss-cross-site-scripting/xss-information-exfiltration-payload.md`.
 - Blockchain chapters → top-level Blockchain & Smart Contract Security (`blockchain-and-crypto-currencies/README.md` entry). Bitcoin P2P stays in Network Services, DApp tests in Web, cryptocurrency privacy in Privacy.
 - VM escape entry point `src/binary-exploitation/vm-escape-and-hypervisor-exploitation.md` maps guest network/display/storage/shared-folder surfaces to QEMU/KVM, VirtualBox, and VMware cases; substantive chapters retain their paths. Slirp's custom-allocator mechanism stays under `libc-heap/`, but its SUMMARY entry belongs with guest-to-host cases.
@@ -36,7 +37,7 @@
 - Remote MCP OAuth, JSON-RPC enumeration, authorization and interception → `src/AI/AI-MCP-Servers.md#remote-mcp-server-testing-workflow`; local CLI delivery, repo config, secrets and artifacts → `src/generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md`. Server testing and client delivery are distinct.
 - eSIM/eUICC profile management, Java Card VM type confusion, OTA/APDU and local card tests → `src/mobile-pentesting/esim-javacard-exploitation.md`. It targets a mobile subscription secure element, not generic hacking or Android app internals; modem/IMS exploitation remains in `android-app-pentesting/baseband-and-soc-isolation-exploitation.md` with a direct contrast link.
 
-- Former TODO web topics: Host poisoning → `pentesting-web/reset-password.md`; session auth → `pentesting-web/403-and-401-bypasses.md`; signup/email change → `pentesting-web/registration-vulnerabilities.md`; Atlassian service desk → `network-services-pentesting/pentesting-web/jira.md`; TRACE → `pentesting-web/hacking-with-cookies/README.md`. Old route redirects to web checklist.
+- Former TODO web topics: Host poisoning → `pentesting-web/reset-password.md`; session auth → `pentesting-web/403-and-401-bypasses.md`; signup/email change → `pentesting-web/registration-vulnerabilities.md`; Jira service desk → `network-services-pentesting/pentesting-web/jira.md`; TRACE → `pentesting-web/hacking-with-cookies/README.md`.
 - Cross-platform host/SaaS collection-tool reference → `src/generic-methodologies-and-resources/post-exploitation-collection-tools.md`; OS-specific procedures stay in OS chapters. Its old TODO route redirects here.
 
 - macOS environment-controlled PHP, Lua, Julia and Octave startup files → `src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-interpreter-startup-file-injection.md`. Keep broader shell, Python, PowerShell and framework injection chapters separate; runtime-specific prerequisites and mitigations remain under headings.
@@ -44,11 +45,11 @@
 
 ## Researcher entry points
 
-- SMB/RPC SCM rights (PsExec/SMBExec/WinExec/SharpMove) → Windows Lateral Movement; POSIX CPU timers/IRQ/ptrace/Chronomaly → Binary Exploitation / Linux kernel.
-- Board pads/debug headers/serial/memory leakage/glitching → Hardware Hacking; RFID/NFC/sub-GHz/IR/BLE/LoRaWAN/iButton → Radio Hacking.
-- OT process safety → ICS; Modbus/OPC UA/BACnet → Network Services. Android device/image → Forensics; app tests → Mobile.
-- Guest network/display/storage/shared folders → VM Escape; SOAP/REST/GraphQL → Web APIs; HTTP 401/403/verbs/proxy/path → Web authorization; generic header behavior → Special HTTP Headers.
-- LFI plus PHP multipart/upload/segfault → Web File Inclusion. eSIM/eUICC/Java Card/OTA/RAM keys → Mobile eSIM; modem/SoC → Android baseband.
+- Board debug/serial/glitching → Hardware Hacking; RFID/NFC/radio/iButton → Radio Hacking.
+- OT safety → ICS; Modbus/OPC UA/BACnet → Network Services. Android image → Forensics; app tests → Mobile.
+- Guest surfaces → VM Escape; SOAP/REST/GraphQL → Web APIs; 401/403 → Web authorization; header behavior → Special HTTP Headers.
+- LFI/PHP upload race → Web File Inclusion; eSIM/Java Card → Mobile eSIM; modem/SoC → Android baseband.
+- Browser `nosniff`, UTF-16 script, ICO width → XS-Leaks; executable cross-origin script inclusion → XSSI; in-origin script injection → XSS.
 
 ## Deferred
 
