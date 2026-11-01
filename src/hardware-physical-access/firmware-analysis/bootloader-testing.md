@@ -134,6 +134,12 @@ Assess whether the device has secure-boot eFuses/OTP burned. If not, BootROM dow
      ```
    - If the platform is in Setup Mode, accepts unauthenticated key enrollment, or ships with a test/default Platform Key (PKfail class), a local admin or physical attacker can enroll their own KEK/db and keep Secure Boot looking “enabled” while booting arbitrary EFI binaries.<sup>[[3]](#references)</sup>
    - Try booting with downgraded or known-vulnerable signed boot components if Secure Boot revocations (dbx) aren’t current. If the platform still trusts old shims/bootmanagers, you can often load your own kernel or `grub.cfg` from the ESP to gain persistence.
+   - On Windows, patched hosts can still accept vulnerable signed boot managers if the `Microsoft Windows Production PCA 2011` signer remains absent from firmware `dbx`, as observed with BlackX.<sup>[[13]](#references)[[14]](#references)</sup> A Baton Drop-style bypass can enroll an attacker MOK; a legitimate shim can then load an EFI payload signed by that key on later boots.<sup>[[12]](#references)[[13]](#references)</sup> Revoking the old Windows signer after MOK persistence is installed does not by itself stop that shim-based boot path.<sup>[[12]](#references)</sup>
+   - Before testing this rollback path on an authorized UEFI machine, check the **effective firmware revocation state**, not just the Windows update history.<sup>[[13]](#references)[[14]](#references)</sup> Microsoft gives this read-only elevated PowerShell check for the 2011 signer in `dbx`:<sup>[[14]](#references)</sup>
+     ```powershell
+     [System.Text.Encoding]::ASCII.GetString((Get-SecureBootUEFI dbx).Bytes) -match 'Microsoft Windows Production PCA 2011'
+     ```
+     `False` is only a lead: confirm the specific signed boot component and other revocations in a recoverable lab.<sup>[[12]](#references)[[14]](#references)</sup> A pending registry update or an expired signing certificate is not equivalent to a completed `dbx` revocation.<sup>[[13]](#references)[[14]](#references)</sup>
 
 12. Stale shim / SBAT / dbx revocation testing
    - Old Microsoft-signed shims and vendor forks can still act as a BYOVD-style bootkit path if revocations are stale. In an isolated lab, place a historically vulnerable shim on the ESP and attempt to chainload your own `grubx64.efi` or kernel.<sup>[[11]](#references)</sup>
@@ -192,5 +198,8 @@ Be cautious when interacting with SPI/NAND flash during early boot (e.g., ground
 - [9] [QcomModulePkg: add check for set-hw-fence-value command](https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/78297e8cfe091fc59c42fc33d3490e2008910fe2)
 - [10] [Unfit to boot: breaking U-Boot's FIT signature verification](https://www.binarly.io/blog/unfit-to-boot-breaking-u-boots-fit-signature-verification)
 - [11] [Vulnerability Note VU#616257 - Microsoft-signed UEFI shim bootloaders vulnerable to Secure Boot bypass](https://kb.cert.org/vuls/id/616257)
+- [12] [BlackLotus UEFI bootkit: Myth confirmed](https://www.welivesecurity.com/2023/03/01/blacklotus-uefi-bootkit-myth-confirmed/)
+- [13] [BlackX: a BlackLotus-like UEFI bootkit](https://securelist.com/uefi-bootkit-blackx/121539/)
+- [14] [How to manage Windows Boot Manager revocations for Secure Boot changes](https://support.microsoft.com/en-us/servicing/os/windows/2023/03/how-to-manage-the-windows-boot-manager-revocations-for-secure-boot-changes-associated-with-cve-2023)
 
 {{#include ../../banners/hacktricks-training.md}}
