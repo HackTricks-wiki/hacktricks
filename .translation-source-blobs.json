@@ -535,7 +535,7 @@
     "src/mobile-pentesting/android-app-pentesting/accessibility-services-abuse.md": "0d041b8922b611dca6457bcdeb821c53adacc43b",
     "src/mobile-pentesting/android-app-pentesting/adb-commands.md": "4c2f45ebf562f85d875a79af7b31cf4df488dfe8",
     "src/mobile-pentesting/android-app-pentesting/android-anti-instrumentation-and-ssl-pinning-bypass.md": "94ea43543191c3ce710a3379db41fc1f179072e6",
-    "src/mobile-pentesting/android-app-pentesting/android-application-level-virtualization.md": "4babbfdf4034d6be699520eb3a7a3c62bfcd74a2",
+    "src/mobile-pentesting/android-app-pentesting/android-application-level-virtualization.md": "edb4e3fa9cc3eb66fea475f86ac1b68cf83af990",
     "src/mobile-pentesting/android-app-pentesting/android-applications-basics.md": "c8bffdc14d3f9595e45ae0ba4b06e6cd943009e5",
     "src/mobile-pentesting/android-app-pentesting/android-enterprise-work-profile-bypass.md": "068b0c09ce2be538df82d4d58c0a429b1b7b12ed",
     "src/mobile-pentesting/android-app-pentesting/android-hce-nfc-emv-relay-attacks.md": "83baeca4422df864329f4c5a4c4b99c7dbfa54e2",
