@@ -323,7 +323,9 @@ Operational notes:
 PDF24 Creator 11.15.1 illustrates a separate MSI-repair risk: its printer-install custom action can start a visible console with SYSTEM rights during repair. The vendor changed the MSI installer in 11.15.2 to address this behavior. An older product version is only a triage lead. Check the registered or reachable MSI package, whether this user can initiate repair, whether the vulnerable custom action and log-file delay are present, and whether an interactive desktop can expose the console. The reported delay used an oplock on `faxPrnInst.log`; ordinary file writability is not the sole access condition. A non-interactive shell, inaccessible package, or patched installer can break the chain. This issue does not depend on `AlwaysInstallElevated` and differs from replacing a predictable temporary script.
 
 ---
-## Remote supply-chain hijack via weak updater validation (WinGUp / Notepad++)
+## Remote supply-chain hijack via weak updater validation
+
+### Compromised update infrastructure (WinGUp / Notepad++)
 
 Between June 2025 and December 2025, attackers who compromised the hosting infrastructure behind the Notepad++ update flow selectively served malicious manifests to chosen victims. Older WinGUp-based updaters did not fully verify update authenticity, so a hostile XML response could redirect clients to attacker-controlled URLs. Because the client accepted HTTPS content without enforcing both a trusted certificate chain and a valid PE signature on the downloaded installer, victims fetched and executed a trojanized NSIS `update.exe`.<sup>[[12]](#references)[[13]](#references)</sup>
 
@@ -371,6 +373,14 @@ config case_sensitive = false
 
 These patterns generalize to any updater that accepts unsigned manifests or fails to pin installer signers—network hijack + malicious installer + BYO-signed sideloading yields remote code execution under the guise of “trusted” updates.
 
+### Abandoned update domain and unsigned HTTP metadata
+
+An abandoned update hostname is another route to the same trust boundary: an attacker can register a domain that installed clients still poll, without compromising the original hosting provider. In the Time4Popcorn fork, a background Windows service queried several update domains over plain HTTP. Control of one queried domain or interception of the HTTP response let the researchers supply the expected JSON metadata with an executable URL. Merely serving an executable did not trigger an update; the client first needed the correct metadata response. It then downloaded and ran the file as `SYSTEM` without checking its digital signature. See [domain takeover](../../pentesting-web/domain-subdomain-takeover.md#domain-takeover) for the domain-control primitive.<sup>[[19]](#references)</sup>
+
+The macOS helper used different domains and a different JSON schema but ran the supplied file as root. Android required the user to open the app and approve APK installation, so it was not a silent background path.<sup>[[19]](#references)[[20]](#references)</sup>
+
+Do not treat the updater's `hid` query parameter as a reliable one-host selector for targeted responses. The Windows client hashed the C-drive volume serial and volume GUID, but its normal successful `RegCloseKey` path skipped adding `MachineGuid` to the MD5 input. Cloned partitions could therefore share an ID. On macOS, hostname or network-address changes could make one host present multiple IDs. One-time delivery or allowlisting by this value can miss real clients or miscount the target population.<sup>[[19]](#references)</sup>
+
 ### Notification configuration as a second update trigger
 
 An updater can use separate remote configurations to **stage content and trigger its execution**. This requires control of the configurations or their responses; the reports do not identify how origin access was obtained. In the AOMEI case, `down_html.ini` selected an archive URL, version (`thrid`), and MD5 (`Val`); the attacker raised the version and changed the URL and matching checksum together. This is the [metadata trust-boundary failure](#2-hijacking-the-update-channel-to-run-code-as-system) covered above. The additional execution path was `Notifycfg.ini`: it directed `ABNotify.exe` to load an extracted `upgrade-now.html` through a local `file:///` URL in a WebView. The page automatically navigated to a sibling executable, which the WebView handed to the system shell. The child inherited the notifier's privileges; this did not inherently elevate it to SYSTEM.<sup>[[17]](#references)[[18]](#references)</sup>
@@ -397,3 +407,6 @@ Google also reported a tampered `Notifycfg.ini` with more than 35,000 repeated d
 - [16] [Quarkslab – MyReport Updater: From gRPC to SYSTEM](https://blog.quarkslab.com/myreport-updater-from-grpc-to-system.html)
 - [17] [ManageEngine Threat Analysis Lab – AOMEI Backupper supply-chain compromise](https://www.manageengine.com/threat-analysis-lab/aomei-backupper-supply-chain-compromise.html)
 - [18] [Google Threat Intelligence Group and Mandiant – Investigating Ephemeral Supply Chain Tampering](https://cloud.google.com/blog/topics/threat-intelligence/investigating-ephemeral-supply-chain-tampering)
+- [19] [Eye Research – Operation IXIM: Preventing a botnet of millions of Popcorn Time users](https://labs.eye.security/operation-ixim-preventing-a-botnet-of-millions-of-popcorn-time-users/)
+- [20] [Eye Research – Time4Popcorn updater vulnerability advisory](https://labs.eye.security/cve-2026-30612-a-vulnerability-in-time4popcorn-popcorntime/)
+{{#include ../../banners/hacktricks-training.md}}
