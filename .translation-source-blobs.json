@@ -1026,7 +1026,7 @@
     "src/privacy/reproducible-privacy-testing.md": "7ab67dc6e97874564e8eae6cd35ca1371f550eee",
     "src/privacy/threat-modeling-and-identity-separation.md": "e519cbaa543315ba67759acaac5530c853581946",
     "src/reversing/common-api-used-in-malware.md": "93244e577e90e47f9eedcd4d917284e0a9863720",
-    "src/reversing/reversing-tools-basic-methods/README.md": "a03576b6c1dbdafe849db7c5aaa02043c247ca66",
+    "src/reversing/reversing-tools-basic-methods/README.md": "96d28e0686971af8014d3c62d7c3c3a7d64fe6b3",
     "src/reversing/reversing-tools-basic-methods/angr/README.md": "f0291abdf9b010eec8f6c38c1271088a184e4ed8",
     "src/reversing/reversing-tools-basic-methods/angr/angr-examples.md": "79182f6bf453e28e32c46106b671104809231948",
     "src/reversing/reversing-tools-basic-methods/blobrunner.md": "3bb864d2fe3f5728c50757947b54b726386ce819",
