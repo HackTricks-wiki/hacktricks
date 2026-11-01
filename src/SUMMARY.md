@@ -940,7 +940,6 @@
   - [Server Side XSS (Dynamic PDF)](pentesting-web/xss-cross-site-scripting/server-side-xss-dynamic-pdf.md)
   - [Shadow DOM](pentesting-web/xss-cross-site-scripting/shadow-dom.md)
   - [SOME - Same Origin Method Execution](pentesting-web/xss-cross-site-scripting/some-same-origin-method-execution.md)
-  - [Sniff Leak](pentesting-web/xss-cross-site-scripting/sniff-leak.md)
   - [XSS Information Exfiltration Payload](pentesting-web/xss-cross-site-scripting/xss-information-exfiltration-payload.md)
   - [Wasm Linear Memory Template Overwrite Xss](pentesting-web/xss-cross-site-scripting/wasm-linear-memory-template-overwrite-xss.md)
   - [XSS in Markdown](pentesting-web/xss-cross-site-scripting/xss-in-markdown.md)
