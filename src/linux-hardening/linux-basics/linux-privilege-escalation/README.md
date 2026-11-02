@@ -1994,6 +1994,8 @@ Specifies whether root can log in using ssh. The upstream OpenSSH default is `pr
 
 A private CA key can also be usable **without being readable** to the current user if a privilege-delegation rule lets that user invoke an unrestricted [certificate signer such as `ssh-keygen -s`](https://man.openbsd.org/ssh-keygen#-s) under the key owner's identity. Correlate the exact allowed command and arguments with the signer account's access to the key, the public CA trusted by the effective sshd configuration, the principal accepted for the target account, certificate validity, and that account's login policy. A delegated signer command or a trusted CA file alone does not prove access to another account; do not sign a test certificate during passive enumeration.
 
+For the separate per-account CA trust path, see [SSH certificate principal delimiter confusion](../../../network-services-pentesting/pentesting-ssh.md#ssh-certificate-principal-delimiter-confusion).
+
 ### AuthorizedKeysFile
 
 Specifies files that contain the public keys that can be used for user authentication. It can contain tokens like `%h`, which will be replaced by the home directory. **You can indicate absolute paths** (starting in `/`) or **relative paths from the user's home**. For example:
@@ -2374,6 +2376,8 @@ Learn more and see a generalized pattern applicable to other discovery/monitorin
 **EvilAbigail (physical access):** [https://github.com/GDSSecurity/EvilAbigail](https://github.com/GDSSecurity/EvilAbigail)\
 **Recopilation of more scripts**: [https://github.com/1N3/PrivEsc](https://github.com/1N3/PrivEsc)
 
+
+
 ## References
 
 - [1] [0xdf – HTB Planning (Crontab UI privesc, zip -P creds reuse)](https://0xdf.gitlab.io/2025/09/13/htb-planning.html)
@@ -2415,5 +2419,4 @@ Learn more and see a generalized pattern applicable to other discovery/monitorin
 - [37] [tech.feedyourhead.at - Details Of A Logrotate Race Condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition)
 - [38] [Python 3.10 documentation – `site` and path configuration files](https://docs.python.org/3.10/library/site.html)
 - [39] [0xdf – HTB: SmartHire](https://0xdf.gitlab.io/2026/09/26/htb-smarthire.html)
-
 {{#include ../../../banners/hacktricks-training.md}}
