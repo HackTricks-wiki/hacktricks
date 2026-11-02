@@ -1045,6 +1045,7 @@
     - [SROP - arm64](binary-exploitation/rop-return-oriented-programing/srop-sigreturn-oriented-programming/srop-arm64.md)
   - [Windows SEH Overflow](binary-exploitation/stack-overflow/windows-seh-overflow.md)
 - [Array Indexing](binary-exploitation/array-indexing.md)
+- [PHP Request OOM Bailout and Stale State](binary-exploitation/php-request-oom-bailout-and-stale-state.md)
 - [Chrome Exploiting](binary-exploitation/chrome-exploiting.md)
 - [Common Exploiting Problems Unsafe Relocation Fixups](binary-exploitation/common-exploiting-problems-unsafe-relocation-fixups.md)
 - [Integer Overflow](binary-exploitation/integer-overflow-and-underflow.md)
