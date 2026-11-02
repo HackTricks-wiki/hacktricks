@@ -12,7 +12,7 @@
 
 - Trusted-host Rlogin (513/TCP) and Rsh (514/TCP) → `src/network-services-pentesting/pentesting-rlogin.md`; Rexec (512/TCP) stays separate because it uses passwords and a distinct wire protocol.
 - SCM/SCMR execution (PsExec, WinExec, SMBExec, SCMExec, SharpMove) → `src/windows-hardening/lateral-movement/psexec-and-winexec.md`; scheduler, DCOM, WMI, WinRM and RDP are separate interfaces. Cloud pivots stay in Cloud.
-- POSIX CPU timer TOCTOU/IRQ/task-work, ptrace reproducer, PoC variants, and Chronomaly are at `src/binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md`; Linux Hardening's `kernel-lpe-cves/README.md` links there. Memory corruption/kernel exploitation belongs in Binary Exploitation; host assessment belongs in Linux Hardening.
+- POSIX CPU timer TOCTOU/IRQ/task-work, ptrace PoCs and Chronomaly → `src/binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md`; Linux Hardening links there. Kernel exploitation belongs in Binary Exploitation; host assessment in Linux Hardening.
 - Board, side-channel, fault and signal work → `src/hardware-physical-access/hardware-hacking/`; physical access → `physical-attacks.md`; firmware → `firmware-analysis/`; radio/iButton → `radio-hacking/`.
 - Model execution, fine-tuning, serving and hosted tools → `src/AI/AI-Model-Tools-and-Platforms.md`, separate from attacks and architecture. Burp Intruder, extensions and Session Switcher → `src/pentesting-web/burp-suite.md`, separate from checklist and IDOR.
 - OT/ICS process-safety and planning are at `src/industrial-control-systems/README.md`; Modbus protocol models and testing are at `src/network-services-pentesting/pentesting-modbus.md`. OPC UA and BACnet remain protocol-specific Network Services chapters.
@@ -27,7 +27,7 @@
 - General Web API testing (SOAP/REST/GraphQL discovery, CXF XOP and tRPC cases, tools) is at `src/pentesting-web/web-api-pentesting.md`; the 80/443 service overview links directly to it. Cloud retains provider-specific API control-plane semantics.
 - RDPexec → `src/network-services-pentesting/pentesting-rdp.md#remote-command-execution-with-an-authenticated-rdp-session`; Windows Lateral Movement links directly there, avoiding a procedure-free stub.
 - Python `venv` and wheel builds → `src/generic-methodologies-and-resources/python/basic-python.md#virtual-environments-and-wheel-builds-venv`; the Python hub links to this heading, not a thin setup page.
-- General 401/403 bypasses live at `src/pentesting-web/403-and-401-bypasses.md`; broader request/response header behavior lives at `src/pentesting-web/special-http-headers.md`. Keep separate: authorization bypass is one task, header behavior is a reference. The Network Services 80/443 overview links to both while retaining service/product discovery; old routes redirect.
+- 401/403 authorization bypasses → `src/pentesting-web/403-and-401-bypasses.md`; broader request/response behavior → `src/pentesting-web/special-http-headers.md`. The 80/443 service overview links to both and retains product discovery; old routes redirect.
 - Public HTTP/TCP relay exposure → `src/generic-hacking/expose-local-to-the-internet.md`, beside tunneling; old reverse-shell route redirects.
 - PHP multipart temporary-upload LFI races, including the PHP 7.0/7.2 crash/cleanup variant → `src/pentesting-web/file-inclusion/lfi2rce-via-temp-file-uploads.md#segmentation-fault-variant-on-php-70-and-72`. Keep phpinfo disclosure, session upload-progress files and filter-only payloads separate: different primitives.
 - Chosen-input MD5 suffix and `0e` numeric-zero searches are headings at `src/crypto/hashes/README.md#chosen-input-md5-hash-searches`, not Python sandbox topics. PHP type-juggling behavior and version caveats stay in `network-services-pentesting/pentesting-web/php-tricks-esp/README.md#loose-comparisons-and-type-juggling`; both entry points link directly to the relevant explanation.
@@ -35,7 +35,7 @@
 - AI fuzzing seeds/harnesses/PoV/patching → `src/AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md`; source review, mobile entry-point tasks and kernel audits → `src/AI/AI-Assisted-Source-Review-and-Vulnerability-Validation.md`. Split by research task, not platform; both stay in AI.
 
 - Remote MCP OAuth, JSON-RPC enumeration, authorization and interception → `src/AI/AI-MCP-Servers.md#remote-mcp-server-testing-workflow`; local CLI delivery, repo config, secrets and artifacts → `src/generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md`. Server testing and client delivery are distinct.
-- eSIM/eUICC profile management, Java Card VM type confusion, OTA/APDU and local card tests → `src/mobile-pentesting/esim-javacard-exploitation.md`. It targets a mobile subscription secure element, not generic hacking or Android app internals; modem/IMS exploitation remains in `android-app-pentesting/baseband-and-soc-isolation-exploitation.md` with a direct contrast link.
+- eSIM/eUICC profile management, Java Card VM type confusion, OTA/APDU and card tests → `src/mobile-pentesting/esim-javacard-exploitation.md`. This is a mobile secure element, not Android app internals; modem/IMS stays in `android-app-pentesting/baseband-and-soc-isolation-exploitation.md`.
 
 - Former TODO web topics: Host poisoning → `pentesting-web/reset-password.md`; session auth → `pentesting-web/403-and-401-bypasses.md`; signup/email change → `pentesting-web/registration-vulnerabilities.md`; Jira service desk → `network-services-pentesting/pentesting-web/jira.md`; TRACE → `pentesting-web/hacking-with-cookies/README.md`.
 - Cross-platform host/SaaS collection-tool reference → `src/generic-methodologies-and-resources/post-exploitation-collection-tools.md`; OS-specific procedures stay in OS chapters. Its old TODO route redirects here.
@@ -50,6 +50,7 @@
 - Guest surfaces → VM Escape; SOAP/REST/GraphQL → Web APIs; 401/403 → Web authorization; header behavior → Special HTTP Headers.
 - LFI/PHP upload race → Web File Inclusion; eSIM/Java Card → Mobile eSIM; modem/SoC → Android baseband.
 - Browser `nosniff`, UTF-16 script, ICO width → XS-Leaks; executable cross-origin script inclusion → XSSI; in-origin script injection → XSS.
+- Same-site HTML-injection leaks (SS-Leaks) → `src/pentesting-web/dangling-markup-html-scriptless-injection/README.md#same-site-leaks-ss-leaks`; unlike cross-origin XS-Leaks, injection and the probed page share an origin. Former standalone page redirects.
 
 ## Deferred
 
