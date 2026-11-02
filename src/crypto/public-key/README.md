@@ -50,6 +50,18 @@ Technical note:
 - Validate that points are not the point at infinity, have valid coordinates, satisfy the curve equation, and belong to the required subgroup.<sup>[[6]](#references)</sup>
 - In CTF challenges, this is often modeled as a server multiplying an attacker-chosen point by a secret scalar and returning a derived value.
 
+## Malformed ML-DSA signing keys and rejection-sampling leakage
+
+ML-DSA's expanded private key encodes polynomial vectors `s1` and `s2` with coefficients in `[-η, η]`. FIPS 204 notes that decoding malformed secret-key bytes can produce coefficients outside this range. The signing algorithm does not itself require an additional private-key consistency check.<sup>[[8]](#references)</sup>
+
+The relevant prerequisite is control over an **expanded signing key before it is imported or used to sign**, not a malformed public key submitted to a verifier. A permissive import path may accept altered packed coefficients and still produce signatures that verify. Compare acceptance at import and signing, then check the resulting signatures, using the [cryptographic key-encoding fuzzing workflow](../../generic-methodologies-and-resources/fuzzing.md#differential-fuzzing-of-cryptographic-key-encodings).<sup>[[9]](#references)[[10]](#references)</sup>
+
+Signing computes `z = y + c·s1` and `r0 = LowBits(w − c·s2)`, rejecting a candidate when `||z||∞ ≥ γ1 − β` or `||r0||∞ ≥ γ2 − β`. These checks make accepted outputs independent of the valid small secrets. Out-of-range secret coefficients can upset that rejection-sampling argument and introduce secret-dependent bias. This is a conditional leakage mechanism, **not** a demonstrated full-key recovery from the reported library discrepancy.<sup>[[8]](#references)[[10]](#references)</sup>
+
+Private-key validation is distinct from signature verification. In the reported comparison, OpenSSL, BoringSSL, and SymCrypt applied extra private-key checks, while liboqs accepted malformed expanded keys during signing; its underlying `mldsa-native` provides a `pk_from_sk()` validator that liboqs did not expose. FIPS 204 does not mandate those extra validation checks.<sup>[[9]](#references)[[10]](#references)</sup>
+
+{{#include ../../banners/hacktricks-training.md}}
+
 ## References
 
 - [1] [SageMath](https://www.sagemath.org/)
@@ -59,5 +71,6 @@ Technical note:
 - [5] [Breitner and Heninger: Biased Nonce Sense — Lattice Attacks against Weak ECDSA Signatures](https://eprint.iacr.org/2019/023)
 - [6] [SEC 1 v2.0: Elliptic Curve Cryptography](https://www.secg.org/sec1-v2.pdf)
 - [7] [Python `ecdsa` documentation](https://ecdsa.readthedocs.io/)
-
-{{#include ../../banners/hacktricks-training.md}}
+- [8] [NIST FIPS 204: Module-Lattice-Based Digital Signature Standard](https://doi.org/10.6028/NIST.FIPS.204)
+- [9] [Missing ML-DSA and ML-KEM key checks - liboqs issue #2517](https://github.com/open-quantum-safe/liboqs/issues/2517)
+- [10] [State of Post-Quantum Cryptography Implementations](http://blog.quarkslab.com/state-of-post-quantum-cryptography-implementations.html)

@@ -379,6 +379,16 @@ engine.paths_between("handle_request", "parse_ipv6")
 
 The important methodology is the intersection: **complexity x exposure x impact**. Use the graph to pick fuzz targets with the highest expected security value, then use mutation survivors to decide which boundaries and invariants your harness must stress.<sup>[[5]](#references)</sup>
 
+## Differential fuzzing of cryptographic key encodings
+
+Start from valid serialized keys or standard test vectors. Mutate encoded fields without breaking the length and structure needed to reach import and operation paths, then submit the same bytes to independent implementations. Compare acceptance and errors. Randomized signatures and ciphertexts need correctness oracles, not byte-for-byte comparison: verify signatures or compare the shared secrets from an encapsulation/decapsulation round trip. Test vectors establish conformance for known cases; differential mutation probes malformed encodings beyond them.<sup>[[23]](#references)[[26]](#references)</sup>
+
+For these key formats, use format-specific oracles:<sup>[[24]](#references)[[25]](#references)[[26]](#references)</sup>
+
+- **ML-DSA expanded signing keys:** alter packed `s1` or `s2` coefficients outside `[-η, η]` while keeping the key parseable. Check whether import or signing rejects it and whether any resulting signature verifies. Acceptance differences alone are not standards violations, because FIPS 204 does not mandate extra private-key checks. See the [conditional leakage mechanism](../crypto/public-key/#malformed-ml-dsa-signing-keys-and-rejection-sampling-leakage).
+- **ML-KEM key pairs:** separate the required encapsulation-key and decapsulation-input checks from the optional pairwise-consistency check (PCT) on an imported pair. Encapsulate with its public key, decapsulate with its private key, and compare shared secrets; a mismatch can break encrypted communication even when individual keys pass input checks. Check whether the API validates inputs in the operation or through a separate call; libcrux exposes `validate_public_key(pk)` and `validate_private_key(sk, ct)`, which do not replace a PCT.
+- **XMSS/XMSSMT raw keys:** test serialized **signing and verifying** key round trips across parameter sets, not just operations with in-memory keys. XMSS and XMSSMT have separate four-byte OID namespaces, so an OID-only parser that tries XMSS first can misclassify a colliding XMSSMT key and reject import. The reported RustCrypto parser illustrates an interoperability/availability failure, not a signature forgery.
+
 ## Go Fuzzing With gosentry: Stronger Engine, Typed Inputs, And Differential Checks
 
 If a Go target already has a native `testing.F` harness, a practical upgrade path is to run the same harness with [gosentry](https://github.com/trailofbits/gosentry), a forked Go toolchain that keeps `go test -fuzz` but swaps the backend to **LibAFL**.<sup>[[7]](#references)[[8]](#references)</sup>
@@ -480,7 +490,7 @@ After a campaign, replay the saved queue corpus to generate a Go coverage report
 
 Run the command from the **same package** and with the **same `-fuzz` target** so gosentry resolves the right cached campaign state.
 
-
+{{#include ../banners/hacktricks-training.md}}
 
 ## References
 
@@ -506,4 +516,7 @@ Run the command from the **same package** and with the **same `-fuzz` target** s
 - [20] [CFITSIO Extended Filename Syntax](https://heasarc.gsfc.nasa.gov/docs/software/fitsio/filters.html)
 - [21] [Doyensec Advisory: CFITSIO Q4 2025](https://www.doyensec.com/resources/Doyensec_Advisory_CFITSIO_Q42025.pdf)
 - [22] [Fuzzing CFITSIO Extended Filename Syntax: 16 Memory-Safety Vulnerabilities and Codex-Assisted Triage](https://blog.doyensec.com/2026/04/20/cfitsio-fuzzing.html)
-{{#include ../banners/hacktricks-training.md}}
+- [23] [Differential fuzzing for cryptography](https://blog.quarkslab.com/differential-fuzzing-for-cryptography.html)
+- [24] [NIST FIPS 203: Module-Lattice-Based Key-Encapsulation Mechanism Standard](https://doi.org/10.6028/NIST.FIPS.203)
+- [25] [XMSSMT OID parsing bug - RustCrypto issue #1442](https://github.com/RustCrypto/signatures/issues/1442)
+- [26] [State of Post-Quantum Cryptography Implementations](http://blog.quarkslab.com/state-of-post-quantum-cryptography-implementations.html)
