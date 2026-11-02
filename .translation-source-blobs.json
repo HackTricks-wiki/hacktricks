@@ -784,7 +784,7 @@
     "src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-php-safe_mode-bypass-via-proc_open-and-custom-environment-exploit.md": "4ffe786bf256b50ae08d4edfe31ead6186c2ab1b",
     "src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-via-mem.md": "b87bf183319237536e1c7a9e6cf7b3a6a3c25aa2",
     "src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-php-5.2.4-ioncube-extension-exploit.md": "32c7bbef2ed8fdd22e6c1f77c572b973c06364fe",
-    "src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-php-5.x-shellshock-exploit.md": "98e72af50d1172eb034911b3938dbb0ebc2ba02e",
+    "src/network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-php-5.x-shellshock-exploit.md": "29fd61aa3f1aad398a3d9a450adba516fcd38e25",
     "src/network-services-pentesting/pentesting-web/prestashop.md": "89a5e422aae9098d7984109210d0c1c20a97deef",
     "src/network-services-pentesting/pentesting-web/proxmox-ve.md": "7a6556563d191d562c79ec7d80a47c89513c33d6",
     "src/network-services-pentesting/pentesting-web/put-method-webdav.md": "6f96ac2ba1bd0652ae361c7c22c1096976d99ccf",
