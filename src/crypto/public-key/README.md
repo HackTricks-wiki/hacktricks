@@ -52,15 +52,15 @@ Technical note:
 
 ## Malformed ML-DSA signing keys and rejection-sampling leakage
 
-An ML-DSA expanded private key encodes secret polynomial vectors `s1` and `s2` whose coefficients must be in `[-η, η]`. If an attacker can alter serialized private-key bytes **before import and signing**, flip packed coefficient bits so the key remains parseable but a coefficient falls outside that interval. Compare import and signing behavior across libraries using the [cryptographic differential-fuzzing workflow](../../generic-methodologies-and-resources/fuzzing.md#differential-fuzzing-of-cryptographic-key-encodings). This is not an attack from submitting a malformed public key to a verifier: the altered **signing** key must actually be used.<sup>[[10]](#references)</sup>
+ML-DSA's expanded private key encodes polynomial vectors `s1` and `s2` with coefficients in `[-η, η]`. FIPS 204 notes that decoding malformed secret-key bytes can produce coefficients outside this range. The signing algorithm does not itself require an additional private-key consistency check.<sup>[[8]](#references)</sup>
 
-Signing computes `z = y + c·s1` and uses rejection sampling to keep returned `z` coefficients inside the parameter-set-dependent interval `[-γ1 + β + 1, γ1 - β - 1]`. It similarly rejects on `r = w - c·s2` outside `[-γ2 + β + 1, γ2 - β - 1]`. These bounds hide the small valid secret coefficients. With an out-of-range coefficient, some otherwise valid outputs become unreachable, so accepted signatures can have a secret-dependent distribution. This is a conditional leakage mechanism, not a demonstrated full-key recovery from the reported discrepancy.<sup>[[10]](#references)</sup>
+The relevant prerequisite is control over an **expanded signing key before it is imported or used to sign**, not a malformed public key submitted to a verifier. A permissive import path may accept altered packed coefficients and still produce signatures that verify. Compare acceptance at import and signing, then check the resulting signatures, using the [cryptographic key-encoding fuzzing workflow](../../generic-methodologies-and-resources/fuzzing.md#differential-fuzzing-of-cryptographic-key-encodings).<sup>[[9]](#references)[[10]](#references)</sup>
 
-The distinction is **key validation**, not basic signature verification. OpenSSL, BoringSSL, and SymCrypt add private-key checks; the reported liboqs signing API accepted malformed expanded keys, while its underlying `mldsa-native` implementation has a `pk_from_sk()` validator that liboqs did not expose.<sup>[[9]](#references)[[10]](#references)</sup>
+Signing computes `z = y + c·s1` and `r0 = LowBits(w − c·s2)`, rejecting a candidate when `||z||∞ ≥ γ1 − β` or `||r0||∞ ≥ γ2 − β`. These checks make accepted outputs independent of the valid small secrets. Out-of-range secret coefficients can upset that rejection-sampling argument and introduce secret-dependent bias. This is a conditional leakage mechanism, **not** a demonstrated full-key recovery from the reported library discrepancy.<sup>[[8]](#references)[[10]](#references)</sup>
 
-FIPS 204 warns that unpacking untrusted encodings can yield out-of-range coefficients, but it does not mandate these extra private-key checks.<sup>[[8]](#references)[[9]](#references)</sup>
+Private-key validation is distinct from signature verification. In the reported comparison, OpenSSL, BoringSSL, and SymCrypt applied extra private-key checks, while liboqs accepted malformed expanded keys during signing; its underlying `mldsa-native` provides a `pk_from_sk()` validator that liboqs did not expose. FIPS 204 does not mandate those extra validation checks.<sup>[[9]](#references)[[10]](#references)</sup>
 
-A fault that changes secret coefficients is another prerequisite for the same bias, independent of key import.<sup>[[10]](#references)</sup>
+{{#include ../../banners/hacktricks-training.md}}
 
 ## References
 
@@ -74,5 +74,3 @@ A fault that changes secret coefficients is another prerequisite for the same bi
 - [8] [NIST FIPS 204: Module-Lattice-Based Digital Signature Standard](https://doi.org/10.6028/NIST.FIPS.204)
 - [9] [Missing ML-DSA and ML-KEM key checks - liboqs issue #2517](https://github.com/open-quantum-safe/liboqs/issues/2517)
 - [10] [State of Post-Quantum Cryptography Implementations](http://blog.quarkslab.com/state-of-post-quantum-cryptography-implementations.html)
-
-{{#include ../../banners/hacktricks-training.md}}

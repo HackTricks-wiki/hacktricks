@@ -381,15 +381,13 @@ The important methodology is the intersection: **complexity x exposure x impact*
 
 ## Differential fuzzing of cryptographic key encodings
 
-Begin with a valid serialized key pair or a standard test vector, then mutate **fields in the encoded key** while preserving enough length and structure to reach the import and operation code. Submit the same bytes to independent implementations. Compare import acceptance, operation errors, and outputs, but do not treat different randomized signatures or KEM ciphertexts as bugs by themselves: verify the signature or perform an encapsulate/decapsulate round trip instead.<sup>[[23]](#references)[[26]](#references)</sup>
+Start from valid serialized keys or standard test vectors. Mutate encoded fields without breaking the length and structure needed to reach import and operation paths, then submit the same bytes to independent implementations. Compare acceptance and errors. Randomized signatures and ciphertexts need correctness oracles, not byte-for-byte comparison: verify signatures or compare the shared secrets from an encapsulation/decapsulation round trip. Test vectors establish conformance for known cases; differential mutation probes malformed encodings beyond them.<sup>[[23]](#references)[[26]](#references)</sup>
 
-A test-vector runner such as `crypto-condor` checks conformance on known cases; differential mutation explores malformed inputs and implementation disagreements beyond those vectors. Quarkslab's DeltAFLy used this approach, but it is an internal rather than publicly available fuzzer.<sup>[[26]](#references)</sup>
+For these key formats, use format-specific oracles:<sup>[[24]](#references)[[25]](#references)[[26]](#references)</sup>
 
-Useful key-format-specific oracles are:<sup>[[24]](#references)[[25]](#references)[[26]](#references)</sup>
-
-- **ML-DSA expanded signing keys:** mutate packed `s1` or `s2` coefficients outside `[-η, η]` while keeping the key parseable. Compare whether import or signing rejects the key and whether produced signatures verify. A disagreement alone is not a standards violation: FIPS 204 does not require the extra private-key checks. The [malformed-key leakage mechanism](../crypto/public-key/#malformed-ml-dsa-signing-keys-and-rejection-sampling-leakage) explains the security-relevant condition.
-- **ML-KEM key pairs:** distinguish mandatory encapsulation-key and decapsulation-input checks from the optional pairwise-consistency check (PCT). For an imported pair, encapsulate with its public key, decapsulate the ciphertext with its private key, and compare the shared secrets. A pair that passes parsing but fails PCT can break later encrypted communication. Test dedicated validation APIs too: libcrux separates `validate_public_key(pk)` and `validate_private_key(sk, ct)` from the operation calls, and these are not a substitute for PCT.
-- **XMSS/XMSSMT raw keys:** test serialized public-key import rather than only in-memory generated keys. Their four-byte parameter OIDs occupy separate namespaces and can collide. In RustCrypto, `VerifyingKey::<P>::try_from(bytes)` reaches a parser that tries the XMSS namespace before the XMSSMT offset. A colliding XMSSMT key resolves to the wrong parameter set and fails import even though an internally generated key works. This is an interoperability/availability result, not a signature forgery.
+- **ML-DSA expanded signing keys:** alter packed `s1` or `s2` coefficients outside `[-η, η]` while keeping the key parseable. Check whether import or signing rejects it and whether any resulting signature verifies. Acceptance differences alone are not standards violations, because FIPS 204 does not mandate extra private-key checks. See the [conditional leakage mechanism](../crypto/public-key/#malformed-ml-dsa-signing-keys-and-rejection-sampling-leakage).
+- **ML-KEM key pairs:** separate the required encapsulation-key and decapsulation-input checks from the optional pairwise-consistency check (PCT) on an imported pair. Encapsulate with its public key, decapsulate with its private key, and compare shared secrets; a mismatch can break encrypted communication even when individual keys pass input checks. Check whether the API validates inputs in the operation or through a separate call; libcrux exposes `validate_public_key(pk)` and `validate_private_key(sk, ct)`, which do not replace a PCT.
+- **XMSS/XMSSMT raw keys:** test serialized **signing and verifying** key round trips across parameter sets, not just operations with in-memory keys. XMSS and XMSSMT have separate four-byte OID namespaces, so an OID-only parser that tries XMSS first can misclassify a colliding XMSSMT key and reject import. The reported RustCrypto parser illustrates an interoperability/availability failure, not a signature forgery.
 
 ## Go Fuzzing With gosentry: Stronger Engine, Typed Inputs, And Differential Checks
 
@@ -492,7 +490,7 @@ After a campaign, replay the saved queue corpus to generate a Go coverage report
 
 Run the command from the **same package** and with the **same `-fuzz` target** so gosentry resolves the right cached campaign state.
 
-
+{{#include ../banners/hacktricks-training.md}}
 
 ## References
 
@@ -522,4 +520,3 @@ Run the command from the **same package** and with the **same `-fuzz` target** s
 - [24] [NIST FIPS 203: Module-Lattice-Based Key-Encapsulation Mechanism Standard](https://doi.org/10.6028/NIST.FIPS.203)
 - [25] [XMSSMT OID parsing bug - RustCrypto issue #1442](https://github.com/RustCrypto/signatures/issues/1442)
 - [26] [State of Post-Quantum Cryptography Implementations](http://blog.quarkslab.com/state-of-post-quantum-cryptography-implementations.html)
-{{#include ../banners/hacktricks-training.md}}
