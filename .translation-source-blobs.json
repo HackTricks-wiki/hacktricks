@@ -955,7 +955,7 @@
     "src/pentesting-web/ssrf-server-side-request-forgery/README.md": "2b28b637056e846094d8c8db094378baa44540a2",
     "src/pentesting-web/ssrf-server-side-request-forgery/cloud-ssrf.md": "a09ecd4acf322bac29a3c0a12528fcecd71d3a7c",
     "src/pentesting-web/ssrf-server-side-request-forgery/ssrf-vulnerable-platforms.md": "1d1d0d6a8ab4f51d501f20aa5630a0d16ffd0c7f",
-    "src/pentesting-web/ssrf-server-side-request-forgery/url-format-bypass.md": "3aa76d7de3dc1d4b63df16445b113b55b32d7ad7",
+    "src/pentesting-web/ssrf-server-side-request-forgery/url-format-bypass.md": "5e45111849b56f684ff41ed88da43a8c3f000482",
     "src/pentesting-web/ssti-server-side-template-injection/README.md": "5f4c74d840f97b43c728e604974e09574078858b",
     "src/pentesting-web/ssti-server-side-template-injection/el-expression-language.md": "250ae9ac080b9ac34d2f5102292d28b1088c2241",
     "src/pentesting-web/ssti-server-side-template-injection/jinja2-ssti.md": "d9eeaa26f6e8522b3bb974b2de3f67999b237d57",
