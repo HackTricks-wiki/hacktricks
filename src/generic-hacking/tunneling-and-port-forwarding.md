@@ -238,6 +238,23 @@ rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
 ```
 
+## Yggdrasil userspace overlay with yggstack
+
+[Yggstack](https://github.com/yggdrasil-network/yggstack) joins Yggdrasil's encrypted IPv6 mesh without a TUN interface or administrator privileges. It offers a SOCKS5 listener for connections **from the local process into the overlay**, and TCP forwarding in either direction. This is useful when a pivot cannot install a tunnel driver, but the operator endpoint must also join Yggdrasil and the pivot still needs outbound connectivity to a configured peer.<sup>[[64]](#references)[[65]](#references)</sup>
+
+Generate a configuration, add an authorized peer URI to its `Peers` section, then choose the SOCKS listener or remote-port exposure mode. The latter makes a service bound only to `127.0.0.1:8080` reachable at port `18080` on the node's Yggdrasil address; it does **not** publish the service to the ordinary Internet. The commands below are alternative runs of the same node, not two processes to start with the same identity.<sup>[[64]](#references)[[65]](#references)</sup>
+
+```bash
+./yggstack -genconf > yggdrasil.conf
+# Add a peer URI to the Peers section of yggdrasil.conf first.
+./yggstack -useconffile yggdrasil.conf -socks 127.0.0.1:1080
+./yggstack -useconffile yggdrasil.conf -remote-tcp 18080:127.0.0.1:8080
+```
+
+A Go implant can use the same userspace stack in-process rather than run `yggstack` as a separate executable. In ESET's MythicRatatoskr case, the implant selected three embedded public peers, generated a new Ed25519 identity on each start (changing its overlay IPv6 address), suppressed node metadata with empty `NodeInfo` and `NodeInfoPrivacy`, then reached an HTTPS endpoint inside the mesh. A local SOCKS5 listener could be exposed with its overlay port-forwarding command.<sup>[[64]](#references)[[67]](#references)</sup>
+
+This can hide the final overlay destination from an ordinary egress view, but not the public peer connections or the source IP visible to direct peers. Yggdrasil does not provide anonymity.<sup>[[66]](#references)[[67]](#references)</sup>
+
 ## Tailcat: accountless userspace TCP forwarding
 
 Tailcat uses Tailscale's WireGuard/NAT-traversal/DERP data plane without the Tailscale control plane. It needs neither a Tailscale account nor administrator privileges, and it does not install host routes or change DNS. Unlike [Tailscale Serve/Funnel](expose-local-to-the-internet.md#tailscale-funnel--serve) or the in-process [BOFScale tailnet](#bofscale---cdn-fronted-in-process-tailnet), the server shares a *tailcat address* out of band. The client uses that address to reach a port served by the remote node.<sup>[[62]](#references)</sup>
@@ -1098,5 +1115,9 @@ The same report details the defaults, wildcard listeners, packet decryption, rel
 - [61] [RFC 4787 - NAT Behavioral Requirements for Unicast UDP](https://www.rfc-editor.org/rfc/rfc4787.html)
 - [62] [Tailcat README](https://github.com/tailscale/tailcat/blob/main/README.md)
 - [63] [Malwarebytes - Kothamine malware uses Tailscale’s tailcat to evade network detection](https://www.malwarebytes.com/blog/threat-intel/2026/09/kothamine-malware-uses-tailscales-tailcat-to-evade-network-detection)
+- [64] [Yggstack README](https://github.com/yggdrasil-network/yggstack)
+- [65] [Yggdrasil configuration: connecting to peers](https://yggdrasil-network.github.io/configuration.html)
+- [66] [Yggdrasil FAQ: anonymity and peering](https://yggdrasil-network.github.io/faq.html)
+- [67] [ESET Research: MythicRatatoskr Yggdrasil-enabled backdoor](https://welivesecurity.com/en/eset-research/mythicratatoskr-yggdrasil-enabled-backdoor-deployed-uac0099-sandworm-collaboration)
 
 {{#include ../banners/hacktricks-training.md}}
