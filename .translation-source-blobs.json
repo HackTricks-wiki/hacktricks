@@ -379,7 +379,7 @@
     "src/linux-hardening/interesting-files-permissions/README.md": "dea7677836881f2c98f12e75c71b2fdf10a2c775",
     "src/linux-hardening/interesting-files-permissions/ld.so.conf-example.md": "084ca168cc4d5ade40e5a0028c7923b90ec0e20d",
     "src/linux-hardening/interesting-files-permissions/linux-capabilities.md": "6e1a41fc1df543cd85358e74f7926f6f34e887c5",
-    "src/linux-hardening/interesting-files-permissions/nfs-no_root_squash-misconfiguration-pe.md": "65240077b90e4e07a9aefbd555b221225704b278",
+    "src/linux-hardening/interesting-files-permissions/nfs-no_root_squash-misconfiguration-pe.md": "5aaae6a3db255a70324241153fc051d744f43c9e",
     "src/linux-hardening/interesting-files-permissions/selinux.md": "1fc2ba165d0a220f614994919719efceed81da68",
     "src/linux-hardening/interesting-files-permissions/suid-sgid-and-acl-triage.md": "15c3ef021a3ee12f989ec1e387476e456b241f40",
     "src/linux-hardening/interesting-files-permissions/suid-shared-library-and-linker-abuse.md": "75b4f44b488c0f7a6884fe8b54dca42a3c3f4145",
