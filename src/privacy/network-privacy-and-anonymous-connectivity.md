@@ -2,68 +2,71 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Faragha ya mtandao ni uamuzi wa routing, si utambulisho kamili. Chagua njia kwa kuuliza ni nani anayepaswa kushindwa kuunganisha **chanzo**, **lengwa**, **maudhui**, na **muda**.
+Faragha ya mtandao ni uamuzi wa njia ya trafiki, si utambulisho kamili. Chagua njia kwa kujiuliza ni nani hapaswi kuweza kuunganisha **chanzo**, **lengwa**, **maudhui**, na **muda**.
 
-Kwa inventory iliyosanifiwa—`Pros`, `Cons`, `Procedure`, na `Detection` kwa kila familia ya access-path—anza na [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md). Ukurasa huu unaeleza kwa upana chaguo za kawaida zinazoweza kutekelezwa.
+Kwa orodha sanifu—`Pros`, `Cons`, `Procedure` ya hatua kwa hatua, na `Detection` kwa kila familia ya njia ya ufikiaji—anza na [Katalogi ya Mbinu za Ufikiaji wa Mtandao Bila Kujulikana](anonymous-internet-access-techniques.md). Ukurasa huu unaeleza kwa undani zaidi chaguo za kawaida zinazoweza kutumika.
 
-## Kile ambacho kila observer anaweza kuona kwa kawaida
+## Kile ambacho kila mwangalizi anaweza kuona kwa kawaida
 
-| Path | Local network / ISP | Intermediary | Destination | Main limitation | Relative speed |
+| Njia | Mtandao wa ndani / ISP | Mpatanishi | Lengwa | Kizuizi kikuu | Kasi ya kadirio |
 |---|---|---|---|---|---|
-| Direct HTTPS | Metadata ya chanzo, lengwa, muda/ujazo | Hosting/CDN huona muunganisho | Source IP, data ya browser/app | Hakuna faragha ya source-IP | Ya haraka zaidi |
-| Commercial VPN | Chanzo kimeunganishwa na VPN; si metadata ya kawaida ya lengwa | VPN huona metadata ya chanzo na lengwa | VPN egress IP | Provider mmoja anakuwa sehemu ya correlation | Kwa kawaida ya haraka |
-| Self-hosted VPN/VPS | Chanzo kimeunganishwa na VPS | Kumbukumbu za host/account/payment/control-plane | VPS egress IP | Rahisi kuhusishwa na server/account iliyokodishwa | Kwa kawaida ya haraka |
-| Tor Browser | Chanzo kimeunganishwa na Tor/bridge; muda/ujazo | Kila relay huona sehemu ndogo tu | Tor exit, data ya browser | Polepole; hatari za account/endpoint/correlation | Wastani/polepole |
-| Tails/Whonix | Njia ya Tor inayofanana, ikiwa na mipaka imara zaidi ya routing | Vikwazo vilevile vya Tor | Tor exit/application data | Makosa ya kiutendaji na host/hardware bado vinaendelea | Wastani/polepole |
-| Public guest Wi-Fi + HTTPS | Venue huona kifaa cha ndani/muda na malengo | Venue ISP huona metadata | Guest public IP | Correlation ya eneo halisi/captive-portal/kifaa | Ya haraka/inabadilika |
-| Cellular hotspot | Carrier huona subscriber/device/location na malengo | VPN/Tor ikiwa imetumika | Carrier, VPN, au Tor egress IP | Mobile subscription na location ni vitambulisho vya kudumu | Ya haraka/inabadilika |
-| Mixnet | Access huona matumizi ya mixnet; muda/ujazo | Mixing nodes nyingi | Gateway/egress | Ecosystem inayoibuka; gharama ya latency na bandwidth | Polepole zaidi |
+| HTTPS ya moja kwa moja | Chanzo, metadata ya lengwa, muda/ujazo | Mtoa huduma wa hosting/CDN huona muunganisho | IP ya chanzo, data ya kivinjari/programu | Hakuna faragha ya IP ya chanzo | Ya kasi zaidi |
+| VPN ya kibiashara | Chanzo kimeunganishwa na VPN; kwa kawaida si metadata ya lengwa | VPN huona chanzo na metadata ya lengwa | IP ya kutoka ya VPN | Mtoa huduma mmoja huwa sehemu ya kulinganisha miunganisho | Kwa kawaida ya kasi |
+| VPN/VPS inayojisimamiwa | Chanzo kimeunganishwa na VPS | Rekodi za hosti/akaunti/malipo/control plane | IP ya kutoka ya VPS | Ni rahisi kuhusisha na seva/akaunti iliyokodishwa | Kwa kawaida ya kasi |
+| Tor Browser | Chanzo kimeunganishwa na Tor/bridge; muda/ujazo | Relay huona tu sehemu ndogo | Tor exit, data ya kivinjari | Polepole zaidi; hatari za akaunti/endpoint/kulinganisha | Ya wastani/polepole |
+| Tails/Whonix | Njia ya Tor inayofanana, yenye mipaka imara zaidi ya uelekezaji | Vizuizi vilevile vya Tor | Tor exit/data ya programu | Makosa ya kiutendaji na hosti/vifaa bado ni hatari | Ya wastani/polepole |
+| Wi-Fi ya wageni ya umma + HTTPS | Eneo huona kifaa cha ndani/muda na malengo | ISP ya eneo huona metadata | IP ya umma ya mgeni | Ulinganishaji wa eneo halisi/ukurasa wa captive portal/kifaa | Ya kasi/inayotofautiana |
+| Hotspot ya simu | Mtoa huduma huona mteja/kifaa/mahali na malengo | VPN/Tor ikitumika | IP ya kutoka ya mtoa huduma, VPN au Tor | Usajili wa simu na mahali ni vitambulisho vinavyodumu | Ya kasi/inayotofautiana |
+| Mixnet | Ufikiaji huona matumizi ya mixnet; muda/ujazo | Nodi nyingi za kuchanganya | Gateway/egress | Mfumo ikolojia unaochipuka; gharama ya muda wa kusubiri na kipimo data | Polepole zaidi |
 
-HTTPS hulinda maudhui yanayosafirishwa lakini si metadata yote. EFF inabainisha kuwa domain, muda, na ukubwa wa traffic vinaweza kubaki vinaonekana kwa intermediaries hata wakati page paths, credentials, na messages zimesimbwa kwa njia fiche.<sup>[[1]](#references)</sup>
+HTTPS hulinda maudhui yanaposafirishwa lakini si metadata yote. EFF inabainisha kuwa domain, muda na ukubwa wa trafiki vinaweza kubaki vinaonekana kwa wapatanishi hata wakati njia za kurasa, vitambulisho na ujumbe vimesimbwa kwa njia fiche.<sup>[[1]](#references)</sup>
 
-## VPNs: faragha ya haraka yenye trust iliyokolezwa
+Overlay iliyosimbwa kwa njia fiche si mtandao wa kutokujulikana moja kwa moja: peers za moja kwa moja za Yggdrasil zinaweza kuona anwani za IP za wenzao.<sup>[[20]](#references)</sup> [Usambazaji wa userspace na usafirishaji wa SOCKS](../generic-hacking/tunneling-and-port-forwarding.md#yggdrasil-userspace-overlay-with-yggstack) ni chaguo la tunneling, si safu ya kuficha chanzo.<sup>[[20]](#references)[[21]](#references)</sup>
 
-VPN ni muhimu kwa kuficha metadata ya lengwa kutoka kwa access ISP, kulinda first hop kwenye mtandao usioaminika, kuwasilisha engagement egress address thabiti, au kufikia private network. **Haifanyi user asiweze kutambulika.** VPN huona source connection na inaweza kuona destination metadata; accounts, cookies, GPS, fingerprints, na payment information hubaki.<sup>[[1]](#references)</sup>
+## VPN: faragha ya haraka yenye uaminifu uliokolezwa
 
-### Orodha ya ukaguzi wa provider
+VPN husaidia kuficha metadata ya lengwa kutoka kwa ISP ya ufikiaji, kulinda hop ya kwanza kwenye mtandao usioaminika, kutoa anwani thabiti ya egress kwa kazi, au kufikia mtandao wa faragha. **Haifanyi mtumiaji asijulikane.** VPN huona muunganisho wa chanzo na inaweza kuona metadata ya lengwa; akaunti, cookies, GPS, fingerprint na taarifa za malipo hubaki.<sup>[[1]](#references)</sup>
 
-1. **Ownership and jurisdiction:** tambua legal entity, parent company, nchi za uendeshaji, infrastructure subcontractors, na legal process inayotumika.
-2. **Collected data:** tofautisha account/billing, source IP, connection timestamps, bandwidth, crash telemetry, DNS queries, na destination logs. “No browsing logs” haimaanishi “no data.”
-3. **Retention and deletion:** tafuta muda kamili wa kuhifadhi data na ikiwa backups, fraud systems, na processors hufuata ratiba hiyo hiyo.
-4. **Evidence:** pendelea audits za umma zenye scope, tarehe, findings, na remediation; clients zinazoweza kuzalishwa upya/open; transparency reports; na incidents zilizorekodiwa.
-5. **Protocol and client:** WireGuard, OpenVPN, au protocol nyingine iliyokaguliwa na inayotunzwa; automatic updates; DNS na IPv6 handling; kill switch; na per-platform leak tests.
-6. **Business model:** elewa jinsi service ya bure au inayofadhiliwa inavyopata fedha. Kuonekana kwenye app store pekee si ushahidi wa operation inayoaminika.
-7. **Payment fit:** alternative payment inaweza kupunguza billing disclosure kwa VPN lakini haifuti source IP inayoonekana kwenye kila connection.
+### Orodha ya kutathmini mtoa huduma
 
-### Configure na verify VPN
+1. **Umiliki na mamlaka ya kisheria:** tambua huluki ya kisheria, kampuni mama, nchi za uendeshaji, wakandarasi wadogo wa miundombinu na taratibu za kisheria zinazotumika.
+2. **Data inayokusanywa:** tofautisha data ya akaunti/malipo, IP ya chanzo, mihuri ya muda ya muunganisho, kipimo data, telemetry ya hitilafu, maswali ya DNS na rekodi za malengo. “Hakuna rekodi za kuvinjari” haimaanishi “hakuna data.”
+3. **Uhifadhi na ufutaji:** tafuta muda kamili wa kuhifadhi data na kama nakala rudufu, mifumo ya kuzuia ulaghai na wachakataji hufuata ratiba hiyo hiyo.
+4. **Ushahidi:** pendelea ukaguzi wa umma unaoeleza upeo, tarehe, matokeo na marekebisho; clients zilizo wazi zinazoweza kujengwa tena; ripoti za uwazi; na matukio yaliyoandikwa.
+5. **Itifaki na client:** WireGuard, OpenVPN au itifaki nyingine inayotunzwa na kukaguliwa; masasisho ya kiotomatiki; ushughulikiaji wa DNS na IPv6; kill switch; na majaribio ya leak kwa kila jukwaa.
+6. **Muundo wa biashara:** elewa jinsi huduma ya bure au inayofadhiliwa inavyolipiwa. Kuwepo kwenye app store pekee si ushahidi wa uendeshaji unaoaminika.
+7. **Ufaafu wa malipo:** njia mbadala ya malipo inaweza kupunguza taarifa za malipo zinazofichuliwa kwa VPN lakini haifuti IP ya chanzo inayoonekana kila muunganisho unapofanyika.
 
-1. Install signed client ya provider/organization kutoka official source yake.
-2. Chagua **full tunnel** isipokuwa route iliyorekodiwa lazima ipite nje yake. Split tunneling huunda correlation na leak paths.
-3. Washa fail-closed/always-on behavior na zuia traffic wakati wa reconnect.
-4. Tuma DNS kupitia tunnel na test IPv4 pamoja na IPv6. Zima protocol ikiwa tu haiwezi kutunnel kwa usalama na umekubali kupoteza functionality.
-5. Test sleep/wake, kubadilisha network, captive-portal login, tunnel crash, na hotspot tethering. NCSC inaonya kuwa tethered clients zinaweza kupita VPN ya simu kwenye baadhi ya platforms.<sup>[[2]](#references)</sup>
-6. Tumia test endpoint inayodhibitiwa na organization kurekodi IPv4, IPv6, DNS resolver, na connection timing zinazoonekana. Usifichue engagement nyeti kwa random “leak test” sites.
-7. Fanya test tena baada ya mabadiliko ya client, OS, network, au policy.
+### Sanidi na uthibitishe VPN
 
-### Hostile-LAN routing bypasses
+1. Sakinisha client iliyosainiwa ya mtoa huduma/shirika kutoka chanzo chake rasmi.
+2. Chagua **full tunnel** isipokuwa kuna route iliyoandikwa ambayo lazima ipite nje yake. Split tunneling huunda njia za kulinganisha miunganisho na leak.
+3. Washa tabia ya fail-closed/always-on na uzuie trafiki wakati wa kuunganisha tena.
+4. Elekeza DNS kupitia tunnel na ujaribu IPv4 na IPv6 zote mbili. Zima itifaki ikiwa tu haiwezi kupitishwa kwa usalama kupitia tunnel na umekubali kupoteza utendaji wake.
+5. Jaribu kulala/kuamka, kubadili mtandao, kuingia kwenye captive portal, kuanguka kwa tunnel na kushiriki intaneti kupitia hotspot. NCSC inaonya kuwa clients zilizounganishwa kupitia tethering zinaweza kupita VPN ya simu kwenye baadhi ya majukwaa.<sup>[[2]](#references)</sup>
+6. Tumia endpoint ya majaribio inayodhibitiwa na shirika kurekodi IPv4, IPv6, DNS resolver na muda wa muunganisho unaoonekana. Usifichue kazi nyeti kwa tovuti za nasibu za “leak test”.
+7. Jaribu tena baada ya mabadiliko ya client, OS, mtandao au sera.
 
-VPN inaweza kuendelea kuonekana ikiwa “connected” huku packets zilizochaguliwa zikipita nje yake kwa sababu operating system huchagua route **kabla** VPN haijasimba packet. TunnelCrack ilionyesha njia mbili za kutumia vibaya routing exceptions za kawaida: **LocalNet** hufanya Internet destination ionekane iko kwenye directly connected subnet, huku **ServerIP** ikispoof VPN-gateway resolution ili target address irithi clear-network exception inayohitajika na VPN transport. Hizi ni client/routing failures, si kuvunjwa kwa WireGuard, OpenVPN, IPsec, au TLS; HTTPS payloads hubaki zimesimbwa end-to-end, lakini local observer anaweza kupata destination/timing metadata na data yoyote ya cleartext protocol.<sup>[[18]](#references)</sup>
+### Njia za kukwepa uelekezaji kwenye LAN hasimu
 
-TunnelVision hutumia primitive hiyo hiyo ya pre-encryption kupitia DHCP option 121. DHCP server hasidi au iliyoathiriwa inaweza kusakinisha classless route iliyo specific zaidi kuliko catch-all route ya VPN, na kuchagua physical interface kwa host au range yoyote. VPN control channel inaweza kubaki hai, hivyo kill switch inayowashwa tu tunnel inapokatika huenda isiwake na ukaguzi mmoja wa public “IP leak” unaweza kukosa bypasses zilizochaguliwa.<sup>[[19]](#references)</sup>
+VPN inaweza kuonekana kuwa “imeunganishwa” huku baadhi ya pakiti zikipita nje yake kwa sababu mfumo wa uendeshaji huchagua route **kabla** VPN haijasimba pakiti. TunnelCrack ilionyesha njia mbili za kutumia vibaya misamaha ya kawaida ya uelekezaji: **LocalNet** hufanya lengwa la intaneti lionekane kuwa kwenye subnet iliyounganishwa moja kwa moja, huku **ServerIP** ikighushi utatuzi wa gateway ya VPN ili anwani lengwa irithi msamaha wa mtandao usiosimbwa unaohitajika na usafirishaji wa VPN. Haya ni mapungufu ya client/uelekezaji, si uvunjaji wa WireGuard, OpenVPN, IPsec au TLS; payload za HTTPS hubaki zimesimbwa kutoka mwisho hadi mwisho, lakini mwangalizi wa ndani anaweza kupata metadata ya lengwa/muda na data yoyote ya itifaki iliyo wazi.<sup>[[18]](#references)</sup>
 
-Packet-filter kill switch inayoruhusu DHCP na authenticated VPN transport pekee kwenye physical interface inapaswa kubadilisha hali hii kuwa fail-closed behavior, lakini targeted route injection bado inaweza kuunda selective-denial side channel. Kwa Linux workloads zenye madhara makubwa, pendelea [route-enforced network-namespace pattern](advanced-network-privacy-architectures.md#enforce-the-route-per-workload) yenye nguvu zaidi, ambapo application namespace haina physical interface wala clear-network default route.<sup>[[19]](#references)</sup>
+TunnelVision hutumia primitive hiyo hiyo ya kabla ya usimbaji kupitia DHCP option 121. Seva hasimu au iliyoathiriwa ya DHCP inaweza kusakinisha route isiyo na class ambayo ni mahususi zaidi kuliko route ya VPN inayojumuisha yote, na hivyo kuchagua kiolesura halisi kwa hosti au masafa yoyote. Chaneli ya udhibiti wa VPN inaweza kubaki hai, kwa hiyo kill switch inayowashwa tu tunnel inapokatika inaweza kutofanya kazi, na ukaguzi mmoja wa umma wa “IP leak” unaweza kukosa bypass za kuchagua.<sup>[[19]](#references)</sup>
 
-#### Owned-lab verification
+Kill switch ya packet-filter inayoruhusu DHCP na usafirishaji wa VPN uliothibitishwa pekee kwenye kiolesura halisi inapaswa kusababisha fail-closed, lakini uingizaji lengwa wa route bado unaweza kuunda side channel ya kunyima huduma kwa kuchagua. Kwa workload za Linux zenye matokeo makubwa, pendelea [muundo imara zaidi wa network-namespace unaotekeleza route](advanced-network-privacy-architectures.md#enforce-the-route-per-workload), ambapo namespace ya programu haina kiolesura halisi wala default route ya mtandao usiosimbwa.<sup>[[19]](#references)</sup>
 
-Test client/OS/version halisi kwenye AP, DHCP server, VPN endpoint, na destination unazomiliki; madai ya bidhaa nzima hupitwa na wakati haraka kwa sababu routing na packet-filter implementations hutegemea platform. Capture kwenye endpoint yenyewe pamoja na test server—website ya egress-IP pekee haithibitishi kuwa kila destination inafuata tunnel.<sup>[[18]](#references)[[19]](#references)</sup>
+#### Uthibitishaji kwenye maabara inayomilikiwa
 
-1. Connect VPN, rekodi VPN-server address, na hifadhi kila IPv4/IPv6 routing table pamoja na policy-routing rule. Kwenye Windows tumia `route print`; kwenye macOS tumia `netstat -rn`; kwenye Linux tumia commands zilizo hapa chini.
-2. Query selected route kwa owned destination IPs kadhaa. Next hop/interface lazima iwe tunnel, isipokuwa documented VPN transport endpoint.
-3. Kwa TunnelVision, renew lease kwenye controlled DHCP network na install option 121 route **kwa owned test destination pekee**. Pass inamaanisha traffic bado inatunnel au inazuiwa—haitolewi kamwe kama destination traffic kwenye physical interface.
-4. Kwa LocalNet, mpe client lab-only public documentation subnet kama `203.0.113.0/24` na uweke owned test destination ndani yake. Thibitisha kuwa kuwezesha LAN access hakufanyi Internet-class destinations zipite nje ya tunnel.
-5. Kwa ServerIP, kabla ya VPN connection, controlled DNS i-resolve owned VPN hostname kwa owned test destination, huku lab gateway iki-forward VPN transport kwenye real owned VPN endpoint. Client haipaswi ku-exempt unrelated application traffic kwenda kwenye spoofed address.
-6. Rudia ukiwa na “local network access” ikiwa enabled na disabled, baada ya reconnect, sleep/wake, kubadilisha network, na VPN-process crash. Test IPv4, IPv6, na DNS kwa kujitegemea.
-7. Kagua physical-interface capture. Inapaswa kuwa na DHCP na encrypted packets kwenda kwa VPN server, si packets zinazoelekezwa moja kwa moja kwa owned test destination. Pia thibitisha kuwa bypass iliyokataliwa haiwezi kujirudia kimya baada ya user prompts au connectivity repair.
+Jaribu client/OS/toleo husika hasa kwenye AP, seva ya DHCP, endpoint ya VPN na lengwa unalomiliki; madai yanayohusu bidhaa nzima hupitwa na wakati haraka kwa sababu utekelezaji wa uelekezaji na packet-filter hutofautiana kulingana na jukwaa. Nasa trafiki kwenye endpoint yenyewe na pia kwenye seva ya majaribio—tovuti inayoonyesha egress-IP pekee haithibitishi kuwa kila lengwa hufuata tunnel.<sup>[[18]](#references)[[19]](#references)</sup>
+
+1. Unganisha VPN, rekodi anwani ya seva ya VPN, na uhifadhi kila jedwali la uelekezaji la IPv4/IPv6 na kanuni ya policy-routing. Kwenye Windows tumia `route print`; kwenye macOS tumia `netstat -rn`; kwenye Linux tumia amri zilizo hapa chini.
+2. Uliza route iliyochaguliwa kwa IP kadhaa za malengo unayomiliki. Hop/kiolesura kinachofuata lazima kiwe tunnel, isipokuwa endpoint ya usafirishaji wa VPN iliyoandikwa.
+3. Kwa TunnelVision, fanya upya lease kwenye mtandao unaodhibitiwa wa DHCP na usakinishe route ya option 121 **kwa lengwa moja tu la majaribio unalomiliki**. Jaribio limefaulu ikiwa trafiki bado inapitia tunnel au imezuiwa—haitoki kamwe kama trafiki ya lengwa kwenye kiolesura halisi.
+4. Kwa LocalNet, weka subnet ya majaribio ya nyaraka za umma inayotumika maabara pekee, kama `203.0.113.0/24`, kwa client na uweke lengwa la majaribio unalomiliki ndani yake. Thibitisha kuwa kuwasha ufikiaji wa LAN hakufanyi malengo ya aina ya intaneti yapite nje ya tunnel.
+5. Kwa ServerIP, kabla ya kuunganisha VPN, elekeza DNS inayodhibitiwa itatue hostname ya VPN unayomiliki kuwa lengwa la majaribio unalomiliki, huku gateway ya maabara ikielekeza usafirishaji wa VPN kwenye endpoint halisi ya VPN unayomiliki. Client haipaswi kuondoa ulinzi wa trafiki isiyohusiana ya programu inayoelekezwa kwenye anwani iliyoghushiwa.
+6. Rudia jaribio ukiwasha na kuzima “local network access”, baada ya kuunganisha tena, kulala/kuamka, kubadili mtandao na kuanguka kwa mchakato wa VPN. Jaribu IPv4, IPv6 na DNS kila moja kivyake.
+7. Kagua capture ya kiolesura halisi. Inapaswa kuwa na DHCP na pakiti zilizosimbwa kwa seva ya VPN, si pakiti zinazoelekezwa moja kwa moja kwa lengwa la majaribio unalomiliki. Pia thibitisha kuwa bypass iliyokataliwa haiwezi kurejea kimyakimya baada ya maombi ya mtumiaji au kurekebisha muunganisho.
+
 ```bash
 # Run route monitoring and capture in separate terminals.
 TEST_IP=203.0.113.10 # replace with the owned test endpoint
@@ -73,111 +76,112 @@ ip route get "$TEST_IP"
 ip monitor route
 sudo tcpdump -ni any "host $TEST_IP"
 ```
-## Tor Browser: kutotenganishwa zaidi kwenye wavuti
 
-Tor huunda mzunguko kupitia relays nyingi ili kwa kawaida relay moja isijue chanzo na lengwa kwa pamoja. Lengwa huona Tor exit badala ya IP ya mtumiaji; mtandao wa ndani kwa kawaida huona muunganisho wa Tor.<sup>[[3]](#references)</sup> Tor imeundwa kwa programu za TCP zenye latency ndogo, hivyo huwa polepole na haiwezi kuhakikisha ulinzi dhidi ya mshambuliaji anayeweza kuoanisha ncha zote mbili.<sup>[[4]](#references)</sup>
+## Tor Browser: kutounganishwa kwa shughuli za wavuti kwa nguvu zaidi
 
-### Mtiririko salama wa Tor Browser
+Tor huunda mzunguko kupitia relays nyingi ili kwa kawaida relay moja isiweze kujua chanzo na lengwa vyote viwili. Lengwa huona Tor exit badala ya IP ya mtumiaji; mtandao wa karibu kwa kawaida huona muunganisho wa Tor.<sup>[[3]](#references)</sup> Tor imeundwa kwa programu za TCP zenye latency ndogo, kwa hiyo huwa polepole zaidi na haiwezi kuhakikisha ulinzi dhidi ya mshambulizi anayeweza kulinganisha ncha zote mbili.<sup>[[4]](#references)</sup>
 
-1. Pakua Tor Browser kutoka Tor Project au mirror rasmi pekee, na uthibitishe signature inapowezekana.
-2. Tumia **Tor Browser**, si browser ya kawaida iliyoelekezwa kwenye Tor SOCKS port. Browser za kawaida zinaweza kuvuja DNS/WebRTC na hali inayotambulisha mtumiaji.<sup>[[5]](#references)</sup>
-3. Dumisha size, fonts, extensions na privacy settings za default. Add-ons za ziada zinaweza kufanya browser itofautike zaidi.<sup>[[6]](#references)</sup>
-4. Chagua kiwango cha usalama **Safer** au **Safest** wakati kuvunjika kwa baadhi ya tovuti kunakubalika.
-5. Tumia bridge wakati Tor ya moja kwa moja imezuiwa au wakati IP za relay za kawaida zingesababisha mwonekano wa ndani usiokubalika. Bridges hupunguza utambuzi rahisi; haziondoi traffic analysis.<sup>[[7]](#references)</sup>
-6. Usiingie kwenye account inayokutambulisha, usitoe taarifa zinazokutambulisha, wala usifungue documents active zilizopakuliwa katika application ya nje yenye muunganisho wa mtandao.
-7. Tumia session/context tofauti kwa kila identity. “New circuit” si sawa na kufuta identity ya browser/application; tumia **New Identity** au anzisha upya isolated environment inapofaa.
-8. Pendelea HTTPS yenye authentication au onion service yenye authentication. Tor exit inaweza kuona traffic ya HTTP isiyosimbwa.
+### Mtiririko salama wa kazi wa Tor Browser
+
+1. Pakua Tor Browser kutoka Tor Project au kioo rasmi pekee, na uthibitishe saini inapowezekana.
+2. Tumia **Tor Browser**, si kivinjari cha kawaida kilichoelekezwa kwenye port ya Tor SOCKS. Vivinjari vya kawaida vinaweza kuvuja DNS/WebRTC na hali inayoweza kukutambulisha.<sup>[[5]](#references)</sup>
+3. Dumisha ukubwa, fonti, viendelezi na mipangilio ya faragha ya chaguomsingi. Viongezi vya ziada vinaweza kufanya kivinjari kiwe cha kipekee zaidi.<sup>[[6]](#references)</sup>
+4. Chagua kiwango cha usalama **Safer** au **Safest** ikiwa unaweza kukubali hitilafu zaidi.
+5. Tumia bridge pale Tor ya moja kwa moja inapozuiwa au IP za relay za kawaida zitakapoonyesha shughuli nyingi mno kwa mtandao wa karibu. Bridges hupunguza utambuzi rahisi; haziondoi uchanganuzi wa trafiki.<sup>[[7]](#references)</sup>
+6. Usiingie kwenye akaunti inayokutambulisha, usitoe taarifa zinazokutambulisha, wala kufungua hati amilifu zilizopakuliwa kwenye programu ya nje iliyo kwenye mtandao.
+7. Tumia kipindi/muktadha tofauti kwa kila utambulisho. “New circuit” si sawa na kufuta utambulisho wa kivinjari/programu; tumia **New Identity** au uwashe upya mazingira yaliyotengwa inapofaa.
+8. Pendelea HTTPS iliyothibitishwa au huduma ya onion iliyothibitishwa. Tor exit inaweza kuona trafiki ya HTTP isiyosimbwa kwa njia fiche.
 
 ### Tor pamoja na VPN
 
-Kuzichanganya si salama zaidi moja kwa moja. VPN kabla ya Tor inaweza kuficha miunganisho ya moja kwa moja ya Tor relay kutoka kwa ISP huku VPN ikiiona source; Tor kabla ya VPN huipa VPN mwonekano thabiti wa shughuli za baada ya Tor na inaweza kupunguza anonymity set. Configuration isiyo sahihi inaweza kusababisha leaks. Tor Project inapendekeza michanganyiko hii kwa threat models za advanced na zilizoainishwa wazi pekee.<sup>[[8]](#references)</sup>
+Kuzichanganya si salama zaidi moja kwa moja. VPN kabla ya Tor inaweza kuficha miunganisho ya moja kwa moja ya Tor relay kutoka kwa ISP huku VPN ikiona chanzo; Tor kabla ya VPN huipa VPN mwonekano thabiti wa shughuli za baada ya Tor na huenda ikapunguza kundi la kutokutambulika. Mipangilio isiyo sahihi inaweza kusababisha leaks. Tor Project inapendekeza michanganyiko hiyo kwa miundo ya vitisho iliyo wazi na kwa watumiaji wa hali ya juu pekee.<sup>[[8]](#references)</sup>
 
 ## Wi-Fi ya umma na ya wageni
 
-HTTPS ya kisasa humaanisha kuwa majirani wanaosikiliza kwa kawaida hawawezi kusoma maudhui ya wavuti yaliyosimbwa ipasavyo, lakini guest Wi-Fi si anonymity. Eneo linaweza kurekodi nyakati za kujiunga, identifiers za kifaa, data ya captive portal, destinations na maelezo ya DHCP; cameras, manunuzi, usafiri na ufuatiliaji wa kimwili vinaweza kumtambua mtumiaji. Hotspot bandia yenye jina linalofanana inaweza pia kunasa credentials za portal au kubadilisha traffic isiyosimbwa.<sup>[[9]](#references)</sup>
+HTTPS ya kisasa humaanisha kwamba majirani wanaofuatilia tu kwa kawaida hawawezi kusoma maudhui ya wavuti yaliyosimbwa kwa njia fiche ipasavyo, lakini Wi-Fi ya wageni si kutokujulikana. Eneo linaweza kurekodi nyakati za kuunganishwa, vitambulishi vya kifaa, data ya captive portal, maeneo lengwa na maelezo ya DHCP; kamera, manunuzi, usafiri na uangalizi wa moja kwa moja vinaweza kumtambua mtumiaji. Hotspot bandia yenye jina linalofanana inaweza pia kunasa vitambulisho vya portal au kubadilisha trafiki isiyosimbwa kwa njia fiche.<sup>[[9]](#references)</sup>
 
-### Mtiririko halali wa guest network
+### Mtiririko wa kazi halali wa mtandao wa wageni
 
-1. Tumia network inayotolewa kwa wageni pekee au ambayo mwenyewe amekupa ruhusa ya wazi. Waulize wahudumu SSID kamili na utaratibu wa portal.
-2. Update endpoint na travel router kabla ya kuwasili. Zima file/printer sharing, inbound discovery, auto-join na uchunguzi wa networks zilizokumbukwa.
-3. Washa private/randomized Wi-Fi address ya OS. Apple systems za sasa zinaweza kutumia rotating addresses kwenye networks zilizo wazi au dhaifu; randomization ya kisasa ya Android kwa kawaida hudumu kwa kila SSID. Hii hupunguza identifier moja ya ndani pekee.<sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
-4. Pendelea travel router inayodhibitiwa na organization au low-trust bridge device kati ya workstation yenye privileges na guest network. Hii huweka firewall/VPN policy katikati, lakini haimfichi router kutoka kwa eneo.<sup>[[12]](#references)</sup>
-5. Kamilisha captive portal kupitia low-trust device/browser iliyoteuliwa pekee. Usiweke kamwe credentials za binafsi au zilizotumika tena katika context inayodaiwa kuwa anonymous. Funga portal browser baada ya muunganisho kuanzishwa.
-6. Anzisha full-tunnel VPN au Tor kabla ya shughuli nyeti na uthibitishe fail-closed behavior.
-7. Sahau network baada ya matumizi na kagua policy ya portal kuhusu account na kuhifadhi data.
+1. Tumia mtandao unaotolewa kwa wageni pekee, au mtandao ambao mmiliki amekupa ruhusa ya wazi kuutumia. Waulize wafanyakazi SSID kamili na utaratibu wa portal.
+2. Sasisha endpoint na travel router kabla ya kufika. Zima kushiriki faili/printa, ugunduzi unaoingia, kujiunga kiotomatiki na uchunguzi wa mitandao iliyokumbukwa.
+3. Washa anwani ya Wi-Fi ya faragha/ya kubahatishwa ya OS. Mifumo ya sasa ya Apple inaweza kutumia anwani zinazobadilika kwenye mitandao iliyo wazi/dhaifu; ubahatishaji wa Android za kisasa kwa kawaida hudumu kwa kila SSID. Hili hupunguza kitambulishi kimoja tu cha karibu.<sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
+4. Pendelea travel router inayodhibitiwa na shirika au kifaa cha bridge kisichoaminika sana kati ya workstation yenye ruhusa za juu na mtandao wa wageni. Hii huweka pamoja sera za firewall/VPN lakini haifichi router kutoka kwa eneo.<sup>[[12]](#references)</sup>
+5. Kamilisha captive portal kupitia kifaa/kivinjari maalum kisichoaminika sana pekee. Usiweke kamwe vitambulisho vya kibinafsi au vilivyotumika tena katika muktadha unaodhaniwa kuwa haukutambulishi. Funga kivinjari cha portal baada ya muunganisho kuanzishwa.
+6. Anzisha VPN ya full-tunnel au Tor kabla ya shughuli nyeti na uthibitishe tabia ya fail-closed.
+7. Sahau mtandao baada ya kuutumia na kagua sera ya akaunti ya portal/uhifadhi wa data.
 
 {% hint style="danger" %}
-Kuvunja Wi-Fi ya jirani, kukwepa portal, kutumia guest credentials zilizovuja, kunakili access ya mgeni mwingine, au kuficha Raspberry Pi kwenye café ni shughuli isiyoruhusiwa—si mbinu ya privacy. Njia salama zinazolingana ni lawful guest network, site iliyoidhinishwa na client, au drop node iliyoandikwa na kuwekwa na kurejeshwa kwa ridhaa ya maandishi ya mwenye mali.
+Kuvunja Wi-Fi ya jirani, kukwepa portal, kutumia vitambulisho vya wageni vilivyovuja, kunakili ufikiaji wa mgeni mwingine, au kuficha Raspberry Pi kwenye mkahawa ni shughuli zisizoidhinishwa—si mbinu za faragha. Njia salama zinazolingana ni mtandao halali wa wageni, tovuti iliyoidhinishwa na mteja, au drop node iliyoandikwa na kuwekwa na kurejeshwa kwa idhini ya maandishi ya mmiliki wa mali.
 {% endhint %}
 
 ## Travel routers
 
-Travel router inaweza kutenga workstation dhidi ya broadcasts hatari za ndani, kutekeleza firewall, kutoa SSID ya ndani thabiti na kuunganisha VPN upya kiotomatiki. **Si anonymous**: upstream huona radio identity yake na timing ya traffic, na VPN provider huona source ya tunnel.
+Travel router inaweza kutenga workstation dhidi ya matangazo ya ndani yenye uhasama, kutekeleza firewall, kutoa SSID ya ndani inayobaki thabiti na kuunganisha VPN upya kiotomatiki. **Haikufanyi usitambulike**: mtandao wa juu huona utambulisho wake wa redio na muda wa trafiki, na mtoa huduma wa VPN huona chanzo cha tunnel.
 
-- Tumia firmware inayoungwa mkono ya OpenWrt/vendor na uondoe services zisizotumika.
-- Administer kupitia Ethernet au dedicated management SSID yenye password ya kipekee.
-- Zima WAN-side administration, UPnP, WPS, file sharing na inbound traffic isiyoombwa.
-- Tumia randomized/private WAN MAC pale tu inapoungwa mkono na inaporuhusiwa.
-- Tekeleza VPN policy kwenye router, ikijumuisha DNS na IPv6, na zuia egress tunnel inaposhindwa.
-- Usidhani phone hotspot hupitisha vifaa vilivyotether kupitia VPN ya simu; ifanyie test.
+- Tumia firmware inayoungwa mkono ya OpenWrt/vendor na uondoe huduma zisizotumika.
+- Simamia kupitia Ethernet au SSID maalum ya usimamizi yenye nenosiri la kipekee.
+- Zima usimamizi kupitia upande wa WAN, UPnP, WPS, kushiriki faili na trafiki inayoingia ambayo haijaombwa.
+- Tumia MAC ya WAN ya faragha/iliyobahatishwa pale tu inapoungwa mkono na kuruhusiwa.
+- Tekeleza sera ya VPN kwenye router, ikijumuisha DNS na IPv6, na zuia trafiki ya nje tunnel inaposhindwa.
+- Usidhani hotspot ya simu hupitisha vifaa vilivyounganishwa kupitia VPN ya simu; jaribu.
 
-## Cellular, SIMs na eSIMs
+## Cellular, SIM na eSIM
 
-Cellular ni rahisi lakini si anonymous. Operators huhifadhi subscriber/device identifiers na location inayotokana na kujiunga kwa kifaa kwenye network; eSIM bado ni mobile subscription. Prepaid haimaanishi kwa uhakika kuwa haijasajiliwa—mahitaji hutofautiana kwa nchi na hubadilika.<sup>[[13]](#references)</sup>
+Cellular ni rahisi kutumia lakini haikufanyi usitambulike. Waendeshaji huhifadhi vitambulishi vya mteja/kifaa na eneo linalotokana na kuunganishwa kwenye mtandao; eSIM bado ni usajili wa simu. Kulipia kabla hakumaanishi kwa uhakika kuwa usajili hauhitajiki—masharti hutofautiana kulingana na nchi na hubadilika.<sup>[[13]](#references)</sup>
 
-Kiutendaji:
+Kwa upande wa uendeshaji:
 
-- Tumia device tofauti inayoungwa mkono ili kupunguza kuanikwa kwa data binafsi, si kuunda subscriber wa kubuni.
-- Usibebe kifaa “tofauti” muda wote kando ya simu binafsi ikiwa co-location iko kwenye threat model.
-- Zima cellular, Wi-Fi, Bluetooth na location access zisizotumika; kuzima kifaa kunatoa mpaka wa radio wenye nguvu zaidi kuliko UI toggles.
-- Weka traffic nyeti ndani ya approved VPN/Tor path, huku ukitambua kuwa carrier bado anajua subscription/device location na tunnel endpoint.
-- Thibitisha current registration na retention rules kupitia national regulator au local counsel; usitegemee lists za mtandaoni za “anonymous SIM countries.”
+- Tumia kifaa tofauti kinachoungwa mkono ili kupunguza kufichuliwa kwa data ya kibinafsi, si kuunda mteja wa kubuni.
+- Usibebe kifaa “tofauti” kila wakati pamoja na simu ya kibinafsi ikiwa kuonekana pamoja kwa vifaa hivyo ni sehemu ya muundo wa vitisho.
+- Zima cellular, Wi-Fi, Bluetooth na ufikiaji wa eneo usiotumika; kuzima kifaa ni kizuizi kikubwa zaidi cha redio kuliko vitufe vya UI.
+- Pitisha trafiki nyeti ndani ya njia ya VPN/Tor iliyoidhinishwa, huku ukitambua kwamba mtoa huduma wa simu bado anajua usajili/eneo la kifaa na ncha ya tunnel.
+- Thibitisha kanuni za sasa za usajili na uhifadhi kwa mdhibiti wa kitaifa au mshauri wa eneo husika; usitegemee orodha za mtandaoni za “nchi zenye SIM zisizotambulika.”
 
-## DNS na TLS metadata
+## Metadata ya DNS na TLS
 
-- **DoH/DoT/DoQ** husimba DNS kati ya client na resolver, na kuzuia kusomwa au kubadilishwa kwa urahisi ndani ya mtandao, lakini resolver bado huona queries na transport identifiers. Hubadilisha trust; hazitoi anonymity.<sup>[[14]](#references)</sup>
-- **ODoH** huongeza proxy ili resolver asilazimike kujua client IP, kwa kudhani proxy na target hazishirikiani. Traffic analysis iko wazi nje ya scope.<sup>[[15]](#references)</sup>
-- **TLS Encrypted Client Hello (ECH)** inaweza kulinda server name ya ndani katika TLS handshake wakati client, DNS na server zina support. Destination IP, timing, volume na endpoint bado vinaonekana.<sup>[[16]](#references)</sup>
-- Katika VPN au Tor environment iliyosanidiwa ipasavyo, DNS inapaswa kufuata route inayoungwa mkono na environment hiyo. Kuongeza resolver tofauti kunaweza kuunda observer mpya au fingerprint.
+- **DoH/DoT/DoQ** husimba DNS kwa njia fiche kati ya mteja na resolver, hivyo kuzuia usomaji au urekebishaji rahisi wa ndani, lakini resolver bado huona maswali na vitambulishi vya usafirishaji. Huhamisha uaminifu; havikufanyi usitambulike.<sup>[[14]](#references)</sup>
+- **ODoH** huongeza proxy ili resolver isihitaji kujua IP ya mteja, ikidhaniwa kuwa proxy na target hazishirikiani. Uchanganuzi wa trafiki haujajumuishwa waziwazi.<sup>[[15]](#references)</sup>
+- **TLS Encrypted Client Hello (ECH)** inaweza kulinda jina la ndani la seva katika TLS handshake wakati mteja, DNS na seva vinapoiunga mkono. IP lengwa, muda, kiasi cha trafiki na endpoint bado huonekana.<sup>[[16]](#references)</sup>
+- Katika mazingira ya VPN au Tor yaliyosanidiwa ipasavyo, DNS inapaswa kufuata njia inayoungwa mkono na mazingira hayo. Kuongeza resolver tofauti kunaweza kuunda mtazamaji mpya au alama ya utambulisho.
 
-### Mtiririko wa kuthibitisha Encrypted-DNS/ECH
+### Mtiririko wa uthibitishaji wa DNS iliyosimbwa kwa njia fiche/ECH
 
-1. Amua kama DNS inadhibitiwa na VPN/Tor environment, OS au application. Isanidi katika layer **moja** iliyokusudiwa badala ya kuweka resolvers zisizohusiana kwa pamoja.
-2. Chagua resolver kwa kuzingatia privacy/retention policy yake iliyochapishwa na uwashe strict encrypted mode pale platform inapoiunga mkono. Opportunistic fallback inaweza kurudi kimya kimya kwenye plaintext.
-3. Query unique subdomain chini ya authoritative test zone unayoidhibiti; thibitisha kuwa authoritative log inaona recursive resolver iliyokusudiwa.
-4. Capture traffic ya test device pekee kwa authorization. Thibitisha kuwa access network haiwezi kusoma plaintext DNS, huku ukitambua kuwa inaweza kuona encrypted resolver/tunnel endpoint.
-5. Test encrypted resolver iliyozuiwa/isiyofikika. Hali ya kupita ni fail-closed iliyochaguliwa au fallback iliyoandikwa—si clear query iliyotokea kwa bahati mbaya.
-6. Kwa ECH, tumia host inayodhibitiwa yenye ECH na kagua client/server diagnostics kuthibitisha kuwa **inner** ClientHello ilikubaliwa. Kutoa HTTPS record pekee hakuthibitishi kuwa ECH ilifaulu.
-7. Rudia baada ya mabadiliko ya network, captive portals, browser updates na VPN reconnects. Rekodi component inayomiliki DNS/ECH ili administrators wa baadaye wasitengeneze bypass.
+1. Amua kama DNS inadhibitiwa na mazingira ya VPN/Tor, OS au programu. Isanidi kwenye tabaka **moja** linalokusudiwa badala ya kuweka resolvers zisizohusiana juu kwa juu.
+2. Chagua resolver kulingana na sera yake iliyochapishwa ya faragha/uhifadhi na uwashe hali fiche kali pale mfumo unapoiunga mkono. Kurudi nyuma kwa hiari kunaweza kurudisha DNS kwenye maandishi wazi bila taarifa.
+3. Tuma ombi kwa subdomain ya kipekee chini ya eneo la majaribio la authoritative unalodhibiti; thibitisha kwamba logi ya authoritative inaona recursive resolver iliyokusudiwa.
+4. Nasa trafiki ya kifaa cha majaribio pekee na kwa idhini. Thibitisha kuwa mtandao wa ufikiaji hauwezi kusoma DNS iliyo kwenye maandishi wazi, huku ukitambua kwamba unaweza kuona ncha ya resolver/tunnel iliyosimbwa kwa njia fiche.
+5. Jaribu resolver iliyosimbwa kwa njia fiche iliyozuiwa/isiyofikika. Hali ya kufaulu ni tabia iliyochaguliwa ya fail-closed au kurudi nyuma iliyorekodiwa—si ombi la wazi lililotokea kwa bahati mbaya.
+6. Kwa ECH, tumia host inayodhibitiwa na inayowezesha ECH na kagua uchunguzi wa mteja/seva ili kuthibitisha kwamba **inner** ClientHello ilikubaliwa. Kutoa tu rekodi ya HTTPS hakuthibitishi kuwa ECH ilifaulu.
+7. Rudia baada ya mabadiliko ya mtandao, captive portals, masasisho ya kivinjari na kuunganishwa upya kwa VPN. Rekodi ni kipengele gani kinachodhibiti DNS/ECH ili wasimamizi wa baadaye wasitengeneze njia ya kukwepa.
 
 ## Mixnets
 
-Mixnets kama Nym au Katzenpost huongeza packets zenye size maalum, delay, reordering na cover traffic ili kupinga timing correlation. Sifa hizo hugharimu latency na bandwidth, na ushahidi huru wa deployment-scale ni mdogo. Zichukulie mixnets za consumer za sasa kama **emerging/high-latency options**, si replacements za haraka au zilizohakikishwa za Tor/VPNs.<sup>[[17]](#references)</sup>
+Mixnets kama Nym au Katzenpost huongeza pakiti za ukubwa usiobadilika, ucheleweshaji, kupanga upya na trafiki ya kuficha ili kupinga ulinganishaji wa muda. Sifa hizo hugharimu latency na bandwidth, na ushahidi huru wa matumizi kwa kiwango kikubwa ni mdogo. Chukulia mixnets za sasa za watumiaji kama **chaguo zinazoibuka/zenye latency kubwa**, si mbadala za Tor/VPN zilizo za haraka au za uhakika.<sup>[[17]](#references)</sup>
 
-### Mtiririko wa evaluation
+### Mtiririko wa tathmini
 
-1. Tambua client inayodumishwa na application kamili inayoungwa mkono; usilazimishe traffic ya browser/system isiyo ya kawaida kupitia proxy ambayo haijaandikwa.
-2. Soma threat model ya sasa kuhusu assumptions za entry, mix nodes, gateway, destination na collusion.
-3. Install kutoka official signed source katika test compartment tofauti na utumie endpoint yako salama pekee.
-4. Pima delivery latency, limits za message-size, reliability, retransmission na kinachotokea gateway isipopatikana.
-5. Kagua local traffic na endpoint yako ili kuthibitisha path na source iliyokusudiwa. Kagua kama replies hutumia privacy design hiyo hiyo.
-6. Test shutdown/failure: application haipaswi kurudi kimya kimya kwenye direct Internet access.
-7. Usizime cover traffic, kupunguza delays au kuchagua fixed routes zisizo za kawaida kwa ajili ya speed pekee; mabadiliko haya yanaweza kubatilisha anonymity model iliyotajwa.
-8. Iache ikiwa experimental hadi deployment maalum, independent analysis na operational reliability zifikie kiwango cha madhara kinachowezekana.
+1. Tambua mteja anayodumishwa na programu mahususi inayoungwa mkono; usilazimishe trafiki ya kivinjari/mfumo isiyoainishwa kupitia proxy isiyo na nyaraka.
+2. Soma muundo wa sasa wa vitisho kuhusu entry, mix nodes, gateway, lengwa na dhana za ushirikiano.
+3. Sakinisha kutoka chanzo rasmi chenye saini katika sehemu tofauti ya majaribio na utumie endpoint yako mwenyewe isiyo na madhara pekee.
+4. Pima latency ya uwasilishaji, vikomo vya ukubwa wa ujumbe, kutegemewa, kutuma tena na kinachotokea gateway isipatikane.
+5. Kagua trafiki ya ndani na endpoint yako mwenyewe ili kuthibitisha njia na chanzo kilichokusudiwa. Angalia kama majibu yanatumia muundo huo huo wa faragha.
+6. Jaribu kuzima/hitilafu: programu haipaswi kurudi kimyakimya kwenye ufikiaji wa moja kwa moja wa Internet.
+7. Usizime trafiki ya kuficha, kupunguza ucheleweshaji au kuchagua njia zisizo za kawaida zisizobadilika kwa ajili ya kasi tu; mabadiliko haya yanaweza kubatilisha muundo uliotajwa wa kutokutambulika.
+8. Iweke katika hali ya majaribio hadi matumizi mahususi, uchanganuzi huru na kutegemewa kwa uendeshaji vifikie kiwango kinachohitajika na madhara yanayoweza kutokea.
 
-## Orodha ya ukaguzi wa network preflight
+## Orodha ya ukaguzi kabla ya kutumia mtandao
 
-- [ ] Authorization inahusu access network, target, dates na source infrastructure.
-- [ ] Endpoint haina identities zisizohusiana au active sync sessions.
-- [ ] IPv4, IPv6, DNS na reconnect behavior zinaendana na mpango.
-- [ ] Controlled DHCP/local-subnet route injection haiwezi kuhamishia test traffic kwenye physical interface.
-- [ ] Destination huona egress iliyotarajiwa pekee.
-- [ ] Captive portal na hotspot behavior zimefanyiwa test bila traffic nyeti.
-- [ ] Local sharing/discovery na automatic network joining zimezimwa.
-- [ ] Observer table na residual traffic-correlation risk zimekubaliwa.
-- [ ] Provider policy, retention na emergency contact ni za sasa.
+- [ ] Idhini inajumuisha mtandao wa ufikiaji, lengwa, tarehe na miundombinu ya chanzo.
+- [ ] Endpoint haina utambulisho mwingine usiohusiana au vipindi amilifu vya usawazishaji.
+- [ ] IPv4, IPv6, DNS na tabia ya kuunganisha upya vinaendana na mpango.
+- [ ] Uingizaji wa njia unaodhibitiwa wa DHCP/subnet ya ndani hauwezi kuelekeza trafiki ya majaribio kwenye kiolesura halisi.
+- [ ] Lengwa huona egress inayotarajiwa pekee.
+- [ ] Tabia ya captive portal na hotspot imejaribiwa bila trafiki nyeti.
+- [ ] Kushiriki/kugundua vifaa kwenye mtandao wa ndani na kujiunga kiotomatiki kwenye mitandao kumezimwa.
+- [ ] Jedwali la watazamaji na hatari iliyobaki ya kulinganisha trafiki limekubaliwa.
+- [ ] Sera ya mtoa huduma, uhifadhi wa data na mawasiliano ya dharura ni ya sasa.
 
-Kwa split-knowledge relays, route-enforced workloads, pluggable transports, onion services, I2P na disposable remote browsers, endelea kwenye [Advanced Network Privacy Architectures](advanced-network-privacy-architectures.md).
+Kwa relays za maarifa yaliyogawanywa, workloads zinazolazimishwa kufuata njia, pluggable transports, huduma za onion, I2P na vivinjari vya mbali vinavyotupwa baada ya matumizi, endelea kwenye [Miundo ya Kina ya Faragha ya Mtandao](advanced-network-privacy-architectures.md).
 
 
 
@@ -185,21 +189,23 @@ Kwa split-knowledge relays, route-enforced workloads, pluggable transports, onio
 
 - [1] [EFF — Kuchagua VPN Inayokufaa](https://ssd.eff.org/module/choosing-vpn-thats-right-you)
 - [2] [UK NCSC — Mwongozo wa usalama wa kifaa: Virtual Private Networks](https://www.ncsc.gov.uk/collection/device-security-guidance/infrastructure/virtual-private-networks)
-- [3] [Tor Project — Ulinzi wa privacy na anonymity unaotolewa na Tor](https://support.torproject.org/about-tor/introduction/protections/)
+- [3] [Tor Project — Ulinzi wa faragha na kutokutambulika unaotolewa na Tor](https://support.torproject.org/about-tor/introduction/protections/)
 - [4] [Tor Specifications — Utangulizi mfupi wa Tor](https://spec.torproject.org/intro/)
-- [5] [Tor Project — Kutumia Tor pamoja na browsers nyingine](https://support.torproject.org/tor-browser/security/using-tor-with-other-browsers/)
-- [6] [Tor Project — Plugins na add-ons katika Tor Browser](https://support.torproject.org/tor-browser/features/plugins/)
-- [7] [Tor Project — Kuondoa kizuizi cha Tor](https://support.torproject.org/tor-browser/circumvention/unblocking-tor/)
+- [5] [Tor Project — Kutumia Tor pamoja na vivinjari vingine](https://support.torproject.org/tor-browser/security/using-tor-with-other-browsers/)
+- [6] [Tor Project — Plugins na viongezi katika Tor Browser](https://support.torproject.org/tor-browser/features/plugins/)
+- [7] [Tor Project — Kufungua Tor iliyozuiwa](https://support.torproject.org/tor-browser/circumvention/unblocking-tor/)
 - [8] [Tor Project — Kutumia Tor Browser pamoja na VPN](https://support.torproject.org/tor-browser/general/vpn-with-tor/)
-- [9] [FTC Consumer Advice — Je, Public Wi-Fi Networks ni salama?](https://consumer.ftc.gov/articles/are-public-wi-fi-networks-safe-what-you-need-know)
-- [10] [Apple Platform Security — Wi-Fi privacy pamoja na Apple devices](https://support.apple.com/guide/security/wi-fi-privacy-with-apple-devices-sec31e483abf/web)
-- [11] [Android Open Source Project — Kutekeleza MAC randomization](https://source.android.com/docs/core/connect/wifi-mac-randomization)
-- [12] [UK NCSC — Principles za Secure Privileged Access Workstations](https://www.ncsc.gov.uk/files/ncsc-principles-for-secure-privileged-access-workstations--paws-.pdf)
-- [13] [GSMA — Mandatory SIM registration: mitazamo ya policy na regulatory](https://www.gsma.com/solutions-and-impact/connectivity-for-good/mobile-for-development/programme/digital-identity/mandatory-sim-registration-policy-and-regulatory-perspectives-in-the-absence-of-data-protection-laws/)
-- [14] [RFC 8932 — Mapendekezo kwa DNS Privacy Service Operators](https://www.rfc-editor.org/rfc/rfc8932.html)
+- [9] [FTC Consumer Advice — Je, mitandao ya Wi-Fi ya umma ni salama?](https://consumer.ftc.gov/articles/are-public-wi-fi-networks-safe-what-you-need-know)
+- [10] [Apple Platform Security — Faragha ya Wi-Fi kwenye vifaa vya Apple](https://support.apple.com/guide/security/wi-fi-privacy-with-apple-devices-sec31e483abf/web)
+- [11] [Android Open Source Project — Kutekeleza ubahatishaji wa MAC](https://source.android.com/docs/core/connect/wifi-mac-randomization)
+- [12] [UK NCSC — Kanuni za workstation salama zenye ufikiaji wa juu](https://www.ncsc.gov.uk/files/ncsc-principles-for-secure-privileged-access-workstations--paws-.pdf)
+- [13] [GSMA — Usajili wa lazima wa SIM: mitazamo ya sera na udhibiti](https://www.gsma.com/solutions-and-impact/connectivity-for-good/mobile-for-development/programme/digital-identity/mandatory-sim-registration-policy-and-regulatory-perspectives-in-the-absence-of-data-protection-laws/)
+- [14] [RFC 8932 — Mapendekezo kwa waendeshaji wa huduma za faragha ya DNS](https://www.rfc-editor.org/rfc/rfc8932.html)
 - [15] [RFC 9230 — Oblivious DNS over HTTPS](https://www.rfc-editor.org/rfc/rfc9230.html)
 - [16] [RFC 9849 — TLS Encrypted Client Hello](https://www.rfc-editor.org/rfc/rfc9849.html)
-- [17] [Katzenpost — Threat Model](https://katzenpost.network/docs/threat_model/)
-- [18] [Xue et al. — Kukwepa Tunnels: Kuvuja Traffic ya VPN Client kwa Kutumia Routing Tables](https://www.usenix.org/system/files/usenixsecurity23-xue.pdf)
-- [19] [Leviathan Security — TunnelVision: Jinsi Attackers Wanavyoweza Kufichua Routing-Based VPNs na Kusababisha VPN Leak Kamili](https://www.leviathansecurity.com/blog/tunnelvision)
+- [17] [Katzenpost — Muundo wa vitisho](https://katzenpost.network/docs/threat_model/)
+- [18] [Xue et al. — Kukwepa Tunnels: Kuvuja kwa Trafiki ya VPN Client kwa Kutumia Vibaya Jedwali za Uelekezaji](https://www.usenix.org/system/files/usenixsecurity23-xue.pdf)
+- [19] [Leviathan Security — TunnelVision: Jinsi Washambuliaji Wanavyoweza Kufichua VPN Zinazotegemea Uelekezaji na Kusababisha VPN Leak Kamili](https://www.leviathansecurity.com/blog/tunnelvision)
+- [20] [Maswali Yanayoulizwa Mara kwa Mara kuhusu Yggdrasil: Je, Yggdrasil haikutambulishi?](https://yggdrasil-network.github.io/faq.html#is-yggdrasil-anonymous)
+- [21] [Yggstack README](https://github.com/yggdrasil-network/yggstack)
 {{#include ../banners/hacktricks-training.md}}
