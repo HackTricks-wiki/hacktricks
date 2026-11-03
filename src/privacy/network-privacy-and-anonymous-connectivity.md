@@ -2,68 +2,71 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Network privacy is a routing decision, not a complete identity. Select a path by asking who should be unable to connect **source**, **destination**, **content**, and **timing**.
+नेटवर्क गोपनीयता routing का निर्णय है, पूर्ण पहचान-छिपाव नहीं। रास्ता चुनते समय पूछें कि किससे **source**, **destination**, **content**, और **timing** छिपे होने चाहिए।
 
-For the normalized inventory—`Pros`, `Cons`, step-by-step `Procedure`, and `Detection` for every access-path family—start with the [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md). This page expands the common deployable options.
+हर access-path family के लिए मानकीकृत सूची—`Pros`, `Cons`, चरण-दर-चरण `Procedure`, और `Detection`—के लिए [Anonymous Internet Access Technique Catalog](anonymous-internet-access-techniques.md) से शुरू करें। यह पेज आम तौर पर इस्तेमाल किए जा सकने वाले विकल्पों का विस्तार करता है।
 
-## What each observer can usually see
+## हर observer आम तौर पर क्या देख सकता है
 
-| Path | Local network / ISP | Intermediary | Destination | Main limitation | Relative speed |
+| Path | Local network / ISP | Intermediary | Destination | मुख्य सीमा | सापेक्ष गति |
 |---|---|---|---|---|---|
-| Direct HTTPS | Source, destination metadata, timing/volume | Hosting/CDN sees connection | Source IP, browser/app data | No source-IP privacy | Fastest |
-| Commercial VPN | Source connected to VPN; not usual destination metadata | VPN sees source and destination metadata | VPN egress IP | One provider becomes a correlation point | Usually fast |
-| Self-hosted VPN/VPS | Source connected to VPS | Host/account/payment/control-plane logs | VPS egress IP | Easy to attribute to the rented server/account | Usually fast |
-| Tor Browser | Source connected to Tor/bridge; timing/volume | Relays each see a limited portion | Tor exit, browser data | Slower; account/endpoint/correlation risks | Moderate/slow |
-| Tails/Whonix | Similar Tor path, with stronger routing boundaries | Same Tor limitations | Tor exit/application data | Operational mistakes and host/hardware remain | Moderate/slow |
-| Public guest Wi-Fi + HTTPS | Venue sees local device/timing and destinations | Venue ISP sees metadata | Guest public IP | Physical/captive-portal/device correlation | Fast/variable |
-| Cellular hotspot | Carrier sees subscriber/device/location and destinations | VPN/Tor if used | Carrier, VPN, or Tor egress IP | Mobile subscription and location are durable identifiers | Fast/variable |
-| Mixnet | Access sees mixnet use; timing/volume | Multiple mixing nodes | Gateway/egress | Emerging ecosystem; latency and bandwidth cost | Slowest |
+| Direct HTTPS | Source, destination metadata, timing/volume | Hosting/CDN को connection दिखता है | Source IP, browser/app data | Source-IP गोपनीयता नहीं | सबसे तेज़ |
+| Commercial VPN | Source VPN से जुड़ा हुआ; आम तौर पर destination metadata नहीं | VPN को source और destination metadata दिखता है | VPN egress IP | एक provider correlation point बन जाता है | आम तौर पर तेज़ |
+| Self-hosted VPN/VPS | Source VPS से जुड़ा हुआ | Host/account/payment/control-plane logs | VPS egress IP | किराए के server/account से जोड़ना आसान | आम तौर पर तेज़ |
+| Tor Browser | Source Tor/bridge से जुड़ा हुआ; timing/volume | हर relay को सीमित हिस्सा दिखता है | Tor exit, browser data | धीमा; account/endpoint/correlation जोखिम | मध्यम/धीमा |
+| Tails/Whonix | मिलता-जुलता Tor path, अधिक मज़बूत routing boundaries के साथ | Tor की वही सीमाएँ | Tor exit/application data | परिचालन संबंधी गलतियाँ और host/hardware फिर भी जोखिम बने रहते हैं | मध्यम/धीमा |
+| Public guest Wi-Fi + HTTPS | Venue को local device/timing और destinations दिखते हैं | Venue ISP को metadata दिखता है | Guest public IP | भौतिक मौजूदगी/captive-portal/device correlation | तेज़/बदलती हुई |
+| Cellular hotspot | Carrier को subscriber/device/location और destinations दिखते हैं | इस्तेमाल होने पर VPN/Tor | Carrier, VPN, या Tor egress IP | Mobile subscription और location स्थायी पहचानकर्ता हैं | तेज़/बदलती हुई |
+| Mixnet | Access को mixnet का उपयोग और timing/volume दिखते हैं | कई mixing nodes | Gateway/egress | उभरता हुआ ecosystem; latency और bandwidth की लागत | सबसे धीमा |
 
-HTTPS protects content in transit but not all metadata. EFF notes that domain, time, and traffic size can remain visible to intermediaries even when page paths, credentials, and messages are encrypted.<sup>[[1]](#references)</sup>
+HTTPS transit में content की रक्षा करता है, लेकिन सभी metadata की नहीं। EFF के अनुसार, page paths, credentials, और messages एन्क्रिप्टेड होने पर भी domain, time, और traffic size intermediaries को दिख सकते हैं।<sup>[[1]](#references)</sup>
 
-## VPNs: fast privacy with concentrated trust
+Encrypted overlay अपने-आप anonymity network नहीं होता: Yggdrasil के direct peers एक-दूसरे के IP addresses देख सकते हैं।<sup>[[20]](#references)</sup> इसका [userspace forwarding और SOCKS transport](../generic-hacking/tunneling-and-port-forwarding.md#yggdrasil-userspace-overlay-with-yggstack) tunneling का विकल्प है, source-anonymity layer नहीं।<sup>[[20]](#references)[[21]](#references)</sup>
 
-A VPN is useful for hiding destination metadata from the access ISP, protecting a first hop on an untrusted network, presenting a stable engagement egress address, or reaching a private network. It does **not** make a user anonymous. The VPN sees the source connection and can observe destination metadata; accounts, cookies, GPS, fingerprints, and payment information remain.<sup>[[1]](#references)</sup>
+## VPNs: केंद्रित भरोसे के साथ तेज़ privacy
 
-### Provider evaluation checklist
+VPN, access ISP से destination metadata छिपाने, अविश्वसनीय network पर पहले hop की सुरक्षा करने, engagement के लिए स्थिर egress address देने, या private network तक पहुँचने में उपयोगी है। यह उपयोगकर्ता को anonymous **नहीं** बनाता। VPN source connection देखता है और destination metadata देख सकता है; accounts, cookies, GPS, fingerprints, और payment information फिर भी मौजूद रहते हैं।<sup>[[1]](#references)</sup>
 
-1. **Ownership and jurisdiction:** identify the legal entity, parent company, operating countries, infrastructure subcontractors, and applicable legal process.
-2. **Collected data:** distinguish account/billing, source IP, connection timestamps, bandwidth, crash telemetry, DNS queries, and destination logs. “No browsing logs” does not mean “no data.”
-3. **Retention and deletion:** find precise durations and whether backups, fraud systems, and processors follow the same schedule.
-4. **Evidence:** prefer public audits with scope, date, findings, and remediation; reproducible/open clients; transparency reports; and documented incidents.
-5. **Protocol and client:** maintained WireGuard, OpenVPN, or another reviewed protocol; automatic updates; DNS and IPv6 handling; kill switch; and per-platform leak tests.
-6. **Business model:** understand how a free or subsidized service is funded. App-store presence alone is not evidence of trustworthy operation.
-7. **Payment fit:** alternative payment can reduce billing disclosure to the VPN but does not erase the source IP observed at every connection.
+### Provider की जाँच-सूची
 
-### Configure and verify a VPN
+1. **Ownership और jurisdiction:** कानूनी entity, parent company, संचालन वाले देश, infrastructure subcontractors, और लागू कानूनी प्रक्रिया की पहचान करें।
+2. **एकत्र किया गया data:** account/billing, source IP, connection timestamps, bandwidth, crash telemetry, DNS queries, और destination logs में अंतर करें। “No browsing logs” का मतलब “कोई data नहीं” नहीं है।
+3. **Retention और deletion:** सटीक अवधि पता करें और जाँचें कि backups, fraud systems, और processors भी उसी अवधि का पालन करते हैं या नहीं।
+4. **Evidence:** ऐसे सार्वजनिक audits को प्राथमिकता दें जिनका scope, date, findings, और remediation उपलब्ध हों; साथ ही reproducible/open clients, transparency reports, और दर्ज incidents देखें।
+5. **Protocol और client:** maintained WireGuard, OpenVPN, या कोई अन्य reviewed protocol; automatic updates; DNS और IPv6 handling; kill switch; और हर platform पर leak tests।
+6. **Business model:** समझें कि free या subsidized service को पैसा कहाँ से मिलता है। App-store में मौजूद होना भरोसेमंद संचालन का प्रमाण नहीं है।
+7. **Payment की उपयुक्तता:** वैकल्पिक payment से VPN को billing जानकारी कम मिल सकती है, लेकिन हर connection पर देखा जाने वाला source IP मिटता नहीं है।
 
-1. Install the provider/organization's signed client from its official source.
-2. Select **full tunnel** unless a documented route must bypass it. Split tunneling creates correlation and leak paths.
-3. Enable fail-closed/always-on behavior and block traffic during reconnect.
-4. Send DNS through the tunnel and test both IPv4 and IPv6. Disable a protocol only if it cannot be safely tunneled and the loss of functionality is accepted.
-5. Test sleep/wake, network switching, captive-portal login, tunnel crash, and hotspot tethering. NCSC warns that tethered clients may bypass a phone's VPN on some platforms.<sup>[[2]](#references)</sup>
-6. Use an organization-controlled test endpoint to record observed IPv4, IPv6, DNS resolver, and connection timing. Do not expose a sensitive engagement to random “leak test” sites.
-7. Re-test after client, OS, network, or policy changes.
+### VPN को configure और verify करें
+
+1. Provider/organization का signed client उसके आधिकारिक स्रोत से install करें।
+2. **Full tunnel** चुनें, जब तक किसी documented route को tunnel से बाहर रखना ज़रूरी न हो। Split tunneling से correlation और leak के रास्ते बनते हैं।
+3. Fail-closed/always-on व्यवहार चालू करें और reconnect के दौरान traffic block करें।
+4. DNS को tunnel से भेजें और IPv4 तथा IPv6 दोनों जाँचें। किसी protocol को तभी disable करें जब उसे सुरक्षित रूप से tunnel न किया जा सके और उसकी functionality खोना स्वीकार्य हो।
+5. Sleep/wake, network switching, captive-portal login, tunnel crash, और hotspot tethering जाँचें। NCSC चेतावनी देता है कि कुछ platforms पर tethered clients, phone के VPN को bypass कर सकते हैं।<sup>[[2]](#references)</sup>
+6. देखे गए IPv4, IPv6, DNS resolver, और connection timing दर्ज करने के लिए organization-controlled test endpoint इस्तेमाल करें। किसी संवेदनशील engagement को अनजान “leak test” sites के सामने उजागर न करें।
+7. Client, OS, network, या policy में बदलाव के बाद फिर से जाँचें।
 
 ### Hostile-LAN routing bypasses
 
-A VPN can remain visibly “connected” while selected packets bypass it because the operating system chooses a route **before** the VPN encrypts the packet. TunnelCrack demonstrated two ways to abuse common routing exceptions: **LocalNet** makes an Internet destination appear to be on the directly connected subnet, while **ServerIP** spoofs VPN-gateway resolution so a target address inherits the clear-network exception needed by the VPN transport. These are client/routing failures rather than breaks in WireGuard, OpenVPN, IPsec, or TLS; HTTPS payloads remain end-to-end encrypted, but the local observer can recover destination/timing metadata and any cleartext protocol data.<sup>[[18]](#references)</sup>
+VPN “connected” दिखता रह सकता है, जबकि चुने हुए packets उसे bypass कर सकते हैं, क्योंकि operating system packet को VPN द्वारा encrypt किए जाने **से पहले** route चुनता है। TunnelCrack ने आम routing exceptions के दुरुपयोग के दो तरीके दिखाए: **LocalNet** Internet destination को सीधे जुड़े subnet का हिस्सा दिखाता है, जबकि **ServerIP** VPN-gateway resolution को spoof करता है, ताकि target address को VPN transport के लिए ज़रूरी clear-network exception मिल जाए। ये client/routing की विफलताएँ हैं, WireGuard, OpenVPN, IPsec, या TLS को तोड़ना नहीं; HTTPS payload end-to-end encrypted रहते हैं, लेकिन local observer destination/timing metadata और cleartext protocol data हासिल कर सकता है।<sup>[[18]](#references)</sup>
 
-TunnelVision applies the same pre-encryption primitive through DHCP option 121. A malicious or compromised DHCP server can install a classless route that is more specific than the VPN's catch-all route, selecting the physical interface for an arbitrary host or range. The VPN control channel can stay alive, so a kill switch triggered only by tunnel disconnection may not activate and a single public “IP leak” check can miss selective bypasses.<sup>[[19]](#references)</sup>
+TunnelVision, DHCP option 121 के ज़रिए इसी pre-encryption primitive का इस्तेमाल करता है। Malicious या compromised DHCP server ऐसा classless route install कर सकता है जो VPN के catch-all route से अधिक specific हो और किसी भी host या range के लिए physical interface चुन सके। VPN control channel चालू रह सकता है, इसलिए केवल tunnel disconnect होने पर सक्रिय होने वाला kill switch शायद चालू न हो; साथ ही, एक अकेली सार्वजनिक “IP leak” जाँच चुनिंदा bypasses को पकड़ने में विफल हो सकती है।<sup>[[19]](#references)</sup>
 
-A packet-filter kill switch that permits only DHCP and the authenticated VPN transport on the physical interface should turn this into fail-closed behavior, but targeted route injection can still create a selective-denial side channel. For high-consequence Linux workloads, prefer the stronger [route-enforced network-namespace pattern](advanced-network-privacy-architectures.md#enforce-the-route-per-workload), where the application namespace has no physical interface or clear-network default route.<sup>[[19]](#references)</sup>
+ऐसा packet-filter kill switch जो physical interface पर केवल DHCP और authenticated VPN transport की अनुमति देता है, इसे fail-closed व्यवहार में बदलना चाहिए। फिर भी, लक्षित route injection से selective-denial side channel बन सकता है। अधिक गंभीर परिणामों वाले Linux workloads के लिए, अधिक मज़बूत [route-enforced network-namespace pattern](advanced-network-privacy-architectures.md#enforce-the-route-per-workload) को प्राथमिकता दें, जहाँ application namespace में न तो physical interface हो और न ही clear-network default route।<sup>[[19]](#references)</sup>
 
 #### Owned-lab verification
 
-Test the exact client/OS/version on an owned AP, DHCP server, VPN endpoint, and destination; product-wide claims age quickly because routing and packet-filter implementations are platform-specific. Capture on the endpoint itself as well as the test server—an egress-IP website alone does not prove that every destination follows the tunnel.<sup>[[18]](#references)[[19]](#references)</sup>
+ठीक उसी client/OS/version को अपने AP, DHCP server, VPN endpoint, और destination पर जाँचें; product-wide दावे जल्दी पुराने हो जाते हैं, क्योंकि routing और packet-filter implementations platform के अनुसार अलग होते हैं। Endpoint पर और test server पर, दोनों जगह capture करें—केवल egress-IP website से यह साबित नहीं होता कि हर destination tunnel से होकर जाता है।<sup>[[18]](#references)[[19]](#references)</sup>
 
-1. Connect the VPN, record the VPN-server address, and save every IPv4/IPv6 routing table and policy-routing rule. On Windows use `route print`; on macOS use `netstat -rn`; on Linux use the commands below.
-2. Query the selected route for several owned destination IPs. The next hop/interface must be the tunnel, except for the documented VPN transport endpoint.
-3. For TunnelVision, renew the lease on the controlled DHCP network and install an option 121 route **only for an owned test destination**. A pass means traffic is still tunneled or blocked—never emitted as destination traffic on the physical interface.
-4. For LocalNet, assign the client a lab-only public documentation subnet such as `203.0.113.0/24` and place the owned test destination within it. Verify that enabling LAN access does not make Internet-class destinations bypass the tunnel.
-5. For ServerIP, before VPN connection have controlled DNS resolve the owned VPN hostname to the owned test destination, while the lab gateway forwards the VPN transport to the real owned VPN endpoint. The client must not exempt unrelated application traffic to the spoofed address.
-6. Repeat with “local network access” both enabled and disabled, after reconnect, sleep/wake, network switching, and a VPN-process crash. Test IPv4, IPv6, and DNS independently.
-7. Inspect the physical-interface capture. It should contain DHCP and encrypted packets to the VPN server, not packets addressed directly to the owned test destination. Also confirm that a rejected bypass cannot silently fall back after user prompts or connectivity repair.
+1. VPN से connect करें, VPN-server address दर्ज करें, और IPv4/IPv6 की हर routing table तथा policy-routing rule सहेजें। Windows पर `route print`, macOS पर `netstat -rn`, और Linux पर नीचे दिए गए commands इस्तेमाल करें।
+2. अपने कई destination IPs के लिए चुना गया route जाँचें। Documented VPN transport endpoint को छोड़कर, next hop/interface tunnel होना चाहिए।
+3. TunnelVision जाँचने के लिए, controlled DHCP network पर lease renew करें और option 121 route **केवल अपने test destination के लिए** install करें। Pass का मतलब है कि traffic tunnel से जाता रहे या block हो—वह physical interface पर destination traffic के रूप में कभी न निकले।
+4. LocalNet जाँचने के लिए, client को lab-only public documentation subnet जैसे `203.0.113.0/24` का address दें और अपने test destination को उसी में रखें। Verify करें कि LAN access चालू करने से Internet-class destinations tunnel bypass न करें।
+5. ServerIP जाँचने के लिए, VPN connection से पहले controlled DNS से अपने VPN hostname को अपने test destination पर resolve कराएँ, जबकि lab gateway VPN transport को असली owned VPN endpoint तक forward करे। Client को spoofed address पर unrelated application traffic की छूट नहीं देनी चाहिए।
+6. “local network access” को चालू और बंद—दोनों स्थितियों में, reconnect, sleep/wake, network switching, और VPN-process crash के बाद फिर से जाँचें। IPv4, IPv6, और DNS को अलग-अलग test करें।
+7. Physical-interface capture की जाँच करें। उसमें DHCP और VPN server को भेजे गए encrypted packets होने चाहिए, न कि सीधे अपने test destination को भेजे गए packets। यह भी पुष्टि करें कि अस्वीकृत bypass, user prompts या connectivity repair के बाद चुपचाप fallback न कर सके।
+
 ```bash
 # Run route monitoring and capture in separate terminals.
 TEST_IP=203.0.113.10 # replace with the owned test endpoint
@@ -73,133 +76,136 @@ ip route get "$TEST_IP"
 ip monitor route
 sudo tcpdump -ni any "host $TEST_IP"
 ```
-## Tor Browser: मजबूत web unlinkability
 
-Tor कई relays के माध्यम से एक circuit बनाता है, इसलिए सामान्यतः कोई एक relay source और destination दोनों को नहीं जानता। Destination को user's IP के बजाय Tor exit दिखाई देता है; local network को सामान्यतः Tor connection दिखाई देता है।<sup>[[3]](#references)</sup> Tor को low-latency TCP applications के लिए बनाया गया है, इसलिए यह धीमा है और ऐसे adversary से protection की guarantee नहीं दे सकता जो दोनों ends को correlate कर सके।<sup>[[4]](#references)</sup>
+## Tor Browser: अधिक मजबूत web unlinkability
 
-### सुरक्षित Tor Browser workflow
+Tor कई relays के ज़रिए एक circuit बनाता है, ताकि सामान्यतः किसी एक relay को source और destination दोनों का पता न हो। Destination को user के IP के बजाय Tor exit दिखाई देता है; स्थानीय नेटवर्क को सामान्यतः Tor connection दिखाई देता है।<sup>[[3]](#references)</sup> Tor को low-latency TCP applications के लिए डिज़ाइन किया गया है, इसलिए यह धीमा है और ऐसे adversary के विरुद्ध सुरक्षा की गारंटी नहीं दे सकता जो दोनों सिरों पर traffic correlate कर सके।<sup>[[4]](#references)</sup>
 
-1. Tor Browser केवल Tor Project या किसी official mirror से download करें और संभव हो तो signature verify करें।
-2. सामान्य browser को Tor SOCKS port पर point करने के बजाय **Tor Browser** का उपयोग करें। सामान्य browsers DNS/WebRTC और identifying state leak कर सकते हैं।<sup>[[5]](#references)</sup>
-3. Default size, fonts, extensions और privacy settings बनाए रखें। अतिरिक्त add-ons browser को अधिक unique बना सकते हैं।<sup>[[6]](#references)</sup>
+### Tor Browser का सुरक्षित workflow
+
+1. Tor Browser केवल Tor Project या किसी आधिकारिक mirror से डाउनलोड करें और संभव हो तो signature verify करें।
+2. Tor SOCKS port की ओर निर्देशित सामान्य browser के बजाय **Tor Browser** इस्तेमाल करें। सामान्य browsers से DNS/WebRTC और पहचान बताने वाली state leak हो सकती है।<sup>[[5]](#references)</sup>
+3. डिफ़ॉल्ट size, fonts, extensions और privacy settings बनाए रखें। अतिरिक्त add-ons browser को अधिक विशिष्ट बना सकते हैं।<sup>[[6]](#references)</sup>
 4. जब बढ़ी हुई breakage स्वीकार्य हो, तो **Safer** या **Safest** security level चुनें।
-5. जब direct Tor blocked हो या सामान्य relay IPs स्थानीय visibility को अस्वीकार्य बना दें, तो bridge का उपयोग करें। Bridges आसान recognition को कम करते हैं; वे traffic analysis समाप्त नहीं करते।<sup>[[7]](#references)</sup>
-6. किसी identifying account में log in न करें, identifying information न दें, और downloaded active documents को किसी external networked application में न खोलें।
-7. प्रत्येक identity के लिए अलग session/context का उपयोग करें। “New circuit” browser/application identity मिटाने के समान नहीं है; उचित स्थिति में **New Identity** का उपयोग करें या isolated environment restart करें।
+5. जब direct Tor blocked हो या सामान्य relay IPs से स्थानीय स्तर पर अस्वीकार्य visibility बनती हो, तो bridge इस्तेमाल करें। Bridges से आसानी से पहचानना मुश्किल होता है; वे traffic analysis को खत्म नहीं करते।<sup>[[7]](#references)</sup>
+6. पहचान बताने वाले account में log in न करें, पहचान बताने वाली जानकारी न दें, और डाउनलोड किए गए active documents को किसी बाहरी networked application में न खोलें।
+7. हर identity के लिए अलग session/context इस्तेमाल करें। “New circuit” का अर्थ browser/application identity मिटाना नहीं है; ज़रूरत के अनुसार **New Identity** इस्तेमाल करें या isolated environment restart करें।
 8. Authenticated HTTPS या authenticated onion service को प्राथमिकता दें। Tor exit unencrypted HTTP traffic देख सकता है।
 
-### Tor plus VPN
+### Tor और VPN साथ में
 
-इनका संयोजन अपने-आप अधिक सुरक्षित नहीं होता। Tor से पहले VPN ISP से direct Tor relay connections छिपा सकता है, जबकि VPN source देखता है; VPN से पहले Tor रखने पर VPN को post-Tor activity का स्थिर view मिलता है और anonymity set छोटा हो सकता है। Misconfiguration leaks उत्पन्न कर सकता है। Tor Project ऐसे combinations की recommendation केवल advanced, explicit threat models के लिए करता है।<sup>[[8]](#references)</sup>
+इन्हें साथ इस्तेमाल करना अपने आप अधिक सुरक्षित नहीं बनाता। Tor से पहले VPN लगाने पर ISP से direct Tor relay connections छिप सकती हैं, जबकि VPN को source दिखता है; VPN से पहले Tor लगाने पर VPN को Tor के बाद की activity का स्थिर दृश्य मिलता है और anonymity set छोटा हो सकता है। गलत configuration से leaks हो सकते हैं। Tor Project ऐसे संयोजनों की सिफारिश केवल उन्नत, स्पष्ट threat models के लिए करता है।<sup>[[8]](#references)</sup>
 
-## Public और guest Wi-Fi
+## सार्वजनिक और guest Wi-Fi
 
-Modern HTTPS का अर्थ है कि passive neighbors सामान्यतः properly encrypted web content नहीं पढ़ सकते, लेकिन guest Wi-Fi anonymity नहीं है। Venue association times, device identifiers, captive-portal data, destinations और DHCP details record कर सकता है; cameras, purchases, transport और physical observation user की पहचान कर सकते हैं। समान नाम वाला fake hotspot portal credentials capture कर सकता है या unencrypted traffic manipulate कर सकता है।<sup>[[9]](#references)</sup>
+आधुनिक HTTPS का अर्थ है कि निष्क्रिय पड़ोसी आमतौर पर ठीक से encrypted web content नहीं पढ़ सकते, लेकिन guest Wi-Fi anonymity नहीं है। स्थल association times, device identifiers, captive-portal data, destinations और DHCP details रिकॉर्ड कर सकता है; कैमरे, खरीदारी, परिवहन और प्रत्यक्ष निगरानी user की पहचान कर सकते हैं। इसी तरह के नाम वाला नकली hotspot portal credentials भी हासिल कर सकता है या unencrypted traffic में हेरफेर कर सकता है।<sup>[[9]](#references)</sup>
 
-### Lawful guest-network workflow
+### Guest network का वैध workflow
 
-1. केवल guests के लिए offered network या ऐसा network उपयोग करें जिसके लिए owner ने explicit permission दी हो। Staff से exact SSID और portal procedure पूछें।
-2. Arrival से पहले endpoint और travel router update करें। File/printer sharing, inbound discovery, auto-join और remembered-network probing disable करें।
-3. OS का private/randomized Wi-Fi address enable करें। Current Apple systems open/weak networks पर rotating addresses उपयोग कर सकते हैं; modern Android randomization सामान्यतः प्रति SSID persistent होती है। इससे केवल एक local identifier कम होता है।<sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
-4. Privileged workstation और guest network के बीच organization-controlled travel router या low-trust bridge device को प्राथमिकता दें। इससे firewall/VPN policy centralize होती है, लेकिन router venue से छिपता नहीं है।<sup>[[12]](#references)</sup>
-5. Captive portal केवल designated low-trust device/browser के माध्यम से पूरा करें। कथित anonymous context के लिए personal या reused credentials कभी enter न करें। Connectivity स्थापित होने के बाद portal browser बंद करें।
-6. Sensitive activity से पहले full-tunnel VPN या Tor शुरू करें और fail-closed behavior confirm करें।
-7. उपयोग के बाद network भूलें और portal account/data-retention policy review करें।
+1. केवल वही network इस्तेमाल करें जो guests के लिए उपलब्ध कराया गया हो या जिसके लिए owner ने स्पष्ट अनुमति दी हो। कर्मचारियों से सटीक SSID और portal प्रक्रिया पूछें।
+2. पहुँचने से पहले endpoint और travel router update करें। File/printer sharing, inbound discovery, auto-join और याद रखे गए network की probing बंद करें।
+3. OS का private/randomized Wi-Fi address चालू करें। मौजूदा Apple systems खुले/कमज़ोर networks पर rotating addresses इस्तेमाल कर सकते हैं; आधुनिक Android में randomization आमतौर पर प्रति SSID स्थायी होती है। इससे केवल एक स्थानीय identifier कम होता है।<sup>[[10]](#references)</sup><sup>[[11]](#references)</sup>
+4. Privileged workstation और guest network के बीच organization-controlled travel router या low-trust bridge device को प्राथमिकता दें। इससे firewall/VPN policy एक जगह लागू होती है, लेकिन स्थल से router नहीं छिपता।<sup>[[12]](#references)</sup>
+5. Captive portal केवल निर्धारित low-trust device/browser से पूरा करें। कथित anonymous context के लिए personal या दोबारा इस्तेमाल किए गए credentials कभी न डालें। Connection स्थापित होने के बाद portal browser बंद कर दें।
+6. संवेदनशील activity से पहले full-tunnel VPN या Tor शुरू करें और fail-closed behavior की पुष्टि करें।
+7. इस्तेमाल के बाद network को भूल जाएँ और portal की account/data-retention policy देखें।
 
 {% hint style="danger" %}
-किसी neighbor का Wi-Fi crack करना, portal bypass करना, leaked guest credentials का उपयोग करना, किसी अन्य guest का access clone करना, या café में Raspberry Pi छिपाना unauthorized activity है—यह privacy technique नहीं है। सुरक्षित विकल्प lawful guest network, client-approved site, या property owner's written consent के साथ रखा और recover किया गया documented drop node हैं।
+पड़ोसी का Wi-Fi crack करना, portal bypass करना, leaked guest credentials इस्तेमाल करना, किसी अन्य guest का access clone करना या कैफ़े में Raspberry Pi छिपाना अनधिकृत गतिविधि है—privacy technique नहीं। सुरक्षित विकल्प हैं: वैध guest network, client-अनुमोदित site, या property owner की लिखित सहमति से लगाई और वापस ली गई documented drop node।
 {% endhint %}
 
 ## Travel routers
 
-Travel router workstation को hostile local broadcasts से isolate कर सकता है, firewall enforce कर सकता है, consistent internal SSID provide कर सकता है और VPN को automatically reconnect कर सकता है। यह **anonymous** नहीं है: upstream इसकी radio identity और traffic timing देखता है, और इसका VPN provider tunnel source देखता है।
+Travel router workstation को शत्रुतापूर्ण स्थानीय broadcasts से अलग कर सकता है, firewall लागू कर सकता है, एक स्थिर आंतरिक SSID दे सकता है और VPN से अपने आप दोबारा connect हो सकता है। यह **anonymous** नहीं है: upstream को इसकी radio identity और traffic timing दिखते हैं, और इसके VPN provider को tunnel source दिखता है।
 
-- Supported OpenWrt/vendor firmware का उपयोग करें और unused services हटाएं।
-- Ethernet या unique password वाले dedicated management SSID के माध्यम से administer करें।
-- WAN-side administration, UPnP, WPS, file sharing और unsolicited inbound traffic disable करें।
-- केवल जहां supported और permitted हो, randomized/private WAN MAC का उपयोग करें।
-- Router पर VPN policy enforce करें, जिसमें DNS और IPv6 शामिल हैं, और tunnel fail होने पर egress block करें।
-- यह न मानें कि phone hotspot tethered devices को phone के VPN के माध्यम से tunnel करता है; इसका test करें।
+- समर्थित OpenWrt/vendor firmware इस्तेमाल करें और अनुपयोगी services हटाएँ।
+- Ethernet या अलग management SSID पर अद्वितीय password के साथ administration करें।
+- WAN-side administration, UPnP, WPS, file sharing और अनचाहे inbound traffic को बंद करें।
+- Randomized/private WAN MAC का इस्तेमाल केवल वहीं करें जहाँ यह समर्थित और अनुमत हो।
+- Router पर DNS और IPv6 समेत VPN policy लागू करें, और tunnel विफल होने पर egress block करें।
+- यह न मानें कि phone hotspot, tethered devices को phone के VPN से tunnel करता है; इसकी जाँच करें।
 
 ## Cellular, SIMs और eSIMs
 
-Cellular सुविधाजनक है, लेकिन anonymous नहीं है। Operators subscriber/device identifiers और network attachment से derived location maintain करते हैं; eSIM अभी भी mobile subscription है। Prepaid का अर्थ reliably unregistered नहीं होता—requirements देश के अनुसार अलग होती हैं और बदलती रहती हैं।<sup>[[13]](#references)</sup>
+Cellular सुविधाजनक है, लेकिन anonymous नहीं। Operators subscriber/device identifiers और network से जुड़ने के आधार पर स्थान की जानकारी रखते हैं; eSIM भी mobile subscription ही है। Prepaid का अर्थ हमेशा unregistered नहीं होता—आवश्यकताएँ देश के अनुसार अलग होती हैं और बदलती रहती हैं।<sup>[[13]](#references)</sup>
 
-Operationally:
+व्यावहारिक तौर पर:
 
-- Personal data का exposure कम करने के लिए अलग, supported device का उपयोग करें, fictional subscriber बनाने के लिए नहीं।
-- यदि co-location threat model में है, तो “separate” device को personal phone के साथ लगातार न रखें।
-- Unused cellular, Wi-Fi, Bluetooth और location access disable करें; powering off, UI toggles की तुलना में stronger radio boundary है।
-- Sensitive traffic को approved VPN/Tor path के अंदर रखें, यह समझते हुए कि carrier subscription/device location और tunnel endpoint अभी भी जानता है।
-- National regulator या local counsel से current registration और retention rules verify करें; “anonymous SIM countries” की online lists पर निर्भर न रहें।
+- Personal data का exposure कम करने के लिए अलग, समर्थित device इस्तेमाल करें; काल्पनिक subscriber बनाने के लिए नहीं।
+- अगर threat model में साथ-साथ मौजूद होना शामिल है, तो “अलग” device को personal phone के साथ लगातार न रखें।
+- अनुपयोगी cellular, Wi-Fi, Bluetooth और location access बंद करें; radio boundary बनाने के लिए power off करना UI toggles से अधिक प्रभावी है।
+- संवेदनशील traffic को स्वीकृत VPN/Tor path के भीतर रखें, लेकिन यह ध्यान रखें कि carrier को subscription/device का स्थान और tunnel endpoint फिर भी पता रहता है।
+- मौजूदा registration और retention नियम national regulator या स्थानीय वकील से जाँचें; “anonymous SIM countries” की online सूचियों पर भरोसा न करें।
 
 ## DNS और TLS metadata
 
-- **DoH/DoT/DoQ** client और resolver के बीच DNS encrypt करते हैं, जिससे simple local reading या modification रुकती है, लेकिन resolver queries और transport identifiers अभी भी देखता है। वे trust को स्थानांतरित करते हैं; anonymity provide नहीं करते।<sup>[[14]](#references)</sup>
-- **ODoH** एक proxy जोड़ता है, जिससे resolver को client IP जानने की आवश्यकता नहीं रहती, बशर्ते proxy और target collude न करें। Traffic analysis स्पष्ट रूप से scope से बाहर है।<sup>[[15]](#references)</sup>
-- **TLS Encrypted Client Hello (ECH)** TLS handshake में inner server name को protect कर सकता है, जब client, DNS और server इसका support करते हों। Destination IP, timing, volume और endpoint visible रहते हैं।<sup>[[16]](#references)</sup>
-- Correctly configured VPN या Tor environment में DNS को उस environment के supported route का अनुसरण करना चाहिए। अलग resolver जोड़ने से नया observer या fingerprint बन सकता है।
+- **DoH/DoT/DoQ** client और resolver के बीच DNS को encrypt करते हैं, जिससे स्थानीय स्तर पर उसे आसानी से पढ़ना या बदलना संभव नहीं रहता; लेकिन resolver को queries और transport identifiers दिखते हैं। इससे trust का स्थान बदलता है; anonymity नहीं मिलती।<sup>[[14]](#references)</sup>
+- **ODoH** एक proxy जोड़ता है, ताकि resolver को client IP जानने की ज़रूरत न पड़े—यह मानते हुए कि proxy और target मिलीभगत न करें। Traffic analysis स्पष्ट रूप से इसके दायरे से बाहर है।<sup>[[15]](#references)</sup>
+- **TLS Encrypted Client Hello (ECH)** TLS handshake में भीतरी server name की सुरक्षा कर सकता है, बशर्ते client, DNS और server इसका समर्थन करें। Destination IP, timing, volume और endpoint फिर भी दिखाई देते हैं।<sup>[[16]](#references)</sup>
+- ठीक से configure किए गए VPN या Tor environment में DNS को उसी environment के समर्थित route से जाना चाहिए। अलग resolver जोड़ने से नया observer या fingerprint बन सकता है।
 
-### Encrypted-DNS/ECH verification workflow
+### Encrypted-DNS/ECH सत्यापन workflow
 
-1. तय करें कि DNS को VPN/Tor environment, OS या application control करता है। Unrelated resolvers stack करने के बजाय इसे **one** intended layer में configure करें।
-2. Resolver की published privacy/retention policy के आधार पर resolver चुनें और जहां platform support करता हो, strict encrypted mode enable करें। Opportunistic fallback silently plaintext पर लौट सकता है।
-3. अपने control वाले authoritative test zone के अंतर्गत unique subdomain query करें; confirm करें कि authoritative log intended recursive resolver को देखता है।
-4. Authorization के साथ केवल test device का traffic capture करें। Confirm करें कि access network plaintext DNS नहीं पढ़ सकता, यह समझते हुए कि वह encrypted resolver/tunnel endpoint देख सकता है।
-5. किसी blocked/unreachable encrypted resolver का test करें। Pass condition चुना गया fail-closed या documented fallback behavior है—accidental clear query नहीं।
-6. ECH के लिए controlled ECH-enabled host का उपयोग करें और client/server diagnostics inspect करके confirm करें कि **inner** ClientHello accepted हुआ। केवल HTTPS record offer होना ECH के सफल होने का proof नहीं है।
-7. Network changes, captive portals, browser updates और VPN reconnects के बाद दोहराएं। Record करें कि DNS/ECH का ownership किस component के पास है, ताकि बाद के administrators bypass न बना दें।
+1. तय करें कि DNS को VPN/Tor environment, OS या application में से कौन नियंत्रित करेगा। असंबंधित resolvers की परतें लगाने के बजाय इसे **एक** इच्छित layer में configure करें।
+2. प्रकाशित privacy/retention policy के आधार पर resolver चुनें और platform द्वारा समर्थित होने पर strict encrypted mode चालू करें। Opportunistic fallback चुपचाप plaintext पर लौट सकता है।
+3. अपने नियंत्रण वाले authoritative test zone के अंतर्गत एक unique subdomain query करें; पुष्टि करें कि authoritative log में इच्छित recursive resolver दिखाई दे रहा है।
+4. अनुमति के साथ केवल test device का traffic capture करें। पुष्टि करें कि access network plaintext DNS नहीं पढ़ सकता, लेकिन यह ध्यान रखें कि उसे encrypted resolver/tunnel endpoint दिखाई देता है।
+5. किसी blocked/unreachable encrypted resolver की जाँच करें। सफल परिणाम चुना हुआ fail-closed या documented fallback behavior है—अनजाने में clear query होना नहीं।
+6. ECH के लिए नियंत्रित ECH-enabled host इस्तेमाल करें और client/server diagnostics देखें, ताकि पुष्टि हो कि **inner** ClientHello स्वीकार किया गया। केवल HTTPS record उपलब्ध होने से यह साबित नहीं होता कि ECH सफल हुआ।
+7. Network में बदलाव, captive portals, browser updates और VPN reconnects के बाद दोबारा जाँचें। दर्ज करें कि DNS/ECH का नियंत्रण किस component के पास है, ताकि बाद के administrators कोई bypass न बना दें।
 
 ## Mixnets
 
-Nym या Katzenpost जैसे Mixnets timing correlation का प्रतिरोध करने के लिए fixed-size packets, delay, reordering और cover traffic जोड़ते हैं। इन properties की कीमत latency और bandwidth है, और independent deployment-scale evidence सीमित है। Current consumer mixnets को **emerging/high-latency options** मानें, Tor/VPNs के faster या guaranteed replacements नहीं।<sup>[[17]](#references)</sup>
+Nym या Katzenpost जैसे mixnets timing correlation से बचाव के लिए fixed-size packets, delay, reordering और cover traffic जोड़ते हैं। इन विशेषताओं की कीमत latency और bandwidth है, और deployment के बड़े पैमाने पर स्वतंत्र प्रमाण सीमित हैं। मौजूदा consumer mixnets को Tor/VPNs के तेज़ या सुनिश्चित विकल्प नहीं, बल्कि **उभरते/उच्च-latency वाले विकल्प** मानें।<sup>[[17]](#references)</sup>
 
-### Evaluation workflow
+### मूल्यांकन workflow
 
-1. Maintained client और exact supported application की पहचान करें; undocumented proxy के माध्यम से arbitrary browser/system traffic force न करें।
-2. Entry, mix nodes, gateway, destination और collusion assumptions के लिए current threat model पढ़ें।
-3. Official signed source से अलग test compartment में install करें और केवल benign owned endpoint का उपयोग करें।
-4. Delivery latency, message-size limits, reliability, retransmission और gateway unavailable होने पर behavior measure करें।
-5. Intended path और source confirm करने के लिए local traffic और owned endpoint inspect करें। Check करें कि replies उसी privacy design का उपयोग करते हैं या नहीं।
-6. Shutdown/failure test करें: application को silently direct Internet access पर fallback नहीं करना चाहिए।
-7. केवल speed के लिए cover traffic disable न करें, delays कम न करें या unusual fixed routes न चुनें; ये changes stated anonymity model को invalid कर सकते हैं।
-8. इसे experimental रखें, जब तक specific deployment, independent analysis और operational reliability consequence level के अनुरूप न हों।
+1. Maintained client और उसके द्वारा समर्थित सटीक application की पहचान करें; arbitrary browser/system traffic को undocumented proxy से जबरन न भेजें।
+2. Entry, mix nodes, gateway, destination और collusion से जुड़ी धारणाओं के लिए मौजूदा threat model पढ़ें।
+3. अलग test compartment में आधिकारिक signed source से install करें और केवल अपने नियंत्रण वाले benign endpoint का इस्तेमाल करें।
+4. Delivery latency, message-size limits, reliability, retransmission और gateway अनुपलब्ध होने पर होने वाले व्यवहार को मापें।
+5. इच्छित path और source की पुष्टि के लिए स्थानीय traffic और अपने नियंत्रण वाले endpoint की जाँच करें। यह भी देखें कि replies में वही privacy design इस्तेमाल होता है या नहीं।
+6. Shutdown/failure की जाँच करें: application को चुपचाप direct Internet access पर वापस नहीं जाना चाहिए।
+7. केवल गति के लिए cover traffic बंद न करें, delays कम न करें या असामान्य fixed routes न चुनें; इन बदलावों से घोषित anonymity model अमान्य हो सकता है।
+8. जब तक विशेष deployment, स्वतंत्र विश्लेषण और operational reliability परिणामों के स्तर के अनुरूप न हों, इसे प्रयोगात्मक ही रखें।
 
 ## Network preflight checklist
 
-- [ ] Authorization में access network, target, dates और source infrastructure शामिल हैं।
-- [ ] Endpoint में कोई unrelated identities या active sync sessions नहीं हैं।
-- [ ] IPv4, IPv6, DNS और reconnect behavior plan से match करते हैं।
-- [ ] Controlled DHCP/local-subnet route injection test traffic को physical interface पर move नहीं कर सकता।
-- [ ] Destination को केवल expected egress दिखाई देता है।
-- [ ] Captive portal और hotspot behavior को sensitive traffic के बिना test किया गया है।
-- [ ] Local sharing/discovery और automatic network joining disable हैं।
-- [ ] Observer table और residual traffic-correlation risk स्वीकार किए गए हैं।
-- [ ] Provider policy, retention और emergency contact current हैं।
+- [ ] अनुमति में access network, target, dates और source infrastructure शामिल हैं।
+- [ ] Endpoint में असंबंधित identities या सक्रिय sync sessions नहीं हैं।
+- [ ] IPv4, IPv6, DNS और reconnect behavior योजना के अनुरूप हैं।
+- [ ] नियंत्रित DHCP/local-subnet route injection test traffic को physical interface पर नहीं भेज सकता।
+- [ ] Destination को केवल अपेक्षित egress दिखाई देता है।
+- [ ] Captive portal और hotspot behavior को संवेदनशील traffic के बिना जाँचा गया है।
+- [ ] स्थानीय sharing/discovery और automatic network joining बंद हैं।
+- [ ] Observer table और शेष traffic-correlation risk स्वीकार किए गए हैं।
+- [ ] Provider policy, retention और emergency contact की जानकारी मौजूदा है।
 
-Split-knowledge relays, route-enforced workloads, pluggable transports, onion services, I2P और disposable remote browsers के लिए [Advanced Network Privacy Architectures](advanced-network-privacy-architectures.md) पर आगे पढ़ें।
+Split-knowledge relays, route-enforced workloads, pluggable transports, onion services, I2P और disposable remote browsers के लिए, [Advanced Network Privacy Architectures](advanced-network-privacy-architectures.md) पर जाएँ।
 
 
 
 ## References
 
-- [1] [EFF — अपने लिए सही VPN चुनना](https://ssd.eff.org/module/choosing-vpn-thats-right-you)
+- [1] [EFF — आपके लिए सही VPN चुनना](https://ssd.eff.org/module/choosing-vpn-thats-right-you)
 - [2] [UK NCSC — Device security guidance: Virtual Private Networks](https://www.ncsc.gov.uk/collection/device-security-guidance/infrastructure/virtual-private-networks)
-- [3] [Tor Project — Tor द्वारा प्रदान की जाने वाली privacy और anonymity protections](https://support.torproject.org/about-tor/introduction/protections/)
+- [3] [Tor Project — Tor द्वारा दी जाने वाली privacy और anonymity सुरक्षा](https://support.torproject.org/about-tor/introduction/protections/)
 - [4] [Tor Specifications — Tor का संक्षिप्त परिचय](https://spec.torproject.org/intro/)
-- [5] [Tor Project — अन्य browsers के साथ Tor का उपयोग](https://support.torproject.org/tor-browser/security/using-tor-with-other-browsers/)
-- [6] [Tor Project — Tor Browser में Plugins और add-ons](https://support.torproject.org/tor-browser/features/plugins/)
-- [7] [Tor Project — Tor को unblock करना](https://support.torproject.org/tor-browser/circumvention/unblocking-tor/)
-- [8] [Tor Project — VPN के साथ Tor Browser का उपयोग](https://support.torproject.org/tor-browser/general/vpn-with-tor/)
-- [9] [FTC Consumer Advice — क्या Public Wi-Fi Networks सुरक्षित हैं?](https://consumer.ftc.gov/articles/are-public-wi-fi-networks-safe-what-you-need-know)
+- [5] [Tor Project — अन्य browsers के साथ Tor का इस्तेमाल](https://support.torproject.org/tor-browser/security/using-tor-with-other-browsers/)
+- [6] [Tor Project — Tor Browser में plugins और add-ons](https://support.torproject.org/tor-browser/features/plugins/)
+- [7] [Tor Project — Tor की रुकावट हटाना](https://support.torproject.org/tor-browser/circumvention/unblocking-tor/)
+- [8] [Tor Project — VPN के साथ Tor Browser का इस्तेमाल](https://support.torproject.org/tor-browser/general/vpn-with-tor/)
+- [9] [FTC Consumer Advice — क्या सार्वजनिक Wi-Fi नेटवर्क सुरक्षित हैं?](https://consumer.ftc.gov/articles/are-public-wi-fi-networks-safe-what-you-need-know)
 - [10] [Apple Platform Security — Apple devices के साथ Wi-Fi privacy](https://support.apple.com/guide/security/wi-fi-privacy-with-apple-devices-sec31e483abf/web)
 - [11] [Android Open Source Project — MAC randomization लागू करना](https://source.android.com/docs/core/connect/wifi-mac-randomization)
-- [12] [UK NCSC — Secure Privileged Access Workstations के लिए Principles](https://www.ncsc.gov.uk/files/ncsc-principles-for-secure-privileged-access-workstations--paws-.pdf)
-- [13] [GSMA — Mandatory SIM registration: policy and regulatory perspectives](https://www.gsma.com/solutions-and-impact/connectivity-for-good/mobile-for-development/programme/digital-identity/mandatory-sim-registration-policy-and-regulatory-perspectives-in-the-absence-of-data-protection-laws/)
-- [14] [RFC 8932 — DNS Privacy Service Operators के लिए Recommendations](https://www.rfc-editor.org/rfc/rfc8932.html)
+- [12] [UK NCSC — सुरक्षित Privileged Access Workstations के सिद्धांत](https://www.ncsc.gov.uk/files/ncsc-principles-for-secure-privileged-access-workstations--paws-.pdf)
+- [13] [GSMA — अनिवार्य SIM registration: नीतिगत और नियामक दृष्टिकोण](https://www.gsma.com/solutions-and-impact/connectivity-for-good/mobile-for-development/programme/digital-identity/mandatory-sim-registration-policy-and-regulatory-perspectives-in-the-absence-of-data-protection-laws/)
+- [14] [RFC 8932 — DNS Privacy Service Operators के लिए सुझाव](https://www.rfc-editor.org/rfc/rfc8932.html)
 - [15] [RFC 9230 — Oblivious DNS over HTTPS](https://www.rfc-editor.org/rfc/rfc9230.html)
 - [16] [RFC 9849 — TLS Encrypted Client Hello](https://www.rfc-editor.org/rfc/rfc9849.html)
 - [17] [Katzenpost — Threat Model](https://katzenpost.network/docs/threat_model/)
-- [18] [Xue et al. — Bypassing Tunnels: Routing Tables का दुरुपयोग करके VPN Client Traffic Leak करना](https://www.usenix.org/system/files/usenixsecurity23-xue.pdf)
-- [19] [Leviathan Security — TunnelVision: Attackers Routing-Based VPNs को Total VPN Leak के लिए Decloak कैसे कर सकते हैं](https://www.leviathansecurity.com/blog/tunnelvision)
+- [18] [Xue et al. — Tunnels को bypass करना: Routing Tables का दुरुपयोग करके VPN Client Traffic leak करना](https://www.usenix.org/system/files/usenixsecurity23-xue.pdf)
+- [19] [Leviathan Security — TunnelVision: Routing-Based VPNs को पूरी तरह VPN leak करने के लिए Attackers कैसे Decloak कर सकते हैं](https://www.leviathansecurity.com/blog/tunnelvision)
+- [20] [Yggdrasil FAQ: क्या Yggdrasil anonymous है?](https://yggdrasil-network.github.io/faq.html#is-yggdrasil-anonymous)
+- [21] [Yggstack README](https://github.com/yggdrasil-network/yggstack)
 {{#include ../banners/hacktricks-training.md}}
