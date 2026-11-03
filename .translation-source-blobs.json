@@ -211,7 +211,7 @@
     "src/generic-methodologies-and-resources/basic-forensic-methodology/pcap-inspection/README.md": "da4af9afe9f2f07563d10891a66248205b0f336c",
     "src/generic-methodologies-and-resources/basic-forensic-methodology/pcap-inspection/dnscat-exfiltration.md": "56ad9b538823fa4767e4a2aeb140e2f1b8ae85e7",
     "src/generic-methodologies-and-resources/basic-forensic-methodology/pcap-inspection/suricata-and-iptables-cheatsheet.md": "20f6aeb057b7dfc3e2e199b66208e02d5478d632",
-    "src/generic-methodologies-and-resources/basic-forensic-methodology/pcap-inspection/usb-keystrokes.md": "dff1f53f2dea557ff6aebe3381a452517f01285e",
+    "src/generic-methodologies-and-resources/basic-forensic-methodology/pcap-inspection/usb-keystrokes.md": "f39e8ef34f2dc142013f4ce159b7628fc3f11bb3",
     "src/generic-methodologies-and-resources/basic-forensic-methodology/pcap-inspection/wifi-pcap-analysis.md": "dfaa7402e1ff3d8e60452bcf9d6f164f01c1d108",
     "src/generic-methodologies-and-resources/basic-forensic-methodology/pcap-inspection/wireshark-tricks.md": "0d8609d321dc26445419833ff9ea4f56ce72c48e",
     "src/generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md": "82e451719f020baecedc965977e450d690027364",
