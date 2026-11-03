@@ -39,6 +39,32 @@ LDAP relay/MITM attacks forward authentication to a domain controller to obtain 
   - **Server 2025**: leave legacy policy at `None` and set `LDAP server signing requirements Enforcement` = `Enabled` (Not Configured = enforced by default; set `Disabled` to avoid it).<sup>[[1]](#references)</sup>
 - **Compatibility**: Inventory non-Windows appliances and applications using simple binds or unsigned SASL binds. Microsoft documents support on maintained Windows versions; legacy-client compatibility statements should be verified against the actual client stack rather than reduced to an XP version threshold.<sup>[[2]](#references)</sup>
 
+## Relay paths and signed-SASL reauthentication
+
+If **only signing** is required, relaying to LDAPS can still work when channel binding is not enforced: TLS supplies transport integrity. If **only channel binding** is required, plain LDAP has no TLS channel to bind; a relay can authenticate on TCP 389 and then use StartTLS for operations that require TLS, provided the relayed identity has the necessary rights. Enforcing both closes these conventional alternatives, but it did not stop the following flaw on unpatched domain controllers.<sup>[[5]](#references)</sup>
+
+### Stacking an LDAP operation after a relayed Bind
+
+On affected Windows Server 2016–2025 domain controllers, first establish a **signed NTLM SASL LDAP connection** on TCP 389 as identity X, using credentials whose session key you know (or an anonymous NTLM SASL context where accepted). Coerce identity Y to authenticate **over SMB** to the relay. Forward Y's NTLM NEGOTIATE and the DC's CHALLENGE through GSS-SPNEGO Bind requests on X's existing LDAP connection. The Windows SMB client sets `NTLMSSP_NEGOTIATE_SIGN`, so the resulting LDAP bind requires a signed SASL layer; an HTTP/WebDAV-origin exchange generally lacks that flag and is not interchangeable here.<sup>[[5]](#references)</sup>
+
+When Y sends NTLM AUTHENTICATE, put **two distinct LDAP messages in one length-prefixed SASL record**: a BindRequest carrying that response, then a ModifyRequest. Sign the entire record with X's known key. The vulnerable DC verifies the record under X, completes the Bind and switches the connection's authorization to Y, then executes the remaining ModifyRequest as Y without rechecking the record under Y's key. This does not disclose Y's password or session key; a later record signed by X fails. An RBCD write to `msDS-AllowedToActOnBehalfOfOtherIdentity` or a shadow-credential write to `msDS-KeyCredentialLink` still requires Y to have permission on the target object. See [RBCD](resource-based-constrained-delegation.md), [shadow credentials](acl-persistence-abuse/shadow-credentials.md), and, for a relayed DC machine account, [DCSync](dcsync.md).<sup>[[5]](#references)</sup>
+
+This is a **plain LDAP** bypass, not an LDAPS channel-binding bypass. On LDAPS, TLS protects the connection and Windows does not establish the X-key NTLM SASL signing layer needed for this record-stacking path. If TCP 389 is unavailable, the technique does not simply transfer to TCP 636. The October 2026 cumulative update KB5126646 prevents the same-record operation by discarding remaining data after the Bind changes the connection identity.<sup>[[5]](#references)</sup>
+
+The researcher's [LDAP Switcheroo](https://github.com/grayhatkiller/switcheroo) wraps a modified `ntlmrelayx.py` for this workflow. It requires an **SMB** coercion source, a pinned Impacket tree exposing LDAP signing/security-context APIs (PyPI Impacket 0.13.1 is insufficient), and an attacker-controlled account for the initial signed bind. For an RBCD write, supply the victim object's DN and the SID of a controlled delegating computer; use `-attribute` with `-value` or `-value-hex` for another permitted write. Confirm the tool's independent signed read-back rather than treating a relay-side `FAILED` message as proof that the ModifyRequest failed.<sup>[[5]](#references)[[6]](#references)</sup>
+
+```bash
+sudo PYTHONPATH=/path/to/pinned-impacket python3 switcheroo.py \
+  'EXAMPLE/low@dc.example.com' -dc-ip <DC_IP> \
+  -base-dn 'DC=example,DC=com' -listen-ip <ATTACKER_IP> \
+  -victim 'EXAMPLE/VICTIM$' \
+  -modify-dn 'CN=VICTIM,CN=Computers,DC=example,DC=com' \
+  -rbcd-sid '<CONTROLLED_COMPUTER_SID>' \
+  -ntlmrelayx /path/to/pinned-impacket/examples/ntlmrelayx.py
+```
+
+Trigger the SMB authentication separately; see [forcing privileged NTLM authentication](printers-spooler-service-abuse.md) for one coercion surface and the [relay overview](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) for others. The tool's command and implementation are documented in its repository.<sup>[[6]](#references)</sup>
+
 ## Audit-first rollout (recommended ~30 days)
 
 1. Enable LDAP interface diagnostics on each DC to log unsigned binds (Event **2889**):<sup>[[1]](#references)</sup>
@@ -64,4 +90,6 @@ Reg Add HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics /v "16 LDAP Inte
 - [2] [Microsoft KB4520412 - LDAP channel binding & signing requirements](https://support.microsoft.com/en-us/topic/2020-and-2023-ldap-channel-binding-and-ldap-signing-requirements-for-windows-kb4520412-ef185fb8-00f7-167d-744c-f299a66fc00a)
 - [3] [Microsoft CVE-2017-8563 - LDAP relay mitigation update](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2017-8563)
 - [4] [0xdf – HTB Bruno (LDAP signing disabled → Kerberos relay → RBCD)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
+- [5] [SpecterOps – Signed, Sealed, and Relayed, NTLM-style](https://specterops.io/blog/2026/10/23/ldap-signing-bypass-ntlm-relay/)
+- [6] [LDAP Switcheroo proof of concept](https://github.com/grayhatkiller/switcheroo)
 {{#include ../../banners/hacktricks-training.md}}
