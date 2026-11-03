@@ -344,7 +344,7 @@
     "src/hardware-physical-access/radio-hacking/proxmark-3.md": "f5c4b4aa42f40e078460829ad63d86f17f8b303d",
     "src/hardware-physical-access/radio-hacking/sub-ghz-rf.md": "13884df933167c8af130e6135b6db15d000ca8ed",
     "src/hardware-physical-access/radio-hacking/vsat-forward-link-injection.md": "e45843ae4d24b53c130ec11a7abbe53f5c65d84a",
-    "src/industrial-control-systems/README.md": "3c50b11188cbf27e7c216afaec3626a9637ff693",
+    "src/industrial-control-systems/README.md": "9d21f42c5059c771c87b9e140c51b8cebfaa0e87",
     "src/linux-hardening/README.md": "70b2a0bf90a7b2227e86c7b77f2d6e1afa6edf9a",
     "src/linux-hardening/containers-namespaces/README.md": "490d54d9fe8b2f1488eaec2930a83cff63e0ba18",
     "src/linux-hardening/containers-namespaces/container-security/README.md": "f8fb1993ff767715fc8d5b10e8c004c8f0e6ecef",
