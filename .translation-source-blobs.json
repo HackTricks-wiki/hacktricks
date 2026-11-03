@@ -874,7 +874,7 @@
     "src/pentesting-web/file-inclusion/lfi2rce-via-compress.zlib-+-php_stream_prefer_studio-+-path-disclosure.md": "290febecc19baf9669b46d50825cc3aaec0da7b0",
     "src/pentesting-web/file-inclusion/lfi2rce-via-eternal-waiting.md": "e472d711ba5a52d92d029113cf3de29302a19b21",
     "src/pentesting-web/file-inclusion/lfi2rce-via-nginx-temp-files.md": "6619b473d00b9f169e4775e12f4d9e747b6b8e95",
-    "src/pentesting-web/file-inclusion/lfi2rce-via-php-filters.md": "1d31caebc1367d4016cf70053b7d887a11aee84a",
+    "src/pentesting-web/file-inclusion/lfi2rce-via-php-filters.md": "84ae893001683f9994a8ec06975a6f772a66668c",
     "src/pentesting-web/file-inclusion/lfi2rce-via-phpinfo.md": "4c4a4441ba10e46ec31bb0b151974c831395aea4",
     "src/pentesting-web/file-inclusion/lfi2rce-via-temp-file-uploads.md": "db2c181396d35645fb7b7cbc81b1327173ebaf4a",
     "src/pentesting-web/file-inclusion/phar-deserialization.md": "91357172ce45762025d5ab22577edd0f1eecb20e",
