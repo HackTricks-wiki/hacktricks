@@ -6,9 +6,9 @@
 - Use headings when variants share mechanism and task; split when transport, prerequisites, or task differ. Size alone is not decisive.
 - Main HackTricks owns general security techniques; HackTricks Cloud owns provider/service/IAM-specific pivots. Use verified public URLs for cross-book links.
 - A removed Markdown chapter needs a whole-page mdBook redirect in `book.toml`. Update current local links; historical fragments are out of scope. Preserve unique content before deleting a source.
-- Recheck paths and pending PR overlap; this guide describes the target clone, not merged status.
+- Recheck paths and pending PR overlap before editing.
 
-## Canonical locations and boundaries in the target clone
+## Canonical locations and boundaries
 
 - Trusted-host Rlogin (513/TCP) and Rsh (514/TCP) → `src/network-services-pentesting/pentesting-rlogin.md`; Rexec (512/TCP) stays separate because it uses passwords and a distinct wire protocol.
 - SCM/SCMR execution (PsExec, WinExec, SMBExec, SCMExec, SharpMove) → `src/windows-hardening/lateral-movement/psexec-and-winexec.md`; scheduler, DCOM, WMI, WinRM and RDP are separate interfaces. Cloud pivots stay in Cloud.
@@ -40,7 +40,7 @@
 - Former TODO web topics: Host poisoning → `pentesting-web/reset-password.md`; session auth → `pentesting-web/403-and-401-bypasses.md`; signup/email change → `pentesting-web/registration-vulnerabilities.md`; Jira service desk → `network-services-pentesting/pentesting-web/jira.md`; TRACE → `pentesting-web/hacking-with-cookies/README.md`.
 - Cross-platform host/SaaS collection-tool reference → `src/generic-methodologies-and-resources/post-exploitation-collection-tools.md`; OS-specific procedures stay in OS chapters. Its old TODO route redirects here.
 
-- macOS environment-controlled PHP, Lua, Julia and Octave startup files → `src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-interpreter-startup-file-injection.md`. Keep broader shell, Python, PowerShell and framework injection chapters separate; runtime-specific prerequisites and mitigations remain under headings.
+- macOS environment-controlled PHP, Lua, Julia, Octave, R, Ruby and Erlang/Elixir interpreter startup → `src/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-interpreter-startup-file-injection.md`. Each runtime keeps its prerequisites, variants and mitigation under headings; shell, Python, PowerShell and framework injection stay separate.
 - MIFARE Classic stored-value tampering (Crypto1, balance diff/integrity, Proxmark3 transcript, magic UID caveats) → `src/hardware-physical-access/radio-hacking/pentesting-rfid.md#mifare-classic-offline-stored-value-tampering-broken-crypto1`; `proxmark-3.md` keeps generic tool commands and links to this tool-independent card-balance task.
 
 ## Researcher entry points
@@ -50,11 +50,12 @@
 - Guest surfaces → VM Escape; SOAP/REST/GraphQL → Web APIs; 401/403 → Web authorization; header behavior → Special HTTP Headers.
 - LFI/PHP upload race → Web File Inclusion; eSIM/Java Card → Mobile eSIM; modem/SoC → Android baseband.
 - Browser `nosniff`, UTF-16 script, ICO width → XS-Leaks; executable cross-origin script inclusion → XSSI; in-origin script injection → XSS.
+- `R_PROFILE`, `RUBYOPT`, `ERL_AFLAGS` → macOS interpreter startup chapter.
 - Same-site HTML-injection leaks (SS-Leaks) → `src/pentesting-web/dangling-markup-html-scriptless-injection/README.md#same-site-leaks-ss-leaks`; unlike cross-origin XS-Leaks, injection and the probed page share an origin. Former standalone page redirects.
 
 ## Deferred
 
-- `network-services-pentesting/pentesting-web/` is mixed (~91 pages); audit inbound links and product prerequisites before wholesale moves. Web ownership alone does not justify URL churn.
+- `network-services-pentesting/pentesting-web/` is mixed; audit inbound links and product prerequisites before wholesale moves. Web ownership alone does not justify URL churn.
 - `todo/more-tools.md` is an uncurated cross-domain list; audit destinations before splitting. SaaS collection tools in Main warrant coordinated Cloud ownership review.
 - Blockchain overview and Privacy cryptocurrency need a union audit before consolidation.
-- Audit long escalation, macOS startup and iOS exploitation by task and links, not length alone.
+- Audit long escalation and iOS exploitation by task and links, not length alone.
