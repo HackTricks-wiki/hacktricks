@@ -240,9 +240,9 @@ rportfwd_local stop [bind port]
 
 ## Yggdrasil userspace overlay with yggstack
 
-[Yggstack](https://github.com/yggdrasil-network/yggstack) joins Yggdrasil's encrypted IPv6 mesh without a TUN interface or administrator privileges. It offers a SOCKS5 listener for connections **from the local process into the overlay**, and TCP forwarding in either direction. This is useful when a pivot cannot install a tunnel driver, but the operator endpoint must also join Yggdrasil and the pivot still needs outbound connectivity to a configured peer.<sup>[[64]](#references)[[65]](#references)</sup>
+[Yggstack](https://github.com/yggdrasil-network/yggstack) joins Yggdrasil's encrypted IPv6 mesh without a TUN interface or administrator privileges. It provides a local SOCKS5 listener for connections into the overlay and TCP forwarding in either direction.<sup>[[64]](#references)</sup> A pivot must be able to reach a configured peer, and the operator endpoint must also join the mesh to reach its overlay address.<sup>[[65]](#references)</sup>
 
-Generate a configuration, add an authorized peer URI to its `Peers` section, then choose the SOCKS listener or remote-port exposure mode. The latter makes a service bound only to `127.0.0.1:8080` reachable at port `18080` on the node's Yggdrasil address; it does **not** publish the service to the ordinary Internet. The commands below are alternative runs of the same node, not two processes to start with the same identity.<sup>[[64]](#references)[[65]](#references)</sup>
+Generate a configuration and add a reachable peer URI to its `Peers` section, then choose the SOCKS listener or remote-port exposure mode.<sup>[[64]](#references)[[65]](#references)</sup> The latter exposes a service bound to `127.0.0.1:8080` on port `18080` of the node's Yggdrasil address, not on the ordinary Internet. On a public mesh, other overlay nodes may reach the exposed service, so a peer connection is not an access-control boundary.<sup>[[64]](#references)[[66]](#references)</sup> The commands below are alternative runs of the same node.<sup>[[64]](#references)</sup>
 
 ```bash
 ./yggstack -genconf > yggdrasil.conf
@@ -251,9 +251,9 @@ Generate a configuration, add an authorized peer URI to its `Peers` section, the
 ./yggstack -useconffile yggdrasil.conf -remote-tcp 18080:127.0.0.1:8080
 ```
 
-A Go implant can use the same userspace stack in-process rather than run `yggstack` as a separate executable. In ESET's MythicRatatoskr case, the implant selected three embedded public peers, generated a new Ed25519 identity on each start (changing its overlay IPv6 address), suppressed node metadata with empty `NodeInfo` and `NodeInfoPrivacy`, then reached an HTTPS endpoint inside the mesh. A local SOCKS5 listener could be exposed with its overlay port-forwarding command.<sup>[[64]](#references)[[67]](#references)</sup>
+A Go agent can embed the userspace stack instead of launching a separate `yggstack` process. ESET documented an implementation that generated a new Ed25519 identity on each start, changing its overlay IPv6 address, and set empty `NodeInfo` plus `NodeInfoPrivacy` to limit disclosed node metadata. It communicated with an HTTPS endpoint inside the mesh and could expose a local TCP listener over its overlay address.<sup>[[64]](#references)[[67]](#references)</sup>
 
-This can hide the final overlay destination from an ordinary egress view, but not the public peer connections or the source IP visible to direct peers. Yggdrasil does not provide anonymity.<sup>[[66]](#references)[[67]](#references)</sup>
+The overlay can obscure the final destination from an ordinary egress view, but not the peer connections or the source IP visible to direct peers. Yggdrasil does not provide anonymity.<sup>[[66]](#references)[[67]](#references)</sup> See [network privacy and anonymous connectivity](../privacy/network-privacy-and-anonymous-connectivity.md) for the distinction between encrypted transport and anonymity.
 
 ## Tailcat: accountless userspace TCP forwarding
 
@@ -1118,6 +1118,6 @@ The same report details the defaults, wildcard listeners, packet decryption, rel
 - [64] [Yggstack README](https://github.com/yggdrasil-network/yggstack)
 - [65] [Yggdrasil configuration: connecting to peers](https://yggdrasil-network.github.io/configuration.html)
 - [66] [Yggdrasil FAQ: anonymity and peering](https://yggdrasil-network.github.io/faq.html)
-- [67] [ESET Research: MythicRatatoskr Yggdrasil-enabled backdoor](https://welivesecurity.com/en/eset-research/mythicratatoskr-yggdrasil-enabled-backdoor-deployed-uac0099-sandworm-collaboration)
+- [67] [ESET Research: MythicRatatoskr Yggdrasil-enabled backdoor](https://www.welivesecurity.com/en/eset-research/mythicratatoskr-yggdrasil-enabled-backdoor-deployed-uac0099-sandworm-collaboration)
 
 {{#include ../banners/hacktricks-training.md}}
