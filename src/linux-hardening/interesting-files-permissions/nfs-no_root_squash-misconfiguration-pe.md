@@ -22,11 +22,23 @@ For more information about **NFS** check:
 
 ## Privilege Escalation
 
+### Root-equivalent anonymous mapping
+
+Do not check only for `no_root_squash`. With `root_squash,anonuid=0,anongid=0`, a client's UID/GID 0 request is squashed **back to root**. With `all_squash,anonuid=0,anongid=0`, even non-root client identities are mapped to root on the server. On a writable `sec=sys` export, either configuration can provide the root-owned file primitive used in the SUID handoff below; the allowed-client and victim-mount restrictions still apply.<sup>[[4]](#references)</sup>
+
+On the server, use `exportfs -v` to inspect the active export and the options for the **matching client**, including `rw`, `sec=`, squash mode, and `anonuid`/`anongid`. Also inspect `/etc/exports.d/*.exports` when reviewing the configuration; `/etc/exports` alone may be incomplete.<sup>[[4]](#references)[[6]](#references)</sup>
+
+```bash
+# Example /etc/exports entries: squashed requests map to server UID 0
+/srv/share 192.0.2.10(rw,sec=sys,root_squash,anonuid=0,anongid=0)
+/srv/share 192.0.2.11(rw,sec=sys,all_squash,anonuid=0,anongid=0)
+```
+
 ### Remote Exploit
 
 Option 1 using bash:
 - On an allowed client, mount a writable export as root, copy **`/bin/bash`** into it, set its **SUID** bit, and execute it from a victim mount that does not use `nosuid`.<sup>[[2]](#references)[[4]](#references)</sup>
-    - For the uploaded file to remain owned by root, the server must use **`no_root_squash`**. If root is squashed, a SUID binary for another account is possible only when the client can legitimately create or own it with that account's numeric UID/GID.<sup>[[4]](#references)</sup>
+    - For the uploaded file to remain owned by root, the server must preserve client UID 0 with **`no_root_squash`** or map the request to UID 0 with **`anonuid=0`**. Otherwise, a SUID binary for another account is possible only when the client can create or own it with that account's numeric UID/GID.<sup>[[4]](#references)</sup>
 
 ```bash
 #Attacker, as root user
@@ -139,6 +151,8 @@ Run like:
 drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old
 ```
 
+
+
 ## References
 
 - [1] [lnv42/libnfs](https://github.com/lnv42/libnfs)
@@ -146,5 +160,5 @@ drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old
 - [3] [sahlberg/libnfs](https://github.com/sahlberg/libnfs)
 - [4] [exports(5) — Linux manual page](https://man7.org/linux/man-pages/man5/exports.5.html)
 - [5] [RFC 1813: NFS Version 3 Protocol Specification](https://datatracker.ietf.org/doc/html/rfc1813)
-
+- [6] [exportfs(8) — Linux manual page](https://man7.org/linux/man-pages/man8/exportfs.8.html)
 {{#include ../../banners/hacktricks-training.md}}
