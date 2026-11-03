@@ -1,89 +1,117 @@
-# USB Keystrokes
+# USBキーストローク
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-以下のような keyboard の USB 通信を含む pcap がある場合:
+次のような、キーボードのUSB通信を含むpcapがある場合:
 
-![USB Keystrokes: 以下のような keyboard の USB 通信を含む pcap がある場合](<../../../images/image (962).png>)
+![USBキーストローク: 次のような、キーボードのUSB通信を含むpcapがある場合](<../../../images/image (962).png>)
 
-**boot protocol** を使用する keyboard では、各 Interrupt IN report は固定された 8 バイトのレイアウトになっています。1 バイトの modifier、1 バイトの reserved、6 バイトの keycode で構成されます。host は連続する report を比較し、keycode を HID usage にマッピングして key event を再構築します。<sup>[[8]](#references)</sup>
+HID **boot protocol**を使用するキーボードでは、各Interrupt INレポートは固定の8バイト構成です。1バイト目は修飾キー、2バイト目は予約済み、残りの6バイトはキーコードです。ホストは連続するレポートを比較し、キーコードをHID usageに対応付けてキーイベントを再構成します。<sup>[[8]](#references)</sup>
 
-## USB HID report の基本
+一般的なキャプチャの初期調査については、[Pcap Inspection](./)を参照してください。
 
-標準的な boot keyboard input report は、次のように構成されます。<sup>[[8]](#references)[[9]](#references)</sup>
+## USB HIDレポートの基本
 
-| Byte | Meaning |
+標準的なboot keyboard入力レポートは、次のような構成です。<sup>[[8]](#references)[[9]](#references)</sup>
+
+| Byte | 意味 |
 | --- | --- |
-| 0 | Modifier bitmap（`0x02` = Left Shift、`0x20` = Right Shift、`0x40` = Right Alt など）。複数の bit を同時に設定できます。 |
-| 1 | Reserved byte。未使用の report では通常、ゼロに設定されます。OEM または system 固有の用途には portability がありません。 |
-| 2-7 | USB usage ID format の keycode を最大 6 個格納します（`0x04 = a`、`0x1E = 1`）。`0x00` は「key なし」を意味します。 |
+| 0 | 修飾キーのビットマップ（`0x02` = 左Shift、`0x20` = 右Shift、`0x40` = 右Altなど）。複数のビットを同時に設定できます。 |
+| 1 | 予約済みバイト。未使用のレポートでは通常、ゼロに設定します。OEMまたはシステム固有の用途には互換性がありません。 |
+| 2-7 | USB usage ID形式のキーコードを最大6個まで格納します（`0x04 = a`、`0x1E = 1`）。`0x00`は「キーなし」を意味します。 | 
 
-boot layout では、6 個を超える non-modifier key が押されている場合、すべての key slot に usage ID `0x01`（`Keyboard ErrorRollOver`）が report されます。また、認識できない組み合わせを示す場合もあります。<sup>[[8]](#references)[[9]](#references)</sup> この layout を理解しておくと、raw の `usb.capdata` bytes しかない場合にも役立ちます。
+bootレイアウトでは、修飾キー以外のキーが6個を超えて押されると、すべてのキー用スロットにusage ID `0x01`（`Keyboard ErrorRollOver`）が報告されます。また、認識できない組み合わせを示す場合もあります。<sup>[[8]](#references)[[9]](#references)</sup> このレイアウトを理解しておくと、生の`usb.capdata`バイトしかない場合にも役立ちます。
 
-## PCAP から HID data を抽出する
+## PCAPからのHIDデータの抽出
 
-### 最初に keyboard interface を特定する
+### 最初にキーボードインターフェースを特定する
 
-busy な capture では、report を dump する前に HID keyboard を特定します。信頼できる出発点は interface descriptor response です。<sup>[[3]](#references)[[8]](#references)</sup>
+通信量の多いキャプチャでは、レポートをダンプする前にHIDキーボードを特定してください。信頼できる出発点は、インターフェースディスクリプターの応答です。<sup>[[3]](#references)[[8]](#references)</sup>
+
 ```text
 usb.transfer_type == 0x02 && usb.endpoint_address.direction == 1 && usb.bDescriptorType == 4 && usb.bInterfaceClass == 3
 ```
-HID class は次の interface 値を定義します:<sup>[[8]](#references)</sup>
 
-- `subclass == 1` は Boot Interface Subclass です。`protocol == 1` と組み合わせると boot keyboard を識別します
-- `protocol == 2` は boot mouse を識別します
-- `protocol == 0` は boot protocol がないことを意味します。8-byte layout と決めつけず、HID report descriptor を調査してください
+HID class は次のインターフェース値を定義します:<sup>[[8]](#references)</sup>
 
-interface が判明したら、何かを export する前に、フィルターを `usb.bus_id`、`usb.device_address`、可能であれば `usb.bInterfaceNumber` に固定します。
+- `subclass == 1` は Boot Interface Subclass です。`protocol == 1` の場合、ブートキーボードを示します
+- `protocol == 2` はブートマウスを示します
+- `protocol == 0` はブートプロトコルなしを意味します。8バイトのレイアウトだと決めつけず、HID report descriptor を調べてください
 
-### Wireshark workflow
+ブート対応インターフェースがあっても、**ブートプロトコルが有効である証拠にはなりません**。HID デバイスは report protocol で初期化されます。ホストは `SET_PROTOCOL` (`bRequest = 0x0b`、`wValue = 0`) でブートモードを選択します。`wValue = 1` は report protocol を選択します。キャプチャに列挙処理が含まれている場合、8バイトのブートデコーダーを使う前に、キーボードインターフェースのリクエスト（`wIndex`）を確認してください。含まれていない場合は、インターフェース記述子からモードを推測せず、観測されたレポートレイアウトを確認してください。<sup>[[8]](#references)[[10]](#references)</sup>
 
-1. **デバイスを分離する**: keyboard からの interrupt IN traffic に対して、例として `usb.transfer_type == 0x01 && usb.endpoint_address.direction == 1 && usb.device_address == 3` でフィルターします。
-2. **有用な列を追加する**: `Leftover Capture Data` フィールド（`usb.capdata`）と、使用する `usbhid.*` フィールド（例: `usbhid.boot_report.keyboard.keycode_1`）を右クリックして、すべての frame を開かずに keystroke を追跡できるようにします。<sup>[[11]](#references)</sup>
-3. **空の report を非表示にする**: `!(usb.capdata == 00:00:00:00:00:00:00:00)` を適用して idle frame を除外します。
-4. **post-processing 用に export する**: `File -> Export Packet Dissections -> As CSV` を選択し、`frame.number`、`usb.src`、`usb.capdata`、および `usbhid.boot_report.keyboard.modifier.left_shift` や `usbhid.boot_report.keyboard.modifier.right_alt` などの decoded modifier fields を含めます。これらは後で script による再構築に使用します。<sup>[[10]](#references)[[11]](#references)</sup>
+```bash
+tshark -r usb.pcapng -Y 'usb.setup.bRequest == 0x0b' -T fields \
+  -e frame.number -e usb.bus_id -e usb.device_address \
+  -e usb.setup.wIndex -e usb.setup.wValue
+```
 
-### Command-line workflow
+インターフェースが判明したら、何かをエクスポートする前に、`usb.bus_id`、`usb.device_address`、可能であれば`usb.bInterfaceNumber`でフィルターを絞り込みます。
 
-classic な extraction pattern（`usb.capdata` を dump し、idle report を除外して usage ID を map する方法）は、original 2017 analysis とその walkthrough に登場します。<sup>[[1]](#references)[[2]](#references)</sup>
+### Wiresharkでのワークフロー
 
-`ctf-usb-keyboard-parser` repository は、classic な tshark + sed pipeline を自動化します:<sup>[[5]](#references)</sup>
+1. **デバイスを分離する**: キーボードからのinterrupt INトラフィックをフィルターします。例: `usb.transfer_type == 0x01 && usb.endpoint_address.direction == 1 && usb.device_address == 3`。
+2. **便利な列を追加する**: `Leftover Capture Data`フィールド（`usb.capdata`）や、好みの`usbhid.*`フィールド（例: `usbhid.boot_report.keyboard.keycode_1`）を右クリックして列に追加すると、すべてのフレームを開かずにキーストロークを追跡できます。<sup>[[11]](#references)</sup>
+3. **空のレポートを非表示にする**: `!(usb.capdata == 00:00:00:00:00:00:00:00)`を適用し、アイドルフレームを除外します。
+4. **後処理用にエクスポートする**: `File -> Export Packet Dissections -> As CSV`を選択し、`frame.number`、`usb.src`、`usb.capdata`、および`usbhid.boot_report.keyboard.modifier.left_shift`や`usbhid.boot_report.keyboard.modifier.right_alt`などのデコード済み修飾キーのフィールドを含めます。後でスクリプトを使って再構成できます。<sup>[[10]](#references)[[11]](#references)</sup>
+
+### コマンドラインでのワークフロー
+
+`usb.capdata`をダンプし、アイドルレポートを除外して、Usage IDをマッピングする古典的な抽出手法は、2017年の元の分析とそのウォークスルーで紹介されています。<sup>[[1]](#references)[[2]](#references)</sup>
+
+`ctf-usb-keyboard-parser`リポジトリは、古典的なtshark + sedのパイプラインを自動化します。<sup>[[5]](#references)</sup>
+
 ```bash
 tshark -r ./usb.pcap -Y 'usb.capdata && usb.data_len == 8' -T fields -e usb.capdata | sed 's/../:&/g2' > keystrokes.txt
 python3 usbkeyboard.py ./keystrokes.txt
 ```
-新しいキャプチャでは、Wireshark がデコードした `usbhid.data` フィールドを優先し、`usb.capdata` にフォールバックします。デバイスごとのファイルに、レポートごとに1つの payload を書き込みます。<sup>[[7]](#references)[[10]](#references)[[11]](#references)</sup>
+
+新しいキャプチャでは、Wiresharkでデコードされた `usbhid.data` フィールドを優先し、使用できない場合は `usb.capdata` を使います。レポートごとに1つのペイロードをデバイスごとのファイルに書き込みます:<sup>[[7]](#references)[[10]](#references)[[11]](#references)</sup>
+
 ```bash
 tshark -r usb.pcapng -Y "usb.capdata || usbhid.data" -T fields -E separator=$'\t' -e usb.src -e usb.capdata -e usbhid.data | \
-awk -F '\t' '{ payload = ($3 != "" ? $3 : $2); if (payload != "") print payload > "usbdata-" $1 ".txt" }'
+  awk -F '\t' '{ payload = ($3 != "" ? $3 : $2); if (payload != "") print payload > "usbdata-" $1 ".txt" }'
 ```
-これらのデバイスごとのファイルは、想定される hex 形式に正規化した後、decoder に入力できます。キャプチャが GATT 経由でトンネリングされた BLE keyboards から取得された場合は、`btatt.value && frame.len == 20` でフィルタリングし、decoder にかける前に hex payloads をダンプしてください。<sup>[[7]](#references)</sup>
 
-### レポートが classic 8-byte boot report ではない場合
+デバイスごとのファイルは、デコーダーが想定する形式に合わせて16進数形式を正規化した後、デコーダーに渡せます。キャプチャがGATT経由でトンネリングされたBLEキーボードからのものなら、`btatt.value && frame.len == 20`でフィルタリングし、デコード前に16進数のペイロードをダンプしてください。<sup>[[7]](#references)</sup>
 
-non-boot interface や report ID によって payload のレイアウトが変わる可能性があるため、すべての keyboard report が `modifier,reserved,key1..key6` に一致すると想定しないでください。<sup>[[8]](#references)[[11]](#references)</sup>
+### レポートが一般的な8バイトのboot reportではない場合
 
-- Wireshark がすでに HID layer を解析している場合は、`usb.capdata` よりも `usbhid.data` を優先します。
-- すべての行が constant prefix または report ID で始まる場合は、常に byte 0 が modifier であると想定せず、offset-aware decoder でその部分を削除します。<sup>[[7]](#references)</sup>
-- 一部の USBPcap exports では reserved byte が省略されるため、`--no-reserved` をサポートする decoder や custom offset を使うと時間を節約できます。<sup>[[7]](#references)</sup>
-- HID report descriptor または BLE HOGP report map が capture に含まれている場合は、parser を作成する前にそれを使って実際の field layout を復元します。
+非bootインターフェースやReport IDによってペイロードのレイアウトが変わることがあるため、すべてのキーボードレポートが`modifier,reserved,key1..key6`に一致するとは限りません。<sup>[[8]](#references)[[11]](#references)</sup>
 
-## decoding の自動化
+- WiresharkがすでにHIDレイヤーを解析している場合は、`usb.capdata`より`usbhid.data`を優先してください。
+- 各行が一定のプレフィックスまたはReport IDで始まる場合は、常にバイト0がmodifierだと仮定せず、オフセットに対応したデコーダーで取り除いてください。<sup>[[7]](#references)</sup>
+- USBPcapのエクスポートによってはreservedバイトが省略されているため、`--no-reserved`に対応したデコーダーやカスタムオフセットを使うと時間を節約できます。<sup>[[7]](#references)</sup>
+- キャプチャにHID report descriptorまたはBLE HOGP report mapが含まれている場合は、パーサーを作成する前にそれを使って実際のフィールドレイアウトを特定してください。
 
-- **ctf-usb-keyboard-parser** は、簡単な CTF challenges に今でも便利で、repository に同梱されています。<sup>[[5]](#references)</sup>
-- **CTF-Usb_Keyboard_Parser**（`main.py`）は `pcap` と `pcapng` files の両方を native に解析し、`LinkTypeUsbLinuxMmapped`/`LinkTypeUsbPcap` を理解します。また、tshark やその他の external dependency を必要としないため、isolated sandboxes に適しています。<sup>[[6]](#references)</sup>
-- **USB-HID-decoders** は keyboard、mouse、tablet の visualizers を追加します。`extract_hid_data.sh` helper（tshark backend）または `extract_hid_data.py`（scapy backend）を実行し、生成された text file を decoder または replay modules に入力して、keystrokes が展開される様子を確認できます。<sup>[[7]](#references)</sup>
+### report-protocolのキーbitmapをデコードする
 
-### Stateful decoding が重要な理由
+入力レポートが6つのbootキーslotではなくbitmapであるキーボードの場合、enumerationトラフィック内で**HID report descriptor**を見つけてください。このフィルターは、WiresharkがReport Sizeアイテムをデコードしたフレームを検出します。フレームを開き、descriptor全体を確認してください。descriptorが見つからない場合は、キーボードを接続する前に新しいキャプチャを開始してください。<sup>[[11]](#references)[[12]](#references)[[13]](#references)</sup>
 
-USB boot keyboards は、新しい key event がない場合でも idle rate で reports を送信するため、capture には release event の前に同じ reports が繰り返し含まれることがあります。実用的な decoder は次の処理を行う必要があります。<sup>[[3]](#references)[[8]](#references)</sup>
+```bash
+tshark -r usb.pcapng -Y 'usbhid.item.global.report_size' -T fields \
+  -e frame.number -e usb.bus_id -e usb.device_address
+```
 
-- 前回の report と比較して、新しく押された keycodes のみを出力する
-- byte 0 または `usbhid.boot_report.keyboard.modifier.left_shift` や `usbhid.boot_report.keyboard.modifier.right_alt` などの parsed fields から modifier state（`Shift`、`Ctrl`、`AltGr`）を保持する
-- `Caps Lock` などの toggle keys を追跡する。uppercase output は Shift だけでは制御されないためです
-- HID usage IDs は layout-agnostic であることを覚えておく。`0x1d` は、host keyboard layout に応じて物理的な `z`/`y` key position を表します。<sup>[[9]](#references)</sup>
+各キーボード Input レポートについて、`Report ID`（存在する場合）、`Usage Page`（キーボードキーは `0x07`）、`Usage Minimum/Maximum`、`Report Size`、`Report Count`、および各 `Input` 項目が **Variable** か **Array** かを確認します。キー項目のビットオフセットを求めるには、それ以前のすべての Input フィールドと定数パディングを数えます。レポートフィールドはバイト境界に揃っているとは限りません。連続するキーボードの Usage を持つ1ビットの Variable フィールドは、キー状態ビットマップです。このフィールドのビット0は最初に宣言された Usage に、ビット1は次の Usage に対応します。一方、Array には、押されたキーごとに1つのビットが格納されるのではなく、ディスクリプターの Usage 範囲を使って解決する値が格納されます。Report ID が宣言されている場合は、まずそのプレフィックスを持つレポートを選び、フィールドオフセットを計算するときはそのバイトをスキップします。新しいキー押下だけを出力するには、同じインターフェースかつ同じ Report ID の連続するレポート間で、押下中の Usage の集合を比較します。<sup>[[8]](#references)[[12]](#references)[[13]](#references)</sup>
 
-## Quick Python decoder
+## デコードの自動化
+
+- **ctf-usb-keyboard-parser** は、手早く CTF に取り組む際に今も便利で、リポジトリに同梱されています。<sup>[[5]](#references)</sup>
+- **CTF-Usb_Keyboard_Parser**（`main.py`）は `pcap` と `pcapng` の両ファイルをネイティブに解析し、`LinkTypeUsbLinuxMmapped`/`LinkTypeUsbPcap` に対応しています。また、tshark などの外部依存関係が不要なため、隔離されたサンドボックスに適しています。<sup>[[6]](#references)</sup>
+- **USB-HID-decoders** は、キーボード、マウス、タブレットのビジュアライザーを追加します。`extract_hid_data.sh` ヘルパー（tshark バックエンド）または `extract_hid_data.py`（scapy バックエンド）を実行し、生成されたテキストファイルをデコーダーまたはリプレイモジュールに渡して、キー入力を再現できます。<sup>[[7]](#references)</sup>
+
+### 状態を考慮したデコードが重要
+
+USB boot keyboard は、新しいキーイベントがない場合もアイドルレートでレポートを送信するため、キャプチャにはキーが離される前の同一レポートが複数含まれることがあります。実用的なデコーダーでは、次の処理が必要です。<sup>[[3]](#references)[[8]](#references)</sup>
+
+- 前のレポートと比較し、新しく押されたキーコードだけを出力する
+- バイト0、または `usbhid.boot_report.keyboard.modifier.left_shift` や `usbhid.boot_report.keyboard.modifier.right_alt` などの解析済みフィールドから、修飾キーの状態（`Shift`、`Ctrl`、`AltGr`）を保持する
+- 大文字の出力は `Shift` だけで決まるわけではないため、`Caps Lock` などのトグルキーの状態を追跡する
+- HID Usage ID はキーボードレイアウトに依存しないことに留意する。`0x1d` は、ホストのキーボードレイアウトによって物理的な `z`/`y` キーの位置を示します。<sup>[[9]](#references)</sup>
+
+## 簡易 Python デコーダー
+
 ```python
 #!/usr/bin/env python3
 import sys
@@ -92,47 +120,52 @@ SHIFTED = {0x2d:'_',0x2e:'+',0x2f:'{',0x30:'}',0x33:':',0x34:'"',0x36:'<',0x37:'
 prev = set()
 caps = False
 for raw in sys.stdin:
-raw = raw.strip().replace(':', '')
-if len(raw) != 16:
-continue
-modifier = int(raw[0:2], 16)
-keycodes = [int(raw[i:i+2], 16) for i in range(4, 16, 2)]
-current = {k for k in keycodes if k}
-newly_pressed = [k for k in keycodes if k and k not in prev]
-shift = bool(modifier & 0x22)
-for keycode in newly_pressed:
-if keycode == 0x39:
-caps = not caps
-continue
-char = SHIFTED.get(keycode) if shift else None
-if char is None:
-char = NORMAL.get(keycode, '?')
-if char.isalpha() and (shift ^ caps):
-char = char.upper()
-sys.stdout.write(char)
-prev = current
+    raw = raw.strip().replace(':', '')
+    if len(raw) != 16:
+        continue
+    modifier = int(raw[0:2], 16)
+    keycodes = [int(raw[i:i+2], 16) for i in range(4, 16, 2)]
+    current = {k for k in keycodes if k}
+    newly_pressed = [k for k in keycodes if k and k not in prev]
+    shift = bool(modifier & 0x22)
+    for keycode in newly_pressed:
+        if keycode == 0x39:
+            caps = not caps
+            continue
+        char = SHIFTED.get(keycode) if shift else None
+        if char is None:
+            char = NORMAL.get(keycode, '?')
+            if char.isalpha() and (shift ^ caps):
+                char = char.upper()
+        sys.stdout.write(char)
+    prev = current
 ```
-それを先ほどダンプしたプレーンな hex 行に入力すると、完全な parser を環境に取り込まずに、すぐに大まかな再構成を取得できます。US 以外の layout では、これは被害者ホストに表示された最終的な glyph ではなく、物理的なキー位置を再構成します。
 
-## Troubleshooting tips
+先ほどダンプしたプレーンな16進数の行を入力すれば、環境にフルパーサーを導入せずに、すぐに大まかな再構成結果を得られます。US以外のレイアウトでは、被害者ホスト上で最終的に表示される文字ではなく、物理キーの位置が再構成されます。
 
-- Wireshark に `usbhid.*` フィールドが表示されない場合、HID report descriptor がキャプチャされていない可能性があります。キャプチャ中にキーボードを抜き差しするか、raw の `usb.capdata` にフォールバックしてください。
-- Linux の software capture では `usbmon` が通常のソースです。Windows では、raw USB URB を認識するために Wireshark が **USBPcap** extcap に依存します。<sup>[[4]](#references)</sup>
-- キーボードが hub または dock 経由で接続されていた場合は、まず interface descriptor を確認し、その device/interface pair のみを decode してください。Composite HID capture では、keyboard と mouse の report が混在することがよくあります。
-- Windows capture では **USBPcap** extcap interface が必要です。Wireshark の upgrade 後もこれが残っていることを確認してください。extcap がないと device list が空になります。<sup>[[4]](#references)</sup>
-- decode を開始する前に、必ず bus、device、interface の tuple（`usb.bus_id`、`usb.device_address`、`usb.bInterfaceNumber`。例：`1.9.1`）を照合してください — 複数の keyboard や storage device が混在すると、意味のない keystroke になります。<sup>[[10]](#references)</sup>
+## トラブルシューティングのヒント
+
+- Wiresharkに`usbhid.*`フィールドが表示されない場合、HID report descriptorがキャプチャされていない可能性があります。キャプチャ中にキーボードを再接続するか、`usb.capdata`の生データにフォールバックしてください。
+- Linuxでソフトウェアキャプチャする場合は、通常`usbmon`を使用します。Windowsで生のUSB URBを確認するには、Wiresharkが**USBPcap** extcapに依存します。<sup>[[4]](#references)</sup>
+- キーボードがハブまたはドック経由で接続されていた場合は、まずinterface descriptorを確認し、その後、そのデバイス/interfaceの組み合わせだけをデコードしてください。Composite HIDのキャプチャでは、キーボードとマウスのレポートが混在することがよくあります。
+- Windowsでのキャプチャには**USBPcap** extcapインターフェースが必要です。Wiresharkのアップグレード後も利用できることを確認してください。extcapが欠けていると、デバイス一覧が空になります。<sup>[[4]](#references)</sup>
+- デコードする前に、必ずバス、デバイス、interfaceの組み合わせ（`usb.bus_id`、`usb.device_address`、`usb.bInterfaceNumber`。例：`1.9.1`）を照合してください。複数のキーボードやストレージデバイスを混同すると、意味不明なキー入力になります。<sup>[[10]](#references)</sup>
+
+
 
 ## References
 
-- [1] [HackIT CTF 2017 Writeup: foren100](https://0xd13a.github.io/ctfs/hackit2017/foren100/)
-- [2] [USB Keyboard packet capture analysis](https://naykisec.github.io/USB-Keyboard-packet-capture-analysis/)
-- [3] [ACSC Quals 2023 - pcap 1, 2 write-up](https://hackmd.io/@t510599/acsc-2023-quals-pcap)
-- [4] [Wireshark USB capture setup](https://wiki.wireshark.org/CaptureSetup/USB)
+- [1] [HackIT CTF 2017 解説: foren100](https://0xd13a.github.io/ctfs/hackit2017/foren100/)
+- [2] [USB Keyboardパケットキャプチャの解析](https://naykisec.github.io/USB-Keyboard-packet-capture-analysis/)
+- [3] [ACSC Quals 2023 - pcap 1、2の解説](https://hackmd.io/@t510599/acsc-2023-quals-pcap)
+- [4] [WiresharkのUSBキャプチャ設定](https://wiki.wireshark.org/CaptureSetup/USB)
 - [5] [ctf-usb-keyboard-parser](https://github.com/TeamRocketIst/ctf-usb-keyboard-parser)
 - [6] [CTF-Usb_Keyboard_Parser](https://github.com/5h4rrk/CTF-Usb_Keyboard_Parser)
 - [7] [USB-HID-decoders](https://github.com/Nissen96/USB-HID-decoders)
-- [8] [Device Class Definition for Human Interface Devices (HID) 1.11](https://www.usb.org/sites/default/files/documents/hid1_11.pdf)
+- [8] [ヒューマンインターフェースデバイス（HID）のデバイスクラス定義 1.11](https://www.usb.org/sites/default/files/documents/hid1_11.pdf)
 - [9] [HID Usage Tables 1.2](https://usb.org/sites/default/files/hut1_2.pdf)
 - [10] [Wireshark Display Filter Reference: USB](https://www.wireshark.org/docs/dfref/u/usb.html)
 - [11] [Wireshark Display Filter Reference: USB HID](https://www.wireshark.org/docs/dfref/u/usbhid.html)
+- [12] [Linux kernel: HID report descriptor入門](https://docs.kernel.org/hid/hidintro.html)
+- [13] [snakeCTF 2024: ordinary-keyboardの解説](https://snakectf.org/writeups/2024-quals/misc/ordinary-keyboard)
 {{#include ../../../banners/hacktricks-training.md}}
