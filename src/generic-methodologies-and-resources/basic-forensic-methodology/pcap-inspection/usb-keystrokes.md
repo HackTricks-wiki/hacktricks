@@ -8,6 +8,8 @@ If you have a pcap containing the communication via USB of a keyboard like the f
 
 For a keyboard using the HID **boot protocol**, each Interrupt IN report has a fixed 8-byte layout: one modifier byte, one reserved byte, and six keycode bytes. The host compares successive reports and maps keycodes to HID usages to reconstruct key events.<sup>[[8]](#references)</sup>
 
+For general capture triage, see [Pcap Inspection](./).
+
 ## USB HID report basics
 
 The standard boot keyboard input report is structured as follows.<sup>[[8]](#references)[[9]](#references)</sup>
@@ -35,6 +37,14 @@ The HID class defines these interface values:<sup>[[8]](#references)</sup>
 - `subclass == 1` is the Boot Interface Subclass; with `protocol == 1` it identifies a boot keyboard
 - `protocol == 2` identifies a boot mouse
 - `protocol == 0` means no boot protocol; inspect the HID report descriptor instead of assuming an 8-byte layout
+
+A boot-capable interface is **not proof that boot protocol is active**. HID devices initialize in report protocol. The host selects boot mode with `SET_PROTOCOL` (`bRequest = 0x0b`, `wValue = 0`); `wValue = 1` selects report protocol. If enumeration is in the capture, check the request for the keyboard interface (`wIndex`) before using an eight-byte boot decoder. If it is absent, verify the observed report layout instead of inferring the mode from the interface descriptor.<sup>[[8]](#references)[[10]](#references)</sup>
+
+```bash
+tshark -r usb.pcapng -Y 'usb.setup.bRequest == 0x0b' -T fields \
+  -e frame.number -e usb.bus_id -e usb.device_address \
+  -e usb.setup.wIndex -e usb.setup.wValue
+```
 
 Once the interface is known, pin your filters to `usb.bus_id`, `usb.device_address`, and if possible `usb.bInterfaceNumber` before exporting anything.
 
@@ -73,6 +83,17 @@ A non-boot interface or a report ID can change the payload layout, so do not ass
 - If every line starts with a constant prefix or report ID, strip it with an offset-aware decoder rather than assuming byte 0 is always the modifier.<sup>[[7]](#references)</sup>
 - Some USBPcap exports omit the reserved byte, so decoders that support `--no-reserved` or a custom offset save time.<sup>[[7]](#references)</sup>
 - If the HID report descriptor or BLE HOGP report map is present in the capture, use it to recover the actual field layout before writing a parser.
+
+### Decode a report-protocol key bitmap
+
+For a keyboard whose input report is a bitmap rather than six boot key slots, locate its **HID report descriptor** in the enumeration traffic. This filter finds frames where Wireshark decoded a Report Size item; open one and inspect the full descriptor. Start a new capture before plugging in the keyboard if the descriptor is missing.<sup>[[11]](#references)[[12]](#references)[[13]](#references)</sup>
+
+```bash
+tshark -r usb.pcapng -Y 'usbhid.item.global.report_size' -T fields \
+  -e frame.number -e usb.bus_id -e usb.device_address
+```
+
+For each keyboard Input report, note its `Report ID` (if any), `Usage Page` (`0x07` for keyboard keys), `Usage Minimum/Maximum`, `Report Size`, `Report Count`, and whether each `Input` item is **Variable** or **Array**. Count all preceding Input fields and constant padding to find the key field's bit offset; report fields need not be byte-aligned. A one-bit Variable field with consecutive keyboard usages is a key-state bitmap: bit 0 of that field maps to its first declared usage, bit 1 to the next, and so on. An Array instead contains values resolved through the descriptor's usage range, not one pressed key per bit. If a Report ID is declared, first select reports with that prefix and skip its byte when calculating field offsets. Compare held-usage sets between consecutive reports of the **same interface and Report ID** to emit only new presses.<sup>[[8]](#references)[[12]](#references)[[13]](#references)</sup>
 
 ## Automating the decoding
 
@@ -130,6 +151,8 @@ Feed it with the plain hex lines dumped earlier to get an instant rough reconstr
 - Windows captures require the **USBPcap** extcap interface; make sure it survived Wireshark upgrades, as missing extcaps leave you with empty device lists.<sup>[[4]](#references)</sup>
 - Always correlate the bus, device, and interface tuple (`usb.bus_id`, `usb.device_address`, `usb.bInterfaceNumber`; e.g. `1.9.1`) before decoding anything — mixing multiple keyboards or storage devices leads to nonsense keystrokes.<sup>[[10]](#references)</sup>
 
+
+
 ## References
 
 - [1] [HackIT CTF 2017 Writeup: foren100](https://0xd13a.github.io/ctfs/hackit2017/foren100/)
@@ -143,5 +166,6 @@ Feed it with the plain hex lines dumped earlier to get an instant rough reconstr
 - [9] [HID Usage Tables 1.2](https://usb.org/sites/default/files/hut1_2.pdf)
 - [10] [Wireshark Display Filter Reference: USB](https://www.wireshark.org/docs/dfref/u/usb.html)
 - [11] [Wireshark Display Filter Reference: USB HID](https://www.wireshark.org/docs/dfref/u/usbhid.html)
-
+- [12] [Linux kernel: Introduction to HID report descriptors](https://docs.kernel.org/hid/hidintro.html)
+- [13] [snakeCTF 2024: ordinary-keyboard writeup](https://snakectf.org/writeups/2024-quals/misc/ordinary-keyboard)
 {{#include ../../../banners/hacktricks-training.md}}
