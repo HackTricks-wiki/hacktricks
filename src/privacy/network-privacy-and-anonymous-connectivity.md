@@ -21,6 +21,8 @@ For the normalized inventory—`Pros`, `Cons`, step-by-step `Procedure`, and `De
 
 HTTPS protects content in transit but not all metadata. EFF notes that domain, time, and traffic size can remain visible to intermediaries even when page paths, credentials, and messages are encrypted.<sup>[[1]](#references)</sup>
 
+An encrypted overlay is not automatically an anonymity network: Yggdrasil direct peers can see each other's IP addresses.<sup>[[20]](#references)</sup> Its [userspace forwarding and SOCKS transport](../generic-hacking/tunneling-and-port-forwarding.md#yggdrasil-userspace-overlay-with-yggstack) is a tunneling option, not a source-anonymity layer.<sup>[[20]](#references)[[21]](#references)</sup>
+
 ## VPNs: fast privacy with concentrated trust
 
 A VPN is useful for hiding destination metadata from the access ISP, protecting a first hop on an untrusted network, presenting a stable engagement egress address, or reaching a private network. It does **not** make a user anonymous. The VPN sees the source connection and can observe destination metadata; accounts, cookies, GPS, fingerprints, and payment information remain.<sup>[[1]](#references)</sup>
@@ -204,4 +206,6 @@ For split-knowledge relays, route-enforced workloads, pluggable transports, onio
 - [17] [Katzenpost — Threat Model](https://katzenpost.network/docs/threat_model/)
 - [18] [Xue et al. — Bypassing Tunnels: Leaking VPN Client Traffic by Abusing Routing Tables](https://www.usenix.org/system/files/usenixsecurity23-xue.pdf)
 - [19] [Leviathan Security — TunnelVision: How Attackers Can Decloak Routing-Based VPNs for a Total VPN Leak](https://www.leviathansecurity.com/blog/tunnelvision)
+- [20] [Yggdrasil FAQ: Is Yggdrasil anonymous?](https://yggdrasil-network.github.io/faq.html#is-yggdrasil-anonymous)
+- [21] [Yggstack README](https://github.com/yggdrasil-network/yggstack)
 {{#include ../banners/hacktricks-training.md}}
