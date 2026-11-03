@@ -26,19 +26,21 @@ A refrigeration system manager coordinates compressor and case controllers but d
 
 ### Date-derived maintenance-code login
 
-On affected Danfoss system managers, a second XML authentication path accepts a code derived from the controller's date instead of an account password. Synacktiv's SM800/SC255 analysis shows that the `eds_only` or `quantum_only` XML attributes route `xml_load_file` through `check_authorize` to `check_code_of_day`. Its advisory publishes decompiled code for this check and shows that `read_date_time` on `xml.cgi` discloses the date without authentication. Claroty found a corresponding `getauth` path on the AK-SM 800A, but redacted its trigger attributes; do not assume the older models' attribute names work on that platform.<sup>[[2]](#references)[[3]](#references)</sup>
+On affected Danfoss system managers, an alternate XML login accepts a code derived from the controller's date instead of an account password.<sup>[[2]](#references)[[3]](#references)</sup> On the SM800 and SC255, Synacktiv traced the `eds_only` and `quantum_only` attributes through `xml_load_file` and `check_authorize` to `check_code_of_day`. Its advisory also shows that `read_date_time` on `xml.cgi` discloses the controller's date without authentication.<sup>[[2]](#references)</sup> Claroty found a corresponding `getauth` path on the AK-SM 800A, but redacted its trigger attributes; the older models' attribute names should not be assumed to work on that platform.<sup>[[3]](#references)</sup>
+
+Synacktiv documents the unauthenticated date query as follows:<sup>[[2]](#references)</sup>
 
 ```bash
 curl -k -d '<cmd action="read_date_time"/>' https://<controller>/xml.cgi
 ```
 
-The code has no device-specific secret, so recovering the algorithm from [firmware](../hardware-physical-access/firmware-analysis/) enables a date-valid credential across affected devices. Confirm the model and firmware first: a date response alone does not prove that the alternate login is present or that a session was obtained.<sup>[[2]](#references)[[3]](#references)</sup>
+The code has no device-specific secret: recovering the algorithm from [firmware](../hardware-physical-access/firmware-analysis/) can yield a date-valid credential for devices with the same affected implementation.<sup>[[2]](#references)[[3]](#references)</sup> Confirm the model and firmware first. A date response alone does not establish that the alternate login is present or that a session was obtained.
 
 ### Bulk configuration and defrost-heater abuse
 
 After administrative access, identify the system manager's mapped case controllers and whether its configuration-distribution function can update them together. A case setpoint change normally warms a cabinet only toward room temperature. To heat it beyond ambient, the relevant control is the case controller's electric evaporator defrost heater: defrost stops cooling and runs that heater until a sensor or timer terminates the cycle. Changing the defrost method, schedule, termination temperature, and time limit can keep the heater active instead. The manager can distribute those changes across many cases and suppress associated alarms, turning one supervisory compromise into a store-wide process change.<sup>[[4]](#references)</sup>
 
-This is a physical-process hazard, not a safe live-system proof of concept. Thermal cut-outs should limit heater operation, but continuous duty can still overheat a pre-existing weak electrical connection. Validate configuration and impact only in an approved lab or with the operator's process-safety plan.<sup>[[4]](#references)</sup>
+This is a physical-process hazard, not a safe live-system proof of concept. Where present, thermal cut-outs may limit heater operation, but continuous duty can still overheat a pre-existing weak electrical connection. Validate configuration and impact only in an approved lab or with the operator's process-safety plan.<sup>[[4]](#references)</sup>
 
 ## Protocol entry points
 
