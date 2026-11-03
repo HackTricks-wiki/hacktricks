@@ -271,9 +271,7 @@ The standalone Lua interpreter executes code or an `@file` from **`LUA_INIT`** (
 
 **`R_PROFILE_USER`** and **`R_PROFILE`** redirect startup profiles containing R code. **`R_DEFAULT_PACKAGES`** / **`R_SCRIPT_DEFAULT_PACKAGES`** plus an R library path can instead auto-load an installed package.
 
-{{#ref}}
-macos-r-applications-injection.md
-{{#endref}}
+[R startup profiles and package loading](macos-interpreter-startup-file-injection.md#r-startup-profiles-and-package-loading)
 
 ### Julia Injection
 
@@ -285,9 +283,7 @@ macos-r-applications-injection.md
 
 **`ERL_AFLAGS`**, **`ERL_FLAGS`**, or **`ERL_ZFLAGS`** can inject an Erlang VM **`-eval`** expression without requiring a payload file; Elixir workloads commonly start the same VM.
 
-{{#ref}}
-macos-erlang-elixir-applications-injection.md
-{{#endref}}
+[Erlang/Elixir VM flag injection](macos-interpreter-startup-file-injection.md#erlang-and-elixir-vm-flags)
 
 ### GNU Octave Injection
 
@@ -317,9 +313,7 @@ macos-perl-applications-injection.md
 It's also possible to abuse ruby env variables (**`RUBYOPT`**, **`RUBYLIB`**) to make arbitrary scripts execute arbitrary code:
 
 
-{{#ref}}
-macos-ruby-applications-injection.md
-{{#endref}}
+[Ruby `RUBYOPT`/`RUBYLIB` loader options](macos-interpreter-startup-file-injection.md#ruby-loader-options)
 
 ### Python Injection
 
