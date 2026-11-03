@@ -31,6 +31,9 @@ default-theme = "hacktricks-light"
 hash-files = false
 
 [output.html.redirect]
+"/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-r-applications-injection.html" = "macos-interpreter-startup-file-injection.html"
+"/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-ruby-applications-injection.html" = "macos-interpreter-startup-file-injection.html"
+"/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-erlang-elixir-applications-injection.html" = "macos-interpreter-startup-file-injection.html"
 "/pentesting-web/dangling-markup-html-scriptless-injection/ss-leaks.html" = "index.html"
 "/pentesting-web/xss-cross-site-scripting/sniff-leak.html" = "../xs-search/index.html"
 "/pentesting-web/xss-cross-site-scripting/steal-info-js.html" = "xss-information-exfiltration-payload.html"
