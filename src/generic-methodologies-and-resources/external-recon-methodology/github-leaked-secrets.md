@@ -2,82 +2,104 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### git repos とファイルシステムで secrets を見つけるツール
+### git repoやファイルシステム内のsecretを見つけるツール
 
 - [TruffleHog](https://github.com/dxa4481/truffleHog)
 - [Gitleaks](https://github.com/gitleaks/gitleaks)
-- [Nosey Parker](https://github.com/praetorian-inc/noseyparker)（archived；[Titus](https://github.com/praetorian-inc/titus) に置き換え）
+- [Nosey Parker](https://github.com/praetorian-inc/noseyparker) (アーカイブ済み。後継は[Titus](https://github.com/praetorian-inc/titus))
 - [ggshield](https://github.com/GitGuardian/ggshield)
 - [RExpository](https://github.com/JaimePolop/RExpository)
 - [detect-secrets](https://github.com/Yelp/detect-secrets)
 - [gitGraber](https://github.com/hisxo/gitGraber)
-- [shhgit](https://github.com/eth0izzle/shhgit)（unmaintained）
+- [shhgit](https://github.com/eth0izzle/shhgit) (メンテナンス終了)
 - [github-dorks](https://github.com/techgaun/github-dorks)
-- [gitrob](https://github.com/michenriksen/gitrob)（archived）
-- [git-all-secrets](https://github.com/anshumanbh/git-all-secrets)（archived）
+- [gitrob](https://github.com/michenriksen/gitrob) (アーカイブ済み)
+- [git-all-secrets](https://github.com/anshumanbh/git-all-secrets) (アーカイブ済み)
 - [git-secrets](https://github.com/awslabs/git-secrets)
 - [gittyleaks](https://github.com/kootenpv/gittyleaks)
 - [GitDorker](https://github.com/obheda12/GitDorker)
 
-> Notes
-> - TruffleHog v3 は多くの credentials を live で verify でき、GitHub orgs、issues/PRs、gists、wikis を scan できます。例：`trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)[[13]](#references)</sup>
-> - Gitleaks は Git repositories、directories、archives を scan します。history には `gitleaks git -v --log-opts="--all" <repo>`、directories には `gitleaks dir -v <path>` を使用し、archives を調査するには `--max-archive-depth 1` を使用します。<sup>[[6]](#references)</sup>
-> - Nosey Parker は archived となり、Titus に置き換えられました。既存の installations では、`noseyparker scan --datastore np.db <path|repo>` に続けて `noseyparker report --datastore np.db` を引き続き使用できます。<sup>[[7]](#references)[[8]](#references)</sup>
-> - ggshield（GitGuardian CLI）は files、repositories、Docker images を scan し、local または CI workflows と統合できます：`ggshield secret scan repo <path-or-url>`.<sup>[[9]](#references)</sup>
+> 注意事項
+> - TruffleHog v3は多くのcredentialをリアルタイムで検証でき、GitHub org、issue/PR、gist、wikiをスキャンできます。例: `trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)[[13]](#references)</sup>
+> - GitleaksはGit repository、directory、archiveをスキャンします。履歴のスキャンには`gitleaks git -v --log-opts="--all" <repo>`、directoryのスキャンには`gitleaks dir -v <path>`を使い、archiveを調べるには`--max-archive-depth 1`を指定します。<sup>[[6]](#references)</sup>
+> - Nosey Parkerはアーカイブ済みで、後継はTitusです。既存のインストール環境では、`noseyparker scan --datastore np.db <path|repo>`に続けて`noseyparker report --datastore np.db`を実行できます。<sup>[[7]](#references)[[8]](#references)</sup>
+> - ggshield (GitGuardian CLI)はファイル、repository、Docker imageをスキャンし、ローカルやCIのworkflowと連携します: `ggshield secret scan repo <path-or-url>`.<sup>[[9]](#references)</sup>
 
-### GitHub で secrets が一般的に leak する場所
+### GitHubでsecretがよくleakする場所
 
-- GitHub Code Search は default branch のみを index します。non-default branches は直接調査するか、clone してください。<sup>[[4]](#references)</sup>
-- 完全な git history とその他の branches/tags（gitleaks/trufflehog で clone および scan；GitHub search が対象とするのは indexed content のみ）。<sup>[[4]](#references)[[6]](#references)</sup>
-- Issues、pull requests、comments、descriptions（TruffleHog の GitHub source は `--issue-comments` や `--pr-comments` などの flags でこれらをサポートします）。<sup>[[2]](#references)</sup>
-- Actions workflow logs と artifacts（read access があれば表示または download でき、secret redaction は保証されません）。<sup>[[11]](#references)[[12]](#references)</sup>
-- Wikis と release assets。
-- Gists（tooling または UI で search；一部の tools は gists を含めることができます）。<sup>[[2]](#references)[[13]](#references)</sup>
+- GitHub Code Searchがインデックスするのはdefault branchのみです。default branch以外は直接確認するか、cloneしてください。<sup>[[4]](#references)</sup>
+- gitの全履歴およびその他のbranch/tag (cloneしてgitleaks/trufflehogでスキャンしてください。GitHub検索が対象とするのはインデックス済みのコンテンツのみです)。<sup>[[4]](#references)[[6]](#references)</sup>
+- issue、pull request、comment、description (TruffleHogのGitHub sourceでは、`--issue-comments`や`--pr-comments`などのflagでこれらをスキャンできます)。<sup>[[2]](#references)</sup>
+- Actionsのworkflow logとartifact (読み取り権限があれば閲覧またはダウンロードできます。また、secretが確実にマスキングされるとは限りません)。<sup>[[11]](#references)[[12]](#references)</sup>
+- wikiとrelease asset。
+- gist (ツールまたはUIで検索できます。一部のツールはgistも対象にできます)。<sup>[[2]](#references)[[13]](#references)</sup>
 
-> Gotchas
-> - GitHub の Code Search UI は regex をサポートしますが、REST/API path（`gh search code` を含む）では legacy engine が使用され、regex features は公開されません。regex queries には UI を優先してください。<sup>[[3]](#references)[[5]](#references)</sup>
-> - GitHub search は documented size limit を超える files を除外し、exhaustive ではありません。徹底するには、clone して secrets scanner で locally scan してください。<sup>[[4]](#references)</sup>
+> 注意点
+> - GitHub Code Search UIはregexに対応していますが、REST/API経由の検索 (`gh search code`を含む) では旧式のエンジンが使われ、regex機能は公開されていません。regexクエリにはUIを使ってください。<sup>[[3]](#references)[[5]](#references)</sup>
+> - GitHub検索では、文書化されたサイズ上限を超えるファイルは対象外となり、網羅的な検索はできません。漏れなく調べるには、cloneしてローカルでsecret scannerを実行してください。<sup>[[4]](#references)</sup>
 
-### Programmatic org-wide scanning
+### org全体のプログラムによるスキャン
 
-- TruffleHog（GitHub source）。<sup>[[2]](#references)[[13]](#references)</sup>
+- TruffleHog (GitHub source)。<sup>[[2]](#references)[[13]](#references)</sup>
 ```bash
 export GITHUB_TOKEN=<token>
 trufflehog github --org Target --results=verified \
---include-wikis --issue-comments --pr-comments --gist-comments
+  --include-wikis --issue-comments --pr-comments --gist-comments
 ```
-- 組織内のすべてのリポジトリに対して Gitleaks を実行する（浅い clone を行い、`gitleaks dir` で scan する）。<sup>[[6]](#references)</sup>
+- すべての組織リポジトリを対象に Gitleaks を実行する（shallow clone し、`gitleaks dir` でスキャンする）。<sup>[[6]](#references)</sup>
 ```bash
 gh repo list Target --limit 1000 --json nameWithOwner,url \
 | jq -r '.[].url' | while read -r r; do
-tmp=$(mktemp -d); git clone --depth 1 "$r" "$tmp" && \
-gitleaks dir -v "$tmp" || true; rm -rf "$tmp";
+  tmp=$(mktemp -d); git clone --depth 1 "$r" "$tmp" && \
+  gitleaks dir -v "$tmp" || true; rm -rf "$tmp";
 done
 ```
-- 既存のインストール向けの mono checkout 上での Nosey Parker。<sup>[[7]](#references)</sup>
+- mono checkout 上で Nosey Parker を実行（既存のインストール向け）。<sup>[[7]](#references)</sup>
 ```bash
 # after cloning many repos beneath ./org
 noseyparker scan --datastore np.db org/ && noseyparker report --datastore np.db
 ```
-- ggshield クイックスキャン。<sup>[[9]](#references)</sup>
+- ggshieldのクイックスキャン。<sup>[[9]](#references)</sup>
 ```bash
 # current working tree
 ggshield secret scan path -r .
 # full git history of a repo
 ggshield secret scan repo <path-or-url>
 ```
-> Tip: git history では、削除されたsecretを検出するために、`git log -p --all`をparseするscannerを優先してください。<sup>[[6]](#references)</sup>
 
-### modern tokens向けのUpdated dorks
+> Tip: git history については、削除された secrets を検出できるよう、`git log -p --all` を解析する scanner を優先してください。<sup>[[6]](#references)</sup>
+
+### Pull-request refs と Gist revision history
+
+通常の clone では GitHub の `refs/pull/<number>/head` refs は取得されないため、取得するまでは `git log --all` でそれらの refs からのみ到達可能な commit を検出できません。<sup>[[14]](#references)[[17]](#references)</sup> PR refs からは、contributor が fork を削除した後でも、未 merge の commit が公開される可能性があります。<sup>[[15]](#references)</sup> branch history の書き換えだけでは、PR references を通じて機密性の高い commit に到達可能なままの場合があります。<sup>[[16]](#references)</sup>
+
+full clone では、scan の前に選択した PR head を fetch するか、追加の download に見合う場合は、広告されているすべての PR head に対する wildcard refspec を使用してください。<sup>[[17]](#references)[[18]](#references)</sup> Gitleaks は `git log -p` を使ってローカルの commit patch を scan するため、refs の fetch 後に再実行してください。<sup>[[6]](#references)</sup>
+
+```bash
+git fetch origin 'refs/pull/123/head:refs/remotes/origin/pr/123'
+# Or fetch every advertised PR head:
+git fetch origin '+refs/pull/*/head:refs/remotes/origin/pr/*'
+gitleaks git -v --log-opts="--all" .
+```
+
+GistにもGit履歴があるため、現在のファイルだけを確認すると、後のリビジョンで削除された認証情報を見落とすことがあります。<sup>[[19]](#references)</sup> スコープ内の公開Gistについては、Gitリポジトリをcloneして各リビジョンをスキャンしてください。<sup>[[19]](#references)[[6]](#references)</sup>
+
+```bash
+git clone https://gist.github.com/GIST_ID.git
+gitleaks git -v --log-opts="--all" GIST_ID
+```
+
+### modern tokens向けに更新されたdorks
 
 - GitHub tokens: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`.<sup>[[10]](#references)</sup>
 - Slack tokens: `xoxb-` `xoxp-` `xoxa-` `xoxs-` `xoxc-` `xoxe-`
-- Cloud and general:
-- `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` `aws_session_token`
-- `GOOGLE_API_KEY` `AZURE_TENANT_ID` `AZURE_CLIENT_SECRET`
-- `OPENAI_API_KEY` `ANTHROPIC_API_KEY`
+- Cloudおよび一般:
+  - `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` `aws_session_token`
+  - `GOOGLE_API_KEY` `AZURE_TENANT_ID` `AZURE_CLIENT_SECRET`
+  - `OPENAI_API_KEY` `ANTHROPIC_API_KEY`
 
 ### **Dorks**
+
 ```bash
 ".mlab.com password"
 "access_key"
@@ -351,21 +373,30 @@ GCP SECRET
 AWS SECRET
 "private" extension:pgp
 ```
-追加の code-search ワークフローについては、[広範なソースコード検索](wide-source-code-search.md) を参照してください。
+
+追加の code-search ワークフローについては、[Wide Source Code Search](wide-source-code-search.md) を参照してください。
+
+
 
 ## References
 
-- [1] [public repositories に secrets を置かない（GitHub Blog、2024年2月29日）](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
-- [2] [TruffleHog v3 – leak した credentials の検出、検証、分析](https://github.com/trufflesecurity/trufflehog)
-- [3] [GitHub Code Search syntax の理解](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
-- [4] [code の検索（legacy）](https://docs.github.com/en/search-github/searching-on-github/searching-code)
+- [1] [公開リポジトリに secrets を含めない（GitHub Blog、2024年2月29日）](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
+- [2] [TruffleHog v3 – leak された認証情報の発見、検証、分析](https://github.com/trufflesecurity/trufflehog)
+- [3] [GitHub Code Search 構文を理解する](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
+- [4] [コードを検索する（legacy）](https://docs.github.com/en/search-github/searching-on-github/searching-code)
 - [5] [gh search code](https://cli.github.com/manual/gh_search_code)
 - [6] [Gitleaks README](https://github.com/gitleaks/gitleaks/blob/master/README.md)
 - [7] [Nosey Parker README](https://github.com/praetorian-inc/noseyparker#readme)
 - [8] [Titus README](https://github.com/praetorian-inc/titus#readme)
 - [9] [ggshield README](https://github.com/GitGuardian/ggshield#readme)
-- [10] [Secrets reference（GitHub Actions）](https://docs.github.com/en/actions/reference/security/secrets)
+- [10] [Secrets リファレンス（GitHub Actions）](https://docs.github.com/en/actions/reference/security/secrets)
 - [11] [Secrets（GitHub Actions）](https://docs.github.com/en/actions/concepts/security/secrets)
-- [12] [workflow run logs の使用（GitHub Actions）](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-workflow-run-logs)
-- [13] [TruffleHog GitHub source](https://github.com/trufflesecurity/trufflehog/blob/main/main.go)
+- [12] [ワークフロー実行ログの使用（GitHub Actions）](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-workflow-run-logs)
+- [13] [TruffleHog GitHub ソースコード](https://github.com/trufflesecurity/trufflehog/blob/main/main.go)
+- [14] [pull request の refs と merge ブランチ（GitHub Docs）](https://docs.github.com/en/pull-requests/reference/pull-requests)
+- [15] [pull request をローカルで checkout する（GitHub Docs）](https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/checking-out-pull-requests-locally)
+- [16] [リポジトリから機密データを削除する（GitHub Docs）](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository)
+- [17] [git-fetch ドキュメント](https://git-scm.com/docs/git-fetch)
+- [18] [pull request のスキャン（betterleaks）](https://github.com/betterleaks/betterleaks/blob/main/docs/scanning.md)
+- [19] [Gists の REST API エンドポイント（GitHub Docs）](https://docs.github.com/en/rest/gists/gists)
 {{#include ../../banners/hacktricks-training.md}}
