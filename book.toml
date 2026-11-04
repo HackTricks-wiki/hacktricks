@@ -31,6 +31,7 @@ default-theme = "hacktricks-light"
 hash-files = false
 
 [output.html.redirect]
+"/pentesting-web/sql-injection/postgresql-injection/dblink-lo_import-data-exfiltration.html" = "index.html"
 "/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-r-applications-injection.html" = "macos-interpreter-startup-file-injection.html"
 "/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-ruby-applications-injection.html" = "macos-interpreter-startup-file-injection.html"
 "/macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-erlang-elixir-applications-injection.html" = "macos-interpreter-startup-file-injection.html"
