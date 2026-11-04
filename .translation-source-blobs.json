@@ -232,7 +232,7 @@
     "src/generic-methodologies-and-resources/basic-forensic-methodology/windows-forensics/interesting-windows-registry-keys.md": "714971ac172b0e3f93f727cba91f3da37a1e2f00",
     "src/generic-methodologies-and-resources/external-recon-methodology/README.md": "73d31c492552f50e122c1b8a23a7e65b01a83df8",
     "src/generic-methodologies-and-resources/external-recon-methodology/database-leaks.md": "5b04524d6ab8074a53e07adee805beff74bf878d",
-    "src/generic-methodologies-and-resources/external-recon-methodology/github-leaked-secrets.md": "00f69a3e96db82732b5ff229d03751d7bfa5a238",
+    "src/generic-methodologies-and-resources/external-recon-methodology/github-leaked-secrets.md": "243a441b206f41ec9d0f54c21bdb52a87064f381",
     "src/generic-methodologies-and-resources/external-recon-methodology/reconnaissance-and-threat-intelligence-apis.md": "2e209b2e69b78d53fd6ad5e37a65e73dbda185f0",
     "src/generic-methodologies-and-resources/external-recon-methodology/wide-source-code-search.md": "5a374191ec7910912c92a28486c73662f8cff68e",
     "src/generic-methodologies-and-resources/fuzzing.md": "d25cbc5624fa826710ab66e376995516cd98b109",
