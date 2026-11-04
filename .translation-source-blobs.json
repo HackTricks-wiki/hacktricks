@@ -704,7 +704,7 @@
     "src/network-services-pentesting/pentesting-rpcbind.md": "c27af9715098860817848777f5c341c57b3f583b",
     "src/network-services-pentesting/pentesting-sap.md": "b959fb62db4823d5f557182933520ccd6fd37ce1",
     "src/network-services-pentesting/pentesting-smb/README.md": "7b5703767742876d1485bce8237815371b61b18c",
-    "src/network-services-pentesting/pentesting-smb/ksmbd-attack-surface-and-fuzzing-syzkaller.md": "21e26f184b43c6de5a9e1dd024de72e7d5c7208f",
+    "src/network-services-pentesting/pentesting-smb/ksmbd-attack-surface-and-fuzzing-syzkaller.md": "7535d00c5d042a910775c5ab9b1209b939c7add1",
     "src/network-services-pentesting/pentesting-smb/rpcclient-enumeration.md": "5a55391eb419365618ac2e5cb324212a116848da",
     "src/network-services-pentesting/pentesting-smtp/README.md": "80fdf86f7f8b2370ee2b308fbacff415c897dbc0",
     "src/network-services-pentesting/pentesting-smtp/smtp-commands.md": "8c3acf8f813050b7d34bbf49e82f83f4fb06b419",
