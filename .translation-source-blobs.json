@@ -941,7 +941,7 @@
     "src/pentesting-web/sql-injection/mysql-injection/README.md": "b5c5ee0eb398d54bc6373cd647cea5396db47d35",
     "src/pentesting-web/sql-injection/mysql-injection/mysql-ssrf.md": "7e527f3dc54d89181507686690461d82b65f72e9",
     "src/pentesting-web/sql-injection/oracle-injection.md": "b9be83cb60d233de7b8addb8fa4545850b665199",
-    "src/pentesting-web/sql-injection/postgresql-injection/README.md": "f7c7aac42fd1803cdaee48510c1f797e61638c0d",
+    "src/pentesting-web/sql-injection/postgresql-injection/README.md": "c9054ce15ae2176066c0cfda07a8ef09b297133d",
     "src/pentesting-web/sql-injection/postgresql-injection/big-binary-files-upload-postgresql.md": "3e311432d6722ff317f5847c92054fa67424d0ab",
     "src/pentesting-web/sql-injection/postgresql-injection/dblink-lo_import-data-exfiltration.md": "d6b5f6aad9cff7cf193ec27a7ec6a9a8f2b2c6e3",
     "src/pentesting-web/sql-injection/postgresql-injection/network-privesc-port-scanner-and-ntlm-chanllenge-response-disclosure.md": "1ce7602e9d9459c3a650d38ef598aaa0e2e515cc",
