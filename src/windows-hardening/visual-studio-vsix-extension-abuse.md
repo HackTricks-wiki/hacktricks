@@ -1,21 +1,21 @@
-# Visual Studio VSIX Eklentisinin Kötüye Kullanımı
+# Visual Studio VSIX Eklentisi Kötüye Kullanımı
 
 {{#include ../banners/hacktricks-training.md}}
 
-Bir Visual Studio eklentisi, sıradan düzenleyici etkinliklerini oturum açmış kullanıcının kimliğiyle kod çalıştırma fırsatına dönüştürebilir. Kötü amaçlı bir VSIX, benzer görünümlü bir yayıncı veya güvenliği ihlal edilmiş bir eklenti güncellemesi, normal kurulum kanalları aracılığıyla kullanıcıya ulaşabilir. Yönetici istemiyle yapılan kurulum, kullanıcının onay verdiği bir kurulum yoludur; otomatik bir ayrıcalık yükseltme değildir.<sup>[[1]](#references)</sup>
+Bir Visual Studio eklentisi, rutin düzenleyici etkinliklerini oturum açmış kullanıcının kimliği altında kod yürütmeye dönüştürebilir. Kötü amaçlı bir VSIX, benzer görünümlü bir yayıncı veya güvenliği ihlal edilmiş bir eklenti güncellemesi, normal yükleme kanalları üzerinden kullanıcıya ulaşabilir. Yönetici izni isteyen bir yükleme, kullanıcının onayladığı bir yükleme yoludur; otomatik bir privilege escalation değildir.<sup>[[1]](#references)</sup>
 
-## Çalıştırma modeli
+## Yürütme modeli
 
-Klasik VSSDK eklentileri genellikle `devenv.exe` içinde çalışır. Daha yeni `VisualStudio.Extensibility` modeli, modern .NET eklentilerini çoğunlukla işlem dışında çalıştırır: Visual Studio çağrıları, özel bir `Microsoft.ServiceHub.Host.Extensibility` işlemine yönlendirir. Bu, IDE kararlılığını yalıtır ancak eklentiyi kullanıcının Windows izinlerinden **sandbox ile yalıtmaz**. Tam yürütülebilir dosya adı, `ServiceHub.Host.Extensibility.arm64.exe` gibi bir mimari son eki içerebilir.<sup>[[1]](#references)[[2]](#references)</sup>
+Klasik VSSDK eklentileri genellikle `devenv.exe` içinde çalışır. Yeni `VisualStudio.Extensibility` modeli ise modern .NET eklentilerini çoğunlukla işlem dışında çalıştırır: Visual Studio çağrıları özel bir `Microsoft.ServiceHub.Host.Extensibility` işlemine yönlendirir. Bu, IDE'nin kararlılığını korur ancak eklentiyi kullanıcının Windows izinlerinden **sandbox içine almaz**. Çalıştırılabilir dosyanın tam adı, `ServiceHub.Host.Extensibility.arm64.exe` gibi bir mimari soneki içerebilir.<sup>[[1]](#references)[[2]](#references)</sup>
 
-### Sıradan düzenleyici etkinliklerinde tetikleme
+### Olağan düzenleyici etkinliğinde tetikleme
 
-Bir eklenti, yalnızca dikkat çekici bir menü komutu sunmak yerine `ITextViewOpenClosedListener` uygulayabilir. `TextViewOpenedAsync` geri çağrısı, eşleşen belgeler için çağrılırken `TextViewExtensionConfiguration.AppliesTo` etkinleştirmeyi JSON gibi yaygın bir türle sınırlayabilir. Gerçek bir biçimlendirici veya linter, dosya açıldığında yan etki olarak ikinci bir eylem çalıştırırken duyurulan işlevini de yerine getirebilir.<sup>[[1]](#references)[[3]](#references)</sup>
+Bir eklenti, yalnızca dikkat çeken bir menü komutu sunmak yerine `ITextViewOpenClosedListener` uygulayabilir. `TextViewOpenedAsync` geri çağrısı, eşleşen belgeler için çağrılırken `TextViewExtensionConfiguration.AppliesTo` etkinleştirmeyi JSON gibi yaygın bir türle sınırlandırabilir. Gerçek bir formatter veya linter, bir dosya açıldığında yan etki olarak ikinci bir eylem gerçekleştirirken duyurulan işlevini de yerine getirebilir.<sup>[[1]](#references)[[3]](#references)</sup>
 
-Aşağıdaki sadeleştirilmiş örüntü, önemli yürütme noktalarını gösterir; açıklık için meşru biçimlendiriciyi ve hata işlemeyi içermez.<sup>[[1]](#references)[[3]](#references)</sup>
+Aşağıdaki sadeleştirilmiş örüntü, önemli yürütme noktalarını gösterir; açıklık açısından meşru formatter'ı ve hata işlemeyi içermez.<sup>[[1]](#references)[[3]](#references)</sup>
 
 <details>
-<summary>Olayla tetiklenen, bellekte çalışan yönetilen assembly yükleyicisi</summary>
+<summary>Olay tetiklemeli bellek içi yönetilen assembly yükleyicisi</summary>
 
 ```csharp
 [VisualStudioContribution]
@@ -46,11 +46,11 @@ internal class JsonListener : ExtensionPart, ITextViewOpenClosedListener
 
 </details>
 
-Bu zincir Base64 metnini indirir, assembly baytlarına çözer, bunları `MemoryStream` üzerinden toplanabilir bir `AssemblyLoadContext` ile yükler, yansıtılan `EntryPoint`'i parametresiz ya da `string[]` ile çağırır, asenkron giriş noktalarını bekler ve bağlamı boşaltır. İkinci aşama diske yazılmaz; ancak VSIX ve birincil extension DLL disk artefaktları olarak kalır. Base64, özgünlük veya gizlilik sağlamaz; ayrıca HTTP kullanımı, yol üzerindeki bir saldırganın yanıtı değiştirmesine olanak tanır.<sup>[[1]](#references)</sup>
+Bu zincir Base64 metnini indirir, assembly byte'larına çözer, bunları `MemoryStream` üzerinden collectible bir `AssemblyLoadContext` içine yükler, yansıtma yoluyla `EntryPoint`'i parametresiz veya `string[]` ile çağırır, asenkron entry point'leri await eder ve context'i unload eder. İkinci aşama diske yazılmaz; ancak VSIX ve birincil extension DLL'i disk artefaktları olarak kalır. Base64, özgünlük veya gizlilik sağlamaz; HTTP kullanımı da aradaki bir saldırganın yanıtı değiştirmesine olanak tanır.<sup>[[1]](#references)</sup>
 
-Operasyonel varyasyonlar arasında, hazırlama başarısız olduğunda duyurulan özelliğin çalışmaya devam etmesi için tüm istisnaları yok saymak veya düzenlemelerden sonra tetiklenmek üzere `ITextViewChangedListener` kullanmak yer alır. Kod extension host içinde çalışır ve bu kullanıcı için kullanılabilir yönetilen API'leri, P/Invoke'u, dosyaları, kimlik bilgilerini ve alt süreçleri kullanabilir.<sup>[[1]](#references)</sup>
+Operasyonel varyasyonlar arasında, staging başarısız olduğunda duyurulan özelliğin çalışmaya devam etmesi için tüm exception'ları bastırmak veya düzenlemelerden sonra tetiklenmesi için `ITextViewChangedListener` kullanmak yer alır. Kod, extension host içinde çalışır ve o kullanıcı için kullanılabilir managed API'leri, P/Invoke'u, dosyaları, kimlik bilgilerini ve child process'leri kullanabilir.<sup>[[1]](#references)</sup>
 
-Yerel plugin otomatik yüklemesine dayalı, editöre özgü ilgili bir yürütme yüzeyi için bkz.:
+Native plugin autoloading tabanlı, editöre özgü ilgili bir execution surface için bkz.:
 
 {{#ref}}
 windows-local-privilege-escalation/notepad-plus-plus-plugin-autoload-persistence.md
@@ -58,13 +58,13 @@ windows-local-privilege-escalation/notepad-plus-plus-plugin-autoload-persistence
 
 ### Marketplace ve dağıtım güveninin kötüye kullanılması
 
-Bir VSIX doğrudan paylaşılan/oltalanan bir dosya olarak, web Marketplace'ten veya Visual Studio'nun gömülü Marketplace tarayıcısı üzerinden gelebilir. Esas olarak benzersizliği ve ayrılmış sözcükler listesini denetleyen publisher kaydı, görsel olarak çağrışım yapan publisher kimliklerine olanak tanıyabilir; zaten güvenilen bir publisher'ı veya extension'ı ele geçirmek ise daha da etkilidir, çünkü yüklenmiş bir kullanıcı tabanını devralır. Marketplace yüklemesi Visual Studio Installer'ı başlatır ve indirilen VSIX'i geçici olarak `%LOCALAPPDATA%\Temp` altına yerleştirir; `payload.vsix` meşru olarak da kullanıldığından, yalnızca dosya adı bir gösterge değildir.<sup>[[1]](#references)</sup>
+Bir VSIX doğrudan paylaşılan/phishing amaçlı bir dosya olarak, web Marketplace'ten veya Visual Studio'nun yerleşik Marketplace tarayıcısı üzerinden gelebilir. Temelde benzersizliği ve ayrılmış sözcükler listesini denetleyen publisher kaydı, görsel olarak yanıltıcı publisher kimliklerine izin verebilir; zaten güvenilen bir publisher'ı veya extension'ı ele geçirmek daha da etkilidir, çünkü kurulu bir kullanıcı tabanından yararlanır. Marketplace kurulumu Visual Studio Installer'ı çalıştırır ve indirilen VSIX'i geçici olarak `%LOCALAPPDATA%\Temp` altına yerleştirir; `payload.vsix` adı meşru olarak da kullanılır, bu nedenle tek başına dosya adı bir gösterge değildir.<sup>[[1]](#references)</sup>
 
-MDSec, bir extension'ı doğrudan yükleyen Visual Studio URL protokolü tespit etmedi. Operatörün yine de kullanıcının VSIX'i yüklemesini/güvenmesini sağlaması veya mevcut bir extension'ın dağıtım yolunu ele geçirmesi gerekir. `AllUsers` paketi Visual Studio yükleme klasörüne yüklenir ve yükseltme isteyebilir; ancak bu, yönetici veya SYSTEM erişimine otomatik bir yol değil, normal ve onaya dayalı bir yükleyici davranışıdır.<sup>[[1]](#references)[[4]](#references)</sup>
+MDSec, bir extension'ı doğrudan yükleyen bir Visual Studio URL protokolü tespit etmedi. Operatörün yine de kullanıcının VSIX'i yüklemesini/güvenmesini sağlaması veya mevcut bir extension'ın dağıtım yolunu ele geçirmesi gerekir. `AllUsers` paketi Visual Studio kurulum klasörüne yüklenir ve yükseltme isteyebilir; ancak bu, yönetici veya SYSTEM erişimine otomatik bir yol değil, normal ve kullanıcı onayı gerektiren bir installer davranışıdır.<sup>[[1]](#references)[[4]](#references)</sup>
 
 ### Büyük ölçekte statik denetim
 
-VSIX paketleri genellikle ZIP kapsayıcılarıdır; bu nedenle güvenli bir Marketplace inceleme hattı paketleri listeleyebilir, extension kodunu **yüklemeden** açabilir, manifestleri ayrıştırabilir, yürütülebilir yüzeyleri belirleyebilir ve yönetilen assembly'leri `ilspycmd` ile decompile edebilir. Yaygın paketlenmiş bağımlılıkları hariç tuttuktan sonra extension'a ait assembly'lere öncelik verin; ardından kimlik bilgisi deposuyla ilgili dizeleri dosya okuma ve ağ üzerinden gönderme, kodlama ve gönderme, indirme ve yürütme, kimlik bilgisi yöneticisi ve ağ erişimi ya da ekran görüntüsü alma ve gönderme gibi davranış kümeleriyle ilişkilendirin.<sup>[[1]](#references)[[5]](#references)</sup>
+VSIX paketleri genellikle ZIP kapsayıcılarıdır. Bu nedenle güvenli bir Marketplace inceleme pipeline'ı paketleri sıralayabilir, extension kodunu **yüklemeden** açabilir, manifest'leri ayrıştırabilir, yürütülebilir yüzeyleri belirleyebilir ve managed assembly'leri `ilspycmd` ile decompile edebilir. Yaygın olarak birlikte paketlenen bağımlılıkları hariç tuttuktan sonra extension'a ait assembly'lere öncelik verin; ardından kimlik bilgisi deposuyla ilgili dizeleri, dosya okuma ile ağ üzerinden gönderme, kodlama ile gönderme, indirme ile yürütme, kimlik bilgisi yöneticisi ile ağ erişimi veya ekran görüntüsü alma ile gönderme gibi davranış kümeleriyle ilişkilendirin.<sup>[[1]](#references)[[5]](#references)</sup>
 
 ```bash
 unzip -q sample.vsix -d sample-vsix
@@ -73,16 +73,18 @@ ilspycmd -p -o decompiled sample-vsix/path/to/extension.dll
 rg -n -i 'Login Data|logins\.json|key4\.db|wallet\.dat|\.aws[/\\]credentials|LoadFromStream|EntryPoint|cmd\.exe' decompiled
 ```
 
-Ayrıca, her yürütme yüzeyinin yönetilen kod olduğunu varsaymak yerine yerel DLL'leri, MSBuild targets'larını, script'leri, T4 şablonlarını ve yükleyici payload'larını da envantere alın. Şüpheli davranışları manifestte belirtilen amaçla karşılaştırın; telemetri ve meşru güncelleyiciler, veri sızdırma veya hazırlık faaliyetlerine benzeyebilir. Yalnızca statik inceleme; paketlenmiş, gizlenmiş, dinamik olarak çözümlenen ve etkin olmayan kodları gözden kaçırır. Yalnızca en son sürümü incelemek de kötü amaçlı eski sürümlerin gözden kaçmasına yol açar.<sup>[[1]](#references)</sup>
+Ayrıca, her yürütme yüzeyinin managed code olduğunu varsaymak yerine native DLL'leri, MSBuild hedeflerini, betikleri, T4 şablonlarını ve yükleyici payload'larını da envantere alın. Şüpheli davranışları manifest'in iddia ettiği amaçla karşılaştırın; telemetry ve meşru güncelleyiciler exfiltration veya staging'e benzeyebilir. Yalnızca statik inceleme; paketlenmiş, gizlenmiş, dinamik olarak çözümlenen ve dormant kodu gözden kaçırır. Yalnızca en son sürümü incelemek de geçmişteki kötü amaçlı sürümlerin gözden kaçmasına yol açar.<sup>[[1]](#references)</sup>
 
-Ayrı bir proje yükleme saldırısı, VSIX yüklemeden kötü amaçlı bir [MSBuild `GetFrameworkPaths` target'ı](visual-studio-project-msbuild-execution.md) çalıştırabilir.<sup>[[6]](#references)</sup>
+VS Code farklı bir extension host ve manifest kullanır. Otomatik VS Code extension kurulumunu besleyen yazılabilir bir paylaşım için bkz. [VS Code extension drop-share execution](vscode-extension-abuse.md).
+
+Ayrı bir proje yükleme saldırısı, VSIX yüklemeden kötü amaçlı bir [MSBuild `GetFrameworkPaths` hedefini](visual-studio-project-msbuild-execution.md) çalıştırabilir.<sup>[[6]](#references)</sup>
 
 ## References
 
 - [1] [MDSec - Visual Studio Eklentileri Yeniden İncelendi](https://www.mdsec.co.uk/2026/05/visual-studio-extensions-revisited/)
-- [2] [Microsoft Learn - VisualStudio.Extensibility Hakkında](https://learn.microsoft.com/en-us/visualstudio/extensibility/visualstudio.extensibility/visualstudio-extensibility?view=visualstudio)
+- [2] [Microsoft Learn - VisualStudio.Extensibility hakkında](https://learn.microsoft.com/en-us/visualstudio/extensibility/visualstudio.extensibility/visualstudio-extensibility?view=visualstudio)
 - [3] [Microsoft Learn - ITextViewOpenClosedListener.TextViewOpenedAsync](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.extensibility.editor.itextviewopenclosedlistener.textviewopenedasync?view=vs-extensibility)
-- [4] [Microsoft Learn - Bir VSIX paketinin anatomisi](https://learn.microsoft.com/en-us/visualstudio/extensibility/anatomy-of-a-vsix-package?view=visualstudio)
+- [4] [Microsoft Learn - Bir VSIX paketinin yapısı](https://learn.microsoft.com/en-us/visualstudio/extensibility/anatomy-of-a-vsix-package?view=visualstudio)
 - [5] [ILSpy - ilspycmd .NET aracı](https://github.com/icsharpcode/ILSpy/blob/master/ICSharpCode.ILSpyCmd/README.md)
-- [6] [Unit 42 - Blinder Tunnel Kampanyası Irak Altyapısını Hedef Alıyor](https://unit42.paloaltonetworks.com/blinder-tunnel-targets-critical-infrastructure/)
+- [6] [Unit 42 - Blinder Tunnel kampanyası Irak altyapısını hedef alıyor](https://unit42.paloaltonetworks.com/blinder-tunnel-targets-critical-infrastructure/)
 {{#include ../banners/hacktricks-training.md}}
